@@ -18,6 +18,7 @@ import struct
 from pathlib import Path
 
 from tools import REPO_ROOT as REPO
+from tools.targets.camry.builders.build_camry_8965F3307000_command_cone_ingress import exact_pairs
 from tools.targets.camry.support.camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256
 
 OUT = REPO / "data/generated/camry_8965F3307000_internal_assist_oracles.json"
@@ -149,9 +150,8 @@ def main() -> int:
            "DAT_febee8c2 = DAT_febeae6e;")
 
     # AE3C is itself an internal calibration-derived snapshot from FEBEB140.
-    tokens(funcs, 0xBCD62, "*(undefined2 *)(puVar38 + -0x9c4) = *(undefined2 *)(puVar38 + -0x6c0);")
-    need(0xFEBEB800 - 0x9C4 == 0xFEBEAE3C and 0xFEBEB800 - 0x6C0 == 0xFEBEB140,
-         "AE3C/B140 GP geometry drift")
+    need((0xFEBEB140, 0xFEBEAE3C) in exact_pairs(0xBCD62, funcs),
+         "AE3C calibration-derived snapshot edge drift")
 
     term_specs = {
         0x1C3E: {

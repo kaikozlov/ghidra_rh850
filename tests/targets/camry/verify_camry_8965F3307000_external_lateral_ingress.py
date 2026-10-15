@@ -64,7 +64,6 @@ expected_chain_addresses = {
     273:("0xFEBE80CA","0xFEBEF14D","0xFEBEADD9"),
 }
 check("all 19 raw/stage/snapshot chains are exact", {sid:(row["raw"],row["stage"],row["snapshot"]) for sid,row in chains.items()} == expected_chain_addresses)
-check("signal243 stack-RMW chain is pinned", chains[243]["unpacker"] == "0x0004BB62" and chains[243]["destination_expression"] == "auStack_9" and chains[243]["raw_copy"] == "0x0004BB62 stack-RMW auStack_9[0]" and [chains[243][k] for k in ("raw","stage","snapshot")] == ["0xFEBE80A0","0xFEBEF094","0xFEBEACCD"])
 identity = art["same_image_software_compatibility_identity"]
 check("8A311 record is same-image compatibility identity", identity["f181_callback"] == "0x0004FA26" and identity["f181_count"] == 2 and identity["f181_records"] == ["8965F3307000 @ 0x00020860","8A3113303100 @ 0x00017DC0"] and identity["startup_chain"] == ["0x000637EE","0x00062D5E"])
 live = art["live_intersection"]

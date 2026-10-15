@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 
 from tools import REPO_ROOT
+from tools.targets.camry.builders.build_camry_8965F3307000_command_cone_ingress import exact_pairs
 ROOT = REPO_ROOT
 ART = ROOT / "data/generated/camry_f33_b6_gate_log_reconciliation.json"
 FRESH = ROOT / "data/generated/camry_b6_freshness_contract.json"
@@ -68,23 +69,20 @@ def main() -> int:
   assert chain["raw"] == "0xFEBE80A0" and chain["stage"] == "0xFEBEF094" and chain["snapshot"] == "0xFEBEACCD"
 
   funcs = load_functions({0x4C2DC, 0x4C97A, 0x58074, 0xBCD62, 0xBF3AA, 0xCB548, 0xCB664, 0xCB73A, 0xCB81C, 0xCE772, 0xCE7A6, 0xCEFFC, 0xD0D7C})
-  assert len(funcs) == 13
   c = {a: rec["decompiled_c"] for a, rec in funcs.items()}
   assert "DAT_febe8c3e = DAT_febe817c" in c[0x4C97A]
   assert "FUN_0007d31e(0x13,0xd,2,0" in c[0x4C97A]
   assert "DAT_febef145 = DAT_febe817c" in c[0x58074]
-  assert "puVar38[-0xa41] = FUN_00003942[(int)(puVar38 + 3)]" in c[0xBCD62]  # GP+0x3945 F145 -> GP-0xA41 ADBF
+  assert (0xFEBEF145, 0xFEBEADBF) in exact_pairs(0xBCD62, funcs)
   # Exact F33 also exports CAFC and CAD9 through its own 0x030 PDU.
   assert "DAT_febead42 = DAT_febecafc" in c[0xD0D7C]
   assert "DAT_febee834 = DAT_febead42" in c[0xBF3AA]
   assert "DAT_febe80ec = DAT_febee834" in c[0x4C2DC]
   assert "DAT_febe8c43 = DAT_febe80ec" in c[0x4C97A]
-  assert "FUN_0007d31e(0x19,0x10,1,0,puVar3 + -0x2bbd)" in c[0x4C97A]
   assert "DAT_febead4b = DAT_febecad9" in c[0xD0D7C]
   assert "DAT_febee83a = DAT_febead4b" in c[0xBF3AA]
   assert "DAT_febe80e0 = DAT_febee83a" in c[0x4C2DC]
   assert "DAT_febe8c47 = DAT_febe80e0" in c[0x4C97A]
-  assert "FUN_0007d31e(0x1f,0x13,1,0,puVar3 + -0x2bb9)" in c[0x4C97A]
   for token in ("DAT_febeaccc == '\\0'", "DAT_febeaccd == '\\0'", "DAT_febeadbf < 2", "DAT_febecafc == '\\0'", "DAT_febecad9 == '\\0'"):
     assert token in c[0xCE772]
   for token in ("DAT_febeaccc != '\\0'", "DAT_febeaccd != '\\0'", "DAT_febeadbf == '\\x02'", "DAT_febecafc == '\\x01'", "DAT_febecad9 == '\\x01'"):

@@ -454,7 +454,7 @@
     "0x0BCD62": {
       "body_sha256": "76d78c2605f902e96eb723f662d9fba543b1d1db85aedf62b9b3894b8c0220aa",
       "body_size": 2748,
-      "decompiled_c_sha256": "92bf38fe2429215245f39996a22a519cae52923fbd92b88fb9762386fabeb55e",
+      "decompiled_c_sha256": "c94c163c0248da1e9a42366d4763c591ee4cb08c326c706cdfaccf9316c6b1b3",
       "role": "application snapshot + cooperative-controller wrapper"
     },
     "0x0BF33E": {
@@ -502,7 +502,7 @@
     "0x0CB2A2": {
       "body_sha256": "47e9e6d34d89dbc5acf04e9d944a274745c7ece794ce514024cfd9a471460c26",
       "body_size": 86,
-      "decompiled_c_sha256": "c3931e8c7d01853ff2f923b97c60935aedc4e007ad06994da4c9591d247350b0",
+      "decompiled_c_sha256": "be38cac3723d94d74647b0eb3bcdc5424f15ffd14ed137f09084d78282270f09",
       "role": "B6 route-health readiness flags"
     },
     "0x0CB664": {
@@ -646,7 +646,7 @@
     "0x0CEFA4": {
       "body_sha256": "685ba14acb09eef538bdee93aff263b5945e80ed70df7be0bd712b9e348eaed2",
       "body_size": 68,
-      "decompiled_c_sha256": "c267a73afc30ad26badbdda24d56cb5ae6b70cc20b63cfb276d7837cae643d46",
+      "decompiled_c_sha256": "5b630c42670c78f95733ee556a054f69d22d2bf00843b58dbc9124ad918d22de",
       "role": "B6 profile health synthesis"
     },
     "0x0CEFFC": {
@@ -694,7 +694,7 @@
     "0x0CFDA0": {
       "body_sha256": "2d5e966e707fef202903503c886141ff941709accacf879c09f8186f7650a328",
       "body_size": 52,
-      "decompiled_c_sha256": "5e10b8020e3e40cbb52a60648fb1de3999b457c0c84571724284ab114bc72f90",
+      "decompiled_c_sha256": "383369c28b7a5ac39d2ba0f6d321a1da25d1b1f0ec0096274f0d859e0a8f51c8",
       "role": "B6 sig273 health-qualified publication"
     },
     "0x0D0218": {

@@ -1,0 +1,154 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_regulator_composition_first_channel_invalid",
+  "entry": {
+    "role": "real5E202 first channel0-invalid composition: feedback exclusion, common37228 correction using OLD differential6C78 before370E6, regulation, modulation, arbitration, history and both compare buffers through return; no hardware acquisition or timer commit",
+    "scope": "resolved-address",
+    "address": "0x5e202"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "r6": "0x2",
+    "r7": "0x200",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": ["0x798"],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated nested-call stack; all calls execute real target ROM"
+    },
+    {
+      "address": "0xfebe6af4",
+      "size": 1168,
+      "fill": 0,
+      "evidence": "explicit synthetic initialized software state6AF4..6F83, including previous channel masks6C84/6CC6=0, previous raw/gated errors0, zero sampled reference and second-axis state; no acquisition is run"
+    },
+    {
+      "address": "0xfebe6b3c",
+      "hex": "c0ffffff00000000e0ffffff00000000",
+      "evidence": "staged signed32 banks: first axes-64,-32 and second axes0.387CE snapshots all banks, then37E48 excludes bank0 under71EC bit0"
+    },
+    {
+      "address": "0xfebe6c78",
+      "hex": "00000800",
+      "evidence": "previous differential accumulator524288.372CA loads it before370E6 changes it; first-invalid common correction must not use the later523944 value"
+    },
+    {
+      "address": "0xfebe6c8c",
+      "hex": "00001000",
+      "evidence": "previous common accumulator1048576;372FE..37330 and37364..37366 correct it to(1048576-524288)/2=262144 before applying current recurrence"
+    },
+    {
+      "address": "0xfebe6c60",
+      "hex": "8000000000008000",
+      "evidence": "retained36F26 output-scale value128 and accumulator128*65536; its real target128 recurrence preserves this staged value"
+    },
+    {
+      "address": "0xfebe5f36",
+      "hex": "0002",
+      "evidence": "synthetic512 selects real38162 speed-map zero tail; reference-correction addends are zero"
+    },
+    {
+      "address": "0xfebe71ec",
+      "hex": "0100",
+      "evidence": "first channel0-invalid observation, with prior6C84=0; other channel remains included. This is not a physical-disable or bridge-output assertion"
+    },
+    {
+      "address": "0xfebe7d4a",
+      "hex": "0000",
+      "evidence": "explicit38162 synthetic phase-domain input"
+    },
+    {
+      "address": "0xfebe7d54",
+      "hex": "0000fc7f",
+      "evidence": "synthetic output-frame pair0,32764; both reference and regulated transforms execute their actual arithmetic"
+    },
+    {
+      "address": "0xfebe7d60",
+      "hex": "0000fc7f",
+      "evidence": "explicit second-bank output-frame coefficient pair0,32764; no measured-frame coefficient substitution"
+    },
+    {
+      "address": "0xfebe7da6",
+      "hex": "00000000",
+      "evidence": "explicit unsigned scaling-gate observations loaded at37008/3700C before branch admission; not fresh hardware samples"
+    },
+    {
+      "address": "0xfebe8a14",
+      "hex": "00",
+      "evidence": "37A92 gain refresh inactive; staged zero requests are clamped by real ROM: commonKp243/Ki294735 and differentialKp10/Ki25074"
+    },
+    {
+      "address": "0xfebe8a20",
+      "hex": "00",
+      "evidence": "37840 external-bound refresh inactive; real378D4 copies zero second-axis publications under6EA8!=5A"
+    },
+    {
+      "address": "0xfebe8b28",
+      "hex": "00000000",
+      "evidence": "explicit acquisition-status input with40004 reset mask clear"
+    },
+    {
+      "address": "0xfebe8bae",
+      "hex": "0000",
+      "evidence": "both selected arbitration indices zero; neither common reset nor per-bank output reset takes priority over channel-invalid correction"
+    },
+    {
+      "address": "0xfebee5c3",
+      "hex": "00",
+      "evidence": "385C4 real ROM bank0 selector"
+    },
+    {
+      "address": "0xfebee741",
+      "hex": "00000000000000",
+      "evidence": "explicit inactive385C4 external-limit status and magnitude"
+    },
+    {"address": "0xfebe38a0", "size": 40, "fill": 204, "evidence": "explicit retained compare buffers; hardware consumers excluded"},
+    {"address": "0xfebe5f40", "hex": "00000000", "evidence": "explicit sampled snapshot source"},
+    {"address": "0xfebe7d68", "size": 52, "fill": 0, "evidence": "explicit sampled sources for unconditional57FD2 publication"},
+    {"address": "0xfebe7eaa", "hex": "0000", "evidence": "explicit sampled snapshot source"},
+    {"address": "0xfebe8b5c", "size": 160, "fill": 0, "evidence": "initialized software arbitration and history; no competing enabled slot"},
+    {"address": "0xfebe8b6c", "hex": "e02ef055401f204e803ec05d", "evidence": "retained prior code triplets12000,22000,8000 and20000,16000,24000 for real57484 averaging/history shift"},
+    {"address": "0xfebe8b92", "hex": "0080", "evidence": "bank0 arbitration symmetric limit32768"},
+    {"address": "0xfebe8b9c", "hex": "0080", "evidence": "bank1 arbitration symmetric limit32768"},
+    {"address": "0xfebeec00", "size": 40, "fill": 165, "evidence": "snapshot destination initialized; no hardware observation asserted"},
+    {
+      "address": "0xfebeead0",
+      "hex": "00000000",
+      "evidence": "380DE non-magic guard; its real channel-invalid observer reset call executes and is not substituted"
+    }
+  ],
+  "checks": [
+    {"name": "full software callback returns after compare staging and snapshot publication", "kind": "register", "register": "PC", "equals": "0x798"},
+    {"name": "modulation and arbitration select the current live codes", "kind": "memory", "address": "0xfebe8bee", "size": 12, "equals_hex": "cf3b4c3741373f4abc45b245"},
+    {"name": "history averages the current and retained code generations", "kind": "memory", "address": "0xfebe8b60", "size": 12, "equals_hex": "57359e46402b2f4c1e42b951"},
+    {"name": "retained history advances without losing the previous generation", "kind": "memory", "address": "0xfebe8b6c", "size": 24, "equals_hex": "cf3b4c3741373f4abc45b245e02ef055401f204e803ec05d"},
+    {"name": "halfword compares use live codes and preserve port masks", "kind": "memory", "address": "0xfebe38a0", "size": 16, "equals_hex": "cccca2082f093109ccccdf066c076e07"},
+    {"name": "word compares use averaged generation and W V U order", "kind": "memory", "address": "0xfebe38b0", "size": 24, "equals_hex": "a80a0000510700006d090000f6050000dd070000a3060000"},
+    {"name": "37E48 excludes bank0 and publishes common minus32 but difference plus32", "kind": "memory", "address": "0xfebe6d70", "size": 12, "equals_hex": "e0ff00002000000000000000"},
+    {"name": "real ROM zero-sample reference composition publishes four zero axis references", "kind": "memory", "address": "0xfebe6d7c", "size": 8, "equals_hex": "0000000000000000"},
+    {"name": "common raw and gated errors both32 with no prior saturation gate", "kind": "memory", "address": "0xfebe6c7c", "size": 8, "equals_hex": "0000200020002000"},
+    {"name": "common remembers current invalid mask and corrected OLD differential-based accumulator262144", "kind": "memory", "address": "0xfebe6c84", "size": 12, "equals_hex": "01000000000004007f1f0400"},
+    {"name": "common update262144 plus243 times32 plus trunc575 times32 divided64 is270207", "kind": "memory", "address": "0xfebe6c8c", "size": 4, "equals_hex": "7f1f0400"},
+    {"name": "later differential update uses raw and gated minus32 and becomes523944, not the common correction input", "kind": "memory", "address": "0xfebe6c70", "size": 12, "equals_hex": "0000e0ffe0ffe0ffa8fe0700"},
+    {"name": "zero second-axis transition still records current invalid mask", "kind": "memory", "address": "0xfebe6cc6", "size": 2, "equals_hex": "0100"},
+    {"name": "369E4 invalid-mask path uses whole common accumulator and publishes360, not healthy common-plus-difference halves", "kind": "memory", "address": "0xfebe6bf8", "size": 8, "equals_hex": "6801000000000000"},
+    {"name": "36CF0 invalid-mask path likewise publishes360, not healthy common-minus-difference halves", "kind": "memory", "address": "0xfebe6c24", "size": 8, "equals_hex": "6801000000000000"},
+    {"name": "bank0 bounded first axis360 is unsaturated", "kind": "memory", "address": "0xfebe6be9", "size": 5, "equals_hex": "0000006801"},
+    {"name": "bank1 bounded first axis360 is unsaturated", "kind": "memory", "address": "0xfebe6c15", "size": 5, "equals_hex": "0000006801"},
+    {"name": "real retained36F26 scaling forwards both bank axes360 and zero second axes", "kind": "memory", "address": "0xfebe6c40", "size": 8, "equals_hex": "6801000068010000"},
+    {"name": "real38C7C publishes bank0 triplet290 minus143 minus147", "kind": "memory", "address": "0xfebe6e68", "size": 6, "equals_hex": "220171ff6dff"},
+    {"name": "real38D6C publishes bank1 triplet290 minus143 minus147", "kind": "memory", "address": "0xfebe6e70", "size": 6, "equals_hex": "220171ff6dff"}
+  ]
+}

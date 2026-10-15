@@ -80,6 +80,10 @@ DEREF = re.compile(
     r"\s*\(\s*(puVar\d+)\s*\+\s*(-?0x[0-9a-f]+)\s*\)")
 PARR = re.compile(r"\b(puVar\d+)\s*\[\s*(-?0x[0-9a-f]+)\s*\]")
 PTRADD = re.compile(r"\(\s*(puVar\d+)\s*\+\s*(-?0x[0-9a-f]+)\s*\)")
+CODE_GP_ADDRESS = re.compile(
+    r"\bFUN_([0-9a-f]{8})(?:\[\s*|\s*\+\s*)"
+    r"\(\s*(?:int|uint)\s*\)\s*"
+    r"(?:\(\s*(puVar\d+)(?:\s*\+\s*(-?(?:0x[0-9a-f]+|\d+)))?\s*\)|(puVar\d+))")
 
 
 def bases_of(text: str) -> dict[str, int]:
@@ -88,6 +92,14 @@ def bases_of(text: str) -> dict[str, int]:
 
 def cell_tokens(stmt: str, bases: dict[str, int]) -> set[int]:
     out = set()
+    # Ghidra can render a byte offset as a code symbol, for example
+    # FUN_00003942[(int)(puVar7 + 3)]. Resolve the complete address before
+    # looking for ordinary pointer additions, which would lose the symbol.
+    for m in CODE_GP_ADDRESS.finditer(stmt):
+        var = m.group(2) or m.group(4)
+        if var in bases:
+            out.add((bases[var] + int(m.group(1), 16) + int(m.group(3) or "0", 0)) & 0xFFFFFFFF)
+    stmt = CODE_GP_ADDRESS.sub(" ", stmt)
     for m in DAT_TOK.finditer(stmt):
         out.add(int(m.group(1), 16) + int(m.group(2) or 0))
     for m in DEREF.finditer(stmt):
@@ -557,7 +569,7 @@ def build() -> dict:
         },
     }
     token(0xCBA80, funcs, "DAT_febeae90", "DAT_febec7dc")
-    token(0xBCD62, funcs, "*(undefined2 *)(puVar38 + -0x9f4) = *(undefined2 *)(puVar38 + 0x696);")
+    need(pair_map.get(0xFEBEAE0C) == 0xFEBEBE96, "FEBEAE0C snapshot pair drift")
     token(0xC1BE4, funcs, "DAT_febeafa8 = DAT_febeac68;")
     token(0xFCC00, funcs, "DAT_febeef8e = DAT_febe71f2;")
     token(0x57F00, funcs, "DAT_febeee02 = DAT_febe686c;", "DAT_febeee12 = DAT_febe8a24;")

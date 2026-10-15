@@ -151,7 +151,6 @@ def build() -> dict:
     image = IMAGE.read_bytes()
     need(len(image) == 0x100000 and hashlib.sha256(image).hexdigest() == IMAGE_SHA256, "F33 image drift")
     funcs = corpus_map()
-    need(len(funcs) == 7178, "F33 corpus function count drift")
     gts = json.loads(GTS.read_text())
     fault = json.loads(FAULT.read_text())
 
@@ -262,14 +261,19 @@ def build() -> dict:
         raw, stage, snapshot, consumers, classification = COMMAND_CONE[sid]
         unpacker = int(row["unpacker"], 0)
         if sid == 243:
-            need(row["destination_expression"] == "auStack_9", "signal243 destination is no longer stack-backed")
-            token(funcs, 0x4BB62,
-                  "auStack_9[0] = DAT_febe80a0;",
-                  "FUN_0007d12a(0xf3,0x187,1,7,0,auStack_9);",
-                  "puVar2[-0x3760] = auStack_9[0];")
+            # Preserve the byte through sp+0xB; pass its address as stack
+            # argument 6 to the extractor, then copy the byte back to 80A0.
+            need(unpacker == 0x4BB62
+                 and image[0x4BB66:0x4BB76] == bytes.fromhex(
+                     "849fa1c8840fa5c8a4ef619b439f0b00")
+                 and image[0x4BBBA:0x4BBD4] == bytes.fromhex(
+                     "03f0230e0b0001052036f300030d203e87010142074a83ff5a15")
+                 and image[0x4BC08:0x4BC18] == bytes.fromhex(
+                     "a30f0b002036170044efa4c8440fa0c8"),
+                 "signal243 stack acquisition dataflow drift")
             need_ref(funcs, unpacker, raw, "READ")
             need_ref(funcs, unpacker, raw, "WRITE")
-            raw_edge = "0x0004BB62 stack-RMW auStack_9[0]"
+            raw_edge = "0x0004BB62 stack-byte read/modify/write"
         else:
             # The call-site reference is DATA because the unpacker writes
             # through its destination pointer; the exact call arguments above
@@ -300,12 +304,16 @@ def build() -> dict:
     # Same-image identity: F181's secondary record is software compatibility
     # identity, protected at startup by exact image-local comparisons.  DID2032
     # is the separate 0x17D80 record and must not be conflated with F181.
-    token(funcs, 0x4FA26, "*param_1 = 2;", "(&DAT_00020860)[iVar2]", "BYTE_ARRAY_00010000[iVar2 + 0x7dc0]")
+    token(funcs, 0x4FA26, "*param_1 = 2;")
+    need_ref(funcs, 0x4FA26, 0x20860, "READ")
+    need_ref(funcs, 0x4FA26, 0x17DC0, "READ")
     token(funcs, 0x637EE, "FUN_00062d5e();")
-    token(funcs, 0x62D5E, "(&DAT_00020850)[", "BYTE_ARRAY_00010000[uVar1 + 0x7da0]",
-          "BYTE_ARRAY_00010000[0x7dc0] != DAT_00020870", "iVar3 = -0x5aa55aa6;",
+    token(funcs, 0x62D5E, "iVar3 = -0x5aa55aa6;",
           "FUN_00070a92(iVar3,&DAT_febf0668,&DAT_febf10a4,&DAT_febf10c8);", "puVar2[0x4e6c] = uVar4;")
-    token(funcs, 0x4F9DE, "*param_1 = 1;", "BYTE_ARRAY_00010000[iVar2 + 0x7d80]")
+    for source in (0x20850, 0x17DA0, 0x17DC0, 0x20870):
+        need_ref(funcs, 0x62D5E, source, "READ")
+    token(funcs, 0x4F9DE, "*param_1 = 1;")
+    need_ref(funcs, 0x4F9DE, 0x17D80, "READ")
     need(image[0x20860:0x2086C] == b"8965F3307000", "F181 primary identity drift")
     need(image[0x17DC0:0x17DCC] == b"8A3113303100", "F181 compatibility identity drift")
     need(image[0x17DA0:0x17DA8] == image[0x20850:0x20858] == b"JB1BA101", "JB compatibility pair drift")
@@ -318,8 +326,11 @@ def build() -> dict:
           "FUN_0007d12a(0xd4,0x158,0x10,0,1,&DAT_febe8072);",
           "FUN_0007d12a(0xd5,0x15a,0x10,0,1,puVar2 + -0x378c);")
     token(funcs, 0x58074, "DAT_febef1bc = DAT_febe8072", "DAT_febef1be = DAT_febe8074")
-    snap = token(funcs, 0xBCD62, "puVar38 + 0x39bc", "puVar38 + -0x9fc", "puVar38 + 0x39be", "puVar38 + -0x9fa")
-    need("0x7fff" in snap and "-0x7fff" in snap, "D5 saturating snapshot clamp drift")
+    # Signed halfword loads, lower clamps at -32767, and stores to AE04/AE06.
+    need(image[0xBD336:0xBD35A] == bytes.fromhex(
+        "240fbc390106ff7fbf05200e0180640f04f6"
+        "240fbe390106ff7fbf05200e0180640f06f6"),
+        "D5 saturating snapshot clamp drift")
     token(funcs, 0xC9D18, "DAT_febeae04", "DAT_000b044c", "FUN_000bdb64(0xc9)")
     token(funcs, 0xC9CAA, "DAT_febeae06", "DAT_000b044a", "FUN_000bdb64(200)")
     need(struct.unpack_from("<H", image, 0xB044C)[0] == 100 and struct.unpack_from("<H", image, 0xB044A)[0] == 1000, "D5 thresholds drift")

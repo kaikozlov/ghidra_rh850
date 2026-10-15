@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from tools.targets.camry.support import camry_f33_corpus as f33
 from tools import REPO_ROOT
+from tools.targets.camry.builders.build_camry_8965F3307000_command_cone_ingress import exact_pairs
 import argparse
 import hashlib
 import json
@@ -399,6 +400,12 @@ def analyze() -> dict[str, Any]:
     if gate_source_census[name]["writers"] != expected:
       raise RuntimeError(f"{name} writer drift: {gate_source_census[name]['writers']}")
 
+  snapshot_pairs = set(exact_pairs(0xBCD62, corpus))
+  # BCE30..BCE48 maps global COM states 0/2 unchanged, 3->4, others->1
+  # into r29; BD00A..BD00C publishes r29 at the recovered ACBD reference.
+  # CEFA8..CEFE0 calls grouped-status selectors 0x11/0x1A, inhibits when
+  # their OR equals 0x5A, otherwise publishes each route-status == 0.
+  # These are instruction/dataflow guards, not decompiler-local spellings.
   checks = {
     "secoc_ingress_state_and_pointer_checks": all(x in c[0x8EE7C] for x in ("DAT_febe54f4 == -0x1ff", "param_2 != (int *)0x0", "FUN_0008f34a")),
     "queue_wrapper_calls_insert": "FUN_0008e9c6(1" in c[0x8F34A],
@@ -411,9 +418,21 @@ def analyze() -> dict[str, Any]:
     "route_generation_update": "DAT_febe5338" in c[0x8E772] and "DAT_febe52d8" in c[0x8E772],
     "app_unpack_requires_new_generation_and_global_state": "DAT_febe7f68 < 2" in c[0x4BD46] and "DAT_febe80c8 != DAT_febe5364" in c[0x4BD46],
     "stage_maps_b6_core_fields": all(x in c[0x58074] for x in ("DAT_febef130 = DAT_febe80bc", "DAT_febef1fa = DAT_febe80b8", "DAT_febef138 = DAT_febe80c4", "DAT_febef139 = DAT_febe80c5", "DAT_febef000 = DAT_febe7f68")),
-    "snapshot_maps_b6_fields": all(x in c[0xBCD62] for x in ("puVar38[-0xa50] = puVar38[0x3930]", "*(undefined2 *)(puVar38 + -0x970) = *(undefined2 *)(puVar38 + 0x39fa)", "puVar38[-0xa23] = puVar38[0x3955]", "puVar38[-0xa45] = puVar38[0x3934]", "puVar38[-0xa44] = puVar38[0x3937]", "puVar38[-0xa43] = puVar38[0x3938]", "puVar38[-0xa42] = puVar38[0x3939]", "puVar38[-0xa47] = puVar38[0x393e]")),
-    "global_com_state_normalizes_to_acbd": all(x in c[0xBCD62] for x in ("cVar1 = puVar38[0x3800]", "cVar21 = cVar1", "cVar21 = '\\x04'", "cVar21 = '\\x01'", "puVar38[-0xb43] = cVar21")) or all(x in c[0xBCD62] for x in ("cVar1 = puVar38[0x3800]", "cVar44 = cVar1", "cVar44 = '\\x04'", "cVar44 = '\\x01'", "puVar38[-0xb43] = cVar44")),
-    "b6_health_requires_status_zero": all(x in c[0xCEFA4] for x in ("FUN_000bdb76(0x11)", "FUN_000bdb76(0x1a)", "puVar2[0x12ff] = bVar1 && puVar2[-0xa47] == '\\0'")),
+    "snapshot_maps_b6_fields": all(
+      (int(field["stage"], 16), int(field["snapshot"], 16)) in snapshot_pairs
+      for field in FIELD_MAP if field["snapshot"]
+    ) and (0xFEBEF13E, 0xFEBEADB9) in snapshot_pairs,
+    "global_com_state_normalizes_to_acbd": (
+      image[0xBCE30:0xBCE4A] == bytes.fromhex("84d70138e0d1f20562d2d20563d2d20501eac5051ae8a50504ea")
+      and image[0xBD00A:0xBD00E] == bytes.fromhex("06f081eb")
+      and any(int(ref["from_addr"], 16) == 0xBD00C
+              and int(ref["to_addr"], 16) == 0xFEBEACBD and ref["ref_type"] == "WRITE"
+              for ref in corpus[0xBCD62]["data_references"])
+    ),
+    "b6_health_requires_status_zero": image[0xCEFA8:0xCEFE4] == bytes.fromhex(
+      "20361100beffcaeb0ae820361a00beffc0eba40fc1f40ae9a49fb9f51d06a6ffca05"
+      "009a000af505e099e29f0000e009e20f0000449fff12440ffe12"
+    ),
     "id11_maps_bank2_only_when_health_and_acbd_allow": all(x in c[0xCEFFC] for x in ("DAT_febecb00 = 7", "DAT_febeacbd == '\\0'", "DAT_febecaff == '\\x01'", "DAT_febeadb0 == '\\v'", "DAT_febecb00 = 2")),
     "id11_does_not_arm_ca614_state_gate": all(x in c[0xCA614] for x in ("DAT_febeadb0 != '\\x19'", "DAT_febeadb0 != '\\x1b'")) and "DAT_febeadb0 == '\\v'" not in c[0xCA614],
     "sig263_is_special_0x31_transient_condition_not_id11_gate": all(x in c[0xCB664] for x in ("DAT_febeaddd == '\\0'", "DAT_febeaddd != '\\0'", "DAT_febec7b4")) and all(x in c[0xCB73A] for x in ("DAT_febec7b4", "DAT_febeadb0 == '1'", "DAT_febec7bf = '\\x01'")),

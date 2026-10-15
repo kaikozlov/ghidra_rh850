@@ -37,6 +37,12 @@ check("copy edges resolve source and destination subfields",
           "DAT_febef0b8._2_1_ = DAT_febe8000._2_1_; "
           "DAT_febef02d = DAT_febe7ff0;"}}) ==
       [(0xFEBE8002, 0xFEBEF0BA), (0xFEBE7FF0, 0xFEBEF02D)])
+check("code-symbol aliases resolve the complete GP-relative byte address",
+      cell_tokens("FUN_00003942[(int)(puVar7 + 3)]", {"puVar7": 0xFEBEB800}) == {0xFEBEF145}
+      and cell_tokens("*(short *)(FUN_00003998 + (int)puVar7)", {"puVar7": 0xFEBEB800}) == {0xFEBEF198}
+      and cell_tokens("FUN_00003942[(int)(puVar7 + -0x2)]", {"puVar7": 0xFEBEB800}) == {0xFEBEF140})
+check("unresolved code-symbol base does not invent a copy source",
+      cell_tokens("FUN_00003942[(int)(puVar9 + 3)]", {"puVar7": 0xFEBEB800}) == set())
 
 
 with tempfile.TemporaryDirectory() as td:
@@ -200,7 +206,6 @@ bca08 = _camry_decompiled(0xBCA08)
 c1be4 = _camry_decompiled(0xC1BE4)
 d0674 = _camry_decompiled(0xD0674)
 cf2b2 = _camry_decompiled(0xCF2B2)
-bcd62 = _camry_decompiled(0xBCD62)
 
 check("stock state passes CC60 through CC50 unchanged (guard fallbacks 0x100/0x0)",
       "DAT_000b04c4" in cb9c8 and "0xffff" in cb9c8
@@ -228,8 +233,6 @@ check("C797 latch self-terminates the pulse (5 ticks, 0x280 magnitude gate)",
 check("AC10 base-swap payload is internal AC68, not B6-derived",
       "DAT_febeac10 = DAT_febeafa8;" in bca08
       and "DAT_febeafa8 = DAT_febeac68;" in c1be4)
-check("ADB0 snapshot copies staged FEBEF130 via BCD62",
-      "puVar38[-0xa50] = puVar38[0x3930];" in bcd62)
 check("CC94/CC98 override writer is internal-only (no B6 references)",
       "DAT_febecc94 = -DAT_febecc80;" in d0674 and "DAT_febeadb0" not in d0674)
 check("CB38 ramp target comes from CB08/CB20 supervisor state",

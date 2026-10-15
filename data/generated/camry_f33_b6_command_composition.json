@@ -31,7 +31,7 @@
     "0x0BCD62": {
       "body_sha256": "76d78c2605f902e96eb723f662d9fba543b1d1db85aedf62b9b3894b8c0220aa",
       "body_size": 2748,
-      "decompiled_c_sha256": "92bf38fe2429215245f39996a22a519cae52923fbd92b88fb9762386fabeb55e",
+      "decompiled_c_sha256": "c94c163c0248da1e9a42366d4763c591ee4cb08c326c706cdfaccf9316c6b1b3",
       "role": "input snapshot plus B6 supervisor invocation"
     },
     "0x0BF33E": {

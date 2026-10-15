@@ -3,6 +3,7 @@
 from __future__ import annotations
 from tools.targets.camry.support import camry_f33_corpus as f33
 from tools import REPO_ROOT
+from tools.targets.camry.builders.build_camry_8965F3307000_command_cone_ingress import exact_pairs
 import argparse, hashlib, json, math, struct
 from pathlib import Path
 from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
@@ -177,12 +178,13 @@ def main() -> int:
         raise ValueError('Camry B6 signal 261/262 destination reference drift')
 
     # Raw -> staging -> snapshot -> target-conditioning/plausibility consumers.
-    stage = funcs[0x58074]['decompiled_c']; snap = funcs[0xBCD62]['decompiled_c']
+    stage = funcs[0x58074]['decompiled_c']
+    snapshot_pairs = set(exact_pairs(0xBCD62, funcs))
     preprocess = funcs[0xCCF0E]['decompiled_c']; clamp = funcs[0xCCFB2]['decompiled_c']; plaus = funcs[0xCEE7C]['decompiled_c']
     selector_decode = funcs[0xCEFFC]['decompiled_c']; selector_aux = funcs[0xCB73A]['decompiled_c']
     need(stage, 'DAT_febef130 = DAT_febe80bc;', 'DAT_febef1fa = DAT_febe80b8;')
-    need(snap, '*(undefined2 *)(puVar38 + -0x970) = *(undefined2 *)(puVar38 + 0x39fa);',
-         'puVar38[-0xa50] = puVar38[0x3930];')
+    if not {(0xFEBEF1FA, 0xFEBEAE90), (0xFEBEF130, 0xFEBEADB0)} <= snapshot_pairs:
+        raise ValueError('Camry B6 snapshot edge drift')
     need(preprocess, 'iVar1 = DAT_febeae90 * 2;', '0x7fff', '-0x7fff', 'DAT_febec8b4')
     need(clamp, 'DAT_febec8b4', 'DAT_febec9fe', 'DAT_febeca00', 'DAT_febec8b8')
     need(plaus, 'sVar4 = *(short *)(puVar12 + -0x970);', 'FUN_000d0970((int)sVar4)')
@@ -211,9 +213,8 @@ def main() -> int:
         raise ValueError('Camry DID1037 row drift')
     need(did1037, 'asStack_a[0] = DAT_febe7d46;', 'FUN_00070110', 'FUN_0006a5ac')
     need(stage, 'DAT_febef1a0 = DAT_febe8048;', 'DAT_febef06f = DAT_febe804f;')
-    need(snap,
-         '*(undefined2 *)(puVar38 + -0xa02) = *(undefined2 *)(puVar38 + 0x39a0);',
-         'puVar38[-0xb3b] = puVar38[0x386f];')
+    if not {(0xFEBEF1A0, 0xFEBEADFE), (0xFEBEF06F, 0xFEBEACC5)} <= snapshot_pairs:
+        raise ValueError('Camry measured-angle snapshot edge drift')
     need(measured_combine, 'DAT_febeb16c = DAT_febef1a0 * 0xf + (short)DAT_febef06f;')
     need(measured_condition, '((int)DAT_febeacc5 + DAT_febeadfe * 0xf) * 0x6fb) / 0x200;',
          'iVar13 = iVar12 * 2 - iVar1;')

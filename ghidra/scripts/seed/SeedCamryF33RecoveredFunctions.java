@@ -2101,7 +2101,7 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         .setComment("With workmask bit1, state>=0200 runs current conversion, feedback regulation, limiting, transforms "
             + "and slot0 publication. Independently state>=0101 runs arbitration/history and compare staging, "
             + "so0101..01FF can stage existing values without recomputing control.57FD2 always publishes "
-            + "snapshots. Native composed proof currently ends at38A58, not physical output.");
+            + "snapshots. Software compare staging is separate from acquisition and hardware commit.");
     semanticFunction(0x38E52L, "f33_scale_first_phase_codes", v,
         new ParameterImpl("scale", s32, currentProgram),
         new ParameterImpl("triplet", halfwords, currentProgram))
@@ -2134,7 +2134,15 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     semanticData(0x31B86L, s16, "f33_current_correction_coefficient_a", "Signed scalar1019.");
     semanticData(0x31B8CL, s16, "f33_current_correction_coefficient_b", "Signed scalar-1019.");
     semanticData(0x31B96L, s16, "f33_current_correction_phase_slope", "Signed scalar-853.");
-    getFunctionAt(toAddr(0x37228L)).setComment("Common first-axis regulator: error=sat(6D80-6D70), accumulator6C8C. Directional prior-saturation flags gate integration but not proportional error difference. Signed accumulator saturation +/-7FFFFFFF. On first channel-invalid transition, combine prior differential accumulator before division by2. Runs before differential370E6.");
+    getFunctionAt(toAddr(0x37228L)).setComment("Common first-axis regulator: error=sat(6D80-6D70), accumulator6C8C. "
+        + "Prior saturation gates integration, not proportional error difference. First-invalid correction "
+        + "requires ENTIRE previous6C84==0: bit0 selects(common-old differential)/2 before bit1's plus case. "
+        + "Symmetric saturation precedes division. Publish corrected6C88, then update before370E6; "
+        + "the reset branch does not clear6C84/6C88.");
+    getFunctionAt(toAddr(0x36F26L)).setComment("Retained output scaling follows a projected bank-axis product "
+        + "and a separate scale accumulator. Unconditionally load unsigned7DA6/7DA8 before admission. "
+        + "A zero filtered estimate selects target128; actual fractional recurrence still runs. "
+        + "Staged scale128 forwards nonzero bank axes without implying fresh acquisition or PWM duty.");
     getFunctionAt(toAddr(0x370E6L)).setComment("Differential first-axis regulator: error=sat(6D82-6D74), accumulator6C78. Prior output-direction flags gate integration; both nonzero selected slot indices or8B28&40004 reset state. Additional accumulator clamp uses ROM31A3C. Selected slot indices are not physical-disable booleans.");
     getFunctionAt(toAddr(0x3777EL)).setComment("Common second-axis regulator aggregate375C2/375E6/3762E: error uses unsaturated32-bit feedback6D78, not halfword6D72. Persistent accumulator6CCC, directional anti-windup and first channel-invalid transition adjustment; additional clamp31A68.");
     getFunctionAt(toAddr(0x37538L)).setComment("Differential second-axis regulator aggregate373E6/37418/37460: error=sat(6D7E-6D76), accumulator6CA0, directional anti-windup and additional clamp31A58. Reset follows selected arbitration indices and acquisition status, not a generic diagnostic inhibit.");
@@ -2330,6 +2338,80 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         "Unsigned16 divisor/count threshold2000; not a fused32-bit scalar with following calibration.");
     semanticData(0xAF582L, u16, "f33_estimator_source_limit_default", "Exact default8000.");
     semanticData(0xAF584L, u16, "f33_estimator_source_limit_mode2", "Exact mode2 default8000.");
+  }
+  private void annotateEstimatorQualifiers() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    DataType bytes = new PointerDataType(u8, 4);
+    DataType halves = new PointerDataType(u16, 4);
+    semanticFunction(0x49E98L, "f33_get_grouped_status_byte", u8,
+        new ParameterImpl("selector", u32, currentProgram))
+        .setComment("Low8 selector<30 reads290DA+8*selector: values1/2 select7F51/7F52; "
+            + "other rows or out-of-range selectors return7F50. These are staged status bytes, not event IDs.");
+    semanticFunction(0xBDB76L, "f33_get_application_grouped_status", u8,
+        new ParameterImpl("selector", u32, currentProgram))
+        .setComment("Narrow selector to low8 and forward through the real49E98 thunk. Preserve the "
+            + "returned byte; the former void inference lost consequential estimator/supervisor dataflow.");
+    semanticFunction(0xC405EL, "f33_refresh_estimator_tracking_qualifiers", v)
+        .setComment("Refresh threshold maps, source stabilityC042, paired-source qualificationC044, "
+            + "then compositeC045. C43E0 consumes these newly produced bytes before acquisition/tracking.");
+    semanticFunction(0xC3908L, "f33_refresh_estimator_qualifier_thresholds", v)
+        .setComment("Always refresh five C0B4-indexed scalesC00C..14; exact maps are flat1024. Only "
+            + "AD18==11 refreshes axisADF6 maps and composite thresholdsC016..28. AD3F==2 selects "
+            + "separate but numerically identical curves:584,218,102,384,40. Other AD18 holds those thresholds.");
+    semanticFunction(0xC3A50L, "f33_update_estimator_source_mode_gate", v)
+        .setComment("C02E is5A except when AD3F==2 and eitherAD5C!=2 or abs32(s16AE40)>=unsignedC028. "
+            + "The signed16 input is widened before abs32, not passed through wrapping abs16.");
+    semanticFunction(0xC3A84L, "f33_advance_estimator_stability_window", v,
+        new ParameterImpl("count", halves, currentProgram),
+        new ParameterImpl("qualified", bytes, currentProgram))
+        .setComment("Count0 reseeds max/minC000/C004 toBF78; otherwise extend extrema. Wrapped spread "
+            + "must be strictly below80*AE38/1024. Incremented u16 count>10 pins10 and publishes5A; "
+            + "earlier admitted counts retain oldC042. Failed spread clears count/status.");
+    semanticFunction(0xC3B00L, "f33_qualify_estimator_source_stability", v)
+        .setComment("Refresh source-mode gate even if outer AD3F0/3, BFC5!=0 orAC02!=0 rejects. Admitted "
+            + "path clamps low32(BF74+s16BF98) symmetrically16, updatesC034 by input-oldC03C, then "
+            + "low32 shift10 /8672 and narrowing toC03C. Wrapped abs16(output)<signedC026, "
+            + "abs16(BF9C)<160 andC02E5A admit the extrema window; rejection clearsC03E/C042.");
+    semanticFunction(0xC3BD4L, "f33_update_estimator_group_release", v)
+        .setComment("Real grouped status selector12hex nonzero resetsC02A and inhibitsC02F5A. Zero "
+            + "increments u16 count; reaching inclusive40 pins40 and clears inhibition in that invocation.");
+    semanticFunction(0xC3C12L, "f33_advance_estimator_pair_window", v,
+        new ParameterImpl("count", halves, currentProgram),
+        new ParameterImpl("qualified", bytes, currentProgram))
+        .setComment("Mean of four unsignedBFA2/4/6/8 samples must be nonzero. Either normalized "
+            + "cross-pair difference >=7 percent rejects and setsC0435A. Require pair difference<C024, "
+            + "abs32(BF80)<C020, abs32(s16BFA0)<signedC022 andBFB0/BFB15A. Incremented count>10 "
+            + "pins10/publishes5A; earlier admission retainsC044. Rejection clears count/status.");
+    semanticFunction(0xC3D04L, "f33_qualify_estimator_paired_sources", v)
+        .setComment("Always update grouped release. BFB25A andC02F0 admit paired window; otherwise "
+            + "clearC040/C044 but leave pair-mismatchC043 unchanged because the window did not run.");
+    semanticFunction(0xC3D4CL, "f33_estimator_base_source_constraint", u32)
+        .setComment("Return5A only for BFB3/BFB4/BF46 zero and wrapped abs16(AE06/AE04)<=1; otherwise0.");
+    semanticFunction(0xC3DA0L, "f33_estimator_mode2_constraint_a", u32)
+        .setComment("AD3C other than2 returns5A. Mode2 requires wrapped abs16(AE4C/AE50)<=1 "
+            + "andAD34/AD35 zero.");
+    semanticFunction(0xC3DF2L, "f33_estimator_mode2_constraint_b", u32)
+        .setComment("AD3F other than2 returns5A. Mode2 requires wrapped abs16(AE4E/AE52)<=1 "
+            + "andAD34/AD35 zero.");
+    semanticFunction(0xC3E44L, "f33_qualify_estimator_source_constraints", v)
+        .setComment("Always compute/store three source constraintsC030..32. C0455A additionally "
+            + "requires both AD3C/AD3F outside0/3, AD1811, BFB25A, BFB50 and absolute paired mean "
+            + "minusADF6 strictly below1280. This is not the same gate as either consecutive window.");
+    semanticData(0xAF614L, s32, "f33_estimator_stability_filter_divisor", "Exact8672 after low32 shift10.");
+    semanticData(0xAF618L, s32, "f33_estimator_stability_spread_scale", "Exact80; scale byAE38/1024.");
+    semanticData(0xAF61CL, s16, "f33_estimator_stability_amplitude_limit", "Exact160; strict signed comparison.");
+    semanticData(0xAF61EL, u16, "f33_estimator_stability_window", "Exact10; incremented count must exceed.");
+    semanticData(0xAF620L, u16, "f33_estimator_group_release_window", "Exact40; inclusive release.");
+    semanticData(0xAF622L, u16, "f33_estimator_pair_percent_limit", "Exact7; equality rejects.");
+    semanticData(0xAF624L, u16, "f33_estimator_pair_window", "Exact10; incremented count must exceed.");
+    semanticData(0xAF626L, new ArrayDataType(s16, 6, 2), "f33_estimator_source_amplitude_limits",
+        "Six signed bounds, each1. Shared wrapping abs16 preserves INT16_MIN behavior.");
+    semanticData(0xAF632L, u16, "f33_estimator_pair_axis_margin", "Exact1280; strict absolute-difference gate.");
   }
   private void annotateEstablishedTracking() throws Exception {
     DataType v = VoidDataType.dataType;
@@ -2836,6 +2918,84 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     semanticData(0xFEBE82DCL, new ArrayDataType(captureType, 3, 240), "f33_diagnostic_capture_slots",
         "First unqualified, distinct-code unqualified and qualified240-byte records. RAM publication is not durable persistence.");
   }
+  private void annotateDiagnosticAgingAndClear() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType bytes = new PointerDataType(u8, 4);
+    DataType halves = new PointerDataType(u16, 4);
+    semanticFunction(0x510E0L, "f33_update_classifier_status_latch", u8)
+        .setComment("Return/store actual R10 byte82B4. Zero latch asserts5A only for7F515A; nonzero "
+            + "latch clears only when7F51 andE827 are both zero. Caller512E4 uses nonzero, not equality5A.");
+    semanticFunction(0x5110AL, "f33_age_classifier_flag_group", v,
+        new ParameterImpl("flags", bytes, currentProgram),
+        new ParameterImpl("activity", bytes, currentProgram),
+        new ParameterImpl("age", halves, currentProgram),
+        new ParameterImpl("threshold", u16, currentProgram))
+        .setComment("Snapshot unsignedE8B0 before PMRFF00. Consume activity5A and reset age, then "
+            + "increment while age<=threshold. Clear whole flag group only for age>threshold andE8B0>=22170. "
+            + "Consumed activity leaves age1; already-over-threshold age holds. No class-counter decrement.");
+    semanticFunction(0x5116CL, "f33_age_classifier_retained_flags", v)
+        .setComment("Same activity/strict age contract for82A5/82A8/82CE with exact600, but noE8B0 gate. "
+            + "PMRFF00 protects updates; histories and active class counts are untouched.");
+    semanticFunction(0x511B6L, "f33_age_classifier_groups", v)
+        .setComment("Snapshot flagsA4/A5, then age nonzero groups in A3,A5,A4 order. Exact thresholds "
+            + "200/600/200 are invocation counts, not elapsed time or event-bitmap aging.");
+    semanticFunction(0x51208L, "f33_classifier_selector3_predicate", u32)
+        .setComment("Return5A for zero6AF0, E8533/4, E854FF, E85511, sentinel33333333 inE91C/E924/E92C "
+            + "or62E12 resultA55AA55A; otherwise0. Structural classifier priority, not a recovered OEM fault name.");
+    semanticFunction(0x51266L, "f33_update_classifier_status22_edges", u32)
+        .setComment("Each E857/8/9==22 asserts its82B1/2/3 latch; rising edges set82A4.bit5 and "
+            + "activity82A75A. Other values clear that latch. Return5A while any source equals22.");
+    semanticFunction(0x512E4L, "f33_update_diagnostic_classifier_output", v)
+        .setComment("Update bank predicate, snapshot active counts, update status latch, then age flags. "
+            + "Select using pre-aging counts and post-aging flags plus application predicates; publish "
+            + "selector82A0 and its five-byte2A19C row. Cleared age flags do not imply cleared active counts "
+            + "or event histories. Stateful selectors1/2 have separate counters82B6/82B8.");
+    semanticFunction(0x51592L, "f33_reset_classifier_counts_and_flags", v)
+        .setComment("Clear nine active counters and82A3/A4/A5 flags, reload ages200/200/600. "
+            + "Do not clear activity82A6/A7/A8 or describe this as resetting every classifier field.");
+    semanticFunction(0x4D63EL, "f33_diagnostic_clear_request_callback", u16)
+        .setComment("Idle81B2 publishes1410 and requests operation1, returning pending4. Matching "
+            + "family14 with low10 stays pending; terminal low0 returns0 and other terminal lows return6, "
+            + "clearing81B2. Other families return6 without stealing their state. RAM reset is not durable completion.");
+    semanticFunction(0x51714L, "f33_request_diagnostic_clear", u32)
+        .setComment("Idle lifecycle82D4: set1, reset RAM state, then set high bit to81. Other states "
+            + "except81 deduplicate request1 in four queue bytes82D8..DB and insert at normalized "
+            + "circular index82D6. Return0, not a persistence acknowledgement or queue-full status.");
+    semanticFunction(0x516DCL, "f33_clear_diagnostic_ram_generation", v)
+        .setComment("If E856==11, save six current exceptional event IDs around bitmap reset, capture "
+            + "maintenance and classifier reset, then restore them. Otherwise run the same reset without "
+            + "preservation. Second retained history60F0 is not cleared by this operation.");
+    semanticFunction(0x51674L, "f33_snapshot_preserved_current_events", v,
+        new ParameterImpl("events", halves, currentProgram))
+        .setComment("Write six halfwords: ROM2FC44 event ID when its entry current bit is set, otherwise0. "
+            + "Retained-only exceptions do not qualify; the real buffer is12 bytes, not six byte flags.");
+    semanticFunction(0x516A6L, "f33_restore_preserved_current_events", v,
+        new ParameterImpl("events", halves, currentProgram))
+        .setComment("Read six saved IDs/zero slots;525E0 restores valid events into three histories. "
+            + "Pass descriptor byte1 in realR6 to classifier assertion when nonzero. Exact preserved-event "
+            + "classes1/0 do not rebuild class2 counters; class1 has no50FC8 handler.");
+    semanticFunction(0x5255AL, "f33_clear_current_and_first_event_history", v)
+        .setComment("Phase5F85AA, clear12 words each6090/60C0/6120, rebuild descriptor bitmap, "
+            + "set dirty5F81/82 and5F84.bit3, then phaseA5. Preserve second retained60F0.");
+    semanticFunction(0x525A0L, "f33_clear_second_event_history", v)
+        .setComment("Distinct operation: phase5F85AA, clear60F0, eight-byte banks5F71/5F79 and6028/602A, "
+            + "set dirty5F84.bit4 and phaseA5. InitialAA store is instruction-visible despite C folding.");
+    semanticFunction(0x51E46L, "f33_rebuild_event_descriptor_bitmap", v)
+        .setComment("Rows0..17F inclusive: set6120 bit when descriptor byte2 OR byte5 is zero. "
+            + "Includes row0; does not simply copy an existing failure history.");
+    semanticFunction(0x52FCCL, "f33_mark_capture_slots_for_clear", v)
+        .setComment("For occupied slots, marker44 drops occupancy and copies240-byte ROM defaults. "
+            + "Other markers retain occupancy/data except event halfword90=0 and markerB7=22. "
+            + "Set corresponding dirty bit2 and global phaseA5; if no slot is occupied, restore entry6150 phase. "
+            + "Always set615A5A and clear6166. Retained supplement85AC is not erased.");
+    semanticData(0x30E40L, u16, "f33_classifier_primary_age_threshold", "Exact200 invocations; strict expiry.");
+    semanticData(0x30E42L, u16, "f33_classifier_secondary_age_threshold", "Exact200 invocations; strict expiry.");
+    semanticData(0x30E44L, u16, "f33_classifier_retained_age_threshold", "Exact600 invocations; strict expiry.");
+    semanticData(0x30E46L, u16, "f33_classifier_age_release_threshold", "Exact22170; unsignedE8B0 inclusive gate.");
+  }
   private void annotateAssistComposition() throws Exception {
     DataType v = VoidDataType.dataType;
     DataType s16 = ShortDataType.dataType;
@@ -3286,11 +3446,13 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateSensingPipeline();
     annotateRateObserver();
     annotateEstimatorAcquisition();
+    annotateEstimatorQualifiers();
     annotateEstablishedTracking();
     annotateThermalModels();
     annotateThermalArbitration();
     annotateFaultActions();
     annotateDiagnosticEventLifecycle();
+    annotateDiagnosticAgingAndClear();
     annotateAssistComposition();
     annotateApplicationLifecycle();
     annotateServiceLifecycle();

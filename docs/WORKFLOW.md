@@ -118,6 +118,23 @@ $UV python -m tools.targets.camry.analysis.plot_camry_20260930_vmc_status \
   and `--inventory` (see each module's `--help`) instead of any new wrapper
   script.
 
+The F33 B6/gate reconciliation also scans retained rlogs and needs an external
+reader environment, including `capnp`. Its `--openpilot-root` is the parent
+exposing the `openpilot` Python package, rather than the source-tree argument in
+the extraction example above. For a checkout with an existing `.venv`, run the
+registered producer from this repository root:
+
+```bash
+../kai-openpilot/.venv/bin/python \
+  -m tools.targets.camry.analysis.analyze_camry_f33_b6_gate_log_reconciliation \
+  --openpilot-root ../kai-openpilot
+```
+
+Supply `--log-root` when the retained corpus is elsewhere. The ordinary
+repository Python environment is not assumed to contain the external reader's
+dependencies. Retain reader corruption warnings as evidence limits; do not
+repair raw captures or reinterpret regeneration as a new vehicle observation.
+
 ### Gear and READY evidence
 
 Regenerate the controlled Camry selector evidence without external inputs:

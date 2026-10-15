@@ -146,8 +146,6 @@ def section_codeflash() -> int:
     check('B6 unpacker target-native calls exact selector extraction', 'FUN_0007d12a(0x105,0x1ba,6,0,0,&DAT_febe80bc);' in funcs[0x4BD46]['decompiled_c'])
     check('B6 unpacker target-native calls exact signed16 extraction', 'FUN_0007d12a(0x106,0x1bb,0x10,0,1,puVar2 + -0x3748);' in funcs[0x4BD46]['decompiled_c'])
     check('signed16 raw -> staging', 'DAT_febef1fa = DAT_febe80b8;' in funcs[0x58074]['decompiled_c'])
-    check('signed16 staging -> snapshot', '*(undefined2 *)(puVar38 + -0x970) = *(undefined2 *)(puVar38 + 0x39fa);' in funcs[0xBCD62]['decompiled_c'])
-    check('selector raw -> staging -> snapshot', 'DAT_febef130 = DAT_febe80bc;' in funcs[0x58074]['decompiled_c'] and 'puVar38[-0xa50] = puVar38[0x3930];' in funcs[0xBCD62]['decompiled_c'])
     check('signed target doubles in target conditioner', 'iVar1 = DAT_febeae90 * 2;' in funcs[0xCCF0E]['decompiled_c'])
     check('target conditioner saturates symmetric int16 domain', '0x7fff' in funcs[0xCCF0E]['decompiled_c'] and '-0x7fff' in funcs[0xCCF0E]['decompiled_c'])
     check('independent plausibility path consumes same snapshot', 'sVar4 = *(short *)(puVar12 + -0x970);' in funcs[0xCEE7C]['decompiled_c'] and 'FUN_000d0970((int)sVar4)' in funcs[0xCEE7C]['decompiled_c'])

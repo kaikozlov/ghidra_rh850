@@ -2507,8 +2507,9 @@ differential state. `37228` runs before `370E6`, so that adjustment uses the
 **previous** differential accumulator.
 
 Both nonzero selected arbitration indices `8BAE/8BAF`, or status mask
-`8B28&40004`, reset the regulator states. These indices are not physical-disable
-booleans. `369E4/36CF0` combine common/difference accumulators into bank outputs,
+`8B28&40004`, reset the recurrences, not every retained cell: common first-axis
+`6C84/6C88` survive that reset. These indices are not physical-disable booleans.
+`369E4/36CF0` combine common/difference accumulators into bank outputs,
 apply calibrated envelopes and publish saturation directions for the next update.
 Further retained filtering and conditional bounds precede the regulated
 axis-to-phase transforms **`38C7C/38D6C`**. By contrast, `38A58/38B6A` transform
@@ -2523,6 +2524,43 @@ inlining preserves that register dataflow without substituting native callees.
 indices/inverses, and optionally applies symmetric code bounds. A mode-owned
 slot3 substitution therefore need not win against slot4.
 
+The [prior-saturation](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_regulator_composition_prior_positive_saturation.json)
+and [first channel-loss](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_regulator_composition_first_channel_invalid.json)
+compositions execute real `5E202(2,0200)` through return: feedback, retained
+regulation, phase transforms, modulation, arbitration, history, both software
+compare buffers and snapshot publication. Inputs and retained states are explicit;
+no callee is replaced.
+
+| Staged transition | Updated common accumulator | Updated differential accumulator | Published bank0 first axis | Published bank1 first axis |
+|---|---:|---:|---:|---:|
+| Prior positive saturation, healthy banks | 1056352 | 524448 | 1055 | 354 |
+| First bank0-invalid observation | 270207 | 523944 | 360 | 360 |
+
+The saturation case suppresses current integral errors while preserving
+proportional increments; new output saturation directions then become0.
+The channel-loss correction requires the **entire prior mask `6C84==0`**,
+not merely a previously clear corresponding bit. Bit0 takes precedence over
+bit1. Its checked intermediate `6C88=262144` comes from
+`(1048576−524288)/2`, before the differential recurrence updates that second
+operand. Final output quantization alone could conceal a reversed update order.
+
+Both cases continue through real `36F26` retained scaling and publish nonzero
+phase triplets. Its `7DA6/7DA8` loads occur before admission, even when the
+filtered estimate is zero. Explicitly supplying those staged observations does
+not bypass the fractional filter or establish fresh hardware samples.
+
+Both compositions use the ordinary modulation0 branch and allow newly published
+slot0 to win without a competing slot. `37C4C` selects opposite calibrated
+offset curves for the two banks; `38842/3894C` add those offsets before the real
+shared-scale/code-bound calculation and arbitration.
+
+The software output interfaces then diverge in time: `57484` averages current
+and retained code triplets under the admitted history branch, stages the word
+compares from that average, and shifts the previous generation. `57DF0` stages
+halfword compares from the **unaveraged current** triplets. Native execution
+checks both generations, W/V/U versus U/V/W storage, and untouched port masks.
+Equal regulator inputs do not imply identical word/halfword compare buffers.
+
 ### 34.4 Temporal and hardware boundary
 
 `66786` first commits **previously staged** compares through `61E72`, then
@@ -2534,11 +2572,12 @@ publication `57FD2` runs regardless.
 
 Word-side history staging and halfword compare staging remain distinct interfaces;
 [§77.9](#779-pwm-compare-staging-without-an-electrical-duty-claim) owns their
-quantizer, lane/slot mapping and retained native regressions. The connected
-regulator/output reconstruction above is **instruction/dataflow evidence**, not
-new end-to-end native or vehicle execution. DMA ring indexing/consumption is
-bounded, but ADC age, DMA coherency, rotor/sample alignment, timer-latch timing,
-output polarity and physical bridge/motor response are not established here.
+quantizer, lane/slot mapping and retained native regressions. The composed
+regulator runs now include modulation0, slot0 arbitration and both staging
+interfaces, not acquisition or hardware commit. Nonzero modulation states and
+competing-slot combinations are not exhaustively exercised. DMA ring
+indexing/consumption is bounded, but ADC age, DMA coherency, rotor/sample alignment,
+timer-latch timing, output polarity and physical bridge/motor response remain open.
 
 ### 34.5 Upstream assist composition and retained state
 
@@ -2892,6 +2931,50 @@ accepted sample `BFD8`. Neither clears its own request. `C4046` calls reseed
 center before subsequent source prework. Separate acknowledgement consumption
 and qualification remain part of the `C492C` path.
 
+#### Qualifier production and consecutive stability
+
+`C43E0` runs `C405E` **before** choosing acquisition or established tracking.
+This produces three distinct admission bytes, not one shared validity latch.
+`C3908` always refreshes five source-count scales, flat1024 in this image.
+Only `AD18==11` refreshes the axis-dependent thresholds; otherwise they are held.
+The two `AD3F`-selected map sets have identical values584/218/102/384/40.
+
+| Qualifier | Producer and admission | State lifetime |
+|---|---|---|
+| `C042` | `C3B00`: source mode outside0/3, `BFC5/AC02==0`, filtered-amplitude and `BF9C` gates, then the `C3A84` extrema window | Spread must be **strictly below** `80*AE38/1024`; incremented count must **exceed10**, then pins10. Rejection clears count/status, not every internal filter/extrema cell. |
+| `C044` | `C3D04`: `BFB2==5A`, grouped-status inhibition released, then `C3C12` paired observations and source bounds | Zero four-sample mean rejects. Either normalized cross-pair difference≥7% rejects. Other amplitude/pair comparisons are strict; incremented count must **exceed10**. Skipping the window retains its separate mismatch byte `C043`. |
+| `C045` | `C3E44`: both modes outside0/3, `AD18==11`, `BFB2==5A`, `BFB5==0`, three source constraints and paired-mean/axis difference<1280 | Recomputed on every call, without either consecutive-window counter. Mode2 adds its specific source-amplitude/status constraints. |
+
+`C045` also depends on communication snapshots: `C3D4C` requires
+wrapped signed16 magnitudes of `AE04/AE06`≤1, with `BFB3/BFB4/BF46` clear.
+These are the exact D5 signal212/213 path through `F1BC/F1BE` and the
+`BCD62` lower clamp at−32767. This is an estimator-admission dependency,
+not a direct current-command input or proof of physical units/sample freshness.
+
+The source-stability filter first symmetrically clamps the low32 sum
+`BF74+s16(BF98)`, adds it minus prior `C03C` to `C034`, then performs low32
+shift10, signed division8672 and signed16 narrowing. Its wrapped absolute-value
+checks are not saturating magnitude tests. The extrema window follows only
+after those checks. On count0 it reseeds both extrema to the current `BF78`.
+
+The grouped status is an existing software cache, not an event/DTC identity:
+`BDB76 → 49E98` selects `7F50/51/52` using low8 selector and ROM routing.
+For selector12hex, nonzero status resets the release count and asserts
+inhibition. Zero status increments it; **reaching40**, not exceeding40,
+clears inhibition in the same invocation. This differs from both stability windows.
+The B6 health consumer uses a different predicate: `CEFA4` inhibits when the
+**OR** of grouped selectors11/1A equals5A, then separately requires each
+route-status byte to be zero. Do not substitute the estimator's generic nonzero
+test for that instruction-verified equality.
+
+The [qualifier-to-tracker composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_estimator_qualifier_tracking_composition.json)
+starts with all three estimator qualifiers clear. Real grouped release39→40
+and stability-window10→11 transitions produce the admission bytes, then the
+same `C43E0` invocation runs established tracking and its bounded update.
+It stops before `C4358` projection. Producer validity bytes and sampled inputs
+are explicit RAM preconditions; the result does not establish their hardware
+freshness or close the separate retained `C492C` qualification path.
+
 #### Established-source tracking and center adoption
 
 Once reference-valid `BFF0==5A`, `C419C` tracks `BF78−BFD4` rather than acquiring
@@ -2938,9 +3021,9 @@ The [warmup boundary](../../tests/fixtures/rh850/machine/camry-8965F3307000/camr
 holds that filter at 99→100; the
 [qualifier interruption](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_established_tracking_qualifier_pause_retains_filter.json)
 retains prior filter/difference while resetting warmup and refreshing `BFEE`.
-These execute `C419C` and its admitted callees, not the enclosing qualifier
-refresh or every center-adoption domain. Consistency/plausibility and secondary
-prediction remain separate dependencies.
+These three scenarios execute `C419C` and its admitted callees, not every
+center-adoption domain. The separate composition above covers upstream qualifier
+production; retained `C492C` qualification and secondary prediction remain dependencies.
 
 #### Observer-dependent bounds are not a zero-output veto
 
@@ -10428,6 +10511,71 @@ the first call; neither an invented return nor a replacement implementation is
 used. The rebuilt C now restores the saved mask after every storage branch.
 
 
+#### Classifier aging and selective clear are different operations
+
+`512E4` snapshots active class counters, then calls `511B6` to age flag groups,
+and selects its output using **pre-aging counters and post-aging flags**.
+The selector at `82A0` indexes a five-byte ROM row at `2A19C`; it is not a DTC
+identity. The aging worker does not decrement those active counters or alter
+the three event histories.
+
+| Flag group | Activity marker / age counter | Strict age threshold | Additional clear condition |
+|---|---|---:|---|
+| `82A3` | `82A6 / 82CA` | 200 | Unsigned staged `E8B0>=22170` |
+| `82A4` | `82A7 / 82CC` | 200 | Unsigned staged `E8B0>=22170` |
+| `82A5` | `82A8 / 82CE` | 600 | None |
+
+An activity marker equal to5A is consumed and resets age before incrementing,
+so that invocation leaves age1. Counts increment only while≤threshold; clearing
+requires **>threshold**, and an already greater count holds. A failed `E8B0`
+gate therefore retains the applicable flags until a later admitted invocation.
+These are invocation counts, not measured recovery durations. `511B6` ages
+nonzero groups in A3,A5,A4 order; the helper's PMR section is not an atomic
+snapshot of the entire classifier.
+
+The [classifier-aging composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dem_lifecycle_classifier_age_thresholds.json)
+distinguishes200→201 and600→601 clearing from199→200 retention. Active class2
+count1 survives, selecting row7 despite the aged flags clearing. The event
+histories and `5F85==AA` bitmap inhibition remain unchanged.
+After aging, `51266` can additionally assert `82A4.bit5` and activity on a new
+`E857/8/9==22` edge; a continuing22 still supplies its selection predicate
+without another edge. The final selector is not a pure projection of aged flags.
+
+Explicit clear follows `4D63E → 51714 → 516DC`. An idle callback publishes
+`81B2=1410` and returns pending4. An idle lifecycle sets `82D4=1`, performs the
+RAM generation change, then publishes81. Other busy phases queue operation1,
+deduplicated among four bytes `82D8..DB`;81 does not enqueue it again.
+The RAM operation composes:
+
+- `5255A` clears **6090 and60C0**, but preserves **60F0**. It rebuilds6120
+  from descriptor byte2-or-byte5 zero tests, including row0.
+- `52FCC` handles occupied captures by marker:44 drops occupancy and copies
+  ROM defaults; other markers retain occupancy and captured data except the
+  event halfword at offset90 and markerB7, changed to0/22. Dirty bit2 and pending
+  phase are separate from physical storage.
+- `51592` clears active class counters and flags, reloads ages200/200/600, but
+  **retains activity markers**.
+- Only for `E856==11`, six exceptional event IDs from ROM2FC44 are saved before
+  reset **if their entry current bit is set**. The twelve-byte saved list contains
+  IDs or zero slots. Restoration repopulates all three histories and feeds the
+  real descriptor class to the classifier; retained-only events are not restored.
+
+The [selective-clear composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dem_lifecycle_clear_preserves_second_history.json)
+restores current exception0E, removes ordinary12E from the first two generations,
+does not restore retained-only51 there, and preserves the second retained history.
+It also checks the rebuilt descriptor bitmap, retained activity markers and
+occupied non44 capture marking without erasing the retained supplement.
+Operation2's distinct `525A0` clears60F0 and auxiliary history state instead;
+the two operations must not be collapsed into “clear every diagnostic.”
+
+Production callers exist: `8C104` invokes the clear callback; `5F91C` schedules
+classifier updates behind level≥102 and its generation bit1. This does not
+establish reachability of every synthetic state combination or an elapsed-time
+aging period. Reporters reject lifecycle1/2/4/6, not completed-RAM high-bit forms:
+81 is **not** a blanket reporting inhibit. Record staging/status polling
+(`52222`, `52186/521F2`, `52108`) and completion/queue draining `51A98` remain
+separate. The native clear returns pending, not an invented persistence success.
+
 #### Numeric routine-control joins and application service lifecycle
 
 Exact RID configuration at `26918` and the 19-row callback table at `256DC`
@@ -10578,32 +10726,45 @@ requests in postwork. Foreground request reconciliation/mode publication occurs
 in a different context. Owner requests, reduced flags, selected outputs and
 mode caches are therefore not a single synchronous state transition.
 
-**Remaining high-value dependencies:** complete estimator consistency/plausibility
+**Remaining high-value dependencies:** retained `C492C` estimator qualification
 and secondary prediction; remaining monitor detection-to-action and Dem/DTC joins;
-diagnostic aging, capture persistence and lifecycle reachability; other ECU
-thermal estimators and restore qualification; OEM service identities, calibration
-units and physical source identity; ADC/DMA freshness and hardware feedback/update timing.
+diagnostic persistence and full lifecycle/queue reachability; other ECU thermal
+estimators and restore qualification; OEM service identities, calibration units
+and physical source identity; ADC/DMA freshness and hardware feedback/update timing.
 The recovered application, fault-action and diagnostic contracts do not require
 a complete peripheral or NvM emulator. Static connectivity and bounded native
 scenarios are not exhaustive semantic closure or vehicle results.
 
-**Verification checkpoint (2026-10-15, established tracking and upstream thermal models).**
+**Verification checkpoint (2026-10-15, regulation through compare staging, estimator admission and diagnostic lifecycle).**
 Independent four-stage rebuilds plus signature finalization agreed on the
-canonical inventory. Native compositions passed for established tracking,
-warmup/interruption, the motor gain threshold, retained offset following, and
-model-to-map/arbitration intervals. The existing wrapped `INT16_MIN` acquisition
-regression also passed. All used unmodified firmware and explicit RAM inputs,
-without replacement callees or peripheral-model extension.
+canonical inventory. Native compositions passed for full software regulation
+under prior saturation and first channel loss, qualifier production feeding
+established tracking, classifier-age boundaries, and selective diagnostic clear.
+They used unmodified firmware and explicit RAM inputs, without replacement
+callees or peripheral-model extension.
 
-Rebuilt C retains the signed thermal branch returns, fractional-following record
-and signed16 absolute-value contract. Coverage, function-boundary, D5 provenance,
-command-cone, assist-oracle and B6 composition/end-to-end/ingress gates passed;
-live coverage matched the canonical ledger exactly. Matching project/corpus
-were promoted after clean teardown, and the new evidence links resolve.
-The assist producer now checks selector/table/writer references instead of local
-variable spelling; an obsolete supervisor source-spelling assertion was removed,
-not repinned. Exact calibration checks and composed execution evidence remain.
-These are software reconstruction results, not new vehicle observations.
+Rebuilt types retain actual grouped-status returns and the six-halfword clear
+preservation record. Coverage, function-boundary, D5 provenance, command-cone,
+assist-oracle, B6 composition/end-to-end/ingress, CodeFlash, external-ingress
+and retained-log reconciliation gates passed. Live coverage matched the
+canonical ledger exactly; matching project/corpus were promoted after clean
+teardown.
+
+Provenance checks now resolve snapshot addresses and verify consequential
+instruction/dataflow boundaries instead of repinning temporary-variable spelling.
+The copy-edge normalizer also resolves code-symbol-plus-GP aliases as complete
+addresses; regression cases prevent losing the symbol or inventing a source
+when the GP base is unknown. Exact calibration and composed-execution checks remain.
+
+Retained-log provenance was regenerated with the existing external reader
+runtime. That replay emitted a corrupted-events warning on historical route
+`0000001c--574c06b528`; raw captures were not changed. These are bounded replay
+and software reconstruction results, not new vehicle observations.
+
+The preceding `0d4df529` checkpoint contains established tracking,
+warmup/interruption, motor/source3 thermal models, offset following and
+model-to-map/arbitration intervals, plus the retained wrapped `INT16_MIN`
+acquisition regression.
 
 The preceding `7261f2f1` checkpoint contains diagnostic failure/pass generations,
 capture selection, classifier release and control-fault independence. Its
