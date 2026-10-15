@@ -7892,3 +7892,48 @@ This changes observability, not the firmware or the signed-comparison contract.
 Pending-FPI handling remains outside these `FPEC=0` execution cases; its existing
 architectural model was not suppressed to simplify the C.
 
+### 77.8 Logical NvM mapping and request publication
+
+The logical descriptor table is now typed independently of the physical table:
+**124 sixteen-byte rows at `26C0C`**, count at `26C08`, versus the **123 six-byte
+physical descriptors at `27634`**. `73CA4` reads the explicit unsigned storage
+handle at logical-row offset `+8`; it does not subtract one:
+
+| Logical handle | Stored physical-handle field |
+|---|---:|
+| 0 | 1 |
+| 1 | `FFFE` |
+| 2–123 | 1–122 |
+
+The `FFFE` result is outside the physical descriptor bound. No copy identity,
+redundancy grouping or application-object meaning follows from this mapping.
+Logical-row `+6` supplies payload length; `+4` selects buffer handling; `+C`
+is the default pointer. Other fields remain opaque in the target type.
+
+All registered logical rows have buffer mode 1 and a NULL default pointer.
+`74614` and `746DE` independently select the read/write overrides at
+`FEBF6B08`/`FEBF6B0C`; without an override their registered configuration returns
+NULL. Mode 4's scratch-buffer branch is present in instructions but is not a
+registered configuration. Setters `745E4`/`746AA` clear `FEBF6B14` before storing
+the caller pointer. Their ten-byte reset helper `745DA` preserves `r6/r7`;
+inlining its actual p-code removes the previously invented `extraout_r7` input.
+Fresh decompilation now carries the real buffer argument into each store.
+
+`FEBF6AEC` is a **single operation record**, not a multi-entry queue. `73ADC`
+copies the operation, logical handle and two pointers, leaving the two padding
+bytes untouched. `73AFC` rejects state 2 before reading the supplied pointer;
+otherwise it publishes those fields, sets state 2 and phase 1, and returns zero.
+The step field is preserved. `73AB0` initializes the record and dispatch fields,
+also without writing the record padding. Publication performs no handle,
+operation or pointer validation and does not itself execute a flash operation.
+
+The exact-CodeFlash sweep passed **631 scenarios**: all logical mappings,
+both selectors across every registered row and override state, setter
+NULL/nonNULL cases, low-width inputs, initialization, and publication states.
+Fourteen representative tracked scenarios also passed, including an inaccessible
+input pointer on busy rejection and deliberately distinct input/global padding.
+Two clean rebuilds agreed on 7,181 functions and produced 40 curated reviews
+(39 verified, one bounded). This closes the local mapping/buffer/publication
+contracts, not full request completion, checksum validation, logical copy
+consensus, learned-parameter restoration or physical flash timing.
+

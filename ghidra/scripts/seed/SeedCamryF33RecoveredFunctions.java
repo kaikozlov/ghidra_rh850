@@ -423,6 +423,99 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "there and comparesAAAAAAAA; the trailer is not always at byte60 "
             + "of the first page. Executed for every registered length class.");
   }
+  private void annotateNvmLogicalRequests() throws Exception {
+    CategoryPath category = new CategoryPath("/CamryF33");
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType pointer = new PointerDataType(VoidDataType.dataType, 4);
+    StructureDataType descriptor =
+        new StructureDataType(category, "F33NvmLogicalDescriptor", 0);
+    descriptor.setPackingEnabled(true);
+    descriptor.add(Undefined4DataType.dataType, "opaque_00", "Not interpreted here.");
+    descriptor.add(u8, "buffer_mode", "All 124 registered rows contain1. Selectors use mode4 for scratch storage.");
+    descriptor.add(Undefined1DataType.dataType, "opaque_05", "Not interpreted here.");
+    descriptor.add(u16, "payload_bytes", "Length passed by the logical read callback.");
+    descriptor.add(u16, "storage_handle", "Explicit mapping consumed by73CA4; not implicit handle-minus-one.");
+    descriptor.add(Undefined2DataType.dataType, "opaque_0a", "Not interpreted here.");
+    descriptor.add(pointer, "default_buffer", "All registered rows containNULL; explicit overrides take precedence.");
+    int count = currentProgram.getMemory().getShort(toAddr(0x26C08L)) & 0xFFFF;
+    semanticData(0x26C0CL, new ArrayDataType(resolve(descriptor), count, 16),
+        "f33_nvm_logical_descriptors",
+        "124 logical rows, distinct from123 six-byte physical descriptors at27634. "
+        + "Storage mapping: logical0->1,1->FFFE,2->1,...,123->122. "
+        + "Do not treat FFFE as an admitted physical handle or infer copy grouping.");
+    semanticData(0x26C08L, u16, "f33_nvm_logical_descriptor_count",
+        "Logical descriptor count; the leaf selectors do not enforce this bound.");
+    StructureDataType request =
+        new StructureDataType(category, "F33NvmOperation", 0);
+    request.setPackingEnabled(true);
+    request.add(u32, "operation", "Published operation selector; admission does not validate it.");
+    request.add(u16, "logical_handle", "Logical descriptor index, not the physical storage handle.");
+    request.add(Undefined2DataType.dataType, "padding_06", "Not copied or initialized by73ADC/73AB0.");
+    request.add(pointer, "buffer_08", "Read operation callback consumes this destination pointer.");
+    request.add(pointer, "buffer_0c", "Write operation callback consumes this source pointer.");
+    DataType requestType = resolve(request);
+    semanticData(0xFEBF6AECL, requestType, "f33_nvm_pending_operation",
+        "Single operation record. State byteFEBF6B00==2 rejects a new publication "
+        + "before reading its input; this is not a multi-entry queue.");
+    semanticData(0xFEBF6AFCL, u16, "f33_nvm_operation_phase",
+        "Publication and initialization set1; dispatch consumes this phase.");
+    semanticData(0xFEBF6AFEL, u16, "f33_nvm_operation_step",
+        "Initialization setsFFFF. Publication leaves this field unchanged.");
+    semanticData(0xFEBF6B00L, u8, "f33_nvm_operation_state",
+        "Initialization sets0; publication rejects2, otherwise copies the record and sets2.");
+    semanticData(0xFEBF6B08L, pointer, "f33_nvm_read_buffer_override",
+        "Set by745E4 and consumed by74614; distinct from the write override.");
+    semanticData(0xFEBF6B0CL, pointer, "f33_nvm_write_buffer_override",
+        "Set by746AA and consumed by746DE.");
+    semanticData(0xFEBF6B14L, u8, "f33_nvm_buffer_retry",
+        "Cleared by745DA before either override setter; broader retry policy not reconstructed here.");
+    semanticFunction(0x73CA4L, "f33_nvm_storage_handle", u32,
+        new ParameterImpl("logical_handle", u16, currentProgram))
+        .setComment("Return unsigned16 field+8 from26C0C+16*low16(handle), "
+            + "zero-extended to r10. No local bound check; r7 is not read. "
+            + "All124 rows and high-bit truncation executed against exact CodeFlash.");
+    semanticFunction(0x745DAL, "f33_nvm_reset_buffer_retry", VoidDataType.dataType)
+        .setComment("Clear byteFEBF6B14; onlyr11 is clobbered. Preserve r6/r7 "
+            + "through the real p-code so the override setters retain their inputs.");
+    getFunctionAt(toAddr(0x745DAL)).setInline(true);
+    semanticFunction(0x745E4L, "f33_nvm_set_read_buffer", VoidDataType.dataType,
+        new ParameterImpl("logical_handle", u16, currentProgram),
+        new ParameterImpl("buffer", pointer, currentProgram))
+        .setComment("Clear buffer retry, then store buffer atFEBF6B08. "
+            + "NULL with descriptor mode2 calls71CE0(handle,0); registered mode1 "
+            + "does not take that callback. No local handle bound check.");
+    semanticFunction(0x746AAL, "f33_nvm_set_write_buffer", VoidDataType.dataType,
+        new ParameterImpl("logical_handle", u16, currentProgram),
+        new ParameterImpl("buffer", pointer, currentProgram))
+        .setComment("Clear buffer retry, then store buffer atFEBF6B0C. "
+            + "NULL with descriptor mode2 calls71CE0(handle,77); registered mode1 "
+            + "does not take that callback. No local handle bound check.");
+    semanticFunction(0x74614L, "f33_nvm_read_buffer", pointer,
+        new ParameterImpl("logical_handle", u16, currentProgram))
+        .setComment("Read descriptor mode, then prefer nonNULL overrideFEBF6B08. "
+            + "Without override useFEBF6B10 for mode4, otherwise descriptor+C. "
+            + "All registered rows are mode1 withNULL defaults; no bound check.");
+    semanticFunction(0x746DEL, "f33_nvm_write_buffer", pointer,
+        new ParameterImpl("logical_handle", u16, currentProgram))
+        .setComment("Same selection using overrideFEBF6B0C, notFEBF6B08. "
+            + "Both selectors executed for all124 rows withNULL/nonNULL overrides. "
+            + "Unregistered mode4 is instruction-derived, not an executed configuration.");
+    semanticFunction(0x73AB0L, "f33_nvm_initialize_operation", VoidDataType.dataType)
+        .setComment("Set operationFFFFFFFF, handleFFFF, both pointersNULL, "
+            + "phase1, stepFFFF and state0. Leave record padding unchanged.");
+    semanticFunction(0x73ADCL, "f33_nvm_copy_operation", VoidDataType.dataType,
+        new ParameterImpl("request", new PointerDataType(requestType, 4), currentProgram))
+        .setComment("Copy only fields+0,+4,+8,+C intoFEBF6AEC. "
+            + "Do not copy the two padding bytes or adjacent dispatch state.");
+    semanticFunction(0x73AFCL, "f33_nvm_submit_operation", u32,
+        new ParameterImpl("request", new PointerDataType(requestType, 4), currentProgram))
+        .setComment("State2 returns1 without reading request. Otherwise copy "
+            + "the four operation fields, set state2 and phase1, return0. "
+            + "No operation/handle/pointer validation, interrupt mask or flash "
+            + "execution at this layer. Step and padding remain unchanged.");
+  }
   @Override public void run() throws Exception {
     String[] args = getScriptArgs();
     if (args.length != 1) throw new IllegalArgumentException("expected function_seeds.csv path");
@@ -450,6 +543,7 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateFreshnessLayouts();
     annotateBootDispatchAndCurves();
     annotateNvmDescriptors();
+    annotateNvmLogicalRequests();
     println("SeedCamryF33RecoveredFunctions: seeded " + count
         + " evidence-backed entries and applied exact-F33 semantic prototypes");
   }
