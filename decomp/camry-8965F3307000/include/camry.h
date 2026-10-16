@@ -79,6 +79,9 @@ uint32_t f33_nvm_get_family0_status(uint32_t object);
 uint32_t f33_nvm_get_family1_completion(uint32_t object);
 uint32_t f33_nvm_get_family1_record(uint32_t object, uint32_t destination);
 uint32_t f33_nvm_get_family1_status(uint32_t object);
+uint32_t f33_nvm_get_family2_status(uint32_t object);
+uint32_t f33_read_repair_redundant_u8(
+    uint32_t raw, uint32_t encoded55, uint32_t encoded_aa, uint32_t fallback);
 uint32_t f33_nvm_check_family1_checksum(uint32_t object);
 void f33_nvm_publish_family1_checksum(uint32_t object);
 uint32_t f33_nvm_retain_token_while_reads_pending(uint32_t token);

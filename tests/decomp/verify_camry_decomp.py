@@ -42,6 +42,8 @@ VALUE_RETURN = {
     "f33_nvm_get_family1_completion",
     "f33_nvm_get_family1_record",
     "f33_nvm_get_family1_status",
+    "f33_nvm_get_family2_status",
+    "f33_read_repair_redundant_u8",
     "f33_nvm_check_family1_checksum",
     "f33_nvm_retain_token_while_reads_pending",
     "f33_force_unconfirmed_terminal_monitor_healthy",
@@ -218,6 +220,10 @@ def bind(library: ctypes.CDLL) -> None:
     library.f33_nvm_get_family1_record.restype = u32
     library.f33_nvm_get_family1_status.argtypes = [u32]
     library.f33_nvm_get_family1_status.restype = u32
+    library.f33_nvm_get_family2_status.argtypes = [u32]
+    library.f33_nvm_get_family2_status.restype = u32
+    library.f33_read_repair_redundant_u8.argtypes = [u32, u32, u32, u32]
+    library.f33_read_repair_redundant_u8.restype = u32
     library.f33_classify_channel_residual_a.argtypes = []
     library.f33_classify_channel_residual_a.restype = u32
     library.f33_check_learned_quad_bounds.argtypes = []
@@ -508,6 +514,8 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
         return int(library.f33_freshness_reconstruct_candidate(r6, r7, r8, r9)) & 0xFFFFFFFF
     if name == "f33_nvm_get_family1_record":
         return int(library.f33_nvm_get_family1_record(r6, r7)) & 0xFFFFFFFF
+    if name == "f33_read_repair_redundant_u8":
+        return int(library.f33_read_repair_redundant_u8(r6, r7, r8, r9)) & 0xFFFFFFFF
     if name == "f33_classify_channel_residual_a":
         return int(library.f33_classify_channel_residual_a()) & 0xFFFFFFFF
     if name == "f33_check_learned_quad_bounds":

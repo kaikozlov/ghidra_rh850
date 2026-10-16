@@ -287,7 +287,7 @@ static int32_t f33_publish_redundant_u8(
     return 0;
 }
 
-static uint32_t f33_read_repair_redundant_u8(
+uint32_t f33_read_repair_redundant_u8(
     uint32_t raw, uint32_t encoded55, uint32_t encoded_aa, uint32_t fallback) {
     uint32_t voted = 0u;
     int32_t status = f33_vote_redundant_u8(raw, encoded55, encoded_aa, &voted);
@@ -332,6 +332,17 @@ uint32_t f33_nvm_get_family1_status(uint32_t object) {
         camry_gp + index + 22664u,
         camry_gp + index + 22700u,
         0x12u);
+}
+
+uint32_t f33_nvm_get_family2_status(uint32_t object) {
+    uint32_t index = object & 0xffffu;
+    if (index >= camry_read16((3u << 16) - 21132u))
+        return 0xffu;
+    return f33_read_repair_redundant_u8(
+        camry_gp + index + 20048u,
+        camry_gp + index + 22680u,
+        camry_gp + index + 22716u,
+        0x10u);
 }
 
 static uint32_t family1_word_fold(uint32_t object) {
