@@ -211,6 +211,8 @@ def bind(library: ctypes.CDLL) -> None:
     library.f33_nvm_enqueue_family0_read.restype = u32
     library.f33_curve16_interpolate_with_slope.argtypes = [u32, u32, u32]
     library.f33_curve16_interpolate_with_slope.restype = u32
+    library.f33_update_thermal_release_envelope.argtypes = []
+    library.f33_update_thermal_release_envelope.restype = None
     library.f33_force_unconfirmed_terminal_monitor_healthy.argtypes = [u32, u32, u32]
     library.f33_force_unconfirmed_terminal_monitor_healthy.restype = u32
     library.f33_nvm_read_buffer.argtypes = [u32]
@@ -484,6 +486,9 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
         return int(library.f33_classify_channel_residual_a()) & 0xFFFFFFFF
     if name == "f33_check_learned_quad_bounds":
         return int(library.f33_check_learned_quad_bounds()) & 0xFFFFFFFF
+    if name == "f33_update_thermal_release_envelope":
+        library.f33_update_thermal_release_envelope()
+        return None
     if name == "f33_curve16_interpolate_with_slope":
         return int(library.f33_curve16_interpolate_with_slope(r6, r7, r8)) & 0xFFFFFFFF
     if name == "f33_force_unconfirmed_terminal_monitor_healthy":

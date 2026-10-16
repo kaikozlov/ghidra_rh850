@@ -934,3 +934,75 @@ uint32_t f33_curve16_interpolate_with_slope(uint32_t curve, uint32_t x_bits, uin
     camry_write16(slope_out, (uint32_t)curve_slope(curve, x, index));
     return value;
 }
+
+static void f33_set_current_limit_request(uint32_t owner, uint32_t limit) {
+    owner &= 0xffu;
+    if (owner < 10u)
+        camry_write16(camry_gp + 1332u + (owner << 1), limit);
+}
+
+static uint32_t f33_reduce_thermal_current_requests(void) {
+    uint32_t minimum = 22170u;
+    uint32_t index;
+    for (index = 0u; index < 10u; index++) {
+        uint32_t mask = camry_read32(0xaf0ccu + ((index >> 5) << 2));
+        if (((mask >> (index & 31u)) & 1u) == 0u)
+            continue;
+        {
+            uint32_t request = camry_read16(camry_gp + 1332u + (index << 1));
+            if ((int32_t)request < (int32_t)minimum)
+                minimum = request;
+        }
+    }
+    return minimum;
+}
+
+void f33_update_thermal_release_envelope(void) {
+    uint32_t state = camry_gp + 1352u;
+    uint32_t amplitude = sat_abs_half(camry_read16(camry_gp - 1964u));
+    uint32_t speed = camry_read16(camry_gp + 1762u);
+    uint32_t gate = camry_read8(camry_gp + 1776u);
+    uint32_t previous = camry_read16(state + 6u);
+    uint32_t base = camry_read16(state + 4u);
+    uint32_t counter = camry_read16(state + 2u);
+    uint32_t table = 0xaf0d0u;
+    int32_t hold_amplitude = sign_half(camry_read16(table + 2u));
+    uint32_t published = f33_reduce_thermal_current_requests();
+    uint32_t mode = 0u;
+
+    if (previous < published) {
+        uint32_t saved = camry_read8(state);
+        if ((int32_t)amplitude <= hold_amplitude && previous <= camry_read16(table)) {
+            published = previous;
+        } else {
+            uint32_t coefficient;
+            uint32_t square;
+            uint64_t wide;
+            if (speed < camry_read16(table + 4u) && gate == 17u) {
+                coefficient = camry_read32(table + 8u);
+                mode = 2u;
+            } else {
+                coefficient = camry_read32(table + 12u);
+                mode = 1u;
+            }
+            if (saved != mode) {
+                counter = 0u;
+                base = previous;
+            }
+            if (counter != 0xffffu)
+                counter = (counter + 1u) & 0xffffu;
+            square = counter * counter;
+            wide = (uint64_t)square * (uint64_t)coefficient;
+            if ((wide >> 32) == 0u) {
+                uint32_t sum = base + (uint32_t)(wide >> 16);
+                if ((int32_t)sum <= (int32_t)published)
+                    published = sum & 0xffffu;
+            }
+        }
+    }
+    f33_set_current_limit_request(7u, published);
+    camry_write8(state, mode);
+    camry_write16(state + 2u, counter);
+    camry_write16(state + 4u, base);
+    camry_write16(state + 6u, published);
+}

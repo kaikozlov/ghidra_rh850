@@ -109,3 +109,4 @@ uint32_t f33_classify_channel_residual_a(void);
 uint32_t f33_curve16_interpolate_with_slope(uint32_t curve, uint32_t x, uint32_t slope);
 uint32_t f33_check_learned_quad_bounds(void);
 uint32_t f33_nvm_enqueue_family0_read(uint32_t object);
+void f33_update_thermal_release_envelope(void);
