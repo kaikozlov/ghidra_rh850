@@ -152,14 +152,15 @@
     "0x00098B8A",
     "0x00098B96"
   ],
-  "function_rows_sha256": "c6384afe9f7742a7b1dccb4b6433b96c3d665555438e18b3a0a805bee25ff37b",
+  "function_rows_sha256": "df2ddffa71e20d06ac48f4372a152bbb823acad86c19a5eedbac58ec2f7b6152",
   "ghidra_script": "ghidra/scripts/investigate/AuditCallConeStores.java",
   "pointer_parameter_dependent": {
-    "function_count": 52,
+    "function_count": 53,
     "functions": [
       "0x0007A77E",
       "0x0007B18A",
       "0x0007B452",
+      "0x0007B9AC",
       "0x0007BB0E",
       "0x0007CD60",
       "0x0007EAD0",
@@ -210,8 +211,8 @@
       "0x0008584C",
       "0x0008E7BA"
     ],
-    "rows_sha256": "0ef8e7e25798586f0bd112dbc3abdd8ab262281ecaeef08ec5b2fd191db77421",
-    "store_count": 209
+    "rows_sha256": "5849c2867e3ccf2a00e75688a55d3f7768c39b2727bd936ee34c2ddacaf3fcb5",
+    "store_count": 225
   },
   "roots": [
     "0x0007BBC2",
@@ -226,13 +227,13 @@
   ],
   "schema": "camry-8965f3307000-prefault-store-audit-v1",
   "scope": "Direct-call closure rooted at the exact F33 pre-fault foreground receive path, RSCFD RX/error interrupt stubs, diagnostic adapter, class-0 CanIf callback, and class-5/XCP adapter. Parameter dependence is intraprocedural and is therefore an over-approximation: caller/configuration provenance must still be resolved.",
-  "store_rows_sha256": "8822874fd6349ea08aac49efce8088f47dffbf19ba204b914f747d9a43e0b910",
+  "store_rows_sha256": "df85cb4f87a859cca30ddd308a5fac06c3fc7d4d0ff8d2f42593849f43d2279e",
   "summary": {
-    "computed": 268,
+    "computed": 284,
     "functions": 151,
     "ranged": 37,
-    "stores": 275,
-    "unknown": 231
+    "stores": 291,
+    "unknown": 247
   },
   "target": "camry-8965F3307000"
 }

@@ -98,14 +98,14 @@
     ],
     "memory_op_summary": {
       "arith": 0,
-      "functions": 307,
-      "indirects": 20,
-      "loads": 854,
+      "functions": 295,
+      "indirects": 25,
+      "loads": 840,
       "param_arith": 0,
       "param_indirects": 5,
-      "param_loads": 620
+      "param_loads": 609
     },
-    "pointer_parameter_store_count": 283,
+    "pointer_parameter_store_count": 299,
     "roots": [
       "0x0007BBC2",
       "0x0007C43C",
@@ -124,11 +124,11 @@
       "0x00092946"
     ],
     "store_summary": {
-      "computed": 366,
-      "functions": 307,
+      "computed": 380,
+      "functions": 295,
       "ranged": 56,
-      "stores": 412,
-      "unknown": 307
+      "stores": 426,
+      "unknown": 321
     }
   },
   "guard_and_boot": {

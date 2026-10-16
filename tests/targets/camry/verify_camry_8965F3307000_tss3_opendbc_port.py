@@ -96,8 +96,8 @@ def section_tss3_opendbc_port() -> int:
     check("B22:B23 mapped feedback wire exact", m["wire"] == "B22:B23" and m["signal_id"] == 33 and m["pdu_slice_offset_table"] == "0x00022840")
     check("driver torque wire fields exact", [f["wire"] for f in s["0x030"]["driver_torque_fields"]][:2] == ["B8", "B17[3:0]"])
     check("aggregate packs the mapped chain", all(tok in funcs[0x37E48]["decompiled_c"] for tok in ("DAT_febe6e28", "DAT_febe6d78 = iVar2 + iVar4", "DAT_febe6d72 = (short)iVar5")))
-    check("map is nonlinear lookup interpolation", all(tok in funcs[0x38678]["decompiled_c"] for tok in ("DAT_00031d44", "(&PTR_DAT_000210f4)", "if ((int)param_1 < 1)")))
-    check("publish maps extended Q sum conditioned by sibling axis", all(tok in funcs[0x3879E]["decompiled_c"] for tok in ("DAT_febe6d78", "DAT_febe6d70", "FUN_00038678")))
+    check("map is nonlinear lookup interpolation", all(tok in funcs[0x38678]["decompiled_c"] for tok in ("DAT_00031d44", "(&PTR_DAT_000210f4)", "if (value < 1)")))
+    check("publish maps extended Q sum conditioned by sibling axis", all(tok in funcs[0x3879E]["decompiled_c"] for tok in ("DAT_febe6d78", "DAT_febe6d70", "f33_lookup_signed_five_map_signal")))
     tx030 = funcs[0x4C490]["decompiled_c"]
     check("0x030 staging formula exact",
           all(tok in tx030 for tok in ("-0x50e8", "-0x3694", "/ 0x100) * 100", "/ 0x2000"))

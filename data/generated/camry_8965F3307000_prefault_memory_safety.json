@@ -115,11 +115,11 @@
   },
   "computed_store_audit": {
     "call_cone": {
-      "computed": 268,
+      "computed": 284,
       "functions": 151,
       "ranged": 37,
-      "stores": 275,
-      "unknown": 231
+      "stores": 291,
+      "unknown": 247
     },
     "communication_dimensions": {
       "DAT_2183C": 1,
@@ -203,7 +203,7 @@
         "lo": "0xFEBE0000"
       }
     ],
-    "whole_image_critical_candidate_rows": 62
+    "whole_image_critical_candidate_rows": 65
   },
   "consumer_closure": {
     "class0_com": {

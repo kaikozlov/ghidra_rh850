@@ -504,7 +504,7 @@ def build() -> dict:
     # AC3C is a healthy-parameter integrity bank, not a drive-mode input.  B7374 stores
     # the boolean result of FF254/62E12, whose exact comparison is ROM 0x17DA0.. against
     # working copy 0x20850.. before the TMR-protected FEBF0668 verdict.
-    token(0xB7374, funcs, "iVar2 = FUN_000ff254();", "puVar1[-0x4ac] = iVar2 == 0;")
+    token(0xB7374, funcs, "iVar2 = thunk_FUN_00062e12();", "puVar1[-0x4ac] = iVar2 == 0;")
     need(GP - 0x4AC == 0xFEBEB354 and pair_map.get(0xFEBEAC3C) == 0xFEBEB354,
          "AC3C integrity-bank snapshot drift")
     need({0x20850, 0x17DA0} <=

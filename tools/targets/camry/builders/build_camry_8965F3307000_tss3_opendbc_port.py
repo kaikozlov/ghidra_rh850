@@ -141,8 +141,8 @@ def build() -> dict:
                             "DAT_febe6d78 = iVar2 + iVar4", "DAT_febe6d72 = (short)iVar5")
     mapped = need_tokens(funcs, 0x38678,
                          "DAT_00031d44", "DAT_00031d46", "DAT_00031d48", "DAT_00031d4a", "DAT_00031d4c",
-                         "(&PTR_DAT_000210f4)", "if ((int)param_1 < 1)")
-    publish = need_tokens(funcs, 0x3879E, "DAT_febe6d78", "DAT_febe6d70", "FUN_00038678")
+                         "(&PTR_DAT_000210f4)", "if (value < 1)")
+    publish = need_tokens(funcs, 0x3879E, "DAT_febe6d78", "DAT_febe6d70", "f33_lookup_signed_five_map_signal")
     tx030_source = need_tokens(funcs, 0x4C490,
                                "-0x50e8", "-0x3694")
     need(all(token in aggregate for token in ("DAT_febe6d70", "DAT_febe6d72", "DAT_febe6d78")),

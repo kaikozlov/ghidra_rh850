@@ -107,7 +107,7 @@ public class ApplyRecoveredTables extends GhidraScript {
     Function function = getFunctionAt(toAddr(entry));
     if (function == null) throw new IllegalStateException("missing function at " + hex(entry));
     JsonElement name = row.get("name");
-    if (name != null) function.setName(name.getAsString(), SourceType.USER_DEFINED);
+    if (name != null && !name.isJsonNull()) function.setName(name.getAsString(), SourceType.USER_DEFINED);
     JsonElement ret = row.get("return");
     if (ret != null) {
       function.setReturnType(resolve(ret.getAsString()), SourceType.USER_DEFINED);
@@ -129,6 +129,15 @@ public class ApplyRecoveredTables extends GhidraScript {
     if (bool(row, "no_return")) function.setNoReturn(true);
     JsonElement convention = row.get("calling_convention");
     if (convention != null) function.setCallingConvention(convention.getAsString());
+    JsonElement thunk = row.get("thunk");
+    if (thunk != null) {
+      long target = Long.parseLong(thunk.getAsString().substring(2), 16);
+      Function targetFunction = getFunctionAt(toAddr(target));
+      if (targetFunction == null) {
+        throw new IllegalStateException("missing thunk target " + hex(target) + " for " + hex(entry));
+      }
+      function.setThunkedFunction(targetFunction);
+    }
   }
 
   private void applyData(JsonObject row) throws Exception {

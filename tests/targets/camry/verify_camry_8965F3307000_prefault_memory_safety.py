@@ -98,7 +98,7 @@ check(
 cs = art["computed_store_audit"]
 check(
     "critical-cell candidate denominator",
-    cs["whole_image_critical_candidate_rows"] == 62
+    cs["whole_image_critical_candidate_rows"] == 65
     and cs["critical_cells"] == [
         "0xFEBE3DF0","0xFEBE3DF1","0xFEBE3DF2","0xFEBE3DF3","0xFEBE3DF4","0xFEBE3DF5",
         "0xFEBE5628","0xFEBF0FD0","0xFEBF117C","0xFEBF1180","0xFEBF1194","0xFEBF1198",

@@ -27,7 +27,7 @@ with tempfile.TemporaryDirectory() as td:
     check("artifact regenerates exactly",p.returncode==0 and out.read_bytes()==ART.read_bytes())
 
 cone=art["expanded_cone"]
-check("expanded cone includes all DCM callbacks",len(cone["roots"])==15 and cone["store_summary"]["functions"]==307 and cone["memory_op_summary"]["functions"]==307)
+check("expanded cone includes all DCM callbacks",len(cone["roots"])==15 and cone["store_summary"]["functions"]==295 and cone["memory_op_summary"]["functions"]==295)
 check("expanded critical coarse hits explicitly closed",cone["critical_known_range_rows"]==15 and cone["critical_known_range_functions"]==["0x0008E7BA","0x00093C6C","0x00093C9A","0x00093DE8","0x00093E5C","0x00093EF6","0x00093F4E","0x0009405C"] and cone["dcm_route_domain"]==[0,1,2])
 ecm=art["ecm_reset_routing"]
 check("ECM runtime source set exact",ecm["runtime_micfg0"]=="0x100B001E" and ecm["maskable_sources"]==[1,2,3,4,16,17,19,28])

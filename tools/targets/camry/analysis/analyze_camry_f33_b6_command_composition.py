@@ -313,7 +313,7 @@ def analyze() -> dict[str, Any]:
     ),
     "b6_supervisor_and_shared_composition_have_distinct_wrappers": (
       "FUN_000d0eec();" in f[0xD1130]
-      and "FUN_000d1130();" in f[0xBCD62]
+      and "thunk_FUN_000d0eec();" in f[0xBCD62]
       and f"{corpus[0xD0AF6]['name']}();" in f[0xD1100]
       and "FUN_000d1100();" in f[0xBCD02]
     ),

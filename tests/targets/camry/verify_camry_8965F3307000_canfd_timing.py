@@ -44,7 +44,7 @@ check(
     "boot CAN-FD initializer is separate and writes legacy GCFG",
     "FUN_00003b3c()" in boot_init["decompiled_c"]
     and "DAT_ffd204fc = 1" in boot_mode["decompiled_c"]
-    and "DAT_ffd20084 = 0xffff0000" in boot_gcfg["decompiled_c"],
+    and "GCFG = 0xffff0000" in boot_gcfg["decompiled_c"],
 )
 check(
     "application RS-CANFD init chain exact",
@@ -55,7 +55,7 @@ check(
 )
 check(
     "application global configuration source reaches GCFG",
-    "PTR_DAT_0002303c = DAT_00022e80" in app_apply["decompiled_c"]
+    "PTR_GCFG_0002303c = DAT_00022e80" in app_apply["decompiled_c"]
     and any(r["to_addr"] == "0x00022e80" and r["ref_type"] == "READ" for r in app_apply["data_references"])
     and any(r["to_addr"] == "0xffd20084" and r["ref_type"] == "WRITE" for r in app_apply["data_references"]),
 )

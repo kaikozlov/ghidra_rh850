@@ -558,7 +558,7 @@
     {
       "body_sha256": "a00f3f3eb86314d6645155548f2b80dfee64ced3e8dd8c0d04a38020525f8ae9",
       "body_size": 226,
-      "decompiled_c_sha256": "c4d8372ad4d95a6e53bd7f559d2b338f29087b79fe00e1a0194a9e3eb805f620",
+      "decompiled_c_sha256": "8995de1141562fc831660658d04039c11e995c2e6a875e0b3b47cc2c8b802d0f",
       "entry": "0x0007B2C4"
     },
     {
@@ -600,7 +600,7 @@
     {
       "body_sha256": "7d9cbb052aa0369d39a22c9004ea14636e34db2234df05f4ff5b9cbb7c7880bc",
       "body_size": 434,
-      "decompiled_c_sha256": "ad5ca11b49e97afb26fc143f23b62699449809684501a471d4ecc3fcb18717d6",
+      "decompiled_c_sha256": "60094df459a6d4d56a3eb0cf749d2ddf8089c8fdbf862fade279a429f6d6f279",
       "entry": "0x0007FD46"
     },
     {
@@ -684,7 +684,7 @@
     {
       "body_sha256": "d10a3216d91ed3c5b692b7efc3796426165932fdd47988417a9d0f4d8398e329",
       "body_size": 114,
-      "decompiled_c_sha256": "93bc425b9f991a549a6a1bf4e30b1a145ded5d90b2eab3cd474093cd1d293aa0",
+      "decompiled_c_sha256": "e7cf64773622de19a25e1f5844ed4fa41370b682d95f208ea5fa33fe34a909e6",
       "entry": "0x0008E8A0"
     },
     {
@@ -696,7 +696,7 @@
     {
       "body_sha256": "6b400bd052e65702face2c4b5322f5015806d14f350e1a4789d9cadc98a56864",
       "body_size": 218,
-      "decompiled_c_sha256": "5fd3cde9fbbae252c304e5fa7c9c62fee4f9f978f9b74268d58d498b4686a602",
+      "decompiled_c_sha256": "b6b402791fbda9bb9d613ac50be65b3f8534a656e175ac49dc9936b8fd4ae8b0",
       "entry": "0x0008E9C6"
     },
     {
@@ -931,11 +931,11 @@
   "inputs": {
     "computed_store_target_census": {
       "path": "data/generated/camry_8965F3307000_computed_store_target_census.json",
-      "sha256": "78e4200b6f7b941724b78713c95798a8847774f8930ea937219d413c7940c31a"
+      "sha256": "c933cb7fba061dabec0a5320f8acc23caeb7b100fec04e33c7e2ed3c54d16751"
     },
     "dmac_destination_computed_store_census": {
       "path": "data/generated/camry_8965F3307000_dmac_destination_computed_store_census.json",
-      "sha256": "5012c198fb705e79065971126425ebde56849c8bc27ed5c1ca9e2dcee11d6a3d"
+      "sha256": "a93f819c08ee16b5adf535f6b311852616bf25428139ddba416836d361e25e31"
     },
     "resolver_script": {
       "path": "ghidra/scripts/investigate/AuditComputedStoreTargets.java",

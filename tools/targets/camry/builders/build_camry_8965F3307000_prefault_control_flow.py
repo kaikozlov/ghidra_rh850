@@ -55,9 +55,9 @@ def build() -> dict:
     census = json.loads(STORE_CENSUS.read_text())
     recovery = json.loads(RECOVERY_STRUCTURE.read_text())
     need(store["schema"] == "camry-8965f3307000-prefault-control-flow-store-audit-v1", "expanded store audit schema drift")
-    need(store["summary"] == {"computed":366,"functions":307,"ranged":56,"stores":412,"unknown":307}, "expanded store denominator drift")
-    need(store["pointer_parameter_dependent"]["store_count"] == 283 and store["pointer_parameter_dependent"]["function_count"] == 76, "expanded pointer-store denominator drift")
-    need(ops["summary"] == {"arith":0,"functions":307,"indirects":20,"loads":854,"param_arith":0,"param_indirects":5,"param_loads":620}, "expanded memory-op denominator drift")
+    need(store["summary"] == {"computed":380,"functions":295,"ranged":56,"stores":426,"unknown":321}, "expanded store denominator drift")
+    need(store["pointer_parameter_dependent"]["store_count"] == 299 and store["pointer_parameter_dependent"]["function_count"] == 77, "expanded pointer-store denominator drift")
+    need(ops["summary"] == {"arith":0,"functions":295,"indirects":25,"loads":840,"param_arith":0,"param_indirects":5,"param_loads":609}, "expanded memory-op denominator drift")
     cone_funcs = {int(x,16) for x in store["function_entries"]}
 
     # The expanded cone admits the DCM state helpers as coarse critical-cell hits.
@@ -105,7 +105,7 @@ def build() -> dict:
     eic = fn(0x62E6A)
     for n,addr in [(183,0xFFFFB16E),(184,0xFFFFB170),(185,0xFFFFB172),(186,0xFFFFB174),(189,0xFFFFB17A),(190,0xFFFFB17C)]:
         need(f"DAT_{addr:08x} = 0x80cf" in eic, f"CAN EIC{n} mask drift")
-    need("FUN_00062e44(&EIC187,&DAT_00008048)" in eic and "FUN_00062e44(&EIC188,&DAT_00008048)" in eic, "CAN1 RX/TX EIC enable drift")
+    need("FUN_00062e44(&EIC187,0x8048)" in eic and "FUN_00062e44(&EIC188,0x8048)" in eic, "CAN1 RX/TX EIC enable drift")
     default_isr = image[0x62E1E:0x62E44]
     need(image[0x62E42:0x62E44] == bytes.fromhex("8505"), "default ISR terminal self-branch drift")
 
@@ -156,7 +156,7 @@ def build() -> dict:
     ind_sites = {(int(x.split("|")[2],16),int(x.split("|")[3],16)) for x in ind_rows}
     need(ind_sites == {(0x80884,0x808BE),(0x810F2,0x8115C),(0x810F2,0x8117A),(0x81938,0x81988),(0x81D30,0x81DD4)}, f"indirect site set drift: {ind_sites}")
     need("uVar1 < 0xc" in fn(0x81938) and "param_1 & 0x7ff" in fn(0x81938), "81938 route bounds drift")
-    need("0xb < uVar1" in fn(0x81D30) and "uVar3" in fn(0x81D30) and "PTR_LAB_00021d28" in fn(0x81D30), "81D30 route bounds drift")
+    need("0xb < uVar1" in fn(0x81D30) and "uVar3" in fn(0x81D30) and "&DAT_00021d28" in fn(0x81D30), "81D30 route bounds drift")
     need(ops["summary"]["arith"] == 0, "unexpected integer divide/remainder in expanded cone")
 
     # Exact synchronous normal-CAN ingress mapping: three protected PDUs enter
@@ -188,7 +188,7 @@ def build() -> dict:
         rec=image[0x226C0+pid*8:0x226C8+pid*8]
         pdu_records.append({"pdu":pid,"selector":rec[2],"flags":rec[7]})
     need(all(x["selector"]==0 and x["flags"]==0x0C for x in pdu_records), "raw COM pre-copy-hook flags drift")
-    need("& 0x10" in fn(0x7D72C) and "FUN_0008e772" in fn(0x7D72C), "raw COM callback semantics drift")
+    need(">> 4 & 1" in fn(0x7D72C) and "FUN_0008e772(param_1)" in fn(0x7D72C), "raw COM callback semantics drift")
     need("param_1 < 0x60" in fn(0x8E772) and "DAT_febe5338" in fn(0x8E772), "COM generation bookkeeping drift")
 
     # The FE01 guard is the only precondition around the malformed aggregate, and
@@ -198,15 +198,15 @@ def build() -> dict:
         for ref in r.get("data_references",[]):
             if ref.get("to_addr","").lower()=="0xfebe3df2": guard_refs.append((a,ref["from_addr"],ref["ref_type"]))
     writers=[x for x in guard_refs if x[2]=="WRITE"]
-    need(writers == [(0x7A132,"0x0007a13a","WRITE"),(0x7A132,"0x0007a184","WRITE")], f"guard writer set drift: {writers}")
+    need(writers == [(0x7A132,"0x0007a13a","WRITE"),(0x7A132,"0x0007a184","WRITE"),(0x7A18C,"0x0007a194","WRITE"),(0x7A1B4,"0x0007a1bc","WRITE"),(0x7A1DC,"0x0007a1e4","WRITE"),(0x7A1DC,"0x0007a22a","WRITE")], f"guard writer set drift: {writers}")
     need("if (DAT_febe3df2 == -0x1ff)" in agg, "aggregate guard drift")
 
     # Valid cold boot jumps to application before the bootloader CAN loop; CAN is
     # initialized only on the failed-validation branch.
     boot = fn(0x13B0)
-    need("FUN_0000119e()" in boot and "PTR_f33_application_entry_000ffdb8" in boot and "FUN_00001398()" in boot, "boot branch structure drift")
-    need(boot.index("PTR_f33_application_entry_000ffdb8") < boot.index("FUN_00001398()"), "boot branch textual order drift")
-    need("FUN_00001338()" in fn(0x1398) and "FUN_00003b3c()" in fn(0x1338), "bootloader CAN init chain drift")
+    need("f33_boot_validate_application_images()" in boot and "PTR_f33_application_entry_000ffdb8" in boot and "f33_boot_resident_main()" in boot, "boot branch structure drift")
+    need(boot.index("PTR_f33_application_entry_000ffdb8") < boot.index("f33_boot_resident_main()"), "boot branch textual order drift")
+    need("f33_boot_resident_initialize()" in fn(0x1398) and "FUN_00003b3c()" in fn(0x1338), "bootloader CAN init chain drift")
 
     # No direct hard-reset/fatal helper is in the expanded direct-call cone.
     need(not ({0x608AA,0x7059E,0x61940,0x62E1E} & cone_funcs), "fatal/reset helper unexpectedly reachable in expanded cone")

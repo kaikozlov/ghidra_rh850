@@ -14472,3 +14472,30 @@ composition; `a602ee87` contains the assist/service lifecycle compositions;
 evidence. The latter's historical post-auth helper regression
 used stubbed stock aggregate calls; that remains emulator-local evidence, not
 native execution of those aggregates or a vehicle result.
+
+### 77.28 2026-10-16 structural family pass
+
+The remaining DEFAULT-named population was shape-classified from the exact
+image and canonical corpus by the tracked
+`analyze_camry_8965F3307000_function_families.py` census
+(`camry_8965F3307000_function_family_census.json`): 3,216 distinct
+normalized-pseudocode shapes, 379 duplicate clusters covering 2,321 functions,
+and five byte/shape-verified micro-idioms. 985 functions received
+table rows in one pass: 632 two-byte return-only stubs
+(`7f00` = `jmp [lp]`) named `f33_return_only_stub_*`; 186 twelve-byte
+`prepare/jarl/dispose` far-call trampolines marked as thunks (callers now
+resolve to `thunk_<target>`); 108 single/paired constant publishers and 59
+constant sources documented with shape-graded comments (targets unnamed, so
+no semantic claim). These are structural hypotheses verified at the
+byte/shape level, not executed or OEM-verified semantics.
+
+Named functions moved 2,173 → 2,864 and documented 2,011 → 2,996. Two
+independent rebuilds produced byte-identical inventories; the A/B diff
+contains exactly the designed 691 renames, 186 thunk flips, and 985 new
+comments, with no body or signature changes. Corpus-dependent artifacts and
+call-cone censuses were regenerated; call cones now expand through thunks
+(prefault store denominators moved 275→291 stores, 151 functions unchanged).
+The pass also repaired pre-existing stale pins in the canfd-timing, fault
+status, flash-backend, prefault and tss3-port checks that predated it
+(SFR-labeled rendering `GCFG`/`FSTATR`/`FASTAT`, renamed classifier calls),
+bringing the full target suite to 25/25.

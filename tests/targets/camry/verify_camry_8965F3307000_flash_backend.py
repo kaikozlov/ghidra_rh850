@@ -34,13 +34,13 @@ def section_flash_backend() -> int:
         size=row['body_size']; check(f'F33 function 0x{entry:X} raw body hash', hashlib.sha256(image[entry:entry+size]).hexdigest()==row['body_sha256'])
     check('F33 ready helper uses FSTATR bit15', '& 0x8000' in F[0x78BFA]['decompiled_c'])
     status=F[0x78C30]['decompiled_c']
-    check('F33 status-clear helper uses FSTATR error bit and FASTAT command-lock family', all(x in status for x in ('& 0x4000','0xffa10010','0x10','0xffa20000,0x50')))
+    check('F33 status-clear helper uses FSTATR error bit and FASTAT command-lock family', all(x in status for x in ('& 0x4000','FSTATR','FASTAT','FACI_COMMAND_AREA')))
     forced=F[0x78CE6]['decompiled_c']
-    check('F33 forced-stop helper emits B3 and waits on ready', '0xffa20000,0xb3' in forced and '0x8000,0x8000' in forced)
+    check('F33 forced-stop helper emits B3 and waits on ready', 'FACI_COMMAND_AREA = 0xb3' in forced and '0x8000,0x8000' in forced)
     program=F[0x78E2A]['decompiled_c']
-    write='FUN_00078aec(0xffa20000,local_20[uVar5]);'; dbfull='if ((uVar2 & 0x400) != 0)'
+    write='Ramffa20000 = local_20[uVar4];'; dbfull='(uVar1 >> 10 & 1) != 0'
     check('F33 native program routine checks DBFULL bit10 after each halfword write', write in program and dbfull in program and program.index(write)<program.index(dbfull))
-    check('F33 native program routine uses E8 and terminal D0', '0xffa20000,0xe8' in program and '0xffa20000,0xd0' in program)
+    check('F33 native program routine uses E8 and terminal D0', 'FACI_COMMAND_AREA = 0xe8' in program and 'FACI_COMMAND_AREA = 0xd0' in program)
     check('F33 native final status mask remains 0x24068', '& 0x24068' in F[0x79026]['decompiled_c'])
 
     print('\n== exact Toyota T-0035 manufacturer evidence ==')

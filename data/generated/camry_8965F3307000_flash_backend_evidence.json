@@ -20,8 +20,8 @@
           "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nuint FUN_00078bfa(void)\n\n{\n  uint uVar1;\n  \n  uVar1 = FUN_00078ae0(&DAT_ffa10080);\n  return (uVar1 & 0x8000) >> 0xf;\n}\n\n",
-      "decompiled_c_sha256": "59610bf8778f74c8d10716c2d3be5d0063b42d50b8ee302b1170e660a1ee3c06",
+      "decompiled_c": "\n/* WARNING: Inlined function: f33_load_u32 */\n\nuint FUN_00078bfa(void)\n\n{\n  uint uVar1;\n  \n  uVar1 = FSTATR;\n  return (uVar1 & 0x8000) >> 0xf;\n}\n\n",
+      "decompiled_c_sha256": "35595e6354ac3120c0a2fd716e0f35e6ca7edf048258c9deb8b9f9f4e64699ef",
       "entry": "0x00078BFA"
     },
     {
@@ -41,10 +41,24 @@
           "ref_type": "PARAM",
           "to_addr": "0xffa10080",
           "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00078c4c",
+          "operand_index": 0,
+          "ref_type": "PARAM",
+          "to_addr": "0xffa10010",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00078c60",
+          "operand_index": 2,
+          "ref_type": "PARAM",
+          "to_addr": "0xffa20000",
+          "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nvoid FUN_00078c30(void)\n\n{\n  uint uVar1;\n  int iVar2;\n  \n  uVar1 = FUN_00078ae0(&DAT_ffa10080);\n  if (((uVar1 & 0x4000) == 0x4000) && (iVar2 = FUN_00078ad4(0xffa10010), iVar2 != 0x10)) {\n    FUN_00078ae6();\n  }\n  FUN_00078ae6(0xffa20000,0x50);\n  return;\n}\n\n",
-      "decompiled_c_sha256": "9c358bb7b66c6bb647017c826827c031c166b329b0cefe907ea34a389324beb8",
+      "decompiled_c": "\n/* WARNING: Inlined function: f33_load_u32 */\n/* WARNING: Inlined function: f33_load_u8 */\n/* WARNING: Inlined function: f33_store_u8 */\n\nvoid FUN_00078c30(void)\n\n{\n  uchar uVar1;\n  uint uVar2;\n  \n  uVar2 = FSTATR;\n  if (((uVar2 & 0x4000) == 0x4000) && (uVar1 = FASTAT, uVar1 != '\\x10')) {\n    FASTAT = '\\x10';\n  }\n  FACI_COMMAND_AREA = 'P';\n  return;\n}\n\n",
+      "decompiled_c_sha256": "6b11292cdba545e2d5308ccf54abc769ce3dceb759a2355677b54fe6805e6f24",
       "entry": "0x00078C30"
     },
     {
@@ -66,10 +80,17 @@
           "to_space": "ram"
         },
         {
-          "from_addr": "0x00078d22",
+          "from_addr": "0x00078d02",
           "operand_index": 0,
           "ref_type": "PARAM",
-          "to_addr": "0x00008000",
+          "to_addr": "0xffa10010",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00078d16",
+          "operand_index": 2,
+          "ref_type": "PARAM",
+          "to_addr": "0xffa20000",
           "to_space": "ram"
         },
         {
@@ -78,17 +99,10 @@
           "ref_type": "PARAM",
           "to_addr": "0xffa10080",
           "to_space": "ram"
-        },
-        {
-          "from_addr": "0x00078d2a",
-          "operand_index": 0,
-          "ref_type": "PARAM",
-          "to_addr": "0x00008000",
-          "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nundefined4 FUN_00078ce6(void)\n\n{\n  uint uVar1;\n  int iVar2;\n  undefined4 uVar3;\n  \n  uVar1 = FUN_00078ae0(&DAT_ffa10080);\n  if (((uVar1 & 0x4000) == 0x4000) && (iVar2 = FUN_00078ad4(0xffa10010), iVar2 != 0x10)) {\n    FUN_00078ae6();\n  }\n  FUN_00078ae6(0xffa20000,0xb3);\n  uVar1 = FUN_000793f0(&DAT_ffa10080,0x8000,0x8000,0xe5);\n  if (uVar1 < 2) {\n    uVar3 = 0;\n  }\n  else {\n    uVar3 = 8;\n  }\n  return uVar3;\n}\n\n",
-      "decompiled_c_sha256": "38cced88343bb4874e29c9a2b49afe11a4cab236ec88282547c79c951f18cfa7",
+      "decompiled_c": "\n/* WARNING: Inlined function: f33_load_u32 */\n/* WARNING: Inlined function: f33_load_u8 */\n/* WARNING: Inlined function: f33_store_u8 */\n/* If FSTATR.ILGLERR and FASTAT!=10, write FASTAT10. IssueB3, then793F0(FSTATR,8000,8000,E5);\n   return0 for poll0/1, else8. Actual mask precedence makes poll1 unreachable for these identical\n   masks. No P/E entry/exit or automatic completion; native timeout1859 instructions and explicit\n   hypothetical completion111 instructions. If ILGLERR and FASTAT!=10 write10; issueB3 then\n   poll(FSTATR,8000,8000,E5). Poll0/1 maps0 and timeout2 maps8. Identical masks make poll1\n   unreachable here. Native111-instruction explicit completion and1859-instruction timeout; P/E\n   transition and physical completion are not synthesized. */\n\nuint f33_faci_force_stop_and_poll(void)\n\n{\n  uchar uVar1;\n  uint uVar2;\n  \n  uVar2 = FSTATR;\n  if (((uVar2 & 0x4000) == 0x4000) && (uVar1 = FASTAT, uVar1 != '\\x10')) {\n    FASTAT = '\\x10';\n  }\n  FACI_COMMAND_AREA = 0xb3;\n  uVar2 = f33_poll_word_masks(&FSTATR,0x8000,0x8000,0xe5);\n  if (uVar2 < 2) {\n    uVar2 = 0;\n  }\n  else {\n    uVar2 = 8;\n  }\n  return uVar2;\n}\n\n",
+      "decompiled_c_sha256": "81f4a4889a8fb8da6eab674fc235ea639ffd623bb2b7b46f3aa4ee263f1083ab",
       "entry": "0x00078CE6"
     },
     {
@@ -103,15 +117,43 @@
       "body_size": 156,
       "data_references": [
         {
+          "from_addr": "0x00078e40",
+          "operand_index": 0,
+          "ref_type": "PARAM",
+          "to_addr": "0xffa10030",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00078e54",
+          "operand_index": 2,
+          "ref_type": "PARAM",
+          "to_addr": "0xffa20000",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00078e84",
+          "operand_index": 2,
+          "ref_type": "PARAM",
+          "to_addr": "0xffa20000",
+          "to_space": "ram"
+        },
+        {
           "from_addr": "0x00078e8e",
           "operand_index": 0,
           "ref_type": "PARAM",
           "to_addr": "0xffa10080",
           "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00078eb4",
+          "operand_index": 2,
+          "ref_type": "PARAM",
+          "to_addr": "0xffa20000",
+          "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nint FUN_00078e2a(undefined4 *param_1,undefined4 param_2,uint param_3)\n\n{\n  undefined4 uVar1;\n  int extraout_r6;\n  int extraout_r7;\n  uint uVar2;\n  int iVar3;\n  uint uVar4;\n  uint uVar5;\n  undefined2 local_20 [6];\n  \n  uVar4 = 0;\n  FUN_00078e10();\n  FUN_00078af2(0xffa10030,param_2);\n  FUN_00078af2(extraout_r6 + 4,extraout_r7 + param_3 + -1);\n  FUN_00078ae6(0xffa20000,0xe8);\n  FUN_00078ae6();\n  do {\n    uVar1 = *param_1;\n    param_1 = param_1 + 1;\n    local_20[0] = (short)uVar1;\n    uVar4 = uVar4 + 1;\n    local_20[1] = (short)((uint)uVar1 >> 0x10);\n    for (uVar5 = 0; uVar5 < param_3 >> 1; uVar5 = uVar5 + 1) {\n      FUN_00078aec(0xffa20000,local_20[uVar5]);\n      uVar2 = FUN_00078ae0(&DAT_ffa10080);\n      if ((uVar2 & 0x400) != 0) {\n        return 7;\n      }\n    }\n  } while (uVar4 < param_3 >> 2);\n  iVar3 = FUN_00078de2();\n  if (iVar3 == 1) {\n    FUN_00078ae6(0xffa20000,0xd0);\n  }\n  return iVar3;\n}\n\n",
-      "decompiled_c_sha256": "f05489aee9d410744497d387a1f9fd3e701ff91f3ee3579dd5c8ac6867bccb82",
+      "decompiled_c": "\n/* WARNING: Inlined function: f33_store_u32 */\n/* WARNING: Inlined function: f33_store_u8 */\n/* WARNING: Inlined function: f33_store_u16 */\n/* WARNING: Inlined function: f33_load_u32 */\n\nuint FUN_00078e2a(undefined4 *param_1,uint param_2,uint param_3)\n\n{\n  uint uVar1;\n  undefined4 uVar2;\n  uint uVar3;\n  uint uVar4;\n  undefined2 local_20 [4];\n  \n  uVar3 = 0;\n  FUN_00078e10();\n  FSADDR = param_2;\n  FEADDR = (param_2 + param_3) - 1;\n  FACI_COMMAND_AREA = 0xe8;\n  FACI_COMMAND_AREA = (uchar)(param_3 >> 1);\n  do {\n    uVar2 = *param_1;\n    param_1 = param_1 + 1;\n    local_20[0] = (short)uVar2;\n    uVar3 = uVar3 + 1;\n    local_20[1] = (short)((uint)uVar2 >> 0x10);\n    for (uVar4 = 0; uVar4 < param_3 >> 1; uVar4 = uVar4 + 1) {\n      Ramffa20000 = local_20[uVar4];\n      uVar1 = FSTATR;\n      if ((uVar1 >> 10 & 1) != 0) {\n        return 7;\n      }\n    }\n  } while (uVar3 < param_3 >> 2);\n  uVar3 = f33_faci_check_dataflash_addresses();\n  if (uVar3 == 1) {\n    FACI_COMMAND_AREA = 0xd0;\n  }\n  return uVar3;\n}\n\n",
+      "decompiled_c_sha256": "22a846898273269154166dd70a429073959f9d788586434f1702c34c9c73624b",
       "entry": "0x00078E2A"
     },
     {
@@ -133,8 +175,8 @@
           "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nundefined4 FUN_00079026(void)\n\n{\n  uint uVar1;\n  undefined4 uVar2;\n  \n  uVar1 = FUN_00078ae0(&DAT_ffa10080);\n  if ((uVar1 & 0x24068) == 0) {\n    uVar2 = 0;\n  }\n  else {\n    uVar2 = 7;\n  }\n  return uVar2;\n}\n\n",
-      "decompiled_c_sha256": "76f9ae222a710cb1654e09be96abab2a0ef0b3a57b15d78bd1b715d55a5b16dd",
+      "decompiled_c": "\n/* WARNING: Inlined function: f33_load_u32 */\n\nundefined4 FUN_00079026(void)\n\n{\n  uint uVar1;\n  undefined4 uVar2;\n  \n  uVar1 = FSTATR;\n  if ((uVar1 & 0x24068) == 0) {\n    uVar2 = 0;\n  }\n  else {\n    uVar2 = 7;\n  }\n  return uVar2;\n}\n\n",
+      "decompiled_c_sha256": "949d5eb29a8f4df4601883be85f5c167fa8e2975aefa213323498ffe33ef28f7",
       "entry": "0x00079026"
     }
   ],
@@ -145,5 +187,5 @@
   },
   "schema": "camry-8965f3307000-flash-backend-evidence-v1",
   "software_id": "8965F3307000",
-  "source_corpus_sha256": "f33efdbecac7d2d8ee8589ae8492d828451f5f1523aa43c72f672597c77fa8d1"
+  "source_corpus_sha256": "8345c06112d59ae6ed45f69e6240089eaa28eaf7b5d20e58487124397262ae60"
 }

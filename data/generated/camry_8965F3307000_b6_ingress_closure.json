@@ -71,7 +71,7 @@
         "subbus_sequence": "0x33"
       },
       "path": "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json",
-      "sha256": "e5162cee10bf5f4b5437f74313229ee429a990d91b07850755ff6a6957ef42a8",
+      "sha256": "1a2062968402cd7e0dc73bc4a4793af512ceeaaed8bcf6c16ad371eebdd26ad3",
       "skid": {
         "bus_index": 32,
         "bus_name": "Bus 4",
@@ -117,7 +117,7 @@
     "0x0006A3BE": {
       "body_sha256": "227c8ab097ee8448e441c6a8c8095396e122c250996dc20b07fb2439646514b9",
       "body_size": 50,
-      "decompiled_c_sha256": "08ac737ecf59da97d6687b19045ad5ceadc2abbd4696501762cb3f962bac0c70",
+      "decompiled_c_sha256": "a06c98ddcd740947e51cd4a45731e898806cf99711ef8e133b33d28eaa77b784",
       "role": "legacy Toyota checksum dispatcher"
     },
     "0x0006A410": {
@@ -141,25 +141,25 @@
     "0x00079EDE": {
       "body_sha256": "c13bd6248633f1b6e69410a75cf6eef47fba52fb322f9723a3461d818df70383",
       "body_size": 56,
-      "decompiled_c_sha256": "e46df78f289f101ddaeedc2fa874da13793f96a08edd5311f3743fd7f882e27e",
+      "decompiled_c_sha256": "f2f2fd99c3c7ce949a3f02bed00e6ee4782034886969f7822c7e9edecae848a6",
       "role": "software Rx ring foreground drain aggregate"
     },
     "0x0007A232": {
       "body_sha256": "453a4c503a8e55bdd237d403628b8431d0860462006b9d290ec506583a8881a1",
       "body_size": 34,
-      "decompiled_c_sha256": "5a7968f5f4385183e6f40976f60eb78eae823a22c60359ff554d5101f968665c",
+      "decompiled_c_sha256": "5539288e55fc1fc8cdb90a376c473dba0cce8f846131ff943fa46b0872377514",
       "role": "CAN receive interrupt state gate"
     },
     "0x0007A254": {
       "body_sha256": "30a60286baf7fbc844f1fcd156ead38429f9cbcc9a4e412d94fdf0b58ca06ef8",
       "body_size": 116,
-      "decompiled_c_sha256": "d08fec54cd0ef3b2b0f52ae2192f4d1f2f55a4891f68ff9dc6fe7c7244d56922",
+      "decompiled_c_sha256": "e65c7bf884be46968189ee10be460d3d4051251f4adb4b3c2355f52ed1199097",
       "role": "foreground CAN/PduR/SecOC aggregate"
     },
     "0x0007D72C": {
       "body_sha256": "ab6c3514c592e1a007d7d38abf723d22b905037b3ae7132cdcc5c1c73ec5b239",
       "body_size": 212,
-      "decompiled_c_sha256": "7802e041ecd9ad0f271d3d76cbec3e2ba7c5b410cedccab7d8f3d8702c9d2b5d",
+      "decompiled_c_sha256": "201484dd3ee17f167b38824c98fd98de1313f31ebfdb9ea761cb79e996511ae9",
       "role": "generated-COM receive callback"
     },
     "0x00080884": {
@@ -171,7 +171,7 @@
     "0x000808D6": {
       "body_sha256": "32d2a5120a17b88d913a27eb0458c8143cd62f3f663304dbd4bdf590c4865a7c",
       "body_size": 296,
-      "decompiled_c_sha256": "582aa002d8afe874814f932beafeb8b51da2139b4c9f625c50d3f5a4a9846ef3",
+      "decompiled_c_sha256": "52d33c7b769c029f6f03e4c23cdc428ea3a73ad3ca9617c78f6e99b33de86008",
       "role": "software Rx ring drain"
     },
     "0x000809FE": {
@@ -183,25 +183,25 @@
     "0x00080A4A": {
       "body_sha256": "1766a98c93308777908f3ae71f2753385a001f094f7fe92475ebe91173269543",
       "body_size": 248,
-      "decompiled_c_sha256": "5d9f137c2b4ab0f03e05ee5804e9ef1db18385475171bd329d4c2d8a16447145",
+      "decompiled_c_sha256": "c676900f4d281c92ef17960fc6a416405cc7dbd9bd96fce8dd07017c09cb0ca6",
       "role": "software Rx ring writer"
     },
     "0x00080B42": {
       "body_sha256": "d2ae5e4e46d9f7437fb93fc98c0482ed417b10c1bab71a59cea54bc44f131696",
       "body_size": 128,
-      "decompiled_c_sha256": "9385d1364276ce3ca646923249799794bbf58aaa5516534e5c9fb29dbc839191",
+      "decompiled_c_sha256": "6f83e2c163340df6c10a245d7fe327de1192304bb460a1dd6f16a6a4c32a0195",
       "role": "generic Rx admission/ring writer"
     },
     "0x000810F2": {
       "body_sha256": "b5cfa2ca048a5c88f3e0379d5c0b0288b58e3e30366d95d00355ec41ea37a452",
       "body_size": 204,
-      "decompiled_c_sha256": "0b2ee182e9cdfebf7c50801001df497886253972d69a72919aec0d804d310834",
+      "decompiled_c_sha256": "3834b06785877fcdde055026ed4c85afbf3b09723a6de3ad26497ae6e4bb7a64",
       "role": "normal CanIf Rx callback"
     },
     "0x00081CA6": {
       "body_sha256": "2b7c5736393c68204635d71cf7306a67685445f4451aeae9f29516e75cdbb4f5",
       "body_size": 112,
-      "decompiled_c_sha256": "5ac6f1b17bf6c0c0cfface11d0d907cc1c0b0ad94e925ac36ff491f029020de8",
+      "decompiled_c_sha256": "2df93e350b0b8fd0ee73d94ca2c3f80d697d5b39da1ad9ad72acdcfa7b8198c0",
       "role": "PduR upper-route dispatcher"
     },
     "0x00081D16": {
@@ -213,7 +213,7 @@
     "0x00081D30": {
       "body_sha256": "10182dc0838fac121551d4dea3a9d10f19781b00a8d790c38c3e689f995154a7",
       "body_size": 172,
-      "decompiled_c_sha256": "d57d7b3299a9dc7a034c9a6a1a01974064eef050fecf763cf9b8fffc0405703d",
+      "decompiled_c_sha256": "d456578ec9e04e834b0ada9707901e73f19061a7e83b2a51d564d690186ca2f0",
       "role": "PduR lower-route dispatcher"
     },
     "0x00083CE4": {
@@ -261,7 +261,7 @@
     "0x0008E8A0": {
       "body_sha256": "d10a3216d91ed3c5b692b7efc3796426165932fdd47988417a9d0f4d8398e329",
       "body_size": 114,
-      "decompiled_c_sha256": "93bc425b9f991a549a6a1bf4e30b1a145ded5d90b2eab3cd474093cd1d293aa0",
+      "decompiled_c_sha256": "e7cf64773622de19a25e1f5844ed4fa41370b682d95f208ea5fa33fe34a909e6",
       "role": "SecOC queue head selector"
     },
     "0x0008E912": {
@@ -273,7 +273,7 @@
     "0x0008E9C6": {
       "body_sha256": "6b400bd052e65702face2c4b5322f5015806d14f350e1a4789d9cadc98a56864",
       "body_size": 218,
-      "decompiled_c_sha256": "5fd3cde9fbbae252c304e5fa7c9c62fee4f9f978f9b74268d58d498b4686a602",
+      "decompiled_c_sha256": "b6b402791fbda9bb9d613ac50be65b3f8534a656e175ac49dc9936b8fd4ae8b0",
       "role": "SecOC queue insert/copy"
     },
     "0x0008ED8E": {
@@ -297,7 +297,7 @@
     "0x0008EFF8": {
       "body_sha256": "4c8105aaa818faa8723ec89a090f6811ab388f88e937190499d7bd9547e7fb88",
       "body_size": 70,
-      "decompiled_c_sha256": "9d8635dd22b779777dcfaad7b476cc527e60c356455f090b9b99bece1e06ac34",
+      "decompiled_c_sha256": "724efc6d146a1c48e6d704b2e1a5bcc2d1c1c5b4fa510e62350bbb4e44964aa3",
       "role": "SecOC foreground receive aggregate"
     },
     "0x0008F2B0": {
@@ -309,7 +309,7 @@
     "0x0008F34A": {
       "body_sha256": "50c9e2538c46e5bdc9dbbae5e48cdfc248536b9ee3439765b240a81e1c38d0b4",
       "body_size": 128,
-      "decompiled_c_sha256": "e36612358290af98f3d9dfae795686fd93d0787dd22dc3225b5910e8e12790bb",
+      "decompiled_c_sha256": "2779f9cedd981e42392cb4cd55623cbb47eb437fe313a0ac59a657fecc9bd705",
       "role": "SecOC receive queue wrapper"
     },
     "0x0008F546": {
@@ -339,7 +339,7 @@
     "0x0008FABA": {
       "body_sha256": "e937244dfdbef8ec132299da455ddf9d6f5ff5cad5defed1b0485592a3b4aefd",
       "body_size": 152,
-      "decompiled_c_sha256": "46d19fd1a304974c204b3d88eb854651f3ddfc399469c831da2f088bd2943afd",
+      "decompiled_c_sha256": "05392471aa86029aa32b23bc63d321ca5f4c2c6e8fd9a2d1711e0a55742cdff1",
       "role": "opposite queue-family insertion helper"
     },
     "0x00090204": {
@@ -538,7 +538,7 @@
   ],
   "target": {
     "canonical_function_count": 7331,
-    "canonical_inventory_sha256": "0a737d03d3a9b561dcba8459e0626c15ec8fd2551f9c3fcd0e1f2e04f17fbcf0",
+    "canonical_inventory_sha256": "09160daa37a3ac5481340cc514e9a6f28a7583326a83c4ec5d3892dc48c24539",
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "software_id": "8965F3307000"
   }

@@ -77,9 +77,9 @@ def build() -> dict:
     cone = load(CONE)
     census = load(STORE_CENSUS)
     need(cone["schema"] == "camry-8965f3307000-prefault-store-audit-v1", "call-cone evidence drift")
-    need(cone["summary"] == {"computed": 268, "functions": 151, "ranged": 37, "stores": 275, "unknown": 231}, "call-cone denominator drift")
-    need(cone["pointer_parameter_dependent"]["store_count"] == 209, "parameter-store denominator drift")
-    need(cone["pointer_parameter_dependent"]["function_count"] == 52, "parameter-store function denominator drift")
+    need(cone["summary"] == {"computed": 284, "functions": 151, "ranged": 37, "stores": 291, "unknown": 247}, "call-cone denominator drift")
+    need(cone["pointer_parameter_dependent"]["store_count"] == 225, "parameter-store denominator drift")
+    need(cone["pointer_parameter_dependent"]["function_count"] == 53, "parameter-store function denominator drift")
     cone_funcs = {int(x, 16) for x in cone["function_entries"]}
 
     # Whole-image statically ranged STORE candidates whose recovered interval can
@@ -92,7 +92,7 @@ def build() -> dict:
         if hits:
             critical_rows.append((int(row["function"], 16), row, hits))
     cone_critical = [(fn, row, hits) for fn, row, hits in critical_rows if fn in cone_funcs]
-    need(len(critical_rows) == 62, f"critical whole-image candidate denominator drift: {len(critical_rows)}")
+    need(len(critical_rows) == 65, f"critical whole-image candidate denominator drift: {len(critical_rows)}")
     need({fn for fn, _, _ in cone_critical} == {0x8E7BA}, f"pre-fault critical intersection drift: {sorted({fn for fn,_,_ in cone_critical})}")
     e7ba = fn_decomp(0x8E7BA)
     need("(param_1 & 0xffff) < 0x60" in e7ba and "DAT_febe5398" in e7ba, "0x8E7BA exact bound drift")
@@ -126,9 +126,9 @@ def build() -> dict:
     need("FUN_00083f3e(0)" in app_comm, "79DFA -> 83F3E edge drift")
     need("FUN_00084652()" in app_rscfd, "83F3E -> 84652 edge drift")
     need("FUN_00084570()" in app_driver, "84652 -> 84570 edge drift")
-    need("PTR_DAT_0002303c = DAT_00022e80" in app_apply, "application GCFG writer drift")
-    need("FUN_00001338()" in boot_loop and "FUN_00003b3c()" in boot_init and "FUN_0000396c()" in boot_rscfd, "boot RSCFD chain drift")
-    need("DAT_ffd20084 = 0xffff0000" in boot_gcfg, "boot GCFG constant drift")
+    need("PTR_GCFG_0002303c = DAT_00022e80" in app_apply, "application GCFG writer drift")
+    need("f33_boot_resident_initialize()" in boot_loop and "FUN_00003b3c()" in boot_init and "FUN_0000396c()" in boot_rscfd, "boot RSCFD chain drift")
+    need("GCFG = 0xffff0000" in boot_gcfg, "boot GCFG constant drift")
 
     # Exact RS-CANFD global configuration. Renesas P1M-E manual table 17.106:
     # bit5 CMPOC, bit2 DRE, bit1 DCE.
