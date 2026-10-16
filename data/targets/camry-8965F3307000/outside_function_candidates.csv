@@ -69,8 +69,8 @@ target_addr,decoded_instruction_count,decoded_byte_count,run_start,run_end,incom
 0x0001bcee,32,64,0x0001bcee,0x0001bd2d,0,1,0,,,true,false,false,1,false,false,pointer-referenced-code-run,unresolved
 0x0001bd0c,17,34,0x0001bd0c,0x0001bd2d,0,1,0,,,true,false,false,1,false,false,pointer-referenced-code-run,unresolved
 0x0001bd0e,16,32,0x0001bd0e,0x0001bd2d,0,1,0,,,true,false,false,1,false,false,pointer-referenced-code-run,unresolved
-0x0001c474,6,14,0x0001c474,0x0001c481,0,2,0,,,true,false,false,1,false,false,pointer-referenced-code-run,unresolved
-0x0001c924,17,38,0x0001c924,0x0001c949,0,1,0,,,true,false,false,1,false,false,pointer-referenced-code-run,unresolved
+0x0001c474,6,14,0x0001c474,0x0001c481,0,0,0,,,true,false,false,1,false,false,orphan-decoded-run,unresolved
+0x0001c924,17,38,0x0001c924,0x0001c949,0,0,0,,,true,false,false,1,false,false,orphan-decoded-run,unresolved
 0x0001d600,12,30,0x0001d600,0x0001e519,0,1,0,,,true,false,false,1,false,false,pointer-referenced-code-run,unresolved
 0x0001d630,20,50,0x0001d630,0x0001e55d,0,3,0,,,true,false,false,1,false,false,pointer-referenced-code-run,unresolved
 0x0001d648,11,26,0x0001d648,0x0001e55d,0,1,0,,,true,false,false,1,false,false,pointer-referenced-code-run,unresolved

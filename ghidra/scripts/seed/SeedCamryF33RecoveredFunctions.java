@@ -4755,8 +4755,6 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     getFunctionAt(toAddr(0x71398L)).setComment("PAIRED ABI exit: apply profileROM31683=0, restore SP from r2, restore r1..ep and return through preserved continuation. LP is outside the saved register range. Exact assembly, not ordinary C stack effects, defines this contract.");
     getFunctionAt(toAddr(0x65AC0L)).setComment("Assembly MPAT0..15 save with persistent SP delta-64. Used in timer interrupt frames; not a normal stack-neutral leaf.");
     getFunctionAt(toAddr(0x65B4AL)).setComment("Assembly MPAT0..15 restore with persistent SP delta+64, paired with65AC0. Restores the interrupted MPU profile, including foreground profile1.");
-    getFunctionAt(toAddr(0xB4FFCL)).setComment("Vote qualified health stateB20E/B20C/B20D; unrecoverable vote starts at0. States0/33 may select11,0 may select33,33 may clear,11 may select22 and latchB20F. Route the new state throughB4F8A BEFORE publishing it. Physical analog-channel identities and OEM state names remain bounded.");
-    getFunctionAt(toAddr(0xB4F8AL)).setComment("Health-state event routing:11 requests event1 with zero-output gates in families0400/0500;22 requests1 only in those families and2 in0700/0800. Exact0522 also checksAFCE!=11. No event1 cancellation here; do not infer universal immediate shutdown.");
     semanticFunction(0x56B06L, "f33_set_channel_owner_request", v,
         new ParameterImpl("owner", u8, currentProgram),
         new ParameterImpl("request_mask", u32, currentProgram))
@@ -6573,6 +6571,413 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         .setComment("Nonreturningreset-selectedapplicationstartupownership:loadapplicationcontext715B4(abandonbootframes),clearoldbootstack632B2,configureguards/MPU/ECC/ECM/interrupts,publishretainedsnapshotandcopyROMdata,runstartupstatus/safety-devicegates,image-IDpublication62D5E,and666BCapplicationinitializers.6378CbootCRCmustpassbefore665F2startpulse;then701EA(0),EI,andforeground66062. "
             + "Hardwarewaitsareexternalboundaries;DISPOSEsuffixisnotanordinaryreturnpath.");
   }
+  private void annotateInitializationAndSnapshots() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    semanticFunction(0x58804L, "f33_initialize_application_and_request_first_generation", v)
+        .setComment("Run cold software initialization58828, then request redundant8C08=A55A. This runs inside666BC before "
+            + "timers; it is not physical reset or an aggregate hardware-success gate.");
+    semanticFunction(0x58828L, "f33_initialize_cold_application_state", v)
+        .setComment("Clear restart token, redundant restart classification8C1A/B/C, counters8C16/17 and cadence8C19. "
+            + "Initialize cold ECU acquisition58C9A and cold control-retained cellsBF91E viaFDC00, then common58814. "
+            + "This path differs from warm5886C.");
+    semanticFunction(0x5886CL, "f33_reinitialize_application_for_foreground_restart", v)
+        .setComment("Clear four task last-mode words8C00/02/04/06 and set inverses8C0C/0E/10/12=FFFF, then common58814. "
+            + "Do not rerun58C9A/BF91E or reset task cadence/restart token. BF97A resets both live mode and "
+            + "publishedE8CC to0; acquired inputs and cold-owned health generation history survive.");
+    semanticFunction(0x58814L, "f33_initialize_generated_application_components", v)
+        .setComment("Ordered common initializer:59448 ECU work state, FDC14\u2192BF97A control work state, then5C6D8 copies control "
+            + "publications into ECU views. Both cold58828 and warm5886C call this; it does not invoke the "
+            + "low-level666BC hardware/NvM startup sequence.");
+    semanticFunction(0x59448L, "f33_initialize_ecu_application_work_state", v)
+        .setComment("Generated ECU initialization and signal propagation. Reset monitor/action records and qualification, "
+            + "initialize control/filter work state, copy current acquisition into task views; "
+            + "final58070,FC4F8,58074,58802 sequence publishes ECU foreground outputs. No claim that every calibration "
+            + "has an OEM physical meaning.");
+    semanticFunction(0xBF97AL, "f33_initialize_control_application_work_state", v)
+        .setComment("Generated control initialization and input propagation, including request bitmaps/slots, redundant live "
+            + "mode, current-limit owner slots and filter/controller state. Cold-onlyBF91E is separate. Directly "
+            + "seed the E800+ output image, includingE8CC=0, rather than calling periodic publisherBF3AA.");
+    semanticFunction(0x58C9AL, "f33_initialize_cold_ecu_input_state", v)
+        .setComment("Cold-only ECU input/status initialization before generated components. Both six-halfword acquisition "
+            + "banks822C/8238 start8000; many status/validity cells have explicit nonzero defaults. Not a blanket "
+            + "zeroing operation and not called by warm5886C.");
+    semanticFunction(0xBF91EL, "f33_initialize_cold_control_retained_state", v)
+        .setComment("Cold-only control-retained state: clearB195/B196 andBE7E with other retained input/filter cells; selected "
+            + "qualifiers start1. Warm5886C skips this owner; health edge history can survive the common component "
+            + "initialization.");
+    semanticFunction(0x5C6D8L, "f33_snapshot_initialized_control_publications", v)
+        .setComment("After both common initializers, copyE400/E600 publication fields into6434..644C and6768..6794 ECU views. "
+            + "Does not publish liveB11A toE8CC or obtain new physical inputs.");
+    semanticFunction(0x5897AL, "f33_snapshot_ch1_inputs", v)
+        .setComment("Save PMR; setFFC0; copy ECU inputs through5C7B6 and control inputs throughFDC28; restore entryPMR. The "
+            + "caller subsequently runs CH1 transition/steady workers.");
+    semanticFunction(0x58A1CL, "f33_snapshot_ch2_inputs", v)
+        .setComment("Save PMR; FFC0 protects5CA3A/FDC3C acquisition snapshot; FF80 protects5CF1C/FDC50 control snapshot; "
+            + "restore entryPMR. These are ordered windows, not an all-task atomic generation.");
+    semanticFunction(0x58B1AL, "f33_snapshot_foreground_inputs", v)
+        .setComment("Save PMR; FFC0\u21925D12C/FDC64 acquisition views, FF80\u21925D5E0/FDC78 control views, FF00\u21925D6DC/FDC8C "
+            + "monitor/health/service views; restore entryPMR. Not one interrupt-free snapshot and not physical input "
+            + "freshness.");
+    semanticFunction(0x5CA3AL, "f33_snapshot_ecu_ch2_acquisition", v)
+        .setComment("Copy current ECU acquisition/status into CH2-specific views;822C/8238 banks become622C/6238. Called "
+            + "in58A1C FFC0 window; foreground6450/645C copies remain a different generation.");
+    semanticFunction(0x5D12CL, "f33_snapshot_ecu_foreground_acquisition", v)
+        .setComment("Copy current ECU acquisition/status into foreground-specific views;822C/8238 banks become6450/645C. "
+            + "Called in58B1A FFC0 window; does not overwrite CH2 copies622C/6238.");
+    semanticFunction(0xC1B84L, "f33_snapshot_control_ch2_acquisition", v)
+        .setComment("CopyEC00..EC24 publication into AF74..AF98 CH2 input view, preserving byte/halfword/word widths. FDC3C is "
+            + "called within58A1C FFC0 window. ForegroundAFD4..AFF8 is separately sampled.");
+    semanticFunction(0xC1C9EL, "f33_snapshot_control_foreground_acquisition", v)
+        .setComment("CopyEC00..EC24 publication into AFD4..AFF8 foreground view, preserving widths. FDC64 is called "
+            + "within58B1A FFC0 window; no synchronization with a previously sampled CH2 bank is implied.");
+    semanticFunction(0xC1BE4L, "f33_snapshot_control_ch2_feedback", v)
+        .setComment("CopyACxx controller fields andED00..ED12 outputs into AF9C..AFCA CH2 view under the58A1C FF80 window, "
+            + "after the separately masked acquisition copy.");
+    semanticFunction(0xC1CFEL, "f33_snapshot_control_foreground_feedback", v)
+        .setComment("CopyB354/B3A0/B3A6/B430/B436, ACxx controller fields andED00..ED12 outputs into AFFC..B062 foreground "
+            + "view under58B1A FF80, before monitor/health/service snapshot window.");
+    semanticFunction(0x58074L, "f33_publish_foreground_ecu_outputs", v)
+        .setComment("Publish current ECU state into F000/F1xx/F2xx shared outputs, including7F68\u2192F000 and6954\u2192F204. Called "
+            + "after generated ECU initialization and by foreground transition/steady workers; publication does not make "
+            + "all inputs temporally coherent.");
+    semanticFunction(0xBCD62L, "f33_refresh_foreground_control_projection", v)
+        .setComment("Prepare ACxx/ADxx control projection from foreground sampled inputs and current software state. "
+            + "NormalizeF000 as0\u21920,2\u21922,3\u21924,other\u21921. ACC0 holds outside live0400 with groupedstatus16!=5A; inside that "
+            + "gate it becomes(F09B==0 && F000==0). Integer scale conversions do not establish physical units. Called "
+            + "only for captured modes0300..0522.");
+    semanticFunction(0xBF3AAL, "f33_publish_foreground_control_outputs", v)
+        .setComment("Publish control/health/current-limit state intoE800+ and copy immutable calibration bounds. Includes "
+            + "liveB11A\u2192E8CC after the mode arbiter. Central transition/steady workers call this last even for mode0; "
+            + "common initializationBF97A does not.");
+    semanticFunction(0xB1C54L, "f33_start_mode100_after_foreground_restart", v)
+        .setComment("After common warm reinitialization and all task input snapshots, transition live mode to0100 through real "
+            + "entry/exit hooks. Not directE8CC publication; subsequent foreground dispatch owns the published "
+            + "generation.");
+    semanticFunction(0xC214CL, "f33_dispatch_control_foreground_transition", v,
+        new ParameterImpl("cadence_mask", u32, currentProgram),
+        new ParameterImpl("captured_mode", u32, currentProgram),
+        new ParameterImpl("previous_mode", u32, currentProgram))
+        .setComment("Use low16 new/old captured mode to run crossing-only initializers plus admitted steady components, with "
+            + "cadence bits1/4 controlling slower work. Health is active above0100; current limit producers above01FF; "
+            + "projectionBCD62 only0300..0522. Reconcile/advance live mode after producers, then publishBF3AA; later "
+            + "workers still use captured arguments.");
+    semanticFunction(0xC26A4L, "f33_dispatch_control_foreground_steady", v,
+        new ParameterImpl("cadence_mask", u32, currentProgram),
+        new ParameterImpl("captured_mode", u32, currentProgram))
+        .setComment("Run components admitted by low16 captured mode and cadence bits, without crossing initializers. Health "
+            + "above0100 precedes nonthermal/thermal limit producers above01FF; projection only0300..0522. "
+            + "Reconcile/advance live mode, then publishBF3AA even when capturedmode0. No atomic change of other task "
+            + "generations.");
+  }
+  private void annotateNonthermalCurrentLimits() throws Exception {
+    semanticFunction(0xBA962L, "f33_reset_owner5_release_state", VoidDataType.dataType)
+        .setComment("Clear owner5 request/accumulator/release state to0; BCAB=5A. Restrictive entry state, not nominal.");
+    semanticFunction(0xBA97EL, "f33_decay_owner5_limit_request", UnsignedIntegerDataType.dataType)
+        .setComment("Seed on first use from BCCC; retain k950 and unsigned16.16 decay toward0; snap<=128. Return full unsigned "
+            + "R10.");
+    semanticFunction(0xBAA18L, "f33_release_owner5_limit_request", UnsignedIntegerDataType.dataType,
+        new ParameterImpl("target", UnsignedIntegerDataType.dataType, currentProgram))
+        .setComment("Use low16 target; conditional hold or fast/ordinary quadratic release, mode-change rebase. Reset "
+            + "decay-init and reseed decayaccumulator from returned request.");
+    semanticFunction(0xBAAD8L, "f33_publish_owner5_limit_request", VoidDataType.dataType)
+        .setComment("Publish owner5 from active decay, conditional release or retained hold. Family0500 with alreadyzero skips "
+            + "decay; BCAA active and BCAB report markers remain distinct.");
+    semanticFunction(0xBAB58L, "f33_reset_owner4_release_state", VoidDataType.dataType)
+        .setComment("Set owner4 previous/base22170 and accumulator22170<<16; clear release mode, control mode and count.");
+    semanticFunction(0xBAB72L, "f33_release_owner4_limit_request", UnsignedIntegerDataType.dataType)
+        .setComment("Release owner4 toward22170 with conditional hold, k115828/4666 and mode-change quadratic rebase; clear its "
+            + "decay accumulator.");
+    semanticFunction(0xBAC2CL, "f33_force_owner4_nominal_request", UnsignedIntegerDataType.dataType)
+        .setComment("Clear release mode and accumulator, return full22170; accumulator is0, not nominal<<16.");
+    semanticFunction(0xBAC3AL, "f33_decay_owner4_limit_request", UnsignedIntegerDataType.dataType,
+        new ParameterImpl("coefficient", UnsignedIntegerDataType.dataType, currentProgram))
+        .setComment("Use low16 coefficient*50; mismatched previous/high16 accumulator reseeds from common BCCC, filter toward0 "
+            + "and snap<=128.");
+    semanticFunction(0xBAC9CL, "f33_force_owner4_zero_request", UnsignedIntegerDataType.dataType)
+        .setComment("Clear release mode and decayaccumulator and return0.");
+    semanticFunction(0xBACA8L, "f33_publish_owner4_limit_request", VoidDataType.dataType)
+        .setComment("BCBD1 nominal,2 k250 decay,3 k6550 decay,4 zero,others conditional quadratic release; publish owner4 and "
+            + "BCC2.");
+    semanticFunction(0xBACF8L, "f33_set_owner4_limit_mode", VoidDataType.dataType,
+        new ParameterImpl("mode", UnsignedIntegerDataType.dataType, currentProgram))
+        .setComment("Store low8 mode toBCBD. Direct reference only from thunkFDFC6; no normal caller inferred.");
+    semanticFunction(0xBAD02L, "f33_stage_absolute_limit_seeds", VoidDataType.dataType)
+        .setComment("BCC8=symmetric sat_abs(AFE2), BCCA=sat_abs(AFE0), BCCC=min those two. Distinct owner8 seed versus common "
+            + "owner4/5 seed.");
+    semanticFunction(0xBAD46L, "f33_reset_owner8_release_state", VoidDataType.dataType)
+        .setComment("Set owner8 request/base22170, accumulatornominal, mode/count0. Does not initialize active delayBCD8.");
+    semanticFunction(0xBAD5EL, "f33_follow_owner8_qualification_floor", UnsignedIntegerDataType.dataType,
+        new ParameterImpl("coefficient", UnsignedIntegerDataType.dataType, currentProgram))
+        .setComment("After calibrated unsigned delay, filter toward B08A; coherency mismatch seeds BCC8; snap when filtered "
+            + "output<target+128. Exact coefficient/delay0 produces B08A immediately.");
+    semanticFunction(0xBADE2L, "f33_release_owner8_limit_request", UnsignedIntegerDataType.dataType)
+        .setComment("When channelsclear, conditionally hold or quadraticrelease toward22170 using k117028/4663; clear "
+            + "decayaccumulator anddelay.");
+    semanticFunction(0xBAE9EL, "f33_publish_owner8_limit_request", VoidDataType.dataType)
+        .setComment("B082&3 chooses qualification-floor path; otherwise retained quadraticrelease. Publish owner8 andBCD6.");
+    semanticFunction(0xBAEE6L, "f33_reset_owner1_qualification_state", VoidDataType.dataType)
+        .setComment("Clear qualification/counters/baseline; target22170, persisted-derived admission default5A, initmarker0. "
+            + "BCF0 request reset is separateBB16C.");
+    semanticFunction(0xBAF06L, "f33_initialize_owner1_persisted_admission", VoidDataType.dataType)
+        .setComment("Only F027=5A admits persisted-derived decision; set BCE2=5A iff F1E0==0 and signedF182<0, else0; "
+            + "publishBCE3=5A.");
+    semanticFunction(0xBAF3EL, "f33_qualify_owner1_limit_state", VoidDataType.dataType)
+        .setComment("Retained states0/11/22/33 qualify signed snapshot relationships, enter/release counters and reversal; "
+            + "state22 maps F174 with AF06C and BEE2 gainAF084 into targetBCE8. Units unassigned.");
+    semanticFunction(0xBB16CL, "f33_reset_owner1_limit_request", VoidDataType.dataType)
+        .setComment("Initialize retained requestBCF0 to22170 only.");
+    semanticFunction(0xBB176L, "f33_publish_owner1_limit_request", VoidDataType.dataType)
+        .setComment("Use retained qualificationstate:0 +28 release,11 -28 decay,22 tiered13/10/4 decay or+28 recovery toward "
+            + "target,33 nominal. Narrow arithmetic before final signed clamp[0,22170], publish owner1.");
+    semanticFunction(0xBB2F6L, "f33_reset_owner6_calibration_envelope", VoidDataType.dataType)
+        .setComment("Seed signed AFDC and unsignedB084 retained filters; nominal request/cap/candidates; clear markers, "
+            + "transition/family state.");
+    semanticFunction(0xBB33CL, "f33_select_owner6_calibration_family", VoidDataType.dataType)
+        .setComment("Accept B30C55AAAA55 orAA5555AA; otherwise use exactfallbackAF1B8=AA5555AA.");
+    semanticFunction(0xBB362L, "f33_update_owner6_gate_and_axis_filter", VoidDataType.dataType)
+        .setComment("Opposite-sign AFDC/AFE0 dwell selects bypass marker; gated BEE2 hysteresis retains bank latch. Signed AFDC "
+            + "filter k30573 uses signedDIVQ65536.");
+    semanticFunction(0xBB43AL, "f33_update_owner6_source_transition", VoidDataType.dataType)
+        .setComment("Clamp unsignedB084[2304,4096]; B1A9 override2816/cap22170; override-mode transition filterk6547 "
+            + "untilresidual<26. Preserve retained mode/hysteresis.");
+    semanticFunction(0xBB544L, "f33_publish_owner6_calibration_envelope", VoidDataType.dataType)
+        .setComment("Select real family/bank map pair and extrapolation, recordrawcandidate; signed cap/floor gives "
+            + "exactdesired22170. AF1760 immediate output with inclusive3 snap. Publish owner6.");
+    semanticFunction(0xBB71CL, "f33_update_owner6_calibration_envelope", VoidDataType.dataType)
+        .setComment("Compose real familyselection,gate/axisfilter,sourcetransition andscalarpublication in order.");
+    semanticFunction(0xBBFBCL, "f33_reset_owner3_shutdown_request", VoidDataType.dataType)
+        .setComment("Nominal22170 request/accumulator; active and cutoff latch0,cachedcoefficient0. Qualification reset "
+            + "isBC0F8.");
+    semanticFunction(0xBBFD4L, "f33_publish_owner3_shutdown_request", VoidDataType.dataType)
+        .setComment("Active qualificationlow input decayswithk1300, reportsA1failure andactions; inclusive128 cutoff latch "
+            + "publishesmask70017001. Holdbandkeepsoutput; inactivepassreleasesnominal andclearsacc/latch.");
+    semanticFunction(0xBC0F8L, "f33_reset_owner3_signal_qualification", VoidDataType.dataType)
+        .setComment("Clear BDA8/BDA9 and seed entrycount4/releasecount1.");
+    semanticFunction(0xBC114L, "f33_qualify_owner3_shutdown_signal", VoidDataType.dataType)
+        .setComment("AdmitB1A7=5A,B20E0/33,B1BC0. Strict low<2125 withentryinhibit andcount4; release onlystrict>2176 "
+            + "withcount1. Equality/holdbehaviorretained.");
+    semanticFunction(0xBC196L, "f33_set_owner3_entry_inhibit", VoidDataType.dataType,
+        new ParameterImpl("inhibit", UnsignedIntegerDataType.dataType, currentProgram))
+        .setComment("Store low8 entryinhibitBDAA; does not itself clearactivequalification.");
+    semanticFunction(0xBC19EL, "f33_reset_owner2_deficit_request", VoidDataType.dataType)
+        .setComment("Reset feedbackerrorstates/accumulators,nominalbase/request/minimum,entry2/release200/recovery2 "
+            + "andactioncount520. ExternalBDB2 unchanged.");
+    semanticFunction(0xBC1E4L, "f33_publish_owner2_deficit_limit_request", VoidDataType.dataType)
+        .setComment("B1A7 andowner5activegate; delayed2304/3072 qualification ofEE20; "
+            + "retainedfast/slow/highpasssignedfilters,base/minimum feedbackandsteppedrelease. Publishowner2 "
+            + "andaction9/class3 countdown.");
+    semanticFunction(0xBC5F4L, "f33_set_owner2_entry_inhibit", VoidDataType.dataType,
+        new ParameterImpl("inhibit", UnsignedIntegerDataType.dataType, currentProgram))
+        .setComment("Store low8 entryinhibitBDB2; no implicitreset ofqualificationorrequest.");
+    semanticFunction(0x35CECL, "f33_update_limit_budget_branch0", VoidDataType.dataType)
+        .setComment("71ECbit0 disables branch; otherwise selectedconstant minus62BC*62D4,dividebyabs62D6 "
+            + "orboundonzero,clamp\u00b126604 into6AFC. No physicalunitsassigned.");
+    semanticFunction(0x35D58L, "f33_update_limit_budget_branch1", VoidDataType.dataType)
+        .setComment("Companionbranch using71ECbit1,62C0*62D8 andabs62DA,clamp\u00b126604 "
+            + "into6B08;otherchannelbitselectsalternateconstant.");
+    semanticFunction(0x35DC2L, "f33_reset_owner9_budget_limit_state", VoidDataType.dataType)
+        .setComment("Seedfilteredbudget,maprequest/finalrequest26604, bothaccumulators26604<<16; "
+            + "clearnegativequalificationandreleasemarkers/counts.");
+    semanticFunction(0x35DE6L, "f33_map_owner9_budget_limit", UnsignedIntegerDataType.dataType,
+        new ParameterImpl("budget", UnsignedIntegerDataType.dataType, currentProgram))
+        .setComment("Zeroextend low16budget; map38678 withsigned6422 selector, signedcap22170 andzeroextendresult.");
+    semanticFunction(0x35E06L, "f33_follow_owner9_limit_request", UnsignedIntegerDataType.dataType,
+        new ParameterImpl("target", UnsignedIntegerDataType.dataType, currentProgram))
+        .setComment("Enabledmode33 withcalibratedrisegain0 holdsincreasesandpassesdecreases, thenclamp[0,22170]. "
+            + "Othermode11lowpass/mode22stepremainnotselectedbythisimage.");
+    semanticFunction(0x35EE0L, "f33_publish_owner9_budget_limit", VoidDataType.dataType)
+        .setComment("Clampbranchsum[0,26604],filterunsignedbudget,mapandretainrequest. Sustainednegative62DCmarkerA5 "
+            + "or7827/7937nonzero bypassesrequesttonominal22170. RealFDFD4callerpublishesowner9.");
+    semanticFunction(0x38678L, "f33_lookup_signed_five_map_signal", IntegerDataType.dataType,
+        new ParameterImpl("value", IntegerDataType.dataType, currentProgram),
+        new ParameterImpl("selector", ShortDataType.dataType, currentProgram))
+        .setComment("Symmetricabs signedinput bounded65535, interpolate128-grid unsignedordinates from5 realmapsselected "
+            + "bysignedselector andQ10crossmapweight,restoreinputsign. No physicalaxisunitsclaimed.");
+    semanticFunction(0xD12D2L, "f33_filter_unsigned_sample_accumulator", VoidDataType.dataType,
+        new ParameterImpl("sample", new PointerDataType(UnsignedShortDataType.dataType, 4), currentProgram),
+        new ParameterImpl("coefficient", UnsignedIntegerDataType.dataType, currentProgram),
+        new ParameterImpl("output", new PointerDataType(UnsignedShortDataType.dataType, 4), currentProgram),
+        new ParameterImpl("accumulator", new PointerDataType(UnsignedIntegerDataType.dataType, 4), currentProgram))
+        .setComment("8-bytesample prevU16,targetU16,accU32. Coefficientoutside1..65535 becomes65536. Low32 unsigned "
+            + "recurrence,logicalhigh16output andwordaccumulatorthroughr8/r9. Reusehelper,nonewphysicalmodel.");
+    semanticFunction(0xD1D0AL, "f33_store_signed_halfword_max", VoidDataType.dataType,
+        new ParameterImpl("value", ShortDataType.dataType, currentProgram),
+        new ParameterImpl("bound", ShortDataType.dataType, currentProgram),
+        new ParameterImpl("output", new PointerDataType(ShortDataType.dataType, 4), currentProgram))
+        .setComment("Sign-extend low16 inputs and store their signed maximum throughR8. R10 is not a defined return; the only "
+            + "live caller is owner1 BB176. Explicit output pointer prevents a lost retained-request update in "
+            + "decompilation.");
+    semanticFunction(0xD1D3CL, "f33_store_signed_halfword_min", VoidDataType.dataType,
+        new ParameterImpl("value", ShortDataType.dataType, currentProgram),
+        new ParameterImpl("bound", ShortDataType.dataType, currentProgram),
+        new ParameterImpl("output", new PointerDataType(ShortDataType.dataType, 4), currentProgram))
+        .setComment("Sign-extend low16 inputs and store their signed minimum throughR8. R10 is not a defined return; the only "
+            + "live caller is owner1 BB176. Explicit output pointer prevents a lost retained-request update in "
+            + "decompilation.");
+    semanticData(0xAF034L, UnsignedIntegerDataType.dataType, "f33_owner5_fast_release_coefficient",
+        "Raw32 quadraticrelease scalar115828; not pointer/address. MULU square/coefficient dataflow in corresponding release helper.");
+    semanticData(0xAF038L, UnsignedIntegerDataType.dataType, "f33_owner5_normal_release_coefficient",
+        "Raw32 quadraticrelease scalar4666; not pointer/address. MULU square/coefficient dataflow in corresponding release helper.");
+    semanticData(0xAF048L, UnsignedIntegerDataType.dataType, "f33_owner4_fast_release_coefficient",
+        "Raw32 quadraticrelease scalar115828; not pointer/address. MULU square/coefficient dataflow in corresponding release helper.");
+    semanticData(0xAF04CL, UnsignedIntegerDataType.dataType, "f33_owner4_normal_release_coefficient",
+        "Raw32 quadraticrelease scalar4666; not pointer/address. MULU square/coefficient dataflow in corresponding release helper.");
+    semanticData(0xAEFA0L, UnsignedIntegerDataType.dataType, "f33_owner8_fast_release_coefficient",
+        "Raw32 quadraticrelease scalar117028; not pointer/address. MULU square/coefficient dataflow in corresponding release helper.");
+    semanticData(0xAEFA4L, UnsignedIntegerDataType.dataType, "f33_owner8_normal_release_coefficient",
+        "Raw32 quadraticrelease scalar4663; not pointer/address. MULU square/coefficient dataflow in corresponding release helper.");
+  }
+
+  private void annotateHealthCoherencePolicy() throws Exception {
+    semanticFunction(0xB3CC8L, "f33_initialize_source_coherence_history", VoidDataType.dataType)
+        .setComment("Initialize only redundant B18E to0; preserve receive-generation B195/B196 and counters. Not a cold "
+            + "application reset.");
+    semanticFunction(0xB3CE2L, "f33_reset_current_source_coherence_observations", VoidDataType.dataType)
+        .setComment("Clear B198/B19A/B19C,B190/B191 and redundant summary; preserveB195/B196 and separateB193/B194/B19E/B1A0.");
+    semanticFunction(0xB3D08L, "f33_qualify_packed_channel_zero_status", UnsignedIntegerDataType.dataType,
+        new ParameterImpl("count", new PointerDataType(UnsignedShortDataType.dataType, 4), currentProgram),
+        new ParameterImpl("packed_status_qualifier_limit", UnsignedIntegerDataType.dataType, currentProgram),
+        new ParameterImpl("current_tag", UnsignedIntegerDataType.dataType, currentProgram),
+        new ParameterImpl("expected_tag", UnsignedIntegerDataType.dataType, currentProgram),
+        new ParameterImpl("generation_armed", UnsignedCharDataType.dataType, currentProgram))
+        .setComment("R6 counter; R7 packed byte status,byte qualifier,uint16 threshold; R8 current tag; R9 expected; fifth "
+            + "argument low byte at incomingSP. Armed!=5A preserves count and returns0. Otherwise "
+            + "exactA5/status0/B084>=2304/tag match or33333333/FFFFFFFF; strict uint16 count>limit. FullR10=0/1.");
+    semanticFunction(0xB3D7CL, "f33_qualify_secondary_received_status_delay", UnsignedIntegerDataType.dataType)
+        .setComment("BEDD5A,BEDE>=512,B084>=2304; strictB19C>200, otherwise reset0. Independent ofB196.");
+    semanticFunction(0xB3DC0L, "f33_refresh_gated_source_coherence_indicator", VoidDataType.dataType,
+        new ParameterImpl("source_history", UnsignedIntegerDataType.dataType, currentProgram))
+        .setComment("Only called byB3F44 under entryB1D1==5A; recomputeB192. Unlike summarybit3, standalonebit1 is not direct "
+            + "trigger; selected-problem branch acceptsbit1 orF093bit1.");
+    semanticFunction(0xB3E50L, "f33_update_latched_secondary_channel_qualification", VoidDataType.dataType)
+        .setComment("IndependentB19E/B1A0 pair, shared generation gateB196; stickyB194bit0 thenB1935A; called under "
+            + "entryB1D6==5A.");
+    semanticFunction(0xB3F2AL, "f33_is_health_or_command_completion_observed", UnsignedIntegerDataType.dataType)
+        .setComment("FullR10=1 onlyB20E==11 orB190==5A; numeric state22 alone does not assert this predicate.");
+    semanticFunction(0xB3F44L, "f33_update_source_coherence_history", VoidDataType.dataType)
+        .setComment("Vote/republish stickyB18E; detect admitted receive-generation edge; currentchannel delays andB191 lowbits; "
+            + "conditionalB192 and separate sticky qualifier; OR aggregatebit3 and prior qualified/commandcompletionbit4. "
+            + "Always saveBE7E->B195.");
+    semanticFunction(0xB4158L, "f33_clear_source_coherence_reentry_history", VoidDataType.dataType)
+        .setComment("ClearB198/B19A/B19C andB192; publishB18E&F4 clearingbits0/1/3 only. PreserveB191,B195/B196 and separate "
+            + "sticky pair.");
+    semanticFunction(0xB4180L, "f33_close_health_receive_generation_qualification", VoidDataType.dataType)
+        .setComment("Clear onlyB196. Invoked by qualifiedB20E11->22; does not rewriteB195.");
+    semanticFunction(0xB4186L, "f33_reset_secondary_channel_qualification_history", VoidDataType.dataType)
+        .setComment("ClearB19E/B1A0,B193 andonlybit0ofB194.");
+    semanticFunction(0xB419AL, "f33_latch_health_command_completion", VoidDataType.dataType)
+        .setComment("SetB190=5A; laterB3F2A OR-latches sourcehistorybit4; no mode request here.");
+    semanticFunction(0xB41AEL, "f33_initialize_health_record_lifecycle", VoidDataType.dataType)
+        .setComment("Only redundantB1A4=0; preserve neighboring one-shot and stage-entry history.");
+    semanticFunction(0xB41C8L, "f33_reset_health_record_lifecycle_entry", VoidDataType.dataType)
+        .setComment("ClearB1A5/B1A7 and redundantB1A4; distinct fromB41AE initializer.");
+    semanticFunction(0xB41E8L, "f33_publish_health_lifecycle_mode_indicator", VoidDataType.dataType)
+        .setComment("B1A6 zero for family<=0300 or0400withB1BD5A, otherwise5A.");
+    semanticFunction(0xB4214L, "f33_advance_health_record_lifecycle", VoidDataType.dataType)
+        .setComment("VoteB1A4 fallback11. Sticky sourcehistorybit3 enters family-specific record "
+            + "invalidation/request23/lifecycle11; old11+completionbit4 enters22. State0->11 cannot also complete same "
+            + "call. Republish lifecycle triplet.");
+    semanticFunction(0xB49E4L, "f33_qualify_health_source_recovery", VoidDataType.dataType)
+        .setComment("Qualify strictB0802125..4096 orF0FD1/F0FE0; on recovery event8Dpass/cache flags/sourcehistory "
+            + "reentry-clear; B1C8bit4->bit2. ConditionalB192 feedback clearsB1D1.");
+    semanticFunction(0xB4AB6L, "f33_latch_health_source_unavailability", VoidDataType.dataType)
+        .setComment("Gated call fromB4EF4: latchB1CE andB1C8bit4 while clearingbit2; reportevent8D failure independently of "
+            + "health publication.");
+    semanticFunction(0xB4C4CL, "f33_update_health_secondary_qualification_handshake", VoidDataType.dataType)
+        .setComment("StageB1D5/B1D6 from paired receivedstatuses andB193. Later exact0/0 reset branch wins, callsB4186 and "
+            + "returnsstageA5; no invented permission.");
+    semanticFunction(0xB4D26L, "f33_latch_qualified_health_entry_conditions", VoidDataType.dataType)
+        .setComment("Existing staged-source eligibility plus conditionedmulti-input/count paths OR-latchB1C8bit3/B1CD. Preserve "
+            + "numeric software policy; physical meanings unknown.");
+    semanticFunction(0xB4E4EL, "f33_latch_qualified_health_completion_conditions", VoidDataType.dataType)
+        .setComment("UnderB1CD5A, strict2125<B080<4096: after40 counts ORbit0; family0800 ORbit1 immediately. Outside resets "
+            + "counter not latchedbits.");
+    semanticFunction(0xB4EF4L, "f33_update_qualified_health_source_policy", VoidDataType.dataType)
+        .setComment("Advance received/conditioned recovery policy, gated unavailability/fade, secondary handshake, "
+            + "entry/completion latches; called afterB3F44/B4214 beforeB4FFC.");
+    semanticFunction(0xB4F52L, "f33_initialize_qualified_health_state", VoidDataType.dataType)
+        .setComment("Initialize redundantB20E0 only; not stickyB20F or source-generation reset.");
+    semanticFunction(0xB4F6CL, "f33_reset_qualified_health_state_entry", VoidDataType.dataType)
+        .setComment("Initialize redundantB20E0 andclearB20F; doesnotclearB195/B196.");
+    semanticFunction(0xBE65CL, "f33_refresh_first_health_source_cache", VoidDataType.dataType)
+        .setComment("Existing source arithmetic plusF0FB1/0/other->BE79A5/5A/FF; no physicalchannel identity assigned.");
+    semanticFunction(0xBE6E0L, "f33_refresh_second_health_source_cache", VoidDataType.dataType)
+        .setComment("F0521/0/other->BE7AA5/5A/FF; BE7B usesoverrideB18F whennot1; saveF052inBE78.");
+    semanticFunction(0xBE712L, "f33_refresh_health_channel_classifications", VoidDataType.dataType)
+        .setComment("PublishBE7C/BE7D0/11/22 from exactpaired statusbytes andlow receivedbits; not persistedselection tags.");
+    semanticFunction(0xBE778L, "f33_refresh_health_received_source_generation", VoidDataType.dataType)
+        .setComment("Refresh first/second source andclassification caches thenF13F->BE7E. Scheduler optionally admits this "
+            + "generationbeforeunconditionalhealthtierstep.");
+    semanticFunction(0xD1306L, "f33_reset_application_latched_monitor", VoidDataType.dataType,
+        new ParameterImpl("state", new PointerDataType(currentProgram.getDataTypeManager().getDataType("/CamryF33/F33LatchedMonitorState"), 4), currentProgram))
+        .setComment("Application copy of ten-byte latched-monitor reset: clear+0word,+4/+6/+8halfwords; preserve "
+            + "allocationtail.");
+    semanticFunction(0xD1386L, "f33_step_application_latched_monitor", UnsignedIntegerDataType.dataType,
+        new ParameterImpl("state", new PointerDataType(currentProgram.getDataTypeManager().getDataType("/CamryF33/F33LatchedMonitorState"), 4), currentProgram),
+        new ParameterImpl("limits", new PointerDataType(currentProgram.getDataTypeManager().getDataType("/CamryF33/F33MonitorLimits"), 4), currentProgram),
+        new ParameterImpl("callbacks", new PointerDataType(currentProgram.getDataTypeManager().getDataType("/CamryF33/F33TwoSidedMonitorCallbacks"), 4), currentProgram))
+        .setComment("Application-region equivalent of6AE7C. Existing ten-byte state and13callbacks; strictcounters, "
+            + "terminalfailure22, fullR10=11. Reuseexistingtypes, not a secondmonitorconvention.");
+    semanticFunction(0xBB248L, "f33_initialize_lifecycle_difference_monitor", VoidDataType.dataType)
+        .setComment("D1306resetofBCF4ten-bytestate.");
+    semanticFunction(0xBB258L, "f33_reset_lifecycle_difference_monitor_entry", VoidDataType.dataType)
+        .setComment("SameD1306resetofBCF4; separateentryowner.");
+    semanticFunction(0xBB268L, "f33_step_lifecycle_difference_monitor", VoidDataType.dataType)
+        .setComment("D1386(BCF4,AF050,AECA0),limits0/6; scheduledbyexistingmaskbit4.");
+    semanticFunction(0xBB284L, "f33_classify_lifecycle_conditioned_sample_difference", UnsignedIntegerDataType.dataType)
+        .setComment("B1A4!=11->44. Else signedconvertedB02CminusB00C>=1920,BEDE>1280,BEF0==11->22; otherwise11. No physicalunit "
+            + "or OEMmeaning inferred.");
+    semanticFunction(0xBB2DCL, "f33_confirm_lifecycle_difference_diagnostic", VoidDataType.dataType)
+        .setComment("Latchdiagnosticstatusslot10through545DE, thenconditionallysubmitrecord8/capture800through51CF6. No "
+            + "directmoderequest.");
+    semanticFunction(0xB451AL, "f33_update_health_status_delay_summaries", VoidDataType.dataType)
+        .setComment("B4346 classification0/1/3 is retainedinR10 acrossB4370(noR10write), thenpassedtoB4430; "
+            + "B4370maydestructivelyshiftR6. BothfeedB44E0current/heldsummaries. Do notinventsecondpermissionreturn.");
+    semanticFunction(0xB4346L, "f33_classify_received_status_delay", UnsignedIntegerDataType.dataType)
+        .setComment("F058 bit0 clear resetsB1B4 and returns0; otherwise return1 until strict count>268, then3. "
+            + "Confirmed count holds. R10 is reused across the following first-window helper.");
+    semanticFunction(0xB4370L, "f33_update_first_health_status_window", VoidDataType.dataType,
+        new ParameterImpl("classification", UnsignedIntegerDataType.dataType, currentProgram))
+        .setComment("UnderBE9C5A, received-status windows use1200/2000 counters and current B191/classification inhibition. "
+            + "Inactive hold release uses200; publishB1AA/B1AB. Exact192-byte leaf preservesR10 while shiftingR6. "
+            + "Inline real p-code so B451A forwards its original classifier to the second window.");
+    getFunctionAt(toAddr(0xB4370L)).setInline(true);
+    semanticFunction(0xB4430L, "f33_update_second_health_status_window", VoidDataType.dataType,
+        new ParameterImpl("classification", UnsignedIntegerDataType.dataType, currentProgram))
+        .setComment("CompanionB1AC/B1AD window. Initial F04E1 branch uses B191/classification inhibition; alternate "
+            + "F04C!=0/B1BD5A branch does not. Distinct1200/2000 active counters and200-observation held release.");
+    semanticFunction(0xB44E0L, "f33_publish_current_and_held_health_windows", VoidDataType.dataType)
+        .setComment("Rebuild B1A8 from currentB1AA/B1AC, B1A9 from heldB1AB/B1AD. Current inhibits owner1 "
+            + "qualification; held selects owner6 source override. No meaningful scalar return contract.");
+    semanticFunction(0xB4FFCL, "f33_advance_qualified_health_state", VoidDataType.dataType)
+        .setComment("VoteB20E/B20C/B20D with fallback0 only on uncorrectable disagreement. States0/33 take11 first onB1C8 "
+            + "bit3/5; otherwise0\u219233 onbit4 and33\u21920 onbit2.11\u219222 onbit0/1 latchesB20F and clearsB196. Route new state "
+            + "before publishing;22 does not self-clear. Numeric software phases, not OEM failure labels.");
+    semanticFunction(0xB4F8AL, "f33_route_qualified_health_mode_requests", VoidDataType.dataType,
+        new ParameterImpl("qualified_state", UnsignedCharDataType.dataType, currentProgram))
+        .setComment("State11 requests1, with BCB0==0 in0400/0500;22 requests1 only in0400/0500 and2 in0700/0800. Exact0522 also "
+            + "requiresAFCE!=11 andBCB0==0. Never cancels request1. Routing consumes the new qualified state before "
+            + "redundant publication.");
+    semanticData(0xFEBEB18CL, UnsignedCharDataType.dataType, "f33_source_coherence_summary_xor55",
+        "Encoded peer of stickyB18E, XOR55; next byte XORAA.");
+    semanticData(0xFEBEB18EL, UnsignedCharDataType.dataType, "f33_source_coherence_history",
+        "Sticky OR bits0 channel qualification,1 secondary qualification,3 aggregate trigger,4 qualified-state11 or software completion; D268C publishes redundant peers.");
+    semanticData(0xFEBEB191L, UnsignedCharDataType.dataType, "f33_current_source_coherence_observations",
+        "Low two bits rebuilt per B3F44 invocation; upper bits preserved; not interchangeable with stickyB18E.");
+    semanticData(0xFEBEB195L, UnsignedCharDataType.dataType, "f33_previous_health_receive_generation",
+        "Always updated fromBE7E, even whileF000>=2 blocks edge admission.");
+    semanticData(0xFEBEB196L, UnsignedCharDataType.dataType, "f33_health_receive_generation_armed",
+        "Latch5A on changedBE7E only whenF000<2. Shared current and independent sticky qualifier pairs; B20E11->22 closes it.");
+    semanticData(0xFEBEBCF4L, currentProgram.getDataTypeManager().getDataType("/CamryF33/F33LatchedMonitorState"), "f33_application_lifecycle_difference_monitor_state",
+        "Exact ten-byte state; do not absorb adjacent allocation padding.");
+    semanticData(0xAF050L, currentProgram.getDataTypeManager().getDataType("/CamryF33/F33MonitorLimits"), "f33_application_lifecycle_difference_monitor_limits",
+        "Passing0/failing6; strict counter crossings.");
+    semanticData(0xAECA0L, currentProgram.getDataTypeManager().getDataType("/CamryF33/F33TwoSidedMonitorCallbacks"), "f33_application_lifecycle_difference_monitor_callbacks",
+        "Normal/failing classifierBB284; confirm_failingBB2DC; every other callback null. Existing13-pointer layout.");
+  }
+
+
   @Override public void run() throws Exception {
     String[] args = getScriptArgs();
     if (args.length != 1) throw new IllegalArgumentException("expected function_seeds.csv path");
@@ -6648,6 +7053,9 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateScalarMonitorComposition();
     annotateApplicationModeTransitions();
     annotateResetAndForegroundOwnership();
+    annotateInitializationAndSnapshots();
+    annotateNonthermalCurrentLimits();
+    annotateHealthCoherencePolicy();
     annotateDataFlashReads();
     annotateFaciSubmission();
     annotatePwmCompareStaging();

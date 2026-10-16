@@ -1,0 +1,161 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_application_warm_restart_ownership",
+  "entry": {
+    "role": "Real warm-restart owner5886C executes58814\u219259448 andBF97A and output snapshot5C6D8. It resets generated control/mode/monitor state but does not rerun cold-only acquisition initialization or reset task cadence/retained health cells. No patched callees; no hardware reset or physical reachability claim.",
+    "scope": "resolved-address",
+    "address": "0x5886c"
+  },
+  "max_instructions": 200000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xfe00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe0000",
+      "size": 131072,
+      "fill": 165,
+      "evidence": "Explicit prior application RAM and nested-call stack; not physical reset or a valid operating-state claim."
+    },
+    {
+      "address": "0xfebe822c",
+      "hex": "34127856bc9af0de11223344",
+      "evidence": "Acquired halfwords distinct from cold-init8000 sentinels."
+    },
+    {
+      "address": "0xfebe8c08",
+      "hex": "5aa50ff0",
+      "evidence": "Valid foreground restart request and XOR5555 copy."
+    },
+    {
+      "address": "0xfebe8c14",
+      "hex": "f00f11fe22a7",
+      "evidence": "Restart XORAAAA; retained task counters and cadence mask."
+    },
+    {
+      "address": "0xfebeb195",
+      "hex": "5a5a",
+      "evidence": "Retained cold-owned health/coherence state."
+    },
+    {
+      "address": "0xfebf0690",
+      "hex": "5aa5",
+      "evidence": "Explicit lower NvM busy-state canary; not an emulated transaction."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Complete real nested initialization returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Caller stack restored",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "Priority mask restored",
+      "kind": "register",
+      "register": "PMR",
+      "equals": "0xfe00"
+    },
+    {
+      "name": "Mode-generation caches cleared",
+      "kind": "memory",
+      "address": "0xfebe8c00",
+      "size": 8,
+      "equals_hex": "0000000000000000"
+    },
+    {
+      "name": "Mode-generation inverse copies valid",
+      "kind": "memory",
+      "address": "0xfebe8c0c",
+      "size": 8,
+      "equals_hex": "ffffffffffffffff"
+    },
+    {
+      "name": "Restart request survives until dispatcher consumes it",
+      "kind": "memory",
+      "address": "0xfebe8c08",
+      "size": 4,
+      "equals_hex": "5aa50ff0"
+    },
+    {
+      "name": "Restart inverse and cadence retained",
+      "kind": "memory",
+      "address": "0xfebe8c14",
+      "size": 6,
+      "equals_hex": "f00f11fe22a7"
+    },
+    {
+      "name": "Acquisition remains from prior generation",
+      "kind": "memory",
+      "address": "0xfebe822c",
+      "size": 12,
+      "equals_hex": "34127856bc9af0de11223344"
+    },
+    {
+      "name": "Cold-owned health cells retained",
+      "kind": "memory",
+      "address": "0xfebeb195",
+      "size": 2,
+      "equals_hex": "5a5a"
+    },
+    {
+      "name": "Current mode reinitialized",
+      "kind": "memory",
+      "address": "0xfebeb11a",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "Mode request queue cleared",
+      "kind": "memory",
+      "address": "0xfebeb0a8",
+      "size": 100,
+      "equals_hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "Current fault qualification cleared",
+      "kind": "memory",
+      "address": "0xfebe71ec",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "Fault qualification redundant copies coherent",
+      "kind": "memory",
+      "address": "0xfebe7108",
+      "size": 4,
+      "equals_hex": "5555aaaa"
+    },
+    {
+      "name": "Warm initialization resets the published mode too",
+      "kind": "memory",
+      "address": "0xfebee8cc",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "NvM busy state not a software reset target",
+      "kind": "memory",
+      "address": "0xfebf0690",
+      "size": 2,
+      "equals_hex": "5aa5"
+    }
+  ]
+}

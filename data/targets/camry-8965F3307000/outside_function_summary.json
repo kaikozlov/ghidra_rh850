@@ -4,8 +4,8 @@
   },
   "candidate_class_counts": {
     "ambiguous-data": 5,
-    "orphan-decoded-run": 86,
-    "pointer-referenced-code-run": 408
+    "orphan-decoded-run": 88,
+    "pointer-referenced-code-run": 406
   },
   "candidate_count": 499,
   "csv": "outside_function_candidates.csv",

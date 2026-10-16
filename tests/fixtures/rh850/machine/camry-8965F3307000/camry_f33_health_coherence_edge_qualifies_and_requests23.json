@@ -1,0 +1,41 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_health_coherence_edge_qualifies_and_requests23",
+  "entry": {"role": "real C2424..C242C two-call interval: admitted receive-generation edge arms qualification, selected channel crosses strict10 observation threshold and sticky bit3 queues request23 in family0300; already-set one-shot B1A5 retains prior record invalidation, no hardware or OEM state-name claim", "scope": "resolved-address", "address": "0xc2424"},
+  "max_instructions": 12000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {"sp": "0xfebe2000", "gp": "0xfebeb800", "tp": "0x23dfc", "lp": "0x798", "PSW": "0x20", "FPEC": "0x0", "PMR": "0xfe00"},
+  "stop_addresses": ["0xc242c"],
+  "memory": [
+    {"address": "0xfebe1800", "size": 2048, "fill": 165, "evidence": "isolated initialized real nested-call stack"},
+    {"address": "0xfebeb080", "size": 672, "fill": 0, "evidence": "explicit application counters, request generations, health triplets and source-selection state through B31F"},
+    {"address": "0xfebebe78", "size": 104, "fill": 0, "evidence": "explicit received-status cache through BEDF"},
+    {"address": "0xfebef000", "size": 368, "fill": 0, "evidence": "explicit receive and diagnostic status cache through F16F"},
+    {"address": "0xfebeb084", "hex": "0009", "evidence": "shared conditioned qualifier equals exact AEFA8=2304 admission boundary"},
+    {"address": "0xfebeb094", "hex": "ffffffff", "evidence": "request acknowledgments have distinct set bits before enqueue"},
+    {"address": "0xfebeb0a0", "hex": "5556", "evidence": "family0300 first encoded redundant mode word"},
+    {"address": "0xfebeb0a4", "hex": "aaa9", "evidence": "family0300 second encoded redundant mode word"},
+    {"address": "0xfebeb11a", "hex": "0003", "evidence": "actual current major mode family0300"},
+    {"address": "0xfebeb18c", "hex": "55aa00", "evidence": "coherent initial zero sticky summary"},
+    {"address": "0xfebeb191", "hex": "a0", "evidence": "unowned upper bits must survive transient low-bit rebuild"},
+    {"address": "0xfebeb195", "hex": "0100", "evidence": "previous generation1 and initially disarmed qualification gate"},
+    {"address": "0xfebeb198", "hex": "0a00", "evidence": "selected first channel sits exactly at strict10 confirmation threshold"},
+    {"address": "0xfebeb1a2", "hex": "55aa005a", "evidence": "lifecycle state0 with B1A5=5A: record invalidation already performed, but request23 must still enqueue"},
+    {"address": "0xfebeb314", "hex": "55aaaa55", "evidence": "valid first-channel persisted source tag55AAAA55"},
+    {"address": "0xfebebe79", "hex": "a5", "evidence": "first source qualifier maps received status1 to A5"},
+    {"address": "0xfebebe7e", "hex": "02", "evidence": "new receive-generation value differs while F000<2"}
+  ],
+  "checks": [
+    {"name": "real two-call interval completes", "kind": "register", "register": "PC", "equals": "0xc242c"},
+    {"name": "nested stack restored", "kind": "register", "register": "sp", "equals": "0xfebe2000"},
+    {"name": "priority mask preserved", "kind": "register", "register": "PMR", "equals": "0xfe00"},
+    {"name": "generation edge arms gate and publishes new history byte", "kind": "memory", "address": "0xfebeb195", "size": 2, "equals_hex": "025a"},
+    {"name": "only selected channel crosses strict threshold", "kind": "memory", "address": "0xfebeb198", "size": 6, "equals_hex": "0b0000000000"},
+    {"name": "sticky source and aggregate bits are encoded coherently", "kind": "memory", "address": "0xfebeb18c", "size": 3, "equals_hex": "5ca309"},
+    {"name": "transient source bit preserves upper owner bits", "kind": "memory", "address": "0xfebeb191", "size": 1, "equals_hex": "a1"},
+    {"name": "family0300 keeps lifecycle0 while preserving one-shot and setting entered-history latch", "kind": "memory", "address": "0xfebeb1a2", "size": 6, "equals_hex": "55aa005a005a"},
+    {"name": "actual request23 is pending in second word", "kind": "memory", "address": "0xfebeb09c", "size": 4, "equals_hex": "08000000"},
+    {"name": "request23 clears only its matching acknowledgment", "kind": "memory", "address": "0xfebeb094", "size": 4, "equals_hex": "f7ffffff"}
+  ]
+}

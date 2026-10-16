@@ -220,19 +220,19 @@
     "0x058074": {
       "body_sha256": "0c4d0104e4c90a5679e8a9fc567485460ce8a0710d4cbb61518d5e6498880057",
       "body_size": 1934,
-      "decompiled_c_sha256": "995712c9f2e95b07f5f9a2944cb3e3163685bdc349830beb5db86dc90ec1083a",
+      "decompiled_c_sha256": "90cb28b484fbbf5549ffe48b8d3d69ab27ca13ff368103b5bb50ec04c63acaf1",
       "role": "generated-COM stage copier"
     },
     "0x05899E": {
       "body_sha256": "360298ede4783a29bd5efa86937ccc0199571d3283b2116bd2d2601489c636f4",
       "body_size": 126,
-      "decompiled_c_sha256": "47fd5b4d9018dc19ab4170fc22e345a9f0c590c12a751510711a2b3cd32766d6",
+      "decompiled_c_sha256": "7551f8bc1f27444b8b5b43766ae1a20c3f2841fad4d1f804c792154797f96f8f",
       "role": "shared command task coordinator"
     },
     "0x058B5E": {
       "body_sha256": "0c6eb6b596dfffdc298158d0ae8928ae17ba244ba1716fcd7119b357170351d9",
       "body_size": 294,
-      "decompiled_c_sha256": "f8a1a5837cc3256fae79419b9cc26b4f0963161c14d72cba78b5db7f7fe52e83",
+      "decompiled_c_sha256": "b5979fcdc2fd8ab3c79abc8ce12169d063751ce5ca28a7bc986c0ac1da9b808d",
       "role": "generated-COM/application task coordinator"
     },
     "0x05DF5C": {
@@ -424,13 +424,13 @@
     "0x0B4B6C": {
       "body_sha256": "e6e3002b373546a633c97a259f34b9c7c027926f686ae75507f11b4ab1792419",
       "body_size": 224,
-      "decompiled_c_sha256": "be3197ebd36b68a2ffea422ef84480ee4cbd8b6b4666c49f4695694d3d740a22",
+      "decompiled_c_sha256": "730a31d43ca4029059c4afa4ac1abd60b991addae17a8375f1240cac69fed555",
       "role": "common command output-scale ramp"
     },
     "0x0B4EF4": {
       "body_sha256": "b20256b5c4e34da3169f00396359e8e974760b6411e29781a2860192458dabac",
       "body_size": 94,
-      "decompiled_c_sha256": "0b5896c514fedb4abff5b6f2220be073542513cd79eee59627301331e8bbe0b4",
+      "decompiled_c_sha256": "bc270b7ebef8b70489d4c50865a15062189bb44d6789192cbc29545ea82de32e",
       "role": "common command output-scale coordinator"
     },
     "0x0BCAA6": {
@@ -454,7 +454,7 @@
     "0x0BCD62": {
       "body_sha256": "76d78c2605f902e96eb723f662d9fba543b1d1db85aedf62b9b3894b8c0220aa",
       "body_size": 2748,
-      "decompiled_c_sha256": "c94c163c0248da1e9a42366d4763c591ee4cb08c326c706cdfaccf9316c6b1b3",
+      "decompiled_c_sha256": "b549c19f1af0eaf885bab787e35093f88456364f0691c9c1dfca48b031880c24",
       "role": "application snapshot + cooperative-controller wrapper"
     },
     "0x0BF33E": {

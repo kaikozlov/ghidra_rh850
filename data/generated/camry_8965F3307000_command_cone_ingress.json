@@ -497,6 +497,7 @@
         "0xB3F44",
         "0xB4370",
         "0xB4430",
+        "0xB451A",
         "0xB4546",
         "0xB480C",
         "0xB48DC",
@@ -539,7 +540,7 @@
         "0xBF0EC"
       ],
       "structural_claim": "no function above 0xBF0EC (no C/D-family cluster compute or composition function) reads stage cells directly; the C/D families consume the L4 snapshot bank instead",
-      "total": 51
+      "total": 52
     },
     "L4_snapshot_copiers": {
       "0xBC96A": {

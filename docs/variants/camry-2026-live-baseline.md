@@ -3759,6 +3759,138 @@ heating/cooling dynamics and input-generation alignment are not established
 by this arbitration composition. No physical heating, voltage or timing
 experiment was performed, and no peripheral model was added.
 
+### 34.9 Nonthermal current limits and retained releases
+
+The exact F33 scalar requests form a shared software reduction, not independent
+permissions. `BB736` replaces one of ten halfword slots at `BD34`; it does not
+run the reducer. Normal `BB786` considers owners1..9. Service `BB7C2` excludes
+owners0 and5 but includes the retained thermal owner7. `BB7FA` publishes the
+selected result at `AF40` and, independently, signed `min(owner6,owner9)` at
+`AF42`. An owner0 thermal change therefore reaches the normal route through
+owner7's existing release envelope, not an immediate inclusion of slot0.
+
+| Owner / producer | Retained request domain | Important hold or release boundary |
+|---|---|---|
+| 1 / `BAF3E → BB176` | Qualified mapped target and stepped signed-halfword envelope | Qualification0 releases by28,11 decreases by28,22 follows a tiered target,33 returns nominal22170; narrowing precedes final clamp. |
+| 2 / `BC1E4` | Conditioned-scalar deficit, fast/slow/high-pass error and retained minimum baseline | Owner5 active suppresses this domain; global gate loss immediately restores nominal, while ordinary recovery adds3 only after its countdown. |
+| 3 / `BC114 → BBFD4` | Delayed low-input qualification and cutoff latch | Strict low2125/high2176 hysteresis; the intervening hold band neither filters nor reports pass/failure. Inactive release clears the latch and restores nominal. |
+| 4 / `BACA8` | Externally selected decay, force-zero/nominal, or quadratic release | Modes2/3 decay with distinct coefficients; mode4 forces0; mode1 forces nominal; other modes may hold rather than release. |
+| 5 / `BAAD8` | Qualified-health/lifecycle decay with separate active/report markers | Entry initializes request0. Active0500 with request0 skips decay. Inactive but lifecycle not11 holds the old request; selected service reduction excludes this owner. |
+| 6 / `BB71C` | Real family/bank lookup and source-transition filters | Exact desired-request floor and cap both22170, followed immediately with coefficient0. From initializer-consistent state this image produces no new below-nominal request. |
+| 8 / `BAE9E` | Imported fault-qualification floor followed by retained release | With `B082&3!=0`, exact zero delay/coefficient gives `B08A` immediately; channels clearing selects a separate hold/release envelope. |
+| 9 / `35EE0` | Two signed branch budgets, five-map conversion and retained one-way envelope | Exact enabled mode33 has rise coefficient0: decreases pass, increases hold. Bypass or reinitialization releases the restriction. |
+
+Owner0 and owner7 retain the thermal ownership described above. These structural
+owner IDs are not DTCs, physical sensors or OEM protection names. In particular,
+owner3's `B084` and owner2's direct `EE20` descend from the same staged `7DB2`
+through `57F00/C1DE0`, potentially from different snapshot generations. Owner8's
+`B08A` comes from `EE26`, sourced from the existing `71F2` fault-class amplitude
+limit. Those are software joins, not recovered voltage/current units.
+
+#### Shared arithmetic and distinct release state
+
+`D12D2` consumes an eight-byte sample: unsigned previous/target halfwords and
+a word accumulator. Coefficients outside1..65535 become65536. It computes
+`low32(accumulator - previous*k + target*k)` and takes the **logical** high
+halfword. Owners2/3/6 instead use signed `DIVQ 65536`, truncating toward zero,
+then explicit halfword narrowing. Arithmetic right shift is not interchangeable
+with that division for negative values.
+
+Owners4/5/8 rebase their quadratic release on a mode change: reset unsigned16
+count and save the old request, then increment the count up toFFFF. A nonzero
+high word of `k*count*count` selects the target directly; otherwise the low-word
+term shifted16 is added to the baseline and capped at the target. Their raw32
+calibrations are scalars, not pointers despite earlier `PTR_LAB` rendering.
+
+| Owner | Fast / ordinary quadratic coefficient | Hold threshold at small `abs(B054)` | Decay reseed source |
+|---|---|---|---|
+| 4 | 115828 / 4666 | Request≤11085 with `abs(B054)≤256` | `BCCC=min(sat_abs(AFE2),sat_abs(AFE0))` |
+| 5 | 115828 / 4666 | Same threshold, unless its fast-release predicate wins | Same `BCCC`; first-use coefficient remains950 |
+| 8 | 117028 / 4663 | Request≤16628 with `abs(B054)≤256` | `BCC8=sat_abs(AFE2)`, not the common minimum |
+
+The fast predicates differ: owner5 also admits `B118==5A` and uses `BEDE<512`,
+whereas owners4/8 use `BEE2<512`; the corresponding received qualifier must be11.
+Clearing a decay accumulator is deliberate: the next active call compares its
+high halfword with the previous output and can reseed from the sampled source.
+It must not be silently replaced by a nominal accumulator initialization.
+The externally addressable owner4 selector has no established normal caller
+beyond its thunk; that absence does not prove it cannot be invoked indirectly.
+
+#### Qualification, deficit feedback and consequential actions
+
+Owner1's ordinary qualification requires lifecycle `B1A4==11` and current-window
+summary `B1A8==0`. Its persisted-derived first-admission flag is refreshed only
+when `F027==5A`; absent that validity, the initial flag remains in force.
+Reversal of signed `B054` resets qualification. Entry uses byte count32 and
+`abs(B054)≥1536`; a later signed `AFF4` displacement of at least364 moves11
+into22. The exact zero delta threshold in the earlier admission test must not
+be mistaken for a missing condition: the accompanying `AFDC/AFE0` predicates
+still control whether the count advances. Release requires `abs(B054)<1408`
+for the retained byte-count boundary16; equality does not advance release.
+
+In22, the real `F174` map ranges from7680 to4081; its `BEE2` multiplier map has
+real ordinate1024. The request decreases in tiers13/10/4 with floors14812,
+10755 and the mapped target, or increases by28 toward that target. Every
+add/subtract is narrowed before final signed clamp0..22170. The signed max/min
+helpers take the output pointer inR8; an omitted third argument previously hid
+the retained-output update in `BB176`'s decompilation.
+
+Owner2 admits `B1A7==5A` only while owner5's active marker is not5A. Its direct
+unsigned `EE20` input enters below2304 after countdown2 reaches stored0, and
+releases strictly above3072 after countdown200; equality retains qualification.
+Entry inhibition blocks entry, not necessarily an already active latch.
+The error is symmetrically clamped `2304-EE20`. Fast/slow coefficients are
+2060/12350; the high-pass recurrence also uses12350. The initial base is the
+minimum saturated absolute `AF80/AF82`, following downward toward11085 with
+coefficient3360. The retained minimum can only decrease while active:
+`min(old, max(base - max(fast_error,0)*840/8,0))`.
+The final candidate subtracts proportional error and, for high-pass≥68, a
+separate derivative term. Positive-error gains are60/30 and derivative gains
+120/60 according to `B1D1`; negative-error gain is20. Preserve each signed
+integer division and the symmetric final subtraction before clamp0..22170.
+Unqualified slow recovery adds3 after countdown2, while global gate loss resets
+all error states and releases immediately. A separate deficit≥1920 against
+`sat_abs(AFA4)` counts down520, then notifies action9/class3-duration10; it is
+not the scalar-publication admission gate.
+
+Owner3 requires `B1A7==5A`, qualified health0/33 and `B1BC==0`. Entry below2125
+uses countdown4; release above2176 uses countdown1, each acting on a later call
+with stored0. Active low-input calls report eventA1 failure, decay toward0 with
+coefficient1300, and notify action4/class2-duration50. The first output≤128
+sets the cutoff latch and snaps0. Thereafter latch1 publishes slot3 mask
+`70017001`; it is not an independent every-call forced-zero assignment.
+In the2125..2176 hold band there is no filter step, pass/failure report or
+new action4 notification. Inactive calls report pass and restore nominal.
+These diagnostic/action namespace IDs do not establish an OEM component name.
+
+#### Calibrated nominal path and one-way budget envelope
+
+Owner6 still performs genuine signed-axis lookups, family selection, bank
+hysteresis and source-transition filtering. Valid family tags are `55AAAA55`
+and `AA5555AA`; otherwise it uses the latter fallback. `B1A9==5A` selects the
+held-window override source2816. The final desired request is
+`max(min(raw_candidate,cap),floor)`: both exact cap and floor equal22170.
+This explains the initialized nominal result without deleting the real maps
+or claiming the same result for arbitrary inconsistent/corrupt retained state.
+
+Owner9's branch budgets use signed low32 products and division toward zero;
+a zero divisor uses the positive bound26604. `71EC` bits independently suppress
+branches. The sum is clamped0..26604, then converted through five real maps
+selected by signed `6422`, with Q10 cross-map interpolation and128-wide axis
+segments. No physical power or voltage meaning is assigned to the operands.
+The configured release mode33 has `31940==0`. For a reached request in0..22170,
+increases therefore hold and decreases pass. Sustained negative `62DC` first
+marks5A for15 observations, thenA5; that A5, or nonzero `7827/7937`, bypasses
+the map/follower and releases owner9 to22170. Other owners can still bind.
+
+The native [qualified decrease](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_nonthermal_limit_qualified_decrease.json)
+and [release back to thermal ownership](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_nonthermal_limit_release_hands_back_to_thermal.json)
+execute the real `C209A..C20AF` scheduler interval through owner publication and
+masked reduction. They distinguish retained owner1 from owner7 and the separate
+owner6/9 bound. They do not execute an entire acquisition cycle or every producer
+branch. Other numerical conclusions above are **recovered** from exact
+instructions, dataflow and calibration, not new physical observations.
+
 ## 35. Hidden-ingress false-negative audit: no concrete alternate producer found; residuals closed in §36
 
 This audit was originally launched because zero-B6 factory steering was treated as tension with the firmware model. CORR-135 removes that premise: the exact B6-independent `D0218` path already reaches physical actuation. The audit remains useful as a bounded false-negative census of hidden mutation/ingress mechanisms, but those mechanisms are no longer required to explain the retained LTA/LCA observation.
@@ -10915,6 +11047,55 @@ it is not a getter or a region-bound update. Timer ISRs save their exception,
 GPR and MPAT context on the interrupted stack before switching. The persistent
 stack effects of `65AC0/65B4A` remain assembly contracts, not ordinary C leaves.
 
+#### Cold initialization, software restart and input generations
+
+Cold `58804` runs `58828` and then requests the first foreground generation.
+`58828` clears the restart token/classifier, task counters and cadence mask,
+initializes ECU acquisition/status through `58C9A` and cold control-retained
+cells through `BF91E`, then invokes common `58814`. The common order is ECU
+work-state initialization `59448`, control initialization `BF97A`, then
+`5C6D8` copying initialized control publications into ECU views.
+
+Warm `5886C` instead clears the four task last-mode words and initializes their
+inverse copies, then calls only the common initializer. It skips the cold-only
+acquisition and retained-health owners. It preserves task cadence, acquired
+samples and health receive history `B195/B196`, while resetting request slots,
+live mode, monitor/action state and other generated work state. Importantly,
+`BF97A` **also directly seeds the published output image, including `E8CC=0`**;
+absence of a call to periodic publisher `BF3AA` does not mean that old published
+mode survives. Both cold and warm initialization can overwrite publications.
+This software restart does not rerun the lower hardware/NvM startup `666BC`.
+
+The foreground restart dispatcher subsequently snapshots CH1, CH2 and foreground
+inputs, then calls `B1C54` to transition live mode to0100 through real hooks.
+Normal foreground processing still owns later publication and mode advancement.
+The generated initializers write many work-state defaults directly; nearby
+`JMP LP` hooks are not responsible for those writes. Crossing-only initializers
+in the ordinary dispatchers have different retention scopes from this common
+restart and from cold initialization.
+
+| Input owner | Priority-mask windows, in execution order | Separate generation examples |
+|---|---|---|
+| CH1 `5897A` | `FFC0`: `5C7B6/FDC28`; restore entryPMR | CH1 acquisition/control view |
+| CH2 `58A1C` | `FFC0`: `5CA3A/FDC3C`; `FF80`: `5CF1C/FDC50`; restore | Raw822C/8238→622C/6238; EC00..EC24→AF74..AF98 |
+| Foreground `58B1A` | `FFC0`: `5D12C/FDC64`; `FF80`: `5D5E0/FDC78`; `FF00`: `5D6DC/FDC8C`; restore | Raw822C/8238→6450/645C; EC00..EC24→AFD4..AFF8, then separate feedback and monitor views |
+
+These are ordered priority-masked windows, not one all-task atomic snapshot.
+`BCD62` prepares the foreground control projection only for captured modes
+0300..0522. It normalizes raw `F000` as0→0,2→2,3→4,other→1 and applies existing
+integer scales without establishing physical units. Its `ACC0` field holds
+outside live0400 with grouped-status16!=5A; within that gate it becomes
+`F09B==0 && F000==0`. After control work and mode arbitration, `BF3AA` publishes
+live control state, whereas `58074` publishes ECU outputs in its own phase.
+
+The composed [warm-restart regression](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_application_warm_restart_ownership.json)
+executes both complete common initializers and final snapshot with unmodified
+CodeFlash. It verifies reset state alongside retained input/cadence/health and
+lower NvM busy-state canaries. Separate throwaway native smokes exercised cold
+initialization and both CH2/foreground snapshot wrappers, including preservation
+of the alternate generation and restoration of entryPMR. These do not measure
+interrupt interleavings, fresh sensor acquisition or physical reset retention.
+
 #### Published mode is not live mode or a pending request
 
 Live mode `B11A` has redundant copies `B0A0/B0A4`. `E8CC` is its published
@@ -11029,6 +11210,107 @@ and [0800 pending2 suppressing7 while NvM is busy](../../tests/fixtures/rh850/ma
 They do not establish production reachability of every initialized state or
 execute the terminal hardware-reset sequence.
 
+#### Source coherence, health policy and record lifetimes
+
+The source-coherence chain keeps receive history, current observations, sticky
+summary, record lifecycle and qualified health separate. `BE778` refreshes
+received caches and `F13F→BE7E` only on its admitted cadence bit. Health processing
+can advance while that cache remains unchanged. The threshold scalar `B084`
+is also a staged input, not proof of a newly sampled physical channel.
+
+| State | Owner and lifetime |
+|---|---|
+| `B195/B196` | Prior received generation / armed qualification latch. Only a changed `BE7E` with `F000<2` arms5A; `B195` always advances, even when admission is frozen. An unadmitted edge is consumed, not replayed later. |
+| `B191` low bits | Current invocation's channel and secondary confirmations; upper owner bits preserved. Healthy/unadmitted calls can clear these bits. |
+| Redundant `B18E/B18C/B18D` | Sticky OR history: channel confirmationbit0, delayed secondarybit1, aggregate source/coherencebit3, qualified-state11 or software completionbit4. Normal healthy calls do not clear it. |
+| `B192` | Recomputed only when entry `B1D1==5A`; otherwise retained. Its trigger differs from aggregatebit3, notably for standalone historybit1. |
+| `B193/B194` and counters `B19E/B1A0` | Independent qualification under entry `B1D6==5A`, sharing `B196` but with sticky confirmation rather than current `B191` semantics. |
+| Redundant `B1A4` | Record/lifecycle state0/11/22, with family-specific side effects and old-state transition precedence. |
+| Redundant `B20E` | Qualified numeric health state0/33/11/22, consumed by mode routing before its new redundant value is published. |
+
+`B3D08` has a consequential mixed ABI: R6 is the halfword counter pointer;
+R7 packs status byte, qualifier byte and threshold halfword; R8/R9 carry current
+and expected source tags; the fifth argument's low byte is on the incoming
+stack. It returns a full-register boolean. When that byte is not5A, it returns0
+**without changing the counter**. Otherwise it requires qualifierA5, status0,
+`B084≥2304` and a matching tag or actual sentinel33333333/FFFFFFFF. Confirmation
+is strict `count>10`, with the incremented count tested on the same call.
+The independent `B3D7C` path instead requires `BEDD==5A`, `BEDE≥512` and
+`B084≥2304`, confirming strictly above200 and resetting when predicates fail.
+
+The current source tag `B314` comes from record0102 and has actual sentinel
+handling; it is not interchangeable with separately retained selection `B30C`.
+The sticky aggregatebit3 combines earlier/current source confirmations,
+`B18F`, `F16A&1010`, or classified selection problems with received `F093.bit1`,
+under the scalar threshold. Majority repair retains agreeing history; only
+uncorrectable disagreement falls back to0. Publication rewrites all peers.
+
+`B4214` then consumes the repaired summary and votes lifecycle `B1A4`, using11
+on an uncorrectable vote. From0 with summarybit3, family0500 invalidates learned
+records5/6 and replaces request-channel masks before entering11; family0300
+performs record invalidation once, queues actual request23 on each qualifying
+visit, and remains0. Family0400 enters11 without those record operations.
+From old11, summarybit4 advances to22. A0→11 transition cannot also complete to22
+in the same invocation. Callers do not condition these transitions on acceptance
+of the record setters: asynchronous persistence and final flash completion are
+separate evidence boundaries.
+
+`B4EF4` subsequently runs conditioned-source recovery/unavailability, paired
+received-source handshakes and qualified-state latches. Recovery uses strict
+2125..4096 windows or exact received-status combinations; diagnostic event8D
+reporting is a side effect, not a second authorization gate. In the paired
+handshake, a later exact0/0 reset predicate wins over an earlier qualification
+in the same call. Counter completion can latch `B1C8` bits; leaving the window
+resets the counter, not those accumulated bits. Bit5 is consumed but its source
+remains unassigned by the examined local dynamic producers.
+
+`B4FFC` applies this numeric transition policy after majority voting:
+
+| Old qualified state | Condition, in precedence order | New state / side effect |
+|---|---|---|
+| 0 or33 | `B1C8.bit3` or bit5 | 11 |
+| 0, otherwise | bit4 | 33 |
+| 33, otherwise | bit2 | 0 |
+| 11 | bit0 or bit1 | 22; latch `B20F=5A`, clear generation admission `B196` |
+| 22 or another voted value | No matching transition | Retain |
+
+The existing `B4F8A` router receives that **new** value before publication.
+State11 requests1 with the established zero-output gates;22 requests1 only
+in0400/0500 and requests2 in0700/0800. There is no request1 cancellation here.
+`B3F44/B4214` ran earlier, so a new qualified11 can request a mode change now
+but contributes sticky summarybit4/lifecycle completion on a later pass.
+Do not merge these generations into one immediate shutdown predicate.
+
+Current/held windows also affect real control. `B451A` rebuilds current summary
+`B1A8` and held summary `B1A9` from separate received-status windows. Current
+observations `B191` inhibit particular1200/2000-count windows; inactive inputs
+can retain held indicators through a200-observation release, whereas disabled
+`BE9C` clears both. `B1A8` inhibits owner1 qualification; `B1A9` selects owner6's
+smoothed override source. These are different effects, not duplicate permission
+bits. At the assembly boundary, the classifier result inR10 survives `B4370`
+and feeds `B4430`; the first helper can destructively shiftR6. The target seed
+inlines that exact leaf's p-code, following the existing preserved-register
+convention rather than inventing a second return. The native
+[two-window composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_health_coherence_classifier_survives_window_call.json)
+checks that the original classifier inhibits both real windows and their
+published current/held summaries. No final R10 return is required from the
+outer publisher.
+
+The application difference monitor `BB268 → D1386` reuses the existing ten-byte
+latched state and thirteen-pointer callback layout. Under lifecycle11 its
+classifier requires converted sample difference≥1920, `BEDE>1280` and qualifier11;
+otherwise it reports healthy or bypass44. Strict fail limit6 confirms on the
+seventh observation. Terminal failure bypasses future classifiers until reset;
+its callback latches diagnostic status10 and conditionally queues record8,
+not a direct application mode request.
+
+Native compositions verify [generation-edge qualification and request23](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_health_coherence_edge_qualifies_and_requests23.json),
+[majority repair, frozen-edge consumption and lifecycle precedence](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_health_coherence_repair_sticky_precedes_completion.json),
+and [qualified22 routing request2](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_health_coherence_qualified22_routes_request2.json).
+They use real callers/callees and explicit RAM; other policy branches remain
+static reconstruction. OEM state names, physical source identities, input age
+and completed DataFlash programming are not established by these scenarios.
+
 #### Fault, health, service and programming requests differ
 
 | Request | Provenance and qualification | Consequence/boundary |
@@ -11062,8 +11344,10 @@ enabled amplitude limit at `71F2` under PMR`FFC0`.
 | 9–15; or no enabled bit | 22170 |
 
 This is the command-amplitude bound traced through `EF8E/AC52` in §30, not a
-command source, age counter, or a `BD34` current-limit owner. Bit15 by itself
-does not reduce this bound below nominal.
+command source or age counter. Publication is not itself a `BD34` owner update:
+owner8 later consumes the bound through `EE26/B08A` under its channel qualifier
+([§34.9](#349-nonthermal-current-limits-and-retained-releases)).
+Bit15 by itself does not reduce this bound below nominal.
 
 Only a prior-zero→nonzero qualification sets `71E4=5A`. `3BF3A` then strips
 masks12/70/C00 from words0/1/2 of matching **current** records and repairs
@@ -12144,41 +12428,50 @@ and [normalization acknowledgement before group completion](../../tests/fixtures
 These explicit-RAM software scenarios do not establish physical persistence,
 sensor/actuator effects, external request reachability or all interrupt interleavings.
 
-**Remaining high-value dependencies:** production reachability across diagnostic
-and mode groups; remaining numerical control-map surfaces and cross-task
-retention; raw3838..383C/status acquisition, ADC/DMA and local-link freshness;
-physical persistence of the thermal-history lifecycle; full resident-boot
-services and SEG/cache/CRC/ECC/startup feedback; OEM service identities,
-calibration units and physical source identity. The connected application,
-fault-action and diagnostic contracts do not require a complete peripheral or
-NvM emulator. Static connectivity and bounded native scenarios are not
-exhaustive semantic closure or vehicle results.
+**Remaining high-value dependencies:** received/staged-source provenance and
+production reachability across diagnostic and mode groups; remaining numerical
+control-map surfaces and cross-task retention; raw3838..383C/status acquisition,
+ADC/DMA and local-link freshness; the unassigned `B1C8.bit5` producer; physical
+persistence of the thermal-history lifecycle; full resident-boot services and
+SEG/cache/CRC/ECC/programming feedback; OEM service identities, calibration
+units and physical source identity. The connected application, fault-action
+and diagnostic contracts do not require a complete peripheral or NvM emulator.
+Static connectivity and bounded native scenarios are not exhaustive semantic
+closure or vehicle results.
 
-**Verification checkpoint (2026-10-15, mode arbitration, monitor/action ownership
-and reset-to-foreground reconstruction).**
-The cited composed native scenarios passed with unmodified CodeFlash and
-explicit RAM, without replacement callees or peripheral-model extensions.
-The separate reverse-handoff probe reached the documented unmapped SEGFLAG
-write; full programming handoff is not claimed as executed.
+**Verification checkpoint (2026-10-15, nonthermal limits, health/coherence policy
+and initialization/snapshot ownership).**
+Composed native execution passed for retained-limit reduction/handoff, packed
+health qualification, sticky/current repair and lifecycle precedence, qualified
+mode routing, live-register forwarding through both health windows, and complete
+warm application reinitialization. Throwaway cold-initialization and task-snapshot
+smokes also passed. All use unmodified CodeFlash and explicit RAM, with no
+replacement callees or peripheral-model extensions.
+
 Independent four-stage A/B rebuilds and signature finalization matched.
 Canonical inventory, corpus, semantic coverage and function-discovery outputs
 were regenerated; live coverage and project parity passed. Matching project
-and corpus were promoted after clean teardown.
+and corpus were promoted after clean teardown. Rebuilt C exposes the packed
+register/stack qualifier ABI, the signed-bound helper's actual output pointer,
+and the original classifier forwarded after exact-leaf inlining, rather than
+an invented intermediate return value.
 
 Coverage, function-boundary, D5 provenance, assist-oracle, command-cone,
 B6 composition/end-to-end/ingress, CodeFlash, external-ingress, retained-log
 reconciliation, protected030 transmit, complete EPS transmit and application
-RAM-loader gates passed, as did the protected-B6 acceptance ladder. Rebuilt C
-preserves typed qualifier callbacks/state and full-register mode/readiness
-returns. The ingress producer's obsolete symbol/temporary-name assertions
-were removed; an exact instruction check preserves the identity-publication
-call and its unconditional continuation into application initialization.
-Static-only reviews remain **recovered**; **verified** applies to the cited
-executed assertions, not every branch in an annotated function.
-Retained-log regeneration reported corrupted events on historical route
-`0000001c--574c06b528`; raw captures were unchanged. This checkpoint does not
-establish physical persistence, input freshness, vehicle reachability or
-whole-image semantic closure.
+RAM-loader gates passed, as did the protected-B6 acceptance ladder.
+Static-only reviews remain **recovered**; **verified** applies to executed
+assertions, not every branch of an annotated function. Retained-log regeneration
+again reported corrupted events on historical route `0000001c--574c06b528`;
+raw captures were unchanged. This checkpoint does not establish physical
+persistence, input freshness, vehicle reachability or whole-image semantic closure.
+
+The preceding `de4757a5` checkpoint contains major-mode arbitration,
+monitor/action ownership and reset-to-foreground reconstruction, with composed
+native execution and matching independent project evidence. Its reverse-handoff
+probe reached the unmapped SEGFLAG write; the full programming handoff remains
+a static contract. Its ingress producer repair replaced obsolete C-spelling
+assertions with the real identity-publication/unconditional-startup call sequence.
 
 The preceding `013d0087` checkpoint contains diagnostic admission, configured
 application writes and routine lifecycles, with composed native execution,
