@@ -4038,7 +4038,7 @@
     },
     "decompiler_evidence": {
       "path": "data/generated/camry_8965F3307000_fault_status_decompiler_evidence.json",
-      "sha256": "5d16bf817c5575623f5fc8ab125b1503c9cc19bd1a5c1183626bd192a29714cf"
+      "sha256": "d90d5813a63b6fbd7d9f3cc013eaf1f60c00a1efbcaf6ae1be928894670fb87c"
     },
     "h_techstream_vocabulary": {
       "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
@@ -4046,7 +4046,7 @@
     },
     "tx_contract": {
       "path": "data/generated/camry_8965F3307000_tss3_opendbc_port.json",
-      "sha256": "5479e8b4e7dec7ebbe69c7d0ddeb20a45f5bc13564e4aa2ccbad7cf6c72da9be"
+      "sha256": "83df49971dcde56b9adfc216cbad1097b54149d581841d5fc1cffdbfada8a68b"
     }
   },
   "target": {

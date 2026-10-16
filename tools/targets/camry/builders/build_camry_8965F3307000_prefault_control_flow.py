@@ -122,7 +122,7 @@ def build() -> dict:
     global_error_enables = {"DEIE":(gctr>>8)&1,"MEIE":(gctr>>9)&1,"THLEIE":(gctr>>10)&1,"CMPOFIE":(gctr>>11)&1}
     need(not any(global_error_enables.values()), f"global CAN error IRQ unexpectedly enabled: {global_error_enables}")
     agg = fn(0x7A254)
-    need(agg.index("FUN_00079ede") < agg.index("FUN_00079f16"), "foreground CAN recovery order drift")
+    need(agg.index("FUN_00079ede") < agg.index("f33_run_init_chain_79f16"), "foreground CAN recovery order drift")
     incident = recovery["incident"]
     need(incident["hook_address"] == "0x0007A272", "incident hook address drift")
     need(incident["recorded_bad_four_bytes"] == "ff02925b", "recorded incident write drift")

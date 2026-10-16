@@ -14499,3 +14499,15 @@ The pass also repaired pre-existing stale pins in the canfd-timing, fault
 status, flash-backend, prefault and tss3-port checks that predated it
 (SFR-labeled rendering `GCFG`/`FSTATR`/`FASTAT`, renamed classifier calls),
 bringing the full target suite to 25/25.
+
+The 2026-10-16 follow-up reading pass classified the top near-duplicate
+families (LSH over normalized-pseudocode token shingles, Jaccard >= 0.80)
+into eight machine-gated shapes and added 451 more table rows: monitor-reset
+wrappers joined to their named state cells (100), literal diagnostic event
+reporters (79), failing-count status predicates (17), constant-block fills
+(107) and cell-block copies (8), sequential initializer chains (46), UDS
+routine-class wrappers (35), and capture-slot field dispatchers (59).
+A/B inventory delta is exactly the 451 renames plus comments. Named
+functions moved 2,864 -> 3,315 and documented 2,996 -> 3,447; remaining
+DEFAULT-named functions 4,016, of which the <64B tail dominates. Suite
+remains 25/25 after pin catch-up for renamed callees.

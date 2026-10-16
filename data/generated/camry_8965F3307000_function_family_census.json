@@ -8,7 +8,7 @@
   },
   "canonical_corpus": {
     "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
-    "sha256": "8345c06112d59ae6ed45f69e6240089eaa28eaf7b5d20e58487124397262ae60"
+    "sha256": "03595727cd349e2dbbedf4ec542255d40a015694b44f7eb2a7cf063816678e4e"
   },
   "classes": {
     "constant_source": [],
@@ -260,10 +260,6 @@
       {
         "entry": "0x8D4D4",
         "target": "0x8D4AE"
-      },
-      {
-        "entry": "0x8DE8C",
-        "target": "0x8DE1A"
       },
       {
         "entry": "0x8EF78",
@@ -570,32 +566,8 @@
         "target": "0xB6D72"
       },
       {
-        "entry": "0xB72DE",
-        "target": "0xB72C2"
-      },
-      {
-        "entry": "0xB7332",
-        "target": "0xB7314"
-      },
-      {
-        "entry": "0xB7340",
-        "target": "0xB7314"
-      },
-      {
         "entry": "0xB8EB6",
         "target": "0xB8E8E"
-      },
-      {
-        "entry": "0xB8EE2",
-        "target": "0xB8ECA"
-      },
-      {
-        "entry": "0xB8F2E",
-        "target": "0xB8F16"
-      },
-      {
-        "entry": "0xB8F3C",
-        "target": "0xB8F16"
       },
       {
         "entry": "0xB8F68",
@@ -614,18 +586,6 @@
         "target": "0xD0BDA"
       },
       {
-        "entry": "0xBCA8E",
-        "target": "0xD0A3E"
-      },
-      {
-        "entry": "0xBCA9A",
-        "target": "0xD0A3E"
-      },
-      {
-        "entry": "0xBCD16",
-        "target": "0xD0CE8"
-      },
-      {
         "entry": "0xBDB58",
         "target": "0xD10D4"
       },
@@ -634,16 +594,8 @@
         "target": "0xCEFA4"
       },
       {
-        "entry": "0xD10F4",
-        "target": "0xD0A3E"
-      },
-      {
         "entry": "0xD110C",
         "target": "0xD0BDA"
-      },
-      {
-        "entry": "0xD1124",
-        "target": "0xD0CE8"
       },
       {
         "entry": "0xD1130",
@@ -672,14 +624,6 @@
       {
         "entry": "0xFC624",
         "target": "0xFCC00"
-      },
-      {
-        "entry": "0xFCAD4",
-        "target": "0xFD400"
-      },
-      {
-        "entry": "0xFDC28",
-        "target": "0xC1B24"
       },
       {
         "entry": "0xFE114",
@@ -737,18 +681,18 @@
   "evidence_note": "Idiom membership is byte/shape-verified against the exact image and canonical corpus; family-propagated names derived from this census are structural hypotheses, not executed or OEM-verified semantics.",
   "schema": "camry-8965f3307000-function-family-census-v1",
   "summary": {
-    "default_named_functions": 4467,
-    "distinct_normalized_shapes": 3350,
-    "duplicate_cluster_count": 388,
-    "duplicate_cluster_members": 1505,
+    "default_named_functions": 4016,
+    "distinct_normalized_shapes": 3183,
+    "duplicate_cluster_count": 332,
+    "duplicate_cluster_members": 1165,
     "idiom_class_counts": {
       "constant_source": 0,
-      "far_call_trampoline": 179,
+      "far_call_trampoline": 165,
       "paired_constant_publisher": 0,
       "return_only_stub": 0,
       "single_constant_publisher": 0
     },
-    "idiom_class_members": 179
+    "idiom_class_members": 165
   },
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",

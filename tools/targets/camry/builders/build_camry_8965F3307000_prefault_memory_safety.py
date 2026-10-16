@@ -122,7 +122,7 @@ def build() -> dict:
     boot_rscfd = fn_decomp(0x3B3C)
     boot_gcfg = fn_decomp(0x396C)
     need("FUN_0007a132()" in app_startup, "application startup -> 7A132 edge drift")
-    need("FUN_00079dfa()" in app_root and "0xfe01" in app_root, "7A132 application init/order drift")
+    need("f33_run_init_chain_79dfa()" in app_root and "0xfe01" in app_root, "7A132 application init/order drift")
     need("FUN_00083f3e(0)" in app_comm, "79DFA -> 83F3E edge drift")
     need("FUN_00084652()" in app_rscfd, "83F3E -> 84652 edge drift")
     need("FUN_00084570()" in app_driver, "84652 -> 84570 edge drift")

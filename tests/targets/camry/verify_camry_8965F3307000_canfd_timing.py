@@ -48,7 +48,7 @@ check(
 )
 check(
     "application RS-CANFD init chain exact",
-    "FUN_00079dfa()" in app_root["decompiled_c"]
+    "f33_run_init_chain_79dfa()" in app_root["decompiled_c"]
     and "FUN_00083f3e(0)" in app_comm_init["decompiled_c"]
     and "FUN_00084652()" in app_rscfd_init["decompiled_c"]
     and "FUN_00084570()" in app_driver_init["decompiled_c"],

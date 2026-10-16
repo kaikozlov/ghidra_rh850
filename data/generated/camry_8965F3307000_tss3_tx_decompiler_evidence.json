@@ -3028,6 +3028,6 @@
     "boundary": "Disposable Ghidra corpus used only to recover the selected functions and a bounded direct/fixed-GP reference census. Every promoted row is independently body-hash-bound to the exact normalized F33 image.",
     "function_count": 7331,
     "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
-    "sha256": "8345c06112d59ae6ed45f69e6240089eaa28eaf7b5d20e58487124397262ae60"
+    "sha256": "03595727cd349e2dbbedf4ec542255d40a015694b44f7eb2a7cf063816678e4e"
   }
 }

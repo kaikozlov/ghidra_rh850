@@ -341,8 +341,8 @@ def build() -> dict:
         "240fbc390106ff7fbf05200e0180640f04f6"
         "240fbe390106ff7fbf05200e0180640f06f6"),
         "D5 saturating snapshot clamp drift")
-    token(funcs, 0xC9D18, "DAT_febeae04", "DAT_000b044c", "FUN_000bdb64(0xc9)")
-    token(funcs, 0xC9CAA, "DAT_febeae06", "DAT_000b044a", "FUN_000bdb64(200)")
+    token(funcs, 0xC9D18, "DAT_febeae04", "DAT_000b044c", "f33_report_diagnostic_event_failure_ffff_32_bdb64(0xc9)")
+    token(funcs, 0xC9CAA, "DAT_febeae06", "DAT_000b044a", "f33_report_diagnostic_event_failure_ffff_32_bdb64(200)")
     need(struct.unpack_from("<H", image, 0xB044C)[0] == 100 and struct.unpack_from("<H", image, 0xB044A)[0] == 1000, "D5 thresholds drift")
     for event in (0xC8, 0xC9):
         rec = image[0x2FC50 + event * 8:0x2FC50 + (event + 1) * 8]

@@ -1573,6 +1573,6 @@
     "boundary": "Disposable exact-F33 Ghidra corpus. Promoted functions are independently raw-body-hash-bound to the normalized 8965F3307000 image; the disposable project/corpus is not required at verification time.",
     "function_count": 7331,
     "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
-    "sha256": "8345c06112d59ae6ed45f69e6240089eaa28eaf7b5d20e58487124397262ae60"
+    "sha256": "03595727cd349e2dbbedf4ec542255d40a015694b44f7eb2a7cf063816678e4e"
   }
 }
