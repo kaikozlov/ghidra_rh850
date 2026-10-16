@@ -305,7 +305,7 @@
     },
     "0x085112": {
       "body_size": 166,
-      "decompiled_c_sha256": "3d9c6e11f38136a545a785507622c764506864e89db9a692bf7ab0556f414390",
+      "decompiled_c_sha256": "544275c8f4c9a01bac56c70414204b9949c579282cd0f53cf9b2f65db4d9c755",
       "role": "lower CAN driver transmit dispatcher"
     },
     "0x0853AA": {
@@ -753,7 +753,7 @@
       ],
       "can_fd": true,
       "can_id": "0x030",
-      "configured_only_note": "signals 36, 37 and 283 are assigned to PDU0 by the exact signal->PDU table but no literal call to either generated pack helper exists anywhere in the 7,318-function canonical corpus; no wire field is invented for them",
+      "configured_only_note": "signals 36, 37 and 283 are assigned to PDU0 by the exact signal->PDU table but no literal call to either generated pack helper exists anywhere in the 7,320-function canonical corpus; no wire field is invented for them",
       "configured_without_direct_pack_call": [
         36,
         37,

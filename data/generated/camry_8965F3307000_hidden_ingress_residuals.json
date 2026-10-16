@@ -57,9 +57,9 @@
     "census": {
       "candidateFunctions": 49,
       "candidates": 103,
-      "functions": 7318,
-      "knownRangeStores": 5452,
-      "stores": 14171
+      "functions": 7320,
+      "knownRangeStores": 5453,
+      "stores": 14172
     },
     "closure_groups": [
       {
@@ -172,9 +172,9 @@
     "computed_store_census": {
       "candidateFunctions": 3,
       "candidates": 5,
-      "functions": 7318,
-      "knownRangeStores": 5452,
-      "stores": 14171
+      "functions": 7320,
+      "knownRangeStores": 5453,
+      "stores": 14172
     },
     "destination_field_count": 44,
     "destination_registers": {
@@ -568,7 +568,7 @@
     {
       "body_sha256": "2439dd509964393a8b41e40e3c08f82464626f47dd2cc2fa33b0fcc3abae16ff",
       "body_size": 98,
-      "decompiled_c_sha256": "a631149fe9393ec15d590ef5a23372c03086db1148efb45f86198cf5d14c7907",
+      "decompiled_c_sha256": "de043a2d83f260190b3afd6de9a872e6b9d654c9c301359059ddaf6fee36e2f8",
       "entry": "0x0007FAFA"
     },
     {
@@ -917,11 +917,11 @@
   "inputs": {
     "computed_store_target_census": {
       "path": "data/generated/camry_8965F3307000_computed_store_target_census.json",
-      "sha256": "f6bb80c3b5966125e5d2ab5c957347c04e8f405da613bb6e29339bccf62876ae"
+      "sha256": "77a3f171e63907868368c49f176365be623ab3a988f092a6fa7d013d50b26d82"
     },
     "dmac_destination_computed_store_census": {
       "path": "data/generated/camry_8965F3307000_dmac_destination_computed_store_census.json",
-      "sha256": "ee81c2bdcda5ae14ef3322e6acf2d163929ab01eb0535fc53c97e49d416ac4f3"
+      "sha256": "3f8af80d30f6c74be123d3fb066761b79a5e5aa1fbc73b57055c6c5cf5d32eb1"
     },
     "resolver_script": {
       "path": "ghidra/scripts/investigate/AuditComputedStoreTargets.java",
@@ -932,7 +932,7 @@
   "schema": "camry-8965f3307000-hidden-ingress-residuals-v1",
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-    "corpus_function_count": 7318,
+    "corpus_function_count": 7320,
     "software_id": "8965F3307000"
   }
 }

@@ -1,0 +1,137 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_sid28_policy_to_requested_network_mode",
+  "entry": {
+    "role": "synthetic inter-context handoff of successfully published SID28 policy8196=11 to a later real foreground49AD2 update. Real monitor reduction\u2192edge-selected49A48\u21927BC56\u2192ROM2184C callback7C110 changes requested3DE0 only. No controller-status indication is synthesized; logical0/driver1/RSCFD0-channel1/vehicle bus are distinct.",
+    "scope": "resolved-address",
+    "address": "0x49ad2"
+  },
+  "max_instructions": 12000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1a00",
+      "size": 1536,
+      "fill": 165,
+      "evidence": "real nested-call stack"
+    },
+    {
+      "address": "0xfebe8196",
+      "hex": "11",
+      "evidence": "synthetic handoff of completed SID28 Tx-policy request, not7F97"
+    },
+    {
+      "address": "0xfebe81cc",
+      "hex": "5a",
+      "evidence": "application availability admits ordinary network enable absent8196"
+    },
+    {
+      "address": "0xfebe7f2c",
+      "size": 32,
+      "fill": 0,
+      "evidence": "explicit monitor banks, edge caches and delay counters"
+    },
+    {
+      "address": "0xfebe7f35",
+      "hex": "11",
+      "evidence": "previous opposite request edge ensures disable callback executes"
+    },
+    {
+      "address": "0xfebee826",
+      "hex": "00",
+      "evidence": "no edge that reloads qualification delay"
+    },
+    {
+      "address": "0xfebee88e",
+      "hex": "0000",
+      "evidence": "explicit duration source"
+    },
+    {
+      "address": "0xfebe3de0",
+      "hex": "1e0f000000000000ff00000000000000",
+      "evidence": "request1E, reconciled software policy0F, zero countdown; six-byte status row flags0/good complement0,FF"
+    },
+    {
+      "address": "0xfebe3df0",
+      "hex": "03",
+      "evidence": "previous network-status indication3 retained independently of current request"
+    },
+    {
+      "address": "0xfebe4938",
+      "hex": "fe01",
+      "evidence": "network manager initialized sentinel"
+    },
+    {
+      "address": "0xfebe492a",
+      "hex": "fe01",
+      "evidence": "retained upper network mode maps to mode2 for monitor reduction"
+    },
+    {
+      "address": "0xfebe5022",
+      "hex": "a857",
+      "evidence": "driver-index1 software state running; foreground request must not change it synchronously"
+    }
+  ],
+  "checks": [
+    {
+      "name": "foreground update returns normally",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "real nested frames restore caller stack",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "edge-selected lower callback requests0F without rewriting reconciled software policy0F",
+      "kind": "memory",
+      "address": "0xfebe3de0",
+      "size": 4,
+      "equals_hex": "0f0f0000"
+    },
+    {
+      "name": "edge cache records disable request",
+      "kind": "memory",
+      "address": "0xfebe7f35",
+      "size": 1,
+      "equals_hex": "22"
+    },
+    {
+      "name": "retained upstream network indication is not a fabricated confirmation",
+      "kind": "memory",
+      "address": "0xfebe3df0",
+      "size": 1,
+      "equals_hex": "03"
+    },
+    {
+      "name": "driver-index1 state remains independently running",
+      "kind": "memory",
+      "address": "0xfebe5022",
+      "size": 2,
+      "equals_hex": "a857"
+    },
+    {
+      "name": "SID28 policy remains latched",
+      "kind": "memory",
+      "address": "0xfebe8196",
+      "size": 1,
+      "equals_hex": "11"
+    }
+  ]
+}

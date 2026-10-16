@@ -1,0 +1,155 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_current_reference_dual_fault_bit_precedence",
+  "entry": {
+    "role": "Real5E202 snapshot, paired feedback selection, ordinary curve floor and current publication with71EC lowbits both set. Bit0 precedence resets bank0 but selects retained bank1; reset leaves ratio and staged snapshots intact. Stop before38A58; no claim of physical channel loss.",
+    "scope": "resolved-address",
+    "address": "0x5e202"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "r6": "0x2",
+    "r7": "0x200",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x38a58"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated nested-call stack; all calls execute exact firmware"
+    },
+    {
+      "address": "0xfebe6af4",
+      "size": 1168,
+      "fill": 0,
+      "evidence": "explicit synthetic initialized motor-pipeline working state through6F83; overwritten sample and diagnostic sibling follow"
+    },
+    {
+      "address": "0xfebe6af4",
+      "hex": "00fc0010",
+      "evidence": "independent synthetic cross-rate inputs: motor sample6AF4=-1024, diagnostic sibling6AF6=4096; never a vehicle-command assertion"
+    },
+    {
+      "address": "0xfebe5f36",
+      "hex": "0002",
+      "evidence": "synthetic512 raw input chooses the exact38162 speed-map zero tail; no OEM units are assigned"
+    },
+    {
+      "address": "0xfebe71ec",
+      "hex": "0000",
+      "evidence": "healthy paired-channel gate;380DE follows its real no-reset branch and38162 computes its real correction path"
+    },
+    {
+      "address": "0xfebe7d4a",
+      "hex": "0000",
+      "evidence": "explicit phase-domain input to38162; no rotor position or physical unit is asserted"
+    },
+    {
+      "address": "0xfebe8a14",
+      "hex": "00",
+      "evidence": "real37A92 initialization gate is inactive; this case targets command conversion rather than feedback-coefficient initialization"
+    },
+    {
+      "address": "0xfebe8b28",
+      "hex": "00000000",
+      "evidence": "explicit37E48 acquisition-status input; zero acquisition snapshots remain real RAM inputs"
+    },
+    {
+      "address": "0xfebee5c3",
+      "hex": "00",
+      "evidence": "select exact385C4 ROM bank0; no calibration bytes are replaced"
+    },
+    {
+      "address": "0xfebee741",
+      "hex": "00000000000000",
+      "evidence": "explicit385C4 inactive external-limit status and magnitude"
+    },
+    {
+      "address": "0xfebeead0",
+      "hex": "00000000",
+      "evidence": "non-magic380DE guard; no software reset callback is bypassed or replaced"
+    },
+    {
+      "address": "0xfebe6f7e",
+      "hex": "66a9",
+      "evidence": "Retained ordinary thermal-floor publication from3A406; exact maps are flat minus22170."
+    },
+    {
+      "address": "0xfebe6b50",
+      "hex": "78ecd2047b00",
+      "evidence": "Bank0 output, retained ratio and previous error before invalidation."
+    },
+    {
+      "address": "0xfebe6b74",
+      "hex": "30f83702d3ff",
+      "evidence": "Independent bank1 feedback state; bit0 precedence must not reset it."
+    },
+    {
+      "address": "0xfebe71ec",
+      "hex": "0300",
+      "evidence": "Both low bits set; this exercises actual branch precedence, not an invented both-invalid neutral fallback."
+    }
+  ],
+  "checks": [
+    {
+      "name": "real caller reaches the next transform boundary after37F16",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x38a58"
+    },
+    {
+      "name": "Bank0 reset clears output/error but retains ratio",
+      "kind": "memory",
+      "address": "0xfebe6b50",
+      "size": 6,
+      "equals_hex": "0000d2040000"
+    },
+    {
+      "name": "Bank1 remains retained despite both bits set",
+      "kind": "memory",
+      "address": "0xfebe6b74",
+      "size": 6,
+      "equals_hex": "30f83702d3ff"
+    },
+    {
+      "name": "Staged generation survives later bank0 reset",
+      "kind": "memory",
+      "address": "0xfebe6e1a",
+      "size": 4,
+      "equals_hex": "78ec30f8"
+    },
+    {
+      "name": "Half-scaled curve floor does not replace selected bank1 request",
+      "kind": "memory",
+      "address": "0xfebe6d8a",
+      "size": 6,
+      "equals_hex": "30f800f100f1"
+    },
+    {
+      "name": "Selected request reaches both first-axis baseline and actual command",
+      "kind": "memory",
+      "address": "0xfebe6dc8",
+      "size": 4,
+      "equals_hex": "30f830f8"
+    },
+    {
+      "name": "Published current mirror is selected bank1 request",
+      "kind": "memory",
+      "address": "0xfebe6d86",
+      "size": 2,
+      "equals_hex": "30f8"
+    }
+  ]
+}

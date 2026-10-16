@@ -518,9 +518,19 @@ def main() -> int:
            "DAT_febe6af4 = -sVar1;")
     tokens(funcs, 0x387BA, "DAT_febe6e0a = DAT_febe6af4;")
     tokens(funcs, 0x38502, "DAT_febe6e0a", "DAT_febe6dec")
-    tokens(funcs, 0x3835E, "iVar2 = (int)DAT_febe6dec;", "DAT_febe6dc8 = DAT_febe6dec,")
+    # Signed loads and CMOVGE select separate actual and feedback-baseline
+    # minima. Bind their register/store dataflow, not decompiler-local spelling.
+    need(image[0x3835E:0x38392] == bytes.fromhex(
+        "3e06f01b03006088240fecb524978ab51106a6ffba05019ce505"
+        "249ffab5e199e19f3c9be19124f6c8b5809ce1973c0b810c7f00"
+    ), "3835E actual/baseline current selection instruction drift")
+    need(image[0x31BF0] != 0x5A, "3835E fixed-current calibration override became active")
     tokens(funcs, 0x384D8, "DAT_febe6e0a", f"{funcs[0x38396]['name']}(")
-    tokens(funcs, 0x37F16, "DAT_febe6d84 = DAT_febe6dd6;", "DAT_febe6d86 = DAT_febe6dc8;")
+    # R18 carries 6DD6 to 6D84; R19 carries actual 6DC8, not baseline
+    # 6DCA, to 6D86. EP-relative destinations are 6D7C+8 and +A.
+    need(image[0x37F16:0x37F26] == bytes.fromhex(
+        "2497d6b524f67cb5249fc8b58494859c"
+    ), "37F16 actual current diagnostic publication instruction drift")
 
     funnel_cells = {
         "FEBECC64": 0xFEBECC64,

@@ -1,0 +1,141 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_current_reference_feedback_paired_update",
+  "entry": {
+    "scope": "resolved-address",
+    "address": "0x5df1e",
+    "role": "Real scheduled workmask1/state0200 path: measured-current transform, envelope qualification, both feedback updates, code-limit reduction and current-control snapshot. Previous regulator outputs and first-axis baseline are explicit synthetic generations; no physical acquisition or timing claim."
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0x1",
+    "r7": "0x200"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe0000",
+      "size": 131072,
+      "fill": 0,
+      "evidence": "Explicit synthetic application RAM, not an executed firmware initialization or fresh hardware acquisition."
+    },
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Initialized nested-call stack; all native calls execute exact firmware."
+    },
+    {
+      "address": "0xfebe6bf4",
+      "hex": "204e",
+      "evidence": "Prior bank0 positive envelope denominator."
+    },
+    {
+      "address": "0xfebe6bfc",
+      "hex": "c8b5ffff",
+      "evidence": "Prior unclipped bank0 second-axis regulator output."
+    },
+    {
+      "address": "0xfebe6c20",
+      "hex": "0000",
+      "evidence": "Zero bank1 denominator must select ratio1024 even with zero demand."
+    },
+    {
+      "address": "0xfebe6ce4",
+      "hex": "204e",
+      "evidence": "Retained shared envelope ceiling."
+    },
+    {
+      "address": "0xfebe6dca",
+      "hex": "18fc",
+      "evidence": "Prior pre-additional-scaling first-axis baseline."
+    },
+    {
+      "address": "0xfebe6b54",
+      "hex": "0f00",
+      "evidence": "Independent bank0 previous error."
+    },
+    {
+      "address": "0xfebe6b78",
+      "hex": "c4ff",
+      "evidence": "Independent bank1 previous error."
+    },
+    {
+      "address": "0xfebe6b6c",
+      "hex": "40e20100",
+      "evidence": "Prior transient delta, retained while transient mode is inactive."
+    },
+    {
+      "address": "0xfebe6b90",
+      "hex": "0f04f6ff",
+      "evidence": "Independent retained bank1 transient delta."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Real composition reaches its declared boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Bank0 signed ratio/error recurrence",
+      "kind": "memory",
+      "address": "0xfebe6b50",
+      "size": 6,
+      "equals_hex": "10fccc03ceff"
+    },
+    {
+      "name": "Zero denominator selects maximum ratio rather than zero error",
+      "kind": "memory",
+      "address": "0xfebe6b74",
+      "size": 6,
+      "equals_hex": "03fc00049aff"
+    },
+    {
+      "name": "Bank0 signed weighted correction before global clamp",
+      "kind": "memory",
+      "address": "0xfebe6b70",
+      "size": 4,
+      "equals_hex": "f49707fe"
+    },
+    {
+      "name": "Bank1 uses its own previous error",
+      "kind": "memory",
+      "address": "0xfebe6b94",
+      "size": 4,
+      "equals_hex": "305001fe"
+    },
+    {
+      "name": "Inactive transient path retains bank0 prior delta",
+      "kind": "memory",
+      "address": "0xfebe6b6c",
+      "size": 4,
+      "equals_hex": "40e20100"
+    },
+    {
+      "name": "Inactive transient path retains bank1 prior delta",
+      "kind": "memory",
+      "address": "0xfebe6b90",
+      "size": 4,
+      "equals_hex": "0f04f6ff"
+    },
+    {
+      "name": "Native scheduled frame restores caller stack",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    }
+  ]
+}

@@ -1,0 +1,175 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_app_programming_pending_ack_queues_mode9_not_session2",
+  "entry": {
+    "role": "Synthetic handoff at operation3 after pending-response acknowledgement, with real state1 retained by SID10 admission. Real8B334/4D604/B15AC queue software request9; stop95626 before further NRC78 processing. Does not run mode arbitration, NvM readiness, context transfer or hardware.",
+    "scope": "resolved-address",
+    "address": "0x95d1c"
+  },
+  "max_instructions": 50000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0x3",
+    "r7": "0xfebe1000"
+  },
+  "stop_addresses": [
+    "0x95626",
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1800",
+      "size": 2048,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack; saved GPRs explicitly zero through gpr_fill"
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "empty priority-mask stack"
+    },
+    {
+      "address": "0xfebe5000",
+      "size": 4096,
+      "fill": 0,
+      "evidence": "explicit initialized DCM software state, not external reachability or receive execution"
+    },
+    {
+      "address": "0xfebf4900",
+      "size": 768,
+      "fill": 0,
+      "evidence": "explicit initialized app-SA buffers and software AES contexts, no entropy emulation"
+    },
+    {
+      "address": "0xfebe595c",
+      "hex": "03030300",
+      "evidence": "application extended session remains published"
+    },
+    {
+      "address": "0xfebe59e2",
+      "hex": "00",
+      "evidence": "logical protocol record0 used to construct programming record"
+    },
+    {
+      "address": "0xfebe5d54",
+      "hex": "0101",
+      "evidence": "configured session row1 programming target2, deferred state1"
+    },
+    {
+      "address": "0xfebe5d58",
+      "hex": "0011befe000000000212befe00000000000000004000000010000200",
+      "evidence": "retained advanced session message supplied by prior admission"
+    },
+    {
+      "address": "0xfebe5e50",
+      "hex": "a5000000",
+      "evidence": "enabled empty event queue; enqueue event0E allowed"
+    },
+    {
+      "address": "0xfebe66ba",
+      "hex": "ffff",
+      "evidence": "explicit application programming-admission sample >=0A00"
+    },
+    {
+      "address": "0xfebee81f",
+      "hex": "00",
+      "evidence": "application programming gate not encoded11"
+    },
+    {
+      "address": "0xfebe819a",
+      "hex": "00",
+      "evidence": "physical addressing; functional branch not selected"
+    },
+    {
+      "address": "0xfebe81ae",
+      "hex": "00",
+      "evidence": "programming mode request has not yet been made"
+    },
+    {
+      "address": "0xfebeb090",
+      "hex": "00000000000000000000000000000000",
+      "evidence": "empty cancel/request bitmaps"
+    },
+    {
+      "address": "0xfebeb0ba",
+      "hex": "0000",
+      "evidence": "Explicit prior request9 status0; B15AC reads this existing halfword after publishing its bitmap request."
+    },
+    {
+      "address": "0xfebf3b14",
+      "hex": "000000000000000101ff",
+      "evidence": "application handoff wrapper initialized idle"
+    }
+  ],
+  "checks": [
+    {
+      "name": "application session remains3",
+      "kind": "memory",
+      "address": "0xfebe595c",
+      "size": 4,
+      "equals_hex": "03030300"
+    },
+    {
+      "name": "session deferred state2 after queued request",
+      "kind": "memory",
+      "address": "0xfebe5d55",
+      "size": 1,
+      "equals_hex": "02"
+    },
+    {
+      "name": "software major-mode request9 only",
+      "kind": "memory",
+      "address": "0xfebeb098",
+      "size": 4,
+      "equals_hex": "00020000"
+    },
+    {
+      "name": "Request9 is queued but its status slot is not materialized",
+      "kind": "memory",
+      "address": "0xfebeb0ba",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "application programming request latch set",
+      "kind": "memory",
+      "address": "0xfebe81ae",
+      "size": 1,
+      "equals_hex": "5a"
+    },
+    {
+      "name": "wrapper latch remains pending not completed",
+      "kind": "memory",
+      "address": "0xfebf3b19",
+      "size": 1,
+      "equals_hex": "5a"
+    },
+    {
+      "name": "event0E queued once",
+      "kind": "memory",
+      "address": "0xfebe5e51",
+      "size": 4,
+      "equals_hex": "0100010e"
+    },
+    {
+      "name": "pending NRC remains78",
+      "kind": "register",
+      "register": "r7",
+      "equals": "0x78"
+    },
+    {
+      "name": "bounded response-pending boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x95626"
+    }
+  ]
+}

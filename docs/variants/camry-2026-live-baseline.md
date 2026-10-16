@@ -4293,6 +4293,113 @@ published cache. The `695A` request controller and `6A61` worker are distinct
 lifetimes; no second permission system, physical timing or durable calibration
 claim follows from these numerical and publication contracts.
 
+### 34.12 Feedback-derived current references and retained map transitions
+
+This exact-F33 slice connects the prior regulator outputs in §34.3 to the
+sampled-command conversion in §34.2. It does not introduce another command
+source or an engagement gate. Work bit0 updates the paired feedback requests
+through `5DE02/5DF1E`; work bit1 later stages them through `387CE` and consumes
+them in `5DF5C/5E202`. The two stages are not one atomic control generation.
+
+`3636A/36502` use the **prior unclipped second-axis regulator outputs**
+`6BFC/6C28` and their envelope values `6BF4/6C20`. In the exact configuration,
+the denominator is the smaller of that bank envelope and retained `6CE4`.
+The numerator is the saturating signed16 absolute magnitude times1024.
+Division truncates toward zero; a zero denominator selects ratio1024 rather
+than zero. Ratio clamps to0..1024, then error`922−ratio` is bounded and halved
+when `71EC&3` is nonzero.
+
+| Feedback calibration | Current-error coefficient | Previous-error coefficient |
+|---|---:|---:|
+| Ordinary | 6144 | −1228 |
+| Transient `6B4C==5A` | 30720 | −6144 |
+
+The correction is `low32(k0*error − k1*previous_error)`, added to the retained
+baseline `s16(6DCA)*32768` with symmetric signed32 saturation. Transient mode
+then bounds the relative delta to±41943040 and re-adds the baseline without a
+second saturation. The final raw bounds are **−726474424..0**, followed by
+signed division by32768 and halfword publication. Optional error-dependent gain
+scaling is disabled by exact calibration. Ordinary updates retain the old
+transient-delta observable. Reset clears output/error/gain state but retains
+the ratio and does not rewrite the separately staged `6E1A/6E1C` generation.
+
+#### Qualification, curve floor and asymmetric release
+
+`3629A` owns the transient predicate, active byte and invocation budget separately.
+Its raw predicate requires unsigned `EB94` in`[8960,38400)`, and either
+`abs(s16(63D4))>=2347` or the conjunction `abs(63D4)>=1630 && abs(63D8)>=2048`.
+The independent admission gates are `7568==0`, `E603==0`, `71EC&1FF==0` and
+`EB83==11`. No physical units are assigned to those raw thresholds here.
+
+An exact previous-predicate0→current5A edge admits activation, as does an
+already-active5A state below count3000. The current predicate need not remain
+true during that hold. Failed admission clears active/count but still records
+the predicate, so reopening a gate does not replay a consumed edge. A new edge
+at count3000 can keep activity for that invocation **without resetting the
+budget**; continued qualification then expires. These are invocation transitions,
+not a measured duration.
+
+The lower-bound map has a different input from the command map `38502`.
+`37F92` takes measured second-axis feedback mirror `6D72`, doubles it when
+`71EC&3`, then saturates and takes its absolute magnitude. `37FD2` uses the
+switched unsigned-axis/signed-ordinate curve `31B5C` in transient mode; otherwise
+it interpolates the signed `2C31E` ordinates and applies thermal floor`6F7E`
+(§34.8). The ordinary floor is applied before the separate half-scaling for
+`71EC&3`; the switched branch does not read that floor.
+
+Leaving transient mode seeds the Q16 accumulator from the previous curve
+output. While filtering is active, the exact recurrence is
+`A=low32(A−previous_output*304+raw_floor*304)`, with candidate`trunc(A/65536)`.
+The release comparison uses **signed16(raw_floor−previous_output)<=128**, not
+an absolute difference. A negative change can therefore select the raw floor
+immediately even when its magnitude exceeds128. Accumulator and candidate are
+updated before this release decision. Re-entering transient mode does not
+explicitly clear an already-active filter.
+
+#### Selected request, actual command and feedback baseline
+
+`380DE` first refreshes the curve floor. With healthy banks it takes the smaller
+staged feedback request. Bit0 instead selects bank1 and resets bank0; otherwise
+bit1 selects bank0 and resets bank1. **Both bits take bit0 precedence**, not an
+invented neutral fallback. Marker`EAD0=5AA5A55A` separately resets both and
+selects0. The selected request is upper-bounded by0, then lower-bounded by the
+curve result, and published at`6D8A`.
+
+The later additional scaling is independently qualified. `3903A` refreshes
+`6EA8` only when`8A20==1`; `37840` refreshes the shared second-axis envelope
+under that same gate. Its selected envelope is **lower-bounded** by the selected
+calibration, then reused both as a feedback denominator ceiling and a later
+regulated-output clamp. Closed refresh gates retain prior state. Input`E744`
+is staged from`AC1C`; its use here does not establish independent CAN authority.
+
+With qualified additional scaling, `385C4` chooses a gain by`E5C3&1` and
+`E741`. Bank0 is flat128; the selected bank1 map decreases from128 to0 between
+raw inputs5287 and6809. `38582` divides the signed product by128 and narrows
+before `385A8` re-applies the floor/upper bound. Its retained difference fields
+are pass-through observables, **not a recovered slew limiter**. The meaningful
+signed R10 return is now represented in the rebuild annotations.
+
+`3835E` deliberately preserves two values:
+
+- Actual first-axis command`6DC8=min(base_map6DEC, additional_bound6DFA)`.
+- Feedback baseline`6DCA=min(base_map6DEC, pre-additional_request6D8A)`.
+
+Paired feedback uses the latter; `37F16` publishes the former. The bounded
+native compositions exercise real scheduled work or the real current-control
+prefix through current-pair publication, stopping before`38A58` where stated:
+
+| Composition | Verified software consequence |
+|---|---|
+| [Paired feedback update](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_current_reference_feedback_paired_update.json) | Independent histories produce requests−1008/−1021; zero denominator selects ratio1024. |
+| [Transient release with additional scaling](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_current_reference_transient_release_and_scaled_consumer.json) | Filtered floor and feedback baseline−20420 remain distinct from actual first-axis command−11007. |
+| [Both low fault bits](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_current_reference_dual_fault_bit_precedence.json) | Bank0 resets without erasing its staged generation; retained bank1 request−2000 is selected. |
+| [Negative release delta](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_current_reference_negative_delta_releases_filter.json) | Raw−7680 is selected over calculated candidate−7003; filter activity clears. |
+| [New edge at exhausted budget](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_current_reference_transient_edge_at_budget_limit.json) | Active5A is retained at count3000 without a reset; execution stops before aggregate-output GPIO. |
+
+These scenarios supply explicit prior generations. They do not establish fresh
+acquisition, physical voltage/current units, closed-loop stability, task timing
+or physical output commitment.
+
 ## 35. Hidden-ingress false-negative audit: no concrete alternate producer found; residuals closed in §36
 
 This audit was originally launched because zero-B6 factory steering was treated as tension with the firmware model. CORR-135 removes that premise: the exact B6-independent `D0218` path already reaches physical actuation. The audit remains useful as a bounded false-negative census of hidden mutation/ingress mechanisms, but those mechanisms are no longer required to explain the retained LTA/LCA observation.
@@ -12835,6 +12942,199 @@ and [normalization acknowledgement before group completion](../../tests/fixtures
 These explicit-RAM software scenarios do not establish physical persistence,
 sensor/actuator effects, external request reachability or all interrupt interleavings.
 
+#### Application session publication and inactivity ownership
+
+Application SID10 and SID27 are not the resident implementation in §77.26.
+The ordinary SID10 subfunction records at`259EC` admit:
+
+| Requested session | Allowed current sessions | Exact configured action |
+|---|---|---|
+| 1 | 1,2,3 | Immediate publication |
+| 2 | 2,3 | Deferred programming lifetime |
+| 3 | 1,3 | Immediate publication |
+
+Logical service-list selector3 exposes only1/3; selector4 exposes1/`0x40`.
+These selectors are not physical bus identities. The programming precondition
+rejects unsigned`E892>384`; equality admits. The native walk also establishes
+that this sample is loaded even when a different target session does not use
+the comparison.
+
+For an immediate row, `95A3E` requires four response-body bytes of capacity.
+Exact`26120=0` selects immediate publication: `9254A` stores current/previous/
+target session under its critical section, exits it, clears the published
+security bitmap, then `92518` invokes session notifications. Only afterward
+are the timing response and length staged. Same-session publication still
+notifies. The separate deferred-publication API and response-completion joins
+exist, but are not this exact SID10 policy.
+
+Notification `968CC` clears the generic issued-level token only when the
+seed-callback-success flag is1. Application notification `4D582` always clears
+its challenge, duplicate and client material. It clears diagnostic network
+requests`8196/8197` only for new session1 or old1→new`0x40`, **not every session
+change**. Exact SID28 restore byte`261C4=0` disables the independent `9704E`
+restore body. The [extended-session composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_app_session_extended_publishes_and_invalidates_security_before_response.json)
+verifies relocking and crypto reset before response processing, while retained
+network policy, failure counts, delay bits and both armed delay timers survive.
+
+TesterPresent's ordinary leaf only checks its remaining payload and requests
+a response. Inactivity is owned by receive/release/response joins:
+`91EA8` arms timer5 for a nondefault session using protocol-selected raw S3
+values; `9373A` pauses it during admitted receive, and `91F26` checks other
+active receive owners before restarting. Exact functional`3E80` has a separate
+receive-path shortcut when`5960==1`. Timer5 expiry reaches`91B18`, which
+publishes default1 and thereby relocks/notifies; this is not a physical reset.
+Timer durations and quantum5 remain raw firmware units, not measured seconds.
+
+#### Application security: token, challenge and delay are separate lifetimes
+
+The active application level2 uses **`27/03` and `27/04` in session3**.
+Both carry16 bytes after the SID/subfunction prefix: client material on the
+seed request, submitted key on the key request. The level1 callbacks configured
+for session2 return failure without supplying an algorithm; the resident
+`27/01–02` implementation must not be substituted for them.
+
+The actual application transform is software AES, not CMAC, SecOC or ICU-S:
+
+`K = AES128_DECRYPT(ROM[20840], client_material[497A])`
+
+`expected = AES128_ENCRYPT(K, challenge[495A])`
+
+`8D91A` compares until the first unequal byte. It clears active challenge and
+duplicate on acceptance but retains client material; the shared196-byte AES
+context is wiped after each block. Its intermediate/expected stack buffers are
+not explicitly wiped. The [real-AES acceptance composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_app_security_real_aes_key_success_publishes_before_response.json)
+executes the decrypt/encrypt/compare chain and verifies that generic security
+publication occurs before response processing.
+
+| Owner | State and consequential lifetime |
+|---|---|
+| Published security | Two-word bitmap`5954`; allzero means locked. Accepted key publishes level2 before response; session publication relocks. |
+| Generic key eligibility | Issued level`5DCD`, separate callback-success flag`5DCE`; key attempts and rejection consume the token. |
+| Application challenge | Active`FEBF4958`, challenge`495A`, duplicate`496A`, client material`497A`; failed comparison does not erase them. |
+| Attempt/delay policy | Saturating per-row failures`5DCF[2]`, mask`5DC8`, timers7/8; reseed, delay expiry and session notification do not reset failures. |
+
+Seed preparation copies client material **before** generic delay/current-security
+checks. An active nonzero challenge is reused. Consequently, the
+[active-delay reseed](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_app_security_reseed_updates_client_before_active_delay_rejection.json)
+updates client material and copies the challenge before NRC37 clears eligibility.
+Likewise, the already-unlocked same-level path runs the real callback before
+zeroing the outgoing seed and leaving no new key token.
+
+A real bad-key comparison increments failures; below threshold2 it returns35,
+and at/above threshold it arms the raw10000 delay and returns36. The
+[second-bad-key composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_app_security_second_bad_key_starts_delay_retains_challenge.json)
+verifies timer8 remaining10004, consumed token, retained challenge/client and
+locked published security. Delay expiry clears only its mask bit. A later
+reseed does not restore a fresh failure budget.
+
+Malformed key length with a matching token also counts a failure, but returns13
+without running the delay-threshold branch. A mismatched nonzero token similarly
+counts then returns24; a zero-token replay returns24 without incrementing.
+There is no independent delay-mask test in the key path. Actual delay handling
+normally removes eligibility, but these distinct gates must not be collapsed.
+Service cancellation clears generic continuation/token state, not the retained
+challenge, client, attempts or delay. Exact application callbacks are synchronous;
+their latent generic pending/cancel machinery is not a hardware-cancellation proof.
+
+New challenge generation remains a separate hardware-input boundary. `8D74A`
+samples complemented timer halfwords through`64E2A`, transforms candidate
+material through two software CTR initializations, and applies exclusions.
+After up to two transformed attempts, the raw last timer material is **also
+exclusion-checked**, unlike the resident fallback. Active duplicate state is
+cleared after successful key/session reset, not persistent previous-challenge
+history. The native compositions above use an explicitly retained challenge;
+they do not measure entropy, timer correlation or fallback frequency.
+
+#### Programming acknowledgement is not a completed application handoff
+
+Initial application SID10/02 admission retains deferred state1 and sends78;
+it neither publishes application session2 nor requests mode9. A later
+pending-response acknowledgement reaches operation3 and `95B88`. The eight-byte
+object constructed at`5D4C` is passed onward, but exact`8B334` ignores that
+argument: its actual submission uses its own zeroed word`FEBF3B14`.
+
+Application admission separately checks`E81F`, unsigned`66BA>=0A00` and physical
+addressing`819A==0`. Accepted submission reaches`4D604→B15AC(9)`, setting the
+request bitmap and application latch. The [pending-acknowledgement composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_app_programming_pending_ack_queues_mode9_not_session2.json)
+verifies that **the request is queued while its status slot remains unmaterialized**,
+application session remains3, and event0E/response78 remain pending.
+
+Once`3B19` is nonzero, `8B334` returns pending10 without polling hardware
+completion. Local [operation2 cancellation](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_app_programming_cancel_retains_queued_request9.json)
+clears local pending state and invalidates event0E, but does not withdraw request9
+or clear`81AE`. Request arbitration, live mode0900 and published mode are later
+owners (§77.24), not synonyms for acceptance.
+
+Actual handoff still requires the existing NvM-readiness join in`56CF6`.
+`65F5E` performs hardware writes and transfers CPU context using the fixed
+nine-word ROM`31788` record, not the constructed`5D4C` object. The resident replay
+is owned by §77.26. None of these new native scenarios performs a flash write,
+resident transfer, physical reset or completed diagnostic transport exchange.
+
+#### Communication-control policy and controller-mode generations
+
+Exact application SID28 admits subfunctions00/01/03 in session3 and only
+communication byte01. Subfunction02 is absent; the generic NM/subnet/node
+branches are not configured services. Its local unsigned sample limit is384,
+not the512 limit used by some application writes. The
+[admitted equality](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_sid28_disable_tx_admitted.json)
+and [first-above-limit rejection](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_sid28_admission_retains_policy.json)
+compositions check the real callback chain and retained policy on rejection.
+
+The consequential action is `8DA5E→4FD18`: mapped-mode bit0 writes retained
+`8196=00/11`. Thus sub0 releases the Tx-policy request, while sub1 and sub3
+produce the same local inhibition. The request name for sub3 does not establish
+an additional implemented normal-Rx disable. Exact lower adapters return0 and
+the dispatch gate returns5A, so this software action completes synchronously;
+that is not a controller acknowledgement. SID28 does **not** produce immediate
+inhibit`7F97` or delayed COM inhibit`7F96`.
+
+Queued DCM continuation uses event26h and retained message`5DF8`. Cancellation
+removes that work and clears the release sentinel, not`8196`. Session restore
+is disabled by exact`261C4=0`; the selective clearing in`4D582` above remains
+the actual session-to-policy edge.
+
+Later foreground `49AD2` snapshots`8196/81CC`, reduces channel status, and requests
+enable only for state2, policy not11 and availability5A. Its edge cache records
+an **issued request**, ignoring the lower return value. Selected dispatch
+`21867=1→21870→2184C` reaches the real policy callbacks`7C110/7C136`.
+
+| Layer | Retained owner | Meaning, not an implied hardware acknowledgement |
+|---|---|---|
+| Diagnostic policy | `8196` | Requested normal-Tx inhibition |
+| Foreground edge cache | `7F35` | Last issued enable/disable edge |
+| Lower policy | `3DE0/3DE1/3DE2` | Requested policy, reconciled software policy and countdown |
+| Upper indication | `3DF0`, selected mode`4924` | Software network indication/progression |
+| Logical controller | `48D8` | Request cache, which can change before driver completion |
+| Physical-driver software state | `5020[index]` | Independent initialized/running/stopped/pending/recovery states |
+
+The [foreground composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_sid28_policy_to_requested_network_mode.json)
+changes requested policy without fabricating a driver confirmation. Periodic
+`7A254` runs policy reconciliation before driver polling/fault aggregation;
+these are separately scheduled generations. Their COM gates and existing
+receive-generation monitors remain distinct owners (§77.24).
+
+The exact selected mapping is **logical controller0 → driver index1 →
+RSCFD0 channel1**, established by`21978=FF00FF` and the pointer row selecting
+`FFD20014/18/1C`. The P1M-E manual identifies these as`CFDC1CTR/STS/ERFL`.
+This does not identify a vehicle bus or transceiver wiring.
+
+`7F4DC(...,3)` can cache logical stopped state before `83FFA` has moved the
+selected driver beyond stop-pending`3EC1`. The [native stop-request composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_controller_stop_pending_before_mmio.json)
+checks that ordering and stops at`837D6`, before the first physical status read.
+Actual start/stop completion depends on GSTS/CSTS and configured resources.
+The stopped-software path requests channel reset, not automatically physical
+sleep; exact no-communication adapters do not establish transceiver sleep/wakeup.
+
+Hardware bus-off is separately observed from ERFL bit3 (BOEF), cleared with the
+actual write-zero mask and latched at`5010`. Its mapped software event occupies
+`48FE` bits7:6. The marker/nibble-integrity failure path occupies bits1:0 instead;
+not every stop/recovery is bus-off. Recovery state`491C`, countdown`491E` and
+selected mode`4924` are separate. Expiring a software hold does not prove physical
+bus recovery. Register polling, shared-module reinitialization, bus delivery and
+external transport reachability remain explicit dependencies; no peripheral
+model was extended for these compositions.
+
 ### 77.26 Resident diagnostics, transfer ownership and queued programming boundaries
 
 The resident implementation is distinct from application DCM in §77.25.
@@ -13157,21 +13457,57 @@ This does not claim that an invalid queued request is reachable through an admit
 external service.
 
 
-**Remaining high-value dependencies:** remaining numerical control-map surfaces
-and cross-task retention; physical3838..383C/status sources, ADC/DMA, GPIO and
-local-link freshness; the unassigned `B1C8.bit5` producer; production admission
-of the0600 stimulus start and mode/diagnostic/foreground interleavings; physical
-persistence of thermal and learned records; resident timer entropy/fallback,
-CRC admission and the dynamic programming driver; SEG/cache/ECC/programming
-feedback; OEM service identities, calibration units and physical source identity.
-Acquisition publication, numerical fit/stimulus transitions, cached-command
-precedence, output-owner arbitration, resident AES/CBC/CMAC and security lifetimes
-are recovered software contracts, not placeholders for those hardware questions.
-A complete peripheral or NvM emulator is not a prerequisite for continuing
-application reconstruction. Static connectivity and bounded native scenarios
-are not exhaustive semantic closure or vehicle results.
+**Remaining high-value dependencies:** additional numerical/calibration surfaces
+and cross-task retention/interleavings; physical3838..383C/status sources,
+ADC/DMA, GPIO and local-link freshness; the unassigned `B1C8.bit5` producer;
+production admission of the0600 stimulus start; end-to-end application transport,
+response completion and controller-status acknowledgement; physical persistence
+of thermal and learned records; application/resident timer entropy and fallback;
+resident CRC admission and the dynamic programming driver; SEG/cache/ECC feedback;
+OEM service identities, calibration units and physical source identity.
+The recovered current-reference, session/security, programming-request and
+network-policy contracts distinguish these dependencies rather than replacing
+them with assumed success. A complete peripheral or NvM emulator is not a
+prerequisite for continuing application reconstruction. Static connectivity and
+bounded native scenarios are not exhaustive semantic closure or vehicle results.
 
-**2026-10-16 checkpoint: adaptation, image cryptography and output-owner lifetimes.**
+**2026-10-16 checkpoint: current-reference feedback, application sessions/security and network lifetimes.**
+The connected contracts are owned by
+[current-reference feedback and retained transitions](#3412-feedback-derived-current-references-and-retained-map-transitions),
+[application session publication](#application-session-publication-and-inactivity-ownership),
+[application security](#application-security-token-challenge-and-delay-are-separate-lifetimes),
+[programming acknowledgement](#programming-acknowledgement-is-not-a-completed-application-handoff)
+and [communication-control generations](#communication-control-policy-and-controller-mode-generations).
+Native compositions verify paired feedback and asymmetric release, independent
+actual/baseline current values, session/security publication and retained delays,
+real software AES comparison, queued-versus-completed programming state, and
+network policy/request/pending-state boundaries. No new peripheral model or live
+vehicle experiment was introduced. Whole-image semantic reconstruction remains open.
+
+Independent fresh four-stage A/B rebuilds and signature finalization produced
+identical canonical inventories. Corpus, semantic coverage and outside-function
+outputs were regenerated; live coverage and project parity passed. Fresh E1/E2
+HighFunction audits retained the same candidate rows and function sets. Rebuilt
+C preserves the signed scaling return, application-security message pointer and
+fourth-argument communication-admission NRC pointer.
+
+The assist-oracle producer now checks the exact signed actual/baseline selection
+and current-publication instructions instead of anonymous C spellings. A
+throwaway derivative changing the publication source from actual `6DC8` to
+feedback baseline `6DCA` was rejected. Prose/recommendation/constant-output
+assertions were removed; existing binary geometry, calibration behavior,
+reader/writer and regeneration regressions remain.
+
+The matching project/corpus snapshot was promoted after clean teardown, with
+unchanged corpus identity. Semantic coverage, function boundaries, D5 and
+hidden-ingress provenance, assist/command-cone and B6 composition/end-to-end/
+ingress/acceptance, CodeFlash, external ingress, protected030/EPS transmit,
+application RAM-loader, retained family-census and gate/log reconciliation gates
+passed. The historical corrupted-events warning remains confined to the retained
+capture; source firmware and raw captures were not modified. New report links
+resolved and promoted scenario scaffolds were removed.
+
+**Preceding checkpoint `a38bf0df` (2026-10-16): adaptation, image cryptography and output-owner lifetimes.**
 The connected contracts are owned by
 [adaptation and retained-record admission](#3411-adaptation-stimulus-and-retained-record-admission),
 [output-owner admission and release](#output-owner-admission-priority-and-deferred-release),

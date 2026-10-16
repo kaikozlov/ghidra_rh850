@@ -178,25 +178,25 @@
     "0x038162": {
       "body_sha256": "fe6b7eff71c8177b1441e1db3851e074a6c6536bfe54267c36ba4054407d8037",
       "body_size": 504,
-      "decompiled_c_sha256": "9dbd2f6276c0f1612f8167b5c6c0d65293aba8ab54555ee57372b521e2a47d9d",
+      "decompiled_c_sha256": "7929aa3241673bdfe469ee75f02d98760f63f2da81ef00d5fe38d7ecec1ae40c",
       "role": "downstream motor-current processing"
     },
     "0x03835E": {
       "body_sha256": "5b3e60f24a390be1019d3b7028211c3cdec2c69f45596d0e9e02b52672055f2e",
       "body_size": 52,
-      "decompiled_c_sha256": "ac88022150252864e408f16260310d49058d068efcb6ba859dcfb46101261455",
+      "decompiled_c_sha256": "83c3bcdb5cc6c306cef680e542d52fd4ca0b66f4697c8da6f2cc996f1b98bc1b",
       "role": "motor-current bound stage"
     },
     "0x0384D8": {
       "body_sha256": "91c5e85b853c58aec231c10bd3e185c3550c72ae2f3190632fa5f54d1d105696",
       "body_size": 38,
-      "decompiled_c_sha256": "571e727d69c72a9a475d445b4a20353070b80c748500d8b38d9f0536339229e4",
+      "decompiled_c_sha256": "c2cec6ca20c7f9f5d86e0308286af1d06ad562cc25132fd7ad755fe1c2f62915",
       "role": "signed motor-current command stage"
     },
     "0x038502": {
       "body_sha256": "41eb9c6e202e6d80cb9d353888696fb3a1a5ebff1323ed4fab2b3c7be3dc04cc",
       "body_size": 124,
-      "decompiled_c_sha256": "4dd74a428fbece3c0641cd3ea922a18c71ab452333192a59ca7dbb2196bb2ec6",
+      "decompiled_c_sha256": "df043f4fea4d37230ae2c716e134fc2caaba2fa8013ac9f0f3642c9fdee6fe4b",
       "role": "motor-current command magnitude map"
     },
     "0x0387BA": {
@@ -238,7 +238,7 @@
     "0x05DF5C": {
       "body_sha256": "c496bf67475b688190f244ba164ea1535d676539ef21bb7bce020729b4c7546f",
       "body_size": 676,
-      "decompiled_c_sha256": "51bb2e969844a277265d5ac7a1ea419f1dff03ae395a4d718e7823eae03d7178",
+      "decompiled_c_sha256": "069c103129e8ffa7473fad372297c44d7c7125f414d36515aea5538515cf1a3a",
       "role": "motor-model scheduler aggregate"
     },
     "0x065FEA": {
@@ -3008,7 +3008,7 @@
     }
   ],
   "target": {
-    "canonical_function_count": 7318,
+    "canonical_function_count": 7320,
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "software_id": "8965F3307000"
   }

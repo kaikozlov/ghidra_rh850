@@ -1,0 +1,139 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_app_security_real_aes_key_success_publishes_before_response",
+  "entry": {
+    "role": "Synthetic configured SID27 sub4 operation0 with prior issued level2 token. Executes actual application software AES decrypt-under-ROM20840 then encrypt-challenge and comparison, publishes security bit before95644; no response completion or hardware crypto/entropy claim.",
+    "scope": "resolved-address",
+    "address": "0x96b84"
+  },
+  "max_instructions": 200000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0x0",
+    "r7": "0xfebe1000"
+  },
+  "stop_addresses": [
+    "0x95644",
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1800",
+      "size": 2048,
+      "fill": 165,
+      "evidence": "isolated initialized nested-call stack; saved GPRs explicitly zero through gpr_fill"
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "empty priority-mask stack"
+    },
+    {
+      "address": "0xfebe5000",
+      "size": 4096,
+      "fill": 0,
+      "evidence": "explicit initialized DCM software state, not external reachability or receive execution"
+    },
+    {
+      "address": "0xfebf4900",
+      "size": 768,
+      "fill": 0,
+      "evidence": "explicit initialized app-SA buffers and software AES contexts, no entropy emulation"
+    },
+    {
+      "address": "0xfebe1000",
+      "hex": "0011befe100000000212befe00000000000000004000000027000200",
+      "evidence": "advanced16-byte key message"
+    },
+    {
+      "address": "0xfebe1200",
+      "hex": "6704a5a5",
+      "evidence": "reserved positive response header"
+    },
+    {
+      "address": "0xfebe5dcc",
+      "hex": "0102010001",
+      "evidence": "row1, issued level2 token, issued flag1, level2 failure1"
+    },
+    {
+      "address": "0xfebf4958",
+      "hex": "5a0000112233445566778899aabbccddeeff00112233445566778899aabbccddeeff2a5e0be8120dd79241f62b5b1f6ed45d",
+      "evidence": "retained application challenge and client material; no timer sampling"
+    },
+    {
+      "address": "0xfebe1100",
+      "hex": "69c4e0d86a7b0430d8cdb78070b4c55a",
+      "evidence": "known AES128 standard ciphertext; client material decrypts to000102..0F"
+    },
+    {
+      "address": "0xfebf498c",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "software AES context wipe canary"
+    }
+  ],
+  "checks": [
+    {
+      "name": "level2 security bitmap published",
+      "kind": "memory",
+      "address": "0xfebe5954",
+      "size": 8,
+      "equals_hex": "0200000000000000"
+    },
+    {
+      "name": "generic issued token consumed",
+      "kind": "memory",
+      "address": "0xfebe5dcd",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "level2 failures cleared",
+      "kind": "memory",
+      "address": "0xfebe5dd0",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "challenge and duplicate consumed",
+      "kind": "memory",
+      "address": "0xfebf4958",
+      "size": 34,
+      "equals_hex": "00000000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "client material retained after acceptance",
+      "kind": "memory",
+      "address": "0xfebf497a",
+      "size": 16,
+      "equals_hex": "2a5e0be8120dd79241f62b5b1f6ed45d"
+    },
+    {
+      "name": "196-byte AES context wiped",
+      "kind": "memory",
+      "address": "0xfebf498c",
+      "size": 196,
+      "equals_hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "positive response has no extra body",
+      "kind": "memory",
+      "address": "0xfebe5de0",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "bounded accepted-key response boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x95644"
+    }
+  ]
+}

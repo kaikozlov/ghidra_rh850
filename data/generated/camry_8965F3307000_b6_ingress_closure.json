@@ -537,8 +537,8 @@
     "Joined to the Sep-10 ID63 marker experiment, the direct Panda B6 disappears before successful F33 controller1 decode/CanIf admission while native B6 continues to reach the same family1/profile2 queue."
   ],
   "target": {
-    "canonical_function_count": 7318,
-    "canonical_inventory_sha256": "f5adc7a4d686d75ad3df906af208435f8f09429a8eddf8d92b7524402945ef07",
+    "canonical_function_count": 7320,
+    "canonical_inventory_sha256": "cd88d1a09ae2a9e683ed9c7e5c5811bb0243d39e1337006df4c22dbbb7626271",
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "software_id": "8965F3307000"
   }

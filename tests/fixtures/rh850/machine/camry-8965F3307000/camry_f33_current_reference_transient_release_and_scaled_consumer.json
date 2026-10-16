@@ -1,0 +1,185 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_current_reference_transient_release_and_scaled_consumer",
+  "entry": {
+    "role": "Real5E202 current-input snapshot, measured feedback, transient-floor release, configured bank1 additional scaling, current-map selection and publication; stop before38A58. Synthetic retained generations expose pre-scaling feedback baseline separately from actual first-axis command; no physical-output claim.",
+    "scope": "resolved-address",
+    "address": "0x5e202"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "r6": "0x2",
+    "r7": "0x200",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x38a58"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated nested-call stack; all calls execute exact firmware"
+    },
+    {
+      "address": "0xfebe6af4",
+      "size": 1168,
+      "fill": 0,
+      "evidence": "explicit synthetic initialized motor-pipeline working state through6F83; overwritten sample and diagnostic sibling follow"
+    },
+    {
+      "address": "0xfebe6af4",
+      "hex": "00fc0010",
+      "evidence": "independent synthetic cross-rate inputs: motor sample6AF4=-1024, diagnostic sibling6AF6=4096; never a vehicle-command assertion"
+    },
+    {
+      "address": "0xfebe5f36",
+      "hex": "0002",
+      "evidence": "synthetic512 raw input chooses the exact38162 speed-map zero tail; no OEM units are assigned"
+    },
+    {
+      "address": "0xfebe71ec",
+      "hex": "0000",
+      "evidence": "healthy paired-channel gate;380DE follows its real no-reset branch and38162 computes its real correction path"
+    },
+    {
+      "address": "0xfebe7d4a",
+      "hex": "0000",
+      "evidence": "explicit phase-domain input to38162; no rotor position or physical unit is asserted"
+    },
+    {
+      "address": "0xfebe8a14",
+      "hex": "00",
+      "evidence": "real37A92 initialization gate is inactive; this case targets command conversion rather than feedback-coefficient initialization"
+    },
+    {
+      "address": "0xfebe8b28",
+      "hex": "00000000",
+      "evidence": "explicit37E48 acquisition-status input; zero acquisition snapshots remain real RAM inputs"
+    },
+    {
+      "address": "0xfebee5c3",
+      "hex": "00",
+      "evidence": "select exact385C4 ROM bank0; no calibration bytes are replaced"
+    },
+    {
+      "address": "0xfebee741",
+      "hex": "00000000000000",
+      "evidence": "explicit385C4 inactive external-limit status and magnitude"
+    },
+    {
+      "address": "0xfebeead0",
+      "hex": "00000000",
+      "evidence": "non-magic380DE guard; no software reset callback is bypassed or replaced"
+    },
+    {
+      "address": "0xfebe6f7e",
+      "hex": "66a9",
+      "evidence": "Retained ordinary thermal-floor publication from3A406; exact maps are flat minus22170."
+    },
+    {
+      "address": "0xfebe6b50",
+      "hex": "e0b1",
+      "evidence": "Prior bank0 feedback-derived first-axis request."
+    },
+    {
+      "address": "0xfebe6b74",
+      "hex": "f8ad",
+      "evidence": "More-negative prior bank1 request; ordinary selector takes minimum."
+    },
+    {
+      "address": "0xfebe6d88",
+      "hex": "5a0000b0",
+      "evidence": "Prior transient source5A and selected request; current6B4C is zero."
+    },
+    {
+      "address": "0xfebe6d8c",
+      "hex": "00b0",
+      "evidence": "Retained transient curve output seeds release accumulator."
+    },
+    {
+      "address": "0xfebe6dfa",
+      "hex": "c8b5",
+      "evidence": "Previous additional-scaled output for delta observables."
+    },
+    {
+      "address": "0xfebe6ea8",
+      "hex": "5a",
+      "evidence": "Previously published qualification for additional envelope scaling."
+    },
+    {
+      "address": "0xfebee5c3",
+      "hex": "01",
+      "evidence": "Select real bank1 calibration; no ROM overlay."
+    },
+    {
+      "address": "0xfebee741",
+      "hex": "11",
+      "evidence": "Admit actual configured gain map."
+    },
+    {
+      "address": "0xfebee744",
+      "hex": "70170000",
+      "evidence": "Synthetic retained AC1C-derived input maps to gain69 through exact1699C rows."
+    }
+  ],
+  "checks": [
+    {
+      "name": "real caller reaches the next transform boundary after37F16",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x38a58"
+    },
+    {
+      "name": "Release chooses filtered floor and keeps transition active",
+      "kind": "memory",
+      "address": "0xfebe6d88",
+      "size": 12,
+      "equals_hex": "005a3cb03cb000e200323cb0"
+    },
+    {
+      "name": "Q16 release accumulator uses previous output and coefficient304",
+      "kind": "memory",
+      "address": "0xfebe6d98",
+      "size": 4,
+      "equals_hex": "00603bb0"
+    },
+    {
+      "name": "Configured signed gain69 narrows quotient toward zero",
+      "kind": "memory",
+      "address": "0xfebe6df0",
+      "size": 4,
+      "equals_hex": "450001d5"
+    },
+    {
+      "name": "Additional scaling publishes new actual first-axis bound and prior value",
+      "kind": "memory",
+      "address": "0xfebe6dfa",
+      "size": 4,
+      "equals_hex": "01d5c8b5"
+    },
+    {
+      "name": "Actual command differs from feedback baseline before additional scaling",
+      "kind": "memory",
+      "address": "0xfebe6dc8",
+      "size": 4,
+      "equals_hex": "01d53cb0"
+    },
+    {
+      "name": "Current publication observes actual first-axis command",
+      "kind": "memory",
+      "address": "0xfebe6d86",
+      "size": 2,
+      "equals_hex": "01d5"
+    }
+  ]
+}

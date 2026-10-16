@@ -1,0 +1,144 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_current_reference_negative_delta_releases_filter",
+  "entry": {
+    "role": "Real5E202 through current-pair publication with retained release filter active. A negative raw-minus-prior delta releases immediately even when its magnitude exceeds128; filtered candidate remains observable but is not selected. Stop before38A58.",
+    "scope": "resolved-address",
+    "address": "0x5e202"
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "r6": "0x2",
+    "r7": "0x200",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x38a58"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "isolated nested-call stack; all calls execute exact firmware"
+    },
+    {
+      "address": "0xfebe6af4",
+      "size": 1168,
+      "fill": 0,
+      "evidence": "explicit synthetic initialized motor-pipeline working state through6F83; overwritten sample and diagnostic sibling follow"
+    },
+    {
+      "address": "0xfebe6af4",
+      "hex": "00fc0010",
+      "evidence": "independent synthetic cross-rate inputs: motor sample6AF4=-1024, diagnostic sibling6AF6=4096; never a vehicle-command assertion"
+    },
+    {
+      "address": "0xfebe5f36",
+      "hex": "0002",
+      "evidence": "synthetic512 raw input chooses the exact38162 speed-map zero tail; no OEM units are assigned"
+    },
+    {
+      "address": "0xfebe71ec",
+      "hex": "0000",
+      "evidence": "healthy paired-channel gate;380DE follows its real no-reset branch and38162 computes its real correction path"
+    },
+    {
+      "address": "0xfebe7d4a",
+      "hex": "0000",
+      "evidence": "explicit phase-domain input to38162; no rotor position or physical unit is asserted"
+    },
+    {
+      "address": "0xfebe8a14",
+      "hex": "00",
+      "evidence": "real37A92 initialization gate is inactive; this case targets command conversion rather than feedback-coefficient initialization"
+    },
+    {
+      "address": "0xfebe8b28",
+      "hex": "00000000",
+      "evidence": "explicit37E48 acquisition-status input; zero acquisition snapshots remain real RAM inputs"
+    },
+    {
+      "address": "0xfebee5c3",
+      "hex": "00",
+      "evidence": "select exact385C4 ROM bank0; no calibration bytes are replaced"
+    },
+    {
+      "address": "0xfebee741",
+      "hex": "00000000000000",
+      "evidence": "explicit385C4 inactive external-limit status and magnitude"
+    },
+    {
+      "address": "0xfebeead0",
+      "hex": "00000000",
+      "evidence": "non-magic380DE guard; no software reset callback is bypassed or replaced"
+    },
+    {
+      "address": "0xfebe6f7e",
+      "hex": "66a9",
+      "evidence": "Retained ordinary thermal-floor publication from3A406; exact maps are flat minus22170."
+    },
+    {
+      "address": "0xfebe6b50",
+      "hex": "d8dc",
+      "evidence": "Retained feedback request below ordinary curve floor."
+    },
+    {
+      "address": "0xfebe6b74",
+      "hex": "c0e0",
+      "evidence": "Independent second feedback request."
+    },
+    {
+      "address": "0xfebe6d88",
+      "hex": "005a",
+      "evidence": "Ordinary source with transition filtering already active."
+    },
+    {
+      "address": "0xfebe6d8c",
+      "hex": "a8e4",
+      "evidence": "Previous filtered curve output."
+    },
+    {
+      "address": "0xfebe6d98",
+      "hex": "0000a8e4",
+      "evidence": "Consistent prior Q16 accumulator for minus7000."
+    }
+  ],
+  "checks": [
+    {
+      "name": "real caller reaches the next transform boundary after37F16",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x38a58"
+    },
+    {
+      "name": "Negative delta selects raw floor and clears active filter",
+      "kind": "memory",
+      "address": "0xfebe6d88",
+      "size": 12,
+      "equals_hex": "000000e200e200e258fda5e4"
+    },
+    {
+      "name": "Filter arithmetic executes before asymmetric release decision",
+      "kind": "memory",
+      "address": "0xfebe6d98",
+      "size": 4,
+      "equals_hex": "80d8a4e4"
+    },
+    {
+      "name": "Raw floor reaches actual current selection and feedback baseline",
+      "kind": "memory",
+      "address": "0xfebe6dc8",
+      "size": 4,
+      "equals_hex": "00e200e2"
+    }
+  ]
+}
