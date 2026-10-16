@@ -900,8 +900,8 @@
     ]
   },
   "exact_rdbi_table": {
-    "offset": "0x2928C",
-    "record_count": 241
+    "offset": "0x2927C",
+    "record_count": 242
   },
   "normal_selector_effect_closure": {
     "C58B8_C1A4_C1A6_selector_records": {
@@ -1057,10 +1057,10 @@
     "classification": "verified canonical direct-reference negative: no exact F33 RDBI callback directly reads FEBEC158/FEBEC156, and canonical write targets of all direct selector-reader functions do not intersect the 136 direct RDBI RAM source cells. Pointer/indexed or downstream-derived diagnostic effects remain outside this negative.",
     "denominator": {
       "distinct_direct_ram_read_cells_ge_FEBE0000": 136,
-      "rdbi_records": 241,
+      "rdbi_records": 242,
       "selector_direct_reader_functions": 34,
       "selector_reader_write_targets_intersecting_rdbi_read_cells": 0,
-      "unique_callbacks": 195
+      "unique_callbacks": 196
     }
   },
   "shared_proxy_scale": {
@@ -1071,7 +1071,7 @@
   },
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-    "corpus_function_count": 7320,
+    "corpus_function_count": 7328,
     "software_id": "8965F3307000"
   }
 }

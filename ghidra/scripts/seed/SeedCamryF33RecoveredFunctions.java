@@ -4005,7 +4005,7 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     message.add(bytes, "request", "Advanced after admitted SID/subfunction prefixes.");
     message.add(u32, "request_length", "Remaining request bytes.");
     message.add(bytes, "response", "Advanced past separately counted prefixes.");
-    message.add(u32, "response_length", "Response body length, excluding retained prefix count.");
+    message.add(u32, "response_length", "Handler body length; main5630 includes retained prefixes after9126A. Transport extent is16-bit.");
     message.add(u8, "addressing_kind", "Low bit supplied to application gate;1 selects functional response suppression.");
     message.add(u8, "suppress_positive", "Captured subfunction bit7.");
     message.add(u16, "opaque_12", "Not interpreted here.");
@@ -4126,9 +4126,9 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         new ParameterImpl("response", infoPointer, currentProgram))
         .setComment("Initialize context; run first policy, service/session/security resolution, then second policy before direct/subfunction dispatch. Result1 stages NRC; other nonzero policy results choose silent disposition3. Session denial precedes application addressing publication.");
     semanticFunction(0x9139EL, "f33_dcm_clear_active_service", v)
-        .setComment("Clear retained service ID562C, callback5628 and header count562D, then reset negative-response state.");
+        .setComment("Clear retained SID562C, callback5628 and prefix count562D, then reset message5630; this is not the NRC5624 reset.");
     semanticFunction(0x9165EL, "f33_dcm_cancel_active_service", v)
-        .setComment("If active callback exists, clear negative-response state and call operation2 with5630; then finish local cleanup and clear active service. Does not itself prove downstream control/persistence cancellation.");
+        .setComment("If callback exists, zero main message5630 then invoke operation2. Clear NRC5624 and active state afterward. Retained handler copies/application effects are independent.");
     semanticFunction(0x916ACL, "f33_dcm_notify_active_service_operation_three", v)
         .setComment("Invoke active callback with operation3 and5630 when nonnull; no inferred completion or physical result.");
     semanticFunction(0x91688L, "f33_dcm_get_message_context", messagePointer)
@@ -9535,6 +9535,1038 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     semanticData(0xFEBE5010L, new ArrayDataType(u8, 3, 1), "f33_driver_bus_off_observation_latch", "3Cclear/5Aobserved;setfromERFLBOEF");
   }
 
+  private void annotateMonitorCalibrationAndOutputEnvelopes() throws Exception {
+    CategoryPath category = new CategoryPath("/CamryF33");
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType s8 = SignedByteDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    StructureDataType layout0 = new StructureDataType(category, "F33MonitorCurrentCoefficients", 0);
+    layout0.setPackingEnabled(true);
+    StructureDataType layout1 = new StructureDataType(category, "F33MonitorCurrentActiveCalibration", 0);
+    layout1.setPackingEnabled(true);
+    StructureDataType layout2 = new StructureDataType(category, "F33MonitorCurrentStagedCalibration", 0);
+    layout2.setPackingEnabled(true);
+    StructureDataType layout3 = new StructureDataType(category, "F33MonitorCurrentRecord", 0);
+    layout3.setPackingEnabled(true);
+    StructureDataType layout4 = new StructureDataType(category, "F33RegulatorOutputEnvelopeCalibration", 0);
+    layout4.setPackingEnabled(true);
+    StructureDataType layout5 = new StructureDataType(category, "F33RegulatorOutputEnvelopeState", 0);
+    layout5.setPackingEnabled(true);
+    layout0.add(new ArrayDataType(s16, 6, 2), "negative_residual_gain", "Selected for residual<0.");
+    layout0.add(new ArrayDataType(s16, 6, 2), "nonnegative_residual_gain", "Selected for residual>=0.");
+    layout0.add(new ArrayDataType(s16, 6, 2), "bias", "Signed residual offset, not a physical zero claim.");
+    layout1.add(u8, "changed", "5A iff staged coefficients differ on valid nonbusy source path.");
+    layout1.add(u8, "range_error", "5A for rejected changed coefficients; equal bypasses validation.");
+    layout1.add(layout0, "coefficients", "Consumed by current conditioning before later scheduled adoption.");
+    layout1.add(new ArrayDataType(u8, 2, 1), "opaque_26", "Not assigned a calibration meaning.");
+    layout2.add(u8, "source_status", "32A8C publishes44/22.");
+    layout2.add(u8, "busy", "5A while refresh is unresolved.");
+    layout2.add(layout0, "coefficients", "Grouped by sign/bias across both banks.");
+    layout2.add(new ArrayDataType(u8, 2, 1), "opaque_26", "Not interpreted.");
+    layout2.add(u32, "marker", "A55A5AA5 valid; complementary failure. Setter publication is not acceptance.");
+    layout3.add(u32, "marker", "Record0200 marker, separate from status10.");
+    layout3.add(new ArrayDataType(s16, 3, 2), "bank1_negative_gain", "Serialized bank1 before bank0; different order from staged arrays.");
+    layout3.add(new ArrayDataType(s16, 3, 2), "bank1_nonnegative_gain", "Serialized bank1 before bank0; different order from staged arrays.");
+    layout3.add(new ArrayDataType(s16, 3, 2), "bank1_bias", "Serialized bank1 before bank0; different order from staged arrays.");
+    layout3.add(new ArrayDataType(s16, 3, 2), "bank0_negative_gain", "Serialized bank1 before bank0; different order from staged arrays.");
+    layout3.add(new ArrayDataType(s16, 3, 2), "bank0_nonnegative_gain", "Serialized bank1 before bank0; different order from staged arrays.");
+    layout3.add(new ArrayDataType(s16, 3, 2), "bank0_bias", "Serialized bank1 before bank0; different order from staged arrays.");
+    layout4.add(s8, "cubic_coefficient", "SLD.B at36982/36C8E loadsF5 as-11, not16-bit245.");
+    layout4.add(u8, "opaque_01", "Not part of the signed coefficient.");
+    layout4.add(s16, "first_upper", "Inclusive7658 saturation.");
+    layout4.add(s16, "first_lower", "Inclusive-7658 saturation.");
+    layout4.add(s16, "quadratic_coefficient", "Exact127.");
+    layout4.add(s16, "linear_coefficient", "Exact-1135.");
+    layout4.add(u16, "scale_upper", "Exact1707.");
+    layout4.add(u16, "scale_lower", "Exact700.");
+    layout4.add(new ArrayDataType(u8, 2, 1), "opaque_0e", "Not interpreted.");
+    layout4.add(s32, "base", "17365676; final addition is symmetrically saturated.");
+    layout4.add(s32, "lower", "Exact0.");
+    layout4.add(s32, "upper", "Exact17365676.");
+    layout4.add(s32, "band_width", "Exact209715 before/2048.");
+    layout5.add(u8, "second_saturation", "0interior,1positive,2negative; equality saturates.");
+    layout5.add(u8, "first_saturation", "0interior,1positive,2negative; equality saturates.");
+    layout5.add(u8, "reset_cleared_status", "Reset clears; no further role assigned here.");
+    layout5.add(u8, "opaque_03", "Preserved padding.");
+    layout5.add(s16, "first", "Clamped first-axis output.");
+    layout5.add(s16, "second", "Prior magnitude participates in next limit selection.");
+    layout5.add(s16, "selected_second_limit", "Magnitude clamp inside current envelope band.");
+    layout5.add(s16, "second_lower", "Lower envelope edge.");
+    layout5.add(s16, "second_upper", "Upper envelope edge.");
+    layout5.add(new ArrayDataType(u8, 2, 1), "opaque_0e", "Preserved padding.");
+    layout5.add(s32, "first_unclipped", "Scaled first-axis value before7658 clamp.");
+    layout5.add(s32, "second_unclipped", "Scaled second-axis value before selected limit.");
+    layout5.add(s32, "raw_cubic", "Cubic before its lower/upper clamp.");
+    layout5.add(s32, "lower_before_clamp", "Clamped cubic minus band width; before lower clamp.");
+    layout5.add(s32, "combined_second", "Common or wrapping common+/-differential divided2.");
+    layout5.add(u32, "retained_24", "Reset1024; normal composition preserves this field.");
+    layout5.add(u32, "retained_28", "Reset1024; normal composition preserves this field.");
+    semanticFunction(0x48D48L, "f33_refresh_monitor_current_reference_banks", v)
+        .setComment("Exact31E58=1: refresh each retained three-channel reference bank7E6C/7E72 only when corresponding "
+            + "snapshot636A/636B equals5A; otherwise hold the older reference generation.");
+    semanticFunction(0x48DA6L, "f33_condition_monitor_current_planes", v)
+        .setComment("Refresh qualified reference banks, then project six channels with signed residual-dependent gains6906/6912 "
+            + "and biases691E.7E78 uses622C minus retained7E6C minus bias;7E84 uses6238 minus32768 and bias;7E90 uses622C "
+            + "with the fixed midpoint. Symmetric32 multiply saturation, truncation/16384, then symmetric16 saturation. CH2 "
+            + "monitor representation, not rotating-frame feedback.");
+    semanticFunction(0x32724L, "f33_monitor_current_coefficients_differ", u32)
+        .setComment("Compare all18 active/staged signed halfwords; return5A iff any differ, else0. Comparison precedes range "
+            + "validation in32876.");
+    semanticFunction(0x327D6L, "f33_adopt_monitor_current_coefficients", v)
+        .setComment("Copy staged negative/nonnegative gain arrays and biases into active6906/6912/691E. Does not publish source "
+            + "marker or changed/error bytes.");
+    semanticFunction(0x32848L, "f33_reset_active_monitor_current_coefficients", v)
+        .setComment("Set all12 active gains to signedBE36=-16842 and all six biases0. Does not clear6904/6905 status bytes.");
+    semanticFunction(0x32876L, "f33_update_active_monitor_current_calibration", v)
+        .setComment("Only8A18==5A acts. Valid6954=A55A5AA5 and busy692D=0: compare; equal skips validation and publishes "
+            + "statuses0/0; changed validates, adopts on0 or resets active defaults on5A. Invalid marker/busy resets active "
+            + "coefficients but retains previous changed/error bytes. Stage and source marker are not invalidated by range "
+            + "rejection.");
+    semanticFunction(0x328D4L, "f33_copy_monitor_calibration_from_rom_record", v)
+        .setComment("Makes its own40-byte family2 record0200 getter call, separate from caller marker read. Copy coefficients "
+            + "only on status10; serialized bank1 precedes bank0, while RAM arrays group both banks by sign/bias. Getter "
+            + "reads immutable ROMA000, not setter RAMF5D0; no atomic two-read claim.");
+    semanticFunction(0x32972L, "f33_validate_staged_monitor_current_coefficients", u32)
+        .setComment("Return0 iff all12 gains are inclusively[-20912,-14080] and all six biases inclusively[-1835,1835]; "
+            + "otherwise5A. Signed16 calibration bounds30EA0..30EA6; no state mutation.");
+    semanticFunction(0x32A48L, "f33_reset_staged_monitor_current_coefficients", v)
+        .setComment("Set staged12 gains to-16842 and six biases0. Exact leaf changesR1/EP and preservesR10, which32A76 returns "
+            + "from preceding validation. Inline real p-code to preserve this ABI fact.");
+    semanticFunction(0x32A76L, "f33_validate_or_reset_staged_monitor_current_coefficients", u32)
+        .setComment("Return original range-validation status0/5A. On5A reset staged coefficients through32A48, without converting "
+            + "the failed result into success.");
+    semanticFunction(0x32A8CL, "f33_restore_monitor_current_calibration", v)
+        .setComment("First0200 getter must return10 with markerA55A5AA5;328D4 separately gets/copies coefficients, then "
+            + "validation may reset them. Success sets markerA55A5AA5/source44 and diagnostic0124 healthy; failure sets "
+            + "complementary marker5AA5A55A/source22 and event0124/failure32. No persistence or two-read atomicity claim.");
+    semanticFunction(0x32AF0L, "f33_reload_monitor_current_calibration_marker", u32)
+        .setComment("First0200 getter checks status10/marker; second independent getter through328D4 copies coefficients;32A76 "
+            + "validates/resets stage. ReturnA55A5AA5 on success, complementary5AA5A55A on failure. Reads ROM, not the "
+            + "setter RAM mirror.");
+    semanticFunction(0x32B30L, "f33_refresh_monitor_current_calibration", v)
+        .setComment("When6501==5A and source marker valid, set busy5A, reload via32AF0 and clear busy only on valid return; "
+            + "invalid return reports0124/failure32. Other admission states clear busy and retain marker. Active "
+            + "coefficients are adopted separately later.");
+    semanticFunction(0x32BE8L, "f33_submit_monitor_current_calibration_record", v)
+        .setComment("Serialize bank1 then bank0 coefficients after valid record marker and call setter0200. Ignore setter "
+            + "admission result; unconditionally publish valid6954 afterward. This marker is neither setter acceptance nor "
+            + "durability, and later getter still reads ROMA000.");
+    semanticFunction(0x32C78L, "f33_get_staged_monitor_current_range_status", u32)
+        .setComment("Forward32972 range result inR10; no additional gate or transformation.");
+    semanticFunction(0x3695EL, "f33_regulator_output_envelope_cubic_bank0", s32)
+        .setComment("Bank0 cubic in saturating abs16 of clamped first-axis output. Leading coefficient is signed BYTEF5=-11 "
+            + "(SLD.B), not halfword245. Sequential truncation: ((-1135+((127+(-11*x)/128)*x)/1024)/4)*x; symmetric32 "
+            + "saturated add to17365676. No physical unit inferred.");
+    semanticFunction(0x36C6AL, "f33_regulator_output_envelope_cubic_bank1", s32)
+        .setComment("Bank1 cubic in saturating abs16 of clamped first-axis output. Leading coefficient is signed BYTEF5=-11 "
+            + "(SLD.B), not halfword245. Sequential truncation: ((-1135+((127+(-11*x)/128)*x)/1024)/4)*x; symmetric32 "
+            + "saturated add to17365676. No physical unit inferred.");
+    semanticFunction(0x369E4L, "f33_compose_regulator_output_bank0", v)
+        .setComment("Bank0: reset on8BAE nonzero or8B28&40004. Healthy71EC low bits0 uses wrapping32 common+differential then "
+            + "signed/2; any invalid bit uses common terms directly. Clamp own signed scale6CF0 to700..1707; truncate/256, "
+            + "symmetric32 multiply, truncate/2048. First axis clamps+/-7658 with equality saturation. Second limit uses "
+            + "signed-byte cubic and209715-wide band, retaining prior output magnitude inside new band; current magnitude "
+            + "below lower edge selects lower edge. Publish separate unclipped values, band and saturation directions. Not "
+            + "physical PWM delivery.");
+    semanticFunction(0x36CF0L, "f33_compose_regulator_output_bank1", v)
+        .setComment("Bank1: reset on8BAF nonzero or8B28&40004. Healthy71EC low bits0 uses wrapping32 common-differential then "
+            + "signed/2; any invalid bit uses common terms directly. Clamp own signed scale6CF4 to700..1707; truncate/256, "
+            + "symmetric32 multiply, truncate/2048. First axis clamps+/-7658 with equality saturation. Second limit uses "
+            + "signed-byte cubic and209715-wide band, retaining prior output magnitude inside new band; current magnitude "
+            + "below lower edge selects lower edge. Publish separate unclipped values, band and saturation directions. Not "
+            + "physical PWM delivery.");
+    semanticFunction(0x5E444L, "f33_step_transitioned_channel_monitor_slice", v,
+        new ParameterImpl("unused_r6", u32, currentProgram),
+        new ParameterImpl("current_mode", u16, currentProgram),
+        new ParameterImpl("previous_mode", u16, currentProgram))
+        .setComment("Low16 current modeR7/prior modeR8 control entry initialization and monitor groups. For current>100h "
+            + "condition current planes before monitor consumers; for current>102h adopt active calibration only after "
+            + "fault aggregation. Thus this invocation uses the prior active-calibration generation. Mode600 sampling and "
+            + "later owner9 budgets are separate branches; no task-period claim.");
+    semanticFunction(0x5E9F2L, "f33_step_steady_channel_monitor_slice", v,
+        new ParameterImpl("unused_r6", u32, currentProgram),
+        new ParameterImpl("current_mode", u16, currentProgram))
+        .setComment("Steady-mode counterpart: current planes when low16 mode>100h; aggregate actions then calibration adoption "
+            + "when mode>102h. No transition initializers. Current conditioning therefore precedes active-calibration "
+            + "adoption in this call.");
+    semanticData(0xFEBE6904L, resolve(layout1), "f33_monitor_current_active_calibration",
+        "Exact recovered software layout; source generation and publication are separate.");
+    semanticData(0xFEBE692CL, resolve(layout2), "f33_monitor_current_staged_calibration",
+        "Exact recovered software layout; source generation and publication are separate.");
+    semanticData(0xA000L, resolve(layout3), "f33_monitor_current_rom_record",
+        "Exact recovered software layout; source generation and publication are separate.");
+    semanticData(0xFEBEF5D0L, resolve(layout3), "f33_monitor_current_setter_ram_record",
+        "Exact recovered software layout; source generation and publication are separate.");
+    semanticData(0x319E0L, new ArrayDataType(resolve(layout4), 2, 32), "f33_regulator_output_envelope_calibrations",
+        "Exact recovered software layout; source generation and publication are separate.");
+    semanticData(0xFEBE6BE8L, new ArrayDataType(resolve(layout5), 2, 44), "f33_regulator_output_envelopes",
+        "Exact recovered software layout; source generation and publication are separate.");
+    semanticData(0xFEBE7E6CL, new ArrayDataType(u16, 6, 2), "f33_monitor_current_retained_reference",
+        "Two independently qualified three-channel reference generations.");
+    semanticData(0xFEBE7E78L, new ArrayDataType(s16, 6, 2), "f33_monitor_current_dynamic_reference_plane",
+        "622C minus retained reference and bias; not rotating-frame feedback.");
+    semanticData(0xFEBE7E84L, new ArrayDataType(s16, 6, 2), "f33_monitor_current_second_midpoint_plane",
+        "6238 minus32768 and bias; signed calibrated projection.");
+    semanticData(0xFEBE7E90L, new ArrayDataType(s16, 6, 2), "f33_monitor_current_first_midpoint_plane",
+        "622C minus32768 and bias; separate source generation.");
+    semanticData(0x30EA0L, new ArrayDataType(s16, 4, 2), "f33_monitor_current_gain_bias_bounds",
+        "Gain upper/lower=-14080/-20912; bias upper/lower=1835/-1835, inclusive.");
+    getFunctionAt(toAddr(0x32A48L)).setInline(true);
+  }
+
+  private void annotateDiagnosticTransportOwnership() throws Exception {
+    CategoryPath category = new CategoryPath("/CamryF33");
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType F33DcmMessageContextType = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33DcmMessageContext");
+    DataType F33PduInfoType = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33PduInfo");
+    StructureDataType layout0 = new StructureDataType(category, "F33DcmReceiveRoute", 0);
+    layout0.setPackingEnabled(true);
+    StructureDataType layout1 = new StructureDataType(category, "F33DcmReceiveBufferConfiguration", 0);
+    layout1.setPackingEnabled(true);
+    StructureDataType layout2 = new StructureDataType(category, "F33DcmReceiveBufferState", 0);
+    layout2.setPackingEnabled(true);
+    StructureDataType layout3 = new StructureDataType(category, "F33DcmReceiveDescriptor", 0);
+    layout3.setPackingEnabled(true);
+    StructureDataType layout4 = new StructureDataType(category, "F33DcmTransmitDescriptor", 0);
+    layout4.setPackingEnabled(true);
+    StructureDataType layout5 = new StructureDataType(category, "F33DcmConnection", 0);
+    layout5.setPackingEnabled(true);
+    StructureDataType layout6 = new StructureDataType(category, "F33DcmProtocolConfiguration", 0);
+    layout6.setPackingEnabled(true);
+    StructureDataType layout7 = new StructureDataType(category, "F33DcmResponseNode", 0);
+    layout7.setPackingEnabled(true);
+    StructureDataType layout8 = new StructureDataType(category, "F33DcmResponseQueue", 0);
+    layout8.setPackingEnabled(true);
+    StructureDataType layout9 = new StructureDataType(category, "F33DcmRetryInfo", 0);
+    layout9.setPackingEnabled(true);
+    StructureDataType layout10 = new StructureDataType(category, "F33CanTpFrameInfo", 0);
+    layout10.setPackingEnabled(true);
+    StructureDataType layout11 = new StructureDataType(category, "F33CanTpTxStatePrefix", 0);
+    layout11.setPackingEnabled(true);
+    StructureDataType layout12 = new StructureDataType(category, "F33CanTpConfiguration", 0);
+    layout12.setPackingEnabled(true);
+    StructureDataType layout13 = new StructureDataType(category, "F33CanTpTxConnection", 0);
+    layout13.setPackingEnabled(true);
+    layout0.add(u16, "protocol_index", "Recovered field use; opaque fields remain uninterpreted.");
+    layout0.add(u16, "connection_index", "Recovered field use; opaque fields remain uninterpreted.");
+    layout0.add(u16, "receive_descriptor_index", "Recovered field use; opaque fields remain uninterpreted.");
+    layout0.add(u16, "communication_slot", "Recovered field use; opaque fields remain uninterpreted.");
+    layout0.add(u16, "paired_receive_slot_or_ffff", "Recovered field use; opaque fields remain uninterpreted.");
+    layout0.add(u16, "receive_id", "Recovered field use; opaque fields remain uninterpreted.");
+    layout1.add(u32, "capacity", "Recovered field use; opaque fields remain uninterpreted.");
+    layout1.add(new PointerDataType(u8, 4), "base", "Recovered field use; opaque fields remain uninterpreted.");
+    layout2.add(new PointerDataType(u8, 4), "write_cursor", "Recovered field use; opaque fields remain uninterpreted.");
+    layout2.add(u16, "received_length", "Recovered field use; opaque fields remain uninterpreted.");
+    layout2.add(new ArrayDataType(u8, 2, 1), "opaque_06", "Recovered field use; opaque fields remain uninterpreted.");
+    layout2.add(u16, "remaining_capacity", "Recovered field use; opaque fields remain uninterpreted.");
+    layout2.add(u8, "receiving", "Recovered field use; opaque fields remain uninterpreted.");
+    layout2.add(u8, "abort_pending", "Recovered field use; opaque fields remain uninterpreted.");
+    layout2.add(u8, "inactivity_participant", "Recovered field use; opaque fields remain uninterpreted.");
+    layout2.add(new ArrayDataType(u8, 3, 1), "opaque_0d", "Recovered field use; opaque fields remain uninterpreted.");
+    layout3.add(u32, "functional_timeout_raw", "Recovered field use; opaque fields remain uninterpreted.");
+    layout3.add(u16, "upper_receive_id", "Recovered field use; opaque fields remain uninterpreted.");
+    layout3.add(u16, "lower_receive_cancel_id", "Recovered field use; opaque fields remain uninterpreted.");
+    layout3.add(u8, "addressing_kind", "Recovered field use; opaque fields remain uninterpreted.");
+    layout3.add(u8, "functional_response_inhibit", "Recovered field use; opaque fields remain uninterpreted.");
+    layout3.add(new ArrayDataType(u8, 2, 1), "opaque_0a", "Recovered field use; opaque fields remain uninterpreted.");
+    layout4.add(u32, "response_capacity", "Recovered field use; opaque fields remain uninterpreted.");
+    layout4.add(u16, "upper_confirmation_id", "Recovered field use; opaque fields remain uninterpreted.");
+    layout4.add(u16, "lower_transmit_id", "Recovered field use; opaque fields remain uninterpreted.");
+    layout4.add(u8, "retain_session_on_failure", "Recovered field use; opaque fields remain uninterpreted.");
+    layout4.add(new ArrayDataType(u8, 3, 1), "opaque_09", "Recovered field use; opaque fields remain uninterpreted.");
+    layout5.add(u16, "configured_protocol_tag", "Recovered field use; opaque fields remain uninterpreted.");
+    layout5.add(u8, "opaque_02", "Recovered field use; opaque fields remain uninterpreted.");
+    layout5.add(u8, "priority", "Recovered field use; opaque fields remain uninterpreted.");
+    layout5.add(new PointerDataType(layout3, 4), "receive_rows", "Recovered field use; opaque fields remain uninterpreted.");
+    layout5.add(new PointerDataType(layout4, 4), "transmit", "Recovered field use; opaque fields remain uninterpreted.");
+    layout6.add(new PointerDataType(new PointerDataType(layout5, 4), 4), "connections", "Recovered field use; opaque fields remain uninterpreted.");
+    layout6.add(u32, "overall_timeout_raw", "Recovered field use; opaque fields remain uninterpreted.");
+    layout6.add(u16, "inactivity_timeout_raw", "Recovered field use; opaque fields remain uninterpreted.");
+    layout6.add(u16, "dispatch_delay_raw", "Recovered field use; opaque fields remain uninterpreted.");
+    layout6.add(u16, "p2_margin_raw", "Recovered field use; opaque fields remain uninterpreted.");
+    layout6.add(u16, "p2_star_margin_raw", "Recovered field use; opaque fields remain uninterpreted.");
+    layout6.add(u8, "published_protocol_value", "Recovered field use; opaque fields remain uninterpreted.");
+    layout6.add(u8, "allow_lower_cancellation", "Recovered field use; opaque fields remain uninterpreted.");
+    layout6.add(new ArrayDataType(u8, 2, 1), "opaque_12", "Recovered field use; opaque fields remain uninterpreted.");
+    layout7.add(new PointerDataType(layout7, 4), "next", "Recovered field use; opaque fields remain uninterpreted.");
+    layout7.add(new PointerDataType(u8, 4), "data", "Recovered field use; opaque fields remain uninterpreted.");
+    layout7.add(u16, "length", "Recovered field use; opaque fields remain uninterpreted.");
+    layout7.add(new ArrayDataType(u8, 2, 1), "opaque_0a", "Recovered field use; opaque fields remain uninterpreted.");
+    layout7.add(u8, "disposition", "Recovered field use; opaque fields remain uninterpreted.");
+    layout7.add(new ArrayDataType(u8, 3, 1), "opaque_0d", "Recovered field use; opaque fields remain uninterpreted.");
+    layout8.add(new PointerDataType(layout7, 4), "sentinel", "Recovered field use; opaque fields remain uninterpreted.");
+    layout8.add(new PointerDataType(layout7, 4), "tail", "Recovered field use; opaque fields remain uninterpreted.");
+    layout8.add(new PointerDataType(u8, 4), "copy_cursor", "Recovered field use; opaque fields remain uninterpreted.");
+    layout8.add(u16, "remaining_length", "Recovered field use; opaque fields remain uninterpreted.");
+    layout8.add(new ArrayDataType(u8, 2, 1), "opaque_0e", "Recovered field use; opaque fields remain uninterpreted.");
+    layout8.add(u8, "notification_result", "Recovered field use; opaque fields remain uninterpreted.");
+    layout8.add(u8, "pending_notification", "Recovered field use; opaque fields remain uninterpreted.");
+    layout8.add(new ArrayDataType(u8, 2, 1), "opaque_12", "Recovered field use; opaque fields remain uninterpreted.");
+    layout9.add(u8, "retry_kind", "Recovered field use; opaque fields remain uninterpreted.");
+    layout9.add(u8, "opaque_01", "Recovered field use; opaque fields remain uninterpreted.");
+    layout9.add(u16, "retry_count", "Recovered field use; opaque fields remain uninterpreted.");
+    layout10.add(new PointerDataType(u8, 4), "data", "Recovered field use; opaque fields remain uninterpreted.");
+    layout10.add(u32, "length", "Recovered field use; opaque fields remain uninterpreted.");
+    layout11.add(u32, "remaining_or_accepted_length", "Recovered field use; opaque fields remain uninterpreted.");
+    layout11.add(u16, "transmit_id", "Recovered field use; opaque fields remain uninterpreted.");
+    layout11.add(u16, "timeout_ticks", "Recovered field use; opaque fields remain uninterpreted.");
+    layout11.add(u8, "state", "Recovered field use; opaque fields remain uninterpreted.");
+    layout11.add(u8, "sequence_number", "Recovered field use; opaque fields remain uninterpreted.");
+    layout11.add(u8, "block_remaining", "Recovered field use; opaque fields remain uninterpreted.");
+    layout11.add(u8, "flow_control_flag", "Recovered field use; opaque fields remain uninterpreted.");
+    layout11.add(u8, "spacing_ticks", "Recovered field use; opaque fields remain uninterpreted.");
+    layout11.add(new ArrayDataType(u8, 3, 1), "opaque_0d", "Recovered field use; opaque fields remain uninterpreted.");
+    layout12.add(new PointerDataType(v, 4), "channel_rows", "Recovered field use; opaque fields remain uninterpreted.");
+    layout12.add(u16, "first_receive_id", "Recovered field use; opaque fields remain uninterpreted.");
+    layout12.add(u16, "first_transmit_id", "Recovered field use; opaque fields remain uninterpreted.");
+    layout12.add(u16, "opaque_08", "Recovered field use; opaque fields remain uninterpreted.");
+    layout12.add(u16, "first_canif_confirmation_id", "Recovered field use; opaque fields remain uninterpreted.");
+    layout12.add(u8, "channel_count", "Recovered field use; opaque fields remain uninterpreted.");
+    layout12.add(u8, "receive_count", "Recovered field use; opaque fields remain uninterpreted.");
+    layout12.add(u8, "transmit_count", "Recovered field use; opaque fields remain uninterpreted.");
+    layout12.add(u8, "opaque_0f", "Recovered field use; opaque fields remain uninterpreted.");
+    layout12.add(u8, "canif_confirmation_count", "Recovered field use; opaque fields remain uninterpreted.");
+    layout12.add(new ArrayDataType(u8, 3, 1), "opaque_11", "Recovered field use; opaque fields remain uninterpreted.");
+    layout13.add(u8, "opaque_00", "Recovered field use; opaque fields remain uninterpreted.");
+    layout13.add(u8, "channel_state_index", "Recovered field use; opaque fields remain uninterpreted.");
+    layout13.add(u16, "transmit_id", "Recovered field use; opaque fields remain uninterpreted.");
+    layout13.add(new ArrayDataType(u8, 4, 1), "opaque_04", "Recovered field use; opaque fields remain uninterpreted.");
+    layout13.add(u16, "upper_response_id", "Recovered field use; opaque fields remain uninterpreted.");
+    layout13.add(u16, "canif_frame_id", "Recovered field use; opaque fields remain uninterpreted.");
+    layout13.add(u8, "addressing_format", "Recovered field use; opaque fields remain uninterpreted.");
+    layout13.add(u8, "single_frame_only", "Recovered field use; opaque fields remain uninterpreted.");
+    layout13.add(u8, "address_byte", "Recovered field use; opaque fields remain uninterpreted.");
+    layout13.add(u8, "opaque_0f", "Recovered field use; opaque fields remain uninterpreted.");
+    layout13.add(u16, "frame_confirmation_timeout_raw", "Recovered field use; opaque fields remain uninterpreted.");
+    layout13.add(u16, "flow_control_timeout_raw", "Recovered field use; opaque fields remain uninterpreted.");
+    layout13.add(new ArrayDataType(u8, 2, 1), "opaque_14", "Recovered field use; opaque fields remain uninterpreted.");
+    layout13.add(u8, "frame_capacity", "Recovered field use; opaque fields remain uninterpreted.");
+    layout13.add(u8, "cancel_supported", "Recovered field use; opaque fields remain uninterpreted.");
+    layout13.add(u8, "opaque_18", "Recovered field use; opaque fields remain uninterpreted.");
+    layout13.add(u8, "pad_frames_to_eight", "Recovered field use; opaque fields remain uninterpreted.");
+    layout13.add(new ArrayDataType(u8, 6, 1), "opaque_1a", "Recovered field use; opaque fields remain uninterpreted.");
+    semanticFunction(0x91386L, "f33_dcm_reset_message_context", v)
+        .setComment("Zero main message pointers, lengths, addressing, suppression, capacity, SID and selector; opaque padding is "
+            + "untouched. Cancellation invokes this before operation2.");
+    semanticFunction(0x911B2L, "f33_dcm_stage_negative_response", v,
+        new ParameterImpl("message", new PointerDataType(F33DcmMessageContextType, 4), currentProgram),
+        new ParameterImpl("nrc", u8, currentProgram))
+        .setComment("NRC78 requests pending-response lifetime without setting final NRC5624. Other NRCs set5624 and "
+            + "serialize7F/SID/NRC at5967.");
+    semanticFunction(0x911DAL, "f33_dcm_select_response_disposition", v,
+        new ParameterImpl("message", new PointerDataType(F33DcmMessageContextType, 4), currentProgram))
+        .setComment("Select disposition0 positive,1 negative,2 suppressed positive,3 silent negative. Exact flag26AEB=0 disallows "
+            + "responses to SID bit6. Prior pending acceptance59EA bypasses suppress-positive and functional NRC "
+            + "suppression, not SID-bit6 filtering.");
+    semanticFunction(0x9126AL, "f33_dcm_complete_service_response", v,
+        new ParameterImpl("message", new PointerDataType(F33DcmMessageContextType, 4), currentProgram))
+        .setComment("Copy remaining request length/routing to main5630, add retained prefix count to body length, then select and "
+            + "stage final disposition. Does not itself mean transport confirmation.");
+    semanticFunction(0x912BEL, "f33_dcm_deliver_response_notification", u32,
+        new ParameterImpl("result", u8, currentProgram),
+        new ParameterImpl("pending_notification", u8, currentProgram))
+        .setComment("Nonzero pending flag invokes operation3 without clearing active state. Final notification runs "
+            + "service/generic observers, then clears active context and NRC; it does not invoke operation3.");
+    semanticFunction(0x91C0AL, "f33_dcm_dispatch_retained_receive", v,
+        new ParameterImpl("receive_slot", u16, currentProgram))
+        .setComment("Build routing from25EE8 and configured RX descriptors, obtain completed receive buffer and shared768-byte "
+            + "response buffer, then invoke91566 admission.");
+    semanticFunction(0x91C92L, "f33_dcm_run_queued_response_notification", v)
+        .setComment("Consume latched queue result/pending flag. Final notification resets queue transport state and finishes "
+            + "staged-session notifications before observers; pending flag preserves callback and invokes operation3.");
+    semanticFunction(0x91CE2L, "f33_dcm_stage_final_response", v,
+        new ParameterImpl("message", new PointerDataType(F33DcmMessageContextType, 4), currentProgram),
+        new ParameterImpl("disposition", u8, currentProgram))
+        .setComment("Only overall phase5960==2 stages a response. Use shared root5A20 and truncate total message response length "
+            + "to16-bit PduInfo before933F8.");
+    semanticFunction(0x920BEL, "f33_dcm_start_of_reception", u32,
+        new ParameterImpl("receive_id", u16, currentProgram),
+        new ParameterImpl("first_frame", new PointerDataType(F33PduInfoType, 4), currentProgram),
+        new ParameterImpl("total_length", u16, currentProgram),
+        new ParameterImpl("available", new PointerDataType(u16, 4), currentProgram))
+        .setComment("Map receive IDs2/3/4 to slots0/1/2; check communication permission and pending abort. Zero total length "
+            + "queries configured capacity only. Nonzero <=256 claims receive slot and arms watchdog0; larger returns3. "
+            + "Initial data pointer is not copied here.");
+    semanticFunction(0x92152L, "f33_dcm_copy_receive_data", u32,
+        new ParameterImpl("receive_id", u16, currentProgram),
+        new ParameterImpl("chunk", new PointerDataType(F33PduInfoType, 4), currentProgram),
+        new ParameterImpl("available", new PointerDataType(u16, 4), currentProgram))
+        .setComment("Require mapped active slot, communication admission and chunk length <=remaining capacity; copy into "
+            + "retained receive cursor and update16-bit received/remaining lengths. Rejection releases/reset slot and may "
+            + "restart inactivity.");
+    semanticFunction(0x921D2L, "f33_dcm_receive_indication", v,
+        new ParameterImpl("receive_id", u16, currentProgram),
+        new ParameterImpl("result", u8, currentProgram))
+        .setComment("Only active mapped slots participate. Success with permission arbitrates ownership; selected codes10..13 "
+            + "claim pending-dispatch slot, phase2, P2/overall timers and deferred event0 scheduling via timer6. Failure "
+            + "releases slot and considers S3 restart.");
+    semanticFunction(0x922AAL, "f33_dcm_run_scheduled_request", v)
+        .setComment("Event0 snapshots pending-dispatch slot and overall phase; phase2 installs current-dispatch slot and admits "
+            + "service, otherwise resets pending receive buffer.");
+    semanticFunction(0x926D2L, "f33_dcm_copy_transmit_data", u32,
+        new ParameterImpl("transmit_id", u16, currentProgram),
+        new ParameterImpl("chunk", new PointerDataType(F33PduInfoType, 4), currentProgram),
+        new ParameterImpl("retry", new PointerDataType(layout9, 4), currentProgram),
+        new ParameterImpl("available", new PointerDataType(u16, 4), currentProgram))
+        .setComment("Require matching configured confirmation ID and state30/31/32/40. Copy response cursor bytes into lower "
+            + "buffer, advance pointer/decrement16-bit length; retry descriptors may rewind. Rearm watchdog1. This copy is "
+            + "not final confirmation.");
+    semanticFunction(0x927A4L, "f33_dcm_map_response_delivery_result", u32,
+        new ParameterImpl("disposition", u8, currentProgram),
+        new ParameterImpl("transport_result", u8, currentProgram))
+        .setComment("Positive0 maps success/failure0/1; negative1 maps2/3; suppressed positive2 always0; other dispositions "
+            + "including silent3 and pending10 map2. Return is four-valued, not bool.");
+    semanticFunction(0x92836L, "f33_dcm_transmit_confirmation", v,
+        new ParameterImpl("transmit_id", u16, currentProgram),
+        new ParameterImpl("result", u8, currentProgram))
+        .setComment("Matching configured ID pops queue head, latches mapped result and explicit-pending flag. Pending30..32 "
+            + "restarts pending timers and may queue29/1; final40 finalizes session/receive ownership and queues29. Actual "
+            + "callback notification occurs later.");
+    semanticFunction(0x9296AL, "f33_dcm_submit_transport_response", u32,
+        new ParameterImpl("transmit_id", u16, currentProgram),
+        new ParameterImpl("response", new PointerDataType(F33PduInfoType, 4), currentProgram),
+        new ParameterImpl("disposition", u8, currentProgram))
+        .setComment("Dispositions>1 except10/11 bypass lower transmission and return84. Check communication; propagate lower "
+            + "refusal as81, unavailable as82, pending-inhibited as83. Zero lower return arms watchdog1; pending10 also "
+            + "sets59EA. Software acceptance is not CAN transmission.");
+    semanticFunction(0x92AB0L, "f33_dcm_reset_response_queue", v)
+        .setComment("Initialize shared response cursor/capacity and fixed sentinel plus four response nodes: "
+            + "positive0,negative1,silent3,pending10. Reset forced/explicit pending flags5965/5966; do not erase "
+            + "handler-retained request copies.");
+    semanticFunction(0x92C5CL, "f33_dcm_transport_watchdog_expired", v)
+        .setComment("Timer1 stops processing timers. Final/queued-final states notify failure, service/pending states cancel "
+            + "operation2, then release receive/session joins and reset queue. Lower cancellation is requested only in the "
+            + "specified in-flight states.");
+    semanticFunction(0x92E00L, "f33_dcm_try_final_response", v,
+        new ParameterImpl("transmit_id", u16, currentProgram),
+        new ParameterImpl("response", new PointerDataType(F33PduInfoType, 4), currentProgram),
+        new ParameterImpl("disposition", u8, currentProgram))
+        .setComment("Try9296A; accepted response retains queue until confirmation. Communication unavailability queues "
+            + "retry2B/state21 unless forced pending forbids it. Suppression/refusal complete software ownership without "
+            + "proving delivery.");
+    semanticFunction(0x92F76L, "f33_dcm_try_pending_response", v,
+        new ParameterImpl("transmit_id", u16, currentProgram),
+        new ParameterImpl("response", new PointerDataType(F33PduInfoType, 4), currentProgram),
+        new ParameterImpl("explicit_pending", u8, currentProgram))
+        .setComment("Submit pending10. Explicit service request may receive operation3 after acknowledgement; automatic P2 "
+            + "pending does not. Pending refusal retires node, handles session failure and timers, without fabricating a "
+            + "successful network frame.");
+    semanticFunction(0x93188L, "f33_dcm_append_response_node", v,
+        new ParameterImpl("queue", new PointerDataType(layout8, 4), currentProgram),
+        new ParameterImpl("node", new PointerDataType(layout7, 4), currentProgram))
+        .setComment("Append fixed node via tail->next; update tail and clear node next. No payload copy or allocation.");
+    semanticFunction(0x93198L, "f33_dcm_enqueue_pending_response", new PointerDataType(F33PduInfoType, 4),
+        new ParameterImpl("service_id", u8, currentProgram))
+        .setComment("Serialize7F/SID/78 at596A, append fixed pending node4, refresh cursor and return node4 descriptor. Payload "
+            + "remains owned by DCM until copied/confirmed.");
+    semanticFunction(0x931CEL, "f33_dcm_p2_response_deadline", v,
+        new ParameterImpl("service_id", u8, currentProgram))
+        .setComment("Automatic deadline sets5965=1 and sends NRC78 from state10; states23/24 first cancel old service and may "
+            + "cancel lower Tx. Explicit-pending callback latch5966 is not set here.");
+    semanticFunction(0x93286L, "f33_dcm_enqueue_general_reject", v,
+        new ParameterImpl("service_id", u8, currentProgram))
+        .setComment("Timer2 policy constructs final7F/SID/10 using fixed negative node. Preserve in-flight pending ownership via "
+            + "states32/22 or submit final; do not confuse generated10 with pending78.");
+    semanticFunction(0x933F8L, "f33_dcm_enqueue_final_disposition", v,
+        new ParameterImpl("response", new PointerDataType(F33PduInfoType, 4), currentProgram),
+        new ParameterImpl("disposition", u8, currentProgram))
+        .setComment("Select fixed positive/negative/silent node. State30 appends behind in-flight pending and becomes31 without "
+            + "another lower submit. Active10/11/20 submit final40; cancellation states use separate software completion "
+            + "joins.");
+    semanticFunction(0x93538L, "f33_dcm_request_explicit_pending_response", v,
+        new ParameterImpl("service_id", u8, currentProgram))
+        .setComment("Explicit NRC78 in state10 cancels timer4, sets5965/5966 and submits pending30; state11 queues pending20 "
+            + "until timer3; state30 coalesces by setting notification latch only.");
+    semanticFunction(0x936E6L, "f33_dcm_compare_protocol_priority", u32,
+        new ParameterImpl("candidate_slot", u16, currentProgram),
+        new ParameterImpl("owner_slot", u16, currentProgram))
+        .setComment("Compare configured protocol priority bytes:2 candidate numerically lower/higher priority,1 equal,0 candidate "
+            + "numerically greater. Return is ternary, not bool.");
+    semanticFunction(0x9373AL, "f33_dcm_claim_receive_slot", u32,
+        new ParameterImpl("receive_slot", u16, currentProgram))
+        .setComment("Use overall phase, protocol identity and existing receive owner to accept/reset slot; pause S3 for admitted "
+            + "active-session receive. Mark receive-in-progress separately from service/dispatch ownership.");
+    semanticFunction(0x93978L, "f33_dcm_arbitrate_completed_receive", u32,
+        new ParameterImpl("receive_slot", u16, currentProgram))
+        .setComment("Functional exact3E80 during active-session phase1 takes receive shortcut. Otherwise arbitrate candidate "
+            + "against pending owner, cancel/release displaced reception or queue service-cancellation event28 for "
+            + "higher-priority protocol.");
+    semanticFunction(0x93B50L, "f33_dcm_get_overall_request_timeout", u32)
+        .setComment("Return configured protocol timeout or selected functional override, and publish zero-time flag59EC. Real R10 "
+            + "return is used by timer2 admission; not void.");
+    semanticFunction(0x93BD6L, "f33_dcm_select_response_deadline", u16,
+        new ParameterImpl("use_retained", u8, currentProgram),
+        new ParameterImpl("use_current_session", u8, currentProgram))
+        .setComment("Fresh selection reads session raw timings and subtracts protocol margins with floor0; retains P2star at59D8 "
+            + "and pending spacing at59DA. Return initial raw P2 or retained P2star.");
+    semanticFunction(0x93DE8L, "f33_dcm_append_receive_chunk", u32,
+        new ParameterImpl("receive_slot", u16, currentProgram),
+        new ParameterImpl("chunk", new PointerDataType(F33PduInfoType, 4), currentProgram),
+        new ParameterImpl("available", new PointerDataType(u16, 4), currentProgram))
+        .setComment("Copy exactly16-bit chunk length into slot cursor, add received and subtract remaining16-bit lengths. "
+            + "Caller92152 owns capacity check.");
+    semanticFunction(0x93E3EL, "f33_dcm_count_receiving_slots", u16)
+        .setComment("Count three59F0-stride10 slot receive-active bytes equal1. Real R10 result is consumed by release and "
+            + "inactivity decisions; not void.");
+    semanticFunction(0x95626L, "f33_dcm_report_negative_or_pending", v,
+        new ParameterImpl("message", new PointerDataType(F33DcmMessageContextType, 4), currentProgram),
+        new ParameterImpl("nrc", u8, currentProgram))
+        .setComment("Stage NRC;78 leaves service pending and does not finalize message. Other NRCs complete "
+            + "through9126A/disposition queue.");
+    semanticFunction(0x95644L, "f33_dcm_report_positive_response", v,
+        new ParameterImpl("message", new PointerDataType(F33DcmMessageContextType, 4), currentProgram))
+        .setComment("Forward handler-retained body length/routing through9126A. This is response readiness, not delivery.");
+    semanticFunction(0x79DBEL, "f33_pdur_cantp_transmit_adapter", u32,
+        new ParameterImpl("transmit_id", u16, currentProgram),
+        new ParameterImpl("response", new PointerDataType(F33PduInfoType, 4), currentProgram))
+        .setComment("Forward to7A376; only descriptor16-bit length is consumed by CanTp admission. Payload remains at upper "
+            + "owner.");
+    semanticFunction(0x7A376L, "f33_cantp_transmit_descriptor", u32,
+        new ParameterImpl("transmit_id", u16, currentProgram),
+        new ParameterImpl("response", new PointerDataType(F33PduInfoType, 4), currentProgram))
+        .setComment("Read response length at+4 and pass to7A334; propagate real R10 result. Does not copy payload.");
+    semanticFunction(0x7A728L, "f33_cantp_find_transmit_connection", new PointerDataType(layout13, 4),
+        new ParameterImpl("configuration", new PointerDataType(layout12, 4), currentProgram),
+        new ParameterImpl("transmit_id", u16, currentProgram))
+        .setComment("Range-check namespaced ID then scan configured channel Tx rows by+2 ID; return matching pointer or null. "
+            + "Exact instructions preserve R10=0 until match.");
+    semanticFunction(0x7B3D0L, "f33_cantp_accept_transmit_length", u32,
+        new ParameterImpl("configuration", new PointerDataType(layout12, 4), currentProgram),
+        new ParameterImpl("transmit_id", u16, currentProgram),
+        new ParameterImpl("length", u32, currentProgram))
+        .setComment("Require1..4095, configured connection, idleE1 and half-duplex peer qualification. Store TxID,length and "
+            + "stateD2 in0x20-byte channel stride;0 means accepted length only, not copied or emitted.");
+    semanticFunction(0x7B540L, "f33_cantp_copy_upper_transmit_bytes", u32,
+        new ParameterImpl("upper_id", u16, currentProgram),
+        new ParameterImpl("chunk", new PointerDataType(layout10, 4), currentProgram),
+        new ParameterImpl("remaining", new PointerDataType(u32, 4), currentProgram))
+        .setComment("Build16-bit PduInfo and call PduR81A66 with null retry; return actual copy result and zero-extended "
+            + "remaining count. DCM926D2 owns cursor.");
+    semanticFunction(0x7B20CL, "f33_cantp_submit_can_frame", u32,
+        new ParameterImpl("canif_id", u16, currentProgram),
+        new ParameterImpl("frame", new PointerDataType(layout10, 4), currentProgram))
+        .setComment("Build F33PduInfo, run exact no-op81FFA then existing CanIf7FEF8 snapshot/enqueue.0 means software lower "
+            + "acceptance only; driver/controller and physical network remain separate.");
+    semanticFunction(0x7B894L, "f33_cantp_run_transmit_channels", v)
+        .setComment("Scheduled task resolves acceptedD2 to single/first-frame construction, obtains upper bytes, submits CanIf "
+            + "frame and advances segmented transport states. Timeout paths clear channel and report upper failure.");
+    semanticFunction(0x7BB0EL, "f33_cantp_handle_frame_confirmation", v,
+        new ParameterImpl("connection", new PointerDataType(layout13, 4), currentProgram))
+        .setComment("CanIf software confirmation advances single/multi-frame state. Only completed aggregate transport clears "
+            + "channel and reports upper result0; intermediate frames may wait for flow-control or spacing.");
+    semanticData(0x25EE8L, new ArrayDataType(resolve(layout0), 3, 12), "f33_dcm_receive_route",
+        "93B32/93CCE field loads 25EE8..25F0B exact little-endian bytes");
+    semanticData(0x25E90L, new ArrayDataType(resolve(layout1), 3, 8), "f33_dcm_receive_buffer_configuration",
+        "920BE capacity check 93C6C/93C9A/93E5C configured buffer references");
+    semanticData(0xFEBE59F0L, new ArrayDataType(resolve(layout2), 3, 16), "f33_dcm_receive_buffer_state",
+        "93DE8 copies and arithmetic 93C9A clears receiving/participant, not abort_pending 93EF6 writes abort_pending "
+            + "93F66 queues inactive-slot cancellation then marks abort_pending");
+    semanticData(0x25EA8L, resolve(layout3), "f33_dcm_receive_descriptor_0",
+        "91C0A,91B84,93D2E,93D9A,93B50,9238C exact field use");
+    semanticData(0x25EB4L, resolve(layout3), "f33_dcm_receive_descriptor_1",
+        "91C0A,91B84,93D2E,93D9A,93B50,9238C exact field use");
+    semanticData(0x25F24L, resolve(layout3), "f33_dcm_receive_descriptor_2",
+        "91C0A,91B84,93D2E,93D9A,93B50,9238C exact field use");
+    semanticData(0x25F0CL, resolve(layout4), "f33_dcm_transmit_descriptor_0",
+        "93CE6 capacity 93E82 lower Tx ID 93EBC confirmation ID 92B66 configured failure gate");
+    semanticData(0x25F18L, resolve(layout4), "f33_dcm_transmit_descriptor_1",
+        "93CE6 capacity 93E82 lower Tx ID 93EBC confirmation ID 92B66 configured failure gate");
+    semanticData(0x25F30L, resolve(layout5), "f33_dcm_connection_0",
+        "91C0A,936E6,95B88 Protocol tags are not promoted to physical CAN IDs from this structure alone.");
+    semanticData(0x25F3CL, resolve(layout5), "f33_dcm_connection_1",
+        "91C0A,936E6,95B88 Protocol tags are not promoted to physical CAN IDs from this structure alone.");
+    semanticData(0x25EC0L, new ArrayDataType(resolve(layout6), 2, 20), "f33_dcm_protocol_configuration",
+        "93B18,93B50,93BD6,921D2,92A1E,937B0 exact field use");
+    semanticData(0xFEBE5984L, new ArrayDataType(resolve(layout7), 5, 16), "f33_dcm_response_node",
+        "92AB0 initialization 9317A index*16 93188/92B98 append/pop 933F8 node selection 93696 retirement");
+    semanticData(0xFEBE5970L, resolve(layout8), "f33_dcm_response_queue",
+        "92AB0,92A74,92BD8,926D2,936CA");
+    semanticData(0xFEBE4F40L, resolve(layout11), "f33_cantp_tx_state_prefix_0",
+        "7B3D0 admission 7B452 reset 7B74E segmented copy 7BB0E confirmation Only prefix of0x20-byte channel storage; "
+            + "Rx peer state starts+0x10 and is not given a full new type here.");
+    semanticData(0xFEBE4F60L, resolve(layout11), "f33_cantp_tx_state_prefix_1",
+        "7B3D0 admission 7B452 reset 7B74E segmented copy 7BB0E confirmation Only prefix of0x20-byte channel storage; "
+            + "Rx peer state starts+0x10 and is not given a full new type here.");
+    semanticData(0xFEBE4F80L, resolve(layout11), "f33_cantp_tx_state_prefix_2",
+        "7B3D0 admission 7B452 reset 7B74E segmented copy 7BB0E confirmation Only prefix of0x20-byte channel storage; "
+            + "Rx peer state starts+0x10 and is not given a full new type here.");
+    semanticData(0x22C70L, resolve(layout12), "f33_cantp_configuration",
+        "7A334/7A728/7A67E exact offsets and22C70 bytes");
+    semanticData(0x22B9EL, resolve(layout13), "f33_cantp_tx_connection_0",
+        "7A728 selects by+2 7B3D0 state_index+1 and single-frame-only+13 7B596/7B64E/7B74E "
+            + "upper+8,CanIf+10,capacity+22,padding+25 7B47E cancellation flag+23 Both exact configured rows use zero "
+            + "addressing-format overhead.");
+    semanticData(0x22BBEL, resolve(layout13), "f33_cantp_tx_connection_1",
+        "7A728 selects by+2 7B3D0 state_index+1 and single-frame-only+13 7B596/7B64E/7B74E "
+            + "upper+8,CanIf+10,capacity+22,padding+25 7B47E cancellation flag+23 Both exact configured rows use zero "
+            + "addressing-format overhead.");
+    semanticData(0xFEBE5624L, u8, "f33_dcm_final_nrc",
+        "0 positive; final NRC otherwise. Explicit78 uses596A and does not set this byte.");
+    semanticData(0xFEBE5960L, u8, "f33_dcm_request_phase",
+        "0 default/idle;1 nondefault-session inactivity lifetime;2 active dispatch/request. Independent of response "
+            + "transport state5964.");
+    semanticData(0xFEBE5964L, u8, "f33_dcm_response_transport_state",
+        "Opaque numeric enum documented in grouped state map, not a physical CAN state.");
+    semanticData(0xFEBE5965L, u8, "f33_dcm_forced_pending_deadline",
+        "P2/explicit pending and retry policy latch, cleared by queue reset.");
+    semanticData(0xFEBE5966L, u8, "f33_dcm_explicit_pending_notification",
+        "Service-requested78 requires eventual operation3; automatic78 does not.");
+    semanticData(0xFEBE5967L, new ArrayDataType(u8, 3, 1), "f33_dcm_final_negative_response",
+        "7F originalSID NRC; separate from pending buffer.");
+    semanticData(0xFEBE596AL, new ArrayDataType(u8, 3, 1), "f33_dcm_pending_negative_response",
+        "7F originalSID78, independently transport-owned.");
+    semanticData(0xFEBE59D8L, u16, "f33_dcm_retained_p2_star_raw",
+        "Selected transport timingB minus protocol margin; raw3500 in exact configured sessions.");
+    semanticData(0xFEBE59DAL, u16, "f33_dcm_pending_spacing_raw",
+        "Selected timingC raw2000; timer3.");
+    semanticData(0xFEBE59E0L, u16, "f33_dcm_pending_dispatch_receive_slot",
+        "Selected receive completion owner used by event0 and timer admission.");
+    semanticData(0xFEBE59E2L, u16, "f33_dcm_current_dispatch_receive_slot",
+        "Current service route; not necessarily still receiving bytes.");
+    semanticData(0xFEBE59E8L, u16, "f33_dcm_displaced_transmit_id",
+        "Saved lower Tx cancellation target during preemption.");
+    semanticData(0xFEBE59EAL, u8, "f33_dcm_pending_transport_accepted",
+        "Set only after lower acceptance of pending10, overrides some later suppression gates; reset on receive/queue "
+            + "release joins.");
+    semanticData(0xFEBE59EBL, u8, "f33_dcm_zero_p2_deadline",
+        "Zero selected P2 raw value flag.");
+    semanticData(0xFEBE59ECL, u8, "f33_dcm_zero_overall_timeout",
+        "Zero overall timeout flag; timer2 may resolve SID from pending receive buffer before dispatch.");
+    semanticData(0xFEBE5A20L, new ArrayDataType(u8, 768, 1), "f33_dcm_shared_response_buffer",
+        "Single shared protocol-independent response store; queue nodes/copy cursors hold references, not copies.");
+  }
+
+  private void annotateDiagnosticReadPublication() throws Exception {
+    CategoryPath category = new CategoryPath("/CamryF33");
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    DataType F33DcmMessageContextType = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33DcmMessageContext");
+    StructureDataType layout0 = new StructureDataType(category, "F33DidPublicationMetadata", 0);
+    layout0.setPackingEnabled(true);
+    StructureDataType layout1 = new StructureDataType(category, "F33DcmDidClass", 0);
+    layout1.setPackingEnabled(true);
+    StructureDataType layout2 = new StructureDataType(category, "F33DiagSourceBuffer", 0);
+    layout2.setPackingEnabled(true);
+    StructureDataType layout3 = new StructureDataType(category, "F33DiagOutputView", 0);
+    layout3.setPackingEnabled(true);
+    StructureDataType layout4 = new StructureDataType(category, "F33DtcTuple", 0);
+    layout4.setPackingEnabled(true);
+    StructureDataType layout5 = new StructureDataType(category, "F33SnapshotIdentifierTuple", 0);
+    layout5.setPackingEnabled(true);
+    StructureDataType layout6 = new StructureDataType(category, "F33CaptureFieldDescriptor", 0);
+    layout6.setPackingEnabled(true);
+    StructureDataType layout7 = new StructureDataType(category, "F33DiagProprietaryMessage", 0);
+    layout7.setPackingEnabled(true);
+    FunctionDefinitionDataType F33DidPayloadReader = new FunctionDefinitionDataType(category, "F33DidPayloadReader");
+    F33DidPayloadReader.setReturnType(u32);
+    F33DidPayloadReader.setArguments(new ParameterDefinitionImpl("output", new PointerDataType(u8, 4), null),
+        new ParameterDefinitionImpl("length", u16, null));
+    FunctionDefinitionDataType F33DiagnosticAvailability = new FunctionDefinitionDataType(category, "F33DiagnosticAvailability");
+    F33DiagnosticAvailability.setReturnType(u32);
+    FunctionDefinitionDataType F33DidClassPresence = new FunctionDefinitionDataType(category, "F33DidClassPresence");
+    F33DidClassPresence.setReturnType(u32);
+    F33DidClassPresence.setArguments(new ParameterDefinitionImpl("did", u16, null),
+        new ParameterDefinitionImpl("operation", u8, null),
+        new ParameterDefinitionImpl("absent", new PointerDataType(u8, 4), null));
+    FunctionDefinitionDataType F33DidClassLength = new FunctionDefinitionDataType(category, "F33DidClassLength");
+    F33DidClassLength.setReturnType(u32);
+    F33DidClassLength.setArguments(new ParameterDefinitionImpl("did", u16, null),
+        new ParameterDefinitionImpl("operation", u8, null),
+        new ParameterDefinitionImpl("length", new PointerDataType(u16, 4), null));
+    FunctionDefinitionDataType F33DidClassRead = new FunctionDefinitionDataType(category, "F33DidClassRead");
+    F33DidClassRead.setReturnType(u32);
+    F33DidClassRead.setArguments(new ParameterDefinitionImpl("did", u16, null),
+        new ParameterDefinitionImpl("output", new PointerDataType(u8, 4), null),
+        new ParameterDefinitionImpl("operation", u8, null),
+        new ParameterDefinitionImpl("length", new PointerDataType(u16, 4), null),
+        new ParameterDefinitionImpl("nrc", new PointerDataType(u8, 4), null));
+    FunctionDefinitionDataType F33DidClassWrite = new FunctionDefinitionDataType(category, "F33DidClassWrite");
+    F33DidClassWrite.setReturnType(u32);
+    F33DidClassWrite.setArguments(new ParameterDefinitionImpl("did", u16, null),
+        new ParameterDefinitionImpl("payload", new PointerDataType(u8, 4), null),
+        new ParameterDefinitionImpl("operation", u8, null),
+        new ParameterDefinitionImpl("length", u16, null),
+        new ParameterDefinitionImpl("nrc", new PointerDataType(u8, 4), null));
+    FunctionDefinitionDataType F33CaptureFieldSerializer = new FunctionDefinitionDataType(category, "F33CaptureFieldSerializer");
+    F33CaptureFieldSerializer.setReturnType(v);
+    F33CaptureFieldSerializer.setArguments(new ParameterDefinitionImpl("view", u8, null),
+        new ParameterDefinitionImpl("output", new PointerDataType(u8, 4), null));
+    layout0.add(u16, "did", "Recovered field use; opaque fields remain uninterpreted.");
+    layout0.add(u16, "payload_length", "Recovered field use; opaque fields remain uninterpreted.");
+    layout0.add(new PointerDataType(F33DidPayloadReader, 4), "reader", "Recovered field use; opaque fields remain uninterpreted.");
+    layout0.add(new PointerDataType(F33DiagnosticAvailability, 4), "available", "Null admits; otherwise exact5A");
+    layout0.add(u8, "route_kind", "Only kind0 selected by4D36E");
+    layout0.add(new ArrayDataType(u8, 3, 1), "opaque_0d", "Recovered field use; opaque fields remain uninterpreted.");
+    layout1.add(new PointerDataType(F33DidClassPresence, 4), "presence", "Recovered field use; opaque fields remain uninterpreted.");
+    layout1.add(new PointerDataType(F33DidClassLength, 4), "length", "Recovered field use; opaque fields remain uninterpreted.");
+    layout1.add(new PointerDataType(F33DidClassRead, 4), "read", "Recovered field use; opaque fields remain uninterpreted.");
+    layout1.add(new PointerDataType(F33DidClassWrite, 4), "write", "Reuse existing write callback ABI; not an untyped request-derived target");
+    layout1.add(new PointerDataType(v, 4), "policy", "Fixed class access-policy object");
+    layout1.add(u16, "first_did", "Recovered field use; opaque fields remain uninterpreted.");
+    layout1.add(u16, "last_did", "Recovered field use; opaque fields remain uninterpreted.");
+    layout1.add(u8, "probe_presence", "Recovered field use; opaque fields remain uninterpreted.");
+    layout1.add(new ArrayDataType(u8, 3, 1), "opaque_19", "Recovered field use; opaque fields remain uninterpreted.");
+    layout2.add(u8, "status", "Status namespace differs by operation; not a universal success Boolean");
+    layout2.add(u8, "detail", "Recovered field use; opaque fields remain uninterpreted.");
+    layout2.add(u16, "length", "Recovered field use; opaque fields remain uninterpreted.");
+    layout2.add(new PointerDataType(u8, 4), "bytes", "Recovered field use; opaque fields remain uninterpreted.");
+    layout3.add(new PointerDataType(u8, 4), "bytes", "Recovered field use; opaque fields remain uninterpreted.");
+    layout3.add(new PointerDataType(u16, 4), "length", "Recovered field use; opaque fields remain uninterpreted.");
+    layout3.add(new PointerDataType(u16, 4), "capacity", "Recovered field use; opaque fields remain uninterpreted.");
+    layout4.add(new ArrayDataType(u8, 3, 1), "dtc_msb_first", "Recovered field use; opaque fields remain uninterpreted.");
+    layout4.add(u8, "status", "Recovered field use; opaque fields remain uninterpreted.");
+    layout5.add(new ArrayDataType(u8, 3, 1), "dtc_msb_first", "Recovered field use; opaque fields remain uninterpreted.");
+    layout5.add(u8, "record_number", "1 or10, not DTC status");
+    layout6.add(u16, "identifier", "Capture field namespace; do not equate to RDBI DID");
+    layout6.add(u8, "exclude_secondary_view", "Recovered field use; opaque fields remain uninterpreted.");
+    layout6.add(u8, "opaque_03", "Recovered field use; opaque fields remain uninterpreted.");
+    layout6.add(new PointerDataType(F33CaptureFieldSerializer, 4), "serialize_capture", "Recovered field use; opaque fields remain uninterpreted.");
+    layout6.add(u32, "opaque_08", "Recovered field use; opaque fields remain uninterpreted.");
+    layout6.add(new PointerDataType(v, 4), "serialize_event_data", "Separate selector3/event format callback");
+    layout6.add(new PointerDataType(F33DiagnosticAvailability, 4), "available", "Recovered field use; opaque fields remain uninterpreted.");
+    layout6.add(u16, "opaque_14", "Recovered field use; opaque fields remain uninterpreted.");
+    layout6.add(u8, "payload_length", "Recovered field use; opaque fields remain uninterpreted.");
+    layout6.add(u8, "opaque_17", "Recovered field use; opaque fields remain uninterpreted.");
+    layout7.add(new PointerDataType(u8, 4), "request", "Recovered field use; opaque fields remain uninterpreted.");
+    layout7.add(u32, "request_length", "Recovered field use; opaque fields remain uninterpreted.");
+    layout7.add(new PointerDataType(u8, 4), "response", "Recovered field use; opaque fields remain uninterpreted.");
+    layout7.add(u32, "response_length", "Recovered field use; opaque fields remain uninterpreted.");
+    semanticFunction(0x962F2L, "f33_dcm_read_did_service", u32,
+        new ParameterImpl("operation", u8, currentProgram),
+        new ParameterImpl("message", new PointerDataType(F33DcmMessageContextType, 4), currentProgram))
+        .setComment("Operation0 admits configured SID22;2 cancels retained read continuation. Other operations return0. Message "
+            + "snapshot, read preparation and serialization are separate from response delivery.");
+    semanticFunction(0x961DCL, "f33_dcm_begin_read_did_request", u32,
+        new ParameterImpl("message", new PointerDataType(F33DcmMessageContextType, 4), currentProgram))
+        .setComment("Copy28-byte advanced message to5D84. Reject remaining length<2, odd, or more than one DID with13. Reset "
+            + "cursors and preflight output length before invoking payload readers.");
+    semanticFunction(0x9613CL, "f33_dcm_preflight_read_did_body", u32,
+        new ParameterImpl("operation", u8, currentProgram))
+        .setComment("Resolve/precondition one configured DID and add payload length plus two DID bytes. Reject expected "
+            + "body>min(capacity,65534) with14 before positive-body serialization. Generic loop does not expand configured "
+            + "admission beyond one DID.");
+    semanticFunction(0x95FB4L, "f33_dcm_serialize_read_did_body", u32,
+        new ParameterImpl("operation", u8, currentProgram))
+        .setComment("Echo admitted DID then invoke fixed class reader into retained response. Advance body by reported u16 "
+            + "length, enforce post-read cap and submit only at completed cursor. Pending/iteration events are generic "
+            + "machinery, not configured multi-DID support.");
+    semanticFunction(0x95EDCL, "f33_dcm_resolve_read_did_route", u32)
+        .setComment("Dynamic DID bank count0 selects static class ranges. Require read capability; retain class index5D78 and "
+            + "route kind5D7A. Class membership alone does not prove available metadata.");
+    semanticFunction(0x95DCCL, "f33_dcm_check_read_did_policy_and_length", u32)
+        .setComment("Read current session/security snapshots, apply class policy, then fixed local callback and length callback. "
+            + "Session rejection31 and security33 are distinct from metadata absence31 and whole-body capacity14.");
+    semanticFunction(0x8B464L, "f33_did_read_application_adapter", u32,
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", new PointerDataType(u16, 4), currentProgram),
+        new ParameterImpl("nrc", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("did", u16, currentProgram))
+        .setComment("Retain metadata-selected payload length and choose local kind0 serializer or kind1 side route. Direct "
+            + "metadata reader returns application status, mapped through8B41A. Pending state3B26..2B is adapter state, not "
+            + "source-sampling atomicity.");
+    semanticFunction(0x4D802L, "f33_read_selected_did_payload", u32,
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u16, currentProgram))
+        .setComment("Use selected metadata index81B8 and invoke fixed record+4 reader; out-of-range returns3. Length and "
+            + "availability selection are separate operations.");
+    semanticFunction(0x4D836L, "f33_get_did_metadata_route_kind", u8,
+        new ParameterImpl("did", u16, currentProgram))
+        .setComment("Scan all242 metadata records and return matching record kind orFF. Kind is a route discriminator, not an "
+            + "arbitrary memory-access class.");
+    semanticFunction(0x4D278L, "f33_serialize_available_did_bitmap", v,
+        new ParameterImpl("did_page", u16, currentProgram),
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u16, currentProgram))
+        .setComment("Clear output then set MSB-first bits for kind0 metadata strictly above page base and below base+256, with "
+            + "null/5A availability callback. Bitmap is generated from current availability, not a cached guarantee that a "
+            + "later read succeeds.");
+    semanticFunction(0x8C2E0L, "f33_dcm_clear_diagnostic_service", u32,
+        new ParameterImpl("operation", u8, currentProgram),
+        new ParameterImpl("message", new PointerDataType(F33DcmMessageContextType, 4), currentProgram))
+        .setComment("Clear service operation callback. Retain advanced message for operation0; nonzero operations reset/cancel "
+            + "module state. Response submission is not acknowledgement or durable completion.");
+    semanticFunction(0x8C69AL, "f33_dcm_read_dtc_count_service", u32,
+        new ParameterImpl("operation", u8, currentProgram),
+        new ParameterImpl("message", new PointerDataType(F33DcmMessageContextType, 4), currentProgram))
+        .setComment("DTC count operation callback. Retain advanced message for operation0; nonzero operations reset/cancel module "
+            + "state. Response submission is not acknowledgement or durable completion.");
+    semanticFunction(0x8CB1AL, "f33_dcm_read_dtc_list_service", u32,
+        new ParameterImpl("operation", u8, currentProgram),
+        new ParameterImpl("message", new PointerDataType(F33DcmMessageContextType, 4), currentProgram))
+        .setComment("DTC list operation callback. Retain advanced message for operation0; nonzero operations reset/cancel module "
+            + "state. Response submission is not acknowledgement or durable completion.");
+    semanticFunction(0x8CE84L, "f33_dcm_read_snapshot_identifiers_service", u32,
+        new ParameterImpl("operation", u8, currentProgram),
+        new ParameterImpl("message", new PointerDataType(F33DcmMessageContextType, 4), currentProgram))
+        .setComment("Snapshot identifiers operation callback. Retain advanced message for operation0; nonzero operations "
+            + "reset/cancel module state. Response submission is not acknowledgement or durable completion.");
+    semanticFunction(0x8D416L, "f33_dcm_read_snapshot_by_dtc_service", u32,
+        new ParameterImpl("operation", u8, currentProgram),
+        new ParameterImpl("message", new PointerDataType(F33DcmMessageContextType, 4), currentProgram))
+        .setComment("Snapshot records operation callback. Retain advanced message for operation0; nonzero operations reset/cancel "
+            + "module state. Response submission is not acknowledgement or durable completion. Exact capacity4 path "
+            + "reaches95626 with NRC0 and consequently submits a positive header-only response through CanTp length "
+            + "acceptance; not NRC14 or a transmitted negative response.");
+    semanticFunction(0x8C234L, "f33_dcm_begin_clear_diagnostic_request", u32,
+        new ParameterImpl("message", new PointerDataType(F33DcmMessageContextType, 4), currentProgram))
+        .setComment("Require exactly3 remaining bytes, assemble big-endian24 group and retain message3BD4. Application validation "
+            + "accepts onlyFFFFFF; accepted group enters existing asynchronous clear owner1410.");
+    semanticFunction(0x4D682L, "f33_validate_clear_all_diagnostic_group", u32,
+        new ParameterImpl("group", u32, currentProgram))
+        .setComment("Return0 only for24-bit groupFFFFFF; other groups return1. No configured per-DTC selective-clear API is "
+            + "implied.");
+    semanticFunction(0x4D690L, "f33_get_dtc_status_availability_mask", u32,
+        new ParameterImpl("mask", new PointerDataType(u8, 4), currentProgram))
+        .setComment("StoreB9 and return0. Status availability is not event-history bitmap layout.");
+    semanticFunction(0x4D69CL, "f33_begin_filtered_dtc_iteration", u32,
+        new ParameterImpl("mask", u8, currentProgram))
+        .setComment("Retain mask&B9 at8198 and reset u16 result count81B4 and cursor81B6. Actual derived-status snapshot is "
+            + "deferred until first527D6 scan.");
+    semanticFunction(0x4D6D4L, "f33_next_filtered_dtc", u32,
+        new ParameterImpl("dtc", new PointerDataType(u32, 4), currentProgram),
+        new ParameterImpl("status", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Advance through snapshot status5F87 and DTC catalogue30850. Return0 for next matching tuple,1 for "
+            + "exhausted/invalid; retain cursor and limit successful results to1023. DTC index is not event number.");
+    semanticFunction(0x527D6L, "f33_scan_dtc_status_snapshot", u32,
+        new ParameterImpl("mask", u8, currentProgram),
+        new ParameterImpl("dtc", new PointerDataType(u32, 4), currentProgram),
+        new ParameterImpl("status", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("start_index", u16, currentProgram))
+        .setComment("Starting index1 refreshes160 status bytes at5F87 from derived DTC banks and healthy-observed events, then "
+            + "scans configured nonzero DTCs. Later cursor reads use that status generation rather than rebuilding each "
+            + "item.");
+    semanticFunction(0x5261AL, "f33_build_dtc_status_snapshot", v,
+        new ParameterImpl("status", new PointerDataType(u8, 4), currentProgram))
+        .setComment("For configured DTC indices synthesize bit0 from602C,28 from6040 and80 from6054. Add10 when an associated "
+            + "event lacks6120 healthy observation and retained bit3 is clear. These are derived DTC generations, not raw "
+            + "event bitmaps.");
+    semanticFunction(0x51FD2L, "f33_rebuild_derived_diagnostic_banks", v,
+        new ParameterImpl("generation_selector", u8, currentProgram))
+        .setComment("A5 maps current6090 into602C and classifier-qualified6054; other selector maps retained60C0 into6040. Map "
+            + "descriptors only for event1..17F, nonzero DTC index<160 and flagbit6. Rebuild auxiliary banks "
+            + "separately;6054 is not60F0.");
+    semanticFunction(0x8C7F2L, "f33_append_dtc_tuple_if_fits", u32,
+        new ParameterImpl("tuple", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Append exactly4 bytes only with nonnull response and unsigned remaining capacity>3. Failure returns1 without "
+            + "partial tuple; caller merge continues, allowing a complete-tuple prefix rather than NRC14.");
+    semanticFunction(0x8C858L, "f33_merge_dtc_list_sources", u32,
+        new ParameterImpl("local", new PointerDataType(layout2, 4), currentProgram),
+        new ParameterImpl("side", new PointerDataType(layout2, 4), currentProgram))
+        .setComment("Merge ascending24-bit DTC tuples; deduplicate equal DTCs, OR statuses and clear bit10 when combined "
+            + "status&29 is nonzero. Appends are bounded per tuple; omitted trailing tuples do not force whole-response "
+            + "failure.");
+    semanticFunction(0x8CC14L, "f33_merge_snapshot_identifier_sources", u32,
+        new ParameterImpl("local", new PointerDataType(layout2, 4), currentProgram),
+        new ParameterImpl("side", new PointerDataType(layout2, 4), currentProgram),
+        new ParameterImpl("output", new PointerDataType(layout3, 4), currentProgram))
+        .setComment("Copy each nonempty source only if its whole length fits u16 capacity. Compare first24-bit DTCs to avoid "
+            + "duplicate second source; do not merge snapshot record numbers or publish partial source bytes.");
+    semanticFunction(0x5310EL, "f33_get_secondary_capture_record_mask", u32,
+        new ParameterImpl("dtc", new PointerDataType(u32, 4), currentProgram))
+        .setComment("For occupied capture slot1 require duplicate events to map to same nonzero packed DTC, then return mask3 for "
+            + "available record numbers1 and10. Event duplicates are not complements.");
+    semanticFunction(0x4D72CL, "f33_next_snapshot_identifier_tuple", u32,
+        new ParameterImpl("dtc", new PointerDataType(u32, 4), currentProgram),
+        new ParameterImpl("record_number", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Retain slot1 DTC at81C4 and record mask8199; emit record1 then10, then clear cached pair on exhaustion. "
+            + "Record numbers are not DTC status bytes.");
+    semanticFunction(0x531E0L, "f33_serialize_retained_capture_record", s32,
+        new ParameterImpl("record_view", u8, currentProgram),
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("capacity", u16, currentProgram))
+        .setComment("Views0/1 serialize record numbers1/10 from configured75-field table2A364, with field gate and view "
+            + "exclusion. Emit record number/count then identifier/length/payload. Return-1 on capacity crossing; payload "
+            + "callbacks choose retained sources, not a new physical sample.");
+    semanticFunction(0x8DDCCL, "f33_dcm_enable_dtc_setting_service", u32,
+        new ParameterImpl("operation", u8, currentProgram),
+        new ParameterImpl("message", new PointerDataType(F33DcmMessageContextType, 4), currentProgram))
+        .setComment("Operation0 forwards fixed selection1 and requires zero remaining bytes; other operations reset module "
+            + "continuation. Application action clears8197, not stored diagnostic histories.");
+    semanticFunction(0x8DDEAL, "f33_dcm_disable_dtc_setting_service", u32,
+        new ParameterImpl("operation", u8, currentProgram),
+        new ParameterImpl("message", new PointerDataType(F33DcmMessageContextType, 4), currentProgram))
+        .setComment("Operation0 forwards fixed selection2 and requires zero remaining bytes; other operations reset continuation. "
+            + "Application action requests8197=5A; grouped status propagation occurs later.");
+    semanticFunction(0x50904L, "f33_publish_dtc_setting_request", v,
+        new ParameterImpl("selection", u8, currentProgram))
+        .setComment("Store8197=5A only for selection2, otherwise0. Does not clear events, captures, classifiers or control "
+            + "actions; later49E22 and58074 publish consequences.");
+    semanticFunction(0x965C0L, "f33_dcm_read_memory_service", u32,
+        new ParameterImpl("operation", u8, currentProgram),
+        new ParameterImpl("message", new PointerDataType(F33DcmMessageContextType, 4), currentProgram))
+        .setComment("Operation0 validates configured ALFID15 and bounded memory family;2 cancels adapter state;3 enters "
+            + "configured continuation path. No memory write or indirect executable dispatch.");
+    semanticFunction(0x4FC8EL, "f33_read_configured_application_memory", u32,
+        new ParameterImpl("address_record", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u16, currentProgram))
+        .setComment("Require1..255 bytes. Memory family1 copies allowed local-RAM bytes after five overlap exclusions; family2 "
+            + "uses bounded DataFlash read after two exclusions. Other family/range returns3, bad length/read failure4.");
+    semanticFunction(0x9862EL, "f33_dcm_begin_proprietary_event_read", u32,
+        new ParameterImpl("message", new PointerDataType(F33DcmMessageContextType, 4), currentProgram),
+        new ParameterImpl("selector", u8, currentProgram))
+        .setComment("Selector1 requires0 request bytes;2 requires2-byte event ID;3 requires event ID plus2-byte subselector. "
+            + "Retain message5E34, echo event ID for2/3, then fixed catalogue selection and output merge. Not generic "
+            + "arbitrary memory access.");
+    semanticFunction(0x8DE98L, "f33_begin_proprietary_event_selection", u32,
+        new ParameterImpl("operation", u8, currentProgram),
+        new ParameterImpl("selector", u8, currentProgram),
+        new ParameterImpl("event_id", u16, currentProgram),
+        new ParameterImpl("subselector", u16, currentProgram))
+        .setComment("Retain bounded selector/IDs at45D0/45D2/45DC and publish selection through50916. IDs index event data "
+            + "catalogue, not callback addresses.");
+    semanticFunction(0x50922L, "f33_serialize_selected_proprietary_event", u32,
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", new PointerDataType(u16, 4), currentProgram))
+        .setComment("Selector1 formats enabled IDs,2 event data,3 selected event record. Bounded catalogue2AB70 has51 populated "
+            + "IDs in64 slots. Map signed helper errors-4/-1 to4/6, otherwise10; do not assign OEM names from ID/type.");
+    semanticFunction(0x4D3BEL, "f33_did_available_4d3be", u32)
+        .setComment("0x5A when expression holds; otherwise 0 for u32[FEBEE91C] == 0xAA5555AA. BF3AA: FEBEB314 -> FEBEE91C.");
+    semanticFunction(0x4D3D6L, "f33_did_available_4d3d6", u32)
+        .setComment("0x5A when expression holds; otherwise 0 for u8[FEBEE802] == 0x5A. BF3AA: FEBEBE9C -> FEBEE802.");
+    semanticFunction(0x4D3E4L, "f33_did_available_4d3e4", u32)
+        .setComment("0x5A when expression holds; otherwise 0 for u8[FEBEE804] == 0x5A. BF3AA: FEBEBE9A -> FEBEE804.");
+    semanticFunction(0x4D3F2L, "f33_did_available_4d3f2", u32)
+        .setComment("0x5A when expression holds; otherwise 0 for u8[FEBEE803] == 0x5A. BF3AA: FEBEBE99 -> FEBEE803.");
+    semanticFunction(0x4D400L, "f33_did_available_4d400", u32)
+        .setComment("0x5A when expression holds; otherwise 0 for u8[FEBEE870] != 0x5A. BF3AA: FEBEBE9D -> FEBEE870.");
+    semanticFunction(0x4D412L, "f33_did_available_4d412", u32)
+        .setComment("0x5A when expression holds; otherwise 0 for u8[FEBEE870] == 0x5A. BF3AA: FEBEBE9D -> FEBEE870.");
+    semanticFunction(0x4D420L, "f33_did_available_4d420", u32)
+        .setComment("0x5A when expression holds; otherwise 0 for u8[FEBEE805] == 0x5A. BF3AA: FEBEBE9F -> FEBEE805.");
+    semanticFunction(0x4D42EL, "f33_did_available_4d42e", u32)
+        .setComment("0x5A when expression holds; otherwise 0 for u8[FEBEE806] == 0x5A. BF3AA: FEBEBEA0 -> FEBEE806.");
+    semanticFunction(0x8C448L, "f33_count_merged_dtc_sources", u32,
+        new ParameterImpl("local", new PointerDataType(layout2, 4), currentProgram),
+        new ParameterImpl("side", new PointerDataType(layout2, 4), currentProgram))
+        .setComment("Walk ascending24-bit DTC tuples, counting one for equal IDs and one for each unmatched ID. Count accumulates "
+            + "inR6 with16-bit wrapping and is passed directly to8C422; return0. Missing count in C is an ABI/dataflow "
+            + "defect, not a constant zero result.");
+    semanticFunction(0x8C422L, "f33_append_dtc_count", v,
+        new ParameterImpl("count", u16, currentProgram))
+        .setComment("Append big-endian16-bit count and increment body length by2. Caller19/01 only tests capacity!=0 before "
+            + "writing its4-byte body; shared transport allocation is larger but this is not a general4-byte "
+            + "caller-capacity guard.");
+    semanticFunction(0x8C3A8L, "f33_begin_dtc_count_iteration", u32,
+        new ParameterImpl("mask", u8, currentProgram))
+        .setComment("Forward status mask to4D69C and retain unmasked byte3BF5. Preserve returnedR10 through final store/dispose; "
+            + "caller8C66A checks it.");
+    semanticFunction(0x8C214L, "f33_dcm_join_clear_diagnostic_phases", u32,
+        new ParameterImpl("group", u32, currentProgram),
+        new ParameterImpl("message", new PointerDataType(F33DcmMessageContextType, 4), currentProgram))
+        .setComment("Preserve group/message, call8C018(message,group), and on success8C104(message,group). Return "
+            + "consequentialR10 from last phase without manufacturing success;8C2A8 retains it.");
+    semanticFunction(0x4D520L, "f33_begin_proprietary_operation", u8,
+        new ParameterImpl("operation", u8, currentProgram),
+        new ParameterImpl("message", new PointerDataType(layout7, 4), currentProgram),
+        new ParameterImpl("selected_index", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Operation0 passes request byte count, request pointer, response+1 and selected-index pointer to34DD4. Retain "
+            + "message81C8 and BA10/BA00 owner, then return4D4F2 status inR10. Nonzero operation follows notification "
+            + "branch. Not void.");
+    semanticFunction(0x4D560L, "f33_finish_proprietary_operation", u8,
+        new ParameterImpl("selected_index", u8, currentProgram),
+        new ParameterImpl("response_length", new PointerDataType(u32, 4), currentProgram))
+        .setComment("Invoke fixed finish callback34E66(index,length), update BA10/BA00 owner, and return translated4D4F2 status "
+            + "inR10. Both second argument and result are consumed by8E2DE; not a void one-argument notifier.");
+    semanticFunction(0x8E2DEL, "f33_proprietary_operation_finish_join", u32,
+        new ParameterImpl("selected_index", u8, currentProgram),
+        new ParameterImpl("response_length", new PointerDataType(u32, 4), currentProgram))
+        .setComment("Join local fixed finish callback and exact side stub0. Preserve full mergeR10 through status stores and "
+            + "dispose; caller8E3A2 compares0/2/other for completion/pending/error. No fake side completion needed.");
+    semanticFunction(0x50990L, "f33_get_did_publication_metadata", new PointerDataType(layout0, 4),
+        new ParameterImpl("count", new PointerDataType(u16, 4), currentProgram))
+        .setComment("Write exact count242 and return2927C, including leading0100/4FB10. Metadata membership is distinct from "
+            + "kind0 plus current availability admission.");
+    semanticData(0x2927CL, new ArrayDataType(resolve(layout0), 242, 16), "f33_did_publication_metadata",
+        "50990 4D36E 4D492 4D802 ROM bytes");
+    semanticData(0x2603CL, new ArrayDataType(resolve(layout1), 5, 28), "f33_dcm_did_class",
+        "Five configured classes; following zero spare is not traversed by count26016=5.");
+    semanticData(0x2A364L, new ArrayDataType(resolve(layout6), 75, 24), "f33_capture_field_descriptor",
+        "56664 53190 531E0 ROM bytes");
+    semanticData(0xFEBF48ECL, resolve(layout7), "f33_diag_proprietary_message",
+        "Retained first-four-word operation view, not the28-byte DCM context; full context retained separately "
+            + "at493C.");
+    semanticData(0xFEBE5D74L, u32, "f33_dcm_read_expected_body_length",
+        "Preflight aggregate length including two DID bytes; not actual emitted body.");
+    semanticData(0xFEBE5D78L, u16, "f33_dcm_read_selected_class",
+        "Static class index retained separately from metadata81B8.");
+    semanticData(0xFEBE5D7AL, u8, "f33_dcm_read_route_kind",
+        "1 static class,2 generic dynamic route; exact dynamic bank empty.");
+    semanticData(0xFEBE5D7CL, u16, "f33_dcm_read_current_did",
+        "Retained software state; interpretation follows the owning publication/consumer.");
+    semanticData(0xFEBE5D7EL, u16, "f33_dcm_read_did_cursor",
+        "Retained software state; interpretation follows the owning publication/consumer.");
+    semanticData(0xFEBE5D80L, u16, "f33_dcm_read_did_count",
+        "Configured request admission permits only1.");
+    semanticData(0xFEBE5D84L, F33DcmMessageContextType, "f33_dcm_read_message",
+        "Retained software state; interpretation follows the owning publication/consumer.");
+    semanticData(0xFEBE5F87L, new ArrayDataType(u8, 160, 1), "f33_dtc_status_iteration_snapshot",
+        "Rebuilt at first527D6 start1; not live event/physical fault state.");
+    semanticData(0xFEBE602CL, new ArrayDataType(u32, 5, 4), "f33_derived_current_dtc_bitmap",
+        "Retained software state; interpretation follows the owning publication/consumer.");
+    semanticData(0xFEBE6040L, new ArrayDataType(u32, 5, 4), "f33_derived_retained_dtc_bitmap",
+        "Retained software state; interpretation follows the owning publication/consumer.");
+    semanticData(0xFEBE6054L, new ArrayDataType(u32, 5, 4), "f33_derived_classified_current_dtc_bitmap",
+        "Generated from current events with classifier!=0; NOT second-retained event history60F0.");
+    semanticData(0xFEBE8197L, u8, "f33_dtc_setting_inhibit_request",
+        "Direct85 state; grouped status and F002 are separately scheduled projections.");
+    semanticData(0xFEBE8198L, u8, "f33_dtc_requested_status_mask",
+        "Retained software state; interpretation follows the owning publication/consumer.");
+    semanticData(0xFEBE81B4L, u16, "f33_dtc_iteration_result_count",
+        "Retained software state; interpretation follows the owning publication/consumer.");
+    semanticData(0xFEBE81B6L, u16, "f33_dtc_iteration_catalogue_cursor",
+        "Retained software state; interpretation follows the owning publication/consumer.");
+    semanticData(0xFEBE81C4L, u32, "f33_snapshot_identifier_cached_dtc",
+        "Retained software state; interpretation follows the owning publication/consumer.");
+    semanticData(0xFEBF3BD4L, F33DcmMessageContextType, "f33_dcm_clear_message",
+        "Retained software state; interpretation follows the owning publication/consumer.");
+    semanticData(0xFEBF3BFCL, F33DcmMessageContextType, "f33_dcm_dtc_count_message",
+        "Retained software state; interpretation follows the owning publication/consumer.");
+    semanticData(0xFEBF3F24L, F33DcmMessageContextType, "f33_dcm_dtc_list_message",
+        "Retained software state; interpretation follows the owning publication/consumer.");
+    semanticData(0xFEBF4248L, F33DcmMessageContextType, "f33_dcm_snapshot_identifiers_message",
+        "Retained software state; interpretation follows the owning publication/consumer.");
+    semanticData(0xFEBF457CL, F33DcmMessageContextType, "f33_dcm_snapshot_record_message",
+        "Retained software state; interpretation follows the owning publication/consumer.");
+    semanticData(0xFEBF45B4L, F33DcmMessageContextType, "f33_dcm_dtc_setting_message",
+        "Retained software state; interpretation follows the owning publication/consumer.");
+    semanticData(0xFEBF3C18L, new ArrayDataType(u8, 768, 1), "f33_dtc_count_local_tuple_scratch",
+        "Retained software state; interpretation follows the owning publication/consumer.");
+    semanticData(0xFEBF3F40L, new ArrayDataType(u8, 768, 1), "f33_dtc_list_local_tuple_scratch",
+        "Retained software state; interpretation follows the owning publication/consumer.");
+    semanticData(0xFEBF4264L, new ArrayDataType(u8, 768, 1), "f33_snapshot_identifier_local_scratch",
+        "Retained software state; interpretation follows the owning publication/consumer.");
+    StructureDataType continuation = new StructureDataType(category, "F33DtcListContinuation", 0);
+    continuation.setPackingEnabled(true);
+    continuation.add(u16, "opaque_00", "Retained then cleared; no further role assigned.");
+    continuation.add(u16, "scratch_length", "Complete local tuples already collected.");
+    continuation.add(u8, "phase", "0 starts,2 polls; distinct from operation and transport phase.");
+    continuation.add(u8, "requested_mask", "Retained request status mask.");
+    continuation.add(u8, "local_result", "1 iterator finished;2 requests continuation.");
+    continuation.add(u8, "yielded", "First ready pass stores5A after actually queuingED.");
+    continuation.add(u8, "side_status", "Exact side callback is a zero-return stub, not a modeled completion.");
+    continuation.add(u8, "side_result", "2 keeps the side source pending.");
+    continuation.add(new ArrayDataType(u8, 2, 1), "opaque_0a", "Not interpreted.");
+    semanticData(0xFEBF3F18L, resolve(continuation), "f33_dtc_list_continuation",
+        "Retained local source generation and one-pass yield barrier; queuedED delivery is separate.");
+    semanticFunction(0x8C960L, "f33_dcm_advance_dtc_list_request", u32,
+        new ParameterImpl("message", new PointerDataType(F33DcmMessageContextType, 4), currentProgram))
+        .setComment("Collect local tuples and poll side source; always queueED before the first ready result. "
+            + "A later ready call merges retained scratch, retaining only complete tuples that fit, then calls95644. "
+            + "Clear continuation only after that API returns. A later derived-status generation does not replace "
+            + "the already collected local snapshot; direct native re-entry is not proof of OS event dispatch.");
+  }
+
   @Override public void run() throws Exception {
     String[] args = getScriptArgs();
     if (args.length != 1) throw new IllegalArgumentException("expected function_seeds.csv path");
@@ -9624,6 +10656,9 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateCurrentReferenceFeedback();
     annotateApplicationSessionSecurity();
     annotateApplicationNetworkLifetimes();
+    annotateMonitorCalibrationAndOutputEnvelopes();
+    annotateDiagnosticTransportOwnership();
+    annotateDiagnosticReadPublication();
     annotatePhaseModulation();
     annotateDataFlashReads();
     annotateFaciSubmission();

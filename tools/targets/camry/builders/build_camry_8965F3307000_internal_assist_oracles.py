@@ -26,8 +26,8 @@ GTS = REPO / "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json
 GTS_REGISTRY = REPO / "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json"
 COMMAND_CONE = REPO / "data/generated/camry_8965F3307000_command_cone_ingress.json"
 LIVE_SELECTOR = REPO / "data/generated/camry_2026_baseline_selector_live.json"
-RDBI_OFFSET = 0x2928C
-RDBI_COUNT = 241
+RDBI_OFFSET = 0x2927C
+RDBI_COUNT = 242
 
 
 def need(cond: object, msg: str) -> None:
@@ -81,6 +81,8 @@ def main() -> int:
     image = IMAGE.read_bytes()
     need(len(image) == 0x100000, "unexpected CodeFlash length")
 
+    # All metadata from 0x50990, including both kinds; do not filter this
+    # observability denominator by the dynamic read-admission gate in 0x4D36E.
     rdbi = []
     for i in range(RDBI_COUNT):
         off = RDBI_OFFSET + i * 16
@@ -108,7 +110,7 @@ def main() -> int:
          f"selector RDBI direct-ref negative drift: {selector_direct}")
 
     unique_callbacks = {rr["callback"] for rr in rdbi if rr["callback"]}
-    need(len(unique_callbacks) == 195 and all(cb in funcs for cb in unique_callbacks),
+    need(len(unique_callbacks) == 196 and all(cb in funcs for cb in unique_callbacks),
          f"RDBI callback denominator drift: {len(unique_callbacks)}")
     did_read_cells = set()
     for cb in unique_callbacks:

@@ -1305,7 +1305,7 @@
         "record_index": 144
       }
     ],
-    "f33_total_data_ids": 241,
+    "f33_total_data_ids": 242,
     "gtsplus_named_f33_data_ids": 121,
     "named_data_ids": [
       {
@@ -4089,8 +4089,8 @@
   "sources": {
     "f33_decompiler_corpus": {
       "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
-      "sha256": "e17dcec4c17ae7e77d0143b4e098604a13740e0c1f845f4409b1a8cf5e98d37c",
-      "size": 12230674
+      "sha256": "d7b3f3ac52ee6bb28ac653305f93f9700940874e4d08631996b69acad3c6e472",
+      "size": 13342682
     },
     "gts_emps": {
       "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/NA/DB/Gen/EMPS_P5.ddb",
@@ -4131,8 +4131,13 @@
   "target": {
     "codeflash_path": "firmware/camry-8965F3307000/CodeFlash.bin",
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-    "rdbi_record_count": 241,
-    "rdbi_table_offset": "0x02928C",
+    "rdbi_membership_boundary": "Complete DID metadata, not currently readable DID admission. 0x4D36E selects kind byte +0x0C == 0 and requires an absent availability callback or a callback result of 0x5A.",
+    "rdbi_record_count": 242,
+    "rdbi_record_kind_counts": {
+      "0": 196,
+      "1": 46
+    },
+    "rdbi_table_offset": "0x02927C",
     "software_id": "8965F3307000"
   }
 }

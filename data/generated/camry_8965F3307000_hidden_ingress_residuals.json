@@ -57,9 +57,9 @@
     "census": {
       "candidateFunctions": 49,
       "candidates": 103,
-      "functions": 7320,
-      "knownRangeStores": 5453,
-      "stores": 14172
+      "functions": 7328,
+      "knownRangeStores": 5471,
+      "stores": 14190
     },
     "closure_groups": [
       {
@@ -172,9 +172,9 @@
     "computed_store_census": {
       "candidateFunctions": 3,
       "candidates": 5,
-      "functions": 7320,
-      "knownRangeStores": 5453,
-      "stores": 14172
+      "functions": 7328,
+      "knownRangeStores": 5471,
+      "stores": 14190
     },
     "destination_field_count": 44,
     "destination_registers": {
@@ -532,7 +532,7 @@
     {
       "body_sha256": "9cad4c1947e321a80ea86008915984329c61b788f9f2a9544fa12f04b4f1582b",
       "body_size": 6,
-      "decompiled_c_sha256": "8091bf4f0884d9903f8ce25c9747970142cb28ff287a8683f07cf7580de27ed6",
+      "decompiled_c_sha256": "6148214c54fd91685127ce229945bd2d521b63511da5cf70947ae5c7044cd5d9",
       "entry": "0x0007A32E"
     },
     {
@@ -544,7 +544,7 @@
     {
       "body_sha256": "a00f3f3eb86314d6645155548f2b80dfee64ced3e8dd8c0d04a38020525f8ae9",
       "body_size": 226,
-      "decompiled_c_sha256": "2b791bc95d8f2649aa1dac99fdc4eb20e1ed1a77e2b66d248de9ae658d8beb7f",
+      "decompiled_c_sha256": "1ec3fc49cd8092376be295297ac416053841c326bf23cae3621b352139432d20",
       "entry": "0x0007B2C4"
     },
     {
@@ -718,61 +718,61 @@
     {
       "body_sha256": "c8dac67094db410306ced97c5d6d75b1de8515389e51114691b6e43d701de355",
       "body_size": 94,
-      "decompiled_c_sha256": "7e479185356a78a9cc30bcb6d0efa788f6e3aa5d9af1210880f06b78fe58a1d0",
+      "decompiled_c_sha256": "3b6cb450c19eb7fcf6177e1686cb9a9d5273c88f5cf1feca4a198e1da0e5fafe",
       "entry": "0x00093ABA"
     },
     {
       "body_sha256": "5813db0c182e922216860fb9b682b69d0b5361d71f67805940274a1531d3c5ec",
       "body_size": 6,
-      "decompiled_c_sha256": "85d12efe3f0e43edeee8fcc02c2264dfe51837d33734b792ab9adf77d16f36c4",
+      "decompiled_c_sha256": "1c17619cdf53b6935da95a43b0b005b16e645b80e05d87aed4df3def14fd19e2",
       "entry": "0x00093C60"
     },
     {
       "body_sha256": "8a7c2ca0b4fa0c141d28fb778576423f4242f8d12d3b0f1daf2346cc12733785",
       "body_size": 6,
-      "decompiled_c_sha256": "756a4845686d8eae52f50b247aac837be24edaf09991a40f7574007770036947",
+      "decompiled_c_sha256": "c3a28aaa4ed37dace447190abb30d67d649b56db45a83403cde372a9a9acf5c1",
       "entry": "0x00093C66"
     },
     {
       "body_sha256": "fbf9cd483ac2d53ae166f4dabf9dde492bd2841802b0912fe40289d02bb67306",
       "body_size": 34,
-      "decompiled_c_sha256": "19987c6fbb496610fa4c46ca28d717c723b5bff338e60c781e107db70621027f",
+      "decompiled_c_sha256": "c7baf7018ff602a4401f8b2f8b98118c3db2b79575d5b3b578d324f86ca2e522",
       "entry": "0x00093C6C"
     },
     {
       "body_sha256": "c047e062d7ecd752068716ae2b9d84599b6dff3acb3ef1b945ce4b56ea19a8ff",
       "body_size": 52,
-      "decompiled_c_sha256": "362438dc135548e3f5c42b8e9ca1967cd6371836da19291512dec84798f1613f",
+      "decompiled_c_sha256": "a4add617db3eaf9de6fbbe1e48a95a479b0459f125554db05e43d67bcd90b063",
       "entry": "0x00093C9A"
     },
     {
       "body_sha256": "b85471eaa9e09fdfae8e1142ac41600b8da6bab9cdba8ba14b429518c8530142",
       "body_size": 74,
-      "decompiled_c_sha256": "583d3bfd4986b0ac4a49ee0ad51aa3e11dc4cd950e39333ae5bd3a51c71d0b90",
+      "decompiled_c_sha256": "89130ebcefa99dd7487bfaf66b454fc524f3e8934a21473553158fb10f7ca200",
       "entry": "0x00093DE8"
     },
     {
       "body_sha256": "d458efee5118df50d3d790da31bac8d516e6dd0a2965093e432e89258c8e8315",
       "body_size": 38,
-      "decompiled_c_sha256": "8ade087a55f69d33cc0fc43ef6874cc4c150c8fd5b6bc92fa79ce12cc75f99fc",
+      "decompiled_c_sha256": "302a95493f121a18b2295ebf40449e0a0789007a7d6e50229d8328d426709aa3",
       "entry": "0x00093E5C"
     },
     {
       "body_sha256": "1dd6db5c7afe41a2e406f2ba32e6df2fb292eb8971b44630ea20b073eb7310cf",
       "body_size": 12,
-      "decompiled_c_sha256": "bd0432f59c43c8fc2bc9851df0851ba7deb21fa0e12e6c3bfccc7ecb2adcb0d2",
+      "decompiled_c_sha256": "e046dd366551d3da0c2cdfc563a1cce6ccebd366960b1301d99c3cba4cf3fee3",
       "entry": "0x00093EF6"
     },
     {
       "body_sha256": "9c990bcbba3a6b88bfd09acb745402bbd10acf2eb245c85e34abdc2f514920c2",
       "body_size": 34,
-      "decompiled_c_sha256": "1180d8d38915c0e20fac90f3670e53393949edfa72afa541279d54ac3e25caeb",
+      "decompiled_c_sha256": "c56a9eb62dd8402e8a10298138af4cfc7acf53147bb0ceb5bc5cf25a0d48d04c",
       "entry": "0x00093F0E"
     },
     {
       "body_sha256": "374d21efcf3169efc09a85eee140cb25eb04ac755dfb4d4bd843957ce47853ff",
       "body_size": 12,
-      "decompiled_c_sha256": "39258fce8a3213388aaee77afc934fff94859186a9f67e5201b8311e85571cf2",
+      "decompiled_c_sha256": "dac1f125f9c5fa95c0274f54099d965f5db16b8ee8957e68de3b40f7ff67e655",
       "entry": "0x00093F4E"
     },
     {
@@ -917,11 +917,11 @@
   "inputs": {
     "computed_store_target_census": {
       "path": "data/generated/camry_8965F3307000_computed_store_target_census.json",
-      "sha256": "77a3f171e63907868368c49f176365be623ab3a988f092a6fa7d013d50b26d82"
+      "sha256": "3a043704e09a6b9897ac491c732340edf9c965707cdb29663a9e8803296bdd2a"
     },
     "dmac_destination_computed_store_census": {
       "path": "data/generated/camry_8965F3307000_dmac_destination_computed_store_census.json",
-      "sha256": "3f8af80d30f6c74be123d3fb066761b79a5e5aa1fbc73b57055c6c5cf5d32eb1"
+      "sha256": "ad31e000648666075f94623b0f7538e6daae2689bdcc881c935a370de3e2e66e"
     },
     "resolver_script": {
       "path": "ghidra/scripts/investigate/AuditComputedStoreTargets.java",
@@ -932,7 +932,7 @@
   "schema": "camry-8965f3307000-hidden-ingress-residuals-v1",
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-    "corpus_function_count": 7320,
+    "corpus_function_count": 7328,
     "software_id": "8965F3307000"
   }
 }

@@ -6,7 +6,7 @@ import argparse
 import hashlib
 import json
 import struct
-from collections import defaultdict
+from collections import Counter, defaultdict
 from pathlib import Path
 from tools.techstream.parse_ddb import DDBParser, ECU_TABLE_CLASS_NAMES, MASTER_TABLE_CLASS_NAMES
 from tools.techstream.ddb_semantics import extract_behavior_records, extract_monitor_records, records
@@ -25,8 +25,8 @@ DECOMP = REPO_ROOT / "data/generated/camry_8965F3307000_gtsplus_decompiler_evide
 F33_CORPUS = REPO_ROOT / F33_TARGET["decompiler_corpus"]
 OUT = REPO_ROOT / "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json"
 IMAGE_SHA = F33_TARGET["codeflash_sha256"]
-RDBI_OFFSET = 0x2928C
-RDBI_COUNT = 241
+RDBI_OFFSET = 0x2927C
+RDBI_COUNT = 242
 
 
 def sha(path: Path) -> str:
@@ -133,8 +133,11 @@ def main() -> int:
     gm = {row["monitor_key"]: row for row in g_mon}
     vm = {row["monitor_key"]: row for row in v_mon}
 
-    # Exact F33 RDBI table: <u16 DID, u16 payload size, u32 callback, u32 aux,
-    # u32 selector>. The selector distinguishes system 1/2 for shared callbacks.
+    # Complete metadata returned by 0x50990: <u16 DID, u16 payload size,
+    # u32 reader, u32 availability callback, u32 selector/kind>. Membership is
+    # not read admission: 0x4D36E requires kind byte +0x0C == 0 and either no
+    # availability callback or its result == 0x5A. Shared readers use the
+    # selector to distinguish system 1/2.
     rdbi = []
     for index in range(RDBI_COUNT):
         off = RDBI_OFFSET + index * 16
@@ -442,6 +445,14 @@ def main() -> int:
             "codeflash_sha256": IMAGE_SHA,
             "rdbi_table_offset": f"0x{RDBI_OFFSET:06X}",
             "rdbi_record_count": RDBI_COUNT,
+            "rdbi_record_kind_counts": dict(sorted(Counter(
+                str(row["selector"] & 0xFF) for row in rdbi
+            ).items())),
+            "rdbi_membership_boundary": (
+                "Complete DID metadata, not currently readable DID admission. "
+                "0x4D36E selects kind byte +0x0C == 0 and requires an absent "
+                "availability callback or a callback result of 0x5A."
+            ),
         },
         "current_master_join": {
             "category": {

@@ -30,12 +30,12 @@ with tempfile.TemporaryDirectory() as td:
 art = json.loads(ART.read_text())
 check("exact target firmware identity", art["target"]["software_id"] == "8965F3307000"
       and art["target"]["codeflash_sha256"] == "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7")
-check("exact RDBI table denominator pinned", art["exact_rdbi_table"] == {"offset":"0x2928C", "record_count":241})
+check("exact RDBI table denominator pinned", art["exact_rdbi_table"] == {"offset":"0x2927C", "record_count":242})
 sel = art["selector_state_direct_rdbi"]
 check("selector cells have no direct exact-F33 RDBI callback", sel["cells"] == {"FEBEC156":[], "FEBEC158":[]})
 check("selector diagnostic negative denominator is explicit and intersection-free",
       sel["denominator"] == {
-          "rdbi_records":241, "unique_callbacks":195, "distinct_direct_ram_read_cells_ge_FEBE0000":136,
+          "rdbi_records":242, "unique_callbacks":196, "distinct_direct_ram_read_cells_ge_FEBE0000":136,
           "selector_direct_reader_functions":34, "selector_reader_write_targets_intersecting_rdbi_read_cells":0,
       })
 rows = {r["data_id"]: r for r in art["d0218_term_proxies"]}

@@ -1,0 +1,118 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_regulator_envelope_retains_previous_output_magnitude",
+  "entry": {
+    "role": "Real369E4 bank0 common/differential output composition and3695E calibrated cubic envelope. Explicit retained PI accumulators and prior negative bank output demonstrate magnitude-based hysteresis and new positive saturation. These are software handoffs, not a fresh complete PI update or physical output.",
+    "scope": "resolved-address",
+    "address": "0x369e4"
+  },
+  "max_instructions": 5000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1c00",
+      "size": 1024,
+      "fill": 165,
+      "evidence": "Isolated stack for the real nested saturating-multiply calls."
+    },
+    {
+      "address": "0xfebe8bae",
+      "hex": "00",
+      "evidence": "Ordinary owner selection; do not select the real reset branch."
+    },
+    {
+      "address": "0xfebe8b28",
+      "hex": "00000000",
+      "evidence": "Explicit output-request snapshot without40004 reset mask."
+    },
+    {
+      "address": "0xfebe71ec",
+      "hex": "0000",
+      "evidence": "Both banks admitted; normalsum/2 path uses common and differential generations."
+    },
+    {
+      "address": "0xfebe6c78",
+      "hex": "00b00400",
+      "evidence": "Retained first-axis differential accumulator."
+    },
+    {
+      "address": "0xfebe6c8c",
+      "hex": "00b00400",
+      "evidence": "Retained first-axis common accumulator."
+    },
+    {
+      "address": "0xfebe6ca0",
+      "hex": "00504600",
+      "evidence": "Retained second-axis differential accumulator."
+    },
+    {
+      "address": "0xfebe6ccc",
+      "hex": "00504600",
+      "evidence": "Retained second-axis common accumulator."
+    },
+    {
+      "address": "0xfebe6cf0",
+      "hex": "00040000",
+      "evidence": "Explicit shared32-bit output scale inside exact700..1707 calibration bounds."
+    },
+    {
+      "address": "0xfebe6be8",
+      "size": 44,
+      "fill": 165,
+      "evidence": "Bank0 output state canaries; prior second-axis output follows."
+    },
+    {
+      "address": "0xfebe6bee",
+      "hex": "62df",
+      "evidence": "Prior magnitude8350 lies strictly between8297 and8399. Exact36982 SLD.B reads cubic coefficientF5 as signed -11, not halfword245."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Real output-composition call returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Cubic helper restores caller frame",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "New second-axis positive saturation differs from first-axis non-saturation",
+      "kind": "memory",
+      "address": "0xfebe6be8",
+      "size": 2,
+      "equals_hex": "0100"
+    },
+    {
+      "name": "Hysteresis selects prior magnitude8350 rather than either new envelope endpoint",
+      "kind": "memory",
+      "address": "0xfebe6bec",
+      "size": 10,
+      "equals_hex": "58029e209e206920cf20"
+    },
+    {
+      "name": "Unclipped outputs and raw cubic generations remain distinguishable",
+      "kind": "memory",
+      "address": "0xfebe6bf8",
+      "size": 20,
+      "equals_hex": "58020000282300002c7d0601f949030100504600"
+    }
+  ]
+}

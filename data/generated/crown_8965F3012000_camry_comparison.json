@@ -316,13 +316,14 @@
       "-2790": 1,
       "-2802": 1,
       "-2814": 1,
-      "-2826": 38
+      "-2826": 39
     },
-    "camry_table": "0x0002928C",
-    "count": 241,
-    "crown_table": "0x00028FA8",
+    "camry_table": "0x0002927C",
+    "count": 242,
+    "crown_table": "0x00028F98",
     "did_membership_identical": true,
-    "unique_callbacks": 195
+    "membership_boundary": "Complete metadata membership only; not currently readable DID admission.",
+    "unique_callbacks": 196
   },
   "schema": "crown-8965f3012000-camry-f33-comparison-v1"
 }

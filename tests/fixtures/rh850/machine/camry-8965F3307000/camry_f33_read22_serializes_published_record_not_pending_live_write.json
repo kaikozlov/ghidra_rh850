@@ -1,0 +1,150 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_read22_serializes_published_record_not_pending_live_write",
+  "entry": {
+    "role": "Real22 preflight, class3 callbacks, metadata selection and application serializer. Exact3-byte body capacity. Stop BEFORE positive submission95644; source generation is foreground cache, not newer live/staged record103.",
+    "scope": "resolved-address",
+    "address": "0x961dc"
+  },
+  "max_instructions": 30000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "r6": "0xfebe4000",
+    "r7": "0x0",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xfe00"
+  },
+  "stop_addresses": [
+    "0x95626",
+    "0x95644",
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1800",
+      "size": 2048,
+      "fill": 165,
+      "evidence": "Real nested-call stack; no replacements"
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Established native empty PMR-save nesting counter; real98CDA/6A45E saves PMR=FE00 at39E0 and98CE6/6A4C4 restores it. No critical-section or session-snapshot callee is skipped."
+    },
+    {
+      "address": "0xfebe4000",
+      "hex": "0041befe020000000042befe00000000000000000300000022000200",
+      "evidence": "Advanced context; positive SID prefix owned outside this entry"
+    },
+    {
+      "address": "0xfebe4200",
+      "size": 8,
+      "fill": 165,
+      "evidence": "Body and guard bytes"
+    },
+    {
+      "address": "0xfebe5954",
+      "size": 12,
+      "fill": 0,
+      "evidence": "Locked security bitmap and session storage before explicit session1"
+    },
+    {
+      "address": "0xfebe595c",
+      "hex": "01",
+      "evidence": "Ordinary session1; static read-class policy count0"
+    },
+    {
+      "address": "0xfebf3b26",
+      "size": 6,
+      "fill": 0,
+      "evidence": "Idle real read adapter; reader remains real"
+    },
+    {
+      "address": "0xfebe4100",
+      "hex": "2005",
+      "evidence": "One configured DID, big endian"
+    },
+    {
+      "address": "0xfebee84a",
+      "hex": "5a",
+      "evidence": "Published availability of record103 read byte"
+    },
+    {
+      "address": "0xfebee84d",
+      "hex": "11",
+      "evidence": "Older foreground publication, intentionally different from live record"
+    },
+    {
+      "address": "0xfebeb2c2",
+      "hex": "22",
+      "evidence": "Newer live record byte must not leak through published DID read"
+    },
+    {
+      "address": "0xfebeb2ca",
+      "hex": "11",
+      "evidence": "Pending application record work is not durable/live completion"
+    }
+  ],
+  "checks": [
+    {
+      "name": "real critical sections restore the caller priority mask",
+      "kind": "register",
+      "register": "PMR",
+      "equals": "0xfe00"
+    },
+    {
+      "name": "real critical sections balance the save stack",
+      "kind": "memory",
+      "address": "0xfebe39dc",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "positive submission boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x95644"
+    },
+    {
+      "name": "DID echo plus old published byte",
+      "kind": "memory",
+      "address": "0xfebe4200",
+      "size": 4,
+      "equals_hex": "200511a5"
+    },
+    {
+      "name": "body length excludes SID prefix",
+      "kind": "memory",
+      "address": "0xfebe5d90",
+      "size": 4,
+      "equals_hex": "03000000"
+    },
+    {
+      "name": "selected metadata index220",
+      "kind": "memory",
+      "address": "0xfebe81b8",
+      "size": 2,
+      "equals_hex": "dc00"
+    },
+    {
+      "name": "new live byte untouched",
+      "kind": "memory",
+      "address": "0xfebeb2c2",
+      "size": 1,
+      "equals_hex": "22"
+    },
+    {
+      "name": "staged marker untouched",
+      "kind": "memory",
+      "address": "0xfebeb2ca",
+      "size": 1,
+      "equals_hex": "11"
+    }
+  ]
+}

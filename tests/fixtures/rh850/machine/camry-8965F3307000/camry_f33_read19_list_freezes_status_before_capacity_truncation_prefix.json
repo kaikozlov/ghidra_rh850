@@ -1,0 +1,187 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_read19_list_freezes_status_before_capacity_truncation_prefix",
+  "entry": {
+    "role": "Real configured19/02 callback, status mask, derived-bank snapshot, cursor traversal, scratch tuples and first scheduled yield. Caller body capacity7 fits one tuple after B9 with two unusable bytes. Prefix preserves real scheduling and retained state for8C960 continuation in native-compositions.json; no replacement callee or fake completion.",
+    "scope": "resolved-address",
+    "address": "0x8cb1a"
+  },
+  "max_instructions": 30000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "r6": "0x0",
+    "r7": "0xfebe4000",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xfe00"
+  },
+  "stop_addresses": [
+    "0x798",
+    "0x95644",
+    "0x95626"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1800",
+      "size": 2048,
+      "fill": 165,
+      "evidence": "Real nested-call stack; no replacements"
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Established native empty PMR-save nesting counter; real98D0A/6A45E and98D16/6A4C4 save and restore caller PMR=FE00."
+    },
+    {
+      "address": "0xfebe5e50",
+      "hex": "a5000000",
+      "evidence": "Established enabled empty software event queue (producer0 consumer0 count0), as in app_programming_pending_ack_queues_mode9_not_session2. Real989EC must enqueue ED at5E54 and advance producer/count, not short-circuit scheduling."
+    },
+    {
+      "address": "0xfebe4000",
+      "hex": "0041befe010000000042befe00000000000000000700000019000200",
+      "evidence": "Advanced after SID/subfunction"
+    },
+    {
+      "address": "0xfebe4100",
+      "hex": "01",
+      "evidence": "Select current-derived status bit0 only"
+    },
+    {
+      "address": "0xfebe4200",
+      "size": 16,
+      "fill": 165,
+      "evidence": "Tuple guard region"
+    },
+    {
+      "address": "0xfebf3f18",
+      "size": 808,
+      "fill": 0,
+      "evidence": "Idle configured list module and real scratch"
+    },
+    {
+      "address": "0xfebe602c",
+      "size": 60,
+      "fill": 0,
+      "evidence": "Three derived DTC banks"
+    },
+    {
+      "address": "0xfebe602c",
+      "hex": "06000000",
+      "evidence": "DTC indices1/2 current-derived bits"
+    },
+    {
+      "address": "0xfebe6120",
+      "size": 48,
+      "fill": 255,
+      "evidence": "All event healthy-observed bits set so no uncompleted-test bit is synthesized"
+    },
+    {
+      "address": "0xfebe5f87",
+      "size": 160,
+      "fill": 165,
+      "evidence": "First iterator call must refresh this status snapshot"
+    }
+  ],
+  "checks": [
+    {
+      "name": "first pass performs real scheduled-work publication",
+      "kind": "memory",
+      "address": "0xfebe5e50",
+      "size": 5,
+      "equals_hex": "a5010001ed"
+    },
+    {
+      "name": "real scheduling restores the caller priority mask",
+      "kind": "register",
+      "register": "PMR",
+      "equals": "0xfe00"
+    },
+    {
+      "name": "real scheduling balances the PMR save stack",
+      "kind": "memory",
+      "address": "0xfebe39dc",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "complete retained list handoff state",
+      "kind": "memory",
+      "address": "0xfebf3f18",
+      "size": 10,
+      "equals_hex": "000008000201015a0000"
+    },
+    {
+      "name": "retained context preserves capacity7 and status-only body length1",
+      "kind": "memory",
+      "address": "0xfebf3f24",
+      "size": 28,
+      "equals_hex": "0041befe010000000042befe01000000000000000700000019000200"
+    },
+    {
+      "name": "native caller stack restored at software handoff",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "original derived source generation selects DTC1 and2",
+      "kind": "memory",
+      "address": "0xfebe602c",
+      "size": 4,
+      "equals_hex": "06000000"
+    },
+    {
+      "name": "retained iterator completed two results with last cursor2",
+      "kind": "memory",
+      "address": "0xfebe81b4",
+      "size": 4,
+      "equals_hex": "02000200"
+    },
+    {
+      "name": "first invocation returns after scheduling",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "list continuation is pending",
+      "kind": "register",
+      "register": "r10",
+      "equals": "0xa"
+    },
+    {
+      "name": "published status mask only so far",
+      "kind": "memory",
+      "address": "0xfebe4200",
+      "size": 2,
+      "equals_hex": "b9a5"
+    },
+    {
+      "name": "local frozen tuples retain both DTCs",
+      "kind": "memory",
+      "address": "0xfebf3f40",
+      "size": 8,
+      "equals_hex": "4526960145d60401"
+    },
+    {
+      "name": "first-pass barrier armed",
+      "kind": "memory",
+      "address": "0xfebf3f1f",
+      "size": 1,
+      "equals_hex": "5a"
+    },
+    {
+      "name": "current status snapshot indices1/2",
+      "kind": "memory",
+      "address": "0xfebe5f88",
+      "size": 2,
+      "equals_hex": "0101"
+    }
+  ]
+}

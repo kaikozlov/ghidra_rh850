@@ -174,7 +174,8 @@ producer.
 ## 4. Family dictionary vs this F33 (GetSupport)
 
 `EMPS_P5.ddb` Data List still has DID `0x1CEE` Target Lateral ID. Exact F33’s
-241-entry RDBI table does **not** implement it.
+complete242-record DID metadata table does **not** contain it. The corrected
+geometry includes leading DID0100 at2927C; this does not change the1CEE negative.
 
 That is the intended GTS+ behavior: role `0x67` `GetSupportP5` / role `0xD5`
 `GetSupportMultiP5` ask the connected ECU which DIDs it implements, then hide

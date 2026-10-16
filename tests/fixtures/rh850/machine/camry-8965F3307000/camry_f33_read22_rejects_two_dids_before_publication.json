@@ -1,0 +1,80 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_read22_rejects_two_dids_before_publication",
+  "entry": {
+    "role": "Real configured22 admission after SID prefix reservation. Two DID payload is syntactically even but exceeds exact one-DID policy. Stop BEFORE negative submission95626; no wire-completion claim.",
+    "scope": "resolved-address",
+    "address": "0x961dc"
+  },
+  "max_instructions": 30000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "r6": "0xfebe4000",
+    "r7": "0x0",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xfe00"
+  },
+  "stop_addresses": [
+    "0x95626",
+    "0x95644",
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1800",
+      "size": 2048,
+      "fill": 165,
+      "evidence": "Real nested-call stack; no replacements"
+    },
+    {
+      "address": "0xfebe4000",
+      "hex": "0041befe040000000042befe00000000000000002000000022000200",
+      "evidence": "Advanced F33DcmMessageContext"
+    },
+    {
+      "address": "0xfebe4100",
+      "hex": "20050204",
+      "evidence": "Two individually configured DIDs"
+    },
+    {
+      "address": "0xfebe4200",
+      "size": 32,
+      "fill": 165,
+      "evidence": "No serializer should run"
+    }
+  ],
+  "checks": [
+    {
+      "name": "reject before response submission",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x95626"
+    },
+    {
+      "name": "NRC13 for configured count bound",
+      "kind": "register",
+      "register": "r7",
+      "equals": "0x13"
+    },
+    {
+      "name": "response remains intact",
+      "kind": "memory",
+      "address": "0xfebe4200",
+      "size": 8,
+      "equals_hex": "a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "retained response body length remains zero",
+      "kind": "memory",
+      "address": "0xfebe5d90",
+      "size": 4,
+      "equals_hex": "00000000"
+    }
+  ]
+}

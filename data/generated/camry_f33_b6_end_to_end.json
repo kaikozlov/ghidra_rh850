@@ -220,7 +220,7 @@
     "0x058074": {
       "body_sha256": "0c4d0104e4c90a5679e8a9fc567485460ce8a0710d4cbb61518d5e6498880057",
       "body_size": 1934,
-      "decompiled_c_sha256": "b2421463fad4cf677a1ebf406ff85349f380708b694fddcb95ad577445c0482c",
+      "decompiled_c_sha256": "db43bdd8f4bcae071ea0dd500ef311ead393613b2d5ce56bd5af687b90e5eec3",
       "role": "generated-COM stage copier"
     },
     "0x05899E": {
@@ -238,7 +238,7 @@
     "0x05DF5C": {
       "body_sha256": "c496bf67475b688190f244ba164ea1535d676539ef21bb7bce020729b4c7546f",
       "body_size": 676,
-      "decompiled_c_sha256": "069c103129e8ffa7473fad372297c44d7c7125f414d36515aea5538515cf1a3a",
+      "decompiled_c_sha256": "d4cd1e8f332d88424531fa8fed7c9a2c95238bfda9f0ac6f5d93b3486a03e129",
       "role": "motor-model scheduler aggregate"
     },
     "0x065FEA": {
@@ -3008,7 +3008,7 @@
     }
   ],
   "target": {
-    "canonical_function_count": 7320,
+    "canonical_function_count": 7328,
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "software_id": "8965F3307000"
   }

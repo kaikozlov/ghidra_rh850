@@ -1232,7 +1232,7 @@ without transferring names from a related calibration. The current Toyota master
 Camry-HV vehicle types **12704, 12862, and 12984** to generation-20 category **405
 `EMPS_P5`**. Relative to V18, current `EMPS_P5` expands type 62 from 222×64-byte
 records to 230×80-byte records while preserving a 214-key mirrored Data Monitor
-subset. The exact F33 RDBI table at `0x2928C` contains 241 records, of which **121**
+subset. The exact F33 DID metadata table at `0x2927C` contains 242 records, of which **121**
 have names in current GTS+. High-value exact joins include DID1035 Steering Wheel
 Torque (`0x4DB70`), DID1036 Steering Angle Velocity (`0x4DBBC`), DID1037 Steering
 Angle (`0x4DBF8`), DID1151 Motor Actual Current (Q Axis) (`0x4E394`), DID1152
@@ -2251,7 +2251,7 @@ Deterministic evidence is `data/generated/camry_8965F3307000_internal_assist_ora
 
 ## 32. Exact-F33 passive internal-assist RDBI oracles: term proxies exist; selector state does not
 
-VAR-080 closes the most useful read-only diagnostic observability around the B6-independent `D0218` baseline-assist path. The exact 241-record F33 RDBI table resolves to **195 unique callbacks reading 136 distinct `>=FEBE0000` RAM source cells**, and has **no callback that directly reads `FEBEC158` or `FEBEC156`**. The canonical graph has 34 direct selector-reader functions; their write targets intersect those 136 direct RDBI source cells **zero times**. Thus the recovered `C54A2/C5554` parameter-bank selector is not directly enumerable through an exact DID. This is a canonical direct-reference negative: pointer/indexed copies and downstream-derived diagnostic effects remain bounded.
+VAR-080 closes the most useful read-only diagnostic observability around the B6-independent `D0218` baseline-assist path. The exact 242-record F33 DID metadata table resolves to **196 unique callbacks reading 136 distinct `>=FEBE0000` RAM source cells**, and has **no callback that directly reads `FEBEC158` or `FEBEC156`**. The canonical graph has 34 direct selector-reader functions; their write targets intersect those 136 direct RDBI source cells **zero times**. Thus the recovered `C54A2/C5554` parameter-bank selector is not directly enumerable through an exact DID. This is a canonical direct-reference negative: pointer/indexed copies and downstream-derived diagnostic effects remain bounded.
 
 Two `D0218` terms do have exact passive RDBI projections. `D0D7C` computes `FEBEAE12 = clamp(FEBEC5EE * FEBEAE3C / 0x8000, +/-0x569A)` and `FEBEAE6E = clamp(FEBECB38 * FEBEAE3C / 0x8000, +/-0x569A)`; `BF3AA` snapshots those to `FEBEE8B6` and `FEBEE8C2`. DID `0x1C3E` / callback `0x4EA90` returns `(FEBEE8B6*100)/0x80`, while DIDs `0x1C38`, `0x1C4A`, and `0x1C50` / callbacks `0x4EA06`, `0x4EB7C`, and `0x4EC06` all return `(FEBEE8C2*100)/0x80`; every callback saturates to signed16 before emitting the two-byte payload. `FEBEAE3C <- FEBEB140` is the internal calibration-derived scale already closed by VAR-078. These DIDs are therefore exact **scaled/clamped term proxies**, not raw `D0218` terms and not OEM-named engineering units. Current target-native `EMPS_P5` names none of these four exact F33 DIDs; Toyota's named downstream reference remains DID `0x1C02` **Command Value Torque**.
 
@@ -4400,6 +4400,108 @@ These scenarios supply explicit prior generations. They do not establish fresh
 acquisition, physical voltage/current units, closed-loop stability, task timing
 or physical output commitment.
 
+### 34.13 Monitor-current calibration and regulator-output envelopes
+
+This exact `camry-8965F3307000` slice is **recovered** from decompilation and
+instruction/dataflow checks. Native results below are **verified** only for their
+explicit software states. RAM suffixes here denote `FEBE` addresses. Monitor
+conditioning is not the rotating-frame feedback calculation in §34.12.
+
+#### Retained references and staged calibration are separate generations
+
+`5CA3A` publishes CH2 samples `822C/8238 → 622C/6238` and validity
+`7E1E/7E1F → 636A/636B`. With exact calibration `31E58=1`, `48D48` refreshes
+reference bank0 `7E6C` only when `636A=5A`, and bank1 `7E72` only when
+`636B=5A`; otherwise each bank retains its previous three values. `48DA6`
+conditions six channels into three independent signed16 planes:
+
+| Output plane | Residual before gain selection |
+|---|---|
+| `7E78` | `622C − retained 7E6C − bias` |
+| `7E84` | `6238 − 32768 − bias` |
+| `7E90` | `622C − 32768 − bias` |
+
+Negative residuals select the six signed gains at `6906`; nonnegative residuals
+select `6912`. Biases are at `691E`. Multiplication saturates symmetrically to
+signed32, division by16384 truncates toward zero, and output saturates
+symmetrically to signed16. The [projection composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_monitor_current_projection_retained_reference_banks.json)
+checks independent reference retention, both gain signs and all three planes
+using synthetic range-valid active coefficients—not a claim that a learned
+record supplied those values.
+
+Active coefficients and status `6904/6905` are distinct from staged source
+status/busy `692C/692D`, coefficients `692E/693A/6946` and marker `6954`.
+`32876` acts only when `8A18=5A`:
+
+| Staged condition | Active coefficients | Changed/error status |
+|---|---|---|
+| Marker `A55A5AA5`, not busy, coefficients equal | Retain; skip range validation | `0/0` |
+| Same admission, changed and in range | Adopt staged coefficients | `5A/0` |
+| Same admission, changed but out of range | Twelve gains −16842, six biases0 | `5A/5A` |
+| Invalid marker or busy | Same fallback coefficients | Retain preceding status bytes |
+
+Gain bounds are inclusive `[-20912,-14080]`; bias bounds are inclusive
+`[-1835,1835]`. Rejection does not invalidate the staged source marker. The
+[endpoint composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_monitor_calibration_adopts_inclusive_gain_and_bias_boundaries.json)
+and [out-of-range composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_monitor_calibration_rejects_bias_above_limit_without_invalidating_source.json)
+exercise adoption and fallback through the actual validator and initializer.
+The `32A48` leaf preserves the validator's R10 result; its mere presence is not
+another successful validation.
+
+Record0200's getter selects immutable CodeFlash `A000`, **not** the setter's
+RAM `FEBEF5D0` (§77.23). Its40-byte body contains the marker and18 coefficients;
+serialized bank1 precedes bank0. `32A8C/32AF0` inspect one getter result, then
+`328D4` independently gets the record again before copying coefficients. This
+is neither an atomic getter transaction nor proof of persistence. The
+[refresh composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_monitor_record_refresh_reads_rom_not_setter_ram.json)
+checks ROM selection against deliberately different setter RAM. Separately,
+`32BE8` ignores setter admission and publishes a valid staged marker even when
+the setter rejects; the [rejected-setter composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_monitor_record_marker_publishes_after_rejected_setter.json)
+checks that marker change without a record/status/flag write. A valid staged
+marker is therefore not evidence of a successful store or a learned origin.
+
+Scheduled `5E444`/`5E9F2` work conditions these planes early when mode exceeds
+`100`; when mode exceeds `102`, fault aggregation precedes later calibration
+adoption. That invocation's conditioned values use the preceding active
+calibration generation. Physical acquisition freshness, calibration provenance,
+engineering units and wall-clock scheduling remain separate dependencies.
+
+#### Regulator clipping retains its own output history
+
+`369E4` and `36CF0` own independent44-byte states `6BE8/6C14`. Reset admission
+is the corresponding `8BAE/8BAF` flag or `8B28 & 40004`. With both low fault bits
+of `71EC` clear, the banks use wrapping `(common+differential)/2` and
+`(common−differential)/2`; either fault bit instead selects the common input.
+Each bank clamps its signed scale `6CF0/6CF4` to700..1707, truncates the input
+axis by256, multiplies with symmetric signed32 saturation, then truncates by2048.
+
+The first axis clips at ±7658, including equality in its saturation indication.
+Its absolute clipped value `x` selects a cubic envelope for the second axis.
+For this image, with every division truncating toward zero:
+
+```text
+p = 127 + trunc((-11 * x) / 128)
+q = -1135 + trunc((p * x) / 1024)
+c = clamp(sat32(17365676 + trunc(q / 4) * x), 0, 17365676)
+upper = trunc(c / 2048)
+lower = trunc(max(c - 209715, 0) / 2048)
+```
+
+The coefficient at the first cubic load is a **signed byte −11**, not the
+halfword value245: exact `SLD.B` instructions settle the width/sign that a C
+cast alone did not. When the new raw second-axis magnitude is below `lower`,
+that lower bound is selected. Otherwise the preceding second-axis output
+magnitude is clamped into `[lower,upper]` to select the new limit. The raw second
+axis then clips against that limit. Unclipped values, band and saturation
+signs remain distinct; retained words at state+24/+28 initialize to1024 and
+are not overwritten by ordinary composition.
+
+The [retained-envelope composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_regulator_envelope_retains_previous_output_magnitude.json)
+checks `x=600`: cubic17202476, band8297..8399, preceding magnitude8350 retained
+rather than replaced by either edge. Existing invalid-channel and prior-positive-
+saturation compositions remain. These are numerical/state contracts, not a
+physical voltage-limit model, stability result or proof of output commitment.
+
 ## 35. Hidden-ingress false-negative audit: no concrete alternate producer found; residuals closed in §36
 
 This audit was originally launched because zero-B6 factory steering was treated as tension with the firmware model. CORR-135 removes that premise: the exact B6-independent `D0218` path already reaches physical actuation. The audit remains useful as a bounded false-negative census of hidden mutation/ingress mechanisms, but those mechanisms are no longer required to explain the retained LTA/LCA observation.
@@ -4619,7 +4721,7 @@ Operation), 2070 *Cooperative Control in Progress Flag* (bits 8-15, 0=OFF/1=ON),
 2071 *Target Steering Angle After Output Compensation* (bits 16-31, signed16,
 1.5 deg/count diagnostic view), 2072 *Advanced Drive Target Steering Angle*
 (bits 32-47). TMS-060 already bounds the live-oracle consequence: `0x1CEE` is
-**absent from exact F33's 241-record RDBI table**, so the EPS-side cooperative
+**absent from exact F33's 242-record DID metadata table**, so the EPS-side cooperative
 target is not directly pollable on this car; `0x1C3E/0x1C38/0x1C4A/0x1C50`
 remain the internal-assist RDBI proxies (§32).
 
@@ -12841,9 +12943,9 @@ Direct dispatch `91410` reserves the positive SID prefix before invoking
 operation0. Generic subfunction dispatch `91466` reserves two prefix bytes,
 retains suppress-positive bit7 and clears that bit in the request. Active
 callback5628 and message5630 are retained separately from response completion.
-`9165E` calls operation2 before clearing active state; `916AC` notifies
-operation3. Neither notification alone proves cancellation/completion of a
-previously requested application operation.
+`9165E` clears the main message before operation2, then clears NRC; handler-retained
+copies have their own lifetime. `916AC` notifies operation3. Neither notification
+alone proves cancellation/completion of a previously requested application operation.
 
 #### Configured writes: immediate state versus queued records
 
@@ -13134,6 +13236,154 @@ selected mode`4924` are separate. Expiring a software hold does not prove physic
 bus recovery. Register polling, shared-module reinitialization, bus delivery and
 external transport reachability remain explicit dependencies; no peripheral
 model was extended for these compositions.
+
+#### Request ownership, response transport and completion
+
+The application receive, service and response objects have separate lifetimes.
+Three receive owners each provide256 bytes; the admitted service uses main
+message `FEBE5630` and shared response storage `FEBE5A20` of768 bytes. Handler
+body length, main message length including reserved positive prefixes, and the
+lower16-bit PDU extent are not interchangeable. Cancellation `9165E` clears
+the main message **before** operation2 and clears NRC `5624` afterward. A
+handler's retained copy, such as read22 context `5D84`, can still exist during
+that callback. Resetting these objects does not undo a prior application write.
+
+The response coordinator distinguishes active work, queued responses, lower
+ownership and deferred notification. Its significant transitions are:
+
+| State | Ownership / next boundary |
+|---|---|
+| `10` | Active service; automatic pending deadline eligible |
+| `20 → 30` | Pending response queued, then accepted by lower transport |
+| `30 → 31` | Pending remains lower-owned while final response is queued |
+| `11` | Service continues after pending; spacing/cooldown applies |
+| `21/22` | Final/generated rejection waits for retry |
+| `23/24/25` | Cancellation or failed-pending cleanup has not yet retired every owner |
+| `40 → 50 → 00` | Final disposition/lower completion, deferred result notification, idle |
+
+These are coordinator states, not NRCs or response-disposition codes. Lower
+admission distinguishes accepted0, refusal81, communication82,
+pending-inhibited83 and suppressed84. Outer SID-bit6 policy (`26AEB=0`) is
+separate from the request's suppress-positive bit. Accepted-pending flag `59EA`
+affects later final suppression: a queued final behind pending is not simply
+discarded because the original request set suppress-positive.
+
+`7A376` supplies the lower16-bit extent; `7B3D0` retains Tx ID, length and state
+`D2`. Acceptance does **not** copy payload, queue a controller frame or confirm
+delivery. Configured selectors2/3 use Tx0/PDU0800/channel0/CanIf0800/raw CAN7A9;
+selector4 uses Tx1/PDU0801/channel2/CanIf0802/raw CAN7A8. These are software route
+identities, not vehicle connector bus numbers. A CanTp cancellation can refuse
+to revoke an already accepted single-frame claim while DCM cleanup proceeds.
+
+Pending confirmation queues later notification; it does not immediately invoke
+service operation3 or mode9. Raw timer0/1 limits are1,000,000, overall timer2
+is50,000, timer3 spacing is2000, and timer4 selects P2 policy. Their clock units
+and real scheduling latency are not inferred from those constants.
+
+Native compositions cover [final queued behind pending](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_transport_final_queued_behind_pending_ignores_suppress_positive.json),
+[length-only acceptance without copy or confirmation](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_transport_response_completion_accepts_length_without_copy_or_confirmation.json),
+[deferred pending notification](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_transport_pending_confirmation_defers_operation_three.json)
+and [watchdog cancellation with a surviving CanTp claim](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_transport_watchdog_cancels_service_but_cantp_single_frame_claim_survives.json).
+The last enters the expired software timer callback explicitly; it does not
+simulate elapsed physical time. Lower payload acquisition, segmentation,
+frame acknowledgement and controller execution remain dependency boundaries.
+
+#### Read, clear and control publication lifetimes
+
+**Configured surface.** The ordinary application list admits19/14/AB in
+sessions1/3,22 in1/2/3, and23/85/BA in3, subject to the preceding service and
+application gates. Configured19 subfunctions are01/02/03/04;85 has01/02;AB has
+01/02/03. Null local security lists do not bypass those other owners. Application
+34/36/37 have null direct workers; resident transfer in §77.26 is a different
+implementation. No application SID2F is configured.
+
+**Read22 admission and source age.** Exact getter `50990` returns242 metadata
+records at `2927C`, including leading DID0100/reader4FB10. There are196 kind0
+rows and46 kind1 rows; `4D36E` admits only kind0 and an absent availability
+callback or callback result5A. Metadata membership and GTS naming are therefore
+not a promise of read admission. Dynamic availability gates read `BF3AA`'s
+published `E802..E806/E870/E91C` state, not fresh source samples. The support
+page readers rebuild32-byte maps using `(DID−1)&FF`, MSB first; a support response
+does not freeze availability for a later request.
+
+Although the generic engine iterates, instructions `96214..96222` configure
+**one DID per request**. Odd, short or two-DID bodies produce13. Dynamic-DID
+count is0; five configured static read classes add no local session/security
+restriction. `9613C` preflights the complete DID echo plus fixed payload against
+`min(capacity,65534)` and produces14 before echo or reader execution if it will
+not fit. [Two-DID rejection](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_read22_rejects_two_dids_before_publication.json)
+and [capacity-before-copy](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_read22_capacity_failure_precedes_payload_copy.json)
+exercise these configured boundaries rather than generic multi-DID behavior.
+
+Most scalar/control reads consume sequential `BF3AA` publications in `E800+`.
+In particular,2005..2009 use cached record103 bytes `E84D..E851` and cached
+availability `E84A`; a queued2E request, changed live record and published read
+are distinct generations. The [published-record composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_read22_serializes_published_record_not_pending_live_write.json)
+checks that distinction through serialization. Other readers use separately
+scheduled snapshots, retained45-byte profiles, ROM or record getters. There is
+no whole-bank atomic sampling guarantee. Unavailable record20A makes010B fail
+with22; unavailable record207 makesF18C successfully return20 question marks.
+Those outcomes must not be flattened into a universal failed-read convention.
+
+**DTC status and retained capture.** Event IDs, descriptor indices, packed24-bit
+DTCs, RDBI DIDs, snapshot-field identifiers and record numbers are separate
+namespaces. `51FD2` reduces current event map6090 into derived602C and
+classifier-qualified6054; retained event60C0 reduces into6040. Bank6054 is not
+the second-retained event map60F0. Scheduled rebuilding and record publication
+are different generations (§77.24).
+
+19/01 and/02 mask the requested status withB9. First scan `527D6` freezes the
+160-byte status image `5F87`; later iteration uses that image despite newer
+derived banks. Count/list completion crosses a scheduled continuation barrier
+even when the exact side-source stubs return no data. 19/02 merges sorted
+four-byte DTC/status tuples, ORs duplicate statuses, and clears bit10 when the
+merged status intersects29. It appends only complete tuples; insufficient
+capacity leaves a positive complete-tuple prefix, not NRC14. The
+[prefix composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_read19_list_freezes_status_before_capacity_truncation_prefix.json)
+executes the actual ED enqueue. Its [continuation boundary](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_read19_retained_snapshot_capacity_discards_incomplete_tail.json)
+checks retained tuples after the derived bank changes. A state-preserving native
+smoke also ran both calls on the same emulator, retaining the real prefix's
+CPU/RAM and queue; it supplied the later software call explicitly, not an OS
+scheduler delivery. 19/03 instead copies each complete capture-list source only
+if that entire source fits.
+
+19/04 writes the queried DTC/status header, then uses stored slot1 capture data
+and75 field descriptors at `2A364`. Record1/view0 and record10/view1 have
+separate availability. Serialization emits record number/count followed by
+identifier16, length8 and payload—not read22 metadata entries. At a synthetic
+four-byte body-capacity boundary, `53168` rejects record capacity before field
+copy, but the error-merging path leaves NRC zero. The
+[full short-record composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_read19_short_record_capacity_submits_header_only_positive.json)
+therefore reaches actual CanTp acceptance of positive `59 04 45 D6 04 00`,
+length6, with no record payload. Staged `7F 19 00` is not selected. This is not
+NRC14, a transmitted negative response, or evidence that an ordinary tester can
+select a four-byte buffer: normal shared allocation is768 bytes. These native
+scenarios execute real critical sections with initialized OS nesting/queue
+state; they do not substitute successful helper or hardware callbacks.
+
+**Clear14 and setting-control85.** Exact clear accepts groupFFFFFF and publishes
+asynchronous request `81B2=1410`. The existing selective-clear owner preserves
+second-retained history and separates control action, derived-status rebuild,
+record completion and response delivery. SID85 publishes `8197=0/5A` for
+subfunction01/02. Scheduled `49E22/49DE4` later derive group policy and `510E0`
+may latch classifier state; this is neither immediate physical recovery nor a
+universal veto on event reporting/control actions. Cancellation does not undo
+the applied byte. Existing selective-clear and inhibited-reporting regressions
+remain authoritative.
+
+**Other configured reads/control.** SID23 accepts ALFID15: one family byte plus
+four address bytes and one nonzero size byte, with exactly seven request bytes.
+Family1 bounds RAM `FEBE0000..FEBFFFFF`; family2 bounds DataFlash
+`FF200000..FF207FFF`. Application overlap exclusions further reject protected
+subranges, and the read is limited to255 bytes. This is not arbitrary write or
+execution. AB selectors01/02/03 route the enabled-event catalogue and bounded
+record serializers; fixed type bytes are not function pointers or OEM names.
+BA routes ten fixed operations F1/F3..FB, each with six-byte requests and no
+operation-specific response body. General admission requires `5F4F=5A`; exact
+F7 plus the five bytes `BAENA` can enter while that gate is closed. The callback
+results and finish-length pointer are real ABI values, not void calls. These
+routing contracts are **recovered**; every child operation's application lifetime,
+OEM meaning and external transport reachability are not claimed closed.
 
 ### 77.26 Resident diagnostics, transfer ownership and queued programming boundaries
 
@@ -13460,18 +13710,55 @@ external service.
 **Remaining high-value dependencies:** additional numerical/calibration surfaces
 and cross-task retention/interleavings; physical3838..383C/status sources,
 ADC/DMA, GPIO and local-link freshness; the unassigned `B1C8.bit5` producer;
-production admission of the0600 stimulus start; end-to-end application transport,
-response completion and controller-status acknowledgement; physical persistence
-of thermal and learned records; application/resident timer entropy and fallback;
-resident CRC admission and the dynamic programming driver; SEG/cache/ECC feedback;
-OEM service identities, calibration units and physical source identity.
-The recovered current-reference, session/security, programming-request and
-network-policy contracts distinguish these dependencies rather than replacing
-them with assumed success. A complete peripheral or NvM emulator is not a
-prerequisite for continuing application reconstruction. Static connectivity and
-bounded native scenarios are not exhaustive semantic closure or vehicle results.
+production admission of the0600 stimulus start; lower application payload copy,
+segmentation, frame confirmation and controller-status acknowledgement;
+retained-profile production/age and BA child-operation lifetimes; physical
+persistence of thermal/calibration records; application/resident timer entropy
+and fallback; resident CRC admission and the dynamic programming driver;
+SEG/cache/ECC feedback; OEM service identities, calibration units and physical
+source identity. The recovered calibration, request/publication and response
+contracts distinguish these dependencies rather than replacing them with assumed
+success. A complete peripheral or NvM emulator is not a prerequisite for further
+application reconstruction. Static connectivity and bounded native scenarios
+are not exhaustive semantic closure or vehicle results.
 
-**2026-10-16 checkpoint: current-reference feedback, application sessions/security and network lifetimes.**
+**2026-10-16 checkpoint: monitor calibration, regulator envelopes and diagnostic publication/transport.**
+The subsystem contracts are owned by
+[monitor conditioning and regulator envelopes](#3413-monitor-current-calibration-and-regulator-output-envelopes),
+[request/response ownership](#request-ownership-response-transport-and-completion)
+and [read/clear/control publication](#read-clear-and-control-publication-lifetimes).
+Composed native execution covers calibration generations, retained output limits,
+pending/final/cancel ownership and read serialization. The same-emulator DTC
+continuation preserves actual prefix state across a later publication. No
+peripheral model or live vehicle experiment was added. Whole-image semantic
+reconstruction remains open.
+
+Independent fresh four-stage A/B rebuilds and signature finalization produced
+identical canonical inventories for Camry and, for the shared metadata-geometry
+correction, Crown. Both corpora were regenerated; Camry semantic/discovery outputs,
+live coverage and both project parities passed. Fresh E1/E2 HighFunction audits
+retain the same candidate PCs and function sets. Changed E1 pointer expressions
+reflect typed views of the same32-byte channel strides and16-byte response nodes,
+not new store destinations. The source images remain unchanged.
+
+The cross-target resident-ingress producer now checks instruction gates and
+byte-level response structure instead of anonymous C spelling. Only four
+individually validated calls to target-local critical-section adapters are
+relocated for comparison; their operands are not masked without validation.
+Throwaway derivatives changing unsupported NRC, a functional-kind comparison,
+and one critical-section call were rejected. Prose and copied-wire-constant
+assertions were removed; existing binary geometry, source-generation and
+regeneration regressions remain.
+
+Selected semantic/function-boundary, provenance, assist/B6/ingress, protected-TX,
+loader/recovery-identity, portable/external GTS+, Crown-geometry, capture-replay
+and cross-target ingress gates passed. Matching Camry and Crown snapshots were
+promoted after clean teardown; both corpus identities remained unchanged.
+Retained-capture regeneration still reports the historical corrupted-events
+warning for route `0000001c--574c06b528`; firmware and raw captures were not
+modified. New report links resolved and owned scenario scaffolds were removed.
+
+**Preceding checkpoint `8e71bb8d` (2026-10-16): current-reference feedback, application sessions/security and network lifetimes.**
 The connected contracts are owned by
 [current-reference feedback and retained transitions](#3412-feedback-derived-current-references-and-retained-map-transitions),
 [application session publication](#application-session-publication-and-inactivity-ownership),

@@ -1,0 +1,216 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_transport_final_queued_behind_pending_ignores_suppress_positive",
+  "entry": {
+    "role": "Synthetic handler-completion handoff while a real pending response is already transport-owned. Execute95644/9126A/disposition933F8; no replacement callees. Expected queued31 is not a second transmission or confirmation. Receive/service admission and prior pending acceptance are explicit preconditions.",
+    "scope": "resolved-address",
+    "address": "0x95644"
+  },
+  "max_instructions": 100000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0xfebe1000"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1800",
+      "size": 2048,
+      "fill": 165,
+      "evidence": "Explicit nested-call stack, not acquired reset state."
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Empty priority-mask stack."
+    },
+    {
+      "address": "0xfebe4f00",
+      "size": 4608,
+      "fill": 0,
+      "evidence": "Explicit initialized CanTp/DCM software RAM; no receive, mode startup or hardware execution is claimed."
+    },
+    {
+      "address": "0xfebe1000",
+      "hex": "0111befe00000000215abefe0400000000000000ff02000022000200",
+      "evidence": "Handler-retained advanced response context handoff."
+    },
+    {
+      "address": "0xfebe5630",
+      "hex": "0111befe00000000215abefe0400000000000000ff02000022000200",
+      "evidence": "Main DCM context before completion."
+    },
+    {
+      "address": "0xfebe5628",
+      "hex": "f26209002201",
+      "evidence": "Configured SID22 callback, original SID22 and one prefix byte."
+    },
+    {
+      "address": "0xfebe564c",
+      "hex": "02000200",
+      "evidence": "Both logical communication slots explicitly in transmit-permitted mode2; not inferred from controller hardware."
+    },
+    {
+      "address": "0xfebe5650",
+      "hex": "01",
+      "evidence": "Actual917B2 communication-callback enable state; extended-session handoff does not release a default-session ComM owner."
+    },
+    {
+      "address": "0xfebe595c",
+      "hex": "03030300",
+      "evidence": "Published extended-session snapshot."
+    },
+    {
+      "address": "0xfebe5960",
+      "hex": "02000000100000",
+      "evidence": "Overall active phase2, response state10, pending flags clear."
+    },
+    {
+      "address": "0xfebe59e0",
+      "hex": "00000000",
+      "evidence": "Pending and current dispatch slot0 (physical selector2)."
+    },
+    {
+      "address": "0xfebe5a20",
+      "hex": "6202041234",
+      "evidence": "Shared response root: positive SID62, DID0204 and two example payload bytes."
+    },
+    {
+      "address": "0xfebe4f3d",
+      "hex": "aa",
+      "evidence": "CanTp initialized marker from actual module init contract."
+    },
+    {
+      "address": "0xfebe4f48",
+      "hex": "e1",
+      "evidence": "CanTp channel0 Tx idle."
+    },
+    {
+      "address": "0xfebe4f5a",
+      "hex": "e1",
+      "evidence": "CanTp channel0 Rx idle, satisfies half-duplex gate."
+    },
+    {
+      "address": "0xfebe5e50",
+      "hex": "a5000000",
+      "evidence": "Enabled empty real event queue."
+    },
+    {
+      "address": "0xfebe5970",
+      "hex": "8459befec459befe6a59befe0300000000000000",
+      "evidence": "Response queue root: sentinel/tail and current16-bit descriptor/result pair."
+    },
+    {
+      "address": "0xfebe5984",
+      "hex": "c459befe",
+      "evidence": "Fixed linked-list sentinel next pointer."
+    },
+    {
+      "address": "0xfebe5994",
+      "hex": "00000000205abefe0003000000000000",
+      "evidence": "Fixed positive final node1."
+    },
+    {
+      "address": "0xfebe59a4",
+      "hex": "000000006759befe0300000001000000",
+      "evidence": "Fixed negative final node2."
+    },
+    {
+      "address": "0xfebe59b4",
+      "hex": "00000000000000000000000003000000",
+      "evidence": "Fixed silent node3."
+    },
+    {
+      "address": "0xfebe59c4",
+      "hex": "000000006a59befe0300000010000000",
+      "evidence": "Fixed pending node4."
+    },
+    {
+      "address": "0xfebe596a",
+      "hex": "7f1078",
+      "evidence": "Retained NRC78 wire bytes."
+    },
+    {
+      "address": "0xfebe1000",
+      "hex": "0111befe00000000215abefe0400000000010000ff02000022000200",
+      "evidence": "Handler suppress-positive set; prior pending acceptance is expected to override suppression."
+    },
+    {
+      "address": "0xfebe5964",
+      "hex": "30",
+      "evidence": "Pending response is already in transport."
+    },
+    {
+      "address": "0xfebe59ea",
+      "hex": "01",
+      "evidence": "9296A previously accepted pending10."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Returns through caller sentinel",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Final is queued behind in-flight pending",
+      "kind": "memory",
+      "address": "0xfebe5964",
+      "size": 1,
+      "equals_hex": "31"
+    },
+    {
+      "name": "Main total response includes one prefix",
+      "kind": "memory",
+      "address": "0xfebe563c",
+      "size": 4,
+      "equals_hex": "05000000"
+    },
+    {
+      "name": "Pending next points to final node",
+      "kind": "memory",
+      "address": "0xfebe59c4",
+      "size": 4,
+      "equals_hex": "9459befe"
+    },
+    {
+      "name": "Queue tail becomes final node",
+      "kind": "memory",
+      "address": "0xfebe5974",
+      "size": 4,
+      "equals_hex": "9459befe"
+    },
+    {
+      "name": "Queued final root and16-bit length",
+      "kind": "memory",
+      "address": "0xfebe5998",
+      "size": 6,
+      "equals_hex": "205abefe0500"
+    },
+    {
+      "name": "This completion did not submit another CanTp request",
+      "kind": "memory",
+      "address": "0xfebe4f48",
+      "size": 1,
+      "equals_hex": "e1"
+    },
+    {
+      "name": "Active handler retained while pending owns transport",
+      "kind": "memory",
+      "address": "0xfebe5628",
+      "size": 4,
+      "equals_hex": "f2620900"
+    }
+  ]
+}

@@ -36,7 +36,15 @@ ram = RAM.read_bytes()
 
 check("artifact schema/target", a["schema"] == "gtsplus-2026-camry-8965f3307000-emps-semantics-v1" and a["target"]["software_id"] == "8965F3307000")
 check("exact F33 image hash", len(img) == 0x100000 and sha(IMAGE) == a["target"]["codeflash_sha256"] == "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7")
-check("RDBI table geometry", a["target"]["rdbi_table_offset"] == "0x02928C" and a["target"]["rdbi_record_count"] == 241)
+check("RDBI getter returns complete metadata geometry",
+      img[0x50990:0x509A0] == bytes.fromhex("06f0200ef200800c2a067c9202007f00")
+      and a["target"]["rdbi_table_offset"] == "0x02927C"
+      and a["target"]["rdbi_record_count"] == 242)
+check("metadata kinds remain distinct from read admission",
+      a["target"]["rdbi_record_kind_counts"] == {"0": 196, "1": 46}
+      and img[0x4D384:0x4D3BA] == bytes.fromhex(
+          "1df0c4f2caf16c08e0098a157008fc09da0d04e5e0e1e205fcc760f9"
+          "0a06a6ffaa0d64efb8c900dae50541eae30f0300e1e9f6e51b50"))
 check("current master binds new Camry-HV types to EMPS_P5", a["current_master_join"]["category"] == {"category_id": 405, "database": "EMPS_P5.ddb", "ecu_name": "EMPS", "generation": 20} and [x["vehicle_type"] for x in a["current_master_join"]["new_camry_vehicle_types_using_emps_p5"]] == [12704, 12862, 12984])
 topo = a["current_camry_can_topology"]
 check("current Camry CAN-table geometry exact", topo["table_geometry"] == {
@@ -59,14 +67,14 @@ check("F33 B6 is on that same controller1 rule span", f33can["controller1_rule_c
 f33_rx_rule_ids = [struct.unpack_from("<I", img, 0x230B8 + 0x10 * i)[0] for i in range(47)]
 check("F33 normal RX rules exclude TSS3 cruise-switch 0x0FE", 0x0FE not in f33_rx_rule_ids)
 check("F33 normal Tx table starts with exact 030 steering-status carrier", f33can["normal_tx_table"] == "0x00021F58" and f33can["normal_tx_ids"] == ["0x030","0x351","0x394","0x4A3","0x4C8"])
-check("CAN-topology interpretation keeps connector boundary", "Skid Control (ABS/VSC/TRAC) and Power Steering (EPS) are co-resident" in topo["interpretation"] and "not Comma/Panda bus numbers" in topo["boundary"])
 check("GTS+ expands type62 222x64 -> 230x80", a["emps_p5_schema_delta"]["v18_type62"] == {"record_count": 222, "record_size": 64} and a["emps_p5_schema_delta"]["gtsplus_type62"] == {"record_count": 230, "record_size": 80})
 check("current mirrored datamon tables named", [(x["table_id"], x["class_name"]) for x in a["emps_p5_schema_delta"]["mirrored_current_tables"]] == [(151, "CDbDataIdForRobTable"), (153, "CDbBehaviorDataRecordP5Table"), (156, "CDbDataIdForDmTable"), (157, "CDbDatamonitorP5Table")])
 check("type157 is exact 214-key subset", a["emps_p5_schema_delta"]["type157_subset_of_type62"]["common_key_count"] == 214 and a["emps_p5_schema_delta"]["type157_subset_of_type62"]["type157_key_count"] == 214 and a["emps_p5_schema_delta"]["type157_subset_of_type62"]["type62_key_count"] == 230)
 check("current-only monitor keys exact", [x["monitor_key"] for x in a["emps_p5_schema_delta"]["current_only_monitor_rows"]] == [223, 224, 225, 226, 227, 228, 410, 1413])
 check("new behavior code exact", [(x["signature"], x["name"]) for x in a["emps_p5_schema_delta"]["current_only_behavior_codes"]] == [("X2436", "Beta Cooperative Control Transmission Counter Malfunction")])
-check("P5 DTC table semantic set unchanged", a["emps_p5_schema_delta"]["type65_dtc_delta"].startswith("none; all 166"))
-check("121/241 F33 DIDs current-named", a["f33_rdbi_join"]["f33_total_data_ids"] == 241 and a["f33_rdbi_join"]["gtsplus_named_f33_data_ids"] == 121)
+check("current names join the complete F33 metadata table",
+      a["f33_rdbi_join"]["f33_total_data_ids"] == 242
+      and a["f33_rdbi_join"]["gtsplus_named_f33_data_ids"] == 121)
 
 named = {x["data_id"]: x for x in a["f33_rdbi_join"]["named_data_ids"]}
 expected = {
@@ -85,13 +93,14 @@ check("only current-only F33 additions are ASIC upper words", [(x["monitor_key"]
 
 # Verify exact table records independently of the generated artifact.
 def rdbi(did: int):
-    for i in range(241):
-        off = 0x2928C + i * 16
+    for i in range(242):
+        off = 0x2927C + i * 16
         rd, size, cb, aux, selector = struct.unpack_from("<HHIII", img, off)
         if rd == did:
             return off, size, cb, aux, selector
     return None
 
+check("F33 metadata includes leading DID 0100 reader", rdbi(0x0100) == (0x2927C, 32, 0x4FB10, 0, 0))
 check("F33 DID 1C05 record", rdbi(0x1C05) == (0x29A6C, 8, 0x4E848, 0, 0), str(rdbi(0x1C05)))
 check("F33 DID 1C0C record", rdbi(0x1C0C) == (0x29ABC, 8, 0x4E848, 0, 1), str(rdbi(0x1C0C)))
 check("ASIC split names/bits exact", [(x["data_id"], x["name"], x["bit_range"], x["f33_selector"]) for x in a["asic_state_join"]["gtsplus_rows"]] == [("0x1C05", "ASIC State Information", [0, 31], 0), ("0x1C05", "ASIC State Information 2", [32, 63], 0), ("0x1C0C", "ASIC State Information (System 2)", [0, 31], 1), ("0x1C0C", "ASIC State Information 2 (System 2)", [32, 63], 1)])

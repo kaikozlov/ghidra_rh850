@@ -217,3 +217,11 @@ address,provenance,note
 0x000B342A,firmware/camry-8965F3307000/CodeFlash.bin,application mode hook pointer at AEB4C
 0x0007C110,firmware/camry-8965F3307000/CodeFlash.bin,selected normal-network policy disable callback at2184C via21867=1 and21870; leaf body through JMP LP at7C134
 0x000968CC,firmware/camry-8965F3307000/CodeFlash.bin,application session notification callback at25F48; conditional security-token invalidation through JMP LP at968DC
+0x0004D3BE,firmware/camry-8965F3307000/CodeFlash.bin,Fixed optional callback pointers in complete2927C metadata table at29374; exact instruction boundary
+0x0004D3D6,firmware/camry-8965F3307000/CodeFlash.bin,Fixed optional callback pointers in complete2927C metadata table at29874; exact instruction boundary
+0x0004D3E4,firmware/camry-8965F3307000/CodeFlash.bin,Fixed optional callback pointers in complete2927C metadata table at29AD4;29AE4;29AF4; exact instruction boundary
+0x0004D3F2,firmware/camry-8965F3307000/CodeFlash.bin,Fixed optional callback pointers in complete2927C metadata table at29B04;29B14;29B24; exact instruction boundary
+0x0004D400,firmware/camry-8965F3307000/CodeFlash.bin,Fixed optional callback pointers in complete2927C metadata table at29B34;29B44;29B54; exact instruction boundary
+0x0004D412,firmware/camry-8965F3307000/CodeFlash.bin,Fixed optional callback pointers in complete2927C metadata table at29B64;29B74; exact instruction boundary
+0x0004D420,firmware/camry-8965F3307000/CodeFlash.bin,Fixed optional callback pointers in complete2927C metadata table at29B84;29B94;29BA4; exact instruction boundary
+0x0004D42E,firmware/camry-8965F3307000/CodeFlash.bin,Fixed optional callback pointers in complete2927C metadata table at29BB4;29BC4;29BD4; exact instruction boundary

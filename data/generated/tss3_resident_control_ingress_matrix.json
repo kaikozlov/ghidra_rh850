@@ -175,11 +175,11 @@
           4
         ],
         "decompiler_semantic_hashes": {
-          "copy_engine": "799a7ad0763a8ebc34484c0a794c7dc2b5d3f7edc745dd1f413c3ae63c6cfd84",
-          "response_action": "c701298c1b6c819d7e224d2a62ad73a36498b65616628ae1bbd212c11694e67d",
-          "response_machine": "9c68504e4653c5f0c26feb2ac100cdc3ed253530bff01876f1fa46f59843df71",
-          "response_selector": "85c7b31cd3642771420331f7f682ff6405339a42fe0276926504c30d0f24cb2d",
-          "service_lookup": "4441a65bceef175557097d825538f3becda4429c8f5ac04b5081ec40445b18b3"
+          "copy_engine": "89130ebcefa99dd7487bfaf66b454fc524f3e8934a21473553158fb10f7ca200",
+          "response_action": "42299aeadb82cede0df051354b838a39ced2287a9feaf590b4d7b30a94da21c9",
+          "response_machine": "b8ce3a09941f8320addbfaa46041ed4a8307cfeb7fdab2fe701f1511b6359bac",
+          "response_selector": "52a5703a9eb1857c1d9b020ee17dc3018f2a3cb4310210772bc8c1326c11d2d1",
+          "service_lookup": "5a1f3266351b23e2c3be54e75b534f2e8eb260c2a97ae65aa7f2b35a0e7147dd"
         },
         "diagnostic_request_block": "0x00021FA0",
         "format": "classic",
@@ -214,9 +214,118 @@
           "service_lookup": "0x00090F98",
           "start_of_reception": "0x000920BE"
         },
+        "instruction_evidence": {
+          "copy_engine": {
+            "address": "0x00093DE8",
+            "body_sha256": "b85471eaa9e09fdfae8e1142ac41600b8da6bab9cdba8ba14b429518c8530142",
+            "body_size": 74,
+            "checks": [
+              {
+                "address": "0x00093DF2",
+                "bytes": "0095410a938f0100c100419a528f0000009541920195",
+                "meaning": "Copy each byte and advance the destination cursor"
+              },
+              {
+                "address": "0x00093E1A",
+                "bytes": "72080052d209820c7408e79f0500b309840c680f0000",
+                "meaning": "Advance used length and subtract remaining capacity"
+              }
+            ]
+          },
+          "response_action": {
+            "address": "0x00091CE2",
+            "body_sha256": "5cc8cf0d7ed9c32e15d3b32db451190b317dda557aed2796048be93f6fe6de36",
+            "body_size": 50,
+            "checks": [
+              {
+                "address": "0x00091CE6",
+                "bytes": "07e006e89c00",
+                "meaning": "Retain the response pointer and byte disposition"
+              },
+              {
+                "address": "0x00091CF2",
+                "bytes": "80ff32096252ca0d033080ffea1f3d0f0d001c380330630f040080ffec16",
+                "meaning": "Gate response state2, narrow body extent to16 bits, then enqueue"
+              }
+            ]
+          },
+          "response_machine": {
+            "address": "0x000933F8",
+            "body_sha256": "6bae05dc9227b55703c443fd7cd701d558f993a30db8d3ddb96a2da26c741953",
+            "body_size": 320,
+            "checks": [
+              {
+                "address": "0x00093402",
+                "bytes": "c7deff00ea0d06e80132bfff6efd1df0000d0ae06a0f050072086a0f0800e50d61daea050232bfff52fd0ae0f5050332bfff48fd4adf",
+                "meaning": "Select positive, negative or silent node and retain disposition"
+              },
+              {
+                "address": "0x0009343C",
+                "bytes": "bffff8f60a06d0ffca0d",
+                "meaning": "State30 branches to append behind in-flight pending"
+              },
+              {
+                "address": "0x00093456",
+                "bytes": "20363100b51d",
+                "meaning": "Appended final advances to state31"
+              }
+            ]
+          },
+          "response_selector": {
+            "address": "0x000911DA",
+            "body_sha256": "1c632142215be1abea2d0d10f3008d1ae3b4632c65af4cda306ac7acf433a5e1",
+            "body_size": 144,
+            "checks": [
+              {
+                "address": "0x0009122E",
+                "bytes": "013ae0e1fa159d9f1100619aba150106effff20d0106eeffc20d0106cfff920d010682ffe205010681ffb2056152aa05033a",
+                "meaning": "Functional kind1 with NRC11/12/31/7E/7F selects silent disposition3"
+              }
+            ]
+          },
+          "service_lookup": {
+            "address": "0x00090F98",
+            "body_sha256": "ce29d443b0611b3e60d37cd0d760840948659c822980d84f145ba09515ef9c1b",
+            "body_size": 194,
+            "checks": [
+              {
+                "address": "0x00090FFA",
+                "bytes": "e009822d",
+                "meaning": "Null descriptor takes the unsupported-service branch"
+              },
+              {
+                "address": "0x0009104C",
+                "bytes": "200e1100490f0000",
+                "meaning": "Unsupported service stores NRC11 through the error pointer"
+              }
+            ]
+          }
+        },
         "pdur_rx_pdu": "0x0803",
         "physical_request": "0x7A1",
         "resident_sampling_boundary": "after receive drain 0x00079EDE; complete N-SDU is already copied by the PduR/DCM receive callbacks, while service dispatch/unsupported-SID handling is a separate DCM-main path",
+        "response_machine_relocated_calls": [
+          {
+            "address": "0x00093446",
+            "bytes": "80ffac58",
+            "target": "0x00098CF2"
+          },
+          {
+            "address": "0x00093452",
+            "bytes": "80ffac58",
+            "target": "0x00098CFE"
+          },
+          {
+            "address": "0x000934FC",
+            "bytes": "80fff657",
+            "target": "0x00098CF2"
+          },
+          {
+            "address": "0x00093518",
+            "bytes": "80ffe657",
+            "target": "0x00098CFE"
+          }
+        ],
         "secondary_request": "0x7A0",
         "service_table": "0x00025C54",
         "unsupported_service_nrc": "0x11",
@@ -317,10 +426,10 @@
           4
         ],
         "decompiler_semantic_hashes": {
-          "copy_engine": "53902bf4972f25c481ded290ece2e5fca41a61b69de5cd88b03811d2d380b0fe",
+          "copy_engine": "b145b638bd3f9fbfbf6fa32fda4f2887a3942f7f67ae0b7ac13875cf012684c4",
           "response_action": "52d3454e4bf333933829abfb4c0a32675d7cb2d63b4de3bcf2e744a84ce7b5bf",
           "response_machine": "6354257f8b740ffea28f9134d7f288f42bb91c846850803dde64b67bb55059d8",
-          "response_selector": "a8feece4d656266b926bb05a775132d4e88c1494b7715594a77ccd4adca5654d",
+          "response_selector": "ada8f8b27c5af7cec6d051f05179639cf6a42913bf6da1ca98b5201a158d97ea",
           "service_lookup": "603b4de22d8b02a779fd7459d5d61adbd84abcbf7c1875d346dfe7645b4357d9"
         },
         "diagnostic_request_block": "0x00021F4C",
@@ -356,9 +465,118 @@
           "service_lookup": "0x0008A2A8",
           "start_of_reception": "0x0008B3CE"
         },
+        "instruction_evidence": {
+          "copy_engine": {
+            "address": "0x0008D0F8",
+            "body_sha256": "3683498e4bb7af8ff16bd3479cc42c5875334cb2f81ae14963f499647dcc8c21",
+            "body_size": 74,
+            "checks": [
+              {
+                "address": "0x0008D102",
+                "bytes": "0095410a938f0100c100419a528f0000009541920195",
+                "meaning": "Copy each byte and advance the destination cursor"
+              },
+              {
+                "address": "0x0008D12A",
+                "bytes": "72080052d209820c7408e79f0500b309840c680f0000",
+                "meaning": "Advance used length and subtract remaining capacity"
+              }
+            ]
+          },
+          "response_action": {
+            "address": "0x0008AFF2",
+            "body_sha256": "5cc8cf0d7ed9c32e15d3b32db451190b317dda557aed2796048be93f6fe6de36",
+            "body_size": 50,
+            "checks": [
+              {
+                "address": "0x0008AFF6",
+                "bytes": "07e006e89c00",
+                "meaning": "Retain the response pointer and byte disposition"
+              },
+              {
+                "address": "0x0008B002",
+                "bytes": "80ff32096252ca0d033080ffea1f3d0f0d001c380330630f040080ffec16",
+                "meaning": "Gate response state2, narrow body extent to16 bits, then enqueue"
+              }
+            ]
+          },
+          "response_machine": {
+            "address": "0x0008C708",
+            "body_sha256": "6bae05dc9227b55703c443fd7cd701d558f993a30db8d3ddb96a2da26c741953",
+            "body_size": 320,
+            "checks": [
+              {
+                "address": "0x0008C712",
+                "bytes": "c7deff00ea0d06e80132bfff6efd1df0000d0ae06a0f050072086a0f0800e50d61daea050232bfff52fd0ae0f5050332bfff48fd4adf",
+                "meaning": "Select positive, negative or silent node and retain disposition"
+              },
+              {
+                "address": "0x0008C74C",
+                "bytes": "bffff8f60a06d0ffca0d",
+                "meaning": "State30 branches to append behind in-flight pending"
+              },
+              {
+                "address": "0x0008C766",
+                "bytes": "20363100b51d",
+                "meaning": "Appended final advances to state31"
+              }
+            ]
+          },
+          "response_selector": {
+            "address": "0x0008A4EA",
+            "body_sha256": "74003c2aed74f204cd893247e5cdab96a9e9d03216c5792cf03974c84776e49f",
+            "body_size": 144,
+            "checks": [
+              {
+                "address": "0x0008A53E",
+                "bytes": "013ae0e1fa159d9f1100619aba150106effff20d0106eeffc20d0106cfff920d010682ffe205010681ffb2056152aa05033a",
+                "meaning": "Functional kind1 with NRC11/12/31/7E/7F selects silent disposition3"
+              }
+            ]
+          },
+          "service_lookup": {
+            "address": "0x0008A2A8",
+            "body_sha256": "5eb866d30f1d89929e8b03a8a83bb607492f71f744da2b706a3d34c3681348fa",
+            "body_size": 194,
+            "checks": [
+              {
+                "address": "0x0008A30A",
+                "bytes": "e009822d",
+                "meaning": "Null descriptor takes the unsupported-service branch"
+              },
+              {
+                "address": "0x0008A35C",
+                "bytes": "200e1100490f0000",
+                "meaning": "Unsupported service stores NRC11 through the error pointer"
+              }
+            ]
+          }
+        },
         "pdur_rx_pdu": "0x0803",
         "physical_request": "0x7A1",
         "resident_sampling_boundary": "after receive drain 0x0007744A; complete N-SDU is already copied by the PduR/DCM receive callbacks, while service dispatch/unsupported-SID handling is a separate DCM-main path",
+        "response_machine_relocated_calls": [
+          {
+            "address": "0x0008C756",
+            "bytes": "80ffac58",
+            "target": "0x00092002"
+          },
+          {
+            "address": "0x0008C762",
+            "bytes": "80ffac58",
+            "target": "0x0009200E"
+          },
+          {
+            "address": "0x0008C80C",
+            "bytes": "80fff657",
+            "target": "0x00092002"
+          },
+          {
+            "address": "0x0008C828",
+            "bytes": "80ffe657",
+            "target": "0x0009200E"
+          }
+        ],
         "secondary_request": "0x7A0",
         "service_table": "0x00025B38",
         "unsupported_service_nrc": "0x11",
@@ -459,10 +677,10 @@
           4
         ],
         "decompiler_semantic_hashes": {
-          "copy_engine": "53902bf4972f25c481ded290ece2e5fca41a61b69de5cd88b03811d2d380b0fe",
+          "copy_engine": "b145b638bd3f9fbfbf6fa32fda4f2887a3942f7f67ae0b7ac13875cf012684c4",
           "response_action": "52d3454e4bf333933829abfb4c0a32675d7cb2d63b4de3bcf2e744a84ce7b5bf",
           "response_machine": "6354257f8b740ffea28f9134d7f288f42bb91c846850803dde64b67bb55059d8",
-          "response_selector": "a8feece4d656266b926bb05a775132d4e88c1494b7715594a77ccd4adca5654d",
+          "response_selector": "ada8f8b27c5af7cec6d051f05179639cf6a42913bf6da1ca98b5201a158d97ea",
           "service_lookup": "603b4de22d8b02a779fd7459d5d61adbd84abcbf7c1875d346dfe7645b4357d9"
         },
         "diagnostic_request_block": "0x00021F4C",
@@ -498,9 +716,118 @@
           "service_lookup": "0x0008A2A8",
           "start_of_reception": "0x0008B3CE"
         },
+        "instruction_evidence": {
+          "copy_engine": {
+            "address": "0x0008D0F8",
+            "body_sha256": "3683498e4bb7af8ff16bd3479cc42c5875334cb2f81ae14963f499647dcc8c21",
+            "body_size": 74,
+            "checks": [
+              {
+                "address": "0x0008D102",
+                "bytes": "0095410a938f0100c100419a528f0000009541920195",
+                "meaning": "Copy each byte and advance the destination cursor"
+              },
+              {
+                "address": "0x0008D12A",
+                "bytes": "72080052d209820c7408e79f0500b309840c680f0000",
+                "meaning": "Advance used length and subtract remaining capacity"
+              }
+            ]
+          },
+          "response_action": {
+            "address": "0x0008AFF2",
+            "body_sha256": "5cc8cf0d7ed9c32e15d3b32db451190b317dda557aed2796048be93f6fe6de36",
+            "body_size": 50,
+            "checks": [
+              {
+                "address": "0x0008AFF6",
+                "bytes": "07e006e89c00",
+                "meaning": "Retain the response pointer and byte disposition"
+              },
+              {
+                "address": "0x0008B002",
+                "bytes": "80ff32096252ca0d033080ffea1f3d0f0d001c380330630f040080ffec16",
+                "meaning": "Gate response state2, narrow body extent to16 bits, then enqueue"
+              }
+            ]
+          },
+          "response_machine": {
+            "address": "0x0008C708",
+            "body_sha256": "6bae05dc9227b55703c443fd7cd701d558f993a30db8d3ddb96a2da26c741953",
+            "body_size": 320,
+            "checks": [
+              {
+                "address": "0x0008C712",
+                "bytes": "c7deff00ea0d06e80132bfff6efd1df0000d0ae06a0f050072086a0f0800e50d61daea050232bfff52fd0ae0f5050332bfff48fd4adf",
+                "meaning": "Select positive, negative or silent node and retain disposition"
+              },
+              {
+                "address": "0x0008C74C",
+                "bytes": "bffff8f60a06d0ffca0d",
+                "meaning": "State30 branches to append behind in-flight pending"
+              },
+              {
+                "address": "0x0008C766",
+                "bytes": "20363100b51d",
+                "meaning": "Appended final advances to state31"
+              }
+            ]
+          },
+          "response_selector": {
+            "address": "0x0008A4EA",
+            "body_sha256": "74003c2aed74f204cd893247e5cdab96a9e9d03216c5792cf03974c84776e49f",
+            "body_size": 144,
+            "checks": [
+              {
+                "address": "0x0008A53E",
+                "bytes": "013ae0e1fa159d9f1100619aba150106effff20d0106eeffc20d0106cfff920d010682ffe205010681ffb2056152aa05033a",
+                "meaning": "Functional kind1 with NRC11/12/31/7E/7F selects silent disposition3"
+              }
+            ]
+          },
+          "service_lookup": {
+            "address": "0x0008A2A8",
+            "body_sha256": "5eb866d30f1d89929e8b03a8a83bb607492f71f744da2b706a3d34c3681348fa",
+            "body_size": 194,
+            "checks": [
+              {
+                "address": "0x0008A30A",
+                "bytes": "e009822d",
+                "meaning": "Null descriptor takes the unsupported-service branch"
+              },
+              {
+                "address": "0x0008A35C",
+                "bytes": "200e1100490f0000",
+                "meaning": "Unsupported service stores NRC11 through the error pointer"
+              }
+            ]
+          }
+        },
         "pdur_rx_pdu": "0x0803",
         "physical_request": "0x7A1",
         "resident_sampling_boundary": "after receive drain 0x0007744A; complete N-SDU is already copied by the PduR/DCM receive callbacks, while service dispatch/unsupported-SID handling is a separate DCM-main path",
+        "response_machine_relocated_calls": [
+          {
+            "address": "0x0008C756",
+            "bytes": "80ffac58",
+            "target": "0x00092002"
+          },
+          {
+            "address": "0x0008C762",
+            "bytes": "80ffac58",
+            "target": "0x0009200E"
+          },
+          {
+            "address": "0x0008C80C",
+            "bytes": "80fff657",
+            "target": "0x00092002"
+          },
+          {
+            "address": "0x0008C828",
+            "bytes": "80ffe657",
+            "target": "0x0009200E"
+          }
+        ],
         "secondary_request": "0x7A0",
         "service_table": "0x00025B38",
         "unsupported_service_nrc": "0x11",
@@ -601,10 +928,10 @@
           4
         ],
         "decompiler_semantic_hashes": {
-          "copy_engine": "2389fd5089dc09eb00d401f7a3ac71f5998833fc8aee189643a0eac591d3a1ef",
+          "copy_engine": "c954c0216fe17e53504bbb3c651ac122775c4a09bb32e700fa6dac92251b7752",
           "response_action": "f01290f2a8482e86d061f972c39daa3d429ce6ae338fd4b702403e25410e4b94",
           "response_machine": "cb52ca76fce98ed00cb952f334d1aaff630107375b94760dfad34b16896e0a4e",
-          "response_selector": "5a17fc952cc21e59562943c47fc16eaa821a475cb4f374ffdb963bbfdf41bc2c",
+          "response_selector": "f05b9f9d9373c22a9b8e0274b77ebf4e159ec9ae9a68c5d22042d29dcedc1abc",
           "service_lookup": "92035aeee1610359e8b1e58a2ba06777eea528ce8c9547e5646b2a27aa250bc5"
         },
         "diagnostic_request_block": "0x00021E88",
@@ -640,9 +967,118 @@
           "service_lookup": "0x0008EA38",
           "start_of_reception": "0x0008FB5E"
         },
+        "instruction_evidence": {
+          "copy_engine": {
+            "address": "0x00091888",
+            "body_sha256": "0434f9f94fa8b00db703e791d3e1312702e7416809156f91dee60b72282b857f",
+            "body_size": 74,
+            "checks": [
+              {
+                "address": "0x00091892",
+                "bytes": "0095410a938f0100c100419a528f0000009541920195",
+                "meaning": "Copy each byte and advance the destination cursor"
+              },
+              {
+                "address": "0x000918BA",
+                "bytes": "72080052d209820c7408e79f0500b309840c680f0000",
+                "meaning": "Advance used length and subtract remaining capacity"
+              }
+            ]
+          },
+          "response_action": {
+            "address": "0x0008F782",
+            "body_sha256": "5cc8cf0d7ed9c32e15d3b32db451190b317dda557aed2796048be93f6fe6de36",
+            "body_size": 50,
+            "checks": [
+              {
+                "address": "0x0008F786",
+                "bytes": "07e006e89c00",
+                "meaning": "Retain the response pointer and byte disposition"
+              },
+              {
+                "address": "0x0008F792",
+                "bytes": "80ff32096252ca0d033080ffea1f3d0f0d001c380330630f040080ffec16",
+                "meaning": "Gate response state2, narrow body extent to16 bits, then enqueue"
+              }
+            ]
+          },
+          "response_machine": {
+            "address": "0x00090E98",
+            "body_sha256": "582cec2bdcc92b0db97dfd9bbb36f7ae3df31beb330819ef6ec50a902a546e82",
+            "body_size": 320,
+            "checks": [
+              {
+                "address": "0x00090EA2",
+                "bytes": "c7deff00ea0d06e80132bfff6efd1df0000d0ae06a0f050072086a0f0800e50d61daea050232bfff52fd0ae0f5050332bfff48fd4adf",
+                "meaning": "Select positive, negative or silent node and retain disposition"
+              },
+              {
+                "address": "0x00090EDC",
+                "bytes": "bffff8f60a06d0ffca0d",
+                "meaning": "State30 branches to append behind in-flight pending"
+              },
+              {
+                "address": "0x00090EF6",
+                "bytes": "20363100b51d",
+                "meaning": "Appended final advances to state31"
+              }
+            ]
+          },
+          "response_selector": {
+            "address": "0x0008EC7A",
+            "body_sha256": "eb1b4237386b8346a1ec6893b629d0ffd2ad176aef64e0dc0b4468af1a2d095d",
+            "body_size": 144,
+            "checks": [
+              {
+                "address": "0x0008ECCE",
+                "bytes": "013ae0e1fa159d9f1100619aba150106effff20d0106eeffc20d0106cfff920d010682ffe205010681ffb2056152aa05033a",
+                "meaning": "Functional kind1 with NRC11/12/31/7E/7F selects silent disposition3"
+              }
+            ]
+          },
+          "service_lookup": {
+            "address": "0x0008EA38",
+            "body_sha256": "157dad7b5629150668bf695e759f3e1f1ab3d96a58d4fb0921199af03a517a68",
+            "body_size": 194,
+            "checks": [
+              {
+                "address": "0x0008EA9A",
+                "bytes": "e009822d",
+                "meaning": "Null descriptor takes the unsupported-service branch"
+              },
+              {
+                "address": "0x0008EAEC",
+                "bytes": "200e1100490f0000",
+                "meaning": "Unsupported service stores NRC11 through the error pointer"
+              }
+            ]
+          }
+        },
         "pdur_rx_pdu": "0x0803",
         "physical_request": "0x7A1",
         "resident_sampling_boundary": "after receive drain 0x000792EE; complete N-SDU is already copied by the PduR/DCM receive callbacks, while service dispatch/unsupported-SID handling is a separate DCM-main path",
+        "response_machine_relocated_calls": [
+          {
+            "address": "0x00090EE6",
+            "bytes": "80ffc458",
+            "target": "0x000967AA"
+          },
+          {
+            "address": "0x00090EF2",
+            "bytes": "80ffc458",
+            "target": "0x000967B6"
+          },
+          {
+            "address": "0x00090F9C",
+            "bytes": "80ff0e58",
+            "target": "0x000967AA"
+          },
+          {
+            "address": "0x00090FB8",
+            "bytes": "80fffe57",
+            "target": "0x000967B6"
+          }
+        ],
         "secondary_request": "0x7A0",
         "service_table": "0x00025990",
         "unsupported_service_nrc": "0x11",

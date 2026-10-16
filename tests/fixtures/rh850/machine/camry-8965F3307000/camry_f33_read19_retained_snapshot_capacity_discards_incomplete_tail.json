@@ -1,0 +1,190 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_read19_retained_snapshot_capacity_discards_incomplete_tail",
+  "entry": {
+    "role": "Real8C960 second invocation at an explicit seeded software handoff, not an executed first pass or OS dispatch. Prefix report already observed both frozen tuples and old status snapshot before its missing-PMR-state fault; exact8CA58..8CA84 stores derive the remaining handoff bytes. Later current-derived generation selects DTC3, but retained scratch still selects DTC1/2. Capacity7 permits one complete tuple plus two unusable bytes. Stop at95644 BEFORE submission execution: no response delivery claim. Pair with corrected prefix and native-compositions.json for state-preserving execution.",
+    "scope": "resolved-address",
+    "address": "0x8c960"
+  },
+  "max_instructions": 30000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "r6": "0xfebf3f24",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xfe00"
+  },
+  "stop_addresses": [
+    "0x95644",
+    "0x95626",
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1800",
+      "size": 2048,
+      "fill": 165,
+      "evidence": "Explicit fresh call stack at software re-entry; no executable overlay or replaced callee"
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000ffff0000",
+      "evidence": "Derived balanced empty nesting counter and retired first PMR save slot after real6A4C4; continuation does not require fabricated OS execution"
+    },
+    {
+      "address": "0xfebe5e50",
+      "hex": "a5010001ed",
+      "evidence": "Expected prefix publication by real989EC: producer1 consumer0 count1 eventED. Retained as evidence only; direct continuation does not claim queue consumption or scheduler dispatch"
+    },
+    {
+      "address": "0xfebf3f18",
+      "size": 808,
+      "fill": 0,
+      "evidence": "Same initialized list workspace as prefix; exact retained nonzero fields follow"
+    },
+    {
+      "address": "0xfebf3f18",
+      "hex": "000008000201015a0000",
+      "evidence": "Exact8C960 first-pass terminal stores: opaque u16=0, scratch bytes8, phase2, mask1, local done1, first-pass barrier5A, side output0, side return0. Before the reported fault these values are partly locals; this complete seed is static-derived, not a completed-prefix capture"
+    },
+    {
+      "address": "0xfebf3f24",
+      "hex": "0041befe010000000042befe01000000000000000700000019000200",
+      "evidence": "Real8CB1A copies all28 context bytes;8C75C writesB9 and increments response body length0->1. Capacity7 differs from original report's5 only in this field; prefix was corrected to7"
+    },
+    {
+      "address": "0xfebf3f40",
+      "hex": "4526960145d60401",
+      "evidence": "Actual failed-prefix report observed both complete old-generation tuples before OS-state fault; no source/callee patch"
+    },
+    {
+      "address": "0xfebe4100",
+      "hex": "01",
+      "evidence": "Retained requested status mask input"
+    },
+    {
+      "address": "0xfebe4200",
+      "size": 16,
+      "fill": 165,
+      "evidence": "Original response and guard region; prefix published onlyB9"
+    },
+    {
+      "address": "0xfebe4200",
+      "hex": "b9",
+      "evidence": "Actual prefix report observed status maskB9 with next byteA5"
+    },
+    {
+      "address": "0xfebe602c",
+      "size": 60,
+      "fill": 0,
+      "evidence": "All three derived banks explicit before later-source mutation"
+    },
+    {
+      "address": "0xfebe602c",
+      "hex": "08000000",
+      "evidence": "Only inter-invocation source mutation: new current-derived generation has DTC3, not frozen DTC1/2. This is a software publication input, not fabricated scheduler state"
+    },
+    {
+      "address": "0xfebe6120",
+      "size": 48,
+      "fill": 255,
+      "evidence": "Same healthy-observed map as prefix"
+    },
+    {
+      "address": "0xfebe5f87",
+      "size": 160,
+      "fill": 0,
+      "evidence": "Exact5261A snapshot for original banks6/0/0 and all healthy-observed events; no inferred uncompleted-test bits"
+    },
+    {
+      "address": "0xfebe5f88",
+      "hex": "0101",
+      "evidence": "Actual prefix report observed old status snapshot for DTC indices1/2"
+    },
+    {
+      "address": "0xfebe8198",
+      "hex": "01",
+      "evidence": "4D69C retained requested mask"
+    },
+    {
+      "address": "0xfebe81b4",
+      "hex": "02000200",
+      "evidence": "Exact4D6D4/527D6 traversal yields two results, last cursor2; exhaustion does not overwrite the cursor. Not consulted once local terminal flag1 is retained"
+    }
+  ],
+  "checks": [
+    {
+      "name": "positive submission entry reached without executing response API",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x95644"
+    },
+    {
+      "name": "submission argument is real retained context",
+      "kind": "register",
+      "register": "r6",
+      "equals": "0xfebf3f24"
+    },
+    {
+      "name": "one old-generation tuple only and all remaining bytes untouched",
+      "kind": "memory",
+      "address": "0xfebe4200",
+      "size": 12,
+      "equals_hex": "b945269601a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "published body length5 not capacity7 or full union9",
+      "kind": "memory",
+      "address": "0xfebf3f30",
+      "size": 4,
+      "equals_hex": "05000000"
+    },
+    {
+      "name": "caller capacity7 leaves two bytes insufficient for next whole tuple",
+      "kind": "memory",
+      "address": "0xfebf3f38",
+      "size": 4,
+      "equals_hex": "07000000"
+    },
+    {
+      "name": "both old tuples remain in frozen scratch despite omitted tail",
+      "kind": "memory",
+      "address": "0xfebf3f40",
+      "size": 8,
+      "equals_hex": "4526960145d60401"
+    },
+    {
+      "name": "later derived source generation remains DTC3 only",
+      "kind": "memory",
+      "address": "0xfebe602c",
+      "size": 4,
+      "equals_hex": "08000000"
+    },
+    {
+      "name": "old snapshot is not refreshed from the later source",
+      "kind": "memory",
+      "address": "0xfebe5f87",
+      "size": 4,
+      "equals_hex": "00010100"
+    },
+    {
+      "name": "response preparation does not claim event delivery",
+      "kind": "memory",
+      "address": "0xfebe5e50",
+      "size": 5,
+      "equals_hex": "a5010001ed"
+    },
+    {
+      "name": "submission-entry stop precedes continuation reset stores",
+      "kind": "memory",
+      "address": "0xfebf3f18",
+      "size": 10,
+      "equals_hex": "000008000201015a0000"
+    }
+  ]
+}
