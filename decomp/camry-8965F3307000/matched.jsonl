@@ -18,6 +18,7 @@
 {"addr": "0x6842c", "name": "f33_nvm_retain_token_while_reads_pending", "status": "equivalent"}
 {"addr": "0x689de", "name": "f33_nvm_family0_chunk_cost", "status": "equivalent"}
 {"addr": "0x68a50", "name": "f33_nvm_get_family1_completion", "status": "equivalent"}
+{"addr": "0x6810c", "name": "f33_nvm_get_family1_status", "status": "equivalent"}
 {"addr": "0x68144", "name": "f33_nvm_get_family1_record", "status": "equivalent"}
 {"addr": "0x6a744", "name": "f33_force_unconfirmed_terminal_monitor_healthy", "status": "equivalent"}
 {"addr": "0x73552", "name": "f33_nvm_unlink_queue_slot", "status": "equivalent"}

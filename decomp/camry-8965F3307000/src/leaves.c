@@ -246,18 +246,18 @@ uint32_t f33_nvm_get_family1_completion(uint32_t object) {
 }
 
 static int32_t f33_vote_redundant_u8(
-    uint32_t raw, uint32_t encoded55, uint32_t encoded_aa, uint32_t output) {
+    uint32_t raw, uint32_t encoded55, uint32_t encoded_aa, uint32_t *voted) {
     uint32_t plain;
     uint32_t copy55;
     uint32_t copy_aa;
     int32_t status;
-    if (raw == 0u || encoded55 == 0u || encoded_aa == 0u || output == 0u || raw == output)
+    if (raw == 0u || encoded55 == 0u || encoded_aa == 0u)
         return -1;
     plain = camry_read8(raw);
     copy55 = camry_read8(encoded55) ^ 0x55u;
     copy_aa = camry_read8(encoded_aa) ^ 0xaau;
     if (plain == copy55) {
-        camry_write8(output, plain);
+        *voted = plain;
         if (plain == copy_aa)
             return 0;
         return -11;
@@ -269,10 +269,10 @@ static int32_t f33_vote_redundant_u8(
         } else {
             status = -13;
         }
-        camry_write8(output, plain);
+        *voted = plain;
         return status;
     }
-    camry_write8(output, plain);
+    *voted = plain;
     return -11;
 }
 
@@ -289,14 +289,14 @@ static int32_t f33_publish_redundant_u8(
 
 static uint32_t f33_read_repair_redundant_u8(
     uint32_t raw, uint32_t encoded55, uint32_t encoded_aa, uint32_t fallback) {
-    uint32_t slot = 0xfebe1ffbu;
-    int32_t status = f33_vote_redundant_u8(raw, encoded55, encoded_aa, slot);
+    uint32_t voted = 0u;
+    int32_t status = f33_vote_redundant_u8(raw, encoded55, encoded_aa, &voted);
     if (status != 0) {
         if (status != -12 && status != -11)
-            camry_write8(slot, fallback);
-        f33_publish_redundant_u8(camry_read8(slot), raw, encoded55, encoded_aa);
+            voted = fallback & 0xffu;
+        f33_publish_redundant_u8(voted, raw, encoded55, encoded_aa);
     }
-    return camry_read8(slot);
+    return voted & 0xffu;
 }
 
 uint32_t f33_nvm_get_family1_record(uint32_t object, uint32_t destination) {
@@ -321,6 +321,17 @@ uint32_t f33_nvm_get_family1_record(uint32_t object, uint32_t destination) {
     if (status == 0x10u && f33_nvm_check_family1_checksum(index) != 1u)
         status = 0x12u;
     return status;
+}
+
+uint32_t f33_nvm_get_family1_status(uint32_t object) {
+    uint32_t index = object & 0xffffu;
+    if (index >= camry_read16((3u << 16) - 21134u))
+        return 0xffu;
+    return f33_read_repair_redundant_u8(
+        camry_gp + index + 19240u,
+        camry_gp + index + 22664u,
+        camry_gp + index + 22700u,
+        0x12u);
 }
 
 static uint32_t family1_word_fold(uint32_t object) {

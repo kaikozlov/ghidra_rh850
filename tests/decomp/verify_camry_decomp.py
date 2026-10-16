@@ -41,6 +41,7 @@ VALUE_RETURN = {
     "f33_nvm_get_family0_status",
     "f33_nvm_get_family1_completion",
     "f33_nvm_get_family1_record",
+    "f33_nvm_get_family1_status",
     "f33_nvm_check_family1_checksum",
     "f33_nvm_retain_token_while_reads_pending",
     "f33_force_unconfirmed_terminal_monitor_healthy",
@@ -215,6 +216,8 @@ def bind(library: ctypes.CDLL) -> None:
     library.f33_freshness_reconstruct_candidate.restype = u32
     library.f33_nvm_get_family1_record.argtypes = [u32, u32]
     library.f33_nvm_get_family1_record.restype = u32
+    library.f33_nvm_get_family1_status.argtypes = [u32]
+    library.f33_nvm_get_family1_status.restype = u32
     library.f33_classify_channel_residual_a.argtypes = []
     library.f33_classify_channel_residual_a.restype = u32
     library.f33_check_learned_quad_bounds.argtypes = []
