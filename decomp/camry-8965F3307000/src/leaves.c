@@ -658,6 +658,21 @@ uint32_t f33_freshness_select_reset_candidate(uint32_t received, uint32_t search
     return 0;
 }
 
+void f33_freshness_commit_pending(uint32_t slot, uint32_t verification_result) {
+    uint32_t index = slot & 0xffffu;
+    uint32_t offset;
+    uint32_t displacement;
+    uint32_t destination;
+    uint32_t source;
+    if (index >= 2u || (verification_result & 0xffu) != 1u)
+        return;
+    displacement = index * 12u;
+    destination = camry_gp - 25124u + displacement;
+    source = camry_gp - 25100u + displacement;
+    for (offset = 0u; offset < 12u; offset++)
+        camry_write8(destination + offset, camry_read8(source + offset));
+}
+
 void f33_freshness_decode_wire(uint32_t wire, uint32_t bit_length, uint32_t freshness) {
     uint32_t low;
     if (bit_length == 4u) {

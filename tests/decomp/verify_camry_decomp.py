@@ -204,6 +204,8 @@ def bind(library: ctypes.CDLL) -> None:
     library.f33_nvm_submit_operation.restype = u32
     library.f33_freshness_select_reset_candidate.argtypes = [u32, u32]
     library.f33_freshness_select_reset_candidate.restype = u32
+    library.f33_freshness_commit_pending.argtypes = [u32, u32]
+    library.f33_freshness_commit_pending.restype = None
     library.f33_classify_channel_residual_a.argtypes = []
     library.f33_classify_channel_residual_a.restype = u32
     library.f33_check_learned_quad_bounds.argtypes = []
@@ -485,6 +487,9 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
         return int(library.f33_nvm_submit_operation(r6)) & 0xFFFFFFFF
     if name == "f33_freshness_select_reset_candidate":
         return int(library.f33_freshness_select_reset_candidate(r7, r8)) & 0xFFFFFFFF
+    if name == "f33_freshness_commit_pending":
+        library.f33_freshness_commit_pending(r6, r7)
+        return None
     if name == "f33_classify_channel_residual_a":
         return int(library.f33_classify_channel_residual_a()) & 0xFFFFFFFF
     if name == "f33_check_learned_quad_bounds":
