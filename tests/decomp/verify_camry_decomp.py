@@ -15,6 +15,7 @@ from tools.project.analysis_target import target as resolve_target
 ORACLES = ROOT / "oracles.jsonl"
 INCLUDE = ROOT / "include"
 SOURCES = sorted((ROOT / "src").glob("*.c"))
+HOST_MEM = Path(__file__).with_name("camry_host_mem.c")
 MAX_SPAN = 2_000_000
 
 # r10 is the C return value. memcpy returns the destination pointer.
@@ -33,6 +34,18 @@ VALUE_RETURN = {
     "f33_nvm_storage_handle",
     "f33_nvm_advance_family0_request_index",
     "f33_nvm_advance_family1_request_index",
+    "f33_nvm_allocation_pages",
+    "f33_nvm_record_offset",
+    "f33_nvm_payload_chunk_length",
+    "f33_nvm_get_family0_status",
+    "f33_nvm_get_family1_completion",
+    "f33_nvm_probe_range_rejected",
+    "f33_nvm_translate_diagnostic_mask",
+    "f33_lookup_u32_value_by_key",
+    "f33_poll_word_masks",
+    "f33_icus20_read_bit0",
+    "f33_nvm_translate_read_driver_result",
+    "f33_nvm_translate_saved_driver_result",
 }
 
 ROM_TABLES = (
@@ -59,9 +72,11 @@ def compile_sources(directory: Path) -> ctypes.CDLL:
     subprocess.run(
         [
             "cc", "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror",
+            "-DCAMRY_HOST",
             "-I", str(INCLUDE),
             "-dynamiclib", "-o", str(library),
             *[str(path) for path in SOURCES],
+            str(HOST_MEM),
         ],
         check=True,
         text=True,
@@ -109,6 +124,62 @@ def bind(library: ctypes.CDLL) -> None:
     ):
         getattr(library, name).argtypes = [u32]
         getattr(library, name).restype = u32
+    library.f33_nvm_record_offset.argtypes = [u32, u32, u32]
+    library.f33_nvm_record_offset.restype = u32
+    library.f33_nvm_payload_chunk_length.argtypes = [u32, u32]
+    library.f33_nvm_payload_chunk_length.restype = u32
+    library.f33_nvm_probe_range_rejected.argtypes = [u32, u32]
+    library.f33_nvm_probe_range_rejected.restype = u32
+    library.f33_lookup_u32_value_by_key.argtypes = [u32, u32, u32]
+    library.f33_lookup_u32_value_by_key.restype = u32
+    library.f33_poll_word_masks.argtypes = [u32, u32, u32, u32]
+    library.f33_poll_word_masks.restype = u32
+    library.f33_clear_application_ram_4k.argtypes = []
+    library.f33_clear_application_ram_4k.restype = None
+    library.f33_nvm_set_physical_result_state.argtypes = [u32]
+    library.f33_nvm_set_physical_result_state.restype = None
+    library.f33_nvm_set_secondary_result_state.argtypes = [u32]
+    library.f33_nvm_set_secondary_result_state.restype = None
+    library.f33_icus20_read_bit0.argtypes = []
+    library.f33_icus20_read_bit0.restype = u32
+    library.f33_nvm_lookup_byte_result.argtypes = [u32, u32, u32]
+    library.f33_nvm_lookup_byte_result.restype = u32
+    library.f33_nvm_translate_read_driver_result.argtypes = [u32]
+    library.f33_nvm_translate_read_driver_result.restype = u32
+    library.f33_nvm_translate_saved_driver_result.argtypes = []
+    library.f33_nvm_translate_saved_driver_result.restype = u32
+    library.camry_host_reset.argtypes = []
+    library.camry_host_reset.restype = None
+    library.camry_host_add.argtypes = [u32, u8p, u32]
+    library.camry_host_add.restype = None
+
+
+def scenario_regions(scenario: dict) -> list[tuple[int, bytearray]]:
+    regions = []
+    for row in scenario.get("memory", []):
+        address = int(row["address"], 16)
+        if "hex" in row:
+            payload = bytearray.fromhex(row["hex"])
+        else:
+            payload = bytearray([row["fill"] & 0xFF]) * row["size"]
+        regions.append((address, payload))
+    return regions
+
+
+def read_regions(regions: list[tuple[int, bytearray]], address: int, size: int) -> bytes:
+    actual = bytearray(size)
+    seen = bytearray(size)
+    for base, data in regions:
+        start = max(address, base)
+        end = min(address + size, base + len(data))
+        if start >= end:
+            continue
+        for cursor in range(start, end):
+            actual[cursor - address] = data[cursor - base]
+            seen[cursor - address] = 1
+    if any(flag == 0 for flag in seen):
+        raise AssertionError(f"address {address:#x} size {size} is outside the oracle regions")
+    return bytes(actual)
 
 
 def materialize(scenario: dict) -> tuple[bytearray, int] | None:
@@ -153,13 +224,15 @@ def covers(base: int, size: int, address: int, length: int) -> bool:
 
 def useful_oracle(scenario: dict) -> bool:
     checks = scenario.get("checks") or []
-    if any(check.get("kind") == "event-count" for check in checks):
-        return False
-    return any(
-        check.get("kind") == "memory"
-        or (check.get("kind") == "register" and check.get("register") == "r10")
+    has_r10 = any(
+        check.get("kind") == "register" and check.get("register") == "r10"
         for check in checks
     )
+    has_memory = any(check.get("kind") == "memory" for check in checks)
+    has_event = any(check.get("kind") == "event-count" for check in checks)
+    if has_event and not has_r10:
+        return False
+    return has_memory or has_r10
 
 
 def accessed_ranges(name: str, registers: dict) -> list[tuple[int, int]]:
@@ -184,10 +257,33 @@ def accessed_ranges(name: str, registers: dict) -> list[tuple[int, int]]:
     return []
 
 
+def install_address_space(library: ctypes.CDLL, code_view, code_size: int, view, base: int, memory: bytearray) -> None:
+    u8p = ctypes.POINTER(ctypes.c_uint8)
+    library.camry_host_reset()
+    library.camry_host_add(0, ctypes.cast(code_view, u8p), code_size)
+    if memory:
+        library.camry_host_add(base & 0xFFFFFFFF, ctypes.cast(view, u8p), len(memory))
+
+
+def install_regions(library: ctypes.CDLL, code_view, code_size: int, regions: list[tuple[int, bytearray]]) -> list:
+    u8p = ctypes.POINTER(ctypes.c_uint8)
+    views = []
+    library.camry_host_reset()
+    library.camry_host_add(0, ctypes.cast(code_view, u8p), code_size)
+    for base, data in regions:
+        view = view_of(data)
+        views.append(view)
+        library.camry_host_add(base & 0xFFFFFFFF, ctypes.cast(view, u8p), len(data))
+    return views
+
+
 def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: dict) -> int | None:
     r6 = int(registers.get("r6", "0"), 16)
     r7 = int(registers.get("r7", "0"), 16)
     r8 = int(registers.get("r8", "0"), 16)
+    r9 = int(registers.get("r9", "0"), 16)
+    ctypes.c_uint32.in_dll(library, "camry_gp").value = int(registers.get("gp", "0"), 16) & 0xFFFFFFFF
+    ctypes.c_uint32.in_dll(library, "camry_tp").value = int(registers.get("tp", "0"), 16) & 0xFFFFFFFF
     u8p = ctypes.POINTER(ctypes.c_uint8)
     u32p = ctypes.POINTER(ctypes.c_uint32)
     if name == "f33_memcpy_forward":
@@ -233,12 +329,45 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
         return int(library.f33_nvm_family0_chunk_cost(r6))
     if name == "f33_scale_u16_delta_s16_x4":
         return int(library.f33_scale_u16_delta_s16_x4(r6, r7, r8)) & 0xFFFFFFFF
+    if name == "f33_nvm_record_offset":
+        return int(library.f33_nvm_record_offset(r6, r7, r8)) & 0xFFFFFFFF
+    if name == "f33_nvm_payload_chunk_length":
+        return int(library.f33_nvm_payload_chunk_length(r6, r7)) & 0xFFFFFFFF
+    if name == "f33_nvm_probe_range_rejected":
+        return int(library.f33_nvm_probe_range_rejected(r6, r7)) & 0xFFFFFFFF
+    if name == "f33_lookup_u32_value_by_key":
+        return int(library.f33_lookup_u32_value_by_key(r6, r7, r8)) & 0xFFFFFFFF
+    if name == "f33_poll_word_masks":
+        return int(library.f33_poll_word_masks(r6, r7, r8, r9)) & 0xFFFFFFFF
+    if name == "f33_clear_application_ram_4k":
+        library.f33_clear_application_ram_4k()
+        return None
+    if name == "f33_nvm_set_physical_result_state":
+        library.f33_nvm_set_physical_result_state(r6)
+        return None
+    if name == "f33_nvm_set_secondary_result_state":
+        library.f33_nvm_set_secondary_result_state(r6)
+        return None
+    if name == "f33_icus20_read_bit0":
+        return int(library.f33_icus20_read_bit0()) & 0xFFFFFFFF
+    if name == "f33_nvm_lookup_byte_result":
+        return int(library.f33_nvm_lookup_byte_result(r6, r7, r8)) & 0xFFFFFFFF
+    if name == "f33_nvm_translate_saved_driver_result":
+        return int(library.f33_nvm_translate_saved_driver_result()) & 0xFFFFFFFF
     if name in VALUE_RETURN:
         return int(getattr(library, name)(r6)) & 0xFFFFFFFF
     raise AssertionError(f"no C call for {name}")
 
 
-def check_results(scenario: dict, name: str, image: bytearray, base: int, registers: dict, returned: int | None) -> None:
+def check_results(
+    scenario: dict,
+    name: str,
+    image: bytearray | None,
+    base: int,
+    registers: dict,
+    returned: int | None,
+    regions: list[tuple[int, bytearray]] | None = None,
+) -> None:
     memory_checks = 0
     r10_checks = 0
     for check in scenario["checks"]:
@@ -274,7 +403,10 @@ def check_results(scenario: dict, name: str, image: bytearray, base: int, regist
         address = int(check["address"], 16)
         size = check["size"]
         expected = bytes.fromhex(check["equals_hex"])
-        actual = bytes(image[address - base : address - base + size])
+        if regions is not None:
+            actual = read_regions(regions, address, size)
+        else:
+            actual = bytes(image[address - base : address - base + size])
         if actual != expected:
             raise AssertionError(f"{scenario['name']}: {check['name']} mismatch")
     if memory_checks == 0 and r10_checks == 0:
@@ -310,11 +442,14 @@ def main() -> int:
         if row["status"] not in {"equivalent", "byte-matched"}:
             raise SystemExit(f"unknown match status {row['status']}")
     executed = {address: 0 for address in matched}
+    metadata = resolve_target("camry-8965F3307000")[1]
+    codeflash = bytearray((REPO_ROOT / metadata["codeflash"]).read_bytes())
     with tempfile.TemporaryDirectory(prefix="camry-decomp-") as directory:
         library = compile_sources(Path(directory))
         bind(library)
         check_rom(library)
         print("PASS rom tables match CodeFlash")
+        code_view = view_of(codeflash)
         for scenario in load_oracles():
             entry = scenario.get("entry", {})
             if entry.get("scope") != "resolved-address":
@@ -323,16 +458,25 @@ def main() -> int:
             if address not in matched or not useful_oracle(scenario):
                 continue
             name = matched[address]["name"]
+            registers = scenario.get("registers", {})
             mapped = materialize(scenario)
+            ranges = accessed_ranges(name, registers)
             if mapped is None:
-                continue
-            memory, base = mapped
-            ranges = accessed_ranges(name, scenario.get("registers", {}))
-            if any(not covers(base, len(memory), start, length) for start, length in ranges):
-                continue
-            view = view_of(memory) if memory else view_of(bytearray(b"\x00"))
-            returned = call_function(library, name, view, base, scenario.get("registers", {}))
-            check_results(scenario, name, memory, base, scenario.get("registers", {}), returned)
+                if ranges:
+                    continue
+                regions = scenario_regions(scenario)
+                held = install_regions(library, code_view, len(codeflash), regions)
+                returned = call_function(library, name, None, 0, registers)
+                check_results(scenario, name, None, 0, registers, returned, regions)
+                del held
+            else:
+                memory, base = mapped
+                if any(not covers(base, len(memory), start, length) for start, length in ranges):
+                    continue
+                view = view_of(memory) if memory else view_of(bytearray(b"\x00"))
+                install_address_space(library, code_view, len(codeflash), view, base, memory)
+                returned = call_function(library, name, view, base, registers)
+                check_results(scenario, name, memory, base, registers, returned)
             executed[address] += 1
             print(f"PASS {name} {scenario['name']}")
     missing = [row["name"] for address, row in matched.items() if executed[address] == 0]

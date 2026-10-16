@@ -116,3 +116,11 @@ uint32_t f33_update_whole_words(uint32_t *destination, uint32_t *source, uint16_
     }
     return differed;
 }
+
+void f33_clear_application_ram_4k(void) {
+    uint32_t address = 0xfebe7000u;
+    while (address < 0xfebe8000u) {
+        camry_write32(address, 0);
+        address += 4u;
+    }
+}

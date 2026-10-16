@@ -4,10 +4,45 @@
 
 /* Camry 8965F3307000 application prototypes. A function lives here once its
  * C is checked against the original bytes. Names are the symbol-map names.
+ *
+ * camry_read/camry_write are the absolute 32-bit address space. camry_gp and
+ * camry_tp are the ABI gp and tp registers.
  */
+
+#ifdef CAMRY_HOST
+uint32_t camry_read8(uint32_t address);
+uint32_t camry_read16(uint32_t address);
+uint32_t camry_read32(uint32_t address);
+void camry_write8(uint32_t address, uint32_t value);
+void camry_write16(uint32_t address, uint32_t value);
+void camry_write32(uint32_t address, uint32_t value);
+#else
+static inline uint32_t camry_read8(uint32_t address) {
+    return *(volatile uint8_t *)(uintptr_t)address;
+}
+static inline uint32_t camry_read16(uint32_t address) {
+    return *(volatile uint16_t *)(uintptr_t)address;
+}
+static inline uint32_t camry_read32(uint32_t address) {
+    return *(volatile uint32_t *)(uintptr_t)address;
+}
+static inline void camry_write8(uint32_t address, uint32_t value) {
+    *(volatile uint8_t *)(uintptr_t)address = (uint8_t)value;
+}
+static inline void camry_write16(uint32_t address, uint32_t value) {
+    *(volatile uint16_t *)(uintptr_t)address = (uint16_t)value;
+}
+static inline void camry_write32(uint32_t address, uint32_t value) {
+    *(volatile uint32_t *)(uintptr_t)address = value;
+}
+#endif
+
+extern uint32_t camry_gp;
+extern uint32_t camry_tp;
 
 void *f33_memcpy_forward(void *destination, void *source, uint32_t byte_count);
 void f33_memzero(void *destination, uint32_t byte_count);
+void f33_clear_application_ram_4k(void);
 void f33_copy_whole_words(uint32_t *destination, uint32_t *source, uint16_t byte_count);
 uint32_t f33_update_whole_words(uint32_t *destination, uint32_t *source, uint16_t byte_count);
 
@@ -23,8 +58,25 @@ uint32_t f33_scale_u16_delta_s16_x4(uint32_t value, uint32_t origin, uint32_t ga
 
 uint32_t f33_nvm_payload_length(uint32_t handle);
 uint32_t f33_nvm_base_offset(uint32_t handle);
+uint32_t f33_nvm_allocation_pages(uint32_t handle);
+uint32_t f33_nvm_record_offset(uint32_t handle, uint32_t allocation_index, uint32_t byte_offset);
 uint32_t f33_nvm_payload_page_count(uint32_t handle);
+uint32_t f33_nvm_payload_chunk_length(uint32_t handle, uint32_t payload_offset);
 uint32_t f33_nvm_trailer_offset(uint32_t handle);
 uint32_t f33_nvm_storage_handle(uint32_t handle);
 uint32_t f33_nvm_advance_family0_request_index(uint32_t index);
 uint32_t f33_nvm_advance_family1_request_index(uint32_t index);
+uint32_t f33_nvm_get_family0_status(uint32_t object);
+uint32_t f33_nvm_get_family1_completion(uint32_t object);
+uint32_t f33_nvm_probe_range_rejected(uint32_t byte_offset, uint32_t byte_count);
+uint32_t f33_nvm_translate_diagnostic_mask(uint32_t source_mask);
+
+uint32_t f33_lookup_u32_value_by_key(uint32_t key, uint32_t fallback, uint32_t table);
+uint32_t f33_poll_word_masks(uint32_t word, uint32_t first_mask, uint32_t second_mask, uint32_t attempts);
+
+void f33_nvm_set_physical_result_state(uint32_t state);
+void f33_nvm_set_secondary_result_state(uint32_t state);
+uint32_t f33_icus20_read_bit0(void);
+uint32_t f33_nvm_lookup_byte_result(uint32_t key, uint32_t rows, uint32_t row_count);
+uint32_t f33_nvm_translate_read_driver_result(uint32_t driver_result);
+uint32_t f33_nvm_translate_saved_driver_result(void);
