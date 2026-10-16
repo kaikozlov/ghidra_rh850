@@ -1,3 +1,4 @@
+{"addr": "0x35640", "name": "f33_check_learned_quad_bounds", "status": "equivalent"}
 {"addr": "0x422b8", "name": "f33_classify_channel_residual_a", "status": "equivalent"}
 {"addr": "0x61aea", "name": "f33_pwm_initialize_compare_stages", "status": "equivalent"}
 {"addr": "0x61c90", "name": "f33_pwm_stage_halfword_compares", "status": "equivalent"}
@@ -7,6 +8,7 @@
 {"addr": "0x66e50", "name": "f33_update_whole_words", "status": "equivalent"}
 {"addr": "0x67350", "name": "f33_nvm_recover_family0_request_indices", "status": "equivalent"}
 {"addr": "0x673c2", "name": "f33_nvm_advance_family0_request_index", "status": "equivalent"}
+{"addr": "0x676ba", "name": "f33_nvm_enqueue_family0_read", "status": "equivalent"}
 {"addr": "0x6792c", "name": "f33_nvm_get_family0_status", "status": "equivalent"}
 {"addr": "0x67a58", "name": "f33_nvm_recover_family1_request_indices", "status": "equivalent"}
 {"addr": "0x67aca", "name": "f33_nvm_advance_family1_request_index", "status": "equivalent"}

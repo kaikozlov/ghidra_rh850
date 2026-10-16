@@ -107,3 +107,5 @@ void f33_freshness_decode_wire(uint32_t wire, uint32_t bit_length, uint32_t fres
 uint32_t f33_freshness_select_reset_candidate(uint32_t received, uint32_t search);
 uint32_t f33_classify_channel_residual_a(void);
 uint32_t f33_curve16_interpolate_with_slope(uint32_t curve, uint32_t x, uint32_t slope);
+uint32_t f33_check_learned_quad_bounds(void);
+uint32_t f33_nvm_enqueue_family0_read(uint32_t object);

@@ -869,6 +869,64 @@ static int32_t curve_slope(uint32_t curve, int32_t x, uint32_t index) {
     return divq_s((int32_t)((uint32_t)mixed << 9), 256);
 }
 
+uint32_t f33_check_learned_quad_bounds(void) {
+    int32_t upper_a = (int32_t)camry_read32(0xfebee8e8u);
+    int32_t lower_a = (int32_t)camry_read32(0xfebee8ecu);
+    int32_t upper_b = (int32_t)camry_read32(0xfebee8f0u);
+    int32_t lower_b = (int32_t)camry_read32(0xfebee8f4u);
+    int32_t first = (int32_t)f33_scale_u16_delta_s16_x4(camry_read16(0xfebe6ae6u), 0x800u, 0xf633u);
+    int32_t second = (int32_t)f33_scale_u16_delta_s16_x4(camry_read16(0xfebe6ae8u), 0x800u, 0xf633u);
+    int32_t third = (int32_t)f33_scale_u16_delta_s16_x4(camry_read16(0xfebe6aeau), 0x800u, 0xf633u);
+    int32_t fourth = (int32_t)f33_scale_u16_delta_s16_x4(camry_read16(0xfebe6aecu), 0x800u, 0xf633u);
+    if (first > upper_a || first < lower_a || second > upper_a || second < lower_a
+        || third > upper_b || third < lower_b || fourth > upper_b || fourth < lower_b)
+        return 0x5au;
+    return 0;
+}
+
+static uint32_t f33_nvm_family0_request_full(uint32_t producer, uint32_t consumer) {
+    uint32_t limit = consumer & 0xffu;
+    if (limit == 0u)
+        limit = camry_read8(0x2ad8au);
+    return ((producer & 0xffu) + 1u == limit) ? 1u : 0u;
+}
+
+static uint32_t f33_nvm_previous_family0_request(uint32_t index) {
+    uint32_t value = index & 0xffu;
+    if (value == 0u)
+        value = camry_read8(0x2ad8au);
+    return (value - 1u) & 0xffu;
+}
+
+uint32_t f33_nvm_enqueue_family0_read(uint32_t object) {
+    uint32_t handle = object & 0xffffu;
+    uint32_t indices = camry_gp + 20090u;
+    uint32_t producer;
+    uint32_t result;
+    uint32_t previous;
+    uint32_t cell;
+
+    f33_nvm_recover_family0_request_indices(indices, indices + 1u);
+    producer = camry_read8(indices);
+    if (f33_nvm_family0_request_full(producer, camry_read8(indices + 1u)) == 1u
+        || handle >= camry_read16(0x2ad70u)) {
+        result = 0u;
+    } else {
+        previous = f33_nvm_previous_family0_request(producer);
+        cell = camry_gp + 19592u + (previous << 2);
+        if (camry_read16(cell + 2u) != handle || camry_read8(cell) != 0x11u) {
+            camry_write8(camry_gp + handle + 19208u, 0x20u);
+            cell = camry_gp + 19592u + (producer << 2);
+            camry_write8(cell, 0x11u);
+            camry_write16(cell + 2u, handle);
+            producer = f33_nvm_advance_family0_request_index(producer);
+        }
+        result = 1u;
+    }
+    camry_write8(indices, producer);
+    return result;
+}
+
 uint32_t f33_curve16_interpolate_with_slope(uint32_t curve, uint32_t x_bits, uint32_t slope_out) {
     int32_t x = sign_half(x_bits);
     uint32_t index = curve_segment(curve, x);
