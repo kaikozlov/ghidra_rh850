@@ -116,15 +116,18 @@ def body_hash(img: bytes, rec: dict[str, Any]) -> str:
     return sha(bytes(out))
 
 
-def direct_calls(text: str) -> set[int]:
-    # Exclude the function's own declaration; only call expressions in the
-    # decompiled body are graph edges.
-    body = text.split("{", 1)[1] if "{" in text else text
-    return {int(x, 16) for x in re.findall(r"FUN_([0-9a-fA-F]{8})\s*\(", body)}
+def direct_calls(text: str, symbol_addresses: dict[str, int]) -> set[int]:
+    # Resolve canonical symbols, not just anonymous FUN names. Ignore comments,
+    # string/character literals and the function declaration when collecting edges.
+    code = re.sub(r'/\*.*?\*/|//[^\n]*|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'',
+                  " ", text, flags=re.DOTALL)
+    body = code.split("{", 1)[1] if "{" in code else ""
+    return {symbol_addresses[name] for name in re.findall(r"\b([A-Za-z_]\w*)\s*\(", body)
+            if name in symbol_addresses}
 
 
-def call_path(funcs: dict[int, dict[str, Any]], path: list[int]) -> bool:
-    return all(b in direct_calls(funcs[a]["decompiled_c"]) for a, b in itertools.pairwise(path))
+def call_path(graph: dict[int, set[int]], path: list[int]) -> bool:
+    return all(b in graph[a] for a, b in itertools.pairwise(path))
 
 
 def refs_to(funcs: dict[int, dict[str, Any]], target: int, typ: str | None = None) -> list[dict[str, str]]:
@@ -148,6 +151,9 @@ def analyze() -> dict[str, Any]:
     missing = sorted(set(ROLE) - set(funcs))
     need(not missing, f"critical canonical entries missing: {[hex(x) for x in missing]}")
     c = {a: funcs[a]["decompiled_c"] for a in ROLE}
+    symbol_addresses = {rec["name"]: address for address, rec in funcs.items()}
+    graph = {address: direct_calls(rec["decompiled_c"], symbol_addresses)
+             for address, rec in funcs.items()}
 
     # 1) Physical RSCFD acceptance and generic Rx object order.
     rules = [struct.unpack_from("<IIII", img, 0x230B8 + i*16) for i in range(47)]
@@ -203,12 +209,14 @@ def analyze() -> dict[str, Any]:
 
     irq_path = [0x71508,0x66026,0x667B6,0x7A232,0x79EBA,0x83CE4,0x83EDA,0x83E0C,0x83D14,0x80B42,0x80A4A]
     # The vector wrapper -> 66026 and the remaining direct calls are explicit in the promoted corpus.
-    need(call_path(funcs, irq_path), "hardware Rx interrupt call path drift")
-    need("eiret" in funcs[0x71508].get("mnemonics", []) or "FUN_00066026" in c[0x71508], "interrupt wrapper evidence drift")
+    need(call_path(graph, irq_path), "hardware Rx interrupt call path drift")
+    need(img[0x71564:0x71568] == bytes.fromhex("bfffc24a")
+         and img[0x715AE:0x715B2] == bytes.fromhex("e0074801"),
+         "interrupt wrapper JARL66026/EIRET instruction drift")
 
     # 2) Foreground ring drain and exact normal CanIf B6 admission.
     fg_rx_path = [0x667E6,0x7A254,0x79EDE,0x809FE,0x808D6,0x80884]
-    need(call_path(funcs, fg_rx_path), "foreground software-ring drain path drift")
+    need(call_path(graph, fg_rx_path), "foreground software-ring drain path drift")
     need(u16(img,0x21908) == 0 and u16(img,0x2190A) == 43, "CanIf controller0 descriptor range drift")
     callback_table = [u32(img,0x21A24+i*4) for i in range(6)]
     need(callback_table[0] == 0x810F2, f"normal CanIf callback slot0 drift: {callback_table}")
@@ -231,7 +239,7 @@ def analyze() -> dict[str, Any]:
     # CanIf calls the 81D16 shim directly; the shim dispatches through the
     # configured pointer at 21CE4, whose exact value is 81D30.  Do not model
     # that table-selected edge as a direct call in the corpus graph.
-    need(call_path(funcs,[0x810F2,0x81D16]), "CanIf->PduR lower-shim direct edge drift")
+    need(call_path(graph,[0x810F2,0x81D16]), "CanIf->PduR lower-shim direct edge drift")
 
     # 4) SecOC profile selection and receive queue geometry.
     profiles = []
@@ -251,7 +259,7 @@ def analyze() -> dict[str, Any]:
     need(all(x in c[0x8F2B0] for x in
              ("param_2 == '\\0'", "(&DAT_0002587c)[(short)uVar1 * 0x28]", "2 < uVar1")),
          "route-to-profile resolver drift")
-    need(call_path(funcs,[0x8EE7C,0x8F34A,0x8E9C6]), "SecOC receive-enqueue path drift")
+    need(call_path(graph,[0x8EE7C,0x8F34A,0x8E9C6]), "SecOC receive-enqueue path drift")
     need("FUN_0008e9c6(1" in c[0x8F34A], "receive wrapper no longer uses queue family1")
     need(all(x in c[0x8E862] for x in ("&DAT_febe546a", "&DAT_febe54ac")), "receive queue-family base drift")
     need(all(x in c[0x8E912] for x in ("param_1 == 1", "&DAT_0002586c", "&DAT_00025870")), "profile queue resolver drift")
@@ -274,13 +282,13 @@ def analyze() -> dict[str, Any]:
     t = c[0x7A254]
     need(t.find("FUN_00079ede();") < t.find("FUN_0006a410();"), "same-invocation receive/consumer ordering drift")
     consume_path = [0x6A410,0x8EFF8,0x8EF84,0x8F98C]
-    need(call_path(funcs,consume_path), "SecOC consumer path drift")
+    need(call_path(graph,consume_path), "SecOC consumer path drift")
     need(all(x in c[0x8F98C] for x in ("FUN_0008e8a0(1,0", "FUN_0008f746", "FUN_0008f906")), "SecOC consumer transaction drift")
 
     # 6) Successful profile2 delivery resolves the same secured buffer and route44 into COM.
     need("FUN_0008f546" in c[0x8F906], "post-verify upper delivery edge drift")
     need("FUN_0008eb1c(1" in c[0x8F546] and "FUN_00090204" in c[0x8F546], "upper delivery queue-family/pdur edge drift")
-    need(call_path(funcs,[0x90204,0x81CA6]), "upper PduR shim path drift")
+    need(call_path(graph,[0x90204,0x81CA6]), "upper PduR shim path drift")
     need(u32(img,0x21E08) == 0x7D72C, "generated COM Rx callback pointer drift")
     route44_rec = img[0x226C0+44*8:0x226C0+(44+1)*8]
     need(route44_rec == bytes.fromhex("060000002000000c"), f"route44 COM record drift: {route44_rec.hex()}")
@@ -290,8 +298,8 @@ def analyze() -> dict[str, Any]:
     need("FUN_0008e772(param_1)" in c[0x7D72C], "COM callback generation-update edge drift")
     need(refs_to(funcs,0x8E772) == [], "unexpected direct data ref to helper")
     # Canonical caller identity is stronger than a docs claim: promoted 7D72C is the sole direct caller.
-    callers_8e772 = sorted(f"0x{a:08X}" for a,r in funcs.items() if 0x8E772 in direct_calls(r["decompiled_c"]))
-    callers_7d72c = sorted(f"0x{a:08X}" for a,r in funcs.items() if 0x7D72C in direct_calls(r["decompiled_c"]))
+    callers_8e772 = sorted(f"0x{a:08X}" for a, callees in graph.items() if 0x8E772 in callees)
+    callers_7d72c = sorted(f"0x{a:08X}" for a, callees in graph.items() if 0x7D72C in callees)
     need(callers_8e772 == ["0x0007D72C"], f"8E772 caller census drift: {callers_8e772}")
     # 7D72C is table-dispatched, so no direct caller is expected.
     need(callers_7d72c == [], f"7D72C unexpectedly gained direct callers: {callers_7d72c}")
@@ -305,7 +313,7 @@ def analyze() -> dict[str, Any]:
     # Exact upper-source uniqueness: 90204 only comes from 8F546; 8F546 only from the
     # SecOC receive result machinery.  This rules out an autonomous software route44 ticker.
     def callers_of(target: int) -> list[str]:
-        return sorted(f"0x{a:08X}" for a,r in funcs.items() if target in direct_calls(r["decompiled_c"]))
+        return sorted(f"0x{a:08X}" for a, callees in graph.items() if target in callees)
     upper_census = {f"0x{x:08X}": callers_of(x) for x in (0x90204,0x8F546,0x8F906,0x8F34A,0x8EE7C)}
     need(upper_census["0x00090204"] == ["0x0008F546"], f"90204 caller drift: {upper_census}")
     need(set(upper_census["0x0008F546"]) == {"0x0008F596","0x0008F906"}, f"8F546 caller drift: {upper_census}")

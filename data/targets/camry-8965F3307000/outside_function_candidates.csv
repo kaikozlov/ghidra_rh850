@@ -209,7 +209,6 @@ target_addr,decoded_instruction_count,decoded_byte_count,run_start,run_end,incom
 0x0002fbb4,2,4,0x0002fbb4,0x0002fbb7,0,1,0,,0x0003ab78,true,false,false,1,false,false,pointer-referenced-code-run,unresolved
 0x00030000,61,122,0x00030000,0x00030079,0,0,0,,,true,false,false,1,false,false,orphan-decoded-run,unresolved
 0x00030400,22,44,0x00030400,0x0003042b,0,1,0,,,true,false,false,1,false,false,pointer-referenced-code-run,unresolved
-0x00030dd0,10,26,0x00030dd0,0x00030de9,0,1,0,,0x00065324,true,false,false,1,false,false,pointer-referenced-code-run,unresolved
 0x00031b80,1,2,0x00031b80,0x00031b81,0,0,0,,,true,false,false,1,false,false,orphan-decoded-run,unresolved
 0x0004ab6c,15,42,0x0004ab6c,0x0004ab95,0,1,0,,,true,false,false,3,false,false,pointer-referenced-code-run,unresolved
 0x0004ab8a,2,6,0x0004ab8a,0x0004ab8f,0,0,0,,,true,false,false,1,false,false,orphan-decoded-run,unresolved
@@ -232,7 +231,6 @@ target_addr,decoded_instruction_count,decoded_byte_count,run_start,run_end,incom
 0x0004d47a,2,4,0x0004d47a,0x0004d47d,0,7,0,,,true,false,false,1,false,false,pointer-referenced-code-run,unresolved
 0x0004d484,2,4,0x0004d484,0x0004d487,0,2,0,,,true,false,false,1,false,false,pointer-referenced-code-run,unresolved
 0x0004d488,2,4,0x0004d488,0x0004d48b,0,5,0,,,true,false,false,1,false,false,pointer-referenced-code-run,unresolved
-0x0004d48c,2,6,0x0004d48c,0x0004d491,0,16,0,,,true,false,false,1,false,false,pointer-referenced-code-run,unresolved
 0x00050000,15,38,0x00050000,0x00050025,0,2,0,,,true,false,false,2,false,false,pointer-referenced-code-run,unresolved
 0x0005001a,6,12,0x0005001a,0x00050025,0,1,0,,,true,false,false,2,false,false,pointer-referenced-code-run,unresolved
 0x00050022,2,4,0x00050022,0x00050025,0,0,0,,,true,false,false,1,false,false,orphan-decoded-run,unresolved

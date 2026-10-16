@@ -1,0 +1,128 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_ba_tzclr_rejected_record100_still_pending",
+  "entry": {
+    "role": "Execute real configured F8 TZCLR start and fixed finish22/2 through learned-record reset request. Record100 setter rejects; software reset tracker and requester ownership still arm. Stop at98AAE before pending-response scheduling. No physical acquisition/store/completion supplied.",
+    "scope": "resolved-address",
+    "address": "0x8e3a2"
+  },
+  "max_instructions": 150000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0xfebe1000"
+  },
+  "stop_addresses": [
+    "0x98aae"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe0000",
+      "size": 131072,
+      "fill": 0,
+      "evidence": "Explicit initialized software RAM and nested-call stack handoff, not reset/acquisition/hardware state."
+    },
+    {
+      "address": "0xfebe1000",
+      "hex": "0011befe060000000012befe00000000",
+      "evidence": "Real16-byte proprietary message: request, length6, response, initial length0."
+    },
+    {
+      "address": "0xfebe1100",
+      "hex": "f8545a434c52",
+      "evidence": "Exact F8 plus TZCLR."
+    },
+    {
+      "address": "0xfebe5f4f",
+      "hex": "5a01",
+      "evidence": "Already-published BA gate, retained count1."
+    },
+    {
+      "address": "0xfebeb11a",
+      "hex": "0004",
+      "evidence": "Allowed live software mode0400."
+    },
+    {
+      "address": "0xfebef208",
+      "hex": "a55a5aa5",
+      "evidence": "Published learned record marker is nonzero."
+    },
+    {
+      "address": "0xfebe6af0",
+      "hex": "a55a5aa5",
+      "evidence": "Application learned marker is nonzero so3599E attempts record100 reset."
+    },
+    {
+      "address": "0xfebf0672",
+      "hex": "5a",
+      "evidence": "Exact redundant global setter-rejection gate."
+    },
+    {
+      "address": "0xfebf10aa",
+      "hex": "0f",
+      "evidence": "XOR55 setter gate plane."
+    },
+    {
+      "address": "0xfebf10ce",
+      "hex": "f0",
+      "evidence": "XORAA setter gate plane."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Reaches specified software boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x98aae"
+    },
+    {
+      "name": "Reset software tracker armed despite setter rejection",
+      "kind": "memory",
+      "address": "0xfebe6adc",
+      "size": 1,
+      "equals_hex": "11"
+    },
+    {
+      "name": "Record reset request retained with BA requester bit1",
+      "kind": "memory",
+      "address": "0xfebeb494",
+      "size": 3,
+      "equals_hex": "005a02"
+    },
+    {
+      "name": "Reset request provenance published",
+      "kind": "memory",
+      "address": "0xfebeb497",
+      "size": 2,
+      "equals_hex": "5a02"
+    },
+    {
+      "name": "BA10 remains pending, not accepted persistence",
+      "kind": "memory",
+      "address": "0xfebe81b2",
+      "size": 2,
+      "equals_hex": "10ba"
+    },
+    {
+      "name": "Pending finish does not set successful-finish latch",
+      "kind": "memory",
+      "address": "0xfebe5f53",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "No admitted record queue entry",
+      "kind": "memory",
+      "address": "0xfebf067a",
+      "size": 4,
+      "equals_hex": "00000000"
+    }
+  ]
+}

@@ -753,7 +753,7 @@
       ],
       "can_fd": true,
       "can_id": "0x030",
-      "configured_only_note": "signals 36, 37 and 283 are assigned to PDU0 by the exact signal->PDU table but no literal call to either generated pack helper exists anywhere in the 7,328-function canonical corpus; no wire field is invented for them",
+      "configured_only_note": "signals 36, 37 and 283 are assigned to PDU0 by the exact signal->PDU table but no literal call to either generated pack helper exists anywhere in the 7,329-function canonical corpus; no wire field is invented for them",
       "configured_without_direct_pack_call": [
         36,
         37,

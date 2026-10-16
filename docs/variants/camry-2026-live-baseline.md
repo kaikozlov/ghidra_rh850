@@ -4502,6 +4502,98 @@ rather than replaced by either edge. Existing invalid-channel and prior-positive
 saturation compositions remain. These are numerical/state contracts, not a
 physical voltage-limit model, stability result or proof of output commitment.
 
+### 34.14 Retained control profiles: qualification, magnitude ranks and read projection
+
+Exact target remains `camry-8965F3307000`. These are **RAM control profiles**,
+not the separate56-byte application sample,240-byte event capture or an NvM
+record. Decompilation and instruction/dataflow establish the software contracts;
+the composed native cases below verify specific supplied generations, not
+physical freshness, OEM units or exhaustive scheduling interleavings.
+
+```mermaid
+flowchart LR
+  Q[Qualification B9B8E] --> W[Working profiles BA642]
+  W --> F[First bank BA336]
+  W --> R[Magnitude ranks BA5A0]
+  F --> G[Sparse52-byte gather]
+  R --> G
+  G --> D[Current masking and45-byte DID payload]
+```
+
+**Generation ownership.** `58074` publishes the received scalars and four byte
+counters; `C1CFE/C1DE0` publish other control observations, and `D0D7C` produces
+`AE5C`. These are separate generations, not one simultaneous sensor sample.
+Foreground `C214C/C26A4` run qualification only in captured modes0300..0522,
+then retention for captured mode>=0100; both require cadence bit1. Outside the
+qualification range, retention can consume held qualification/completion state.
+The configured cadence is every second foreground dispatch, not proof of a
+fresh message or measured10ms interval.
+
+Five slots use distinct threshold tables. Qualification requires bounded
+magnitudes, source/status admission, the learned marker and counter-pair
+agreement. Four published byte-counter deltas accumulate with modulo256
+correction and signed saturation; both pair differences must have magnitude<3.
+The smaller-magnitude **signed** endpoint feeds the calibrated threshold test.
+The observed `AE5C` interval must have signed span<50; its sum saturates and its
+mean truncates toward zero. Crucially, `B9950` preserves `B4A8` when the current
+qualification fails. `B9B06` consumes even a held5A, resets interval state and
+publishes `B4AD=5A`. Completion is therefore not a fresh-generation token or
+proof that every current gate passed.
+
+Working production independently accumulates means/maxima, refreshes or holds
+received metadata, and stages the latest observation. The `B770` elapsed-source
+marker latches after its input predicate first passes; afterward its divider
+continues despite loss of that predicate. Every ten producer calls advances a
+counter capped6000. The separate integral uses the **instantaneous** predicate
+and otherwise holds. Neither field is the age of a particular retained bank.
+Signed/narrowed arithmetic is retained: for example, the scaled-feedback maximum
+compares a narrowed signed16 value while its sum uses the full scaled value.
+
+| Retention owner | Condition | State transition |
+|---|---|---|
+| First bank `BA336` | `B6DF!=0` | Freeze bank and refresh counters; only5A is later read-valid |
+| First bank | `B6DF==0`, entry refresh count<100, no completion | Increment the second byte counter and copy it to both counters |
+| First bank | `B6DF==0`, count>=100 or `B4AD==5A` | Copy working profile; clear counters; validity becomes5A only for completion |
+| Ranked banks `BA5A0` | Completion and `abs_sat(B504)>abs_sat(B87C)` | Shift rank1 to rank2, then replace rank1 and its comparison value |
+| Ranked banks | Not above rank1, but above rank2 comparison `B886` | Replace rank2 only |
+| Ranked banks | Otherwise | Retain both profiles and comparison values |
+
+The periodic invalid refresh occurs on call101 from ordinary zero counters,
+not call100. Ranking saturates `abs(-32768)` to32767 and is strict at each rank;
+equality with rank1 can still fill a smaller rank2. It is not chronological
+history, duplicate suppression or unique capture identity. Each replacement
+copies all numerical and metadata planes, but not per-bank validity/age flags.
+Common cold **or warm software initialization** through `BF97A` clears these
+banks; retained does not mean reset-surviving or durable.
+
+**Read-visible state differs from retained state.** Five working entries per
+field feed fifteen retained entries: five slots in each of three banks.
+`BA672/BA730/BA7EE` gather into a52-byte local envelope, leaving offsets09 and
+2A..2B unwritten. They append **current** slot validity `B6DF` and elapsed-source
+marker `B770`, even for older ranked values. Read adapters locally hide the
+integral/elapsed fields when `B770!=5A`, mask numerical groups and use capture
+sentinel32767 when `B6DF!=5A`, and replace six packed metadata bytes withFF when
+published `E813!=5A`. Shared composite, scaled word, numerical scalar and kind
+are not all covered by those same masks. Retained RAM is unchanged.
+
+`4F084` emits45 bytes with big-endian numerical fields, clamps selected signed
+groups and normalizes kind>2 to3. Neither the sparse holes nor current flags
+are serialized. DIDs1CF4..1CF8 select first-bank slots0..4;1CF9..1D03 interleave
+the ranked pairs, skipping **1D00, the separate32-byte available-DID bitmap**.
+All fifteen profile entries have kind0, length45 and the constant5A availability
+leaf `4D48C`; availability is distinct from payload masking.
+
+Native [locked-first/ranked replacement](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_retained_profiles_locked_and_ranked.json),
+[invalid periodic refresh](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_retained_profiles_invalid_refresh.json)
+and [qualified replacement with rank shift](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_retained_profiles_triggered_replacement.json)
+compose real production, retention, publication, sparse gather and all three
+slot0 projections. Only the last also runs the qualifier root. Explicit RAM
+call continuations join unchanged CodeFlash functions on one emulator; they
+are not the ordinary scheduler, replacement callees or peripheral completions.
+Checks cover retained-bank selection, current masks,45-byte output and untouched
+holes/canaries. Lower acquisition, OEM source identities and physical timing
+remain boundaries; no hardware-model extension was needed.
+
 ## 35. Hidden-ingress false-negative audit: no concrete alternate producer found; residuals closed in §36
 
 This audit was originally launched because zero-B6 factory steering was treated as tension with the firmware model. CORR-135 removes that premise: the exact B6-independent `D0218` path already reaches physical actuation. The audit remains useful as a bounded false-negative census of hidden mutation/ingress mechanisms, but those mechanisms are no longer required to explain the retained LTA/LCA observation.
@@ -11661,6 +11753,62 @@ it is not a getter or a region-bound update. Timer ISRs save their exception,
 GPR and MPAT context on the interrupted stack before switching. The persistent
 stack effects of `65AC0/65B4A` remain assembly contracts, not ordinary C leaves.
 
+#### Dispatch supervision is separate from execution profiling
+
+The task wrappers unconditionally supervise progress **before** their bodies.
+CH0/CH1/foreground increment their four-byte rate-window count under the real
+FFC0 priority-mask pair, saturating at255. They restore the caller's PMR before
+checking the upper limit. CH2 runs `6540C`: DMA-progress windows first, then
+three dispatch-rate windows. This is not a wall-clock execution-duration test.
+
+| Task-rate policy | CH2 invocations per window | Inclusive admitted dispatch count |
+|---|---:|---:|
+| CH0, ROM30DC0 | 2 | 5..20 |
+| CH1, ROM30DC4 | 4 | 5..20 |
+| Foreground, ROM30DC8 | 20 | 1..8 |
+
+On a completed window, `653A8` snapshots and clears the count under the priority
+mask, restores PMR, then checks the range. Failure enters terminal `61940`
+before extrema or phase publication; success updates min/max and resets phase.
+Incomplete windows retain their counts/extrema. Early upper-bound crossing
+also enters `61940`, before the corresponding application task body. No local
+DCM setting, application-mode or engagement gate suppresses these guards.
+
+DMA supervision uses four independent six-invocation windows: channels0/8
+accept138..258 progress units, channel6 accepts15..60 and channel14 accepts18..72.
+`609B0` snapshots/acknowledges status, reads total/remaining, saves a per-channel
+position and computes the wrapped delta; simultaneous status bits4/5 instead
+select half the total. These are ordered hardware-register accesses, not an
+atomic RAM snapshot. The accumulator adds modulo32 before saturating to16 bits;
+its phase byte wraps rather than saturates. Native DMA progress, register timing
+and correspondence to physical samples remain explicit dependencies.
+
+`61940` has no ordinary return: it masks priorities, applies an MPU profile,
+requests paired output levels, stops the configured external clock, switches
+P4_5, submits another hardware command and spins at619BE. The existing
+[recovery report](camry-f33-eps-recovery-2026-09-11.md) owns the board/clock/reset
+interpretation. Reaching this software boundary does not establish a physical
+reset or output state.
+
+Optional profiling is different: exact ROM31910 is0, so the scheduler's5A-gated
+profiling hooks are disabled while supervision remains active. Compiled profile
+code tracks parent/child contexts, raw counter deltas and sample rings;
+exclusive time subtracts child accumulation modulo32. ROM31911 is also0; its5A
+mode holds busy maxima and an idle **minimum**, not an extra fault threshold.
+`64E2A` returns `~u32[FFE51010]` and preserves R6/R7/R8. Its exact leaf inlining
+repairs missing adjustment/index arguments in the decompiled profile APIs.
+Application challenge sampling also uses this counter independently of31910;
+neither physical resolution nor entropy quality follows from that connection.
+
+The native [upper-limit equality](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_task_rate_upper_equality_admits_control.json)
+and [upper crossing](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_task_rate_upper_crossing_precedes_control.json)
+execute the real CH0 entry and stop at the control-body or terminal boundary.
+The [three-window composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_task_rate_window_publishes_independent_generations.json)
+and [lower rejection](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_task_rate_window_rejection_consumes_count_before_terminal.json)
+execute65414..6543E after an explicit post-DMA handoff, checking count consumption,
+independent generations and restored PMR. They do not execute DMA feedback,
+terminal hardware, asynchronous interrupts or measured scheduling budgets.
+
 #### Cold initialization, software restart and input generations
 
 Cold `58804` runs `58828` and then requests the first foreground generation.
@@ -13381,9 +13529,67 @@ record serializers; fixed type bytes are not function pointers or OEM names.
 BA routes ten fixed operations F1/F3..FB, each with six-byte requests and no
 operation-specific response body. General admission requires `5F4F=5A`; exact
 F7 plus the five bytes `BAENA` can enter while that gate is closed. The callback
-results and finish-length pointer are real ABI values, not void calls. These
-routing contracts are **recovered**; every child operation's application lifetime,
-OEM meaning and external transport reachability are not claimed closed.
+results and finish-length pointer are real ABI values, not void calls. Their
+application-state lifetimes are reconstructed below; OEM meaning and external
+transport reachability remain separate boundaries.
+
+#### BA application operations retain state beyond diagnostic ownership
+
+The configured rows at27EC4 contain fixed start/finish callbacks, six-byte
+requests and zero operation-specific response bytes. `34E66` consumes the real
+signed finish result, writes full32-bit length0 only for nonnegative completion,
+and latches `5F53=5A`. Later `4C490` uses that latch for a command projection;
+it is not a per-operation payload. No arbitrary callable address is supplied by
+the request.
+
+**Retained admission.** `34CD0` joins record105's marker and record18's count.
+Status10 plus markerA55A5AA5 establishes admission; invalid count status or
+count>30 clears it. A valid zero count does not itself close a valid marker gate.
+F6/F7 request independent record writes and ignore setter admission. Their
+finish callbacks poll cached statuses: both10 complete, either20/21 waits,
+otherwise error. F7 start requires bit1 of the numerical security level—not a
+numeric greater-than comparison—but finish does not recheck token/security or
+re-read the records. The [rejected-setter composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_ba_enable_rejected_setters_old_success_opens_gate.json)
+executes both real refusals, then opens gate/count30 from **old cached success**.
+This is not evidence of accepted or durable writes.
+
+Actual mode0700 entry calls `354D6`: nonzero gate plus nonzero count consumes
+one count and requests record18; reaching zero also closes the gate and requests
+zero record105. RAM publication ignores setter refusal. Gate5A/count0 remains
+unchanged. The lifetime is defined by a software mode transition, not an
+inferred ignition cycle or timer.
+
+| Operation/token | Admission/start | Finish and downstream lifetime |
+|---|---|---|
+| F1/JTEKM, F4/JTRM1, F5/JTRM2, F9/JTRM3 | Selectors3/5/6/7 admit only modes0400,0500,0700..0702,0800 | Latch B112=5A and B113=11/22/44/88; later BCBD8 publishes AC2B/AC2C into the existing assist/curve selection |
+| F3/TMPCL | Validate token; no reset at initial start | Reset thermal/model RAM, request records6/5 and retain phase5F51; wait for trackers, without proving accepted stores or physical erasure |
+| F6/BADIS | Request zero count/marker | Cached-status join closes live gate/count; no transaction-generation identity |
+| F7/BAENA | Closed-gate exception plus security bit1 | Cached-status join opens live gate/count30; no durable-store proof |
+| F8/TZCLR | E81F==0, unsigned E892<=384, E884/E88A!=5A | Signed result of B90CA(22,2) joins the existing learned-record reset, requester and scheduled publication lifecycle |
+| FA/byte+VSPD | Receive **status80A5!=0**; stage byte unchanged | Latch B116=5A/B117=byte; scheduled BEE2C selects zero-extended byte<<7 before existing conditioning |
+| FB/ASINC | Validate token | Latch B118=5A; owner5's rising-target release selects its existing fast coefficient, not an immediate output write |
+
+The [TZCLR composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_ba_tzclr_rejected_record100_still_pending.json)
+executes actual record100 rejection while retaining reset tracker/requester
+ownership and pending response state. The [FA finish/conditioning composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_ba_fa_finish_then_scheduled_unsigned_override.json)
+checks unsignedFF→7F80 through the real finish and scheduled conditioner, using
+an explicit call join after a supplied staging handoff. It does not execute the
+normal scheduler or establish physical speed/output behavior.
+
+**Cancellation is not rollback.** Diagnostic notification clears BA continuation
+and wrapper staging, not the application selectors, unsigned override, fast-release
+latch, thermal phase or retained counters. Recovered direct selector deactivation
+is B330A selector4, absent from the configured BA rows; initializer ownership
+remains separate. No BA-specific timeout/clear is invented for the other latches.
+The retained-start worker `34D2C` requires `5F4C=5A`, but recovered direct writers
+only initialize/clear that byte. Normal configured pending continuation reaches
+fixed **finish** callbacks; no start-worker arming producer is established by
+that reference census. External tester reachability, OEM operation names,
+physical persistence and actuator consequences remain separate dependencies.
+
+The profile DIDs' production, ranking and current read masks are owned by
+[§34.14](#3414-retained-control-profiles-qualification-magnitude-ranks-and-read-projection),
+not by generic diagnostic transport completion.
 
 ### 77.26 Resident diagnostics, transfer ownership and queued programming boundaries
 
@@ -13708,21 +13914,49 @@ external service.
 
 
 **Remaining high-value dependencies:** additional numerical/calibration surfaces
-and cross-task retention/interleavings; physical3838..383C/status sources,
-ADC/DMA, GPIO and local-link freshness; the unassigned `B1C8.bit5` producer;
-production admission of the0600 stimulus start; lower application payload copy,
-segmentation, frame confirmation and controller-status acknowledgement;
-retained-profile production/age and BA child-operation lifetimes; physical
-persistence of thermal/calibration records; application/resident timer entropy
-and fallback; resident CRC admission and the dynamic programming driver;
-SEG/cache/ECC feedback; OEM service identities, calibration units and physical
-source identity. The recovered calibration, request/publication and response
-contracts distinguish these dependencies rather than replacing them with assumed
-success. A complete peripheral or NvM emulator is not a prerequisite for further
-application reconstruction. Static connectivity and bounded native scenarios
-are not exhaustive semantic closure or vehicle results.
+and cross-task interleavings; physical3838..383C/status sources, ADC/DMA progress,
+GPIO and local-link freshness; the unassigned `B1C8.bit5` producer; production
+admission of the0600 stimulus start; lower application payload copy, segmentation,
+frame confirmation and controller-status acknowledgement; physical source/age
+interpretation of retained profiles and external BA reachability; persistence of
+thermal/calibration records; application/resident counter resolution, entropy and
+fallback; resident CRC admission and the dynamic programming driver; SEG/cache/ECC
+feedback; OEM service identities and calibration units. Recovered task supervision,
+profile retention and BA application lifetimes distinguish these dependencies
+rather than substituting assumed success. A complete peripheral or NvM emulator
+is not a prerequisite for further application reconstruction. Static connectivity
+and bounded native scenarios are not exhaustive semantic closure or vehicle results.
 
-**2026-10-16 checkpoint: monitor calibration, regulator envelopes and diagnostic publication/transport.**
+**2026-10-16 checkpoint: retained control profiles, BA application lifetimes and task supervision.**
+The connected owners are [§34.14](#3414-retained-control-profiles-qualification-magnitude-ranks-and-read-projection),
+[BA application operations](#ba-application-operations-retain-state-beyond-diagnostic-ownership)
+and [dispatch supervision](#dispatch-supervision-is-separate-from-execution-profiling).
+Composed native execution passed for qualification/retention/read projection,
+record-refusal versus BA completion, retained unsigned override, and task-rate
+admission/terminal boundaries. No firmware bytes, peripheral model or live
+vehicle configuration were changed. Whole-image semantic reconstruction remains open.
+
+Independent fresh A/B rebuilds produced identical canonical inventories.
+Parity, corpus regeneration, live semantic coverage and function discovery
+completed; the matching snapshot was promoted after clean teardown, with the
+corpus identity unchanged by promotion. Fresh E1/E2 audits preserve candidate
+PCs, owners, ranges and target hits. Pointer-expression changes represent
+equivalent low-byte masks/zero extensions and typed array views, not new
+destination families.
+
+The B6 ingress producer now resolves canonical semantic symbols in its call
+graph rather than requiring anonymous `FUN_` spelling. Exact interrupt
+JARL/EIRET bytes remain checked. A throwaway graph smoke preserved renamed
+edges and rejected a removed call hidden in a comment/string/declaration.
+Selected semantic/boundary, provenance, assist/B6/ingress, protected-TX,
+loader/recovery, GTS+, capture-replay and cross-target ingress gates passed.
+Language-server diagnostics still flag untouched mixed-type dictionary
+arithmetic and module/import style in that producer; its exercised regeneration
+and artifact gate passed. Retained-capture regeneration again reported corrupted
+events in historical route `0000001c--574c06b528`; raw captures were preserved.
+New subsystem report links resolved.
+
+**Preceding checkpoint `3efb84f7` (2026-10-16): monitor calibration, regulator envelopes and diagnostic publication/transport.**
 The subsystem contracts are owned by
 [monitor conditioning and regulator envelopes](#3413-monitor-current-calibration-and-regulator-output-envelopes),
 [request/response ownership](#request-ownership-response-transport-and-completion)

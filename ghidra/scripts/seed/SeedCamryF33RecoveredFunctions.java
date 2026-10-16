@@ -2792,8 +2792,7 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "B2CFE on mode0701/event27 before B1620(0702), not itself an AEB00 family hook. "
             + "Separate admission/queues/trackers, not an atomic or durable snapshot.");
     semanticFunction(0x35114L, "f33_service_clear_thermal_history", s32)
-        .setComment("Phase0 resets squared drive and models, publishes records6/5, sets phase5A, returns-1. "
-            + "Phase5A waits while either tracker==1, then clears phase and returns0 only if bothFF, else-6.");
+        .setComment("Configured F3 finish callback. Phase0 resets squared-drive/model state, requests records6/5 and arms5F51=5A while returning-1. Wait for both trackers to leave1; bothFF return0,other terminal combination-6; clear phase on terminal. Tracker arming ignores store admission; no durable-clear proof.");
     semanticFunction(0x3B55AL, "f33_should_zero_restored_thermal_offset", u32,
         new ParameterImpl("record_marker", s16, currentProgram))
         .setComment("Select signed absolute reference7DCE/7DD6 by7BF8 byte availability, otherwise "
@@ -10567,6 +10566,884 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "the already collected local snapshot; direct native re-entry is not proof of OS event dispatch.");
   }
 
+  private void annotateBaApplicationLifetimes() throws Exception {
+    CategoryPath category = new CategoryPath("/CamryF33");
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    StructureDataType layout0 = new StructureDataType(category, "F33BaConfiguredOperation", 0);
+    layout0.setPackingEnabled(true);
+    StructureDataType layout1 = new StructureDataType(category, "F33BaApplicationWork", 0);
+    layout1.setPackingEnabled(true);
+    FunctionDefinitionDataType numeric = new FunctionDefinitionDataType(category, "F33BaNumericSource");
+    numeric.setReturnType(v);
+    numeric.setArguments(new ParameterDefinitionImpl("first", new PointerDataType(u32, 4), null), new ParameterDefinitionImpl("second", new PointerDataType(u32, 4), null));
+    FunctionDefinitionDataType start = new FunctionDefinitionDataType(category, "F33BaStart");
+    start.setReturnType(s32);
+    start.setArguments(new ParameterDefinitionImpl("phase", u8, null), new ParameterDefinitionImpl("payload", new PointerDataType(u8, 4), null), new ParameterDefinitionImpl("output", new PointerDataType(u8, 4), null));
+    FunctionDefinitionDataType finish = new FunctionDefinitionDataType(category, "F33BaFinish");
+    finish.setReturnType(s32);
+    layout0.add(u8, "operation", "Exact field offset/width from instruction dataflow.");
+    layout0.add(u8, "request_length", "Exact field offset/width from instruction dataflow.");
+    layout0.add(u8, "response_body_length", "Exact field offset/width from instruction dataflow.");
+    layout0.add(u8, "numeric_format", "Exact field offset/width from instruction dataflow.");
+    layout0.add(new PointerDataType(numeric, 4), "numeric_source", "Null in every configured row; no numeric-source output used.");
+    layout0.add(new PointerDataType(start, 4), "start", "Exact field offset/width from instruction dataflow.");
+    layout0.add(new PointerDataType(finish, 4), "finish", "Exact field offset/width from instruction dataflow.");
+    if (layout0.getLength() != 16) throw new IllegalStateException("F33BaConfiguredOperation extent drift");
+    layout1.add(u8, "retained_start_phase", "Exact field offset/width from instruction dataflow.");
+    layout1.add(u8, "selected_index", "Exact field offset/width from instruction dataflow.");
+    layout1.add(u8, "opaque_02", "Exact field offset/width from instruction dataflow.");
+    layout1.add(u8, "admission", "Exact field offset/width from instruction dataflow.");
+    layout1.add(u8, "remaining_mode700_entries", "Exact field offset/width from instruction dataflow.");
+    layout1.add(u8, "thermal_clear_phase", "Exact field offset/width from instruction dataflow.");
+    layout1.add(u8, "staged_unsigned_override", "Exact field offset/width from instruction dataflow.");
+    layout1.add(u8, "finished_projection_latch", "Exact field offset/width from instruction dataflow.");
+    if (layout1.getLength() != 8) throw new IllegalStateException("F33BaApplicationWork extent drift");
+    semanticFunction(0x34CD0L, "f33_reload_ba_admission_records", v)
+        .setComment("Get record105 marker and record18 count. Exact10/A55A5AA5 establishes5A; invalid status or count>30 "
+            + "clears gate and count. Valid count0 preserves marker-derived gate. RAM publication, not a physical flash "
+            + "read.");
+    semanticFunction(0x34D7AL, "f33_compare_ba_token_bytes", u32,
+        new ParameterImpl("left", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("right", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u8, currentProgram))
+        .setComment("Compare zero-extended low8 length bytes exactly; return1 on equality,0 on first mismatch. No independent "
+            + "source-size validation.");
+    semanticFunction(0x34DA2L, "f33_ba_enable_closed_gate_exception", u32,
+        new ParameterImpl("operation", u8, currentProgram),
+        new ParameterImpl("request_length", u8, currentProgram),
+        new ParameterImpl("payload", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Return5A only for F7,length6 and five exact BAENA bytes. Token comparison runs before selector/length "
+            + "conjunction; this is not a general input-bounds guard.");
+    semanticFunction(0x34DD4L, "f33_dispatch_ba_configured_start", s32,
+        new ParameterImpl("request_length", u8, currentProgram),
+        new ParameterImpl("request", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("response", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("selected_index", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Require admission5A or exact F7/BAENA exception, then scan ten fixed16-byte rows. Require length6 and "
+            + "call fixed start; retain index even for negative result. Closed gate returns-13, unknown/null-3, wrong "
+            + "length-6. All configured result lengths are0.");
+    semanticFunction(0x34D2CL, "f33_poll_ba_retained_start", v)
+        .setComment("Only phase5F4C==5A reinvokes retained start with null payload and stack response. Pending-1 retains "
+            + "phase; terminal reports to4D4CA and clears phase. Recovered direct writers initialize/clear phase only; "
+            + "no phase-arming producer is established.");
+    semanticFunction(0x34E66L, "f33_dispatch_ba_configured_finish", s32,
+        new ParameterImpl("configured_index", u8, currentProgram),
+        new ParameterImpl("response_length", new PointerDataType(u32, 4), currentProgram))
+        .setComment("Call fixed finish indexed by low8 without a local bounds check. Nonnegative result writes full32-bit "
+            + "configured length0 and latches5F53=5A. Negative result preserves length and latch. Preserve real "
+            + "signedR10 from finish callbacks.");
+    semanticFunction(0x352B6L, "f33_ba_security_level_bit1_enabled", u32)
+        .setComment("Read numerical published DCM security level and return5A if its bit1 is set, else0. This is not a "
+            + "greater-than-or-equal security-level comparison.");
+    semanticFunction(0x354D6L, "f33_consume_ba_retained_admission_count", v)
+        .setComment("Called by mode0700 entry, not an inferred timer or ignition event. If gate and count are nonzero, "
+            + "decrement low8 count, request record18; reaching0 also clears gate and requests zero record105. Ignore "
+            + "setter return and publish decremented RAM regardless. Gate5A/count0 remains unchanged.");
+    semanticFunction(0x35094L, "f33_ba_f1_validate_jtekm", s32,
+        new ParameterImpl("configured_index", u8, currentProgram),
+        new ParameterImpl("payload", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("response", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Exact JTEKM requests internal selector3 admission in modes0400/0500/0700..0702/0800; no latch mutation "
+            + "at start.");
+    semanticFunction(0x350BAL, "f33_ba_f1_latch_selector3", s32)
+        .setComment("Return real B338C(3) R10=0; setB112=5A,B113=11. Persistent software selector, not a physical completion.");
+    semanticFunction(0x350C8L, "f33_ba_f3_validate_tmpcl", s32,
+        new ParameterImpl("configured_index", u8, currentProgram),
+        new ParameterImpl("payload", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("response", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Phase0 requires TMPCL; phase5A returns-1 while either thermal tracker1,0 only when bothFF,otherwise-6. "
+            + "This start does not reset thermal state.");
+    semanticFunction(0x35170L, "f33_ba_f4_validate_jtrm1", s32,
+        new ParameterImpl("configured_index", u8, currentProgram),
+        new ParameterImpl("payload", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("response", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Exact JTRM1 requests internal selector5 admission in allowed modes; start does not setB112.");
+    semanticFunction(0x35196L, "f33_ba_f4_latch_selector5", s32)
+        .setComment("Return real B338C(5) R10=0; setB112=5A,B113=22.");
+    semanticFunction(0x351A4L, "f33_ba_f5_validate_jtrm2", s32,
+        new ParameterImpl("configured_index", u8, currentProgram),
+        new ParameterImpl("payload", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("response", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Exact JTRM2 requests internal selector6 admission in allowed modes; start does not setB112.");
+    semanticFunction(0x351CAL, "f33_ba_f5_latch_selector6", s32)
+        .setComment("Return real B338C(6) R10=0; setB112=5A,B113=44.");
+    semanticFunction(0x351D8L, "f33_ba_f6_request_disable", s32,
+        new ParameterImpl("configured_index", u8, currentProgram),
+        new ParameterImpl("payload", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("response", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Phase0 exact BADIS requests zero record18 and105, ignoring admissions. Phase5A polls both cached "
+            + "statuses: exact10 clears live gate/count,20/21 waits-1,otherwise-9.");
+    semanticFunction(0x3526EL, "f33_ba_f6_finish_disable", s32)
+        .setComment("Both cached statuses10 clear5F4F/50 and return0; either20/21 waits-1;otherwise-9. Does not prove either "
+            + "setter was admitted.");
+    semanticFunction(0x352CEL, "f33_ba_f7_request_enable", s32,
+        new ParameterImpl("configured_index", u8, currentProgram),
+        new ParameterImpl("payload", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("response", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Require numerical security-level bit1 at every invocation. Phase0 exact BAENA requests record18=count30 "
+            + "and105=markerA55A5AA5, ignoring admission returns. Phase5A joins cached statuses and publishes "
+            + "gate/count on exact10.");
+    semanticFunction(0x3538CL, "f33_ba_f7_finish_enable", s32)
+        .setComment("Both cached statuses10 publish count30/gate5A and return0; either20/21 waits-1,otherwise-9. No "
+            + "token/security recheck or marker re-read; old success can satisfy rejected requests.");
+    semanticFunction(0x353E0L, "f33_ba_f8_validate_tzclr", s32,
+        new ParameterImpl("configured_index", u8, currentProgram),
+        new ParameterImpl("payload", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("response", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Require TZCLR,byteE81F==0,unsigned halfwordE892<=384,bytesE884/E88A!=5A. Return0 or-6; no reset mutation "
+            + "at start.");
+    semanticFunction(0x35428L, "f33_ba_f8_request_learned_reset", s32)
+        .setComment("Return real B90CA(22,2) signedR10, not void. Request record100 reset via existing learned lifecycle; "
+            + "pending ownership survives rejected setter. Published completion is not physical persistence.");
+    semanticFunction(0x3543AL, "f33_ba_f9_validate_jtrm3", s32,
+        new ParameterImpl("configured_index", u8, currentProgram),
+        new ParameterImpl("payload", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("response", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Exact JTRM3 requests internal selector7 admission in allowed modes; start does not setB112.");
+    semanticFunction(0x35460L, "f33_ba_f9_latch_selector7", s32)
+        .setComment("Return real B338C(7) R10=0; setB112=5A,B113=88.");
+    semanticFunction(0x3546EL, "f33_ba_fa_stage_unsigned_override", s32,
+        new ParameterImpl("configured_index", u8, currentProgram),
+        new ParameterImpl("payload", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("response", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Compare payload[1..4] with VSPD; require receive-status80A5!=0, then copy payload[0] unchanged to5F52. "
+            + "No numeric clamp, physical speed or persistence assertion.");
+    semanticFunction(0x354A0L, "f33_ba_fa_latch_unsigned_override", s32)
+        .setComment("Return real B33BC(5F52) R10=0; setB116=5A andB117=staged unsigned byte. ScheduledBEE2C later selects "
+            + "zero-extendedB117<<7.");
+    semanticFunction(0x354B0L, "f33_ba_fb_validate_asinc", s32,
+        new ParameterImpl("configured_index", u8, currentProgram),
+        new ParameterImpl("payload", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("response", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Exact ASINC returns0,otherwise-6. No mutation in start.");
+    semanticFunction(0x354CAL, "f33_ba_fb_latch_owner5_fast_release", s32)
+        .setComment("Return real B33CC R10=0; setB118=5A. Later owner5 rising-limit release selects fast coefficient; this "
+            + "does not directly set the limit or physical output.");
+    semanticFunction(0xB330AL, "f33_admit_internal_ba_selector", s32,
+        new ParameterImpl("selector", u32, currentProgram),
+        new ParameterImpl("authorization", u32, currentProgram))
+        .setComment("Selectors3/5/6/7 admit only modes0400/0500/0700..0702/0800. Selector4 clearsB112; selector1 additionally "
+            + "needs11294C43 andsetsB110=1;selector2 in0600 setsB111=1. Reuse existing mode ownership.");
+    semanticFunction(0xB338CL, "f33_latch_internal_ba_selector", s32,
+        new ParameterImpl("selector", u32, currentProgram))
+        .setComment("SetB113=22/44/88 for selectors5/6/7,otherwise11; setB112=5A,return0. Scheduled BCBD8 copies them "
+            + "toAC2B/AC2C.");
+    semanticFunction(0xB33BCL, "f33_latch_ba_unsigned_override", s32,
+        new ParameterImpl("value", u8, currentProgram))
+        .setComment("SetB116=5A andB117=value,return0; no timeout/cancellation in this API.");
+    semanticFunction(0xB33CCL, "f33_latch_ba_owner5_fast_release", s32)
+        .setComment("SetB118=5A,return0. Consumed by owner5 release predicate; no local reset.");
+    semanticData(0x27EC0L, u8, "f33_ba_operation_count",
+        "Exact configured or retained software state; no physical outcome inferred.");
+    semanticData(0x27EC4L, new ArrayDataType(resolve(layout0), 10, 16), "f33_ba_operations",
+        "Exact configured or retained software state; no physical outcome inferred.");
+    semanticData(0xFEBE5F4CL, resolve(layout1), "f33_ba_application_work",
+        "Exact configured or retained software state; no physical outcome inferred.");
+    semanticData(0x30F1DL, u8, "f33_ba_retained_admission_count_limit",
+        "Exact configured or retained software state; no physical outcome inferred.");
+    semanticData(0x30F1EL, u16, "f33_ba_tzclr_raw_input_limit",
+        "Exact configured or retained software state; no physical outcome inferred.");
+  }
+
+  private void annotateRetainedControlProfiles() throws Exception {
+    CategoryPath category = new CategoryPath("/CamryF33");
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    StructureDataType layout0 = new StructureDataType(category, "F33RetainedControlProfile", 0);
+    layout0.setPackingEnabled(true);
+    layout0.add(u8, "scalar_kind", "Exact field offset/width from instruction dataflow.");
+    layout0.add(new ArrayDataType(u8, 6, 1), "packed_metadata", "Exact field offset/width from instruction dataflow.");
+    layout0.add(u8, "current_first_profile_validity", "Exact field offset/width from instruction dataflow.");
+    layout0.add(u8, "current_elapsed_source_validity", "Exact field offset/width from instruction dataflow.");
+    layout0.add(u8, "unwritten_09", "Gather never writes; not serialized.");
+    layout0.add(u16, "integrated_source", "Exact field offset/width from instruction dataflow.");
+    layout0.add(u16, "elapsed_groups", "Exact field offset/width from instruction dataflow.");
+    layout0.add(u16, "source_u16_max", "Exact field offset/width from instruction dataflow.");
+    layout0.add(u16, "source_u16_mean", "Exact field offset/width from instruction dataflow.");
+    layout0.add(s16, "received_composite", "Exact field offset/width from instruction dataflow.");
+    layout0.add(s16, "scaled_b054_max", "Exact field offset/width from instruction dataflow.");
+    layout0.add(s16, "scaled_b054_mean", "Exact field offset/width from instruction dataflow.");
+    layout0.add(s16, "capture_value", "Exact field offset/width from instruction dataflow.");
+    layout0.add(s16, "f1c6_max", "Exact field offset/width from instruction dataflow.");
+    layout0.add(s16, "f1c6_mean", "Exact field offset/width from instruction dataflow.");
+    layout0.add(s16, "f1c8_max", "Exact field offset/width from instruction dataflow.");
+    layout0.add(s16, "f1c8_mean", "Exact field offset/width from instruction dataflow.");
+    layout0.add(s16, "f1ca_max", "Exact field offset/width from instruction dataflow.");
+    layout0.add(s16, "f1ca_mean", "Exact field offset/width from instruction dataflow.");
+    layout0.add(s16, "scaled_ae5c_max", "Exact field offset/width from instruction dataflow.");
+    layout0.add(s16, "scaled_ae5c_min", "Exact field offset/width from instruction dataflow.");
+    layout0.add(new ArrayDataType(u8, 2, 1), "unwritten_2a", "Gather never writes; not serialized.");
+    layout0.add(u32, "route31_scalar", "Exact field offset/width from instruction dataflow.");
+    layout0.add(s32, "scaled_f228", "Exact field offset/width from instruction dataflow.");
+    if (layout0.getLength() != 52) throw new IllegalStateException("F33RetainedControlProfile extent drift");
+    semanticFunction(0xB93AAL, "f33_qualify_control_profile_observation", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Set slot qualification from configured magnitude/source/marker gates. Five configured slots use "
+            + "AED78..AEDC4. This is a software observation gate, not physical freshness.");
+    semanticFunction(0xB957AL, "f33_accumulate_profile_counter_first_a", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("While qualificationB49E==5A, add sourceF15B minus previous signed16 byte sample, adding256 when narrowed "
+            + "delta is negative; clamp signed32 total to[-32768,32767]. Save previous sample even when unqualified.");
+    semanticFunction(0xB95F2L, "f33_accumulate_profile_counter_first_b", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("While qualificationB49E==5A, add sourceF15C minus previous signed16 byte sample, adding256 when narrowed "
+            + "delta is negative; clamp signed32 total to[-32768,32767]. Save previous sample even when unqualified.");
+    semanticFunction(0xB966AL, "f33_accumulate_profile_counter_second_a", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("While qualificationB49E==5A, add sourceF15D minus previous signed16 byte sample, adding256 when narrowed "
+            + "delta is negative; clamp signed32 total to[-32768,32767]. Save previous sample even when unqualified.");
+    semanticFunction(0xB96E2L, "f33_accumulate_profile_counter_second_b", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("While qualificationB49E==5A, add sourceF15E minus previous signed16 byte sample, adding256 when narrowed "
+            + "delta is negative; clamp signed32 total to[-32768,32767]. Save previous sample even when unqualified.");
+    semanticFunction(0xB977CL, "f33_qualify_control_profile_counter_pairs", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Require current qualification and saturating-abs differences of both accumulated pairs strictly below "
+            + "configured3. Publish the result toB49E and4A3.");
+    semanticFunction(0xB9804L, "f33_select_control_profile_counter_floor", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("While4A3==5A retain the smaller-magnitude signed endpoint in each counter pair, then select the "
+            + "smaller-magnitude signed value; otherwise clear the endpoints/output. Do not replace signed comparison "
+            + "source with an unsigned magnitude.");
+    semanticFunction(0xB98C8L, "f33_update_control_profile_threshold", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Track unsigned maximumF1B6 while4A3==5A; unsigned32 interpolation from slot table stores a32-bit "
+            + "threshold. Outside qualification clear maximum/intermediate and use configured lower ordinate. "
+            + "Subtraction/multiply wrap before division/clipping.");
+    semanticFunction(0xB9950L, "f33_publish_control_profile_threshold_result", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("OnlyB4A3==5A recomputesB4A8 as signed selected-counter value>=threshold. Otherwise preserve4A8; "
+            + "completion may consume a held result.");
+    semanticFunction(0xB99A0L, "f33_track_control_profile_source_extrema", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Signed16 AE5C times37549 uses low32 signed product and truncating signed division65536, then narrows "
+            + "signed16. Qualified calls update signed extrema; other calls reseed both from current scaled source.");
+    semanticFunction(0xB99F8L, "f33_reset_control_profile_interval", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Seed both extrema from shared4E4 and clear the eight per-slot counter accumulator/previous-output words. "
+            + "Does not clear first/ranked retained banks or their validity.");
+    semanticFunction(0xB9A2AL, "f33_average_control_profile_source_interval", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Qualified signed extrema span<50 admits count increment capped65536 and saturating signed32 sum; signed "
+            + "division truncates toward zero and narrows to16 bits. Rejection clears this interval and49E, leaving "
+            + "completion-source4A8 independently held.");
+    semanticFunction(0xB9B06L, "f33_publish_control_profile_interval", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("ExactB4A8==5A copies interval mean toB504/B50E, resets interval and counter-pair state, and "
+            + "publishesB4AD5A. Otherwise retainB50E inB504 and publishB4AD0.B4A8 is not cleared here.");
+    semanticFunction(0xB9B8EL, "f33_run_control_profile_qualification", v)
+        .setComment("Refresh common control/source gates, then run qualification, counter-pair, threshold, extrema/mean and "
+            + "completion for slots0..4. Foreground modes0300..0522 and cadence bit1 own this generation.");
+    semanticFunction(0xB9BC2L, "f33_refresh_profile_scaled_word", v)
+        .setComment("F0C0==0 andF000<2 refresh sharedBBD8 from low32(F228*9387), signed division65536. Other calls hold the "
+            + "value. Source receipt and record retention are separate.");
+    semanticFunction(0xB9BF0L, "f33_refresh_profile_received_composite", v)
+        .setComment("F069==0,F000<2,F154==2,F06B==0 refresh signed halfwordB852 from signedF1A0*15 plus signed byteF06F; "
+            + "otherwise hold. Store narrows modulo65536.");
+    semanticFunction(0xB9C28L, "f33_accumulate_profile_unsigned_source", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("While4A3==5A increment narrowed unsigned16 count then cap60000, add unsignedF1B6 into unsigned32 sum "
+            + "capped900000000, form integer mean and signed/unsigned maximum. Rejection clears this aggregate; no new "
+            + "receive-generation requirement is imposed.");
+    semanticFunction(0xB9CBEL, "f33_accumulate_profile_signed_source1", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("While4A3==5A increment narrowed unsigned16 count then cap60000, add signedF1C6 into signed32 sum "
+            + "clamped\u00b11638339, form integer mean and signed/unsigned maximum. Rejection clears this aggregate; no new "
+            + "receive-generation requirement is imposed.");
+    semanticFunction(0xB9D5EL, "f33_accumulate_profile_signed_source2", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("While4A3==5A increment narrowed unsigned16 count then cap60000, add signedF1C8 into signed32 sum "
+            + "clamped\u00b11638339, form integer mean and signed/unsigned maximum. Rejection clears this aggregate; no new "
+            + "receive-generation requirement is imposed.");
+    semanticFunction(0xB9EAAL, "f33_accumulate_profile_signed_source3", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("While4A3==5A increment narrowed unsigned16 count then cap60000, add signedF1CA into signed32 sum "
+            + "clamped\u00b1368852, form integer mean and signed/unsigned maximum. Rejection clears this aggregate; no new "
+            + "receive-generation requirement is imposed.");
+    semanticFunction(0xB9DFCL, "f33_accumulate_profile_scaled_feedback", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("While4A3==5A accumulate signed B054*1000/256 with sum clamped\u00b175000000, count capped60000 and truncated "
+            + "signed mean; maximum compares narrowed signed16 scaled source. Rejection clears aggregate.");
+    semanticFunction(0xB9F48L, "f33_select_profile_source_extrema", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Qualified4A3 selects retained interval extrema4E6/B4F0. Otherwise use currentB4E4 only after "
+            + "first-profile validityB6DF5A; before it select zeros.");
+    semanticFunction(0xB9F8EL, "f33_update_control_profile_aggregates", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Run all five aggregate groups and select source extrema in order for the given low8 slot. Keep the "
+            + "realR6 slot argument to first childB9C28.");
+    semanticFunction(0xB9FBCL, "f33_age_control_profile_source_latch", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("F093==0,F000<2,F094==0 and unsignedF1B6>400 latchB7705A. Once latched, advance byte divider and halfword "
+            + "counter each ten calls, cap6000; losing source admission does not clear latch or stop subsequent call "
+            + "aging.");
+    semanticFunction(0xBA052L, "f33_integrate_control_profile_unsigned_source", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Same instantaneous source gate asB9FBC, not its sticky latch, adds unsignedF1B6 to wrapped32-bit "
+            + "accumulator then caps900000000 and stores quotient/36000 to unsigned16. Ineligible calls retain "
+            + "accumulator/value.");
+    semanticFunction(0xBA0C4L, "f33_refresh_control_profile_packed_metadata", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("F0F8==0 andF000<2 copy six already-conditioned packed bytesBE66..6B into this working slot; otherwise "
+            + "hold. No additional decoding or fresh-generation check.");
+    semanticFunction(0xBA134L, "f33_refresh_control_profile_scalar_metadata", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("F065==0 andF000<2 copy typed numericalF218 and raw typeF067 into this working slot; otherwise hold. The "
+            + "numerical scalar is not a pointer.");
+    semanticFunction(0xBA170L, "f33_stage_control_profile", v,
+        new ParameterImpl("slot", u8, currentProgram),
+        new ParameterImpl("capture_value", s16, currentProgram))
+        .setComment("Copy current aggregates, held shared scalars and metadata into five-slot working structure-of-arrays. "
+            + "This does not replace any retained bank.");
+    semanticFunction(0xBA224L, "f33_select_and_stage_control_profile", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Stage504 only if6DF==5A orB6DF==0 withB4AD==5A; otherwise stage signed32767 sentinel. CallsBA170 with "
+            + "realR6 slot andR7 signed value.");
+    semanticFunction(0xBA25EL, "f33_refresh_control_profile_working", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Update sticky age, gated integral and metadata, then stage working profile. Preserve slot argument "
+            + "throughBA134 intoBA224.");
+    semanticFunction(0xBA284L, "f33_retain_first_control_profile", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Copy all numerical and seven metadata fields from working slot to first retained bank. Caller controls "
+            + "locking; this copy does not store validity or elapsed-source marker.");
+    semanticFunction(0xBA336L, "f33_update_first_control_profile_retention", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("OnlyB6DF==0 can replace first bank: entry refresh counter>=100 orB4AD5A copies working; reset both byte "
+            + "counters and setB6DF toB4AD5A or0. Otherwise advance duplicated byte count. Any nonzeroB6DF freezes this "
+            + "bank.");
+    semanticFunction(0xBA398L, "f33_promote_ranked_control_profile", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Copy rank1 profile to rank2 before replacing rank1 with working. Applies to sixteen halfword, two word "
+            + "and seven byte planes; validity/age markers are not shifted.");
+    semanticFunction(0xBA4EAL, "f33_replace_second_ranked_control_profile", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Replace only rank2 with working profile. Does not alter rank1 or first bank; common validity/age are not "
+            + "recorded per generation.");
+    semanticFunction(0xBA5A0L, "f33_rank_control_profile_magnitude", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("OnlyB4AD5A considers signed504 magnitude with abs(-32768)=32767. Strictly above first rank shifts first "
+            + "to second; otherwise strictly above second replaces second. Ties may populate second but do not replace "
+            + "an equal-ranked record.");
+    semanticFunction(0xBA642L, "f33_run_control_profile_retention", v)
+        .setComment("Refresh shared scalars once; for slots0..4 update aggregates, build working row, update first-profile "
+            + "retention and rank candidate. Foreground captured mode>=0100 and cadence bit1; qualification root has a "
+            + "narrower mode gate.");
+    semanticFunction(0xBA672L, "f33_gather_first_control_profile", v,
+        new ParameterImpl("output", new PointerDataType(layout0, 4), currentProgram),
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Gather retained bank0 into sparse52-byte envelope; do not write offset09,2A..2B or bytes beyond33. "
+            + "Append current common slot validityB6DF and sticky age-valid770 rather than captured per-bank flags. No "
+            + "local slot bound.");
+    semanticFunction(0xBA730L, "f33_gather_first_ranked_control_profile", v,
+        new ParameterImpl("output", new PointerDataType(layout0, 4), currentProgram),
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Gather retained bank1 into sparse52-byte envelope; do not write offset09,2A..2B or bytes beyond33. "
+            + "Append current common slot validityB6DF and sticky age-valid770 rather than captured per-bank flags. No "
+            + "local slot bound.");
+    semanticFunction(0xBA7EEL, "f33_gather_second_ranked_control_profile", v,
+        new ParameterImpl("output", new PointerDataType(layout0, 4), currentProgram),
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Gather retained bank2 into sparse52-byte envelope; do not write offset09,2A..2B or bytes beyond33. "
+            + "Append current common slot validityB6DF and sticky age-valid770 rather than captured per-bank flags. No "
+            + "local slot bound.");
+    semanticFunction(0x4F084L, "f33_serialize_retained_control_profile", v,
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("profile", new PointerDataType(layout0, 4), currentProgram))
+        .setComment("Serialize45 bytes big-endian: clamp signed source groups, signed32 scaled word to16 bits, signed "
+            + "feedback groups to\u00b125000 and kind to3. This serializer applies no record-validity gate by itself; "
+            + "unsigned16/32 all-ones checks preserve their bit patterns.");
+    semanticFunction(0x4F2E8L, "f33_read_first_control_profile", v,
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Gather bank0 into52-byte stack envelope; currentB770!=5A hides integral/age fields, currentB6DF!=5A "
+            + "masks numerical observation groups with capture sentinel32767, and publishedE813!=5A replaces six packed "
+            + "bytesFF. Then serialize45 bytes; retained RAM is unchanged.");
+    semanticFunction(0x4F3A6L, "f33_read_first_ranked_control_profile", v,
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Gather bank1 into52-byte stack envelope; currentB770!=5A hides integral/age fields, currentB6DF!=5A "
+            + "masks numerical observation groups with capture sentinel32767, and publishedE813!=5A replaces six packed "
+            + "bytesFF. Then serialize45 bytes; retained RAM is unchanged.");
+    semanticFunction(0x4F424L, "f33_read_second_ranked_control_profile", v,
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Gather bank2 into52-byte stack envelope; currentB770!=5A hides integral/age fields, currentB6DF!=5A "
+            + "masks numerical observation groups with capture sentinel32767, and publishedE813!=5A replaces six packed "
+            + "bytesFF. Then serialize45 bytes; retained RAM is unchanged.");
+    semanticFunction(0x4F356L, "f33_rdbi_1cf4_callback", u32,
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u16, currentProgram))
+        .setComment("Configured45-byte read of first profile, slot0; apply current validity/publication gates without "
+            + "mutating retained RAM. Return0; supplied length is ignored by this fixed callback. DID1D00 is a separate "
+            + "bitmap, not a profile.");
+    semanticFunction(0x4F366L, "f33_rdbi_1cf5_callback", u32,
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u16, currentProgram))
+        .setComment("Configured45-byte read of first profile, slot1; apply current validity/publication gates without "
+            + "mutating retained RAM. Return0; supplied length is ignored by this fixed callback. DID1D00 is a separate "
+            + "bitmap, not a profile.");
+    semanticFunction(0x4F376L, "f33_rdbi_1cf6_callback", u32,
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u16, currentProgram))
+        .setComment("Configured45-byte read of first profile, slot2; apply current validity/publication gates without "
+            + "mutating retained RAM. Return0; supplied length is ignored by this fixed callback. DID1D00 is a separate "
+            + "bitmap, not a profile.");
+    semanticFunction(0x4F386L, "f33_rdbi_1cf7_callback", u32,
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u16, currentProgram))
+        .setComment("Configured45-byte read of first profile, slot3; apply current validity/publication gates without "
+            + "mutating retained RAM. Return0; supplied length is ignored by this fixed callback. DID1D00 is a separate "
+            + "bitmap, not a profile.");
+    semanticFunction(0x4F396L, "f33_rdbi_1cf8_callback", u32,
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u16, currentProgram))
+        .setComment("Configured45-byte read of first profile, slot4; apply current validity/publication gates without "
+            + "mutating retained RAM. Return0; supplied length is ignored by this fixed callback. DID1D00 is a separate "
+            + "bitmap, not a profile.");
+    semanticFunction(0x4F414L, "f33_rdbi_1cf9_callback", u32,
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u16, currentProgram))
+        .setComment("Configured45-byte read of magnitude-rank1 profile, slot0; apply current validity/publication gates "
+            + "without mutating retained RAM. Return0; supplied length is ignored by this fixed callback. DID1D00 is a "
+            + "separate bitmap, not a profile.");
+    semanticFunction(0x4F492L, "f33_rdbi_1cfa_callback", u32,
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u16, currentProgram))
+        .setComment("Configured45-byte read of magnitude-rank2 profile, slot0; apply current validity/publication gates "
+            + "without mutating retained RAM. Return0; supplied length is ignored by this fixed callback. DID1D00 is a "
+            + "separate bitmap, not a profile.");
+    semanticFunction(0x4F4A2L, "f33_rdbi_1cfb_callback", u32,
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u16, currentProgram))
+        .setComment("Configured45-byte read of magnitude-rank1 profile, slot1; apply current validity/publication gates "
+            + "without mutating retained RAM. Return0; supplied length is ignored by this fixed callback. DID1D00 is a "
+            + "separate bitmap, not a profile.");
+    semanticFunction(0x4F4B2L, "f33_rdbi_1cfc_callback", u32,
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u16, currentProgram))
+        .setComment("Configured45-byte read of magnitude-rank2 profile, slot1; apply current validity/publication gates "
+            + "without mutating retained RAM. Return0; supplied length is ignored by this fixed callback. DID1D00 is a "
+            + "separate bitmap, not a profile.");
+    semanticFunction(0x4F4C2L, "f33_rdbi_1cfd_callback", u32,
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u16, currentProgram))
+        .setComment("Configured45-byte read of magnitude-rank1 profile, slot2; apply current validity/publication gates "
+            + "without mutating retained RAM. Return0; supplied length is ignored by this fixed callback. DID1D00 is a "
+            + "separate bitmap, not a profile.");
+    semanticFunction(0x4F4D2L, "f33_rdbi_1cfe_callback", u32,
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u16, currentProgram))
+        .setComment("Configured45-byte read of magnitude-rank2 profile, slot2; apply current validity/publication gates "
+            + "without mutating retained RAM. Return0; supplied length is ignored by this fixed callback. DID1D00 is a "
+            + "separate bitmap, not a profile.");
+    semanticFunction(0x4F4E2L, "f33_rdbi_1cff_callback", u32,
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u16, currentProgram))
+        .setComment("Configured45-byte read of magnitude-rank1 profile, slot3; apply current validity/publication gates "
+            + "without mutating retained RAM. Return0; supplied length is ignored by this fixed callback. DID1D00 is a "
+            + "separate bitmap, not a profile.");
+    semanticFunction(0x4F4F2L, "f33_rdbi_1d01_callback", u32,
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u16, currentProgram))
+        .setComment("Configured45-byte read of magnitude-rank2 profile, slot3; apply current validity/publication gates "
+            + "without mutating retained RAM. Return0; supplied length is ignored by this fixed callback. DID1D00 is a "
+            + "separate bitmap, not a profile.");
+    semanticFunction(0x4F502L, "f33_rdbi_1d02_callback", u32,
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u16, currentProgram))
+        .setComment("Configured45-byte read of magnitude-rank1 profile, slot4; apply current validity/publication gates "
+            + "without mutating retained RAM. Return0; supplied length is ignored by this fixed callback. DID1D00 is a "
+            + "separate bitmap, not a profile.");
+    semanticFunction(0x4F512L, "f33_rdbi_1d03_callback", u32,
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u16, currentProgram))
+        .setComment("Configured45-byte read of magnitude-rank2 profile, slot4; apply current validity/publication gates "
+            + "without mutating retained RAM. Return0; supplied length is ignored by this fixed callback. DID1D00 is a "
+            + "separate bitmap, not a profile.");
+    semanticFunction(0x4D48CL, "f33_did_always_available", u32)
+        .setComment("Exact MOVEA5A,R10;JMP LP leaf. Configured profile metadata uses this availability callback; payload "
+            + "projection separately masks invalid or unavailable fields.");
+    semanticData(0xFEBEB890L, new ArrayDataType(s16, 5, 2), "f33_profile_working_capture_value",
+        "BA170/BA284; BF97A initialization");
+    semanticData(0xFEBEB930L, new ArrayDataType(s16, 15, 2), "f33_profile_retained_capture_value",
+        "5*bank+slot; bank0 first, bank1 magnitude rank1, bank2 magnitude rank2");
+    semanticData(0xFEBEB89AL, new ArrayDataType(s16, 5, 2), "f33_profile_working_received_composite",
+        "BA170/BA284; BF97A initialization");
+    semanticData(0xFEBEB94EL, new ArrayDataType(s16, 15, 2), "f33_profile_retained_received_composite",
+        "5*bank+slot; bank0 first, bank1 magnitude rank1, bank2 magnitude rank2");
+    semanticData(0xFEBEB8A4L, new ArrayDataType(u16, 5, 2), "f33_profile_working_elapsed_groups",
+        "BA170/BA284; BF97A initialization");
+    semanticData(0xFEBEB96CL, new ArrayDataType(u16, 15, 2), "f33_profile_retained_elapsed_groups",
+        "5*bank+slot; bank0 first, bank1 magnitude rank1, bank2 magnitude rank2");
+    semanticData(0xFEBEB8AEL, new ArrayDataType(u16, 5, 2), "f33_profile_working_integrated_source",
+        "BA170/BA284; BF97A initialization");
+    semanticData(0xFEBEB98AL, new ArrayDataType(u16, 15, 2), "f33_profile_retained_integrated_source",
+        "5*bank+slot; bank0 first, bank1 magnitude rank1, bank2 magnitude rank2");
+    semanticData(0xFEBEB8B8L, new ArrayDataType(u16, 5, 2), "f33_profile_working_source_u16_max",
+        "BA170/BA284; BF97A initialization");
+    semanticData(0xFEBEB9A8L, new ArrayDataType(u16, 15, 2), "f33_profile_retained_source_u16_max",
+        "5*bank+slot; bank0 first, bank1 magnitude rank1, bank2 magnitude rank2");
+    semanticData(0xFEBEB8C2L, new ArrayDataType(u16, 5, 2), "f33_profile_working_source_u16_mean",
+        "BA170/BA284; BF97A initialization");
+    semanticData(0xFEBEB9C6L, new ArrayDataType(u16, 15, 2), "f33_profile_retained_source_u16_mean",
+        "5*bank+slot; bank0 first, bank1 magnitude rank1, bank2 magnitude rank2");
+    semanticData(0xFEBEB8CCL, new ArrayDataType(s16, 5, 2), "f33_profile_working_f1c6_max",
+        "BA170/BA284; BF97A initialization");
+    semanticData(0xFEBEB9E4L, new ArrayDataType(s16, 15, 2), "f33_profile_retained_f1c6_max",
+        "5*bank+slot; bank0 first, bank1 magnitude rank1, bank2 magnitude rank2");
+    semanticData(0xFEBEB8D6L, new ArrayDataType(s16, 5, 2), "f33_profile_working_f1c6_mean",
+        "BA170/BA284; BF97A initialization");
+    semanticData(0xFEBEBA02L, new ArrayDataType(s16, 15, 2), "f33_profile_retained_f1c6_mean",
+        "5*bank+slot; bank0 first, bank1 magnitude rank1, bank2 magnitude rank2");
+    semanticData(0xFEBEB8E0L, new ArrayDataType(s16, 5, 2), "f33_profile_working_f1c8_max",
+        "BA170/BA284; BF97A initialization");
+    semanticData(0xFEBEBA20L, new ArrayDataType(s16, 15, 2), "f33_profile_retained_f1c8_max",
+        "5*bank+slot; bank0 first, bank1 magnitude rank1, bank2 magnitude rank2");
+    semanticData(0xFEBEB8EAL, new ArrayDataType(s16, 5, 2), "f33_profile_working_f1c8_mean",
+        "BA170/BA284; BF97A initialization");
+    semanticData(0xFEBEBA3EL, new ArrayDataType(s16, 15, 2), "f33_profile_retained_f1c8_mean",
+        "5*bank+slot; bank0 first, bank1 magnitude rank1, bank2 magnitude rank2");
+    semanticData(0xFEBEB8F4L, new ArrayDataType(s16, 5, 2), "f33_profile_working_f1ca_max",
+        "BA170/BA284; BF97A initialization");
+    semanticData(0xFEBEBA5CL, new ArrayDataType(s16, 15, 2), "f33_profile_retained_f1ca_max",
+        "5*bank+slot; bank0 first, bank1 magnitude rank1, bank2 magnitude rank2");
+    semanticData(0xFEBEB8FEL, new ArrayDataType(s16, 5, 2), "f33_profile_working_f1ca_mean",
+        "BA170/BA284; BF97A initialization");
+    semanticData(0xFEBEBA7AL, new ArrayDataType(s16, 15, 2), "f33_profile_retained_f1ca_mean",
+        "5*bank+slot; bank0 first, bank1 magnitude rank1, bank2 magnitude rank2");
+    semanticData(0xFEBEB908L, new ArrayDataType(s16, 5, 2), "f33_profile_working_scaled_ae5c_max",
+        "BA170/BA284; BF97A initialization");
+    semanticData(0xFEBEBA98L, new ArrayDataType(s16, 15, 2), "f33_profile_retained_scaled_ae5c_max",
+        "5*bank+slot; bank0 first, bank1 magnitude rank1, bank2 magnitude rank2");
+    semanticData(0xFEBEB912L, new ArrayDataType(s16, 5, 2), "f33_profile_working_scaled_ae5c_min",
+        "BA170/BA284; BF97A initialization");
+    semanticData(0xFEBEBAB6L, new ArrayDataType(s16, 15, 2), "f33_profile_retained_scaled_ae5c_min",
+        "5*bank+slot; bank0 first, bank1 magnitude rank1, bank2 magnitude rank2");
+    semanticData(0xFEBEB91CL, new ArrayDataType(s16, 5, 2), "f33_profile_working_scaled_b054_max",
+        "BA170/BA284; BF97A initialization");
+    semanticData(0xFEBEBAD4L, new ArrayDataType(s16, 15, 2), "f33_profile_retained_scaled_b054_max",
+        "5*bank+slot; bank0 first, bank1 magnitude rank1, bank2 magnitude rank2");
+    semanticData(0xFEBEB926L, new ArrayDataType(s16, 5, 2), "f33_profile_working_scaled_b054_mean",
+        "BA170/BA284; BF97A initialization");
+    semanticData(0xFEBEBAF2L, new ArrayDataType(s16, 15, 2), "f33_profile_retained_scaled_b054_mean",
+        "5*bank+slot; bank0 first, bank1 magnitude rank1, bank2 magnitude rank2");
+    semanticData(0xFEBEBC04L, new ArrayDataType(s32, 5, 4), "f33_profile_working_scaled_f228",
+        "BA170/BA284; BF97A initialization");
+    semanticData(0xFEBEBC2CL, new ArrayDataType(s32, 15, 4), "f33_profile_retained_scaled_f228",
+        "5*bank+slot; bank0 first, bank1 magnitude rank1, bank2 magnitude rank2");
+    semanticData(0xFEBEBC18L, new ArrayDataType(u32, 5, 4), "f33_profile_working_route31_scalar",
+        "BA170/BA284; BF97A initialization");
+    semanticData(0xFEBEBC68L, new ArrayDataType(u32, 15, 4), "f33_profile_retained_route31_scalar",
+        "5*bank+slot; bank0 first, bank1 magnitude rank1, bank2 magnitude rank2");
+    semanticData(0xFEBEB6E4L, new ArrayDataType(u8, 5, 1), "f33_profile_working_metadata_0",
+        "BA170");
+    semanticData(0xFEBEB707L, new ArrayDataType(u8, 15, 1), "f33_profile_retained_metadata_0",
+        "5*bank+slot");
+    semanticData(0xFEBEB6E9L, new ArrayDataType(u8, 5, 1), "f33_profile_working_metadata_1",
+        "BA170");
+    semanticData(0xFEBEB716L, new ArrayDataType(u8, 15, 1), "f33_profile_retained_metadata_1",
+        "5*bank+slot");
+    semanticData(0xFEBEB6EEL, new ArrayDataType(u8, 5, 1), "f33_profile_working_metadata_2",
+        "BA170");
+    semanticData(0xFEBEB725L, new ArrayDataType(u8, 15, 1), "f33_profile_retained_metadata_2",
+        "5*bank+slot");
+    semanticData(0xFEBEB6F3L, new ArrayDataType(u8, 5, 1), "f33_profile_working_metadata_3",
+        "BA170");
+    semanticData(0xFEBEB734L, new ArrayDataType(u8, 15, 1), "f33_profile_retained_metadata_3",
+        "5*bank+slot");
+    semanticData(0xFEBEB6F8L, new ArrayDataType(u8, 5, 1), "f33_profile_working_metadata_4",
+        "BA170");
+    semanticData(0xFEBEB743L, new ArrayDataType(u8, 15, 1), "f33_profile_retained_metadata_4",
+        "5*bank+slot");
+    semanticData(0xFEBEB6FDL, new ArrayDataType(u8, 5, 1), "f33_profile_working_metadata_5",
+        "BA170");
+    semanticData(0xFEBEB752L, new ArrayDataType(u8, 15, 1), "f33_profile_retained_metadata_5",
+        "5*bank+slot");
+    semanticData(0xFEBEB702L, new ArrayDataType(u8, 5, 1), "f33_profile_working_metadata_6",
+        "BA170");
+    semanticData(0xFEBEB761L, new ArrayDataType(u8, 15, 1), "f33_profile_retained_metadata_6",
+        "5*bank+slot");
+    semanticData(0xFEBEB6DFL, new ArrayDataType(u8, 5, 1), "f33_profile_first_validity",
+        "decompilation-evidence.json; exact indexed instructions");
+    semanticData(0xFEBEB770L, new ArrayDataType(u8, 5, 1), "f33_profile_elapsed_validity",
+        "decompilation-evidence.json; exact indexed instructions");
+    semanticData(0xFEBEB6D5L, new ArrayDataType(u8, 5, 1), "f33_profile_first_refresh_counter",
+        "decompilation-evidence.json; exact indexed instructions");
+    semanticData(0xFEBEB6DAL, new ArrayDataType(u8, 5, 1), "f33_profile_first_refresh_counter_copy",
+        "decompilation-evidence.json; exact indexed instructions");
+    semanticData(0xFEBEB87CL, new ArrayDataType(s16, 5, 2), "f33_profile_rank1_comparison_value",
+        "decompilation-evidence.json; exact indexed instructions");
+    semanticData(0xFEBEB886L, new ArrayDataType(s16, 5, 2), "f33_profile_rank2_comparison_value",
+        "decompilation-evidence.json; exact indexed instructions");
+    semanticData(0xFEBEB49EL, new ArrayDataType(u8, 5, 1), "f33_profile_qualification",
+        "decompilation-evidence.json; exact indexed instructions");
+    semanticData(0xFEBEB4A3L, new ArrayDataType(u8, 5, 1), "f33_profile_counter_pair_qualification",
+        "decompilation-evidence.json; exact indexed instructions");
+    semanticData(0xFEBEB4A8L, new ArrayDataType(u8, 5, 1), "f33_profile_threshold_result",
+        "decompilation-evidence.json; exact indexed instructions");
+    semanticData(0xFEBEB4ADL, new ArrayDataType(u8, 5, 1), "f33_profile_observation_published",
+        "decompilation-evidence.json; exact indexed instructions");
+    semanticData(0xFEBEB504L, new ArrayDataType(s16, 5, 2), "f33_profile_published_observation",
+        "decompilation-evidence.json; exact indexed instructions");
+    semanticData(0xAED78L, new ArrayDataType(u8, 5, 1), "f33_profile_config_f159_exclusive_upper",
+        "configured-profile-tables.json; exact CodeFlash bytes");
+    semanticData(0xAED7EL, new ArrayDataType(s16, 5, 2), "f33_profile_config_b054_abs_upper",
+        "configured-profile-tables.json; exact CodeFlash bytes");
+    semanticData(0xAED88L, new ArrayDataType(s16, 5, 2), "f33_profile_config_f1ca_abs_upper",
+        "configured-profile-tables.json; exact CodeFlash bytes");
+    semanticData(0xAED92L, new ArrayDataType(s16, 5, 2), "f33_profile_config_f1c6_abs_upper",
+        "configured-profile-tables.json; exact CodeFlash bytes");
+    semanticData(0xAED9CL, new ArrayDataType(s16, 5, 2), "f33_profile_config_f1c8_abs_upper",
+        "configured-profile-tables.json; exact CodeFlash bytes");
+    semanticData(0xAEDA6L, new ArrayDataType(s16, 5, 2), "f33_profile_config_enable_nonzero",
+        "configured-profile-tables.json; exact CodeFlash bytes");
+    semanticData(0xAEDB0L, new ArrayDataType(u16, 5, 2), "f33_profile_config_f1b6_exclusive_lower",
+        "configured-profile-tables.json; exact CodeFlash bytes");
+    semanticData(0xAEDBAL, new ArrayDataType(u16, 5, 2), "f33_profile_config_f1b6_exclusive_upper",
+        "configured-profile-tables.json; exact CodeFlash bytes");
+    semanticData(0xAEDC4L, new ArrayDataType(u16, 5, 2), "f33_profile_config_b084_inclusive_lower",
+        "configured-profile-tables.json; exact CodeFlash bytes");
+    semanticData(0xAEDCEL, new ArrayDataType(u16, 5, 2), "f33_profile_config_interpolation_upper",
+        "configured-profile-tables.json; exact CodeFlash bytes");
+    semanticData(0xAEDD8L, new ArrayDataType(u16, 5, 2), "f33_profile_config_interpolation_lower",
+        "configured-profile-tables.json; exact CodeFlash bytes");
+    semanticData(0xAEDE2L, new ArrayDataType(u16, 5, 2), "f33_profile_config_axis_upper",
+        "configured-profile-tables.json; exact CodeFlash bytes");
+    semanticData(0xAEDECL, new ArrayDataType(u16, 5, 2), "f33_profile_config_axis_lower",
+        "configured-profile-tables.json; exact CodeFlash bytes");
+    semanticData(0xAEDF6L, new ArrayDataType(u16, 5, 2), "f33_profile_config_b4e6_minus_b4f0_exclusive_upper",
+        "configured-profile-tables.json; exact CodeFlash bytes");
+    semanticData(0xAEE00L, new ArrayDataType(s32, 5, 4), "f33_profile_config_first_difference_exclusive_upper",
+        "configured-profile-tables.json; exact CodeFlash bytes");
+    semanticData(0xAEE14L, new ArrayDataType(s32, 5, 4), "f33_profile_config_second_difference_exclusive_upper",
+        "configured-profile-tables.json; exact CodeFlash bytes");
+  }
+
+  private void annotateTaskProgressAndProfiling() throws Exception {
+    CategoryPath category = new CategoryPath("/CamryF33");
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    StructureDataType layout0 = new StructureDataType(category, "F33TaskRateWindow", 0);
+    layout0.setPackingEnabled(true);
+    StructureDataType layout1 = new StructureDataType(category, "F33TaskRatePolicy", 0);
+    layout1.setPackingEnabled(true);
+    StructureDataType layout2 = new StructureDataType(category, "F33DmaProgressWindow", 0);
+    layout2.setPackingEnabled(true);
+    StructureDataType layout3 = new StructureDataType(category, "F33DmaProgressPolicy", 0);
+    layout3.setPackingEnabled(true);
+    StructureDataType layout4 = new StructureDataType(category, "F33ExecutionProfiles", 0);
+    layout4.setPackingEnabled(true);
+    layout0.add(u8, "phase", "Exact field offset/width from instruction dataflow.");
+    layout0.add(u8, "count", "Exact field offset/width from instruction dataflow.");
+    layout0.add(u8, "maximum", "Exact field offset/width from instruction dataflow.");
+    layout0.add(u8, "minimum", "Exact field offset/width from instruction dataflow.");
+    if (layout0.getLength() != 4) throw new IllegalStateException("F33TaskRateWindow extent drift");
+    layout1.add(u8, "window", "Exact field offset/width from instruction dataflow.");
+    layout1.add(u8, "minimum", "Exact field offset/width from instruction dataflow.");
+    layout1.add(u8, "maximum", "Exact field offset/width from instruction dataflow.");
+    layout1.add(u8, "opaque_03", "Exact field offset/width from instruction dataflow.");
+    if (layout1.getLength() != 4) throw new IllegalStateException("F33TaskRatePolicy extent drift");
+    layout2.add(u8, "phase", "Exact field offset/width from instruction dataflow.");
+    layout2.add(u8, "opaque_01", "Exact field offset/width from instruction dataflow.");
+    layout2.add(u16, "sum", "Exact field offset/width from instruction dataflow.");
+    layout2.add(u16, "maximum", "Exact field offset/width from instruction dataflow.");
+    layout2.add(u16, "minimum", "Exact field offset/width from instruction dataflow.");
+    if (layout2.getLength() != 8) throw new IllegalStateException("F33DmaProgressWindow extent drift");
+    layout3.add(u8, "channel", "Exact field offset/width from instruction dataflow.");
+    layout3.add(u8, "window", "Exact field offset/width from instruction dataflow.");
+    layout3.add(u16, "minimum", "Exact field offset/width from instruction dataflow.");
+    layout3.add(u16, "maximum", "Exact field offset/width from instruction dataflow.");
+    layout3.add(u16, "opaque_06", "Exact field offset/width from instruction dataflow.");
+    if (layout3.getLength() != 8) throw new IllegalStateException("F33DmaProgressPolicy extent drift");
+    layout4.add(new ArrayDataType(u32, 10, 4), "ch2_exclusive", "Exact field offset/width from instruction dataflow.");
+    layout4.add(u32, "slot4_exclusive", "Exact field offset/width from instruction dataflow.");
+    layout4.add(new ArrayDataType(u32, 16, 4), "foreground_exclusive", "Exact field offset/width from instruction dataflow.");
+    layout4.add(new ArrayDataType(u32, 10, 4), "ch2_inclusive", "Exact field offset/width from instruction dataflow.");
+    layout4.add(u32, "slot4_inclusive", "Exact field offset/width from instruction dataflow.");
+    layout4.add(new ArrayDataType(u32, 16, 4), "foreground_inclusive", "Exact field offset/width from instruction dataflow.");
+    layout4.add(u32, "idle_previous", "Exact field offset/width from instruction dataflow.");
+    layout4.add(u32, "idle_accumulated", "Exact field offset/width from instruction dataflow.");
+    layout4.add(u32, "idle_last", "Exact field offset/width from instruction dataflow.");
+    layout4.add(new ArrayDataType(u32, 6, 4), "start", "Exact field offset/width from instruction dataflow.");
+    layout4.add(new ArrayDataType(u32, 6, 4), "child_ticks", "Exact field offset/width from instruction dataflow.");
+    layout4.add(new ArrayDataType(u16, 8, 2), "ch0_inclusive", "Exact field offset/width from instruction dataflow.");
+    layout4.add(new ArrayDataType(u16, 8, 2), "ch1_exclusive", "Exact field offset/width from instruction dataflow.");
+    layout4.add(new ArrayDataType(u16, 8, 2), "ch1_inclusive", "Exact field offset/width from instruction dataflow.");
+    layout4.add(new ArrayDataType(u8, 4, 1), "ring_heads", "Exact field offset/width from instruction dataflow.");
+    layout4.add(u8, "active", "Exact field offset/width from instruction dataflow.");
+    layout4.add(new ArrayDataType(u8, 7, 1), "parent", "Exact field offset/width from instruction dataflow.");
+    if (layout4.getLength() != 336) throw new IllegalStateException("F33ExecutionProfiles extent drift");
+    semanticFunction(0x61940L, "f33_enter_terminal_hardware_sequence", v)
+        .setComment("Set PMR FFFF and configured MPU profile, request paired output levels, disable the configured "
+            + "peripheral, stop external clock, switch P4_5 and submit the final hardware command; then branch forever "
+            + "at619BE. No ordinary return. Software task guards reach this boundary directly, not through a DTC "
+            + "setting gate. Physical reset/output effects remain the existing recovery-report boundary.");
+    getFunctionAt(toAddr(0x61940L)).setNoReturn(true);
+    semanticFunction(0x609B0L, "f33_read_dma_progress_delta", u32,
+        new ParameterImpl("channel", u8, currentProgram))
+        .setComment("For channel<16 snapshot flags&30 atFFFF8424+40*channel, acknowledge at+2C, compute "
+            + "low16(total-remaining), save atFEBE380C+2*channel and subtract previous, adding total on wrap. Both flag "
+            + "bits select total/2 instead. Invalid channel returns0. Ordered SFR reads are a hardware boundary, not an "
+            + "atomic RAM sample.");
+    semanticFunction(0x65258L, "f33_reset_task_rate_window", v,
+        new ParameterImpl("state", new PointerDataType(layout0, 4), currentProgram))
+        .setComment("Set phase/count/max to0 and min toFF; four-byte state, no timing or dispatch.");
+    semanticFunction(0x65266L, "f33_initialize_task_progress_supervision", v)
+        .setComment("Reset four task-rate records at8DB0 and four DMA records at8DC0. DMA phase/sum/max become0 and minFFFF; "
+            + "byte1 is untouched.");
+    semanticFunction(0x652AAL, "f33_record_supervised_task_dispatch", v,
+        new ParameterImpl("state", new PointerDataType(layout0, 4), currentProgram),
+        new ParameterImpl("policy", new PointerDataType(layout1, 4), currentProgram))
+        .setComment("Saturating u8 count increment under FFC0 priority mask; restore incoming PMR before comparing inclusive "
+            + "upper bound. Exceeding policy.max enters terminal61940 before task body. No local mode, DTC or "
+            + "engagement gate.");
+    semanticFunction(0x652E2L, "f33_record_ch0_dispatch", v)
+        .setComment("Apply real task-rate increment/upper-bound guard to state8DB0 using ROM30DC0. Runs before the "
+            + "corresponding task body.");
+    semanticFunction(0x652F8L, "f33_record_auxiliary_dispatch", v)
+        .setComment("Apply real task-rate increment/upper-bound guard to state8DB4 using ROM30DC0. No direct caller recovered "
+            + "in the canonical graph; do not invent a scheduled task.");
+    semanticFunction(0x6530EL, "f33_record_ch1_dispatch", v)
+        .setComment("Apply real task-rate increment/upper-bound guard to state8DB8 using ROM30DC4. Runs before the "
+            + "corresponding task body.");
+    semanticFunction(0x65442L, "f33_record_foreground_dispatch", v)
+        .setComment("Apply real task-rate increment/upper-bound guard to state8DBC using ROM30DC8. Runs before the "
+            + "corresponding task body.");
+    semanticFunction(0x653A8L, "f33_check_task_rate_window", v,
+        new ParameterImpl("state", new PointerDataType(layout0, 4), currentProgram),
+        new ParameterImpl("policy", new PointerDataType(layout1, 4), currentProgram))
+        .setComment("Saturating u8 phase increment. At configured window snapshot and clear count under FFC0, restore PMR, "
+            + "then enforce inclusive min/max. Failure enters61940 before extrema/phase publication. Success updates "
+            + "extrema and resets phase; incomplete windows retain count/extrema.");
+    semanticFunction(0x65324L, "f33_check_dma_progress_windows", v)
+        .setComment("Four configured channels0/8/6/14 accumulate609B0 deltas with u32 addition then u16 saturation; wrapping "
+            + "u8 phase completes each six calls. Inclusive configured ranges138..258,138..258,15..60,18..72. Failure "
+            + "enters61940; success updates extrema and clears sum/phase. Hardware progress and physical timing remain "
+            + "unexecuted.");
+    semanticFunction(0x6540CL, "f33_supervise_scheduled_progress", v)
+        .setComment("CH2 calls DMA progress checks first, then CH0/CH1/foreground rate windows. ROM windows2/4/20 "
+            + "accept5..20/5..20/1..8 dispatches. Native composition covers actual65414..6543E software interval after "
+            + "the DMA call, not DMA execution or elapsed-time guarantees.");
+    semanticFunction(0x64D58L, "f33_initialize_execution_profiles", v)
+        .setComment("Clear sample rings, start ticks, child accumulators and idle state. Active context and seven parent "
+            + "bytes become6 (idle); separate slot4 scalar samples are cleared too. Profiling data is not the "
+            + "independently active task-rate supervisor.");
+    semanticFunction(0x64E2AL, "f33_read_inverted_profile_counter", u32)
+        .setComment("Return bitwise complement of u32[FFE51010]. Exact LD.W/NOT/JMP only alter R1/R10 and arithmetic flags; "
+            + "preserve incoming R6/R7/R8 for profile adapters. Inline this real leaf to repair decompiler "
+            + "live-argument loss. Hardware counter values, rate and entropy are not established.");
+    getFunctionAt(toAddr(0x64E2AL)).setInline(true);
+    semanticFunction(0x64E34L, "f33_begin_execution_profile", v,
+        new ParameterImpl("slot", u8, currentProgram),
+        new ParameterImpl("entry_adjust", s32, currentProgram))
+        .setComment("Read inverted counter, save prior active context in parent[slot], select slot and record adjusted start. "
+            + "If prior context6, add7 and accumulate idle delta; slot5 publishes/reset idle accumulation, choosing MIN "
+            + "with prior sample when31911==5A. Clear child ticks. Arithmetic wraps32; no local slot bound.");
+    semanticFunction(0x64F34L, "f33_end_execution_profile", u32,
+        new ParameterImpl("slot", u8, currentProgram),
+        new ParameterImpl("exit_adjust", s32, currentProgram),
+        new ParameterImpl("parent_adjust", u32, currentProgram))
+        .setComment("Restore active context from parent[slot]. Return (counter-exit_adjust)-start[slot] modulo32. Parent6 "
+            + "updates idle previous tick; other parents accumulate elapsed+parent_adjust in child ticks. Real R7/R8 "
+            + "inputs survive the counter leaf; no fake extra return registers.");
+    semanticFunction(0x65188L, "f33_read_adjusted_profile_elapsed", u32,
+        new ParameterImpl("slot", u8, currentProgram),
+        new ParameterImpl("exit_adjust", s32, currentProgram))
+        .setComment("Return (inverted counter-exit_adjust)-start[low8(slot)] modulo32. ZXB before leaf call, then preserved "
+            + "R6/R7 determine index/adjustment. No slot validation or physical time conversion.");
+    semanticFunction(0x64E9AL, "f33_begin_execution_profile_slot0", v)
+        .setComment("Begin slot0 with raw entry adjustment105. No local PMR wrapper.");
+    semanticFunction(0x64EACL, "f33_begin_execution_profile_slot2", v)
+        .setComment("Begin slot2 with raw entry adjustment118. Preserve PMR around FFC0 critical window.");
+    semanticFunction(0x64ECEL, "f33_begin_execution_profile_slot3", v)
+        .setComment("Begin slot3 with raw entry adjustment120. Preserve PMR around FFC0 critical window.");
+    semanticFunction(0x64EF0L, "f33_begin_execution_profile_slot4", v)
+        .setComment("Begin slot4 with raw entry adjustment59. Preserve PMR around FFC0 critical window.");
+    semanticFunction(0x64F12L, "f33_begin_execution_profile_slot5", v)
+        .setComment("Begin slot5 with raw entry adjustment31. Preserve PMR around FFC0 critical window.");
+    semanticFunction(0x64F7AL, "f33_end_execution_profile_slot0", v)
+        .setComment("End slot0, exit adjustment-19, parent adjustment81. Eight-entry u16 inclusive ring8D74. Exclusive "
+            + "subtracts accumulated child ticks modulo32; narrow u16 where specified.31911==5A retains maximum "
+            + "independently per output; otherwise overwrite. No timing-budget enforcement.");
+    semanticFunction(0x64FCAL, "f33_end_execution_profile_slot2", v)
+        .setComment("End slot2, exit adjustment4, parent adjustment117. Eight-entry u16 exclusive/inclusive rings8D84/8D94. "
+            + "Exclusive subtracts accumulated child ticks modulo32; narrow u16 where specified.31911==5A retains "
+            + "maximum independently per output; otherwise overwrite. No timing-budget enforcement.");
+    semanticFunction(0x65044L, "f33_end_execution_profile_slot3", v)
+        .setComment("End slot3, exit adjustment2, parent adjustment117. Ten-entry u32 exclusive/inclusive rings8C60/8CCC. "
+            + "Exclusive subtracts accumulated child ticks modulo32; narrow u16 where specified.31911==5A retains "
+            + "maximum independently per output; otherwise overwrite. No timing-budget enforcement.");
+    semanticFunction(0x650B8L, "f33_end_execution_profile_slot4", v)
+        .setComment("End slot4, exit adjustment64, parent adjustment154. Single u32 exclusive/inclusive samples8C88/8CF4. "
+            + "Exclusive subtracts accumulated child ticks modulo32; narrow u16 where specified.31911==5A retains "
+            + "maximum independently per output; otherwise overwrite. No timing-budget enforcement.");
+    semanticFunction(0x65116L, "f33_end_execution_profile_slot5", v)
+        .setComment("End slot5, exit adjustment68, parent adjustment118. Sixteen-entry u32 exclusive/inclusive "
+            + "rings8C8C/8CF8. Exclusive subtracts accumulated child ticks modulo32; narrow u16 where "
+            + "specified.31911==5A retains maximum independently per output; otherwise overwrite. No timing-budget "
+            + "enforcement.");
+    semanticFunction(0x651A2L, "f33_read_execution_profile_slot0", u32)
+        .setComment("Return adjusted live elapsed for slot0, adjustment-19. Keep actual R10 result; not void.");
+    semanticFunction(0x651B4L, "f33_read_execution_profile_slot2", u32)
+        .setComment("Return adjusted live elapsed for slot2, adjustment4. Subtract accumulated child ticks modulo32 inside "
+            + "preserved FFC0 priority window.");
+    semanticFunction(0x651DCL, "f33_read_execution_profile_slot3", u32)
+        .setComment("Return adjusted live elapsed for slot3, adjustment2. Subtract accumulated child ticks modulo32 inside "
+            + "preserved FFC0 priority window.");
+    semanticFunction(0x65204L, "f33_read_execution_profile_slot4", u32)
+        .setComment("Return adjusted live elapsed for slot4, adjustment64. Subtract accumulated child ticks modulo32 inside "
+            + "preserved FFC0 priority window.");
+    semanticFunction(0x6522EL, "f33_read_execution_profile_slot5", u32)
+        .setComment("Return adjusted live elapsed for slot5, adjustment68. Subtract accumulated child ticks modulo32 inside "
+            + "preserved FFC0 priority window.");
+    semanticFunction(0x65FAEL, "f33_run_ch0_application_task", v)
+        .setComment("If ROM31910==5A bracket dispatch with slot0 profiling. Unconditionally run supervisor652E2 before "
+            + "body66786, then increment wrapping completion counter39D8. Exact31910=0 disables only profiling, not "
+            + "supervision. Native guard evidence stops before the task body.");
+    semanticFunction(0x65FEAL, "f33_run_ch1_application_task", v)
+        .setComment("If ROM31910==5A bracket dispatch with slot2 profiling. Unconditionally run supervisor6530E before "
+            + "body6679E, then increment wrapping completion counter39D9. Exact31910=0 disables only profiling, not "
+            + "supervision. Native guard evidence stops before the task body.");
+    semanticFunction(0x66026L, "f33_run_ch2_application_task", v)
+        .setComment("If ROM31910==5A bracket dispatch with slot3 profiling. Unconditionally run supervisor6540C before "
+            + "body667B6, then increment wrapping completion counter39DA. Exact31910=0 disables only profiling, not "
+            + "supervision. Native guard evidence stops before the task body.");
+    semanticFunction(0x8D6B0L, "f33_fill_counter_sample_pairs", v,
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u8, currentProgram))
+        .setComment("For floor(low8(length)/2) iterations sample64E2A and write low16 big-endian; leave an odd trailing byte "
+            + "untouched.8D74A uses16 bytes as candidate challenge material. Same counter as profiler, independent "
+            + "of31910 profiling gate. No entropy-quality or hardware-timer execution claim.");
+    semanticData(0x30DC0L, new ArrayDataType(resolve(layout1), 3, 4), "f33_task_rate_policies",
+        "CH0/CH1/foreground completed-window policies; min/max inclusive.");
+    semanticData(0x30DCCL, new ArrayDataType(resolve(layout3), 4, 8), "f33_dma_progress_policies",
+        "Channels0/8/6/14; window6. Final halfword uninterpreted.");
+    semanticData(0xFEBE8DB0L, new ArrayDataType(resolve(layout0), 4, 4), "f33_task_rate_windows",
+        "CH0/auxiliary/CH1/foreground. Auxiliary has no recovered direct scheduled caller.");
+    semanticData(0xFEBE8DC0L, new ArrayDataType(resolve(layout2), 4, 8), "f33_dma_progress_windows",
+        "Eight-byte state per configured channel; byte1 is not initialized here.");
+    semanticData(0xFEBE8C60L, resolve(layout4), "f33_execution_profiles",
+        "Raw counter bookkeeping, not dispatch-rate supervision. Six software contexts and idle6.");
+    semanticData(0x31910L, u8, "f33_execution_profiling_enabled",
+        "Exact value0; only5A enables scheduler profiling hooks.");
+    semanticData(0x31911L, u8, "f33_execution_profile_peak_hold",
+        "Exact value0;5A selects busy maxima and idle minimum.");
+  }
+
   @Override public void run() throws Exception {
     String[] args = getScriptArgs();
     if (args.length != 1) throw new IllegalArgumentException("expected function_seeds.csv path");
@@ -10659,6 +11536,9 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateMonitorCalibrationAndOutputEnvelopes();
     annotateDiagnosticTransportOwnership();
     annotateDiagnosticReadPublication();
+    annotateBaApplicationLifetimes();
+    annotateRetainedControlProfiles();
+    annotateTaskProgressAndProfiling();
     annotatePhaseModulation();
     annotateDataFlashReads();
     annotateFaciSubmission();

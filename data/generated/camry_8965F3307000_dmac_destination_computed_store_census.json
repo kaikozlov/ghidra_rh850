@@ -197,13 +197,13 @@
         "0xFFFF87D4"
       ],
       "lo": "0xFFFF842C",
-      "pointer_expression": "CAST(INT_ADD(INT_MULT(INT_AND((register, 0x18, 4),0xff),0x40),0xffff842c))",
+      "pointer_expression": "CAST(INT_ADD(INT_MULT(INT_ZEXT((register, 0x18, 1)),0x40),0xffff842c))",
       "store": "0x000609CE"
     }
   ],
   "canonical_corpus": {
     "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
-    "sha256": "d7b3f3ac52ee6bb28ac653305f93f9700940874e4d08631996b69acad3c6e472"
+    "sha256": "e2431f5025425884e558b18305189db6e405227dfba11471e90e006f8ded3b00"
   },
   "ghidra_script": {
     "path": "ghidra/scripts/investigate/AuditComputedStoreTargets.java",
@@ -215,9 +215,9 @@
   "summary": {
     "candidateFunctions": 3,
     "candidates": 5,
-    "functions": 7328,
-    "knownRangeStores": 5471,
-    "stores": 14190
+    "functions": 7329,
+    "knownRangeStores": 5466,
+    "stores": 14185
   },
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",

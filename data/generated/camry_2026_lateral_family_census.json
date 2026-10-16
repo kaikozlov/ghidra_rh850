@@ -1516,17 +1516,17 @@
         "src_0_1_2_id_counts_raw": {},
         "unmatched_native_candidate_id_counts": {}
       },
-      "duration_s": 121.032537,
+      "duration_s": 181.037012,
       "first_08a_id": 0,
       "first_mono_s": 59.542857893,
       "id_transition_counts": {
         "0->11": 4,
         "0->18": 1,
-        "11->0": 3,
+        "11->0": 4,
         "18->0": 1
       },
-      "last_08a_id": 11,
-      "last_mono_s": 180.575394821,
+      "last_08a_id": 0,
+      "last_mono_s": 240.579870141,
       "native_081_id_counts": {
         "0": 8472,
         "11": 2084,

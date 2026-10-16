@@ -71,7 +71,7 @@
         "subbus_sequence": "0x33"
       },
       "path": "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json",
-      "sha256": "351474f6f7069e393e37c143222b62b8d08583d897eea3f4a0f2b6962a80a927",
+      "sha256": "fb0b2993e3ab7ec3e50d26a85e29a0528d06db27ba1404342602b70c6d408453",
       "skid": {
         "bus_index": 32,
         "bus_name": "Bus 4",
@@ -93,7 +93,7 @@
     "0x00066026": {
       "body_sha256": "da415cc00b1daa8fceb5e10e2c6ee095d54d03a4906e24bbbd0678b360fb386f",
       "body_size": 60,
-      "decompiled_c_sha256": "3c4ca6ecc2f9155e9aa295c5808ec4659376e3d95b21621a010f75359e74ea53",
+      "decompiled_c_sha256": "dadc98f7efa66521c84c840a42d0ef4c4daff31a498d2df8115189ba3e8342dc",
       "role": "interrupt dispatch aggregate"
     },
     "0x000667B6": {
@@ -129,7 +129,7 @@
     "0x00071508": {
       "body_sha256": "0a68ffc255d72f4c3429e63355652dbedd2857d6961910d52be1d635a85a0691",
       "body_size": 170,
-      "decompiled_c_sha256": "d5195335ded74e1d166f891c3a5d3d2cd40167cff924b80b68f4f329e44280ff",
+      "decompiled_c_sha256": "2bd1c4aa8f5eef24ff627b6fab30d229780f5d36bf995f7b2630370b08d8262d",
       "role": "controller-1 receive interrupt wrapper"
     },
     "0x00079EBA": {
@@ -537,8 +537,8 @@
     "Joined to the Sep-10 ID63 marker experiment, the direct Panda B6 disappears before successful F33 controller1 decode/CanIf admission while native B6 continues to reach the same family1/profile2 queue."
   ],
   "target": {
-    "canonical_function_count": 7328,
-    "canonical_inventory_sha256": "71174b64d2aa0170d8c679f17b6c3e78f77a9361c34c5f56cb2252b2be013b72",
+    "canonical_function_count": 7329,
+    "canonical_inventory_sha256": "238cba32c1a6b87ca3d3bffc5083b624132baa170ba5d61d6c54e900989f43aa",
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "software_id": "8965F3307000"
   }

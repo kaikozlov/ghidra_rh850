@@ -1,0 +1,133 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_ba_enable_rejected_setters_old_success_opens_gate",
+  "entry": {
+    "role": "Execute real configured F7 BAENA start and finish joins after diagnostic routing. Both real setters reject via initialized redundant gate. Old cached success is deliberately retained, so finish opens admission despite no store. Stop at8E6BA before DCM response publication. No fake accepted store or persistence.",
+    "scope": "resolved-address",
+    "address": "0x8e3a2"
+  },
+  "max_instructions": 150000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0xfebe1000"
+  },
+  "stop_addresses": [
+    "0x8e6ba"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe0000",
+      "size": 131072,
+      "fill": 0,
+      "evidence": "Explicit initialized software RAM and nested-call stack handoff, not reset/acquisition/hardware state."
+    },
+    {
+      "address": "0xfebe1000",
+      "hex": "0011befe060000000012befe00000000",
+      "evidence": "Real16-byte proprietary message: request, length6, response, initial length0."
+    },
+    {
+      "address": "0xfebe1100",
+      "hex": "f74241454e41",
+      "evidence": "Exact configured F7 plus BAENA."
+    },
+    {
+      "address": "0xfebe5954",
+      "hex": "0200000000000000",
+      "evidence": "Published security bitmap yields numerical level2; BA enable tests level bit1, not minimum>=2."
+    },
+    {
+      "address": "0xfebf0672",
+      "hex": "5a",
+      "evidence": "Exact redundant global setter-rejection gate."
+    },
+    {
+      "address": "0xfebf10aa",
+      "hex": "0f",
+      "evidence": "XOR55 setter gate plane."
+    },
+    {
+      "address": "0xfebf10ce",
+      "hex": "f0",
+      "evidence": "XORAA setter gate plane."
+    },
+    {
+      "address": "0xfebf0320",
+      "hex": "10",
+      "evidence": "Record18 old cached success."
+    },
+    {
+      "address": "0xfebf032d",
+      "hex": "10",
+      "evidence": "Record105 old cached success raw."
+    },
+    {
+      "address": "0xfebf108d",
+      "hex": "45",
+      "evidence": "Record105 old success XOR55."
+    },
+    {
+      "address": "0xfebf10b1",
+      "hex": "ba",
+      "evidence": "Record105 old success XORAA."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Reaches specified software boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x8e6ba"
+    },
+    {
+      "name": "Old success opens gate and publishes exact count30 despite rejected setters",
+      "kind": "memory",
+      "address": "0xfebe5f4f",
+      "size": 2,
+      "equals_hex": "5a1e"
+    },
+    {
+      "name": "Nonnegative finish latches successful-finish diagnostic projection",
+      "kind": "memory",
+      "address": "0xfebe5f53",
+      "size": 1,
+      "equals_hex": "5a"
+    },
+    {
+      "name": "Owner BA00 after immediate completion",
+      "kind": "memory",
+      "address": "0xfebe81b2",
+      "size": 2,
+      "equals_hex": "00ba"
+    },
+    {
+      "name": "Neither family ring advances",
+      "kind": "memory",
+      "address": "0xfebf067a",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Record18 old status not replaced",
+      "kind": "memory",
+      "address": "0xfebf0320",
+      "size": 1,
+      "equals_hex": "10"
+    },
+    {
+      "name": "Record105 old status not replaced",
+      "kind": "memory",
+      "address": "0xfebf032d",
+      "size": 1,
+      "equals_hex": "10"
+    }
+  ]
+}

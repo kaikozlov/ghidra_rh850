@@ -244,13 +244,13 @@
     "0x065FEA": {
       "body_sha256": "8f9ddeeee60d272e09d956ba8c3cd1ddfd8040d55da5a6cce030408375b2fa03",
       "body_size": 60,
-      "decompiled_c_sha256": "0f155fa512b11312975b36065cffed5a2409048474f05644fe711836d3dd0b6c",
+      "decompiled_c_sha256": "a66b225dbfbaecf766fa04f47bed420043a251f48a9e978b02d5eb31ffdff104",
       "role": "shared command cyclic task root"
     },
     "0x066062": {
       "body_sha256": "b08f13a1f1d02c86eb0f461268b1ffd0ee6196907e31201c4b045bf8990f83dc",
       "body_size": 92,
-      "decompiled_c_sha256": "b9a2198c832dda88ba8747e6b572bd584424c7e169cda2630977765b5a585c66",
+      "decompiled_c_sha256": "bb9c399cb802791ba0128d1e80ec4a3d4359a959b751b4b2562b97e79b974dce",
       "role": "communications/application cyclic task root"
     },
     "0x06679E": {
@@ -412,13 +412,13 @@
     "0x0B330A": {
       "body_sha256": "57e7129d5fc4edfeab51ed39524904a5bae055f6635a504735defdd18dbbd63c",
       "body_size": 130,
-      "decompiled_c_sha256": "3a7be01a4e622b203d1f1410526ef2a2414724d820930e780b5e0f33c30ce66f",
+      "decompiled_c_sha256": "6a797164692221c8a392eaa04258d04446b2e1f2e3e4fca0d2635aa3049351c1",
       "role": "diagnostic/service branch clear API"
     },
     "0x0B338C": {
       "body_sha256": "ee0c05615ba42f59d658e590937b6ce94201a200a42a191f5e0964f017116e6e",
       "body_size": 48,
-      "decompiled_c_sha256": "8d9cf5a2ff23529cbfdb11853524e33990ef0382c64f20884b505efe07c727a7",
+      "decompiled_c_sha256": "bb8a401b8432d4949176c05740f26668347881e1c0e9215ce152203de62e594d",
       "role": "diagnostic/service branch set API"
     },
     "0x0B4B6C": {
@@ -3008,7 +3008,7 @@
     }
   ],
   "target": {
-    "canonical_function_count": 7328,
+    "canonical_function_count": 7329,
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "software_id": "8965F3307000"
   }
