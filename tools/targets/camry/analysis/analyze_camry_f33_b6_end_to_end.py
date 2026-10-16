@@ -470,8 +470,19 @@ def analyze() -> dict[str, Any]:
     "ac5a_is_internal_ramped_scale": "DAT_febeac5a = DAT_febeb1f8" in c[0xBCBD8] and "DAT_febeb1f8" in c[0xB4B6C] and "0x400" in c[0xB4EF4],
     "d042c_multiplies_by_ac5a": "DAT_febecc62 = (short)((int)((int)DAT_febecc50 * (uint)DAT_febeac5a) / 0x400);" in c[0xD042C],
     "common_actuator_gate_can_zero_command": all(x in c[0xD042C] for x in ("DAT_febeac29", "DAT_febeac2a", "DAT_febecc66 = 0")),
-    "ac29_ac2a_derive_internal_system_state": "0x70017001" in c[0xBCAA6] and "0x40004" in c[0xBCAA6] and "DAT_febeef90 = DAT_febe8b28" in c[0xFCC00],
-    "8b28_is_computed_internal_status_aggregate": "*(uint *)(puVar4 + -0x2cd8) = uVar5" in c[0x572E6] and "FUN_000571b4" in c[0x572E6] and "FUN_0005721c" in c[0x572E6],
+    "ac29_ac2a_derive_internal_system_state": (
+      "0x70017001" in c[0xBCAA6] and "0x40004" in c[0xBCAA6]
+      # EP=GP+3780; LD.W GP-2CD8 into r1; SST.W r1 at EP+10.
+      # This is the actual 8B28 -> EF90 copy, independent of global names.
+      and image[0xFCC2A:0xFCC3A] == bytes.fromhex("24f6803784038503860c240f29d3090d")
+    ),
+    "8b28_is_computed_internal_status_aggregate": (
+      # Zero r28, OR eight words at GP-2CDC+8+4*i, pass that request
+      # to571B4/5721C, OR both results into preserved r29, publish8B28.
+      image[0x572EA:0x57312] == bytes.fromhex(
+        "00e2249e24d31c0801f0c2f2d3f1410a049512e1680a96fd1c30bfffb0fe0ae81c30bfff10ff0ae9"
+      ) and image[0x57372:0x57376] == bytes.fromhex("64ef29d3")
+    ),
     "internal_override_trigger_and_replacement_are_exact": "DAT_febecc98 = uVar7" in c[0xD0528] and "DAT_febecc94 = -DAT_febecc80" in c[0xD0674] and all(x in c[0xD047C] for x in ("DAT_febecc98", "DAT_febecc94", "DAT_febecc64")),
     "motor_side_can_substitute_internal_bounded_source": all(x in c[0x35C4C] for x in ("DAT_febee40c", "DAT_febee780 == 'Z'", "DAT_febee406 == 'Z'", "DAT_febe6af4 = -sVar1")),
     "motor_mirror_path": "DAT_febee40c = DAT_febeac54" in c[0xBF33E] and "DAT_febe6af4 = -sVar1" in c[0x35C4C] and "DAT_febe6e0a = DAT_febe6af4" in c[0x387BA],

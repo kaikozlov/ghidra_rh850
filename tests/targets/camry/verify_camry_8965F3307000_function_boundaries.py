@@ -45,6 +45,12 @@ check("false +4 child functions are absent", not (false & set(rows)))
 check("omitted B6 receive-path entries are recovered with complete bodies",
       all(entry in rows and rows[entry]["body_size"] == size
           for entry, size in recovered.items()))
+fit = rows.get(0x336B8, {})
+check("six-channel fit owns its state44 fall-through and shared terminal epilogue",
+      0x33966 not in rows
+      and fit.get("body_ranges") == [
+        {"min": "0x000336b8", "max": "0x00033aa3", "space": "ram"},
+      ])
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

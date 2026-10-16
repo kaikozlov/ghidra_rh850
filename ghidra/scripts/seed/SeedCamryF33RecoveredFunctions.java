@@ -2119,7 +2119,7 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     semanticFunction(0x57A5AL, "f33_select_phase_output_slots", v)
         .setComment("Scan slots0..4 and choose the highest enabled slot for each bank. Publish selected "
             + "index/complement and triplets8BEE..8BF8. Optional code clamp uses [8000-L,L], L bounded4000..8000. "
-            + "Selected indices are not boolean bridge-disable flags; slot4 can outrank mode-owned slot3.");
+            + "Selected indices are not boolean bridge-disable flags; slot4 can outrank aggregate-request neutral slot3.");
     semanticFunction(0x66786L, "f33_fast_control_cycle", v)
         .setComment("Commit PREVIOUS compare stage through61E72, then6289C, acquire/publish snapshots66824, and "
             + "dispatch next application work588E8. New controller output is staged for a later cycle. No ADC "
@@ -7651,12 +7651,8 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         .setComment("Ownstimestamp-gatedsend,78pending,inflightlockandoverallterminalstate;doesnotownFACIoperation.");
     semanticFunction(0x666CL, "f33_boot_diagnostic_timeout_progress", v)
         .setComment("Executingrequests\u219265AA;idlesession2/3rawelapsedtimeoutpublishesdefault1.");
-    semanticFunction(0x6BDEL, "f33_boot_transfer_block_transform_progress", v)
-        .setComment("Atmostone16-byteblockpercall;shorttaildeductedwithoutcopy;7108returnignored;noarbitrarylengthtransformclaim.");
     semanticFunction(0x6C8EL, "f33_boot_transfer_compare_progress", v)
         .setComment("Atmost16bytespercall;firstmismatchclearsbusybutkeepsfailure1;onlycompleteall-matchclearsfailure0.");
-    semanticFunction(0x6EE0L, "f33_boot_region_authentication_progress", v)
-        .setComment("7170returns2busy/0pass/1fail;updates2BFCresultandclears2BFDactiveonterminal.");
     semanticFunction(0x4A9AL, "f33_boot_write_did_progress", v)
         .setComment("Waits2BFBjobcompletion;responds6Eor72afterrequestpendinglockclears.");
     semanticFunction(0x5C06L, "f33_boot_routine_timer_progress", v)
@@ -8182,6 +8178,577 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     semanticData(0x2C118L, new ArrayDataType(point, 129, 4), "f33_phase_lower_modulation_offset_curve",
         "128 numerical rows followed by FFFFFFFF. These consumers index ordinates directly and use fixed endpoint constants, not the sentinel.");
   }
+  private void annotateResidentImageCrypto() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    CategoryPath category = new CategoryPath("/CamryF33");
+    DataType F33BootAes128ContextType = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33BootAes128Context");
+    if (F33BootAes128ContextType == null) throw new IllegalStateException("missing resident AES context layout");
+    StructureDataType imageLayout0 = new StructureDataType(category, "F33BootAes128CbcContext", 0);
+    imageLayout0.setPackingEnabled(true);
+    imageLayout0.add(F33BootAes128ContextType, "aes", null);
+    imageLayout0.add(new ArrayDataType(u8, 16, 1), "previous_ciphertext", null);
+    imageLayout0.add(new ArrayDataType(u8, 16, 1), "unused_extension", null);
+    DataType F33BootAes128CbcContextType = resolve(imageLayout0);
+    StructureDataType imageLayout1 = new StructureDataType(category, "F33BootAes128CmacContext", 0);
+    imageLayout1.setPackingEnabled(true);
+    imageLayout1.add(F33BootAes128ContextType, "aes", null);
+    imageLayout1.add(new ArrayDataType(u8, 16, 1), "chain", null);
+    imageLayout1.add(new ArrayDataType(u8, 16, 1), "subkey1", null);
+    imageLayout1.add(new ArrayDataType(u8, 16, 1), "subkey2", null);
+    imageLayout1.add(u8, "subkeys_ready", null);
+    imageLayout1.add(new ArrayDataType(u8, 3, 1), "padding", null);
+    DataType F33BootAes128CmacContextType = resolve(imageLayout1);
+    semanticFunction(0x7068L, "f33_boot_image_derive_key", v)
+        .setComment("Derive retained2D18=AES128_ENCRYPT(ROMBFD8,configured2D08),one16-byte block. Shared AES2D48 "
+            + "cleared196bytes afterward; configured/derived buffers retained. Distinct from SID27 BFE8 decrypt "
+            + "derivation.");
+    semanticFunction(0x709AL, "f33_boot_image_initialize_contexts", v)
+        .setComment("Initialize CBC2EF0 with derived key2D18/IV2CF8; initialize CMAC2C00 same key with zero chain then derive "
+            + "CMAC subkeys. Wrapper ignores all statuses. Does not consume authentication prefix yet.");
+    semanticFunction(0x70D4L, "f33_boot_image_crypto_initialize", v)
+        .setComment("Derive image key7068 then initialize both CBC/CMAC709A. Reinitializes shared image contexts, not a "
+            + "per-transfer-chunk action.");
+    semanticFunction(0x70E4L, "f33_boot_image_clear_contexts", v)
+        .setComment("Clear CBC2EF0 all228 bytes then CMAC2C00 all248 bytes. Retain IV/material/derived key/output and "
+            + "authentication cursors; does not reset activity flags.");
+    semanticFunction(0x70FCL, "f33_boot_image_crypto_clear", v)
+        .setComment("Forward to70E4, wiping CBC and CMAC contexts only. TransferExit6BD2 and routine completion6F04 share this "
+            + "owner.");
+    semanticFunction(0x7108L, "f33_boot_image_decrypt_block", u32,
+        new ParameterImpl("ciphertext", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("plaintext", new PointerDataType(u8, 4), currentProgram))
+        .setComment("AES128-CBC decrypt one16-byte block with persistent2EF0 context through8162. Return0 success or1 failure; "
+            + "foreground6BDE ignores this return.");
+    semanticFunction(0x7122L, "f33_boot_image_authentication_begin", u32,
+        new ParameterImpl("start", u32, currentProgram),
+        new ParameterImpl("length", u32, currentProgram))
+        .setComment("Select fixed descriptor trailer; feed configured IV2CF8 as NONFINAL16-byte CMAC prefix into2D28; on "
+            + "success seed cursor=start and last_block=start+length-16. Return0/1. No length-multiple/minimum/alignment "
+            + "validation; context must already be initialized. Trailer is stored even if prefix update fails.");
+    semanticFunction(0x7170L, "f33_boot_image_authentication_step", u32)
+        .setComment("One16-byte CMAC update or exact-trailer skip. Final when cursor==last_block OR "
+            + "cursor+16==last_block==trailer. Final compares16 bytes early-exit, incrementing trailer cursor only for "
+            + "equal bytes. Return2busy/0match/1failure; data cursor always advances16, including skip/failure. Does not "
+            + "wipe or invalidate context.");
+    semanticFunction(0x7D50L, "f33_boot_aes128_cmac_derive_subkeys", u32,
+        new ParameterImpl("context", new PointerDataType(F33BootAes128CmacContextType, 4), currentProgram))
+        .setComment("AES_K(16 zero ROM91F1 bytes), then big-endian128-bit doubling twice; XOR87 into low byte for each "
+            + "high-bit carry. Store K1 at+D4,K2 at+E4,ready1 at+F4. Return0/FF.");
+    semanticFunction(0x7E0CL, "f33_boot_aes128_cmac_update_block", u32,
+        new ParameterImpl("input", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u8, currentProgram),
+        new ParameterImpl("final_block", u32, currentProgram),
+        new ParameterImpl("context", new PointerDataType(F33BootAes128CmacContextType, 4), currentProgram))
+        .setComment("AES128-CMAC update. Nonfinal length16; final==1 allows1..16 (zero rejected). Full final XOR K1; partial "
+            + "final80/zero pad XOR K2. XOR retained chain, encrypt, copy output to chain. Require "
+            + "AES.valid1/subkeys_ready1. Return0/FF; does NOT invalidate/finalize-latch or wipe. Fifth arg callerSP+0.");
+    semanticFunction(0x7FB4L, "f33_boot_aes128_cmac_initialize", u32,
+        new ParameterImpl("key", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("key_length", u8, currentProgram),
+        new ParameterImpl("context", new PointerDataType(F33BootAes128CmacContextType, 4), currentProgram))
+        .setComment("Require key length16, clear AES.valid and49-byte chain/K1/K2/ready extension, initialize shared AES base. "
+            + "Does not derive subkeys;7D50 required separately. Return0/FF.");
+    semanticFunction(0x7FFCL, "f33_boot_aes128_cmac_clear", v,
+        new ParameterImpl("context", new PointerDataType(F33BootAes128CmacContextType, 4), currentProgram))
+        .setComment("Clear valid then all248 CMAC context bytes through76B6; not caller configured key/material or output.");
+    semanticFunction(0x8162L, "f33_boot_aes128_cbc_decrypt_block", u32,
+        new ParameterImpl("ciphertext", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("plaintext", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u8, currentProgram),
+        new ParameterImpl("context", new PointerDataType(F33BootAes128CbcContextType, 4), currentProgram))
+        .setComment("Require length16 and AES.valid1; decrypt ciphertext to16-byte local, XOR previous_ciphertext at+C4 into "
+            + "output, then copy original input into previous_ciphertext. Return0/FF. Input/output aliasing not "
+            + "generally supported inside primitive;6BDE uses separate local output then copies back, preserving "
+            + "in-place transfer chain.");
+    semanticFunction(0x82B6L, "f33_boot_aes128_cbc_initialize", u32,
+        new ParameterImpl("key", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("key_length", u8, currentProgram),
+        new ParameterImpl("iv", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("iv_length", u8, currentProgram),
+        new ParameterImpl("context", new PointerDataType(F33BootAes128CbcContextType, 4), currentProgram))
+        .setComment("Require low8 key/IV lengths16; clear AES.valid, copyIV to+C4, initialize AES base under key, setvalid1 on "
+            + "success. Return0/FF. Fifth argument callerSP+0/calleeSP+8. Does not initialize unused final16 bytes "
+            + "of228-byte clear allocation.");
+    semanticFunction(0x834EL, "f33_boot_aes128_cbc_clear", v,
+        new ParameterImpl("context", new PointerDataType(F33BootAes128CbcContextType, 4), currentProgram))
+        .setComment("Clear AES.valid then entire228-byte CBC allocation through76B6. Does not clear configured IV/key "
+            + "material.");
+    semanticFunction(0x6BA8L, "f33_boot_transfer_crypto_initialize", v)
+        .setComment("SID34 optional-transform setup forwards70D4; derives image key and resets BOTH CBC/CMAC contexts.");
+    semanticFunction(0x6BD2L, "f33_boot_transfer_crypto_clear", v)
+        .setComment("TransferExit optional-transform cleanup forwards70FC; wipes BOTH CBC and CMAC, not worker "
+            + "activity/pointers or configured materials.");
+    semanticFunction(0x6C52L, "f33_boot_block_transform_clear_activity", v)
+        .setComment("Clear2BDE active only; retain transform remaining/source/destination and all crypto contexts. Resident "
+            + "initialization6A22 uses this, not a secure erase.");
+    semanticFunction(0x6EAEL, "f33_boot_authentication_crypto_initialize", v)
+        .setComment("Routine CRC-success path initializes image key/BOTH CBC-CMAC contexts via70D4 before authentication "
+            + "submission.");
+    semanticFunction(0x6EBAL, "f33_boot_region_authentication_submit", u32,
+        new ParameterImpl("start", u32, currentProgram),
+        new ParameterImpl("length", u32, currentProgram))
+        .setComment("Real r6/r7 start,length passed unchanged to7122; reject ifactive2BFD!=0, else seed CMAC-prefix/cursors "
+            + "and publishresult1/active1 on success. Return0accepted/1rejected. Does not initialize contexts by itself.");
+    semanticFunction(0x6F04L, "f33_boot_region_authentication_clear_contexts", v)
+        .setComment("Routine wait-auth terminal cleanup forwards70FC; wipes both CBC and CMAC, retaining "
+            + "result/activity/cursors/configured materials/output.");
+    semanticFunction(0x6F10L, "f33_boot_region_authentication_clear_activity", v)
+        .setComment("Setresult2BFC=1,clearactive2BFD=0 only; no context/material/cursor wipe. Resident6A22 initialization "
+            + "caller.");
+    semanticFunction(0x6BDEL, "f33_boot_transfer_block_transform_progress", v)
+        .setComment("Refine existing owner: CBC decrypt at most one full16-byte block via7108 into stack-local then copy back; "
+            + "preserve originalciphertext chain for in-place job. Ignore crypto failure and copy local regardless. "
+            + "Tail1..15 deducted without decrypt/copy or pointer advancement; active clears atremaining0.");
+    semanticFunction(0x6EE0L, "f33_boot_region_authentication_progress", v)
+        .setComment("Retain established name. Process onlyactive,7170return2busy;0clearsresult;terminal0/1clearsactive. Does "
+            + "not wipe contexts/configured key/output/cursors; timer routine5936/5A04 separately clearscontexts on "
+            + "normal terminal consumption.");
+    semanticData(0xBFD8L, new ArrayDataType(u8, 16, 1), "f33_boot_image_key_derivation_key",
+        "Resident image-crypto state; distinct from security-access and application SecOC lifetimes.");
+    semanticData(0xFEBF2D08L, new ArrayDataType(u8, 16, 1), "f33_boot_image_key_material",
+        "Resident image-crypto state; distinct from security-access and application SecOC lifetimes.");
+    semanticData(0xFEBF2D18L, new ArrayDataType(u8, 16, 1), "f33_boot_image_derived_key",
+        "Resident image-crypto state; distinct from security-access and application SecOC lifetimes.");
+    semanticData(0xFEBF2CF8L, new ArrayDataType(u8, 16, 1), "f33_boot_image_iv_and_authentication_prefix",
+        "Resident image-crypto state; distinct from security-access and application SecOC lifetimes.");
+    semanticData(0xFEBF2D28L, new ArrayDataType(u8, 16, 1), "f33_boot_image_authentication_block",
+        "Resident image-crypto state; distinct from security-access and application SecOC lifetimes.");
+    semanticData(0xFEBF2C00L, F33BootAes128CmacContextType, "f33_boot_image_cmac_context",
+        "Resident image-crypto state; distinct from security-access and application SecOC lifetimes.");
+    semanticData(0xFEBF2EF0L, F33BootAes128CbcContextType, "f33_boot_image_cbc_context",
+        "Resident image-crypto state; distinct from security-access and application SecOC lifetimes.");
+    semanticData(0xFEBF30A8L, u32, "f33_boot_authentication_last_block",
+        "Resident image-crypto state; distinct from security-access and application SecOC lifetimes.");
+    semanticData(0xFEBF30ACL, new PointerDataType(u8, 4), "f33_boot_authentication_trailer_cursor",
+        "Resident image-crypto state; distinct from security-access and application SecOC lifetimes.");
+    semanticData(0xFEBF30B0L, new PointerDataType(u8, 4), "f33_boot_authentication_data_cursor",
+        "Resident image-crypto state; distinct from security-access and application SecOC lifetimes.");
+  }
+
+  private void annotateApplicationAdaptation() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    CategoryPath category = new CategoryPath("/CamryF33");
+    StructureDataType curvePoint = new StructureDataType(category, "F33CurvePointU16S16", 0);
+    curvePoint.setPackingEnabled(true);
+    curvePoint.add(u16, "x", "Unsigned axis; FFFF terminates traversal.");
+    curvePoint.add(s16, "y", "Signed interpolation ordinate; physical units unassigned.");
+    semanticData(0x31B5CL, new ArrayDataType(resolve(curvePoint), 9, 4),
+        "f33_switched_signed_request_curve",
+        "37FD2 passes this unsigned-axis/signed-ordinate curve to702B0 when6B4C=5A. Eight numerical rows "
+            + "and FFFF sentinel; the sentinel returns the preceding ordinate0. Typing the full36-byte "
+            + "table removes the false JARL decoded at31B66, which otherwise recreates interior function33966.");
+    // 33966 is fall-through after DIVQ33962, sharing the sole PREPARE336B8 and DISPOSE33AA0.
+    currentProgram.getFunctionManager().removeFunction(toAddr(0x33966L));
+    Function fit = getFunctionAt(toAddr(0x336B8L));
+    if (fit == null) throw new IllegalStateException("missing six-channel fit root");
+    fit.setBody(new AddressSet(toAddr(0x336B8L), toAddr(0x33AA3L)));
+    StructureDataType fitLayout0 = new StructureDataType(category, "F33SixChannelFitWork", 0);
+    fitLayout0.setPackingEnabled(true);
+    fitLayout0.add(u8, "state", null);
+    fitLayout0.add(u8, "active", null);
+    fitLayout0.add(u8, "unsigned_initialized", null);
+    fitLayout0.add(u8, "signed_initialized", null);
+    fitLayout0.add(u8, "coverage_count", null);
+    fitLayout0.add(new ArrayDataType(u8, 1, 1), "reserved_5", null);
+    fitLayout0.add(s16, "previous_angle", null);
+    fitLayout0.add(new ArrayDataType(u16, 6, 2), "unsigned_max", null);
+    fitLayout0.add(new ArrayDataType(u16, 6, 2), "unsigned_min", null);
+    fitLayout0.add(new ArrayDataType(u16, 6, 2), "unsigned_previous", null);
+    fitLayout0.add(new ArrayDataType(u16, 6, 2), "first_gain", null);
+    fitLayout0.add(new ArrayDataType(u16, 6, 2), "first_center", null);
+    fitLayout0.add(new ArrayDataType(s16, 6, 2), "signed_max", null);
+    fitLayout0.add(new ArrayDataType(s16, 6, 2), "signed_min", null);
+    fitLayout0.add(new ArrayDataType(s16, 6, 2), "signed_previous", null);
+    fitLayout0.add(new ArrayDataType(u16, 6, 2), "second_gain", null);
+    fitLayout0.add(new ArrayDataType(s16, 6, 2), "second_center", null);
+    fitLayout0.add(new ArrayDataType(u16, 3, 2), "component_angle", null);
+    fitLayout0.add(new ArrayDataType(u8, 2, 1), "reserved_134", null);
+    fitLayout0.add(s32, "coverage_sum", null);
+    fitLayout0.add(s32, "coverage_min", null);
+    fitLayout0.add(s32, "coverage_max", null);
+    fitLayout0.add(new ArrayDataType(u32, 6, 4), "unsigned_q16", null);
+    fitLayout0.add(new ArrayDataType(s32, 6, 4), "signed_q16", null);
+    DataType F33SixChannelFitWorkType = resolve(fitLayout0);
+    semanticData(0xFEBE6960L, F33SixChannelFitWorkType, "f33_six_channel_fit_work",
+        "Expose retained numerical flow without physically naming six channels; actual unsigned/signed differences and accumulator arithmetic matter.");
+    StructureDataType fitLayout1 = new StructureDataType(category, "F33Mode600StimulusFitWork", 0);
+    fitLayout1.setPackingEnabled(true);
+    fitLayout1.add(u8, "state", null);
+    fitLayout1.add(u8, "active", null);
+    fitLayout1.add(u8, "stimulus_valid", null);
+    fitLayout1.add(new ArrayDataType(u8, 1, 1), "reserved_3", null);
+    fitLayout1.add(s16, "positive_mean", null);
+    fitLayout1.add(s16, "negative_mean", null);
+    fitLayout1.add(s16, "stimulus", null);
+    fitLayout1.add(u16, "hold_count", null);
+    fitLayout1.add(u16, "sample_count", null);
+    fitLayout1.add(new ArrayDataType(u8, 2, 1), "reserved_14", null);
+    fitLayout1.add(s32, "folded_angle_sum", null);
+    fitLayout1.add(s32, "signed_component_sum", null);
+    DataType F33Mode600StimulusFitWorkType = resolve(fitLayout1);
+    semanticData(0xFEBE6A60L, F33Mode600StimulusFitWorkType, "f33_mode600_stimulus_fit_work",
+        "Make partial cancel/abort vs full initialization and independent sums explicit; not an actuator/sensor success object.");
+    StructureDataType fitLayout2 = new StructureDataType(category, "F33FitCoefficients", 0);
+    fitLayout2.setPackingEnabled(true);
+    fitLayout2.add(new ArrayDataType(u16, 6, 2), "first_center", null);
+    fitLayout2.add(new ArrayDataType(u16, 6, 2), "first_gain", null);
+    fitLayout2.add(new ArrayDataType(s16, 6, 2), "second_center", null);
+    fitLayout2.add(new ArrayDataType(u16, 6, 2), "second_gain", null);
+    fitLayout2.add(new ArrayDataType(u16, 3, 2), "component_angle", null);
+    DataType F33FitCoefficientsType = resolve(fitLayout2);
+    semanticData(0xFEBE6A26L, F33FitCoefficientsType, "f33_published_fit_coefficients",
+        "Published and retained27-halfword groups compared by33AB6; NOT the serialized0202 order, which interleaves pairs.");
+    semanticData(0xFEBE6A84L, F33FitCoefficientsType, "f33_retained_fit_coefficients",
+        "Published and retained27-halfword groups compared by33AB6; NOT the serialized0202 order, which interleaves pairs.");
+    semanticFunction(0x336B8L, "f33_step_six_channel_fit", v)
+        .setComment("Mode0512/0600 six-channel numerical-fit controller; active6961=5A, states0/11/22/33/44/55/66. Prior-angle "
+            + "update occurs even while inactive or phase-admission fails. First sweep follows literal0x8000, not "
+            + "acquired samples; numerical success is not physical calibration. Terminal flag clears on next invocation. "
+            + "Interior33966 shares this function frame; it is not an independent ABI.");
+    semanticFunction(0x32D26L, "f33_track_fit_angular_coverage", u32,
+        new ParameterImpl("angle", s16, currentProgram),
+        new ParameterImpl("required_spans", u8, currentProgram))
+        .setComment("Wrapped signed16 angle delta accumulates signed32 directional extrema; max-min>=65536 increments wrapping "
+            + "byte span count. Return0/5A/A5; does not update previous-angle itself.");
+    semanticFunction(0x32D88L, "f33_step_unsigned_literal_fit_sweep", v,
+        new ParameterImpl("angle", s16, currentProgram))
+        .setComment("Admission gates from raw retained5F36 and7DB0; invalid gate clears phase-init only. Six unsigned Q16 "
+            + "recurrences track literal32768, seed all extrema/outputs32768 and use exact gain11258. Calls angular "
+            + "coverage threshold5; final coverage changes root state11->22.");
+    semanticFunction(0x330A0L, "f33_step_signed_constant_fit_sweep", v,
+        new ParameterImpl("angle", s16, currentProgram))
+        .setComment("Derive six signed channels from retained first gains/centers and literal32768, not live sample channels. "
+            + "Symmetric saturation, signed division and six Q16 recurrences use truncation toward zero. Same input "
+            + "gates and coverage threshold5 advance33->44.");
+    semanticFunction(0x33AA4L, "f33_begin_six_channel_fit", v)
+        .setComment("Set state6960=0 and active6961=5A only; does not erase prior fits before subsequent phase initialization.");
+    semanticFunction(0x33D3CL, "f33_check_foreground_fit_bounds", u32)
+        .setComment("Check foreground snapshot, not mutable worker arrays. Returns5A for accepted and0 otherwise. Exact "
+            + "configured unsigned bounds are full0..65535 and signed centers full-32768..32767; therefore not a "
+            + "meaningful physical calibration validation.");
+    semanticFunction(0x33F14L, "f33_step_fit_completion", v)
+        .setComment("Active6A5C=5A starts worker then watches cached foreground6528.55 plus snapshot bounds stages0202 and "
+            + "state22;66 or failed check reports existing52/slot17 and state44. Later22 responds0;44 responds-9. Does "
+            + "not await physical NvM completion.");
+    semanticFunction(0x33F9CL, "f33_request_six_channel_fit", u32)
+        .setComment("Set6A5C=5A and return0; retains6A5D. Only recovered direct caller32CA0; this helper alone does not "
+            + "guarantee a fresh run.");
+    semanticFunction(0x348DAL, "f33_publish_fit_candidate_record", v)
+        .setComment("Copy foreground centers/gains/angles into retained6A84..6AB8, serialize64-byte0202 record markerA55A5AA5 "
+            + "plus reserved zero, enqueue setter; publish6A7A=44 and6ABC marker immediately. Do not interpret immediate "
+            + "software marker as durable write success.");
+    semanticFunction(0x34028L, "f33_step_mode600_stimulus_fit", v)
+        .setComment("Family0600 active5A sequencer: positive and negative1280 stimulus, bounded delayed angle averaging and "
+            + "independent signed component sum, paired correction staging, mean agreement, queued records0208/0209. "
+            + "Abort response-6 resets live request but retains count/sums. Completion polls only RAM marker.");
+    semanticFunction(0x33FAAL, "f33_initialize_mode600_stimulus_fit", v)
+        .setComment("State10; clear request-valid, means, stimulus, timer, sample count and both32-bit sums. Retain "
+            + "active6A61;343F0 sets it5A before calling here.");
+    semanticFunction(0x33FC6L, "f33_cancel_mode600_stimulus_fit", v)
+        .setComment("Only clear6A61/6A62 and set state6A60=10. Preserve remaining means/stimulus/counters/sums. Existing "
+            + "mode0600 exit owner calls this and retains its name/contract.");
+    semanticFunction(0x33FD6L, "f33_abort_mode600_stimulus_fit", v,
+        new ParameterImpl("active", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("request_valid", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("stimulus", new PointerDataType(s16, 4), currentProgram),
+        new ParameterImpl("hold_count", new PointerDataType(u16, 4), currentProgram),
+        new ParameterImpl("positive_mean", new PointerDataType(s16, 4), currentProgram),
+        new ParameterImpl("negative_mean", new PointerDataType(s16, 4), currentProgram),
+        new ParameterImpl("state", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Clear passed active/request/stimulus/hold/means, set state10; stage zero pair, respond-6, cancel worker. "
+            + "Does not clear sample count or accumulators. Last three pointer arguments at entry SP+0/+4/+8.");
+    semanticFunction(0x343F0L, "f33_begin_mode600_stimulus_fit", u32)
+        .setComment("Set active6A61=5A then full initializer33FAA and return0. No registered call/xref was recovered; keep "
+            + "admission boundary unresolved rather than claiming diagnostic reachability.");
+    semanticFunction(0x32594L, "f33_stage_pair_correction", s32,
+        new ParameterImpl("selector", u8, currentProgram),
+        new ParameterImpl("values", new PointerDataType(s16, 4), currentProgram))
+        .setComment("Selector0 copies both raw halfwords to68AA/AC, writes software markerA55A5AA5, returns0; other selector "
+            + "returns-6. Existing32454 record projection can independently replace these slots; no calibration "
+            + "durability claim.");
+    semanticFunction(0x325C8L, "f33_queue_pair_correction_records", v)
+        .setComment("Build marker+pair records and request setters0208/0209; ignore returns and write RAM markerA55A5AA5 "
+            + "immediately. Persistence/physical copy consensus remain existing NvM boundary.");
+    semanticFunction(0x32CA0L, "f33_step_mode600_fit_request", v)
+        .setComment("When695A==5A, state0 requests6A5C and moves1; nonzero completion state starts "
+            + "request6959=5A/valueROM30EA8 and moves2; completion22/44 clears stimulus and moves3/4; next terminal pass "
+            + "clears695A. This is distinct from34028 worker active6A61.");
+    semanticFunction(0x34C56L, "f33_select_mode600_stimulus_request", v)
+        .setComment("Prioritize cached6210/6212 from34028 over6959/695C request, else signed torque map. Publish source ID and "
+            + "negated selected request. No inferred physical current actuation, freshness or actual output consumer.");
+    semanticFunction(0x344F4L, "f33_check_retained_fit_bounds", u32)
+        .setComment("Return5A for invalid retained6A84..6AB8,0 valid. Unlike permissive foreground candidate check, exact "
+            + "retained gains24097..32768, first centers31623..33913, signed second centers-286..286 and "
+            + "angles8118..8374. Does not mutate retained values.");
+    semanticFunction(0x34C3AL, "f33_check_fit_record_admission", u32)
+        .setComment("Preserve344F4 full R10 result across PREPARE/DISPOSE.33CDC consumes0 for admissible changed record and5A "
+            + "for invalid. Replace existing void prototype; no unrelated register clobber/inline fiction.");
+    semanticFunction(0x33CDCL, "f33_step_retained_fit_coherence", v)
+        .setComment("Only on8A18==5A: require6ABC markerA55A5AA5; compare27 halfwords against last publication. Unchanged "
+            + "skips validation; changed+valid retained bounds copies, invalid marker/bounds resets published arrays to "
+            + "defaults.6A24/25 retain comparison and validation statuses.");
+    semanticFunction(0x33AB6L, "f33_compare_retained_fit_coefficients", u32)
+        .setComment("Compare all27 halfwords of6A26 publication with6A84 retained candidate. Return0 identical,5A changed; not "
+            + "a calibration-health verdict.");
+    semanticFunction(0x33BEAL, "f33_copy_retained_fit_coefficients", v)
+        .setComment("Copy grouped centers/gains/angles6A84..6AB8 to6A26..6A5A after coherence admission; no physical "
+            + "calibration transformation.");
+    semanticFunction(0x33C98L, "f33_reset_published_fit_coefficients", v)
+        .setComment("Default published first centers/gains and second gains to8000, second centers0, angles2000. Retained "
+            + "source6A84 and marker remain independent.");
+    semanticFunction(0x34408L, "f33_restore_fit_coefficients", v)
+        .setComment("Get64-byte0202 record and publish unpacked centers/gains/angles only when getter returns10, under "
+            + "existing PMR helper. Does not itself validate marker or numeric bounds; caller346F0 owns marker/status "
+            + "and346B2 owns bounds/defaulting.");
+    semanticFunction(0x3465AL, "f33_reset_retained_fit_coefficients", v)
+        .setComment("Under existing FFC0 priority mask, default retained first centers/gains and second gains8000, second "
+            + "centers0 and angles2000; does not imply accepted physical calibration.");
+    semanticFunction(0x346B2L, "f33_validate_or_default_retained_fit", u32)
+        .setComment("Return344F4 status;5A first defaults retained values via3465A. Existing346F0 marker/diagnostic owner "
+            + "remains separate from candidate publication.");
+    StructureDataType parameters = new StructureDataType(category, "F33FitParameters", 0);
+    parameters.setPackingEnabled(true);
+    parameters.add(u8, "unsigned_coverage_spans", null);
+    parameters.add(u8, "signed_coverage_spans", null);
+    parameters.add(u16, "qualifier_lower", null);
+    parameters.add(u16, "qualifier_upper", null);
+    parameters.add(u16, "reserved_06", null);
+    parameters.add(s16, "magnitude_upper", null);
+    parameters.add(u16, "unsigned_filter_half_gain", null);
+    parameters.add(u16, "signed_filter_half_gain", null);
+    parameters.add(u16, "first_gain_numerator", null);
+    parameters.add(u16, "second_gain_numerator", null);
+    parameters.add(u16, "gain_upper", null);
+    parameters.add(u16, "gain_lower", null);
+    parameters.add(u16, "reserved_16", null);
+    parameters.add(new ArrayDataType(u16, 10, 2), "candidate_bound_words", null);
+    parameters.add(s16, "stimulus", null);
+    parameters.add(u16, "initial_hold_calls", null);
+    parameters.add(s16, "sample_admission", null);
+    parameters.add(u16, "release_hold_calls", null);
+    parameters.add(u16, "recheck_hold_calls", null);
+    parameters.add(s16, "component_mean_limit", null);
+    parameters.add(s16, "folded_angle_limit", null);
+    parameters.add(s16, "pass_difference_limit", null);
+    parameters.add(u16, "mode600_input_upper", null);
+    parameters.add(u16, "mode600_qualifier_lower", null);
+    parameters.add(u16, "sample_count", null);
+    semanticData(0x30EACL, resolve(parameters), "f33_fit_parameters",
+        "Exact fit/stimulus thresholds and invocation counts. Candidate bounds retain encoded halfwords; no physical units assigned.");
+  }
+
+  private void annotateOutputOwnerLifetimes() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    CategoryPath category = new CategoryPath("/CamryF33");
+    semanticFunction(0x35FAEL, "f33_initialize_terminal_output_ramp", v)
+        .setComment("Clear active6B2C,phase6B2D,reserved6B2E and invocation counter6B30. Does not itself release slot1 or "
+            + "request word7.");
+    semanticFunction(0x35FBCL, "f33_step_terminal_output_ramp", v)
+        .setComment("Only active6B2C==5A publishes slot1 in both banks. Entry count<60000 requests owner7 mask40004, advances "
+            + "by200 only when6798==1 otherwise1, interpolates exact30E60, and sets phase1. Map is0 through59950 then "
+            + "rises to8000 at60000. Already-terminal count requests70017001, codes8000 and phase2 without advancing. "
+            + "Inactive clears request7/count/phase and releases slot1, retaining its triplets. No wall-time or "
+            + "electrical-duty claim; later aggregate neutral slot3 can outrank slot1.");
+    semanticFunction(0x360BCL, "f33_request_terminal_output_ramp", v)
+        .setComment("Set active6B2C=5A only; do not reset retained ramp count. Fault output router3C470 is the recovered "
+            + "requester.");
+    semanticFunction(0x360C6L, "f33_cancel_terminal_output_ramp", v)
+        .setComment("Clear active6B2C only. Subsequent35FBC invocation clears request7/count/phase and releases slot1; this "
+            + "setter is not immediate output retirement.");
+    semanticFunction(0x5737AL, "f33_set_output_request_word", v,
+        new ParameterImpl("owner", u8, currentProgram),
+        new ParameterImpl("request", u32, currentProgram))
+        .setComment("Low8 owner<8 replaces one u32 at8B2C. No reduction, physical port write or slot arbitration here.");
+    semanticFunction(0x571B4L, "f33_apply_output_request_port_levels", u32,
+        new ParameterImpl("request", u32, currentProgram))
+        .setComment("Map request bit0/16 to configured port-level callbacks and return only those bits. If prior8B28 has both "
+            + "bit1/17 set, perform preliminary paired writes for both-new-set or both-new-clear before normal per-bank "
+            + "writes. No GPIO feedback or software permission is derived.");
+    semanticFunction(0x5721CL, "f33_stage_output_request_phase_masks", u32,
+        new ParameterImpl("request", u32, currentProgram))
+        .setComment("Per bank start6-bit mask3F; requestbit2 selects38, bits12/13/14 AND F6/ED/1B and echo their status bits. "
+            + "All three phase bits add statusbit1; otherwise low3 mask zero addsbit2. Repeat at+16. Stage masks "
+            + "through61C40 and publish8B24/25. Masking alone40004 does not activate neutral slot3.");
+    semanticFunction(0x572E6L, "f33_publish_aggregate_output_requests", v)
+        .setComment("OR eight owner words8B2C; apply configured GPIO levels571B4 and phase-mask staging5721C, OR returned "
+            + "status. Per-bank status&3 activates slot3 with three exact31908=4000 codes; otherwise release slot3. "
+            + "Finally publish8B28. This does not select a winner. Full native entry stops at unmapped "
+            + "GPIOFFC100C4;57308..57376 continuation has explicit R28/R10 handoff, not physical-output proof.");
+    semanticFunction(0x57390L, "f33_initialize_direct_output_requests", v)
+        .setComment("Clear request enables8B4C/D and initialize both retained triplets8B4E..58 to4000. Called on crossing into "
+            + "mode>0100; unlike573FE it also resets codes.");
+    semanticFunction(0x573AEL, "f33_publish_direct_output_requests", v)
+        .setComment("Each nonzero request byte8B4C/D copies its retained triplet to slot4 with context10 and activates that "
+            + "bank. Zero releases slot4 without erasing its codes. Flags dirty selection only on change. Native "
+            + "composition verifies independent activation/release then real arbitration, including slot1 clamp "
+            + "exemption.");
+    semanticFunction(0x57408L, "f33_clear_direct_output_bank0", v)
+        .setComment("Store0 to request byte8B4C only. Publication/release of slot4 occurs later in573AE; retained triplet is "
+            + "unchanged.");
+    semanticFunction(0x57414L, "f33_request_direct_output_bank0", v)
+        .setComment("Store5A to request byte8B4C only. Publication/release of slot4 occurs later in573AE; retained triplet is "
+            + "unchanged.");
+    semanticFunction(0x5740EL, "f33_clear_direct_output_bank1", v)
+        .setComment("Store0 to request byte8B4D only. Publication/release of slot4 occurs later in573AE; retained triplet is "
+            + "unchanged.");
+    semanticFunction(0x5741EL, "f33_request_direct_output_bank1", v)
+        .setComment("Store5A to request byte8B4D only. Publication/release of slot4 occurs later in573AE; retained triplet is "
+            + "unchanged.");
+    semanticFunction(0x57428L, "f33_set_direct_output_codes_bank0", v,
+        new ParameterImpl("codes", new PointerDataType(u16, 4), currentProgram))
+        .setComment("Copy three halfwords into retained direct request at8B4E; do not activate the request or publish slot4. "
+            + "No local pointer or code-range validation.");
+    semanticFunction(0x57440L, "f33_set_direct_output_codes_bank1", v,
+        new ParameterImpl("codes", new PointerDataType(u16, 4), currentProgram))
+        .setComment("Copy three halfwords into retained direct request at8B54; do not activate the request or publish slot4. "
+            + "No local pointer or code-range validation.");
+    semanticFunction(0x575BAL, "f33_initialize_output_code_limit_requests", v)
+        .setComment("Set all three requested limits per bank and cached minima to8000; complements7FFF. Published limits/flags "
+            + "are separate575F6 outputs.");
+    semanticFunction(0x5775CL, "f33_set_output_code_limit_bank0", v,
+        new ParameterImpl("owner", u8, currentProgram),
+        new ParameterImpl("limit", u16, currentProgram))
+        .setComment("Low8 owner<3 stores requested u16 limit; reduce all three from nominal8000 and update minimum/complement. "
+            + "Unchanged request may return early when cache is already no greater. Only owner1 has a recovered "
+            + "requester,3C6A8. Published limits/flags wait for575F6.");
+    semanticFunction(0x577CCL, "f33_set_output_code_limit_bank1", v,
+        new ParameterImpl("owner", u8, currentProgram),
+        new ParameterImpl("limit", u16, currentProgram))
+        .setComment("Low8 owner<3 stores requested u16 limit; reduce all three from nominal8000 and update minimum/complement. "
+            + "Unchanged request may return early when cache is already no greater. Only owner1 has a recovered "
+            + "requester,3C6A8. Published limits/flags wait for575F6.");
+    semanticFunction(0x5790CL, "f33_release_output_code_limit_bank0", v,
+        new ParameterImpl("owner", u8, currentProgram))
+        .setComment("Low8 owner<3 restores requested limit8000; reduce all three from nominal8000 and update "
+            + "minimum/complement. Unchanged request may return early when cache is already no greater. Only owner1 has "
+            + "a recovered requester,3C6A8. Published limits/flags wait for575F6.");
+    semanticFunction(0x5797AL, "f33_release_output_code_limit_bank1", v,
+        new ParameterImpl("owner", u8, currentProgram))
+        .setComment("Low8 owner<3 restores requested limit8000; reduce all three from nominal8000 and update "
+            + "minimum/complement. Unchanged request may return early when cache is already no greater. Only owner1 has "
+            + "a recovered requester,3C6A8. Published limits/flags wait for575F6.");
+    semanticFunction(0x579F4L, "f33_initialize_phase_output_slots", v)
+        .setComment("Clear both five-slot enable banks and dirty flags; initialize all triplets4000. Select index0, "
+            + "complementFF and enable slot0 in both banks. Does not overwrite selected output triplets8BEE..F8.");
+    semanticFunction(0x57BCAL, "f33_write_phase_output_slot_pair", v,
+        new ParameterImpl("context", u16, currentProgram),
+        new ParameterImpl("slot", u8, currentProgram),
+        new ParameterImpl("first", new PointerDataType(u16, 4), currentProgram),
+        new ParameterImpl("second", new PointerDataType(u16, 4), currentProgram))
+        .setComment("Low8 slot<5 copies three u16 codes per bank; does not activate slot. Context low16<3 writes directly, "
+            + "otherwise uses existing FFC0 priority mask pair. No code clamp here.");
+    semanticFunction(0x57CB4L, "f33_write_phase_output_slot_bank0", v,
+        new ParameterImpl("context", u16, currentProgram),
+        new ParameterImpl("slot", u8, currentProgram),
+        new ParameterImpl("codes", new PointerDataType(u16, 4), currentProgram))
+        .setComment("Low8 slot<5 copies three u16 codes in this bank without activation. Context low16<3 writes directly, "
+            + "otherwise existing FFC0 priority mask pair; no clamp or all-interrupt atomicity claim.");
+    semanticFunction(0x57D4EL, "f33_write_phase_output_slot_bank1", v,
+        new ParameterImpl("context", u16, currentProgram),
+        new ParameterImpl("slot", u8, currentProgram),
+        new ParameterImpl("codes", new PointerDataType(u16, 4), currentProgram))
+        .setComment("Low8 slot<5 copies three u16 codes in this bank without activation. Context low16<3 writes directly, "
+            + "otherwise existing FFC0 priority mask pair; no clamp or all-interrupt atomicity claim.");
+    semanticFunction(0x57C48L, "f33_activate_phase_output_slot_pair", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Low8 slot<5 writes enable5A in both banks. Only changed flags dirty that bank selector; triplets and "
+            + "current selected index remain retained until57A5A.");
+    semanticFunction(0x57C7EL, "f33_release_phase_output_slot_pair", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Low8 slot<5 writes enable0 in both banks. Only changed flags dirty that bank selector; triplets and "
+            + "current selected index remain retained until57A5A.");
+    semanticFunction(0x57D0CL, "f33_activate_phase_output_slot_bank0", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Low8 slot<5 writes enable5A in first bank. Only changed flags dirty that bank selector; triplets and "
+            + "current selected index remain retained until57A5A.");
+    semanticFunction(0x57D2EL, "f33_release_phase_output_slot_bank0", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Low8 slot<5 writes enable0 in first bank. Only changed flags dirty that bank selector; triplets and "
+            + "current selected index remain retained until57A5A.");
+    semanticFunction(0x57DA6L, "f33_activate_phase_output_slot_bank1", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Low8 slot<5 writes enable5A in second bank. Only changed flags dirty that bank selector; triplets and "
+            + "current selected index remain retained until57A5A.");
+    semanticFunction(0x57DCAL, "f33_release_phase_output_slot_bank1", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("Low8 slot<5 writes enable0 in second bank. Only changed flags dirty that bank selector; triplets and "
+            + "current selected index remain retained until57A5A.");
+    semanticFunction(0x5E8A8L, "f33_update_mode_owned_application_requests", v,
+        new ParameterImpl("context", u32, currentProgram),
+        new ParameterImpl("mode", u16, currentProgram),
+        new ParameterImpl("previous_mode", u16, currentProgram))
+        .setComment("R7/R8 low16 current/prior mode. Mode>0100 updates aggregate and direct output owners; crossing from<=0100 "
+            + "also resets direct enables/codes before publication. Mode>=0200 advances offset selector;0300..0400 "
+            + "clears reserved monitor action slot;>0101 updates additional paired outputs. Ends57F00. These are "
+            + "mode-dependent calls, not a second steering permission system.");
+    semanticFunction(0x5EBA0L, "f33_update_steady_application_requests", v,
+        new ParameterImpl("context", u32, currentProgram),
+        new ParameterImpl("mode", u16, currentProgram))
+        .setComment("Steady-mode counterpart: low16 mode>0100 updates aggregate/direct output owners and other configured "
+            + "requests without entry reset;>=0200 advances phase offset,0300..0400 clears reserved monitor slot,>0101 "
+            + "updates additional paired outputs. Ends57F00; no implied physical scheduling interval.");
+    semanticFunction(0x61C40L, "f33_stage_configured_phase_mask", v,
+        new ParameterImpl("bank", u32, currentProgram),
+        new ParameterImpl("mask", u32, currentProgram))
+        .setComment("For absent input bits0/3/1/4/2/5, OR descriptor315D4+bank*1C halfwords+8/A/C/E/10/12 into the software "
+            + "PWM port_mask. No peripheral write here; later commit owner is separate. Recovered callers pass bank0/1; "
+            + "no local bank bound.");
+    semanticFunction(0x61F32L, "f33_write_configured_output_port_level_a", v,
+        new ParameterImpl("bank", u32, currentProgram))
+        .setComment("Use descriptor315D4+bank*1C: port group bits8..15, pin low4 and level byte+4. Write "
+            + "((level&1)|10000)<<pin to FFC10004+group*40. Exact banks0/1 targetFFC100C4 bit6 andFFC10084 bit4; level-a "
+            + "is1 and level-b0. No local bank bound, GPIO readback or physical bridge-state proof.");
+    semanticFunction(0x61F64L, "f33_write_configured_output_port_level_b", v,
+        new ParameterImpl("bank", u32, currentProgram))
+        .setComment("Use descriptor315D4+bank*1C: port group bits8..15, pin low4 and level byte+5. Write "
+            + "((level&1)|10000)<<pin to FFC10004+group*40. Exact banks0/1 targetFFC100C4 bit6 andFFC10084 bit4; level-a "
+            + "is1 and level-b0. No local bank bound, GPIO readback or physical bridge-state proof.");
+    semanticFunction(0x66A12L, "f33_write_output_bank0_port_level_a", v)
+        .setComment("Fixed bank0 veneer for configured port level-a. Physical output response is outside the recovered "
+            + "software contract.");
+    semanticFunction(0x66A20L, "f33_write_output_bank0_port_level_b", v)
+        .setComment("Fixed bank0 veneer for configured port level-b. Physical output response is outside the recovered "
+            + "software contract.");
+    semanticFunction(0x66A78L, "f33_write_output_bank1_port_level_a", v)
+        .setComment("Fixed bank1 veneer for configured port level-a. Physical output response is outside the recovered "
+            + "software contract.");
+    semanticFunction(0x66A86L, "f33_write_output_bank1_port_level_b", v)
+        .setComment("Fixed bank1 veneer for configured port level-b. Physical output response is outside the recovered "
+            + "software contract.");
+    semanticFunction(0x669C8L, "f33_stage_output_bank0_phase_mask", v,
+        new ParameterImpl("mask", u8, currentProgram))
+        .setComment("Forward mask to61C40 with fixed bank0; software port-mask staging, not immediate hardware commit.");
+    semanticFunction(0x66A2EL, "f33_stage_output_bank1_phase_mask", v,
+        new ParameterImpl("mask", u8, currentProgram))
+        .setComment("Forward mask to61C40 with fixed bank1; software port-mask staging, not immediate hardware commit.");
+    semanticData(0xFEBE8B2CL, new ArrayDataType(u32, 8, 4), "f33_output_request_words", "Eight independently replaced request words;572E6 OR reduction.");
+    semanticData(0xFEBE8B28L, u32, "f33_output_request_status", "Returned status after configured port writes and phase-mask staging; not pin feedback.");
+    semanticData(0xFEBE8B24L, new ArrayDataType(u8, 2, 1), "f33_output_phase_masks", "Current six-bit masks; software staging, not physical output proof.");
+    semanticData(0xFEBE8B4CL, new ArrayDataType(u8, 2, 1), "f33_direct_output_request_enables", "Any nonzero byte requests bank-local slot4; publication is deferred.");
+    semanticData(0xFEBE8B4EL, new ArrayDataType(u16, 3, 2), "f33_direct_output_codes_bank0", "Retained first-bank direct request codes.");
+    semanticData(0xFEBE8B54L, new ArrayDataType(u16, 3, 2), "f33_direct_output_codes_bank1", "Retained second-bank direct request codes.");
+    semanticData(0xFEBE8BA2L, new ArrayDataType(u8, 5, 1), "f33_output_slot_enables_bank0", "Only exact5A participates in highest-slot selection.");
+    semanticData(0xFEBE8BA8L, new ArrayDataType(u8, 5, 1), "f33_output_slot_enables_bank1", "Release retains triplet and dirties later selection.");
+    semanticData(0xFEBE8BB2L, new ArrayDataType(u16, 15, 2), "f33_output_slot_codes_bank0", "Five contiguous triplets; slot1 is exempt from code clamp.");
+    semanticData(0xFEBE8BD0L, new ArrayDataType(u16, 15, 2), "f33_output_slot_codes_bank1", "Five contiguous triplets; writers do not activate automatically.");
+  }
+
   @Override public void run() throws Exception {
     String[] args = getScriptArgs();
     if (args.length != 1) throw new IllegalArgumentException("expected function_seeds.csv path");
@@ -8265,6 +8832,9 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateResidentDiagnosticLifecycle();
     annotateAcquisitionOwnership();
     annotateResidentSecurityCrypto();
+    annotateResidentImageCrypto();
+    annotateApplicationAdaptation();
+    annotateOutputOwnerLifetimes();
     annotatePhaseModulation();
     annotateDataFlashReads();
     annotateFaciSubmission();

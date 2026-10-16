@@ -1,0 +1,114 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_mode600_positive_sequence_reaches_negative_admission_boundary",
+  "entry": {
+    "scope": "resolved-address",
+    "address": "0x34028",
+    "role": "Execute real34028 repeated-call state machine with synthetic LP self-return. Start positive sampling with1023 prior zero samples; real final sample, mean evaluation,500 hold,1024 sum samples,5000 release, negative request and2500 hold execute. Positive current remains at+1778, so the first negative-sampling invocation reaches real abort gate3438C; stop BEFORE abort. No acquisition freshness, wall-time, NvM completion or physical motion claim. No firmware patch."
+  },
+  "max_instructions": 2000000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x34028",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xfe00"
+  },
+  "stop_addresses": [
+    "0x3438c"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe0000",
+      "size": 131072,
+      "fill": 0,
+      "evidence": "Explicit retained LocalRAM and stack handoff, not reset or an acquisition freshness claim."
+    },
+    {
+      "address": "0xfebeeacc",
+      "hex": "0006",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebeeac4",
+      "hex": "0002",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebe7db0",
+      "hex": "0009",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebe5f36",
+      "hex": "f206",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebe6a60",
+      "hex": "125a5a00",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebe6a64",
+      "hex": "000000000005c409ff03",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebe6a70",
+      "hex": "0000000000000000",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebe6c40",
+      "hex": "0000010000000000",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebe68aa",
+      "hex": "34127856",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Positive pass traverses holds and enters negative sampling22",
+      "kind": "memory",
+      "address": "0xfebe6a60",
+      "size": 3,
+      "equals_hex": "225a5a"
+    },
+    {
+      "name": "Pass means zero, requested stimulus negative1280, hold count retained2500, sample count reset",
+      "kind": "memory",
+      "address": "0xfebe6a64",
+      "size": 10,
+      "equals_hex": "0000000000fbc4090000"
+    },
+    {
+      "name": "Independent numerical sums remain zero",
+      "kind": "memory",
+      "address": "0xfebe6a70",
+      "size": 8,
+      "equals_hex": "0000000000000000"
+    },
+    {
+      "name": "Temporary paired correction zeroed before negative stimulus",
+      "kind": "memory",
+      "address": "0xfebe68aa",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Temporary correction marker is software-valid only",
+      "kind": "memory",
+      "address": "0xfebe68b4",
+      "size": 4,
+      "equals_hex": "a55a5aa5"
+    }
+  ]
+}

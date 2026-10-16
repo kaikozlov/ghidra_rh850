@@ -843,6 +843,11 @@ rebuilds produce byte-identical canonical inventories. Review the tracked diff,
 then rerun `make verify-project-parity`. Ordinary verification never updates the
 baseline.
 
+Run fresh A/B rebuilds sequentially when sharing the default isolated Ghidra
+home: each rebuild reinstalls the shared `GhidraFindcrypt` extension directory.
+Independent reproduction means separate fresh project imports, not concurrent
+extension bootstrap.
+
 The whole-image corpus is the decompilation source; use `tools/pseudo --target
 TARGET` to read functions. The registry's `semantic_reviews` path owns curated
 function conclusions; its `function_discovery_reviews` path owns adjudicated

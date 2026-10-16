@@ -2804,7 +2804,7 @@
   ],
   "canonical_corpus": {
     "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
-    "sha256": "8160f69bc796f509f39cf197b4d020413d2b99d767bc6525b785eb637638949e"
+    "sha256": "d247658941616c52d4688283077856b360fedd132eb7809dffa4bcdf17eeeecd"
   },
   "ghidra_script": {
     "path": "ghidra/scripts/investigate/AuditComputedStoreTargets.java",
@@ -2816,9 +2816,9 @@
   "summary": {
     "candidateFunctions": 49,
     "candidates": 103,
-    "functions": 7319,
-    "knownRangeStores": 5454,
-    "stores": 14192
+    "functions": 7318,
+    "knownRangeStores": 5452,
+    "stores": 14171
   },
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",

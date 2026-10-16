@@ -1,0 +1,130 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_image_crypto_cmac_final_then_routine_cleanup",
+  "entry": {
+    "role": "Actual6EE0->7170->7E0C final CMAC comparison after explicit host-generated IV-prefix chain. Synthetic LP=5936 joins timer routine state2 and stops59CC after real context wipe; omits CRC verification, routine admission and transport.",
+    "scope": "resolved-address",
+    "address": "0x6ee0"
+  },
+  "max_instructions": 200000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebf9800",
+    "tp": "0x869c",
+    "lp": "0x5936",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0x0"
+  },
+  "stop_addresses": [
+    "0x59cc"
+  ],
+  "memory": [
+    {
+      "address": "0xfebf2c00",
+      "hex": "4c0dab0a9d9b93e1793f0f3e58b06ffdaaa5ff60373e6c814e0163bf16b10c42605bd3275765bfa61964dc190fd5d05b672bea51304e55f7292a89ee26ff59b579e03fa649ae6a516084e3bf467bba0a481458fc01ba32ad613ed11227456b18066bf53007d1c79d66ef168f41aa7d97ea947db3ed45ba2e8baaaca1ca00d13609aa78c7e4efc2e96f456e48a545bf7e7ca28bc1984d4928f7082760524d981ea9e4f9c131a9b0e9c6a1978994ec0f970000000000000000000000000000000001000000d0e94d4366c5ed87bb01fb969ef5d7606d036f7a6bba700a3827f427338f2f1cda06def4d774e014704fe84e671e5e3801000000",
+      "evidence": "Host-expanded CMAC context with AES_K(IV) nonfinal prefix chain"
+    },
+    {
+      "address": "0xfebf2ef0",
+      "hex": "4c0dab0a9d9b93e1793f0f3e58b06ffdaaa5ff60373e6c814e0163bf16b10c42605bd3275765bfa61964dc190fd5d05b672bea51304e55f7292a89ee26ff59b579e03fa649ae6a516084e3bf467bba0a481458fc01ba32ad613ed11227456b18066bf53007d1c79d66ef168f41aa7d97ea947db3ed45ba2e8baaaca1ca00d13609aa78c7e4efc2e96f456e48a545bf7e7ca28bc1984d4928f7082760524d981ea9e4f9c131a9b0e9c6a1978994ec0f970000000000000000000000000000000001000000101112131415161718191a1b1c1d1e1f00000000000000000000000000000000",
+      "evidence": "Retained CBC context canary for terminal wipe"
+    },
+    {
+      "address": "0xfebf2cf8",
+      "hex": "101112131415161718191a1b1c1d1e1f000102030405060708090a0b0c0d0e0f4c0dab0a9d9b93e1793f0f3e58b06ffd",
+      "evidence": "Retained IV,material,derived image key"
+    },
+    {
+      "address": "0xfebf2bfc",
+      "hex": "0101",
+      "evidence": "Authentication result1,active1"
+    },
+    {
+      "address": "0xfebf30a8",
+      "hex": "f00fbffef00fbffee00fbffe",
+      "evidence": "Last requested block is fixed trailer; cursor is preceding payload block"
+    },
+    {
+      "address": "0xfebf0fe0",
+      "hex": "202122232425262728292a2b2c2d2e2fc6a78b5243b6c617e3507deb2a27fff2",
+      "evidence": "RAM-region final data and trailer"
+    },
+    {
+      "address": "0xfebf2b69",
+      "hex": "02",
+      "evidence": "Synthetic preexisting routine wait-auth state2"
+    },
+    {
+      "address": "0xfebf2bba",
+      "hex": "0000",
+      "evidence": "Non-aborted request status for timer owner"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Terminal authentication result and inactive",
+      "kind": "memory",
+      "address": "0xfebf2bfc",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "Cursor always advances16 on terminal",
+      "kind": "memory",
+      "address": "0xfebf30b0",
+      "size": 4,
+      "equals_hex": "f00fbffe"
+    },
+    {
+      "name": "Trailer comparison pointer advances only on equal bytes",
+      "kind": "memory",
+      "address": "0xfebf30ac",
+      "size": 4,
+      "equals_hex": "0010bffe"
+    },
+    {
+      "name": "Computed CMAC is IV||payload, excludes trailer",
+      "kind": "memory",
+      "address": "0xfebf2d28",
+      "size": 16,
+      "equals_hex": "c6a78b5243b6c617e3507deb2a27fff2"
+    },
+    {
+      "name": "Configured material retained after authentication",
+      "kind": "memory",
+      "address": "0xfebf2cf8",
+      "size": 48,
+      "equals_hex": "101112131415161718191a1b1c1d1e1f000102030405060708090a0b0c0d0e0f4c0dab0a9d9b93e1793f0f3e58b06ffd"
+    },
+    {
+      "name": "Routine advances to positive-response-ready state4",
+      "kind": "memory",
+      "address": "0xfebf2b69",
+      "size": 1,
+      "equals_hex": "04"
+    },
+    {
+      "name": "Real routine cleanup wipes entire CMAC context",
+      "kind": "memory",
+      "address": "0xfebf2c00",
+      "size": 248,
+      "equals_hex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "Real routine cleanup wipes entire CBC context",
+      "kind": "memory",
+      "address": "0xfebf2ef0",
+      "size": 228,
+      "equals_hex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "Stop after real cleanup before response-ready processing",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x59cc"
+    }
+  ]
+}

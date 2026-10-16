@@ -214,7 +214,7 @@
     "0x0572E6": {
       "body_sha256": "bf123243292fe77411ac6e24c10610435382ba3d1e215a9a5c2625c1798962f6",
       "body_size": 148,
-      "decompiled_c_sha256": "4bf90bc6ac558353cc33ac4f09048546ff80ed85b64fc452e0d93eac95e4ae70",
+      "decompiled_c_sha256": "8a99fca49203ba44c310552e38525dfe630005a9b81ccee125f801ddd1b1673d",
       "role": "internal steering actuator-state aggregate producer"
     },
     "0x058074": {
@@ -238,7 +238,7 @@
     "0x05DF5C": {
       "body_sha256": "c496bf67475b688190f244ba164ea1535d676539ef21bb7bce020729b4c7546f",
       "body_size": 676,
-      "decompiled_c_sha256": "8e8990fdfdd4168365df5c4cc5d0e4bfeccf857a68bfdefd6b3e29bc7305ff73",
+      "decompiled_c_sha256": "51bb2e969844a277265d5ac7a1ea419f1dff03ae395a4d718e7823eae03d7178",
       "role": "motor-model scheduler aggregate"
     },
     "0x065FEA": {
@@ -808,7 +808,7 @@
     "0x0FCC00": {
       "body_sha256": "aa16c246aab1e45e5ab0c548e641efbd18e508de7ebf6811c181acac7f4382e9",
       "body_size": 78,
-      "decompiled_c_sha256": "a463ef04dd237b4e2fa451bc9cf6333bdedb318978d2bd19354bc4c917a0b11f",
+      "decompiled_c_sha256": "12a4b0af25bb8f80c37f761a3876c3d638991c0a43b8af98c6d78a7d090f6f66",
       "role": "internal system-state snapshot to EEF90"
     }
   },
@@ -3008,7 +3008,7 @@
     }
   ],
   "target": {
-    "canonical_function_count": 7319,
+    "canonical_function_count": 7318,
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "software_id": "8965F3307000"
   }

@@ -1,0 +1,133 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_adaptation_first_sweep_coverage_then_zero_span_failure",
+  "entry": {
+    "scope": "resolved-address",
+    "address": "0x336b8",
+    "role": "Execute336B8 state11 with literal-input recurrence and final angular-coverage crossing, then state22 zero-span failure. Synthetic LP self-return supplies repeated invocations, omitting scheduler/acquisition and elapsed time. Stop33A96 BEFORE terminal active-flag cleanup: failure66 is published on the preceding invocation; active remains5A until the stopped next terminal pass. No firmware patch."
+  },
+  "max_instructions": 30000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x336b8",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xfe00"
+  },
+  "stop_addresses": [
+    "0x33a96"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe0000",
+      "size": 131072,
+      "fill": 0,
+      "evidence": "Explicit retained LocalRAM and stack handoff, not reset or an acquisition freshness claim."
+    },
+    {
+      "address": "0xfebe6960",
+      "hex": "115a5a000400",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebe6966",
+      "hex": "0000",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebe6968",
+      "hex": "008000800080008000800080008000800080008000800080008000800080008000800080",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebe698c",
+      "hex": "111122223333444455556666",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebe6998",
+      "hex": "010102020303040405050606",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebe69e8",
+      "hex": "ffff000000000000ffff0000",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebe69f4",
+      "hex": "000000800000008000000080000000800000008000000080",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebe7d94",
+      "hex": "0100",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebe7db0",
+      "hex": "0009",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebe5f36",
+      "hex": "4006",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Final coverage advances byte count to five and zero span fails on next pass",
+      "kind": "memory",
+      "address": "0xfebe6960",
+      "size": 5,
+      "equals_hex": "665a5a0005"
+    },
+    {
+      "name": "Root advances retained angle even across computational state changes",
+      "kind": "memory",
+      "address": "0xfebe6966",
+      "size": 2,
+      "equals_hex": "0100"
+    },
+    {
+      "name": "Literal0x8000 recurrence cannot manufacture sample extrema",
+      "kind": "memory",
+      "address": "0xfebe6968",
+      "size": 36,
+      "equals_hex": "008000800080008000800080008000800080008000800080008000800080008000800080"
+    },
+    {
+      "name": "Failure retains all prior first-stage gains",
+      "kind": "memory",
+      "address": "0xfebe698c",
+      "size": 12,
+      "equals_hex": "111122223333444455556666"
+    },
+    {
+      "name": "Failure retains first-stage midpoints",
+      "kind": "memory",
+      "address": "0xfebe6998",
+      "size": 12,
+      "equals_hex": "010102020303040405050606"
+    },
+    {
+      "name": "Coverage crossing resets sum and extrema",
+      "kind": "memory",
+      "address": "0xfebe69e8",
+      "size": 12,
+      "equals_hex": "000000000000000000000000"
+    },
+    {
+      "name": "Fixed-point states remain at literal-input equilibrium",
+      "kind": "memory",
+      "address": "0xfebe69f4",
+      "size": 24,
+      "equals_hex": "000000800000008000000080000000800000008000000080"
+    }
+  ]
+}

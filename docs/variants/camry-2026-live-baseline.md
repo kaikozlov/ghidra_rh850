@@ -2620,6 +2620,62 @@ fresh acquisition, upstream nonzero regulation, interrupt scheduling or physical
 output commitment.
 
 
+#### Output-owner admission, priority and deferred release
+
+The software owner order is descending slot index; enabling a slot, writing its
+triplet, selecting it and committing hardware are separate operations:
+
+| Slot | Recovered producer and lifetime |
+|---|---|
+| 0 | Ordinary computed output from `38F72`; enabled by initialization. |
+| 1 | `35FBC` terminal-ramp owner while `6B2C==5A`; the exact clamp-exemption mask is `FFFFFFFD`. |
+| 2 | Supported by the arrays and selector; no producer recovered in this reviewed call graph. |
+| 3 | `572E6` aggregate-request owner, publishing neutral `4000` when the corresponding aggregate status has either low bit set. |
+| 4 | `573AE` direct retained request; any nonzero `8B4C/8B4D` enables its bank and publishes `8B4E/8B54`. Highest priority. |
+
+The triplet setters do not activate slots. Activation/release use exact `5A`
+flags and dirty the selector only on a change; release retains the old triplet.
+Context values below3 use the direct update path; other contexts bracket the
+update with PMR `FFC0`. The direct-entry initializer `57390` clears enables and
+sets retained codes to `4000`; `573FE` clears only enables. `5E8A8` performs that
+initialization when crossing from a mode at or below0100 into a mode above0100.
+`5EBA0` updates the steady-state requests without resetting them. Reviewed direct
+requesters include delayed status-bit monitors, not just diagnostic handlers.
+
+`35FBC` does not turn its counter into a recovered time unit. Below60000, it
+publishes aggregate request `00040004`, increments by200 only for `6798==1`
+(otherwise by1), and interpolates the exact map
+`(0,0),(59950,0),(60000,32768),(65535,65535)`. At an entry count of60000 or more,
+it holds the count, publishes `70017001` and stages `8000` in slot1. Inactive
+execution clears its request/count/phase and releases slot1, retaining its codes.
+Clearing `6B2C` alone therefore defers release until this owner runs.
+
+The reduced-limit path is independent: three retained requests per bank reduce
+to a cached minimum plus complement. Initialization/release use `8000`.
+The reviewed requester `3C6A8` owns index1 and selects exact limits18022/30474
+from fault-bit pairs2/3 and4/5; the lower bit wins if both are set. `575F6`
+publishes the resulting limits before a later modulation computation consumes them.
+
+`572E6` ORs eight request words. Its GPIO helper consumes bits0/16. The remaining
+software forms a six-bit mask per bank: start`3F`, bit2 replaces it with`38`,
+and bits12/13/14 AND it with`F6/ED/1B`. All three phase bits set status bit1;
+otherwise a zero low-three-bit mask sets status bit2. `61C40` ORs descriptor
+masks into the existing port-mask stages at `FEBE38A0`, rather than committing
+PWM compares. Request`00040004` releases slot3; `70017001` produces status
+`70037003` and activates neutral slot3, which then outranks terminal slot1.
+Publication alone does not rescan the cached selected indices.
+
+The [direct-owner composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_direct_output_owner_release_and_priority.json)
+executes activation, selection and release. The
+[delay](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_output_request_delay_releases_neutral_software_continuation.json)
+and [terminal](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_output_request_terminal_selects_neutral_software_continuation.json)
+compositions execute only `57308..57376`, after a declared GPIO-helper handoff
+and before the root's frame disposal. Full-root attempts stop at unmapped
+`FFC100C4`; they are **not passing full-root scenarios**. Static instruction
+checks recover real writes to `FFC100C4/FFC10084`, with configured levels1/0
+and upper-halfword pin masks. No GPIO response, bridge identity, physical output
+or wall-clock ramp duration is established, and no peripheral model was added.
+
 ### 34.4 Temporal and hardware boundary
 
 `66786` first commits **previously staged** compares through `61E72`, then
@@ -4132,6 +4188,110 @@ reset each other. Only old completion0→new5A calls `BD86E` to update `ACEC` an
 the real record snapshot; later completed calls do not repeat that mutation.
 This is retained-record qualification, not continuous received-fault monitoring.
 
+
+### 34.11 Adaptation, stimulus and retained-record admission
+
+This slice connects the numerical workers to foreground snapshots, retained
+records and mode0600 stimulus selection. Addresses below are exact F33; shortened
+RAM addresses have prefix `FEBE`. Physical calibration meaning and engineering
+units remain unassigned.
+
+#### Six-channel fit: numerical state is not acquired-sample provenance
+
+The main work-bit0 path calls `336B8` in exact modes0512/0600; the worker itself
+requires `6961==5A`. Its state at `6960` is:
+
+| State | Transition and retained effects |
+|---|---|
+| 0 | Reset phase initialization/count/coverage, retain old fits, enter11. |
+| 11 | Unsigned first sweep and extrema; five angular-coverage intervals enter22. |
+| 22 | Require all six unsigned widths positive. Gains are `(33424<<15)/width`, clamped16384..49152; centers are unsigned midpoints. Success enters33; failure enters66 without replacing those fits. |
+| 33 | Apply the retained first centers/gains, then signed recurrence/extrema; five coverage intervals enter44. |
+| 44 | Require positive signed half-ranges; gains are `(10052<<15)/half_range`, clamped16384..49152, with three pair-angle evaluations. Success enters55. Failure enters66 but still publishes signed centers, retaining old gains/angles. |
+| 55 / 66 | Clear activity on the following invocation while retaining terminal state. An invalid state first becomes66. |
+
+The first sweep feeds **literal32768**, not an acquired channel sample.
+With coefficient`2*ROM[30EB6]=11258`, its actual recurrence is
+`A'=low32(A+11258*(32768−previous_u16)); output=A'>>16`.
+Initialization at `A=80000000`, output/extrema`8000` is an equilibrium: adequate
+angular coverage can therefore end in zero-span failure rather than a successful
+fit. The [whole-root equilibrium scenario](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_adaptation_first_sweep_coverage_then_zero_span_failure.json)
+executes that consequence. This is not evidence of physical sensor calibration
+or production reachability of the seeded state.
+
+Coverage uses wrapped signed16 angle differences, signed32 directional
+accumulation/extrema and a span threshold65536; reaching it increments a byte
+counter and resets the coverage words. Five intervals, not elapsed time, admit
+the next phase. Magnitude/`7DB0` admission failures clear the phase-init flag;
+readmission resets extrema/coverage rather than replaying missed angles.
+The root refreshes previous angle from `7D94` even when inactive or unadmitted.
+The second sweep uses signed division truncated toward zero, with transformed
+channels clamped to ±32767; it is not an arithmetic-right-shift substitute.
+
+`33966` is an interior continuation after `DIVQ` at33962, not an independent
+ten-argument function: one frame begins at336B8 and ends at33AA0.
+Its apparent incoming call came from curve data at31B66. `37FD2→702B0` consumes
+the nine unsigned-axis/signed-ordinate pairs at31B5C, including theFFFF sentinel.
+Typing that36-byte table removes the false call before merging the function body;
+merely deleting the interior function lets auto-analysis recreate it.
+The [second-fit/publication composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_adaptation_second_fit_clamps_and_foreground_publication.json)
+crosses that continuation and then runs `5D12C` through its return at5D5DE.
+That snapshot publishes state/fit data into `6528/6542..6576`; consumers may
+therefore see an older generation than the live work structure at6960.
+
+#### Foreground completion and retained record0202 have different bounds
+
+`33F9C` sets request`6A5C=5A` without clearing old completion`6A5D`.
+`33F14` starts the worker, then consumes **snapshot6528**, not live6960.
+Snapshot55 reaches `33D3C`; its exact configured candidate bounds cover the
+representable field domains. It copies27 halfwords into retained `6A84..6AB8`,
+submits record0202 through `348DA`, and immediately publishes marker
+`6ABC=A55A5AA5`/status`6A7A=44`. It does not wait for the record setter's status.
+Snapshot66 or a failed candidate check reports fault52/slot17. Terminal responses
+are delivered on later invocations, separately from the worker's terminal state.
+
+`33CDC` requires `8A18==5A` and checks the marker and differences from the published
+27 halfwords. A changed valid candidate must pass the stricter `344F4` result,
+forwarded in R10 by `34C3A`; unchanged data skips that revalidation. Retained
+bounds are inclusive: gains24097..32768, first centers31623..33913, second
+centers−286..286 and angles8118..8374. Invalid data publishes defaults at
+`6A26..6A5A`: gains/first centers32768, second centers0, angles8192.
+`34408` reloads record0202 only for getter result10; marker and bound/default
+handling remain separate.
+
+The64-byte serialized record is not the grouped RAM layout: marker32, zero32;
+three groups of two first centers and two first gains; three groups of two signed
+second centers, two second gains and one angle; trailing zero16.
+Software snapshot publication and a submitted record are not durable persistence.
+
+#### Mode0600 stimulus: staged correction, retained cache and partial cancellation
+
+`34028` requires mode0600, activity`6A61=5A`, `EAC4<=512` and `7DB0>=2304`.
+`343F0` supplies a full initializer/start path, but this walk recovered no caller
+or ROM pointer to it. That production-admission question remains open.
+
+| Phase | Exact software progression |
+|---|---|
+| Positive / negative admission | States10/20 stage zero corrections, request ±1280 and set validity5A. States11/21 hold2500 invocations, then clear sample count/angle sum. |
+| Angle sampling | States12/22 require signed`5F36>=1778` / `<=−1778`. After1024 samples, evaluation on the next call narrows the mean to signed16 before the absolute-value bound5461; stage its negative as correction. |
+| Component sampling | States13/23 hold500 invocations. States14/24 require `abs(5F36)>=1778`, collect1024 signed32 component-sum samples, then require absolute sum at most398336 and clear the stimulus. |
+| Inter-pass / completion | States16/26 hold5000 invocations; positive advances to negative, negative to31. State31 requires pass-mean difference at most1092, stages the negative truncated average, and submits0208/0209. StateFF waits only for software marker`68B4=A55A5AA5`, not an NvM completion status. |
+
+The angle samples use narrowed signed16 component sums from `6C40+6C44` and
+`6C42+6C46`; the later component accumulator retains the signed32 sums.
+The [positive-pass composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_mode600_positive_sequence_reaches_negative_admission_boundary.json)
+reaches negative admission; it does not claim a complete two-pass physical run.
+Abort `33FD6` clears means, live stimulus/validity, timer and activity, stages
+zero corrections and publishes response−6/state10, but retains sample count and
+both accumulators. Mode-exit `B32FA→33FC6` is a partial cancel, not full initialization.
+
+`5C7B6` caches validity/value into `6210/6212`. In0600, `34C56` prefers that cache
+over the separate `6959/695C` completion stimulus, then falls back to the `7E0C`
+map. The [abort/cache composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_mode600_failure_clears_live_request_but_retains_cached_foreground.json)
+demonstrates that clearing live validity does not immediately clear the already
+published cache. The `695A` request controller and `6A61` worker are distinct
+lifetimes; no second permission system, physical timing or durable calibration
+claim follows from these numerical and publication contracts.
 
 ## 35. Hidden-ingress false-negative audit: no concrete alternate producer found; residuals closed in §36
 
@@ -12865,15 +13025,79 @@ A duplicate accepted sequence repeats76 without requeueing. Remaining length is
 decremented at admission; foreground `4F50`, not the handler, later copies ready
 data to RAM or appends it to the flash-input ring. Timer progress owns the response.
 
-The optional transform worker processes full16-byte units. A remainder below16
-performs no block copy yet is deducted from remaining length: arbitrary byte-tail
-decryption is not established. The alternate compare path clears activity on
-mismatch, publishing success only after all bytes match; its caller advances
-address/remaining even after a failed comparison and then reports the failure.
+The transform is AES-128-CBC decryption, with the image-key and chunk lifetime
+described below. Full blocks are transformed; a short final tail remains unchanged
+when the caller later copies/queues the original chunk length. The alternate
+compare path clears activity on mismatch, publishing success only after all bytes
+match; its caller advances address/remaining even after a failed comparison and
+then reports the failure.
 TransferExit requires an admitted download state, zero remaining and exact length1.
 It does not invoke the apparent final-input setter at426E. That eight-byte candidate
 has no recovered direct caller or ROM pointer in this bounded walk and is not
 promoted to a reachable service owner.
+
+#### Image-key derivation, CBC transfer and CMAC authentication
+
+This is a separate key path from SID27 challenge response.
+`70D4` derives `K_image=AES128_ENCRYPT(ROM[BFD8],RAM[2D08])` into `2D18`, then
+initializes CBC context`2EF0` and CMAC context`2C00`. DID0201 supplies the16-byte
+material at2D08;0202 supplies IV2CF8 under the previously described sequence and
+session/security gates. Shared temporary AES context2D48 is cleared; material,
+IV and derived key remain. `5160` selects value1 from the exact ROM configuration
+byte`BFF8=00`; the custom download format must match this selector.
+No OEM provisioning identity is inferred from this cryptographic role.
+
+`6BB4` rejects a busy transform, otherwise retains source/destination and a
+uint16 remaining length. Each `6BDE` step decrypts at most one16-byte block
+through `7108→8162`, using a stack temporary before copying the result.
+The CBC chain retains the original ciphertext, including in-place operation.
+A remainder1..15 is deducted without transformation, copy or pointer advancement;
+there is no PKCS7 processing or arbitrary-tail decryption. Static dataflow also
+shows that `6BDE` ignores the transform helper's failure status and still copies
+the temporary; the success-path native scenario does not exercise that failure.
+`4DF2` later marks the chunk ready; `4F50` performs the separate RAM/ring transfer.
+
+Authentication reinitializes the shared image contexts through `6EAE→70D4`
+after the separate CRC stage. `6EBA` does not itself initialize them.
+Setup `7122` resolves a nonzero descriptor trailer, consumes the16-byte IV as
+a nonfinal CMAC prefix, then retains cursor=start and last-block=start+length−16.
+Failed setup can already have changed the context/trailer while retaining old
+cursor/end state.
+
+`7E0C` implements AES-CMAC with K1/K2 subkeys: nonfinal input must be exactly16
+bytes; final input is1..16, with the standard partial-block80 padding. It requires
+initialized AES/subkey state but has no finalized latch, automatic reset or wipe.
+`7170` consumes16 bytes per step, skipping the descriptor's authentication trailer.
+It finalizes at the last block, or at its predecessor when the trailer is last.
+Thus the normal aligned message is **IV followed by requested data blocks except
+the trailer**. The trailer locations belong to the region table below.
+
+Comparison exits at the first unequal byte. The retained trailer pointer advances
+for each equal byte, while the data cursor advances by16 even on mismatch, skip
+or busy return. There is no independent minimum/alignment/multiple-of16 guard in
+this helper: a misaligned length may never hit its final-block equality, and a
+single-block trailer cannot finalize the already consumed prefix. These are
+static helper consequences, **not a demonstrated remotely admitted bypass**;
+service range gates and the preceding CRC operation remain separate.
+
+`6EE0` retains activity for busy result2, publishes inactive/success for0, and
+inactive/failure for1. The routine owners consume that result and call `6F04`
+to wipe **both** CBC and CMAC contexts. Admitted TransferExit also wipes both;
+some earlier rejection paths do not. These wipes retain key material, IV, derived
+key, output and cursors. `6C52/6F10` cancellation changes activity/result state
+without clearing the contexts. Transport/routine cancellation is not uniformly
+an image-worker cancellation, so already active foreground work can outlive a
+service-state reset.
+
+Native [derivation/initialization](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_image_crypto_derive_and_initialize.json),
+[CBC plus retained tail](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_image_crypto_cbc_full_block_then_discard_tail.json),
+[CMAC success/cleanup](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_image_crypto_cmac_final_then_routine_cleanup.json)
+and [CMAC mismatch retention](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_image_crypto_cmac_mismatch_retains_state.json)
+execute original firmware instructions at declared handoffs. Independent OpenSSL
+computations matched the derivation, CBC, prefix chain, subkeys and final tag.
+They do not substitute a CRC result, dynamic programming callback or physical
+flash device. CRC/DCRA and the resident RAM driver's implementation remain
+explicit dependencies rather than a reason to postpone these software contracts.
 
 #### Range policy, stream lifetime and the dynamic driver boundary
 
@@ -12934,19 +13158,49 @@ external service.
 
 
 **Remaining high-value dependencies:** remaining numerical control-map surfaces
-and cross-task retention; physical3838..383C/status sources, ADC/DMA and local-link
-freshness; the unassigned `B1C8.bit5` producer; production reachability across
-mode/diagnostic and resident timer/foreground interleavings; physical persistence
-of thermal and learned records; resident timer entropy/fallback behavior and the
-dynamic programming driver; SEG/cache/CRC/ECC/programming feedback; OEM service
-identities, calibration units and physical source identity. Internal `F000`,
-route30 generations, acquisition publication ownership and resident software
-AES/security lifetimes are recovered contracts, not placeholders for those
-remaining hardware questions. A complete peripheral or NvM emulator is not a
-prerequisite for continuing application reconstruction. Static connectivity and
-bounded native scenarios are not exhaustive semantic closure or vehicle results.
+and cross-task retention; physical3838..383C/status sources, ADC/DMA, GPIO and
+local-link freshness; the unassigned `B1C8.bit5` producer; production admission
+of the0600 stimulus start and mode/diagnostic/foreground interleavings; physical
+persistence of thermal and learned records; resident timer entropy/fallback,
+CRC admission and the dynamic programming driver; SEG/cache/ECC/programming
+feedback; OEM service identities, calibration units and physical source identity.
+Acquisition publication, numerical fit/stimulus transitions, cached-command
+precedence, output-owner arbitration, resident AES/CBC/CMAC and security lifetimes
+are recovered software contracts, not placeholders for those hardware questions.
+A complete peripheral or NvM emulator is not a prerequisite for continuing
+application reconstruction. Static connectivity and bounded native scenarios
+are not exhaustive semantic closure or vehicle results.
 
-**2026-10-15 checkpoint: acquisition ownership, resident security and nonzero modulation.**
+**2026-10-16 checkpoint: adaptation, image cryptography and output-owner lifetimes.**
+The connected contracts are owned by
+[adaptation and retained-record admission](#3411-adaptation-stimulus-and-retained-record-admission),
+[output-owner admission and release](#output-owner-admission-priority-and-deferred-release),
+and [resident image cryptography](#image-key-derivation-cbc-transfer-and-cmac-authentication).
+Native compositions passed for numerical fit completion/failure and foreground
+publication, positive stimulus progression and retained-cache precedence,
+image-key/CBC/CMAC success and failure lifetimes, and direct-owner priority/release.
+Aggregate-request execution remains bounded after the explicit GPIO handoff;
+the full-root MMIO stop is retained as a dependency, not reported as a pass.
+
+Independent four-stage rebuilds and signature finalization matched. Canonical
+inventory, corpus, semantic coverage and function-discovery outputs were
+regenerated; live coverage, project parity and the function-boundary regression
+passed. Rebuilt-C inspection confirms the single fit-function body and the
+R10 retained-record admission chain. Fresh E1/E2 HighFunction audits have unchanged
+candidate rows and function sets. The B6 end-to-end producer now checks the
+actual request-OR/helper-result/publication and `8B28→EF90` copy instructions,
+rather than old `FUN_`/`DAT_` spellings; regeneration passed.
+
+The matching project/corpus snapshot was promoted after clean teardown; its
+corpus identity remained unchanged by promotion. Semantic coverage, D5 and
+hidden-ingress provenance, assist/command-cone and B6 composition/end-to-end/
+ingress/acceptance, CodeFlash, external ingress, protected030/EPS transmit,
+application RAM-loader, retained family-census and gate/log reconciliation gates
+passed. The historical corrupted-events warning remains scoped to the retained
+capture; raw captures were not modified. Changed links were checked, temporary
+query/scenario scaffolds removed, and no peripheral models extended.
+
+**Preceding checkpoint `a01c5d47` (2026-10-15): acquisition ownership, resident security and nonzero modulation.**
 Native execution passed for ring consumption/publication and serial acceptance,
 CRC rejection and sequence resynchronization under explicit software handoffs.
 Resident compositions passed for the independent AES known answer, accepted-key

@@ -1,0 +1,152 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_mode600_failure_clears_live_request_but_retains_cached_foreground",
+  "entry": {
+    "scope": "resolved-address",
+    "address": "0x34028",
+    "role": "Execute34028 sample-evaluation failure: signed average narrows to-32768 and symmetric abs clamps32767, exceeding5461. Execute genuine33FD6 cleanup and34EA4/4D4CA response. Synthetic return LP joins real34C56 selector without refreshing foreground6210/6212, demonstrating cached request retention after live6A62/6A68 clear. Stop before34CCA dispose. Omitted normal caller/foreground snapshot explicitly; no firmware patch, no peripheral or deployment claim."
+  },
+  "max_instructions": 30000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x34c56",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xfe00"
+  },
+  "stop_addresses": [
+    "0x34cca"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe0000",
+      "size": 131072,
+      "fill": 0,
+      "evidence": "Explicit retained LocalRAM and stack handoff, not reset or an acquisition freshness claim."
+    },
+    {
+      "address": "0xfebeeacc",
+      "hex": "0006",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebeeac4",
+      "hex": "0002",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebe7db0",
+      "hex": "0009",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebe5f36",
+      "hex": "f206",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebe6a60",
+      "hex": "125a5a00",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebe6a64",
+      "hex": "6f00de0000054d000004",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebe6a70",
+      "hex": "000000feefbeadde",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebe68aa",
+      "hex": "6f00de00",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebe6210",
+      "hex": "5a",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebe6212",
+      "hex": "0005",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    },
+    {
+      "address": "0xfebe81b2",
+      "hex": "10ba",
+      "evidence": "Exact-image retained software state handed off; no physical sample acquisition or time model."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Abort resets live mode600 state and request validity",
+      "kind": "memory",
+      "address": "0xfebe6a60",
+      "size": 3,
+      "equals_hex": "100000"
+    },
+    {
+      "name": "Abort clears both means command and delay counter but retains sample count",
+      "kind": "memory",
+      "address": "0xfebe6a64",
+      "size": 10,
+      "equals_hex": "00000000000000000004"
+    },
+    {
+      "name": "Abort does not erase numerical accumulators",
+      "kind": "memory",
+      "address": "0xfebe6a70",
+      "size": 8,
+      "equals_hex": "000000feefbeadde"
+    },
+    {
+      "name": "Abort restores paired correction to zero",
+      "kind": "memory",
+      "address": "0xfebe68aa",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Response state acknowledges pending application request",
+      "kind": "memory",
+      "address": "0xfebe81b2",
+      "size": 2,
+      "equals_hex": "00ba"
+    },
+    {
+      "name": "Failure response carries signed minus6",
+      "kind": "memory",
+      "address": "0xfebe81c0",
+      "size": 4,
+      "equals_hex": "faffffff"
+    },
+    {
+      "name": "Cached foreground validity is not cleared by live abort",
+      "kind": "memory",
+      "address": "0xfebe6210",
+      "size": 1,
+      "equals_hex": "5a"
+    },
+    {
+      "name": "Selector still admits stale foreground source1",
+      "kind": "memory",
+      "address": "0xfebe6ac8",
+      "size": 2,
+      "equals_hex": "5a01"
+    },
+    {
+      "name": "Selected cached stimulus is negated into correction request",
+      "kind": "memory",
+      "address": "0xfebe6acc",
+      "size": 2,
+      "equals_hex": "00fb"
+    }
+  ]
+}
