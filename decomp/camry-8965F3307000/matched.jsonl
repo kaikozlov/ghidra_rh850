@@ -8,6 +8,7 @@
 {"addr": "0x68a50", "name": "f33_nvm_get_family1_completion", "status": "equivalent"}
 {"addr": "0x73a86", "name": "f33_lookup_u32_value_by_key", "status": "equivalent"}
 {"addr": "0x73ca4", "name": "f33_nvm_storage_handle", "status": "equivalent"}
+{"addr": "0x747e0", "name": "f33_nvm_get_logical_storage_page", "status": "equivalent"}
 {"addr": "0x74884", "name": "f33_nvm_payload_length", "status": "equivalent"}
 {"addr": "0x74892", "name": "f33_nvm_base_offset", "status": "equivalent"}
 {"addr": "0x748b0", "name": "f33_nvm_allocation_pages", "status": "equivalent"}
@@ -16,6 +17,7 @@
 {"addr": "0x7494c", "name": "f33_nvm_translate_read_driver_result", "status": "equivalent"}
 {"addr": "0x76554", "name": "f33_nvm_set_physical_result_state", "status": "equivalent"}
 {"addr": "0x7680c", "name": "f33_nvm_set_secondary_result_state", "status": "equivalent"}
+{"addr": "0x76a1c", "name": "f33_nvm_accumulate_side_status", "status": "equivalent"}
 {"addr": "0x77314", "name": "f33_nvm_payload_page_count", "status": "equivalent"}
 {"addr": "0x77330", "name": "f33_nvm_payload_chunk_length", "status": "equivalent"}
 {"addr": "0x77356", "name": "f33_nvm_sum_bytes", "status": "equivalent"}
@@ -26,7 +28,9 @@
 {"addr": "0x78aec", "name": "f33_store_u16", "status": "equivalent"}
 {"addr": "0x78af2", "name": "f33_store_u32", "status": "equivalent"}
 {"addr": "0x793f0", "name": "f33_poll_word_masks", "status": "equivalent"}
+{"addr": "0x79530", "name": "f33_nvm_get_direct_operation_result", "status": "equivalent"}
 {"addr": "0x795d4", "name": "f33_nvm_probe_range_rejected", "status": "equivalent"}
+{"addr": "0x7971c", "name": "f33_nvm_accumulate_diagnostic_mask", "status": "equivalent"}
 {"addr": "0x79826", "name": "f33_nvm_translate_diagnostic_mask", "status": "equivalent"}
 {"addr": "0x89f2e", "name": "f33_memcpy_forward", "status": "equivalent"}
 {"addr": "0x8a134", "name": "f33_memzero", "status": "equivalent"}

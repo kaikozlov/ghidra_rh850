@@ -113,6 +113,18 @@ uint32_t f33_nvm_storage_handle(uint32_t handle) {
     return read_u16(f33_nvm_logical_descriptors + (handle & 0xffffu) * 16u + 8u);
 }
 
+uint32_t f33_nvm_get_storage_page(uint32_t storage_handle, uint16_t *page_out) {
+    *page_out = read_u16(f33_nvm_descriptors + (storage_handle & 0xffffu) * 6u);
+    return 0;
+}
+
+uint32_t f33_nvm_get_logical_storage_page(uint32_t logical_handle, uint16_t *page_out) {
+    uint32_t handle = logical_handle & 0xffffu;
+    if ((handle - 2u) >= 122u)
+        return 1;
+    return f33_nvm_get_storage_page(f33_nvm_storage_handle(handle), page_out);
+}
+
 static uint32_t advance_request_index(uint32_t index, unsigned cell_count) {
     uint32_t current = index & 0xffu;
     int32_t limit = (int32_t)cell_count - 1;
@@ -175,6 +187,32 @@ uint32_t f33_nvm_translate_diagnostic_mask(uint32_t source_mask) {
     return result;
 }
 
+void f33_nvm_accumulate_diagnostic_mask(uint32_t source_mask) {
+    uint32_t translated = f33_nvm_translate_diagnostic_mask(source_mask);
+    uint32_t service = camry_read8(0xfebf6cccu);
+    uint32_t adjusted = service - 6u;
+    uint32_t base = 0xfebf6cc0u;
+    if (adjusted <= 2u) {
+        camry_write32(base, camry_read32(base) | translated);
+        return;
+    }
+    adjusted -= 6u;
+    if (adjusted <= 1u) {
+        camry_write32(base, camry_read32(base) | translated);
+        camry_write32(base + 8u, camry_read32(base + 8u) | translated);
+        return;
+    }
+    adjusted -= 10u;
+    if (adjusted > 2u)
+        return;
+    camry_write32(base, camry_read32(base) | translated);
+}
+
+void f33_nvm_accumulate_side_status(uint32_t value) {
+    uint32_t mask = value > 1u ? 0x8000u : (value == 1u ? 2u : 1u);
+    f33_nvm_accumulate_diagnostic_mask(mask);
+}
+
 uint32_t f33_lookup_u32_value_by_key(uint32_t key, uint32_t fallback, uint32_t table) {
     uint32_t count = camry_read32(table);
     uint32_t index = 0;
@@ -230,6 +268,21 @@ void f33_nvm_set_secondary_result_state(uint32_t state) {
     }
     if (store)
         camry_write8(0xfebf6b72u, narrowed);
+}
+
+uint32_t f33_nvm_get_secondary_result(void) {
+    return camry_read8(0xfebf6b72u);
+}
+
+uint32_t f33_nvm_get_direct_operation_result(void) {
+    uint32_t value = f33_nvm_get_secondary_result();
+    if (value == 0u)
+        return 0;
+    if (value == 1u)
+        return 1;
+    if (value == 5u || value == 6u)
+        return value;
+    return 4;
 }
 
 uint32_t f33_icus20_read_bit0(void) {

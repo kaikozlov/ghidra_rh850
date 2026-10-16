@@ -32,6 +32,7 @@ VALUE_RETURN = {
     "f33_nvm_payload_page_count",
     "f33_nvm_trailer_offset",
     "f33_nvm_storage_handle",
+    "f33_nvm_get_logical_storage_page",
     "f33_nvm_advance_family0_request_index",
     "f33_nvm_advance_family1_request_index",
     "f33_nvm_allocation_pages",
@@ -46,6 +47,7 @@ VALUE_RETURN = {
     "f33_icus20_read_bit0",
     "f33_nvm_translate_read_driver_result",
     "f33_nvm_translate_saved_driver_result",
+    "f33_nvm_get_direct_operation_result",
 }
 
 ROM_TABLES = (
@@ -148,6 +150,14 @@ def bind(library: ctypes.CDLL) -> None:
     library.f33_nvm_translate_read_driver_result.restype = u32
     library.f33_nvm_translate_saved_driver_result.argtypes = []
     library.f33_nvm_translate_saved_driver_result.restype = u32
+    library.f33_nvm_get_logical_storage_page.argtypes = [u32, ctypes.POINTER(ctypes.c_uint16)]
+    library.f33_nvm_get_logical_storage_page.restype = u32
+    library.f33_nvm_get_direct_operation_result.argtypes = []
+    library.f33_nvm_get_direct_operation_result.restype = u32
+    library.f33_nvm_accumulate_diagnostic_mask.argtypes = [u32]
+    library.f33_nvm_accumulate_diagnostic_mask.restype = None
+    library.f33_nvm_accumulate_side_status.argtypes = [u32]
+    library.f33_nvm_accumulate_side_status.restype = None
     library.camry_host_reset.argtypes = []
     library.camry_host_reset.restype = None
     library.camry_host_add.argtypes = [u32, u8p, u32]
@@ -254,6 +264,8 @@ def accessed_ranges(name: str, registers: dict) -> list[tuple[int, int]]:
     if name in {"f33_copy_whole_words", "f33_update_whole_words"}:
         words = (r8 & 0xFFFF) & ~3
         return [(r6, words), (r7, words)]
+    if name == "f33_nvm_get_logical_storage_page":
+        return [(r7, 2)]
     return []
 
 
@@ -354,6 +366,18 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
         return int(library.f33_nvm_lookup_byte_result(r6, r7, r8)) & 0xFFFFFFFF
     if name == "f33_nvm_translate_saved_driver_result":
         return int(library.f33_nvm_translate_saved_driver_result()) & 0xFFFFFFFF
+    if name == "f33_nvm_get_logical_storage_page":
+        return int(library.f33_nvm_get_logical_storage_page(
+            r6, pointer(view, base, r7, ctypes.POINTER(ctypes.c_uint16)),
+        )) & 0xFFFFFFFF
+    if name == "f33_nvm_get_direct_operation_result":
+        return int(library.f33_nvm_get_direct_operation_result()) & 0xFFFFFFFF
+    if name == "f33_nvm_accumulate_diagnostic_mask":
+        library.f33_nvm_accumulate_diagnostic_mask(r6)
+        return None
+    if name == "f33_nvm_accumulate_side_status":
+        library.f33_nvm_accumulate_side_status(r6)
+        return None
     if name in VALUE_RETURN:
         return int(getattr(library, name)(r6)) & 0xFFFFFFFF
     raise AssertionError(f"no C call for {name}")
@@ -367,6 +391,7 @@ def check_results(
     registers: dict,
     returned: int | None,
     regions: list[tuple[int, bytearray]] | None = None,
+    codeflash: bytes | None = None,
 ) -> None:
     memory_checks = 0
     r10_checks = 0
@@ -375,7 +400,7 @@ def check_results(
         if kind == "register":
             register = check["register"]
             expected = int(check["equals"], 16)
-            if register == "sp":
+            if register in {"sp", "PC"}:
                 continue
             if register == "r10" and name in POINTER_RETURN:
                 r10_checks += 1
@@ -397,16 +422,25 @@ def check_results(
                     f"{scenario['name']}: preserved {register} {actual:#x} != {expected:#x}"
                 )
             continue
-        if kind != "memory":
+        if kind not in {"memory", "memory-equal"}:
             continue
         memory_checks += 1
         address = int(check["address"], 16)
         size = check["size"]
-        expected = bytes.fromhex(check["equals_hex"])
         if regions is not None:
             actual = read_regions(regions, address, size)
         else:
             actual = bytes(image[address - base : address - base + size])
+        if kind == "memory-equal":
+            source = int(check["source_address"], 16)
+            if codeflash is not None and source + size <= len(codeflash):
+                expected = codeflash[source : source + size]
+            elif regions is not None:
+                expected = read_regions(regions, source, size)
+            else:
+                expected = bytes(image[source - base : source - base + size])
+        else:
+            expected = bytes.fromhex(check["equals_hex"])
         if actual != expected:
             raise AssertionError(f"{scenario['name']}: {check['name']} mismatch")
     if memory_checks == 0 and r10_checks == 0:
@@ -467,7 +501,7 @@ def main() -> int:
                 regions = scenario_regions(scenario)
                 held = install_regions(library, code_view, len(codeflash), regions)
                 returned = call_function(library, name, None, 0, registers)
-                check_results(scenario, name, None, 0, registers, returned, regions)
+                check_results(scenario, name, None, 0, registers, returned, regions, codeflash)
                 del held
             else:
                 memory, base = mapped
@@ -476,7 +510,7 @@ def main() -> int:
                 view = view_of(memory) if memory else view_of(bytearray(b"\x00"))
                 install_address_space(library, code_view, len(codeflash), view, base, memory)
                 returned = call_function(library, name, view, base, registers)
-                check_results(scenario, name, memory, base, registers, returned)
+                check_results(scenario, name, memory, base, registers, returned, codeflash=codeflash)
             executed[address] += 1
             print(f"PASS {name} {scenario['name']}")
     missing = [row["name"] for address, row in matched.items() if executed[address] == 0]
