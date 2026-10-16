@@ -1,0 +1,221 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_mode_transition_0701_restart_at20",
+  "entry": {
+    "role": "Real B1808/B2CFE, selected pending2, NvM readiness scans, B176E counter boundary and exact FF038 constant0 target. Competing10/7 remain pending;19 increments to20 without transition,20 returns ready and commits0000 through real hooks, clears NvM gates and publishes foreground restart request. Does not run restart dispatcher or claim measured timeout.",
+    "scope": "resolved-address",
+    "address": "0xb1808"
+  },
+  "max_instructions": 15000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xfe00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1800",
+      "size": 2048,
+      "fill": 165,
+      "evidence": "explicit real nested-call stack"
+    },
+    {
+      "address": "0xfebe8a00",
+      "size": 352,
+      "fill": 0,
+      "evidence": "explicit software output request state"
+    },
+    {
+      "address": "0xfebeb000",
+      "size": 512,
+      "fill": 0,
+      "evidence": "explicit mode arbitration and snapshot state"
+    },
+    {
+      "address": "0xfebeb0a0",
+      "hex": "5452ffffabadff00",
+      "evidence": "valid0701 mode redundancy and old selected complement"
+    },
+    {
+      "address": "0xfebeb11a",
+      "hex": "0107",
+      "evidence": "live0701 so B2CFE returns0"
+    },
+    {
+      "address": "0xfebeb0ac",
+      "hex": "5aa5",
+      "evidence": "pending request2"
+    },
+    {
+      "address": "0xfebeb0b6",
+      "hex": "5aa5",
+      "evidence": "pending request7 must not bypass request2 wait"
+    },
+    {
+      "address": "0xfebeb0bc",
+      "hex": "5aa5",
+      "evidence": "pending request10 must not bypass request2 wait"
+    },
+    {
+      "address": "0xfebeb114",
+      "hex": "145a",
+      "evidence": "retained invocation count and already-issued classifier reset latch"
+    },
+    {
+      "address": "0xfebeb072",
+      "hex": "01000000",
+      "evidence": "nonzero output snapshot forces count threshold path"
+    },
+    {
+      "address": "0xfebf0308",
+      "size": 32,
+      "fill": 17,
+      "evidence": "32 exact-ROM family0 statuses11; none has pending high nibble20"
+    },
+    {
+      "address": "0xfebf0328",
+      "size": 16,
+      "fill": 17,
+      "evidence": "16 exact-ROM family1 statuses11"
+    },
+    {
+      "address": "0xfebf1088",
+      "size": 16,
+      "fill": 68,
+      "evidence": "family1 status XOR55 copies"
+    },
+    {
+      "address": "0xfebf10ac",
+      "size": 16,
+      "fill": 187,
+      "evidence": "family1 status XORAA copies"
+    },
+    {
+      "address": "0xfebf0671",
+      "hex": "5a5a00",
+      "evidence": "both resettable NvM gates and zero independent readiness-block byte0673"
+    },
+    {
+      "address": "0xfebf0690",
+      "hex": "0000",
+      "evidence": "neither NvM family busy marker isA5 orFF"
+    },
+    {
+      "address": "0xfebe8c08",
+      "hex": "0000",
+      "evidence": "no preexisting restart request"
+    },
+    {
+      "address": "0xfebee8cc",
+      "hex": "0107",
+      "evidence": "published generation remains0701"
+    }
+  ],
+  "checks": [
+    {
+      "name": "real owner returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "real stack restored",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "live mode boundary",
+      "kind": "memory",
+      "address": "0xfebeb11a",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "readiness counter boundary",
+      "kind": "memory",
+      "address": "0xfebeb114",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "request2 acknowledgement boundary",
+      "kind": "memory",
+      "address": "0xfebeb0ac",
+      "size": 2,
+      "equals_hex": "a55a"
+    },
+    {
+      "name": "request7 retained",
+      "kind": "memory",
+      "address": "0xfebeb0b6",
+      "size": 2,
+      "equals_hex": "5aa5"
+    },
+    {
+      "name": "request10 retained",
+      "kind": "memory",
+      "address": "0xfebeb0bc",
+      "size": 2,
+      "equals_hex": "5aa5"
+    },
+    {
+      "name": "restart request boundary",
+      "kind": "memory",
+      "address": "0xfebe8c08",
+      "size": 2,
+      "equals_hex": "5aa5"
+    },
+    {
+      "name": "NvM gate clear boundary",
+      "kind": "memory",
+      "address": "0xfebf0671",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "published generation is not live commit",
+      "kind": "memory",
+      "address": "0xfebee8cc",
+      "size": 2,
+      "equals_hex": "0107"
+    },
+    {
+      "name": "live zero XOR5555 copy",
+      "kind": "memory",
+      "address": "0xfebeb0a0",
+      "size": 2,
+      "equals_hex": "5555"
+    },
+    {
+      "name": "live zero XORAAAA copy",
+      "kind": "memory",
+      "address": "0xfebeb0a4",
+      "size": 2,
+      "equals_hex": "aaaa"
+    },
+    {
+      "name": "restart request XOR5555 copy",
+      "kind": "memory",
+      "address": "0xfebe8c0a",
+      "size": 2,
+      "equals_hex": "0ff0"
+    },
+    {
+      "name": "restart request XORAAAA copy",
+      "kind": "memory",
+      "address": "0xfebe8c14",
+      "size": 2,
+      "equals_hex": "f00f"
+    }
+  ]
+}

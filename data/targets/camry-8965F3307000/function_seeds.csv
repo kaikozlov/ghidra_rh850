@@ -4,7 +4,7 @@ address,provenance,note
 0x00000748,firmware/camry-8965F3307000/CodeFlash.bin,EIIC table traversal reached from the boot vector; key match or FFFFFFFF sentinel selects the handler
 0x0000079A,firmware/camry-8965F3307000/CodeFlash.bin,direct JARL at1408; recovered28-byte register-write/readback routine ending in JMP LP
 0x000007B6,firmware/camry-8965F3307000/CodeFlash.bin,direct JARL at140C; recovered76-byte register-write/poll routine ending in JMP LP
-0x00001404,firmware/camry-8965F3307000/CodeFlash.bin,PREPARE LP entry through DISPOSE at1474; startup-like sequence and RAM-clear loops; external reachability remains unclosed
+0x00001404,firmware/camry-8965F3307000/CodeFlash.bin,PREPARE LP entry reached by reset-body JARL at067C; register setup and RAM-clear loops through DISPOSE at1474
 0x00001E44,firmware/camry-8965F3307000/CodeFlash.bin,first boot interrupt-table handler at 0x86A0; calls 0x1CE8 at 0x1E48
 0x00008370,firmware/camry-8965F3307000/CodeFlash.bin,start of35E4 copied code;42-byte RAM-table dispatcher through DISPOSE at8396; real relocation and dispatch executed
 0x00034C56,data/generated/camry_8965F3307000_lateral_decompiler_evidence.json,exact-F33 function entry promoted by prior generated decompiler evidence
@@ -160,3 +160,58 @@ address,provenance,note
 0x00050568,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at25788
 0x00050702,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at257A0
 0x00050706,firmware/camry-8965F3307000/CodeFlash.bin,configured diagnostic callback pointer at257A4
+0x0003E77E,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 283C4; configured root 3E624
+0x0003EA1C,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 283D0; configured root 3E8BC
+0x0003EC40,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 283DC; configured root 3EB04
+0x0003EE70,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 283E8; configured root 3ED34
+0x0003F1C8,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 283F4; configured root 3F13A
+0x0003F452,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 28400; configured root 3F3D2
+0x0003F668,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 2840C; configured root 3F5E8
+0x0003F7D8,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 28418; configured root 3F744
+0x0003F964,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 28424; configured root 3F8D0
+0x0003FB3C,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 28430; configured root 3FABC
+0x0003FD16,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 2843C; configured root 3FC96
+0x0003FE4A,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 28448; configured root 3FDDE
+0x0003FF84,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 28454; configured root 3FF18
+0x00040166,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 28460; configured root 400D0
+0x00040346,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 2846C; configured root 402B0
+0x00040596,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 28478; configured root 40516
+0x000407D2,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 28484; configured root 40752
+0x0004093E,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 28490; configured root 408BE
+0x00040AB6,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 2849C; configured root 40A36
+0x00040D0E,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 284A8; configured root 40C8E
+0x00040FA8,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 284B4; configured root 40F28
+0x00041234,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 284C0; configured root 4110C
+0x0004149E,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 284CC; configured root 41376
+0x0004170E,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 284D8; configured root 415C0
+0x00041946,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 284E4; configured root 417F8
+0x00041B6A,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 284F0; configured root 41A2E
+0x00041D9A,firmware/camry-8965F3307000/CodeFlash.bin,monitor predicate pointer at 284FC; configured root 41C5E
+0x000001B0,firmware/camry-8965F3307000/CodeFlash.bin,absolute reset-vector JMP at0002; register/context setup and direct JARL to1404 at067C
+0x00000000,firmware/camry-8965F3307000/CodeFlash.bin,exact SYNCP at0000 followed by six-byte absolute JMP to01B0 at0002
+0x0004539E,firmware/camry-8965F3307000/CodeFlash.bin,scalar monitor callback pointer at 28AC8;28ACC
+0x0004546A,firmware/camry-8965F3307000/CodeFlash.bin,scalar monitor callback pointer at 28AFC;28B00
+0x000455BA,firmware/camry-8965F3307000/CodeFlash.bin,scalar monitor callback pointer at 28B30;28B34
+0x00045684,firmware/camry-8965F3307000/CodeFlash.bin,scalar monitor callback pointer at 28B64;28B68
+0x0004574C,firmware/camry-8965F3307000/CodeFlash.bin,scalar monitor callback pointer at 28B98;28B9C
+0x000457BE,firmware/camry-8965F3307000/CodeFlash.bin,scalar monitor callback pointer at 28BA0
+0x00045894,firmware/camry-8965F3307000/CodeFlash.bin,scalar monitor callback pointer at 28BD4;28BD8
+0x00045900,firmware/camry-8965F3307000/CodeFlash.bin,scalar monitor callback pointer at 28BDC
+0x000459F6,firmware/camry-8965F3307000/CodeFlash.bin,scalar monitor callback pointer at 28C10;28C14
+0x00045AC6,firmware/camry-8965F3307000/CodeFlash.bin,scalar monitor callback pointer at 28C44;28C48
+0x00045EBC,firmware/camry-8965F3307000/CodeFlash.bin,scalar monitor callback pointer at 28C78;28C7C;28C80
+0x00045F7A,firmware/camry-8965F3307000/CodeFlash.bin,scalar monitor callback pointer at 28CB4;28CB8;28CBC
+0x0003BAEC,firmware/camry-8965F3307000/CodeFlash.bin,scalar monitor callback pointer at 27FCC;27FD0
+0x0003BB7E,firmware/camry-8965F3307000/CodeFlash.bin,scalar monitor callback pointer at 28000;28004
+0x0003BC86,firmware/camry-8965F3307000/CodeFlash.bin,scalar monitor callback pointer at 28034;28038
+0x0003BD36,firmware/camry-8965F3307000/CodeFlash.bin,scalar monitor callback pointer at 28068;2806C
+0x000B1C32,firmware/camry-8965F3307000/CodeFlash.bin,application mode hook pointer at AEB00;AEB04
+0x000B1DA0,firmware/camry-8965F3307000/CodeFlash.bin,application mode hook pointer at AEB0C
+0x000B2BF4,firmware/camry-8965F3307000/CodeFlash.bin,application mode hook pointer at AEB18
+0x000B2BF6,firmware/camry-8965F3307000/CodeFlash.bin,application mode hook pointer at AEB1C
+0x000B2CA2,firmware/camry-8965F3307000/CodeFlash.bin,application mode hook pointer at AEB24
+0x000B32F4,firmware/camry-8965F3307000/CodeFlash.bin,application mode hook pointer at AEB30
+0x000B2E62,firmware/camry-8965F3307000/CodeFlash.bin,application mode hook pointer at AEB3C
+0x000B2EE2,firmware/camry-8965F3307000/CodeFlash.bin,application mode hook pointer at AEB40
+0x000B2EE4,firmware/camry-8965F3307000/CodeFlash.bin,application mode hook pointer at AEB44
+0x000B342A,firmware/camry-8965F3307000/CodeFlash.bin,application mode hook pointer at AEB4C

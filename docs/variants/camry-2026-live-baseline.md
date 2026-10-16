@@ -9159,6 +9159,73 @@ Verification used the unchanged registered CodeFlash:
   their tracked paths. No malformed-table completeness or vehicle result
   is implied.
 
+#### Reset, resident boot and application ownership
+
+The cold path starts at CodeFlash `0000` (`SYNCP; JMP 01B0`), not at an
+ordinary C call. `01B0` disables interrupts, establishes the boot register
+context and checks JPPR/ECM/BIST conditions before `067C: JARL 1404`.
+Failed pre-C checks reach the `0744` halt path; some publish a retained error
+token first. They do not enter the resident diagnostic loop. Cache and
+hardware-status waits remain explicit dependencies, not simulated success.
+
+```mermaid
+flowchart TD
+  R["0000 → 01B0: reset context and pre-C checks"] --> H["1404: hardware setup and RAM sweeps"]
+  H --> V["13B0 → 119E: application validation"]
+  V -->|accepted| A["20880 → 637EE: application context and initialization"]
+  V -->|rejected| B["1398: resident boot loop"]
+  A --> C["6378C: resident-boot CRC gate"]
+  C --> T["665F2: timer trigger and steady reloads"]
+  T --> F["PMR release, EI, 66062 foreground"]
+  P["65F5E: explicit programming handoff"] --> X["9F00 → 148E: boot context and record transfer"]
+  X --> B
+```
+
+`01B0` clears `FEBE7000..7FFF` before `1404`. The later RAM-loop slice in
+§77.17 still preserves its lower32KiB **when entered at1426**, but that is
+not the complete reset path: `FEBE7000..7FFF` was already swept. These
+software sweeps do not cover `FEBE0000..6FFF`; this says nothing about
+hardware reset retention policy.
+
+`119E` makes up to three attempts at both CRC-region checks and the ECC
+check, followed by up to three attempts at the magic values at `FFE00/17E00`.
+Boot descriptors `8DD0/8DE0` select `10000+7DF0` and `18000+E7DF0` bytes;
+the CRC helper streams words with seed/result `FFFFFFFF`. Success dispatches
+through `[FFDB8]=20880` without a local pointer-range check. This is a
+hardware-CRC feedback contract, not an offline proof that the CRC peripheral
+accepted the image. The resident path owns its boot stack/table and TAUJ0 CH2:
+initial state `FEBF2904=1` suppresses IRQ services; its loop publishes2.
+It is not the application CH3 foreground scheduler.
+
+The application cutover deliberately abandons the boot call frames.
+`715B4` installs `SP=FEBE2000`, `GP=FEBEB800`, `TP=23DFC`, `INTBP=20200`
+and `EBASE=20000`, then returns to the continuation in `637EE` using LP.
+The [composed native prefix](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_startup_application_context_cutover.json)
+verifies both actual boot-stack writes and the new context, stopping at637F6
+before RAM clear or hardware initialization. Whole-function C stack propagation
+can place the earlier20880 save on the new stack incorrectly; assembly is the
+ownership boundary, not an ordinary C stack unwind.
+
+Initialization captures retained tokens before replacing them, copies ROM
+`10000..17DEF` to `FEBF7C00..FEBFF9EF`, initializes NvM/application/diagnostic
+state, then checks the resident-boot CRC before starting application timers.
+The image-identity comparison `62D5E` publishes redundant failure state but
+does **not** itself block launch. Timer start pulses PIC1ASST after the
+first-interval reloads are configured; the steady reloads are written afterward.
+Clock propagation, ECM/ECC response, acquisition completion and external
+safety-device feedback are not inferred from initialization order.
+
+The reverse programming transfer is **not reset**: `9F00` preserves the ROM
+`31788` record pointer, masks interrupts, clears SEGFLAG/SEGADDR/SEGCONT,
+installs the boot context and enters148E/1398 without the1404 sweeps or119E
+validation. P1M-E hardware manual Table3.77 identifies the SEG registers at
+`FFFEE980/982/988`; these are system-error registers, not INTC controls.
+A real native prefix stops at `9F16`, the currently unmapped SEGFLAG write to
+`FFFEE982`. The remaining transfer is recovered from instructions/dataflow,
+not claimed as executed. No permissive register model or replacement callee
+was introduced to make this path pass. Full resident services and physical
+reset/startup feedback remain separate dependencies.
+
 ### 77.6 NvM descriptor and allocation reconstruction
 
 The corrected storage interpretation is owned by §55. The target-native seed
@@ -10873,6 +10940,95 @@ The composed native reconciliation scenario verifies these distinctions, request
 precedence, PMR restoration and the boundary after the last valid slot. This
 is a software request-lifecycle result, not execution of every mode callback.
 
+#### Major-family arbitration and retained restart readiness
+
+`B1808` repairs live mode, captures its family, runs at most one internal
+transition, then arbitrates major requests. An internal transition and a
+major transition can therefore occur in the same invocation. The major-family
+graph below uses **decimal request IDs**; labels are `priority:request`,
+with lower priority numbers examined first within each source family.
+Mode codes are hexadecimal; OEM mode names remain unassigned.
+
+```mermaid
+flowchart LR
+  M100["0100"] -->|1:0| M700["0700"]
+  M100 -->|2:9| M900["0900"]
+  M100 -->|3:5| M200["0200"]
+  M200 -->|1:0, 2:1| M700
+  M200 -->|3:9| M900
+  M200 -->|4:3| M300["0300"]
+  M300 -->|1:0, 2:1| M700
+  M300 -->|3:9| M900
+  M300 -->|4:6| M500["0500"]
+  M300 -->|5:12| M400["0400"]
+  M400 -->|1:0, 2:1, 5:11| M700
+  M400 -->|3:9| M900
+  M400 -->|4:6| M500
+  M400 -->|6:7| M600["0600"]
+  M500 -->|1:0, 2:1| M700
+  M500 -->|3:9| M900
+  M500 -->|4:4, B1A4 zero| M300
+  M500 -->|4:4, B1A4 nonzero| M400
+  M500 -->|5:7| M600
+  M600 -->|1:0, 3:8, 4:1| M700
+  M600 -->|2:13, 5:9| M900
+  M700 -->|1:0, 4:10| M800["0800"]
+  M700 -->|2:9| M900
+  M700 -->|3:2, post-worker0701| W["Readiness wait; blocks lower requests"]
+  W -->|ready, exact constant selector0| Z["0000 plus foreground restart"]
+  M700 -->|5:7| M600
+  M800 -->|1:15| H["61940 terminal hardware sequence"]
+  M800 -->|2:9| M900
+  M800 -->|3:2| Q["Readiness wait; blocks request7"]
+  Q -->|ready: publish3845, acknowledge2| M800
+  M800 -->|4:7| M600
+  M900 -->|1:14| M800
+```
+
+Pending low-ID selection stores the selected ID/complement and pretransition
+mode. Acknowledgement requires that selection for IDs below16; IDs above16
+can be acknowledged unconditionally by a sweep. ID16 falls between these rules
+and is not used by the recovered graph. Consequently, losing **major** requests
+remain pending, while an internal0500 selection sweep can consume its losing
+pending requests42/44/46. A request bit is still not a materialized slot.
+
+The transition helper runs old-family exit and new-family entry before
+committing live mode, even for a same-family transition. Hooks see the old
+live mode; `E8CC` publication remains separate. All major families except0200
+clear direct-enable bytes `8B4C/8B4D` before their worker.0200 retains its
+stage-issued enables until the corresponding stage action or family exit.
+
+The0200 sequencer advances through020D from readiness requests based on
+**published** `E8CC`, using low8(`E8CC+0x15`). It clears the paired readiness
+flags after requesting. Published/live skew can leave a phase request pending
+until live state catches up. Channel-disable bits preserve that channel's
+prior owner masks. The0204/020C actions use the configured signed triplet
+`[-32768,-32768,-32768]`;020D uses zeros. These are software command values,
+not demonstrated physical output. The final020D action requests major3 and,
+conditionally,6, allowing the subsequent0300 service join.
+
+`B176E` checks NvM readiness **first**. Busy NvM freezes counter `B114`, even
+if the counter is already above its limit. Otherwise zero sampled outputs can
+complete immediately; with nonzero outputs, entry19 increments to20 and still
+waits, while entry20 completes and clears the counter. The exact
+`FF038 → 66FEE` selector returns0, so ready0701 request2 takes `B17EE`:
+mode0000 plus redundant `8C08=A55A` foreground restart, not0800 or reset.
+In0800, request2 instead publishes redundant3845 without changing mode.
+No wall-time or persistence guarantee follows from these invocation counters.
+
+The0301 counter reaches5 and requests its next transition on a later invocation;
+entry/exit hooks do not reset it. The0900 programming counter can request14
+at its threshold regardless of that invocation's NvM-readiness result; the
+actual handoff attempt remains readiness-dependent. These are distinct gates.
+
+Native compositions verify
+[programming before lower-priority service](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_mode_transition_programming_precedes_service.json),
+[0701 waiting at19](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_mode_transition_0701_wait_at19.json),
+[0701 software restart at20](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_mode_transition_0701_restart_at20.json),
+and [0800 pending2 suppressing7 while NvM is busy](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_mode_transition_0800_pending2_blocks7_while_nvm_busy.json).
+They do not establish production reachability of every initialized state or
+execute the terminal hardware-reset sequence.
+
 #### Fault, health, service and programming requests differ
 
 | Request | Provenance and qualification | Consequence/boundary |
@@ -10942,6 +11098,105 @@ current-limit owners, and checks mode-request cancellation and PMR restoration.
 It does not inject a physical fault or prove hardware output response. The
 paired sample-monitor join below closes one substantial producer family;
 other monitor families remain separate.
+
+#### Mode-sequenced monitors and shared action-slot ownership
+
+The0200..020D stage monitors share an eight-byte terminal qualifier, not a
+single accumulated hardware-fault object. `5EC24` initializes the entered
+stage before its first step; `5F610` runs the active exact-mode workers.
+A mode change does not reset every stage or every shared action slot.
+Snapshot qualification `6764` can hold a stage while action encoding consults
+newer live qualification `71EC`; neither is an atomic whole-pipeline snapshot.
+
+| Mode stages | Principal raw inputs / configured comparison | Confirmed action kinds |
+|---|---|---|
+|0200|Primary/peer unsigned samples; signed widened difference>1180, with4736/1055 partitions|1D/1E and32|
+|0201,0202,0203|Sample<351 or status bit; sample>1247 under distinct requested/observed-state gates|1D/1E|
+|0204,0205|Selected status-bit triplets from8285..8290|1D/1E|
+|0206,0207|Status8291/8292; inclusive raw interval886..6020|1D/1E|
+|0208|Coupled66B2/66B4 below1326 after both-channel admission|1A, independent slot9|
+|0209,020A|Sample<965; selected status8282/8281|1D/1E|
+|020B|Unsigned three-sample range10224..54526, with different upper/lower failure events|1B/1C|
+|020C,020D|Status triplets under requested/observed state2 and channel-admission gates|1B/1C and32|
+
+The table's comparisons apply **after** stage-specific admission. Closed gates
+classify44, not healthy. Exact gates, callbacks and calibration layouts are in
+the target seed; no voltage, physical channel or OEM fault identity is implied.
+Readiness is also independent of confirmation: some stages drive staged owner
+masks before waiting,0201 has a separate invalid-observation budget, and020B
+entry preserves its prior readiness/timer fields. `3EFD4 → 3EF1C` checks failure
+**counters**, so even the first unconfirmed failure can block the healthy cache.
+
+Terminal failures confirm only after count>200; passing thresholds are0 or2.
+A terminal result bypasses future predicate/reporting calls until reset.
+Classification44 publishesFF while preserving counts. The configured policy
+bytes are zero; the generic force-healthy helper cannot heal an already
+terminal failure, and its direct native test does not prove a nonzero policy
+branch reachable in these configured roots.
+
+Most paired stage producers share slots10/11. A confirmed producer snapshots
+the old current record into retained storage, clears current, merges **its own**
+action kinds and selects current with marker5A. A later producer therefore
+**replaces** the earlier producer; OR accumulation is local to one producer.
+With no confirmed source, the preceding action is left untouched. Retained history
+is not simultaneously ORed while current is selected. Native runs distinguish
+[threshold equality preserving the previous producer](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_hardware_monitor_range_threshold_equality_preserves_previous_producer.json)
+from [strict crossing replacing it](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_hardware_monitor_range_confirmation_replaces_previous_producer.json),
+and preserve [terminal failure against force-healthy](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_hardware_monitor_force_healthy_preserves_terminal_failure.json).
+
+Diagnostic callbacks remain a separate namespace. For example, events57..59
+and5D..5F join descriptor DTC index4 / packed45D649, while CE..D0 andDB..DD
+join indices26/29 / packed553A00/553B00. Coupled events60/61 join indices37/39 /
+packed555A16/555B16. Sharing an action slot or action kind does not imply the
+same DTC, and these packed values do not recover OEM text or physical causes.
+
+#### Scalar qualification, healthy notifications and recovery
+
+The other scalar families reuse three additional qualifier layouts. Their
+normal API returns11; persistent status is written through the state pointer.
+Treating the return as status loses the real dataflow.
+
+| Qualifier | Persistent state | Consequential retention rule |
+|---|---|---|
+|Terminal `6A6BA`|8 bytes: status/pad/pass/fail/peak|Both healthy0 and failed22 terminal;44 preserves counters.|
+|Latched `6AE7C`|10 used bytes: packed/pass/fail/peak|Confirmed failure22 terminal; confirmed healthy2200 still evaluates failure; disabled pending paths clear but peak survives.|
+|Recoverable `6A8B4`|12 bytes: latched fields plus recovery count|Confirmed failure uses a separate recovery predicate; recovery must strictly exceed its limit.|
+|Windowed `6B31A`|14 used bytes: packed/pass/pass-window/fail/fail-window/peak|Pending failure survives healthy11 or ambiguous33 within its window; expiry wins before confirmation; invalid44 resets.|
+
+The18-byte transient recovery scratch used by `70F56` is **not** the persistent
+12-byte state. Its high-water field survives recovery. Typed layouts and
+callback vectors distinguish these records instead of accepting the misleading
+array/local-stack shape in untyped C.
+
+Because reset code occupies address zero, Ghidra can print null callback guards
+as comparisons with `f33_reset_vector`. Those instructions test address zero;
+they do not dispatch reset. The typed callback/state dataflow is recovered,
+but this symbol-rendering ambiguity must not be read as ordinary portable C.
+
+| Producer family | Action ownership and source boundary |
+|---|---|
+|Status-bit pairs45356..4562A|Slots7/8; qualification and availability gate state updates. Pending transition notifications are separate from confirmed1B/1C/1D/1E actions.|
+|Primary/peer comparisons456FA..45A6C|Slot6 kind16. Some closed paths emit healthy-observed events while retaining confirmed state and its action.|
+|Raw thermistor inputs45E74/45F32|Slot18 kind16; unsigned inclusive1206..65231 predicates and strict recovery. No signed-temperature interpretation of the raw threshold.|
+|Acquisition/status3BAB2..3BCFC|Slot20 kind31. Sources81D0/1 and separately gated81D6..81DC; the pair>=61211 and<=3093 consists of two unsigned comparisons, not one signed interval.|
+|Health/B3C6C and request33EE6|Independent slots19/17; control action does not require diagnostic failure admission.|
+
+`51E2C → 52A2A` sets the healthy-observed bitmap at6120; it does not clear the
+current or retained failure histories. The [composed primary/peer case](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_scalar_monitor_healthy_notification_retains_fault_action.json)
+therefore retains the current fault and slot6 action despite a healthy-observed
+notification. The acquisition cases exercise the real scheduler interval:
+[failure confirmation within window6](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_scalar_window_confirmation_before_expiry.json)
+versus [expiry at7 before another failure confirms](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_scalar_window_expiry_precedes_confirmation.json).
+Their diagnostic lifecycle gate is closed while control-action publication
+still occurs. The [thermistor recovery composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_scalar_thermistor_recovery_adopts_pass.json)
+accepts both inclusive raw endpoints, clears current failure/action after
+recovery26>25, and preserves peak and retained diagnostic history.
+
+Input ownership stops at the actual snapshot/copy chain: `5D6DC` copies the
+primary/peer and thermistor samples; `50C9A` expands3838/383A/383C status bits;
+`66932/50A06/50A1C` publish the acquisition/status snapshots. These joins do
+not establish ADC/DMA freshness, peripheral acknowledgement, physical scaling
+or cross-interrupt atomicity.
 
 #### Paired sample-monitor qualification feeds independent action records
 
@@ -11889,38 +12144,46 @@ and [normalization acknowledgement before group completion](../../tests/fixtures
 These explicit-RAM software scenarios do not establish physical persistence,
 sensor/actuator effects, external request reachability or all interrupt interleavings.
 
-**Remaining high-value dependencies:** the other monitor/action and Dem/DTC
-joins; production reachability across diagnostic groups; remaining numerical
-control-map surfaces and cross-task retention; physical persistence of the
-recovered thermal-history lifecycle; OEM service identities, calibration units
-and physical source identity; ADC/DMA and local-link freshness, hardware
-feedback/update timing.
-The recovered application, fault-action and diagnostic contracts do not require
-a complete peripheral or NvM emulator. Static connectivity and bounded native
-scenarios are not exhaustive semantic closure or vehicle results.
+**Remaining high-value dependencies:** production reachability across diagnostic
+and mode groups; remaining numerical control-map surfaces and cross-task
+retention; raw3838..383C/status acquisition, ADC/DMA and local-link freshness;
+physical persistence of the thermal-history lifecycle; full resident-boot
+services and SEG/cache/CRC/ECC/startup feedback; OEM service identities,
+calibration units and physical source identity. The connected application,
+fault-action and diagnostic contracts do not require a complete peripheral or
+NvM emulator. Static connectivity and bounded native scenarios are not
+exhaustive semantic closure or vehicle results.
 
-**Verification checkpoint (2026-10-15, diagnostic admission, application writes
-and routine lifecycles).**
-Composed native scenarios passed against the rebuilt A project with unmodified
-CodeFlash and explicit RAM, without replacement callees or peripheral-model
-extensions. Independent four-stage A/B rebuilds and signature finalization
-matched. Canonical inventory, corpus, semantic coverage and function-discovery
-outputs were regenerated; live coverage and project parity passed. The matching
-project/corpus were promoted after clean teardown. Native scenarios were run on
-A, not independently on B.
+**Verification checkpoint (2026-10-15, mode arbitration, monitor/action ownership
+and reset-to-foreground reconstruction).**
+The cited composed native scenarios passed with unmodified CodeFlash and
+explicit RAM, without replacement callees or peripheral-model extensions.
+The separate reverse-handoff probe reached the documented unmapped SEGFLAG
+write; full programming handoff is not claimed as executed.
+Independent four-stage A/B rebuilds and signature finalization matched.
+Canonical inventory, corpus, semantic coverage and function-discovery outputs
+were regenerated; live coverage and project parity passed. Matching project
+and corpus were promoted after clean teardown.
 
 Coverage, function-boundary, D5 provenance, assist-oracle, command-cone,
 B6 composition/end-to-end/ingress, CodeFlash, external-ingress, retained-log
 reconciliation, protected030 transmit, complete EPS transmit and application
-RAM-loader gates passed, as did the protected-B6 acceptance ladder. Rebuilt
-decompilation retains both record103 staging arguments and the typed
-service/subfunction selection through callback dispatch.
+RAM-loader gates passed, as did the protected-B6 acceptance ladder. Rebuilt C
+preserves typed qualifier callbacks/state and full-register mode/readiness
+returns. The ingress producer's obsolete symbol/temporary-name assertions
+were removed; an exact instruction check preserves the identity-publication
+call and its unconditional continuation into application initialization.
 Static-only reviews remain **recovered**; **verified** applies to the cited
 executed assertions, not every branch in an annotated function.
 Retained-log regeneration reported corrupted events on historical route
 `0000001c--574c06b528`; raw captures were unchanged. This checkpoint does not
 establish physical persistence, input freshness, vehicle reachability or
 whole-image semantic closure.
+
+The preceding `013d0087` checkpoint contains diagnostic admission, configured
+application writes and routine lifecycles, with composed native execution,
+independent rebuilds and matching promoted evidence. Record103 staging and
+service/subfunction selection retain their recovered argument contracts.
 
 The preceding `afa19f4b` checkpoint contains dynamic-compensation generations,
 paired-source monitors and transmit publication. Its native compositions,

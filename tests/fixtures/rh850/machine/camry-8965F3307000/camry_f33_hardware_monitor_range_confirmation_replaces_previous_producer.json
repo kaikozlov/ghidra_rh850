@@ -1,0 +1,174 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_hardware_monitor_range_confirmation_replaces_previous_producer",
+  "entry": {
+    "role": "Real 4110C source triplet engine and slot10 replacement at strict failure200 boundary; prior kind1D is an explicitly initialized previous-producer publication. No hardware identity, freshness, startup or repeated scheduler timing claim.",
+    "scope": "resolved-address",
+    "address": "0x4110c"
+  },
+  "max_instructions": 12000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xfe00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1800",
+      "size": 2048,
+      "fill": 165,
+      "evidence": "isolated initialized stack"
+    },
+    {
+      "address": "0xfebe5f00",
+      "size": 11520,
+      "fill": 0,
+      "evidence": "explicit application snapshot, diagnostics, monitor/action state; no ROM replacement"
+    },
+    {
+      "address": "0xfebe6848",
+      "hex": "5a",
+      "evidence": "outer readiness latch already complete; no hardware admission setup"
+    },
+    {
+      "address": "0xfebe64d0",
+      "hex": "02",
+      "evidence": "observed channel0 state2"
+    },
+    {
+      "address": "0xfebe64d8",
+      "hex": "02",
+      "evidence": "requested channel0 state2"
+    },
+    {
+      "address": "0xfebe6620",
+      "hex": "04000000",
+      "evidence": "requested bit2 set and bit1 clear"
+    },
+    {
+      "address": "0xfebe661c",
+      "hex": "04000000",
+      "evidence": "observed bit2 set and bit1 clear"
+    },
+    {
+      "address": "0xfebe65f2",
+      "hex": "5a",
+      "evidence": "range-monitor admission"
+    },
+    {
+      "address": "0xfebe6450",
+      "hex": "60ea30753075",
+      "evidence": "first staged source above54526; other sources inside inclusive range"
+    },
+    {
+      "address": "0xfebe7694",
+      "hex": "ff000000c800c800",
+      "evidence": "first source at fail boundary; pending has no callback before strict crossing"
+    },
+    {
+      "address": "0xfebe769c",
+      "hex": "0000010000000000",
+      "evidence": "second source terminal healthy (pass1>0)"
+    },
+    {
+      "address": "0xfebe76a4",
+      "hex": "0000010000000000",
+      "evidence": "third source terminal healthy"
+    },
+    {
+      "address": "0xfebe82d4",
+      "hex": "01",
+      "evidence": "real diagnostic failure callback lifecycle-inhibited, action update independent"
+    },
+    {
+      "address": "0xfebe7278",
+      "hex": "02004000440440210100a5a5",
+      "evidence": "prior producer slot10 kind1D and tail canary; not an OR accumulator across invocations"
+    },
+    {
+      "address": "0xfebe7398",
+      "hex": "000000000000000000003c3c",
+      "evidence": "retained tail canary"
+    },
+    {
+      "address": "0xfebe7150",
+      "hex": "fdff",
+      "evidence": "prior current mode complement"
+    },
+    {
+      "address": "0xfebe71b0",
+      "hex": "feff",
+      "evidence": "prior current class complement"
+    },
+    {
+      "address": "0xfebe71d6",
+      "hex": "5a",
+      "evidence": "prior current slot10 selected"
+    }
+  ],
+  "checks": [
+    {
+      "name": "real monitor and nested callbacks return",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "stack restored",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "strict failure boundary",
+      "kind": "memory",
+      "address": "0xfebe7694",
+      "size": 8,
+      "equals_hex": "22000000c900c900"
+    },
+    {
+      "name": "shared-slot current action replacement not cross-producer OR",
+      "kind": "memory",
+      "address": "0xfebe7278",
+      "size": 12,
+      "equals_hex": "02004000050440210100a5a5"
+    },
+    {
+      "name": "retained record only changes on action publication",
+      "kind": "memory",
+      "address": "0xfebe7398",
+      "size": 12,
+      "equals_hex": "020040004404402101003c3c"
+    },
+    {
+      "name": "high-range event selection occurs only when predicate runs",
+      "kind": "memory",
+      "address": "0xfebe684a",
+      "size": 2,
+      "equals_hex": "6600"
+    },
+    {
+      "name": "last scratch events belong to third source",
+      "kind": "memory",
+      "address": "0xfebe76ac",
+      "size": 6,
+      "equals_hex": "68006b003075"
+    },
+    {
+      "name": "diagnostic lifecycle inhibits failure bitmap",
+      "kind": "memory",
+      "address": "0xfebe6090",
+      "size": 48,
+      "equals_hex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ]
+}

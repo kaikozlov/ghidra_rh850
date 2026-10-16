@@ -4735,17 +4735,6 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         .setComment("Index low8(request_id), without a local bounds check. Clear only5AA5; preserve pendingA55A and "
             + "every other value. Cancellation after materialization therefore does not revoke an unaccepted "
             + "request.");
-    semanticFunction(0xB1808L, "f33_advance_application_mode", v)
-        .setComment("Family-specific prioritized mode FSM. Running families prioritize accepted event0/1 over "
-            + "diagnostic event9, with family-local service/transition requests below them. Acknowledgement is "
-            + "selected-ID/complement qualified; losing pending requests remain. Submode workers and OEM state "
-            + "meanings remain separate from this recovered dispatch contract.");
-    semanticFunction(0xB16F4L, "f33_transition_application_mode", v,
-        new ParameterImpl("new_mode", u16, currentProgram))
-        .setComment("Use AEB00 entry/exit pairs by mode high byte. Execute old-family exit, then new-family entry, then "
-            + "publish redundant live modeB11A/B0A0/B0A4. Callbacks therefore see the old live mode. Mode "
-            + "snapshotE8CC and per-task cached modes update separately; request-slot effects are not "
-            + "instantaneous hardware state.");
     semanticFunction(0x3C232L, "f33_route_fault_action_mode_request", v,
         new ParameterImpl("actions", u32, currentProgram))
         .setComment("Hard action bit0 or gatedbit1 latchesB190 and requests event0 only when publishedEB9A==0. "
@@ -4974,6 +4963,1616 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         "Scalar3400 (D48), loaded by63ABC and passed to71C68. "
         + "Not a pointer into the instruction atD46.");
   }
+  private void annotateComposedMonitorLayouts() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    CategoryPath category = new CategoryPath("/CamryF33");
+    FunctionDefinitionDataType predicate = new FunctionDefinitionDataType(category, "F33MonitorPredicate");
+    predicate.setReturnType(u32);
+    FunctionDefinitionDataType action = new FunctionDefinitionDataType(category, "F33MonitorAction");
+    action.setReturnType(v);
+    DataType predicatePointer = new PointerDataType(predicate, 4);
+    DataType actionPointer = new PointerDataType(action, 4);
+    StructureDataType terminalMonitorState = new StructureDataType(category, "F33TerminalMonitorState", 0);
+    terminalMonitorState.setPackingEnabled(true);
+    terminalMonitorState.add(u8, "status", null);
+    terminalMonitorState.add(u8, "padding", null);
+    terminalMonitorState.add(u16, "passing_count", null);
+    terminalMonitorState.add(u16, "failing_count", null);
+    terminalMonitorState.add(u16, "failing_high_water", null);
+    resolve(terminalMonitorState);
+    StructureDataType latchedMonitorState = new StructureDataType(category, "F33LatchedMonitorState", 0);
+    latchedMonitorState.setPackingEnabled(true);
+    latchedMonitorState.add(u32, "packed_status", null);
+    latchedMonitorState.add(u16, "passing_count", null);
+    latchedMonitorState.add(u16, "failing_count", null);
+    latchedMonitorState.add(u16, "failing_high_water", null);
+    resolve(latchedMonitorState);
+    StructureDataType recoverableMonitorState = new StructureDataType(category, "F33RecoverableMonitorState", 0);
+    recoverableMonitorState.setPackingEnabled(true);
+    recoverableMonitorState.add(u32, "packed_status", null);
+    recoverableMonitorState.add(u16, "passing_count", null);
+    recoverableMonitorState.add(u16, "failing_count", null);
+    recoverableMonitorState.add(u16, "failing_high_water", null);
+    recoverableMonitorState.add(u16, "recovery_count", null);
+    resolve(recoverableMonitorState);
+    StructureDataType windowedMonitorState = new StructureDataType(category, "F33WindowedMonitorState", 0);
+    windowedMonitorState.setPackingEnabled(true);
+    windowedMonitorState.add(u32, "packed_status", null);
+    windowedMonitorState.add(u16, "passing_count", null);
+    windowedMonitorState.add(u16, "passing_window", null);
+    windowedMonitorState.add(u16, "failing_count", null);
+    windowedMonitorState.add(u16, "failing_window", null);
+    windowedMonitorState.add(u16, "failing_high_water", null);
+    resolve(windowedMonitorState);
+    StructureDataType monitorRecoveryScratch = new StructureDataType(category, "F33MonitorRecoveryScratch", 0);
+    monitorRecoveryScratch.setPackingEnabled(true);
+    monitorRecoveryScratch.add(u16, "passing_count", null);
+    monitorRecoveryScratch.add(u16, "opaque_02", null);
+    monitorRecoveryScratch.add(u16, "failing_count", null);
+    monitorRecoveryScratch.add(u16, "failing_high_water", null);
+    monitorRecoveryScratch.add(u16, "opaque_08", null);
+    monitorRecoveryScratch.add(u16, "recovery_count", null);
+    monitorRecoveryScratch.add(u16, "opaque_0c", null);
+    monitorRecoveryScratch.add(u16, "opaque_0e", null);
+    monitorRecoveryScratch.add(u16, "opaque_10", null);
+    resolve(monitorRecoveryScratch);
+    StructureDataType monitorLimits = new StructureDataType(category, "F33MonitorLimits", 0);
+    monitorLimits.setPackingEnabled(true);
+    monitorLimits.add(u16, "passing_limit", null);
+    monitorLimits.add(u16, "failing_limit", null);
+    resolve(monitorLimits);
+    StructureDataType recoverableMonitorLimits = new StructureDataType(category, "F33RecoverableMonitorLimits", 0);
+    recoverableMonitorLimits.setPackingEnabled(true);
+    recoverableMonitorLimits.add(u16, "passing_limit", null);
+    recoverableMonitorLimits.add(u16, "failing_limit", null);
+    recoverableMonitorLimits.add(u16, "recovery_limit", null);
+    resolve(recoverableMonitorLimits);
+    StructureDataType windowedMonitorLimits = new StructureDataType(category, "F33WindowedMonitorLimits", 0);
+    windowedMonitorLimits.setPackingEnabled(true);
+    windowedMonitorLimits.add(u16, "passing_limit", null);
+    windowedMonitorLimits.add(u16, "passing_window_limit", null);
+    windowedMonitorLimits.add(u16, "failing_limit", null);
+    windowedMonitorLimits.add(u16, "failing_window_limit", null);
+    resolve(windowedMonitorLimits);
+    StructureDataType terminalMonitorCallbacks = new StructureDataType(category, "F33TerminalMonitorCallbacks", 0);
+    terminalMonitorCallbacks.setPackingEnabled(true);
+    terminalMonitorCallbacks.add(predicatePointer, "classify", null);
+    terminalMonitorCallbacks.add(actionPointer, "healthy_observed", null);
+    terminalMonitorCallbacks.add(actionPointer, "failed", null);
+    resolve(terminalMonitorCallbacks);
+    StructureDataType twoSidedMonitorCallbacks = new StructureDataType(category, "F33TwoSidedMonitorCallbacks", 0);
+    twoSidedMonitorCallbacks.setPackingEnabled(true);
+    twoSidedMonitorCallbacks.add(predicatePointer, "classify_normal", null);
+    twoSidedMonitorCallbacks.add(predicatePointer, "classify_failing", null);
+    twoSidedMonitorCallbacks.add(actionPointer, "enter_passing", null);
+    twoSidedMonitorCallbacks.add(actionPointer, "leave_pending_passing", null);
+    twoSidedMonitorCallbacks.add(actionPointer, "confirm_passing", null);
+    twoSidedMonitorCallbacks.add(actionPointer, "leave_confirmed_passing", null);
+    twoSidedMonitorCallbacks.add(actionPointer, "enter_failing", null);
+    twoSidedMonitorCallbacks.add(actionPointer, "leave_pending_failing", null);
+    twoSidedMonitorCallbacks.add(actionPointer, "confirm_failing", null);
+    twoSidedMonitorCallbacks.add(actionPointer, "repeat_pending_passing", null);
+    twoSidedMonitorCallbacks.add(actionPointer, "repeat_confirmed_passing", null);
+    twoSidedMonitorCallbacks.add(actionPointer, "repeat_pending_failing", null);
+    twoSidedMonitorCallbacks.add(actionPointer, "repeat_confirmed_failing", null);
+    resolve(twoSidedMonitorCallbacks);
+    StructureDataType recoverableMonitorCallbacks = new StructureDataType(category, "F33RecoverableMonitorCallbacks", 0);
+    recoverableMonitorCallbacks.setPackingEnabled(true);
+    recoverableMonitorCallbacks.add(predicatePointer, "classify_normal", null);
+    recoverableMonitorCallbacks.add(predicatePointer, "classify_failing", null);
+    recoverableMonitorCallbacks.add(predicatePointer, "classify_recovery", null);
+    recoverableMonitorCallbacks.add(actionPointer, "enter_passing", null);
+    recoverableMonitorCallbacks.add(actionPointer, "leave_pending_passing", null);
+    recoverableMonitorCallbacks.add(actionPointer, "confirm_passing", null);
+    recoverableMonitorCallbacks.add(actionPointer, "leave_confirmed_passing", null);
+    recoverableMonitorCallbacks.add(actionPointer, "enter_failing", null);
+    recoverableMonitorCallbacks.add(actionPointer, "leave_pending_failing", null);
+    recoverableMonitorCallbacks.add(actionPointer, "confirm_failing", null);
+    recoverableMonitorCallbacks.add(actionPointer, "recover_confirmed_failing", null);
+    recoverableMonitorCallbacks.add(actionPointer, "repeat_pending_passing", null);
+    recoverableMonitorCallbacks.add(actionPointer, "repeat_confirmed_passing", null);
+    recoverableMonitorCallbacks.add(actionPointer, "repeat_pending_failing", null);
+    recoverableMonitorCallbacks.add(actionPointer, "repeat_confirmed_failing", null);
+    resolve(recoverableMonitorCallbacks);
+  }
+  private void annotateTerminalMonitorComposition() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType monitorLimitsType = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33MonitorLimits");
+    DataType F33MonitorLimitsPointer = new PointerDataType(currentProgram.getDataTypeManager().getDataType("/CamryF33/F33MonitorLimits"), 4);
+    DataType terminalMonitorCallbacksType = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33TerminalMonitorCallbacks");
+    DataType F33TerminalMonitorCallbacksPointer = new PointerDataType(currentProgram.getDataTypeManager().getDataType("/CamryF33/F33TerminalMonitorCallbacks"), 4);
+    DataType terminalMonitorStateType = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33TerminalMonitorState");
+    DataType F33TerminalMonitorStatePointer = new PointerDataType(currentProgram.getDataTypeManager().getDataType("/CamryF33/F33TerminalMonitorState"), 4);
+    semanticFunction(0x3E624L, "f33_step_delayed_status_bit_triplet_a", v)
+        .setComment("Configured mode0205 channela monitor; 3 eight-byte states at759C. Own qualification6764 bit0 holds "
+            + "state without reset. Gate baseline_one (numeric states, no physical meaning); threshold "
+            + "pass2/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot10 with "
+            + "kind(s)0x1d; no confirmed source leaves previous action untouched. Callback table283C4; failure "
+            + "events0x57,0x58,0x59. See configured-family matrix for readiness sequencing and exact predicate.");
+    semanticFunction(0x3E77EL, "f33_classify_delayed_status_bit_triplet_a", u32)
+        .setComment("No-argument configured classifier. Gate baseline_one: requested==0 && observed==0 && "
+            + "bit(6620,b+2)==1 && bit(661C,b+2)==1 && bit(6628,b+1)==0 && bit(6614,0)==1 &&65F0==5A. Closed gate "
+            + "returns44, otherwise22 iff scratch_byte==5A, else11. Full threshold partitions preserved in ROM. No "
+            + "physical units/source identity asserted.");
+    semanticFunction(0x3E7D4L, "f33_record_delayed_status_bit_triplet_a_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection is mutable source scratch before each engine invocation.");
+    semanticFunction(0x3E7E4L, "f33_record_delayed_status_bit_triplet_a_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection is mutable source scratch before each engine invocation.");
+    semanticFunction(0x3E8BCL, "f33_step_delayed_status_bit_triplet_b", v)
+        .setComment("Configured mode0205 channelb monitor; 3 eight-byte states at75B8. Own qualification6764 bit1 holds "
+            + "state without reset. Gate baseline_one (numeric states, no physical meaning); threshold "
+            + "pass2/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot11 with "
+            + "kind(s)0x1e; no confirmed source leaves previous action untouched. Callback table283D0; failure "
+            + "events0x5d,0x5e,0x5f. See configured-family matrix for readiness sequencing and exact predicate.");
+    semanticFunction(0x3EA1CL, "f33_classify_delayed_status_bit_triplet_b", u32)
+        .setComment("No-argument configured classifier. Gate baseline_one: requested==0 && observed==0 && "
+            + "bit(6620,b+2)==1 && bit(661C,b+2)==1 && bit(6628,b+1)==0 && bit(6614,0)==1 &&65F0==5A. Closed gate "
+            + "returns44, otherwise22 iff scratch_byte==5A, else11. Full threshold partitions preserved in ROM. No "
+            + "physical units/source identity asserted.");
+    semanticFunction(0x3EA72L, "f33_record_delayed_status_bit_triplet_b_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection is mutable source scratch before each engine invocation.");
+    semanticFunction(0x3EA82L, "f33_record_delayed_status_bit_triplet_b_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection is mutable source scratch before each engine invocation.");
+    semanticFunction(0x3EB04L, "f33_step_matched_state2_status_bit_triplet_a", v)
+        .setComment("Configured mode020D channela monitor; 3 eight-byte states at75D4. Own qualification6764 bit0 holds "
+            + "state without reset. Gate off_both2 (numeric states, no physical meaning); threshold pass2/fail200 "
+            + "with strict crossings. Any confirmed22 retains/replaces shared slot10 with kind(s)0x1b,0x32; no "
+            + "confirmed source leaves previous action untouched. Callback table283DC; failure "
+            + "events0xce,0xcf,0xd0. See configured-family matrix for readiness sequencing and exact predicate.");
+    semanticFunction(0x3EC40L, "f33_classify_matched_state2_status_bit_triplet_a", u32)
+        .setComment("No-argument configured classifier. Gate off_both2: requested==2 &&observed==2 "
+            + "&&(6620&(6<<b))==(4<<b) &&(661C&(6<<b))==(4<<b) &&bit(6628,b+1)==0 &&6614.bit0==0 && "
+            + "own65F6/65F7==5A. Closed gate returns44, otherwise22 iff scratch_byte==5A, else11. Full threshold "
+            + "partitions preserved in ROM. No physical units/source identity asserted.");
+    semanticFunction(0x3ECA2L, "f33_record_matched_state2_status_bit_triplet_a_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection is mutable source scratch before each engine invocation.");
+    semanticFunction(0x3ECB2L, "f33_record_matched_state2_status_bit_triplet_a_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection is mutable source scratch before each engine invocation.");
+    semanticFunction(0x3ED34L, "f33_step_matched_state2_status_bit_triplet_b", v)
+        .setComment("Configured mode020D channelb monitor; 3 eight-byte states at75F0. Own qualification6764 bit1 holds "
+            + "state without reset. Gate off_both2 (numeric states, no physical meaning); threshold pass2/fail200 "
+            + "with strict crossings. Any confirmed22 retains/replaces shared slot11 with kind(s)0x1c,0x32; no "
+            + "confirmed source leaves previous action untouched. Callback table283E8; failure "
+            + "events0xdb,0xdc,0xdd. See configured-family matrix for readiness sequencing and exact predicate.");
+    semanticFunction(0x3EE70L, "f33_classify_matched_state2_status_bit_triplet_b", u32)
+        .setComment("No-argument configured classifier. Gate off_both2: requested==2 &&observed==2 "
+            + "&&(6620&(6<<b))==(4<<b) &&(661C&(6<<b))==(4<<b) &&bit(6628,b+1)==0 &&6614.bit0==0 && "
+            + "own65F6/65F7==5A. Closed gate returns44, otherwise22 iff scratch_byte==5A, else11. Full threshold "
+            + "partitions preserved in ROM. No physical units/source identity asserted.");
+    semanticFunction(0x3EED6L, "f33_record_matched_state2_status_bit_triplet_b_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection is mutable source scratch before each engine invocation.");
+    semanticFunction(0x3EEE6L, "f33_record_matched_state2_status_bit_triplet_b_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection is mutable source scratch before each engine invocation.");
+    semanticFunction(0x3F13AL, "f33_step_coupled_sample_threshold_both", v)
+        .setComment("Configured mode0208 coupled-channel monitor; qualification6764&3 resets engine then forces status0 "
+            + "rather than holding.. Gate coupled (numeric states, no physical meaning); threshold pass0/fail200 "
+            + "with strict crossings. Any confirmed22 retains/replaces shared slot9 with kind(s)0x1a; no confirmed "
+            + "source leaves previous action untouched. Callback table283F4; failure events0x60,0x61. See "
+            + "configured-family matrix for readiness sequencing and exact predicate.");
+    semanticFunction(0x3F1C8L, "f33_classify_coupled_sample_threshold_both", u32)
+        .setComment("No-argument configured classifier. Gate coupled: 64D8==2 &&64D9==2 &&64D0==0 &&64D1==0 "
+            + "&&(6620&60006)==20002 &&(661C&40004)==40004 &&(6628&20002)==20002 &&6614.bit0==0 &&65F0==5A; hex "
+            + "masks. Closed gate returns44, otherwise22 iff 66B2<1326 &&66B4<1326 (configured equal threshold "
+            + "pairs;66B8 partition3328 covers all values), else11. Full threshold partitions preserved in ROM. No "
+            + "physical units/source identity asserted.");
+    semanticFunction(0x3F27CL, "f33_record_coupled_sample_threshold_both_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection 0x60,0x61.");
+    semanticFunction(0x3F294L, "f33_record_coupled_sample_threshold_both_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection 0x60,0x61.");
+    semanticFunction(0x3F3D2L, "f33_step_command_status_bit_clear_a", v)
+        .setComment("Configured mode0206 channela monitor; 1 eight-byte states at7614. Own qualification6764 bit0 holds "
+            + "state without reset. Gate baseline_zero (numeric states, no physical meaning); threshold "
+            + "pass2/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot10 with "
+            + "kind(s)0x1d; no confirmed source leaves previous action untouched. Callback table28400; failure "
+            + "events0x74. See configured-family matrix for readiness sequencing and exact predicate.");
+    semanticFunction(0x3F452L, "f33_classify_command_status_bit_clear_a", u32)
+        .setComment("No-argument configured classifier. Gate baseline_zero: same as baseline_one except6614.bit0==0. "
+            + "Closed gate returns44, otherwise22 iff 8291==0, else11. Full threshold partitions preserved in ROM. "
+            + "No physical units/source identity asserted.");
+    semanticFunction(0x3F4A6L, "f33_record_command_status_bit_clear_a_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection 0x74.");
+    semanticFunction(0x3F4B6L, "f33_record_command_status_bit_clear_a_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection 0x74.");
+    semanticFunction(0x3F5E8L, "f33_step_command_status_bit_clear_b", v)
+        .setComment("Configured mode0206 channelb monitor; 1 eight-byte states at761C. Own qualification6764 bit1 holds "
+            + "state without reset. Gate baseline_zero (numeric states, no physical meaning); threshold "
+            + "pass2/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot11 with "
+            + "kind(s)0x1e; no confirmed source leaves previous action untouched. Callback table2840C; failure "
+            + "events0x75. See configured-family matrix for readiness sequencing and exact predicate.");
+    semanticFunction(0x3F668L, "f33_classify_command_status_bit_clear_b", u32)
+        .setComment("No-argument configured classifier. Gate baseline_zero: same as baseline_one except6614.bit0==0. "
+            + "Closed gate returns44, otherwise22 iff 8292==0, else11. Full threshold partitions preserved in ROM. "
+            + "No physical units/source identity asserted.");
+    semanticFunction(0x3F6BCL, "f33_record_command_status_bit_clear_b_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection 0x75.");
+    semanticFunction(0x3F6CCL, "f33_record_command_status_bit_clear_b_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection 0x75.");
+    semanticFunction(0x3F744L, "f33_step_bounded_sample_or_status_a", v)
+        .setComment("Configured mode0201 channela monitor; 1 eight-byte states at7624. Own qualification6764 bit0 holds "
+            + "state without reset. Gate baseline_zero (numeric states, no physical meaning); threshold "
+            + "pass2/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot10 with "
+            + "kind(s)0x1d; no confirmed source leaves previous action untouched. Callback table28418; failure "
+            + "events0x89. See configured-family matrix for readiness sequencing and exact predicate.");
+    semanticFunction(0x3F7D8L, "f33_classify_bounded_sample_or_status_a", u32)
+        .setComment("No-argument configured classifier. Gate baseline_zero: same as baseline_one except6614.bit0==0. "
+            + "Closed gate returns44, otherwise22 iff 66BC<351 || 8284==5A, else11. Full threshold partitions "
+            + "preserved in ROM. No physical units/source identity asserted.");
+    semanticFunction(0x3F848L, "f33_record_bounded_sample_or_status_a_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection 0x89.");
+    semanticFunction(0x3F858L, "f33_record_bounded_sample_or_status_a_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection 0x89.");
+    semanticFunction(0x3F8D0L, "f33_step_bounded_sample_or_status_b", v)
+        .setComment("Configured mode0201 channelb monitor; 1 eight-byte states at762C. Own qualification6764 bit1 holds "
+            + "state without reset. Gate baseline_zero (numeric states, no physical meaning); threshold "
+            + "pass2/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot11 with "
+            + "kind(s)0x1e; no confirmed source leaves previous action untouched. Callback table28424; failure "
+            + "events0x8a. See configured-family matrix for readiness sequencing and exact predicate.");
+    semanticFunction(0x3F964L, "f33_classify_bounded_sample_or_status_b", u32)
+        .setComment("No-argument configured classifier. Gate baseline_zero: same as baseline_one except6614.bit0==0. "
+            + "Closed gate returns44, otherwise22 iff 66BE<351 || 8283==5A, else11. Full threshold partitions "
+            + "preserved in ROM. No physical units/source identity asserted.");
+    semanticFunction(0x3F9D4L, "f33_record_bounded_sample_or_status_b_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection 0x8a.");
+    semanticFunction(0x3F9E4L, "f33_record_bounded_sample_or_status_b_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection 0x8a.");
+    semanticFunction(0x3FABCL, "f33_step_requested_state_sample_threshold_a", v)
+        .setComment("Configured mode0203 channela monitor; 1 eight-byte states at7634. Own qualification6764 bit0 holds "
+            + "state without reset. Gate requested2_one (numeric states, no physical meaning); threshold "
+            + "pass0/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot10 with "
+            + "kind(s)0x1d; no confirmed source leaves previous action untouched. Callback table28430; failure "
+            + "events0xef. See configured-family matrix for readiness sequencing and exact predicate.");
+    semanticFunction(0x3FB3CL, "f33_classify_requested_state_sample_threshold_a", u32)
+        .setComment("No-argument configured classifier. Gate requested2_one: requested==2 &&observed==0 "
+            + "&&bit(6620,b+2)==1 &&bit(661C,b+2)==1 &&bit(6628,b+1)==0 &&6614.bit0==1 &&65F0==5A. Closed gate "
+            + "returns44, otherwise22 iff 66B2>1247 (both3328 partitions), else11. Full threshold partitions "
+            + "preserved in ROM. No physical units/source identity asserted.");
+    semanticFunction(0x3FBAEL, "f33_record_requested_state_sample_threshold_a_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection 0xef.");
+    semanticFunction(0x3FBBEL, "f33_record_requested_state_sample_threshold_a_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection 0xef.");
+    semanticFunction(0x3FC96L, "f33_step_requested_state_sample_threshold_b", v)
+        .setComment("Configured mode0203 channelb monitor; 1 eight-byte states at7644. Own qualification6764 bit1 holds "
+            + "state without reset. Gate requested2_one (numeric states, no physical meaning); threshold "
+            + "pass0/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot11 with "
+            + "kind(s)0x1e; no confirmed source leaves previous action untouched. Callback table2843C; failure "
+            + "events0xf0. See configured-family matrix for readiness sequencing and exact predicate.");
+    semanticFunction(0x3FD16L, "f33_classify_requested_state_sample_threshold_b", u32)
+        .setComment("No-argument configured classifier. Gate requested2_one: requested==2 &&observed==0 "
+            + "&&bit(6620,b+2)==1 &&bit(661C,b+2)==1 &&bit(6628,b+1)==0 &&6614.bit0==1 &&65F0==5A. Closed gate "
+            + "returns44, otherwise22 iff 66B4>1247 (both3328 partitions), else11. Full threshold partitions "
+            + "preserved in ROM. No physical units/source identity asserted.");
+    semanticFunction(0x3FD88L, "f33_record_requested_state_sample_threshold_b_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection 0xf0.");
+    semanticFunction(0x3FD98L, "f33_record_requested_state_sample_threshold_b_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection 0xf0.");
+    semanticFunction(0x3FDDEL, "f33_step_asserted_state_sample_threshold_a", v)
+        .setComment("Configured mode0209 channela monitor; 1 eight-byte states at67F0. Own qualification6764 bit0 holds "
+            + "state without reset. Gate asserted_zero (numeric states, no physical meaning); threshold "
+            + "pass0/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot10 with "
+            + "kind(s)0x1d; no confirmed source leaves previous action untouched. Callback table28448; failure "
+            + "events0x9d. See configured-family matrix for readiness sequencing and exact predicate.");
+    semanticFunction(0x3FE4AL, "f33_classify_asserted_state_sample_threshold_a", u32)
+        .setComment("No-argument configured classifier. Gate asserted_zero: requested==2 &&observed==0 "
+            + "&&(6620&(6<<b))==(2<<b) &&bit(661C,b+2)==1 &&bit(6628,b+1)==1 &&6614.bit0==0 &&65F0==5A. Closed gate "
+            + "returns44, otherwise22 iff 66B2<965 (configured equal thresholds in both3328 partitions), else11. "
+            + "Full threshold partitions preserved in ROM. No physical units/source identity asserted.");
+    semanticFunction(0x3FEC2L, "f33_record_asserted_state_sample_threshold_a_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection 0x9d.");
+    semanticFunction(0x3FED2L, "f33_record_asserted_state_sample_threshold_a_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection 0x9d.");
+    semanticFunction(0x3FF18L, "f33_step_asserted_state_sample_threshold_b", v)
+        .setComment("Configured mode0209 channelb monitor; 1 eight-byte states at67F8. Own qualification6764 bit1 holds "
+            + "state without reset. Gate asserted_zero (numeric states, no physical meaning); threshold "
+            + "pass0/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot11 with "
+            + "kind(s)0x1e; no confirmed source leaves previous action untouched. Callback table28454; failure "
+            + "events0xc7. See configured-family matrix for readiness sequencing and exact predicate.");
+    semanticFunction(0x3FF84L, "f33_classify_asserted_state_sample_threshold_b", u32)
+        .setComment("No-argument configured classifier. Gate asserted_zero: requested==2 &&observed==0 "
+            + "&&(6620&(6<<b))==(2<<b) &&bit(661C,b+2)==1 &&bit(6628,b+1)==1 &&6614.bit0==0 &&65F0==5A. Closed gate "
+            + "returns44, otherwise22 iff 66B4<965 (configured equal thresholds in both3328 partitions), else11. "
+            + "Full threshold partitions preserved in ROM. No physical units/source identity asserted.");
+    semanticFunction(0x3FFFCL, "f33_record_asserted_state_sample_threshold_b_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection 0xc7.");
+    semanticFunction(0x4000CL, "f33_record_asserted_state_sample_threshold_b_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection 0xc7.");
+    semanticFunction(0x400D0L, "f33_step_sample_difference_window_a", v)
+        .setComment("Configured mode0200 channela monitor; 1 eight-byte states at7654. Own qualification6764 bit0 holds "
+            + "state without reset. Gate baseline_zero (numeric states, no physical meaning); threshold "
+            + "pass0/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot10 with "
+            + "kind(s)0x1d,0x32; no confirmed source leaves previous action untouched. Callback table28460; failure "
+            + "events0x79. See configured-family matrix for readiness sequencing and exact predicate.");
+    semanticFunction(0x40166L, "f33_classify_sample_difference_window_a", u32)
+        .setComment("No-argument configured classifier. Gate baseline_zero: same as baseline_one except6614.bit0==0. "
+            + "Closed gate returns44, otherwise22 iff (int32(uint16(66B8))-int32(uint16(66AE))>1180 &&66B8<=4736) "
+            + "|| (66AE<1055 &&66B8>4736), else11. Full threshold partitions preserved in ROM. No physical "
+            + "units/source identity asserted.");
+    semanticFunction(0x401DCL, "f33_record_sample_difference_window_a_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection 0x79.");
+    semanticFunction(0x401ECL, "f33_record_sample_difference_window_a_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection 0x79.");
+    semanticFunction(0x402B0L, "f33_step_sample_difference_window_b", v)
+        .setComment("Configured mode0200 channelb monitor; 1 eight-byte states at765C. Own qualification6764 bit1 holds "
+            + "state without reset. Gate baseline_zero (numeric states, no physical meaning); threshold "
+            + "pass0/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot11 with "
+            + "kind(s)0x1e,0x32; no confirmed source leaves previous action untouched. Callback table2846C; failure "
+            + "events0xb8. See configured-family matrix for readiness sequencing and exact predicate.");
+    semanticFunction(0x40346L, "f33_classify_sample_difference_window_b", u32)
+        .setComment("No-argument configured classifier. Gate baseline_zero: same as baseline_one except6614.bit0==0. "
+            + "Closed gate returns44, otherwise22 iff (int32(uint16(66B8))-int32(uint16(66B0))>1180 &&66B8<=4736) "
+            + "|| (66B0<1055 &&66B8>4736), else11. Full threshold partitions preserved in ROM. No physical "
+            + "units/source identity asserted.");
+    semanticFunction(0x403BCL, "f33_record_sample_difference_window_b_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection 0xb8.");
+    semanticFunction(0x403CCL, "f33_record_sample_difference_window_b_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection 0xb8.");
+    semanticFunction(0x40516L, "f33_step_matched_state2_status_bit_a", v)
+        .setComment("Configured mode020A channela monitor; 1 eight-byte states at7664. Own qualification6764 bit0 holds "
+            + "state without reset. Gate off_both2 (numeric states, no physical meaning); threshold pass2/fail200 "
+            + "with strict crossings. Any confirmed22 retains/replaces shared slot10 with kind(s)0x1d; no confirmed "
+            + "source leaves previous action untouched. Callback table28478; failure events0x78. See "
+            + "configured-family matrix for readiness sequencing and exact predicate.");
+    semanticFunction(0x40596L, "f33_classify_matched_state2_status_bit_a", u32)
+        .setComment("No-argument configured classifier. Gate off_both2: requested==2 &&observed==2 "
+            + "&&(6620&(6<<b))==(4<<b) &&(661C&(6<<b))==(4<<b) &&bit(6628,b+1)==0 &&6614.bit0==0 && "
+            + "own65F6/65F7==5A. Closed gate returns44, otherwise22 iff 8282==5A, else11. Full threshold partitions "
+            + "preserved in ROM. No physical units/source identity asserted.");
+    semanticFunction(0x405F8L, "f33_record_matched_state2_status_bit_a_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection 0x78.");
+    semanticFunction(0x40608L, "f33_record_matched_state2_status_bit_a_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection 0x78.");
+    semanticFunction(0x40752L, "f33_step_matched_state2_status_bit_b", v)
+        .setComment("Configured mode020A channelb monitor; 1 eight-byte states at766C. Own qualification6764 bit1 holds "
+            + "state without reset. Gate off_both2 (numeric states, no physical meaning); threshold pass2/fail200 "
+            + "with strict crossings. Any confirmed22 retains/replaces shared slot11 with kind(s)0x1e; no confirmed "
+            + "source leaves previous action untouched. Callback table28484; failure events0xc4. See "
+            + "configured-family matrix for readiness sequencing and exact predicate.");
+    semanticFunction(0x407D2L, "f33_classify_matched_state2_status_bit_b", u32)
+        .setComment("No-argument configured classifier. Gate off_both2: requested==2 &&observed==2 "
+            + "&&(6620&(6<<b))==(4<<b) &&(661C&(6<<b))==(4<<b) &&bit(6628,b+1)==0 &&6614.bit0==0 && "
+            + "own65F6/65F7==5A. Closed gate returns44, otherwise22 iff 8281==5A, else11. Full threshold partitions "
+            + "preserved in ROM. No physical units/source identity asserted.");
+    semanticFunction(0x40838L, "f33_record_matched_state2_status_bit_b_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection 0xc4.");
+    semanticFunction(0x40848L, "f33_record_matched_state2_status_bit_b_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection 0xc4.");
+    semanticFunction(0x408BEL, "f33_step_baseline_sample_threshold_a", v)
+        .setComment("Configured mode0202 channela monitor; 1 eight-byte states at7674. Own qualification6764 bit0 holds "
+            + "state without reset. Gate baseline_zero (numeric states, no physical meaning); threshold "
+            + "pass0/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot10 with "
+            + "kind(s)0x1d; no confirmed source leaves previous action untouched. Callback table28490; failure "
+            + "events0x9c. See configured-family matrix for readiness sequencing and exact predicate.");
+    semanticFunction(0x4093EL, "f33_classify_baseline_sample_threshold_a", u32)
+        .setComment("No-argument configured classifier. Gate baseline_zero: same as baseline_one except6614.bit0==0. "
+            + "Closed gate returns44, otherwise22 iff 66B2>1247 (both3328 partitions), else11. Full threshold "
+            + "partitions preserved in ROM. No physical units/source identity asserted.");
+    semanticFunction(0x409B0L, "f33_record_baseline_sample_threshold_a_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection 0x9c.");
+    semanticFunction(0x409C0L, "f33_record_baseline_sample_threshold_a_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection 0x9c.");
+    semanticFunction(0x40A36L, "f33_step_baseline_sample_threshold_b", v)
+        .setComment("Configured mode0202 channelb monitor; 1 eight-byte states at767C. Own qualification6764 bit1 holds "
+            + "state without reset. Gate baseline_zero (numeric states, no physical meaning); threshold "
+            + "pass0/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot11 with "
+            + "kind(s)0x1e; no confirmed source leaves previous action untouched. Callback table2849C; failure "
+            + "events0xc6. See configured-family matrix for readiness sequencing and exact predicate.");
+    semanticFunction(0x40AB6L, "f33_classify_baseline_sample_threshold_b", u32)
+        .setComment("No-argument configured classifier. Gate baseline_zero: same as baseline_one except6614.bit0==0. "
+            + "Closed gate returns44, otherwise22 iff 66B4>1247 (both3328 partitions), else11. Full threshold "
+            + "partitions preserved in ROM. No physical units/source identity asserted.");
+    semanticFunction(0x40B28L, "f33_record_baseline_sample_threshold_b_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection 0xc6.");
+    semanticFunction(0x40B38L, "f33_record_baseline_sample_threshold_b_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection 0xc6.");
+    semanticFunction(0x40C8EL, "f33_step_observed_state_sample_regions_a", v)
+        .setComment("Configured mode0207 channela monitor; 1 eight-byte states at7684. Own qualification6764 bit0 holds "
+            + "state without reset. Gate observed2_zero (numeric states, no physical meaning); threshold "
+            + "pass0/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot10 with "
+            + "kind(s)0x1d; no confirmed source leaves previous action untouched. Callback table284A8; failure "
+            + "events0x7b. See configured-family matrix for readiness sequencing and exact predicate.");
+    semanticFunction(0x40D0EL, "f33_classify_observed_state_sample_regions_a", u32)
+        .setComment("No-argument configured classifier. Gate observed2_zero: requested==0 &&observed==2 "
+            + "&&bit(6620,b+2)==1 &&(661C&(6<<b))==(2<<b) &&bit(6628,b+1)==1 &&6614.bit0==0 &&65F0==5A. Closed gate "
+            + "returns44, otherwise22 iff 66B2<886 ||66B2>6020 (six-region predicate partitions66B8 at2816/4736 "
+            + "with equal lower/upper thresholds), else11. Full threshold partitions preserved in ROM. No physical "
+            + "units/source identity asserted.");
+    semanticFunction(0x40DC2L, "f33_record_observed_state_sample_regions_a_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection 0x7b.");
+    semanticFunction(0x40DD2L, "f33_record_observed_state_sample_regions_a_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection 0x7b.");
+    semanticFunction(0x40F28L, "f33_step_observed_state_sample_regions_b", v)
+        .setComment("Configured mode0207 channelb monitor; 1 eight-byte states at768C. Own qualification6764 bit1 holds "
+            + "state without reset. Gate observed2_zero (numeric states, no physical meaning); threshold "
+            + "pass0/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot11 with "
+            + "kind(s)0x1e; no confirmed source leaves previous action untouched. Callback table284B4; failure "
+            + "events0xba. See configured-family matrix for readiness sequencing and exact predicate.");
+    semanticFunction(0x40FA8L, "f33_classify_observed_state_sample_regions_b", u32)
+        .setComment("No-argument configured classifier. Gate observed2_zero: requested==0 &&observed==2 "
+            + "&&bit(6620,b+2)==1 &&(661C&(6<<b))==(2<<b) &&bit(6628,b+1)==1 &&6614.bit0==0 &&65F0==5A. Closed gate "
+            + "returns44, otherwise22 iff 66B4<886 ||66B4>6020 (six-region predicate partitions66B8 at2816/4736 "
+            + "with equal lower/upper thresholds), else11. Full threshold partitions preserved in ROM. No physical "
+            + "units/source identity asserted.");
+    semanticFunction(0x41060L, "f33_record_observed_state_sample_regions_b_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection 0xba.");
+    semanticFunction(0x41070L, "f33_record_observed_state_sample_regions_b_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection 0xba.");
+    semanticFunction(0x4110CL, "f33_step_sample_range_triplet_a", v)
+        .setComment("Configured mode020B channela monitor; 3 eight-byte states at7694. Own qualification6764 bit0 holds "
+            + "state without reset. Gate range_both2 (numeric states, no physical meaning); threshold pass0/fail200 "
+            + "with strict crossings. Any confirmed22 retains/replaces shared slot10 with kind(s)0x1b; no confirmed "
+            + "source leaves previous action untouched. Callback table284C0; failure "
+            + "events0x66,0x67,0x68,0x69,0x6a,0x6b. See configured-family matrix for readiness sequencing and exact "
+            + "predicate.");
+    semanticFunction(0x41234L, "f33_classify_sample_range_triplet_a", u32)
+        .setComment("No-argument configured classifier. Gate range_both2: same as off_both2 but admission "
+            + "own65F2/65F3==5A. Closed gate returns44, otherwise22 iff scratch_u16>54526 selects first event; "
+            + "scratch_u16<10224 selects second event; inclusive10224..54526 healthy, else11. Full threshold "
+            + "partitions preserved in ROM. No physical units/source identity asserted.");
+    semanticFunction(0x412B4L, "f33_record_sample_range_triplet_a_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection is mutable source scratch before each engine invocation.");
+    semanticFunction(0x412CEL, "f33_record_sample_range_triplet_a_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection uses persistent684A/6852 written only by actually executed range "
+            + "predicate.");
+    semanticFunction(0x41376L, "f33_step_sample_range_triplet_b", v)
+        .setComment("Configured mode020B channelb monitor; 3 eight-byte states at76B4. Own qualification6764 bit1 holds "
+            + "state without reset. Gate range_both2 (numeric states, no physical meaning); threshold pass0/fail200 "
+            + "with strict crossings. Any confirmed22 retains/replaces shared slot11 with kind(s)0x1c; no confirmed "
+            + "source leaves previous action untouched. Callback table284CC; failure "
+            + "events0xf5,0xf6,0xf7,0xf8,0xf9,0xfa. See configured-family matrix for readiness sequencing and exact "
+            + "predicate.");
+    semanticFunction(0x4149EL, "f33_classify_sample_range_triplet_b", u32)
+        .setComment("No-argument configured classifier. Gate range_both2: same as off_both2 but admission "
+            + "own65F2/65F3==5A. Closed gate returns44, otherwise22 iff same unsigned range10224..54526; "
+            + "first/second eventF5..F7/F8..FA, else11. Full threshold partitions preserved in ROM. No physical "
+            + "units/source identity asserted.");
+    semanticFunction(0x41522L, "f33_record_sample_range_triplet_b_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection is mutable source scratch before each engine invocation.");
+    semanticFunction(0x4153CL, "f33_record_sample_range_triplet_b_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection uses persistent684A/6852 written only by actually executed range "
+            + "predicate.");
+    semanticFunction(0x415C0L, "f33_step_startup_status_bit_triplet_a", v)
+        .setComment("Configured mode0204 channela monitor; 3 eight-byte states at76D4. Own qualification6764 bit0 holds "
+            + "state without reset. Gate baseline_one (numeric states, no physical meaning); threshold "
+            + "pass2/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot10 with "
+            + "kind(s)0x1d; no confirmed source leaves previous action untouched. Callback table284D8; failure "
+            + "events0x54,0x55,0x56. See configured-family matrix for readiness sequencing and exact predicate.");
+    semanticFunction(0x4170EL, "f33_classify_startup_status_bit_triplet_a", u32)
+        .setComment("No-argument configured classifier. Gate baseline_one: requested==0 && observed==0 && "
+            + "bit(6620,b+2)==1 && bit(661C,b+2)==1 && bit(6628,b+1)==0 && bit(6614,0)==1 &&65F0==5A. Closed gate "
+            + "returns44, otherwise22 iff scratch_byte==5A, else11. Full threshold partitions preserved in ROM. No "
+            + "physical units/source identity asserted.");
+    semanticFunction(0x41764L, "f33_record_startup_status_bit_triplet_a_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection is mutable source scratch before each engine invocation.");
+    semanticFunction(0x41774L, "f33_record_startup_status_bit_triplet_a_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection is mutable source scratch before each engine invocation.");
+    semanticFunction(0x417F8L, "f33_step_startup_status_bit_triplet_b", v)
+        .setComment("Configured mode0204 channelb monitor; 3 eight-byte states at76F0. Own qualification6764 bit1 holds "
+            + "state without reset. Gate baseline_one (numeric states, no physical meaning); threshold "
+            + "pass2/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot11 with "
+            + "kind(s)0x1e; no confirmed source leaves previous action untouched. Callback table284E4; failure "
+            + "events0x5a,0x5b,0x5c. See configured-family matrix for readiness sequencing and exact predicate.");
+    semanticFunction(0x41946L, "f33_classify_startup_status_bit_triplet_b", u32)
+        .setComment("No-argument configured classifier. Gate baseline_one: requested==0 && observed==0 && "
+            + "bit(6620,b+2)==1 && bit(661C,b+2)==1 && bit(6628,b+1)==0 && bit(6614,0)==1 &&65F0==5A. Closed gate "
+            + "returns44, otherwise22 iff scratch_byte==5A, else11. Full threshold partitions preserved in ROM. No "
+            + "physical units/source identity asserted.");
+    semanticFunction(0x4199CL, "f33_record_startup_status_bit_triplet_b_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection is mutable source scratch before each engine invocation.");
+    semanticFunction(0x419ACL, "f33_record_startup_status_bit_triplet_b_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection is mutable source scratch before each engine invocation.");
+    semanticFunction(0x41A2EL, "f33_step_matched_state2_startup_triplet_a", v)
+        .setComment("Configured mode020C channela monitor; 3 eight-byte states at770C. Own qualification6764 bit0 holds "
+            + "state without reset. Gate off_both2 (numeric states, no physical meaning); threshold pass2/fail200 "
+            + "with strict crossings. Any confirmed22 retains/replaces shared slot10 with kind(s)0x1b,0x32; no "
+            + "confirmed source leaves previous action untouched. Callback table284F0; failure "
+            + "events0x7f,0x80,0x81. See configured-family matrix for readiness sequencing and exact predicate.");
+    semanticFunction(0x41B6AL, "f33_classify_matched_state2_startup_triplet_a", u32)
+        .setComment("No-argument configured classifier. Gate off_both2: requested==2 &&observed==2 "
+            + "&&(6620&(6<<b))==(4<<b) &&(661C&(6<<b))==(4<<b) &&bit(6628,b+1)==0 &&6614.bit0==0 && "
+            + "own65F6/65F7==5A. Closed gate returns44, otherwise22 iff scratch_byte==5A, else11. Full threshold "
+            + "partitions preserved in ROM. No physical units/source identity asserted.");
+    semanticFunction(0x41BCCL, "f33_record_matched_state2_startup_triplet_a_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection is mutable source scratch before each engine invocation.");
+    semanticFunction(0x41BDCL, "f33_record_matched_state2_startup_triplet_a_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection is mutable source scratch before each engine invocation.");
+    semanticFunction(0x41C5EL, "f33_step_matched_state2_startup_triplet_b", v)
+        .setComment("Configured mode020C channelb monitor; 3 eight-byte states at7728. Own qualification6764 bit1 holds "
+            + "state without reset. Gate off_both2 (numeric states, no physical meaning); threshold pass2/fail200 "
+            + "with strict crossings. Any confirmed22 retains/replaces shared slot11 with kind(s)0x1c,0x32; no "
+            + "confirmed source leaves previous action untouched. Callback table284FC; failure "
+            + "events0x82,0x83,0x84. See configured-family matrix for readiness sequencing and exact predicate.");
+    semanticFunction(0x41D9AL, "f33_classify_matched_state2_startup_triplet_b", u32)
+        .setComment("No-argument configured classifier. Gate off_both2: requested==2 &&observed==2 "
+            + "&&(6620&(6<<b))==(4<<b) &&(661C&(6<<b))==(4<<b) &&bit(6628,b+1)==0 &&6614.bit0==0 && "
+            + "own65F6/65F7==5A. Closed gate returns44, otherwise22 iff scratch_byte==5A, else11. Full threshold "
+            + "partitions preserved in ROM. No physical units/source identity asserted.");
+    semanticFunction(0x41E00L, "f33_record_matched_state2_startup_triplet_b_healthy_observed", v)
+        .setComment("Set healthy-observed6120 bit via51E2C; does not clear current/retained diagnostic failure. Event "
+            + "selection is mutable source scratch before each engine invocation.");
+    semanticFunction(0x41E10L, "f33_record_matched_state2_startup_triplet_b_failure", v)
+        .setComment("Call51C66(event,32 hex); diagnostic lifecycle rejection is separate from later control-action "
+            + "publication. Event selection is mutable source scratch before each engine invocation.");
+    semanticFunction(0x6A6ACL, "f33_reset_terminal_monitor", v,
+        new ParameterImpl("state", F33TerminalMonitorStatePointer, currentProgram))
+        .setComment("statusFF; pass/fail/highwater0; padding byte1 untouched. Eight-byte "
+            + "layout:status0,padding1,pass2,fail4,highwater6.");
+    semanticFunction(0x6A6BAL, "f33_step_terminal_monitor", u32,
+        new ParameterImpl("state", F33TerminalMonitorStatePointer, currentProgram),
+        new ParameterImpl("thresholds", F33MonitorLimitsPointer, currentProgram),
+        new ParameterImpl("callbacks", F33TerminalMonitorCallbacksPointer, currentProgram))
+        .setComment("Inputs r6 state*,r7 two uint16 thresholds*,r8 three-pointer callback table*. Test fail>threshold "
+            + "first => status22 with no predicate or callback. Else pass>threshold => status0 with no predicate or "
+            + "callback. Else call table[0].11 clears fail and increments pass; crossing strict pass>threshold "
+            + "sets0 and calls table[1] once.22 clears pass and increments fail, updates highwater max; crossing "
+            + "fail>threshold sets22 and calls table[2] once.44 or any other classification storesFF and preserves "
+            + "all counters/highwater. Result r10 always11, not stored status. No automatic recovery from either "
+            + "terminal state before explicit reset.");
+    semanticFunction(0x6A744L, "f33_force_unconfirmed_terminal_monitor_healthy", u32,
+        new ParameterImpl("state", F33TerminalMonitorStatePointer, currentProgram),
+        new ParameterImpl("thresholds", F33MonitorLimitsPointer, currentProgram),
+        new ParameterImpl("callbacks", F33TerminalMonitorCallbacksPointer, currentProgram))
+        .setComment("Only when BOTH fail<=threshold and pass<=threshold, write status0, call table[1] if nonnull, set "
+            + "fail0/pass=passThreshold+1. Does not change highwater. Already terminal healthy OR failed state "
+            + "untouched. Therefore policy byte5A cannot heal confirmed failure. Callbacks use existing scratch "
+            + "selection; wrappers do not refresh it in forced path.");
+    semanticFunction(0x3EF1CL, "f33_publish_configured_monitor_failure_count_summary", v)
+        .setComment("3EFD4\u21923EF1C evaluates27 per-root getters of FAIL COUNTS at state+4 (not status), then530FC(9,11) if "
+            + "any fail count nonzero. A first failing observation makes this summary11 before status22 "
+            + "confirmation. UnknownFF with zero failure count does not. Inadmissible44 preserves nonzero fail "
+            + "counts and therefore summary; explicit reset clears them.");
+    semanticFunction(0x3E5D2L, "f33_admit_delayed_status_bit_triplet_a", u32)
+        .setComment("Return readiness latch in r10:5A means admitted, not a void side-effect-only helper. Retain "
+            + "completed latch until explicit stage initializer; pending sequencing and counts per "
+            + "configured-family readiness contract. No hardware success is inferred from this software latch.");
+    semanticFunction(0x3E86AL, "f33_admit_delayed_status_bit_triplet_b", u32)
+        .setComment("Return readiness latch in r10:5A means admitted, not a void side-effect-only helper. Retain "
+            + "completed latch until explicit stage initializer; pending sequencing and counts per "
+            + "configured-family readiness contract. No hardware success is inferred from this software latch.");
+    semanticFunction(0x3F0C8L, "f33_admit_coupled_sample_monitor", u32)
+        .setComment("Return readiness latch in r10:5A means admitted, not a void side-effect-only helper. Retain "
+            + "completed latch until explicit stage initializer; pending sequencing and counts per "
+            + "configured-family readiness contract. No hardware success is inferred from this software latch.");
+    semanticFunction(0x3F396L, "f33_admit_command_status_monitor_a", u32)
+        .setComment("Return readiness latch in r10:5A means admitted, not a void side-effect-only helper. Retain "
+            + "completed latch until explicit stage initializer; pending sequencing and counts per "
+            + "configured-family readiness contract. No hardware success is inferred from this software latch.");
+    semanticFunction(0x3F5ACL, "f33_admit_command_status_monitor_b", u32)
+        .setComment("Return readiness latch in r10:5A means admitted, not a void side-effect-only helper. Retain "
+            + "completed latch until explicit stage initializer; pending sequencing and counts per "
+            + "configured-family readiness contract. No hardware success is inferred from this software latch.");
+    semanticFunction(0x3F71CL, "f33_admit_bounded_sample_monitor_a", u32)
+        .setComment("Return readiness latch in r10:5A means admitted, not a void side-effect-only helper. Retain "
+            + "completed latch until explicit stage initializer; pending sequencing and counts per "
+            + "configured-family readiness contract. No hardware success is inferred from this software latch.");
+    semanticFunction(0x3F8A8L, "f33_admit_bounded_sample_monitor_b", u32)
+        .setComment("Return readiness latch in r10:5A means admitted, not a void side-effect-only helper. Retain "
+            + "completed latch until explicit stage initializer; pending sequencing and counts per "
+            + "configured-family readiness contract. No hardware success is inferred from this software latch.");
+    semanticFunction(0x3FA80L, "f33_admit_requested_state_sample_monitor_a", u32)
+        .setComment("Return readiness latch in r10:5A means admitted, not a void side-effect-only helper. Retain "
+            + "completed latch until explicit stage initializer; pending sequencing and counts per "
+            + "configured-family readiness contract. No hardware success is inferred from this software latch.");
+    semanticFunction(0x3FC5AL, "f33_admit_requested_state_sample_monitor_b", u32)
+        .setComment("Return readiness latch in r10:5A means admitted, not a void side-effect-only helper. Retain "
+            + "completed latch until explicit stage initializer; pending sequencing and counts per "
+            + "configured-family readiness contract. No hardware success is inferred from this software latch.");
+    semanticFunction(0x4005EL, "f33_admit_sample_difference_monitor_a", u32)
+        .setComment("Return readiness latch in r10:5A means admitted, not a void side-effect-only helper. Retain "
+            + "completed latch until explicit stage initializer; pending sequencing and counts per "
+            + "configured-family readiness contract. No hardware success is inferred from this software latch.");
+    semanticFunction(0x400A8L, "f33_admit_sample_difference_elapsed_a", u32)
+        .setComment("Return readiness latch in r10:5A means admitted, not a void side-effect-only helper. Retain "
+            + "completed latch until explicit stage initializer; pending sequencing and counts per "
+            + "configured-family readiness contract. No hardware success is inferred from this software latch.");
+    semanticFunction(0x4023EL, "f33_admit_sample_difference_monitor_b", u32)
+        .setComment("Return readiness latch in r10:5A means admitted, not a void side-effect-only helper. Retain "
+            + "completed latch until explicit stage initializer; pending sequencing and counts per "
+            + "configured-family readiness contract. No hardware success is inferred from this software latch.");
+    semanticFunction(0x40288L, "f33_admit_sample_difference_elapsed_b", u32)
+        .setComment("Return readiness latch in r10:5A means admitted, not a void side-effect-only helper. Retain "
+            + "completed latch until explicit stage initializer; pending sequencing and counts per "
+            + "configured-family readiness contract. No hardware success is inferred from this software latch.");
+    semanticFunction(0x404BCL, "f33_admit_matched_state2_status_monitor_a", u32)
+        .setComment("Return readiness latch in r10:5A means admitted, not a void side-effect-only helper. Retain "
+            + "completed latch until explicit stage initializer; pending sequencing and counts per "
+            + "configured-family readiness contract. No hardware success is inferred from this software latch.");
+    semanticFunction(0x406F8L, "f33_admit_matched_state2_status_monitor_b", u32)
+        .setComment("Return readiness latch in r10:5A means admitted, not a void side-effect-only helper. Retain "
+            + "completed latch until explicit stage initializer; pending sequencing and counts per "
+            + "configured-family readiness contract. No hardware success is inferred from this software latch.");
+    semanticFunction(0x40896L, "f33_admit_baseline_sample_monitor_a", u32)
+        .setComment("Return readiness latch in r10:5A means admitted, not a void side-effect-only helper. Retain "
+            + "completed latch until explicit stage initializer; pending sequencing and counts per "
+            + "configured-family readiness contract. No hardware success is inferred from this software latch.");
+    semanticFunction(0x40A0EL, "f33_admit_baseline_sample_monitor_b", u32)
+        .setComment("Return readiness latch in r10:5A means admitted, not a void side-effect-only helper. Retain "
+            + "completed latch until explicit stage initializer; pending sequencing and counts per "
+            + "configured-family readiness contract. No hardware success is inferred from this software latch.");
+    semanticFunction(0x40C38L, "f33_admit_observed_state_sample_monitor_a", u32)
+        .setComment("Return readiness latch in r10:5A means admitted, not a void side-effect-only helper. Retain "
+            + "completed latch until explicit stage initializer; pending sequencing and counts per "
+            + "configured-family readiness contract. No hardware success is inferred from this software latch.");
+    semanticFunction(0x40ED2L, "f33_admit_observed_state_sample_monitor_b", u32)
+        .setComment("Return readiness latch in r10:5A means admitted, not a void side-effect-only helper. Retain "
+            + "completed latch until explicit stage initializer; pending sequencing and counts per "
+            + "configured-family readiness contract. No hardware success is inferred from this software latch.");
+    semanticFunction(0x410E4L, "f33_admit_sample_range_triplet_a", u32)
+        .setComment("Return readiness latch in r10:5A means admitted, not a void side-effect-only helper. Retain "
+            + "completed latch until explicit stage initializer; pending sequencing and counts per "
+            + "configured-family readiness contract. No hardware success is inferred from this software latch.");
+    semanticFunction(0x4134EL, "f33_admit_sample_range_triplet_b", u32)
+        .setComment("Return readiness latch in r10:5A means admitted, not a void side-effect-only helper. Retain "
+            + "completed latch until explicit stage initializer; pending sequencing and counts per "
+            + "configured-family readiness contract. No hardware success is inferred from this software latch.");
+    semanticData(0xFEBE759CL, new ArrayDataType(terminalMonitorStateType, 3, terminalMonitorStateType.getLength()), "f33_delayed_status_bit_triplet_a_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B66AL, monitorLimitsType, "f33_delayed_status_bit_triplet_a_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x283C4L, terminalMonitorCallbacksType, "f33_delayed_status_bit_triplet_a_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE75B8L, new ArrayDataType(terminalMonitorStateType, 3, terminalMonitorStateType.getLength()), "f33_delayed_status_bit_triplet_b_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B66EL, monitorLimitsType, "f33_delayed_status_bit_triplet_b_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x283D0L, terminalMonitorCallbacksType, "f33_delayed_status_bit_triplet_b_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE75D4L, new ArrayDataType(terminalMonitorStateType, 3, terminalMonitorStateType.getLength()), "f33_matched_state2_status_bit_triplet_a_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B672L, monitorLimitsType, "f33_matched_state2_status_bit_triplet_a_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x283DCL, terminalMonitorCallbacksType, "f33_matched_state2_status_bit_triplet_a_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE75F0L, new ArrayDataType(terminalMonitorStateType, 3, terminalMonitorStateType.getLength()), "f33_matched_state2_status_bit_triplet_b_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B676L, monitorLimitsType, "f33_matched_state2_status_bit_triplet_b_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x283E8L, terminalMonitorCallbacksType, "f33_matched_state2_status_bit_triplet_b_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE760CL, terminalMonitorStateType, "f33_coupled_sample_threshold_both_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B67AL, monitorLimitsType, "f33_coupled_sample_threshold_both_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x283F4L, terminalMonitorCallbacksType, "f33_coupled_sample_threshold_both_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE7614L, terminalMonitorStateType, "f33_command_status_bit_clear_a_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B67EL, monitorLimitsType, "f33_command_status_bit_clear_a_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x28400L, terminalMonitorCallbacksType, "f33_command_status_bit_clear_a_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE761CL, terminalMonitorStateType, "f33_command_status_bit_clear_b_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B682L, monitorLimitsType, "f33_command_status_bit_clear_b_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x2840CL, terminalMonitorCallbacksType, "f33_command_status_bit_clear_b_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE7624L, terminalMonitorStateType, "f33_bounded_sample_or_status_a_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B686L, monitorLimitsType, "f33_bounded_sample_or_status_a_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x28418L, terminalMonitorCallbacksType, "f33_bounded_sample_or_status_a_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE762CL, terminalMonitorStateType, "f33_bounded_sample_or_status_b_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B68AL, monitorLimitsType, "f33_bounded_sample_or_status_b_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x28424L, terminalMonitorCallbacksType, "f33_bounded_sample_or_status_b_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE7634L, terminalMonitorStateType, "f33_requested_state_sample_threshold_a_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B68EL, monitorLimitsType, "f33_requested_state_sample_threshold_a_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x28430L, terminalMonitorCallbacksType, "f33_requested_state_sample_threshold_a_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE7644L, terminalMonitorStateType, "f33_requested_state_sample_threshold_b_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B692L, monitorLimitsType, "f33_requested_state_sample_threshold_b_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x2843CL, terminalMonitorCallbacksType, "f33_requested_state_sample_threshold_b_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE67F0L, terminalMonitorStateType, "f33_asserted_state_sample_threshold_a_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B696L, monitorLimitsType, "f33_asserted_state_sample_threshold_a_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x28448L, terminalMonitorCallbacksType, "f33_asserted_state_sample_threshold_a_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE67F8L, terminalMonitorStateType, "f33_asserted_state_sample_threshold_b_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B69AL, monitorLimitsType, "f33_asserted_state_sample_threshold_b_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x28454L, terminalMonitorCallbacksType, "f33_asserted_state_sample_threshold_b_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE7654L, terminalMonitorStateType, "f33_sample_difference_window_a_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B69EL, monitorLimitsType, "f33_sample_difference_window_a_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x28460L, terminalMonitorCallbacksType, "f33_sample_difference_window_a_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE765CL, terminalMonitorStateType, "f33_sample_difference_window_b_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B6A2L, monitorLimitsType, "f33_sample_difference_window_b_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x2846CL, terminalMonitorCallbacksType, "f33_sample_difference_window_b_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE7664L, terminalMonitorStateType, "f33_matched_state2_status_bit_a_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B6A6L, monitorLimitsType, "f33_matched_state2_status_bit_a_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x28478L, terminalMonitorCallbacksType, "f33_matched_state2_status_bit_a_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE766CL, terminalMonitorStateType, "f33_matched_state2_status_bit_b_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B6AAL, monitorLimitsType, "f33_matched_state2_status_bit_b_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x28484L, terminalMonitorCallbacksType, "f33_matched_state2_status_bit_b_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE7674L, terminalMonitorStateType, "f33_baseline_sample_threshold_a_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B6AEL, monitorLimitsType, "f33_baseline_sample_threshold_a_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x28490L, terminalMonitorCallbacksType, "f33_baseline_sample_threshold_a_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE767CL, terminalMonitorStateType, "f33_baseline_sample_threshold_b_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B6B2L, monitorLimitsType, "f33_baseline_sample_threshold_b_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x2849CL, terminalMonitorCallbacksType, "f33_baseline_sample_threshold_b_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE7684L, terminalMonitorStateType, "f33_observed_state_sample_regions_a_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B6B6L, monitorLimitsType, "f33_observed_state_sample_regions_a_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x284A8L, terminalMonitorCallbacksType, "f33_observed_state_sample_regions_a_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE768CL, terminalMonitorStateType, "f33_observed_state_sample_regions_b_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B6BAL, monitorLimitsType, "f33_observed_state_sample_regions_b_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x284B4L, terminalMonitorCallbacksType, "f33_observed_state_sample_regions_b_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE7694L, new ArrayDataType(terminalMonitorStateType, 3, terminalMonitorStateType.getLength()), "f33_sample_range_triplet_a_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B6BEL, monitorLimitsType, "f33_sample_range_triplet_a_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x284C0L, terminalMonitorCallbacksType, "f33_sample_range_triplet_a_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE76B4L, new ArrayDataType(terminalMonitorStateType, 3, terminalMonitorStateType.getLength()), "f33_sample_range_triplet_b_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B6C2L, monitorLimitsType, "f33_sample_range_triplet_b_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x284CCL, terminalMonitorCallbacksType, "f33_sample_range_triplet_b_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE76D4L, new ArrayDataType(terminalMonitorStateType, 3, terminalMonitorStateType.getLength()), "f33_startup_status_bit_triplet_a_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B6C6L, monitorLimitsType, "f33_startup_status_bit_triplet_a_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x284D8L, terminalMonitorCallbacksType, "f33_startup_status_bit_triplet_a_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE76F0L, new ArrayDataType(terminalMonitorStateType, 3, terminalMonitorStateType.getLength()), "f33_startup_status_bit_triplet_b_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B6CAL, monitorLimitsType, "f33_startup_status_bit_triplet_b_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x284E4L, terminalMonitorCallbacksType, "f33_startup_status_bit_triplet_b_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE770CL, new ArrayDataType(terminalMonitorStateType, 3, terminalMonitorStateType.getLength()), "f33_matched_state2_startup_triplet_a_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B6CEL, monitorLimitsType, "f33_matched_state2_startup_triplet_a_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x284F0L, terminalMonitorCallbacksType, "f33_matched_state2_startup_triplet_a_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+    semanticData(0xFEBE7728L, new ArrayDataType(terminalMonitorStateType, 3, terminalMonitorStateType.getLength()), "f33_matched_state2_startup_triplet_b_states",
+        "Eight-byte terminal states; padding is not cleared; each stage has mutable predicate selectors.");
+    semanticData(0x2B6D2L, monitorLimitsType, "f33_matched_state2_startup_triplet_b_limits",
+        "Strict passing/failing > thresholds; counts are observations, not measured elapsed time.");
+    semanticData(0x284FCL, terminalMonitorCallbacksType, "f33_matched_state2_startup_triplet_b_callbacks",
+        "Predicate and terminal-transition reporters; healthy-observed notification does not itself clear current diagnostic history.");
+  }
+  private void annotateScalarMonitorComposition() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType latchedMonitorStateType = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33LatchedMonitorState");
+    DataType F33LatchedMonitorStatePointer = new PointerDataType(currentProgram.getDataTypeManager().getDataType("/CamryF33/F33LatchedMonitorState"), 4);
+    DataType monitorLimitsType = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33MonitorLimits");
+    DataType F33MonitorLimitsPointer = new PointerDataType(currentProgram.getDataTypeManager().getDataType("/CamryF33/F33MonitorLimits"), 4);
+    DataType F33MonitorRecoveryScratchPointer = new PointerDataType(currentProgram.getDataTypeManager().getDataType("/CamryF33/F33MonitorRecoveryScratch"), 4);
+    DataType recoverableMonitorCallbacksType = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33RecoverableMonitorCallbacks");
+    DataType F33RecoverableMonitorCallbacksPointer = new PointerDataType(currentProgram.getDataTypeManager().getDataType("/CamryF33/F33RecoverableMonitorCallbacks"), 4);
+    DataType recoverableMonitorLimitsType = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33RecoverableMonitorLimits");
+    DataType F33RecoverableMonitorLimitsPointer = new PointerDataType(currentProgram.getDataTypeManager().getDataType("/CamryF33/F33RecoverableMonitorLimits"), 4);
+    DataType recoverableMonitorStateType = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33RecoverableMonitorState");
+    DataType F33RecoverableMonitorStatePointer = new PointerDataType(currentProgram.getDataTypeManager().getDataType("/CamryF33/F33RecoverableMonitorState"), 4);
+    DataType twoSidedMonitorCallbacksType = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33TwoSidedMonitorCallbacks");
+    DataType F33TwoSidedMonitorCallbacksPointer = new PointerDataType(currentProgram.getDataTypeManager().getDataType("/CamryF33/F33TwoSidedMonitorCallbacks"), 4);
+    DataType windowedMonitorLimitsType = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33WindowedMonitorLimits");
+    DataType F33WindowedMonitorLimitsPointer = new PointerDataType(currentProgram.getDataTypeManager().getDataType("/CamryF33/F33WindowedMonitorLimits"), 4);
+    DataType windowedMonitorStateType = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33WindowedMonitorState");
+    DataType F33WindowedMonitorStatePointer = new PointerDataType(currentProgram.getDataTypeManager().getDataType("/CamryF33/F33WindowedMonitorState"), 4);
+    DataType ushortPointer = new PointerDataType(u16, 4);
+    semanticFunction(0x45356L, "f33_step_local_output_status_a_monitor", v)
+        .setComment("State7B50 -> slot7 index1. Qualification6764.bit0 holds confirmed state via6AE18; otherwise "
+            + "predicate requires6624.bit0 and65F6=5A, then8284=5A fails. Limits200/200; event8E. Policy2BC54=0 in "
+            + "this image.");
+    semanticFunction(0x45410L, "f33_step_local_channel_mismatch_a_monitor", v)
+        .setComment("State7B5C -> slot7 index0. Requires qualification bit0 clear andE820=5A; predicate "
+            + "requires64DC.bit1/64D4.bit1 clear and65F6=5A, then8282=5A fails. Limits16/16; event77. Disabled gate "
+            + "preserves confirmed state.");
+    semanticFunction(0x45572L, "f33_step_local_output_status_b_monitor", v)
+        .setComment("State7B6C -> slot8 index1. Qualification6764.bit1 holds confirmed state; predicate requires6624.bit1 "
+            + "and65F7=5A, then8283=5A fails. Limits200/200; event8F.");
+    semanticFunction(0x4562AL, "f33_step_local_channel_mismatch_b_monitor", v)
+        .setComment("State7B78 -> slot8 index0. Requires qualification bit1 clear andE820=5A; predicate "
+            + "requires64DC.bit17/64D4.bit17 clear and65F7=5A, then8281=5A fails. Limits16/16; event73.");
+    semanticFunction(0x456FAL, "f33_step_admitted_scalar_receive_condition_monitor", v)
+        .setComment("State7B84 -> slot6 index3. E820 admits recoverable qualifier with limits25/125/25. Reset/disabled "
+            + "gate also clears admission count6868. Predicate relates E822/E823, receive803C/803E and "
+            + "unsigned66B8; eventA5.");
+    semanticFunction(0x45838L, "f33_step_paired_scalar_relation_monitor", v)
+        .setComment("State7B90 -> slot6 index0. Requires qualification bits0/1 clear andE820=5A, otherwise retain "
+            + "confirmed state. Relation predicate uses unsigned66B8 against66AE/66B0 plus source-status gates. "
+            + "Recoverable limits125/125/25; eventA2.");
+    semanticFunction(0x4599CL, "f33_step_qualified_scalar_relation_a_monitor", v)
+        .setComment("State7B9C -> slot6 index1. Only qualification bit1 SET andE820=5A runs qualifier. Otherwise report "
+            + "healthy-observed9E without clearing retained monitor state, then publish its low status byte. "
+            + "Limits0/125; confirmed failure is latched until explicit reset.");
+    semanticFunction(0x45A6CL, "f33_step_qualified_scalar_relation_b_monitor", v)
+        .setComment("State7BA8 -> slot6 index2. Only qualification bit0 SET andE820=5A runs qualifier. Otherwise "
+            + "healthy-observed9F leaves retained state unchanged. Limits0/125; raw source66B0 replaces66AE.");
+    semanticFunction(0x45E74L, "f33_step_raw_thermistor_range_a_monitor", v)
+        .setComment("State7BDC -> slot18 index0. Qualification bit0 clear admits recoverable qualifier; otherwise retain "
+            + "confirmed state. Raw unsigned6492 range1206..65231 inclusive. Pass/fail/recovery limits25/25/25; "
+            + "event88.");
+    semanticFunction(0x45F32L, "f33_step_raw_thermistor_range_b_monitor", v)
+        .setComment("State7BE8 -> slot18 index1. Qualification bit1 clear admits recoverable qualifier. Raw unsigned6498 "
+            + "range1206..65231 inclusive; same25/25/25 limits; event85.");
+    semanticFunction(0x3BAB2L, "f33_step_acquisition_status_a_monitor", v)
+        .setComment("State70C8 -> slot20 index0. Predicate81D0=5A fails. Windowed qualifier limits pass2/windowFFFF and "
+            + "fail3/window6; confirmed failure latches. EventD3; published status is low result byte.");
+    semanticFunction(0x3BB44L, "f33_step_acquisition_status_b_monitor", v)
+        .setComment("State70D8 -> slot20 index1. Predicate81D1=5A fails. Same windowed2/FFFF/3/6 limits; eventD4. Status "
+            + "flags are staged from380A/B through66932 and50A06, not physical timing proof.");
+    semanticFunction(0x3BC4CL, "f33_step_acquisition_range_a_monitor", v)
+        .setComment("State70EC -> slot20 index2. Predicate requires81D4=5A, then unsigned81D6>=61211 and81D8<=3093. "
+            + "Latched limits2/20; eventD6. Do not reinterpret these two separate unsigned bounds as a signed "
+            + "interval.");
+    semanticFunction(0x3BCFCL, "f33_step_acquisition_range_b_monitor", v)
+        .setComment("State70F8 -> slot20 index3. Valid81D5 gates unsigned81DA>=61211 and81DC<=3093. Latched limits2/20; "
+            + "eventD7.");
+    semanticFunction(0x45324L, "f33_publish_local_channel_a_monitor_status", v,
+        new ParameterImpl("index", u8, currentProgram),
+        new ParameterImpl("packed_status", u32, currentProgram))
+        .setComment("If low8(index)<2, store low8(packed_status) to FEBE7B4C+index. Other bits of the packed qualifier "
+            + "result are not published.");
+    semanticFunction(0x45540L, "f33_publish_local_channel_b_monitor_status", v,
+        new ParameterImpl("index", u8, currentProgram),
+        new ParameterImpl("packed_status", u32, currentProgram))
+        .setComment("If low8(index)<2, store low8(packed_status) to FEBE7B68+index. Other bits of the packed qualifier "
+            + "result are not published.");
+    semanticFunction(0x45B9EL, "f33_publish_scalar_relation_monitor_status", v,
+        new ParameterImpl("index", u8, currentProgram),
+        new ParameterImpl("packed_status", u32, currentProgram))
+        .setComment("If low8(index)<4, store low8(packed_status) to FEBE7BB4+index. Other bits of the packed qualifier "
+            + "result are not published.");
+    semanticFunction(0x46058L, "f33_publish_thermistor_range_monitor_status", v,
+        new ParameterImpl("index", u8, currentProgram),
+        new ParameterImpl("packed_status", u32, currentProgram))
+        .setComment("If low8(index)<2, store low8(packed_status) to FEBE7BF4+index. Other bits of the packed qualifier "
+            + "result are not published.");
+    semanticFunction(0x3BC1AL, "f33_publish_acquisition_monitor_status", v,
+        new ParameterImpl("index", u8, currentProgram),
+        new ParameterImpl("packed_status", u32, currentProgram))
+        .setComment("If low8(index)<4, store low8(packed_status) to FEBE70E8+index. Other bits of the packed qualifier "
+            + "result are not published.");
+    semanticFunction(0x4539EL, "f33_classify_local_output_status_a", u32)
+        .setComment("6624.bit0 and65F6=5A admit;8284=5A returns22,otherwise11; inadmissible44.8284 is staged "
+            + "local383A.bit3.");
+    semanticFunction(0x4546AL, "f33_classify_local_channel_mismatch_a", u32)
+        .setComment("64DC.bit1/64D4.bit1 clear and65F6=5A admit;8282=5A fails22 else11; inadmissible44.8282 is "
+            + "local383A.bit9.");
+    semanticFunction(0x455BAL, "f33_classify_local_output_status_b", u32)
+        .setComment("6624.bit1 and65F7=5A admit;8283=5A fails22 else11; inadmissible44.8283 is local383A.bit2.");
+    semanticFunction(0x45684L, "f33_classify_local_channel_mismatch_b", u32)
+        .setComment("64DC.bit17/64D4.bit17 clear and65F7=5A admit;8281=5A fails22 else11; inadmissible44.8281 is "
+            + "local383A.bit8.");
+    semanticFunction(0x4574CL, "f33_classify_admitted_scalar_receive_condition", u32)
+        .setComment("With E822=5A/E823=0, increment6868 until entry count11. Thereafter803C=1 and803E=0 fails22. "
+            + "Strict2304<66B8<4096 returns11; outside gives33 after admitted delay,44 before it. Inactive gate "
+            + "resets6868. Inputs and comparisons are unsigned.");
+    semanticFunction(0x457BEL, "f33_classify_scalar_receive_recovery", u32)
+        .setComment("Strict2304<66B8<4096 returns11; endpoints and outside return22. Recovery count is separate from "
+            + "admission6868.");
+    semanticFunction(0x45894L, "f33_classify_paired_scalar_relation", u32)
+        .setComment("Any6751/52 or65C2/3/4/5 nonzero returns44. Otherwise66B8>4736 and either66AE/66B0<=4096 "
+            + "returns22;66B8<=4736 and either peer<=4096 returns11; other combinations33. All raw values unsigned.");
+    semanticFunction(0x45900L, "f33_classify_paired_scalar_recovery", u32)
+        .setComment("Same six source-status gates; then inclusive768<=66B8<=4096 returns11,otherwise22. This is not the "
+            + "entry predicate range.");
+    semanticFunction(0x459F6L, "f33_classify_qualified_scalar_relation_a", u32)
+        .setComment("6751 or65C2/4/5 nonzero returns44; otherwise unsigned66B8>4736 and66AE<=4096 returns22,else11.");
+    semanticFunction(0x45AC6L, "f33_classify_qualified_scalar_relation_b", u32)
+        .setComment("6752 or65C3/4/5 nonzero returns44; otherwise unsigned66B8>4736 and66B0<=4096 returns22,else11.");
+    semanticFunction(0x45EBCL, "f33_classify_raw_thermistor_range_a", u32)
+        .setComment("Unsigned6492 inside inclusive1206..65231 returns11,otherwise22. LD.HU and unsigned branches prove "
+            + "raw-domain bounds, not signed temperatures.");
+    semanticFunction(0x45F7AL, "f33_classify_raw_thermistor_range_b", u32)
+        .setComment("Unsigned6498 inside inclusive1206..65231 returns11,otherwise22. Same predicate used for entry and "
+            + "recovery.");
+    semanticFunction(0x3BAECL, "f33_classify_acquisition_status_a", u32)
+        .setComment("81D0=5A returns22; any other byte returns11. Full R10 is defined.");
+    semanticFunction(0x3BB7EL, "f33_classify_acquisition_status_b", u32)
+        .setComment("81D1=5A returns22; any other byte returns11. Full R10 is defined.");
+    semanticFunction(0x3BC86L, "f33_classify_acquisition_range_a", u32)
+        .setComment("81D4!=5A returns44. Otherwise unsigned81D6>=61211 AND81D8<=3093 returns11,else22. Separate lower and "
+            + "upper samples, not a signed scalar range.");
+    semanticFunction(0x3BD36L, "f33_classify_acquisition_range_b", u32)
+        .setComment("81D5!=5A returns44. Otherwise unsigned81DA>=61211 AND81DC<=3093 returns11,else22.");
+    semanticFunction(0x452A8L, "f33_publish_local_channel_monitor_actions_a", v)
+        .setComment("Always retain/clear slot7, then low-byte confirmed mask22 at7B4D adds kind1B and7B4C adds1D; select "
+            + "current. Any nonzero status sets diagnostic-cache blocker6=11; combined pending mask11 "
+            + "sets817D[4]=5A, otherwise0. Pending and confirmed consumers differ.");
+    semanticFunction(0x454C4L, "f33_publish_local_channel_monitor_actions_b", v)
+        .setComment("Rebuild slot8 from7B69 kind1C and7B68 kind1E. Any nonzero sets blocker7=11; pending mask11 "
+            + "sets817D[5]=5A. Current selected even when no action remains.");
+    semanticFunction(0x45B20L, "f33_publish_scalar_relation_monitor_actions", v)
+        .setComment("Always rebuild slot6; OR7BB4..7BB7 with mask22 selects kind16.7BB8 is any nonzero status;7BB9/7BBA "
+            + "are confirmed indices0/3 respectively. General blocking is not the same as either endpoint-specific "
+            + "flag.");
+    semanticFunction(0x45FD4L, "f33_publish_thermistor_range_monitor_actions", v)
+        .setComment("Rebuild slot18 with kind16 when either7BF4/5 has confirmed mask22. Publish packed per-channel status "
+            + "at7BF8 with pending11 precedence over22 within each byte; always set publication marker7BF6=5A.");
+    semanticFunction(0x3BBBAL, "f33_publish_acquisition_monitor_actions", v)
+        .setComment("Always retain/clear slot20; any confirmed mask22 among70E8..EB selects kind31,then select current. "
+            + "Any nonzero source status sets diagnostic-cache blocker1=11. Unlike shared startup-stage producers, "
+            + "an all-clear invocation replaces current with zero.");
+    semanticFunction(0x45CCEL, "f33_clear_reserved_monitor_action_slot", v)
+        .setComment("Retain/clear slot21, select its empty current record, clear diagnostic-cache blocker10. No monitor "
+            + "predicate or fault action is produced here.");
+    semanticFunction(0xB3C6CL, "f33_publish_health_coherence_fault_actions", v)
+        .setComment("Rebuild slot19 with kind16 unless B218/B21C bothA55A5AA5,B20E!=33,B215=0,B252=44,B253=0. Select "
+            + "current even when clear. This checks staged health/coherence fields; no new diagnostic event is "
+            + "reported here.");
+    semanticFunction(0x33EE6L, "f33_publish_application_record_path_fault", v)
+        .setComment("Report event52/capture-kind50,then independently retain/clear slot17,encodekind1,select current. "
+            + "Called on terminal failure in33F14; diagnostic reporting inhibition does not veto the control "
+            + "action.");
+    semanticFunction(0x3588AL, "f33_step_learned_quad_record_completion", v)
+        .setComment("After357C0, decrement nonzero6AE4. Valid source66D5=5A and marker6AF0=A55A5AA5 invoke learned-quad "
+            + "restoration; failed restoration reports128 and sets6AE1=5A. Pending write/reset6ADD/6ADC poll "
+            + "record100: exact10 succeeds,high-nibble20 waits,other status reports130 and publishes slot17/kind1. "
+            + "Write success restores valid marker and passes0E; reset success clears marker and reports0E "
+            + "through51D38. Publication and physical persistence remain distinct.");
+    semanticFunction(0x530FCL, "f33_set_diagnostic_cache_blocker", v,
+        new ParameterImpl("index", u8, currentProgram),
+        new ParameterImpl("status", u8, currentProgram))
+        .setComment("Store low8(status) at615B+low8(index) only for index<11. Independent families feed healthy-cache "
+            + "refresh admission; a pending monitor may block without confirmed actions.");
+    semanticFunction(0x4C794L, "f33_set_monitor_pending_projection", v,
+        new ParameterImpl("index", u8, currentProgram),
+        new ParameterImpl("status", u8, currentProgram))
+        .setComment("Store low8(status) at817D+low8(index) only for index<10. Does not itself report a diagnostic event "
+            + "or select a fault-action record.");
+    semanticFunction(0x51E2CL, "f33_report_diagnostic_healthy_observed", v,
+        new ParameterImpl("event", u32, currentProgram))
+        .setComment("For low16(event)1..17F, call52A2A to mark the independent6120 bitmap. No diagnostic lifecycle gate "
+            + "and no ordinary-pass clearing of6090/60C0/60F0.");
+    semanticFunction(0x52A2AL, "f33_mark_diagnostic_healthy_observed", v,
+        new ParameterImpl("event", u32, currentProgram))
+        .setComment("For event1..17F, set its6120 bitmap bit only when absent, under saved/restored PMRFF00. Current and "
+            + "retained failure histories are untouched.");
+    semanticFunction(0x5D6DCL, "f33_snapshot_monitor_inputs", v)
+        .setComment("Sequentially snapshot acquisition channels820C..8228, output/channel request state, conditioned "
+            + "scalars7DA4..7DB6, monitor statuses, live qualification71EC/limit71F2, scalar availability7BBC..7BC3 "
+            + "and application-record fields.66B8<-7DB0;66AE/B0<-7DA6/A8;6492/98<-821E/24. No local critical "
+            + "section makes the entire snapshot atomic.");
+    semanticFunction(0x50C9AL, "f33_snapshot_local_status_link_flags", v)
+        .setComment("Publish62CD4 result at8294; expand cached local3838/383A/383C bits into8278..8292 and "
+            + "packed8298,clear829C. In particular8284/8282/8283/8281 reflect383A bits3/9/2/8. These are software "
+            + "cached status-link fields, not CAN wire joins or independent freshness proof.");
+    semanticFunction(0x50A06L, "f33_snapshot_acquisition_status_flags", v)
+        .setComment("Copy5F26/5F27 to81D0/81D1. Their producer66932 copies cached380A/380B; no physical error identity is "
+            + "inferred.");
+    semanticFunction(0x50A1CL, "f33_snapshot_acquisition_range_fields", v)
+        .setComment("Copy5EEA/C/E/5EF0 to81D6/8/A/C; publish valid markers81D4/5 as5F26/27 XOR5A. Only source byte0 "
+            + "produces the exact5A marker admitted by range predicates.");
+    semanticFunction(0x66932L, "f33_publish_acquisition_diagnostic_snapshot", v)
+        .setComment("Compose transfer-group copies62ABC,62B18,6294E into5EE0..5F24, and copy cached380A/B to5F26/27. The "
+            + "range fields5EEA/C/E/5EF0 and later81D6/8/A/C are staged generations, not an atomic physical "
+            + "measurement.");
+    semanticFunction(0x62ABCL, "f33_copy_acquisition_diagnostic_samples", v,
+        new ParameterImpl("destination", ushortPointer, currentProgram))
+        .setComment("Copy four halfwords through62A50 then five through62A86 into the same destination; retain the "
+            + "original destination across the first call. Firmware transfer groups6/14 are structural indices.");
+    semanticFunction(0x62A50L, "f33_copy_transfer_group6_samples", v,
+        new ParameterImpl("destination", ushortPointer, currentProgram))
+        .setComment("Write four destination halfwords using group6 count/base plus four ROM30F20 byte indices and60630 "
+            + "getter. No physical channel identity or freshness is added.");
+    semanticFunction(0x62A86L, "f33_copy_transfer_group14_samples", v,
+        new ParameterImpl("destination", ushortPointer, currentProgram))
+        .setComment("Write five halfwords at destination+8 using group14 count/base plus ROM30F44 indices and606DA "
+            + "getter. The first four halfwords are preserved.");
+    semanticFunction(0x45BC8L, "f33_publish_primary_scalar_availability", v)
+        .setComment("Unsigned7DB0>=2125 sets7BBC=5A; inclusive2125..4736 sets7BBD=5A. Below lower bound clears both; "
+            + "above upper retains7BBC but clears7BBD.");
+    semanticFunction(0x45BF4L, "f33_publish_channel_scalar_availability_a", v)
+        .setComment("Unsigned7DA6>=1818 sets7BC0=5A;>=2125 additionally7BBE=5A. No upper bound in this helper.");
+    semanticFunction(0x45C20L, "f33_publish_channel_scalar_availability_b", v)
+        .setComment("Unsigned7DA8>=1818 sets7BC1=5A;>=2125 additionally7BBF=5A. No upper bound in this helper.");
+    semanticFunction(0x45C4CL, "f33_publish_paired_scalar_availability", v)
+        .setComment("7BC2/3=5A if primary7DB0 OR respective7DA6/7DA8 is inside inclusive2125..4736. EB85 selects "
+            + "alternate ROM lower-bound entries, but both equal2125 in this exact image. Later5D6DC "
+            + "publishes65F6/7.");
+    semanticFunction(0x45CB2L, "f33_update_scalar_availability", v)
+        .setComment("Run primary,channelA,channelB andpaired availability publishers in that order. Their destination "
+            + "bank7BBC..7BC3 is distinct from the later65F0..65F7 snapshot.");
+    semanticFunction(0x3BB02L, "f33_report_scalar_event_d3_healthy_observed", v)
+        .setComment("Report eventD3 through51E2C/52A2A healthy-observed bitmap; does not clear current failure history.");
+    semanticFunction(0x3BB12L, "f33_report_scalar_event_d3_failure", v)
+        .setComment("Report eventD3 with capture kind10; diagnostic admission remains in51C66.");
+    semanticFunction(0x3BB94L, "f33_report_scalar_event_d4_healthy_observed", v)
+        .setComment("Report eventD4 through51E2C/52A2A healthy-observed bitmap; does not clear current failure history.");
+    semanticFunction(0x3BBA4L, "f33_report_scalar_event_d4_failure", v)
+        .setComment("Report eventD4 with capture kind10; diagnostic admission remains in51C66.");
+    semanticFunction(0x3BCBAL, "f33_report_scalar_event_d6_healthy_observed", v)
+        .setComment("Report eventD6 through51E2C/52A2A healthy-observed bitmap; does not clear current failure history.");
+    semanticFunction(0x3BCCAL, "f33_report_scalar_event_d6_failure", v)
+        .setComment("Report eventD6 with capture kind10; diagnostic admission remains in51C66.");
+    semanticFunction(0x3BD6AL, "f33_report_scalar_event_d7_healthy_observed", v)
+        .setComment("Report eventD7 through51E2C/52A2A healthy-observed bitmap; does not clear current failure history.");
+    semanticFunction(0x3BD7AL, "f33_report_scalar_event_d7_failure", v)
+        .setComment("Report eventD7 with capture kind10; diagnostic admission remains in51C66.");
+    semanticFunction(0x453CCL, "f33_report_scalar_event_8e_healthy_observed", v)
+        .setComment("Report event8E through51E2C/52A2A healthy-observed bitmap; does not clear current failure history.");
+    semanticFunction(0x453DCL, "f33_report_scalar_event_8e_failure", v)
+        .setComment("Report event8E with capture kind50; diagnostic admission remains in51C66.");
+    semanticFunction(0x4549CL, "f33_report_scalar_event_77_healthy_observed", v)
+        .setComment("Report event77 through51E2C/52A2A healthy-observed bitmap; does not clear current failure history.");
+    semanticFunction(0x454ACL, "f33_report_scalar_event_77_failure", v)
+        .setComment("Report event77 with capture kind50; diagnostic admission remains in51C66.");
+    semanticFunction(0x455E6L, "f33_report_scalar_event_8f_healthy_observed", v)
+        .setComment("Report event8F through51E2C/52A2A healthy-observed bitmap; does not clear current failure history.");
+    semanticFunction(0x455F6L, "f33_report_scalar_event_8f_failure", v)
+        .setComment("Report event8F with capture kind50; diagnostic admission remains in51C66.");
+    semanticFunction(0x456B6L, "f33_report_scalar_event_73_healthy_observed", v)
+        .setComment("Report event73 through51E2C/52A2A healthy-observed bitmap; does not clear current failure history.");
+    semanticFunction(0x456C6L, "f33_report_scalar_event_73_failure", v)
+        .setComment("Report event73 with capture kind50; diagnostic admission remains in51C66.");
+    semanticFunction(0x457E0L, "f33_report_scalar_event_a5_healthy_observed", v)
+        .setComment("Report eventA5 through51E2C/52A2A healthy-observed bitmap; does not clear current failure history.");
+    semanticFunction(0x457F0L, "f33_report_scalar_event_a5_failure", v)
+        .setComment("Clear admission counter6868 before reporting eventA5 with capture kind400; diagnostic rejection does "
+            + "not undo that clear.");
+    semanticFunction(0x45808L, "f33_report_scalar_event_a5_pass", v)
+        .setComment("Report eventA5 through51D5E ordinary pass; current failure clears while normal retained histories "
+            + "survive.");
+    semanticFunction(0x45948L, "f33_report_scalar_event_a2_healthy_observed", v)
+        .setComment("Report eventA2 through51E2C/52A2A healthy-observed bitmap; does not clear current failure history.");
+    semanticFunction(0x45958L, "f33_report_scalar_event_a2_failure", v)
+        .setComment("Report eventA2 with capture kind400; diagnostic admission remains in51C66.");
+    semanticFunction(0x4596CL, "f33_report_scalar_event_a2_pass", v)
+        .setComment("Report eventA2 through51D5E ordinary pass; current failure clears while normal retained histories "
+            + "survive.");
+    semanticFunction(0x45A38L, "f33_report_scalar_event_9e_failure", v)
+        .setComment("Report event9E with capture kind400; diagnostic admission remains in51C66.");
+    semanticFunction(0x45B08L, "f33_report_scalar_event_9f_failure", v)
+        .setComment("Report event9F with capture kind400; diagnostic admission remains in51C66.");
+    semanticFunction(0x45EDEL, "f33_report_scalar_event_88_healthy_observed", v)
+        .setComment("Report event88 through51E2C/52A2A healthy-observed bitmap; does not clear current failure history.");
+    semanticFunction(0x45EEEL, "f33_report_scalar_event_88_failure", v)
+        .setComment("Report event88 with capture kind800; diagnostic admission remains in51C66.");
+    semanticFunction(0x45F02L, "f33_report_scalar_event_88_pass", v)
+        .setComment("Report event88 through51D5E ordinary pass; current failure clears while normal retained histories "
+            + "survive.");
+    semanticFunction(0x45F9CL, "f33_report_scalar_event_85_healthy_observed", v)
+        .setComment("Report event85 through51E2C/52A2A healthy-observed bitmap; does not clear current failure history.");
+    semanticFunction(0x45FACL, "f33_report_scalar_event_85_failure", v)
+        .setComment("Report event85 with capture kind800; diagnostic admission remains in51C66.");
+    semanticFunction(0x45FC0L, "f33_report_scalar_event_85_pass", v)
+        .setComment("Report event85 through51D5E ordinary pass; current failure clears while normal retained histories "
+            + "survive.");
+    semanticFunction(0x6ADFCL, "f33_reset_latched_monitor", v,
+        new ParameterImpl("state", F33LatchedMonitorStatePointer, currentProgram))
+        .setComment("Clear packed status, passing/failing counts and failure high-water at offsets0/4/6/8. Exactly10 "
+            + "bytes of the usual12-byte allocation; adjacent halfword untouched.");
+    semanticFunction(0x6AE18L, "f33_retain_disabled_latched_monitor", v,
+        new ParameterImpl("state", F33LatchedMonitorStatePointer, currentProgram),
+        new ParameterImpl("limits", F33MonitorLimitsPointer, currentProgram))
+        .setComment("Recompute state from counters without callbacks: retain failure22 when fail_count>fail_limit; "
+            + "otherwise retain pass2200 only when fail_count=0 and pass_count>pass_limit. Clear pending paths; "
+            + "preserve failure high-water. Gate closure is not a reset of a confirmed failure.");
+    semanticFunction(0x6AE7CL, "f33_step_latched_monitor", u32,
+        new ParameterImpl("state", F33LatchedMonitorStatePointer, currentProgram),
+        new ParameterImpl("limits", F33MonitorLimitsPointer, currentProgram),
+        new ParameterImpl("callbacks", F33TwoSidedMonitorCallbacksPointer, currentProgram))
+        .setComment("Ten-byte state and13-pointer callbacks. Derive phase from counters, not old packed status.11/22 "
+            + "classify healthy/failure; strict counter>limit confirms. Failed22 is terminal and bypasses "
+            + "predicates; confirmed healthy still evaluates entry predicate for failure. Pending33/44 resets both "
+            + "current counts. Transition hooks differ from repeated-state hooks. Write packed "
+            + "status0/11001100/2200/00110011/22; return full R10=11,not status.");
+    semanticFunction(0x6A874L, "f33_reset_recoverable_monitor", v,
+        new ParameterImpl("state", F33RecoverableMonitorStatePointer, currentProgram))
+        .setComment("Clear all12 bytes: packed status,passing/failing counts,failure high-water and recovery count.");
+    semanticFunction(0x6A882L, "f33_retain_disabled_recoverable_monitor", v,
+        new ParameterImpl("state", F33RecoverableMonitorStatePointer, currentProgram),
+        new ParameterImpl("limits", F33RecoverableMonitorLimitsPointer, currentProgram))
+        .setComment("Retain confirmed failure22 including its recovery count; preserve confirmed pass2200,otherwise "
+            + "discard pending counts. Clear recovery only outside confirmed failure; high-water survives. No "
+            + "predicate or reporting callback.");
+    semanticFunction(0x6A8B4L, "f33_step_recoverable_monitor", u32,
+        new ParameterImpl("state", F33RecoverableMonitorStatePointer, currentProgram),
+        new ParameterImpl("limits", F33RecoverableMonitorLimitsPointer, currentProgram),
+        new ParameterImpl("callbacks", F33RecoverableMonitorCallbacksPointer, currentProgram))
+        .setComment("Twelve-byte state and15-pointer callbacks. Pending confirmation follows strict passing/failing "
+            + "thresholds. Confirmed failure calls third predicate and70F56 recovery scratch: strict "
+            + "recovery_count>limit clears current counts/status and invokes recovery callback. Preserve failure "
+            + "high-water. Stores packed status; returns full R10=11. The local recovery scratch is not the same "
+            + "layout as persistent state.");
+    semanticFunction(0x6AE08L, "f33_reset_windowed_monitor", v,
+        new ParameterImpl("state", F33WindowedMonitorStatePointer, currentProgram))
+        .setComment("Clear14 used bytes of16-byte state allocation: result,pass count/window,fail count/window,fail "
+            + "high-water. Adjacent trailing halfword untouched.");
+    semanticFunction(0x6B31AL, "f33_step_windowed_monitor", u32,
+        new ParameterImpl("state", F33WindowedMonitorStatePointer, currentProgram),
+        new ParameterImpl("limits", F33WindowedMonitorLimitsPointer, currentProgram),
+        new ParameterImpl("callbacks", F33TwoSidedMonitorCallbacksPointer, currentProgram))
+        .setComment("Fourteen-byte state and13-pointer callbacks. Pending failure counts failing classifications within a "
+            + "separately advancing window: healthy11 or ambiguous33 preserves accumulated failure count; invalid44 "
+            + "resets it. Window expiry wins before another failure can confirm. Both confirmation and expiry use "
+            + "strict > comparisons with16-bit increments. Exact acquisition config pass2/windowFFFF,fail3/window6. "
+            + "Confirmed failure latches; packed status stored and full R10=11 returned.");
+    semanticFunction(0x70F56L, "f33_step_monitor_recovery_scratch", u32,
+        new ParameterImpl("classification", u8, currentProgram),
+        new ParameterImpl("scratch", F33MonitorRecoveryScratchPointer, currentProgram),
+        new ParameterImpl("limit", ushortPointer, currentProgram))
+        .setComment("Truncate classification to8 bits.11 increments scratch recovery_count at+10 while<=limit; strict "
+            + "crossing clears halfwords0/2/4/8/10/12/16 and returns0,else44000022.22/44 clear recovery_count and "
+            + "return22; other classifications return22 preserving it. Scratch+6 high-water survives. This18-byte "
+            + "transient layout is not the persistent monitor record.");
+    semanticData(0xFEBE7B50L, latchedMonitorStateType, "f33_scalar_monitor_45356_state",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x2B9B4L, monitorLimitsType, "f33_scalar_monitor_45356_limits",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x28AC8L, twoSidedMonitorCallbacksType, "f33_scalar_monitor_45356_callbacks",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0xFEBE7B5CL, latchedMonitorStateType, "f33_scalar_monitor_45410_state",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x2B9B8L, monitorLimitsType, "f33_scalar_monitor_45410_limits",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x28AFCL, twoSidedMonitorCallbacksType, "f33_scalar_monitor_45410_callbacks",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0xFEBE7B6CL, latchedMonitorStateType, "f33_scalar_monitor_45572_state",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x2B9BCL, monitorLimitsType, "f33_scalar_monitor_45572_limits",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x28B30L, twoSidedMonitorCallbacksType, "f33_scalar_monitor_45572_callbacks",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0xFEBE7B78L, latchedMonitorStateType, "f33_scalar_monitor_4562a_state",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x2B9C0L, monitorLimitsType, "f33_scalar_monitor_4562a_limits",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x28B64L, twoSidedMonitorCallbacksType, "f33_scalar_monitor_4562a_callbacks",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0xFEBE7B84L, recoverableMonitorStateType, "f33_scalar_monitor_456fa_state",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x2B9C4L, recoverableMonitorLimitsType, "f33_scalar_monitor_456fa_limits",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x28B98L, recoverableMonitorCallbacksType, "f33_scalar_monitor_456fa_callbacks",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0xFEBE7B90L, recoverableMonitorStateType, "f33_scalar_monitor_45838_state",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x2B9CAL, recoverableMonitorLimitsType, "f33_scalar_monitor_45838_limits",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x28BD4L, recoverableMonitorCallbacksType, "f33_scalar_monitor_45838_callbacks",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0xFEBE7B9CL, latchedMonitorStateType, "f33_scalar_monitor_4599c_state",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x2B9D0L, monitorLimitsType, "f33_scalar_monitor_4599c_limits",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x28C10L, twoSidedMonitorCallbacksType, "f33_scalar_monitor_4599c_callbacks",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0xFEBE7BA8L, latchedMonitorStateType, "f33_scalar_monitor_45a6c_state",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x2B9D4L, monitorLimitsType, "f33_scalar_monitor_45a6c_limits",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x28C44L, twoSidedMonitorCallbacksType, "f33_scalar_monitor_45a6c_callbacks",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0xFEBE7BDCL, recoverableMonitorStateType, "f33_scalar_monitor_45e74_state",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x2BA0CL, recoverableMonitorLimitsType, "f33_scalar_monitor_45e74_limits",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x28C78L, recoverableMonitorCallbacksType, "f33_scalar_monitor_45e74_callbacks",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0xFEBE7BE8L, recoverableMonitorStateType, "f33_scalar_monitor_45f32_state",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x2BA12L, recoverableMonitorLimitsType, "f33_scalar_monitor_45f32_limits",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x28CB4L, recoverableMonitorCallbacksType, "f33_scalar_monitor_45f32_callbacks",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0xFEBE70C8L, windowedMonitorStateType, "f33_scalar_monitor_3bab2_state",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x2B5E0L, windowedMonitorLimitsType, "f33_scalar_monitor_3bab2_limits",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x27FCCL, twoSidedMonitorCallbacksType, "f33_scalar_monitor_3bab2_callbacks",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0xFEBE70D8L, windowedMonitorStateType, "f33_scalar_monitor_3bb44_state",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x2B5E8L, windowedMonitorLimitsType, "f33_scalar_monitor_3bb44_limits",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x28000L, twoSidedMonitorCallbacksType, "f33_scalar_monitor_3bb44_callbacks",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0xFEBE70ECL, latchedMonitorStateType, "f33_scalar_monitor_3bc4c_state",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x2B5F0L, monitorLimitsType, "f33_scalar_monitor_3bc4c_limits",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x28034L, twoSidedMonitorCallbacksType, "f33_scalar_monitor_3bc4c_callbacks",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0xFEBE70F8L, latchedMonitorStateType, "f33_scalar_monitor_3bcfc_state",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x2B5F4L, monitorLimitsType, "f33_scalar_monitor_3bcfc_limits",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+    semanticData(0x28068L, twoSidedMonitorCallbacksType, "f33_scalar_monitor_3bcfc_callbacks",
+        "Exact configured monitor layout; callback events and action publication have separate retention rules.");
+  }
+  private void annotateApplicationModeTransitions() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    semanticFunction(0xB1808L, "f33_advance_application_mode", v)
+        .setComment("Repair live mode, run at most one current-family internal transition, then family-prioritized major "
+            + "requests. Low IDs acknowledge only selected/complement-qualified pending winner; losing low pending "
+            + "requests retain.0701 pending2 can suppress10/7 until NvM/output snapshot readiness; exactFF038 "
+            + "constant0 then requests foreground restart through mode0000, not0800. All families except0200 clear "
+            + "direct-enable8B4C/4D. Mode publicationE8CC is separate.");
+    semanticFunction(0xB16F4L, "f33_transition_application_mode", v,
+        new ParameterImpl("new_mode", u16, currentProgram))
+        .setComment("If old and new mode<0A00, run AEB00 old-family exit then new-family entry before redundant live "
+            + "commitB11A/B0A0/B0A4. Hooks see old live mode. No same-mode/family short circuit and no E8CC "
+            + "publication.");
+    semanticFunction(0xB1620L, "f33_publish_live_application_mode", v,
+        new ParameterImpl("mode", u16, currentProgram))
+        .setComment("Commit liveB11A with XOR5555/B0A0 and XORAAAA/B0A4 throughD26D0 priority-protected redundant "
+            + "publisher. Does not publishE8CC.");
+    semanticFunction(0xB167EL, "f33_repair_live_application_mode", v)
+        .setComment("Vote liveB11A and redundantB0A0/B0A4; republish voted value only on repairable statuses-12/-11. No "
+            + "automatic invalid-to-zero fallback.");
+    semanticFunction(0xB16BCL, "f33_probe_pending_mode_request", u32,
+        new ParameterImpl("request_id", u8, currentProgram))
+        .setComment("Return1 exactly when request slotB0A8+2*ID isA55A. Pending IDs<16 capture "
+            + "selectedB10C/complementB0A6 and old liveB11C/complementB0A2. Internal IDs>=16 do not replace "
+            + "selected metadata. Failed probes retain metadata. Caller must provide valid slot ID.");
+    semanticFunction(0xB1738L, "f33_acknowledge_selected_mode_request", v,
+        new ParameterImpl("request_id", u8, currentProgram))
+        .setComment("Change pendingA55A to5AA5 only for matching selectedID/complement, or internalID>16. Does not clear "
+            + "request bitmap or losing low pending slots. ID16 is not unconditional.");
+    semanticFunction(0xB176EL, "f33_qualify_mode_restart_readiness", u32)
+        .setComment("Require66F1E NvM readiness first. Then return5A/resetB114 when all sampledB072..B075 zero or "
+            + "retainedcount>=20. Otherwise replace8A70/8AD0 owners0/1 with20002 and increment;19\u219220 still "
+            + "returns0. NvM not ready freezes counter even above20 and with zero snapshots. Counts are "
+            + "invocations, not measuredtime.");
+    semanticFunction(0xB17EEL, "f33_request_foreground_restart_from_mode", v)
+        .setComment("Clear redundantNvM gates0671/0672 viaFF010/FF024, transition0000 through realhooks, then publish "
+            + "foreground request8C08=A55A throughFEFC0/5889A. Not an immediate CPU reset or mode snapshot publish.");
+    semanticFunction(0xB166EL, "f33_reset_mode_readiness_counter", v)
+        .setComment("Clear retainedB114 then call empty0100 entryhook. Separate reset path; normal familyexit does not "
+            + "clear the readinesscounter.");
+    semanticFunction(0xB1D00L, "f33_advance_mode100_substate", v)
+        .setComment("Exact0100\u21920101(event17)\u21920102(18)\u21920103(19);0103 event20 requests major5. Internal events acknowledge "
+            + "independently of selected majorID.0100/0103 self-request their next internalevent;0101 waits NvM "
+            + "acquisition phase0 via5678A.");
+    semanticFunction(0xB281EL, "f33_advance_mode200_output_sequence", v)
+        .setComment("Advance exactly one0200..020D stage using matching IDs21..34. Each admitted channel gets "
+            + "stage-specific owner masks; disabled B082 channels retain. Direct-output stages0203/020B/020C load "
+            + "triplets then enable5A. Terminal020D requests3 plus6 only ifB32E0 selector!=1, clears direct "
+            + "enables; major arbiter runs afterward.");
+    semanticFunction(0x31FCAL, "f33_request_published_mode200_phase", v)
+        .setComment("Use PUBLISHED E8CC family0200 and redundant6884/6885 readiness, with6764 channel bypassbits. Compute "
+            + "low8(E8CC+0x15), admit<0x23, pass that ID inr6 toFDFFC, then clearbothreadinessflags. Live/published "
+            + "generation skew may emit an older retainedphase request.");
+    semanticFunction(0xB27FEL, "f33_complete_mode200_output_sequence", v)
+        .setComment("Clear direct-enable bytes8B4C/8B4D, setB10F throughB32E0; when returnedselector!=1 request6, then "
+            + "alwaysrequest3.0200 takes3\u21920300 first; retained6 may subsequentlyjoin0500 unless "
+            + "higher-priorityrequests win.");
+    semanticFunction(0xB32E0L, "f33_select_service_join_after_mode200", u32)
+        .setComment("Set and returnB10F=1 if32-bitF208nonzero, otherwise2. CallerB27FE uses r10 to decide whether to "
+            + "request6; do not typevoid.");
+    semanticFunction(0xB2B9EL, "f33_advance_mode300_substate", v)
+        .setComment("0300 matchingevent35/0x23 appliesB2B0A output/record actions then commits0301.0301 increments "
+            + "retainedB10D to5, then requests36/0x24; accepting36 requestsmajor12\u21920400 without changing0301. "
+            + "Counter is not reset on0300 entry/exit.");
+    semanticFunction(0xB2B70L, "f33_step_mode301_invocation_counter", v)
+        .setComment("If retainedB10D<5 increment; otherwise request36/0x24 andretaincounter. The invocationentering5 "
+            + "doesnotrequest; no measuredtimeclaim.");
+    semanticFunction(0xB2BF8L, "f33_apply_mode400_output_requests", v)
+        .setComment("Clear owners0/1 of8B2C/8A9C/8AE8/8A50/8A2C/8260, conditionally write8AA8=2/20000 "
+            + "forclearB082channelbits. Doesnotclear8A70/8AD0; top-level573FE separatelyclearsdirectenables.");
+    semanticFunction(0xB2C82L, "f33_enter_mode400", v)
+        .setComment("Finalize diagnosticlog45CFC, clear8B2Cowners0/1, setclassifier82A9=5A. Oldlive mode remainsvisible "
+            + "until callercommitsnewmode.");
+    semanticFunction(0xB2CFEL, "f33_advance_mode700_substate", u32)
+        .setComment("Advance atmostone0700\u21920701(event38/0x26),0701\u21920702(39/0x27 retainedrecordsnapshot), or0702 "
+            + "event40/0x28 requestsmajor10. ReturnB2CE4 r10:0onlywhilepost-worker live0701;5Aotherwise. "
+            + "ParentB1808 usesreturnfor event2 restartbranch.");
+    semanticFunction(0xB2CE4L, "f33_get_mode700_progress_marker", u32)
+        .setComment("Return0 onlyfor exactlive0701, otherwise5A including0700/0702. Thisispost-submode "
+            + "readinessbranchselector, not an independentlyqualified hardware readiness.");
+    semanticFunction(0xB2D74L, "f33_request_mode701_snapshot_unless_health_selected", v)
+        .setComment("Request39/0x27 unless selectedID/complementisvalidandID1. Calledin0700entrywhileoldlive mode "
+            + "remains; health-selected1 delaysretainedsnapshotrequest for laterthermalproducer.");
+    semanticFunction(0xB2D94L, "f33_request_mode700_initial_step", v)
+        .setComment("Request38/0x26 andfinalize diagnosticlog45CFC. Doesnotmaterializeslotdirectly; "
+            + "reconciliationlaterruns.");
+    semanticFunction(0xB2DA8L, "f33_enter_mode700", v)
+        .setComment("Reportserviceaborts;publishretained thermal/records8,9,D and conditionalrecords18/105;mark5F84.bit1 "
+            + "andqualified89D2[].bit1;setB250=5A;request38andconditionally39;finalizelog. "
+            + "Set8A48owner0=3,8B2Cowners0/1=70017001, clear8AD0/8AE8/8A50/8A2C/8260owners0/1,8AA8=4/40000. "
+            + "Doesnotclear8A70owners.");
+    semanticFunction(0xB2E64L, "f33_apply_mode800_ready_output_requests", v)
+        .setComment("Onlyif66F1E==1replace8A70owners0/1=20002,8A9C=4/40000,8AD0/8AE8=0,8AA8=4/40000,8A88owners2/3=2/20000. "
+            + "NvMbusy leavesmaskstateunchanged; top-leveldirectenableclearstilloccurs.");
+    semanticFunction(0xB32F4L, "f33_enter_mode600", v)
+        .setComment("ClearB110 on0600entry. Nootheraction; separateexitclearsB111 andresets6A60..6A62.");
+    semanticFunction(0xB32FAL, "f33_exit_mode600", v)
+        .setComment("ClearB111, call33FC6 toclear6A61/6A62 andset6A60=10 before newfamilyentry andlivecommit.");
+    semanticFunction(0xB33DAL, "f33_enter_mode900", v)
+        .setComment("Set8B2Cowners0/1=70017001,8A70owners0/1=20002,8AD0owners0/1=20002. "
+            + "Thisrequestsoutput-ownerstate,notphysicalpowerconfirmation.0900exitandsteadyworkersareempty.");
+    semanticFunction(0x66F1EL, "f33_application_nvm_is_ready", u32)
+        .setComment("Return1 onlywhen all32family0/all16repairedfamily1 statuses avoidpending highnibble20,busy0690/0691 "
+            + "neitherFFnorA5,and0673zero. Usedby0701/0800mode-readiness andexistingforegroundhandoff. No "
+            + "hardwarepowerpredicate.");
+    semanticFunction(0xFF038L, "f33_get_mode_restart_hardware_selector", u32)
+        .setComment("Tail-wrapper66FEE returns0 inexactimage.0701event2-ready therefore takesB17EE "
+            + "softwareforegroundrestart; return5A alternative0800edgeisnotreachablethroughthistarget.");
+    semanticFunction(0x573FEL, "f33_clear_direct_output_enables", v)
+        .setComment("Clear8B4C/8B4D only. "
+            + "Majorarbitercallsbeforeeveryhandledfamilyexcept0200;stageandexitcallersalsoexplicitlyclear. "
+            + "Doesnotclearownerrequestarraysorprovephysicalzerooutput.");
+    semanticFunction(0xB1DA4L, "f33_apply_mode0201_entry_requests", v)
+        .setComment("Apply per-channel output-owner bundle for transition0200\u21920201; "
+            + "onlychannelswithclearB082bitarechanged. "
+            + "Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table. "
+            + "Directenable: 0.");
+    semanticFunction(0xB1E70L, "f33_apply_mode0202_entry_requests", v)
+        .setComment("Apply per-channel output-owner bundle for transition0201\u21920202; "
+            + "onlychannelswithclearB082bitarechanged. "
+            + "Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table. "
+            + "Directenable: 0.");
+    semanticFunction(0xB1F3AL, "f33_apply_mode0203_entry_requests", v)
+        .setComment("Apply per-channel output-owner bundle for transition0202\u21920203; "
+            + "onlychannelswithclearB082bitarechanged. "
+            + "Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table. "
+            + "Directenable: 0.");
+    semanticFunction(0xB2004L, "f33_apply_mode0204_entry_requests", v)
+        .setComment("Apply per-channel output-owner bundle for transition0203\u21920204; "
+            + "onlychannelswithclearB082bitarechanged. "
+            + "Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table. "
+            + "Directenable: 5A with AF3DE triplet.");
+    semanticFunction(0xB20E0L, "f33_apply_mode0205_entry_requests", v)
+        .setComment("Apply per-channel output-owner bundle for transition0204\u21920205; "
+            + "onlychannelswithclearB082bitarechanged. "
+            + "Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table. "
+            + "Directenable: 0.");
+    semanticFunction(0xB21AAL, "f33_apply_mode0206_entry_requests", v)
+        .setComment("Apply per-channel output-owner bundle for transition0205\u21920206; "
+            + "onlychannelswithclearB082bitarechanged. "
+            + "Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table. "
+            + "Directenable: 0.");
+    semanticFunction(0xB2274L, "f33_apply_mode0207_entry_requests", v)
+        .setComment("Apply per-channel output-owner bundle for transition0206\u21920207; "
+            + "onlychannelswithclearB082bitarechanged. "
+            + "Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table. "
+            + "Directenable: 0.");
+    semanticFunction(0xB233AL, "f33_apply_mode0208_entry_requests", v)
+        .setComment("Apply per-channel output-owner bundle for transition0207\u21920208; "
+            + "onlychannelswithclearB082bitarechanged. "
+            + "Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table. "
+            + "Directenable: 0.");
+    semanticFunction(0xB2400L, "f33_apply_mode0209_entry_requests", v)
+        .setComment("Apply per-channel output-owner bundle for transition0208\u21920209; "
+            + "onlychannelswithclearB082bitarechanged. "
+            + "Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table. "
+            + "Directenable: 0.");
+    semanticFunction(0xB24CAL, "f33_apply_mode020a_entry_requests", v)
+        .setComment("Apply per-channel output-owner bundle for transition0209\u2192020A; "
+            + "onlychannelswithclearB082bitarechanged. "
+            + "Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table. "
+            + "Directenable: 0.");
+    semanticFunction(0xB258EL, "f33_apply_mode020b_entry_requests", v)
+        .setComment("Apply per-channel output-owner bundle for transition020A\u2192020B; "
+            + "onlychannelswithclearB082bitarechanged. "
+            + "Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table. "
+            + "Directenable: 0.");
+    semanticFunction(0xB2654L, "f33_apply_mode020c_entry_requests", v)
+        .setComment("Apply per-channel output-owner bundle for transition020B\u2192020C; "
+            + "onlychannelswithclearB082bitarechanged. "
+            + "Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table. "
+            + "Directenable: 5A with AF3DE triplet.");
+    semanticFunction(0xB272AL, "f33_apply_mode020d_entry_requests", v)
+        .setComment("Apply per-channel output-owner bundle for transition020C\u2192020D; "
+            + "onlychannelswithclearB082bitarechanged. "
+            + "Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table. "
+            + "Directenable: 5A with AF3E4 triplet.");
+    semanticFunction(0x66FEEL, "f33_platform_restart_selector_constant_zero", u32)
+        .setComment("Return full R10=0. Exact-image selector used through FF038: ready0701 request2 takes software "
+            + "foreground restart, not0800.");
+    semanticFunction(0xFEFFCL, "f33_query_application_nvm_readiness", u32)
+        .setComment("Tail-call66F1E and preserve its full R10 readiness result. No independent hardware power or "
+            + "persistence assertion.");
+    semanticFunction(0xB1C32L, "f33_mode_hook_b1c32", v)
+        .setComment("JMP LP with no state change; AEB00 table 0x0 entry, 0x0 exit. Exact-image hook, not a missing "
+            + "implementation.");
+    semanticFunction(0xB1DA0L, "f33_mode_hook_b1da0", v)
+        .setComment("JMP LP with no state change; AEB00 table 0x100 exit. Exact-image hook, not a missing implementation.");
+    semanticFunction(0xB2BF4L, "f33_mode_hook_b2bf4", v)
+        .setComment("JMP LP with no state change; AEB00 table 0x300 entry. Exact-image hook, not a missing "
+            + "implementation.");
+    semanticFunction(0xB2BF6L, "f33_mode_hook_b2bf6", v)
+        .setComment("JMP LP with no state change; AEB00 table 0x300 exit. Exact-image hook, not a missing implementation.");
+    semanticFunction(0xB2CA2L, "f33_mode_hook_b2ca2", v)
+        .setComment("JMP LP with no state change; AEB00 table 0x400 exit. Exact-image hook, not a missing implementation.");
+    semanticFunction(0xB2E62L, "f33_mode_hook_b2e62", v)
+        .setComment("JMP LP with no state change; AEB00 table 0x700 exit. Exact-image hook, not a missing implementation.");
+    semanticFunction(0xB2EE2L, "f33_mode_hook_b2ee2", v)
+        .setComment("JMP LP with no state change; AEB00 table 0x800 entry. Exact-image hook, not a missing "
+            + "implementation.");
+    semanticFunction(0xB2EE4L, "f33_mode_hook_b2ee4", v)
+        .setComment("JMP LP with no state change; AEB00 table 0x800 exit. Exact-image hook, not a missing implementation.");
+    semanticFunction(0xB342AL, "f33_mode_hook_b342a", v)
+        .setComment("JMP LP with no state change; AEB00 table 0x900 exit. Exact-image hook, not a missing implementation.");
+  }
+  private void annotateResetAndForegroundOwnership() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType uintPointer = new PointerDataType(u32, 4);
+    semanticFunction(0x0L, "f33_reset_vector", v)
+        .setComment("Hardware reset-vector stub: SYNCP then absolute JMP01B0 without changingLP. The destination owns CPU "
+            + "context/safety gates and first1404 call. Not an ordinary C-call/return ABI. Physical device vector "
+            + "selection is outside this static proof.");
+    semanticFunction(0x1B0L, "f33_reset_context_and_startup", v)
+        .setComment("Nonreturning assembly reset entry. DI;initialize GPR/system-register "
+            + "context,SPFEBE8000,GPFEBF9800,TP869C,EBASE1,INTBP0,PMRFFFF,MPM0. Gate JP0_4/BIST/ECM status with "
+            + "rereads;failure publishes protected retained token and halts0744. Pass path clears/enables "
+            + "instruction cache with unbounded readback waits,initializes data-buffer/MPU/FPU "
+            + "state,clearsFEBE7000..7FFF,then calls1404 and cannot return normally. Do not infer physical reset "
+            + "completion or register feedback from this software contract.");
+    semanticFunction(0x1404L, "f33_boot_hardware_ram_init_and_select_image", v)
+        .setComment("Called directly by reset assembly067C after first7000..7FFF clear and CPU setup. Perform "
+            + "ordered79A/7B6/802/880/8C8/96E/C52 hardware controls;SYNCM;preserve the empty reversed-bound first "
+            + "loop;clear established upper LocalRAM andGlobalRAM intervals;setEEPRDCYCL3;call13B0. Earlier "
+            + "hardware readback loops have no software timeout. RAM-clear extents/tests remain77.17 owner.");
+    semanticFunction(0x13B0L, "f33_boot_select_application_or_resident", v)
+        .setComment("Run port/config,retainedECM snapshot,ECM reset and boundedclock controls before119E validates both "
+            + "image regions/ECC/magic. Return0 calls the full-width application entry pointer atFFDB8 "
+            + "(registered20880) with no diagnostic dwell or local pointer-range guard. Failure resetsINTC "
+            + "controls,sets2908=FF andeight subsequentwords=FFFFFFFF,then enters resident1398. Any application "
+            + "return halts1402. This branch is distinct from deliberate9F00 programming transfer.");
+    semanticFunction(0x119EL, "f33_boot_validate_application_images", u32)
+        .setComment("Return0 only after a successful pair of descriptor-backed CRC checks481A(1),481A(0) plus115A "
+            + "CodeFlashECC snapshot/clear,then bothFFE00 and17E00 markerwords equal5AA5A55A. Each stage permits at "
+            + "most3 attempts;stage2 is reached only afterstage1 success. Return1 otherwise. HardwareCRC/ECC "
+            + "feedback is an external dependency;no fixed diagnostic startup interval is provided.");
+    semanticFunction(0x481AL, "f33_boot_validate_crc_region", u32,
+        new ParameterImpl("region", u32, currentProgram))
+        .setComment("Validate region selector through344C/3438;reject missingdescriptor/count. For each16-byte "
+            + "descriptor,require base andlength equal metadata-indirected words,then47EA streams words from "
+            + "thatbase withCRC seedFFFFFFFF andmust return0. Return0 on allpassing;FFFFFFFF on failure. "
+            + "Registeredselectors0/1 hold one recordeach;not generic pointer or image validity outside those "
+            + "descriptors.");
+    semanticFunction(0x1338L, "f33_boot_resident_initialize", v)
+        .setComment("Initialize resident diagnostic/service mode with stateFEBF2904=1 and2900=0,then orderedresident "
+            + "lower/service/flash/timer setup.1CA0 startsTAUJ0CH2. State1 prevents existing14A2 timer callback "
+            + "services until main137A publishesstate2. Does not validate or launch application.");
+    semanticFunction(0x137AL, "f33_boot_resident_service_iteration", v)
+        .setComment("Publish resident stateFEBF2904=2 before invoking078C,4428,479A,4874 once. This is the body of1398 "
+            + "resident loop and admits existingtimer callback14A2 services;it is not applicationCH3 foreground.");
+    semanticFunction(0x1398L, "f33_boot_resident_main", v)
+        .setComment("Nonreturning resident bootloader root reached by cold-start validation failure or explicit148E "
+            + "programming handoff. Run1338 initialization,restore priority mask with7244(0),EI,then "
+            + "repeatedly137A. Application66062 andapplicationvector/table ownership are not entered here.");
+    semanticFunction(0x9F00L, "f33_application_transfer_to_boot_context", v,
+        new ParameterImpl("handoff_record", uintPointer, currentProgram))
+        .setComment("Assembly nonreturning application-to-boot context transfer,not a reset. Preserve r6 handoff-record "
+            + "pointer;DI,PMRFFFF,clear SEGFLAG/SEGADDR/SEGCONT atFFFEE982/988/980 (hardware manual Table3.77); "
+            + "setPSW18020,EBASE1,INTBP0,SPFEBE8000,GPFEBF9800,TP869C,MPM0,then148E. Does not run1404 RAM "
+            + "sweeps or119E application validation. Parent65F5E suppliesROM31788. Ordinary return/stack "
+            + "assumptions are invalid.");
+    semanticFunction(0x148EL, "f33_boot_resident_enter_with_record", v,
+        new ParameterImpl("handoff_record", uintPointer, currentProgram))
+        .setComment("Copy exactlyninewords from r6 toFEBF2908 through real1478 word-copy,then enter1398 resident "
+            + "bootloader. Requires bootGP/SP/context alreadyestablished by9F00;not an ordinaryapplication-callable "
+            + "initializationhelper.");
+    semanticFunction(0x62BAEL, "f33_startup_capture_retained_token", v)
+        .setComment("Capture retained-register wordsFFC0A000/004/008/00C intoFEBE39B4/8DE4/8DF8/39B8 before "
+            + "replacingregistertoken withA5A5A5A5/F0F0F0F0/0F0F0F0F andfourthword0. Snapshot is later classified "
+            + "by62BF6;it is not a RAM-clear survivor inferred fromreset.");
+    semanticFunction(0x62BF6L, "f33_startup_classify_retained_token", v)
+        .setComment("Clear39BC..39BF;recognize exactprotected prior token9B9B9B9B,3E3E3E3E,6D6D6D6D,5A5A5A5A,setting "
+            + "correspondingflag5A. Lasttoken additionallyrequires39B8.highbyte5A. Thenpublish7C7C7C7C "
+            + "withXORcopies through62B90 andclearPowerOnResetflag viaRESFC=1. OEM tokenmeaning isnot "
+            + "assigned;thisdoesnot establish physicalresetretention.");
+    semanticFunction(0x62D5EL, "f33_startup_publish_image_identity_check", v)
+        .setComment("Compare eightbytes17DA0/20850,then onlyif equalfivebytes17DC0/20870. Any mismatch publishesA55AA55A "
+            + "instead0 through70A92 toFEBF0668/raw,10A4/XOR55555555,10C8/XORAAAAAAAA. Primaryeight-byte mismatch "
+            + "additionallypublishes066C=5A;secondary-onlymismatchleaves066C=0. Returnswithout blockingstartup;do "
+            + "not callthis a launchauthorizationgate.");
+    semanticFunction(0x6378CL, "f33_startup_validate_resident_boot_crc", v)
+        .setComment("Before releasingapplicationtimers,feedall10240wordsat0000..9FFF intoDCRA1 withCTL0/seedFFFFFFFF. "
+            + "AcceptonlyCOUTFFFFFFFF;retryup tothree times,thenenter61940 fatalhandling. Areturned initializer "
+            + "meanssoftwaregatepassedagainst suppliedhardwareCRCfeedback,not aphysicalCRCmodelproof.");
+    semanticFunction(0x665F2L, "f33_startup_start_timers_and_load_steady_periods", v)
+        .setComment("PulsePIC1ASST=1 tostart previouslyselected timers withtheir "
+            + "configuredfirst-intervalCDRs;callrealspin_wait(1),writePWMcompares,thenreplacetimerreloadswithsteadyperiod-1. "
+            + "Calledonlyafter666BC initializationand6378C bootCRCgate,andbefore701EA(0),EI,66062. "
+            + "Triggercompletion/physicaltimingarenotmodeledhere.");
+    semanticFunction(0x666BCL, "f33_application_initialize_before_timer_start", v)
+        .setComment("Orderedapplicationinitializationdispatcher,calledby637EE "
+            + "withinterruptsdisabledbeforebootCRCgateandtimerstart. Lowlevelandsoftwareinitializersinclude66BC8 "
+            + "NvMacquisitioninitialization/boundedbootstrap,diagnostics/communications,664F6timerconfiguration,65F8Ebookkeeping,62BF6retainedclassification,6681Eclear5F28,and58804appstateinitialization/publication. "
+            + "Noaggregatehardware-successreturnorrollbackexists;donotconflateinitializedstatewithacquireddataorphysicalreadiness.");
+    semanticFunction(0x637EEL, "f33_startup_coordinator", v)
+        .setComment("Nonreturningreset-selectedapplicationstartupownership:loadapplicationcontext715B4(abandonbootframes),clearoldbootstack632B2,configureguards/MPU/ECC/ECM/interrupts,publishretainedsnapshotandcopyROMdata,runstartupstatus/safety-devicegates,image-IDpublication62D5E,and666BCapplicationinitializers.6378CbootCRCmustpassbefore665F2startpulse;then701EA(0),EI,andforeground66062. "
+            + "Hardwarewaitsareexternalboundaries;DISPOSEsuffixisnotanordinaryreturnpath.");
+  }
   @Override public void run() throws Exception {
     String[] args = getScriptArgs();
     if (args.length != 1) throw new IllegalArgumentException("expected function_seeds.csv path");
@@ -5044,6 +6643,11 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateDiagnosticWritesAndRoutines();
     annotateApplicationLifecycle();
     annotateServiceLifecycle();
+    annotateComposedMonitorLayouts();
+    annotateTerminalMonitorComposition();
+    annotateScalarMonitorComposition();
+    annotateApplicationModeTransitions();
+    annotateResetAndForegroundOwnership();
     annotateDataFlashReads();
     annotateFaciSubmission();
     annotatePwmCompareStaging();

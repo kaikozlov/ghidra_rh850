@@ -286,7 +286,7 @@
     "0x089646": {
       "body_sha256": "4eec6679c98796dc7414b3706482e4fb6d89d6e503bab1f9a113f8a90879af7d",
       "body_size": 148,
-      "decompiled_c_sha256": "73937ba34283d1b5966b3b3515eceff00cc857f08ac1e62122bb6068f5f76525",
+      "decompiled_c_sha256": "f725d7a1b64e84ecb8d6f59a235b9af72830dbc242871d7c0ef20991feff46bb",
       "role": "ICU-S command dispatcher"
     },
     "0x089C98": {
@@ -352,13 +352,13 @@
     "0x08F746": {
       "body_sha256": "4cb7b08ada0b7e058aed4e9f44083b931a920427548e6d29abeb4f523e4fd1b7",
       "body_size": 396,
-      "decompiled_c_sha256": "e9a646c79a017e031eb6be6588769d797a77a959e9059b1a9eba2cc34799c8cb",
+      "decompiled_c_sha256": "12466679a33b275cf75df66d67e707834d5005e82e94fc42d76a316efd048c0b",
       "role": "SecOC verification coordinator"
     },
     "0x08F8D2": {
       "body_sha256": "758aab3b401cb94bcb88cd8e04de103fa37c85de872d2ee6b1652ab53a3ab636",
       "body_size": 52,
-      "decompiled_c_sha256": "b664263081cb86463df4dbc4b42ee290bf31677ab62cd7f5edc26924e242e61b",
+      "decompiled_c_sha256": "044c025e98af271dec90f45a0b6e20ab086dcd66477e73ea0525ea5e754657e8",
       "role": "post-crypto profile callback dispatcher"
     },
     "0x08F906": {
@@ -3008,7 +3008,7 @@
     }
   ],
   "target": {
-    "canonical_function_count": 7264,
+    "canonical_function_count": 7319,
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "software_id": "8965F3307000"
   }

@@ -1,0 +1,25 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_startup_application_context_cutover",
+  "entry": {"role": "Exact boot-selected20880 wrapper,637EE coordinator prologue and715B4 context loader. Demonstrates intentional abandonment of boot-side call frames and switch to application SP/GP/TP/vector ownership. Stops at637F6 before the separately covered RAM clear and all hardware initialization; not a physical reset or full launch proof.", "scope": "resolved-address", "address": "0x20880"},
+  "max_instructions": 100,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {"sp": "0xfebe7ff0", "gp": "0xfebf9800", "tp": "0x869c", "lp": "0x1402", "PSW": "0x18020", "FPEC": "0x0", "EBASE": "0x0", "INTBP": "0x0"},
+  "stop_addresses": ["0x637f6"],
+  "memory": [
+    {"address": "0xfebe7fe0", "size": 16, "fill": 165, "evidence": "explicit boot-side caller stack below13B0 frame; two real PREPARE instructions write7FEC/7FE8 before context loader switches SP"},
+    {"address": "0xfebe1fe0", "size": 32, "fill": 90, "evidence": "new application stack canary; context loader sets SP without copying old frames or touching this memory"}
+  ],
+  "checks": [
+    {"name": "coordinator continues after context call", "kind": "register", "register": "PC", "equals": "0x637f6"},
+    {"name": "application stack replaces abandoned boot stack", "kind": "register", "register": "sp", "equals": "0xfebe2000"},
+    {"name": "application global data anchor", "kind": "register", "register": "gp", "equals": "0xfebeb800"},
+    {"name": "application interrupt dispatch anchor", "kind": "register", "register": "tp", "equals": "0x23dfc"},
+    {"name": "application exception base", "kind": "register", "register": "EBASE", "equals": "0x20000"},
+    {"name": "application interrupt table base", "kind": "register", "register": "INTBP", "equals": "0x20200"},
+    {"name": "interrupts remain disabled during cutover", "kind": "register", "register": "PSW", "equals": "0x18020"},
+    {"name": "boot-side frames remain below old stack", "kind": "memory", "address": "0xfebe7fe0", "size": 16, "equals_hex": "a5a5a5a5a5a5a5a58808020002140000"},
+    {"name": "new stack is not a relocated call frame", "kind": "memory", "address": "0xfebe1fe0", "size": 32, "equals_hex": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a"}
+  ]
+}

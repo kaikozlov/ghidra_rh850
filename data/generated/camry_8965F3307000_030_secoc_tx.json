@@ -37,7 +37,7 @@
     },
     "0x089440": {
       "body_size": 150,
-      "decompiled_c_sha256": "259172dc7db0ba52b710828fc79cc0f7083217de9075795e39b8d06bfe7febff",
+      "decompiled_c_sha256": "3d25c182617e76866e6b91613ad1775c355d4ce2ecb1af2b208deff0e355c6d8",
       "role": "CryptoIf record dispatcher"
     },
     "0x089BC2": {
@@ -82,7 +82,7 @@
     },
     "0x08FD90": {
       "body_size": 320,
-      "decompiled_c_sha256": "cde4230ee16af119ff68fb5d433d5ef93841e7bdd59fd4538d982dcf20e7aa28",
+      "decompiled_c_sha256": "8f80aef8a2b7a4a6659e1aa1c100512b96fb268e0e5811d3c80cd8a8d3cb891b",
       "role": "SecOC Tx authentication coordinator"
     },
     "0x08FED0": {
@@ -92,7 +92,7 @@
     },
     "0x08FFDA": {
       "body_size": 272,
-      "decompiled_c_sha256": "3718b27fa152b4bc5db14f7cc59ef433585261dbd626ed893282387312dbae7e",
+      "decompiled_c_sha256": "6e4ae8b2452b8d71fb5f8eac3f72f5efd5a1ab29a6938682c4cb2bc4cf70af6f",
       "role": "secured-PDU assembly and lower transmit"
     },
     "0x090736": {

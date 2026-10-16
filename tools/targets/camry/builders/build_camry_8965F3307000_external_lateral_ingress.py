@@ -311,14 +311,15 @@ def build() -> dict:
     need(len(cone_rows) == 19 and len(empty_cone_ids) == 97, "19/116 scalar command-cone census drift")
 
     # Same-image identity: F181's secondary record is software compatibility
-    # identity, protected at startup by exact image-local comparisons.  DID2032
-    # is the separate 0x17D80 record and must not be conflated with F181.
+    # identity. Startup comparisons publish error state, not a local launch veto.
+    # DID2032 is the separate 0x17D80 record and must not be conflated with F181.
     token(funcs, 0x4FA26, "*param_1 = 2;")
     need_ref(funcs, 0x4FA26, 0x20860, "READ")
     need_ref(funcs, 0x4FA26, 0x17DC0, "READ")
-    token(funcs, 0x637EE, "FUN_00062d5e();")
-    token(funcs, 0x62D5E, "iVar3 = -0x5aa55aa6;",
-          "FUN_00070a92(iVar3,&DAT_febf0668,&DAT_febf10a4,&DAT_febf10c8);", "puVar2[0x4e6c] = uVar4;")
+    # JARL 62D5E followed by JARL 666BC: identity publication precedes the
+    # application initializer without a caller-side result/permission branch.
+    need(image[0x6383A:0x63842] == bytes.fromhex("bfff24f580ff7e2e"),
+         "startup identity-publication/initialization call sequence drift")
     for source in (0x20850, 0x17DA0, 0x17DC0, 0x20870):
         need_ref(funcs, 0x62D5E, source, "READ")
     token(funcs, 0x4F9DE, "*param_1 = 1;")
