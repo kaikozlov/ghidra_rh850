@@ -71,7 +71,7 @@
         "subbus_sequence": "0x33"
       },
       "path": "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json",
-      "sha256": "f71cab3ad170a877c3264e3ee586eeb99cd660303a0574bca312f47958532bce",
+      "sha256": "e5162cee10bf5f4b5437f74313229ee429a990d91b07850755ff6a6957ef42a8",
       "skid": {
         "bus_index": 32,
         "bus_name": "Bus 4",
@@ -105,7 +105,7 @@
     "0x000667E6": {
       "body_sha256": "96d89859e02738c11ddd556d055628f6e75a1e0b88c8f129e2dba902a34a5307",
       "body_size": 32,
-      "decompiled_c_sha256": "cdaf705a96e59dff3a9ba0e81fcc6d3867f5ba7c455918555ecf273a4209f8db",
+      "decompiled_c_sha256": "73b841b0caa439263472966c416d26eeec8e57728ad4142d2b57c1e8a195ba35",
       "role": "foreground communications/application aggregate"
     },
     "0x0006A32C": {
@@ -339,7 +339,7 @@
     "0x0008FABA": {
       "body_sha256": "e937244dfdbef8ec132299da455ddf9d6f5ff5cad5defed1b0485592a3b4aefd",
       "body_size": 152,
-      "decompiled_c_sha256": "6707f74ea8cc2b6e8bbe68d0d5b63bba23366af977a74770ca52afd92328e563",
+      "decompiled_c_sha256": "46d19fd1a304974c204b3d88eb854651f3ddfc399469c831da2f088bd2943afd",
       "role": "opposite queue-family insertion helper"
     },
     "0x00090204": {
@@ -538,7 +538,7 @@
   ],
   "target": {
     "canonical_function_count": 7331,
-    "canonical_inventory_sha256": "6566dea13113ee85f27d994dff58cd837afaf43f0ef2b4cb9354692ca840946b",
+    "canonical_inventory_sha256": "0a737d03d3a9b561dcba8459e0626c15ec8fd2551f9c3fcd0e1f2e04f17fbcf0",
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "software_id": "8965F3307000"
   }

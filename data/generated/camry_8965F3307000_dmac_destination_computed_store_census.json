@@ -203,7 +203,7 @@
   ],
   "canonical_corpus": {
     "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
-    "sha256": "74256bd0687f1935ac8c80141722ed0a9ac651ff480bf9cd4fd495b31498a48b"
+    "sha256": "c2e39cd78c83c6df5c4bbf01644fef457b7cf4c120255817122ac0a1aca1d211"
   },
   "ghidra_script": {
     "path": "ghidra/scripts/investigate/AuditComputedStoreTargets.java",

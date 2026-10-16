@@ -18,7 +18,7 @@ Profiles:
   application-rx-consumers     Export application Rx consumer audit CSV
   application-tx-producers     Export Tx refs and build producer evidence CSV
   outside-functions            Export/adjudicate outside-function census + summary
-  semantic-coverage            Export/review semantic coverage ledger + summary
+  semantic-coverage            Semantic coverage summary (derived tables, or legacy CSV review)
   project-inventory            Export normalized project inventory (build/out or build/tmp only)
 
 PROJECT_DIR defaults to the selected target's registered work_dir. Profile-specific environment
@@ -52,6 +52,13 @@ PROGRAM_NAME=$(TARGET_FIELD program_name)
 CODEFLASH="$ROOT/$(TARGET_FIELD codeflash)"
 EXPECTED_SHA=$(TARGET_FIELD codeflash_sha256)
 PROJECT_DIR="${PROJECT_DIR:-$ROOT/$(TARGET_FIELD work_dir)}"
+# Derived-coverage targets (registered recovered-function tables) compute their
+# summary from the tracked inventory baseline and machine fixtures only; no live
+# Ghidra project is needed. Legacy CSV-review targets keep the project-backed path.
+if [[ "$PROFILE" == "semantic-coverage" ]] \
+   && [[ -n "$(TARGET_FIELD recovered_functions 2>/dev/null || true)" ]]; then
+  exec python3 -m tools.project.build_derived_coverage --target "$ANALYSIS_TARGET"
+fi
 
 resolve_path() {
   python3 -c 'from pathlib import Path; import sys; print(Path(sys.argv[1]).expanduser().resolve())' "$1"

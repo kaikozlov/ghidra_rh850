@@ -9820,29 +9820,42 @@ sections retain their more detailed evidence and capture boundaries.
 
 ### 77.1 Coverage is not understanding
 
-The target now uses the existing semantic-coverage and outside-function
-machinery, with paths owned by
-[`analysis_targets.json`](../../data/analysis_targets.json). Structural exports
-check executable identity and do not apply Sienna's fixed-address callback-table
-rules to Camry. Curated reviews are distinct from generated metrics:
+Since 2026-10-16 the target's recovered semantics are table-driven, with paths
+owned by [`analysis_targets.json`](../../data/analysis_targets.json):
 
-- [`semantic_review_status.csv`](../../data/targets/camry-8965F3307000/semantic_review_status.csv)
-  records a function's conclusion, evidence source, grade, and execution status.
+- [`recovered_functions.jsonl`](../../data/targets/camry-8965F3307000/recovered_functions.jsonl)
+  and [`recovered_data.jsonl`](../../data/targets/camry-8965F3307000/recovered_data.jsonl)
+  are the single hand-maintained record of per-function semantics: name,
+  signature, parameters, comment, and bounded marker, one line per address.
+  `SeedCamryF33Semantics.java` keeps only structural work (type definitions,
+  code surgery, dynamic-length tables); the generic `ApplyRecoveredTables.java`
+  applies the tables during the rebuild. Routine semantic recovery is a table
+  edit, and the applied comments are visible in the decompiler corpus.
 - [`semantic_coverage_summary.json`](../../data/targets/camry-8965F3307000/semantic_coverage_summary.json)
-  reports the generated counts, not an estimated percentage of OEM intent recovered.
+  is machine-derived from the canonical inventory baseline, the machine-fixture
+  census, and the bounded markers: `named`, `documented`, `fixture_executed`,
+  `bounded`. It is not an estimated percentage of OEM intent recovered.
 - [`outside_function_summary.json`](../../data/targets/camry-8965F3307000/outside_function_summary.json)
   is a conservative candidate census, not a missing-function count. Candidate
   decoded-byte totals are sums of runs, not unique executable-byte coverage.
 
+The retired hand-graded review CSVs (2026-10-14..16) carried a parallel prose
+summary per function plus repeated evidence-scope boilerplate; their
+function-specific content was merged into the table comments, and evidence-scope
+conventions remain owned by [FINDINGS](../status/FINDINGS.md#evidence-model)
+and this report rather than per-function rows.
+
 A generic function name does not imply an unknown algorithm; a descriptive name
-does not imply a verified contract. Likewise, an unreviewed ledger row means no
-conclusion has been entered there, not that the earlier subsystem reports contain
-no evidence about that function.
+does not imply a verified contract. A `FUN_` name with no table row means no
+conclusion has been entered, not that the earlier subsystem reports contain no
+evidence about that function.
 
 ### 77.2 Executed contracts and durable prototypes
 
 The first verified increment put these target-specific names, formal parameter
-types, return contracts, and comments in `SeedCamryF33RecoveredFunctions.java`:
+types, return contracts, and comments in the recovered-semantics inputs (then
+`SeedCamryF33RecoveredFunctions.java`; since 2026-10-16, the
+`recovered_functions.jsonl` table):
 
 | Entry | Recovered contract | Evidence boundary |
 |---|---|---|
@@ -10829,7 +10842,7 @@ The full logical-module initializer `73F0A` executes to its real return in
 with explicitly nonzero RAM; exact post-state checks distinguish writes from
 assumed cold-zero values. No callee is replaced. Thirty-one more contracts,
 typed queue slots/headers and the separate logical-zero record are persisted
-in `SeedCamryF33RecoveredFunctions.java` and the existing review CSV.
+in the recovered-semantics inputs (`recovered_functions.jsonl` since 2026-10-16).
 
 **Geometry and initialization.**
 
