@@ -55,6 +55,8 @@ VALUE_RETURN = {
     "f33_nvm_read_buffer",
     "f33_nvm_write_buffer",
     "f33_nvm_submit_operation",
+    "f33_classify_channel_residual_a",
+    "f33_curve16_interpolate_with_slope",
 }
 
 ROM_TABLES = (
@@ -199,6 +201,10 @@ def bind(library: ctypes.CDLL) -> None:
     library.f33_nvm_submit_operation.restype = u32
     library.f33_freshness_select_reset_candidate.argtypes = [u32, u32]
     library.f33_freshness_select_reset_candidate.restype = u32
+    library.f33_classify_channel_residual_a.argtypes = []
+    library.f33_classify_channel_residual_a.restype = u32
+    library.f33_curve16_interpolate_with_slope.argtypes = [u32, u32, u32]
+    library.f33_curve16_interpolate_with_slope.restype = u32
     library.f33_force_unconfirmed_terminal_monitor_healthy.argtypes = [u32, u32, u32]
     library.f33_force_unconfirmed_terminal_monitor_healthy.restype = u32
     library.f33_nvm_read_buffer.argtypes = [u32]
@@ -468,6 +474,10 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
         return int(library.f33_nvm_submit_operation(r6)) & 0xFFFFFFFF
     if name == "f33_freshness_select_reset_candidate":
         return int(library.f33_freshness_select_reset_candidate(r7, r8)) & 0xFFFFFFFF
+    if name == "f33_classify_channel_residual_a":
+        return int(library.f33_classify_channel_residual_a()) & 0xFFFFFFFF
+    if name == "f33_curve16_interpolate_with_slope":
+        return int(library.f33_curve16_interpolate_with_slope(r6, r7, r8)) & 0xFFFFFFFF
     if name == "f33_force_unconfirmed_terminal_monitor_healthy":
         return int(library.f33_force_unconfirmed_terminal_monitor_healthy(r6, r7, r8)) & 0xFFFFFFFF
     if name in VALUE_RETURN:

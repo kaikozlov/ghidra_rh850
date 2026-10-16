@@ -688,3 +688,191 @@ void f33_freshness_decode_wire(uint32_t wire, uint32_t bit_length, uint32_t fres
     camry_write8(freshness + 10u, low & 3u);
     camry_write8(freshness + 11u, bit_length);
 }
+
+static int32_t sign_half(uint32_t bits) {
+    return (int32_t)(int16_t)(bits & 0xffffu);
+}
+
+static uint32_t sat_abs_half(uint32_t bits) {
+    int32_t value = sign_half(bits);
+    if (value <= -32767)
+        return 32767u;
+    if (value < 0)
+        value = -value;
+    return (uint32_t)value;
+}
+
+static uint32_t sat_abs_word(uint32_t bits) {
+    int32_t value = (int32_t)bits;
+    if (value <= (int32_t)0x80000001u)
+        return 0x7fffffffu;
+    if (value < 0)
+        return (uint32_t)(-value);
+    return bits;
+}
+
+uint32_t f33_classify_channel_residual_a(void) {
+    uint32_t status = camry_read32(0xfebe8b28u);
+    int32_t reference = (int32_t)sat_abs_half(camry_read16(0xfebe77b8u));
+    int32_t channel = (int32_t)sat_abs_half(camry_read16(0xfebe629eu));
+    uint32_t minimum = camry_read16(0xfebe7da6u);
+    uint32_t gate = camry_read16(0xfebe7b34u);
+    uint32_t companion = camry_read8(0xfebe77b4u);
+    uint32_t source = sat_abs_word(camry_read32(0xfebe77bcu));
+    uint32_t selector;
+    int32_t channel_limit;
+    uint32_t minimum_limit;
+    const uint32_t rom = 0x2b816u;
+
+    if (companion != 0u || (status & 0x40004u) != 0u)
+        return 0x44u;
+    selector = camry_read8(0xfebeeb88u);
+    if (selector == 0x5au) {
+        channel_limit = sign_half(camry_read16(rom + 8u));
+        minimum_limit = camry_read16(rom + 10u);
+    } else {
+        channel_limit = sign_half(camry_read16(rom + 4u));
+        minimum_limit = camry_read16(rom + 6u);
+    }
+    if (reference < sign_half(camry_read16(rom))
+        && source > camry_read16(rom + 2u)
+        && channel <= channel_limit
+        && minimum >= minimum_limit)
+        return 0x22u;
+    if (reference < sign_half(camry_read16(rom + 12u))
+        && source <= camry_read16(rom + 14u)
+        && selector == 0u
+        && channel <= sign_half(camry_read16(rom + 16u))
+        && minimum >= camry_read16(rom + 18u)
+        && gate == 0xffffu)
+        return 0x11u;
+    return 0x33u;
+}
+
+static int32_t divq_s(int32_t dividend, int32_t divisor) {
+    if (divisor == 0)
+        return dividend;
+    if (dividend == (int32_t)0x80000000u && divisor == -1)
+        return dividend;
+    return dividend / divisor;
+}
+
+static int32_t mul_low_s(int32_t left, int32_t right) {
+    return (int32_t)((int64_t)left * (int64_t)right);
+}
+
+static int32_t curve_x(uint32_t curve, uint32_t index) {
+    return sign_half(camry_read16(curve + (index << 2)));
+}
+
+static uint32_t curve_y(uint32_t curve, uint32_t index) {
+    return camry_read16(curve + (index << 2) + 2u);
+}
+
+static uint32_t curve_segment(uint32_t curve, int32_t x) {
+    if (x >= curve_x(curve, 8u)) {
+        if (x >= curve_x(curve, 12u)) {
+            if (x >= curve_x(curve, 14u))
+                return x < curve_x(curve, 15u) ? 14u : 15u;
+            return x < curve_x(curve, 13u) ? 12u : 13u;
+        }
+        if (x >= curve_x(curve, 10u))
+            return x < curve_x(curve, 11u) ? 10u : 11u;
+        return x < curve_x(curve, 9u) ? 8u : 9u;
+    }
+    if (x >= curve_x(curve, 4u)) {
+        if (x >= curve_x(curve, 6u))
+            return x < curve_x(curve, 7u) ? 6u : 7u;
+        return x < curve_x(curve, 5u) ? 4u : 5u;
+    }
+    if (x >= curve_x(curve, 2u))
+        return x < curve_x(curve, 3u) ? 2u : 3u;
+    return x < curve_x(curve, 1u) ? 0u : 1u;
+}
+
+static int32_t slope_term(int32_t dx, int32_t dy) {
+    int32_t scaled = (int32_t)((uint32_t)dy << 8);
+    if (dx == 0) {
+        int32_t fallback = sign_half(camry_read16(0xaf88cu));
+        return divq_s((int32_t)((uint32_t)fallback << 8), 512);
+    }
+    return divq_s(scaled, dx);
+}
+
+static uint32_t curve_value(uint32_t curve, int32_t x, uint32_t index) {
+    int32_t x0;
+    int32_t x1;
+    uint32_t y0;
+    uint32_t y1;
+    int32_t dx;
+    int32_t quot;
+
+    if (index == 15u)
+        return curve_y(curve, 15u);
+    x0 = curve_x(curve, index);
+    x1 = curve_x(curve, index + 1u);
+    y0 = curve_y(curve, index);
+    y1 = curve_y(curve, index + 1u);
+    dx = sign_half((uint32_t)(x1 - x0));
+    quot = divq_s(mul_low_s((int32_t)(y1 - y0), x - x0), dx);
+    return ((uint32_t)quot + y0) & 0xffffu;
+}
+
+static int32_t curve_slope(uint32_t curve, int32_t x, uint32_t index) {
+    int32_t x0;
+    int32_t x1;
+    uint32_t y0;
+    uint32_t y1;
+    int32_t dx;
+    int32_t current;
+    int32_t next;
+    int32_t previous;
+    int32_t high;
+    int32_t low;
+    int32_t mixed;
+
+    if (index == 15u) {
+        int32_t span = curve_x(curve, 15u) - curve_x(curve, 14u);
+        if (span == 0)
+            return sign_half(camry_read16(0xaf88cu));
+        current = divq_s(
+            (int32_t)((uint32_t)(int32_t)(curve_y(curve, 15u) - curve_y(curve, 14u)) << 8),
+            span);
+        return divq_s((int32_t)((uint32_t)current << 9), 256);
+    }
+    x0 = curve_x(curve, index);
+    x1 = curve_x(curve, index + 1u);
+    y0 = curve_y(curve, index);
+    y1 = curve_y(curve, index + 1u);
+    dx = x1 - x0;
+    current = slope_term(dx, (int32_t)(y1 - y0));
+    if (index == 14u) {
+        next = current;
+    } else {
+        next = slope_term(
+            curve_x(curve, index + 2u) - x1,
+            (int32_t)(curve_y(curve, index + 2u) - y1));
+    }
+    if (index == 0u) {
+        previous = current;
+    } else {
+        previous = slope_term(
+            x0 - curve_x(curve, index - 1u),
+            (int32_t)(y0 - curve_y(curve, index - 1u)));
+    }
+    if (dx == 0)
+        return sign_half(camry_read16(0xaf88cu));
+    high = current > next ? current : next;
+    low = previous > current ? previous : current;
+    mixed = (int32_t)((uint32_t)low + (uint32_t)divq_s(
+        mul_low_s((int32_t)((uint32_t)high - (uint32_t)low), x - x0), dx));
+    return divq_s((int32_t)((uint32_t)mixed << 9), 256);
+}
+
+uint32_t f33_curve16_interpolate_with_slope(uint32_t curve, uint32_t x_bits, uint32_t slope_out) {
+    int32_t x = sign_half(x_bits);
+    uint32_t index = curve_segment(curve, x);
+    uint32_t value = curve_value(curve, x, index);
+    camry_write16(slope_out, (uint32_t)curve_slope(curve, x, index));
+    return value;
+}
