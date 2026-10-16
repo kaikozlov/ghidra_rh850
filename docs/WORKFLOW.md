@@ -697,26 +697,19 @@ whole-program audits remain legacy-Sienna checks:
 make verify-processor TARGET=sienna-8965B4512000 PROJECT_DIR="$PWD/build/work/sienna-rebuild"
 ```
 
-Semantic coverage and outside-function discovery use the selected target's
-registered artifact paths and enforce its executable hash. The legacy Sienna
-keeps its curated CSV review pipeline; first-class table-driven targets derive
-their coverage summary from tracked inputs only. Against an already rebuilt,
-stopped legacy project:
+Camry `8965F3307000` decompilation lives in
+[decomp/camry-8965F3307000](../decomp/camry-8965F3307000/README.md).
+`tools/decomp identity` relinks CodeFlash from `symbols.jsonl`. Matched C is
+checked with `tools/test camry_decomp`.
+
+Semantic coverage and outside-function discovery remain the legacy Sienna CSV
+pipeline. Those two generators are pinned to the Sienna work project:
 
 ```bash
-make generate-semantic-coverage TARGET=camry-8965F3307000   # derived: inventory baseline + machine fixtures, no live project
-make generate-semantic-coverage TARGET=sienna-8965B4512000 PROJECT_DIR="$PWD/build/work/targets/sienna-8965B4512000/project"
-make generate-function-discovery TARGET=camry-8965F3307000 PROJECT_DIR="$PWD/build/work/targets/camry-8965F3307000/project"
+make generate-semantic-coverage
+make generate-function-discovery
 make verify-semantic-coverage-live TARGET=sienna-8965B4512000 PROJECT_DIR="$PWD/build/work/project"
 ```
-
-Targets with registered `recovered_functions` tables have no hand-maintained
-review CSVs: naming, signatures, and per-function conclusions live in the
-registered tables, are applied by `ApplyRecoveredTables.java` during the
-rebuild, and are visible as Ghidra comments in the decompiler corpus. The
-derived summary reports machine-checkable classes only (`named`, `documented`,
-`fixture_executed`, `bounded`); it is not a percentage of OEM intent recovered,
-and evidence-scope conventions stay in the owning subsystem reports.
 
 `verification.toml` lists suites and external prerequisites. It does not
 assign tests to changed files. Broad sweeps and Ghidra rebuilds are release or
@@ -799,11 +792,9 @@ the P1M-E device profile, and `ApplyP1MSfrTypes` — plus the target's registere
 context script (`device_profile_script`, e.g. `ApplyCamryF33DeviceProfile.java`),
 then stage their registered seed scripts (`entry_seed_script`,
 `diagnostic_seed_script`, `recovered_seed_script`, plus the target's
-`function_seeds` CSV) as their own durable analysis commits; targets with
-registered `recovered_functions`/`recovered_data` tables additionally apply
-them through the generic `ApplyRecoveredTables.java` preScript in the same
-recovered stage, so routine semantic recovery is a table edit rather than a
-script change. All first-class targets end with the
+`function_seeds` CSV) as their own durable analysis commits. Camry's recovered
+seed only repairs structural code and data boundaries. Function names and C
+are owned by `decomp/camry-8965F3307000/`. All first-class targets end with the
 same `-noanalysis` `ApplyCallingConventions` finalizer. Exact-target scripts do
 not maintain a second hardware map.
 
@@ -857,11 +848,10 @@ home: each rebuild reinstalls the shared `GhidraFindcrypt` extension directory.
 Independent reproduction means separate fresh project imports, not concurrent
 extension bootstrap.
 
-The whole-image corpus is the decompilation source; use `tools/pseudo --target
-TARGET` to read functions. For table-driven targets the registry's
-`recovered_functions`/`recovered_data` tables own per-function conclusions
-(applied as comments and visible in the corpus); the legacy `semantic_reviews`
-CSV still owns curated conclusions for Sienna, and `function_discovery_reviews`
+The whole-image corpus is Ghidra output for reading a function; use
+`tools/pseudo --target TARGET`. Camry understanding that is being recompiled
+lives in `decomp/camry-8965F3307000/src/`. The legacy `semantic_reviews` CSV
+still owns curated conclusions for Sienna, and `function_discovery_reviews`
 owns adjudicated outside-function clusters. Exporters regenerate the
 corresponding summaries. Structural coverage/ranking provides navigation, not
 additional proof.

@@ -138,11 +138,12 @@ generate-application-transmit:
 generate-processor-fixture:
 	$(PYTHON) -m tools.testing.processor.build_processor_fixture
 
+# Sienna-owned inventories. Camry has no outside-function or semantic-coverage fields.
 generate-function-discovery:
-	GHIDRA_ANALYSIS_TARGET="$(TARGET)" PROJECT_DIR="$(PROJECT_DIR)" tools/project/export_ghidra_project.sh outside-functions
+	GHIDRA_ANALYSIS_TARGET="$(LEGACY_SIENNA_TARGET)" PROJECT_DIR="$(LEGACY_SIENNA_PROJECT_DIR)" tools/project/export_ghidra_project.sh outside-functions
 
 generate-semantic-coverage:
-	GHIDRA_ANALYSIS_TARGET="$(TARGET)" PROJECT_DIR="$(PROJECT_DIR)" tools/project/export_ghidra_project.sh semantic-coverage
+	GHIDRA_ANALYSIS_TARGET="$(LEGACY_SIENNA_TARGET)" PROJECT_DIR="$(LEGACY_SIENNA_PROJECT_DIR)" tools/project/export_ghidra_project.sh semantic-coverage
 
 generate-decompiler-corpus:
 ifeq ($(TARGET),$(LEGACY_SIENNA_TARGET))

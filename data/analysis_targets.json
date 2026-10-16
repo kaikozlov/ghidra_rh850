@@ -18,10 +18,7 @@
    "work_dir": "build/work/targets/camry-8965F3307000/project",
    "inventory_baseline": "data/targets/camry-8965F3307000/ghidra_project_inventory.baseline.jsonl",
    "decompiler_corpus": "data/generated/camry-8965F3307000/decompilations.jsonl",
-   "semantic_coverage_summary": "data/targets/camry-8965F3307000/semantic_coverage_summary.json",
-   "outside_function_candidates": "data/targets/camry-8965F3307000/outside_function_candidates.csv",
-   "outside_function_summary": "data/targets/camry-8965F3307000/outside_function_summary.json",
-   "function_discovery_reviews": "data/targets/camry-8965F3307000/function_discovery_reviewed_clusters.csv",
+   "decomp_root": "decomp/camry-8965F3307000",
    "rebuild_profile": "camry_f33_v1",
    "codeflash_size": 1048576,
    "codeflash_base": "0x00000000",
@@ -34,8 +31,6 @@
    "entry_seed_script": "SeedCamryF33Entries.java",
    "diagnostic_seed_script": "SeedCamryF33Diagnostics.java",
    "recovered_seed_script": "SeedCamryF33Semantics.java",
-   "recovered_functions": "data/targets/camry-8965F3307000/recovered_functions.jsonl",
-   "recovered_data": "data/targets/camry-8965F3307000/recovered_data.jsonl",
    "ram_runtime": {
     "profile": "camry-f33",
     "payloads": [

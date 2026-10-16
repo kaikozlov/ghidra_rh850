@@ -1,0 +1,5 @@
+#!/bin/sh
+# tools/decomp — Camry identity image and decompilation status.
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+exec uv run --project "$ROOT" --locked python -m tools.camry_decomp "$@"

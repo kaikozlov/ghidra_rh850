@@ -93,14 +93,7 @@ echo "[$TARGET 3/4] seed registered diagnostic callbacks and re-run analysis"
 runh diagnostics -process "$PROGRAM_NAME" -preScript "$DIAGNOSTIC_SEED_SCRIPT" \
   -commit "Seed registered target diagnostic callbacks"
 echo "[$TARGET 4/4] seed promoted registered-target functions and analyze"
-RECOVERED_TABLES_ARGS=()
-RECOVERED_FUNCTIONS_REL=$(field recovered_functions 2>/dev/null || true)
-RECOVERED_DATA_REL=$(field recovered_data 2>/dev/null || true)
-if [[ -n "$RECOVERED_FUNCTIONS_REL" && -n "$RECOVERED_DATA_REL" ]]; then
-  RECOVERED_TABLES_ARGS=(-preScript ApplyRecoveredTables.java "$ROOT/$RECOVERED_FUNCTIONS_REL" "$ROOT/$RECOVERED_DATA_REL")
-fi
 runh recovered -process "$PROGRAM_NAME" -preScript "$RECOVERED_SEED_SCRIPT" "$SEEDS" \
-  "${RECOVERED_TABLES_ARGS[@]}" \
   -commit "Seed evidence-backed registered-target recovered functions"
 echo "[$TARGET 4b] finalize calling conventions without analysis"
 runh conventions -process "$PROGRAM_NAME" -noanalysis -postScript ApplyCallingConventions.java \

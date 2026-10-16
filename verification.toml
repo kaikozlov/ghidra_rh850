@@ -315,6 +315,9 @@ tests = ["tests/firmware/verify_p1m_device_profile.py"]
 [suite.rh850_firmware]
 tests = ["tests/tooling/verify_rh850_machine.py"]
 
+[suite.camry_decomp]
+tests = ["tests/decomp/verify_camry_decomp.py"]
+
 [suite.rh850_payload]
 tests = ["tests/tooling/verify_rh850_payload.py"]
 

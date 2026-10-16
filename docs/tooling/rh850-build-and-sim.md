@@ -460,18 +460,11 @@ The generated suite has no calibration-named JSON inputs:
 |ICU-S output callback|structural callback role plus dump-relative output state|four supplied output words, cursor advance, and acknowledgement|
 
 `tools/test rh850_firmware` requires these scenarios to pass on every
-registered signer target: Camry, Crown, Corolla F, and Corolla H. Target-owned
-fixtures under `tests/fixtures/rh850/machine/` are retained only for
-device-model boundaries and negative behavior, not as a target compatibility
-matrix.
+registered signer target: Camry, Crown, Corolla F, and Corolla H.
 
-Individual retained model scenarios remain available by registered target:
-
-```bash
-tools/rh850 test firmware camry-8965F3307000 \
-  tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_faci_command.json \
-  tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_application_reset.json
-```
+Camry's retained original-byte scenarios are one JSON object per line in
+`decomp/camry-8965F3307000/oracles.jsonl`. `tools/test camry_decomp` checks the
+functions whose C is listed in that tree's `matched.jsonl`.
 
 Each report embeds the resolved run contract: unique candidate count or
 dump-contract source, resolved entry, exact entry-instruction hash,

@@ -170,11 +170,14 @@ The channel1 request base isFFD20224. Classic admission checks
 `CFDTMSTS & 1E`; FD additionally checks retained nibble consistency.
 Request storage and software admission are not proof of physical delivery.
 
-Native compositions execute the real scheduler for
-[classic admission](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_tx_publication_classic_due_enqueues_snapshot.json),
-[classic queue-full retention](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_tx_publication_classic_full_retains_queued_content.json),
-[protected application-only copying](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_tx_publication_protected_due_copies_application_only.json)
-and [occupied protected-generation rejection](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_tx_publication_protected_busy_preserves_generation.json).
+Native compositions execute the real scheduler for classic admission
+(`camry_f33_tx_publication_classic_due_enqueues_snapshot`), classic queue-full
+retention (`camry_f33_tx_publication_classic_full_retains_queued_content`),
+protected application-only copying
+(`camry_f33_tx_publication_protected_due_copies_application_only`) and occupied
+protected-generation rejection
+(`camry_f33_tx_publication_protected_busy_preserves_generation`). Those
+scenarios are retained in `decomp/camry-8965F3307000/oracles.jsonl`.
 All passed with real callees and explicit RAM, without firmware overlays or
 hardware-model extension. Group transitions, queue wrapping/large-record paths,
 concurrent interrupts, MAC completion and physical transmission are not covered
