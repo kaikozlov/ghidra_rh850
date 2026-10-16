@@ -9753,6 +9753,12 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     layout12.setPackingEnabled(true);
     StructureDataType layout13 = new StructureDataType(category, "F33CanTpTxConnection", 0);
     layout13.setPackingEnabled(true);
+    StructureDataType layout14 = new StructureDataType(category, "F33CanTpRxConnection", 0);
+    layout14.setPackingEnabled(true);
+    StructureDataType layout15 = new StructureDataType(category, "F33CanTpRxState", 0);
+    layout15.setPackingEnabled(true);
+    StructureDataType layout16 = new StructureDataType(category, "F33CanTpChannelConfiguration", 0);
+    layout16.setPackingEnabled(true);
     layout0.add(u16, "protocol_index", "Recovered field use; opaque fields remain uninterpreted.");
     layout0.add(u16, "connection_index", "Recovered field use; opaque fields remain uninterpreted.");
     layout0.add(u16, "receive_descriptor_index", "Recovered field use; opaque fields remain uninterpreted.");
@@ -9819,38 +9825,83 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     layout11.add(u8, "state", "Recovered field use; opaque fields remain uninterpreted.");
     layout11.add(u8, "sequence_number", "Recovered field use; opaque fields remain uninterpreted.");
     layout11.add(u8, "block_remaining", "Recovered field use; opaque fields remain uninterpreted.");
-    layout11.add(u8, "flow_control_flag", "Recovered field use; opaque fields remain uninterpreted.");
+    layout11.add(u8, "block_size", "Initial FC BS; zero means unrestricted, not boolean.");
     layout11.add(u8, "spacing_ticks", "Recovered field use; opaque fields remain uninterpreted.");
     layout11.add(new ArrayDataType(u8, 3, 1), "opaque_0d", "Recovered field use; opaque fields remain uninterpreted.");
-    layout12.add(new PointerDataType(v, 4), "channel_rows", "Recovered field use; opaque fields remain uninterpreted.");
+    layout12.add(new PointerDataType(layout16, 4), "channel_rows", "Exact configured channel records.");
     layout12.add(u16, "first_receive_id", "Recovered field use; opaque fields remain uninterpreted.");
     layout12.add(u16, "first_transmit_id", "Recovered field use; opaque fields remain uninterpreted.");
-    layout12.add(u16, "opaque_08", "Recovered field use; opaque fields remain uninterpreted.");
+    layout12.add(u16, "first_canif_receive_id", "Receive-frame namespace starts0804.");
     layout12.add(u16, "first_canif_confirmation_id", "Recovered field use; opaque fields remain uninterpreted.");
     layout12.add(u8, "channel_count", "Recovered field use; opaque fields remain uninterpreted.");
     layout12.add(u8, "receive_count", "Recovered field use; opaque fields remain uninterpreted.");
     layout12.add(u8, "transmit_count", "Recovered field use; opaque fields remain uninterpreted.");
-    layout12.add(u8, "opaque_0f", "Recovered field use; opaque fields remain uninterpreted.");
+    layout12.add(u8, "canif_receive_count", "Three configured frame receive IDs.");
     layout12.add(u8, "canif_confirmation_count", "Recovered field use; opaque fields remain uninterpreted.");
     layout12.add(new ArrayDataType(u8, 3, 1), "opaque_11", "Recovered field use; opaque fields remain uninterpreted.");
     layout13.add(u8, "opaque_00", "Recovered field use; opaque fields remain uninterpreted.");
     layout13.add(u8, "channel_state_index", "Recovered field use; opaque fields remain uninterpreted.");
     layout13.add(u16, "transmit_id", "Recovered field use; opaque fields remain uninterpreted.");
-    layout13.add(new ArrayDataType(u8, 4, 1), "opaque_04", "Recovered field use; opaque fields remain uninterpreted.");
+    layout13.add(u16, "canif_confirmation_id", "7A5C2 active-owner lookup.");
+    layout13.add(u16, "flow_control_receive_id", "7A480 FC routing.");
     layout13.add(u16, "upper_response_id", "Recovered field use; opaque fields remain uninterpreted.");
     layout13.add(u16, "canif_frame_id", "Recovered field use; opaque fields remain uninterpreted.");
     layout13.add(u8, "addressing_format", "Recovered field use; opaque fields remain uninterpreted.");
     layout13.add(u8, "single_frame_only", "Recovered field use; opaque fields remain uninterpreted.");
     layout13.add(u8, "address_byte", "Recovered field use; opaque fields remain uninterpreted.");
-    layout13.add(u8, "opaque_0f", "Recovered field use; opaque fields remain uninterpreted.");
+    layout13.add(u8, "flow_control_address_byte", "Format4 incoming address; exact rows use normal format.");
     layout13.add(u16, "frame_confirmation_timeout_raw", "Recovered field use; opaque fields remain uninterpreted.");
     layout13.add(u16, "flow_control_timeout_raw", "Recovered field use; opaque fields remain uninterpreted.");
-    layout13.add(new ArrayDataType(u8, 2, 1), "opaque_14", "Recovered field use; opaque fields remain uninterpreted.");
+    layout13.add(u16, "consecutive_copy_timeout_raw", "N_Cs budget with software spacing adjustments.");
     layout13.add(u8, "frame_capacity", "Recovered field use; opaque fields remain uninterpreted.");
     layout13.add(u8, "cancel_supported", "Recovered field use; opaque fields remain uninterpreted.");
-    layout13.add(u8, "opaque_18", "Recovered field use; opaque fields remain uninterpreted.");
+    layout13.add(u8, "overlap_final_confirmation_policy", "Generic final-overlap success policy; configured0.");
     layout13.add(u8, "pad_frames_to_eight", "Recovered field use; opaque fields remain uninterpreted.");
-    layout13.add(new ArrayDataType(u8, 6, 1), "opaque_1a", "Recovered field use; opaque fields remain uninterpreted.");
+    layout13.add(u8, "require_padded_flow_control", "7B9C8 short-frame gate; configured1.");
+    layout13.add(u8, "extended_transmit_address_byte", "Formats2/3 only; exact rows normal.");
+    layout13.add(u8, "preemption_rank", "Compared with RX rank; exact per-channel ranks equal.");
+    layout13.add(new ArrayDataType(u8, 3, 1), "opaque_1d", "Unproved trailing fields.");
+    layout14.add(u8, "connection_index", "7A84C/7A89A indexes complementary parameter storage");
+    layout14.add(u8, "channel_state_index", "7AEBE/7B126 select32-byte state stride");
+    layout14.add(u16, "receive_id", "7A6D2 lookup and retained ownership");
+    layout14.add(u16, "canif_receive_id", "7A41C dispatch");
+    layout14.add(u16, "canif_fc_confirmation_id", "7A620 matching");
+    layout14.add(u16, "upper_receive_id", "7AD64/7A8E8/7A79E upper interface");
+    layout14.add(u16, "canif_fc_transmit_id", "7A96C submit;FFFF disables configured FF");
+    layout14.add(u8, "addressing_format", "22B98 PCI offset lookup");
+    layout14.add(u8, "single_frame_only", "7AE76 rejects nonzero");
+    layout14.add(u8, "receive_address_byte", "7A41C format4 address match only; all exact rows normal");
+    layout14.add(u8, "flow_control_address_byte", "7A96C format4 outgoing address only; all exact rows normal");
+    layout14.add(u16, "frame_confirmation_timeout_raw", "7A9DE timerN_Ar+2");
+    layout14.add(u16, "buffer_wait_timeout_raw", "7AEBE/7B18A N_Br-3");
+    layout14.add(u16, "consecutive_receive_timeout_raw", "7B06A/7B18A N_Cr+2");
+    layout14.add(u8, "default_block_size", "7A862 fallback and7A84C init");
+    layout14.add(u8, "default_stmin_encoding", "7A8B0 fallback and7A89A init");
+    layout14.add(u16, "wait_frame_limit", "7A9DE compares wait count before WAIT");
+    layout14.add(u8, "require_padded_receive", "7ABA2/7AFF8 extent gates");
+    layout14.add(u8, "pad_flow_control_to_eight", "7A96C");
+    layout14.add(u8, "extended_flow_address_byte", "7A96C format2/3 outgoing; exact rows normal");
+    layout14.add(u8, "preemption_rank", "7AC9C/7ABE6 lower numeric rank may displace owner; exact per-channel ranks equal");
+    layout14.add(new ArrayDataType(u8, 2, 1), "opaque_1e", "Unproved; retain opaque bytes.");
+    if (layout14.getLength() != 32) throw new IllegalStateException("F33CanTpRxConnection extent drift");
+    layout15.add(u32, "remaining_length", "7AEBE subtract first payload;7B06A append");
+    layout15.add(u16, "receive_id", "7AEBE store;7A77E resetFFFF");
+    layout15.add(u16, "timeout_ticks", "7A9DE/7B18A and7B248");
+    layout15.add(u16, "wait_frame_count", "7A9DE increments timed WAIT; reset on CTS");
+    layout15.add(u8, "state", "E1 idle,69 capacity poll,5A awaiting FC confirm,4B receiving CF");
+    layout15.add(u8, "first_frame_dlc", "7AEBE stores byte from frame length; no new meaning inferred");
+    layout15.add(u8, "expected_sequence_number", "7AEBE initializes1;7B06A modulo16");
+    layout15.add(u8, "block_remaining", "7A9DE reloadBS;7B06A decrements only nonzero");
+    layout15.add(u8, "flow_status_marker", "F0 CTS/E1 WAIT/D2 OVERFLOW internal markers; low nibble emitted");
+    layout15.add(u8, "admission_generation", "SF/FF admission increments;7AAF2 qualifies reset by snapshot equality;7A77E preserves");
+    if (layout15.getLength() != 16) throw new IllegalStateException("F33CanTpRxState extent drift");
+    layout16.add(new PointerDataType(layout14, 4), "receive_rows", "7A41C/7A6D2");
+    layout16.add(new PointerDataType(layout13, 4), "transmit_rows", "7A480/7A728");
+    layout16.add(u8, "half_duplex", "7B3D0 requires peerE1 when1; SF/FF gate7ADF8/7AF76");
+    layout16.add(u8, "receive_count", "7A41C/7A6D2");
+    layout16.add(u8, "transmit_count", "7A480/7A728");
+    layout16.add(u8, "configured_index", "ROM0,1,2; no runtime semantic beyond identity assigned");
+    if (layout16.getLength() != 12) throw new IllegalStateException("F33CanTpChannelConfiguration extent drift");
     semanticFunction(0x91386L, "f33_dcm_reset_message_context", v)
         .setComment("Zero main message pointers, lengths, addressing, suppression, capacity, SID and selector; opaque padding is "
             + "untouched. Cancellation invokes this before operation2.");
@@ -10089,13 +10140,13 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         "92AB0,92A74,92BD8,926D2,936CA");
     semanticData(0xFEBE4F40L, resolve(layout11), "f33_cantp_tx_state_prefix_0",
         "7B3D0 admission 7B452 reset 7B74E segmented copy 7BB0E confirmation Only prefix of0x20-byte channel storage; "
-            + "Rx peer state starts+0x10 and is not given a full new type here.");
+            + "Rx peer state occupies the separately typed next16 bytes.");
     semanticData(0xFEBE4F60L, resolve(layout11), "f33_cantp_tx_state_prefix_1",
         "7B3D0 admission 7B452 reset 7B74E segmented copy 7BB0E confirmation Only prefix of0x20-byte channel storage; "
-            + "Rx peer state starts+0x10 and is not given a full new type here.");
+            + "Rx peer state occupies the separately typed next16 bytes.");
     semanticData(0xFEBE4F80L, resolve(layout11), "f33_cantp_tx_state_prefix_2",
         "7B3D0 admission 7B452 reset 7B74E segmented copy 7BB0E confirmation Only prefix of0x20-byte channel storage; "
-            + "Rx peer state starts+0x10 and is not given a full new type here.");
+            + "Rx peer state occupies the separately typed next16 bytes.");
     semanticData(0x22C70L, resolve(layout12), "f33_cantp_configuration",
         "7A334/7A728/7A67E exact offsets and22C70 bytes");
     semanticData(0x22B9EL, resolve(layout13), "f33_cantp_tx_connection_0",
@@ -10140,6 +10191,22 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         "Zero overall timeout flag; timer2 may resolve SID from pending receive buffer before dispatch.");
     semanticData(0xFEBE5A20L, new ArrayDataType(u8, 768, 1), "f33_dcm_shared_response_buffer",
         "Single shared protocol-independent response store; queue nodes/copy cursors hold references, not copies.");
+    semanticData(0x22C4CL, new ArrayDataType(resolve(layout16), 3, 12), "f33_cantp_channel_configuration",
+        "configured_geometry.json exact ROM and7A41C/7A480/7A728");
+    semanticData(0x22BDEL, new ArrayDataType(resolve(layout14), 3, 32), "f33_cantp_receive_connections",
+        "configured_geometry.json plus receive validators");
+    semanticData(0xFEBE4F50L, resolve(layout15), "f33_cantp_rx_state_0",
+        "Exact configured storage; hardware outcome is not inferred.");
+    semanticData(0xFEBE4F70L, resolve(layout15), "f33_cantp_rx_state_1",
+        "Exact configured storage; hardware outcome is not inferred.");
+    semanticData(0xFEBE4F90L, resolve(layout15), "f33_cantp_rx_state_2",
+        "Exact configured storage; hardware outcome is not inferred.");
+    semanticData(0x22C84L, new ArrayDataType(u8, 256, 1), "f33_cantp_stmin_to_spacing_ticks",
+        "7BA1A full byte index; exact mapping exported in configured_geometry.json");
+    semanticData(0xFEBE4FA0L, new ArrayDataType(new ArrayDataType(u16, 2, 2), 3, 4), "f33_cantp_rx_flow_parameters_with_complements",
+        "7A84C/7A862 BS and7A89A/7A8B0 STmin; each byte plus inverse high byte; mismatch latches0F and restores row default");
+    semanticData(0xFEBE4EFCL, new ArrayDataType(u8, 8, 1), "f33_cantp_shared_frame_scratch",
+        "7A96C/7B596/7B64E/7B74E; no retained upper payload ownership");
   }
 
   private void annotateDiagnosticReadPublication() throws Exception {
@@ -11444,6 +11511,693 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         "Exact value0;5A selects busy maxima and idle minimum.");
   }
 
+  private void annotateCanTpPayloadLifecycle() throws Exception {
+    CategoryPath category = new CategoryPath("/CamryF33");
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    DataType F33CanTpConfigurationType = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33CanTpConfiguration");
+    if (F33CanTpConfigurationType == null) throw new IllegalStateException("missing F33CanTpConfiguration");
+    DataType F33CanTpFrameInfoType = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33CanTpFrameInfo");
+    if (F33CanTpFrameInfoType == null) throw new IllegalStateException("missing F33CanTpFrameInfo");
+    DataType F33CanTpRxConnectionType = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33CanTpRxConnection");
+    if (F33CanTpRxConnectionType == null) throw new IllegalStateException("missing F33CanTpRxConnection");
+    DataType F33CanTpRxStateType = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33CanTpRxState");
+    if (F33CanTpRxStateType == null) throw new IllegalStateException("missing F33CanTpRxState");
+    DataType F33CanTpTxConnectionType = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33CanTpTxConnection");
+    if (F33CanTpTxConnectionType == null) throw new IllegalStateException("missing F33CanTpTxConnection");
+    DataType F33CanTpTxStatePrefixType = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33CanTpTxStatePrefix");
+    if (F33CanTpTxStatePrefixType == null) throw new IllegalStateException("missing F33CanTpTxStatePrefix");
+    DataType F33PduInfoType = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33PduInfo");
+    if (F33PduInfoType == null) throw new IllegalStateException("missing F33PduInfo");
+    semanticFunction(0x7A408L, "f33_cantp_foreground_cycle", v)
+        .setComment("Decrement bounded16-bit channel timers, advance receive FC/timeout work, then acquire and queue transmit "
+            + "segments. This software cycle does not poll RSCFD or supply lower frame confirmation.");
+    semanticFunction(0x7A41CL, "f33_cantp_find_receive_frame_connection", new PointerDataType(F33CanTpRxConnectionType, 4),
+        new ParameterImpl("configuration", new PointerDataType(F33CanTpConfigurationType, 4), currentProgram),
+        new ParameterImpl("canif_receive_id", u16, currentProgram),
+        new ParameterImpl("frame_bytes", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Scan configured channel Rx rows by+4 CanIf ID and optional address byte; return first matching row or "
+            + "null. Exact configuration uses normal addressing.");
+    semanticFunction(0x7A480L, "f33_cantp_find_flow_control_connection", new PointerDataType(F33CanTpTxConnectionType, 4),
+        new ParameterImpl("configuration", new PointerDataType(F33CanTpConfigurationType, 4), currentProgram),
+        new ParameterImpl("canif_receive_id", u16, currentProgram),
+        new ParameterImpl("frame_bytes", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Scan configured Tx rows by+6 flow-control receive ID and optional address byte; return matching connection "
+            + "or null.");
+    semanticFunction(0x7A57AL, "f33_cantp_receive_can_frame", v,
+        new ParameterImpl("canif_receive_id", u16, currentProgram),
+        new ParameterImpl("pdu", new PointerDataType(F33PduInfoType, 4), currentProgram))
+        .setComment("Require initialized markerAA and configured CanIf receive range0804..0806. Widen descriptor length16 into "
+            + "internal frame length32 and dispatch SF/FF/CF or flow control; frame bytes remain caller-owned during this "
+            + "call.");
+    semanticFunction(0x7A5C2L, "f33_cantp_find_active_transmit_confirmation", new PointerDataType(F33CanTpTxConnectionType, 4),
+        new ParameterImpl("configuration", new PointerDataType(F33CanTpConfigurationType, 4), currentProgram),
+        new ParameterImpl("canif_confirmation_id", u16, currentProgram))
+        .setComment("Find connection whose+4 confirmation ID matches and whose+2 TxID owns that channel. An unclaimed channel "
+            + "never receives aggregate transmit completion.");
+    semanticFunction(0x7A620L, "f33_cantp_find_active_receive_confirmation", new PointerDataType(F33CanTpRxConnectionType, 4),
+        new ParameterImpl("configuration", new PointerDataType(F33CanTpConfigurationType, 4), currentProgram),
+        new ParameterImpl("canif_confirmation_id", u16, currentProgram))
+        .setComment("Find configured Rx FC-confirmation row matching+6 ID and the channel retained receive ID.");
+    semanticFunction(0x7A67EL, "f33_cantp_confirm_can_frame", v,
+        new ParameterImpl("canif_confirmation_id", u16, currentProgram))
+        .setComment("Require initialized marker and configured confirmation range0800..0803; prefer matching active Tx "
+            + "connection, else active receive FC owner. Per-frame progression and aggregate application completion "
+            + "remain distinct.");
+    semanticFunction(0x7A6D2L, "f33_cantp_find_receive_connection", new PointerDataType(F33CanTpRxConnectionType, 4),
+        new ParameterImpl("configuration", new PointerDataType(F33CanTpConfigurationType, 4), currentProgram),
+        new ParameterImpl("receive_id", u16, currentProgram))
+        .setComment("Range-check namespaced receive ID0802..0804 and scan configured Rx rows by+2 ID; return matching pointer "
+            + "or null.");
+    semanticFunction(0x7A77EL, "f33_cantp_reset_receive_owner", v,
+        new ParameterImpl("state", new PointerDataType(F33CanTpRxStateType, 4), currentProgram))
+        .setComment("Release retained receive ID, remaining bytes, countdown, wait count, sequence and FC state. Preserve "
+            + "admission generation byte+0F; it qualifies a surrounding foreground reset.");
+    semanticFunction(0x7A7AEL, "f33_cantp_finish_receive_aggregate", v,
+        new ParameterImpl("connection", new PointerDataType(F33CanTpRxConnectionType, 4), currentProgram),
+        new ParameterImpl("state", new PointerDataType(F33CanTpRxStateType, 4), currentProgram),
+        new ParameterImpl("result", u8, currentProgram))
+        .setComment("Reset transport receive owner before forwarding the supplied aggregate result through PduR to the "
+            + "configured upper receive indication. Result0 is aggregate software receive success, not service "
+            + "completion.");
+    semanticFunction(0x7A7CAL, "f33_cantp_cancel_receive_owner", u32,
+        new ParameterImpl("configuration", new PointerDataType(F33CanTpConfigurationType, 4), currentProgram),
+        new ParameterImpl("receive_id", u16, currentProgram))
+        .setComment("Cancel matching active receive work in FC/wait states, but refuse state4B when remaining bytes fit one "
+            + "final CF. Exact lower cancel hook7B246 is a no-op; upper failure/reset is separate.");
+    semanticFunction(0x7A8E8L, "f33_cantp_copy_upper_receive_bytes", u32,
+        new ParameterImpl("upper_id", u16, currentProgram),
+        new ParameterImpl("chunk", new PointerDataType(F33CanTpFrameInfoType, 4), currentProgram),
+        new ParameterImpl("available", new PointerDataType(u32, 4), currentProgram))
+        .setComment("Narrow internal chunk length32 to PduInfo16, call actual upper receive-copy route and widen returned "
+            + "capacity16. Preserve the real R10 copy result; no payload storage is owned here.");
+    semanticFunction(0x7A91CL, "f33_cantp_multiply_receive_block_capacity", u32,
+        new ParameterImpl("cf_payload_capacity", u8, currentProgram),
+        new ParameterImpl("block_size", u8, currentProgram))
+        .setComment("Accumulate capacity shifted by each set bit of block_size, truncating the sum to16 bits. This computes "
+            + "configured CF payload capacity times BS; it is not an empty delay loop.");
+    semanticFunction(0x7A93EL, "f33_cantp_select_receive_flow_status", u32,
+        new ParameterImpl("remaining", u32, currentProgram),
+        new ParameterImpl("available", u32, currentProgram),
+        new ParameterImpl("cf_payload_capacity", u8, currentProgram),
+        new ParameterImpl("block_size", u8, currentProgram))
+        .setComment("Return F0 CTS when upper capacity covers remaining bytes, or min(remaining,CFcapacity*BS) for nonzero BS. "
+            + "Otherwise return E1 WAIT. No physical timing unit is implied.");
+    semanticFunction(0x7A96CL, "f33_cantp_queue_receive_flow_control", u32,
+        new ParameterImpl("connection", new PointerDataType(F33CanTpRxConnectionType, 4), currentProgram),
+        new ParameterImpl("flow_status", u8, currentProgram),
+        new ParameterImpl("block_size", u8, currentProgram),
+        new ParameterImpl("stmin", u8, currentProgram))
+        .setComment("Construct PCI30|status plus BS/STmin in shared frame scratch and submit actual CanIf route. Exact physical "
+            + "rows pad to8 with00; return actual software enqueue status.");
+    semanticFunction(0x7A9DEL, "f33_cantp_poll_receive_capacity_and_flow", v,
+        new ParameterImpl("connection", new PointerDataType(F33CanTpRxConnectionType, 4), currentProgram),
+        new ParameterImpl("state", new PointerDataType(F33CanTpRxStateType, 4), currentProgram))
+        .setComment("Query upper capacity with a zero-length copy, choose CTS or timed WAIT, and enforce configured wait-frame "
+            + "limit. Upper overflow stateD2 queues FC32. State5A/countdownN_Ar+2 precedes lower frame confirmation.");
+    semanticFunction(0x7AAF2L, "f33_cantp_run_receive_channels", v)
+        .setComment("Resolve active4B/5A/69 receive owners. Poll capacity/queue FC in69 and abort expired4B/5A through upper "
+            + "failure; invalid owner/state resets are generation-qualified.");
+    semanticFunction(0x7ABA2L, "f33_cantp_reject_single_frame_extent", u32,
+        new ParameterImpl("connection", new PointerDataType(F33CanTpRxConnectionType, 4), currentProgram),
+        new ParameterImpl("frame", new PointerDataType(F33CanTpFrameInfoType, 4), currentProgram))
+        .setComment("Return0 only for nonzero SF length within7-addressOffset, physical extent<=8 and enough supplied bytes. "
+            + "Exact rows require an eight-byte padded CAN frame; rejected length does not copy payload.");
+    semanticFunction(0x7AD64L, "f33_cantp_start_upper_receive", u32,
+        new ParameterImpl("upper_id", u16, currentProgram),
+        new ParameterImpl("first_chunk", new PointerDataType(F33CanTpFrameInfoType, 4), currentProgram),
+        new ParameterImpl("total_length", u16, currentProgram),
+        new ParameterImpl("available", new PointerDataType(u32, 4), currentProgram))
+        .setComment("Build16-bit first-chunk descriptor and invoke configured upper start-of-reception with total length. Widen "
+            + "capacity output and preserve actual R10 result; caller performs the payload copy.");
+    semanticFunction(0x7AD96L, "f33_cantp_deliver_single_frame", v,
+        new ParameterImpl("connection", new PointerDataType(F33CanTpRxConnectionType, 4), currentProgram),
+        new ParameterImpl("frame", new PointerDataType(F33CanTpFrameInfoType, 4), currentProgram))
+        .setComment("Strip PCI/address prefix, claim upper buffer for SF extent, copy exactly that extent when capacity "
+            + "suffices, then report aggregate result. Padding never enters the upper buffer.");
+    semanticFunction(0x7AE76L, "f33_cantp_reject_first_frame_extent", u32,
+        new ParameterImpl("connection", new PointerDataType(F33CanTpRxConnectionType, 4), currentProgram),
+        new ParameterImpl("frame", new PointerDataType(F33CanTpFrameInfoType, 4), currentProgram))
+        .setComment("Accept FF only for multiframe-enabled connection with FC route, exact CAN length8, and12-bit total "
+            + "in8-addressOffset..4095. Functional row22BFE is SF-only.");
+    semanticFunction(0x7AEBEL, "f33_cantp_begin_first_frame_receive", v,
+        new ParameterImpl("connection", new PointerDataType(F33CanTpRxConnectionType, 4), currentProgram),
+        new ParameterImpl("frame", new PointerDataType(F33CanTpFrameInfoType, 4), currentProgram),
+        new ParameterImpl("state", new PointerDataType(F33CanTpRxStateType, 4), currentProgram))
+        .setComment("Retain remaining total minus first-frame payload, expected SN1, DLC and capacity-poll state69. Start upper "
+            + "receive before copying the first6 configured bytes; upper return3 records FC-overflowD2, other refusal "
+            + "resets.");
+    semanticFunction(0x7AFF8L, "f33_cantp_reject_consecutive_frame", u32,
+        new ParameterImpl("connection", new PointerDataType(F33CanTpRxConnectionType, 4), currentProgram),
+        new ParameterImpl("frame", new PointerDataType(F33CanTpFrameInfoType, 4), currentProgram),
+        new ParameterImpl("state", new PointerDataType(F33CanTpRxStateType, 4), currentProgram))
+        .setComment("Require configured padded extent and expected low-nibble sequence. Wrong sequence or short "
+            + "required-padding final frame aborts upper reception; other malformed extents may be ignored without "
+            + "resetting the owner.");
+    semanticFunction(0x7B06AL, "f33_cantp_append_consecutive_receive", v,
+        new ParameterImpl("connection", new PointerDataType(F33CanTpRxConnectionType, 4), currentProgram),
+        new ParameterImpl("frame", new PointerDataType(F33CanTpFrameInfoType, 4), currentProgram),
+        new ParameterImpl("state", new PointerDataType(F33CanTpRxStateType, 4), currentProgram))
+        .setComment("Copy min(remaining,frameDLC-addressOffset-1) bytes to upper owner. Advance modulo16 sequence and block "
+            + "countdown for nonfinal CF; block exhaustion schedules another FC. Zero remaining completes aggregate "
+            + "reception, excluding CAN padding.");
+    semanticFunction(0x7B126L, "f33_cantp_handle_consecutive_receive", v,
+        new ParameterImpl("connection", new PointerDataType(F33CanTpRxConnectionType, 4), currentProgram),
+        new ParameterImpl("frame", new PointerDataType(F33CanTpFrameInfoType, 4), currentProgram))
+        .setComment("Accept matching RxID in4B or early5A/F0, validate extent/sequence and append payload. Early CF may consume "
+            + "a CTS before its lower confirmation; exact cancel hook is no-op.");
+    semanticFunction(0x7B18AL, "f33_cantp_confirm_receive_flow_control", v,
+        new ParameterImpl("connection", new PointerDataType(F33CanTpRxConnectionType, 4), currentProgram))
+        .setComment("CTS confirmation moves5A/F0 to4B with N_Cr+2; WAIT moves5A/E1 to69 with N_Br-3. Overflow5A/D2 retires "
+            + "local state without inventing an upper receive claim.");
+    semanticFunction(0x7B248L, "f33_cantp_tick_channel_timeouts", v)
+        .setComment("For all configured channels, decrement nonzero Rx/Tx16-bit countdowns. Values above exact sanity limit1000 "
+            + "latch error0F and become0, not a wrapping long timeout.");
+    semanticFunction(0x7B452L, "f33_cantp_reset_transmit_owner", v,
+        new ParameterImpl("state", new PointerDataType(F33CanTpTxStatePrefixType, 4), currentProgram))
+        .setComment("Clear remaining length, timeout, block fields and spacing, set TxIDFFFF/SNFF/stateE1. No lower queue drain "
+            + "or upper notification is implied by this reset alone. Exact leaf changes only R1/EP and flags; "
+            + "preserve R8 carrying the aggregate completion result through the real inline p-code.");
+    getFunctionAt(toAddr(0x7B452L)).setInline(true);
+    semanticFunction(0x7B47EL, "f33_cantp_cancel_transmit_owner", u32,
+        new ParameterImpl("configuration", new PointerDataType(F33CanTpConfigurationType, 4), currentProgram),
+        new ParameterImpl("transmit_id", u16, currentProgram))
+        .setComment("Require configured cancellation support and matching TxID. Refuse queued SF C3, final CF87/remaining0 and "
+            + "SF-sized D2; revoke segmented work, reset owner and report upper failure in allowed states. Lower cancel "
+            + "hook does not remove queued frames.");
+    semanticFunction(0x7B524L, "f33_cantp_write_transmit_address_byte", v,
+        new ParameterImpl("connection", new PointerDataType(F33CanTpTxConnectionType, 4), currentProgram),
+        new ParameterImpl("frame", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Mode+0C==4 writes connection+0E to frame[0]; modes2/3 use+1B; other modes leave frame unchanged. "
+            + "Exact leaf preserves R6 and R8 used by SF/FF construction; inline actual p-code, not a replacement.");
+    getFunctionAt(toAddr(0x7B524L)).setInline(true);
+    semanticFunction(0x7B596L, "f33_cantp_build_and_queue_single_frame", v,
+        new ParameterImpl("connection", new PointerDataType(F33CanTpTxConnectionType, 4), currentProgram),
+        new ParameterImpl("state", new PointerDataType(F33CanTpTxStatePrefixType, 4), currentProgram),
+        new ParameterImpl("payload_length", u8, currentProgram))
+        .setComment("Obtain upper bytes into shared frame scratch, add SF PCI/padding and claim C3/countdownN_As+2 before CanIf "
+            + "enqueue. Any upper copy refusal or lower enqueue refusal finishes aggregate with failure.");
+    semanticFunction(0x7B64EL, "f33_cantp_build_and_queue_first_frame", v,
+        new ParameterImpl("connection", new PointerDataType(F33CanTpTxConnectionType, 4), currentProgram),
+        new ParameterImpl("state", new PointerDataType(F33CanTpTxStatePrefixType, 4), currentProgram),
+        new ParameterImpl("total_length", u32, currentProgram))
+        .setComment("Encode12-bit FF extent, obtain first6 configured payload bytes, retain remaining and stateB4/SNFF/N_As+2, "
+            + "then queue8-byte frame. State ownership updates precede lower enqueue.");
+    semanticFunction(0x7B74EL, "f33_cantp_build_and_queue_consecutive_frame", v,
+        new ParameterImpl("connection", new PointerDataType(F33CanTpTxConnectionType, 4), currentProgram),
+        new ParameterImpl("state", new PointerDataType(F33CanTpTxStatePrefixType, 4), currentProgram))
+        .setComment("Acquire up to7 configured bytes and build modulo16 CF; pad only final frame to8. Success consumes "
+            + "remaining and block allowance before enqueue in87/N_As+2. Upper busy2 preserves96 for retry; other "
+            + "copy/enqueue refusal reports aggregate failure.");
+    semanticFunction(0x7B86CL, "f33_cantp_open_consecutive_copy_window", v,
+        new ParameterImpl("connection", new PointerDataType(F33CanTpTxConnectionType, 4), currentProgram),
+        new ParameterImpl("state", new PointerDataType(F33CanTpTxStatePrefixType, 4), currentProgram))
+        .setComment("When spacing state78 expires, enter96 with max(N_Cs-(spacingTicks+3),0) countdown. The foreground then "
+            + "attempts actual upper copying; this is not a hardware send delay.");
+    semanticFunction(0x7B9ACL, "f33_cantp_finish_transmit_aggregate", v,
+        new ParameterImpl("connection", new PointerDataType(F33CanTpTxConnectionType, 4), currentProgram),
+        new ParameterImpl("state", new PointerDataType(F33CanTpTxStatePrefixType, 4), currentProgram),
+        new ParameterImpl("result", u8, currentProgram))
+        .setComment("Release aggregate Tx owner before forwarding supplied result through PduR to DCM. Intermediate lower "
+            + "confirmations must not call this until all remaining bytes have completed.");
+    semanticFunction(0x7B9C8L, "f33_cantp_reject_flow_control_frame", u32,
+        new ParameterImpl("connection", new PointerDataType(F33CanTpTxConnectionType, 4), currentProgram),
+        new ParameterImpl("frame", new PointerDataType(F33CanTpFrameInfoType, 4), currentProgram),
+        new ParameterImpl("state", new PointerDataType(F33CanTpTxStatePrefixType, 4), currentProgram))
+        .setComment("Require multiframe-capable connection, sufficient FC bytes and status0..2. Exact rows require length8 when "
+            + "frame is shorter than8; status>2 or short padded FC aborts aggregate, other short nonpadded forms may only "
+            + "be ignored.");
+    semanticFunction(0x7BA1AL, "f33_cantp_capture_initial_flow_parameters", v,
+        new ParameterImpl("state", new PointerDataType(F33CanTpTxStatePrefixType, 4), currentProgram),
+        new ParameterImpl("block_size", u8, currentProgram),
+        new ParameterImpl("stmin_encoding", u8, currentProgram))
+        .setComment("Only while SNFF, retain received BS and map STmin byte through exact256-entry22C84 table. Later CTS "
+            + "reloads retained BS and does not replace initial flow parameters.");
+    semanticFunction(0x7BA32L, "f33_cantp_apply_flow_control", v,
+        new ParameterImpl("connection", new PointerDataType(F33CanTpTxConnectionType, 4), currentProgram),
+        new ParameterImpl("frame", new PointerDataType(F33CanTpFrameInfoType, 4), currentProgram))
+        .setComment("CTS reloads block remaining and enters96/N_Cs-3; WAIT entersA5/N_Bs+2; OVERFLOW aborts aggregate. No "
+            + "received-WAIT counter is imposed on transmit work.");
+    semanticFunction(0x7BA9EL, "f33_cantp_handle_flow_control", v,
+        new ParameterImpl("connection", new PointerDataType(F33CanTpTxConnectionType, 4), currentProgram),
+        new ParameterImpl("frame", new PointerDataType(F33CanTpFrameInfoType, 4), currentProgram))
+        .setComment("Accept matching TxID whileB4/A5 or87 at a nonfinal exhausted nonzero block. Valid FC can advance an "
+            + "unconfirmed FF/CF; exact lower cancellation is no-op. Ignore FC outside those qualified ownership states.");
+
+  }
+
+  private void annotateDcmQueuedDelivery() throws Exception {
+    CategoryPath category = new CategoryPath("/CamryF33");
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    DataType F33DcmMessageContextType = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33DcmMessageContext");
+    if (F33DcmMessageContextType == null) throw new IllegalStateException("missing F33DcmMessageContext");
+    DataType F33DcmResponseQueueType = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33DcmResponseQueue");
+    if (F33DcmResponseQueueType == null) throw new IllegalStateException("missing F33DcmResponseQueue");
+    DataType F33DiagProprietaryMessageType = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33DiagProprietaryMessage");
+    if (F33DiagProprietaryMessageType == null) throw new IllegalStateException("missing F33DiagProprietaryMessage");
+    StructureDataType layout0 = new StructureDataType(category, "F33DcmEventRing", 0);
+    layout0.setPackingEnabled(true);
+    StructureDataType layout1 = new StructureDataType(category, "F33DcmSoftwareTimer", 0);
+    layout1.setPackingEnabled(true);
+    StructureDataType layout2 = new StructureDataType(category, "F33DcmProprietaryContinuation", 0);
+    layout2.setPackingEnabled(true);
+    FunctionDefinitionDataType callback0 = new FunctionDefinitionDataType(category, "F33DcmEventCallback");
+    callback0.setReturnType(v);
+    callback0.setArguments(new ParameterDefinitionImpl("event_id", u8, null));
+    FunctionDefinitionDataType callback1 = new FunctionDefinitionDataType(category, "F33DcmTimerCallback");
+    callback1.setReturnType(v);
+    callback1.setArguments(new ParameterDefinitionImpl("timer_slot", u8, null));
+    layout0.add(u8, "producer", "Exact instruction-bound field extent.");
+    layout0.add(u8, "consumer", "Exact instruction-bound field extent.");
+    layout0.add(u8, "occupied_slots", "Exact instruction-bound field extent.");
+    layout0.add(new ArrayDataType(u8, 31, 1), "event_ids", "FF tombstones remain occupied until popped.");
+    if (layout0.getLength() != 34) throw new IllegalStateException("F33DcmEventRing extent drift");
+    layout1.add(u32, "remaining", "Exact instruction-bound field extent.");
+    layout1.add(u8, "active", "Only exactly1 is serviced.");
+    layout1.add(new ArrayDataType(u8, 3, 1), "opaque_05", "Exact instruction-bound field extent.");
+    if (layout1.getLength() != 8) throw new IllegalStateException("F33DcmSoftwareTimer extent drift");
+    layout2.add(u8, "selected_index", "Exact instruction-bound field extent.");
+    layout2.add(u8, "phase", "0 idle/begin;1 pending start join;2 finish join.");
+    layout2.add(u8, "application_result", "Exact instruction-bound field extent.");
+    layout2.add(u8, "side_result", "Exact instruction-bound field extent.");
+    layout2.add(u8, "side_status", "Exact instruction-bound field extent.");
+    layout2.add(new ArrayDataType(u8, 3, 1), "opaque_05", "Exact instruction-bound field extent.");
+    if (layout2.getLength() != 8) throw new IllegalStateException("F33DcmProprietaryContinuation extent drift");
+    semanticFunction(0x9893AL, "f33_dcm_reset_event_ring", v)
+        .setComment("Reset producer, consumer and occupied-slot count only; retained slot bytes are not cleared. Common DCM "
+            + "initialization calls this before enabling foreground dispatch.");
+    semanticFunction(0x98946L, "f33_dcm_dispatch_entry_event_generation", v)
+        .setComment("Snapshot entry occupied-slot count, pop that many FIFO slots under the existing OS priority-mask pair, and "
+            + "invoke configured callbacks after restoring the mask. FF tombstones consume budget. New tail entries "
+            + "remain beyond the original generation under normal ring invariants; this is a slot-count budget, not an "
+            + "execution-time bound.");
+    semanticFunction(0x989CCL, "f33_dcm_validate_event_id", u32,
+        new ParameterImpl("event_id", u8, currentProgram))
+        .setComment("Return0 for IDs00..2B or EB..F1 using configured extended count7; return1 otherwise. Validation does not "
+            + "check whether the selected ROM callback pointer is nonnull.");
+    semanticFunction(0x989ECL, "f33_dcm_enqueue_event", u32,
+        new ParameterImpl("event_id", u8, currentProgram))
+        .setComment("Validate low8 event ID, append one byte to the31-slot counted ring and wrap producer30 to0. Return0 "
+            + "accepted,1 invalid,2 full. Duplicates are retained; tombstones still occupy capacity. No inline callback "
+            + "or init-marker gate.");
+    semanticFunction(0x98A44L, "f33_dcm_invalidate_queued_event", u32,
+        new ParameterImpl("event_id", u8, currentProgram),
+        new ParameterImpl("first_only", u8, currentProgram))
+        .setComment("Scan current occupied slots from consumer and replace matching bytes withFF under the existing critical "
+            + "pair. Only first_only==1 stops at first match; other values invalidate all. Return0 matched,1 invalid ID,3 "
+            + "absent. Indices and occupancy are unchanged.");
+    semanticFunction(0x98AAEL, "f33_dcm_post_service_event", v,
+        new ParameterImpl("event_id", u8, currentProgram))
+        .setComment("Forward low8 event ID to989EC; callers discard enqueue status. No retry, coalescing or callback execution "
+            + "is added.");
+    semanticFunction(0x98ABCL, "f33_dcm_cancel_service_events", v,
+        new ParameterImpl("event_id", u8, currentProgram),
+        new ParameterImpl("first_only", u8, currentProgram))
+        .setComment("Forward low8 arguments to98A44; cancellation tombstones entries without reclaiming occupied slots.");
+    semanticFunction(0x98ACCL, "f33_dcm_reset_timer_slots", v)
+        .setComment("Zero remaining and active fields for nine8-byte software timers; padding is untouched.");
+    semanticFunction(0x98AE4L, "f33_dcm_advance_software_timers", v)
+        .setComment("Visit timer slots0 through8. Under the existing critical pair, active==1 expires only for unsigned "
+            + "remaining<quantum5; otherwise subtract5 modulo32. Clear active before invoking configured callback outside "
+            + "the pair. Later slots observe earlier callbacks; visited slots are not revisited.");
+    semanticFunction(0x98B3AL, "f33_dcm_arm_software_timer", v,
+        new ParameterImpl("timer_slot", u8, currentProgram),
+        new ParameterImpl("duration", u32, currentProgram))
+        .setComment("For low8 slot<9 write remaining=(duration+quantum5-1) modulo32 and active1 under the existing "
+            + "priority-mask pair. Rearming overwrites rather than accumulates; zero duration arms remaining4.");
+    semanticFunction(0x98B6AL, "f33_dcm_cancel_software_timer", v,
+        new ParameterImpl("timer_slot", u8, currentProgram))
+        .setComment("For low8 slot<9 clear only active under the existing priority-mask pair. Leave remaining and already "
+            + "queued events unchanged; inactive or invalid slots have no callback.");
+    semanticFunction(0x922EAL, "f33_dcm_post_receive_dispatch_after_delay", v)
+        .setComment("Timer6 callback tombstones all pending event0 slots then appends one fresh event0. Occupancy is not "
+            + "compacted and both statuses are discarded, so a full ring can reject the fresh append.");
+    semanticFunction(0x8C2FEL, "f33_dcm_resume_queued_clear_request", v)
+        .setComment("EventEB re-enters8C214 with retained group3BCC and existing28-byte message3BD4; no per-event message "
+            + "pointer is stored.");
+    semanticFunction(0x8C6FAL, "f33_dcm_resume_queued_dtc_count", v)
+        .setComment("EventEC re-enters8C4F8 with retained28-byte message3BFC.");
+    semanticFunction(0x8CB7AL, "f33_dcm_resume_queued_dtc_list", v)
+        .setComment("EventED re-enters8C960 with existing28-byte message3F24 and retained local snapshot/scratch. Dispatcher "
+            + "has already consumed the queue slot.");
+    semanticFunction(0x8CEE4L, "f33_dcm_resume_queued_snapshot_identifiers", v)
+        .setComment("EventEE re-enters8CCB8 using that module's retained state and existing message4248.");
+    semanticFunction(0x8DE08L, "f33_dcm_resume_queued_dtc_setting", v)
+        .setComment("EventF0 re-enters8DD54 with retained28-byte message45B4.");
+    semanticFunction(0x8E4AAL, "f33_dcm_resume_queued_proprietary_operation", v)
+        .setComment("EventF1 re-enters8E3A2 with existing16-byte proprietary operation view48EC. Its response length is "
+            + "separate from retained full DCM context493C; no new request/action is implied by this wrapper.");
+    semanticFunction(0x8D476L, "f33_dcm_resume_queued_snapshot_record", v)
+        .setComment("EventEF polls8D15E with retained4564/4573/4574. Result10 retains them; other results reset the snapshot "
+            + "module through8CEF0 and clear those retained inputs.");
+    semanticFunction(0x8CAFEL, "f33_dcm_cancel_retained_dtc_list", v)
+        .setComment("Reset DTC-list scratch/phase/yield state, tombstone all queuedED slots and release shared diagnostic "
+            + "continuation token through9560E(1). Ring occupancy is retained until dispatch pops tombstones.");
+    semanticFunction(0x8E41EL, "f33_dcm_cancel_retained_proprietary_operation", v)
+        .setComment("Tombstone all queuedF1 slots and reset selected index, phase and module result bytes through8E1E0. Does "
+            + "not revoke BA application/requester ownership or undo an earlier record request.");
+    semanticFunction(0x8E434L, "f33_dcm_proprietary_operation_service", u32,
+        new ParameterImpl("operation", u8, currentProgram),
+        new ParameterImpl("message", new PointerDataType(F33DcmMessageContextType, 4), currentProgram))
+        .setComment("Operation0 copies interpreted full-context fields to493C and first four words to existing16-byte48EC "
+            + "operation view, then enters8E3A2. Nonzero operations cancel queuedF1/module continuation without copying "
+            + "the incoming cleared main context. Return0; operation state is retained separately.");
+    semanticFunction(0x936CAL, "f33_dcm_snapshot_response_notification", v,
+        new ParameterImpl("result", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("pending_notification", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Read current response-queue root+10/+11 and store through preserved incomingR6/R7 pointers. Does not clear "
+            + "the latch. Caller91C92 selects final notification versus operation3 from this snapshot.");
+    semanticFunction(0x92A6EL, "f33_dcm_get_response_queue", new PointerDataType(F33DcmResponseQueueType, 4))
+        .setComment("Return5970 inR10 while preserving incomingR6/R7. Inline exact leaf p-code where callers forward pointer "
+            + "arguments through this getter.");
+    getFunctionAt(toAddr(0x92A6EL)).setInline(true);
+    semanticFunction(0x8E3A2L, "f33_dcm_advance_proprietary_operation", v,
+        new ParameterImpl("message", new PointerDataType(F33DiagProprietaryMessageType, 4), currentProgram))
+        .setComment("Join retained proprietary start/finish state. Merged2 postsF1;0 echoes retained command and completes "
+            + "message;other statuses select negative response. Re-entry retains module state rather than restarting the "
+            + "application action.");
+    semanticFunction(0x8E20EL, "f33_dcm_join_proprietary_start", u32,
+        new ParameterImpl("message", new PointerDataType(F33DiagProprietaryMessageType, 4), currentProgram),
+        new ParameterImpl("selected_index", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Start phase0 or poll phase1 with existing local/side status merge. Preserve selected index and module "
+            + "results;phase2 returns0 for the finish join without restarting the start action.");
+    semanticFunction(0x8E6BAL, "f33_dcm_complete_proprietary_message", v,
+        new ParameterImpl("message", new PointerDataType(F33DiagProprietaryMessageType, 4), currentProgram))
+        .setComment("Copy proprietary operation response length to existing52C8, then complete the enclosing52BC DCM context. "
+            + "Completion readiness is not transport confirmation.");
+    semanticFunction(0x8E6D2L, "f33_dcm_reject_proprietary_message", v,
+        new ParameterImpl("ignored_message", new PointerDataType(F33DiagProprietaryMessageType, 4), currentProgram),
+        new ParameterImpl("nrc", u8, currentProgram))
+        .setComment("Use incomingR7 NRC to stage and complete the enclosing52BC DCM context. IncomingR6 operation-view pointer "
+            + "is not consumed.");
+    semanticData(0xFEBE5E50L, u8, "f33_dcm_foreground_enabled",
+        "Root988C2 requiresA5. Queue/timer helpers do not independently gate on this marker.");
+    semanticData(0xFEBE5E51L, resolve(layout0), "f33_dcm_event_ring",
+        "Exact configured storage; hardware outcome is not inferred.");
+    semanticData(0xFEBE5E74L, new ArrayDataType(resolve(layout1), 9, 8), "f33_dcm_software_timers",
+        "Exact configured storage; hardware outcome is not inferred.");
+    semanticData(0x26AECL, u32, "f33_dcm_timer_quantum",
+        "Exact configured storage; hardware outcome is not inferred.");
+    semanticData(0x26AF4L, u8, "f33_dcm_extended_event_count",
+        "Exact configured storage; hardware outcome is not inferred.");
+    semanticData(0x26AF8L, new ArrayDataType(new PointerDataType(callback0, 4), 8, 4), "f33_dcm_extended_event_callbacks",
+        "7 producer-admitted entriesEB..F1 followed by nullF2 sentinel consumed only by broader dispatcher range.");
+    semanticData(0x26B18L, new ArrayDataType(new PointerDataType(callback0, 4), 45, 4), "f33_dcm_event_callbacks",
+        "Producer admits00..2B; dispatcher also accepts null spare2C. Keep existing26BB0 event26h communication callback label as alias/nonprimary if array data conflicts.");
+    semanticData(0x26BCCL, new ArrayDataType(new PointerDataType(callback1, 4), 9, 4), "f33_dcm_timer_callbacks",
+        "Exact configured storage; hardware outcome is not inferred.");
+    semanticData(0xFEBF48E4L, resolve(layout2), "f33_dcm_proprietary_continuation",
+        "Exact configured storage; hardware outcome is not inferred.");
+    semanticData(0xFEBF493CL, F33DcmMessageContextType, "f33_dcm_proprietary_retained_message",
+        "8E434 copies interpreted fields, not opaque padding; pointer fields retain original buffers. Existing16-byte48EC operation view remains separate.");
+  }
+
+  private void annotateCryptoBankLifetimes() throws Exception {
+    CategoryPath category = new CategoryPath("/CamryF33");
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    semanticFunction(0x68F72L, "f33_crypto_bank_clear_fragment_history", v)
+        .setComment("Clear eight repeat/generation/seen bytes, previous/qualified64-byte banks and qualified mask. Does not by "
+            + "itself release an application operation.");
+    semanticFunction(0x68FAAL, "f33_crypto_bank_clear_key_material", v,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("For low8 slot<2 clear exactly64 request and48 result bytes. Leaf preserves incomingR7/R8/R9; inline real "
+            + "p-code so direct request output pointer survives. No key erasure in hardware is implied.");
+    getFunctionAt(toAddr(0x68FAAL)).setInline(true);
+    semanticFunction(0x68FE0L, "f33_crypto_bank_clear_test_material", v)
+        .setComment("Clear five qualification histories, scalar pair, four8-byte previous/qualified groups and fixed16-byte "
+            + "input/expected/AES/MAC buffers. No hardware cancellation.");
+    semanticFunction(0x69064L, "f33_crypto_bank_initialize_work", v)
+        .setComment("Clear direct/collected/test activation, timers, qualification histories and outputs. Initialize result "
+            + "lengths48/16/16, verification result1, two profile states11 and observation counters. Mode bytes5099/509A "
+            + "are separately owned.");
+    semanticFunction(0x6914CL, "f33_crypto_bank_initialize_mode", v)
+        .setComment("Initialize current and previous mode bytes5099/509A to5A; startup also invokes69064.");
+    semanticFunction(0x6915AL, "f33_crypto_bank_profile_count", u32)
+        .setComment("Return min(unsigned ROM2597C,2); exact value1. Five-instruction leaf preservesR6, including packed "
+            + "callback high16 consumed by6A1B2. Inline real p-code.");
+    getFunctionAt(toAddr(0x6915AL)).setInline(true);
+    semanticFunction(0x6916AL, "f33_crypto_bank_reset_configured_profiles", v)
+        .setComment("For bounded configured profile count invoke8F0A8 then8F0D4, discarding statuses. Root invokes this on the "
+            + "first non-A5 cycle after modeA5; lower freshness/profile reset semantics remain separate.");
+    semanticFunction(0x6918EL, "f33_crypto_bank_run_startup_verification", v)
+        .setComment("Initialize verification result1. Only ROM30D67==5A enters fixed-vector command7 sequence, with explicit "
+            + "interrupt/priority handling. Exact gate0 skips hardware work and reports result==0 through8EE16(FF). Not "
+            + "an established key-validity proof.");
+    semanticFunction(0x6921EL, "f33_crypto_bank_initialize_verification_report", v)
+        .setComment("Run startup verification publication then clear accumulated observation count505C. Exact gate0 does not "
+            + "issue a crypto command.");
+    semanticFunction(0x6922EL, "f33_crypto_bank_advance_profile_qualification", v)
+        .setComment("For state11: three zero-status observations select44 immediately. Otherwise increment16-bit count while "
+            + "below620; a later call at620 selects88/status5A only for zero good and nonzero bad, else22. No "
+            + "physical-time conversion.");
+    semanticFunction(0x692AEL, "f33_crypto_bank_publish_verification_result", v)
+        .setComment("Pass record{word1,byte(result509D==0)} to initialized SecOC API8EE16 with IDFF. Boolean publication is "
+            + "separate from ICU-S command completion.");
+    semanticFunction(0x692D2L, "f33_crypto_bank_submit_key_material", u32,
+        new ParameterImpl("slot", u8, currentProgram))
+        .setComment("For slot<2 wait in22 unless79B70 returns0F and direct NvM result is not1. Reset output capacity48; submit "
+            + "configured command8 job0 with64 input bytes. Accepted0 yields33, other results66. Physical "
+            + "readiness/crypto completion remain dependencies.");
+    semanticFunction(0x6933CL, "f33_crypto_bank_begin_post_update_verification", u32)
+        .setComment("Reset result509D to1. Exact ROM30D67=0 returns46 without issuing fixed-vector command7. Configured5A "
+            + "branch returns45 on accepted job1, else46 with result1.");
+    semanticFunction(0x6938EL, "f33_crypto_bank_advance_direct_update", v)
+        .setComment("Increment saturating16-bit timer. Above120 choose66; timeout while45 also publishes result1. States11/22 "
+            + "submit;44 starts optional verification;46 publishes result and becomes55. Store phase and timer after "
+            + "sequential transitions.");
+    semanticFunction(0x693FEL, "f33_crypto_bank_collect_key_fragments", u32)
+        .setComment("Observe eight configured generation bytes and copy8 bytes per changed group. First/matching sample "
+            + "increments wrapping repeat count; mismatch restarts at1. Count>=3 sets sticky qualified bit and copies "
+            + "group. Later mismatch does not clear that bit. MaskFF copies64 qualified bytes to slot1 and returns22; "
+            + "otherwise11. Group getter status is ignored.");
+    semanticFunction(0x69780L, "f33_crypto_bank_advance_collected_update", v)
+        .setComment("Increment saturating timer; strict >1200 gives66. State11 collects;22 submits;44 starts optional "
+            + "verification;46 publishes then55, with sequential transitions possible in one invocation. Physical "
+            + "submission readiness remains distinct.");
+    semanticFunction(0x697F4L, "f33_crypto_bank_collect_test_vector", u32)
+        .setComment("Qualify scalar selector/mode pair plus four8-byte groups on changed generations using repeat threshold3. "
+            + "Mask bits remain set across later mismatches. Full1F copies the pair and two16-byte banks to fixed test "
+            + "inputs and returns22; otherwise11.");
+    semanticFunction(0x69BD8L, "f33_crypto_bank_submit_test_vector", u32)
+        .setComment("Mode0 submits configured AES job0 with selector50A4 and16-byte input/output; mode1 submits MAC job1 with "
+            + "the same fixed input extent. Reset capacity16. Accepted0 gives23, invalid mode/refusal44. No algorithm "
+            + "outcome is fabricated.");
+    semanticFunction(0x69C58L, "f33_crypto_bank_advance_test_operation", v)
+        .setComment("Increment saturating timer; strict >1160 selects44. State11 collects then may submit22 in the same call; "
+            + "accepted job waits in23. Completion callback separately compares output and publishes33 or44.");
+    semanticFunction(0x69CA2L, "f33_crypto_bank_foreground_cycle", v)
+        .setComment("Before normal receive/DCM: modeA5 reinitializes work each cycle; priorA5 on departure resets configured "
+            + "profiles. Advance profile qualification, consume direct abort5A, then active direct/collected/test workers "
+            + "in order. Save old current mode as previous. Hardware completion is not performed by this aggregate.");
+    semanticFunction(0x69D1CL, "f33_crypto_bank_retire_direct_update", v)
+        .setComment("Phase55 sets activation2;66 setsFF and saturating failure count, latching inhibition5A at configured5 "
+            + "failures. Preserve material until result read or later reset.");
+    semanticFunction(0x69D68L, "f33_crypto_bank_retire_collected_update", v)
+        .setComment("Phase55/66 sets activation2/FF and clears fragment history plus slot1 request/result material. Restore "
+            + "terminal phase after clearing; completion does not retain slot1 response bytes.");
+    semanticFunction(0x69DA4L, "f33_crypto_bank_retire_test_operation", v)
+        .setComment("Phase33 sets activation2 and failure flag0;44 sets activationFF and failure flag5A. Other phases remain "
+            + "active.");
+    semanticFunction(0x69DD2L, "f33_crypto_bank_publish_observation_window", v)
+        .setComment("Reduce callback observation counts using exact30D62/30D64 thresholds, saturating total505C, wrapping byte "
+            + "interval/index and sixteen-bit counters. Preserve raw count semantics; no inferred milliseconds or "
+            + "steering authority.");
+    semanticFunction(0x69E7CL, "f33_crypto_bank_maintain_terminal_states", v)
+        .setComment("After DCM in667E6: retire each active application bank then publish observation window. Separate from69CA2 "
+            + "advance before receive; neither is a CAN-controller lifecycle manager.");
+    semanticFunction(0x69EACL, "f33_crypto_bank_stage_direct_request", u32,
+        new ParameterImpl("input", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("input_length", u16, currentProgram),
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("output_length", u16, currentProgram))
+        .setComment("Clamp request64/output49. Return5 when inhibited,8 when already active, otherwise initialize active direct "
+            + "update22 and clear material. Input copy still occurs on refusal/busy; output status plus zeros is written "
+            + "when length nonzero. ActualR8 survives68FAA; no NULL checks.");
+    semanticFunction(0x69F3EL, "f33_crypto_bank_read_direct_result", u32,
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u16, currentProgram))
+        .setComment("Clamp output49; emit activation then48 result bytes only for activation2, otherwise zeros. If activation2 "
+            + "orFF clear direct request/result even for length0; retain activation. Repeated completed reads therefore "
+            + "return status2 with consumed zero material. Return0.");
+    semanticFunction(0x69FA2L, "f33_crypto_bank_snapshot_key_generations", v)
+        .setComment("Snapshot configured generation indices10..17 into prior-generation bytes. Activation does not treat "
+            + "already-present material as a new generation.");
+    semanticFunction(0x6A028L, "f33_crypto_bank_activate_collected_update", v)
+        .setComment("Only activation0 becomes1/state11/timer0; clear fragment/material state and snapshot current eight "
+            + "generations. Existing nonzero activation is not restarted.");
+    semanticFunction(0x6A058L, "f33_crypto_bank_snapshot_test_generations", v)
+        .setComment("Snapshot five configured source generations before collection; scalar pair and four byte groups have "
+            + "independent histories.");
+    semanticFunction(0x6A0AEL, "f33_crypto_bank_activate_test_operation", v)
+        .setComment("RID100F action reaches this gate. Only activation0 becomes1/state11/timer0; clear test material/history "
+            + "and snapshot generations. CAN bytes alone do not arm it.");
+    semanticFunction(0x6A0D8L, "f33_crypto_bank_compare_aes_result", u32)
+        .setComment("Compare16 fixed expected bytes5196 with AES result51A6; mismatch44, complete equality33. Not a hardware "
+            + "implementation of AES.");
+    semanticFunction(0x6A0FEL, "f33_crypto_bank_compare_mac_result", u32)
+        .setComment("Compare16 fixed expected bytes5196 with MAC result51B6; mismatch44, complete equality33. No arbitrary "
+            + "message or output length.");
+    semanticFunction(0x6A1B2L, "f33_crypto_bank_record_profile_status", v,
+        new ParameterImpl("packed_status", u32, currentProgram))
+        .setComment("Store low/high16 at5054/5056. For state11 and configured low ID0, saturating-increment zero-status507E or "
+            + "nonzero-status5080. High16 remains inR6 across exact6915A leaf; no extra callback argument.");
+    semanticFunction(0x6A2A0L, "f33_crypto_bank_key_update_completed", u32,
+        new ParameterImpl("result", u8, currentProgram))
+        .setComment("Configured command8 callback27E54: low8 result0 selects44 else66. Route to direct phase5092 only if direct "
+            + "activation5091==1; otherwise write collected phase5097 without its activation check. Routing uses current "
+            + "activation, not a retained submission-bank token. Return0.");
+    semanticFunction(0x6A2C2L, "f33_crypto_bank_aes_completed", u32,
+        new ParameterImpl("result", u8, currentProgram))
+        .setComment("Configured AES callback: nonzero result sets test phase44; zero compares fixed16-byte output and "
+            + "sets33/44. No active-generation check here; return0.");
+    semanticFunction(0x6A2DCL, "f33_crypto_bank_verification_completed", u32,
+        new ParameterImpl("result", u8, currentProgram))
+        .setComment("Configured command7 job1 callback27E0C: nonzero result forces509D=1. Select direct phase if activation1, "
+            + "otherwise collected phase; set46. Return0; no submission-generation token.");
+    semanticFunction(0x6A300L, "f33_crypto_bank_mac_completed", u32,
+        new ParameterImpl("result", u8, currentProgram))
+        .setComment("Configured MAC job1 callback: nonzero result sets44; zero compares fixed16-byte output and sets33/44. "
+            + "Return0, no local active-generation check.");
+    semanticFunction(0x89ABCL, "f33_crypto_key_job_deliver_completion", v,
+        new ParameterImpl("result", u8, currentProgram))
+        .setComment("Only activeA5 with valid complemented retained descriptor and nonnull callback+4 delivers. Reset channel "
+            + "before invoking saved callback(result). Pointer mismatch sets error1 and resets without callback. Explicit "
+            + "software callback input is not an ICU-S hardware result.");
+    semanticFunction(0x8F1D0L, "f33_secoc_publish_crypto_qualification", u32,
+        new ParameterImpl("qualified", u8, currentProgram))
+        .setComment("Under the existing critical pair: input1 storesD2,0 storesE1 at5502; other low-byte inputs return1 without "
+            + "changing it. Valid input returns0. This flag is not a global steering permission.");
+    semanticFunction(0x8F202L, "f33_secoc_crypto_qualification_reported", u32)
+        .setComment("Return1 only for5502==D2. RX recovery8F596 and completion8F906 combine this with per-profile "
+            + "configuration; do not interpret it as universal successful authentication.");
+    semanticData(0xFEBE503CL, new ArrayDataType(u8, 8, 1), "f33_crypto_key_fragment_repeat_count",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE5044L, new ArrayDataType(u8, 8, 1), "f33_crypto_key_fragment_previous_generation",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE504CL, new ArrayDataType(u8, 8, 1), "f33_crypto_key_fragment_seen",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE50C6L, new ArrayDataType(u8, 64, 1), "f33_crypto_key_fragment_previous",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE5106L, new ArrayDataType(u8, 64, 1), "f33_crypto_key_fragment_qualified",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE5146L, new ArrayDataType(u8, 32, 1), "f33_crypto_test_fragment_previous",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE5166L, new ArrayDataType(u8, 32, 1), "f33_crypto_test_fragment_qualified",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE5186L, new ArrayDataType(u8, 16, 1), "f33_crypto_test_input",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE5196L, new ArrayDataType(u8, 16, 1), "f33_crypto_test_expected",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE51A6L, new ArrayDataType(u8, 16, 1), "f33_crypto_aes_result",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE51B6L, new ArrayDataType(u8, 16, 1), "f33_crypto_mac_result",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE50A6L, new ArrayDataType(u8, 5, 1), "f33_crypto_test_repeat_count",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE50ABL, new ArrayDataType(u8, 5, 1), "f33_crypto_test_previous_generation",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE50B0L, new ArrayDataType(u8, 5, 1), "f33_crypto_test_seen",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE51C6L, new ArrayDataType(new ArrayDataType(u8, 64, 1), 2, 64), "f33_crypto_key_request",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE5246L, new ArrayDataType(new ArrayDataType(u8, 48, 1), 2, 48), "f33_crypto_key_result",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE5091L, u8, "f33_crypto_direct_activation",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE5092L, u8, "f33_crypto_direct_phase",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE5093L, u8, "f33_crypto_direct_failure_count",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE5094L, u8, "f33_crypto_direct_inhibited",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE5095L, u8, "f33_crypto_direct_abort_request",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE5096L, u8, "f33_crypto_collected_activation",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE5097L, u8, "f33_crypto_collected_phase",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE5098L, u8, "f33_crypto_key_fragment_qualified_mask",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE5099L, u8, "f33_crypto_mode",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE509AL, u8, "f33_crypto_previous_mode",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE509BL, u8, "f33_crypto_test_activation",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE509CL, u8, "f33_crypto_test_phase",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE509DL, u8, "f33_crypto_verification_result",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE50A2L, u8, "f33_crypto_test_qualified_mask",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE50A3L, u8, "f33_crypto_test_failed",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE50A4L, u8, "f33_crypto_test_selector",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE50A5L, u8, "f33_crypto_test_mode",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE5082L, u16, "f33_crypto_direct_elapsed_calls",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE5084L, u16, "f33_crypto_collected_elapsed_calls",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE5086L, u16, "f33_crypto_test_elapsed_calls",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE5064L, u32, "f33_crypto_key_result_capacity",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE5068L, u32, "f33_crypto_aes_result_capacity",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE506CL, u32, "f33_crypto_mac_result_capacity",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE5060L, new ArrayDataType(u16, 2, 2), "f33_crypto_profile_elapsed_calls",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE507AL, new ArrayDataType(u8, 2, 1), "f33_crypto_profile_failed",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE507CL, new ArrayDataType(u8, 2, 1), "f33_crypto_profile_phase",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE507EL, new ArrayDataType(u8, 2, 1), "f33_crypto_profile_zero_status_count",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE5080L, new ArrayDataType(u8, 2, 1), "f33_crypto_profile_nonzero_status_count",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0xFEBE5502L, u8, "f33_secoc_crypto_qualification",
+        "D2 when explicitly reported true, E1 when false; RX consumers combine it with per-profile fields, not universal authentication authority.");
+    semanticData(0x257C0L, new ArrayDataType(u16, 8, 2), "f33_crypto_key_fragment_generation_indices",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0x257DAL, new ArrayDataType(u16, 8, 2), "f33_crypto_key_fragment_signal_indices",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0x257F6L, new ArrayDataType(u16, 8, 2), "f33_crypto_key_fragment_byte_offsets",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0x2597CL, u8, "f33_crypto_config_profile_count",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0x30D67L, u8, "f33_crypto_config_fixed_verification_enable",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0x30E26L, u16, "f33_crypto_config_direct_timeout_calls",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0x30E28L, u16, "f33_crypto_config_collected_timeout_calls",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0x30E2AL, u16, "f33_crypto_config_test_timeout_calls",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0x30E2CL, u16, "f33_crypto_config_profile_wait_calls",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0x30E2EL, u8, "f33_crypto_config_direct_failure_limit",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+    semanticData(0x30E2FL, u8, "f33_crypto_config_fragment_repeat_threshold",
+        "Exact software storage and instruction/dataflow ownership; not a hardware outcome.");
+  }
+
   @Override public void run() throws Exception {
     String[] args = getScriptArgs();
     if (args.length != 1) throw new IllegalArgumentException("expected function_seeds.csv path");
@@ -11539,6 +12293,9 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateBaApplicationLifetimes();
     annotateRetainedControlProfiles();
     annotateTaskProgressAndProfiling();
+    annotateCanTpPayloadLifecycle();
+    annotateDcmQueuedDelivery();
+    annotateCryptoBankLifetimes();
     annotatePhaseModulation();
     annotateDataFlashReads();
     annotateFaciSubmission();

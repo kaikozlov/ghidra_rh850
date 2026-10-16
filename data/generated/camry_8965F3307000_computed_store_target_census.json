@@ -6,6 +6,7 @@
     "0x0003C116",
     "0x0003C184",
     "0x0003C19C",
+    "0x00069EAC",
     "0x0007B248",
     "0x0007B2C4",
     "0x0007DD64",
@@ -152,6 +153,53 @@
       "store": "0x0003C22E"
     },
     {
+      "function": "0x00069EAC",
+      "hi": "0xFEBF51C5",
+      "hits": [
+        "0xFEBE6AF4",
+        "0xFEBE6AF8",
+        "0xFEBE6D84",
+        "0xFEBE6D86",
+        "0xFEBE6DC8",
+        "0xFEBE6DD6",
+        "0xFEBE6DEC",
+        "0xFEBE6E0A",
+        "0xFEBE71F2",
+        "0xFEBEAC52",
+        "0xFEBEAC54",
+        "0xFEBEAC56",
+        "0xFEBEAC5A",
+        "0xFEBEADB0",
+        "0xFEBEAE90",
+        "0xFEBEBF3C",
+        "0xFEBEC3BA",
+        "0xFEBEC43C",
+        "0xFEBEC4C0",
+        "0xFEBEC5EE",
+        "0xFEBEC7BF",
+        "0xFEBEC81A",
+        "0xFEBECB38",
+        "0xFEBECBE8",
+        "0xFEBECC2C",
+        "0xFEBECC48",
+        "0xFEBECC4C",
+        "0xFEBECC4E",
+        "0xFEBECC50",
+        "0xFEBECC60",
+        "0xFEBECC62",
+        "0xFEBECC64",
+        "0xFEBECC66",
+        "0xFEBECC94",
+        "0xFEBECC98",
+        "0xFEBEE40A",
+        "0xFEBEE40C",
+        "0xFEBEEF8E"
+      ],
+      "lo": "0xFEBE51C6",
+      "pointer_expression": "PTRADD(PTRSUB(PTRSUB(0x0,0xfebe51c6),0x0),MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x4, 4),0x1),0xffff)),0x1)",
+      "store": "0x00069F14"
+    },
+    {
       "function": "0x0007B248",
       "hi": "0xFEBE6F36",
       "hits": [
@@ -233,7 +281,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F54",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe4f54),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1))",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f50),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0x4)",
       "store": "0x0007B2EA"
     },
     {
@@ -250,7 +298,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F5C",
-      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4f5c),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1)",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f50),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0xc)",
       "store": "0x0007B2EC"
     },
     {
@@ -420,7 +468,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F50",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe4f50),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1))",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f50),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0x0)",
       "store": "0x0007B302"
     },
     {
@@ -437,7 +485,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F56",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe4f56),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1))",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f50),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0x6)",
       "store": "0x0007B304"
     },
     {
@@ -454,7 +502,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F58",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe4f58),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1))",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f50),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0x8)",
       "store": "0x0007B306"
     },
     {
@@ -471,7 +519,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F5A",
-      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4f5a),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1)",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f50),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0xa)",
       "store": "0x0007B308"
     },
     {
@@ -488,7 +536,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F5B",
-      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4f5b),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1)",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f50),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0xb)",
       "store": "0x0007B30A"
     },
     {
@@ -505,7 +553,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F5D",
-      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4f5d),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1)",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f50),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0xd)",
       "store": "0x0007B30C"
     },
     {
@@ -522,7 +570,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F5E",
-      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4f5e),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1)",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f50),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0xe)",
       "store": "0x0007B30E"
     },
     {
@@ -539,7 +587,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F5F",
-      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4f5f),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1)",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f50),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0xf)",
       "store": "0x0007B310"
     },
     {
@@ -2804,7 +2852,7 @@
   ],
   "canonical_corpus": {
     "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
-    "sha256": "e2431f5025425884e558b18305189db6e405227dfba11471e90e006f8ded3b00"
+    "sha256": "74256bd0687f1935ac8c80141722ed0a9ac651ff480bf9cd4fd495b31498a48b"
   },
   "ghidra_script": {
     "path": "ghidra/scripts/investigate/AuditComputedStoreTargets.java",
@@ -2814,11 +2862,11 @@
   "schema": "camry-8965f3307000-computed-store-target-census-v1",
   "scope": "known-range high-pcode STORE pointer arithmetic only; unknown/unbounded pointer stores are intentionally outside this census and handled by independent pointer/callback provenance work",
   "summary": {
-    "candidateFunctions": 49,
-    "candidates": 103,
-    "functions": 7329,
+    "candidateFunctions": 50,
+    "candidates": 104,
+    "functions": 7331,
     "knownRangeStores": 5466,
-    "stores": 14185
+    "stores": 14266
   },
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",

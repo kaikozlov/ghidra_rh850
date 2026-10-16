@@ -2,7 +2,7 @@
   "combined_classification": "VAR-084 E1 and E2 are closed without finding a hidden computed-store or DMAC steering ingress. CORR-135 subsequently removes the premise that such an escape was needed to explain zero-B6 factory LTA: exact F33 has a B6-independent D0218->CC60->CC50 actuation path. These negatives therefore bound hidden mutation mechanisms; they do not imply an 0x08A-to-B6 transform.",
   "e1_register_arithmetic_store_targets": {
     "boundary": "unknown/unbounded pointer stores and memory-safety bugs are not promoted to impossible; this closes VAR-084 E1 specifically, not arbitrary pointer corruption",
-    "candidate_function_count": 49,
+    "candidate_function_count": 50,
     "candidate_functions": [
       "0x0003B8E4",
       "0x0003BD8E",
@@ -10,6 +10,7 @@
       "0x0003C116",
       "0x0003C184",
       "0x0003C19C",
+      "0x00069EAC",
       "0x0007B248",
       "0x0007B2C4",
       "0x0007DD64",
@@ -55,11 +56,11 @@
       "0x000CF51C"
     ],
     "census": {
-      "candidateFunctions": 49,
-      "candidates": 103,
-      "functions": 7329,
+      "candidateFunctions": 50,
+      "candidates": 104,
+      "functions": 7331,
       "knownRangeStores": 5466,
-      "stores": 14185
+      "stores": 14266
     },
     "closure_groups": [
       {
@@ -152,6 +153,13 @@
           "0x000CF51C"
         ],
         "name": "cbxx_diagnostic_state"
+      },
+      {
+        "bound": "R28 input length is clamped to64 before all activation branches; unsigned index<R28 confines store69F14 to FEBE51C6..FEBE5205. Caller-selected output pointers are outside this known-base closure.",
+        "functions": [
+          "0x00069EAC"
+        ],
+        "name": "direct_crypto_request_copy"
       }
     ],
     "result": "zero recovered register-arithmetic STORE path can land on any audited steering command/current target once exact runtime/configuration index bounds are applied",
@@ -172,9 +180,9 @@
     "computed_store_census": {
       "candidateFunctions": 3,
       "candidates": 5,
-      "functions": 7329,
+      "functions": 7331,
       "knownRangeStores": 5466,
-      "stores": 14185
+      "stores": 14266
     },
     "destination_field_count": 44,
     "destination_registers": {
@@ -530,6 +538,12 @@
       "entry": "0x000628B2"
     },
     {
+      "body_sha256": "1fb4c155d98ec1048062221995c1d521112c2e3e6f1ad63edf0fd2b0fd006c6f",
+      "body_size": 146,
+      "decompiled_c_sha256": "02bc8514028b5079d74de3e5195a57a2cc20568daec8f7c66e7ea9e727c06024",
+      "entry": "0x00069EAC"
+    },
+    {
       "body_sha256": "9cad4c1947e321a80ea86008915984329c61b788f9f2a9544fa12f04b4f1582b",
       "body_size": 6,
       "decompiled_c_sha256": "6148214c54fd91685127ce229945bd2d521b63511da5cf70947ae5c7044cd5d9",
@@ -538,13 +552,13 @@
     {
       "body_sha256": "1762ba5c077213a97399f7998d2e7737f2af93449e2a606fa4aa5d1f7ce6d13e",
       "body_size": 124,
-      "decompiled_c_sha256": "f8fb38338df65814521ad70378a56ca2175f419e713d9c72135b0c95c24301bc",
+      "decompiled_c_sha256": "dc88a67a9049b5cad363c9de97efda744f0543bcaeffcc24f41f1d5c8c3f63c9",
       "entry": "0x0007B248"
     },
     {
       "body_sha256": "a00f3f3eb86314d6645155548f2b80dfee64ced3e8dd8c0d04a38020525f8ae9",
       "body_size": 226,
-      "decompiled_c_sha256": "1ec3fc49cd8092376be295297ac416053841c326bf23cae3621b352139432d20",
+      "decompiled_c_sha256": "c4d8372ad4d95a6e53bd7f559d2b338f29087b79fe00e1a0194a9e3eb805f620",
       "entry": "0x0007B2C4"
     },
     {
@@ -706,7 +720,7 @@
     {
       "body_sha256": "860fc368a14af6365d6ee17c3bbaa4723a157b9c6f4a14023f888c51b42d3be4",
       "body_size": 134,
-      "decompiled_c_sha256": "69454108d244fe090fedce77eb5f83eb02aa3bcd922f0772952ed0d3dc4b23f0",
+      "decompiled_c_sha256": "4a478a077a31f4973082d87a80e93b8abdf541af5601440dc9bf1a2b010e837a",
       "entry": "0x0008F906"
     },
     {
@@ -917,11 +931,11 @@
   "inputs": {
     "computed_store_target_census": {
       "path": "data/generated/camry_8965F3307000_computed_store_target_census.json",
-      "sha256": "d727e741de3a39d4d4ec749735a9d3980a91172c6ae43ac8c3c763d6bac86371"
+      "sha256": "93aa2cbb42b9dcbc3cdf47b7b16491e8f9c057b3af54cfcd21b1b3eab5d647a5"
     },
     "dmac_destination_computed_store_census": {
       "path": "data/generated/camry_8965F3307000_dmac_destination_computed_store_census.json",
-      "sha256": "3e91e9998f5f6c456a2a5ccd1e02211019c6044813ec898790e3093f0b23948e"
+      "sha256": "1700916b6ccbd037b616049dd5fc6fe1b4884b122eac66d3b756e6665882d654"
     },
     "resolver_script": {
       "path": "ghidra/scripts/investigate/AuditComputedStoreTargets.java",
@@ -932,7 +946,7 @@
   "schema": "camry-8965f3307000-hidden-ingress-residuals-v1",
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-    "corpus_function_count": 7329,
+    "corpus_function_count": 7331,
     "software_id": "8965F3307000"
   }
 }

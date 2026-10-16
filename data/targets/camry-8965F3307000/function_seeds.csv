@@ -226,3 +226,5 @@ address,provenance,note
 0x0004D420,firmware/camry-8965F3307000/CodeFlash.bin,Fixed optional callback pointers in complete2927C metadata table at29B84;29B94;29BA4; exact instruction boundary
 0x0004D42E,firmware/camry-8965F3307000/CodeFlash.bin,Fixed optional callback pointers in complete2927C metadata table at29BB4;29BC4;29BD4; exact instruction boundary
 0x0004D48C,firmware/camry-8965F3307000/CodeFlash.bin,Configured availability leaf in fifteen retained-profile DID rows; exact MOVEA5A/R10 and JMP LP instruction boundary
+0x0006A2A0,firmware/camry-8965F3307000/CodeFlash.bin,Configured command8 completion callback pointer at27E54; bounded34-byte leaf ending in JMP LP at6A2C0
+0x0006A2DC,firmware/camry-8965F3307000/CodeFlash.bin,Configured command7 job1 completion callback pointer at27E0C; independent entry between6A2C2 and6A300

@@ -248,10 +248,23 @@ def build() -> dict:
          "indirect signal-id table drift")
     need({x["can_id"] for x in indirect} == set(range(0x013, 0x020)),
          "indirect PDU family drift")
-    token(0x693FE, funcs, "FUN_0007e72a(DAT_000257da,DAT_000257f6,8,",
-          "[0x40] = 0x5a;", "DAT_00030e2f <=")
-    token(0x697F4, funcs, "FUN_0007e72a(DAT_000257ee,DAT_0002580a,8,",
-          "DAT_00030e2f <=")
+    # Pin real table-load/copy/qualification dataflow, not decompiler labels.
+    # First group in each bank: R6 signal, R7 byte offset, R8 length8,
+    # R9 stack destination, actual7E72A call, then changed-marker5A.
+    for start, expected in (
+        (0x6943E, ("40360200403e0200e637db570348e73ff7570842"
+                   "81ffd852200e5a00430f4000")),
+        (0x698D0, ("40360200403e0200e637ef57234e0b00e73f0b580842"
+                   "81ff444e200e5a00430f2c00")),
+        # Byte repeat counts compare unsigned against the same ROM threshold.
+        (0x696E0, "400e0300a10f2f0ee189a11d"),
+        (0x699B2, "2e062f0e0300"),
+        (0x699E8, "81008e9f0100f309c10d"),
+        (0x69B02, "90008e9f0100f381b11d"),
+    ):
+        encoded = bytes.fromhex(expected)
+        need(image[start:start + len(encoded)] == encoded,
+             f"crypto-bank group qualification dataflow drift at {start:#x}")
     token(0x7E72A, funcs, "(&DAT_febe4a48)[", "(param_2 & 0xffff)]",
           " - 0x6ec2]")
     token(0x7D12A, funcs, " - 0x6ec2]", " + ((param_2 & 0xffff) - 0x6db8)")

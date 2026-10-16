@@ -1,0 +1,155 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_dcm_event_dtc_cancellation",
+  "entry": {
+    "role": "Same real prefix;9165E zeros main context then actual8CB1A operation2 resets module and tombstonesED.98946 consumesFF as one budgeted slot with no consumer call. Explicit software handoff, not wire admission or physical completion.",
+    "scope": "resolved-address",
+    "address": "0x8cb1a"
+  },
+  "max_instructions": 250000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0xfebf8018",
+    "r6": "0x0",
+    "r7": "0xfebe4000",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xfe00"
+  },
+  "stop_addresses": [
+    "0x95644",
+    "0x95626",
+    "0xfebf802c"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe1800",
+      "size": 2048,
+      "fill": 165,
+      "evidence": "Real nested-call stack; no replacements"
+    },
+    {
+      "address": "0xfebe39dc",
+      "hex": "00000000",
+      "evidence": "Established native empty PMR-save nesting counter; real98D0A/6A45E and98D16/6A4C4 save and restore caller PMR=FE00."
+    },
+    {
+      "address": "0xfebe5e50",
+      "hex": "a5000000",
+      "evidence": "Established enabled empty software event queue (producer0 consumer0 count0), as in app_programming_pending_ack_queues_mode9_not_session2. Real989EC must enqueue ED at5E54 and advance producer/count, not short-circuit scheduling."
+    },
+    {
+      "address": "0xfebe4000",
+      "hex": "0041befe010000000042befe00000000000000000700000019000200",
+      "evidence": "Advanced after SID/subfunction"
+    },
+    {
+      "address": "0xfebe4100",
+      "hex": "01",
+      "evidence": "Select current-derived status bit0 only"
+    },
+    {
+      "address": "0xfebe4200",
+      "size": 16,
+      "fill": 165,
+      "evidence": "Tuple guard region"
+    },
+    {
+      "address": "0xfebf3f18",
+      "size": 808,
+      "fill": 0,
+      "evidence": "Idle configured list module and real scratch"
+    },
+    {
+      "address": "0xfebe602c",
+      "size": 60,
+      "fill": 0,
+      "evidence": "Three derived DTC banks"
+    },
+    {
+      "address": "0xfebe602c",
+      "hex": "06000000",
+      "evidence": "DTC indices1/2 current-derived bits"
+    },
+    {
+      "address": "0xfebe6120",
+      "size": 48,
+      "fill": 255,
+      "evidence": "All event healthy-observed bits set so no uncompleted-test bit is synthesized"
+    },
+    {
+      "address": "0xfebe5f87",
+      "size": 160,
+      "fill": 165,
+      "evidence": "First iterator call must refresh this status snapshot"
+    },
+    {
+      "address": "0xfebe5628",
+      "evidence": "Explicit legitimate active callback/header handoff for configured19/02. Later cancellation uses real9165E operation2.",
+      "hex": "1acb08001902"
+    },
+    {
+      "address": "0xfebe5630",
+      "evidence": "Main context matches the already admitted direct handler context; cancellation resets it before operation2.",
+      "hex": "0041befe010000000042befe00000000000000000700000019000200"
+    },
+    {
+      "address": "0xfebf8000",
+      "hex": "21062c60befe085261570100210646890900e1c760f9850521065e160900e1c760f9210646890900e1c760f985050000",
+      "evidence": "Explicit RAM caller, not substituted firmware. Reproduce with v850-elf-as -mv850e3v5; v850-elf-ld -Ttext=0xFEBF8000; objcopy -O binary. Source:\n/* Link only in RAM at FEBF8000. The initial entry remains real CodeFlash8CB1A.\n * Route its returned LP to one of these two labels. No firmware overlay,\n * replacement callback or direct8C960 continuation is used. */\n    .section .text.dcm_event_dtc,\"ax\"\n    .align 2\n    .global dcm_dtc_deliver_queued_generation\n dcm_dtc_deliver_queued_generation:\n    /* A new derived source generation must not replace retained local tuples. */\n    mov 0xfebe602c, r1\n    mov 8, r10\n    st.w r10, 0[r1]\n    mov 0x00098946, r1\n    jarl [r1], lp\n    /* Normal delivery stops at95644 before this return. */\n    .global dcm_dtc_unexpected_return\n dcm_dtc_unexpected_return:\n    br dcm_dtc_unexpected_return\n\n    .global dcm_dtc_cancel_before_queue_delivery\n dcm_dtc_cancel_before_queue_delivery:\n    mov 0x0009165e, r1\n    jarl [r1], lp\n    mov 0x00098946, r1\n    jarl [r1], lp\n    .global dcm_dtc_cancel_done\n dcm_dtc_cancel_done:\n    br dcm_dtc_cancel_done\n"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Cancelled ED still took one occupied slot until pop",
+      "kind": "memory",
+      "address": "0xfebe5e50",
+      "size": 5,
+      "equals_hex": "a5010100ff"
+    },
+    {
+      "name": "DTC module reset rather than resumed",
+      "kind": "memory",
+      "address": "0xfebf3f18",
+      "size": 10,
+      "equals_hex": "0000000000000000ff00"
+    },
+    {
+      "name": "Retained list message overwritten by actual operation2 main zeroing",
+      "kind": "memory",
+      "address": "0xfebf3f24",
+      "size": 28,
+      "equals_hex": "00000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "No tuple emitted after cancellation",
+      "kind": "memory",
+      "address": "0xfebe4200",
+      "size": 12,
+      "equals_hex": "b9a5a5a5a5a5a5a5a5a5a5a5"
+    },
+    {
+      "name": "Active service released",
+      "kind": "memory",
+      "address": "0xfebe5628",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Caller PMR restored",
+      "kind": "register",
+      "register": "PMR",
+      "equals": "0xfe00"
+    },
+    {
+      "name": "Completed the actual queued-call composition",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0xfebf802c"
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_crypto_bank_fragment_qualification_and_cleanup",
+  "entry": {
+    "scope": "resolved-address",
+    "address": "0x6a028",
+    "role": "Real activation followed by four explicit calls to the real eight-fragment collector, then actual worker timeout and maintenance. Inputs advance software generations only. The collector is called directly; the submission branch and hardware crypto producer are not executed. Source validity flags remain zero, so the copy getter returns20 which this collector ignores."
+  },
+  "max_instructions": 150000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0xfebf8000",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xfe00"
+  },
+  "stop_addresses": [
+    "0xfebf8178"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe0000",
+      "size": 131072,
+      "fill": 0,
+      "evidence": "Explicit software RAM/stack handoff; not a hardware reset or peripheral result."
+    },
+    {
+      "address": "0xfebf8000",
+      "hex": "21064253befe015241570000415701004157020041570300415704004157050041570600415707002106fe930600e1c760f921064253befe025241570000415701004157020041570300415704004157050041570600415707002106fe930600e1c760f921064253befe0352415700004157010041570200415703004157040041570500415706004157070021064953befe0252415700002106fe930600e1c760f921060090bffe615701002c069850befe8c570100415704002106a74abefe2a06aa000000415700004157010041570200415703004157040041570500415706004157070021064253befe0452415700000352415707002106fe930600e1c760f921060890bffe6157010026062090bffe27060652befe28064000000021062e9f0800e1c760f926066090bffe27063c50befe084221062e9f0800e1c760f921069850befe8157010021066890bffe4157000021068450befe2a06b004000061570000210680970600e1c760f921067c9e0600e1c760f98505000000000000000000000000000000000000",
+      "evidence": "Explicit RAM caller plus nonexecuted decoder lookahead. Assemble v850-elf-as -mv850e3v5; link -Ttext=0xFEBF8000; objcopy -O binary. Source:\n/* Explicit caller for original CodeFlash functions; no substituted callee. */\n.section .text,\"ax\"\n.align 2\n.macro CALL target\n mov \\target, r1\n jarl [r1], lp\n.endm\n.macro GENERATION value\n mov 0xfebe5342, r1\n mov \\value, r10\n st.b r10, 0[r1]\n st.b r10, 1[r1]\n st.b r10, 2[r1]\n st.b r10, 3[r1]\n st.b r10, 4[r1]\n st.b r10, 5[r1]\n st.b r10, 6[r1]\n st.b r10, 7[r1]\n.endm\n.global material_after_activation\nmaterial_after_activation:\n GENERATION 1\n CALL 0x693fe\n GENERATION 2\n CALL 0x693fe\n GENERATION 3\n mov 0xfebe5349, r1\n mov 2, r10\n st.b r10, 0[r1]\n CALL 0x693fe\n mov 0xfebf9000, r1\n st.w r10, 0[r1]\n mov 0xfebe5098, r12\n ld.bu 0[r12], r10\n st.b r10, 4[r1]\n /* Group0 changes after qualifying; group7 reaches its third generation. */\n mov 0xfebe4aa7, r1\n mov 0xaa, r10\n st.b r10, 0[r1]\n st.b r10, 1[r1]\n st.b r10, 2[r1]\n st.b r10, 3[r1]\n st.b r10, 4[r1]\n st.b r10, 5[r1]\n st.b r10, 6[r1]\n st.b r10, 7[r1]\n mov 0xfebe5342, r1\n mov 4, r10\n st.b r10, 0[r1]\n mov 3, r10\n st.b r10, 7[r1]\n CALL 0x693fe\n mov 0xfebf9008, r1\n st.w r10, 0[r1]\n mov 0xfebf9020, r6\n mov 0xfebe5206, r7\n mov 64, r8\n CALL 0x89f2e\n mov 0xfebf9060, r6\n mov 0xfebe503c, r7\n mov 8, r8\n CALL 0x89f2e\n mov 0xfebe5098, r1\n ld.bu 0[r1], r10\n mov 0xfebf9068, r1\n st.b r10, 0[r1]\n /* Exercise the real worker timeout and terminal maintenance, not submission. */\n mov 0xfebe5084, r1\n mov 1200, r10\n st.h r10, 0[r1]\n CALL 0x69780\n CALL 0x69e7c\n.global material_qualification_done\nmaterial_qualification_done:\n br material_qualification_done\n"
+    },
+    {
+      "address": "0xfebe4aa7",
+      "hex": "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f40",
+      "evidence": "Configured signal90..97 offsets95..151 reference these64 bytes. Not physical CAN reception."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Reached the composed software boundary",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0xfebf8178"
+    },
+    {
+      "name": "Seven qualified fragments do not complete the bank",
+      "kind": "memory",
+      "address": "0xfebf9000",
+      "size": 5,
+      "equals_hex": "110000007f"
+    },
+    {
+      "name": "Last fragment completes despite another fragment changing",
+      "kind": "memory",
+      "address": "0xfebf9008",
+      "size": 4,
+      "equals_hex": "22000000"
+    },
+    {
+      "name": "Qualified bank retains earlier group0 rather than new mismatching bytes",
+      "kind": "memory",
+      "address": "0xfebf9020",
+      "size": 64,
+      "equals_hex": "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f40"
+    },
+    {
+      "name": "Mismatch restarts only its repeat count; completed mask stays set",
+      "kind": "memory",
+      "address": "0xfebf9060",
+      "size": 9,
+      "equals_hex": "0103030303030303ff"
+    },
+    {
+      "name": "Timeout terminal state survives maintenance",
+      "kind": "memory",
+      "address": "0xfebe5096",
+      "size": 3,
+      "equals_hex": "ff6600"
+    },
+    {
+      "name": "Worker crosses configured timeout1200 strictly",
+      "kind": "memory",
+      "address": "0xfebe5084",
+      "size": 2,
+      "equals_hex": "b104"
+    },
+    {
+      "name": "Terminal cleanup clears repeat/generation/seen and collected data",
+      "kind": "memory",
+      "address": "0xfebe503c",
+      "size": 24,
+      "equals_hex": "000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "Terminal cleanup clears previous and qualified fragments",
+      "kind": "memory",
+      "address": "0xfebe50c6",
+      "size": 128,
+      "equals_hex": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "Terminal cleanup clears slot1 request",
+      "kind": "memory",
+      "address": "0xfebe5206",
+      "size": 64,
+      "equals_hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "Terminal cleanup clears slot1 response",
+      "kind": "memory",
+      "address": "0xfebe5276",
+      "size": 48,
+      "equals_hex": "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ]
+}

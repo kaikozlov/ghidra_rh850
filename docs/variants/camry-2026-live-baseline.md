@@ -2189,7 +2189,7 @@ Deterministic evidence is the `firmware_exact_0x090` and
 
 CORR-127 closes the denominator question raised by the broader `0x58074` staging audit. The old VAR-065 `19/116 nonempty, 97 empty` count was a count through one fixed raw→stage→snapshot model, not an exhaustive census of every staged COM value and consumer. The exact-F33 pipeline is larger but still converges to the same external-command result.
 
-**L1/L2 denominator.** Exact `FUN_0007D12A` literal calls provide **116 scalar raw cells** (including signal243's stack-RMW path `0x4BB62 -> FEBE80A0`). The table-driven callers `0x693FE/0x697F4` add **14 configured extracts**, signals 90..103, spanning CAN `0x013..0x01F`; their qualification/forwarding state remains inside the communications-manager family and does not become a lateral magnitude. `FUN_00058074` stages **99 of the 116 scalar raw cells over 106 exact copy edges**. The other 17 raw cells have no consumer beyond their unpacker/staging/init machinery.
+**L1/L2 denominator.** Exact `FUN_0007D12A` literal calls provide **116 scalar raw cells** (including signal243's stack-RMW path `0x4BB62 -> FEBE80A0`). The table-driven callers `0x693FE/0x697F4` add **14 configured extracts**, signals 90..103, spanning CAN `0x013..0x01F`; their qualification state belongs to the [crypto-test banks](#7727-crypto-test-banks-material-qualification-and-completion-ownership), not a lateral-command magnitude. `FUN_00058074` stages **99 of the 116 scalar raw cells over 106 exact copy edges**. The other 17 raw cells have no consumer beyond their unpacker/staging/init machinery.
 
 The 2026-10-15 regeneration repairs an overlapping-field parsing error:
 `DAT_febe8000._2_1_` denotes byte `FEBE8002`, not the containing word's base.
@@ -4662,11 +4662,13 @@ reports only target intersections that are not already represented by a canonica
 reference. Unknown/unbounded pointers are deliberately not converted into false certainty;
 that general memory-corruption class remains separate from E1/E2.
 
-**E1 — register-arithmetic STORE targets.** Across **14,192** recovered STORE operations,
-**5,454** have a statically bounded target range. Scanning the command/current/D0218 target
-set produces **103 candidate STORE rows in 49 functions** before exact runtime/configuration
-bounds are applied. Every candidate collapses outside the target cell it only overlapped
-under the coarse range analysis:
+**E1 — register-arithmetic STORE targets.** The
+[current identity-bound census](../../data/generated/camry_8965F3307000_computed_store_target_census.json)
+records recovered stores, bounded ranges and conservative intersections with the
+command/current/D0218 target set. Its totals change with the recovered graph;
+each candidate still requires exact runtime/configuration bounds. The recovered
+candidate families collapse outside the target cells they overlap under coarse
+range analysis:
 
 - the `FEBE71F2` candidates are ordinary indexed status arrays: `3B8E4` receives only
   literal lane indices **0..7**, while `3C108/3C116/3C184/3C19C` are bounded to
@@ -4680,6 +4682,10 @@ under the coarse range analysis:
   `FEBE5651/FEBE5751/FEBE5851`; the apparent wide indexed motor/snapshot families are
   called only with the exact five-channel domain **0..4**; and the remaining `CBxx`
   helpers carry explicit `<=0x13` / `<3` bounds.
+- the direct crypto-request copy at`69F14` is bounded by an unconditional
+  input-length clamp to64 and an unsigned loop comparison, confining its
+  known-base writes to`FEBE51C6..FEBE5205`; caller-selected output pointers are
+  not included in this closure.
 
 The result is **zero recovered register-arithmetic STORE path that can land on an audited
 steering command/current target after exact index provenance is applied**. This closes
@@ -13433,8 +13439,111 @@ Native compositions cover [final queued behind pending](../../tests/fixtures/rh8
 [deferred pending notification](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_transport_pending_confirmation_defers_operation_three.json)
 and [watchdog cancellation with a surviving CanTp claim](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_transport_watchdog_cancels_service_but_cantp_single_frame_claim_survives.json).
 The last enters the expired software timer callback explicitly; it does not
-simulate elapsed physical time. Lower payload acquisition, segmentation,
-frame acknowledgement and controller execution remain dependency boundaries.
+simulate elapsed physical time. The following connected reconstruction closes
+payload/segmentation and queued software delivery, not physical frame acknowledgement
+or controller execution.
+
+##### Deferred CanTp payload, segmentation and lower queue ownership
+
+`7A408` advances transport counters, receive work and transmit work in that
+order. Payload acquisition is deferred until this work runs. The configured
+normal-address path emits an eight-byte CAN record: SF carries1..7 bytes,
+FF carries the first6, and CF carries up to7 with sequence wrapping15→0.
+Only the final frame is padded; padding is not application payload. Transport
+extent may reach4095 while DCM receive capacity remains256 and its shared
+response allocation768. Those are different limits, not interchangeable claims.
+
+The TX copy route `7B540 → 81A66 → 81990 → 7BE7E → 926D2` consumes the real
+DCM cursor/remaining count. CanTp retains counts and frame scratch, not a payload
+pointer. The subsequent CanIf enqueue copies that scratch into another owner.
+Both physical transport queues have seven-word storage; one classic frame
+occupies five words. Until actual driver service drains it, a second frame does
+not fit. Copying upper bytes precedes this enqueue decision: refusal does not
+roll the upper cursor back.
+
+| CanTp TX phase | Meaning and transition |
+|---|---|
+| D2 | Accepted extent; deferred SF/FF acquisition |
+| C3 | Queued SF awaiting lower confirmation; cancellation refused |
+| B4 / A5 | FF awaiting confirmation / waiting for flow control |
+| 96 | CF copy window; upper busy2 retains ownership for later work |
+| 87 | Queued CF; only final remaining0 may complete the aggregate |
+| 78 | Software spacing interval before the next copy window |
+
+A matching CTS may arrive before local FF/CF confirmation. Initial CTS captures
+BS and table-normalized STmin; later CTS reloads the original BS rather than
+changing those parameters. BS0 is unrestricted. WAIT restarts its wait timeout;
+there is no TX-side received-WAIT counter. These are raw software countdowns,
+not measured milliseconds. The exact lower cancellation hook `7B246` does
+nothing: aggregate cancellation cannot retroactively erase a queued CanIf frame.
+
+RX retains its own ID, expected sequence, remaining extent and FC budget.
+Physical rows permit multi-frame reception; the functional row is SF-only.
+The upper start callback claims capacity before CanTp copies the first6 bytes.
+Capacity shortage may generate WAIT; a total above256 produces overflow without
+an admitted DCM request. A matching early CF is accepted in receive phase5A/F0
+as well as4B. Wrong sequence aborts; other malformed geometry branches are not
+all equivalent to cancellation. The final CF copies only the announced remaining
+bytes, resets CanTp ownership, then reports aggregate receive success. DCM still
+owns deferred service dispatch.
+
+Native compositions exercise [FF/CTS/CF with real queue-pressure refusal](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_cantp_ff_then_early_cts_cf_queue_pressure.json),
+[FF/CF reception excluding nonzero padding](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_cantp_receive_ff_then_cf_truncates_padding.json),
+and [refused SF cancellation followed by the actual software confirmation chain](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_cantp_uncancellable_sf_software_confirmation.json).
+The last supplies a lower **software API indication**, not a simulated hardware
+ACK. Real queue drain, controller feedback, bus arbitration and physical delivery
+remain boundaries. Intermediate enqueue/confirmation is not aggregate success,
+and aggregate success is not later DCM operation3 delivery.
+
+##### Queued events, timer generations and retained application contexts
+
+The event object is a **31-slot counted byte FIFO**, not a queue of contexts.
+`98946` snapshots occupied-slot count, then consumes that many slots, releasing
+the existing critical section before each configured callback. Callback-created
+tail entries wait for a later invocation under normal FIFO invariants. Cancellation
+`98A44` writesFF tombstones without moving cursors or reducing occupancy;
+tombstones consume both capacity and the next dispatch budget.
+
+Timer6's callback `922EA` invalidates all old event0 entries and then attempts
+one fresh append, in separate critical sections. A full ring remains full even
+when every old entry has becomeFF. The append can fail; subsequent tombstone
+drain does not implicitly retry or rearm it. Producer range validation also does
+not guarantee a nonnull callback: the ROM map is sparse, and the consumer's
+accepted range is broader than the producer's. These helpers are not a safe
+arbitrary-event execution API.
+
+The nine timers have independent32-bit remaining values and byte active flags.
+Arm writes `(duration+4) mod 2^32`; cancel clears only active. The worker expires
+an active timer only when **unsigned remaining<5**. Equality5 becomes0 while
+remaining active, then expires on a later visit. It clears active before calling
+outside the critical section. Earlier callbacks can therefore cancel or rearm
+later slots in the same pass; already visited slots are not revisited. The root
+`988C2` runs maintenance, timers, then queue dispatch. A timer-posted event can
+enter that same queue generation; an event-posted continuation cannot.
+
+Configured ED/F1/29h callbacks consume module-retained state, not a queue-owned
+snapshot. Actual ED dispatch reaches the frozen19/02 list through `8CB7A`;
+actual cancellation tombstones ED and clears its retained module. F1 reaches
+BA finish through `8E4AA`. Its F8 finish reads **publishedF00F**, not the newly
+armed live tracker6ADC: real foreground publication `58074` makes the pending11
+visible. With stale published0, a later finish instead returns error and clears
+the reset-request byte, despite live tracker11. This distinction is an explicit
+software-handoff result, not a claim of a normal-road scheduling defect.
+
+Actual29h delivery reaches `91C92`, invokes pending operation3, requests mode9
+and appends0E beyond the current budget. The next0E can requeue while still
+pending. Service cancellation removes that continuation but leaves request9 and
+the application latch. Likewise, BA cancellation does not undo its already
+admitted application/requester state.
+
+Native evidence covers [frozen ED delivery](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dcm_event_dtc_generation.json),
+[ED cancellation before delivery](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dcm_event_dtc_cancellation.json),
+[BA publication, requeue and cancellation](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dcm_event_ba_pending_cancellation.json),
+[the stale-publication error boundary](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dcm_event_ba_stale_publication.json),
+and [pending notification, timer equality/cancellation and full-ring replacement loss](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_dcm_event_pending_timers_capacity.json).
+These preserve actual prefix RAM and call original firmware continuations. They
+do not establish physical latency, interrupt interleavings, programming handoff
+or peripheral success.
 
 #### Read, clear and control publication lifetimes
 
@@ -13913,21 +14022,133 @@ This does not claim that an invalid queued request is reachable through an admit
 external service.
 
 
+### 77.27 Crypto-test banks, material qualification and completion ownership
+
+This is the stock ICU-S application bank, not a CAN-controller manager or a
+second steering-permission system. The [command-surface owner](../security/icu-hsm-command-surface.md#4-application-layer-owners-stock-callers-per-command)
+retains command/driver classification. Here the unit is activation → collected
+material → submission → callback → application result. `69CA2` runs before
+receive/DCM; `69E7C` retires terminal states after DCM in the same foreground
+aggregate. The [incident recovery boundary](camry-f33-recovery-exception-followup.md#10-the-stock-crypto-oracle-is-ordered-before-the-hook-but-cannot-be-newly-armed)
+is unchanged: startup resets activation, and the malformed receive hook prevents
+later diagnostic arming/maintenance in that incident lifecycle.
+
+| Application owner | Input and progress | Terminal ownership |
+|---|---|---|
+| Direct key-update bank0 | Up to64 supplied bytes; state22 submits fixed command8 job0; saturating call timer, strict>120 timeout | Phase55→activation2;66→FF and failure count. Five failures inhibit later admission. Result read consumes request/result bytes but retains terminal activation |
+| Collected key-update bank1 | Eight independently qualified8-byte groups, signals90..97; same64-byte command8 request,48-byte result capacity; strict>1200 timeout | Phase55/66→activation2/FF, then maintenance clears qualification history and both material buffers |
+| Fixed crypto-test bank | Scalar selector/mode pair plus four8-byte groups; mode0 submits AES, mode1 MAC;16-byte input/expected/output; strict>1160 timeout | Callback compares the fixed16-byte expected/output buffers; phase33/44→activation2/FF and failure flag0/5A |
+
+Collected-bank activation requires its idle0 state, clears prior work and
+snapshots current generation bytes. RID100F arms the fixed test bank; CAN
+01B..01F alone does not. The generation comparison is inequality, not proof of
+fresh physical data. A first or identical changed-generation sample increments
+a wrapping byte repeat count; mismatch restarts it at1. At threshold3 the
+qualified bit and stored fragment are updated. **Later mismatch does not clear
+an already qualified bit.** The eventual aggregate can therefore combine an
+older qualified fragment with later qualifying fragments. The byte-group getter
+copies even when it returns status20, and the collector ignores that status.
+
+Direct request staging is also not a pure admission check: it clamps lengths,
+returns5 when inhibited or8 when already active, but still copies the supplied
+request bytes. Its actual output pointer survives the bounded material-clear
+leaf; the durable inline annotation repairs the previous decompiler argument
+loss. The corresponding result getter emits status plus up to48 bytes and
+clears direct material for terminal2/FF **even when requested length is zero**.
+After one successful-status read, another still reports2 but reads cleared bytes.
+None of these RAM operations erase a hardware key.
+
+Typed reconstruction exposes `69F14` as an additional conservative E1
+computed-store candidate. Its actual input length is clamped to64 before every
+activation branch; the unsigned loop writes only`FEBE51C6..FEBE5205`.
+Instruction-bound closure covers that known-base request buffer, **not** the
+caller-selected output pointer or arbitrary pointer corruption.
+
+The global command8 channel retains a complemented descriptor pointer. Its
+completion adapter validates that ownership and releases the channel **before**
+calling the configured application callback at6A2A0. That callback selects the
+direct bank if its **current activation is1**, otherwise the collected phase;
+it retains no original submission-bank token and does not check the collected
+activation. The command7 callback at6A2DC uses the same selection. Both previously
+missing entries are now represented in tracked function seeds. Native composition
+with both activations supplied confirms the selection rule; production reachability
+of overlapping activations or late completions remains an interleaving question,
+not an asserted vehicle fault.
+
+After key-update callback success, optional fixed-vector verification is gated
+by exact ROM30D67, which is **zero**. This configuration takes the no-command
+path with result byte1, publishes false through the actual SecOC API and advances
+to phase55. That terminal phase is consequently not evidence that optional
+verification ran. SecOC encodes this report asE1/D2 at5502; RX recovery/completion
+combine it with per-profile configuration. It is not universal authentication
+success or a global steering authorization.
+
+The separate profile observer uses the bounded configured count1. Packed callback
+low16 identifies the configured profile; high16 distinguishes zero/nonzero status.
+While phase11, its byte counters saturate. Three zero-status observations select44;
+otherwise a raw620-call wait ends in88/status5A only for no zero-status and at least
+one nonzero-status observation, or22 otherwise. ModeA5 repeatedly reinitializes
+bank work; departure fromA5 calls the existing configured profile-reset interfaces.
+No wall-clock duration, OEM status name or hardware-ready meaning is inferred.
+
+The [qualification/terminal-cleanup composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_crypto_bank_fragment_qualification_and_cleanup.json)
+uses real activation, collectors, timeout and maintenance. Collector calls are
+explicit; it does not execute the lower submission branch. The [configured callback/result-consumption composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_crypto_bank_callback_owner_and_result_consumption.json)
+executes descriptor release, the real callback, foreground/maintenance and repeated
+result reads. Its completion indication and existing output bytes are explicit
+software inputs, **not** modeled ICU-S key-update success. Physical readiness,
+secure-hardware output, normal concurrent admission and persistence remain separate
+dependencies; no peripheral model was extended.
+
 **Remaining high-value dependencies:** additional numerical/calibration surfaces
 and cross-task interleavings; physical3838..383C/status sources, ADC/DMA progress,
 GPIO and local-link freshness; the unassigned `B1C8.bit5` producer; production
-admission of the0600 stimulus start; lower application payload copy, segmentation,
-frame confirmation and controller-status acknowledgement; physical source/age
-interpretation of retained profiles and external BA reachability; persistence of
-thermal/calibration records; application/resident counter resolution, entropy and
-fallback; resident CRC admission and the dynamic programming driver; SEG/cache/ECC
-feedback; OEM service identities and calibration units. Recovered task supervision,
-profile retention and BA application lifetimes distinguish these dependencies
+admission of the0600 stimulus start; real CAN queue drain, frame-confirmation
+production and controller-status acknowledgement; physical source/age interpretation
+of retained profiles and external BA reachability; crypto-bank concurrent admission,
+late completion and ICU-S effects; persistence of thermal/calibration records;
+application/resident counter resolution, entropy and fallback; resident CRC admission
+and the dynamic programming driver; SEG/cache/ECC feedback; OEM service identities
+and calibration units. Payload copying/segmentation, queued continuation delivery,
+task supervision and retained application lifetimes now expose these boundaries
 rather than substituting assumed success. A complete peripheral or NvM emulator
 is not a prerequisite for further application reconstruction. Static connectivity
 and bounded native scenarios are not exhaustive semantic closure or vehicle results.
 
-**2026-10-16 checkpoint: retained control profiles, BA application lifetimes and task supervision.**
+**2026-10-16 checkpoint: deferred transport, queued diagnostic delivery and crypto-bank ownership.**
+The connected contracts are owned by [payload/segmentation and lower queues](#deferred-cantp-payload-segmentation-and-lower-queue-ownership),
+[queued events and retained contexts](#queued-events-timer-generations-and-retained-application-contexts)
+and [crypto-bank lifetimes](#7727-crypto-test-banks-material-qualification-and-completion-ownership).
+Composed native execution passed for transmit queue pressure, early flow control,
+receive-padding exclusion, aggregate completion, event generations/cancellation,
+timer equality/capacity, BA live-versus-published state, material qualification/
+cleanup and callback/result consumption. Supplied confirmations and crypto
+completion data remain explicit software inputs, not physical CAN or ICU-S results.
+
+Independent fresh four-stage rebuilds and signature finalization matched.
+Inventory, corpus, semantic coverage and discovery outputs were regenerated;
+project parity and live coverage passed. Rebuilt C preserves the real frame
+connection, FF extent, aggregate completion result, DCM output pointers and
+crypto arguments across the exact inlined leaves. The matching snapshot was
+promoted after clean teardown; corpus and firmware identities were unchanged.
+
+Fresh E1 auditing adds the direct request-copy candidate closed by its actual
+64-byte bound; existing candidate PCs/ranges/target hits and E2 families remain
+unchanged. The command-cone producer now checks collector instructions instead
+of anonymous C spelling. Throwaway in-memory derivatives, bypassing only image
+identity admission, were rejected by the unsigned-qualification and request-copy
+instruction guards. No source firmware was changed.
+
+Selected semantic/boundary, provenance, assist/B6/ingress, protected-TX,
+loader/recovery, GTS+, capture-replay and cross-target ingress gates passed.
+Producer language-server diagnostics still flag untouched optional/mixed-value
+typing and module/import style; exercised regeneration and artifact gates passed.
+Retained-capture regeneration preserves the historical corrupted-events warning
+for route`0000001c--574c06b528`; raw captures were unchanged. New subsystem links
+resolved and owned caller-assembly scaffolds were removed. No peripheral model
+was extended; whole-image semantic reconstruction remains open.
+
+**Preceding checkpoint `35ace739` (2026-10-16): retained control profiles, BA application lifetimes and task supervision.**
 The connected owners are [§34.14](#3414-retained-control-profiles-qualification-magnitude-ranks-and-read-projection),
 [BA application operations](#ba-application-operations-retain-state-beyond-diagnostic-ownership)
 and [dispatch supervision](#dispatch-supervision-is-separate-from-execution-profiling).

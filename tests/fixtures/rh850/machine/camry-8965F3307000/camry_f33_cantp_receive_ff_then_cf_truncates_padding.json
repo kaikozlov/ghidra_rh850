@@ -1,0 +1,177 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_cantp_receive_ff_then_cf_truncates_padding",
+  "entry": {
+    "scope": "resolved-address",
+    "address": "0x7a57a",
+    "role": "Receive two explicit software CAN frames on configured raw7A1 route/CanIf0804. First frame declares8 and supplies6 payload bytes; the actual foreground queues CTS30/BS0/STmin28. Supply final CF while that FC remains unconfirmed, a branch explicitly supported by5A/F0. Copy only remaining2 bytes and pass aggregate receive indication through real application interfaces. Stop before timer6 delivery/service dispatch; no physical reception or transmitted FC acknowledgement is simulated."
+  },
+  "max_instructions": 180000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0xfebf2000",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00",
+    "r6": "0x804",
+    "r7": "0xfebe1000"
+  },
+  "stop_addresses": [
+    "0xfebf2028"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe0000",
+      "size": 131072,
+      "fill": 0,
+      "evidence": "Explicit software RAM and stack handoff; not hardware reset or physical state."
+    },
+    {
+      "address": "0xfebe4f3d",
+      "hex": "aa",
+      "evidence": "Explicit initialized CanTp marker."
+    },
+    {
+      "address": "0xfebe5e50",
+      "hex": "a5000000",
+      "evidence": "Enabled empty software event queue; no delivery invocation."
+    },
+    {
+      "address": "0xfebe4f40",
+      "hex": "00000000ffff0000e1ff00000000000000000000ffff00000000e100ff00f000",
+      "evidence": "Exact initialized32-byte channel handoff from7B2C4; unclaimed Tx/Rx owners."
+    },
+    {
+      "address": "0xfebe4f60",
+      "hex": "00000000ffff0000e1ff00000000000000000000ffff00000000e100ff00f000",
+      "evidence": "Exact initialized32-byte channel handoff from7B2C4; unclaimed Tx/Rx owners."
+    },
+    {
+      "address": "0xfebe4f80",
+      "hex": "00000000ffff0000e1ff00000000000000000000ffff00000000e100ff00f000",
+      "evidence": "Exact initialized32-byte channel handoff from7B2C4; unclaimed Tx/Rx owners."
+    },
+    {
+      "address": "0xfebe48d8",
+      "hex": "a857",
+      "evidence": "Software CanIf initialized/running admission marker; no controller producer executed."
+    },
+    {
+      "address": "0xfebe4903",
+      "hex": "5a",
+      "evidence": "Software queue admission mode."
+    },
+    {
+      "address": "0xfebe48fe",
+      "hex": "5555",
+      "evidence": "Independent software permission flags required by7FD46."
+    },
+    {
+      "address": "0xfebe48e6",
+      "hex": "000000000000",
+      "evidence": "Empty configured queue2, capacity7 words at21AE0 and bufferFEBE3E48; no driver drain occurs."
+    },
+    {
+      "address": "0xfebe564c",
+      "hex": "02000200",
+      "evidence": "Explicit software communication permission."
+    },
+    {
+      "address": "0xfebe59e0",
+      "hex": "00000000",
+      "evidence": "Receive/dispatch route slot0."
+    },
+    {
+      "address": "0xfebe59f0",
+      "hex": "5156befe000000000001000000000000",
+      "evidence": "Available256-byte configured receive owner0, not the768-byte response store."
+    },
+    {
+      "address": "0xfebe1000",
+      "hex": "0011befe0800",
+      "evidence": "Initial FF descriptor."
+    },
+    {
+      "address": "0xfebe1010",
+      "hex": "1011befe0800",
+      "evidence": "Final CF descriptor."
+    },
+    {
+      "address": "0xfebe1100",
+      "hex": "1008220204112233",
+      "evidence": "First frame: total8 and six application bytes."
+    },
+    {
+      "address": "0xfebe1110",
+      "hex": "214455eeeeeeeeee",
+      "evidence": "CF sequence1, two remaining data bytes and five nonzero padding canaries."
+    },
+    {
+      "address": "0xfebf2000",
+      "hex": "3f060e20bffe210608a40700610026060408000027061010befe3f062820bffe21067aa507006100",
+      "evidence": "Explicit call-only software continuation: [{\"target\": \"0x7a408\", \"arguments\": {}}, {\"target\": \"0x7a57a\", \"arguments\": {\"r6\": \"0x804\", \"r7\": \"0xfebe1010\"}}]. Sets arguments/LP/target then JMP[r1] into unmodified CodeFlash; not a scheduler, callee replacement or hardware acknowledgement."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Exactly8 application bytes copied; padding and following byte excluded",
+      "kind": "memory",
+      "address": "0xfebe5651",
+      "size": 9,
+      "equals_hex": "220204112233445500"
+    },
+    {
+      "name": "Retained receive length8/capacity248 stays owned pending service dispatch",
+      "kind": "memory",
+      "address": "0xfebe59f4",
+      "size": 7,
+      "equals_hex": "08000000f80001"
+    },
+    {
+      "name": "CanTp aggregate receive owner resets after completion indication",
+      "kind": "memory",
+      "address": "0xfebe4f50",
+      "size": 15,
+      "equals_hex": "00000000ffff00000000e100ff00f0"
+    },
+    {
+      "name": "Actual configured CTS frame queued, not physically confirmed",
+      "kind": "memory",
+      "address": "0xfebe3e48",
+      "size": 20,
+      "equals_hex": "08840108f77bfef7a90700003000280000000000"
+    },
+    {
+      "name": "Application request enters active phase2",
+      "kind": "memory",
+      "address": "0xfebe5960",
+      "size": 1,
+      "equals_hex": "02"
+    },
+    {
+      "name": "Application response coordinator awaits service dispatch",
+      "kind": "memory",
+      "address": "0xfebe5964",
+      "size": 1,
+      "equals_hex": "10"
+    },
+    {
+      "name": "No service event delivery has been fabricated",
+      "kind": "memory",
+      "address": "0xfebe5e51",
+      "size": 3,
+      "equals_hex": "000000"
+    },
+    {
+      "name": "Timer6 owns deferred service dispatch; no hardware clock progression supplied",
+      "kind": "memory",
+      "address": "0xfebe5ea8",
+      "size": 1,
+      "equals_hex": "01"
+    }
+  ]
+}

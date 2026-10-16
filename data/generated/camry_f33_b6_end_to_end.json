@@ -262,7 +262,7 @@
     "0x0667E6": {
       "body_sha256": "96d89859e02738c11ddd556d055628f6e75a1e0b88c8f129e2dba902a34a5307",
       "body_size": 32,
-      "decompiled_c_sha256": "a2cefcb24b107df29946a5fa2756a9381077090d2b8a0b408788bf9d7a0b2a27",
+      "decompiled_c_sha256": "cdaf705a96e59dff3a9ba0e81fcc6d3867f5ba7c455918555ecf273a4209f8db",
       "role": "communications/application aggregate"
     },
     "0x07D800": {
@@ -364,7 +364,7 @@
     "0x08F906": {
       "body_sha256": "860fc368a14af6365d6ee17c3bbaa4723a157b9c6f4a14023f888c51b42d3be4",
       "body_size": 134,
-      "decompiled_c_sha256": "69454108d244fe090fedce77eb5f83eb02aa3bcd922f0772952ed0d3dc4b23f0",
+      "decompiled_c_sha256": "4a478a077a31f4973082d87a80e93b8abdf541af5601440dc9bf1a2b010e837a",
       "role": "root result / Gate-2 coordinator"
     },
     "0x090204": {
@@ -3008,7 +3008,7 @@
     }
   ],
   "target": {
-    "canonical_function_count": 7329,
+    "canonical_function_count": 7331,
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "software_id": "8965F3307000"
   }

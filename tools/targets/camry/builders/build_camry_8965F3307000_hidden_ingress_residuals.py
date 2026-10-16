@@ -37,6 +37,7 @@ OUT = ROOT / "data/generated/camry_8965F3307000_hidden_ingress_residuals.json"
 
 E1_FUNCTIONS = {
     0x3B8E4, 0x3BD8E, 0x3C108, 0x3C116, 0x3C184, 0x3C19C,
+    0x69EAC,
     0x7B248, 0x7B2C4, 0x7DD64, 0x7E364, 0x7FC0E, 0x82294, 0x82880,
     0x8300E, 0x830D0, 0x832F4, 0x850C2, 0x850E0, 0x8E772, 0x8E790,
     0x8E7A4, 0x8E7BA, 0x8E7D0, 0x8F60E, 0x8F6B2, 0x93C6C, 0x93C9A,
@@ -246,6 +247,19 @@ def build() -> dict:
     for entry in (0xCF4DA, 0xCF4F8, 0xCF51C):
         need("< 3" in ctext(rows, entry), f"{entry:#x} three-entry bound drift")
 
+    # E1-G: the typed direct crypto-request copy exposes a conservative
+    # uint16 loop interval. R28 is clamped to64 before any state-dependent
+    # branch; 69F14 stores at GP-663A+index only while unsigned index<R28.
+    # Caller-selected output pointers remain outside this known-base closure.
+    for start, encoded in (
+        (0x69EB0, "07e009e806d0dc00dd00"),
+        (0x69ECC, "1c06bfffb90520e64000"),
+        (0x69F00, "000ab50d0198da99939f010001f0c4f1410ac1005e9fc699fc09d1f5"),
+    ):
+        expected = bytes.fromhex(encoded)
+        need(image[start:start + len(expected)] == expected,
+             f"direct crypto-request copy bound drift at {start:#x}")
+
     # E2: destination registers are +0x04 and +0x14 in every 0x40-byte channel.
     # The computed-target census finds only control-register accesses at modulo
     # offsets 0x20/0x2C/0x38, never a destination offset.
@@ -330,6 +344,7 @@ def build() -> dict:
                 {"name": "logical_block_state", "functions": [hx(x) for x in (0x93C6C,0x93C9A,0x93DE8,0x93E5C,0x93EF6,0x93F4E,0x9405C)], "bound": "logical-block index domain is exactly 0..2; backing buffers are FEBE5651/FEBE5751/FEBE5851; ring index wraps at two slots"},
                 {"name": "five_channel_snapshot_state", "functions": [hx(x) for x in (0xB9CBE,0xB9D5E,0xB9DFC,0xB9EAA,0xBA052,0xBA134,0xBA170,0xBA284,0xBA398,0xBA4EA,0xBEF80,0xBEF8E)], "bound": "top-level BA642 index is 0..4 and BEF80/BEF8E is called with literal 0; writes remain below FEBEBF3C"},
                 {"name": "cbxx_diagnostic_state", "functions": [hx(x) for x in (0xCA242,0xCB45E,0xCF4DA,0xCF4F8,0xCF51C)], "bound": "CA242/CB45E ring indices are <=0x13 and CF4xx helpers are <3; writes remain below the steering-command CCxx region"},
+                {"name": "direct_crypto_request_copy", "functions": [hx(0x69EAC)], "bound": "R28 input length is clamped to64 before all activation branches; unsigned index<R28 confines store69F14 to FEBE51C6..FEBE5205. Caller-selected output pointers are outside this known-base closure."},
             ],
             "result": "zero recovered register-arithmetic STORE path can land on any audited steering command/current target once exact runtime/configuration index bounds are applied",
             "boundary": "unknown/unbounded pointer stores and memory-safety bugs are not promoted to impossible; this closes VAR-084 E1 specifically, not arbitrary pointer corruption",

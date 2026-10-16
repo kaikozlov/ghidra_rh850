@@ -1,0 +1,200 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_cantp_ff_then_early_cts_cf_queue_pressure",
+  "entry": {
+    "scope": "resolved-address",
+    "address": "0x7b894",
+    "role": "Accepted transport response8 is explicit input. Execute actual foreground FF copy/enqueue, supply an eight-byte FC CTS through the real receive interface while FF confirmation remains absent, then execute actual CF copy/enqueue attempt. The configured7-word CanIf queue cannot hold two5-word records without a real drain; failure must propagate to DCM rather than assert delivery. No driver service, RSCFD feedback, fake completion or successful lower confirmation is supplied."
+  },
+  "max_instructions": 180000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0xfebf2000",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0xfebf2028"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe0000",
+      "size": 131072,
+      "fill": 0,
+      "evidence": "Explicit software RAM and stack handoff; not hardware reset or physical state."
+    },
+    {
+      "address": "0xfebe4f3d",
+      "hex": "aa",
+      "evidence": "Explicit initialized CanTp marker."
+    },
+    {
+      "address": "0xfebe5e50",
+      "hex": "a5000000",
+      "evidence": "Enabled empty software event queue; no delivery invocation."
+    },
+    {
+      "address": "0xfebe4f40",
+      "hex": "00000000ffff0000e1ff00000000000000000000ffff00000000e100ff00f000",
+      "evidence": "Exact initialized32-byte channel handoff from7B2C4; unclaimed Tx/Rx owners."
+    },
+    {
+      "address": "0xfebe4f60",
+      "hex": "00000000ffff0000e1ff00000000000000000000ffff00000000e100ff00f000",
+      "evidence": "Exact initialized32-byte channel handoff from7B2C4; unclaimed Tx/Rx owners."
+    },
+    {
+      "address": "0xfebe4f80",
+      "hex": "00000000ffff0000e1ff00000000000000000000ffff00000000e100ff00f000",
+      "evidence": "Exact initialized32-byte channel handoff from7B2C4; unclaimed Tx/Rx owners."
+    },
+    {
+      "address": "0xfebe48d8",
+      "hex": "a857",
+      "evidence": "Software CanIf initialized/running admission marker; no controller producer executed."
+    },
+    {
+      "address": "0xfebe4903",
+      "hex": "5a",
+      "evidence": "Software queue admission mode."
+    },
+    {
+      "address": "0xfebe48fe",
+      "hex": "5555",
+      "evidence": "Independent software permission flags required by7FD46."
+    },
+    {
+      "address": "0xfebe48e6",
+      "hex": "000000000000",
+      "evidence": "Empty configured queue2, capacity7 words at21AE0 and bufferFEBE3E48; no driver drain occurs."
+    },
+    {
+      "address": "0xfebe564c",
+      "hex": "02000200",
+      "evidence": "Explicit software communication permission for both configured slots."
+    },
+    {
+      "address": "0xfebe5650",
+      "hex": "01",
+      "evidence": "Enabled communication callback state."
+    },
+    {
+      "address": "0xfebe595c",
+      "hex": "03030300",
+      "evidence": "Extended-session software snapshot."
+    },
+    {
+      "address": "0xfebe5960",
+      "hex": "02000000400000",
+      "evidence": "DCM active phase and response state handoff."
+    },
+    {
+      "address": "0xfebe59e0",
+      "hex": "00000000",
+      "evidence": "Pending/current dispatch receive slot0."
+    },
+    {
+      "address": "0xfebe5970",
+      "hex": "8459befe9459befe205abefe0800000000000000",
+      "evidence": "Single lower-owned response queue; cursor and unsigned16-bit extent are software inputs."
+    },
+    {
+      "address": "0xfebe5984",
+      "hex": "9459befe",
+      "evidence": "Sentinel points to current response node."
+    },
+    {
+      "address": "0xfebe5994",
+      "hex": "00000000205abefe0800000000000000",
+      "evidence": "Current node retains disposition separately from DCM state."
+    },
+    {
+      "address": "0xfebe5a20",
+      "hex": "6202041122334455",
+      "evidence": "Upper-owned eight-byte response; admission itself never copied it."
+    },
+    {
+      "address": "0xfebe4f40",
+      "hex": "0800000000080000d2ff000000000000",
+      "evidence": "Accepted Tx0800 length8 in channel0 before scheduled copy."
+    },
+    {
+      "address": "0xfebe1000",
+      "hex": "0011befe0800",
+      "evidence": "Software CanIf receive descriptor for FC."
+    },
+    {
+      "address": "0xfebe1100",
+      "hex": "3000000000000000",
+      "evidence": "Explicit peer flow-control CTS input; BS0, STmin0. This is not a local frame-confirmation event."
+    },
+    {
+      "address": "0xfebf2000",
+      "hex": "26060408000027060010befe3f061a20bffe21067aa5070061003f062820bffe210694b807006100",
+      "evidence": "Explicit call-only software continuation: [{\"target\": \"0x7a57a\", \"arguments\": {\"r6\": \"0x804\", \"r7\": \"0xfebe1000\"}}, {\"target\": \"0x7b894\", \"arguments\": {}}]. Sets arguments/LP/target then JMP[r1] into unmodified CodeFlash; not a scheduler, callee replacement or hardware acknowledgement."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Only actual first frame remains in configured CanIf queue",
+      "kind": "memory",
+      "address": "0xfebe3e48",
+      "size": 20,
+      "equals_hex": "08840008f77bfff7a90700001008620204112233"
+    },
+    {
+      "name": "Second enqueue refusal retains first queue record/counters",
+      "kind": "memory",
+      "address": "0xfebe48e6",
+      "size": 6,
+      "equals_hex": "050000000500"
+    },
+    {
+      "name": "Final CF bytes obtained from upper cursor before lower queue refusal",
+      "kind": "memory",
+      "address": "0xfebe4efc",
+      "size": 8,
+      "equals_hex": "2144550000000000"
+    },
+    {
+      "name": "Queue refusal retires aggregate CanTp owner, not success",
+      "kind": "memory",
+      "address": "0xfebe4f40",
+      "size": 13,
+      "equals_hex": "00000000ffff0000e1ff000000"
+    },
+    {
+      "name": "DCM failure disposition awaits deferred event notification",
+      "kind": "memory",
+      "address": "0xfebe5964",
+      "size": 1,
+      "equals_hex": "50"
+    },
+    {
+      "name": "Positive response maps lower failure to result1",
+      "kind": "memory",
+      "address": "0xfebe5980",
+      "size": 2,
+      "equals_hex": "0100"
+    },
+    {
+      "name": "Only deferred result notification is queued",
+      "kind": "memory",
+      "address": "0xfebe5e51",
+      "size": 4,
+      "equals_hex": "01000129"
+    },
+    {
+      "name": "Aggregate failure releases DCM owner and clears only first response byte",
+      "kind": "memory",
+      "address": "0xfebe5a20",
+      "size": 8,
+      "equals_hex": "0002041122334455"
+    }
+  ]
+}
