@@ -1334,3 +1334,340 @@ void f33_update_thermal_release_envelope(void) {
     camry_write16(state + 4u, base);
     camry_write16(state + 6u, published);
 }
+
+static uint32_t f33_nvm_read_logical_result(uint32_t logical, uint32_t output) {
+    uint32_t handle = logical & 0xffffu;
+    camry_write8(output, camry_read8(0xfebf6000u + (handle << 1)));
+    return 0u;
+}
+
+static uint32_t f33_nvm_check_logical_handle(
+    uint32_t logical, uint32_t api, uint32_t allow_zero) {
+    uint32_t handle = logical & 0xffffu;
+    uint32_t limit = (camry_read16(camry_tp + 11788u) - 1u) & 0xffffu;
+    (void)api;
+    if (handle >= 2u) {
+        if (handle <= limit)
+            return 0u;
+    } else if ((allow_zero & 0xffu) == 1u && handle == 0u) {
+        return 0u;
+    }
+    return 1u;
+}
+
+static uint32_t f33_nvm_check_not_pending(uint32_t logical, uint32_t api) {
+    uint32_t handle = logical & 0xffffu;
+    uint32_t output = 0xfebe1fffu;
+    (void)api;
+    f33_nvm_read_logical_result(handle, output);
+    if (camry_read8(output) != 2u)
+        return 0u;
+    return 1u;
+}
+
+static uint32_t f33_nvm_check_buffer_argument(
+    uint32_t logical, uint32_t buffer, uint32_t api) {
+    uint32_t handle = logical & 0xffffu;
+    uint32_t kind;
+    (void)api;
+    if (buffer != 0u)
+        return 0u;
+    kind = camry_read8(camry_tp + 11792u + (handle << 4) + 4u);
+    if (kind == 4u || kind == 2u)
+        return 0u;
+    return 1u;
+}
+
+static uint32_t f33_nvm_check_read_request(uint32_t logical, uint32_t buffer) {
+    uint32_t pending;
+    uint32_t argument;
+    if (f33_nvm_check_logical_handle(logical, 6u, 0u) != 0u)
+        return 1u;
+    pending = f33_nvm_check_not_pending(logical, 6u);
+    argument = f33_nvm_check_buffer_argument(logical, buffer, 6u);
+    if (pending == 0u && argument == 0u)
+        return 0u;
+    return 1u;
+}
+
+static uint32_t f33_nvm_enqueue_pooled_operation(uint32_t request) {
+    (void)request;
+    return 1u;
+}
+
+static uint32_t f33_nvm_enqueue_zero_handle_operation(uint32_t request) {
+    (void)request;
+    return 1u;
+}
+
+static void f33_nvm_finish_queued_operation(uint32_t selector) {
+    (void)selector;
+}
+
+void f33_nvm_publish_logical_result(uint32_t logical_handle, uint32_t operation, uint32_t result);
+
+static uint32_t f33_nvm_queue_operation(
+    uint32_t operation, uint32_t logical, uint32_t buffer, uint32_t other) {
+    uint32_t handle = logical & 0xffffu;
+    uint32_t request = 0xfebe1fd0u;
+    uint32_t status;
+    camry_write32(request, operation);
+    camry_write16(request + 4u, handle);
+    camry_write32(request + 8u, buffer);
+    camry_write32(request + 12u, other);
+    camry_write8(0xfebf60fdu, 1u);
+    if (handle == 0u)
+        status = f33_nvm_enqueue_zero_handle_operation(request);
+    else
+        status = f33_nvm_enqueue_pooled_operation(request);
+    f33_nvm_finish_queued_operation(3u);
+    if (status == 0u)
+        f33_nvm_publish_logical_result(handle, operation, 2u);
+    return status;
+}
+
+static uint32_t f33_nvm_enqueue_read(uint32_t logical, uint32_t destination) {
+    uint32_t handle = logical & 0xffffu;
+    uint32_t status = 1u;
+    if (f33_nvm_check_read_request(handle, destination) == 0u)
+        status = f33_nvm_queue_operation(0xa1a62093u, handle, destination, 0u);
+    return status;
+}
+
+static uint32_t f33_nvm_get_family0_completion(uint32_t object) {
+    uint32_t index = object & 0xffffu;
+    uint32_t count = camry_read16((3u << 16) - 21136u);
+    if (index >= count)
+        return 0xa5u;
+    return camry_read8(camry_gp + index + 19256u);
+}
+
+static uint32_t f33_nvm_handle_family1_read_result(uint32_t result, uint32_t logical) {
+    uint32_t handle = logical & 0xffffu;
+    uint32_t object = camry_read8(0x2b010u + (handle << 1));
+    uint32_t slot = object & 3u;
+    uint32_t descriptor = 0x2af0cu + (object << 3);
+    uint32_t first = camry_read16(descriptor + 2u);
+    uint32_t payload = camry_read16(descriptor);
+    uint32_t mask_address = camry_gp + 20120u + (slot << 2);
+    uint32_t mask = camry_read32(mask_address);
+    uint32_t copy;
+    uint32_t completed = 0u;
+    uint32_t retry_out;
+    uint32_t index;
+    uint32_t failed;
+    uint32_t base;
+    uint32_t destination;
+    result &= 0xffu;
+    if (handle == first) {
+        copy = 0u;
+        mask = 0u;
+    } else if (handle == ((first + 4u) & 0xffffffffu)) {
+        copy = 1u;
+    } else if (handle == ((first + 8u) & 0xffffffffu)) {
+        copy = 2u;
+    } else {
+        camry_write32(mask_address, 0x5a005au + 23040u);
+        return 0u;
+    }
+    if (result == 0u) {
+        retry_out = 0u;
+    } else {
+        uint32_t retry = camry_read8(camry_gp + 20116u);
+        if (retry < 2u) {
+            uint32_t stage = camry_gp + 21256u + (((slot * 3u) + copy) << 5);
+            f33_nvm_enqueue_read(handle, stage);
+            retry_out = (retry + 1u) & 0xffu;
+            completed = 0x5au;
+        } else {
+            retry_out = 0u;
+            mask |= 0x5au << ((copy << 3) & 31u);
+        }
+    }
+    camry_write8(camry_gp + 20116u, retry_out);
+    if (completed == 0x5au || copy != 2u) {
+        camry_write32(mask_address, mask);
+        return 0u;
+    }
+    failed = 0u;
+    for (index = 0u; index < payload; index = (index + 1u) & 0xffffu) {
+        uint32_t address = camry_gp + 21256u + (slot * 96u) + index;
+        uint32_t raw = camry_read8(address);
+        uint32_t copy55 = camry_read8(address + 32u) ^ 0x55u;
+        uint32_t copy_aa = camry_read8(address + 64u) ^ 0xaau;
+        if (raw == copy_aa && (mask & 0x5a005au) == 0u)
+            continue;
+        if (raw == copy55 && (mask & 0x5a5au) == 0u)
+            continue;
+        if (copy55 == copy_aa && (mask & (0x5a005au + 22950u)) == 0u)
+            camry_write8(address, copy55);
+        else
+            failed = 0x5au;
+    }
+    if (failed == 0u) {
+        destination = camry_read32(descriptor + 4u);
+        base = camry_gp + 21256u + (slot * 96u);
+        for (index = 0u; (int32_t)index < (int32_t)payload; index++)
+            camry_write8(destination + index, camry_read8(base + index));
+        camry_write8(camry_gp + object + 19288u, 0x5au);
+    } else {
+        camry_write8(camry_gp + object + 19288u, 0xa5u);
+    }
+    camry_write32(mask_address, mask);
+    return 0x5au;
+}
+
+static uint32_t f33_nvm_handle_family1_write_result(uint32_t result, uint32_t logical) {
+    uint32_t handle = logical & 0xffffu;
+    uint32_t object = camry_read8(0x2b010u + (handle << 1));
+    uint32_t descriptor = 0x2af0cu + (object << 3);
+    uint32_t first = camry_read16(descriptor + 2u);
+    uint32_t slot = object & 3u;
+    uint32_t mask_address = camry_gp + 20120u + (slot << 2);
+    uint32_t mask = camry_read32(mask_address);
+    uint32_t copy;
+    uint32_t completion;
+    result &= 0xffu;
+    if (handle == first) {
+        copy = 0u;
+        mask = 0u;
+    } else if (handle == ((first + 4u) & 0xffffffffu)) {
+        copy = 1u;
+    } else if (handle == ((first + 8u) & 0xffffffffu)) {
+        copy = 2u;
+    } else {
+        camry_write32(mask_address, 0x5a5a5au);
+        return 0u;
+    }
+    if (result != 0u)
+        mask |= 0x5au << ((copy << 3) & 31u);
+    if (copy != 2u) {
+        camry_write32(mask_address, mask);
+        return 0u;
+    }
+    completion = mask == 0u ? 0x5au : 0xa5u;
+    camry_write8(camry_gp + object + 19288u, completion);
+    camry_write32(mask_address, mask);
+    return 0x5au;
+}
+
+static uint32_t f33_nvm_handle_family0_write_result(uint32_t result, uint32_t logical) {
+    uint32_t handle = logical & 0xffffu;
+    uint32_t object = camry_read8(0x2b010u + (handle << 1));
+    uint32_t descriptor = 0x2ad8cu + (object * 12u);
+    uint32_t origin = camry_read16(descriptor + 4u);
+    uint32_t last = (origin + camry_read16(descriptor + 2u) - 1u) & 0xffffu;
+    uint32_t cursor_address = camry_gp + 19304u + (object << 1);
+    uint32_t cursor = camry_read16(cursor_address);
+    uint32_t completion;
+    result &= 0xffu;
+    if (cursor != 0xffffu) {
+        uint32_t next = (cursor + 1u) & 0xffffu;
+        if (next > last)
+            cursor = origin;
+        else
+            cursor = next;
+    } else {
+        cursor = origin;
+    }
+    if (result == 0u && handle == cursor) {
+        camry_write16(cursor_address, cursor);
+        completion = 0x5au;
+    } else {
+        completion = 0xa5u;
+    }
+    camry_write8(camry_gp + object + 19256u, completion);
+    return 0x5au;
+}
+
+static uint32_t f33_nvm_handle_family0_read_result(
+    uint32_t result, uint32_t logical, uint32_t record) {
+    (void)result;
+    (void)logical;
+    (void)record;
+    return 0u;
+}
+
+static uint32_t f33_nvm_route_application_result(
+    uint32_t event, uint32_t logical, uint32_t result) {
+    uint32_t handle = logical & 0xffffu;
+    uint32_t route = camry_read16(0x2b010u + (handle << 1));
+    uint32_t object = route & 0xffu;
+    uint32_t family = route & 0xff00u;
+    uint32_t status;
+    uint32_t descriptor;
+    event &= 0xffu;
+    result &= 0xffu;
+    if (family == 0u) {
+        if (f33_nvm_get_family0_completion(object) != 0xffu)
+            return 0u;
+        descriptor = 0x2ad8cu + (object * 12u);
+        if (camry_read16(descriptor + 4u) == 0xffffu)
+            return 0u;
+        if (event == 6u)
+            status = f33_nvm_handle_family0_read_result(result, handle, camry_gp + 21640u);
+        else if (event == 7u)
+            status = f33_nvm_handle_family0_write_result(result, handle);
+        else
+            return 0u;
+        if (status == 0x5au)
+            camry_write8(camry_gp + 20112u, 0u);
+        return 0u;
+    }
+    if (family != 0x100u)
+        return 0u;
+    if (f33_nvm_get_family1_completion(object) != 0xffu)
+        return 0u;
+    descriptor = 0x2af0cu + (object << 3);
+    if (camry_read16(descriptor + 2u) == 0xffffu)
+        return 0u;
+    if (event == 6u)
+        status = f33_nvm_handle_family1_read_result(result, handle);
+    else if (event == 7u)
+        status = f33_nvm_handle_family1_write_result(result, handle);
+    else
+        return 0u;
+    if (status == 0x5au)
+        camry_write8(camry_gp + 20113u, 0u);
+    return 0u;
+}
+
+static void f33_nvm_notify_zero_handle_result(uint32_t operation, uint32_t result) {
+    uint32_t narrowed = result & 0xffu;
+    uint32_t event = f33_lookup_u32_value_by_key(operation, 0xffu, camry_tp + 14288u);
+    uint32_t callback = camry_read32(camry_tp + 11772u);
+    (void)event;
+    if (narrowed == 2u || callback == 0u)
+        return;
+}
+
+static void f33_nvm_notify_logical_result(
+    uint32_t logical, uint32_t operation, uint32_t result) {
+    uint32_t handle = logical & 0xffffu;
+    uint32_t narrowed = result & 0xffu;
+    uint32_t callback = camry_read32(camry_tp + 11776u);
+    uint32_t field = camry_read16(camry_tp + (handle << 4) + 0x2e1au);
+    if (((field >> 5) & 1u) != 0u)
+        (void)handle;
+    if (narrowed == 2u || callback == 0u)
+        return;
+    f33_nvm_route_application_result(
+        f33_lookup_u32_value_by_key(operation, 0xffu, camry_tp + 14288u),
+        handle,
+        narrowed);
+}
+
+static void f33_nvm_route_logical_result(
+    uint32_t logical, uint32_t operation, uint32_t result) {
+    if ((logical & 0xffffu) == 0u)
+        f33_nvm_notify_zero_handle_result(operation, result);
+    else
+        f33_nvm_notify_logical_result(logical, operation, result);
+}
+
+void f33_nvm_publish_logical_result(
+    uint32_t logical_handle, uint32_t operation, uint32_t result) {
+    uint32_t handle = logical_handle & 0xffffu;
+    camry_write8(0xfebf6000u + (handle << 1), result);
+    f33_nvm_route_logical_result(handle, operation, result);
+}

@@ -224,6 +224,8 @@ def bind(library: ctypes.CDLL) -> None:
     library.f33_nvm_get_family2_status.restype = u32
     library.f33_nvm_initialize_family1_application.argtypes = []
     library.f33_nvm_initialize_family1_application.restype = None
+    library.f33_nvm_publish_logical_result.argtypes = [u32, u32, u32]
+    library.f33_nvm_publish_logical_result.restype = None
     library.f33_read_repair_redundant_u8.argtypes = [u32, u32, u32, u32]
     library.f33_read_repair_redundant_u8.restype = u32
     library.f33_classify_channel_residual_a.argtypes = []
@@ -472,6 +474,9 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
         return None
     if name == "f33_nvm_initialize_family1_application":
         library.f33_nvm_initialize_family1_application()
+        return None
+    if name == "f33_nvm_publish_logical_result":
+        library.f33_nvm_publish_logical_result(r6, r7, r8)
         return None
     if name == "f33_nvm_unlink_queue_slot":
         library.f33_nvm_unlink_queue_slot(r6, r7, r8)
