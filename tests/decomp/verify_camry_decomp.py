@@ -43,6 +43,7 @@ VALUE_RETURN = {
     "f33_nvm_check_family1_checksum",
     "f33_nvm_retain_token_while_reads_pending",
     "f33_force_unconfirmed_terminal_monitor_healthy",
+    "f33_freshness_select_reset_candidate",
     "f33_nvm_probe_range_rejected",
     "f33_nvm_translate_diagnostic_mask",
     "f33_lookup_u32_value_by_key",
@@ -185,6 +186,10 @@ def bind(library: ctypes.CDLL) -> None:
     library.f33_nvm_publish_family1_checksum.restype = None
     library.f33_pwm_initialize_compare_stages.argtypes = [u32]
     library.f33_pwm_initialize_compare_stages.restype = None
+    library.f33_pwm_stage_halfword_compares.argtypes = [u32, u32, u32, u32]
+    library.f33_pwm_stage_halfword_compares.restype = None
+    library.f33_freshness_select_reset_candidate.argtypes = [u32, u32]
+    library.f33_freshness_select_reset_candidate.restype = u32
     library.f33_force_unconfirmed_terminal_monitor_healthy.argtypes = [u32, u32, u32]
     library.f33_force_unconfirmed_terminal_monitor_healthy.restype = u32
     library.f33_nvm_read_buffer.argtypes = [u32]
@@ -438,6 +443,11 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
     if name == "f33_pwm_initialize_compare_stages":
         library.f33_pwm_initialize_compare_stages(r6)
         return None
+    if name == "f33_pwm_stage_halfword_compares":
+        library.f33_pwm_stage_halfword_compares(r6, r7, r8, r9)
+        return None
+    if name == "f33_freshness_select_reset_candidate":
+        return int(library.f33_freshness_select_reset_candidate(r7, r8)) & 0xFFFFFFFF
     if name == "f33_force_unconfirmed_terminal_monitor_healthy":
         return int(library.f33_force_unconfirmed_terminal_monitor_healthy(r6, r7, r8)) & 0xFFFFFFFF
     if name in VALUE_RETURN:

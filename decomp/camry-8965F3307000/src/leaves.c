@@ -554,6 +554,63 @@ void f33_freshness_encode_wire(uint32_t freshness, uint32_t wire, uint32_t bit_c
     camry_write32(bit_capacity, length);
 }
 
+static uint32_t stage_halfword_compare(uint32_t code) {
+    uint32_t span = camry_read16(0x3166cu);
+    uint32_t offset = camry_read16(0x3166eu);
+    if (code == 0u)
+        return span + (offset << 1);
+    if (code >= 0x8000u)
+        return 0;
+    return offset + ((((0x8000u - code) * span) >> 15));
+}
+
+void f33_pwm_stage_halfword_compares(
+    uint32_t slot, uint32_t u_code, uint32_t v_code, uint32_t w_code) {
+    uint32_t record = camry_gp - 32608u + (slot << 3);
+    camry_write16(record + 2u, stage_halfword_compare(u_code & 0xffffu));
+    camry_write16(record + 4u, stage_halfword_compare(v_code & 0xffffu));
+    camry_write16(record + 6u, stage_halfword_compare(w_code & 0xffffu));
+}
+
+uint32_t f33_freshness_select_reset_candidate(uint32_t received, uint32_t search) {
+    uint32_t skip = camry_read16(search + 12u);
+    uint32_t index = 0;
+    camry_write16(search + 14u, 0);
+    while (index < 5u) {
+        uint32_t reset = camry_read32(camry_gp - 25148u);
+        uint32_t candidate = reset;
+        int usable = 1;
+        camry_write32(search + 8u, reset);
+        if (index == 1u) {
+            usable = reset != 0u;
+            candidate = reset - 1u;
+        } else if (index == 2u) {
+            usable = reset <= 0xffffeu;
+            candidate = reset + 1u;
+        } else if (index == 3u) {
+            usable = reset >= 2u;
+            candidate = reset - 2u;
+        } else if (index == 4u) {
+            usable = reset <= 0xffffdu;
+            candidate = reset + 2u;
+        }
+        if (usable) {
+            uint32_t width = camry_read32(search + 4u) & 0x1fu;
+            uint32_t masked = candidate & ((1u << width) - 1u);
+            if (index != 0u)
+                camry_write32(search + 8u, candidate);
+            if ((masked & 0xffu) == camry_read8(received + 10u)) {
+                if (skip == 0u)
+                    return 1u;
+                skip = (skip - 1u) & 0xffffu;
+            }
+        }
+        index = (index + 1u) & 0xffffu;
+        camry_write16(search + 14u, index);
+    }
+    return 0;
+}
+
 void f33_freshness_decode_wire(uint32_t wire, uint32_t bit_length, uint32_t freshness) {
     uint32_t low;
     if (bit_length == 4u) {

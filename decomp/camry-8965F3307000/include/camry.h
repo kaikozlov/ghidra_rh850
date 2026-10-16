@@ -43,6 +43,7 @@ extern uint32_t camry_tp;
 void *f33_memcpy_forward(void *destination, void *source, uint32_t byte_count);
 void f33_memzero(void *destination, uint32_t byte_count);
 void f33_pwm_initialize_compare_stages(uint32_t compare);
+void f33_pwm_stage_halfword_compares(uint32_t slot, uint32_t u_code, uint32_t v_code, uint32_t w_code);
 uint32_t f33_force_unconfirmed_terminal_monitor_healthy(uint32_t state, uint32_t thresholds, uint32_t callbacks);
 void f33_copy_whole_words(uint32_t *destination, uint32_t *source, uint16_t byte_count);
 uint32_t f33_update_whole_words(uint32_t *destination, uint32_t *source, uint16_t byte_count);
@@ -99,3 +100,4 @@ void f33_nvm_recover_family0_request_indices(uint32_t producer_out, uint32_t con
 void f33_nvm_recover_family1_request_indices(uint32_t producer_out, uint32_t consumer_out);
 void f33_freshness_encode_wire(uint32_t freshness, uint32_t wire, uint32_t bit_capacity);
 void f33_freshness_decode_wire(uint32_t wire, uint32_t bit_length, uint32_t freshness);
+uint32_t f33_freshness_select_reset_candidate(uint32_t received, uint32_t search);

@@ -1,4 +1,5 @@
 {"addr": "0x61aea", "name": "f33_pwm_initialize_compare_stages", "status": "equivalent"}
+{"addr": "0x61c90", "name": "f33_pwm_stage_halfword_compares", "status": "equivalent"}
 {"addr": "0x632b2", "name": "f33_clear_application_ram_4k", "status": "equivalent"}
 {"addr": "0x66e2e", "name": "f33_copy_whole_words", "status": "equivalent"}
 {"addr": "0x66e50", "name": "f33_update_whole_words", "status": "equivalent"}
@@ -49,4 +50,5 @@
 {"addr": "0x8b018", "name": "f33_icus20_read_bit0", "status": "equivalent"}
 {"addr": "0x90566", "name": "f33_freshness_encode_wire", "status": "equivalent"}
 {"addr": "0x90736", "name": "f33_freshness_decode_wire", "status": "equivalent"}
+{"addr": "0x909ca", "name": "f33_freshness_select_reset_candidate", "status": "equivalent"}
 {"addr": "0xb73ba", "name": "f33_scale_u16_delta_s16_x4", "status": "equivalent"}
