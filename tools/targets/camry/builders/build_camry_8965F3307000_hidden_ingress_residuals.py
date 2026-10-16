@@ -3,8 +3,8 @@
 
 E1 is the bounded register-arithmetic STORE-address false-negative class left by
 canonical Ghidra references.  The target-native HighFunction census is promoted
-as an image/script-bound generated input, then every candidate family is closed
-against exact target constants and call/config bounds from the canonical corpus.
+as an image/script/corpus-bound generated input, then every candidate family is
+closed against exact target constants and call/config bounds from that corpus.
 
 E2 is the DMAC destination-register rewrite class.  The same STORE resolver is
 run against every channel's two destination registers; exact decompilation then
@@ -87,7 +87,7 @@ def bind(rows: dict[int, dict], image: bytes, entries: set[int] | list[int]) -> 
 
 
 def literal_call_args(rows: dict[int, dict], callee: int) -> list[int]:
-    token = f"FUN_{callee:08x}("
+    token = str(rows[callee]["name"]) + "("
     vals: list[int] = []
     rx = re.compile(re.escape(token) + r"(?:\(.*?\)|[^,])*?\(?\s*(0x[0-9a-fA-F]+|\d+)\s*,")
     for entry, row in rows.items():
@@ -149,33 +149,40 @@ def refresh_census(path: Path, audit_output: Path) -> None:
     old["candidates"] = rows
     old["candidate_functions"] = candidate_functions
     old["summary"] = summary
+    old["canonical_corpus"] = {
+        "path": str(CORPUS.relative_to(ROOT)),
+        "sha256": sha(CORPUS.read_bytes()),
+    }
     path.write_text(json.dumps(old, indent=2, sort_keys=True) + "\n")
 
 
-def census_summary(c: dict, *, candidates: int, functions: int) -> None:
+def census_summary(c: dict, *, corpus_functions: int, corpus_sha256: str) -> None:
     need(c["schema"] == "camry-8965f3307000-computed-store-target-census-v1", "computed-store schema drift")
     need(c["target"] == {"software_id": "8965F3307000", "codeflash_sha256": IMAGE_SHA256}, "computed-store target drift")
     expected_sha = sha(SCRIPT.read_bytes())
     need(c["ghidra_script"] == {"path": "ghidra/scripts/investigate/AuditComputedStoreTargets.java", "sha256": expected_sha}, "computed-store script identity drift")
-    need(c["summary"] == {
-        "candidateFunctions": functions,
-        "candidates": candidates,
-        "functions": 7178,
-        "knownRangeStores": 5438,
-        "stores": 14059,
-    }, "computed-store census denominator drift")
+    need(c.get("canonical_corpus") == {
+        "path": str(CORPUS.relative_to(ROOT)),
+        "sha256": corpus_sha256,
+    }, "computed-store census is stale; rerun both audits against the matching rebuilt project")
+    summary = c["summary"]
+    need(summary["functions"] == corpus_functions, "computed-store audit did not cover the canonical function set")
+    need(summary["candidates"] == len(c["candidates"]), "computed-store candidate count/output mismatch")
+    functions = {row["function"] for row in c["candidates"]}
+    need(functions == set(c["candidate_functions"]), "computed-store candidate function/output mismatch")
+    need(summary["candidateFunctions"] == len(functions), "computed-store candidate-function count/output mismatch")
 
 
 def build() -> dict:
     image = IMAGE.read_bytes()
     need(len(image) == 0x100000 and sha(image) == IMAGE_SHA256, "exact F33 image drift")
     rows, total = load_function_corpus(CORPUS)
-    need(total == 7178, f"F33 corpus denominator drift: {total}")
+    corpus_sha256 = sha(CORPUS.read_bytes())
 
     e1 = load_json(E1)
     e2 = load_json(E2)
-    census_summary(e1, candidates=103, functions=49)
-    census_summary(e2, candidates=5, functions=3)
+    census_summary(e1, corpus_functions=total, corpus_sha256=corpus_sha256)
+    census_summary(e2, corpus_functions=total, corpus_sha256=corpus_sha256)
     e1_funcs = {int(x, 16) for x in e1["candidate_functions"]}
     e2_funcs = {int(x, 16) for x in e2["candidate_functions"]}
     need(e1_funcs == E1_FUNCTIONS, f"E1 candidate function set drift: {sorted(e1_funcs ^ E1_FUNCTIONS)}")
@@ -264,7 +271,9 @@ def build() -> dict:
     plus14_writers = sorted(entry for entry, row in rows.items() if plus14_store.search(str(row.get("decompiled_c", ""))))
     need(plus04_writers == [0x6082C], f"DMAC +04 writer set drift: {plus04_writers}")
     need(plus14_writers == [0x6082C, 0x60A6A], f"DMAC +14 writer set drift: {plus14_writers}")
-    need("return *(undefined4 *)((param_1 & 0xff) * 0x40 + -0x7bfc);" in ctext(rows, 0x6091E), "DMAC +04 reader drift")
+    # ZXB r6; SHL 6,r6; LD.W -0x7bfc[r6],r10; JMP lp. The accessor's
+    # named uint return and uchar argument do not alter this read-only dataflow.
+    need(image[0x6091E:0x60928] == bytes.fromhex("8600c632265705847f00"), "DMAC +04 reader instruction drift")
 
     # Runtime updater 60A6A has only four callers, and all callsites pass one of
     # seven fixed CodeFlash descriptor families. Bind each table byte-for-byte.

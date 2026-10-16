@@ -201,6 +201,10 @@
       "store": "0x000609CE"
     }
   ],
+  "canonical_corpus": {
+    "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
+    "sha256": "8160f69bc796f509f39cf197b4d020413d2b99d767bc6525b785eb637638949e"
+  },
   "ghidra_script": {
     "path": "ghidra/scripts/investigate/AuditComputedStoreTargets.java",
     "sha256": "eb1c8c95ff08239ee520f0e2ae1a32f6b02fd02117317d0b733ef329f164d3c6"
@@ -211,9 +215,9 @@
   "summary": {
     "candidateFunctions": 3,
     "candidates": 5,
-    "functions": 7178,
-    "knownRangeStores": 5438,
-    "stores": 14059
+    "functions": 7319,
+    "knownRangeStores": 5454,
+    "stores": 14192
   },
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",

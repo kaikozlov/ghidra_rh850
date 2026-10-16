@@ -2566,6 +2566,60 @@ halfword compares from the **unaveraged current** triplets. Native execution
 checks both generations, W/V/U versus U/V/W storage, and untouched port masks.
 Equal regulator inputs do not imply identical word/halfword compare buffers.
 
+#### Nonzero modulation and competing output owners
+
+`37C4C` forms unsigned32 squared magnitudes from the two signed16 axis pairs.
+Its ordinary classes are0 below6166256,5A below54546923, andA5 at or above
+that second boundary. The offset-map argument is **low16(magnitude>>12)**;
+32-count interpolation uses opposite maps `2BF14/2C118` in the two banks.
+The software selector `6D6C` alternates5A/A5 every125 advances; exact override
+`31B18=11` does not force either side. These counts are not a recovered PWM period.
+
+The code-limit flags take precedence over magnitude. `575F6` reduces three
+requests per bank when its cached minimum/complement disagree, then publishes
+`8B88/89=5A` precisely when the minimum is below`0x8000`. That flag forces
+modulation0 and offset6144. Reduced code limits and ordinary unforced5A/A5
+modulation must not be combined as though they were independent current states.
+
+`38C7C/38D6C` compute the third phase from the negative sum of **unsaturated**
+first/second intermediates, then saturate each published phase to±32767.
+Compensation uses the separate reference triplets: `368B0` maps command magnitude
+into a gain, and `36678` refreshes amplitude only when `8A14==1`. The exact base
+calibration is100, with an additional retained-input reduction and gain scaling.
+A closed refresh gate holds the old amplitude. `36750/367FE` always calculate
+signed deltas, linear inside±96 reference counts and bounded by that amplitude;
+**A5 suppresses adding the deltas, not calculating them**.
+
+Mode0 adds its offset. In5A, the selected side aligns the maximum to11426 or the
+minimum to492, with opposite selector polarity between banks. Other modes choose
+upper alignment when `3*max>12288`, otherwise lower alignment, then clamp every
+phase to0..12288. These are software phase codes, not measured electrical duty.
+
+The [nonzero native tail](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_modulation_tail_nonzero_modes_and_slot_priority.json)
+starts at`5E280`, after upstream regulation, and stops at its epilogue`5E2D6`.
+Explicit axis/reference/retained states exercise the real transforms, compensation,
+5A/A5 modulation, scaling, publication, arbitration and both staging interfaces:
+
+| Bank | Regulated axes | Calculated compensation | Modulated phase triplet | Published slot0 triplet | Winning slot |
+|---|---|---|---|---|---|
+| 0 | 3000,0 | 100,−100,−100; added | 11426,7559,7555 | 30473,20159,20149 | 4 |
+| 1 | 16000,0 | 100,−52,−52; not added | 12288,0,0 | 32768,0,0 | 3 |
+
+Thus slot0 is genuinely computed and published even though competing slots win.
+`57A5A` rescans only on a dirty flag or index/complement mismatch. Its ordinary
+code clamp uses `[0x8000−L,L]`, withL bounded`0x4000..0x8000`; the exact mask
+exempts **slot1**. A self-consistent cached index is not range-checked here.
+Nonzero winners bypass `57484` averaging but still advance both history generations.
+
+The separate [staging-only invocation](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_output_staging_only_retains_control_state.json)
+runs all of`5E202(2,0101)` through return. It retains nonzero regulator state and
+old modulation classes while updating arbitration/history/compares, including
+slot1's clamp exemption. Published reduced-limit flags do not retroactively
+recompute modulation when the compute gate is closed. Neither scenario proves
+fresh acquisition, upstream nonzero regulation, interrupt scheduling or physical
+output commitment.
+
+
 ### 34.4 Temporal and hardware boundary
 
 `66786` first commits **previously staged** compares through `61E72`, then
@@ -2577,12 +2631,13 @@ publication `57FD2` runs regardless.
 
 Word-side history staging and halfword compare staging remain distinct interfaces;
 [§77.9](#779-pwm-compare-staging-without-an-electrical-duty-claim) owns their
-quantizer, lane/slot mapping and retained native regressions. The composed
-regulator runs now include modulation0, slot0 arbitration and both staging
-interfaces, not acquisition or hardware commit. Nonzero modulation states and
-competing-slot combinations are not exhaustively exercised. DMA ring
-indexing/consumption is bounded, but ADC age, DMA coherency, rotor/sample alignment,
-timer-latch timing, output polarity and physical bridge/motor response remain open.
+quantizer, lane/slot mapping and retained native regressions. Full-root regulator
+runs cover modulation0 and slot0. The separate nonzero tail now covers5A/A5 and
+competing slots, while a full staging-only invocation verifies retained control.
+These are bounded software scenarios, not exhaustive mode combinations. Ring
+consumption and mixed publication generations are reconstructed in §34.6; ADC age,
+DMA coherency, rotor/sample alignment, timer-latch timing, output polarity and
+physical bridge/motor response remain open.
 
 ### 34.5 Upstream assist composition and retained state
 
@@ -2986,21 +3041,70 @@ flowchart LR
   Coefficients --> Transform
 ```
 
-**Acquisition boundary.** The transfer descriptor block is `FFFF8400`, not
-`FEBE3C00`: `6091E` loads from `R6*64-0x7BFC`, and `60940` uses
-`movea -0x7BF8,R6,EP` after scaling the channel. Neither operation adds GP.
-The consumer selects a ring window from descriptor counters and acknowledges
-entries by clearing their low halfwords. This establishes software addressing
-and consumption, not analog simultaneity, DMA completion ordering or sample age.
-The physical identity of that descriptor block remains a hardware boundary.
+#### Acquisition ownership and mixed publication generations
 
-`668E2` consumes RSENT slots only on odd `5F28`, then increments the byte on
-**every** invocation. `566DC` observes the resulting parity and produces
-`8A1C==5A` on the consume generation. This is software cadence, not a new-frame
-guarantee: unchanged slot contents can be republished. Sequence, range and
-pair-consistency monitors are separate consumers; their error counters are not
-the publication gate. The serial records likewise have a distinct ten-byte
-frame check and rolling sequence, not the RSENT torque decode.
+The transfer descriptor block is `FFFF8400`, not `FEBE3C00`: scaled-channel
+addressing in `6091E/60940` does not add GP. For channel0/8, `60940` combines
+descriptor+08/+18 halfwords with low16 arithmetic. `620DC` selects count−3 for
+odd counts, count−6 for even counts≥6, otherwise count+432−6. The six subsequent
+offsets are **not individually reduced modulo432**. Count0 selects426..431;
+count2 gives four valid entries and two zero results; count4 gives two and four.
+Count1 underflows to65534/65535 before selecting0..3. Hardware reachability of
+those unusual snapshots is not established by this arithmetic.
+
+Each valid `60676/60720` read returns `(word&0x7FF8)<<1` and clears the complete
+low halfword while retaining the upper halfword. It does not inspect a freshness
+or validity tag, or advance the producer descriptor. `6217E` calls both getters
+with the same output pointer, but obtains their counts separately. `66824`
+permutes their twelve halfwords into first triples followed by last triples;
+`50B6A` forwards those into reference-side and measured-side application inputs.
+No analog simultaneity, DMA ordering or sample age follows from that publication.
+
+Serial acquisition is a separate ownership chain. `62576` admits decoding only
+when its controller snapshot has byte2==0 and byte3==10. `62488` uses descriptor
+channels2/10 to select two five-u16 blocks from the20-word FIFOs, then validates
+the second. `61008` copies without acknowledging or clearing those FIFO words.
+Software CRC `623EE` consumes bytes0,3,2,5,4,7,6,9 with initial/finalFF and the
+ROM`2B118` table, comparing byte8. A bad CRC retains the sequence, values and masks.
+A CRC-valid frame stores its incoming two-bit sequence **before** comparing it
+with `(previous+1)&3`: a sequence mismatch resynchronizes that state while
+retaining numeric fields and masks. Acceptance publishes14/14/12-bit fields.
+Channel1's `629A2` projection negates modulo those widths, not by saturation.
+
+| Publication | Owner | Retention / generation boundary |
+|---|---|---|
+| Numeric triplets `5F12/14/16`, `5F1C/1E/20` | `66824 → 629A2` | Copies retained values even without a newly accepted frame |
+| Eight byte counters `5F29..30` | `627E0`, then `66824 → 629A2` | Wrapping occurrence counts for RX/count, RX/TX, CRC and sequence failures; copying does not clear them |
+| Masks `5F18/1A/22/24` | `66932 → 6294E` | Separate four-slot OR windows; clear previous slot, read current, advance cursor |
+| Local-link cache `3838..383C` | `61404/614D4` | Periodic header6000+CRC admission differs from the polled CRC-valid helper path |
+
+The numeric records are twelve-byte-stride driver records with two untouched tail
+bytes. The interspersed application masks are **not** those tail bytes or part of
+a pair of coherent records. `50BBC` combines these generations without a per-copy
+freshness gate; a zero error counter after wrap is not evidence of current data.
+`66786` services both serial channels before numeric publication, and both see
+the same entry`39D8&3`; the task advances that phase only after application work.
+The independent mask/local-link task does not create an all-source snapshot.
+
+The [group0](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_acquisition_group0_software_handoff_bank_retention.json)
+and [group8 boundary](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_acquisition_group8_software_handoff_bank_retention.json)
+cases verify low-halfword acknowledgment, retained tags, zero tails and publication.
+The [accepted serial](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_acquisition_serial_current_software_handoff_publication.json),
+[sequence mismatch](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_acquisition_serial_sequence_mismatch_software_handoff_publication.json)
+and [CRC rejection](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_acquisition_serial_crc_reject_software_handoff_publication.json)
+cases distinguish accepted fields/masks from retained data and sequence recovery.
+These execute real software continuations **after an explicit descriptor-count
+handoff**, with synthetic saved return links into the post-getter publication
+suffix. They do not execute the intact caller chain, acquire the supplied peer
+bank, or run `627E0`'s counter reduction. No firmware instruction or callee is
+replaced. Controller timing, count-register behavior, local-link freshness and
+physical source identity remain explicit hardware dependencies.
+
+`668E2` independently consumes RSENT slots only on odd `5F28`, then increments
+that byte on every invocation. `566DC` produces `8A1C==5A` on that software
+consume generation, not on proof of a fresh frame. Sequence/range/consistency
+monitors remain separate consumers. The serial electrical-angle records are not
+the RSENT torque stream.
 
 #### Torque selection operates on pair differences
 
@@ -4086,17 +4190,19 @@ The direct vehicle observation remains evidence to explain, but it no longer dem
 
 ## 36. E1/E2 closure: computed STORE arithmetic and runtime DMAC destination provenance are clean
 
-VAR-085 executes the two falsifiers left open by §35 against the exact F33 image and the
-current canonical decompiler corpus. The reusable target-native resolver is
-`ghidra/scripts/investigate/AuditComputedStoreTargets.java`. It works on HighFunction STORE
+VAR-085 executes the two falsifiers left open by §35 against the exact F33 image.
+The refreshed censuses are bound to the current canonical corpus hash; a changed
+graph requires a fresh audit, not replacement of expected totals. The reusable
+target-native resolver is `ghidra/scripts/investigate/AuditComputedStoreTargets.java`.
+It works on HighFunction STORE
 pointer expressions, recovers conservative unsigned-32 address ranges through constants,
 casts, adds/subtracts, masks, shifts, multiplies, `PTRADD/PTRSUB`, and bounded PHIs, and
 reports only target intersections that are not already represented by a canonical write
 reference. Unknown/unbounded pointers are deliberately not converted into false certainty;
 that general memory-corruption class remains separate from E1/E2.
 
-**E1 — register-arithmetic STORE targets.** Across **14,059** recovered STORE operations,
-**5,438** have a statically bounded target range. Scanning the command/current/D0218 target
+**E1 — register-arithmetic STORE targets.** Across **14,192** recovered STORE operations,
+**5,454** have a statically bounded target range. Scanning the command/current/D0218 target
 set produces **103 candidate STORE rows in 49 functions** before exact runtime/configuration
 bounds are applied. Every candidate collapses outside the target cell it only overlapped
 under the coarse range analysis:
@@ -12664,14 +12770,76 @@ has already prepared the driver and uses the same publication join without
 repeating preparation. Inactivity recovery and security delays are raw-counter
 contracts, not measured wall time.
 
-SID27 is allowed in session2. Both successful seed and key requests have length18:
-SID, subfunction and **16 client bytes**, including the seed request. The seed
-path stores client material and generates a separate challenge. `704C` transforms
-client material using ROM `BFE8`, then encrypts the challenge with the resulting
-intermediate key. This is not a seed-only mapping or the application SecOC CMAC.
-Correct comparison sets security2; a first bad key gives35, a second gives36,
-clears the challenge and restarts the delay. Native successful unlock, challenge
-entropy and the remaining crypto-helper ABI are not closed here.
+SID27 is allowed in session2. Successful seed and key requests each have length18:
+SID, subfunction and **16 client bytes**, including the seed request. The recovered
+transform is:
+
+`expected = AES128_Encrypt(AES128_Decrypt(ROM[BFE8..BFF7], client_material), challenge)`
+
+This is software AES-128, not CMAC, a hash or a seed-only mapping. The native
+[known-answer composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_resident_crypto_derive_aes128_known_answer.json)
+uses client material`28acc9537d6f38cb6c160aa1f450f09c`, which decrypts to the
+standard key`000102030405060708090a0b0c0d0e0f`; challenge
+`00112233445566778899aabbccddeeff` produces`69c4e0d86a7b0430d8cdb78070b4c55a`.
+The real forward/inverse rounds, expansion and context clears execute. The shared
+196-byte context is wiped after each operation; the intermediate key and expected
+key on caller stacks are not explicitly cleared. Key comparison exits on the
+first unequal byte rather than following a constant-time comparison path.
+
+Handshake byte`2B55` is separate from security byte`2B0F`:
+
+```mermaid
+stateDiagram-v2
+  state "1: no issued challenge" as Idle
+  state "2: challenge issued" as Issued
+  state "3: accepted handshake" as Accepted
+  Idle --> Issued: seed / generate challenge
+  Issued --> Issued: seed / retain challenge, replace client material
+  Issued --> Accepted: correct key / response submission returns
+  Issued --> Idle: counted failure / response submission returns
+  Issued --> Idle: session invalidation / clear challenge
+  Accepted --> Accepted: seed / zero challenge reply
+  Accepted --> Idle: session invalidation / security becomes1
+```
+
+Correct comparison stores security2, clears the failed count and challenge, and
+forms`6702` **before** response submission. Handshake3 is published only after
+that call returns. The [accepted-key boundary](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_resident_crypto_key_accepted_before_response_boundary.json)
+checks the earlier stores at`674A` entry, including pending state3 in`r29`; it is
+not a claim of completed transport or complete unlock. The first-mismatch case
+similarly observes negative35 and pending state1 before response processing.
+
+A first malformed key length also counts as failure, returning13. A second
+counted failure starts a raw200000000-unit delay, clears count/challenge and
+returns36. **A new seed is required between counted attempts**: key requests in
+handshake1/3 return24, rather than counting another failure. Seed delay==1 returns37
+before length validation; the key path has no separate delay check. In handshake2,
+reseed replaces the client material but retains the challenge; in3, seed returns
+sixteen zeros without replacing client material. Native cases retain these
+precedence, replay and reseed distinctions.
+
+Challenge generation `6F22` makes up to two attempts. `48D2` gathers eight low16
+raw timer reads into a16-byte key, high byte first. Software AES-CTR starts from
+zero counter and zero input, so its candidate is `AES_timer_key(0^128)`. Exclusion
+records`8FA0/8FB0` reject zero,FF and, when history is valid, the previously accepted
+candidate. Accepted output updates`2D38` and history flag`30B4`. After two rejected
+or failed attempts, output is the last **raw timer-derived key**, return status1,
+without a history update. `5328` ignores that status. The228-byte candidate context
+is cleared, but timer entropy, physical resolution and fallback frequency are not
+established. These sampling/fallback paths are instruction/dataflow reconstruction,
+not native timer execution; the AES-CTR API accepts one16-byte block, not arbitrary
+stream lengths, and rejects an allFF counter before encryption.
+
+`51D8 → 55FC` invalidates the handshake under the priority mask. For issued state2
+it clears the challenge but does not write security; for accepted3 it relocks
+security to1. Client material, response cache, failed count, active delay and
+challenge history survive this helper. `55AA` installs the delay and clears the
+protocol buffers without itself resetting security or previous-challenge history.
+`562A` only cancels delay during application-handoff replay. Cold RAM clear removes
+history; the direct programming handoff is not that reset. Timer `51AC` progresses
+session work before delay expiry; expiry requires unsigned elapsed **strictly
+greater** than duration. Native session-invalidation cases verify the different
+security/challenge effects, not every timer/foreground interleaving.
 
 The `8F14` DID table makes F181 the only readable entry. Its resident reply has
 prefix02 and **32 literal21 bytes** produced by `5F3E`, not a recovered physical
@@ -12766,18 +12934,60 @@ external service.
 
 
 **Remaining high-value dependencies:** remaining numerical control-map surfaces
-and cross-task retention; raw3838..383C/status acquisition, ADC/DMA and local-link
+and cross-task retention; physical3838..383C/status sources, ADC/DMA and local-link
 freshness; the unassigned `B1C8.bit5` producer; production reachability across
-mode/diagnostic interleavings; physical persistence of thermal and learned records;
-resident challenge/crypto-helper semantics and the dynamic programming driver;
-SEG/cache/CRC/ECC/programming feedback; OEM service identities, calibration units
-and physical source identity. Internal `F000` ownership and the route30 generation
-join are now recovered, not placeholders for an unknown physical signal.
-The connected contracts do not require a complete peripheral or NvM emulator.
-Static connectivity and bounded native scenarios are not exhaustive semantic
-closure or vehicle results.
+mode/diagnostic and resident timer/foreground interleavings; physical persistence
+of thermal and learned records; resident timer entropy/fallback behavior and the
+dynamic programming driver; SEG/cache/CRC/ECC/programming feedback; OEM service
+identities, calibration units and physical source identity. Internal `F000`,
+route30 generations, acquisition publication ownership and resident software
+AES/security lifetimes are recovered contracts, not placeholders for those
+remaining hardware questions. A complete peripheral or NvM emulator is not a
+prerequisite for continuing application reconstruction. Static connectivity and
+bounded native scenarios are not exhaustive semantic closure or vehicle results.
 
-**2026-10-15 checkpoint: received-input conditioning and resident-service lifetimes.**
+**2026-10-15 checkpoint: acquisition ownership, resident security and nonzero modulation.**
+Native execution passed for ring consumption/publication and serial acceptance,
+CRC rejection and sequence resynchronization under explicit software handoffs.
+Resident compositions passed for the independent AES known answer, accepted-key
+and mismatch response boundaries, replay/reseed/delay precedence, and distinct
+session-invalidation effects. Control compositions passed for nonzero5A/A5
+modulation with competing owners and for staging-only retention. The scopes and
+omitted hardware/caller paths are stated in §34 and §77.26; these are not intact
+acquisition-task, completed-unlock or physical-output proofs.
+
+Independent four-stage A/B rebuilds and signature finalization matched. Canonical
+inventory, corpus, coverage and function-discovery outputs were regenerated;
+live coverage and project parity passed. The matching project/corpus snapshot
+was promoted after clean teardown. Rebuilt-C inspection confirmed the shared
+acquisition output pointer, AES context preservation and fifth-argument CTR ABI.
+`6F22` still renders an `unaff_r28` local on its hypothetical zero-count path;
+the exact exclusion-record counts2/3 establish initialization before use. It is
+not an additional caller argument or an unresolved challenge algorithm.
+
+The D5 producer now derives copy edges and scaling from the copiers' exact
+load/shift/store dataflow, rather than anonymous `DAT_` spellings. Its regression
+checks the complete bank permutation, byte-counter interleaving, separate masks
+and four scaled fields. A throwaway altered-store-register check was rejected,
+rather than attributing an unrelated register's write to the loaded source.
+
+The E1/E2 HighFunction censuses were rerun against the matching rebuilt project.
+The recovered candidate families and their exact exclusion bounds are unchanged;
+the closure producer now rejects a stale corpus identity instead of pinning an
+obsolete graph size. Its named thermal callsite extraction and instruction-bound
+DMA accessor check survive the semantic annotations. A throwaway stale-input
+check was rejected. Prose-spelling assertions were removed; descriptor geometry,
+writer/caller sets, destination bounds and hardware-reference regressions remain.
+
+Coverage, function boundaries, D5 provenance, hidden-ingress residuals,
+assist-oracle, command-cone, B6 composition/end-to-end/ingress and acceptance-ladder, CodeFlash,
+external-ingress, protected030/EPS transmit and application RAM-loader gates
+passed. Retained family census and gate/log reconciliation were regenerated and
+verified against the matching corpus. The historical corrupted-events warning
+for route `0000001c--574c06b528` remains; raw captures were not modified.
+Changed report links were checked. No peripheral models were extended.
+
+**Preceding checkpoint `a6d12085` (2026-10-15): received-input conditioning and resident-service lifetimes.**
 Composed native execution passed for delayed readiness and record8 convergence,
 held decode with consumed generations, ordered qualifier overwrite, and metadata
 hold/retention. Resident compositions passed for single-frame admission, deferred

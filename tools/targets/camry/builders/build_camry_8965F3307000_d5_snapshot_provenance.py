@@ -97,26 +97,50 @@ def body(funcs: dict[str, dict], ea: str) -> str:
     return funcs[ea]["decompiled_c"] or ""
 
 
-def assignments(src: str) -> list[tuple[str, str]]:
-    """(destination, rhs) for simple DAT_ assignments in decompiled C."""
-    return re.findall(r"(DAT_febe[0-9a-f]{4})\s*=\s*([^;]+);", src)
+def staging_transfers(image: bytes, entry: int) -> list[tuple[int, int, int]]:
+    """Recover (destination, source, scale) from the two straight-line copiers.
 
-
-def copy_edges(funcs: dict[str, dict], ea: str) -> list[list[str]]:
-    edges = []
-    for dst, rhs in assignments(body(funcs, ea)):
-        value = rhs.split(" << ")[0].strip()
-        if value.startswith("DAT_febe"):
-            edges.append([f"0x{dst[4:].upper()}", f"0x{value[4:].upper()}"])
-    return edges
-
-
-def scaled_edges(funcs: dict[str, dict], ea: str) -> dict[str, str]:
-    out = {}
-    for dst, rhs in assignments(body(funcs, ea)):
-        if re.fullmatch(r"DAT_febe[0-9a-f]{4} << 2", rhs.strip()):
-            out[f"0x{dst[4:].upper()}"] = "x4"
-    return out
+    Accept only their GP-relative unsigned loads into r1, GP-to-EP setup,
+    optional SHL2, same-width short stores from r1, and return. This deliberately
+    does not infer array element widths from decompiler names or pair unrelated
+    READ/WRITE references. Unsupported register/dataflow changes fail closed.
+    """
+    pc = entry
+    ep = None
+    value = None
+    transfers = []
+    while True:
+        opcode = struct.unpack_from("<H", image, pc)[0]
+        if opcode in (0x0FE4, 0x0F84, 0x0FA4):  # LD.HU / LD.BU disp16[gp],r1
+            if value is not None:
+                raise ValueError(f"unconsumed staging load at {pc:#x}")
+            encoded = struct.unpack_from("<H", image, pc + 2)[0]
+            if not encoded & 1:
+                raise ValueError(f"unsupported staging load at {pc:#x}")
+            # LD.BU carries displacement bit0 in instruction bit5; the low
+            # bit of the second halfword is opcode, not an address bit.
+            displacement = (encoded & 0xFFFE) | (1 if opcode == 0x0FA4 else 0)
+            if displacement & 0x8000:
+                displacement -= 0x10000
+            value = (GP + displacement, 2 if opcode == 0x0FE4 else 1, 1)
+            pc += 4
+        elif opcode == 0xF624:  # MOVEA disp16,gp,ep; preserves r1
+            ep = GP + struct.unpack_from("<h", image, pc + 2)[0]
+            pc += 4
+        elif opcode == 0x0AC2 and value is not None and value[1:] == (2, 1):
+            value = (value[0], 2, 4)  # SHL 2,r1
+            pc += 2
+        elif opcode & 0xFF80 in (0x0B80, 0x0C80):  # SST.B / SST.H r1,disp[ep]
+            width = 1 if opcode & 0xFF80 == 0x0B80 else 2
+            if ep is None or value is None or value[1] != width:
+                raise ValueError(f"unmatched staging store at {pc:#x}")
+            transfers.append((ep + (opcode & 0x7F) * width, value[0], value[2]))
+            value = None
+            pc += 2
+        elif opcode == 0x007F and value is None:  # JMP [lp]
+            return transfers
+        else:
+            raise ValueError(f"unsupported staging instruction at {pc:#x}: {opcode:#06x}")
 
 
 def builder_facts() -> dict:
@@ -136,6 +160,9 @@ def builder_facts() -> dict:
 def build() -> dict:
     funcs = load_corpus()
     b = lambda ea: body(funcs, ea)
+    image = IMAGE.read_bytes()
+    transfers = {ea: staging_transfers(image, int(ea, 16))
+                 for ea in ("0x00050b6a", "0x00050bbc")}
 
     # --- staging census -----------------------------------------------------
     staging_writers = {ea for ea, _, kind, _ in refs(funcs, *STAGING, ("WRITE",))}
@@ -277,10 +304,12 @@ def build() -> dict:
                 ),
             },
             "copy_edges": {
-                "0x00050b6a": copy_edges(funcs, "0x00050b6a"),
-                "0x00050bbc": copy_edges(funcs, "0x00050bbc"),
+                ea: [[f"0x{dst:08X}", f"0x{src:08X}"] for dst, src, _ in rows]
+                for ea, rows in transfers.items()
             },
-            "scaled_cells_0x50bbc": scaled_edges(funcs, "0x00050bbc"),
+            "scaled_cells_0x50bbc": {
+                f"0x{dst:08X}": "x4" for dst, _, scale in transfers["0x00050bbc"] if scale == 4
+            },
             "init_marker_only_0x58c9a": init_only,
         },
         "acquisition_source_block": {

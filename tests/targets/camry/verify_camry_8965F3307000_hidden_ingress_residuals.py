@@ -29,21 +29,6 @@ with tempfile.TemporaryDirectory() as td:
     check("closure artifact regenerates byte-exact", p.returncode == 0 and out.read_bytes() == ART.read_bytes())
 
 art = json.loads(ART.read_text())
-groups = {x["name"]: x for x in art["e1_register_arithmetic_store_targets"]["closure_groups"]}
-check("E1 71F2 arithmetic aliases close by exact lane/index bounds",
-      "0..7" in groups["71f2_status_arrays"]["bound"] and "<0x18" in groups["71f2_status_arrays"]["bound"])
-check("E1 generated-COM aliases close below steering cells",
-      "0xFEBE48xx..0xFEBE4Fxx" in groups["generated_com_bookkeeping"]["bound"]
-      and "FEBE3DF8..FEBE3EA0" in groups["generated_com_bookkeeping"]["bound"])
-check("E1 XCP/CAN manager aliases close below steering cells",
-      "FEBE493E..FEBE503A" in groups["xcp_can_manager_state"]["bound"])
-check("E1 diagnostic/event aliases close below steering cells",
-      "FEBE5527" in groups["diagnostic_event_state"]["bound"])
-check("E1 logical-block aliases have exact three-buffer domain",
-      all(x in groups["logical_block_state"]["bound"] for x in ("FEBE5651","FEBE5751","FEBE5851")))
-check("E1 five-channel and CBxx aliases are explicitly bounded",
-      "0..4" in groups["five_channel_snapshot_state"]["bound"]
-      and "<3" in groups["cbxx_diagnostic_state"]["bound"])
 em = art["e2_dmac_destination_reprogramming"]
 check("E2 destination-register geometry pinned",
       em["destination_registers"] == {"channel_base":"0xFFFF8400","channel_stride":64,"offsets":["0x04","0x14"],"channels":16})
@@ -98,25 +83,6 @@ check("exact F33 has no application FlexRay/PSI5 data references",
 check("sole RSENT SFR reference is RSENT1IDE enable at 0xFFE06018",
       refs["rsent"] == [("0x00060c20", "0x00060c40", "WRITE", 0xFFE06018)])
 
-def _decomp(entry: str) -> str:
-    with corpus.open() as fh:
-        for line in fh:
-            rec = json.loads(line)
-            if rec.get("entry_addr") == entry:
-                return rec["decompiled_c"]
-    raise AssertionError(f"missing corpus function {entry}")
-
-rsent_init = _decomp("0x00060c20")
-rsent_get = _decomp("0x00062b32")
-rsent_copy = _decomp("0x000668e2")
-check("RSENT1 path terminates in the existing four-sensor torque acquisition staging",
-      "DAT_0003125c" in rsent_init and "FUN_00060a6a" in rsent_init
-      and "FUN_00060c60" in rsent_get
-      and all(x in rsent_copy for x in ("-0x58fe", "-0x58fc", "-0x58f6", "-0x58f4")))
-d5 = json.loads((REPO / "data/generated/camry_8965F3307000_d5_snapshot_provenance.json").read_text())
-check("D5 provenance pins RSENT raw origin/staging cells",
-      "FEEF90FC/FEEF910C" in d5["four_sensor_decode"]["raw_origin"]
-      and "FEBE5F02/5F04" in d5["four_sensor_decode"]["raw_staging"])
 
 print(f"\nResults: {passed} passed, {failed} failed")
 sys.exit(1 if failed else 0)

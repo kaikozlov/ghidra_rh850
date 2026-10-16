@@ -586,7 +586,7 @@
         "0xFEBEEF8E"
       ],
       "lo": "0xFEBE4978",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe4978),INT_MULT(INT_AND((register, 0x18, 4),0xffff),0x2),0x1))",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4978),INT_AND((register, 0x18, 4),0xffff),0x2)",
       "store": "0x0007DDD2"
     },
     {
@@ -633,7 +633,7 @@
         "0xFEBEEF8E"
       ],
       "lo": "0xFEBE4978",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe4978),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x4, 4),0x1),0xffff)),0x2),0x1))",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4978),MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x4, 4),0x1),0xffff)),0x2)",
       "store": "0x0007E374"
     },
     {
@@ -680,7 +680,7 @@
         "0xFEBEEF8E"
       ],
       "lo": "0xFEBE48DA",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe48da),INT_MULT(INT_AND((register, 0x1c, 4),0xffff),0x6),0x1))",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe48da),INT_MULT(INT_ZEXT((register, 0x1c, 2)),0x3),0x2)",
       "store": "0x0007FCB2"
     },
     {
@@ -727,7 +727,7 @@
         "0xFEBEEF8E"
       ],
       "lo": "0xFEBE48DE",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe48de),INT_MULT(INT_AND((register, 0x1c, 4),0xffff),0x6),0x1))",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe48da),INT_ADD(INT_MULT(INT_ZEXT((register, 0x1c, 2)),0x3),0x2),0x2)",
       "store": "0x0007FCB4"
     },
     {
@@ -2802,6 +2802,10 @@
       "store": "0x000CF564"
     }
   ],
+  "canonical_corpus": {
+    "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
+    "sha256": "8160f69bc796f509f39cf197b4d020413d2b99d767bc6525b785eb637638949e"
+  },
   "ghidra_script": {
     "path": "ghidra/scripts/investigate/AuditComputedStoreTargets.java",
     "sha256": "eb1c8c95ff08239ee520f0e2ae1a32f6b02fd02117317d0b733ef329f164d3c6"
@@ -2812,9 +2816,9 @@
   "summary": {
     "candidateFunctions": 49,
     "candidates": 103,
-    "functions": 7178,
-    "knownRangeStores": 5438,
-    "stores": 14059
+    "functions": 7319,
+    "knownRangeStores": 5454,
+    "stores": 14192
   },
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",

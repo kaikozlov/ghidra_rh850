@@ -1,0 +1,202 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_acquisition_serial_sequence_mismatch_software_handoff_publication",
+  "entry": {
+    "address": "0x624ba",
+    "scope": "resolved-address",
+    "role": "Software handoff immediately after60934 DMAC low-count read: explicit R10=6 and genuine62488 frame/live registers. Execute real FIFO copies, software CRC, sequence gate, field/mask producer, then66824 post-getter suffix and629A2. ADC bank snapshot is explicitly handed off, not acquired in this case;627E0 counter reducer is not invoked and counters intentionally remain prior generation. No patched firmware."
+  },
+  "max_instructions": 20000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe1fac",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xfe00",
+    "r10": "0x6",
+    "r23": "0xfebe392d",
+    "r24": "0xfebe392b",
+    "r25": "0x0",
+    "r27": "0x0",
+    "r28": "0xfebe38d0",
+    "r29": "0xfebe3900"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe0000",
+      "size": 131072,
+      "fill": 0,
+      "evidence": "Explicit prior LocalRAM, application/driver states and prepared caller frame; not a reset or hardware acquisition model."
+    },
+    {
+      "address": "0xfeef8000",
+      "size": 65536,
+      "fill": 0,
+      "evidence": "Explicit shared-memory producer handoff; hardware timing/trigger execution excluded."
+    },
+    {
+      "address": "0xfebe1ffc",
+      "hex": "98070000",
+      "evidence": "Saved LP in actual66824 PREPARE{lp},12-word frame; caller SP2000."
+    },
+    {
+      "address": "0xfebe38d0",
+      "hex": "11112222330310203040aabb23013402450350607080ccdd",
+      "evidence": "Prior two12-byte decoded records; last2 bytes per record are not copied by629A2."
+    },
+    {
+      "address": "0xfebe5f18",
+      "hex": "11a122b2",
+      "evidence": "Prior independently published6294E masks;66824 does not rewrite them."
+    },
+    {
+      "address": "0xfebe5f22",
+      "hex": "33c344d4",
+      "evidence": "Other-channel independent status-mask generation."
+    },
+    {
+      "address": "0xfebe5f29",
+      "hex": "eeeeeeeeeeeeeeee",
+      "evidence": "Prior counters must be overwritten by cached serial record counters, not treated as booleans."
+    },
+    {
+      "address": "0xfebe1fac",
+      "hex": "3068060000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Synthetic caller join using the genuine saved-register layout (LP in the lowest word): resume66830 while omitted caller/hardware paths remain outside this proof."
+    },
+    {
+      "address": "0xfebe1fe4",
+      "hex": "0101020103010401050106010701080109010a010b010c01",
+      "evidence": "Explicit bank snapshot handed off after6217E; no DMAC model implied."
+    },
+    {
+      "address": "0xfeef8050",
+      "hex": "12008d349e151c099c5612008d349e151c099c56",
+      "evidence": "Twenty-u16 FIFO bank: prior frame at words0..4 and selected frame at words5..9;61008 copies without acknowledging/clearing."
+    },
+    {
+      "address": "0xfebe3928",
+      "hex": "02",
+      "evidence": "Previous accepted CRC-valid sequence; only CRC success replaces it, even if sequence is rejected."
+    },
+    {
+      "address": "0xfebe392e",
+      "hex": "02",
+      "evidence": "Current four-slot OR-accumulation cursor; parser must not advance it."
+    },
+    {
+      "address": "0xfebe3934",
+      "hex": "0001",
+      "evidence": "Prior first mask in current slot2."
+    },
+    {
+      "address": "0xfebe393c",
+      "hex": "8000",
+      "evidence": "Prior second mask in current slot2."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Bounded software handoff reaches return sentinel",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Prepared application caller stack restored",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "Unrelated mask publication retained",
+      "kind": "memory",
+      "address": "0xfebe5f18",
+      "size": 4,
+      "equals_hex": "11a122b2"
+    },
+    {
+      "name": "Other mask publication retained",
+      "kind": "memory",
+      "address": "0xfebe5f22",
+      "size": 4,
+      "equals_hex": "33c344d4"
+    },
+    {
+      "name": "Wrapping counter snapshots copied without clearing",
+      "kind": "memory",
+      "address": "0xfebe5f29",
+      "size": 8,
+      "equals_hex": "1020304050607080"
+    },
+    {
+      "name": "Handed-off banks published by real66824 suffix",
+      "kind": "memory",
+      "address": "0xfebe5ec8",
+      "size": 24,
+      "equals_hex": "0101020103010701080109010401050106010a010b010c01"
+    },
+    {
+      "name": "Current fields only on CRC and next-sequence success; otherwise retained fields",
+      "kind": "memory",
+      "address": "0xfebe5f12",
+      "size": 6,
+      "equals_hex": "111122223303"
+    },
+    {
+      "name": "CRC-valid mismatch consumes/resynchronizes sequence; bad CRC does not",
+      "kind": "memory",
+      "address": "0xfebe3928",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Exact CRC verdict byte",
+      "kind": "memory",
+      "address": "0xfebe392b",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Exact sequence verdict byte",
+      "kind": "memory",
+      "address": "0xfebe392d",
+      "size": 1,
+      "equals_hex": "5a"
+    },
+    {
+      "name": "Decoder does not advance independent mask publication cursor",
+      "kind": "memory",
+      "address": "0xfebe392e",
+      "size": 1,
+      "equals_hex": "02"
+    },
+    {
+      "name": "Accepted first mask ORed only into current slot",
+      "kind": "memory",
+      "address": "0xfebe3934",
+      "size": 2,
+      "equals_hex": "0001"
+    },
+    {
+      "name": "Accepted second mask ORed only into current slot",
+      "kind": "memory",
+      "address": "0xfebe393c",
+      "size": 2,
+      "equals_hex": "8000"
+    },
+    {
+      "name": "FIFO copy does not consume/clear payload",
+      "kind": "memory",
+      "address": "0xfeef805a",
+      "size": 10,
+      "equals_hex": "12008d349e151c099c56"
+    }
+  ]
+}

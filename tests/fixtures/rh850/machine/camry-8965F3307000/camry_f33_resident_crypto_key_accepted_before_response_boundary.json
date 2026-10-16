@@ -1,0 +1,108 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_resident_crypto_key_accepted_before_response_boundary",
+  "entry": {
+    "role": "Real SID27 handler, AES derivation and 16-byte comparison. Stop before674A response scheduling reaches unsupported FFE51010: security publication is complete; handshake3 remains pending in r29 until response returns. Not full native unlock.",
+    "scope": "resolved-address",
+    "address": "0x5516"
+  },
+  "max_instructions": 100000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebf9800",
+    "tp": "0x869c",
+    "lp": "0xfebf1000",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0x0",
+    "r6": "0x12"
+  },
+  "stop_addresses": [
+    "0x674a"
+  ],
+  "memory": [
+    {
+      "address": "0xfebf2b0e",
+      "hex": "0201",
+      "evidence": "explicit programming session and security state"
+    },
+    {
+      "address": "0xfebf2b24",
+      "hex": "00112233445566778899aabbccddeeff28acc9537d6f38cb6c160aa1f450f09ca5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "retained challenge, client material and response challenge canary"
+    },
+    {
+      "address": "0xfebf2b54",
+      "hex": "00020000",
+      "evidence": "last subfunction, handshake, delay flag, failed-attempt count"
+    },
+    {
+      "address": "0xfebf30bf",
+      "hex": "01",
+      "evidence": "physical addressing mode; request data immediately follows"
+    },
+    {
+      "address": "0xfebf30c0",
+      "hex": "270269c4e0d86a7b0430d8cdb78070b4c55a",
+      "evidence": "explicit diagnostic request at ordinary resident request buffer"
+    }
+  ],
+  "checks": [
+    {
+      "name": "security accepted",
+      "kind": "memory",
+      "address": "0xfebf2b0f",
+      "size": 1,
+      "equals_hex": "02"
+    },
+    {
+      "name": "challenge erased on success",
+      "kind": "memory",
+      "address": "0xfebf2b24",
+      "size": 16,
+      "equals_hex": "00000000000000000000000000000000"
+    },
+    {
+      "name": "fail count cleared",
+      "kind": "memory",
+      "address": "0xfebf2b57",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "positive key response formed",
+      "kind": "memory",
+      "address": "0xfebf2ad0",
+      "size": 2,
+      "equals_hex": "6702"
+    },
+    {
+      "name": "pending handshake3 in caller callee-saved register",
+      "kind": "register",
+      "register": "r29",
+      "equals": "0x3"
+    },
+    {
+      "name": "handshake write awaits response return",
+      "kind": "memory",
+      "address": "0xfebf2b55",
+      "size": 1,
+      "equals_hex": "02"
+    },
+    {
+      "name": "real crypto context wiped after derivation",
+      "kind": "memory",
+      "address": "0xfebf2d48",
+      "size": 196,
+      "equals_hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "bounded exact-ROM endpoint",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x674a"
+    }
+  ]
+}

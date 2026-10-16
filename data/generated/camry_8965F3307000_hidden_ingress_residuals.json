@@ -57,9 +57,9 @@
     "census": {
       "candidateFunctions": 49,
       "candidates": 103,
-      "functions": 7178,
-      "knownRangeStores": 5438,
-      "stores": 14059
+      "functions": 7319,
+      "knownRangeStores": 5454,
+      "stores": 14192
     },
     "closure_groups": [
       {
@@ -172,9 +172,9 @@
     "computed_store_census": {
       "candidateFunctions": 3,
       "candidates": 5,
-      "functions": 7178,
-      "knownRangeStores": 5438,
-      "stores": 14059
+      "functions": 7319,
+      "knownRangeStores": 5454,
+      "stores": 14192
     },
     "destination_field_count": 44,
     "destination_registers": {
@@ -424,55 +424,55 @@
     {
       "body_sha256": "1ecaeba6a291af0b88e4eca1af35f93015bf2394717a5e62894364a11240d60d",
       "body_size": 124,
-      "decompiled_c_sha256": "bed07abddc0857fae721e4167b824379fdc7bcaef0ffc74ab89add8c572e6812",
+      "decompiled_c_sha256": "d0f08467ca8409163746917b495408c69dde600dfebd851bf167fb60259922a3",
       "entry": "0x0003B8E4"
     },
     {
       "body_sha256": "13434e48d95ee5ce60adc12dd3c993df384cfcb3fc0de8d365558de2722ccb5c",
       "body_size": 268,
-      "decompiled_c_sha256": "d8594ad4537081c018a13375118b00a18ad1a6e8967b8e1333f44afcbe09f65a",
+      "decompiled_c_sha256": "5dd182f2cda6905c15febb5c079c30502ac00b4b64950981df1fa35c64e4a8e8",
       "entry": "0x0003B960"
     },
     {
       "body_sha256": "8a08e55359d17f0f3f73d04ac208a957c85612f212e98f372e643173d035ca9e",
       "body_size": 56,
-      "decompiled_c_sha256": "9998078acf0be44fba75d75e1fe37a8b9cbb75387302368ab21e3e3a9d40cf27",
+      "decompiled_c_sha256": "29fa28ced9b4cbe703b341c5556d2fc6b303172c244bd0f655259d5c885e8a72",
       "entry": "0x0003BD8E"
     },
     {
       "body_sha256": "6aeaac0d6cd21fd38b3afd4ba8534f0845ccaedaabc0c6ea9bab955a4d594f7b",
       "body_size": 14,
-      "decompiled_c_sha256": "cc4e683f48ecdeb70130c8ed12e30414ff55cc2b2fb80816174a66dce0bbdbd2",
+      "decompiled_c_sha256": "a39b744f3e3567c9cb506cb2ef2da3dc3a9362cc137e1dbc547ef79e030be60b",
       "entry": "0x0003C108"
     },
     {
       "body_sha256": "8399b15c3385014354aee64c396e0e7bc2700a4cf0964c53efbb335dab265968",
       "body_size": 110,
-      "decompiled_c_sha256": "56b421d311847c59aa2dbff635e0c2373888f2e70d6a291b31360e7006e9aadd",
+      "decompiled_c_sha256": "f84dd3dea0b1ba8eaea9f87f6599864bb76f335c08ba4f4e6f61473ee60828b2",
       "entry": "0x0003C116"
     },
     {
       "body_sha256": "d91e72ba9138be4e663a4bb14f2ec959895b1054bbe31a920e087f03c98dbdfe",
       "body_size": 24,
-      "decompiled_c_sha256": "47ab56171139a3707cbf49ccaf00cc06ea4d9300417d5e3141dee920e5c133d8",
+      "decompiled_c_sha256": "0ef6177b778be88ad75b76fc1a6513bcfba357b897b212125e1abfa270e8b5dd",
       "entry": "0x0003C184"
     },
     {
       "body_sha256": "a821876ce95784e49fd89f19fbe6a1a589874911a6341d2aca230ebdef7a41f3",
       "body_size": 150,
-      "decompiled_c_sha256": "8b266b96483b8522fba41e6f86fed9a0c2b6e3693afc9c57a888b048ac6e261f",
+      "decompiled_c_sha256": "505eceeccacdcd3e376073f4c34868beaedf951445e1e8500d381300fb84a138",
       "entry": "0x0003C19C"
     },
     {
       "body_sha256": "a0dbff28987156f5a541a6d8cc26c2429516703527d1e9b9de5a2f127e2d6f8b",
       "body_size": 206,
-      "decompiled_c_sha256": "4d436301eb57616967c084629d035a5d8304956b725c72993ef2966dc8ea3d25",
+      "decompiled_c_sha256": "334d144742fdd998386dbf4fa7413adc103ca148b661e16b3c348cd5908d4c9f",
       "entry": "0x0003D348"
     },
     {
       "body_sha256": "8f3319ccf077efb5061e6f270a3768ad4a59726bbd304ba4db36bf381a40c568",
       "body_size": 432,
-      "decompiled_c_sha256": "fa3c9afb68498cc257ffd722b15e1ddf2ff67b9125415e6acaccff2830b3207f",
+      "decompiled_c_sha256": "31288dd25a8801eb268c9706e4410f15bed45aea1e922ebf45c15401ab565efa",
       "entry": "0x00060462"
     },
     {
@@ -496,7 +496,7 @@
     {
       "body_sha256": "ad7f837c498ef0dd22337dd7f8b66b00be7449266017814e965fe1bde7cee64f",
       "body_size": 10,
-      "decompiled_c_sha256": "7d426575d2f5489cc4c7d4e145aab72ee312a5bec9de94cae90f30e115ec3169",
+      "decompiled_c_sha256": "0e85c29a7033b3ef2dab6139b95649f980adc19c3e7d3e54f5960bc6aec7305b",
       "entry": "0x0006091E"
     },
     {
@@ -520,7 +520,7 @@
     {
       "body_sha256": "27d66c6339bdb867194fae88449c0b08c57b5e564343ca535b463b092b94e180",
       "body_size": 176,
-      "decompiled_c_sha256": "d9abd4e78607d86a7a84dd6160e9d7954be02f193ca419d768237743e2a74df9",
+      "decompiled_c_sha256": "02ff3f7899cb59e3da874bdb0dc9da9eccb630f15845ecfc90fb1ec279e650a6",
       "entry": "0x00061B90"
     },
     {
@@ -550,19 +550,19 @@
     {
       "body_sha256": "9e6bd8b4cd25553ff7f00107ad1354cf1a7a13560901f6b64a99b9d99b6ff3ff",
       "body_size": 196,
-      "decompiled_c_sha256": "05828a83781ba142759fa2a9b5f3c187ad9bdfeb4d5d8fc61a196ab03fa35a84",
+      "decompiled_c_sha256": "a6f6c9ce63ac7abe70b4e353733cdf1ec16e062735109e75a4e3a3baca48e990",
       "entry": "0x0007DCA0"
     },
     {
       "body_sha256": "886990185048d539f859186f919dc6b68e01e09b16d77934a38b01bae85710f9",
       "body_size": 116,
-      "decompiled_c_sha256": "3baeeca9556091615270c518e993274848923ef9ec95cddc22570bfee89a80c1",
+      "decompiled_c_sha256": "97443e3e3d42e282b38390d469e5bfa6c0327684bdfb1ba3329da0cbd2aeb7c4",
       "entry": "0x0007DD64"
     },
     {
       "body_sha256": "fdb12b85b2def3a46874872bb4b40a2b06e9b3ab19f6adafa2edb419f620b468",
       "body_size": 28,
-      "decompiled_c_sha256": "c888da19f92c2d067f48ba09a25134151b3bb08a1f2dbc117da583ae7d5f0d16",
+      "decompiled_c_sha256": "a313663b5d2bf49b37452f19abcfd92730454cbef3e10322d0e105d6fda068ef",
       "entry": "0x0007E364"
     },
     {
@@ -580,13 +580,13 @@
     {
       "body_sha256": "24774748e16479b75a3f8ed92b17fb14e37d6466cb33468540c3ef4586878687",
       "body_size": 312,
-      "decompiled_c_sha256": "ca621efc185beb5021286ba8d3b80601a0f5fe6aa4fc8ed95ce3a267c6e1e39c",
+      "decompiled_c_sha256": "a58cea3680165164adb5d747393adf136a80926f7ff8950ff5c3cc04c8ad0bf1",
       "entry": "0x0007FC0E"
     },
     {
       "body_sha256": "7d9cbb052aa0369d39a22c9004ea14636e34db2234df05f4ff5b9cbb7c7880bc",
       "body_size": 434,
-      "decompiled_c_sha256": "aa219bef70f36e90f306f1dcbd3f34277ce9a3fa35dac0f1d3a302a299fecfd8",
+      "decompiled_c_sha256": "79b43f2d2b8fa3eaeeda9518afb6e5b2ad572c40c25071723d280ab3791b9b4d",
       "entry": "0x0007FD46"
     },
     {
@@ -616,7 +616,7 @@
     {
       "body_sha256": "ed8ecdb1b00106174da349a0e3ff2b796a8d85c5f723e11c57f91f264ebf4012",
       "body_size": 216,
-      "decompiled_c_sha256": "e2d41a93b4e287e2000f9e10de67552aad7bb364a5fd144ec071fac7ca1882d6",
+      "decompiled_c_sha256": "cf4d936deebf74c22ed1d4b004b1831ec99a0d598186fd7fe2b7f0596d6ff13c",
       "entry": "0x000832F4"
     },
     {
@@ -664,7 +664,7 @@
     {
       "body_sha256": "05ecc3e9977835b273ea0b2434788b8d8b5f7af2d3313052145bb376eb32ee56",
       "body_size": 62,
-      "decompiled_c_sha256": "42d884ff6732dabf4dedd526ca283b582c5d73b0b51df7b9142f41d940a4ccc5",
+      "decompiled_c_sha256": "ef29340df0f3aaedbbf9daa3c90fe19031408847911e3bb4e1402b7821935770",
       "entry": "0x0008E862"
     },
     {
@@ -682,7 +682,7 @@
     {
       "body_sha256": "6b400bd052e65702face2c4b5322f5015806d14f350e1a4789d9cadc98a56864",
       "body_size": 218,
-      "decompiled_c_sha256": "8f1b7f81dc3d8bdf83d9b868a5aa7a8e37fd09a15bae905172ccdd154851f6e9",
+      "decompiled_c_sha256": "5fd3cde9fbbae252c304e5fa7c9c62fee4f9f978f9b74268d58d498b4686a602",
       "entry": "0x0008E9C6"
     },
     {
@@ -700,7 +700,7 @@
     {
       "body_sha256": "4cb7b08ada0b7e058aed4e9f44083b931a920427548e6d29abeb4f523e4fd1b7",
       "body_size": 396,
-      "decompiled_c_sha256": "e9a646c79a017e031eb6be6588769d797a77a959e9059b1a9eba2cc34799c8cb",
+      "decompiled_c_sha256": "12466679a33b275cf75df66d67e707834d5005e82e94fc42d76a316efd048c0b",
       "entry": "0x0008F746"
     },
     {
@@ -712,7 +712,7 @@
     {
       "body_sha256": "f05b334c3f7b1a28cd80a4cd04acde7cd7d726a65ae427b2fd47c30d5108ed7b",
       "body_size": 58,
-      "decompiled_c_sha256": "43650ebe23d12efa6f695801bcf2911f75d30a48e621974350b1b16295a8427b",
+      "decompiled_c_sha256": "b9277ddeab2241f399ca3a27a6716ae0ddc0915366a1300f21c813fd3a24a33b",
       "entry": "0x0008F98C"
     },
     {
@@ -808,13 +808,13 @@
     {
       "body_sha256": "3af0e5630b7f3aa6be8a6d5aa78a8312b83f737f7dfb43916c9ea0c059fccf96",
       "body_size": 114,
-      "decompiled_c_sha256": "c863d4b16267706da2454e436789a387f623763e4a0524cd67694bb5264072b8",
+      "decompiled_c_sha256": "0608ec7d8f3ff36ecf14779e150ece603965126e8b236ada84ca956c9a431291",
       "entry": "0x000BA052"
     },
     {
       "body_sha256": "04f2b68ac877183d6e85c64fe8710a6564f8d592757055c17630ed73b52cdb79",
       "body_size": 60,
-      "decompiled_c_sha256": "9c93f756110c02dc28a886f17542f077fccbf1e68dc25115014964c5c538eb45",
+      "decompiled_c_sha256": "2a01dac9e127b464d1d9d2e3186be144da007c0abee6a5e64a4d942764427873",
       "entry": "0x000BA134"
     },
     {
@@ -886,13 +886,13 @@
     {
       "body_sha256": "636c454a8a2b5a39b0d39c98ce899db480d4dbfc2f837253b5f1178f949c8246",
       "body_size": 184,
-      "decompiled_c_sha256": "0847f487a1d3c509fbbe6ae1cc01c40306fa8d531ac517c1d5294a282fb77f25",
+      "decompiled_c_sha256": "4409f35f1c84720e9be0c3fa9473cc61f77e365349a3d9f8db7b248fb059d67c",
       "entry": "0x000CA242"
     },
     {
       "body_sha256": "6eded6362f1b616da53593e38f76e9583e08bd331bf6278768afbce1e4bf1a73",
       "body_size": 184,
-      "decompiled_c_sha256": "fab2512dea3df637c68c857620d525732311b99f927f93d7608a283c4f8ac051",
+      "decompiled_c_sha256": "71280a9bd0d33c3cfe84ee0aa3ea4d6a471b0c8924533db92fb47744484a52bd",
       "entry": "0x000CB45E"
     },
     {
@@ -917,11 +917,11 @@
   "inputs": {
     "computed_store_target_census": {
       "path": "data/generated/camry_8965F3307000_computed_store_target_census.json",
-      "sha256": "9987b050c344b4eab1b5d50f359f525e4848c091fae7b98518679f76856149b3"
+      "sha256": "d17d34b788f4909bb94154ee5b2f5e2223e626abb7ce765221244ed806cccb3a"
     },
     "dmac_destination_computed_store_census": {
       "path": "data/generated/camry_8965F3307000_dmac_destination_computed_store_census.json",
-      "sha256": "c14178a7c7c71eb938118849de3c3b3853355ace27bb6dd796d4c8d4f2541634"
+      "sha256": "fd639e97097de788a268e2e7bab6f8e9ae2d7f4e12777ce976438919d32e3842"
     },
     "resolver_script": {
       "path": "ghidra/scripts/investigate/AuditComputedStoreTargets.java",
@@ -932,7 +932,7 @@
   "schema": "camry-8965f3307000-hidden-ingress-residuals-v1",
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-    "corpus_function_count": 7178,
+    "corpus_function_count": 7319,
     "software_id": "8965F3307000"
   }
 }

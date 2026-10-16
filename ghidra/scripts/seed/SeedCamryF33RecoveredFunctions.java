@@ -2148,8 +2148,6 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     getFunctionAt(toAddr(0x37538L)).setComment("Differential second-axis regulator aggregate373E6/37418/37460: error=sat(6D7E-6D76), accumulator6CA0, directional anti-windup and additional clamp31A58. Reset follows selected arbitration indices and acquisition status, not a generic diagnostic inhibit.");
     getFunctionAt(toAddr(0x38A58L)).setComment("Reference-derived first-bank phase transform used by compensation36750, not the final regulated output transform. Combine main/correction current pairs, halve when71EC low2bits clear, use output-frame coefficients7D54/56 and saturate triplet6E58/5A/5C.");
     getFunctionAt(toAddr(0x38B6AL)).setComment("Second-bank reference-derived phase compensation transform, paired with38A58. Its triplet is distinct from the regulated output of38D6C.");
-    getFunctionAt(toAddr(0x38C7CL)).setComment("Transform limited first-bank regulated axis commands to phase triplet6E68/6A/6C using output-frame coefficients; signed saturation +/-32767. Compensation and modulation offset/clipping follow.");
-    getFunctionAt(toAddr(0x38D6CL)).setComment("Second-bank regulated axis-to-phase transform, publishing6E70/72/74. Not the same interface as measured-frame feedback coefficients or reference compensation.");
   }
   private void annotateSensingPipeline() throws Exception {
     DataType v = VoidDataType.dataType;
@@ -2164,8 +2162,9 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "FEBE3C00. No local channel bound; physical descriptor-block identity remains separate.");
     semanticFunction(0x60940L, "f33_count_transfer_entries", u16,
         new ParameterImpl("channel", u8, currentProgram))
-        .setComment("Channels<16 combine low/high halfwords of descriptor+08/+18 using low16 arithmetic; "
-            + "otherwise return0. BaseFFFF8400 is independent of GP. A count does not establish sample age.");
+        .setComment("Channels<16 combine descriptor+08/+18 halfwords with low16 arithmetic; otherwise return0. "
+            + "BaseFFFF8400 is independent of GP. Ring consumers select six entries without per-offset modulo: "
+            + "counts2/4 produce zero tails. Count and low16 payload acknowledgments do not establish sample age.");
     semanticFunction(0x668E2L, "f33_consume_rsent_sensor_slots", v)
         .setComment("On odd5F28 consume two slot records through62B32 and publish5F02..5F10; increment5F28 "
             + "on every call. Software one-of-two cadence, not proof that hardware supplied a new frame.");
@@ -6031,9 +6030,9 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         .setComment("Copy5EEA/C/E/5EF0 to81D6/8/A/C; publish valid markers81D4/5 as5F26/27 XOR5A. Only source byte0 "
             + "produces the exact5A marker admitted by range predicates.");
     semanticFunction(0x66932L, "f33_publish_acquisition_diagnostic_snapshot", v)
-        .setComment("Compose transfer-group copies62ABC,62B18,6294E into5EE0..5F24, and copy cached380A/B to5F26/27. The "
-            + "range fields5EEA/C/E/5EF0 and later81D6/8/A/C are staged generations, not an atomic physical "
-            + "measurement.");
+        .setComment("Compose62ABC,62B18,6294E into5EE0..5F24 and cached380A/B into5F26/27. "
+            + "6294E rotates serial mask windows and publishes5F18/1A/22/24;66824 does not write these masks. "
+            + "The range and mask fields are staged generations, not an atomic physical measurement.");
     semanticFunction(0x62ABCL, "f33_copy_acquisition_diagnostic_samples", v,
         new ParameterImpl("destination", ushortPointer, currentProgram))
         .setComment("Copy four halfwords through62A50 then five through62A86 into the same destination; retain the "
@@ -7497,8 +7496,9 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         new ParameterImpl("request_length", u16, currentProgram))
         .setComment("Resident SID27: session2; masked subfunctions1 and2 only. Both seed and key requests require18 bytes.5328 "
             + "stages16 client bytes and returns a16-byte challenge;53F2 derives and compares16 expected key bytes. "
-            + "Success sets security2B0F=2/handshake2B55=3; bad key35, repeated failures36 plus raw-counter delay; active "
-            + "delay rejects seed with37.");
+            + "Success stores security2B0F=2 before response submission; handshake2B55=3 follows its return. "
+            + "Bad key35; a second counted failure gives36 and raw-counter delay. Active delay rejects seed "
+            + "with37 before length validation; reseed and replay behavior are owned by5328/53F2.");
     semanticFunction(0x688AL, "f33_boot_service_communication_control", v,
         new ParameterImpl("request_length", u16, currentProgram))
         .setComment("Resident SID28: session3, length3, masked subfunction1 and communication byte1 only; invalid "
@@ -7663,11 +7663,6 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         .setComment("ExplicitRIDdispatch10F0/10F1\u21925936,10F2\u21925A04,FF00\u21925B70;noROMcallbackcallthroughFFFFFFFF.");
     semanticFunction(0x4F1CL, "f33_boot_transfer_timer_progress", v)
         .setComment("Downloadstate2\u21924DF2program/copy;10\u21924E92compare,otherwiseclearsactive.");
-    semanticFunction(0x704CL, "f33_boot_security_derive_expected_key", v,
-        new ParameterImpl("client_material", new PointerDataType(u8, 4), currentProgram),
-        new ParameterImpl("challenge", new PointerDataType(u8, 4), currentProgram),
-        new ParameterImpl("expected_key", new PointerDataType(u8, 4), currentProgram))
-        .setComment("Derives16-byteintermediatekeyfromclientmaterialwithROMBFE8using6FEC,then701Eencryptschallengeintokey.Notsimpleseedonlymapping.");
     semanticFunction(0x5D40L, "f33_boot_download_positive_response", v)
         .setComment("Forms74 20 04 02andpasseslength4inr8to674A;repairmisrenderedmissinglength.");
     semanticFunction(0x5F3EL, "f33_boot_read_did_fill_payload", u32,
@@ -7733,6 +7728,459 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
             + "else24. Reply through4B38; no input consumption.");
     semanticData(0x8EF4L, new ArrayDataType(u8, 16, 1), "f33_boot_service_session_constants",
         "Service-local required sessions and admission lists; not interrupt-table fields or a single permission bitmask.");
+  }
+
+  private void annotateAcquisitionOwnership() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    CategoryPath category = new CategoryPath("/CamryF33");
+    StructureDataType layout0 = new StructureDataType(category, "F33AcquisitionGroupPair", 0);
+    layout0.setPackingEnabled(true);
+    layout0.add(new ArrayDataType(u16, 6, 2), "group0", null);
+    layout0.add(new ArrayDataType(u16, 6, 2), "group8", null);
+    DataType layout0Type = resolve(layout0);
+    StructureDataType layout1 = new StructureDataType(category, "F33SerialAcquisitionRecord", 0);
+    layout1.setPackingEnabled(true);
+    layout1.add(u16, "field14_0", null);
+    layout1.add(u16, "field14_1", null);
+    layout1.add(u16, "field12", null);
+    layout1.add(u8, "rx_count_failures", null);
+    layout1.add(u8, "rx_or_tx_failures", null);
+    layout1.add(u8, "crc_failures", null);
+    layout1.add(u8, "sequence_failures", null);
+    layout1.add(new ArrayDataType(u8, 2, 1), "untouched_tail", null);
+    DataType layout1Type = resolve(layout1);
+    StructureDataType layout2 = new StructureDataType(category, "F33SerialAcquisitionMasks", 0);
+    layout2.setPackingEnabled(true);
+    layout2.add(u16, "first", null);
+    layout2.add(u16, "second", null);
+    DataType layout2Type = resolve(layout2);
+    StructureDataType layout3 = new StructureDataType(category, "F33SerialControllerStatus", 0);
+    layout3.setPackingEnabled(true);
+    layout3.add(u8, "status_bit8", null);
+    layout3.add(u8, "status_bit7", null);
+    layout3.add(u8, "status_bit3", null);
+    layout3.add(u8, "count0_7bit", null);
+    layout3.add(u8, "count1_7bit", null);
+    layout3.add(u8, "count2_7bit", null);
+    DataType layout3Type = resolve(layout3);
+    semanticFunction(0x620DCL, "f33_select_acquisition_six_entry_base", u16,
+        new ParameterImpl("count", u16, currentProgram),
+        new ParameterImpl("capacity", u16, currentProgram))
+        .setComment("Odd count selects count-3; even selects count-6 with one capacity addition only when count<6. Return "
+            + "low16; caller does not modulo-wrap each following offset. Boundary counts2/4 yield out-of-range zero "
+            + "tails, not ring wrap. No freshness/reachability claim.");
+    semanticFunction(0x620FEL, "f33_copy_acquisition_group0_samples", v,
+        new ParameterImpl("output", new PointerDataType(layout0Type, 4), currentProgram))
+        .setComment("Real R6 is the output pointer, not an unused integer. Read descriptor count for channel0, select "
+            + "six-entry base with capacity432, consume offsets0..5 from30F2C through60676. Store six u16 at output+0. "
+            + "No software cursor advancement, per-entry validity check or retained-value fallback; out-of-range "
+            + "returns0.");
+    semanticFunction(0x6213EL, "f33_copy_acquisition_group8_samples", v,
+        new ParameterImpl("output", new PointerDataType(layout0Type, 4), currentProgram))
+        .setComment("Real R6 is the output pointer, not an unused integer. Read descriptor count for channel8, select "
+            + "six-entry base with capacity432, consume offsets0..5 from30F34 through60720. Store six u16 at output+12. "
+            + "No software cursor advancement, per-entry validity check or retained-value fallback; out-of-range "
+            + "returns0.");
+    semanticFunction(0x6217EL, "f33_copy_acquisition_group_pair", v,
+        new ParameterImpl("output", new PointerDataType(layout0Type, 4), currentProgram))
+        .setComment("Call620FE then6213E with the SAME real R6 pointer, saved inR29. Produces group0[6],group8[6] at "
+            + "offsets0/12. Fix auto-decompiler missing620FE argument; native62182/62188 explicitly preserve/restore it. "
+            + "Descriptor counts are separate reads, not one producer epoch.");
+    semanticFunction(0x60676L, "f33_consume_acquisition_group0_entry", u32,
+        new ParameterImpl("index", u16, currentProgram))
+        .setComment("Index<432: read u32[FEEF81E0+index*4], return(value&7FF8)<<1, and rewrite only retained upper16 (low16 "
+            + "cleared). Out-of-range returns0 without access. Ignores low3/bit15 and upper metadata for acceptance; no "
+            + "freshness flag or producer-count update.");
+    semanticFunction(0x60720L, "f33_consume_acquisition_group8_entry", u32,
+        new ParameterImpl("index", u16, currentProgram))
+        .setComment("Index<432: read u32[FEEF8A20+index*4], return(value&7FF8)<<1, and rewrite only retained upper16 (low16 "
+            + "cleared). Out-of-range returns0 without access. Ignores low3/bit15 and upper metadata for acceptance; no "
+            + "freshness flag or producer-count update.");
+    semanticFunction(0x66824L, "f33_publish_fast_acquisition_inputs", v)
+        .setComment("Buffer twelve halfwords through6217E, then permute group0[0:3],group8[0:3],group0[3:6],group8[3:6] "
+            + "to5EC8..5EDE. Then629A2 copies cached serial triplets/counters and publish5F12/14/16,5F1C/1E/20,5F29..30. "
+            + "Does NOT write5F18/1A/22/24 ancillary masks. Sequential stores, no validity gate or atomic cross-source "
+            + "generation.");
+    semanticFunction(0x629A2L, "f33_copy_cached_serial_acquisition_records", v,
+        new ParameterImpl("output", new PointerDataType(layout1Type, 4), currentProgram))
+        .setComment("Write two12-byte-stride records: threeu16 plus fouru8 occurrence counters; offsets10/11 remain untouched. "
+            + "Types ROM31678={0,11}: second record negates modulo14/14/12 bits; first copies raw. Does not acquire, "
+            + "validate, clear counters, copy ancillary masks or distinguish current/retained sample.");
+    semanticFunction(0x62488L, "f33_decode_serial_acquisition_frame", v,
+        new ParameterImpl("channel", u8, currentProgram),
+        new ParameterImpl("fifo", u8, currentProgram),
+        new ParameterImpl("crc_failure", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("sequence_failure", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Caller62576 guarantees channel<2 and initializes verdicts0. Use descriptor low count31676[channel] to "
+            + "select two five-u16 FIFO blocks; validate second with623EE. Bad CRC retains sequence/triplet/masks. "
+            + "CRC-valid incoming sequence is stored BEFORE next-sequence comparison; mismatch sets5A and retains "
+            + "triplet/masks while resynchronizing. Accepted14/14/12-bit fields write38D0+12*channel and OR two11-bit "
+            + "masks through6245A. No FIFO acknowledgment.");
+    semanticFunction(0x62576L, "f33_sample_serial_acquisition_channel", v,
+        new ParameterImpl("channel", u8, currentProgram))
+        .setComment("Channel<2: snapshot61054 into38E8+6*channel. Only status.byte2==0 and byte3==10 decode62488. Otherwise "
+            + "retain decoded sample and set RX/count failure. CRC/sequence local flags reset0 on every call before "
+            + "admission; publish scratch+29/+2A/+2B/+2D verdicts, not counters.");
+    semanticFunction(0x627E0L, "f33_accumulate_serial_acquisition_failures", v,
+        new ParameterImpl("channel", u8, currentProgram))
+        .setComment("Channel<2: increment wrappingu8 counters38D6..D9+12*channel for missing/wrong RX count, combined "
+            + "RX-status or TX-submission failure, software CRC failure, sequence failure. Equality5A only. Numeric "
+            + "retention and sequence acceptance are separate; zero after wrap is not healthy/fresh proof.");
+    semanticFunction(0x62846L, "f33_service_serial_acquisition_channel", v,
+        new ParameterImpl("channel", u8, currentProgram))
+        .setComment("Run62576, then command/reply branch selected by "
+            + "entry39D8&3:0->62636(0),626D6(1);1->6276C(0);2->62636(1),626D6(0);3->6276C(1). Call60F7C(channel,0), "
+            + "then627E0. Sample decoding can fail/retain while a current command error updates counters. Task "
+            + "advances39D8 only after both channels and application dispatch.");
+    semanticFunction(0x6289CL, "f33_service_serial_acquisition_pair", v)
+        .setComment("Service logical channels0 then1 through62846, without incrementing task phase between them.66786 invokes "
+            + "this before66824 caches serial samples/counters. No ADC or serial timing guarantee.");
+    semanticFunction(0x6245AL, "f33_accumulate_serial_acquisition_masks", v,
+        new ParameterImpl("channel", u8, currentProgram),
+        new ParameterImpl("first_mask", u16, currentProgram),
+        new ParameterImpl("second_mask", u16, currentProgram))
+        .setComment("Channel<2: OR accepted11-bit frame masks into scratch+30/+38 arrays using(cursor+2E&3). Does not advance "
+            + "cursor, clear prior slot or publish application masks.6294E owns cursor advancement and previous-slot "
+            + "clear.");
+    semanticFunction(0x6294EL, "f33_rotate_and_copy_serial_acquisition_masks", v,
+        new ParameterImpl("output", new PointerDataType(layout2Type, 4), currentProgram))
+        .setComment("For channels0/1: clear mask arrays at previous(cursor-1)&3, read current first mask, advance "
+            + "cursor(cursor+1)&3, publish first mask then read/publish current second mask. Output two4-byte mask "
+            + "pairs. Current slot is not cleared in this call.66932 publication5F18/1A/22/24 belongs to another task "
+            + "generation than66824 numeric/counters.");
+    semanticFunction(0x62192L, "f33_initialize_serial_acquisition_channel", v,
+        new ParameterImpl("channel", u8, currentProgram))
+        .setComment("Channel<2: clear driver buffers/flags/four-slot mask arrays/cursor and published occurrence counters; "
+            + "seed prior sequence3 and numeric triplet{0,0,0800}. First valid incoming sequence0 qualifies. No "
+            + "acquisition completed by initialization.");
+    semanticFunction(0x61054L, "f33_read_serial_controller_status", v,
+        new ParameterImpl("channel", u8, currentProgram),
+        new ParameterImpl("acknowledgment", u16, currentProgram),
+        new ParameterImpl("output", new PointerDataType(layout3Type, 4), currentProgram))
+        .setComment("Physical channel<2: ROM3140C+50*channel selects controller block. Snapshot status bits8/7/3 and "
+            + "three7-bit counts into six bytes, then acknowledge with halfword(ack&100)|(status&8).62576 uses byte2==0 "
+            + "and byte3==10; other status bytes do not gate decoding there. This is register contract, not current "
+            + "sample age.");
+    semanticFunction(0x61008L, "f33_copy_serial_fifo_words", v,
+        new ParameterImpl("channel", u8, currentProgram),
+        new ParameterImpl("output", new PointerDataType(u16, 4), currentProgram),
+        new ParameterImpl("offset", u8, currentProgram),
+        new ParameterImpl("count", u8, currentProgram))
+        .setComment("Channel<2 and offset<=configured_capacity-count: copy countu16 words from ROM313FC[channel] FIFO; caller "
+            + "uses capacity20 and count5. No wrap, clear, cursor advance, status check or return verdict; rejected "
+            + "bounds leave destination unchanged.");
+    semanticFunction(0x60934L, "f33_read_transfer_primary_count_low", u32,
+        new ParameterImpl("channel", u8, currentProgram))
+        .setComment("Return low16 of u32[FFFF8408+64*low8(channel)]. No<16 bounds gate here;62488 supplies ROM channels2/10. "
+            + "Distinct from60940 combined-count calculation. This SFR is an explicit native model boundary, not "
+            + "ordinary RAM.");
+    semanticFunction(0x50B6AL, "f33_copy_acquisition_banks_to_application", v)
+        .setComment("Copy fast5EC8..5EDE banks into application822C..8242: group first triples ->8238/823E reference-side "
+            + "inputs; group last triples ->822C/8232 measured-side inputs. No validity/freshness test.5DE82 mode>FF "
+            + "admits copy, mode>100 admits downstream conditioning.");
+    semanticFunction(0x50BBCL, "f33_copy_serial_acquisition_to_application", v)
+        .setComment("Publish first two cached serial fields shiftedleft2, third unchanged; expand eight cached wrapping "
+            + "counters5F29..30 to interleaved application8244..4B; independently copy masks5F18/1A/22/24 "
+            + "->8258/5A/5C/5E. These mask fields come from66932/6294E, not629A2, and may be another generation. No "
+            + "per-call validity gate.");
+    semanticData(0x30F2CL, new ArrayDataType(u8, 6, 1), "f33_acquisition_group0_offsets",
+        "Exact00,01,02,03,04,05; next2bytes padding not part of six-entry loop.");
+    semanticData(0x30F34L, new ArrayDataType(u8, 6, 1), "f33_acquisition_group8_offsets",
+        "Exact00,01,02,03,04,05.");
+    semanticData(0x31674L, new ArrayDataType(u8, 2, 1), "f33_serial_acquisition_fifo_channels",
+        "Exact0,1, driver FIFO/status selection.");
+    semanticData(0x31676L, new ArrayDataType(u8, 2, 1), "f33_serial_acquisition_transfer_channels",
+        "Exact2,10 descriptor low-count selection.");
+    semanticData(0x31678L, new ArrayDataType(u8, 2, 1), "f33_serial_acquisition_field_encoding",
+        "Exact0,11;11 selects modular negation in629A2.");
+    semanticData(0xFEBE38D0L, new ArrayDataType(layout1Type, 2, 12), "f33_serial_acquisition_retained_records",
+        "Two12byte decoded records; numeric fields retained on missing/rejected input; counters separately accumulated.");
+    semanticData(0xFEBE5EC8L, new ArrayDataType(u16, 12, 2), "f33_acquisition_application_sample_banks",
+        "Permuted group0 first3,group8 first3,group0 last3,group8 last3; no freshness marker.");
+    semanticData(0xFEBE5F29L, new ArrayDataType(u8, 8, 1), "f33_serial_acquisition_failure_counter_snapshot",
+        "Channel0 four counters thenchannel1 four;wrapping occurrences,not validity flags.");
+  }
+  private void annotateResidentSecurityCrypto() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    CategoryPath category = new CategoryPath("/CamryF33");
+    StructureDataType layout0 = new StructureDataType(category, "F33BootAes128Context", 0);
+    layout0.setPackingEnabled(true);
+    layout0.add(new ArrayDataType(u8, 176, 1), "round_keys", null);
+    layout0.add(new ArrayDataType(u8, 16, 1), "row_order_state", null);
+    layout0.add(u8, "valid", null);
+    layout0.add(u8, "round", null);
+    layout0.add(new ArrayDataType(u8, 2, 1), "padding", null);
+    DataType layout0Type = resolve(layout0);
+    StructureDataType layout1 = new StructureDataType(category, "F33BootAes128CtrContext", 0);
+    layout1.setPackingEnabled(true);
+    layout1.add(layout0Type, "aes", null);
+    layout1.add(new ArrayDataType(u8, 16, 1), "cleared_extension", null);
+    layout1.add(new ArrayDataType(u8, 16, 1), "counter_be", null);
+    DataType layout1Type = resolve(layout1);
+    StructureDataType layout2 = new StructureDataType(category, "F33BootChallengeExclusionRecord", 0);
+    layout2.setPackingEnabled(true);
+    layout2.add(new ArrayDataType(new PointerDataType(u8, 4), 3, 4), "excluded_blocks", null);
+    layout2.add(u8, "count", null);
+    layout2.add(new ArrayDataType(u8, 3, 1), "padding", null);
+    DataType layout2Type = resolve(layout2);
+    semanticFunction(0x5328L, "f33_boot_security_seed_request", v,
+        new ParameterImpl("request_length", u16, currentProgram))
+        .setComment("Resident SID27 seed request. Active delay==1 gives37 before exact18-byte length check13. State1 copies16 "
+            + "client bytes from request+2 to2B34, calls6F22 into2B24 ignoring its0/1 status, copies challenge to2B44 "
+            + "and schedules handshake2 after response submission returns. State2 replaces client material but reuses "
+            + "same challenge. State3 returns16 zero response bytes without changing client. Invalid handshake0/>3 "
+            + "silently normalizes1. Valid paths preserve original subfunction at2B54 and form67 response via52DE. Not a "
+            + "successful native unlock/entropy claim.");
+    semanticFunction(0x53F2L, "f33_boot_security_key_request", v,
+        new ParameterImpl("request_length", u16, currentProgram))
+        .setComment("Only handshake2 checks exact18-byte request and derives expected16 bytes at currentSP "
+            + "using704C(client2B34,challenge2B24,SP). Compare is early-exit bytewise, not constant-time. Valid key "
+            + "storessecurity2,clearsfailurecountandchallenge,forms6702,pendinghandshake3inr29;2B55=3onlyafter52DE/674Areturns. "
+            + "First mismatch increments shared failed count and35,pendingstate1; second mismatch or second "
+            + "malformed-length attempt captures raw counter "
+            + "andstarts200000000delay,clearscount/challenge,gives36,pendingstate1. First malformed length13 also "
+            + "counts. States1/3reject24;state0/>3silentlynormalizes1.No explicit delay gate in key path.");
+    semanticFunction(0x6F22L, "f33_boot_security_generate_challenge", u32,
+        new ParameterImpl("challenge_out", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Output-only r6 pointer; return r10=0 accepted transformed candidate,1 fallback raw timer-derived16 bytes. "
+            + "Two-attempt rejection sampler:48D2 gathers low16bits of8 raw timer reads big-endian into16-byte stack "
+            + "key;72D6 initializesAES128CTRwithzeroROM8FD0counter;729C transformszeroROM8FC0block into "
+            + "AES_timerkey(0^128);7346wipes228-byteCTRcontext2E0C. Exclude zero andFF "
+            + "blocks;afterprioracceptedoutputalsoexclude2D38. Onaccepted candidatecopyto2D38andset30B4=1. "
+            + "Onsecondrejection/libraryfailurecopylast rawstackkeytooutputwithoutupdatinghistory. No entropy-quality "
+            + "guarantee. Incoming r28 is NOT an ABI argument: both ROM records have nonzero count2/3, and each "
+            + "comparison initializes r28 before use.");
+    semanticFunction(0x6FECL, "f33_boot_security_decrypt_client_material", v,
+        new ParameterImpl("client_material", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("intermediate_key", new PointerDataType(u8, 4), currentProgram))
+        .setComment("AES-128 single-block DECRYPT client_material under exactROMBFE8 key into intermediate_key;not encryption "
+            + "andnotCMAC. Shared AES contextFEBF2D48 init7680,length16,decrypt7470,length16,clear76C6.");
+    semanticFunction(0x701EL, "f33_boot_security_encrypt_block", v,
+        new ParameterImpl("key", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("plaintext", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("ciphertext", new PointerDataType(u8, 4), currentProgram))
+        .setComment("AES-128 single-block encryption with16-byte key/input/output,using shared "
+            + "contextFEBF2D48;clearsentire196-bytecontextafteroperation. r6key,r7plaintext,r8output; "
+            + "noapplicationGP/SecOCsemantics.");
+    semanticFunction(0x704CL, "f33_boot_security_derive_expected_key", v,
+        new ParameterImpl("client_material", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("challenge", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("expected_key", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Expected key = AES128_ENCRYPT(AES128_DECRYPT(ROM[BFE8..BFF7], client_material), challenge). The16-byte "
+            + "intermediate is stack-local, not CMAC, hash or a seed-only mapping. Both operations clear the "
+            + "shared196-byte context; intermediate and expected-key stack buffers are not explicitly cleared. "
+            + "Independent known-answer native composition verifies this transform, not complete transport/unlock.");
+    semanticFunction(0x7352L, "f33_boot_aes128_encrypt_block", u32,
+        new ParameterImpl("plaintext", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("ciphertext", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u8, currentProgram),
+        new ParameterImpl("context", new PointerDataType(layout0Type, 4), currentProgram))
+        .setComment("SoftwareAES128singleblock:requirelength16andcontext.valid1;row-orientedstateat+B0,10rounds,noMixColumnsinlastround,outputstandardcolumnorder.Return0success,FFinvalid.Exact-leaflive-registerpreservation "
+            + "matters:7B42callswithr8=16/r9contextalreadylive.");
+    semanticFunction(0x7470L, "f33_boot_aes128_decrypt_block", u32,
+        new ParameterImpl("ciphertext", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("plaintext", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u8, currentProgram),
+        new ParameterImpl("context", new PointerDataType(layout0Type, 4), currentProgram))
+        .setComment("SoftwareinverseAES128singleblock;length16andvalid1;round10AddRoundKeythen10inverseShiftRows/inverseSubBytes/AddRoundKeyroundswithinverseMixColumnsonlynonfinalrounds;return0/FF.");
+    semanticFunction(0x7680L, "f33_boot_aes128_initialize_context", u32,
+        new ParameterImpl("key", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("key_length", u8, currentProgram),
+        new ParameterImpl("context", new PointerDataType(layout0Type, 4), currentProgram))
+        .setComment("Only16-bytekeyaccepted;clearstate/valid/round,expand44words=176byteswith7594,setvalid1.Return0orFF.7594preserveslivecontextpointerr8at76ACdespiteordinarydecompilerextraout_r8;useexistingexact-leafinliningconventionratherthaninventingextraABIresult.");
+    semanticFunction(0x76C6L, "f33_boot_aes128_clear_context", v,
+        new ParameterImpl("context", new PointerDataType(layout0Type, 4), currentProgram))
+        .setComment("Clearvalidthenall196bytesvia76B6wordzero loop.");
+    semanticFunction(0x729CL, "f33_boot_security_generate_candidate_block", u32,
+        new ParameterImpl("challenge_out", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("context", new PointerDataType(layout1Type, 4), currentProgram))
+        .setComment("CopyzeroROM8FC0blocktostack;7B42AESCTRtransformintooutputusingr9context.Return0/FF.");
+    semanticFunction(0x72D6L, "f33_boot_security_initialize_candidate_context", u32,
+        new ParameterImpl("timer_key", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("key_length", u8, currentProgram),
+        new ParameterImpl("context", new PointerDataType(layout1Type, 4), currentProgram))
+        .setComment("CopyROM8FD0zero16-bytecounter;onlylength16;call7C9A(key,16,counter,16,context)withfifthargstack+0atcallerSP.Return0/FF.");
+    semanticFunction(0x7346L, "f33_boot_security_clear_candidate_context", v,
+        new ParameterImpl("context", new PointerDataType(layout1Type, 4), currentProgram))
+        .setComment("Forwardr6to7D3C,wipeentire228-byteAESCTRcontext;notzeroargumentdespitemissingpseudoparameter.");
+    semanticFunction(0x5584L, "f33_boot_security_delay_progress", v)
+        .setComment("Onlydelayflag1:unsigned32elapsed=(timer-start),cleardelayonlyelapsed>duration(strict);doesnotresetfailures,handshake,security,buffers.Timer51ACownsperiodiccall;noexplicitseconds.");
+    semanticFunction(0x55AAL, "f33_boot_security_initialize_handshake", v)
+        .setComment("Installraw200000000durationandcapturecounter;setdelay1,failcount0;clearretainedchallenge/client/responsechallenge;lastsubfunction0;handshake1.Doesnotitselfstoresecurity2B0Fanddoesnotresetprevious-challenge2D38/30B4.5086setsinitialsession1/security1;50EAsetsession2withoutitsownsecuritystore.");
+    semanticFunction(0x55FCL, "f33_boot_security_invalidate_handshake", v)
+        .setComment("Calledbyprioritymasked51D8sessionpublication.Ifhandshake1:securityunchanged;handshake2:clear16challengebyteswithoutwritingsecurity;otherstates(includingaccepted3):security1.Thenhandshake1.Retainsclient,responsecache,failcount,delay/history.");
+    semanticFunction(0x562AL, "f33_boot_security_cancel_delay", v)
+        .setComment("Onlyclearactive-delayflag.5148callsonapplicationhandoffreplaypath6504;doesnotresetfailurecountorhandshakeorclient/challenge.");
+    semanticFunction(0x7594L, "f33_boot_aes128_expand_round_keys", v,
+        new ParameterImpl("key", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("round_keys", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Expand16 key bytes into176 bytes (44 words), using the standard forward S-box and ten round constants. "
+            + "Exact leaf preserves incoming R8 context, subsequently used at76AC; inline real p-code instead of "
+            + "inventing another return value.");
+    semanticFunction(0x7C9AL, "f33_boot_aes128_ctr_initialize", u32,
+        new ParameterImpl("key", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("key_length", u8, currentProgram),
+        new ParameterImpl("counter", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("counter_length", u8, currentProgram),
+        new ParameterImpl("context", new PointerDataType(layout1Type, 4), currentProgram))
+        .setComment("Require low8 key/counter lengths16. Fifth argument is context at callerSP+0, calleeSP+8 after saves. "
+            + "Clear extension, copy16-byte big-endian counter to+D4 and initialize AES context. Return0 success orFF "
+            + "invalid.");
+    semanticFunction(0x7B42L, "f33_boot_aes128_ctr_transform_block", u32,
+        new ParameterImpl("input", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("output", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u8, currentProgram),
+        new ParameterImpl("context", new PointerDataType(layout1Type, 4), currentProgram))
+        .setComment("Require length16, valid context and counter not allFF. Encrypt counter, XOR16 input bytes into output, "
+            + "increment counter as128-bit big-endian. Return0 orFF. R8 length andR9 context remain live for7352; not an "
+            + "arbitrary-length streaming API.");
+    semanticFunction(0x7D3CL, "f33_boot_aes128_ctr_clear", v,
+        new ParameterImpl("context", new PointerDataType(layout1Type, 4), currentProgram))
+        .setComment("Clear valid then all228 context bytes through76B6. Does not clear caller stack buffers or retained "
+            + "challenge history.");
+    semanticData(0x8FA0L, layout2Type, "f33_boot_security_initial_exclusions",
+        "Resident security lifetime only; not application SecOC ownership. See challenge, protocol and context contracts.");
+    semanticData(0x8FB0L, layout2Type, "f33_boot_security_history_exclusions",
+        "Resident security lifetime only; not application SecOC ownership. See challenge, protocol and context contracts.");
+    semanticData(0xBFE8L, new ArrayDataType(u8, 16, 1), "f33_boot_security_client_decryption_key",
+        "Resident security lifetime only; not application SecOC ownership. See challenge, protocol and context contracts.");
+    semanticData(0xFEBF2B1CL, u32, "f33_boot_security_delay_duration",
+        "Resident security lifetime only; not application SecOC ownership. See challenge, protocol and context contracts.");
+    semanticData(0xFEBF2B20L, u32, "f33_boot_security_delay_start",
+        "Resident security lifetime only; not application SecOC ownership. See challenge, protocol and context contracts.");
+    semanticData(0xFEBF2B24L, new ArrayDataType(u8, 16, 1), "f33_boot_security_challenge",
+        "Resident security lifetime only; not application SecOC ownership. See challenge, protocol and context contracts.");
+    semanticData(0xFEBF2B34L, new ArrayDataType(u8, 16, 1), "f33_boot_security_client_material",
+        "Resident security lifetime only; not application SecOC ownership. See challenge, protocol and context contracts.");
+    semanticData(0xFEBF2B44L, new ArrayDataType(u8, 16, 1), "f33_boot_security_response_challenge",
+        "Resident security lifetime only; not application SecOC ownership. See challenge, protocol and context contracts.");
+    semanticData(0xFEBF2B54L, u8, "f33_boot_security_request_subfunction",
+        "Resident security lifetime only; not application SecOC ownership. See challenge, protocol and context contracts.");
+    semanticData(0xFEBF2B55L, u8, "f33_boot_security_handshake_state",
+        "Resident security lifetime only; not application SecOC ownership. See challenge, protocol and context contracts.");
+    semanticData(0xFEBF2B56L, u8, "f33_boot_security_delay_active",
+        "Resident security lifetime only; not application SecOC ownership. See challenge, protocol and context contracts.");
+    semanticData(0xFEBF2B57L, u8, "f33_boot_security_failed_attempts",
+        "Resident security lifetime only; not application SecOC ownership. See challenge, protocol and context contracts.");
+    semanticData(0xFEBF2D38L, new ArrayDataType(u8, 16, 1), "f33_boot_security_previous_accepted_challenge",
+        "Resident security lifetime only; not application SecOC ownership. See challenge, protocol and context contracts.");
+    semanticData(0xFEBF2D48L, layout0Type, "f33_boot_security_aes_context",
+        "Resident security lifetime only; not application SecOC ownership. See challenge, protocol and context contracts.");
+    semanticData(0xFEBF2E0CL, layout1Type, "f33_boot_security_candidate_context",
+        "Resident security lifetime only; not application SecOC ownership. See challenge, protocol and context contracts.");
+    semanticData(0xFEBF30B4L, u8, "f33_boot_security_challenge_history_valid",
+        "Resident security lifetime only; not application SecOC ownership. See challenge, protocol and context contracts.");
+    // The real leaf preserves R8 used by the context-valid store after expansion.
+    getFunctionAt(toAddr(0x7594L)).setInline(true);
+    semanticData(0x8FF1L, new ArrayDataType(u8, 256, 1), "CRYPT_AES_Encryption_SBox",
+        "Standard forward AES substitution box; used by key expansion and forward rounds.");
+    semanticData(0x90F1L, new ArrayDataType(u8, 256, 1), "CRYPT_AES_Decryption_SBox_Inverse",
+        "Standard inverse AES substitution box; preserve established Findcrypt name.");
+  }
+  private void annotatePhaseModulation() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    CategoryPath category = new CategoryPath("/CamryF33");
+    semanticFunction(0x38C7CL, "f33_transform_first_regulated_phase_commands", v)
+        .setComment("Transform limited first-bank axes with output-frame sine/cosine coefficients. Signed division truncates "
+            + "toward zero. Compute third phase from the negative sum of UNSATURATED first/second intermediates; publish "
+            + "all three saturated to +/-32767 at6E68/6A/6C. Measured-current and reference-compensation transforms are "
+            + "different producers.");
+    semanticFunction(0x38D6CL, "f33_transform_second_regulated_phase_commands", v)
+        .setComment("Second-bank output-frame transform to6E70/72/74. Third phase uses unsaturated intermediate sum before its "
+            + "own +/-32767 clamp. Native nonzero composition covers both banks, subsequent compensation, modulation and "
+            + "losing slot0 publication.");
+    semanticFunction(0x37C4CL, "f33_select_phase_modulation_modes", v)
+        .setComment("Square signed16 axis pairs6C40/42 and6C44/46 into unsigned32 energies6D64/68. Curve input is "
+            + "low16(energy>>12), with32-count interpolation and fixed endpoint beyond index126. Selector6D6C swaps "
+            + "upper/lower offset maps between banks. Each8B88/89==5A overrides energy with mode0 and offset6144. "
+            + "Otherwise energy<6166256 gives0, <54546923 gives5A, elseA5. These are software modulation classes, not "
+            + "physical bridge states.");
+    semanticFunction(0x368B0L, "f33_map_phase_compensation_gain", v)
+        .setComment("Use saturating absolute signed16 command6E0A to interpolate unsigned ordinates of2BD10 with16-count "
+            + "spacing; index>=127 returns1024. Publish6BE4. Table x words and finalFFFFFFFF row are not read by this "
+            + "consumer.");
+    semanticFunction(0x36678L, "f33_refresh_phase_compensation_amplitude", v)
+        .setComment("Only8A14==1 recomputes32-bit6B98; otherwise retain it. Exact calibrated7DB2 base curve collapses to100. "
+            + "WhenEAC6<512, abs(7EA8)>683 reduces the base toward0 at3413, and above3413 selects0. Scale by6BE4/1024. "
+            + "No recovered physical units; native composition exercises retained amplitude, not this entire "
+            + "recomputation surface.");
+    semanticFunction(0x36750L, "f33_compensate_first_regulated_phases", v)
+        .setComment("Retain raw regulated triplet in6BB4/B8/BC. Reference6E58/5A/5C selects signed compensation bounded by "
+            + "+/-6B98, linear within +/-96. Always calculate6BA8/AC/B0; modeA5 suppresses ADDITION, not calculation. "
+            + "Publish adjusted32-bit triplet6B9C/BA0/BA4.");
+    semanticFunction(0x367FEL, "f33_compensate_second_regulated_phases", v)
+        .setComment("Second bank: reference6E60/62/64 and regulated6E70/72/74; raw backup6BD8/DC/E0, computed "
+            + "deltas6BCC/D0/D4, adjusted6BC0/C4/C8. ModeA5 retains raw output despite nonzero computed deltas. Signed "
+            + "divisions truncate toward zero.");
+    semanticFunction(0x38842L, "f33_modulate_first_phase_triplet", v)
+        .setComment("Mode0 adds the recovered offset. Mode5A aligns max to11426 when selector5A, otherwise min to492. Other "
+            + "modes choose upper12288-max when3*max>12288, otherwise0-min, then clamp each32-bit sum to0..12288. "
+            + "Publish halfwords6E3A/3C/3E; subsequent scaling and arbitration remain distinct.");
+    semanticFunction(0x3894CL, "f33_modulate_second_phase_triplet", v)
+        .setComment("Paired modulation to6E4A/4C/4E. Mode5A selects upper alignment for selectorA5, opposite the first bank. "
+            + "Mode0 adds its offset; other modes use the same strict3*max threshold and0..12288 clamp. Native "
+            + "composition exercises first5A and secondA5 with nonzero deltas.");
+    semanticFunction(0x37DE4L, "f33_initialize_phase_offset_selector", v)
+        .setComment("Set selector6D6C=5A, adjacent byte6D6D=0 and counter6D6E=0. This initializes software offset alternation, "
+            + "not a PWM period or electrical phase.");
+    semanticFunction(0x37DF4L, "f33_advance_phase_offset_selector", v)
+        .setComment("Increment low16 counter; entry>=125 or increment reaching125 resets counter and toggles5A toA5, any other "
+            + "selector to5A. ROM31B18 then overrides to5A for33 orA5 for22; exact value11 leaves alternation enabled. "
+            + "No physical cadence inferred.");
+    semanticFunction(0x575F6L, "f33_reduce_phase_output_code_limits", v)
+        .setComment("Per bank, reduce three unsigned requested limits from nominal8000 only when cached minimum/complement "
+            + "disagree. Publish minimum8B92/9C and flag8B88/89=5A exactly when below8000. Thus ordinary reduced limits "
+            + "also force mode0 in37C4C. Self-consistent caches are retained; not an independent bridge-disable "
+            + "permission.");
+    semanticFunction(0x57484L, "f33_stage_phase_output_history", v)
+        .setComment("Average current/prior triplets only when both new and previous selected indices are0, ROM3190C!=5A and "
+            + "the threshold conditions admit. Nonzero winners bypass averaging but still shift current to prior and "
+            + "prior to older history, and publish winner indices8B5C/D plus averaging flags8B5E/F. Hardware commit "
+            + "occurs later.");
+    semanticFunction(0x57DF0L, "f33_stage_live_phase_halfword_compares", v)
+        .setComment("Forward selected triplets8BEE/F0/F2 and8BF4/F6/F8 through669DA and66A40 into halfword compare staging. No "
+            + "arbitration, recomputation or hardware commit here.");
+    semanticFunction(0x57FD2L, "f33_publish_current_control_snapshot", v)
+        .setComment("Unconditionally publish the current-control diagnostic snapshotEC00..24, including raw5F36 and retained "
+            + "command/current/limit fields.5E202 calls this even when control computation and output staging are both "
+            + "skipped. No atomic acquisition generation is implied.");
+    semanticData(0x31AE4L, u16, "f33_phase_forced_offset",
+        "Exact6144; used when the published code-limit flag is5A.");
+    semanticData(0x31AE8L, u32, "f33_phase_modulation_first_energy_threshold",
+        "Exact6166256; inclusive transition from0 to5A.");
+    semanticData(0x31AECL, u32, "f33_phase_modulation_second_energy_threshold",
+        "Exact54546923; inclusive transition toA5.");
+    semanticData(0x31B18L, u8, "f33_phase_offset_selector_override",
+        "Exact11;33 forces5A and22 forcesA5 after counter progression.");
+    semanticData(0x31B26L, u16, "f33_phase_offset_selector_period",
+        "Exact125 software advances, not an established hardware time.");
+    semanticData(0xFEBE6D6CL, u8, "f33_phase_offset_selector",
+        "Alternating5A/A5; chooses opposite upper/lower alignment between banks.");
+    semanticData(0xFEBE6D6EL, u16, "f33_phase_offset_selector_counter",
+        "Reset/toggled on reaching125; independent from arbitration winner indices.");
+    DataType point = currentProgram.getDataTypeManager().getDataType("/CamryF33/F33CurvePointS16U16");
+    if (point == null) throw new IllegalStateException("missing exact-F33 curve point layout");
+    semanticData(0x2BD10L, new ArrayDataType(point, 129, 4), "f33_phase_compensation_gain_curve",
+        "128 numerical rows followed by FFFFFFFF. These consumers index ordinates directly and use fixed endpoint constants, not the sentinel.");
+    semanticData(0x2BF14L, new ArrayDataType(point, 129, 4), "f33_phase_upper_modulation_offset_curve",
+        "128 numerical rows followed by FFFFFFFF. These consumers index ordinates directly and use fixed endpoint constants, not the sentinel.");
+    semanticData(0x2C118L, new ArrayDataType(point, 129, 4), "f33_phase_lower_modulation_offset_curve",
+        "128 numerical rows followed by FFFFFFFF. These consumers index ordinates directly and use fixed endpoint constants, not the sentinel.");
   }
   @Override public void run() throws Exception {
     String[] args = getScriptArgs();
@@ -7815,6 +8263,9 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateResidentFlashOperationLifecycle();
     annotateReceivedInputConditioning();
     annotateResidentDiagnosticLifecycle();
+    annotateAcquisitionOwnership();
+    annotateResidentSecurityCrypto();
+    annotatePhaseModulation();
     annotateDataFlashReads();
     annotateFaciSubmission();
     annotatePwmCompareStaging();

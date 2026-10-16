@@ -200,8 +200,6 @@ target_addr,decoded_instruction_count,decoded_byte_count,run_start,run_end,incom
 0x0002196a,1,2,0x0002196a,0x0002196b,0,2,0,,0x0007f5ba;0x0007f5f0,true,false,false,1,false,false,pointer-referenced-code-run,unresolved
 0x00022840,8,16,0x00022840,0x0002284f,0,4,0,,0x0007d05c;0x0007d72c;0x0007df14;0x0007e5a4,true,false,false,1,false,false,pointer-referenced-code-run,unresolved
 0x00022e94,2,8,0x00022e94,0x00022e9b,0,3,0,,0x00083b14;0x0008488c;0x0008569a,true,false,false,1,false,false,pointer-referenced-code-run,unresolved
-0x0002bf16,4,8,0x0002bf16,0x0002bf1d,0,4,0,,0x00037c4c,true,false,false,1,false,false,pointer-referenced-code-run,unresolved
-0x0002c11a,3,8,0x0002c11a,0x0002c121,0,4,0,,0x00037c4c,true,false,false,1,false,false,pointer-referenced-code-run,unresolved
 0x0002d32c,4,8,0x0002d32c,0x0002d333,0,1,0,,,true,false,false,1,false,false,pointer-referenced-code-run,unresolved
 0x0002db34,4,8,0x0002db34,0x0002db3b,0,1,0,,,true,false,false,1,false,false,pointer-referenced-code-run,unresolved
 0x0002df38,4,8,0x0002df38,0x0002df3f,0,1,0,,,true,false,false,1,false,false,pointer-referenced-code-run,unresolved

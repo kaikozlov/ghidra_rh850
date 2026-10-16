@@ -1,0 +1,81 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_resident_crypto_delay_precedes_seed_length_validation",
+  "entry": {
+    "role": "Session2 and SID27 length>=2 dispatch to seed handler; active delay37 precedes its exact18-byte validation. No entropy call.",
+    "scope": "resolved-address",
+    "address": "0x5516"
+  },
+  "max_instructions": 100000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebf9800",
+    "tp": "0x869c",
+    "lp": "0xfebf1000",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0x0",
+    "r6": "0x2"
+  },
+  "stop_addresses": [
+    "0x674a"
+  ],
+  "memory": [
+    {
+      "address": "0xfebf2b0e",
+      "hex": "0201",
+      "evidence": "explicit programming session and security state"
+    },
+    {
+      "address": "0xfebf2b24",
+      "hex": "00112233445566778899aabbccddeeff28acc9537d6f38cb6c160aa1f450f09ca5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "retained challenge, client material and response challenge canary"
+    },
+    {
+      "address": "0xfebf2b54",
+      "hex": "00010100",
+      "evidence": "last subfunction, handshake, delay flag, failed-attempt count"
+    },
+    {
+      "address": "0xfebf30bf",
+      "hex": "01",
+      "evidence": "physical addressing mode; request data immediately follows"
+    },
+    {
+      "address": "0xfebf30c0",
+      "hex": "2701",
+      "evidence": "explicit diagnostic request at ordinary resident request buffer"
+    }
+  ],
+  "checks": [
+    {
+      "name": "delay beats invalid seed length",
+      "kind": "memory",
+      "address": "0xfebf2ad0",
+      "size": 3,
+      "equals_hex": "7f2737"
+    },
+    {
+      "name": "delay remains owned by timer path",
+      "kind": "memory",
+      "address": "0xfebf2b56",
+      "size": 1,
+      "equals_hex": "01"
+    },
+    {
+      "name": "denied seed does not stage material",
+      "kind": "memory",
+      "address": "0xfebf2b34",
+      "size": 16,
+      "equals_hex": "28acc9537d6f38cb6c160aa1f450f09c"
+    },
+    {
+      "name": "bounded exact-ROM endpoint",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x674a"
+    }
+  ]
+}

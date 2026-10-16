@@ -45,17 +45,34 @@ check(
 )
 check("0x58c9a is init/marker-only (closes VAR-071 bound)", st["init_marker_only_0x58c9a"] is True)
 edges = st["copy_edges"]
-check(
-    "0x50b6a copies exactly the 12 group-input halfwords",
-    len(edges["0x00050b6a"]) == 12
-    and all(d.startswith("0xFEBE82") for d, s in edges["0x00050b6a"])
-    and all(s.startswith("0xFEBE5E") for d, s in edges["0x00050b6a"]),
-)
-check(
-    "serial-sensor staging has four scaled fields",
-    len(edges["0x00050bbc"]) == 18
-    and sorted(st["scaled_cells_0x50bbc"]) == ["0xFEBE824C", "0xFEBE824E", "0xFEBE8250", "0xFEBE8252"],
-)
+expected_groups = [
+    [f"0x{destination + i * 2:08X}", f"0x{source + i * 2:08X}"]
+    for destination, source in (
+        (0xFEBE8238, 0xFEBE5EC8), (0xFEBE822C, 0xFEBE5ED4),
+        (0xFEBE823E, 0xFEBE5ECE), (0xFEBE8232, 0xFEBE5EDA),
+    )
+    for i in range(3)
+]
+check("group-input staging preserves both reference/measured bank permutations",
+      sorted(edges["0x00050b6a"]) == sorted(expected_groups))
+expected_serial = [
+    [f"0xFEBE{dst:04X}", f"0xFEBE{src:04X}"]
+    for dst, src in (
+        (0x824C, 0x5F12), (0x824E, 0x5F14), (0x8254, 0x5F16),
+        (0x8250, 0x5F1C), (0x8252, 0x5F1E), (0x8256, 0x5F20),
+        (0x8258, 0x5F18), (0x825A, 0x5F1A), (0x825C, 0x5F22), (0x825E, 0x5F24),
+    )
+] + [
+    [f"0x{0xFEBE8244 + channel + counter * 2:08X}",
+     f"0x{0xFEBE5F29 + channel * 4 + counter:08X}"]
+    for channel in range(2) for counter in range(4)
+]
+check("serial staging separates numeric fields, interleaved byte counters and masks",
+      sorted(edges["0x00050bbc"]) == sorted(expected_serial))
+check("only the four 14-bit serial fields are scaled by four",
+      st["scaled_cells_0x50bbc"] == {
+          f"0xFEBE{address:04X}": "x4" for address in (0x824C, 0x824E, 0x8250, 0x8252)
+      })
 
 
 rp = art["ring_producers"]

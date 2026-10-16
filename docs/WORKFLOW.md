@@ -849,6 +849,21 @@ function conclusions; its `function_discovery_reviews` path owns adjudicated
 outside-function clusters. Exporters regenerate the corresponding ledgers and
 summaries. Structural coverage/ranking provides navigation, not additional proof.
 
+For Camry `camry-8965F3307000`, the E1/E2 computed-store censuses also depend on
+the canonical corpus, not only the firmware hash. After promoting a changed
+corpus, run `ghidra/scripts/investigate/AuditComputedStoreTargets.java` through
+`tools/gtarget camry-8965F3307000 script run` against the matching rebuilt working
+project. Supply each census artifact's `targets` list after `--`, separately for
+`camry_8965F3307000_computed_store_target_census.json` and
+`camry_8965F3307000_dmac_destination_computed_store_census.json` in
+`data/generated/`. Retain each script's stdout or single-result JSON wrapper,
+then run
+`uv run python -m tools.targets.camry.builders.build_camry_8965F3307000_hidden_ingress_residuals
+--refresh-e1-output E1_OUTPUT --refresh-e2-output E2_OUTPUT`.
+The producer binds the refreshed censuses to the corpus hash and rejects stale
+inputs. Do not relabel old audit output or repin aggregate totals to bypass that
+dependency; changed candidate families require analysis before closure.
+
 ## CI
 
 Normal push/PR CI runs the small `make verify` core suite. The exhaustive
