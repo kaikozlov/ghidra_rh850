@@ -77,6 +77,7 @@ uint32_t f33_nvm_advance_family0_request_index(uint32_t index);
 uint32_t f33_nvm_advance_family1_request_index(uint32_t index);
 uint32_t f33_nvm_get_family0_status(uint32_t object);
 uint32_t f33_nvm_get_family1_completion(uint32_t object);
+uint32_t f33_nvm_get_family1_record(uint32_t object, uint32_t destination);
 uint32_t f33_nvm_check_family1_checksum(uint32_t object);
 void f33_nvm_publish_family1_checksum(uint32_t object);
 uint32_t f33_nvm_retain_token_while_reads_pending(uint32_t token);

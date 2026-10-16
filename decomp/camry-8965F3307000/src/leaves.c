@@ -245,6 +245,84 @@ uint32_t f33_nvm_get_family1_completion(uint32_t object) {
     return camry_read8(camry_gp + index + 19288u);
 }
 
+static int32_t f33_vote_redundant_u8(
+    uint32_t raw, uint32_t encoded55, uint32_t encoded_aa, uint32_t output) {
+    uint32_t plain;
+    uint32_t copy55;
+    uint32_t copy_aa;
+    int32_t status;
+    if (raw == 0u || encoded55 == 0u || encoded_aa == 0u || output == 0u || raw == output)
+        return -1;
+    plain = camry_read8(raw);
+    copy55 = camry_read8(encoded55) ^ 0x55u;
+    copy_aa = camry_read8(encoded_aa) ^ 0xaau;
+    if (plain == copy55) {
+        camry_write8(output, plain);
+        if (plain == copy_aa)
+            return 0;
+        return -11;
+    }
+    if (plain != copy_aa) {
+        if (copy55 == copy_aa) {
+            status = -12;
+            plain = copy55;
+        } else {
+            status = -13;
+        }
+        camry_write8(output, plain);
+        return status;
+    }
+    camry_write8(output, plain);
+    return -11;
+}
+
+static int32_t f33_publish_redundant_u8(
+    uint32_t value, uint32_t raw, uint32_t encoded55, uint32_t encoded_aa) {
+    if (raw == 0u || encoded55 == 0u || encoded_aa == 0u)
+        return -1;
+    value &= 0xffu;
+    camry_write8(raw, value);
+    camry_write8(encoded55, value ^ 0x55u);
+    camry_write8(encoded_aa, value ^ 0xaau);
+    return 0;
+}
+
+static uint32_t f33_read_repair_redundant_u8(
+    uint32_t raw, uint32_t encoded55, uint32_t encoded_aa, uint32_t fallback) {
+    uint32_t slot = 0xfebe1ffbu;
+    int32_t status = f33_vote_redundant_u8(raw, encoded55, encoded_aa, slot);
+    if (status != 0) {
+        if (status != -12 && status != -11)
+            camry_write8(slot, fallback);
+        f33_publish_redundant_u8(camry_read8(slot), raw, encoded55, encoded_aa);
+    }
+    return camry_read8(slot);
+}
+
+uint32_t f33_nvm_get_family1_record(uint32_t object, uint32_t destination) {
+    uint32_t index = object & 0xffffu;
+    uint32_t descriptor;
+    uint32_t source;
+    uint32_t words;
+    uint32_t offset;
+    uint32_t status;
+    if (index >= camry_read16((3u << 16) - 21134u))
+        return 0xffu;
+    descriptor = 0x2af0cu + (index << 3);
+    source = camry_read32(descriptor + 4u);
+    words = camry_read16(descriptor) >> 2;
+    for (offset = 0u; offset < words; offset = (offset + 1u) & 0xffffu)
+        camry_write32(destination + (offset << 2), camry_read32(source + (offset << 2)));
+    status = f33_read_repair_redundant_u8(
+        camry_gp + index + 19240u,
+        camry_gp + index + 22664u,
+        camry_gp + index + 22700u,
+        0x12u);
+    if (status == 0x10u && f33_nvm_check_family1_checksum(index) != 1u)
+        status = 0x12u;
+    return status;
+}
+
 static uint32_t family1_word_fold(uint32_t object) {
     uint32_t descriptor = 0x2af0cu + (object << 3);
     uint32_t words = camry_read16(descriptor) >> 2;
