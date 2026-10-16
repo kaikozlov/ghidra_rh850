@@ -730,6 +730,42 @@ saturate:
     return 0u;
 }
 
+uint32_t f33_freshness_reconstruct_candidate(
+    uint32_t slot, uint32_t received, uint32_t skip_matches, uint32_t reconstructed) {
+    uint32_t search = 0xfebe1fd8u;
+    uint32_t bit_length = camry_read8(received + 11u);
+    uint32_t message_width;
+    uint32_t reset_width;
+    uint32_t span;
+    uint32_t committed_message;
+    uint32_t received_message;
+    int32_t slot_index;
+
+    camry_write8(search + 16u, 0);
+    camry_write16(search + 12u, skip_matches);
+    if (bit_length > 10u) {
+        message_width = 8u;
+        reset_width = 2u;
+    } else if (bit_length < 2u) {
+        message_width = 0u;
+        reset_width = bit_length;
+    } else {
+        message_width = (bit_length - 2u) & 0xffffu;
+        reset_width = 2u;
+    }
+    camry_write32(search + 4u, reset_width);
+    slot_index = sign_half(camry_read16(slot + 2u));
+    camry_write32(search, message_width);
+    span = 1u << (message_width & 31u);
+    committed_message = camry_read16(camry_gp - 25116u + (uint32_t)(slot_index * 12));
+    received_message = camry_read16(received + 8u);
+    if (received_message <= (committed_message & (span - 1u)))
+        camry_write8(search + 16u, 1u);
+    if (f33_freshness_select_reset_candidate(received, search) != 1u)
+        return 0x22u;
+    return f33_freshness_reconstruct_ordinary(slot, received, search, reconstructed);
+}
+
 void f33_freshness_decode_wire(uint32_t wire, uint32_t bit_length, uint32_t freshness) {
     uint32_t low;
     if (bit_length == 4u) {

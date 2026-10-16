@@ -60,6 +60,7 @@
 {"addr": "0x90736", "name": "f33_freshness_decode_wire", "status": "equivalent"}
 {"addr": "0x909ca", "name": "f33_freshness_select_reset_candidate", "status": "equivalent"}
 {"addr": "0x90a48", "name": "f33_freshness_reconstruct_ordinary", "status": "equivalent"}
+{"addr": "0x90b1c", "name": "f33_freshness_reconstruct_candidate", "status": "equivalent"}
 {"addr": "0x90d6a", "name": "f33_freshness_commit_pending", "status": "equivalent"}
 {"addr": "0xb73ba", "name": "f33_scale_u16_delta_s16_x4", "status": "equivalent"}
 {"addr": "0xbb88c", "name": "f33_update_thermal_release_envelope", "status": "equivalent"}
