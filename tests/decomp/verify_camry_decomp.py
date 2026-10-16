@@ -44,6 +44,7 @@ VALUE_RETURN = {
     "f33_nvm_retain_token_while_reads_pending",
     "f33_force_unconfirmed_terminal_monitor_healthy",
     "f33_freshness_select_reset_candidate",
+    "f33_freshness_reconstruct_ordinary",
     "f33_nvm_probe_range_rejected",
     "f33_nvm_translate_diagnostic_mask",
     "f33_lookup_u32_value_by_key",
@@ -206,6 +207,8 @@ def bind(library: ctypes.CDLL) -> None:
     library.f33_freshness_select_reset_candidate.restype = u32
     library.f33_freshness_commit_pending.argtypes = [u32, u32]
     library.f33_freshness_commit_pending.restype = None
+    library.f33_freshness_reconstruct_ordinary.argtypes = [u32, u32, u32, u32]
+    library.f33_freshness_reconstruct_ordinary.restype = u32
     library.f33_classify_channel_residual_a.argtypes = []
     library.f33_classify_channel_residual_a.restype = u32
     library.f33_check_learned_quad_bounds.argtypes = []
@@ -490,6 +493,8 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
     if name == "f33_freshness_commit_pending":
         library.f33_freshness_commit_pending(r6, r7)
         return None
+    if name == "f33_freshness_reconstruct_ordinary":
+        return int(library.f33_freshness_reconstruct_ordinary(r6, r7, r8, r9)) & 0xFFFFFFFF
     if name == "f33_classify_channel_residual_a":
         return int(library.f33_classify_channel_residual_a()) & 0xFFFFFFFF
     if name == "f33_check_learned_quad_bounds":

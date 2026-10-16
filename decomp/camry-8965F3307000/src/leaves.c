@@ -552,6 +552,8 @@ void f33_nvm_recover_family1_request_indices(uint32_t producer_out, uint32_t con
         camry_gp + 19854u);
 }
 
+static int32_t sign_half(uint32_t bits);
+
 void f33_freshness_encode_wire(uint32_t freshness, uint32_t wire, uint32_t bit_capacity) {
     uint32_t length = camry_read8(freshness + 11u);
     if (length > camry_read8(bit_capacity))
@@ -671,6 +673,61 @@ void f33_freshness_commit_pending(uint32_t slot, uint32_t verification_result) {
     source = camry_gp - 25100u + displacement;
     for (offset = 0u; offset < 12u; offset++)
         camry_write8(destination + offset, camry_read8(source + offset));
+}
+
+uint32_t f33_freshness_reconstruct_ordinary(
+    uint32_t slot, uint32_t received, uint32_t search, uint32_t reconstructed) {
+    uint32_t trip = camry_read32(camry_gp - 25152u);
+    int32_t slot_index = sign_half(camry_read16(slot + 2u));
+    uint32_t record = camry_gp - 25124u + (uint32_t)(slot_index * 12);
+    uint32_t committed_trip = camry_read32(record);
+    uint32_t committed_reset = camry_read32(record + 4u);
+    uint32_t committed_message = camry_read16(record + 8u);
+    uint32_t ceiling = 0xffffffffu >> 12;
+    uint32_t result = 0x22u;
+
+    if (committed_trip == trip && committed_reset == camry_read32(search + 8u)) {
+        uint32_t width;
+        uint32_t span;
+        uint32_t combined;
+        uint32_t interval;
+        uint32_t sum;
+        camry_write32(reconstructed, committed_trip);
+        camry_write32(reconstructed + 4u, committed_reset);
+        result = 0u;
+        if (committed_reset >= ceiling)
+            goto saturate;
+        width = camry_read32(search);
+        span = 1u << (width & 31u);
+        combined = camry_read16(received + 8u) | (committed_message & ~(span - 1u));
+        camry_write16(reconstructed + 8u, combined);
+        if (camry_read8(search + 16u) != 1u)
+            return 0u;
+        interval = 0u;
+        if (width < 8u)
+            interval = span & 0xffffu;
+        sum = interval + committed_message;
+        if ((sum & 0xffffu) <= committed_message || (int32_t)(sum - 255u) > 0)
+            goto saturate;
+        camry_write16(reconstructed + 8u, combined + interval);
+        return 0u;
+    }
+    if (trip > committed_trip
+        || (trip == committed_trip && camry_read32(search + 8u) > committed_reset)) {
+        uint32_t reset = camry_read32(search + 8u);
+        camry_write32(reconstructed, trip);
+        camry_write16(reconstructed + 8u, camry_read16(received + 8u));
+        camry_write32(reconstructed + 4u, reset);
+        if (reset < ceiling)
+            return 0u;
+    } else {
+        if (camry_read16(search + 14u) < 4u)
+            return 0x23u;
+        return result;
+    }
+saturate:
+    camry_write16(reconstructed + 8u, 0xffu);
+    return 0u;
 }
 
 void f33_freshness_decode_wire(uint32_t wire, uint32_t bit_length, uint32_t freshness) {

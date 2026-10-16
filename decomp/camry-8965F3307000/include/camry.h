@@ -106,6 +106,8 @@ void f33_freshness_encode_wire(uint32_t freshness, uint32_t wire, uint32_t bit_c
 void f33_freshness_decode_wire(uint32_t wire, uint32_t bit_length, uint32_t freshness);
 uint32_t f33_freshness_select_reset_candidate(uint32_t received, uint32_t search);
 void f33_freshness_commit_pending(uint32_t slot, uint32_t verification_result);
+uint32_t f33_freshness_reconstruct_ordinary(
+    uint32_t slot, uint32_t received, uint32_t search, uint32_t reconstructed);
 uint32_t f33_classify_channel_residual_a(void);
 uint32_t f33_curve16_interpolate_with_slope(uint32_t curve, uint32_t x, uint32_t slope);
 uint32_t f33_check_learned_quad_bounds(void);
