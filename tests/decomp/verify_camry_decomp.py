@@ -54,6 +54,7 @@ VALUE_RETURN = {
     "f33_nvm_get_direct_operation_result",
     "f33_nvm_read_buffer",
     "f33_nvm_write_buffer",
+    "f33_nvm_submit_operation",
 }
 
 ROM_TABLES = (
@@ -188,6 +189,14 @@ def bind(library: ctypes.CDLL) -> None:
     library.f33_pwm_initialize_compare_stages.restype = None
     library.f33_pwm_stage_halfword_compares.argtypes = [u32, u32, u32, u32]
     library.f33_pwm_stage_halfword_compares.restype = None
+    library.f33_pwm_stage_word_compares.argtypes = [u32, u32, u32, u32]
+    library.f33_pwm_stage_word_compares.restype = None
+    library.f33_nvm_set_read_buffer.argtypes = [u32, u32]
+    library.f33_nvm_set_read_buffer.restype = None
+    library.f33_nvm_set_write_buffer.argtypes = [u32, u32]
+    library.f33_nvm_set_write_buffer.restype = None
+    library.f33_nvm_submit_operation.argtypes = [u32]
+    library.f33_nvm_submit_operation.restype = u32
     library.f33_freshness_select_reset_candidate.argtypes = [u32, u32]
     library.f33_freshness_select_reset_candidate.restype = u32
     library.f33_force_unconfirmed_terminal_monitor_healthy.argtypes = [u32, u32, u32]
@@ -446,6 +455,17 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
     if name == "f33_pwm_stage_halfword_compares":
         library.f33_pwm_stage_halfword_compares(r6, r7, r8, r9)
         return None
+    if name == "f33_pwm_stage_word_compares":
+        library.f33_pwm_stage_word_compares(r6, r7, r8, r9)
+        return None
+    if name == "f33_nvm_set_read_buffer":
+        library.f33_nvm_set_read_buffer(r6, r7)
+        return None
+    if name == "f33_nvm_set_write_buffer":
+        library.f33_nvm_set_write_buffer(r6, r7)
+        return None
+    if name == "f33_nvm_submit_operation":
+        return int(library.f33_nvm_submit_operation(r6)) & 0xFFFFFFFF
     if name == "f33_freshness_select_reset_candidate":
         return int(library.f33_freshness_select_reset_candidate(r7, r8)) & 0xFFFFFFFF
     if name == "f33_force_unconfirmed_terminal_monitor_healthy":

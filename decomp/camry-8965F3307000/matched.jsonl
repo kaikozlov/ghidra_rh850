@@ -1,5 +1,6 @@
 {"addr": "0x61aea", "name": "f33_pwm_initialize_compare_stages", "status": "equivalent"}
 {"addr": "0x61c90", "name": "f33_pwm_stage_halfword_compares", "status": "equivalent"}
+{"addr": "0x61d38", "name": "f33_pwm_stage_word_compares", "status": "equivalent"}
 {"addr": "0x632b2", "name": "f33_clear_application_ram_4k", "status": "equivalent"}
 {"addr": "0x66e2e", "name": "f33_copy_whole_words", "status": "equivalent"}
 {"addr": "0x66e50", "name": "f33_update_whole_words", "status": "equivalent"}
@@ -17,8 +18,11 @@
 {"addr": "0x73552", "name": "f33_nvm_unlink_queue_slot", "status": "equivalent"}
 {"addr": "0x73a86", "name": "f33_lookup_u32_value_by_key", "status": "equivalent"}
 {"addr": "0x73ab0", "name": "f33_nvm_initialize_operation", "status": "equivalent"}
+{"addr": "0x73afc", "name": "f33_nvm_submit_operation", "status": "equivalent"}
 {"addr": "0x73ca4", "name": "f33_nvm_storage_handle", "status": "equivalent"}
+{"addr": "0x745e4", "name": "f33_nvm_set_read_buffer", "status": "equivalent"}
 {"addr": "0x74614", "name": "f33_nvm_read_buffer", "status": "equivalent"}
+{"addr": "0x746aa", "name": "f33_nvm_set_write_buffer", "status": "equivalent"}
 {"addr": "0x746de", "name": "f33_nvm_write_buffer", "status": "equivalent"}
 {"addr": "0x747e0", "name": "f33_nvm_get_logical_storage_page", "status": "equivalent"}
 {"addr": "0x74884", "name": "f33_nvm_payload_length", "status": "equivalent"}

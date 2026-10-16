@@ -178,6 +178,29 @@ uint32_t f33_nvm_write_buffer(uint32_t logical_handle) {
     return logical_buffer(logical_handle, 0xfebf6b0cu);
 }
 
+static void f33_nvm_reset_buffer_retry(void) {
+    camry_write8(0xfebf6b14u, 0);
+}
+
+static void f33_return_only_stub_71ce0(void) {
+}
+
+static void publish_buffer_override(uint32_t logical_handle, uint32_t buffer, uint32_t override) {
+    uint32_t handle = logical_handle & 0xffffu;
+    f33_nvm_reset_buffer_retry();
+    camry_write32(override, buffer);
+    if (buffer == 0u && camry_read8(camry_tp + (handle << 4) + 11796u) == 2u)
+        f33_return_only_stub_71ce0();
+}
+
+void f33_nvm_set_read_buffer(uint32_t logical_handle, uint32_t buffer) {
+    publish_buffer_override(logical_handle, buffer, 0xfebf6b08u);
+}
+
+void f33_nvm_set_write_buffer(uint32_t logical_handle, uint32_t buffer) {
+    publish_buffer_override(logical_handle, buffer, 0xfebf6b0cu);
+}
+
 uint32_t f33_nvm_get_storage_page(uint32_t storage_handle, uint16_t *page_out) {
     *page_out = read_u16(f33_nvm_descriptors + (storage_handle & 0xffffu) * 6u);
     return 0;
@@ -570,6 +593,30 @@ void f33_pwm_stage_halfword_compares(
     camry_write16(record + 2u, stage_halfword_compare(u_code & 0xffffu));
     camry_write16(record + 4u, stage_halfword_compare(v_code & 0xffffu));
     camry_write16(record + 6u, stage_halfword_compare(w_code & 0xffffu));
+}
+
+void f33_pwm_stage_word_compares(
+    uint32_t slot, uint32_t w_code, uint32_t v_code, uint32_t u_code) {
+    uint32_t base = camry_gp - 32592u + (uint32_t)((int32_t)(int16_t)slot * 12);
+    camry_write32(base, stage_halfword_compare(u_code & 0xffffu) & 0xffffu);
+    camry_write32(base + 4u, stage_halfword_compare(v_code & 0xffffu) & 0xffffu);
+    camry_write32(base + 8u, stage_halfword_compare(w_code & 0xffffu) & 0xffffu);
+}
+
+static void f33_nvm_copy_operation(uint32_t operation) {
+    camry_write32(0xfebf6aecu, camry_read32(operation));
+    camry_write16(0xfebf6af0u, camry_read16(operation + 4u));
+    camry_write32(0xfebf6af4u, camry_read32(operation + 8u));
+    camry_write32(0xfebf6af8u, camry_read32(operation + 12u));
+}
+
+uint32_t f33_nvm_submit_operation(uint32_t operation) {
+    if (camry_read8(0xfebf6b00u) == 2u)
+        return 1u;
+    f33_nvm_copy_operation(operation);
+    camry_write8(0xfebf6b00u, 2u);
+    camry_write16(0xfebf6afcu, 1u);
+    return 0u;
 }
 
 uint32_t f33_freshness_select_reset_candidate(uint32_t received, uint32_t search) {

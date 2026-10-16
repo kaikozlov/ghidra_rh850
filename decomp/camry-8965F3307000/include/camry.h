@@ -44,6 +44,7 @@ void *f33_memcpy_forward(void *destination, void *source, uint32_t byte_count);
 void f33_memzero(void *destination, uint32_t byte_count);
 void f33_pwm_initialize_compare_stages(uint32_t compare);
 void f33_pwm_stage_halfword_compares(uint32_t slot, uint32_t u_code, uint32_t v_code, uint32_t w_code);
+void f33_pwm_stage_word_compares(uint32_t slot, uint32_t w_code, uint32_t v_code, uint32_t u_code);
 uint32_t f33_force_unconfirmed_terminal_monitor_healthy(uint32_t state, uint32_t thresholds, uint32_t callbacks);
 void f33_copy_whole_words(uint32_t *destination, uint32_t *source, uint16_t byte_count);
 uint32_t f33_update_whole_words(uint32_t *destination, uint32_t *source, uint16_t byte_count);
@@ -68,6 +69,8 @@ uint32_t f33_nvm_trailer_offset(uint32_t handle);
 uint32_t f33_nvm_storage_handle(uint32_t handle);
 uint32_t f33_nvm_read_buffer(uint32_t logical_handle);
 uint32_t f33_nvm_write_buffer(uint32_t logical_handle);
+void f33_nvm_set_read_buffer(uint32_t logical_handle, uint32_t buffer);
+void f33_nvm_set_write_buffer(uint32_t logical_handle, uint32_t buffer);
 uint32_t f33_nvm_get_storage_page(uint32_t storage_handle, uint16_t *page_out);
 uint32_t f33_nvm_get_logical_storage_page(uint32_t logical_handle, uint16_t *page_out);
 uint32_t f33_nvm_advance_family0_request_index(uint32_t index);
@@ -85,6 +88,7 @@ void f33_nvm_accumulate_result_class(uint32_t result_class);
 
 uint32_t f33_lookup_u32_value_by_key(uint32_t key, uint32_t fallback, uint32_t table);
 void f33_nvm_initialize_operation(void);
+uint32_t f33_nvm_submit_operation(uint32_t operation);
 void f33_nvm_unlink_queue_slot(uint32_t header, uint32_t index, uint32_t previous);
 uint32_t f33_poll_word_masks(uint32_t word, uint32_t first_mask, uint32_t second_mask, uint32_t attempts);
 
