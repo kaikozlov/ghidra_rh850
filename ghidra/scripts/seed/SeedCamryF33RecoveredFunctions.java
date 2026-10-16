@@ -6514,8 +6514,8 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
         .setComment("Validate region selector through344C/3438;reject missingdescriptor/count. For each16-byte "
             + "descriptor,require base andlength equal metadata-indirected words,then47EA streams words from "
             + "thatbase withCRC seedFFFFFFFF andmust return0. Return0 on allpassing;FFFFFFFF on failure. "
-            + "Registeredselectors0/1 hold one recordeach;not generic pointer or image validity outside those "
-            + "descriptors.");
+            + "Selectors0/1 cover CodeFlash and selector2 covers FEBF0000+FF0 with metadata atFEBF0FE0/4; "
+            + "each has one descriptor. This is not generic pointer or image validity outside those descriptors.");
     semanticFunction(0x1338L, "f33_boot_resident_initialize", v)
         .setComment("Initialize resident diagnostic/service mode with stateFEBF2904=1 and2900=0,then orderedresident "
             + "lower/service/flash/timer setup.1CA0 startsTAUJ0CH2. State1 prevents existing14A2 timer callback "
@@ -6858,7 +6858,8 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     semanticFunction(0xB3F44L, "f33_update_source_coherence_history", VoidDataType.dataType)
         .setComment("Vote/republish stickyB18E; detect admitted receive-generation edge; currentchannel delays andB191 lowbits; "
             + "conditionalB192 and separate sticky qualifier; OR aggregatebit3 and prior qualified/commandcompletionbit4. "
-            + "Always saveBE7E->B195.");
+            + "Always saveBE7E->B195. BE7E is consumed route30 generation, not a global coherent receive epoch "
+            + "or B6 command generation; frozen decoding can still consume the edge.");
     semanticFunction(0xB4158L, "f33_clear_source_coherence_reentry_history", VoidDataType.dataType)
         .setComment("ClearB198/B19A/B19C andB192; publishB18E&F4 clearingbits0/1/3 only. PreserveB191,B195/B196 and separate "
             + "sticky pair.");
@@ -6901,14 +6902,18 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     semanticFunction(0xB4F6CL, "f33_reset_qualified_health_state_entry", VoidDataType.dataType)
         .setComment("Initialize redundantB20E0 andclearB20F; doesnotclearB195/B196.");
     semanticFunction(0xBE65CL, "f33_refresh_first_health_source_cache", VoidDataType.dataType)
-        .setComment("Existing source arithmetic plusF0FB1/0/other->BE79A5/5A/FF; no physicalchannel identity assigned.");
+        .setComment("Existing arithmetic uses F194 from route26. F0FB1/0/other->BE79A5/5A/FF; F0FB and F052 "
+            + "both copy route30 payload bit8031, not independent physical channels.");
     semanticFunction(0xBE6E0L, "f33_refresh_second_health_source_cache", VoidDataType.dataType)
-        .setComment("F0521/0/other->BE7AA5/5A/FF; BE7B usesoverrideB18F whennot1; saveF052inBE78.");
+        .setComment("F0521/0/other->BE7AA5/5A/FF; BE7B uses overrideB18F when not1; save F052 inBE78. "
+            + "Normal58074 duplicates route30 payload bit8031 into both F052 and F0FB.");
     semanticFunction(0xBE712L, "f33_refresh_health_channel_classifications", VoidDataType.dataType)
-        .setComment("PublishBE7C/BE7D0/11/22 from exactpaired statusbytes andlow receivedbits; not persistedselection tags.");
+        .setComment("PublishBE7C/BE7D0/11/22 from paired status gates and low F057/F051 bits. Both sources "
+            + "copy route30 receive status802F, not payload bits or persisted selection tags.");
     semanticFunction(0xBE778L, "f33_refresh_health_received_source_generation", VoidDataType.dataType)
-        .setComment("Refresh first/second source andclassification caches thenF13F->BE7E. Scheduler optionally admits this "
-            + "generationbeforeunconditionalhealthtierstep.");
+        .setComment("Refresh both caches and classifications, then F13F->BE7E on admitted cadence bit1. "
+            + "F13F is route30 consumed copy generation; it can advance while payload decoding is frozen. "
+            + "Arithmetic sampleF194 comes from separate route26, so this is not simultaneous freshness.");
     semanticFunction(0xD1306L, "f33_reset_application_latched_monitor", VoidDataType.dataType,
         new ParameterImpl("state", new PointerDataType(currentProgram.getDataTypeManager().getDataType("/CamryF33/F33LatchedMonitorState"), 4), currentProgram))
         .setComment("Application copy of ten-byte latched-monitor reset: clear+0word,+4/+6/+8halfwords; preserve "
@@ -6978,6 +6983,757 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
   }
 
 
+  private void annotateResidentFlashOperationLifecycle() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    CategoryPath category = new CategoryPath("/CamryF33");
+    StructureDataType policy = new StructureDataType(category, "F33BootRangePolicyEntry", 0);
+    policy.setPackingEnabled(true);
+    policy.add(u32, "lower", "Inclusive start.");
+    policy.add(u32, "upper", "Inclusive end.");
+    policy.add(u32, "kind_mask", "Bit(kind&31), current33.");
+    policy.add(u8, "storage_class", "0 CodeFlash,1 resident RAM; not operation class2B17.");
+    policy.add(u8, "completion_selector", "Current0; used for completion-bit updates.");
+    policy.add(u16, "reserved", null);
+    DataType policyType = resolve(policy);
+    semanticData(0x8DA0L, new ArrayDataType(policyType, 3, 16), "f33_boot_service_range_policy",
+        "32D2/3318 explicitly reject a wrapped last address before applying these range/kind predicates.");
+    StructureDataType crc = new StructureDataType(category, "F33BootCrcDescriptor", 0);
+    crc.setPackingEnabled(true);
+    crc.add(u32, "base", "Region data address.");
+    crc.add(u32, "length", "CRC byte extent.");
+    crc.add(new PointerDataType(u32, 4), "base_metadata", "Word that must equal base.");
+    crc.add(new PointerDataType(u32, 4), "length_metadata", "Word that must equal length.");
+    DataType crcType = resolve(crc);
+    semanticData(0x8DD0L, new ArrayDataType(crcType, 3, 16), "f33_boot_region_crc_descriptors",
+        "Two CodeFlash regions and one downloaded RAM region; CRC acceptance is not physical programming proof.");
+    StructureDataType region = new StructureDataType(category, "F33BootRegionDescriptor", 0);
+    region.setPackingEnabled(true);
+    region.add(u32, "lower", "Inclusive range start.");
+    region.add(u32, "upper", "Inclusive range end.");
+    region.add(u32, "authentication_trailer", "3392 lookup; not an executable callback.");
+    region.add(u32, "marker_block", "33CC lookup; zero for RAM region.");
+    region.add(u32, "counter_block", "3402 lookup; zero for RAM region.");
+    region.add(u32, "crc_count", "Count of CRC descriptors.");
+    region.add(new PointerDataType(crcType, 4), "crc_descriptors", "Descriptor array.");
+    DataType regionType = resolve(region);
+    semanticData(0x8E00L, new ArrayDataType(regionType, 3, 28), "f33_boot_regions",
+        "Resident CodeFlash and RAM ranges; range-kind admission32D2/3318 is separate from335E lookup.");
+    semanticData(0x86ECL, new ArrayDataType(u32, 39, 4), "f33_boot_flash_block_boundaries",
+        "38 half-open block intervals: eight8KiB blocks then thirty32KiB blocks, ending100000.");
+    FunctionDefinitionDataType blank = new FunctionDefinitionDataType(category, "F33BootBlankCheckCallback");
+    blank.setReturnType(u32);
+    blank.setArguments(new ParameterDefinition[] {
+        new ParameterDefinitionImpl("address", u32, null),
+        new ParameterDefinitionImpl("word_count", u32, null)});
+    DataType blankType = currentProgram.getDataTypeManager().addDataType(blank, DataTypeConflictHandler.REPLACE_HANDLER);
+    semanticData(0x86E4L, new PointerDataType(blankType, 4), "f33_boot_relocated_blank_check_entry",
+        "FEBF11F0 corresponds to copied ROM8560 during boot; distinct from downloaded driver wordFEBF0FD0.");
+    semanticFunction(0x335EL, "f33_boot_select_region_for_range", u32,
+        new ParameterImpl("address", u32, currentProgram),
+        new ParameterImpl("length", u32, currentProgram),
+        new ParameterImpl("region", new PointerDataType(u32, 4), currentProgram))
+        .setComment("Reject zero length; scan three28-byte8E00 records. First unsigned address>=lower and "
+            + "modulo32(address+length-1)<=upper wins; write selector. No separate overflow or address<=upper guard. "
+            + "Returns0found/1missing.");
+    semanticFunction(0x3402L, "f33_boot_select_counter_block_for_range", u32,
+        new ParameterImpl("address", u32, currentProgram),
+        new ParameterImpl("length", u32, currentProgram),
+        new ParameterImpl("counter_block", new PointerDataType(u32, 4), currentProgram))
+        .setComment("Same inclusive modulo32 region search as335E, but output descriptor+16 counter-block address. Zero for RAM "
+            + "region2; no implicit overflow guard.");
+    semanticFunction(0x3438L, "f33_boot_crc_descriptor_count", u32,
+        new ParameterImpl("region", u32, currentProgram))
+        .setComment("Unsigned selector<3 returns region record+20 count; otherwise0. All exact records contain1.");
+    semanticFunction(0x344CL, "f33_boot_crc_descriptors", new PointerDataType(currentProgram.getDataTypeManager().getDataType("/CamryF33/F33BootCrcDescriptor"), 4),
+        new ParameterImpl("region", u32, currentProgram))
+        .setComment("Unsigned selector<3 returns region record+24 descriptor pointer; otherwiseNULL. Include RAM region2, not "
+            + "just boot/application image regions. Real leaf preserves R6 for the following3438 call in481A; inline its "
+            + "exact instructions.");
+    getFunctionAt(toAddr(0x344CL)).setInline(true);
+    semanticFunction(0x3474L, "f33_boot_find_flash_block_start", u32,
+        new ParameterImpl("address", u32, currentProgram),
+        new ParameterImpl("block_start", new PointerDataType(u32, 4), currentProgram))
+        .setComment("Search38 half-open intervals in39-word86EC boundary array. Write containing lower bound andreturn0; "
+            + "otherwisewriteF8000 andreturn1.");
+    semanticFunction(0x34A8L, "f33_boot_find_flash_block_end", u32,
+        new ParameterImpl("address", u32, currentProgram),
+        new ParameterImpl("block_end", new PointerDataType(u32, 4), currentProgram))
+        .setComment("Search same38 half-open intervals. Write containing upper bound andreturn0; otherwisewrite100000 "
+            + "andreturn1.");
+    semanticFunction(0x34DAL, "f33_boot_get_flash_block_skip_flag", u32,
+        new ParameterImpl("address", u32, currentProgram))
+        .setComment("Return zero-extended2954[containing block index], or0 outside38 intervals.4332 skips lower erase only for "
+            + "exact flag1. Do not infer a physical erased-state witness.");
+    semanticFunction(0x3506L, "f33_boot_clear_flash_block_skip_flags", v,
+        new ParameterImpl("first_block", u32, currentProgram),
+        new ParameterImpl("last_block", u32, currentProgram))
+        .setComment("If first<=last, clear2954 entries for covered successive intervals underFFFF PMR; stop after crossinglast. "
+            + "RestoreentryPMR. Numeric block addresses, not interrupt callbacks.");
+    semanticFunction(0x3552L, "f33_boot_check_relocated_blank_words", u32,
+        new ParameterImpl("address", u32, currentProgram),
+        new ParameterImpl("word_count", u32, currentProgram))
+        .setComment("Invoke ROM86E4 pointerFEBF11F0, copied fromCF8560 by35E4, forwardingR6/R7 andreturningR10. This ECC-backed "
+            + "blank check is distinct from programming callback[FEBF0FD0].");
+    semanticFunction(0x3562L, "f33_boot_check_rounded_program_span_blank", u32,
+        new ParameterImpl("address", u32, currentProgram),
+        new ParameterImpl("length", u32, currentProgram))
+        .setComment("Round nonzero byte length up256 with32-bit arithmetic, divideby4, andcall3552(address,word_count); "
+            + "normalize nonzero resultto1. Length0 reaches wrapped arithmetic andzero wordcount; do not add absent "
+            + "validation. Hardware ECC/test-mode feedback remains bounded.");
+    semanticFunction(0x40A2L, "f33_boot_prepare_aligned_input_ring", u32,
+        new ParameterImpl("address", u32, currentProgram),
+        new ParameterImpl("length", u32, currentProgram),
+        new ParameterImpl("aligned_address", new PointerDataType(u32, 4), currentProgram),
+        new ParameterImpl("padded_length", new PointerDataType(u32, 4), currentProgram))
+        .setComment("Length0returns1 unchanged. Otherwise alignaddressdown512, add low9bits tolength modulo32, fillthat manyFF "
+            + "prefixbytes in1800 ring; publishproducer=prefix,consumer0 andreturn0. Realleaf preservesR6/R7/R9 for411A "
+            + "subsequent40E0; inlineactualp-code. Lateradmission failure doesnotundo ringmutation.");
+    getFunctionAt(toAddr(0x40A2L)).setInline(true);
+    semanticFunction(0x40E0L, "f33_boot_select_operation_blocks", u32,
+        new ParameterImpl("address", u32, currentProgram),
+        new ParameterImpl("length", u32, currentProgram),
+        new ParameterImpl("first_block", new PointerDataType(u32, 4), currentProgram),
+        new ParameterImpl("last_block", new PointerDataType(u32, 4), currentProgram))
+        .setComment("Rejectlength0 orfailedfirst3474 lookup. Lookup modulo32lastaddress, ignoresecondlookupreturn, "
+            + "andreturn(last_block<first_block). An out-of-range lastaddress can use3474 fallbackF8000; this is not "
+            + "complete region validation.");
+    semanticFunction(0x411AL, "f33_boot_submit_erase_program_stream", u32,
+        new ParameterImpl("address", u32, currentProgram),
+        new ParameterImpl("length", u32, currentProgram))
+        .setComment("Rejectbusy2AA1.40A2prepares512-aligned ringbefore40E0rangeadmission. Onaccept "
+            + "setmode0,currentblock/nextboundary,writecursor,paddedremaining,result1,busy1; clearfinal/cancel/pause. "
+            + "Retain prior2994counter-block selection.0accepted/1rejected; notflashcompletion.");
+    semanticFunction(0x4188L, "f33_boot_submit_program_stream", u32,
+        new ParameterImpl("address", u32, currentProgram),
+        new ParameterImpl("length", u32, currentProgram))
+        .setComment("Rejectbusy;40A2seedsalignmentprefixbefore3562 ECC-backedroundedblankcheck. Onaccept "
+            + "setmode1,writecursor,paddedremaining,result1,busy1;clearfinal/cancel/pause.0accepted/1rejected. "
+            + "Hardwareblankcheck andfailed-admission ringeffects are separate.");
+    semanticFunction(0x41E0L, "f33_boot_submit_block_erase", u32,
+        new ParameterImpl("address", u32, currentProgram),
+        new ParameterImpl("length", u32, currentProgram))
+        .setComment("Rejectbusy;40E0selectsfirst/lastblocks;3402selectscounterblock. Clearcoveredskipflags3506; "
+            + "setmode2,first/last/nextblock,counteraddress,result1,busy1;clearfinal/cancel/pause.0accepted/1rejected; no "
+            + "deviceoperation until4428.");
+    semanticFunction(0x4260L, "f33_boot_set_flash_worker_pause", v,
+        new ParameterImpl("paused", u8, currentProgram))
+        .setComment("Storelow8 into299F. Any nonzero pauses4428 work, but finalcancel processing remains active.");
+    semanticFunction(0x4266L, "f33_boot_request_flash_worker_cancel", v)
+        .setComment("Set299E=1; doesnot immediatelyclearbusy orchange result.4428 later consumes it evenwhenpaused.");
+    semanticFunction(0x4276L, "f33_boot_append_program_input", v,
+        new ParameterImpl("source", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u16, currentProgram))
+        .setComment("Append low16length bytes fromsource to1800 ring; wrapproducer at1100 andpublish2998 afterward. No "
+            + "owncapacitycheck orPMR. Caller42D8 admission protectsreservedslot.");
+    semanticFunction(0x42A4L, "f33_boot_program_input_occupancy", u32)
+        .setComment("Snapshotu16producer2998 andconsumer299A underFFFF PMR; compute modulo1100 occupancy, zxh tofullR10, "
+            + "restorePMR. Equalindicesmeanempty.");
+    semanticFunction(0x42D8L, "f33_boot_program_input_has_insufficient_space", u32,
+        new ParameterImpl("requested_length", u16, currentProgram))
+        .setComment("Return signed(1100-occupancy < low16(requested_length)+1). Reserveoneslot; validcapacity4351. No enqueue "
+            + "orstatechange.");
+    semanticFunction(0x42F6L, "f33_boot_stage_preserved_program_counter", u32)
+        .setComment("Ifnonzero2994 lies in[currentblock,nextboundary), stage32-bitcounter+1modulo32 then63FFFFFFFFwords "
+            + "in29A0;return0. Otherwisereturn1unchanged. Counterblockpreservation, notrequestpayload.");
+    semanticFunction(0x4332L, "f33_boot_erase_current_block_preserving_counter", u32)
+        .setComment("Skipcallbackonlyif34DA(currentblock)==1. Otherwise42F6 optionallystagescounter; "
+            + "call[FEBF0FD0](block,0,1,&status), thenonstatus0 andstagedcounter call(pointer,29A0,0,&status). Any "
+            + "nonzero statusreturns1, else0. Boot-phase dynamicdriverboundary; overlapping "
+            + "applicationNvMglobalisnotcallee.");
+    semanticFunction(0x4390L, "f33_boot_consume_program_input", v,
+        new ParameterImpl("destination", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u16, currentProgram))
+        .setComment("Copylow16length bytes from1800 ring,wrapconsumerat1100,publish299Aaftercopy. Caller43BEchecksavailability; "
+            + "no localcapacitycheck.");
+    semanticFunction(0x43BEL, "f33_boot_stage_and_program_input_chunk", u32,
+        new ParameterImpl("length", u32, currentProgram))
+        .setComment("Return2withoutmutation iflow16length>ringoccupancy. Otherwiseconsumeinto29A0,padFF to256 "
+            + "usingfullsignedlength comparison, theninvoke[FEBF0FD0](cursor,buffer,0,&status) "
+            + "unlesscursor==2994counterblock. Returnbool(status!=0); skippedcounterblockreturns0. "
+            + "Consumptionprecedesdevicefailure;4428supplieslength<=256.");
+    semanticFunction(0x4428L, "f33_boot_advance_flash_operation", v)
+        .setComment("UnderFFFF PMR, busy0returns; nonzeropause skipswork. "
+            + "Mode0erasesanddrains<=256chunks,mode1drains,mode2erasescoveredblocks. rc2waitsforinput;rc1clearsbusy "
+            + "retainingresult; successfulcompletionsetsresult0/busy0. "
+            + "Finalcancel==1alwaysclearcancel/busy/pausewithoutpromotingsuccess. "
+            + "Devicecallbackandphysicalcompletionremainexplicitboundary.");
+    semanticFunction(0x4590L, "f33_boot_reset_flash_operation_queue", v)
+        .setComment("Clearbusy,pause,cancel,finalmarker,ringproducer/consumer;setresult1. "
+            + "Doesnotclearcursor,remaining,counterblock orstaging; no lowerdevicecancel.");
+    semanticFunction(0x47BAL, "f33_boot_submit_region_crc_verification", u32,
+        new ParameterImpl("address", u32, currentProgram),
+        new ParameterImpl("length", u32, currentProgram),
+        new ParameterImpl("opaque_tag", u8, currentProgram))
+        .setComment("If2AADnonzeroreturn1unchanged; otherwisequeueaddress/length/tag,setresult2,pending1,return0. No "
+            + "rangevalidationhere;4874 validatesselectedregion later. Noterase.");
+    semanticFunction(0x47DEL, "f33_boot_region_crc_result", u32)
+        .setComment("Returnzero-extended2AAC result: initializer/admission2, worker0success/1failure.");
+    semanticFunction(0x47E4L, "f33_boot_region_crc_pending", u32)
+        .setComment("Returnzero-extended2AAD pendingbyte; notCRCresult.");
+    semanticFunction(0x4874L, "f33_boot_advance_region_crc_verification", v)
+        .setComment("Onlypending==1 and335Evalidrange call481A onselectedwholeregion, notrequestedsubrange. ThenunderFFFF "
+            + "PMRclear pending/start/length andsetresultbool(CRC!=0);opaque tagretained. Invalidorzerolength remains "
+            + "pending unchanged.");
+    semanticFunction(0x48C4L, "f33_boot_reset_region_crc_verification", v)
+        .setComment("SetCRCresult2 andpending0; retainaddress,length,opaque tag. Separatefrom47AC transition-job reset.");
+  }
+
+  private void annotateReceivedInputConditioning() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    semanticFunction(0x49F20L, "f33_advance_dual_source_admission_qualification", v)
+        .setComment("Configured source qualifier: local0 + predicate22 starts11 and shared mode1. Persistent22 with entry "
+            + "count>=5 selects local22/shared2; entry persistence>=200 selects local44/shared3. Local11 resets on any "
+            + "predicate other than22, including inapplicable44. Local22 recovers on11 immediately with configured "
+            + "recovery limit0; predicate44 resets counters only. Local44 recovers only after entry healthy-count>=200; "
+            + "other predicates reset that recovery count. Direct shared7F68 writes are ordered, not a max/OR reduction.");
+    semanticFunction(0x4A05EL, "f33_advance_first_source_admission_qualification", v)
+        .setComment("Configured source qualifier: local0 + predicate22 starts11 and shared mode1. Persistent22 with entry "
+            + "count>=5 selects local22/shared2; entry persistence>=200 selects local44/shared3. Local11 resets on any "
+            + "predicate other than22, including inapplicable44. Local22 recovers on11 immediately with configured "
+            + "recovery limit0; predicate44 resets counters only. Local44 has no ordinary recovery branch; cause "
+            + "latch7F6A is set on entry. Direct shared7F68 writes are ordered, not a max/OR reduction.");
+    semanticFunction(0x4A160L, "f33_advance_second_source_admission_qualification", v)
+        .setComment("Configured source qualifier: local0 + predicate22 starts11 and shared mode1. Persistent22 with entry "
+            + "count>=5 selects local22/shared2; entry persistence>=200 selects local44/shared3. Local11 resets on any "
+            + "predicate other than22, including inapplicable44. Local22 recovers on11 immediately with configured "
+            + "recovery limit0; predicate44 resets counters only. Local44 has no ordinary recovery branch; cause "
+            + "latch7F6B is set on entry. Direct shared7F68 writes are ordered, not a max/OR reduction.");
+    semanticFunction(0xBE304L, "f33_scale_staged_byte_pair_to_control_raw", v)
+        .setComment("Scale unsignedF03D/F03E by5243 then logicalshift12 intoBE54/BE56. NormalECUpublisher setsbothsources0; no "
+            + "physicalunits.");
+    semanticFunction(0xBE326L, "f33_condition_staged_offset_scalar", v)
+        .setComment("F02D8..108 ->signed(F02D-48)*128;outsideholdBE5E andstatus0->1. "
+            + "Alwayscopyfourdefaultstatusbytes;noF000gate.");
+    semanticFunction(0xBE38CL, "f33_initialize_received_word_age_from_record13", v)
+        .setComment("Readlogicalrecord13;onlyresult10adoptsword+0andage+4,otherwiseclearboth. Notamodetierreentryage-reset.");
+    semanticFunction(0xBE3C4L, "f33_condition_received_word_and_age", v,
+        new ParameterImpl("policy", u8, currentProgram))
+        .setComment("Hold5A;resetseedA5;adoptadmittedfreshnonFFFFF18A;resetageonlyonchangedvalue,otherwiseadd5withFFFFFFFEsentinelhandling. "
+            + "AlwaysconsumeF039generation.");
+    semanticFunction(0xBE43AL, "f33_condition_received_typed_scalar", v,
+        new ParameterImpl("policy", u8, currentProgram))
+        .setComment("Hold5A;resetA5;invalidstatusclears;admittednewgenerationadoptsuint32F218<=999999withtype1/2,otherwisezero. "
+            + "AlwaysconsumeF066generation;BE74isnotapointer.");
+    semanticFunction(0xBE4A4L, "f33_validate_packed_decimal_byte", u32,
+        new ParameterImpl("packed_value", u8, currentProgram))
+        .setComment("Returnunchangedlow8R6whenbothnibblesaredecimaldigits,elsefullR10=FF. Validationonly,noconversion.");
+    semanticFunction(0xBE4C2L, "f33_condition_received_packed_decimal_fields", v,
+        new ParameterImpl("policy", u8, currentProgram))
+        .setComment("Hold5A/resetA5;invalidstatusorinvalidfreshsix-membertuple->allFF. "
+            + "Nibbledigitsandrawbyteboundsretainedwithoutdecimalconversion;alwaysconsumeF0F7generation.");
+    semanticFunction(0xBE5AAL, "f33_refresh_received_control_metadata", v)
+        .setComment("B20E11/33selecthold5A;prior33->0selectresetA5;else0. Callthreeconditioners;saveB20EandpublishBE64=5A.");
+    semanticFunction(0xBE5FCL, "f33_stage_received_word_age_record13", v)
+        .setComment("StagewordBE6E,reservedhalfword0,ageBE70aslogicalrecord13throughFF09C.");
+    semanticFunction(0xBE622L, "f33_seed_health_received_source_filter", v)
+        .setComment("TierentryinitializesBE78/7B,BE79/7A=5Aandfixed-ratioF194filterseedindependentlyofoptionalBE778cadence. "
+            + "NoOEMsourceidentity.");
+    semanticFunction(0xBEA14L, "f33_publish_first_fixed_received_marker", v)
+        .setComment("SetBED4=55AAAA55,BE9D/BEB3=0,BEA7=5A. Unconditionalsoftwaremarker,notreceivedidentity.");
+    semanticFunction(0xBEA2CL, "f33_publish_second_fixed_received_marker", v)
+        .setComment("SetBED8=55AAAA55,BE9E/BEB4=0,BEA8=5A. Unconditionalsoftwaremarker.");
+    semanticFunction(0xBEA44L, "f33_initialize_fixed_received_markers", v)
+        .setComment("Callbothfixedmarkerpublishersduringcommoncontrolinitialization.");
+    semanticFunction(0xBEA56L, "f33_qualify_received_scalar_startup", v)
+        .setComment("WhileBEA2=0,F000<2qualifiesBEC4atentry>=300,clearsBE98;badgateresetscount. "
+            + "Stickycompletion;alwaysBEAD0andBEAE=BE98.");
+    semanticFunction(0xBEAA4L, "f33_qualify_received_channel_b_startup", v)
+        .setComment("WhileBEA3=0,F000<2,F0280,F02B1qualifyBEBCatentry>=48->BEA3/BE99=5A;alwaysBEAF0. "
+            + "Canonicalpublisherdefaultsinhibitnewqualification.");
+    semanticFunction(0xBEAFAL, "f33_qualify_received_channel_c_startup", v)
+        .setComment("WhileBEA4=0,F000<2,F0600qualifyBEBEatentry>=96->BEA4/BE9A=5A;alwaysBEB00. CanonicalF0601inhibits.");
+    semanticFunction(0xBEB48L, "f33_qualify_received_channel_d_startup", v)
+        .setComment("WhileBEA5=0,F000<2andF069receive-status0qualifyBEC0atentry>=40->BEA5/BE9B5A;alwaysBEB2=BE9B. "
+            + "Stickycompletion.");
+    semanticFunction(0xBEB96L, "f33_qualify_received_channel_e_startup", v)
+        .setComment("WhileBEA6=0,F000<2andF04Creceive-status0qualifyBEC2atentry>=64->BEA6/BE9C5A;alwaysBEB1=BE9C.");
+    semanticFunction(0xBEBE4L, "f33_publish_received_channel_f_defaults", v)
+        .setComment("PublishBE9F/BEB6=5Awithoutwirepredicate.");
+    semanticFunction(0xBEBF2L, "f33_publish_received_channel_g_default", v)
+        .setComment("PublishBEA0=5Awithoutwirepredicate.");
+    semanticFunction(0xBEBFCL, "f33_publish_received_channel_h_default", v)
+        .setComment("PublishBEA1=5Awithoutwirepredicate.");
+    semanticFunction(0xBEC06L, "f33_publish_fixed_received_channel_defaults", v)
+        .setComment("ComposeBEBE4/BEBF2/BEBFCconstantsoftwaredefaults.");
+    semanticFunction(0xBEC1AL, "f33_clear_fixed_received_metadata", v)
+        .setComment("ClearBEB8/BEB5;noinputsampling.");
+    semanticFunction(0xBEC24L, "f33_qualify_received_paired_channel_startup", v)
+        .setComment("WhileBEBB=0,F000<2and(F1480orF1490)qualifyBED0atentry>=200->BEBB/BEBA5A;alwaysBEB7=BEBA. "
+            + "Canonicalboth1inhibit.");
+    semanticFunction(0xBEC7AL, "f33_publish_received_startup_delay_default", v)
+        .setComment("ClearonlyBEADduringglobalstartupdelay;otherchannelstateisretained.");
+    semanticFunction(0xBEC80L, "f33_update_delayed_received_startup_qualification", v)
+        .setComment("EntryBEC6<200onlyclearsBEADandincrements;entry>=200runsreadiness/defaultgroup. "
+            + "Alwayspublishbothfixedmarkersaftereitherbranch. Mode>=0101everyforegroundinvocation.");
+    semanticFunction(0xBF0AAL, "f33_qualify_record8_admitted_observations", v,
+        new ParameterImpl("result", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("completed", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("zero_count", new PointerDataType(u16, 4), currentProgram),
+        new ParameterImpl("nonzero_count", new PointerDataType(u16, 4), currentProgram))
+        .setComment("R6resultbyte*,R7completionbyte*,R8zero-countu16*,R9nonzero-countu16*. "
+            + "Prefercount>=3resultACEDovercount>=8result0;clampwinningcount.");
+    semanticFunction(0xBF0ECL, "f33_step_record8_confirmation_window", v,
+        new ParameterImpl("result", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("completed", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Increment16-bittotal;strict>10failsbeforeobservations. "
+            + "F0690permitsF06Ezero/nonzeroobservationcounts;statusnonzeroqualifiesinvalidcount>=8. "
+            + "Result/completionpointersarepreservedacrossrealBF0AA.");
+    semanticFunction(0xBF18AL, "f33_advance_record8_startup_confirmation", v)
+        .setComment("OnceonlywhileinitialACED5A;strictincrementedwarmup>60;B080>4096rejects;F0015Aadmitswindowelseclearinnercounts. "
+            + "OnoldBF040->newcompletion5AcommitBD86Eandsnapshot.");
+    semanticFunction(0xBF232L, "f33_update_initialized_record8_confirmation", v)
+        .setComment("CallBF18AonlyACEE==5A;closedgatefreezesallstate. "
+            + "Calledmode>=0101beforeoptionalhealthsourcecachegeneration.");
+    semanticFunction(0xBF24CL, "f33_update_acquired_scalar_hysteresis", v)
+        .setComment("Saturatingabs16AFE0andROMenable5A;setBF11at>=5120,clearat<=2560,retainbetween. "
+            + "Acquiredscalar,notwireidentity.");
+    semanticFunction(0xBF298L, "f33_debounce_acquired_scalar_hysteresis", v)
+        .setComment("Incrementselectedu16counteronlywhile<=limitandclearoppositeonlyonincrementpath;strict>limitupdatesBF10. "
+            + "ROMlimit0givesone-invocationordinaryresponse.");
+    semanticFunction(0xBF2E4L, "f33_refresh_acquired_scalar_status_publication", v)
+        .setComment("ComposeBF24ChysteresisthenBF298debouncedBF10publishedtoE848byBF3AA;mode>=0100.");
+    semanticFunction(0x4B378L, "f33_refresh_route30_health_inputs", v)
+        .setComment("Route30classical51E/8;only7F68<2andchanged5356decodefourfields. "
+            + "Alwaysconsume5356->802Eandrefreshstatusselector12->802F,evenwithfrozendecode.802EfeedsF13F/BE7E.");
+    semanticFunction(0x4A298L, "f33_update_internal_source_admission_lifecycle", v)
+        .setComment("Set7F6Ffrom7F2C1/2,runthreeconfiguredobservationfamiliesinorder,then7F70admission. "
+            + "Shared7F68isorderedlastwriter,notwirepayloadoraggregateOR.");
+    semanticFunction(0x4A26AL, "f33_publish_internal_source_observation_admission", v)
+        .setComment("7F70=5Aonlyunsigned66B8in2304..4096and7F68not2/3;otherwise0. IndependentlypublishedF001.");
+    semanticFunction(0x4A306L, "f33_classify_dual_internal_source_observations", u32)
+        .setComment("Return44for6764lowqualificationbitsorclosed7F6F;22foravailable66B8outside2304..4096andboth66AE/66B0below2304orbothabove4096;else11.");
+    semanticFunction(0x4A360L, "f33_classify_first_internal_source_observation", u32)
+        .setComment("Requires6764.bit1and7F6F5A,else44;available66B8outside2304..4096plus66AEoutsidefails22;else11.");
+    semanticFunction(0x4A3AEL, "f33_classify_second_internal_source_observation", u32)
+        .setComment("Requires6764.bit0and7F6F5A,else44;available66B8outside2304..4096plus66B0outsidefails22;else11.");
+    semanticData(0xFEBE7F68L, u8, "f33_internal_source_admission_state",
+        "Ordered internal qualifier state0/1/2/3. Not a decoded physical/OEM input; publishedF000.");
+    semanticData(0xFEBEF000L, u8, "f33_published_internal_source_admission_state",
+        "58074copyof7F68;0/1admitF000<2. No physicalidentityassertion.");
+    semanticData(0xFEBE5356L, u8, "f33_route30_copy_generation",
+        "COM5338+30bytegeneration;incrementedmodulo256by8E772afteraccepted7D72Cpublication.");
+    semanticData(0xFEBE802EL, u8, "f33_route30_consumed_generation",
+        "4B378alwayssnapshots5356,evenwhen7F68>=2preventspayloaddecode.");
+    semanticData(0xFEBE802FL, u8, "f33_route30_receive_status",
+        "Statusselector12(bit0rawinvalid,bit1confirmedtimeout);notgenerationorpayload.");
+    semanticData(0xFEBEF13FL, u8, "f33_published_route30_consumed_generation",
+        "58074copyof802E;canadvancewithoutnewscalar8031.");
+    semanticData(0xFEBEBE7EL, u8, "f33_health_cached_route30_generation",
+        "BE778copyF13Fonlyonadmittedcadence;notuniversalhealthsamplegeneration.");
+    semanticData(0xFEBEBE54L, u16, "f33_scaled_staged_byte_a",
+        "floor(uint8F03D*5243/4096),normally0;rawfixedratio.");
+    semanticData(0xFEBEBE56L, u16, "f33_scaled_staged_byte_b",
+        "floor(uint8F03E*5243/4096),normally0;rawfixedratio.");
+    semanticData(0xFEBEBE5EL, s16, "f33_conditioned_offset_scalar",
+        "(F02D-48)*128for8..108;holdoutsidewithstatusqualificationBE58.");
+    semanticData(0xFEBEBE6EL, u16, "f33_received_retained_word",
+        "AdmittednonFFFFF18A;logicalrecord13word+0.");
+    semanticData(0xFEBEBE70L, u32, "f33_received_word_unchanged_age",
+        "Increment5pernonheldBE3C4callunlessadoptedvaluechanges. FFFFFFFEisreset-cycle sentinel,notpermanentsaturation;nowall-timeunits.");
+    semanticData(0xFEBEBE74L, u32, "f33_received_typed_scalar",
+        "Numeric0..999999withBE62type1/2;notCodeFlashpointer. Canonicalpointerrenderingmustberepaired.");
+    semanticData(0xFEBEF218L, u32, "f33_published_route31_numeric_scalar",
+        "Unsigned32 route31 scalar published by58074, compared numerically against999999 byBE43A; not a pointer.");
+    semanticData(0xFEBE8034L, u32, "f33_route31_numeric_scalar",
+        "4B40E decodes raw unsigned32 signalAB from route31 into this cell; physical units remain unassigned.");
+    semanticData(0xFEBEBE66L, new ArrayDataType(u8, 6, 1), "f33_received_packed_decimal_fields",
+        "Validatedpackeddecimalbytesretainedunchanged;anyinvalidmemberpublishesallFF. NoOEMcalendaridentity.");
+    semanticData(0xFEBEBEC6L, u16, "f33_received_qualification_startup_count",
+        "Entry<200incrementswithoutchannelstep;entry>=200admitseight-membergroup.");
+    semanticData(0xFEBEBF04L, u8, "f33_record8_confirmation_complete",
+        "Completion5Afreezesone-shotdecision;onlyold0->5AcommitsACECandsnapshot.");
+    semanticData(0xFEBEBF05L, u8, "f33_record8_confirmation_result",
+        "One-shotresultpassedtoBD86E,notreceivefaultclassification.");
+    semanticData(0xFEBEBF06L, u16, "f33_record8_confirmation_warmup_count",
+        "uint16incrementthenstrict>60admitswindow;clamp60afterexpiry.");
+    semanticData(0xFEBEBF08L, u16, "f33_record8_zero_observation_count",
+        "F0690/F06E0count;inclusive>=3positivecompletion.");
+    semanticData(0xFEBEBF0AL, u16, "f33_record8_nonzero_observation_count",
+        "F0690/F06Enonzerocount;inclusive>=8zeroresultcompletion.");
+    semanticData(0xFEBEBF0CL, u16, "f33_record8_invalid_observation_count",
+        "F069nonzerocount;inclusive>=8zeroresultcompletion.");
+    semanticData(0xFEBEBF0EL, u16, "f33_record8_confirmation_window_count",
+        "uint16increment;strict>10expiresbeforeobservationclassification.");
+  }
+
+  private void annotateResidentDiagnosticLifecycle() throws Exception {
+    DataType v = VoidDataType.dataType;
+    DataType u8 = UnsignedCharDataType.dataType;
+    DataType u16 = UnsignedShortDataType.dataType;
+    DataType u32 = UnsignedIntegerDataType.dataType;
+    DataType s16 = ShortDataType.dataType;
+    DataType s32 = IntegerDataType.dataType;
+    CategoryPath category = new CategoryPath("/CamryF33");
+    FunctionDefinitionDataType service = new FunctionDefinitionDataType(category, "F33BootServiceCallback");
+    service.setReturnType(v);
+    service.setArguments(new ParameterDefinition[] {new ParameterDefinitionImpl("request_length", u16, null)});
+    DataType serviceType = currentProgram.getDataTypeManager().addDataType(service, DataTypeConflictHandler.REPLACE_HANDLER);
+    StructureDataType layout0 = new StructureDataType(category, "F33BootPduInfo", 0);
+    layout0.setPackingEnabled(true);
+    layout0.add(new PointerDataType(u8, 4), "data", null);
+    layout0.add(u16, "length", null);
+    layout0.add(u16, "padding", null);
+    DataType layout0Type = resolve(layout0);
+    StructureDataType layout1 = new StructureDataType(category, "F33BootServiceEntry", 0);
+    layout1.setPackingEnabled(true);
+    layout1.add(u8, "sid", null);
+    layout1.add(u8, "address_mode_mask", null);
+    layout1.add(u16, "reserved", null);
+    layout1.add(new PointerDataType(serviceType, 4), "handler", null);
+    DataType layout1Type = resolve(layout1);
+    semanticData(0x8E54L, new ArrayDataType(layout1Type, 20, 8), "f33_boot_diagnostic_services",
+        "5222passeslengthinr6aftercheckingSIDand1<<30BFagainstmask.");
+    StructureDataType layout2 = new StructureDataType(category, "F33BootChannelEntry", 0);
+    layout2.setPackingEnabled(true);
+    layout2.add(u32, "handoff_selector", null);
+    layout2.add(u8, "transport_handle", null);
+    layout2.add(u8, "address_mode", null);
+    layout2.add(u16, "reserved", null);
+    DataType layout2Type = resolve(layout2);
+    semanticData(0x8F04L, new ArrayDataType(layout2Type, 2, 8), "f33_boot_diagnostic_channels",
+        "Usedby6504recordmatch,6374addressmode,65AA/674Aoutgoinghandle;notunconditionallyaCANIDtable.");
+    StructureDataType layout3 = new StructureDataType(category, "F33BootDidEntry", 0);
+    layout3.setPackingEnabled(true);
+    layout3.add(new PointerDataType(u8, 4), "target", null);
+    layout3.add(u16, "payload_length", null);
+    layout3.add(u16, "identifier", null);
+    layout3.add(u8, "access_flags", null);
+    layout3.add(u8, "job_mode", null);
+    layout3.add(u8, "reply_prefix", null);
+    layout3.add(u8, "reserved", null);
+    DataType layout3Type = resolve(layout3);
+    semanticData(0x8F14L, new ArrayDataType(layout3Type, 4, 12), "f33_boot_diagnostic_identifiers",
+        "Flags1read/2write;jobmode0queuedring,1RAMcopy;prefixFFabsent.");
+    StructureDataType layout4 = new StructureDataType(category, "F33BootRoutineEntry", 0);
+    layout4.setPackingEnabled(true);
+    layout4.add(u32, "opaque_word", null);
+    layout4.add(u16, "identifier", null);
+    layout4.add(u8, "configured_subfunction", null);
+    layout4.add(u8, "request_option_length", null);
+    layout4.add(u8, "response_extra_length", null);
+    layout4.add(new ArrayDataType(u8, 3, 1), "reserved", null);
+    DataType layout4Type = resolve(layout4);
+    semanticData(0x8F44L, new ArrayDataType(layout4Type, 5, 12), "f33_boot_diagnostic_routines",
+        "Allopaque_wordsFFFFFFFFnotcallbackpointers;567EusesdescriptorfieldsandexplicitRIDdispatch.");
+    StructureDataType layout5 = new StructureDataType(category, "F33BootTimerSlot", 0);
+    layout5.setPackingEnabled(true);
+    layout5.add(u32, "deadline", null);
+    layout5.add(u32, "token", null);
+    layout5.add(u8, "armed", null);
+    layout5.add(u8, "generation", null);
+    layout5.add(u16, "reserved", null);
+    DataType layout5Type = resolve(layout5);
+    semanticData(0xFEBF2938L, new ArrayDataType(layout5Type, 2, 12), "f33_boot_timer_slots",
+        "1D9Aclearsarmedbeforecallback;generationcomparedin30D2preventsaleventconsumption.");
+    StructureDataType layout6 = new StructureDataType(category, "F33BootHandoffRecord", 0);
+    layout6.setPackingEnabled(true);
+    layout6.add(u32, "tag", null);
+    layout6.add(u32, "channel_selector", null);
+    layout6.add(new ArrayDataType(u32, 2, 4), "opaque_words2_3", null);
+    layout6.add(u32, "session_subfunction", null);
+    layout6.add(u32, "suppress_positive", null);
+    layout6.add(new ArrayDataType(u32, 3, 4), "opaque_words6_8", null);
+    DataType layout6Type = resolve(layout6);
+    semanticData(0x31788L, layout6Type, "f33_boot_application_handoff_record",
+        "148Ecopiesninewords;6A22readsfirsteight;6504useslowbyteofsubfunctionandnonzerotestofsuppression.");
+    semanticData(0xFEBF2908L, layout6Type, "f33_boot_captured_handoff_record",
+        "Resident phase nine-word record copied by148E; not an application DCM request.");
+    semanticData(0xFEBF2B0EL, u8, "f33_boot_diagnostic_session",
+        "Resident boot phase only; application RAM reuse is not this ownership contract.");
+    semanticData(0xFEBF2B0FL, u8, "f33_boot_security_state",
+        "Resident boot phase only; application RAM reuse is not this ownership contract.");
+    semanticData(0xFEBF2B13L, u8, "f33_boot_download_state",
+        "Resident boot phase only; application RAM reuse is not this ownership contract.");
+    semanticData(0xFEBF2B17L, u8, "f33_boot_operation_region_class",
+        "Resident boot phase only; application RAM reuse is not this ownership contract.");
+    semanticData(0xFEBF2BBAL, u8, "f33_boot_request_state",
+        "Resident boot phase only; application RAM reuse is not this ownership contract.");
+    semanticData(0xFEBF2BBBL, u8, "f33_boot_response_state",
+        "Resident boot phase only; application RAM reuse is not this ownership contract.");
+    semanticData(0xFEBF2BBCL, u8, "f33_boot_response_pending_in_flight",
+        "Resident boot phase only; application RAM reuse is not this ownership contract.");
+    semanticData(0xFEBF2BBDL, u8, "f33_boot_terminal_after_response",
+        "Resident boot phase only; application RAM reuse is not this ownership contract.");
+    semanticData(0xFEBF2BB8L, u16, "f33_boot_request_append_index",
+        "Resident boot phase only; application RAM reuse is not this ownership contract.");
+    semanticData(0xFEBF30B8L, u16, "f33_boot_request_length",
+        "Resident boot phase only; application RAM reuse is not this ownership contract.");
+    semanticData(0xFEBF30BAL, u16, "f33_boot_response_remaining",
+        "Resident boot phase only; application RAM reuse is not this ownership contract.");
+    semanticData(0xFEBF30BCL, u16, "f33_boot_active_channel",
+        "Resident boot phase only; application RAM reuse is not this ownership contract.");
+    semanticData(0xFEBF30BEL, u8, "f33_boot_active_sid",
+        "Resident boot phase only; application RAM reuse is not this ownership contract.");
+    semanticData(0xFEBF30BFL, u8, "f33_boot_address_mode",
+        "Resident boot phase only; application RAM reuse is not this ownership contract.");
+    semanticData(0xFEBF30C0L, new ArrayDataType(u8, 4096, 1), "f33_boot_request_bytes",
+        "Resident boot phase only; application RAM reuse is not this ownership contract.");
+    semanticFunction(0x5222L, "f33_boot_dispatch_diagnostic_service", v,
+        new ParameterImpl("sid", u8, currentProgram),
+        new ParameterImpl("request_length", u16, currentProgram))
+        .setComment("ROM8E54twentyentryresident-onlyservice/address-modedispatch;unmatchedormaskdenied\u219251FA(SID,11).NoapplicationDCMtable.");
+    semanticFunction(0x614AL, "f33_boot_service_session_control", v,
+        new ParameterImpl("request_length", u16, currentProgram))
+        .setComment("Resident SID10: require length2 and masked subfunction1/2/3; reject target2 from session1 or target3 from "
+            + "session2 with7E. Stage requested session in2B9F/2BA0 and deferred state2BA3; programming entry queues4776 "
+            + "or foreground flag2BA2.6244 publishes the session only after the foreground join, then "
+            + "responds50/subfunction/00 32 01 F4.");
+    semanticFunction(0x60C2L, "f33_boot_service_reset_request", v,
+        new ParameterImpl("request_length", u16, currentProgram))
+        .setComment("Resident SID11: session2, security2, length2, masked subfunction1 only. Stage51/subfunction positive "
+            + "response and request terminal action through67DA; successful response completion joins159E "
+            + "resident-state3/interrupt-disable halt path, not a proven physical ECU reset.");
+    semanticFunction(0x5516L, "f33_boot_service_security_access", v,
+        new ParameterImpl("request_length", u16, currentProgram))
+        .setComment("Resident SID27: session2; masked subfunctions1 and2 only. Both seed and key requests require18 bytes.5328 "
+            + "stages16 client bytes and returns a16-byte challenge;53F2 derives and compares16 expected key bytes. "
+            + "Success sets security2B0F=2/handshake2B55=3; bad key35, repeated failures36 plus raw-counter delay; active "
+            + "delay rejects seed with37.");
+    semanticFunction(0x688AL, "f33_boot_service_communication_control", v,
+        new ParameterImpl("request_length", u16, currentProgram))
+        .setComment("Resident SID28: session3, length3, masked subfunction1 and communication byte1 only; invalid "
+            + "subfunction12, invalid communication byte31, bad length13. Store original subfunction and "
+            + "form68/masked-subfunction with bit7 positive-response suppression. No physical communication-disable side "
+            + "effect is established by this handler.");
+    semanticFunction(0x4FF8L, "f33_boot_service_tester_present", v,
+        new ParameterImpl("request_length", u16, currentProgram))
+        .setComment("Resident SID3E: sessions1/2/3, length2, subfunction00 or80 only. Form7E/00 through4FCE; original bit7 "
+            + "controls positive-response suppression. Functional3E80 has a separate request-admission special case while "
+            + "another request is receiving.");
+    semanticFunction(0x693AL, "f33_boot_service_dtc_setting", v,
+        new ParameterImpl("request_length", u16, currentProgram))
+        .setComment("Resident SID85: session3, length2 and masked subfunction2 only. Store original subfunction and formC5/02 "
+            + "through6910 with bit7 positive-response suppression. No application DTC-state mutation is established "
+            + "here.");
+    semanticFunction(0x5FB8L, "f33_boot_service_read_did", v,
+        new ParameterImpl("request_length", u16, currentProgram))
+        .setComment("Resident SID22: sessions1/2/3, length3 and a read-enabled match among four8F14 descriptors. Only "
+            + "configured F181 is readable: reply62/F181/02 followed by32 literal21 bytes generated by5F3E. Unknown or "
+            + "unreadable DID31; bad length13.5F3E receives descriptor index inr6 and payload offset inr7.");
+    semanticFunction(0x4948L, "f33_boot_service_write_did", v,
+        new ParameterImpl("request_length", u16, currentProgram))
+        .setComment("Resident SID2E: session2, security2, exact length3+8F14 descriptor payload and write flag2.0201 "
+            + "requires2AB2=1 and schedules16-byte job then state2;0202 requires state2, schedules16-byte job, "
+            + "sets2B16=1/state0;0203 requires state0 and returns immediate6E/state1.4A9A waits asynchronous job "
+            + "completion and emits6E or72.");
+    semanticFunction(0x567EL, "f33_boot_service_routine_control", v,
+        new ParameterImpl("request_length", u16, currentProgram))
+        .setComment("Resident SID31: session2, security2, masked start subfunction1, exact length4+configured options.8F44 "
+            + "configures10F0/10F1/10F2/10F3/FF00; all except10F3 require45 00 plus BE32 address/length. Range-kind "
+            + "gates32D2/3318 precede CRC-verification47BA or queued operation41E0. Timer5C06 owns deferred "
+            + "completion;10F3 immediately sets alternate download state8 and responds71.");
+    semanticFunction(0x5D68L, "f33_boot_service_request_download", v,
+        new ParameterImpl("request_length", u16, currentProgram))
+        .setComment("Resident SID34: session2/security2, exact13-byte custom request; DFI high nibble0, low nibble2B15, "
+            + "following format46, selector00/01 then00, BE32 address and size.32D2 classifies the range; normal state0 "
+            + "stages download1, alternate state8 stages9. Store2B00/2B04 and reset transfer counters; optional block "
+            + "crypto starts6BA8. Positive response is four bytes74 20 04 02.");
+    semanticFunction(0x4DBAL, "f33_boot_service_transfer_data", v,
+        new ParameterImpl("request_length", u16, currentProgram))
+        .setComment("Resident SID36: preserve request length inr6; advance download1 to2 or9 to10, then call4B7C program/copy "
+            + "or4CA2 comparison. Payload is at most1024 bytes and full1024 except final; sequence mismatches73, "
+            + "duplicate sequence repeats76 without requeue. Actual ready data consumption occurs later in "
+            + "foreground4F50; timer4DF2/4E92 owns completion and positive76/sequence.");
+    semanticFunction(0x5C92L, "f33_boot_service_transfer_exit", v,
+        new ParameterImpl("request_length", u16, currentProgram))
+        .setComment("Resident SID37: session2, download state2 or10, remaining transfer bytes0 and exact length1. Optionally "
+            + "end block crypto; clear operation class2B17, address2B00, length2B04 and download state2B13; respond77. "
+            + "Incomplete transfer rejects24 and may request4266 cancellation. No call to426E final-input setter is "
+            + "present.");
+    semanticFunction(0x69B0L, "f33_boot_service_reject_configured", v,
+        new ParameterImpl("request_length", u16, currentProgram))
+        .setComment("Sharedconfiguredcallbackfor23/2C/14/19/2F/AB/BA/BB;readsSIDfromrequestbyte0andreturnsNRC7F.Doesnotimplementthoseservices.");
+    semanticFunction(0x2B8AL, "f33_boot_transport_receive_frame", v,
+        new ParameterImpl("selector", u16, currentProgram),
+        new ParameterImpl("pdu", new PointerDataType(currentProgram.getDataTypeManager().getDataType("/CamryF33/F33BootPduInfo"), 4), currentProgram))
+        .setComment("Checksresidenttransportenabled,selector<2,length2..8;routesPCI0/10/20/30usingexact8D50config.PDUisnotcompletedrequestdata.");
+    semanticFunction(0x1EEEL, "f33_boot_transport_rx_record_callback", v,
+        new ParameterImpl("record", new PointerDataType(v, 4), currentProgram))
+        .setComment("ActualROM88FCcallback,buildsPDUandcalls2B8A.Record+4u16selector,+8u32length,+Cinlinebytes.");
+    semanticFunction(0x6374L, "f33_boot_request_admit", u32,
+        new ParameterImpl("channel", u16, currentProgram),
+        new ParameterImpl("first_chunk", new PointerDataType(currentProgram.getDataTypeManager().getDataType("/CamryF33/F33BootPduInfo"), 4), currentProgram),
+        new ParameterImpl("total_length", u16, currentProgram),
+        new ParameterImpl("remaining_capacity", new PointerDataType(u16, 4), currentProgram))
+        .setComment("Admissionreturns0accepted/1busy/3tooLong.Maximum4096;writesr9capacity;storesSID/address-mode/channelandresetsappendindex.Seeexceptionalreceivingreplacementbehavior.");
+    semanticFunction(0x6464L, "f33_boot_request_append", u32,
+        new ParameterImpl("channel", u16, currentProgram),
+        new ParameterImpl("chunk", new PointerDataType(currentProgram.getDataTypeManager().getDataType("/CamryF33/F33BootPduInfo"), 4), currentProgram),
+        new ParameterImpl("remaining_capacity", new PointerDataType(u16, 4), currentProgram))
+        .setComment("Returns0success/1capacityerror;readsONLYlowbyteofdescriptorlength,updatesu16total30B8,andcalls6422.6422mustpreserver8capacityoutputliveacrosscall.");
+    semanticFunction(0x6422L, "f33_boot_request_append_bytes", v,
+        new ParameterImpl("source", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u8, currentProgram))
+        .setComment("Appendinto4096-byteFEBF30C0using2BB8index.Preservesr8;inlineexactleafinGhidraso6464doesnotinventextraout_r8.");
+    getFunctionAt(toAddr(0x6422L)).setInline(true);
+    semanticFunction(0x64B8L, "f33_boot_request_receive_complete", v,
+        new ParameterImpl("channel", u16, currentProgram),
+        new ParameterImpl("status", u8, currentProgram))
+        .setComment("Status0capturesrawcountertimestamps,publishesexecuting2/substate0anddispatchesSID+length.Nonzerostatusabortsthereceive.");
+    semanticFunction(0x6B4CL, "f33_boot_transport_request_admit", u32,
+        new ParameterImpl("channel", u16, currentProgram),
+        new ParameterImpl("first_chunk", new PointerDataType(currentProgram.getDataTypeManager().getDataType("/CamryF33/F33BootPduInfo"), 4), currentProgram),
+        new ParameterImpl("total_length", u16, currentProgram),
+        new ParameterImpl("remaining_capacity", new PointerDataType(u16, 4), currentProgram))
+        .setComment("Enabledgateveneerpreservesr9fourthargumentto6374;returns1whendisabled.");
+    semanticFunction(0x6B6CL, "f33_boot_transport_request_append", u32,
+        new ParameterImpl("channel", u16, currentProgram),
+        new ParameterImpl("chunk", new PointerDataType(currentProgram.getDataTypeManager().getDataType("/CamryF33/F33BootPduInfo"), 4), currentProgram),
+        new ParameterImpl("remaining_capacity", new PointerDataType(u16, 4), currentProgram))
+        .setComment("Registerpreserving6464veneer;notvoidone-argumentCfunction.");
+    semanticFunction(0x6B7AL, "f33_boot_transport_receive_complete", v,
+        new ParameterImpl("channel", u16, currentProgram),
+        new ParameterImpl("status", u8, currentProgram))
+        .setComment("Correcttypedveneerfor64B8completion.");
+    semanticFunction(0x66FAL, "f33_boot_response_copy_chunk", u32,
+        new ParameterImpl("channel", u16, currentProgram),
+        new ParameterImpl("chunk", new PointerDataType(currentProgram.getDataTypeManager().getDataType("/CamryF33/F33BootPduInfo"), 4), currentProgram),
+        new ParameterImpl("unused", u32, currentProgram),
+        new ParameterImpl("remaining", new PointerDataType(u16, 4), currentProgram))
+        .setComment("Outgoingrequestdescriptorlengthlowbytecontrolsactualcopy;consumes30BAremaining,writesr9remaining;caller6B8Aforwardsliveregisters.");
+    semanticFunction(0x6B8AL, "f33_boot_transport_response_copy", u32,
+        new ParameterImpl("channel", u16, currentProgram),
+        new ParameterImpl("chunk", new PointerDataType(currentProgram.getDataTypeManager().getDataType("/CamryF33/F33BootPduInfo"), 4), currentProgram),
+        new ParameterImpl("unused", u32, currentProgram),
+        new ParameterImpl("remaining", new PointerDataType(u16, 4), currentProgram))
+        .setComment("Realresponsechunkcallbackveneerforwardingr7/r8/r9;notvoidone-argument.");
+    semanticFunction(0x66BEL, "f33_boot_response_complete", v,
+        new ParameterImpl("channel", u16, currentProgram),
+        new ParameterImpl("status", u8, currentProgram))
+        .setComment("Duringresponse-pendingstate3onlyclearsinflightlock2BBC;othercompletionreleasesrequestownerandmayjointheterminalpath159E.");
+    semanticFunction(0x6B98L, "f33_boot_transport_response_complete", v,
+        new ParameterImpl("channel", u16, currentProgram),
+        new ParameterImpl("status", u8, currentProgram))
+        .setComment("Responsecompletionveneerfor66BE;notreceivecompletion64B8.");
+    semanticFunction(0x674AL, "f33_boot_response_submit", v,
+        new ParameterImpl("mode", u8, currentProgram),
+        new ParameterImpl("data", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u16, currentProgram))
+        .setComment("Stagesresponseorcompletesasuppressedrequest;forcestransmissionafterprevious78pending.Same-countertickdeferralavoidsimmediatesend,then65AAownsprogress.");
+    semanticFunction(0x51FAL, "f33_boot_negative_response", v,
+        new ParameterImpl("sid", u8, currentProgram),
+        new ParameterImpl("nrc", u8, currentProgram))
+        .setComment("Forms7F,SID,NRC;mode0functionalelse2physical;submitslength3.");
+    semanticFunction(0x51D8L, "f33_boot_session_publish", v,
+        new ParameterImpl("session", u8, currentProgram))
+        .setComment("Prioritymaskedpublicationof2B0Efollowed55FCsecurityhandshakereset.");
+    semanticFunction(0x6244L, "f33_boot_session_progress", v)
+        .setComment("Timer-contextdeferredsessiontransition;waits4794/478Ethenforeground62DCflagbeforepublication/positive50.");
+    semanticFunction(0x62DCL, "f33_boot_session_foreground_join", v)
+        .setComment("Consumes2BA2flag;preparesdriveronlyif2BD1!=1,thenalwaysclearsflag.");
+    semanticFunction(0x6B1EL, "f33_boot_programming_prepare", v)
+        .setComment("Clears2BD2,152Adriverprepare/519Cformatinitialize,thenpublishes2BD1=1.");
+    semanticFunction(0x4F50L, "f33_boot_transfer_foreground_consume", v)
+        .setComment("Readyqueuebridgeonlywhenoperationclass1/2;u16lenfrom2AC4,ringsource2AC0orRAMcopyto2AB8,clear2ACBandadvanceaddress.");
+    semanticFunction(0x6AACL, "f33_boot_diagnostic_foreground", v)
+        .setComment("Enabledforegroundruns51C8/6E60/6EE0/6BDE/6C8Einthatorder;separatefromtimer51AC.");
+    semanticFunction(0x6A06L, "f33_boot_diagnostic_timer_services", v)
+        .setComment("Enabledtimer666Cthen51AC;doesnotcallhardwareforeground4428.");
+    semanticFunction(0x51ACL, "f33_boot_diagnostic_timer_progress", v)
+        .setComment("6244session,5584securitydelay,4A9ADID,5C06routine,4F1Ctransferorderedtimerwork.");
+    semanticFunction(0x69D2L, "f33_boot_diagnostic_enable_from_handoff", v)
+        .setComment("Enablesonlyhandofftag0orFF;noapplicationDCMinitialization.");
+    semanticFunction(0x6A22L, "f33_boot_diagnostic_initialize_from_handoff", v)
+        .setComment("Resetsresidentserviceworkers;tag0preparesdriverandreplaysrecordsessionthrough6504;tagFFwaitswithtimestamp.");
+    semanticFunction(0x6504L, "f33_boot_diagnostic_replay_handoff_session", v)
+        .setComment("Matchchannelrecord8F04/8F0C,forceextendedsession3andreadsubfunction/suppressionfromhandoffword4/5,thenadmit/append/complete10request.");
+    semanticFunction(0x65AAL, "f33_boot_response_timer_progress", v)
+        .setComment("Ownstimestamp-gatedsend,78pending,inflightlockandoverallterminalstate;doesnotownFACIoperation.");
+    semanticFunction(0x666CL, "f33_boot_diagnostic_timeout_progress", v)
+        .setComment("Executingrequests\u219265AA;idlesession2/3rawelapsedtimeoutpublishesdefault1.");
+    semanticFunction(0x6BDEL, "f33_boot_transfer_block_transform_progress", v)
+        .setComment("Atmostone16-byteblockpercall;shorttaildeductedwithoutcopy;7108returnignored;noarbitrarylengthtransformclaim.");
+    semanticFunction(0x6C8EL, "f33_boot_transfer_compare_progress", v)
+        .setComment("Atmost16bytespercall;firstmismatchclearsbusybutkeepsfailure1;onlycompleteall-matchclearsfailure0.");
+    semanticFunction(0x6EE0L, "f33_boot_region_authentication_progress", v)
+        .setComment("7170returns2busy/0pass/1fail;updates2BFCresultandclears2BFDactiveonterminal.");
+    semanticFunction(0x4A9AL, "f33_boot_write_did_progress", v)
+        .setComment("Waits2BFBjobcompletion;responds6Eor72afterrequestpendinglockclears.");
+    semanticFunction(0x5C06L, "f33_boot_routine_timer_progress", v)
+        .setComment("ExplicitRIDdispatch10F0/10F1\u21925936,10F2\u21925A04,FF00\u21925B70;noROMcallbackcallthroughFFFFFFFF.");
+    semanticFunction(0x4F1CL, "f33_boot_transfer_timer_progress", v)
+        .setComment("Downloadstate2\u21924DF2program/copy;10\u21924E92compare,otherwiseclearsactive.");
+    semanticFunction(0x704CL, "f33_boot_security_derive_expected_key", v,
+        new ParameterImpl("client_material", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("challenge", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("expected_key", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Derives16-byteintermediatekeyfromclientmaterialwithROMBFE8using6FEC,then701Eencryptschallengeintokey.Notsimpleseedonlymapping.");
+    semanticFunction(0x5D40L, "f33_boot_download_positive_response", v)
+        .setComment("Forms74 20 04 02andpasseslength4inr8to674A;repairmisrenderedmissinglength.");
+    semanticFunction(0x5F3EL, "f33_boot_read_did_fill_payload", u32,
+        new ParameterImpl("descriptor_index", u8, currentProgram),
+        new ParameterImpl("payload_offset", u16, currentProgram))
+        .setComment("FirmwarefillsconfiguredDIDpayloadbyteswithliteral0x21;keepscallerregisterABI(notanOEManumberread).");
+    semanticFunction(0x6C6CL, "f33_boot_compare_submit", u32,
+        new ParameterImpl("left", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("right", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("length", u32, currentProgram))
+        .setComment("Returns1ifalreadybusyelse0,setsfailure1/active1andfull32-bitremaining/pointers;4CA2preserveslivelengthr8acrosssetup.");
+    semanticFunction(0x6BB4L, "f33_boot_block_transform_submit", u32,
+        new ParameterImpl("length", u16, currentProgram),
+        new ParameterImpl("source", new PointerDataType(u8, 4), currentProgram),
+        new ParameterImpl("destination", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Returns1busy/0accepted;storeslengthu16,pointers,sets2BDEactive;worker6BDEtransformsfull16-byteblocks.");
+    semanticFunction(0x32D2L, "f33_boot_classify_service_range", u32,
+        new ParameterImpl("start", u32, currentProgram),
+        new ParameterImpl("length", u32, currentProgram),
+        new ParameterImpl("kind", u8, currentProgram),
+        new ParameterImpl("storage_class", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Return0/write class byte for first permitted8DA0 range, else1/output unchanged. Require nonzero length and "
+            + "unsigned start<=end after modulo32 end=start+length-1. Check kind-mask bit(kind&31) and inclusive bounds. "
+            + "Actual classes:0 CodeFlash windows10000..17DFF/18000..FFDFF;1 RAM FEBF0000..0FFF. All rows mask33. Used by "
+            + "download, transfer and routine admission.");
+    semanticFunction(0x3318L, "f33_boot_service_range_completion_selector", u32,
+        new ParameterImpl("start", u32, currentProgram),
+        new ParameterImpl("length", u32, currentProgram),
+        new ParameterImpl("kind", u8, currentProgram),
+        new ParameterImpl("completion_selector", new PointerDataType(u8, 4), currentProgram))
+        .setComment("Same nonzero/no-wrap/kind-mask/inclusive predicates as32D2, but output8DA0 row byte+13. Return0/write "
+            + "output on match, else1/output unchanged. All current selector bytes are0;567E stores this as2B68 for "
+            + "completion bit updates. This is not the storage class or descriptor index.");
+    semanticFunction(0x3392L, "f33_boot_lookup_authentication_trailer", u32,
+        new ParameterImpl("start", u32, currentProgram),
+        new ParameterImpl("length", u32, currentProgram),
+        new ParameterImpl("trailer_address", new PointerDataType(u32, 4), currentProgram))
+        .setComment("Return0/write nonzero8E00 descriptor+8 pointer for nonzero length with lower<=start and modulo32 "
+            + "end<=upper; else1/output unchanged. No explicit start<=end or start<=upper check. Current "
+            + "outputs17DF0/FFDF0/FEBF0FF0.7122 stores the pointer for7170 final16-byte comparison; lookup alone does not "
+            + "verify CRC or authentication.");
+    semanticFunction(0x33CCL, "f33_boot_lookup_completion_marker", u32,
+        new ParameterImpl("start", u32, currentProgram),
+        new ParameterImpl("length", u32, currentProgram),
+        new ParameterImpl("marker_address", new PointerDataType(u32, 4), currentProgram))
+        .setComment("Return0/write8E00 descriptor+12 marker address for nonzero length with lower<=start and modulo32 "
+            + "end<=upper; else1/output unchanged. No explicit no-wrap check and no null-marker rejection: current "
+            + "outputs17E00/FFE00/0.5A04 caller is already kind4/class0 admitted before5286 queues5AA5A55A at the marker.");
+    semanticFunction(0x4B7CL, "f33_boot_admit_program_transfer_chunk", v,
+        new ParameterImpl("request_length", u16, currentProgram))
+        .setComment("Consume the full low16 request length forwarded from4DBA. Require session2, nonzero remaining, sequence "
+            + "admission and payload1..1024, full1024 unless final. Decrement remaining at admission; classify RAM versus "
+            + "CodeFlash, stage source/length and transform-or-ready state. Foreground4F50 consumes later; failures "
+            + "request queue cancellation.");
+    semanticFunction(0x4CA2L, "f33_boot_admit_compare_transfer_chunk", v,
+        new ParameterImpl("request_length", u16, currentProgram))
+        .setComment("Consume low16 request length from4DBA with the same payload/sequence shape, but stage comparison rather "
+            + "than direct transfer. Preserve payload length in R8 for6C6C; optional block transform precedes comparison. "
+            + "Foreground comparison and timer response are separate completion owners.");
+    semanticFunction(0x4D8CL, "f33_boot_reject_transfer_state", v,
+        new ParameterImpl("request_length", u16, currentProgram))
+        .setComment("Use request length even in unsupported download state: wrong session gives7F; otherwise length<3 gives13, "
+            + "else24. Reply through4B38; no input consumption.");
+    semanticData(0x8EF4L, new ArrayDataType(u8, 16, 1), "f33_boot_service_session_constants",
+        "Service-local required sessions and admission lists; not interrupt-table fields or a single permission bitmask.");
+  }
   @Override public void run() throws Exception {
     String[] args = getScriptArgs();
     if (args.length != 1) throw new IllegalArgumentException("expected function_seeds.csv path");
@@ -7056,6 +7812,9 @@ public class SeedCamryF33RecoveredFunctions extends GhidraScript {
     annotateInitializationAndSnapshots();
     annotateNonthermalCurrentLimits();
     annotateHealthCoherencePolicy();
+    annotateResidentFlashOperationLifecycle();
+    annotateReceivedInputConditioning();
+    annotateResidentDiagnosticLifecycle();
     annotateDataFlashReads();
     annotateFaciSubmission();
     annotatePwmCompareStaging();

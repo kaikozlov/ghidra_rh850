@@ -1,0 +1,125 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_received_conditioning_hold_consumes_metadata_generations",
+  "entry": {
+    "role": "Real metadata ownerBE5AA and all three conditioners: qualified-state11 hold wins over invalid source statuses, retaining numeric and packed values while consuming each incoming generation. Releasing hold cannot replay those edges without another generation. No physical source identity or storage persistence claim.",
+    "scope": "resolved-address",
+    "address": "0xbe5aa"
+  },
+  "max_instructions": 200000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xfe00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe0000",
+      "size": 131072,
+      "fill": 0,
+      "evidence": "Explicit prior application RAM and stack, not a physical reset or vehicle reachability claim. No patched callees."
+    },
+    {
+      "address": "0xfebeb20e",
+      "hex": "11",
+      "evidence": "Qualified source state selects hold."
+    },
+    {
+      "address": "0xfebebe60",
+      "hex": "011002200033",
+      "evidence": "Retained word/type flags, old generations and prior state."
+    },
+    {
+      "address": "0xfebebe66",
+      "hex": "25091518405930",
+      "evidence": "Retained packed bytes followed by prior generation30."
+    },
+    {
+      "address": "0xfebebe6e",
+      "hex": "3412",
+      "evidence": "Retained word."
+    },
+    {
+      "address": "0xfebebe70",
+      "hex": "1e000000",
+      "evidence": "Retained raw age."
+    },
+    {
+      "address": "0xfebebe74",
+      "hex": "40e20100",
+      "evidence": "Retained numerical scalar, notpointer."
+    },
+    {
+      "address": "0xfebef038",
+      "hex": "ff21",
+      "evidence": "Invalid source status plus new word generation."
+    },
+    {
+      "address": "0xfebef065",
+      "hex": "ff32",
+      "evidence": "Invalid source status plus new typed-scalar generation."
+    },
+    {
+      "address": "0xfebef0f7",
+      "hex": "43ff",
+      "evidence": "New packed-field generation with invalid status."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Real composed path returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Application caller stack restored",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe2000"
+    },
+    {
+      "name": "Priority mask restored",
+      "kind": "register",
+      "register": "PMR",
+      "equals": "0xfe00"
+    },
+    {
+      "name": "Hold retains flags but consumes both scalar generations",
+      "kind": "memory",
+      "address": "0xfebebe60",
+      "size": 6,
+      "equals_hex": "012102325a11"
+    },
+    {
+      "name": "Packed fields retained despite invalid status and generation consumed",
+      "kind": "memory",
+      "address": "0xfebebe66",
+      "size": 7,
+      "equals_hex": "25091518405943"
+    },
+    {
+      "name": "Retained word and age unchanged",
+      "kind": "memory",
+      "address": "0xfebebe6e",
+      "size": 6,
+      "equals_hex": "34121e000000"
+    },
+    {
+      "name": "Typed numerical scalar retained",
+      "kind": "memory",
+      "address": "0xfebebe74",
+      "size": 4,
+      "equals_hex": "40e20100"
+    }
+  ]
+}

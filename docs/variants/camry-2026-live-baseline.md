@@ -2068,7 +2068,7 @@ activation counter trio.
 | `FEBEACCE` | `0x0D5` signal211 B0[3] (`0x4B86E`→`FEBEF097`) | CAN, brake-domain monitor gate | verified (§18 census) |
 | `FEBEC5FC`/`FEBEC600` | `0x0D5` s213/s212 monitor pair `FEBEAE06`/`FEBEAE04` (clamp ±1000/±100, trips `[0xB044A]=1000`/`[0xB044C]=100`, Dem 200/201) | CAN monitor channels | verified |
 | `FEBEADF6` | filtered `0x0D7` signal283 SP1 speed (`0xBECF4` clamp 30000 → `0xBEDC4/0xBEE2C`, status `FEBEBEF0`) | CAN, 0.01 km/h; UDS `0xBA` op `FA` tester override | verified |
-| `FEBEACBD` | `FEBEF000 ← FEBE7F68` | internal ComM communication-mode {0..3} | verified internal |
+| `FEBEACBD` | `FEBEF000 ← FEBE7F68`, then `BCD62` normalization | Internal source-admission state0..3, normalized to0/1/2/4; not an established AUTOSAR ComM enum. See [§34.10](#3410-received-input-conditioning-and-source-generation-ownership). | recovered |
 | `FEBEAD19` | `FEBEF014 ← FEBE687B ← FEBE7FC8` | internal service/lifecycle state | verified internal |
 | `FEBEACBE` | `FEBEB1A4==0x11` | internal system-transition phase | verified internal |
 | `FEBEADFC` | `FEBEB354` | boot-time same-image software identity | verified internal |
@@ -3890,6 +3890,144 @@ masked reduction. They distinguish retained owner1 from owner7 and the separate
 owner6/9 bound. They do not execute an entire acquisition cycle or every producer
 branch. Other numerical conclusions above are **recovered** from exact
 instructions, dataflow and calibration, not new physical observations.
+
+### 34.10 Received-input conditioning and source-generation ownership
+
+This exact `camry-8965F3307000` slice connects generated receive publications to
+control readiness, health and retained metadata. Contracts are **recovered**
+from the registered image; the linked native scenarios verify only their
+explicit RAM states and instruction intervals. No physical sender or OEM unit
+is inferred from an identifier, scale or calendar-shaped field.
+
+#### Internal admission is not a received signal
+
+`58074` publishes internal `7F68→F000` and, independently, `7F70→F001`.
+`4A298` runs the dual-source, first-source and second-source qualifiers in that
+order. Their predicates use `6764`, `66AC`, unsigned `66B8/66AE/66B0`, and the
+registered `2304..4096` intervals; `7F2C` must be1 or2. The three ROM bypass
+bytes at `2BCE8..EA` are all zero in this image.
+
+The local qualifier states are0/11/22/44, distinct from shared admission0/1/2/3.
+A first failing22 observation starts local11 and shared1. Continued failure
+with entry count at least5 selects local22/shared2; entry persistence at least200
+selects local44/shared3. Local11 resets on **any predicate other than22**,
+including inapplicable44. Local22 recovers on11 immediately with the configured
+zero recovery limits; predicate44 clears its persistence/recovery counters
+without changing the state. Only the dual-source local44 has an ordinary
+healthy recovery path, requiring entry recovery count at least200.
+
+Each qualifier writes shared `7F68` directly. This is **ordered last-writer
+publication**, not a maximum or OR of the local states. The native
+[ordered-qualification composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_received_conditioning_admission_is_ordered_last_writer.json)
+leaves the first local44 intact while a later healthy local11 resets shared
+`7F68` and the first cause latch. `4A26A` separately publishes `7F70=5A` only
+when `66B8` is in range and shared state is neither2 nor3. `F000<2` therefore
+expresses a software admission policy, not a decoded voltage, vehicle state or
+universal freshness guarantee.
+
+#### Consumed generation and decoded payload can diverge
+
+```mermaid
+flowchart LR
+  C["Accepted COM route30 copy: 51E / 8 bytes"] --> G["8E772: increment byte5356"]
+  G --> U["4B378: always save5356 into802E"]
+  G --> D["Decode only if7F68<2 and generation changed"]
+  D --> P["Route30 payload fields, including8031"]
+  U --> E["58074: F13F"]
+  E --> H["Admitted BE778 cadence: BE7E"]
+  H --> Q["B3F44: always saveB195; conditionally armB196"]
+```
+
+Route30 resolves through the signal/PDU tables to raw `FEBE4B47` and classical
+`51E/8`; status selector12 maps to that route, **not route12**. A copy consumed
+while `7F68>=2` is not decoded later merely because admission reopens. Another
+generation is required, and the byte aliases after256 increments. The
+[frozen-decode native interval](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_received_conditioning_frozen_decode_publishes_consumed_generation.json)
+executes the generated unpackers and real `58074`, observing the new consumed
+generation with the prior payload retained.
+
+Normal `58074` copies the same `8031` payload bit into **both `F052` and `F0FB`**.
+It copies route30 receive status `802F` into `F051/F057` as well as `F04F/F058`.
+Thus the two health cache paths are not independent physical inputs, and the
+low bits used by `BE712` are receive-status bits, not payload bits. Their paired
+diagnostic gates remain distinct. Arithmetic input `F194←8014` instead comes
+from route26, classical `115/8`, with a separate generation. `BE7E` cannot
+establish simultaneous freshness of that sample and the route30 classifications.
+
+#### Readiness is delayed, sticky and partly constant-disabled
+
+`C214C/C26A4` run `BE326/BE304` for captured mode at least0100; readiness and
+record8 confirmation run at least0101, before the optional cadence-bit1 health
+refresh. `BEC80` increments entry counts below200 without running the channel
+group. Starting at zero, the first group invocation is therefore the201st
+admitted call. Afterward each channel counts only while its completion byte is
+zero; entry count at least its limit completes5A. A bad predicate resets an
+incomplete channel's count, but nonzero completion freezes its qualification.
+These are startup qualifications, not receive-message ages.
+
+| Channel owner | Additional predicate, always with `F000<2` | Limit | Established source boundary |
+|---|---|---:|---|
+| `BEA56` | None | 300 | Publishes scalar default0 on completion |
+| `BEAA4` | `F028==0 && F02B==1` | 48 | Normal publisher fixes these to1/0; not eligible there |
+| `BEAFA` | `F060==0` | 96 | Normal publisher fixes it to1 |
+| `BEB48` | `F069==0` | 40 | Route35 receive status, FD `25/32` |
+| `BEB96` | `F04C==0` | 64 | Route23 receive status, classical `D0/8` |
+| `BEC24` | Either `F148/F149==0` | 200 | Normal publisher fixes both to1 |
+
+Other members publish fixed5A/zero defaults. `BEA14/BEA2C` always publish the
+`55AAAA55` markers, including during the initial delay. Those constants are not
+authenticated source identities. Mode-tier crossing calls empty leaves and does
+not reset the history; common `BF97A` initialization does. Native
+[delay-boundary](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_received_conditioning_delay_boundary_preserves_channels.json)
+and [readiness/record8](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_received_conditioning_ready_and_record8_confirmation.json)
+compositions distinguish these boundaries without executing a whole scheduler.
+
+`BE304` computes unsigned `floor(byte*5243/4096)` into `BE54/56`; normal sources
+`F03D/F03E` are both zero. `BE326` admits `F02D` in8..108 and publishes signed
+`(value-48)*128`, otherwise retaining its scalar and changing status0 to1.
+The source is a raw byte from route5, classical `3B0/8`; no physical unit is
+assigned. Acquired `AFE0`, separately, drives absolute-value hysteresis at
+5120/2560. Its configured debounce limit is zero, so ordinary initialized
+state publishes after one invocation; it is not a wire-derived threshold.
+
+#### Metadata hold consumes edges rather than replaying them
+
+`BE5AA`, admitted at captured mode0102 or higher, chooses hold5A when qualified
+health state `B20E` is11 or33. A prior33→current0 transition chooses resetA5;
+otherwise policy0 applies. All three conditioners save their incoming generation
+**even while holding**, and the wrapper records the new health state.
+
+| Metadata | Admission and retention |
+|---|---|
+| Word and raw age `BE6E/BE70` | New generation, status0, nonFFFF word and `F000<2` admit `F18A`. Only a changed value resets age; otherwise a nonheld call advances by5. Values aboveFFFFFFFD normalize to0; the near-overflow band publishesFFFFFFFE. That sentinel returns to5 on a later call, not permanent saturation. Logical record13 load/store owns persistence requests. |
+| Typed scalar `BE74` | Unsigned numerical0..999999 with type1/2, from route31 classical `611/8`; not a pointer. Outside hold, invalid receive status clears it immediately, while a new admitted but invalid tuple also clears it. |
+| Six packed bytes `BE66..6B` | Route33 classical `675/8`. Validate both decimal nibbles and raw bounds `00..38,01..12,01..31,00..23,00..59,00..59` in hex. Preserve accepted packed bytes; any invalid member publishes allFF. No BCD conversion or OEM calendar identity is established. |
+
+The numeric source and destination are typed `uint32`. Ghidra can still render
+the `999999` immediate as `&UNK_000f423f`; the instruction compares its value
+without dereferencing that address. This is a remaining C-rendering boundary,
+not a pointer-valued input or an unknown numerical limit.
+
+The native [metadata-hold composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_received_conditioning_hold_consumes_metadata_generations.json)
+retains all three value groups despite invalid source statuses while consuming
+each new generation. Releasing hold alone cannot replay those edges.
+
+#### Record8 confirmation is a separate post-load one-shot
+
+`BD81E` loads logical record8, adopts `AF04/AE0E/ACEC` only on result10, saves
+initial eligibility into `ACED`, snapshots the record, then sets `ACEE=5A`.
+Read failure clears only `ACEC`, retaining the other values. `BF232` does nothing
+while `ACEE` is closed. With eligible `ACED`, the uint16 warmup must increment
+**above60** before observations; it then clamps to60. Completion is sticky.
+
+Above raw `B080=4096`, the result is zero. Otherwise `F001==5A` admits a window
+whose incremented total must not exceed10. Valid route35 status permits zero
+or nonzero `F06E` observations: three zeros retain `ACED`, eight nonzeros clear
+the result. Eight invalid-status observations also clear it. Opposite runs
+reset each other. Only old completion0→new5A calls `BD86E` to update `ACEC` and
+the real record snapshot; later completed calls do not repeat that mutation.
+This is retained-record qualification, not continuous received-fault monitoring.
+
 
 ## 35. Hidden-ingress false-negative audit: no concrete alternate producer found; residuals closed in §36
 
@@ -9355,8 +9493,9 @@ validation. P1M-E hardware manual Table3.77 identifies the SEG registers at
 A real native prefix stops at `9F16`, the currently unmapped SEGFLAG write to
 `FFFEE982`. The remaining transfer is recovered from instructions/dataflow,
 not claimed as executed. No permissive register model or replacement callee
-was introduced to make this path pass. Full resident services and physical
-reset/startup feedback remain separate dependencies.
+was introduced to make this path pass. Resident service lifetimes are reconstructed
+in [§77.26](#7726-resident-diagnostics-transfer-ownership-and-queued-programming-boundaries);
+physical reset/startup feedback remains outside this prefix's execution proof.
 
 ### 77.6 NvM descriptor and allocation reconstruction
 
@@ -11213,10 +11352,12 @@ execute the terminal hardware-reset sequence.
 #### Source coherence, health policy and record lifetimes
 
 The source-coherence chain keeps receive history, current observations, sticky
-summary, record lifecycle and qualified health separate. `BE778` refreshes
-received caches and `F13F→BE7E` only on its admitted cadence bit. Health processing
-can advance while that cache remains unchanged. The threshold scalar `B084`
-is also a staged input, not proof of a newly sampled physical channel.
+summary, record lifecycle and qualified health separate. [§34.10](#3410-received-input-conditioning-and-source-generation-ownership)
+joins `F13F→BE7E` to consumed route30 generation, which can advance without payload
+decoding. `BE778` refreshes it only on admitted cadence bit1; health processing can
+advance while that cache remains unchanged. The two flag caches share a payload
+source, while arithmetic `F194` has a separate route26 generation. The staged
+threshold `B084` is likewise not proof of a newly sampled physical channel.
 
 | State | Owner and lifetime |
 |---|---|
@@ -12428,19 +12569,250 @@ and [normalization acknowledgement before group completion](../../tests/fixtures
 These explicit-RAM software scenarios do not establish physical persistence,
 sensor/actuator effects, external request reachability or all interrupt interleavings.
 
-**Remaining high-value dependencies:** received/staged-source provenance and
-production reachability across diagnostic and mode groups; remaining numerical
-control-map surfaces and cross-task retention; raw3838..383C/status acquisition,
-ADC/DMA and local-link freshness; the unassigned `B1C8.bit5` producer; physical
-persistence of the thermal-history lifecycle; full resident-boot services and
-SEG/cache/CRC/ECC/programming feedback; OEM service identities, calibration
-units and physical source identity. The connected application, fault-action
-and diagnostic contracts do not require a complete peripheral or NvM emulator.
+### 77.26 Resident diagnostics, transfer ownership and queued programming boundaries
+
+The resident implementation is distinct from application DCM in §77.25.
+This reconstruction uses the exact `camry-8965F3307000` image and boot register
+context. Static contracts are **recovered**; native evidence below is bounded
+to explicit software states. No vehicle programming, physical reset or new
+hardware model was used.
+
+#### Foreground, timer and handoff ownership
+
+`1338` initializes resident state1; `137A` publishes state2 before each foreground
+iteration. Only state2 admits the `14A2` timer services. `69D2` enables diagnostic
+work only for captured handoff tag0 orFF. Other tags leave that work disabled,
+even though the resident loop continues.
+
+The deliberate application handoff copies **nine words** into `FEBF2908`.
+ROM `31788` contains `{0,7A1,0,0,2,0,0,0,0}`. `6504` matches its selector against
+`8F04`, establishes session3, and replays `10 02` through the ordinary resident
+request admission/copy/completion path. It is not application DCM dispatch or
+a second reset. No selector match enters a terminal loop. The previously bounded
+SEGFLAG handoff prefix remains unchanged.
+
+```mermaid
+flowchart TD
+  F["137A resident foreground"] --> D["6AAC: session join, transfer consume, data/auth/transform/compare jobs"]
+  D --> W["4428: queued flash operation"]
+  W --> J["479A: transition-job completion"]
+  J --> V["4874: queued region CRC verification"]
+  T["14A2, only resident state2"] --> E["1D9A: armed timers and generation-tagged callbacks"]
+  E --> S["6A06: response timing, session/security, DID/routine/transfer progress"]
+  S --> P["2250: transport state progress"]
+```
+
+Timer slots clear their armed flag before dispatch; later callbacks reject stale
+generations. Deadline comparison is signed `deadline-now<=0`. Raw counter values
+from `FFE51010` and constants below are not converted into seconds. The separate
+`6AAC` flag window clears only for `0<elapsed<=window`; elapsed beyond the window
+is not an ordinary timeout-clear condition.
+
+#### Transport admission and configured exposure
+
+The lower callback `1EEE→2B8A` accepts an eight-byte descriptor, not an application
+COM message. Enabled transport requires selector below2 and frame length2..8.
+Configured normal-address frames dispatch SF/FF/CF/FC by PCI. Only receive record0
+has the exact multiframe-enable value1; record1 contains2, so it is not a second
+multiframe receiver. CF sequence is modulo16; the final payload is truncated to
+remaining length before completion. Flow-control STmin normalization and timer
+values remain raw software encodings.
+
+Request admission caps total length at4096. Executing state2 rejects another
+request. Receiving state1 may be replaced, except the exact functional two-byte
+`3E 80` special case; a separate lock applies outside receiving state. Each append
+consumes only the low byte of the descriptor's halfword length. That does not
+make the descriptor field itself a byte: framing and outgoing paths also read
+its full halfword. The real SF native
+[admission composition](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_resident_diagnostic_single_frame_admission.json)
+copies `10 02`, excludes padding, and preserves the capacity-output pointer through
+the leaf append, stopping before timer capture and service dispatch.
+
+ROM `8E54` supplies the resident service/address-mode table. Logical address mode0
+selects the functional bit; mode1 selects the physical bit. The table exposes:
+
+| SIDs | Address modes | Actual resident behavior |
+|---|---|---|
+| `10` | Both | Session control with deferred programming transition |
+| `11/27/22/2E/31/34/36/37` | Physical | Terminal request, security, DID read/write, routines, download/transfer/exit |
+| `28/3E/85` | Functional | Narrow communication/tester-present/DTC-setting handlers; no application-state effect inferred |
+| `14` | Physical | Configured generic rejection |
+| `23/2C/19/2F/AB/BA/BB` | Both | Configured generic rejection, not implemented memory/DTC/other services |
+
+Unmatched SID or denied addressing gives NRC11 before the handler. Configured
+`69B0` rejection gives NRC7F. The native
+[functional routine rejection](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_resident_diagnostic_functional_routine_rejected.json)
+proves that ordering and formats `7F 31 11` with suppression mode0; it stops before
+response processing. `674A` normally suppresses mode0 responses unless a prior
+response-pending state requires staging. Response completion of a pending78
+clears its in-flight flag without finishing the service; other completion releases
+the request. Terminal-after-response is an explicit separate state.
+
+`67DA→159E→1560` ultimately masks interrupts, changes bounded controls and enters
+an endless loop. Calling SID11 “ECU reset” does not establish a physical reset
+from those software instructions alone.
+
+#### Session, security and identifier state
+
+Session starts1 and security starts locked1. Session2 cannot be requested from1;
+session3 cannot be requested from2. Accepted programming-session entry queues a
+transition job, then waits for foreground preparation and later timer publication.
+The native [deferred-session case](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_resident_diagnostic_programming_session_deferred.json)
+executes the real ROM dispatcher and job submission from session3: the request is
+staged while session/security remain unchanged. The explicit application handoff
+has already prepared the driver and uses the same publication join without
+repeating preparation. Inactivity recovery and security delays are raw-counter
+contracts, not measured wall time.
+
+SID27 is allowed in session2. Both successful seed and key requests have length18:
+SID, subfunction and **16 client bytes**, including the seed request. The seed
+path stores client material and generates a separate challenge. `704C` transforms
+client material using ROM `BFE8`, then encrypts the challenge with the resulting
+intermediate key. This is not a seed-only mapping or the application SecOC CMAC.
+Correct comparison sets security2; a first bad key gives35, a second gives36,
+clears the challenge and restarts the delay. Native successful unlock, challenge
+entropy and the remaining crypto-helper ABI are not closed here.
+
+The `8F14` DID table makes F181 the only readable entry. Its resident reply has
+prefix02 and **32 literal21 bytes** produced by `5F3E`, not a recovered physical
+identifier string. Write-only0203/0201/0202 form a state0→1→2→0 sequence;0201/0202
+copy16 bytes into their configured RAM destinations asynchronously, and the latter
+sets `2B16`. Their OEM provisioning meaning is not assigned merely from buffer
+size or DID numbers.
+
+#### Transfer and operation classes remain separate
+
+Routine descriptors at `8F44` configure `10F0/10F1/10F2/10F3/FF00`, all start-only.
+The leading FFFFFFFF words are opaque values, not callbacks. All but10F3 require
+ten option bytes beginning `45 00`, then big-endian address and length. Session2,
+security2, exact lengths and the range-kind gates precede submission. `47BA`
+queues **CRC verification**, not erase. FF00 reaches the separate block-erase
+queue, initially paused until response-pending progress permits release.
+
+RequestDownload is the exact thirteen-byte custom format with literal46 and
+additional selector/zero bytes, not a substituted conventional44 format. Accepted
+reply is **`74 20 04 02`**, length4. TransferData allows at most1024 payload bytes,
+requires full1024 except the final chunk, and checks sequence before staging.
+A duplicate accepted sequence repeats76 without requeueing. Remaining length is
+decremented at admission; foreground `4F50`, not the handler, later copies ready
+data to RAM or appends it to the flash-input ring. Timer progress owns the response.
+
+The optional transform worker processes full16-byte units. A remainder below16
+performs no block copy yet is deducted from remaining length: arbitrary byte-tail
+decryption is not established. The alternate compare path clears activity on
+mismatch, publishing success only after all bytes match; its caller advances
+address/remaining even after a failed comparison and then reports the failure.
+TransferExit requires an admitted download state, zero remaining and exact length1.
+It does not invoke the apparent final-input setter at426E. That eight-byte candidate
+has no recovered direct caller or ROM pointer in this bounded walk and is not
+promoted to a reachable service owner.
+
+#### Range policy, stream lifetime and the dynamic driver boundary
+
+`8DA0` range policy and `8E00` region descriptors are related but distinct:
+
+| Region | Inclusive data range | Storage class | Authentication trailer | Marker / counter block |
+|---|---|---|---|---|
+| 0 | `10000..17DFF` | 0, CodeFlash | `17DF0` | `17E00 / 17F00` |
+| 1 | `18000..FFDFF` | 0, CodeFlash | `FFDF0` | `FFE00 / FFF00` |
+| 2 | `FEBF0000..FEBF0FFF` | 1, resident RAM | `FEBF0FF0` | Both zero |
+
+All policy rows have kind mask33 and completion selector0. `32D2/3318` reject
+zero length and unsigned wrapped end addresses before applying kind/range tests.
+The descriptor lookups `335E/3392/33CC/3402` do not independently supply that
+no-wrap check. Marker lookup permits zero; the real marker-writing caller has
+already passed CodeFlash admission. A weaker helper is not, by itself, a proven
+bypass of the caller's policy. CRC region2 uses `FEBF0000+FF0`, with metadata words
+at `FEBF0FE0/4`; it is not excluded from `481A` just because startup validates0/1.
+
+Queue admission and completion are different contracts:
+
+- `411A` selects combined erase/program mode0; `4188` selects program-only mode1
+  after an ECC-backed blank check; `41E0` selects block-erase mode2 and the counter
+  block. Busy requests reject. Successful admission sets result1 and busy1.
+- `40A2` aligns down512 and seeds the ring with an FF prefix **before later
+  admission checks**. Rejection can therefore leave ring changes. `40E0` checks
+  the first block lookup but ignores the second lookup's return, allowing its
+  F8000 fallback; it is not a substitute for the service range policy.
+- The ring spans4352 bytes and reserves one slot. `42D8` checks space;
+  `4276` itself does not. `4428` consumes at most256 bytes per step.
+  Insufficient input waits, a callback error clears busy while retaining the
+  failure result, and successful completion publishes result0/busy0.
+- A nonzero pause skips work, but a cancel request is processed afterward even
+  while paused. Cancel clears busy/pause without changing failure into success.
+  A cancel is a request to the foreground owner, not an immediate device abort.
+- Input is consumed and paddedFF to a256-byte staging page before the programming
+  callback. The selected counter page is excluded from ordinary input programming;
+  erase instead preserves its incremented word with an otherwise FF page.
+
+The indirect operation callback is loaded from **`FEBF0FD0`**, in the resident
+RAM image region. Its application-phase rendering as an offset into
+`f33_nvm_family0_read_record` is not a call to NvM. It is also **not** the copied
+ROM helper `FEBF12B8`, whose source is8628. The separate blank-check entry
+`FEBF11F0` corresponds to copied ROM8560. Actual dynamic-driver implementation,
+CodeFlash erase/program feedback and physical interrupted-operation behavior
+remain explicit dependencies; no successful device callback was substituted.
+
+The native [combined admission](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_resident_queue_combined_admission_preserves_range.json)
+proves original range arguments survive alignment preparation. The real resident
+[wrapped-input/counter exclusion](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_resident_queue_wrap_metadata_and_crc_pending.json)
+and [paused cancellation](../../tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_resident_queue_pause_still_consumes_cancel.json)
+compositions verify software cursor, ring, padding and result transitions without
+entering a programming callback. In the first, an independent zero-length CRC
+request remains pending: `47BA` admits without range validation, and `4874` clears
+the request only after successful range selection and a region-validation result.
+This does not claim that an invalid queued request is reachable through an admitted
+external service.
+
+
+**Remaining high-value dependencies:** remaining numerical control-map surfaces
+and cross-task retention; raw3838..383C/status acquisition, ADC/DMA and local-link
+freshness; the unassigned `B1C8.bit5` producer; production reachability across
+mode/diagnostic interleavings; physical persistence of thermal and learned records;
+resident challenge/crypto-helper semantics and the dynamic programming driver;
+SEG/cache/CRC/ECC/programming feedback; OEM service identities, calibration units
+and physical source identity. Internal `F000` ownership and the route30 generation
+join are now recovered, not placeholders for an unknown physical signal.
+The connected contracts do not require a complete peripheral or NvM emulator.
 Static connectivity and bounded native scenarios are not exhaustive semantic
 closure or vehicle results.
 
-**Verification checkpoint (2026-10-15, nonthermal limits, health/coherence policy
-and initialization/snapshot ownership).**
+**2026-10-15 checkpoint: received-input conditioning and resident-service lifetimes.**
+Composed native execution passed for delayed readiness and record8 convergence,
+held decode with consumed generations, ordered qualifier overwrite, and metadata
+hold/retention. Resident compositions passed for single-frame admission, deferred
+programming-session transition, functional routine rejection, aligned and wrapped
+queue consumption, protected-counter exclusion, paused cancellation, and retained
+invalid CRC work. A separate native reply smoke emitted `74200402`.
+These proofs use unmodified CodeFlash and explicit RAM, without replacement
+callees or new peripheral models.
+
+Independent four-stage A/B rebuilds and signature finalization matched. Inventory,
+corpus, coverage and function-discovery outputs were regenerated; live coverage
+and project parity passed. Matching project and corpus were promoted after clean
+teardown. Rebuilt-C inspection confirmed transfer-length, CRC-selector and
+remaining-capacity pointer arguments across the recovered register lifetimes.
+Instruction checks retain the numerical and packed-field interpretation even
+where Ghidra's C rendering remains imperfect.
+
+Affected ingress/composition reducers now resolve primary RAM labels through the
+canonical inventory. Generated-input admission and packed-metadata publication
+checks use exact instructions rather than anonymous symbol or decompiler-local
+spellings. The retained family census dispatches its workers as package modules,
+so the external log-reader environment does not change repository import identity.
+
+Coverage, function-boundary, D5 provenance, assist-oracle, command-cone,
+B6 composition/end-to-end/ingress and acceptance-ladder, CodeFlash,
+external-ingress, protected030/EPS transmit and application RAM-loader gates
+passed. Retained family-census and gate/log reconciliation regeneration and
+verification also passed. The census now includes the sibling-controller
+consumers already documented in §34; retained road populations were unchanged.
+Historical route `0000001c--574c06b528` again emitted the corrupted-events warning;
+raw captures were not modified. These checks do not establish physical freshness,
+flash-driver success, production reachability or whole-image semantic closure.
+
+**Preceding checkpoint `97497358` (2026-10-15): nonthermal limits, health/coherence
+policy and initialization/snapshot ownership.**
 Composed native execution passed for retained-limit reduction/handoff, packed
 health qualification, sticky/current repair and lifecycle precedence, qualified
 mode routing, live-register forwarding through both health windows, and complete

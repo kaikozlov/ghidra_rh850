@@ -401,6 +401,7 @@ def analyze() -> dict[str, Any]:
       raise RuntimeError(f"{name} writer drift: {gate_source_census[name]['writers']}")
 
   snapshot_pairs = set(exact_pairs(0xBCD62, corpus))
+  stage_pairs = set(exact_pairs(0x58074, corpus))
   # Numeric references survive recovered array types. The native controller
   # compositions separately check retained gain, terminal fade and clamp order.
   controller_refs = {
@@ -423,8 +424,12 @@ def analyze() -> dict[str, Any]:
     "upper_delivery_reaches_pdur": "FUN_00090204" in c[0x8F546] and "FUN_00081ca6" in c[0x90204],
     "route44_guard_unconditional": "return 1;" in c[0x7D800],
     "route_generation_update": "DAT_febe5338" in c[0x8E772] and "DAT_febe52d8" in c[0x8E772],
-    "app_unpack_requires_new_generation_and_global_state": "DAT_febe7f68 < 2" in c[0x4BD46] and "DAT_febe80c8 != DAT_febe5364" in c[0x4BD46],
-    "stage_maps_b6_core_fields": all(x in c[0x58074] for x in ("DAT_febef130 = DAT_febe80bc", "DAT_febef1fa = DAT_febe80b8", "DAT_febef138 = DAT_febe80c4", "DAT_febef139 = DAT_febe80c5", "DAT_febef000 = DAT_febe7f68")),
+    "app_unpack_requires_new_generation_and_global_state": f33.b6_unpack_generation_gate(image),
+    "stage_maps_b6_core_fields": {
+      (0xFEBE80BC, 0xFEBEF130), (0xFEBE80B8, 0xFEBEF1FA),
+      (0xFEBE80C4, 0xFEBEF138), (0xFEBE80C5, 0xFEBEF139),
+      (0xFEBE7F68, 0xFEBEF000),
+    } <= stage_pairs,
     "snapshot_maps_b6_fields": all(
       (int(field["stage"], 16), int(field["snapshot"], 16)) in snapshot_pairs
       for field in FIELD_MAP if field["snapshot"]
@@ -436,10 +441,7 @@ def analyze() -> dict[str, Any]:
               and int(ref["to_addr"], 16) == 0xFEBEACBD and ref["ref_type"] == "WRITE"
               for ref in corpus[0xBCD62]["data_references"])
     ),
-    "b6_health_requires_status_zero": image[0xCEFA8:0xCEFE4] == bytes.fromhex(
-      "20361100beffcaeb0ae820361a00beffc0eba40fc1f40ae9a49fb9f51d06a6ffca05"
-      "009a000af505e099e29f0000e009e20f0000449fff12440ffe12"
-    ),
+    "b6_health_requires_status_zero": f33.b6_route_health_gate(image),
     "id11_maps_bank2_only_when_health_and_acbd_allow": all(x in c[0xCEFFC] for x in ("DAT_febecb00 = 7", "DAT_febeacbd == '\\0'", "DAT_febecaff == '\\x01'", "DAT_febeadb0 == '\\v'", "DAT_febecb00 = 2")),
     "id11_does_not_arm_ca614_state_gate": all(x in c[0xCA614] for x in ("DAT_febeadb0 != '\\x19'", "DAT_febeadb0 != '\\x1b'")) and "DAT_febeadb0 == '\\v'" not in c[0xCA614],
     "sig263_is_special_0x31_transient_condition_not_id11_gate": all(x in c[0xCB664] for x in ("DAT_febeaddd == '\\0'", "DAT_febeaddd != '\\0'", "DAT_febec7b4")) and all(x in c[0xCB73A] for x in ("DAT_febec7b4", "DAT_febeadb0 == '1'", "DAT_febec7bf = '\\x01'")),

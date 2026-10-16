@@ -323,6 +323,7 @@ def aggregate_segment_rows(rows: list[dict]) -> dict:
 
 def exact_f33() -> dict:
   corpus = f33.CORPUS
+  image = f33.IMAGE.read_bytes()
   rows = {}
   for line in corpus.open():
     row = json.loads(line)
@@ -333,7 +334,6 @@ def exact_f33() -> dict:
   unpack = funcs[0x4BD46]
   cef26 = funcs[0xCEF26]
   ce7fe = funcs[0xCE7FE]
-  cefa4 = funcs[0xCEFA4]
   writes_cb00 = sorted(f'0x{a:08X}' for a, c in funcs.items() if re.search(r'DAT_febecb00\s*=', c))
   reads_adb0 = sorted(f'0x{a:08X}' for a, c in funcs.items() if 'DAT_febeadb0' in c)
 
@@ -373,11 +373,11 @@ def exact_f33() -> dict:
     264: ('B6[6:4]', 0xFEBEADB1, 'no recovered downstream direct reader after snapshot'),
     265: ('B6[2]', 0xFEBEADBB, 'when 1 suppresses one additive controller contribution'),
     266: ('B6[1:0]', None, 'staged at FEBEF135 but not propagated into the broad input snapshot; no recovered downstream direct reader'),
-    267: ('B7[7:6]', 0xFEBEADC2, 'no recovered downstream direct reader after snapshot'),
+    267: ('B7[7:6]', 0xFEBEADC2, 'CB0FC sibling-controller mode selector and retained transition state'),
     268: ('B7[5:0]', 0xFEBEADBC, 'application modulo-64 sequence'),
     269: ('B8', 0xFEBEADBD, 'percentage contribution divided by 100; special 201/202/203 calibration behavior'),
     270: ('B9', 0xFEBEADBE, 'percentage contribution divided by 100'),
-    271: ('B10[7]', 0xFEBEADC1, 'no recovered downstream direct reader after snapshot'),
+    271: ('B10[7]', 0xFEBEADC1, 'CA558 sibling-controller readiness condition; zero admits and nonzero clears readiness'),
     272: ('B10[5]', 0xFEBEADE0, 'no recovered downstream direct reader after snapshot'),
     273: ('B10[2:0]', 0xFEBEADD9, 'valid-gated 3-bit status/mode republished through CFDA0/CFDD4; not a profile-selector input'),
   }
@@ -392,12 +392,12 @@ def exact_f33() -> dict:
     }
 
   expected_readers = {
-    '261': ['0x000CB73A', '0x000CEFFC'],
-    '262': ['0x000CBA80', '0x000CBB66', '0x000CCF0E', '0x000CEE7C'],
+    '261': ['0x000CA614', '0x000CB73A', '0x000CEFFC'],
+    '262': ['0x000CAAA2', '0x000CBA80', '0x000CBB66', '0x000CCF0E', '0x000CEE7C'],
     '263': ['0x000CB664'],
-    '264': [], '265': ['0x000CDA20'], '266': [], '267': [],
+    '264': [], '265': ['0x000CDA20'], '266': [], '267': ['0x000CB0FC'],
     '268': ['0x000CEC8A'], '269': ['0x000CE3AA'], '270': ['0x000CDFF8'],
-    '271': [], '272': [], '273': ['0x000CFDA0'],
+    '271': ['0x000CA558'], '272': [], '273': ['0x000CFDA0'],
   }
   for sig, readers in expected_readers.items():
     if secondary[sig]['direct_reader_entries'] != readers:
@@ -411,7 +411,7 @@ def exact_f33() -> dict:
     'selector_resets_to_default_each_invocation': "DAT_febecb00 = '\\a'" in ceffc or 'DAT_febecb00 = 7' in ceffc,
     'selector_writer_entries_complete_decompilation_corpus': writes_cb00,
     'target_id_snapshot_reader_entries_complete_decompilation_corpus': reads_adb0,
-    'unpacker_new_generation_gate': 'DAT_febe80c8 != DAT_febe5364' in unpack and 'DAT_febe7f68 < 2' in unpack,
+    'unpacker_new_generation_gate': f33.b6_unpack_generation_gate(image),
     'unpacker_has_previous_target_id_comparison': 'DAT_febe80bc ==' in unpack or 'DAT_febe80bc !=' in unpack,
     'communication_timeout': {'pdu': 44, 'nominal_ms': 35, 'basis': 'seven exact-F33 foreground ticks at 5 ms'},
     'profile_supervision': {
@@ -432,10 +432,10 @@ def exact_f33() -> dict:
     'secondary_application_fields': secondary,
     'secondary_field_authorization_boundary': {
       'generic_command_enable_recovered': False,
-      'basis': 'CEFFC reads only ACBD, CAFF and Target Lateral ID. ACBD is a staged COM/extraction-status value; CEFA4 builds CAFF from communication-monitor/validity state. No signal263..273 snapshot is a direct CEFFC input, and their complete direct-reader census resolves the live consumers above.',
+      'basis': 'CEFFC reads only ACBD, CAFF and Target Lateral ID. ACBD normalizes the internal source-admission state published through 7F68/F000; CEFA4 builds CAFF from grouped status and route validity. No signal263..273 snapshot is a direct CEFFC input, and their complete direct-reader census resolves the live consumers above.',
       'signal263_scope': 'CB664 uses signal263 as an inhibit condition in the C7B4 state that CB73A then gates on Target Lateral ID 49 (Self-Propelled Transport); it is not ordinary LTA/LDA/PDA/SDG enablement.',
       'signal273_scope': 'CFDA0 conditionally republishes signal273 into a separate status/mode machine consumed by CFDD4/CFE64; it is not a CEFFC selector input.',
-      'cefa4_communication_validity_shape': all(x in cefa4 for x in ('FUN_000bdb76(0x11)', 'FUN_000bdb76(0x1a)', 'puVar2[0x12ff]')),
+      'cefa4_communication_validity_shape': f33.b6_route_health_gate(image),
     },
     'known_frc_state_carriers_absent_from_exact_rx': [f'0x{x:03X}' for x in sorted(state_carriers)],
     'exact_normal_rx_descriptor_count': len(accepted_rx),
@@ -466,13 +466,14 @@ def main() -> None:
     for path in files:
       with tempfile.NamedTemporaryFile(prefix='camry-seg-', suffix='.json', delete=False) as tf: tmp=Path(tf.name)
       try:
-        subprocess.run([sys.executable, str(Path(__file__).resolve()), '--single-file', str(path), '--openpilot-root', str(args.openpilot_root), '--out', str(tmp)], check=True)
+        subprocess.run([sys.executable, '-m', 'tools.targets.camry.analysis.analyze_camry_2026_lateral_family_census', '--single-file', str(path), '--openpilot-root', str(args.openpilot_root), '--out', str(tmp)], check=True)
         parts.append(json.loads(tmp.read_text()))
       finally: tmp.unlink(missing_ok=True)
     row=aggregate_segment_rows(parts)
     row['route']=ROUTES[short][-1]; row['source_dir']=str(route_dir)
     args.out.write_text(json.dumps(row, sort_keys=True)+'\n')
     return
+  firmware = exact_f33()
   routes = {}
   agg_ids = Counter(); agg_b6_src012 = Counter(); agg_b6_dupe = Counter(); agg_b6_native = Counter(); agg_b6_send = Counter(); agg_episodes = Counter(); agg_081 = Counter(); agg_081_pairs = Counter()
   total_segments = 0
@@ -480,7 +481,7 @@ def main() -> None:
     with tempfile.NamedTemporaryFile(prefix=f'camry-{short}-', suffix='.json', delete=False) as tf:
       tmp = Path(tf.name)
     try:
-      cmd = [sys.executable, str(Path(__file__).resolve()), '--single-route', short, '--openpilot-root', str(args.openpilot_root), '--log-root', str(args.log_root), '--capture-root', str(args.capture_root), '--out', str(tmp)]
+      cmd = [sys.executable, '-m', 'tools.targets.camry.analysis.analyze_camry_2026_lateral_family_census', '--single-route', short, '--openpilot-root', str(args.openpilot_root), '--log-root', str(args.log_root), '--capture-root', str(args.capture_root), '--out', str(tmp)]
       subprocess.run(cmd, check=True)
       row = json.loads(tmp.read_text())
     finally:
@@ -505,7 +506,7 @@ def main() -> None:
       'boundary': 'LogReader emits a corrupted-events RuntimeWarning while reading route 1c; its recovered 0x08A population is ID0 only, so it does not create any positive steering-profile witness. The other selected routes reduce without that warning.',
     },
     'oem_target_lateral_id_dictionary': {str(k): v for k,v in LABELS.items()},
-    'exact_f33': exact_f33(),
+    'exact_f33': firmware,
     'aggregate': {
       'native_08a_target_lateral_id_counts': {str(k): v for k,v in sorted(agg_ids.items())},
       'observed_target_lateral_ids': observed,

@@ -30,7 +30,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from tools import REPO_ROOT as REPO
-from tools.targets.camry.support.camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256
+from tools.targets.camry.support.camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256, INVENTORY
 
 OUT = REPO / "data/generated/camry_8965F3307000_command_cone_ingress.json"
 
@@ -71,10 +71,30 @@ def corpus_map() -> dict[int, dict]:
     return out
 
 
+def _ram_data_symbols() -> dict[str, int]:
+    """Resolve primary RAM labels from the matching canonical inventory."""
+    symbols = {}
+    with INVENTORY.open() as source:
+        for line in source:
+            row = json.loads(line)
+            if (row["record"] != "user_symbol" or row["symbol_type"] != "Label"
+                    or not row["primary"] or row["address"]["space"] != "ram"):
+                continue
+            address = int(row["address"]["offset"], 16)
+            if 0xFE000000 <= address <= 0xFEFFFFFF:
+                symbols[row["qualified_name"]] = address
+    return symbols
+
+
+_RAM_DATA_SYMBOLS = _ram_data_symbols()
+
+
 # ---------------------------------------------------------------- parsing ---
 
 PTR_ASSIGN = re.compile(r"\b(puVar\d+|pbVar\d+)\s*=\s*&?(?:LAB_|DAT_)([0-9a-f]{8})")
 DAT_TOK = re.compile(r"\bDAT_(fe[0-9a-f]{6})(?:\._(\d+)_\d+_)?\b")
+NAMED_CELL = re.compile(
+    r"(?<![\w.:])([A-Za-z_]\w*)(?:\._(\d+)_\d+_)?(?!\w|\s*[.\[])")
 DEREF = re.compile(
     r"\*\s*\(\s*(?:undefined\d*|ushort|uint|int|short|char|uchar|ulong|long|bool)\s*\*?\s*\)"
     r"\s*\(\s*(puVar\d+)\s*\+\s*(-?0x[0-9a-f]+)\s*\)")
@@ -90,7 +110,8 @@ def bases_of(text: str) -> dict[str, int]:
     return {m.group(1): int(m.group(2), 16) for m in PTR_ASSIGN.finditer(text)}
 
 
-def cell_tokens(stmt: str, bases: dict[str, int]) -> set[int]:
+def cell_tokens(stmt: str, bases: dict[str, int],
+                symbols: dict[str, int] = _RAM_DATA_SYMBOLS) -> set[int]:
     out = set()
     # Ghidra can render a byte offset as a code symbol, for example
     # FUN_00003942[(int)(puVar7 + 3)]. Resolve the complete address before
@@ -102,6 +123,9 @@ def cell_tokens(stmt: str, bases: dict[str, int]) -> set[int]:
     stmt = CODE_GP_ADDRESS.sub(" ", stmt)
     for m in DAT_TOK.finditer(stmt):
         out.add(int(m.group(1), 16) + int(m.group(2) or 0))
+    for m in NAMED_CELL.finditer(stmt):
+        if m.group(1) in symbols:
+            out.add(symbols[m.group(1)] + int(m.group(2) or 0))
     for m in DEREF.finditer(stmt):
         var, off = m.group(1), int(m.group(2), 16)
         if var in bases:
@@ -707,8 +731,12 @@ def build() -> dict:
           "*(short *)(puVar5 + -0x8c0) = (short)")
     need(GP - 0x8C0 == 0xFEBEAF40, "FEBEAF40 layout drift")
     token(0xB7728, funcs, "DAT_febef093 != '\\0'", "DAT_febef094 != '\\0'")
-    token(0xBE4C2, funcs, "uVar13 = FUN_000be4a4(DAT_febef0f1);", "puVar7[0x666] = (char)uVar13;")
-    need(GP + 0x666 == 0xFEBEBE66, "FEBEBE66 layout drift")
+    # Field0: F0F1 -> r19 -> validator R6/R10 -> r29 -> BE66.
+    # The intervening validity/range branches can retain or replace it with FF.
+    need(image[0xBE4E0:0xBE4E4] == bytes.fromhex("a49ff138")
+         and image[0xBE52A:0xBE532] == bytes.fromhex("1330bfff78ff0ae8")
+         and image[0xBE592:0xBE598] == bytes.fromhex("24f6600686eb"),
+         "packed metadata source/validator/publication instruction drift")
     token(0xB49E4, funcs, "DAT_febeb1fa")  # qualification record family anchor
 
     # remaining stage readers -> qualification/telemetry only (bounded sweep)

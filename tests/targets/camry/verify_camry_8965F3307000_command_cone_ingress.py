@@ -43,6 +43,12 @@ check("code-symbol aliases resolve the complete GP-relative byte address",
       and cell_tokens("FUN_00003942[(int)(puVar7 + -0x2)]", {"puVar7": 0xFEBEB800}) == {0xFEBEF140})
 check("unresolved code-symbol base does not invent a copy source",
       cell_tokens("FUN_00003942[(int)(puVar9 + 3)]", {"puVar7": 0xFEBEB800}) == set())
+check("named scalar views resolve addresses and byte offsets",
+      cell_tokens("sample + sample._2_1_", {}, {"sample": 0xFEBE8000})
+      == {0xFEBE8000, 0xFEBE8002})
+check("unresolved named members and array elements do not invent scalar edges",
+      cell_tokens("sample.member + sample[2] + sample [3] + missing", {},
+                  {"sample": 0xFEBE8000}) == set())
 
 
 with tempfile.TemporaryDirectory() as td:

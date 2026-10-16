@@ -1,0 +1,40 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_received_conditioning_delay_boundary_preserves_channels",
+  "entry": {"role": "Real C26B4..C26CA steady foreground interval: BE326 and BE304 conversions precede delayed BEC80 and gated BF232. Entry BEC6=199 reaches ROM200 without admitting channel qualification on this invocation; unconditional sentinel publications still occur. Software invocation counts and raw numeric units only.", "scope": "resolved-address", "address": "0xc26b4"},
+  "max_instructions": 4000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {"sp": "0xfebe2000", "gp": "0xfebeb800", "tp": "0x23dfc", "lp": "0x798", "r29": "0x101", "r28": "0x0", "PSW": "0x20", "FPEC": "0x0", "PMR": "0xfe00"},
+  "stop_addresses": ["0xc26ca"],
+  "memory": [
+    {"address": "0xfebe1800", "size": 2048, "fill": 165, "evidence": "isolated real nested-call stack"},
+    {"address": "0xfebebe54", "size": 192, "fill": 0, "evidence": "explicit local conditioning state through BF13"},
+    {"address": "0xfebef000", "size": 368, "fill": 0, "evidence": "explicit staged scalar/status inputs"},
+    {"address": "0xfebeacee", "hex": "00", "evidence": "record8 initialization gate closed, so BF232 must not modify pending state"},
+    {"address": "0xfebef000", "hex": "01", "evidence": "internal source-admission state1 still admits F000<2 checks"},
+    {"address": "0xfebef03d", "hex": "ff80", "evidence": "unsigned byte scale endpoints distinguish ld.bu from signed byte interpretation"},
+    {"address": "0xfebebe5e", "hex": "3412", "evidence": "invalid F02D=0 must hold prior scaled halfword and promote status0 to1"},
+    {"address": "0xfebebe98", "hex": "77", "evidence": "prior scalar cache must not be cleared while startup delay remains unexpired at entry"},
+    {"address": "0xfebebead", "hex": "9966", "evidence": "delay-only helper clears BEAD but leaves BEAE untouched"},
+    {"address": "0xfebebeb2", "hex": "33", "evidence": "channel publication must hold because qualification group was not called"},
+    {"address": "0xfebebec0", "hex": "2800", "evidence": "channel already at ROM40, but startup wrapper must still prevent its qualification"},
+    {"address": "0xfebebec4", "hex": "2c01c700", "evidence": "first channel at ROM300; wrapper startup counter199 before ROM200"},
+    {"address": "0xfebebf04", "hex": "00a53c00", "evidence": "pending one-shot result and warmup counter must remain unchanged behind ACEE gate"}
+  ],
+  "checks": [
+    {"name": "real interval completes", "kind": "register", "register": "PC", "equals": "0xc26ca"},
+    {"name": "nested calls restore stack", "kind": "register", "register": "sp", "equals": "0xfebe2000"},
+    {"name": "unsigned fixed ratio scalars", "kind": "memory", "address": "0xfebebe54", "size": 4, "equals_hex": "4601a300"},
+    {"name": "invalid scalar reports status1", "kind": "memory", "address": "0xfebebe58", "size": 1, "equals_hex": "01"},
+    {"name": "invalid scalar holds prior raw scaled value", "kind": "memory", "address": "0xfebebe5e", "size": 2, "equals_hex": "3412"},
+    {"name": "delay reaches200 without calling ready group", "kind": "memory", "address": "0xfebebec4", "size": 4, "equals_hex": "2c01c800"},
+    {"name": "qualification latch remains unready", "kind": "memory", "address": "0xfebebea2", "size": 1, "equals_hex": "00"},
+    {"name": "prior scalar retained", "kind": "memory", "address": "0xfebebe98", "size": 1, "equals_hex": "77"},
+    {"name": "only delay publication clears", "kind": "memory", "address": "0xfebebead", "size": 2, "equals_hex": "0066"},
+    {"name": "delayed channel publication retained", "kind": "memory", "address": "0xfebebeb2", "size": 1, "equals_hex": "33"},
+    {"name": "unconditional marker pair publishes during delay", "kind": "memory", "address": "0xfebebed4", "size": 8, "equals_hex": "55aaaa5555aaaa55"},
+    {"name": "unconditional ready markers set", "kind": "memory", "address": "0xfebebea7", "size": 2, "equals_hex": "5a5a"},
+    {"name": "closed ACEE gate retains one-shot counters", "kind": "memory", "address": "0xfebebf04", "size": 4, "equals_hex": "00a53c00"}
+  ]
+}

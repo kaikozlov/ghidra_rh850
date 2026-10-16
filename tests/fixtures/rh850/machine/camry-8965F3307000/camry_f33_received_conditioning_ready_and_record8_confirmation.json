@@ -1,0 +1,42 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_received_conditioning_ready_and_record8_confirmation",
+  "entry": {"role": "Real C26B4..C26CA steady foreground interval at BEC6=200. Channel counter equality qualifies, previously ready channel holds despite blocked source predicate, and BF232 composes strict warmup expiry with inclusive third admitted zero observation to publish ACEC and the real retained estimator snapshot. No patched callee or physical-unit claim.", "scope": "resolved-address", "address": "0xc26b4"},
+  "max_instructions": 6000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {"sp": "0xfebe2000", "gp": "0xfebeb800", "tp": "0x23dfc", "lp": "0x798", "r29": "0x101", "r28": "0x0", "PSW": "0x20", "FPEC": "0x0", "PMR": "0xfe00"},
+  "stop_addresses": ["0xc26ca"],
+  "memory": [
+    {"address": "0xfebe1800", "size": 2048, "fill": 165, "evidence": "isolated real nested-call stack"},
+    {"address": "0xfebebe54", "size": 192, "fill": 0, "evidence": "explicit conditioning and qualification counters"},
+    {"address": "0xfebef000", "size": 368, "fill": 0, "evidence": "explicit staged inputs"},
+    {"address": "0xfebebff4", "size": 8, "fill": 165, "evidence": "retained estimator snapshot canaries"},
+    {"address": "0xfebeacec", "hex": "005a5a", "evidence": "record8 old status0, initial eligibility5A and initialized gate5A"},
+    {"address": "0xfebeaf04", "hex": "78563412", "evidence": "snapshot source AF04"},
+    {"address": "0xfebeae0e", "hex": "6824", "evidence": "snapshot source AE0E"},
+    {"address": "0xfebeb080", "hex": "0010", "evidence": "B080 equals4096: strict greater-than early rejection must not trigger"},
+    {"address": "0xfebef000", "hex": "015a", "evidence": "internal mode1 admits scalar decode predicates, separately F001=5A admits record8 observations"},
+    {"address": "0xfebef028", "hex": "01", "evidence": "previously completed BEA3 channel has a now-blocked predicate"},
+    {"address": "0xfebef02d", "hex": "08", "evidence": "lowest admitted scalar8 maps to signed (8-48)*128"},
+    {"address": "0xfebef060", "hex": "01", "evidence": "canonical publisher's disabled channel default"},
+    {"address": "0xfebef148", "hex": "0101", "evidence": "canonical publisher's paired disabled channel defaults"},
+    {"address": "0xfebebe98", "hex": "775a", "evidence": "first raw cache is cleared on qualification, second prior ready value is retained"},
+    {"address": "0xfebebea3", "hex": "5a", "evidence": "existing second-channel completion is sticky"},
+    {"address": "0xfebebec0", "hex": "28003f002c01c800", "evidence": "BEB48 count40 qualifies; BEB96 count63 increments to64 without qualifying; BEA56 count300 qualifies; startup count200 admits group"},
+    {"address": "0xfebebf06", "hex": "3c000200000000000900", "evidence": "warmup60 crosses only after increment; zero-observation count2 reaches3; total observation9 reaches10 without exceeding maximum10"}
+  ],
+  "checks": [
+    {"name": "real interval completes", "kind": "register", "register": "PC", "equals": "0xc26ca"},
+    {"name": "nested calls restore stack", "kind": "register", "register": "sp", "equals": "0xfebe2000"},
+    {"name": "signed scalar conversion remains raw fixed ratio", "kind": "memory", "address": "0xfebebe5e", "size": 2, "equals_hex": "00ec"},
+    {"name": "first channel equality completes and clears cache", "kind": "memory", "address": "0xfebebe98", "size": 2, "equals_hex": "005a"},
+    {"name": "only admitted equal-threshold channels complete", "kind": "memory", "address": "0xfebebea2", "size": 5, "equals_hex": "5a5a005a00"},
+    {"name": "qualified fourth channel is published", "kind": "memory", "address": "0xfebebeb1", "size": 2, "equals_hex": "005a"},
+    {"name": "count63 only reaches64", "kind": "memory", "address": "0xfebebec2", "size": 2, "equals_hex": "4000"},
+    {"name": "startup delay remains pinned", "kind": "memory", "address": "0xfebebec6", "size": 2, "equals_hex": "c800"},
+    {"name": "record8 one-shot commits positive status", "kind": "memory", "address": "0xfebebf04", "size": 12, "equals_hex": "5a5a3c000300000000000a00"},
+    {"name": "publication changes ACEC without changing initial eligibility", "kind": "memory", "address": "0xfebeacec", "size": 3, "equals_hex": "5a5a5a"},
+    {"name": "real callback snapshots estimator and committed status", "kind": "memory", "address": "0xfebebff4", "size": 7, "equals_hex": "7856341268245a"}
+  ]
+}

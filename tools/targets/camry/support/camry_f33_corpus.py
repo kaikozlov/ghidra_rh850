@@ -26,7 +26,30 @@ def queue_copy_precedes_publication(image: bytes) -> bool:
         "23f70d001de0fa0f0500c3e2dcf1800c"
     )
 
+def b6_unpack_generation_gate(image: bytes) -> bool:
+    """Check the two branches that skip B6 extraction at 4BD46.
+
+    With GP=FEBEB800, load admission byte FEBE7F68 into r19, consumed
+    generation FEBE80C8 into r1, and current generation FEBE5364 into r29.
+    Admission >=2 or equal generations branch to 4BEB8, past extraction.
+    """
+    return image[0x4BD4A:0x4BD62] == bytes.fromhex(
+        "849f69c7840fc9c884ef659b629ae9076101fd09e2075b01"
+    )
+
+def b6_route_health_gate(image: bytes) -> bool:
+    """Check CEFA4's grouped-status and route-status admission instructions.
+
+    Selectors 11/1A are ORed; exactly 5A inhibits publication. Otherwise CAFF
+    and CAFE each require their corresponding route-status byte to be zero.
+    """
+    return image[0xCEFA8:0xCEFE4] == bytes.fromhex(
+        "20361100beffcaeb0ae820361a00beffc0eba40fc1f40ae9a49fb9f51d06a6ffca05"
+        "009a000af505e099e29f0000e009e20f0000449fff12440ffe12"
+    )
+
 __all__ = [
     "CAPTURE", "CORPUS", "DATAFLASH", "IMAGE", "IMAGE_SHA256", "INVENTORY",
     "TARGET", "TARGET_NAME", "body_bytes", "display_path", "queue_copy_precedes_publication",
+    "b6_unpack_generation_gate", "b6_route_health_gate",
 ]

@@ -1,0 +1,112 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_resident_diagnostic_single_frame_admission",
+  "entry": {
+    "role": "Unmodified real2B8A\u2192242A\u219223B8\u21926B4C\u21926374\u21926B6C\u21926464\u21926422; stop at6B7A target64B8 before hardware timer read. Proves r8 remaining-capacity pointer survives6422 and PDU padding is not admitted.",
+    "scope": "resolved-address",
+    "address": "0x2b8a"
+  },
+  "max_instructions": 3000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebf9800",
+    "tp": "0x869c",
+    "lp": "0xfebf1000",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0x0",
+    "r6": "0x0",
+    "r7": "0xfebf1100"
+  },
+  "stop_addresses": [
+    "0x64b8"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe0000",
+      "size": 131072,
+      "fill": 0,
+      "evidence": "Explicit initialized boot RAM and caller stack, not a physical reset. Detailed inputs below select the admitted software path."
+    },
+    {
+      "address": "0xfebf2930",
+      "hex": "01",
+      "evidence": "Transport receive enable required by2B8A; distinct from diagnostic foreground enable2BD0."
+    },
+    {
+      "address": "0xfebf1100",
+      "hex": "0012bffe08000000",
+      "evidence": "synthetic PDU descriptor: byte bufferFEBF1200,length8"
+    },
+    {
+      "address": "0xfebf1200",
+      "hex": "0210025555555555",
+      "evidence": "synthetic normal-addressed single frame carrying10 02; padding is not request data"
+    },
+    {
+      "address": "0xfebf2bd0",
+      "hex": "01",
+      "evidence": "resident service enabled input"
+    },
+    {
+      "address": "0xfebf2bba",
+      "hex": "000000000000",
+      "evidence": "idle request/response owner"
+    },
+    {
+      "address": "0xfebf30b8",
+      "hex": "0000000000000000",
+      "evidence": "empty receive counters and channel metadata"
+    },
+    {
+      "address": "0xfebf30c0",
+      "hex": "aaaaaaaa",
+      "evidence": "receive buffer canary"
+    }
+  ],
+  "checks": [
+    {
+      "name": "stopped before timer capture and service dispatch",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x64b8"
+    },
+    {
+      "name": "two request bytes appended, padding excluded",
+      "kind": "memory",
+      "address": "0xfebf30c0",
+      "size": 4,
+      "equals_hex": "1002aaaa"
+    },
+    {
+      "name": "received byte total",
+      "kind": "memory",
+      "address": "0xfebf30b8",
+      "size": 2,
+      "equals_hex": "0200"
+    },
+    {
+      "name": "active channel zero physical mode",
+      "kind": "memory",
+      "address": "0xfebf30bc",
+      "size": 4,
+      "equals_hex": "00001001"
+    },
+    {
+      "name": "request state still receiving",
+      "kind": "memory",
+      "address": "0xfebf2bba",
+      "size": 1,
+      "equals_hex": "01"
+    },
+    {
+      "name": "transport returned idle before completion callback",
+      "kind": "memory",
+      "address": "0xfebf2931",
+      "size": 1,
+      "equals_hex": "00"
+    }
+  ]
+}

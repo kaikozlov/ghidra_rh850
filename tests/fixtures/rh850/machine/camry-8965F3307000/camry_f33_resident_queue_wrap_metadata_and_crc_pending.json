@@ -1,0 +1,151 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_resident_queue_wrap_metadata_and_crc_pending",
+  "entry": {
+    "role": "Real resident foreground137A executes queue4428, ring42A4/4390, stage43BE, independent479A completion and4874 range gate. Mode1 reaches the exact protected-counter-block skip, not a flash callback. Invalid zero-length CRC request remains pending. No physical programming or transport reachability claim.",
+    "scope": "resolved-address",
+    "address": "0x137a"
+  },
+  "max_instructions": 200000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe8000",
+    "gp": "0xfebf9800",
+    "tp": "0x869c",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "FPEC": "0x0",
+    "PMR": "0xfe00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "memory": [
+    {
+      "address": "0xfebe0000",
+      "size": 131072,
+      "fill": 0,
+      "evidence": "Explicit boot RAM/stack fixture, not physical reset. Transport gate2BD0 stays disabled; no patched callee or modeled flash success."
+    },
+    {
+      "address": "0xfebf28f8",
+      "hex": "0102030405060708",
+      "evidence": "Tail of wrapped ring."
+    },
+    {
+      "address": "0xfebf1800",
+      "hex": "090a0b0c0d0e0f10",
+      "evidence": "Head of wrapped ring."
+    },
+    {
+      "address": "0xfebf298c",
+      "hex": "00ff0f00",
+      "evidence": "Cursor equals selected protected counter page."
+    },
+    {
+      "address": "0xfebf2990",
+      "hex": "10000000",
+      "evidence": "Remaining transfer bytes."
+    },
+    {
+      "address": "0xfebf2994",
+      "hex": "00ff0f00",
+      "evidence": "Selected protected counter-page address."
+    },
+    {
+      "address": "0xfebf2998",
+      "hex": "0800f81001000000",
+      "evidence": "Producer8, consumer10F8, mode1; no pause/cancel/final marker."
+    },
+    {
+      "address": "0xfebf29a0",
+      "hex": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+      "evidence": "Distinct staging before full zero-tail replacement."
+    },
+    {
+      "address": "0xfebf2aa0",
+      "hex": "01010201",
+      "evidence": "Program pending/result1 and independent completion pending/result2."
+    },
+    {
+      "address": "0xfebf2aa4",
+      "hex": "00800100",
+      "evidence": "Queued CRC start with zero length is invalid."
+    },
+    {
+      "address": "0xfebf2aac",
+      "hex": "0201a5",
+      "evidence": "Independent CRC result2,pending1,opaque tagA5."
+    }
+  ],
+  "checks": [
+    {
+      "name": "Real composed path returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Boot caller stack restored",
+      "kind": "register",
+      "register": "sp",
+      "equals": "0xfebe8000"
+    },
+    {
+      "name": "Priority mask restored",
+      "kind": "register",
+      "register": "PMR",
+      "equals": "0xfe00"
+    },
+    {
+      "name": "Resident IRQ-service phase published",
+      "kind": "memory",
+      "address": "0xfebf2904",
+      "size": 1,
+      "equals_hex": "02"
+    },
+    {
+      "name": "Cursor and remaining commit after consumed protected block",
+      "kind": "memory",
+      "address": "0xfebf298c",
+      "size": 8,
+      "equals_hex": "10ff0f0000000000"
+    },
+    {
+      "name": "Wrapped ring fully consumed without changing mode",
+      "kind": "memory",
+      "address": "0xfebf2998",
+      "size": 8,
+      "equals_hex": "0800080001000000"
+    },
+    {
+      "name": "Ring bytes preserved in order and unused page filled FF",
+      "kind": "memory",
+      "address": "0xfebf29a0",
+      "size": 256,
+      "equals_hex": "0102030405060708090a0b0c0d0e0f10ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    },
+    {
+      "name": "Program and independent completion finish",
+      "kind": "memory",
+      "address": "0xfebf2aa0",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Invalid CRC request retains start and zero extent",
+      "kind": "memory",
+      "address": "0xfebf2aa4",
+      "size": 8,
+      "equals_hex": "0080010000000000"
+    },
+    {
+      "name": "Invalid CRC request remains pending with opaque tag intact",
+      "kind": "memory",
+      "address": "0xfebf2aac",
+      "size": 3,
+      "equals_hex": "0201a5"
+    }
+  ]
+}

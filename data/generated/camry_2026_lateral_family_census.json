@@ -119,6 +119,7 @@
     "secondary_application_fields": {
       "261": {
         "direct_reader_entries": [
+          "0x000CA614",
           "0x000CB73A",
           "0x000CEFFC"
         ],
@@ -129,6 +130,7 @@
       },
       "262": {
         "direct_reader_entries": [
+          "0x000CAAA2",
           "0x000CBA80",
           "0x000CBB66",
           "0x000CCF0E",
@@ -172,9 +174,11 @@
         "wire": "B6[1:0]"
       },
       "267": {
-        "direct_reader_entries": [],
+        "direct_reader_entries": [
+          "0x000CB0FC"
+        ],
         "exact_oem_name": null,
-        "role": "no recovered downstream direct reader after snapshot",
+        "role": "CB0FC sibling-controller mode selector and retained transition state",
         "snapshot": "0xFEBEADC2",
         "wire": "B7[7:6]"
       },
@@ -206,9 +210,11 @@
         "wire": "B9"
       },
       "271": {
-        "direct_reader_entries": [],
+        "direct_reader_entries": [
+          "0x000CA558"
+        ],
         "exact_oem_name": null,
-        "role": "no recovered downstream direct reader after snapshot",
+        "role": "CA558 sibling-controller readiness condition; zero admits and nonzero clears readiness",
         "snapshot": "0xFEBEADC1",
         "wire": "B10[7]"
       },
@@ -230,7 +236,7 @@
       }
     },
     "secondary_field_authorization_boundary": {
-      "basis": "CEFFC reads only ACBD, CAFF and Target Lateral ID. ACBD is a staged COM/extraction-status value; CEFA4 builds CAFF from communication-monitor/validity state. No signal263..273 snapshot is a direct CEFFC input, and their complete direct-reader census resolves the live consumers above.",
+      "basis": "CEFFC reads only ACBD, CAFF and Target Lateral ID. ACBD normalizes the internal source-admission state published through 7F68/F000; CEFA4 builds CAFF from grouped status and route validity. No signal263..273 snapshot is a direct CEFFC input, and their complete direct-reader census resolves the live consumers above.",
       "cefa4_communication_validity_shape": true,
       "generic_command_enable_recovered": false,
       "signal263_scope": "CB664 uses signal263 as an inhibit condition in the C7B4 state that CB73A then gates on Target Lateral ID 49 (Self-Propelled Transport); it is not ordinary LTA/LDA/PDA/SDG enablement.",
@@ -260,6 +266,7 @@
       "0x000CEFFC"
     ],
     "target_id_snapshot_reader_entries_complete_decompilation_corpus": [
+      "0x000CA614",
       "0x000CB73A",
       "0x000CEFFC"
     ],
@@ -1509,7 +1516,7 @@
         "src_0_1_2_id_counts_raw": {},
         "unmatched_native_candidate_id_counts": {}
       },
-      "duration_s": 324.476388,
+      "duration_s": 241.027053,
       "first_08a_id": 0,
       "first_mono_s": 59.542857893,
       "id_transition_counts": {
@@ -1519,7 +1526,7 @@
         "18->0": 1
       },
       "last_08a_id": 0,
-      "last_mono_s": 384.01924602,
+      "last_mono_s": 300.569911101,
       "native_081_id_counts": {
         "0": 8472,
         "11": 2084,
