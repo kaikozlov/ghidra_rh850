@@ -927,6 +927,91 @@ uint32_t f33_nvm_enqueue_family0_read(uint32_t object) {
     return result;
 }
 
+static uint32_t f33_words_differ_and_copy(uint32_t destination, uint32_t source, uint32_t byte_count) {
+    uint32_t index;
+    uint32_t differed = 0u;
+    for (index = 0u; index < (byte_count >> 2); index = (index + 1u) & 0xffffu) {
+        uint32_t value = camry_read32(source + (index << 2));
+        uint32_t address = destination + (index << 2);
+        if (camry_read32(address) != value) {
+            camry_write32(address, value);
+            differed = 1u;
+        }
+    }
+    return differed;
+}
+
+static void f33_copy_family0_request_cell(uint32_t from_index, uint32_t to_index) {
+    uint32_t from = camry_gp + 19592u + (from_index << 2);
+    uint32_t to = camry_gp + 19592u + (to_index << 2);
+    camry_write8(to, camry_read8(from));
+    camry_write16(to + 2u, camry_read16(from + 2u));
+}
+
+uint32_t f33_nvm_set_family0_record(uint32_t object, uint32_t source) {
+    uint32_t handle = object & 0xffffu;
+    uint32_t indices = camry_gp + 20090u;
+    uint32_t producer;
+    uint32_t consumer;
+    uint32_t count;
+    uint32_t found;
+    uint32_t remaining;
+    uint32_t kind;
+    uint32_t previous;
+    uint32_t descriptor;
+    uint32_t slot;
+
+    f33_nvm_recover_family0_request_indices(indices, indices + 1u);
+    producer = camry_read8(indices);
+    consumer = camry_read8(indices + 1u);
+    if (f33_nvm_family0_request_full(producer, consumer) == 1u
+        || handle >= camry_read16(0x2ad70u))
+        return 0u;
+    previous = f33_nvm_previous_family0_request(producer);
+    count = camry_read8(0x2ad8au);
+    found = 0xffu;
+    remaining = count;
+    while (remaining != 0u) {
+        uint32_t cell = camry_gp + 19592u + (consumer << 2);
+        uint32_t cell_kind = camry_read8(cell);
+        remaining -= 1u;
+        if (camry_read16(cell + 2u) == handle && (cell_kind == 0x22u || cell_kind == 0x33u))
+            found = cell_kind;
+        if (consumer == producer || found != 0xffu)
+            break;
+        consumer = f33_nvm_advance_family0_request_index(consumer);
+    }
+    descriptor = 0x2ad8cu + handle * 12u;
+    kind = 0x33u;
+    if (f33_words_differ_and_copy(camry_read32(descriptor + 8u), source, camry_read16(descriptor)) == 1u
+        || found == 0x22u)
+        kind = 0x22u;
+    if (consumer == previous) {
+        camry_write8(camry_gp + 19592u + (consumer << 2), kind);
+    } else {
+        slot = producer;
+        if (consumer != producer && count != 0u) {
+            remaining = count;
+            while (remaining != 0u) {
+                uint32_t next = f33_nvm_advance_family0_request_index(consumer);
+                remaining -= 1u;
+                if (consumer == previous) {
+                    slot = consumer;
+                    break;
+                }
+                f33_copy_family0_request_cell(next, consumer);
+                consumer = next;
+            }
+        }
+        camry_write8(camry_gp + handle + 19208u, 0x20u);
+        camry_write8(camry_gp + 19592u + (slot << 2), kind);
+        camry_write16(camry_gp + 19594u + (slot << 2), handle);
+        producer = f33_nvm_advance_family0_request_index(slot);
+    }
+    camry_write8(indices, producer);
+    return 1u;
+}
+
 uint32_t f33_curve16_interpolate_with_slope(uint32_t curve, uint32_t x_bits, uint32_t slope_out) {
     int32_t x = sign_half(x_bits);
     uint32_t index = curve_segment(curve, x);

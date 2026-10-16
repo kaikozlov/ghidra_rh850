@@ -9,6 +9,7 @@
 {"addr": "0x67350", "name": "f33_nvm_recover_family0_request_indices", "status": "equivalent"}
 {"addr": "0x673c2", "name": "f33_nvm_advance_family0_request_index", "status": "equivalent"}
 {"addr": "0x676ba", "name": "f33_nvm_enqueue_family0_read", "status": "equivalent"}
+{"addr": "0x6773a", "name": "f33_nvm_set_family0_record", "status": "equivalent"}
 {"addr": "0x6792c", "name": "f33_nvm_get_family0_status", "status": "equivalent"}
 {"addr": "0x67a58", "name": "f33_nvm_recover_family1_request_indices", "status": "equivalent"}
 {"addr": "0x67aca", "name": "f33_nvm_advance_family1_request_index", "status": "equivalent"}

@@ -59,6 +59,7 @@ VALUE_RETURN = {
     "f33_curve16_interpolate_with_slope",
     "f33_check_learned_quad_bounds",
     "f33_nvm_enqueue_family0_read",
+    "f33_nvm_set_family0_record",
 }
 
 ROM_TABLES = (
@@ -209,6 +210,8 @@ def bind(library: ctypes.CDLL) -> None:
     library.f33_check_learned_quad_bounds.restype = u32
     library.f33_nvm_enqueue_family0_read.argtypes = [u32]
     library.f33_nvm_enqueue_family0_read.restype = u32
+    library.f33_nvm_set_family0_record.argtypes = [u32, u32]
+    library.f33_nvm_set_family0_record.restype = u32
     library.f33_curve16_interpolate_with_slope.argtypes = [u32, u32, u32]
     library.f33_curve16_interpolate_with_slope.restype = u32
     library.f33_update_thermal_release_envelope.argtypes = []
@@ -489,6 +492,8 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
     if name == "f33_update_thermal_release_envelope":
         library.f33_update_thermal_release_envelope()
         return None
+    if name == "f33_nvm_set_family0_record":
+        return int(library.f33_nvm_set_family0_record(r6, r7)) & 0xFFFFFFFF
     if name == "f33_curve16_interpolate_with_slope":
         return int(library.f33_curve16_interpolate_with_slope(r6, r7, r8)) & 0xFFFFFFFF
     if name == "f33_force_unconfirmed_terminal_monitor_healthy":
