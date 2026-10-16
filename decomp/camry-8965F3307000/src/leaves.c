@@ -345,6 +345,41 @@ uint32_t f33_nvm_get_family2_status(uint32_t object) {
         0x10u);
 }
 
+void f33_nvm_initialize_family1_application(void) {
+    uint32_t requests = camry_read8((3u << 16) - 21109u);
+    uint32_t objects = camry_read16((3u << 16) - 21134u);
+    uint32_t index;
+    uint32_t cell;
+    uint32_t descriptor;
+    uint32_t words;
+    uint32_t buffer;
+    uint32_t offset;
+    uint32_t base;
+    for (index = 0u; index < requests; index++) {
+        cell = camry_gp + 19852u + (index << 2);
+        camry_write8(cell, 0xffu);
+        camry_write16(cell + 2u, 0xffffu);
+    }
+    for (index = 0u; index < objects; index++) {
+        camry_write16(camry_gp + (index << 1) + 19496u, 0);
+        f33_publish_redundant_u8(
+            0u,
+            camry_gp + index + 19240u,
+            camry_gp + index + 22664u,
+            camry_gp + index + 22700u);
+        descriptor = 0x2af0cu + (index << 3);
+        words = camry_read16(descriptor) >> 2;
+        buffer = camry_read32(descriptor + 4u);
+        for (offset = 0u; offset < words; offset++)
+            camry_write32(buffer + (offset << 2), 0);
+    }
+    camry_write16(camry_gp + 20110u, 0);
+    base = camry_gp + 20102u;
+    camry_write16(base + 6u, 0xffffu);
+    for (offset = 0u; offset < 5u; offset++)
+        camry_write8(base + offset, 0);
+}
+
 static uint32_t family1_word_fold(uint32_t object) {
     uint32_t descriptor = 0x2af0cu + (object << 3);
     uint32_t words = camry_read16(descriptor) >> 2;

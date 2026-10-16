@@ -20,6 +20,7 @@
 {"addr": "0x68a50", "name": "f33_nvm_get_family1_completion", "status": "equivalent"}
 {"addr": "0x66c24", "name": "f33_read_repair_redundant_u8", "status": "equivalent"}
 {"addr": "0x671d0", "name": "f33_nvm_get_family2_status", "status": "equivalent"}
+{"addr": "0x679b8", "name": "f33_nvm_initialize_family1_application", "status": "equivalent"}
 {"addr": "0x6810c", "name": "f33_nvm_get_family1_status", "status": "equivalent"}
 {"addr": "0x68144", "name": "f33_nvm_get_family1_record", "status": "equivalent"}
 {"addr": "0x6a744", "name": "f33_force_unconfirmed_terminal_monitor_healthy", "status": "equivalent"}
