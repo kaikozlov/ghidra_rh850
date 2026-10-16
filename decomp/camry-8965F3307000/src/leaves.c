@@ -252,6 +252,32 @@ void f33_nvm_publish_family1_checksum(uint32_t object) {
     camry_write16(camry_gp + (index << 1) + 19496u, 0xa55au - total);
 }
 
+uint32_t f33_nvm_retain_token_while_reads_pending(uint32_t token) {
+    uint32_t value = token & 0xffu;
+    uint32_t marker = 90u;
+    uint32_t index = 0;
+    uint32_t count = camry_read16((3u << 16) - 21134u);
+    while (index < count && marker != 0u) {
+        if (camry_read8(camry_gp + index + 19288u) == 255u)
+            marker = 0u;
+        index = (index + 1u) & 0xffffu;
+    }
+    if (marker != 0u) {
+        index = 0;
+        count = camry_read16((3u << 16) - 21136u);
+        while (index < count) {
+            if (camry_read8(camry_gp + index + 19256u) == 255u)
+                marker = 0u;
+            index = (index + 1u) & 0xffffu;
+            if (marker == 0u)
+                break;
+        }
+        if (marker != 0u)
+            value = 0u;
+    }
+    return value;
+}
+
 uint32_t f33_nvm_probe_range_rejected(uint32_t byte_offset, uint32_t byte_count) {
     uint32_t first_page = camry_read16(camry_tp + 16076u);
     uint32_t page_count;

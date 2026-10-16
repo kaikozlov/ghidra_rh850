@@ -41,6 +41,7 @@ VALUE_RETURN = {
     "f33_nvm_get_family0_status",
     "f33_nvm_get_family1_completion",
     "f33_nvm_check_family1_checksum",
+    "f33_nvm_retain_token_while_reads_pending",
     "f33_force_unconfirmed_terminal_monitor_healthy",
     "f33_nvm_probe_range_rejected",
     "f33_nvm_translate_diagnostic_mask",
@@ -170,6 +171,8 @@ def bind(library: ctypes.CDLL) -> None:
     library.f33_nvm_unlink_queue_slot.restype = None
     library.f33_nvm_check_family1_checksum.argtypes = [u32]
     library.f33_nvm_check_family1_checksum.restype = u32
+    library.f33_nvm_retain_token_while_reads_pending.argtypes = [u32]
+    library.f33_nvm_retain_token_while_reads_pending.restype = u32
     library.f33_nvm_publish_family1_checksum.argtypes = [u32]
     library.f33_nvm_publish_family1_checksum.restype = None
     library.f33_pwm_initialize_compare_stages.argtypes = [u32]

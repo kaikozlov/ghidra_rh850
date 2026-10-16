@@ -75,6 +75,7 @@ uint32_t f33_nvm_get_family0_status(uint32_t object);
 uint32_t f33_nvm_get_family1_completion(uint32_t object);
 uint32_t f33_nvm_check_family1_checksum(uint32_t object);
 void f33_nvm_publish_family1_checksum(uint32_t object);
+uint32_t f33_nvm_retain_token_while_reads_pending(uint32_t token);
 uint32_t f33_nvm_probe_range_rejected(uint32_t byte_offset, uint32_t byte_count);
 uint32_t f33_nvm_translate_diagnostic_mask(uint32_t source_mask);
 void f33_nvm_accumulate_diagnostic_mask(uint32_t source_mask);
