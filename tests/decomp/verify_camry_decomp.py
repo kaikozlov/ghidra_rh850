@@ -40,6 +40,7 @@ VALUE_RETURN = {
     "f33_nvm_payload_chunk_length",
     "f33_nvm_get_family0_status",
     "f33_nvm_get_family1_completion",
+    "f33_nvm_check_family1_checksum",
     "f33_nvm_probe_range_rejected",
     "f33_nvm_translate_diagnostic_mask",
     "f33_lookup_u32_value_by_key",
@@ -164,6 +165,12 @@ def bind(library: ctypes.CDLL) -> None:
     library.f33_nvm_accumulate_result_class.restype = None
     library.f33_nvm_initialize_operation.argtypes = []
     library.f33_nvm_initialize_operation.restype = None
+    library.f33_nvm_unlink_queue_slot.argtypes = [u32, u32, u32]
+    library.f33_nvm_unlink_queue_slot.restype = None
+    library.f33_nvm_check_family1_checksum.argtypes = [u32]
+    library.f33_nvm_check_family1_checksum.restype = u32
+    library.f33_nvm_publish_family1_checksum.argtypes = [u32]
+    library.f33_nvm_publish_family1_checksum.restype = None
     library.f33_nvm_read_buffer.argtypes = [u32]
     library.f33_nvm_read_buffer.restype = u32
     library.f33_nvm_write_buffer.argtypes = [u32]
@@ -393,6 +400,12 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
         return None
     if name == "f33_nvm_initialize_operation":
         library.f33_nvm_initialize_operation()
+        return None
+    if name == "f33_nvm_unlink_queue_slot":
+        library.f33_nvm_unlink_queue_slot(r6, r7, r8)
+        return None
+    if name == "f33_nvm_publish_family1_checksum":
+        library.f33_nvm_publish_family1_checksum(r6)
         return None
     if name in VALUE_RETURN:
         return int(getattr(library, name)(r6)) & 0xFFFFFFFF

@@ -186,6 +186,36 @@ uint32_t f33_nvm_get_family1_completion(uint32_t object) {
     return camry_read8(camry_gp + index + 19288u);
 }
 
+static uint32_t family1_word_fold(uint32_t object) {
+    uint32_t descriptor = 0x2af0cu + (object << 3);
+    uint32_t words = camry_read16(descriptor) >> 2;
+    uint32_t buffer = camry_read32(descriptor + 4u);
+    uint32_t total = 0;
+    uint32_t cursor = 0;
+    while (cursor < words) {
+        uint32_t word = camry_read32(buffer + (cursor << 2));
+        cursor += 1u;
+        total += word;
+        total += word >> 16;
+    }
+    return total;
+}
+
+uint32_t f33_nvm_check_family1_checksum(uint32_t object) {
+    uint32_t index = object & 0xffffu;
+    uint32_t total = family1_word_fold(index);
+    uint32_t seed = camry_read16(camry_gp + (index << 1) + 19496u);
+    if (((total + seed) & 0xffffu) == 0xa55au)
+        return 1u;
+    return 0xffffffffu;
+}
+
+void f33_nvm_publish_family1_checksum(uint32_t object) {
+    uint32_t index = object & 0xffffu;
+    uint32_t total = family1_word_fold(index);
+    camry_write16(camry_gp + (index << 1) + 19496u, 0xa55au - total);
+}
+
 uint32_t f33_nvm_probe_range_rejected(uint32_t byte_offset, uint32_t byte_count) {
     uint32_t first_page = camry_read16(camry_tp + 16076u);
     uint32_t page_count;
@@ -260,6 +290,20 @@ void f33_nvm_accumulate_result_class(uint32_t result_class) {
     else
         mask = 0x8000u;
     f33_nvm_accumulate_diagnostic_mask(mask);
+}
+
+void f33_nvm_unlink_queue_slot(uint32_t header, uint32_t index, uint32_t previous) {
+    uint32_t slot = 0xfebf6128u + (index & 0xffffu) * 16u;
+    uint32_t next = camry_read16(slot + 14u);
+    uint32_t prev = previous & 0xffffu;
+    if (prev == 0xffffu) {
+        camry_write16(header, next);
+        prev = next;
+    } else {
+        camry_write16(0xfebf6128u + prev * 16u + 14u, next);
+    }
+    if (next == 0xffffu)
+        camry_write16(header + 2u, prev);
 }
 
 void f33_nvm_initialize_operation(void) {

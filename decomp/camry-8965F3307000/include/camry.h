@@ -72,6 +72,8 @@ uint32_t f33_nvm_advance_family0_request_index(uint32_t index);
 uint32_t f33_nvm_advance_family1_request_index(uint32_t index);
 uint32_t f33_nvm_get_family0_status(uint32_t object);
 uint32_t f33_nvm_get_family1_completion(uint32_t object);
+uint32_t f33_nvm_check_family1_checksum(uint32_t object);
+void f33_nvm_publish_family1_checksum(uint32_t object);
 uint32_t f33_nvm_probe_range_rejected(uint32_t byte_offset, uint32_t byte_count);
 uint32_t f33_nvm_translate_diagnostic_mask(uint32_t source_mask);
 void f33_nvm_accumulate_diagnostic_mask(uint32_t source_mask);
@@ -80,6 +82,7 @@ void f33_nvm_accumulate_result_class(uint32_t result_class);
 
 uint32_t f33_lookup_u32_value_by_key(uint32_t key, uint32_t fallback, uint32_t table);
 void f33_nvm_initialize_operation(void);
+void f33_nvm_unlink_queue_slot(uint32_t header, uint32_t index, uint32_t previous);
 uint32_t f33_poll_word_masks(uint32_t word, uint32_t first_mask, uint32_t second_mask, uint32_t attempts);
 
 void f33_nvm_set_physical_result_state(uint32_t state);
