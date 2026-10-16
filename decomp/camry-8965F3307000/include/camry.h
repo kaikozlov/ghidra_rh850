@@ -42,7 +42,8 @@ extern uint32_t camry_tp;
 
 void *f33_memcpy_forward(void *destination, void *source, uint32_t byte_count);
 void f33_memzero(void *destination, uint32_t byte_count);
-void f33_clear_application_ram_4k(void);
+void f33_pwm_initialize_compare_stages(uint32_t compare);
+uint32_t f33_force_unconfirmed_terminal_monitor_healthy(uint32_t state, uint32_t thresholds, uint32_t callbacks);
 void f33_copy_whole_words(uint32_t *destination, uint32_t *source, uint16_t byte_count);
 uint32_t f33_update_whole_words(uint32_t *destination, uint32_t *source, uint16_t byte_count);
 

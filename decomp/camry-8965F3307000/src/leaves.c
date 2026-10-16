@@ -10,6 +10,42 @@
 uint32_t camry_gp;
 uint32_t camry_tp;
 
+void f33_pwm_initialize_compare_stages(uint32_t compare) {
+    uint32_t value = compare & 0xffffu;
+    uint32_t index = 0;
+    while (index < 2u) {
+        uint32_t halves = camry_gp - 32608u + (index << 3);
+        uint32_t loaded = camry_read16((3u << 16) + (index << 3) + 5650u);
+        camry_write16(halves + 2u, value);
+        camry_write16(halves + 4u, value);
+        camry_write16(halves + 6u, value);
+        camry_write16(halves, loaded);
+        uint32_t words = camry_gp - 32592u + index * 12u;
+        camry_write32(words, value);
+        camry_write32(words + 4u, value);
+        camry_write32(words + 8u, value);
+        index += 1u;
+    }
+}
+
+uint32_t f33_force_unconfirmed_terminal_monitor_healthy(
+    uint32_t state, uint32_t thresholds, uint32_t callbacks) {
+    uint32_t limit_high = camry_read16(thresholds + 2u);
+    uint32_t value_high = camry_read16(state + 4u);
+    uint32_t value_low = camry_read16(state + 2u);
+    uint32_t limit_low = camry_read16(thresholds);
+    uint32_t callback;
+    if (value_high > limit_high || value_low > limit_low)
+        return 17u;
+    callback = camry_read32(callbacks + 4u);
+    camry_write8(state, 0);
+    if (callback != 0u)
+        ((void (*)(void))(uintptr_t)callback)();
+    camry_write16(state + 4u, 0);
+    camry_write16(state + 2u, limit_low + 1u);
+    return 17u;
+}
+
 extern const unsigned char f33_nvm_descriptors[];
 extern const unsigned char f33_nvm_logical_descriptors[];
 extern const unsigned char f33_nvm_family0_request_cell_count;
