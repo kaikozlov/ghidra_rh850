@@ -64,6 +64,8 @@ uint32_t f33_nvm_payload_page_count(uint32_t handle);
 uint32_t f33_nvm_payload_chunk_length(uint32_t handle, uint32_t payload_offset);
 uint32_t f33_nvm_trailer_offset(uint32_t handle);
 uint32_t f33_nvm_storage_handle(uint32_t handle);
+uint32_t f33_nvm_read_buffer(uint32_t logical_handle);
+uint32_t f33_nvm_write_buffer(uint32_t logical_handle);
 uint32_t f33_nvm_get_storage_page(uint32_t storage_handle, uint16_t *page_out);
 uint32_t f33_nvm_get_logical_storage_page(uint32_t logical_handle, uint16_t *page_out);
 uint32_t f33_nvm_advance_family0_request_index(uint32_t index);
@@ -74,8 +76,10 @@ uint32_t f33_nvm_probe_range_rejected(uint32_t byte_offset, uint32_t byte_count)
 uint32_t f33_nvm_translate_diagnostic_mask(uint32_t source_mask);
 void f33_nvm_accumulate_diagnostic_mask(uint32_t source_mask);
 void f33_nvm_accumulate_side_status(uint32_t value);
+void f33_nvm_accumulate_result_class(uint32_t result_class);
 
 uint32_t f33_lookup_u32_value_by_key(uint32_t key, uint32_t fallback, uint32_t table);
+void f33_nvm_initialize_operation(void);
 uint32_t f33_poll_word_masks(uint32_t word, uint32_t first_mask, uint32_t second_mask, uint32_t attempts);
 
 void f33_nvm_set_physical_result_state(uint32_t state);

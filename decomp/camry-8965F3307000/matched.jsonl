@@ -7,7 +7,10 @@
 {"addr": "0x689de", "name": "f33_nvm_family0_chunk_cost", "status": "equivalent"}
 {"addr": "0x68a50", "name": "f33_nvm_get_family1_completion", "status": "equivalent"}
 {"addr": "0x73a86", "name": "f33_lookup_u32_value_by_key", "status": "equivalent"}
+{"addr": "0x73ab0", "name": "f33_nvm_initialize_operation", "status": "equivalent"}
 {"addr": "0x73ca4", "name": "f33_nvm_storage_handle", "status": "equivalent"}
+{"addr": "0x74614", "name": "f33_nvm_read_buffer", "status": "equivalent"}
+{"addr": "0x746de", "name": "f33_nvm_write_buffer", "status": "equivalent"}
 {"addr": "0x747e0", "name": "f33_nvm_get_logical_storage_page", "status": "equivalent"}
 {"addr": "0x74884", "name": "f33_nvm_payload_length", "status": "equivalent"}
 {"addr": "0x74892", "name": "f33_nvm_base_offset", "status": "equivalent"}
@@ -18,6 +21,7 @@
 {"addr": "0x76554", "name": "f33_nvm_set_physical_result_state", "status": "equivalent"}
 {"addr": "0x7680c", "name": "f33_nvm_set_secondary_result_state", "status": "equivalent"}
 {"addr": "0x76a1c", "name": "f33_nvm_accumulate_side_status", "status": "equivalent"}
+{"addr": "0x76a3a", "name": "f33_nvm_accumulate_result_class", "status": "equivalent"}
 {"addr": "0x77314", "name": "f33_nvm_payload_page_count", "status": "equivalent"}
 {"addr": "0x77330", "name": "f33_nvm_payload_chunk_length", "status": "equivalent"}
 {"addr": "0x77356", "name": "f33_nvm_sum_bytes", "status": "equivalent"}

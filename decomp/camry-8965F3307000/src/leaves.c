@@ -63,6 +63,13 @@ static uint16_t read_u16(const unsigned char *address) {
     return (uint16_t)address[0] | ((uint16_t)address[1] << 8);
 }
 
+static uint32_t read_u32(const unsigned char *address) {
+    return (uint32_t)address[0]
+        | ((uint32_t)address[1] << 8)
+        | ((uint32_t)address[2] << 16)
+        | ((uint32_t)address[3] << 24);
+}
+
 uint32_t f33_nvm_payload_length(uint32_t handle) {
     return read_u16(f33_nvm_descriptors + (handle & 0xffffu) * 6u + 2u);
 }
@@ -111,6 +118,28 @@ uint32_t f33_nvm_trailer_offset(uint32_t handle) {
 
 uint32_t f33_nvm_storage_handle(uint32_t handle) {
     return read_u16(f33_nvm_logical_descriptors + (handle & 0xffffu) * 16u + 8u);
+}
+
+static const unsigned char *logical_descriptor(uint32_t handle) {
+    return f33_nvm_logical_descriptors + (handle & 0xffffu) * 16u;
+}
+
+static uint32_t logical_buffer(uint32_t logical_handle, uint32_t override_address) {
+    uint32_t override = camry_read32(override_address);
+    const unsigned char *row = logical_descriptor(logical_handle);
+    if (override != 0u)
+        return override;
+    if (row[4] == 4u)
+        return 0xfebf6b10u;
+    return read_u32(row + 12);
+}
+
+uint32_t f33_nvm_read_buffer(uint32_t logical_handle) {
+    return logical_buffer(logical_handle, 0xfebf6b08u);
+}
+
+uint32_t f33_nvm_write_buffer(uint32_t logical_handle) {
+    return logical_buffer(logical_handle, 0xfebf6b0cu);
 }
 
 uint32_t f33_nvm_get_storage_page(uint32_t storage_handle, uint16_t *page_out) {
@@ -211,6 +240,36 @@ void f33_nvm_accumulate_diagnostic_mask(uint32_t source_mask) {
 void f33_nvm_accumulate_side_status(uint32_t value) {
     uint32_t mask = value > 1u ? 0x8000u : (value == 1u ? 2u : 1u);
     f33_nvm_accumulate_diagnostic_mask(mask);
+}
+
+void f33_nvm_accumulate_result_class(uint32_t result_class) {
+    uint32_t code = (result_class & 0xffu) - 33u;
+    uint32_t mask;
+    if (code <= 1u)
+        mask = 8u;
+    else if (code == 94u)
+        mask = 4u;
+    else if (code == 96u)
+        mask = 32u;
+    else if (code == 98u)
+        mask = 64u;
+    else if (code == 220u)
+        mask = 8u;
+    else if (code == 222u)
+        mask = 16u;
+    else
+        mask = 0x8000u;
+    f33_nvm_accumulate_diagnostic_mask(mask);
+}
+
+void f33_nvm_initialize_operation(void) {
+    camry_write32(0xfebf6aecu + 12u, 0);
+    camry_write32(0xfebf6aecu + 8u, 0);
+    camry_write8(0xfebf6b00u, 0);
+    camry_write16(0xfebf6afcu, 1u);
+    camry_write16(0xfebf6aecu + 4u, 0xffffu);
+    camry_write32(0xfebf6aecu, 0xffffffffu);
+    camry_write16(0xfebf6afeu, 0xffffu);
 }
 
 uint32_t f33_lookup_u32_value_by_key(uint32_t key, uint32_t fallback, uint32_t table) {

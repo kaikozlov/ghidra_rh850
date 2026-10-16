@@ -48,6 +48,8 @@ VALUE_RETURN = {
     "f33_nvm_translate_read_driver_result",
     "f33_nvm_translate_saved_driver_result",
     "f33_nvm_get_direct_operation_result",
+    "f33_nvm_read_buffer",
+    "f33_nvm_write_buffer",
 }
 
 ROM_TABLES = (
@@ -158,6 +160,14 @@ def bind(library: ctypes.CDLL) -> None:
     library.f33_nvm_accumulate_diagnostic_mask.restype = None
     library.f33_nvm_accumulate_side_status.argtypes = [u32]
     library.f33_nvm_accumulate_side_status.restype = None
+    library.f33_nvm_accumulate_result_class.argtypes = [u32]
+    library.f33_nvm_accumulate_result_class.restype = None
+    library.f33_nvm_initialize_operation.argtypes = []
+    library.f33_nvm_initialize_operation.restype = None
+    library.f33_nvm_read_buffer.argtypes = [u32]
+    library.f33_nvm_read_buffer.restype = u32
+    library.f33_nvm_write_buffer.argtypes = [u32]
+    library.f33_nvm_write_buffer.restype = u32
     library.camry_host_reset.argtypes = []
     library.camry_host_reset.restype = None
     library.camry_host_add.argtypes = [u32, u8p, u32]
@@ -377,6 +387,12 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
         return None
     if name == "f33_nvm_accumulate_side_status":
         library.f33_nvm_accumulate_side_status(r6)
+        return None
+    if name == "f33_nvm_accumulate_result_class":
+        library.f33_nvm_accumulate_result_class(r6)
+        return None
+    if name == "f33_nvm_initialize_operation":
+        library.f33_nvm_initialize_operation()
         return None
     if name in VALUE_RETURN:
         return int(getattr(library, name)(r6)) & 0xFFFFFFFF
