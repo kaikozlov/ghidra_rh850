@@ -169,6 +169,14 @@ def bind(library: ctypes.CDLL) -> None:
     library.f33_nvm_initialize_operation.restype = None
     library.f33_nvm_unlink_queue_slot.argtypes = [u32, u32, u32]
     library.f33_nvm_unlink_queue_slot.restype = None
+    library.f33_nvm_recover_family0_request_indices.argtypes = [u32, u32]
+    library.f33_nvm_recover_family0_request_indices.restype = None
+    library.f33_nvm_recover_family1_request_indices.argtypes = [u32, u32]
+    library.f33_nvm_recover_family1_request_indices.restype = None
+    library.f33_freshness_encode_wire.argtypes = [u32, u32, u32]
+    library.f33_freshness_encode_wire.restype = None
+    library.f33_freshness_decode_wire.argtypes = [u32, u32, u32]
+    library.f33_freshness_decode_wire.restype = None
     library.f33_nvm_check_family1_checksum.argtypes = [u32]
     library.f33_nvm_check_family1_checksum.restype = u32
     library.f33_nvm_retain_token_while_reads_pending.argtypes = [u32]
@@ -411,6 +419,18 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
         return None
     if name == "f33_nvm_unlink_queue_slot":
         library.f33_nvm_unlink_queue_slot(r6, r7, r8)
+        return None
+    if name == "f33_nvm_recover_family0_request_indices":
+        library.f33_nvm_recover_family0_request_indices(r6, r7)
+        return None
+    if name == "f33_nvm_recover_family1_request_indices":
+        library.f33_nvm_recover_family1_request_indices(r6, r7)
+        return None
+    if name == "f33_freshness_encode_wire":
+        library.f33_freshness_encode_wire(r6, r7, r8)
+        return None
+    if name == "f33_freshness_decode_wire":
+        library.f33_freshness_decode_wire(r6, r7, r8)
         return None
     if name == "f33_nvm_publish_family1_checksum":
         library.f33_nvm_publish_family1_checksum(r6)

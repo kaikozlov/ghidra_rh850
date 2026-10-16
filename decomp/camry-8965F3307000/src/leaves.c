@@ -475,3 +475,112 @@ uint32_t f33_nvm_translate_saved_driver_result(void) {
     uint32_t key = camry_read8(0xfebf0000u + 27425u);
     return f33_nvm_lookup_byte_result(key, camry_tp + 15160u, 11u);
 }
+
+static void recover_request_indices(
+    uint32_t producer_out,
+    uint32_t consumer_out,
+    uint32_t indices,
+    uint32_t count_address,
+    uint32_t cell0) {
+    uint32_t producer = camry_read8(indices);
+    uint32_t consumer = camry_read8(indices + 1u);
+    uint32_t count = camry_read8(count_address);
+    uint32_t index;
+    if (producer < count && consumer < count) {
+        camry_write8(producer_out, producer);
+        camry_write8(consumer_out, consumer);
+        return;
+    }
+    producer = 0;
+    consumer = 0;
+    index = 1u;
+    while (index < count) {
+        uint32_t previous = camry_read16(cell0 + ((index - 1u) << 2));
+        uint32_t current = camry_read16(cell0 + (index << 2));
+        if (previous == 0xffffu) {
+            if (current != 0xffffu)
+                consumer = index;
+        } else if (current == 0xffffu) {
+            producer = index;
+        }
+        index = (index + 1u) & 0xffu;
+    }
+    camry_write8(producer_out, producer);
+    camry_write8(consumer_out, consumer);
+    camry_write8(indices, producer);
+    camry_write8(indices + 1u, consumer);
+}
+
+void f33_nvm_recover_family0_request_indices(uint32_t producer_out, uint32_t consumer_out) {
+    recover_request_indices(
+        producer_out,
+        consumer_out,
+        camry_gp + 20090u,
+        (3u << 16) - 21110u,
+        camry_gp + 19594u);
+}
+
+void f33_nvm_recover_family1_request_indices(uint32_t producer_out, uint32_t consumer_out) {
+    recover_request_indices(
+        producer_out,
+        consumer_out,
+        camry_gp + 20102u,
+        (3u << 16) - 21109u,
+        camry_gp + 19854u);
+}
+
+void f33_freshness_encode_wire(uint32_t freshness, uint32_t wire, uint32_t bit_capacity) {
+    uint32_t length = camry_read8(freshness + 11u);
+    if (length > camry_read8(bit_capacity))
+        return;
+    if (length == 46u) {
+        uint32_t trip = camry_read32(freshness);
+        uint32_t reset = camry_read32(freshness + 4u);
+        uint32_t message = camry_read16(freshness + 8u);
+        uint32_t low = camry_read8(freshness + 10u);
+        camry_write8(wire, trip >> 8);
+        camry_write8(wire + 1u, trip);
+        camry_write8(wire + 2u, reset >> 12);
+        camry_write8(wire + 3u, reset >> 4);
+        camry_write8(wire + 4u, (reset << 4) | (message >> 4));
+        camry_write8(wire + 5u, (message << 4) | (low << 2));
+    } else if (length == 4u) {
+        uint32_t message = camry_read16(freshness + 8u);
+        uint32_t low = camry_read8(freshness + 10u);
+        camry_write8(wire, (message << 6) | (low << 4));
+    } else {
+        length = 0;
+    }
+    camry_write32(bit_capacity, length);
+}
+
+void f33_freshness_decode_wire(uint32_t wire, uint32_t bit_length, uint32_t freshness) {
+    uint32_t low;
+    if (bit_length == 4u) {
+        uint32_t byte = camry_read8(wire);
+        camry_write32(freshness, 0);
+        camry_write32(freshness + 4u, 0);
+        camry_write16(freshness + 8u, byte >> 6);
+        low = byte >> 4;
+    } else if (bit_length == 46u) {
+        uint32_t first = camry_read8(wire);
+        uint32_t second = camry_read8(wire + 1u);
+        uint32_t third = camry_read8(wire + 2u);
+        uint32_t fourth = camry_read8(wire + 3u);
+        uint32_t fifth = camry_read8(wire + 4u);
+        uint32_t sixth = camry_read8(wire + 5u);
+        camry_write32(freshness, (first << 8) | second);
+        camry_write32(freshness + 4u, (third << 12) | (fourth << 4) | (fifth >> 4));
+        camry_write16(freshness + 8u, ((fifth << 4) | (sixth >> 4)) & 0xffu);
+        low = sixth >> 2;
+    } else {
+        camry_write32(freshness, 0);
+        camry_write32(freshness + 4u, 0);
+        camry_write16(freshness + 8u, 0);
+        camry_write8(freshness + 10u, 0);
+        camry_write8(freshness + 11u, 0);
+        return;
+    }
+    camry_write8(freshness + 10u, low & 3u);
+    camry_write8(freshness + 11u, bit_length);
+}

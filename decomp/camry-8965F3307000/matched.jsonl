@@ -2,8 +2,10 @@
 {"addr": "0x632b2", "name": "f33_clear_application_ram_4k", "status": "equivalent"}
 {"addr": "0x66e2e", "name": "f33_copy_whole_words", "status": "equivalent"}
 {"addr": "0x66e50", "name": "f33_update_whole_words", "status": "equivalent"}
+{"addr": "0x67350", "name": "f33_nvm_recover_family0_request_indices", "status": "equivalent"}
 {"addr": "0x673c2", "name": "f33_nvm_advance_family0_request_index", "status": "equivalent"}
 {"addr": "0x6792c", "name": "f33_nvm_get_family0_status", "status": "equivalent"}
+{"addr": "0x67a58", "name": "f33_nvm_recover_family1_request_indices", "status": "equivalent"}
 {"addr": "0x67aca", "name": "f33_nvm_advance_family1_request_index", "status": "equivalent"}
 {"addr": "0x67b12", "name": "f33_nvm_check_family1_checksum", "status": "equivalent"}
 {"addr": "0x67c8c", "name": "f33_nvm_publish_family1_checksum", "status": "equivalent"}
@@ -45,4 +47,6 @@
 {"addr": "0x89f2e", "name": "f33_memcpy_forward", "status": "equivalent"}
 {"addr": "0x8a134", "name": "f33_memzero", "status": "equivalent"}
 {"addr": "0x8b018", "name": "f33_icus20_read_bit0", "status": "equivalent"}
+{"addr": "0x90566", "name": "f33_freshness_encode_wire", "status": "equivalent"}
+{"addr": "0x90736", "name": "f33_freshness_decode_wire", "status": "equivalent"}
 {"addr": "0xb73ba", "name": "f33_scale_u16_delta_s16_x4", "status": "equivalent"}

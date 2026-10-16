@@ -95,3 +95,7 @@ uint32_t f33_icus20_read_bit0(void);
 uint32_t f33_nvm_lookup_byte_result(uint32_t key, uint32_t rows, uint32_t row_count);
 uint32_t f33_nvm_translate_read_driver_result(uint32_t driver_result);
 uint32_t f33_nvm_translate_saved_driver_result(void);
+void f33_nvm_recover_family0_request_indices(uint32_t producer_out, uint32_t consumer_out);
+void f33_nvm_recover_family1_request_indices(uint32_t producer_out, uint32_t consumer_out);
+void f33_freshness_encode_wire(uint32_t freshness, uint32_t wire, uint32_t bit_capacity);
+void f33_freshness_decode_wire(uint32_t wire, uint32_t bit_length, uint32_t freshness);
