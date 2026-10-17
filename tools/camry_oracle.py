@@ -184,10 +184,10 @@ def _covers_mapped(start: int, end: int) -> bool:
     return False
 
 
-def _load_bodies() -> tuple[dict[str, str], set[str]]:
+def _load_c_bodies(paths: list[Path]) -> tuple[dict[str, str], set[str]]:
     bodies: dict[str, str] = {}
     duplicates: set[str] = set()
-    for path in sorted((ROOT / "src" / "all").glob("*.c")):
+    for path in paths:
         lines = path.read_text(encoding="utf-8").splitlines()
         index = 0
         while index < len(lines):
@@ -221,6 +221,23 @@ def _load_bodies() -> tuple[dict[str, str], set[str]]:
             if name in bodies:
                 duplicates.add(name)
             bodies[name] = chunk
+    return bodies, duplicates
+
+
+def _load_bodies() -> tuple[dict[str, str], set[str]]:
+    """src/all bodies, plus verified functions that live only in oracle.c.
+
+    The differential link does not compile oracle.c. A converted caller still
+    needs that verified text when its bytes enter the function.
+    """
+    bodies, duplicates = _load_c_bodies(sorted((ROOT / "src" / "all").glob("*.c")))
+    oracle = ROOT / "src" / "oracle.c"
+    if oracle.is_file():
+        extra, extra_dups = _load_c_bodies([oracle])
+        duplicates.update(name for name in extra_dups if name not in bodies)
+        for name, chunk in extra.items():
+            if name not in bodies:
+                bodies[name] = chunk
     return bodies, duplicates
 
 
@@ -1907,6 +1924,7 @@ def run_oracles() -> int:
     symbols = load_symbols()
     status = {int(row["addr"], 16): row for row in load_matched()}
     bodies, duplicates = _load_bodies()
+    linked = _src_definitions()
     functions = {}
     for row in symbols:
         fn = walk_symbol(code, row)
@@ -2010,7 +2028,11 @@ def run_oracles() -> int:
             reject(exc.kind, name, exc.detail)
             continue
         calls = set().union(*(run.calls for run in runs))
-        if any(functions[target].name not in bodies for target in calls if target in functions):
+        if any(
+            functions[target].name not in bodies and functions[target].name not in linked
+            for target in calls
+            if target in functions
+        ):
             reject("no-converted-body", name)
             continue
         planned.append(Planned(address, name, signature, body, runs, calls, windows))
