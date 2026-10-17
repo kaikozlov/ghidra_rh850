@@ -1309,7 +1309,9 @@ def _linkable(
         body = bodies.get(name)
         if body is None:
             continue
-        for callee in _c_calls(body):
+        for callee in _c_calls(body) | (
+            set(re.findall(r"\b([A-Za-z_][A-Za-z0-9_]*)\b", body)) & bodies.keys()
+        ):
             if callee in seen or callee not in bodies:
                 continue
             seen.add(callee)
@@ -1468,7 +1470,9 @@ def _reachable_stubs(
         if name in seen:
             continue
         seen.add(name)
-        for callee in _c_calls(bodies.get(name, "")):
+        referenced = set(re.findall(r"\b([A-Za-z_][A-Za-z0-9_]*)\b", bodies.get(name, "")))
+        referenced.update(_c_calls(bodies.get(name, "")))
+        for callee in referenced:
             if callee in stubs and callee not in wanted:
                 wanted.append(callee)
             elif callee in bodies:
@@ -1569,10 +1573,15 @@ def _verify() -> str | None:
     log_path.write_text((result.stderr or "") + "\n" + (result.stdout or ""), encoding="utf-8")
     if result.returncode == 0:
         return None
+    blob = (result.stderr or "") + "\n" + (result.stdout or "")
+    missing = _undefined_symbols(blob)
     err = [line for line in (result.stderr or "").splitlines() if line.strip()]
     fails = [line for line in (result.stdout or "").splitlines() if line.startswith("FAIL ")]
     shown = (err[-4:] + fails) or (result.stdout or "").strip().splitlines()[-6:]
-    return " | ".join(shown)
+    text = " | ".join(shown)
+    if missing:
+        text = "undefined:" + ",".join(missing) + "\n" + text
+    return text
 
 
 def _keep_verified(
@@ -1585,12 +1594,14 @@ def _keep_verified(
     reject,
     examples: dict[str, str],
     stubs: dict[str, str] | None = None,
+    forced: tuple[str, ...] = (),
 ) -> list[tuple[Planned, list[dict]]]:
     if not passed:
         return []
     kept, support = _linkable(
         [item.name for item, _rows in passed], bodies, defined, symbols, macros,
     )
+    support = list(dict.fromkeys((*forced, *support)))
     runnable = [(item, rows) for item, rows in passed if item.name in kept]
     for item, _rows in passed:
         if item.name not in kept:
@@ -1603,6 +1614,30 @@ def _keep_verified(
     if error is None:
         return runnable
     _restore(snapshots)
+    if error.startswith("undefined:"):
+        header, _, detail = error.partition("\n")
+        missing = [name for name in header.split(":", 1)[1].split(",") if name]
+        prototypes = _prototypes()
+        have = set(forced) | set(support) | defined
+        extra = list(forced)
+        stub_map = dict(stubs or {})
+        grew = False
+        for name in missing:
+            if name in have or name in stub_map:
+                continue
+            if name in bodies:
+                extra.append(name)
+                have.add(name)
+                grew = True
+            elif name in prototypes:
+                stub_map[name] = prototypes[name]
+                grew = True
+        if grew:
+            return _keep_verified(
+                runnable, snapshots, bodies, defined, symbols, macros, reject, examples,
+                stub_map, tuple(extra),
+            )
+        error = detail or error
     dupes = set(re.findall(
         r"(?:redefinition of '|duplicate symbol '_)([A-Za-z_][A-Za-z0-9_]*)",
         error,
@@ -1626,7 +1661,7 @@ def _keep_verified(
             examples["verifier"] = error[:180]
             rest = [(item, rows) for item, rows in runnable if item not in bad]
             return _keep_verified(
-                rest, snapshots, bodies, defined, symbols, macros, reject, examples, stubs,
+                rest, snapshots, bodies, defined, symbols, macros, reject, examples, stubs, forced,
             )
     named = [item for item, _rows in runnable if item.name in error]
     if named and len(named) < len(runnable):
@@ -1634,15 +1669,21 @@ def _keep_verified(
             reject("verifier", item.name, address=item.address)
         examples["verifier"] = error[:180]
         rest = [(item, rows) for item, rows in runnable if item not in named]
-        return _keep_verified(rest, snapshots, bodies, defined, symbols, macros, reject, examples, stubs)
+        return _keep_verified(
+            rest, snapshots, bodies, defined, symbols, macros, reject, examples, stubs, forced,
+        )
     if len(runnable) == 1 or "FAIL " not in error:
         for item, _rows in runnable:
             reject("verifier", item.name, address=item.address)
         examples["verifier"] = error[:180]
         return []
     mid = len(runnable) // 2
-    left = _keep_verified(runnable[:mid], snapshots, bodies, defined, symbols, macros, reject, examples, stubs)
-    right = _keep_verified(runnable[mid:], snapshots, bodies, defined, symbols, macros, reject, examples, stubs)
+    left = _keep_verified(
+        runnable[:mid], snapshots, bodies, defined, symbols, macros, reject, examples, stubs, forced,
+    )
+    right = _keep_verified(
+        runnable[mid:], snapshots, bodies, defined, symbols, macros, reject, examples, stubs, forced,
+    )
     return left + right
 
 
