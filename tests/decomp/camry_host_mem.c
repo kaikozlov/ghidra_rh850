@@ -72,6 +72,23 @@ void camry_write16(uint32_t address, uint32_t value) {
     bytes[1] = (uint8_t)(value >> 8);
 }
 
+uint8_t *camry_host_ptr(uint32_t address) {
+    return camry_host_locate(address, 1);
+}
+
+uint32_t camry_host_addr(const void *pointer) {
+    const uint8_t *bytes = pointer;
+    int index;
+    for (index = camry_host_region_count - 1; index >= 0; index -= 1) {
+        CamryHostRegion *region = &camry_host_regions[index];
+        const uint8_t *end = region->data + region->size;
+        if (bytes >= region->data && bytes < end)
+            return region->base + (uint32_t)(bytes - region->data);
+    }
+    fprintf(stderr, "unmapped camry host pointer\n");
+    abort();
+}
+
 void camry_write32(uint32_t address, uint32_t value) {
     uint8_t *bytes = camry_host_locate(address, 4);
     bytes[0] = (uint8_t)value;

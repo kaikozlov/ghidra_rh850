@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import ctypes
 import json
+import os
+import signal
 import subprocess
 import tempfile
 from pathlib import Path
@@ -13,8 +15,12 @@ from tools.camry_decomp import ROOT, identity_image, load_matched, load_symbols
 from tools.project.analysis_target import target as resolve_target
 
 ORACLES = ROOT / "oracles.jsonl"
+SIGNATURES = {
+    row["name"]: row["signature"]
+    for row in load_symbols()
+    if row.get("signature")
+}
 INCLUDE = ROOT / "include"
-SOURCES = sorted((ROOT / "src").glob("*.c"))
 HOST_MEM = Path(__file__).with_name("camry_host_mem.c")
 MAX_SPAN = 2_000_000
 
@@ -117,13 +123,18 @@ def load_oracles() -> list[dict]:
 
 def compile_sources(directory: Path, optimize: str = "-O2") -> ctypes.CDLL:
     library = directory / "libcamry.dylib"
+    sources = sorted((ROOT / "src").glob("*.c"))
     subprocess.run(
         [
-            "cc", "-std=c11", optimize, "-Wall", "-Wextra", "-Werror",
+            "cc", "-std=c11", optimize, "-Wall", "-Wextra", "-Werror", "-fwrapv",
+            "-Wno-unused-variable", "-Wno-unused-parameter",
+            "-Wno-unused-function", "-Wno-unused-label",
+            "-Wno-pointer-to-int-cast", "-Wno-int-to-pointer-cast",
+            "-Wno-bitwise-op-parentheses",
             "-DCAMRY_HOST",
             "-I", str(INCLUDE),
             "-dynamiclib", "-o", str(library),
-            *[str(path) for path in SOURCES],
+            *[str(path) for path in sources],
             str(HOST_MEM),
         ],
         check=True,
@@ -326,6 +337,8 @@ def bind(library: ctypes.CDLL) -> None:
     if (ROOT / "src" / "lifted.c").exists():
         library.camry_lift_run.argtypes = [u32, u32, u32, u32, u32, u32]
         library.camry_lift_run.restype = u32
+    library.camry_host_ptr.argtypes = [u32]
+    library.camry_host_ptr.restype = u8p
 
 
 def scenario_regions(scenario: dict) -> list[tuple[int, bytearray]]:
@@ -658,6 +671,88 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
     raise AssertionError(f"no C call for {name}")
 
 
+def parse_signature(signature: str, name: str) -> tuple[str, list[str]]:
+    opening = signature.find("(")
+    closing = signature.rfind(")")
+    if opening < 0 or closing < opening or name not in signature[:opening]:
+        raise AssertionError(f"unparsed signature for {name}")
+    return_type = " ".join(signature[:opening].replace(name, "").split())
+    body = signature[opening + 1:closing].strip()
+    if body in {"", "void"}:
+        return return_type, []
+    params: list[str] = []
+    depth = 0
+    start = 0
+    for index, char in enumerate(body):
+        if char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+        elif char == "," and depth == 0:
+            params.append(body[start:index].strip())
+            start = index + 1
+    params.append(body[start:].strip())
+    return return_type, params
+
+
+def call_corpus(library: ctypes.CDLL, name: str, signature: str, registers: dict) -> int | None:
+    ctypes.c_uint32.in_dll(library, "camry_gp").value = int(registers.get("gp", "0"), 16) & 0xFFFFFFFF
+    ctypes.c_uint32.in_dll(library, "camry_tp").value = int(registers.get("tp", "0"), 16) & 0xFFFFFFFF
+    ctypes.c_uint32.in_dll(library, "camry_sp").value = int(registers.get("sp", "0"), 16) & 0xFFFFFFFF
+    return_type, params = parse_signature(signature, name)
+    if len(params) > 4:
+        raise AssertionError(f"{name} has stack arguments")
+    values = [
+        int(registers.get(f"r{6 + index}", "0"), 16) & 0xFFFFFFFF
+        for index in range(len(params))
+    ]
+    u8p = ctypes.POINTER(ctypes.c_uint8)
+    u32 = ctypes.c_uint32
+    argtypes = []
+    args = []
+    for param, value in zip(params, values):
+        if "*" in param:
+            argtypes.append(u8p)
+            args.append(library.camry_host_ptr(value))
+        else:
+            argtypes.append(u32)
+            args.append(value)
+    function = getattr(library, name)
+    function.argtypes = argtypes
+    if return_type == "void":
+        function.restype = None
+        function(*args)
+        return None
+    function.restype = u32
+    return int(function(*args)) & 0xFFFFFFFF
+
+
+def corpus_returns(form: str | None, name: str) -> bool | None:
+    if form == "lifted":
+        return True
+    if form != "corpus":
+        return None
+    return_type, _params = parse_signature(SIGNATURES[name], name)
+    return return_type != "void"
+
+
+def call_matched(
+    library: ctypes.CDLL,
+    form: str | None,
+    address: int,
+    name: str,
+    registers: dict,
+    limit: int,
+    view,
+    base: int,
+) -> int | None:
+    if form == "lifted":
+        return call_lifted(library, address, registers, limit)
+    if form == "corpus":
+        return call_corpus(library, name, SIGNATURES[name], registers)
+    return call_function(library, name, view, base, registers)
+
+
 def call_lifted(library: ctypes.CDLL, address: int, registers: dict, limit: int) -> int:
     ctypes.c_uint32.in_dll(library, "camry_gp").value = int(registers.get("gp", "0"), 16) & 0xFFFFFFFF
     ctypes.c_uint32.in_dll(library, "camry_tp").value = int(registers.get("tp", "0"), 16) & 0xFFFFFFFF
@@ -773,6 +868,86 @@ def check_rom(library: ctypes.CDLL) -> None:
             raise SystemExit(f"{name} drifted from CodeFlash {address:#x}")
 
 
+def _returns_value(signature: str, name: str) -> bool:
+    return_type, _params = parse_signature(signature, name)
+    return return_type != "void"
+
+
+def _run_corpus_scenario(library, scenario, name, signature, codeflash: bytes) -> None:
+    registers = scenario.get("registers", {})
+    mapped = materialize(scenario)
+    code_view = view_of(bytearray(codeflash))
+    value_return = _returns_value(signature, name)
+    if mapped is None:
+        regions = scenario_regions(scenario)
+        install_regions(library, code_view, len(codeflash), regions)
+        returned = call_corpus(library, name, signature, registers)
+        check_results(
+            scenario, name, None, 0, registers, returned, regions, codeflash,
+            value_return=value_return,
+        )
+        return
+    memory, base = mapped
+    view = view_of(memory) if memory else view_of(bytearray(b"\x00"))
+    install_address_space(library, code_view, len(codeflash), view, base, memory)
+    returned = call_corpus(library, name, signature, registers)
+    check_results(
+        scenario, name, memory, base, registers, returned, codeflash=codeflash,
+        value_return=value_return,
+    )
+
+
+def screen_corpus(rows: list[dict]) -> list[dict]:
+    """Return compiled corpus rows whose useful oracles all pass."""
+    by_address = {int(row["addr"]): row for row in rows}
+    grouped: dict[int, list[dict]] = {addr: [] for addr in by_address}
+    for scenario in load_oracles():
+        entry = scenario.get("entry") or {}
+        if entry.get("scope") != "resolved-address" or not useful_oracle(scenario):
+            continue
+        address = int(entry["address"], 16)
+        if address in grouped:
+            grouped[address].append(scenario)
+    metadata = resolve_target("camry-8965F3307000")[1]
+    codeflash = (REPO_ROOT / metadata["codeflash"]).read_bytes()
+    passed = []
+    with tempfile.TemporaryDirectory(prefix="camry-corpus-") as directory:
+        library = compile_sources(Path(directory))
+        bind(library)
+        for address, row in sorted(by_address.items()):
+            scenarios = grouped[address]
+            if not scenarios:
+                continue
+            ok = True
+            for scenario in scenarios:
+                read_fd, write_fd = os.pipe()
+                pid = os.fork()
+                if pid == 0:
+                    os.close(read_fd)
+                    signal.signal(signal.SIGALRM, lambda *_args: os._exit(1))
+                    signal.alarm(2)
+                    try:
+                        _run_corpus_scenario(
+                            library, scenario, row["name"], row["signature"], codeflash,
+                        )
+                    except BaseException as exc:
+                        os.write(write_fd, str(exc).encode()[:400])
+                        os._exit(1)
+                    os._exit(0)
+                os.close(write_fd)
+                _pid, status = os.waitpid(pid, 0)
+                detail = os.read(read_fd, 400).decode(errors="replace")
+                os.close(read_fd)
+                if not (os.WIFEXITED(status) and os.WEXITSTATUS(status) == 0):
+                    ok = False
+                    print(f"FAIL {row['name']} {scenario['name']} {detail}")
+                    break
+            if ok:
+                passed.append(row)
+                print(f"PASS {row['name']} {address:#x} {len(scenarios)}")
+    return passed
+
+
 def main() -> int:
     image, report = identity_image(load_symbols())
     if hashlib_matches(image, report):
@@ -805,10 +980,12 @@ def main() -> int:
             if address not in matched or not useful_oracle(scenario):
                 continue
             name = matched[address]["name"]
-            lifted = matched[address].get("form") == "lifted"
+            form = matched[address].get("form")
+            lifted = form == "lifted"
+            corpus = form == "corpus"
             registers = scenario.get("registers", {})
             mapped = materialize(scenario)
-            ranges = [] if lifted else accessed_ranges(name, registers)
+            ranges = [] if lifted or corpus else accessed_ranges(name, registers)
             limit = int(scenario.get("max_instructions") or 200000)
             if mapped is None:
                 if ranges:
@@ -818,13 +995,12 @@ def main() -> int:
                 dcra, dcra_view = attach_dcra(library, name)
                 if lifted and dcra is None and 1 + len(regions) < 8:
                     dcra, dcra_view = attach_dcra_window(library)
-                returned = (
-                    call_lifted(library, address, registers, limit)
-                    if lifted else call_function(library, name, None, 0, registers)
+                returned = call_matched(
+                    library, form, address, name, registers, limit, None, 0,
                 )
                 check_results(
                     scenario, name, None, 0, registers, returned, regions, codeflash, dcra,
-                    value_return=True if lifted else None,
+                    value_return=corpus_returns(form, name) if corpus or lifted else None,
                 )
                 del held, dcra_view
             else:
@@ -836,13 +1012,12 @@ def main() -> int:
                 dcra, dcra_view = attach_dcra(library, name)
                 if lifted and dcra is None:
                     dcra, dcra_view = attach_dcra_window(library)
-                returned = (
-                    call_lifted(library, address, registers, limit)
-                    if lifted else call_function(library, name, view, base, registers)
+                returned = call_matched(
+                    library, form, address, name, registers, limit, view, base,
                 )
                 check_results(
                     scenario, name, memory, base, registers, returned, codeflash=codeflash, dcra=dcra,
-                    value_return=True if lifted else None,
+                    value_return=corpus_returns(form, name) if corpus or lifted else None,
                 )
                 del dcra_view
             executed[address] += 1
