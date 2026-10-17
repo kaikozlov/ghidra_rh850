@@ -2703,6 +2703,18 @@ def _call_facts() -> dict:
         for inst in fn.insts:
             if inst.kind in {"jarl", "jr"} and inst.target in names_at:
                 grouped.setdefault(inst.target, []).append(inst.addr)
+        # mov imm, reg; jmp [reg] is a tail call. Pair it only when this
+        # function does not also call that target with jarl/jr, so an existing
+        # match does not become a count mismatch.
+        for inst in fn.insts:
+            if inst.kind != "jmp" or not inst.reg or inst.addr not in state:
+                continue
+            held = state[inst.addr].get(inst.reg, set())
+            if len(held) != 1 or next(iter(held))[0] != "imm":
+                continue
+            target = next(iter(held))[1]
+            if target in names_at and target not in grouped:
+                grouped.setdefault(target, []).append(inst.addr)
         sites[row["name"]] = grouped
         targets = []
         pmr_origins: list[set] = []

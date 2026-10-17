@@ -1223,7 +1223,7 @@ void f33_refresh_mode_diagnostic_admission(void)
     FUN_00091b50();
     FUN_000917a4(0);
     f33_run_init_chain_8e62a();
-    ((void)(0x88), thunk_FUN_000b9320());
+    thunk_FUN_000b9320(0x88);
     FUN_0004cf6c();
     FUN_0004d4bc();
   }
@@ -1882,7 +1882,7 @@ void f33_diagnostic_session_changed_application(uchar old_session,uchar new_sess
   if ((new_session == '\x01') || ((old_session == '\x01' && (new_session == '@')))) {
     (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x366a))))) = 0;
     (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3669))))) = 0;
-    ((void)(0x88), thunk_FUN_000b9320());
+    thunk_FUN_000b9320(0x88);
     f33_diag_routine_clear_nonrunning_results('\0');
   }
   return;
@@ -5401,14 +5401,14 @@ void f33_start_pending_write_mode_request(void)
   if (DAT_febe81af == '\x11') {
     puVar2 = 0xfebeb800u;
     FUN_00035aa2();
-    ((void)(0x11), thunk_FUN_000b9320());
+    thunk_FUN_000b9320(0x11);
     uVar1 = 0x12;
   }
   else {
     if (DAT_febe81af != '!') {
       return;
     }
-    ((void)(0x22), thunk_FUN_000b9320());
+    thunk_FUN_000b9320(0x22);
     uVar1 = 0x22;
   }
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3651))))) = uVar1;
@@ -5500,7 +5500,7 @@ uint f33_write_2001_request_record101_reset(uchar *payload,ushort unused_length)
   uint uVar4;
   
   puVar2 = 0xfebeb800u;
-  iVar3 = ((void)(*payload), (void)(unused_length), thunk_FUN_000b5a74());
+  iVar3 = ((void)(unused_length), thunk_FUN_000b5a74(*payload));
   if (iVar3 == 1) {
     uVar4 = f33_request_record101_reset_write();
     uVar1 = 0x2e10;

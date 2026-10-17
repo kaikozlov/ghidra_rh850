@@ -2568,7 +2568,7 @@ void FUN_00056336(int param_1)
   undefined1 uStack_b;
   
   puVar2 = 0xfebeb800u;
-  ((void)(&local_28), (void)(10), thunk_FUN_000be1f8());
+  thunk_FUN_000be1f8(camry_host_addr(&local_28), 10);
   (*((undefined2 *)camry_host_ptr((uint32_t)(param_1 + 2)))) = 0;
   (*((undefined1 *)camry_host_ptr((uint32_t)(param_1 + 4)))) = uStack_25;
   (*((undefined1 *)camry_host_ptr((uint32_t)(param_1 + 5)))) = uStack_24;
@@ -2646,7 +2646,7 @@ void FUN_00056458(int param_1)
   undefined1 uStack_b;
   
   puVar1 = 0xfebeb800u;
-  ((void)(auStack_28), (void)(10), thunk_FUN_000be1f8());
+  thunk_FUN_000be1f8(camry_host_addr(auStack_28), 10);
   (*((undefined2 *)camry_host_ptr((uint32_t)(param_1 + 4)))) = 0;
   (*((undefined2 *)camry_host_ptr((uint32_t)(param_1 + 6)))) = 0;
   (*((undefined1 *)camry_host_ptr((uint32_t)(param_1 + 8)))) = uStack_25;
@@ -2729,7 +2729,7 @@ void FUN_000564ce(int param_1)
   undefined1 uStack_b;
   
   puVar2 = 0xfebeb800u;
-  ((void)(&local_28), (void)(0x32), thunk_FUN_000be1f8());
+  thunk_FUN_000be1f8(camry_host_addr(&local_28), 0x32);
   (*((undefined2 *)camry_host_ptr((uint32_t)(param_1 + 2)))) = 0;
   (*((undefined1 *)camry_host_ptr((uint32_t)(param_1 + 4)))) = uStack_25;
   (*((undefined1 *)camry_host_ptr((uint32_t)(param_1 + 5)))) = uStack_24;
@@ -2807,7 +2807,7 @@ void FUN_000565f2(int param_1)
   undefined1 uStack_b;
   
   puVar1 = 0xfebeb800u;
-  ((void)(auStack_28), (void)(0x32), thunk_FUN_000be1f8());
+  thunk_FUN_000be1f8(camry_host_addr(auStack_28), 0x32);
   (*((undefined2 *)camry_host_ptr((uint32_t)(param_1 + 4)))) = 0;
   (*((undefined2 *)camry_host_ptr((uint32_t)(param_1 + 6)))) = 0;
   (*((undefined1 *)camry_host_ptr((uint32_t)(param_1 + 8)))) = uStack_25;

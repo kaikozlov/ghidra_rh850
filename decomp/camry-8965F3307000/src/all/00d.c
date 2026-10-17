@@ -1628,7 +1628,7 @@ int f33_ba_f8_request_learned_reset(void)
 {
   int iVar1;
   
-  iVar1 = ((void)(0x22), (void)(2), thunk_FUN_000b90ca());
+  iVar1 = thunk_FUN_000b90ca(0x22,2);
   return iVar1;
 }
 

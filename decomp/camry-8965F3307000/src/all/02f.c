@@ -396,8 +396,8 @@ LAB_000bc552:
   if ((iVar7 - iVar12 < 0 != (iVar7 < 0 != iVar12 < 0 && iVar12 < 0 == iVar7 - iVar12 < 0) ||
        iVar7 == iVar12) && (sVar4 = DAT_000af142, cVar1 == 'Z')) {
     if (sStack_4e == 0) {
-      ((void)(9), thunk_FUN_000545de());
-      ((void)(3), (void)(10), thunk_FUN_00051cf6());
+      thunk_FUN_000545de(9);
+      thunk_FUN_00051cf6(3,10);
       sVar4 = sStack_4e;
     }
     else {
@@ -473,8 +473,8 @@ void FUN_000bc5fe(void)
      ((((DAT_febebd9c == '\x01' || (DAT_febef38b == 'Z')) || (DAT_febebded == '\x01')) ||
       (DAT_febebde4 == '\x01')))) {
     puVar2 = 0xfebeb800u;
-    ((void)(0), thunk_FUN_000545de());
-    ((void)(5), (void)(10), thunk_FUN_00051cf6());
+    thunk_FUN_000545de(0);
+    thunk_FUN_00051cf6(5,10);
     cVar1 = 'Z';
   }
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(0x5dc))))) = cVar1;
@@ -607,14 +607,14 @@ LAB_000bc762:
   puVar3 = ((undefined *)camry_host_ptr(0xfebeb800u));
   if (DAT_febebde3 == '\0') {
     if (cVar11 == 'Z') {
-      ((void)(0xe), thunk_FUN_000545de());
-      ((void)(4), (void)(0x32), thunk_FUN_00051cf6());
+      thunk_FUN_000545de(0xe);
+      thunk_FUN_00051cf6(4,0x32);
       puVar3 = ((undefined *)camry_host_ptr((uint32_t)(puVar4)));
     }
   }
   else if (cVar11 != 'Z') {
     puVar3 = ((undefined *)camry_host_ptr(0xfebeb800u));
-    ((void)(0xe), thunk_FUN_00054724());
+    thunk_FUN_00054724(0xe);
   }
   bVar2 = cVar11 == 'Z';
 LAB_000bc7a4:
@@ -701,7 +701,7 @@ void FUN_000bc7ce(void)
         }
         else {
           f33_report_diagnostic_event_failure(0x9a,100);
-          ((void)(0xd), thunk_FUN_000545de());
+          thunk_FUN_000545de(0xd);
           uVar11 = 0;
           puVar5 = ((undefined *)camry_host_ptr((uint32_t)(puVar4)));
           cVar9 = '\x01';
@@ -725,7 +725,7 @@ void FUN_000bc7ce(void)
           else {
             f33_report_diagnostic_event_failure(0x9a,100);
             cVar9 = '\x01';
-            ((void)(0xd), thunk_FUN_000545de());
+            thunk_FUN_000545de(0xd);
             uVar10 = 0;
           }
         }
@@ -886,7 +886,7 @@ void f33_run_init_chain_bca62(void)
 void FUN_000bca7e(undefined1 param_1)
 
 {
-  ((void)(param_1), (void)(10), thunk_FUN_00051cf6());
+  thunk_FUN_00051cf6(param_1,10);
   return;
 }
 

@@ -217,7 +217,7 @@ void f33_route_fault_action_mode_request(uint actions)
   if (((actions & 1) == 0) && (((DAT_febe71ec & 0x8000) == 0 || ((actions >> 1 & 1) == 0)))) {
     if (((actions >> 3 & 1) == 0) &&
        (((DAT_febe71ec & 0x8000) == 0 || (uVar4 = 0, (actions & 0x10) == 0)))) {
-      ((void)(uVar4), thunk_FUN_000b14d2());
+      thunk_FUN_000b14d2(uVar4);
       return;
     }
     f33_latch_health_command_completion();
@@ -572,7 +572,7 @@ void f33_route_fault_ancillary_actions(uint actions)
   limit_00 = DAT_00031800;
   uVar5 = DAT_febe71ec & 0x8000;
   if ((actions >> 0xc & 1) == 0) {
-    ((void)(0xf), thunk_FUN_000b14d2());
+    thunk_FUN_000b14d2(0xf);
   }
   else {
     thunk_FUN_000b15ac();
@@ -586,7 +586,7 @@ void f33_route_fault_ancillary_actions(uint actions)
     f33_set_owner2_entry_inhibit(1);
     f33_set_owner3_entry_inhibit(1);
   }
-  ((void)(!bVar1), thunk_FUN_000bc93a());
+  thunk_FUN_000bc93a(!bVar1);
   limit = limit_00;
   if (((actions >> 2 & 1) == 0) && (limit = uVar2, (actions >> 3 & 1) == 0)) {
     f33_release_output_code_limit_bank0('\x01');
@@ -1706,11 +1706,11 @@ void f33_compose_communication_status_fault_actions(void)
   puVar1 = 0xfebeb800u;
   status = (byte)DAT_febe7f3a & 0x10;
   if ((DAT_febe7f3a & 0x1010) == 0) {
-    thunk_FUN_000bef8e();
+    thunk_FUN_000bef8e(0x0);
   }
   else {
     status = 0x22;
-    ((void)(0), thunk_FUN_000bef80());
+    thunk_FUN_000bef80(0);
   }
   f33_set_communication_monitor_status(1,status);
   f33_retain_and_clear_fault_record(0x10);

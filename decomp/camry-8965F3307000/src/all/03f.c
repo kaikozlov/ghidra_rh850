@@ -436,6 +436,24 @@ undefined2 thunk_FUN_000b1c64(void)
 
 
 
+void thunk_FUN_000bef80(undefined4 param_1)
+
+{
+  FUN_000bef80(param_1);
+  return;
+}
+
+
+
+void thunk_FUN_000bef8e(undefined4 param_1)
+
+{
+  FUN_000bef8e(param_1);
+  return;
+}
+
+
+
 uint thunk_FUN_000bdcfe(void)
 
 {
@@ -452,10 +470,53 @@ uint thunk_FUN_000bdf24(void)
 
 
 
+void thunk_FUN_000b9320(undefined4 param_1)
+
+{
+  FUN_000b9320(param_1);
+  return;
+}
+
+
+
+undefined4 thunk_FUN_000b90ca(undefined4 param_1, undefined4 param_2)
+
+{
+  return FUN_000b90ca(param_1, param_2);
+}
+
+
+
+void thunk_FUN_000be1f8(undefined4 param_1, undefined4 param_2)
+
+{
+  FUN_000be1f8(param_1, param_2);
+  return;
+}
+
+
+
 void thunk_FUN_000b524a(void)
 
 {
   FUN_000b524a();
+  return;
+}
+
+
+
+undefined4 thunk_FUN_000b8d9c(undefined4 param_1)
+
+{
+  return FUN_000b8d9c(param_1);
+}
+
+
+
+void thunk_FUN_000b8dda(undefined4 param_1)
+
+{
+  FUN_000b8dda(param_1);
   return;
 }
 
@@ -470,10 +531,35 @@ void thunk_FUN_000b8e52(void)
 
 
 
+void thunk_FUN_000bc93a(undefined4 param_1)
+
+{
+  FUN_000bc93a(param_1);
+  return;
+}
+
+
+
 undefined4 thunk_FUN_000bdb48(void)
 
 {
   return FUN_000bdb48();
+}
+
+
+
+undefined4 thunk_FUN_000b14d2(undefined4 param_1)
+
+{
+  return FUN_000b14d2(param_1);
+}
+
+
+
+undefined4 thunk_FUN_000b5a74(undefined4 param_1)
+
+{
+  return FUN_000b5a74(param_1);
 }
 
 
@@ -595,6 +681,42 @@ void thunk_FUN_000b85d0(void)
 
 
 
+void thunk_FUN_0004d0a4(undefined4 param_1, undefined4 param_2)
+
+{
+  FUN_0004d0a4(param_1, param_2);
+  return;
+}
+
+
+
+void thunk_FUN_00056cda(undefined4 param_1, undefined4 param_2)
+
+{
+  FUN_00056cda(param_1, param_2);
+  return;
+}
+
+
+
+void thunk_FUN_00056f14(undefined4 param_1, undefined4 param_2)
+
+{
+  FUN_00056f14(param_1, param_2);
+  return;
+}
+
+
+
+void thunk_FUN_00056c26(undefined4 param_1, undefined4 param_2)
+
+{
+  FUN_00056c26(param_1, param_2);
+  return;
+}
+
+
+
 void thunk_FUN_000515ca(void)
 
 {
@@ -622,6 +744,24 @@ void thunk_FUN_000515e6(void)
 
 
 
+void thunk_FUN_000524be(undefined4 param_1)
+
+{
+  FUN_000524be(param_1);
+  return;
+}
+
+
+
+void thunk_FUN_00035772(undefined4 param_1, undefined4 param_2, undefined4 param_3, undefined4 param_4)
+
+{
+  FUN_00035772(param_1, param_2, param_3, param_4);
+  return;
+}
+
+
+
 void thunk_FUN_0003599e(void)
 
 {
@@ -635,6 +775,24 @@ void thunk_FUN_00035780(void)
 
 {
   FUN_00035780();
+  return;
+}
+
+
+
+void thunk_FUN_0005693e(undefined4 param_1, undefined4 param_2)
+
+{
+  FUN_0005693e(param_1, param_2);
+  return;
+}
+
+
+
+void thunk_FUN_00034ea4(undefined4 param_1, undefined4 param_2)
+
+{
+  FUN_00034ea4(param_1, param_2);
   return;
 }
 
@@ -667,10 +825,64 @@ void thunk_FUN_00034bce(void)
 
 
 
+void thunk_FUN_00056e66(undefined4 param_1, undefined4 param_2)
+
+{
+  FUN_00056e66(param_1, param_2);
+  return;
+}
+
+
+
+void thunk_FUN_000545de(undefined4 param_1)
+
+{
+  FUN_000545de(param_1);
+  return;
+}
+
+
+
+void thunk_FUN_00054724(undefined4 param_1)
+
+{
+  FUN_00054724(param_1);
+  return;
+}
+
+
+
 uint thunk_FUN_0004841e(void)
 
 {
   return FUN_0004841e();
+}
+
+
+
+void thunk_FUN_000568dc(undefined4 param_1, undefined4 param_2)
+
+{
+  FUN_000568dc(param_1, param_2);
+  return;
+}
+
+
+
+void thunk_FUN_000569ac(undefined4 param_1, undefined4 param_2)
+
+{
+  FUN_000569ac(param_1, param_2);
+  return;
+}
+
+
+
+void thunk_FUN_00050c82(undefined4 param_1, undefined4 param_2)
+
+{
+  FUN_00050c82(param_1, param_2);
+  return;
 }
 
 
@@ -833,10 +1045,28 @@ int thunk_FUN_0006163e(void)
 
 
 
+void thunk_FUN_00051cf6(undefined4 param_1, undefined4 param_2)
+
+{
+  FUN_00051cf6(param_1, param_2);
+  return;
+}
+
+
+
 void thunk_FUN_00052a10(void)
 
 {
   FUN_00052a10();
+  return;
+}
+
+
+
+void thunk_FUN_00051d38(undefined4 param_1, undefined4 param_2, undefined4 param_3)
+
+{
+  FUN_00051d38(param_1, param_2, param_3);
   return;
 }
 
@@ -855,6 +1085,15 @@ void thunk_FUN_00035ad6(void)
 
 {
   FUN_00035ad6();
+  return;
+}
+
+
+
+void thunk_FUN_00056b78(undefined4 param_1, undefined4 param_2)
+
+{
+  FUN_00056b78(param_1, param_2);
   return;
 }
 

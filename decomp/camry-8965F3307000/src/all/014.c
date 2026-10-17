@@ -216,7 +216,7 @@ uint f33_diag_routine_1002_normalize_lifecycle
   puVar2 = 0xfebeb800u;
   if (control_type == '\x01') {
     ((void)(1), (void)(unused_input), (void)(unused_input_length), FUN_00035aa2());
-    ((void)(0x44), thunk_FUN_000b9320());
+    thunk_FUN_000b9320(0x44);
     (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3663))))) = 1;
     uVar1 = 0;
   }
@@ -309,7 +309,7 @@ uint f33_diag_routine_1007_admit(uchar control_type)
   
   cVar1 = DAT_febe819f;
   if (control_type == '\x01') {
-    iVar2 = ((void)(0), thunk_FUN_000b8d9c());
+    iVar2 = thunk_FUN_000b8d9c(0);
     if (iVar2 != 0x5a) {
       return 5;
     }
@@ -342,7 +342,7 @@ uint f33_diag_routine_1007_restart_lifecycle_group0
   uint32_t puVar2;
   puVar2 = 0xfebeb800u;
   if (control_type == '\x01') {
-    ((void)(0), (void)(unused_input), (void)(unused_input_length), thunk_FUN_000b8dda());
+    ((void)(unused_input), (void)(unused_input_length), thunk_FUN_000b8dda(0));
     (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3661))))) = 1;
     uVar1 = 0;
   }
@@ -371,7 +371,7 @@ uint f33_diag_routine_1008_admit(uchar control_type)
   
   cVar1 = DAT_febe81a0;
   if (control_type == '\x01') {
-    iVar2 = ((void)(2), thunk_FUN_000b8d9c());
+    iVar2 = thunk_FUN_000b8d9c(2);
     if (iVar2 != 0x5a) {
       return 5;
     }
@@ -784,7 +784,7 @@ uint f33_diag_routine_1109_request_record100_reset
   uint uVar2;
   
   if (control_type == '\x01') {
-    application_status = ((void)(0x22), (void)(1), (void)(unused_input_length), thunk_FUN_000b90ca());
+    application_status = ((void)(unused_input_length), thunk_FUN_000b90ca(0x22, 1));
     uVar2 = f33_diag_translate_application_request_status(application_status);
     if (uVar2 == 2) {
       uVar2 = 0;
