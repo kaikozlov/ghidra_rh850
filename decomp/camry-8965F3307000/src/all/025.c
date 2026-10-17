@@ -911,6 +911,26 @@ LAB_00094b70:
   return 1;
 }
 
+undefined4 FUN_00094ba8(char param_1)
+
+{
+  uint uVar1;
+  
+  if (PTR_PTR_00026034 != 0) {
+    uVar1 = 0;
+    if (PTR_PTR_00026030 == 0) {
+      return 1;
+    }
+    for (; uVar1 < (byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)((PTR_PTR_00026030) + (uint32_t)(4) * 1u)))); uVar1 = uVar1 + 1 & 0xff) {
+      if (param_1 == (*((char *)camry_host_ptr((uint32_t)((*((volatile int32_t *)camry_host_ptr((uint32_t)(PTR_PTR_00026030)))) + uVar1))))) {
+        return 0;
+      }
+    }
+  }
+  return 1;
+}
+
+
 
 
 undefined4 FUN_00094d9c(ushort param_1,undefined2 *param_2)

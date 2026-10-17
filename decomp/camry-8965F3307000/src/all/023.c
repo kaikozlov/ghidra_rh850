@@ -1540,6 +1540,44 @@ void f33_fill_counter_sample_pairs(uchar *output,uchar length)
   return;
 }
 
+undefined4 FUN_0008d6d6(int param_1)
+
+{
+  F33BootChallengeExclusionRecord *pFVar1;
+  uint uVar2;
+  int iVar3;
+  uint uVar4;
+  int iVar5;
+  
+  pFVar1 = ((void *)camry_host_ptr((uint32_t)((0x25620u))));
+  iVar3 = 0x5a;
+  uVar4 = 0;
+  iVar5 = iVar3;
+  if (f33_app_security_challenge_active != '\0') {
+    pFVar1 = ((void *)camry_host_ptr((uint32_t)((0x25630u))));
+  }
+  do {
+    if (pFVar1->count <= uVar4) break;
+    uVar2 = 0;
+    iVar5 = iVar3;
+    do {
+      if ((*((uchar *)camry_host_ptr((uint32_t)(uVar2 + param_1)))) != (*((volatile uint8_t *)camry_host_ptr((uint32_t)((pFVar1->excluded_blocks[uVar4]) + (uint32_t)(uVar2)))))) {
+        iVar5 = 0;
+      }
+      uVar2 = uVar2 + 1 & 0xff;
+    } while ((iVar5 == 0x5a) && (uVar2 < 0x10));
+    if (iVar5 != 0) {
+      iVar3 = 0;
+    }
+    uVar4 = uVar4 + 1 & 0xff;
+  } while (iVar3 == 0x5a);
+  if (iVar5 != 0) {
+    return 0;
+  }
+  return 0x5a;
+}
+
+
 
 
 /* Up to2 timer-derived candidates: sample16 bytes, initializeCTR(timerkey,counter0),

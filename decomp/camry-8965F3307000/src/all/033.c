@@ -398,6 +398,31 @@ void FUN_000cc514(void)
   return;
 }
 
+void FUN_000cc530(void)
+
+{
+  DAT_febec88e = 0;
+  DAT_febec88f = 0;
+  DAT_febec868 = 0;
+  DAT_febec890 = 0;
+  DAT_febec891 = 0;
+  DAT_febec874 = 0;
+  DAT_febec892 = 0;
+  DAT_febec876 = 0;
+  DAT_febec878 = 0;
+  DAT_febec87a = 0;
+  DAT_febec87c = 0;
+  DAT_febec88c = (*((volatile uint8_t *)camry_host_ptr((uint32_t)((f33_calibration_bank_bases[DAT_febeac3c & 1]) + (uint32_t)(0x228c)))));
+  DAT_febec88d = (*((volatile uint8_t *)camry_host_ptr((uint32_t)((f33_calibration_bank_bases[DAT_febeac3c & 1]) + (uint32_t)(0x228d)))));
+  DAT_febec87e = 0;
+  DAT_febec880 = 0;
+  DAT_febec86c = 0;
+  DAT_febec882 = 0;
+  DAT_febec886 = 0;
+  return;
+}
+
+
 
 
 /* Constant-block fill: 5 literal assignments into one contiguous cell block; shape-verified.

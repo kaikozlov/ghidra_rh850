@@ -1677,6 +1677,23 @@ undefined4 FUN_00091b78(void)
   return f33_dcm_restore_default_session();
 }
 
+bool FUN_00091b84(short param_1)
+
+{
+  uchar uVar1;
+  undefined4 local_10;
+  undefined2 uStack_c;
+  
+  local_10 = 0;
+  uStack_c = 0;
+  uVar1 = ((F33DcmReceiveDescriptor *)camry_host_ptr((uint32_t)(((F33DcmConnection *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)((f33_dcm_protocol_configuration[(short)f33_dcm_receive_route[param_1].protocol_index].
+          connections) + (uint32_t)(f33_dcm_receive_route[param_1].connection_index) * 4u)))))))->receive_rows)))
+          [f33_dcm_receive_route[param_1].receive_descriptor_index].addressing_kind;
+  FUN_00093c6c(param_1,&local_10);
+  return FUN_000916c6(uVar1,&local_10);
+}
+
+
 
 
 undefined4 FUN_00091bd2(int param_1)
@@ -1717,6 +1734,34 @@ undefined4 FUN_00091bf2(void)
   thunk_FUN_0006a4c4();
   return uVar1;
 }
+
+/* Build routing from25EE8 and configured RX descriptors, obtain completed receive buffer and
+   shared768-byte response buffer, then invoke91566 admission. */
+
+void f33_dcm_dispatch_retained_receive(ushort receive_slot)
+
+{
+  F33DcmRequestRoute local_1c;
+  F33PduInfo FStack_18;
+  F33PduInfo FStack_10;
+  
+  FStack_18.length = 0;
+  FStack_18.data = 0;
+  FStack_10.length = 0;
+  FStack_10.data = 0;
+  local_1c.addressing_kind =
+       ((F33DcmReceiveDescriptor *)camry_host_ptr((uint32_t)(((F33DcmConnection *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)((f33_dcm_protocol_configuration
+       [(short)f33_dcm_receive_route[(short)receive_slot].protocol_index].connections) + (uint32_t)(f33_dcm_receive_route[(short)receive_slot].connection_index) * 4u)))))))->receive_rows)))
+       [f33_dcm_receive_route[(short)receive_slot].receive_descriptor_index].addressing_kind;
+  local_1c.service_list_selector = f33_dcm_receive_route[(short)receive_slot].receive_id;
+  thunk_FUN_0006a45e();
+  FUN_00093c6c(receive_slot,&FStack_10);
+  thunk_FUN_0006a4c4();
+  FUN_00093ce6(&FStack_18);
+  f33_dcm_begin_service_request(&local_1c,&FStack_10,&FStack_18);
+  return;
+}
+
 
 
 
@@ -3904,6 +3949,26 @@ void f33_dcm_snapshot_response_notification(uchar *result,uchar *pending_notific
   *pending_notification = f33_dcm_response_queue.pending_notification;
   return;
 }
+
+/* Compare configured protocol priority bytes:2 candidate numerically lower/higher priority,1
+   equal,0 candidate numerically greater. Return is ternary, not bool. */
+
+uint f33_dcm_compare_protocol_priority(ushort candidate_slot,ushort owner_slot)
+
+{
+  byte bVar1;
+  byte bVar2;
+  
+  bVar1 = ((F33DcmConnection *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)((f33_dcm_protocol_configuration
+          [(short)f33_dcm_receive_route[(short)candidate_slot].protocol_index].connections) + (uint32_t)(f33_dcm_receive_route[(short)candidate_slot].connection_index) * 4u)))))))->priority;
+  bVar2 = ((F33DcmConnection *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)((f33_dcm_protocol_configuration
+          [(short)f33_dcm_receive_route[(short)owner_slot].protocol_index].connections) + (uint32_t)(f33_dcm_receive_route[(short)owner_slot].connection_index) * 4u)))))))->priority;
+  if (bVar2 <= bVar1) {
+    return (uint)(bVar1 == bVar2);
+  }
+  return 2;
+}
+
 
 
 

@@ -1296,6 +1296,9 @@ def _is_compare_operand(code: str, start: int, end: int) -> bool:
 
 
 def _rewrite_int_to_pointer(code: str, pointers: set[str]) -> str:
+    # `*(int *)SLOT` is the word at that firmware address. Folding it first
+    # keeps an outer `(char *)(word + index)` from hiding the load.
+    code = _rewrite_slot_word_derefs(code)
     pieces: list[str] = []
     cursor = 0
     search = 0
@@ -5558,6 +5561,356 @@ def _matching_open_paren(code: str, close: int) -> int | None:
     return None
 
 
+_SLOT_WORD_DEREF = re.compile(
+    r"\*\s*\(\s*(int|uint|undefined4|ulong|long)\s*\*\s*\)\s*"
+    r"([A-Za-z_][A-Za-z0-9_]*)\b"
+)
+_SLOT_WORD_CTYPE = {
+    "int": "int32_t",
+    "uint": "uint32_t",
+    "undefined4": "uint32_t",
+    "ulong": "uint32_t",
+    "long": "int32_t",
+}
+
+
+def _rewrite_slot_word_derefs(code: str) -> str:
+    """`*(int *)SLOT` loads the word stored at a pointer slot.
+
+    The slot macro is already that firmware address. A host dereference of
+    the integer is not the `ld.w`.
+    """
+    slots = _uint32_slot_names()
+    spans = _comment_spans(code)
+    pieces: list[str] = []
+    cursor = 0
+    for match in _SLOT_WORD_DEREF.finditer(code):
+        if match.start() < cursor or _span_contains(spans, match.start()):
+            continue
+        if match.group(2) not in slots or not _is_deref_star(code, match.start()):
+            continue
+        pieces.append(code[cursor:match.start()])
+        pieces.append(_typed_load(match.group(2), _SLOT_WORD_CTYPE[match.group(1)]))
+        cursor = match.end()
+    pieces.append(code[cursor:])
+    return "".join(pieces)
+
+
+def _leading_byte_cast(code: str, index: int) -> int | None:
+    """Start of a `(byte)` / `(char)` cast whose operand begins at `index`."""
+    cursor = index - 1
+    while cursor >= 0 and code[cursor] in " \t\n\r":
+        cursor -= 1
+    if cursor < 0 or code[cursor] != ")":
+        return None
+    depth = 0
+    start = cursor
+    while start >= 0:
+        if code[start] == ")":
+            depth += 1
+        elif code[start] == "(":
+            depth -= 1
+            if depth == 0:
+                inner = " ".join(code[start + 1:cursor].split())
+                width = _POINTEE_WIDTH.get(inner)
+                if "*" in inner or width is None or width[1] != 1:
+                    return None
+                return start
+        start -= 1
+    return None
+
+
+def _expr_is_byte(expr: str, destinations: dict[str, tuple[str, int]]) -> bool:
+    text = " ".join(expr.split())
+    if re.fullmatch(r"'(?:\\.|[^'\\])'", text):
+        return True
+    name = re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", text)
+    if name is not None:
+        found = destinations.get(name.group(0))
+        return found is not None and found[1] == 1
+    return re.match(
+        r"^\(?\*\(\((?:volatile )?(?:uchar|byte|char|undefined1|undefined|uint8_t|int8_t) \*\)",
+        text,
+    ) is not None
+
+
+def _used_as_byte(
+    code: str, start: int, end: int, destinations: dict[str, tuple[str, int]],
+) -> bool:
+    """The value at [start, end) is a byte load, not a word."""
+    if _leading_byte_cast(code, start) is not None:
+        return True
+    assigned = _assigned_byte(code, start, destinations)
+    if assigned is not None and assigned[1] == 1:
+        return True
+    nxt = _skip_space(code, end)
+    if code.startswith(("==", "!="), nxt):
+        rhs_end = _scan_side(code, nxt + 2, 1, ",;)")
+        return _expr_is_byte(code[nxt + 2:rhs_end], destinations)
+    op, op_at = _compare_before(code, start)
+    if op in {"==", "!="}:
+        lhs_at = _scan_side(code, op_at - 1, -1, ",;(")
+        return _expr_is_byte(code[lhs_at:op_at], destinations)
+    return False
+
+
+def _ident_before(code: str, pos: int) -> str | None:
+    index = pos - 1
+    while index >= 0 and code[index] in " \t\n\r":
+        index -= 1
+    end = index + 1
+    while index >= 0 and (code[index].isalnum() or code[index] == "_"):
+        index -= 1
+    name = code[index + 1:end]
+    if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", name):
+        return name
+    return None
+
+
+def _receiver_start(code: str, op_at: int) -> int | None:
+    """Object before `.field` or `->field` at `op_at`."""
+    index = op_at - 1
+    while index >= 0 and code[index] in " \t\n\r":
+        index -= 1
+    if index >= 0 and code[index] == "]":
+        try:
+            index = _match_bracket_back(code, index) - 1
+        except ValueError:
+            return None
+        while index >= 0 and code[index] in " \t\n\r":
+            index -= 1
+    end = index + 1
+    while index >= 0 and (code[index].isalnum() or code[index] == "_"):
+        index -= 1
+    if end == index + 1:
+        return None
+    return index + 1
+
+
+_POINTER_ARRAYS: dict[str, tuple[str, int]] | None = None
+_DOUBLE_POINTERS: dict[str, str] | None = None
+
+
+def _subscript_expr_start(code: str, bracket: int) -> int | None:
+    """Start of `object->field` or `name` immediately before `[`."""
+    index = bracket - 1
+    while index >= 0 and code[index] in " \t\n\r":
+        index -= 1
+    if index < 0:
+        return None
+    start = None
+    while index >= 0:
+        end = index + 1
+        while index >= 0 and (code[index].isalnum() or code[index] == "_"):
+            index -= 1
+        if end == index + 1:
+            return start
+        start = index + 1
+        while index >= 0 and code[index] in " \t\n\r":
+            index -= 1
+        if index >= 1 and code.startswith("->", index - 1):
+            index -= 2
+        elif index >= 0 and code[index] == ".":
+            index -= 1
+        else:
+            return start
+        while index >= 0 and code[index] in " \t\n\r":
+            index -= 1
+    return start
+
+
+def _pointer_array_pointees() -> dict[str, tuple[str, int]]:
+    """`field[i][j]` on `uchar *32[N]` is the byte at the loaded pointer."""
+    global _POINTER_ARRAYS
+    if _POINTER_ARRAYS is not None:
+        return _POINTER_ARRAYS
+    scalars = {
+        "uchar": ("uint8_t", 1),
+        "byte": ("uint8_t", 1),
+        "char": ("uint8_t", 1),
+        "undefined1": ("uint8_t", 1),
+        "undefined": ("uint8_t", 1),
+    }
+    found: dict[str, tuple[str, int] | None] = {}
+    for row in _struct_rows().values():
+        for field in row["fields"]:
+            base, stars, array = _ghidra_base(field["type"])
+            if stars != 1 or not array:
+                continue
+            width = scalars.get(base)
+            previous = found.get(field["name"], width)
+            found[field["name"]] = width if previous == width else None
+    _POINTER_ARRAYS = {
+        name: width for name, width in found.items() if width is not None
+    }
+    return _POINTER_ARRAYS
+
+
+def _double_pointer_fields() -> dict[str, str]:
+    """`field[index]` on `T *32 *32` loads one pointer to T."""
+    global _DOUBLE_POINTERS
+    if _DOUBLE_POINTERS is not None:
+        return _DOUBLE_POINTERS
+    functions = _function_types()
+    found: dict[str, set[str | None]] = {}
+    for row in _struct_rows().values():
+        for field in row["fields"]:
+            base, stars, array = _ghidra_base(field["type"])
+            kind: str | None = base if stars == 2 and not array and base not in functions else None
+            found.setdefault(field["name"], set()).add(kind)
+    _DOUBLE_POINTERS = {
+        name: next(iter(kinds))
+        for name, kinds in found.items()
+        if len(kinds) == 1 and None not in kinds
+    }
+    return _DOUBLE_POINTERS
+
+
+def _rewrite_loaded_word_indexes(code: str) -> str:
+    """`(byte)SLOT[index]` is the byte at the loaded pointer plus the index.
+
+    The slot macro is the pointer word. A word-scaled `SLOT[1]` has no byte
+    cast and stays a subscript.
+    """
+    slots = _uint32_slot_names()
+    spans = _comment_spans(code)
+    pieces: list[str] = []
+    cursor = 0
+    for match in re.finditer(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\[", code):
+        if match.start() < cursor or _span_contains(spans, match.start()):
+            continue
+        if match.group(1) not in slots:
+            continue
+        cast_at = _leading_byte_cast(code, match.start())
+        if cast_at is None or cast_at < cursor:
+            continue
+        try:
+            end = _match_bracket(code, match.end() - 1)
+        except ValueError:
+            continue
+        nxt = _skip_space(code, end + 1)
+        if nxt < len(code) and code[nxt] == "[":
+            continue
+        index = code[match.end():end]
+        pieces.append(code[cursor:cast_at])
+        pieces.append(_typed_load(
+            f"{match.group(1)} + (uint32_t)({index})",
+            "uint8_t",
+        ))
+        cursor = end + 1
+    pieces.append(code[cursor:])
+    return "".join(pieces)
+
+
+def _rewrite_pointer_word_indexes(code: str) -> str:
+    """Index a loaded pointer word at the width of that load.
+
+    `bases[slot][offset]` assigned to a byte is `ld.bu` at the selected base.
+    `record->excluded_blocks[i][j]` is the byte at that pointer word.
+    `configuration[n].connections[index]` loads one `F33DcmConnection` pointer
+    (`shl 2`, then `ld.w`).
+    """
+    destinations = _byte_destinations(code)
+    arrays = _pointer_array_pointees()
+    doubles = _double_pointer_fields()
+    tables = _uint32_array_names()
+    spans = _comment_spans(code)
+    pieces: list[str] = []
+    cursor = 0
+    start = 0
+    while True:
+        bracket = code.find("[", start)
+        if bracket < 0:
+            pieces.append(code[cursor:])
+            break
+        if bracket < cursor or _span_contains(spans, bracket):
+            start = bracket + 1
+            continue
+        close = bracket - 1
+        while close >= cursor and code[close] in " \t\n":
+            close -= 1
+        inner_open = None
+        if close >= cursor and code[close] == "]":
+            try:
+                inner_open = _match_bracket_back(code, close)
+            except ValueError:
+                inner_open = None
+        if inner_open is not None and inner_open >= cursor:
+            field = _ident_before(code, inner_open)
+            base_start = _subscript_expr_start(code, inner_open)
+            try:
+                end = _match_bracket(code, bracket)
+            except ValueError:
+                start = bracket + 1
+                continue
+            nxt = _skip_space(code, end + 1)
+            if nxt < len(code) and code[nxt] == "=" and not code.startswith("==", nxt):
+                start = bracket + 1
+                continue
+            index = code[bracket + 1:end]
+            pointee = arrays.get(field) if field else None
+            root = code[base_start:inner_open].strip() if base_start is not None else ""
+            if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", root):
+                root = ""
+            byte = (
+                pointee is not None and pointee[1] == 1
+            ) or (
+                root in tables and base_start is not None and _used_as_byte(
+                    code, base_start, end + 1, destinations,
+                )
+            )
+            if byte and base_start is not None:
+                inner = code[base_start:close + 1]
+                pieces.append(code[cursor:base_start])
+                pieces.append(_typed_load(
+                    f"({inner}) + (uint32_t)({index})",
+                    "uint8_t",
+                ))
+                cursor = end + 1
+                start = cursor
+                continue
+        field_at = bracket
+        while field_at > cursor and code[field_at - 1] in " \t\n":
+            field_at -= 1
+        name = _ident_before(code, field_at)
+        pointee_name = doubles.get(name) if name else None
+        if pointee_name is None:
+            start = bracket + 1
+            continue
+        op_at = field_at - len(name)
+        while op_at > 0 and code[op_at - 1] in " \t\n":
+            op_at -= 1
+        if code.startswith("->", op_at - 2):
+            op_at -= 2
+        elif op_at > 0 and code[op_at - 1] == ".":
+            op_at -= 1
+        else:
+            start = bracket + 1
+            continue
+        receiver = _receiver_start(code, op_at)
+        if receiver is None or receiver < cursor:
+            start = bracket + 1
+            continue
+        try:
+            end = _match_bracket(code, bracket)
+        except ValueError:
+            start = bracket + 1
+            continue
+        index = code[bracket + 1:end]
+        field_expr = code[receiver:field_at].strip()
+        pieces.append(code[cursor:receiver])
+        pieces.append(_host_pointer(
+            _typed_load(
+                f"({field_expr}) + (uint32_t)({index}) * 4u",
+                "uint32_t",
+            ),
+            pointee_name,
+        ))
+        cursor = end + 1
+        start = cursor
+    return "".join(pieces)
+
+
 def _rewrite_integer_subscripts(code: str) -> str:
     """`(firmware_address + offset)[index]` is the byte at that address.
 
@@ -6140,6 +6493,8 @@ def _rewrite_body(code: str) -> str:
     code = _rewrite_scaled_table(code)
     code = _rewrite_loaded_pointer_subscripts(code)
     code = _rewrite_integer_subscripts(code)
+    code = _rewrite_loaded_word_indexes(code)
+    code = _rewrite_pointer_word_indexes(code)
     code = _rewrite_late_pointer_fields(code)
     code = _rewrite_pointer_assignments(code, firmware=True)
     return code

@@ -1169,6 +1169,38 @@ void FUN_000851b8(void)
   return;
 }
 
+undefined4 FUN_000851ee(uint param_1)
+
+{
+  ushort controller_route;
+  uint32_t puVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  int iVar4;
+  undefined4 uVar5;
+  
+  puVar1 = 0xfebeb800u;
+  puVar2 = 0x23dfcu;
+  uVar3 = (uint)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(PTR_DAT_00022e38 + (uint32_t)((param_1 & 0xffff) * 2)))));
+  if (f33_driver_channel_software_states[uVar3] == running_software_state) {
+    iVar4 = FUN_000855f4(uVar3,(*((volatile uint8_t *)camry_host_ptr((uint32_t)((PTR_DAT_00022e38 + (param_1 & 0xffff) * 2) + (uint32_t)(1))))));
+    if (iVar4 == 0) {
+      controller_route =
+           (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + ((param_1 & 0xffff) - (uint)*(ushort *)(puVar2 + -0xfc0) & 0xffff) * 2 +
+                      -0x67d6))));
+      (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + ((param_1 & 0xffff) - (uint)*(ushort *)(puVar2 + -0xfc0) & 0xffff) * 2 + -0x67d6)))) =
+           0xffff;
+      f33_complete_queued_can_tx(controller_route);
+    }
+    uVar5 = 0;
+  }
+  else {
+    uVar5 = 1;
+  }
+  return uVar5;
+}
+
+
 
 
 void FUN_00085240(uint param_1,ushort param_2)
