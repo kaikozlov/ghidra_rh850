@@ -6990,6 +6990,23 @@ def _header_pointer_returns() -> set[str]:
     return found
 
 
+def _hand_integer_returns() -> set[str]:
+    """camry.h owns these returns. A corpus `void *` is not a host pointer."""
+    header = _strip_comments((ROOT / "include" / "camry.h").read_text(encoding="utf-8"))
+    found: set[str] = set()
+    for line in header.splitlines():
+        text = line.strip()
+        if not text.endswith(";") or "(" not in text:
+            continue
+        head = text.split("(", 1)[0]
+        if "*" in head:
+            continue
+        name = head.split()[-1]
+        if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", name):
+            found.add(name)
+    return found
+
+
 def _pointer_return_names() -> set[str]:
     global _POINTER_RETURNS
     if _POINTER_RETURNS is None:
@@ -6999,6 +7016,7 @@ def _pointer_return_names() -> set[str]:
             if _returns_pointer(_c_signature(row["decompiled_c"]))
         }
         _POINTER_RETURNS.update(_header_pointer_returns())
+        _POINTER_RETURNS.difference_update(_hand_integer_returns())
     return _POINTER_RETURNS
 
 

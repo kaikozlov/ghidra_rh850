@@ -2694,6 +2694,31 @@ undefined4 FUN_00072474(void)
   return uVar3;
 }
 
+undefined4 FUN_000724c0(void)
+
+{
+  ushort logical_handle;
+  void *pvVar1;
+  int iVar2;
+  undefined4 uVar3;
+  
+  pvVar1 = ((void *)camry_host_ptr((uint32_t)(f33_nvm_scheduler_operation.buffer_08)));
+  logical_handle = f33_nvm_scheduler_operation.logical_handle;
+  FUN_00071f28(f33_nvm_scheduler_operation.logical_handle,f33_nvm_scheduler_operation.operation);
+  iVar2 = FUN_00072418();
+  if (iVar2 == 0) {
+    FUN_00071fe4(logical_handle,pvVar1);
+    DAT_febf6118 = f33_nvm_read_buffer(logical_handle);
+    uVar3 = FUN_00072474();
+  }
+  else {
+    uVar3 = 2;
+    DAT_febf6114 = 0x3f721401;
+  }
+  return uVar3;
+}
+
+
 
 
 void FUN_0007250e(undefined2 param_1,char param_2)
@@ -2767,6 +2792,46 @@ undefined4 FUN_00072632(void)
 {
   return FUN_0007252c(DAT_febf6125);
 }
+
+undefined4 FUN_00072646(void)
+
+{
+  ushort logical_handle;
+  int iVar1;
+  uint uVar2;
+  undefined4 uVar3;
+  F33NvmOperation local_20;
+  
+  logical_handle = f33_nvm_scheduler_operation.logical_handle;
+  iVar1 = FUN_00074708(f33_nvm_scheduler_operation.logical_handle);
+  if (iVar1 == 0) {
+    DAT_febf611c = f33_nvm_write_buffer(logical_handle);
+    local_20.buffer_08 = 0;
+    local_20.logical_handle = logical_handle;
+    local_20.operation = 2;
+    local_20.buffer_0c = DAT_febf611c;
+    uVar2 = f33_nvm_submit_operation(camry_host_addr(&local_20));
+    if (uVar2 == 0) {
+      DAT_febf6114 = 0x22aa8a36;
+      return 4;
+    }
+  }
+  else {
+    if (iVar1 != 1) {
+      if (iVar1 != 2) {
+        return 2;
+      }
+      DAT_febf6114 = 0xa1a62093;
+      return 2;
+    }
+    FUN_00072108(4);
+    FUN_0007211a(1);
+  }
+  FUN_00072058(logical_handle);
+  uVar3 = FUN_0007243c(1);
+  return uVar3;
+}
+
 
 
 
@@ -2874,6 +2939,31 @@ undefined4 FUN_000727b2(void)
   return FUN_0007275e();
 }
 
+undefined4 FUN_000727d2(void)
+
+{
+  ushort logical_handle;
+  void *pvVar1;
+  int iVar2;
+  undefined4 uVar3;
+  
+  pvVar1 = ((void *)camry_host_ptr((uint32_t)(f33_nvm_scheduler_operation.buffer_08)));
+  logical_handle = f33_nvm_scheduler_operation.logical_handle;
+  FUN_00071f28(f33_nvm_scheduler_operation.logical_handle,f33_nvm_scheduler_operation.operation);
+  iVar2 = FUN_00072418();
+  if (iVar2 == 0) {
+    FUN_00072074(logical_handle,pvVar1);
+    DAT_febf6118 = f33_nvm_read_buffer(logical_handle);
+    uVar3 = FUN_000727b2();
+  }
+  else {
+    uVar3 = 2;
+    DAT_febf6114 = 0x3f721401;
+  }
+  return uVar3;
+}
+
+
 
 
 /* Far-call trampoline: prepare {lp},0 / jarl 0x7275E / dispose 0,{lp},lp; byte-verified against the
@@ -2980,6 +3070,40 @@ undefined4 FUN_00072920(ushort param_1,undefined1 param_2)
   FUN_00071f82(param_1,f33_nvm_scheduler_operation.operation);
   return FUN_000728d2(param_1 + 1);
 }
+
+undefined4 FUN_00072958(void)
+
+{
+  ushort logical_handle;
+  undefined4 uVar1;
+  int iVar2;
+  uint uVar3;
+  F33NvmOperation local_18;
+  
+  logical_handle = DAT_febf6122;
+  iVar2 = FUN_0007285c(DAT_febf6122);
+  if (iVar2 == 1) {
+    uVar1 = 4;
+  }
+  else {
+    FUN_00071fe4(logical_handle,0);
+    DAT_febf6118 = f33_nvm_read_buffer(logical_handle);
+    local_18.buffer_0c = 0;
+    local_18.logical_handle = logical_handle;
+    local_18.operation = 1;
+    local_18.buffer_08 = DAT_febf6118;
+    uVar3 = f33_nvm_submit_operation(camry_host_addr(&local_18));
+    if (uVar3 == 0) {
+      DAT_febf6114 = 0xa1a62093;
+      return 4;
+    }
+    FUN_00072010(logical_handle);
+    uVar1 = 1;
+  }
+  uVar1 = FUN_00072920(logical_handle,uVar1);
+  return uVar1;
+}
+
 
 
 
