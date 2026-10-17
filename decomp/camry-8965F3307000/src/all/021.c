@@ -82,6 +82,25 @@ void FUN_00084160(void)
 
 
 
+void FUN_000841a6(uint param_1)
+
+{
+  int iVar1;
+  
+  param_1 = param_1 & 0xff;
+  f33_driver_channel_software_states[param_1] = recovery_pending;
+  FUN_000850e0((uint)(byte)param_1);
+  iVar1 = FUN_00084e44(param_1);
+  if (iVar1 == 0) {
+    ((void)(param_1), FUN_00084fea());
+    f33_driver_channel_software_states[param_1] = stopped_software_state;
+  }
+  FUN_000835c6(param_1);
+  return;
+}
+
+
+
 bool FUN_000841e6(undefined1 param_1,undefined2 param_2)
 
 {
@@ -89,6 +108,36 @@ bool FUN_000841e6(undefined1 param_1,undefined2 param_2)
   
   iVar1 = FUN_00085012(param_1,param_2);
   return iVar1 != 0;
+}
+
+
+
+void FUN_00084274(uint param_1)
+
+{
+  int iVar1;
+  
+  f33_driver_channel_software_states[param_1 & 0xff] = stop_pending;
+  iVar1 = FUN_00084b74((uint)(byte)param_1);
+  if (iVar1 == 0) {
+    f33_driver_channel_software_states[param_1 & 0xff] = stopped_software_state;
+  }
+  return;
+}
+
+
+
+void FUN_000842a0(uint param_1)
+
+{
+  F33DriverChannelSoftwareState FVar1;
+  
+  FVar1 = f33_driver_channel_software_states[param_1 & 0xff];
+  if ((((FVar1 == start_pending) || (FVar1 == recovery_pending)) || (FVar1 == stop_pending)) ||
+     (FVar1 == running_software_state)) {
+    f33_driver_channel_software_states[param_1 & 0xff] = stopped_software_state;
+  }
+  return;
 }
 
 
@@ -999,6 +1048,56 @@ void FUN_000850e0(uint param_1)
     *(undefined2 *)(((undefined *)camry_host_ptr(0xfebe502au)) + uVar3 * 2) = 0xffff;
   }
   return;
+}
+
+
+
+/* Require physical-channel initialization sentinel; choose classic853AA or FD8549E by raw-ID bit30.
+   Subsequent CFDTMC request store is not proof of bus delivery. */
+
+uint f33_driver_admit_can_tx(ushort driver_handle,F33CanDriverPdu *pdu)
+
+{
+  byte *pbVar1;
+  undefined8 uVar2;
+  undefined4 uVar3;
+  uint uVar4;
+  uint uVar5;
+  uchar *local_28;
+  uint uStack_24;
+  byte bStack_20;
+  
+  uVar2 = 0x23dfcfebeb800;
+  uVar4 = 1;
+  pbVar1 = ((void *)camry_host_ptr((uint32_t)(PTR_DAT_00022e38 + (uint)driver_handle * 2)));
+  uVar5 = (uint)*pbVar1;
+  if (f33_driver_channel_software_states[uVar5] == running_software_state) {
+    uVar3 = FUN_0007a2da();
+    local_28 = ((void *)camry_host_ptr((uint32_t)(pdu->data)));
+    uStack_24 = pdu->raw_id;
+    bStack_20 = pdu->length;
+    if ((uStack_24 >> 0x1e & 1) == 0) {
+      if (0xf < bStack_20) {
+        bStack_20 = 0xf;
+      }
+      uVar4 = FUN_000853aa(uVar5,pbVar1[1],&local_28);
+    }
+    else {
+      if (0x40 < bStack_20) {
+        bStack_20 = 0x40;
+      }
+      uVar4 = FUN_0008549e(uVar5,pbVar1[1],&local_28);
+    }
+    if (uVar4 == 0) {
+      (*((ushort *)camry_host_ptr((uint32_t)(((uint)driver_handle - (uint)*(ushort *)((int)((ulonglong)uVar2 >> 0x20) + -0xfc0) & 0xffff)
+        * 2 + (int)uVar2 + -0x67d6)))) = pdu->confirmation_handle;
+    }
+    else if (uVar4 != 2) {
+      uVar4 = 1;
+    }
+    ((void)(uVar3), thunk_FUN_0006a4c4());
+  }
+  return uVar4;
 }
 
 

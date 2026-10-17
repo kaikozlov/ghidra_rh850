@@ -4069,6 +4069,21 @@ bool FUN_00083710(uint param_1)
 
 
 
+undefined4 FUN_0008377e(uint param_1)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = 1;
+  if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x22e5fu + (uint32_t)((param_1 & 0xff) * 4) * 1u)))) == '\x01') &&
+     (f33_driver_channel_software_states[param_1 & 0xff] == running_software_state)) {
+    uVar1 = FUN_00083c50((uint)(byte)param_1);
+  }
+  return uVar1;
+}
+
+
+
 void FUN_000837ac(uint param_1)
 
 {
@@ -4489,6 +4504,71 @@ void FUN_00083f30(void)
 {
   FUN_00083ef2(1);
   return;
+}
+
+
+
+/* 0start/1stop;stage3BC4/3EC1beforephysicalhelpers;return0includespending.
+   Commit57A8/6B94onlyafterzerohelperresult;7FB5Cindicationisempty. */
+
+uint f33_driver_request_channel_start_stop(uchar driver_index,uchar request)
+
+{
+  F33DriverChannelSoftwareState FVar1;
+  undefined4 uVar2;
+  int iVar3;
+  uint uVar4;
+  F33DriverChannelSoftwareState *pFVar5;
+  
+  uVar4 = (uint)driver_index;
+  if (request == '\0') {
+    FVar1 = f33_driver_channel_software_states[uVar4];
+    pFVar5 = f33_driver_channel_software_states + uVar4;
+    if (((FVar1 != stopped_software_state) && (FVar1 != stop_pending)) &&
+       (FVar1 != recovery_pending)) {
+      return 1;
+    }
+    *pFVar5 = start_pending;
+    FUN_000835c6(uVar4);
+    iVar3 = FUN_00084a5e(uVar4);
+    if (iVar3 != 0) {
+      return 0;
+    }
+    FVar1 = running_software_state;
+    uVar2 = 2;
+  }
+  else {
+    if (request != '\x01') {
+      return 1;
+    }
+    FVar1 = f33_driver_channel_software_states[uVar4];
+    pFVar5 = f33_driver_channel_software_states + uVar4;
+    if ((FVar1 != start_pending) && (FVar1 != running_software_state)) {
+      if (FVar1 == stopped_software_state) {
+        return 0;
+      }
+      if (FVar1 == stop_pending) {
+        return 0;
+      }
+      if (FVar1 == recovery_pending) {
+        return 0;
+      }
+      return 1;
+    }
+    *pFVar5 = stop_pending;
+    if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x22e5fu + (uint32_t)(uVar4 * 4) * 1u)))) == '\0') && ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x22e5eu + (uint32_t)(uVar4 * 4) * 1u)))) == '\x01')) {
+      f33_driver_observe_and_clear_bus_off_entry(driver_index);
+    }
+    iVar3 = FUN_00084b74(uVar4);
+    if (iVar3 != 0) {
+      return 0;
+    }
+    FVar1 = stopped_software_state;
+    uVar2 = 3;
+  }
+  *pFVar5 = FVar1;
+  ((void)(uVar4), (void)(uVar2), f33_return_only_stub_7fb5c());
+  return 0;
 }
 
 

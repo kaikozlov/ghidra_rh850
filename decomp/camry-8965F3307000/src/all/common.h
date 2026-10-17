@@ -11600,6 +11600,11 @@ _Static_assert(sizeof(RSCFD_CFSTS) == 4, "cfsts");
 #define PTR_f33_return_only_stub_81d2e_00021e6c (*((volatile uint32_t *)camry_host_ptr(0x21e6cu)))
 #define PTR_f33_return_only_stub_81d2e_00021f24 (*((volatile uint32_t *)camry_host_ptr(0x21f24u)))
 #define PMR camry_pmr
+#define start_pending 0x3bc4
+#define recovery_pending 0x3dc2
+#define stop_pending 0x3ec1
+#define running_software_state 0x57a8
+#define stopped_software_state 0x6b94
 #define Ramffc0a000 (*((volatile uint32_t *)camry_host_ptr(0xffc0a000u)))
 #define Ramffc0a004 (*((volatile uint32_t *)camry_host_ptr(0xffc0a004u)))
 #define Ramffc0a008 (*((volatile uint32_t *)camry_host_ptr(0xffc0a008u)))

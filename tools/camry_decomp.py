@@ -4068,6 +4068,17 @@ def _common_header(text: str, signatures: dict[str, str]) -> str:
         )
     if re.search(r"\bPMR\b", text):
         lines.append("#define PMR camry_pmr")
+    # Halfwords stored into f33_driver_channel_software_states. The compares
+    # against the same slot use these immediates in the same order.
+    for name, value in (
+        ("start_pending", 0x3BC4),
+        ("recovery_pending", 0x3DC2),
+        ("stop_pending", 0x3EC1),
+        ("running_software_state", 0x57A8),
+        ("stopped_software_state", 0x6B94),
+    ):
+        if name not in function_names and re.search(rf"\b{name}\b", text):
+            lines.append(f"#define {name} 0x{value:x}")
     ram_widths = _call_facts()["ram"]
     ram_types = {1: "uint8_t", 2: "uint16_t", 4: "uint32_t"}
     for name in sorted(set(re.findall(r"\b(Ram[0-9A-Fa-f]+)\b", text))):

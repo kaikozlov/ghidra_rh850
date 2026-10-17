@@ -4746,7 +4746,7 @@
 {"addr": "0x83702", "name": "FUN_00083702", "status": "converted"}
 {"addr": "0x83710", "name": "FUN_00083710", "status": "converted"}
 {"addr": "0x83724", "name": "FUN_00083724", "status": "unconvertible"}
-{"addr": "0x8377e", "name": "FUN_0008377e", "status": "unconvertible"}
+{"addr": "0x8377e", "name": "FUN_0008377e", "status": "converted"}
 {"addr": "0x837ac", "name": "FUN_000837ac", "status": "converted"}
 {"addr": "0x837d6", "name": "f33_driver_observe_and_clear_bus_off_entry", "status": "converted"}
 {"addr": "0x83806", "name": "f33_return_only_stub_83806", "status": "converted"}
@@ -4777,14 +4777,14 @@
 {"addr": "0x83f30", "name": "FUN_00083f30", "status": "converted"}
 {"addr": "0x83f3e", "name": "FUN_00083f3e", "status": "unconvertible"}
 {"addr": "0x83f9a", "name": "FUN_00083f9a", "status": "unconvertible"}
-{"addr": "0x83ffa", "name": "f33_driver_request_channel_start_stop", "status": "unconvertible"}
+{"addr": "0x83ffa", "name": "f33_driver_request_channel_start_stop", "status": "converted"}
 {"addr": "0x840c2", "name": "f33_driver_poll_pending_channel_modes", "status": "converted"}
 {"addr": "0x84160", "name": "FUN_00084160", "status": "converted"}
-{"addr": "0x841a6", "name": "FUN_000841a6", "status": "unconvertible"}
+{"addr": "0x841a6", "name": "FUN_000841a6", "status": "converted"}
 {"addr": "0x841e6", "name": "FUN_000841e6", "status": "converted"}
 {"addr": "0x841fc", "name": "FUN_000841fc", "status": "unconvertible"}
-{"addr": "0x84274", "name": "FUN_00084274", "status": "unconvertible"}
-{"addr": "0x842a0", "name": "FUN_000842a0", "status": "unconvertible"}
+{"addr": "0x84274", "name": "FUN_00084274", "status": "converted"}
+{"addr": "0x842a0", "name": "FUN_000842a0", "status": "converted"}
 {"addr": "0x842ce", "name": "FUN_000842ce", "status": "converted"}
 {"addr": "0x842dc", "name": "FUN_000842dc", "status": "converted"}
 {"addr": "0x842fe", "name": "FUN_000842fe", "status": "converted"}
@@ -4819,7 +4819,7 @@
 {"addr": "0x8509a", "name": "FUN_0008509a", "status": "converted"}
 {"addr": "0x850c2", "name": "FUN_000850c2", "status": "converted"}
 {"addr": "0x850e0", "name": "FUN_000850e0", "status": "converted"}
-{"addr": "0x85112", "name": "f33_driver_admit_can_tx", "status": "unconvertible"}
+{"addr": "0x85112", "name": "f33_driver_admit_can_tx", "status": "converted"}
 {"addr": "0x851b8", "name": "FUN_000851b8", "status": "converted"}
 {"addr": "0x851ee", "name": "FUN_000851ee", "status": "unconvertible"}
 {"addr": "0x85240", "name": "FUN_00085240", "status": "converted"}
