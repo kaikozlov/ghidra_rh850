@@ -1843,6 +1843,51 @@ uint32_t f33_nvm_submit_family1_write_copies(uint32_t object) {
     return result;
 }
 
+uint32_t f33_nvm_submit_bulk_reads(void) {
+    uint32_t attempted = 0u;
+    uint32_t index = 0u;
+    while (index < camry_read16(0x2ad72u)) {
+        uint32_t completion = camry_gp + index + 0x4b58u;
+        if (camry_read8(completion) != 0x5au) {
+            uint32_t descriptor = 0x2af0cu + (index << 3);
+            uint32_t first = camry_read16(descriptor + 2u);
+            if (first != 0xffffu) {
+                uint32_t slot = index & 3u;
+                uint32_t stage = camry_gp + 0x5308u + slot * 96u;
+                (void)f33_nvm_enqueue_read(first, stage);
+                (void)f33_nvm_enqueue_read((first + 4u) & 0xffffu, stage + 32u);
+                (void)f33_nvm_enqueue_read((first + 8u) & 0xffffu, stage + 64u);
+                camry_write8(completion, 0xffu);
+                attempted = 0x5au;
+            }
+        }
+        index = (index + 1u) & 0xffffu;
+    }
+    index = 0u;
+    while (index < camry_read16(0x2ad70u)) {
+        uint32_t completion = camry_gp + index + 0x4b38u;
+        if (camry_read8(completion) != 0x5au) {
+            uint32_t descriptor = 0x2ad8cu + index * 12u;
+            uint32_t first = camry_read16(descriptor + 4u);
+            if (first != 0xffffu) {
+                uint32_t count = camry_read16(descriptor + 2u);
+                uint32_t end = (first + count - 1u) & 0xffffu;
+                uint32_t handle = first;
+                while (handle <= end) {
+                    (void)f33_nvm_enqueue_read(handle, camry_gp + 0x5488u);
+                    handle = (handle + 1u) & 0xffffu;
+                }
+                camry_write16(camry_gp + (index << 1) + 0x4b68u, 0xffffu);
+                camry_write8(completion, 0xffu);
+                camry_write32(camry_gp + (index << 2) + 0x4ba8u, 0u);
+                attempted = 0x5au;
+            }
+        }
+        index = (index + 1u) & 0xffffu;
+    }
+    return attempted == 0u ? 0u : 0xffu;
+}
+
 static uint32_t f33_nvm_get_family0_completion(uint32_t object) {
     uint32_t index = object & 0xffffu;
     uint32_t count = camry_read16((3u << 16) - 21136u);

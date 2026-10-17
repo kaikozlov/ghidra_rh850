@@ -79,6 +79,7 @@ VALUE_RETURN = {
     "f33_nvm_arm_family0_write",
     "f33_nvm_submit_family1_read_copies",
     "f33_nvm_submit_family1_write_copies",
+    "f33_nvm_submit_bulk_reads",
 }
 
 DCRA1_BASE = 0xFFD51000
@@ -296,6 +297,8 @@ def bind(library: ctypes.CDLL) -> None:
     library.f33_nvm_submit_family1_read_copies.restype = u32
     library.f33_nvm_submit_family1_write_copies.argtypes = [u32]
     library.f33_nvm_submit_family1_write_copies.restype = u32
+    library.f33_nvm_submit_bulk_reads.argtypes = []
+    library.f33_nvm_submit_bulk_reads.restype = u32
     library.f33_force_unconfirmed_terminal_monitor_healthy.argtypes = [u32, u32, u32]
     library.f33_force_unconfirmed_terminal_monitor_healthy.restype = u32
     library.f33_nvm_read_buffer.argtypes = [u32]
@@ -585,6 +588,8 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
         return int(library.f33_read_repair_redundant_u8(r6, r7, r8, r9)) & 0xFFFFFFFF
     if name == "f33_classify_channel_residual_a":
         return int(library.f33_classify_channel_residual_a()) & 0xFFFFFFFF
+    if name == "f33_nvm_submit_bulk_reads":
+        return int(library.f33_nvm_submit_bulk_reads()) & 0xFFFFFFFF
     if name == "f33_check_learned_quad_bounds":
         return int(library.f33_check_learned_quad_bounds()) & 0xFFFFFFFF
     if name == "f33_update_thermal_release_envelope":
