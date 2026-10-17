@@ -104,7 +104,7 @@ REASONS = {
     "host-link": "the converted closure does not link; the missing callee is outside this batch",
     "host-compile": "the converted body does not compile in the host check",
     "trace-cap": "the machine stopped recording memory accesses at 4096, so the write set is incomplete",
-    "dropped-return": "the bytes write a return value and the converted C is void",
+    "dropped-return": "this function writes r10 and the converted C is void; a callee's leftover r10 is not a return",
     "invented-return": "the bytes leave the incoming r10 alone and the converted C returns a value",
     "return-mismatch": "the host return does not equal the original r10",
     "memory-mismatch": "a caller-visible memory write differs",
@@ -127,6 +127,7 @@ class Run:
     writes: set[tuple[int, int]] = field(default_factory=set)
     memory: dict[int, int] = field(default_factory=dict)
     r10_written: bool = False
+    root_r10: bool = False
     regs: list[int] = field(default_factory=lambda: [0] * 32)
     calls: set[int] = field(default_factory=set)
     steps: int = 0
@@ -251,6 +252,7 @@ class _Machine:
         self.run = Run()
         self.regs = [0] * 32
         self.root = 0
+        self.in_root = False
 
     def execute(self, fn, params: list[tuple[bool, int]], fill: int) -> Run:
         self.fill = fill
@@ -267,6 +269,7 @@ class _Machine:
         for index, (pointer, ordinal) in enumerate(params):
             self.regs[6 + index] = ARG_BASE + index * ARG_STRIDE if pointer else ordinal
         self.root = fn.entry
+        self.in_root = False
         blocked = _static_block(fn)
         if blocked:
             raise Harness(blocked)
@@ -285,6 +288,7 @@ class _Machine:
             if owner is None:
                 raise Harness("fallthrough")
             self.run.steps += 1
+            self.in_root = owner.entry == self.root
             pc = self._step(owner, inst)
             if pc is None:
                 return
@@ -415,6 +419,8 @@ class _Machine:
         self.regs[reg] = value
         if reg == 10:
             self.run.r10_written = True
+            if self.in_root:
+                self.run.root_r10 = True
         self.stack_regs.discard(reg)
         if stack:
             self.stack_regs.add(reg)
@@ -1809,7 +1815,7 @@ def _judge(item: Planned, run: Run, scenario: dict, report: dict) -> str | None:
     bytes_return = sim_r10 != SENTINEL
     if not bytes_return and return_type != "void":
         return "invented-return"
-    if bytes_return and return_type == "void":
+    if bytes_return and return_type == "void" and run.root_r10:
         return "dropped-return"
     return None
 
