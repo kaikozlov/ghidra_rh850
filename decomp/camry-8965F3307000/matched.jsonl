@@ -4877,7 +4877,7 @@
 {"addr": "0x88726", "name": "FUN_00088726", "status": "equivalent", "form": "corpus", "signature": "void FUN_00088726(void)"}
 {"addr": "0x8874c", "name": "FUN_0008874c", "status": "equivalent", "form": "corpus", "signature": "void FUN_0008874c(void)"}
 {"addr": "0x8877e", "name": "FUN_0008877e", "status": "converted"}
-{"addr": "0x88802", "name": "FUN_00088802", "status": "unconvertible"}
+{"addr": "0x88802", "name": "FUN_00088802", "status": "converted"}
 {"addr": "0x88876", "name": "FUN_00088876", "status": "converted"}
 {"addr": "0x888d0", "name": "FUN_000888d0", "status": "equivalent", "form": "corpus", "signature": "void FUN_000888d0(void)"}
 {"addr": "0x8892c", "name": "FUN_0008892c", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_0008892c(void)"}
@@ -4886,7 +4886,7 @@
 {"addr": "0x88b3a", "name": "FUN_00088b3a", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00088b3a(void)"}
 {"addr": "0x88b52", "name": "FUN_00088b52", "status": "equivalent", "form": "corpus", "signature": "void FUN_00088b52(void)"}
 {"addr": "0x88b84", "name": "FUN_00088b84", "status": "unconvertible"}
-{"addr": "0x88c36", "name": "FUN_00088c36", "status": "unconvertible"}
+{"addr": "0x88c36", "name": "FUN_00088c36", "status": "converted"}
 {"addr": "0x88caa", "name": "FUN_00088caa", "status": "converted"}
 {"addr": "0x88d04", "name": "FUN_00088d04", "status": "equivalent", "form": "corpus", "signature": "void FUN_00088d04(void)"}
 {"addr": "0x88d60", "name": "FUN_00088d60", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00088d60(void)"}
@@ -5508,7 +5508,7 @@
 {"addr": "0x94a2e", "name": "FUN_00094a2e", "status": "converted"}
 {"addr": "0x94ae0", "name": "FUN_00094ae0", "status": "converted"}
 {"addr": "0x94ba8", "name": "FUN_00094ba8", "status": "unconvertible"}
-{"addr": "0x94be2", "name": "FUN_00094be2", "status": "unconvertible"}
+{"addr": "0x94be2", "name": "FUN_00094be2", "status": "converted"}
 {"addr": "0x94cc4", "name": "FUN_00094cc4", "status": "converted"}
 {"addr": "0x94d04", "name": "FUN_00094d04", "status": "converted"}
 {"addr": "0x94d9c", "name": "FUN_00094d9c", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00094d9c(ushort param_1,undefined2 *param_2)"}
