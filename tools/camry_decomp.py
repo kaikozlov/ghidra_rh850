@@ -225,9 +225,24 @@ def _pointer_names(signature: str, code: str) -> set[str]:
                     names.add(match.group(1))
     for line in code.splitlines():
         text = line.strip()
-        if not text.endswith(";") or "(" in text or "*" not in text:
+        if not text.endswith(";") or "(" in text or "*" not in text or text.startswith("/*"):
             continue
-        for match in re.finditer(r"\*\s*([A-Za-z_][A-Za-z0-9_]*)\s*(?:;|,)", text):
+        first = re.match(r"[A-Za-z_][A-Za-z0-9_]*", text)
+        first_word = first.group(0) if first else ""
+        is_decl = first_word in _PRIMITIVE_TYPES | {"code", "enum", "sbyte"} or (
+            re.fullmatch(r"[A-Z][A-Za-z0-9_]*", first_word) is not None
+        )
+        if is_decl:
+            for match in re.finditer(r"\*\s*([A-Za-z_][A-Za-z0-9_]*)\s*(?:;|,|=)", text):
+                names.add(match.group(1))
+            continue
+        # `a * b` is multiplication. `*b` and `= *b` are dereferences.
+        for match in re.finditer(r"\*\s*([A-Za-z_][A-Za-z0-9_]*)", text):
+            prev = match.start() - 1
+            while prev >= 0 and text[prev] in " \t":
+                prev -= 1
+            if prev >= 0 and (text[prev].isalnum() or text[prev] in "_)\\]"):
+                continue
             names.add(match.group(1))
     return names
 

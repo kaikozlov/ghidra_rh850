@@ -2423,6 +2423,73 @@ uint f33_map_owner9_budget_limit(uint budget)
 
 
 
+/* Clampbranchsum[0,26604],filterunsignedbudget,mapandretainrequest. Sustainednegative62DCmarkerA5
+   or7827/7937nonzero bypassesrequesttonominal22170. RealFDFD4callerpublishesowner9. */
+
+void f33_publish_owner9_budget_limit(void)
+
+{
+  uint uVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  uint uVar4;
+  ushort limit;
+  int iVar5;
+  int iVar6;
+  
+  puVar2 = 0xfebeb800u;
+  if (DAT_febe62dc < 0) {
+    if (DAT_febe6b15 < DAT_00031924) {
+      DAT_febe6b15 = DAT_febe6b15 + 1;
+      DAT_febe6b14 = 'Z';
+    }
+    else {
+      DAT_febe6b14 = -0x5b;
+    }
+  }
+  else {
+    DAT_febe6b15 = 0;
+    DAT_febe6b14 = '\0';
+  }
+  uVar1 = DAT_febe6b08 + DAT_febe6afc;
+  uVar4 = (uint)DAT_0003192a;
+  if ((int)(uVar1 - uVar4) < 0 != ((int)uVar1 < 0 && -1 < (int)(uVar1 - uVar4))) {
+    uVar4 = uVar1;
+  }
+  if ((int)uVar4 < 0) {
+    uVar4 = 0;
+  }
+  uVar1 = (uint)DAT_00031928;
+  if (uVar1 - 1 < 0xffff) {
+    iVar5 = DAT_febe6b18 * uVar1;
+    iVar6 = (uVar4 & 0xffff) * uVar1;
+  }
+  else {
+    iVar5 = (uint)DAT_febe6b18 << 0x10;
+    iVar6 = uVar4 << 0x10;
+  }
+  uVar1 = iVar6 + (DAT_febe6b24 - iVar5);
+  if (((((int8_t)DAT_febe6b14) == -0x5b) || (DAT_febe7827 != '\0')) || (DAT_febe7937 != '\0')) {
+    uVar4 = 0x569a;
+    limit = 0x569a;
+    DAT_febe6b28 = 0x569a0000;
+  }
+  else {
+    puVar2 = 0xfebeb800u;
+    uVar4 = f33_map_owner9_budget_limit(uVar1 >> 0x10);
+    uVar3 = f33_follow_owner9_limit_request(uVar4);
+    limit = (ushort)uVar3;
+  }
+  f33_set_current_limit_request(9,limit);
+  (*((short *)camry_host_ptr((uint32_t)((0xffffb318u + (uint32_t)((int)puVar2)))))) = (short)(uVar1 >> 0x10);
+  (*((uint *)camry_host_ptr((uint32_t)((0xffffb324u + (uint32_t)((int)puVar2)))))) = uVar1;
+  (*((short *)camry_host_ptr((uint32_t)((0xffffb31au + (uint32_t)((int)puVar2)))))) = (short)uVar4;
+  (*((ushort *)camry_host_ptr((uint32_t)((0xffffb316u + (uint32_t)((int)puVar2)))))) = limit;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -3699,6 +3766,286 @@ void FUN_00036910(void)
 
 
 
+/* WARNING: Removing unreachable block (ram,0x0003699c) */
+/* WARNING: Removing unreachable block (ram,0x0003698c) */
+/* WARNING: Removing unreachable block (ram,0x000369a6) */
+/* Bank0 cubic in saturating abs16 of clamped first-axis output. Leading coefficient is signed
+   BYTEF5=-11 (SLD.B), not halfword245. Sequential truncation:
+   ((-1135+((127+(-11*x)/128)*x)/1024)/4)*x; symmetric32 saturated add to17365676. No physical unit
+   inferred. */
+
+int f33_regulator_output_envelope_cubic_bank0(void)
+
+{
+  int iVar1;
+  int iVar2;
+  
+  iVar2 = (int)f33_regulator_output_envelopes[0].first;
+  if (iVar2 + 0x7fff < 0 == (-1 < iVar2 && iVar2 + 0x7fff < 0) && iVar2 != -0x7fff) {
+    if (iVar2 < 0) {
+      iVar2 = (int)-f33_regulator_output_envelopes[0].first;
+    }
+  }
+  else {
+    iVar2 = 0x7fff;
+  }
+  iVar2 = (((int)f33_regulator_output_envelope_calibrations[0].linear_coefficient +
+           (((int)f33_regulator_output_envelope_calibrations[0].quadratic_coefficient +
+            ((int)(short)iVar2 *
+            (int)(short)f33_regulator_output_envelope_calibrations[0].cubic_coefficient) / 0x80) *
+           iVar2) / 0x400) / 4) * iVar2;
+  if (iVar2 < 1) {
+    if ((f33_regulator_output_envelope_calibrations[0].base < 1) &&
+       (iVar1 = -0x7fffffff - iVar2,
+       iVar1 - f33_regulator_output_envelope_calibrations[0].base < 0 ==
+       (iVar1 < 0 != f33_regulator_output_envelope_calibrations[0].base < 0 &&
+       f33_regulator_output_envelope_calibrations[0].base < 0 ==
+       iVar1 - f33_regulator_output_envelope_calibrations[0].base < 0) &&
+       iVar1 != f33_regulator_output_envelope_calibrations[0].base)) {
+      return -0x7fffffff;
+    }
+  }
+  else if ((0 < f33_regulator_output_envelope_calibrations[0].base) &&
+          (iVar1 = (0x7fffffff - iVar2) - f33_regulator_output_envelope_calibrations[0].base,
+          iVar1 < 0 !=
+          (0x7fffffff - iVar2 < 0 != f33_regulator_output_envelope_calibrations[0].base < 0 &&
+          f33_regulator_output_envelope_calibrations[0].base < 0 == iVar1 < 0))) {
+    return 0x7fffffff;
+  }
+  return f33_regulator_output_envelope_calibrations[0].base + iVar2;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x00036bb2) */
+/* WARNING: Removing unreachable block (ram,0x00036bae) */
+/* WARNING: Removing unreachable block (ram,0x00036b4e) */
+/* WARNING: Removing unreachable block (ram,0x00036af8) */
+/* WARNING: Removing unreachable block (ram,0x00036af0) */
+/* WARNING: Removing unreachable block (ram,0x00036a9c) */
+/* WARNING: Removing unreachable block (ram,0x00036a64) */
+/* WARNING: Removing unreachable block (ram,0x00036a36) */
+/* WARNING: Removing unreachable block (ram,0x00036a6a) */
+/* WARNING: Removing unreachable block (ram,0x00036a18) */
+/* Bank0: reset on8BAE nonzero or8B28&40004. Healthy71EC low bits0 uses wrapping32
+   common+differential then signed/2; any invalid bit uses common terms directly. Clamp own signed
+   scale6CF0 to700..1707; truncate/256, symmetric32 multiply, truncate/2048. First axis
+   clamps+/-7658 with equality saturation. Second limit uses signed-byte cubic and209715-wide band,
+   retaining prior output magnitude inside new band; current magnitude below lower edge selects
+   lower edge. Publish separate unclipped values, band and saturation directions. Not physical PWM
+   delivery. */
+
+void f33_compose_regulator_output_bank0(void)
+
+{
+  short sVar1;
+  uint32_t puVar3;
+  int iVar4;
+  uint uVar5;
+  int iVar6;
+  uint uVar7;
+  int iVar8;
+  int iVar9;
+  int iVar10;
+  undefined1 *puVar11;
+  int iVar2;
+  
+  puVar3 = 0xfebeb800u;
+  if ((DAT_febe8bae != '\0') || ((f33_output_request_status & 0x40004) != 0)) {
+    f33_regulator_output_envelopes[0].selected_second_limit =
+         (short)(f33_regulator_output_envelope_calibrations[0].base / 0x800);
+    f33_regulator_output_envelopes[0].second_saturation = '\0';
+    f33_regulator_output_envelopes[0].first_saturation = '\0';
+    f33_regulator_output_envelopes[0].reset_cleared_status = '\0';
+    f33_regulator_output_envelopes[0].first = 0;
+    f33_regulator_output_envelopes[0].second = 0;
+    f33_regulator_output_envelopes[0].second_lower =
+         (short)((f33_regulator_output_envelope_calibrations[0].base -
+                 f33_regulator_output_envelope_calibrations[0].band_width) / 0x800);
+    f33_regulator_output_envelopes[0].second_upper =
+         f33_regulator_output_envelopes[0].selected_second_limit;
+    f33_regulator_output_envelopes[0].first_unclipped = 0;
+    f33_regulator_output_envelopes[0].second_unclipped = 0;
+    f33_regulator_output_envelopes[0].raw_cubic = f33_regulator_output_envelope_calibrations[0].base
+    ;
+    f33_regulator_output_envelopes[0].lower_before_clamp =
+         f33_regulator_output_envelope_calibrations[0].base -
+         f33_regulator_output_envelope_calibrations[0].band_width;
+    f33_regulator_output_envelopes[0].combined_second = 0;
+    f33_regulator_output_envelopes[0].retained_24 = 0x400;
+    f33_regulator_output_envelopes[0].retained_28 = 0x400;
+    return;
+  }
+  iVar10 = DAT_febe6c8c;
+  f33_regulator_output_envelopes[0].combined_second = DAT_febe6ccc;
+  if ((DAT_febe71ec & 3) == 0) {
+    iVar10 = (DAT_febe6c78 + DAT_febe6c8c) / 2;
+    f33_regulator_output_envelopes[0].combined_second = (DAT_febe6ca0 + DAT_febe6ccc) / 2;
+  }
+  uVar5 = (uint)f33_regulator_output_envelope_calibrations[0].scale_lower;
+  iVar8 = f33_regulator_output_envelope_calibrations[0].scale_upper - DAT_febe6cf0;
+  uVar7 = DAT_febe6cf0;
+  if (iVar8 < 0 != ((int)DAT_febe6cf0 < 0 && (int)DAT_febe6cf0 < 0 == iVar8 < 0)) {
+    uVar7 = (uint)f33_regulator_output_envelope_calibrations[0].scale_upper;
+  }
+  if ((int)(uVar7 - uVar5) < 0 == ((int)uVar7 < 0 && -1 < (int)(uVar7 - uVar5))) {
+    uVar5 = uVar7;
+  }
+  iVar10 = iVar10 / 0x100;
+  if ((iVar10 == 0) || (uVar5 == 0)) {
+    uVar7 = 0;
+  }
+  else {
+    if (iVar10 < 0) {
+      if (-1 < (int)uVar5) goto LAB_00036ad4;
+    }
+    else if ((int)uVar5 < 0) {
+LAB_00036ad4:
+      iVar8 = (int)((ulonglong)((longlong)(int)uVar5 * (longlong)iVar10) >> 0x20) + 1;
+      if ((iVar8 < 0 != (-1 < (longlong)(int)uVar5 * (longlong)iVar10 && iVar8 < 0)) ||
+         (uVar7 = iVar10 * uVar5, uVar7 < 0x80000001)) {
+        uVar7 = 0x80000001;
+      }
+      goto LAB_00036aec;
+    }
+    if ((-1 < (longlong)(int)uVar5 * (longlong)iVar10 &&
+         (int)((ulonglong)((longlong)(int)uVar5 * (longlong)iVar10) >> 0x20) != 0) ||
+       (uVar7 = iVar10 * uVar5, 0x7fffffff < uVar7)) {
+      uVar7 = 0x7fffffff;
+    }
+  }
+LAB_00036aec:
+  f33_regulator_output_envelopes[0].first_unclipped = (int)uVar7 / 0x800;
+  iVar10 = f33_regulator_output_envelopes[0].combined_second / 0x100;
+  if ((iVar10 == 0) || (uVar5 == 0)) {
+    iVar10 = 0;
+    goto LAB_00036b46;
+  }
+  if (iVar10 < 0) {
+    if (-1 < (int)uVar5) goto LAB_00036b2a;
+LAB_00036b14:
+    if ((-1 < (longlong)(int)uVar5 * (longlong)iVar10 &&
+         (int)((ulonglong)((longlong)(int)uVar5 * (longlong)iVar10) >> 0x20) != 0) ||
+       (0x7fffffff < iVar10 * uVar5)) {
+      iVar10 = 0x7fffffff;
+      goto LAB_00036b46;
+    }
+  }
+  else {
+    if (-1 < (int)uVar5) goto LAB_00036b14;
+LAB_00036b2a:
+    iVar8 = (int)((ulonglong)((longlong)(int)uVar5 * (longlong)iVar10) >> 0x20) + 1;
+    if ((iVar8 < 0 != (-1 < (longlong)(int)uVar5 * (longlong)iVar10 && iVar8 < 0)) ||
+       (iVar10 * uVar5 < 0x80000001)) {
+      iVar10 = -0x7fffffff;
+      goto LAB_00036b46;
+    }
+  }
+  iVar10 = iVar10 * uVar5;
+LAB_00036b46:
+  iVar8 = (int)f33_regulator_output_envelope_calibrations[0].first_upper;
+  iVar10 = iVar10 / 0x800;
+  if (iVar8 - f33_regulator_output_envelopes[0].first_unclipped < 0 ==
+      (iVar8 < 0 != f33_regulator_output_envelopes[0].first_unclipped < 0 &&
+      f33_regulator_output_envelopes[0].first_unclipped < 0 ==
+      iVar8 - f33_regulator_output_envelopes[0].first_unclipped < 0) &&
+      iVar8 != f33_regulator_output_envelopes[0].first_unclipped) {
+    f33_regulator_output_envelopes[0].first =
+         (short)f33_regulator_output_envelopes[0].first_unclipped;
+    iVar8 = f33_regulator_output_envelope_calibrations[0].first_lower -
+            f33_regulator_output_envelopes[0].first_unclipped;
+    if (iVar8 < 0 ==
+        (f33_regulator_output_envelope_calibrations[0].first_lower < 0 !=
+         f33_regulator_output_envelopes[0].first_unclipped < 0 &&
+        f33_regulator_output_envelopes[0].first_unclipped < 0 == iVar8 < 0)) {
+      f33_regulator_output_envelopes[0].first_saturation = '\x02';
+      f33_regulator_output_envelopes[0].first =
+           f33_regulator_output_envelope_calibrations[0].first_lower;
+    }
+    else {
+      f33_regulator_output_envelopes[0].first_saturation = '\0';
+    }
+  }
+  else {
+    f33_regulator_output_envelopes[0].first_saturation = '\x01';
+    f33_regulator_output_envelopes[0].first =
+         f33_regulator_output_envelope_calibrations[0].first_upper;
+  }
+  f33_regulator_output_envelopes[0].second_unclipped = iVar10;
+  iVar4 = f33_regulator_output_envelope_cubic_bank0();
+  iVar9 = f33_regulator_output_envelope_calibrations[0].upper;
+  iVar8 = f33_regulator_output_envelope_calibrations[0].lower;
+  puVar11 = ((undefined *)camry_host_ptr((uint32_t)((0xffffb3e8u + (uint32_t)((int)puVar3)))));
+  (*((int *)camry_host_ptr((uint32_t)((0xffffb400u + (uint32_t)((int)puVar3)))))) = iVar4;
+  if (iVar9 - iVar4 < 0 != (iVar9 < 0 != iVar4 < 0 && iVar4 < 0 == iVar9 - iVar4 < 0)) {
+    iVar4 = iVar9;
+  }
+  iVar9 = iVar8;
+  if (iVar4 - iVar8 < 0 == (iVar4 < 0 != iVar8 < 0 && iVar8 < 0 == iVar4 - iVar8 < 0)) {
+    iVar9 = iVar4;
+  }
+  iVar4 = iVar9 - f33_regulator_output_envelope_calibrations[0].band_width;
+  (*((int *)camry_host_ptr((uint32_t)((0xffffb404u + (uint32_t)((int)puVar3)))))) = iVar4;
+  if (iVar8 - iVar4 < 0 == (iVar8 < 0 != iVar4 < 0 && iVar4 < 0 == iVar8 - iVar4 < 0) &&
+      iVar8 != iVar4) {
+    iVar4 = iVar8;
+  }
+  iVar9 = iVar9 / 0x800;
+  iVar4 = iVar4 / 0x800;
+  iVar8 = (int)(*((short *)camry_host_ptr((uint32_t)((0xffffb3eeu + (uint32_t)((int)puVar3))))));
+  (*((short *)camry_host_ptr((uint32_t)((0xffffb3f4u + (uint32_t)((int)puVar3)))))) = (short)iVar9;
+  (*((short *)camry_host_ptr((uint32_t)((0xffffb3f2u + (uint32_t)((int)puVar3)))))) = (short)iVar4;
+  if (iVar10 + 0x7fffffff < 0 == (-1 < iVar10 && iVar10 + 0x7fffffff < 0) && iVar10 != -0x7fffffff)
+  {
+    iVar6 = iVar10;
+    if (iVar10 < 0) {
+      iVar6 = -iVar10;
+    }
+  }
+  else {
+    iVar6 = 0x7fffffff;
+  }
+  if (iVar8 + 0x7fffffff < 0 == (-1 < iVar8 && iVar8 + 0x7fffffff < 0) && iVar8 != -0x7fffffff) {
+    if (iVar8 < 0) {
+      iVar8 = -iVar8;
+    }
+  }
+  else {
+    iVar8 = 0x7fffffff;
+  }
+  iVar2 = iVar4;
+  if (((iVar6 - iVar4 < 0 == (iVar6 < 0 != iVar4 < 0 && iVar4 < 0 == iVar6 - iVar4 < 0)) &&
+      (iVar2 = iVar9,
+      iVar8 - iVar9 < 0 != (iVar8 < 0 != iVar9 < 0 && iVar9 < 0 == iVar8 - iVar9 < 0) ||
+      iVar8 == iVar9)) &&
+     (iVar2 = iVar4, iVar8 - iVar4 < 0 == (iVar8 < 0 != iVar4 < 0 && iVar4 < 0 == iVar8 - iVar4 < 0)
+     )) {
+    iVar2 = iVar8;
+  }
+  sVar1 = (short)iVar2;
+  iVar8 = (int)sVar1;
+  (*((short *)camry_host_ptr((uint32_t)((0xffffb3f0u + (uint32_t)((int)puVar3)))))) = sVar1;
+  if (iVar10 - iVar8 < 0 == (iVar10 < 0 != iVar8 < 0 && iVar8 < 0 == iVar10 - iVar8 < 0)) {
+    *puVar11 = 1;
+    (*((short *)camry_host_ptr((uint32_t)((0xffffb3eeu + (uint32_t)((int)puVar3)))))) = sVar1;
+  }
+  else {
+    iVar9 = -iVar8;
+    if (iVar10 + iVar8 < 0 == (iVar10 < 0 != iVar9 < 0 && iVar9 < 0 == iVar10 + iVar8 < 0) &&
+        iVar10 != iVar9) {
+      *puVar11 = 0;
+      (*((short *)camry_host_ptr((uint32_t)((0xffffb3eeu + (uint32_t)((int)puVar3)))))) = (short)iVar10;
+    }
+    else {
+      *puVar11 = 2;
+      (*((short *)camry_host_ptr((uint32_t)((0xffffb3eeu + (uint32_t)((int)puVar3)))))) = (short)iVar9;
+    }
+  }
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -3738,6 +4085,286 @@ void FUN_00036c1c(void)
   f33_regulator_output_envelopes[1].second_lower =
        (short)((f33_regulator_output_envelope_calibrations[1].base -
                f33_regulator_output_envelope_calibrations[1].band_width) / 0x800);
+  return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x00036ca8) */
+/* WARNING: Removing unreachable block (ram,0x00036c98) */
+/* WARNING: Removing unreachable block (ram,0x00036cb2) */
+/* Bank1 cubic in saturating abs16 of clamped first-axis output. Leading coefficient is signed
+   BYTEF5=-11 (SLD.B), not halfword245. Sequential truncation:
+   ((-1135+((127+(-11*x)/128)*x)/1024)/4)*x; symmetric32 saturated add to17365676. No physical unit
+   inferred. */
+
+int f33_regulator_output_envelope_cubic_bank1(void)
+
+{
+  int iVar1;
+  int iVar2;
+  
+  iVar2 = (int)f33_regulator_output_envelopes[1].first;
+  if (iVar2 + 0x7fff < 0 == (-1 < iVar2 && iVar2 + 0x7fff < 0) && iVar2 != -0x7fff) {
+    if (iVar2 < 0) {
+      iVar2 = (int)-f33_regulator_output_envelopes[1].first;
+    }
+  }
+  else {
+    iVar2 = 0x7fff;
+  }
+  iVar2 = (((int)f33_regulator_output_envelope_calibrations[1].linear_coefficient +
+           (((int)f33_regulator_output_envelope_calibrations[1].quadratic_coefficient +
+            ((int)(short)iVar2 *
+            (int)(short)f33_regulator_output_envelope_calibrations[1].cubic_coefficient) / 0x80) *
+           iVar2) / 0x400) / 4) * iVar2;
+  if (iVar2 < 1) {
+    if ((f33_regulator_output_envelope_calibrations[1].base < 1) &&
+       (iVar1 = -0x7fffffff - iVar2,
+       iVar1 - f33_regulator_output_envelope_calibrations[1].base < 0 ==
+       (iVar1 < 0 != f33_regulator_output_envelope_calibrations[1].base < 0 &&
+       f33_regulator_output_envelope_calibrations[1].base < 0 ==
+       iVar1 - f33_regulator_output_envelope_calibrations[1].base < 0) &&
+       iVar1 != f33_regulator_output_envelope_calibrations[1].base)) {
+      return -0x7fffffff;
+    }
+  }
+  else if ((0 < f33_regulator_output_envelope_calibrations[1].base) &&
+          (iVar1 = (0x7fffffff - iVar2) - f33_regulator_output_envelope_calibrations[1].base,
+          iVar1 < 0 !=
+          (0x7fffffff - iVar2 < 0 != f33_regulator_output_envelope_calibrations[1].base < 0 &&
+          f33_regulator_output_envelope_calibrations[1].base < 0 == iVar1 < 0))) {
+    return 0x7fffffff;
+  }
+  return f33_regulator_output_envelope_calibrations[1].base + iVar2;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x00036eba) */
+/* WARNING: Removing unreachable block (ram,0x00036eb6) */
+/* WARNING: Removing unreachable block (ram,0x00036e56) */
+/* WARNING: Removing unreachable block (ram,0x00036e00) */
+/* WARNING: Removing unreachable block (ram,0x00036df8) */
+/* WARNING: Removing unreachable block (ram,0x00036da4) */
+/* WARNING: Removing unreachable block (ram,0x00036d78) */
+/* WARNING: Removing unreachable block (ram,0x00036d42) */
+/* WARNING: Removing unreachable block (ram,0x00036d24) */
+/* WARNING: Removing unreachable block (ram,0x00036d7c) */
+/* Bank1: reset on8BAF nonzero or8B28&40004. Healthy71EC low bits0 uses wrapping32
+   common-differential then signed/2; any invalid bit uses common terms directly. Clamp own signed
+   scale6CF4 to700..1707; truncate/256, symmetric32 multiply, truncate/2048. First axis
+   clamps+/-7658 with equality saturation. Second limit uses signed-byte cubic and209715-wide band,
+   retaining prior output magnitude inside new band; current magnitude below lower edge selects
+   lower edge. Publish separate unclipped values, band and saturation directions. Not physical PWM
+   delivery. */
+
+void f33_compose_regulator_output_bank1(void)
+
+{
+  short sVar1;
+  uint32_t puVar3;
+  int iVar4;
+  uint uVar5;
+  int iVar6;
+  uint uVar7;
+  int iVar8;
+  int iVar9;
+  int iVar10;
+  undefined1 *puVar11;
+  int iVar2;
+  
+  puVar3 = 0xfebeb800u;
+  if ((DAT_febe8baf != '\0') || ((f33_output_request_status & 0x40004) != 0)) {
+    f33_regulator_output_envelopes[1].selected_second_limit =
+         (short)(f33_regulator_output_envelope_calibrations[1].base / 0x800);
+    f33_regulator_output_envelopes[1].second_saturation = '\0';
+    f33_regulator_output_envelopes[1].first_saturation = '\0';
+    f33_regulator_output_envelopes[1].reset_cleared_status = '\0';
+    f33_regulator_output_envelopes[1].first = 0;
+    f33_regulator_output_envelopes[1].second = 0;
+    f33_regulator_output_envelopes[1].second_lower =
+         (short)((f33_regulator_output_envelope_calibrations[1].base -
+                 f33_regulator_output_envelope_calibrations[1].band_width) / 0x800);
+    f33_regulator_output_envelopes[1].second_upper =
+         f33_regulator_output_envelopes[1].selected_second_limit;
+    f33_regulator_output_envelopes[1].first_unclipped = 0;
+    f33_regulator_output_envelopes[1].second_unclipped = 0;
+    f33_regulator_output_envelopes[1].raw_cubic = f33_regulator_output_envelope_calibrations[1].base
+    ;
+    f33_regulator_output_envelopes[1].lower_before_clamp =
+         f33_regulator_output_envelope_calibrations[1].base -
+         f33_regulator_output_envelope_calibrations[1].band_width;
+    f33_regulator_output_envelopes[1].combined_second = 0;
+    f33_regulator_output_envelopes[1].retained_24 = 0x400;
+    f33_regulator_output_envelopes[1].retained_28 = 0x400;
+    return;
+  }
+  f33_regulator_output_envelopes[1].combined_second = DAT_febe6ccc;
+  iVar10 = DAT_febe6c8c;
+  if ((DAT_febe71ec & 3) == 0) {
+    f33_regulator_output_envelopes[1].combined_second = (DAT_febe6ccc - DAT_febe6ca0) / 2;
+    iVar10 = (DAT_febe6c8c - DAT_febe6c78) / 2;
+  }
+  uVar5 = (uint)f33_regulator_output_envelope_calibrations[1].scale_lower;
+  iVar8 = f33_regulator_output_envelope_calibrations[1].scale_upper - DAT_febe6cf4;
+  uVar7 = DAT_febe6cf4;
+  if (iVar8 < 0 != ((int)DAT_febe6cf4 < 0 && (int)DAT_febe6cf4 < 0 == iVar8 < 0)) {
+    uVar7 = (uint)f33_regulator_output_envelope_calibrations[1].scale_upper;
+  }
+  if ((int)(uVar7 - uVar5) < 0 == ((int)uVar7 < 0 && -1 < (int)(uVar7 - uVar5))) {
+    uVar5 = uVar7;
+  }
+  iVar10 = iVar10 / 0x100;
+  if ((iVar10 == 0) || (uVar5 == 0)) {
+    uVar7 = 0;
+  }
+  else {
+    if (iVar10 < 0) {
+      if (-1 < (int)uVar5) goto LAB_00036ddc;
+    }
+    else if ((int)uVar5 < 0) {
+LAB_00036ddc:
+      iVar8 = (int)((ulonglong)((longlong)(int)uVar5 * (longlong)iVar10) >> 0x20) + 1;
+      if ((iVar8 < 0 != (-1 < (longlong)(int)uVar5 * (longlong)iVar10 && iVar8 < 0)) ||
+         (uVar7 = iVar10 * uVar5, uVar7 < 0x80000001)) {
+        uVar7 = 0x80000001;
+      }
+      goto LAB_00036df4;
+    }
+    if ((-1 < (longlong)(int)uVar5 * (longlong)iVar10 &&
+         (int)((ulonglong)((longlong)(int)uVar5 * (longlong)iVar10) >> 0x20) != 0) ||
+       (uVar7 = iVar10 * uVar5, 0x7fffffff < uVar7)) {
+      uVar7 = 0x7fffffff;
+    }
+  }
+LAB_00036df4:
+  f33_regulator_output_envelopes[1].first_unclipped = (int)uVar7 / 0x800;
+  iVar10 = f33_regulator_output_envelopes[1].combined_second / 0x100;
+  if ((iVar10 == 0) || (uVar5 == 0)) {
+    iVar10 = 0;
+    goto LAB_00036e4e;
+  }
+  if (iVar10 < 0) {
+    if (-1 < (int)uVar5) goto LAB_00036e32;
+LAB_00036e1c:
+    if ((-1 < (longlong)(int)uVar5 * (longlong)iVar10 &&
+         (int)((ulonglong)((longlong)(int)uVar5 * (longlong)iVar10) >> 0x20) != 0) ||
+       (0x7fffffff < iVar10 * uVar5)) {
+      iVar10 = 0x7fffffff;
+      goto LAB_00036e4e;
+    }
+  }
+  else {
+    if (-1 < (int)uVar5) goto LAB_00036e1c;
+LAB_00036e32:
+    iVar8 = (int)((ulonglong)((longlong)(int)uVar5 * (longlong)iVar10) >> 0x20) + 1;
+    if ((iVar8 < 0 != (-1 < (longlong)(int)uVar5 * (longlong)iVar10 && iVar8 < 0)) ||
+       (iVar10 * uVar5 < 0x80000001)) {
+      iVar10 = -0x7fffffff;
+      goto LAB_00036e4e;
+    }
+  }
+  iVar10 = iVar10 * uVar5;
+LAB_00036e4e:
+  iVar8 = (int)f33_regulator_output_envelope_calibrations[1].first_upper;
+  iVar10 = iVar10 / 0x800;
+  if (iVar8 - f33_regulator_output_envelopes[1].first_unclipped < 0 ==
+      (iVar8 < 0 != f33_regulator_output_envelopes[1].first_unclipped < 0 &&
+      f33_regulator_output_envelopes[1].first_unclipped < 0 ==
+      iVar8 - f33_regulator_output_envelopes[1].first_unclipped < 0) &&
+      iVar8 != f33_regulator_output_envelopes[1].first_unclipped) {
+    f33_regulator_output_envelopes[1].first =
+         (short)f33_regulator_output_envelopes[1].first_unclipped;
+    iVar8 = f33_regulator_output_envelope_calibrations[1].first_lower -
+            f33_regulator_output_envelopes[1].first_unclipped;
+    if (iVar8 < 0 ==
+        (f33_regulator_output_envelope_calibrations[1].first_lower < 0 !=
+         f33_regulator_output_envelopes[1].first_unclipped < 0 &&
+        f33_regulator_output_envelopes[1].first_unclipped < 0 == iVar8 < 0)) {
+      f33_regulator_output_envelopes[1].first_saturation = '\x02';
+      f33_regulator_output_envelopes[1].first =
+           f33_regulator_output_envelope_calibrations[1].first_lower;
+    }
+    else {
+      f33_regulator_output_envelopes[1].first_saturation = '\0';
+    }
+  }
+  else {
+    f33_regulator_output_envelopes[1].first_saturation = '\x01';
+    f33_regulator_output_envelopes[1].first =
+         f33_regulator_output_envelope_calibrations[1].first_upper;
+  }
+  f33_regulator_output_envelopes[1].second_unclipped = iVar10;
+  iVar4 = f33_regulator_output_envelope_cubic_bank1();
+  iVar9 = f33_regulator_output_envelope_calibrations[1].upper;
+  iVar8 = f33_regulator_output_envelope_calibrations[1].lower;
+  puVar11 = ((undefined *)camry_host_ptr((uint32_t)((0xffffb414u + (uint32_t)((int)puVar3)))));
+  (*((int *)camry_host_ptr((uint32_t)((0xffffb42cu + (uint32_t)((int)puVar3)))))) = iVar4;
+  if (iVar9 - iVar4 < 0 != (iVar9 < 0 != iVar4 < 0 && iVar4 < 0 == iVar9 - iVar4 < 0)) {
+    iVar4 = iVar9;
+  }
+  iVar9 = iVar8;
+  if (iVar4 - iVar8 < 0 == (iVar4 < 0 != iVar8 < 0 && iVar8 < 0 == iVar4 - iVar8 < 0)) {
+    iVar9 = iVar4;
+  }
+  iVar4 = iVar9 - f33_regulator_output_envelope_calibrations[1].band_width;
+  (*((int *)camry_host_ptr((uint32_t)((0xffffb430u + (uint32_t)((int)puVar3)))))) = iVar4;
+  if (iVar8 - iVar4 < 0 == (iVar8 < 0 != iVar4 < 0 && iVar4 < 0 == iVar8 - iVar4 < 0) &&
+      iVar8 != iVar4) {
+    iVar4 = iVar8;
+  }
+  iVar9 = iVar9 / 0x800;
+  iVar4 = iVar4 / 0x800;
+  iVar8 = (int)(*((short *)camry_host_ptr((uint32_t)((0xffffb41au + (uint32_t)((int)puVar3))))));
+  (*((short *)camry_host_ptr((uint32_t)((0xffffb420u + (uint32_t)((int)puVar3)))))) = (short)iVar9;
+  (*((short *)camry_host_ptr((uint32_t)((0xffffb41eu + (uint32_t)((int)puVar3)))))) = (short)iVar4;
+  if (iVar10 + 0x7fffffff < 0 == (-1 < iVar10 && iVar10 + 0x7fffffff < 0) && iVar10 != -0x7fffffff)
+  {
+    iVar6 = iVar10;
+    if (iVar10 < 0) {
+      iVar6 = -iVar10;
+    }
+  }
+  else {
+    iVar6 = 0x7fffffff;
+  }
+  if (iVar8 + 0x7fffffff < 0 == (-1 < iVar8 && iVar8 + 0x7fffffff < 0) && iVar8 != -0x7fffffff) {
+    if (iVar8 < 0) {
+      iVar8 = -iVar8;
+    }
+  }
+  else {
+    iVar8 = 0x7fffffff;
+  }
+  iVar2 = iVar4;
+  if (((iVar6 - iVar4 < 0 == (iVar6 < 0 != iVar4 < 0 && iVar4 < 0 == iVar6 - iVar4 < 0)) &&
+      (iVar2 = iVar9,
+      iVar8 - iVar9 < 0 != (iVar8 < 0 != iVar9 < 0 && iVar9 < 0 == iVar8 - iVar9 < 0) ||
+      iVar8 == iVar9)) &&
+     (iVar2 = iVar4, iVar8 - iVar4 < 0 == (iVar8 < 0 != iVar4 < 0 && iVar4 < 0 == iVar8 - iVar4 < 0)
+     )) {
+    iVar2 = iVar8;
+  }
+  sVar1 = (short)iVar2;
+  iVar8 = (int)sVar1;
+  (*((short *)camry_host_ptr((uint32_t)((0xffffb41cu + (uint32_t)((int)puVar3)))))) = sVar1;
+  if (iVar10 - iVar8 < 0 == (iVar10 < 0 != iVar8 < 0 && iVar8 < 0 == iVar10 - iVar8 < 0)) {
+    *puVar11 = 1;
+    (*((short *)camry_host_ptr((uint32_t)((0xffffb41au + (uint32_t)((int)puVar3)))))) = sVar1;
+  }
+  else {
+    iVar9 = -iVar8;
+    if (iVar10 + iVar8 < 0 == (iVar10 < 0 != iVar9 < 0 && iVar9 < 0 == iVar10 + iVar8 < 0) &&
+        iVar10 != iVar9) {
+      *puVar11 = 0;
+      (*((short *)camry_host_ptr((uint32_t)((0xffffb41au + (uint32_t)((int)puVar3)))))) = (short)iVar10;
+    }
+    else {
+      *puVar11 = 2;
+      (*((short *)camry_host_ptr((uint32_t)((0xffffb41au + (uint32_t)((int)puVar3)))))) = (short)iVar9;
+    }
+  }
   return;
 }
 
@@ -5546,6 +6173,101 @@ uint f33_current_reference_curve_feedback_magnitude(void)
     return uVar2;
   }
   return 0x7fff;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x000380b2) */
+/* WARNING: Removing unreachable block (ram,0x0003806a) */
+/* WARNING: Removing unreachable block (ram,0x00038038) */
+/* Transient5A uses unsigned-axis/signed-ordinate31B5C; ordinary mode interpolates signed2C31E
+   ordinates in128-count intervals and applies floor6F7E. Halve toward zero when71EC&3. Leaving
+   transient seeds Q16 accumulator from previous output and enables filtering. While active
+   A=low32(A-old_output*K+raw*K),K=304; publish trunc(A/65536). Signed16(raw-old_output)<=128
+   releases directly to raw, not an absolute-delta test. Accumulator/filtered candidate are updated
+   before release; inactive filtering retains those fields. */
+
+void f33_update_current_reference_curve_floor(ushort feedback_magnitude)
+
+{
+  uchar uVar1;
+  short sVar2;
+  ushort uVar3;
+  int iVar4;
+  uint32_t puVar5;
+  uint uVar6;
+  int iVar7;
+  short sVar8;
+  int iVar9;
+  int iVar10;
+  uchar uVar11;
+  short sStack_1a;
+  
+  uVar3 = DAT_febe71ec;
+  iVar7 = f33_current_reference_floor.accumulator_q16;
+  sVar2 = f33_current_reference_floor.curve_floor;
+  uVar11 = f33_current_reference_floor.filter_active;
+  uVar1 = f33_current_reference_transient.active;
+  puVar5 = 0xfebeb800u;
+  iVar10 = (int)f33_current_reference_floor.curve_floor;
+  if (f33_current_reference_transient.active == 'Z') {
+    puVar5 = 0xfebeb800u;
+    FUN_000702b0(f33_switched_signed_request_curve,(uint)feedback_magnitude,&sStack_1a);
+  }
+  else {
+    uVar6 = (uint)(feedback_magnitude >> 7);
+    if (uVar6 < 0xff) {
+      iVar9 = (int)(short)(*(short *)(((undefined *)camry_host_ptr(0x2c31eu)) + uVar6 * 4) +
+                          (short)((int)((feedback_magnitude & 0x7f) *
+                                       ((int)*(short *)(((undefined *)camry_host_ptr(0x2c31eu)) + (uVar6 + 1) * 4) -
+                                       (int)*(short *)(((undefined *)camry_host_ptr(0x2c31eu)) + uVar6 * 4))) / 0x80));
+    }
+    else {
+      iVar9 = 0;
+    }
+    sStack_1a = (short)iVar9;
+    if (f33_current_reference_floor.previous_transient == 'Z') {
+      iVar7 = iVar10 << 0x10;
+      uVar11 = 'Z';
+    }
+    iVar4 = (int)DAT_febe6f7e;
+    if (iVar4 - iVar9 < 0 == (iVar4 < 0 != iVar9 < 0 && iVar9 < 0 == iVar4 - iVar9 < 0) &&
+        iVar4 != iVar9) {
+      sStack_1a = DAT_febe6f7e;
+    }
+  }
+  if ((uVar3 & 3) != 0) {
+    sStack_1a = sStack_1a / 2;
+  }
+  (*((short *)camry_host_ptr((uint32_t)((0xffffb58eu + (uint32_t)((int)puVar5)))))) = sStack_1a;
+  sVar8 = sStack_1a;
+  if (uVar11 == 'Z') {
+    uVar6 = (uint)f33_current_reference_floor_calibration.filter_coefficient;
+    if (uVar6 - 1 < 0xffff) {
+      iVar10 = iVar10 * uVar6;
+      iVar9 = (int)sStack_1a * uVar6;
+    }
+    else {
+      iVar10 = iVar10 << 0x10;
+      iVar9 = (int)sStack_1a << 0x10;
+    }
+    iVar9 = iVar9 + (iVar7 - iVar10);
+    (*((int *)camry_host_ptr((uint32_t)((0xffffb598u + (uint32_t)((int)puVar5)))))) = iVar9;
+    iVar7 = (int)f33_current_reference_floor_calibration.release_delta_threshold;
+    iVar10 = (int)(short)(sStack_1a - sVar2);
+    sVar8 = (short)(iVar9 / 0x10000);
+    (*((short *)camry_host_ptr((uint32_t)((0xffffb592u + (uint32_t)((int)puVar5)))))) = sVar8;
+    (*((short *)camry_host_ptr((uint32_t)((0xffffb590u + (uint32_t)((int)puVar5)))))) = sStack_1a - sVar2;
+    if (iVar10 - iVar7 < 0 != (iVar10 < 0 != iVar7 < 0 && iVar7 < 0 == iVar10 - iVar7 < 0) ||
+        iVar10 == iVar7) {
+      uVar11 = '\0';
+      sVar8 = sStack_1a;
+    }
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb588u + (uint32_t)((int)puVar5) * 1u)))) = uVar1;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb589u + (uint32_t)((int)puVar5) * 1u)))) = uVar11;
+  (*((short *)camry_host_ptr((uint32_t)((0xffffb58cu + (uint32_t)((int)puVar5)))))) = sVar8;
+  return;
 }
 
 

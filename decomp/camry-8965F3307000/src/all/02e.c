@@ -4872,6 +4872,284 @@ void f33_update_owner6_gate_and_axis_filter(void)
 
 
 
+/* Clamp unsignedB084[2304,4096]; B1A9 override2816/cap22170; override-mode transition filterk6547
+   untilresidual<26. Preserve retained mode/hysteresis. */
+
+void f33_update_owner6_source_transition(void)
+
+{
+  ushort uVar1;
+  undefined1 uVar2;
+  int iVar3;
+  uint32_t puVar4;
+  char cVar5;
+  uint uVar6;
+  ushort uVar7;
+  uint uVar8;
+  uint uVar9;
+  uint uVar10;
+  uint uVar11;
+  undefined1 uVar12;
+  uint uVar13;
+  int iVar14;
+  int local_34;
+  undefined2 uStack_2e;
+  
+  uVar7 = DAT_000af184;
+  puVar4 = 0xfebeb800u;
+  uVar9 = (uint)DAT_000af182;
+  uVar10 = (uint)DAT_000af184;
+  uVar6 = (uint)DAT_000af186;
+  local_34 = DAT_febebd28;
+  uVar13 = uVar9;
+  if (DAT_febeb084 <= uVar9) {
+    uVar13 = (uint)DAT_febeb084;
+  }
+  uVar8 = uVar10;
+  if (uVar10 <= uVar13) {
+    uVar8 = uVar13;
+  }
+  if (uVar6 == 0) {
+    iVar3 = (uint)DAT_febebd08 << 0x10;
+    iVar14 = uVar8 << 0x10;
+  }
+  else {
+    iVar3 = DAT_febebd08 * uVar6;
+    iVar14 = uVar8 * uVar6;
+  }
+  uVar13 = iVar14 + (DAT_febebd1c - iVar3);
+  uVar6 = uVar13 >> 0x10;
+  if (DAT_febeb1a9 == 'Z') {
+    uVar1 = DAT_000af192;
+    if (DAT_febebd20 == 0x55aaaa55) {
+      uVar1 = DAT_000af190;
+    }
+    uVar6 = (uint)uVar1;
+    cVar5 = 'Z';
+    uStack_2e = DAT_000af18c;
+  }
+  else {
+    uStack_2e = 0x569a;
+    cVar5 = '\0';
+  }
+  if ((cVar5 == DAT_febebd03) &&
+     ((DAT_febebd04 != 'Z' ||
+      (DAT_febebd28 - DAT_000af1b4 < 0 !=
+       (DAT_febebd28 < 0 != DAT_000af1b4 < 0 && DAT_000af1b4 < 0 == DAT_febebd28 - DAT_000af1b4 < 0)
+      )))) {
+    uVar2 = 0;
+  }
+  else {
+    uVar8 = (uint)DAT_000af18e;
+    uVar12 = 0x5a;
+    if (uVar8 == 0) {
+      iVar3 = (uint)DAT_febebd0e << 0x10;
+      iVar14 = uVar6 << 0x10;
+    }
+    else {
+      iVar3 = DAT_febebd0e * uVar8;
+      iVar14 = uVar6 * uVar8;
+    }
+    uVar8 = iVar14 + (DAT_febebd24 - iVar3);
+    uVar11 = uVar8 >> 0x10;
+    puVar4 = 0xfebeb800u;
+    FUN_000d1194(uVar6 - uVar11,&local_34);
+    uVar2 = 0x5a;
+    if (local_34 - DAT_000af1b4 < 0 ==
+        (local_34 < 0 != DAT_000af1b4 < 0 && DAT_000af1b4 < 0 == local_34 - DAT_000af1b4 < 0))
+    goto LAB_000bb51a;
+  }
+  uVar12 = uVar2;
+  uVar8 = uVar6 << 0x10;
+  uVar11 = uVar6;
+LAB_000bb51a:
+  (*((short *)camry_host_ptr((uint32_t)(puVar4 + 0x50e)))) = (short)uVar11;
+  if (uVar9 < uVar11) {
+    uVar11 = uVar9;
+  }
+  (*((short *)camry_host_ptr((uint32_t)(puVar4 + 0x508)))) = (short)(uVar13 >> 0x10);
+  if (uVar10 <= uVar11) {
+    uVar7 = (ushort)uVar11;
+  }
+  (*((uint *)camry_host_ptr((uint32_t)(puVar4 + 0x51c)))) = uVar13;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(0x503))))) = cVar5;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar4 + 0x50a)))) = uVar7;
+  (*((uint *)camry_host_ptr((uint32_t)(puVar4 + 0x524)))) = uVar8;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(0x504))))) = uVar12;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar4 + 0x50c)))) = uStack_2e;
+  (*((int *)camry_host_ptr((uint32_t)(puVar4 + 0x528)))) = local_34;
+  return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x000bb6d6) */
+/* WARNING: Removing unreachable block (ram,0x000bb656) */
+/* WARNING: Removing unreachable block (ram,0x000bb670) */
+/* Select real family/bank map pair and extrapolation, recordrawcandidate; signed cap/floor gives
+   exactdesired22170. AF1760 immediate output with inclusive3 snap. Publish owner6. */
+
+void f33_publish_owner6_calibration_envelope(void)
+
+{
+  char cVar1;
+  int iVar2;
+  int iVar3;
+  uint32_t puVar4;
+  int iVar5;
+  int iVar6;
+  undefined *puVar7;
+  undefined *puVar8;
+  uint uVar9;
+  uint uVar10;
+  short sVar11;
+  uint uVar12;
+  int iVar13;
+  uint uVar14;
+  int iVar15;
+  undefined2 *puVar16;
+  short local_38;
+  short sStack_36;
+  short sStack_34;
+  short sStack_32;
+  short sStack_30;
+  short sStack_2e;
+  
+  iVar5 = DAT_febebd30;
+  iVar15 = DAT_febebd18;
+  cVar1 = DAT_febebd00;
+  puVar4 = 0xfebeb800u;
+  sStack_34 = DAT_febebd12;
+  sStack_2e = DAT_febebd06;
+  sStack_32 = DAT_febebd14;
+  uVar14 = (uint)DAT_febebd0a;
+  sStack_30 = DAT_febebd0c;
+  if (DAT_febebd02 == '\0') {
+    if (DAT_febebd20 == 0x55aaaa55) {
+      puVar16 = ((undefined *)camry_host_ptr(0xaf18au));
+      puVar8 = ((undefined *)camry_host_ptr(0xaf244u));
+      puVar7 = ((undefined *)camry_host_ptr(0xaf2ccu));
+      uVar9 = (uint)DAT_000af18a;
+      uVar10 = (uint)DAT_000af198;
+      if (uVar14 < DAT_000af19c) {
+LAB_000bb5be:
+        uVar12 = (uint)(ushort)puVar16[0xd];
+      }
+      else {
+        uVar12 = (uint)DAT_000af1a0;
+      }
+    }
+    else {
+      puVar16 = ((undefined *)camry_host_ptr(0xaf188u));
+      puVar8 = ((undefined *)camry_host_ptr(0xaf354u));
+      puVar7 = ((undefined *)camry_host_ptr(0xaf1bcu));
+      uVar9 = (uint)DAT_000af188;
+      uVar10 = (uint)DAT_000af19a;
+      if (DAT_000af19e <= uVar14) goto LAB_000bb5be;
+      uVar12 = (uint)DAT_000af1a6;
+    }
+  }
+  else if (DAT_febebd20 == 0x55aaaa55) {
+    puVar8 = ((undefined *)camry_host_ptr(0xaf288u));
+    puVar7 = ((undefined *)camry_host_ptr(0xaf310u));
+    uVar9 = (uint)DAT_000af18a;
+    uVar10 = (uint)DAT_000af198;
+    if (uVar14 < DAT_000af1a8) {
+      uVar12 = (uint)DAT_000af1b0;
+    }
+    else {
+      uVar12 = (uint)DAT_000af1ac;
+    }
+  }
+  else {
+    puVar8 = ((undefined *)camry_host_ptr(0xaf398u));
+    puVar7 = ((undefined *)camry_host_ptr(0xaf200u));
+    uVar9 = (uint)DAT_000af188;
+    uVar10 = (uint)DAT_000af19a;
+    if (uVar14 < DAT_000af1aa) {
+      uVar12 = (uint)DAT_000af1b2;
+    }
+    else {
+      uVar12 = (uint)DAT_000af1ae;
+    }
+  }
+  FUN_000d1178((int)DAT_febebd10,&sStack_36);
+  if (cVar1 == 'Z') {
+    iVar13 = 0x569a;
+    goto LAB_000bb6ae;
+  }
+  FUN_000d1de4(puVar8,(int)sStack_36,&sStack_34);
+  FUN_000d1de4(puVar7,(int)sStack_36,&sStack_32);
+  if (uVar14 < uVar10) {
+    iVar5 = (int)(uVar12 * (uVar14 - uVar10)) / 0x800;
+    iVar13 = (int)sStack_32;
+LAB_000bb696:
+    iVar5 = iVar5 + iVar13;
+  }
+  else {
+    if (uVar9 < uVar14) {
+      iVar5 = (int)(uVar12 * (uVar14 - uVar9)) / 0x800;
+      iVar13 = (int)sStack_34;
+      goto LAB_000bb696;
+    }
+    iVar5 = (int)sStack_32;
+    if (uVar9 != uVar10) {
+      iVar2 = uVar9 - uVar10;
+      iVar13 = (sStack_34 - iVar5) * (uVar14 - uVar10);
+      if (iVar2 != 0) {
+        if (iVar13 == -0x80000000 && iVar2 == -1) {
+          iVar13 = -0x80000000;
+        }
+        else {
+          iVar13 = iVar13 / iVar2;
+        }
+      }
+      goto LAB_000bb696;
+    }
+  }
+  iVar3 = (int)sStack_30;
+  iVar2 = (int)DAT_000af194;
+  iVar13 = iVar5;
+  if (iVar3 - iVar5 < 0 != (iVar3 < 0 != iVar5 < 0 && iVar5 < 0 == iVar3 - iVar5 < 0)) {
+    iVar13 = iVar3;
+  }
+  sVar11 = DAT_000af194;
+  if (iVar13 - iVar2 < 0 == (iVar13 < 0 != iVar2 < 0 && iVar2 < 0 == iVar13 - iVar2 < 0)) {
+    sVar11 = (short)iVar13;
+  }
+  iVar13 = (int)sVar11;
+LAB_000bb6ae:
+  uVar14 = (uint)DAT_000af176;
+  if (uVar14 == 0) {
+    iVar3 = (int)sStack_2e << 0x10;
+    iVar2 = iVar13 << 0x10;
+  }
+  else {
+    iVar3 = (int)sStack_2e * uVar14;
+    iVar2 = iVar13 * uVar14;
+  }
+  iVar2 = (iVar15 - iVar3) + iVar2;
+  FUN_000d1178((int)(short)((short)(iVar2 / 0x10000) - (short)iVar13),&local_38);
+  iVar3 = (int)DAT_000af180;
+  iVar6 = (int)local_38;
+  iVar15 = iVar2 / 0x10000;
+  if (iVar6 - iVar3 < 0 != (iVar6 < 0 != iVar3 < 0 && iVar3 < 0 == iVar6 - iVar3 < 0) ||
+      iVar6 == iVar3) {
+    iVar2 = iVar13 << 0x10;
+    iVar15 = iVar13;
+  }
+  f33_set_current_limit_request(6,(ushort)iVar15);
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar4 + 0x506)))) = (ushort)iVar15;
+  (*((int *)camry_host_ptr((uint32_t)(puVar4 + 0x518)))) = iVar2;
+  (*((int *)camry_host_ptr((uint32_t)(puVar4 + 0x530)))) = iVar5;
+  (*((short *)camry_host_ptr((uint32_t)(puVar4 + 0x512)))) = sStack_34;
+  (*((short *)camry_host_ptr((uint32_t)(puVar4 + 0x516)))) = (short)iVar13;
+  (*((short *)camry_host_ptr((uint32_t)(puVar4 + 0x514)))) = sStack_32;
+  return;
+}
+
+
+
 /* Compose real familyselection,gate/axisfilter,sourcetransition andscalarpublication in order. */
 
 void f33_update_owner6_calibration_envelope(void)

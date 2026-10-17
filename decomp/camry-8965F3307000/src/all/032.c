@@ -1717,6 +1717,74 @@ void FUN_000c9650(void)
 
 
 
+/* Native composed release clears the gain sub-state and advances retained accumulator3072 to2560
+   using exact6144 coefficients; gain512 decays to426 rather than clearing immediately. */
+
+void FUN_000c973a(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  short sVar3;
+  int iVar4;
+  int iVar5;
+  int iVar6;
+  
+  puVar2 = 0xfebeb800u;
+  cVar1 = DAT_febec5f4;
+  if (DAT_febec5f4 == '\0') {
+    if (((DAT_febec5f3 != '\x01') || (DAT_febec5ac != 0)) ||
+       ((DAT_febeacce != '\x01' ||
+        ((DAT_febeaccd != '\0' || (cVar1 = DAT_febeacbd == '\0', !(bool)cVar1))))))
+    goto LAB_000c978e;
+  }
+  else {
+    if ((((DAT_febec5f3 != '\0') && ((DAT_febec5ac & 1) == 0)) && (DAT_febeacce != '\0')) &&
+       ((DAT_febeaccd != '\x01' && (DAT_febeacbd == '\0')))) goto LAB_000c978e;
+    cVar1 = false;
+  }
+  DAT_febec5f4 = cVar1;
+  cVar1 = DAT_febec5f4;
+LAB_000c978e:
+  iVar4 = (int)DAT_febec5be;
+  DAT_febec5bc = DAT_000b0180;
+  DAT_febec5ba = DAT_000b016e;
+  if (cVar1 == '\x01') {
+    DAT_febec5bc = DAT_000b017e;
+    DAT_febec5ba = DAT_000b016c;
+  }
+  iVar5 = (int)DAT_febec5bc;
+  iVar6 = DAT_febec5b0 * DAT_febec5bc;
+  if (iVar4 != 0) {
+    if (iVar6 == -0x80000000 && iVar4 == -1) {
+      iVar6 = -0x80000000;
+    }
+    else {
+      iVar6 = iVar6 / iVar4;
+    }
+  }
+  DAT_febec5b0 = (DAT_febec5ba + iVar6) - (int)DAT_febec5b8;
+  iVar4 = DAT_febec5b0 * 0x400;
+  if (iVar5 != 0) {
+    if (iVar4 == -0x80000000 && iVar5 == -1) {
+      iVar4 = 0;
+    }
+    else {
+      iVar4 = iVar4 / iVar5;
+    }
+  }
+  DAT_febec5b8 = (short)iVar4;
+  DAT_febec5be = DAT_febec5bc;
+  sVar3 = f33_abs_s16_wrapping(DAT_febec5b8 - DAT_febec5ba);
+  iVar4 = (int)sVar3;
+  if (iVar4 + -0x14 < 0 != (iVar4 < 0 && -1 < iVar4 + -0x14) || iVar4 == 0x14) {
+    (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + 0xdb8)))) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + 0xdba))));
+  }
+  return;
+}
+
+
+
 /* Native foreground subsequence preserves C5EC and its accumulator when admission is inactive.
    Prior nonzero state remains despite zero current source; no claim about retained-drive initial
    state. */
