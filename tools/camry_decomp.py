@@ -5731,6 +5731,26 @@ def _function_entries() -> dict[str, int]:
     return _FUNCTION_ENTRIES
 
 
+def _header_pointer_returns() -> set[str]:
+    """Prototypes in common.h win over a void corpus signature.
+
+    Equivalent bodies such as `FUN_00075bfe` return `undefined *`. The corpus
+    text still says void, and the caller compares r10 as an integer.
+    """
+    header = ROOT / "src" / "all" / "common.h"
+    found: set[str] = set()
+    if not header.exists():
+        return found
+    for line in header.read_text(encoding="utf-8").splitlines():
+        text = line.strip()
+        if not text.endswith(";") or "(" not in text or not _returns_pointer(text[:-1]):
+            continue
+        name = text.split("(", 1)[0].split()[-1].lstrip("*")
+        if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", name):
+            found.add(name)
+    return found
+
+
 def _pointer_return_names() -> set[str]:
     global _POINTER_RETURNS
     if _POINTER_RETURNS is None:
@@ -5739,6 +5759,7 @@ def _pointer_return_names() -> set[str]:
             for row in _corpus_functions()
             if _returns_pointer(_c_signature(row["decompiled_c"]))
         }
+        _POINTER_RETURNS.update(_header_pointer_returns())
     return _POINTER_RETURNS
 
 
