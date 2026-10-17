@@ -830,6 +830,47 @@ void f33_dcm_reset_timer_slots(void)
 
 
 
+/* Visit timer slots0 through8. Under the existing critical pair, active==1 expires only for
+   unsigned remaining<quantum5; otherwise subtract5 modulo32. Clear active before invoking
+   configured callback outside the pair. Later slots observe earlier callbacks; visited slots are
+   not revisited. */
+
+void f33_dcm_advance_software_timers(void)
+
+{
+  uint *puVar1;
+  bool bVar2;
+  uint32_t puVar3;
+  uint32_t puVar4;
+  uint uVar5;
+  
+  puVar3 = 0xfebeb800u;
+  puVar4 = 0x23dfcu;
+  uVar5 = 0;
+  do {
+    bVar2 = false;
+    thunk_FUN_0006a45e();
+    puVar1 = ((uint *)camry_host_ptr((uint32_t)(puVar3 + uVar5 * 8 + -0x598c)));
+    if ((char)puVar1[1] == '\x01') {
+      if (*puVar1 < (*((uint *)camry_host_ptr((uint32_t)(puVar4 + 0x2cf0))))) {
+        *(undefined1 *)(puVar1 + 1) = 0;
+        bVar2 = true;
+      }
+      else {
+        *puVar1 = camry_host_addr(((undefined *)camry_host_ptr((uint32_t)(*puVar1 - (*((int *)camry_host_ptr((uint32_t)(puVar4 + 0x2cf0))))))));
+      }
+    }
+    thunk_FUN_0006a4c4();
+    if (bVar2) {
+      (*(int (*)())*(code **)(puVar4 + uVar5 * 4 + 0x2dd0))(uVar5);
+    }
+    uVar5 = uVar5 + 1;
+  } while (uVar5 < 9);
+  return;
+}
+
+
+
 /* For low8 slot<9 write remaining=(duration+quantum5-1) modulo32 and active1 under the existing
    priority-mask pair. Rearming overwrites rather than accumulates; zero duration arms remaining4.
     */

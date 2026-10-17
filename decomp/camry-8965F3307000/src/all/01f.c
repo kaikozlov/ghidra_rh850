@@ -4359,6 +4359,116 @@ uint FUN_0007fbdc(uint param_1,uint param_2)
 
 
 
+/* Large-record queue path with retained cursor/capacity accounting; queue admission is not physical
+   transmission. */
+
+uint f33_enqueue_large_can_tx(F33CanIfTxRecord *record,ushort queue_index,ushort capacity_words)
+
+{
+  uint *puVar1;
+  uchar *puVar2;
+  uchar *puVar3;
+  int iVar4;
+  byte bVar5;
+  uchar uVar6;
+  uchar uVar7;
+  uchar uVar8;
+  ushort uVar9;
+  uint uVar10;
+  uint uVar11;
+  uint uVar12;
+  uint uVar13;
+  uint uVar14;
+  int iVar15;
+  uint uVar16;
+  undefined *puVar17;
+  uchar *puVar18;
+  uint uVar19;
+  uint uVar20;
+  uint uVar21;
+  uint uVar22;
+  uint uVar23;
+  uint uVar24;
+  
+  uVar10 = (uint)queue_index;
+  uVar11 = (uint)capacity_words;
+  uVar13 = record->raw_id;
+  uVar12 = 1;
+  uVar20 = (uint)record->length;
+  uVar14 = uVar13 & 0x40000000;
+  if (uVar14 == 0) {
+    uVar21 = 8;
+  }
+  else {
+    uVar21 = uVar20;
+    if (0x40 < uVar20) {
+      uVar21 = 0x40;
+    }
+    uVar20 = (uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x22d84u + (uint32_t)((int)(uVar21 - 1 & 0xff) >> 2) * 1u))));
+  }
+  uVar22 = (uint)f33_can_tx_queue_cursors[uVar10 * 3];
+  uVar24 = (uint)f33_can_tx_queue_cursors[uVar10 * 3 + 2];
+  if (((int)((uVar22 + 2) - uVar11) < 0 || uVar22 + 2 == uVar11) && (uVar24 <= uVar11)) {
+    iVar4 = ((int)(uVar20 + 7) >> 3) * 2;
+    iVar15 = iVar4 + 3;
+    uVar19 = uVar11 - uVar22 & 0xffff;
+    uVar16 = iVar4 + 5;
+    uVar12 = uVar11;
+    uVar23 = uVar22;
+    if (-1 < (int)(uVar16 - uVar19) && uVar16 != uVar19) {
+      uVar24 = uVar24 + uVar19;
+      uVar23 = 0;
+      uVar12 = uVar22;
+    }
+    uVar24 = iVar15 + uVar24;
+    if ((uVar24 & 0xffff) <= uVar11) {
+      if (uVar12 < uVar11) {
+        puVar17 = ((void *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x21a54u + (uint32_t)(uVar10) * 4u)))))));
+        *(undefined4 *)(puVar17 + uVar12 * 4) = 0xffffffff;
+        (*((undefined4 *)camry_host_ptr((uint32_t)((int)(puVar17 + uVar12 * 4) + 4)))) = 0;
+      }
+      puVar17 = ((void *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x21a54u + (uint32_t)(uVar10) * 4u)))))));
+      f33_can_tx_queue_cursors[uVar10 * 3] = (short)iVar15 + (short)uVar23;
+      f33_can_tx_queue_cursors[uVar10 * 3 + 2] = (ushort)uVar24;
+      uVar9 = record->source_pdu;
+      puVar1 = (uint *)(puVar17 + uVar23 * 4);
+      bVar5 = record->class_flags;
+      puVar1[2] = uVar13;
+      uVar10 = (uint)uVar9 * 0x10000 + (uint)bVar5 * 0x100 + uVar20;
+      *puVar1 = uVar10;
+      puVar1[1] = ~uVar10;
+      uVar10 = DAT_000218ec;
+      uVar11 = uVar21 & 0xfc;
+      if ((uVar21 != uVar20) && (uVar14 != 0)) {
+        for (uVar12 = uVar21 >> 2; uVar12 = uVar12 & 0xff, uVar12 < (uint)((int)uVar20 >> 2);
+            uVar12 = uVar12 + 1) {
+          puVar1[uVar12 + 3] = uVar10;
+        }
+      }
+      puVar18 = ((void *)camry_host_ptr((uint32_t)(record->data)));
+      for (uVar20 = 0; uVar20 < uVar11; uVar20 = uVar20 + 4 & 0xff) {
+        puVar2 = puVar18 + uVar20;
+        uVar6 = puVar2[1];
+        uVar7 = puVar2[2];
+        uVar8 = puVar2[3];
+        puVar3 = ((uchar *)camry_host_ptr((uint32_t)((int)camry_host_addr(puVar1) + uVar20 + 0xc)));
+        *puVar3 = *puVar2;
+        puVar3[1] = uVar6;
+        puVar3[2] = uVar7;
+        puVar3[3] = uVar8;
+      }
+      for (; uVar11 < uVar21; uVar11 = uVar11 + 1 & 0xff) {
+        (*((uchar *)camry_host_ptr((uint32_t)((int)camry_host_addr(puVar1) + uVar11 + 0xc)))) = puVar18[uVar11];
+      }
+      return 0;
+    }
+    uVar12 = 2;
+  }
+  return uVar12;
+}
+
+
+
 /* Normal class first copies up to64 bytes into4FB2 and calls811BE, before controller/route/capacity
    admission. Queue-full2 preserves old queue but scratch already contains newer data. Native
    classic admission copies source into queued record; full queue preserves old

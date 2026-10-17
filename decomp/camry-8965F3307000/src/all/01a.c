@@ -1490,6 +1490,27 @@ uint f33_crypto_bank_aes_completed(uchar result)
 
 
 
+/* Configured command7 job1 callback27E0C: nonzero result forces509D=1. Select direct phase if
+   activation1, otherwise collected phase; set46. Return0; no submission-generation token. */
+
+uint f33_crypto_bank_verification_completed(uchar result)
+
+{
+  uchar *puVar1;
+  
+  if (result != '\0') {
+    f33_crypto_verification_result = '\x01';
+  }
+  puVar1 = ((void *)camry_host_ptr((uint32_t)((0xfebe5097u))));
+  if (f33_crypto_direct_activation == '\x01') {
+    puVar1 = ((void *)camry_host_ptr((uint32_t)((0xfebe5092u))));
+  }
+  *puVar1 = 'F';
+  return 0;
+}
+
+
+
 /* Configured MAC job1 callback: nonzero result sets44; zero compares fixed16-byte output and
    sets33/44. Return0, no local active-generation check. */
 
@@ -2106,6 +2127,378 @@ void f33_retain_disabled_recoverable_monitor
 
 
 
+/* Twelve-byte state and15-pointer callbacks. Pending confirmation follows strict passing/failing
+   thresholds. Confirmed failure calls third predicate and70F56 recovery scratch: strict
+   recovery_count>limit clears current counts/status and invokes recovery callback. Preserve failure
+   high-water. Stores packed status; returns full R10=11. The local recovery scratch is not the same
+   layout as persistent state. Native paired raw-thermistor recovery accepts both inclusive
+   endpoints and clears current status after recovery26>25, preserving failure high-water. */
+
+uint f33_step_recoverable_monitor
+               (F33RecoverableMonitorState *state,F33RecoverableMonitorLimits *limits,
+               F33RecoverableMonitorCallbacks *callbacks)
+
+{
+  ushort uVar1;
+  ushort uVar2;
+  uint uVar3;
+  uint uVar4;
+  short sVar5;
+  ushort uVar6;
+  F33MonitorAction *pFVar7;
+  ushort local_2c;
+  F33MonitorRecoveryScratch FStack_2a;
+  
+  FStack_2a.failing_high_water = state->failing_high_water;
+  FStack_2a.passing_count = state->passing_count;
+  FStack_2a.failing_count = state->failing_count;
+  FStack_2a.recovery_count = state->recovery_count;
+  uVar1 = limits->passing_limit;
+  local_2c = limits->recovery_limit;
+  uVar2 = limits->failing_limit;
+  if (FStack_2a.failing_count == 0) {
+    if (uVar1 < FStack_2a.passing_count) {
+      sVar5 = 0x2200;
+    }
+    else {
+      sVar5 = 0;
+      if (FStack_2a.passing_count != 0) {
+        sVar5 = 0x1100;
+      }
+    }
+  }
+  else {
+    sVar5 = 0x22;
+    if (FStack_2a.failing_count <= uVar2) {
+      sVar5 = 0x11;
+    }
+  }
+  if (sVar5 == 0) {
+    uVar4 = (*(int (*)())callbacks->classify_normal)();
+    if (uVar4 == 0x11) {
+      if ((uVar1 < FStack_2a.passing_count) ||
+         (uVar2 = FStack_2a.passing_count + 1, uVar6 = FStack_2a.passing_count + 1,
+         FStack_2a.passing_count = uVar2, uVar1 < uVar6)) {
+        uVar4 = 0x2200;
+      }
+      else {
+        uVar4 = 0x11001100;
+      }
+      FStack_2a.failing_count = 0;
+    }
+    else if (uVar4 == 0x22) {
+      FStack_2a.passing_count = 0;
+      if (FStack_2a.failing_count <= uVar2) {
+        FStack_2a.failing_count = FStack_2a.failing_count + 1;
+      }
+      if (FStack_2a.failing_high_water < FStack_2a.failing_count) {
+        FStack_2a.failing_high_water = FStack_2a.failing_count;
+      }
+      uVar4 = 0x22;
+      if (FStack_2a.failing_count <= uVar2) {
+        uVar4 = 0x110011;
+      }
+    }
+    else if ((uVar4 == 0x33) || (uVar4 == 0x44)) {
+      FStack_2a.failing_count = 0;
+      FStack_2a.passing_count = 0;
+      uVar4 = 0;
+    }
+    else {
+      uVar4 = 0xffff;
+    }
+    uVar3 = uVar4 & 0xffff;
+    if (uVar3 == 0) goto LAB_0006add8;
+    if (uVar3 == 0x11) {
+      if ((uintptr_t)(callbacks->enter_failing)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())callbacks->enter_failing)();
+      }
+      pFVar7 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_pending_failing)));
+    }
+    else if (uVar3 == 0x22) {
+      if ((uintptr_t)(callbacks->enter_failing)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())callbacks->enter_failing)();
+      }
+      if ((uintptr_t)(callbacks->confirm_failing)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())callbacks->confirm_failing)();
+      }
+      pFVar7 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_confirmed_failing)));
+    }
+    else if (uVar3 == 0x1100) {
+      if ((uintptr_t)(callbacks->enter_passing)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())callbacks->enter_passing)();
+      }
+      pFVar7 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_pending_passing)));
+    }
+    else {
+      if (uVar3 != 0x2200) {
+        uVar4 = 0;
+        goto LAB_0006add8;
+      }
+      if ((uintptr_t)(callbacks->enter_passing)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())callbacks->enter_passing)();
+      }
+      if ((uintptr_t)(callbacks->confirm_passing)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())callbacks->confirm_passing)();
+      }
+      pFVar7 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_confirmed_passing)));
+    }
+    goto joined_r0x0006abfe;
+  }
+  if (sVar5 == 0x11) {
+    uVar4 = (*(int (*)())callbacks->classify_failing)();
+    if (uVar4 == 0x11) {
+      if ((uVar1 < FStack_2a.passing_count) ||
+         (uVar2 = FStack_2a.passing_count + 1, uVar6 = FStack_2a.passing_count + 1,
+         FStack_2a.passing_count = uVar2, uVar1 < uVar6)) {
+        uVar4 = 0x2200;
+      }
+      else {
+        uVar4 = 0x11001100;
+      }
+      FStack_2a.failing_count = 0;
+    }
+    else if (uVar4 == 0x22) {
+      FStack_2a.passing_count = 0;
+      if (FStack_2a.failing_count <= uVar2) {
+        FStack_2a.failing_count = FStack_2a.failing_count + 1;
+      }
+      if (FStack_2a.failing_high_water < FStack_2a.failing_count) {
+        FStack_2a.failing_high_water = FStack_2a.failing_count;
+      }
+      uVar4 = 0x22;
+      if (FStack_2a.failing_count <= uVar2) {
+        uVar4 = 0x110011;
+      }
+    }
+    else if ((uVar4 == 0x33) || (uVar4 == 0x44)) {
+      FStack_2a.failing_count = 0;
+      FStack_2a.passing_count = 0;
+      uVar4 = 0;
+    }
+    else {
+      uVar4 = 0xffff;
+    }
+    uVar3 = uVar4 & 0xffff;
+    if (uVar3 != 0) {
+      if (uVar3 == 0x11) {
+        pFVar7 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_pending_failing)));
+      }
+      else if (uVar3 == 0x22) {
+        if ((uintptr_t)(callbacks->confirm_failing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->confirm_failing)();
+        }
+        pFVar7 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_confirmed_failing)));
+      }
+      else if (uVar3 == 0x1100) {
+        if ((uintptr_t)(callbacks->leave_pending_failing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->leave_pending_failing)();
+        }
+        if ((uintptr_t)(callbacks->enter_passing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->enter_passing)();
+        }
+        pFVar7 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_pending_passing)));
+      }
+      else {
+        if (uVar3 != 0x2200) {
+          if ((uintptr_t)(callbacks->repeat_pending_failing)!=(uintptr_t)(f33_reset_vector)) {
+            (*(int (*)())callbacks->repeat_pending_failing)();
+          }
+          uVar4 = 0x11;
+          goto LAB_0006add8;
+        }
+        if ((uintptr_t)(callbacks->leave_pending_failing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->leave_pending_failing)();
+        }
+        if ((uintptr_t)(callbacks->enter_passing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->enter_passing)();
+        }
+        if ((uintptr_t)(callbacks->confirm_passing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->confirm_passing)();
+        }
+        pFVar7 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_confirmed_passing)));
+      }
+      goto joined_r0x0006abfe;
+    }
+    pFVar7 = ((void *)camry_host_ptr((uint32_t)(callbacks->leave_pending_failing)));
+joined_r0x0006ad1a:
+    if ((uintptr_t)(pFVar7)!=(uintptr_t)(f33_reset_vector)) {
+      (*(int (*)())pFVar7)();
+    }
+  }
+  else {
+    if (sVar5 == 0x1100) {
+      uVar4 = (*(int (*)())callbacks->classify_normal)();
+      if (uVar4 == 0x11) {
+        if ((uVar1 < FStack_2a.passing_count) ||
+           (uVar2 = FStack_2a.passing_count + 1, uVar6 = FStack_2a.passing_count + 1,
+           FStack_2a.passing_count = uVar2, uVar1 < uVar6)) {
+          uVar4 = 0x2200;
+        }
+        else {
+          uVar4 = 0x11001100;
+        }
+        FStack_2a.failing_count = 0;
+      }
+      else if (uVar4 == 0x22) {
+        FStack_2a.passing_count = 0;
+        if (FStack_2a.failing_count <= uVar2) {
+          FStack_2a.failing_count = FStack_2a.failing_count + 1;
+        }
+        if (FStack_2a.failing_high_water < FStack_2a.failing_count) {
+          FStack_2a.failing_high_water = FStack_2a.failing_count;
+        }
+        uVar4 = 0x22;
+        if (FStack_2a.failing_count <= uVar2) {
+          uVar4 = 0x110011;
+        }
+      }
+      else if ((uVar4 == 0x33) || (uVar4 == 0x44)) {
+        FStack_2a.failing_count = 0;
+        FStack_2a.passing_count = 0;
+        uVar4 = 0;
+      }
+      else {
+        uVar4 = 0xffff;
+      }
+      uVar3 = uVar4 & 0xffff;
+      if (uVar3 == 0) {
+        pFVar7 = ((void *)camry_host_ptr((uint32_t)(callbacks->leave_pending_passing)));
+        goto joined_r0x0006ad1a;
+      }
+      if (uVar3 == 0x11) {
+        if ((uintptr_t)(callbacks->leave_pending_passing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->leave_pending_passing)();
+        }
+        if ((uintptr_t)(callbacks->enter_failing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->enter_failing)();
+        }
+        pFVar7 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_pending_failing)));
+      }
+      else if (uVar3 == 0x22) {
+        if ((uintptr_t)(callbacks->leave_pending_passing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->leave_pending_passing)();
+        }
+        if ((uintptr_t)(callbacks->enter_failing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->enter_failing)();
+        }
+        if ((uintptr_t)(callbacks->confirm_failing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->confirm_failing)();
+        }
+        pFVar7 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_confirmed_failing)));
+      }
+      else if (uVar3 == 0x1100) {
+        pFVar7 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_pending_passing)));
+      }
+      else {
+        if (uVar3 != 0x2200) {
+          if ((uintptr_t)(callbacks->repeat_pending_passing)!=(uintptr_t)(f33_reset_vector)) {
+            (*(int (*)())callbacks->repeat_pending_passing)();
+          }
+          uVar4 = 0x1100;
+          goto LAB_0006add8;
+        }
+        if ((uintptr_t)(callbacks->confirm_passing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->confirm_passing)();
+        }
+        pFVar7 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_confirmed_passing)));
+      }
+    }
+    else if (sVar5 == 0x2200) {
+      uVar4 = (*(int (*)())callbacks->classify_normal)();
+      if (uVar4 == 0x11) {
+LAB_0006a970:
+        FStack_2a.failing_count = 0;
+LAB_0006a974:
+        uVar4 = 0x2200;
+      }
+      else {
+        if (uVar4 != 0x22) {
+          if ((uVar4 == 0x33) || (uVar4 == 0x44)) goto LAB_0006a970;
+          goto LAB_0006a974;
+        }
+        FStack_2a.passing_count = 0;
+        if (FStack_2a.failing_count <= uVar2) {
+          FStack_2a.failing_count = FStack_2a.failing_count + 1;
+        }
+        if (FStack_2a.failing_high_water < FStack_2a.failing_count) {
+          FStack_2a.failing_high_water = FStack_2a.failing_count;
+        }
+        uVar4 = 0x22;
+        if (FStack_2a.failing_count <= uVar2) {
+          uVar4 = 0x110011;
+        }
+      }
+      uVar3 = uVar4 & 0xffff;
+      if (uVar3 == 0) {
+        pFVar7 = ((void *)camry_host_ptr((uint32_t)(callbacks->leave_confirmed_passing)));
+        goto joined_r0x0006ad1a;
+      }
+      if (uVar3 == 0x11) {
+        if ((uintptr_t)(callbacks->leave_confirmed_passing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->leave_confirmed_passing)();
+        }
+        if ((uintptr_t)(callbacks->enter_failing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->enter_failing)();
+        }
+        pFVar7 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_pending_failing)));
+      }
+      else if (uVar3 == 0x22) {
+        if ((uintptr_t)(callbacks->leave_confirmed_passing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->leave_confirmed_passing)();
+        }
+        if ((uintptr_t)(callbacks->enter_failing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->enter_failing)();
+        }
+        if ((uintptr_t)(callbacks->confirm_failing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->confirm_failing)();
+        }
+        pFVar7 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_confirmed_failing)));
+      }
+      else {
+        pFVar7 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_confirmed_passing)));
+        if (uVar3 != 0x2200) {
+          if ((uintptr_t)(pFVar7)!=(uintptr_t)(f33_reset_vector)) {
+            (*(int (*)())pFVar7)();
+          }
+          uVar4 = 0x2200;
+          goto LAB_0006add8;
+        }
+      }
+    }
+    else {
+      uVar4 = (*(int (*)())callbacks->classify_recovery)();
+      uVar4 = f33_step_monitor_recovery_scratch((uchar)uVar4,&FStack_2a,&local_2c);
+      if ((uVar4 & 0xffff) == 0) {
+        pFVar7 = ((void *)camry_host_ptr((uint32_t)(callbacks->recover_confirmed_failing)));
+      }
+      else {
+        pFVar7 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_confirmed_failing)));
+        if ((uVar4 & 0xffff) != 0x22) {
+          if ((uintptr_t)(pFVar7)!=(uintptr_t)(f33_reset_vector)) {
+            (*(int (*)())pFVar7)();
+          }
+          uVar4 = 0x22;
+          goto LAB_0006add8;
+        }
+      }
+    }
+joined_r0x0006abfe:
+    if ((uintptr_t)(pFVar7)!=(uintptr_t)(f33_reset_vector)) {
+      (*(int (*)())pFVar7)();
+    }
+  }
+LAB_0006add8:
+  state->packed_status = uVar4;
+  state->passing_count = FStack_2a.passing_count;
+  state->failing_count = FStack_2a.failing_count;
+  state->failing_high_water = FStack_2a.failing_high_water;
+  state->recovery_count = FStack_2a.recovery_count;
+  return 0x11;
+}
+
+
+
 /* Clear packed status, passing/failing counts and failure high-water at offsets0/4/6/8. Exactly10
    bytes of the usual12-byte allocation; adjacent halfword untouched. */
 
@@ -2188,6 +2581,779 @@ void FUN_0006ae48(undefined4 *param_1,ushort *param_2)
   }
   *param_1 = uVar1;
   return;
+}
+
+
+
+/* Ten-byte state and13-pointer callbacks. Derive phase from counters, not old packed status.11/22
+   classify healthy/failure; strict counter>limit confirms. Failed22 is terminal and bypasses
+   predicates; confirmed healthy still evaluates entry predicate for failure. Pending33/44 resets
+   both current counts. Transition hooks differ from repeated-state hooks. Write packed
+   status0/11001100/2200/00110011/22; return full R10=11,not status. */
+
+uint f33_step_latched_monitor
+               (F33LatchedMonitorState *state,F33MonitorLimits *limits,
+               F33TwoSidedMonitorCallbacks *callbacks)
+
+{
+  ushort uVar1;
+  ushort uVar2;
+  short sVar3;
+  uint uVar4;
+  uint uVar5;
+  ushort uVar6;
+  ushort uVar7;
+  ushort uVar8;
+  F33MonitorAction *pFVar9;
+  
+  uVar8 = state->failing_count;
+  uVar7 = state->passing_count;
+  uVar6 = state->failing_high_water;
+  uVar1 = limits->passing_limit;
+  uVar2 = limits->failing_limit;
+  if (uVar8 == 0) {
+    if (uVar1 < uVar7) {
+      sVar3 = 0x2200;
+    }
+    else {
+      sVar3 = 0;
+      if (uVar7 != 0) {
+        sVar3 = 0x1100;
+      }
+    }
+  }
+  else {
+    sVar3 = 0x22;
+    if (uVar8 <= uVar2) {
+      sVar3 = 0x11;
+    }
+  }
+  if (sVar3 == 0) {
+    uVar5 = (*(int (*)())callbacks->classify_normal)();
+    if (uVar5 == 0x11) {
+      if ((uVar1 < uVar7) || (uVar7 = uVar7 + 1, uVar1 < uVar7)) {
+        uVar5 = 0x2200;
+      }
+      else {
+        uVar5 = 0x11001100;
+      }
+      uVar8 = 0;
+    }
+    else if (uVar5 == 0x22) {
+      uVar7 = 0;
+      if (uVar8 <= uVar2) {
+        uVar8 = uVar8 + 1;
+      }
+      uVar1 = uVar8;
+      if (uVar8 <= uVar6) {
+        uVar1 = uVar6;
+      }
+      uVar6 = uVar1;
+      uVar5 = 0x22;
+      if (uVar8 <= uVar2) {
+        uVar5 = 0x110011;
+      }
+    }
+    else if ((uVar5 == 0x33) || (uVar5 == 0x44)) {
+      uVar7 = 0;
+      uVar8 = 0;
+      uVar5 = 0;
+    }
+    else {
+      uVar5 = 0xffff;
+    }
+    uVar4 = uVar5 & 0xffff;
+    if (uVar4 != 0) {
+      if (uVar4 == 0x11) {
+        if ((uintptr_t)(callbacks->enter_failing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->enter_failing)();
+        }
+        pFVar9 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_pending_failing)));
+      }
+      else if (uVar4 == 0x22) {
+        if ((uintptr_t)(callbacks->enter_failing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->enter_failing)();
+        }
+        if ((uintptr_t)(callbacks->confirm_failing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->confirm_failing)();
+        }
+        pFVar9 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_confirmed_failing)));
+      }
+      else if (uVar4 == 0x1100) {
+        if ((uintptr_t)(callbacks->enter_passing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->enter_passing)();
+        }
+        pFVar9 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_pending_passing)));
+      }
+      else {
+        if (uVar4 != 0x2200) {
+          uVar5 = 0;
+          goto LAB_0006b308;
+        }
+        if ((uintptr_t)(callbacks->enter_passing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->enter_passing)();
+        }
+        if ((uintptr_t)(callbacks->confirm_passing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->confirm_passing)();
+        }
+        pFVar9 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_confirmed_passing)));
+      }
+      if ((uintptr_t)(pFVar9)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())pFVar9)();
+      }
+    }
+    goto LAB_0006b308;
+  }
+  if (sVar3 == 0x11) {
+    uVar5 = (*(int (*)())callbacks->classify_failing)();
+    if (uVar5 == 0x11) {
+      if ((uVar1 < uVar7) || (uVar7 = uVar7 + 1, uVar1 < uVar7)) {
+        uVar5 = 0x2200;
+      }
+      else {
+        uVar5 = 0x11001100;
+      }
+      uVar8 = 0;
+    }
+    else if (uVar5 == 0x22) {
+      uVar7 = 0;
+      if (uVar8 <= uVar2) {
+        uVar8 = uVar8 + 1;
+      }
+      uVar1 = uVar8;
+      if (uVar8 <= uVar6) {
+        uVar1 = uVar6;
+      }
+      uVar6 = uVar1;
+      uVar5 = 0x22;
+      if (uVar8 <= uVar2) {
+        uVar5 = 0x110011;
+      }
+    }
+    else if ((uVar5 == 0x33) || (uVar5 == 0x44)) {
+      uVar7 = 0;
+      uVar8 = 0;
+      uVar5 = 0;
+    }
+    else {
+      uVar5 = 0xffff;
+    }
+    uVar4 = uVar5 & 0xffff;
+    if (uVar4 == 0) {
+      if ((uintptr_t)(callbacks->leave_pending_failing)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())callbacks->leave_pending_failing)();
+      }
+    }
+    else {
+      if (uVar4 == 0x11) {
+        pFVar9 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_pending_failing)));
+      }
+      else if (uVar4 == 0x22) {
+        if ((uintptr_t)(callbacks->confirm_failing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->confirm_failing)();
+        }
+        pFVar9 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_confirmed_failing)));
+      }
+      else if (uVar4 == 0x1100) {
+        if ((uintptr_t)(callbacks->leave_pending_failing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->leave_pending_failing)();
+        }
+        if ((uintptr_t)(callbacks->enter_passing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->enter_passing)();
+        }
+        pFVar9 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_pending_passing)));
+      }
+      else {
+        if (uVar4 != 0x2200) {
+          if ((uintptr_t)(callbacks->repeat_pending_failing)!=(uintptr_t)(f33_reset_vector)) {
+            (*(int (*)())callbacks->repeat_pending_failing)();
+          }
+          uVar5 = 0x11;
+          goto LAB_0006b308;
+        }
+        if ((uintptr_t)(callbacks->leave_pending_failing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->leave_pending_failing)();
+        }
+        if ((uintptr_t)(callbacks->enter_passing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->enter_passing)();
+        }
+        if ((uintptr_t)(callbacks->confirm_passing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->confirm_passing)();
+        }
+        pFVar9 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_confirmed_passing)));
+      }
+      if ((uintptr_t)(pFVar9)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())pFVar9)();
+      }
+    }
+    goto LAB_0006b308;
+  }
+  if (sVar3 == 0x1100) {
+    uVar5 = (*(int (*)())callbacks->classify_normal)();
+    if (uVar5 == 0x11) {
+      if ((uVar1 < uVar7) || (uVar7 = uVar7 + 1, uVar1 < uVar7)) {
+        uVar5 = 0x2200;
+      }
+      else {
+        uVar5 = 0x11001100;
+      }
+      uVar8 = 0;
+    }
+    else if (uVar5 == 0x22) {
+      uVar7 = 0;
+      if (uVar8 <= uVar2) {
+        uVar8 = uVar8 + 1;
+      }
+      uVar1 = uVar8;
+      if (uVar8 <= uVar6) {
+        uVar1 = uVar6;
+      }
+      uVar6 = uVar1;
+      uVar5 = 0x22;
+      if (uVar8 <= uVar2) {
+        uVar5 = 0x110011;
+      }
+    }
+    else if ((uVar5 == 0x33) || (uVar5 == 0x44)) {
+      uVar7 = 0;
+      uVar8 = 0;
+      uVar5 = 0;
+    }
+    else {
+      uVar5 = 0xffff;
+    }
+    uVar4 = uVar5 & 0xffff;
+    if (uVar4 == 0) {
+      if ((uintptr_t)(callbacks->leave_pending_passing)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())callbacks->leave_pending_passing)();
+      }
+    }
+    else {
+      if (uVar4 == 0x11) {
+        if ((uintptr_t)(callbacks->leave_pending_passing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->leave_pending_passing)();
+        }
+        if ((uintptr_t)(callbacks->enter_failing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->enter_failing)();
+        }
+        pFVar9 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_pending_failing)));
+      }
+      else if (uVar4 == 0x22) {
+        if ((uintptr_t)(callbacks->leave_pending_passing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->leave_pending_passing)();
+        }
+        if ((uintptr_t)(callbacks->enter_failing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->enter_failing)();
+        }
+        if ((uintptr_t)(callbacks->confirm_failing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->confirm_failing)();
+        }
+        pFVar9 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_confirmed_failing)));
+      }
+      else if (uVar4 == 0x1100) {
+        pFVar9 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_pending_passing)));
+      }
+      else {
+        if (uVar4 != 0x2200) {
+          if ((uintptr_t)(callbacks->repeat_pending_passing)!=(uintptr_t)(f33_reset_vector)) {
+            (*(int (*)())callbacks->repeat_pending_passing)();
+          }
+          uVar5 = 0x1100;
+          goto LAB_0006b308;
+        }
+        if ((uintptr_t)(callbacks->confirm_passing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->confirm_passing)();
+        }
+        pFVar9 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_confirmed_passing)));
+      }
+      if ((uintptr_t)(pFVar9)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())pFVar9)();
+      }
+    }
+    goto LAB_0006b308;
+  }
+  if (sVar3 != 0x2200) {
+    if ((uintptr_t)(callbacks->repeat_confirmed_failing)!=(uintptr_t)(f33_reset_vector)) {
+      (*(int (*)())callbacks->repeat_confirmed_failing)();
+    }
+    uVar5 = 0x22;
+    goto LAB_0006b308;
+  }
+  uVar5 = (*(int (*)())callbacks->classify_normal)();
+  if (uVar5 == 0x11) {
+LAB_0006af18:
+    uVar8 = 0;
+LAB_0006af1a:
+    uVar5 = 0x2200;
+  }
+  else {
+    if (uVar5 != 0x22) {
+      if ((uVar5 == 0x33) || (uVar5 == 0x44)) goto LAB_0006af18;
+      goto LAB_0006af1a;
+    }
+    uVar7 = 0;
+    if (uVar8 <= uVar2) {
+      uVar8 = uVar8 + 1;
+    }
+    uVar1 = uVar8;
+    if (uVar8 <= uVar6) {
+      uVar1 = uVar6;
+    }
+    uVar6 = uVar1;
+    uVar5 = 0x22;
+    if (uVar8 <= uVar2) {
+      uVar5 = 0x110011;
+    }
+  }
+  uVar4 = uVar5 & 0xffff;
+  if (uVar4 == 0) {
+    if ((uintptr_t)(callbacks->leave_confirmed_passing)!=(uintptr_t)(f33_reset_vector)) {
+      (*(int (*)())callbacks->leave_confirmed_passing)();
+    }
+  }
+  else {
+    if (uVar4 == 0x11) {
+      if ((uintptr_t)(callbacks->leave_confirmed_passing)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())callbacks->leave_confirmed_passing)();
+      }
+      if ((uintptr_t)(callbacks->enter_failing)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())callbacks->enter_failing)();
+      }
+      pFVar9 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_pending_failing)));
+    }
+    else if (uVar4 == 0x22) {
+      if ((uintptr_t)(callbacks->leave_confirmed_passing)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())callbacks->leave_confirmed_passing)();
+      }
+      if ((uintptr_t)(callbacks->enter_failing)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())callbacks->enter_failing)();
+      }
+      if ((uintptr_t)(callbacks->confirm_failing)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())callbacks->confirm_failing)();
+      }
+      pFVar9 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_confirmed_failing)));
+    }
+    else {
+      pFVar9 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_confirmed_passing)));
+      if (uVar4 != 0x2200) {
+        if ((uintptr_t)(pFVar9)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())pFVar9)();
+        }
+        uVar5 = 0x2200;
+        goto LAB_0006b308;
+      }
+    }
+    if ((uintptr_t)(pFVar9)!=(uintptr_t)(f33_reset_vector)) {
+      (*(int (*)())pFVar9)();
+    }
+  }
+LAB_0006b308:
+  state->packed_status = uVar5;
+  state->passing_count = uVar7;
+  state->failing_count = uVar8;
+  state->failing_high_water = uVar6;
+  return 0x11;
+}
+
+
+
+/* Fourteen-byte state and13-pointer callbacks. Pending failure counts failing classifications
+   within a separately advancing window: healthy11 or ambiguous33 preserves accumulated failure
+   count; invalid44 resets it. Window expiry wins before another failure can confirm. Both
+   confirmation and expiry use strict > comparisons with16-bit increments. Exact acquisition config
+   pass2/windowFFFF,fail3/window6. Confirmed failure latches; packed status stored and full R10=11
+   returned. Native acquisition scheduler compositions confirm at failure-window6 but expire at7
+   before another failing classification can confirm. Failure high-water and record padding survive.
+    */
+
+uint f33_step_windowed_monitor
+               (F33WindowedMonitorState *state,F33WindowedMonitorLimits *limits,
+               F33TwoSidedMonitorCallbacks *callbacks)
+
+{
+  ushort uVar1;
+  ushort uVar2;
+  ushort uVar3;
+  ushort uVar4;
+  short sVar5;
+  uint uVar6;
+  uint uVar7;
+  ushort uVar8;
+  ushort uVar9;
+  ushort uVar10;
+  ushort uVar11;
+  ushort uVar12;
+  F33MonitorAction *pFVar13;
+  
+  uVar10 = state->passing_count;
+  uVar9 = state->passing_window;
+  uVar12 = state->failing_count;
+  uVar11 = state->failing_window;
+  uVar8 = state->failing_high_water;
+  uVar1 = limits->passing_window_limit;
+  uVar2 = limits->passing_limit;
+  uVar3 = limits->failing_limit;
+  uVar4 = limits->failing_window_limit;
+  if (uVar12 == 0) {
+    if (uVar2 < uVar10) {
+      sVar5 = 0x2200;
+    }
+    else {
+      sVar5 = 0;
+      if (uVar10 != 0) {
+        sVar5 = 0x1100;
+      }
+    }
+  }
+  else {
+    sVar5 = 0x22;
+    if (uVar12 <= uVar3) {
+      sVar5 = 0x11;
+    }
+  }
+  if (sVar5 == 0) {
+    uVar7 = (*(int (*)())callbacks->classify_normal)();
+    if (uVar7 == 0x11) {
+      if ((uVar1 < uVar9) || (uVar9 = uVar9 + 1, uVar1 < uVar9)) {
+        uVar10 = 0;
+        uVar9 = 0;
+        uVar7 = 0;
+      }
+      else if ((uVar2 < uVar10) || (uVar10 = uVar10 + 1, uVar2 < uVar10)) {
+        uVar7 = 0x2200;
+      }
+      else {
+        uVar7 = 0x11001100;
+      }
+      uVar12 = 0;
+      uVar11 = 0;
+    }
+    else if (uVar7 == 0x22) {
+      uVar10 = 0;
+      uVar9 = 0;
+      if ((uVar4 < uVar11) || (uVar11 = uVar11 + 1, uVar4 < uVar11)) goto LAB_0006b648;
+      if (uVar12 <= uVar3) {
+        uVar12 = uVar12 + 1;
+      }
+      uVar1 = uVar12;
+      if (uVar12 <= uVar8) {
+        uVar1 = uVar8;
+      }
+      uVar8 = uVar1;
+      uVar7 = 0x22;
+      if (uVar12 <= uVar3) {
+        uVar7 = 0x110011;
+      }
+    }
+    else if ((uVar7 == 0x33) || (uVar7 == 0x44)) {
+LAB_0006b648:
+      uVar10 = 0;
+      uVar9 = 0;
+      uVar11 = 0;
+      uVar7 = 0;
+      uVar12 = uVar9;
+    }
+    else {
+      uVar7 = 0;
+    }
+    uVar6 = uVar7 & 0xffff;
+    if (uVar6 != 0) {
+      if (uVar6 == 0x11) {
+        if ((uintptr_t)(callbacks->enter_failing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->enter_failing)();
+        }
+        pFVar13 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_pending_failing)));
+      }
+      else if (uVar6 == 0x22) {
+        if ((uintptr_t)(callbacks->enter_failing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->enter_failing)();
+        }
+        if ((uintptr_t)(callbacks->confirm_failing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->confirm_failing)();
+        }
+        pFVar13 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_confirmed_failing)));
+      }
+      else if (uVar6 == 0x1100) {
+        if ((uintptr_t)(callbacks->enter_passing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->enter_passing)();
+        }
+        pFVar13 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_pending_passing)));
+      }
+      else {
+        if (uVar6 != 0x2200) {
+          uVar7 = 0;
+          goto LAB_0006b7bc;
+        }
+        if ((uintptr_t)(callbacks->enter_passing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->enter_passing)();
+        }
+        if ((uintptr_t)(callbacks->confirm_passing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->confirm_passing)();
+        }
+        pFVar13 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_confirmed_passing)));
+      }
+      if ((uintptr_t)(pFVar13)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())pFVar13)();
+      }
+    }
+    goto LAB_0006b7bc;
+  }
+  if (sVar5 == 0x11) {
+    uVar7 = (*(int (*)())callbacks->classify_failing)();
+    if ((uVar4 < uVar11) || (uVar11 = uVar11 + 1, uVar4 < uVar11)) {
+LAB_0006b744:
+      uVar10 = 0;
+      uVar9 = 0;
+      uVar12 = 0;
+      uVar11 = 0;
+      uVar7 = 0;
+    }
+    else {
+      if (uVar7 == 0x11) {
+LAB_0006b73e:
+        uVar10 = 0;
+        uVar9 = uVar10;
+      }
+      else {
+        if (uVar7 == 0x22) {
+          uVar10 = 0;
+          uVar9 = 0;
+          if (uVar12 <= uVar3) {
+            uVar12 = uVar12 + 1;
+          }
+          uVar1 = uVar12;
+          if (uVar12 <= uVar8) {
+            uVar1 = uVar8;
+          }
+          uVar8 = uVar1;
+          uVar7 = 0x22;
+          if (uVar12 <= uVar3) {
+            uVar7 = 0x110011;
+          }
+          goto LAB_0006b74e;
+        }
+        if (uVar7 == 0x33) goto LAB_0006b73e;
+        if (uVar7 == 0x44) goto LAB_0006b744;
+      }
+      uVar7 = 0x11;
+    }
+LAB_0006b74e:
+    uVar6 = uVar7 & 0xffff;
+    if (uVar6 == 0) {
+      if ((uintptr_t)(callbacks->leave_pending_failing)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())callbacks->leave_pending_failing)();
+      }
+    }
+    else {
+      if (uVar6 == 0x11) {
+        pFVar13 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_pending_failing)));
+      }
+      else {
+        if (uVar6 != 0x22) {
+          if ((uintptr_t)(callbacks->repeat_pending_failing)!=(uintptr_t)(f33_reset_vector)) {
+            (*(int (*)())callbacks->repeat_pending_failing)();
+          }
+          uVar7 = 0x11;
+          goto LAB_0006b7bc;
+        }
+        if ((uintptr_t)(callbacks->confirm_failing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->confirm_failing)();
+        }
+        pFVar13 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_confirmed_failing)));
+      }
+      if ((uintptr_t)(pFVar13)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())pFVar13)();
+      }
+    }
+    goto LAB_0006b7bc;
+  }
+  if (sVar5 == 0x1100) {
+    uVar7 = (*(int (*)())callbacks->classify_normal)();
+    if ((uVar1 < uVar9) || (uVar9 = uVar9 + 1, uVar1 < uVar9)) {
+LAB_0006b502:
+      uVar10 = 0;
+      uVar9 = 0;
+      uVar11 = 0;
+      uVar7 = 0;
+      uVar12 = uVar9;
+    }
+    else if (uVar7 == 0x11) {
+      if ((uVar2 < uVar10) || (uVar10 = uVar10 + 1, uVar2 < uVar10)) {
+        uVar7 = 0x2200;
+      }
+      else {
+        uVar7 = 0x11001100;
+      }
+      uVar12 = 0;
+      uVar11 = 0;
+    }
+    else if (uVar7 == 0x22) {
+      uVar10 = 0;
+      uVar9 = 0;
+      if ((uVar4 < uVar11) || (uVar11 = uVar11 + 1, uVar4 < uVar11)) goto LAB_0006b502;
+      if (uVar12 <= uVar3) {
+        uVar12 = uVar12 + 1;
+      }
+      uVar1 = uVar12;
+      if (uVar12 <= uVar8) {
+        uVar1 = uVar8;
+      }
+      uVar8 = uVar1;
+      uVar7 = 0x22;
+      if (uVar12 <= uVar3) {
+        uVar7 = 0x110011;
+      }
+    }
+    else {
+      if (uVar7 == 0x33) {
+        uVar12 = 0;
+        uVar11 = uVar12;
+      }
+      else if (uVar7 == 0x44) goto LAB_0006b502;
+      uVar7 = 0x1100;
+    }
+    uVar6 = uVar7 & 0xffff;
+    if (uVar6 == 0) {
+      if ((uintptr_t)(callbacks->leave_pending_passing)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())callbacks->leave_pending_passing)();
+      }
+    }
+    else {
+      if (uVar6 == 0x11) {
+        if ((uintptr_t)(callbacks->leave_pending_passing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->leave_pending_passing)();
+        }
+        if ((uintptr_t)(callbacks->enter_failing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->enter_failing)();
+        }
+        pFVar13 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_pending_failing)));
+      }
+      else if (uVar6 == 0x22) {
+        if ((uintptr_t)(callbacks->leave_pending_passing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->leave_pending_passing)();
+        }
+        if ((uintptr_t)(callbacks->enter_failing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->enter_failing)();
+        }
+        if ((uintptr_t)(callbacks->confirm_failing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->confirm_failing)();
+        }
+        pFVar13 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_confirmed_failing)));
+      }
+      else if (uVar6 == 0x1100) {
+        pFVar13 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_pending_passing)));
+      }
+      else {
+        if (uVar6 != 0x2200) {
+          if ((uintptr_t)(callbacks->repeat_pending_passing)!=(uintptr_t)(f33_reset_vector)) {
+            (*(int (*)())callbacks->repeat_pending_passing)();
+          }
+          uVar7 = 0x1100;
+          goto LAB_0006b7bc;
+        }
+        if ((uintptr_t)(callbacks->confirm_passing)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())callbacks->confirm_passing)();
+        }
+        pFVar13 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_confirmed_passing)));
+      }
+      if ((uintptr_t)(pFVar13)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())pFVar13)();
+      }
+    }
+    goto LAB_0006b7bc;
+  }
+  if (sVar5 != 0x2200) {
+    if ((uintptr_t)(callbacks->repeat_confirmed_failing)!=(uintptr_t)(f33_reset_vector)) {
+      (*(int (*)())callbacks->repeat_confirmed_failing)();
+    }
+    uVar7 = 0x22;
+    goto LAB_0006b7bc;
+  }
+  uVar7 = (*(int (*)())callbacks->classify_normal)();
+  if (uVar7 == 0x11) {
+LAB_0006b3d6:
+    uVar12 = 0;
+    uVar11 = 0;
+LAB_0006b3da:
+    uVar7 = 0x2200;
+  }
+  else {
+    if (uVar7 != 0x22) {
+      if ((uVar7 == 0x33) || (uVar7 == 0x44)) goto LAB_0006b3d6;
+      goto LAB_0006b3da;
+    }
+    uVar10 = 0;
+    uVar9 = 0;
+    if ((uVar4 < uVar11) || (uVar11 = uVar11 + 1, uVar4 < uVar11)) {
+      uVar12 = 0;
+      uVar11 = 0;
+      uVar7 = 0;
+    }
+    else {
+      if (uVar12 <= uVar3) {
+        uVar12 = uVar12 + 1;
+      }
+      uVar1 = uVar12;
+      if (uVar12 <= uVar8) {
+        uVar1 = uVar8;
+      }
+      uVar8 = uVar1;
+      uVar7 = 0x22;
+      if (uVar12 <= uVar3) {
+        uVar7 = 0x110011;
+      }
+    }
+  }
+  uVar6 = uVar7 & 0xffff;
+  if (uVar6 == 0) {
+    if ((uintptr_t)(callbacks->leave_confirmed_passing)!=(uintptr_t)(f33_reset_vector)) {
+      (*(int (*)())callbacks->leave_confirmed_passing)();
+    }
+  }
+  else {
+    if (uVar6 == 0x11) {
+      if ((uintptr_t)(callbacks->leave_confirmed_passing)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())callbacks->leave_confirmed_passing)();
+      }
+      if ((uintptr_t)(callbacks->enter_failing)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())callbacks->enter_failing)();
+      }
+      pFVar13 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_pending_failing)));
+    }
+    else if (uVar6 == 0x22) {
+      if ((uintptr_t)(callbacks->leave_confirmed_passing)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())callbacks->leave_confirmed_passing)();
+      }
+      if ((uintptr_t)(callbacks->enter_failing)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())callbacks->enter_failing)();
+      }
+      if ((uintptr_t)(callbacks->confirm_failing)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())callbacks->confirm_failing)();
+      }
+      pFVar13 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_confirmed_failing)));
+    }
+    else {
+      pFVar13 = ((void *)camry_host_ptr((uint32_t)(callbacks->repeat_confirmed_passing)));
+      if (uVar6 != 0x2200) {
+        if ((uintptr_t)(pFVar13)!=(uintptr_t)(f33_reset_vector)) {
+          (*(int (*)())pFVar13)();
+        }
+        uVar7 = 0x2200;
+        goto LAB_0006b7bc;
+      }
+    }
+    if ((uintptr_t)(pFVar13)!=(uintptr_t)(f33_reset_vector)) {
+      (*(int (*)())pFVar13)();
+    }
+  }
+LAB_0006b7bc:
+  state->packed_status = uVar7;
+  state->passing_count = uVar10;
+  state->passing_window = uVar9;
+  state->failing_count = uVar12;
+  state->failing_window = uVar11;
+  state->failing_high_water = uVar8;
+  return 0x11;
 }
 
 

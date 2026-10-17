@@ -2774,6 +2774,26 @@ void FUN_0008e82c(void)
 
 
 
+bool FUN_0008e862(ushort param_1,undefined4 *param_2)
+
+{
+  if (param_1 == 0) {
+    *(undefined2 *)(param_2 + 3) = 1;
+    *param_2 = (0xfebe5458u);
+    param_2[1] = camry_host_addr(f33_secoc_tx_queue_head_pair);
+    param_2[2] = camry_host_addr(f33_secoc_tx_application_snapshot);
+  }
+  if (param_1 == 1) {
+    *param_2 = camry_host_addr(((undefined *)camry_host_ptr(0xfebe546au)));
+    param_2[1] = camry_host_addr(((undefined *)camry_host_ptr(0xfebe5464u)));
+    param_2[2] = camry_host_addr(((undefined *)camry_host_ptr(0xfebe54acu)));
+    *(undefined2 *)(param_2 + 3) = 3;
+  }
+  return 1 < param_1;
+}
+
+
+
 undefined4 FUN_0008e8a0(undefined2 param_1,ushort param_2,ushort *param_3)
 
 {

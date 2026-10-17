@@ -3174,6 +3174,26 @@ void FUN_00073eda(void)
 
 
 
+/* Store767EA at6B04 for nonzero low8, otherwise766F4. Does not call the pointer. Low8 input nonzero
+   stores767EA at6B04; zero stores766F4. SHL24 distinguishes only low8. Native initialized service
+   selects767EA; zero branch is exact instruction evidence. Does not call selected pointer or
+   establish its ABI. */
+
+void f33_nvm_set_service_poll(uchar full_service)
+
+{
+  code *pcVar1;
+  
+  pcVar1 = FUN_000767ea;
+  if (full_service == '\0') {
+    pcVar1 = FUN_000766f4;
+  }
+  f33_nvm_selected_service_poll = camry_host_addr(pcVar1);
+  return;
+}
+
+
+
 /* Actual full initializer executes5772 instructions under explicit RAM preconditions. Initialize
    logical cells, buffer overrides, abortF0, pending/active records and queues. Preserve
    service-state bytes,6126,6B14 and padding.7477A clears the same6B18 word once in this target. No

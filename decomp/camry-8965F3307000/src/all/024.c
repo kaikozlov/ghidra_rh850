@@ -3817,6 +3817,21 @@ void FUN_00093c66(ushort param_1)
 
 
 
+void FUN_00093c6c(uint param_1,undefined4 *param_2)
+
+{
+  uchar *puVar1;
+  
+  param_1 = param_1 & 0xffff;
+  puVar1 = ((void *)camry_host_ptr((uint32_t)(f33_dcm_receive_buffer_configuration[param_1].base)));
+  f33_dcm_receive_buffer_state[param_1].write_cursor = camry_host_addr(puVar1);
+  *param_2 = camry_host_addr(puVar1);
+  *(ushort *)(param_2 + 1) = f33_dcm_receive_buffer_state[param_1].received_length;
+  return;
+}
+
+
+
 uchar FUN_00093c8e(void)
 
 {

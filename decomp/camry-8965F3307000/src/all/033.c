@@ -4302,6 +4302,38 @@ void f33_fill_constant_block_cfe8e(void)
 
 
 
+void FUN_000cfea4(char param_1,short *param_2)
+
+{
+  undefined *puVar1;
+  
+  if (param_1 != DAT_febecbed) {
+    *param_2 = 0;
+    if (param_1 == '\0') {
+      DAT_febecbf6 = 0;
+      DAT_febecbfa = 0;
+      DAT_febecbfc = 0;
+      return;
+    }
+    puVar1 = ((void *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xb148cu + (uint32_t)(DAT_febeac3c & 1) * 4u)))))));
+    if (param_1 == '\x01') {
+      DAT_febecbf6 = *(undefined2 *)(puVar1 + 0x36);
+    }
+    else if (param_1 == '\x02') {
+      DAT_febecbf6 = *(undefined2 *)(puVar1 + 0x38);
+    }
+    else {
+      DAT_febecbf6 = *(undefined2 *)(puVar1 + 0x3a);
+    }
+    DAT_febecbfa = DAT_febecbf6;
+    DAT_febecbfc = DAT_febecbf6;
+    *param_2 = *param_2 + 1;
+  }
+  return;
+}
+
+
+
 void FUN_000cff04(void)
 
 {

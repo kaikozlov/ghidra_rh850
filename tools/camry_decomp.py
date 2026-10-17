@@ -2694,6 +2694,8 @@ def _scan_side(code: str, start: int, step: int, stops: str) -> int:
     index = start
     while 0 <= index < len(code):
         char = code[index]
+        if step < 0 and char == "}" and depth == 0:
+            return index + 1
         if step < 0 and char in ")]}":
             depth += 1
         elif step < 0 and char in "([{":
@@ -2712,6 +2714,17 @@ def _scan_side(code: str, start: int, step: int, stops: str) -> int:
     return 0 if step < 0 else len(code)
 
 
+def _integer_pointer_targets(signature: str, code: str) -> set[str]:
+    """Names declared as one pointer to an integer, such as `undefined4 *slot`."""
+    pattern = re.compile(
+        r"\b(?:unsigned\s+int|unsigned\s+long|signed\s+int|undefined[1248]?|"
+        r"uint|ulong|ushort|byte|uchar|char|short|int|long|bool|code|"
+        r"uint32_t|uint16_t|uint8_t|int32_t|int16_t|int8_t)\s*\*\s*"
+        r"([A-Za-z_][A-Za-z0-9_]*)"
+    )
+    return set(pattern.findall(signature + "\n" + code))
+
+
 def _rewrite_pointer_assignments(code: str) -> str:
     """Store a firmware address in a pointer, and a pointer into an integer."""
     brace = _opening_brace(code)
@@ -2719,6 +2732,7 @@ def _rewrite_pointer_assignments(code: str) -> str:
         return code
     signature = _c_signature(code)
     kind = _kind_context(signature, code)
+    integer_targets = _integer_pointer_targets(signature, code)
     body = code[brace:]
     replacements: list[tuple[int, int, str]] = []
     for site in _assignment_sites(body):
@@ -2730,6 +2744,9 @@ def _rewrite_pointer_assignments(code: str) -> str:
             continue
         lhs_kind = kind(lhs)
         rhs_kind = kind(rhs)
+        deref = re.fullmatch(r"\*\s*([A-Za-z_][A-Za-z0-9_]*)", lhs)
+        if lhs_kind == "unknown" and deref and deref.group(1) in integer_targets:
+            lhs_kind = "integer"
         if lhs_kind == "pointer" and rhs_kind == "integer":
             replacements.append((
                 site + 1,

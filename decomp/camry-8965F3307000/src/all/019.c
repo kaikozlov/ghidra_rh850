@@ -3281,6 +3281,113 @@ void FUN_00067a52(void)
 
 
 
+/* Same consume-before-validation and11/22/33 selection contract as family0, using68626/6869E and
+   redundant status publication; write selection additionally clears068A. Span flag5A selects
+   phase11 regardless6889A result. Empty ring scans repaired status triplets with fallback12; first
+   status10 with failing live checksum calls68626 then stops, but still returns0 and preserves
+   phase/active/completion. Native empty-ring failure queues three actual reads while leaving prior
+   completion5A; caller reachability/restoration is not inferred. Recover indices. Span flag5A
+   selects phase11/return1 despite real busy rejection. Ordinary dequeue clears state/object and
+   advances consumer before validation, preserving+1.11 selects read phase22;22 always attempts
+   write,33 only if completion!=5A, both phase33. Ignore arm return; status21/active/return1.
+   Unknown kind status32/return0 preserves phase/active; invalid object only consumes. Any remaining
+   matching cell overrides20. Family1 clears whole-write retry for22/33; empty ring repairs triplets
+   then first status10/checksum failure submits reads yet returns0, preserving
+   phase/active/completion. Native real three-read enqueue with old completion5A is a direct
+   helper-state proof, not restoration. Bulk operation after6879C remains bounded. */
+
+uint f33_nvm_select_family1_request(void)
+
+{
+  code *pcVar1;
+  code cVar2;
+  ushort object;
+  int iVar3;
+  undefined8 uVar4;
+  uint uVar5;
+  int iVar6;
+  uint uVar7;
+  undefined1 uVar8;
+  uchar value;
+  uint uVar9;
+  int iVar10;
+  byte bStack_1a;
+  byte bStack_19;
+  
+  uVar4 = 0xfebeb800;
+  f33_nvm_recover_family1_request_indices(&bStack_1a,&bStack_19);
+  iVar3 = (int)uVar4;
+  if ((*((char *)camry_host_ptr((uint32_t)(iVar3 + 0x4e88)))) == 'Z') {
+    f33_nvm_dispatch_family1_page_span();
+    uVar8 = 0x11;
+    uVar7 = 1;
+    goto LAB_00067c7a;
+  }
+  uVar8 = (*((undefined1 *)camry_host_ptr((uint32_t)(iVar3 + 0x4e89))));
+  uVar7 = 0;
+  if ((uint)bStack_1a == (uint)bStack_19) {
+    for (iVar10 = 0; iVar3 = (int)uVar4,
+        (int)(iVar10 - (uint)f33_nvm_family1_object_count) < 0 !=
+        (iVar10 < 0 && -1 < (int)(iVar10 - (uint)f33_nvm_family1_object_count)); iVar10 = iVar10 + 1
+        ) {
+      uVar5 = f33_read_repair_redundant_u8
+                        (camry_host_addr(((uchar *)camry_host_ptr((uint32_t)(iVar3 + 0x4b28 + iVar10)))), camry_host_addr(((uchar *)camry_host_ptr((uint32_t)(iVar3 + 0x5888 + iVar10)))), camry_host_addr(((uchar *)camry_host_ptr((uint32_t)(iVar3 + 0x58ac + iVar10)))), '\x12');
+      if (uVar5 == 0x10) {
+        iVar6 = f33_nvm_check_family1_checksum((ushort)iVar10);
+        iVar3 = (int)uVar4;
+        if (iVar6 != 1) {
+          f33_nvm_submit_family1_read_copies((ushort)iVar10);
+          break;
+        }
+      }
+    }
+    goto LAB_00067c7a;
+  }
+  pcVar1 = ((void *)camry_host_ptr((uint32_t)(0x4d8cu + (uint)bStack_19 * 4 + iVar3)));
+  object = *(ushort *)(pcVar1 + 2);
+  uVar9 = (uint)object;
+  cVar2 = *pcVar1;
+  *(undefined2 *)(pcVar1 + 2) = 0xffff;
+  *pcVar1 = (code)0xff;
+  uVar5 = f33_nvm_advance_family1_request_index(bStack_19);
+  bStack_19 = (byte)uVar5;
+  if (f33_nvm_family1_object_count <= uVar9) goto LAB_00067c7a;
+  if (cVar2 == (code)0x11) {
+    f33_nvm_submit_family1_read_copies(object);
+    uVar8 = 0x22;
+    (*((ushort *)camry_host_ptr((uint32_t)(iVar3 + 0x4e8c)))) = object;
+LAB_00067c06:
+    value = '!';
+    uVar7 = 1;
+  }
+  else {
+    if ((cVar2 == (code)0x22) || (cVar2 == (code)0x33)) {
+      uVar7 = f33_nvm_get_family1_completion(object);
+      if ((cVar2 == (code)0x22) || (uVar7 != 0x5a)) {
+        f33_nvm_submit_family1_write_copies(object);
+      }
+      (*((ushort *)camry_host_ptr((uint32_t)(iVar3 + 0x4e8c)))) = object;
+      uVar8 = 0x33;
+      (*((undefined1 *)camry_host_ptr((uint32_t)(iVar3 + 0x4e8a)))) = 0;
+      goto LAB_00067c06;
+    }
+    value = '2';
+  }
+  uVar5 = f33_nvm_family1_has_request_cell(object);
+  if (uVar5 == 1) {
+    value = ' ';
+  }
+  f33_publish_redundant_u8
+            (value,((uchar *)camry_host_ptr((uint32_t)(iVar3 + 0x4b28 + uVar9))),((uchar *)camry_host_ptr((uint32_t)(iVar3 + 0x5888 + uVar9))),
+             ((uchar *)camry_host_ptr((uint32_t)(iVar3 + 0x58ac + uVar9))));
+LAB_00067c7a:
+  (*((undefined1 *)camry_host_ptr((uint32_t)(iVar3 + 0x4e89)))) = uVar8;
+  (*((byte *)camry_host_ptr((uint32_t)(iVar3 + 0x4e87)))) = bStack_19;
+  return uVar7;
+}
+
+
+
 /* Snapshot phase/object and queue indices. Phase11 sets0688=A5. Valid phase22/33 completion5A
    publishes checksum seed then status10. Phase22 failure calls68A6C: zero->30, every other
    result->11; no checksum publication. Phase33 failure increments retry below2, calls 6869E and
