@@ -96,6 +96,31 @@ void FUN_0004c142(void)
 
 
 
+/* WARNING: Removing unreachable block (ram,0x0004c19e) */
+
+void FUN_0004c14e(void)
+
+{
+  uint32_t puVar1;
+  undefined1 uStack_7;
+  undefined1 auStack_6 [2];
+  
+  puVar1 = 0xfebeb800u;
+  DAT_febe810d = (undefined1)DAT_febe8048;
+  DAT_febe810b = DAT_febe80de | 0x20;
+  DAT_febe810c = (byte)((ushort)DAT_febe8048 >> 8) & 0xf;
+  FUN_00070110((int)DAT_febe7d46,0x7ff,(int)0xfffff800,auStack_6);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x36f1))))) = auStack_6[0];
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x36f2))))) = auStack_6[1] & 0xf;
+  FUN_0006a5cc((int)((*((short *)camry_host_ptr((uint32_t)(puVar1 + -0x36ae)))) / 10),&uStack_7);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x36f0))))) = uStack_7;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x36ef))))) = (char)((ushort)(*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x36a8)))) >> 8);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x36ee))))) = (char)(*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x36a8))));
+  return;
+}
+
+
+
 char FUN_0004c1c0(void)
 
 {
@@ -2166,7 +2191,7 @@ undefined4 f33_rdbi_0102_callback(int param_1)
     uStack_e = DAT_febee896;
     uStack_f = DAT_febee815;
     FUN_00070180(DAT_febee896,0xfffe,&uStack_e);
-    FUN_00070192(uStack_c,0xfffffffe,&uStack_c);
+    FUN_00070192(uStack_c,(int)0xfffffffe,&uStack_c);
     FUN_0007016e(uStack_f,1,&uStack_f);
   }
   else {
@@ -2461,13 +2486,41 @@ undefined4 did_1035_steering_wheel_torque(undefined4 param_1)
   
   if (DAT_febe6af0 == -0x5aa5a55b) {
     local_c = (DAT_febe66a8 * 1000) / 0x100;
-    FUN_0007012a(local_c,25000,0xffff9e58,&local_c);
+    FUN_0007012a(local_c,25000,(int)0xffff9e58,&local_c);
     iVar1 = (int)(short)local_c;
   }
   else {
     iVar1 = -0x8000;
   }
   FUN_0006a5ac(iVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0004dbda) */
+
+undefined4 did_1036_steering_angle_velocity(undefined4 param_1)
+
+{
+  short sStack_a;
+  
+  sStack_a = (short)((DAT_febe66a4 * 0x168) / 0x400);
+  FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
+  FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+undefined4 did_1037_steering_angle(undefined4 param_1)
+
+{
+  short sStack_a;
+  
+  sStack_a = DAT_febe7d46;
+  FUN_00070110((int)DAT_febe7d46,0x7ff,(int)0xfffff800,&sStack_a);
+  FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
 }
 
@@ -2503,6 +2556,25 @@ undefined4 f33_rdbi_1062_callback(undefined4 param_1)
   uStack_a = (undefined2)((uint)DAT_febe66ae * 100 >> 8);
   FUN_00070180((uint)DAT_febe66ae * 100 >> 8,0x9c4,&uStack_a);
   FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0004dcb8) */
+/* RDBI1063/1069 aliases: signed7DDA*10/128, narrow16, clamp[-500,2000], encodeBE16. Current EMPS_P5
+   names thermistor temperature with wire units0.1degC. Exact table rows293FC/2945C bind
+   DID1063/1069 to the same signed7DDA thermistor publication. Scale10/128 then clamp[-500,2000],
+   encodeBE16 and return0; diagnostic units0.1degC. */
+
+uint f33_rdbi_1063_callback(uchar *output)
+
+{
+  short sStack_a;
+  
+  sStack_a = (short)((DAT_febe7dda * 10) / 0x80);
+  FUN_00070110((int)sStack_a,2000,(int)0xfffffe0c,&sStack_a);
+  FUN_0006a5ac((int)sStack_a,output);
   return 0;
 }
 
@@ -2571,7 +2643,7 @@ undefined4 f33_rdbi_1091_callback(undefined4 param_1)
   int local_c;
   
   local_c = (DAT_febe64f2 * 1000) / 0x100;
-  FUN_0007012a(local_c,25000,0xffff9e58,&local_c);
+  FUN_0007012a(local_c,25000,(int)0xffff9e58,&local_c);
   FUN_0006a5ac((int)(short)local_c, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
 }
@@ -2586,7 +2658,7 @@ undefined4 f33_rdbi_1092_callback(undefined4 param_1)
   int local_c;
   
   local_c = (DAT_febe64f4 * 1000) / 0x100;
-  FUN_0007012a(local_c,25000,0xffff9e58,&local_c);
+  FUN_0007012a(local_c,25000,(int)0xffff9e58,&local_c);
   FUN_0006a5ac((int)(short)local_c, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
 }
@@ -2601,7 +2673,7 @@ undefined4 f33_rdbi_1093_callback(undefined4 param_1)
   int local_c;
   
   local_c = (DAT_febe64f6 * 1000) / 0x100;
-  FUN_0007012a(local_c,25000,0xffff9e58,&local_c);
+  FUN_0007012a(local_c,25000,(int)0xffff9e58,&local_c);
   FUN_0006a5ac((int)(short)local_c, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
 }
@@ -2616,7 +2688,7 @@ undefined4 f33_rdbi_1094_callback(undefined4 param_1)
   int local_c;
   
   local_c = (DAT_febe64f8 * 1000) / 0x100;
-  FUN_0007012a(local_c,25000,0xffff9e58,&local_c);
+  FUN_0007012a(local_c,25000,(int)0xffff9e58,&local_c);
   FUN_0006a5ac((int)(short)local_c, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
 }
@@ -2670,6 +2742,51 @@ undefined4 f33_rdbi_1098_callback(undefined4 param_1)
   uStack_a = DAT_febe66dc;
   FUN_00070180(DAT_febe66dc,0xffff,&uStack_a);
   FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0004df08) */
+
+undefined4 f33_rdbi_10c1_callback(undefined4 param_1)
+
+{
+  short sStack_a;
+  
+  sStack_a = (short)((DAT_febe6654 * 100) / 0x80);
+  FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
+  FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0004df44) */
+
+undefined4 f33_rdbi_10c2_callback(undefined4 param_1)
+
+{
+  short sStack_a;
+  
+  sStack_a = (short)((DAT_febe6656 * 100) / 0x80);
+  FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
+  FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0004df80) */
+
+undefined4 f33_rdbi_10c3_callback(undefined4 param_1)
+
+{
+  short sStack_a;
+  
+  sStack_a = (short)((DAT_febe6658 * 100) / 0x80);
+  FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
+  FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
 }
 
@@ -2752,6 +2869,51 @@ undefined4 f33_rdbi_10ca_callback(undefined4 param_1)
   uStack_a = (undefined2)((uint)DAT_febe66ae * 100 >> 8);
   FUN_00070180((uint)DAT_febe66ae * 100 >> 8,0x9c4,&uStack_a);
   FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0004e09c) */
+
+undefined4 f33_rdbi_10f1_callback(undefined4 param_1)
+
+{
+  short sStack_a;
+  
+  sStack_a = (short)((DAT_febe665a * 100) / 0x80);
+  FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
+  FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0004e0d8) */
+
+undefined4 f33_rdbi_10f2_callback(undefined4 param_1)
+
+{
+  short sStack_a;
+  
+  sStack_a = (short)((DAT_febe665c * 100) / 0x80);
+  FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
+  FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0004e114) */
+
+undefined4 f33_rdbi_10f3_callback(undefined4 param_1)
+
+{
+  short sStack_a;
+  
+  sStack_a = (short)((DAT_febe665e * 100) / 0x80);
+  FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
+  FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
 }
 
@@ -2934,7 +3096,7 @@ undefined4 f33_rdbi_112d_callback(undefined4 param_1)
   int local_c;
   
   local_c = (DAT_febee938 * 4000) / 0x1000;
-  FUN_0007012a(local_c,0x1ffff,0xfffe0000,&local_c);
+  FUN_0007012a(local_c,0x1ffff,(int)0xfffe0000,&local_c);
   FUN_0006a594(local_c, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
 }
@@ -3004,6 +3166,66 @@ undefined4 f33_rdbi_1133_callback(undefined1 *param_1)
   uStack_9 = DAT_febee88b;
   FUN_0007016e(DAT_febee88b,3,&uStack_9);
   *param_1 = uStack_9;
+  return 0;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0004e3b2) */
+
+undefined4 did_1151_motor_actual_current_q_axis(undefined4 param_1)
+
+{
+  short sStack_a;
+  
+  sStack_a = (short)((DAT_febe670e * 100) / 0x80);
+  FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
+  FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0004e3ee) */
+
+undefined4 did_1152_command_value_current_q_axis(undefined4 param_1)
+
+{
+  short sStack_a;
+  
+  sStack_a = (short)((DAT_febe6724 * 100) / 0x80);
+  FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
+  FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0004e42a) */
+
+undefined4 did_1153_motor_actual_current_2_d_axis(undefined4 param_1)
+
+{
+  short sStack_a;
+  
+  sStack_a = (short)((DAT_febe670c * 100) / 0x80);
+  FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
+  FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0004e466) */
+
+undefined4 did_1154_command_value_current_2_d_axis(undefined4 param_1)
+
+{
+  short sStack_a;
+  
+  sStack_a = (short)((DAT_febe6726 * 100) / 0x80);
+  FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
+  FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
 }
 
@@ -3113,6 +3335,19 @@ undefined4 did_1185_can_vehicle_speed_sp1(undefined4 param_1)
   uStack_a = DAT_febe809a;
   FUN_00070180(DAT_febe809a,30000,&uStack_a);
   FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_1186_callback(undefined4 param_1)
+
+{
+  short sStack_a;
+  
+  sStack_a = DAT_febe804a;
+  FUN_00070110((int)DAT_febe804a,0x7fff,(int)0xffff8000,&sStack_a);
+  FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
 }
 
@@ -3320,6 +3555,54 @@ undefined4 did_1c05_1c0c_asic_state_information(int param_1)
 
 
 
+/* WARNING: Removing unreachable block (ram,0x0004e890) */
+/* ECU overheat-prevention estimate:6F6C==0 emits7FFF sentinel, not zero degrees. Otherwise scale
+   signed6F7A*10/128 and clamp[-500,2000]; encodeBE16 and return0. Exact1C06 row29A7C: activity6F6C
+   zero emits7FFF sentinel; otherwise scale6F7A*10/128 and clamp[-500,2000], encodeBE16. Named ECU
+   overheat-prevention estimate, not proof of global limit dominance. */
+
+uint f33_rdbi_1c06_callback(uchar *output)
+
+{
+  short sStack_a;
+  
+  if (DAT_febe6f6c == '\0') {
+    sStack_a = 0x7fff;
+  }
+  else {
+    sStack_a = (short)((DAT_febe6f7a * 10) / 0x80);
+    FUN_00070110((int)sStack_a,2000,(int)0xfffffe0c,&sStack_a);
+  }
+  FUN_0006a5ac((int)sStack_a,output);
+  return 0;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0004e8de) */
+/* Motor overheat-prevention estimate:6F6D==0 emits7FFF sentinel; otherwise scale signed6F7C*10/128
+   and clamp[-500,2000]. Diagnostic visibility is not the global limit winner. Exact1C07 row29A8C:
+   activity6F6D zero emits7FFF sentinel; otherwise scale6F7C*10/128 and clamp[-500,2000],
+   encodeBE16. Separate motor diagnostic activity and temperature. */
+
+uint f33_rdbi_1c07_callback(uchar *output)
+
+{
+  short sStack_a;
+  
+  if (DAT_febe6f6d == '\0') {
+    sStack_a = 0x7fff;
+  }
+  else {
+    sStack_a = (short)((DAT_febe6f7c * 10) / 0x80);
+    FUN_00070110((int)sStack_a,2000,(int)0xfffffe0c,&sStack_a);
+  }
+  FUN_0006a5ac((int)sStack_a,output);
+  return 0;
+}
+
+
+
 undefined4 f33_rdbi_1c08_callback(undefined1 *param_1)
 
 {
@@ -3359,6 +3642,21 @@ undefined4 f33_rdbi_1c31_callback(undefined1 *param_1)
 
 
 
+/* WARNING: Removing unreachable block (ram,0x0004e99a) */
+
+undefined4 f33_rdbi_1c32_callback(undefined4 param_1)
+
+{
+  short sStack_a;
+  
+  sStack_a = (short)((DAT_febee8c6 * 100) / 0x80);
+  FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
+  FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
 undefined4 f33_rdbi_1c33_callback(undefined1 *param_1)
 
 {
@@ -3380,6 +3678,21 @@ undefined4 f33_rdbi_1c37_callback(undefined1 *param_1)
   uStack_9 = DAT_febee842;
   FUN_0007016e(DAT_febee842,1,&uStack_9);
   *param_1 = uStack_9;
+  return 0;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0004ea24) */
+
+undefined4 f33_rdbi_1c38_callback(undefined4 param_1)
+
+{
+  short sStack_a;
+  
+  sStack_a = (short)((DAT_febee8c2 * 100) / 0x80);
+  FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
+  FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
 }
 
@@ -3411,6 +3724,21 @@ undefined4 f33_rdbi_1c3d_callback(undefined1 *param_1)
 
 
 
+/* WARNING: Removing unreachable block (ram,0x0004eaae) */
+
+undefined4 f33_rdbi_1c3e_callback(undefined4 param_1)
+
+{
+  short sStack_a;
+  
+  sStack_a = (short)((DAT_febee8b6 * 100) / 0x80);
+  FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
+  FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
 undefined4 f33_rdbi_1c3f_callback(undefined1 *param_1)
 
 {
@@ -3437,6 +3765,21 @@ undefined4 f33_rdbi_1c43_callback(undefined1 *param_1)
 
 
 
+/* WARNING: Removing unreachable block (ram,0x0004eb38) */
+
+undefined4 f33_rdbi_1c44_callback(undefined4 param_1)
+
+{
+  short sStack_a;
+  
+  sStack_a = (short)((DAT_febee8ba * 100) / 0x80);
+  FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
+  FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
 undefined4 f33_rdbi_1c49_callback(undefined1 *param_1)
 
 {
@@ -3445,6 +3788,21 @@ undefined4 f33_rdbi_1c49_callback(undefined1 *param_1)
   uStack_9 = DAT_febee83e;
   FUN_0007016e(DAT_febee83e,1,&uStack_9);
   *param_1 = uStack_9;
+  return 0;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0004eb9a) */
+
+undefined4 f33_rdbi_1c4a_callback(undefined4 param_1)
+
+{
+  short sStack_a;
+  
+  sStack_a = (short)((DAT_febee8c2 * 100) / 0x80);
+  FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
+  FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
 }
 
@@ -3476,6 +3834,21 @@ undefined4 f33_rdbi_1c4f_callback(undefined1 *param_1)
 
 
 
+/* WARNING: Removing unreachable block (ram,0x0004ec24) */
+
+undefined4 f33_rdbi_1c50_callback(undefined4 param_1)
+
+{
+  short sStack_a;
+  
+  sStack_a = (short)((DAT_febee8c2 * 100) / 0x80);
+  FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
+  FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
 undefined4 f33_rdbi_1c51_callback(undefined1 *param_1)
 
 {
@@ -3497,6 +3870,21 @@ undefined4 f33_rdbi_1c52_callback(undefined1 *param_1)
   uStack_9 = DAT_febee860;
   FUN_0007016e(DAT_febee860,0xf,&uStack_9);
   *param_1 = uStack_9;
+  return 0;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0004ecae) */
+
+undefined4 f33_rdbi_1c53_callback(undefined4 param_1)
+
+{
+  short sStack_a;
+  
+  sStack_a = (short)((DAT_febee8da * 100) / 0x80);
+  FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
+  FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
 }
 
@@ -3586,7 +3974,7 @@ undefined4 f33_rdbi_1c87_callback(int param_1)
   uStack_e = DAT_febe7bd0;
   uStack_f = DAT_febe7bc9;
   FUN_00070180(DAT_febe7bd0,0xfffe,&uStack_e);
-  FUN_00070192(uStack_c,0xfffffffe,&uStack_c);
+  FUN_00070192(uStack_c,(int)0xfffffffe,&uStack_c);
   FUN_0007016e(uStack_f,1,&uStack_f);
   FUN_0006a574(uStack_e, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   FUN_0006a55c(uStack_c, ((undefined1 *)camry_host_ptr((uint32_t)(param_1 + 2))));
@@ -3684,7 +4072,7 @@ undefined4 f33_rdbi_1ca2_callback(int param_1)
   uStack_e = DAT_febee898;
   uStack_f = DAT_febee818;
   FUN_00070180(DAT_febee898,0xfffe,&uStack_e);
-  FUN_00070192(uStack_c,0xfffffffe,&uStack_c);
+  FUN_00070192(uStack_c,(int)0xfffffffe,&uStack_c);
   FUN_0007016e(uStack_f,1,&uStack_f);
   FUN_0006a574(uStack_e, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   FUN_0006a55c(uStack_c, ((undefined1 *)camry_host_ptr((uint32_t)(param_1 + 2))));
@@ -3744,7 +4132,7 @@ undefined4 f33_rdbi_1ca6_callback(int param_1)
   uStack_e = DAT_febee89a;
   uStack_f = DAT_febee819;
   FUN_00070180(DAT_febee89a,0xfffe,&uStack_e);
-  FUN_00070192(uStack_c,0xfffffffe,&uStack_c);
+  FUN_00070192(uStack_c,(int)0xfffffffe,&uStack_c);
   FUN_0007016e(uStack_f,1,&uStack_f);
   FUN_0006a574(uStack_e, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   FUN_0006a55c(uStack_c, ((undefined1 *)camry_host_ptr((uint32_t)(param_1 + 2))));

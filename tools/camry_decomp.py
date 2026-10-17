@@ -1988,6 +1988,42 @@ def _rewrite_pointer_compares(code: str, pointers: set[str]) -> str:
     return "".join(pieces)
 
 
+def _rewrite_wide_call_constants(code: str) -> str:
+    """A hex literal above INT_MAX is unsigned, so passing it to short warns.
+
+    `(int)0xfffff800` is the same bits and is the negative short Ghidra meant.
+    """
+
+    def rewrite(text: str) -> str:
+        pieces: list[str] = []
+        cursor = 0
+        for match in _CALL.finditer(text):
+            if match.start() < cursor:
+                continue
+            try:
+                close = _match_paren(text, match.end() - 1)
+            except ValueError:
+                continue
+            inner = rewrite(text[match.end():close])
+            arguments = _split_args(inner)
+            rewritten_args: list[str] = []
+            for arg in arguments:
+                stripped = arg.strip()
+                if re.fullmatch(r"0x[0-9A-Fa-f]+", stripped) and int(stripped, 16) > 0x7FFFFFFF:
+                    prefix = arg[:len(arg) - len(arg.lstrip())]
+                    suffix = arg[len(arg.rstrip()):]
+                    rewritten_args.append(f"{prefix}(int){stripped}{suffix}")
+                else:
+                    rewritten_args.append(arg)
+            pieces.append(text[cursor:match.end()])
+            pieces.append(",".join(rewritten_args))
+            cursor = close
+        pieces.append(text[cursor:])
+        return "".join(pieces)
+
+    return rewrite(code)
+
+
 def _rewrite_body(code: str) -> str:
     code = _strip_calling_convention(code)
     code = _rewrite_firmware_bases(code)
@@ -2013,6 +2049,7 @@ def _rewrite_body(code: str) -> str:
     code = _rewrite_pointer_assignments(code)
     code = _rewrite_indirect_calls(code)
     code = _rewrite_pointer_compares(code, pointers)
+    code = _rewrite_wide_call_constants(code)
     return code
 
 

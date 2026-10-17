@@ -1085,7 +1085,7 @@ int FUN_000b88b2(int param_1,int param_2)
       iVar7 = iVar4 / iVar3;
     }
   }
-  FUN_000d1cf6(iVar7,0x7fff,0xffff8001,&local_2c);
+  FUN_000d1cf6(iVar7,0x7fff,(int)0xffff8001,&local_2c);
   iStack_24 = (*((int *)camry_host_ptr((uint32_t)(puVar5 + -0x3d8))));
   (*((short *)camry_host_ptr((uint32_t)(puVar5 + -0x3ea)))) = sVar2;
   (*((int *)camry_host_ptr((uint32_t)(puVar5 + -0x3e0)))) = iVar4;
@@ -1094,7 +1094,7 @@ int FUN_000b88b2(int param_1,int param_2)
   (*((int *)camry_host_ptr((uint32_t)(puVar5 + -0x3dc)))) = iVar7;
   cVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0x7fc)))));
   iStack_28 = ((iVar6 + local_2c) * iVar4) / 0x80;
-  FUN_000d1cf6(iStack_28,0x7fff,0xffff8001,&iStack_28);
+  FUN_000d1cf6(iStack_28,0x7fff,(int)0xffff8001,&iStack_28);
   if (((cVar1 != '\x02') || (iStack_28 < 0)) && ((cVar1 != '\x01' || (-1 < iStack_28)))) {
     iStack_24 = iStack_24 + iStack_28;
   }
@@ -1102,10 +1102,10 @@ int FUN_000b88b2(int param_1,int param_2)
   (*((short *)camry_host_ptr((uint32_t)(puVar5 + -0x3f0)))) = (short)iStack_28;
   (*((int *)camry_host_ptr((uint32_t)(puVar5 + -0x3d8)))) = iStack_24;
   iStack_20 = local_2c * DAT_000af550;
-  FUN_000d1cf6(iStack_20,0x7fff,0xffff8001,&iStack_20);
+  FUN_000d1cf6(iStack_20,0x7fff,(int)0xffff8001,&iStack_20);
   (*((short *)camry_host_ptr((uint32_t)(puVar5 + -0x3ee)))) = (short)iStack_20;
   iStack_1c = (param_2 * DAT_000af552) / 0x80;
-  FUN_000d1cf6(iStack_1c,0x7fff,0xffff8001,&iStack_1c);
+  FUN_000d1cf6(iStack_1c,0x7fff,(int)0xffff8001,&iStack_1c);
   (*((short *)camry_host_ptr((uint32_t)(puVar5 + -0x3ec)))) = (short)iStack_1c;
   return iStack_24 + iStack_20 + iStack_1c;
 }
@@ -1236,7 +1236,7 @@ void FUN_000b8a64(void)
   iVar4 = (int)DAT_000af558;
   (*((short *)camry_host_ptr((uint32_t)(puVar5 + -0x3ce)))) = (short)local_14;
   iStack_10 = -(local_14 * iVar4) / 0x40;
-  FUN_000d1cf6(iStack_10,0x7fff,0xffff8001,&iStack_10);
+  FUN_000d1cf6(iStack_10,0x7fff,(int)0xffff8001,&iStack_10);
   sVar6 = DAT_000af55a;
   iVar4 = (int)DAT_000af55a;
   (*((short *)camry_host_ptr((uint32_t)(puVar5 + -0x3cc)))) = (short)iStack_10;
@@ -5568,10 +5568,10 @@ void FUN_000bbb88(void)
   
   puVar2 = 0xfebeb800u;
   iVar1 = (int)DAT_febef17a + (int)DAT_febef178;
-  FUN_000d1cf6(iVar1,0x7fff,0xffff8001,asStack_10);
+  FUN_000d1cf6(iVar1,0x7fff,(int)0xffff8001,asStack_10);
   FUN_000d1de4(((undefined *)camry_host_ptr(0xaee7cu)),(int)asStack_10[0],&sStack_12);
   iStack_c = (int)((iVar1 - sStack_12) * (uint)DAT_000aee35) / 0x80;
-  FUN_000d1cf6(iStack_c,32000,0xffffe700,&iStack_c);
+  FUN_000d1cf6(iStack_c,32000,(int)0xffffe700,&iStack_c);
   (*((int *)camry_host_ptr((uint32_t)(puVar2 + 0x58c)))) = iVar1;
   (*((short *)camry_host_ptr((uint32_t)(puVar2 + 0x564)))) = sStack_12;
   (*((short *)camry_host_ptr((uint32_t)(puVar2 + 0x566)))) = (short)iStack_c;
@@ -5612,7 +5612,7 @@ void FUN_000bbbfc(void)
   iVar6 = (int)DAT_febebd64;
   iVar10 = (int)DAT_febebd6a;
   local_34 = (int)DAT_febef17c - (int)DAT_febebd66;
-  FUN_000d1cf6(local_34,32000,0xffffe700,&local_34);
+  FUN_000d1cf6(local_34,32000,(int)0xffffe700,&local_34);
   sVar3 = (short)local_34;
   iVar9 = (int)(short)local_34;
   iVar5 = iVar11;
@@ -5642,10 +5642,10 @@ void FUN_000bbbfc(void)
   if (cVar1 != '\0') {
     iStack_2c = (int)((iVar6 + iVar2) * (uint)DAT_000aee36) / 0x80;
     iStack_28 = iStack_2c + iStack_30;
-    FUN_000d1cf6(iStack_2c,32000,0xffffe700,&iStack_2c);
-    FUN_000d1cf6(iStack_28,32000,0xffffe700,&iStack_28);
+    FUN_000d1cf6(iStack_2c,32000,(int)0xffffe700,&iStack_2c);
+    FUN_000d1cf6(iStack_28,32000,(int)0xffffe700,&iStack_28);
   }
-  FUN_000d1cf6(iStack_30,32000,0xffffe700,&iStack_30);
+  FUN_000d1cf6(iStack_30,32000,(int)0xffffe700,&iStack_30);
   (*((short *)camry_host_ptr((uint32_t)(puVar4 + 0x568)))) = sVar3;
   (*((int *)camry_host_ptr((uint32_t)(puVar4 + 0x590)))) = iVar10;
   (*((short *)camry_host_ptr((uint32_t)(puVar4 + 0x56a)))) = (short)iVar11;
@@ -5830,7 +5830,7 @@ void FUN_000bbe7a(void)
   iVar9 = (int)DAT_febebd7c;
   sStack_26 = DAT_febebd80;
   iStack_20 = (int)DAT_febebd6c - (int)DAT_febebd72;
-  FUN_000d1cf6(iStack_20,32000,0xffffe700,&iStack_20);
+  FUN_000d1cf6(iStack_20,32000,(int)0xffffe700,&iStack_20);
   sVar3 = (short)iStack_20;
   iVar6 = (int)(short)iStack_20;
   if (iVar6 - iVar7 < 0 == (iVar6 < 0 != iVar7 < 0 && iVar7 < 0 == iVar6 - iVar7 < 0) &&

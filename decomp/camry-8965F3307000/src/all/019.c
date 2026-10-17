@@ -1774,7 +1774,7 @@ void FUN_00065cda(void)
     bVar2 = DAT_febf3402 + 1;
   }
   if (DAT_00030dec <= bVar2) {
-    FUN_00062b90(0xd6d6d6d6);
+    FUN_00062b90((int)0xd6d6d6d6);
                     /* WARNING: Subroutine does not return */
     f33_enter_terminal_hardware_sequence();
   }
@@ -1879,7 +1879,7 @@ void FUN_00065dd6(void)
       DAT_febf3403 = DAT_febf3403 + 1;
     }
     if (DAT_00030ded <= DAT_febf3403) {
-      FUN_00062b90(0xc7c7c7c7);
+      FUN_00062b90((int)0xc7c7c7c7);
                     /* WARNING: Subroutine does not return */
       f33_enter_terminal_hardware_sequence();
     }
@@ -1915,7 +1915,7 @@ void FUN_00065f24(void)
     bVar2 = DAT_febf3404 + 1;
   }
   if (DAT_00030dee <= bVar2) {
-    FUN_00062b90(0xe3e3e3e3);
+    FUN_00062b90((int)0xe3e3e3e3);
                     /* WARNING: Subroutine does not return */
     f33_enter_terminal_hardware_sequence();
   }

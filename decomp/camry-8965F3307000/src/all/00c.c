@@ -3136,7 +3136,7 @@ void f33_step_fit_completion(void)
         puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
         f33_publish_application_record_path_fault();
       }
-      FUN_00034ea4(0,0xfffffff7);
+      FUN_00034ea4(0,(int)0xfffffff7);
     }
   }
 LAB_00033f90:
@@ -3232,7 +3232,7 @@ void f33_abort_mode600_stimulus_fit
     *psVar1 = 0;
   } while (uVar2 < 2);
   f33_stage_pair_correction('\0',asStack_8);
-  FUN_00034ea4(0,0xfffffffa);
+  FUN_00034ea4(0,(int)0xfffffffa);
   f33_cancel_mode600_stimulus_fit();
   return;
 }

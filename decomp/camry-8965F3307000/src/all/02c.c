@@ -3009,7 +3009,7 @@ void FUN_000b394c(void)
   if ((DAT_febeb168 == 'Z') && (DAT_febeb16a == 'Z')) {
     puVar2 = 0xfebeb800u;
     local_10 = FUN_000b3920(DAT_febeb178,0x400,DAT_febeb138);
-    FUN_000d1cf6(local_10,0x5b05b0,0xffa4fa50,&local_10);
+    FUN_000d1cf6(local_10,0x5b05b0,(int)0xffa4fa50,&local_10);
     iVar6 = local_10;
     uVar3 = FUN_000b3920(local_10, 0x4507, camry_host_addr(((undefined *)camry_host_ptr(0xb400u))));
     iVar1 = (DAT_000af100 * iVar5) / 0x4000;

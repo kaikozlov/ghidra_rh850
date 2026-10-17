@@ -3574,7 +3574,7 @@ void FUN_00073c14(void)
   uint uVar1;
   
   if (f33_nvm_operation_state == '\x02') {
-    uVar1 = FUN_00073a5c(f33_nvm_pending_operation.operation,0xffffffff,((undefined *)camry_host_ptr(0x2758cu)));
+    uVar1 = FUN_00073a5c(f33_nvm_pending_operation.operation,(int)0xffffffff,((undefined *)camry_host_ptr(0x2758cu)));
     if (uVar1 < 2) {
       FUN_00073ba0(uVar1);
     }

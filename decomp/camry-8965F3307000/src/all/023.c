@@ -1845,7 +1845,7 @@ undefined1 FUN_0008db8c(F33DcmMessageContext *param_1)
     DAT_febf45aa = 0;
     DAT_febf45ab = 0;
     uStack_1e = DAT_febf45a8;
-    lower_status = ((void)(0xc0000000), (void)(2), (void)(1), (void)(&uStack_1e), (void)(&uStack_1d), f33_return_const_0_8b10c());
+    lower_status = ((void)((int)0xc0000000), (void)(2), (void)(1), (void)(&uStack_1e), (void)(&uStack_1d), f33_return_const_0_8b10c());
   }
   else {
     if (DAT_febf45ac != '\x01') {
@@ -1921,7 +1921,7 @@ undefined1 FUN_0008dc7c(F33DcmMessageContext *param_1)
   if (DAT_febf45ac == '\x01') {
     uStack_1e = DAT_febf45a8;
     cVar3 = '\x02';
-    lower_status = ((void)(0xc0000001), (void)(2), (void)(1), (void)(&uStack_1e), (void)(&uStack_1d), f33_return_const_0_8b10c());
+    lower_status = ((void)((int)0xc0000001), (void)(2), (void)(1), (void)(&uStack_1e), (void)(&uStack_1d), f33_return_const_0_8b10c());
   }
   else {
     if (DAT_febf45ac != '\x02') {
@@ -2198,7 +2198,7 @@ uint f33_dcm_join_proprietary_start(F33DiagProprietaryMessage *message,uchar *se
       (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebf48fcu + (uint32_t)(uVar4) * 1u)))) = uVar3;
       uVar4 = uVar1;
     } while (uVar1 < 0x40);
-    lower_status = ((void)(0xe0000000), (void)(2), (void)(uVar2 & 0xffff), (void)(((undefined *)camry_host_ptr(0xfebf48fcu))), (void)(&uStack_1d), f33_return_const_0_8b10c());
+    lower_status = ((void)((int)0xe0000000), (void)(2), (void)(uVar2 & 0xffff), (void)(((undefined *)camry_host_ptr(0xfebf48fcu))), (void)(&uStack_1d), f33_return_const_0_8b10c());
   }
   else {
     if (f33_dcm_proprietary_continuation.phase != '\x01') {
@@ -2257,7 +2257,7 @@ uint f33_proprietary_operation_finish_join(uchar selected_index,uint *response_l
   } while (uVar2 < 0x40);
   if (uVar5 == '\x01') {
     uVar5 = '\x02';
-    lower_status = ((void)(0xe0000001), (void)(2), (void)(0), (void)(((undefined *)camry_host_ptr(0xfebf48fcu))), (void)(&uStack_1d), f33_return_const_0_8b10c());
+    lower_status = ((void)((int)0xe0000001), (void)(2), (void)(0), (void)(((undefined *)camry_host_ptr(0xfebf48fcu))), (void)(&uStack_1d), f33_return_const_0_8b10c());
   }
   else {
     if (uVar5 != '\x02') {

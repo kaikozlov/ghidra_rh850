@@ -4485,7 +4485,7 @@ void FUN_000b7896(void)
   if (DAT_febeb388 == '\x02') {
     local_8 = DAT_febeb398 / 10;
     puVar1 = 0xfebeb800u;
-    FUN_000d1cf6(local_8,0x7fff,0xffff8001,&local_8);
+    FUN_000d1cf6(local_8,0x7fff,(int)0xffff8001,&local_8);
   }
   else {
     (*((uint16_t *)((uint8_t *)&local_8 + 0u))) = 19999;
@@ -4713,7 +4713,7 @@ void FUN_000b7a12(void)
   iVar4 = (int)DAT_000af47c;
   (*((short *)camry_host_ptr((uint32_t)(puVar5 + -0x45e)))) = (short)local_14;
   iStack_10 = -(local_14 * iVar4) / 0x40;
-  FUN_000d1cf6(iStack_10,0x7fff,0xffff8001,&iStack_10);
+  FUN_000d1cf6(iStack_10,0x7fff,(int)0xffff8001,&iStack_10);
   sVar6 = DAT_000af47e;
   iVar4 = (int)DAT_000af47e;
   (*((short *)camry_host_ptr((uint32_t)(puVar5 + -0x45c)))) = (short)iStack_10;
@@ -4851,7 +4851,7 @@ void FUN_000b7b00(void)
       iVar6 = iVar4 / iVar3;
     }
   }
-  FUN_000d1cf6(iVar6,0x7fff,0xffff8001,&local_2c);
+  FUN_000d1cf6(iVar6,0x7fff,(int)0xffff8001,&local_2c);
   iStack_20 = (*((int *)camry_host_ptr((uint32_t)(puVar5 + -0x440))));
   (*((short *)camry_host_ptr((uint32_t)(puVar5 + -0x44c)))) = sVar1;
   (*((int *)camry_host_ptr((uint32_t)(puVar5 + -0x448)))) = iVar4;
@@ -4860,7 +4860,7 @@ void FUN_000b7b00(void)
   (*((int *)camry_host_ptr((uint32_t)(puVar5 + -0x444)))) = iVar6;
   cVar2 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0x800)))));
   iStack_24 = ((sVar1 + local_2c) * iVar4) / 0x80;
-  FUN_000d1cf6(iStack_24,0x7fff,0xffff8001,&iStack_24);
+  FUN_000d1cf6(iStack_24,0x7fff,(int)0xffff8001,&iStack_24);
   if (((cVar2 != '\x02') || (iStack_24 < 0)) && ((cVar2 != '\x01' || (-1 < iStack_24)))) {
     iStack_20 = iStack_20 + iStack_24;
   }
@@ -4868,10 +4868,10 @@ void FUN_000b7b00(void)
   (*((short *)camry_host_ptr((uint32_t)(puVar5 + -0x452)))) = (short)iStack_24;
   (*((int *)camry_host_ptr((uint32_t)(puVar5 + -0x440)))) = iStack_20;
   iStack_1c = local_2c * DAT_000af48a;
-  FUN_000d1cf6(iStack_1c,0x7fff,0xffff8001,&iStack_1c);
+  FUN_000d1cf6(iStack_1c,0x7fff,(int)0xffff8001,&iStack_1c);
   iStack_18 = 0;
   (*((short *)camry_host_ptr((uint32_t)(puVar5 + -0x450)))) = (short)iStack_1c;
-  FUN_000d1cf6(0,0x7fff,0xffff8001,&iStack_18);
+  FUN_000d1cf6(0,0x7fff,(int)0xffff8001,&iStack_18);
   (*((short *)camry_host_ptr((uint32_t)(puVar5 + -0x44e)))) = (short)iStack_18;
   (*((int *)camry_host_ptr((uint32_t)(puVar5 + -0x43c)))) = iStack_20 + iStack_1c + iStack_18;
   return;

@@ -653,7 +653,7 @@ LAB_0000486c:
     for (uVar6 = 0; uVar5 = 0, uVar6 < uVar3; uVar6 = uVar6 + 1) {
       pFVar1 = pFVar2 + uVar6;
       if (((pFVar1->base != *((uint32_t *)camry_host_ptr((uint32_t)(pFVar1->base_metadata)))) || (pFVar1->length != *((uint32_t *)camry_host_ptr((uint32_t)(pFVar1->length_metadata)))))
-         || (iVar4 = FUN_000047ea(pFVar1->base,pFVar1->length,0xffffffff), iVar4 != 0))
+         || (iVar4 = FUN_000047ea(pFVar1->base,pFVar1->length,(int)0xffffffff), iVar4 != 0))
       goto LAB_0000486c;
     }
   }

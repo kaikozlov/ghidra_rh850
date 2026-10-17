@@ -2851,10 +2851,10 @@ void FUN_00039768(void)
   iVar3 = (int)DAT_febe66ec;
   iVar2 = FUN_0003975a((int)DAT_febe65b0,(int)DAT_febe66e6);
   iVar5 = FUN_0003975a(iVar8,iVar5);
-  FUN_0007012a(iVar5 + iVar2,0x4000,0xffffc000,&local_28);
+  FUN_0007012a(iVar5 + iVar2,0x4000,(int)0xffffc000,&local_28);
   iVar2 = FUN_0003975a(iVar7,iVar4);
   iVar5 = FUN_0003975a(iVar6,iVar3);
-  FUN_0007012a(iVar5 + iVar2,0x4000,0xffffc000,&iStack_24);
+  FUN_0007012a(iVar5 + iVar2,0x4000,(int)0xffffc000,&iStack_24);
   (*((short *)camry_host_ptr((uint32_t)((0xffffb6eeu + (uint32_t)((int)puVar1)))))) = (short)iStack_24;
   (*((short *)camry_host_ptr((uint32_t)((0xffffb6ecu + (uint32_t)((int)puVar1)))))) = (short)local_28;
   (*((int *)camry_host_ptr((uint32_t)((0xffffb6fcu + (uint32_t)((int)puVar1)))))) = iStack_24 + local_28;

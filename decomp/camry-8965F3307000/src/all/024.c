@@ -3043,7 +3043,7 @@ void f33_dcm_reset_response_queue(void)
   f33_dcm_final_negative_response[0] = '\0';
   f33_dcm_response_queue.remaining_length = 0;
   f33_dcm_response_queue.copy_cursor = 0;
-  FUN_00093ce6(((undefined4 *)camry_host_ptr((uint32_t)(0xfebe5978))));
+  FUN_00093ce6(((undefined4 *)camry_host_ptr((uint32_t)((int)0xfebe5978))));
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x5e9a))))) = 0;
   (*((undefined4 *)camry_host_ptr((uint32_t)(puVar2 + -0x5e68)))) = (*((undefined4 *)camry_host_ptr((uint32_t)(puVar2 + -0x5e88))));
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x5e9b))))) = 0;
