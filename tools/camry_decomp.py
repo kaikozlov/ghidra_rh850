@@ -3236,6 +3236,17 @@ _ARRAY_ELEMENTS = {
 }
 
 
+def _array_macro(name: str, addr: int, ctype: str) -> str:
+    """A two-dimensional table is a pointer to its inner row."""
+    row = re.fullmatch(r"(.+) \[(\d+)\]", ctype)
+    if row:
+        return (
+            f"#define {name} ((volatile {row.group(1)} (*)[{row.group(2)}])"
+            f"camry_host_ptr(0x{addr:x}u))"
+        )
+    return f"#define {name} ((volatile {ctype} *)camry_host_ptr(0x{addr:x}u))"
+
+
 def _data_symbols() -> dict[str, int]:
     return {name: addr for name, (addr, _ctype, _array) in _data_layouts().items()}
 
@@ -3272,8 +3283,12 @@ def _data_layouts() -> dict[str, tuple[int, str, bool]]:
         type_name = concrete_type(row["type"], set())
         if "[" in type_name:
             element = type_name.split("[", 1)[0]
+            dims = [int(item) for item in re.findall(r"\[(\d+)\]", type_name)]
             if element in _ARRAY_ELEMENTS:
                 ctype, _scale = _ARRAY_ELEMENTS[element]
+                # element[inner][outer] is C outer rows of inner elements.
+                if len(dims) == 2:
+                    ctype = f"{ctype} [{dims[0]}]"
                 found[row["name"]] = (addr, ctype, True)
             elif re.fullmatch(r"[A-Z][A-Za-z0-9_]*", element):
                 found[row["name"]] = (addr, element, True)
@@ -3518,9 +3533,7 @@ def _render_corpus(selected: dict[int, dict]) -> str:
         if any(row["name"] == name for row in selected.values()):
             continue
         if is_array:
-            lines.append(
-                f"#define {name} ((volatile {ctype} *)camry_host_ptr(0x{addr:x}u))"
-            )
+            lines.append(_array_macro(name, addr, ctype))
         else:
             lines.append(
                 f"#define {name} (*((volatile {ctype} *)camry_host_ptr(0x{addr:x}u)))"
@@ -4148,7 +4161,7 @@ def _common_header(text: str, signatures: dict[str, str]) -> str:
         if name in registers or name in function_names or re.search(rf"\b{name}\b", text) is None:
             continue
         if is_array:
-            lines.append(f"#define {name} ((volatile {ctype} *)camry_host_ptr(0x{addr:x}u))")
+            lines.append(_array_macro(name, addr, ctype))
         else:
             lines.append(
                 f"#define {name} (*((volatile {ctype} *)camry_host_ptr(0x{addr:x}u)))"

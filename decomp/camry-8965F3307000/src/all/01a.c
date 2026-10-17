@@ -809,6 +809,36 @@ void f33_crypto_bank_clear_fragment_history(void)
 
 
 
+/* WARNING: This is an inlined function */
+/* For low8 slot<2 clear exactly64 request and48 result bytes. Leaf preserves incomingR7/R8/R9;
+   inline real p-code so direct request output pointer survives. No key erasure in hardware is
+   implied. */
+
+void f33_crypto_bank_clear_key_material(uchar slot)
+
+{
+  uint uVar1;
+  uint uVar2;
+  
+  if (slot < 2) {
+    uVar2 = 0;
+    do {
+      uVar1 = uVar2 + 1;
+      f33_crypto_key_request[slot][uVar2] = '\0';
+      uVar2 = uVar1;
+    } while (uVar1 < 0x40);
+    uVar2 = 0;
+    do {
+      uVar1 = uVar2 + 1;
+      f33_crypto_key_result[(short)(ushort)slot][uVar2] = '\0';
+      uVar2 = uVar1;
+    } while (uVar1 < 0x30);
+  }
+  return;
+}
+
+
+
 /* Clear five qualification histories, scalar pair, four8-byte previous/qualified groups and
    fixed16-byte input/expected/AES/MAC buffers. No hardware cancellation. */
 
@@ -1724,6 +1754,120 @@ void f33_crypto_bank_maintain_terminal_states(void)
   }
   f33_crypto_bank_publish_observation_window();
   return;
+}
+
+
+
+/* WARNING: Inlined function: f33_crypto_bank_clear_key_material */
+/* Clamp request64/output49. Return5 when inhibited,8 when already active, otherwise initialize
+   active direct update22 and clear material. Input copy still occurs on refusal/busy; output status
+   plus zeros is written when length nonzero. ActualR8 survives68FAA; no NULL checks. */
+
+uint f33_crypto_bank_stage_direct_request
+               (uchar *input,ushort input_length,uchar *output,ushort output_length)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uint uVar3;
+  uint uVar4;
+  
+  uVar3 = (uint)input_length;
+  uVar4 = (uint)output_length;
+  if (0x31 < uVar4) {
+    uVar4 = 0x31;
+  }
+  if (0x40 < uVar3) {
+    uVar3 = 0x40;
+  }
+  if (f33_crypto_direct_inhibited == '\0') {
+    if (f33_crypto_direct_activation == '\x01') {
+      uVar2 = 8;
+    }
+    else {
+      f33_crypto_direct_activation = '\x01';
+      f33_crypto_direct_elapsed_calls = 0;
+      f33_crypto_direct_phase = '\"';
+      uVar2 = 0;
+      do {
+        uVar1 = uVar2 + 1;
+        f33_crypto_key_request[0][uVar2] = '\0';
+        uVar2 = uVar1;
+      } while (uVar1 < 0x40);
+      uVar2 = 0;
+      do {
+        uVar1 = uVar2 + 1;
+        f33_crypto_key_result[0][uVar2] = '\0';
+        uVar2 = uVar1;
+      } while (uVar1 < 0x30);
+      uVar2 = 0;
+    }
+  }
+  else {
+    uVar2 = 5;
+  }
+  for (uVar1 = 0; uVar1 < uVar3; uVar1 = uVar1 + 1 & 0xffff) {
+    f33_crypto_key_request[0][uVar1] = input[uVar1];
+  }
+  if (uVar4 != 0) {
+    *output = f33_crypto_direct_activation;
+    for (uVar3 = 1; uVar3 < uVar4; uVar3 = uVar3 + 1 & 0xffff) {
+      output[uVar3] = '\0';
+    }
+  }
+  return uVar2;
+}
+
+
+
+/* WARNING: Inlined function: f33_crypto_bank_clear_key_material */
+/* Clamp output49; emit activation then48 result bytes only for activation2, otherwise zeros. If
+   activation2 orFF clear direct request/result even for length0; retain activation. Repeated
+   completed reads therefore return status2 with consumed zero material. Return0. */
+
+uint f33_crypto_bank_read_direct_result(uchar *output,ushort length)
+
+{
+  uchar uVar1;
+  uint uVar2;
+  uint uVar3;
+  
+  uVar1 = f33_crypto_direct_activation;
+  uVar3 = (uint)length;
+  if (uVar3 < 0x32) {
+    if (uVar3 == 0) goto LAB_00069f8c;
+  }
+  else {
+    uVar3 = 0x31;
+  }
+  *output = f33_crypto_direct_activation;
+  uVar2 = 1;
+  if (uVar1 == '\x02') {
+    for (; uVar2 < uVar3; uVar2 = uVar2 + 1 & 0xffff) {
+      output[uVar2] = f33_crypto_key_request[1][uVar2 + 0x3f];
+    }
+  }
+  else {
+    for (; uVar2 < uVar3; uVar2 = uVar2 + 1 & 0xffff) {
+      output[uVar2] = '\0';
+    }
+  }
+LAB_00069f8c:
+  if ((uVar1 == '\x02') || (uVar1 == 0xff)) {
+    uVar3 = 0;
+    do {
+      uVar2 = uVar3 + 1;
+      f33_crypto_key_request[0][uVar3] = '\0';
+      uVar3 = uVar2;
+    } while (uVar2 < 0x40);
+    uVar3 = 0;
+    do {
+      uVar2 = uVar3 + 1;
+      f33_crypto_key_result[0][uVar3] = '\0';
+      uVar3 = uVar2;
+    } while (uVar2 < 0x30);
+  }
+  return 0;
 }
 
 

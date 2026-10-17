@@ -3300,7 +3300,7 @@
 {"addr": "0x68f6a", "name": "f33_return_const_0_68f6a", "status": "converted"}
 {"addr": "0x68f6e", "name": "f33_return_const_0_68f6e", "status": "converted"}
 {"addr": "0x68f72", "name": "f33_crypto_bank_clear_fragment_history", "status": "converted"}
-{"addr": "0x68faa", "name": "f33_crypto_bank_clear_key_material", "status": "unconvertible"}
+{"addr": "0x68faa", "name": "f33_crypto_bank_clear_key_material", "status": "converted"}
 {"addr": "0x68fe0", "name": "f33_crypto_bank_clear_test_material", "status": "converted"}
 {"addr": "0x69064", "name": "f33_crypto_bank_initialize_work", "status": "converted"}
 {"addr": "0x6914c", "name": "f33_crypto_bank_initialize_mode", "status": "converted"}
@@ -3324,8 +3324,8 @@
 {"addr": "0x69da4", "name": "f33_crypto_bank_retire_test_operation", "status": "converted"}
 {"addr": "0x69dd2", "name": "f33_crypto_bank_publish_observation_window", "status": "converted"}
 {"addr": "0x69e7c", "name": "f33_crypto_bank_maintain_terminal_states", "status": "converted"}
-{"addr": "0x69eac", "name": "f33_crypto_bank_stage_direct_request", "status": "unconvertible"}
-{"addr": "0x69f3e", "name": "f33_crypto_bank_read_direct_result", "status": "unconvertible"}
+{"addr": "0x69eac", "name": "f33_crypto_bank_stage_direct_request", "status": "converted"}
+{"addr": "0x69f3e", "name": "f33_crypto_bank_read_direct_result", "status": "converted"}
 {"addr": "0x69fa2", "name": "f33_crypto_bank_snapshot_key_generations", "status": "converted"}
 {"addr": "0x6a028", "name": "f33_crypto_bank_activate_collected_update", "status": "converted"}
 {"addr": "0x6a058", "name": "f33_crypto_bank_snapshot_test_generations", "status": "converted"}
@@ -4199,10 +4199,10 @@
 {"addr": "0x7a79e", "name": "FUN_0007a79e", "status": "converted"}
 {"addr": "0x7a7ae", "name": "f33_cantp_finish_receive_aggregate", "status": "converted"}
 {"addr": "0x7a7ca", "name": "f33_cantp_cancel_receive_owner", "status": "converted"}
-{"addr": "0x7a84c", "name": "FUN_0007a84c", "status": "unconvertible"}
-{"addr": "0x7a862", "name": "FUN_0007a862", "status": "unconvertible"}
-{"addr": "0x7a89a", "name": "FUN_0007a89a", "status": "unconvertible"}
-{"addr": "0x7a8b0", "name": "FUN_0007a8b0", "status": "unconvertible"}
+{"addr": "0x7a84c", "name": "FUN_0007a84c", "status": "converted"}
+{"addr": "0x7a862", "name": "FUN_0007a862", "status": "converted"}
+{"addr": "0x7a89a", "name": "FUN_0007a89a", "status": "converted"}
+{"addr": "0x7a8b0", "name": "FUN_0007a8b0", "status": "converted"}
 {"addr": "0x7a8e8", "name": "f33_cantp_copy_upper_receive_bytes", "status": "unconvertible"}
 {"addr": "0x7a91c", "name": "f33_cantp_multiply_receive_block_capacity", "status": "converted"}
 {"addr": "0x7a93e", "name": "f33_cantp_select_receive_flow_status", "status": "converted"}
@@ -4230,7 +4230,7 @@
 {"addr": "0x7b20c", "name": "f33_cantp_submit_can_frame", "status": "converted"}
 {"addr": "0x7b246", "name": "f33_return_only_stub_7b246", "status": "converted"}
 {"addr": "0x7b248", "name": "f33_cantp_tick_channel_timeouts", "status": "converted"}
-{"addr": "0x7b2c4", "name": "FUN_0007b2c4", "status": "unconvertible"}
+{"addr": "0x7b2c4", "name": "FUN_0007b2c4", "status": "converted"}
 {"addr": "0x7b3a6", "name": "FUN_0007b3a6", "status": "converted"}
 {"addr": "0x7b3b6", "name": "FUN_0007b3b6", "status": "converted"}
 {"addr": "0x7b3d0", "name": "f33_cantp_accept_transmit_length", "status": "converted"}

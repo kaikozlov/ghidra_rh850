@@ -3726,6 +3726,56 @@ uint f33_cantp_cancel_receive_owner(F33CanTpConfiguration *configuration,ushort 
 
 
 
+void FUN_0007a84c(byte *param_1,ushort param_2)
+
+{
+  f33_cantp_rx_flow_parameters_with_complements[*param_1][0] = param_2 | (param_2 ^ 0xff) << 8;
+  return;
+}
+
+
+
+uint FUN_0007a862(byte *param_1)
+
+{
+  uint uVar1;
+  
+  uVar1 = (uint)f33_cantp_rx_flow_parameters_with_complements[*param_1][0];
+  if ((uVar1 & 0xff ^ (int)uVar1 >> 8) != 0xff) {
+    uVar1 = (uint)param_1[0x16];
+    DAT_febe4f3c = 0xf;
+    FUN_0007a84c(param_1,uVar1);
+  }
+  return uVar1 & 0xff;
+}
+
+
+
+void FUN_0007a89a(byte *param_1,ushort param_2)
+
+{
+  f33_cantp_rx_flow_parameters_with_complements[*param_1][1] = param_2 | (param_2 ^ 0xff) << 8;
+  return;
+}
+
+
+
+uint FUN_0007a8b0(byte *param_1)
+
+{
+  uint uVar1;
+  
+  uVar1 = (uint)f33_cantp_rx_flow_parameters_with_complements[*param_1][1];
+  if ((uVar1 & 0xff ^ (int)uVar1 >> 8) != 0xff) {
+    uVar1 = (uint)param_1[0x17];
+    DAT_febe4f3c = 0xf;
+    FUN_0007a89a(param_1,uVar1);
+  }
+  return uVar1 & 0xff;
+}
+
+
+
 /* Accumulate capacity shifted by each set bit of block_size, truncating the sum to16 bits. This
    computes configured CF payload capacity times BS; it is not an empty delay loop. */
 
@@ -4511,6 +4561,73 @@ void f33_cantp_tick_channel_timeouts(void)
   else if (DAT_febe4f3d != 'U') {
     DAT_febe4f3c = 0xf;
   }
+  return;
+}
+
+
+
+void FUN_0007b2c4(int *param_1)
+
+{
+  byte bVar1;
+  byte bVar2;
+  int iVar3;
+  undefined8 uVar4;
+  uint uVar5;
+  ushort uVar6;
+  uint uVar7;
+  
+  uVar4 = 0x23dfcfebeb800;
+  uVar5 = (uint)DAT_00022c48;
+  for (uVar7 = 0; uVar7 < uVar5; uVar7 = uVar7 + 1 & 0xff) {
+    ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar7 * 2].transmit_id = 0xffff;
+    ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar7 * 2].sequence_number = 0xff;
+    ((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar7 * 2].receive_id = 0xffff;
+    ((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar7 * 2].expected_sequence_number = 0xff;
+    ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar7 * 2].remaining_or_accepted_length = 0;
+    ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar7 * 2].timeout_ticks = 0;
+    ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar7 * 2].state = 0xe1;
+    ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar7 * 2].block_remaining = '\0';
+    ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar7 * 2].block_size = '\0';
+    ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar7 * 2].spacing_ticks = '\0';
+    ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar7 * 2].opaque_0d[0] = '\0';
+    ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar7 * 2].opaque_0d[1] = '\0';
+    ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar7 * 2].opaque_0d[2] = '\0';
+    ((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar7 * 2].remaining_length = 0;
+    ((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar7 * 2].timeout_ticks = 0;
+    ((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar7 * 2].wait_frame_count = 0;
+    ((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar7 * 2].state = 0xe1;
+    ((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar7 * 2].first_frame_dlc = '\0';
+    ((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar7 * 2].block_remaining = '\0';
+    ((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar7 * 2].flow_status_marker = 0xf0;
+    ((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar7 * 2].admission_generation = '\0';
+  }
+  uVar5 = (uint)DAT_00022c47;
+  for (uVar7 = 0; uVar7 < uVar5; uVar7 = uVar7 + 1 & 0xff) {
+    f33_cantp_rx_flow_parameters_with_complements[uVar7][0] = 0;
+    f33_cantp_rx_flow_parameters_with_complements[uVar7][1] = 0;
+  }
+  bVar2 = *(byte *)(param_1 + 3);
+  uVar6 = 0;
+  while( true ) {
+    iVar3 = (int)uVar4;
+    uVar5 = 0;
+    if (bVar2 <= uVar6) break;
+    bVar1 = (*((byte *)camry_host_ptr((uint32_t)(*param_1 + (short)uVar6 * 0xc + 9))));
+    for (uVar5 = 0; uVar5 < bVar1; uVar5 = uVar5 + 1 & 0xff) {
+      iVar3 = uVar5 * 0x20 + (*((int *)camry_host_ptr((uint32_t)(*param_1 + (short)uVar6 * 0xc))));
+      FUN_0007a84c(((byte *)camry_host_ptr((uint32_t)(iVar3))), (*((undefined1 *)camry_host_ptr((uint32_t)(iVar3 + 0x16)))));
+      FUN_0007a89a(((byte *)camry_host_ptr((uint32_t)(iVar3))), (*((undefined1 *)camry_host_ptr((uint32_t)(iVar3 + 0x17)))));
+    }
+    uVar6 = uVar6 + 1 & 0xff;
+  }
+  do {
+    (*((undefined1 *)camry_host_ptr((uint32_t)(uVar5 + iVar3 + -0x6904)))) = 0;
+    uVar5 = uVar5 + 1;
+  } while (uVar5 < 0x40);
+  (*((undefined1 *)camry_host_ptr((uint32_t)(iVar3 + -0x68c4)))) = 0xf0;
+  f33_return_only_stub_7b208();
+  (*((undefined1 *)camry_host_ptr((uint32_t)(iVar3 + -0x68c3)))) = 0xaa;
   return;
 }
 
