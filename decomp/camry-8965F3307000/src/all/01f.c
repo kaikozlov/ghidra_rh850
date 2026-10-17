@@ -33,6 +33,64 @@ void FUN_0007c0b4(ushort param_1)
 
 
 
+void FUN_0007c0e8(void)
+
+{
+  uint uVar1;
+  uint uVar2;
+  
+  uVar2 = (uint)DAT_0002183c;
+  for (uVar1 = 0; uVar1 < uVar2; uVar1 = uVar1 + 1 & 0xff) {
+    ((volatile F33RequestedNormalNetworkPolicy *)camry_host_ptr(0xfebe3de0u))[uVar1].remaining_delay = 0;
+    ((volatile F33RequestedNormalNetworkPolicy *)camry_host_ptr(0xfebe3de0u))[uVar1].requested_policy = '\x1e';
+    ((volatile F33RequestedNormalNetworkPolicy *)camry_host_ptr(0xfebe3de0u))[uVar1].reconciled_software_policy = '\x0f';
+  }
+  return;
+}
+
+
+
+/* SelectedROM2184Cslot0leaf;change3DE0from1Eto0Freturn0,otherwiserequestheldreturn12h. NoMMIO. */
+
+uint f33_request_normal_network_policy_disable(uchar network)
+
+{
+  bool bVar1;
+  uchar uVar2;
+  uint uVar3;
+  
+  uVar3 = 0x12;
+  uVar2 = ((volatile F33RequestedNormalNetworkPolicy *)camry_host_ptr(0xfebe3de0u))[(uint)network - (uint)DAT_0002183d & 0xff].
+          requested_policy;
+  bVar1 = uVar2 == '\x1e';
+  if (bVar1) {
+    uVar2 = '\x0f';
+  }
+  ((volatile F33RequestedNormalNetworkPolicy *)camry_host_ptr(0xfebe3de0u))[(uint)network - (uint)DAT_0002183d & 0xff].requested_policy
+       = uVar2;
+  if (bVar1) {
+    uVar3 = 0;
+  }
+  return uVar3;
+}
+
+
+
+void FUN_0007c2d6(uint param_1)
+
+{
+  ushort uVar1;
+  
+  uVar1 = ((volatile F33RequestedNormalNetworkPolicy *)camry_host_ptr(0xfebe3de0u))[param_1 & 0xff].remaining_delay;
+  if (uVar1 != 0) {
+    uVar1 = uVar1 - 1;
+  }
+  ((volatile F33RequestedNormalNetworkPolicy *)camry_host_ptr(0xfebe3de0u))[param_1 & 0xff].remaining_delay = uVar1;
+  return;
+}
+
+
+
 void FUN_0007c2ee(void)
 
 {
@@ -422,6 +480,76 @@ void f33_return_only_stub_7c70e(void)
 
 
 
+void FUN_0007c710(void)
+
+{
+  uint uVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  
+  puVar2 = 0x23dfcu;
+  uVar3 = (uint)DAT_00021ba8;
+  for (uVar1 = 0; uVar1 < uVar3; uVar1 = uVar1 + 1 & 0xff) {
+    ((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[uVar1].remaining_delay = '\0';
+    ((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[uVar1].mode_state = 0xff;
+    ((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[uVar1].uninterpreted = '\0';
+  }
+  FUN_0007cd12();
+  (*(int (*)())*(code **)(puVar2 + -0x2260))();
+  return;
+}
+
+
+
+void FUN_0007c748(void)
+
+{
+  uint uVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  
+  puVar2 = 0x23dfcu;
+  uVar3 = (uint)DAT_00021ba8;
+  for (uVar1 = 0; uVar1 < uVar3; uVar1 = uVar1 + 1 & 0xff) {
+    ((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[uVar1].mode_state = 0x7f8;
+  }
+  FUN_0007cd3e();
+  (*(int (*)())*(code **)(puVar2 + -0x2260))();
+  return;
+}
+
+
+
+void FUN_0007c77a(uint param_1)
+
+{
+  byte bVar1;
+  byte bVar2;
+  
+  bVar1 = ((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[param_1 & 0xff].remaining_delay;
+  bVar2 = bVar1;
+  if ((bVar1 != 0) && (bVar2 = DAT_00021bab, (byte)(bVar1 - 1) <= DAT_00021bab)) {
+    bVar2 = bVar1 - 1;
+  }
+  ((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[param_1 & 0xff].remaining_delay = bVar2;
+  return;
+}
+
+
+
+void FUN_0007c7fc(uint param_1)
+
+{
+  param_1 = param_1 & 0xff;
+  if (((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[param_1].remaining_delay == '\0') {
+    FUN_0007eaf2(DAT_00021ba9 + param_1 & 0xff,0);
+    ((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[param_1].mode_state = 0xff;
+  }
+  return;
+}
+
+
+
 void FUN_0007c830(uchar param_1)
 
 {
@@ -450,6 +578,31 @@ void FUN_0007c880(char param_1)
 
 
 
+void FUN_0007c8a8(byte param_1)
+
+{
+  uint32_t puVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  
+  puVar1 = 0xfebeb800u;
+  puVar2 = 0x23dfcu;
+  uVar3 = (uint)param_1;
+  if (((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[uVar3].remaining_delay == '\0') {
+    f33_request_logical_controller_run_stop(param_1,'\x02');
+    if ((*((short *)camry_host_ptr((uint32_t)(puVar1 + uVar3 * 8 + -0x6ee4)))) == 0xff) {
+      FUN_0007c880(uVar3);
+    }
+    else {
+      FUN_0007eaf2((byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x2253))))) + uVar3 & 0xff,1);
+    }
+    ((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[uVar3].mode_state = 0x2fd;
+  }
+  return;
+}
+
+
+
 int FUN_0007c96c(undefined1 param_1,undefined1 param_2)
 
 {
@@ -460,6 +613,230 @@ int FUN_0007c96c(undefined1 param_1,undefined1 param_2)
     FUN_0007cd60(param_1);
   }
   return iVar1;
+}
+
+
+
+undefined4 FUN_0007c98c(char param_1)
+
+{
+  byte logical_controller;
+  uint32_t puVar1;
+  int iVar2;
+  ushort uVar3;
+  undefined4 uVar4;
+  uchar uVar5;
+  uint uVar6;
+  
+  puVar1 = 0x23dfcu;
+  uVar4 = 0;
+  logical_controller = param_1 - DAT_00021ba9;
+  uVar6 = (uint)logical_controller;
+  uVar3 = ((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[uVar6].mode_state;
+  uVar5 = ((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[uVar6].remaining_delay;
+  if (uVar3 == 0xff) goto LAB_0007ca32;
+  if ((uVar3 == 0x1fe) || (uVar3 == 0x2fd)) {
+    FUN_000832da(param_1,0);
+    f33_request_logical_controller_run_stop(logical_controller,'\x03');
+    iVar2 = FUN_0007f56a(uVar6);
+    if (iVar2 != 0) {
+      uVar5 = '\x03';
+      uVar3 = 0x3fc;
+      goto LAB_0007ca32;
+    }
+    FUN_0007f4fe(uVar6,2);
+    uVar5 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(uVar6 - 0x2252)))));
+    if (uVar5 == '\0') {
+      FUN_0007eaf2(param_1,0);
+      uVar3 = 0xff;
+      goto LAB_0007ca32;
+    }
+  }
+  else {
+    if ((uVar3 == 0x3fc) || (uVar3 == 0x4fb)) goto LAB_0007ca32;
+    if ((uVar3 != 0x5fa) && (uVar3 != 0x8f7)) {
+      uVar4 = 1;
+      goto LAB_0007ca32;
+    }
+    FUN_0007f4fe(uVar6,2);
+    uVar5 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(uVar6 - 0x2252)))));
+  }
+  uVar3 = 0x4fb;
+LAB_0007ca32:
+  ((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[uVar6].mode_state = uVar3;
+  ((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[uVar6].remaining_delay = uVar5;
+  return uVar4;
+}
+
+
+
+undefined4 FUN_0007ca3e(char param_1)
+
+{
+  uint32_t puVar1;
+  ushort uVar2;
+  undefined4 uVar3;
+  uchar uVar4;
+  uint uVar5;
+  
+  puVar1 = 0x23dfcu;
+  uVar3 = 0;
+  uVar5 = (uint)(byte)(param_1 - DAT_00021ba9);
+  uVar2 = ((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[uVar5].mode_state;
+  uVar4 = ((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[uVar5].remaining_delay;
+  if (uVar2 == 0xff) {
+LAB_0007caaa:
+    FUN_0007f4fe(uVar5,0);
+    uVar4 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(uVar5 - 0x2252)))));
+    if (uVar4 == '\0') {
+LAB_0007cabe:
+      FUN_0007c830(uVar5);
+LAB_0007cac4:
+      uVar2 = 0x1fe;
+      goto LAB_0007cace;
+    }
+  }
+  else {
+    if (uVar2 == 0x1fe) goto LAB_0007cace;
+    if (uVar2 == 0x2fd) {
+      FUN_000832da(param_1,1);
+      FUN_00080f6c(uVar5,1);
+      FUN_0007eaf2(param_1,1);
+      goto LAB_0007cac4;
+    }
+    if (uVar2 == 0x3fc) goto LAB_0007cabe;
+    if (uVar2 == 0x4fb) goto LAB_0007caaa;
+    if (uVar2 == 0x5fa) goto LAB_0007cace;
+    if (uVar2 != 0x8f7) {
+      uVar3 = 1;
+      goto LAB_0007cace;
+    }
+  }
+  uVar2 = 0x5fa;
+LAB_0007cace:
+  ((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[uVar5].mode_state = uVar2;
+  ((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[uVar5].remaining_delay = uVar4;
+  return uVar3;
+}
+
+
+
+undefined4 FUN_0007cada(char param_1)
+
+{
+  byte logical_controller;
+  ushort uVar1;
+  uint32_t puVar2;
+  ushort uVar3;
+  undefined4 uVar4;
+  uchar uVar5;
+  uint uVar6;
+  
+  puVar2 = 0x23dfcu;
+  uVar4 = 0;
+  logical_controller = param_1 - DAT_00021ba9;
+  uVar6 = (uint)logical_controller;
+  uVar1 = ((volatile F33SelectedNetworkRecoveryState *)camry_host_ptr(0xfebe491cu))[uVar6].recovery_state;
+  uVar3 = ((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[uVar6].mode_state;
+  uVar5 = ((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[uVar6].remaining_delay;
+  if (uVar3 == 0xff) {
+LAB_0007cb36:
+    FUN_0007f4fe(uVar6,0);
+    uVar5 = '\0';
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(uVar6 - 0x2252))))) != '\0') {
+      uVar3 = 0x8f7;
+      uVar5 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(uVar6 - 0x2252))))) + '\x01';
+      goto LAB_0007cb80;
+    }
+LAB_0007cb52:
+    f33_request_logical_controller_run_stop(logical_controller,'\x02');
+    if (uVar1 == 0xff) {
+LAB_0007cb70:
+      FUN_0007c880(uVar6);
+    }
+    else {
+      FUN_0007eaf2(param_1,1);
+    }
+  }
+  else {
+    if (uVar3 != 0x1fe) {
+      if (uVar3 == 0x2fd) goto LAB_0007cb80;
+      if (uVar3 != 0x3fc) {
+        if (uVar3 != 0x4fb) {
+          if (uVar3 == 0x5fa) {
+            uVar3 = 0x8f7;
+          }
+          else if (uVar3 != 0x8f7) {
+            uVar4 = 1;
+          }
+          goto LAB_0007cb80;
+        }
+        goto LAB_0007cb36;
+      }
+      goto LAB_0007cb52;
+    }
+    if (uVar1 == 0xff) goto LAB_0007cb70;
+  }
+  uVar3 = 0x2fd;
+LAB_0007cb80:
+  ((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[uVar6].mode_state = uVar3;
+  ((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[uVar6].remaining_delay = uVar5;
+  return uVar4;
+}
+
+
+
+/* Expose0/1/2from4924and491Crecovery,notdriverCSTS. Unknownstatesreturn1withoutpublication. */
+
+uint f33_get_selected_network_software_mode(uchar network,uchar *mode)
+
+{
+  ushort uVar1;
+  uchar uVar2;
+  uint uVar3;
+  
+  uVar3 = (uint)network - (uint)DAT_00021ba9 & 0xff;
+  if (DAT_00021ba8 <= uVar3) {
+    return 1;
+  }
+  uVar1 = ((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[uVar3].mode_state;
+  if (uVar1 == 0xff) {
+    uVar2 = '\0';
+  }
+  else {
+    if (uVar1 != 0x1fe) {
+      if (uVar1 == 0x2fd) {
+        *mode = '\x02';
+        if (((volatile F33SelectedNetworkRecoveryState *)camry_host_ptr(0xfebe491cu))[uVar3].recovery_state != 0x1fe) {
+          return 0;
+        }
+      }
+      else if ((((uVar1 != 0x3fc) && (uVar1 != 0x4fb)) && (uVar1 != 0x5fa)) && (uVar1 != 0x8f7)) {
+        return 1;
+      }
+    }
+    uVar2 = '\x01';
+  }
+  *mode = uVar2;
+  return 0;
+}
+
+
+
+void FUN_0007cc1e(uint param_1)
+
+{
+  uint uVar1;
+  
+  param_1 = param_1 & 0xff;
+  if (((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[param_1].mode_state == 0x2fd) {
+    uVar1 = DAT_00021ba9 + param_1 & 0xff;
+    FUN_00080f6c(param_1,3);
+    FUN_0007eaf2(uVar1,2);
+    FUN_000832da(uVar1,2);
+  }
+  FUN_0007c0b4(param_1);
+  return;
 }
 
 
@@ -497,6 +874,18 @@ void FUN_0007cc60(byte param_1,char param_2)
 
 
 
+void FUN_0007ccbe(byte param_1)
+
+{
+  if ((((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[param_1].mode_state == 0x2fd) ||
+     (((volatile F33SelectedNetworkModeState *)camry_host_ptr(0xfebe4924u))[param_1].mode_state == 0x1fe)) {
+    f33_request_logical_controller_run_stop(param_1,'\x02');
+  }
+  return;
+}
+
+
+
 void FUN_0007cce4(char param_1,undefined2 param_2)
 
 {
@@ -507,6 +896,56 @@ void FUN_0007cce4(char param_1,undefined2 param_2)
   FUN_0008156c(param_1);
   FUN_0007cdda(cVar1,param_2);
   return;
+}
+
+
+
+void FUN_0007cd12(void)
+
+{
+  uint uVar1;
+  uint uVar2;
+  
+  uVar2 = (uint)DAT_00021ba8;
+  for (uVar1 = 0; uVar1 < uVar2; uVar1 = uVar1 + 1 & 0xff) {
+    ((volatile F33SelectedNetworkRecoveryState *)camry_host_ptr(0xfebe491cu))[uVar1].remaining_hold = 0;
+    ((volatile F33SelectedNetworkRecoveryState *)camry_host_ptr(0xfebe491cu))[uVar1].recovery_state = 0xff;
+    ((volatile F33SelectedNetworkRecoveryState *)camry_host_ptr(0xfebe491cu))[uVar1].aggregated_cause = 0;
+    ((volatile F33SelectedNetworkRecoveryState *)camry_host_ptr(0xfebe491cu))[uVar1].reported_fault_class = '\x03';
+    ((volatile F33SelectedNetworkRecoveryState *)camry_host_ptr(0xfebe491cu))[uVar1].uninterpreted = '\0';
+  }
+  return;
+}
+
+
+
+void FUN_0007cd3e(void)
+
+{
+  uint uVar1;
+  uint uVar2;
+  
+  uVar2 = (uint)DAT_00021ba8;
+  for (uVar1 = 0; uVar1 < uVar2; uVar1 = uVar1 + 1 & 0xff) {
+    ((volatile F33SelectedNetworkRecoveryState *)camry_host_ptr(0xfebe491cu))[uVar1].aggregated_cause = 0;
+    ((volatile F33SelectedNetworkRecoveryState *)camry_host_ptr(0xfebe491cu))[uVar1].reported_fault_class = '\x03';
+  }
+  return;
+}
+
+
+
+ushort FUN_0007cd7c(uint param_1)
+
+{
+  ushort uVar1;
+  ushort uVar2;
+  
+  uVar1 = ((volatile F33SelectedNetworkRecoveryState *)camry_host_ptr(0xfebe491cu))[param_1 & 0xff].aggregated_cause & 0x58;
+  if (((uVar1 == 8) || (uVar1 == 0x10)) || (uVar2 = 0, uVar1 == 0x40)) {
+    uVar2 = uVar1;
+  }
+  return uVar2;
 }
 
 
@@ -523,6 +962,21 @@ undefined4 FUN_0007cda0(char param_1)
     uVar1 = 0x80;
   }
   return uVar1;
+}
+
+
+
+void FUN_0007cdc2(uint param_1)
+
+{
+  short sVar1;
+  
+  sVar1 = ((volatile F33SelectedNetworkRecoveryState *)camry_host_ptr(0xfebe491cu))[param_1 & 0xff].remaining_hold;
+  if (0 < sVar1) {
+    sVar1 = sVar1 + -1;
+  }
+  ((volatile F33SelectedNetworkRecoveryState *)camry_host_ptr(0xfebe491cu))[param_1 & 0xff].remaining_hold = sVar1;
+  return;
 }
 
 

@@ -1395,6 +1395,43 @@ void FUN_00061a1c(void)
 
 
 
+void FUN_00061a76(uint param_1,uint param_2,uint param_3)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  uint uVar4;
+  uint uVar5;
+  int iVar6;
+  
+  param_1 = param_1 & 0xffff;
+  param_2 = param_2 & 0xffff;
+  param_3 = param_3 & 0xffff;
+  uVar4 = (uint)DAT_00031670;
+  iVar6 = 0;
+  do {
+    iVar2 = iVar6 + 1;
+    uVar5 = (uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x315d0u + (uint32_t)(iVar6) * 1u))));
+    iVar3 = uVar5 * 0x1000;
+    iVar1 = iVar6 + -1;
+    *(undefined2 *)(((undefined *)camry_host_ptr(0xffe70210u)) + iVar3) = 0;
+    *(uint *)(((undefined *)camry_host_ptr(0xffe7006cu)) + iVar3) = param_1;
+    *(uint *)(((undefined *)camry_host_ptr(0xffe70070u)) + iVar3) = param_1;
+    *(undefined2 *)(((undefined *)camry_host_ptr(0xffe70210u)) + iVar3) = 0xda5a;
+    *(uint *)(((undefined *)camry_host_ptr(0xffe7014cu)) + iVar3) = param_2;
+    (*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xffe70184u + (uint32_t)(uVar5 * 0x400) * 4u)))) = param_3;
+    (*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xffe70180u + (uint32_t)(uVar5 * 0x400) * 4u)))) = param_3;
+    *(uint *)(((undefined *)camry_host_ptr(0xffe70148u)) + iVar3) = param_2 + uVar4 * -2 & 0xffff;
+    (*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xffe70144u + (uint32_t)(uVar5 * 0x400) * 4u)))) = param_1 * 2 + param_2 & 0xffff;
+    (*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xffe70188u + (uint32_t)(uVar5 * 0x400) * 4u)))) = param_3;
+    iVar6 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  return;
+}
+
+
+
 void FUN_00061b22(void)
 
 {
@@ -1530,6 +1567,36 @@ void FUN_00061dfa(short param_1,ushort param_2)
   (*((ushort *)camry_host_ptr((uint32_t)(iVar1 + -0x3effec)))) = (*((ushort *)camry_host_ptr((uint32_t)(iVar1 + -0x3effec)))) | uVar5;
   (*((ushort *)camry_host_ptr((uint32_t)(iVar1 + -0x3effec)))) = (*((ushort *)camry_host_ptr((uint32_t)(iVar1 + -0x3effec)))) & uVar6;
   (*((ushort *)camry_host_ptr((uint32_t)(iVar1 + -0x3efff0)))) = (*((ushort *)camry_host_ptr((uint32_t)(iVar1 + -0x3efff0)))) & uVar6;
+  return;
+}
+
+
+
+void FUN_00061e72(void)
+
+{
+  int iVar1;
+  undefined2 *puVar2;
+  int iVar3;
+  undefined2 uVar4;
+  uint uVar5;
+  undefined8 uVar6;
+  int iVar7;
+  
+  uVar6 = 0xfebeb800;
+  iVar7 = 0;
+  do {
+    puVar2 = (undefined2 *)(((undefined *)camry_host_ptr(0xffff80a0u)) + iVar7 * 8 + (int)uVar6);
+    uVar4 = *puVar2;
+    uVar5 = (uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x315d0u + (uint32_t)(iVar7) * 1u))));
+    (*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xffe70184u + (uint32_t)(uVar5 * 0x400) * 4u)))) = (uint)(ushort)puVar2[2];
+    (*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xffe70180u + (uint32_t)(uVar5 * 0x400) * 4u)))) = (uint)(ushort)puVar2[3];
+    (*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xffe70188u + (uint32_t)(uVar5 * 0x400) * 4u)))) = (uint)(ushort)puVar2[1];
+    FUN_00061dfa(iVar7,uVar4);
+    iVar3 = iVar7 + 1;
+    iVar1 = iVar7 + -1;
+    iVar7 = iVar3;
+  } while (((iVar1 < 0) || (iVar3 < 0)));
   return;
 }
 

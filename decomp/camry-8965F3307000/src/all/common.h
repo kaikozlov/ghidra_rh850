@@ -502,8 +502,6 @@ typedef struct PTR_DAT_000af828 PTR_DAT_000af828;
 typedef struct Qualified2 Qualified2;
 typedef struct R6resultbyte R6resultbyte;
 typedef struct R7completionbyte R7completionbyte;
-typedef struct RSCFD_CFSTS RSCFD_CFSTS;
-typedef struct RSCFD_TxMessageBuffer RSCFD_TxMessageBuffer;
 typedef struct Saturate2 Saturate2;
 struct F33AcquisitionGroupPair {
     uint16_t group0[6];
@@ -1888,15 +1886,40 @@ struct F33MonitorCurrentStagedCalibration {
     uint32_t marker;
 };
 _Static_assert(sizeof(struct F33MonitorCurrentStagedCalibration) == 44, "F33MonitorCurrentStagedCalibration");
+typedef struct RSCFD_TxMessageBuffer RSCFD_TxMessageBuffer;
+struct RSCFD_TxMessageBuffer {
+    uint32_t word0;
+    uint32_t word1;
+    uint32_t word2;
+    uint32_t word3;
+    uint32_t word4;
+    uint8_t reserved_14_1f[12];
+};
+typedef struct RSCFD_CommonFifoFrame RSCFD_CommonFifoFrame;
+struct RSCFD_CommonFifoFrame {
+    uint32_t word0;
+    uint32_t word1;
+    uint32_t word2;
+    uint32_t word3;
+    uint32_t word4;
+    uint8_t reserved_14_1f[12];
+};
+typedef struct RSCFD_CFSTS RSCFD_CFSTS;
+struct RSCFD_CFSTS {
+    uint32_t reserved_0_2 : 3;
+    uint32_t status_b3 : 1;
+    uint32_t reserved_4_31 : 28;
+};
+_Static_assert(sizeof(RSCFD_TxMessageBuffer) == 32, "tx buffer");
+_Static_assert(sizeof(RSCFD_CommonFifoFrame) == 32, "fifo frame");
+_Static_assert(sizeof(RSCFD_CFSTS) == 4, "cfsts");
 
 #define CFAPCTL (*((volatile uint32_t *)camry_host_ptr(0xffc62100u)))
 #define CFCC3 (*((volatile uint32_t *)camry_host_ptr(0xffd20124u)))
 #define CFCC5 (*((volatile uint32_t *)camry_host_ptr(0xffd2012cu)))
 #define CFDTMC (*((volatile uint32_t *)camry_host_ptr(0xffd20250u)))
-#define CFDTMID (*((volatile uint32_t *)camry_host_ptr(0xffd24000u)))
 #define CFECCCTL_PE1 (*((volatile uint32_t *)camry_host_ptr(0xffc62400u)))
 #define CFECCCTL_VCI2CFBA (*((volatile uint32_t *)camry_host_ptr(0xffc62200u)))
-#define CFID (*((volatile uint32_t *)camry_host_ptr(0xffd23400u)))
 #define CFSTSTCTL_PE1 (*((volatile uint32_t *)camry_host_ptr(0xffc624f0u)))
 #define CFSTSTCTL_VCI2CFBA (*((volatile uint32_t *)camry_host_ptr(0xffc622f0u)))
 #define CKSC3C (*((volatile uint32_t *)camry_host_ptr(0xfff890c0u)))

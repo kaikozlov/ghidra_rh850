@@ -2622,6 +2622,21 @@ void f33_report_diagnostic_healthy_observed_2b_3dcca(void)
 
 
 
+void FUN_0003dcda(void)
+
+{
+  uint event;
+  
+  event = 0x2b;
+  if (((*((volatile uint8_t *)camry_host_ptr(0xfebe71edu))) & 1) != 0) {
+    event = 0x33;
+  }
+  f33_report_diagnostic_event_failure(event,10);
+  return;
+}
+
+
+
 /* f33_report_diagnostic_healthy_observed(0x2c); whole-body shape-verified. The literal is the
    encoded diagnostic event, not a recovered OEM name. */
 
@@ -2629,6 +2644,21 @@ void f33_report_diagnostic_healthy_observed_2c_3dd48(void)
 
 {
   f33_report_diagnostic_healthy_observed(0x2c);
+  return;
+}
+
+
+
+void FUN_0003dd58(void)
+
+{
+  uint event;
+  
+  event = 0x2c;
+  if (((*((volatile uint8_t *)camry_host_ptr(0xfebe71edu))) & 1) != 0) {
+    event = 0x34;
+  }
+  f33_report_diagnostic_event_failure(event,10);
   return;
 }
 
@@ -2807,6 +2837,40 @@ void FUN_0003df22(void)
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbd49u + (uint32_t)((int)puVar1) * 1u)))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x54b1)))));
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbd4au + (uint32_t)((int)puVar1) * 1u)))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x54af)))));
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbd4bu + (uint32_t)((int)puVar1) * 1u)))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x54ad)))));
+  return;
+}
+
+
+
+/* Parallel primary B gated by bit8, with separate counter snapshots and retained state. */
+
+void f33_step_paired_source_counter_monitor_b(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_0002bb6c == 'Z') {
+    puVar1 = 0xfebeb800u;
+    f33_reset_latched_monitor((F33LatchedMonitorState *)((undefined *)camry_host_ptr(0xfebe7538u)));
+  }
+  else {
+    if (((*((volatile uint8_t *)camry_host_ptr(0xfebe71edu))) & 1) == 0) {
+      f33_step_latched_monitor
+                ((F33LatchedMonitorState *)((undefined *)camry_host_ptr(0xfebe7538u)),(F33MonitorLimits *)((undefined *)camry_host_ptr(0x2b646u)),
+                 (F33TwoSidedMonitorCallbacks *)
+                 &PTR_f33_classify_paired_source_counter_changes_b_00028328);
+      goto LAB_0003df92;
+    }
+    puVar1 = 0xfebeb800u;
+    f33_retain_disabled_latched_monitor
+              ((F33LatchedMonitorState *)((undefined *)camry_host_ptr(0xfebe7538u)),(F33MonitorLimits *)((undefined *)camry_host_ptr(0x2b646u)));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbd44u + (uint32_t)((int)puVar1) * 1u)))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbd45u + (uint32_t)((int)puVar1) * 1u)))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbd46u + (uint32_t)((int)puVar1) * 1u)))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbd47u + (uint32_t)((int)puVar1) * 1u)))) = 0;
+LAB_0003df92:
+  f33_publish_paired_source_monitor_status(1,(*((uint *)camry_host_ptr((uint32_t)((0xffffbd38u + (uint32_t)((int)puVar1)))))));
   return;
 }
 

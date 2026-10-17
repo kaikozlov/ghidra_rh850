@@ -3378,6 +3378,124 @@ uint f33_cantp_reject_single_frame_extent(F33CanTpRxConnection *connection,F33Ca
 
 
 
+/* WARNING: Inlined function: f33_cantp_reset_transmit_owner */
+
+undefined4 FUN_0007abe6(F33CanTpConfiguration *param_1,int param_2)
+
+{
+  uint uVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  F33CanTpTxConnection *connection;
+  F33CanTpTxStatePrefix *state;
+  
+  puVar2 = 0xfebeb800u;
+  uVar1 = (uint)(*((byte *)camry_host_ptr((uint32_t)(param_2 + 1))));
+  state = ((void *)camry_host_ptr((uint32_t)((0xfebe4f40u) + uVar1 * 2)));
+  connection = f33_cantp_find_transmit_connection
+                         (param_1,((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar1 * 2].transmit_id);
+  if (connection == (F33CanTpTxConnection *)0x0) {
+LAB_0007ac88:
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x68c4))))) = 0xf;
+    ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar1 * 2].transmit_id = 0xffff;
+    state->remaining_or_accepted_length = 0;
+    ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar1 * 2].state = 0xe1;
+    ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar1 * 2].timeout_ticks = 0;
+    ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar1 * 2].sequence_number = 0xff;
+    ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar1 * 2].block_remaining = '\0';
+    ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar1 * 2].block_size = '\0';
+    ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar1 * 2].spacing_ticks = '\0';
+    return 0;
+  }
+  uVar3 = ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar1 * 2].state;
+  if ((uVar3 == 0xc3) || ((uVar3 == 0x87 && (state->remaining_or_accepted_length == 0)))) {
+    if (connection->overlap_final_confirmation_policy == '\0') goto LAB_0007ac40;
+    if (connection->overlap_final_confirmation_policy == '\x01') {
+      uVar3 = '\0';
+      goto LAB_0007ac82;
+    }
+LAB_0007ac4c:
+    ((void)(connection->canif_frame_id), f33_return_only_stub_7b246());
+  }
+  else {
+    if ((uVar3 == 0xb4) || (uVar3 == 0x87)) {
+LAB_0007ac40:
+      if (connection->preemption_rank <= (*((byte *)camry_host_ptr((uint32_t)(param_2 + 0x1d))))) {
+        return 1;
+      }
+      goto LAB_0007ac4c;
+    }
+    if ((((uVar3 != 'x') && (uVar3 != 0x96)) && (uVar3 != 0xa5)) && (uVar3 != 0xd2))
+    goto LAB_0007ac88;
+    if (connection->preemption_rank <= (*((byte *)camry_host_ptr((uint32_t)(param_2 + 0x1d))))) {
+      return 1;
+    }
+  }
+  uVar3 = '\x01';
+LAB_0007ac82:
+  f33_cantp_finish_transmit_aggregate(connection,state,uVar3);
+  return 0;
+}
+
+
+
+undefined4 FUN_0007ac9c(F33CanTpConfiguration *param_1,int param_2)
+
+{
+  uchar uVar1;
+  uchar uVar2;
+  ushort receive_id;
+  uint uVar3;
+  undefined *puVar4;
+  F33CanTpRxConnection *connection;
+  
+  puVar4 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  uVar3 = (uint)(*((byte *)camry_host_ptr((uint32_t)(param_2 + 1))));
+  uVar1 = ((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar3 * 2].state;
+  uVar2 = ((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar3 * 2].flow_status_marker;
+  if (uVar1 == 0xe1) {
+    return 0;
+  }
+  if ((uVar1 == 'i') || (uVar1 == 'K')) {
+    receive_id = ((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar3 * 2].receive_id;
+    puVar4 = ((undefined *)camry_host_ptr(0xfebeb800u));
+    connection = f33_cantp_find_receive_connection(param_1,receive_id);
+    if (connection != (F33CanTpRxConnection *)0x0) {
+      if ((receive_id != (*((ushort *)camry_host_ptr((uint32_t)(param_2 + 2))))) &&
+         (connection->preemption_rank <= (*((byte *)camry_host_ptr((uint32_t)(param_2 + 0x1d)))))) {
+        return 1;
+      }
+LAB_0007ad36:
+      f33_cantp_finish_receive_aggregate(connection, ((F33CanTpRxState *)camry_host_ptr((uint32_t)((0xfebe4f50u) + uVar3 * 2))), '\x01');
+      return 0;
+    }
+  }
+  else if ((uVar1 == 'Z') &&
+          (puVar4 = ((undefined *)camry_host_ptr(0xfebeb800u)),
+          connection = f33_cantp_find_receive_connection
+                                 (param_1,((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar3 * 2].receive_id),
+          connection != (F33CanTpRxConnection *)0x0)) {
+    if ((uVar2 == 0xf0) || (uVar2 == 0xe1)) {
+      if ((((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar3 * 2].receive_id != (*((ushort *)camry_host_ptr((uint32_t)(param_2 + 2))))) &&
+         (connection->preemption_rank <= (*((byte *)camry_host_ptr((uint32_t)(param_2 + 0x1d)))))) {
+        return 1;
+      }
+      ((void)(connection->canif_fc_transmit_id), f33_return_only_stub_7b246());
+      goto LAB_0007ad36;
+    }
+    if (uVar2 == 0xd2) {
+      ((void)(connection->canif_fc_transmit_id), f33_return_only_stub_7b246());
+      goto LAB_0007ad56;
+    }
+  }
+  puVar4[-0x68c4] = 0xf;
+LAB_0007ad56:
+  f33_cantp_reset_receive_owner(((F33CanTpRxState *)camry_host_ptr((uint32_t)((0xfebe4f50u) + uVar3 * 2))));
+  return 0;
+}
+
+
+
 /* Strip PCI/address prefix, claim upper buffer for SF extent, copy exactly that extent when
    capacity suffices, then report aggregate result. Padding never enters the upper buffer. */
 

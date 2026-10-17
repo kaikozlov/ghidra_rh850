@@ -3326,6 +3326,83 @@ LAB_000063dc:
 
 
 
+/* WARNING: This is an inlined function */
+/* Appendinto4096-byteFEBF30C0using2BB8index.Preservesr8;inlineexactleafinGhidraso6464doesnotinventextraout_r8.
+   Native real SF admission copies10 02 without padding, preserving the live capacity pointer; stops
+   before timer capture/service dispatch. */
+
+void f33_boot_request_append_bytes(uchar *source,uchar length)
+
+{
+  uchar uVar1;
+  uint uVar2;
+  uint uVar3;
+  
+  uVar3 = (uint)length;
+  uVar2 = (uint)f33_boot_request_append_index;
+  if ((-1 < (int)(uVar3 + uVar2 + -0x1000)) && (uVar3 = 0, uVar2 < 0x1000)) {
+    uVar3 = 0x1000 - uVar2 & 0xffff;
+  }
+  for (; uVar3 != 0; uVar3 = uVar3 - 1) {
+    uVar1 = *source;
+    source = source + 1;
+    f33_boot_request_append_index = (ushort)(uVar2 + 1);
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebf30c0u + (uint32_t)(uVar2) * 1u)))) = uVar1;
+    uVar2 = uVar2 + 1 & 0xffff;
+  }
+  return;
+}
+
+
+
+/* WARNING: Inlined function: f33_boot_request_append_bytes */
+/* Returns0success/1capacityerror;readsONLYlowbyteofdescriptorlength,updatesu16total30B8,andcalls6422.6422mustpreserver8capacityoutputliveacrosscall.
+   Native real SF admission copies10 02 without padding, preserving the live capacity pointer; stops
+   before timer capture/service dispatch. */
+
+uint f33_boot_request_append(ushort channel,F33BootPduInfo *chunk,ushort *remaining_capacity)
+
+{
+  uchar uVar1;
+  byte bVar2;
+  uchar *puVar3;
+  uint uVar4;
+  uint uVar5;
+  uint uVar6;
+  
+  bVar2 = (byte)chunk->length;
+  uVar6 = (uint)bVar2;
+  puVar3 = ((void *)camry_host_ptr((uint32_t)(chunk->data)));
+  uVar5 = 1;
+  if (uVar6 != 0) {
+    uVar4 = 0x1000 - f33_boot_request_length;
+    if ((int)(uVar6 - uVar4) < 0 == ((int)uVar4 < 0 && (int)uVar4 < 0 == (int)(uVar6 - uVar4) < 0)
+        && uVar6 != uVar4) goto LAB_000064a0;
+    f33_boot_request_length = bVar2 + f33_boot_request_length;
+    uVar5 = (uint)f33_boot_request_append_index;
+    uVar4 = uVar6;
+    if ((-1 < (int)(uVar6 + uVar5 + -0x1000)) && (uVar4 = 0, uVar5 < 0x1000)) {
+      uVar4 = 0x1000 - uVar5 & 0xffff;
+    }
+    for (; uVar4 != 0; uVar4 = uVar4 - 1) {
+      uVar1 = *puVar3;
+      puVar3 = puVar3 + 1;
+      f33_boot_request_append_index = (ushort)(uVar5 + 1);
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebf30c0u + (uint32_t)(uVar5) * 1u)))) = uVar1;
+      uVar5 = uVar5 + 1 & 0xffff;
+    }
+  }
+  uVar5 = 0;
+  *remaining_capacity = 0x1000 - f33_boot_request_length;
+LAB_000064a0:
+  if (DAT_febf2bbe == '\x01') {
+    ((void)(f33_boot_active_sid), (void)(uVar6), f33_return_only_stub_5282());
+  }
+  return uVar5;
+}
+
+
+
 /* Status0capturesrawcountertimestamps,publishesexecuting2/substate0anddispatchesSID+length.Nonzerostatusabortsthereceive.
     */
 
@@ -3573,6 +3650,21 @@ void f33_boot_response_submit(uchar mode,uchar *data,ushort length)
       FUN_0000159e();
     }
   }
+  return;
+}
+
+
+
+void FUN_000067b0(undefined1 *param_1,uint param_2)
+
+{
+  uint uVar1;
+  
+  for (uVar1 = 0; uVar1 < (param_2 & 0xffff); uVar1 = uVar1 + 1) {
+    *param_1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebf30c0u + (uint32_t)(uVar1) * 1u))));
+    param_1 = param_1 + 1;
+  }
+  f33_boot_request_append_index = 0;
   return;
 }
 

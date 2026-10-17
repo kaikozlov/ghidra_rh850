@@ -37,6 +37,118 @@ void f33_return_only_stub_54242(void)
 
 
 
+/* Default staged source bank with application selector50; selected sampleB8 comes fromB02C and
+   limit/positive flag useAFD0 rather thanAF40. No hardware-freshness claim. Default source bank
+   uses application selector50, B02C sample and AFD0 positive/limit fields; software-source
+   generations are not physical sampling times. */
+
+void f33_build_diagnostic_capture_default(F33DiagnosticCapture *output)
+
+{
+  undefined2 uVar1;
+  uchar uVar2;
+  uint32_t puVar3;
+  F33DiagnosticApplicationSample local_40;
+  
+  puVar3 = 0xfebeb800u;
+  f33_snapshot_diagnostic_application(&local_40,0x32);
+  *(undefined4 *)output->profile_prefix = (*((undefined4 *)camry_host_ptr((uint32_t)(puVar3 + -0x517c))));
+  *(undefined2 *)(output->profile_prefix + 8) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x515c))));
+  output->profile_prefix[0x42] = local_40.raw[0];
+  *(undefined2 *)(output->profile_prefix + 4) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x50f2))));
+  *(undefined2 *)(output->profile_prefix + 6) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x50dc))));
+  *(undefined2 *)(output->profile_prefix + 10) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x5148))));
+  *(undefined2 *)(output->profile_prefix + 0xc) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x5158))));
+  *(undefined2 *)(output->profile_prefix + 0xe) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x50f4))));
+  *(undefined2 *)(output->profile_prefix + 0x10) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x5188))));
+  *(undefined2 *)(output->profile_prefix + 0x12) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x5186))));
+  *(undefined2 *)(output->profile_prefix + 0x14) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x5184))));
+  *(undefined2 *)(output->profile_prefix + 0x16) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x5182))));
+  *(undefined2 *)(output->profile_prefix + 0x18) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x5180))));
+  *(undefined2 *)(output->profile_prefix + 0x1a) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x517e))));
+  *(undefined2 *)(output->profile_prefix + 0x1c) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x51ac))));
+  *(undefined2 *)(output->profile_prefix + 0x1e) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x51aa))));
+  *(undefined2 *)(output->profile_prefix + 0x20) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x51a8))));
+  *(undefined2 *)(output->profile_prefix + 0x22) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x51a6))));
+  *(undefined2 *)(output->profile_prefix + 0x24) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x51a4))));
+  *(undefined2 *)(output->profile_prefix + 0x26) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x51a2))));
+  *(undefined2 *)(output->profile_prefix + 0x28) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x535e))));
+  *(undefined2 *)(output->profile_prefix + 0x2a) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x535c))));
+  *(undefined2 *)(output->profile_prefix + 0x2c) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x535a))));
+  *(undefined2 *)(output->profile_prefix + 0x2e) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x5358))));
+  *(undefined2 *)(output->profile_prefix + 0x30) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x5356))));
+  *(undefined2 *)(output->profile_prefix + 0x32) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x5354))));
+  *(undefined2 *)(output->profile_prefix + 0x34) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x5152))));
+  *(undefined2 *)(output->profile_prefix + 0x36) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x5150))));
+  *(undefined2 *)(output->profile_prefix + 0x38) = (*((uint16_t *)((uint8_t *)&local_40 + 10u)));
+  *(undefined2 *)(output->profile_prefix + 0x3a) = (*((uint16_t *)((uint8_t *)&local_40 + 12u)));
+  *(undefined2 *)(output->profile_prefix + 0x3c) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x50da))));
+  *(undefined2 *)(output->profile_prefix + 0x3e) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x5146))));
+  uVar1 = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x3aba))));
+  output->profile_prefix[0x46] = '\0';
+  output->profile_prefix[0x47] = '\0';
+  *(undefined2 *)(output->profile_prefix + 0x40) = uVar1;
+  *(undefined2 *)(output->profile_prefix + 0x44) = (*((uint16_t *)((uint8_t *)&local_40 + 24u)));
+  output->profile_prefix[0x43] = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x3814)))));
+  output->extended_prefix[5] = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x37fa)))));
+  *(undefined2 *)output->extended_prefix = (*((uint16_t *)((uint8_t *)&local_40 + 14u)));
+  *(undefined2 *)(output->extended_prefix + 2) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x3a32))));
+  output->extended_prefix[4] = local_40.raw[1];
+  output->extended_prefix[0xc] = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x3abc)))));
+  output->extended_prefix[8] = local_40.raw[2];
+  *(undefined2 *)(output->extended_prefix + 6) = (*((uint16_t *)((uint8_t *)&local_40 + 18u)));
+  output->extended_prefix[9] = local_40.raw[3];
+  *(undefined2 *)(output->extended_prefix + 10) = (*((uint16_t *)((uint8_t *)&local_40 + 20u)));
+  output->extended_prefix[0xd] = local_40.raw[4];
+  *(undefined2 *)(output->extended_prefix + 0xe) = (*((uint16_t *)((uint8_t *)&local_40 + 22u)));
+  *(undefined2 *)(output->extended_prefix + 0x10) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x530e))));
+  *(undefined2 *)(output->extended_prefix + 0x12) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x530c))));
+  *(undefined2 *)(output->extended_prefix + 0x14) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x530a))));
+  *(undefined2 *)(output->extended_prefix + 0x16) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x5308))));
+  *(undefined2 *)(output->extended_prefix + 0x1a) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x3766))));
+  *(undefined2 *)(output->extended_prefix + 0x1c) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x37b6))));
+  *(undefined2 *)(output->extended_prefix + 0x1e) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x37a0))));
+  *(undefined2 *)(output->extended_prefix + 0x20) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x379e))));
+  output->extended_prefix[0x22] = local_40.raw[5];
+  output->selected_sample = (*((uint16_t *)((uint8_t *)&local_40 + 26u)));
+  output->extended_prefix[0x23] = '\x11';
+  *(undefined2 *)output->extended_middle = (*((uint16_t *)((uint8_t *)&local_40 + 16u)));
+  *(undefined4 *)(output->extended_middle + 2) = (*((uint32_t *)((uint8_t *)&local_40 + 32u)));
+  output->extended_middle[6] = local_40.raw[6];
+  output->extended_middle[7] = local_40.raw[7];
+  *(undefined4 *)(output->extended_middle + 0xe) = (*((uint32_t *)((uint8_t *)&local_40 + 36u)));
+  output->extended_tail[10] = local_40.raw[0x28];
+  output->extended_tail[0xb] = local_40.raw[0x29];
+  output->extended_tail[0xc] = local_40.raw[0x2a];
+  output->extended_tail[0xd] = local_40.raw[0x2b];
+  output->extended_tail[0xe] = local_40.raw[0x2c];
+  output->extended_tail[0xf] = local_40.raw[0x2d];
+  output->extended_middle[10] = local_40.raw[8];
+  *(undefined2 *)(output->extended_middle + 8) = (*((uint16_t *)((uint8_t *)&local_40 + 28u)));
+  output->extended_middle[0xb] = local_40.raw[9];
+  *(undefined2 *)(output->extended_middle + 0xc) = (*((uint16_t *)((uint8_t *)&local_40 + 30u)));
+  output->extended_tail[0x10] = local_40.raw[0x30];
+  *(undefined2 *)(output->extended_prefix + 0x18) = (*((uint16_t *)((uint8_t *)&local_40 + 46u)));
+  *(undefined2 *)(output->extended_middle + 0x12) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x5200))));
+  *(undefined2 *)(output->extended_middle + 0x14) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x51fe))));
+  *(undefined2 *)(output->extended_middle + 0x16) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x51f8))));
+  *(undefined2 *)(output->extended_middle + 0x18) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x51fc))));
+  *(undefined2 *)(output->extended_middle + 0x1a) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x51fa))));
+  *(undefined2 *)(output->extended_middle + 0x1c) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x51f6))));
+  output->ecu_thermal_estimate = (*((short *)camry_host_ptr((uint32_t)((0xffffb77au + (uint32_t)((int)puVar3))))));
+  output->motor_thermal_estimate = (*((short *)camry_host_ptr((uint32_t)((0xffffb77cu + (uint32_t)((int)puVar3))))));
+  output->ecu_thermal_source = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb76cu + (uint32_t)((int)puVar3) * 1u))));
+  uVar2 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb76du + (uint32_t)((int)puVar3) * 1u))));
+  output->extended_tail[0x11] = '\0';
+  output->motor_thermal_active = uVar2;
+  *(undefined2 *)output->extended_tail = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x3a2a))));
+  *(undefined4 *)(output->extended_tail + 2) = (*((undefined4 *)camry_host_ptr((uint32_t)(puVar3 + -0x3568))));
+  *(undefined4 *)(output->extended_tail + 6) = (*((undefined4 *)camry_host_ptr((uint32_t)(puVar3 + -0x3564))));
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */

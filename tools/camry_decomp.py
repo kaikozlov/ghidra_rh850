@@ -321,6 +321,229 @@ def _rewrite_indexed(code: str) -> str:
     return "".join(pieces)
 
 
+# Peripheral windows whose Ghidra type is wider than the machine-register scalar.
+# Field offsets are the committed ApplyP1MSfrTypes layouts (stride 0x20 message
+# slots, CFSTS bit 3). Spelling the field name would expand the SFR macro.
+_DEVICE_FIELDS: dict[int, tuple[int, dict[str, tuple[int, str]]]] = {
+    0xFFD24000: (0x20, {
+        "CFDTMID": (0, "uint32_t"),
+        "CFDTMPTR": (4, "uint32_t"),
+        "CFDTMFDCTR": (8, "uint32_t"),
+        "CFDTMDF0": (12, "uint32_t"),
+        "CFDTMDF1": (16, "uint32_t"),
+    }),
+    0xFFD24200: (0x20, {
+        "CFDTMID": (0, "uint32_t"),
+        "CFDTMPTR": (4, "uint32_t"),
+        "CFDTMFDCTR": (8, "uint32_t"),
+        "CFDTMDF0": (12, "uint32_t"),
+        "CFDTMDF1": (16, "uint32_t"),
+    }),
+    0xFFD23400: (0x20, {
+        "CFID": (0, "uint32_t"),
+        "CFPTR": (4, "uint32_t"),
+        "CFFDCSTS": (8, "uint32_t"),
+        "CFDF0": (12, "uint32_t"),
+        "CFDF1": (16, "uint32_t"),
+    }),
+    0xFFD23580: (0x20, {
+        "CFID": (0, "uint32_t"),
+        "CFPTR": (4, "uint32_t"),
+        "CFFDCSTS": (8, "uint32_t"),
+        "CFDF0": (12, "uint32_t"),
+        "CFDF1": (16, "uint32_t"),
+    }),
+}
+_DEVICE_BITS: dict[int, tuple[int, dict[str, int]]] = {
+    0xFFD20178: (4, {"status_b3": 3}),
+    0xFFD20184: (4, {"status_b3": 3}),
+}
+# C type and element stride for `&label + index` on a recovered peripheral struct.
+_DEVICE_TYPES: dict[int, tuple[str, int]] = {
+    0xFFD24000: ("RSCFD_TxMessageBuffer", 0x20),
+    0xFFD24200: ("RSCFD_TxMessageBuffer", 0x20),
+    0xFFD23400: ("RSCFD_CommonFifoFrame", 0x20),
+    0xFFD23580: ("RSCFD_CommonFifoFrame", 0x20),
+    0xFFD20178: ("RSCFD_CFSTS", 4),
+    0xFFD20184: ("RSCFD_CFSTS", 4),
+}
+_DEVICE_STRUCT_TEXT = """
+typedef struct RSCFD_TxMessageBuffer RSCFD_TxMessageBuffer;
+struct RSCFD_TxMessageBuffer {
+    uint32_t word0;
+    uint32_t word1;
+    uint32_t word2;
+    uint32_t word3;
+    uint32_t word4;
+    uint8_t reserved_14_1f[12];
+};
+typedef struct RSCFD_CommonFifoFrame RSCFD_CommonFifoFrame;
+struct RSCFD_CommonFifoFrame {
+    uint32_t word0;
+    uint32_t word1;
+    uint32_t word2;
+    uint32_t word3;
+    uint32_t word4;
+    uint8_t reserved_14_1f[12];
+};
+typedef struct RSCFD_CFSTS RSCFD_CFSTS;
+struct RSCFD_CFSTS {
+    uint32_t reserved_0_2 : 3;
+    uint32_t status_b3 : 1;
+    uint32_t reserved_4_31 : 28;
+};
+"""
+_DEVICE_STRUCT_NAMES = {
+    "RSCFD_TxMessageBuffer", "RSCFD_CommonFifoFrame", "RSCFD_CFSTS",
+}
+_SCALAR_WIDTHS = {
+    "uint8_t": 1, "int8_t": 1, "uint16_t": 2, "int16_t": 2,
+    "uint32_t": 4, "int32_t": 4, "uint64_t": 8,
+}
+_WIDTH_CTYPES = {1: "uint8_t", 2: "uint16_t", 4: "uint32_t", 8: "uint64_t"}
+
+
+def _symbol_address(name: str) -> int | None:
+    found = _absolute_names().get(name)
+    if found is not None:
+        return found
+    match = re.fullmatch(r"(?:DAT|UNK)_([0-9A-Fa-f]+)", name)
+    if match:
+        return int(match.group(1), 16)
+    return None
+
+
+def _volatile_at(address_expr: str, ctype: str) -> str:
+    return f"(*((volatile {ctype} *)camry_host_ptr((uint32_t)({address_expr}))))"
+
+
+def _scaled_address(base: int, index: str, stride: int, offset: int) -> str:
+    expr = f"0x{base:x}u + (uint32_t)({index}) * {stride}u"
+    if offset:
+        expr += f" + {offset}u"
+    return expr
+
+
+def _trailing_field(code: str, end: int) -> tuple[str | None, int]:
+    nxt = _skip_space(code, end + 1)
+    match = re.match(r"\.\s*([A-Za-z_][A-Za-z0-9_]*)", code[nxt:])
+    if match is None:
+        return None, end
+    return match.group(1), nxt + match.end()
+
+
+def _symbol_element(name: str) -> tuple[str, int] | None:
+    """Scalar width of a data symbol or machine register. Structs are separate."""
+    layout = _data_layouts().get(name)
+    if layout is not None:
+        _addr, ctype, _array = layout
+        if ctype in _struct_rows():
+            return None
+        width = _SCALAR_WIDTHS.get(ctype)
+        if width is None:
+            return None
+        return _WIDTH_CTYPES[width], width
+    row = _machine_registers().get(name)
+    if row is None:
+        return None
+    width = int(row.get("size") or 0)
+    ctype = _WIDTH_CTYPES.get(width)
+    if ctype is None:
+        return None
+    return ctype, width
+
+
+def _rewrite_device_pointer_add(code: str) -> str:
+    """`&label + index` on a peripheral struct advances by the struct size."""
+    pieces: list[str] = []
+    cursor = 0
+    pattern = re.compile(r"&([A-Za-z_][A-Za-z0-9_]*)\s*\+")
+    for match in pattern.finditer(code):
+        if match.start() < cursor:
+            continue
+        address = _symbol_address(match.group(1))
+        spec = _DEVICE_TYPES.get(address) if address is not None else None
+        if spec is None:
+            continue
+        expr_end = _scan_side(code, match.end(), 1, ",;)")
+        expr = code[match.end():expr_end].strip()
+        if not expr:
+            continue
+        ctype, stride = spec
+        pieces.append(code[cursor:match.start()])
+        pieces.append(
+            f"(({ctype} *)camry_host_ptr((uint32_t)"
+            f"(0x{address:x}u + (uint32_t)({expr}) * {stride}u)))"
+        )
+        cursor = expr_end
+    pieces.append(code[cursor:])
+    return "".join(pieces)
+
+
+def _rewrite_symbol_indexes(code: str) -> str:
+    """`(&symbol)[index]` keeps the symbol's element stride.
+
+    A struct-typed object is an array of that struct. A peripheral label
+    indexed through a recovered device field uses that field's byte offset.
+    Replacing `&symbol` with a bare integer drops both.
+    """
+    pieces: list[str] = []
+    cursor = 0
+    pattern = re.compile(r"\(&([A-Za-z_][A-Za-z0-9_]*)\)\s*\[")
+    structs = _struct_rows()
+    for match in pattern.finditer(code):
+        if match.start() < cursor:
+            continue
+        name = match.group(1)
+        try:
+            end = _match_bracket(code, match.end() - 1)
+        except ValueError:
+            continue
+        index = _rewrite_symbol_indexes(code[match.end():end])
+        address = _symbol_address(name)
+        if address is None:
+            continue
+        field, field_end = _trailing_field(code, end)
+        device = _DEVICE_FIELDS.get(address)
+        bits = _DEVICE_BITS.get(address)
+        replacement = None
+        consumed = end + 1
+        if device is not None and field is not None and field in device[1]:
+            offset, ctype = device[1][field]
+            replacement = _volatile_at(
+                _scaled_address(address, index, device[0], offset), ctype,
+            )
+            consumed = field_end
+        elif bits is not None and field is not None and field in bits[1]:
+            word = _volatile_at(_scaled_address(address, index, bits[0], 0), "uint32_t")
+            bit = bits[1][field]
+            replacement = f"((({word}) >> {bit}) & 1u)"
+            consumed = field_end
+        elif device is not None and field is not None:
+            continue
+        elif bits is not None and field is not None:
+            continue
+        else:
+            layout = _data_layouts().get(name)
+            if layout is not None and layout[1] in structs:
+                replacement = (
+                    f"((volatile {layout[1]} *)camry_host_ptr(0x{address:x}u))[{index}]"
+                )
+            else:
+                element = _symbol_element(name)
+                if element is None or field is not None:
+                    continue
+                ctype, width = element
+                replacement = _volatile_at(
+                    _scaled_address(address, index, width, 0), ctype,
+                )
+        pieces.append(code[cursor:match.start()])
+        pieces.append(replacement)
+        cursor = consumed
+    pieces.append(code[cursor:])
+    return "".join(pieces)
+
+
 _ADDR_TOKEN = re.compile(r"&(?:LAB|DAT|UNK)_([0-9A-Fa-f]+)")
 
 
@@ -1138,7 +1361,10 @@ def _rewrite_function_indexes(code: str) -> str:
     return "".join(pieces)
 
 
-_BITFIELD = re.compile(r"\b([A-Za-z_][A-Za-z0-9_]*)\._(\d+)_(\d+)_")
+_OVERLAY = re.compile(
+    r"\b(?P<head>[A-Za-z_][A-Za-z0-9_]*(?:\s*\[[^\[\]]*\])?(?:\s*\.\s*[A-Za-z_][A-Za-z0-9_]*)*)"
+    r"\._(?P<off>\d+)_(?P<size>\d+)_"
+)
 _BIT_WIDTHS = {1: "uint8_t", 2: "uint16_t", 4: "uint32_t"}
 _LOCAL_SIZES = {
     "undefined1": 1, "byte": 1, "uchar": 1, "char": 1, "code": 1, "bool": 1,
@@ -1162,27 +1388,133 @@ def _local_sizes(code: str) -> dict[str, int]:
     return sizes
 
 
+def _split_overlay_head(head: str) -> tuple[str, str | None, list[str]] | None:
+    match = re.fullmatch(
+        r"([A-Za-z_][A-Za-z0-9_]*)(?:\s*\[([^\[\]]*)\])?\s*"
+        r"((?:\.\s*[A-Za-z_][A-Za-z0-9_]*)*)",
+        head,
+    )
+    if match is None:
+        return None
+    fields = re.findall(r"\.\s*([A-Za-z_][A-Za-z0-9_]*)", match.group(3))
+    return match.group(1), match.group(2), fields
+
+
+def _member_offset(struct_name: str, fields: list[str]) -> int | None:
+    rows = _struct_rows()
+    current = struct_name
+    offset = 0
+    for index, field_name in enumerate(fields):
+        row = rows.get(current)
+        if row is None:
+            return None
+        found = next((field for field in row["fields"] if field["name"] == field_name), None)
+        if found is None:
+            return None
+        offset += int(found["offset"])
+        if index + 1 == len(fields):
+            return offset
+        base, stars, _array = _ghidra_base(found["type"])
+        if stars or base not in rows:
+            return None
+        current = base
+    return None
+
+
+def _assignment_rhs(code: str, end: int) -> tuple[str, int] | None:
+    nxt = _skip_space(code, end)
+    if nxt >= len(code) or code[nxt] != "=" or code.startswith("==", nxt):
+        return None
+    rhs_at = nxt + 1
+    semi = _scan_side(code, rhs_at, 1, ";")
+    if semi >= len(code) or code[semi] != ";":
+        return None
+    return code[rhs_at:semi].strip(), semi
+
+
 def _rewrite_bitfields(code: str) -> str:
     """Ghidra `name._offset_size_` is a byte overlay, not a struct field."""
-    addresses = _absolute_names()
     locals = _local_sizes(code)
-
-    def replace(match: re.Match[str]) -> str:
-        name = match.group(1)
-        offset = int(match.group(2))
-        size = int(match.group(3))
+    var_structs = _struct_var_types(code)
+    pieces: list[str] = []
+    cursor = 0
+    for match in _OVERLAY.finditer(code):
+        if match.start() < cursor:
+            continue
+        parsed = _split_overlay_head(match.group("head"))
+        if parsed is None:
+            continue
+        name, index, fields = parsed
+        offset = int(match.group("off"))
+        size = int(match.group("size"))
         ctype = _BIT_WIDTHS.get(size)
-        if ctype is None:
-            return match.group(0)
-        address = addresses.get(name)
-        if address is not None:
-            target = (address + offset) & 0xFFFFFFFF
-            return f"(*((volatile {ctype} *)camry_host_ptr(0x{target:x}u)))"
-        if locals.get(name, -1) < offset + size:
-            return match.group(0)
-        return f"(*(({ctype} *)((uint8_t *)&{name} + {offset}u)))"
-
-    return _BITFIELD.sub(replace, code)
+        replacement = None
+        consumed = match.end()
+        if fields:
+            struct = var_structs.get(name)
+            member = _member_offset(struct, fields) if struct else None
+            stride = _struct_rows().get(struct, {}).get("size") if struct else None
+            if ctype is None or member is None or stride is None:
+                continue
+            total = member + offset
+            address = _symbol_address(name)
+            if address is not None:
+                if index is None:
+                    target = (address + total) & 0xFFFFFFFF
+                    expr = f"0x{target:x}u"
+                else:
+                    expr = _scaled_address(address, index, int(stride), total)
+                replacement = _volatile_at(expr, ctype)
+            else:
+                disp = f"(uint8_t *)&{name} + {total}u"
+                if index is not None:
+                    disp = (
+                        f"(uint8_t *)&{name} + (uint32_t)({index}) * {int(stride)}u"
+                        f" + {total}u"
+                    )
+                replacement = f"(*(({ctype} *)({disp})))"
+        else:
+            address = _symbol_address(name)
+            if ctype is not None and address is not None:
+                target = (address + offset) & 0xFFFFFFFF
+                replacement = f"(*((volatile {ctype} *)camry_host_ptr(0x{target:x}u)))"
+            elif ctype is not None and locals.get(name, -1) >= offset + size:
+                replacement = f"(*(({ctype} *)((uint8_t *)&{name} + {offset}u)))"
+            elif (
+                size == 3
+                and index is None
+                and 0 < locals.get(name, -1) >= offset + size
+                and locals[name] <= 8
+            ):
+                mask = (1 << (size * 8)) - 1
+                shift = offset * 8
+                assigned = _assignment_rhs(code, match.end())
+                if assigned is not None:
+                    rhs, consumed = assigned
+                    kept = (
+                        f"({name} & ~{mask:#x}u)"
+                        if shift == 0
+                        else f"({name} & ~({mask:#x}u << {shift}))"
+                    )
+                    stored = (
+                        f"((uint32_t)({rhs}) & {mask:#x}u)"
+                        if shift == 0
+                        else f"(((uint32_t)({rhs}) & {mask:#x}u) << {shift})"
+                    )
+                    replacement = f"{name} = {kept} | {stored}"
+                else:
+                    replacement = (
+                        f"((uint32_t)({name}) & {mask:#x}u)"
+                        if shift == 0
+                        else f"(((uint32_t)({name}) >> {shift}) & {mask:#x}u)"
+                    )
+        if replacement is None:
+            continue
+        pieces.append(code[cursor:match.start()])
+        pieces.append(replacement)
+        cursor = consumed
+    pieces.append(code[cursor:])
+    return "".join(pieces)
 
 
 def _rewrite_thunk_calls(code: str) -> str:
@@ -1490,6 +1822,8 @@ def _rewrite_body(code: str) -> str:
     code = _IDIOM.sub(r"((\1 < 0) || (\2 < 0))", code)
     code = _rewrite_indexed(code)
     code = _rewrite_addresses(code, pointers)
+    code = _rewrite_device_pointer_add(code)
+    code = _rewrite_symbol_indexes(code)
     code = _rewrite_named_addresses(code, pointer_return=_returns_pointer(signature))
     code = _rewrite_pointer_to_int(code, pointers)
     code = _rewrite_int_to_pointer(code, pointers)
@@ -2370,7 +2704,7 @@ def _common_header(text: str, signatures: dict[str, str]) -> str:
     enums = {row["name"]: row for row in _type_layouts().get("enums") or []}
     forbidden = (
         _PRIMITIVE_TYPES | set(registers) | set(data) | function_names
-        | function_types | set(enums)
+        | function_types | set(enums) | _DEVICE_STRUCT_NAMES
     )
     for name in sorted(function_types):
         if name in function_names or name in registers or name in data:
@@ -2395,6 +2729,12 @@ def _common_header(text: str, signatures: dict[str, str]) -> str:
     visible = {name: row for name, row in structs.items() if name not in forbidden}
     if visible:
         lines.extend(_struct_definitions(visible))
+        emitted = True
+    if _DEVICE_STRUCT_NAMES & types:
+        lines.append(_DEVICE_STRUCT_TEXT.strip())
+        lines.append("_Static_assert(sizeof(RSCFD_TxMessageBuffer) == 32, \"tx buffer\");")
+        lines.append("_Static_assert(sizeof(RSCFD_CommonFifoFrame) == 32, \"fifo frame\");")
+        lines.append("_Static_assert(sizeof(RSCFD_CFSTS) == 4, \"cfsts\");")
         emitted = True
     if emitted:
         lines.append("")

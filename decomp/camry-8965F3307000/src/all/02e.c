@@ -4896,6 +4896,63 @@ void f33_set_current_limit_request(uint owner,ushort limit)
 
 
 
+/* Return min(22170, enabled BD34 owners). AF0CC=1 selects only owner0. Full R10 return is consumed
+   byBB88C; the former void inference lost this value. Return min22170 over mask-selected
+   current-limit owners. Exact AF0CC=1 selects only thermal owner0. Full R10 return is consumed by
+   BB88C; not void. */
+
+uint f33_reduce_thermal_current_requests(void)
+
+{
+  int iVar1;
+  uint uVar2;
+  uint uVar3;
+  uint uVar4;
+  
+  uVar4 = 0x569a;
+  uVar3 = 0;
+  do {
+    if ((((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xaf0ccu + (uint32_t)(uVar3 >> 5) * 4u)))) >> (uVar3 & 0x1f) & 1) != 0) &&
+       ((int)((ushort)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebebd34u + (uint32_t)(uVar3) * 2u)))) - uVar4) < 0)) {
+      uVar4 = (uint)(ushort)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebebd34u + (uint32_t)(uVar3) * 2u))));
+    }
+    uVar2 = uVar3 + 1;
+    iVar1 = uVar3 - 9;
+    uVar3 = uVar2;
+  } while (iVar1 < 0 != ((int)uVar2 < 0 && -1 < iVar1));
+  return uVar4;
+}
+
+
+
+/* Return min(22170, BD34 owners excluded by AF0CC). Exact mask1 selects owners1..9, including the
+   retained thermal-release owner7. Return min22170 over complement of AF0CC: owners1..9, including
+   retained thermal-release owner7. */
+
+uint f33_reduce_other_current_requests(void)
+
+{
+  int iVar1;
+  uint uVar2;
+  uint uVar3;
+  uint uVar4;
+  
+  uVar4 = 0x569a;
+  uVar3 = 0;
+  do {
+    if ((((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xaf0ccu + (uint32_t)(uVar3 >> 5) * 4u)))) >> (uVar3 & 0x1f) & 1) == 0) &&
+       ((int)((ushort)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebebd34u + (uint32_t)(uVar3) * 2u)))) - uVar4) < 0)) {
+      uVar4 = (uint)(ushort)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebebd34u + (uint32_t)(uVar3) * 2u))));
+    }
+    uVar2 = uVar3 + 1;
+    iVar1 = uVar3 - 9;
+    uVar3 = uVar2;
+  } while (iVar1 < 0 != ((int)uVar2 < 0 && -1 < iVar1));
+  return uVar4;
+}
+
+
+
 /* Return min(22170, BD34 owners whose AECD4 bit is clear). Exact mask21 excludes owners0/5, not the
    retained thermal-release owner7. Return min22170 over owners excluded by neither bit of AECD4=21.
    Owners0/5 are skipped, but retained thermal owner7 is not. */

@@ -1847,6 +1847,24 @@ void f33_step_local_channel_mismatch_b_monitor(void)
 
 
 
+/* 64DC.bit17/64D4.bit17 clear and65F7=5A admit;8281=5A fails22 else11; inadmissible44.8281 is
+   local383A.bit8. */
+
+uint f33_classify_local_channel_mismatch_b(void)
+
+{
+  if (((((*((volatile uint8_t *)camry_host_ptr(0xfebe64deu))) & 2) == 0) && (((*((volatile uint8_t *)camry_host_ptr(0xfebe64d6u))) & 2) == 0)) && (DAT_febe65f7 == 'Z'))
+  {
+    if (DAT_febe8281 == 'Z') {
+      return 0x22;
+    }
+    return 0x11;
+  }
+  return 0x44;
+}
+
+
+
 /* Report event73 through51E2C/52A2A healthy-observed bitmap; does not clear current failure
    history. */
 
