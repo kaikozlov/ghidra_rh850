@@ -3424,7 +3424,7 @@ void FUN_00062e1e(undefined4 param_1, undefined4 param_2, undefined4 param_3, un
       if (((camry_psw & 0xbfffffd0) >> 0xf & 1) == 0) {
         in_EBASE = in_RBASE;
       }
-      (*(int (*)())camry_host_ptr((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();
+      (*(int (*)())camry_indirect((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();
     }
   }
   __enable_irq();
@@ -3953,7 +3953,7 @@ void f33_startup_coordinator(void)
       if (((camry_psw & 0xbfffffdf) >> 0xf & 1) == 0) {
         in_EBASE = in_RBASE;
       }
-      (*(int (*)())camry_host_ptr((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();
+      (*(int (*)())camry_indirect((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();
     }
   }
   __enable_irq();

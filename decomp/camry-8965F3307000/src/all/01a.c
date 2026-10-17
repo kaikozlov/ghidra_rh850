@@ -1078,7 +1078,7 @@ uint f33_crypto_bank_run_startup_verification(void)
             if (((uVar6 & 0xbfffffdf) >> 0xf & 1) == 0) {
               in_EBASE = in_RBASE;
             }
-            (*(int (*)())camry_host_ptr((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();
+            (*(int (*)())camry_indirect((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();
           }
         }
         __enable_irq();

@@ -27,6 +27,7 @@ from tools.camry_decomp import (
     _stmt_parts,
     load_matched,
     load_symbols,
+    write_indirect_table,
 )
 from tools.camry_lift import Inst, load_image, walk_symbol
 from tools.emulation.p1me_machine import P1MEMachineError
@@ -228,10 +229,6 @@ def _static_block(fn) -> str | None:
             return "trap"
         if inst.kind == "callt":
             return "callt"
-        if inst.kind in {"jarl_ind", "switch"}:
-            return "indirect-call" if inst.kind == "jarl_ind" else "switch"
-        if inst.kind == "jmp" and inst.reg not in {0, 31}:
-            return "indirect-call"
     return None
 
 
@@ -338,6 +335,11 @@ class _Machine:
             return self._jump(fn, inst.target if count else nxt)
         if kind == "jmp":
             return self._transfer(self.regs[inst.reg])
+        if kind == "jarl_ind":
+            self._write_reg(inst.link, nxt)
+            return self._transfer(self.regs[inst.reg])
+        if kind == "switch":
+            return self._switch(fn, nxt, inst.reg)
         if kind == "jmpdisp":
             return self._transfer(_u32(inst.base + self.regs[inst.reg]))
         if kind == "jr":
@@ -364,6 +366,17 @@ class _Machine:
         if nxt in fn.sites:
             return nxt
         raise Harness("fallthrough")
+
+    def _switch(self, fn, nxt: int, reg: int) -> int:
+        # Halfword displacement table immediately after the instruction.
+        slot = _u32(nxt + (self.regs[reg] << 1))
+        if slot + 2 > len(self.code):
+            raise Harness("external-branch")
+        disp = int.from_bytes(self.code[slot:slot + 2], "little", signed=True)
+        target = _u32(nxt + (disp << 1))
+        if target not in fn.sites:
+            raise Harness("external-branch")
+        return target
 
     def _jump(self, fn, target: int) -> int:
         if target not in fn.sites:
@@ -1219,6 +1232,9 @@ def _compile(
     for _name, decl in _object_definitions():
         stub_text.append(decl)
     stub_path.write_text("\n".join(stub_text) + "\n", encoding="utf-8")
+    table = directory / "indirect_table.c"
+    linked = [source, *(_src_paths())]
+    write_indirect_table(table, linked)
     result = subprocess.run(
         [
             "cc", "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror", "-fwrapv",
@@ -1233,7 +1249,7 @@ def _compile(
             "-I", str(ROOT / "include"),
             "-I", str(ROOT / "src" / "all"),
             "-dynamiclib", "-o", str(library),
-            str(source), str(stub_path), str(HOST_MEM),
+            str(source), str(stub_path), str(table), str(HOST_MEM),
             *[str(path) for path in _src_paths()],
         ],
         text=True,

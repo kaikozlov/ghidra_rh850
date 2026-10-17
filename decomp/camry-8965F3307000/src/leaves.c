@@ -1,3 +1,6 @@
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "camry.h"
 
 /* Leaves checked against the original instruction bytes and retained oracles.
@@ -12,6 +15,23 @@ uint32_t camry_tp;
 uint32_t camry_sp;
 uint32_t camry_pmr;
 uint32_t camry_psw = 0x20u;
+
+void *camry_indirect(uint32_t address) {
+    uint32_t lo = 0;
+    uint32_t hi = camry_indirect_count;
+    while (lo < hi) {
+        uint32_t mid = lo + ((hi - lo) >> 1);
+        uint32_t key = camry_indirect_slots[mid].address;
+        if (key == address)
+            return camry_indirect_slots[mid].function;
+        if (key < address)
+            lo = mid + 1;
+        else
+            hi = mid;
+    }
+    fprintf(stderr, "unresolved camry indirect 0x%08x\n", address);
+    abort();
+}
 
 void f33_pwm_initialize_compare_stages(uint32_t compare) {
     uint32_t value = compare & 0xffffu;

@@ -280,7 +280,7 @@ void FUN_000084f8(uint param_1)
         if (((camry_psw & 0xbfffffd0) >> 0xf & 1) == 0) {
           param_1 = in_RBASE;
         }
-        (*(int (*)())camry_host_ptr((uint32_t)((param_1 & 0xfffffe00) + 0x70)))();
+        (*(int (*)())camry_indirect((uint32_t)((param_1 & 0xfffffe00) + 0x70)))();
       }
     }
     __enable_irq();

@@ -2332,7 +2332,7 @@ int FUN_00089d80(void)
   if (DAT_00027e7c <= DAT_febf13c0) {
     uVar4 = 0;
   }
-  iVar3 = (*(int (*)())camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x27eb0u + (uint32_t)(uVar4) * 4u))))))();
+  iVar3 = (*(int (*)())camry_indirect((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x27eb0u + (uint32_t)(uVar4) * 4u))))))();
   if (iVar3 == 2) {
     (*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + 0x5bc4)))) = (*((undefined4 *)camry_host_ptr((uint32_t)(puVar2 + 0x4080))));
   }

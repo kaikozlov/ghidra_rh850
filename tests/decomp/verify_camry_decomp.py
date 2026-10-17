@@ -12,7 +12,7 @@ import tempfile
 from pathlib import Path
 
 from tools import REPO_ROOT
-from tools.camry_decomp import ROOT, identity_image, load_matched, load_symbols
+from tools.camry_decomp import ROOT, identity_image, load_matched, load_symbols, write_indirect_table
 from tools.project.analysis_target import target as resolve_target
 
 ORACLES = ROOT / "oracles.jsonl"
@@ -127,6 +127,9 @@ def load_oracles() -> list[dict]:
 def compile_sources(directory: Path, optimize: str = "-O2") -> ctypes.CDLL:
     library = directory / "libcamry.dylib"
     sources = sorted((ROOT / "src").glob("*.c"))
+    table = directory / "indirect_table.c"
+    write_indirect_table(table, sources)
+    sources = [*sources, table]
     result = subprocess.run(
         [
             "cc", "-std=c11", optimize, "-Wall", "-Wextra", "-Werror", "-fwrapv",

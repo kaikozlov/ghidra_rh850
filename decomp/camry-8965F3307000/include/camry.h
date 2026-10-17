@@ -46,6 +46,14 @@ extern uint32_t camry_tp;
 extern uint32_t camry_pmr;
 extern uint32_t camry_psw;
 
+typedef struct {
+    uint32_t address;
+    void *function;
+} camry_indirect_slot;
+extern const camry_indirect_slot camry_indirect_slots[];
+extern const uint32_t camry_indirect_count;
+void *camry_indirect(uint32_t address);
+
 void *f33_memcpy_forward(void *destination, void *source, uint32_t byte_count);
 void f33_memzero(void *destination, uint32_t byte_count);
 void f33_pwm_initialize_compare_stages(uint32_t compare);

@@ -2430,7 +2430,7 @@ undefined4 FUN_00065bd4(undefined4 param_1,undefined4 param_2,undefined4 param_3
       if (((in_FEPSW & 0xbfffffbf) >> 0xf & 1) == 0) {
         in_EBASE = in_RBASE;
       }
-      in_r10 = (*(int (*)())camry_host_ptr((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))(param_1,param_2,param_3,param_4);
+      in_r10 = (*(int (*)())camry_indirect((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))(param_1,param_2,param_3,param_4);
     }
   }
   return in_r10;

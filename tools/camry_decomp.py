@@ -4485,6 +4485,155 @@ def apply_system_inputs() -> tuple[int, int]:
     return functions, files
 
 
+_INDIRECT_CALL = "(*(int (*)())camry_host_ptr("
+
+
+def _rewrite_indirect_dispatch(code: str) -> str:
+    """Call a firmware address through the host dispatch table.
+
+    `camry_host_ptr` returns bytes. The call wants the compiled function at
+    that address.
+    """
+    pieces: list[str] = []
+    index = 0
+    while True:
+        found = code.find(_INDIRECT_CALL, index)
+        if found < 0:
+            pieces.append(code[index:])
+            break
+        opening = found + len(_INDIRECT_CALL) - 1
+        try:
+            closing = _match_paren(code, opening)
+        except ValueError:
+            pieces.append(code[index:found + len(_INDIRECT_CALL)])
+            index = found + len(_INDIRECT_CALL)
+            continue
+        expr = code[opening + 1:closing]
+        pieces.append(code[index:found])
+        pieces.append(f"(*(int (*)())camry_indirect({expr})")
+        index = closing + 1
+    return "".join(pieces)
+
+
+def apply_indirect_dispatch() -> tuple[int, int]:
+    """Point converted firmware-address calls at camry_indirect. Equivalent bodies stay."""
+    blocked: set[str] = set()
+    allowed: set[str] = set()
+    by_name: dict[str, set[str]] = {}
+    for row in load_matched():
+        by_name.setdefault(row["name"], set()).add(row["status"])
+    for name, statuses in by_name.items():
+        if statuses & {"equivalent", "byte-matched"}:
+            blocked.add(name)
+        elif "converted" in statuses:
+            allowed.add(name)
+    functions = 0
+    files = 0
+    for path in sorted((ROOT / "src" / "all").glob("*.c")):
+        lines = path.read_text(encoding="utf-8").splitlines()
+        out: list[str] = []
+        index = 0
+        changed = False
+        while index < len(lines):
+            line = lines[index]
+            if (
+                not line.strip()
+                or line.startswith("#")
+                or line.startswith((" ", "\t", "/*", "//"))
+            ):
+                out.append(line)
+                index += 1
+                continue
+            start = index
+            while index < len(lines) and "{" not in lines[index]:
+                index += 1
+            if index >= len(lines):
+                out.extend(lines[start:])
+                break
+            depth = 0
+            while index < len(lines):
+                depth += lines[index].count("{") - lines[index].count("}")
+                index += 1
+                if depth <= 0:
+                    break
+            chunk = "\n".join(lines[start:index])
+            match = re.search(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\(", _c_signature(chunk))
+            name = match.group(1) if match else ""
+            if name in allowed and name not in blocked:
+                updated = _rewrite_indirect_dispatch(chunk)
+                if updated != chunk:
+                    functions += 1
+                    changed = True
+                    chunk = updated
+            out.extend(chunk.split("\n"))
+        if changed:
+            path.write_text("\n".join(out) + "\n", encoding="utf-8")
+            files += 1
+    return functions, files
+
+
+def _defined_function_names(text: str) -> set[str]:
+    names: set[str] = set()
+    lines = text.splitlines()
+    index = 0
+    skip = {"if", "for", "while", "switch", "return", "sizeof"}
+    while index < len(lines):
+        raw = lines[index]
+        index += 1
+        if not raw or raw[0] in " \t#/*}" or raw.startswith("static"):
+            continue
+        buf = raw.strip()
+        while index < len(lines) and "{" not in buf and ";" not in buf:
+            nxt = lines[index]
+            if not nxt.strip() or nxt.startswith(("/*", " *", " */", "//")):
+                index += 1
+                continue
+            if "(" in buf and nxt[0] not in " \t{":
+                break
+            buf += " " + nxt.strip()
+            index += 1
+            if len(buf) > 1500:
+                break
+        head = buf.split("{", 1)[0]
+        if "{" not in buf or ";" in head:
+            continue
+        paren = head.find("(")
+        if paren < 0:
+            continue
+        match = re.search(r"([A-Za-z_][A-Za-z0-9_]*)\s*$", head[:paren])
+        if match and match.group(1) not in skip:
+            names.add(match.group(1))
+    return names
+
+
+def write_indirect_table(path: Path, sources: list[Path]) -> None:
+    """Map linked function addresses to their compiled bodies."""
+    addresses: dict[str, int] = {}
+    for row in load_symbols():
+        addresses.setdefault(row["name"], int(row["addr"], 16))
+    chosen: dict[int, str] = {}
+    for source in sources:
+        for name in _defined_function_names(source.read_text(encoding="utf-8")):
+            addr = addresses.get(name)
+            if addr is None or addr in chosen:
+                continue
+            chosen[addr] = name
+    lines = [
+        "#include <stdint.h>",
+        "typedef struct { uint32_t address; void *function; } camry_indirect_slot;",
+    ]
+    for addr in sorted(chosen):
+        lines.append(f"extern void {chosen[addr]}();")
+    lines.append("const camry_indirect_slot camry_indirect_slots[] = {")
+    if not chosen:
+        lines.append("    {0u, 0},")
+    for addr in sorted(chosen):
+        lines.append(f"    {{0x{addr:x}u, (void *){chosen[addr]}}},")
+    lines.append("};")
+    lines.append(f"const uint32_t camry_indirect_count = {len(chosen)}u;")
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
 def _rewrite_body(code: str) -> str:
     code = _strip_calling_convention(code)
     code = _widen_signature(code)
@@ -4522,6 +4671,7 @@ def _rewrite_body(code: str) -> str:
     code = _rewrite_runtime_gp(code)
     code = _rewrite_signed_values(code)
     code = _rewrite_system_inputs(code)
+    code = _rewrite_indirect_dispatch(code)
     return code
 
 

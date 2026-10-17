@@ -81,7 +81,7 @@ void f33_boot_eiint_context(void)
       if ((camry_psw & 0x8000) == 0) {
         uVar1 = in_RBASE;
       }
-      (*(int (*)())camry_host_ptr((uint32_t)((uVar1 & 0xfffffe00) + 0x70)))();
+      (*(int (*)())camry_indirect((uint32_t)((uVar1 & 0xfffffe00) + 0x70)))();
       in_EIIC = extraout_r6;
       in_r7 = extraout_r7;
       in_r8 = extraout_r8;
@@ -109,7 +109,7 @@ void f33_boot_eiint_context(void)
       if (((in_EIPSW & 0xbfffffbf) >> 0xf & 1) == 0) {
         in_EBASE = in_RBASE;
       }
-      (*(int (*)())camry_host_ptr((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))(in_r6,in_r7,in_r8,in_r9);
+      (*(int (*)())camry_indirect((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))(in_r6,in_r7,in_r8,in_r9);
     }
   }
   return;
@@ -1170,7 +1170,7 @@ void f33_boot_resident_main(void)
       if (((camry_psw & 0xbfffffdf) >> 0xf & 1) == 0) {
         in_EBASE = in_RBASE;
       }
-      (*(int (*)())camry_host_ptr((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();
+      (*(int (*)())camry_indirect((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();
     }
   }
   __enable_irq();
@@ -1203,7 +1203,7 @@ void f33_boot_select_application_or_resident(void)
   FUN_000010c6();
   uVar5 = f33_boot_validate_application_images();
   if (uVar5 == 0) {
-    (*(int (*)())camry_host_ptr((uint32_t)(PTR_f33_application_entry_000ffdb8)))();
+    (*(int (*)())camry_indirect((uint32_t)(PTR_f33_application_entry_000ffdb8)))();
   }
   else {
     FUN_00001206();
@@ -3284,7 +3284,7 @@ void FUN_000032a0(char *param_1)
   uVar1 = 0;
   do {
     if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x8d90u + (uint32_t)(uVar1 * 8) * 1u)))) == *param_1) {
-      (*(int (*)())camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x8d94u + (uint32_t)(uVar1 * 2) * 4u))))))(*param_1,*(undefined2 *)(param_1 + 4));
+      (*(int (*)())camry_indirect((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x8d94u + (uint32_t)(uVar1 * 2) * 4u))))))(*param_1,*(undefined2 *)(param_1 + 4));
       return;
     }
     uVar1 = uVar1 + 1;

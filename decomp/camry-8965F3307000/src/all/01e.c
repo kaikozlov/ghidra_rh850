@@ -5903,7 +5903,7 @@ void f33_return_only_stub_7be56(void)
 void FUN_0007be58(undefined2 param_1,undefined4 param_2,undefined2 param_3)
 
 {
-  (*(int (*)())camry_host_ptr((uint32_t)(PTR_f33_dcm_start_of_reception_0002188c)))(param_1,param_2,param_3);
+  (*(int (*)())camry_indirect((uint32_t)(PTR_f33_dcm_start_of_reception_0002188c)))(param_1,param_2,param_3);
   return;
 }
 
@@ -5912,7 +5912,7 @@ void FUN_0007be58(undefined2 param_1,undefined4 param_2,undefined2 param_3)
 void FUN_0007be6c(undefined2 param_1)
 
 {
-  (*(int (*)())camry_host_ptr((uint32_t)(PTR_f33_dcm_copy_receive_data_00021890)))(param_1);
+  (*(int (*)())camry_indirect((uint32_t)(PTR_f33_dcm_copy_receive_data_00021890)))(param_1);
   return;
 }
 
@@ -5921,7 +5921,7 @@ void FUN_0007be6c(undefined2 param_1)
 void FUN_0007be7e(undefined2 param_1)
 
 {
-  (*(int (*)())camry_host_ptr((uint32_t)(PTR_f33_dcm_copy_transmit_data_00021894)))(param_1);
+  (*(int (*)())camry_indirect((uint32_t)(PTR_f33_dcm_copy_transmit_data_00021894)))(param_1);
   return;
 }
 
@@ -5930,7 +5930,7 @@ void FUN_0007be7e(undefined2 param_1)
 void FUN_0007be90(undefined2 param_1,undefined1 param_2)
 
 {
-  (*(int (*)())camry_host_ptr((uint32_t)(PTR_f33_dcm_receive_indication_00021898)))(param_1,param_2);
+  (*(int (*)())camry_indirect((uint32_t)(PTR_f33_dcm_receive_indication_00021898)))(param_1,param_2);
   return;
 }
 
@@ -5939,7 +5939,7 @@ void FUN_0007be90(undefined2 param_1,undefined1 param_2)
 void FUN_0007bea4(undefined2 param_1,undefined1 param_2)
 
 {
-  (*(int (*)())camry_host_ptr((uint32_t)(PTR_f33_dcm_transmit_confirmation_0002189c)))(param_1,param_2);
+  (*(int (*)())camry_indirect((uint32_t)(PTR_f33_dcm_transmit_confirmation_0002189c)))(param_1,param_2);
   return;
 }
 
@@ -5948,7 +5948,7 @@ void FUN_0007bea4(undefined2 param_1,undefined1 param_2)
 void FUN_0007beb8(undefined2 param_1)
 
 {
-  (*(int (*)())camry_host_ptr((uint32_t)(PTR_FUN_000218a0)))(param_1);
+  (*(int (*)())camry_indirect((uint32_t)(PTR_FUN_000218a0)))(param_1);
   return;
 }
 

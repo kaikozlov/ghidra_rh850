@@ -145,7 +145,7 @@ void FUN_0007c2ee(void)
     (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe3de8u + (uint32_t)(iVar5) * 1u)))) = 0xff;
   }
   DAT_febe4fb0 = 0x2d;
-  (*(int (*)())camry_host_ptr((uint32_t)(PTR_FUN_0002181c)))();
+  (*(int (*)())camry_indirect((uint32_t)(PTR_FUN_0002181c)))();
   (*(int (*)())*(code **)(puVar2 + -0x25d4))();
   (*(int (*)())*(code **)(puVar2 + -0x25d0))();
   return;
@@ -324,7 +324,7 @@ void FUN_0007c4c6(void)
     (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe3de4u + (uint32_t)(iVar4) * 1u)))) = 0x1e;
     (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe3de5u + (uint32_t)(iVar4) * 1u)))) = 0x1e;
   }
-  (*(int (*)())camry_host_ptr((uint32_t)(PTR_FUN_0002181c)))();
+  (*(int (*)())camry_indirect((uint32_t)(PTR_FUN_0002181c)))();
   (*(int (*)())*(code **)(puVar2 + -0x25d4))();
   (*(int (*)())*(code **)(puVar2 + -0x25d0))();
   return;
@@ -1875,7 +1875,7 @@ void FUN_0007d72c(uint param_1,int *param_2)
   param_1 = param_1 & 0xffff;
   bVar2 = (*((byte *)camry_host_ptr((uint32_t)(&PTR_DAT_000226c7 + param_1 * 2))));
   if ((bVar2 >> 4 & 1) != 0) {
-    uVar8 = (*(int (*)())camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x21c4cu + (uint32_t)((byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x226c2u + (uint32_t)(param_1 * 8) * 1u))))) * 4u))))))(param_1,param_2,&uStack_1e,&uStack_1d);
+    uVar8 = (*(int (*)())camry_indirect((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x21c4cu + (uint32_t)((byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x226c2u + (uint32_t)(param_1 * 8) * 1u))))) * 4u))))))(param_1,param_2,&uStack_1e,&uStack_1d);
     iVar9 = ((void)(param_1), (void)(uVar8), (void)(uStack_1e), (void)(uStack_1d), f33_return_const_1_833e0());
     if (iVar9 != 1) {
       return;
@@ -2596,7 +2596,7 @@ void FUN_0007e29c(uint param_1,uint param_2)
   param_1 = param_1 & 0xff;
   if (param_2 >> 7 != 0) {
     puVar2 = 0x23dfcu;
-    (*(int (*)())camry_host_ptr((uint32_t)(PTR_f33_return_only_stub_7e59c_00021c2c)))(param_1);
+    (*(int (*)())camry_indirect((uint32_t)(PTR_f33_return_only_stub_7e59c_00021c2c)))(param_1);
   }
   FUN_0007e046(param_1,param_2);
   if (param_2 == 0xc0) {
@@ -2772,7 +2772,7 @@ void FUN_0007e43c(uint param_1)
   byte bVar1;
   
   bVar1 = (*((byte *)camry_host_ptr((uint32_t)(&PTR_DAT_000226c7 + (param_1 & 0xffff) * 2))));
-  (*(int (*)())camry_host_ptr((uint32_t)(PTR_f33_return_only_stub_7e720_00021c14)))();
+  (*(int (*)())camry_indirect((uint32_t)(PTR_f33_return_only_stub_7e720_00021c14)))();
   if ((bVar1 >> 1 & 1) != 0) {
     FUN_0008e7a4(param_1 & 0xffff);
   }
@@ -3305,7 +3305,7 @@ void FUN_0007e782(void)
   }
   DAT_febe493a = 0;
   DAT_febe493c = 0xffff;
-  (*(int (*)())camry_host_ptr((uint32_t)(PTR_f33_return_only_stub_7ed66_00021bbc)))();
+  (*(int (*)())camry_indirect((uint32_t)(PTR_f33_return_only_stub_7ed66_00021bbc)))();
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x6ec8)))) = 0x1fe;
   return;
 }
@@ -3348,7 +3348,7 @@ uint FUN_0007e804(uint param_1)
   param_1 = param_1 & 0xff;
   iVar1 = param_1 * 0x10;
   if ((*(ushort *)(((undefined *)camry_host_ptr(0x21bdcu)) + param_1 * 2) & DAT_febe493a) == 0) {
-    uVar5 = (*(int (*)())camry_host_ptr((uint32_t)(PTR_f33_return_const_0_7ed6c_00021bc8)))(param_1);
+    uVar5 = (*(int (*)())camry_indirect((uint32_t)(PTR_f33_return_const_0_7ed6c_00021bc8)))(param_1);
     if (uVar5 != 0) goto LAB_0007e87a;
     if (((*(short *)(((undefined *)camry_host_ptr(0xfebe4930u)) + iVar1) != 0x1fe) &&
         (*(short *)(((undefined *)camry_host_ptr(0xfebe4932u)) + iVar1) != 0x1fe)) &&
@@ -3432,7 +3432,7 @@ int FUN_0007e912(uint param_1)
   puVar2 = 0x23dfcu;
   param_1 = param_1 & 0xff;
   if ((*(ushort *)(((undefined *)camry_host_ptr(0x21bdcu)) + param_1 * 2) & DAT_febe493a) == 0) {
-    iVar3 = (*(int (*)())camry_host_ptr((uint32_t)(PTR_f33_return_const_0_7ed70_00021bcc)))(param_1);
+    iVar3 = (*(int (*)())camry_indirect((uint32_t)(PTR_f33_return_const_0_7ed70_00021bcc)))(param_1);
     if (iVar3 != 0) {
       return iVar3;
     }
@@ -3530,7 +3530,7 @@ undefined4 FUN_0007ea26(uint param_1,char param_2)
       ((void)(uVar4), thunk_FUN_0006a4c4());
     }
     else {
-      uVar5 = (*(int (*)())camry_host_ptr((uint32_t)(PTR_f33_return_const_1_7ed7c_00021bc0)))(param_1 & 0xff,param_2);
+      uVar5 = (*(int (*)())camry_indirect((uint32_t)(PTR_f33_return_const_1_7ed7c_00021bc0)))(param_1 & 0xff,param_2);
     }
   }
   return uVar5;
@@ -3581,7 +3581,7 @@ void FUN_0007eb32(void)
 
 {
   if (DAT_febe4938 == 0x1fe) {
-    (*(int (*)())camry_host_ptr((uint32_t)(PTR_FUN_00021bd8)))();
+    (*(int (*)())camry_indirect((uint32_t)(PTR_FUN_00021bd8)))();
   }
   return;
 }
@@ -3676,7 +3676,7 @@ undefined4 FUN_0007ec40(undefined1 param_1,uint param_2,char param_3)
     uVar1 = 0x2fd;
   }
   else {
-    (*(int (*)())camry_host_ptr((uint32_t)(PTR_f33_return_only_stub_7ed74_00021bd0)))(param_1);
+    (*(int (*)())camry_indirect((uint32_t)(PTR_f33_return_only_stub_7ed74_00021bd0)))(param_1);
   }
   return uVar1;
 }
@@ -4657,7 +4657,7 @@ void FUN_0007f75a(void)
   for (uVar5 = 0; uVar5 < uVar4; uVar5 = uVar5 + 1 & 0xff) {
     f33_logical_controller_request_cache[uVar5] = 0x6e91;
   }
-  (*(int (*)())camry_host_ptr((uint32_t)(PTR_FUN_000218f0)))();
+  (*(int (*)())camry_indirect((uint32_t)(PTR_FUN_000218f0)))();
   FUN_00080bc2();
   for (uVar5 = 0; uVar5 < uVar4; uVar5 = uVar5 + 1 & 0xff) {
     (*(int (*)())*(code **)((int)((ulonglong)uVar2 >> 0x20) + -0x24c4))(uVar5);
@@ -4980,7 +4980,7 @@ void FUN_0007fb60(char param_1)
   uint uVar3;
   
   uVar2 = 0x23dfc00000000;
-  (*(int (*)())camry_host_ptr((uint32_t)(PTR_FUN_000218f8)))();
+  (*(int (*)())camry_indirect((uint32_t)(PTR_FUN_000218f8)))();
   FUN_00080c20(param_1);
   (*(int (*)())*(code **)((int)((ulonglong)uVar2 >> 0x20) + -0x24bc))(param_1);
   FUN_00080e32(param_1,2);

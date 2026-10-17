@@ -336,11 +336,11 @@ uint f33_boot_erase_current_block_preserving_counter(void)
   if (uVar3 != 1) {
     uVar3 = f33_boot_stage_preserved_program_counter();
     uVar1 = (*((volatile uint32_t *)camry_host_ptr(0xfebf0fd0u)));
-    (*(int (*)())camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr(0xfebf0fd0u)))))((*((undefined4 *)camry_host_ptr((uint32_t)(puVar2 + -0x6e80)))),0,1,&cStack_11)
+    (*(int (*)())camry_indirect((uint32_t)(*((volatile uint32_t *)camry_host_ptr(0xfebf0fd0u)))))((*((undefined4 *)camry_host_ptr((uint32_t)(puVar2 + -0x6e80)))),0,1,&cStack_11)
     ;
     if ((cStack_11 != '\0') ||
        ((uVar3 == 0 &&
-        ((*(int (*)())camry_host_ptr((uint32_t)(uVar1)))((*((undefined4 *)camry_host_ptr((uint32_t)(puVar2 + -0x6e6c)))),puVar2 + -0x6e60,0,&cStack_11),
+        ((*(int (*)())camry_indirect((uint32_t)(uVar1)))((*((undefined4 *)camry_host_ptr((uint32_t)(puVar2 + -0x6e6c)))),puVar2 + -0x6e60,0,&cStack_11),
         cStack_11 != '\0')))) {
       uVar4 = 1;
     }
@@ -407,7 +407,7 @@ uint f33_boot_stage_and_program_input_chunk(uint length)
       cStack_11 = '\0';
     }
     else {
-      (*(int (*)())camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr(0xfebf0fd0u)))))((*((int *)camry_host_ptr((uint32_t)(puVar1 + -0x6e74)))),destination,0,&cStack_11);
+      (*(int (*)())camry_indirect((uint32_t)(*((volatile uint32_t *)camry_host_ptr(0xfebf0fd0u)))))((*((int *)camry_host_ptr((uint32_t)(puVar1 + -0x6e74)))),destination,0,&cStack_11);
     }
     uVar3 = (uint)(cStack_11 != '\0');
   }
