@@ -1086,10 +1086,34 @@ def _c_calls(body: str) -> set[str]:
 
 
 def _defined_lines(text: str) -> set[str]:
+    """Names of function definitions, including signatures wrapped before '('."""
     names = set()
-    for line in text.splitlines():
-        match = re.match(r"^[A-Za-z_][\w\s\*]*\s([A-Za-z_][A-Za-z0-9_]*)\s*\(", line)
-        if match and not line.rstrip().endswith(";"):
+    lines = text.splitlines()
+    index = 0
+    while index < len(lines):
+        raw = lines[index]
+        index += 1
+        if not raw or raw[0] in " \t#/*}":
+            continue
+        buf = raw.strip()
+        while index < len(lines) and "{" not in buf and ";" not in buf:
+            nxt = lines[index]
+            if not nxt.strip() or nxt.startswith(("/*", " *", " */", "//")):
+                index += 1
+                continue
+            # A return type can sit on its own line. After '(' only an indented
+            # continuation or the opening brace still belongs to this signature.
+            if "(" in buf and nxt[0] not in " \t{":
+                break
+            buf += " " + nxt.strip()
+            index += 1
+            if len(buf) > 1500:
+                break
+        head = buf.split("{", 1)[0]
+        if "{" not in buf or ";" in head:
+            continue
+        match = re.match(r"[A-Za-z_][\w\s\*]*\s([A-Za-z_][A-Za-z0-9_]*)\s*\(", head)
+        if match:
             names.add(match.group(1))
     return names
 
@@ -1382,6 +1406,31 @@ def _keep_verified(
     if error is None:
         return runnable
     _restore(snapshots)
+    dupes = set(re.findall(
+        r"(?:redefinition of '|duplicate symbol '_)([A-Za-z_][A-Za-z0-9_]*)",
+        error,
+    ))
+    if dupes:
+        def reaches(name: str, seen: set[str] | None = None) -> bool:
+            if name in dupes:
+                return True
+            if name not in bodies:
+                return False
+            seen = set() if seen is None else seen
+            if name in seen:
+                return False
+            seen.add(name)
+            return any(reaches(callee, seen) for callee in _c_calls(bodies[name]))
+
+        bad = [item for item, _rows in runnable if reaches(item.name)]
+        if bad and len(bad) < len(runnable):
+            for item in bad:
+                reject("verifier", item.name, address=item.address)
+            examples["verifier"] = error[:180]
+            rest = [(item, rows) for item, rows in runnable if item not in bad]
+            return _keep_verified(
+                rest, snapshots, bodies, defined, symbols, macros, reject, examples,
+            )
     named = [item for item, _rows in runnable if item.name in error]
     if named and len(named) < len(runnable):
         for item in named:
