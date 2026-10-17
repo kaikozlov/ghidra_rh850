@@ -2115,6 +2115,8 @@ _TRACKED = tuple(range(1, 32))
 _CALLER_KILLED = {1, 2, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 30, 31}
 _ARG_CLOBBERS: dict[int, set[int]] | None = None
 _R10_PRESERVE: set[int] = set()
+# Callees that return with one immediate in r4. The caller keeps that global pointer.
+_R4_SETTERS: dict[int, int] = {}
 _CHECKED_NAMES: set[str] | None = None
 _NO_WRITE = {
     "cmp", "tst", "cmpi", "st8", "st16", "st32", "set1", "not1", "clr1", "tst1",
@@ -2179,12 +2181,15 @@ def _write_origin(state: dict[int, set], reg: int | None, origin: tuple) -> None
         state[reg] = {origin}
 
 
-def _entry_state() -> dict[int, set]:
+def _entry_state(gp: int | None = None) -> dict[int, set]:
     state = {reg: {_FAIL} for reg in _TRACKED}
     for reg in (6, 7, 8, 9):
         state[reg] = {("entry", reg, "")}
     # r3 is the stack pointer. Its displacement is from the value at entry.
     state[3] = {("sp", 0)}
+    # r4 is the global pointer. Callers that agree pass one immediate.
+    if gp is not None:
+        state[4] = {("imm", gp & 0xFFFFFFFF)}
     return state
 
 
@@ -2233,6 +2238,9 @@ def _transfer(state: dict[int, set], inst) -> dict[int, set]:
             cur[10] = {("call", inst.target)}
         elif 10 in killed and 10 in cur:
             cur[10] = {_FAIL}
+        left = _R4_SETTERS.get(inst.target)
+        if left is not None and 4 in cur:
+            cur[4] = {("imm", left)}
         return cur
     if inst.kind == "callt":
         for reg in _CALLER_KILLED | {6, 7, 8, 9}:
@@ -2373,8 +2381,8 @@ def _transfer(state: dict[int, set], inst) -> dict[int, set]:
     return cur
 
 
-def _function_origins(fn) -> dict[int, dict[int, set]]:
-    incoming: dict[int, dict[int, set]] = {fn.entry: _entry_state()}
+def _function_origins(fn, gp: int | None = None) -> dict[int, dict[int, set]]:
+    incoming: dict[int, dict[int, set]] = {fn.entry: _entry_state(gp)}
     work = [fn.entry]
     index_of = {inst.addr: index for index, inst in enumerate(fn.insts)}
     while work:
@@ -2876,6 +2884,87 @@ def _r10_preservers(
     return preserve
 
 
+def _passed_gps(fn, state: dict, names_at: dict[int, str]) -> list[tuple[str, set]]:
+    """r4 at each direct call. r4 is callee-saved, so this is the callee's gp."""
+    found: list[tuple[str, set]] = []
+    for inst in fn.insts:
+        if inst.kind in {"jarl", "jr"} and inst.target in names_at:
+            found.append((names_at[inst.target], set(state.get(inst.addr, {}).get(4, {_FAIL}))))
+            continue
+        if inst.kind != "jmp" or not inst.reg or inst.addr not in state:
+            continue
+        held = state[inst.addr].get(inst.reg, set())
+        if len(held) == 1 and next(iter(held))[0] == "imm" and next(iter(held))[1] in names_at:
+            found.append((names_at[next(iter(held))[1]], set(state[inst.addr].get(4, {_FAIL}))))
+    return found
+
+
+def _returned_r4(fn, state: dict) -> int | None:
+    """The immediate left in r4 when every return agrees."""
+    imms: list[int] = []
+    for inst in fn.insts:
+        key = ("ret", inst.addr)
+        if key not in state:
+            continue
+        origin = state[key].get(4, set())
+        if len(origin) != 1 or next(iter(origin))[0] != "imm":
+            return None
+        imms.append(next(iter(origin))[1] & 0xFFFFFFFF)
+    if not imms or len(set(imms)) != 1:
+        return None
+    return imms[0]
+
+
+def _entry_gps(walked: list[tuple[dict, object]], names_at: dict[int, str]) -> dict[str, dict]:
+    """Origins after r4 is the one global pointer every caller passes."""
+    global _R4_SETTERS
+    by_name = {row["name"]: fn for row, fn in walked}
+    entry: dict[str, int] = {}
+    state_of: dict[str, dict] = {}
+    wave = list(by_name)
+    setters_done = False
+    for _round in range(len(by_name) + 1):
+        if not wave:
+            break
+        for name in wave:
+            state_of[name] = _function_origins(by_name[name], entry.get(name))
+        if not setters_done:
+            found: dict[int, int] = {}
+            for row, fn in walked:
+                left = _returned_r4(fn, state_of[row["name"]])
+                if left is not None:
+                    found[int(row["addr"], 16)] = left
+            setters_done = True
+            if found:
+                _R4_SETTERS = found
+                state_of.clear()
+                entry = {}
+                wave = list(by_name)
+                continue
+        incoming: dict[str, list[set]] = {}
+        for name, state in state_of.items():
+            for callee, origin in _passed_gps(by_name[name], state, names_at):
+                incoming.setdefault(callee, []).append(origin)
+        new_entry: dict[str, int] = {}
+        for name, origins in incoming.items():
+            imms = []
+            agreed = True
+            for origin in origins:
+                if len(origin) == 1 and next(iter(origin))[0] == "imm":
+                    imms.append(next(iter(origin))[1] & 0xFFFFFFFF)
+                    continue
+                agreed = False
+                break
+            if agreed and imms and len(set(imms)) == 1:
+                new_entry[name] = imms[0]
+        wave = [
+            name for name in set(new_entry) | set(entry)
+            if new_entry.get(name) != entry.get(name) and name in by_name
+        ]
+        entry = new_entry
+    return state_of
+
+
 def _call_facts() -> dict:
     """Argument registers and r10 at each direct call, from the function bytes."""
     global _CALL_FACTS, _ARG_CLOBBERS, _R10_PRESERVE
@@ -2919,8 +3008,9 @@ def _call_facts() -> dict:
             counters[row["name"]] = imms
     _ARG_CLOBBERS = _arg_clobber_map(direct_writes, direct_calls, callt)
     _R10_PRESERVE = _r10_preservers(direct_r10, direct_calls, callt)
+    states = _entry_gps(walked, names_at)
     for row, fn in walked:
-        state = _function_origins(fn)
+        state = states[row["name"]]
         origins[row["name"]] = state
         grouped: dict[int, list[int]] = {}
         for inst in fn.insts:

@@ -17103,7 +17103,7 @@ int f33_interpolate_current_curve(short first_component);
 void f33_interpolate_selected_angle_target(void);
 int f33_interpolate_signed_sentinel_curve(short *points,short input);
 int f33_interpolate_unsigned_axis_sentinel_curve(ushort *points,ushort input);
-uint f33_invalidate_thermal_history_record(void);
+void f33_invalidate_thermal_history_record(void);
 uint f33_is_health_or_command_completion_observed(void);
 void f33_latch_availability_override(void);
 int f33_latch_ba_owner5_fast_release(void);

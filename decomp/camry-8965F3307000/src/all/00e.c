@@ -2730,7 +2730,7 @@ void f33_reset_thermal_models_and_history_record(void)
    defaults with A55A rejecting marker and7F80 ancillary value, retain cached maxima, ignore setter
    acceptance and leave tracker unchanged. */
 
-uint f33_invalidate_thermal_history_record(void)
+void f33_invalidate_thermal_history_record(void)
 
 {
   undefined2 local_3c;
@@ -2788,7 +2788,8 @@ uint f33_invalidate_thermal_history_record(void)
   uStack_a = 0xa55a;
   uStack_8 = DAT_febe6ee6;
   uStack_6 = DAT_febe6ee8;
-  return f33_nvm_set_record(6,(uint *)&local_3c);
+  f33_nvm_set_record(6,(uint *)&local_3c);
+  return;
 }
 
 

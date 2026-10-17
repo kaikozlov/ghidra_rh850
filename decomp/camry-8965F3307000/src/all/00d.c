@@ -2293,6 +2293,39 @@ undefined4 FUN_00035b44(undefined4 param_1,undefined4 param_2,uint param_3)
 
 
 
+void FUN_00035b78(void)
+
+{
+  undefined1 uVar1;
+  int iVar2;
+  int iVar3;
+  
+  uVar1 = DAT_febe5f5c;
+  iVar2 = FUN_00035b12(0,DAT_febe5f5c,0);
+  iVar3 = FUN_00035b12(0x0, (*((volatile uint8_t *)camry_host_ptr(0xfebe5f5du))), 0x1);
+  if ((iVar2 == 0x5a) || (iVar3 == 0x5a)) {
+    FUN_00051866();
+    DAT_febe5f58 = 0;
+    DAT_febe5f59 = 0;
+    DAT_febe5f5e = DAT_0002bd02;
+    DAT_febe5f60 = DAT_0002bd02;
+  }
+  iVar2 = FUN_00035b44(0,uVar1,0);
+  iVar3 = FUN_00035b44(0x0, (*((volatile uint8_t *)camry_host_ptr(0xfebe5f5du))), 0x1);
+  if ((iVar2 == 0x5a) || (iVar3 == 0x5a)) {
+    thunk_FUN_000b90ca(0x22,0);
+    DAT_febe5f5a = 0;
+    DAT_febe5f5b = 0;
+    DAT_febe5f62 = DAT_0002bd06;
+    DAT_febe5f64 = DAT_0002bd06;
+  }
+  DAT_febe5f5c = 0;
+  DAT_febe5f5d = 0;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */

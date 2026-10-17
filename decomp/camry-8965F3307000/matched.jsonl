@@ -666,7 +666,7 @@
 {"addr": "0x35aea", "name": "f33_fill_constant_block_35aea", "status": "converted"}
 {"addr": "0x35b12", "name": "FUN_00035b12", "status": "converted"}
 {"addr": "0x35b44", "name": "FUN_00035b44", "status": "converted"}
-{"addr": "0x35b78", "name": "FUN_00035b78", "status": "unconvertible"}
+{"addr": "0x35b78", "name": "FUN_00035b78", "status": "converted"}
 {"addr": "0x35c00", "name": "f33_return_only_stub_35c00", "status": "converted"}
 {"addr": "0x35c02", "name": "FUN_00035c02", "status": "converted"}
 {"addr": "0x35c10", "name": "FUN_00035c10", "status": "converted"}
@@ -6056,7 +6056,7 @@
 {"addr": "0xb63ac", "name": "FUN_000b63ac", "status": "converted"}
 {"addr": "0xb6414", "name": "FUN_000b6414", "status": "converted"}
 {"addr": "0xb64c8", "name": "FUN_000b64c8", "status": "converted"}
-{"addr": "0xb651e", "name": "FUN_000b651e", "status": "unconvertible"}
+{"addr": "0xb651e", "name": "FUN_000b651e", "status": "converted"}
 {"addr": "0xb655e", "name": "FUN_000b655e", "status": "converted"}
 {"addr": "0xb65ca", "name": "FUN_000b65ca", "status": "converted"}
 {"addr": "0xb65f4", "name": "FUN_000b65f4", "status": "converted"}
@@ -6108,10 +6108,10 @@
 {"addr": "0xb70d8", "name": "FUN_000b70d8", "status": "converted"}
 {"addr": "0xb70e2", "name": "FUN_000b70e2", "status": "converted"}
 {"addr": "0xb7108", "name": "FUN_000b7108", "status": "converted"}
-{"addr": "0xb7186", "name": "FUN_000b7186", "status": "unconvertible"}
+{"addr": "0xb7186", "name": "FUN_000b7186", "status": "converted"}
 {"addr": "0xb71e2", "name": "FUN_000b71e2", "status": "converted"}
 {"addr": "0xb71f8", "name": "FUN_000b71f8", "status": "converted"}
-{"addr": "0xb722c", "name": "FUN_000b722c", "status": "unconvertible"}
+{"addr": "0xb722c", "name": "FUN_000b722c", "status": "converted"}
 {"addr": "0xb726c", "name": "FUN_000b726c", "status": "converted"}
 {"addr": "0xb72a2", "name": "FUN_000b72a2", "status": "converted"}
 {"addr": "0xb72ba", "name": "FUN_000b72ba", "status": "converted"}

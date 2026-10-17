@@ -3412,6 +3412,35 @@ LAB_000b6516:
 
 
 
+void FUN_000b651e(void)
+
+{
+  int iVar1;
+  uint32_t puVar2;
+  ushort uVar3;
+  
+  puVar2 = 0xfebeb800u;
+  iVar1 = (int)(uint)DAT_febeb2d4 >> 8;
+  uVar3 = DAT_febeb2d4;
+  if (iVar1 != 0) {
+    if (iVar1 == 0x11) {
+      puVar2 = 0xfebeb800u;
+      uVar3 = FUN_000b6414((*((volatile uint16_t *)camry_host_ptr(0xfebeb2d4u))));
+    }
+    else if ((iVar1 == 0x22) || (iVar1 == 0x44)) {
+      puVar2 = 0xfebeb800u;
+      uVar3 = camry_host_addr(FUN_000b64c8((*((volatile uint16_t *)camry_host_ptr(0xfebeb2d4u)))));
+    }
+    else if (iVar1 != 0x88) {
+      uVar3 = 0x8844;
+    }
+  }
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x52c)))) = uVar3;
+  return;
+}
+
+
+
 void FUN_000b655e(void)
 
 {
@@ -4631,6 +4660,24 @@ LAB_000b715a:
 
 
 
+undefined2 FUN_000b7186(undefined2 param_1)
+
+{
+  if (((DAT_000aef58 <= DAT_febeb320) || (DAT_febeb43c == 'Z')) || (DAT_febeb43b == 'Z')) {
+    if ((DAT_febeb328 == -0x55aaaa56) || (DAT_febeb328 == 0x55aaaa55)) {
+      FUN_000b706c((*((volatile uint32_t *)camry_host_ptr(0xfebeb328u))));
+      param_1 = 0x2211;
+    }
+    else {
+      FUN_000b706c(0);
+      param_1 = 0x4411;
+    }
+  }
+  return param_1;
+}
+
+
+
 undefined2 FUN_000b71e2(undefined2 param_1)
 
 {
@@ -4651,6 +4698,35 @@ undefined ** FUN_000b71f8(uint param_1)
     return (undefined **)((undefined *)camry_host_ptr(0x8844u));
   }
   return (undefined **)(param_1 & 0xffff);
+}
+
+
+
+void FUN_000b722c(void)
+
+{
+  int iVar1;
+  uint32_t puVar2;
+  ushort uVar3;
+  
+  puVar2 = 0xfebeb800u;
+  iVar1 = (int)(uint)DAT_febeb324 >> 8;
+  uVar3 = DAT_febeb324;
+  if (iVar1 != 0) {
+    if (iVar1 == 0x11) {
+      puVar2 = 0xfebeb800u;
+      uVar3 = FUN_000b71e2((*((volatile uint16_t *)camry_host_ptr(0xfebeb324u))));
+    }
+    else if ((iVar1 == 0x22) || (iVar1 == 0x44)) {
+      puVar2 = 0xfebeb800u;
+      uVar3 = camry_host_addr(FUN_000b71f8((*((volatile uint16_t *)camry_host_ptr(0xfebeb324u)))));
+    }
+    else if (iVar1 != 0x88) {
+      uVar3 = 0x8844;
+    }
+  }
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x4dc)))) = uVar3;
+  return;
 }
 
 
