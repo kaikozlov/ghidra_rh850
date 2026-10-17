@@ -2901,10 +2901,10 @@ uint FUN_00062cd4(void)
   if ((cVar2 == 'Z') || (cVar1 == 'Z')) {
     uVar9 = 1;
   }
-  if (puVar7 == ((undefined *)camry_host_ptr(0xa55au))) {
+  if ((uintptr_t)(puVar7)==(uintptr_t)(((undefined *)camry_host_ptr(0xa55au)))) {
     uVar9 = uVar9 | 0x1000;
   }
-  if (puVar8 == ((undefined *)camry_host_ptr(0xa55au))) {
+  if ((uintptr_t)(puVar8)==(uintptr_t)(((undefined *)camry_host_ptr(0xa55au)))) {
     uVar9 = uVar9 | 0x10000;
   }
   if (cVar3 == 'Z') {
@@ -2992,6 +2992,25 @@ void FUN_00062e44(ushort *param_1,ushort param_2)
   } while (bVar1 < 10);
                     /* WARNING: Subroutine does not return */
   f33_enter_terminal_hardware_sequence();
+}
+
+
+
+/* Zero1024 words atFEBE7000..FEBE7FFF; preserve adjacent words. Actual5122-instruction call,
+   distinct from the boot96KiB LocalRAM clear. Zero1024 words atFEBE7000..7FFF; preserve both
+   adjacent words. Native5122 instructions. Separate from startup Local/Global RAM loops. */
+
+void f33_clear_application_ram_4k(void)
+
+{
+  undefined4 *puVar1;
+  
+  puVar1 = (undefined4 *)((undefined *)camry_host_ptr(0xfebe7000u));
+  do {
+    *puVar1 = 0;
+    puVar1 = puVar1 + 1;
+  } while ((uintptr_t)(puVar1)<(uintptr_t)(((undefined *)camry_host_ptr(0xfebe8000u))));
+  return;
 }
 
 
@@ -3228,6 +3247,22 @@ void FUN_00063338(void)
     bVar3 = bVar3 + 1;
   } while (bVar3 < 0x1f);
   ECMPEM = 0;
+  return;
+}
+
+
+
+void f33_startup_copy_helper(void)
+
+{
+  undefined4 *puVar1;
+  undefined4 *puVar2;
+  
+  puVar2 = ((undefined *)camry_host_ptr(0xfebf7c00u));
+  for (puVar1 = ((undefined *)camry_host_ptr(0x10000u));(uintptr_t)(puVar1)<(uintptr_t)(((undefined *)camry_host_ptr(0x17df0u))); puVar1 = puVar1 + 1) {
+    *puVar2 = *puVar1;
+    puVar2 = puVar2 + 1;
+  }
   return;
 }
 

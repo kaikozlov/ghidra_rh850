@@ -1977,6 +1977,96 @@ undefined4 FUN_000390d4(short param_1,short param_2)
 
 
 
+/* Record6 terms18..22 and marker32; same exact-status and conditional-zero contract. Rejected
+   record uses539/3803/0/0/0/0. Seed via signed contribution*4096/gain followed by saturating
+   multiply128; zero gain seeds0. Does not rewrite the retained record. Source5 six saved
+   contributions pass exact status/marker qualification. Strict selected-difference boundary changes
+   downstream model/map winner while retaining the source record. */
+
+void f33_restore_ecu_source5_thermal_model(void)
+
+{
+  uint *puVar1;
+  uint32_t puVar2;
+  int iVar3;
+  uint uVar4;
+  undefined4 uVar5;
+  undefined4 uVar6;
+  undefined4 uVar7;
+  undefined4 uVar8;
+  undefined4 uVar9;
+  undefined4 uVar10;
+  int iVar11;
+  int iVar12;
+  int iVar13;
+  int iVar14;
+  int iVar15;
+  undefined4 *puVar16;
+  uint local_58 [6];
+  short sStack_40;
+  short sStack_3e;
+  short sStack_3c;
+  short sStack_3a;
+  short sStack_38;
+  short sStack_36;
+  ushort uStack_26;
+  
+  puVar2 = 0xfebeb800u;
+  puVar1 = local_58;
+  puVar16 = ((undefined *)camry_host_ptr(0x21108u));
+  do {
+    uVar10 = *puVar16;
+    puVar16 = puVar16 + 1;
+    *puVar1 = uVar10;
+    puVar1 = puVar1 + 1;
+  } while ((uintptr_t)(puVar16)!=(uintptr_t)(((undefined *)camry_host_ptr(0x21140u))));
+  uVar4 = f33_nvm_get_record(6, camry_host_addr(local_58));
+  if ((uVar4 == 0x10) && (uStack_26 != 0xa55a)) {
+    if ((((((*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x3c08)))) & 0xff) == 0) ||
+         (((*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x3c08)))) & 0xff00) == 0)) && (uStack_26 != 0x5aa5)) &&
+       (uVar4 = f33_should_zero_ecu_source5_thermal_seed(uStack_26), uVar4 == 0x5a)) {
+      iVar3 = 0;
+      iVar15 = 0;
+      iVar14 = 0;
+      iVar13 = 0;
+      iVar12 = 0;
+      iVar11 = 0;
+    }
+    else {
+      iVar3 = (int)sStack_40;
+      iVar15 = (int)sStack_3e;
+      iVar14 = (int)sStack_3c;
+      iVar13 = (int)sStack_3a;
+      iVar12 = (int)sStack_38;
+      iVar11 = (int)sStack_36;
+    }
+  }
+  else {
+    iVar3 = (int)DAT_0002b2a6;
+    iVar15 = (int)DAT_0002b2a8;
+    iVar14 = (int)DAT_0002b2aa;
+    iVar13 = (int)DAT_0002b2ac;
+    iVar12 = (int)DAT_0002b2ae;
+    iVar11 = (int)DAT_0002b2b0;
+  }
+  uVar10 = FUN_000390d4(iVar3,(int)DAT_0002b28c);
+  uVar5 = FUN_000390d4(iVar15,(int)DAT_0002b28e);
+  uVar6 = FUN_000390d4(iVar14,(int)DAT_0002b290);
+  uVar7 = FUN_000390d4(iVar13,(int)DAT_0002b292);
+  uVar8 = FUN_000390d4(iVar12,(int)DAT_0002b294);
+  uVar9 = FUN_000390d4(iVar11,(int)DAT_0002b296);
+  (*((undefined4 *)camry_host_ptr((uint32_t)((0xffffb6c0u + (uint32_t)((int)puVar2)))))) = uVar10;
+  (*((undefined4 *)camry_host_ptr((uint32_t)((0xffffb6c4u + (uint32_t)((int)puVar2)))))) = uVar5;
+  (*((undefined4 *)camry_host_ptr((uint32_t)((0xffffb6c8u + (uint32_t)((int)puVar2)))))) = uVar6;
+  (*((undefined4 *)camry_host_ptr((uint32_t)((0xffffb6ccu + (uint32_t)((int)puVar2)))))) = uVar7;
+  (*((undefined4 *)camry_host_ptr((uint32_t)((0xffffb6d0u + (uint32_t)((int)puVar2)))))) = uVar8;
+  (*((undefined4 *)camry_host_ptr((uint32_t)((0xffffb6d4u + (uint32_t)((int)puVar2)))))) = uVar9;
+  (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb6aeu + (uint32_t)((int)puVar2)))))) = 0x3480;
+  return;
+}
+
+
+
 /* Six poles6EC0..6ED4: first three use6EF0, last three70B0. Divisors200/420/1/1/1/1,
    gains13/100/0/0/0/0 and bias0. Clamp summed contributions then selector3 offset/following using
    source index2. Return adjusted signedR10; zero-gain poles still evolve. Three poles use6EF0 and
@@ -2699,6 +2789,46 @@ void f33_return_only_stub_3985a(void)
 
 
 
+/* Copy record6, accept tail+34/+36 on exact status10 WITHOUT checking markerA55A. Otherwise clear
+   both restored maxima6F06/08. Separate from model-term validity. Restore record6 tail maxima on
+   exact10 without markerA55A rejection; otherwise clear pair. History admission differs from model
+   terms. */
+
+void f33_restore_thermal_drive_epoch_maxima(void)
+
+{
+  uint *puVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  undefined4 uVar4;
+  undefined4 *puVar5;
+  uint local_3c [13];
+  undefined2 uStack_8;
+  undefined2 uStack_6;
+  
+  puVar2 = 0xfebeb800u;
+  puVar1 = local_3c;
+  puVar5 = ((undefined *)camry_host_ptr(0x21140u));
+  do {
+    uVar4 = *puVar5;
+    puVar5 = puVar5 + 1;
+    *puVar1 = uVar4;
+    puVar1 = puVar1 + 1;
+  } while ((uintptr_t)(puVar5)!=(uintptr_t)(((undefined *)camry_host_ptr(0x21178u))));
+  uVar3 = f33_nvm_get_record(6, camry_host_addr(local_3c));
+  if (uVar3 == 0x10) {
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb706u + (uint32_t)((int)puVar2)))))) = uStack_8;
+  }
+  else {
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb706u + (uint32_t)((int)puVar2)))))) = 0;
+    uStack_6 = 0;
+  }
+  (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb708u + (uint32_t)((int)puVar2)))))) = uStack_6;
+  return;
+}
+
+
+
 /* Filter70B0 with divisor30000/gain25, clamp contribution0..32767 and retain run maximum6F04. Merge
    that one maximum with restored6F06/08 into6F00/02; ties permitted. Do not feed current outputs
    back into the restored pair. Filter70B0 with30000 divisor/25 gain, retain current-run maximum,
@@ -2903,6 +3033,58 @@ void FUN_000399e6(short param_1,short param_2)
   (*((undefined4 *)camry_host_ptr((uint32_t)((0xffffb720u + (uint32_t)((int)puVar1)))))) = uVar2;
   (*((undefined4 *)camry_host_ptr((uint32_t)((0xffffb724u + (uint32_t)((int)puVar1)))))) = uVar3;
   (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb712u + (uint32_t)((int)puVar1)))))) = 0x3480;
+  return;
+}
+
+
+
+/* Record6 terms10/12 and common marker32/conditional-zero contract. Rejection uses zero defaults.
+   Exact gains0/0 seed both poles0 even with nonzero saved contributions. Source4 reads terms10/12
+   and common marker32; rejected records use zeros. Exact zero gains seed zero poles even when saved
+   contributions are nonzero. */
+
+void f33_restore_ecu_source4_thermal_model(void)
+
+{
+  uint *puVar1;
+  uint32_t puVar2;
+  int iVar3;
+  int iVar4;
+  uint uVar5;
+  undefined4 uVar6;
+  undefined4 *puVar7;
+  uint local_3c [4];
+  short sStack_2c;
+  short sStack_2a;
+  ushort uStack_a;
+  
+  puVar2 = 0xfebeb800u;
+  puVar1 = local_3c;
+  puVar7 = ((undefined *)camry_host_ptr(0x21178u));
+  do {
+    uVar6 = *puVar7;
+    puVar7 = puVar7 + 1;
+    *puVar1 = uVar6;
+    puVar1 = puVar1 + 1;
+  } while ((uintptr_t)(puVar7)!=(uintptr_t)(((undefined *)camry_host_ptr(0x211b0u))));
+  uVar5 = f33_nvm_get_record(6, camry_host_addr(local_3c));
+  if ((uVar5 == 0x10) && (uStack_a != 0xa55a)) {
+    if ((((((*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x3c08)))) & 0xff) == 0) ||
+         (((*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x3c08)))) & 0xff00) == 0)) && (uStack_a != 0x5aa5)) &&
+       (uVar5 = f33_should_zero_ecu_source4_thermal_seed(uStack_a), uVar5 == 0x5a)) {
+      iVar3 = 0;
+      iVar4 = 0;
+    }
+    else {
+      iVar3 = (int)sStack_2c;
+      iVar4 = (int)sStack_2a;
+    }
+  }
+  else {
+    iVar3 = (int)DAT_0002b31e;
+    iVar4 = (int)DAT_0002b320;
+  }
+  FUN_000399e6(iVar3,iVar4);
   return;
 }
 
@@ -3152,6 +3334,79 @@ LAB_00039c5a:
     uVar2 = 0;
   }
   return uVar2;
+}
+
+
+
+/* Record6 terms08/0A/0C/0E, marker32. Exact status10 and marker!=A55A admit saved terms,
+   conditionally zeroed for marker0/selected difference>32000 with a zero7BF8 byte. Rejected record
+   uses3390/222 per branch. 6764&3 chooses initial gains and6F35; seed poles from
+   contribution*4096/gain then saturating multiply128. Restore source2 contributions from shared
+   record6 RAM mirror before status admission; marker0/difference32000 retains and32001 zeros terms.
+   Gain-dependent pole seeding then feeds both branch updates. */
+
+void f33_restore_ecu_source2_thermal_model(void)
+
+{
+  ushort uVar1;
+  uint *puVar2;
+  uint32_t puVar3;
+  int iVar4;
+  int iVar5;
+  uint uVar6;
+  undefined4 uVar7;
+  int iVar8;
+  int iVar9;
+  undefined1 uVar10;
+  undefined4 *puVar11;
+  uint local_4c [2];
+  short sStack_44;
+  short sStack_42;
+  short sStack_40;
+  short sStack_3e;
+  ushort uStack_1a;
+  
+  uVar1 = DAT_febe6764;
+  puVar3 = 0xfebeb800u;
+  puVar2 = local_4c;
+  puVar11 = ((undefined *)camry_host_ptr(0x211b0u));
+  do {
+    uVar7 = *puVar11;
+    puVar11 = puVar11 + 1;
+    *puVar2 = uVar7;
+    puVar2 = puVar2 + 1;
+  } while ((uintptr_t)(puVar11)!=(uintptr_t)(((undefined *)camry_host_ptr(0x211e8u))));
+  uVar6 = f33_nvm_get_record(6, camry_host_addr(local_4c));
+  if ((uVar6 == 0x10) && (uStack_1a != 0xa55a)) {
+    if ((((((*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x3c08)))) & 0xff) == 0) ||
+         (((*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x3c08)))) & 0xff00) == 0)) && (uStack_1a != 0x5aa5)) &&
+       (uVar6 = f33_should_zero_ecu_source2_thermal_seed(uStack_1a), uVar6 == 0x5a)) {
+      iVar4 = 0;
+      iVar9 = 0;
+      iVar5 = 0;
+      iVar8 = 0;
+    }
+    else {
+      iVar4 = (int)sStack_44;
+      iVar9 = (int)sStack_40;
+      iVar5 = (int)sStack_42;
+      iVar8 = (int)sStack_3e;
+    }
+  }
+  else {
+    iVar4 = (int)DAT_0002b39e;
+    iVar9 = (int)DAT_0002b3ba;
+    iVar5 = (int)DAT_0002b3a0;
+    iVar8 = (int)DAT_0002b3bc;
+  }
+  uVar10 = 0;
+  if ((uVar1 & 3) != 0) {
+    uVar10 = 0x5a;
+  }
+  FUN_00039efe(iVar4,iVar5,uVar10);
+  FUN_0003a160(iVar9,iVar8,uVar10);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb735u + (uint32_t)((int)puVar3) * 1u)))) = uVar10;
+  return;
 }
 
 
@@ -3831,7 +4086,7 @@ uint f33_choose_thermal_limit_source
   uint uVar1;
   
   uVar1 = (uint)current;
-  if ((source != (uchar *)0x0) && (candidate <= uVar1)) {
+  if (((uintptr_t)(source)!=(uintptr_t)((uchar *)0x0)) && (candidate <= uVar1)) {
     *source = candidate_source;
     uVar1 = (uint)candidate;
   }
@@ -3864,7 +4119,7 @@ uint f33_select_ecu_thermal_limit(uchar *source,uchar bank)
   uVar3 = DAT_febe6f68;
   puVar2 = 0xfebeb800u;
   puVar1 = 0xfebeb800u;
-  if (source == (uchar *)0x0) {
+  if ((uintptr_t)(source)==(uintptr_t)((uchar *)0x0)) {
     if (bank == '\0') {
       uVar5 = 0x569a;
     }
@@ -3876,7 +4131,7 @@ uint f33_select_ecu_thermal_limit(uchar *source,uchar bank)
     if (bank == '\0') {
       *source = '\x02';
       uVar4 = DAT_febe6f30;
-      if ((source != (uchar *)0x0) && (DAT_febe6f30 <= uVar3)) {
+      if (((uintptr_t)(source)!=(uintptr_t)((uchar *)0x0)) && (DAT_febe6f30 <= uVar3)) {
         *source = '\x04';
         uVar3 = uVar4;
       }
@@ -3918,7 +4173,7 @@ int f33_select_ecu_thermal_diagnostic(ushort limit,uchar source,uchar *active_so
   ushort uVar1;
   int iVar2;
   
-  if (active_source == (uchar *)0x0) {
+  if ((uintptr_t)(active_source)==(uintptr_t)((uchar *)0x0)) {
     return 0;
   }
   uVar1 = 0x2b4d;
@@ -4201,6 +4456,70 @@ LAB_0003a5b6:
     uVar2 = 0;
   }
   return uVar2;
+}
+
+
+
+/* Seed56-byte local from211E8 then get application record6. Status!=10 or markerA55A uses ROM
+   terms307/2893 per branch. Otherwise use saved terms unless at least one7BF8 byte is zero,
+   marker==0 and selected signed source difference>32000. Marker is passed in realR6 to3A56E.
+   Restore chooses live poles; it does not erase the record or prove durability. Record6 exact
+   status10 and marker admission choose saved motor contributions or defaults307/2893. Marker0 and
+   selected signed difference>32000 conditionally zero terms; equality retains. Real pole seeding
+   and all-model arbitration executed from RAM mirror; no physical durability claim. */
+
+void f33_restore_motor_thermal_model(void)
+
+{
+  undefined4 *puVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  undefined4 uVar4;
+  int iVar5;
+  int iVar6;
+  int iVar7;
+  int iVar8;
+  undefined4 *puVar9;
+  undefined4 local_4c;
+  short sStack_48;
+  short sStack_46;
+  ushort uStack_1a;
+  
+  puVar2 = 0xfebeb800u;
+  puVar1 = &local_4c;
+  puVar9 = ((undefined *)camry_host_ptr(0x211e8u));
+  do {
+    uVar4 = *puVar9;
+    puVar9 = puVar9 + 1;
+    *puVar1 = uVar4;
+    puVar1 = puVar1 + 1;
+  } while ((uintptr_t)(puVar9)!=(uintptr_t)(((undefined *)camry_host_ptr(0x21220u))));
+  uVar3 = f33_nvm_get_record(6, camry_host_addr(&local_4c));
+  iVar8 = (int)(short)local_4c;
+  iVar7 = (int)sStack_48;
+  iVar6 = (int)(*((uint16_t *)((uint8_t *)&local_4c + 2u)));
+  iVar5 = (int)sStack_46;
+  if ((uVar3 == 0x10) && (uStack_1a != 0xa55a)) {
+    if ((((((*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x3c08)))) & 0xff) == 0) ||
+         (((*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x3c08)))) & 0xff00) == 0)) && (uStack_1a != 0x5aa5)) &&
+       (uVar3 = f33_should_zero_motor_thermal_seed(uStack_1a), uVar3 == 0x5a)) {
+      iVar8 = 0;
+      iVar5 = 0;
+      iVar7 = 0;
+      iVar6 = 0;
+    }
+  }
+  else {
+    iVar8 = (int)DAT_0002b4b6;
+    iVar5 = (int)DAT_0002b4b4;
+    iVar7 = iVar8;
+    iVar6 = iVar5;
+  }
+  FUN_0003a808(iVar8);
+  FUN_0003a94a(iVar7);
+  FUN_0003a82a(iVar6);
+  FUN_0003a96c(iVar5);
+  return;
 }
 
 
@@ -5949,6 +6268,59 @@ void FUN_0003b5d2(short param_1,short param_2)
   (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb874u + (uint32_t)((int)puVar1)))))) = 0x3980;
   (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb876u + (uint32_t)((int)puVar1)))))) = 0x3980;
   (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb878u + (uint32_t)((int)puVar1)))))) = 0x3980;
+  return;
+}
+
+
+
+/* Copy record6 before exact status10/marker!=A55A admission. Zero-byte7BF8 and marker!=5AA5
+   permit3B55A conditional zero. Restore+16 then+14 through gains100/25; rejection uses exact zero
+   defaults. Seed baseline outputs7074/76/78 to14720. Copy record6 before exact10/nonA55A admission;
+   selected absolute-reference test can zero saved offsets, otherwise restore+16/+14 through
+   gains100/25. Zero defaults and14720 output baseline. */
+
+void f33_restore_thermal_offset_terms(void)
+
+{
+  uint *puVar1;
+  uint32_t puVar2;
+  int iVar3;
+  int iVar4;
+  uint uVar5;
+  undefined4 uVar6;
+  undefined4 *puVar7;
+  uint local_3c [5];
+  short sStack_28;
+  short sStack_26;
+  short sStack_a;
+  
+  puVar2 = 0xfebeb800u;
+  puVar1 = local_3c;
+  puVar7 = ((undefined *)camry_host_ptr(0x21268u));
+  do {
+    uVar6 = *puVar7;
+    puVar7 = puVar7 + 1;
+    *puVar1 = uVar6;
+    puVar1 = puVar1 + 1;
+  } while ((uintptr_t)(puVar7)!=(uintptr_t)(((undefined *)camry_host_ptr(0x212a0u))));
+  uVar5 = f33_nvm_get_record(6, camry_host_addr(local_3c));
+  if ((uVar5 == 0x10) && (sStack_a != -0x5aa6)) {
+    if ((((((*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x3c08)))) & 0xff) == 0) ||
+         (((*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x3c08)))) & 0xff00) == 0)) && (sStack_a != 0x5aa5)) &&
+       (uVar5 = f33_should_zero_restored_thermal_offset(sStack_a), uVar5 == 0x5a)) {
+      iVar3 = 0;
+      iVar4 = 0;
+    }
+    else {
+      iVar3 = (int)sStack_26;
+      iVar4 = (int)sStack_28;
+    }
+  }
+  else {
+    iVar3 = (int)DAT_0002b5b0;
+    iVar4 = (int)DAT_0002b5b2;
+  }
+  FUN_0003b5d2(iVar3,iVar4);
   return;
 }
 

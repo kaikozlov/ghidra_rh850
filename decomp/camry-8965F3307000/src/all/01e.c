@@ -31,9 +31,9 @@ void FUN_0007805e(undefined *param_1)
 {
   uchar auStack_8 [4];
   
-  if ((param_1 != ((undefined *)camry_host_ptr((uint32_t)(0xffff)))) &&
+  if (((uintptr_t)(param_1)!=(uintptr_t)(((undefined *)camry_host_ptr((uint32_t)(0xffff))))) &&
      (param_1 = (undefined *)f33_nvm_read_with_optional_blank_check(DAT_febf6c2c,4,auStack_8,'\x01')
-     , param_1 == ((undefined *)camry_host_ptr((uint32_t)(0x3))))) {
+     ,(uintptr_t)(param_1)==(uintptr_t)(((undefined *)camry_host_ptr((uint32_t)(0x3)))))) {
     param_1 = ((undefined *)camry_host_ptr(0xfffdu));
   }
   ((void)(param_1), FUN_0007849e());
@@ -3493,7 +3493,7 @@ undefined4 FUN_0007abe6(F33CanTpConfiguration *param_1,int param_2)
   state = ((void *)camry_host_ptr((uint32_t)((0xfebe4f40u) + uVar1 * 2)));
   connection = f33_cantp_find_transmit_connection
                          (param_1,((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar1 * 2].transmit_id);
-  if (connection == (F33CanTpTxConnection *)0x0) {
+  if ((uintptr_t)(connection)==(uintptr_t)((F33CanTpTxConnection *)0x0)) {
 LAB_0007ac88:
     (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x68c4))))) = 0xf;
     ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar1 * 2].transmit_id = 0xffff;
@@ -3559,7 +3559,7 @@ undefined4 FUN_0007ac9c(F33CanTpConfiguration *param_1,int param_2)
     receive_id = ((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar3 * 2].receive_id;
     puVar4 = ((undefined *)camry_host_ptr(0xfebeb800u));
     connection = f33_cantp_find_receive_connection(param_1,receive_id);
-    if (connection != (F33CanTpRxConnection *)0x0) {
+    if ((uintptr_t)(connection)!=(uintptr_t)((F33CanTpRxConnection *)0x0)) {
       if ((receive_id != (*((ushort *)camry_host_ptr((uint32_t)(param_2 + 2))))) &&
          (connection->preemption_rank <= (*((byte *)camry_host_ptr((uint32_t)(param_2 + 0x1d)))))) {
         return 1;
@@ -3572,8 +3572,7 @@ LAB_0007ad36:
   else if ((uVar1 == 'Z') &&
           (puVar4 = ((undefined *)camry_host_ptr(0xfebeb800u)),
           connection = f33_cantp_find_receive_connection
-                                 (param_1,((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar3 * 2].receive_id),
-          connection != (F33CanTpRxConnection *)0x0)) {
+                                 (param_1,((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar3 * 2].receive_id),(uintptr_t)(connection)!=(uintptr_t)((F33CanTpRxConnection *)0x0))) {
     if ((uVar2 == 0xf0) || (uVar2 == 0xe1)) {
       if ((((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar3 * 2].receive_id != (*((ushort *)camry_host_ptr((uint32_t)(param_2 + 2))))) &&
          (connection->preemption_rank <= (*((byte *)camry_host_ptr((uint32_t)(param_2 + 0x1d)))))) {
@@ -4371,8 +4370,7 @@ void f33_cantp_run_transmit_channels(void)
   
   uVar4 = 0xfebeb800;
   if ((((int8_t)DAT_febe4f3d) == -0x56) &&
-     (configuration = (F33CanTpConfiguration *)FUN_0007a32e(),
-     configuration != (F33CanTpConfiguration *)0x0)) {
+     (configuration = (F33CanTpConfiguration *)FUN_0007a32e(),(uintptr_t)(configuration)!=(uintptr_t)((F33CanTpConfiguration *)0x0))) {
     bVar3 = configuration->channel_count;
     for (uVar6 = 0; uVar6 < bVar3; uVar6 = uVar6 + 1 & 0xff) {
       iVar5 = uVar6 * 0x20 + (int)uVar4;
@@ -4383,7 +4381,7 @@ void f33_cantp_run_transmit_channels(void)
       if (((((cVar1 == 'x') || (cVar1 == -0x79)) || (cVar1 == -0x6a)) ||
           ((cVar1 == -0x5b || (cVar1 == -0x4c)))) || ((cVar1 == -0x3d || (cVar1 == -0x2e)))) {
         unaff_r27 = f33_cantp_find_transmit_connection(configuration,(*((ushort *)camry_host_ptr((uint32_t)(iVar5 + -0x68bc)))));
-        if (unaff_r27 != (F33CanTpTxConnection *)0x0) goto LAB_0007b916;
+        if ((uintptr_t)(unaff_r27)!=(uintptr_t)((F33CanTpTxConnection *)0x0)) goto LAB_0007b916;
 LAB_0007b908:
         (*((undefined1 *)camry_host_ptr((uint32_t)((int)uVar4 + -0x68c4)))) = 0xf;
         (*((undefined2 *)camry_host_ptr((uint32_t)(iVar5 + -0x68bc)))) = 0xffff;

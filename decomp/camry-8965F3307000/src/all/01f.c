@@ -4490,19 +4490,19 @@ uint f33_canif_transmit(ushort source_pdu,F33PduInfo *info)
   puVar4 = ((undefined *)camry_host_ptr((uint32_t)(source_pdu & 0xf800)));
   uVar3 = source_pdu & 0x7ff;
   if ((source_pdu & 0xf800) != 0) {
-    if (puVar4 == ((undefined *)camry_host_ptr((uint32_t)(0x6000)))) {
+    if ((uintptr_t)(puVar4)==(uintptr_t)(((undefined *)camry_host_ptr((uint32_t)(0x6000))))) {
       puVar4 = ((undefined *)camry_host_ptr((uint32_t)(0x1)));
     }
-    else if (puVar4 == ((undefined *)camry_host_ptr((uint32_t)(0x800)))) {
+    else if ((uintptr_t)(puVar4)==(uintptr_t)(((undefined *)camry_host_ptr((uint32_t)(0x800))))) {
       puVar4 = ((undefined *)camry_host_ptr((uint32_t)(0x2)));
     }
-    else if (puVar4 == ((undefined *)camry_host_ptr(0xb800u))) {
+    else if ((uintptr_t)(puVar4)==(uintptr_t)(((undefined *)camry_host_ptr(0xb800u)))) {
       puVar4 = ((undefined *)camry_host_ptr((uint32_t)(0x3)));
     }
-    else if (puVar4 == ((undefined *)camry_host_ptr((uint32_t)(0xc000)))) {
+    else if ((uintptr_t)(puVar4)==(uintptr_t)(((undefined *)camry_host_ptr((uint32_t)(0xc000))))) {
       puVar4 = ((undefined *)camry_host_ptr((uint32_t)(0x4)));
     }
-    else if (puVar4 == ((undefined *)camry_host_ptr((uint32_t)(0xf800)))) {
+    else if ((uintptr_t)(puVar4)==(uintptr_t)(((undefined *)camry_host_ptr((uint32_t)(0xf800))))) {
       puVar4 = ((undefined *)camry_host_ptr((uint32_t)(0x5)));
     }
     else {
@@ -4510,7 +4510,7 @@ uint f33_canif_transmit(ushort source_pdu,F33PduInfo *info)
     }
   }
   uVar2 = 1;
-  if ((puVar4 != ((undefined *)camry_host_ptr((uint32_t)(0xff)))) && (uVar3 < (ushort)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0x21a48u + (uint32_t)((int)camry_host_addr(puVar4)) * 2u)))))) {
+  if (((uintptr_t)(puVar4)!=(uintptr_t)(((undefined *)camry_host_ptr((uint32_t)(0xff))))) && (uVar3 < (ushort)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0x21a48u + (uint32_t)((int)camry_host_addr(puVar4)) * 2u)))))) {
     puVar1 = ((uint *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x21994u + (uint32_t)((int)camry_host_addr(puVar4)) * 4u)))) + uVar3 * 8)));
     local_10.raw_id = *puVar1;
     local_10.class_flags = (uchar)(1 << ((uint)camry_host_addr(puVar4) & 0x1f));

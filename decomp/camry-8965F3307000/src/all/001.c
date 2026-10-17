@@ -48,7 +48,7 @@ uint f33_boot_prepare_aligned_input_ring
 
 
 /* Rejectlength0 orfailedfirst3474 lookup. Lookup modulo32lastaddress, ignoresecondlookupreturn,
-   andreturn(last_block<first_block). An out-of-range lastaddress can use3474 fallbackF8000; this is
+   andreturn((uintptr_t)(last_block)<(uintptr_t)(first_block)). An out-of-range lastaddress can use3474 fallbackF8000; this is
    not complete region validation. */
 
 uint f33_boot_select_operation_blocks(uint address,uint length,uint *first_block,uint *last_block)
@@ -645,7 +645,7 @@ uint f33_boot_validate_crc_region(uint region)
     pFVar2 = (F33BootCrcDescriptor *)0x0;
   }
   uVar3 = f33_boot_crc_descriptor_count(region);
-  if ((uVar3 == 0) || (pFVar2 == (F33BootCrcDescriptor *)0x0)) {
+  if ((uVar3 == 0) || ((uintptr_t)(pFVar2)==(uintptr_t)((F33BootCrcDescriptor *)0x0))) {
 LAB_0000486c:
     uVar5 = 0xffffffff;
   }
@@ -2185,7 +2185,7 @@ LAB_0000573c:
       start = 0;
       puVar6 = ((undefined *)camry_host_ptr((uint32_t)(uVar14 - 0x10f0)));
       length = 0;
-      if (puVar6 < ((undefined *)camry_host_ptr((uint32_t)(0x2)))) {
+      if ((uintptr_t)(puVar6)<(uintptr_t)(((undefined *)camry_host_ptr((uint32_t)(0x2))))) {
         if ((local_28[2] == 'E') && (local_28[3] == '\0')) {
           start = FUN_000052a6(local_28 + 4,4);
           length = FUN_000052a6(auStack_20,4);
@@ -2205,7 +2205,7 @@ LAB_000058d2:
           }
         }
       }
-      else if (puVar6 == ((undefined *)camry_host_ptr((uint32_t)(0x2)))) {
+      else if ((uintptr_t)(puVar6)==(uintptr_t)(((undefined *)camry_host_ptr((uint32_t)(0x2))))) {
         if ((local_28[2] == 'E') && (local_28[3] == '\0')) {
           start = FUN_000052a6(local_28 + 4,4);
           length = FUN_000052a6(auStack_20,4);
@@ -2225,7 +2225,7 @@ LAB_000058d2:
         }
       }
       else {
-        if (puVar6 == ((undefined *)camry_host_ptr((uint32_t)(0x3)))) {
+        if ((uintptr_t)(puVar6)==(uintptr_t)(((undefined *)camry_host_ptr((uint32_t)(0x3))))) {
 LAB_000058da:
           (*((ushort *)camry_host_ptr((uint32_t)(puVar7 + -0x6c9c)))) = uVar10;
           (*((uint *)camry_host_ptr((uint32_t)(puVar7 + -0x6ca8)))) = start;
@@ -2234,17 +2234,17 @@ LAB_000058da:
           (*((uint *)camry_host_ptr((uint32_t)(puVar7 + -0x6ca4)))) = length;
           (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(-0x6c99))))) = uVar13;
           (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(-0x6c98))))) = auStack_2b[0];
-          if (puVar6 < ((undefined *)camry_host_ptr((uint32_t)(0x3)))) {
+          if ((uintptr_t)(puVar6)<(uintptr_t)(((undefined *)camry_host_ptr((uint32_t)(0x3))))) {
             (*((undefined4 *)camry_host_ptr((uint32_t)(puVar7 + -0x6ca0)))) = unaff_r25;
             (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(-0x6c97))))) = 1;
             return;
           }
-          if (puVar6 == ((undefined *)camry_host_ptr((uint32_t)(0x3)))) {
+          if ((uintptr_t)(puVar6)==(uintptr_t)(((undefined *)camry_host_ptr((uint32_t)(0x3))))) {
             (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(-0x6ced))))) = 8;
             FUN_00005644();
           }
           else {
-            if (puVar6 == ((undefined *)camry_host_ptr(0xee10u))) {
+            if ((uintptr_t)(puVar6)==(uintptr_t)(((undefined *)camry_host_ptr(0xee10u)))) {
               (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(-0x6c97))))) = 1;
               return;
             }
@@ -2253,7 +2253,7 @@ LAB_000058da:
           (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(-0x6c97))))) = 0;
           return;
         }
-        if (((puVar6 == ((undefined *)camry_host_ptr(0xee10u))) && (local_28[2] == 'E')) && (local_28[3] == '\0')) {
+        if ((((uintptr_t)(puVar6)==(uintptr_t)(((undefined *)camry_host_ptr(0xee10u)))) && (local_28[2] == 'E')) && (local_28[3] == '\0')) {
           start = FUN_000052a6(local_28 + 4,4);
           length = FUN_000052a6(auStack_20,4);
           uVar11 = f33_boot_classify_service_range(start,length,'\x01',&local_2c);
@@ -2537,13 +2537,13 @@ void f33_boot_routine_timer_progress(void)
   
   if ((DAT_febf2b69 != '\0') && (f33_boot_response_pending_in_flight != '\x01')) {
     puVar1 = ((undefined *)camry_host_ptr((uint32_t)(DAT_febf2b64 - 0x10f0)));
-    if (puVar1 < ((undefined *)camry_host_ptr((uint32_t)(0x2)))) {
+    if ((uintptr_t)(puVar1)<(uintptr_t)(((undefined *)camry_host_ptr((uint32_t)(0x2))))) {
       FUN_00005936();
     }
-    else if (puVar1 == ((undefined *)camry_host_ptr((uint32_t)(0x2)))) {
+    else if ((uintptr_t)(puVar1)==(uintptr_t)(((undefined *)camry_host_ptr((uint32_t)(0x2))))) {
       FUN_00005a04();
     }
-    else if (puVar1 == ((undefined *)camry_host_ptr(0xee10u))) {
+    else if ((uintptr_t)(puVar1)==(uintptr_t)(((undefined *)camry_host_ptr(0xee10u)))) {
       FUN_00005b70();
     }
     else {
@@ -3570,7 +3570,7 @@ void f33_boot_response_timer_progress(void)
     puVar2 = 0xfebf9800u;
     iVar4 = FUN_00001d24();
     if ((uint)(iVar4 - (*((int *)camry_host_ptr((uint32_t)(puVar2 + -0x6c50))))) < 3600000000) {
-      if (((undefined *)camry_host_ptr((uint32_t)(iVar4 - *(int *)(puVar2 + -0x6c54)))) <= puVar6) {
+      if ((uintptr_t)(((undefined *)camry_host_ptr((uint32_t)(iVar4 - *(int *)(puVar2 + -0x6c54)))))<=(uintptr_t)(puVar6)) {
         return;
       }
       if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x6c44))))) == '\x01') {
@@ -4692,7 +4692,7 @@ uint f33_boot_security_generate_candidate_block
     puVar5 = puVar5 + 1;
     *puVar2 = uVar1;
     puVar2 = puVar2 + 1;
-  } while (puVar5 != ((undefined *)camry_host_ptr(0x8fd0u)));
+  } while ((uintptr_t)(puVar5)!=(uintptr_t)(((undefined *)camry_host_ptr(0x8fd0u))));
   uVar4 = f33_boot_aes128_ctr_transform_block(local_14,challenge_out,'\x10',context);
   uVar3 = 0;
   if (uVar4 != 0) {
@@ -4723,7 +4723,7 @@ uint f33_boot_security_initialize_candidate_context
     puVar4 = puVar4 + 1;
     *puVar2 = uVar1;
     puVar2 = puVar2 + 1;
-  } while (puVar4 != ((undefined *)camry_host_ptr(0x8fe0u)));
+  } while ((uintptr_t)(puVar4)!=(uintptr_t)(((undefined *)camry_host_ptr(0x8fe0u))));
   if ((key_length == '\x10') &&
      (uVar3 = f33_boot_aes128_ctr_initialize(timer_key,'\x10',local_14,'\x10',context), uVar3 == 0))
   {
@@ -5388,7 +5388,7 @@ uint f33_boot_aes128_cmac_derive_subkeys(F33BootAes128CmacContext *context)
     puVar7 = puVar7 + 1;
     *puVar3 = uVar2;
     puVar3 = puVar3 + 1;
-  } while (puVar7 != ((undefined *)camry_host_ptr(0x9201u)));
+  } while ((uintptr_t)(puVar7)!=(uintptr_t)(((undefined *)camry_host_ptr(0x9201u))));
   if (((context->aes).valid == '\x01') &&
      (uVar5 = f33_boot_aes128_encrypt_block(local_18,local_28,'\x10',&context->aes), uVar5 == 0)) {
     puVar7 = context->subkey1;

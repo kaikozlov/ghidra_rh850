@@ -222,7 +222,7 @@ undefined4 FUN_000942ac(char param_1,char param_2,int *param_3)
   uint uVar3;
   int iVar4;
   
-  if (param_3 == (int *)0x0) {
+  if ((uintptr_t)(param_3)==(uintptr_t)((int *)0x0)) {
     return 1;
   }
   if (param_1 == '\x01' || param_1 == '\x02') {
@@ -787,7 +787,7 @@ undefined4 FUN_00094ee6(char param_1,undefined1 *param_2,char param_3)
   
   puVar1 = 0x23dfcu;
   if (param_1 == '\x01') {
-    if ((((param_3 == '\0') || (param_2 == (undefined1 *)0x0)) ||
+    if ((((param_3 == '\0') || ((uintptr_t)(param_2)==(uintptr_t)((undefined1 *)0x0))) ||
         (iVar2 = FUN_00094d9c(CONCAT11(*param_2,param_2[1]),&sStack_e), iVar2 != 0)) ||
        ((sStack_e != 0 || ((*((int *)camry_host_ptr((uint32_t)(puVar1 + 0x21ec)))) == 0)))) {
       uVar3 = 1;
@@ -859,7 +859,7 @@ undefined4 FUN_00094f94(char param_1,int *param_2,undefined2 param_3,undefined1 
   undefined4 uVar2;
   
   *param_4 = 0;
-  if (param_2 == (int *)0x0) {
+  if ((uintptr_t)(param_2)==(uintptr_t)((int *)0x0)) {
     return 1;
   }
   if (param_1 == '\0') {
@@ -1677,7 +1677,7 @@ undefined4 FUN_0009586c(undefined4 *param_1)
     param_1 = param_1 + 1;
     *puVar1 = uVar4;
     puVar1 = puVar1 + 1;
-  } while (puVar5 != param_1);
+  } while ((uintptr_t)(puVar5)!=(uintptr_t)(param_1));
   FUN_000955b6(0);
   if ((*((uint *)camry_host_ptr((uint32_t)(puVar2 + -0x5acc)))) < 3) {
     nrc = '\x13';
@@ -2187,10 +2187,10 @@ LAB_00096124:
         puVar1 = ((undefined *)camry_host_ptr((uint32_t)(*(int *)(iVar6 + -0x5a70) + (uint)auStack_22[0])));
         puVar9 = *(undefined **)(iVar6 + -0x5a68);
         *(undefined **)(iVar6 + -0x5a70) = puVar1;
-        if (((undefined *)camry_host_ptr(0xfffdu)) < puVar9) {
+        if ((uintptr_t)(((undefined *)camry_host_ptr(0xfffdu)))<(uintptr_t)(puVar9)) {
           puVar9 = ((undefined *)camry_host_ptr((uint32_t)(0xfffe)));
         }
-        if (puVar1 <= puVar9) goto code_r0x000960ac;
+        if ((uintptr_t)(puVar1)<=(uintptr_t)(puVar9)) goto code_r0x000960ac;
       }
       else if (iVar5 == 1) {
         FUN_000955b6(0);
@@ -2203,10 +2203,10 @@ LAB_00096124:
         puVar1 = ((undefined *)camry_host_ptr((uint32_t)(*(int *)(iVar6 + -0x5a70) + (uint)auStack_22[0])));
         puVar9 = *(undefined **)(iVar6 + -0x5a68);
         *(undefined **)(iVar6 + -0x5a70) = puVar1;
-        if (((undefined *)camry_host_ptr(0xfffdu)) < puVar9) {
+        if ((uintptr_t)(((undefined *)camry_host_ptr(0xfffdu)))<(uintptr_t)(puVar9)) {
           puVar9 = ((undefined *)camry_host_ptr((uint32_t)(0xfffe)));
         }
-        if (puVar1 <= puVar9) {
+        if ((uintptr_t)(puVar1)<=(uintptr_t)(puVar9)) {
           (*((ushort *)camry_host_ptr((uint32_t)(iVar6 + -0x5a82)))) = uVar11;
           event_id = '\x05';
           goto LAB_00096114;
@@ -3558,7 +3558,7 @@ undefined4 FUN_000979a2(undefined4 *param_1)
     puVar8 = puVar8 + 1;
     *puVar2 = uVar6;
     puVar2 = puVar2 + 1;
-  } while (param_1 + 7 != puVar8);
+  } while ((uintptr_t)(param_1 + 7)!=(uintptr_t)(puVar8));
   FUN_000955b6(0);
   if ((uint)param_1[1] < 3) {
     uStack_13 = '\x13';

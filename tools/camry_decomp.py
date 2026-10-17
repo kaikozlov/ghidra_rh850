@@ -601,6 +601,8 @@ def _expr_end_bound(code: str, start: int) -> int:
             if depth == 0:
                 break
             depth -= 1
+        elif depth == 0 and char == ">" and index > 0 and code[index - 1] == "-":
+            pass
         elif depth == 0 and (
             char in ";,?:<>"
             or code.startswith("||", index)
@@ -630,6 +632,8 @@ def _expr_before(code: str, op_index: int) -> str:
                 start = index + 1
                 break
             depth -= 1
+        elif depth == 0 and char == ">" and index > 0 and code[index - 1] == "-":
+            pass
         elif depth == 0 and (
             char in ";,?:<>"
             or (index > 0 and code.startswith(("||", "&&", "==", "!="), index - 1))
@@ -1876,6 +1880,76 @@ def _rewrite_indirect_calls(code: str) -> str:
     return "".join(pieces)
 
 
+def _comparison_operand_is_pointer(expr: str, pointers: set[str], entries: set[str]) -> bool:
+    text = expr.strip()
+    if not text:
+        return False
+    if text.startswith('"'):
+        return True
+    if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", text) and text in entries:
+        return True
+    # `*(code **)slot` is a pointer. A single star yields the pointee.
+    if text.startswith("*"):
+        inner = text[1:].lstrip()
+        if inner.startswith("("):
+            try:
+                end = _match_paren(inner, 0)
+            except ValueError:
+                return False
+            if inner[1:end].count("*") >= 2:
+                return True
+        return False
+    return _is_pointer_expr(text, pointers)
+
+
+def _rewrite_pointer_compares(code: str, pointers: set[str]) -> str:
+    """Compare unlike pointer types as host addresses.
+
+    A stored routine compared with `f33_reset_vector`, and a RAM walk
+    compared with a differently typed end pointer, are address compares.
+    """
+    entries = set(_function_entries())
+    pieces: list[str] = []
+    cursor = 0
+    index = 0
+    while index < len(code):
+        if code.startswith(("<<", ">>"), index):
+            index += 2
+            continue
+        # `->` is a member access, not a greater-than compare.
+        if code[index] == ">" and index > 0 and code[index - 1] == "-":
+            index += 1
+            continue
+        op = next(
+            (item for item in ("<=", ">=", "==", "!=", "<", ">") if code.startswith(item, index)),
+            None,
+        )
+        if op is None:
+            index += 1
+            continue
+        raw_left = _expr_before(code, index)
+        left_at = index - len(raw_left)
+        if left_at < cursor:
+            index += len(op)
+            continue
+        right_end = _expr_end_bound(code, index + len(op))
+        raw_right = code[index + len(op):right_end]
+        if not (
+            _comparison_operand_is_pointer(raw_left, pointers, entries)
+            and _comparison_operand_is_pointer(raw_right, pointers, entries)
+        ):
+            index += len(op)
+            continue
+        pieces.append(code[cursor:left_at])
+        pieces.append(f"(uintptr_t)({raw_left.strip()})")
+        pieces.append(op)
+        pieces.append(f"(uintptr_t)({raw_right.strip()})")
+        cursor = right_end
+        index = right_end
+    pieces.append(code[cursor:])
+    return "".join(pieces)
+
+
 def _rewrite_body(code: str) -> str:
     code = _strip_calling_convention(code)
     code = _rewrite_firmware_bases(code)
@@ -1900,6 +1974,7 @@ def _rewrite_body(code: str) -> str:
     code = _rewrite_struct_fields(code)
     code = _rewrite_pointer_assignments(code)
     code = _rewrite_indirect_calls(code)
+    code = _rewrite_pointer_compares(code, pointers)
     return code
 
 

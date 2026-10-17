@@ -1825,7 +1825,7 @@ undefined4 FUN_00087f52(void *param_1,int param_2,undefined4 param_3,uint param_
 {
   undefined4 uVar1;
   
-  if ((((param_1 == (void *)0x0) || (param_4 == 0)) || (param_5 == (uint *)0x0)) ||
+  if (((((uintptr_t)(param_1)==(uintptr_t)((void *)0x0)) || (param_4 == 0)) || ((uintptr_t)(param_5)==(uintptr_t)((uint *)0x0))) ||
      (param_2 != 0x40)) {
     uVar1 = 1;
   }

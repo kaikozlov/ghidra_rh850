@@ -1078,7 +1078,7 @@ uint f33_serialize_selected_proprietary_event(uchar *output,ushort *length)
   uint uVar1;
   uint uVar2;
   
-  if ((output != (uchar *)0x0) && (length != (ushort *)0x0)) {
+  if (((uintptr_t)(output)!=(uintptr_t)((uchar *)0x0)) && ((uintptr_t)(length)!=(uintptr_t)((ushort *)0x0))) {
     uVar2 = (uint)*length;
     if (DAT_febe81ad != 0) {
       if (DAT_febe81ad == 1) {
@@ -3109,6 +3109,27 @@ LAB_00051b5c:
 
 
 
+void FUN_00051b64(void)
+
+{
+  uint32_t puVar1;
+  uint uVar2;
+  
+  puVar1 = 0x23dfcu;
+  if ((DAT_febee856 == '\x11') && ((DAT_febee85b == '\0' || (DAT_febee85b == '\"')))) {
+    uVar2 = 0;
+    do {
+      if ((uintptr_t)(*(code **)(puVar1 + uVar2 * 4 + -0x2ab0))!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())*(code **)(puVar1 + uVar2 * 4 + -0x2ab0))();
+      }
+      uVar2 = uVar2 + 1;
+    } while (uVar2 < 4);
+  }
+  return;
+}
+
+
+
 /* Nonzero82D4 invokes completion/dispatch, then independently run51B64 mode-gated callbacks. Those
    E85611/E85B0-or22 callbacks are not persistence acknowledgement. Native scheduler interval
    composes old-status polling, acknowledgement and queued restart, or holds callback/queue when a
@@ -4836,7 +4857,7 @@ uint f33_get_secondary_capture_record_mask(uint *dtc)
   uint uVar3;
   
   uVar2 = 0;
-  if ((dtc != (uint *)0x0) && (DAT_febe6152 == '\x01')) {
+  if (((uintptr_t)(dtc)!=(uintptr_t)((uint *)0x0)) && (DAT_febe6152 == '\x01')) {
     uVar1 = 0;
     if (f33_diagnostic_capture_slots[1].event < 0x180) {
       uVar1 = *(uint *)(((undefined *)camry_host_ptr(0x30850u)) +
@@ -4882,6 +4903,34 @@ undefined4 FUN_00053168(int param_1,int param_2,ushort param_3,undefined1 *param
 
 
 
+undefined4 FUN_00053190(uint param_1,char param_2)
+
+{
+  int iVar1;
+  undefined4 uVar2;
+  int iVar3;
+  ushort uStack_12;
+  
+  uVar2 = 0;
+  iVar1 = camry_host_addr(FUN_00056664(&uStack_12));
+  if ((param_1 & 0xffff) < (uint)uStack_12) {
+    iVar1 = (param_1 & 0xffff) * 0x18 + iVar1;
+    iVar3 = iVar1;
+    if (param_2 != '\0') {
+      iVar3 = iVar1 + 8;
+    }
+    if ((*((int *)camry_host_ptr((uint32_t)(iVar3 + 4)))) != 0) {
+      uVar2 = 0x5a;
+      if ((uintptr_t)(*(code **)(iVar1 + 0x10))!=(uintptr_t)(f33_reset_vector)) {
+        uVar2 = (*(int (*)())*(code **)(iVar1 + 0x10))();
+      }
+    }
+  }
+  return uVar2;
+}
+
+
+
 /* Views0/1 serialize record numbers1/10 from configured75-field table2A364, with field gate and
    view exclusion. Emit record number/count then identifier/length/payload. Return-1 on capacity
    crossing; payload callbacks choose retained sources, not a new physical sample. */
@@ -4901,7 +4950,7 @@ int f33_serialize_retained_capture_record(uchar record_view,uchar *output,ushort
   
   iVar8 = 0;
   uVar6 = '\0';
-  if (((record_view < 2) && (output != (uchar *)0x0)) &&
+  if (((record_view < 2) && ((uintptr_t)(output)!=(uintptr_t)((uchar *)0x0))) &&
      (iVar4 = camry_host_addr(FUN_00056664(&uStack_2a)), iVar4 != 0)) {
     uVar3 = '\x10';
     if (record_view == '\0') {

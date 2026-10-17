@@ -1189,6 +1189,22 @@ undefined4 FUN_00099388(int param_1,short param_2)
 
 
 
+void FUN_000993f0(void)
+
+{
+  undefined4 *puVar1;
+  undefined4 *puVar2;
+  
+  puVar2 = ((undefined *)camry_host_ptr(0xfebf7c00u));
+  for (puVar1 = ((undefined *)camry_host_ptr(0x10000u));(uintptr_t)(puVar1)<(uintptr_t)(((undefined *)camry_host_ptr(0x17df0u))); puVar1 = puVar1 + 1) {
+    *puVar2 = *puVar1;
+    puVar2 = puVar2 + 1;
+  }
+  return;
+}
+
+
+
 undefined4 FUN_00099414(int param_1,short param_2)
 
 {

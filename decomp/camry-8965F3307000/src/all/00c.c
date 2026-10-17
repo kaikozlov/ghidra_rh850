@@ -972,6 +972,73 @@ void f33_return_only_stub_328d2(void)
 
 
 
+/* Makes its own40-byte family2 record0200 getter call, separate from caller marker read. Copy
+   coefficients only on status10; serialized bank1 precedes bank0, while RAM arrays group both banks
+   by sign/bias. Getter reads immutable ROMA000, not setter RAMF5D0; no atomic two-read claim. */
+
+void f33_copy_monitor_calibration_from_rom_record(void)
+
+{
+  uint *puVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  undefined4 uVar4;
+  undefined4 *puVar5;
+  uint local_30;
+  undefined2 uStack_2c;
+  undefined2 uStack_2a;
+  undefined2 uStack_28;
+  undefined2 uStack_26;
+  undefined2 uStack_24;
+  undefined2 uStack_22;
+  undefined2 uStack_20;
+  undefined2 uStack_1e;
+  undefined2 uStack_1c;
+  undefined2 uStack_1a;
+  undefined2 uStack_18;
+  undefined2 uStack_16;
+  undefined2 uStack_14;
+  undefined2 uStack_12;
+  undefined2 uStack_10;
+  undefined2 uStack_e;
+  undefined2 uStack_c;
+  undefined2 uStack_a;
+  
+  puVar2 = 0xfebeb800u;
+  puVar1 = &local_30;
+  puVar5 = ((undefined *)camry_host_ptr(0x21030u));
+  do {
+    uVar4 = *puVar5;
+    puVar5 = puVar5 + 1;
+    *puVar1 = uVar4;
+    puVar1 = puVar1 + 1;
+  } while ((uintptr_t)(puVar5)!=(uintptr_t)(((undefined *)camry_host_ptr(0x21058u))));
+  uVar3 = f33_nvm_get_record(0x200, camry_host_addr(&local_30));
+  if (uVar3 == 0x10) {
+    (*((undefined2 *)camry_host_ptr((uint32_t)((int)(0xffffb12eu + (uint32_t)((int)puVar2)))))) = uStack_1a;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((int)(0xffffb130u + (uint32_t)((int)puVar2)))))) = uStack_18;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((int)(0xffffb132u + (uint32_t)((int)puVar2)))))) = uStack_16;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((int)(0xffffb134u + (uint32_t)((int)puVar2)))))) = uStack_2c;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((int)(0xffffb136u + (uint32_t)((int)puVar2)))))) = uStack_2a;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((int)(0xffffb138u + (uint32_t)((int)puVar2)))))) = uStack_28;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb13au + (uint32_t)((int)puVar2)))))) = uStack_14;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((int)(0xffffb13cu + (uint32_t)((int)puVar2)))))) = uStack_12;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((int)(0xffffb13eu + (uint32_t)((int)puVar2)))))) = uStack_10;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((int)(0xffffb140u + (uint32_t)((int)puVar2)))))) = uStack_26;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((int)(0xffffb142u + (uint32_t)((int)puVar2)))))) = uStack_24;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((int)(0xffffb144u + (uint32_t)((int)puVar2)))))) = uStack_22;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((int)(0xffffb146u + (uint32_t)((int)puVar2)))))) = uStack_e;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((int)(0xffffb148u + (uint32_t)((int)puVar2)))))) = uStack_c;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((int)(0xffffb14au + (uint32_t)((int)puVar2)))))) = uStack_a;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((int)(0xffffb14cu + (uint32_t)((int)puVar2)))))) = uStack_20;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((int)(0xffffb14eu + (uint32_t)((int)puVar2)))))) = uStack_1e;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((int)(0xffffb150u + (uint32_t)((int)puVar2)))))) = uStack_1c;
+  }
+  return;
+}
+
+
+
 /* Return0 iff all12 gains are inclusively[-20912,-14080] and all six biases
    inclusively[-1835,1835]; otherwise5A. Signed16 calibration bounds30EA0..30EA6; no state mutation.
     */

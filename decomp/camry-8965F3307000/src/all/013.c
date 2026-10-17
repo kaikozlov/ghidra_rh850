@@ -1366,6 +1366,41 @@ uint f33_check_diagnostic_application_admission(uchar addressing_kind)
 
 
 
+void FUN_0004d1a4(int param_1,uint param_2)
+
+{
+  F33DidPublicationMetadata *pFVar1;
+  byte *pbVar2;
+  ushort uVar3;
+  uint uVar4;
+  F33DidPublicationMetadata *pFVar5;
+  int iVar6;
+  ushort uStack_1e;
+  
+  for (uVar4 = 0; uVar4 < (param_2 & 0xffff); uVar4 = uVar4 + 1 & 0xffff) {
+    (*((undefined1 *)camry_host_ptr((uint32_t)(uVar4 + param_1)))) = 0;
+  }
+  pFVar5 = f33_get_did_publication_metadata(&uStack_1e);
+  for (iVar6 = 0;
+      (int)(iVar6 - (uint)uStack_1e) < 0 != (iVar6 < 0 && -1 < (int)(iVar6 - (uint)uStack_1e));
+      iVar6 = iVar6 + 1) {
+    pFVar1 = pFVar5 + iVar6;
+    uVar3 = pFVar1->did;
+    if (((pFVar1->route_kind == '\0') && ((uVar3 & 0xff) == 0)) &&
+       (((uintptr_t)(pFVar1->available)==(uintptr_t)(f33_reset_vector)|| (uVar4 = (*(int (*)())pFVar1->available)(), uVar4 == 0x5a))))
+    {
+      uVar4 = (int)(uint)uVar3 >> 0xb;
+      if (uVar4 < (param_2 & 0xff)) {
+        pbVar2 = ((byte *)camry_host_ptr((uint32_t)(uVar4 + param_1)));
+        *pbVar2 = *pbVar2 | (byte)(0x80 >> ((int)(uint)uVar3 >> 8 & 7U));
+      }
+    }
+  }
+  return;
+}
+
+
+
 void FUN_0004d222(int param_1,uint param_2)
 
 {
@@ -1419,6 +1454,38 @@ void FUN_0004d308(uint param_1,int param_2,uint param_3)
     }
   }
   return;
+}
+
+
+
+/* Scans242 records2927C stride16 kind0, optional gate result5A, storesindex81B8; returns0/3. */
+
+uint f33_select_available_did_metadata(ushort did)
+
+{
+  F33DidPublicationMetadata *pFVar1;
+  uint32_t puVar2;
+  F33DidPublicationMetadata *pFVar3;
+  uint uVar4;
+  int iVar5;
+  ushort uStack_12;
+  
+  puVar2 = 0xfebeb800u;
+  pFVar3 = f33_get_did_publication_metadata(&uStack_12);
+  iVar5 = 0;
+  while( true ) {
+    if ((int)(iVar5 - (uint)uStack_12) < 0 == (iVar5 < 0 && -1 < (int)(iVar5 - (uint)uStack_12))) {
+      return 3;
+    }
+    pFVar1 = pFVar3 + iVar5;
+    if ((pFVar1->route_kind == '\0') && (pFVar1->did == did)) break;
+    iVar5 = iVar5 + 1;
+  }
+  if (((uintptr_t)(pFVar1->available)!=(uintptr_t)(f33_reset_vector)) && (uVar4 = (*(int (*)())pFVar1->available)(), uVar4 != 0x5a)) {
+    return 3;
+  }
+  (*((short *)camry_host_ptr((uint32_t)(puVar2 + -0x3648)))) = (short)iVar5;
+  return 0;
 }
 
 
@@ -1897,7 +1964,7 @@ uint f33_next_filtered_dtc(uint *dtc,uchar *status)
   
   uVar1 = f33_dtc_iteration_result_count;
   puVar2 = 0xfebeb800u;
-  if ((((dtc == (uint *)0x0) || (status == (uchar *)0x0)) ||
+  if (((((uintptr_t)(dtc)==(uintptr_t)((uint *)0x0)) || ((uintptr_t)(status)==(uintptr_t)((uchar *)0x0))) ||
       (uVar3 = f33_scan_dtc_status_snapshot
                          (f33_dtc_requested_status_mask,&uStack_14,&uStack_15,
                           f33_dtc_iteration_catalogue_cursor + 1), uVar3 == 0)) ||
@@ -1931,7 +1998,7 @@ uint f33_next_snapshot_identifier_tuple(uint *dtc,uchar *record_number)
   puVar1 = 0xfebeb800u;
   uVar3 = (uint)DAT_febe8199;
   local_10 = f33_snapshot_identifier_cached_dtc;
-  if ((dtc == (uint *)0x0) || (record_number == (uchar *)0x0)) {
+  if (((uintptr_t)(dtc)==(uintptr_t)((uint *)0x0)) || ((uintptr_t)(record_number)==(uintptr_t)((uchar *)0x0))) {
 LAB_0004d786:
     local_10 = 0;
     bVar2 = 0;
@@ -1971,7 +2038,7 @@ undefined4 FUN_0004d79a(undefined4 param_1,undefined4 param_2,undefined1 *param_
   undefined4 uVar2;
   undefined1 uStack_9;
   
-  if ((param_3 == (undefined1 *)0x0) || (iVar1 = FUN_00052922(param_1, camry_host_addr(&uStack_9)), iVar1 != 0x5a)) {
+  if (((uintptr_t)(param_3)==(uintptr_t)((undefined1 *)0x0)) || (iVar1 = FUN_00052922(param_1, camry_host_addr(&uStack_9)), iVar1 != 0x5a)) {
     uVar2 = 1;
   }
   else {
@@ -2069,7 +2136,7 @@ undefined4 f33_rdbi_0103_callback(undefined1 *param_1)
   if (DAT_febee813 == 'Z') {
     uStack_d = DAT_febee814;
     FUN_0007016e(DAT_febee814,2,&uStack_d);
-    if (puVar1 < ((undefined *)camry_host_ptr(0xf4240u))) goto LAB_0004d926;
+    if ((uintptr_t)(puVar1)<(uintptr_t)(((undefined *)camry_host_ptr(0xf4240u)))) goto LAB_0004d926;
   }
   else {
     uStack_d = 0;
@@ -2078,6 +2145,53 @@ undefined4 f33_rdbi_0103_callback(undefined1 *param_1)
 LAB_0004d926:
   FUN_0006a55c(camry_host_addr(puVar1), param_1);
   *param_1 = uStack_d;
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_0105_callback(int param_1)
+
+{
+  int iVar1;
+  int iVar2;
+  uint *puVar3;
+  int iVar4;
+  uint uVar5;
+  undefined4 uVar6;
+  undefined4 *puVar7;
+  uint local_18;
+  undefined1 local_14 [12];
+  
+  puVar3 = &local_18;
+  puVar7 = ((undefined *)camry_host_ptr(0x212f8u));
+  do {
+    uVar6 = *puVar7;
+    puVar7 = puVar7 + 1;
+    *puVar3 = uVar6;
+    puVar3 = puVar3 + 1;
+  } while ((uintptr_t)(puVar7)!=(uintptr_t)(((undefined *)camry_host_ptr(0x21308u))));
+  uVar5 = f33_nvm_get_record(0x204, camry_host_addr(&local_18));
+  if ((uVar5 == 0x10) && (local_18 == 0xa55a5aa5)) {
+    iVar4 = 0;
+    do {
+      iVar2 = iVar4 + 1;
+      iVar1 = iVar4 + -9;
+      (*((undefined1 *)camry_host_ptr((uint32_t)(iVar4 + param_1)))) = local_14[iVar4];
+      iVar4 = iVar2;
+    } while (((iVar1 < 0) || (iVar2 < 0)));
+  }
+  else {
+    iVar4 = 0;
+    do {
+      iVar2 = iVar4 + 1;
+      (*((undefined1 *)camry_host_ptr((uint32_t)(iVar4 + param_1)))) = 0x3f;
+      iVar1 = iVar4 + -9;
+      iVar4 = iVar2;
+    } while (((iVar1 < 0) || (iVar2 < 0)));
+  }
+  (*((undefined1 *)camry_host_ptr((uint32_t)(param_1 + 10)))) = 0;
+  (*((undefined1 *)camry_host_ptr((uint32_t)(param_1 + 0xb)))) = 0;
   return 0;
 }
 
@@ -2114,6 +2228,46 @@ undefined4 f33_rdbi_0109_callback(undefined1 *param_1)
   param_1[4] = uVar3;
   param_1[5] = uVar2;
   return 0;
+}
+
+
+
+undefined4 f33_rdbi_010b_callback(int param_1)
+
+{
+  int iVar1;
+  int iVar2;
+  uint *puVar3;
+  int iVar4;
+  uint uVar5;
+  undefined4 uVar6;
+  undefined4 *puVar7;
+  uint local_20;
+  undefined1 local_1c [20];
+  
+  puVar3 = &local_20;
+  puVar7 = ((undefined *)camry_host_ptr(0x21308u));
+  do {
+    uVar6 = *puVar7;
+    puVar7 = puVar7 + 1;
+    *puVar3 = uVar6;
+    puVar3 = puVar3 + 1;
+  } while ((uintptr_t)(puVar7)!=(uintptr_t)(((undefined *)camry_host_ptr(0x21320u))));
+  uVar5 = f33_nvm_get_record(0x20a, camry_host_addr(&local_20));
+  if ((uVar5 == 0x10) && (local_20 == 0xa55a5aa5)) {
+    uVar6 = 0;
+    iVar4 = 0;
+    do {
+      iVar2 = iVar4 + 1;
+      iVar1 = iVar4 + -0xf;
+      (*((undefined1 *)camry_host_ptr((uint32_t)(iVar4 + param_1)))) = local_1c[iVar4];
+      iVar4 = iVar2;
+    } while (((iVar1 < 0) || (iVar2 < 0)));
+  }
+  else {
+    uVar6 = 5;
+  }
+  return uVar6;
 }
 
 
@@ -4433,7 +4587,7 @@ undefined4 f33_rdbi_f18c_callback(int param_1,uint param_2)
     puVar6 = puVar6 + 1;
     *puVar2 = uVar5;
     puVar2 = puVar2 + 1;
-  } while (puVar6 != (undefined4 *)((undefined *)camry_host_ptr(0x21348u)));
+  } while ((uintptr_t)(puVar6)!=(uintptr_t)((undefined4 *)((undefined *)camry_host_ptr(0x21348u))));
   uVar4 = f33_nvm_get_record(0x207, camry_host_addr(&local_34));
   if ((uVar4 == 0x10) && (local_34 == 0xa55a5aa5)) {
     for (iVar3 = 0; iVar1 = iVar3 - (param_2 & 0xffff), ((iVar1 < 0) || (iVar3 < 0));

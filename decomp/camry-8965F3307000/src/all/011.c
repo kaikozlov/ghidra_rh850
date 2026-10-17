@@ -2610,7 +2610,7 @@ void FUN_00045d98(void)
     puVar5 = puVar5 + 1;
     *puVar1 = uVar4;
     puVar1 = puVar1 + 1;
-  } while (puVar5 != (undefined4 *)((undefined *)camry_host_ptr(0x212b8u)));
+  } while ((uintptr_t)(puVar5)!=(uintptr_t)((undefined4 *)((undefined *)camry_host_ptr(0x212b8u))));
   uVar3 = f33_nvm_get_record(0xc, camry_host_addr(&local_1c));
   if (uVar3 == 0x11) {
     (*((uint16_t *)((uint8_t *)&local_1c + 0u))) = 0;

@@ -969,7 +969,7 @@ uint f33_compare_ba_token_bytes(uchar *left,uchar *right,uchar length)
     if (length <= uVar1) {
       return 1;
     }
-    if (left[uVar1] != right[uVar1]) break;
+    if ((uintptr_t)(left[uVar1])!=(uintptr_t)(right[uVar1])) break;
     uVar1 = uVar1 + 1 & 0xff;
   }
   return 0;

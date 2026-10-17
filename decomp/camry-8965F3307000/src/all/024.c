@@ -349,7 +349,7 @@ undefined4 FUN_000905de(short param_1,uchar *param_2,uint *param_3)
   
   puVar1 = 0xfebeb800u;
   uVar2 = 1;
-  if ((((param_1 == 0) && (param_2 != (uchar *)0x0)) && (param_3 != (uint *)0x0)) &&
+  if ((((param_1 == 0) && ((uintptr_t)(param_2)!=(uintptr_t)((uchar *)0x0))) && ((uintptr_t)(param_3)!=(uintptr_t)((uint *)0x0))) &&
      (0x2d < *param_3)) {
     thunk_FUN_0006a45e();
     local_18.trip = (*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x61f4))));
@@ -376,7 +376,7 @@ undefined4 FUN_0009063c(ushort param_1,uchar *param_2,uint *param_3)
   
   puVar2 = 0xfebeb800u;
   uVar3 = 1;
-  if ((((param_1 < 2) && (param_2 != (uchar *)0x0)) && (param_3 != (uint *)0x0)) &&
+  if ((((param_1 < 2) && ((uintptr_t)(param_2)!=(uintptr_t)((uchar *)0x0))) && ((uintptr_t)(param_3)!=(uintptr_t)((uint *)0x0))) &&
      (0x2d < *param_3)) {
     thunk_FUN_0006a45e();
     puVar1 = ((uint *)camry_host_ptr((uint32_t)(puVar2 + (short)param_1 * 0xc + -0x6224)));
@@ -429,7 +429,7 @@ undefined4 FUN_000906e2(short param_1,int param_2,uint *param_3)
   
   puVar1 = 0xfebeb800u;
   uVar2 = 1;
-  if ((((param_1 == 0) && (param_2 != 0)) && (param_3 != (uint *)0x0)) && (0x23 < *param_3)) {
+  if ((((param_1 == 0) && (param_2 != 0)) && ((uintptr_t)(param_3)!=(uintptr_t)((uint *)0x0))) && (0x23 < *param_3)) {
     thunk_FUN_0006a45e();
     local_18 = (*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + -0x6240))));
     uStack_14 = (*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + -0x623c))));
@@ -454,7 +454,7 @@ undefined4 FUN_000907aa(short param_1,uchar *param_2,int param_3)
   
   puVar1 = 0xfebeb800u;
   uVar2 = 1;
-  if (((param_1 == 0) && (param_2 != (uchar *)0x0)) && (param_3 == 0x2e)) {
+  if (((param_1 == 0) && ((uintptr_t)(param_2)!=(uintptr_t)((uchar *)0x0))) && (param_3 == 0x2e)) {
     f33_freshness_decode_wire(camry_host_addr(param_2), 0x2e, camry_host_addr(&local_10));
     thunk_FUN_0006a45e();
     (*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x61f4)))) = local_10.trip;
@@ -478,7 +478,7 @@ undefined4 FUN_000907ea(ushort param_1,uchar *param_2,int param_3)
   
   puVar2 = 0xfebeb800u;
   uVar3 = 1;
-  if (((param_1 < 2) && (param_2 != (uchar *)0x0)) && (param_3 == 0x2e)) {
+  if (((param_1 < 2) && ((uintptr_t)(param_2)!=(uintptr_t)((uchar *)0x0))) && (param_3 == 0x2e)) {
     f33_freshness_decode_wire(camry_host_addr(param_2), 0x2e, camry_host_addr(&local_14));
     thunk_FUN_0006a45e();
     puVar1 = ((uint *)camry_host_ptr((uint32_t)(puVar2 + (short)param_1 * 0xc + -0x6224)));
@@ -717,7 +717,7 @@ uint f33_dcm_check_session_list(uchar *allowed,uchar count)
   
   uVar2 = 1;
   uStack_11 = '\x01';
-  if (allowed == (uchar *)0x0) {
+  if ((uintptr_t)(allowed)==(uintptr_t)((uchar *)0x0)) {
 LAB_00090f50:
     uVar2 = 0;
   }
@@ -744,7 +744,7 @@ uint f33_dcm_check_security_list(uchar *allowed,uchar count)
   
   uStack_11 = '\0';
   uVar2 = 1;
-  if (allowed == (uchar *)0x0) {
+  if ((uintptr_t)(allowed)==(uintptr_t)((uchar *)0x0)) {
 LAB_00090f90:
     uVar2 = 0;
   }
@@ -787,7 +787,7 @@ uint f33_dcm_invoke_request_policy
     if ((stage & 2) != 0) {
       puVar2 = ((undefined4 *)camry_host_ptr((uint32_t)(PTR_PTR_00025c04)));
     }
-    if (puVar2 != (undefined4 *)0x0) {
+    if ((uintptr_t)(puVar2)!=(uintptr_t)((undefined4 *)0x0)) {
       bVar5 = message->addressing_kind;
       puVar4 = ((void *)camry_host_ptr((uint32_t)(message->request)));
       uVar6 = message->request_length;
@@ -1450,7 +1450,7 @@ uint f33_dcm_get_security_level(uchar *level)
 {
   uint uVar1;
   
-  if (level == (uchar *)0x0) {
+  if ((uintptr_t)(level)==(uintptr_t)((uchar *)0x0)) {
     uVar1 = 0;
   }
   else {
@@ -1468,7 +1468,7 @@ uint f33_dcm_get_session(uchar *session)
 {
   uint uVar1;
   
-  if (session == (uchar *)0x0) {
+  if ((uintptr_t)(session)==(uintptr_t)((uchar *)0x0)) {
     uVar1 = 0;
   }
   else {
@@ -2137,7 +2137,7 @@ uint f33_dcm_start_of_reception
     return 1;
   }
   if (total_length == 0) {
-    if (available != (ushort *)0x0) {
+    if ((uintptr_t)(available)!=(uintptr_t)((ushort *)0x0)) {
       *available = (ushort)(*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + uVar4 * 8 + 0x2094))));
     }
     return 0;
@@ -2148,7 +2148,7 @@ uint f33_dcm_start_of_reception
     if (uVar4 != 1) {
       return 1;
     }
-    if (available != (ushort *)0x0) {
+    if ((uintptr_t)(available)!=(uintptr_t)((ushort *)0x0)) {
       *available = (ushort)*puVar3;
     }
     f33_dcm_arm_software_timer('\0',(*((uint *)camry_host_ptr((uint32_t)(puVar1 + 0x2088)))));
@@ -2744,25 +2744,25 @@ uint f33_dcm_copy_transmit_data
   uVar6 = 0;
   piVar2 = (int *)f33_return_const_febe5978_93690();
   uVar3 = FUN_00093ebc();
-  if ((uVar3 == transmit_id) && (chunk != (F33PduInfo *)0x0)) {
+  if ((uVar3 == transmit_id) && ((uintptr_t)(chunk)!=(uintptr_t)((F33PduInfo *)0x0))) {
     uVar4 = FUN_00092b34();
     iVar5 = FUN_00092c46(uVar4);
     if (iVar5 == 1) {
       f33_dcm_cancel_software_timer('\x01');
       if (chunk->length == 0) {
-        if (available == (ushort *)0x0) {
+        if ((uintptr_t)(available)==(uintptr_t)((ushort *)0x0)) {
           uVar6 = 1;
         }
         else {
           *available = *(ushort *)(piVar2 + 1);
-          if ((retry != (F33DcmRetryInfo *)0x0) && (retry->retry_kind == '\0')) {
+          if (((uintptr_t)(retry)!=(uintptr_t)((F33DcmRetryInfo *)0x0)) && (retry->retry_kind == '\0')) {
             *(undefined2 *)(piVar2 + 1) = 0;
             *available = 0;
           }
         }
       }
       else {
-        if (retry == (F33DcmRetryInfo *)0x0) {
+        if ((uintptr_t)(retry)==(uintptr_t)((F33DcmRetryInfo *)0x0)) {
           if (*(ushort *)(piVar2 + 1) < chunk->length) {
             uVar6 = 2;
           }
@@ -2777,7 +2777,7 @@ uint f33_dcm_copy_transmit_data
         else {
           uVar6 = FUN_0009262c(chunk,retry,piVar2);
         }
-        if (available != (ushort *)0x0) {
+        if ((uintptr_t)(available)!=(uintptr_t)((ushort *)0x0)) {
           *available = *(ushort *)(piVar2 + 1);
         }
       }
@@ -3111,8 +3111,8 @@ int * FUN_00092b98(undefined4 *param_1)
   int *piVar4;
   
   piVar3 = (int *)0x0;
-  if ((((param_1 != (undefined4 *)0x0) && (piVar4 = (int *)*param_1, piVar4 != (int *)0x0)) &&
-      (piVar1 = (int *)*piVar4, piVar1 != (int *)0x0)) &&
+  if (((((uintptr_t)(param_1)!=(uintptr_t)((undefined4 *)0x0)) && (piVar4 = (int *)*param_1,(uintptr_t)(piVar4)!=(uintptr_t)((int *)0x0))) &&
+      (piVar1 = (int *)*piVar4,(uintptr_t)(piVar1)!=(uintptr_t)((int *)0x0))) &&
      (iVar2 = *piVar1, *piVar4 = iVar2, piVar3 = piVar1, iVar2 == 0)) {
     param_1[1] = camry_host_addr(f33_dcm_response_node);
   }
@@ -3127,7 +3127,7 @@ undefined4 FUN_00092bc2(undefined4 *param_1)
   undefined4 uVar1;
   
   uVar1 = 0;
-  if ((param_1 != (undefined4 *)0x0) && ((undefined4 *)*param_1 != (undefined4 *)0x0)) {
+  if (((uintptr_t)(param_1)!=(uintptr_t)((undefined4 *)0x0)) && ((uintptr_t)((undefined4 *)*param_1)!=(uintptr_t)((undefined4 *)0x0))) {
     uVar1 = *(undefined4 *)*param_1;
   }
   return uVar1;
@@ -3312,7 +3312,7 @@ void FUN_00092f08(void)
   uStack_d = '\0';
   uVar1 = FUN_00093e82();
   response = (F33PduInfo *)FUN_00092d38(&uStack_d);
-  if (response != (F33PduInfo *)0x0) {
+  if ((uintptr_t)(response)!=(uintptr_t)((F33PduInfo *)0x0)) {
     iVar2 = FUN_00092b34();
     if (iVar2 == 0x21) {
       FUN_00092a86(0x40);

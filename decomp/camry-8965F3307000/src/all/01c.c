@@ -1,6 +1,64 @@
 #include "common.h"
 
 
+void FUN_00070068(short *param_1,int param_2,int param_3)
+
+{
+  short sVar1;
+  code *pcVar2;
+  
+  if (0xfffe < (*((ushort *)camry_host_ptr((uint32_t)(param_2 + 4))))) {
+    return;
+  }
+  if (0xfffe < (*((ushort *)camry_host_ptr((uint32_t)(param_2 + 10))))) {
+    return;
+  }
+  sVar1 = *param_1;
+  if (sVar1 == 0) {
+LAB_000700be:
+    if ((uintptr_t)(*(code **)(param_3 + 0x1c))!=(uintptr_t)(f33_reset_vector)) {
+      (*(int (*)())*(code **)(param_3 + 0x1c))();
+    }
+LAB_000700ca:
+    if ((uintptr_t)(*(code **)(param_3 + 0x24))!=(uintptr_t)(f33_reset_vector)) {
+      (*(int (*)())*(code **)(param_3 + 0x24))();
+    }
+  }
+  else {
+    if (sVar1 == 0x11) goto LAB_000700ca;
+    if (sVar1 != 0x22) {
+      if (sVar1 == 0x1100) {
+        pcVar2 = *(code **)(param_3 + 0x10);
+      }
+      else {
+        if (sVar1 != 0x2200) goto LAB_000700ee;
+        pcVar2 = *(code **)(param_3 + 0x18);
+      }
+      if ((uintptr_t)(pcVar2)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())pcVar2)();
+      }
+      goto LAB_000700be;
+    }
+  }
+  if ((uintptr_t)(*(code **)(param_3 + 0x2c))!=(uintptr_t)(f33_reset_vector)) {
+    (*(int (*)())*(code **)(param_3 + 0x2c))();
+  }
+  if ((uintptr_t)(*(code **)(param_3 + 0x40))!=(uintptr_t)(f33_reset_vector)) {
+    (*(int (*)())*(code **)(param_3 + 0x40))();
+  }
+LAB_000700ee:
+  param_1[7] = 0;
+  param_1[3] = 0;
+  param_1[2] = 0;
+  param_1[0] = 0x44;
+  param_1[1] = 0;
+  param_1[4] = (*((short *)camry_host_ptr((uint32_t)(param_2 + 4)))) + 1;
+  param_1[8] = (*((short *)camry_host_ptr((uint32_t)(param_2 + 10)))) + 1;
+  return;
+}
+
+
+
 void FUN_00070110(short param_1,short param_2,short param_3,short *param_4)
 
 {
@@ -407,8 +465,8 @@ int f33_vote_redundant_u8(uchar *raw,uchar *xor55,uchar *xorAA,uchar *output)
   byte bVar3;
   byte bVar4;
   
-  if ((((raw == (uchar *)0x0) || (xor55 == (uchar *)0x0)) || (xorAA == (uchar *)0x0)) ||
-     ((output == (uchar *)0x0 || (raw == output)))) {
+  if (((((uintptr_t)(raw)==(uintptr_t)((uchar *)0x0)) || ((uintptr_t)(xor55)==(uintptr_t)((uchar *)0x0))) || ((uintptr_t)(xorAA)==(uintptr_t)((uchar *)0x0))) ||
+     (((uintptr_t)(output)==(uintptr_t)((uchar *)0x0)|| ((uintptr_t)(raw)==(uintptr_t)(output))))) {
     iVar2 = -1;
   }
   else {
@@ -453,8 +511,8 @@ undefined4 FUN_000707ac(ushort *param_1,ushort *param_2,ushort *param_3,ushort *
   ushort uVar3;
   ushort uVar4;
   
-  if ((((param_1 == (ushort *)0x0) || (param_2 == (ushort *)0x0)) || (param_3 == (ushort *)0x0)) ||
-     ((param_4 == (ushort *)0x0 || (param_1 == param_4)))) {
+  if (((((uintptr_t)(param_1)==(uintptr_t)((ushort *)0x0)) || ((uintptr_t)(param_2)==(uintptr_t)((ushort *)0x0))) || ((uintptr_t)(param_3)==(uintptr_t)((ushort *)0x0))) ||
+     (((uintptr_t)(param_4)==(uintptr_t)((ushort *)0x0)|| ((uintptr_t)(param_1)==(uintptr_t)(param_4))))) {
     uVar2 = 0xffffffff;
   }
   else {
@@ -499,8 +557,8 @@ undefined4 FUN_00070822(uint *param_1,uint *param_2,uint *param_3,uint *param_4)
   uint uVar3;
   uint uVar4;
   
-  if ((((param_1 == (uint *)0x0) || (param_2 == (uint *)0x0)) || (param_3 == (uint *)0x0)) ||
-     ((param_4 == (uint *)0x0 || (param_1 == param_4)))) {
+  if (((((uintptr_t)(param_1)==(uintptr_t)((uint *)0x0)) || ((uintptr_t)(param_2)==(uintptr_t)((uint *)0x0))) || ((uintptr_t)(param_3)==(uintptr_t)((uint *)0x0))) ||
+     (((uintptr_t)(param_4)==(uintptr_t)((uint *)0x0)|| ((uintptr_t)(param_1)==(uintptr_t)(param_4))))) {
     uVar1 = 0xffffffff;
   }
   else {
@@ -545,8 +603,8 @@ undefined4 FUN_000708a0(byte *param_1,byte *param_2,byte *param_3,byte *param_4)
   byte bVar3;
   byte bVar4;
   
-  if ((((param_1 == (byte *)0x0) || (param_2 == (byte *)0x0)) || (param_3 == (byte *)0x0)) ||
-     ((param_4 == (byte *)0x0 || (param_1 == param_4)))) {
+  if (((((uintptr_t)(param_1)==(uintptr_t)((byte *)0x0)) || ((uintptr_t)(param_2)==(uintptr_t)((byte *)0x0))) || ((uintptr_t)(param_3)==(uintptr_t)((byte *)0x0))) ||
+     (((uintptr_t)(param_4)==(uintptr_t)((byte *)0x0)|| ((uintptr_t)(param_1)==(uintptr_t)(param_4))))) {
     uVar2 = 0xffffffff;
   }
   else {
@@ -591,8 +649,8 @@ undefined4 FUN_00070916(ushort *param_1,ushort *param_2,ushort *param_3,ushort *
   ushort uVar3;
   ushort uVar4;
   
-  if ((((param_1 == (ushort *)0x0) || (param_2 == (ushort *)0x0)) || (param_3 == (ushort *)0x0)) ||
-     ((param_4 == (ushort *)0x0 || (param_1 == param_4)))) {
+  if (((((uintptr_t)(param_1)==(uintptr_t)((ushort *)0x0)) || ((uintptr_t)(param_2)==(uintptr_t)((ushort *)0x0))) || ((uintptr_t)(param_3)==(uintptr_t)((ushort *)0x0))) ||
+     (((uintptr_t)(param_4)==(uintptr_t)((ushort *)0x0)|| ((uintptr_t)(param_1)==(uintptr_t)(param_4))))) {
     uVar2 = 0xffffffff;
   }
   else {
@@ -637,8 +695,8 @@ undefined4 FUN_0007098c(uint *param_1,uint *param_2,uint *param_3,uint *param_4)
   uint uVar3;
   uint uVar4;
   
-  if ((((param_1 == (uint *)0x0) || (param_2 == (uint *)0x0)) || (param_3 == (uint *)0x0)) ||
-     ((param_4 == (uint *)0x0 || (param_1 == param_4)))) {
+  if (((((uintptr_t)(param_1)==(uintptr_t)((uint *)0x0)) || ((uintptr_t)(param_2)==(uintptr_t)((uint *)0x0))) || ((uintptr_t)(param_3)==(uintptr_t)((uint *)0x0))) ||
+     (((uintptr_t)(param_4)==(uintptr_t)((uint *)0x0)|| ((uintptr_t)(param_1)==(uintptr_t)(param_4))))) {
     uVar1 = 0xffffffff;
   }
   else {
@@ -687,7 +745,7 @@ int f33_publish_redundant_u8(uchar value,uchar *raw,uchar *xor55,uchar *xorAA)
   int iVar1;
   uint saved_mask;
   
-  if (((raw == (uchar *)0x0) || (xor55 == (uchar *)0x0)) || (xorAA == (uchar *)0x0)) {
+  if ((((uintptr_t)(raw)==(uintptr_t)((uchar *)0x0)) || ((uintptr_t)(xor55)==(uintptr_t)((uchar *)0x0))) || ((uintptr_t)(xorAA)==(uintptr_t)((uchar *)0x0))) {
     iVar1 = -1;
   }
   else {
@@ -716,7 +774,7 @@ int f33_publish_redundant_u16(ushort value,ushort *raw,ushort *xor5555,ushort *x
   int iVar1;
   uint saved_mask;
   
-  if (((raw == (ushort *)0x0) || (xor5555 == (ushort *)0x0)) || (xorAAAA == (ushort *)0x0)) {
+  if ((((uintptr_t)(raw)==(uintptr_t)((ushort *)0x0)) || ((uintptr_t)(xor5555)==(uintptr_t)((ushort *)0x0))) || ((uintptr_t)(xorAAAA)==(uintptr_t)((ushort *)0x0))) {
     iVar1 = -1;
   }
   else {
@@ -738,7 +796,7 @@ undefined4 FUN_00070a92(uint param_1,uint *param_2,uint *param_3,uint *param_4)
   undefined4 uVar1;
   uint saved_mask;
   
-  if (((param_2 == (uint *)0x0) || (param_3 == (uint *)0x0)) || (param_4 == (uint *)0x0)) {
+  if ((((uintptr_t)(param_2)==(uintptr_t)((uint *)0x0)) || ((uintptr_t)(param_3)==(uintptr_t)((uint *)0x0))) || ((uintptr_t)(param_4)==(uintptr_t)((uint *)0x0))) {
     uVar1 = 0xffffffff;
   }
   else {
@@ -760,7 +818,7 @@ undefined4 FUN_00070ade(byte param_1,byte *param_2,byte *param_3,byte *param_4)
   undefined4 uVar1;
   uint saved_mask;
   
-  if (((param_2 == (byte *)0x0) || (param_3 == (byte *)0x0)) || (param_4 == (byte *)0x0)) {
+  if ((((uintptr_t)(param_2)==(uintptr_t)((byte *)0x0)) || ((uintptr_t)(param_3)==(uintptr_t)((byte *)0x0))) || ((uintptr_t)(param_4)==(uintptr_t)((byte *)0x0))) {
     uVar1 = 0xffffffff;
   }
   else {
@@ -782,7 +840,7 @@ undefined4 FUN_00070b22(ushort param_1,ushort *param_2,ushort *param_3,ushort *p
   undefined4 uVar1;
   uint saved_mask;
   
-  if (((param_2 == (ushort *)0x0) || (param_3 == (ushort *)0x0)) || (param_4 == (ushort *)0x0)) {
+  if ((((uintptr_t)(param_2)==(uintptr_t)((ushort *)0x0)) || ((uintptr_t)(param_3)==(uintptr_t)((ushort *)0x0))) || ((uintptr_t)(param_4)==(uintptr_t)((ushort *)0x0))) {
     uVar1 = 0xffffffff;
   }
   else {
@@ -804,7 +862,7 @@ undefined4 FUN_00070b66(uint param_1,uint *param_2,uint *param_3,uint *param_4)
   undefined4 uVar1;
   uint saved_mask;
   
-  if (((param_2 == (uint *)0x0) || (param_3 == (uint *)0x0)) || (param_4 == (uint *)0x0)) {
+  if ((((uintptr_t)(param_2)==(uintptr_t)((uint *)0x0)) || ((uintptr_t)(param_3)==(uintptr_t)((uint *)0x0))) || ((uintptr_t)(param_4)==(uintptr_t)((uint *)0x0))) {
     uVar1 = 0xffffffff;
   }
   else {
@@ -1004,7 +1062,7 @@ undefined4 FUN_00071014(char param_1,undefined2 *param_2,ushort *param_3)
   ushort uVar1;
   ushort uVar2;
   
-  if ((param_2 == (undefined2 *)0x0) || (param_3 == (ushort *)0x0)) {
+  if (((uintptr_t)(param_2)==(uintptr_t)((undefined2 *)0x0)) || ((uintptr_t)(param_3)==(uintptr_t)((ushort *)0x0))) {
     return 0xffff;
   }
   if (param_1 == 'D') {
@@ -1045,7 +1103,7 @@ undefined4 FUN_00071086(char param_1,undefined2 *param_2,ushort *param_3)
   ushort uVar2;
   ushort uVar3;
   
-  if ((param_2 == (undefined2 *)0x0) || (param_3 == (ushort *)0x0)) {
+  if (((uintptr_t)(param_2)==(uintptr_t)((undefined2 *)0x0)) || ((uintptr_t)(param_3)==(uintptr_t)((ushort *)0x0))) {
     return 0xffff;
   }
   if (param_1 != '\x11') {
@@ -1096,7 +1154,7 @@ undefined4 FUN_0007110c(char param_1,undefined2 *param_2,ushort *param_3)
   ushort uVar2;
   ushort uVar3;
   
-  if ((param_2 == (undefined2 *)0x0) || (param_3 == (ushort *)0x0)) {
+  if (((uintptr_t)(param_2)==(uintptr_t)((undefined2 *)0x0)) || ((uintptr_t)(param_3)==(uintptr_t)((ushort *)0x0))) {
     return 0xffff;
   }
   if (param_1 != '\x11') {
@@ -1148,7 +1206,7 @@ undefined4 FUN_00071194(char param_1,undefined2 *param_2,ushort *param_3)
   ushort uVar2;
   ushort uVar3;
   
-  if ((param_2 == (undefined2 *)0x0) || (param_3 == (ushort *)0x0)) {
+  if (((uintptr_t)(param_2)==(uintptr_t)((undefined2 *)0x0)) || ((uintptr_t)(param_3)==(uintptr_t)((ushort *)0x0))) {
     return 0xffff;
   }
   if (param_1 == 'D') {
@@ -1205,7 +1263,7 @@ undefined4 FUN_00071232(char param_1,undefined2 *param_2,ushort *param_3)
   ushort uVar2;
   ushort uVar3;
   
-  if ((param_2 == (undefined2 *)0x0) || (param_3 == (ushort *)0x0)) {
+  if (((uintptr_t)(param_2)==(uintptr_t)((undefined2 *)0x0)) || ((uintptr_t)(param_3)==(uintptr_t)((ushort *)0x0))) {
     return 0xffff;
   }
   if (param_1 != '\x11') {
@@ -1416,6 +1474,29 @@ undefined4 f33_return_const_0_71d88(void)
 
 {
   return 0;
+}
+
+
+
+/* Perform the event lookup even before checking result2 or callbackNULL. Conditional callback takes
+   event/result only. Registered 26BF8 isNULL, so this exact target emits no zero-handle application
+   callback. Look up the operation event before testing low8 result2 or callbackNULL. A nonNULL
+   callback would take low8 event/result, with no consumed return value. Registered26BF8 isNULL, so
+   this exact target emits no application callback for logical0. Real zero-handle route executes and
+   updates only its logical result cell; no unregistered callback implementation is claimed. */
+
+void f33_nvm_notify_zero_handle_result(uint operation,uchar result)
+
+{
+  uint32_t puVar1;
+  uint uVar2;
+  
+  puVar1 = 0x23dfcu;
+  uVar2 = f33_lookup_u32_value_by_key(operation,0xff,(0x275ccu));
+  if ((result != '\x02') && ((uintptr_t)(*(code **)(puVar1 + 0x2dfc))!=(uintptr_t)(f33_reset_vector))) {
+    (*(int (*)())*(code **)(puVar1 + 0x2dfc))(uVar2 & 0xff,result);
+  }
+  return;
 }
 
 

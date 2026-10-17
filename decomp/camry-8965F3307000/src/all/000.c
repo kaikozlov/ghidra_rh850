@@ -580,6 +580,42 @@ void f33_boot_select_application_or_resident(void)
 
 
 
+/* Called directly by reset assembly067C after first7000..7FFF clear and CPU setup. Perform
+   ordered79A/7B6/802/880/8C8/96E/C52 hardware controls;SYNCM;preserve the empty reversed-bound
+   first loop;clear established upper LocalRAM andGlobalRAM intervals;setEEPRDCYCL3;call13B0.
+   Earlier hardware readback loops have no software timeout. RAM-clear extents/tests remain77.17
+   owner. */
+
+void f33_boot_hardware_ram_init_and_select_image(void)
+
+{
+  undefined4 *puVar1;
+  
+  FUN_0000079a();
+  FUN_000007b6();
+  FUN_00000802();
+  FUN_00000880();
+  FUN_000008c8();
+  FUN_0000096e();
+  FUN_00000c52();
+  __synchronize();
+  for (puVar1 = ((undefined *)camry_host_ptr(0xfebf7c00u));(uintptr_t)(puVar1)<(uintptr_t)(((undefined *)camry_host_ptr(0xfebe7000u))); puVar1 = puVar1 + 1) {
+    *puVar1 = 0;
+  }
+  for (puVar1 = (undefined4 *)((undefined *)camry_host_ptr(0xfebe8000u));(uintptr_t)(puVar1)<(uintptr_t)(((undefined4 *)camry_host_ptr((uint32_t)(0xfec00000)))); puVar1 = puVar1 + 1)
+  {
+    *puVar1 = 0;
+  }
+  for (puVar1 = ((undefined *)camry_host_ptr(0xfeef8000u));(uintptr_t)(puVar1)<(uintptr_t)(((undefined4 *)camry_host_ptr((uint32_t)(0xfef08000)))); puVar1 = puVar1 + 1) {
+    *puVar1 = 0;
+  }
+  EEPRDCYCL = '\x03';
+  f33_boot_select_application_or_resident();
+  return;
+}
+
+
+
 void FUN_00001478(undefined4 *param_1,undefined4 *param_2,int param_3)
 
 {
