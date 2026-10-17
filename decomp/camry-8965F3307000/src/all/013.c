@@ -1549,6 +1549,28 @@ uint f33_did_always_available(void)
 
 
 
+/* Metadata index81B8, readsu16record+2, writes0 if out of range. */
+
+void f33_get_selected_did_payload_length(ushort *length)
+
+{
+  ushort uVar1;
+  uint32_t puVar2;
+  F33DidPublicationMetadata *pFVar3;
+  ushort uStack_a;
+  
+  puVar2 = 0xfebeb800u;
+  pFVar3 = f33_get_did_publication_metadata(&uStack_a);
+  uVar1 = 0;
+  if ((uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x3648)))) < (uint)uStack_a) {
+    uVar1 = pFVar3[(*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x3648))))].payload_length;
+  }
+  *length = uVar1;
+  return;
+}
+
+
+
 /* Single constant publisher: DAT_febe81c8 = 0; Shape-classified from the canonical corpus; the
    target cell is not yet named, so the written state's meaning is unknown. */
 
@@ -1869,6 +1891,54 @@ LAB_0004d786:
   }
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3667))))) = bVar2;
   (*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x363c)))) = local_10;
+  return uVar3;
+}
+
+
+
+/* Use selected metadata index81B8 and invoke fixed record+4 reader; out-of-range returns3. Length
+   and availability selection are separate operations. */
+
+uint f33_read_selected_did_payload(uchar *output,ushort length)
+
+{
+  uint32_t puVar1;
+  F33DidPublicationMetadata *pFVar2;
+  uint uVar3;
+  ushort uStack_e;
+  
+  puVar1 = 0xfebeb800u;
+  pFVar2 = f33_get_did_publication_metadata(&uStack_e);
+  if ((uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x3648)))) < (uint)uStack_e) {
+    uVar3 = (*(int (*)())pFVar2[(*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x3648))))].reader)(output,length);
+  }
+  else {
+    uVar3 = 3;
+  }
+  return uVar3;
+}
+
+
+
+/* Scan all242 metadata records and return matching record kind orFF. Kind is a route discriminator,
+   not an arbitrary memory-access class. */
+
+uchar f33_get_did_metadata_route_kind(ushort did)
+
+{
+  uint uVar1;
+  F33DidPublicationMetadata *pFVar2;
+  uchar uVar3;
+  ushort uStack_e;
+  
+  uVar3 = 0xff;
+  pFVar2 = f33_get_did_publication_metadata(&uStack_e);
+  for (uVar1 = 0; (int)(uVar1 - uStack_e) < 0 != ((int)uVar1 < 0 && -1 < (int)(uVar1 - uStack_e));
+      uVar1 = uVar1 + 1) {
+    if (pFVar2[uVar1].did == did) {
+      uVar3 = pFVar2[uVar1 & 0xffff].route_kind;
+    }
+  }
   return uVar3;
 }
 
@@ -3428,6 +3498,52 @@ undefined4 f33_rdbi_1cab_callback(undefined4 param_1,undefined2 param_2)
 
 
 
+/* Gather bank0 into52-byte stack envelope; currentB770!=5A hides integral/age fields,
+   currentB6DF!=5A masks numerical observation groups with capture sentinel32767, and
+   publishedE813!=5A replaces six packed bytesFF. Then serialize45 bytes; retained RAM is unchanged.
+    */
+
+void f33_read_first_control_profile(uchar *output,uchar slot)
+
+{
+  uint32_t puVar1;
+  F33RetainedControlProfile FStack_3c;
+  
+  puVar1 = 0xfebeb800u;
+  f33_gather_first_control_profile(&FStack_3c,slot);
+  if (FStack_3c.current_elapsed_source_validity != 'Z') {
+    FStack_3c.integrated_source = 0;
+    FStack_3c.elapsed_groups = 0;
+  }
+  if (FStack_3c.current_first_profile_validity != 'Z') {
+    FStack_3c.scaled_b054_mean = 0;
+    FStack_3c.scaled_b054_max = 0;
+    FStack_3c.scaled_ae5c_min = 0;
+    FStack_3c.scaled_ae5c_max = 0;
+    FStack_3c.f1ca_mean = 0;
+    FStack_3c.f1ca_max = 0;
+    FStack_3c.f1c8_mean = 0;
+    FStack_3c.f1c8_max = 0;
+    FStack_3c.f1c6_mean = 0;
+    FStack_3c.f1c6_max = 0;
+    FStack_3c.source_u16_mean = 0;
+    FStack_3c.source_u16_max = 0;
+    FStack_3c.capture_value = 0x7fff;
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x3013))))) != 'Z') {
+    FStack_3c.packed_metadata[0] = 0xff;
+    FStack_3c.packed_metadata[1] = 0xff;
+    FStack_3c.packed_metadata[2] = 0xff;
+    FStack_3c.packed_metadata[3] = 0xff;
+    FStack_3c.packed_metadata[4] = 0xff;
+    FStack_3c.packed_metadata[5] = 0xff;
+  }
+  f33_serialize_retained_control_profile(output,&FStack_3c);
+  return;
+}
+
+
+
 /* Configured45-byte read of first profile, slot0; apply current validity/publication gates without
    mutating retained RAM. Return0; supplied length is ignored by this fixed callback. DID1D00 is a
    separate bitmap, not a profile. */
@@ -3493,6 +3609,52 @@ uint f33_rdbi_1cf8_callback(uchar *output,ushort length)
 
 
 
+/* Gather bank1 into52-byte stack envelope; currentB770!=5A hides integral/age fields,
+   currentB6DF!=5A masks numerical observation groups with capture sentinel32767, and
+   publishedE813!=5A replaces six packed bytesFF. Then serialize45 bytes; retained RAM is unchanged.
+    */
+
+void f33_read_first_ranked_control_profile(uchar *output,uchar slot)
+
+{
+  uint32_t puVar1;
+  F33RetainedControlProfile FStack_3c;
+  
+  puVar1 = 0xfebeb800u;
+  f33_gather_first_ranked_control_profile(&FStack_3c,slot);
+  if (FStack_3c.current_elapsed_source_validity != 'Z') {
+    FStack_3c.integrated_source = 0;
+    FStack_3c.elapsed_groups = 0;
+  }
+  if (FStack_3c.current_first_profile_validity != 'Z') {
+    FStack_3c.scaled_b054_mean = 0;
+    FStack_3c.scaled_b054_max = 0;
+    FStack_3c.scaled_ae5c_min = 0;
+    FStack_3c.scaled_ae5c_max = 0;
+    FStack_3c.f1ca_mean = 0;
+    FStack_3c.f1ca_max = 0;
+    FStack_3c.f1c8_mean = 0;
+    FStack_3c.f1c8_max = 0;
+    FStack_3c.f1c6_mean = 0;
+    FStack_3c.f1c6_max = 0;
+    FStack_3c.source_u16_mean = 0;
+    FStack_3c.source_u16_max = 0;
+    FStack_3c.capture_value = 0x7fff;
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x3013))))) != 'Z') {
+    FStack_3c.packed_metadata[0] = 0xff;
+    FStack_3c.packed_metadata[1] = 0xff;
+    FStack_3c.packed_metadata[2] = 0xff;
+    FStack_3c.packed_metadata[3] = 0xff;
+    FStack_3c.packed_metadata[4] = 0xff;
+    FStack_3c.packed_metadata[5] = 0xff;
+  }
+  f33_serialize_retained_control_profile(output,&FStack_3c);
+  return;
+}
+
+
+
 /* Configured45-byte read of magnitude-rank1 profile, slot0; apply current validity/publication
    gates without mutating retained RAM. Return0; supplied length is ignored by this fixed callback.
    DID1D00 is a separate bitmap, not a profile. */
@@ -3502,6 +3664,52 @@ uint f33_rdbi_1cf9_callback(uchar *output,ushort length)
 {
   f33_read_first_ranked_control_profile(output,'\0');
   return 0;
+}
+
+
+
+/* Gather bank2 into52-byte stack envelope; currentB770!=5A hides integral/age fields,
+   currentB6DF!=5A masks numerical observation groups with capture sentinel32767, and
+   publishedE813!=5A replaces six packed bytesFF. Then serialize45 bytes; retained RAM is unchanged.
+    */
+
+void f33_read_second_ranked_control_profile(uchar *output,uchar slot)
+
+{
+  uint32_t puVar1;
+  F33RetainedControlProfile FStack_3c;
+  
+  puVar1 = 0xfebeb800u;
+  f33_gather_second_ranked_control_profile(&FStack_3c,slot);
+  if (FStack_3c.current_elapsed_source_validity != 'Z') {
+    FStack_3c.integrated_source = 0;
+    FStack_3c.elapsed_groups = 0;
+  }
+  if (FStack_3c.current_first_profile_validity != 'Z') {
+    FStack_3c.scaled_b054_mean = 0;
+    FStack_3c.scaled_b054_max = 0;
+    FStack_3c.scaled_ae5c_min = 0;
+    FStack_3c.scaled_ae5c_max = 0;
+    FStack_3c.f1ca_mean = 0;
+    FStack_3c.f1ca_max = 0;
+    FStack_3c.f1c8_mean = 0;
+    FStack_3c.f1c8_max = 0;
+    FStack_3c.f1c6_mean = 0;
+    FStack_3c.f1c6_max = 0;
+    FStack_3c.source_u16_mean = 0;
+    FStack_3c.source_u16_max = 0;
+    FStack_3c.capture_value = 0x7fff;
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x3013))))) != 'Z') {
+    FStack_3c.packed_metadata[0] = 0xff;
+    FStack_3c.packed_metadata[1] = 0xff;
+    FStack_3c.packed_metadata[2] = 0xff;
+    FStack_3c.packed_metadata[3] = 0xff;
+    FStack_3c.packed_metadata[4] = 0xff;
+    FStack_3c.packed_metadata[5] = 0xff;
+  }
+  f33_serialize_retained_control_profile(output,&FStack_3c);
+  return;
 }
 
 

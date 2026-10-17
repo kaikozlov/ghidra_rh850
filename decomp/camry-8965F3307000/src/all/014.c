@@ -4234,6 +4234,31 @@ void f33_clear_diagnostic_supplement(uchar *destination)
 
 
 
+/* Copy60 words forward. Exact leaf changes only R1/R19/EP and flags; call also changes LP. Its
+   target-local convention preserves R10 carrying saved PMR in52E18. Do not invent a mask return or
+   rely on repeated-loop inlining, which fails at later calls. Forward60-word copy preserves R10.
+   Exact target-local convention retains saved PMR across every call in52E18; repeated-loop inlining
+   only handled the first call. No fictitious return or replacement body. */
+
+void 
+f33_copy_diagnostic_capture(F33DiagnosticCapture *destination,F33DiagnosticCapture *source)
+
+{
+  int iVar1;
+  uint uVar2;
+  
+  uVar2 = 0;
+  do {
+    iVar1 = uVar2 * 4;
+    uVar2 = uVar2 + 1;
+    *(undefined4 *)(destination->profile_prefix + iVar1) =
+         *(undefined4 *)(source->profile_prefix + iVar1);
+  } while (uVar2 < 0x3c);
+  return;
+}
+
+
+
 void FUN_00052aa6(void)
 
 {
@@ -4475,6 +4500,193 @@ void f33_copy_diagnostic_supplement(uchar *destination,uchar *source)
 
 
 
+/* Construct240-byte profile4/10/default record, fill supplemental72 bytes from85AC or zeros when
+   qualified==1, and write duplicate event words at90/92. Only then check 6150==AA storage inhibit.
+   Under PMRFF00, unqualified first capture fills82DC once; 615A==5A and nonzero packedDTC distinct
+   from both prior records also fills83CC. Qualified capture fills84BC. Update occupancy/dirty flags
+   and consume615A on replacement. 240-byte profile and72-byte supplement precede storage
+   inhibition. First and distinct-DTC unqualified slots differ from qualified slot. Native composed
+   failure verifies selected sources, thermal projection, slot isolation and preserved PMR; not
+   physical freshness or persistence. */
+
+void f33_capture_diagnostic_event(ushort event,ushort capture_kind,uchar qualified)
+
+{
+  uint32_t puVar1;
+  uint saved_mask;
+  int iVar2;
+  int iVar3;
+  int iVar4;
+  F33DiagnosticCapture FStack_108;
+  
+  puVar1 = 0xfebeb800u;
+  if (capture_kind == 4) {
+    f33_build_diagnostic_capture_kind4(&FStack_108);
+  }
+  else if (capture_kind == 10) {
+    f33_build_diagnostic_capture_kind10(&FStack_108);
+  }
+  else {
+    f33_build_diagnostic_capture_default(&FStack_108);
+  }
+  FStack_108.event = event;
+  FStack_108.event_copy = event;
+  if (qualified == '\x01') {
+    f33_clear_diagnostic_supplement(FStack_108.supplemental);
+  }
+  else {
+    f33_copy_diagnostic_supplement(FStack_108.supplemental, ((undefined *)camry_host_ptr((uint32_t)(puVar1 + -0x3254))));
+  }
+  iVar3 = 0;
+  iVar4 = *(int *)(((undefined *)camry_host_ptr(0x30850u)) + (uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x2fc52u + (uint32_t)((uint)event * 8) * 1u)))) * 8);
+  if ((*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x3494)))) < 0x180) {
+    iVar3 = *(int *)(((undefined *)camry_host_ptr(0x30850u)) +
+                    (uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x2fc52u + (uint32_t)((uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x3494)))) * 8) * 1u)))) * 8);
+  }
+  iVar2 = 0;
+  if ((*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x33a4)))) < 0x180) {
+    iVar2 = *(int *)(((undefined *)camry_host_ptr(0x30850u)) +
+                    (uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x2fc52u + (uint32_t)((uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x33a4)))) * 8) * 1u)))) * 8);
+  }
+  if (((int8_t)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56b0)))))) == -0x56) {
+    return;
+  }
+  saved_mask = f33_priority_mask_enter(0xff00);
+  if (qualified != '\x01') {
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56af))))) == '\0') {
+      f33_copy_diagnostic_capture(((F33DiagnosticCapture *)camry_host_ptr((uint32_t)(puVar1 + -0x3524))),&FStack_108);
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56af))))) = 1;
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56ac))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56ac))))) | 2;
+    }
+    if (((((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56a6))))) != 'Z') || (iVar4 == iVar3)) || (iVar4 == iVar2)) || (iVar4 == 0))
+    goto LAB_00052f22;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56a6))))) = 0;
+  if (qualified == '\x01') {
+    f33_copy_diagnostic_capture(((F33DiagnosticCapture *)camry_host_ptr((uint32_t)(puVar1 + -0x3344))),&FStack_108);
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56ad))))) = 1;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56aa))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56aa))))) | 2;
+  }
+  else {
+    f33_copy_diagnostic_capture(((F33DiagnosticCapture *)camry_host_ptr((uint32_t)(puVar1 + -0x3434))),&FStack_108);
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56ae))))) = 1;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56ab))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56ab))))) | 2;
+  }
+LAB_00052f22:
+  f33_priority_mask_restore(saved_mask);
+  return;
+}
+
+
+
+void FUN_00052f32(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  DAT_febe6150 = 0xaa;
+  DAT_febe615a = 0x5a;
+  DAT_febe6166 = 0;
+  if (f33_diagnostic_capture_slots[0].extended_prefix[0x23] == '\"') {
+    DAT_febe6151 = 0;
+    puVar1 = 0xfebeb800u;
+    f33_copy_diagnostic_capture(f33_diagnostic_capture_slots,(F33DiagnosticCapture *)((undefined *)camry_host_ptr(0x2a1f4u)));
+  }
+  else {
+    f33_diagnostic_capture_slots[0].extended_prefix[0x23] = 'D';
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56ac))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56ac))))) | 4;
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x337d))))) == '\"') {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56ae))))) = 0;
+    f33_copy_diagnostic_capture
+              (((F33DiagnosticCapture *)camry_host_ptr((uint32_t)(puVar1 + -0x3434))),(F33DiagnosticCapture *)((undefined *)camry_host_ptr(0x2a1f4u)));
+  }
+  else {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x337d))))) = 0x44;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56ab))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56ab))))) | 4;
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x328d))))) == '\"') {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56ad))))) = 0;
+    f33_copy_diagnostic_capture
+              (((F33DiagnosticCapture *)camry_host_ptr((uint32_t)(puVar1 + -0x3344))),(F33DiagnosticCapture *)((undefined *)camry_host_ptr(0x2a1f4u)));
+  }
+  else {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x328d))))) = 0x44;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56aa))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56aa))))) | 4;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56b0))))) = 0xa5;
+  return;
+}
+
+
+
+/* For occupied slots, marker44 drops occupancy and copies240-byte ROM defaults. Other markers
+   retain occupancy/data except event halfword90=0 and markerB7=22. Set corresponding dirty bit2 and
+   global phaseA5; if no slot is occupied, restore entry6150 phase. Always set615A5A and clear6166.
+   Retained supplement85AC is not erased. Occupied marker44 resets record/occupancy; other markers
+   preserve captured data except event90=0 and markerB7=22. Dirtybit2 and pending phase remain
+   separate from physical storage; supplement85AC survives. */
+
+void f33_mark_capture_slots_for_clear(void)
+
+{
+  undefined1 uVar1;
+  uint32_t puVar2;
+  undefined *puVar3;
+  
+  uVar1 = DAT_febe6150;
+  puVar2 = 0xfebeb800u;
+  puVar3 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  DAT_febe6150 = 0xaa;
+  DAT_febe615a = 0x5a;
+  DAT_febe6166 = 0;
+  if (DAT_febe6151 == '\x01') {
+    if (f33_diagnostic_capture_slots[0].extended_prefix[0x23] == 'D') {
+      DAT_febe6151 = '\0';
+      f33_copy_diagnostic_capture
+                (f33_diagnostic_capture_slots,(F33DiagnosticCapture *)((undefined *)camry_host_ptr(0x2a1f4u)));
+      puVar3 = ((undefined *)camry_host_ptr((uint32_t)(puVar2)));
+    }
+    else {
+      f33_diagnostic_capture_slots[0].event = 0;
+      f33_diagnostic_capture_slots[0].extended_prefix[0x23] = '\"';
+      puVar3 = ((undefined *)camry_host_ptr(0xfebeb800u));
+    }
+    puVar3[-0x56ac] = puVar3[-0x56ac] | 4;
+    uVar1 = 0xa5;
+  }
+  if (puVar3[-0x56ae] == '\x01') {
+    if (puVar3[-0x337d] == 'D') {
+      puVar3[-0x56ae] = 0;
+      f33_copy_diagnostic_capture
+                ((F33DiagnosticCapture *)(puVar3 + -0x3434),(F33DiagnosticCapture *)((undefined *)camry_host_ptr(0x2a1f4u)));
+    }
+    else {
+      *(undefined2 *)(puVar3 + -0x33a4) = 0;
+      puVar3[-0x337d] = 0x22;
+    }
+    puVar3[-0x56ab] = puVar3[-0x56ab] | 4;
+    uVar1 = 0xa5;
+  }
+  if (puVar3[-0x56ad] == '\x01') {
+    if (puVar3[-0x328d] == 'D') {
+      puVar3[-0x56ad] = 0;
+      f33_copy_diagnostic_capture
+                ((F33DiagnosticCapture *)(puVar3 + -0x3344),(F33DiagnosticCapture *)((undefined *)camry_host_ptr(0x2a1f4u)));
+    }
+    else {
+      *(undefined2 *)(puVar3 + -0x32b4) = 0;
+      puVar3[-0x328d] = 0x22;
+    }
+    puVar3[-0x56aa] = puVar3[-0x56aa] | 4;
+    uVar1 = 0xa5;
+  }
+  puVar3[-0x56b0] = uVar1;
+  return;
+}
+
+
+
 void FUN_00053092(void)
 
 {
@@ -4515,6 +4727,39 @@ void f33_set_diagnostic_cache_blocker(uchar index,uchar status)
     (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe615bu + (uint32_t)(index) * 1u)))) = status;
   }
   return;
+}
+
+
+
+/* For occupied capture slot1 require duplicate events to map to same nonzero packed DTC, then
+   return mask3 for available record numbers1 and10. Event duplicates are not complements. */
+
+uint f33_get_secondary_capture_record_mask(uint *dtc)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uint uVar3;
+  
+  uVar2 = 0;
+  if ((dtc != (uint *)0x0) && (DAT_febe6152 == '\x01')) {
+    uVar1 = 0;
+    if (f33_diagnostic_capture_slots[1].event < 0x180) {
+      uVar1 = *(uint *)(((undefined *)camry_host_ptr(0x30850u)) +
+                       (uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x2fc52u + (uint32_t)((uint)f33_diagnostic_capture_slots[1].event * 8) * 1u))))
+                       * 8);
+    }
+    uVar3 = 0;
+    if (f33_diagnostic_capture_slots[1].event_copy < 0x180) {
+      uVar3 = *(uint *)(((undefined *)camry_host_ptr(0x30850u)) +
+                       (uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x2fc52u + (uint32_t)((uint)f33_diagnostic_capture_slots[1].event_copy * 8) * 1u)))) * 8);
+    }
+    if ((uVar1 == uVar3) && (uVar1 != 0)) {
+      *dtc = uVar1;
+      uVar2 = 3;
+    }
+  }
+  return uVar2;
 }
 
 
@@ -4678,6 +4923,25 @@ uint FUN_0005377c(uint param_1)
     uVar1 = 10000;
   }
   return uVar1;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x000539f0) */
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_539cc(ushort param_1,undefined4 param_2)
+
+{
+  short sStack_a;
+  
+  sStack_a = (short)(((*((short *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                                (short)(param_1 & 0xff) * 0x48 + 0x44)))) * 100) / 0x80);
+  FUN_00070110((int)sStack_a,0x7fff,0,&sStack_a);
+  FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
 }
 
 

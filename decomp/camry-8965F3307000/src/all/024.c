@@ -235,6 +235,60 @@ void FUN_00090502(void)
 
 
 
+undefined4 FUN_000905de(short param_1,uchar *param_2,uint *param_3)
+
+{
+  uint32_t puVar1;
+  undefined4 uVar2;
+  F33FreshnessWire local_18;
+  
+  puVar1 = 0xfebeb800u;
+  uVar2 = 1;
+  if ((((param_1 == 0) && (param_2 != (uchar *)0x0)) && (param_3 != (uint *)0x0)) &&
+     (0x2d < *param_3)) {
+    thunk_FUN_0006a45e();
+    local_18.trip = (*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x61f4))));
+    local_18.reset = (*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x61f0))));
+    local_18.message = (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x61ec))));
+    thunk_FUN_0006a4c4();
+    local_18.reset_low2 = (byte)local_18.reset & 3;
+    local_18.bit_length = '.';
+    f33_freshness_encode_wire(camry_host_addr(&local_18), camry_host_addr(param_2), camry_host_addr(param_3));
+    uVar2 = 0;
+  }
+  return uVar2;
+}
+
+
+
+undefined4 FUN_0009063c(ushort param_1,uchar *param_2,uint *param_3)
+
+{
+  uint *puVar1;
+  uint32_t puVar2;
+  undefined4 uVar3;
+  F33FreshnessWire local_1c;
+  
+  puVar2 = 0xfebeb800u;
+  uVar3 = 1;
+  if ((((param_1 < 2) && (param_2 != (uchar *)0x0)) && (param_3 != (uint *)0x0)) &&
+     (0x2d < *param_3)) {
+    thunk_FUN_0006a45e();
+    puVar1 = ((uint *)camry_host_ptr((uint32_t)(puVar2 + (short)param_1 * 0xc + -0x6224)));
+    local_1c.trip = *puVar1;
+    local_1c.reset = puVar1[1];
+    local_1c.message = (ushort)puVar1[2];
+    thunk_FUN_0006a4c4();
+    local_1c.reset_low2 = (byte)local_1c.reset & 3;
+    local_1c.bit_length = '.';
+    f33_freshness_encode_wire(camry_host_addr(&local_1c), camry_host_addr(param_2), camry_host_addr(param_3));
+    uVar3 = 0;
+  }
+  return uVar3;
+}
+
+
+
 void FUN_000906a4(undefined4 *param_1,undefined1 *param_2,uint *param_3)
 
 {
@@ -527,6 +581,93 @@ LAB_00090f90:
 
 
 
+/* Stage bit1 selects hook family; bit0 selects post-SID request and adds address flag10. Clamp byte
+   extent toFFFF. Exact first hook disabled, second enabled. Preserve nonzero callback result; only
+   result1 is an NRC path in the service entry. */
+
+uint f33_dcm_invoke_request_policy
+               (uchar service_id,F33DcmMessageContext *message,uint stage,uchar *negative_response)
+
+{
+  char cVar1;
+  undefined4 *puVar2;
+  uint uVar3;
+  uchar *puVar4;
+  byte bVar5;
+  uint uVar6;
+  uchar uStack_2e;
+  uchar uStack_2d;
+  
+  *negative_response = '\0';
+  uVar3 = 0;
+  cVar1 = DAT_00025bf8;
+  if ((stage & 2) != 0) {
+    cVar1 = DAT_00025bf9;
+  }
+  if (cVar1 == '\x01') {
+    puVar2 = ((undefined4 *)camry_host_ptr((uint32_t)(PTR_PTR_00025bfc)));
+    if ((stage & 2) != 0) {
+      puVar2 = ((undefined4 *)camry_host_ptr((uint32_t)(PTR_PTR_00025c04)));
+    }
+    if (puVar2 != (undefined4 *)0x0) {
+      bVar5 = message->addressing_kind;
+      puVar4 = ((void *)camry_host_ptr((uint32_t)(message->request)));
+      uVar6 = message->request_length;
+      if ((stage & 1) == 0) {
+        puVar4 = puVar4 + 1;
+        uVar6 = uVar6 - 1;
+      }
+      else {
+        bVar5 = bVar5 | 0x10;
+      }
+      if (0xffff < uVar6) {
+        uVar6 = 0xffff;
+      }
+      uStack_2e = '\0';
+      uStack_2d = service_id;
+      uVar6 = (*(int (*)())*puVar2)(service_id,puVar4,uVar6 & 0xffff,bVar5,
+                                 message->service_list_selector,&uStack_2e);
+      if (uVar6 != 0) {
+        uVar3 = uVar6;
+        if (uVar6 == 1) {
+          *negative_response = uStack_2e;
+        }
+        else {
+          *negative_response = uStack_2e;
+        }
+      }
+    }
+  }
+  return uVar3;
+}
+
+
+
+/* Copy remaining request length/routing to main5630, add retained prefix count to body length, then
+   select and stage final disposition. Does not itself mean transport confirmation. */
+
+void f33_dcm_complete_service_response(F33DcmMessageContext *message)
+
+{
+  uchar uVar1;
+  F33DcmMessageContext *message_00;
+  int iVar2;
+  
+  message_00 = f33_dcm_get_message_context();
+  message_00->request_length = message->request_length;
+  iVar2 = FUN_000916a6();
+  message_00->response_length = message->response_length + iVar2;
+  uVar1 = message->suppress_positive;
+  message_00->addressing_kind = message->addressing_kind;
+  message_00->suppress_positive = uVar1;
+  message_00->service_id = message->service_id;
+  message_00->service_list_selector = message->service_list_selector;
+  f33_dcm_select_response_disposition(message_00);
+  return;
+}
+
+
+
 void FUN_000912b2(void)
 
 {
@@ -541,6 +682,42 @@ void FUN_000912b8(void)
 {
   f33_dcm_final_nrc = '\0';
   return;
+}
+
+
+
+/* Nonzero pending flag invokes operation3 without clearing active state. Final notification runs
+   service/generic observers, then clears active context and NRC; it does not invoke operation3. */
+
+uint f33_dcm_deliver_response_notification(uchar result,uchar pending_notification)
+
+{
+  uint32_t puVar1;
+  F33DcmMessageContext *pFVar2;
+  int iVar3;
+  undefined4 uVar4;
+  
+  puVar1 = 0x23dfcu;
+  if (pending_notification == '\0') {
+    pFVar2 = f33_dcm_get_message_context();
+    iVar3 = FUN_0009169a();
+    if (iVar3 == 1) {
+      FUN_00095650(pFVar2->service_id,pFVar2->service_list_selector,result);
+    }
+    uVar4 = FUN_0009168e();
+    if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x1dfc))))) == '\x01') && ((*((int *)camry_host_ptr((uint32_t)(0x1e04u + (int)puVar1)))) != 0)) {
+      (*(int (*)())**(undefined4 **)(0x1e04u + (int)puVar1))(uVar4,pFVar2->addressing_kind,pFVar2->service_list_selector,result);
+    }
+    if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x1dfd))))) == '\x01') && ((*((int *)camry_host_ptr((uint32_t)(puVar1 + 0x1e0c)))) != 0)) {
+      (*(int (*)())**(undefined4 **)(puVar1 + 0x1e0c))(uVar4,pFVar2->addressing_kind,pFVar2->service_list_selector,result);
+    }
+    f33_dcm_clear_active_service();
+    FUN_000912b8();
+  }
+  else {
+    f33_dcm_notify_active_service_operation_three();
+  }
+  return 0;
 }
 
 
@@ -567,6 +744,99 @@ void FUN_000913ea(undefined1 param_1)
 
 {
   DAT_febe562c = param_1;
+  return;
+}
+
+
+
+/* Exact selectors2/3/4 select rows0/1/2 at25C0C. Unknown selector falls back to row0; not a CAN-bus
+   identity claim. */
+
+uint f33_dcm_select_service_list(ushort selector)
+
+{
+  uint uVar1;
+  
+  uVar1 = 0;
+  do {
+    if (f33_dcm_service_lists[uVar1].selector == selector) {
+      return uVar1;
+    }
+    uVar1 = uVar1 + 1;
+  } while (uVar1 < 3);
+  return 0;
+}
+
+
+
+/* Initialize context; run first policy, service/session/security resolution, then second policy
+   before direct/subfunction dispatch. Result1 stages NRC; other nonzero policy results choose
+   silent disposition3. Session denial precedes application addressing publication. Native
+   service-entry compositions verify extended-session DID2013 writes1234 while COM7F96 remains
+   inhibited, default-session NRC7F before addressing publication, and application-gate silent drop
+   that still publishes addressing kind. Stop before91CE2 transport publication; no external wire
+   reachability claim. */
+
+void f33_dcm_begin_service_request
+               (F33DcmRequestRoute *route,F33PduInfo *request,F33PduInfo *response)
+
+{
+  uint32_t puVar1;
+  uint32_t puVar2;
+  undefined1 uVar3;
+  uint uVar4;
+  F33DcmMessageContext *message;
+  uchar uStack_16;
+  uchar uStack_15;
+  F33DcmServiceSelection FStack_14;
+  
+  puVar1 = 0xfebeb800u;
+  puVar2 = 0x23dfcu;
+  uStack_15 = '\0';
+  uStack_16 = '\0';
+  f33_dcm_initialize_message_context
+            (route->service_list_selector,route->addressing_kind,request,response);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x61b8))))) = **(undefined1 **)(puVar1 + -0x61d0);
+  FUN_000913ea(**(undefined1 **)(puVar1 + -0x61d0));
+  message = ((F33DcmMessageContext *)camry_host_ptr((uint32_t)(puVar1 + -0x61d0)));
+  uVar4 = f33_dcm_invoke_request_policy(**(uchar **)(puVar1 + -0x61d0),message,0,&uStack_15);
+  if (uVar4 == 0) {
+    uVar4 = f33_dcm_select_service_list(route->service_list_selector);
+    FStack_14.list = camry_host_addr(((F33DcmServiceList *)camry_host_ptr((uint32_t)(0x1e10u + (int)(puVar2 + uVar4 * 8)))));
+    FStack_14.service = 0;
+    uStack_15 = '\0';
+    uVar4 = f33_dcm_resolve_service(message,&FStack_14,&uStack_16,&uStack_15);
+    if (uVar4 != 0) {
+      uVar3 = 0;
+      if (uStack_15 != '\x11') {
+        uVar3 = **(undefined1 **)(puVar1 + -0x61d0);
+      }
+      goto LAB_0009162a;
+    }
+    uStack_15 = '\0';
+    uVar4 = f33_dcm_invoke_request_policy(**(uchar **)(puVar1 + -0x61d0),message,2,&uStack_15);
+    if (uVar4 == 0) {
+      if (uStack_16 == '\0') {
+        f33_dcm_dispatch_direct_service(message, ((F33DcmService *)camry_host_ptr((uint32_t)(FStack_14.service))));
+        return;
+      }
+      f33_dcm_dispatch_subfunction_service(message, ((F33DcmService *)camry_host_ptr((uint32_t)(FStack_14.service))));
+      return;
+    }
+    uVar3 = **(undefined1 **)(puVar1 + -0x61d0);
+  }
+  else {
+    uVar3 = 0;
+  }
+  if (uVar4 != 1) {
+    FUN_000955c2(uVar3,0);
+    FUN_0009136c(message);
+    return;
+  }
+LAB_0009162a:
+  FUN_000955c2(uVar3,uStack_15);
+  f33_dcm_stage_negative_response(message,uStack_15);
+  f33_dcm_complete_service_response(message);
   return;
 }
 
@@ -754,6 +1024,27 @@ undefined4 FUN_0009184a(undefined1 param_1)
 {
   FUN_000917d0(param_1,2);
   return 0;
+}
+
+
+
+undefined4 FUN_0009185c(short param_1,char param_2)
+
+{
+  ushort uVar1;
+  uint32_t puVar2;
+  undefined4 uVar3;
+  
+  puVar2 = 0xfebeb800u;
+  uVar3 = 0;
+  uVar1 = f33_dcm_receive_route[param_1].communication_slot;
+  thunk_FUN_0006a45e();
+  if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)((uint)uVar1 * 2 + -0x61b4))))) == '\x02') ||
+     ((param_2 == '\x01' && ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)((uint)uVar1 * 2 + -0x61b4))))) == '\x01')))) {
+    uVar3 = 1;
+  }
+  thunk_FUN_0006a4c4();
+  return uVar3;
 }
 
 
@@ -1104,6 +1395,28 @@ void FUN_00091cd2(undefined1 param_1,undefined1 param_2)
 
 {
   FUN_00093162(param_1,param_2);
+  return;
+}
+
+
+
+/* Only overall phase5960==2 stages a response. Use shared root5A20 and truncate total message
+   response length to16-bit PduInfo before933F8. */
+
+void f33_dcm_stage_final_response(F33DcmMessageContext *message,uchar disposition)
+
+{
+  int iVar1;
+  F33PduInfo local_14;
+  
+  local_14.data = 0;
+  local_14.length = 0;
+  iVar1 = FUN_00092624();
+  if (iVar1 == 2) {
+    FUN_00093ce6(&local_14);
+    local_14.length = (ushort)message->response_length;
+    f33_dcm_enqueue_final_disposition(&local_14,disposition);
+  }
   return;
 }
 
@@ -1528,6 +1841,32 @@ void FUN_00092054(undefined1 param_1,undefined1 param_2)
 
 
 
+void FUN_00092064(uchar param_1,ushort *param_2,ushort *param_3,ushort *param_4)
+
+{
+  int iVar1;
+  int iVar2;
+  short sVar3;
+  int iVar4;
+  
+  iVar4 = 0;
+  do {
+    sVar3 = (short)iVar4;
+    if (f33_app_session_timing_rows[sVar3].session == param_1) {
+      *param_2 = f33_app_session_timing_rows[sVar3].response_timing_a_raw;
+      *param_3 = f33_app_session_timing_rows[sVar3].transport_timing_b_raw;
+      *param_4 = f33_app_session_timing_rows[sVar3].transport_timing_c_raw;
+      return;
+    }
+    iVar2 = iVar4 + 1;
+    iVar1 = iVar4 + -3;
+    iVar4 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  return;
+}
+
+
+
 void FUN_00092094(undefined1 param_1)
 
 {
@@ -1551,6 +1890,97 @@ void FUN_000920b0(undefined1 param_1)
 {
   FUN_0009184a(param_1);
   return;
+}
+
+
+
+/* Map receive IDs2/3/4 to slots0/1/2; check communication permission and pending abort. Zero total
+   length queries configured capacity only. Nonzero <=256 claims receive slot and arms watchdog0;
+   larger returns3. Initial data pointer is not copied here. */
+
+uint f33_dcm_start_of_reception
+               (ushort receive_id,F33PduInfo *first_frame,ushort total_length,ushort *available)
+
+{
+  uint32_t puVar1;
+  int iVar2;
+  undefined4 *puVar3;
+  uint uVar4;
+  
+  puVar1 = 0x23dfcu;
+  uVar4 = 0;
+  while (receive_id != f33_dcm_receive_route[(short)(ushort)uVar4].receive_id) {
+    uVar4 = uVar4 + 1;
+    if (2 < uVar4) {
+      return 1;
+    }
+  }
+  iVar2 = FUN_0009185c(uVar4,1);
+  if (iVar2 != 1) {
+    return 1;
+  }
+  iVar2 = FUN_00093f02(uVar4);
+  if (iVar2 != 0) {
+    return 1;
+  }
+  if (total_length == 0) {
+    if (available != (ushort *)0x0) {
+      *available = (ushort)(*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + uVar4 * 8 + 0x2094))));
+    }
+    return 0;
+  }
+  if ((uint)total_length <= ((*((uint *)camry_host_ptr((uint32_t)(puVar1 + uVar4 * 8 + 0x2094)))) & 0xffff)) {
+    puVar3 = ((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + uVar4 * 8 + 0x2094)));
+    uVar4 = f33_dcm_claim_receive_slot((ushort)uVar4);
+    if (uVar4 != 1) {
+      return 1;
+    }
+    if (available != (ushort *)0x0) {
+      *available = (ushort)*puVar3;
+    }
+    f33_dcm_arm_software_timer('\0',(*((uint *)camry_host_ptr((uint32_t)(puVar1 + 0x2088)))));
+    return 0;
+  }
+  return 3;
+}
+
+
+
+/* Require mapped active slot, communication admission and chunk length <=remaining capacity; copy
+   into retained receive cursor and update16-bit received/remaining lengths. Rejection
+   releases/reset slot and may restart inactivity. */
+
+uint f33_dcm_copy_receive_data(ushort receive_id,F33PduInfo *chunk,ushort *available)
+
+{
+  uint32_t puVar1;
+  int iVar2;
+  int iVar3;
+  uint uVar4;
+  undefined4 uVar5;
+  uint uVar6;
+  
+  puVar1 = 0x23dfcu;
+  uVar6 = 1;
+  iVar2 = FUN_00093f0e(receive_id);
+  if ((iVar2 != 0xffff) && (iVar3 = FUN_00093e32(iVar2), iVar3 == 1)) {
+    f33_dcm_cancel_software_timer('\0');
+    iVar3 = FUN_0009185c(iVar2,1);
+    if ((iVar3 == 1) && (uVar4 = FUN_000940ae(iVar2), chunk->length <= uVar4)) {
+      uVar6 = f33_dcm_append_receive_chunk((ushort)iVar2,chunk,available);
+    }
+    else {
+      uVar5 = FUN_00093f5a(iVar2);
+      FUN_00093c9a(iVar2,1);
+      FUN_00091f26(iVar2,uVar5);
+      iVar2 = FUN_00093a8c();
+      if (iVar2 != 1) {
+        return 1;
+      }
+    }
+    f33_dcm_arm_software_timer('\0',(*((uint *)camry_host_ptr((uint32_t)(puVar1 + 0x2088)))));
+  }
+  return uVar6;
 }
 
 
@@ -2501,6 +2931,14 @@ void FUN_00093162(undefined1 param_1,undefined1 param_2)
 
 
 
+F33DcmResponseNode * FUN_0009317a(uint param_1)
+
+{
+  return f33_dcm_response_node + (param_1 & 0xff);
+}
+
+
+
 /* Automatic deadline sets5965=1 and sends NRC78 from state10; states23/24 first cancel old service
    and may cancel lower Tx. Explicit-pending callback latch5966 is not set here. */
 
@@ -2701,6 +3139,65 @@ void FUN_00093ab2(void)
 
 
 
+void FUN_00093aba(void)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uchar *puVar3;
+  uint uVar4;
+  
+  f33_dcm_pending_transport_accepted = '\0';
+  f33_dcm_shared_response_buffer[0] = '\0';
+  f33_dcm_pending_dispatch_receive_slot = 0;
+  f33_dcm_current_dispatch_receive_slot = 0;
+  f33_dcm_retained_p2_star_raw = 0;
+  f33_dcm_pending_spacing_raw = 0;
+  DAT_febe59e4 = 0;
+  DAT_febe59e6 = 0;
+  f33_dcm_displaced_transmit_id = 0;
+  f33_dcm_zero_p2_deadline = '\0';
+  f33_dcm_zero_overall_timeout = '\0';
+  uVar4 = 0;
+  do {
+    f33_dcm_receive_buffer_state[uVar4].receiving = '\0';
+    puVar3 = ((void *)camry_host_ptr((uint32_t)(f33_dcm_receive_buffer_configuration[uVar4].base)));
+    uVar1 = uVar4 + 1;
+    f33_dcm_receive_buffer_state[uVar4].write_cursor = camry_host_addr(puVar3);
+    *puVar3 = '\0';
+    uVar2 = f33_dcm_receive_buffer_configuration[uVar4].capacity;
+    f33_dcm_receive_buffer_state[uVar4].received_length = 0;
+    f33_dcm_receive_buffer_state[uVar4].abort_pending = '\0';
+    f33_dcm_receive_buffer_state[uVar4].inactivity_participant = '\0';
+    f33_dcm_receive_buffer_state[uVar4].remaining_capacity = (ushort)uVar2;
+    uVar4 = uVar1;
+  } while (uVar1 < 3);
+  return;
+}
+
+
+
+ushort FUN_00093b18(void)
+
+{
+  return f33_dcm_protocol_configuration
+         [(short)f33_dcm_receive_route[(short)f33_dcm_current_dispatch_receive_slot].protocol_index]
+         .inactivity_timeout_raw;
+}
+
+
+
+void FUN_00093b32(short param_1,ushort *param_2,ushort *param_3,ushort *param_4)
+
+{
+  *param_2 = f33_dcm_receive_route[param_1].protocol_index;
+  *param_3 = f33_dcm_receive_route[param_1].connection_index;
+  *param_4 = f33_dcm_receive_route[param_1].receive_descriptor_index;
+  return;
+}
+
+
+
 /* Return configured protocol timeout or selected functional override, and publish zero-time
    flag59EC. Real R10 return is used by timer2 admission; not void. */
 
@@ -2735,6 +3232,49 @@ uint f33_dcm_get_overall_request_timeout(void)
   }
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x5e14))))) = uVar6 == 0;
   return uVar6;
+}
+
+
+
+/* Fresh selection reads session raw timings and subtracts protocol margins with floor0; retains
+   P2star at59D8 and pending spacing at59DA. Return initial raw P2 or retained P2star. */
+
+ushort f33_dcm_select_response_deadline(uchar use_retained,uchar use_current_session)
+
+{
+  ushort uVar1;
+  ushort uVar2;
+  uint32_t puVar3;
+  uint32_t puVar4;
+  short sVar5;
+  int iVar6;
+  uchar uStack_b;
+  ushort uStack_a;
+  
+  puVar3 = 0xfebeb800u;
+  puVar4 = 0x23dfcu;
+  uVar1 = f33_dcm_receive_route[(short)f33_dcm_pending_dispatch_receive_slot].protocol_index;
+  uStack_b = '\x01';
+  uStack_a = 0;
+  uVar2 = f33_dcm_retained_p2_star_raw;
+  if (use_retained != '\x01') {
+    if (use_current_session == '\x01') {
+      f33_dcm_get_session(&uStack_b);
+    }
+    FUN_00092064(uStack_b, &uStack_a, ((undefined *)camry_host_ptr((uint32_t)(puVar3 + -0x5e28))), ((undefined *)camry_host_ptr((uint32_t)(puVar3 + -0x5e26))));
+    iVar6 = (short)uVar1 * 0x14;
+    uVar2 = uStack_a;
+    if ((*((ushort *)camry_host_ptr((uint32_t)(puVar4 + iVar6 + 0x20d0)))) <= uStack_a) {
+      uVar2 = uStack_a - (*((short *)camry_host_ptr((uint32_t)(puVar4 + iVar6 + 0x20d0))));
+    }
+    sVar5 = 0;
+    if ((*((ushort *)camry_host_ptr((uint32_t)(puVar4 + iVar6 + 0x20d2)))) <= (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x5e28))))) {
+      sVar5 = (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x5e28)))) - (*((short *)camry_host_ptr((uint32_t)(puVar4 + iVar6 + 0x20d2))));
+    }
+    (*((short *)camry_host_ptr((uint32_t)(puVar3 + -0x5e28)))) = sVar5;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x5e15))))) = uVar2 == 0;
+  }
+  return uVar2;
 }
 
 
@@ -2776,6 +3316,40 @@ void FUN_00093c94(uchar param_1)
 
 {
   f33_dcm_pending_transport_accepted = param_1;
+  return;
+}
+
+
+
+void FUN_00093c9a(uint param_1,char param_2)
+
+{
+  uchar *puVar1;
+  uint uVar2;
+  
+  param_1 = param_1 & 0xffff;
+  if (param_2 == '\0') {
+    f33_dcm_shared_response_buffer[0] = '\0';
+    f33_dcm_pending_transport_accepted = '\0';
+  }
+  puVar1 = ((void *)camry_host_ptr((uint32_t)(f33_dcm_receive_buffer_configuration[param_1].base)));
+  f33_dcm_receive_buffer_state[param_1].receiving = '\0';
+  f33_dcm_receive_buffer_state[param_1].write_cursor = camry_host_addr(puVar1);
+  *puVar1 = '\0';
+  uVar2 = f33_dcm_receive_buffer_configuration[param_1].capacity;
+  f33_dcm_receive_buffer_state[param_1].received_length = 0;
+  f33_dcm_receive_buffer_state[param_1].inactivity_participant = '\0';
+  f33_dcm_receive_buffer_state[param_1].remaining_capacity = (ushort)uVar2;
+  return;
+}
+
+
+
+void FUN_00093cce(short param_1,ushort *param_2,ushort *param_3)
+
+{
+  *param_2 = f33_dcm_receive_route[param_1].protocol_index;
+  *param_3 = f33_dcm_receive_route[param_1].connection_index;
   return;
 }
 
@@ -2853,6 +3427,82 @@ undefined1 FUN_00093d9a(void)
 
 
 
+/* Copy exactly16-bit chunk length into slot cursor, add received and subtract remaining16-bit
+   lengths. Caller92152 owns capacity check. */
+
+uint f33_dcm_append_receive_chunk(ushort receive_slot,F33PduInfo *chunk,ushort *available)
+
+{
+  F33DcmReceiveBufferState *pFVar1;
+  uchar uVar2;
+  ushort uVar3;
+  uchar *puVar4;
+  
+  puVar4 = ((void *)camry_host_ptr((uint32_t)(chunk->data)));
+  uVar3 = 0;
+  while( true ) {
+    pFVar1 = f33_dcm_receive_buffer_state + receive_slot;
+    if (chunk->length <= uVar3) break;
+    uVar3 = uVar3 + 1;
+    uVar2 = *puVar4;
+    puVar4 = puVar4 + 1;
+    *((uint8_t *)camry_host_ptr((uint32_t)(pFVar1->write_cursor))) = uVar2;
+    pFVar1->write_cursor = pFVar1->write_cursor + 1;
+  }
+  f33_dcm_receive_buffer_state[receive_slot].received_length =
+       f33_dcm_receive_buffer_state[receive_slot].received_length + chunk->length;
+  uVar3 = f33_dcm_receive_buffer_state[receive_slot].remaining_capacity - chunk->length;
+  f33_dcm_receive_buffer_state[receive_slot].remaining_capacity = uVar3;
+  *available = uVar3;
+  return 0;
+}
+
+
+
+uchar FUN_00093e32(uint param_1)
+
+{
+  return f33_dcm_receive_buffer_state[param_1 & 0xffff].receiving;
+}
+
+
+
+/* Count three59F0-stride10 slot receive-active bytes equal1. Real R10 result is consumed by release
+   and inactivity decisions; not void. */
+
+ushort f33_dcm_count_receiving_slots(void)
+
+{
+  uint uVar1;
+  ushort uVar2;
+  
+  uVar2 = 0;
+  uVar1 = 0;
+  do {
+    if (f33_dcm_receive_buffer_state[uVar1].receiving == '\x01') {
+      uVar2 = uVar2 + 1;
+    }
+    uVar1 = uVar1 + 1;
+  } while (uVar1 < 3);
+  return uVar2;
+}
+
+
+
+void FUN_00093e5c(uint param_1,uchar param_2)
+
+{
+  param_1 = param_1 & 0xffff;
+  if (param_2 == '\x01') {
+    f33_dcm_receive_buffer_state[param_1].write_cursor =
+         f33_dcm_receive_buffer_configuration[param_1].base;
+  }
+  f33_dcm_receive_buffer_state[param_1].receiving = param_2;
+  return;
+}
+
+
+
 undefined2 FUN_00093e82(void)
 
 {
@@ -2883,6 +3533,69 @@ undefined2 FUN_00093ebc(void)
   FUN_00093cce(f33_dcm_current_dispatch_receive_slot,&local_8,&uStack_6);
   return (*((undefined2 *)camry_host_ptr((uint32_t)(*(int *)(*(int *)((uint)uStack_6 * 4 + *(int *)(puVar1 + local_8 * 0x14 + 0x20c4)) + 8) +
           4))));
+}
+
+
+
+void FUN_00093ef6(uint param_1,uchar param_2)
+
+{
+  f33_dcm_receive_buffer_state[param_1 & 0xffff].abort_pending = param_2;
+  return;
+}
+
+
+
+uchar FUN_00093f02(uint param_1)
+
+{
+  return f33_dcm_receive_buffer_state[param_1 & 0xffff].abort_pending;
+}
+
+
+
+uint FUN_00093f0e(ushort param_1)
+
+{
+  uint uVar1;
+  
+  uVar1 = 0;
+  do {
+    if (param_1 == f33_dcm_receive_route[(short)uVar1].receive_id) {
+      return uVar1;
+    }
+    uVar1 = uVar1 + 1;
+  } while (uVar1 < 3);
+  return 0xffff;
+}
+
+
+
+uchar FUN_00093f30(short param_1)
+
+{
+  if (f33_dcm_receive_route[param_1].paired_receive_slot_or_ffff != 0xffff) {
+    return f33_dcm_receive_buffer_state[f33_dcm_receive_route[param_1].paired_receive_slot_or_ffff].
+           receiving;
+  }
+  return '\0';
+}
+
+
+
+void FUN_00093f4e(uint param_1,uchar param_2)
+
+{
+  f33_dcm_receive_buffer_state[param_1 & 0xffff].inactivity_participant = param_2;
+  return;
+}
+
+
+
+uchar FUN_00093f5a(uint param_1)
+
+{
+  return f33_dcm_receive_buffer_state[param_1 & 0xffff].inactivity_participant;
 }
 
 

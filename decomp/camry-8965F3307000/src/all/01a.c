@@ -1839,6 +1839,126 @@ void FUN_0006a678(ushort *param_1,int param_2,undefined2 *param_3,int *param_4)
 
 
 
+/* statusFF; pass/fail/highwater0; padding byte1 untouched. Eight-byte
+   layout:status0,padding1,pass2,fail4,highwater6. */
+
+void f33_reset_terminal_monitor(F33TerminalMonitorState *state)
+
+{
+  state->status = 0xff;
+  state->passing_count = 0;
+  state->failing_count = 0;
+  state->failing_high_water = 0;
+  return;
+}
+
+
+
+/* Clear all12 bytes: packed status,passing/failing counts,failure high-water and recovery count. */
+
+void f33_reset_recoverable_monitor(F33RecoverableMonitorState *state)
+
+{
+  state->packed_status = 0;
+  state->passing_count = 0;
+  state->failing_count = 0;
+  state->failing_high_water = 0;
+  state->recovery_count = 0;
+  return;
+}
+
+
+
+/* Retain confirmed failure22 including its recovery count; preserve confirmed pass2200,otherwise
+   discard pending counts. Clear recovery only outside confirmed failure; high-water survives. No
+   predicate or reporting callback. */
+
+void f33_retain_disabled_recoverable_monitor
+               (F33RecoverableMonitorState *state,F33RecoverableMonitorLimits *limits)
+
+{
+  uint uVar1;
+  
+  if (limits->failing_limit < state->failing_count) {
+    uVar1 = 0x22;
+  }
+  else {
+    if ((state->failing_count == 0) && (limits->passing_limit < state->passing_count)) {
+      uVar1 = 0x2200;
+    }
+    else {
+      state->passing_count = 0;
+      uVar1 = 0;
+    }
+    state->failing_count = 0;
+    state->recovery_count = 0;
+  }
+  state->packed_status = uVar1;
+  return;
+}
+
+
+
+/* Clear packed status, passing/failing counts and failure high-water at offsets0/4/6/8. Exactly10
+   bytes of the usual12-byte allocation; adjacent halfword untouched. */
+
+void f33_reset_latched_monitor(F33LatchedMonitorState *state)
+
+{
+  state->packed_status = 0;
+  state->passing_count = 0;
+  state->failing_count = 0;
+  state->failing_high_water = 0;
+  return;
+}
+
+
+
+/* Clear14 used bytes of16-byte state allocation: result,pass count/window,fail count/window,fail
+   high-water. Adjacent trailing halfword untouched. */
+
+void f33_reset_windowed_monitor(F33WindowedMonitorState *state)
+
+{
+  state->packed_status = 0;
+  state->passing_count = 0;
+  state->passing_window = 0;
+  state->failing_count = 0;
+  state->failing_window = 0;
+  state->failing_high_water = 0;
+  return;
+}
+
+
+
+/* Recompute state from counters without callbacks: retain failure22 when fail_count>fail_limit;
+   otherwise retain pass2200 only when fail_count=0 and pass_count>pass_limit. Clear pending paths;
+   preserve failure high-water. Gate closure is not a reset of a confirmed failure. */
+
+void f33_retain_disabled_latched_monitor(F33LatchedMonitorState *state,F33MonitorLimits *limits)
+
+{
+  uint uVar1;
+  
+  if (limits->failing_limit < state->failing_count) {
+    uVar1 = 0x22;
+  }
+  else {
+    if ((state->failing_count == 0) && (limits->passing_limit < state->passing_count)) {
+      uVar1 = 0x2200;
+    }
+    else {
+      state->passing_count = 0;
+      uVar1 = 0;
+    }
+    state->failing_count = 0;
+  }
+  state->packed_status = uVar1;
+  return;
+}
+
+
+
 void FUN_0006ae48(undefined4 *param_1,ushort *param_2)
 
 {
@@ -1886,6 +2006,40 @@ void FUN_0006b98a(undefined4 *param_1)
   *(undefined2 *)(param_1 + 2) = 0;
   (*((undefined2 *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_1) + 10)))) = 0;
   *(undefined2 *)(param_1 + 3) = 0;
+  return;
+}
+
+
+
+/* Reclassify from counters; retain confirmed22/escalated44 and confirmed pass2200, discard pending
+   paths. Failure high-water survives. Disabled escalating monitor reclassifies from counters,
+   retaining confirmed22/escalated44/confirmed-pass2200 while clearing pending state; high-water
+   survives. */
+
+void f33_retain_disabled_escalating_monitor(F33EscalatingMonitorState *state,ushort *calibration)
+
+{
+  uint uVar1;
+  
+  if (calibration[7] < state->elapsed_count) {
+    uVar1 = 0x44;
+  }
+  else if ((state->elapsed_count == 0) && (state->failing_count <= calibration[5])) {
+    if ((state->failing_count == 0) && (calibration[2] < state->passing_count)) {
+      uVar1 = 0x2200;
+    }
+    else {
+      state->passing_count = 0;
+      uVar1 = 0;
+    }
+    state->failing_count = 0;
+    state->recovery_count = 0;
+    state->elapsed_count = 0;
+  }
+  else {
+    uVar1 = 0x22;
+  }
+  state->packed_status = uVar1;
   return;
 }
 

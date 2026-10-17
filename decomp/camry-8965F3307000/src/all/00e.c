@@ -595,6 +595,36 @@ void f33_return_only_stub_387cc(void)
 
 
 
+/* Sequentially stage measured halfwords and full32-bit component banks6B34..48, paired feedback
+   requests6B50/74 to6E1A/1C, diagnostic sibling6AF6 and prior saturation directions. Later380DE
+   resets do not rewrite this generation; no atomic hardware acquisition claim. */
+
+void f33_latch_current_feedback_and_reference_inputs(void)
+
+{
+  DAT_febe6e12 = DAT_febe6b34;
+  DAT_febe6e14 = DAT_febe6b36;
+  DAT_febe6e16 = DAT_febe6b38;
+  DAT_febe6e18 = DAT_febe6b3a;
+  DAT_febe6e28 = DAT_febe6b3c;
+  DAT_febe6e2c = DAT_febe6b40;
+  DAT_febe6e30 = DAT_febe6b44;
+  DAT_febe6e1e = 0;
+  DAT_febe6e20 = 0;
+  DAT_febe6e34 = DAT_febe6b48;
+  DAT_febe6e1a = f33_current_reference_feedback[0].request;
+  DAT_febe6e1c = f33_current_reference_feedback[1].request;
+  DAT_febe6e22 = DAT_febe6af6;
+  DAT_febe6e24 = DAT_febe6af6;
+  DAT_febe6e0c = f33_regulator_output_envelopes[0].first_saturation;
+  DAT_febe6e0e = f33_regulator_output_envelopes[1].first_saturation;
+  DAT_febe6e0d = f33_regulator_output_envelopes[0].second_saturation;
+  DAT_febe6e0f = f33_regulator_output_envelopes[1].second_saturation;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -5259,6 +5289,52 @@ void FUN_0003b288(void)
 
 
 
+/* WARNING: Removing unreachable block (ram,0x0003b362) */
+/* WARNING: Removing unreachable block (ram,0x0003b30e) */
+
+void FUN_0003b2f6(void)
+
+{
+  short sVar1;
+  short sVar2;
+  uint32_t puVar3;
+  int iVar4;
+  int local_2c;
+  short sStack_28;
+  short sStack_26;
+  int iStack_24;
+  F33FractionalFollowing16 FStack_20;
+  F33FractionalFollowing16 FStack_18;
+  
+  sVar1 = DAT_febe7014;
+  puVar3 = 0xfebeb800u;
+  iVar4 = (int)DAT_febe7014;
+  FStack_18.accumulator = DAT_febe7038;
+  FStack_18.target = DAT_febe7014;
+  FStack_18.previous = DAT_febe7016;
+  if ((short)(DAT_febe7038 / 0x10000) != DAT_febe7016) {
+    FStack_18.previous = DAT_febe7014;
+    FStack_18.accumulator = iVar4 << 0x10;
+  }
+  f33_follow_s16_fractional(&FStack_18,(uint)DAT_0002b590,&sStack_28,&local_2c);
+  sVar2 = DAT_febe7018;
+  FStack_20.target = sVar1;
+  DAT_febe7016 = sStack_28;
+  FStack_20.previous = DAT_febe7018;
+  (*((int *)camry_host_ptr((uint32_t)((0xffffb838u + (uint32_t)((int)puVar3)))))) = local_2c;
+  FStack_20.accumulator = (*((int *)camry_host_ptr((uint32_t)((0xffffb83cu + (uint32_t)((int)puVar3))))));
+  if ((short)(FStack_20.accumulator / 0x10000) != sVar2) {
+    FStack_20.previous = sVar1;
+    FStack_20.accumulator = iVar4 << 0x10;
+  }
+  f33_follow_s16_fractional(&FStack_20,(uint)DAT_0002b592,&sStack_26,&iStack_24);
+  DAT_febe7018 = sStack_26;
+  (*((int *)camry_host_ptr((uint32_t)((0xffffb83cu + (uint32_t)((int)puVar3)))))) = iStack_24;
+  return;
+}
+
+
+
 /* Sequential initializer chain: 4 unconditional calls and no other statements; shape-verified. The
    called sequence is the function's entire behavior; chain family members differ in callee sets. */
 
@@ -5642,6 +5718,52 @@ int f33_stage_dual_thermal_squared_inputs(short upper,short lower)
 
 
 
+/* WARNING: Removing unreachable block (ram,0x0003b7da) */
+/* WARNING: Removing unreachable block (ram,0x0003b786) */
+
+void FUN_0003b76e(void)
+
+{
+  short sVar1;
+  short sVar2;
+  uint32_t puVar3;
+  int iVar4;
+  int local_2c;
+  short sStack_28;
+  short sStack_26;
+  int iStack_24;
+  F33FractionalFollowing16 FStack_20;
+  F33FractionalFollowing16 FStack_18;
+  
+  sVar1 = DAT_febe7074;
+  puVar3 = 0xfebeb800u;
+  iVar4 = (int)DAT_febe7074;
+  FStack_18.accumulator = DAT_febe7088;
+  FStack_18.target = DAT_febe7074;
+  FStack_18.previous = DAT_febe7076;
+  if ((short)(DAT_febe7088 / 0x10000) != DAT_febe7076) {
+    FStack_18.previous = DAT_febe7074;
+    FStack_18.accumulator = iVar4 << 0x10;
+  }
+  f33_follow_s16_fractional(&FStack_18,(uint)DAT_0002b5b4,&sStack_28,&local_2c);
+  sVar2 = DAT_febe7078;
+  FStack_20.target = sVar1;
+  DAT_febe7076 = sStack_28;
+  FStack_20.previous = DAT_febe7078;
+  (*((int *)camry_host_ptr((uint32_t)((0xffffb888u + (uint32_t)((int)puVar3)))))) = local_2c;
+  FStack_20.accumulator = (*((int *)camry_host_ptr((uint32_t)((0xffffb88cu + (uint32_t)((int)puVar3))))));
+  if ((short)(FStack_20.accumulator / 0x10000) != sVar2) {
+    FStack_20.previous = sVar1;
+    FStack_20.accumulator = iVar4 << 0x10;
+  }
+  f33_follow_s16_fractional(&FStack_20,(uint)DAT_0002b5b6,&sStack_26,&iStack_24);
+  DAT_febe7078 = sStack_26;
+  (*((int *)camry_host_ptr((uint32_t)((0xffffb88cu + (uint32_t)((int)puVar3)))))) = iStack_24;
+  return;
+}
+
+
+
 void FUN_0003b810(void)
 
 {
@@ -5720,6 +5842,40 @@ void FUN_0003b88e(void)
 LAB_0003b8dc:
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb872u + (uint32_t)((int)camry_host_addr(puVar2)) * 1u)))) = cVar5;
   return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0003b908) */
+/* Reseed selector accumulator7090 from previous<<16 when its signed /65536 narrowed16 disagrees.
+   Apply fractional follower with exact coefficient800; add bias to accumulator/output, cap output
+   at32000 and return signed16. Exact mode1/3 biases are0. Mismatch to previous quantized estimate
+   reseeds per-selector accumulator. Exact coefficient800 follows target with retained fractional
+   remainder; bias and upper cap follow. Native composition checks independent accumulators. */
+
+int f33_follow_thermal_offset_target(uint selector,short target,short previous,short bias)
+
+{
+  int iVar1;
+  int iVar2;
+  short sStack_22;
+  int iStack_20;
+  int iStack_1c;
+  F33FractionalFollowing16 FStack_18;
+  
+  iVar1 = (selector & 0xff) * 4;
+  FStack_18.accumulator = *(int *)(((undefined *)camry_host_ptr(0xfebe7090u)) + iVar1);
+  if ((int)(short)(FStack_18.accumulator / 0x10000) != (int)previous) {
+    FStack_18.accumulator = (int)previous << 0x10;
+  }
+  FStack_18.previous = previous;
+  FStack_18.target = target;
+  f33_follow_s16_fractional(&FStack_18,(uint)DAT_0002b594 * 800,&sStack_22,&iStack_1c);
+  iVar2 = (int)DAT_0002b596;
+  *(int *)(((undefined *)camry_host_ptr(0xfebe7090u)) + iVar1) = bias * 0x10000 + iStack_1c;
+  iStack_20 = (int)sStack_22 + (int)bias;
+  FUN_00070160(iStack_20,iVar2,&iStack_20);
+  return (int)(short)iStack_20;
 }
 
 

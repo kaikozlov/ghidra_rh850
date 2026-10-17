@@ -3444,6 +3444,129 @@ void f33_run_control_profile_retention(void)
 
 
 
+/* Gather retained bank0 into sparse52-byte envelope; do not write offset09,2A..2B or bytes
+   beyond33. Append current common slot validityB6DF and sticky age-valid770 rather than captured
+   per-bank flags. No local slot bound. */
+
+void f33_gather_first_control_profile(F33RetainedControlProfile *output,uchar slot)
+
+{
+  output->capture_value = f33_profile_retained_capture_value[slot];
+  output->received_composite = f33_profile_retained_received_composite[slot];
+  output->integrated_source = f33_profile_retained_integrated_source[slot];
+  output->elapsed_groups = f33_profile_retained_elapsed_groups[slot];
+  output->scaled_f228 = f33_profile_retained_scaled_f228[slot];
+  output->source_u16_max = f33_profile_retained_source_u16_max[slot];
+  output->source_u16_mean = f33_profile_retained_source_u16_mean[slot];
+  output->f1c6_max = f33_profile_retained_f1c6_max[slot];
+  output->f1c6_mean = f33_profile_retained_f1c6_mean[slot];
+  output->f1c8_max = f33_profile_retained_f1c8_max[slot];
+  output->f1c8_mean = f33_profile_retained_f1c8_mean[slot];
+  output->f1ca_max = f33_profile_retained_f1ca_max[slot];
+  output->f1ca_mean = f33_profile_retained_f1ca_mean[slot];
+  output->scaled_ae5c_max = f33_profile_retained_scaled_ae5c_max[slot];
+  output->scaled_ae5c_min = f33_profile_retained_scaled_ae5c_min[slot];
+  output->scaled_b054_max = f33_profile_retained_scaled_b054_max[slot];
+  output->scaled_b054_mean = f33_profile_retained_scaled_b054_mean[slot];
+  output->route31_scalar = f33_profile_retained_route31_scalar[slot];
+  output->scalar_kind = f33_profile_retained_metadata_0[slot];
+  output->packed_metadata[0] = f33_profile_retained_metadata_1[slot];
+  output->packed_metadata[1] = f33_profile_retained_metadata_2[slot];
+  output->packed_metadata[2] = f33_profile_retained_metadata_3[slot];
+  output->packed_metadata[3] = f33_profile_retained_metadata_4[slot];
+  output->packed_metadata[4] = f33_profile_retained_metadata_5[slot];
+  output->packed_metadata[5] = f33_profile_retained_metadata_6[slot];
+  output->current_first_profile_validity = f33_profile_first_validity[slot];
+  output->current_elapsed_source_validity = f33_profile_elapsed_validity[slot];
+  return;
+}
+
+
+
+/* Gather retained bank1 into sparse52-byte envelope; do not write offset09,2A..2B or bytes
+   beyond33. Append current common slot validityB6DF and sticky age-valid770 rather than captured
+   per-bank flags. No local slot bound. */
+
+void f33_gather_first_ranked_control_profile(F33RetainedControlProfile *output,uchar slot)
+
+{
+  uint uVar1;
+  
+  uVar1 = (uint)slot;
+  output->capture_value = f33_profile_retained_capture_value[uVar1 + 5];
+  output->received_composite = f33_profile_retained_received_composite[uVar1 + 5];
+  output->integrated_source = f33_profile_retained_integrated_source[uVar1 + 5];
+  output->elapsed_groups = f33_profile_retained_elapsed_groups[uVar1 + 5];
+  output->scaled_f228 = f33_profile_retained_scaled_f228[uVar1 + 5];
+  output->source_u16_max = f33_profile_retained_source_u16_max[uVar1 + 5];
+  output->source_u16_mean = f33_profile_retained_source_u16_mean[uVar1 + 5];
+  output->f1c6_max = f33_profile_retained_f1c6_max[uVar1 + 5];
+  output->f1c6_mean = f33_profile_retained_f1c6_mean[uVar1 + 5];
+  output->f1c8_max = f33_profile_retained_f1c8_max[uVar1 + 5];
+  output->f1c8_mean = f33_profile_retained_f1c8_mean[uVar1 + 5];
+  output->f1ca_max = f33_profile_retained_f1ca_max[uVar1 + 5];
+  output->f1ca_mean = f33_profile_retained_f1ca_mean[uVar1 + 5];
+  output->scaled_ae5c_max = f33_profile_retained_scaled_ae5c_max[uVar1 + 5];
+  output->scaled_ae5c_min = f33_profile_retained_scaled_ae5c_min[uVar1 + 5];
+  output->scaled_b054_max = f33_profile_retained_scaled_b054_max[uVar1 + 5];
+  output->scaled_b054_mean = f33_profile_retained_scaled_b054_mean[uVar1 + 5];
+  output->route31_scalar = f33_profile_retained_route31_scalar[uVar1 + 5];
+  output->scalar_kind = f33_profile_retained_metadata_0[uVar1 + 5];
+  output->packed_metadata[0] = f33_profile_retained_metadata_1[uVar1 + 5];
+  output->packed_metadata[1] = f33_profile_retained_metadata_2[uVar1 + 5];
+  output->packed_metadata[2] = f33_profile_retained_metadata_3[uVar1 + 5];
+  output->packed_metadata[3] = f33_profile_retained_metadata_4[uVar1 + 5];
+  output->packed_metadata[4] = f33_profile_retained_metadata_5[uVar1 + 5];
+  output->packed_metadata[5] = f33_profile_retained_metadata_6[uVar1 + 5];
+  output->current_first_profile_validity = f33_profile_first_validity[uVar1];
+  output->current_elapsed_source_validity = f33_profile_elapsed_validity[uVar1];
+  return;
+}
+
+
+
+/* Gather retained bank2 into sparse52-byte envelope; do not write offset09,2A..2B or bytes
+   beyond33. Append current common slot validityB6DF and sticky age-valid770 rather than captured
+   per-bank flags. No local slot bound. */
+
+void f33_gather_second_ranked_control_profile(F33RetainedControlProfile *output,uchar slot)
+
+{
+  uint uVar1;
+  
+  uVar1 = (uint)slot;
+  output->capture_value = f33_profile_retained_capture_value[uVar1 + 10];
+  output->received_composite = f33_profile_retained_received_composite[uVar1 + 10];
+  output->integrated_source = f33_profile_retained_integrated_source[uVar1 + 10];
+  output->elapsed_groups = f33_profile_retained_elapsed_groups[uVar1 + 10];
+  output->scaled_f228 = f33_profile_retained_scaled_f228[uVar1 + 10];
+  output->source_u16_max = f33_profile_retained_source_u16_max[uVar1 + 10];
+  output->source_u16_mean = f33_profile_retained_source_u16_mean[uVar1 + 10];
+  output->f1c6_max = f33_profile_retained_f1c6_max[uVar1 + 10];
+  output->f1c6_mean = f33_profile_retained_f1c6_mean[uVar1 + 10];
+  output->f1c8_max = f33_profile_retained_f1c8_max[uVar1 + 10];
+  output->f1c8_mean = f33_profile_retained_f1c8_mean[uVar1 + 10];
+  output->f1ca_max = f33_profile_retained_f1ca_max[uVar1 + 10];
+  output->f1ca_mean = f33_profile_retained_f1ca_mean[uVar1 + 10];
+  output->scaled_ae5c_max = f33_profile_retained_scaled_ae5c_max[uVar1 + 10];
+  output->scaled_ae5c_min = f33_profile_retained_scaled_ae5c_min[uVar1 + 10];
+  output->scaled_b054_max = f33_profile_retained_scaled_b054_max[uVar1 + 10];
+  output->scaled_b054_mean = f33_profile_retained_scaled_b054_mean[uVar1 + 10];
+  output->route31_scalar = f33_profile_retained_route31_scalar[uVar1 + 10];
+  output->scalar_kind = f33_profile_retained_metadata_0[uVar1 + 10];
+  output->packed_metadata[0] = f33_profile_retained_metadata_1[uVar1 + 10];
+  output->packed_metadata[1] = f33_profile_retained_metadata_2[uVar1 + 10];
+  output->packed_metadata[2] = f33_profile_retained_metadata_3[uVar1 + 10];
+  output->packed_metadata[3] = f33_profile_retained_metadata_4[uVar1 + 10];
+  output->packed_metadata[4] = f33_profile_retained_metadata_5[uVar1 + 10];
+  output->packed_metadata[5] = f33_profile_retained_metadata_6[uVar1 + 10];
+  output->current_first_profile_validity = f33_profile_first_validity[uVar1];
+  output->current_elapsed_source_validity = f33_profile_elapsed_validity[uVar1];
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */

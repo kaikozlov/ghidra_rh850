@@ -881,6 +881,38 @@ undefined4 FUN_00060f7c(ushort param_1,uint param_2)
 
 
 
+/* Physical channel<2: ROM3140C+50*channel selects controller block. Snapshot status bits8/7/3 and
+   three7-bit counts into six bytes, then acknowledge with halfword(ack&100)|(status&8).62576 uses
+   byte2==0 and byte3==10; other status bytes do not gate decoding there. This is register contract,
+   not current sample age. */
+
+void f33_read_serial_controller_status
+               (uchar channel,ushort acknowledgment,F33SerialControllerStatus *output)
+
+{
+  int iVar1;
+  undefined4 uVar2;
+  undefined4 uVar3;
+  uint uVar4;
+  
+  if (channel < 2) {
+    iVar1 = (uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x3140cu + (uint32_t)((short)(ushort)channel * 0x50) * 1u)))) * 0x2000;
+    uVar4 = (*((uint *)camry_host_ptr((uint32_t)(iVar1 + -0x27fffc))));
+    uVar2 = (*((undefined4 *)camry_host_ptr((uint32_t)(iVar1 + -0x27effc))));
+    uVar3 = (*((undefined4 *)camry_host_ptr((uint32_t)(iVar1 + -0x27efe8))));
+    output->status_bit8 = (byte)(uVar4 >> 8) & 1;
+    output->status_bit7 = (uchar)((uVar4 & 0x80) >> 7);
+    output->status_bit3 = (uchar)((uVar4 & 8) >> 3);
+    output->count0_7bit = (byte)uVar2 & 0x7f;
+    output->count1_7bit = (byte)((uint)uVar3 >> 0x10) & 0x7f;
+    output->count2_7bit = (byte)uVar3 & 0x7f;
+    (*((ushort *)camry_host_ptr((uint32_t)(iVar1 + -0x27fff8)))) = acknowledgment & 0x100 | (ushort)(uVar4 & 8);
+  }
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -1435,6 +1467,42 @@ void FUN_00061b90(void)
 
 
 
+/* For absent input bits0/3/1/4/2/5, OR descriptor315D4+bank*1C halfwords+8/A/C/E/10/12 into the
+   software PWM port_mask. No peripheral write here; later commit owner is separate. Recovered
+   callers pass bank0/1; no local bank bound. */
+
+void f33_stage_configured_phase_mask(uint bank,uint mask)
+
+{
+  ushort uVar1;
+  int iVar2;
+  
+  iVar2 = (short)bank * 0x1c;
+  uVar1 = 0;
+  if ((mask & 1) == 0) {
+    uVar1 = *(ushort *)(((undefined *)camry_host_ptr(0x315dcu)) + iVar2);
+  }
+  if ((mask >> 3 & 1) == 0) {
+    uVar1 = uVar1 | *(ushort *)(((undefined *)camry_host_ptr(0x315deu)) + iVar2);
+  }
+  if ((mask >> 1 & 1) == 0) {
+    uVar1 = uVar1 | *(ushort *)(((undefined *)camry_host_ptr(0x315e0u)) + iVar2);
+  }
+  if ((mask >> 4 & 1) == 0) {
+    uVar1 = uVar1 | *(ushort *)(((undefined *)camry_host_ptr(0x315e2u)) + iVar2);
+  }
+  if ((mask >> 2 & 1) == 0) {
+    uVar1 = uVar1 | *(ushort *)(((undefined *)camry_host_ptr(0x315e4u)) + iVar2);
+  }
+  if ((mask >> 5 & 1) == 0) {
+    uVar1 = uVar1 | *(ushort *)(((undefined *)camry_host_ptr(0x315e6u)) + iVar2);
+  }
+  f33_pwm_halfword_stages[bank].port_mask = uVar1;
+  return;
+}
+
+
+
 void FUN_00061dfa(short param_1,ushort param_2)
 
 {
@@ -1573,6 +1641,102 @@ void FUN_00061f96(void)
 
 
 
+void FUN_00061fce(void)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  uint uVar4;
+  int iVar5;
+  
+  iVar5 = 0;
+  do {
+    uVar4 = f33_channel_ports[iVar5].output_selector & 0xf;
+    iVar2 = ((f33_channel_ports[iVar5].output_selector & 0xff00) >> 8) * 0x40;
+    (*((uint *)camry_host_ptr((uint32_t)(iVar2 + -0x3efffc)))) = (f33_channel_ports[iVar5].requested_level & 1 | 0x10000) << uVar4
+    ;
+    iVar1 = iVar5 + 1;
+    iVar3 = 0x10000 << uVar4;
+    (*((int *)camry_host_ptr((uint32_t)(iVar2 + -0x3effdc)))) = iVar3;
+    (*((int *)camry_host_ptr((uint32_t)(iVar2 + -0x3effe0)))) = iVar3;
+    iVar2 = iVar5 + -1;
+    iVar5 = iVar1;
+  } while (((iVar2 < 0) || (iVar1 < 0)));
+  return;
+}
+
+
+
+void FUN_00062018(void)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  int iVar4;
+  int iVar5;
+  
+  iVar5 = 0;
+  do {
+    iVar2 = iVar5 + 1;
+    iVar3 = 0x10000 << (f33_channel_ports[iVar5].output_selector & 0xf);
+    iVar4 = ((f33_channel_ports[iVar5].output_selector & 0xff00) >> 8) * 0x40;
+    iVar1 = iVar5 + -1;
+    (*((int *)camry_host_ptr((uint32_t)(iVar4 + -0x3effdc)))) = iVar3;
+    (*((int *)camry_host_ptr((uint32_t)(iVar4 + -0x3effe0)))) = iVar3;
+    iVar5 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  return;
+}
+
+
+
+/* Descriptor-driven masked port write using reference_level; no local index validation.
+   Descriptor-indexed masked port write using reference level and output selector. Two reviewed
+   channels are port0bit10 and port3bit5; generic helper has no local index check. */
+
+void f33_write_channel_reference_level(uint channel)
+
+{
+  (*((uint *)camry_host_ptr((uint32_t)(((f33_channel_ports[channel].output_selector & 0xff00) >> 8) * 0x40 + -0x3efffc)))) =
+       (f33_channel_ports[channel].reference_level & 1 | 0x10000) <<
+       (f33_channel_ports[channel].output_selector & 0xf);
+  return;
+}
+
+
+
+/* Descriptor-driven masked port write using requested_level; no local index validation.
+   Descriptor-indexed masked port write using requested rather than reference level. Exact reviewed
+   rows select level0 versus reference1; no inferred OEM actuator identity. */
+
+void f33_write_channel_requested_level(uint channel)
+
+{
+  (*((uint *)camry_host_ptr((uint32_t)(((f33_channel_ports[channel].output_selector & 0xff00) >> 8) * 0x40 + -0x3efffc)))) =
+       (f33_channel_ports[channel].requested_level & 1 | 0x10000) <<
+       (f33_channel_ports[channel].output_selector & 0xf);
+  return;
+}
+
+
+
+/* Read the descriptor-selected halfword port input, isolate its bit, return zero-extended level. No
+   local index validation; the two reviewed wrappers pass0/1. Read descriptor-selected halfword port
+   input and isolate its bit into zero-extended R10. Input observation is separate from
+   output-register writes and physical response. */
+
+uint f33_read_channel_input_level(uint channel)
+
+{
+  return (int)((uint)(*((ushort *)camry_host_ptr((uint32_t)((uint)f33_channel_ports[channel].input_port * 0x40 + -0x3efff4)))) &
+              1 << (f33_channel_ports[channel].input_bit & 0x1f)) >>
+         (f33_channel_ports[channel].input_bit & 0x1f) & 0xff;
+}
+
+
+
 /* Odd count selects count-3; even selects count-6 with one capacity addition only when count<6.
    Return low16; caller does not modulo-wrap each following offset. Boundary counts2/4 yield
    out-of-range zero tails, not ring wrap. No freshness/reachability claim. Native evidence covers
@@ -1600,6 +1764,66 @@ ushort f33_select_acquisition_six_entry_base(ushort count,ushort capacity)
 
 
 
+/* Real R6 is the output pointer, not an unused integer. Read descriptor count for channel0, select
+   six-entry base with capacity432, consume offsets0..5 from30F2C through60676. Store six u16 at
+   output+0. No software cursor advancement, per-entry validity check or retained-value fallback;
+   out-of-range returns0. Native evidence covers explicit software continuations and a synthetic
+   post-getter publication join, not descriptor acquisition or the intact fast task. */
+
+void f33_copy_acquisition_group0_samples(F33AcquisitionGroupPair *output)
+
+{
+  int iVar1;
+  int iVar2;
+  ushort uVar3;
+  uint uVar4;
+  int iVar5;
+  
+  uVar3 = f33_count_transfer_entries('\0');
+  uVar3 = f33_select_acquisition_six_entry_base(uVar3,0x1b0);
+  iVar5 = 0;
+  do {
+    uVar4 = f33_consume_acquisition_group0_entry(""[iVar5] + uVar3);
+    output->group0[iVar5] = (ushort)uVar4;
+    iVar2 = iVar5 + 1;
+    iVar1 = iVar5 + -5;
+    iVar5 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  return;
+}
+
+
+
+/* Real R6 is the output pointer, not an unused integer. Read descriptor count for channel8, select
+   six-entry base with capacity432, consume offsets0..5 from30F34 through60720. Store six u16 at
+   output+12. No software cursor advancement, per-entry validity check or retained-value fallback;
+   out-of-range returns0. Native evidence covers explicit software continuations and a synthetic
+   post-getter publication join, not descriptor acquisition or the intact fast task. */
+
+void f33_copy_acquisition_group8_samples(F33AcquisitionGroupPair *output)
+
+{
+  int iVar1;
+  int iVar2;
+  ushort uVar3;
+  uint uVar4;
+  int iVar5;
+  
+  uVar3 = f33_count_transfer_entries('\b');
+  uVar3 = f33_select_acquisition_six_entry_base(uVar3,0x1b0);
+  iVar5 = 0;
+  do {
+    uVar4 = f33_consume_acquisition_group8_entry(""[iVar5] + uVar3);
+    output->group8[iVar5] = (ushort)uVar4;
+    iVar2 = iVar5 + 1;
+    iVar1 = iVar5 + -5;
+    iVar5 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  return;
+}
+
+
+
 /* Call620FE then6213E with the SAME real R6 pointer, saved inR29. Produces group0[6],group8[6] at
    offsets0/12. Fix auto-decompiler missing620FE argument; native62182/62188 explicitly
    preserve/restore it. Descriptor counts are separate reads, not one producer epoch. */
@@ -1609,6 +1833,89 @@ void f33_copy_acquisition_group_pair(F33AcquisitionGroupPair *output)
 {
   f33_copy_acquisition_group0_samples(output);
   f33_copy_acquisition_group8_samples(output);
+  return;
+}
+
+
+
+/* Channel<2: clear driver buffers/flags/four-slot mask arrays/cursor and published occurrence
+   counters; seed prior sequence3 and numeric triplet{0,0,0800}. First valid incoming sequence0
+   qualifies. No acquisition completed by initialization. */
+
+void f33_initialize_serial_acquisition_channel(uchar channel)
+
+{
+  undefined2 *puVar1;
+  int iVar2;
+  uint uVar3;
+  uint uVar4;
+  ushort uVar5;
+  int iVar6;
+  int iVar7;
+  
+  if (channel < 2) {
+    uVar5 = (ushort)channel;
+    iVar7 = (short)uVar5 * 0x5a;
+    iVar6 = (short)(ushort)channel * 6;
+    uVar3 = 0;
+    do {
+      puVar1 = (undefined2 *)(((undefined *)camry_host_ptr(0xfebe3900u)) + uVar3 * 2 + iVar7);
+      uVar3 = uVar3 + 1;
+      *puVar1 = 0;
+      puVar1[10] = 0;
+    } while (uVar3 < 10);
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe3928u + (uint32_t)(iVar7) * 1u)))) = 3;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe3929u + (uint32_t)(iVar7) * 1u)))) = 0;
+    uVar3 = 0;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe392au + (uint32_t)(iVar7) * 1u)))) = 0;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe392bu + (uint32_t)(iVar7) * 1u)))) = 0;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe392cu + (uint32_t)(iVar7) * 1u)))) = 0;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe392du + (uint32_t)(iVar7) * 1u)))) = 0;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe392eu + (uint32_t)(iVar7) * 1u)))) = 0;
+    do {
+      iVar2 = uVar3 * 2 + iVar7;
+      uVar3 = uVar3 + 1;
+      *(undefined2 *)(((undefined *)camry_host_ptr(0xfebe3900u)) + iVar2 + 0x30) = 0;
+      *(undefined2 *)(((undefined *)camry_host_ptr(0xfebe3900u)) + iVar2 + 0x38) = 0;
+    } while (uVar3 < 4);
+    uVar3 = 0;
+    do {
+      iVar2 = uVar3 + (uint)channel * 2;
+      uVar3 = uVar3 + 1;
+      *(undefined2 *)(((undefined *)camry_host_ptr(0xfebe38c8u)) + iVar2 * 2) = 0;
+    } while (uVar3 < 2);
+    uVar3 = 0;
+    do {
+      (*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe3900u + (uint32_t)(uVar3 + iVar7 + 0x40) * 2u)))) = 0;
+      *(undefined2 *)(((undefined *)camry_host_ptr(0xfebe3900u)) + uVar3 * 2 + iVar7 + 0x42) = 0;
+      uVar4 = 0;
+      do {
+        iVar2 = (short)uVar3 * 5 + uVar4;
+        uVar4 = uVar4 + 1;
+        *(undefined2 *)(((undefined *)camry_host_ptr(0xfebe3900u)) + iVar2 * 2 + iVar7 + 0x46) = 0;
+      } while (uVar4 < 5);
+      uVar3 = uVar3 + 1;
+    } while (uVar3 < 2);
+    f33_serial_acquisition_retained_records[(short)uVar5].sequence_failures = '\0';
+    f33_serial_acquisition_retained_records[(short)uVar5].crc_failures = '\0';
+    f33_serial_acquisition_retained_records[(short)uVar5].rx_or_tx_failures = '\0';
+    f33_serial_acquisition_retained_records[(short)uVar5].rx_count_failures = '\0';
+    f33_serial_acquisition_retained_records[(short)uVar5].field12 = 0x800;
+    f33_serial_acquisition_retained_records[(short)uVar5].field14_1 = 0;
+    f33_serial_acquisition_retained_records[(short)uVar5].field14_0 = 0;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe38edu + (uint32_t)(iVar6) * 1u)))) = 0;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe38ecu + (uint32_t)(iVar6) * 1u)))) = 0;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe38ebu + (uint32_t)(iVar6) * 1u)))) = 0;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe38eau + (uint32_t)(iVar6) * 1u)))) = 0;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe38e9u + (uint32_t)(iVar6) * 1u)))) = 0;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe38e8u + (uint32_t)(iVar6) * 1u)))) = 0;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe38f9u + (uint32_t)(iVar6) * 1u)))) = 0;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe38f8u + (uint32_t)(iVar6) * 1u)))) = 0;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe38f7u + (uint32_t)(iVar6) * 1u)))) = 0;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe38f6u + (uint32_t)(iVar6) * 1u)))) = 0;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe38f5u + (uint32_t)(iVar6) * 1u)))) = 0;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe38f4u + (uint32_t)(iVar6) * 1u)))) = 0;
+  }
   return;
 }
 
@@ -1781,6 +2088,81 @@ void f33_accumulate_serial_acquisition_masks(uchar channel,ushort first_mask,ush
          *(ushort *)(((undefined *)camry_host_ptr(0xfebe3900u)) + iVar1 + 0x30) | first_mask;
     *(ushort *)(((undefined *)camry_host_ptr(0xfebe3900u)) + iVar1 + 0x38) =
          *(ushort *)(((undefined *)camry_host_ptr(0xfebe3900u)) + iVar1 + 0x38) | second_mask;
+  }
+  return;
+}
+
+
+
+/* Caller62576 guarantees channel<2 and initializes verdicts0. Use descriptor low
+   count31676[channel] to select two five-u16 FIFO blocks; validate second with623EE. Bad CRC
+   retains sequence/triplet/masks. CRC-valid incoming sequence is stored BEFORE next-sequence
+   comparison; mismatch sets5A and retains triplet/masks while resynchronizing. Accepted14/14/12-bit
+   fields write38D0+12*channel and OR two11-bit masks through6245A. No FIFO acknowledgment. Native
+   evidence covers explicit software continuations and a synthetic post-getter publication join, not
+   descriptor acquisition or the intact fast task. */
+
+void f33_decode_serial_acquisition_frame
+               (uchar channel,uchar fifo,uchar *crc_failure,uchar *sequence_failure)
+
+{
+  ushort uVar1;
+  ushort uVar2;
+  ushort uVar3;
+  byte bVar4;
+  uchar offset;
+  uint uVar5;
+  int iVar6;
+  uchar offset_00;
+  ushort uVar7;
+  int iVar8;
+  
+  uVar7 = (ushort)channel;
+  iVar8 = (short)uVar7 * 0x5a;
+  uVar5 = f33_read_transfer_primary_count_low("\x02\n"[channel]);
+  if (uVar5 < 0xb) {
+    if (uVar5 < 6) {
+      offset_00 = '\n';
+      offset = '\x05';
+    }
+    else {
+      offset_00 = '\x05';
+      offset = '\0';
+    }
+  }
+  else if (uVar5 < 0x10) {
+    offset_00 = '\0';
+    offset = '\x0f';
+  }
+  else {
+    offset_00 = '\x0f';
+    offset = '\n';
+  }
+  f33_copy_serial_fifo_words(fifo,(ushort *)(((undefined *)camry_host_ptr(0xfebe3900u)) + iVar8),offset,'\x05');
+  f33_copy_serial_fifo_words(fifo,(ushort *)(((undefined *)camry_host_ptr(0xfebe390au)) + iVar8),offset_00,'\x05');
+  iVar6 = FUN_000623ee(((undefined *)camry_host_ptr(0xfebe390au)) + iVar8);
+  *crc_failure = (uchar)iVar6;
+  if (iVar6 == 0) {
+    bVar4 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe3928u + (uint32_t)(iVar8) * 1u))));
+    uVar5 = (int)(*(ushort *)(((undefined *)camry_host_ptr(0xfebe390au)) + iVar8) & 0xc0) >> 6;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe3928u + (uint32_t)(iVar8) * 1u)))) = (char)uVar5;
+    if (uVar5 == (bVar4 + 1 & 3)) {
+      uVar1 = *(ushort *)(((undefined *)camry_host_ptr(0xfebe390cu)) + iVar8);
+      f33_serial_acquisition_retained_records[(short)uVar7].field14_0 =
+           (ushort)((*(ushort *)(((undefined *)camry_host_ptr(0xfebe390au)) + iVar8) & 0x3f) << 8) | uVar1 >> 8;
+      uVar2 = *(ushort *)(((undefined *)camry_host_ptr(0xfebe390eu)) + iVar8);
+      uVar3 = *(ushort *)(((undefined *)camry_host_ptr(0xfebe3910u)) + iVar8);
+      f33_serial_acquisition_retained_records[(short)uVar7].field14_1 =
+           (uVar1 & 0xff) << 6 | uVar2 >> 10;
+      f33_serial_acquisition_retained_records[(short)uVar7].field12 =
+           (uVar2 & 0x3ff) << 2 | uVar3 >> 0xe;
+      f33_accumulate_serial_acquisition_masks
+                (channel,(ushort)((int)(uVar3 & 0x3ff8) >> 3),
+                 (ushort)((uVar3 & 7) << 8) | *(ushort *)(((undefined *)camry_host_ptr(0xfebe3912u)) + iVar8) >> 8);
+    }
+    else {
+      *sequence_failure = 'Z';
+    }
   }
   return;
 }
@@ -1978,6 +2360,42 @@ void FUN_0006276c(ushort param_1,char param_2)
 
 
 
+/* Channel<2: increment wrappingu8 counters38D6..D9+12*channel for missing/wrong RX count, combined
+   RX-status or TX-submission failure, software CRC failure, sequence failure. Equality5A only.
+   Numeric retention and sequence acceptance are separate; zero after wrap is not healthy/fresh
+   proof. */
+
+void f33_accumulate_serial_acquisition_failures(uchar channel)
+
+{
+  int iVar1;
+  ushort uVar2;
+  
+  if (channel < 2) {
+    uVar2 = (ushort)channel;
+    iVar1 = (short)uVar2 * 0x5a;
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe3929u + (uint32_t)(iVar1) * 1u)))) == 'Z') {
+      f33_serial_acquisition_retained_records[(short)uVar2].rx_count_failures =
+           f33_serial_acquisition_retained_records[(short)uVar2].rx_count_failures + '\x01';
+    }
+    if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe392au + (uint32_t)(iVar1) * 1u)))) == 'Z') || ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe392cu + (uint32_t)(iVar1) * 1u)))) == 'Z')) {
+      f33_serial_acquisition_retained_records[(short)uVar2].rx_or_tx_failures =
+           f33_serial_acquisition_retained_records[(short)uVar2].rx_or_tx_failures + '\x01';
+    }
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe392bu + (uint32_t)(iVar1) * 1u)))) == 'Z') {
+      f33_serial_acquisition_retained_records[(short)uVar2].crc_failures =
+           f33_serial_acquisition_retained_records[(short)uVar2].crc_failures + '\x01';
+    }
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe392du + (uint32_t)(iVar1) * 1u)))) == 'Z') {
+      f33_serial_acquisition_retained_records[(short)uVar2].sequence_failures =
+           f33_serial_acquisition_retained_records[(short)uVar2].sequence_failures + '\x01';
+    }
+  }
+  return;
+}
+
+
+
 /* Run62576, then command/reply branch selected by
    entry39D8&3:0->62636(0),626D6(1);1->6276C(0);2->62636(1),626D6(0);3->6276C(1).
    Call60F7C(channel,0), then627E0. Sample decoding can fail/retain while a current command error
@@ -2033,6 +2451,80 @@ void f33_service_serial_acquisition_pair(void)
     f33_service_serial_acquisition_channel((uchar)uVar1);
     uVar1 = uVar1 + 1;
   } while (uVar1 < 2);
+  return;
+}
+
+
+
+/* For channels0/1: clear mask arrays at previous(cursor-1)&3, read current first mask, advance
+   cursor(cursor+1)&3, publish first mask then read/publish current second mask. Output two4-byte
+   mask pairs. Current slot is not cleared in this call.66932 publication5F18/1A/22/24 belongs to
+   another task generation than66824 numeric/counters. */
+
+void f33_rotate_and_copy_serial_acquisition_masks(F33SerialAcquisitionMasks *output)
+
+{
+  F33SerialAcquisitionMasks *pFVar1;
+  ushort uVar2;
+  int iVar3;
+  int iVar4;
+  uint uVar5;
+  uint uVar6;
+  
+  uVar5 = 0;
+  do {
+    iVar4 = (short)uVar5 * 0x5a;
+    uVar6 = (byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe392eu + (uint32_t)(iVar4) * 1u)))) & 3;
+    iVar3 = (uVar6 - 1 & 3) * 2 + iVar4;
+    *(undefined2 *)(((undefined *)camry_host_ptr(0xfebe3900u)) + iVar3 + 0x30) = 0;
+    *(undefined2 *)(((undefined *)camry_host_ptr(0xfebe3900u)) + iVar3 + 0x38) = 0;
+    uVar2 = *(ushort *)(((undefined *)camry_host_ptr(0xfebe3930u)) + uVar6 * 2 + iVar4);
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe392eu + (uint32_t)(iVar4) * 1u)))) = (char)uVar6 + 1U & 3;
+    pFVar1 = output + uVar5;
+    uVar5 = uVar5 + 1;
+    pFVar1->first = uVar2;
+    pFVar1->second = *(ushort *)(((undefined *)camry_host_ptr(0xfebe3900u)) + uVar6 * 2 + iVar4 + 0x38);
+  } while (uVar5 < 2);
+  return;
+}
+
+
+
+/* Write two12-byte-stride records: threeu16 plus fouru8 occurrence counters; offsets10/11 remain
+   untouched. Types ROM31678={0,11}: second record negates modulo14/14/12 bits; first copies raw.
+   Does not acquire, validate, clear counters, copy ancillary masks or distinguish current/retained
+   sample. Native evidence covers explicit software continuations and a synthetic post-getter
+   publication join, not descriptor acquisition or the intact fast task. */
+
+void f33_copy_cached_serial_acquisition_records(F33SerialAcquisitionRecord *output)
+
+{
+  F33SerialAcquisitionRecord *pFVar1;
+  ushort uVar2;
+  short sVar3;
+  uint uVar4;
+  
+  uVar4 = 0;
+  do {
+    sVar3 = (short)uVar4;
+    pFVar1 = output + sVar3;
+    if (""[uVar4] == '\x11') {
+      pFVar1->field14_0 = -f33_serial_acquisition_retained_records[sVar3].field14_0 & 0x3fff;
+      pFVar1->field14_1 = -f33_serial_acquisition_retained_records[sVar3].field14_1 & 0x3fff;
+      uVar2 = -f33_serial_acquisition_retained_records[sVar3].field12 & 0xfff;
+    }
+    else {
+      pFVar1->field14_0 = f33_serial_acquisition_retained_records[sVar3].field14_0;
+      pFVar1->field14_1 = f33_serial_acquisition_retained_records[sVar3].field14_1;
+      uVar2 = f33_serial_acquisition_retained_records[sVar3].field12;
+    }
+    pFVar1->field12 = uVar2;
+    uVar4 = uVar4 + 1;
+    pFVar1->rx_count_failures = f33_serial_acquisition_retained_records[sVar3].rx_count_failures;
+    pFVar1->rx_or_tx_failures = f33_serial_acquisition_retained_records[sVar3].rx_or_tx_failures;
+    pFVar1->crc_failures = f33_serial_acquisition_retained_records[sVar3].crc_failures;
+    pFVar1->sequence_failures = f33_serial_acquisition_retained_records[sVar3].sequence_failures;
+  } while (uVar4 < 2);
   return;
 }
 

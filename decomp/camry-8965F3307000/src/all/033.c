@@ -1708,6 +1708,47 @@ void FUN_000ce8ca(void)
 
 
 
+/* Generic retained unsigned gain step used by eight producers. Direction2 and current>=down_target
+   select bounded subtraction; otherwise step toward up_target. Write only current at+8; not a
+   torque-specific policy or elapsed-time controller. Generic unsigned retained gain stepping uses
+   direction2/current>=down_target for bounded subtraction and otherwise bounded upward/default
+   selection. Eight caller preparation leaves preserve the actual state pointer. */
+
+void f33_step_retained_unsigned_gain(F33GainSlewState *state)
+
+{
+  int iVar1;
+  ushort uVar2;
+  ushort uVar3;
+  ushort uVar4;
+  uint uVar5;
+  
+  uVar2 = state->current;
+  uVar5 = (uint)uVar2;
+  uVar4 = state->down_target;
+  if ((uVar5 < uVar4) || (state->direction != '\x02')) {
+    uVar4 = state->up_target;
+    uVar3 = state->up_step;
+    uVar5 = uVar4 - uVar5;
+    iVar1 = uVar5 - uVar3;
+    if (iVar1 < 0 == ((int)uVar5 < 0 && -1 < iVar1) && uVar5 != uVar3) {
+      uVar4 = uVar2 + uVar3;
+    }
+  }
+  else {
+    uVar3 = state->down_step;
+    uVar5 = uVar5 - uVar4;
+    iVar1 = uVar5 - uVar3;
+    if (iVar1 < 0 == ((int)uVar5 < 0 && -1 < iVar1) && uVar5 != uVar3) {
+      uVar4 = uVar2 - uVar3;
+    }
+  }
+  state->current = uVar4;
+  return;
+}
+
+
+
 void FUN_000ce912(char *param_1)
 
 {

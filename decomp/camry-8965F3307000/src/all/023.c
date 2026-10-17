@@ -285,6 +285,95 @@ bool FUN_0008c3c0(int param_1,ushort *param_2,undefined1 *param_3)
 
 
 
+undefined4 FUN_0008c4f8(F33DcmMessageContext *param_1)
+
+{
+  undefined4 uVar1;
+  undefined2 uVar2;
+  undefined1 uVar3;
+  char cVar4;
+  int iVar5;
+  char cVar6;
+  uint uVar7;
+  uchar uStack_44;
+  undefined1 uStack_43;
+  ushort uStack_42;
+  F33DiagSourceBuffer FStack_40;
+  F33DiagSourceBuffer FStack_38;
+  undefined1 auStack_30 [8];
+  
+  cVar4 = DAT_febf3bf7;
+  uVar3 = DAT_febf3bf5;
+  cVar6 = DAT_febf3bf4;
+  uVar2 = DAT_febf3bf0;
+  iVar5 = 0;
+  uStack_42 = DAT_febf3bf2;
+  uVar7 = (uint)DAT_febf3bf9;
+  uStack_44 = DAT_febf3bf6;
+  uStack_43 = DAT_febf3bf8;
+  if (DAT_febf3bf4 == '\0') {
+    cVar6 = '\x02';
+    auStack_30[0] = DAT_febf3bf5;
+    uVar7 = ((void)(0x20000100), (void)(2), (void)(1), (void)(auStack_30), (void)(&uStack_43), f33_return_const_0_8b10c());
+    while ((uStack_44 != '\x01' && (iVar5 != 1))) {
+      iVar5 = FUN_0008c3c0(camry_host_addr(f33_dtc_count_local_tuple_scratch), &uStack_42, &uStack_44);
+    }
+  }
+  else if (DAT_febf3bf4 == '\x02') {
+    if (uVar7 == 2) {
+      uVar7 = ((void)(1), (void)(2), f33_return_const_0_8b110());
+    }
+    while ((uStack_44 != '\x01' && (iVar5 != 1))) {
+      iVar5 = FUN_0008c3c0(camry_host_addr(f33_dtc_count_local_tuple_scratch), &uStack_42, &uStack_44);
+    }
+  }
+  else {
+    uStack_44 = '\x01';
+    uVar7 = 1;
+    uStack_42 = 0;
+    uVar2 = 0;
+  }
+  if ((uStack_44 == '\x02') || (uVar7 == 2)) {
+    f33_dcm_post_service_event(0xec);
+  }
+  else {
+    if (cVar4 != '\0') {
+      FStack_38.bytes = camry_host_addr(f33_dtc_count_local_tuple_scratch);
+      FStack_40.status = (uchar)uVar7;
+      FStack_40.bytes = 0;
+      FStack_38.length = uStack_42;
+      FStack_40.length = 0;
+      FStack_38.status = uStack_44;
+      f33_count_merged_dtc_sources(&FStack_38,&FStack_40);
+      f33_dcm_report_positive_response(param_1);
+      cVar6 = '\0';
+      uVar2 = 0;
+      uVar7 = 0;
+      uStack_42 = 0;
+      uVar3 = 0;
+      uStack_44 = '\0';
+      cVar4 = '\0';
+      uVar1 = 0;
+      goto LAB_0008c600;
+    }
+    f33_dcm_post_service_event(0xec);
+    cVar4 = 'Z';
+  }
+  uVar1 = 10;
+LAB_0008c600:
+  DAT_febf3bf0 = uVar2;
+  DAT_febf3bf9 = (char)uVar7;
+  DAT_febf3bf5 = uVar3;
+  DAT_febf3bf2 = uStack_42;
+  DAT_febf3bf4 = cVar6;
+  DAT_febf3bf7 = cVar4;
+  DAT_febf3bf6 = uStack_44;
+  DAT_febf3bf8 = uStack_43;
+  return uVar1;
+}
+
+
+
 /* EventEC re-enters8C4F8 with retained28-byte message3BFC. */
 
 void f33_dcm_resume_queued_dtc_count(void)
@@ -1513,6 +1602,19 @@ undefined4 FUN_0008e672(undefined1 param_1,undefined4 *param_2)
 
 
 
+/* Copy proprietary operation response length to existing52C8, then complete the enclosing52BC DCM
+   context. Completion readiness is not transport confirmation. */
+
+void f33_dcm_complete_proprietary_message(F33DiagProprietaryMessage *message)
+
+{
+  DAT_febe52c8 = message->response_length;
+  f33_dcm_complete_service_response((F33DcmMessageContext *)((undefined *)camry_host_ptr(0xfebe52bcu)));
+  return;
+}
+
+
+
 /* Use incomingR7 NRC to stage and complete the enclosing52BC DCM context. IncomingR6 operation-view
    pointer is not consumed. */
 
@@ -2582,6 +2684,51 @@ undefined4 FUN_0008fa86(void)
     return 3;
   }
   return 2;
+}
+
+
+
+/* Require5568E1/55695A; claimD2/A5 and increment generation before copy. Subtract four reserved
+   bytes. Occupied rejection21 preserves prior snapshot/head/count but COM consumes this request.
+   Native protected admission claims generation and copies28 application bytes, leaving trailer
+   outside extent. Occupied claim21 preserves old snapshot/head/generation. Internal malformed-queue
+   failures are not claimed to preserve payload. */
+
+uint f33_claim_secoc_tx_snapshot(ushort profile,F33PduInfo *info)
+
+{
+  uint32_t puVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  uchar *local_18;
+  short sStack_14;
+  
+  puVar1 = 0xfebeb800u;
+  puVar2 = 0x23dfcu;
+  uVar3 = 0;
+  thunk_FUN_0006a45e();
+  if ((((int8_t)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6298)))))) == -0x1f) && ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6297))))) == 'Z')) {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6298))))) = 0xd2;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6297))))) = 0xa5;
+    (*((short *)camry_host_ptr((uint32_t)(puVar1 + -0x6296)))) = (*((short *)camry_host_ptr((uint32_t)(puVar1 + -0x6296)))) + 1;
+  }
+  else {
+    uVar3 = 0x21;
+  }
+  thunk_FUN_0006a4c4();
+  if (uVar3 == 0) {
+    local_18 = ((void *)camry_host_ptr((uint32_t)(info->data)));
+    sStack_14 = info->length - (*((short *)camry_host_ptr((uint32_t)(puVar2 + 0x1b42))));
+    uVar3 = FUN_0008e9c6(0,profile,&local_18);
+    if (uVar3 != 0) {
+      thunk_FUN_0006a45e();
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6298))))) = 0xe1;
+      (*((short *)camry_host_ptr((uint32_t)(puVar1 + -0x6296)))) = (*((short *)camry_host_ptr((uint32_t)(puVar1 + -0x6296)))) + -1;
+      thunk_FUN_0006a4c4();
+    }
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6297))))) = 0x5a;
+  }
+  return uVar3;
 }
 
 

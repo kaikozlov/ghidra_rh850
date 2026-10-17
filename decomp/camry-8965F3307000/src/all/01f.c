@@ -3570,3 +3570,170 @@ uint FUN_0007fbdc(uint param_1,uint param_2)
 }
 
 
+
+/* Normal class first copies up to64 bytes into4FB2 and calls811BE, before controller/route/capacity
+   admission. Queue-full2 preserves old queue but scratch already contains newer data. Native
+   classic admission copies source into queued record; full queue preserves old
+   header/payload/cursors while scratch receives newer source. Other controller/classes remain
+   static. */
+
+uint f33_snapshot_and_enqueue_can_tx(uchar controller,ushort route,F33CanIfTxRecord *record)
+
+{
+  ushort *puVar1;
+  undefined4 *puVar2;
+  uint *puVar3;
+  ushort queue_index;
+  ushort capacity_words;
+  uchar *puVar4;
+  uint uVar5;
+  uint32_t puVar6;
+  uint32_t puVar7;
+  uint uVar8;
+  undefined4 uVar9;
+  int iVar10;
+  uint uVar11;
+  uint uVar12;
+  uint uVar13;
+  uint uVar14;
+  uint uVar15;
+  uint uVar16;
+  uint uVar17;
+  F33CanIfTxRecord local_28;
+  
+  uVar8 = (uint)controller;
+  puVar6 = 0xfebeb800u;
+  puVar7 = 0x23dfcu;
+  uVar14 = 1;
+  if (uVar8 < DAT_00021970) {
+    local_28.length = record->length;
+    uVar16 = (uint)local_28.length;
+    uVar15 = record->class_flags | 0x80;
+    local_28.raw_id = record->raw_id;
+    local_28.class_flags = (uchar)uVar15;
+    local_28.source_pdu = record->source_pdu;
+    puVar4 = ((void *)camry_host_ptr((uint32_t)(record->data)));
+    local_28.data = camry_host_addr(puVar4);
+    if (uVar15 == 0x81) {
+      if (0x40 < uVar16) {
+        uVar16 = 0x40;
+      }
+      puVar6 = 0xfebeb800u;
+      uVar9 = FUN_0007a2da();
+      for (uVar5 = 0; uVar5 < uVar16; uVar5 = uVar5 + 1 & 0xff) {
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar6 + (uint32_t)(uVar5 - 0x684e))))) = puVar4[uVar5];
+      }
+      ((void)(uVar9), thunk_FUN_0006a4c4());
+      local_28.data = puVar6 + -0x684e;
+      iVar10 = (*(int (*)())*(code **)(puVar7 + uVar8 * 4 + -0x24fc))(uVar8,&local_28);
+      uVar16 = (uint)local_28.length;
+      if (iVar10 != 0) {
+        return 1;
+      }
+    }
+    iVar10 = FUN_0007fbdc(uVar8,route);
+    uVar9 = FUN_0007a2da();
+    if (((((*((short *)camry_host_ptr((uint32_t)(puVar6 + uVar8 * 2 + -0x6f28)))) == 0x57a8) && ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar6 + (uint32_t)(uVar8 - 0x6efd))))) == 'Z'))
+        && ((*((short *)camry_host_ptr((uint32_t)(puVar6 + uVar8 * 2 + -0x6f02)))) == 0x5555)) && (iVar10 != 0xff)) {
+      puVar1 = ((ushort *)camry_host_ptr((uint32_t)((short)iVar10 * 10 + *(int *)(puVar7 + uVar8 * 4 + -0x2518))));
+      queue_index = puVar1[4];
+      uVar5 = (uint)queue_index;
+      capacity_words = *puVar1;
+      uVar8 = (uint)capacity_words;
+      if (uVar16 < 9) {
+        uVar13 = (uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar6 + uVar5 * 6 + -0x6f26))));
+        uVar12 = (uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar6 + uVar5 * 6 + -0x6f22))));
+        if (((int)((uVar13 + 2) - uVar8) < 0 || uVar13 + 2 == uVar8) && (uVar12 <= uVar8)) {
+          uVar11 = uVar8 - uVar13 & 0xffff;
+          uVar14 = uVar13;
+          uVar17 = uVar8;
+          if (uVar11 < 7) {
+            uVar12 = uVar12 + uVar11;
+            uVar14 = 0;
+            uVar17 = uVar13;
+          }
+          if (uVar8 < (uVar12 + 5 & 0xffff)) {
+            uVar14 = 2;
+          }
+          else {
+            if (uVar17 < uVar8) {
+              puVar2 = ((undefined4 *)camry_host_ptr((uint32_t)(uVar17 * 4 + *(int *)(puVar7 + uVar5 * 4 + -0x23a8))));
+              *puVar2 = 0xffffffff;
+              puVar2[1] = 0;
+            }
+            iVar10 = (*((int *)camry_host_ptr((uint32_t)(puVar7 + uVar5 * 4 + -0x23a8))));
+            (*((short *)camry_host_ptr((uint32_t)(puVar6 + uVar5 * 6 + -0x6f26)))) = (short)uVar14 + 5;
+            (*((short *)camry_host_ptr((uint32_t)(puVar6 + uVar5 * 6 + -0x6f22)))) = (short)(uVar12 + 5);
+            puVar3 = ((uint *)camry_host_ptr((uint32_t)(uVar14 * 4 + iVar10)));
+            uVar8 = (uint)local_28.source_pdu * 0x10000 + uVar15 * 0x100 + uVar16;
+            *puVar3 = uVar8;
+            puVar3[1] = ~uVar8;
+            puVar3[2] = local_28.raw_id;
+            for (uVar8 = 0; uVar8 < uVar16; uVar8 = uVar8 + 1 & 0xff) {
+              (*((uchar *)camry_host_ptr((uint32_t)((int)camry_host_addr(puVar3) + uVar8 + 0xc)))) = ((uint8_t *)camry_host_ptr((uint32_t)(local_28.data)))[uVar8];
+            }
+            uVar14 = 0;
+          }
+        }
+      }
+      else {
+        uVar14 = f33_enqueue_large_can_tx(&local_28,queue_index,capacity_words);
+      }
+    }
+    ((void)(uVar9), thunk_FUN_0006a4c4());
+  }
+  return uVar14;
+}
+
+
+
+/* Decode source namespace and construct transmit record. Real R10 return defaults1 and
+   propagates7FD46 status; not void. */
+
+uint f33_canif_transmit(ushort source_pdu,F33PduInfo *info)
+
+{
+  uint *puVar1;
+  uint uVar2;
+  uint uVar3;
+  undefined *puVar4;
+  F33CanIfTxRecord local_10;
+  
+  puVar4 = ((undefined *)camry_host_ptr((uint32_t)(source_pdu & 0xf800)));
+  uVar3 = source_pdu & 0x7ff;
+  if ((source_pdu & 0xf800) != 0) {
+    if (puVar4 == ((undefined *)camry_host_ptr((uint32_t)(0x6000)))) {
+      puVar4 = ((undefined *)camry_host_ptr((uint32_t)(0x1)));
+    }
+    else if (puVar4 == ((undefined *)camry_host_ptr((uint32_t)(0x800)))) {
+      puVar4 = ((undefined *)camry_host_ptr((uint32_t)(0x2)));
+    }
+    else if (puVar4 == ((undefined *)camry_host_ptr(0xb800u))) {
+      puVar4 = ((undefined *)camry_host_ptr((uint32_t)(0x3)));
+    }
+    else if (puVar4 == ((undefined *)camry_host_ptr((uint32_t)(0xc000)))) {
+      puVar4 = ((undefined *)camry_host_ptr((uint32_t)(0x4)));
+    }
+    else if (puVar4 == ((undefined *)camry_host_ptr((uint32_t)(0xf800)))) {
+      puVar4 = ((undefined *)camry_host_ptr((uint32_t)(0x5)));
+    }
+    else {
+      puVar4 = ((undefined *)camry_host_ptr((uint32_t)(0xff)));
+    }
+  }
+  uVar2 = 1;
+  if ((puVar4 != ((undefined *)camry_host_ptr((uint32_t)(0xff)))) && (uVar3 < (ushort)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0x21a48u + (uint32_t)((int)camry_host_addr(puVar4)) * 2u)))))) {
+    puVar1 = ((uint *)camry_host_ptr((uint32_t)((&PTR_DAT_00021994)[(int)camry_host_addr(puVar4)] + uVar3 * 8)));
+    local_10.raw_id = *puVar1;
+    local_10.class_flags = (uchar)(1 << ((uint)camry_host_addr(puVar4) & 0x1f));
+    local_10.length = (uchar)info->length;
+    local_10.data = info->data;
+    local_10.source_pdu = source_pdu;
+    uVar2 = f33_snapshot_and_enqueue_can_tx
+                      ((uchar)puVar1[1],(*((ushort *)camry_host_ptr((uint32_t)((int)camry_host_addr(puVar1) + 6)))) | (ushort)((int)camry_host_addr(puVar4) << 8),
+                       &local_10);
+  }
+  return uVar2;
+}
+
+

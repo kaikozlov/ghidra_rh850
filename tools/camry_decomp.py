@@ -534,6 +534,8 @@ def _kind_context(signature: str, code: str, pointers: set[str] | None = None):
     ))
     integers = (_declared_integers(signature, code) | data_scalars) - pointers - arrays - doubles
     functions = set(_function_entries())
+    var_structs = _struct_var_types(signature + "\n" + code)
+    field_kinds = _scalar_field_kinds()
 
     def kind(expr: str) -> str:
         return _expr_kind(
@@ -543,6 +545,8 @@ def _kind_context(signature: str, code: str, pointers: set[str] | None = None):
             integers=integers,
             functions=functions,
             doubles=doubles,
+            var_structs=var_structs,
+            field_kinds=field_kinds,
         )
 
     return kind
@@ -602,6 +606,8 @@ def _expr_kind(
     integers: set[str],
     functions: set[str],
     doubles: set[str],
+    var_structs: dict[str, str] | None = None,
+    field_kinds: dict[tuple[str, str], str] | None = None,
 ) -> str:
     text = text.strip()
     if not text:
@@ -624,6 +630,8 @@ def _expr_kind(
                 integers=integers,
                 functions=functions,
                 doubles=doubles,
+                var_structs=var_structs,
+                field_kinds=field_kinds,
             )
             for part in parts
         ]
@@ -639,6 +647,8 @@ def _expr_kind(
             integers=integers,
             functions=functions,
             doubles=doubles,
+            var_structs=var_structs,
+            field_kinds=field_kinds,
         )
         if text[0] == "!":
             return "integer" if inner != "unknown" else "unknown"
@@ -686,6 +696,9 @@ def _expr_kind(
         return "unknown"
     name = match.group(0)
     rest = text[match.end():].lstrip()
+    field_kind = _scalar_field_kind(name, rest, var_structs, field_kinds)
+    if field_kind is not None:
+        return field_kind
     if name in functions and name not in pointers and name not in integers:
         return "pointer" if not rest else "unknown"
     if name in pointers or name in arrays or name in integers or name.startswith(("DAT_", "UNK_", "PTR_")):
@@ -1469,6 +1482,7 @@ def _rewrite_body(code: str) -> str:
     code = _rewrite_function_indexes(code)
     code = _rewrite_function_values(code)
     code = _rewrite_signed_byte_compares(code)
+    code = _rewrite_struct_fields(code)
     code = _rewrite_indirect_calls(code)
     return code
 
@@ -1515,7 +1529,13 @@ def _data_symbols() -> dict[str, int]:
     return {name: addr for name, (addr, _ctype, _array) in _data_layouts().items()}
 
 
+_DATA_LAYOUTS: dict[str, tuple[int, str, bool]] | None = None
+
+
 def _data_layouts() -> dict[str, tuple[int, str, bool]]:
+    global _DATA_LAYOUTS
+    if _DATA_LAYOUTS is not None:
+        return _DATA_LAYOUTS
     found: dict[str, tuple[int, str, bool]] = {}
     for row in _load_jsonl(ROOT / "data.jsonl"):
         addr = _address(row["addr"])
@@ -1532,6 +1552,7 @@ def _data_layouts() -> dict[str, tuple[int, str, bool]]:
             continue
         ctype = _SCALAR_TYPES.get(type_name) or _scalar_type(addr, "uint8_t")
         found[row["name"]] = (addr, ctype, False)
+    _DATA_LAYOUTS = found
     return found
 
 
@@ -1883,6 +1904,339 @@ def _failure_class(message: str) -> str:
     return text[:200]
 
 
+_TYPE_LAYOUTS: dict | None = None
+_SCALAR_FIELDS: dict[tuple[str, str], str] | None = None
+_POINTER_FIELDS: dict[tuple[str, str], str] | None = None
+_FIELD_C = {
+    "byte": "uint8_t", "uchar": "uint8_t", "char": "uint8_t",
+    "undefined": "uint8_t", "undefined1": "uint8_t", "code": "uint8_t",
+    "sbyte": "int8_t",
+    "ushort": "uint16_t", "undefined2": "uint16_t",
+    "short": "int16_t",
+    "uint": "uint32_t", "dword": "uint32_t", "ulong": "uint32_t", "undefined4": "uint32_t",
+    "int": "int32_t",
+    "undefined8": "uint64_t",
+    "float": "float", "double": "double",
+}
+_FIELD_ACCESS = re.compile(
+    r"\b([A-Za-z_][A-Za-z0-9_]*)(\s*\[[^\[\]]*\])?\s*(->|\.)\s*([A-Za-z_][A-Za-z0-9_]*)"
+)
+
+
+def _type_layouts() -> dict:
+    global _TYPE_LAYOUTS
+    if _TYPE_LAYOUTS is None:
+        path = ROOT / "struct_layouts.json"
+        if path.exists():
+            _TYPE_LAYOUTS = json.loads(path.read_text(encoding="utf-8"))
+        else:
+            _TYPE_LAYOUTS = {"structs": [], "functions": [], "enums": []}
+    return _TYPE_LAYOUTS
+
+
+def _struct_rows() -> dict[str, dict]:
+    return {row["name"]: row for row in _type_layouts().get("structs") or []}
+
+
+def _function_types() -> set[str]:
+    return set(_type_layouts().get("functions") or [])
+
+
+def _ghidra_base(type_name: str) -> tuple[str, int, str]:
+    text = type_name.strip()
+    array = ""
+    match = re.search(r"\[(\d+)\]$", text)
+    if match:
+        array = f"[{match.group(1)}]"
+        text = text[:match.start()].strip()
+    base = " ".join(text.replace("*32", " ").replace("*", " ").split())
+    return base, text.count("*"), array
+
+
+def _field_c(type_name: str, size: int, structs: set[str]) -> tuple[str, str]:
+    """A firmware pointer is four bytes on this target, including inside a struct."""
+    base, stars, array = _ghidra_base(type_name)
+    if stars:
+        return "uint32_t", array
+    if base in _FIELD_C:
+        return _FIELD_C[base], array
+    if base in structs:
+        return base, array
+    fallback = {1: "uint8_t", 2: "uint16_t", 4: "uint32_t", 8: "uint64_t"}.get(size)
+    if fallback and not array:
+        return fallback, ""
+    return "uint8_t", array or f"[{size}]"
+
+
+def _pointed_c_type(type_name: str) -> str | None:
+    base, stars, array = _ghidra_base(type_name)
+    if stars != 1 or array or base in _function_types():
+        return None
+    if base in _FIELD_C:
+        return _FIELD_C[base]
+    if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", base):
+        return base
+    return None
+
+
+def _scalar_field_kinds() -> dict[tuple[str, str], str]:
+    global _SCALAR_FIELDS
+    if _SCALAR_FIELDS is not None:
+        return _SCALAR_FIELDS
+    found: dict[tuple[str, str], str] = {}
+    rows = _struct_rows()
+    for name, row in rows.items():
+        for field in row["fields"]:
+            base, stars, array = _ghidra_base(field["type"])
+            if array and not stars:
+                continue
+            if not stars and base in rows:
+                continue
+            found[(name, field["name"])] = "integer"
+    _SCALAR_FIELDS = found
+    return found
+
+
+def _pointer_field_types() -> dict[tuple[str, str], str]:
+    global _POINTER_FIELDS
+    if _POINTER_FIELDS is not None:
+        return _POINTER_FIELDS
+    found: dict[tuple[str, str], str] = {}
+    for name, row in _struct_rows().items():
+        for field in row["fields"]:
+            pointed = _pointed_c_type(field["type"])
+            if pointed is not None:
+                found[(name, field["name"])] = pointed
+    _POINTER_FIELDS = found
+    return found
+
+
+def _struct_bindings(code: str) -> tuple[dict[str, str], set[str]]:
+    structs = set(_struct_rows())
+    found: dict[str, str] = {}
+    pointers: set[str] = set()
+    for name, (_addr, ctype, is_array) in _data_layouts().items():
+        if is_array and ctype in structs:
+            found[name] = ctype
+            pointers.add(name)
+    for match in re.finditer(
+        r"\b([A-Z][A-Za-z0-9_]*)\s*(\*+)?\s*([A-Za-z_][A-Za-z0-9_]*)\s*[,;=)]",
+        code,
+    ):
+        if match.group(1) not in structs:
+            continue
+        found[match.group(3)] = match.group(1)
+        if match.group(2):
+            pointers.add(match.group(3))
+        else:
+            pointers.discard(match.group(3))
+    return found, pointers
+
+
+def _struct_var_types(code: str) -> dict[str, str]:
+    names, _pointers = _struct_bindings(code)
+    return names
+
+
+def _scalar_field_kind(
+    name: str,
+    rest: str,
+    var_structs: dict[str, str] | None,
+    field_kinds: dict[tuple[str, str], str] | None,
+) -> str | None:
+    if not var_structs or not field_kinds or not rest:
+        return None
+    match = re.fullmatch(
+        r"(?:\[[^\[\]]*\])?\s*(?:->|\.)\s*([A-Za-z_][A-Za-z0-9_]*)",
+        rest,
+    )
+    if match is None:
+        return None
+    struct = var_structs.get(name)
+    if struct is None:
+        return None
+    return field_kinds.get((struct, match.group(1)))
+
+
+def _byvalue_deps(row: dict, structs: dict[str, dict]) -> list[str]:
+    deps: list[str] = []
+    for field in row["fields"]:
+        base, stars, _array = _ghidra_base(field["type"])
+        if stars == 0 and base in structs:
+            deps.append(base)
+    return deps
+
+
+def _one_struct(row: dict, structs: set[str]) -> list[str]:
+    lines = [f"struct {row['name']} {{"]
+    cursor = 0
+    for field in row["fields"]:
+        if field["offset"] > cursor:
+            lines.append(f"    uint8_t _pad_{cursor}[{field['offset'] - cursor}];")
+        ctype, array = _field_c(field["type"], field["size"], structs)
+        lines.append(f"    {ctype} {field['name']}{array};")
+        cursor = field["offset"] + field["size"]
+    if row["size"] > cursor:
+        lines.append(f"    uint8_t _pad_{cursor}[{row['size'] - cursor}];")
+    lines.append("};")
+    lines.append(
+        f'_Static_assert(sizeof(struct {row["name"]}) == {row["size"]}, "{row["name"]}");'
+    )
+    return lines
+
+
+def _struct_definitions(structs: dict[str, dict]) -> list[str]:
+    pending = set(structs)
+    lines: list[str] = []
+    while pending:
+        ready = [
+            name for name in sorted(pending)
+            if all(dep not in pending for dep in _byvalue_deps(structs[name], structs))
+        ]
+        if not ready:
+            break
+        for name in ready:
+            lines.extend(_one_struct(structs[name], set(structs)))
+            pending.remove(name)
+    return lines
+
+
+def _comment_spans(code: str) -> list[tuple[int, int]]:
+    return [match.span() for match in re.finditer(r"/\*.*?\*/|//.*?$", code, re.S | re.M)]
+
+
+def _span_contains(spans: list[tuple[int, int]], pos: int) -> bool:
+    for start, end in spans:
+        if start <= pos < end:
+            return True
+        if start > pos:
+            return False
+    return False
+
+
+def _next_code(code: str, index: int) -> int:
+    while index < len(code) and code[index] in " \t\r\n":
+        index += 1
+    return index
+
+
+def _rhs_end(code: str, start: int) -> int:
+    depth = 0
+    index = start
+    while index < len(code):
+        char = code[index]
+        if char == "(":
+            depth += 1
+        elif char == ")":
+            if depth == 0:
+                return index
+            depth -= 1
+        elif depth == 0 and char in ",;":
+            return index
+        index += 1
+    return index
+
+
+def _null_pointer(expr: str) -> bool:
+    text = expr.strip()
+    if _is_null_expr(text):
+        return True
+    return re.fullmatch(r"\([^()]*\*\s*\)\s*(?:0x0+|0+u?|NULL)", text) is not None
+
+
+def _host_pointer(access: str, pointed: str) -> str:
+    return f"(({pointed} *)camry_host_ptr((uint32_t)({access})))"
+
+
+def _rewrite_struct_fields(code: str) -> str:
+    """Use a firmware pointer stored in a struct as a host pointer at the use site."""
+    brace = _opening_brace(code)
+    if brace < 0:
+        return code
+    structs = _struct_rows()
+    pointed = _pointer_field_types()
+    if not structs or not pointed:
+        return code
+    var_types, struct_pointers = _struct_bindings(code)
+    if not var_types:
+        return code
+    signature = _c_signature(code)
+    pointers = _pointer_names(signature, code)
+    kind = _kind_context(signature, code, pointers)
+    body = code[brace:]
+    spans = _comment_spans(body)
+    struct_names = set(structs)
+    replacements: list[tuple[int, int, str]] = []
+    for match in _FIELD_ACCESS.finditer(body):
+        if _span_contains(spans, match.start()):
+            continue
+        var, subscript, op, field = match.groups()
+        struct = var_types.get(var)
+        element = pointed.get((struct, field)) if struct else None
+        if struct is None or element is None:
+            continue
+        is_pointer = var in struct_pointers
+        if subscript:
+            if not is_pointer or op != ".":
+                continue
+        elif is_pointer:
+            if op != "->":
+                continue
+        elif op != ".":
+            continue
+        if replacements and match.start() < replacements[-1][1]:
+            continue
+        access = match.group(0)
+        nxt = _next_code(body, match.end())
+        char = body[nxt] if nxt < len(body) else ""
+        if char == "[":
+            replacements.append((match.start(), match.end(), _host_pointer(access, element)))
+            continue
+        if body.startswith("->", nxt) and element in struct_names:
+            replacements.append((match.start(), match.end(), _host_pointer(access, element)))
+            continue
+        if match.start() > 0 and body[match.start() - 1] == "*":
+            prev = body[match.start() - 2] if match.start() > 1 else ""
+            if prev not in "*&/=" and not (prev.isalnum() or prev == "_"):
+                replacements.append((
+                    match.start() - 1,
+                    match.end(),
+                    f"*{_host_pointer(access, element)}",
+                ))
+                continue
+        if char == "=" and not body.startswith("==", nxt):
+            rhs_at = _rhs_end(body, nxt + 1)
+            rhs = body[nxt + 1:rhs_at].strip()
+            if not rhs:
+                continue
+            stored = "0" if _null_pointer(rhs) else (
+                f"camry_host_addr({rhs})" if kind(rhs) == "pointer" else ""
+            )
+            if stored:
+                replacements.append((match.start(), rhs_at, f"{access} = {stored}"))
+            continue
+        boundary = char
+        if boundary in ",;)" and body[match.end():nxt].strip() == "":
+            prefix = body[:match.start()].rstrip()
+            lhs = re.search(r"([A-Za-z_][A-Za-z0-9_]*)\s*=$", prefix)
+            if lhs and lhs.group(1) in pointers and not prefix.endswith("=="):
+                replacements.append((
+                    match.start(),
+                    match.end(),
+                    f"((void *)camry_host_ptr((uint32_t)({access})))",
+                ))
+    if not replacements:
+        return code
+    pieces: list[str] = []
+    cursor = 0
+    for start, end, text in replacements:
+        pieces.append(body[cursor:start])
+        pieces.append(text)
+        cursor = end
+    pieces.append(body[cursor:])
+    return code[:brace] + "".join(pieces)
+
+
 def _common_header(text: str, signatures: dict[str, str]) -> str:
     registers = _machine_registers()
     data = _data_symbols()
@@ -1897,11 +2251,36 @@ def _common_header(text: str, signatures: dict[str, str]) -> str:
     for _name, (_addr, ctype, _is_array) in _data_layouts().items():
         if re.fullmatch(r"[A-Z][A-Za-z0-9_]*", ctype):
             types.add(ctype)
+    structs = _struct_rows()
+    function_types = _function_types()
+    enums = {row["name"]: row for row in _type_layouts().get("enums") or []}
+    forbidden = (
+        _PRIMITIVE_TYPES | set(registers) | set(data) | function_names
+        | function_types | set(enums)
+    )
+    for name in sorted(function_types):
+        if name in function_names or name in registers or name in data:
+            continue
+        lines.append(f"typedef int {name}();")
+    for name, row in sorted(enums.items()):
+        if name in function_names:
+            continue
+        width = {1: "uint8_t", 2: "uint16_t", 4: "uint32_t"}.get(int(row["size"]), "uint16_t")
+        lines.append(f"typedef {width} {name};")
     emitted = False
-    for name in sorted(types):
-        if name in _PRIMITIVE_TYPES or name in registers or name in data or name in function_names:
+    for name in sorted(structs):
+        if name in forbidden:
             continue
         lines.append(f"typedef struct {name} {name};")
+        emitted = True
+    for name in sorted(types):
+        if name in structs or name in forbidden:
+            continue
+        lines.append(f"typedef struct {name} {name};")
+        emitted = True
+    visible = {name: row for name, row in structs.items() if name not in forbidden}
+    if visible:
+        lines.extend(_struct_definitions(visible))
         emitted = True
     if emitted:
         lines.append("")
@@ -1936,7 +2315,10 @@ def _common_header(text: str, signatures: dict[str, str]) -> str:
     lines.append("")
     for name in sorted(signatures):
         lines.append(signatures[name] + ";")
-    lines.extend(_loose_declarations(text, set(signatures) | _prototype_names()))
+    lines.extend(_loose_declarations(
+        text,
+        set(signatures) | _prototype_names() | function_types | set(enums) | set(structs),
+    ))
     lines.append("")
     return "\n".join(lines) + "\n"
 

@@ -1819,6 +1819,21 @@ void f33_record_sample_range_triplet_a_failure(void)
 
 
 
+undefined2 FUN_000412e2(void)
+
+{
+  undefined2 uVar1;
+  
+  if (((f33_sample_range_triplet_a_states[0].failing_count != 0) ||
+      (f33_sample_range_triplet_a_states[1].failing_count != 0)) ||
+     (uVar1 = 0, f33_sample_range_triplet_a_states[2].failing_count != 0)) {
+    uVar1 = 0x11;
+  }
+  return uVar1;
+}
+
+
+
 void FUN_00041300(void)
 
 {
@@ -1997,6 +2012,21 @@ void f33_record_sample_range_triplet_b_failure(void)
 
 
 
+undefined2 FUN_00041550(void)
+
+{
+  undefined2 uVar1;
+  
+  if (((f33_sample_range_triplet_b_states[0].failing_count != 0) ||
+      (f33_sample_range_triplet_b_states[1].failing_count != 0)) ||
+     (uVar1 = 0, f33_sample_range_triplet_b_states[2].failing_count != 0)) {
+    uVar1 = 0x11;
+  }
+  return uVar1;
+}
+
+
+
 void FUN_0004156e(void)
 
 {
@@ -2160,6 +2190,21 @@ void f33_record_startup_status_bit_triplet_a_failure(void)
 {
   f33_report_diagnostic_event_failure((uint)DAT_febe76ee,0x32);
   return;
+}
+
+
+
+undefined2 FUN_00041788(void)
+
+{
+  undefined2 uVar1;
+  
+  if (((f33_startup_status_bit_triplet_a_states[0].failing_count != 0) ||
+      (f33_startup_status_bit_triplet_a_states[1].failing_count != 0)) ||
+     (uVar1 = 0, f33_startup_status_bit_triplet_a_states[2].failing_count != 0)) {
+    uVar1 = 0x11;
+  }
+  return uVar1;
 }
 
 
@@ -2332,6 +2377,21 @@ void f33_record_startup_status_bit_triplet_b_failure(void)
 
 
 
+undefined2 FUN_000419c0(void)
+
+{
+  undefined2 uVar1;
+  
+  if (((f33_startup_status_bit_triplet_b_states[0].failing_count != 0) ||
+      (f33_startup_status_bit_triplet_b_states[1].failing_count != 0)) ||
+     (uVar1 = 0, f33_startup_status_bit_triplet_b_states[2].failing_count != 0)) {
+    uVar1 = 0x11;
+  }
+  return uVar1;
+}
+
+
+
 void FUN_000419de(void)
 
 {
@@ -2482,6 +2542,21 @@ void f33_record_matched_state2_startup_triplet_a_failure(void)
 {
   f33_report_diagnostic_event_failure((uint)DAT_febe7726,0x32);
   return;
+}
+
+
+
+undefined2 FUN_00041bf0(void)
+
+{
+  undefined2 uVar1;
+  
+  if (((f33_matched_state2_startup_triplet_a_states[0].failing_count != 0) ||
+      (f33_matched_state2_startup_triplet_a_states[1].failing_count != 0)) ||
+     (uVar1 = 0, f33_matched_state2_startup_triplet_a_states[2].failing_count != 0)) {
+    uVar1 = 0x11;
+  }
+  return uVar1;
 }
 
 
@@ -2637,6 +2712,21 @@ void f33_record_matched_state2_startup_triplet_b_failure(void)
 {
   f33_report_diagnostic_event_failure((uint)DAT_febe7742,0x32);
   return;
+}
+
+
+
+undefined2 FUN_00041e24(void)
+
+{
+  undefined2 uVar1;
+  
+  if (((f33_matched_state2_startup_triplet_b_states[0].failing_count != 0) ||
+      (f33_matched_state2_startup_triplet_b_states[1].failing_count != 0)) ||
+     (uVar1 = 0, f33_matched_state2_startup_triplet_b_states[2].failing_count != 0)) {
+    uVar1 = 0x11;
+  }
+  return uVar1;
 }
 
 

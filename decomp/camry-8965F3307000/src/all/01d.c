@@ -2905,6 +2905,48 @@ void FUN_000772ba(int param_1,undefined4 param_2)
 
 
 
+/* Copy low16(byte_count) bytes into context.destination_buffer +low16(payload_offset), through the
+   real74830 byte loop. No local destination bound or checksum validation. Copy low16 byte count
+   from explicit fourth-argument source into context+8 destination pointer plus low16 payload
+   offset, through real74830. Native composed execution covers offset0 and final-chunk offset192
+   with exact copy/canary checks. No local destination bound or checksum admission. */
+
+void f33_nvm_copy_payload_chunk
+               (F33NvmRecordContext *context,ushort payload_offset,ushort byte_count,uchar *source)
+
+{
+  f33_copy_bytes_forward(((uchar *)camry_host_ptr((uint32_t)(context->destination_buffer + payload_offset))), source, (uint)byte_count);
+  return;
+}
+
+
+
+/* WARNING: This is an inlined function */
+/* Store r7 at record-context+8; preserve r6/r7/r10. No destination bound or alignment validation.
+   Typed destination pointer and real p-code inlining. Complete77B12 execution checks the entire
+   copied payload against registered DataFlash without duplicating it in a golden fixture. */
+
+void f33_nvm_set_read_destination(F33NvmRecordContext *context,uchar *destination)
+
+{
+  context->destination_buffer = camry_host_addr(destination);
+  return;
+}
+
+
+
+/* Load full32-bit checksum from context+C; not a pointer read. Six-byte getter loads full32-bit
+   checksum at record context+C. Native post-read comparison executes the actual getter with
+   C0000000-prefixed values. This field is a checksum, not a second buffer pointer. */
+
+uint f33_nvm_tail_checksum(F33NvmRecordContext *context)
+
+{
+  return context->checksum32;
+}
+
+
+
 void FUN_000772e4(int param_1,undefined4 param_2)
 
 {
@@ -3005,6 +3047,21 @@ void FUN_00077824(void)
     uVar1 = f33_nvm_read_payload_checksum(DAT_febf6c44,DAT_febf6c24,'\0');
   }
   ((void)(uVar1), FUN_00077640());
+  return;
+}
+
+
+
+/* WARNING: This is an inlined function */
+/* Store r7 at context+0; preserve r6/r7/r10. Inline the real six-byte body so77B12 retains the
+   record pointer for772D8. Store record pointer r7 at commit-context+0; Inline the real six-byte
+   body to retain77B12's forwarding of r7 into772D8. Composed native execution validates the bound
+   destination and complete payload. */
+
+void f33_nvm_bind_record_context(F33NvmCommitContext *context,F33NvmRecordContext *record)
+
+{
+  context->record = camry_host_addr(record);
   return;
 }
 

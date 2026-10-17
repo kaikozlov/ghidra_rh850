@@ -1902,6 +1902,19 @@ void f33_return_only_stub_83156(void)
 
 
 
+void FUN_00083158(ushort param_1,uchar *param_2,ushort param_3)
+
+{
+  F33PduInfo local_c;
+  
+  local_c.data = camry_host_addr(param_2);
+  local_c.length = param_3;
+  f33_canif_transmit(param_1 & 0xff | 0xf800,&local_c);
+  return;
+}
+
+
+
 bool FUN_00083172(void)
 
 {

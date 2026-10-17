@@ -738,6 +738,26 @@ void f33_dcm_cancel_service_events(uchar event_id,uchar first_only)
 
 
 
+/* Zero remaining and active fields for nine8-byte software timers; padding is untouched. */
+
+void f33_dcm_reset_timer_slots(void)
+
+{
+  uint uVar1;
+  uint uVar2;
+  
+  uVar2 = 0;
+  do {
+    uVar1 = uVar2 + 1;
+    f33_dcm_software_timers[uVar2].remaining = 0;
+    f33_dcm_software_timers[uVar2].active = '\0';
+    uVar2 = uVar1;
+  } while (uVar1 < 9);
+  return;
+}
+
+
+
 /* For low8 slot<9 write remaining=(duration+quantum5-1) modulo32 and active1 under the existing
    priority-mask pair. Rearming overwrites rather than accumulates; zero duration arms remaining4.
     */

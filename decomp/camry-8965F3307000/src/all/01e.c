@@ -3025,6 +3025,19 @@ F33CanTpConfiguration * FUN_0007a32e(void)
 
 
 
+/* Read response length at+4 and pass to7A334; propagate real R10 result. Does not copy payload. */
+
+uint f33_cantp_transmit_descriptor(ushort transmit_id,F33PduInfo *response)
+
+{
+  uint uVar1;
+  
+  uVar1 = FUN_0007a334(transmit_id,response->length);
+  return uVar1;
+}
+
+
+
 /* Decrement bounded16-bit channel timers, advance receive FC/timeout work, then acquire and queue
    transmit segments. This software cycle does not poll RSCFD or supply lower frame confirmation. */
 
@@ -3034,6 +3047,26 @@ void f33_cantp_foreground_cycle(void)
   f33_cantp_tick_channel_timeouts();
   f33_cantp_run_receive_channels();
   f33_cantp_run_transmit_channels();
+  return;
+}
+
+
+
+/* Release retained receive ID, remaining bytes, countdown, wait count, sequence and FC state.
+   Preserve admission generation byte+0F; it qualifies a surrounding foreground reset. */
+
+void f33_cantp_reset_receive_owner(F33CanTpRxState *state)
+
+{
+  state->receive_id = 0xffff;
+  state->remaining_length = 0;
+  state->state = 0xe1;
+  state->expected_sequence_number = 0xff;
+  state->timeout_ticks = 0;
+  state->wait_frame_count = 0;
+  state->first_frame_dlc = '\0';
+  state->block_remaining = '\0';
+  state->flow_status_marker = 0xf0;
   return;
 }
 
@@ -3095,6 +3128,150 @@ uint f33_cantp_select_receive_flow_status
 
 
 
+void FUN_0007aaa2(int param_1,F33CanTpRxState *param_2)
+
+{
+  if (param_2->state == 'Z') {
+    f33_cantp_reset_receive_owner(param_2);
+    ((void)((*((undefined2 *)camry_host_ptr((uint32_t)(param_1 + 10))))), f33_return_only_stub_7b246());
+    FUN_0007a79e((*((undefined2 *)camry_host_ptr((uint32_t)(param_1 + 8)))),1);
+  }
+  return;
+}
+
+
+
+void FUN_0007aace(int param_1,F33CanTpRxState *param_2)
+
+{
+  if (param_2->state == 'K') {
+    f33_cantp_reset_receive_owner(param_2);
+    FUN_0007a79e((*((undefined2 *)camry_host_ptr((uint32_t)(param_1 + 8)))),1);
+  }
+  return;
+}
+
+
+
+/* Return0 only for nonzero SF length within7-addressOffset, physical extent<=8 and enough supplied
+   bytes. Exact rows require an eight-byte padded CAN frame; rejected length does not copy payload.
+    */
+
+uint f33_cantp_reject_single_frame_extent(F33CanTpRxConnection *connection,F33CanTpFrameInfo *frame)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uint uVar3;
+  uint uVar4;
+  uint uVar5;
+  
+  uVar3 = 1;
+  uVar5 = frame->length;
+  uVar4 = (uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x22b98u + (uint32_t)(connection->addressing_format) * 1u))));
+  if (((uVar5 < 9) && (uVar2 = ((uint8_t *)camry_host_ptr((uint32_t)(frame->data)))[uVar4] & 0xf, (((uint8_t *)camry_host_ptr((uint32_t)(frame->data)))[uVar4] & 0xf) != 0)) &&
+     (uVar1 = 7 - uVar4,
+     (int)(uVar2 - uVar1) < 0 != ((int)uVar1 < 0 && (int)uVar1 < 0 == (int)(uVar2 - uVar1) < 0) ||
+     uVar2 == uVar1)) {
+    if (connection->require_padded_receive == '\x01') {
+      if (uVar5 != 8) {
+        return uVar3;
+      }
+    }
+    else if (uVar5 < (uVar2 + uVar4 + 1 & 0xff)) {
+      return uVar3;
+    }
+    uVar3 = 0;
+  }
+  return uVar3;
+}
+
+
+
+/* Strip PCI/address prefix, claim upper buffer for SF extent, copy exactly that extent when
+   capacity suffices, then report aggregate result. Padding never enters the upper buffer. */
+
+void f33_cantp_deliver_single_frame(F33CanTpRxConnection *connection,F33CanTpFrameInfo *frame)
+
+{
+  ushort upper_id;
+  uint uVar1;
+  undefined4 uVar2;
+  uint uVar3;
+  uint local_1c;
+  F33CanTpFrameInfo FStack_18;
+  
+  upper_id = connection->upper_receive_id;
+  FStack_18.data = frame->data + (byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x22b98u + (uint32_t)(connection->addressing_format) * 1u)))) + 1;
+  local_1c = 0;
+  uVar3 = ((uint8_t *)camry_host_ptr((uint32_t)(frame->data)))[(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x22b98u + (uint32_t)(connection->addressing_format) * 1u))))] & 0xf;
+  FStack_18.length = uVar3;
+  uVar1 = f33_cantp_start_upper_receive(upper_id,&FStack_18,(ushort)uVar3,&local_1c);
+  if (uVar1 == 0) {
+    uVar2 = 1;
+    if (uVar3 <= local_1c) {
+      uVar1 = f33_cantp_copy_upper_receive_bytes(upper_id,&FStack_18,&local_1c);
+      if (uVar1 == 0) {
+        uVar2 = 0;
+      }
+      else {
+        uVar2 = 1;
+      }
+    }
+    FUN_0007a79e(upper_id,uVar2);
+  }
+  return;
+}
+
+
+
+/* Require configured padded extent and expected low-nibble sequence. Wrong sequence or short
+   required-padding final frame aborts upper reception; other malformed extents may be ignored
+   without resetting the owner. */
+
+uint f33_cantp_reject_consecutive_frame
+               (F33CanTpRxConnection *connection,F33CanTpFrameInfo *frame,F33CanTpRxState *state)
+
+{
+  bool bVar1;
+  uint uVar2;
+  uint uVar3;
+  uint uVar4;
+  
+  uVar4 = 1;
+  if (connection->single_frame_only != '\0') {
+    return 1;
+  }
+  uVar2 = frame->length;
+  uVar3 = (uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x22b98u + (uint32_t)(connection->addressing_format) * 1u))));
+  if ((7 - uVar3 & 0xff) < state->remaining_length) {
+    if (uVar2 != 8) {
+      return 1;
+    }
+  }
+  else {
+    if (8 < uVar2) {
+      return 1;
+    }
+    if (connection->require_padded_receive == '\x01') {
+      if (uVar2 != 8) goto LAB_0007b05c;
+    }
+    else if (uVar2 < (state->remaining_length + uVar3 + 1 & 0xff)) {
+      return 1;
+    }
+  }
+  bVar1 = (((uint8_t *)camry_host_ptr((uint32_t)(frame->data)))[uVar3] & 0xf) == state->expected_sequence_number;
+  uVar4 = (uint)!bVar1;
+  if (bVar1) {
+    return 0;
+  }
+LAB_0007b05c:
+  f33_cantp_finish_receive_aggregate(connection,state,(uchar)uVar4);
+  return uVar4;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -3127,6 +3304,32 @@ void f33_return_only_stub_7b208(void)
 
 {
   return;
+}
+
+
+
+/* Build F33PduInfo, run exact no-op81FFA then existing CanIf7FEF8 snapshot/enqueue.0 means software
+   lower acceptance only; driver/controller and physical network remain separate. */
+
+uint f33_cantp_submit_can_frame(ushort canif_id,F33CanTpFrameInfo *frame)
+
+{
+  int iVar1;
+  uint uVar2;
+  bool bVar3;
+  F33PduInfo local_14;
+  
+  local_14.data = frame->data;
+  local_14.length = (ushort)frame->length;
+  iVar1 = ((void)(canif_id), (void)(&local_14), f33_return_const_0_81ffa());
+  if (iVar1 == 0) {
+    uVar2 = f33_canif_transmit(canif_id,&local_14);
+    bVar3 = uVar2 == 0;
+  }
+  else {
+    bVar3 = iVar1 == 1;
+  }
+  return (uint)!bVar3;
 }
 
 
@@ -3223,10 +3426,164 @@ undefined4 FUN_0007b3b6(int param_1,int param_2)
 
 
 
+/* Require1..4095, configured connection, idleE1 and half-duplex peer qualification. Store
+   TxID,length and stateD2 in0x20-byte channel stride;0 means accepted length only, not copied or
+   emitted. */
+
+uint f33_cantp_accept_transmit_length
+               (F33CanTpConfiguration *configuration,ushort transmit_id,uint length)
+
+{
+  byte bVar1;
+  uint32_t puVar2;
+  F33CanTpTxConnection *pFVar3;
+  int iVar4;
+  uint uVar5;
+  
+  puVar2 = 0xfebeb800u;
+  uVar5 = 1;
+  if ((length != 0) && (length <= DAT_00022c40)) {
+    pFVar3 = f33_cantp_find_transmit_connection(configuration,transmit_id);
+    iVar4 = FUN_0007b3b6(camry_host_addr(pFVar3), length);
+    if ((iVar4 != 0x10) || (pFVar3->single_frame_only == '\0')) {
+      bVar1 = pFVar3->channel_state_index;
+      if ((((int8_t)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)((uint)bVar1 * 0x20 + -0x68b8)))))) == -0x1f) &&
+         ((((F33CanTpChannelConfiguration *)camry_host_ptr((uint32_t)(configuration->channel_rows)))[(short)(ushort)bVar1].half_duplex == '\0' ||
+          ((((int8_t)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)((uint)bVar1 * 0x20 + -0x68a6)))))) == -0x1f &&
+           (((F33CanTpChannelConfiguration *)camry_host_ptr((uint32_t)(configuration->channel_rows)))[(short)(ushort)bVar1].half_duplex == '\x01')))))) {
+        (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + (uint)bVar1 * 0x20 + -0x68bc)))) = transmit_id;
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)((uint)bVar1 * 0x20 + -0x68b8))))) = 0xd2;
+        uVar5 = 0;
+        (*((uint *)camry_host_ptr((uint32_t)(puVar2 + (uint)bVar1 * 0x20 + -0x68c0)))) = length;
+      }
+    }
+  }
+  return uVar5;
+}
+
+
+
+/* WARNING: This is an inlined function */
+/* Clear remaining length, timeout, block fields and spacing, set TxIDFFFF/SNFF/stateE1. No lower
+   queue drain or upper notification is implied by this reset alone. Exact leaf changes only R1/EP
+   and flags; preserve R8 carrying the aggregate completion result through the real inline p-code.
+    */
+
+void f33_cantp_reset_transmit_owner(F33CanTpTxStatePrefix *state)
+
+{
+  state->transmit_id = 0xffff;
+  state->remaining_or_accepted_length = 0;
+  state->state = 0xe1;
+  state->timeout_ticks = 0;
+  state->sequence_number = 0xff;
+  state->block_remaining = '\0';
+  state->block_size = '\0';
+  state->spacing_ticks = '\0';
+  return;
+}
+
+
+
 void FUN_0007b46e(undefined2 param_1,undefined1 param_2)
 
 {
   FUN_00081a4c(param_1,param_2);
+  return;
+}
+
+
+
+/* WARNING: Inlined function: f33_cantp_reset_transmit_owner */
+/* Require configured cancellation support and matching TxID. Refuse queued SF C3, final
+   CF87/remaining0 and SF-sized D2; revoke segmented work, reset owner and report upper failure in
+   allowed states. Lower cancel hook does not remove queued frames. */
+
+uint f33_cantp_cancel_transmit_owner(F33CanTpConfiguration *configuration,ushort transmit_id)
+
+{
+  char cVar1;
+  byte bVar2;
+  uint32_t puVar3;
+  F33CanTpTxConnection *pFVar4;
+  int iVar5;
+  uint uVar6;
+  int *piVar7;
+  
+  puVar3 = 0xfebeb800u;
+  uVar6 = 1;
+  pFVar4 = f33_cantp_find_transmit_connection(configuration,transmit_id);
+  if (pFVar4->cancel_supported != '\x01') {
+    return 1;
+  }
+  bVar2 = pFVar4->channel_state_index;
+  piVar7 = ((int *)camry_host_ptr((uint32_t)(puVar3 + (uint)bVar2 * 0x20 + -0x68c0)));
+  cVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)((uint)bVar2 * 0x20 + -0x68b8)))));
+  if ((*((ushort *)camry_host_ptr((uint32_t)(puVar3 + (uint)bVar2 * 0x20 + -0x68bc)))) != transmit_id) {
+    return 1;
+  }
+  if (cVar1 == 'x') {
+LAB_0007b4ec:
+    uVar6 = 0;
+  }
+  else {
+    if (cVar1 == -0x79) {
+      if (*piVar7 == 0) goto LAB_0007b4fc;
+      goto LAB_0007b4ec;
+    }
+    if (((cVar1 == -0x6a) || (cVar1 == -0x5b)) || (cVar1 == -0x4c)) goto LAB_0007b4ec;
+    if (cVar1 == -0x3d) goto LAB_0007b4fc;
+    if (cVar1 == -0x2e) {
+      iVar5 = FUN_0007b3b6(camry_host_addr(pFVar4), *piVar7);
+      if (iVar5 != 0x10) goto LAB_0007b4fc;
+      goto LAB_0007b4ec;
+    }
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x68c4))))) = 0xf;
+  }
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + (uint)bVar2 * 0x20 + -0x68bc)))) = 0xffff;
+  *piVar7 = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)((uint)bVar2 * 0x20 + -0x68b8))))) = 0xe1;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + (uint)bVar2 * 0x20 + -0x68ba)))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)((uint)bVar2 * 0x20 + -0x68b7))))) = 0xff;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)((uint)bVar2 * 0x20 + -0x68b6))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)((uint)bVar2 * 0x20 + -0x68b5))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)((uint)bVar2 * 0x20 + -0x68b4))))) = 0;
+LAB_0007b4fc:
+  if (uVar6 == 0) {
+    if ((cVar1 == -0x4c) || (cVar1 == -0x79)) {
+      ((void)(pFVar4->canif_frame_id), f33_return_only_stub_7b246());
+    }
+    FUN_0007b46e(pFVar4->upper_response_id,1);
+  }
+  return uVar6;
+}
+
+
+
+/* WARNING: This is an inlined function */
+/* Mode+0C==4 writes connection+0E to frame[0]; modes2/3 use+1B; other modes leave frame unchanged.
+   Exact leaf preserves R6 and R8 used by SF/FF construction; inline actual p-code, not a
+   replacement. Transmit address prefix: mode+0C==4 copies+0E; modes2/3 copy+1B; others do not
+   write. Exact7B524..7B53F changes onlyR1/EP and flags; preserves connectionR6 and FF extentR8.
+   Real p-code inlining reconnects SF/FF construction without inventing extra outputs. Static
+   instruction/dataflow proof; no separate native claim for alternative address modes. */
+
+void f33_cantp_write_transmit_address_byte(F33CanTpTxConnection *connection,uchar *frame)
+
+{
+  uchar uVar1;
+  
+  uVar1 = connection->addressing_format;
+  if (uVar1 == '\x04') {
+    uVar1 = connection->address_byte;
+  }
+  else {
+    if (uVar1 != '\x02' && uVar1 != '\x03') {
+      return;
+    }
+    uVar1 = connection->extended_transmit_address_byte;
+  }
+  *frame = uVar1;
   return;
 }
 
@@ -3248,6 +3605,130 @@ void FUN_0007b572(int param_1,undefined4 *param_2,char param_3)
     *(undefined1 *)(param_2 + 3) = 0;
     FUN_0007b46e((*((undefined2 *)camry_host_ptr((uint32_t)(param_1 + 8)))),1);
   }
+  return;
+}
+
+
+
+/* WARNING: Inlined function: f33_cantp_write_transmit_address_byte */
+/* Obtain upper bytes into shared frame scratch, add SF PCI/padding and claim C3/countdownN_As+2
+   before CanIf enqueue. Any upper copy refusal or lower enqueue refusal finishes aggregate with
+   failure. */
+
+void f33_cantp_build_and_queue_single_frame
+               (F33CanTpTxConnection *connection,F33CanTpTxStatePrefix *state,uchar payload_length)
+
+{
+  uchar uVar1;
+  ushort uVar2;
+  uint32_t puVar3;
+  undefined4 uVar4;
+  uint uVar5;
+  uint uVar6;
+  uint uVar7;
+  uint uVar8;
+  uint local_28;
+  F33CanTpFrameInfo FStack_24;
+  
+  puVar3 = 0x23dfcu;
+  uVar6 = (uint)payload_length;
+  uVar1 = connection->addressing_format;
+  if (uVar1 == '\x04') {
+    f33_cantp_shared_frame_scratch[0] = connection->address_byte;
+  }
+  else if (uVar1 == '\x02' || uVar1 == '\x03') {
+    f33_cantp_shared_frame_scratch[0] = connection->extended_transmit_address_byte;
+  }
+  uVar8 = (uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x22b98u + (uint32_t)(connection->addressing_format) * 1u))));
+  f33_cantp_shared_frame_scratch[uVar8] = payload_length;
+  uVar7 = uVar8 + uVar6 + 1 & 0xff;
+  uVar8 = uVar8 + 1 & 0xff;
+  local_28 = 0;
+  if (connection->pad_frames_to_eight == '\x01') {
+    uVar7 = 8;
+  }
+  FStack_24.data = camry_host_addr(f33_cantp_shared_frame_scratch + uVar8);
+  FStack_24.length = uVar6;
+  uVar5 = f33_cantp_copy_upper_transmit_bytes(connection->upper_response_id,&FStack_24,&local_28);
+  uVar4 = 0xd2;
+  if (uVar5 == 0) {
+    uVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x11b6)))));
+    while (uVar8 = uVar8 + uVar6 & 0xff, uVar8 < uVar7) {
+      f33_cantp_shared_frame_scratch[uVar8] = uVar1;
+      uVar6 = 1;
+    }
+    FStack_24.data = camry_host_addr(f33_cantp_shared_frame_scratch);
+    if (state->state == 0xd2) {
+      state->state = 0xc3;
+      uVar2 = connection->frame_confirmation_timeout_raw;
+      state->remaining_or_accepted_length = 0;
+      state->timeout_ticks = uVar2 + 2;
+    }
+    FStack_24.length = uVar7;
+    uVar6 = f33_cantp_submit_can_frame(connection->canif_frame_id,&FStack_24);
+    uVar4 = 0xc3;
+    if (uVar6 == 0) {
+      return;
+    }
+  }
+  FUN_0007b572(camry_host_addr(connection), state, uVar4);
+  return;
+}
+
+
+
+/* WARNING: Inlined function: f33_cantp_write_transmit_address_byte */
+/* Encode12-bit FF extent, obtain first6 configured payload bytes, retain remaining and
+   stateB4/SNFF/N_As+2, then queue8-byte frame. State ownership updates precede lower enqueue. */
+
+void f33_cantp_build_and_queue_first_frame
+               (F33CanTpTxConnection *connection,F33CanTpTxStatePrefix *state,uint total_length)
+
+{
+  uchar uVar1;
+  byte bVar2;
+  ushort uVar3;
+  uint uVar4;
+  undefined4 uVar5;
+  uint uVar6;
+  uint local_28;
+  F33CanTpFrameInfo FStack_24;
+  
+  uVar1 = connection->addressing_format;
+  if (uVar1 == '\x04') {
+    f33_cantp_shared_frame_scratch[0] = connection->address_byte;
+  }
+  else if (uVar1 == '\x02' || uVar1 == '\x03') {
+    f33_cantp_shared_frame_scratch[0] = connection->extended_transmit_address_byte;
+  }
+  uVar4 = (uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x22b98u + (uint32_t)(connection->addressing_format) * 1u))));
+  f33_cantp_shared_frame_scratch[uVar4 + 1] = (uchar)total_length;
+  f33_cantp_shared_frame_scratch[uVar4] = (byte)(total_length >> 8) | 0x10;
+  bVar2 = connection->frame_capacity;
+  uVar4 = uVar4 + 2 & 0xff;
+  local_28 = 0;
+  FStack_24.data = camry_host_addr(f33_cantp_shared_frame_scratch + uVar4);
+  uVar6 = bVar2 - uVar4 & 0xff;
+  FStack_24.length = uVar6;
+  uVar4 = f33_cantp_copy_upper_transmit_bytes(connection->upper_response_id,&FStack_24,&local_28);
+  uVar5 = 0xd2;
+  if (uVar4 == 0) {
+    FStack_24.data = camry_host_addr(f33_cantp_shared_frame_scratch);
+    if (state->state == 0xd2) {
+      state->state = 0xb4;
+      uVar3 = connection->frame_confirmation_timeout_raw;
+      state->remaining_or_accepted_length = total_length - uVar6;
+      state->timeout_ticks = uVar3 + 2;
+      state->sequence_number = 0xff;
+    }
+    FStack_24.length = (uint)bVar2;
+    uVar4 = f33_cantp_submit_can_frame(connection->canif_frame_id,&FStack_24);
+    uVar5 = 0xb4;
+    if (uVar4 == 0) {
+      return;
+    }
+  }
+  FUN_0007b572(camry_host_addr(connection), state, uVar5);
   return;
 }
 
@@ -3314,6 +3795,106 @@ void FUN_0007b848(int param_1,undefined4 *param_2)
     (*((undefined1 *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_2) + 0xb)))) = 0;
     *(undefined1 *)(param_2 + 3) = 0;
     FUN_0007b46e((*((undefined2 *)camry_host_ptr((uint32_t)(param_1 + 8)))),1);
+  }
+  return;
+}
+
+
+
+/* When spacing state78 expires, enter96 with max(N_Cs-(spacingTicks+3),0) countdown. The foreground
+   then attempts actual upper copying; this is not a hardware send delay. */
+
+void f33_cantp_open_consecutive_copy_window
+               (F33CanTpTxConnection *connection,F33CanTpTxStatePrefix *state)
+
+{
+  ushort uVar1;
+  ushort uVar2;
+  
+  uVar2 = 0;
+  uVar1 = state->spacing_ticks + 3;
+  if (uVar1 <= connection->consecutive_copy_timeout_raw) {
+    uVar2 = connection->consecutive_copy_timeout_raw - uVar1;
+  }
+  if (state->state == 'x') {
+    state->timeout_ticks = uVar2;
+    state->state = 0x96;
+  }
+  return;
+}
+
+
+
+/* WARNING: Inlined function: f33_cantp_reset_transmit_owner */
+/* Release aggregate Tx owner before forwarding supplied result through PduR to DCM. Intermediate
+   lower confirmations must not call this until all remaining bytes have completed. */
+
+void f33_cantp_finish_transmit_aggregate
+               (F33CanTpTxConnection *connection,F33CanTpTxStatePrefix *state,uchar result)
+
+{
+  state->transmit_id = 0xffff;
+  state->remaining_or_accepted_length = 0;
+  state->state = 0xe1;
+  state->timeout_ticks = 0;
+  state->sequence_number = 0xff;
+  state->block_remaining = '\0';
+  state->block_size = '\0';
+  state->spacing_ticks = '\0';
+  FUN_0007b46e(connection->upper_response_id,result);
+  return;
+}
+
+
+
+/* Require multiframe-capable connection, sufficient FC bytes and status0..2. Exact rows require
+   length8 when frame is shorter than8; status>2 or short padded FC aborts aggregate, other short
+   nonpadded forms may only be ignored. */
+
+uint f33_cantp_reject_flow_control_frame
+               (F33CanTpTxConnection *connection,F33CanTpFrameInfo *frame,
+               F33CanTpTxStatePrefix *state)
+
+{
+  byte bVar1;
+  uint uVar2;
+  
+  uVar2 = 1;
+  if (connection->single_frame_only != '\0') {
+    return 1;
+  }
+  if (frame->length < 8) {
+    if (connection->require_padded_flow_control == '\x01') goto LAB_0007ba0c;
+    if (frame->length < ((byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x22b98u + (uint32_t)(connection->addressing_format) * 1u)))) + 3 & 0xff)) {
+      return 1;
+    }
+  }
+  bVar1 = ((uint8_t *)camry_host_ptr((uint32_t)(frame->data)))[(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x22b98u + (uint32_t)(connection->addressing_format) * 1u))))] & 0xf;
+  uVar2 = (uint)(2 < bVar1);
+  if (bVar1 < 3) {
+    return uVar2;
+  }
+LAB_0007ba0c:
+  f33_cantp_finish_transmit_aggregate(connection,state,(uchar)uVar2);
+  return uVar2;
+}
+
+
+
+/* Only while SNFF, retain received BS and map STmin byte through exact256-entry22C84 table. Later
+   CTS reloads retained BS and does not replace initial flow parameters. */
+
+void f33_cantp_capture_initial_flow_parameters
+               (F33CanTpTxStatePrefix *state,uchar block_size,uchar stmin_encoding)
+
+{
+  uchar uVar1;
+  
+  if (state->sequence_number == 0xff) {
+    uVar1 = "\x01\x03\x03\x03\x03\x03\x04\x04\x04\x04\x04\x05\x05\x05\x05\x05\x06\x06\x06\x06\x06\a\a\a\a\a\b\b\b\b\b\t\t\t\t\t\n\n\n\n\n\v\v\v\v\v\f\f\f\f\f\r\r\r\r\r\x0e\x0e\x0e\x0e\x0e\x0f\x0f\x0f\x0f\x0f\x10\x10\x10\x10\x10\x11\x11\x11\x11\x11\x12\x12\x12\x12\x12\x13\x13\x13\x13\x13\x14\x14\x14\x14\x14\x15\x15\x15\x15\x15\x16\x16\x16\x16\x16\x17\x17\x17\x17\x17\x18\x18\x18\x18\x18\x19\x19\x19\x19\x19\x1a\x1a\x1a\x1a\x1a\x1b\x1b\x1b\x1b\x1b\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x1c\x03\x03\x03\x03\x03\x03\x03\x03\x03\x1c\x1c\x1c\x1c\x1c\x1c"
+            [stmin_encoding];
+    state->block_size = block_size;
+    state->spacing_ticks = uVar1;
   }
   return;
 }

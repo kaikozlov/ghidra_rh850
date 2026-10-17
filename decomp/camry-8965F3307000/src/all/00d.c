@@ -2003,6 +2003,27 @@ void f33_return_only_stub_36344(void)
 
 
 
+/* Clear output, previous error, current error, gains, raw/clamped correction fields and opaque
+   reset-only word. Retain measured ratio and padding; do not clear the separate387CE staged
+   snapshot. */
+
+void f33_reset_bank0_current_reference_feedback(void)
+
+{
+  f33_current_reference_feedback[0].request = 0;
+  f33_current_reference_feedback[0].error = 0;
+  f33_current_reference_feedback[0].previous_error = 0;
+  f33_current_reference_feedback[0].opaque_14 = 0;
+  f33_current_reference_feedback[0].request_before_global_clamp = 0;
+  f33_current_reference_feedback[0].current_gain = 0;
+  f33_current_reference_feedback[0].previous_gain = 0;
+  f33_current_reference_feedback[0].retained_transient_delta = 0;
+  f33_current_reference_feedback[0].saturated_base_plus_delta = 0;
+  return;
+}
+
+
+
 /* Mode-entry initializer forwards to bank0 feedback reset; no enable test or acquisition. */
 
 void f33_initialize_bank0_current_reference_feedback(void)
@@ -2021,6 +2042,27 @@ void f33_initialize_bank0_current_reference_feedback(void)
 void f33_return_only_stub_364dc(void)
 
 {
+  return;
+}
+
+
+
+/* Clear output, previous error, current error, gains, raw/clamped correction fields and opaque
+   reset-only word. Retain measured ratio and padding; do not clear the separate387CE staged
+   snapshot. */
+
+void f33_reset_bank1_current_reference_feedback(void)
+
+{
+  f33_current_reference_feedback[1].request = 0;
+  f33_current_reference_feedback[1].error = 0;
+  f33_current_reference_feedback[1].previous_error = 0;
+  f33_current_reference_feedback[1].opaque_14 = 0;
+  f33_current_reference_feedback[1].request_before_global_clamp = 0;
+  f33_current_reference_feedback[1].current_gain = 0;
+  f33_current_reference_feedback[1].previous_gain = 0;
+  f33_current_reference_feedback[1].retained_transient_delta = 0;
+  f33_current_reference_feedback[1].saturated_base_plus_delta = 0;
   return;
 }
 
@@ -2390,6 +2432,44 @@ void FUN_000368aa(void)
 
 
 
+/* WARNING: Removing unreachable block (ram,0x000368fa) */
+/* Use saturating absolute signed16 command6E0A to interpolate unsigned ordinates of2BD10
+   with16-count spacing; index>=127 returns1024. Publish6BE4. Table x words and finalFFFFFFFF row
+   are not read by this consumer. Native nonzero tail from5E280 and full staging-only5E202(2,0101)
+   verify scoped transform, retention and arbitration effects. No fresh acquisition, upstream
+   nonzero regulation or physical PWM claim. */
+
+void f33_map_phase_compensation_gain(void)
+
+{
+  uint uVar1;
+  uint uVar2;
+  
+  uVar1 = (uint)DAT_febe6e0a;
+  if ((int)(uVar1 + 0x7fff) < 0 == (-1 < (int)uVar1 && (int)(uVar1 + 0x7fff) < 0) &&
+      uVar1 != 0xffff8001) {
+    if ((int)uVar1 < 0) {
+      uVar1 = -uVar1;
+    }
+  }
+  else {
+    uVar1 = 0x7fff;
+  }
+  uVar2 = (uVar1 & 0xffff) >> 4;
+  if (uVar2 < 0x7f) {
+    DAT_febe6be4 = f33_phase_compensation_gain_curve[uVar2].y +
+                   (short)((int)((uVar1 & 0xf) *
+                                ((uint)f33_phase_compensation_gain_curve[uVar2 + 1].y -
+                                (uint)f33_phase_compensation_gain_curve[uVar2].y)) / 0x10);
+  }
+  else {
+    DAT_febe6be4 = 0x400;
+  }
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -2402,6 +2482,89 @@ void f33_return_only_stub_3690e(void)
 
 
 
+/* WARNING: Removing unreachable block (ram,0x0003694e) */
+/* WARNING: Removing unreachable block (ram,0x00036932) */
+
+void FUN_00036910(void)
+
+{
+  f33_regulator_output_envelopes[0].second_saturation = '\0';
+  f33_regulator_output_envelopes[0].first_saturation = '\0';
+  f33_regulator_output_envelopes[0].first = 0;
+  f33_regulator_output_envelopes[0].second = 0;
+  f33_regulator_output_envelopes[0].first_unclipped = 0;
+  f33_regulator_output_envelopes[0].second_unclipped = 0;
+  f33_regulator_output_envelopes[0].raw_cubic = f33_regulator_output_envelope_calibrations[0].base;
+  f33_regulator_output_envelopes[0].selected_second_limit =
+       (short)(f33_regulator_output_envelope_calibrations[0].base / 0x800);
+  f33_regulator_output_envelopes[0].second_upper =
+       f33_regulator_output_envelopes[0].selected_second_limit;
+  f33_regulator_output_envelopes[0].combined_second = 0;
+  f33_regulator_output_envelopes[0].reset_cleared_status = '\0';
+  f33_regulator_output_envelopes[0].lower_before_clamp =
+       f33_regulator_output_envelope_calibrations[0].base -
+       f33_regulator_output_envelope_calibrations[0].band_width;
+  f33_regulator_output_envelopes[0].retained_24 = 0x400;
+  f33_regulator_output_envelopes[0].retained_28 = 0x400;
+  f33_regulator_output_envelopes[0].second_lower =
+       (short)((f33_regulator_output_envelope_calibrations[0].base -
+               f33_regulator_output_envelope_calibrations[0].band_width) / 0x800);
+  return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0003699c) */
+/* WARNING: Removing unreachable block (ram,0x0003698c) */
+/* WARNING: Removing unreachable block (ram,0x000369a6) */
+/* Bank0 cubic in saturating abs16 of clamped first-axis output. Leading coefficient is signed
+   BYTEF5=-11 (SLD.B), not halfword245. Sequential truncation:
+   ((-1135+((127+(-11*x)/128)*x)/1024)/4)*x; symmetric32 saturated add to17365676. No physical unit
+   inferred. */
+
+int f33_regulator_output_envelope_cubic_bank0(void)
+
+{
+  int iVar1;
+  int iVar2;
+  
+  iVar2 = (int)f33_regulator_output_envelopes[0].first;
+  if (iVar2 + 0x7fff < 0 == (-1 < iVar2 && iVar2 + 0x7fff < 0) && iVar2 != -0x7fff) {
+    if (iVar2 < 0) {
+      iVar2 = (int)-f33_regulator_output_envelopes[0].first;
+    }
+  }
+  else {
+    iVar2 = 0x7fff;
+  }
+  iVar2 = (((int)f33_regulator_output_envelope_calibrations[0].linear_coefficient +
+           (((int)f33_regulator_output_envelope_calibrations[0].quadratic_coefficient +
+            ((int)(short)iVar2 *
+            (int)(short)f33_regulator_output_envelope_calibrations[0].cubic_coefficient) / 0x80) *
+           iVar2) / 0x400) / 4) * iVar2;
+  if (iVar2 < 1) {
+    if ((f33_regulator_output_envelope_calibrations[0].base < 1) &&
+       (iVar1 = -0x7fffffff - iVar2,
+       iVar1 - f33_regulator_output_envelope_calibrations[0].base < 0 ==
+       (iVar1 < 0 != f33_regulator_output_envelope_calibrations[0].base < 0 &&
+       f33_regulator_output_envelope_calibrations[0].base < 0 ==
+       iVar1 - f33_regulator_output_envelope_calibrations[0].base < 0) &&
+       iVar1 != f33_regulator_output_envelope_calibrations[0].base)) {
+      return -0x7fffffff;
+    }
+  }
+  else if ((0 < f33_regulator_output_envelope_calibrations[0].base) &&
+          (iVar1 = (0x7fffffff - iVar2) - f33_regulator_output_envelope_calibrations[0].base,
+          iVar1 < 0 !=
+          (0x7fffffff - iVar2 < 0 != f33_regulator_output_envelope_calibrations[0].base < 0 &&
+          f33_regulator_output_envelope_calibrations[0].base < 0 == iVar1 < 0))) {
+    return 0x7fffffff;
+  }
+  return f33_regulator_output_envelope_calibrations[0].base + iVar2;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -2410,6 +2573,89 @@ void f33_return_only_stub_36c1a(void)
 
 {
   return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x00036c5a) */
+/* WARNING: Removing unreachable block (ram,0x00036c3e) */
+
+void FUN_00036c1c(void)
+
+{
+  f33_regulator_output_envelopes[1].second_saturation = '\0';
+  f33_regulator_output_envelopes[1].first_saturation = '\0';
+  f33_regulator_output_envelopes[1].first = 0;
+  f33_regulator_output_envelopes[1].second = 0;
+  f33_regulator_output_envelopes[1].first_unclipped = 0;
+  f33_regulator_output_envelopes[1].second_unclipped = 0;
+  f33_regulator_output_envelopes[1].raw_cubic = f33_regulator_output_envelope_calibrations[1].base;
+  f33_regulator_output_envelopes[1].selected_second_limit =
+       (short)(f33_regulator_output_envelope_calibrations[1].base / 0x800);
+  f33_regulator_output_envelopes[1].second_upper =
+       f33_regulator_output_envelopes[1].selected_second_limit;
+  f33_regulator_output_envelopes[1].combined_second = 0;
+  f33_regulator_output_envelopes[1].reset_cleared_status = '\0';
+  f33_regulator_output_envelopes[1].lower_before_clamp =
+       f33_regulator_output_envelope_calibrations[1].base -
+       f33_regulator_output_envelope_calibrations[1].band_width;
+  f33_regulator_output_envelopes[1].retained_24 = 0x400;
+  f33_regulator_output_envelopes[1].retained_28 = 0x400;
+  f33_regulator_output_envelopes[1].second_lower =
+       (short)((f33_regulator_output_envelope_calibrations[1].base -
+               f33_regulator_output_envelope_calibrations[1].band_width) / 0x800);
+  return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x00036ca8) */
+/* WARNING: Removing unreachable block (ram,0x00036c98) */
+/* WARNING: Removing unreachable block (ram,0x00036cb2) */
+/* Bank1 cubic in saturating abs16 of clamped first-axis output. Leading coefficient is signed
+   BYTEF5=-11 (SLD.B), not halfword245. Sequential truncation:
+   ((-1135+((127+(-11*x)/128)*x)/1024)/4)*x; symmetric32 saturated add to17365676. No physical unit
+   inferred. */
+
+int f33_regulator_output_envelope_cubic_bank1(void)
+
+{
+  int iVar1;
+  int iVar2;
+  
+  iVar2 = (int)f33_regulator_output_envelopes[1].first;
+  if (iVar2 + 0x7fff < 0 == (-1 < iVar2 && iVar2 + 0x7fff < 0) && iVar2 != -0x7fff) {
+    if (iVar2 < 0) {
+      iVar2 = (int)-f33_regulator_output_envelopes[1].first;
+    }
+  }
+  else {
+    iVar2 = 0x7fff;
+  }
+  iVar2 = (((int)f33_regulator_output_envelope_calibrations[1].linear_coefficient +
+           (((int)f33_regulator_output_envelope_calibrations[1].quadratic_coefficient +
+            ((int)(short)iVar2 *
+            (int)(short)f33_regulator_output_envelope_calibrations[1].cubic_coefficient) / 0x80) *
+           iVar2) / 0x400) / 4) * iVar2;
+  if (iVar2 < 1) {
+    if ((f33_regulator_output_envelope_calibrations[1].base < 1) &&
+       (iVar1 = -0x7fffffff - iVar2,
+       iVar1 - f33_regulator_output_envelope_calibrations[1].base < 0 ==
+       (iVar1 < 0 != f33_regulator_output_envelope_calibrations[1].base < 0 &&
+       f33_regulator_output_envelope_calibrations[1].base < 0 ==
+       iVar1 - f33_regulator_output_envelope_calibrations[1].base < 0) &&
+       iVar1 != f33_regulator_output_envelope_calibrations[1].base)) {
+      return -0x7fffffff;
+    }
+  }
+  else if ((0 < f33_regulator_output_envelope_calibrations[1].base) &&
+          (iVar1 = (0x7fffffff - iVar2) - f33_regulator_output_envelope_calibrations[1].base,
+          iVar1 < 0 !=
+          (0x7fffffff - iVar2 < 0 != f33_regulator_output_envelope_calibrations[1].base < 0 &&
+          f33_regulator_output_envelope_calibrations[1].base < 0 == iVar1 < 0))) {
+    return 0x7fffffff;
+  }
+  return f33_regulator_output_envelope_calibrations[1].base + iVar2;
 }
 
 
@@ -2433,6 +2679,120 @@ void f33_return_only_stub_36f22(void)
 void f33_return_only_stub_36f24(void)
 
 {
+  return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x000370ca) */
+/* WARNING: Removing unreachable block (ram,0x000370c6) */
+/* WARNING: Removing unreachable block (ram,0x000370b6) */
+/* WARNING: Removing unreachable block (ram,0x000370aa) */
+/* WARNING: Removing unreachable block (ram,0x00037096) */
+/* WARNING: Removing unreachable block (ram,0x00036ff0) */
+/* WARNING: Removing unreachable block (ram,0x00036f9e) */
+/* WARNING: Removing unreachable block (ram,0x00036f94) */
+/* WARNING: Removing unreachable block (ram,0x00036f8a) */
+/* WARNING: Removing unreachable block (ram,0x00036f84) */
+/* WARNING: Removing unreachable block (ram,0x00036f66) */
+/* Retained output scaling follows a projected bank-axis product and a separate scale accumulator.
+   Unconditionally load unsigned7DA6/7DA8 before admission. A zero filtered estimate selects
+   target128; actual fractional recurrence still runs. Staged scale128 forwards nonzero bank axes
+   without implying fresh acquisition or PWM duty. Unconditional7DA6/7DA8 loads precede scale
+   admission. Zero projected estimate selects target128 while the real retained scale recurrence
+   still runs; nonzero bank axes reach both regulated transforms. */
+
+void FUN_00036f26(void)
+
+{
+  bool bVar1;
+  int iVar2;
+  int iVar3;
+  uint uVar4;
+  int iVar5;
+  
+  DAT_febe6c4c = DAT_000319c4;
+  DAT_febe6c4e = DAT_000319c8;
+  DAT_febe6c54 = (((int)DAT_febe6e12 * (int)f33_regulator_output_envelopes[0].first +
+                  (int)DAT_febe6e14 * (int)DAT_febe6cec) / 0x8000) * (uint)DAT_000319c4;
+  DAT_febe6c58 = (((int)DAT_febe6e16 * (int)f33_regulator_output_envelopes[1].first +
+                  (int)DAT_febe6e18 * (int)DAT_febe6cee) / 0x8000) * (uint)DAT_000319c8;
+  DAT_febe6c68 = (DAT_febe6c58 / 2 + DAT_febe6c54 / 2) / 0x3000;
+  if (DAT_febe6c68 + -0x7fff < 0 == (DAT_febe6c68 < 0 && -1 < DAT_febe6c68 + -0x7fff) &&
+      DAT_febe6c68 != 0x7fff) {
+    iVar5 = 0x7fff;
+  }
+  else {
+    iVar5 = (int)(short)DAT_febe6c68;
+    if (DAT_febe6c68 + 0x7fff < 0 != (-1 < DAT_febe6c68 && DAT_febe6c68 + 0x7fff < 0)) {
+      iVar5 = -0x7fff;
+    }
+  }
+  uVar4 = (uint)DAT_00031a2c;
+  if (uVar4 == 0) {
+    iVar2 = (int)DAT_febe6c4a << 0x10;
+    iVar3 = iVar5 << 0x10;
+  }
+  else {
+    iVar2 = (int)DAT_febe6c4a * uVar4;
+    iVar3 = iVar5 * uVar4;
+  }
+  DAT_febe6c6c = iVar3 + (DAT_febe6c6c - iVar2);
+  DAT_febe6c48 = (short)iVar5;
+  DAT_febe6c4a = (short)(DAT_febe6c6c / 0x10000);
+  iVar5 = (int)DAT_febe6c4a;
+  if (DAT_00031a20 == 'Z') {
+    DAT_febe6c50 = DAT_00031a24;
+    if ((DAT_febe71ec & 3) == 0) {
+      DAT_febe6c50 = DAT_00031a22;
+    }
+    iVar2 = (int)DAT_00031a26;
+    if ((iVar5 - iVar2 < 0 != (iVar5 < 0 != iVar2 < 0 && iVar2 < 0 == iVar5 - iVar2 < 0) ||
+         iVar5 == iVar2) &&
+       (((DAT_febe6c60 + -0x80 < 0 != (DAT_febe6c60 < 0 && -1 < DAT_febe6c60 + -0x80) ||
+         (((iVar3 = (int)DAT_00031a28, iVar2 = f33_current_reference_feedback[0].ratio - iVar3,
+           iVar2 < 0 ==
+           (f33_current_reference_feedback[0].ratio < 0 != iVar3 < 0 && iVar3 < 0 == iVar2 < 0) ||
+           (iVar2 = f33_current_reference_feedback[1].ratio - iVar3,
+           iVar2 < 0 ==
+           (f33_current_reference_feedback[1].ratio < 0 != iVar3 < 0 && iVar3 < 0 == iVar2 < 0))) &&
+          ((DAT_00031a2a <= DAT_febe7da6 || (DAT_00031a2a <= DAT_febe7da8)))))) && (iVar5 != 0)))) {
+      DAT_febe6c5c = (int)DAT_febe6c50 << 7;
+      bVar1 = DAT_febe6c5c < 0;
+      if (iVar5 != 0) {
+        if (DAT_febe6c5c == -0x80000000 && iVar5 == -1) {
+          bVar1 = true;
+          DAT_febe6c5c = -0x80000000;
+        }
+        else {
+          DAT_febe6c5c = DAT_febe6c5c / iVar5;
+          bVar1 = DAT_febe6c5c < 0;
+        }
+      }
+      if (bVar1) {
+        DAT_febe6c5c = -DAT_febe6c5c;
+      }
+      if (DAT_febe6c5c + -0x80 < 0 != (DAT_febe6c5c < 0 && -1 < DAT_febe6c5c + -0x80) ||
+          DAT_febe6c5c == 0x80) goto LAB_00037068;
+    }
+  }
+  DAT_febe6c5c = 0x80;
+LAB_00037068:
+  uVar4 = (uint)DAT_00031a2e;
+  if (uVar4 == 0) {
+    iVar5 = (int)(short)DAT_febe6c60 << 0x10;
+    iVar2 = (int)(short)DAT_febe6c5c << 0x10;
+  }
+  else {
+    iVar5 = (int)(short)DAT_febe6c60 * uVar4;
+    iVar2 = (int)(short)DAT_febe6c5c * uVar4;
+  }
+  DAT_febe6c64 = iVar2 + (DAT_febe6c64 - iVar5);
+  DAT_febe6c60 = (int)(short)(DAT_febe6c64 / 0x10000);
+  DAT_febe6c42 = (short)((DAT_febe6c60 * DAT_febe6cec) / 0x80);
+  DAT_febe6c40 = (short)((DAT_febe6c60 * f33_regulator_output_envelopes[0].first) / 0x80);
+  DAT_febe6c46 = (short)((DAT_febe6c60 * DAT_febe6cee) / 0x80);
+  DAT_febe6c44 = (short)((DAT_febe6c60 * f33_regulator_output_envelopes[1].first) / 0x80);
   return;
 }
 
@@ -2466,6 +2826,114 @@ void f33_fill_constant_block_370d6(void)
 
 
 
+/* WARNING: Removing unreachable block (ram,0x000371b2) */
+/* Differential first-axis regulator: error=sat(6D82-6D74), accumulator6C78. Prior output-direction
+   flags gate integration; both nonzero selected slot indices or8B28&40004 reset state. Additional
+   accumulator clamp uses ROM31A3C. Selected slot indices are not physical-disable booleans.
+   Differential first-axis recurrence follows common update, reverses bank1 saturation-direction
+   interpretation, retains raw-error proportional term and applies extra ROM accumulator bound. */
+
+void FUN_000370e6(void)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  uint uVar4;
+  uint uVar5;
+  int iVar6;
+  uint uVar7;
+  
+  if (((DAT_febe8bae != '\0') && (DAT_febe8baf != '\0')) ||
+     ((f33_output_request_status & 0x40004) != 0)) {
+    DAT_febe6c70 = 0;
+    DAT_febe6c72 = 0;
+    DAT_febe6c74 = 0;
+    DAT_febe6c76 = 0;
+    DAT_febe6c78 = 0;
+    return;
+  }
+  iVar3 = (int)DAT_febe6d82 - (int)DAT_febe6d74;
+  if (iVar3 + 0x7fff < 0 == (-1 < iVar3 && iVar3 + 0x7fff < 0) && iVar3 != -0x7fff) {
+    if (iVar3 + -0x7fff < 0 == (iVar3 < 0 && -1 < iVar3 + -0x7fff) && iVar3 != 0x7fff) {
+      iVar6 = 0x7fff;
+    }
+    else {
+      iVar6 = -0x8000;
+      if (iVar3 + 0x8000 < 0 == (-1 < iVar3 && iVar3 + 0x8000 < 0)) {
+        iVar6 = (int)(short)iVar3;
+      }
+    }
+  }
+  else {
+    iVar6 = -0x7fff;
+  }
+  if ((((f33_regulator_output_envelopes[0].first_saturation == '\x01') ||
+       (f33_regulator_output_envelopes[1].first_saturation == '\x02')) && (-1 < iVar6)) ||
+     (((f33_regulator_output_envelopes[0].first_saturation == '\x02' ||
+       (f33_regulator_output_envelopes[1].first_saturation == '\x01')) && (iVar6 < 0)))) {
+    DAT_febe6c70 = 1;
+    iVar3 = 0;
+  }
+  else {
+    DAT_febe6c70 = 0;
+    iVar3 = iVar6;
+  }
+  uVar4 = (uint)DAT_00031a30;
+  if (DAT_febe6d16 <= uVar4) {
+    uVar4 = (uint)DAT_febe6d16;
+  }
+  uVar5 = (uint)DAT_00031a32;
+  if (uVar5 <= uVar4) {
+    uVar5 = uVar4;
+  }
+  uVar4 = DAT_00031a34;
+  if (DAT_febe6d58 <= DAT_00031a34) {
+    uVar4 = DAT_febe6d58;
+  }
+  uVar7 = DAT_00031a38;
+  if (DAT_00031a38 <= uVar4) {
+    uVar7 = uVar4;
+  }
+  iVar1 = uVar5 * (iVar6 - DAT_febe6c72) + (int)((uVar7 >> 9) * (DAT_febe6c74 + iVar3)) / 0x40;
+  if (iVar1 < 1) {
+    if ((DAT_febe6c78 < 1) &&
+       (iVar2 = -0x7fffffff - iVar1,
+       iVar2 - DAT_febe6c78 < 0 ==
+       (iVar2 < 0 != DAT_febe6c78 < 0 && DAT_febe6c78 < 0 == iVar2 - DAT_febe6c78 < 0) &&
+       iVar2 != DAT_febe6c78)) {
+      iVar1 = -0x7fffffff;
+      goto LAB_000371f4;
+    }
+  }
+  else if ((0 < DAT_febe6c78) &&
+          (iVar2 = (0x7fffffff - iVar1) - DAT_febe6c78,
+          iVar2 < 0 != (0x7fffffff - iVar1 < 0 != DAT_febe6c78 < 0 && DAT_febe6c78 < 0 == iVar2 < 0)
+          )) {
+    iVar1 = 0x7fffffff;
+    goto LAB_000371f4;
+  }
+  iVar1 = iVar1 + DAT_febe6c78;
+LAB_000371f4:
+  iVar2 = DAT_00031a3c;
+  if (iVar1 - DAT_00031a3c < 0 !=
+      (iVar1 < 0 != DAT_00031a3c < 0 && DAT_00031a3c < 0 == iVar1 - DAT_00031a3c < 0) ||
+      iVar1 == DAT_00031a3c) {
+    iVar2 = iVar1;
+  }
+  DAT_febe6c78 = -DAT_00031a3c;
+  if (iVar2 + DAT_00031a3c < 0 ==
+      (iVar2 < 0 != DAT_febe6c78 < 0 && DAT_febe6c78 < 0 == iVar2 + DAT_00031a3c < 0)) {
+    DAT_febe6c78 = iVar2;
+  }
+  DAT_febe6c72 = (short)iVar6;
+  DAT_febe6c74 = (short)iVar3;
+  DAT_febe6c76 = (short)iVar6;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -2489,6 +2957,147 @@ void f33_fill_constant_block_37218(void)
   DAT_febe6c80 = 0;
   DAT_febe6c82 = 0;
   DAT_febe6c8c = 0;
+  return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0003737e) */
+/* WARNING: Removing unreachable block (ram,0x00037366) */
+/* Common first-axis regulator: error=sat(6D80-6D70), accumulator6C8C. Prior saturation gates
+   integration, not proportional error difference. First-invalid correction requires ENTIRE
+   previous6C84==0: bit0 selects(common-old differential)/2 before bit1's plus case. Symmetric
+   saturation precedes division. Publish corrected6C88, then update before370E6; the reset branch
+   does not clear6C84/6C88. Prior saturation gates integration but not proportional error
+   difference. First-invalid correction requires whole previous mask0 and uses old differential
+   before its update. Reset preserves6C84/6C88. */
+
+void FUN_00037228(void)
+
+{
+  int iVar1;
+  uint uVar2;
+  uint uVar3;
+  int iVar4;
+  int iVar5;
+  int iVar6;
+  int iVar7;
+  int iVar8;
+  uint uVar9;
+  
+  if (((DAT_febe8bae != '\0') && (DAT_febe8baf != '\0')) ||
+     ((f33_output_request_status & 0x40004) != 0)) {
+    DAT_febe6c7c = 0;
+    DAT_febe6c7e = 0;
+    DAT_febe6c80 = 0;
+    DAT_febe6c82 = 0;
+    DAT_febe6c8c = 0;
+    return;
+  }
+  iVar7 = (int)DAT_febe6d80 - (int)DAT_febe6d70;
+  if (iVar7 + 0x7fff < 0 == (-1 < iVar7 && iVar7 + 0x7fff < 0) && iVar7 != -0x7fff) {
+    if (iVar7 + -0x7fff < 0 == (iVar7 < 0 && -1 < iVar7 + -0x7fff) && iVar7 != 0x7fff) {
+      iVar8 = 0x7fff;
+    }
+    else {
+      iVar8 = -0x8000;
+      if (iVar7 + 0x8000 < 0 == (-1 < iVar7 && iVar7 + 0x8000 < 0)) {
+        iVar8 = (int)(short)iVar7;
+      }
+    }
+  }
+  else {
+    iVar8 = -0x7fff;
+  }
+  if ((((f33_regulator_output_envelopes[0].first_saturation == '\x01') ||
+       (f33_regulator_output_envelopes[1].first_saturation == '\x01')) && (-1 < iVar8)) ||
+     (((f33_regulator_output_envelopes[0].first_saturation == '\x02' ||
+       (f33_regulator_output_envelopes[1].first_saturation == '\x02')) && (iVar8 < 0)))) {
+    DAT_febe6c7c = 1;
+    iVar7 = 0;
+  }
+  else {
+    DAT_febe6c7c = 0;
+    iVar7 = iVar8;
+  }
+  uVar2 = (uint)DAT_00031a40;
+  if (DAT_febe6d06 <= uVar2) {
+    uVar2 = (uint)DAT_febe6d06;
+  }
+  uVar3 = (uint)DAT_00031a42;
+  if (uVar3 <= uVar2) {
+    uVar3 = uVar2;
+  }
+  uVar2 = DAT_00031a44;
+  if (DAT_febe6d40 <= DAT_00031a44) {
+    uVar2 = DAT_febe6d40;
+  }
+  uVar9 = DAT_00031a48;
+  if (DAT_00031a48 <= uVar2) {
+    uVar9 = uVar2;
+  }
+  iVar6 = 0x7fffffff;
+  iVar5 = -0x7fffffff;
+  iVar4 = iVar6;
+  if (((DAT_febe71ec & 1) == 0) || (DAT_febe6c84 != 0)) {
+    if (((DAT_febe71ec >> 1 & 1) != 0) && (DAT_febe6c84 == 0)) {
+      if (DAT_febe6c8c < 1) {
+        if ((0 < DAT_febe6c78) ||
+           (iVar1 = -0x7fffffff - DAT_febe6c8c, iVar4 = iVar5,
+           iVar1 - DAT_febe6c78 < 0 !=
+           (iVar1 < 0 != DAT_febe6c78 < 0 && DAT_febe6c78 < 0 == iVar1 - DAT_febe6c78 < 0) ||
+           iVar1 == DAT_febe6c78)) goto LAB_00037360;
+      }
+      else if ((DAT_febe6c78 < 1) ||
+              (iVar1 = (0x7fffffff - DAT_febe6c8c) - DAT_febe6c78,
+              iVar1 < 0 ==
+              (0x7fffffff - DAT_febe6c8c < 0 != DAT_febe6c78 < 0 && DAT_febe6c78 < 0 == iVar1 < 0)))
+      {
+LAB_00037360:
+        iVar4 = DAT_febe6c78 + DAT_febe6c8c;
+      }
+      goto LAB_00037364;
+    }
+  }
+  else {
+    if (DAT_febe6c8c < 0) {
+      if ((DAT_febe6c78 < 0) ||
+         (iVar1 = (DAT_febe6c8c + 0x7fffffff) - DAT_febe6c78, iVar4 = iVar5,
+         iVar1 < 0 ==
+         (DAT_febe6c8c + 0x7fffffff < 0 != DAT_febe6c78 < 0 && DAT_febe6c78 < 0 == iVar1 < 0)))
+      goto LAB_0003732e;
+    }
+    else if ((-1 < DAT_febe6c78) ||
+            (iVar1 = -(0x7fffffff - DAT_febe6c8c),
+            iVar1 - DAT_febe6c78 < 0 !=
+            (iVar1 < 0 != DAT_febe6c78 < 0 && DAT_febe6c78 < 0 == iVar1 - DAT_febe6c78 < 0) ||
+            iVar1 == DAT_febe6c78)) {
+LAB_0003732e:
+      iVar4 = DAT_febe6c8c - DAT_febe6c78;
+    }
+LAB_00037364:
+    DAT_febe6c8c = iVar4 / 2;
+  }
+  iVar4 = uVar3 * (iVar8 - DAT_febe6c7e) + (int)((uVar9 >> 9) * (DAT_febe6c80 + iVar7)) / 0x40;
+  if (iVar4 < 1) {
+    if ((DAT_febe6c8c < 1) &&
+       (iVar1 = -0x7fffffff - iVar4, iVar6 = iVar5,
+       iVar1 - DAT_febe6c8c < 0 ==
+       (iVar1 < 0 != DAT_febe6c8c < 0 && DAT_febe6c8c < 0 == iVar1 - DAT_febe6c8c < 0) &&
+       iVar1 != DAT_febe6c8c)) goto LAB_000373b0;
+  }
+  else if ((0 < DAT_febe6c8c) &&
+          (iVar5 = (0x7fffffff - iVar4) - DAT_febe6c8c,
+          iVar5 < 0 != (0x7fffffff - iVar4 < 0 != DAT_febe6c8c < 0 && DAT_febe6c8c < 0 == iVar5 < 0)
+          )) goto LAB_000373b0;
+  iVar6 = iVar4 + DAT_febe6c8c;
+LAB_000373b0:
+  DAT_febe6c88 = DAT_febe6c8c;
+  DAT_febe6c84 = DAT_febe71ec;
+  DAT_febe6c82 = (short)iVar8;
+  DAT_febe6c80 = (short)iVar7;
+  DAT_febe6c8c = iVar6;
+  DAT_febe6c7e = DAT_febe6c82;
   return;
 }
 
@@ -2550,6 +3159,34 @@ int FUN_000373e6(void)
     return iVar2;
   }
   return -0x7fff;
+}
+
+
+
+uint FUN_00037418(short param_1)
+
+{
+  uint uVar1;
+  
+  if ((((f33_regulator_output_envelopes[0].second < 0) ||
+       (f33_regulator_output_envelopes[0].second_saturation != '\x01')) &&
+      ((-1 < f33_regulator_output_envelopes[1].second ||
+       (f33_regulator_output_envelopes[1].second_saturation != '\x02')))) || (param_1 < 0)) {
+    if (((f33_regulator_output_envelopes[0].second < 0) &&
+        (f33_regulator_output_envelopes[0].second_saturation == '\x02')) ||
+       ((-1 < f33_regulator_output_envelopes[1].second &&
+        (f33_regulator_output_envelopes[1].second_saturation == '\x01')))) {
+      uVar1 = (uint)(int)param_1 >> 0x1f;
+    }
+    else {
+      uVar1 = 0;
+    }
+  }
+  else {
+    uVar1 = 1;
+  }
+  DAT_febe6c90 = (char)uVar1;
+  return uVar1;
 }
 
 
@@ -2726,6 +3363,34 @@ int FUN_000375c2(void)
     iVar1 = -0x7fff;
   }
   return (int)(short)iVar1;
+}
+
+
+
+uint FUN_000375e6(short param_1)
+
+{
+  uint uVar1;
+  
+  if ((((f33_regulator_output_envelopes[0].second < 0) ||
+       (f33_regulator_output_envelopes[0].second_saturation != '\x01')) &&
+      ((f33_regulator_output_envelopes[1].second < 0 ||
+       (f33_regulator_output_envelopes[1].second_saturation != '\x01')))) || (param_1 < 0)) {
+    if (((f33_regulator_output_envelopes[0].second < 0) &&
+        (f33_regulator_output_envelopes[0].second_saturation == '\x02')) ||
+       ((f33_regulator_output_envelopes[1].second < 0 &&
+        (f33_regulator_output_envelopes[1].second_saturation == '\x02')))) {
+      uVar1 = (uint)(int)param_1 >> 0x1f;
+    }
+    else {
+      uVar1 = 0;
+    }
+  }
+  else {
+    uVar1 = 1;
+  }
+  DAT_febe6cb8 = (char)uVar1;
+  return uVar1;
 }
 
 
@@ -2939,6 +3604,43 @@ void f33_return_only_stub_378d0(void)
 void f33_return_only_stub_378d2(void)
 
 {
+  return;
+}
+
+
+
+/* Copy regulated second-axis bank outputs6BEE/6C1A to6CEC/6CEE, clamping symmetrically to6CE4 only
+   for6EA8=5A. This later output-envelope use is separate from the denominator choice in3636A/36502.
+    */
+
+void f33_apply_shared_second_axis_envelope(void)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  
+  iVar3 = (int)f33_shared_second_axis_envelope;
+  iVar2 = (int)f33_regulator_output_envelopes[0].second;
+  DAT_febe6cec = f33_regulator_output_envelopes[0].second;
+  if (((f33_additional_current_envelope_qualified == 'Z') &&
+      (DAT_febe6cec = f33_shared_second_axis_envelope,
+      iVar2 - iVar3 < 0 != (iVar2 < 0 != iVar3 < 0 && iVar3 < 0 == iVar2 - iVar3 < 0))) &&
+     (iVar1 = -iVar3, DAT_febe6cec = f33_regulator_output_envelopes[0].second,
+     iVar2 + iVar3 < 0 != (iVar2 < 0 != iVar1 < 0 && iVar1 < 0 == iVar2 + iVar3 < 0) ||
+     iVar2 == iVar1)) {
+    DAT_febe6cec = (short)iVar1;
+  }
+  iVar2 = (int)f33_regulator_output_envelopes[1].second;
+  DAT_febe6cee = f33_regulator_output_envelopes[1].second;
+  if (((f33_additional_current_envelope_qualified == 'Z') &&
+      (DAT_febe6cee = f33_shared_second_axis_envelope,
+      iVar2 - iVar3 < 0 != (iVar2 < 0 != iVar3 < 0 && iVar3 < 0 == iVar2 - iVar3 < 0))) &&
+     (iVar1 = -iVar3, DAT_febe6cee = f33_regulator_output_envelopes[1].second,
+     iVar2 + iVar3 < 0 != (iVar2 < 0 != iVar1 < 0 && iVar1 < 0 == iVar2 + iVar3 < 0) ||
+     iVar2 == iVar1)) {
+    DAT_febe6cee = (short)iVar1;
+  }
   return;
 }
 
@@ -3293,6 +3995,101 @@ void f33_return_only_stub_37c48(void)
 void f33_return_only_stub_37c4a(void)
 
 {
+  return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x00037d9c) */
+/* WARNING: Removing unreachable block (ram,0x00037d66) */
+/* WARNING: Removing unreachable block (ram,0x00037ca0) */
+/* WARNING: Removing unreachable block (ram,0x00037cd4) */
+/* Square signed16 axis pairs6C40/42 and6C44/46 into unsigned32 energies6D64/68. Curve input is
+   low16(energy>>12), with32-count interpolation and fixed endpoint beyond index126. Selector6D6C
+   swaps upper/lower offset maps between banks. Each8B88/89==5A overrides energy with mode0 and
+   offset6144. Otherwise energy<6166256 gives0, <54546923 gives5A, elseA5. These are software
+   modulation classes, not physical bridge states. Native nonzero tail from5E280 and full
+   staging-only5E202(2,0101) verify scoped transform, retention and arbitration effects. No fresh
+   acquisition, upstream nonzero regulation or physical PWM claim. */
+
+void f33_select_phase_modulation_modes(void)
+
+{
+  uint uVar1;
+  uint uVar2;
+  
+  DAT_febe6d64 = (int)DAT_febe6c40 * (int)DAT_febe6c40 + (int)DAT_febe6c42 * (int)DAT_febe6c42;
+  uVar1 = DAT_febe6d64 >> 0xc;
+  uVar2 = (uVar1 & 0xffff) >> 5;
+  if (f33_phase_offset_selector == 'Z') {
+    if (uVar2 < 0x7f) {
+      DAT_febe6d5e = (short)((int)((uVar1 & 0x1f) *
+                                  ((uint)f33_phase_upper_modulation_offset_curve[uVar2 + 1].y -
+                                  (uint)f33_phase_upper_modulation_offset_curve[uVar2].y)) / 0x20) +
+                     f33_phase_upper_modulation_offset_curve[uVar2].y;
+    }
+    else {
+      DAT_febe6d5e = 0x2366;
+    }
+  }
+  else if (uVar2 < 0x7f) {
+    DAT_febe6d5e = f33_phase_lower_modulation_offset_curve[uVar2].y +
+                   (short)((int)((uVar1 & 0x1f) *
+                                ((uint)f33_phase_lower_modulation_offset_curve[uVar2 + 1].y -
+                                (uint)f33_phase_lower_modulation_offset_curve[uVar2].y)) / 0x20);
+  }
+  else {
+    DAT_febe6d5e = 0xc9a;
+  }
+  if (DAT_febe8b88 == 'Z') {
+    DAT_febe6d5c = 0;
+    DAT_febe6d5e = f33_phase_forced_offset;
+  }
+  else if (DAT_febe6d64 < f33_phase_modulation_first_energy_threshold) {
+    DAT_febe6d5c = 0;
+  }
+  else {
+    DAT_febe6d5c = 0x5a;
+    if (f33_phase_modulation_second_energy_threshold <= DAT_febe6d64) {
+      DAT_febe6d5c = 0xa5;
+    }
+  }
+  DAT_febe6d68 = (int)DAT_febe6c44 * (int)DAT_febe6c44 + (int)DAT_febe6c46 * (int)DAT_febe6c46;
+  uVar1 = DAT_febe6d68 >> 0xc;
+  uVar2 = (uVar1 & 0xffff) >> 5;
+  if (f33_phase_offset_selector == 'Z') {
+    if (uVar2 < 0x7f) {
+      DAT_febe6d60 = f33_phase_lower_modulation_offset_curve[uVar2].y +
+                     (short)((int)((uVar1 & 0x1f) *
+                                  ((uint)f33_phase_lower_modulation_offset_curve[uVar2 + 1].y -
+                                  (uint)f33_phase_lower_modulation_offset_curve[uVar2].y)) / 0x20);
+    }
+    else {
+      DAT_febe6d60 = 0xc9a;
+    }
+  }
+  else if (uVar2 < 0x7f) {
+    DAT_febe6d60 = f33_phase_upper_modulation_offset_curve[uVar2].y +
+                   (short)((int)((uVar1 & 0x1f) *
+                                ((uint)f33_phase_upper_modulation_offset_curve[uVar2 + 1].y -
+                                (uint)f33_phase_upper_modulation_offset_curve[uVar2].y)) / 0x20);
+  }
+  else {
+    DAT_febe6d60 = 0x2366;
+  }
+  if (DAT_febe8b89 == 'Z') {
+    DAT_febe6d5d = 0;
+    DAT_febe6d60 = f33_phase_forced_offset;
+  }
+  else if (DAT_febe6d68 < f33_phase_modulation_first_energy_threshold) {
+    DAT_febe6d5d = 0;
+  }
+  else {
+    DAT_febe6d5d = 0x5a;
+    if (f33_phase_modulation_second_energy_threshold <= DAT_febe6d68) {
+      DAT_febe6d5d = 0xa5;
+    }
+  }
   return;
 }
 

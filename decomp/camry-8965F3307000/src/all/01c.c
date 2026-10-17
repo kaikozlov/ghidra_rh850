@@ -834,6 +834,41 @@ uint FUN_00070bb2(uint param_1,int param_2)
 
 
 
+/* Truncate classification to8 bits.11 increments scratch recovery_count at+10 while<=limit; strict
+   crossing clears halfwords0/2/4/8/10/12/16 and returns0,else44000022.22/44 clear recovery_count
+   and return22; other classifications return22 preserving it. Scratch+6 high-water survives.
+   This18-byte transient layout is not the persistent monitor record. */
+
+uint f33_step_monitor_recovery_scratch
+               (uchar classification,F33MonitorRecoveryScratch *scratch,ushort *limit)
+
+{
+  ushort uVar1;
+  ushort uVar2;
+  
+  if (classification != '\x11') {
+    if ((classification == '\"') || (classification == 'D')) {
+      scratch->recovery_count = 0;
+    }
+    return 0x22;
+  }
+  uVar1 = scratch->recovery_count;
+  uVar2 = *limit;
+  if ((uVar1 <= uVar2) && (scratch->recovery_count = uVar1 + 1, (ushort)(uVar1 + 1) <= uVar2)) {
+    return 0x44000022;
+  }
+  scratch->passing_count = 0;
+  scratch->opaque_02 = 0;
+  scratch->failing_count = 0;
+  scratch->opaque_08 = 0;
+  scratch->recovery_count = 0;
+  scratch->opaque_0c = 0;
+  scratch->opaque_10 = 0;
+  return 0;
+}
+
+
+
 undefined4 FUN_00070fa4(char param_1,undefined2 *param_2,ushort *param_3)
 
 {
@@ -1889,6 +1924,54 @@ bool FUN_00072eac(uint *param_1)
 
 
 
+/* Snapshot via721C6. Idle:73C76==1 calls72E70, otherwise abort72130 (lower operation state2).
+   Active status1 calls72ED4; status2 skips it. Always finish723D6. Native quiet scans,
+   ascending-header admission bounded before726C4, phase08 queue retention and explicit10/20
+   terminal dequeue/recycle/result1/6. These terminal inputs do not prove physical programming
+   reached those phases. Snapshot721C6. Idle calls72E70 only when73C76 returns1, otherwise
+   abort72130; active status1 calls72ED4, status2 skips it; always723D6. Native quiet scan/wrap,
+   ascending header selection bounded before726C4, and explicit08/10/20 terminal
+   retention/dequeue/recycle/result1/6. Terminal-state fixtures are not evidence of physical
+   programming progress. */
+
+void f33_nvm_service_scheduler(void)
+
+{
+  uint uVar1;
+  int iVar2;
+  F33NvmOperation FStack_14;
+  
+  uVar1 = f33_nvm_snapshot_scheduler_operation(&FStack_14);
+  if (uVar1 == 0) {
+    iVar2 = FUN_00073c76();
+    if (iVar2 == 1) {
+      FUN_00072e70();
+    }
+    else {
+      FUN_00072130();
+    }
+  }
+  else if (uVar1 != 2) {
+    ((void)(&FStack_14), FUN_00072ed4());
+  }
+  FUN_000723d6();
+  return;
+}
+
+
+
+bool FUN_00072f1e(ushort param_1)
+
+{
+  uint uVar1;
+  F33NvmOperation FStack_1c;
+  
+  uVar1 = f33_nvm_snapshot_scheduler_operation(&FStack_1c);
+  return (uVar1 == 1 || uVar1 == 2) && FStack_1c.logical_handle == param_1;
+}
+
+
+
 void FUN_00072f76(undefined1 param_1)
 
 {
@@ -1969,6 +2052,28 @@ void FUN_00073094(void)
 
 
 
+/* Set head/tailFFFF in all127 headers; do not inspect slots. Clear all127 head/tail pairs toFFFF
+   without touching slots. Exact header extent and adjacent records checked through cold
+   initializer. */
+
+void f33_nvm_clear_queue_headers(void)
+
+{
+  uint uVar1;
+  uint uVar2;
+  
+  uVar2 = 0;
+  do {
+    uVar1 = uVar2 + 1;
+    f33_nvm_queue_headers[uVar2].head = 0xffff;
+    f33_nvm_queue_headers[uVar2].tail = 0xffff;
+    uVar2 = uVar1;
+  } while (uVar1 < 0x7f);
+  return;
+}
+
+
+
 /* Return low16(base+offset), zero-extended. No queue bounds check. Return zero-extended
    low16(base+offset); no local queue bound. Actual final normal queue126 exercised through
    logical123. */
@@ -1977,6 +2082,119 @@ uint f33_nvm_queue_index(uint base,uint offset)
 
 {
   return offset + base & 0xffff;
+}
+
+
+
+/* Relink inclusive range. For nonfree old markers, logical2..123 calls 73078 before clearing;
+   invalid logical calls72130 then still clears. Final nextFFFF. No queue/range validation; not
+   proof of a warm-boot entry. Relink inclusive slot range. Nonfree old marker with logical2..123
+   invokes73078; invalid logical invokes72130 then still clears. Reset markers/buffers/handles and
+   final nextFFFF. No local range validation; not a warm-boot claim. */
+
+void f33_nvm_reset_slot_range_notifying(ushort queue,ushort first,ushort last)
+
+{
+  ushort uVar1;
+  ushort logical_handle;
+  uint operation;
+  uint uVar2;
+  
+  uVar1 = f33_nvm_logical_descriptor_count - 1;
+  f33_nvm_queue_headers[queue].head = first;
+  f33_nvm_queue_headers[queue].tail = last;
+  for (uVar2 = (uint)first; uVar2 <= last; uVar2 = uVar2 + 1 & 0xffff) {
+    operation = f33_nvm_queue_slots[uVar2].operation;
+    if (operation != 0x9da70ae7) {
+      logical_handle = f33_nvm_queue_slots[uVar2].logical_handle;
+      if ((uVar1 < logical_handle) || (logical_handle < 2)) {
+        FUN_00072130();
+      }
+      else {
+        f33_nvm_notify_reset_result(logical_handle,operation);
+      }
+    }
+    f33_nvm_queue_slots[uVar2].operation = 0x9da70ae7;
+    f33_nvm_queue_slots[uVar2].logical_handle = 0xffff;
+    f33_nvm_queue_slots[uVar2].read_buffer = 0;
+    f33_nvm_queue_slots[uVar2].write_buffer = 0;
+    f33_nvm_queue_slots[uVar2].next = (short)uVar2 + 1;
+  }
+  f33_nvm_queue_slots[last].next = 0xffff;
+  return;
+}
+
+
+
+/* WARNING: This is an inlined function */
+/* Set header and inclusive unsigned16 range to free marker, NULL buffers, logicalFFFF, ascending
+   next; last.nextFFFF. Preserve r10:7319A carries pool1 across this call. Inline actual p-code, not
+   an invented return value. No range validation; lastFFFF wraps the loop. Reset inclusive
+   unsigned16 slot range without old-operation notifications; Preserve r10 carrying pool1
+   through7319A. Actual p-code inlined, no fabricated return. No bounds validation; lastFFFF would
+   wrap. */
+
+void f33_nvm_reset_slot_range(ushort queue,ushort first,ushort last)
+
+{
+  uint uVar1;
+  
+  f33_nvm_queue_headers[queue].head = first;
+  f33_nvm_queue_headers[queue].tail = last;
+  for (uVar1 = (uint)first; uVar1 <= last; uVar1 = uVar1 + 1 & 0xffff) {
+    f33_nvm_queue_slots[uVar1].operation = 0x9da70ae7;
+    f33_nvm_queue_slots[uVar1].read_buffer = 0;
+    f33_nvm_queue_slots[uVar1].write_buffer = 0;
+    f33_nvm_queue_slots[uVar1].logical_handle = 0xffff;
+    f33_nvm_queue_slots[uVar1].next = (short)uVar1 + 1;
+  }
+  f33_nvm_queue_slots[last].next = 0xffff;
+  return;
+}
+
+
+
+/* WARNING: Inlined function: f33_nvm_reset_slot_range */
+/* Clear127 headers; reset pool0 slot122 and pool1 slots0..121. Exactly notify==1 selects
+   old-operation notifications. Set free counts1/122 and used counts0/0. Does not initialize the
+   notification-exclusion handle. Initialize pool0 slot122 and pool1 slots0..121, free counts1/122
+   and used0/0. Exactly mode1 selects notifying reset; other modes select plain reset. Both paths
+   executed. */
+
+void f33_nvm_reset_pooled_queues(uchar notify)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uint uVar3;
+  
+  f33_nvm_clear_queue_headers();
+  uVar2 = f33_nvm_queue_index(0,0);
+  uVar3 = f33_nvm_queue_index(1,0);
+  uVar1 = 0x7a;
+  if (notify == '\x01') {
+    f33_nvm_reset_slot_range_notifying((ushort)uVar2,0x7a,0x7a);
+    f33_nvm_reset_slot_range_notifying((ushort)uVar3,0,0x79);
+  }
+  else {
+    f33_nvm_queue_headers[uVar2 & 0xffff].head = 0x7a;
+    f33_nvm_queue_headers[uVar2 & 0xffff].tail = 0x7a;
+    for (; uVar1 < 0x7b; uVar1 = uVar1 + 1 & 0xffff) {
+      f33_nvm_queue_slots[uVar1].operation = 0x9da70ae7;
+      f33_nvm_queue_slots[uVar1].read_buffer = 0;
+      f33_nvm_queue_slots[uVar1].write_buffer = 0;
+      f33_nvm_queue_slots[uVar1].logical_handle = 0xffff;
+      f33_nvm_queue_slots[uVar1].next = (short)uVar1 + 1;
+    }
+    f33_nvm_queue_slots[0x7a].next = 0xffff;
+                    /* WARNING: Could not inline here */
+    f33_nvm_reset_slot_range((ushort)uVar3,0,0x79);
+  }
+  f33_nvm_reserved_free_count = 1;
+  f33_nvm_normal_free_count = 0x7a;
+  f33_nvm_reserved_used_count = 0;
+  f33_nvm_normal_used_count = 0;
+  return;
 }
 
 
@@ -1995,6 +2213,29 @@ bool FUN_00073274(void)
     FUN_00072130();
   }
   return bVar1;
+}
+
+
+
+/* Both sentinels:empty1/return0; neither:empty0/return0. Exactly one sentinel calls72130, returns1
+   and leaves output unchanged. Both sentinel fields mean empty; neither means nonempty. Exactly
+   oneFFFF invokes72130 and returns1 without assigning empty output. Not a slot-chain traversal. */
+
+uint f33_nvm_check_queue_empty(F33NvmQueueHeader *header,uchar *empty)
+
+{
+  if (header->head == 0xffff) {
+    if (header->tail == 0xffff) {
+      *empty = '\x01';
+      return 0;
+    }
+  }
+  else if (header->tail != 0xffff) {
+    *empty = '\0';
+    return 0;
+  }
+  FUN_00072130();
+  return 1;
 }
 
 
@@ -2024,6 +2265,58 @@ uint f33_nvm_check_slot_partition(ushort index,ushort queue)
     uVar2 = 1;
   }
   return uVar2;
+}
+
+
+
+bool FUN_00073334(uint param_1,short param_2)
+
+{
+  ushort logical_handle;
+  uint uVar1;
+  uint uVar2;
+  bool bVar3;
+  
+  logical_handle = f33_nvm_queue_slots[param_1 & 0xffff].logical_handle;
+  bVar3 = true;
+  if ((logical_handle <= (ushort)(f33_nvm_logical_descriptor_count - 1)) && (1 < logical_handle)) {
+    uVar2 = f33_nvm_queue_key(logical_handle);
+    uVar1 = 0;
+    if (param_2 != 2) {
+      uVar1 = (uint)(ushort)(param_2 - 3);
+    }
+    bVar3 = uVar2 != uVar1;
+    if (uVar2 == uVar1) {
+      return false;
+    }
+  }
+  FUN_00072130();
+  return bVar3;
+}
+
+
+
+undefined4 FUN_00073380(ushort param_1,ushort *param_2)
+
+{
+  ushort index;
+  uint uVar1;
+  int iVar2;
+  undefined4 uVar3;
+  uchar uStack_15;
+  
+  uVar3 = 1;
+  uStack_15 = '\0';
+  uVar1 = f33_nvm_check_queue_empty(f33_nvm_queue_headers + param_1,&uStack_15);
+  if ((uVar1 == 0) && (uStack_15 == '\0')) {
+    index = f33_nvm_queue_headers[param_1].head;
+    uVar1 = f33_nvm_check_slot_partition(index,param_1);
+    if ((uVar1 == 0) && (iVar2 = FUN_00073334(index,(uint)param_1), iVar2 == 0)) {
+      *param_2 = index;
+      uVar3 = 0;
+    }
+  }
+  return uVar3;
 }
 
 
@@ -2064,6 +2357,150 @@ void FUN_00073424(undefined4 *param_1,undefined4 *param_2)
   param_1[2] = param_2[1];
   param_1[3] = param_2[2];
   return;
+}
+
+
+
+/* Empty tail sets head; otherwise validate old tail partition and link its next. Set tail=index and
+   new nextFFFF. Return0 or1 on old-tail failure. Does not validate new index or head/tail
+   consistency. TailFFFF sets head; otherwise validate old tail partition and link old tail.next.
+   Set tail and new nextFFFF. Reject bad old tail before append; no new-index validation or header
+   consistency check. */
+
+uint f33_nvm_append_queue_slot(ushort queue,ushort index)
+
+{
+  ushort index_00;
+  uint uVar1;
+  
+  index_00 = f33_nvm_queue_headers[queue].tail;
+  if (index_00 == 0xffff) {
+    f33_nvm_queue_headers[queue].head = index;
+  }
+  else {
+    uVar1 = f33_nvm_check_slot_partition(index_00,queue);
+    if (uVar1 != 0) {
+      return 1;
+    }
+    f33_nvm_queue_slots[index_00].next = index;
+  }
+  f33_nvm_queue_headers[queue].tail = index;
+  f33_nvm_queue_slots[index].next = 0xffff;
+  return 0;
+}
+
+
+
+/* WARNING: This is an inlined function */
+/* Copy operation+0/+4/+8/+C into slot+0/+C/+4/+8; preserve slot.next. Preserve r10, carrying append
+   success through7365C; inline actual p-code. Convert operation fields+0/+4/+8/+C to
+   slot+0/+C/+4/+8, preserving next. Preserves r10 append status through7365C; inline real p-code.
+    */
+
+void f33_nvm_copy_operation_to_slot(F33NvmQueueSlot *slot,F33NvmOperation *operation)
+
+{
+  slot->operation = operation->operation;
+  slot->logical_handle = operation->logical_handle;
+  slot->read_buffer = operation->buffer_08;
+  slot->write_buffer = operation->buffer_0c;
+  return;
+}
+
+
+
+/* WARNING: Inlined function: f33_nvm_copy_operation_to_slot */
+/* Append index, then copy operation only on success. Return append status. Append slot then copy
+   operation only on successful append. Return append status surviving actual73640; no payload read.
+    */
+
+uint f33_nvm_append_operation(ushort queue,ushort index,F33NvmOperation *operation)
+
+{
+  uint uVar1;
+  
+  uVar1 = f33_nvm_append_queue_slot(queue,index);
+  if (uVar1 == 0) {
+    f33_nvm_queue_slots[index].operation = operation->operation;
+    f33_nvm_queue_slots[index].logical_handle = operation->logical_handle;
+    f33_nvm_queue_slots[index].read_buffer = operation->buffer_08;
+    f33_nvm_queue_slots[index].write_buffer = operation->buffer_0c;
+  }
+  return uVar1;
+}
+
+
+
+undefined4 FUN_00073828(ushort *param_1,ushort param_2,ushort *param_3,undefined2 *param_4)
+
+{
+  ushort uVar1;
+  uint uVar2;
+  uint uVar3;
+  int iVar4;
+  
+  uVar1 = *param_1;
+  iVar4 = 0x7b;
+  uVar3 = 0xffffffff;
+  do {
+    uVar2 = (uint)uVar1;
+    if (uVar2 == 0xffff) {
+      return 1;
+    }
+    if (0x7a < uVar2) {
+      FUN_00072130();
+      return 1;
+    }
+    if (param_2 == f33_nvm_queue_slots[uVar2].logical_handle) {
+      *param_3 = uVar1;
+      *param_4 = (short)uVar3;
+      return 0;
+    }
+    uVar1 = f33_nvm_queue_slots[uVar2].next;
+    iVar4 = iVar4 + -1;
+    uVar3 = uVar2;
+  } while (iVar4 != 0);
+  return 1;
+}
+
+
+
+/* WARNING: Inlined function: f33_nvm_unlink_queue_slot */
+
+int FUN_00073878(undefined2 param_1,uint param_2,ushort *param_3)
+
+{
+  F33NvmQueueHeader *header;
+  ushort uVar1;
+  uint uVar2;
+  int iVar3;
+  uchar uStack_19;
+  ushort uStack_18;
+  ushort uStack_16;
+  
+  uStack_18 = 0xffff;
+  uStack_16 = 0xffff;
+  iVar3 = 1;
+  uStack_19 = '\0';
+  header = f33_nvm_queue_headers + (param_2 & 0xffff);
+  uVar2 = f33_nvm_check_queue_empty(header,&uStack_19);
+  if (((uVar2 == 0) && (uStack_19 == '\0')) &&
+     (iVar3 = FUN_00073828(header,param_1,&uStack_18,&uStack_16), iVar3 == 0)) {
+    uVar1 = f33_nvm_queue_slots[uStack_18].next;
+    if (uStack_16 == 0xffff) {
+      header->head = uVar1;
+      uStack_16 = uVar1;
+    }
+    else {
+      f33_nvm_queue_slots[uStack_16].next = uVar1;
+      uVar1 = f33_nvm_queue_slots[uStack_18].next;
+    }
+    if (uVar1 == 0xffff) {
+      f33_nvm_queue_headers[param_2 & 0xffff].tail = uStack_16;
+    }
+    *param_3 = uStack_18;
+  }
+  return iVar3;
 }
 
 

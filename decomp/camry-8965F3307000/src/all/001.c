@@ -531,6 +531,49 @@ uint FUN_000047ea(int param_1,uint param_2,uint param_3)
 
 
 
+/* WARNING: Inlined function: f33_boot_crc_descriptors */
+/* Validate region selector through344C/3438;reject missingdescriptor/count. For each16-byte
+   descriptor,require base andlength equal metadata-indirected words,then47EA streams words from
+   thatbase withCRC seedFFFFFFFF andmust return0. Return0 on allpassing;FFFFFFFF on failure.
+   Selectors0/1 cover CodeFlash and selector2 covers FEBF0000+FF0 with metadata atFEBF0FE0/4; each
+   has one descriptor. This is not generic pointer or image validity outside those descriptors.
+   Selectors0/1 cover CodeFlash; selector2 covers FEBF0000+FF0 with metadataFEBF0FE0/4. All three
+   hold one record each;not generic pointer or image validity outside those descriptors. */
+
+uint f33_boot_validate_crc_region(uint region)
+
+{
+  F33BootCrcDescriptor *pFVar1;
+  F33BootCrcDescriptor *pFVar2;
+  uint uVar3;
+  int iVar4;
+  uint uVar5;
+  uint uVar6;
+  
+  if (region < 3) {
+    pFVar2 = ((void *)camry_host_ptr((uint32_t)(f33_boot_regions[(short)region].crc_descriptors)));
+  }
+  else {
+    pFVar2 = (F33BootCrcDescriptor *)0x0;
+  }
+  uVar3 = f33_boot_crc_descriptor_count(region);
+  if ((uVar3 == 0) || (pFVar2 == (F33BootCrcDescriptor *)0x0)) {
+LAB_0000486c:
+    uVar5 = 0xffffffff;
+  }
+  else {
+    for (uVar6 = 0; uVar5 = 0, uVar6 < uVar3; uVar6 = uVar6 + 1) {
+      pFVar1 = pFVar2 + uVar6;
+      if (((pFVar1->base != *((uint32_t *)camry_host_ptr((uint32_t)(pFVar1->base_metadata)))) || (pFVar1->length != *((uint32_t *)camry_host_ptr((uint32_t)(pFVar1->length_metadata)))))
+         || (iVar4 = FUN_000047ea(pFVar1->base,pFVar1->length,0xffffffff), iVar4 != 0))
+      goto LAB_0000486c;
+    }
+  }
+  return uVar5;
+}
+
+
+
 /* SetCRCresult2 andpending0; retainaddress,length,opaque tag. Separatefrom47AC transition-job
    reset. */
 
@@ -565,6 +608,142 @@ void FUN_00004900(uchar param_1)
 
 {
   f33_boot_negative_response('.',param_1);
+  return;
+}
+
+
+
+void FUN_00004914(void)
+
+{
+  DAT_febf2ad0 = 0x6e;
+  DAT_febf2ad2 = (undefined1)f33_boot_diagnostic_identifiers[(short)(ushort)DAT_febf2ab0].identifier
+  ;
+  DAT_febf2ad1 = (undefined1)
+                 (f33_boot_diagnostic_identifiers[(short)(ushort)DAT_febf2ab0].identifier >> 8);
+  f33_boot_response_submit('\x01',((undefined *)camry_host_ptr(0xfebf2ad0u)),3);
+  return;
+}
+
+
+
+/* Resident SID2E: session2, security2, exact length3+8F14 descriptor payload and write flag2.0201
+   requires2AB2=1 and schedules16-byte job then state2;0202 requires state2, schedules16-byte job,
+   sets2B16=1/state0;0203 requires state0 and returns immediate6E/state1.4A9A waits asynchronous job
+   completion and emits6E or72. */
+
+void f33_boot_service_write_did(ushort request_length)
+
+{
+  int iVar1;
+  char cVar2;
+  uint32_t puVar3;
+  F33BootInterruptEntry *pFVar4;
+  undefined4 uVar5;
+  ushort uVar6;
+  int iVar7;
+  short sVar8;
+  int iVar9;
+  bool bVar10;
+  undefined1 uStack_1b;
+  undefined1 auStack_1a [2];
+  undefined1 auStack_18 [16];
+  
+  puVar3 = 0xfebf9800u;
+  pFVar4 = f33_boot_interrupt_dispatch;
+  FUN_000067b0(&uStack_1b,0x13);
+  uVar6 = FUN_000052a6(auStack_1a,2);
+  cVar2 = *(char *)&pFVar4[0x10b].handler;
+  bVar10 = true;
+  sVar8 = 0;
+  iVar7 = 0;
+  do {
+    iVar9 = (short)iVar7 * 0xc;
+    if ((uVar6 == (*((ushort *)camry_host_ptr((uint32_t)((int)camry_host_addr(pFVar4) + iVar9 + 0x87e))))) &&
+       (((*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(pFVar4) + iVar9 + 0x880)))) & 2) != 0)) {
+      sVar8 = (*((short *)camry_host_ptr((uint32_t)((int)camry_host_addr(pFVar4) + iVar9 + 0x87c))));
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6d50))))) = (char)iVar7;
+      bVar10 = false;
+      break;
+    }
+    iVar1 = iVar7 + 1;
+    iVar9 = iVar7 + -3;
+    iVar7 = iVar1;
+  } while (((iVar9 < 0) || (iVar1 < 0)));
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6cf2))))) != cVar2) {
+    uVar5 = 0x7f;
+    goto LAB_000049aa;
+  }
+  if (request_length < 4) {
+LAB_000049c0:
+    uVar5 = 0x13;
+    goto LAB_000049aa;
+  }
+  if (bVar10) {
+LAB_00004a0c:
+    uVar5 = 0x31;
+    goto LAB_000049aa;
+  }
+  if (request_length != (ushort)(sVar8 + 3U)) goto LAB_000049c0;
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6cf1))))) != '\x02') {
+    uVar5 = 0x33;
+    goto LAB_000049aa;
+  }
+  if (uVar6 < 0x201) goto LAB_00004a0c;
+  if (uVar6 == 0x201) {
+    bVar10 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6d4e))))) == '\x01';
+LAB_00004a04:
+    if (!bVar10) {
+LAB_00004a06:
+      uVar5 = 0x22;
+LAB_000049aa:
+      FUN_00004900(uVar5);
+      return;
+    }
+  }
+  else {
+    if (uVar6 < 0x203) {
+      bVar10 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6d4e))))) == '\x02';
+      goto LAB_00004a04;
+    }
+    if (uVar6 != 0x203) goto LAB_00004a0c;
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6d4e))))) != '\0') goto LAB_00004a06;
+  }
+  if (uVar6 < 0x201) {
+LAB_00004a80:
+    uVar5 = 0x31;
+  }
+  else {
+    if (uVar6 == 0x201) {
+      iVar7 = FUN_00006d5e(((undefined4 *)camry_host_ptr((uint32_t)((int)camry_host_addr(pFVar4) + (short)(ushort)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6d50))))) * 0xc + 0x878))), camry_host_addr(auStack_18));
+      if (iVar7 == 0) {
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6d4e))))) = 2;
+LAB_00004a7c:
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6d4f))))) = 1;
+        return;
+      }
+    }
+    else {
+      if (0x202 < uVar6) {
+        if (uVar6 == 0x203) {
+          FUN_00004914();
+          (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6d4e))))) = 1;
+          (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6d4f))))) = 0;
+          return;
+        }
+        goto LAB_00004a80;
+      }
+      iVar7 = FUN_00006d5e(((undefined4 *)camry_host_ptr((uint32_t)((int)camry_host_addr(pFVar4) + (short)(ushort)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6d50))))) * 0xc + 0x878))), camry_host_addr(auStack_18));
+      if (iVar7 == 0) {
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6cea))))) = 1;
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6d4e))))) = 0;
+        goto LAB_00004a7c;
+      }
+    }
+    uVar5 = 0x72;
+  }
+  FUN_00004900(uVar5);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6d4f))))) = 0;
   return;
 }
 
@@ -670,6 +849,201 @@ void FUN_00004b5a(void)
   DAT_febf2ad0 = 0x76;
   DAT_febf2ad1 = DAT_febf2ac8;
   f33_boot_response_submit('\x01',((undefined *)camry_host_ptr(0xfebf2ad0u)),2);
+  return;
+}
+
+
+
+/* Consume the full low16 request length forwarded from4DBA. Require session2, nonzero remaining,
+   sequence admission and payload1..1024, full1024 unless final. Decrement remaining at admission;
+   classify RAM versus CodeFlash, stage source/length and transform-or-ready state. Foreground4F50
+   consumes later; failures request queue cancellation. Static exact-image instruction/dataflow
+   contract; no complete transfer execution claim. */
+
+void f33_boot_admit_program_transfer_chunk(ushort request_length)
+
+{
+  uchar *source;
+  uint32_t puVar1;
+  F33BootInterruptEntry *pFVar2;
+  uint length;
+  undefined4 uVar3;
+  int iVar4;
+  ushort length_00;
+  uint uVar5;
+  uchar uStack_d;
+  
+  puVar1 = 0xfebf9800u;
+  pFVar2 = f33_boot_interrupt_dispatch;
+  uVar3 = camry_host_addr(FUN_000067d0());
+  (*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + -0x6d4c)))) = uVar3;
+  iVar4 = FUN_00004ae2();
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6cf2))))) != (*((char *)camry_host_ptr((uint32_t)((int)&pFVar2[0x10b].handler + 3))))) {
+    f33_boot_request_flash_worker_cancel();
+    uVar3 = 0x7f;
+    goto LAB_00004ba8;
+  }
+  length_00 = request_length - 2;
+  uVar5 = (uint)length_00;
+  if (request_length < 3) goto LAB_00004c1a;
+  length = (*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x6d44))));
+  if (length == 0) {
+    f33_boot_request_flash_worker_cancel();
+    uVar3 = 0x24;
+    goto LAB_00004ba8;
+  }
+  if (length < uVar5) {
+    f33_boot_request_flash_worker_cancel();
+    uVar3 = 0x71;
+    goto LAB_00004ba8;
+  }
+  if ((iVar4 == 2) || (iVar4 == 3)) {
+    f33_boot_request_flash_worker_cancel();
+    uVar3 = 0x73;
+    goto LAB_00004ba8;
+  }
+  if (iVar4 != 0) {
+    FUN_00004b5a();
+    return;
+  }
+  if (length == uVar5) {
+    if (0x400 < uVar5) goto LAB_00004c0a;
+    if (request_length < 0x403) goto LAB_00004c24;
+  }
+  else {
+    if (uVar5 != 0x400) {
+LAB_00004c0a:
+      f33_boot_request_flash_worker_cancel();
+      uVar3 = 0x31;
+      goto LAB_00004ba8;
+    }
+    if (request_length == 0x402) {
+LAB_00004c24:
+      f33_boot_classify_service_range((*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x6d48)))),length,'\0',&uStack_d);
+      (*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x6d44)))) = (*((int *)camry_host_ptr((uint32_t)(puVar1 + -0x6d44)))) - uVar5;
+      if (uStack_d == '\0') {
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6d36))))) = 2;
+        f33_boot_set_flash_worker_pause('\0');
+      }
+      else {
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6d36))))) = 1;
+      }
+      (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x6d3c)))) = length_00;
+      source = ((uchar *)camry_host_ptr((uint32_t)(*(int *)(puVar1 + -0x6d4c) + 2)));
+      *(uchar **)(puVar1 + -0x6d40) = source;
+      if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6ceb))))) != '\0') {
+        uVar5 = f33_boot_block_transform_submit(length_00,source,source);
+        if (uVar5 != 0) {
+          FUN_00004b38(0x72);
+          (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6d3a))))) = 0;
+          return;
+        }
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6d3a))))) = 1;
+        return;
+      }
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6d35))))) = 1;
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6d3a))))) = 2;
+      return;
+    }
+  }
+LAB_00004c1a:
+  f33_boot_request_flash_worker_cancel();
+  uVar3 = 0x13;
+LAB_00004ba8:
+  FUN_00004b38(uVar3);
+  return;
+}
+
+
+
+/* Consume low16 request length from4DBA with the same payload/sequence shape, but stage comparison
+   rather than direct transfer. Preserve payload length in R8 for6C6C; optional block transform
+   precedes comparison. Foreground comparison and timer response are separate completion owners.
+   Static exact-image instruction/dataflow contract; no complete transfer execution claim. */
+
+void f33_boot_admit_compare_transfer_chunk(ushort request_length)
+
+{
+  uchar *left;
+  undefined1 uVar1;
+  uint uVar2;
+  uint32_t puVar3;
+  F33BootInterruptEntry *pFVar4;
+  ushort length;
+  uint uVar5;
+  undefined4 uVar6;
+  int iVar7;
+  
+  puVar3 = 0xfebf9800u;
+  pFVar4 = f33_boot_interrupt_dispatch;
+  uVar6 = camry_host_addr(FUN_000067d0());
+  (*((undefined4 *)camry_host_ptr((uint32_t)(puVar3 + -0x6d4c)))) = uVar6;
+  iVar7 = FUN_00004ae2();
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6cf2))))) != (*((char *)camry_host_ptr((uint32_t)((int)&pFVar4[0x10b].handler + 3))))) {
+    uVar6 = 0x7f;
+    goto LAB_00004cca;
+  }
+  length = request_length - 2;
+  uVar5 = (uint)length;
+  if (request_length < 3) goto LAB_00004d2a;
+  uVar2 = (*((uint *)camry_host_ptr((uint32_t)(puVar3 + -0x6d44))));
+  if (uVar2 == 0) {
+    uVar6 = 0x24;
+    goto LAB_00004cca;
+  }
+  if (uVar2 < uVar5) {
+    uVar6 = 0x71;
+    goto LAB_00004cca;
+  }
+  if ((iVar7 == 2) || (iVar7 == 3)) {
+    uVar6 = 0x73;
+    goto LAB_00004cca;
+  }
+  if (iVar7 != 0) {
+    FUN_00004b5a();
+    return;
+  }
+  if (uVar2 == uVar5) {
+    if (0x400 < uVar5) goto LAB_00004d1e;
+    if (request_length < 0x403) goto LAB_00004d30;
+  }
+  else {
+    if (uVar5 != 0x400) {
+LAB_00004d1e:
+      uVar6 = 0x31;
+      goto LAB_00004cca;
+    }
+    if (request_length == 0x402) {
+LAB_00004d30:
+      (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x6d3c)))) = length;
+      left = ((uchar *)camry_host_ptr((uint32_t)(*(int *)(puVar3 + -0x6d4c) + 2)));
+      *(uchar **)(puVar3 + -0x6d40) = left;
+      if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6ceb))))) == '\0') {
+        if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6ce9))))) != '\x01' && (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6ce9))))) != '\x02') {
+          return;
+        }
+        uVar5 = f33_boot_compare_submit(left,*(uchar **)(puVar3 + -0x6d48),uVar5);
+        if (uVar5 != 0) goto LAB_00004d6e;
+        uVar1 = 2;
+      }
+      else {
+        uVar5 = f33_boot_block_transform_submit(length,left,left);
+        if (uVar5 != 0) {
+LAB_00004d6e:
+          FUN_00004b38(0x72);
+          (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6d3a))))) = 0;
+          return;
+        }
+        uVar1 = 1;
+      }
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6d3a))))) = uVar1;
+      return;
+    }
+  }
+LAB_00004d2a:
+  uVar6 = 0x13;
+LAB_00004cca:
+  FUN_00004b38(uVar6);
   return;
 }
 
@@ -959,6 +1333,56 @@ void FUN_00004fce(void)
 
 
 
+/* Resident SID3E: sessions1/2/3, length2, subfunction00 or80 only. Form7E/00 through4FCE; original
+   bit7 controls positive-response suppression. Functional3E80 has a separate request-admission
+   special case while another request is receiving. */
+
+void f33_boot_service_tester_present(ushort request_length)
+
+{
+  int iVar1;
+  int iVar2;
+  uint32_t puVar3;
+  F33BootInterruptEntry *pFVar4;
+  undefined4 uVar5;
+  int iVar6;
+  undefined1 uStack_e;
+  char cStack_d;
+  
+  puVar3 = 0xfebf9800u;
+  pFVar4 = f33_boot_interrupt_dispatch;
+  uStack_e = 0;
+  cStack_d = '\0';
+  FUN_000067b0(&uStack_e,2);
+  iVar6 = 0;
+  do {
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6cf2))))) == (*((char *)camry_host_ptr((uint32_t)((int)&pFVar4[0x10c].eiic + iVar6 + 1))))) {
+      if (1 < request_length) {
+        if ((cStack_d != '\0') && (cStack_d != -0x80)) {
+          uVar5 = 0x12;
+          goto LAB_0000502c;
+        }
+        if (request_length == 2) {
+          (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6d34))))) = cStack_d;
+          FUN_00004fce();
+          return;
+        }
+      }
+      uVar5 = 0x13;
+      goto LAB_0000502c;
+    }
+    iVar2 = iVar6 + 1;
+    iVar1 = iVar6 + -2;
+    iVar6 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  uVar5 = 0x7f;
+LAB_0000502c:
+  FUN_00004fba(uVar5);
+  return;
+}
+
+
+
 undefined1 FUN_00005060(char *param_1,char param_2,char param_3)
 
 {
@@ -1126,6 +1550,38 @@ void f33_boot_negative_response(uchar sid,uchar nrc)
   DAT_febf2ad1 = sid;
   DAT_febf2ad2 = nrc;
   f33_boot_response_submit(mode,((undefined *)camry_host_ptr(0xfebf2ad0u)),3);
+  return;
+}
+
+
+
+/* ROM8E54twentyentryresident-onlyservice/address-modedispatch;unmatchedormaskdenied\u219251FA(SID,11).NoapplicationDCMtable.
+   ROM8E54twentyentryresident-onlyservice/address-modedispatch;unmatchedormaskdenied→51FA(SID,11).NoapplicationDCMtable.
+   Native ROM dispatch queues programming-session transition and separately rejects functional
+   routine access before handler execution. No completed session/hardware transport claim. */
+
+void f33_boot_dispatch_diagnostic_service(uchar sid,ushort request_length)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  
+  iVar3 = 0;
+  do {
+    if (sid == f33_boot_diagnostic_services[iVar3].sid) {
+      if (((uint)f33_boot_diagnostic_services[iVar3].address_mode_mask &
+          1 << (f33_boot_address_mode & 0x1f)) != 0) {
+        (*(int (*)())f33_boot_diagnostic_services[iVar3].handler)(request_length);
+        return;
+      }
+      break;
+    }
+    iVar2 = iVar3 + 1;
+    iVar1 = iVar3 + -0x13;
+    iVar3 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  f33_boot_negative_response(sid,'\x11');
   return;
 }
 
@@ -1384,6 +1840,61 @@ LAB_000054da:
 
 
 
+/* Resident SID27: session2; masked subfunctions1 and2 only. Both seed and key requests require18
+   bytes.5328 stages16 client bytes and returns a16-byte challenge;53F2 derives and compares16
+   expected key bytes. Success stores security2B0F=2 before response submission; handshake2B55=3
+   follows its return. Bad key35; a second counted failure gives36 and raw-counter delay. Active
+   delay rejects seed with37 before length validation; reseed and replay behavior are owned
+   by5328/53F2. Success sets security2B0F=2/handshake2B55=3; bad key35, repeated failures36 plus
+   raw-counter delay; active delay rejects seed with37. */
+
+void f33_boot_service_security_access(ushort request_length)
+
+{
+  char cVar1;
+  byte bVar2;
+  uint32_t puVar3;
+  F33BootInterruptEntry *pFVar4;
+  undefined4 uVar5;
+  int iVar6;
+  byte bVar7;
+  
+  puVar3 = 0xfebf9800u;
+  pFVar4 = f33_boot_interrupt_dispatch;
+  iVar6 = camry_host_addr(FUN_000067d0());
+  cVar1 = (*((char *)camry_host_ptr((uint32_t)((int)&pFVar4[0x10b].eiic + 1))));
+  (*((int *)camry_host_ptr((uint32_t)(puVar3 + -0x6ce8)))) = iVar6;
+  bVar2 = (*((byte *)camry_host_ptr((uint32_t)(iVar6 + 1)))) & 0x7f;
+  if ((bVar2 == 1) || (bVar7 = 3, bVar2 == 2)) {
+    bVar7 = bVar2;
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6cf2))))) == cVar1) {
+    if (request_length < 2) {
+      uVar5 = 0x13;
+    }
+    else {
+      if (bVar7 != 3) {
+        if (bVar7 == 1) {
+          f33_boot_security_seed_request(request_length);
+          return;
+        }
+        if (bVar7 == 2) {
+          f33_boot_security_key_request(request_length);
+          return;
+        }
+      }
+      uVar5 = 0x12;
+    }
+  }
+  else {
+    uVar5 = 0x7f;
+  }
+  FUN_000052ca(uVar5);
+  return;
+}
+
+
+
 /* Onlydelayflag1:unsigned32elapsed=(timer-start),cleardelayonlyelapsed>duration(strict);doesnotresetfailures,handshake,security,buffers.Timer51ACownsperiodiccall;noexplicitseconds.
     */
 
@@ -1465,6 +1976,195 @@ void FUN_00005644(void)
   DAT_febf2ad2 = (undefined1)((ushort)DAT_febf2b64 >> 8);
   DAT_febf2ad3 = (undefined1)DAT_febf2b64;
   f33_boot_response_submit(DAT_febf2b66 >> 7 ^ 1,((undefined *)camry_host_ptr(0xfebf2ad0u)),DAT_febf2b67 + 4);
+  return;
+}
+
+
+
+/* Resident SID31: session2, security2, masked start subfunction1, exact length4+configured
+   options.8F44 configures10F0/10F1/10F2/10F3/FF00; all except10F3 require45 00 plus BE32
+   address/length. Range-kind gates32D2/3318 precede CRC-verification47BA or queued operation41E0.
+   Timer5C06 owns deferred completion;10F3 immediately sets alternate download state8 and
+   responds71. */
+
+void f33_boot_service_routine_control(ushort request_length)
+
+{
+  int iVar1;
+  undefined4 *puVar2;
+  int iVar3;
+  bool bVar4;
+  int iVar5;
+  undefined *puVar6;
+  uint32_t puVar7;
+  F33BootInterruptEntry *pFVar8;
+  undefined4 uVar9;
+  ushort uVar10;
+  uint uVar11;
+  ushort uVar12;
+  undefined4 unaff_r25;
+  undefined1 uVar13;
+  uint uVar14;
+  uint length;
+  uint start;
+  uchar local_2c;
+  uchar auStack_2b [2];
+  byte bStack_29;
+  char local_28 [8];
+  undefined1 auStack_20 [8];
+  
+  puVar7 = 0xfebf9800u;
+  pFVar8 = f33_boot_interrupt_dispatch;
+  bStack_29 = 0;
+  auStack_2b[1] = 0;
+  iVar5 = 0;
+  do {
+    local_28[iVar5] = '\0';
+    iVar3 = iVar5 + 1;
+    iVar1 = iVar5 + -1;
+    iVar5 = iVar3;
+  } while (((iVar1 < 0) || (iVar3 < 0)));
+  iVar5 = 0;
+  do {
+    local_28[iVar5 + 2] = '\0';
+    iVar3 = iVar5 + 1;
+    iVar1 = iVar5 + -9;
+    iVar5 = iVar3;
+  } while (((iVar1 < 0) || (iVar3 < 0)));
+  FUN_000067b0(auStack_2b + 1,0xe);
+  uVar10 = FUN_000052a6(local_28,2);
+  bVar4 = true;
+  uVar12 = 0;
+  uVar14 = (uint)uVar10;
+  auStack_2b[0] = '\x01';
+  uVar13 = 0;
+  iVar5 = 0;
+  do {
+    puVar2 = ((undefined4 *)camry_host_ptr((uint32_t)((int)camry_host_addr(pFVar8) + (short)iVar5 * 0xc + 0x8a8)));
+    if (uVar14 == *(ushort *)(puVar2 + 1)) {
+      uVar13 = *(undefined1 *)(puVar2 + 2);
+      bVar4 = false;
+      uVar12 = (ushort)(*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(puVar2) + 7))));
+      unaff_r25 = *puVar2;
+      break;
+    }
+    iVar3 = iVar5 + 1;
+    iVar1 = iVar5 + -4;
+    iVar5 = iVar3;
+  } while (((iVar1 < 0) || (iVar3 < 0)));
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(-0x6cf2))))) != (*((char *)camry_host_ptr((uint32_t)((int)&pFVar8[0x10b].handler + 1))))) {
+    uVar9 = 0x7f;
+    goto LAB_00005706;
+  }
+  if (request_length < 4) {
+LAB_0000573c:
+    uVar9 = 0x13;
+  }
+  else {
+    if (!bVar4) {
+      if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(-0x6cf1))))) != '\x02') {
+        uVar9 = 0x33;
+        goto LAB_00005706;
+      }
+      if ((bStack_29 & 0x7f) != 1) {
+        uVar9 = 0x12;
+        goto LAB_00005706;
+      }
+      if (request_length != (ushort)(uVar12 + 4)) goto LAB_0000573c;
+      start = 0;
+      puVar6 = ((undefined *)camry_host_ptr((uint32_t)(uVar14 - 0x10f0)));
+      length = 0;
+      if (puVar6 < ((undefined *)camry_host_ptr((uint32_t)(0x2)))) {
+        if ((local_28[2] == 'E') && (local_28[3] == '\0')) {
+          start = FUN_000052a6(local_28 + 4,4);
+          length = FUN_000052a6(auStack_20,4);
+          uVar11 = f33_boot_classify_service_range(start,length,'\x04',&local_2c);
+          if ((uVar11 == 0) &&
+             (((local_2c != '\0' && (local_2c == '\x01')) &&
+              (uVar11 = f33_boot_service_range_completion_selector(start,length,'\x04',auStack_2b),
+              uVar11 == 0)))) {
+            uVar11 = f33_boot_submit_region_crc_verification(start,length,local_2c);
+            if (uVar11 == 0) {
+              (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(-0x6ce9))))) = 1;
+              goto LAB_000058da;
+            }
+LAB_000058d2:
+            uVar9 = 0x22;
+            goto LAB_00005706;
+          }
+        }
+      }
+      else if (puVar6 == ((undefined *)camry_host_ptr((uint32_t)(0x2)))) {
+        if ((local_28[2] == 'E') && (local_28[3] == '\0')) {
+          start = FUN_000052a6(local_28 + 4,4);
+          length = FUN_000052a6(auStack_20,4);
+          uVar11 = f33_boot_classify_service_range(start,length,'\x04',&local_2c);
+          if ((uVar11 == 0) &&
+             ((local_2c == '\0' &&
+              (uVar11 = f33_boot_service_range_completion_selector(start,length,'\x04',auStack_2b),
+              uVar11 == 0)))) {
+            uVar11 = f33_boot_submit_region_crc_verification(start,length,local_2c);
+            if (uVar11 == 0) {
+              (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(-0x6ce9))))) = 2;
+              (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(-0x6cef))))) = 0;
+              goto LAB_000058da;
+            }
+            goto LAB_000058d2;
+          }
+        }
+      }
+      else {
+        if (puVar6 == ((undefined *)camry_host_ptr((uint32_t)(0x3)))) {
+LAB_000058da:
+          (*((ushort *)camry_host_ptr((uint32_t)(puVar7 + -0x6c9c)))) = uVar10;
+          (*((uint *)camry_host_ptr((uint32_t)(puVar7 + -0x6ca8)))) = start;
+          puVar6 = ((undefined *)camry_host_ptr((uint32_t)(uVar14 - 0x10f0)));
+          (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(-0x6c9a))))) = bStack_29;
+          (*((uint *)camry_host_ptr((uint32_t)(puVar7 + -0x6ca4)))) = length;
+          (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(-0x6c99))))) = uVar13;
+          (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(-0x6c98))))) = auStack_2b[0];
+          if (puVar6 < ((undefined *)camry_host_ptr((uint32_t)(0x3)))) {
+            (*((undefined4 *)camry_host_ptr((uint32_t)(puVar7 + -0x6ca0)))) = unaff_r25;
+            (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(-0x6c97))))) = 1;
+            return;
+          }
+          if (puVar6 == ((undefined *)camry_host_ptr((uint32_t)(0x3)))) {
+            (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(-0x6ced))))) = 8;
+            FUN_00005644();
+          }
+          else {
+            if (puVar6 == ((undefined *)camry_host_ptr(0xee10u))) {
+              (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(-0x6c97))))) = 1;
+              return;
+            }
+            FUN_00005630(0x31);
+          }
+          (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(-0x6c97))))) = 0;
+          return;
+        }
+        if (((puVar6 == ((undefined *)camry_host_ptr(0xee10u))) && (local_28[2] == 'E')) && (local_28[3] == '\0')) {
+          start = FUN_000052a6(local_28 + 4,4);
+          length = FUN_000052a6(auStack_20,4);
+          uVar11 = f33_boot_classify_service_range(start,length,'\x01',&local_2c);
+          if (((uVar11 == 0) && (local_2c == '\0')) &&
+             (uVar11 = f33_boot_service_range_completion_selector(start,length,'\x01',auStack_2b),
+             uVar11 == 0)) {
+            if ((((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(-0x6cef))))) == '\x01') || (((int8_t)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(-0x6cef)))))) == -0x7f)) &&
+               (uVar11 = f33_boot_submit_block_erase(start,length), uVar11 == 0)) {
+              (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(-0x6cef))))) = 0x81;
+              (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(-0x6ce9))))) = 2;
+              f33_boot_set_flash_worker_pause('\x01');
+              goto LAB_000058da;
+            }
+            goto LAB_000058d2;
+          }
+        }
+      }
+    }
+    uVar9 = 0x31;
+  }
+LAB_00005706:
+  FUN_00005630(uVar9);
   return;
 }
 
@@ -1781,6 +2481,61 @@ void FUN_00005c76(void)
 
 
 
+/* Resident SID37: session2, download state2 or10, remaining transfer bytes0 and exact length1.
+   Optionally end block crypto; clear operation class2B17, address2B00, length2B04 and download
+   state2B13; respond77. Incomplete transfer rejects24 and may request4266 cancellation. No call
+   to426E final-input setter is present. */
+
+void f33_boot_service_transfer_exit(ushort request_length)
+
+{
+  uint32_t puVar1;
+  F33BootInterruptEntry *pFVar2;
+  undefined4 uVar3;
+  int iVar4;
+  undefined1 uStack_9;
+  
+  puVar1 = 0xfebf9800u;
+  pFVar2 = f33_boot_interrupt_dispatch;
+  FUN_000067b0(&uStack_9,1);
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6cf2))))) != (char)pFVar2[0x10c].eiic) {
+    uVar3 = 0x7f;
+    goto LAB_00005cb2;
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6ced))))) == '\x02') {
+    iVar4 = FUN_00004f98();
+    if (iVar4 == 0) {
+LAB_00005cfc:
+      if (request_length == 1) {
+        if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6ceb))))) != '\0') {
+          f33_boot_transfer_crypto_clear();
+        }
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6ce9))))) = 0;
+        (*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + -0x6d00)))) = 0;
+        (*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + -0x6cfc)))) = 0;
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6ced))))) = 0;
+        FUN_00005c76();
+        return;
+      }
+      uVar3 = 0x13;
+      goto LAB_00005cb2;
+    }
+    if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6ce9))))) == '\x02') && ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-27999))))) != '\0')) {
+      f33_boot_request_flash_worker_cancel();
+    }
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6ceb))))) != '\0') {
+      f33_boot_transfer_crypto_clear();
+    }
+  }
+  else if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6ced))))) == '\n') && (iVar4 = FUN_00004f98(), iVar4 == 0)) goto LAB_00005cfc;
+  uVar3 = 0x24;
+LAB_00005cb2:
+  FUN_00005c54(uVar3);
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -1817,6 +2572,138 @@ void f33_boot_download_positive_response(void)
 
 
 
+/* Resident SID34: session2/security2, exact13-byte custom request; DFI high nibble0, low
+   nibble2B15, following format46, selector00/01 then00, BE32 address and size.32D2 classifies the
+   range; normal state0 stages download1, alternate state8 stages9. Store2B00/2B04 and reset
+   transfer counters; optional block crypto starts6BA8. Positive response is four bytes74 20 04 02.
+    */
+
+void f33_boot_service_request_download(ushort request_length)
+
+{
+  bool bVar1;
+  int iVar2;
+  int iVar3;
+  undefined1 uVar4;
+  uint32_t puVar5;
+  F33BootInterruptEntry *pFVar6;
+  undefined4 uVar7;
+  uint start;
+  uint length;
+  uint uVar8;
+  int iVar9;
+  byte abStack_22 [10];
+  undefined1 local_18 [4];
+  
+  puVar5 = 0xfebf9800u;
+  pFVar6 = f33_boot_interrupt_dispatch;
+  abStack_22[3] = '\0';
+  abStack_22[2] = 0;
+  abStack_22[1] = 0;
+  iVar9 = 0;
+  do {
+    abStack_22[iVar9 + 4] = 0;
+    iVar3 = iVar9 + 1;
+    iVar2 = iVar9 + -5;
+    iVar9 = iVar3;
+  } while (((iVar2 < 0) || (iVar3 < 0)));
+  iVar9 = 0;
+  do {
+    local_18[iVar9] = 0;
+    iVar3 = iVar9 + 1;
+    iVar2 = iVar9 + -3;
+    iVar9 = iVar3;
+  } while (((iVar2 < 0) || (iVar3 < 0)));
+  FUN_000067b0(abStack_22 + 1,0xd);
+  start = FUN_000052a6(abStack_22 + 6,4);
+  length = FUN_000052a6(local_18,4);
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0x6cf2))))) != (*((char *)camry_host_ptr((uint32_t)((int)&pFVar6[0x10b].handler + 2))))) {
+    uVar7 = 0x7f;
+    goto LAB_00005f34;
+  }
+  if (request_length < 5) {
+LAB_00005ea8:
+    uVar7 = 0x13;
+    goto LAB_00005f34;
+  }
+  if (abStack_22[2] >> 4 == 0) {
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0x6ced))))) == '\0') {
+      if (((abStack_22[2] & 0xf) == (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0x6ceb)))))) && (abStack_22[3] == 'F')) {
+        if (request_length != 0xd) goto LAB_00005ea8;
+        if ((((abStack_22[4] == '\0') || (abStack_22[4] == '\x01')) && (abStack_22[5] == '\0')) &&
+           ((uVar8 = f33_boot_classify_service_range(start,length,'\0',abStack_22), uVar8 == 0 &&
+            (abStack_22[0] < 2)))) {
+          bVar1 = false;
+          if (abStack_22[0] == 0) {
+            if (abStack_22[4] == '\0') {
+              iVar9 = FUN_000052be();
+              if (((iVar9 == 0) && ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0x6cea))))) == '\x01')) &&
+                 (uVar8 = f33_boot_submit_erase_program_stream(start,length), uVar8 == 0)) {
+                (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0x6ce9))))) = 2;
+                f33_boot_set_flash_worker_pause('\x01');
+              }
+              else {
+LAB_00005e82:
+                bVar1 = true;
+              }
+LAB_00005e8a:
+              uVar4 = 1;
+              goto LAB_00005efc;
+            }
+          }
+          else if (abStack_22[4] == '\x01') {
+            if ((((int8_t)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0x6cef)))))) == -0x7f) || ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0x6cea))))) != '\x01')) goto LAB_00005e82;
+            (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0x6ce9))))) = 1;
+            goto LAB_00005e8a;
+          }
+        }
+      }
+    }
+    else {
+      if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0x6ced))))) != '\b') {
+LAB_00005f30:
+        uVar7 = 0x22;
+        goto LAB_00005f34;
+      }
+      if (((abStack_22[2] & 0xf) == (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0x6ceb)))))) && (abStack_22[3] == 'F')) {
+        if (request_length != 0xd) goto LAB_00005ea8;
+        if ((((abStack_22[4] == '\0') && (abStack_22[5] == '\0')) &&
+            (uVar8 = f33_boot_classify_service_range(start,length,'\x05',abStack_22), uVar8 == 0))
+           && ((abStack_22[0] == 0 && (abStack_22[4] == '\0')))) {
+          bVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0x6cea))))) != '\x01';
+          if (!bVar1) {
+            (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0x6ce9))))) = 2;
+          }
+          uVar4 = 9;
+LAB_00005efc:
+          if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0x6cf1))))) != '\x02') {
+            uVar7 = 0x33;
+            goto LAB_00005f34;
+          }
+          if (!bVar1) {
+            (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0x6ced))))) = uVar4;
+            if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0x6ceb))))) != '\0') {
+              f33_boot_transfer_crypto_initialize();
+            }
+            (*((uint *)camry_host_ptr((uint32_t)(puVar5 + -0x6d00)))) = start;
+            (*((uint *)camry_host_ptr((uint32_t)(puVar5 + -0x6cfc)))) = length;
+            f33_fill_constant_block_4f9e();
+            f33_boot_download_positive_response();
+            return;
+          }
+          goto LAB_00005f30;
+        }
+      }
+    }
+  }
+  uVar7 = 0x31;
+LAB_00005f34:
+  FUN_00005d2c(uVar7);
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -1825,6 +2712,26 @@ void f33_return_only_stub_5f3c(void)
 
 {
   return;
+}
+
+
+
+/* FirmwarefillsconfiguredDIDpayloadbyteswithliteral0x21;keepscallerregisterABI(notanOEManumberread).
+    */
+
+uint f33_boot_read_did_fill_payload(uchar descriptor_index,ushort payload_offset)
+
+{
+  int iVar1;
+  int iVar2;
+  
+  for (iVar2 = 0;
+      iVar1 = iVar2 - (uint)f33_boot_diagnostic_identifiers[(short)(ushort)descriptor_index].
+                            payload_length, ((iVar1 < 0) || (iVar2 < 0));
+      iVar2 = iVar2 + 1) {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebf2b6eu + (uint32_t)(iVar2 + (uint)payload_offset) * 1u)))) = 0x21;
+  }
+  return 0;
 }
 
 
@@ -1849,6 +2756,98 @@ void FUN_00005f7c(void)
   }
   f33_boot_response_submit('\x01',((undefined *)camry_host_ptr(0xfebf2ad0u)),DAT_febf2b6c + 1);
   return;
+}
+
+
+
+/* Resident SID22: sessions1/2/3, length3 and a read-enabled match among four8F14 descriptors. Only
+   configured F181 is readable: reply62/F181/02 followed by32 literal21 bytes generated by5F3E.
+   Unknown or unreadable DID31; bad length13.5F3E receives descriptor index inr6 and payload offset
+   inr7. */
+
+void f33_boot_service_read_did(ushort request_length)
+
+{
+  int iVar1;
+  char cVar2;
+  bool bVar3;
+  bool bVar4;
+  uint uVar5;
+  uint32_t puVar6;
+  F33BootInterruptEntry *pFVar7;
+  int iVar8;
+  undefined4 uVar9;
+  ushort payload_offset;
+  uint uVar10;
+  int iVar11;
+  undefined1 uStack_13;
+  undefined1 auStack_12 [2];
+  
+  puVar6 = 0xfebf9800u;
+  pFVar7 = f33_boot_interrupt_dispatch;
+  FUN_000067b0(&uStack_13,3);
+  uVar10 = FUN_000052a6(auStack_12,2);
+  bVar3 = false;
+  uVar10 = uVar10 & 0xffff;
+  iVar8 = 0;
+  do {
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar6 + (uint32_t)(-0x6cf2))))) == (*((char *)camry_host_ptr((uint32_t)((int)&pFVar7[0x10c].handler + iVar8))))) {
+      bVar3 = true;
+      break;
+    }
+    iVar1 = iVar8 + 1;
+    iVar11 = iVar8 + -2;
+    iVar8 = iVar1;
+  } while (((iVar11 < 0) || (iVar1 < 0)));
+  bVar4 = true;
+  uVar5 = 1;
+  iVar8 = 0;
+  while( true ) {
+    iVar11 = (short)iVar8 * 0xc;
+    if ((uVar10 == (*((ushort *)camry_host_ptr((uint32_t)((int)camry_host_addr(pFVar7) + iVar11 + 0x87e))))) &&
+       (((*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(pFVar7) + iVar11 + 0x880)))) & 1) != 0)) break;
+    iVar1 = iVar8 + 1;
+    iVar11 = iVar8 + -3;
+    iVar8 = iVar1;
+    if (iVar11 < 0 == (iVar1 < 0 && -1 < iVar11)) {
+LAB_0000604e:
+      if (bVar3) {
+        if (request_length == 3) {
+          if (bVar4) {
+            uVar9 = 0x31;
+          }
+          else {
+            if (uVar5 == 0) {
+              FUN_00005f7c();
+              return;
+            }
+            uVar9 = 0x72;
+          }
+        }
+        else {
+          uVar9 = 0x13;
+        }
+      }
+      else {
+        uVar9 = 0x7f;
+      }
+      FUN_00005f68(uVar9);
+      return;
+    }
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar6 + (uint32_t)(-0x6c91))))) = (char)uVar10;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar6 + (uint32_t)(-0x6c92))))) = (char)(uVar10 >> 8);
+  iVar11 = (short)iVar8 * 0xc;
+  cVar2 = (*((char *)camry_host_ptr((uint32_t)((int)camry_host_addr(pFVar7) + iVar11 + 0x882))));
+  payload_offset = 2;
+  bVar4 = false;
+  if (cVar2 != -1) {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar6 + (uint32_t)(-0x6c90))))) = cVar2;
+    payload_offset = 3;
+  }
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar6 + -0x6c94)))) = (*((short *)camry_host_ptr((uint32_t)((int)camry_host_addr(pFVar7) + iVar11 + 0x87c)))) + payload_offset;
+  uVar5 = f33_boot_read_did_fill_payload((uchar)iVar8,payload_offset);
+  goto LAB_0000604e;
 }
 
 
@@ -1880,6 +2879,52 @@ void FUN_00006098(void)
   DAT_febf2ad0 = 0x51;
   DAT_febf2ad1 = DAT_febf2b9e & 0x7f;
   f33_boot_response_submit(DAT_febf2b9e >> 7 ^ 1,((undefined *)camry_host_ptr(0xfebf2ad0u)),2);
+  return;
+}
+
+
+
+/* Resident SID11: session2, security2, length2, masked subfunction1 only. Stage51/subfunction
+   positive response and request terminal action through67DA; successful response completion
+   joins159E resident-state3/interrupt-disable halt path, not a proven physical ECU reset. */
+
+void f33_boot_service_reset_request(ushort request_length)
+
+{
+  uint32_t puVar1;
+  F33BootInterruptEntry *pFVar2;
+  undefined4 uVar3;
+  undefined1 uStack_a;
+  byte bStack_9;
+  
+  puVar1 = 0xfebf9800u;
+  pFVar2 = f33_boot_interrupt_dispatch;
+  uStack_a = 0;
+  bStack_9 = 0;
+  FUN_000067b0(&uStack_a,2);
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6cf2))))) != (char)pFVar2[0x10b].eiic) {
+    uVar3 = 0x7f;
+    goto LAB_000060ee;
+  }
+  if (1 < request_length) {
+    if ((bStack_9 & 0x7f) != 1) {
+      uVar3 = 0x12;
+      goto LAB_000060ee;
+    }
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6cf1))))) != '\x02') {
+      uVar3 = 0x33;
+      goto LAB_000060ee;
+    }
+    if (request_length == 2) {
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6c62))))) = bStack_9;
+      FUN_000067da();
+      FUN_00006098();
+      return;
+    }
+  }
+  uVar3 = 0x13;
+LAB_000060ee:
+  FUN_00006084(uVar3);
   return;
 }
 
@@ -2146,6 +3191,68 @@ void FUN_0000636e(void)
 
 
 
+/* Admissionreturns0accepted/1busy/3tooLong.Maximum4096;writesr9capacity;storesSID/address-mode/channelandresetsappendindex.Seeexceptionalreceivingreplacementbehavior.
+   Native real SF admission copies10 02 without padding, preserving the live capacity pointer; stops
+   before timer capture/service dispatch. */
+
+uint f33_boot_request_admit
+               (ushort channel,F33BootPduInfo *first_chunk,ushort total_length,
+               ushort *remaining_capacity)
+
+{
+  undefined1 uVar1;
+  uchar uVar2;
+  uint32_t puVar3;
+  int iVar4;
+  uchar *puVar5;
+  uint uVar6;
+  
+  puVar3 = 0xfebf9800u;
+  puVar5 = ((void *)camry_host_ptr((uint32_t)(first_chunk->data)));
+  uVar2 = f33_boot_diagnostic_channels[channel].address_mode;
+  uVar1 = (undefined1)first_chunk->length;
+  if (total_length < 0x1001) {
+    uVar6 = 0;
+    *remaining_capacity = 0x1000;
+  }
+  else {
+    uVar6 = 3;
+  }
+  if (f33_boot_request_state == '\x02') {
+LAB_000063dc:
+    uVar6 = 1;
+  }
+  else {
+    iVar4 = FUN_0000526a(camry_host_addr(puVar5), uVar1, uVar2);
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6c46))))) == '\x01') {
+      if (iVar4 == 1) goto LAB_000063dc;
+      if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6c42))))) == '\x01') {
+        ((void)((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6742)))))), f33_return_only_stub_5284());
+      }
+    }
+    else if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6c41))))) == '\x01') goto LAB_000063dc;
+    if (uVar6 == 0) {
+      (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x6744)))) = channel;
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6741))))) = uVar2;
+      uVar2 = *puVar5;
+      (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x6748)))) = 0;
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6742))))) = uVar2;
+      FUN_0000636e();
+      if (iVar4 == 2) {
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6c42))))) = 1;
+        ((void)((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6742)))))), (void)(uVar1), f33_return_only_stub_5280());
+      }
+      else {
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6c42))))) = 0;
+      }
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6c46))))) = 1;
+    }
+  }
+  return uVar6;
+}
+
+
+
 /* Status0capturesrawcountertimestamps,publishesexecuting2/substate0anddispatchesSID+length.Nonzerostatusabortsthereceive.
     */
 
@@ -2257,6 +3364,41 @@ void f33_boot_response_complete(ushort channel,uchar status)
 
 
 
+/* Outgoingrequestdescriptorlengthlowbytecontrolsactualcopy;consumes30BAremaining,writesr9remaining;caller6B8Aforwardsliveregisters.
+    */
+
+uint f33_boot_response_copy_chunk
+               (ushort channel,F33BootPduInfo *chunk,uint unused,ushort *remaining)
+
+{
+  byte bVar1;
+  uint uVar2;
+  uchar *puVar3;
+  uint uVar4;
+  uint uVar5;
+  uint uVar6;
+  
+  bVar1 = (byte)chunk->length;
+  uVar4 = (uint)bVar1;
+  puVar3 = ((void *)camry_host_ptr((uint32_t)(chunk->data)));
+  if (uVar4 != 0) {
+    if (f33_boot_response_remaining < uVar4) {
+      return 1;
+    }
+    uVar6 = (uint)DAT_febf2ba8 - (uint)f33_boot_response_remaining;
+    for (uVar2 = 0; uVar2 < uVar4; uVar2 = uVar2 + 1 & 0xff) {
+      uVar5 = uVar6 & 0xffff;
+      uVar6 = uVar5 + 1;
+      puVar3[uVar2] = (*((uchar *)camry_host_ptr((uint32_t)(DAT_febf2ba4 + uVar5))));
+    }
+    f33_boot_response_remaining = f33_boot_response_remaining - bVar1;
+  }
+  *remaining = f33_boot_response_remaining;
+  return 0;
+}
+
+
+
 undefined1 * FUN_000067d0(void)
 
 {
@@ -2300,6 +3442,54 @@ void FUN_00006860(void)
 
 
 
+/* Resident SID28: session3, length3, masked subfunction1 and communication byte1 only; invalid
+   subfunction12, invalid communication byte31, bad length13. Store original subfunction and
+   form68/masked-subfunction with bit7 positive-response suppression. No physical
+   communication-disable side effect is established by this handler. */
+
+void f33_boot_service_communication_control(ushort request_length)
+
+{
+  uint32_t puVar1;
+  F33BootInterruptEntry *pFVar2;
+  undefined4 uVar3;
+  undefined1 uStack_b;
+  byte bStack_a;
+  char cStack_9;
+  
+  puVar1 = 0xfebf9800u;
+  pFVar2 = f33_boot_interrupt_dispatch;
+  uStack_b = 0;
+  bStack_a = 0;
+  cStack_9 = '\0';
+  FUN_000067b0(&uStack_b,3);
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6cf2))))) != (*((char *)camry_host_ptr((uint32_t)((int)&pFVar2[0x10b].eiic + 2))))) {
+    uVar3 = 0x7f;
+    goto LAB_000068b8;
+  }
+  if (2 < request_length) {
+    if ((bStack_a & 0x7f) != 1) {
+      uVar3 = 0x12;
+      goto LAB_000068b8;
+    }
+    if (request_length == 3) {
+      if (cStack_9 == '\x01') {
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6c3d))))) = bStack_a;
+        FUN_00006860();
+        return;
+      }
+      uVar3 = 0x31;
+      goto LAB_000068b8;
+    }
+  }
+  uVar3 = 0x13;
+LAB_000068b8:
+  FUN_0000684c(uVar3);
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -2327,6 +3517,48 @@ void FUN_00006910(void)
   DAT_febf2ad0 = 0xc5;
   DAT_febf2ad1 = DAT_febf2bc4 & 0x7f;
   f33_boot_response_submit(DAT_febf2bc4 >> 7 ^ 1,((undefined *)camry_host_ptr(0xfebf2ad0u)),2);
+  return;
+}
+
+
+
+/* Resident SID85: session3, length2 and masked subfunction2 only. Store original subfunction and
+   formC5/02 through6910 with bit7 positive-response suppression. No application DTC-state mutation
+   is established here. */
+
+void f33_boot_service_dtc_setting(ushort request_length)
+
+{
+  uint32_t puVar1;
+  F33BootInterruptEntry *pFVar2;
+  undefined4 uVar3;
+  undefined1 uStack_a;
+  byte bStack_9;
+  
+  puVar1 = 0xfebf9800u;
+  pFVar2 = f33_boot_interrupt_dispatch;
+  uStack_a = 0;
+  bStack_9 = 0;
+  FUN_000067b0(&uStack_a,2);
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6cf2))))) == (*((char *)camry_host_ptr((uint32_t)((int)&pFVar2[0x10b].eiic + 3))))) {
+    if (1 < request_length) {
+      if ((bStack_9 & 0x7f) != 2) {
+        uVar3 = 0x12;
+        goto LAB_00006966;
+      }
+      if (request_length == 2) {
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6c3c))))) = bStack_9;
+        FUN_00006910();
+        return;
+      }
+    }
+    uVar3 = 0x13;
+  }
+  else {
+    uVar3 = 0x7f;
+  }
+LAB_00006966:
+  FUN_000068fc(uVar3);
   return;
 }
 
@@ -3087,6 +4319,21 @@ uint f33_boot_security_initialize_candidate_context
 
 
 
+undefined4 FUN_00007316(uchar *param_1,char param_2,F33BootAes128CtrContext *param_3)
+
+{
+  uint uVar1;
+  
+  if (((param_2 == '\x10') && ((param_3->aes).valid == '\x01')) &&
+     (uVar1 = f33_boot_aes128_ctr_initialize(param_1,'\x10',param_3->counter_be,'\x10',param_3),
+     uVar1 == 0)) {
+    return 0;
+  }
+  return 0xff;
+}
+
+
+
 /* Forwardr6to7D3C,wipeentire228-byteAESCTRcontext;notzeroargumentdespitemissingpseudoparameter. */
 
 void f33_boot_security_clear_candidate_context(F33BootAes128CtrContext *context)
@@ -3094,6 +4341,72 @@ void f33_boot_security_clear_candidate_context(F33BootAes128CtrContext *context)
 {
   f33_boot_aes128_ctr_clear(context);
   return;
+}
+
+
+
+/* SoftwareinverseAES128singleblock;length16andvalid1;round10AddRoundKeythen10inverseShiftRows/inverseSubBytes/AddRoundKeyroundswithinverseMixColumnsonlynonfinalrounds;return0/FF.
+   Native AES known-answer and protocol-state cases use explicit RAM. Service paths stop at674A
+   before response/timer completion; direct session invalidation cases return. No complete unlock or
+   entropy claim. */
+
+uint f33_boot_aes128_decrypt_block
+               (uchar *ciphertext,uchar *plaintext,uchar length,F33BootAes128Context *context)
+
+{
+  uchar uVar1;
+  uint uVar2;
+  
+  if ((length == '\x10') && (context->valid == '\x01')) {
+    context->round = '\n';
+    context->row_order_state[0] = *ciphertext;
+    context->row_order_state[4] = ciphertext[1];
+    context->row_order_state[8] = ciphertext[2];
+    context->row_order_state[0xc] = ciphertext[3];
+    context->row_order_state[1] = ciphertext[4];
+    context->row_order_state[5] = ciphertext[5];
+    context->row_order_state[9] = ciphertext[6];
+    context->row_order_state[0xd] = ciphertext[7];
+    context->row_order_state[2] = ciphertext[8];
+    context->row_order_state[6] = ciphertext[9];
+    context->row_order_state[10] = ciphertext[10];
+    context->row_order_state[0xe] = ciphertext[0xb];
+    context->row_order_state[3] = ciphertext[0xc];
+    context->row_order_state[7] = ciphertext[0xd];
+    context->row_order_state[0xb] = ciphertext[0xe];
+    context->row_order_state[0xf] = ciphertext[0xf];
+    FUN_000076da(camry_host_addr(context));
+    while( true ) {
+      uVar1 = context->round + 0xff;
+      context->round = uVar1;
+      FUN_000079ee(camry_host_addr(context));
+      FUN_00007928(camry_host_addr(context));
+      FUN_000076da(camry_host_addr(context));
+      if (uVar1 == '\0') break;
+      FUN_00007a16(camry_host_addr(context));
+    }
+    *plaintext = context->row_order_state[0];
+    plaintext[1] = context->row_order_state[4];
+    plaintext[2] = context->row_order_state[8];
+    plaintext[3] = context->row_order_state[0xc];
+    plaintext[4] = context->row_order_state[1];
+    plaintext[5] = context->row_order_state[5];
+    plaintext[6] = context->row_order_state[9];
+    plaintext[7] = context->row_order_state[0xd];
+    plaintext[8] = context->row_order_state[2];
+    plaintext[9] = context->row_order_state[6];
+    plaintext[10] = context->row_order_state[10];
+    plaintext[0xb] = context->row_order_state[0xe];
+    plaintext[0xc] = context->row_order_state[3];
+    plaintext[0xd] = context->row_order_state[7];
+    plaintext[0xe] = context->row_order_state[0xb];
+    plaintext[0xf] = context->row_order_state[0xf];
+    uVar2 = 0;
+  }
+  else {
+    uVar2 = 0xff;
+  }
+  return uVar2;
 }
 
 
@@ -3147,6 +4460,80 @@ void f33_boot_aes128_expand_round_keys(uchar *key,uchar *round_keys)
 
 
 
+/* WARNING: Inlined function: f33_boot_aes128_expand_round_keys */
+/* Only16-bytekeyaccepted;clearstate/valid/round,expand44words=176byteswith7594,setvalid1.Return0orFF.7594preserveslivecontextpointerr8at76ACdespiteordinarydecompilerextraout_r8;useexistingexact-leafinliningconventionratherthaninventingextraABIresult.
+   Native AES known-answer and protocol-state cases use explicit RAM. Service paths stop at674A
+   before response/timer completion; direct session invalidation cases return. No complete unlock or
+   entropy claim. */
+
+uint f33_boot_aes128_initialize_context(uchar *key,uchar key_length,F33BootAes128Context *context)
+
+{
+  int iVar1;
+  uint uVar2;
+  uint uVar3;
+  
+  if (key_length == '\x10') {
+    context->valid = '\0';
+    context->row_order_state[0] = '\0';
+    context->row_order_state[1] = '\0';
+    context->row_order_state[2] = '\0';
+    context->row_order_state[3] = '\0';
+    context->row_order_state[4] = '\0';
+    context->row_order_state[5] = '\0';
+    context->row_order_state[6] = '\0';
+    context->row_order_state[7] = '\0';
+    context->row_order_state[8] = '\0';
+    context->row_order_state[9] = '\0';
+    context->row_order_state[10] = '\0';
+    context->row_order_state[0xb] = '\0';
+    context->row_order_state[0xc] = '\0';
+    context->row_order_state[0xd] = '\0';
+    context->row_order_state[0xe] = '\0';
+    context->row_order_state[0xf] = '\0';
+    context->round = '\0';
+    uVar2 = 4;
+    context->round_keys[0] = *key;
+    context->round_keys[1] = key[1];
+    context->round_keys[2] = key[2];
+    context->round_keys[3] = key[3];
+    context->round_keys[4] = key[4];
+    context->round_keys[5] = key[5];
+    context->round_keys[6] = key[6];
+    context->round_keys[7] = key[7];
+    context->round_keys[8] = key[8];
+    context->round_keys[9] = key[9];
+    context->round_keys[10] = key[10];
+    context->round_keys[0xb] = key[0xb];
+    context->round_keys[0xc] = key[0xc];
+    context->round_keys[0xd] = key[0xd];
+    context->round_keys[0xe] = key[0xe];
+    context->round_keys[0xf] = key[0xf];
+    do {
+      iVar1 = uVar2 * 4;
+      uVar3 = *(uint *)(context->round_keys + iVar1 + -4);
+      if ((uVar2 & 3) == 0) {
+        uVar3 = (uint)CRYPT_AES_Encryption_SBox[uVar3 & 0xff] << 0x18 |
+                (uint)CRYPT_AES_Encryption_SBox[uVar3 >> 0x18] << 0x10 |
+                (uint)CRYPT_AES_Encryption_SBox[(uVar3 >> 8 & 0xffff) >> 8] << 8 |
+                (uint)((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x8fe0u + (uint32_t)((int)uVar2 >> 2) * 1u)))) ^
+                      CRYPT_AES_Encryption_SBox[uVar3 >> 8 & 0xff]);
+      }
+      uVar2 = uVar2 + 1 & 0xffff;
+      *(uint *)(context->round_keys + iVar1) =
+           *(uint *)(context->round_keys + iVar1 + -0x10) ^ uVar3;
+    } while (uVar2 < 0x2c);
+    context->valid = '\x01';
+    uVar2 = 0;
+  }
+  else {
+    uVar2 = 0xff;
+  }
+  return uVar2;
+}
+
+
+
 void FUN_000076b6(undefined4 *param_1,int param_2)
 
 {
@@ -3154,6 +4541,20 @@ void FUN_000076b6(undefined4 *param_1,int param_2)
     *param_1 = 0;
     param_1 = param_1 + 1;
   }
+  return;
+}
+
+
+
+/* Clearvalidthenall196bytesvia76B6wordzero loop. Native AES known-answer and protocol-state cases
+   use explicit RAM. Service paths stop at674A before response/timer completion; direct session
+   invalidation cases return. No complete unlock or entropy claim. */
+
+void f33_boot_aes128_clear_context(F33BootAes128Context *context)
+
+{
+  context->valid = '\0';
+  FUN_000076b6(context,0xc4);
   return;
 }
 
@@ -3395,6 +4796,325 @@ void FUN_00007a16(int param_1)
     pbVar1[8] = local_4[2];
     pbVar1[0xc] = local_4[3];
   } while (uVar8 < 4);
+  return;
+}
+
+
+
+/* Require low8 key/counter lengths16. Fifth argument is context at callerSP+0, calleeSP+8 after
+   saves. Clear extension, copy16-byte big-endian counter to+D4 and initialize AES context. Return0
+   success orFF invalid. */
+
+uint f33_boot_aes128_ctr_initialize
+               (uchar *key,uchar key_length,uchar *counter,uchar counter_length,
+               F33BootAes128CtrContext *context)
+
+{
+  uint uVar1;
+  
+  if ((key_length == '\x10') && (counter_length == '\x10')) {
+    context->cleared_extension[0] = '\0';
+    context->cleared_extension[1] = '\0';
+    context->cleared_extension[2] = '\0';
+    context->cleared_extension[3] = '\0';
+    context->cleared_extension[4] = '\0';
+    context->cleared_extension[5] = '\0';
+    context->cleared_extension[6] = '\0';
+    context->cleared_extension[7] = '\0';
+    context->cleared_extension[8] = '\0';
+    context->cleared_extension[9] = '\0';
+    context->cleared_extension[10] = '\0';
+    context->cleared_extension[0xb] = '\0';
+    context->cleared_extension[0xc] = '\0';
+    context->cleared_extension[0xd] = '\0';
+    context->cleared_extension[0xe] = '\0';
+    context->cleared_extension[0xf] = '\0';
+    (context->aes).valid = '\0';
+    context->counter_be[0] = *counter;
+    context->counter_be[1] = counter[1];
+    context->counter_be[2] = counter[2];
+    context->counter_be[3] = counter[3];
+    context->counter_be[4] = counter[4];
+    context->counter_be[5] = counter[5];
+    context->counter_be[6] = counter[6];
+    context->counter_be[7] = counter[7];
+    context->counter_be[8] = counter[8];
+    context->counter_be[9] = counter[9];
+    context->counter_be[10] = counter[10];
+    context->counter_be[0xb] = counter[0xb];
+    context->counter_be[0xc] = counter[0xc];
+    context->counter_be[0xd] = counter[0xd];
+    context->counter_be[0xe] = counter[0xe];
+    context->counter_be[0xf] = counter[0xf];
+    uVar1 = f33_boot_aes128_initialize_context(key,'\x10',&context->aes);
+    if (uVar1 == 0) {
+      (context->aes).valid = '\x01';
+      return 0;
+    }
+  }
+  return 0xff;
+}
+
+
+
+/* Clear valid then all228 context bytes through76B6. Does not clear caller stack buffers or
+   retained challenge history. */
+
+void f33_boot_aes128_ctr_clear(F33BootAes128CtrContext *context)
+
+{
+  (context->aes).valid = '\0';
+  FUN_000076b6(context,0xe4);
+  return;
+}
+
+
+
+/* AES_K(16 zero ROM91F1 bytes), then big-endian128-bit doubling twice; XOR87 into low byte for each
+   high-bit carry. Store K1 at+D4,K2 at+E4,ready1 at+F4. Return0/FF. */
+
+uint f33_boot_aes128_cmac_derive_subkeys(F33BootAes128CmacContext *context)
+
+{
+  int iVar1;
+  uchar uVar2;
+  uchar *puVar3;
+  int iVar4;
+  uint uVar5;
+  bool bVar6;
+  uchar *puVar7;
+  byte local_28 [16];
+  uchar local_18 [16];
+  
+  puVar7 = "";
+  puVar3 = local_18;
+  do {
+    uVar2 = *puVar7;
+    puVar7 = puVar7 + 1;
+    *puVar3 = uVar2;
+    puVar3 = puVar3 + 1;
+  } while (puVar7 != ((undefined *)camry_host_ptr(0x9201u)));
+  if (((context->aes).valid == '\x01') &&
+     (uVar5 = f33_boot_aes128_encrypt_block(local_18,local_28,'\x10',&context->aes), uVar5 == 0)) {
+    puVar7 = context->subkey1;
+    bVar6 = false;
+    iVar4 = 0xf;
+    do {
+      puVar7[iVar4] = bVar6 | local_28[iVar4] << 1;
+      bVar6 = (local_28[iVar4] & 0x80) != 0;
+      iVar1 = iVar4 + -1;
+      iVar4 = iVar4 + -1;
+    } while (-1 < iVar1);
+    if ((char)local_28[0] < '\0') {
+      context->subkey1[0xf] = context->subkey1[0xf] ^ 0x87;
+    }
+    bVar6 = false;
+    iVar4 = 0xf;
+    do {
+      context->subkey2[iVar4] = bVar6 | puVar7[iVar4] << 1;
+      bVar6 = (puVar7[iVar4] & 0x80) != 0;
+      iVar1 = iVar4 + -1;
+      iVar4 = iVar4 + -1;
+    } while (-1 < iVar1);
+    if ((*puVar7 & 0x80) != 0) {
+      context->subkey2[0xf] = context->subkey2[0xf] ^ 0x87;
+    }
+    context->subkeys_ready = '\x01';
+    uVar5 = 0;
+  }
+  else {
+    uVar5 = 0xff;
+  }
+  return uVar5;
+}
+
+
+
+/* AES128-CMAC update. Nonfinal length16; final==1 allows1..16 (zero rejected). Full final XOR K1;
+   partial final80/zero pad XOR K2. XOR retained chain, encrypt, copy output to chain. Require
+   AES.valid1/subkeys_ready1. Return0/FF; does NOT invalidate/finalize-latch or wipe. Fifth arg
+   callerSP+0. */
+
+uint f33_boot_aes128_cmac_update_block
+               (uchar *input,uchar *output,uchar length,uint final_block,
+               F33BootAes128CmacContext *context)
+
+{
+  uchar *puVar1;
+  byte *pbVar2;
+  uint uVar3;
+  uint uVar4;
+  byte bVar5;
+  byte *pbVar6;
+  byte local_2c [16];
+  byte bStack_1c;
+  byte bStack_1b;
+  byte bStack_1a;
+  byte bStack_19;
+  byte bStack_18;
+  byte bStack_17;
+  byte bStack_16;
+  byte bStack_15;
+  byte bStack_14;
+  byte bStack_13;
+  byte bStack_12;
+  byte bStack_11;
+  byte bStack_10;
+  byte bStack_f;
+  byte bStack_e;
+  byte bStack_d;
+  
+  uVar4 = (uint)length;
+  if (final_block == 1) {
+    if (0xf < uVar4 - 1) {
+      return 0xff;
+    }
+  }
+  else if (uVar4 != 0x10) {
+    return 0xff;
+  }
+  if (((context->aes).valid == '\x01') && (context->subkeys_ready == '\x01')) {
+    pbVar6 = input;
+    if (final_block == 1) {
+      uVar3 = 0;
+      if (uVar4 == 0x10) {
+        do {
+          pbVar6 = input + uVar3;
+          puVar1 = context->subkey1 + uVar3;
+          pbVar2 = local_2c + uVar3;
+          uVar3 = uVar3 + 1;
+          *pbVar2 = *pbVar6 ^ *puVar1;
+          pbVar6 = local_2c;
+        } while (uVar3 < 0x10);
+      }
+      else {
+        do {
+          if (uVar3 < uVar4) {
+            bVar5 = input[uVar3];
+          }
+          else {
+            bVar5 = 0;
+            if (uVar3 == uVar4) {
+              bVar5 = 0x80;
+            }
+          }
+          pbVar6 = local_2c + uVar3;
+          *pbVar6 = bVar5;
+          puVar1 = context->subkey2 + uVar3;
+          uVar3 = uVar3 + 1;
+          *pbVar6 = *puVar1 ^ bVar5;
+          pbVar6 = local_2c;
+        } while (uVar3 < 0x10);
+      }
+    }
+    bStack_1c = *pbVar6 ^ context->chain[0];
+    bStack_1b = pbVar6[1] ^ context->chain[1];
+    bStack_1a = pbVar6[2] ^ context->chain[2];
+    bStack_19 = pbVar6[3] ^ context->chain[3];
+    bStack_18 = pbVar6[4] ^ context->chain[4];
+    bStack_17 = pbVar6[5] ^ context->chain[5];
+    bStack_16 = pbVar6[6] ^ context->chain[6];
+    bStack_15 = pbVar6[7] ^ context->chain[7];
+    bStack_14 = pbVar6[8] ^ context->chain[8];
+    bStack_13 = pbVar6[9] ^ context->chain[9];
+    bStack_12 = pbVar6[10] ^ context->chain[10];
+    bStack_11 = pbVar6[0xb] ^ context->chain[0xb];
+    bStack_10 = pbVar6[0xc] ^ context->chain[0xc];
+    bStack_f = pbVar6[0xd] ^ context->chain[0xd];
+    bStack_e = pbVar6[0xe] ^ context->chain[0xe];
+    bStack_d = pbVar6[0xf] ^ context->chain[0xf];
+    uVar4 = f33_boot_aes128_encrypt_block(&bStack_1c,output,'\x10',&context->aes);
+    if (uVar4 == 0) {
+      *(undefined4 *)context->chain = *(undefined4 *)output;
+      *(undefined4 *)(context->chain + 4) = *(undefined4 *)(output + 4);
+      *(undefined4 *)(context->chain + 8) = *(undefined4 *)(output + 8);
+      *(undefined4 *)(context->chain + 0xc) = *(undefined4 *)(output + 0xc);
+      return 0;
+    }
+  }
+  return 0xff;
+}
+
+
+
+/* Require key length16, clear AES.valid and49-byte chain/K1/K2/ready extension, initialize shared
+   AES base. Does not derive subkeys;7D50 required separately. Return0/FF. */
+
+uint f33_boot_aes128_cmac_initialize(uchar *key,uchar key_length,F33BootAes128CmacContext *context)
+
+{
+  uint uVar1;
+  
+  if (key_length == '\x10') {
+    (context->aes).valid = '\0';
+    context->chain[0] = '\0';
+    context->chain[1] = '\0';
+    context->chain[2] = '\0';
+    context->chain[3] = '\0';
+    context->chain[4] = '\0';
+    context->chain[5] = '\0';
+    context->chain[6] = '\0';
+    context->chain[7] = '\0';
+    context->chain[8] = '\0';
+    context->chain[9] = '\0';
+    context->chain[10] = '\0';
+    context->chain[0xb] = '\0';
+    context->chain[0xc] = '\0';
+    context->chain[0xd] = '\0';
+    context->chain[0xe] = '\0';
+    context->chain[0xf] = '\0';
+    context->subkey1[0] = '\0';
+    context->subkey1[1] = '\0';
+    context->subkey1[2] = '\0';
+    context->subkey1[3] = '\0';
+    context->subkey1[4] = '\0';
+    context->subkey1[5] = '\0';
+    context->subkey1[6] = '\0';
+    context->subkey1[7] = '\0';
+    context->subkey1[8] = '\0';
+    context->subkey1[9] = '\0';
+    context->subkey1[10] = '\0';
+    context->subkey1[0xb] = '\0';
+    context->subkey1[0xc] = '\0';
+    context->subkey1[0xd] = '\0';
+    context->subkey1[0xe] = '\0';
+    context->subkey1[0xf] = '\0';
+    context->subkey2[0] = '\0';
+    context->subkey2[1] = '\0';
+    context->subkey2[2] = '\0';
+    context->subkey2[3] = '\0';
+    context->subkey2[4] = '\0';
+    context->subkey2[5] = '\0';
+    context->subkey2[6] = '\0';
+    context->subkey2[7] = '\0';
+    context->subkey2[8] = '\0';
+    context->subkey2[9] = '\0';
+    context->subkey2[10] = '\0';
+    context->subkey2[0xb] = '\0';
+    context->subkey2[0xc] = '\0';
+    context->subkey2[0xd] = '\0';
+    context->subkey2[0xe] = '\0';
+    context->subkey2[0xf] = '\0';
+    context->subkeys_ready = '\0';
+    uVar1 = f33_boot_aes128_initialize_context(key,'\x10',&context->aes);
+    if (uVar1 == 0) {
+      (context->aes).valid = '\x01';
+      return 0;
+    }
+  }
+  return 0xff;
+}
+
+
+
+/* Clear valid then all248 CMAC context bytes through76B6; not caller configured key/material or
+   output. */
+
+void f33_boot_aes128_cmac_clear(F33BootAes128CmacContext *context)
+
+{
+  (context->aes).valid = '\0';
+  FUN_000076b6(context,0xf8);
   return;
 }
 

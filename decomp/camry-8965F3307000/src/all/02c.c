@@ -229,6 +229,23 @@ uint f33_probe_pending_mode_request(uchar request_id)
 
 
 
+/* If old and new mode<0A00, run AEB00 old-family exit then new-family entry before redundant live
+   commitB11A/B0A0/B0A4. Hooks see old live mode. No same-mode/family short circuit and no E8CC
+   publication. */
+
+void f33_transition_application_mode(ushort new_mode)
+
+{
+  if ((DAT_febeb11a < 0xa00) && (new_mode < 0xa00)) {
+    (*(int (*)())f33_mode_family_hooks[DAT_febeb11a >> 8].exit)();
+    (*(int (*)())f33_mode_family_hooks[new_mode >> 8].entry)();
+    f33_publish_live_application_mode(new_mode);
+  }
+  return;
+}
+
+
+
 /* Change pendingA55A to5AA5 only for matching selectedID/complement, or internalID>16. Does not
    clear request bitmap or losing low pending slots. ID16 is not unconditional. */
 

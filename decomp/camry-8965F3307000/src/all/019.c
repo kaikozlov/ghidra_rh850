@@ -1224,6 +1224,20 @@ uint f33_read_execution_profile_slot5(void)
 
 
 
+/* Set phase/count/max to0 and min toFF; four-byte state, no timing or dispatch. */
+
+void f33_reset_task_rate_window(F33TaskRateWindow *state)
+
+{
+  state->phase = '\0';
+  state->count = '\0';
+  state->maximum = '\0';
+  state->minimum = 0xff;
+  return;
+}
+
+
+
 /* Reset four task-rate records at8DB0 and four DMA records at8DC0. DMA phase/sum/max become0 and
    minFFFF; byte1 is untouched. */
 
@@ -1254,6 +1268,32 @@ void f33_initialize_task_progress_supervision(void)
 
 
 
+/* Saturating u8 count increment under FFC0 priority mask; restore incoming PMR before comparing
+   inclusive upper bound. Exceeding policy.max enters terminal61940 before task body. No local mode,
+   DTC or engagement gate. */
+
+void f33_record_supervised_task_dispatch(F33TaskRateWindow *state,F33TaskRatePolicy *policy)
+
+{
+  uint saved_mask;
+  byte bVar1;
+  
+  saved_mask = f33_priority_mask_enter(0xffc0);
+  bVar1 = state->count;
+  if (bVar1 != 0xff) {
+    bVar1 = bVar1 + 1;
+  }
+  state->count = bVar1;
+  f33_priority_mask_restore(saved_mask);
+  if (policy->maximum < bVar1) {
+                    /* WARNING: Subroutine does not return */
+    f33_enter_terminal_hardware_sequence();
+  }
+  return;
+}
+
+
+
 /* Apply real task-rate increment/upper-bound guard to state8DB0 using ROM30DC0. Runs before the
    corresponding task body. */
 
@@ -1261,6 +1301,159 @@ void f33_record_ch0_dispatch(void)
 
 {
   f33_record_supervised_task_dispatch(f33_task_rate_windows,f33_task_rate_policies);
+  return;
+}
+
+
+
+/* Apply real task-rate increment/upper-bound guard to state8DB4 using ROM30DC0. No direct caller
+   recovered in the canonical graph; do not invent a scheduled task. */
+
+void f33_record_auxiliary_dispatch(void)
+
+{
+  f33_record_supervised_task_dispatch(f33_task_rate_windows + 1,f33_task_rate_policies);
+  return;
+}
+
+
+
+/* Apply real task-rate increment/upper-bound guard to state8DB8 using ROM30DC4. Runs before the
+   corresponding task body. */
+
+void f33_record_ch1_dispatch(void)
+
+{
+  f33_record_supervised_task_dispatch(f33_task_rate_windows + 2,f33_task_rate_policies + 1);
+  return;
+}
+
+
+
+/* Four configured channels0/8/6/14 accumulate609B0 deltas with u32 addition then u16 saturation;
+   wrapping u8 phase completes each six calls. Inclusive configured
+   ranges138..258,138..258,15..60,18..72. Failure enters61940; success updates extrema and clears
+   sum/phase. Hardware progress and physical timing remain unexecuted. */
+
+void f33_check_dma_progress_windows(void)
+
+{
+  int iVar1;
+  byte bVar2;
+  undefined8 uVar3;
+  uint uVar4;
+  uint uVar5;
+  undefined2 uVar6;
+  uint uVar7;
+  
+  uVar3 = 0xfebeb800;
+  uVar5 = 0;
+  do {
+    uVar4 = f33_read_dma_progress_delta(f33_dma_progress_policies[uVar5].channel);
+    iVar1 = uVar5 * 8 + (int)uVar3;
+    uVar4 = uVar4 + (*((ushort *)camry_host_ptr((uint32_t)(iVar1 + -0x2a3e))));
+    uVar7 = uVar4 & 0xffff;
+    if (0xfffe < uVar4) {
+      uVar7 = 0xffff;
+    }
+    uVar6 = (undefined2)uVar7;
+    bVar2 = (*((byte *)camry_host_ptr((uint32_t)(iVar1 + -0x2a40)))) + 1;
+    if (f33_dma_progress_policies[uVar5].window <= bVar2) {
+      if ((uVar7 < f33_dma_progress_policies[uVar5].minimum) ||
+         (f33_dma_progress_policies[uVar5].maximum < uVar7)) {
+                    /* WARNING: Subroutine does not return */
+        f33_enter_terminal_hardware_sequence();
+      }
+      if ((*((ushort *)camry_host_ptr((uint32_t)(iVar1 + -0x2a3c)))) < uVar7) {
+        (*((undefined2 *)camry_host_ptr((uint32_t)(iVar1 + -0x2a3c)))) = uVar6;
+      }
+      if (uVar7 < (*((ushort *)camry_host_ptr((uint32_t)(iVar1 + -0x2a3a))))) {
+        (*((undefined2 *)camry_host_ptr((uint32_t)(iVar1 + -0x2a3a)))) = uVar6;
+      }
+      bVar2 = 0;
+      uVar6 = 0;
+    }
+    (*((undefined2 *)camry_host_ptr((uint32_t)(iVar1 + -0x2a3e)))) = uVar6;
+    (*((byte *)camry_host_ptr((uint32_t)(iVar1 + -0x2a40)))) = bVar2;
+    uVar5 = uVar5 + 1;
+    if (3 < uVar5) {
+      return;
+    }
+  } while( true );
+}
+
+
+
+/* Saturating u8 phase increment. At configured window snapshot and clear count under FFC0, restore
+   PMR, then enforce inclusive min/max. Failure enters61940 before extrema/phase publication.
+   Success updates extrema and resets phase; incomplete windows retain count/extrema. */
+
+void f33_check_task_rate_window(F33TaskRateWindow *state,F33TaskRatePolicy *policy)
+
+{
+  byte bVar1;
+  byte bVar2;
+  byte bVar3;
+  uint saved_mask;
+  uint uVar4;
+  
+  bVar3 = state->phase;
+  if (bVar3 != 0xff) {
+    bVar3 = bVar3 + 1;
+  }
+  if (policy->window <= bVar3) {
+    saved_mask = f33_priority_mask_enter(0xffc0);
+    bVar3 = state->count;
+    uVar4 = (uint)bVar3;
+    state->count = '\0';
+    f33_priority_mask_restore(saved_mask);
+    if ((uVar4 < policy->minimum) || (policy->maximum < uVar4)) {
+                    /* WARNING: Subroutine does not return */
+      f33_enter_terminal_hardware_sequence();
+    }
+    bVar1 = state->maximum;
+    bVar2 = bVar3;
+    if (-1 < (int)(bVar1 - uVar4) && bVar1 != uVar4) {
+      bVar2 = bVar1;
+    }
+    state->maximum = bVar2;
+    if ((int)(state->minimum - uVar4) < 0) {
+      bVar3 = state->minimum;
+    }
+    state->minimum = bVar3;
+    bVar3 = 0;
+  }
+  state->phase = bVar3;
+  return;
+}
+
+
+
+/* CH2 calls DMA progress checks first, then CH0/CH1/foreground rate windows. ROM windows2/4/20
+   accept5..20/5..20/1..8 dispatches. Native composition covers actual65414..6543E software interval
+   after the DMA call, not DMA execution or elapsed-time guarantees. */
+
+void f33_supervise_scheduled_progress(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  f33_check_dma_progress_windows();
+  f33_check_task_rate_window(((F33TaskRateWindow *)camry_host_ptr((uint32_t)(puVar1 + -0x2a50))),f33_task_rate_policies);
+  f33_check_task_rate_window(((F33TaskRateWindow *)camry_host_ptr((uint32_t)(puVar1 + -0x2a48))),f33_task_rate_policies + 1);
+  f33_check_task_rate_window(((F33TaskRateWindow *)camry_host_ptr((uint32_t)(puVar1 + -0x2a44))),f33_task_rate_policies + 2);
+  return;
+}
+
+
+
+/* Apply real task-rate increment/upper-bound guard to state8DBC using ROM30DC8. Runs before the
+   corresponding task body. */
+
+void f33_record_foreground_dispatch(void)
+
+{
+  f33_record_supervised_task_dispatch(f33_task_rate_windows + 3,f33_task_rate_policies + 2);
   return;
 }
 
@@ -2009,6 +2202,20 @@ void FUN_00066aa2(void)
 
 
 
+/* Return full-width0/1 for input channel0 equal to ROM31302 reference level1. Return full0/1 for
+   channel0 input equal to exact reference level1. GPIO observation only. */
+
+uint f33_channel0_matches_reference(void)
+
+{
+  uint uVar1;
+  
+  uVar1 = f33_read_channel_input_level(0);
+  return (uint)(uVar1 == f33_channel_ports[0].reference_level);
+}
+
+
+
 void FUN_00066acc(void)
 
 {
@@ -2023,6 +2230,21 @@ void FUN_00066ada(void)
 {
   f33_write_channel_requested_level(1);
   return;
+}
+
+
+
+/* Return full-width0/1 for input channel1 equal to ROM3130A reference level1. Return full0/1 for
+   channel1 input equal to exact reference level1. No inference of physical permission or actuator
+   response. */
+
+uint f33_channel1_matches_reference(void)
+
+{
+  uint uVar1;
+  
+  uVar1 = f33_read_channel_input_level(1);
+  return (uint)(uVar1 == f33_channel_ports[1].reference_level);
 }
 
 

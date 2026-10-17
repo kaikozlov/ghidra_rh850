@@ -1787,6 +1787,21 @@ void f33_filter_unsigned_sample_accumulator
 
 
 
+/* Application copy of ten-byte latched-monitor reset: clear+0word,+4/+6/+8halfwords; preserve
+   allocationtail. */
+
+void f33_reset_application_latched_monitor(F33LatchedMonitorState *state)
+
+{
+  state->packed_status = 0;
+  state->passing_count = 0;
+  state->failing_count = 0;
+  state->failing_high_water = 0;
+  return;
+}
+
+
+
 void FUN_000d1cdc(short param_1,short param_2,short param_3,short *param_4)
 
 {

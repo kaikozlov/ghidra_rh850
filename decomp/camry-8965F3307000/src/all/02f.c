@@ -1459,6 +1459,73 @@ void f33_return_only_stub_bdfaa(void)
 
 
 
+/* 56-byte staged application projection; signedAF40 supplies limit and positive flag, AFA4 supplies
+   selected sample. Trailing padding is explicitly zeroed. Kind10 software projection writes56 bytes
+   including explicit zero padding; signedAF40 and its positive predicate plus AFA4 sample. No
+   hardware read. */
+
+void f33_snapshot_diagnostic_application_kind10(F33DiagnosticApplicationSample *output)
+
+{
+  uchar uVar1;
+  undefined2 uVar2;
+  undefined2 uVar3;
+  short sVar4;
+  ushort uVar5;
+  uint uVar6;
+  
+  output->raw[0] = DAT_febebe78;
+  *(undefined2 *)(output->raw + 10) = DAT_febebee2;
+  *(undefined2 *)(output->raw + 0xc) = DAT_febebe82;
+  sVar4 = DAT_febeaf40;
+  *(short *)(output->raw + 0x18) = DAT_febeaf40;
+  uVar2 = DAT_febeb11a;
+  output->raw[1] = 0 < sVar4;
+  uVar3 = DAT_febeae6e;
+  uVar1 = DAT_febeacf1;
+  *(undefined2 *)(output->raw + 0xe) = uVar2;
+  output->raw[2] = uVar1;
+  uVar2 = DAT_febeae12;
+  *(undefined2 *)(output->raw + 0x14) = uVar3;
+  *(undefined2 *)(output->raw + 0x12) = uVar2;
+  output->raw[3] = DAT_febeacf5;
+  output->raw[4] = DAT_febead0a;
+  *(undefined2 *)(output->raw + 0x16) = DAT_febeae36;
+  output->raw[5] = DAT_febeb1c4;
+  *(undefined2 *)(output->raw + 0x1a) = DAT_febeafa4;
+  uVar5 = f33_received_retained_word;
+  *(undefined2 *)(output->raw + 0x1c) = uVar3;
+  *(undefined2 *)(output->raw + 0x1e) = uVar3;
+  *(ushort *)(output->raw + 0x10) = uVar5;
+  *(uint *)(output->raw + 0x20) = f33_received_word_unchanged_age;
+  output->raw[6] = DAT_febebe60;
+  output->raw[7] = DAT_febebe62;
+  uVar6 = f33_received_typed_scalar;
+  output->raw[0x34] = '\0';
+  output->raw[0x35] = '\0';
+  output->raw[0x36] = '\0';
+  output->raw[0x37] = '\0';
+  *(uint *)(output->raw + 0x24) = uVar6;
+  output->raw[0x28] = f33_received_packed_decimal_fields[0];
+  output->raw[0x29] = f33_received_packed_decimal_fields[1];
+  output->raw[0x2a] = f33_received_packed_decimal_fields[2];
+  output->raw[0x2b] = f33_received_packed_decimal_fields[3];
+  output->raw[0x2c] = f33_received_packed_decimal_fields[4];
+  output->raw[0x2d] = f33_received_packed_decimal_fields[5];
+  output->raw[8] = DAT_febead60;
+  output->raw[9] = DAT_febead67;
+  uVar1 = DAT_febead39;
+  output->raw[0x31] = '\0';
+  output->raw[0x30] = uVar1;
+  uVar2 = DAT_febeae58;
+  output->raw[0x32] = '\0';
+  output->raw[0x33] = '\0';
+  *(undefined2 *)(output->raw + 0x2e) = uVar2;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -1495,6 +1562,71 @@ void f33_return_only_stub_be06e(void)
 
 
 
+/* Same application layout as kind10 but selected sample comes fromAC56. Kind4 application layout
+   usesAF40 positive/limit andAC56 selected sample. */
+
+void f33_snapshot_diagnostic_application_kind4(F33DiagnosticApplicationSample *output)
+
+{
+  uchar uVar1;
+  undefined2 uVar2;
+  undefined2 uVar3;
+  short sVar4;
+  ushort uVar5;
+  uint uVar6;
+  
+  output->raw[0] = DAT_febebe78;
+  *(undefined2 *)(output->raw + 10) = DAT_febebee2;
+  *(undefined2 *)(output->raw + 0xc) = DAT_febebe82;
+  sVar4 = DAT_febeaf40;
+  *(short *)(output->raw + 0x18) = DAT_febeaf40;
+  uVar2 = DAT_febeb11a;
+  output->raw[1] = 0 < sVar4;
+  uVar3 = DAT_febeae6e;
+  uVar1 = DAT_febeacf1;
+  *(undefined2 *)(output->raw + 0xe) = uVar2;
+  output->raw[2] = uVar1;
+  uVar2 = DAT_febeae12;
+  *(undefined2 *)(output->raw + 0x14) = uVar3;
+  *(undefined2 *)(output->raw + 0x12) = uVar2;
+  output->raw[3] = DAT_febeacf5;
+  output->raw[4] = DAT_febead0a;
+  *(undefined2 *)(output->raw + 0x16) = DAT_febeae36;
+  output->raw[5] = DAT_febeb1c4;
+  *(undefined2 *)(output->raw + 0x1a) = DAT_febeac56;
+  uVar5 = f33_received_retained_word;
+  *(undefined2 *)(output->raw + 0x1c) = uVar3;
+  *(undefined2 *)(output->raw + 0x1e) = uVar3;
+  *(ushort *)(output->raw + 0x10) = uVar5;
+  *(uint *)(output->raw + 0x20) = f33_received_word_unchanged_age;
+  output->raw[6] = DAT_febebe60;
+  output->raw[7] = DAT_febebe62;
+  uVar6 = f33_received_typed_scalar;
+  output->raw[0x34] = '\0';
+  output->raw[0x35] = '\0';
+  output->raw[0x36] = '\0';
+  output->raw[0x37] = '\0';
+  *(uint *)(output->raw + 0x24) = uVar6;
+  output->raw[0x28] = f33_received_packed_decimal_fields[0];
+  output->raw[0x29] = f33_received_packed_decimal_fields[1];
+  output->raw[0x2a] = f33_received_packed_decimal_fields[2];
+  output->raw[0x2b] = f33_received_packed_decimal_fields[3];
+  output->raw[0x2c] = f33_received_packed_decimal_fields[4];
+  output->raw[0x2d] = f33_received_packed_decimal_fields[5];
+  output->raw[8] = DAT_febead60;
+  output->raw[9] = DAT_febead67;
+  uVar1 = DAT_febead39;
+  output->raw[0x31] = '\0';
+  output->raw[0x30] = uVar1;
+  uVar2 = DAT_febeae58;
+  output->raw[0x32] = '\0';
+  output->raw[0x33] = '\0';
+  *(undefined2 *)(output->raw + 0x2e) = uVar2;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -1526,6 +1658,71 @@ void f33_return_only_stub_be130(void)
 void f33_return_only_stub_be132(void)
 
 {
+  return;
+}
+
+
+
+/* Same application layout with signedAFD0 limit/positive flag and B02C sample. Default application
+   layout substitutesAFD0 positive/limit andB02C selected sample. */
+
+void f33_snapshot_diagnostic_application_default(F33DiagnosticApplicationSample *output)
+
+{
+  uchar uVar1;
+  undefined2 uVar2;
+  undefined2 uVar3;
+  short sVar4;
+  ushort uVar5;
+  uint uVar6;
+  
+  output->raw[0] = DAT_febebe78;
+  *(undefined2 *)(output->raw + 10) = DAT_febebee2;
+  *(undefined2 *)(output->raw + 0xc) = DAT_febebe82;
+  sVar4 = DAT_febeafd0;
+  *(short *)(output->raw + 0x18) = DAT_febeafd0;
+  uVar2 = DAT_febeb11a;
+  output->raw[1] = 0 < sVar4;
+  uVar3 = DAT_febeae6e;
+  uVar1 = DAT_febeacf1;
+  *(undefined2 *)(output->raw + 0xe) = uVar2;
+  output->raw[2] = uVar1;
+  uVar2 = DAT_febeae12;
+  *(undefined2 *)(output->raw + 0x14) = uVar3;
+  *(undefined2 *)(output->raw + 0x12) = uVar2;
+  output->raw[3] = DAT_febeacf5;
+  output->raw[4] = DAT_febead0a;
+  *(undefined2 *)(output->raw + 0x16) = DAT_febeae36;
+  output->raw[5] = DAT_febeb1c4;
+  *(undefined2 *)(output->raw + 0x1a) = DAT_febeb02c;
+  uVar5 = f33_received_retained_word;
+  *(undefined2 *)(output->raw + 0x1c) = uVar3;
+  *(undefined2 *)(output->raw + 0x1e) = uVar3;
+  *(ushort *)(output->raw + 0x10) = uVar5;
+  *(uint *)(output->raw + 0x20) = f33_received_word_unchanged_age;
+  output->raw[6] = DAT_febebe60;
+  output->raw[7] = DAT_febebe62;
+  uVar6 = f33_received_typed_scalar;
+  output->raw[0x34] = '\0';
+  output->raw[0x35] = '\0';
+  output->raw[0x36] = '\0';
+  output->raw[0x37] = '\0';
+  *(uint *)(output->raw + 0x24) = uVar6;
+  output->raw[0x28] = f33_received_packed_decimal_fields[0];
+  output->raw[0x29] = f33_received_packed_decimal_fields[1];
+  output->raw[0x2a] = f33_received_packed_decimal_fields[2];
+  output->raw[0x2b] = f33_received_packed_decimal_fields[3];
+  output->raw[0x2c] = f33_received_packed_decimal_fields[4];
+  output->raw[0x2d] = f33_received_packed_decimal_fields[5];
+  output->raw[8] = DAT_febead60;
+  output->raw[9] = DAT_febead67;
+  uVar1 = DAT_febead39;
+  output->raw[0x31] = '\0';
+  output->raw[0x30] = uVar1;
+  uVar2 = DAT_febeae58;
+  output->raw[0x32] = '\0';
+  output->raw[0x33] = '\0';
+  *(undefined2 *)(output->raw + 0x2e) = uVar2;
   return;
 }
 

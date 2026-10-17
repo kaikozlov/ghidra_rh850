@@ -459,6 +459,85 @@ void f33_run_raw_estimator_cycle(void)
 
 
 
+/* WARNING: Removing unreachable block (ram,0x000c45aa) */
+/* WARNING: Removing unreachable block (ram,0x000c45a2) */
+/* Require AD3C!=0/3,BFB9==5A,BFC5==0 and C0B4>=selected threshold1. Delta is low32
+   ABA4-(ABA0<<7)-(ABA8<<7); rate=(delta/8)/((u16AC12<<4)/1024). Failed gate zeroes delta but
+   RETAINS state/qualification. A zero divisor alone holds oldC084. Output layout is8 bytes.
+   Eight-byte state/qualification/rate result. Native qualified versus failed gate yields31 versus0
+   while failed gate retains state/qualification. Static gates require AD3C!=0/3 and BFC5==0; zero
+   divisor alone holds prior rate. */
+
+void f33_sample_rate_observer(F33RateObserverSample *sample)
+
+{
+  uint uVar1;
+  int iVar2;
+  int iVar3;
+  uchar uVar4;
+  uchar uVar5;
+  
+  if ((DAT_febead3c != '\0') && (DAT_febead3c != '\x03')) {
+    DAT_febec06c = f33_estimator_lower_band_default;
+    if (DAT_febead3c == '\x02') {
+      DAT_febec06c = f33_estimator_lower_band_mode2;
+    }
+    if (((DAT_febebfb9 == 'Z') && (DAT_febebfc5 == '\0')) && (DAT_febec06c <= DAT_febec0b4)) {
+      iVar2 = DAT_febeaba4 + DAT_febeaba0 * -0x80 + DAT_febeaba8 * -0x80;
+      uVar5 = DAT_febec0b7;
+      uVar4 = DAT_febec0b6;
+      goto LAB_000c4598;
+    }
+  }
+  iVar2 = 0;
+  uVar5 = DAT_febec08e;
+  uVar4 = DAT_febec08f;
+LAB_000c4598:
+  uVar1 = ((uint)DAT_febeac12 << 4) / 0x400;
+  iVar3 = DAT_febec084;
+  if ((uVar1 != 0) && (iVar3 = iVar2 / 8, uVar1 != 0)) {
+    if (iVar3 == -0x80000000 && uVar1 == 0xffffffff) {
+      iVar3 = -0x80000000;
+    }
+    else {
+      iVar3 = iVar3 / (int)uVar1;
+    }
+  }
+  sample->rate = iVar3;
+  sample->qualification = uVar4;
+  sample->state = uVar5;
+  return;
+}
+
+
+
+/* Always run C330C source snapshot/qualification prework. Only AC07==5A samples and commits
+   C08F,then C08E,then C084 under PMRFFC0. Closed outer gate holds publication. Composed native
+   prework clears the separate AC01 qualifier at its threshold then commits qualification/state/rate
+   under PMRFFC0. Closed AC07 outer gate holds publication but still runs source prework. */
+
+void f33_commit_rate_observer(void)
+
+{
+  uint32_t puVar1;
+  undefined4 uVar2;
+  F33RateObserverSample local_c;
+  
+  puVar1 = 0xfebeb800u;
+  FUN_000c330c();
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xbf9))))) == 'Z') {
+    f33_sample_rate_observer(&local_c);
+    uVar2 = FUN_000d1da0(0xffc0);
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x88f))))) = local_c.qualification;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x88e))))) = local_c.state;
+    (*((int *)camry_host_ptr((uint32_t)(puVar1 + 0x884)))) = local_c.rate;
+    FUN_000d1dc6(uVar2);
+  }
+  return;
+}
+
+
+
 /* Full initialization clears residuals/bounds/counters, correctionABA8, reseed centerC0B0 and
    sticky plausibilityC0AE. Ordinary failure resetC4714 does not clear that latch. Full
    retained-estimator initialization clears sticky plausibilityC0AE; ordinary failure reset does
@@ -1428,6 +1507,94 @@ void f33_initialize_torque_memory_gain(void)
   DAT_febec130 = 0x400;
   DAT_febec132 = 0x400;
   DAT_febec134 = 0x400;
+  return;
+}
+
+
+
+/* WARNING: This is an inlined function */
+/* Low8 mode<7 selects16-byte D2FB8 row in bankAC3C&1: three dereferenced halfword pointers plus
+   inline up_target. Otherwise retain parameters and select direction1. Real leaf preserves R6 for
+   following CE8DA; inline its actual p-code, not an invented return. Prepare12-byte gain state from
+   low8 mode and banked16-byte rows containing three pointers plus inline target. Preserve R6 into
+   CE8DA; default mode retains parameters. */
+
+void f33_prepare_torque_memory_gain_parameters(F33GainSlewState *state,uint mode)
+
+{
+  int iVar1;
+  ushort uVar2;
+  uchar uVar3;
+  ushort uVar4;
+  ushort uVar5;
+  ushort uVar6;
+  
+  if ((mode & 0xff) < 7) {
+    uVar3 = '\x02';
+    iVar1 = (short)(DAT_febeac3c & 1) * 7 + (mode & 0xff);
+    uVar2 = f33_torque_memory_gain_calibrations[iVar1].up_target;
+    uVar6 = *((uint16_t *)camry_host_ptr((uint32_t)(f33_torque_memory_gain_calibrations[iVar1].down_step)));
+    uVar5 = *((uint16_t *)camry_host_ptr((uint32_t)(f33_torque_memory_gain_calibrations[iVar1].up_step)));
+    uVar4 = *((uint16_t *)camry_host_ptr((uint32_t)(f33_torque_memory_gain_calibrations[iVar1].down_target)));
+  }
+  else {
+    uVar3 = '\x01';
+    uVar2 = DAT_febec12c;
+    uVar6 = DAT_febec130;
+    uVar5 = DAT_febec132;
+    uVar4 = DAT_febec12e;
+  }
+  state->down_step = uVar6;
+  state->up_step = uVar5;
+  state->down_target = uVar4;
+  state->up_target = uVar2;
+  state->direction = uVar3;
+  return;
+}
+
+
+
+/* WARNING: Inlined function: f33_prepare_torque_memory_gain_parameters */
+/* ModeCB00 only when CAB7==1, otherwise7. Prepare stack state, run real CE8DA with preserved R6,
+   then publish parameter tuple and C134. Not evidence of varying initialized gain. CAB7==1 selects
+   CB00 mode otherwise7; prepare and step real stack state then publish tuple/current gain. Both
+   exact banks preserve C1341024 from initialization. */
+
+void f33_update_torque_memory_gain(void)
+
+{
+  int iVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  F33GainSlewState local_10;
+  
+  puVar2 = 0xfebeb800u;
+  uVar3 = 7;
+  if (DAT_febecab7 == '\x01') {
+    uVar3 = (uint)DAT_febecb00;
+  }
+  local_10.current = DAT_febec134;
+  if (uVar3 < 7) {
+    local_10.direction = '\x02';
+    iVar1 = (short)(DAT_febeac3c & 1) * 7 + uVar3;
+    local_10.up_target = f33_torque_memory_gain_calibrations[iVar1].up_target;
+    local_10.down_step = *((uint16_t *)camry_host_ptr((uint32_t)(f33_torque_memory_gain_calibrations[iVar1].down_step)));
+    local_10.up_step = *((uint16_t *)camry_host_ptr((uint32_t)(f33_torque_memory_gain_calibrations[iVar1].up_step)));
+    local_10.down_target = *((uint16_t *)camry_host_ptr((uint32_t)(f33_torque_memory_gain_calibrations[iVar1].down_target)));
+  }
+  else {
+    local_10.direction = '\x01';
+    local_10.up_target = DAT_febec12c;
+    local_10.down_step = DAT_febec130;
+    local_10.up_step = DAT_febec132;
+    local_10.down_target = DAT_febec12e;
+  }
+  f33_step_retained_unsigned_gain(&local_10);
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0x930)))) = local_10.down_step;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0x932)))) = local_10.up_step;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0x92e)))) = local_10.down_target;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0x92c)))) = local_10.up_target;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0x934)))) = local_10.current;
   return;
 }
 

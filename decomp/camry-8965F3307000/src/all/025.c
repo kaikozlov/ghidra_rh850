@@ -58,6 +58,14 @@ undefined2 FUN_0009407c(void)
 
 
 
+ushort FUN_000940ae(uint param_1)
+
+{
+  return f33_dcm_receive_buffer_state[param_1 & 0xffff].remaining_capacity;
+}
+
+
+
 void FUN_000940ba(void)
 
 {
@@ -108,6 +116,80 @@ uchar FUN_000940e6(char param_1)
     uVar1 = f33_dcm_zero_overall_timeout;
   }
   return uVar1;
+}
+
+
+
+void FUN_000940fe(ushort param_1,ushort *param_2,uint param_3,undefined1 *param_4)
+
+{
+  uint uVar1;
+  uint uVar2;
+  ushort uVar3;
+  
+  uVar2 = param_3 & 0xffff;
+  do {
+    uVar3 = *param_2;
+    if (uVar2 <= uVar3) {
+      return;
+    }
+    uVar1 = (int)(uVar3 + uVar2) >> 1;
+    if (f33_dcm_did_class[(short)uVar1].last_did < param_1) {
+      uVar3 = (short)uVar1 + 1;
+      *param_2 = uVar3;
+      uVar1 = uVar2;
+    }
+    uVar2 = uVar1;
+  } while ((param_1 < f33_dcm_did_class[(short)uVar3].first_did) ||
+          (f33_dcm_did_class[(short)uVar3].last_did < param_1));
+  *param_4 = 1;
+  return;
+}
+
+
+
+undefined4 FUN_00094148(ushort param_1,ushort *param_2,byte *param_3)
+
+{
+  undefined *puVar1;
+  undefined4 uVar2;
+  char cStack_13;
+  ushort uStack_12;
+  
+  puVar1 = ((undefined *)camry_host_ptr(0x23dfcu));
+  cStack_13 = '\0';
+  uVar2 = 1;
+  if (DAT_00026016 != 0) {
+    uStack_12 = 0;
+    if (f33_dcm_did_class[0].first_did <= param_1) {
+      if (f33_dcm_did_class[0].last_did < param_1) {
+        if (param_1 <= f33_dcm_did_class[(short)(DAT_00026016 + -1)].last_did) {
+          puVar1 = ((undefined *)camry_host_ptr(0x23dfcu));
+          FUN_000940fe(param_1,&uStack_12,DAT_00026016 + -1,&cStack_13);
+        }
+      }
+      else {
+        cStack_13 = '\x01';
+      }
+    }
+    if ((cStack_13 == '\x01') && (uStack_12 < 6)) {
+      *param_2 = uStack_12;
+      puVar1 = puVar1 + (short)uStack_12 * 0x1c;
+      if ((puVar1[0x2258] == '\x01') && (*(int *)(puVar1 + 0x2240) == 0)) {
+        uVar2 = 2;
+      }
+      else {
+        if ((*((int *)camry_host_ptr((uint32_t)(*(int *)(0x2250u + (int)camry_host_addr(puVar1)) + 4)))) != 0) {
+          *param_3 = 2;
+        }
+        if ((*((int *)camry_host_ptr((uint32_t)(*(int *)(0x2250u + (int)camry_host_addr(puVar1)) + 8)))) != 0) {
+          *param_3 = *param_3 | 4;
+        }
+        uVar2 = 0;
+      }
+    }
+  }
+  return uVar2;
 }
 
 
@@ -216,6 +298,23 @@ LAB_000943c6:
     uVar4 = 1;
   }
   return uVar4;
+}
+
+
+
+uint FUN_0009449e(ushort param_1,ushort param_2,uchar param_3,ushort *param_4)
+
+{
+  uint uVar1;
+  
+  *param_4 = 0;
+  if (param_1 < 6) {
+    uVar1 = (*(int (*)())f33_dcm_did_class[(short)param_1].length)(param_2,param_3,param_4);
+  }
+  else {
+    uVar1 = 1;
+  }
+  return uVar1;
 }
 
 
@@ -1341,6 +1440,28 @@ uint FUN_00095a14(char param_1,F33DcmMessageContext *param_2)
 
 
 
+/* For selected non-immediate row and state1/2 clear localstate/reset8B134 through95D4E(0).
+   Invalidate event0E and release5D24. Does not revoke request9, clear81AE, publishdefault, or prove
+   cancellation of already admitted mode/hardware action. */
+
+void f33_dcm_session_cancel(void)
+
+{
+  if (((f33_app_dcm_session_row_index < 4) &&
+      (f33_app_session_timing_rows[(short)(ushort)f33_app_dcm_session_row_index].transition_kind !=
+       '\0')) &&
+     (f33_app_dcm_session_deferred_state == '\x01' || f33_app_dcm_session_deferred_state == '\x02'))
+  {
+    f33_app_dcm_session_deferred_state = '\0';
+    FUN_00095d4e(0);
+  }
+  f33_dcm_invalidate_queued_event('\x0e','\0');
+  FUN_0009560e(1);
+  return;
+}
+
+
+
 /* Operation0\u219295A3E admission;2\u219295B48 cancellation;3\u219295B88 pending-response
    notification. Other operations no action. Operation0→95A3E admission;2→95B48
    cancellation;3→95B88 pending-response notification. */
@@ -1363,6 +1484,17 @@ uint f33_dcm_session_operation(uchar operation,F33DcmMessageContext *message,uch
     }
   }
   return uVar1;
+}
+
+
+
+void FUN_00095c86(undefined4 param_1,undefined4 param_2,char param_3)
+
+{
+  if (((param_3 == '\0') && (DAT_00026120 == '\x01')) && (f33_app_dcm_session_row_index < 4)) {
+    FUN_00091f9c(f33_app_session_timing_rows[(short)(ushort)f33_app_dcm_session_row_index].session);
+  }
+  return;
 }
 
 
@@ -2008,6 +2140,32 @@ void f33_dcm_security_initialize_delays(void)
   } while (uVar3 < 2);
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x5a33))))) = 0;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x5a32))))) = 0;
+  return;
+}
+
+
+
+void FUN_00096768(void)
+
+{
+  if (f33_app_security_selected_row < 2) {
+    f33_dcm_security_seed_callback_join
+              (f33_app_security_level_rows[(short)(ushort)f33_app_security_selected_row].
+               security_level,'\x01');
+  }
+  return;
+}
+
+
+
+void FUN_0009687c(void)
+
+{
+  if (f33_app_security_selected_row < 2) {
+    f33_dcm_security_key_callback_join
+              (f33_app_security_level_rows[(short)(ushort)f33_app_security_selected_row].
+               security_level,'\x01');
+  }
   return;
 }
 

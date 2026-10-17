@@ -2724,6 +2724,54 @@ void FUN_00056cf0(void)
 
 
 
+void FUN_00056cf6(void)
+
+{
+  int iVar1;
+  int iVar2;
+  ushort uVar3;
+  int iVar4;
+  uint32_t puVar5;
+  uint uVar6;
+  short sVar7;
+  F33PduInfo local_18;
+  uchar local_10 [8];
+  
+  uVar3 = DAT_febe8ac4;
+  puVar5 = 0xfebeb800u;
+  uVar6 = f33_application_nvm_is_ready();
+  if (uVar6 == 1) {
+    FUN_00065f5e();
+  }
+  if (uVar3 < DAT_00030d5e) {
+    sVar7 = uVar3 + 1;
+  }
+  else {
+    FUN_0008b120();
+    FUN_00091b50();
+    FUN_000917a4(0);
+    f33_run_init_chain_8e62a();
+    ((void)(0xe), thunk_FUN_000b15ac());
+    thunk_FUN_0008b134();
+    iVar4 = 0;
+    do {
+      local_10[iVar4] = '\0';
+      iVar2 = iVar4 + 1;
+      iVar1 = iVar4 + -7;
+      iVar4 = iVar2;
+    } while (((iVar1 < 0) || (iVar2 < 0)));
+    builtin_memcpy(local_10,"\x03\x7f\x10\x10",4);
+    local_18.length = 8;
+    local_18.data = camry_host_addr(local_10);
+    f33_canif_transmit(0x800,&local_18);
+    sVar7 = 0;
+  }
+  (*((short *)camry_host_ptr((uint32_t)(puVar5 + -0x2d3c)))) = sVar7;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -4674,6 +4722,35 @@ void f33_return_only_stub_57efc(void)
 void f33_return_only_stub_57fce(void)
 
 {
+  return;
+}
+
+
+
+/* Unconditionally publish the current-control diagnostic snapshotEC00..24, including raw5F36 and
+   retained command/current/limit fields.5E202 calls this even when control computation and output
+   staging are both skipped. No atomic acquisition generation is implied. Native nonzero tail
+   from5E280 and full staging-only5E202(2,0101) verify scoped transform, retention and arbitration
+   effects. No fresh acquisition, upstream nonzero regulation or physical PWM claim. */
+
+void f33_publish_current_control_snapshot(void)
+
+{
+  DAT_febeec24 = 0;
+  DAT_febeec00 = 0;
+  DAT_febeec04 = f33_regulator_output_envelopes[0].second;
+  DAT_febeec06 = f33_regulator_output_envelopes[1].second;
+  DAT_febeec08 = DAT_febe5f36;
+  DAT_febeec0a = DAT_febe7eaa;
+  DAT_febeec0c = DAT_febe6e00;
+  DAT_febeec14 = DAT_febe7d94;
+  DAT_febeec18 = DAT_febe7d74;
+  DAT_febeec1c = DAT_febe5f40;
+  DAT_febeec20 = DAT_febe7d68;
+  DAT_febeec0e = DAT_febe6e0a;
+  DAT_febeec01 = DAT_febe8b88;
+  DAT_febeec02 = DAT_febe8b89;
+  DAT_febeec10 = DAT_febe7d78;
   return;
 }
 
