@@ -842,6 +842,24 @@ def _span(spans: list[tuple[int, int]]) -> tuple[int, int] | None:
     return start, end - start
 
 
+def _cover_objects(spans: list[tuple[int, int]]) -> list[tuple[int, int]]:
+    """Map the whole named object when a field access uses its base pointer.
+
+    ``slots[i].armed`` calls ``camry_host_ptr`` on the object base, while the
+    bytes only touch the field. The base is otherwise outside the write window.
+    """
+    from tools.camry_decomp import _GP_DELTA, _gp_objects
+
+    covered = list(spans)
+    for addr, size in spans:
+        end = addr + size
+        for _name, base, obj_size, _expr in _gp_objects():
+            runtime = (base - _GP_DELTA) & 0xFFFFFFFF
+            if addr < runtime + obj_size and runtime < end:
+                covered.append((runtime, obj_size))
+    return covered
+
+
 def _windows(runs: list[Run], pointers: list[bool] | None = None) -> list[tuple[int, int]]:
     """One window per RAM bank. Separate clusters overflow the host's eight regions."""
     local: list[tuple[int, int]] = []
@@ -879,6 +897,9 @@ def _windows(runs: list[Run], pointers: list[bool] | None = None) -> list[tuple[
         last = max(touched)
         slot = (last - ARG_BASE) // ARG_STRIDE + 1
         local.append((ARG_BASE, slot * ARG_STRIDE))
+    local = _cover_objects(local)
+    glob = _cover_objects(glob)
+    other = _cover_objects(other)
     windows = [window for window in (_span(local), _span(glob)) if window is not None]
     packed = _clusters(other, 16)
     if len(windows) + len(packed) > 6 and packed:
