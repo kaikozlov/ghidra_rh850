@@ -115,11 +115,11 @@ def load_oracles() -> list[dict]:
     return rows
 
 
-def compile_sources(directory: Path) -> ctypes.CDLL:
+def compile_sources(directory: Path, optimize: str = "-O2") -> ctypes.CDLL:
     library = directory / "libcamry.dylib"
     subprocess.run(
         [
-            "cc", "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror",
+            "cc", "-std=c11", optimize, "-Wall", "-Wextra", "-Werror",
             "-DCAMRY_HOST",
             "-I", str(INCLUDE),
             "-dynamiclib", "-o", str(library),
@@ -323,6 +323,9 @@ def bind(library: ctypes.CDLL) -> None:
     library.camry_host_reset.restype = None
     library.camry_host_add.argtypes = [u32, u8p, u32]
     library.camry_host_add.restype = None
+    if (ROOT / "src" / "lifted.c").exists():
+        library.camry_lift_run.argtypes = [u32, u32, u32, u32, u32, u32]
+        library.camry_lift_run.restype = u32
 
 
 def scenario_regions(scenario: dict) -> list[tuple[int, bytearray]]:
@@ -655,9 +658,23 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
     raise AssertionError(f"no C call for {name}")
 
 
-def attach_dcra(library: ctypes.CDLL, name: str):
-    if name not in DCRA_CALLS:
-        return None, None
+def call_lifted(library: ctypes.CDLL, address: int, registers: dict, limit: int) -> int:
+    ctypes.c_uint32.in_dll(library, "camry_gp").value = int(registers.get("gp", "0"), 16) & 0xFFFFFFFF
+    ctypes.c_uint32.in_dll(library, "camry_tp").value = int(registers.get("tp", "0"), 16) & 0xFFFFFFFF
+    ctypes.c_uint32.in_dll(library, "camry_sp").value = int(registers.get("sp", "0"), 16) & 0xFFFFFFFF
+    ctypes.c_uint32.in_dll(library, "camry_step_limit").value = limit
+    ctypes.c_uint32.in_dll(library, "camry_lift_psw").value = int(registers.get("PSW", "0x20"), 16) & 0xFFFFFFFF
+    return int(library.camry_lift_run(
+        address,
+        int(registers.get("r6", "0"), 16),
+        int(registers.get("r7", "0"), 16),
+        int(registers.get("r8", "0"), 16),
+        int(registers.get("r9", "0"), 16),
+        int(registers.get("lp", "0"), 16),
+    )) & 0xFFFFFFFF
+
+
+def attach_dcra_window(library: ctypes.CDLL):
     window = bytearray(DCRA1_SIZE)
     view = view_of(window)
     library.camry_host_add(
@@ -666,6 +683,12 @@ def attach_dcra(library: ctypes.CDLL, name: str):
         DCRA1_SIZE,
     )
     return window, view
+
+
+def attach_dcra(library: ctypes.CDLL, name: str):
+    if name not in DCRA_CALLS:
+        return None, None
+    return attach_dcra_window(library)
 
 
 def check_results(
@@ -678,6 +701,7 @@ def check_results(
     regions: list[tuple[int, bytearray]] | None = None,
     codeflash: bytes | None = None,
     dcra: bytearray | None = None,
+    value_return: bool | None = None,
 ) -> None:
     memory_checks = 0
     r10_checks = 0
@@ -697,7 +721,8 @@ def check_results(
                 elif expected <= 0xFFFF and returned != expected:
                     raise AssertionError(f"{scenario['name']}: r10 {returned} != {expected:#x}")
                 continue
-            if register == "r10" and name in VALUE_RETURN:
+            r10_is_return = name in VALUE_RETURN if value_return is None else value_return
+            if register == "r10" and r10_is_return:
                 r10_checks += 1
                 if returned != expected:
                     raise AssertionError(f"{scenario['name']}: r10 {returned:#x} != {expected:#x}")
@@ -780,18 +805,26 @@ def main() -> int:
             if address not in matched or not useful_oracle(scenario):
                 continue
             name = matched[address]["name"]
+            lifted = matched[address].get("form") == "lifted"
             registers = scenario.get("registers", {})
             mapped = materialize(scenario)
-            ranges = accessed_ranges(name, registers)
+            ranges = [] if lifted else accessed_ranges(name, registers)
+            limit = int(scenario.get("max_instructions") or 200000)
             if mapped is None:
                 if ranges:
                     continue
                 regions = scenario_regions(scenario)
                 held = install_regions(library, code_view, len(codeflash), regions)
                 dcra, dcra_view = attach_dcra(library, name)
-                returned = call_function(library, name, None, 0, registers)
+                if lifted and dcra is None and 1 + len(regions) < 8:
+                    dcra, dcra_view = attach_dcra_window(library)
+                returned = (
+                    call_lifted(library, address, registers, limit)
+                    if lifted else call_function(library, name, None, 0, registers)
+                )
                 check_results(
                     scenario, name, None, 0, registers, returned, regions, codeflash, dcra,
+                    value_return=True if lifted else None,
                 )
                 del held, dcra_view
             else:
@@ -801,9 +834,15 @@ def main() -> int:
                 view = view_of(memory) if memory else view_of(bytearray(b"\x00"))
                 install_address_space(library, code_view, len(codeflash), view, base, memory)
                 dcra, dcra_view = attach_dcra(library, name)
-                returned = call_function(library, name, view, base, registers)
+                if lifted and dcra is None:
+                    dcra, dcra_view = attach_dcra_window(library)
+                returned = (
+                    call_lifted(library, address, registers, limit)
+                    if lifted else call_function(library, name, view, base, registers)
+                )
                 check_results(
                     scenario, name, memory, base, registers, returned, codeflash=codeflash, dcra=dcra,
+                    value_return=True if lifted else None,
                 )
                 del dcra_view
             executed[address] += 1
