@@ -3299,6 +3299,69 @@ void FUN_00006588(void)
 
 
 
+/* Ownstimestamp-gatedsend,78pending,inflightlockandoverallterminalstate;doesnotownFACIoperation. */
+
+void f33_boot_response_timer_progress(void)
+
+{
+  undefined1 uVar1;
+  uint32_t puVar2;
+  F33BootInterruptEntry *pFVar3;
+  int iVar4;
+  undefined4 uVar5;
+  undefined *puVar6;
+  
+  puVar2 = 0xfebf9800u;
+  pFVar3 = f33_boot_interrupt_dispatch;
+  if (f33_boot_response_state == '\x01') {
+    iVar4 = FUN_00001d24();
+    if (iVar4 == (*((int *)camry_host_ptr((uint32_t)(puVar2 + -0x6c54))))) {
+      return;
+    }
+    FUN_00002d88((*((undefined1 *)camry_host_ptr((uint32_t)((int)&pFVar3[*(ushort *)(puVar2 + -0x6744) + 0x10d].handler + 2)))), camry_host_addr(((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x6c5c)))));
+    uVar1 = 2;
+  }
+  else {
+    if (f33_boot_response_state == '\x02') {
+      return;
+    }
+    if (f33_boot_response_state == '\x04') {
+      return;
+    }
+    puVar6 = ((undefined *)camry_host_ptr(0x9c40u));
+    if (f33_boot_response_state == '\x03') {
+      puVar6 = ((undefined *)camry_host_ptr((uint32_t)(0x2349340)));
+    }
+    puVar2 = 0xfebf9800u;
+    iVar4 = FUN_00001d24();
+    if ((uint)(iVar4 - (*((int *)camry_host_ptr((uint32_t)(puVar2 + -0x6c50))))) < 3600000000) {
+      if (((undefined *)camry_host_ptr((uint32_t)(iVar4 - *(int *)(puVar2 + -0x6c54)))) <= puVar6) {
+        return;
+      }
+      if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x6c44))))) == '\x01') {
+        return;
+      }
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x6c40))))) = 0x7f;
+      *(undefined **)(puVar2 + -0x6c5c) = ((void *)camry_host_ptr((uint32_t)(puVar2 + -0x6c40)));
+      (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x6c58)))) = 3;
+      (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x6746)))) = 3;
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x6c3f))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x6742)))));
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x6c3e))))) = 0x78;
+      FUN_00002d88((*((undefined1 *)camry_host_ptr((uint32_t)((int)&pFVar3[*(ushort *)(puVar2 + -0x6744) + 0x10d].handler + 2)))), camry_host_addr(((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x6c5c)))));
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x6c44))))) = 1;
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x6c45))))) = 3;
+      uVar5 = FUN_00001d24();
+      (*((undefined4 *)camry_host_ptr((uint32_t)(puVar2 + -0x6c54)))) = uVar5;
+      return;
+    }
+    uVar1 = 4;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x6c45))))) = uVar1;
+  return;
+}
+
+
+
 /* Executingrequests\u219265AA;idlesession2/3rawelapsedtimeoutpublishesdefault1.
    Executingrequests→65AA;idlesession2/3rawelapsedtimeoutpublishesdefault1. */
 
@@ -3395,6 +3458,49 @@ uint f33_boot_response_copy_chunk
   }
   *remaining = f33_boot_response_remaining;
   return 0;
+}
+
+
+
+/* Stagesresponseorcompletesasuppressedrequest;forcestransmissionafterprevious78pending.Same-countertickdeferralavoidsimmediatesend,then65AAownsprogress.
+    */
+
+void f33_boot_response_submit(uchar mode,uchar *data,ushort length)
+
+{
+  undefined1 uVar1;
+  uint32_t puVar2;
+  uint32_t puVar3;
+  F33BootInterruptEntry *pFVar4;
+  int iVar5;
+  undefined4 uVar6;
+  
+  puVar2 = 0xfebf9800u;
+  puVar3 = 0xfebf9800u;
+  pFVar4 = f33_boot_interrupt_dispatch;
+  if ((f33_boot_response_state == '\x03') || (mode != '\0')) {
+    DAT_febf2ba4 = camry_host_addr(data);
+    DAT_febf2ba8 = length;
+    f33_boot_response_remaining = length;
+    iVar5 = FUN_00001d24();
+    if (iVar5 == (*((int *)camry_host_ptr((uint32_t)(puVar3 + -0x6c54))))) {
+      uVar1 = 1;
+    }
+    else {
+      FUN_00002d88((*((undefined1 *)camry_host_ptr((uint32_t)((int)&pFVar4[*(ushort *)(puVar3 + -0x6744) + 0x10d].handler + 2)))), camry_host_addr(((undefined *)camry_host_ptr((uint32_t)(puVar3 + -0x6c5c)))));
+      uVar1 = 2;
+    }
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6c45))))) = uVar1;
+  }
+  else {
+    f33_boot_request_state = '\0';
+    uVar6 = FUN_00001d24();
+    (*((undefined4 *)camry_host_ptr((uint32_t)(puVar2 + -0x6c4c)))) = uVar6;
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x6c43))))) == '\x01') {
+      FUN_0000159e();
+    }
+  }
+  return;
 }
 
 
@@ -3762,6 +3868,26 @@ void f33_boot_transfer_crypto_initialize(void)
 
 
 
+/* Returns1busy/0accepted;storeslengthu16,pointers,sets2BDEactive;worker6BDEtransformsfull16-byteblocks.
+    */
+
+uint f33_boot_block_transform_submit(ushort length,uchar *source,uchar *destination)
+
+{
+  bool bVar1;
+  
+  bVar1 = DAT_febf2bde == '\0';
+  if (bVar1) {
+    DAT_febf2bde = '\x01';
+    DAT_febf2bd4 = camry_host_addr(source);
+    DAT_febf2bd8 = camry_host_addr(destination);
+    DAT_febf2bdc = length;
+  }
+  return (uint)!bVar1;
+}
+
+
+
 /* TransferExit optional-transform cleanup forwards70FC; wipes BOTH CBC and CMAC, not worker
    activity/pointers or configured materials. */
 
@@ -3838,6 +3964,27 @@ bool FUN_00006c5a(int *param_1)
 
 {
   return *param_1 != 0x5aa5a55a;
+}
+
+
+
+/* Returns1ifalreadybusyelse0,setsfailure1/active1andfull32-bitremaining/pointers;4CA2preserveslivelengthr8acrosssetup.
+    */
+
+uint f33_boot_compare_submit(uchar *left,uchar *right,uint length)
+
+{
+  bool bVar1;
+  
+  bVar1 = DAT_febf2bed == '\0';
+  if (bVar1) {
+    DAT_febf2bec = 1;
+    DAT_febf2bed = '\x01';
+    DAT_febf2be0 = length;
+    DAT_febf2be4 = camry_host_addr(left);
+    DAT_febf2be8 = camry_host_addr(right);
+  }
+  return (uint)!bVar1;
 }
 
 

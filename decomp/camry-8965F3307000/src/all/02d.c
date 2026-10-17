@@ -2572,7 +2572,7 @@ undefined ** FUN_000b64c8(uint param_1)
   undefined **ppuVar3;
   
   puVar1 = 0xfebeb800u;
-  ppuVar3 = (undefined **)(param_1 & 0xffff);
+  ppuVar3 = ((void *)camry_host_ptr((uint32_t)((undefined **)(param_1 & 0xffff))));
   uVar2 = DAT_febeb2d0;
   if (((DAT_febeb2c8 != '\0') && (DAT_febeb2c8 != '\x11')) && (DAT_febeb2c8 != '\"')) {
     puVar1 = 0xfebeb800u;

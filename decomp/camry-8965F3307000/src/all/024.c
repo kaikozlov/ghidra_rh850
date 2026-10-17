@@ -751,6 +751,21 @@ void f33_dcm_reset_message_context(void)
 
 
 
+/* Clear retained SID562C, callback5628 and prefix count562D, then reset message5630; this is not
+   the NRC5624 reset. */
+
+void f33_dcm_clear_active_service(void)
+
+{
+  DAT_febe562c = 0;
+  f33_dcm_active_service_callback = camry_host_addr(f33_reset_vector);
+  DAT_febe562d = 0;
+  f33_dcm_reset_message_context();
+  return;
+}
+
+
+
 void FUN_000913b6(void)
 
 {
@@ -2840,6 +2855,25 @@ undefined1 FUN_00092b66(void)
   return (*((undefined1 *)camry_host_ptr((uint32_t)(*(int *)(*(int *)((uint)*(ushort *)(puVar1 + sVar2 * 0xc + 0x20ee) * 4 +
                             *(int *)(puVar1 + *(short *)(puVar1 + sVar2 * 0xc + 0x20ec) * 0x14 +
                                               0x20c4)) + 8) + 8))));
+}
+
+
+
+int * FUN_00092b98(undefined4 *param_1)
+
+{
+  int *piVar1;
+  int iVar2;
+  int *piVar3;
+  int *piVar4;
+  
+  piVar3 = (int *)0x0;
+  if ((((param_1 != (undefined4 *)0x0) && (piVar4 = (int *)*param_1, piVar4 != (int *)0x0)) &&
+      (piVar1 = (int *)*piVar4, piVar1 != (int *)0x0)) &&
+     (iVar2 = *piVar1, *piVar4 = iVar2, piVar3 = piVar1, iVar2 == 0)) {
+    param_1[1] = camry_host_addr(f33_dcm_response_node);
+  }
+  return piVar3;
 }
 
 

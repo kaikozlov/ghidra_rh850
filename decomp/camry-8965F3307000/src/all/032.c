@@ -440,6 +440,24 @@ LAB_000c85d2:
 
 
 
+void FUN_000c8642(void)
+
+{
+  DAT_febec4ac = camry_host_addr(((undefined *)camry_host_ptr(0xb1248u)));
+  DAT_febec4b4 = 0;
+  DAT_febec4b6 = 0;
+  DAT_febec4c0 = 0;
+  DAT_febec4a4 = 0;
+  DAT_febec4a8 = 0;
+  DAT_febec4b8 = 0;
+  DAT_febec4ba = 0;
+  DAT_febec4bc = 0;
+  DAT_febec4b0 = camry_host_addr(((undefined *)camry_host_ptr(0xb121cu)));
+  return;
+}
+
+
+
 void FUN_000c873e(void)
 
 {

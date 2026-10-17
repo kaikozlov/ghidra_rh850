@@ -52,6 +52,39 @@ void FUN_0004c000(void)
 
 
 
+/* WARNING: Removing unreachable block (ram,0x0004c12c) */
+
+void FUN_0004c0e8(void)
+
+{
+  undefined *puVar1;
+  
+  if (((DAT_febee8cc & 0xff00) == 0x400) &&
+     (DAT_febe812e = (undefined1)DAT_febe6764, (DAT_febe6764 & 0x1ff) == 0)) {
+    puVar1 = ((void *)camry_host_ptr((uint32_t)(DAT_febe64ec)));
+    if ((int)(DAT_febe64ec + -0x8a99) < 0 ==
+        ((int)DAT_febe64ec < 0 && -1 < (int)(DAT_febe64ec + -0x8a99))) {
+      puVar1 = ((undefined *)camry_host_ptr(0x8a99u));
+    }
+    if ((int)camry_host_addr((((undefined *)camry_host_ptr(0x8abcu)) + (int)puVar1)) < 0 !=
+        (-1 < (int)camry_host_addr(puVar1) && (int)camry_host_addr((((undefined *)camry_host_ptr(0x8abcu)) + (int)puVar1)) < 0)) {
+      puVar1 = ((undefined *)camry_host_ptr((uint32_t)(0xffff7544)));
+    }
+    DAT_febe8162 = (undefined2)(((int)camry_host_addr(puVar1) * 0x7627) / 0x100000);
+  }
+  else {
+    DAT_febe812e = 1;
+    DAT_febe8162 = 0;
+  }
+  DAT_febe80f5 = 0;
+  DAT_febe80fd = 0;
+  DAT_febe80fe = 0;
+  DAT_febe80ff = 0;
+  return;
+}
+
+
+
 void FUN_0004c142(void)
 
 {
@@ -1627,6 +1660,41 @@ undefined1 FUN_0004d4f2(int param_1)
 
 
 
+/* Operation0 passes request byte count, request pointer, response+1 and selected-index pointer
+   to34DD4. Retain message81C8 and BA10/BA00 owner, then return4D4F2 status inR10. Nonzero operation
+   follows notification branch. Not void. */
+
+uchar f33_begin_proprietary_operation
+                (uchar operation,F33DiagProprietaryMessage *message,uchar *selected_index)
+
+{
+  undefined2 uVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  int iVar4;
+  
+  puVar2 = 0xfebeb800u;
+  if (operation == '\0') {
+    DAT_febe81c8 = camry_host_addr(message);
+    iVar4 = f33_dispatch_ba_configured_start
+                      ((uchar)message->request_length, ((uchar *)camry_host_ptr((uint32_t)(message->request))), ((uchar *)camry_host_ptr((uint32_t)(message->response + 1))), 
+                       selected_index);
+    uVar1 = 0xba10;
+    if (iVar4 != -1) {
+      uVar1 = 0xba00;
+    }
+    (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x364e)))) = uVar1;
+  }
+  else {
+    iVar4 = 0;
+    f33_dcm_complete_proprietary_message(message);
+  }
+  uVar3 = FUN_0004d4f2(iVar4);
+  return uVar3;
+}
+
+
+
 /* Invoke fixed finish callback34E66(index,length), update BA10/BA00 owner, and return
    translated4D4F2 status inR10. Both second argument and result are consumed by8E2DE; not a void
    one-argument notifier. */
@@ -1967,6 +2035,30 @@ undefined4 f33_rdbi_0102_callback(int param_1)
   FUN_0006a574(uStack_e, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   FUN_0006a55c(uStack_c, ((undefined1 *)camry_host_ptr((uint32_t)(param_1 + 2))));
   (*((undefined1 *)camry_host_ptr((uint32_t)(param_1 + 6)))) = uStack_f;
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_0103_callback(undefined1 *param_1)
+
+{
+  undefined1 *puVar1;
+  undefined1 uStack_d;
+  
+  puVar1 = ((void *)camry_host_ptr((uint32_t)(DAT_febee910)));
+  if (DAT_febee813 == 'Z') {
+    uStack_d = DAT_febee814;
+    FUN_0007016e(DAT_febee814,2,&uStack_d);
+    if (puVar1 < ((undefined *)camry_host_ptr(0xf4240u))) goto LAB_0004d926;
+  }
+  else {
+    uStack_d = 0;
+  }
+  puVar1 = (undefined1 *)0x0;
+LAB_0004d926:
+  FUN_0006a55c(camry_host_addr(puVar1), param_1);
+  *param_1 = uStack_d;
   return 0;
 }
 

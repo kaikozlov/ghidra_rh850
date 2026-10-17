@@ -557,6 +557,16 @@ undefined4 f33_return_const_0_745c4(void)
 
 
 
+void FUN_000745c8(void)
+
+{
+  f33_nvm_read_buffer_override = 0;
+  f33_nvm_write_buffer_override = 0;
+  return;
+}
+
+
+
 /* WARNING: This is an inlined function */
 /* Clear byteFEBF6B14; onlyr11 is clobbered. Preserve r6/r7 through the real p-code so the override
    setters retain their inputs. Clear byteFEBF6B14. Raw ten-byte body clobbers onlyr11 and

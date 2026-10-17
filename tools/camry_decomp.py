@@ -1483,6 +1483,7 @@ def _rewrite_body(code: str) -> str:
     code = _rewrite_function_values(code)
     code = _rewrite_signed_byte_compares(code)
     code = _rewrite_struct_fields(code)
+    code = _rewrite_pointer_assignments(code)
     code = _rewrite_indirect_calls(code)
     return code
 
@@ -2150,6 +2151,100 @@ def _null_pointer(expr: str) -> bool:
 
 def _host_pointer(access: str, pointed: str) -> str:
     return f"(({pointed} *)camry_host_ptr((uint32_t)({access})))"
+
+
+def _assignment_sites(code: str) -> list[int]:
+    spans = _comment_spans(code)
+    sites: list[int] = []
+    depth = 0
+    index = 0
+    while index < len(code):
+        if code.startswith("/*", index):
+            end = code.find("*/", index + 2)
+            index = len(code) if end < 0 else end + 2
+            continue
+        if code.startswith("//", index):
+            end = code.find("\n", index)
+            index = len(code) if end < 0 else end + 1
+            continue
+        char = code[index]
+        if char == "(":
+            depth += 1
+        elif char == ")":
+            depth -= 1
+        elif (
+            depth == 0
+            and char == "="
+            and not _span_contains(spans, index)
+            and (index == 0 or code[index - 1] not in "=!<>+-*/%&|^")
+            and (index + 1 >= len(code) or code[index + 1] != "=")
+        ):
+            sites.append(index)
+        index += 1
+    return sites
+
+
+def _scan_side(code: str, start: int, step: int, stops: str) -> int:
+    depth = 0
+    index = start
+    while 0 <= index < len(code):
+        char = code[index]
+        if step < 0 and char in ")]}":
+            depth += 1
+        elif step < 0 and char in "([{":
+            if depth == 0:
+                return index + 1
+            depth -= 1
+        elif step > 0 and char == "(":
+            depth += 1
+        elif step > 0 and char == ")":
+            if depth == 0:
+                return index
+            depth -= 1
+        elif depth == 0 and char in stops:
+            return index + (1 if step < 0 else 0)
+        index += step
+    return 0 if step < 0 else len(code)
+
+
+def _rewrite_pointer_assignments(code: str) -> str:
+    """Store a firmware address in a pointer, and a pointer into an integer."""
+    brace = _opening_brace(code)
+    if brace < 0:
+        return code
+    signature = _c_signature(code)
+    kind = _kind_context(signature, code)
+    body = code[brace:]
+    replacements: list[tuple[int, int, str]] = []
+    for site in _assignment_sites(body):
+        lhs_at = _scan_side(body, site - 1, -1, ",;{}")
+        rhs_at = _scan_side(body, site + 1, 1, ",;")
+        lhs = body[lhs_at:site].strip()
+        rhs = body[site + 1:rhs_at].strip()
+        if not lhs or not rhs or replacements and lhs_at < replacements[-1][1]:
+            continue
+        lhs_kind = kind(lhs)
+        rhs_kind = kind(rhs)
+        if lhs_kind == "pointer" and rhs_kind == "integer":
+            replacements.append((
+                site + 1,
+                rhs_at,
+                f" ((void *)camry_host_ptr((uint32_t)({rhs})))",
+            ))
+            continue
+        if lhs_kind == "integer" and rhs_kind == "pointer":
+            stored = "0" if _null_pointer(rhs) else f"camry_host_addr({rhs})"
+            replacements.append((site + 1, rhs_at, f" {stored}"))
+    if not replacements:
+        return code
+    pieces: list[str] = []
+    cursor = 0
+    for start, end, text in replacements:
+        pieces.append(body[cursor:start])
+        pieces.append(text)
+        cursor = end
+    pieces.append(body[cursor:])
+    return code[:brace] + "".join(pieces)
 
 
 def _rewrite_struct_fields(code: str) -> str:

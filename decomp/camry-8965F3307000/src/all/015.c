@@ -2941,6 +2941,19 @@ void f33_return_only_stub_56d78(void)
 
 
 
+void FUN_00056d7a(void)
+
+{
+  DAT_febe8ad0 = 2;
+  DAT_febe8ad4 = 0x20000;
+  DAT_febe8ad8 = camry_host_addr(((undefined *)camry_host_ptr(0x20002u)));
+  DAT_febe8adc = camry_host_addr(((undefined *)camry_host_ptr(0x20002u)));
+  DAT_febe8ae0 = camry_host_addr(((undefined *)camry_host_ptr(0x20002u)));
+  return;
+}
+
+
+
 void FUN_00056d92(uint param_1)
 
 {

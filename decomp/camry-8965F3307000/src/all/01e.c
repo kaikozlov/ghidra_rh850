@@ -437,6 +437,82 @@ LAB_00078542:
 
 
 
+int FUN_00078566(int param_1,int param_2,uint param_3)
+
+{
+  undefined4 uVar1;
+  uint uVar2;
+  int iVar3;
+  int iVar4;
+  
+  uVar2 = f33_icus20_second_read_bit0();
+  if (uVar2 == 0) {
+    if (DAT_febf6cb0 == '\x01') {
+      if (DAT_febf6cb2 == '\x0e') {
+        iVar3 = FUN_00078d80(param_2);
+        if (iVar3 != 0) {
+          uVar1 = 4;
+          goto LAB_00078668;
+        }
+        iVar3 = FUN_00078d88(param_1,4);
+        if (iVar3 != 0) {
+          uVar1 = 2;
+          goto LAB_00078668;
+        }
+        iVar3 = FUN_00078d9e(param_1,param_3,4);
+        if (iVar3 != 0) {
+          uVar1 = 3;
+          goto LAB_00078668;
+        }
+        f33_return_only_stub_79d32();
+        FUN_00078bc6();
+        iVar4 = FUN_00078c70(0x80);
+        iVar3 = 1;
+        if (iVar4 != 0) {
+          f33_return_only_stub_79d34();
+          FUN_00078c70(0);
+          uVar1 = 8;
+          goto LAB_00078668;
+        }
+        f33_flash_set_software_enables(1);
+        for (uVar2 = 0; uVar2 < param_3 >> 2; uVar2 = uVar2 + 1) {
+          *(undefined4 *)(((undefined *)camry_host_ptr(0xfebf6c6cu)) + uVar2 * 4) = (*((undefined4 *)camry_host_ptr((uint32_t)(uVar2 * 4 + param_2))));
+        }
+        iVar3 = FUN_00078e2a(((undefined *)camry_host_ptr(0xfebf6c6cu)),param_1,4);
+        f33_return_only_stub_79d34();
+        if (iVar3 == 1) {
+          DAT_febf6c60 = param_1 + 4;
+          DAT_febf6c64 = camry_host_addr(((undefined *)camry_host_ptr(0xfebf6c70u)));
+          DAT_febf6c68 = param_3 + param_1 + -1;
+          DAT_febf6cac = 2;
+          DAT_febf6cb0 = 2;
+          DAT_febf6cb1 = 2;
+          return 0;
+        }
+        FUN_00078f7a();
+        f33_flash_set_software_enables(0);
+        FUN_00078c70(0);
+        uVar1 = 8;
+      }
+      else {
+        uVar1 = 0x83;
+      }
+    }
+    else {
+      uVar1 = 6;
+    }
+  }
+  else {
+    uVar1 = 0x82;
+  }
+  iVar3 = 1;
+LAB_00078668:
+  FUN_0007939c(0x5c,0,2,uVar1);
+  return iVar3;
+}
+
+
+
 int FUN_0007867a(uint param_1,uint param_2)
 
 {
@@ -3333,6 +3409,58 @@ void f33_cantp_deliver_single_frame(F33CanTpRxConnection *connection,F33CanTpFra
       }
     }
     FUN_0007a79e(upper_id,uVar2);
+  }
+  return;
+}
+
+
+
+/* Retain remaining total minus first-frame payload, expected SN1, DLC and capacity-poll state69.
+   Start upper receive before copying the first6 configured bytes; upper return3 records
+   FC-overflowD2, other refusal resets. */
+
+void f33_cantp_begin_first_frame_receive
+               (F33CanTpRxConnection *connection,F33CanTpFrameInfo *frame,F33CanTpRxState *state)
+
+{
+  byte *pbVar1;
+  byte bVar2;
+  ushort uVar3;
+  uint uVar4;
+  uint uVar5;
+  uint local_20;
+  F33CanTpFrameInfo FStack_1c;
+  
+  bVar2 = (byte)frame->length;
+  state->state = 'i';
+  uVar3 = connection->buffer_wait_timeout_raw;
+  state->first_frame_dlc = bVar2;
+  state->timeout_ticks = uVar3 - 3;
+  uVar3 = connection->receive_id;
+  state->wait_frame_count = 0;
+  state->receive_id = uVar3;
+  state->expected_sequence_number = '\x01';
+  state->flow_status_marker = 0xe1;
+  uVar3 = connection->upper_receive_id;
+  pbVar1 = ((void *)camry_host_ptr((uint32_t)(frame->data + (byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x22b98u + (uint32_t)(connection->addressing_format) * 1u)))))));
+  uVar5 = (uint)bVar2 - ((byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x22b98u + (uint32_t)(connection->addressing_format) * 1u)))) + 2) & 0xff;
+  FStack_1c.data = camry_host_addr(pbVar1 + 2);
+  local_20 = 0;
+  uVar4 = (uint)pbVar1[1] | (*pbVar1 & 0xf) << 8;
+  state->remaining_length = uVar4 - uVar5;
+  FStack_1c.length = uVar5;
+  uVar4 = f33_cantp_start_upper_receive(uVar3,&FStack_1c,(ushort)uVar4,&local_20);
+  if (uVar4 == 0) {
+    if ((local_20 < uVar5) ||
+       (uVar4 = f33_cantp_copy_upper_receive_bytes(uVar3,&FStack_1c,&local_20), uVar4 != 0)) {
+      f33_cantp_finish_receive_aggregate(connection,state,'\x01');
+    }
+  }
+  else if (uVar4 == 3) {
+    state->flow_status_marker = 0xd2;
+  }
+  else {
+    f33_cantp_reset_receive_owner(state);
   }
   return;
 }

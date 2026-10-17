@@ -2431,6 +2431,65 @@ uint f33_nvm_append_operation(ushort queue,ushort index,F33NvmOperation *operati
 
 
 
+/* Select free pool0/1 and queue2/3+key. Pop before checking free marker and appending destination;
+   failures after pop do NOT roll back. Only successful append decrements free/increments used.
+   Empty pool with count0 sets service3 state2; other inconsistencies call72130. Return0/1. No local
+   logical bound or payload dereference. Select pool and destination queue, pop before marker/append
+   validation. Post-pop rejection does not roll back free head or adjust counts. Counts change only
+   on success. Empty with free count0 sets service3 state2; inconsistencies publish fault/abort. No
+   local handle bound or pointee access. */
+
+uint f33_nvm_enqueue_pooled_operation(F33NvmOperation *operation)
+
+{
+  ushort uVar1;
+  uint uVar2;
+  uint offset;
+  uint base;
+  ushort *puVar3;
+  ushort *puVar4;
+  ushort uStack_22;
+  
+  uVar1 = operation->logical_handle;
+  uStack_22 = 0xffff;
+  uVar2 = f33_nvm_uses_reserved_queue(uVar1,operation->operation);
+  if (uVar2 != 1) {
+    base = 3;
+    offset = f33_nvm_queue_key(uVar1);
+    puVar4 = ((void *)camry_host_ptr((uint32_t)((0xfebf6ae6u))));
+    puVar3 = ((void *)camry_host_ptr((uint32_t)((0xfebf6aeau))));
+  }
+  else {
+    base = 2;
+    offset = 0;
+    puVar4 = ((void *)camry_host_ptr((uint32_t)((0xfebf6ae4u))));
+    puVar3 = ((void *)camry_host_ptr((uint32_t)((0xfebf6ae8u))));
+  }
+  uVar2 = f33_nvm_queue_index((uint)(uVar2 != 1),0);
+  uVar2 = f33_nvm_pop_queue_head((ushort)uVar2, camry_host_addr(&uStack_22));
+  uVar1 = uStack_22;
+  if (uVar2 == 0) {
+    if (f33_nvm_queue_slots[uStack_22].operation == 0x9da70ae7) {
+      uVar2 = f33_nvm_queue_index(base,offset);
+      uVar2 = f33_nvm_append_operation((ushort)uVar2,uVar1,operation);
+      if (uVar2 != 0) {
+        return uVar2;
+      }
+      *puVar4 = *puVar4 - 1;
+      *puVar3 = *puVar3 + 1;
+      return 0;
+    }
+  }
+  else if (*puVar4 == 0) {
+    FUN_00072108(3);
+    return 1;
+  }
+  FUN_00072130();
+  return 1;
+}
+
+
+
 undefined4 FUN_00073828(ushort *param_1,ushort param_2,ushort *param_3,undefined2 *param_4)
 
 {

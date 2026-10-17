@@ -1384,3 +1384,32 @@ void FUN_00087f22(void)
 }
 
 
+
+undefined4 FUN_00087f52(void *param_1,int param_2,undefined4 param_3,uint param_4,uint *param_5)
+
+{
+  undefined4 uVar1;
+  
+  if ((((param_1 == (void *)0x0) || (param_4 == 0)) || (param_5 == (uint *)0x0)) ||
+     (param_2 != 0x40)) {
+    uVar1 = 1;
+  }
+  else if (*param_5 < 0x30) {
+    uVar1 = 3;
+  }
+  else {
+    uVar1 = 0;
+    DAT_febf10d8 = camry_host_addr(param_5);
+    DAT_febf10e0 = ~(uint)camry_host_addr(param_5);
+    DAT_febf10e4 = ~param_4;
+    DAT_febf10f4 = camry_host_addr(((undefined *)camry_host_ptr(0xfebf10fcu)));
+    DAT_febf10f8 = camry_host_addr(((undefined *)camry_host_ptr(0xfebf113cu)));
+    DAT_febf10dc = param_4;
+    f33_memcpy_forward(((undefined *)camry_host_ptr(0xfebf10fcu)),param_1,0x10);
+    f33_memcpy_forward(((undefined *)camry_host_ptr(0xfebf110cu)),((void *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_1) + 0x10))),0x20);
+    f33_memcpy_forward(((undefined *)camry_host_ptr(0xfebf112cu)),((void *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_1) + 0x30))),0x10);
+  }
+  return uVar1;
+}
+
+
