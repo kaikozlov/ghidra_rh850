@@ -3795,6 +3795,194 @@ def _rewrite_icus(code: str) -> str:
     return code
 
 
+_GHIDRA_GP = 0xFEBF9800
+_RUNTIME_GP = 0xFEBEB800
+_GP_MEMORY = {
+    "ld8s", "ld8u", "ld16s", "ld16u", "ld32",
+    "st8", "st16", "st32", "movea",
+}
+_GP_PAIRS: dict[str, dict[int, int]] | None = None
+_DAT_TYPES: dict[int, str] | None = None
+
+
+def _dat_types() -> dict[int, str]:
+    global _DAT_TYPES
+    if _DAT_TYPES is not None:
+        return _DAT_TYPES
+    found: dict[int, str] = {}
+    header = ROOT / "src" / "all" / "common.h"
+    pattern = re.compile(
+        r"#define\s+DAT_([0-9A-Fa-f]+)\s+"
+        r"\(\*\(\(volatile\s+([A-Za-z0-9_]+)\s+\*\)camry_host_ptr\(0x[0-9A-Fa-f]+u\)\)\)"
+    )
+    if header.exists():
+        for match in pattern.finditer(header.read_text(encoding="utf-8")):
+            found[int(match.group(1), 16)] = match.group(2)
+    _DAT_TYPES = found
+    return found
+
+
+def _gp_address_map() -> dict[str, dict[int, int]]:
+    """Ghidra gp+disp addresses whose bytes actually use r4, the runtime gp."""
+    global _GP_PAIRS
+    if _GP_PAIRS is not None:
+        return _GP_PAIRS
+    from tools.camry_lift import load_image, walk_symbol
+
+    image = load_image()
+    found: dict[str, dict[int, int]] = {}
+    for row in load_symbols():
+        fn = walk_symbol(image, row)
+        if fn is None:
+            continue
+        pairs: dict[int, int] = {}
+        immediates: set[int] = set()
+        accesses: list[int] = []
+        holds_gp = {4}
+        for inst in fn.insts:
+            parsed = _stmt_parts(inst.stmt) if inst.stmt else None
+            if parsed is None:
+                continue
+            name, args = parsed
+            for arg in args:
+                if isinstance(arg, int) and arg > 0xFFFF:
+                    immediates.add(arg & 0xFFFFFFFF)
+            if name == "mov" and len(args) >= 2 and isinstance(args[0], int):
+                if args[1] in holds_gp:
+                    holds_gp.add(args[0])
+                else:
+                    holds_gp.discard(args[0])
+                continue
+            if (
+                name in _GP_MEMORY
+                and len(args) >= 3
+                and args[1] in holds_gp
+                and isinstance(args[2], int)
+            ):
+                accesses.append(args[2])
+            elif (
+                name in {"set1", "not1", "clr1", "tst1"}
+                and len(args) >= 2
+                and args[0] in holds_gp
+                and isinstance(args[1], int)
+            ):
+                accesses.append(args[1])
+            if (
+                args
+                and isinstance(args[0], int)
+                and name not in {"st8", "st16", "st32", "cmp", "cmpi"}
+            ):
+                holds_gp.discard(args[0])
+        for disp in accesses:
+            ghidra = (_GHIDRA_GP + disp) & 0xFFFFFFFF
+            runtime = (_RUNTIME_GP + disp) & 0xFFFFFFFF
+            if ghidra not in immediates:
+                pairs[ghidra] = runtime
+        # The decompiler materializes gp as this immediate even when the bytes
+        # only copy r4 into another register before the access.
+        if _GHIDRA_GP not in immediates:
+            pairs[_GHIDRA_GP] = _RUNTIME_GP
+        if pairs:
+            found[row["name"]] = pairs
+    _GP_PAIRS = found
+    return found
+
+
+def _apply_gp_pairs(code: str, pairs: dict[int, int]) -> str:
+    types = _dat_types()
+    for ghidra in sorted(pairs, key=lambda addr: -len(f"{addr:x}")):
+        runtime = pairs[ghidra]
+        if ghidra == runtime:
+            continue
+        hex_g = f"{ghidra:x}"
+        code = re.sub(
+            rf"(?i)0x0*{hex_g}(?![0-9A-Fa-f])",
+            f"0x{runtime:x}",
+            code,
+        )
+        ctype = types.get(ghidra)
+        if ctype is None:
+            continue
+        expr = f"(*((volatile {ctype} *)camry_host_ptr(0x{runtime:x}u)))"
+        code = re.sub(rf"\bDAT_{hex_g}\b", expr, code)
+    return code
+
+
+def _rewrite_runtime_gp(code: str) -> str:
+    """Use the runtime gp for an address the bytes form as r4+disp.
+
+    Ghidra folds that access against gp 0xfebf9800. The firmware's gp is
+    0xfebeb800, so the folded immediate is 0xE000 high.
+    """
+    signature = _c_signature(code)
+    try:
+        name = _signature_name(signature)
+    except (AssertionError, ValueError):
+        return code
+    pairs = _gp_address_map().get(name)
+    if not pairs:
+        return code
+    return _apply_gp_pairs(code, pairs)
+
+
+def apply_runtime_gp() -> tuple[int, int]:
+    """Retarget converted bodies. Equivalent functions keep the text they passed with."""
+    blocked: set[str] = set()
+    allowed: set[str] = set()
+    by_name: dict[str, set[str]] = {}
+    for row in load_matched():
+        by_name.setdefault(row["name"], set()).add(row["status"])
+    for name, statuses in by_name.items():
+        if statuses & {"equivalent", "byte-matched"}:
+            blocked.add(name)
+        elif "converted" in statuses:
+            allowed.add(name)
+    pairs = _gp_address_map()
+    functions = 0
+    files = 0
+    for path in sorted((ROOT / "src" / "all").glob("*.c")):
+        lines = path.read_text(encoding="utf-8").splitlines()
+        out: list[str] = []
+        index = 0
+        changed = False
+        while index < len(lines):
+            line = lines[index]
+            if (
+                not line.strip()
+                or line.startswith("#")
+                or line.startswith((" ", "\t", "/*", "//"))
+            ):
+                out.append(line)
+                index += 1
+                continue
+            start = index
+            while index < len(lines) and "{" not in lines[index]:
+                index += 1
+            if index >= len(lines):
+                out.extend(lines[start:])
+                break
+            depth = 0
+            while index < len(lines):
+                depth += lines[index].count("{") - lines[index].count("}")
+                index += 1
+                if depth <= 0:
+                    break
+            chunk = "\n".join(lines[start:index])
+            match = re.search(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\(", _c_signature(chunk))
+            name = match.group(1) if match else ""
+            if name in allowed and name not in blocked and pairs.get(name):
+                updated = _apply_gp_pairs(chunk, pairs[name])
+                if updated != chunk:
+                    functions += 1
+                    changed = True
+                    chunk = updated
+            out.extend(chunk.split("\n"))
+        if changed:
+            path.write_text("\n".join(out) + "\n", encoding="utf-8")
+            files += 1
+    return functions, files
+
+
 def _rewrite_body(code: str) -> str:
     code = _strip_calling_convention(code)
     code = _widen_signature(code)
@@ -3829,6 +4017,7 @@ def _rewrite_body(code: str) -> str:
     code = _rewrite_pointer_compares(code, pointers)
     code = _rewrite_wide_call_constants(code)
     code = _rewrite_icus(code)
+    code = _rewrite_runtime_gp(code)
     return code
 
 
