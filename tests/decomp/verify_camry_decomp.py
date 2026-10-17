@@ -74,6 +74,7 @@ VALUE_RETURN = {
     "f33_restore_learned_quad",
     "f33_nvm_pop_queue_head",
     "f33_nvm_enqueue_read",
+    "f33_nvm_enqueue_write",
 }
 
 DCRA1_BASE = 0xFFD51000
@@ -281,6 +282,8 @@ def bind(library: ctypes.CDLL) -> None:
     library.f33_nvm_pop_queue_head.restype = u32
     library.f33_nvm_enqueue_read.argtypes = [u32, u32]
     library.f33_nvm_enqueue_read.restype = u32
+    library.f33_nvm_enqueue_write.argtypes = [u32, u32]
+    library.f33_nvm_enqueue_write.restype = u32
     library.f33_force_unconfirmed_terminal_monitor_healthy.argtypes = [u32, u32, u32]
     library.f33_force_unconfirmed_terminal_monitor_healthy.restype = u32
     library.f33_nvm_read_buffer.argtypes = [u32]
@@ -588,6 +591,8 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
         return int(library.f33_nvm_pop_queue_head(r6, r7)) & 0xFFFFFFFF
     if name == "f33_nvm_enqueue_read":
         return int(library.f33_nvm_enqueue_read(r6, r7)) & 0xFFFFFFFF
+    if name == "f33_nvm_enqueue_write":
+        return int(library.f33_nvm_enqueue_write(r6, r7)) & 0xFFFFFFFF
     if name == "f33_nvm_set_family0_record":
         return int(library.f33_nvm_set_family0_record(r6, r7)) & 0xFFFFFFFF
     if name == "f33_dcra1_crc_raw_words":

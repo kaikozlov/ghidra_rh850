@@ -1671,6 +1671,32 @@ uint32_t f33_nvm_enqueue_read(uint32_t logical, uint32_t destination) {
     return status;
 }
 
+static uint32_t f33_nvm_check_write_inhibit(uint32_t logical) {
+    uint32_t handle = logical & 0xffffu;
+    camry_write8(0xfebf6100u, 1u);
+    if (camry_read8(0xfebf6000u + (handle << 1) + 1u) != 1u)
+        return 0u;
+    f33_nvm_mark_queue_service(6u);
+    return 1u;
+}
+
+static uint32_t f33_nvm_check_write_request(uint32_t logical, uint32_t source) {
+    if (f33_nvm_check_logical_handle(logical, 7u, 0u) != 0u)
+        return 1u;
+    if (f33_nvm_check_not_pending(logical, 7u) != 0u)
+        return 1u;
+    if (f33_nvm_check_buffer_argument(logical, source, 7u) != 0u)
+        return 1u;
+    return f33_nvm_check_write_inhibit(logical);
+}
+
+uint32_t f33_nvm_enqueue_write(uint32_t logical, uint32_t source) {
+    uint32_t handle = logical & 0xffffu;
+    if (f33_nvm_check_write_request(handle, source) != 0u)
+        return 1u;
+    return f33_nvm_queue_operation(0x22aa8a36u, handle, 0u, source);
+}
+
 static uint32_t f33_nvm_get_family0_completion(uint32_t object) {
     uint32_t index = object & 0xffffu;
     uint32_t count = camry_read16((3u << 16) - 21136u);

@@ -83,3 +83,4 @@
 {"addr": "0x73260", "name": "f33_nvm_reset_queues_notifying", "status": "equivalent"}
 {"addr": "0x7358c", "name": "f33_nvm_pop_queue_head", "status": "equivalent"}
 {"addr": "0x73fe8", "name": "f33_nvm_enqueue_read", "status": "equivalent"}
+{"addr": "0x74014", "name": "f33_nvm_enqueue_write", "status": "equivalent"}
