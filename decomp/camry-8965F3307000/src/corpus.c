@@ -2,7 +2,14 @@
 #include "camry.h"
 #include "ghidra_types.h"
 
+#define f33_boot_flash_block_boundaries ((volatile uint32_t *)camry_host_ptr(0x86ecu))
+#define f33_boot_security_challenge ((volatile uint8_t *)camry_host_ptr(0xfebf2b24u))
+#define f33_boot_security_handshake_state (*((volatile uint8_t *)camry_host_ptr(0xfebf2b55u)))
+#define f33_boot_security_state (*((volatile uint8_t *)camry_host_ptr(0xfebf2b0fu)))
 #define f33_current_source_coherence_observations (*((volatile uint8_t *)camry_host_ptr(0xfebeb191u)))
+#define f33_estimator_tracking_band_scale (*((volatile int32_t *)camry_host_ptr(0xaf760u)))
+#define f33_estimator_tracking_step_scale (*((volatile int32_t *)camry_host_ptr(0xaf764u)))
+#define f33_estimator_tracking_warmup (*((volatile uint16_t *)camry_host_ptr(0xaf772u)))
 #define f33_internal_source_admission_state (*((volatile uint8_t *)camry_host_ptr(0xfebe7f68u)))
 #define DAT_0002bb04 (*((volatile uint16_t *)camry_host_ptr(0x2bb04u)))
 #define DAT_0002bb06 (*((volatile uint16_t *)camry_host_ptr(0x2bb06u)))
@@ -29,6 +36,7 @@
 #define DAT_000aefba (*((volatile uint16_t *)camry_host_ptr(0xaefbau)))
 #define DAT_000aefbc (*((volatile uint16_t *)camry_host_ptr(0xaefbcu)))
 #define DAT_000aefbe (*((volatile uint16_t *)camry_host_ptr(0xaefbeu)))
+#define DAT_000af770 (*((volatile uint16_t *)camry_host_ptr(0xaf770u)))
 #define DAT_febe66ac (*((volatile uint8_t *)camry_host_ptr(0xfebe66acu)))
 #define DAT_febe66ae (*((volatile uint16_t *)camry_host_ptr(0xfebe66aeu)))
 #define DAT_febe66b0 (*((volatile uint16_t *)camry_host_ptr(0xfebe66b0u)))
@@ -59,6 +67,10 @@
 #define DAT_febe7f8c (*((volatile uint16_t *)camry_host_ptr(0xfebe7f8cu)))
 #define DAT_febe7f8e (*((volatile uint16_t *)camry_host_ptr(0xfebe7f8eu)))
 #define DAT_febe7f90 (*((volatile uint16_t *)camry_host_ptr(0xfebe7f90u)))
+#define DAT_febead18 (*((volatile uint8_t *)camry_host_ptr(0xfebead18u)))
+#define DAT_febeadf4 (*((volatile uint16_t *)camry_host_ptr(0xfebeadf4u)))
+#define DAT_febeadf6 (*((volatile uint16_t *)camry_host_ptr(0xfebeadf6u)))
+#define DAT_febeae38 (*((volatile uint16_t *)camry_host_ptr(0xfebeae38u)))
 #define DAT_febeb084 (*((volatile uint16_t *)camry_host_ptr(0xfebeb084u)))
 #define DAT_febeb1a8 (*((volatile uint8_t *)camry_host_ptr(0xfebeb1a8u)))
 #define DAT_febeb1a9 (*((volatile uint8_t *)camry_host_ptr(0xfebeb1a9u)))
@@ -72,10 +84,33 @@
 #define DAT_febeb1ba (*((volatile uint16_t *)camry_host_ptr(0xfebeb1bau)))
 #define DAT_febeb1bd (*((volatile uint8_t *)camry_host_ptr(0xfebeb1bdu)))
 #define DAT_febebe9c (*((volatile uint8_t *)camry_host_ptr(0xfebebe9cu)))
+#define DAT_febebf78 (*((volatile uint32_t *)camry_host_ptr(0xfebebf78u)))
+#define DAT_febebfc5 (*((volatile uint8_t *)camry_host_ptr(0xfebebfc5u)))
+#define DAT_febebfd4 (*((volatile uint32_t *)camry_host_ptr(0xfebebfd4u)))
+#define DAT_febebfee (*((volatile uint16_t *)camry_host_ptr(0xfebebfeeu)))
+#define DAT_febec042 (*((volatile uint8_t *)camry_host_ptr(0xfebec042u)))
+#define DAT_febec044 (*((volatile uint8_t *)camry_host_ptr(0xfebec044u)))
+#define DAT_febec045 (*((volatile uint8_t *)camry_host_ptr(0xfebec045u)))
+#define DAT_febec048 (*((volatile uint32_t *)camry_host_ptr(0xfebec048u)))
+#define DAT_febec04c (*((volatile uint32_t *)camry_host_ptr(0xfebec04cu)))
+#define DAT_febec064 (*((volatile uint16_t *)camry_host_ptr(0xfebec064u)))
+#define DAT_febec074 (*((volatile uint32_t *)camry_host_ptr(0xfebec074u)))
+#define DAT_febec078 (*((volatile uint32_t *)camry_host_ptr(0xfebec078u)))
+#define DAT_febec080 (*((volatile uint32_t *)camry_host_ptr(0xfebec080u)))
+#define DAT_febec08e (*((volatile uint8_t *)camry_host_ptr(0xfebec08eu)))
+#define DAT_febec0b4 (*((volatile uint16_t *)camry_host_ptr(0xfebec0b4u)))
 #define DAT_febef04c (*((volatile uint8_t *)camry_host_ptr(0xfebef04cu)))
 #define DAT_febef04e (*((volatile uint8_t *)camry_host_ptr(0xfebef04eu)))
 #define DAT_febef058 (*((volatile uint8_t *)camry_host_ptr(0xfebef058u)))
+#define DAT_febf2998 (*((volatile uint16_t *)camry_host_ptr(0xfebf2998u)))
+#define DAT_febf299a (*((volatile uint16_t *)camry_host_ptr(0xfebf299au)))
+#define DAT_febf2aa1 (*((volatile uint8_t *)camry_host_ptr(0xfebf2aa1u)))
 
+uint f33_boot_find_flash_block_start(uint address,uint *block_start);
+uint f33_boot_find_flash_block_end(uint address,uint *block_end);
+uint f33_boot_select_operation_blocks(uint address,uint length,uint *first_block,uint *last_block);
+uint f33_boot_submit_erase_program_stream(uint address,uint length);
+void f33_boot_security_invalidate_handshake(void);
 void f33_fill_constant_block_49ec6(void);
 void f33_fill_constant_block_49eda(void);
 void f33_fill_constant_block_49eec(void);
@@ -97,6 +132,194 @@ uint f33_classify_received_status_delay(void);
 void f33_update_second_health_status_window(uint classification);
 void f33_publish_current_and_held_health_windows(void);
 void f33_update_health_status_delay_summaries(void);
+void f33_filter_established_estimator_difference (int difference,int *filtered_difference,int *new_accumulator);
+void f33_advance_estimator_source_count(int candidate,int previous);
+void f33_track_established_estimator_difference(void);
+uint FUN_000d0896(ushort *param_1,uint param_2);
+int f33_abs_s32_wrapping(int value);
+
+
+/* Search38 half-open intervals in39-word86EC boundary array. Write containing lower bound
+   andreturn0; otherwisewriteF8000 andreturn1. */
+
+uint f33_boot_find_flash_block_start(uint address,uint *block_start)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  uint uVar4;
+  uint uVar5;
+  
+  uVar5 = 0xf8000;
+  uVar4 = 1;
+  iVar3 = 0;
+  while( true ) {
+    if ((f33_boot_flash_block_boundaries[iVar3] <= address) &&
+       (address < f33_boot_flash_block_boundaries[iVar3 + 1])) break;
+    iVar2 = iVar3 + 1;
+    iVar1 = iVar3 + -0x25;
+    iVar3 = iVar2;
+    if (iVar1 < 0 == (iVar2 < 0 && -1 < iVar1)) {
+LAB_000034a2:
+      *block_start = uVar5;
+      return uVar4;
+    }
+  }
+  uVar4 = 0;
+  uVar5 = f33_boot_flash_block_boundaries[iVar3];
+  goto LAB_000034a2;
+}
+
+
+
+/* Search same38 half-open intervals. Write containing upper bound andreturn0; otherwisewrite100000
+   andreturn1. */
+
+uint f33_boot_find_flash_block_end(uint address,uint *block_end)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  uint uVar4;
+  uint uVar5;
+  
+  uVar5 = 0x100000;
+  uVar4 = 1;
+  iVar3 = 0;
+  while ((address < f33_boot_flash_block_boundaries[iVar3] ||
+         (f33_boot_flash_block_boundaries[iVar3 + 1] <= address))) {
+    iVar2 = iVar3 + 1;
+    iVar1 = iVar3 + -0x25;
+    iVar3 = iVar2;
+    if (iVar1 < 0 == (iVar2 < 0 && -1 < iVar1)) {
+LAB_000034d4:
+      *block_end = uVar5;
+      return uVar4;
+    }
+  }
+  uVar4 = 0;
+  uVar5 = f33_boot_flash_block_boundaries[iVar3 + 1];
+  goto LAB_000034d4;
+}
+
+
+
+/* Rejectlength0 orfailedfirst3474 lookup. Lookup modulo32lastaddress, ignoresecondlookupreturn,
+   andreturn(last_block<first_block). An out-of-range lastaddress can use3474 fallbackF8000; this is
+   not complete region validation. */
+
+uint f33_boot_select_operation_blocks(uint address,uint length,uint *first_block,uint *last_block)
+
+{
+  uint uVar1;
+  uint uVar2;
+  
+  uVar2 = 1;
+  if (length != 0) {
+    uVar1 = f33_boot_find_flash_block_start(address,first_block);
+    if (uVar1 == 0) {
+      f33_boot_find_flash_block_start((length + address) - 1,last_block);
+      uVar2 = (uint)(*last_block < *first_block);
+    }
+  }
+  return uVar2;
+}
+
+
+
+/* WARNING: Inlined function: f33_boot_prepare_aligned_input_ring */
+/* Rejectbusy2AA1.40A2prepares512-aligned ringbefore40E0rangeadmission. Onaccept
+   setmode0,currentblock/nextboundary,writecursor,paddedremaining,result1,busy1;
+   clearfinal/cancel/pause. Retain prior2994counter-block selection.0accepted/1rejected;
+   notflashcompletion. Native combined admission verifies retained original range, aligned prefix
+   and pending state; no flash completion. */
+
+uint f33_boot_submit_erase_program_stream(uint address,uint length)
+
+{
+  bool bVar1;
+  int iVar2;
+  undefined *puVar3;
+  uint uVar4;
+  uint uVar5;
+  uint local_24;
+  uint uStack_20;
+  uint uStack_1c;
+  uint uStack_18;
+  int iStack_14;
+  
+  puVar3 = ((void *)camry_host_ptr(0xfebf9800u));
+  uVar5 = 1;
+  if (DAT_febf2aa1 == '\0') {
+    if (length == 0) {
+      bVar1 = true;
+    }
+    else {
+      uStack_18 = address & 0xfffffe00;
+      uVar4 = address & 0x1ff;
+      iStack_14 = uVar4 + length;
+      for (iVar2 = 0; (int)(iVar2 - uVar4) < 0 != (iVar2 < 0 && -1 < (int)(iVar2 - uVar4));
+          iVar2 = iVar2 + 1) {
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebf1800u + (uint32_t)(iVar2) * 1u)))) = 0xff;
+      }
+      DAT_febf2998 = (undefined2)uVar4;
+      bVar1 = false;
+      DAT_febf299a = 0;
+    }
+    if ((!bVar1) &&
+       (uVar4 = f33_boot_select_operation_blocks(address,length,&local_24,&uStack_20), uVar4 == 0))
+    {
+      *(uint *)(puVar3 + -0x6e74) = uStack_18;
+      *(uint *)(puVar3 + -0x6e80) = local_24;
+      *(int *)(puVar3 + -0x6e70) = iStack_14;
+      f33_boot_find_flash_block_end(local_24,&uStack_1c);
+      puVar3[-28000] = 1;
+      puVar3[-27999] = 1;
+      puVar3[-0x6e64] = 0;
+      uVar5 = 0;
+      *(uint *)(puVar3 + -0x6e78) = uStack_1c;
+      puVar3[-0x6e63] = 0;
+      puVar3[-0x6e62] = 0;
+      puVar3[-0x6e61] = 0;
+    }
+  }
+  return uVar5;
+}
+
+
+
+/* Calledbyprioritymasked51D8sessionpublication.Ifhandshake1:securityunchanged;handshake2:clear16challengebyteswithoutwritingsecurity;otherstates(includingaccepted3):security1.Thenhandshake1.Retainsclient,responsecache,failcount,delay/history.
+   Native AES known-answer and protocol-state cases use explicit RAM. Service paths stop at674A
+   before response/timer completion; direct session invalidation cases return. No complete unlock or
+   entropy claim. */
+
+void f33_boot_security_invalidate_handshake(void)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  
+  if (f33_boot_security_handshake_state != '\x01') {
+    if (f33_boot_security_handshake_state == '\x02') {
+      iVar3 = 0;
+      do {
+        f33_boot_security_challenge[iVar3] = '\0';
+        iVar2 = iVar3 + 1;
+        iVar1 = iVar3 + -0xf;
+        iVar3 = iVar2;
+      } while (((iVar1 < 0) || (iVar2 < 0)));
+    }
+    else {
+      f33_boot_security_state = '\x01';
+    }
+  }
+  f33_boot_security_handshake_state = '\x01';
+  return;
+}
+
 
 
 /* Constant-block fill: 7 literal assignments into one contiguous cell block; shape-verified.
@@ -819,6 +1042,221 @@ LAB_000b4420:
   f33_update_second_health_status_window(classification);
   f33_publish_current_and_held_health_windows();
   return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x000c412c) */
+/* WARNING: Removing unreachable block (ram,0x000c4118) */
+/* WARNING: Removing unreachable block (ram,0x000c40a2) */
+/* WARNING: Removing unreachable block (ram,0x000c409e) */
+/* WARNING: Removing unreachable block (ram,0x000c40f8) */
+/* Clip difference around C080 by AE38/1024. StateC08E selects curveAF77E/AF792/AF7A6 atADF6;
+   gain=8192/curve, or8192 when zero. Clamp low32 error*low16(gain) to +/-8*AE38; add signed
+   increment/4 to GLOBAL C078, publish accumulator/2048 through output pointer. Arithmetic is low32,
+   not a saturating integral; third pointer is output-only. Clip around center; curve-derived low16
+   gain and bounded low32 step feed global accumulatorC078. Third pointer is output-only. Signed
+   divisions by4 and2048 remain separate. */
+
+void f33_filter_established_estimator_difference
+               (int difference,int *filtered_difference,int *new_accumulator)
+
+{
+  int iVar1;
+  int iVar2;
+  undefined *puVar3;
+  undefined1 *puVar4;
+  int iVar5;
+  uint uVar6;
+  int iVar7;
+  int iVar8;
+  
+  puVar3 = ((void *)camry_host_ptr(0xfebeb800u));
+  iVar7 = (int)(f33_estimator_tracking_band_scale * (uint)DAT_febeae38) / 0x400;
+  iVar2 = (int)(f33_estimator_tracking_step_scale * (uint)DAT_febeae38) / 0x400;
+  iVar5 = DAT_febec080 - iVar7;
+  iVar7 = iVar7 + DAT_febec080;
+  if ((difference - iVar7 < 0 !=
+       (difference < 0 != iVar7 < 0 && iVar7 < 0 == difference - iVar7 < 0) || difference == iVar7)
+     && (iVar7 = iVar5,
+        difference - iVar5 < 0 ==
+        (difference < 0 != iVar5 < 0 && iVar5 < 0 == difference - iVar5 < 0) && difference != iVar5)
+     ) {
+    iVar7 = difference;
+  }
+  if (DAT_febec08e == '\"') {
+    puVar4 = ((void *)camry_host_ptr(0xaf7a6u));
+  }
+  else if (DAT_febec08e == '\x11') {
+    puVar4 = ((void *)camry_host_ptr(0xaf792u));
+  }
+  else {
+    puVar4 = ((void *)camry_host_ptr(0xaf77eu));
+  }
+  DAT_febec048 = iVar7;
+  iVar5 = FUN_000d0896(puVar4,DAT_febeadf6);
+  uVar6 = 0x2000;
+  if (iVar5 != 0) {
+    uVar6 = 0x2000 / iVar5;
+  }
+  iVar1 = (iVar7 - *filtered_difference) * (uVar6 & 0xffff);
+  iVar7 = iVar1 - iVar2;
+  iVar8 = iVar2;
+  if (iVar7 < 0 != (iVar1 < 0 != iVar2 < 0 && iVar2 < 0 == iVar7 < 0) || iVar7 == 0) {
+    iVar8 = -iVar2;
+    iVar2 = iVar1 + iVar2;
+    if (iVar2 < 0 == (iVar1 < 0 != iVar8 < 0 && iVar8 < 0 == iVar2 < 0) && iVar2 != 0) {
+      iVar8 = iVar1;
+    }
+  }
+  *(short *)(puVar3 + 0x860) = (short)iVar5;
+  *(short *)(puVar3 + 0x862) = (short)uVar6;
+  iVar2 = *(int *)(puVar3 + 0x878) + iVar8 / 4;
+  *filtered_difference = iVar2 / 0x800;
+  *new_accumulator = iVar2;
+  *(int *)(puVar3 + 0x850) = iVar1;
+  *(int *)(puVar3 + 0x854) = iVar8;
+  return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x000c417e) */
+/* Start from C0B4, not oldBFEC. Below curve ceiling60000, increment if candidate changed or wrapped
+   abs32(candidate-C080)<AE38/1024. Otherwise retain the input count, even above the ceiling.
+   Publish BFEC and diagnostic ceilingC066. Count starts fromC0B4 rather thanBFEC. Below flat60000
+   ceiling increment for changed candidate or strict center band; ceiling gates increment rather
+   than clamping. */
+
+void f33_advance_estimator_source_count(int candidate,int previous)
+
+{
+  int iVar1;
+  undefined *puVar2;
+  uint uVar3;
+  int iVar4;
+  ushort uVar5;
+  uint uVar6;
+  
+  uVar5 = DAT_febec0b4;
+  puVar2 = ((void *)camry_host_ptr(0xfebeb800u));
+  uVar6 = (uint)DAT_febec0b4;
+  uVar3 = FUN_000d0896(((void *)camry_host_ptr(0xaf7bau)),DAT_febeadf4);
+  iVar4 = f33_abs_s32_wrapping(candidate - *(int *)(puVar2 + 0x880));
+  iVar1 = (int)(f33_estimator_tracking_band_scale * (uint)*(ushort *)(puVar2 + -0x9c8)) / 0x400;
+  if ((uVar6 < uVar3) &&
+     ((iVar4 - iVar1 < 0 != (iVar4 < 0 != iVar1 < 0 && iVar1 < 0 == iVar4 - iVar1 < 0) ||
+      (candidate != previous)))) {
+    uVar5 = uVar5 + 1;
+  }
+  *(ushort *)(puVar2 + 0x7ec) = uVar5;
+  *(short *)(puVar2 + 0x866) = (short)uVar3;
+  return;
+}
+
+
+
+/* With BFC5==0, first copyC0B4->BFEE. QualifiersC045/C044/C042=5A, AD18=11 and unsignedADF4>=3840
+   publishC074=low32(BF78-BFD4) and increment u16C064. Only count>100 runs bounded
+   filter/source-count update, then pins100. Failed qualification resets warmup but holds
+   C04C/C078/C074; BFC5!=0 instead clears filter/accumulator and warmup. Established tracking
+   publishes difference before consecutive warmup exceeds100. Qualifier interruption resets warmup
+   but holds filter/difference; BFEE refresh precedes admission. BFC5 instead clears
+   filter/accumulator. */
+
+void f33_track_established_estimator_difference(void)
+
+{
+  ushort uVar1;
+  int previous;
+  undefined *puVar2;
+  ushort uVar3;
+  int local_14;
+  int iStack_10;
+  
+  previous = DAT_febec04c;
+  uVar1 = f33_estimator_tracking_warmup;
+  puVar2 = ((void *)camry_host_ptr(0xfebeb800u));
+  if (DAT_febebfc5 == '\0') {
+    DAT_febebfee = DAT_febec0b4;
+    local_14 = DAT_febec078;
+    iStack_10 = DAT_febec04c;
+    if ((((DAT_febec045 == 'Z') && (DAT_febec044 == 'Z')) && (DAT_febec042 == 'Z')) &&
+       ((DAT_febead18 == '\x11' && (DAT_000af770 <= DAT_febeadf4)))) {
+      DAT_febec074 = DAT_febebf78 - DAT_febebfd4;
+      uVar3 = DAT_febec064 + 1U;
+      if (f33_estimator_tracking_warmup < (ushort)(DAT_febec064 + 1U)) {
+        puVar2 = ((void *)camry_host_ptr(0xfebeb800u));
+        f33_filter_established_estimator_difference(DAT_febec074,&iStack_10,&local_14);
+        f33_advance_estimator_source_count(iStack_10,previous);
+        uVar3 = uVar1;
+      }
+      goto LAB_000c4236;
+    }
+  }
+  else {
+    iStack_10 = 0;
+    local_14 = 0;
+  }
+  uVar3 = 0;
+LAB_000c4236:
+  *(ushort *)(puVar2 + 0x864) = uVar3;
+  *(int *)(puVar2 + 0x84c) = iStack_10;
+  *(int *)(puVar2 + 0x878) = local_14;
+  return;
+}
+
+
+
+uint FUN_000d0896(ushort *param_1,uint param_2)
+
+{
+  ushort *puVar1;
+  int iVar2;
+  int iVar3;
+  uint uVar4;
+  
+  param_2 = param_2 & 0xffff;
+  if ((*param_1 != 0xffff) && (*param_1 < param_2)) {
+    iVar2 = 0;
+    while( true ) {
+      puVar1 = param_1 + iVar2 * 2;
+      uVar4 = (uint)*puVar1;
+      if (uVar4 == 0xffff) {
+        return (uint)puVar1[-1];
+      }
+      if (param_2 <= uVar4) break;
+      iVar2 = iVar2 + 1;
+    }
+    iVar2 = uVar4 - puVar1[-2];
+    iVar3 = (param_2 - puVar1[-2]) * ((uint)puVar1[1] - (uint)puVar1[-1]);
+    if (iVar2 != 0) {
+      if (iVar3 == -0x80000000 && iVar2 == -1) {
+        iVar3 = 0;
+      }
+      else {
+        iVar3 = iVar3 / iVar2;
+      }
+    }
+    return (uint)puVar1[-1] + iVar3 & 0xffff;
+  }
+  return (uint)param_1[1];
+}
+
+
+
+/* Return positive input unchanged, otherwise low32 negation. INT32_MIN remains negative. C
+   unary-minus spelling does not establish a nonnegative result over all32-bit inputs. Signed32
+   absolute-value negation wraps at INT32_MIN. Tracking predicates must not assume every return is
+   nonnegative. */
+
+int f33_abs_s32_wrapping(int value)
+
+{
+  if (value < 1) {
+    value = -value;
+  }
+  return value;
 }
 
 

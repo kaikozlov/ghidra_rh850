@@ -96,3 +96,6 @@
 {"addr": "0x79044", "name": "f33_faci_decode_completion_status", "status": "equivalent"}
 {"addr": "0x4a298", "name": "f33_update_internal_source_admission_lifecycle", "status": "equivalent", "form": "corpus"}
 {"addr": "0xb451a", "name": "f33_update_health_status_delay_summaries", "status": "equivalent", "form": "corpus"}
+{"addr": "0x411a", "name": "f33_boot_submit_erase_program_stream", "status": "equivalent", "form": "corpus"}
+{"addr": "0x55fc", "name": "f33_boot_security_invalidate_handshake", "status": "equivalent", "form": "corpus"}
+{"addr": "0xc419c", "name": "f33_track_established_estimator_difference", "status": "equivalent", "form": "corpus"}
