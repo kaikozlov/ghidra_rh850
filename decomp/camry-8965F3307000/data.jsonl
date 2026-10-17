@@ -24,6 +24,10 @@
 {"addr":"0xfebf6c46","name":"f33_nvm_payload_chunks_remaining","type":"u16"}
 {"addr":"0x2ad72","name":"f33_nvm_family1_object_count","type":"u16"}
 {"addr":"0x2ad70","name":"f33_nvm_family0_object_count","type":"u16"}
+{"addr":"0xfebf0338","name":"f33_nvm_family0_completion","type":"u8[32]"}
+{"addr":"0xfebf0358","name":"f33_nvm_family1_completion","type":"u8[16]"}
+{"addr":"0xfebf0368","name":"f33_nvm_family0_selected_logical_handles","type":"u16[32]"}
+{"addr":"0xfebf03a8","name":"f33_nvm_family0_sequences","type":"u32[32]"}
 {"addr":"0xfebf0708","name":"f33_nvm_family0_write_record","type":"u8[1024]"}
 {"addr":"0xfebf0c88","name":"f33_nvm_family0_read_record","type":"u8[1024]"}
 {"addr":"0xfebef468","name":"f33_learned_quad_record","type":"F33LearnedQuadRecord"}
@@ -372,6 +376,8 @@
 {"addr":"0x8ef4","name":"f33_boot_service_session_constants","type":"u8[16]"}
 {"addr":"0x30f2c","name":"f33_acquisition_group0_offsets","type":"u8[6]"}
 {"addr":"0x30f34","name":"f33_acquisition_group8_offsets","type":"u8[6]"}
+{"addr":"0xfeef81e0","name":"ADCG0_DMA_SAMPLE_RING","type":"u32[432]"}
+{"addr":"0xfeef8a20","name":"ADCG1_DMA_SAMPLE_RING","type":"u32[432]"}
 {"addr":"0x31674","name":"f33_serial_acquisition_fifo_channels","type":"u8[2]"}
 {"addr":"0x31676","name":"f33_serial_acquisition_transfer_channels","type":"u8[2]"}
 {"addr":"0x31678","name":"f33_serial_acquisition_field_encoding","type":"u8[2]"}

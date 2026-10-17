@@ -16,6 +16,7 @@ typedef uint8_t undefined1;
 typedef uint16_t undefined2;
 typedef uint32_t undefined4;
 typedef uint64_t undefined8;
+typedef uint64_t uint5;
 typedef uint16_t ushort;
 typedef uint32_t uint;
 typedef uint32_t ulong;

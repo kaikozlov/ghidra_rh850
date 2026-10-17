@@ -326,6 +326,27 @@ int FUN_00060630(uint param_1)
 
 
 
+/* Index<432: read u32[FEEF81E0+index*4], return(value&7FF8)<<1, and rewrite only retained upper16
+   (low16 cleared). Out-of-range returns0 without access. Ignores low3/bit15 and upper metadata for
+   acceptance; no freshness flag or producer-count update. Native evidence covers explicit software
+   continuations and a synthetic post-getter publication join, not descriptor acquisition or the
+   intact fast task. */
+
+uint f33_consume_acquisition_group0_entry(ushort index)
+
+{
+  uint uVar1;
+  
+  if (0x1af < index) {
+    return 0;
+  }
+  uVar1 = (*((uint *)camry_host_ptr((uint32_t)((0xfeef81e0u) + (uint)index * 4))));
+  (*((uint *)camry_host_ptr((uint32_t)((0xfeef81e0u) + (uint)index * 4)))) = uVar1 & 0xffff0000;
+  return (uVar1 & 0x7ff8) << 1;
+}
+
+
+
 int FUN_000606da(uint param_1)
 
 {
@@ -336,6 +357,27 @@ int FUN_000606da(uint param_1)
   }
   uVar1 = *(uint *)(((undefined *)camry_host_ptr(0xfeef88a0u)) + (param_1 & 0xffff) * 4);
   *(uint *)(((undefined *)camry_host_ptr(0xfeef88a0u)) + (param_1 & 0xffff) * 4) = uVar1 & 0xffff0000;
+  return (uVar1 & 0x7ff8) << 1;
+}
+
+
+
+/* Index<432: read u32[FEEF8A20+index*4], return(value&7FF8)<<1, and rewrite only retained upper16
+   (low16 cleared). Out-of-range returns0 without access. Ignores low3/bit15 and upper metadata for
+   acceptance; no freshness flag or producer-count update. Native evidence covers explicit software
+   continuations and a synthetic post-getter publication join, not descriptor acquisition or the
+   intact fast task. */
+
+uint f33_consume_acquisition_group8_entry(ushort index)
+
+{
+  uint uVar1;
+  
+  if (0x1af < index) {
+    return 0;
+  }
+  uVar1 = (*((uint *)camry_host_ptr((uint32_t)((0xfeef8a20u) + (uint)index * 4))));
+  (*((uint *)camry_host_ptr((uint32_t)((0xfeef8a20u) + (uint)index * 4)))) = uVar1 & 0xffff0000;
   return (uVar1 & 0x7ff8) << 1;
 }
 

@@ -2355,6 +2355,7 @@ _Static_assert(sizeof(RSCFD_CFSTS) == 4, "cfsts");
 #define f33_nvm_family0_active_object (*((volatile uint16_t *)camry_host_ptr(0xfebf0682u)))
 #define f33_nvm_family0_busy (*((volatile uint8_t *)camry_host_ptr(0xfebf0690u)))
 #define f33_nvm_family0_classification_latch (*((volatile uint8_t *)camry_host_ptr(0xfebf067du)))
+#define f33_nvm_family0_completion ((volatile uint8_t *)camry_host_ptr(0xfebf0338u))
 #define f33_nvm_family0_object_count (*((volatile uint16_t *)camry_host_ptr(0x2ad70u)))
 #define f33_nvm_family0_phase (*((volatile uint8_t *)camry_host_ptr(0xfebf0680u)))
 #define f33_nvm_family0_probe_offset (*((volatile uint16_t *)camry_host_ptr(0xfebf0678u)))
@@ -2364,10 +2365,13 @@ _Static_assert(sizeof(RSCFD_CFSTS) == 4, "cfsts");
 #define f33_nvm_family0_request_consumer (*((volatile uint8_t *)camry_host_ptr(0xfebf067bu)))
 #define f33_nvm_family0_request_producer (*((volatile uint8_t *)camry_host_ptr(0xfebf067au)))
 #define f33_nvm_family0_scan_cursor (*((volatile uint16_t *)camry_host_ptr(0xfebf0676u)))
+#define f33_nvm_family0_selected_logical_handles ((volatile uint16_t *)camry_host_ptr(0xfebf0368u))
+#define f33_nvm_family0_sequences ((volatile uint32_t *)camry_host_ptr(0xfebf03a8u))
 #define f33_nvm_family0_span_request (*((volatile uint8_t *)camry_host_ptr(0xfebf067eu)))
 #define f33_nvm_family0_write_record ((volatile uint8_t *)camry_host_ptr(0xfebf0708u))
 #define f33_nvm_family1_active_object (*((volatile uint16_t *)camry_host_ptr(0xfebf068cu)))
 #define f33_nvm_family1_busy (*((volatile uint8_t *)camry_host_ptr(0xfebf0691u)))
+#define f33_nvm_family1_completion ((volatile uint8_t *)camry_host_ptr(0xfebf0358u))
 #define f33_nvm_family1_copy_failure_masks ((volatile uint32_t *)camry_host_ptr(0xfebf0698u))
 #define f33_nvm_family1_object_count (*((volatile uint16_t *)camry_host_ptr(0x2ad72u)))
 #define f33_nvm_family1_phase (*((volatile uint8_t *)camry_host_ptr(0xfebf0689u)))
@@ -11600,6 +11604,8 @@ _Static_assert(sizeof(RSCFD_CFSTS) == 4, "cfsts");
 #define PTR_f33_return_only_stub_81d2e_00021e6c (*((volatile uint32_t *)camry_host_ptr(0x21e6cu)))
 #define PTR_f33_return_only_stub_81d2e_00021f24 (*((volatile uint32_t *)camry_host_ptr(0x21f24u)))
 #define PMR camry_pmr
+extern volatile uint32_t CDBCR;
+extern volatile uint32_t ICCTRL;
 #define start_pending 0x3bc4
 #define recovery_pending 0x3dc2
 #define stop_pending 0x3ec1

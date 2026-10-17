@@ -1794,6 +1794,22 @@ LAB_00071ac4:
 
 
 
+void FUN_00071c48(void)
+
+{
+  uint uVar1;
+  
+  CDBCR = 3;
+  __synchronize();
+  ICCTRL = 0x30103;
+  do {
+    uVar1 = ICCTRL;
+  } while ((uVar1 >> 8 & 1) != 0);
+  return;
+}
+
+
+
 /* Full32-bit nonzero outer count; each iteration decrements an inner counter from155 to zero. Zero
    bypasses both loops. Exact execution takes4 instructions for zero,313*n+5 for positive tested
    n=1,2,3400. These are instruction counts, not clock-cycle or wall-time calibration. No ordinary

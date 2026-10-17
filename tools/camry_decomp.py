@@ -4147,6 +4147,10 @@ def _common_header(text: str, signatures: dict[str, str]) -> str:
         )
     if re.search(r"\bPMR\b", text):
         lines.append("#define PMR camry_pmr")
+    # sr24, sel 13 and sr24, sel 4. These are system registers, like PMR.
+    for name in ("CDBCR", "ICCTRL"):
+        if re.search(rf"\b{name}\b", text):
+            lines.append(f"extern volatile uint32_t {name};")
     # Halfwords stored into f33_driver_channel_software_states. The compares
     # against the same slot use these immediates in the same order.
     for name, value in (

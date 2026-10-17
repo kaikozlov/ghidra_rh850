@@ -178,6 +178,78 @@ int FUN_0006427a(byte param_1)
 
 
 
+void FUN_00064310(void)
+
+{
+  uchar uVar1;
+  uint uVar2;
+  int iVar3;
+  byte bVar4;
+  byte bVar5;
+  
+  bVar4 = 0;
+  iVar3 = 0xff;
+  do {
+    bVar5 = 0;
+    if (iVar3 == 0) {
+      do {
+        bVar5 = bVar5 + 1;
+        if (3 < bVar5) {
+          FUN_00063ea4(0x11);
+        }
+        ECMPCMD1 = 0xa5;
+        ECMESSTC2 = 0x10000000;
+        ECMESSTC2 = 0xefffffff;
+        ECMESSTC2 = 0x10000000;
+        uVar1 = ECMPS;
+      } while (uVar1 != '\0');
+      f33_spin_wait(DAT_00030d9c);
+      return;
+    }
+    do {
+      bVar5 = bVar5 + 1;
+      if (3 < bVar5) {
+        FUN_00063ea4(0x11);
+      }
+      ECMPCMD1 = 0xa5;
+      ECMESSTC2 = 0x40000000;
+      ECMESSTC2 = 0xbfffffff;
+      ECMESSTC2 = 0x40000000;
+      uVar1 = ECMPS;
+    } while (uVar1 != '\0');
+    bVar5 = 0;
+    do {
+      bVar5 = bVar5 + 1;
+      if (3 < bVar5) {
+        FUN_00063ea4(0x11);
+      }
+      ECMMPCMD0 = 0xa5;
+      ECMMECLR = '\x01';
+      ECMMECLR = 0xfe;
+      ECMMECLR = '\x01';
+      uVar1 = ECMPS;
+    } while (uVar1 != '\0');
+    bVar5 = 0;
+    uVar2 = 0;
+    do {
+      if (SUB51(((uint5)uVar2 << 1) >> 0x20,0)) {
+        iVar3 = 0;
+        goto LAB_000643aa;
+      }
+      uVar2 = ECMMESSTR2;
+      bVar5 = bVar5 + 1;
+    } while (bVar5 < 0x1f);
+    iVar3 = 0x11;
+    if (1 < bVar4) {
+      FUN_00063ea4(0x11);
+    }
+LAB_000643aa:
+    bVar4 = bVar4 + 1;
+  } while( true );
+}
+
+
+
 void FUN_000643f6(void)
 
 {

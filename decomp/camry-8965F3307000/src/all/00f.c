@@ -1977,6 +1977,48 @@ void f33_return_only_stub_3d5e2(void)
 
 
 
+void FUN_0003d5e4(void)
+
+{
+  uint uVar1;
+  int iVar2;
+  
+  uVar1 = DAT_febe8294;
+  iVar2 = FUN_000588b6();
+  f33_report_diagnostic_healthy_observed(0xe8);
+  f33_report_diagnostic_healthy_observed(0xd2);
+  f33_report_diagnostic_healthy_observed(0xc2);
+  f33_report_diagnostic_healthy_observed(0xd1);
+  f33_report_diagnostic_healthy_observed(0xc3);
+  f33_report_diagnostic_healthy_observed(0xec);
+  if (iVar2 == 0) {
+    if ((uVar1 >> 8 & 1) != 0) {
+      f33_report_diagnostic_event_failure(0xe1,0x32);
+    }
+    if ((uVar1 >> 0x10 & 1) != 0) {
+      f33_report_diagnostic_event_failure(0xe8,0x32);
+    }
+    if ((uVar1 >> 0x14 & 1) != 0) {
+      f33_report_diagnostic_event_failure(0xd2,0x32);
+    }
+    if ((uVar1 >> 0x18 & 1) != 0) {
+      f33_report_diagnostic_event_failure(0xc5,0x32);
+    }
+    if ((uVar1 >> 4 & 1) != 0) {
+      f33_report_diagnostic_event_failure(0xc2,0x32);
+    }
+    if ((uVar1 >> 0x1c & 1) != 0) {
+      f33_report_diagnostic_event_failure(0xd1,0x32);
+    }
+    if (SUB51(((uint5)uVar1 << 1) >> 0x20,0)) {
+      f33_report_diagnostic_event_failure(0xc3,0x32);
+    }
+  }
+  return;
+}
+
+
+
 /* 8294.bit0 publishes local index0=22 and reportsEC; healthy publishes0 without ordinary pass.
    Local-link aggregate8294.bit0 publishes74A8=22 and reportsEC; healthy path publisheszero without
    ordinary pass reporter. */

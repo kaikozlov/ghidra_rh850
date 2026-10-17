@@ -97,6 +97,79 @@ uint f33_nvm_get_family1_phase(void)
 
 
 
+/* Clear family0/1 completion; set family0 objectsFFFF/counters0; clear 0690..0694, four failure
+   masks, write staging, four read stages and both1024-byte buffers0708/0C88. Then
+   call79B1E,73F0A,764E2; no lower initialization result is propagated. Native19535 instructions
+   with explicit ICU-S zero and externally completed FACI forced stop. ICU-S bit0 rejection still
+   returns after RAM initialization, preserving prior6CB0/6CB2/6CB3 and setting6CB1=1. Not acquired
+   application data. Initialize completion/bookkeeping and both1024-byte buffers then
+   actual79B1E/73F0A/764E2. Full19535-instruction normal call uses explicit ICU-S input and external
+   forced-stop completion. Lower ICUS rejection still finishes RAM initialization and preserves
+   prior admission bytes while setting6CB1=1; no propagated success status or acquired-data claim.
+    */
+
+void f33_nvm_initialize_acquisition(void)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uint uVar3;
+  short sVar4;
+  
+  f33_nvm_family0_busy = '\0';
+  f33_nvm_family1_busy = '\0';
+  uVar2 = 0;
+  do {
+    uVar3 = uVar2 + 1;
+    f33_nvm_family1_copy_failure_masks[uVar2] = 0;
+    uVar2 = uVar3;
+  } while (uVar3 < 4);
+  for (uVar2 = 0; uVar2 < f33_nvm_family0_object_count; uVar2 = uVar2 + 1 & 0xffff) {
+    f33_nvm_family0_completion[uVar2] = '\0';
+    f33_nvm_family0_selected_logical_handles[uVar2] = 0xffff;
+    f33_nvm_family0_sequences[uVar2] = 0;
+  }
+  for (uVar2 = 0; uVar2 < f33_nvm_family1_object_count; uVar2 = uVar2 + 1 & 0xffff) {
+    f33_nvm_family1_completion[uVar2] = '\0';
+  }
+  uVar2 = 0;
+  do {
+    f33_nvm_family0_write_record[uVar2] = '\0';
+    f33_nvm_family0_read_record[uVar2] = '\0';
+    uVar2 = uVar2 + 1;
+  } while (uVar2 < 0x400);
+  uVar2 = 0;
+  do {
+    uVar3 = 0;
+    do {
+      sVar4 = (short)uVar2;
+      uVar1 = uVar3 + 1;
+      f33_nvm_family1_read_stages[sVar4].raw[uVar3] = '\0';
+      f33_nvm_family1_read_stages[sVar4].xor55[uVar3] = '\0';
+      f33_nvm_family1_read_stages[sVar4].xorAA[uVar3] = '\0';
+      uVar3 = uVar1;
+    } while (uVar1 < 0x20);
+    uVar2 = uVar2 + 1;
+  } while (uVar2 < 4);
+  uVar2 = 0;
+  do {
+    f33_nvm_family1_write_stage.raw[uVar2] = '\0';
+    uVar3 = uVar2 + 1;
+    f33_nvm_family1_write_stage.xor55[uVar2] = '\0';
+    f33_nvm_family1_write_stage.xorAA[uVar2] = '\0';
+    uVar2 = uVar3;
+  } while (uVar3 < 0x20);
+  f33_nvm_initial_read_token = '\0';
+  f33_nvm_direct_operation_request = '\0';
+  f33_nvm_copy_read_retry = '\0';
+  FUN_00079b1e();
+  f33_nvm_initialize_logical_module();
+  f33_run_init_chain_764e2();
+  return;
+}
+
+
+
 /* Always call74114 first. If either family busy byte equalsA5, poll and normalize result. Retain
    both flags and direct-operation request only for result1; any other result clears both busy bytes
    and request, then performs real mode-exit cancellation/reconciliation. */
@@ -320,6 +393,22 @@ uchar FUN_00068924(void)
 
 {
   return f33_nvm_family0_busy;
+}
+
+
+
+/* Bound low16 object by registered32; return zero-extended0338 byte, orA5 without reading
+   completion RAM when out of range. Low16 object<registered32 returns zero-extended0338 byte;
+   otherwiseA5 before array access. Exact ten-instruction gate plus native full32-object acquisition
+   passes; malformed-index path is byte/disassembly evidence, not a separate native execution. */
+
+uint f33_nvm_get_family0_completion(ushort object)
+
+{
+  if ((uint)object < (uint)f33_nvm_family0_object_count) {
+    return (uint)f33_nvm_family0_completion[object];
+  }
+  return 0xa5;
 }
 
 
@@ -559,6 +648,102 @@ uint f33_nvm_handle_family0_read_result(uchar result,ushort logical_handle,uchar
     }
   }
   return 0;
+}
+
+
+
+/* Unchecked route object/descriptor. Expected member is low16(selection+1), wrapping to first on
+   oldFFFF or past descriptor end. Only result0 and exact expected handle update selection and
+   completion5A; otherwise completionA5. Always return5A, causing router busy release even on
+   failure. No third argument, sequence/payload update or local retry. Expected member is
+   low16(selection+1), or first on oldFFFF/past-end. Only result0 and exact expected member update
+   selection and completion5A; other cases publishA5. Always return5A, so real68E9E clears busy even
+   on failure. No third argument or sequence/payload/retry update. */
+
+uint f33_nvm_handle_family0_write_result(uchar result,ushort logical_handle)
+
+{
+  byte bVar1;
+  uint uVar2;
+  uchar uVar3;
+  
+  bVar1 = f33_nvm_logical_application_routes[logical_handle].object;
+  uVar2 = (uint)f33_nvm_family0_selected_logical_handles[bVar1];
+  if ((uVar2 == 0xffff) ||
+     (uVar2 = uVar2 + 1 & 0xffff,
+     (((uint)f33_nvm_family0_ram_descriptors[bVar1].logical_count +
+      (uint)f33_nvm_family0_ram_descriptors[bVar1].first_logical_handle) - 1 & 0xffff) < uVar2)) {
+    uVar2 = (uint)f33_nvm_family0_ram_descriptors[bVar1].first_logical_handle;
+  }
+  if ((result == '\0') && (uVar2 == logical_handle)) {
+    f33_nvm_family0_selected_logical_handles[bVar1] = (ushort)uVar2;
+    uVar3 = 'Z';
+  }
+  else {
+    uVar3 = 0xa5;
+  }
+  f33_nvm_family0_completion[bVar1] = uVar3;
+  return 0x5a;
+}
+
+
+
+/* Unchecked route object and family1 descriptor; slot=object&3. Copy0 resets the entire mask
+   without reading it. Nonzero result ORs5A into that copy byte; success does not clear prior
+   failures. Copy2 publishes5A iff the FULL32 mask is zero, otherwiseA5, and returns5A in both
+   cases. Earlier copies return0. Unmatched handle sets005A5A5A and returns0. No read retry, data
+   copy or physical-programming proof. Copy0 resets entire slot mask without a prior read; nonzero
+   result ORs5A into its byte, success preserves prior failures. Copy2 requires full32 mask==0 for
+   completion5A elseA5, returns5A either way so real router releases busy. No read retry or payload
+   read/write. Native first/middle/final, non-5A error bit, slot3 and high-argument-bit cases. No
+   physical-programming claim. */
+
+uint f33_nvm_handle_family1_write_result(uchar result,ushort logical_handle)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uchar uVar3;
+  uint uVar4;
+  int iVar5;
+  uint uVar6;
+  
+  uVar2 = (uint)logical_handle;
+  uVar6 = (uint)f33_nvm_logical_application_routes[uVar2].object;
+  uVar4 = (uint)f33_nvm_family1_ram_descriptors[uVar6].first_logical_handle;
+  if (uVar2 == uVar4) {
+    iVar5 = 0;
+    uVar1 = 0;
+LAB_00068e6e:
+    if (result != '\0') {
+      uVar1 = uVar1 | 0x5a << (iVar5 << 3);
+    }
+    if (iVar5 == 2) {
+      uVar3 = 0xa5;
+      if (uVar1 == 0) {
+        uVar3 = 'Z';
+      }
+      uVar2 = 0x5a;
+      f33_nvm_family1_completion[uVar6] = uVar3;
+      goto LAB_00068e9a;
+    }
+  }
+  else {
+    uVar1 = f33_nvm_family1_copy_failure_masks[uVar6 & 3];
+    if (uVar2 == uVar4 + 4) {
+      iVar5 = 1;
+      goto LAB_00068e6e;
+    }
+    if (uVar2 == uVar4 + 8) {
+      iVar5 = 2;
+      goto LAB_00068e6e;
+    }
+    uVar1 = 0x5a5a5a;
+  }
+  uVar2 = 0;
+LAB_00068e9a:
+  f33_nvm_family1_copy_failure_masks[uVar6 & 3] = uVar1;
+  return uVar2;
 }
 
 

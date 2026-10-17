@@ -3270,6 +3270,58 @@ void f33_run_init_chain_5fa12(void)
 
 
 
+void FUN_0005fa3a(void)
+
+{
+  int iVar1;
+  uint uVar2;
+  
+  uVar2 = 0;
+  DAT_feef90e0 = 0;
+  do {
+    iVar1 = uVar2 * 4;
+    uVar2 = uVar2 + 1;
+    *(undefined4 *)(((undefined *)camry_host_ptr(0xfeef80a0u)) + iVar1) = 0;
+  } while (uVar2 < 0x50);
+  uVar2 = 0;
+  DAT_feef90e4 = 0;
+  do {
+    iVar1 = uVar2 * 4;
+    uVar2 = uVar2 + 1;
+    (*((undefined4 *)camry_host_ptr((uint32_t)((0xfeef81e0u) + iVar1)))) = 0;
+  } while (uVar2 < 0x1b0);
+  DAT_feef90e8 = 0;
+  return;
+}
+
+
+
+void FUN_0005fa84(void)
+
+{
+  int iVar1;
+  uint uVar2;
+  
+  uVar2 = 0;
+  DAT_feef90ec = 0;
+  do {
+    iVar1 = uVar2 * 4;
+    uVar2 = uVar2 + 1;
+    *(undefined4 *)(((undefined *)camry_host_ptr(0xfeef88a0u)) + iVar1) = 0;
+  } while (uVar2 < 0x60);
+  uVar2 = 0;
+  DAT_feef90f0 = 0;
+  do {
+    iVar1 = uVar2 * 4;
+    uVar2 = uVar2 + 1;
+    (*((undefined4 *)camry_host_ptr((uint32_t)((0xfeef8a20u) + iVar1)))) = 0;
+  } while (uVar2 < 0x1b0);
+  DAT_feef90f4 = 0;
+  return;
+}
+
+
+
 void FUN_0005face(void)
 
 {

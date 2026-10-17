@@ -3648,6 +3648,57 @@ void f33_boot_copy_flash_driver_to_ram(void)
 
 
 
+/* Low-byte zero disables the data buffer and instruction cache before requesting both clears;
+   nonzero clears first, then enables both. G3M CDBCR.CDBCLR reads zero; ICCTRL.ICHCLR remains
+   hardware-dependent until completion. Final ICCTRL read, SYNCI and return are real code. Processor
+   fixtures supply an explicit completion event; no cache contents, physical latency or guaranteed
+   completion are inferred. Low-byte zero disables data buffer/instruction cache before clearing;
+   nonzero clears then enables. CDBCLR reads zero while ICHCLR completion is asynchronous.
+   Exact136-byte processor fixture checks command/read behavior and reachable high-IR
+   effects/polls/return. Execution explicitly injects completion; SYNCI remains opaque and the
+   shared return instruction is exercised separately. No physical cache contents or latency claim.
+    */
+
+void f33_boot_cache_set_enabled(uchar enabled)
+
+{
+  uint uVar1;
+  undefined4 uVar2;
+  
+  uVar1 = CDBCR;
+  if (enabled == '\0') {
+    CDBCR = uVar1 & 0xfffffffc;
+    uVar1 = ICCTRL;
+    ICCTRL = uVar1 & 0xfffffffe;
+    uVar1 = CDBCR;
+    CDBCR = uVar1 & 0xfffffffd | 2;
+    uVar2 = CDBCR;
+    uVar1 = ICCTRL;
+    ICCTRL = uVar1 | 0x100;
+    do {
+      uVar1 = ICCTRL;
+    } while ((uVar1 >> 8 & 1) != 0);
+  }
+  else {
+    CDBCR = uVar1 & 0xfffffffd | 2;
+    uVar2 = CDBCR;
+    uVar1 = ICCTRL;
+    ICCTRL = uVar1 | 0x100;
+    do {
+      uVar1 = ICCTRL;
+    } while ((uVar1 >> 8 & 1) != 0);
+    uVar1 = CDBCR;
+    CDBCR = uVar1 & 0xfffffffd | 1;
+    uVar1 = ICCTRL;
+    ICCTRL = uVar1 | 1;
+  }
+  uVar2 = ICCTRL;
+  __synchronize();
+  return;
+}
+
+
+
 void FUN_0000369c(void)
 
 {
