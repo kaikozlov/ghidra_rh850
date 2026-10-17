@@ -4290,6 +4290,39 @@ bool FUN_00083710(uint param_1)
 }
 
 
+void FUN_00083724(void)
+
+{
+  uint32_t puVar1;
+  uint32_t puVar2;
+  int iVar3;
+  int iVar4;
+  uint uVar5;
+  uint uVar6;
+  
+  puVar1 = 0xfebeb800u;
+  puVar2 = 0x23dfcu;
+  uVar5 = (uint)DAT_00022e41;
+  uVar6 = 0;
+  do {
+    if (uVar5 <= uVar6) {
+      return;
+    }
+    if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(uVar6 * 4 + -4000))))) == '\0') && ((*((volatile uint8_t *)camry_host_ptr((uint32_t)((puVar2 + uVar6 * 4 + -4000) + (uint32_t)(1))))) == '\0')) {
+      iVar3 = FUN_00083710((*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + uVar6 * 2 + -0x67e0)))));
+      iVar4 = FUN_00083a04(uVar6);
+      if ((iVar3 != 0) || (iVar4 != 1)) {
+        FUN_00084274(uVar6);
+        FUN_00080d54(uVar6);
+        return;
+      }
+    }
+    uVar6 = uVar6 + 1 & 0xff;
+  } while( true );
+}
+
+
+
 
 undefined4 FUN_0008377e(uint param_1)
 

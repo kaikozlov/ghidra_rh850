@@ -5527,6 +5527,91 @@ def write_indirect_table(path: Path, sources: list[Path]) -> None:
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def _address_sum(expr: str) -> bool:
+    """True when expr adds or subtracts at the top level, ignoring `->`."""
+    depth = 0
+    index = 0
+    while index < len(expr):
+        char = expr[index]
+        if char in "([{":
+            depth += 1
+        elif char in ")]}":
+            depth -= 1
+        elif depth == 0 and char in "+-" and index > 0 and expr[index - 1] not in "+-<>(":
+            return True
+        index += 1
+    return False
+
+
+def _matching_open_paren(code: str, close: int) -> int | None:
+    depth = 0
+    index = close
+    while index >= 0:
+        char = code[index]
+        if char == ")":
+            depth += 1
+        elif char == "(":
+            depth -= 1
+            if depth == 0:
+                return index
+        index -= 1
+    return None
+
+
+def _rewrite_integer_subscripts(code: str) -> str:
+    """`(firmware_address + offset)[index]` is the byte at that address.
+
+    A byte-pointer local rewritten as a uint32, and a pointer word plus an
+    offset, are indexed with `ld.bu`/`st.b`. A sum that is still a pointer
+    type-checks and is left alone.
+    """
+    kind = _kind_context(_c_signature(code), code)
+    pieces: list[str] = []
+    cursor = 0
+    start = 0
+    while True:
+        bracket = code.find("[", start)
+        if bracket < 0:
+            pieces.append(code[cursor:])
+            break
+        close = bracket - 1
+        while close >= cursor and code[close] in " \t\n":
+            close -= 1
+        if close < cursor or code[close] != ")":
+            start = bracket + 1
+            continue
+        open_paren = _matching_open_paren(code, close)
+        if open_paren is None or open_paren < cursor:
+            start = bracket + 1
+            continue
+        before = open_paren - 1
+        while before >= 0 and code[before] in " \t\n":
+            before -= 1
+        if before >= 0 and (code[before].isalnum() or code[before] == "_"):
+            start = bracket + 1
+            continue
+        inner = code[open_paren + 1:close]
+        collapsed = " ".join(inner.split())
+        if _is_pointer_type(collapsed) or _is_int_type(collapsed) or not _address_sum(inner):
+            start = bracket + 1
+            continue
+        if kind(inner) != "integer":
+            start = bracket + 1
+            continue
+        try:
+            end = _match_bracket(code, bracket)
+        except ValueError:
+            start = bracket + 1
+            continue
+        index = _rewrite_integer_subscripts(code[bracket + 1:end])
+        address = _rewrite_integer_subscripts(inner)
+        pieces.append(code[cursor:open_paren])
+        pieces.append(_typed_load(f"({address}) + (uint32_t)({index})", "uint8_t"))
+        cursor = end + 1
+        start = cursor
+    return "".join(pieces)
+
+
 def _rewrite_loaded_pointer_subscripts(code: str) -> str:
     """`(&PTR_...)[slot][index]` is the byte at the loaded pointer plus index.
 
@@ -6054,6 +6139,7 @@ def _rewrite_body(code: str) -> str:
     code = _rewrite_runtime_tp(code)
     code = _rewrite_scaled_table(code)
     code = _rewrite_loaded_pointer_subscripts(code)
+    code = _rewrite_integer_subscripts(code)
     code = _rewrite_late_pointer_fields(code)
     code = _rewrite_pointer_assignments(code, firmware=True)
     return code

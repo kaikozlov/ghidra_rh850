@@ -2049,6 +2049,100 @@ void FUN_000052de(void)
 }
 
 
+/* Resident SID27 seed request. Active delay==1 gives37 before exact18-byte length check13. State1
+   copies16 client bytes from request+2 to2B34, calls6F22 into2B24 ignoring its0/1 status, copies
+   challenge to2B44 and schedules handshake2 after response submission returns. State2 replaces
+   client material but reuses same challenge. State3 returns16 zero response bytes without changing
+   client. Invalid handshake0/>3 silently normalizes1. Valid paths preserve original subfunction
+   at2B54 and form67 response via52DE. Not a successful native unlock/entropy claim. Native AES
+   known-answer and protocol-state cases use explicit RAM. Service paths stop at674A before
+   response/timer completion; direct session invalidation cases return. No complete unlock or
+   entropy claim. */
+
+void f33_boot_security_seed_request(ushort request_length)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  undefined *puVar4;
+  undefined4 uVar6;
+  uchar uVar7;
+  uint32_t puVar5;
+  uVar7 = (*((volatile uint8_t *)camry_host_ptr(0xfebe4b55u)));
+  puVar5 = 0xfebeb800u;
+  puVar4 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  if ((*((volatile uint8_t *)camry_host_ptr(0xfebe4b56u))) == '\x01') {
+    uVar6 = 0x37;
+  }
+  else {
+    if (request_length == 0x12) {
+      iVar3 = 0;
+      if ((*((volatile uint8_t *)camry_host_ptr(0xfebe4b55u))) == '\0') {
+LAB_0000535e:
+        uVar7 = '\x01';
+      }
+      else {
+        if ((*((volatile uint8_t *)camry_host_ptr(0xfebe4b55u))) == '\x01') {
+          do {
+            iVar2 = iVar3 + 1;
+            iVar1 = iVar3 + -0xf;
+            ((volatile uint8_t *)camry_host_ptr(0xfebe4b34u))[iVar3] = (*((uchar *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr(0xfebe4b18u))) + iVar3 + 2))));
+            iVar3 = iVar2;
+          } while (((iVar1 < 0) || (iVar2 < 0)));
+          f33_boot_security_generate_challenge(((volatile uint8_t *)camry_host_ptr(0xfebe4b24u)));
+          iVar3 = 0;
+          do {
+            iVar2 = iVar3 + 1;
+            iVar1 = iVar3 + -0xf;
+            (*((volatile uint8_t *)camry_host_ptr((uint32_t)((puVar5 + iVar3 + -0x6cdc) + (uint32_t)(0x20))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(iVar3 + -0x6cdc)))));
+            iVar3 = iVar2;
+          } while (((iVar1 < 0) || (iVar2 < 0)));
+          uVar7 = '\x02';
+          puVar4 = ((undefined *)camry_host_ptr((uint32_t)(puVar5)));
+        }
+        else if ((*((volatile uint8_t *)camry_host_ptr(0xfebe4b55u))) < 3) {
+          do {
+            iVar2 = iVar3 + 1;
+            iVar1 = iVar3 + -0xf;
+            ((volatile uint8_t *)camry_host_ptr(0xfebe4b34u))[iVar3] = (*((uchar *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr(0xfebe4b18u))) + iVar3 + 2))));
+            iVar3 = iVar2;
+          } while (((iVar1 < 0) || (iVar2 < 0)));
+          iVar3 = 0;
+          do {
+            iVar2 = iVar3 + 1;
+            iVar1 = iVar3 + -0xf;
+            ((volatile uint8_t *)camry_host_ptr(0xfebe4b44u))[iVar3] = ((volatile uint8_t *)camry_host_ptr(0xfebe4b24u))[iVar3];
+            iVar3 = iVar2;
+            puVar4 = ((undefined *)camry_host_ptr(0xfebeb800u));
+          } while (((iVar1 < 0) || (iVar2 < 0)));
+        }
+        else {
+          if ((*((volatile uint8_t *)camry_host_ptr(0xfebe4b55u))) != '\x03') goto LAB_0000535e;
+          do {
+            ((volatile uint8_t *)camry_host_ptr(0xfebe4b44u))[iVar3] = '\0';
+            iVar2 = iVar3 + 1;
+            iVar1 = iVar3 + -0xf;
+            iVar3 = iVar2;
+            puVar4 = ((undefined *)camry_host_ptr(0xfebeb800u));
+          } while (((iVar1 < 0) || (iVar2 < 0)));
+        }
+        puVar4[-0x6cac] = (*((undefined1 *)camry_host_ptr((uint32_t)(*(int *)(puVar4 + -0x6ce8) + 1))));
+        FUN_000052de();
+      }
+      goto LAB_000053ea;
+    }
+    uVar6 = 0x13;
+  }
+  puVar4 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  FUN_000052ca(uVar6);
+LAB_000053ea:
+  puVar4[-0x6cab] = uVar7;
+  return;
+}
+
+
+
 
 /* Only handshake2 checks exact18-byte request and derives expected16 bytes at currentSP
    using704C(client2B34,challenge2B24,SP). Compare is early-exit bytewise, not constant-time. Valid
@@ -2247,6 +2341,46 @@ void f33_boot_security_delay_progress(void)
   }
   return;
 }
+
+
+/* Installraw200000000durationandcapturecounter;setdelay1,failcount0;clearretainedchallenge/client/responsechallenge;lastsubfunction0;handshake1.Doesnotitselfstoresecurity2B0Fanddoesnotresetprevious-challenge2D38/30B4.5086setsinitialsession1/security1;50EAsetsession2withoutitsownsecuritystore.
+    */
+
+undefined4 f33_boot_security_initialize_handshake(void)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  uint32_t puVar4;
+  undefined4 uVar5;
+  
+  puVar4 = 0xfebeb800u;
+  (*((volatile uint32_t *)camry_host_ptr(0xfebe4b1cu))) = 200000000;
+  uVar5 = FUN_00001d24();
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x6caa))))) = 1;
+  (*((undefined4 *)camry_host_ptr((uint32_t)(puVar4 + -0x6ce0)))) = uVar5;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x6ca9))))) = 0;
+  iVar3 = 0;
+  do {
+    iVar2 = iVar3 + 1;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(iVar3 + -0x6cdc))))) = 0;
+    iVar1 = iVar3 + -0xf;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)((puVar4 + iVar3 + -0x6cdc) + (uint32_t)(0x20))))) = 0;
+    iVar3 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  iVar3 = 0;
+  do {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(iVar3 + -0x6ccc))))) = 0;
+    iVar2 = iVar3 + 1;
+    iVar1 = iVar3 + -0xf;
+    iVar3 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x6cac))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x6cab))))) = 1;
+  return uVar5;
+}
+
 
 
 

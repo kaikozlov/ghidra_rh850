@@ -4224,6 +4224,29 @@ void f33_cantp_begin_first_frame_receive
 }
 
 
+/* Accept FF only for multiframe-enabled connection with FC route, exact CAN length8, and12-bit
+   total in8-addressOffset..4095. Functional row22BFE is SF-only. */
+
+uint f33_cantp_reject_first_frame_extent(F33CanTpRxConnection *connection,F33CanTpFrameInfo *frame)
+
+{
+  uint uVar1;
+  uint uVar2;
+  
+  uVar2 = 1;
+  if (((connection->single_frame_only == '\0') && (connection->canif_fc_transmit_id != 0xffff)) &&
+     (frame->length == 8)) {
+    uVar1 = (uint)(*((volatile uint8_t *)camry_host_ptr((uint32_t)((frame->data + (byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x22b98u + (uint32_t)(connection->addressing_format) * 1u))))) + (uint32_t)(1))))) |
+            (((uint8_t *)camry_host_ptr((uint32_t)(frame->data)))[(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x22b98u + (uint32_t)(connection->addressing_format) * 1u))))] & 0xf) << 8;
+    if (8 - (byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x22b98u + (uint32_t)(connection->addressing_format) * 1u)))) <= uVar1) {
+      uVar2 = (uint)(DAT_00022c40 < uVar1);
+    }
+  }
+  return uVar2;
+}
+
+
+
 
 void FUN_0007af76(int *param_1,F33CanTpRxConnection *param_2,F33CanTpFrameInfo *param_3)
 
