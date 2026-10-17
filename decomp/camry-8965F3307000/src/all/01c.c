@@ -1398,6 +1398,15 @@ void FUN_00071f82(undefined2 param_1,uint param_2)
 
 
 
+void FUN_00071fe4(ushort param_1,void *param_2)
+
+{
+  f33_nvm_set_read_buffer(param_1, camry_host_addr(param_2));
+  return;
+}
+
+
+
 void FUN_00071ff2(undefined2 param_1)
 
 {
@@ -1426,6 +1435,15 @@ void FUN_00072010(undefined2 param_1)
 
 
 
+void FUN_0007202c(ushort param_1,void *param_2)
+
+{
+  f33_nvm_set_write_buffer(param_1, camry_host_addr(param_2));
+  return;
+}
+
+
+
 void FUN_0007203a(undefined2 param_1)
 
 {
@@ -1449,6 +1467,15 @@ void FUN_00072058(undefined2 param_1)
   if (iVar1 == 0) {
     ((void)(param_1), (void)(0), f33_return_only_stub_71ce0());
   }
+  return;
+}
+
+
+
+void FUN_00072074(ushort param_1,void *param_2)
+
+{
+  f33_nvm_set_read_buffer(param_1, camry_host_addr(param_2));
   return;
 }
 
@@ -1898,6 +1925,21 @@ void FUN_00073024(uint param_1,char param_2)
     FUN_00071eb4(0,param_1);
   }
   ((void)(0), FUN_000747d2());
+  return;
+}
+
+
+
+void FUN_0007305e(char param_1)
+
+{
+  undefined *puVar1;
+  
+  puVar1 = ((undefined *)camry_host_ptr((uint32_t)(0x5)));
+  if (param_1 == '\x01') {
+    puVar1 = ((undefined *)camry_host_ptr(0xfde8u));
+  }
+  FUN_000747c8(0, camry_host_addr(puVar1));
   return;
 }
 

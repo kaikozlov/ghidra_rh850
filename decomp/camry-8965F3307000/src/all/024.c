@@ -1672,6 +1672,43 @@ void f33_dcm_post_receive_dispatch_after_delay(void)
 
 
 
+/* WARNING: Type propagation algorithm not settling */
+
+void FUN_00092300(void)
+
+{
+  undefined8 uVar1;
+  int iVar2;
+  undefined4 uVar3;
+  int iVar4;
+  ushort auStack_1e [7];
+  
+  uVar1 = 0x23dfc00000000;
+  auStack_1e[0] = 0;
+  auStack_1e[2] = 0;
+  auStack_1e[1] = 0;
+  thunk_FUN_0006a45e();
+  uVar3 = FUN_00092624();
+  FUN_00093f66(camry_host_addr(auStack_1e + 1), auStack_1e, uVar3);
+  thunk_FUN_0006a4c4();
+  for (iVar4 = 0;
+      (int)(iVar4 - (uint)auStack_1e[0]) < 0 !=
+      (iVar4 < 0 && -1 < (int)(iVar4 - (uint)auStack_1e[0])); iVar4 = iVar4 + 1) {
+    iVar2 = (int)((ulonglong)uVar1 >> 0x20);
+    if ((*((char *)camry_host_ptr((uint32_t)(*(short *)((short)auStack_1e[iVar4 * 2U + 2] * 0xc + iVar2 + 0x20ec) * 0x14 +
+                  iVar2 + 0x20d5)))) == '\x01') {
+      FUN_000923de(auStack_1e[iVar4 * 2U + 1]);
+    }
+    uVar3 = FUN_00093f5a(auStack_1e[iVar4 * 2U + 2]);
+    FUN_00093c9a(auStack_1e[iVar4 * 2U + 2],1);
+    FUN_00091f26(auStack_1e[iVar4 * 2U + 2],uVar3);
+    FUN_00093ef6(auStack_1e[iVar4 * 2U + 2],0);
+  }
+  return;
+}
+
+
+
 void FUN_0009238c(void)
 
 {

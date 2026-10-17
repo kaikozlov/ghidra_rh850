@@ -2933,6 +2933,43 @@ void f33_return_only_stub_b391e(void)
 
 
 
+/* WARNING: Removing unreachable block (ram,0x000b39c0) */
+
+void FUN_000b394c(void)
+
+{
+  int iVar1;
+  uint32_t puVar2;
+  undefined4 uVar3;
+  int iVar4;
+  int iVar5;
+  int iVar6;
+  int local_10;
+  
+  puVar2 = 0xfebeb800u;
+  iVar5 = (int)DAT_febeb054;
+  iVar1 = DAT_febeb150;
+  uVar3 = DAT_febeb158;
+  iVar4 = DAT_febeb14c;
+  iVar6 = DAT_febeb148;
+  if ((DAT_febeb168 == 'Z') && (DAT_febeb16a == 'Z')) {
+    puVar2 = 0xfebeb800u;
+    local_10 = FUN_000b3920(DAT_febeb178,0x400,DAT_febeb138);
+    FUN_000d1cf6(local_10,0x5b05b0,0xffa4fa50,&local_10);
+    iVar6 = local_10;
+    uVar3 = FUN_000b3920(local_10, 0x4507, camry_host_addr(((undefined *)camry_host_ptr(0xb400u))));
+    iVar1 = (DAT_000af100 * iVar5) / 0x4000;
+    iVar4 = iVar1 + iVar6;
+  }
+  (*((int *)camry_host_ptr((uint32_t)(puVar2 + -0x6b0)))) = iVar1;
+  (*((int *)camry_host_ptr((uint32_t)(puVar2 + -0x6b8)))) = iVar6;
+  (*((undefined4 *)camry_host_ptr((uint32_t)(puVar2 + -0x6a8)))) = uVar3;
+  (*((int *)camry_host_ptr((uint32_t)(puVar2 + -0x6b4)))) = iVar4;
+  return;
+}
+
+
+
 /* WARNING: Removing unreachable block (ram,0x000b39f8) */
 
 void FUN_000b39d8(void)

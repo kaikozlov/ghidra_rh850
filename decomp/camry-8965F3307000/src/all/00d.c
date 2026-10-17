@@ -86,6 +86,78 @@ void FUN_000346cc(void)
 
 
 
+void FUN_000346f0(void)
+
+{
+  undefined2 uVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  int iVar4;
+  undefined4 uVar5;
+  undefined1 uVar6;
+  undefined4 uVar7;
+  undefined1 uVar8;
+  uint local_54 [16];
+  
+  puVar2 = 0xfebeb800u;
+  uVar3 = f33_nvm_get_record(0x202, camry_host_addr(local_54));
+  uVar5 = 0xa55a5aa5;
+  if ((uVar3 == 0x10) && (local_54[0] == 0xa55a5aa5)) {
+    f33_restore_fit_coefficients();
+    uVar3 = f33_validate_or_default_retained_fit();
+    if (uVar3 == 0) {
+      uVar7 = 0xa55a5aa5;
+      uVar8 = 0x44;
+      f33_report_diagnostic_healthy_observed(0x125);
+      goto LAB_00034744;
+    }
+  }
+  uVar7 = 0x5aa5a55a;
+  uVar8 = 0x22;
+  f33_report_diagnostic_event_failure(0x125,0x32);
+LAB_00034744:
+  uVar3 = f33_nvm_get_record_status(0x205);
+  iVar4 = camry_host_addr(FUN_000567be());
+  if ((uVar3 == 0x10) && ((*((int *)camry_host_ptr((uint32_t)(iVar4 + 0xb8)))) == -0x5aa5a55b)) {
+    uVar6 = 0x44;
+    f33_report_diagnostic_healthy_observed(0x126);
+  }
+  else {
+    uVar5 = 0x5aa5a55a;
+    uVar6 = 0x22;
+    f33_report_diagnostic_event_failure(0x126,0x32);
+  }
+  FUN_000346cc();
+  uVar1 = DAT_00030ef2;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb279u + (uint32_t)((int)puVar2) * 1u)))) = uVar8;
+  (*((undefined4 *)camry_host_ptr((uint32_t)((0xffffb2bcu + (uint32_t)((int)puVar2)))))) = uVar7;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb27cu + (uint32_t)((int)puVar2) * 1u)))) = uVar6;
+  (*((undefined4 *)camry_host_ptr((uint32_t)((0xffffb2c0u + (uint32_t)((int)puVar2)))))) = uVar5;
+  (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb282u + (uint32_t)((int)puVar2)))))) = uVar1;
+  return;
+}
+
+
+
+undefined4 FUN_000347a2(void)
+
+{
+  uint uVar1;
+  uint local_44 [16];
+  
+  uVar1 = f33_nvm_get_record(0x202, camry_host_addr(local_44));
+  if ((uVar1 == 0x10) && (local_44[0] == 0xa55a5aa5)) {
+    f33_restore_fit_coefficients();
+    uVar1 = f33_validate_or_default_retained_fit();
+    if (uVar1 == 0) {
+      return 0xa55a5aa5;
+    }
+  }
+  return 0x5aa5a55a;
+}
+
+
+
 void FUN_000347e2(void)
 
 {
@@ -149,6 +221,23 @@ void FUN_00034858(void)
   }
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb27fu + (uint32_t)((int)puVar1) * 1u)))) = uVar5;
   (*((undefined4 *)camry_host_ptr((uint32_t)((0xffffb2c4u + (uint32_t)((int)puVar1)))))) = uVar4;
+  return;
+}
+
+
+
+void FUN_00034bce(void)
+
+{
+  uint32_t puVar1;
+  uint local_44 [16];
+  
+  puVar1 = 0xfebeb800u;
+  f33_nvm_get_record(0x202, camry_host_addr(local_44));
+  local_44[0] = 0;
+  f33_nvm_set_record(0x202,local_44);
+  (*((undefined4 *)camry_host_ptr((uint32_t)((0xffffb2bcu + (uint32_t)((int)puVar1)))))) = 0x5aa5a55a;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb278u + (uint32_t)((int)puVar1) * 1u)))) = 0x44;
   return;
 }
 
@@ -267,6 +356,39 @@ void f33_select_mode600_stimulus_request(void)
 void f33_return_only_stub_34cce(void)
 
 {
+  return;
+}
+
+
+
+/* Get record105 marker and record18 count. Exact10/A55A5AA5 establishes5A; invalid status or
+   count>30 clears gate and count. Valid count0 preserves marker-derived gate. RAM publication, not
+   a physical flash read. */
+
+void f33_reload_ba_admission_records(void)
+
+{
+  uint32_t puVar1;
+  uint uVar2;
+  undefined1 uVar3;
+  byte local_18 [8];
+  uint auStack_10 [2];
+  
+  puVar1 = 0xfebeb800u;
+  uVar2 = f33_nvm_get_record(0x105, camry_host_addr(auStack_10));
+  if ((uVar2 == 0x10) && (auStack_10[0] == 0xa55a5aa5)) {
+    uVar3 = 0x5a;
+  }
+  else {
+    uVar3 = 0;
+  }
+  uVar2 = f33_nvm_get_record(0x18, camry_host_addr(((uint *)camry_host_ptr((uint32_t)(local_18)))));
+  if ((uVar2 != 0x10) || (f33_ba_retained_admission_count_limit < local_18[0])) {
+    local_18[0] = 0;
+    uVar3 = 0;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58b0))))) = local_18[0];
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58b1))))) = uVar3;
   return;
 }
 

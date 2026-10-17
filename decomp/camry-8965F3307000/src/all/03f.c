@@ -749,6 +749,15 @@ void FUN_000ff09c(uint param_1,uint *param_2)
 
 
 
+void FUN_000ff0b0(uint param_1,uint *param_2)
+
+{
+  f33_nvm_get_record(param_1 & 0xffff, camry_host_addr(param_2));
+  return;
+}
+
+
+
 void FUN_000ff0c4(uint param_1)
 
 {

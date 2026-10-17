@@ -1457,6 +1457,53 @@ undefined4 FUN_00089bb6(undefined4 param_1,undefined4 param_2,undefined4 param_3
 
 
 
+int FUN_00089bc2(undefined2 param_1,undefined4 param_2,undefined4 *param_3,undefined1 param_4)
+
+{
+  char cVar1;
+  uint uVar2;
+  uint32_t puVar3;
+  int iVar4;
+  undefined4 *puVar5;
+  
+  DAT_febf13bc = 0;
+  DAT_febf13bd = 1;
+  puVar3 = 0xfebeb800u;
+  if (param_3 == (undefined4 *)0x0) {
+    puVar5 = (undefined4 *)0x0;
+  }
+  else {
+    DAT_febf13ac = *param_3;
+    puVar5 = ((undefined *)camry_host_ptr(0xfebf13acu));
+  }
+  iVar4 = FUN_00089440(param_1, DAT_febf13a0, DAT_febf13a4, DAT_febf13a8, param_2, camry_host_addr(puVar5), param_4);
+  if (iVar4 == 0) {
+    uVar2 = 0;
+    do {
+      cVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(0x5bbc)))));
+      if (cVar1 == '\x01') {
+        if (param_3 != (undefined4 *)0x0) {
+          *param_3 = (*((undefined4 *)camry_host_ptr((uint32_t)(puVar3 + 0x5bac))));
+          iVar4 = 0;
+          if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(0x5bbd))))) == '\0') break;
+        }
+        iVar4 = 1;
+        break;
+      }
+      uVar2 = uVar2 + 1;
+    } while (uVar2 < 0xe07);
+    if (cVar1 == '\0') {
+      iVar4 = 2;
+    }
+  }
+  else if (iVar4 != 2 && iVar4 != 3) {
+    iVar4 = 1;
+  }
+  return iVar4;
+}
+
+
+
 undefined4 FUN_00089c5a(undefined4 param_1,undefined4 param_2)
 
 {
@@ -2976,6 +3023,72 @@ void FUN_0008b930(int param_1,int param_2,uint param_3)
     (*((undefined1 *)camry_host_ptr((uint32_t)(uVar1 + param_1)))) = (*((undefined1 *)camry_host_ptr((uint32_t)(uVar1 + param_2))));
     (*((undefined1 *)camry_host_ptr((uint32_t)(uVar1 + param_2)))) = 0;
   }
+  return;
+}
+
+
+
+/* WARNING: Inlined function: f33_diag_routine_local_dispatch_enabled */
+/* WARNING: Removing unreachable block (ram,0x0008b9ba) */
+
+void FUN_0008b950(undefined4 param_1,ushort param_2)
+
+{
+  uint uVar1;
+  undefined1 uVar2;
+  undefined1 uVar3;
+  uchar lower_status;
+  uint uVar4;
+  char cVar5;
+  uchar application_status;
+  undefined1 uStack_31;
+  undefined1 auStack_30 [12];
+  
+  uVar3 = DAT_febf3b35;
+  uVar2 = DAT_febf3b34;
+  application_status = DAT_febf3b31;
+  cVar5 = DAT_febf3b30;
+  uStack_31 = DAT_febf3b33;
+  uVar4 = 0;
+  do {
+    uVar1 = uVar4 + 1;
+    auStack_30[uVar4] = 0;
+    uVar4 = uVar1;
+  } while (uVar1 < 8);
+  if (DAT_febf3b30 == '\x01') {
+    cVar5 = '\x02';
+    auStack_30[0] = (undefined1)(param_2 >> 8);
+    auStack_30[1] = (undefined1)param_2;
+    lower_status = ((void)(0x88101031), (void)(2), (void)(2), (void)(auStack_30), (void)(&uStack_31), f33_return_const_0_8b10c());
+  }
+  else {
+    if (DAT_febf3b30 != '\x02') {
+      application_status = '\x01';
+      lower_status = '\x01';
+      goto LAB_0008b9f4;
+    }
+    lower_status = DAT_febf3b32;
+    if (DAT_febf3b32 == '\x02') {
+      lower_status = ((void)(5), (void)(2), f33_return_const_0_8b110());
+    }
+    if (application_status != '\x02') goto LAB_0008b9f4;
+  }
+  uVar4 = f33_crypto_bank_read_direct_result(((undefined *)camry_host_ptr(0xfebf3b56u)),param_2);
+  application_status = (uchar)uVar4;
+LAB_0008b9f4:
+  uVar4 = f33_merge_two_diagnostic_statuses(application_status,lower_status,'\0','\x02');
+  if (uVar4 != 2) {
+    application_status = '\x01';
+    lower_status = '\x01';
+    cVar5 = '\0';
+    FUN_0008b930(param_1, camry_host_addr(((undefined *)camry_host_ptr(0xfebf3b56u))), param_2);
+  }
+  DAT_febf3b31 = application_status;
+  DAT_febf3b32 = lower_status;
+  DAT_febf3b30 = cVar5;
+  DAT_febf3b34 = uVar2;
+  DAT_febf3b35 = uVar3;
+  DAT_febf3b33 = uStack_31;
   return;
 }
 

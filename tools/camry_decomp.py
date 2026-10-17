@@ -784,13 +784,17 @@ def _rewrite_pointer_arguments(code: str, param_types: dict[str, list[str]]) -> 
                 rewritten_args: list[str] = []
                 wrapped = False
                 for index, arg in enumerate(args):
-                    if "*" not in types[index] or kind(arg) != "integer":
-                        rewritten_args.append(arg)
+                    if "*" in types[index] and kind(arg) == "integer":
+                        wrapped = True
+                        rewritten_args.append(
+                            f"(({types[index]})camry_host_ptr((uint32_t)({arg.strip()})))"
+                        )
                         continue
-                    wrapped = True
-                    rewritten_args.append(
-                        f"(({types[index]})camry_host_ptr((uint32_t)({arg.strip()})))"
-                    )
+                    if "*" not in types[index] and kind(arg) == "pointer":
+                        wrapped = True
+                        rewritten_args.append(f"camry_host_addr({arg.strip()})")
+                        continue
+                    rewritten_args.append(arg)
                 if extra:
                     # The callee signature does not read these. Keep their side effects.
                     discarded = ", ".join(f"(void)({arg.strip()})" for arg in extra)

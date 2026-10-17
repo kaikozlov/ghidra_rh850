@@ -2511,6 +2511,57 @@ uint f33_estimator_mode2_constraint_b(void)
 
 
 
+/* Always compute/store three source constraintsC030..32. C0455A additionally requires both
+   AD3C/AD3F outside0/3, AD1811, BFB25A, BFB50 and absolute paired mean minusADF6 strictly
+   below1280. This is not the same gate as either consecutive window. Always publish three
+   constraint results; compositeC045 additionally requires admitted modes/source markers and
+   paired-mean axis difference strictly below1280. No consecutive-window counter. */
+
+void f33_qualify_estimator_source_constraints(void)
+
+{
+  char cVar1;
+  char cVar2;
+  char cVar3;
+  undefined1 uVar4;
+  uint32_t puVar5;
+  uint uVar6;
+  uint uVar7;
+  uint uVar8;
+  int iVar9;
+  uint uVar10;
+  
+  puVar5 = 0xfebeb800u;
+  uVar6 = f33_estimator_base_source_constraint();
+  uVar7 = f33_estimator_mode2_constraint_a();
+  uVar8 = f33_estimator_mode2_constraint_b();
+  if (((((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0xac4))))) != '\0') && ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0xac4))))) != '\x03')) && ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0xac1))))) != '\0')) &&
+     ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0xac1))))) != '\x03')) {
+    cVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0xae8)))));
+    cVar2 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(0x7b2)))));
+    cVar3 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(0x7b5)))));
+    uVar10 = (uint)f33_estimator_pair_axis_margin;
+    iVar9 = f33_abs_s32_wrapping
+                      (camry_host_addr(((undefined *)camry_host_ptr((uint32_t)(((uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar5 + 0x7a2)))) + (uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar5 + 0x7a4)))) >> 1)
+                       - (uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar5 + -0xa0a)))))))));
+    if (((((cVar2 == 'Z') && (cVar1 == '\x11')) &&
+         (((int)(iVar9 - uVar10) < 0 != (iVar9 < 0 && -1 < (int)(iVar9 - uVar10)) &&
+          ((cVar3 == '\0' && (uVar6 == 0x5a)))))) && (uVar7 == 0x5a)) && (uVar8 == 0x5a)) {
+      uVar4 = 0x5a;
+      goto LAB_000c3ec8;
+    }
+  }
+  uVar4 = 0;
+LAB_000c3ec8:
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(0x845))))) = uVar4;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(0x830))))) = (char)uVar6;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(0x831))))) = (char)uVar7;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(0x832))))) = (char)uVar8;
+  return;
+}
+
+
+
 void FUN_000c3edc(void)
 
 {

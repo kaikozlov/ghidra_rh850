@@ -572,6 +572,57 @@ undefined1 FUN_00078896(void)
 
 
 
+/* Ordered admission: second ICU-S offset20 bit0 set returnsB; FEBF6CB0!=1 returns4; FEBF6CB2!=E
+   returnsC. Require nonNULL destination, aligned offset<8000, nonzero aligned length<=64 and
+   inclusive source end<=7FFF; invalid arguments return3. No local destination bounds/alignment
+   check. Run78F28 and map zero to2, nonzero to5. Return5 does not undo destination stores.
+   Conditional native execution is not a hardware readiness or complete application NvM restoration
+   claim. Ordered read admission: second ICUSREG20 bit0 set returnsB; software bytes6CB0!=1
+   or6CB2!=E return4/C. Require nonNULL destination and aligned bounded DataFlash offset/count; Copy
+   result0 maps2 and nonzero maps5 without rollback. Destination alignment is not checked here.
+   Explicit modeled hardware inputs; not a readiness or full NvM restoration claim. */
+
+uint f33_dataflash_read_words(uint dataflash_offset,uint *destination,uint byte_count)
+
+{
+  uint uVar1;
+  int iVar2;
+  
+  uVar1 = f33_icus20_second_read_bit0();
+  if (uVar1 == 0) {
+    if (DAT_febf6cb0 == '\x01') {
+      if (DAT_febf6cb2 == '\x0e') {
+        iVar2 = FUN_00078d80(camry_host_addr(destination));
+        if (((iVar2 == 0) && (iVar2 = FUN_00078d88(dataflash_offset,4), iVar2 == 0)) &&
+           (iVar2 = FUN_00078d9e(dataflash_offset,byte_count,4), iVar2 == 0)) {
+          uVar1 = f33_dataflash_copy_words_ecc(dataflash_offset, camry_host_addr(destination), byte_count);
+          if (uVar1 == 0) {
+            uVar1 = 2;
+          }
+          else {
+            uVar1 = 5;
+          }
+        }
+        else {
+          uVar1 = 3;
+        }
+      }
+      else {
+        uVar1 = 0xc;
+      }
+    }
+    else {
+      uVar1 = 4;
+    }
+  }
+  else {
+    uVar1 = 0xb;
+  }
+  return uVar1;
+}
+
+
+
 /* Ordered ICU-S/software-state/range gates match788B6 except there is no destination argument.
    Enter DataFlash P/E, enable both FHVE controls, set operation3 and submit71,D0. Poll status,
    leave P/E and disable enables on the completed path. Return2 for blank, 7 for nonblank,8 for

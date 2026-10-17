@@ -792,6 +792,19 @@ void FUN_000749e4(void)
 
 
 
+void FUN_000749fc(void)
+
+{
+  DAT_febf6c5a = 0xff;
+  DAT_febf6c59 = 0;
+  DAT_febf6c30 = 0xffffffff;
+  DAT_febf6c48 = 0;
+  FUN_00074872(camry_host_addr(((undefined *)camry_host_ptr(0xfebf6bd0u))), 0, 0x40);
+  return;
+}
+
+
+
 /* Return1 if6B22!=0; otherwise return whether lower status6CB1 equals80. The first branch does not
    read6CB1. Return1 if6B22!=0 without lower status read; otherwise compare6CB1 exactly80. Native
    block-latch and lower-status branches through real consumers. */
@@ -2723,11 +2736,59 @@ void FUN_00076af4(void)
 
 
 
+void FUN_00076be8(ushort param_1)
+
+{
+  int iVar1;
+  uint uVar2;
+  uint uVar3;
+  undefined1 auStack_4c [64];
+  
+  iVar1 = DAT_febf6c24;
+  uVar2 = f33_nvm_payload_page_count(param_1);
+  uVar2 = (uVar2 - f33_nvm_payload_chunks_remaining) * 0x40;
+  uVar3 = f33_nvm_payload_chunk_length(param_1,(ushort)uVar2);
+  FUN_00074872(camry_host_addr(auStack_4c), 0xff, uVar3);
+  FUN_00074c54(iVar1 + (uVar2 & 0xffff) + 4,uVar3,auStack_4c,5,0);
+  return;
+}
+
+
+
 void FUN_00076d02(void)
 
 {
   FUN_0007849e();
   thunk_FUN_000772f8();
+  return;
+}
+
+
+
+void FUN_00076d12(ushort param_1)
+
+{
+  int iVar1;
+  uint uVar2;
+  uint uVar3;
+  int iVar4;
+  undefined4 uVar5;
+  uint uVar6;
+  
+  iVar1 = DAT_febf6c24;
+  uVar2 = f33_nvm_record_offset(param_1,DAT_febf6c42,0);
+  uVar3 = f33_nvm_payload_page_count(param_1);
+  uVar3 = (uVar3 - f33_nvm_payload_chunks_remaining) * 0x40;
+  uVar6 = uVar3 & 0xffff;
+  uVar3 = f33_nvm_payload_chunk_length(param_1,(ushort)uVar3);
+  iVar4 = camry_host_addr(FUN_000776fa(uVar6 + 4 + uVar2,uVar3,((undefined *)camry_host_ptr(0xfebf6b90u)),0));
+  if (iVar4 == 1) {
+    uVar2 = f33_nvm_sum_bytes((ushort)uVar3,((undefined *)camry_host_ptr(0xfebf6b90u)));
+    f33_nvm_checksum_accumulator = f33_nvm_checksum_accumulator + uVar2;
+    FUN_000772ba((0xfebf6b80u), camry_host_addr(((undefined *)camry_host_ptr(0xfebf6b90u))));
+    uVar5 = FUN_000772b4((0xfebf6b80u));
+    FUN_00074c54(iVar1 + uVar6 + 4, uVar3, ((uchar *)camry_host_ptr((uint32_t)(uVar5))), 8, 0);
+  }
   return;
 }
 

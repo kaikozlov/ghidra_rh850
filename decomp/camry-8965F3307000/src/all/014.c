@@ -86,6 +86,39 @@ uint f33_diag_routine_1001_admit(void)
 
 
 
+/* start:4D222(out,32) builds high-byte family support bitmap using low-byte-zero RID
+   entries;outlen32,result2. results:byte,outlen1;other=>7. No asynchronous application service.
+   Raw500AE..50886:
+   R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions.
+   Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32. */
+
+uint f33_diag_routine_1001_family_capabilities
+               (uchar control_type,uchar *unused_input,ushort unused_input_length,uchar *output,
+               ushort *output_length)
+
+{
+  uint32_t puVar1;
+  uint uVar2;
+  
+  puVar1 = 0xfebeb800u;
+  uVar2 = 0;
+  if (control_type == '\x01') {
+    ((void)(unused_input_length), FUN_0004d222(camry_host_addr(output), 0x20));
+    *output_length = 0x20;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3664))))) = 2;
+  }
+  else if (control_type == '\x03') {
+    *output = DAT_febe819c;
+    *output_length = 1;
+  }
+  else {
+    uVar2 = 7;
+  }
+  return uVar2;
+}
+
+
+
 /* 819A==1?5:0. */
 
 uint f33_diag_routine_1000_admit(void)
@@ -100,6 +133,39 @@ uint f33_diag_routine_1000_admit(void)
     uVar1 = 0;
   }
   return uVar1;
+}
+
+
+
+/* start:4D308(1000,out,32) builds10xx RID support bitmap from26918;outlen=32;result=2 immediately.
+   results:copy result byte,outlen1. Other direct control=>7. No asynchronous application service.
+   Raw500AE..50886:
+   R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions.
+   Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32. */
+
+uint f33_diag_routine_1000_capabilities
+               (uchar control_type,uchar *unused_input,ushort unused_input_length,uchar *output,
+               ushort *output_length)
+
+{
+  uint32_t puVar1;
+  uint uVar2;
+  
+  puVar1 = 0xfebeb800u;
+  uVar2 = 0;
+  if (control_type == '\x01') {
+    FUN_0004d308(0x1000, camry_host_addr(output), 0x20);
+    *output_length = 0x20;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3665))))) = 2;
+  }
+  else if (control_type == '\x03') {
+    *output = DAT_febe819b;
+    *output_length = 1;
+  }
+  else {
+    uVar2 = 7;
+  }
+  return uVar2;
 }
 
 
@@ -369,6 +435,38 @@ uint f33_diag_routine_1100_admit(void)
     uVar1 = 0;
   }
   return uVar1;
+}
+
+
+
+/* start4D308(1100,out,32) builds11xx RID support bitmap,result2,outlen32;results byte,len1;other7.
+   Raw500AE..50886:
+   R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions.
+   Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32. */
+
+uint f33_diag_routine_1100_capabilities
+               (uchar control_type,uchar *unused_input,ushort unused_input_length,uchar *output,
+               ushort *output_length)
+
+{
+  uint32_t puVar1;
+  uint uVar2;
+  
+  puVar1 = 0xfebeb800u;
+  uVar2 = 0;
+  if (control_type == '\x01') {
+    FUN_0004d308(0x1100, camry_host_addr(output), 0x20);
+    *output_length = 0x20;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x365e))))) = 2;
+  }
+  else if (control_type == '\x03') {
+    *output = DAT_febe81a2;
+    *output_length = 1;
+  }
+  else {
+    uVar2 = 7;
+  }
+  return uVar2;
 }
 
 
@@ -966,6 +1064,50 @@ void FUN_00050916(undefined1 param_1,undefined2 param_2,undefined2 param_3)
   DAT_febe81ba = param_2;
   DAT_febe81bc = param_3;
   return;
+}
+
+
+
+/* Selector1 formats enabled IDs,2 event data,3 selected event record. Bounded catalogue2AB70 has51
+   populated IDs in64 slots. Map signed helper errors-4/-1 to4/6, otherwise10; do not assign OEM
+   names from ID/type. */
+
+uint f33_serialize_selected_proprietary_event(uchar *output,ushort *length)
+
+{
+  uint uVar1;
+  uint uVar2;
+  
+  if ((output != (uchar *)0x0) && (length != (ushort *)0x0)) {
+    uVar2 = (uint)*length;
+    if (DAT_febe81ad != 0) {
+      if (DAT_febe81ad == 1) {
+        uVar1 = FUN_000557c4(camry_host_addr(output), uVar2);
+      }
+      else if (DAT_febe81ad < 3) {
+        uVar1 = FUN_0005592c(DAT_febe81ba, camry_host_addr(output), uVar2);
+      }
+      else {
+        if (DAT_febe81ad != 3) {
+          return 10;
+        }
+        uVar1 = ((void)(output), (void)(uVar2), FUN_00055c6e(DAT_febe81ba, DAT_febe81bc));
+      }
+      if ((-1 < (int)uVar1) &&
+         ((int)(uVar1 - uVar2) < 0 != ((int)uVar1 < 0 && -1 < (int)(uVar1 - uVar2)) ||
+          uVar1 == uVar2)) {
+        *length = (ushort)uVar1;
+        return 0;
+      }
+      if (uVar1 == 0xfffffffc) {
+        return 4;
+      }
+      if (uVar1 == 0xffffffff) {
+        return 6;
+      }
+    }
+  }
+  return 10;
 }
 
 
@@ -4104,6 +4246,37 @@ void FUN_00052aa6(void)
             (((F33DiagnosticCapture *)camry_host_ptr((uint32_t)(puVar1 + -0x3434))),(F33DiagnosticCapture *)((undefined *)camry_host_ptr(0x2a1f4u)));
   f33_copy_diagnostic_capture
             (((F33DiagnosticCapture *)camry_host_ptr((uint32_t)(puVar1 + -0x3344))),(F33DiagnosticCapture *)((undefined *)camry_host_ptr(0x2a1f4u)));
+  return;
+}
+
+
+
+void FUN_00052ad4(void)
+
+{
+  bool bVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  
+  puVar2 = 0xfebeb800u;
+  uVar3 = f33_nvm_get_record(1, camry_host_addr(((uint *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots)))));
+  bVar1 = false;
+  if (uVar3 != 0x11) {
+    bVar1 = (*((short *)camry_host_ptr((uint32_t)(puVar2 + -0x3492)))) != 0;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x56af))))) = bVar1;
+  uVar3 = f33_nvm_get_record(2, camry_host_addr(((uint *)camry_host_ptr((uint32_t)(puVar2 + -0x3434)))));
+  bVar1 = false;
+  if (uVar3 == 0x10) {
+    bVar1 = (*((short *)camry_host_ptr((uint32_t)(puVar2 + -0x33a2)))) != 0;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x56ae))))) = bVar1;
+  uVar3 = f33_nvm_get_record(3, camry_host_addr(((uint *)camry_host_ptr((uint32_t)(puVar2 + -0x3344)))));
+  bVar1 = false;
+  if (uVar3 == 0x10) {
+    bVar1 = (*((short *)camry_host_ptr((uint32_t)(puVar2 + -0x32b2)))) != 0;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x56ad))))) = bVar1;
   return;
 }
 

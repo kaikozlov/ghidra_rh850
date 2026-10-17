@@ -108,6 +108,41 @@ void f33_filter_established_estimator_difference
 
 
 
+/* WARNING: Removing unreachable block (ram,0x000c417e) */
+/* Start from C0B4, not oldBFEC. Below curve ceiling60000, increment if candidate changed or wrapped
+   abs32(candidate-C080)<AE38/1024. Otherwise retain the input count, even above the ceiling.
+   Publish BFEC and diagnostic ceilingC066. Count starts fromC0B4 rather thanBFEC. Below flat60000
+   ceiling increment for changed candidate or strict center band; ceiling gates increment rather
+   than clamping. */
+
+void f33_advance_estimator_source_count(int candidate,int previous)
+
+{
+  int iVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  int iVar4;
+  ushort uVar5;
+  uint uVar6;
+  
+  uVar5 = DAT_febec0b4;
+  puVar2 = 0xfebeb800u;
+  uVar6 = (uint)DAT_febec0b4;
+  uVar3 = FUN_000d0896(((undefined *)camry_host_ptr(0xaf7bau)),DAT_febeadf4);
+  iVar4 = f33_abs_s32_wrapping(camry_host_addr(((undefined *)camry_host_ptr((uint32_t)(candidate - (*((int *)camry_host_ptr((uint32_t)(puVar2 + 0x880)))))))));
+  iVar1 = (int)(f33_estimator_tracking_band_scale * (uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x9c8))))) / 0x400;
+  if ((uVar6 < uVar3) &&
+     ((iVar4 - iVar1 < 0 != (iVar4 < 0 != iVar1 < 0 && iVar1 < 0 == iVar4 - iVar1 < 0) ||
+      (candidate != previous)))) {
+    uVar5 = uVar5 + 1;
+  }
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0x7ec)))) = uVar5;
+  (*((short *)camry_host_ptr((uint32_t)(puVar2 + 0x866)))) = (short)uVar3;
+  return;
+}
+
+
+
 /* With BFC5==0, first copyC0B4->BFEE. QualifiersC045/C044/C042=5A, AD18=11 and unsignedADF4>=3840
    publishC074=low32(BF78-BFD4) and increment u16C064. Only count>100 runs bounded
    filter/source-count update, then pins100. Failed qualification resets warmup but holds

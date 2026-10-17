@@ -1229,6 +1229,31 @@ void FUN_00003000(void)
 
 
 
+void FUN_00003256(char *param_1)
+
+{
+  char cVar1;
+  uint uVar2;
+  int iVar3;
+  
+  cVar1 = *param_1;
+  uVar2 = 0;
+  do {
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x8d90u + (uint32_t)(uVar2 * 8) * 1u)))) == cVar1) {
+      iVar3 = FUN_00003460((uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x8d91u + (uint32_t)(uVar2 * 8) * 1u)))) * 8 + 0x86dc, camry_host_addr(param_1));
+      if (iVar3 == 0) {
+        return;
+      }
+      FUN_00001d2c(cVar1,0,*(undefined2 *)(param_1 + 4),0);
+      return;
+    }
+    uVar2 = uVar2 + 1;
+  } while (uVar2 < 2);
+  return;
+}
+
+
+
 undefined4 FUN_00003460(int param_1,undefined4 param_2)
 
 {
@@ -1356,6 +1381,28 @@ uint f33_boot_check_rounded_program_span_blank(uint address,uint length)
   
   uVar1 = f33_boot_check_relocated_blank_words(address,(length - 1 & 0xffffff00) + 0x100 >> 2);
   return (uint)(uVar1 != 0);
+}
+
+
+
+void FUN_00003584(void)
+
+{
+  byte bVar1;
+  undefined2 local_c;
+  undefined2 uStack_a;
+  undefined2 uStack_8;
+  undefined2 uStack_6;
+  
+  while (bVar1 = FPMON, (bVar1 & 0x80) == 0) {
+    local_c = 0x8800;
+    uStack_a = 0;
+    uStack_8 = 0xf000;
+    uStack_6 = 0x1f00;
+    FUN_0000167c(camry_host_addr(&local_c));
+    FUN_00007208(0x50);
+  }
+  return;
 }
 
 

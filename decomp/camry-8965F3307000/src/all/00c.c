@@ -384,6 +384,142 @@ void f33_return_only_stub_3226a(void)
 
 
 
+void FUN_0003226c(char param_1)
+
+{
+  int iVar1;
+  uint uVar2;
+  uint uVar3;
+  uint local_20;
+  undefined4 uStack_1c;
+  uint uStack_18;
+  undefined4 uStack_14;
+  
+  uStack_18 = DAT_00021000;
+  uStack_14 = DAT_00021004;
+  local_20 = DAT_00021008;
+  uStack_1c = DAT_0002100c;
+  if (param_1 == '\0') {
+    uVar2 = f33_nvm_get_record(0x208, camry_host_addr(&uStack_18));
+    uVar3 = f33_nvm_get_record(0x209, camry_host_addr(&local_20));
+  }
+  else {
+    if (param_1 == '\x11') {
+      uVar2 = 0x208;
+    }
+    else {
+      if (param_1 != '\"') goto LAB_0003230e;
+      uVar2 = 0x209;
+    }
+    uVar2 = f33_nvm_get_record(uVar2, camry_host_addr(&uStack_18));
+    uVar3 = 0x10;
+  }
+  if ((uVar2 == 0x10) && (uVar3 == 0x10)) {
+    uVar2 = 0;
+    do {
+      iVar1 = uVar2 * 2;
+      *(undefined2 *)(((undefined *)camry_host_ptr(0xfebe68aau)) + iVar1) = (*((undefined2 *)camry_host_ptr((uint32_t)((int)&uStack_14 + iVar1))));
+      if (param_1 == '\0') {
+        *(undefined2 *)(((undefined *)camry_host_ptr(0xfebe68b0u)) + iVar1) = (*((undefined2 *)camry_host_ptr((uint32_t)((int)&uStack_1c + iVar1))));
+      }
+      uVar2 = uVar2 + 1;
+    } while (uVar2 < 2);
+    return;
+  }
+LAB_0003230e:
+  f33_publish_record_coherence_fault();
+  return;
+}
+
+
+
+int FUN_00032316(void)
+
+{
+  uint uVar1;
+  uint uVar2;
+  int iVar3;
+  uint local_1c;
+  undefined4 uStack_18;
+  uint uStack_14;
+  undefined4 uStack_10;
+  
+  uStack_14 = DAT_00021010;
+  uStack_10 = DAT_00021014;
+  local_1c = DAT_00021018;
+  uStack_18 = DAT_0002101c;
+  uVar1 = f33_nvm_get_record(0x208, camry_host_addr(&local_1c));
+  uVar2 = f33_nvm_get_record(0x209, camry_host_addr(&uStack_14));
+  iVar3 = 0;
+  if ((uVar1 == 0x10) && (uVar2 == 0x10)) {
+    uVar1 = 0;
+    do {
+      if ((*((short *)camry_host_ptr((uint32_t)((int)&uStack_18 + uVar1 * 2)))) != (*((short *)camry_host_ptr((uint32_t)((int)&uStack_10 + uVar1 * 2))))) {
+        iVar3 = 0x5a;
+      }
+      uVar1 = uVar1 + 1;
+    } while (uVar1 < 2);
+    if (iVar3 == 0) {
+      FUN_0003226c(0);
+    }
+  }
+  else {
+    iVar3 = 0x5a;
+  }
+  return iVar3;
+}
+
+
+
+void FUN_00032398(void)
+
+{
+  uint32_t puVar1;
+  uint uVar2;
+  uint uVar3;
+  int iVar4;
+  undefined4 uVar5;
+  undefined1 uVar6;
+  uint local_1c [2];
+  uint auStack_14 [2];
+  
+  puVar1 = 0xfebeb800u;
+  uVar2 = f33_nvm_get_record(0x208, camry_host_addr(auStack_14));
+  uVar3 = f33_nvm_get_record(0x209, camry_host_addr(local_1c));
+  if ((uVar2 == 0x10) && (auStack_14[0] == 0xa55a5aa5)) {
+    if ((uVar3 != 0x10) || (local_1c[0] != 0xa55a5aa5)) {
+      uVar5 = 0x11;
+LAB_00032412:
+      FUN_0003226c(uVar5);
+      uVar5 = 0x5aa5a55a;
+      uVar6 = 0x22;
+      f33_report_diagnostic_event_failure(0x123,0x32);
+      goto LAB_0003243c;
+    }
+    iVar4 = FUN_00032316();
+    if (iVar4 == 0) {
+      uVar5 = 0xa55a5aa5;
+      uVar6 = 0x44;
+      f33_report_diagnostic_healthy_observed(0x123);
+      f33_report_diagnostic_healthy_observed(0x12e);
+      goto LAB_0003243c;
+    }
+  }
+  else if ((uVar3 == 0x10) && (local_1c[0] == 0xa55a5aa5)) {
+    uVar5 = 0x22;
+    goto LAB_00032412;
+  }
+  uVar5 = 0x5aa5a55a;
+  uVar6 = 0x22;
+  f33_publish_record_coherence_fault();
+LAB_0003243c:
+  (*((undefined4 *)camry_host_ptr((uint32_t)((int)(0xffffb0b4u + (uint32_t)((int)puVar1)))))) = uVar5;
+  (*((undefined1 *)camry_host_ptr((uint32_t)((int)(0xffffb0a4u + (uint32_t)((int)puVar1)))))) = uVar6;
+  return;
+}
+
+
+
 /* Far-call trampoline: prepare {lp},0 / jarl 0x32398 / dispose 0,{lp},lp; byte-verified against the
    exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
    machine-verified; target semantics not recovered. */
@@ -392,6 +528,61 @@ void thunk_FUN_00032398(void)
 
 {
   FUN_00032398();
+  return;
+}
+
+
+
+/* Get selector0208 into an eight-byte stack record. Success10 selects halfword at
+   record+4+2*low8(index); otherwise use FEBE66CE+2*index. Publish to FEBE68AA+2*index. No local
+   index bound. Native index0 proves ROM source despite conflicting setter-like RAM; OEM meaning
+   unnamed. */
+
+void f33_publish_family2_group8_halfword(uint index)
+
+{
+  int iVar1;
+  undefined2 uVar2;
+  uint32_t puVar3;
+  uint uVar4;
+  uint local_14;
+  undefined4 uStack_10;
+  
+  puVar3 = 0xfebeb800u;
+  local_14 = DAT_00021020;
+  uStack_10 = DAT_00021024;
+  uVar4 = f33_nvm_get_record(0x208, camry_host_addr(&local_14));
+  iVar1 = (index & 0xff) * 2;
+  if (uVar4 == 0x10) {
+    uVar2 = (*((undefined2 *)camry_host_ptr((uint32_t)((int)&uStack_10 + iVar1))));
+  }
+  else {
+    uVar2 = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + iVar1 + -0x5132))));
+  }
+  *(undefined2 *)(((undefined *)camry_host_ptr(0xfebe68aau)) + (index & 0xff) * 2) = uVar2;
+  return;
+}
+
+
+
+void FUN_0003249a(uint param_1)
+
+{
+  int iVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  uint local_14;
+  undefined4 uStack_10;
+  
+  puVar2 = 0xfebeb800u;
+  local_14 = DAT_00021028;
+  uStack_10 = DAT_0002102c;
+  uVar3 = f33_nvm_get_record(0x209, camry_host_addr(&local_14));
+  if (uVar3 == 0x10) {
+    iVar1 = (param_1 & 0xff) * 2;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((int)0xffffb0b0u + (int)(puVar2 + iVar1))))) =
+         (*((undefined2 *)camry_host_ptr((uint32_t)((int)&uStack_10 + iVar1))));
+  }
   return;
 }
 
@@ -643,6 +834,66 @@ uint f33_validate_or_reset_staged_monitor_current_coefficients(void)
     (*((undefined2 *)camry_host_ptr((uint32_t)((int)(0xffffb150u + (uint32_t)((int)puVar1)))))) = 0;
   }
   return uVar2;
+}
+
+
+
+/* First0200 getter must return10 with markerA55A5AA5;328D4 separately gets/copies coefficients,
+   then validation may reset them. Success sets markerA55A5AA5/source44 and diagnostic0124 healthy;
+   failure sets complementary marker5AA5A55A/source22 and event0124/failure32. No persistence or
+   two-read atomicity claim. */
+
+void f33_restore_monitor_current_calibration(void)
+
+{
+  uint32_t puVar1;
+  uint uVar2;
+  undefined4 uVar3;
+  undefined1 uVar4;
+  uint local_34 [10];
+  
+  puVar1 = 0xfebeb800u;
+  uVar2 = f33_nvm_get_record(0x200, camry_host_addr(local_34));
+  if ((uVar2 == 0x10) && (local_34[0] == 0xa55a5aa5)) {
+    f33_copy_monitor_calibration_from_rom_record();
+    uVar2 = f33_validate_or_reset_staged_monitor_current_coefficients();
+    if (uVar2 == 0) {
+      uVar3 = 0xa55a5aa5;
+      uVar4 = 0x44;
+      f33_report_diagnostic_healthy_observed(0x124);
+      goto LAB_00032ae4;
+    }
+  }
+  uVar3 = 0x5aa5a55a;
+  uVar4 = 0x22;
+  f33_report_diagnostic_event_failure(0x124,0x32);
+LAB_00032ae4:
+  (*((undefined4 *)camry_host_ptr((uint32_t)((int)(0xffffb154u + (uint32_t)((int)puVar1)))))) = uVar3;
+  (*((undefined1 *)camry_host_ptr((uint32_t)((int)(0xffffb12cu + (uint32_t)((int)puVar1)))))) = uVar4;
+  return;
+}
+
+
+
+/* First0200 getter checks status10/marker; second independent getter through328D4 copies
+   coefficients;32A76 validates/resets stage. ReturnA55A5AA5 on success, complementary5AA5A55A on
+   failure. Reads ROM, not the setter RAM mirror. */
+
+uint f33_reload_monitor_current_calibration_marker(void)
+
+{
+  uint uVar1;
+  uint local_2c [10];
+  
+  uVar1 = f33_nvm_get_record(0x200, camry_host_addr(local_2c));
+  if ((uVar1 == 0x10) && (local_2c[0] == 0xa55a5aa5)) {
+    f33_copy_monitor_calibration_from_rom_record();
+    uVar1 = f33_validate_or_reset_staged_monitor_current_coefficients();
+    if (uVar1 == 0) {
+      return 0xa55a5aa5;
+    }
+  }
+  return 0x5aa5a55a;
 }
 
 

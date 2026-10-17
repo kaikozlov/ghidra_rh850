@@ -186,6 +186,43 @@ void f33_return_only_stub_4825a(void)
 
 
 
+void FUN_0004825c(void)
+
+{
+  uint32_t puVar1;
+  uint uVar2;
+  undefined1 uVar3;
+  undefined4 local_c;
+  undefined4 uStack_8;
+  
+  puVar1 = 0xfebeb800u;
+  local_c = DAT_000212c8;
+  uStack_8 = DAT_000212cc;
+  uVar2 = f33_nvm_get_record(5, camry_host_addr(&local_c));
+  if (uVar2 == 0x10) {
+    if (((short)local_c == 32000) || ((*((uint16_t *)((uint8_t *)&local_c + 2u))) == 32000)) {
+      uVar3 = 0x5a;
+      goto LAB_000482a4;
+    }
+  }
+  else {
+    (*((uint16_t *)((uint8_t *)&local_c + 0u))) = 32000;
+    (*((uint16_t *)((uint8_t *)&local_c + 2u))) = (short)local_c;
+  }
+  uVar3 = 0;
+LAB_000482a4:
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x3a2e)))) = (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x536e))));
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x3a2c)))) = (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x5368))));
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3a33))))) = uVar3;
+  (*((short *)camry_host_ptr((uint32_t)(puVar1 + -0x3a30)))) = (short)local_c;
+  (*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x3a24)))) = (uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x536e)))) << 0x10;
+  (*((short *)camry_host_ptr((uint32_t)(puVar1 + -0x3a28)))) = (*((uint16_t *)((uint8_t *)&local_c + 2u)));
+  (*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x3a20)))) = (uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x5368)))) << 0x10;
+  return;
+}
+
+
+
 /* Filter unsigned6492 into7DD2/7DDC; mismatch of accumulator high16 and previous output reseeds
    from the input before6A678. Map via31808 into signed7DCE. Condition staged6492 through
    retained7DD2/7DDC; repair inconsistent accumulator high16 by reseeding input, then filter and

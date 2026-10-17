@@ -1161,6 +1161,45 @@ undefined4 f33_return_const_1_7d800(void)
 
 
 
+void FUN_0007d804(short param_1)
+
+{
+  byte bVar1;
+  uint uVar2;
+  undefined8 uVar3;
+  int iVar4;
+  byte bVar5;
+  undefined1 local_2c [32];
+  
+  bVar1 = DAT_00021c6e;
+  uVar3 = 0x23dfc00000000;
+  uVar2 = 0;
+  do {
+    local_2c[uVar2] = 0;
+    uVar2 = uVar2 + 1;
+  } while (uVar2 < 0x20);
+  if (param_1 == 4) {
+    FUN_0008317e(camry_host_addr(local_2c));
+  }
+  FUN_0007e380(camry_host_addr(local_2c));
+  FUN_0007d646(camry_host_addr(local_2c));
+  FUN_000832f4(param_1);
+  FUN_000833cc();
+  FUN_0007e312();
+  for (bVar5 = 0; iVar4 = (int)((ulonglong)uVar3 >> 0x20), bVar5 < bVar1; bVar5 = bVar5 + 1) {
+    FUN_0007e2ea(bVar5);
+    FUN_0007d608(bVar5);
+  }
+  FUN_0007e364();
+  (*(int (*)())*(code **)(iVar4 + -0x21fc))();
+  (*(int (*)())*(code **)(iVar4 + -0x21f8))();
+  (*(int (*)())*(code **)(iVar4 + -0x2200))();
+  FUN_0007e33e();
+  return;
+}
+
+
+
 void FUN_0007d880(void)
 
 {

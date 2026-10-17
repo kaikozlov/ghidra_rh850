@@ -2057,6 +2057,53 @@ void FUN_00066bc8(void)
 
 
 
+/* Snapshot family phases before repairing0670/10A8/10CC with fallback0. Decoded5A returns0. Idle
+   acquisition with an active phase selects2 for family1 before1 for family0. Otherwise step66B16;
+   busy preserves current work. On idle completion,67B58==1 selects2, else 6740A==1 selects1, else
+   preserve work. Native hold repair/fallback and phase priority; request selectors have separate
+   native edge proofs. Decoded5A suppresses selection/progression. Idle acquisition with active
+   phase chooses family1 work2 ahead of family0 work1. Otherwise step acquisition; busy preserves
+   low8 current work, idle tries67B58 then6740A. Native repair/fallback and phase-priority branches;
+   request selectors have separate native edge proofs; complete initialized physical acquisition
+   remains separate. */
+
+uint f33_nvm_select_acquisition_work(uchar current_work)
+
+{
+  uint32_t puVar1;
+  uint uVar2;
+  uint uVar3;
+  uint uVar4;
+  
+  puVar1 = 0xfebeb800u;
+  uVar2 = f33_nvm_get_family0_phase();
+  uVar3 = f33_nvm_get_family1_phase();
+  uVar4 = f33_read_repair_redundant_u8(camry_host_addr(((undefined *)camry_host_ptr((uint32_t)(puVar1 + 0x4e70)))), camry_host_addr(((undefined *)camry_host_ptr((uint32_t)(puVar1 + 0x58a8)))), camry_host_addr(((undefined *)camry_host_ptr((uint32_t)(puVar1 + 0x58cc)))),  '\0');
+  if (uVar4 == 0x5a) {
+    return 0;
+  }
+  if (((uVar2 == 0) && (uVar3 == 0)) || ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x4e73))))) != '\0')) {
+    uVar2 = f33_nvm_step_acquisition_pass();
+    if (uVar2 != 0) {
+      return (uint)current_work;
+    }
+    uVar2 = f33_nvm_select_family1_request();
+    if (uVar2 == 1) {
+      return 2;
+    }
+    uVar2 = f33_nvm_select_family0_request();
+    if (uVar2 != 1) {
+      return (uint)current_work;
+    }
+  }
+  else if (uVar3 != 0) {
+    return 2;
+  }
+  return 1;
+}
+
+
+
 char FUN_00066cc4(char param_1)
 
 {
@@ -2111,6 +2158,71 @@ void f33_nvm_application_cycle(void)
 
 
 
+/* Repair gate0671/10A9/10CD with fallback0; exact5A rejects. Decode family bits8..15 and low8
+   object, ignoring high16. Families0/1 enqueue read-kind11; family2 synchronously refreshes ROM
+   status. Return acceptance, not persistence or CRC success. Static exact-instruction/dataflow
+   review; */
+
+uint f33_nvm_request_record_refresh(uint selector)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uint object;
+  uint uVar3;
+  
+  uVar2 = 0;
+  uVar3 = selector & 0xff00;
+  object = selector & 0xff;
+  uVar1 = f33_read_repair_redundant_u8(camry_host_addr(((undefined *)camry_host_ptr(0xfebf0671u))), camry_host_addr(((undefined *)camry_host_ptr(0xfebf10a9u))), camry_host_addr(((undefined *)camry_host_ptr(0xfebf10cdu))), '\0');
+  if (uVar1 != 0x5a) {
+    if (uVar3 == 0) {
+      uVar2 = f33_nvm_enqueue_family0_read(object);
+    }
+    else if (uVar3 == 0x100) {
+      uVar2 = f33_nvm_enqueue_family1_read(object);
+    }
+    else if (uVar3 == 0x200) {
+      uVar2 = f33_nvm_refresh_family2_record_status(object);
+    }
+  }
+  return uVar2;
+}
+
+
+
+/* Repair gate0672/10AA/10CE with fallback0; exact5A rejects before source access. Dispatch
+   family0/1 RAM update and request admission, or family2 RAM-only update. Unsupported families
+   return0; high16 selector bits ignored. */
+
+uint f33_nvm_set_record(uint selector,uint *source)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uint object;
+  uint uVar3;
+  
+  uVar2 = 0;
+  uVar3 = selector & 0xff00;
+  object = selector & 0xff;
+  uVar1 = f33_read_repair_redundant_u8(camry_host_addr(((undefined *)camry_host_ptr(0xfebf0672u))), camry_host_addr(((undefined *)camry_host_ptr(0xfebf10aau))), camry_host_addr(((undefined *)camry_host_ptr(0xfebf10ceu))), '\0');
+  if (uVar1 != 0x5a) {
+    if (uVar3 == 0) {
+      uVar2 = f33_nvm_set_family0_record(object, camry_host_addr(source));
+    }
+    else if (uVar3 == 0x100) {
+      uVar2 = f33_nvm_set_family1_record(object,source);
+    }
+    else if (uVar3 == 0x200) {
+      uVar2 = f33_nvm_set_family2_record(object,source);
+    }
+  }
+  return uVar2;
+}
+
+
+
 /* Dispatch low8 object by selector bits8..15. Family0 reads raw status; family1 votes with
    fallback12; family2 votes with fallback10. Unknown families returnFF; no physical flash read.
    Static exact-instruction/dataflow review; */
@@ -2136,6 +2248,57 @@ uint f33_nvm_get_record_status(uint selector)
     uVar1 = 0xff;
   }
   return uVar1;
+}
+
+
+
+int FUN_00066e7c(uint param_1,int param_2,uint param_3)
+
+{
+  undefined1 *puVar1;
+  int iVar2;
+  int iVar3;
+  int iVar4;
+  int iVar5;
+  int iVar6;
+  uint uVar7;
+  undefined1 auStack_20 [4];
+  
+  iVar4 = 0;
+  uVar7 = param_1 & 0xfffc;
+  iVar6 = (param_1 & 0xffff) - uVar7;
+  iVar5 = 0;
+  while( true ) {
+    iVar2 = iVar5 - (param_3 & 0xffff);
+    if (iVar2 < 0 == (iVar5 < 0 && -1 < iVar2)) {
+      return iVar4;
+    }
+    if (iVar4 != 0) break;
+    iVar2 = FUN_000689f2(uVar7, camry_host_addr(auStack_20), 4);
+    if (iVar2 == 0) {
+      iVar2 = (param_3 & 0xffff) - iVar5;
+      iVar3 = 4 - iVar6;
+      if (iVar3 - iVar2 < 0 != (iVar3 < 0 != iVar2 < 0 && iVar2 < 0 == iVar3 - iVar2 < 0)) {
+        iVar2 = iVar3;
+      }
+      for (iVar3 = 0;
+          iVar3 - iVar2 < 0 != (iVar3 < 0 != iVar2 < 0 && iVar2 < 0 == iVar3 - iVar2 < 0);
+          iVar3 = iVar3 + 1) {
+        puVar1 = ((undefined1 *)camry_host_ptr((uint32_t)(iVar5 + param_2)));
+        iVar5 = iVar5 + 1;
+        *puVar1 = auStack_20[iVar6 + iVar3];
+      }
+      uVar7 = uVar7 + 4 & 0xffff;
+      iVar6 = 0;
+    }
+    else {
+      if (iVar2 == 0x5a) {
+        return 0x55555555;
+      }
+      iVar4 = -1;
+    }
+  }
+  return iVar4;
 }
 
 
@@ -2258,6 +2421,43 @@ void thunk_FUN_00068318(void)
 
 {
   FUN_00068318();
+  return;
+}
+
+
+
+/* For11 groups, repair status triplet with fallback30. Exact10 bypasses CRC; other values
+   call67090, retry exactly once only on non10, then publish last status across all planes. Real
+   all-recompute sweep publishes10,30,10,30,10,10,10,10,10,10,10 with399 CIN writes. Status10 bypass
+   can preserve prior10 even for the zero-filled groups. For registered11 groups
+   repair0650/1098/10BC with fallback30. otherwise call67090 and retry once only on non10; publish
+   last result. All-recompute records10,30,10,30,10,10,10,10,10,10,10 with399 input writes/425 MMIO
+   writes. Cached10 can bypass even zero-filled ROM groups; shared status also has RAM-update
+   writers. */
+
+void f33_nvm_refresh_family2_status(void)
+
+{
+  int iVar1;
+  undefined8 uVar2;
+  uint uVar3;
+  uint uVar4;
+  
+  uVar2 = 0xfebeb800;
+  for (uVar4 = 0; uVar4 < f33_nvm_family2_object_count; uVar4 = uVar4 + 1 & 0xffff) {
+    iVar1 = (int)uVar2;
+    uVar3 = f33_read_repair_redundant_u8
+                      (camry_host_addr(((uchar *)camry_host_ptr((uint32_t)(uVar4 + iVar1 + 0x4e50)))), camry_host_addr(((uchar *)camry_host_ptr((uint32_t)(uVar4 + iVar1 + 0x5898)))), camry_host_addr(((uchar *)camry_host_ptr((uint32_t)(uVar4 + iVar1 + 0x58bc)))), '0');
+    if (uVar3 != 0x10) {
+      uVar3 = f33_nvm_check_family2_rom_crc((ushort)uVar4);
+      if (uVar3 != 0x10) {
+        uVar3 = f33_nvm_check_family2_rom_crc((ushort)uVar4);
+      }
+      f33_publish_redundant_u8
+                ((uchar)uVar3,((uchar *)camry_host_ptr((uint32_t)(uVar4 + iVar1 + 0x4e50))),((uchar *)camry_host_ptr((uint32_t)(uVar4 + iVar1 + 0x5898))),
+                 ((uchar *)camry_host_ptr((uint32_t)(uVar4 + iVar1 + 0x58bc))));
+    }
+  }
   return;
 }
 

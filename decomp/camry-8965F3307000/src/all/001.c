@@ -317,6 +317,85 @@ void f33_boot_reset_flash_operation_queue(void)
 
 
 
+void FUN_00004678(uint param_1,int param_2,char param_3,uint param_4,undefined4 *param_5)
+
+{
+  undefined4 *puVar1;
+  undefined4 *puVar2;
+  bool bVar3;
+  bool bVar4;
+  undefined8 uVar5;
+  uint uVar6;
+  ushort uVar7;
+  undefined4 local_34;
+  undefined4 uStack_30;
+  uint uStack_2c;
+  undefined4 uStack_28;
+  undefined4 uStack_24;
+  
+  uVar5 = 0x869c00000000;
+  puVar1 = ((undefined4 *)camry_host_ptr((uint32_t)(PTR_PTR_00008940 + (param_1 & 0xffff) * 8)));
+  uVar6 = (uint)(*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(puVar1) + 6))));
+  uVar7 = *(ushort *)(puVar1 + 1);
+  bVar4 = false;
+  do {
+    if (uVar6 == 0) {
+      return;
+    }
+    puVar2 = ((undefined4 *)camry_host_ptr((uint32_t)((uint)uVar7 * 0xc + *(int *)((int)((ulonglong)uVar5 >> 0x20) + 0x29c))));
+    if ((param_2 == puVar2[1]) && (param_3 == *(char *)(puVar2 + 2))) {
+      bVar3 = true;
+      local_34 = 1;
+      uStack_30 = *puVar2;
+      uStack_28 = *param_5;
+      uStack_24 = param_5[1];
+      uStack_2c = param_4 & 0xff;
+      FUN_00003460(*puVar1, camry_host_addr(&local_34));
+    }
+    else {
+      bVar3 = false;
+      if (bVar4) {
+        return;
+      }
+    }
+    uVar7 = uVar7 + 1;
+    uVar6 = uVar6 - 1;
+    bVar4 = bVar3;
+  } while( true );
+}
+
+
+
+void FUN_000046ee(uint param_1,uint param_2,int param_3,char param_4)
+
+{
+  undefined4 *puVar1;
+  undefined4 *puVar2;
+  ushort uVar3;
+  uint uVar4;
+  uint local_c;
+  undefined4 uStack_8;
+  
+  local_c = param_1 & 0xff;
+  puVar1 = ((undefined4 *)camry_host_ptr((uint32_t)(PTR_PTR_00008940 + (param_2 & 0xffff) * 8)));
+  uVar4 = (uint)(*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(puVar1) + 6))));
+  uVar3 = *(ushort *)(puVar1 + 1);
+  while( true ) {
+    if (uVar4 == 0) {
+      return;
+    }
+    puVar2 = ((undefined4 *)camry_host_ptr((uint32_t)(PTR_DAT_0000893c + (uint)uVar3 * 0xc)));
+    if ((param_3 == puVar2[1]) && (param_4 == *(char *)(puVar2 + 2))) break;
+    uVar3 = uVar3 + 1;
+    uVar4 = uVar4 - 1;
+  }
+  uStack_8 = *puVar2;
+  FUN_00003460(*puVar1, camry_host_addr(&local_c));
+  return;
+}
+
+
+
 void FUN_00004744(undefined2 param_1,undefined4 param_2,undefined1 param_3)
 
 {
@@ -2300,6 +2379,42 @@ void f33_boot_diagnostic_timer_services(void)
   if (DAT_febf2bd0 != '\0') {
     f33_boot_diagnostic_timeout_progress();
     f33_boot_diagnostic_timer_progress();
+  }
+  return;
+}
+
+
+
+/* Resetsresidentserviceworkers;tag0preparesdriverandreplaysrecordsessionthrough6504;tagFFwaitswithtimestamp.
+    */
+
+void f33_boot_diagnostic_initialize_from_handoff(void)
+
+{
+  int local_2c [8];
+  
+  if (DAT_febf2bd0 != '\0') {
+    DAT_febf2bd1 = 0;
+    DAT_febf2bd2 = 0;
+    FUN_00006320();
+    FUN_00005086();
+    f33_boot_region_authentication_clear_activity();
+    FUN_00006ea2();
+    f33_boot_block_transform_clear_activity();
+    FUN_00006d02();
+    FUN_00001514(camry_host_addr(local_2c), 8);
+    if (local_2c[0] == 0) {
+      DAT_febf2bcc = 0xffffffff;
+      DAT_febf2bd1 = 1;
+      DAT_febf2bd2 = 0;
+      FUN_0000152a();
+      FUN_0000519c();
+      f33_boot_diagnostic_replay_handoff_session();
+    }
+    else if (local_2c[0] == 0xff) {
+      DAT_febf2bcc = 0xffffffff;
+      DAT_febf2bc8 = FUN_00001d24();
+    }
   }
   return;
 }

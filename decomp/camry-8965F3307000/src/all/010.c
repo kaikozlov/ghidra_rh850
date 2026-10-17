@@ -99,6 +99,52 @@ uint f33_admit_sample_difference_elapsed_a(void)
 
 
 
+/* Configured mode0200 channela monitor; 1 eight-byte states at7654. Own qualification6764 bit0
+   holds state without reset. Gate baseline_zero (numeric states, no physical meaning); threshold
+   pass0/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot10 with
+   kind(s)0x1d,0x32; no confirmed source leaves previous action untouched. Callback table28460;
+   failure events0x79. See configured-family matrix for readiness sequencing and exact predicate. */
+
+void f33_step_sample_difference_window_a(void)
+
+{
+  ushort uVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  uint uVar4;
+  
+  uVar1 = DAT_febe6764;
+  puVar2 = 0xfebeb800u;
+  uVar3 = f33_admit_sample_difference_monitor_a();
+  uVar4 = f33_admit_sample_difference_elapsed_a();
+  if ((uVar3 == 0x5a) && (uVar4 == 0x5a)) {
+    if (DAT_0002bbac == 'Z') {
+      f33_force_unconfirmed_terminal_monitor_healthy
+                (camry_host_addr(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe54u + (uint32_t)((int)puVar2)))))), 
+                 (0x2b69eu), (0x28460u));
+    }
+    else if ((uVar1 & 1) == 0) {
+      f33_step_terminal_monitor
+                (((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe54u + (uint32_t)((int)puVar2))))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b69eu)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x28460u)))));
+    }
+  }
+  else {
+    f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe54u + (uint32_t)((int)puVar2))))));
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbe54u + (uint32_t)((int)puVar2) * 1u)))) == '\0') {
+    FUN_00032036(0x15);
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbe54u + (uint32_t)((int)puVar2) * 1u)))) == '\"') {
+    f33_retain_and_clear_fault_record(10);
+    f33_encode_fault_action_kind('\n','\x1d');
+    f33_encode_fault_action_kind('\n','2');
+    f33_select_current_fault_record(10);
+  }
+  return;
+}
+
+
+
 /* No-argument configured classifier. Gate baseline_zero: same as baseline_one except6614.bit0==0.
    Closed gate returns44, otherwise22 iff (int32(uint16(66B8))-int32(uint16(66AE))>1180
    &&66B8<=4736) || (66AE<1055 &&66B8>4736), else11. Full threshold partitions preserved in ROM. No
@@ -235,6 +281,52 @@ uint f33_admit_sample_difference_elapsed_b(void)
   }
   DAT_febe6809 = (char)uVar1;
   return uVar1;
+}
+
+
+
+/* Configured mode0200 channelb monitor; 1 eight-byte states at765C. Own qualification6764 bit1
+   holds state without reset. Gate baseline_zero (numeric states, no physical meaning); threshold
+   pass0/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot11 with
+   kind(s)0x1e,0x32; no confirmed source leaves previous action untouched. Callback table2846C;
+   failure events0xb8. See configured-family matrix for readiness sequencing and exact predicate. */
+
+void f33_step_sample_difference_window_b(void)
+
+{
+  ushort uVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  uint uVar4;
+  
+  uVar1 = DAT_febe6764;
+  puVar2 = 0xfebeb800u;
+  uVar3 = f33_admit_sample_difference_monitor_b();
+  uVar4 = f33_admit_sample_difference_elapsed_b();
+  if ((uVar3 == 0x5a) && (uVar4 == 0x5a)) {
+    if (DAT_0002bbb0 == 'Z') {
+      f33_force_unconfirmed_terminal_monitor_healthy
+                (camry_host_addr(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe5cu + (uint32_t)((int)puVar2)))))), 
+                 (0x2b6a2u), (0x2846cu));
+    }
+    else if ((uVar1 >> 1 & 1) == 0) {
+      f33_step_terminal_monitor
+                (((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe5cu + (uint32_t)((int)puVar2))))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b6a2u)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x2846cu)))));
+    }
+  }
+  else {
+    f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe5cu + (uint32_t)((int)puVar2))))));
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbe5cu + (uint32_t)((int)puVar2) * 1u)))) == '\0') {
+    FUN_00032050(0x15);
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbe5cu + (uint32_t)((int)puVar2) * 1u)))) == '\"') {
+    f33_retain_and_clear_fault_record(0xb);
+    f33_encode_fault_action_kind('\v','\x1e');
+    f33_encode_fault_action_kind('\v','2');
+    f33_select_current_fault_record(0xb);
+  }
+  return;
 }
 
 
@@ -438,6 +530,51 @@ uint f33_admit_matched_state2_status_monitor_a(void)
 
 
 
+/* Configured mode020A channela monitor; 1 eight-byte states at7664. Own qualification6764 bit0
+   holds state without reset. Gate off_both2 (numeric states, no physical meaning); threshold
+   pass2/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot10 with
+   kind(s)0x1d; no confirmed source leaves previous action untouched. Callback table28478; failure
+   events0x78. See configured-family matrix for readiness sequencing and exact predicate. */
+
+void f33_step_matched_state2_status_bit_a(void)
+
+{
+  ushort uVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  
+  uVar1 = DAT_febe6764;
+  puVar2 = 0xfebeb800u;
+  uVar3 = f33_admit_matched_state2_status_monitor_a();
+  if (uVar3 == 0x5a) {
+    if (DAT_0002bbb4 == 'Z') {
+      f33_force_unconfirmed_terminal_monitor_healthy
+                (camry_host_addr(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe64u + (uint32_t)((int)puVar2)))))), 
+                 (0x2b6a6u), (0x28478u))
+      ;
+    }
+    else if ((uVar1 & 1) == 0) {
+      f33_step_terminal_monitor
+                (((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe64u + (uint32_t)((int)puVar2))))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b6a6u)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x28478u)))))
+      ;
+    }
+  }
+  else {
+    f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe64u + (uint32_t)((int)puVar2))))));
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbe64u + (uint32_t)((int)puVar2) * 1u)))) == '\0') {
+    FUN_00032036(0x1f);
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbe64u + (uint32_t)((int)puVar2) * 1u)))) == '\"') {
+    f33_retain_and_clear_fault_record(10);
+    f33_encode_fault_action_kind('\n','\x1d');
+    f33_select_current_fault_record(10);
+  }
+  return;
+}
+
+
+
 /* No-argument configured classifier. Gate off_both2: requested==2 &&observed==2
    &&(6620&(6<<b))==(4<<b) &&(661C&(6<<b))==(4<<b) &&bit(6628,b+1)==0 &&6614.bit0==0 &&
    own65F6/65F7==5A. Closed gate returns44, otherwise22 iff 8282==5A, else11. Full threshold
@@ -629,6 +766,51 @@ uint f33_admit_matched_state2_status_monitor_b(void)
 
 
 
+/* Configured mode020A channelb monitor; 1 eight-byte states at766C. Own qualification6764 bit1
+   holds state without reset. Gate off_both2 (numeric states, no physical meaning); threshold
+   pass2/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot11 with
+   kind(s)0x1e; no confirmed source leaves previous action untouched. Callback table28484; failure
+   events0xc4. See configured-family matrix for readiness sequencing and exact predicate. */
+
+void f33_step_matched_state2_status_bit_b(void)
+
+{
+  ushort uVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  
+  uVar1 = DAT_febe6764;
+  puVar2 = 0xfebeb800u;
+  uVar3 = f33_admit_matched_state2_status_monitor_b();
+  if (uVar3 == 0x5a) {
+    if (DAT_0002bbb8 == 'Z') {
+      f33_force_unconfirmed_terminal_monitor_healthy
+                (camry_host_addr(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe6cu + (uint32_t)((int)puVar2)))))), 
+                 (0x2b6aau), (0x28484u))
+      ;
+    }
+    else if ((uVar1 >> 1 & 1) == 0) {
+      f33_step_terminal_monitor
+                (((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe6cu + (uint32_t)((int)puVar2))))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b6aau)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x28484u)))))
+      ;
+    }
+  }
+  else {
+    f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe6cu + (uint32_t)((int)puVar2))))));
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbe6cu + (uint32_t)((int)puVar2) * 1u)))) == '\0') {
+    FUN_00032050(0x1f);
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbe6cu + (uint32_t)((int)puVar2) * 1u)))) == '\"') {
+    f33_retain_and_clear_fault_record(0xb);
+    f33_encode_fault_action_kind('\v','\x1e');
+    f33_select_current_fault_record(0xb);
+  }
+  return;
+}
+
+
+
 /* No-argument configured classifier. Gate off_both2: requested==2 &&observed==2
    &&(6620&(6<<b))==(4<<b) &&(661C&(6<<b))==(4<<b) &&bit(6628,b+1)==0 &&6614.bit0==0 &&
    own65F6/65F7==5A. Closed gate returns44, otherwise22 iff 8281==5A, else11. Full threshold
@@ -725,6 +907,51 @@ uint f33_admit_baseline_sample_monitor_a(void)
 
 
 
+/* Configured mode0202 channela monitor; 1 eight-byte states at7674. Own qualification6764 bit0
+   holds state without reset. Gate baseline_zero (numeric states, no physical meaning); threshold
+   pass0/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot10 with
+   kind(s)0x1d; no confirmed source leaves previous action untouched. Callback table28490; failure
+   events0x9c. See configured-family matrix for readiness sequencing and exact predicate. */
+
+void f33_step_baseline_sample_threshold_a(void)
+
+{
+  ushort uVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  
+  uVar1 = DAT_febe6764;
+  puVar2 = 0xfebeb800u;
+  uVar3 = f33_admit_baseline_sample_monitor_a();
+  if (uVar3 == 0x5a) {
+    if (DAT_0002bbbc == 'Z') {
+      f33_force_unconfirmed_terminal_monitor_healthy
+                (camry_host_addr(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe74u + (uint32_t)((int)puVar2)))))), 
+                 (0x2b6aeu), (0x28490u))
+      ;
+    }
+    else if ((uVar1 & 1) == 0) {
+      f33_step_terminal_monitor
+                (((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe74u + (uint32_t)((int)puVar2))))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b6aeu)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x28490u)))))
+      ;
+    }
+  }
+  else {
+    f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe74u + (uint32_t)((int)puVar2))))));
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbe74u + (uint32_t)((int)puVar2) * 1u)))) == '\0') {
+    FUN_00032036(0x17);
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbe74u + (uint32_t)((int)puVar2) * 1u)))) == '\"') {
+    f33_retain_and_clear_fault_record(10);
+    f33_encode_fault_action_kind('\n','\x1d');
+    f33_select_current_fault_record(10);
+  }
+  return;
+}
+
+
+
 /* No-argument configured classifier. Gate baseline_zero: same as baseline_one except6614.bit0==0.
    Closed gate returns44, otherwise22 iff 66B2>1247 (both3328 partitions), else11. Full threshold
    partitions preserved in ROM. No physical units/source identity asserted. */
@@ -815,6 +1042,51 @@ uint f33_admit_baseline_sample_monitor_b(void)
   }
   DAT_febe682c = (char)uVar1;
   return uVar1;
+}
+
+
+
+/* Configured mode0202 channelb monitor; 1 eight-byte states at767C. Own qualification6764 bit1
+   holds state without reset. Gate baseline_zero (numeric states, no physical meaning); threshold
+   pass0/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot11 with
+   kind(s)0x1e; no confirmed source leaves previous action untouched. Callback table2849C; failure
+   events0xc6. See configured-family matrix for readiness sequencing and exact predicate. */
+
+void f33_step_baseline_sample_threshold_b(void)
+
+{
+  ushort uVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  
+  uVar1 = DAT_febe6764;
+  puVar2 = 0xfebeb800u;
+  uVar3 = f33_admit_baseline_sample_monitor_b();
+  if (uVar3 == 0x5a) {
+    if (DAT_0002bbc0 == 'Z') {
+      f33_force_unconfirmed_terminal_monitor_healthy
+                (camry_host_addr(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe7cu + (uint32_t)((int)puVar2)))))), 
+                 (0x2b6b2u), (0x2849cu))
+      ;
+    }
+    else if ((uVar1 >> 1 & 1) == 0) {
+      f33_step_terminal_monitor
+                (((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe7cu + (uint32_t)((int)puVar2))))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b6b2u)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x2849cu)))))
+      ;
+    }
+  }
+  else {
+    f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe7cu + (uint32_t)((int)puVar2))))));
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbe7cu + (uint32_t)((int)puVar2) * 1u)))) == '\0') {
+    FUN_00032050(0x17);
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbe7cu + (uint32_t)((int)puVar2) * 1u)))) == '\"') {
+    f33_retain_and_clear_fault_record(0xb);
+    f33_encode_fault_action_kind('\v','\x1e');
+    f33_select_current_fault_record(0xb);
+  }
+  return;
 }
 
 
@@ -1015,6 +1287,50 @@ uint f33_admit_observed_state_sample_monitor_a(void)
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb031u + (uint32_t)((int)camry_host_addr(puVar1)) * 1u)))) = (char)uVar3;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb030u + (uint32_t)((int)camry_host_addr(puVar1)) * 1u)))) = (char)uVar4;
   return uVar3;
+}
+
+
+
+/* Configured mode0207 channela monitor; 1 eight-byte states at7684. Own qualification6764 bit0
+   holds state without reset. Gate observed2_zero (numeric states, no physical meaning); threshold
+   pass0/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot10 with
+   kind(s)0x1d; no confirmed source leaves previous action untouched. Callback table284A8; failure
+   events0x7b. See configured-family matrix for readiness sequencing and exact predicate. */
+
+void f33_step_observed_state_sample_regions_a(void)
+
+{
+  ushort uVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  
+  uVar1 = DAT_febe6764;
+  puVar2 = 0xfebeb800u;
+  uVar3 = f33_admit_observed_state_sample_monitor_a();
+  if (uVar3 == 0x5a) {
+    if (DAT_0002bbc4 == 'Z') {
+      f33_force_unconfirmed_terminal_monitor_healthy
+                (camry_host_addr(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe84u + (uint32_t)((int)puVar2)))))), 
+                 (0x2b6b6u), 
+                 (0x284a8u));
+    }
+    else if ((uVar1 & 1) == 0) {
+      f33_step_terminal_monitor
+                (((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe84u + (uint32_t)((int)puVar2))))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b6b6u)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x284a8u)))));
+    }
+  }
+  else {
+    f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe84u + (uint32_t)((int)puVar2))))));
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbe84u + (uint32_t)((int)puVar2) * 1u)))) == '\0') {
+    FUN_00032036(0x1c);
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbe84u + (uint32_t)((int)puVar2) * 1u)))) == '\"') {
+    f33_retain_and_clear_fault_record(10);
+    f33_encode_fault_action_kind('\n','\x1d');
+    f33_select_current_fault_record(10);
+  }
+  return;
 }
 
 
@@ -1227,6 +1543,50 @@ uint f33_admit_observed_state_sample_monitor_b(void)
 
 
 
+/* Configured mode0207 channelb monitor; 1 eight-byte states at768C. Own qualification6764 bit1
+   holds state without reset. Gate observed2_zero (numeric states, no physical meaning); threshold
+   pass0/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot11 with
+   kind(s)0x1e; no confirmed source leaves previous action untouched. Callback table284B4; failure
+   events0xba. See configured-family matrix for readiness sequencing and exact predicate. */
+
+void f33_step_observed_state_sample_regions_b(void)
+
+{
+  ushort uVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  
+  uVar1 = DAT_febe6764;
+  puVar2 = 0xfebeb800u;
+  uVar3 = f33_admit_observed_state_sample_monitor_b();
+  if (uVar3 == 0x5a) {
+    if (DAT_0002bbc8 == 'Z') {
+      f33_force_unconfirmed_terminal_monitor_healthy
+                (camry_host_addr(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe8cu + (uint32_t)((int)puVar2)))))), 
+                 (0x2b6bau), 
+                 (0x284b4u));
+    }
+    else if ((uVar1 >> 1 & 1) == 0) {
+      f33_step_terminal_monitor
+                (((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe8cu + (uint32_t)((int)puVar2))))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b6bau)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x284b4u)))));
+    }
+  }
+  else {
+    f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe8cu + (uint32_t)((int)puVar2))))));
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbe8cu + (uint32_t)((int)puVar2) * 1u)))) == '\0') {
+    FUN_00032050(0x1c);
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbe8cu + (uint32_t)((int)puVar2) * 1u)))) == '\"') {
+    f33_retain_and_clear_fault_record(0xb);
+    f33_encode_fault_action_kind('\v','\x1e');
+    f33_select_current_fault_record(0xb);
+  }
+  return;
+}
+
+
+
 /* No-argument configured classifier. Gate observed2_zero: requested==0 &&observed==2
    &&bit(6620,b+2)==1 &&(661C&(6<<b))==(2<<b) &&bit(6628,b+1)==1 &&6614.bit0==0 &&65F0==5A. Closed
    gate returns44, otherwise22 iff 66B4<886 ||66B4>6020 (six-region predicate partitions66B8
@@ -1331,6 +1691,75 @@ uint f33_admit_sample_range_triplet_a(void)
   }
   DAT_febe6848 = (char)uVar1;
   return uVar1;
+}
+
+
+
+/* Configured mode020B channela monitor; 3 eight-byte states at7694. Own qualification6764 bit0
+   holds state without reset. Gate range_both2 (numeric states, no physical meaning); threshold
+   pass0/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot10 with
+   kind(s)0x1b; no confirmed source leaves previous action untouched. Callback table284C0; failure
+   events0x66,0x67,0x68,0x69,0x6a,0x6b. See configured-family matrix for readiness sequencing and
+   exact predicate. Native unsigned-range root preserves a preceding producer at threshold equality,
+   then replaces current action after strict confirmation while retaining the old record. No
+   physical source/fault claim. */
+
+void f33_step_sample_range_triplet_a(void)
+
+{
+  ushort uVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  
+  uVar1 = DAT_febe6764;
+  puVar2 = 0xfebeb800u;
+  uVar3 = f33_admit_sample_range_triplet_a();
+  if (uVar3 == 0x5a) {
+    if (DAT_0002bbcc == 'Z') {
+      f33_force_unconfirmed_terminal_monitor_healthy
+                (camry_host_addr(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe94u + (uint32_t)((int)puVar2)))))), 
+                 (0x2b6beu), (0x284c0u));
+      f33_force_unconfirmed_terminal_monitor_healthy
+                (camry_host_addr(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe9cu + (uint32_t)((int)puVar2)))))), 
+                 (0x2b6beu), (0x284c0u));
+      f33_force_unconfirmed_terminal_monitor_healthy
+                (camry_host_addr(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbea4u + (uint32_t)((int)puVar2)))))), 
+                 (0x2b6beu), (0x284c0u));
+    }
+    else if ((uVar1 & 1) == 0) {
+      (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbeacu + (uint32_t)((int)puVar2)))))) = 0x66;
+      (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbeaeu + (uint32_t)((int)puVar2)))))) = 0x69;
+      (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbeb0u + (uint32_t)((int)puVar2)))))) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x53b0))));
+      f33_step_terminal_monitor
+                (((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe94u + (uint32_t)((int)puVar2))))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b6beu)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x284c0u)))));
+      (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbeacu + (uint32_t)((int)puVar2)))))) = 0x67;
+      (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbeaeu + (uint32_t)((int)puVar2)))))) = 0x6a;
+      (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbeb0u + (uint32_t)((int)puVar2)))))) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x53ae))));
+      f33_step_terminal_monitor
+                (((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe9cu + (uint32_t)((int)puVar2))))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b6beu)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x284c0u)))));
+      (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbeacu + (uint32_t)((int)puVar2)))))) = 0x68;
+      (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbeaeu + (uint32_t)((int)puVar2)))))) = 0x6b;
+      (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbeb0u + (uint32_t)((int)puVar2)))))) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x53ac))));
+      f33_step_terminal_monitor
+                (((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbea4u + (uint32_t)((int)puVar2))))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b6beu)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x284c0u)))));
+    }
+  }
+  else {
+    f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe94u + (uint32_t)((int)puVar2))))));
+    f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe9cu + (uint32_t)((int)puVar2))))));
+    f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbea4u + (uint32_t)((int)puVar2))))));
+  }
+  if ((((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbe94u + (uint32_t)((int)puVar2) * 1u)))) == '\0') && ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbe9cu + (uint32_t)((int)puVar2) * 1u)))) == '\0')) &&
+     ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbea4u + (uint32_t)((int)puVar2) * 1u)))) == '\0')) {
+    FUN_00032036(0x20);
+  }
+  if ((((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbe94u + (uint32_t)((int)puVar2) * 1u)))) == '\"') || ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbe9cu + (uint32_t)((int)puVar2) * 1u)))) == '\"')) ||
+     ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbea4u + (uint32_t)((int)puVar2) * 1u)))) == '\"')) {
+    f33_retain_and_clear_fault_record(10);
+    f33_encode_fault_action_kind('\n','\x1b');
+    f33_select_current_fault_record(10);
+  }
+  return;
 }
 
 
@@ -1445,6 +1874,73 @@ uint f33_admit_sample_range_triplet_b(void)
 
 
 
+/* Configured mode020B channelb monitor; 3 eight-byte states at76B4. Own qualification6764 bit1
+   holds state without reset. Gate range_both2 (numeric states, no physical meaning); threshold
+   pass0/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot11 with
+   kind(s)0x1c; no confirmed source leaves previous action untouched. Callback table284CC; failure
+   events0xf5,0xf6,0xf7,0xf8,0xf9,0xfa. See configured-family matrix for readiness sequencing and
+   exact predicate. */
+
+void f33_step_sample_range_triplet_b(void)
+
+{
+  ushort uVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  
+  uVar1 = DAT_febe6764;
+  puVar2 = 0xfebeb800u;
+  uVar3 = f33_admit_sample_range_triplet_b();
+  if (uVar3 == 0x5a) {
+    if (DAT_0002bbd0 == 'Z') {
+      f33_force_unconfirmed_terminal_monitor_healthy
+                (camry_host_addr(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbeb4u + (uint32_t)((int)puVar2)))))), 
+                 (0x2b6c2u), (0x284ccu));
+      f33_force_unconfirmed_terminal_monitor_healthy
+                (camry_host_addr(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbebcu + (uint32_t)((int)puVar2)))))), 
+                 (0x2b6c2u), (0x284ccu));
+      f33_force_unconfirmed_terminal_monitor_healthy
+                (camry_host_addr(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbec4u + (uint32_t)((int)puVar2)))))), 
+                 (0x2b6c2u), (0x284ccu));
+    }
+    else if ((uVar1 >> 1 & 1) == 0) {
+      (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbeccu + (uint32_t)((int)puVar2)))))) = 0xf5;
+      (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbeceu + (uint32_t)((int)puVar2)))))) = 0xf8;
+      (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbed0u + (uint32_t)((int)puVar2)))))) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x53aa))));
+      f33_step_terminal_monitor
+                (((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbeb4u + (uint32_t)((int)puVar2))))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b6c2u)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x284ccu)))));
+      (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbeccu + (uint32_t)((int)puVar2)))))) = 0xf6;
+      (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbeceu + (uint32_t)((int)puVar2)))))) = 0xf9;
+      (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbed0u + (uint32_t)((int)puVar2)))))) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x53a8))));
+      f33_step_terminal_monitor
+                (((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbebcu + (uint32_t)((int)puVar2))))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b6c2u)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x284ccu)))));
+      (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbeccu + (uint32_t)((int)puVar2)))))) = 0xf7;
+      (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbeceu + (uint32_t)((int)puVar2)))))) = 0xfa;
+      (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbed0u + (uint32_t)((int)puVar2)))))) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x53a6))));
+      f33_step_terminal_monitor
+                (((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbec4u + (uint32_t)((int)puVar2))))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b6c2u)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x284ccu)))));
+    }
+  }
+  else {
+    f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbeb4u + (uint32_t)((int)puVar2))))));
+    f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbebcu + (uint32_t)((int)puVar2))))));
+    f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbec4u + (uint32_t)((int)puVar2))))));
+  }
+  if ((((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbeb4u + (uint32_t)((int)puVar2) * 1u)))) == '\0') && ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbebcu + (uint32_t)((int)puVar2) * 1u)))) == '\0')) &&
+     ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbec4u + (uint32_t)((int)puVar2) * 1u)))) == '\0')) {
+    FUN_00032050(0x20);
+  }
+  if ((((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbeb4u + (uint32_t)((int)puVar2) * 1u)))) == '\"') || ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbebcu + (uint32_t)((int)puVar2) * 1u)))) == '\"')) ||
+     ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbec4u + (uint32_t)((int)puVar2) * 1u)))) == '\"')) {
+    f33_retain_and_clear_fault_record(0xb);
+    f33_encode_fault_action_kind('\v','\x1c');
+    f33_select_current_fault_record(0xb);
+  }
+  return;
+}
+
+
+
 /* No-argument configured classifier. Gate range_both2: same as off_both2 but admission
    own65F2/65F3==5A. Closed gate returns44, otherwise22 iff same unsigned range10224..54526;
    first/second eventF5..F7/F8..FA, else11. Full threshold partitions preserved in ROM. No physical
@@ -1532,6 +2028,97 @@ void FUN_00041596(void)
 
 
 
+/* Configured mode0204 channela monitor; 3 eight-byte states at76D4. Own qualification6764 bit0
+   holds state without reset. Gate baseline_one (numeric states, no physical meaning); threshold
+   pass2/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot10 with
+   kind(s)0x1d; no confirmed source leaves previous action untouched. Callback table284D8; failure
+   events0x54,0x55,0x56. See configured-family matrix for readiness sequencing and exact predicate.
+    */
+
+void f33_step_startup_status_bit_triplet_a(void)
+
+{
+  int iVar1;
+  uint32_t puVar2;
+  char cVar3;
+  ushort uVar4;
+  byte bVar5;
+  
+  bVar5 = DAT_febe6859;
+  cVar3 = DAT_febe6858;
+  puVar2 = 0xfebeb800u;
+  if (DAT_febe685a < DAT_0002b7d4) {
+    iVar1 = 0;
+    uVar4 = DAT_febe685a + 1;
+  }
+  else {
+    iVar1 = 0x5a;
+    uVar4 = DAT_febe685a;
+  }
+  if (DAT_0002bbd4 == 'Z') {
+    puVar2 = 0xfebeb800u;
+    f33_force_unconfirmed_terminal_monitor_healthy
+              (camry_host_addr(f33_startup_status_bit_triplet_a_states), (0x2b6c6u), 
+               (0x284d8u));
+    f33_force_unconfirmed_terminal_monitor_healthy
+              (camry_host_addr(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbedcu + (uint32_t)((int)puVar2)))))), 
+               (0x2b6c6u), (0x284d8u))
+    ;
+    f33_force_unconfirmed_terminal_monitor_healthy
+              (camry_host_addr(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbee4u + (uint32_t)((int)puVar2)))))), 
+               (0x2b6c6u), (0x284d8u))
+    ;
+    goto LAB_000416ac;
+  }
+  if ((DAT_febe6764 & 1) != 0) goto LAB_000416ac;
+  if (((DAT_febe6858 == '\0') && ((DAT_febe64cc & 0x7000) == 0)) && ((DAT_febe64cc & 1) == 0)) {
+    if (DAT_febe6859 < DAT_0002b7d2) {
+      bVar5 = DAT_febe6859 + 1;
+      goto LAB_00041620;
+    }
+    bVar5 = 0;
+    cVar3 = '\x11';
+  }
+  else {
+LAB_00041620:
+    if (DAT_febe6858 != '\x11') goto LAB_000416ac;
+  }
+  if (iVar1 == 0x5a) {
+    DAT_febe76ee = 0x54;
+    DAT_febe76ec = DAT_febe8285;
+    puVar2 = 0xfebeb800u;
+    f33_step_terminal_monitor
+              (f33_startup_status_bit_triplet_a_states, ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b6c6u)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x284d8u)))));
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbeeeu + (uint32_t)((int)puVar2)))))) = 0x55;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbeecu + (uint32_t)((int)puVar2) * 1u)))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x357a)))));
+    f33_step_terminal_monitor
+              (((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbedcu + (uint32_t)((int)puVar2))))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b6c6u)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x284d8u)))))
+    ;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbeeeu + (uint32_t)((int)puVar2)))))) = 0x56;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbeecu + (uint32_t)((int)puVar2) * 1u)))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3579)))));
+    f33_step_terminal_monitor
+              (((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbee4u + (uint32_t)((int)puVar2))))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b6c6u)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x284d8u)))))
+    ;
+  }
+LAB_000416ac:
+  if ((((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbed4u + (uint32_t)((int)puVar2) * 1u)))) == '\0') && ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbedcu + (uint32_t)((int)puVar2) * 1u)))) == '\0')) &&
+     ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbee4u + (uint32_t)((int)puVar2) * 1u)))) == '\0')) {
+    FUN_00032036(0x19);
+  }
+  if ((((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbed4u + (uint32_t)((int)puVar2) * 1u)))) == '\"') || ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbedcu + (uint32_t)((int)puVar2) * 1u)))) == '\"')) ||
+     ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbee4u + (uint32_t)((int)puVar2) * 1u)))) == '\"')) {
+    f33_retain_and_clear_fault_record(10);
+    f33_encode_fault_action_kind('\n','\x1d');
+    f33_select_current_fault_record(10);
+  }
+  (*((char *)camry_host_ptr((uint32_t)((int)(0xffffb058u + (uint32_t)((int)puVar2)))))) = cVar3;
+  (*((byte *)camry_host_ptr((uint32_t)((int)0xffffb058u + (int)(puVar2 + 1))))) = bVar5;
+  (*((ushort *)camry_host_ptr((uint32_t)((int)(0xffffb05au + (uint32_t)((int)puVar2)))))) = uVar4;
+  return;
+}
+
+
+
 /* No-argument configured classifier. Gate baseline_one: requested==0 && observed==0 &&
    bit(6620,b+2)==1 && bit(661C,b+2)==1 && bit(6628,b+1)==0 && bit(6614,0)==1 &&65F0==5A. Closed
    gate returns44, otherwise22 iff scratch_byte==5A, else11. Full threshold partitions preserved in
@@ -1603,6 +2190,98 @@ void FUN_000417ce(void)
   f33_reset_terminal_monitor(f33_startup_status_bit_triplet_b_states);
   f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbef8u + (uint32_t)((int)puVar1))))));
   f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbf00u + (uint32_t)((int)puVar1))))));
+  return;
+}
+
+
+
+/* Configured mode0204 channelb monitor; 3 eight-byte states at76F0. Own qualification6764 bit1
+   holds state without reset. Gate baseline_one (numeric states, no physical meaning); threshold
+   pass2/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot11 with
+   kind(s)0x1e; no confirmed source leaves previous action untouched. Callback table284E4; failure
+   events0x5a,0x5b,0x5c. See configured-family matrix for readiness sequencing and exact predicate.
+    */
+
+void f33_step_startup_status_bit_triplet_b(void)
+
+{
+  int iVar1;
+  uint32_t puVar2;
+  char cVar3;
+  ushort uVar4;
+  byte bVar5;
+  
+  bVar5 = DAT_febe685d;
+  cVar3 = DAT_febe685c;
+  puVar2 = 0xfebeb800u;
+  if (DAT_febe685e < DAT_0002b7d8) {
+    iVar1 = 0;
+    uVar4 = DAT_febe685e + 1;
+  }
+  else {
+    iVar1 = 0x5a;
+    uVar4 = DAT_febe685e;
+  }
+  if (DAT_0002bbd8 == 'Z') {
+    puVar2 = 0xfebeb800u;
+    f33_force_unconfirmed_terminal_monitor_healthy
+              (camry_host_addr(f33_startup_status_bit_triplet_b_states), (0x2b6cau), 
+               (0x284e4u));
+    f33_force_unconfirmed_terminal_monitor_healthy
+              (camry_host_addr(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbef8u + (uint32_t)((int)puVar2)))))), 
+               (0x2b6cau), (0x284e4u))
+    ;
+    f33_force_unconfirmed_terminal_monitor_healthy
+              (camry_host_addr(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbf00u + (uint32_t)((int)puVar2)))))), 
+               (0x2b6cau), (0x284e4u))
+    ;
+    goto LAB_000418e4;
+  }
+  if ((DAT_febe6764 >> 1 & 1) != 0) goto LAB_000418e4;
+  if (((DAT_febe685c == '\0') && ((DAT_febe64cc & 0x70000000) == 0)) &&
+     ((DAT_febe64cc >> 0x10 & 1) == 0)) {
+    if (DAT_febe685d < DAT_0002b7d6) {
+      bVar5 = DAT_febe685d + 1;
+      goto LAB_0004185a;
+    }
+    bVar5 = 0;
+    cVar3 = '\x11';
+  }
+  else {
+LAB_0004185a:
+    if (DAT_febe685c != '\x11') goto LAB_000418e4;
+  }
+  if (iVar1 == 0x5a) {
+    DAT_febe770a = 0x5a;
+    DAT_febe7708 = DAT_febe828b;
+    puVar2 = 0xfebeb800u;
+    f33_step_terminal_monitor
+              (f33_startup_status_bit_triplet_b_states, ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b6cau)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x284e4u)))));
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbf0au + (uint32_t)((int)puVar2)))))) = 0x5b;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbf08u + (uint32_t)((int)puVar2) * 1u)))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3574)))));
+    f33_step_terminal_monitor
+              (((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbef8u + (uint32_t)((int)puVar2))))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b6cau)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x284e4u)))))
+    ;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbf0au + (uint32_t)((int)puVar2)))))) = 0x5c;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbf08u + (uint32_t)((int)puVar2) * 1u)))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3573)))));
+    f33_step_terminal_monitor
+              (((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbf00u + (uint32_t)((int)puVar2))))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b6cau)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x284e4u)))))
+    ;
+  }
+LAB_000418e4:
+  if ((((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbef0u + (uint32_t)((int)puVar2) * 1u)))) == '\0') && ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbef8u + (uint32_t)((int)puVar2) * 1u)))) == '\0')) &&
+     ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbf00u + (uint32_t)((int)puVar2) * 1u)))) == '\0')) {
+    FUN_00032050(0x19);
+  }
+  if ((((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbef0u + (uint32_t)((int)puVar2) * 1u)))) == '\"') || ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbef8u + (uint32_t)((int)puVar2) * 1u)))) == '\"')) ||
+     ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbf00u + (uint32_t)((int)puVar2) * 1u)))) == '\"')) {
+    f33_retain_and_clear_fault_record(0xb);
+    f33_encode_fault_action_kind('\v','\x1e');
+    f33_select_current_fault_record(0xb);
+  }
+  (*((char *)camry_host_ptr((uint32_t)((int)(0xffffb05cu + (uint32_t)((int)puVar2)))))) = cVar3;
+  (*((byte *)camry_host_ptr((uint32_t)((int)0xffffb05cu + (int)(puVar2 + 1))))) = bVar5;
+  (*((ushort *)camry_host_ptr((uint32_t)((int)(0xffffb05eu + (uint32_t)((int)puVar2)))))) = uVar4;
   return;
 }
 
@@ -1683,6 +2362,84 @@ void FUN_00041a06(void)
 
 
 
+/* Configured mode020C channela monitor; 3 eight-byte states at770C. Own qualification6764 bit0
+   holds state without reset. Gate off_both2 (numeric states, no physical meaning); threshold
+   pass2/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot10 with
+   kind(s)0x1b,0x32; no confirmed source leaves previous action untouched. Callback table284F0;
+   failure events0x7f,0x80,0x81. See configured-family matrix for readiness sequencing and exact
+   predicate. */
+
+void f33_step_matched_state2_startup_triplet_a(void)
+
+{
+  uint32_t puVar1;
+  char cVar2;
+  byte bVar3;
+  
+  bVar3 = DAT_febe6861;
+  cVar2 = DAT_febe6860;
+  puVar1 = 0xfebeb800u;
+  if (DAT_0002bbdc == 'Z') {
+    puVar1 = 0xfebeb800u;
+    f33_force_unconfirmed_terminal_monitor_healthy
+              (camry_host_addr(f33_matched_state2_startup_triplet_a_states), 
+               (0x2b6ceu), 
+               (0x284f0u));
+    f33_force_unconfirmed_terminal_monitor_healthy
+              (camry_host_addr(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbf14u + (uint32_t)((int)puVar1)))))), 
+               (0x2b6ceu), 
+               (0x284f0u));
+    f33_force_unconfirmed_terminal_monitor_healthy
+              (camry_host_addr(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbf1cu + (uint32_t)((int)puVar1)))))), 
+               (0x2b6ceu), 
+               (0x284f0u));
+    goto LAB_00041b00;
+  }
+  if ((DAT_febe6764 & 1) != 0) goto LAB_00041b00;
+  if ((DAT_febe6860 == '\0') && ((DAT_febe64cc & 0x7000) == 0)) {
+    if (DAT_febe6861 < DAT_0002b7da) {
+      bVar3 = DAT_febe6861 + 1;
+      goto LAB_00041a78;
+    }
+    bVar3 = 0;
+    cVar2 = '\x11';
+  }
+  else {
+LAB_00041a78:
+    if (DAT_febe6860 != '\x11') goto LAB_00041b00;
+  }
+  DAT_febe7726 = 0x7f;
+  DAT_febe7724 = DAT_febe8285;
+  puVar1 = 0xfebeb800u;
+  f33_step_terminal_monitor
+            (f33_matched_state2_startup_triplet_a_states, ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b6ceu)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x284f0u)))));
+  (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbf26u + (uint32_t)((int)puVar1)))))) = 0x80;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbf24u + (uint32_t)((int)puVar1) * 1u)))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x357a)))));
+  f33_step_terminal_monitor
+            (((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbf14u + (uint32_t)((int)puVar1))))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b6ceu)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x284f0u)))));
+  (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbf26u + (uint32_t)((int)puVar1)))))) = 0x81;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbf24u + (uint32_t)((int)puVar1) * 1u)))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3579)))));
+  f33_step_terminal_monitor
+            (((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbf1cu + (uint32_t)((int)puVar1))))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b6ceu)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x284f0u)))));
+LAB_00041b00:
+  if ((((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbf0cu + (uint32_t)((int)puVar1) * 1u)))) == '\0') && ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbf14u + (uint32_t)((int)puVar1) * 1u)))) == '\0')) &&
+     ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbf1cu + (uint32_t)((int)puVar1) * 1u)))) == '\0')) {
+    FUN_00032036(0x21);
+  }
+  if ((((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbf0cu + (uint32_t)((int)puVar1) * 1u)))) == '\"') || ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbf14u + (uint32_t)((int)puVar1) * 1u)))) == '\"')) ||
+     ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbf1cu + (uint32_t)((int)puVar1) * 1u)))) == '\"')) {
+    f33_retain_and_clear_fault_record(10);
+    f33_encode_fault_action_kind('\n','\x1b');
+    f33_encode_fault_action_kind('\n','2');
+    f33_select_current_fault_record(10);
+  }
+  (*((char *)camry_host_ptr((uint32_t)((int)(0xffffb060u + (uint32_t)((int)puVar1)))))) = cVar2;
+  (*((byte *)camry_host_ptr((uint32_t)((int)0xffffb060u + (int)(puVar1 + 1))))) = bVar3;
+  return;
+}
+
+
+
 /* No-argument configured classifier. Gate off_both2: requested==2 &&observed==2
    &&(6620&(6<<b))==(4<<b) &&(661C&(6<<b))==(4<<b) &&bit(6628,b+1)==0 &&6614.bit0==0 &&
    own65F6/65F7==5A. Closed gate returns44, otherwise22 iff scratch_byte==5A, else11. Full threshold
@@ -1754,6 +2511,84 @@ void FUN_00041c36(void)
   f33_reset_terminal_monitor(f33_matched_state2_startup_triplet_b_states);
   f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbf30u + (uint32_t)((int)puVar1))))));
   f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbf38u + (uint32_t)((int)puVar1))))));
+  return;
+}
+
+
+
+/* Configured mode020C channelb monitor; 3 eight-byte states at7728. Own qualification6764 bit1
+   holds state without reset. Gate off_both2 (numeric states, no physical meaning); threshold
+   pass2/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot11 with
+   kind(s)0x1c,0x32; no confirmed source leaves previous action untouched. Callback table284FC;
+   failure events0x82,0x83,0x84. See configured-family matrix for readiness sequencing and exact
+   predicate. */
+
+void f33_step_matched_state2_startup_triplet_b(void)
+
+{
+  uint32_t puVar1;
+  char cVar2;
+  byte bVar3;
+  
+  bVar3 = DAT_febe6865;
+  cVar2 = DAT_febe6864;
+  puVar1 = 0xfebeb800u;
+  if (DAT_0002bbe0 == 'Z') {
+    puVar1 = 0xfebeb800u;
+    f33_force_unconfirmed_terminal_monitor_healthy
+              (camry_host_addr(f33_matched_state2_startup_triplet_b_states), 
+               (0x2b6d2u), 
+               (0x284fcu));
+    f33_force_unconfirmed_terminal_monitor_healthy
+              (camry_host_addr(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbf30u + (uint32_t)((int)puVar1)))))), 
+               (0x2b6d2u), 
+               (0x284fcu));
+    f33_force_unconfirmed_terminal_monitor_healthy
+              (camry_host_addr(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbf38u + (uint32_t)((int)puVar1)))))), 
+               (0x2b6d2u), 
+               (0x284fcu));
+    goto LAB_00041d30;
+  }
+  if ((DAT_febe6764 >> 1 & 1) != 0) goto LAB_00041d30;
+  if ((DAT_febe6864 == '\0') && ((DAT_febe64cc & 0x7fffffff) >> 0x1c == 0)) {
+    if (DAT_febe6865 < DAT_0002b7de) {
+      bVar3 = DAT_febe6865 + 1;
+      goto LAB_00041ca8;
+    }
+    bVar3 = 0;
+    cVar2 = '\x11';
+  }
+  else {
+LAB_00041ca8:
+    if (DAT_febe6864 != '\x11') goto LAB_00041d30;
+  }
+  DAT_febe7742 = 0x82;
+  DAT_febe7740 = DAT_febe828b;
+  puVar1 = 0xfebeb800u;
+  f33_step_terminal_monitor
+            (f33_matched_state2_startup_triplet_b_states, ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b6d2u)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x284fcu)))));
+  (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbf42u + (uint32_t)((int)puVar1)))))) = 0x83;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbf40u + (uint32_t)((int)puVar1) * 1u)))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3574)))));
+  f33_step_terminal_monitor
+            (((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbf30u + (uint32_t)((int)puVar1))))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b6d2u)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x284fcu)))));
+  (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffbf42u + (uint32_t)((int)puVar1)))))) = 0x84;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbf40u + (uint32_t)((int)puVar1) * 1u)))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3573)))));
+  f33_step_terminal_monitor
+            (((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbf38u + (uint32_t)((int)puVar1))))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b6d2u)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x284fcu)))));
+LAB_00041d30:
+  if ((((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbf28u + (uint32_t)((int)puVar1) * 1u)))) == '\0') && ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbf30u + (uint32_t)((int)puVar1) * 1u)))) == '\0')) &&
+     ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbf38u + (uint32_t)((int)puVar1) * 1u)))) == '\0')) {
+    FUN_00032050(0x21);
+  }
+  if ((((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbf28u + (uint32_t)((int)puVar1) * 1u)))) == '\"') || ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbf30u + (uint32_t)((int)puVar1) * 1u)))) == '\"')) ||
+     ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbf38u + (uint32_t)((int)puVar1) * 1u)))) == '\"')) {
+    f33_retain_and_clear_fault_record(0xb);
+    f33_encode_fault_action_kind('\v','\x1c');
+    f33_encode_fault_action_kind('\v','2');
+    f33_select_current_fault_record(0xb);
+  }
+  (*((char *)camry_host_ptr((uint32_t)((int)(0xffffb064u + (uint32_t)((int)puVar1)))))) = cVar2;
+  (*((byte *)camry_host_ptr((uint32_t)((int)0xffffb064u + (int)(puVar1 + 1))))) = bVar3;
   return;
 }
 

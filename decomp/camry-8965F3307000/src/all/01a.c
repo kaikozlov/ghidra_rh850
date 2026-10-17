@@ -60,6 +60,31 @@ undefined4 FUN_0006808e(void)
 
 
 
+undefined4 FUN_000681aa(void)
+
+{
+  int iVar1;
+  undefined8 uVar2;
+  uint uVar3;
+  uint uVar4;
+  
+  uVar2 = 0xfebeb800;
+  uVar4 = 0;
+  while( true ) {
+    if (f33_nvm_family1_object_count <= uVar4) {
+      return 1;
+    }
+    iVar1 = (int)uVar2;
+    uVar3 = f33_read_repair_redundant_u8
+                      (camry_host_addr(((uchar *)camry_host_ptr((uint32_t)(iVar1 + 0x4b28 + uVar4)))), camry_host_addr(((uchar *)camry_host_ptr((uint32_t)(iVar1 + 0x5888 + uVar4)))), camry_host_addr(((uchar *)camry_host_ptr((uint32_t)(iVar1 + 0x58ac + uVar4)))), '\x12');
+    if ((uVar3 & 0xf0) == 0x20) break;
+    uVar4 = uVar4 + 1 & 0xffff;
+  }
+  return 0;
+}
+
+
+
 /* Return zero-extended byte0689; snapshot precedes hold decoding. Exact LDBU0689 into full32r10
    thenJMPLP. Native work-selection calls snapshot this family1 phase before hold repair and prefer
    it when both phases are active. */
@@ -506,6 +531,76 @@ void f33_crypto_bank_advance_profile_qualification(void)
 
 
 
+/* Pass record{word1,byte(result509D==0)} to initialized SecOC API8EE16 with IDFF. Boolean
+   publication is separate from ICU-S command completion. */
+
+void f33_crypto_bank_publish_verification_result(void)
+
+{
+  undefined4 local_18;
+  undefined1 uStack_14;
+  
+  local_18 = 1;
+  uStack_14 = f33_crypto_verification_result == '\0';
+  FUN_0008ee16(0xff, camry_host_addr(&local_18));
+  return;
+}
+
+
+
+/* For slot<2 wait in22 unless79B70 returns0F and direct NvM result is not1. Reset output
+   capacity48; submit configured command8 job0 with64 input bytes. Accepted0 yields33, other
+   results66. Physical readiness/crypto completion remain dependencies. */
+
+uint f33_crypto_bank_submit_key_material(uchar slot)
+
+{
+  uint32_t puVar1;
+  int iVar2;
+  uint uVar3;
+  
+  puVar1 = 0xfebeb800u;
+  if (slot < 2) {
+    iVar2 = FUN_00079b70();
+    uVar3 = f33_nvm_get_direct_operation_result();
+    if ((iVar2 != 0xf) || (uVar3 == 1)) {
+      return 0x22;
+    }
+    (*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + -0x679c)))) = 0x30;
+    iVar2 = FUN_00089a26(0, camry_host_addr(((undefined *)camry_host_ptr((uint32_t)(puVar1 + (uint)slot * 0x40 + -0x663a)))),  0x40,  0, camry_host_addr(((undefined *)camry_host_ptr((uint32_t)(puVar1 + (short)(ushort)slot * 0x30 + -0x65ba)))), camry_host_addr(((undefined *)camry_host_ptr((uint32_t)(puVar1 + -0x679c)))));
+    if (iVar2 == 0) {
+      return 0x33;
+    }
+  }
+  return 0x66;
+}
+
+
+
+/* Reset result509D to1. Exact ROM30D67=0 returns46 without issuing fixed-vector command7.
+   Configured5A branch returns45 on accepted job1, else46 with result1. */
+
+uint f33_crypto_bank_begin_post_update_verification(void)
+
+{
+  uint32_t puVar1;
+  int iVar2;
+  
+  puVar1 = 0xfebeb800u;
+  f33_crypto_verification_result = '\x01';
+  if (f33_crypto_config_fixed_verification_enable == 'Z') {
+    iVar2 = FUN_00089646(1, camry_host_addr(((undefined *)camry_host_ptr(0x21604u))), camry_host_addr(((undefined *)camry_host_ptr(0x215e4u))), 0x10, camry_host_addr(((undefined *)camry_host_ptr(0x215f4u))), 0x10, 
+                         (0xfebe509du));
+    if (iVar2 == 0) {
+      return 0x45;
+    }
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6763))))) = 1;
+  }
+  return 0x46;
+}
+
+
+
 /* Increment saturating16-bit timer. Above120 choose66; timeout while45 also publishes result1.
    States11/22 submit;44 starts optional verification;46 publishes result and becomes55. Store phase
    and timer after sequential transitions. */
@@ -547,6 +642,150 @@ void f33_crypto_bank_advance_direct_update(void)
   puVar1[-0x676e] = (char)uVar2;
   *(ushort *)(puVar1 + -0x677e) = uVar3;
   return;
+}
+
+
+
+/* Observe eight configured generation bytes and copy8 bytes per changed group. First/matching
+   sample increments wrapping repeat count; mismatch restarts at1. Count>=3 sets sticky qualified
+   bit and copies group. Later mismatch does not clear that bit. MaskFF copies64 qualified bytes to
+   slot1 and returns22; otherwise11. Group getter status is ignored. */
+
+uint f33_crypto_bank_collect_key_fragments(void)
+
+{
+  int iVar1;
+  uchar uVar2;
+  char cVar3;
+  uint32_t puVar4;
+  byte bVar5;
+  uint uVar6;
+  uint uVar7;
+  uint uVar8;
+  char acStack_54 [72];
+  
+  puVar4 = 0xfebeb800u;
+  uVar8 = 0x11;
+  uVar7 = 0;
+  do {
+    uVar6 = 0;
+    do {
+      iVar1 = uVar6 + uVar7 * 8;
+      uVar6 = uVar6 + 1;
+      acStack_54[iVar1] = '\0';
+    } while (uVar6 < 8);
+    acStack_54[uVar7 + 0x40] = '\0';
+    uVar7 = uVar7 + 1;
+  } while (uVar7 < 8);
+  uVar2 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe5338u + (uint32_t)(f33_crypto_key_fragment_generation_indices[0]) * 1u))));
+  if (uVar2 != f33_crypto_key_fragment_previous_generation[0]) {
+    puVar4 = 0xfebeb800u;
+    FUN_0007e72a(f33_crypto_key_fragment_signal_indices[0], f33_crypto_key_fragment_byte_offsets[0], 8
+                 , camry_host_addr(acStack_54));
+    acStack_54[0x40] = 0x5a;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x67bc))))) = uVar2;
+  cVar3 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(f33_crypto_key_fragment_generation_indices[1] - 0x64c8)))));
+  if (cVar3 != (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x67bb)))))) {
+    FUN_0007e72a(f33_crypto_key_fragment_signal_indices[1], f33_crypto_key_fragment_byte_offsets[1], 8
+                 , camry_host_addr(acStack_54 + 8));
+    acStack_54[0x41] = 0x5a;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x67bb))))) = cVar3;
+  cVar3 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(f33_crypto_key_fragment_generation_indices[2] - 0x64c8)))));
+  if (cVar3 != (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x67ba)))))) {
+    FUN_0007e72a(f33_crypto_key_fragment_signal_indices[2], f33_crypto_key_fragment_byte_offsets[2], 8
+                 , camry_host_addr(acStack_54 + 0x10));
+    acStack_54[0x42] = 0x5a;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x67ba))))) = cVar3;
+  cVar3 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(f33_crypto_key_fragment_generation_indices[3] - 0x64c8)))));
+  if (cVar3 != (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x67b9)))))) {
+    FUN_0007e72a(f33_crypto_key_fragment_signal_indices[3], f33_crypto_key_fragment_byte_offsets[3], 8
+                 , camry_host_addr(acStack_54 + 0x18));
+    acStack_54[0x43] = 0x5a;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x67b9))))) = cVar3;
+  cVar3 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(f33_crypto_key_fragment_generation_indices[4] - 0x64c8)))));
+  if (cVar3 != (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x67b8)))))) {
+    FUN_0007e72a(f33_crypto_key_fragment_signal_indices[4], f33_crypto_key_fragment_byte_offsets[4], 8
+                 , camry_host_addr(acStack_54 + 0x20));
+    acStack_54[0x44] = 0x5a;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x67b8))))) = cVar3;
+  cVar3 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(f33_crypto_key_fragment_generation_indices[5] - 0x64c8)))));
+  if (cVar3 != (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x67b7)))))) {
+    FUN_0007e72a(f33_crypto_key_fragment_signal_indices[5], f33_crypto_key_fragment_byte_offsets[5], 8
+                 , camry_host_addr(acStack_54 + 0x28));
+    acStack_54[0x45] = 0x5a;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x67b7))))) = cVar3;
+  cVar3 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(f33_crypto_key_fragment_generation_indices[6] - 0x64c8)))));
+  if (cVar3 != (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x67b6)))))) {
+    FUN_0007e72a(f33_crypto_key_fragment_signal_indices[6], f33_crypto_key_fragment_byte_offsets[6], 8
+                 , camry_host_addr(acStack_54 + 0x30));
+    acStack_54[0x46] = 0x5a;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x67b6))))) = cVar3;
+  cVar3 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(f33_crypto_key_fragment_generation_indices[7] - 0x64c8)))));
+  if (cVar3 != (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x67b5)))))) {
+    FUN_0007e72a(f33_crypto_key_fragment_signal_indices[7], f33_crypto_key_fragment_byte_offsets[7], 8
+                 , camry_host_addr(acStack_54 + 0x38));
+    acStack_54[0x47] = 0x5a;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x67b5))))) = cVar3;
+  uVar7 = 0;
+  do {
+    bVar5 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(uVar7 - 0x67c4)))));
+    if (acStack_54[uVar7 + 0x40] == 'Z') {
+      if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(uVar7 - 0x67b4))))) == '\0') ||
+         (((((iVar1 = uVar7 * 8, acStack_54[iVar1] == (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(iVar1 + -0x673a))))) &&
+             (acStack_54[iVar1 + 1] == (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(iVar1 + -0x6739))))))) &&
+            (acStack_54[iVar1 + 2] == (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(iVar1 + -0x6738))))))) &&
+           ((acStack_54[iVar1 + 3] == (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(iVar1 + -0x6737))))) &&
+            (acStack_54[iVar1 + 4] == (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(iVar1 + -0x6736))))))))) &&
+          ((acStack_54[iVar1 + 5] == (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(iVar1 + -0x6735))))) &&
+           ((acStack_54[iVar1 + 6] == (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(iVar1 + -0x6734))))) &&
+            (acStack_54[iVar1 + 7] == (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(iVar1 + -0x6733))))))))))))) {
+        bVar5 = bVar5 + 1;
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(uVar7 - 0x67b4))))) = 0x5a;
+        if (f33_crypto_config_fragment_repeat_threshold <= bVar5) {
+          (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x6768))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x6768))))) | (byte)(1 << (uVar7 & 0x1f));
+          uVar6 = 0;
+          do {
+            iVar1 = uVar6 + uVar7 * 8;
+            uVar6 = uVar6 + 1;
+            (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(iVar1 + -0x66fa))))) = acStack_54[iVar1];
+          } while (uVar6 < 8);
+        }
+      }
+      else {
+        bVar5 = 1;
+      }
+      uVar6 = 0;
+      do {
+        iVar1 = uVar6 + uVar7 * 8;
+        uVar6 = uVar6 + 1;
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(iVar1 + -0x673a))))) = acStack_54[iVar1];
+      } while (uVar6 < 8);
+    }
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(uVar7 - 0x67c4))))) = bVar5;
+    uVar7 = uVar7 + 1;
+  } while (uVar7 < 8);
+  if (((int8_t)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x6768)))))) == -1) {
+    uVar7 = 0;
+    do {
+      uVar8 = 0;
+      do {
+        iVar1 = uVar8 + uVar7 * 8;
+        uVar8 = uVar8 + 1;
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(iVar1 + -0x65fa))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(iVar1 + -0x66fa)))));
+      } while (uVar8 < 8);
+      uVar7 = uVar7 + 1;
+    } while (uVar7 < 8);
+    uVar8 = 0x22;
+  }
+  return uVar8;
 }
 
 
@@ -596,6 +835,42 @@ void f33_crypto_bank_advance_collected_update(void)
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6769))))) = (char)uVar2;
   (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x677c)))) = uVar3;
   return;
+}
+
+
+
+/* Mode0 submits configured AES job0 with selector50A4 and16-byte input/output; mode1 submits MAC
+   job1 with the same fixed input extent. Reset capacity16. Accepted0 gives23, invalid
+   mode/refusal44. No algorithm outcome is fabricated. */
+
+uint f33_crypto_bank_submit_test_vector(void)
+
+{
+  int iVar1;
+  uint uStack_18;
+  uchar uStack_14;
+  
+  uStack_18 = (uint)f33_crypto_test_mode;
+  if (uStack_18 == 0) {
+    uStack_18 = 1;
+    f33_crypto_aes_result_capacity = 0x10;
+    uStack_14 = f33_crypto_test_selector;
+    iVar1 = FUN_00089838(0, camry_host_addr(&uStack_18), camry_host_addr(f33_crypto_test_input), 0x10, camry_host_addr(f33_crypto_aes_result), 
+                         (0xfebe5068u));
+  }
+  else {
+    if (uStack_18 != 1) {
+      return 0x44;
+    }
+    f33_crypto_mac_result_capacity = 0x10;
+    uStack_14 = f33_crypto_test_selector;
+    iVar1 = FUN_00089440(1, camry_host_addr(&uStack_18), camry_host_addr(f33_crypto_test_input), 0x10, camry_host_addr(f33_crypto_mac_result), 
+                         (0xfebe506cu), 1);
+  }
+  if (iVar1 != 0) {
+    return 0x44;
+  }
+  return 0x23;
 }
 
 
