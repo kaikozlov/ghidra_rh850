@@ -81,6 +81,7 @@ VALUE_RETURN = {
     "f33_nvm_submit_family1_write_copies",
     "f33_nvm_submit_bulk_reads",
     "f33_nvm_step_initial_read_acquisition",
+    "f33_nvm_step_acquisition_pass",
 }
 
 DCRA1_BASE = 0xFFD51000
@@ -90,6 +91,7 @@ DCRA_CALLS = {
     "f33_nvm_check_family2_rom_crc",
     "f33_nvm_get_family2_rom_record",
     "f33_nvm_refresh_family2_record_status",
+    "f33_nvm_step_acquisition_pass",
 }
 
 ROM_TABLES = (
@@ -302,6 +304,10 @@ def bind(library: ctypes.CDLL) -> None:
     library.f33_nvm_submit_bulk_reads.restype = u32
     library.f33_nvm_step_initial_read_acquisition.argtypes = []
     library.f33_nvm_step_initial_read_acquisition.restype = u32
+    library.f33_nvm_step_acquisition_pass.argtypes = []
+    library.f33_nvm_step_acquisition_pass.restype = u32
+    library.f33_nvm_run_bounded_initial_acquisition.argtypes = []
+    library.f33_nvm_run_bounded_initial_acquisition.restype = None
     library.f33_force_unconfirmed_terminal_monitor_healthy.argtypes = [u32, u32, u32]
     library.f33_force_unconfirmed_terminal_monitor_healthy.restype = u32
     library.f33_nvm_read_buffer.argtypes = [u32]
@@ -595,6 +601,11 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
         return int(library.f33_nvm_submit_bulk_reads()) & 0xFFFFFFFF
     if name == "f33_nvm_step_initial_read_acquisition":
         return int(library.f33_nvm_step_initial_read_acquisition()) & 0xFFFFFFFF
+    if name == "f33_nvm_step_acquisition_pass":
+        return int(library.f33_nvm_step_acquisition_pass()) & 0xFFFFFFFF
+    if name == "f33_nvm_run_bounded_initial_acquisition":
+        library.f33_nvm_run_bounded_initial_acquisition()
+        return None
     if name == "f33_check_learned_quad_bounds":
         return int(library.f33_check_learned_quad_bounds()) & 0xFFFFFFFF
     if name == "f33_update_thermal_release_envelope":

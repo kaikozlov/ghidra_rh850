@@ -1936,6 +1936,404 @@ static uint32_t f33_nvm_get_family0_completion(uint32_t object) {
     return camry_read8(camry_gp + index + 19256u);
 }
 
+static uint32_t f33_unimplemented_faci(void) {
+    return camry_read32(0xffa20000u);
+}
+
+static void f33_nvm_consume_deferred_guard(void) {
+    uint32_t base = 0xfebf6ccdu;
+    if (camry_read8(base) != 1u)
+        return;
+    if (camry_read8(base + 1u) != 1u)
+        return;
+    camry_write8(base + 2u, 0xffu);
+}
+
+static void f33_nvm_finish_deferred_guard(void) {
+    uint32_t base = 0xfebf6ccdu;
+    if (camry_read8(base) != 1u)
+        return;
+    if (camry_read8(base + 1u) != 1u)
+        return;
+    if (camry_read8(base + 2u) == 0u)
+        (void)f33_unimplemented_faci();
+    camry_write8(base + 2u, 0xffu);
+}
+
+static void f33_nvm_open_probe_window(void) {
+    f33_nvm_consume_deferred_guard();
+    camry_write8(0xfebf6cceu, 0u);
+}
+
+static uint32_t f33_nvm_probe_window_busy(void) {
+    return camry_read8(0xfebf6cd0u) != 0u ? 1u : 0u;
+}
+
+static void f33_nvm_close_probe_window(void) {
+    camry_write8(0xfebf6cceu, 1u);
+    f33_nvm_finish_deferred_guard();
+}
+
+static uint32_t f33_nvm_direct_probe_mode(void) {
+    return camry_read8(0xfebf6cdcu);
+}
+
+static uint32_t f33_nvm_refresh_direct_probe_mode(void) {
+    uint32_t mode;
+    if (f33_unimplemented_faci() != 0u)
+        mode = 85u;
+    else if (camry_read8(0xfebf6cdcu) == 0u)
+        mode = 0u;
+    else {
+        (void)f33_unimplemented_faci();
+        mode = 0u;
+    }
+    camry_write8(0xfebf6cdcu, mode);
+    return mode;
+}
+
+static uint32_t f33_nvm_reconcile_probe_mode(void) {
+    uint32_t pending = f33_unimplemented_faci();
+    uint32_t mode = f33_nvm_refresh_direct_probe_mode();
+    if (pending != 0u)
+        mode = 85u;
+    return mode;
+}
+
+static uint32_t f33_nvm_poll_probe_mode(void) {
+    return f33_nvm_reconcile_probe_mode();
+}
+
+static void f33_nvm_prepare_read_argument(void) {
+    camry_write8(0xfebf6b20u, 0xffu);
+    camry_write8(0xfebf6b21u, 0xffu);
+}
+
+static uint32_t f33_dataflash_blank_check(uint32_t byte_offset, uint32_t byte_count) {
+    (void)byte_offset;
+    (void)byte_count;
+    return f33_unimplemented_faci();
+}
+
+static uint32_t f33_dataflash_read_words(
+    uint32_t byte_offset, uint32_t destination, uint32_t byte_count) {
+    (void)byte_offset;
+    (void)destination;
+    (void)byte_count;
+    return f33_unimplemented_faci();
+}
+
+static uint32_t f33_nvm_map_blank_check_result(uint32_t byte_offset, uint32_t byte_count) {
+    uint32_t driver = f33_dataflash_blank_check(byte_offset, byte_count & 0xffffu);
+    uint32_t mapped = 4u;
+    if (driver == 2u)
+        mapped = 3u;
+    else if (driver != 7u) {
+        mapped = f33_nvm_translate_read_driver_result(driver);
+        (void)f33_unimplemented_faci();
+        (void)f33_unimplemented_faci();
+    }
+    return mapped;
+}
+
+static uint32_t f33_nvm_read_dataflash_words(
+    uint32_t byte_offset, uint32_t byte_count, uint32_t destination) {
+    uint32_t driver = f33_dataflash_read_words(byte_offset, destination, byte_count & 0xffffu);
+    uint32_t mapped;
+    if (driver == 2u || driver == 5u)
+        mapped = 1u;
+    else {
+        mapped = f33_nvm_translate_read_driver_result(driver);
+        (void)f33_unimplemented_faci();
+        (void)f33_unimplemented_faci();
+    }
+    return mapped;
+}
+
+static uint32_t f33_nvm_sync_admission_result(void) {
+    if (f33_unimplemented_faci() == 1u)
+        return 0xffff0000u;
+    return camry_read8(0xfebf6b23u) != 0u ? 1u : 0u;
+}
+
+static uint32_t f33_nvm_read_with_optional_blank_check(
+    uint32_t byte_offset, uint32_t byte_count, uint32_t destination, uint32_t blank_option) {
+    uint32_t count = byte_count & 0xffffu;
+    uint32_t option = blank_option & 0xffu;
+    if (f33_nvm_sync_admission_result() != 1u)
+        return 0xffff0000u;
+    f33_nvm_prepare_read_argument();
+    if (option == 1u) {
+        uint32_t mapped = f33_nvm_map_blank_check_result(byte_offset, count);
+        if (mapped != 4u)
+            return mapped;
+    }
+    return f33_nvm_read_dataflash_words(byte_offset, count, destination);
+}
+
+static uint32_t f33_nvm_probe_storage_range(uint32_t byte_offset, uint32_t byte_count) {
+    uint32_t count = byte_count & 0xffffu;
+    uint32_t class;
+    f33_nvm_open_probe_window();
+    if (f33_nvm_probe_window_busy() != 0u)
+        class = 9u;
+    else {
+        uint32_t result = f33_nvm_read_with_optional_blank_check(
+            byte_offset, count, camry_sp, 1u);
+        if (result == 1u)
+            class = 3u;
+        else if (result == 3u)
+            class = 2u;
+        else if (result == 0xffff0000u)
+            class = 6u;
+        else
+            class = 4u;
+    }
+    f33_nvm_close_probe_window();
+    return class;
+}
+
+static uint32_t f33_nvm_classify_storage_range(
+    uint32_t ignored_selector, uint32_t byte_offset, uint32_t byte_count) {
+    uint32_t class = 4u;
+    (void)ignored_selector;
+    if (f33_nvm_direct_probe_mode() == 0u)
+        return class;
+    if (f33_nvm_probe_range_rejected(byte_offset, byte_count) != 0u)
+        return class;
+    class = f33_nvm_probe_storage_range(byte_offset, byte_count);
+    if (class == 2u || class == 3u || class == 6u || class == 9u)
+        return class;
+    return 4u;
+}
+
+static uint32_t f33_nvm_classify_family0_chunks(
+    uint32_t object, uint32_t offset, uint32_t count) {
+    uint32_t index = object & 0xffffu;
+    uint32_t use = count & 0xffffu;
+    uint32_t result = 0xffu;
+    uint32_t descriptor;
+    uint32_t first;
+    uint32_t logical_count;
+    uint16_t page = 0u;
+    uint32_t byte_offset;
+    uint32_t step;
+    if (index >= camry_read16(0x2ad70u))
+        return result;
+    descriptor = 0x2ad8cu + index * 12u;
+    first = camry_read16(descriptor + 4u);
+    logical_count = camry_read16(descriptor + 2u);
+    if (first == 0xffffu)
+        return result;
+    if (f33_nvm_get_logical_storage_page((first + logical_count - 1u) & 0xffffu, &page) != 0u)
+        return result;
+    result = 0x5au;
+    camry_write8(camry_gp + 20115u, result);
+    byte_offset = (((offset & 0xffffu) + page) & 0xffffu) << 6;
+    (void)f33_nvm_poll_probe_mode();
+    step = 0u;
+    while (step < use && result == 0x5au) {
+        if (f33_nvm_classify_storage_range(0u, byte_offset, 64u) != 2u)
+            result = 0u;
+        step = (step + 1u) & 0xffffu;
+        byte_offset += 64u;
+    }
+    camry_write8(camry_gp + 20115u, 0u);
+    (void)f33_nvm_poll_probe_mode();
+    return result;
+}
+
+static uint32_t f33_nvm_classify_family1_pages(uint32_t object) {
+    uint32_t index = object & 0xffffu;
+    uint32_t result = 0xffu;
+    uint32_t first;
+    uint32_t copy;
+    if (index >= camry_read16(0x2ad72u))
+        return result;
+    first = camry_read16(0x2af0cu + (index << 3) + 2u);
+    if (first == 0xffffu)
+        return result;
+    camry_write8(camry_gp + 20115u, 0x5au);
+    (void)f33_nvm_poll_probe_mode();
+    for (copy = 0u; copy < 3u; copy++) {
+        uint16_t page = 0u;
+        uint32_t handle = (first + (copy << 2)) & 0xffffu;
+        uint32_t class;
+        if (f33_nvm_get_logical_storage_page(handle, &page) != 0u)
+            goto finish;
+        class = f33_nvm_classify_storage_range(0u, ((uint32_t)page) << 6, 64u);
+        if (class == 2u)
+            continue;
+        if (class == 3u)
+            result = 0u;
+        goto finish;
+    }
+    result = 0x5au;
+finish:
+    camry_write8(camry_gp + 20115u, 0u);
+    (void)f33_nvm_poll_probe_mode();
+    return result;
+}
+
+static uint32_t f33_mulh(uint32_t left, uint32_t right) {
+    return (uint32_t)((int32_t)(int16_t)(left & 0xffffu) * (int32_t)(int16_t)(right & 0xffffu));
+}
+
+static uint32_t f33_nvm_classify_family0_pass(uint16_t *charged_out) {
+    uint32_t cursor = camry_read16(camry_gp + 20086u);
+    uint32_t charged = 0u;
+    uint32_t partial = 0u;
+    uint32_t proceed = 90u;
+    for (;;) {
+        uint32_t count = camry_read16(0x2ad70u);
+        uint32_t status;
+        if (cursor >= count || proceed == 0u)
+            break;
+        if (f33_nvm_get_family0_completion(cursor) == 90u) {
+            status = 16u;
+        } else {
+            uint32_t descriptor = 0x2ad8cu + cursor * 12u;
+            uint32_t product = f33_mulh(
+                camry_read16(descriptor + 2u),
+                f33_nvm_family0_chunk_cost(camry_read16(descriptor))) & 0xffffu;
+            uint32_t limit = camry_read16(0x2ad76u);
+            uint32_t sum = product + charged;
+            uint32_t offset;
+            uint32_t use;
+            if ((int32_t)sum <= (int32_t)limit) {
+                partial = 0u;
+                offset = 0u;
+                use = product;
+            } else if (charged != 0u) {
+                partial = 0u;
+                proceed = 0u;
+                continue;
+            } else {
+                uint32_t saved = camry_read16(camry_gp + 20088u);
+                uint32_t remain = product - saved;
+                if ((int32_t)remain <= (int32_t)limit) {
+                    use = remain & 0xffffu;
+                    partial = 0u;
+                } else {
+                    use = limit;
+                    partial = (limit + saved) & 0xffffu;
+                }
+                offset = saved;
+            }
+            charged = (charged + use) & 0xffffu;
+            if (f33_nvm_classify_family0_chunks(cursor, offset, use) == 0u) {
+                camry_write8(camry_gp + 20093u, 90u);
+                status = 48u;
+            } else if (partial != 0u) {
+                proceed = 0u;
+                continue;
+            } else {
+                status = 17u;
+            }
+        }
+        camry_write8(camry_gp + cursor + 19208u, status);
+        cursor = (cursor + 1u) & 0xffffu;
+        proceed = 90u;
+    }
+    camry_write16(camry_gp + 20086u, cursor);
+    camry_write16(camry_gp + 20088u, partial);
+    *charged_out = (uint16_t)charged;
+    return cursor >= camry_read16(0x2ad70u) ? 90u : 0u;
+}
+
+static uint32_t f33_nvm_classify_family1_pass(uint32_t already_charged) {
+    uint32_t cursor = camry_read16(camry_gp + 20110u);
+    uint32_t charged = already_charged & 0xffffu;
+    uint32_t limit = camry_read16(0x2ad76u);
+    while (cursor < camry_read16(0x2ad72u)) {
+        uint32_t status;
+        if (f33_nvm_get_family1_completion(cursor) == 90u) {
+            status = 16u;
+            f33_nvm_publish_family1_checksum(cursor);
+        } else {
+            charged = (charged + 3u) & 0xffffu;
+            if (charged > limit)
+                break;
+            status = f33_nvm_classify_family1_pages(cursor) == 0u ? 48u : 17u;
+        }
+        f33_publish_redundant_u8(
+            status,
+            camry_gp + cursor + 19240u,
+            camry_gp + cursor + 22664u,
+            camry_gp + cursor + 22700u);
+        cursor = (cursor + 1u) & 0xffffu;
+    }
+    camry_write16(camry_gp + 20110u, cursor);
+    return cursor >= camry_read16(0x2ad72u) ? 90u : 0u;
+}
+
+static void f33_nvm_refresh_family2_status(void) {
+    uint32_t index = 0u;
+    uint32_t count = camry_read16(0x2ad74u);
+    while (index < count) {
+        uint32_t raw = camry_gp + index + 20048u;
+        uint32_t encoded55 = camry_gp + index + 22680u;
+        uint32_t encoded_aa = camry_gp + index + 22716u;
+        uint32_t status = f33_read_repair_redundant_u8(raw, encoded55, encoded_aa, 48u);
+        if (status != 16u) {
+            status = f33_nvm_check_family2_rom_crc(index);
+            if (status != 16u)
+                status = f33_nvm_check_family2_rom_crc(index);
+            f33_publish_redundant_u8(status, raw, encoded55, encoded_aa);
+        }
+        index = (index + 1u) & 0xffffu;
+    }
+}
+
+static void f33_nvm_arm_initial_read_acquisition(void) {
+    camry_write8(camry_gp + 20114u, 90u);
+}
+
+uint32_t f33_nvm_step_acquisition_pass(void) {
+    uint32_t state = camry_read8(camry_gp + 20083u);
+    uint16_t charged;
+    if (state == 0u) {
+        camry_write8(camry_gp + 20083u, 0u);
+        return 0u;
+    }
+    if (state == 51u) {
+        if (f33_nvm_step_initial_read_acquisition() != 0u) {
+            camry_write8(camry_gp + 20083u, 51u);
+            return 1u;
+        }
+        camry_write8(camry_gp + 20083u, 85u);
+        return 1u;
+    }
+    if (state != 85u && state != 170u && state != 204u) {
+        camry_write8(camry_gp + 20083u, 0u);
+        return 0u;
+    }
+    charged = 0u;
+    if (state == 85u && f33_nvm_classify_family0_pass(&charged) != 0u)
+        state = 170u;
+    if (state == 170u && f33_nvm_classify_family1_pass(charged) != 0u)
+        state = 204u;
+    if (state == 204u) {
+        f33_nvm_refresh_family2_status();
+        state = 0u;
+    }
+    camry_write8(camry_gp + 20083u, state);
+    return 1u;
+}
+
+void f33_nvm_run_bounded_initial_acquisition(void) {
+    uint32_t index = 0u;
+    camry_write8(camry_gp + 20083u, 51u);
+    f33_nvm_arm_initial_read_acquisition();
+    while (index < camry_read16(0x2ad7au)) {
+        uint32_t progress = f33_nvm_step_acquisition_pass();
+        index = (index + 1u) & 0xffffu;
+        if (progress == 0u)
+            break;
+    }
+    camry_write8(camry_gp + 20083u, 0u);
+}
+
 static uint32_t f33_nvm_handle_family1_read_result(uint32_t result, uint32_t logical) {
     uint32_t handle = logical & 0xffffu;
     uint32_t object = camry_read8(0x2b010u + (handle << 1));
