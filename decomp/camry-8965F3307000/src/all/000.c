@@ -1585,6 +1585,303 @@ uint FUN_000016f2(void)
   return uVar3;
 }
 
+void FUN_000017c8(void)
+
+{
+  EIC8 = (uint16_t)0x8f;
+  DAT_fffeea12 = 0x8f;
+  DAT_fffeea20 = 0x8f;
+  DAT_fffeea22 = 0x8f;
+  DAT_fffeea24 = 0x8f;
+  DAT_fffeea26 = 0x8f;
+  DAT_fffeea28 = 0x8f;
+  DAT_fffeea2a = 0x8f;
+  DAT_fffeea2c = 0x8f;
+  DAT_fffeea2e = 0x8f;
+  DAT_fffeea30 = 0x8f;
+  DAT_fffeea32 = 0x8f;
+  DAT_fffeea34 = 0x8f;
+  DAT_fffeea36 = 0x8f;
+  DAT_fffeea38 = 0x8f;
+  DAT_fffeea3a = 0x8f;
+  DAT_fffeea3c = 0x8f;
+  DAT_fffeea3e = 0x8f;
+  DAT_ffffb040 = 0x8f;
+  DAT_ffffb042 = 0x8f;
+  DAT_ffffb044 = 0x8f;
+  DAT_ffffb046 = 0x8f;
+  DAT_ffffb048 = 0x8f;
+  DAT_ffffb050 = 0x8f;
+  DAT_ffffb052 = 0x8f;
+  DAT_ffffb054 = 0x8f;
+  DAT_ffffb056 = 0x8f;
+  DAT_ffffb058 = 0x8f;
+  DAT_ffffb05a = 0x8f;
+  DAT_ffffb05c = 0x8f;
+  DAT_ffffb05e = 0x8f;
+  DAT_ffffb060 = 0x8f;
+  DAT_ffffb062 = 0x8f;
+  DAT_ffffb064 = 0x8f;
+  DAT_ffffb066 = 0x8f;
+  DAT_ffffb068 = 0x8f;
+  DAT_ffffb06a = 0x8f;
+  DAT_ffffb06c = 0x8f;
+  DAT_ffffb06e = 0x8f;
+  DAT_ffffb070 = 0x8f;
+  DAT_ffffb072 = 0x8f;
+  DAT_ffffb074 = 0x8f;
+  DAT_ffffb076 = 0x8f;
+  DAT_ffffb078 = 0x8f;
+  DAT_ffffb07a = 0x8f;
+  DAT_ffffb07c = 0x8f;
+  DAT_ffffb07e = 0x8f;
+  DAT_ffffb080 = 0x8f;
+  DAT_ffffb082 = 0x8f;
+  DAT_ffffb084 = 0x8f;
+  DAT_ffffb086 = 0x8f;
+  DAT_ffffb088 = 0x8f;
+  DAT_ffffb08a = 0x8f;
+  DAT_ffffb08c = 0x8f;
+  DAT_ffffb08e = 0x8f;
+  DAT_ffffb090 = 0x8f;
+  DAT_ffffb092 = 0x8f;
+  DAT_ffffb094 = 0x8f;
+  DAT_ffffb096 = 0x8f;
+  DAT_ffffb098 = 0x8f;
+  DAT_ffffb09a = 0x8f;
+  DAT_ffffb09c = 0x8f;
+  DAT_ffffb09e = 0x8f;
+  DAT_ffffb0a0 = 0x8f;
+  DAT_ffffb0a2 = 0x8f;
+  DAT_ffffb0a4 = 0x8f;
+  DAT_ffffb0a6 = 0x8f;
+  DAT_ffffb0a8 = 0x8f;
+  DAT_ffffb0aa = 0x8f;
+  DAT_ffffb0ac = 0x8f;
+  DAT_ffffb0ae = 0x8f;
+  DAT_ffffb0b0 = 0x8f;
+  DAT_ffffb0b2 = 0x8f;
+  DAT_ffffb0b4 = 0x8f;
+  DAT_ffffb0b6 = 0x8f;
+  DAT_ffffb0b8 = 0x8f;
+  DAT_ffffb0ba = 0x8f;
+  DAT_ffffb0bc = 0x8f;
+  DAT_ffffb0be = 0x8f;
+  DAT_ffffb0c0 = 0x8f;
+  DAT_ffffb0c2 = 0x8f;
+  DAT_ffffb0c4 = 0x8f;
+  DAT_ffffb0c6 = 0x8f;
+  DAT_ffffb0c8 = 0x8f;
+  DAT_ffffb0ca = 0x8f;
+  DAT_ffffb0cc = 0x8f;
+  DAT_ffffb0ce = 0x8f;
+  DAT_ffffb0d0 = 0x8f;
+  DAT_ffffb0d2 = 0x8f;
+  DAT_ffffb0d4 = 0x808f;
+  DAT_ffffb0d6 = 0x8f;
+  DAT_ffffb0d8 = 0x8f;
+  DAT_ffffb0da = 0x808f;
+  DAT_ffffb0dc = 0x808f;
+  DAT_ffffb0de = 0x8f;
+  DAT_ffffb0e0 = 0x8f;
+  DAT_ffffb0e2 = 0x808f;
+  DAT_ffffb0e4 = 0x8f;
+  DAT_ffffb0e6 = 0x8f;
+  DAT_ffffb0e8 = 0x8f;
+  DAT_ffffb0ea = 0x8f;
+  DAT_ffffb0ec = 0x8f;
+  DAT_ffffb0ee = 0x8f;
+  DAT_ffffb0f0 = 0x808f;
+  DAT_ffffb0f2 = 0x808f;
+  DAT_ffffb100 = 0x8f;
+  DAT_ffffb102 = 0x8f;
+  DAT_ffffb104 = 0x8f;
+  DAT_ffffb106 = 0x8f;
+  DAT_ffffb108 = 0x8f;
+  EIC133 = (uint16_t)0x8f;
+  EIC134 = (uint16_t)0x8f;
+  EIC135 = (uint16_t)0x9;
+  EIC136 = (uint16_t)0x8f;
+  DAT_ffffb112 = 0x8f;
+  DAT_ffffb114 = 0x8f;
+  DAT_ffffb116 = 0x8f;
+  DAT_ffffb118 = 0x8f;
+  DAT_ffffb11a = 0x8f;
+  DAT_ffffb11c = 0x8f;
+  DAT_ffffb11e = 0x8f;
+  DAT_ffffb120 = 0x8f;
+  DAT_ffffb122 = 0x8f;
+  DAT_ffffb124 = 0x8f;
+  DAT_ffffb126 = 0x8f;
+  DAT_ffffb128 = 0x8f;
+  DAT_ffffb12a = 0x8f;
+  DAT_ffffb12c = 0x8f;
+  DAT_ffffb12e = 0x8f;
+  DAT_ffffb130 = 0x8f;
+  DAT_ffffb132 = 0x8f;
+  DAT_ffffb134 = 0x8f;
+  DAT_ffffb136 = 0x8f;
+  DAT_ffffb138 = 0x8f;
+  DAT_ffffb13c = 0x8f;
+  DAT_ffffb13e = 0x8f;
+  DAT_ffffb140 = 0x8f;
+  DAT_ffffb142 = 0x8f;
+  DAT_ffffb144 = 0x8f;
+  DAT_ffffb146 = 0x8f;
+  DAT_ffffb148 = 0x8f;
+  DAT_ffffb14a = 0x8f;
+  DAT_ffffb14c = 0x8f;
+  DAT_ffffb14e = 0x8f;
+  DAT_ffffb150 = 0x8f;
+  DAT_ffffb152 = 0x8f;
+  DAT_ffffb154 = 0x8f;
+  DAT_ffffb156 = 0x8f;
+  DAT_ffffb158 = 0x8f;
+  DAT_ffffb15a = 0x8f;
+  DAT_ffffb15c = 0x8f;
+  DAT_ffffb15e = 0x8f;
+  DAT_ffffb160 = 0x8f;
+  DAT_ffffb162 = 0x8f;
+  DAT_ffffb164 = 0x8f;
+  DAT_ffffb166 = 0x8f;
+  DAT_ffffb168 = 0x8f;
+  DAT_ffffb16a = 0x8f;
+  DAT_ffffb16c = 0x8f;
+  DAT_ffffb16e = 0x808f;
+  DAT_ffffb170 = 0x808f;
+  DAT_ffffb172 = 0x808f;
+  EIC187 = (uint16_t)0x8009;
+  EIC188 = (uint16_t)0x8009;
+  DAT_ffffb174 = 0x808f;
+  DAT_ffffb17a = 0x808f;
+  DAT_ffffb17c = 0x808f;
+  DAT_ffffb17e = 0x808f;
+  DAT_ffffb180 = 0x808f;
+  DAT_ffffb182 = 0x808f;
+  DAT_ffffb184 = 0x808f;
+  DAT_ffffb186 = 0x808f;
+  DAT_ffffb188 = 0x808f;
+  DAT_ffffb18a = 0x808f;
+  DAT_ffffb18c = 0x808f;
+  DAT_ffffb18e = 0x808f;
+  DAT_ffffb190 = 0x808f;
+  DAT_ffffb192 = 0x808f;
+  DAT_ffffb194 = 0x808f;
+  DAT_ffffb196 = 0x808f;
+  DAT_ffffb198 = 0x808f;
+  DAT_ffffb1b4 = 0x808f;
+  DAT_ffffb1b6 = 0x8f;
+  DAT_ffffb1b8 = 0x8f;
+  DAT_ffffb1ba = 0x808f;
+  DAT_ffffb1c4 = 0x808f;
+  DAT_ffffb1c6 = 0x808f;
+  DAT_ffffb1c8 = 0x808f;
+  DAT_ffffb1ca = 0x808f;
+  DAT_ffffb1cc = 0x808f;
+  DAT_ffffb1ce = 0x808f;
+  DAT_ffffb1d0 = 0x808f;
+  DAT_ffffb1d2 = 0x8f;
+  DAT_ffffb1d4 = 0x808f;
+  DAT_ffffb1d6 = 0x8f;
+  DAT_ffffb1d8 = 0x808f;
+  DAT_ffffb1da = 0x8f;
+  DAT_ffffb1dc = 0x808f;
+  DAT_ffffb1de = 0x8f;
+  DAT_ffffb1e0 = 0x808f;
+  DAT_ffffb1e2 = 0x8f;
+  DAT_ffffb1e4 = 0x808f;
+  DAT_ffffb1e6 = 0x8f;
+  DAT_ffffb1e8 = 0x808f;
+  DAT_ffffb1ea = 0x808f;
+  DAT_ffffb1ec = 0x808f;
+  DAT_ffffb1ee = 0x808f;
+  DAT_ffffb1f0 = 0x808f;
+  DAT_ffffb1f2 = 0x808f;
+  DAT_ffffb1f4 = 0x808f;
+  DAT_ffffb1f6 = 0x808f;
+  DAT_ffffb1f8 = 0x808f;
+  DAT_ffffb1fa = 0x808f;
+  DAT_ffffb1fc = 0x808f;
+  DAT_ffffb200 = 0x8f;
+  DAT_ffffb202 = 0x8f;
+  DAT_ffffb204 = 0x8f;
+  DAT_ffffb206 = 0x8f;
+  DAT_ffffb208 = 0x8f;
+  DAT_ffffb20a = 0x8f;
+  DAT_ffffb20c = 0x8f;
+  DAT_ffffb20e = 0x8f;
+  DAT_ffffb210 = 0x8f;
+  DAT_ffffb212 = 0x8f;
+  DAT_ffffb214 = 0x8f;
+  DAT_ffffb216 = 0x8f;
+  DAT_ffffb218 = 0x8f;
+  DAT_ffffb21a = 0x8f;
+  DAT_ffffb21c = 0x8f;
+  DAT_ffffb21e = 0x8f;
+  DAT_ffffb220 = 0x8f;
+  DAT_ffffb222 = 0x8f;
+  DAT_ffffb224 = 0x8f;
+  DAT_ffffb226 = 0x8f;
+  DAT_ffffb228 = 0x8f;
+  DAT_ffffb22a = 0x8f;
+  DAT_ffffb22c = 0x8f;
+  DAT_ffffb22e = 0x8f;
+  DAT_ffffb230 = 0x8f;
+  DAT_ffffb232 = 0x8f;
+  DAT_ffffb234 = 0x8f;
+  DAT_ffffb236 = 0x8f;
+  DAT_ffffb238 = 0x8f;
+  DAT_ffffb23a = 0x8f;
+  DAT_ffffb23c = 0x8f;
+  DAT_ffffb23e = 0x8f;
+  DAT_ffffb240 = 0x8f;
+  DAT_ffffb242 = 0x8f;
+  DAT_ffffb244 = 0x8f;
+  DAT_ffffb246 = 0x8f;
+  DAT_ffffb24c = 0x8f;
+  DAT_ffffb24e = 0x8f;
+  DAT_ffffb250 = 0x8f;
+  DAT_ffffb252 = 0x8f;
+  DAT_ffffb254 = 0x8f;
+  EIC379 = (uint16_t)0x8f;
+  DAT_ffffb2fe = 0x808f;
+  return;
+}
+
+
+undefined4 FUN_00001bbe(short param_1,char param_2)
+
+{
+  undefined4 uVar1;
+  byte bVar2;
+  EIC_Register *pEVar3;
+  
+  bVar2 = 0x80;
+  if (param_2 == '\x01') {
+    bVar2 = 0;
+  }
+  uVar1 = FUN_0000721e(0xffff);
+  if (param_1 == 0xb8) {
+    pEVar3 = (EIC_Register *)((undefined *)camry_host_ptr(0xffffb170u));
+  }
+  else if (param_1 == 0xb9) {
+    pEVar3 = (EIC_Register *)((undefined *)camry_host_ptr(0xffffb172u));
+  }
+  else if (param_1 == 0xbb) {
+    pEVar3 = ((void *)camry_host_ptr((uint32_t)((0xffffb176u))));
+  }
+  else {
+    if (param_1 != 0xbc) goto LAB_00001c16;
+    pEVar3 = ((void *)camry_host_ptr((uint32_t)((0xffffb178u))));
+  }
+  (*((volatile uint8_t *)(pEVar3))) = ((*((volatile uint8_t *)(pEVar3))) & 0x7fu) | (uint8_t)(((uint32_t)(bVar2 >> 7) & 1u) << 7);
+  __synchronize();
+LAB_00001c16:
+  FUN_00007244(uVar1);
+  return uVar1;
+}
+
+
 
 
 void FUN_00001c20(void)

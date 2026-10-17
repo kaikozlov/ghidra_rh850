@@ -82,6 +82,66 @@ int FUN_000640a0(void)
   return iVar6;
 }
 
+void FUN_0006413c(void)
+
+{
+  uchar uVar1;
+  uint outer_iterations;
+  int iVar2;
+  byte bVar3;
+  
+  FUN_00063f24();
+  bVar3 = 0;
+  EIC8 = (uint16_t)0xc0;
+  while( true ) {
+    ECMPCMD1 = 0xa5;
+    ECMMICFG0 = 4;
+    ECMMICFG0 = 0xfffffffb;
+    ECMMICFG0 = 4;
+    uVar1 = ECMPS;
+    if (uVar1 == '\0') break;
+    bVar3 = bVar3 + 1;
+    if (2 < bVar3) {
+                    /* WARNING: Subroutine does not return */
+      f33_enter_terminal_hardware_sequence();
+    }
+  }
+  FUN_00063f5e();
+  outer_iterations = DAT_00030da0;
+  f33_spin_wait(DAT_00030da0);
+  iVar2 = FUN_00063f6c();
+  bVar3 = 0;
+  while (FUN_0006405e(), iVar2 != 0) {
+    bVar3 = bVar3 + 1;
+    if (2 < bVar3) {
+      FUN_00063ea4(0x55);
+    }
+    FUN_00063f5e();
+    f33_spin_wait(outer_iterations);
+    iVar2 = FUN_00063f6c();
+  }
+  bVar3 = 0;
+  do {
+    ECMPCMD1 = 0xa5;
+    ECMMICFG0 = 0;
+    ECMMICFG0 = 0xffffffff;
+    ECMMICFG0 = 0;
+    uVar1 = ECMPS;
+    if (uVar1 == '\0') {
+      EIC8 = (uint16_t)0x40;
+      iVar2 = FUN_000640a0();
+      if (iVar2 == 0x11) {
+        FUN_00063ea4(0x44);
+      }
+      return;
+    }
+    bVar3 = bVar3 + 1;
+  } while (bVar3 < 3);
+                    /* WARNING: Subroutine does not return */
+  f33_enter_terminal_hardware_sequence();
+}
+
+
 
 
 void FUN_0006420e(void)

@@ -3895,6 +3895,55 @@ def _rewrite_saved_pmr(code: str) -> str:
     return head + body
 
 
+def _rewrite_eimk_stores(code: str) -> str:
+    """`ptr->EIMK = bit` clears bit 7 of the low byte, then ORs the new bit back."""
+    pattern = re.compile(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*->\s*EIMK\s*=")
+    pieces: list[str] = []
+    cursor = 0
+    for match in pattern.finditer(code):
+        if match.start() < cursor:
+            continue
+        depth = 0
+        end = match.end()
+        while end < len(code):
+            char = code[end]
+            if char == "(":
+                depth += 1
+            elif char == ")":
+                depth -= 1
+            elif char == ";" and depth == 0:
+                break
+            end += 1
+        expr = code[match.end():end].strip()
+        if not expr:
+            continue
+        byte = f"(*((volatile uint8_t *)({match.group(1)})))"
+        pieces.append(code[cursor:match.start()])
+        pieces.append(
+            f"{byte} = ({byte} & 0x7fu)"
+            f" | (uint8_t)(((uint32_t)({expr}) & 1u) << 7)"
+        )
+        cursor = end
+    pieces.append(code[cursor:])
+    return "".join(pieces)
+
+
+def _rewrite_eic(code: str) -> str:
+    """An EIC register is one halfword. EIRF is bit 12; EIMK is bit 7 of the low byte."""
+    code = re.sub(
+        r"\bEIC_Register\s+([A-Za-z_][A-Za-z0-9_]*)\s*;",
+        r"uint16_t \1;",
+        code,
+    )
+    code = re.sub(r"\(EIC_Register\)(?!\s*\*)", "(uint16_t)", code)
+    code = re.sub(
+        r"\b([A-Za-z_][A-Za-z0-9_]*)\.EIRF\b",
+        r"((\1 >> 12) & 1u)",
+        code,
+    )
+    return _rewrite_eimk_stores(code)
+
+
 def _rewrite_icus(code: str) -> str:
     """The status word's low bit is BUSY. The command word is CMD, bits 8–15, then the slot."""
     declared = {
@@ -6482,6 +6531,7 @@ def _rewrite_body(code: str) -> str:
     pointees = _stored_pointer_pointees(code)
     code = _rewrite_pointer_compares(code, pointers)
     code = _rewrite_wide_call_constants(code)
+    code = _rewrite_eic(code)
     code = _rewrite_icus(code)
     code = _rewrite_nested_pointer_fields(code)
     code = _rewrite_stored_pointer_loads(code, pointees)
