@@ -4060,6 +4060,102 @@ def _rewrite_runtime_tp(code: str) -> str:
     return _apply_gp_pairs(code, pairs)
 
 
+_PTR_SCALES: dict[int, int] | None = None
+_PTR_WIDTH = {
+    "uint8_t": 1, "int8_t": 1, "uchar": 1, "char": 1, "undefined1": 1,
+    "uint16_t": 2, "int16_t": 2, "ushort": 2, "short": 2, "undefined2": 2,
+    "uint32_t": 4, "int32_t": 4, "uint": 4, "int": 4, "undefined4": 4,
+}
+
+
+def _ptr_dat_scales() -> dict[int, int]:
+    """Element size of each PTR_DAT macro. Pointer addition scales by this."""
+    global _PTR_SCALES
+    if _PTR_SCALES is not None:
+        return _PTR_SCALES
+    header = ROOT / "src" / "all" / "common.h"
+    found: dict[int, int] = {}
+    if header.exists():
+        for match in re.finditer(
+            r"#define\s+PTR_DAT_([0-9A-Fa-f]+)\s+\(\*\(\(volatile\s+(\w+)\s+\*\)",
+            header.read_text(encoding="utf-8"),
+        ):
+            width = _PTR_WIDTH.get(match.group(2))
+            if width:
+                found[int(match.group(1), 16)] = width
+    _PTR_SCALES = found
+    return found
+
+
+def _rewrite_scaled_table(code: str) -> str:
+    """`&PTR_DAT + index` is a typed pointer add. Pass the firmware byte address.
+
+    The cast through uint32 keeps only the low half of the host pointer.
+    The element count in the C is not the byte stride.
+    """
+    try:
+        name = _signature_name(_c_signature(code))
+    except (AssertionError, ValueError):
+        return code
+    pairs = dict(_gp_address_map().get(name, {}))
+    pairs.update(_tp_address_map().get(name, {}))
+    if not pairs:
+        return code
+    scales = _ptr_dat_scales()
+    needle = "(&PTR_DAT_"
+    prefix = "camry_host_ptr((uint32_t)"
+    pieces: list[str] = []
+    index = 0
+    while True:
+        found = code.find(needle, index)
+        if found < 0:
+            pieces.append(code[index:])
+            break
+        if code[max(0, found - len(prefix)):found] != prefix:
+            pieces.append(code[index:found + 1])
+            index = found + 1
+            continue
+        call = found - len(prefix)
+        try:
+            closing = _match_paren(code, call + len("camry_host_ptr"))
+        except ValueError:
+            pieces.append(code[index:found + 1])
+            index = found + 1
+            continue
+        inner = code[call + len("camry_host_ptr") + 1:closing].strip()
+        wrapped = re.match(r"\(uint32_t\)\s*\((.*)\)\s*$", inner, re.S)
+        if wrapped is None:
+            pieces.append(code[index:closing + 1])
+            index = closing + 1
+            continue
+        body = wrapped.group(1).strip()
+        named = re.match(r"&PTR_DAT_([0-9A-Fa-f]+)\s*(.*)\s*$", body, re.S)
+        if named is None:
+            pieces.append(code[index:closing + 1])
+            index = closing + 1
+            continue
+        address = int(named.group(1), 16)
+        rest = named.group(2).strip()
+        scale = scales.get(address)
+        runtime = pairs.get(address)
+        if scale is None or runtime is None or (rest and not rest.startswith("+")):
+            pieces.append(code[index:closing + 1])
+            index = closing + 1
+            continue
+        if rest:
+            expr = rest[1:].strip()
+            replacement = (
+                f"camry_host_ptr((uint32_t)(0x{runtime:x}u + "
+                f"(uint32_t)({expr}) * {scale}u))"
+            )
+        else:
+            replacement = f"camry_host_ptr(0x{runtime:x}u)"
+        pieces.append(code[index:call])
+        pieces.append(replacement)
+        index = closing + 1
+    return "".join(pieces)
+
+
 def _object_sizes() -> dict[str, tuple[int, int]]:
     """Byte span of each named data object, from its declared type."""
     cached = getattr(_object_sizes, "cached", None)
@@ -5087,6 +5183,63 @@ def apply_runtime_tp() -> tuple[int, int]:
     return functions, files
 
 
+def apply_scaled_tables() -> tuple[int, int]:
+    """Retarget converted `&PTR_DAT + index` uses. Equivalent bodies stay."""
+    blocked: set[str] = set()
+    allowed: set[str] = set()
+    by_name: dict[str, set[str]] = {}
+    for row in load_matched():
+        by_name.setdefault(row["name"], set()).add(row["status"])
+    for name, statuses in by_name.items():
+        if statuses & {"equivalent", "byte-matched"}:
+            blocked.add(name)
+        elif "converted" in statuses:
+            allowed.add(name)
+    functions = 0
+    files = 0
+    for path in sorted((ROOT / "src" / "all").glob("*.c")):
+        lines = path.read_text(encoding="utf-8").splitlines()
+        out: list[str] = []
+        index = 0
+        changed = False
+        while index < len(lines):
+            line = lines[index]
+            if (
+                not line.strip()
+                or line.startswith("#")
+                or line.startswith((" ", "\t", "/*", "//"))
+            ):
+                out.append(line)
+                index += 1
+                continue
+            start = index
+            while index < len(lines) and "{" not in lines[index]:
+                index += 1
+            if index >= len(lines):
+                out.extend(lines[start:])
+                break
+            depth = 0
+            while index < len(lines):
+                depth += lines[index].count("{") - lines[index].count("}")
+                index += 1
+                if depth <= 0:
+                    break
+            chunk = "\n".join(lines[start:index])
+            match = re.search(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\(", _c_signature(chunk))
+            name = match.group(1) if match else ""
+            if name in allowed and name not in blocked:
+                updated = _rewrite_scaled_table(chunk)
+                if updated != chunk:
+                    functions += 1
+                    changed = True
+                    chunk = updated
+            out.extend(chunk.split("\n"))
+        if changed:
+            path.write_text("\n".join(out) + "\n", encoding="utf-8")
+            files += 1
+    return functions, files
+
+
 def apply_indirect_dispatch() -> tuple[int, int]:
     """Point converted firmware-address calls at camry_indirect. Equivalent bodies stay."""
     blocked: set[str] = set()
@@ -5245,6 +5398,7 @@ def _rewrite_body(code: str) -> str:
     code = _rewrite_system_inputs(code)
     code = _rewrite_firmware_pointers(code)
     code = _rewrite_runtime_tp(code)
+    code = _rewrite_scaled_table(code)
     return code
 
 
