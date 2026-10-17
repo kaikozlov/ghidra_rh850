@@ -4627,3 +4627,12 @@ void f33_fill_constant_block_8bfea(void)
 }
 
 
+
+void FUN_00089dd6(undefined2 param_1)
+
+{
+  if (PTR_FUN_00027d9c != 0) {
+    (*(int (*)())camry_indirect((uint32_t)(PTR_FUN_00027d9c)))(param_1);
+  }
+  return;
+}

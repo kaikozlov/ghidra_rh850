@@ -5767,3 +5767,15 @@ void FUN_00077f7e(ushort param_1,undefined1 *param_2,char *param_3)
 }
 
 
+
+bool FUN_0007475a(void)
+
+{
+  return f33_nvm_read_buffer_override != 0;
+}
+
+bool FUN_0007476a(void)
+
+{
+  return f33_nvm_write_buffer_override != 0;
+}

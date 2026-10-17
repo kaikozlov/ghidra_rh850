@@ -291,6 +291,30 @@ def _is_null_expr(expr: str) -> bool:
     return text in {"0", "0x0", "0x00", "0u", "0U", "NULL"}
 
 
+_NULL_POINTER = re.compile(
+    r"^\(\s*[A-Za-z_][A-Za-z0-9_ \t]*\*\s*\)\s*(?:0x0+|0+)\s*$"
+)
+
+
+def _is_null_pointer_expr(expr: str) -> bool:
+    """`(void *)0x0` is a null pointer constant, not a firmware address."""
+    text = expr.strip()
+    while text.startswith("(") and text.endswith(")"):
+        try:
+            end = _match_paren(text, 0)
+        except ValueError:
+            return False
+        if end != len(text) - 1:
+            return False
+        inner = text[1:-1].strip()
+        if _NULL_POINTER.fullmatch(inner):
+            return True
+        if _looks_like_type(inner):
+            return False
+        text = inner
+    return _NULL_POINTER.fullmatch(text) is not None
+
+
 def _skip_space(code: str, index: int) -> int:
     while index < len(code) and code[index] in " \t\n\r":
         index += 1
@@ -2037,6 +2061,20 @@ def _rewrite_pointer_compares(code: str, pointers: set[str]) -> str:
             pieces.append(f"(uintptr_t)({raw_left.strip()})")
             pieces.append(op)
             pieces.append(f"(uintptr_t)({raw_right.strip()})")
+            cursor = right_end
+            index = right_end
+            continue
+        # A pointer slot holds a firmware address. Comparing that word with
+        # `(void *)0x0` is the `cmp r0` in the bytes, not a host-pointer test.
+        if left_pointer and not right_pointer and _is_null_pointer_expr(raw_left):
+            pieces.append(code[cursor:left_at])
+            pieces.append("0")
+            cursor = index
+            index += len(op)
+            continue
+        if right_pointer and not left_pointer and _is_null_pointer_expr(raw_right):
+            pieces.append(code[cursor:index + len(op)])
+            pieces.append(" 0")
             cursor = right_end
             index = right_end
             continue
@@ -5409,6 +5447,53 @@ def write_indirect_table(path: Path, sources: list[Path]) -> None:
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def _rewrite_loaded_pointer_subscripts(code: str) -> str:
+    """`(&PTR_...)[slot][index]` is the byte at the loaded pointer plus index.
+
+    The slot load is a uint32. The bytes then add the index and use `ld.bu`/`st.b`.
+    """
+    needle = "(*((volatile uint32_t *)camry_host_ptr("
+    pieces: list[str] = []
+    cursor = 0
+    start = 0
+    while True:
+        at = code.find(needle, start)
+        if at < 0:
+            pieces.append(code[cursor:])
+            break
+        open_paren = at + len(needle) - 1
+        if open_paren >= len(code) or code[open_paren] != "(":
+            start = at + len(needle)
+            continue
+        try:
+            close = _match_paren(code, open_paren)
+        except ValueError:
+            start = at + len(needle)
+            continue
+        if not code.startswith("))", close + 1):
+            start = close + 1
+            continue
+        bracket = _skip_space(code, close + 3)
+        if bracket >= len(code) or code[bracket] != "[":
+            start = close + 1
+            continue
+        try:
+            end = _match_bracket(code, bracket)
+        except ValueError:
+            start = close + 1
+            continue
+        expr = _rewrite_loaded_pointer_subscripts(code[open_paren + 1:close])
+        index = _rewrite_loaded_pointer_subscripts(code[bracket + 1:end])
+        pieces.append(code[cursor:at])
+        pieces.append(
+            "(*((volatile uint8_t *)camry_host_ptr((uint32_t)("
+            f"(*((volatile uint32_t *)camry_host_ptr({expr}))) + (uint32_t)({index})))))"
+        )
+        cursor = end + 1
+        start = cursor
+    return "".join(pieces)
+
+
 def _rewrite_body(code: str) -> str:
     code = _strip_calling_convention(code)
     code = _widen_signature(code)
@@ -5449,6 +5534,7 @@ def _rewrite_body(code: str) -> str:
     code = _rewrite_firmware_pointers(code)
     code = _rewrite_runtime_tp(code)
     code = _rewrite_scaled_table(code)
+    code = _rewrite_loaded_pointer_subscripts(code)
     return code
 
 

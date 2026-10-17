@@ -6206,3 +6206,52 @@ void f33_boot_aes128_cmac_clear(F33BootAes128CmacContext *context)
 }
 
 
+
+void FUN_000045b2(int param_1)
+
+{
+  uint uVar1;
+  undefined4 auStack_10 [2];
+  undefined1 uStack_8;
+  
+  uVar1 = 0;
+  while( true ) {
+    if ((*((volatile uint16_t *)camry_host_ptr(0x240a4u))) <= uVar1) {
+      return;
+    }
+    if (param_1 == (*((int *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr(0x2409cu))) + uVar1 * 0xc))))) break;
+    uVar1 = uVar1 + 1 & 0xffff;
+  }
+  auStack_10[0] = (*((undefined4 *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr(0x2409cu))) + uVar1 * 0xc + 4))));
+  uStack_8 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr(0x2409cu))) + (uint32_t)(uVar1 * 0xc + 8)))));
+  ((void)(auStack_10), FUN_000037e4((*((undefined2 *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr(0x2409cu))) + uVar1 * 0xc + 10))))));
+  return;
+}
+
+undefined4 FUN_00004606(int param_1,undefined4 *param_2)
+
+{
+  uint uVar1;
+  int iVar2;
+  undefined4 uStack_14;
+  undefined4 uStack_10;
+  undefined1 uStack_c;
+  undefined1 uStack_b;
+  
+  if (*(ushort *)(param_2 + 1) < 9) {
+    for (uVar1 = 0; uVar1 < (*((volatile uint16_t *)camry_host_ptr(0x240a4u))); uVar1 = uVar1 + 1 & 0xffff) {
+      if (param_1 == (*((int *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr(0x2409cu))) + uVar1 * 0xc))))) {
+        uStack_14 = (*((undefined4 *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr(0x2409cu))) + uVar1 * 0xc + 4))));
+        uStack_c = (*((volatile uint8_t *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr(0x2409cu))) + (uint32_t)(uVar1 * 0xc + 8)))));
+        uStack_b = (undefined1)*(ushort *)(param_2 + 1);
+        uStack_10 = *param_2;
+        iVar2 = FUN_0000374e((*((undefined2 *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr(0x2409cu))) + uVar1 * 0xc + 10)))),&uStack_14);
+        if (iVar2 == 0) {
+          return 0;
+        }
+        return 1;
+      }
+    }
+  }
+  return 1;
+}

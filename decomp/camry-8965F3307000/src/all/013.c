@@ -5860,3 +5860,30 @@ uint f33_write_2013_precondition(void)
 }
 
 
+
+int FUN_0004c738(void)
+
+{
+  undefined1 uVar1;
+  uint32_t puVar2;
+  int iVar3;
+  int iVar4;
+  int iVar5;
+  
+  puVar2 = 0xfebeb800u;
+  FUN_0004c5fe();
+  iVar3 = FUN_0004c63c();
+  iVar4 = FUN_0004c650();
+  iVar5 = FUN_0004c6e6();
+  if (iVar5 == 0x5a) {
+    uVar1 = 3;
+  }
+  else {
+    uVar1 = 2;
+    if (iVar4 != 0x5a) {
+      uVar1 = iVar3 == 0x5a;
+    }
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3684))))) = uVar1;
+  return iVar5;
+}

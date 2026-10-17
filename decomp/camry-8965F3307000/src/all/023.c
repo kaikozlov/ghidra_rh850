@@ -4907,3 +4907,63 @@ LAB_0008ffce:
 }
 
 
+
+/* Append exactly4 bytes only with nonnull response and unsigned remaining capacity>3. Failure
+   returns1 without partial tuple; caller merge continues, allowing a complete-tuple prefix rather
+   than NRC14. */
+
+uint f33_append_dtc_tuple_if_fits(uchar *tuple)
+
+{
+  uint uVar1;
+  
+  uVar1 = 1;
+  if ((f33_dcm_dtc_list_message.response != 0) &&
+     (3 < f33_dcm_dtc_list_message.response_capacity - f33_dcm_dtc_list_message.response_length)) {
+    uVar1 = 0;
+    ((uint8_t *)camry_host_ptr((uint32_t)(f33_dcm_dtc_list_message.response)))[f33_dcm_dtc_list_message.response_length] = *tuple;
+    ((uint8_t *)camry_host_ptr((uint32_t)(f33_dcm_dtc_list_message.response)))[f33_dcm_dtc_list_message.response_length + 1] = tuple[1];
+    ((uint8_t *)camry_host_ptr((uint32_t)(f33_dcm_dtc_list_message.response)))[f33_dcm_dtc_list_message.response_length + 2] = tuple[2];
+    ((uint8_t *)camry_host_ptr((uint32_t)(f33_dcm_dtc_list_message.response)))[f33_dcm_dtc_list_message.response_length + 3] = tuple[3];
+    f33_dcm_dtc_list_message.response_length = f33_dcm_dtc_list_message.response_length + 4;
+  }
+  return uVar1;
+}
+
+void FUN_0008f4d0(short param_1,short param_2)
+
+{
+  if ((((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x25867u + (uint32_t)(param_1 * 0x50) * 1u)))) == '\0') ||
+      (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x25867u + (uint32_t)(param_1 * 0x50) * 1u)))) == '\x01' && (param_2 != 0)))) &&
+     (PTR_f33_crypto_bank_record_profile_status_00025818 != 0)) {
+    (*(int (*)())camry_indirect((uint32_t)(PTR_f33_crypto_bank_record_profile_status_00025818)))();
+  }
+  return;
+}
+
+void FUN_0008f528(short param_1)
+
+{
+  if (PTR_FUN_00025820 != 0) {
+    (*(int (*)())camry_indirect((uint32_t)(PTR_FUN_00025820)))(*(undefined2 *)(((undefined *)camry_host_ptr(0x25852u)) + param_1 * 0x50));
+  }
+  return;
+}
+
+void FUN_0008f5f8(undefined2 param_1)
+
+{
+  if (PTR_FUN_0002581c != 0) {
+    (*(int (*)())camry_indirect((uint32_t)(PTR_FUN_0002581c)))(param_1);
+  }
+  return;
+}
+
+void FUN_0008fcb4(undefined2 param_1)
+
+{
+  if (PTR_FUN_0002581c != 0) {
+    (*(int (*)())camry_indirect((uint32_t)(PTR_FUN_0002581c)))(param_1);
+  }
+  return;
+}

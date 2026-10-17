@@ -5730,3 +5730,42 @@ void FUN_0004bffa(void)
 }
 
 
+
+void FUN_00049e22(void)
+
+{
+  undefined1 uVar1;
+  uchar uVar2;
+  undefined1 uVar3;
+  int iVar4;
+  int iVar5;
+  int iVar6;
+  int iVar7;
+  int iVar8;
+  
+  uVar3 = DAT_febee826;
+  uVar2 = f33_dtc_setting_inhibit_request;
+  uVar1 = DAT_febe7f97;
+  iVar4 = FUN_00049b5c(DAT_febee826);
+  iVar5 = FUN_00049bba(uVar3);
+  iVar6 = FUN_00049c2c(uVar1);
+  FUN_00049d4a();
+  iVar7 = FUN_00049d5e(1);
+  iVar8 = FUN_00049d5e(2);
+  if ((((iVar4 == 0) && (iVar5 == 0)) && (uVar2 == '\0')) && (iVar6 == 0)) {
+    DAT_febe7f50 = 0;
+  }
+  else {
+    DAT_febe7f50 = 0x5a;
+  }
+  DAT_febe7f51 = DAT_febe7f50;
+  if (iVar7 != 0) {
+    DAT_febe7f51 = 0x5a;
+  }
+  DAT_febe7f52 = DAT_febe7f50;
+  if (iVar8 != 0) {
+    DAT_febe7f52 = 0x5a;
+  }
+  FUN_00049de4();
+  return;
+}

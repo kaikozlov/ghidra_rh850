@@ -1342,3 +1342,20 @@ undefined4 FUN_00099414(int param_1,short param_2)
 }
 
 
+
+void FUN_00098898(void)
+
+{
+  undefined4 *puVar1;
+  undefined *puVar2;
+  uint uVar3;
+  
+  puVar1 = ((void *)camry_host_ptr((uint32_t)(DAT_00026ae4)));
+  puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  if ((DAT_00026ae4 == 0) ||
+     (puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u)), uVar3 = f33_return_const_0_98936(), uVar3 == *(byte *)*puVar1)) {
+    f33_run_init_chain_9887c();
+    puVar2[-0x59b0] = 0xa5;
+  }
+  return;
+}
