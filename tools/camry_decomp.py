@@ -3846,6 +3846,8 @@ def _gp_address_map() -> dict[str, dict[int, int]]:
         holds_gp = {4}
         # gp plus an index. The displacement is still gp-relative.
         indexed: set[int] = set()
+        # movea rd, gp, imm leaves rd = gp+imm. Later stores add their own disp.
+        shifted: dict[int, int] = {}
         for inst in fn.insts:
             parsed = _stmt_parts(inst.stmt) if inst.stmt else None
             if parsed is None:
@@ -3865,16 +3867,31 @@ def _gp_address_map() -> dict[str, dict[int, int]]:
                 else:
                     holds_gp.discard(dst)
                     indexed.discard(dst)
+                    shifted.pop(dst, None)
+                continue
+            if (
+                name == "movea"
+                and len(args) >= 3
+                and isinstance(args[0], int)
+                and isinstance(args[2], int)
+                and args[1] in holds_gp
+            ):
+                shifted[args[0]] = args[2]
+                accesses.append(args[2])
+                holds_gp.discard(args[0])
+                indexed.discard(args[0])
                 continue
             if name == "add" and len(args) >= 2 and isinstance(args[0], int):
                 dst, src = args[0], args[1]
                 if src in holds_gp or src in indexed:
                     indexed.add(dst)
                     holds_gp.discard(dst)
+                    shifted.pop(dst, None)
                     continue
                 if dst in holds_gp or dst in indexed:
                     indexed.add(dst)
                     holds_gp.discard(dst)
+                    shifted.pop(dst, None)
                     continue
             gp_base = holds_gp | indexed
             if (
@@ -3884,6 +3901,13 @@ def _gp_address_map() -> dict[str, dict[int, int]]:
                 and isinstance(args[2], int)
             ):
                 accesses.append(args[2])
+            elif (
+                name in _GP_MEMORY
+                and len(args) >= 3
+                and args[1] in shifted
+                and isinstance(args[2], int)
+            ):
+                accesses.append(shifted[args[1]] + args[2])
             elif (
                 name in {"set1", "not1", "clr1", "tst1"}
                 and len(args) >= 2
@@ -3898,6 +3922,7 @@ def _gp_address_map() -> dict[str, dict[int, int]]:
             ):
                 holds_gp.discard(args[0])
                 indexed.discard(args[0])
+                shifted.pop(args[0], None)
         for disp in accesses:
             ghidra = (_GHIDRA_GP + disp) & 0xFFFFFFFF
             runtime = (_RUNTIME_GP + disp) & 0xFFFFFFFF

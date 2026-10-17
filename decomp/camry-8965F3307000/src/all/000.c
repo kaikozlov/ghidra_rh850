@@ -1942,7 +1942,7 @@ void f33_fill_constant_block_1f24(void)
   (*((volatile uint8_t *)camry_host_ptr(0xfebe4932u))) = 0;
   (*((volatile uint8_t *)camry_host_ptr(0xfebe4931u))) = 0;
   (*((volatile uint8_t *)camry_host_ptr(0xfebe4930u))) = 0xa5;
-  DAT_febf292f = 0;
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe492fu))) = 0;
   (*((volatile uint8_t *)camry_host_ptr(0xfebe492eu))) = 0;
   return;
 }
