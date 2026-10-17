@@ -109,6 +109,28 @@ uint8_t *camry_host_ptr(uint32_t address) {
     return camry_host_locate(address, 1);
 }
 
+int camry_host_firmware(const void *pointer, uint32_t *out) {
+    const uint8_t *bytes = pointer;
+    uintptr_t raw = (uintptr_t)pointer;
+    int index;
+    for (index = camry_host_region_count - 1; index >= 0; index -= 1) {
+        CamryHostRegion *region = &camry_host_regions[index];
+        const uint8_t *end = region->data + region->size;
+        if (bytes >= region->data && bytes < end) {
+            *out = region->base + (uint32_t)(bytes - region->data);
+            return 1;
+        }
+    }
+    for (index = camry_alias_count - 1; index >= 0; index -= 1) {
+        CamryAlias *alias = &camry_aliases[index];
+        if (raw >= alias->host && raw < alias->host + CAMRY_ALIAS_STRIDE) {
+            *out = alias->firmware + (uint32_t)(raw - alias->host);
+            return 1;
+        }
+    }
+    return 0;
+}
+
 uint32_t camry_host_addr(const void *pointer) {
     const uint8_t *bytes = pointer;
     uintptr_t raw = (uintptr_t)pointer;

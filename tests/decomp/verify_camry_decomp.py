@@ -796,6 +796,15 @@ def call_corpus(library: ctypes.CDLL, name: str, signature: str, registers: dict
         result = function(*args)
         if not result:
             return 0
+        firmware = u32()
+        library.camry_host_firmware.argtypes = [ctypes.c_void_p, ctypes.POINTER(u32)]
+        library.camry_host_firmware.restype = ctypes.c_int
+        if library.camry_host_firmware(result, ctypes.byref(firmware)):
+            return int(firmware.value) & 0xFFFFFFFF
+        # A status or firmware address returned through a pointer-typed
+        # signature is the integer in r10, not a host pointer.
+        if result <= 0xFFFFFFFF:
+            return int(result) & 0xFFFFFFFF
         library.camry_host_addr.argtypes = [ctypes.c_void_p]
         library.camry_host_addr.restype = u32
         return int(library.camry_host_addr(result)) & 0xFFFFFFFF
