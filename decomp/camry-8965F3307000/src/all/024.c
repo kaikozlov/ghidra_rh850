@@ -3713,6 +3713,69 @@ void FUN_00092f70(uchar param_1)
   return;
 }
 
+/* WARNING: Inlined function: f33_dcm_get_response_queue */
+
+void FUN_00093052(void)
+
+{
+  uint32_t puVar1;
+  ushort uVar2;
+  int iVar3;
+  undefined4 uVar4;
+  F33PduInfo *response;
+  uint duration;
+  uchar uStack_19;
+  
+  puVar1 = 0xfebeb800u;
+  iVar3 = FUN_00092b34();
+  uVar4 = FUN_00093e82();
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x5e9b))))) == '\0') {
+    if (iVar3 == 0x20) {
+      FUN_00092a86(0x30);
+      f33_dcm_try_pending_response
+                ((ushort)uVar4,(F33PduInfo *)&f33_dcm_response_queue.copy_cursor,'\0');
+    }
+    else if (iVar3 == 0x21) {
+      uStack_19 = 0xff;
+      response = (F33PduInfo *)FUN_00092d38(&uStack_19);
+      if ((uintptr_t)(response)!=(uintptr_t)((F33PduInfo *)0x0)) {
+        FUN_00092a86(0x40);
+        f33_dcm_try_final_response((ushort)uVar4,response,uStack_19);
+      }
+    }
+  }
+  else {
+    duration = FUN_00093c5a();
+    uVar2 = f33_dcm_select_response_deadline('\x01','\x01');
+    if (iVar3 == 0x20) {
+      f33_dcm_arm_software_timer('\x03',duration);
+      f33_dcm_arm_software_timer('\x04',(uint)uVar2);
+      f33_run_init_chain_92bfe();
+      iVar3 = FUN_00092f6a();
+      FUN_00092f70(0);
+      if (iVar3 == 1) {
+        FUN_00091c82(3,1);
+      }
+      FUN_00092a86(0x11);
+    }
+    else if (iVar3 == 0x21) {
+      f33_dcm_cancel_software_timer('\x03');
+      f33_dcm_cancel_software_timer('\x04');
+      f33_dcm_cancel_software_timer('\x02');
+      uVar4 = FUN_00092c1e(1);
+      FUN_00092de8(uVar4);
+    }
+    else if (iVar3 == 0x22) {
+      f33_dcm_cancel_software_timer('\x03');
+      f33_dcm_cancel_software_timer('\x04');
+      FUN_00092a86(0x40);
+      FUN_00092eae(uVar4, ((F33PduInfo *)camry_host_ptr((uint32_t)((int)0xfebe5978))));
+    }
+  }
+  return;
+}
+
+
 
 
 void FUN_00093154(undefined1 *param_1,undefined1 param_2,undefined1 param_3)
@@ -3780,6 +3843,29 @@ void f33_dcm_p2_response_deadline(uchar service_id)
   return;
 }
 
+/* WARNING: Inlined function: f33_dcm_get_response_queue */
+
+void FUN_00093230(void)
+
+{
+  ushort transmit_id;
+  int iVar1;
+  
+  iVar1 = FUN_00092b34();
+  if (iVar1 == 0x11) {
+    FUN_00092a86(0x10);
+  }
+  else if (iVar1 == 0x20) {
+    f33_dcm_cancel_software_timer('\x04');
+    FUN_00092a86(0x30);
+    transmit_id = FUN_00093e82();
+    f33_dcm_try_pending_response(transmit_id,(F33PduInfo *)&f33_dcm_response_queue.copy_cursor,'\0')
+    ;
+  }
+  return;
+}
+
+
 
 
 void FUN_0009338e(void)
@@ -3812,6 +3898,89 @@ void FUN_0009338e(void)
   }
   return;
 }
+
+/* WARNING: Inlined function: f33_dcm_get_response_queue */
+/* Select fixed positive/negative/silent node. State30 appends behind in-flight pending and
+   becomes31 without another lower submit. Active10/11/20 submit final40; cancellation states use
+   separate software completion joins. */
+
+void f33_dcm_enqueue_final_disposition(F33PduInfo *response,uchar disposition)
+
+{
+  undefined4 uVar1;
+  ushort transmit_id;
+  F33DcmResponseNode *node;
+  int iVar2;
+  uint uVar3;
+  
+  if (disposition == '\0') {
+    node = (F33DcmResponseNode *)FUN_0009317a(1);
+    node->data = response->data;
+    node->length = response->length;
+  }
+  else if (disposition == '\x01') {
+    node = (F33DcmResponseNode *)FUN_0009317a(2);
+  }
+  else {
+    node = (F33DcmResponseNode *)FUN_0009317a(3);
+    node->disposition = disposition;
+  }
+  iVar2 = FUN_00092b34();
+  if (iVar2 == 0x30) {
+    thunk_FUN_0006a45e();
+    f33_dcm_append_response_node(((F33DcmResponseQueue *)camry_host_ptr((uint32_t)((0xfebe5970u)))), node);
+    thunk_FUN_0006a4c4();
+    uVar1 = 0x31;
+  }
+  else {
+    if (iVar2 != 0x23) {
+      if (iVar2 == 0x24) {
+        FUN_00091f64(0);
+        FUN_00091faa();
+        uVar3 = f33_dcm_map_response_delivery_result(disposition,'\x01');
+        FUN_00091c82(uVar3,0);
+        f33_dcm_invalidate_queued_event('(','\x01');
+        FUN_0009338e();
+        return;
+      }
+      if (iVar2 == 0x25) {
+        FUN_00091f90();
+        uVar3 = f33_dcm_map_response_delivery_result(disposition,'\x01');
+        FUN_00091c82(uVar3,0);
+        f33_dcm_reset_response_queue();
+        FUN_00092a9c();
+        return;
+      }
+      if (((iVar2 != 0x10) && (iVar2 != 0x11)) && (iVar2 != 0x20)) {
+        return;
+      }
+      thunk_FUN_0006a45e();
+      if (iVar2 == 0x20) {
+        FUN_00093276();
+      }
+      else {
+        f33_dcm_append_response_node(((F33DcmResponseQueue *)camry_host_ptr((uint32_t)((0xfebe5970u)))), node);
+      }
+      FUN_00092bd8();
+      thunk_FUN_0006a4c4();
+      FUN_00092a86(0x40);
+      transmit_id = FUN_00093e82();
+      f33_dcm_try_final_response
+                (transmit_id,(F33PduInfo *)&f33_dcm_response_queue.copy_cursor,disposition);
+      return;
+    }
+    FUN_00091f64(0);
+    FUN_00091faa();
+    uVar3 = f33_dcm_map_response_delivery_result(disposition,'\x01');
+    FUN_00091c82(uVar3,0);
+    f33_dcm_reset_response_queue();
+    f33_dcm_invalidate_queued_event('(','\x01');
+    uVar1 = 0x10;
+  }
+  FUN_00092a86(uVar1);
+  return;
+}
+
 
 
 
@@ -3852,6 +4021,41 @@ void f33_dcm_request_explicit_pending_response(uchar service_id)
   }
   return;
 }
+
+void FUN_000935b6(void)
+
+{
+  undefined4 uVar1;
+  int iVar2;
+  uint uVar3;
+  
+  iVar2 = FUN_00092b34();
+  if (2 < iVar2 - 0x23U) {
+    f33_dcm_cancel_software_timer('\x03');
+    f33_dcm_cancel_software_timer('\x04');
+    f33_dcm_cancel_software_timer('\x02');
+    FUN_00092f70(0);
+    FUN_00093c94(0x0);
+    FUN_000940ba();
+    f33_dcm_invalidate_queued_event(')','\x01');
+    uVar3 = f33_dcm_enqueue_event('(');
+    if (uVar3 == 0) {
+      if ((iVar2 == 0x10 || iVar2 == 0x11) || (iVar2 - 0x20U < 3)) {
+        uVar1 = 0x23;
+      }
+      else {
+        uVar1 = 0x24;
+      }
+      FUN_00092a86(uVar1);
+    }
+    else {
+      uVar1 = FUN_00092c1e(1);
+      FUN_00092de8(uVar1);
+    }
+  }
+  return;
+}
+
 
 
 

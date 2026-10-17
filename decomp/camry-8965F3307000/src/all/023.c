@@ -346,6 +346,86 @@ void f33_append_dtc_count(ushort count)
   return;
 }
 
+/* Walk ascending24-bit DTC tuples, counting one for equal IDs and one for each unmatched ID. Count
+   accumulates inR6 with16-bit wrapping and is passed directly to8C422; return0. Missing count in C
+   is an ABI/dataflow defect, not a constant zero result. */
+
+uint f33_count_merged_dtc_sources(F33DiagSourceBuffer *local,F33DiagSourceBuffer *side)
+
+{
+  byte *pbVar1;
+  uint uVar2;
+  ushort count;
+  uint uVar4;
+  uint uVar5;
+  uint uVar6;
+  ushort uVar3;
+  
+  uVar5 = 0;
+  uVar4 = 0;
+  count = 0;
+  if ((local->status == '\x01') || (side->status == '\x01')) {
+    if (local->length == 0) {
+      uVar6 = 0xffffffff;
+    }
+    else {
+      uVar6 = 0;
+    }
+    if (side->length == 0) {
+      uVar2 = 0xffffffff;
+      count = 0;
+      goto LAB_0008c4e6;
+    }
+    uVar2 = 0;
+    uVar3 = 0;
+    do {
+      do {
+        if (uVar6 != 0) goto LAB_0008c49a;
+        while( true ) {
+          while( true ) {
+            if (uVar5 < local->length) {
+              pbVar1 = ((void *)camry_host_ptr((uint32_t)(local->bytes + uVar5)));
+              uVar6 = (uint)pbVar1[2] | (uint)pbVar1[1] << 8 | (uint)*pbVar1 << 0x10;
+            }
+            else {
+              uVar6 = 0xffffffff;
+            }
+LAB_0008c49a:
+            if (uVar2 == 0) {
+              if (uVar4 < side->length) {
+                pbVar1 = ((void *)camry_host_ptr((uint32_t)(side->bytes + uVar4)));
+                uVar2 = (uint)pbVar1[2] | (uint)pbVar1[1] << 8 | (uint)*pbVar1 << 0x10;
+              }
+              else {
+                uVar2 = 0xffffffff;
+              }
+            }
+            if (uVar6 != uVar2) break;
+            if (uVar6 == 0xffffffff) goto LAB_0008c4ea;
+            count = count + 1;
+            uVar5 = uVar5 + 4 & 0xffff;
+            uVar2 = 0;
+            uVar4 = uVar4 + 4 & 0xffff;
+            uVar3 = uVar3 + 1;
+          }
+          count = uVar3 + 1;
+          if (uVar2 <= uVar6) break;
+          uVar5 = uVar5 + 4 & 0xffff;
+          uVar3 = count;
+        }
+        uVar2 = 0;
+        uVar4 = uVar4 + 4 & 0xffff;
+LAB_0008c4e6:
+        uVar3 = count;
+      } while (uVar6 != 0xffffffff);
+LAB_0008c4ea:;
+    } while (uVar2 != 0xffffffff);
+  }
+  f33_append_dtc_count(count);
+  return 0;
+}
+
+
 
 
 undefined4 FUN_0008c4f8(F33DcmMessageContext *param_1)
@@ -575,6 +655,108 @@ bool FUN_0008c790(int param_1,ushort *param_2,undefined1 *param_3)
   *param_3 = (char)uVar1;
   return uVar1 != 0;
 }
+
+/* Merge ascending24-bit DTC tuples; deduplicate equal DTCs, OR statuses and clear bit10 when
+   combined status&29 is nonzero. Appends are bounded per tuple; omitted trailing tuples do not
+   force whole-response failure. */
+
+uint f33_merge_dtc_list_sources(F33DiagSourceBuffer *local,F33DiagSourceBuffer *side)
+
+{
+  byte *pbVar1;
+  ushort uVar2;
+  F33DiagSourceBuffer *extraout_r7;
+  F33DiagSourceBuffer *extraout_r7_00;
+  F33DiagSourceBuffer *extraout_r7_01;
+  uint uVar3;
+  uint uVar4;
+  uint uVar5;
+  uint uVar6;
+  byte local_24 [4];
+  byte abStack_20 [8];
+  
+  uVar2 = side->length;
+  uVar4 = 0;
+  uVar3 = 0;
+  uVar5 = 0;
+  do {
+    local_24[uVar5] = 0;
+    uVar6 = uVar5 + 1;
+    abStack_20[uVar5] = 0;
+    uVar5 = uVar6;
+  } while (uVar6 < 4);
+  if ((local->status == '\x01') || (side->status == '\x01')) {
+    if (local->length == 0) {
+      uVar5 = 0xffffffff;
+    }
+    else {
+      uVar5 = 0;
+    }
+    if (uVar2 == 0) {
+      uVar6 = 0xffffffff;
+      goto LAB_0008c952;
+    }
+    uVar6 = 0;
+    do {
+      do {
+        if (uVar5 != 0) goto LAB_0008c8ce;
+        while( true ) {
+          if (uVar4 < local->length) {
+            pbVar1 = ((void *)camry_host_ptr((uint32_t)(local->bytes + uVar4)));
+            local_24[0] = *pbVar1;
+            local_24[1] = pbVar1[1];
+            local_24[2] = pbVar1[2];
+            local_24[3] = pbVar1[3];
+            uVar5 = (uint)local_24[2] | (uint)local_24[1] << 8 | (uint)local_24[0] << 0x10;
+          }
+          else {
+            uVar5 = 0xffffffff;
+          }
+LAB_0008c8ce:
+          if (uVar6 == 0) {
+            if (uVar3 < side->length) {
+              pbVar1 = ((void *)camry_host_ptr((uint32_t)(side->bytes + uVar3)));
+              abStack_20[0] = *pbVar1;
+              abStack_20[1] = pbVar1[1];
+              abStack_20[2] = pbVar1[2];
+              abStack_20[3] = pbVar1[3];
+              uVar6 = (uint)abStack_20[2] | (uint)abStack_20[1] << 8 | (uint)abStack_20[0] << 0x10;
+            }
+            else {
+              uVar6 = 0xffffffff;
+            }
+          }
+          if (uVar5 >= uVar6 && uVar5 != uVar6) break;
+          if (uVar5 < uVar6) {
+            f33_append_dtc_tuple_if_fits(local_24);
+            uVar4 = uVar4 + 4 & 0xffff;
+            side = extraout_r7_00;
+          }
+          else {
+            if (uVar5 == 0xffffffff) goto LAB_0008c956;
+            abStack_20[3] = abStack_20[3] | local_24[3];
+            if ((abStack_20[3] & 0x29) != 0) {
+              abStack_20[3] = abStack_20[3] & 0xef;
+            }
+            f33_append_dtc_tuple_if_fits(abStack_20);
+            uVar4 = uVar4 + 4 & 0xffff;
+            uVar6 = 0;
+            uVar3 = uVar3 + 4 & 0xffff;
+            side = extraout_r7;
+          }
+        }
+        f33_append_dtc_tuple_if_fits(abStack_20);
+        uVar6 = 0;
+        uVar3 = uVar3 + 4 & 0xffff;
+        side = extraout_r7_01;
+LAB_0008c952:;
+      } while (uVar5 != 0xffffffff);
+LAB_0008c956:;
+    } while (uVar6 != 0xffffffff);
+  }
+  return 0;
+}
+
 
 
 

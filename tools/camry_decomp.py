@@ -181,15 +181,59 @@ def _opening_brace(code: str) -> int:
     return -1
 
 
+def _skip_quoted(code: str, index: int) -> int:
+    """Index just after a character or string literal that starts at `index`."""
+    quote = code[index]
+    if quote not in "'\"":
+        return index
+    cursor = index + 1
+    while cursor < len(code):
+        if code[cursor] == "\\":
+            cursor += 2
+            continue
+        if code[cursor] == quote:
+            return cursor + 1
+        cursor += 1
+    return index
+
+
+def _quoted_open(code: str, closing: int) -> int | None:
+    """Opening quote of the literal whose closing quote is at `closing`."""
+    quote = code[closing]
+    if quote not in "'\"":
+        return None
+    index = closing - 1
+    while index >= 0:
+        if code[index] != quote:
+            index -= 1
+            continue
+        slashes = 0
+        cursor = index - 1
+        while cursor >= 0 and code[cursor] == "\\":
+            slashes += 1
+            cursor -= 1
+        if slashes % 2 == 0:
+            return index
+        index -= 1
+    return None
+
+
 def _match_paren(code: str, opening: int) -> int:
     depth = 0
-    for index in range(opening, len(code)):
-        if code[index] == "(":
+    index = opening
+    while index < len(code):
+        char = code[index]
+        if char in "'\"":
+            nxt = _skip_quoted(code, index)
+            index = index + 1 if nxt == index else nxt
+            continue
+        if char == "(":
             depth += 1
-        elif code[index] == ")":
+        elif char == ")":
             depth -= 1
             if depth == 0:
                 return index
+        index += 1
     raise ValueError("unbalanced parenthesis")
 
 
@@ -1927,7 +1971,13 @@ def _split_args(arguments: str) -> list[str]:
     parts: list[str] = []
     start = 0
     depth = 0
-    for index, char in enumerate(arguments):
+    index = 0
+    while index < len(arguments):
+        char = arguments[index]
+        if char in "'\"":
+            nxt = _skip_quoted(arguments, index)
+            index = index + 1 if nxt == index else nxt
+            continue
         if char in "([{":
             depth += 1
         elif char in ")]}":
@@ -1935,6 +1985,7 @@ def _split_args(arguments: str) -> list[str]:
         elif char == "," and depth == 0:
             parts.append(arguments[start:index])
             start = index + 1
+        index += 1
     parts.append(arguments[start:])
     return parts
 
@@ -3362,6 +3413,10 @@ def _direct_calls(code: str) -> list[tuple[str, int, int]]:
             index = len(code) if end < 0 else end + 2
             continue
         char = code[index]
+        if char in "'\"":
+            nxt = _skip_quoted(code, index)
+            index = index + 1 if nxt == index else nxt
+            continue
         if char == "(":
             depth += 1
             index += 1
@@ -5085,13 +5140,21 @@ def _rewrite_host_rewrap(code: str) -> str:
 
 def _match_paren_back(code: str, closing: int) -> int:
     depth = 0
-    for index in range(closing, -1, -1):
-        if code[index] == ")":
+    index = closing
+    while index >= 0:
+        char = code[index]
+        if char in "'\"":
+            opened = _quoted_open(code, index)
+            if opened is not None:
+                index = opened - 1
+                continue
+        if char == ")":
             depth += 1
-        elif code[index] == "(":
+        elif char == "(":
             depth -= 1
             if depth == 0:
                 return index
+        index -= 1
     raise ValueError("unbalanced parenthesis")
 
 
@@ -5600,6 +5663,11 @@ def _matching_open_paren(code: str, close: int) -> int | None:
     index = close
     while index >= 0:
         char = code[index]
+        if char in "'\"":
+            opened = _quoted_open(code, index)
+            if opened is not None:
+                index = opened - 1
+                continue
         if char == ")":
             depth += 1
         elif char == "(":
@@ -6497,6 +6565,15 @@ def _rewrite_nested_pointer_fields(code: str) -> str:
     return "".join(pieces)
 
 
+def _rewrite_terminal_labels(code: str) -> str:
+    """A label as the last statement of a block needs an empty statement after it."""
+    return re.sub(
+        r"([A-Za-z_][A-Za-z0-9_]*\s*:)(\s*)(?=\})",
+        r"\1;\2",
+        code,
+    )
+
+
 def _rewrite_body(code: str) -> str:
     code = _strip_calling_convention(code)
     code = _widen_signature(code)
@@ -6547,6 +6624,7 @@ def _rewrite_body(code: str) -> str:
     code = _rewrite_pointer_word_indexes(code)
     code = _rewrite_late_pointer_fields(code)
     code = _rewrite_pointer_assignments(code, firmware=True)
+    code = _rewrite_terminal_labels(code)
     return code
 
 
@@ -6679,8 +6757,9 @@ def _rewrite_named_addresses(code: str, *, pointer_return: bool = False) -> str:
                 return match.group(0)
             return f"return ((undefined *)camry_host_ptr(0x{addr:x}u))"
 
-        code = re.sub(r"return\s+&([A-Za-z_][A-Za-z0-9_]*)\b", returned, code)
-    return re.sub(r"&([A-Za-z_][A-Za-z0-9_]*)\b", replace, code)
+        code = re.sub(r"return\s+&([A-Za-z_][A-Za-z0-9_]*)\b(?!\s*\.)", returned, code)
+    # `&queue.field` is the field's address. Replacing only the object drops the offset.
+    return re.sub(r"&([A-Za-z_][A-Za-z0-9_]*)\b(?!\s*\.)", replace, code)
 
 
 _FUNCTION_ENTRIES: dict[str, int] | None = None

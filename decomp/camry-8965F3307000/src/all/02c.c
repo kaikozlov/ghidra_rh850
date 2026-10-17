@@ -2196,6 +2196,82 @@ void FUN_000b303e(void)
   return;
 }
 
+/* Family0500 selects events2A/2C/2E into0512/0522/0520. Submodes independently qualify completion
+   events and return0500. Accepted queue, selected submode, convergence, persistence and diagnostic
+   result are separate states. Family0500 dispatches service submodes0512/0522/0520 and separately
+   acknowledges completion events. Queue selection, physical convergence, persistence and result
+   publication remain distinct boundaries. */
+
+void f33_advance_service_family(void)
+
+{
+  uchar request_id;
+  ushort mode;
+  uint uVar1;
+  
+  if (DAT_febeb11a != 0x500) {
+    if (DAT_febeb11a == 0x512) {
+      FUN_000b2f8c();
+      uVar1 = f33_probe_pending_mode_request('+');
+      if (uVar1 == 1) {
+        FUN_000b2fb4();
+        f33_publish_live_application_mode(0x500);
+      }
+      request_id = '+';
+    }
+    else if (DAT_febeb11a == 0x520) {
+      FUN_000b301e();
+      uVar1 = f33_probe_pending_mode_request('/');
+      if (uVar1 == 1) {
+        FUN_000b303e();
+        f33_publish_live_application_mode(0x500);
+      }
+      request_id = '/';
+    }
+    else {
+      if (DAT_febeb11a != 0x522) {
+        return;
+      }
+      FUN_000b2fc6();
+      uVar1 = f33_probe_pending_mode_request('-');
+      if (uVar1 == 1) {
+        FUN_000b2fee();
+        f33_publish_live_application_mode(0x500);
+      }
+      request_id = '-';
+    }
+    goto LAB_000b317a;
+  }
+  FUN_000b2ee6();
+  uVar1 = f33_probe_pending_mode_request('*');
+  if (uVar1 == 1) {
+    mode = 0x512;
+LAB_000b311e:
+    f33_publish_live_application_mode(mode);
+  }
+  else {
+    uVar1 = f33_probe_pending_mode_request(',');
+    if (uVar1 == 1) {
+      thunk_FUN_000b77f4();
+      mode = 0x522;
+      goto LAB_000b311e;
+    }
+    uVar1 = f33_probe_pending_mode_request('.');
+    if (uVar1 == 1) {
+      FUN_000b2f5e();
+      mode = 0x520;
+      goto LAB_000b311e;
+    }
+  }
+  f33_acknowledge_selected_mode_request('*');
+  f33_acknowledge_selected_mode_request(',');
+  request_id = '.';
+LAB_000b317a:
+  f33_acknowledge_selected_mode_request(request_id);
+  return;
+}
+
+
 
 
 void FUN_000b3182(void)
