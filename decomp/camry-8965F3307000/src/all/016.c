@@ -622,6 +622,45 @@ undefined4 FUN_000588b6(void)
 
 
 
+void FUN_000588e8(void)
+
+{
+  ushort previous_mode;
+  ushort uVar1;
+  uint32_t puVar2;
+  undefined4 uVar3;
+  
+  puVar2 = 0xfebeb800u;
+  thunk_FUN_000fc3cc();
+  previous_mode = (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x2c00))));
+  uVar1 = (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0x30cc))));
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x2bea))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x2bea))))) + '\x01';
+  if (previous_mode == (ushort)~(*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x2bf4))))) {
+    if (uVar1 != previous_mode) {
+      uVar3 = thunk_FUN_000b1c64();
+      uVar1 = (ushort)uVar3;
+      (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x2c00)))) = uVar1;
+      (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x2bf4)))) = ~uVar1;
+      FUN_0005dc7e(1,uVar3,previous_mode);
+      f33_update_mode_owned_current_feedback(1,uVar1,previous_mode);
+      ((void)(2), (void)(uVar3), (void)(previous_mode), f33_return_only_stub_5df5a());
+      FUN_0005df5c(2,uVar3,previous_mode);
+      return;
+    }
+  }
+  else {
+    (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x2c00)))) = uVar1;
+    (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x2bf4)))) = ~uVar1;
+  }
+  FUN_0005de82(1,uVar1);
+  f33_update_steady_current_feedback(1,uVar1);
+  ((void)(2), (void)(uVar1), f33_return_only_stub_5e200());
+  f33_run_current_control_and_stage_output(2,uVar1);
+  return;
+}
+
+
+
 /* Save PMR; setFFC0; copy ECU inputs through5C7B6 and control inputs throughFDC28; restore
    entryPMR. The caller subsequently runs CH1 transition/steady workers. */
 
@@ -635,6 +674,43 @@ void f33_snapshot_ch1_inputs(void)
   FUN_0005c7b6();
   f33_copy_cell_block_c1b24();
   FUN_000701a6(uVar1);
+  return;
+}
+
+
+
+void FUN_0005899e(void)
+
+{
+  ushort uVar1;
+  ushort uVar2;
+  uint32_t puVar3;
+  undefined4 uVar4;
+  
+  puVar3 = 0xfebeb800u;
+  f33_snapshot_ch1_inputs();
+  FUN_000fc2a0();
+  thunk_FUN_000fc462();
+  uVar1 = (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x2bfe))));
+  uVar2 = (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + 0x30cc))));
+  if (uVar1 == (ushort)~(*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x2bf2))))) {
+    if (uVar2 != uVar1) {
+      uVar4 = thunk_FUN_000b1c64();
+      (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x2bfe)))) = (ushort)uVar4;
+      (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x2bf2)))) = ~(ushort)uVar4;
+      FUN_0005e2da(1,uVar4,uVar1);
+      FUN_000fdcf0(1,uVar4,uVar1);
+      FUN_0005e38e(1,uVar4,uVar1);
+      return;
+    }
+  }
+  else {
+    (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x2bfe)))) = uVar2;
+    (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x2bf2)))) = ~uVar2;
+  }
+  FUN_0005e3ca(1,uVar2);
+  FUN_000fdd04(1,uVar2);
+  FUN_0005e420(1,uVar2);
   return;
 }
 
@@ -656,6 +732,45 @@ void f33_snapshot_ch2_inputs(void)
   f33_copy_cell_block_5cf1c();
   FUN_000fdc50();
   FUN_000701a6(uVar1);
+  return;
+}
+
+
+
+void FUN_00058a50(void)
+
+{
+  ushort previous_mode;
+  ushort uVar1;
+  uint32_t puVar2;
+  undefined4 uVar3;
+  
+  puVar2 = 0xfebeb800u;
+  f33_snapshot_ch2_inputs();
+  thunk_FUN_000fcc9c();
+  thunk_FUN_000fd562();
+  previous_mode = (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x2bfc))));
+  uVar1 = (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0x30cc))));
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x2be8))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x2be8))))) + '\x01';
+  if (previous_mode == (ushort)~(*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x2bf0))))) {
+    if (uVar1 != previous_mode) {
+      uVar3 = thunk_FUN_000b1c64();
+      uVar1 = (ushort)uVar3;
+      (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x2bfc)))) = uVar1;
+      (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x2bf0)))) = ~uVar1;
+      f33_step_transitioned_channel_monitor_slice(1,uVar1,previous_mode);
+      FUN_000fdd18(1,uVar3,previous_mode);
+      f33_update_mode_owned_application_requests(1,uVar1,previous_mode);
+      return;
+    }
+  }
+  else {
+    (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x2bfc)))) = uVar1;
+    (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x2bf0)))) = ~uVar1;
+  }
+  f33_step_steady_channel_monitor_slice(1,uVar1);
+  FUN_000fdd2c(1,uVar1);
+  f33_update_steady_application_requests(1,uVar1);
   return;
 }
 
@@ -700,6 +815,91 @@ void f33_snapshot_foreground_inputs(void)
   f33_snapshot_monitor_inputs();
   FUN_000fdc8c();
   FUN_000701a6(uVar1);
+  return;
+}
+
+
+
+/* Use published modeE8CC and local8C06/inverse8C12. Valid changed mode takes transition workers;
+   broken inverse repairs from snapshot and takes steady workers, not automatic failsafe.
+   Mask=(~n&(n+2)&3E)|1, n+=2 modulo256. Central mode work can change live mode while remaining
+   dispatchers still receive the previously captured mode. Mode-generation-aware dispatch separates
+   live mode, published snapshot and task-local mode/inverse. Broken inverse repairs into steady
+   dispatch. Central mode change does not replace mode arguments already passed to later workers.
+   Physical timing unmeasured. */
+
+void f33_dispatch_foreground_mode_generation(void)
+
+{
+  ushort uVar1;
+  ushort uVar2;
+  uint32_t puVar3;
+  int iVar4;
+  undefined4 uVar5;
+  ushort *raw;
+  ushort *xor5555;
+  byte bVar6;
+  ushort *xorAAAA;
+  uchar *raw_00;
+  byte bVar7;
+  uchar *xor55;
+  uchar *xorAA;
+  uchar uStack_1f;
+  short sStack_1e;
+  
+  puVar3 = 0xfebeb800u;
+  FUN_00058ad8();
+  if ((*((short *)camry_host_ptr((uint32_t)(puVar3 + -0x2bf8)))) == -0x5aa6) {
+    raw = ((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x2bf8)));
+    xor5555 = ((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x2bf6)));
+    xorAAAA = ((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x2bec)));
+    iVar4 = FUN_000707ac(raw,xor5555,xorAAAA,&sStack_1e);
+    if ((iVar4 == 0) && (sStack_1e == -0x5aa6)) {
+      raw_00 = ((undefined *)camry_host_ptr((uint32_t)(puVar3 + -0x2be6)));
+      xor55 = ((undefined *)camry_host_ptr((uint32_t)(puVar3 + -0x2be5)));
+      xorAA = ((undefined *)camry_host_ptr((uint32_t)(puVar3 + -0x2be4)));
+      iVar4 = f33_vote_redundant_u8(raw_00,xor55,xorAA,&uStack_1f);
+      if ((iVar4 == -0xd) || (uStack_1f != '\0')) {
+        uStack_1f = 0xa5;
+      }
+      else {
+        uStack_1f = 'Z';
+      }
+      f33_publish_redundant_u8(uStack_1f,raw_00,xor55,xorAA);
+      f33_reinitialize_application_for_foreground_restart();
+      f33_snapshot_ch1_inputs();
+      f33_snapshot_ch2_inputs();
+      f33_snapshot_foreground_inputs();
+      FUN_000fdd68();
+    }
+    f33_publish_redundant_u16(0,raw,xor5555,xorAAAA);
+  }
+  f33_snapshot_foreground_inputs();
+  uVar1 = (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x2bfa))));
+  uVar2 = (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + 0x30cc))));
+  bVar6 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x2be9))))) + 2;
+  bVar7 = ~(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x2be9))))) & bVar6 & 0x3e | 1;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x2be7))))) = bVar7;
+  if (uVar1 == (ushort)~(*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x2bee))))) {
+    if (uVar2 != uVar1) {
+      uVar5 = thunk_FUN_000b1c64();
+      (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x2bfa)))) = (ushort)uVar5;
+      (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x2bee)))) = ~(ushort)uVar5;
+      FUN_0005ec24(bVar7,uVar5,uVar1);
+      FUN_000fdd40(bVar7,uVar5,uVar1);
+      FUN_0005f464(bVar7,uVar5,uVar1);
+      goto LAB_00058c7c;
+    }
+  }
+  else {
+    (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x2bfa)))) = uVar2;
+    (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x2bee)))) = ~uVar2;
+  }
+  FUN_0005f610(bVar7,uVar2);
+  FUN_000fdd54(bVar7,uVar2);
+  FUN_0005f91c(bVar7,uVar2);
+LAB_00058c7c:
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x2be9))))) = bVar6;
   return;
 }
 

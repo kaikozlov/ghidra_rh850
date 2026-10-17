@@ -5488,6 +5488,40 @@ uint f33_write_2001_precondition(void)
 
 
 
+/* ExactAEBA8 allzero limitsB5A74 acceptedbyte1. B5EBA
+   ignoresbyte,setsB25511/returns1;callbackstatus2,owner2E10;invalid4,clearowner. */
+
+uint f33_write_2001_request_record101_reset(uchar *payload,ushort unused_length)
+
+{
+  undefined2 uVar1;
+  uint32_t puVar2;
+  int iVar3;
+  uint uVar4;
+  
+  puVar2 = 0xfebeb800u;
+  iVar3 = ((void)(*payload), (void)(unused_length), thunk_FUN_000b5a74());
+  if (iVar3 == 1) {
+    uVar4 = f33_request_record101_reset_write();
+    uVar1 = 0x2e10;
+    if (uVar4 == 1) {
+      uVar4 = 2;
+    }
+    else {
+      uVar1 = 0;
+      uVar4 = 9;
+    }
+  }
+  else {
+    uVar4 = 4;
+    uVar1 = 0;
+  }
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x364e)))) = uVar1;
+  return uVar4;
+}
+
+
+
 /* Exact20-byte identity to4FD88. */
 
 uint f33_write_2002_precondition(void)

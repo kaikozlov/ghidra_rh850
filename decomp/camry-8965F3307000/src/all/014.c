@@ -297,6 +297,34 @@ uint f33_diag_routine_1004_request_history_rewrite
 
 
 
+/* start requiresB8D9C(0)==5A,then result!=1;failure5 or duplicate8. No819A or speed gate. Results
+   always admitted;other=>7. Raw50152..5081E zxbR6andfullR10return0/5/7/8;gate details in companion
+   recovery rows. */
+
+uint f33_diag_routine_1007_admit(uchar control_type)
+
+{
+  char cVar1;
+  int iVar2;
+  
+  cVar1 = DAT_febe819f;
+  if (control_type == '\x01') {
+    iVar2 = ((void)(0), thunk_FUN_000b8d9c());
+    if (iVar2 != 0x5a) {
+      return 5;
+    }
+    if (cVar1 == '\x01') {
+      return 8;
+    }
+  }
+  else if (control_type != '\x03') {
+    return 7;
+  }
+  return 0;
+}
+
+
+
 /* startB8DDA(0) initializes B438=11,counterB440=0 (with shared dependent reinitializers
    whenB439!=11),result1,len0. B8D9C(0) checksB439 andB43A, notB438. B8B38 waits five status
    wordsB2D4/B26C/B324/B490/B352 high bytes88;all low bytes22=>group22 and selector4
@@ -326,6 +354,34 @@ uint f33_diag_routine_1007_restart_lifecycle_group0
     uVar1 = 1;
   }
   *output_length = uVar1;
+  return 0;
+}
+
+
+
+/* startB8D9C(2)==5A,then result!=1;failure5/duplicate8. Kind2 checksB438/B439,notB43A. No819A/speed
+   gate;results admitted. Raw50152..5081E zxbR6andfullR10return0/5/7/8;gate details in companion
+   recovery rows. */
+
+uint f33_diag_routine_1008_admit(uchar control_type)
+
+{
+  char cVar1;
+  int iVar2;
+  
+  cVar1 = DAT_febe81a0;
+  if (control_type == '\x01') {
+    iVar2 = ((void)(2), thunk_FUN_000b8d9c());
+    if (iVar2 != 0x5a) {
+      return 5;
+    }
+    if (cVar1 == '\x01') {
+      return 8;
+    }
+  }
+  else if (control_type != '\x03') {
+    return 7;
+  }
   return 0;
 }
 
@@ -704,6 +760,51 @@ uint f33_diag_routine_1109_admit(uchar control_type)
     return 7;
   }
   return 0;
+}
+
+
+
+/* startB90CA(22,1),4D118:pending-1 maps2 then callback0+result1;immediate0 givesresult2;other
+   errors propagate. B90CA rejects modefamily0100/0900;nonzero publishedF208 triggers3599E to queue
+   redundant selector100 defaultquad0800+marker0 when6AF0!=0 andsetsB495=5A,B497=5A,B498=1. If
+   marker already0 returns0 (no required update). B906A waits publishedF00F==11,44
+   terminalsuccess;otherterminalfails;B8FEE reportsselectorB andclearsrequesterbit. Callback
+   acceptance, redundant application record submission, lower NvMsoftwarecompletion and physical
+   durability differ. Raw500AE..50886:
+   R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions.
+   Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32. */
+
+uint f33_diag_routine_1109_request_record100_reset
+               (uchar control_type,uchar *unused_input,ushort unused_input_length,uchar *output,
+               ushort *output_length)
+
+{
+  ushort uVar1;
+  int application_status;
+  uint uVar2;
+  
+  if (control_type == '\x01') {
+    application_status = ((void)(0x22), (void)(1), (void)(unused_input_length), thunk_FUN_000b90ca());
+    uVar2 = f33_diag_translate_application_request_status(application_status);
+    if (uVar2 == 2) {
+      uVar2 = 0;
+      DAT_febe81a6 = '\x01';
+    }
+    else if (uVar2 == 0) {
+      DAT_febe81a6 = '\x02';
+    }
+    uVar1 = 0;
+  }
+  else {
+    if (control_type != '\x03') {
+      return 7;
+    }
+    uVar2 = 0;
+    *output = DAT_febe81a6;
+    uVar1 = 1;
+  }
+  *output_length = uVar1;
+  return uVar2;
 }
 
 

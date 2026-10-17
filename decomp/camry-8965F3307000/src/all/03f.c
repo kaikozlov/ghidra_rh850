@@ -428,29 +428,26 @@ void FUN_000fdd68(void)
 
 
 
-void thunk_FUN_000b1c64(void)
+undefined2 thunk_FUN_000b1c64(void)
 
 {
-  FUN_000b1c64();
-  return;
+  return FUN_000b1c64();
 }
 
 
 
-void thunk_FUN_000bdcfe(void)
+uint thunk_FUN_000bdcfe(void)
 
 {
-  FUN_000bdcfe();
-  return;
+  return FUN_000bdcfe();
 }
 
 
 
-void thunk_FUN_000bdf24(void)
+uint thunk_FUN_000bdf24(void)
 
 {
-  FUN_000bdf24();
-  return;
+  return FUN_000bdf24();
 }
 
 
@@ -473,11 +470,10 @@ void thunk_FUN_000b8e52(void)
 
 
 
-void thunk_FUN_000bdb48(void)
+undefined4 thunk_FUN_000bdb48(void)
 
 {
-  FUN_000bdb48();
-  return;
+  return FUN_000bdb48();
 }
 
 
@@ -671,11 +667,10 @@ void thunk_FUN_00034bce(void)
 
 
 
-void thunk_FUN_0004841e(void)
+uint thunk_FUN_0004841e(void)
 
 {
-  FUN_0004841e();
-  return;
+  return FUN_0004841e();
 }
 
 

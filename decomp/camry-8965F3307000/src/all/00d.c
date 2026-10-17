@@ -1619,6 +1619,21 @@ int f33_ba_f8_validate_tzclr(uchar configured_index,uchar *payload,uchar *respon
 
 
 
+/* Return real B90CA(22,2) signedR10, not void. Request record100 reset via existing learned
+   lifecycle; pending ownership survives rejected setter. Published completion is not physical
+   persistence. */
+
+int f33_ba_f8_request_learned_reset(void)
+
+{
+  int iVar1;
+  
+  iVar1 = ((void)(0x22), (void)(2), thunk_FUN_000b90ca());
+  return iVar1;
+}
+
+
+
 /* Exact JTRM3 requests internal selector7 admission in allowed modes; start does not setB112. */
 
 int f33_ba_f9_validate_jtrm3(uchar configured_index,uchar *payload,uchar *response)

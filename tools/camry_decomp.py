@@ -2219,6 +2219,10 @@ def _transfer(state: dict[int, set], inst) -> dict[int, set]:
             return cur
         _write_origin(cur, dst, _FAIL)
         return cur
+    if name == "stsr" and len(args) >= 3 and args[1] == 11 and args[2] == 2:
+        # stsr sr11, rN, 2 reads PMR. The value is the register's new origin.
+        _write_origin(cur, args[0], ("sreg", 11, 2))
+        return cur
     if name in _NARROW and args and args[0] in cur and len(cur[args[0]]) == 1:
         cur[args[0]] = {_narrow(next(iter(cur[args[0]])), _NARROW[name])}
         return cur
@@ -2653,6 +2657,7 @@ def _call_facts() -> dict:
     origins: dict[str, dict] = {}
     sites: dict[str, dict[int, list[int]]] = {}
     ret_target: dict[str, int] = {}
+    saved_pmr: set[str] = set()
     arity: dict[str, int] = {}
     walked = []
     direct_writes: dict[int, set[int]] = {}
@@ -2679,6 +2684,7 @@ def _call_facts() -> dict:
                 grouped.setdefault(inst.target, []).append(inst.addr)
         sites[row["name"]] = grouped
         targets = []
+        pmr_origins: list[set] = []
         for inst in fn.insts:
             key = ("ret", inst.addr)
             if key not in state:
@@ -2686,11 +2692,18 @@ def _call_facts() -> dict:
             origin = state[key].get(10, set())
             if inst.kind in {"jr", "br"} and inst.target not in fn.sites:
                 origin = {("call", inst.target)}
+            if inst.kind == "jmp" and inst.reg:
+                held = state[key].get(inst.reg, set())
+                if len(held) == 1 and next(iter(held))[0] == "imm" and next(iter(held))[1] in names_at:
+                    origin = {("call", next(iter(held))[1])}
             targets.append(origin)
+            pmr_origins.append(origin)
         if targets and all(len(item) == 1 and next(iter(item))[0] == "call" for item in targets):
             called = {next(iter(item))[1] for item in targets}
             if len(called) == 1 and None not in called:
                 ret_target[row["name"]] = next(iter(called))
+        if pmr_origins and all(len(item) == 1 and next(iter(item)) == ("sreg", 11, 2) for item in pmr_origins):
+            saved_pmr.add(row["name"])
         arity[row["name"]] = _argument_arity(fn, state)
     _meta, functions = load_corpus(
         REPO_ROOT / "data" / "generated" / TARGET / "decompilations.jsonl"
@@ -2782,6 +2795,7 @@ def _call_facts() -> dict:
         "need": need,
         "hand": hand_names,
         "planned": planned,
+        "saved_pmr": saved_pmr,
         "ram": {addr: next(iter(widths)) for addr, widths in ram.items() if len(widths) == 1},
     }
     return _CALL_FACTS
@@ -2971,11 +2985,52 @@ def _rewrite_returned_call(code: str) -> str:
     brace = _opening_brace(code)
     head, body = code[:brace], code[brace:]
     declarator = list(re.finditer(rf"\bvoid(\s+{re.escape(name)}\s*\()", head))
-    if len(declarator) != 1:
+    if not declarator:
         return code
-    found = declarator[0]
-    head = head[:found.start()] + new_type + found.group(1) + head[found.end():]
+    for found in reversed(declarator):
+        head = head[:found.start()] + new_type + found.group(1) + head[found.end():]
     body = body[:start] + "\n  return " + statement + ";" + body[ret_end:]
+    return head + body
+
+
+def _saved_pmr_variable(body: str) -> str | None:
+    """The variable holding the PMR read that the bytes return in r10."""
+    found = None
+    for match in re.finditer(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*=\s*PMR\s*;", body):
+        found = match
+        break
+    if found is None:
+        return None
+    name = found.group(1)
+    if re.search(r"\breturn\b", body[:found.start()]):
+        return None
+    if re.search(rf"\b{re.escape(name)}\s*=(?!=)", body[found.end():]):
+        return None
+    if not re.search(r"\breturn\s*;", body[found.end():]):
+        return None
+    return name
+
+
+def _rewrite_saved_pmr(code: str) -> str:
+    """A void function whose r10 is the PMR it read returns that saved value."""
+    signature = _c_signature(code)
+    name = _signature_name(signature)
+    facts = _call_facts()
+    if name in facts["hand"] or name not in facts["saved_pmr"]:
+        return code
+    if _return_type_of(signature, name) != "void":
+        return code
+    brace = _opening_brace(code)
+    if brace < 0:
+        return code
+    head, body = code[:brace], code[brace:]
+    saved = _saved_pmr_variable(body)
+    declarator = list(re.finditer(rf"\bvoid(\s+{re.escape(name)}\s*\()", head))
+    if saved is None or not declarator:
+        return code
+    for found in reversed(declarator):
+        head = head[:found.start()] + "uint" + found.group(1) + head[found.end():]
+    body = re.sub(r"\breturn\s*;", f"return {saved};", body, count=1)
     return head + body
 
 
@@ -2984,6 +3039,7 @@ def _rewrite_body(code: str) -> str:
     code = _widen_signature(code)
     code = _rewrite_recovered_arguments(code)
     code = _rewrite_returned_call(code)
+    code = _rewrite_saved_pmr(code)
     code = _rewrite_firmware_bases(code)
     signature = _c_signature(code)
     pointers = _pointer_names(signature, code)

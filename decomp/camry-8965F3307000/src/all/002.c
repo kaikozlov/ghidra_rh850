@@ -296,7 +296,7 @@ void FUN_000084f8(uint param_1)
 
 /* WARNING: Removing unreachable block (ram,0x00008530) */
 
-void FUN_0000851c(int param_1)
+uint FUN_0000851c(int param_1)
 
 {
   uint uVar1;
@@ -362,7 +362,7 @@ void FUN_0000851c(int param_1)
     }
     __synchronize();
   }
-  return;
+  return iVar3;
 }
 
 
@@ -432,6 +432,69 @@ void FUN_00008542(undefined4 param_1)
   }
   __synchronize();
   return;
+}
+
+
+
+undefined4 FUN_00008560(int *param_1,uint param_2)
+
+{
+  uint uVar1;
+  int iVar2;
+  undefined4 uVar3;
+  undefined4 uVar4;
+  int *piVar5;
+  
+  uVar3 = FUN_0000851c(0xffff);
+  FUN_000084f8(camry_host_addr(f33_nvm_family0_read_record + 0x3a4));
+  CFECCCTL_PE1 = 0x4001;
+  CFECCCTL_VCI2CFBA = 0x4001;
+  uVar4 = 0;
+  uVar1 = CFECCCTL_VCI2CFBA;
+  __synchronize();
+  __synchronize();
+  piVar5 = param_1;
+  for (iVar2 = 0;
+      (int)(iVar2 - param_2) < 0 !=
+      (iVar2 < 0 != (int)param_2 < 0 && (int)param_2 < 0 == (int)(iVar2 - param_2) < 0);
+      iVar2 = iVar2 + 1) {
+    if (*piVar5 != -1) {
+      uVar4 = 1;
+      goto LAB_000085fa;
+    }
+    piVar5 = piVar5 + 1;
+  }
+  CFSTSTCTL_PE1 = 0x4001;
+  CFSTSTCTL_VCI2CFBA = 0x4001;
+  uVar1 = CFSTSTCTL_VCI2CFBA;
+  __synchronize();
+  __synchronize();
+  param_2 = param_2 >> 2;
+  do {
+    if (param_2 == 0) {
+LAB_000085e2:
+      CFSTSTCTL_PE1 = 0x4000;
+      CFSTSTCTL_VCI2CFBA = 0x4000;
+      uVar1 = CFSTSTCTL_VCI2CFBA;
+      __synchronize();
+      __synchronize();
+LAB_000085fa:
+      CFECCCTL_PE1 = 0x4000;
+      CFECCCTL_VCI2CFBA = 0x4000;
+      uVar1 = CFECCCTL_VCI2CFBA;
+      __synchronize();
+      __synchronize();
+      FUN_000084f8(0);
+      FUN_00008542(uVar3);
+      return uVar4;
+    }
+    if (*param_1 != 0x3ff) {
+      uVar4 = 1;
+      goto LAB_000085e2;
+    }
+    param_1 = param_1 + 4;
+    param_2 = param_2 - 1;
+  } while( true );
 }
 
 
