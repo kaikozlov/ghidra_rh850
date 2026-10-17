@@ -139,14 +139,14 @@
 {"addr": "0x1398", "name": "f33_boot_resident_main", "status": "converted"}
 {"addr": "0x13b0", "name": "f33_boot_select_application_or_resident", "status": "converted"}
 {"addr": "0x1404", "name": "f33_boot_hardware_ram_init_and_select_image", "status": "converted"}
-{"addr": "0x1478", "name": "FUN_00001478", "status": "converted"}
+{"addr": "0x1478", "name": "FUN_00001478", "status": "equivalent", "form": "corpus", "signature": "void FUN_00001478(undefined4 *param_1,undefined4 *param_2,int param_3)"}
 {"addr": "0x148e", "name": "f33_boot_resident_enter_with_record", "status": "converted"}
 {"addr": "0x14a2", "name": "FUN_000014a2", "status": "converted"}
 {"addr": "0x14be", "name": "FUN_000014be", "status": "converted"}
 {"addr": "0x14e8", "name": "FUN_000014e8", "status": "converted"}
 {"addr": "0x1514", "name": "FUN_00001514", "status": "converted"}
 {"addr": "0x152a", "name": "FUN_0000152a", "status": "converted"}
-{"addr": "0x153a", "name": "FUN_0000153a", "status": "converted"}
+{"addr": "0x153a", "name": "FUN_0000153a", "status": "equivalent", "form": "corpus", "signature": "void FUN_0000153a(undefined1 *param_1,undefined1 *param_2,int param_3)"}
 {"addr": "0x1550", "name": "FUN_00001550", "status": "converted"}
 {"addr": "0x1560", "name": "FUN_00001560", "status": "converted"}
 {"addr": "0x159e", "name": "FUN_0000159e", "status": "converted"}
@@ -162,7 +162,7 @@
 {"addr": "0x1c60", "name": "f33_fill_constant_block_1c60", "status": "converted"}
 {"addr": "0x1ca0", "name": "FUN_00001ca0", "status": "converted"}
 {"addr": "0x1ce8", "name": "thunk_FUN_000014a2", "status": "converted"}
-{"addr": "0x1d0e", "name": "FUN_00001d0e", "status": "converted"}
+{"addr": "0x1d0e", "name": "FUN_00001d0e", "status": "equivalent", "form": "corpus", "signature": "void FUN_00001d0e(byte *param_1,uint param_2)"}
 {"addr": "0x1d24", "name": "FUN_00001d24", "status": "converted"}
 {"addr": "0x1d2c", "name": "FUN_00001d2c", "status": "converted"}
 {"addr": "0x1d70", "name": "FUN_00001d70", "status": "converted"}
@@ -223,10 +223,10 @@
 {"addr": "0x32a0", "name": "FUN_000032a0", "status": "converted"}
 {"addr": "0x32d2", "name": "f33_boot_classify_service_range", "status": "converted"}
 {"addr": "0x3318", "name": "f33_boot_service_range_completion_selector", "status": "converted"}
-{"addr": "0x335e", "name": "f33_boot_select_region_for_range", "status": "converted"}
-{"addr": "0x3392", "name": "f33_boot_lookup_authentication_trailer", "status": "converted"}
-{"addr": "0x33cc", "name": "f33_boot_lookup_completion_marker", "status": "converted"}
-{"addr": "0x3402", "name": "f33_boot_select_counter_block_for_range", "status": "converted"}
+{"addr": "0x335e", "name": "f33_boot_select_region_for_range", "status": "equivalent", "form": "corpus", "signature": "uint f33_boot_select_region_for_range(uint address,uint length,uint *region)"}
+{"addr": "0x3392", "name": "f33_boot_lookup_authentication_trailer", "status": "equivalent", "form": "corpus", "signature": "uint f33_boot_lookup_authentication_trailer(uint start,uint length,uint *trailer_address)"}
+{"addr": "0x33cc", "name": "f33_boot_lookup_completion_marker", "status": "equivalent", "form": "corpus", "signature": "uint f33_boot_lookup_completion_marker(uint start,uint length,uint *marker_address)"}
+{"addr": "0x3402", "name": "f33_boot_select_counter_block_for_range", "status": "equivalent", "form": "corpus", "signature": "uint f33_boot_select_counter_block_for_range(uint address,uint length,uint *counter_block)"}
 {"addr": "0x3438", "name": "f33_boot_crc_descriptor_count", "status": "converted"}
 {"addr": "0x344c", "name": "f33_boot_crc_descriptors", "status": "unconvertible"}
 {"addr": "0x3460", "name": "FUN_00003460", "status": "converted"}
@@ -335,7 +335,7 @@
 {"addr": "0x4fba", "name": "FUN_00004fba", "status": "converted"}
 {"addr": "0x4fce", "name": "FUN_00004fce", "status": "converted"}
 {"addr": "0x4ff8", "name": "f33_boot_service_tester_present", "status": "converted"}
-{"addr": "0x5060", "name": "FUN_00005060", "status": "converted"}
+{"addr": "0x5060", "name": "FUN_00005060", "status": "equivalent", "form": "corpus", "signature": "undefined1 FUN_00005060(char *param_1,char param_2,char param_3)"}
 {"addr": "0x5084", "name": "f33_return_only_stub_5084", "status": "converted"}
 {"addr": "0x5086", "name": "FUN_00005086", "status": "converted"}
 {"addr": "0x50ea", "name": "FUN_000050ea", "status": "converted"}
@@ -353,7 +353,7 @@
 {"addr": "0x5282", "name": "f33_return_only_stub_5282", "status": "converted"}
 {"addr": "0x5284", "name": "f33_return_only_stub_5284", "status": "converted"}
 {"addr": "0x5286", "name": "FUN_00005286", "status": "converted"}
-{"addr": "0x52a6", "name": "FUN_000052a6", "status": "converted"}
+{"addr": "0x52a6", "name": "FUN_000052a6", "status": "equivalent", "form": "corpus", "signature": "int FUN_000052a6(byte *param_1,uint param_2)"}
 {"addr": "0x52be", "name": "FUN_000052be", "status": "converted"}
 {"addr": "0x52ca", "name": "FUN_000052ca", "status": "converted"}
 {"addr": "0x52de", "name": "FUN_000052de", "status": "converted"}
@@ -439,7 +439,7 @@
 {"addr": "0x6bd2", "name": "f33_boot_transfer_crypto_clear", "status": "converted"}
 {"addr": "0x6bde", "name": "f33_boot_transfer_block_transform_progress", "status": "converted"}
 {"addr": "0x6c52", "name": "f33_boot_block_transform_clear_activity", "status": "converted"}
-{"addr": "0x6c5a", "name": "FUN_00006c5a", "status": "converted"}
+{"addr": "0x6c5a", "name": "FUN_00006c5a", "status": "equivalent", "form": "corpus", "signature": "bool FUN_00006c5a(int *param_1)"}
 {"addr": "0x6c6c", "name": "f33_boot_compare_submit", "status": "converted"}
 {"addr": "0x6c8e", "name": "f33_boot_transfer_compare_progress", "status": "converted"}
 {"addr": "0x6d02", "name": "FUN_00006d02", "status": "converted"}
@@ -477,13 +477,13 @@
 {"addr": "0x729c", "name": "f33_boot_security_generate_candidate_block", "status": "converted"}
 {"addr": "0x72d6", "name": "f33_boot_security_initialize_candidate_context", "status": "converted"}
 {"addr": "0x7316", "name": "FUN_00007316", "status": "converted"}
-{"addr": "0x7346", "name": "f33_boot_security_clear_candidate_context", "status": "converted"}
+{"addr": "0x7346", "name": "f33_boot_security_clear_candidate_context", "status": "equivalent", "form": "corpus", "signature": "void f33_boot_security_clear_candidate_context(F33BootAes128CtrContext *context)"}
 {"addr": "0x7352", "name": "f33_boot_aes128_encrypt_block", "status": "converted"}
 {"addr": "0x7470", "name": "f33_boot_aes128_decrypt_block", "status": "converted"}
 {"addr": "0x7594", "name": "f33_boot_aes128_expand_round_keys", "status": "converted"}
-{"addr": "0x7680", "name": "f33_boot_aes128_initialize_context", "status": "converted"}
+{"addr": "0x7680", "name": "f33_boot_aes128_initialize_context", "status": "equivalent", "form": "corpus", "signature": "uint f33_boot_aes128_initialize_context(uchar *key,uchar key_length,F33BootAes128Context *context)"}
 {"addr": "0x76b6", "name": "FUN_000076b6", "status": "converted"}
-{"addr": "0x76c6", "name": "f33_boot_aes128_clear_context", "status": "converted"}
+{"addr": "0x76c6", "name": "f33_boot_aes128_clear_context", "status": "equivalent", "form": "corpus", "signature": "void f33_boot_aes128_clear_context(F33BootAes128Context *context)"}
 {"addr": "0x76da", "name": "FUN_000076da", "status": "converted"}
 {"addr": "0x77a8", "name": "FUN_000077a8", "status": "converted"}
 {"addr": "0x786e", "name": "FUN_0000786e", "status": "converted"}
@@ -493,17 +493,17 @@
 {"addr": "0x7a16", "name": "FUN_00007a16", "status": "converted"}
 {"addr": "0x7b42", "name": "f33_boot_aes128_ctr_transform_block", "status": "converted"}
 {"addr": "0x7c9a", "name": "f33_boot_aes128_ctr_initialize", "status": "converted"}
-{"addr": "0x7d3c", "name": "f33_boot_aes128_ctr_clear", "status": "converted"}
+{"addr": "0x7d3c", "name": "f33_boot_aes128_ctr_clear", "status": "equivalent", "form": "corpus", "signature": "void f33_boot_aes128_ctr_clear(F33BootAes128CtrContext *context)"}
 {"addr": "0x7d50", "name": "f33_boot_aes128_cmac_derive_subkeys", "status": "converted"}
 {"addr": "0x7e0c", "name": "f33_boot_aes128_cmac_update_block", "status": "converted"}
-{"addr": "0x7fb4", "name": "f33_boot_aes128_cmac_initialize", "status": "converted"}
-{"addr": "0x7ffc", "name": "f33_boot_aes128_cmac_clear", "status": "converted"}
+{"addr": "0x7fb4", "name": "f33_boot_aes128_cmac_initialize", "status": "equivalent", "form": "corpus", "signature": "uint f33_boot_aes128_cmac_initialize(uchar *key,uchar key_length,F33BootAes128CmacContext *context)"}
+{"addr": "0x7ffc", "name": "f33_boot_aes128_cmac_clear", "status": "equivalent", "form": "corpus", "signature": "void f33_boot_aes128_cmac_clear(F33BootAes128CmacContext *context)"}
 {"addr": "0x8010", "name": "FUN_00008010", "status": "converted"}
-{"addr": "0x811a", "name": "FUN_0000811a", "status": "converted"}
+{"addr": "0x811a", "name": "FUN_0000811a", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_0000811a(uchar *param_1,char param_2,F33BootAes128Context *param_3)"}
 {"addr": "0x814e", "name": "FUN_0000814e", "status": "converted"}
 {"addr": "0x8162", "name": "f33_boot_aes128_cbc_decrypt_block", "status": "converted"}
 {"addr": "0x82b6", "name": "f33_boot_aes128_cbc_initialize", "status": "converted"}
-{"addr": "0x834e", "name": "f33_boot_aes128_cbc_clear", "status": "converted"}
+{"addr": "0x834e", "name": "f33_boot_aes128_cbc_clear", "status": "equivalent", "form": "corpus", "signature": "void f33_boot_aes128_cbc_clear(F33BootAes128CbcContext *context)"}
 {"addr": "0x8370", "name": "f33_boot_ram_dispatch", "status": "converted"}
 {"addr": "0x84f8", "name": "FUN_000084f8", "status": "converted"}
 {"addr": "0x851c", "name": "FUN_0000851c", "status": "converted"}
@@ -542,7 +542,7 @@
 {"addr": "0x324d6", "name": "FUN_000324d6", "status": "converted"}
 {"addr": "0x324fc", "name": "FUN_000324fc", "status": "converted"}
 {"addr": "0x32580", "name": "FUN_00032580", "status": "converted"}
-{"addr": "0x32594", "name": "f33_stage_pair_correction", "status": "converted"}
+{"addr": "0x32594", "name": "f33_stage_pair_correction", "status": "equivalent", "form": "corpus", "signature": "int f33_stage_pair_correction(uchar selector,short *values)"}
 {"addr": "0x325c8", "name": "f33_queue_pair_correction_records", "status": "converted"}
 {"addr": "0x32620", "name": "f33_return_only_stub_32620", "status": "converted"}
 {"addr": "0x32622", "name": "f33_return_only_stub_32622", "status": "converted"}
@@ -612,18 +612,18 @@
 {"addr": "0x34cce", "name": "f33_return_only_stub_34cce", "status": "converted"}
 {"addr": "0x34cd0", "name": "f33_reload_ba_admission_records", "status": "converted"}
 {"addr": "0x34d2c", "name": "f33_poll_ba_retained_start", "status": "converted"}
-{"addr": "0x34d7a", "name": "f33_compare_ba_token_bytes", "status": "converted"}
-{"addr": "0x34da2", "name": "f33_ba_enable_closed_gate_exception", "status": "converted"}
+{"addr": "0x34d7a", "name": "f33_compare_ba_token_bytes", "status": "equivalent", "form": "corpus", "signature": "uint f33_compare_ba_token_bytes(uchar *left,uchar *right,uchar length)"}
+{"addr": "0x34da2", "name": "f33_ba_enable_closed_gate_exception", "status": "equivalent", "form": "corpus", "signature": "uint f33_ba_enable_closed_gate_exception(uchar operation,uchar request_length,uchar *payload)"}
 {"addr": "0x34dd4", "name": "f33_dispatch_ba_configured_start", "status": "converted"}
 {"addr": "0x34e66", "name": "f33_dispatch_ba_configured_finish", "status": "converted"}
 {"addr": "0x34ea4", "name": "FUN_00034ea4", "status": "converted"}
 {"addr": "0x34f00", "name": "FUN_00034f00", "status": "converted"}
-{"addr": "0x35004", "name": "FUN_00035004", "status": "converted"}
-{"addr": "0x35010", "name": "FUN_00035010", "status": "converted"}
+{"addr": "0x35004", "name": "FUN_00035004", "status": "equivalent", "form": "corpus", "signature": "int FUN_00035004(byte *param_1)"}
+{"addr": "0x35010", "name": "FUN_00035010", "status": "equivalent", "form": "corpus", "signature": "int FUN_00035010(byte *param_1)"}
 {"addr": "0x35028", "name": "FUN_00035028", "status": "converted"}
 {"addr": "0x35094", "name": "f33_ba_f1_validate_jtekm", "status": "converted"}
 {"addr": "0x350ba", "name": "f33_ba_f1_latch_selector3", "status": "converted"}
-{"addr": "0x350c8", "name": "f33_ba_f3_validate_tmpcl", "status": "converted"}
+{"addr": "0x350c8", "name": "f33_ba_f3_validate_tmpcl", "status": "equivalent", "form": "corpus", "signature": "int f33_ba_f3_validate_tmpcl(uchar configured_index,uchar *payload,uchar *response)"}
 {"addr": "0x35114", "name": "f33_service_clear_thermal_history", "status": "converted"}
 {"addr": "0x35170", "name": "f33_ba_f4_validate_jtrm1", "status": "converted"}
 {"addr": "0x35196", "name": "f33_ba_f4_latch_selector5", "status": "converted"}
@@ -634,13 +634,13 @@
 {"addr": "0x352b6", "name": "f33_ba_security_level_bit1_enabled", "status": "converted"}
 {"addr": "0x352ce", "name": "f33_ba_f7_request_enable", "status": "converted"}
 {"addr": "0x3538c", "name": "f33_ba_f7_finish_enable", "status": "converted"}
-{"addr": "0x353e0", "name": "f33_ba_f8_validate_tzclr", "status": "converted"}
+{"addr": "0x353e0", "name": "f33_ba_f8_validate_tzclr", "status": "equivalent", "form": "corpus", "signature": "int f33_ba_f8_validate_tzclr(uchar configured_index,uchar *payload,uchar *response)"}
 {"addr": "0x35428", "name": "f33_ba_f8_request_learned_reset", "status": "converted"}
 {"addr": "0x3543a", "name": "f33_ba_f9_validate_jtrm3", "status": "converted"}
 {"addr": "0x35460", "name": "f33_ba_f9_latch_selector7", "status": "converted"}
-{"addr": "0x3546e", "name": "f33_ba_fa_stage_unsigned_override", "status": "converted"}
+{"addr": "0x3546e", "name": "f33_ba_fa_stage_unsigned_override", "status": "equivalent", "form": "corpus", "signature": "int f33_ba_fa_stage_unsigned_override(uchar configured_index,uchar *payload,uchar *response)"}
 {"addr": "0x354a0", "name": "f33_ba_fa_latch_unsigned_override", "status": "converted"}
-{"addr": "0x354b0", "name": "f33_ba_fb_validate_asinc", "status": "converted"}
+{"addr": "0x354b0", "name": "f33_ba_fb_validate_asinc", "status": "equivalent", "form": "corpus", "signature": "int f33_ba_fb_validate_asinc(uchar configured_index,uchar *payload,uchar *response)"}
 {"addr": "0x354ca", "name": "f33_ba_fb_latch_owner5_fast_release", "status": "converted"}
 {"addr": "0x354d6", "name": "f33_consume_ba_retained_admission_count", "status": "converted"}
 {"addr": "0x3552e", "name": "f33_return_only_stub_3552e", "status": "converted"}
@@ -906,10 +906,10 @@
 {"addr": "0x3a27e", "name": "f33_publish_ecu_source2_thermal_limit_maps", "status": "equivalent", "form": "corpus", "signature": "void f33_publish_ecu_source2_thermal_limit_maps(void)"}
 {"addr": "0x3a2b6", "name": "f33_return_only_stub_3a2b6", "status": "converted"}
 {"addr": "0x3a2b8", "name": "f33_fill_constant_block_3a2b8", "status": "equivalent", "form": "corpus", "signature": "void f33_fill_constant_block_3a2b8(void)"}
-{"addr": "0x3a2d2", "name": "f33_choose_thermal_limit_source", "status": "converted"}
+{"addr": "0x3a2d2", "name": "f33_choose_thermal_limit_source", "status": "equivalent", "form": "corpus", "signature": "uint f33_choose_thermal_limit_source (ushort current,ushort candidate,uchar *source,uchar candidate_source)"}
 {"addr": "0x3a2e8", "name": "f33_select_ecu_thermal_limit", "status": "converted"}
 {"addr": "0x3a35e", "name": "f33_select_ecu_thermal_diagnostic", "status": "converted"}
-{"addr": "0x3a3b0", "name": "f33_select_motor_thermal_diagnostic", "status": "converted"}
+{"addr": "0x3a3b0", "name": "f33_select_motor_thermal_diagnostic", "status": "equivalent", "form": "corpus", "signature": "void f33_select_motor_thermal_diagnostic (ushort limit,ushort nominal,uchar *active,short *temperature)"}
 {"addr": "0x3a3ce", "name": "f33_select_smaller_magnitude_s16", "status": "equivalent", "form": "corpus", "signature": "int f33_select_smaller_magnitude_s16(short first,short second)"}
 {"addr": "0x3a406", "name": "f33_map_thermal_current_floor", "status": "converted"}
 {"addr": "0x3a4a0", "name": "f33_arbitrate_thermal_current_limits", "status": "converted"}
@@ -1589,7 +1589,7 @@
 {"addr": "0x44eb8", "name": "f33_report_diagnostic_event_failure_10_44eb8", "status": "converted"}
 {"addr": "0x44eca", "name": "f33_return_only_stub_44eca", "status": "converted"}
 {"addr": "0x44ecc", "name": "f33_return_only_stub_44ecc", "status": "converted"}
-{"addr": "0x44ece", "name": "FUN_00044ece", "status": "converted"}
+{"addr": "0x44ece", "name": "FUN_00044ece", "status": "equivalent", "form": "corpus", "signature": "void FUN_00044ece(uint param_1,ushort *param_2)"}
 {"addr": "0x44ee2", "name": "FUN_00044ee2", "status": "unconvertible"}
 {"addr": "0x44fa2", "name": "FUN_00044fa2", "status": "unconvertible"}
 {"addr": "0x45062", "name": "FUN_00045062", "status": "converted"}
@@ -1971,7 +1971,7 @@
 {"addr": "0x4af6a", "name": "f33_return_only_stub_4af6a", "status": "converted"}
 {"addr": "0x4af6c", "name": "FUN_0004af6c", "status": "converted"}
 {"addr": "0x4afca", "name": "f33_return_only_stub_4afca", "status": "converted"}
-{"addr": "0x4afcc", "name": "FUN_0004afcc", "status": "converted"}
+{"addr": "0x4afcc", "name": "FUN_0004afcc", "status": "equivalent", "form": "corpus", "signature": "void FUN_0004afcc(char param_1,short param_2,uint param_3,undefined2 *param_4)"}
 {"addr": "0x4afe8", "name": "f33_return_only_stub_4afe8", "status": "converted"}
 {"addr": "0x4afea", "name": "f33_return_only_stub_4afea", "status": "converted"}
 {"addr": "0x4afec", "name": "FUN_0004afec", "status": "converted"}
@@ -2106,7 +2106,7 @@
 {"addr": "0x4d0a4", "name": "FUN_0004d0a4", "status": "converted"}
 {"addr": "0x4d0e8", "name": "FUN_0004d0e8", "status": "converted"}
 {"addr": "0x4d118", "name": "f33_diag_translate_application_request_status", "status": "equivalent", "form": "corpus", "signature": "uint f33_diag_translate_application_request_status(int application_status)"}
-{"addr": "0x4d144", "name": "FUN_0004d144", "status": "converted"}
+{"addr": "0x4d144", "name": "FUN_0004d144", "status": "equivalent", "form": "corpus", "signature": "void FUN_0004d144(int param_1,undefined1 *param_2)"}
 {"addr": "0x4d17a", "name": "f33_check_diagnostic_application_admission", "status": "equivalent", "form": "corpus", "signature": "uint f33_check_diagnostic_application_admission(uchar addressing_kind)"}
 {"addr": "0x4d1a4", "name": "FUN_0004d1a4", "status": "converted"}
 {"addr": "0x4d222", "name": "FUN_0004d222", "status": "converted"}
@@ -2138,11 +2138,11 @@
 {"addr": "0x4d604", "name": "f33_app_request_programming_transition", "status": "converted"}
 {"addr": "0x4d63e", "name": "f33_diagnostic_clear_request_callback", "status": "converted"}
 {"addr": "0x4d682", "name": "f33_validate_clear_all_diagnostic_group", "status": "equivalent", "form": "corpus", "signature": "uint f33_validate_clear_all_diagnostic_group(uint group)"}
-{"addr": "0x4d690", "name": "f33_get_dtc_status_availability_mask", "status": "converted"}
+{"addr": "0x4d690", "name": "f33_get_dtc_status_availability_mask", "status": "equivalent", "form": "corpus", "signature": "uint f33_get_dtc_status_availability_mask(uchar *mask)"}
 {"addr": "0x4d69c", "name": "f33_begin_filtered_dtc_iteration", "status": "equivalent", "form": "corpus", "signature": "uint f33_begin_filtered_dtc_iteration(uchar mask)"}
 {"addr": "0x4d6ae", "name": "FUN_0004d6ae", "status": "unconvertible"}
 {"addr": "0x4d6d4", "name": "f33_next_filtered_dtc", "status": "converted"}
-{"addr": "0x4d72c", "name": "f33_next_snapshot_identifier_tuple", "status": "converted"}
+{"addr": "0x4d72c", "name": "f33_next_snapshot_identifier_tuple", "status": "equivalent", "form": "corpus", "signature": "uint f33_next_snapshot_identifier_tuple(uint *dtc,uchar *record_number)"}
 {"addr": "0x4d79a", "name": "FUN_0004d79a", "status": "converted"}
 {"addr": "0x4d7c4", "name": "FUN_0004d7c4", "status": "unconvertible"}
 {"addr": "0x4d802", "name": "f33_read_selected_did_payload", "status": "converted"}
@@ -2155,19 +2155,19 @@
 {"addr": "0x4da4c", "name": "f33_rdbi_0110_callback", "status": "converted"}
 {"addr": "0x4da74", "name": "f33_rdbi_0111_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_0111_callback(void)"}
 {"addr": "0x4da78", "name": "f33_rdbi_0112_callback", "status": "converted"}
-{"addr": "0x4da9e", "name": "f33_rdbi_0204_callback", "status": "converted"}
+{"addr": "0x4da9e", "name": "f33_rdbi_0204_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_0204_callback(undefined1 *param_1)"}
 {"addr": "0x4dabc", "name": "f33_rdbi_1031_callback", "status": "converted"}
 {"addr": "0x4daee", "name": "f33_rdbi_1032_callback", "status": "converted"}
-{"addr": "0x4db18", "name": "f33_rdbi_1033_callback", "status": "converted"}
-{"addr": "0x4db3e", "name": "f33_rdbi_1034_callback", "status": "converted"}
+{"addr": "0x4db18", "name": "f33_rdbi_1033_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1033_callback(undefined1 *param_1)"}
+{"addr": "0x4db3e", "name": "f33_rdbi_1034_callback", "status": "equivalent", "form": "corpus", "signature": "uint f33_rdbi_1034_callback(uchar *output)"}
 {"addr": "0x4db70", "name": "did_1035_steering_wheel_torque", "status": "converted"}
 {"addr": "0x4dbbc", "name": "did_1036_steering_angle_velocity", "status": "converted"}
 {"addr": "0x4dbf8", "name": "did_1037_steering_angle", "status": "converted"}
-{"addr": "0x4dc26", "name": "f33_rdbi_1038_callback", "status": "converted"}
+{"addr": "0x4dc26", "name": "f33_rdbi_1038_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1038_callback(byte *param_1)"}
 {"addr": "0x4dc36", "name": "f33_rdbi_1061_callback", "status": "converted"}
 {"addr": "0x4dc68", "name": "f33_rdbi_1062_callback", "status": "converted"}
 {"addr": "0x4dc9a", "name": "f33_rdbi_1063_callback", "status": "converted"}
-{"addr": "0x4dcd6", "name": "f33_rdbi_1064_callback", "status": "converted"}
+{"addr": "0x4dcd6", "name": "f33_rdbi_1064_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1064_callback(undefined1 *param_1)"}
 {"addr": "0x4dcfc", "name": "f33_rdbi_1065_callback", "status": "converted"}
 {"addr": "0x4dd28", "name": "f33_rdbi_1066_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1066_callback(void)"}
 {"addr": "0x4dd2c", "name": "f33_rdbi_106a_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_106a_callback(void)"}
@@ -2215,62 +2215,62 @@
 {"addr": "0x4e33c", "name": "f33_rdbi_1130_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1130_callback(void)"}
 {"addr": "0x4e340", "name": "f33_rdbi_1131_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1131_callback(void)"}
 {"addr": "0x4e344", "name": "f33_rdbi_1132_callback", "status": "converted"}
-{"addr": "0x4e36e", "name": "f33_rdbi_1133_callback", "status": "converted"}
+{"addr": "0x4e36e", "name": "f33_rdbi_1133_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1133_callback(undefined1 *param_1)"}
 {"addr": "0x4e394", "name": "did_1151_motor_actual_current_q_axis", "status": "converted"}
 {"addr": "0x4e3d0", "name": "did_1152_command_value_current_q_axis", "status": "converted"}
 {"addr": "0x4e40c", "name": "did_1153_motor_actual_current_2_d_axis", "status": "converted"}
 {"addr": "0x4e448", "name": "did_1154_command_value_current_2_d_axis", "status": "converted"}
 {"addr": "0x4e484", "name": "did_1155_motor_rotation_angle", "status": "converted"}
 {"addr": "0x4e4ce", "name": "did_1156_final_motor_current_limited_q_axis", "status": "converted"}
-{"addr": "0x4e508", "name": "f33_rdbi_1181_callback", "status": "converted"}
-{"addr": "0x4e52e", "name": "f33_rdbi_1182_callback", "status": "converted"}
+{"addr": "0x4e508", "name": "f33_rdbi_1181_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1181_callback(undefined1 *param_1)"}
+{"addr": "0x4e52e", "name": "f33_rdbi_1182_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1182_callback(byte *param_1)"}
 {"addr": "0x4e540", "name": "f33_rdbi_1183_callback", "status": "converted"}
 {"addr": "0x4e574", "name": "f33_rdbi_1184_callback", "status": "converted"}
 {"addr": "0x4e5a8", "name": "did_1185_can_vehicle_speed_sp1", "status": "converted"}
 {"addr": "0x4e5d2", "name": "f33_rdbi_1186_callback", "status": "converted"}
-{"addr": "0x4e600", "name": "f33_rdbi_11b1_callback", "status": "converted"}
-{"addr": "0x4e62c", "name": "f33_rdbi_11b3_callback", "status": "converted"}
-{"addr": "0x4e658", "name": "f33_rdbi_11b4_callback", "status": "converted"}
-{"addr": "0x4e684", "name": "f33_rdbi_11b5_callback", "status": "converted"}
-{"addr": "0x4e6b0", "name": "f33_rdbi_11b6_callback", "status": "converted"}
-{"addr": "0x4e6de", "name": "f33_rdbi_11b7_callback", "status": "converted"}
-{"addr": "0x4e706", "name": "f33_rdbi_11b8_callback", "status": "converted"}
-{"addr": "0x4e72e", "name": "f33_rdbi_11b9_callback", "status": "converted"}
-{"addr": "0x4e756", "name": "f33_rdbi_11ba_callback", "status": "converted"}
-{"addr": "0x4e77e", "name": "f33_rdbi_11bb_callback", "status": "converted"}
+{"addr": "0x4e600", "name": "f33_rdbi_11b1_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_11b1_callback(undefined1 *param_1)"}
+{"addr": "0x4e62c", "name": "f33_rdbi_11b3_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_11b3_callback(undefined1 *param_1)"}
+{"addr": "0x4e658", "name": "f33_rdbi_11b4_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_11b4_callback(undefined1 *param_1)"}
+{"addr": "0x4e684", "name": "f33_rdbi_11b5_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_11b5_callback(undefined1 *param_1)"}
+{"addr": "0x4e6b0", "name": "f33_rdbi_11b6_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_11b6_callback(undefined1 *param_1)"}
+{"addr": "0x4e6de", "name": "f33_rdbi_11b7_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_11b7_callback(undefined1 *param_1)"}
+{"addr": "0x4e706", "name": "f33_rdbi_11b8_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_11b8_callback(undefined1 *param_1)"}
+{"addr": "0x4e72e", "name": "f33_rdbi_11b9_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_11b9_callback(undefined1 *param_1)"}
+{"addr": "0x4e756", "name": "f33_rdbi_11ba_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_11ba_callback(undefined1 *param_1)"}
+{"addr": "0x4e77e", "name": "f33_rdbi_11bb_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_11bb_callback(undefined1 *param_1)"}
 {"addr": "0x4e7a6", "name": "f33_rdbi_11bc_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_11bc_callback(void)"}
-{"addr": "0x4e7aa", "name": "f33_rdbi_11bd_callback", "status": "converted"}
+{"addr": "0x4e7aa", "name": "f33_rdbi_11bd_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_11bd_callback(undefined1 *param_1)"}
 {"addr": "0x4e7d6", "name": "did_1c02_command_value_torque", "status": "converted"}
 {"addr": "0x4e81e", "name": "did_1c03_control_state_information", "status": "converted"}
 {"addr": "0x4e848", "name": "did_1c05_1c0c_asic_state_information", "status": "converted"}
 {"addr": "0x4e86a", "name": "f33_rdbi_1c06_callback", "status": "converted"}
 {"addr": "0x4e8b8", "name": "f33_rdbi_1c07_callback", "status": "converted"}
-{"addr": "0x4e906", "name": "f33_rdbi_1c08_callback", "status": "converted"}
-{"addr": "0x4e92e", "name": "f33_rdbi_1c09_callback", "status": "converted"}
-{"addr": "0x4e956", "name": "f33_rdbi_1c31_callback", "status": "converted"}
+{"addr": "0x4e906", "name": "f33_rdbi_1c08_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1c08_callback(undefined1 *param_1)"}
+{"addr": "0x4e92e", "name": "f33_rdbi_1c09_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1c09_callback(undefined1 *param_1)"}
+{"addr": "0x4e956", "name": "f33_rdbi_1c31_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1c31_callback(undefined1 *param_1)"}
 {"addr": "0x4e97c", "name": "f33_rdbi_1c32_callback", "status": "converted"}
-{"addr": "0x4e9b8", "name": "f33_rdbi_1c33_callback", "status": "converted"}
-{"addr": "0x4e9e0", "name": "f33_rdbi_1c37_callback", "status": "converted"}
+{"addr": "0x4e9b8", "name": "f33_rdbi_1c33_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1c33_callback(undefined1 *param_1)"}
+{"addr": "0x4e9e0", "name": "f33_rdbi_1c37_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1c37_callback(undefined1 *param_1)"}
 {"addr": "0x4ea06", "name": "f33_rdbi_1c38_callback", "status": "converted"}
-{"addr": "0x4ea42", "name": "f33_rdbi_1c39_callback", "status": "converted"}
-{"addr": "0x4ea6a", "name": "f33_rdbi_1c3d_callback", "status": "converted"}
+{"addr": "0x4ea42", "name": "f33_rdbi_1c39_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1c39_callback(undefined1 *param_1)"}
+{"addr": "0x4ea6a", "name": "f33_rdbi_1c3d_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1c3d_callback(undefined1 *param_1)"}
 {"addr": "0x4ea90", "name": "f33_rdbi_1c3e_callback", "status": "converted"}
-{"addr": "0x4eacc", "name": "f33_rdbi_1c3f_callback", "status": "converted"}
-{"addr": "0x4eaf4", "name": "f33_rdbi_1c43_callback", "status": "converted"}
+{"addr": "0x4eacc", "name": "f33_rdbi_1c3f_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1c3f_callback(undefined1 *param_1)"}
+{"addr": "0x4eaf4", "name": "f33_rdbi_1c43_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1c43_callback(undefined1 *param_1)"}
 {"addr": "0x4eb1a", "name": "f33_rdbi_1c44_callback", "status": "converted"}
-{"addr": "0x4eb56", "name": "f33_rdbi_1c49_callback", "status": "converted"}
+{"addr": "0x4eb56", "name": "f33_rdbi_1c49_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1c49_callback(undefined1 *param_1)"}
 {"addr": "0x4eb7c", "name": "f33_rdbi_1c4a_callback", "status": "converted"}
-{"addr": "0x4ebb8", "name": "f33_rdbi_1c4b_callback", "status": "converted"}
-{"addr": "0x4ebe0", "name": "f33_rdbi_1c4f_callback", "status": "converted"}
+{"addr": "0x4ebb8", "name": "f33_rdbi_1c4b_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1c4b_callback(undefined1 *param_1)"}
+{"addr": "0x4ebe0", "name": "f33_rdbi_1c4f_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1c4f_callback(undefined1 *param_1)"}
 {"addr": "0x4ec06", "name": "f33_rdbi_1c50_callback", "status": "converted"}
-{"addr": "0x4ec42", "name": "f33_rdbi_1c51_callback", "status": "converted"}
-{"addr": "0x4ec6a", "name": "f33_rdbi_1c52_callback", "status": "converted"}
+{"addr": "0x4ec42", "name": "f33_rdbi_1c51_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1c51_callback(undefined1 *param_1)"}
+{"addr": "0x4ec6a", "name": "f33_rdbi_1c52_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1c52_callback(undefined1 *param_1)"}
 {"addr": "0x4ec90", "name": "f33_rdbi_1c53_callback", "status": "converted"}
-{"addr": "0x4eccc", "name": "f33_rdbi_1c81_callback", "status": "converted"}
-{"addr": "0x4ecf8", "name": "f33_rdbi_1c82_callback", "status": "converted"}
-{"addr": "0x4ed24", "name": "f33_rdbi_1c83_callback", "status": "converted"}
-{"addr": "0x4ed50", "name": "f33_rdbi_1c84_callback", "status": "converted"}
-{"addr": "0x4ed7c", "name": "f33_rdbi_1c86_callback", "status": "converted"}
+{"addr": "0x4eccc", "name": "f33_rdbi_1c81_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1c81_callback(undefined1 *param_1)"}
+{"addr": "0x4ecf8", "name": "f33_rdbi_1c82_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1c82_callback(undefined1 *param_1)"}
+{"addr": "0x4ed24", "name": "f33_rdbi_1c83_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1c83_callback(undefined1 *param_1)"}
+{"addr": "0x4ed50", "name": "f33_rdbi_1c84_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1c84_callback(undefined1 *param_1)"}
+{"addr": "0x4ed7c", "name": "f33_rdbi_1c86_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1c86_callback(undefined1 *param_1)"}
 {"addr": "0x4eda4", "name": "f33_rdbi_1c87_callback", "status": "converted"}
 {"addr": "0x4ee0c", "name": "f33_rdbi_1c99_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1c99_callback(void)"}
 {"addr": "0x4ee10", "name": "f33_rdbi_1c9a_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1c9a_callback(void)"}
@@ -2280,11 +2280,11 @@
 {"addr": "0x4ee20", "name": "f33_rdbi_1c9e_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1c9e_callback(void)"}
 {"addr": "0x4ee24", "name": "f33_rdbi_1c9f_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1c9f_callback(void)"}
 {"addr": "0x4ee28", "name": "f33_rdbi_1ca0_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1ca0_callback(void)"}
-{"addr": "0x4ee2c", "name": "f33_rdbi_1ca1_callback", "status": "converted"}
+{"addr": "0x4ee2c", "name": "f33_rdbi_1ca1_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1ca1_callback(undefined1 *param_1)"}
 {"addr": "0x4ee54", "name": "f33_rdbi_1ca2_callback", "status": "converted"}
 {"addr": "0x4eeba", "name": "f33_rdbi_1ca3_callback", "status": "converted"}
 {"addr": "0x4eee4", "name": "f33_rdbi_1ca4_callback", "status": "converted"}
-{"addr": "0x4ef16", "name": "f33_rdbi_1ca5_callback", "status": "converted"}
+{"addr": "0x4ef16", "name": "f33_rdbi_1ca5_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1ca5_callback(undefined1 *param_1)"}
 {"addr": "0x4ef3e", "name": "f33_rdbi_1ca6_callback", "status": "converted"}
 {"addr": "0x4efa4", "name": "f33_rdbi_1ca7_callback", "status": "converted"}
 {"addr": "0x4efce", "name": "f33_rdbi_1ca8_callback", "status": "converted"}
@@ -2314,27 +2314,27 @@
 {"addr": "0x4f55c", "name": "f33_rdbi_1f03_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1f03_callback(void)"}
 {"addr": "0x4f560", "name": "f33_rdbi_1f04_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_1f04_callback(void)"}
 {"addr": "0x4f564", "name": "f33_rdbi_2001_callback", "status": "converted"}
-{"addr": "0x4f584", "name": "f33_rdbi_2002_callback", "status": "converted"}
+{"addr": "0x4f584", "name": "f33_rdbi_2002_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_2002_callback(undefined1 *param_1)"}
 {"addr": "0x4f5ac", "name": "f33_rdbi_2003_callback", "status": "converted"}
 {"addr": "0x4f5e6", "name": "f33_rdbi_2004_callback", "status": "converted"}
-{"addr": "0x4f620", "name": "f33_rdbi_2005_callback", "status": "converted"}
-{"addr": "0x4f656", "name": "f33_rdbi_2006_callback", "status": "converted"}
-{"addr": "0x4f68c", "name": "f33_rdbi_2007_callback", "status": "converted"}
-{"addr": "0x4f6c2", "name": "f33_rdbi_2008_callback", "status": "converted"}
-{"addr": "0x4f6f8", "name": "f33_rdbi_2009_callback", "status": "converted"}
+{"addr": "0x4f620", "name": "f33_rdbi_2005_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_2005_callback(undefined1 *param_1)"}
+{"addr": "0x4f656", "name": "f33_rdbi_2006_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_2006_callback(undefined1 *param_1)"}
+{"addr": "0x4f68c", "name": "f33_rdbi_2007_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_2007_callback(undefined1 *param_1)"}
+{"addr": "0x4f6c2", "name": "f33_rdbi_2008_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_2008_callback(undefined1 *param_1)"}
+{"addr": "0x4f6f8", "name": "f33_rdbi_2009_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_2009_callback(undefined1 *param_1)"}
 {"addr": "0x4f72e", "name": "f33_rdbi_200a_callback", "status": "converted"}
 {"addr": "0x4f7ae", "name": "f33_rdbi_200b_callback", "status": "converted"}
 {"addr": "0x4f84e", "name": "f33_rdbi_200c_callback", "status": "converted"}
-{"addr": "0x4f888", "name": "f33_rdbi_200d_callback", "status": "converted"}
+{"addr": "0x4f888", "name": "f33_rdbi_200d_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_200d_callback(undefined1 *param_1)"}
 {"addr": "0x4f8be", "name": "f33_rdbi_200e_callback", "status": "converted"}
 {"addr": "0x4f8f8", "name": "f33_rdbi_200f_callback", "status": "converted"}
-{"addr": "0x4f932", "name": "f33_rdbi_2010_callback", "status": "converted"}
+{"addr": "0x4f932", "name": "f33_rdbi_2010_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_2010_callback(undefined1 *param_1)"}
 {"addr": "0x4f97c", "name": "f33_rdbi_2012_callback", "status": "converted"}
 {"addr": "0x4f990", "name": "f33_rdbi_2013_callback", "status": "converted"}
 {"addr": "0x4f9a4", "name": "f33_rdbi_2014_callback", "status": "converted"}
 {"addr": "0x4f9b6", "name": "f33_rdbi_2030_callback", "status": "converted"}
-{"addr": "0x4f9de", "name": "f33_rdbi_2032_callback", "status": "converted"}
-{"addr": "0x4fa26", "name": "f33_rdbi_f181_callback", "status": "converted"}
+{"addr": "0x4f9de", "name": "f33_rdbi_2032_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_2032_callback(undefined1 *param_1)"}
+{"addr": "0x4fa26", "name": "f33_rdbi_f181_callback", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_rdbi_f181_callback(undefined1 *param_1)"}
 {"addr": "0x4fa7c", "name": "f33_rdbi_f186_callback", "status": "converted"}
 {"addr": "0x4fa8a", "name": "f33_rdbi_f18c_callback", "status": "converted"}
 {"addr": "0x4fb00", "name": "f33_rdbi_0101_callback", "status": "converted"}
@@ -2356,7 +2356,7 @@
 {"addr": "0x4fd2e", "name": "f33_start_pending_write_mode_request", "status": "converted"}
 {"addr": "0x4fd68", "name": "f33_finish_pending_write_mode_request", "status": "converted"}
 {"addr": "0x4fd88", "name": "f33_write_0204_precondition", "status": "equivalent", "form": "corpus", "signature": "uint f33_write_0204_precondition(void)"}
-{"addr": "0x4fd9c", "name": "f33_write_0204_stage_mode_persistence", "status": "converted"}
+{"addr": "0x4fd9c", "name": "f33_write_0204_stage_mode_persistence", "status": "equivalent", "form": "corpus", "signature": "uint f33_write_0204_stage_mode_persistence(uchar *payload,ushort unused_length)"}
 {"addr": "0x4fdb8", "name": "f33_write_2001_precondition", "status": "equivalent", "form": "corpus", "signature": "uint f33_write_2001_precondition(void)"}
 {"addr": "0x4fdcc", "name": "f33_write_2001_request_record101_reset", "status": "converted"}
 {"addr": "0x4fe02", "name": "f33_write_2002_precondition", "status": "equivalent", "form": "corpus", "signature": "uint f33_write_2002_precondition(void)"}
@@ -2388,7 +2388,7 @@
 {"addr": "0x50104", "name": "f33_diag_routine_1000_capabilities", "status": "converted"}
 {"addr": "0x50152", "name": "f33_diag_routine_1002_admit", "status": "equivalent", "form": "corpus", "signature": "uint f33_diag_routine_1002_admit(uchar control_type)"}
 {"addr": "0x5018e", "name": "f33_diag_routine_1002_normalize_lifecycle", "status": "converted"}
-{"addr": "0x501d0", "name": "f33_diag_routine_1004_admit", "status": "converted"}
+{"addr": "0x501d0", "name": "f33_diag_routine_1004_admit", "status": "equivalent", "form": "corpus", "signature": "uint f33_diag_routine_1004_admit(uchar control_type,uchar *input)"}
 {"addr": "0x50214", "name": "f33_diag_routine_1004_request_history_rewrite", "status": "converted"}
 {"addr": "0x50258", "name": "f33_diag_routine_1007_admit", "status": "converted"}
 {"addr": "0x5028e", "name": "f33_diag_routine_1007_restart_lifecycle_group0", "status": "converted"}
@@ -2420,7 +2420,7 @@
 {"addr": "0x50904", "name": "f33_publish_dtc_setting_request", "status": "equivalent", "form": "corpus", "signature": "void f33_publish_dtc_setting_request(uchar selection)"}
 {"addr": "0x50916", "name": "FUN_00050916", "status": "equivalent", "form": "corpus", "signature": "void FUN_00050916(undefined1 param_1,undefined2 param_2,undefined2 param_3)"}
 {"addr": "0x50922", "name": "f33_serialize_selected_proprietary_event", "status": "converted"}
-{"addr": "0x50990", "name": "f33_get_did_publication_metadata", "status": "converted"}
+{"addr": "0x50990", "name": "f33_get_did_publication_metadata", "status": "equivalent", "form": "corpus", "signature": "F33DidPublicationMetadata * f33_get_did_publication_metadata(ushort *count)"}
 {"addr": "0x509a0", "name": "f33_return_only_stub_509a0", "status": "converted"}
 {"addr": "0x509a2", "name": "f33_return_only_stub_509a2", "status": "converted"}
 {"addr": "0x509a4", "name": "f33_refresh_diagnostic_application_availability", "status": "converted"}
@@ -2523,7 +2523,7 @@
 {"addr": "0x52972", "name": "FUN_00052972", "status": "converted"}
 {"addr": "0x52a10", "name": "FUN_00052a10", "status": "converted"}
 {"addr": "0x52a2a", "name": "f33_mark_diagnostic_healthy_observed", "status": "converted"}
-{"addr": "0x52a76", "name": "f33_clear_diagnostic_supplement", "status": "converted"}
+{"addr": "0x52a76", "name": "f33_clear_diagnostic_supplement", "status": "equivalent", "form": "corpus", "signature": "void f33_clear_diagnostic_supplement(uchar *destination)"}
 {"addr": "0x52a8a", "name": "f33_copy_diagnostic_capture", "status": "converted"}
 {"addr": "0x52aa6", "name": "FUN_00052aa6", "status": "equivalent", "form": "corpus", "signature": "void FUN_00052aa6(void)"}
 {"addr": "0x52ad4", "name": "FUN_00052ad4", "status": "converted"}
@@ -2532,19 +2532,19 @@
 {"addr": "0x52ca0", "name": "FUN_00052ca0", "status": "converted"}
 {"addr": "0x52da4", "name": "FUN_00052da4", "status": "converted"}
 {"addr": "0x52de4", "name": "f33_run_init_chain_52de4", "status": "converted"}
-{"addr": "0x52dfc", "name": "f33_copy_diagnostic_supplement", "status": "converted"}
+{"addr": "0x52dfc", "name": "f33_copy_diagnostic_supplement", "status": "equivalent", "form": "corpus", "signature": "void f33_copy_diagnostic_supplement(uchar *destination,uchar *source)"}
 {"addr": "0x52e18", "name": "f33_capture_diagnostic_event", "status": "converted"}
 {"addr": "0x52f32", "name": "FUN_00052f32", "status": "converted"}
 {"addr": "0x52fcc", "name": "f33_mark_capture_slots_for_clear", "status": "converted"}
 {"addr": "0x53092", "name": "FUN_00053092", "status": "equivalent", "form": "corpus", "signature": "void FUN_00053092(void)"}
 {"addr": "0x530fc", "name": "f33_set_diagnostic_cache_blocker", "status": "equivalent", "form": "corpus", "signature": "void f33_set_diagnostic_cache_blocker(uchar index,uchar status)"}
-{"addr": "0x5310e", "name": "f33_get_secondary_capture_record_mask", "status": "converted"}
-{"addr": "0x53168", "name": "FUN_00053168", "status": "converted"}
+{"addr": "0x5310e", "name": "f33_get_secondary_capture_record_mask", "status": "equivalent", "form": "corpus", "signature": "uint f33_get_secondary_capture_record_mask(uint *dtc)"}
+{"addr": "0x53168", "name": "FUN_00053168", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00053168(int param_1,int param_2,ushort param_3,undefined1 *param_4)"}
 {"addr": "0x53190", "name": "FUN_00053190", "status": "converted"}
 {"addr": "0x531e0", "name": "f33_serialize_retained_capture_record", "status": "converted"}
 {"addr": "0x53298", "name": "FUN_00053298", "status": "converted"}
 {"addr": "0x53316", "name": "f33_capture_slot_dispatch_53316", "status": "converted"}
-{"addr": "0x53354", "name": "f33_capture_slot_dispatch_53354", "status": "converted"}
+{"addr": "0x53354", "name": "f33_capture_slot_dispatch_53354", "status": "equivalent", "form": "corpus", "signature": "void f33_capture_slot_dispatch_53354(undefined4 param_1,uchar *param_2)"}
 {"addr": "0x533a0", "name": "f33_capture_slot_dispatch_533a0", "status": "converted"}
 {"addr": "0x533cc", "name": "f33_capture_slot_dispatch_533cc", "status": "converted"}
 {"addr": "0x53408", "name": "f33_capture_slot_dispatch_53408", "status": "converted"}
@@ -2649,7 +2649,7 @@
 {"addr": "0x54ce2", "name": "FUN_00054ce2", "status": "converted"}
 {"addr": "0x54df2", "name": "FUN_00054df2", "status": "converted"}
 {"addr": "0x54e28", "name": "FUN_00054e28", "status": "converted"}
-{"addr": "0x54f6e", "name": "FUN_00054f6e", "status": "converted"}
+{"addr": "0x54f6e", "name": "FUN_00054f6e", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00054f6e(char param_1,undefined2 *param_2,undefined2 *param_3)"}
 {"addr": "0x54fa4", "name": "FUN_00054fa4", "status": "equivalent", "form": "corpus", "signature": "int FUN_00054fa4(char param_1)"}
 {"addr": "0x54fda", "name": "FUN_00054fda", "status": "unconvertible"}
 {"addr": "0x55040", "name": "FUN_00055040", "status": "converted"}
@@ -2668,7 +2668,7 @@
 {"addr": "0x5575e", "name": "FUN_0005575e", "status": "converted"}
 {"addr": "0x5578c", "name": "FUN_0005578c", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_0005578c(uint param_1)"}
 {"addr": "0x557c4", "name": "FUN_000557c4", "status": "converted"}
-{"addr": "0x55836", "name": "FUN_00055836", "status": "converted"}
+{"addr": "0x55836", "name": "FUN_00055836", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00055836(short param_1,int param_2,short *param_3)"}
 {"addr": "0x55858", "name": "FUN_00055858", "status": "equivalent", "form": "corpus", "signature": "uint FUN_00055858(undefined2 param_1,int param_2,uint param_3)"}
 {"addr": "0x558ae", "name": "FUN_000558ae", "status": "equivalent", "form": "corpus", "signature": "uint FUN_000558ae(short param_1,int param_2,uint param_3,ushort param_4)"}
 {"addr": "0x5592c", "name": "FUN_0005592c", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_0005592c(short param_1,undefined4 param_2,undefined2 param_3)"}
@@ -2718,8 +2718,8 @@
 {"addr": "0x564cc", "name": "f33_return_only_stub_564cc", "status": "converted"}
 {"addr": "0x564ce", "name": "FUN_000564ce", "status": "converted"}
 {"addr": "0x565f2", "name": "FUN_000565f2", "status": "converted"}
-{"addr": "0x56664", "name": "FUN_00056664", "status": "converted"}
-{"addr": "0x56674", "name": "FUN_00056674", "status": "converted"}
+{"addr": "0x56664", "name": "FUN_00056664", "status": "equivalent", "form": "corpus", "signature": "F33CaptureFieldDescriptor * FUN_00056664(undefined2 *param_1)"}
+{"addr": "0x56674", "name": "FUN_00056674", "status": "equivalent", "form": "corpus", "signature": "undefined * FUN_00056674(undefined2 *param_1)"}
 {"addr": "0x56682", "name": "f33_return_only_stub_56682", "status": "converted"}
 {"addr": "0x56684", "name": "FUN_00056684", "status": "equivalent", "form": "corpus", "signature": "void FUN_00056684(void)"}
 {"addr": "0x5668a", "name": "FUN_0005668a", "status": "converted"}
@@ -2845,8 +2845,8 @@
 {"addr": "0x5740e", "name": "f33_clear_direct_output_bank1", "status": "converted"}
 {"addr": "0x57414", "name": "f33_request_direct_output_bank0", "status": "equivalent", "form": "corpus", "signature": "void f33_request_direct_output_bank0(void)"}
 {"addr": "0x5741e", "name": "f33_request_direct_output_bank1", "status": "converted"}
-{"addr": "0x57428", "name": "f33_set_direct_output_codes_bank0", "status": "converted"}
-{"addr": "0x57440", "name": "f33_set_direct_output_codes_bank1", "status": "converted"}
+{"addr": "0x57428", "name": "f33_set_direct_output_codes_bank0", "status": "equivalent", "form": "corpus", "signature": "void f33_set_direct_output_codes_bank0(ushort *codes)"}
+{"addr": "0x57440", "name": "f33_set_direct_output_codes_bank1", "status": "equivalent", "form": "corpus", "signature": "void f33_set_direct_output_codes_bank1(ushort *codes)"}
 {"addr": "0x57458", "name": "f33_return_only_stub_57458", "status": "converted"}
 {"addr": "0x5745a", "name": "f33_fill_constant_block_5745a", "status": "equivalent", "form": "corpus", "signature": "void f33_fill_constant_block_5745a(void)"}
 {"addr": "0x57484", "name": "f33_stage_phase_output_history", "status": "unconvertible"}
@@ -3048,11 +3048,11 @@
 {"addr": "0x6230e", "name": "FUN_0006230e", "status": "converted"}
 {"addr": "0x6239e", "name": "FUN_0006239e", "status": "converted"}
 {"addr": "0x623c0", "name": "FUN_000623c0", "status": "converted"}
-{"addr": "0x623ee", "name": "FUN_000623ee", "status": "converted"}
+{"addr": "0x623ee", "name": "FUN_000623ee", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_000623ee(byte *param_1)"}
 {"addr": "0x6245a", "name": "f33_accumulate_serial_acquisition_masks", "status": "equivalent", "form": "corpus", "signature": "void f33_accumulate_serial_acquisition_masks(uchar channel,ushort first_mask,ushort second_mask)"}
 {"addr": "0x62488", "name": "f33_decode_serial_acquisition_frame", "status": "converted"}
 {"addr": "0x62576", "name": "f33_sample_serial_acquisition_channel", "status": "converted"}
-{"addr": "0x625f6", "name": "FUN_000625f6", "status": "converted"}
+{"addr": "0x625f6", "name": "FUN_000625f6", "status": "equivalent", "form": "corpus", "signature": "byte FUN_000625f6(byte *param_1)"}
 {"addr": "0x62636", "name": "FUN_00062636", "status": "converted"}
 {"addr": "0x626d6", "name": "FUN_000626d6", "status": "equivalent", "form": "corpus", "signature": "void FUN_000626d6(ushort param_1,char param_2)"}
 {"addr": "0x62714", "name": "FUN_00062714", "status": "converted"}
@@ -3061,7 +3061,7 @@
 {"addr": "0x62846", "name": "f33_service_serial_acquisition_channel", "status": "converted"}
 {"addr": "0x6289c", "name": "f33_service_serial_acquisition_pair", "status": "converted"}
 {"addr": "0x628b2", "name": "FUN_000628b2", "status": "converted"}
-{"addr": "0x6294e", "name": "f33_rotate_and_copy_serial_acquisition_masks", "status": "converted"}
+{"addr": "0x6294e", "name": "f33_rotate_and_copy_serial_acquisition_masks", "status": "equivalent", "form": "corpus", "signature": "void f33_rotate_and_copy_serial_acquisition_masks(F33SerialAcquisitionMasks *output)"}
 {"addr": "0x629a2", "name": "f33_copy_cached_serial_acquisition_records", "status": "converted"}
 {"addr": "0x62a16", "name": "FUN_00062a16", "status": "converted"}
 {"addr": "0x62a50", "name": "f33_copy_transfer_group6_samples", "status": "converted"}
@@ -3077,7 +3077,7 @@
 {"addr": "0x62bf6", "name": "f33_startup_classify_retained_token", "status": "converted"}
 {"addr": "0x62cd4", "name": "FUN_00062cd4", "status": "converted"}
 {"addr": "0x62d54", "name": "f33_return_only_stub_62d54", "status": "converted"}
-{"addr": "0x62d56", "name": "FUN_00062d56", "status": "converted"}
+{"addr": "0x62d56", "name": "FUN_00062d56", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00062d56(undefined2 *param_1)"}
 {"addr": "0x62d5e", "name": "f33_startup_publish_image_identity_check", "status": "unconvertible"}
 {"addr": "0x62df0", "name": "FUN_00062df0", "status": "converted"}
 {"addr": "0x62e12", "name": "FUN_00062e12", "status": "converted"}
@@ -3157,7 +3157,7 @@
 {"addr": "0x651dc", "name": "f33_read_execution_profile_slot3", "status": "converted"}
 {"addr": "0x65204", "name": "f33_read_execution_profile_slot4", "status": "converted"}
 {"addr": "0x6522e", "name": "f33_read_execution_profile_slot5", "status": "converted"}
-{"addr": "0x65258", "name": "f33_reset_task_rate_window", "status": "converted"}
+{"addr": "0x65258", "name": "f33_reset_task_rate_window", "status": "equivalent", "form": "corpus", "signature": "void f33_reset_task_rate_window(F33TaskRateWindow *state)"}
 {"addr": "0x65266", "name": "f33_initialize_task_progress_supervision", "status": "equivalent", "form": "corpus", "signature": "void f33_initialize_task_progress_supervision(void)"}
 {"addr": "0x652aa", "name": "f33_record_supervised_task_dispatch", "status": "converted"}
 {"addr": "0x652e2", "name": "f33_record_ch0_dispatch", "status": "converted"}
@@ -3325,7 +3325,7 @@
 {"addr": "0x69dd2", "name": "f33_crypto_bank_publish_observation_window", "status": "converted"}
 {"addr": "0x69e7c", "name": "f33_crypto_bank_maintain_terminal_states", "status": "converted"}
 {"addr": "0x69eac", "name": "f33_crypto_bank_stage_direct_request", "status": "converted"}
-{"addr": "0x69f3e", "name": "f33_crypto_bank_read_direct_result", "status": "converted"}
+{"addr": "0x69f3e", "name": "f33_crypto_bank_read_direct_result", "status": "equivalent", "form": "corpus", "signature": "uint f33_crypto_bank_read_direct_result(uchar *output,ushort length)"}
 {"addr": "0x69fa2", "name": "f33_crypto_bank_snapshot_key_generations", "status": "converted"}
 {"addr": "0x6a028", "name": "f33_crypto_bank_activate_collected_update", "status": "converted"}
 {"addr": "0x6a058", "name": "f33_crypto_bank_snapshot_test_generations", "status": "equivalent", "form": "corpus", "signature": "void f33_crypto_bank_snapshot_test_generations(void)"}
@@ -3363,34 +3363,34 @@
 {"addr": "0x6a440", "name": "FUN_0006a440", "status": "equivalent", "form": "corpus", "signature": "void FUN_0006a440(void)"}
 {"addr": "0x6a45e", "name": "FUN_0006a45e", "status": "converted"}
 {"addr": "0x6a4c4", "name": "FUN_0006a4c4", "status": "converted"}
-{"addr": "0x6a522", "name": "FUN_0006a522", "status": "converted"}
-{"addr": "0x6a53e", "name": "FUN_0006a53e", "status": "converted"}
-{"addr": "0x6a55c", "name": "FUN_0006a55c", "status": "converted"}
-{"addr": "0x6a574", "name": "FUN_0006a574", "status": "converted"}
-{"addr": "0x6a594", "name": "FUN_0006a594", "status": "converted"}
-{"addr": "0x6a5ac", "name": "FUN_0006a5ac", "status": "converted"}
-{"addr": "0x6a5cc", "name": "FUN_0006a5cc", "status": "converted"}
-{"addr": "0x6a5fa", "name": "FUN_0006a5fa", "status": "converted"}
-{"addr": "0x6a624", "name": "FUN_0006a624", "status": "converted"}
+{"addr": "0x6a522", "name": "FUN_0006a522", "status": "equivalent", "form": "corpus", "signature": "void FUN_0006a522(short param_1,short *param_2)"}
+{"addr": "0x6a53e", "name": "FUN_0006a53e", "status": "equivalent", "form": "corpus", "signature": "void FUN_0006a53e(int param_1,int *param_2)"}
+{"addr": "0x6a55c", "name": "FUN_0006a55c", "status": "equivalent", "form": "corpus", "signature": "void FUN_0006a55c(undefined4 param_1,undefined1 *param_2)"}
+{"addr": "0x6a574", "name": "FUN_0006a574", "status": "equivalent", "form": "corpus", "signature": "void FUN_0006a574(undefined4 param_1,undefined1 *param_2)"}
+{"addr": "0x6a594", "name": "FUN_0006a594", "status": "equivalent", "form": "corpus", "signature": "void FUN_0006a594(undefined4 param_1,undefined1 *param_2)"}
+{"addr": "0x6a5ac", "name": "FUN_0006a5ac", "status": "equivalent", "form": "corpus", "signature": "void FUN_0006a5ac(undefined4 param_1,undefined1 *param_2)"}
+{"addr": "0x6a5cc", "name": "FUN_0006a5cc", "status": "equivalent", "form": "corpus", "signature": "void FUN_0006a5cc(short param_1,undefined1 *param_2)"}
+{"addr": "0x6a5fa", "name": "FUN_0006a5fa", "status": "equivalent", "form": "corpus", "signature": "void FUN_0006a5fa(int param_1,undefined2 *param_2)"}
+{"addr": "0x6a624", "name": "FUN_0006a624", "status": "equivalent", "form": "corpus", "signature": "void FUN_0006a624(uint param_1,undefined1 *param_2)"}
 {"addr": "0x6a63e", "name": "f33_follow_s16_fractional", "status": "converted"}
-{"addr": "0x6a678", "name": "FUN_0006a678", "status": "converted"}
-{"addr": "0x6a6ac", "name": "f33_reset_terminal_monitor", "status": "converted"}
+{"addr": "0x6a678", "name": "FUN_0006a678", "status": "equivalent", "form": "corpus", "signature": "void FUN_0006a678(ushort *param_1,int param_2,undefined2 *param_3,int *param_4)"}
+{"addr": "0x6a6ac", "name": "f33_reset_terminal_monitor", "status": "equivalent", "form": "corpus", "signature": "void f33_reset_terminal_monitor(F33TerminalMonitorState *state)"}
 {"addr": "0x6a6ba", "name": "f33_step_terminal_monitor", "status": "converted"}
 {"addr": "0x6a780", "name": "FUN_0006a780", "status": "converted"}
 {"addr": "0x6a7d8", "name": "FUN_0006a7d8", "status": "converted"}
-{"addr": "0x6a874", "name": "f33_reset_recoverable_monitor", "status": "converted"}
-{"addr": "0x6a882", "name": "f33_retain_disabled_recoverable_monitor", "status": "converted"}
+{"addr": "0x6a874", "name": "f33_reset_recoverable_monitor", "status": "equivalent", "form": "corpus", "signature": "void f33_reset_recoverable_monitor(F33RecoverableMonitorState *state)"}
+{"addr": "0x6a882", "name": "f33_retain_disabled_recoverable_monitor", "status": "equivalent", "form": "corpus", "signature": "void f33_retain_disabled_recoverable_monitor (F33RecoverableMonitorState *state,F33RecoverableMonitorLimits *limits)"}
 {"addr": "0x6a8b4", "name": "f33_step_recoverable_monitor", "status": "converted"}
-{"addr": "0x6adfc", "name": "f33_reset_latched_monitor", "status": "converted"}
-{"addr": "0x6ae08", "name": "f33_reset_windowed_monitor", "status": "converted"}
-{"addr": "0x6ae18", "name": "f33_retain_disabled_latched_monitor", "status": "converted"}
-{"addr": "0x6ae48", "name": "FUN_0006ae48", "status": "converted"}
+{"addr": "0x6adfc", "name": "f33_reset_latched_monitor", "status": "equivalent", "form": "corpus", "signature": "void f33_reset_latched_monitor(F33LatchedMonitorState *state)"}
+{"addr": "0x6ae08", "name": "f33_reset_windowed_monitor", "status": "equivalent", "form": "corpus", "signature": "void f33_reset_windowed_monitor(F33WindowedMonitorState *state)"}
+{"addr": "0x6ae18", "name": "f33_retain_disabled_latched_monitor", "status": "equivalent", "form": "corpus", "signature": "void f33_retain_disabled_latched_monitor(F33LatchedMonitorState *state,F33MonitorLimits *limits)"}
+{"addr": "0x6ae48", "name": "FUN_0006ae48", "status": "equivalent", "form": "corpus", "signature": "void FUN_0006ae48(undefined4 *param_1,ushort *param_2)"}
 {"addr": "0x6ae7c", "name": "f33_step_latched_monitor", "status": "converted"}
 {"addr": "0x6b31a", "name": "f33_step_windowed_monitor", "status": "converted"}
-{"addr": "0x6b7d2", "name": "FUN_0006b7d2", "status": "converted"}
+{"addr": "0x6b7d2", "name": "FUN_0006b7d2", "status": "equivalent", "form": "corpus", "signature": "void FUN_0006b7d2(undefined1 *param_1)"}
 {"addr": "0x6b7f0", "name": "FUN_0006b7f0", "status": "converted"}
-{"addr": "0x6b98a", "name": "FUN_0006b98a", "status": "converted"}
-{"addr": "0x6ba64", "name": "f33_retain_disabled_escalating_monitor", "status": "converted"}
+{"addr": "0x6b98a", "name": "FUN_0006b98a", "status": "equivalent", "form": "corpus", "signature": "void FUN_0006b98a(undefined4 *param_1)"}
+{"addr": "0x6ba64", "name": "f33_retain_disabled_escalating_monitor", "status": "equivalent", "form": "corpus", "signature": "void f33_retain_disabled_escalating_monitor(F33EscalatingMonitorState *state,ushort *calibration)"}
 {"addr": "0x6bdb4", "name": "f33_step_escalating_monitor", "status": "converted"}
 {"addr": "0x6c358", "name": "FUN_0006c358", "status": "converted"}
 {"addr": "0x6c922", "name": "FUN_0006c922", "status": "converted"}
@@ -3405,23 +3405,23 @@
 {"addr": "0x6ff1c", "name": "f33_force_monitor_escalation", "status": "converted"}
 {"addr": "0x6ffc2", "name": "FUN_0006ffc2", "status": "converted"}
 {"addr": "0x70068", "name": "FUN_00070068", "status": "converted"}
-{"addr": "0x70110", "name": "FUN_00070110", "status": "converted"}
-{"addr": "0x7012a", "name": "FUN_0007012a", "status": "converted"}
-{"addr": "0x7013e", "name": "FUN_0007013e", "status": "converted"}
-{"addr": "0x70152", "name": "FUN_00070152", "status": "converted"}
-{"addr": "0x70160", "name": "FUN_00070160", "status": "converted"}
-{"addr": "0x7016e", "name": "FUN_0007016e", "status": "converted"}
-{"addr": "0x70180", "name": "FUN_00070180", "status": "converted"}
-{"addr": "0x70192", "name": "FUN_00070192", "status": "converted"}
+{"addr": "0x70110", "name": "FUN_00070110", "status": "equivalent", "form": "corpus", "signature": "void FUN_00070110(short param_1,short param_2,short param_3,short *param_4)"}
+{"addr": "0x7012a", "name": "FUN_0007012a", "status": "equivalent", "form": "corpus", "signature": "void FUN_0007012a(int param_1,int param_2,int param_3,int *param_4)"}
+{"addr": "0x7013e", "name": "FUN_0007013e", "status": "equivalent", "form": "corpus", "signature": "void FUN_0007013e(uint param_1,uint param_2,uint param_3,uint *param_4)"}
+{"addr": "0x70152", "name": "FUN_00070152", "status": "equivalent", "form": "corpus", "signature": "void FUN_00070152(int param_1,int param_2,int *param_3)"}
+{"addr": "0x70160", "name": "FUN_00070160", "status": "equivalent", "form": "corpus", "signature": "void FUN_00070160(int param_1,int param_2,int *param_3)"}
+{"addr": "0x7016e", "name": "FUN_0007016e", "status": "equivalent", "form": "corpus", "signature": "void FUN_0007016e(byte param_1,byte param_2,byte *param_3)"}
+{"addr": "0x70180", "name": "FUN_00070180", "status": "equivalent", "form": "corpus", "signature": "void FUN_00070180(ushort param_1,ushort param_2,ushort *param_3)"}
+{"addr": "0x70192", "name": "FUN_00070192", "status": "equivalent", "form": "corpus", "signature": "void FUN_00070192(uint param_1,uint param_2,uint *param_3)"}
 {"addr": "0x701a0", "name": "FUN_000701a0", "status": "converted"}
 {"addr": "0x701a6", "name": "FUN_000701a6", "status": "converted"}
 {"addr": "0x70208", "name": "FUN_00070208", "status": "converted"}
 {"addr": "0x7025c", "name": "FUN_0007025c", "status": "converted"}
-{"addr": "0x702b0", "name": "FUN_000702b0", "status": "converted"}
-{"addr": "0x70304", "name": "FUN_00070304", "status": "converted"}
-{"addr": "0x70674", "name": "FUN_00070674", "status": "converted"}
+{"addr": "0x702b0", "name": "FUN_000702b0", "status": "equivalent", "form": "corpus", "signature": "void FUN_000702b0(ushort *param_1,uint param_2,ushort *param_3)"}
+{"addr": "0x70304", "name": "FUN_00070304", "status": "equivalent", "form": "corpus", "signature": "void FUN_00070304(ushort *param_1,uint param_2,ushort *param_3)"}
+{"addr": "0x70674", "name": "FUN_00070674", "status": "equivalent", "form": "corpus", "signature": "void FUN_00070674(int param_1,int param_2,int *param_3)"}
 {"addr": "0x706ae", "name": "FUN_000706ae", "status": "converted"}
-{"addr": "0x70706", "name": "FUN_00070706", "status": "converted"}
+{"addr": "0x70706", "name": "FUN_00070706", "status": "equivalent", "form": "corpus", "signature": "void FUN_00070706(short param_1,short param_2,undefined2 *param_3)"}
 {"addr": "0x70736", "name": "f33_vote_redundant_u8", "status": "converted"}
 {"addr": "0x707ac", "name": "FUN_000707ac", "status": "converted"}
 {"addr": "0x70822", "name": "FUN_00070822", "status": "converted"}
@@ -3436,9 +3436,9 @@
 {"addr": "0x70bb2", "name": "FUN_00070bb2", "status": "converted"}
 {"addr": "0x70be0", "name": "FUN_00070be0", "status": "converted"}
 {"addr": "0x70e32", "name": "FUN_00070e32", "status": "unconvertible"}
-{"addr": "0x70f56", "name": "f33_step_monitor_recovery_scratch", "status": "converted"}
-{"addr": "0x70fa4", "name": "FUN_00070fa4", "status": "converted"}
-{"addr": "0x71014", "name": "FUN_00071014", "status": "converted"}
+{"addr": "0x70f56", "name": "f33_step_monitor_recovery_scratch", "status": "equivalent", "form": "corpus", "signature": "uint f33_step_monitor_recovery_scratch (uchar classification,F33MonitorRecoveryScratch *scratch,ushort *limit)"}
+{"addr": "0x70fa4", "name": "FUN_00070fa4", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00070fa4(char param_1,undefined2 *param_2,ushort *param_3)"}
+{"addr": "0x71014", "name": "FUN_00071014", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00071014(char param_1,undefined2 *param_2,ushort *param_3)"}
 {"addr": "0x71086", "name": "FUN_00071086", "status": "converted"}
 {"addr": "0x7110c", "name": "FUN_0007110c", "status": "converted"}
 {"addr": "0x71194", "name": "FUN_00071194", "status": "converted"}
@@ -3460,7 +3460,7 @@
 {"addr": "0x71ce2", "name": "FUN_00071ce2", "status": "converted"}
 {"addr": "0x71cf4", "name": "f33_return_const_1_71cf4", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_return_const_1_71cf4(void)"}
 {"addr": "0x71cf8", "name": "f33_nvm_get_write_inhibit", "status": "converted"}
-{"addr": "0x71d28", "name": "f33_nvm_read_logical_result", "status": "converted"}
+{"addr": "0x71d28", "name": "f33_nvm_read_logical_result", "status": "equivalent", "form": "corpus", "signature": "uint f33_nvm_read_logical_result(ushort logical_handle,uchar *output)"}
 {"addr": "0x71d3e", "name": "FUN_00071d3e", "status": "equivalent", "form": "corpus", "signature": "void FUN_00071d3e(void)"}
 {"addr": "0x71d7c", "name": "FUN_00071d7c", "status": "equivalent", "form": "corpus", "signature": "void FUN_00071d7c(void)"}
 {"addr": "0x71d88", "name": "f33_return_const_0_71d88", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_return_const_0_71d88(void)"}
@@ -3494,8 +3494,8 @@
 {"addr": "0x7216c", "name": "FUN_0007216c", "status": "converted"}
 {"addr": "0x7217e", "name": "FUN_0007217e", "status": "equivalent", "form": "corpus", "signature": "void FUN_0007217e(void)"}
 {"addr": "0x721ba", "name": "thunk_FUN_0007217e", "status": "equivalent", "form": "corpus", "signature": "void thunk_FUN_0007217e(void)"}
-{"addr": "0x721c6", "name": "f33_nvm_snapshot_scheduler_operation", "status": "converted"}
-{"addr": "0x7220e", "name": "FUN_0007220e", "status": "converted"}
+{"addr": "0x721c6", "name": "f33_nvm_snapshot_scheduler_operation", "status": "equivalent", "form": "corpus", "signature": "uint f33_nvm_snapshot_scheduler_operation(F33NvmOperation *output)"}
+{"addr": "0x7220e", "name": "FUN_0007220e", "status": "equivalent", "form": "corpus", "signature": "bool FUN_0007220e(uint *param_1)"}
 {"addr": "0x72248", "name": "FUN_00072248", "status": "converted"}
 {"addr": "0x72298", "name": "FUN_00072298", "status": "converted"}
 {"addr": "0x722d4", "name": "FUN_000722d4", "status": "converted"}
@@ -3518,7 +3518,7 @@
 {"addr": "0x727b2", "name": "FUN_000727b2", "status": "converted"}
 {"addr": "0x727d2", "name": "FUN_000727d2", "status": "unconvertible"}
 {"addr": "0x72820", "name": "thunk_FUN_0007275e", "status": "converted"}
-{"addr": "0x7282c", "name": "FUN_0007282c", "status": "converted"}
+{"addr": "0x7282c", "name": "FUN_0007282c", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_0007282c(uint param_1,ushort param_2,undefined2 *param_3)"}
 {"addr": "0x7285c", "name": "FUN_0007285c", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_0007285c(undefined2 param_1)"}
 {"addr": "0x72888", "name": "FUN_00072888", "status": "equivalent", "form": "corpus", "signature": "void FUN_00072888(char param_1)"}
 {"addr": "0x7289e", "name": "FUN_0007289e", "status": "converted"}
@@ -3567,32 +3567,32 @@
 {"addr": "0x7319a", "name": "f33_nvm_reset_pooled_queues", "status": "converted"}
 {"addr": "0x73212", "name": "f33_nvm_reset_zero_handle_operation", "status": "converted"}
 {"addr": "0x73274", "name": "FUN_00073274", "status": "equivalent", "form": "corpus", "signature": "bool FUN_00073274(void)"}
-{"addr": "0x732c0", "name": "f33_nvm_check_queue_empty", "status": "converted"}
+{"addr": "0x732c0", "name": "f33_nvm_check_queue_empty", "status": "equivalent", "form": "corpus", "signature": "uint f33_nvm_check_queue_empty(F33NvmQueueHeader *header,uchar *empty)"}
 {"addr": "0x732f6", "name": "f33_nvm_check_slot_partition", "status": "equivalent", "form": "corpus", "signature": "uint f33_nvm_check_slot_partition(ushort index,ushort queue)"}
 {"addr": "0x73328", "name": "f33_nvm_queue_key", "status": "converted"}
 {"addr": "0x73334", "name": "FUN_00073334", "status": "equivalent", "form": "corpus", "signature": "bool FUN_00073334(uint param_1,short param_2)"}
 {"addr": "0x73380", "name": "FUN_00073380", "status": "converted"}
 {"addr": "0x733da", "name": "FUN_000733da", "status": "converted"}
-{"addr": "0x73424", "name": "FUN_00073424", "status": "converted"}
+{"addr": "0x73424", "name": "FUN_00073424", "status": "equivalent", "form": "corpus", "signature": "void FUN_00073424(undefined4 *param_1,undefined4 *param_2)"}
 {"addr": "0x73440", "name": "FUN_00073440", "status": "converted"}
 {"addr": "0x7347e", "name": "FUN_0007347e", "status": "converted"}
 {"addr": "0x734ee", "name": "f33_nvm_uses_reserved_queue", "status": "converted"}
 {"addr": "0x73516", "name": "FUN_00073516", "status": "converted"}
 {"addr": "0x735e6", "name": "f33_nvm_append_queue_slot", "status": "equivalent", "form": "corpus", "signature": "uint f33_nvm_append_queue_slot(ushort queue,ushort index)"}
-{"addr": "0x73640", "name": "f33_nvm_copy_operation_to_slot", "status": "converted"}
-{"addr": "0x7365c", "name": "f33_nvm_append_operation", "status": "converted"}
+{"addr": "0x73640", "name": "f33_nvm_copy_operation_to_slot", "status": "equivalent", "form": "corpus", "signature": "void f33_nvm_copy_operation_to_slot(F33NvmQueueSlot *slot,F33NvmOperation *operation)"}
+{"addr": "0x7365c", "name": "f33_nvm_append_operation", "status": "equivalent", "form": "corpus", "signature": "uint f33_nvm_append_operation(ushort queue,ushort index,F33NvmOperation *operation)"}
 {"addr": "0x73686", "name": "f33_nvm_enqueue_pooled_operation", "status": "converted"}
 {"addr": "0x73748", "name": "FUN_00073748", "status": "equivalent", "form": "corpus", "signature": "uint FUN_00073748(ushort param_1,ushort param_2,undefined4 param_3)"}
 {"addr": "0x73784", "name": "FUN_00073784", "status": "converted"}
-{"addr": "0x73828", "name": "FUN_00073828", "status": "converted"}
+{"addr": "0x73828", "name": "FUN_00073828", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00073828(ushort *param_1,ushort param_2,ushort *param_3,undefined2 *param_4)"}
 {"addr": "0x73878", "name": "FUN_00073878", "status": "converted"}
 {"addr": "0x738e2", "name": "FUN_000738e2", "status": "converted"}
-{"addr": "0x73978", "name": "FUN_00073978", "status": "converted"}
-{"addr": "0x739a8", "name": "FUN_000739a8", "status": "converted"}
+{"addr": "0x73978", "name": "FUN_00073978", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00073978(uint *param_1)"}
+{"addr": "0x739a8", "name": "FUN_000739a8", "status": "equivalent", "form": "corpus", "signature": "bool FUN_000739a8(uint *param_1)"}
 {"addr": "0x739e8", "name": "FUN_000739e8", "status": "equivalent", "form": "corpus", "signature": "void FUN_000739e8(void)"}
 {"addr": "0x73a06", "name": "f33_return_only_stub_73a06", "status": "converted"}
 {"addr": "0x73a5c", "name": "FUN_00073a5c", "status": "converted"}
-{"addr": "0x73adc", "name": "f33_nvm_copy_operation", "status": "converted"}
+{"addr": "0x73adc", "name": "f33_nvm_copy_operation", "status": "equivalent", "form": "corpus", "signature": "void f33_nvm_copy_operation(F33NvmOperation *request)"}
 {"addr": "0x73b2c", "name": "f33_nvm_select_service_poll", "status": "converted"}
 {"addr": "0x73b3a", "name": "thunk_FUN_000766c6", "status": "equivalent", "form": "corpus", "signature": "uchar thunk_FUN_000766c6(void)"}
 {"addr": "0x73b46", "name": "FUN_00073b46", "status": "converted"}
@@ -3616,7 +3616,7 @@
 {"addr": "0x73eee", "name": "f33_nvm_set_service_poll", "status": "converted"}
 {"addr": "0x73f0a", "name": "f33_nvm_initialize_logical_module", "status": "converted"}
 {"addr": "0x73f4e", "name": "FUN_00073f4e", "status": "converted"}
-{"addr": "0x73f78", "name": "FUN_00073f78", "status": "converted"}
+{"addr": "0x73f78", "name": "FUN_00073f78", "status": "equivalent", "form": "corpus", "signature": "uint FUN_00073f78(ushort param_1,uchar *param_2)"}
 {"addr": "0x73f9c", "name": "FUN_00073f9c", "status": "unconvertible"}
 {"addr": "0x73fc8", "name": "FUN_00073fc8", "status": "converted"}
 {"addr": "0x74040", "name": "FUN_00074040", "status": "converted"}
@@ -3633,7 +3633,7 @@
 {"addr": "0x741ea", "name": "f33_return_only_stub_741ea", "status": "converted"}
 {"addr": "0x741ec", "name": "f33_nvm_check_logical_handle", "status": "equivalent", "form": "corpus", "signature": "uint f33_nvm_check_logical_handle(ushort logical_handle,uchar api,uchar allow_zero)"}
 {"addr": "0x74228", "name": "FUN_00074228", "status": "equivalent", "form": "corpus", "signature": "bool FUN_00074228(char param_1)"}
-{"addr": "0x7423a", "name": "f33_nvm_check_not_pending", "status": "converted"}
+{"addr": "0x7423a", "name": "f33_nvm_check_not_pending", "status": "equivalent", "form": "corpus", "signature": "uint f33_nvm_check_not_pending(ushort logical_handle,uchar api)"}
 {"addr": "0x74274", "name": "FUN_00074274", "status": "equivalent", "form": "corpus", "signature": "bool FUN_00074274(uint param_1,undefined1 param_2)"}
 {"addr": "0x742a2", "name": "FUN_000742a2", "status": "converted"}
 {"addr": "0x742ea", "name": "FUN_000742ea", "status": "equivalent", "form": "corpus", "signature": "bool FUN_000742ea(int param_1,undefined1 param_2)"}
@@ -3641,13 +3641,13 @@
 {"addr": "0x74338", "name": "FUN_00074338", "status": "equivalent", "form": "corpus", "signature": "bool FUN_00074338(int param_1,undefined1 param_2)"}
 {"addr": "0x7435a", "name": "FUN_0007435a", "status": "equivalent", "form": "corpus", "signature": "bool FUN_0007435a(undefined4 param_1)"}
 {"addr": "0x7436e", "name": "FUN_0007436e", "status": "equivalent", "form": "corpus", "signature": "bool FUN_0007436e(ushort param_1)"}
-{"addr": "0x74388", "name": "f33_nvm_check_buffer_argument", "status": "converted"}
-{"addr": "0x743bc", "name": "f33_nvm_check_read_request", "status": "converted"}
+{"addr": "0x74388", "name": "f33_nvm_check_buffer_argument", "status": "equivalent", "form": "corpus", "signature": "uint f33_nvm_check_buffer_argument(ushort logical_handle,void *buffer,uchar api)"}
+{"addr": "0x743bc", "name": "f33_nvm_check_read_request", "status": "equivalent", "form": "corpus", "signature": "uint f33_nvm_check_read_request(ushort logical_handle,void *buffer)"}
 {"addr": "0x743f8", "name": "f33_nvm_check_write_inhibit", "status": "converted"}
 {"addr": "0x74422", "name": "f33_nvm_check_write_request", "status": "converted"}
 {"addr": "0x74468", "name": "FUN_00074468", "status": "equivalent", "form": "corpus", "signature": "bool FUN_00074468(undefined2 param_1,undefined1 param_2)"}
 {"addr": "0x74494", "name": "FUN_00074494", "status": "converted"}
-{"addr": "0x744de", "name": "FUN_000744de", "status": "converted"}
+{"addr": "0x744de", "name": "FUN_000744de", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_000744de(ushort param_1)"}
 {"addr": "0x7451e", "name": "FUN_0007451e", "status": "converted"}
 {"addr": "0x74568", "name": "FUN_00074568", "status": "converted"}
 {"addr": "0x745b8", "name": "f33_return_const_0_745b8", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_return_const_0_745b8(void)"}
@@ -3668,7 +3668,7 @@
 {"addr": "0x747d2", "name": "FUN_000747d2", "status": "equivalent", "form": "corpus", "signature": "void FUN_000747d2(void)"}
 {"addr": "0x747dc", "name": "f33_return_only_stub_747dc", "status": "converted"}
 {"addr": "0x747de", "name": "f33_return_only_stub_747de", "status": "converted"}
-{"addr": "0x74830", "name": "f33_copy_bytes_forward", "status": "converted"}
+{"addr": "0x74830", "name": "f33_copy_bytes_forward", "status": "equivalent", "form": "corpus", "signature": "void f33_copy_bytes_forward(uchar *destination,uchar *source,uint byte_count)"}
 {"addr": "0x7484a", "name": "FUN_0007484a", "status": "converted"}
 {"addr": "0x74872", "name": "FUN_00074872", "status": "converted"}
 {"addr": "0x748a2", "name": "f33_nvm_descriptor_option", "status": "converted"}
@@ -3767,7 +3767,7 @@
 {"addr": "0x75ad8", "name": "FUN_00075ad8", "status": "converted"}
 {"addr": "0x75b32", "name": "FUN_00075b32", "status": "converted"}
 {"addr": "0x75b42", "name": "thunk_FUN_00075ad8", "status": "converted"}
-{"addr": "0x75b4e", "name": "FUN_00075b4e", "status": "converted"}
+{"addr": "0x75b4e", "name": "FUN_00075b4e", "status": "equivalent", "form": "corpus", "signature": "undefined1 FUN_00075b4e(undefined4 *param_1)"}
 {"addr": "0x75bb6", "name": "FUN_00075bb6", "status": "converted"}
 {"addr": "0x75bfe", "name": "FUN_00075bfe", "status": "converted"}
 {"addr": "0x75c1c", "name": "FUN_00075c1c", "status": "converted"}
@@ -3777,11 +3777,11 @@
 {"addr": "0x75ca0", "name": "FUN_00075ca0", "status": "unconvertible"}
 {"addr": "0x75cc2", "name": "FUN_00075cc2", "status": "converted"}
 {"addr": "0x75cec", "name": "FUN_00075cec", "status": "unconvertible"}
-{"addr": "0x75d0c", "name": "FUN_00075d0c", "status": "converted"}
+{"addr": "0x75d0c", "name": "FUN_00075d0c", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00075d0c(undefined4 param_1,int *param_2)"}
 {"addr": "0x75d2a", "name": "FUN_00075d2a", "status": "unconvertible"}
-{"addr": "0x75d4a", "name": "FUN_00075d4a", "status": "converted"}
+{"addr": "0x75d4a", "name": "FUN_00075d4a", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00075d4a(undefined4 param_1,int *param_2)"}
 {"addr": "0x75d68", "name": "FUN_00075d68", "status": "unconvertible"}
-{"addr": "0x75d88", "name": "FUN_00075d88", "status": "converted"}
+{"addr": "0x75d88", "name": "FUN_00075d88", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00075d88(undefined4 param_1,int *param_2)"}
 {"addr": "0x75da6", "name": "FUN_00075da6", "status": "unconvertible"}
 {"addr": "0x75dc6", "name": "FUN_00075dc6", "status": "converted"}
 {"addr": "0x75df0", "name": "FUN_00075df0", "status": "unconvertible"}
@@ -3804,7 +3804,7 @@
 {"addr": "0x760c6", "name": "FUN_000760c6", "status": "converted"}
 {"addr": "0x7611c", "name": "FUN_0007611c", "status": "converted"}
 {"addr": "0x7612c", "name": "thunk_FUN_000760c6", "status": "converted"}
-{"addr": "0x76138", "name": "FUN_00076138", "status": "converted"}
+{"addr": "0x76138", "name": "FUN_00076138", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00076138(undefined4 *param_1)"}
 {"addr": "0x7618e", "name": "FUN_0007618e", "status": "unconvertible"}
 {"addr": "0x761e6", "name": "FUN_000761e6", "status": "equivalent", "form": "corpus", "signature": "void FUN_000761e6(void)"}
 {"addr": "0x7620a", "name": "FUN_0007620a", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_0007620a(void)"}
@@ -3860,7 +3860,7 @@
 {"addr": "0x76988", "name": "FUN_00076988", "status": "equivalent", "form": "corpus", "signature": "void FUN_00076988(void)"}
 {"addr": "0x76992", "name": "FUN_00076992", "status": "equivalent", "form": "corpus", "signature": "void FUN_00076992(void)"}
 {"addr": "0x7699c", "name": "FUN_0007699c", "status": "equivalent", "form": "corpus", "signature": "void FUN_0007699c(void)"}
-{"addr": "0x769a6", "name": "FUN_000769a6", "status": "converted"}
+{"addr": "0x769a6", "name": "FUN_000769a6", "status": "equivalent", "form": "corpus", "signature": "uchar FUN_000769a6(undefined2 *param_1,undefined1 *param_2,undefined1 *param_3)"}
 {"addr": "0x769d4", "name": "f33_nvm_publish_erase_driver_result", "status": "converted"}
 {"addr": "0x769f6", "name": "f33_nvm_report_class_byte", "status": "converted"}
 {"addr": "0x76a04", "name": "thunk_FUN_00079432", "status": "equivalent", "form": "corpus", "signature": "bool thunk_FUN_00079432(void)"}
@@ -3873,8 +3873,8 @@
 {"addr": "0x76ada", "name": "f33_return_only_stub_73ca2", "status": "converted"}
 {"addr": "0x76ae6", "name": "FUN_00076ae6", "status": "converted"}
 {"addr": "0x76af4", "name": "FUN_00076af4", "status": "converted"}
-{"addr": "0x76b04", "name": "thunk_FUN_000772f8", "status": "converted"}
-{"addr": "0x76b10", "name": "thunk_FUN_000772f8", "status": "converted"}
+{"addr": "0x76b04", "name": "thunk_FUN_000772f8", "status": "equivalent", "form": "corpus", "signature": "void thunk_FUN_000772f8(void)"}
+{"addr": "0x76b10", "name": "thunk_FUN_000772f8", "status": "equivalent", "form": "corpus", "signature": "void thunk_FUN_000772f8(void)"}
 {"addr": "0x76b1c", "name": "FUN_00076b1c", "status": "converted"}
 {"addr": "0x76b6e", "name": "FUN_00076b6e", "status": "converted"}
 {"addr": "0x76be8", "name": "FUN_00076be8", "status": "converted"}
@@ -3897,18 +3897,18 @@
 {"addr": "0x77170", "name": "FUN_00077170", "status": "converted"}
 {"addr": "0x7723c", "name": "FUN_0007723c", "status": "unconvertible"}
 {"addr": "0x77290", "name": "thunk_FUN_0007490e", "status": "equivalent", "form": "corpus", "signature": "undefined4 thunk_FUN_0007490e(undefined4 param_1)"}
-{"addr": "0x7729c", "name": "FUN_0007729c", "status": "converted"}
-{"addr": "0x772a2", "name": "FUN_000772a2", "status": "converted"}
-{"addr": "0x772a8", "name": "f33_nvm_header_checksum", "status": "converted"}
+{"addr": "0x7729c", "name": "FUN_0007729c", "status": "equivalent", "form": "corpus", "signature": "undefined2 FUN_0007729c(undefined2 *param_1)"}
+{"addr": "0x772a2", "name": "FUN_000772a2", "status": "equivalent", "form": "corpus", "signature": "void FUN_000772a2(undefined2 *param_1,undefined2 param_2)"}
+{"addr": "0x772a8", "name": "f33_nvm_header_checksum", "status": "equivalent", "form": "corpus", "signature": "uint f33_nvm_header_checksum(F33NvmRecordContext *context)"}
 {"addr": "0x772ae", "name": "FUN_000772ae", "status": "converted"}
 {"addr": "0x772b4", "name": "FUN_000772b4", "status": "converted"}
 {"addr": "0x772ba", "name": "FUN_000772ba", "status": "converted"}
 {"addr": "0x772c0", "name": "f33_nvm_copy_payload_chunk", "status": "converted"}
-{"addr": "0x772d8", "name": "f33_nvm_set_read_destination", "status": "converted"}
-{"addr": "0x772de", "name": "f33_nvm_tail_checksum", "status": "converted"}
+{"addr": "0x772d8", "name": "f33_nvm_set_read_destination", "status": "equivalent", "form": "corpus", "signature": "void f33_nvm_set_read_destination(F33NvmRecordContext *context,uchar *destination)"}
+{"addr": "0x772de", "name": "f33_nvm_tail_checksum", "status": "equivalent", "form": "corpus", "signature": "uint f33_nvm_tail_checksum(F33NvmRecordContext *context)"}
 {"addr": "0x772e4", "name": "FUN_000772e4", "status": "converted"}
 {"addr": "0x772ea", "name": "FUN_000772ea", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_000772ea(int param_1)"}
-{"addr": "0x772f8", "name": "FUN_000772f8", "status": "converted"}
+{"addr": "0x772f8", "name": "FUN_000772f8", "status": "equivalent", "form": "corpus", "signature": "void FUN_000772f8(void)"}
 {"addr": "0x77370", "name": "FUN_00077370", "status": "converted"}
 {"addr": "0x77380", "name": "FUN_00077380", "status": "converted"}
 {"addr": "0x773fe", "name": "FUN_000773fe", "status": "converted"}
@@ -3926,12 +3926,12 @@
 {"addr": "0x777ca", "name": "f33_nvm_read_payload_checksum", "status": "converted"}
 {"addr": "0x77824", "name": "FUN_00077824", "status": "converted"}
 {"addr": "0x7786a", "name": "FUN_0007786a", "status": "converted"}
-{"addr": "0x778c6", "name": "f33_nvm_bind_record_context", "status": "converted"}
+{"addr": "0x778c6", "name": "f33_nvm_bind_record_context", "status": "equivalent", "form": "corpus", "signature": "void f33_nvm_bind_record_context(F33NvmCommitContext *context,F33NvmRecordContext *record)"}
 {"addr": "0x778cc", "name": "FUN_000778cc", "status": "converted"}
 {"addr": "0x778d2", "name": "FUN_000778d2", "status": "converted"}
 {"addr": "0x778d8", "name": "FUN_000778d8", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_000778d8(int param_1)"}
-{"addr": "0x778e6", "name": "thunk_FUN_000772f8", "status": "converted"}
-{"addr": "0x778f2", "name": "thunk_FUN_000772f8", "status": "converted"}
+{"addr": "0x778e6", "name": "thunk_FUN_000772f8", "status": "equivalent", "form": "corpus", "signature": "void thunk_FUN_000772f8(void)"}
+{"addr": "0x778f2", "name": "thunk_FUN_000772f8", "status": "equivalent", "form": "corpus", "signature": "void thunk_FUN_000772f8(void)"}
 {"addr": "0x77910", "name": "FUN_00077910", "status": "converted"}
 {"addr": "0x77968", "name": "FUN_00077968", "status": "converted"}
 {"addr": "0x779b2", "name": "FUN_000779b2", "status": "converted"}
@@ -3961,7 +3961,7 @@
 {"addr": "0x77df2", "name": "FUN_00077df2", "status": "equivalent", "form": "corpus", "signature": "void FUN_00077df2(void)"}
 {"addr": "0x77dfe", "name": "thunk_FUN_00077df2", "status": "equivalent", "form": "corpus", "signature": "void thunk_FUN_00077df2(void)"}
 {"addr": "0x77e0a", "name": "FUN_00077e0a", "status": "converted"}
-{"addr": "0x77e22", "name": "FUN_00077e22", "status": "converted"}
+{"addr": "0x77e22", "name": "FUN_00077e22", "status": "equivalent", "form": "corpus", "signature": "void FUN_00077e22(char *param_1,undefined1 *param_2,undefined1 *param_3)"}
 {"addr": "0x77e6e", "name": "FUN_00077e6e", "status": "converted"}
 {"addr": "0x77eba", "name": "FUN_00077eba", "status": "converted"}
 {"addr": "0x77f26", "name": "FUN_00077f26", "status": "converted"}
@@ -4010,7 +4010,7 @@
 {"addr": "0x789e2", "name": "FUN_000789e2", "status": "converted"}
 {"addr": "0x78a56", "name": "FUN_00078a56", "status": "converted"}
 {"addr": "0x78aca", "name": "FUN_00078aca", "status": "equivalent", "form": "corpus", "signature": "undefined1 FUN_00078aca(void)"}
-{"addr": "0x78ae0", "name": "f33_load_u32", "status": "converted"}
+{"addr": "0x78ae0", "name": "f33_load_u32", "status": "equivalent", "form": "corpus", "signature": "uint f33_load_u32(uint *source)"}
 {"addr": "0x78af8", "name": "FUN_00078af8", "status": "equivalent", "form": "corpus", "signature": "void FUN_00078af8(void)"}
 {"addr": "0x78b1c", "name": "FUN_00078b1c", "status": "equivalent", "form": "corpus", "signature": "void FUN_00078b1c(void)"}
 {"addr": "0x78b3a", "name": "f33_flash_set_software_enables", "status": "converted"}
@@ -4056,7 +4056,7 @@
 {"addr": "0x7939c", "name": "FUN_0007939c", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_0007939c(undefined2 param_1,undefined1 param_2,undefined1 param_3,undefined1 param_4)"}
 {"addr": "0x793b0", "name": "f33_return_only_stub_79d32", "status": "converted"}
 {"addr": "0x793bc", "name": "f33_return_only_stub_79d34", "status": "converted"}
-{"addr": "0x793c8", "name": "FUN_000793c8", "status": "converted"}
+{"addr": "0x793c8", "name": "FUN_000793c8", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_000793c8(undefined1 *param_1)"}
 {"addr": "0x793dc", "name": "FUN_000793dc", "status": "converted"}
 {"addr": "0x7940e", "name": "f33_syncp", "status": "converted"}
 {"addr": "0x79420", "name": "FUN_00079420", "status": "equivalent", "form": "corpus", "signature": "bool FUN_00079420(void)"}
@@ -4079,8 +4079,8 @@
 {"addr": "0x796bc", "name": "f33_return_only_stub_796bc", "status": "converted"}
 {"addr": "0x796be", "name": "FUN_000796be", "status": "equivalent", "form": "corpus", "signature": "void FUN_000796be(uint param_1)"}
 {"addr": "0x796f4", "name": "FUN_000796f4", "status": "equivalent", "form": "corpus", "signature": "void FUN_000796f4(uint param_1)"}
-{"addr": "0x79780", "name": "FUN_00079780", "status": "converted"}
-{"addr": "0x797c2", "name": "FUN_000797c2", "status": "converted"}
+{"addr": "0x79780", "name": "FUN_00079780", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00079780(uint param_1,undefined2 *param_2)"}
+{"addr": "0x797c2", "name": "FUN_000797c2", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_000797c2(char param_1,undefined2 *param_2)"}
 {"addr": "0x797f6", "name": "FUN_000797f6", "status": "equivalent", "form": "corpus", "signature": "void FUN_000797f6(void)"}
 {"addr": "0x79848", "name": "FUN_00079848", "status": "equivalent", "form": "corpus", "signature": "bool FUN_00079848(uchar param_1,int param_2)"}
 {"addr": "0x79862", "name": "FUN_00079862", "status": "equivalent", "form": "corpus", "signature": "void FUN_00079862(void)"}
@@ -4195,14 +4195,14 @@
 {"addr": "0x7a67e", "name": "f33_cantp_confirm_can_frame", "status": "converted"}
 {"addr": "0x7a6d2", "name": "f33_cantp_find_receive_connection", "status": "unconvertible"}
 {"addr": "0x7a728", "name": "f33_cantp_find_transmit_connection", "status": "unconvertible"}
-{"addr": "0x7a77e", "name": "f33_cantp_reset_receive_owner", "status": "converted"}
+{"addr": "0x7a77e", "name": "f33_cantp_reset_receive_owner", "status": "equivalent", "form": "corpus", "signature": "void f33_cantp_reset_receive_owner(F33CanTpRxState *state)"}
 {"addr": "0x7a79e", "name": "FUN_0007a79e", "status": "converted"}
 {"addr": "0x7a7ae", "name": "f33_cantp_finish_receive_aggregate", "status": "converted"}
 {"addr": "0x7a7ca", "name": "f33_cantp_cancel_receive_owner", "status": "converted"}
-{"addr": "0x7a84c", "name": "FUN_0007a84c", "status": "converted"}
-{"addr": "0x7a862", "name": "FUN_0007a862", "status": "converted"}
-{"addr": "0x7a89a", "name": "FUN_0007a89a", "status": "converted"}
-{"addr": "0x7a8b0", "name": "FUN_0007a8b0", "status": "converted"}
+{"addr": "0x7a84c", "name": "FUN_0007a84c", "status": "equivalent", "form": "corpus", "signature": "void FUN_0007a84c(byte *param_1,ushort param_2)"}
+{"addr": "0x7a862", "name": "FUN_0007a862", "status": "equivalent", "form": "corpus", "signature": "uint FUN_0007a862(byte *param_1)"}
+{"addr": "0x7a89a", "name": "FUN_0007a89a", "status": "equivalent", "form": "corpus", "signature": "void FUN_0007a89a(byte *param_1,ushort param_2)"}
+{"addr": "0x7a8b0", "name": "FUN_0007a8b0", "status": "equivalent", "form": "corpus", "signature": "uint FUN_0007a8b0(byte *param_1)"}
 {"addr": "0x7a8e8", "name": "f33_cantp_copy_upper_receive_bytes", "status": "unconvertible"}
 {"addr": "0x7a91c", "name": "f33_cantp_multiply_receive_block_capacity", "status": "equivalent", "form": "corpus", "signature": "uint f33_cantp_multiply_receive_block_capacity(uchar cf_payload_capacity,uchar block_size)"}
 {"addr": "0x7a93e", "name": "f33_cantp_select_receive_flow_status", "status": "equivalent", "form": "corpus", "signature": "uint f33_cantp_select_receive_flow_status (uint remaining,uint available,uchar cf_payload_capacity,uchar block_size)"}
@@ -4211,7 +4211,7 @@
 {"addr": "0x7aaa2", "name": "FUN_0007aaa2", "status": "converted"}
 {"addr": "0x7aace", "name": "FUN_0007aace", "status": "converted"}
 {"addr": "0x7aaf2", "name": "f33_cantp_run_receive_channels", "status": "unconvertible"}
-{"addr": "0x7aba2", "name": "f33_cantp_reject_single_frame_extent", "status": "converted"}
+{"addr": "0x7aba2", "name": "f33_cantp_reject_single_frame_extent", "status": "equivalent", "form": "corpus", "signature": "uint f33_cantp_reject_single_frame_extent(F33CanTpRxConnection *connection,F33CanTpFrameInfo *frame)"}
 {"addr": "0x7abe6", "name": "FUN_0007abe6", "status": "converted"}
 {"addr": "0x7ac9c", "name": "FUN_0007ac9c", "status": "converted"}
 {"addr": "0x7ad64", "name": "f33_cantp_start_upper_receive", "status": "unconvertible"}
@@ -4234,7 +4234,7 @@
 {"addr": "0x7b3a6", "name": "FUN_0007b3a6", "status": "converted"}
 {"addr": "0x7b3b6", "name": "FUN_0007b3b6", "status": "converted"}
 {"addr": "0x7b3d0", "name": "f33_cantp_accept_transmit_length", "status": "converted"}
-{"addr": "0x7b452", "name": "f33_cantp_reset_transmit_owner", "status": "converted"}
+{"addr": "0x7b452", "name": "f33_cantp_reset_transmit_owner", "status": "equivalent", "form": "corpus", "signature": "void f33_cantp_reset_transmit_owner(F33CanTpTxStatePrefix *state)"}
 {"addr": "0x7b46e", "name": "FUN_0007b46e", "status": "converted"}
 {"addr": "0x7b47e", "name": "f33_cantp_cancel_transmit_owner", "status": "converted"}
 {"addr": "0x7b524", "name": "f33_cantp_write_transmit_address_byte", "status": "converted"}
@@ -4339,7 +4339,7 @@
 {"addr": "0x7ca3e", "name": "FUN_0007ca3e", "status": "converted"}
 {"addr": "0x7cada", "name": "FUN_0007cada", "status": "converted"}
 {"addr": "0x7cb8c", "name": "FUN_0007cb8c", "status": "converted"}
-{"addr": "0x7cbb6", "name": "f33_get_selected_network_software_mode", "status": "converted"}
+{"addr": "0x7cbb6", "name": "f33_get_selected_network_software_mode", "status": "equivalent", "form": "corpus", "signature": "uint f33_get_selected_network_software_mode(uchar network,uchar *mode)"}
 {"addr": "0x7cc1e", "name": "FUN_0007cc1e", "status": "converted"}
 {"addr": "0x7cc60", "name": "FUN_0007cc60", "status": "converted"}
 {"addr": "0x7ccbe", "name": "FUN_0007ccbe", "status": "converted"}
@@ -4940,14 +4940,14 @@
 {"addr": "0x89c5a", "name": "FUN_00089c5a", "status": "converted"}
 {"addr": "0x89c8c", "name": "FUN_00089c8c", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00089c8c(undefined4 param_1,undefined4 param_2,undefined4 param_3)"}
 {"addr": "0x89c98", "name": "FUN_00089c98", "status": "converted"}
-{"addr": "0x89d08", "name": "FUN_00089d08", "status": "converted"}
+{"addr": "0x89d08", "name": "FUN_00089d08", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00089d08(undefined2 *param_1)"}
 {"addr": "0x89d18", "name": "FUN_00089d18", "status": "converted"}
 {"addr": "0x89d3c", "name": "FUN_00089d3c", "status": "converted"}
 {"addr": "0x89d5e", "name": "FUN_00089d5e", "status": "converted"}
 {"addr": "0x89d80", "name": "FUN_00089d80", "status": "converted"}
 {"addr": "0x89dd6", "name": "FUN_00089dd6", "status": "unconvertible"}
 {"addr": "0x89dec", "name": "FUN_00089dec", "status": "converted"}
-{"addr": "0x89e2c", "name": "FUN_00089e2c", "status": "converted"}
+{"addr": "0x89e2c", "name": "FUN_00089e2c", "status": "equivalent", "form": "corpus", "signature": "void FUN_00089e2c(char param_1,int *param_2)"}
 {"addr": "0x89e72", "name": "FUN_00089e72", "status": "converted"}
 {"addr": "0x8a220", "name": "thunk_FUN_0008b060", "status": "converted"}
 {"addr": "0x8a22c", "name": "FUN_0008a22c", "status": "unconvertible"}
@@ -4989,10 +4989,10 @@
 {"addr": "0x8b0fc", "name": "f33_check_diagnostic_addressing_admission", "status": "equivalent", "form": "corpus", "signature": "uint f33_check_diagnostic_addressing_admission(uchar addressing_flags)"}
 {"addr": "0x8b10c", "name": "f33_return_const_0_8b10c", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_return_const_0_8b10c(void)"}
 {"addr": "0x8b110", "name": "f33_return_const_0_8b110", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_return_const_0_8b110(void)"}
-{"addr": "0x8b114", "name": "thunk_FUN_0008b134", "status": "converted"}
+{"addr": "0x8b114", "name": "thunk_FUN_0008b134", "status": "equivalent", "form": "corpus", "signature": "void thunk_FUN_0008b134(void)"}
 {"addr": "0x8b120", "name": "FUN_0008b120", "status": "converted"}
-{"addr": "0x8b134", "name": "FUN_0008b134", "status": "converted"}
-{"addr": "0x8b172", "name": "thunk_FUN_0008b134", "status": "converted"}
+{"addr": "0x8b134", "name": "FUN_0008b134", "status": "equivalent", "form": "corpus", "signature": "void FUN_0008b134(void)"}
+{"addr": "0x8b172", "name": "thunk_FUN_0008b134", "status": "equivalent", "form": "corpus", "signature": "void thunk_FUN_0008b134(void)"}
 {"addr": "0x8b17e", "name": "FUN_0008b17e", "status": "equivalent", "form": "corpus", "signature": "int FUN_0008b17e(void)"}
 {"addr": "0x8b1b2", "name": "f33_app_programming_admit_and_stage", "status": "converted"}
 {"addr": "0x8b262", "name": "f33_app_programming_submit_local_word", "status": "converted"}
@@ -5073,7 +5073,7 @@
 {"addr": "0x8cee4", "name": "f33_dcm_resume_queued_snapshot_identifiers", "status": "converted"}
 {"addr": "0x8cef0", "name": "f33_fill_constant_block_8cef0", "status": "converted"}
 {"addr": "0x8cf8e", "name": "FUN_0008cf8e", "status": "converted"}
-{"addr": "0x8cfe8", "name": "FUN_0008cfe8", "status": "converted"}
+{"addr": "0x8cfe8", "name": "FUN_0008cfe8", "status": "equivalent", "form": "corpus", "signature": "undefined1 FUN_0008cfe8(char param_1,undefined1 *param_2,undefined1 *param_3,byte *param_4)"}
 {"addr": "0x8d020", "name": "FUN_0008d020", "status": "converted"}
 {"addr": "0x8d0e6", "name": "FUN_0008d0e6", "status": "converted"}
 {"addr": "0x8d15e", "name": "FUN_0008d15e", "status": "unconvertible"}
@@ -5099,7 +5099,7 @@
 {"addr": "0x8d9ac", "name": "FUN_0008d9ac", "status": "equivalent", "form": "corpus", "signature": "void FUN_0008d9ac(void)"}
 {"addr": "0x8d9b6", "name": "FUN_0008d9b6", "status": "converted"}
 {"addr": "0x8d9ca", "name": "FUN_0008d9ca", "status": "equivalent", "form": "corpus", "signature": "void FUN_0008d9ca(void)"}
-{"addr": "0x8da10", "name": "f33_admit_application_communication_request", "status": "converted"}
+{"addr": "0x8da10", "name": "f33_admit_application_communication_request", "status": "equivalent", "form": "corpus", "signature": "uint f33_admit_application_communication_request (uchar subfunction,uchar communication_type,ushort node,uchar *nrc)"}
 {"addr": "0x8da5e", "name": "f33_apply_and_complete_communication_policy_request", "status": "converted"}
 {"addr": "0x8db22", "name": "f33_fill_constant_block_8db22", "status": "equivalent", "form": "corpus", "signature": "void f33_fill_constant_block_8db22(void)"}
 {"addr": "0x8db70", "name": "FUN_0008db70", "status": "converted"}
@@ -5111,8 +5111,8 @@
 {"addr": "0x8ddcc", "name": "f33_dcm_enable_dtc_setting_service", "status": "converted"}
 {"addr": "0x8ddea", "name": "f33_dcm_disable_dtc_setting_service", "status": "converted"}
 {"addr": "0x8de08", "name": "f33_dcm_resume_queued_dtc_setting", "status": "converted"}
-{"addr": "0x8de1a", "name": "f33_fill_constant_block_8de1a", "status": "converted"}
-{"addr": "0x8de8c", "name": "f33_fill_constant_block_8de1a", "status": "converted"}
+{"addr": "0x8de1a", "name": "f33_fill_constant_block_8de1a", "status": "equivalent", "form": "corpus", "signature": "void f33_fill_constant_block_8de1a(void)"}
+{"addr": "0x8de8c", "name": "f33_fill_constant_block_8de1a", "status": "equivalent", "form": "corpus", "signature": "void f33_fill_constant_block_8de1a(void)"}
 {"addr": "0x8de98", "name": "f33_begin_proprietary_event_selection", "status": "equivalent", "form": "corpus", "signature": "uint f33_begin_proprietary_event_selection (uchar operation,uchar selector,ushort event_id,ushort subselector)"}
 {"addr": "0x8debe", "name": "FUN_0008debe", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_0008debe(char param_1)"}
 {"addr": "0x8dee2", "name": "FUN_0008dee2", "status": "converted"}
@@ -5132,7 +5132,7 @@
 {"addr": "0x8e602", "name": "f33_merge_two_diagnostic_statuses", "status": "equivalent", "form": "corpus", "signature": "uint f33_merge_two_diagnostic_statuses (uchar application_status,uchar lower_status,uchar success_status, uchar pending_status)"}
 {"addr": "0x8e624", "name": "f33_diag_routine_local_dispatch_enabled", "status": "equivalent", "form": "corpus", "signature": "uint f33_diag_routine_local_dispatch_enabled(void)"}
 {"addr": "0x8e62a", "name": "f33_run_init_chain_8e62a", "status": "converted"}
-{"addr": "0x8e672", "name": "FUN_0008e672", "status": "converted"}
+{"addr": "0x8e672", "name": "FUN_0008e672", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_0008e672(undefined1 param_1,undefined4 *param_2)"}
 {"addr": "0x8e6ba", "name": "f33_dcm_complete_proprietary_message", "status": "converted"}
 {"addr": "0x8e6d2", "name": "f33_dcm_reject_proprietary_message", "status": "converted"}
 {"addr": "0x8e6ec", "name": "f33_diagnostic_status_to_nrc", "status": "converted"}
@@ -5147,8 +5147,8 @@
 {"addr": "0x8e82c", "name": "FUN_0008e82c", "status": "converted"}
 {"addr": "0x8e862", "name": "FUN_0008e862", "status": "converted"}
 {"addr": "0x8e8a0", "name": "FUN_0008e8a0", "status": "converted"}
-{"addr": "0x8e912", "name": "FUN_0008e912", "status": "converted"}
-{"addr": "0x8e954", "name": "FUN_0008e954", "status": "converted"}
+{"addr": "0x8e912", "name": "FUN_0008e912", "status": "equivalent", "form": "corpus", "signature": "undefined2 FUN_0008e912(short param_1,ushort param_2,undefined4 *param_3,undefined4 *param_4)"}
+{"addr": "0x8e954", "name": "FUN_0008e954", "status": "equivalent", "form": "corpus", "signature": "undefined2 FUN_0008e954(short param_1,ushort *param_2)"}
 {"addr": "0x8e9a0", "name": "FUN_0008e9a0", "status": "equivalent", "form": "corpus", "signature": "bool FUN_0008e9a0(ushort param_1,ushort param_2)"}
 {"addr": "0x8e9c6", "name": "FUN_0008e9c6", "status": "converted"}
 {"addr": "0x8eaa0", "name": "FUN_0008eaa0", "status": "converted"}
@@ -5190,7 +5190,7 @@
 {"addr": "0x8f202", "name": "f33_secoc_crypto_qualification_reported", "status": "equivalent", "form": "corpus", "signature": "uint f33_secoc_crypto_qualification_reported(void)"}
 {"addr": "0x8f210", "name": "FUN_0008f210", "status": "converted"}
 {"addr": "0x8f26c", "name": "FUN_0008f26c", "status": "converted"}
-{"addr": "0x8f2b0", "name": "FUN_0008f2b0", "status": "converted"}
+{"addr": "0x8f2b0", "name": "FUN_0008f2b0", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_0008f2b0(short param_1,char param_2,ushort *param_3)"}
 {"addr": "0x8f2fc", "name": "FUN_0008f2fc", "status": "equivalent", "form": "corpus", "signature": "int FUN_0008f2fc(void)"}
 {"addr": "0x8f34a", "name": "FUN_0008f34a", "status": "converted"}
 {"addr": "0x8f3ca", "name": "FUN_0008f3ca", "status": "converted"}
@@ -5213,7 +5213,7 @@
 {"addr": "0x8f98c", "name": "FUN_0008f98c", "status": "converted"}
 {"addr": "0x8f9c6", "name": "FUN_0008f9c6", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_0008f9c6(void)"}
 {"addr": "0x8fa20", "name": "FUN_0008fa20", "status": "converted"}
-{"addr": "0x8fa5a", "name": "FUN_0008fa5a", "status": "converted"}
+{"addr": "0x8fa5a", "name": "FUN_0008fa5a", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_0008fa5a(short param_1,char param_2,undefined2 *param_3)"}
 {"addr": "0x8fa86", "name": "FUN_0008fa86", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_0008fa86(void)"}
 {"addr": "0x8faba", "name": "f33_claim_secoc_tx_snapshot", "status": "converted"}
 {"addr": "0x8fb52", "name": "FUN_0008fb52", "status": "converted"}
@@ -5234,9 +5234,9 @@
 {"addr": "0x901f6", "name": "FUN_000901f6", "status": "converted"}
 {"addr": "0x90204", "name": "FUN_00090204", "status": "converted"}
 {"addr": "0x90212", "name": "FUN_00090212", "status": "converted"}
-{"addr": "0x9022a", "name": "FUN_0009022a", "status": "converted"}
+{"addr": "0x9022a", "name": "FUN_0009022a", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_0009022a(short param_1,undefined2 *param_2)"}
 {"addr": "0x90248", "name": "FUN_00090248", "status": "converted"}
-{"addr": "0x902b0", "name": "FUN_000902b0", "status": "converted"}
+{"addr": "0x902b0", "name": "FUN_000902b0", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_000902b0(short param_1,undefined2 *param_2)"}
 {"addr": "0x902e4", "name": "FUN_000902e4", "status": "unconvertible"}
 {"addr": "0x90342", "name": "FUN_00090342", "status": "unconvertible"}
 {"addr": "0x903a0", "name": "FUN_000903a0", "status": "unconvertible"}
@@ -5249,11 +5249,11 @@
 {"addr": "0x90502", "name": "FUN_00090502", "status": "converted"}
 {"addr": "0x905de", "name": "FUN_000905de", "status": "converted"}
 {"addr": "0x9063c", "name": "FUN_0009063c", "status": "converted"}
-{"addr": "0x906a4", "name": "FUN_000906a4", "status": "converted"}
+{"addr": "0x906a4", "name": "FUN_000906a4", "status": "equivalent", "form": "corpus", "signature": "void FUN_000906a4(undefined4 *param_1,undefined1 *param_2,uint *param_3)"}
 {"addr": "0x906e2", "name": "FUN_000906e2", "status": "converted"}
 {"addr": "0x907aa", "name": "FUN_000907aa", "status": "converted"}
 {"addr": "0x907ea", "name": "FUN_000907ea", "status": "converted"}
-{"addr": "0x90836", "name": "FUN_00090836", "status": "converted"}
+{"addr": "0x90836", "name": "FUN_00090836", "status": "equivalent", "form": "corpus", "signature": "void FUN_00090836(undefined1 *param_1,int param_2,uint *param_3)"}
 {"addr": "0x90874", "name": "FUN_00090874", "status": "converted"}
 {"addr": "0x908ba", "name": "FUN_000908ba", "status": "unconvertible"}
 {"addr": "0x90b8a", "name": "FUN_00090b8a", "status": "unconvertible"}
@@ -5290,11 +5290,11 @@
 {"addr": "0x9165e", "name": "f33_dcm_cancel_active_service", "status": "converted"}
 {"addr": "0x91688", "name": "f33_dcm_get_message_context", "status": "converted"}
 {"addr": "0x9168e", "name": "FUN_0009168e", "status": "equivalent", "form": "corpus", "signature": "undefined1 FUN_0009168e(void)"}
-{"addr": "0x91694", "name": "FUN_00091694", "status": "converted"}
+{"addr": "0x91694", "name": "FUN_00091694", "status": "equivalent", "form": "corpus", "signature": "undefined1 FUN_00091694(undefined1 *param_1)"}
 {"addr": "0x9169a", "name": "FUN_0009169a", "status": "equivalent", "form": "corpus", "signature": "bool FUN_0009169a(void)"}
 {"addr": "0x916a6", "name": "FUN_000916a6", "status": "equivalent", "form": "corpus", "signature": "undefined1 FUN_000916a6(void)"}
 {"addr": "0x916ac", "name": "f33_dcm_notify_active_service_operation_three", "status": "converted"}
-{"addr": "0x916c6", "name": "FUN_000916c6", "status": "converted"}
+{"addr": "0x916c6", "name": "FUN_000916c6", "status": "equivalent", "form": "corpus", "signature": "bool FUN_000916c6(char param_1,undefined4 *param_2)"}
 {"addr": "0x916ec", "name": "FUN_000916ec", "status": "converted"}
 {"addr": "0x9177c", "name": "FUN_0009177c", "status": "equivalent", "form": "corpus", "signature": "bool FUN_0009177c(void)"}
 {"addr": "0x91788", "name": "FUN_00091788", "status": "converted"}
@@ -5354,7 +5354,7 @@
 {"addr": "0x92040", "name": "f33_return_const_0_92040", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_return_const_0_92040(void)"}
 {"addr": "0x92044", "name": "FUN_00092044", "status": "converted"}
 {"addr": "0x92054", "name": "FUN_00092054", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00092054(undefined1 param_1,undefined1 param_2)"}
-{"addr": "0x92064", "name": "FUN_00092064", "status": "converted"}
+{"addr": "0x92064", "name": "FUN_00092064", "status": "equivalent", "form": "corpus", "signature": "void FUN_00092064(uchar param_1,ushort *param_2,ushort *param_3,ushort *param_4)"}
 {"addr": "0x92094", "name": "FUN_00092094", "status": "converted"}
 {"addr": "0x920a2", "name": "FUN_000920a2", "status": "converted"}
 {"addr": "0x920b0", "name": "FUN_000920b0", "status": "converted"}
@@ -5421,7 +5421,7 @@
 {"addr": "0x92f70", "name": "FUN_00092f70", "status": "equivalent", "form": "corpus", "signature": "void FUN_00092f70(uchar param_1)"}
 {"addr": "0x92f76", "name": "f33_dcm_try_pending_response", "status": "unconvertible"}
 {"addr": "0x93052", "name": "FUN_00093052", "status": "unconvertible"}
-{"addr": "0x93154", "name": "FUN_00093154", "status": "converted"}
+{"addr": "0x93154", "name": "FUN_00093154", "status": "equivalent", "form": "corpus", "signature": "void FUN_00093154(undefined1 *param_1,undefined1 param_2,undefined1 param_3)"}
 {"addr": "0x93162", "name": "FUN_00093162", "status": "equivalent", "form": "corpus", "signature": "void FUN_00093162(undefined1 param_1,undefined1 param_2)"}
 {"addr": "0x9317a", "name": "FUN_0009317a", "status": "converted"}
 {"addr": "0x93188", "name": "f33_dcm_append_response_node", "status": "unconvertible"}
@@ -5449,17 +5449,17 @@
 {"addr": "0x93ab2", "name": "FUN_00093ab2", "status": "equivalent", "form": "corpus", "signature": "void FUN_00093ab2(void)"}
 {"addr": "0x93aba", "name": "FUN_00093aba", "status": "equivalent", "form": "corpus", "signature": "void FUN_00093aba(void)"}
 {"addr": "0x93b18", "name": "FUN_00093b18", "status": "converted"}
-{"addr": "0x93b32", "name": "FUN_00093b32", "status": "converted"}
+{"addr": "0x93b32", "name": "FUN_00093b32", "status": "equivalent", "form": "corpus", "signature": "void FUN_00093b32(short param_1,ushort *param_2,ushort *param_3,ushort *param_4)"}
 {"addr": "0x93b50", "name": "f33_dcm_get_overall_request_timeout", "status": "converted"}
 {"addr": "0x93bd6", "name": "f33_dcm_select_response_deadline", "status": "converted"}
 {"addr": "0x93c5a", "name": "FUN_00093c5a", "status": "equivalent", "form": "corpus", "signature": "ushort FUN_00093c5a(void)"}
 {"addr": "0x93c60", "name": "FUN_00093c60", "status": "equivalent", "form": "corpus", "signature": "ushort FUN_00093c60(void)"}
 {"addr": "0x93c66", "name": "FUN_00093c66", "status": "equivalent", "form": "corpus", "signature": "void FUN_00093c66(ushort param_1)"}
-{"addr": "0x93c6c", "name": "FUN_00093c6c", "status": "converted"}
+{"addr": "0x93c6c", "name": "FUN_00093c6c", "status": "equivalent", "form": "corpus", "signature": "void FUN_00093c6c(uint param_1,undefined4 *param_2)"}
 {"addr": "0x93c8e", "name": "FUN_00093c8e", "status": "equivalent", "form": "corpus", "signature": "uchar FUN_00093c8e(void)"}
 {"addr": "0x93c94", "name": "FUN_00093c94", "status": "equivalent", "form": "corpus", "signature": "void FUN_00093c94(uchar param_1)"}
 {"addr": "0x93c9a", "name": "FUN_00093c9a", "status": "equivalent", "form": "corpus", "signature": "void FUN_00093c9a(uint param_1,char param_2)"}
-{"addr": "0x93cce", "name": "FUN_00093cce", "status": "converted"}
+{"addr": "0x93cce", "name": "FUN_00093cce", "status": "equivalent", "form": "corpus", "signature": "void FUN_00093cce(short param_1,ushort *param_2,ushort *param_3)"}
 {"addr": "0x93ce6", "name": "FUN_00093ce6", "status": "converted"}
 {"addr": "0x93d2e", "name": "FUN_00093d2e", "status": "converted"}
 {"addr": "0x93d9a", "name": "FUN_00093d9a", "status": "converted"}
@@ -5497,7 +5497,7 @@
 {"addr": "0x9449e", "name": "FUN_0009449e", "status": "converted"}
 {"addr": "0x944cc", "name": "FUN_000944cc", "status": "converted"}
 {"addr": "0x94526", "name": "FUN_00094526", "status": "converted"}
-{"addr": "0x9456e", "name": "FUN_0009456e", "status": "converted"}
+{"addr": "0x9456e", "name": "FUN_0009456e", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_0009456e(byte param_1,uint param_2,short param_3,undefined1 *param_4)"}
 {"addr": "0x94590", "name": "FUN_00094590", "status": "converted"}
 {"addr": "0x946c6", "name": "FUN_000946c6", "status": "converted"}
 {"addr": "0x94786", "name": "FUN_00094786", "status": "converted"}
@@ -5511,13 +5511,13 @@
 {"addr": "0x94be2", "name": "FUN_00094be2", "status": "unconvertible"}
 {"addr": "0x94cc4", "name": "FUN_00094cc4", "status": "unconvertible"}
 {"addr": "0x94d04", "name": "FUN_00094d04", "status": "unconvertible"}
-{"addr": "0x94d9c", "name": "FUN_00094d9c", "status": "converted"}
+{"addr": "0x94d9c", "name": "FUN_00094d9c", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00094d9c(ushort param_1,undefined2 *param_2)"}
 {"addr": "0x94df6", "name": "FUN_00094df6", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00094df6(short param_1,int param_2,int param_3)"}
 {"addr": "0x94e6a", "name": "FUN_00094e6a", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00094e6a(undefined2 param_1,int param_2,uint param_3)"}
 {"addr": "0x94ee6", "name": "FUN_00094ee6", "status": "converted"}
 {"addr": "0x94f3a", "name": "FUN_00094f3a", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00094f3a(undefined2 param_1)"}
 {"addr": "0x94f5e", "name": "thunk_FUN_00095500", "status": "equivalent", "form": "corpus", "signature": "undefined4 thunk_FUN_00095500(void)"}
-{"addr": "0x94f6a", "name": "FUN_00094f6a", "status": "converted"}
+{"addr": "0x94f6a", "name": "FUN_00094f6a", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00094f6a(undefined2 param_1,undefined1 *param_2,undefined4 param_3)"}
 {"addr": "0x94f94", "name": "FUN_00094f94", "status": "converted"}
 {"addr": "0x94fea", "name": "FUN_00094fea", "status": "converted"}
 {"addr": "0x9502a", "name": "FUN_0009502a", "status": "converted"}
@@ -5528,11 +5528,11 @@
 {"addr": "0x951fc", "name": "FUN_000951fc", "status": "converted"}
 {"addr": "0x9521e", "name": "FUN_0009521e", "status": "converted"}
 {"addr": "0x95240", "name": "FUN_00095240", "status": "converted"}
-{"addr": "0x95262", "name": "FUN_00095262", "status": "converted"}
-{"addr": "0x95278", "name": "FUN_00095278", "status": "converted"}
-{"addr": "0x9528e", "name": "FUN_0009528e", "status": "converted"}
-{"addr": "0x952a4", "name": "FUN_000952a4", "status": "converted"}
-{"addr": "0x952ba", "name": "FUN_000952ba", "status": "converted"}
+{"addr": "0x95262", "name": "FUN_00095262", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00095262(undefined4 param_1,byte param_2,ushort *param_3)"}
+{"addr": "0x95278", "name": "FUN_00095278", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00095278(undefined4 param_1,byte param_2,ushort *param_3)"}
+{"addr": "0x9528e", "name": "FUN_0009528e", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_0009528e(undefined4 param_1,byte param_2,ushort *param_3)"}
+{"addr": "0x952a4", "name": "FUN_000952a4", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_000952a4(undefined4 param_1,byte param_2,ushort *param_3)"}
+{"addr": "0x952ba", "name": "FUN_000952ba", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_000952ba(undefined4 param_1,byte param_2,ushort *param_3)"}
 {"addr": "0x952d0", "name": "FUN_000952d0", "status": "converted"}
 {"addr": "0x95300", "name": "FUN_00095300", "status": "converted"}
 {"addr": "0x95330", "name": "FUN_00095330", "status": "converted"}
@@ -5540,12 +5540,12 @@
 {"addr": "0x95390", "name": "FUN_00095390", "status": "converted"}
 {"addr": "0x953c0", "name": "FUN_000953c0", "status": "converted"}
 {"addr": "0x953ec", "name": "FUN_000953ec", "status": "converted"}
-{"addr": "0x95418", "name": "FUN_00095418", "status": "converted"}
+{"addr": "0x95418", "name": "FUN_00095418", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00095418(ushort param_1,undefined2 *param_2)"}
 {"addr": "0x95474", "name": "FUN_00095474", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00095474(short param_1,uint param_2)"}
 {"addr": "0x954dc", "name": "FUN_000954dc", "status": "equivalent", "form": "corpus", "signature": "bool FUN_000954dc(short param_1,undefined1 param_2)"}
 {"addr": "0x954ee", "name": "FUN_000954ee", "status": "equivalent", "form": "corpus", "signature": "bool FUN_000954ee(short param_1)"}
 {"addr": "0x95500", "name": "FUN_00095500", "status": "converted"}
-{"addr": "0x95514", "name": "FUN_00095514", "status": "converted"}
+{"addr": "0x95514", "name": "FUN_00095514", "status": "equivalent", "form": "corpus", "signature": "bool FUN_00095514(short param_1,undefined1 *param_2)"}
 {"addr": "0x9552a", "name": "FUN_0009552a", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_0009552a(short param_1,uint param_2)"}
 {"addr": "0x95590", "name": "FUN_00095590", "status": "converted"}
 {"addr": "0x955b6", "name": "FUN_000955b6", "status": "equivalent", "form": "corpus", "signature": "void FUN_000955b6(uchar param_1)"}
@@ -5639,7 +5639,7 @@
 {"addr": "0x9701c", "name": "f33_dcm_dispatch_communication_control_lifetime", "status": "converted"}
 {"addr": "0x9704e", "name": "f33_dcm_notify_communication_session_change", "status": "converted"}
 {"addr": "0x970c0", "name": "f33_dcm_resume_queued_communication_request", "status": "unconvertible"}
-{"addr": "0x97116", "name": "f33_dcm_check_communication_application_admission", "status": "converted"}
+{"addr": "0x97116", "name": "f33_dcm_check_communication_application_admission", "status": "equivalent", "form": "corpus", "signature": "uint f33_dcm_check_communication_application_admission (uchar subfunction,uchar communication_type,ushort node,uchar *nrc)"}
 {"addr": "0x97128", "name": "FUN_00097128", "status": "converted"}
 {"addr": "0x97138", "name": "f33_return_only_stub_97138", "status": "converted"}
 {"addr": "0x9713a", "name": "f33_return_const_0_9713a", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_return_const_0_9713a(void)"}
@@ -5647,7 +5647,7 @@
 {"addr": "0x97142", "name": "f33_dcm_communication_enable_rx_tx", "status": "converted"}
 {"addr": "0x97152", "name": "f33_dcm_communication_enable_rx_disable_tx", "status": "converted"}
 {"addr": "0x97162", "name": "f33_dcm_communication_disable_rx_tx_request", "status": "converted"}
-{"addr": "0x97172", "name": "FUN_00097172", "status": "converted"}
+{"addr": "0x97172", "name": "FUN_00097172", "status": "equivalent", "form": "corpus", "signature": "bool FUN_00097172(ushort param_1,undefined2 *param_2)"}
 {"addr": "0x971e8", "name": "FUN_000971e8", "status": "converted"}
 {"addr": "0x9726c", "name": "FUN_0009726c", "status": "converted"}
 {"addr": "0x972f2", "name": "f33_diag_routine_control_type_supported", "status": "converted"}
@@ -5804,12 +5804,12 @@
 {"addr": "0x98f4c", "name": "FUN_00098f4c", "status": "equivalent", "form": "corpus", "signature": "void FUN_00098f4c(void)"}
 {"addr": "0x98f6e", "name": "FUN_00098f6e", "status": "equivalent", "form": "corpus", "signature": "void FUN_00098f6e(int param_1,char param_2,undefined1 param_3)"}
 {"addr": "0x98fba", "name": "FUN_00098fba", "status": "converted"}
-{"addr": "0x99004", "name": "FUN_00099004", "status": "converted"}
+{"addr": "0x99004", "name": "FUN_00099004", "status": "equivalent", "form": "corpus", "signature": "void FUN_00099004(undefined4 param_1,undefined1 *param_2)"}
 {"addr": "0x9901a", "name": "FUN_0009901a", "status": "converted"}
 {"addr": "0x9907a", "name": "FUN_0009907a", "status": "unconvertible"}
 {"addr": "0x99126", "name": "FUN_00099126", "status": "converted"}
 {"addr": "0x99152", "name": "FUN_00099152", "status": "unconvertible"}
-{"addr": "0x991b6", "name": "FUN_000991b6", "status": "converted"}
+{"addr": "0x991b6", "name": "FUN_000991b6", "status": "equivalent", "form": "corpus", "signature": "void FUN_000991b6(undefined4 *param_1,undefined4 *param_2)"}
 {"addr": "0x991d2", "name": "FUN_000991d2", "status": "unconvertible"}
 {"addr": "0x99226", "name": "FUN_00099226", "status": "converted"}
 {"addr": "0x99266", "name": "FUN_00099266", "status": "unconvertible"}
@@ -6027,7 +6027,7 @@
 {"addr": "0xb59d8", "name": "FUN_000b59d8", "status": "equivalent", "form": "corpus", "signature": "void FUN_000b59d8(void)"}
 {"addr": "0xb5a36", "name": "FUN_000b5a36", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_000b5a36(void)"}
 {"addr": "0xb5a74", "name": "FUN_000b5a74", "status": "converted"}
-{"addr": "0xb5a98", "name": "FUN_000b5a98", "status": "converted"}
+{"addr": "0xb5a98", "name": "FUN_000b5a98", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_000b5a98(uint param_1,undefined1 *param_2)"}
 {"addr": "0xb5afe", "name": "FUN_000b5afe", "status": "converted"}
 {"addr": "0xb5b8c", "name": "FUN_000b5b8c", "status": "equivalent", "form": "corpus", "signature": "void FUN_000b5b8c(char param_1)"}
 {"addr": "0xb5bf6", "name": "FUN_000b5bf6", "status": "converted"}
@@ -6132,7 +6132,7 @@
 {"addr": "0xb7374", "name": "FUN_000b7374", "status": "equivalent", "form": "corpus", "signature": "int FUN_000b7374(void)"}
 {"addr": "0xb738a", "name": "f33_return_only_stub_b738a", "status": "converted"}
 {"addr": "0xb738c", "name": "FUN_000b738c", "status": "equivalent", "form": "corpus", "signature": "void FUN_000b738c(void)"}
-{"addr": "0xb73a0", "name": "FUN_000b73a0", "status": "converted"}
+{"addr": "0xb73a0", "name": "FUN_000b73a0", "status": "equivalent", "form": "corpus", "signature": "void FUN_000b73a0(ushort param_1,ushort *param_2,ushort *param_3)"}
 {"addr": "0xb73cc", "name": "FUN_000b73cc", "status": "converted"}
 {"addr": "0xb7714", "name": "f33_return_only_stub_b7714", "status": "converted"}
 {"addr": "0xb7716", "name": "f33_fill_constant_block_b7716", "status": "equivalent", "form": "corpus", "signature": "void f33_fill_constant_block_b7716(void)"}
@@ -6215,7 +6215,7 @@
 {"addr": "0xb8680", "name": "f33_return_only_stub_b8680", "status": "converted"}
 {"addr": "0xb8682", "name": "FUN_000b8682", "status": "equivalent", "form": "corpus", "signature": "void FUN_000b8682(void)"}
 {"addr": "0xb8690", "name": "f33_select_service_kind1_sample", "status": "converted"}
-{"addr": "0xb86e8", "name": "f33_select_service_kind2_sample", "status": "converted"}
+{"addr": "0xb86e8", "name": "f33_select_service_kind2_sample", "status": "equivalent", "form": "corpus", "signature": "uint f33_select_service_kind2_sample(short *sample)"}
 {"addr": "0xb8704", "name": "f33_select_service_kind3_sample", "status": "converted"}
 {"addr": "0xb8742", "name": "FUN_000b8742", "status": "equivalent", "form": "corpus", "signature": "uint FUN_000b8742(char param_1)"}
 {"addr": "0xb8774", "name": "f33_publish_service_engine_substitution", "status": "equivalent", "form": "corpus", "signature": "undefined2 f33_publish_service_engine_substitution(void)"}
@@ -6389,7 +6389,7 @@
 {"addr": "0xbb95e", "name": "FUN_000bb95e", "status": "converted"}
 {"addr": "0xbb97c", "name": "FUN_000bb97c", "status": "converted"}
 {"addr": "0xbb9d8", "name": "FUN_000bb9d8", "status": "converted"}
-{"addr": "0xbbaa4", "name": "FUN_000bbaa4", "status": "converted"}
+{"addr": "0xbbaa4", "name": "FUN_000bbaa4", "status": "equivalent", "form": "corpus", "signature": "void FUN_000bbaa4(char *param_1,int *param_2,short *param_3)"}
 {"addr": "0xbbaea", "name": "FUN_000bbaea", "status": "converted"}
 {"addr": "0xbbb3c", "name": "FUN_000bbb3c", "status": "equivalent", "form": "corpus", "signature": "void FUN_000bbb3c(void)"}
 {"addr": "0xbbb88", "name": "FUN_000bbb88", "status": "converted"}
@@ -6491,11 +6491,11 @@
 {"addr": "0xbe210", "name": "f33_return_only_stub_be210", "status": "converted"}
 {"addr": "0xbe212", "name": "f33_return_only_stub_be212", "status": "converted"}
 {"addr": "0xbe214", "name": "f33_return_only_stub_be214", "status": "converted"}
-{"addr": "0xbe216", "name": "FUN_000be216", "status": "converted"}
+{"addr": "0xbe216", "name": "FUN_000be216", "status": "equivalent", "form": "corpus", "signature": "void FUN_000be216(undefined1 *param_1)"}
 {"addr": "0xbe288", "name": "f33_return_only_stub_be288", "status": "converted"}
 {"addr": "0xbe28a", "name": "f33_return_only_stub_be28a", "status": "converted"}
 {"addr": "0xbe28c", "name": "f33_return_only_stub_be28c", "status": "converted"}
-{"addr": "0xbe28e", "name": "FUN_000be28e", "status": "converted"}
+{"addr": "0xbe28e", "name": "FUN_000be28e", "status": "equivalent", "form": "corpus", "signature": "void FUN_000be28e(undefined1 *param_1)"}
 {"addr": "0xbe300", "name": "f33_return_only_stub_be300", "status": "converted"}
 {"addr": "0xbe302", "name": "f33_return_only_stub_be302", "status": "converted"}
 {"addr": "0xbe304", "name": "f33_scale_staged_byte_pair_to_control_raw", "status": "equivalent", "form": "corpus", "signature": "void f33_scale_staged_byte_pair_to_control_raw(void)"}
@@ -6566,7 +6566,7 @@
 {"addr": "0xbefd6", "name": "FUN_000befd6", "status": "unconvertible"}
 {"addr": "0xbf0a6", "name": "f33_return_only_stub_bf0a6", "status": "converted"}
 {"addr": "0xbf0a8", "name": "f33_return_only_stub_bf0a8", "status": "converted"}
-{"addr": "0xbf0aa", "name": "f33_qualify_record8_admitted_observations", "status": "converted"}
+{"addr": "0xbf0aa", "name": "f33_qualify_record8_admitted_observations", "status": "equivalent", "form": "corpus", "signature": "void f33_qualify_record8_admitted_observations (uchar *result,uchar *completed,ushort *zero_count,ushort *nonzero_count)"}
 {"addr": "0xbf0ec", "name": "f33_step_record8_confirmation_window", "status": "converted"}
 {"addr": "0xbf18a", "name": "f33_advance_record8_startup_confirmation", "status": "converted"}
 {"addr": "0xbf232", "name": "f33_update_initialized_record8_confirmation", "status": "converted"}
@@ -6669,9 +6669,9 @@
 {"addr": "0xc4640", "name": "f33_check_retained_estimator_consistency", "status": "converted"}
 {"addr": "0xc4714", "name": "f33_clear_retained_estimator_and_request_reset", "status": "equivalent", "form": "corpus", "signature": "void f33_clear_retained_estimator_and_request_reset(void)"}
 {"addr": "0xc475a", "name": "f33_count_retained_estimator_failure", "status": "equivalent", "form": "corpus", "signature": "void f33_count_retained_estimator_failure(void)"}
-{"addr": "0xc478c", "name": "f33_accept_consistent_estimator_center", "status": "converted"}
-{"addr": "0xc47d8", "name": "f33_request_secondary_estimator_reseed", "status": "converted"}
-{"addr": "0xc4816", "name": "f33_accept_unqualified_estimator_center", "status": "converted"}
+{"addr": "0xc478c", "name": "f33_accept_consistent_estimator_center", "status": "equivalent", "form": "corpus", "signature": "void f33_accept_consistent_estimator_center(uchar *snapshot)"}
+{"addr": "0xc47d8", "name": "f33_request_secondary_estimator_reseed", "status": "equivalent", "form": "corpus", "signature": "void f33_request_secondary_estimator_reseed(uchar *snapshot)"}
+{"addr": "0xc4816", "name": "f33_accept_unqualified_estimator_center", "status": "equivalent", "form": "corpus", "signature": "void f33_accept_unqualified_estimator_center(uchar *snapshot)"}
 {"addr": "0xc485a", "name": "f33_route_retained_estimator_qualification", "status": "converted"}
 {"addr": "0xc489c", "name": "f33_validate_and_route_retained_estimator", "status": "converted"}
 {"addr": "0xc492c", "name": "f33_qualify_rate_observer_acquisition", "status": "converted"}
@@ -6685,7 +6685,7 @@
 {"addr": "0xc4b8c", "name": "FUN_000c4b8c", "status": "converted"}
 {"addr": "0xc4bce", "name": "f33_update_rate_observer_deadband", "status": "converted"}
 {"addr": "0xc4bf2", "name": "f33_initialize_secondary_estimator_stability", "status": "equivalent", "form": "corpus", "signature": "void f33_initialize_secondary_estimator_stability(void)"}
-{"addr": "0xc4c0c", "name": "f33_qualify_secondary_estimator_change", "status": "converted"}
+{"addr": "0xc4c0c", "name": "f33_qualify_secondary_estimator_change", "status": "equivalent", "form": "corpus", "signature": "void f33_qualify_secondary_estimator_change(int change,uchar *count,uchar *qualified)"}
 {"addr": "0xc4c56", "name": "f33_update_secondary_estimator_stability", "status": "converted"}
 {"addr": "0xc4cf0", "name": "f33_initialize_assist_torque_conditioner", "status": "equivalent", "form": "corpus", "signature": "void f33_initialize_assist_torque_conditioner(void)"}
 {"addr": "0xc4d68", "name": "f33_update_retained_assist_torque_output", "status": "converted"}
@@ -6694,7 +6694,7 @@
 {"addr": "0xc4f04", "name": "f33_update_torque_conditioner_reseed_selector", "status": "converted"}
 {"addr": "0xc4fda", "name": "f33_repair_assist_torque_conditioner_state", "status": "converted"}
 {"addr": "0xc50e8", "name": "f33_initialize_torque_memory_gain", "status": "equivalent", "form": "corpus", "signature": "void f33_initialize_torque_memory_gain(void)"}
-{"addr": "0xc5106", "name": "f33_prepare_torque_memory_gain_parameters", "status": "converted"}
+{"addr": "0xc5106", "name": "f33_prepare_torque_memory_gain_parameters", "status": "equivalent", "form": "corpus", "signature": "void f33_prepare_torque_memory_gain_parameters(F33GainSlewState *state,uint mode)"}
 {"addr": "0xc5164", "name": "f33_update_torque_memory_gain", "status": "equivalent", "form": "corpus", "signature": "void f33_update_torque_memory_gain(void)"}
 {"addr": "0xc51ac", "name": "f33_scale_torque_memory_correction", "status": "equivalent", "form": "corpus", "signature": "short f33_scale_torque_memory_correction(short value)"}
 {"addr": "0xc51c6", "name": "f33_initialize_torque_memory_correction", "status": "equivalent", "form": "corpus", "signature": "void f33_initialize_torque_memory_correction(void)"}
@@ -6742,7 +6742,7 @@
 {"addr": "0xc656c", "name": "FUN_000c656c", "status": "converted"}
 {"addr": "0xc65c8", "name": "FUN_000c65c8", "status": "converted"}
 {"addr": "0xc65f0", "name": "f33_fill_constant_block_c65f0", "status": "equivalent", "form": "corpus", "signature": "void f33_fill_constant_block_c65f0(void)"}
-{"addr": "0xc660e", "name": "f33_prepare_gain_parameters_c2a4", "status": "converted"}
+{"addr": "0xc660e", "name": "f33_prepare_gain_parameters_c2a4", "status": "equivalent", "form": "corpus", "signature": "void f33_prepare_gain_parameters_c2a4(F33GainSlewState *state,uint mode)"}
 {"addr": "0xc666c", "name": "FUN_000c666c", "status": "equivalent", "form": "corpus", "signature": "void FUN_000c666c(void)"}
 {"addr": "0xc66b4", "name": "FUN_000c66b4", "status": "equivalent", "form": "corpus", "signature": "uint FUN_000c66b4(short param_1)"}
 {"addr": "0xc66ce", "name": "FUN_000c66ce", "status": "converted"}
@@ -6754,7 +6754,7 @@
 {"addr": "0xc6aa4", "name": "FUN_000c6aa4", "status": "converted"}
 {"addr": "0xc6af6", "name": "FUN_000c6af6", "status": "converted"}
 {"addr": "0xc6be0", "name": "FUN_000c6be0", "status": "equivalent", "form": "corpus", "signature": "void FUN_000c6be0(void)"}
-{"addr": "0xc6c24", "name": "f33_prepare_gain_parameters_c2f4", "status": "converted"}
+{"addr": "0xc6c24", "name": "f33_prepare_gain_parameters_c2f4", "status": "equivalent", "form": "corpus", "signature": "void f33_prepare_gain_parameters_c2f4(F33GainSlewState *state,uint mode)"}
 {"addr": "0xc6c82", "name": "FUN_000c6c82", "status": "equivalent", "form": "corpus", "signature": "void FUN_000c6c82(void)"}
 {"addr": "0xc6cca", "name": "FUN_000c6cca", "status": "converted"}
 {"addr": "0xc6d4e", "name": "FUN_000c6d4e", "status": "converted"}
@@ -6853,7 +6853,7 @@
 {"addr": "0xc8ef4", "name": "FUN_000c8ef4", "status": "unconvertible"}
 {"addr": "0xc8f90", "name": "FUN_000c8f90", "status": "equivalent", "form": "corpus", "signature": "void FUN_000c8f90(void)"}
 {"addr": "0xc8fb6", "name": "FUN_000c8fb6", "status": "equivalent", "form": "corpus", "signature": "void FUN_000c8fb6(void)"}
-{"addr": "0xc8ffa", "name": "f33_prepare_gain_parameters_c544", "status": "converted"}
+{"addr": "0xc8ffa", "name": "f33_prepare_gain_parameters_c544", "status": "equivalent", "form": "corpus", "signature": "void f33_prepare_gain_parameters_c544(F33GainSlewState *state,uint mode)"}
 {"addr": "0xc9058", "name": "FUN_000c9058", "status": "equivalent", "form": "corpus", "signature": "void FUN_000c9058(void)"}
 {"addr": "0xc90a0", "name": "FUN_000c90a0", "status": "converted"}
 {"addr": "0xc9124", "name": "FUN_000c9124", "status": "converted"}
@@ -7009,7 +7009,7 @@
 {"addr": "0xce7fe", "name": "FUN_000ce7fe", "status": "converted"}
 {"addr": "0xce836", "name": "FUN_000ce836", "status": "converted"}
 {"addr": "0xce8ca", "name": "FUN_000ce8ca", "status": "converted"}
-{"addr": "0xce8da", "name": "f33_step_retained_unsigned_gain", "status": "converted"}
+{"addr": "0xce8da", "name": "f33_step_retained_unsigned_gain", "status": "equivalent", "form": "corpus", "signature": "void f33_step_retained_unsigned_gain(F33GainSlewState *state)"}
 {"addr": "0xce912", "name": "FUN_000ce912", "status": "converted"}
 {"addr": "0xce964", "name": "f33_fill_constant_block_ce964", "status": "equivalent", "form": "corpus", "signature": "void f33_fill_constant_block_ce964(void)"}
 {"addr": "0xce9ac", "name": "FUN_000ce9ac", "status": "equivalent", "form": "corpus", "signature": "void FUN_000ce9ac(void)"}
@@ -7072,7 +7072,7 @@
 {"addr": "0xcfe14", "name": "FUN_000cfe14", "status": "equivalent", "form": "corpus", "signature": "char FUN_000cfe14(void)"}
 {"addr": "0xcfe64", "name": "FUN_000cfe64", "status": "converted"}
 {"addr": "0xcfe8e", "name": "f33_fill_constant_block_cfe8e", "status": "equivalent", "form": "corpus", "signature": "void f33_fill_constant_block_cfe8e(void)"}
-{"addr": "0xcfea4", "name": "FUN_000cfea4", "status": "converted"}
+{"addr": "0xcfea4", "name": "FUN_000cfea4", "status": "equivalent", "form": "corpus", "signature": "void FUN_000cfea4(char param_1,short *param_2)"}
 {"addr": "0xcff04", "name": "FUN_000cff04", "status": "equivalent", "form": "corpus", "signature": "void FUN_000cff04(void)"}
 {"addr": "0xcff6e", "name": "FUN_000cff6e", "status": "equivalent", "form": "corpus", "signature": "void FUN_000cff6e(void)"}
 {"addr": "0xcff78", "name": "f33_fill_constant_block_cff78", "status": "equivalent", "form": "corpus", "signature": "void f33_fill_constant_block_cff78(void)"}
@@ -7104,13 +7104,13 @@
 {"addr": "0xd0768", "name": "f33_interpolate_signed_sentinel_curve", "status": "converted"}
 {"addr": "0xd07ba", "name": "FUN_000d07ba", "status": "converted"}
 {"addr": "0xd07f2", "name": "FUN_000d07f2", "status": "converted"}
-{"addr": "0xd0844", "name": "f33_interpolate_unsigned_axis_sentinel_curve", "status": "converted"}
+{"addr": "0xd0844", "name": "f33_interpolate_unsigned_axis_sentinel_curve", "status": "equivalent", "form": "corpus", "signature": "int f33_interpolate_unsigned_axis_sentinel_curve(ushort *points,ushort input)"}
 {"addr": "0xd0896", "name": "FUN_000d0896", "status": "converted"}
 {"addr": "0xd08e8", "name": "FUN_000d08e8", "status": "converted"}
 {"addr": "0xd095e", "name": "f33_abs_s16_wrapping", "status": "equivalent", "form": "corpus", "signature": "short f33_abs_s16_wrapping(short value)"}
 {"addr": "0xd0970", "name": "f33_abs_s32_wrapping", "status": "converted"}
-{"addr": "0xd097a", "name": "FUN_000d097a", "status": "converted"}
-{"addr": "0xd0a06", "name": "FUN_000d0a06", "status": "converted"}
+{"addr": "0xd097a", "name": "FUN_000d097a", "status": "equivalent", "form": "corpus", "signature": "void FUN_000d097a(ushort *param_1,uint param_2,undefined2 *param_3,undefined2 *param_4)"}
+{"addr": "0xd0a06", "name": "FUN_000d0a06", "status": "equivalent", "form": "corpus", "signature": "void FUN_000d0a06(int param_1,int param_2,int *param_3)"}
 {"addr": "0xd0a3e", "name": "f33_run_init_chain_d0a3e", "status": "converted"}
 {"addr": "0xd0aae", "name": "f33_publish_command_snapshot", "status": "equivalent", "form": "corpus", "signature": "void f33_publish_command_snapshot(void)"}
 {"addr": "0xd0af6", "name": "f33_run_assist_command_slice", "status": "converted"}
@@ -7134,32 +7134,32 @@
 {"addr": "0xd1154", "name": "FUN_000d1154", "status": "converted"}
 {"addr": "0xd1160", "name": "FUN_000d1160", "status": "equivalent", "form": "corpus", "signature": "void FUN_000d1160(void)"}
 {"addr": "0xd116c", "name": "thunk_FUN_000d0d6c", "status": "converted"}
-{"addr": "0xd1178", "name": "FUN_000d1178", "status": "converted"}
-{"addr": "0xd1194", "name": "FUN_000d1194", "status": "converted"}
-{"addr": "0xd11d6", "name": "FUN_000d11d6", "status": "converted"}
-{"addr": "0xd1222", "name": "FUN_000d1222", "status": "converted"}
-{"addr": "0xd1232", "name": "FUN_000d1232", "status": "converted"}
+{"addr": "0xd1178", "name": "FUN_000d1178", "status": "equivalent", "form": "corpus", "signature": "void FUN_000d1178(short param_1,short *param_2)"}
+{"addr": "0xd1194", "name": "FUN_000d1194", "status": "equivalent", "form": "corpus", "signature": "void FUN_000d1194(int param_1,int *param_2)"}
+{"addr": "0xd11d6", "name": "FUN_000d11d6", "status": "equivalent", "form": "corpus", "signature": "void FUN_000d11d6(undefined4 param_1,undefined4 param_2,undefined1 *param_3)"}
+{"addr": "0xd1222", "name": "FUN_000d1222", "status": "equivalent", "form": "corpus", "signature": "void FUN_000d1222(short param_1,int *param_2)"}
+{"addr": "0xd1232", "name": "FUN_000d1232", "status": "equivalent", "form": "corpus", "signature": "void FUN_000d1232(short param_1,uint param_2,uint param_3,short *param_4)"}
 {"addr": "0xd1272", "name": "FUN_000d1272", "status": "converted"}
-{"addr": "0xd12d2", "name": "f33_filter_unsigned_sample_accumulator", "status": "converted"}
-{"addr": "0xd1306", "name": "f33_reset_application_latched_monitor", "status": "converted"}
+{"addr": "0xd12d2", "name": "f33_filter_unsigned_sample_accumulator", "status": "equivalent", "form": "corpus", "signature": "void f33_filter_unsigned_sample_accumulator (ushort *sample,uint coefficient,ushort *output,uint *accumulator)"}
+{"addr": "0xd1306", "name": "f33_reset_application_latched_monitor", "status": "equivalent", "form": "corpus", "signature": "void f33_reset_application_latched_monitor(F33LatchedMonitorState *state)"}
 {"addr": "0xd1386", "name": "f33_step_application_latched_monitor", "status": "converted"}
 {"addr": "0xd1824", "name": "FUN_000d1824", "status": "converted"}
-{"addr": "0xd1cdc", "name": "FUN_000d1cdc", "status": "converted"}
-{"addr": "0xd1cf6", "name": "FUN_000d1cf6", "status": "converted"}
-{"addr": "0xd1d0a", "name": "f33_store_signed_halfword_max", "status": "converted"}
-{"addr": "0xd1d1c", "name": "FUN_000d1d1c", "status": "converted"}
-{"addr": "0xd1d3c", "name": "f33_store_signed_halfword_min", "status": "converted"}
-{"addr": "0xd1d4e", "name": "FUN_000d1d4e", "status": "converted"}
-{"addr": "0xd1d5c", "name": "FUN_000d1d5c", "status": "converted"}
-{"addr": "0xd1d6e", "name": "FUN_000d1d6e", "status": "converted"}
+{"addr": "0xd1cdc", "name": "FUN_000d1cdc", "status": "equivalent", "form": "corpus", "signature": "void FUN_000d1cdc(short param_1,short param_2,short param_3,short *param_4)"}
+{"addr": "0xd1cf6", "name": "FUN_000d1cf6", "status": "equivalent", "form": "corpus", "signature": "void FUN_000d1cf6(int param_1,int param_2,int param_3,int *param_4)"}
+{"addr": "0xd1d0a", "name": "f33_store_signed_halfword_max", "status": "equivalent", "form": "corpus", "signature": "void f33_store_signed_halfword_max(short value,short bound,short *output)"}
+{"addr": "0xd1d1c", "name": "FUN_000d1d1c", "status": "equivalent", "form": "corpus", "signature": "void FUN_000d1d1c(ushort *param_1,undefined2 *param_2)"}
+{"addr": "0xd1d3c", "name": "f33_store_signed_halfword_min", "status": "equivalent", "form": "corpus", "signature": "void f33_store_signed_halfword_min(short value,short bound,short *output)"}
+{"addr": "0xd1d4e", "name": "FUN_000d1d4e", "status": "equivalent", "form": "corpus", "signature": "void FUN_000d1d4e(int param_1,int param_2,int *param_3)"}
+{"addr": "0xd1d5c", "name": "FUN_000d1d5c", "status": "equivalent", "form": "corpus", "signature": "void FUN_000d1d5c(ushort param_1,ushort param_2,ushort *param_3)"}
+{"addr": "0xd1d6e", "name": "FUN_000d1d6e", "status": "equivalent", "form": "corpus", "signature": "void FUN_000d1d6e(uint param_1,uint param_2,uint *param_3)"}
 {"addr": "0xd1da0", "name": "FUN_000d1da0", "status": "converted"}
 {"addr": "0xd1dc6", "name": "FUN_000d1dc6", "status": "converted"}
 {"addr": "0xd1de4", "name": "FUN_000d1de4", "status": "converted"}
-{"addr": "0xd1e8c", "name": "FUN_000d1e8c", "status": "converted"}
-{"addr": "0xd1ee0", "name": "FUN_000d1ee0", "status": "converted"}
-{"addr": "0xd22c0", "name": "FUN_000d22c0", "status": "converted"}
+{"addr": "0xd1e8c", "name": "FUN_000d1e8c", "status": "equivalent", "form": "corpus", "signature": "void FUN_000d1e8c(ushort *param_1,uint param_2,ushort *param_3)"}
+{"addr": "0xd1ee0", "name": "FUN_000d1ee0", "status": "equivalent", "form": "corpus", "signature": "void FUN_000d1ee0(ushort *param_1,uint param_2,ushort *param_3)"}
+{"addr": "0xd22c0", "name": "FUN_000d22c0", "status": "equivalent", "form": "corpus", "signature": "void FUN_000d22c0(ushort *param_1,ushort param_2,ushort *param_3)"}
 {"addr": "0xd2330", "name": "FUN_000d2330", "status": "converted"}
-{"addr": "0xd2388", "name": "FUN_000d2388", "status": "converted"}
+{"addr": "0xd2388", "name": "FUN_000d2388", "status": "equivalent", "form": "corpus", "signature": "void FUN_000d2388(short param_1,short param_2,undefined2 *param_3)"}
 {"addr": "0xd23b8", "name": "FUN_000d23b8", "status": "converted"}
 {"addr": "0xd242e", "name": "FUN_000d242e", "status": "converted"}
 {"addr": "0xd24a4", "name": "FUN_000d24a4", "status": "converted"}
