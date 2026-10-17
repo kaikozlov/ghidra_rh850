@@ -25,6 +25,9 @@
 {"addr":"0x2ad72","name":"f33_nvm_family1_object_count","type":"u16"}
 {"addr":"0x2ad70","name":"f33_nvm_family0_object_count","type":"u16"}
 {"addr":"0xfebf0308","name":"f33_nvm_family0_status","type":"u8[32]"}
+{"addr":"0xfebf0328","name":"f33_nvm_family1_status","type":"u8[16]"}
+{"addr":"0xfebf1088","name":"f33_app_nvm_family1_status_xor55","type":"u8[16]"}
+{"addr":"0xfebf10ac","name":"f33_app_nvm_family1_status_xorAA","type":"u8[16]"}
 {"addr":"0xfebf0338","name":"f33_nvm_family0_completion","type":"u8[32]"}
 {"addr":"0xfebf0358","name":"f33_nvm_family1_completion","type":"u8[16]"}
 {"addr":"0xfebf0368","name":"f33_nvm_family0_selected_logical_handles","type":"u16[32]"}

@@ -3273,7 +3273,7 @@
 {"addr": "0x67d96", "name": "f33_nvm_classify_family1_pass", "status": "converted"}
 {"addr": "0x67e18", "name": "f33_nvm_family1_request_full", "status": "converted"}
 {"addr": "0x67e32", "name": "f33_nvm_previous_family1_request", "status": "converted"}
-{"addr": "0x67ede", "name": "f33_nvm_set_family1_record", "status": "unconvertible"}
+{"addr": "0x67ede", "name": "f33_nvm_set_family1_record", "status": "converted"}
 {"addr": "0x6805e", "name": "FUN_0006805e", "status": "converted"}
 {"addr": "0x6808e", "name": "FUN_0006808e", "status": "converted"}
 {"addr": "0x681aa", "name": "FUN_000681aa", "status": "converted"}

@@ -4860,3 +4860,116 @@ uint f33_nvm_enqueue_family1_read(uint object)
 }
 
 
+
+/* Reject low16 object>=16 before repair/recovery. Vote status with fallback12, recover indices,
+   then reject full or voted21 before source/descriptor-content reads. Inclusive write-kind scan and
+   changed-word copy precede placement as in family0. Tail duplicate republishes original voted
+   status; other admissions publish20. Opaque bytes stay at physical slots. No checksum, completion,
+   disabled-descriptor or busy gate; no normal rejection after copy. */
+
+uint f33_nvm_set_family1_record(uint object,uint *source)
+
+{
+  int iVar1;
+  int iVar2;
+  code cVar3;
+  int iVar4;
+  undefined8 uVar5;
+  uint uVar6;
+  uint uVar7;
+  uint uVar8;
+  uint uVar9;
+  code cVar10;
+  uint uVar11;
+  uint uVar12;
+  uint uVar13;
+  byte bStack_3a;
+  byte bStack_39;
+  uchar *puStack_38;
+  uchar *puStack_34;
+  uint *puStack_30;
+  
+  uVar5 = 0xfebeb800;
+  uVar12 = object & 0xffff;
+  if (uVar12 < f33_nvm_family1_object_count) {
+    puStack_34 = f33_nvm_family1_status;
+    puStack_38 = f33_app_nvm_family1_status_xor55;
+    puStack_30 = source;
+    uVar6 = f33_read_repair_redundant_u8
+                      (camry_host_addr(f33_nvm_family1_status + uVar12), camry_host_addr(f33_app_nvm_family1_status_xor55 + uVar12), camry_host_addr(f33_app_nvm_family1_status_xorAA + uVar12), '\x12');
+    f33_nvm_recover_family1_request_indices(&bStack_3a,&bStack_39);
+    uVar11 = (uint)bStack_3a;
+    uVar13 = (uint)bStack_39;
+    uVar7 = f33_nvm_family1_request_full(uVar11,uVar13);
+    iVar4 = (int)uVar5;
+    if ((uVar7 == 1) || (uVar6 == 0x21)) {
+      uVar12 = 0;
+    }
+    else {
+      uVar8 = f33_nvm_previous_family1_request(uVar11);
+      cVar10 = (code)0xff;
+      uVar9 = (uint)f33_nvm_family1_request_cell_count;
+      for (uVar7 = uVar9; uVar7 != 0; uVar7 = uVar7 - 1) {
+        iVar4 = uVar13 * 4 + (int)uVar5;
+        cVar3 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x4d8cu + (uint32_t)(iVar4)))));
+        if (((*((ushort *)camry_host_ptr((uint32_t)(iVar4 + 0x4d8e)))) == uVar12) &&
+           ((cVar3 == (code)0x22 || (cVar3 == (code)0x33)))) {
+          cVar10 = cVar3;
+        }
+        if ((uVar13 == uVar11) || (cVar10 != (code)0xff)) break;
+        uVar13 = f33_nvm_advance_family1_request_index((uchar)uVar13);
+        bStack_39 = (byte)uVar13;
+      }
+      uVar13 = f33_update_whole_words
+                         (((uint32_t *)camry_host_ptr((uint32_t)(f33_nvm_family1_ram_descriptors[uVar12].buffer))), puStack_30, 
+                          f33_nvm_family1_ram_descriptors[uVar12].payload_bytes);
+      iVar4 = (int)uVar5;
+      if ((uVar13 == 1) || (cVar10 == (code)0x22)) {
+        cVar10 = (code)0x22;
+      }
+      else {
+        cVar10 = (code)0x33;
+      }
+      uVar13 = (uint)bStack_39;
+      if (uVar13 == uVar8) {
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x4d8cu + (uint32_t)(uVar13 * 4 + iVar4))))) = cVar10;
+      }
+      else {
+        uVar6 = (uint)bStack_3a;
+        uVar7 = uVar6;
+        if (uVar13 != uVar6) {
+          for (; uVar7 = uVar6, uVar9 != 0; uVar9 = uVar9 - 1) {
+            uVar11 = f33_nvm_advance_family1_request_index((uchar)uVar13);
+            iVar4 = (int)uVar5;
+            uVar7 = uVar13;
+            if (uVar13 == uVar8) break;
+            iVar2 = uVar11 * 4 + iVar4;
+            iVar1 = uVar13 * 4 + iVar4;
+            cVar3 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x4d8cu + (uint32_t)(iVar2)))));
+            bStack_39 = (byte)uVar11;
+            (*((undefined2 *)camry_host_ptr((uint32_t)(iVar1 + 0x4d8e)))) = (*((undefined2 *)camry_host_ptr((uint32_t)(iVar2 + 0x4d8e))));
+            (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x4d8cu + (uint32_t)(iVar1))))) = cVar3;
+            uVar13 = uVar11;
+          }
+        }
+        iVar2 = uVar7 * 4 + iVar4;
+        uVar6 = 0x20;
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x4d8cu + (uint32_t)(iVar2))))) = cVar10;
+        (*((short *)camry_host_ptr((uint32_t)(iVar2 + 0x4d8e)))) = (short)object;
+        uVar13 = f33_nvm_advance_family1_request_index((uchar)uVar7);
+        bStack_3a = (byte)uVar13;
+      }
+      f33_publish_redundant_u8
+                ((uchar)uVar6,puStack_34 + uVar12,puStack_38 + uVar12,
+                 f33_app_nvm_family1_status_xorAA + uVar12);
+      uVar12 = 1;
+    }
+    (*((byte *)camry_host_ptr((uint32_t)(iVar4 + 0x4e86)))) = bStack_3a;
+  }
+  else {
+    uVar12 = 0;
+  }
+  return uVar12;
+}
+
+
