@@ -593,7 +593,7 @@
 {"addr": "0x34028", "name": "f33_step_mode600_stimulus_fit", "status": "converted"}
 {"addr": "0x343f0", "name": "f33_begin_mode600_stimulus_fit", "status": "equivalent", "form": "corpus", "signature": "uint f33_begin_mode600_stimulus_fit(void)"}
 {"addr": "0x34406", "name": "f33_return_only_stub_34406", "status": "equivalent", "form": "corpus", "signature": "void f33_return_only_stub_34406(void)"}
-{"addr": "0x34408", "name": "f33_restore_fit_coefficients", "status": "unconvertible"}
+{"addr": "0x34408", "name": "f33_restore_fit_coefficients", "status": "converted"}
 {"addr": "0x344f4", "name": "f33_check_retained_fit_bounds", "status": "equivalent", "form": "corpus", "signature": "uint f33_check_retained_fit_bounds(void)"}
 {"addr": "0x3465a", "name": "f33_reset_retained_fit_coefficients", "status": "equivalent", "form": "corpus", "signature": "uint f33_reset_retained_fit_coefficients(void)"}
 {"addr": "0x346b2", "name": "f33_validate_or_default_retained_fit", "status": "equivalent", "form": "corpus", "signature": "uint f33_validate_or_default_retained_fit(void)"}
@@ -941,7 +941,7 @@
 {"addr": "0x3acf6", "name": "f33_return_only_stub_3acf6", "status": "equivalent", "form": "corpus", "signature": "void f33_return_only_stub_3acf6(void)"}
 {"addr": "0x3acf8", "name": "FUN_0003acf8", "status": "equivalent", "form": "corpus", "signature": "int FUN_0003acf8(void)"}
 {"addr": "0x3ad0c", "name": "f33_should_zero_ecu_source3_thermal_seed", "status": "converted"}
-{"addr": "0x3ad72", "name": "f33_restore_ecu_source3_thermal_model", "status": "unconvertible"}
+{"addr": "0x3ad72", "name": "f33_restore_ecu_source3_thermal_model", "status": "converted"}
 {"addr": "0x3ae10", "name": "f33_update_ecu_source3_thermal_estimate", "status": "converted"}
 {"addr": "0x3ae66", "name": "FUN_0003ae66", "status": "equivalent", "form": "corpus", "signature": "int FUN_0003ae66(short param_1,short param_2)"}
 {"addr": "0x3aeb6", "name": "f33_return_only_stub_3aeb6", "status": "equivalent", "form": "corpus", "signature": "void f33_return_only_stub_3aeb6(void)"}

@@ -343,6 +343,92 @@ void f33_return_only_stub_34406(void)
   return;
 }
 
+/* Get64-byte0202 record and publish unpacked centers/gains/angles only when getter returns10, under
+   existing PMR helper. Does not itself validate marker or numeric bounds; caller346F0 owns
+   marker/status and346B2 owns bounds/defaulting. */
+
+uint f33_restore_fit_coefficients(void)
+
+{
+  uint *puVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  undefined4 uVar4;
+  char *pcVar5;
+  uint local_44 [2];
+  undefined2 uStack_3c;
+  undefined2 uStack_3a;
+  undefined2 uStack_38;
+  undefined2 uStack_36;
+  undefined2 uStack_34;
+  undefined2 uStack_32;
+  undefined2 uStack_30;
+  undefined2 uStack_2e;
+  undefined2 uStack_2c;
+  undefined2 uStack_2a;
+  undefined2 uStack_28;
+  undefined2 uStack_26;
+  undefined2 uStack_24;
+  undefined2 uStack_22;
+  undefined2 uStack_20;
+  undefined2 uStack_1e;
+  undefined2 uStack_1c;
+  undefined2 uStack_1a;
+  undefined2 uStack_18;
+  undefined2 uStack_16;
+  undefined2 uStack_14;
+  undefined2 uStack_12;
+  undefined2 uStack_10;
+  undefined2 uStack_e;
+  undefined2 uStack_c;
+  undefined2 uStack_a;
+  undefined2 uStack_8;
+  
+  puVar2 = 0xfebeb800u;
+  puVar1 = local_44;
+  pcVar5 = (undefined *)camry_host_ptr(0x21058u);
+  do {
+    uVar4 = *(undefined4 *)pcVar5;
+    pcVar5 = pcVar5 + 4;
+    *puVar1 = uVar4;
+    puVar1 = puVar1 + 1;
+  } while ((uintptr_t)(pcVar5)!=(uintptr_t)((undefined *)camry_host_ptr(0x21098u)));
+  uVar3 = f33_nvm_get_record(0x202, camry_host_addr(local_44));
+  if (uVar3 == 0x10) {
+    uVar3 = f33_priority_mask_enter(0xffc0);
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb284u + (uint32_t)((int)puVar2)))))) = uStack_3c;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb286u + (uint32_t)((int)puVar2)))))) = uStack_3a;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb290u + (uint32_t)((int)puVar2)))))) = uStack_38;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb292u + (uint32_t)((int)puVar2)))))) = uStack_36;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb288u + (uint32_t)((int)puVar2)))))) = uStack_34;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb28au + (uint32_t)((int)puVar2)))))) = uStack_32;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb294u + (uint32_t)((int)puVar2)))))) = uStack_30;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb296u + (uint32_t)((int)puVar2)))))) = uStack_2e;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb28cu + (uint32_t)((int)puVar2)))))) = uStack_2c;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb28eu + (uint32_t)((int)puVar2)))))) = uStack_2a;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb298u + (uint32_t)((int)puVar2)))))) = uStack_28;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb29au + (uint32_t)((int)puVar2)))))) = uStack_26;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb29cu + (uint32_t)((int)puVar2)))))) = uStack_24;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb29eu + (uint32_t)((int)puVar2)))))) = uStack_22;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb2a8u + (uint32_t)((int)puVar2)))))) = uStack_20;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb2aau + (uint32_t)((int)puVar2)))))) = uStack_1e;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb2b4u + (uint32_t)((int)puVar2)))))) = uStack_1c;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb2a0u + (uint32_t)((int)puVar2)))))) = uStack_1a;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb2a2u + (uint32_t)((int)puVar2)))))) = uStack_18;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb2acu + (uint32_t)((int)puVar2)))))) = uStack_16;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb2aeu + (uint32_t)((int)puVar2)))))) = uStack_14;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb2b6u + (uint32_t)((int)puVar2)))))) = uStack_12;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb2a4u + (uint32_t)((int)puVar2)))))) = uStack_10;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb2a6u + (uint32_t)((int)puVar2)))))) = uStack_e;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb2b0u + (uint32_t)((int)puVar2)))))) = uStack_c;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb2b2u + (uint32_t)((int)puVar2)))))) = uStack_a;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb2b8u + (uint32_t)((int)puVar2)))))) = uStack_8;
+    f33_priority_mask_restore(uVar3);
+  }
+  return uVar3;
+}
+
+
 
 
 /* Return5A for invalid retained6A84..6AB8,0 valid. Unlike permissive foreground candidate check,

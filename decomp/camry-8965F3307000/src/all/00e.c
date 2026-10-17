@@ -5463,6 +5463,68 @@ LAB_0003ad54:
   return uVar2;
 }
 
+/* Seed56-byte local from21220 then get record6; use fields24/26/28/2A and marker32 (hex offsets).
+   Status!=10 or markerA55A uses zero ROM terms. Otherwise conditional zero requires an absent7BF8
+   byte and3AD0C(marker)==5A: marker0 and selected difference>32000. Source3 restores record6
+   fields24/26/28/2A with marker32 and common strict32000 conditional-zero contract. Exact zero
+   gains seed zero poles independently of accepted contributions; offset path still runs. Mirror
+   unchanged and physical persistence unclaimed. */
+
+void f33_restore_ecu_source3_thermal_model(void)
+
+{
+  uint *puVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  undefined4 uVar4;
+  int iVar5;
+  int iVar6;
+  int iVar7;
+  int iVar8;
+  uchar *puVar9;
+  uint local_4c [9];
+  short sStack_28;
+  short sStack_26;
+  short sStack_24;
+  short sStack_22;
+  ushort uStack_1a;
+  
+  puVar2 = 0xfebeb800u;
+  puVar1 = local_4c;
+  puVar9 = (undefined *)camry_host_ptr(0x21220u);
+  do {
+    uVar4 = *(undefined4 *)puVar9;
+    puVar9 = puVar9 + 4;
+    *puVar1 = uVar4;
+    puVar1 = puVar1 + 1;
+  } while ((uintptr_t)(puVar9)!=(uintptr_t)((undefined *)camry_host_ptr(0x21258u)));
+  uVar3 = f33_nvm_get_record(6, camry_host_addr(local_4c));
+  iVar8 = (int)sStack_28;
+  iVar6 = (int)sStack_24;
+  iVar7 = (int)sStack_26;
+  iVar5 = (int)sStack_22;
+  if ((uVar3 == 0x10) && (uStack_1a != 0xa55a)) {
+    if ((((((*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x3c08)))) & 0xff) == 0) ||
+         (((*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x3c08)))) & 0xff00) == 0)) && (uStack_1a != 0x5aa5)) &&
+       (uVar3 = f33_should_zero_ecu_source3_thermal_seed(uStack_1a), uVar3 == 0x5a)) {
+      iVar8 = 0;
+      iVar6 = 0;
+      iVar7 = 0;
+      iVar5 = 0;
+    }
+  }
+  else {
+    iVar8 = (int)DAT_0002b532;
+    iVar6 = (int)DAT_0002b54a;
+    iVar7 = (int)DAT_0002b534;
+    iVar5 = (int)DAT_0002b54c;
+  }
+  FUN_0003af8a(iVar8,iVar7);
+  FUN_0003b0a2(iVar6,iVar5);
+  return;
+}
+
+
 
 
 /* Uninitialized6FE0 requires7DCC/7BF6 both5A and restore3AD72. Otherwise update both branches and

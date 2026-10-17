@@ -6681,6 +6681,71 @@ def _rewrite_dat_scalars(code: str) -> str:
     return re.sub(r"\b_DAT_([0-9A-Fa-f]+)\b", replace, code)
 
 
+def _symbols_by_addr() -> dict[int, dict]:
+    global _SYMBOLS_BY_ADDR
+    if _SYMBOLS_BY_ADDR is None:
+        _SYMBOLS_BY_ADDR = {int(row["addr"], 16): row for row in load_symbols()}
+    return _SYMBOLS_BY_ADDR
+
+
+def _tp_word_copy(entry: int) -> tuple[int, int] | None:
+    """Bytes of a dword copy from tp+disp for a whole number of words.
+
+    Ghidra renders the end address as a string literal. The copy is `movea`
+    from r5, then `addi length`.
+    """
+    from tools.camry_lift import load_image, walk_symbol
+
+    row = _symbols_by_addr().get(entry)
+    if row is None:
+        return None
+    fn = walk_symbol(load_image(), row)
+    if fn is None:
+        return None
+    for index, inst in enumerate(fn.insts):
+        match = re.fullmatch(r"camry_movea\((\d+), 5, (-?\d+)\);", inst.stmt or "")
+        if match is None:
+            continue
+        base = int(match.group(1))
+        disp = int(match.group(2))
+        for follow in fn.insts[index + 1:index + 8]:
+            added = re.fullmatch(r"camry_addi\((\d+), (\d+), (\d+)\);", follow.stmt or "")
+            if added is None or int(added.group(2)) != base:
+                continue
+            length = int(added.group(3))
+            if length <= 0 or length % 4 or length > 0x400:
+                return None
+            return (_RUNTIME_TP + disp) & 0xFFFFFFFF, length
+    return None
+
+
+def _rewrite_string_word_copies(code: str) -> str:
+    """A string compared as a pointer is the end address of a tp-relative copy."""
+    if '(uintptr_t)("' not in code:
+        return code
+    name = _c_signature(code).split("(", 1)[0].split()[-1].lstrip("*")
+    entry = _function_entries().get(name)
+    if entry is None:
+        return code
+    found = _tp_word_copy(entry)
+    if found is None:
+        return code
+    start, length = found
+    end = (start + length) & 0xFFFFFFFF
+    code = re.sub(
+        r'=\s*""(?=\s*;)',
+        f"= (undefined *)camry_host_ptr(0x{start:x}u)",
+        code,
+        count=1,
+    )
+    return re.sub(
+        r'\(uintptr_t\)\("(?:[^"\\]|\\.)*"\)',
+        f"(uintptr_t)((undefined *)camry_host_ptr(0x{end:x}u))",
+        code,
+        count=1,
+    )
+
+
 def _rewrite_terminal_labels(code: str) -> str:
     """A label as the last statement of a block needs an empty statement after it."""
     return re.sub(
@@ -6743,6 +6808,7 @@ def _rewrite_body(code: str) -> str:
     code = _rewrite_signed_byte_compares(code)
     code = _rewrite_dat_scalars(code)
     code = _rewrite_address_parameters(code)
+    code = _rewrite_string_word_copies(code)
     code = _rewrite_terminal_labels(code)
     return code
 
@@ -6883,6 +6949,7 @@ def _rewrite_named_addresses(code: str, *, pointer_return: bool = False) -> str:
 
 _FUNCTION_ENTRIES: dict[str, int] | None = None
 _POINTER_RETURNS: set[str] | None = None
+_SYMBOLS_BY_ADDR: dict[int, dict] | None = None
 
 
 def _corpus_functions() -> list[dict]:
