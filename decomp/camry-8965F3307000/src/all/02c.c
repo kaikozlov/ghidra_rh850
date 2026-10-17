@@ -636,6 +636,27 @@ LAB_000b1bf6:
 
 
 
+/* Index by low8(request_id), without a local bounds check. Preserve acknowledged5AA5, otherwise
+   publish pendingA55A. Return the zero-extended status in full R10; this return is consumed byB1546
+   and is not void. Materialize low-byte request slot asA55A unless already5AA5, returning full
+   zero-extended status in r10. Native reconciliation consumes the real result; correcting false
+   void prototype restores caller dataflow. */
+
+uint f33_materialize_mode_request(uint request_id)
+
+{
+  undefined *puVar1;
+  
+  puVar1 = ((undefined *)camry_host_ptr((uint32_t)((uint)*(ushort *)(((undefined *)camry_host_ptr(0xfebeb0a8u)) + (request_id & 0xff) * 2))));
+  if ((uintptr_t)(puVar1)!=(uintptr_t)(((undefined *)camry_host_ptr((uint32_t)(0x5aa5))))) {
+    puVar1 = ((undefined *)camry_host_ptr(0xa55au));
+    *(ushort *)(((undefined *)camry_host_ptr(0xfebeb0a8u)) + (request_id & 0xff) * 2) = 0xa55a;
+  }
+  return (uint)camry_host_addr(puVar1);
+}
+
+
+
 /* Index low8(request_id), without a local bounds check. Clear only5AA5; preserve pendingA55A and
    every other value. Cancellation after materialization therefore does not revoke an unaccepted
    request. Clear only acknowledged5AA5 slots. Cancellation does not revoke an already materialized

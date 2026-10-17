@@ -1152,6 +1152,54 @@ def _rewrite_pointer_tables(code: str) -> str:
     return "".join(pieces)
 
 
+def _is_type_cast(inner: str) -> bool:
+    parts = [
+        part for part in inner.replace("*", " ").split()
+        if part not in {"const", "volatile", "unsigned", "signed", "struct"}
+    ]
+    return len(parts) == 1 and parts[0] in _INT_TYPES
+
+
+def _postfix_end(code: str, index: int) -> int:
+    while True:
+        index = _skip_space(code, index)
+        if index >= len(code):
+            return index
+        if code[index] == "(":
+            index = _match_paren(code, index) + 1
+            continue
+        if code[index] == "[":
+            index = _match_bracket(code, index) + 1
+            continue
+        arrow = code.startswith("->", index)
+        if arrow or (code[index] == "." and not code.startswith("..", index)):
+            start = _skip_space(code, index + (2 if arrow else 1))
+            if start < len(code) and (code[start].isalpha() or code[start] == "_"):
+                index = _operand_end(code, start)
+                continue
+        return index
+
+
+def _unary_operand_end(code: str, index: int) -> int | None:
+    """End of the operand after a `(integer-type)` cast."""
+    index = _skip_space(code, index)
+    if index >= len(code):
+        return None
+    if code[index] in "*&":
+        return _unary_operand_end(code, index + 1)
+    if code[index] == "(":
+        end = _match_paren(code, index) + 1
+        if _is_type_cast(code[index + 1:end - 1]):
+            return _unary_operand_end(code, end)
+        return _postfix_end(code, end)
+    if code[index].isalpha() or code[index] == "_":
+        return _postfix_end(code, _operand_end(code, index))
+    number = re.match(r"0x[0-9A-Fa-f]+u?|\d+", code[index:])
+    if number is None:
+        return None
+    return index + number.end()
+
+
 def _rewrite_int_to_pointer(code: str, pointers: set[str]) -> str:
     pieces: list[str] = []
     cursor = 0
@@ -1180,7 +1228,16 @@ def _rewrite_int_to_pointer(code: str, pointers: set[str]) -> str:
             break
         if code[after] == "(":
             end = _match_paren(code, after) + 1
-            expr = code[after + 1:end - 1]
+            inner = code[after + 1:end - 1]
+            if _is_type_cast(inner):
+                operand_end = _unary_operand_end(code, end)
+                if operand_end is None or operand_end <= end:
+                    search = star + 2
+                    continue
+                expr = code[after:operand_end].strip()
+                end = operand_end
+            else:
+                expr = inner
         elif code[after].isalpha() or code[after] == "_":
             end = _operand_end(code, after)
             # `(undefined *)name()` casts the return value. The call binds tighter

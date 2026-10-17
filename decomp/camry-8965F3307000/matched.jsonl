@@ -684,7 +684,7 @@
 {"addr": "0x35dc0", "name": "f33_return_only_stub_35dc0", "status": "converted"}
 {"addr": "0x35dc2", "name": "f33_reset_owner9_budget_limit_state", "status": "converted"}
 {"addr": "0x35de6", "name": "f33_map_owner9_budget_limit", "status": "converted"}
-{"addr": "0x35e06", "name": "f33_follow_owner9_limit_request", "status": "unconvertible"}
+{"addr": "0x35e06", "name": "f33_follow_owner9_limit_request", "status": "converted"}
 {"addr": "0x35ee0", "name": "f33_publish_owner9_budget_limit", "status": "converted"}
 {"addr": "0x35fac", "name": "f33_return_only_stub_35fac", "status": "converted"}
 {"addr": "0x35fae", "name": "f33_initialize_terminal_output_ramp", "status": "converted"}
@@ -5832,7 +5832,7 @@
 {"addr": "0xb176e", "name": "f33_qualify_mode_restart_readiness", "status": "converted"}
 {"addr": "0xb17ee", "name": "f33_request_foreground_restart_from_mode", "status": "converted"}
 {"addr": "0xb1808", "name": "f33_advance_application_mode", "status": "converted"}
-{"addr": "0xb1bfe", "name": "f33_materialize_mode_request", "status": "unconvertible"}
+{"addr": "0xb1bfe", "name": "f33_materialize_mode_request", "status": "converted"}
 {"addr": "0xb1c1a", "name": "f33_clear_acknowledged_mode_request", "status": "converted"}
 {"addr": "0xb1c32", "name": "f33_mode_hook_b1c32", "status": "converted"}
 {"addr": "0xb1c34", "name": "FUN_000b1c34", "status": "converted"}
@@ -6309,11 +6309,11 @@
 {"addr": "0xb9bc0", "name": "f33_return_only_stub_b9bc0", "status": "converted"}
 {"addr": "0xb9bc2", "name": "f33_refresh_profile_scaled_word", "status": "converted"}
 {"addr": "0xb9bf0", "name": "f33_refresh_profile_received_composite", "status": "converted"}
-{"addr": "0xb9c28", "name": "f33_accumulate_profile_unsigned_source", "status": "unconvertible"}
-{"addr": "0xb9cbe", "name": "f33_accumulate_profile_signed_source1", "status": "unconvertible"}
-{"addr": "0xb9d5e", "name": "f33_accumulate_profile_signed_source2", "status": "unconvertible"}
-{"addr": "0xb9dfc", "name": "f33_accumulate_profile_scaled_feedback", "status": "unconvertible"}
-{"addr": "0xb9eaa", "name": "f33_accumulate_profile_signed_source3", "status": "unconvertible"}
+{"addr": "0xb9c28", "name": "f33_accumulate_profile_unsigned_source", "status": "converted"}
+{"addr": "0xb9cbe", "name": "f33_accumulate_profile_signed_source1", "status": "converted"}
+{"addr": "0xb9d5e", "name": "f33_accumulate_profile_signed_source2", "status": "converted"}
+{"addr": "0xb9dfc", "name": "f33_accumulate_profile_scaled_feedback", "status": "converted"}
+{"addr": "0xb9eaa", "name": "f33_accumulate_profile_signed_source3", "status": "converted"}
 {"addr": "0xb9f48", "name": "f33_select_profile_source_extrema", "status": "converted"}
 {"addr": "0xb9f8e", "name": "f33_update_control_profile_aggregates", "status": "converted"}
 {"addr": "0xb9fbc", "name": "f33_age_control_profile_source_latch", "status": "converted"}

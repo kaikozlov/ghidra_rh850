@@ -3048,6 +3048,345 @@ void f33_refresh_profile_received_composite(void)
 
 
 
+/* While4A3==5A increment narrowed unsigned16 count then cap60000, add unsignedF1B6 into unsigned32
+   sum capped900000000, form integer mean and signed/unsigned maximum. Rejection clears this
+   aggregate; no new receive-generation requirement is imposed. */
+
+void f33_accumulate_profile_unsigned_source(uchar slot)
+
+{
+  int iVar1;
+  int iVar2;
+  uint uVar3;
+  ushort uVar4;
+  undefined2 uVar5;
+  undefined *puVar7;
+  uint uVar6;
+  
+  uVar3 = (uint)slot;
+  iVar1 = uVar3 * 2;
+  iVar2 = uVar3 * 4;
+  if (f33_profile_counter_pair_qualification[uVar3] == 'Z') {
+    puVar7 = ((undefined *)camry_host_ptr((uint32_t)((uint)(ushort)(*(short *)(((undefined *)camry_host_ptr(0xfebeb776u)) + iVar1) + 1))));
+    if ((uintptr_t)(((undefined *)camry_host_ptr(0xea5fu)))<(uintptr_t)(puVar7)) {
+      puVar7 = ((undefined *)camry_host_ptr(0xea60u));
+    }
+    uVar3 = (uint)DAT_febef1b6 + *(int *)(((undefined *)camry_host_ptr(0xfebebb24u)) + iVar2);
+    if (899999999 < uVar3) {
+      uVar3 = 900000000;
+    }
+    uVar6 = uVar3;
+    if ((uintptr_t)(puVar7)!=(uintptr_t)((undefined *)0x0)) {
+      uVar6 = uVar3 / (uint)camry_host_addr(puVar7);
+    }
+    uVar5 = (undefined2)uVar6;
+    uVar4 = DAT_febef1b6;
+    if ((uint)DAT_febef1b6 <= (uint)*(ushort *)(((undefined *)camry_host_ptr(0xfebeb78au)) + iVar1)) {
+      uVar4 = *(ushort *)(((undefined *)camry_host_ptr(0xfebeb78au)) + iVar1);
+    }
+  }
+  else {
+    puVar7 = (undefined *)0x0;
+    uVar3 = 0;
+    uVar5 = 0;
+    uVar4 = 0;
+  }
+  *(short *)(((undefined *)camry_host_ptr(0xfebeb794u)) + iVar1) = (short)puVar7;
+  *(short *)(((undefined *)camry_host_ptr(0xfebeb776u)) + iVar1) = (short)puVar7;
+  *(uint *)(((undefined *)camry_host_ptr(0xfebebb10u)) + iVar2) = uVar3;
+  *(undefined2 *)(((undefined *)camry_host_ptr(0xfebeb780u)) + iVar1) = uVar5;
+  *(uint *)(((undefined *)camry_host_ptr(0xfebebb24u)) + iVar2) = uVar3;
+  *(ushort *)(((undefined *)camry_host_ptr(0xfebeb78au)) + iVar1) = uVar4;
+  return;
+}
+
+
+
+/* While4A3==5A increment narrowed unsigned16 count then cap60000, add signedF1C6 into signed32 sum
+   clamped\u00b11638339, form integer mean and signed/unsigned maximum. Rejection clears this
+   aggregate; no new receive-generation requirement is imposed. While4A3==5A increment narrowed
+   unsigned16 count then cap60000, add signedF1C6 into signed32 sum clamped±1638339, form integer
+   mean and signed/unsigned maximum. */
+
+void f33_accumulate_profile_signed_source1(uchar slot)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  short sVar4;
+  undefined *puVar5;
+  uint uVar6;
+  int iVar7;
+  short sVar8;
+  undefined2 uVar9;
+  undefined *puVar11;
+  undefined *puVar10;
+  
+  uVar6 = (uint)slot;
+  iVar2 = uVar6 * 2;
+  iVar3 = uVar6 * 4;
+  sVar4 = *(short *)(((undefined *)camry_host_ptr(0xfebeb7bcu)) + iVar2);
+  if (f33_profile_counter_pair_qualification[uVar6] == 'Z') {
+    iVar7 = (int)DAT_febef1c6;
+    puVar11 = ((undefined *)camry_host_ptr((uint32_t)((uint)(ushort)(*(short *)(((undefined *)camry_host_ptr(0xfebeb7a8u)) + iVar2) + 1))));
+    if ((uintptr_t)(((undefined *)camry_host_ptr(0xea5fu)))<(uintptr_t)(puVar11)) {
+      puVar11 = ((undefined *)camry_host_ptr(0xea60u));
+    }
+    puVar5 = ((undefined *)camry_host_ptr((uint32_t)(iVar7 + *(int *)(((undefined *)camry_host_ptr(0xfebebb4cu)) + iVar3))));
+    if ((int)camry_host_addr((((undefined *)camry_host_ptr(0xffe7003du)) + (int)puVar5)) < 0 ==
+        ((int)camry_host_addr(puVar5) < 0 && -1 < (int)camry_host_addr((((undefined *)camry_host_ptr(0xffe7003du)) + (int)puVar5)))) {
+      puVar5 = ((undefined *)camry_host_ptr((uint32_t)(0x18ffc3)));
+    }
+    if ((int)camry_host_addr((puVar5 + 0x18ffc3)) < 0 != (-1 < (int)camry_host_addr(puVar5) && (int)camry_host_addr((puVar5 + 0x18ffc3)) < 0)) {
+      puVar5 = ((undefined *)camry_host_ptr(0xffe7003du));
+    }
+    puVar10 = puVar5;
+    if ((uintptr_t)(puVar11)!=(uintptr_t)((undefined *)0x0)) {
+      if ((uintptr_t)(puVar5)==(uintptr_t)(((undefined *)camry_host_ptr((uint32_t)(0x80000000))))&&(uintptr_t)(puVar11)==(uintptr_t)(((undefined *)camry_host_ptr((uint32_t)(0xffffffff))))) {
+        puVar10 = (undefined *)0x0;
+      }
+      else {
+        puVar10 = ((undefined *)camry_host_ptr((uint32_t)((int)camry_host_addr(puVar5) / (int)camry_host_addr(puVar11))));
+      }
+    }
+    uVar9 = SUB42(puVar10,0);
+    iVar1 = sVar4 - iVar7;
+    sVar8 = DAT_febef1c6;
+    if (iVar1 < 0 == (sVar4 < 0 != iVar7 < 0 && iVar7 < 0 == iVar1 < 0)) {
+      sVar8 = sVar4;
+    }
+  }
+  else {
+    puVar11 = (undefined *)0x0;
+    puVar5 = (undefined *)0x0;
+    uVar9 = 0;
+    sVar8 = 0;
+  }
+  *(short *)(((undefined *)camry_host_ptr(0xfebeb79eu)) + iVar2) = (short)puVar11;
+  *(short *)(((undefined *)camry_host_ptr(0xfebeb7a8u)) + iVar2) = (short)puVar11;
+  *(undefined **)(((undefined *)camry_host_ptr(0xfebebb38u)) + iVar3) = puVar5;
+  *(undefined2 *)(((undefined *)camry_host_ptr(0xfebeb7b2u)) + iVar2) = uVar9;
+  *(undefined **)(((undefined *)camry_host_ptr(0xfebebb4cu)) + iVar3) = puVar5;
+  *(short *)(((undefined *)camry_host_ptr(0xfebeb7bcu)) + iVar2) = sVar8;
+  return;
+}
+
+
+
+/* While4A3==5A increment narrowed unsigned16 count then cap60000, add signedF1C8 into signed32 sum
+   clamped\u00b11638339, form integer mean and signed/unsigned maximum. Rejection clears this
+   aggregate; no new receive-generation requirement is imposed. While4A3==5A increment narrowed
+   unsigned16 count then cap60000, add signedF1C8 into signed32 sum clamped±1638339, form integer
+   mean and signed/unsigned maximum. */
+
+void f33_accumulate_profile_signed_source2(uchar slot)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  short sVar4;
+  undefined *puVar5;
+  uint uVar6;
+  int iVar7;
+  short sVar8;
+  undefined2 uVar9;
+  undefined *puVar11;
+  undefined *puVar10;
+  
+  uVar6 = (uint)slot;
+  iVar2 = uVar6 * 2;
+  iVar3 = uVar6 * 4;
+  sVar4 = *(short *)(((undefined *)camry_host_ptr(0xfebeb7e4u)) + iVar2);
+  if (f33_profile_counter_pair_qualification[uVar6] == 'Z') {
+    iVar7 = (int)DAT_febef1c8;
+    puVar11 = ((undefined *)camry_host_ptr((uint32_t)((uint)(ushort)(*(short *)(((undefined *)camry_host_ptr(0xfebeb7d0u)) + iVar2) + 1))));
+    if ((uintptr_t)(((undefined *)camry_host_ptr(0xea5fu)))<(uintptr_t)(puVar11)) {
+      puVar11 = ((undefined *)camry_host_ptr(0xea60u));
+    }
+    puVar5 = ((undefined *)camry_host_ptr((uint32_t)(iVar7 + *(int *)(((undefined *)camry_host_ptr(0xfebebb74u)) + iVar3))));
+    if ((int)camry_host_addr((((undefined *)camry_host_ptr(0xffe7003du)) + (int)puVar5)) < 0 ==
+        ((int)camry_host_addr(puVar5) < 0 && -1 < (int)camry_host_addr((((undefined *)camry_host_ptr(0xffe7003du)) + (int)puVar5)))) {
+      puVar5 = ((undefined *)camry_host_ptr((uint32_t)(0x18ffc3)));
+    }
+    if ((int)camry_host_addr((puVar5 + 0x18ffc3)) < 0 != (-1 < (int)camry_host_addr(puVar5) && (int)camry_host_addr((puVar5 + 0x18ffc3)) < 0)) {
+      puVar5 = ((undefined *)camry_host_ptr(0xffe7003du));
+    }
+    puVar10 = puVar5;
+    if ((uintptr_t)(puVar11)!=(uintptr_t)((undefined *)0x0)) {
+      if ((uintptr_t)(puVar5)==(uintptr_t)(((undefined *)camry_host_ptr((uint32_t)(0x80000000))))&&(uintptr_t)(puVar11)==(uintptr_t)(((undefined *)camry_host_ptr((uint32_t)(0xffffffff))))) {
+        puVar10 = (undefined *)0x0;
+      }
+      else {
+        puVar10 = ((undefined *)camry_host_ptr((uint32_t)((int)camry_host_addr(puVar5) / (int)camry_host_addr(puVar11))));
+      }
+    }
+    uVar9 = SUB42(puVar10,0);
+    iVar1 = sVar4 - iVar7;
+    sVar8 = DAT_febef1c8;
+    if (iVar1 < 0 == (sVar4 < 0 != iVar7 < 0 && iVar7 < 0 == iVar1 < 0)) {
+      sVar8 = sVar4;
+    }
+  }
+  else {
+    puVar11 = (undefined *)0x0;
+    puVar5 = (undefined *)0x0;
+    uVar9 = 0;
+    sVar8 = 0;
+  }
+  *(short *)(((undefined *)camry_host_ptr(0xfebeb7c6u)) + iVar2) = (short)puVar11;
+  *(short *)(((undefined *)camry_host_ptr(0xfebeb7d0u)) + iVar2) = (short)puVar11;
+  *(undefined **)(((undefined *)camry_host_ptr(0xfebebb60u)) + iVar3) = puVar5;
+  *(undefined2 *)(((undefined *)camry_host_ptr(0xfebeb7dau)) + iVar2) = uVar9;
+  *(undefined **)(((undefined *)camry_host_ptr(0xfebebb74u)) + iVar3) = puVar5;
+  *(short *)(((undefined *)camry_host_ptr(0xfebeb7e4u)) + iVar2) = sVar8;
+  return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x000b9e28) */
+/* While4A3==5A accumulate signed B054*1000/256 with sum clamped\u00b175000000, count capped60000
+   and truncated signed mean; maximum compares narrowed signed16 scaled source. Rejection clears
+   aggregate. While4A3==5A accumulate signed B054*1000/256 with sum clamped±75000000, count
+   capped60000 and truncated signed mean; */
+
+void f33_accumulate_profile_scaled_feedback(uchar slot)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  uint uVar4;
+  int iVar5;
+  undefined2 uVar6;
+  int iVar7;
+  undefined2 uVar9;
+  undefined *puVar11;
+  int iVar8;
+  int iVar10;
+  
+  uVar4 = (uint)slot;
+  iVar1 = uVar4 * 2;
+  iVar2 = uVar4 * 4;
+  iVar8 = (DAT_febeb054 * 1000) / 0x100;
+  iVar7 = (int)*(short *)(((undefined *)camry_host_ptr(0xfebeb834u)) + iVar1);
+  if (f33_profile_counter_pair_qualification[uVar4] == 'Z') {
+    puVar11 = ((undefined *)camry_host_ptr((uint32_t)((uint)(ushort)(*(short *)(((undefined *)camry_host_ptr(0xfebeb820u)) + iVar1) + 1))));
+    iVar5 = (int)(short)iVar8;
+    if ((uintptr_t)(((undefined *)camry_host_ptr(0xea5fu)))<(uintptr_t)(puVar11)) {
+      puVar11 = ((undefined *)camry_host_ptr(0xea60u));
+    }
+    iVar3 = iVar8 + *(int *)(((undefined *)camry_host_ptr(0xfebebbc4u)) + iVar2);
+    if (iVar3 + -75000000 < 0 == (iVar3 < 0 && -1 < iVar3 + -75000000)) {
+      iVar3 = 75000000;
+    }
+    if (iVar3 + 75000000 < 0 != (-1 < iVar3 && iVar3 + 75000000 < 0)) {
+      iVar3 = -75000000;
+    }
+    iVar10 = iVar3;
+    if ((uintptr_t)(puVar11)!=(uintptr_t)((undefined *)0x0)) {
+      if (iVar3 == -0x80000000 &&(uintptr_t)(puVar11)==(uintptr_t)(((undefined *)camry_host_ptr((uint32_t)(0xffffffff))))) {
+        iVar10 = 0;
+      }
+      else {
+        iVar10 = iVar3 / (int)camry_host_addr(puVar11);
+      }
+    }
+    uVar9 = (undefined2)iVar10;
+    if (iVar7 - iVar5 < 0 == (iVar7 < 0 != iVar5 < 0 && iVar5 < 0 == iVar7 - iVar5 < 0)) {
+      iVar8 = iVar7;
+    }
+    uVar6 = (undefined2)iVar8;
+  }
+  else {
+    puVar11 = (undefined *)0x0;
+    iVar3 = 0;
+    uVar9 = 0;
+    uVar6 = 0;
+  }
+  *(short *)(((undefined *)camry_host_ptr(0xfebeb816u)) + iVar1) = (short)puVar11;
+  *(short *)(((undefined *)camry_host_ptr(0xfebeb820u)) + iVar1) = (short)puVar11;
+  *(int *)(((undefined *)camry_host_ptr(0xfebebbb0u)) + iVar2) = iVar3;
+  *(undefined2 *)(((undefined *)camry_host_ptr(0xfebeb82au)) + iVar1) = uVar9;
+  *(int *)(((undefined *)camry_host_ptr(0xfebebbc4u)) + iVar2) = iVar3;
+  *(undefined2 *)(((undefined *)camry_host_ptr(0xfebeb834u)) + iVar1) = uVar6;
+  return;
+}
+
+
+
+/* While4A3==5A increment narrowed unsigned16 count then cap60000, add signedF1CA into signed32 sum
+   clamped\u00b1368852, form integer mean and signed/unsigned maximum. Rejection clears this
+   aggregate; no new receive-generation requirement is imposed. While4A3==5A increment narrowed
+   unsigned16 count then cap60000, add signedF1CA into signed32 sum clamped±368852, form integer
+   mean and signed/unsigned maximum. */
+
+void f33_accumulate_profile_signed_source3(uchar slot)
+
+{
+  int iVar1;
+  int iVar2;
+  short sVar3;
+  int iVar4;
+  uint uVar5;
+  int iVar6;
+  short sVar7;
+  undefined2 uVar8;
+  undefined *puVar10;
+  int iVar9;
+  
+  uVar5 = (uint)slot;
+  iVar1 = uVar5 * 2;
+  iVar2 = uVar5 * 4;
+  sVar3 = *(short *)(((undefined *)camry_host_ptr(0xfebeb80cu)) + iVar1);
+  if (f33_profile_counter_pair_qualification[uVar5] == 'Z') {
+    iVar6 = (int)DAT_febef1ca;
+    puVar10 = ((undefined *)camry_host_ptr((uint32_t)((uint)(ushort)(*(short *)(((undefined *)camry_host_ptr(0xfebeb7f8u)) + iVar1) + 1))));
+    if ((uintptr_t)(((undefined *)camry_host_ptr(0xea5fu)))<(uintptr_t)(puVar10)) {
+      puVar10 = ((undefined *)camry_host_ptr(0xea60u));
+    }
+    iVar4 = iVar6 + *(int *)(((undefined *)camry_host_ptr(0xfebebb9cu)) + iVar2);
+    if (iVar4 + -0x5a0d4 < 0 == (iVar4 < 0 && -1 < iVar4 + -0x5a0d4)) {
+      iVar4 = 0x5a0d4;
+    }
+    if (iVar4 + 0x5a0d4 < 0 != (-1 < iVar4 && iVar4 + 0x5a0d4 < 0)) {
+      iVar4 = -0x5a0d4;
+    }
+    iVar9 = iVar4;
+    if ((uintptr_t)(puVar10)!=(uintptr_t)((undefined *)0x0)) {
+      if (iVar4 == -0x80000000 &&(uintptr_t)(puVar10)==(uintptr_t)(((undefined *)camry_host_ptr((uint32_t)(0xffffffff))))) {
+        iVar9 = 0;
+      }
+      else {
+        iVar9 = iVar4 / (int)camry_host_addr(puVar10);
+      }
+    }
+    uVar8 = (undefined2)iVar9;
+    iVar9 = sVar3 - iVar6;
+    sVar7 = DAT_febef1ca;
+    if (iVar9 < 0 == (sVar3 < 0 != iVar6 < 0 && iVar6 < 0 == iVar9 < 0)) {
+      sVar7 = sVar3;
+    }
+  }
+  else {
+    puVar10 = (undefined *)0x0;
+    iVar4 = 0;
+    uVar8 = 0;
+    sVar7 = 0;
+  }
+  *(short *)(((undefined *)camry_host_ptr(0xfebeb7eeu)) + iVar1) = (short)puVar10;
+  *(short *)(((undefined *)camry_host_ptr(0xfebeb7f8u)) + iVar1) = (short)puVar10;
+  *(int *)(((undefined *)camry_host_ptr(0xfebebb88u)) + iVar2) = iVar4;
+  *(undefined2 *)(((undefined *)camry_host_ptr(0xfebeb802u)) + iVar1) = uVar8;
+  *(int *)(((undefined *)camry_host_ptr(0xfebebb9cu)) + iVar2) = iVar4;
+  *(short *)(((undefined *)camry_host_ptr(0xfebeb80cu)) + iVar1) = sVar7;
+  return;
+}
+
+
+
 /* Qualified4A3 selects retained interval extrema4E6/B4F0. Otherwise use currentB4E4 only after
    first-profile validityB6DF5A; before it select zeros. */
 

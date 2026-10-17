@@ -2645,6 +2645,97 @@ uint f33_map_owner9_budget_limit(uint budget)
 
 
 
+/* Enabledmode33 withcalibratedrisegain0 holdsincreasesandpassesdecreases, thenclamp[0,22170].
+   Othermode11lowpass/mode22stepremainnotselectedbythisimage. */
+
+uint f33_follow_owner9_limit_request(uint target)
+
+{
+  short sVar1;
+  uint uVar2;
+  uint uVar3;
+  uint uVar4;
+  int iVar5;
+  uint uVar6;
+  int iVar7;
+  undefined *puVar8;
+  undefined *puVar9;
+  
+  uVar4 = target & 0xffff;
+  uVar6 = 0;
+  DAT_febe6b1e = 0;
+  uVar2 = (uint)DAT_febe6b16;
+  puVar9 = ((undefined *)camry_host_ptr((uint32_t)((uint)DAT_febe6b1c)));
+  uVar3 = uVar4;
+  if (DAT_00031925 == 'Z') {
+    sVar1 = (short)target;
+    if (DAT_00031926 == '\x11') {
+      if (uVar2 <= uVar4) {
+        uVar3 = (uint)DAT_0003192c;
+        if (uVar3 - 1 < 0xffff) {
+          iVar5 = uVar2 * uVar3;
+          iVar7 = uVar4 * uVar3;
+        }
+        else {
+          iVar5 = uVar2 << 0x10;
+          iVar7 = target << 0x10;
+        }
+        DAT_febe6b28 = iVar7 + (DAT_febe6b28 - iVar5);
+        iVar5 = (int)DAT_00031930;
+        iVar7 = (int)(short)(sVar1 - (short)(DAT_febe6b28 >> 0x10));
+        uVar3 = DAT_febe6b28 >> 0x10;
+        if (iVar7 - iVar5 < 0 == (iVar7 < 0 != iVar5 < 0 && iVar5 < 0 == iVar7 - iVar5 < 0) &&
+            iVar7 != iVar5) goto LAB_00035ec0;
+      }
+      DAT_febe6b28 = target << 0x10;
+      uVar3 = uVar4;
+    }
+    else {
+      if (DAT_00031926 == '\"') {
+        uVar3 = (uint)(short)(sVar1 - DAT_febe6b16);
+        iVar5 = DAT_0003192e - uVar3;
+        puVar8 = puVar9;
+        if (iVar5 < 0 != ((int)uVar3 < 0 && (int)uVar3 < 0 == iVar5 < 0)) {
+          uVar3 = (uint)DAT_0003192e;
+        }
+      }
+      else {
+        if (DAT_00031926 != '3') goto LAB_00035ec0;
+        puVar8 = (undefined *)0x0;
+        if ((uVar2 < uVar4) &&
+           (puVar8 = ((undefined *)camry_host_ptr((uint32_t)((uint)camry_host_addr((puVar9 + 1)) & 0xffff))),(uintptr_t)(((undefined *)camry_host_ptr(0xfffdu)))<(uintptr_t)(puVar8))) {
+          puVar8 = ((undefined *)camry_host_ptr((uint32_t)(0xfffe)));
+        }
+        uVar6 = (uint)((int)camry_host_addr(puVar8) * DAT_00031940) >> 3;
+        if (0x5699 < uVar6) {
+          uVar6 = 0x569a;
+        }
+        uVar3 = (uint)(short)(sVar1 - DAT_febe6b16);
+        if ((int)(uVar6 - uVar3) < 0 !=
+            ((int)uVar3 < 0 && (int)uVar3 < 0 == (int)(uVar6 - uVar3) < 0)) {
+          uVar3 = uVar6;
+        }
+      }
+      DAT_febe6b1e = (undefined2)uVar6;
+      DAT_febe6b1c = (ushort)puVar8;
+      uVar3 = uVar2 + uVar3 & 0xffff;
+    }
+  }
+LAB_00035ec0:
+  uVar2 = (uint)DAT_00031932;
+  DAT_febe6b20 = (short)uVar3;
+  if (uVar3 < uVar2) {
+    uVar2 = uVar3;
+  }
+  uVar3 = (uint)DAT_00031934;
+  if (uVar3 <= uVar2) {
+    uVar3 = uVar2;
+  }
+  return uVar3;
+}
+
+
+
 /* Clampbranchsum[0,26604],filterunsignedbudget,mapandretainrequest. Sustainednegative62DCmarkerA5
    or7827/7937nonzero bypassesrequesttonominal22170. RealFDFD4callerpublishesowner9. */
 
