@@ -5705,6 +5705,53 @@ void FUN_0003ba84(void)
 
 
 
+/* f33_reset_windowed_monitor wrapper resetting exactly one monitor state
+   ((0xfebe70c8u)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_3bab2(void)
+
+{
+  f33_reset_windowed_monitor(((F33WindowedMonitorState *)camry_host_ptr((uint32_t)((0xfebe70c8u)))));
+  return;
+}
+
+
+
+/* f33_reset_windowed_monitor wrapper resetting exactly one monitor state
+   ((0xfebe70c8u)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_3bab2_3baa2(void)
+
+{
+  f33_reset_windowed_monitor(((F33WindowedMonitorState *)camry_host_ptr((uint32_t)((0xfebe70c8u)))));
+  return;
+}
+
+
+
+/* State70C8 -> slot20 index0. Predicate81D0=5A fails. Windowed qualifier limits pass2/windowFFFF
+   and fail3/window6; confirmed failure latches. EventD3; published status is low result byte. */
+
+void f33_step_acquisition_status_a_monitor(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_0002bb38 == 'Z') {
+    f33_reset_windowed_monitor(((F33WindowedMonitorState *)camry_host_ptr((uint32_t)((0xfebe70c8u)))));
+  }
+  else {
+    f33_step_windowed_monitor
+              (((F33WindowedMonitorState *)camry_host_ptr((uint32_t)((0xfebe70c8u)))), ((F33WindowedMonitorLimits *)camry_host_ptr((uint32_t)((0x2b5e0u)))), ((F33TwoSidedMonitorCallbacks *)camry_host_ptr((uint32_t)((0x27fccu)))));
+  }
+  f33_publish_acquisition_monitor_status('\0',(*((uint *)camry_host_ptr((uint32_t)((0xffffb8c8u + (uint32_t)((int)puVar1)))))));
+  return;
+}
+
+
+
 /* 81D0=5A returns22; any other byte returns11. Full R10 is defined. */
 
 uint f33_classify_acquisition_status_a(void)
@@ -5736,6 +5783,53 @@ void f33_report_scalar_event_d3_failure(void)
 
 {
   f33_report_diagnostic_event_failure(0xd3,10);
+  return;
+}
+
+
+
+/* f33_reset_windowed_monitor wrapper resetting exactly one monitor state
+   ((0xfebe70d8u)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_3bb44(void)
+
+{
+  f33_reset_windowed_monitor(((F33WindowedMonitorState *)camry_host_ptr((uint32_t)((0xfebe70d8u)))));
+  return;
+}
+
+
+
+/* f33_reset_windowed_monitor wrapper resetting exactly one monitor state
+   ((0xfebe70d8u)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_3bb44_3bb34(void)
+
+{
+  f33_reset_windowed_monitor(((F33WindowedMonitorState *)camry_host_ptr((uint32_t)((0xfebe70d8u)))));
+  return;
+}
+
+
+
+/* State70D8 -> slot20 index1. Predicate81D1=5A fails. Same windowed2/FFFF/3/6 limits; eventD4.
+   Status flags are staged from380A/B through66932 and50A06, not physical timing proof. */
+
+void f33_step_acquisition_status_b_monitor(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_0002bb3c == 'Z') {
+    f33_reset_windowed_monitor(((F33WindowedMonitorState *)camry_host_ptr((uint32_t)((0xfebe70d8u)))));
+  }
+  else {
+    f33_step_windowed_monitor
+              (((F33WindowedMonitorState *)camry_host_ptr((uint32_t)((0xfebe70d8u)))), ((F33WindowedMonitorLimits *)camry_host_ptr((uint32_t)((0x2b5e8u)))), ((F33TwoSidedMonitorCallbacks *)camry_host_ptr((uint32_t)((0x28000u)))));
+  }
+  f33_publish_acquisition_monitor_status('\x01',(*((uint *)camry_host_ptr((uint32_t)((0xffffb8d8u + (uint32_t)((int)puVar1)))))));
   return;
 }
 
@@ -5847,6 +5941,54 @@ void f33_publish_acquisition_monitor_status(uchar index,uint packed_status)
 
 
 
+/* f33_reset_latched_monitor wrapper resetting exactly one monitor state
+   ((0xfebe70ecu)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_3bc4c(void)
+
+{
+  f33_reset_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe70ecu)))));
+  return;
+}
+
+
+
+/* f33_reset_latched_monitor wrapper resetting exactly one monitor state
+   ((0xfebe70ecu)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_3bc4c_3bc3c(void)
+
+{
+  f33_reset_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe70ecu)))));
+  return;
+}
+
+
+
+/* State70EC -> slot20 index2. Predicate requires81D4=5A, then unsigned81D6>=61211 and81D8<=3093.
+   Latched limits2/20; eventD6. Do not reinterpret these two separate unsigned bounds as a signed
+   interval. */
+
+void f33_step_acquisition_range_a_monitor(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_0002bb40 == 'Z') {
+    f33_reset_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe70ecu)))));
+  }
+  else {
+    f33_step_latched_monitor
+              (((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe70ecu)))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b5f0u)))), ((F33TwoSidedMonitorCallbacks *)camry_host_ptr((uint32_t)((0x28034u)))));
+  }
+  f33_publish_acquisition_monitor_status('\x02',(*((uint *)camry_host_ptr((uint32_t)((0xffffb8ecu + (uint32_t)((int)puVar1)))))));
+  return;
+}
+
+
+
 /* 81D4!=5A returns44. Otherwise unsigned81D6>=61211 AND81D8<=3093 returns11,else22. Separate lower
    and upper samples, not a signed scalar range. */
 
@@ -5882,6 +6024,53 @@ void f33_report_scalar_event_d6_failure(void)
 
 {
   f33_report_diagnostic_event_failure(0xd6,10);
+  return;
+}
+
+
+
+/* f33_reset_latched_monitor wrapper resetting exactly one monitor state
+   ((0xfebe70f8u)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_3bcfc(void)
+
+{
+  f33_reset_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe70f8u)))));
+  return;
+}
+
+
+
+/* f33_reset_latched_monitor wrapper resetting exactly one monitor state
+   ((0xfebe70f8u)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_3bcfc_3bcec(void)
+
+{
+  f33_reset_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe70f8u)))));
+  return;
+}
+
+
+
+/* State70F8 -> slot20 index3. Valid81D5 gates unsigned81DA>=61211 and81DC<=3093. Latched
+   limits2/20; eventD7. */
+
+void f33_step_acquisition_range_b_monitor(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_0002bb44 == 'Z') {
+    f33_reset_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe70f8u)))));
+  }
+  else {
+    f33_step_latched_monitor
+              (((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe70f8u)))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b5f4u)))), ((F33TwoSidedMonitorCallbacks *)camry_host_ptr((uint32_t)((0x28068u)))));
+  }
+  f33_publish_acquisition_monitor_status('\x03',(*((uint *)camry_host_ptr((uint32_t)((0xffffb8f8u + (uint32_t)((int)puVar1)))))));
   return;
 }
 

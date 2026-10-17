@@ -1866,6 +1866,27 @@ void FUN_00066b04(undefined1 param_1,undefined1 param_2,undefined2 param_3)
 
 
 
+void FUN_00066bc8(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  f33_publish_redundant_u8('Z', ((uchar *)camry_host_ptr((uint32_t)((0xfebf0670u)))), ((uchar *)camry_host_ptr((uint32_t)((0xfebf10a8u)))), ((uchar *)camry_host_ptr((uint32_t)((0xfebf10ccu)))))
+  ;
+  f33_publish_redundant_u8('\0', ((undefined *)camry_host_ptr((uint32_t)(puVar1 + 0x4e71))), ((undefined *)camry_host_ptr((uint32_t)(puVar1 + 0x58a9))), ((undefined *)camry_host_ptr((uint32_t)(puVar1 + 0x58cd))));
+  f33_publish_redundant_u8('\0', ((undefined *)camry_host_ptr((uint32_t)(puVar1 + 0x4e72))), ((undefined *)camry_host_ptr((uint32_t)(puVar1 + 0x58aa))), ((undefined *)camry_host_ptr((uint32_t)(puVar1 + 0x58ce))));
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x4e73))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x4e74))))) = 0;
+  FUN_000672c0();
+  f33_nvm_initialize_family1_application();
+  f33_nvm_initialize_family2_ram();
+  f33_nvm_initialize_acquisition();
+  f33_nvm_run_bounded_initial_acquisition();
+  return;
+}
+
+
+
 char FUN_00066cc4(char param_1)
 
 {
@@ -2033,6 +2054,16 @@ void FUN_00066fba(void)
 
 {
   f33_publish_redundant_u8('\0',((undefined *)camry_host_ptr(0xfebf0672u)),((undefined *)camry_host_ptr(0xfebf10aau)),((undefined *)camry_host_ptr(0xfebf10ceu)));
+  return;
+}
+
+
+
+void FUN_00066fd4(void)
+
+{
+  f33_publish_redundant_u8
+            ('\0', ((uchar *)camry_host_ptr((uint32_t)((0xfebf0670u)))), ((uchar *)camry_host_ptr((uint32_t)((0xfebf10a8u)))), ((uchar *)camry_host_ptr((uint32_t)((0xfebf10ccu)))));
   return;
 }
 

@@ -1653,6 +1653,34 @@ LAB_0004d786:
 
 
 
+undefined4 f33_rdbi_0102_callback(int param_1)
+
+{
+  undefined1 uStack_f;
+  undefined2 uStack_e;
+  undefined4 uStack_c;
+  
+  if (DAT_febee813 == 'Z') {
+    uStack_c = DAT_febee90c;
+    uStack_e = DAT_febee896;
+    uStack_f = DAT_febee815;
+    FUN_00070180(DAT_febee896,0xfffe,&uStack_e);
+    FUN_00070192(uStack_c,0xfffffffe,&uStack_c);
+    FUN_0007016e(uStack_f,1,&uStack_f);
+  }
+  else {
+    uStack_e = 0xffff;
+    uStack_c = 0xffffffff;
+    uStack_f = 0;
+  }
+  FUN_0006a574(uStack_e, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  FUN_0006a55c(uStack_c, ((undefined1 *)camry_host_ptr((uint32_t)(param_1 + 2))));
+  (*((undefined1 *)camry_host_ptr((uint32_t)(param_1 + 6)))) = uStack_f;
+  return 0;
+}
+
+
+
 undefined4 f33_rdbi_0109_callback(undefined1 *param_1)
 
 {
@@ -1688,9 +1716,47 @@ undefined4 f33_rdbi_0109_callback(undefined1 *param_1)
 
 
 
+undefined4 f33_rdbi_0110_callback(undefined4 param_1)
+
+{
+  uint32_t puVar1;
+  int iVar2;
+  uint uVar3;
+  
+  puVar1 = 0xfebeb800u;
+  uVar3 = FUN_0006a130();
+  if (~(*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x2e1c)))) < uVar3) {
+    iVar2 = -1;
+  }
+  else {
+    iVar2 = uVar3 + (*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x2e1c))));
+  }
+  FUN_0006a55c(iVar2, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
 undefined4 f33_rdbi_0111_callback(void)
 
 {
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_0112_callback(undefined4 param_1)
+
+{
+  int iVar1;
+  
+  if (~DAT_febe89ec < DAT_febe8afc) {
+    iVar1 = -1;
+  }
+  else {
+    iVar1 = DAT_febe8afc + DAT_febe89ec;
+  }
+  FUN_0006a55c(iVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
 }
 
@@ -1709,6 +1775,34 @@ undefined4 f33_rdbi_0204_callback(undefined1 *param_1)
     uVar2 = 0x80;
   }
   param_1[1] = uVar2;
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_1031_callback(undefined4 param_1)
+
+{
+  uint uVar1;
+  undefined2 uStack_a;
+  
+  uVar1 = (uint)DAT_febee894 * 10 >> 7;
+  uStack_a = (undefined2)uVar1;
+  FUN_00070180(uVar1,3000,&uStack_a);
+  FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_1032_callback(undefined4 param_1)
+
+{
+  undefined2 uStack_a;
+  
+  uStack_a = DAT_febee890;
+  FUN_00070180(DAT_febee890,0x3200,&uStack_a);
+  FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
 }
 
@@ -1745,10 +1839,58 @@ uint f33_rdbi_1034_callback(uchar *output)
 
 
 
+/* WARNING: Removing unreachable block (ram,0x0004dba0) */
+
+undefined4 did_1035_steering_wheel_torque(undefined4 param_1)
+
+{
+  int iVar1;
+  int local_c;
+  
+  if (DAT_febe6af0 == -0x5aa5a55b) {
+    local_c = (DAT_febe66a8 * 1000) / 0x100;
+    FUN_0007012a(local_c,25000,0xffff9e58,&local_c);
+    iVar1 = (int)(short)local_c;
+  }
+  else {
+    iVar1 = -0x8000;
+  }
+  FUN_0006a5ac(iVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
 undefined4 f33_rdbi_1038_callback(byte *param_1)
 
 {
   *param_1 = DAT_febe7fec & 0xf;
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_1061_callback(undefined4 param_1)
+
+{
+  undefined2 uStack_a;
+  
+  uStack_a = (undefined2)((uint)DAT_febe66b8 * 100 >> 8);
+  FUN_00070180((uint)DAT_febe66b8 * 100 >> 8,0x9c4,&uStack_a);
+  FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_1062_callback(undefined4 param_1)
+
+{
+  undefined2 uStack_a;
+  
+  uStack_a = (undefined2)((uint)DAT_febe66ae * 100 >> 8);
+  FUN_00070180((uint)DAT_febe66ae * 100 >> 8,0x9c4,&uStack_a);
+  FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
 }
 
@@ -1796,6 +1938,176 @@ undefined4 f33_rdbi_106a_callback(void)
 
 
 
+undefined4 f33_rdbi_106b_callback(undefined4 param_1)
+
+{
+  undefined2 uStack_a;
+  
+  uStack_a = (undefined2)((uint)DAT_febe66b2 * 100 >> 8);
+  FUN_00070180((uint)DAT_febe66b2 * 100 >> 8,0x9c4,&uStack_a);
+  FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0004dd7e) */
+
+undefined4 f33_rdbi_1091_callback(undefined4 param_1)
+
+{
+  int local_c;
+  
+  local_c = (DAT_febe64f2 * 1000) / 0x100;
+  FUN_0007012a(local_c,25000,0xffff9e58,&local_c);
+  FUN_0006a5ac((int)(short)local_c, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0004ddb6) */
+
+undefined4 f33_rdbi_1092_callback(undefined4 param_1)
+
+{
+  int local_c;
+  
+  local_c = (DAT_febe64f4 * 1000) / 0x100;
+  FUN_0007012a(local_c,25000,0xffff9e58,&local_c);
+  FUN_0006a5ac((int)(short)local_c, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0004ddee) */
+
+undefined4 f33_rdbi_1093_callback(undefined4 param_1)
+
+{
+  int local_c;
+  
+  local_c = (DAT_febe64f6 * 1000) / 0x100;
+  FUN_0007012a(local_c,25000,0xffff9e58,&local_c);
+  FUN_0006a5ac((int)(short)local_c, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0004de26) */
+
+undefined4 f33_rdbi_1094_callback(undefined4 param_1)
+
+{
+  int local_c;
+  
+  local_c = (DAT_febe64f8 * 1000) / 0x100;
+  FUN_0007012a(local_c,25000,0xffff9e58,&local_c);
+  FUN_0006a5ac((int)(short)local_c, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_1095_callback(undefined4 param_1)
+
+{
+  undefined2 uStack_a;
+  
+  uStack_a = DAT_febe66d6;
+  FUN_00070180(DAT_febe66d6,0xffff,&uStack_a);
+  FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_1096_callback(undefined4 param_1)
+
+{
+  undefined2 uStack_a;
+  
+  uStack_a = DAT_febe66d8;
+  FUN_00070180(DAT_febe66d8,0xffff,&uStack_a);
+  FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_1097_callback(undefined4 param_1)
+
+{
+  undefined2 uStack_a;
+  
+  uStack_a = DAT_febe66da;
+  FUN_00070180(DAT_febe66da,0xffff,&uStack_a);
+  FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_1098_callback(undefined4 param_1)
+
+{
+  undefined2 uStack_a;
+  
+  uStack_a = DAT_febe66dc;
+  FUN_00070180(DAT_febe66dc,0xffff,&uStack_a);
+  FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_10c4_callback(undefined4 param_1)
+
+{
+  uint uVar1;
+  undefined2 uStack_a;
+  
+  uVar1 = (uint)DAT_febe64a2 * 0x271 >> 0xb;
+  uStack_a = (undefined2)uVar1;
+  FUN_00070180(uVar1,10000,&uStack_a);
+  FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_10c5_callback(undefined4 param_1)
+
+{
+  uint uVar1;
+  undefined2 uStack_a;
+  
+  uVar1 = (uint)DAT_febe64a4 * 0x271 >> 0xb;
+  uStack_a = (undefined2)uVar1;
+  FUN_00070180(uVar1,10000,&uStack_a);
+  FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_10c6_callback(undefined4 param_1)
+
+{
+  uint uVar1;
+  undefined2 uStack_a;
+  
+  uVar1 = (uint)DAT_febe64a6 * 0x271 >> 0xb;
+  uStack_a = (undefined2)uVar1;
+  FUN_00070180(uVar1,10000,&uStack_a);
+  FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
 undefined4 f33_rdbi_10c7_callback(void)
 
 {
@@ -1820,6 +2132,64 @@ undefined4 f33_rdbi_10c9_callback(void)
 
 
 
+undefined4 f33_rdbi_10ca_callback(undefined4 param_1)
+
+{
+  undefined2 uStack_a;
+  
+  uStack_a = (undefined2)((uint)DAT_febe66ae * 100 >> 8);
+  FUN_00070180((uint)DAT_febe66ae * 100 >> 8,0x9c4,&uStack_a);
+  FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_10f4_callback(undefined4 param_1)
+
+{
+  uint uVar1;
+  undefined2 uStack_a;
+  
+  uVar1 = (uint)DAT_febe64a8 * 0x271 >> 0xb;
+  uStack_a = (undefined2)uVar1;
+  FUN_00070180(uVar1,10000,&uStack_a);
+  FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_10f5_callback(undefined4 param_1)
+
+{
+  uint uVar1;
+  undefined2 uStack_a;
+  
+  uVar1 = (uint)DAT_febe64aa * 0x271 >> 0xb;
+  uStack_a = (undefined2)uVar1;
+  FUN_00070180(uVar1,10000,&uStack_a);
+  FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_10f6_callback(undefined4 param_1)
+
+{
+  uint uVar1;
+  undefined2 uStack_a;
+  
+  uVar1 = (uint)DAT_febe64ac * 0x271 >> 0xb;
+  uStack_a = (undefined2)uVar1;
+  FUN_00070180(uVar1,10000,&uStack_a);
+  FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
 undefined4 f33_rdbi_10f7_callback(void)
 
 {
@@ -1839,6 +2209,19 @@ undefined4 f33_rdbi_10f8_callback(void)
 undefined4 f33_rdbi_10f9_callback(void)
 
 {
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_10fa_callback(undefined4 param_1)
+
+{
+  undefined2 uStack_a;
+  
+  uStack_a = (undefined2)((uint)DAT_febe66b0 * 100 >> 8);
+  FUN_00070180((uint)DAT_febe66b0 * 100 >> 8,0x9c4,&uStack_a);
+  FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
 }
 
@@ -1892,6 +2275,34 @@ undefined4 f33_rdbi_1129_callback(void)
 
 
 
+undefined4 f33_rdbi_112b_callback(undefined4 param_1)
+
+{
+  undefined2 uStack_a;
+  
+  uStack_a = DAT_febe6608;
+  FUN_00070180(DAT_febe6608,0x1000,&uStack_a);
+  FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0004e2dc) */
+
+undefined4 f33_rdbi_112d_callback(undefined4 param_1)
+
+{
+  int local_c;
+  
+  local_c = (DAT_febee938 * 4000) / 0x1000;
+  FUN_0007012a(local_c,0x1ffff,0xfffe0000,&local_c);
+  FUN_0006a594(local_c, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
 undefined4 f33_rdbi_112f_callback(void)
 
 {
@@ -1916,6 +2327,19 @@ undefined4 f33_rdbi_1131_callback(void)
 
 
 
+undefined4 f33_rdbi_1132_callback(undefined4 param_1)
+
+{
+  uint local_c;
+  
+  local_c = DAT_febee950;
+  FUN_0007012a(DAT_febee950,0xffff,0,&local_c);
+  FUN_0006a574(local_c & 0xffff, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
 undefined4 f33_rdbi_1133_callback(undefined1 *param_1)
 
 {
@@ -1924,6 +2348,21 @@ undefined4 f33_rdbi_1133_callback(undefined1 *param_1)
   uStack_9 = DAT_febee88b;
   FUN_0007016e(DAT_febee88b,3,&uStack_9);
   *param_1 = uStack_9;
+  return 0;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0004e4ea) */
+
+undefined4 did_1156_final_motor_current_limited_q_axis(undefined4 param_1)
+
+{
+  short sStack_a;
+  
+  sStack_a = (short)((DAT_febe678c * 100) / 0x80);
+  FUN_00070110((int)sStack_a,0x7fff,0,&sStack_a);
+  FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
 }
 
@@ -1982,6 +2421,19 @@ undefined4 f33_rdbi_1184_callback(undefined1 *param_1)
   sStack_a = DAT_febe8062 / 100;
   FUN_00070110((int)sStack_a,0xff,0,&sStack_a);
   *param_1 = (char)sStack_a;
+  return 0;
+}
+
+
+
+undefined4 did_1185_can_vehicle_speed_sp1(undefined4 param_1)
+
+{
+  undefined2 uStack_a;
+  
+  uStack_a = DAT_febe809a;
+  FUN_00070180(DAT_febe809a,30000,&uStack_a);
+  FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
 }
 
@@ -2143,6 +2595,31 @@ undefined4 f33_rdbi_11bd_callback(undefined1 *param_1)
   uStack_a = (undefined2)uVar1;
   FUN_00070180(uVar1,0xff,&uStack_a);
   *param_1 = (char)uStack_a;
+  return 0;
+}
+
+
+
+undefined4 did_1c03_control_state_information(undefined4 param_1)
+
+{
+  undefined2 uStack_a;
+  
+  uStack_a = DAT_febee8cc;
+  FUN_00070180(DAT_febee8cc,0xffff,&uStack_a);
+  FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+undefined4 did_1c05_1c0c_asic_state_information(int param_1)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  FUN_0006a55c(DAT_febe8298, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  FUN_0006a55c((*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + -0x3564)))), ((undefined1 *)camry_host_ptr((uint32_t)(param_1 + 4))));
   return 0;
 }
 
@@ -2403,6 +2880,27 @@ undefined4 f33_rdbi_1c86_callback(undefined1 *param_1)
 
 
 
+undefined4 f33_rdbi_1c87_callback(int param_1)
+
+{
+  undefined1 uStack_f;
+  undefined2 uStack_e;
+  undefined4 uStack_c;
+  
+  uStack_c = DAT_febe7bd4;
+  uStack_e = DAT_febe7bd0;
+  uStack_f = DAT_febe7bc9;
+  FUN_00070180(DAT_febe7bd0,0xfffe,&uStack_e);
+  FUN_00070192(uStack_c,0xfffffffe,&uStack_c);
+  FUN_0007016e(uStack_f,1,&uStack_f);
+  FUN_0006a574(uStack_e, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  FUN_0006a55c(uStack_c, ((undefined1 *)camry_host_ptr((uint32_t)(param_1 + 2))));
+  (*((undefined1 *)camry_host_ptr((uint32_t)(param_1 + 6)))) = uStack_f;
+  return 0;
+}
+
+
+
 undefined4 f33_rdbi_1c99_callback(void)
 
 {
@@ -2480,6 +2978,53 @@ undefined4 f33_rdbi_1ca1_callback(undefined1 *param_1)
 
 
 
+undefined4 f33_rdbi_1ca2_callback(int param_1)
+
+{
+  undefined1 uStack_f;
+  undefined2 uStack_e;
+  undefined4 uStack_c;
+  
+  uStack_c = DAT_febee914;
+  uStack_e = DAT_febee898;
+  uStack_f = DAT_febee818;
+  FUN_00070180(DAT_febee898,0xfffe,&uStack_e);
+  FUN_00070192(uStack_c,0xfffffffe,&uStack_c);
+  FUN_0007016e(uStack_f,1,&uStack_f);
+  FUN_0006a574(uStack_e, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  FUN_0006a55c(uStack_c, ((undefined1 *)camry_host_ptr((uint32_t)(param_1 + 2))));
+  (*((undefined1 *)camry_host_ptr((uint32_t)(param_1 + 6)))) = uStack_f;
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_1ca3_callback(undefined4 param_1)
+
+{
+  undefined2 uStack_a;
+  
+  uStack_a = DAT_febee8a0;
+  FUN_00070180(DAT_febee8a0,0xffff,&uStack_a);
+  FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_1ca4_callback(undefined4 param_1)
+
+{
+  undefined2 uStack_a;
+  
+  uStack_a = (undefined2)((uint)DAT_febee89c * 100 >> 8);
+  FUN_00070180((uint)DAT_febee89c * 100 >> 8,0x9c4,&uStack_a);
+  FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
 undefined4 f33_rdbi_1ca5_callback(undefined1 *param_1)
 
 {
@@ -2488,6 +3033,83 @@ undefined4 f33_rdbi_1ca5_callback(undefined1 *param_1)
   uStack_9 = DAT_febee817;
   FUN_0007016e(DAT_febee817,0xff,&uStack_9);
   *param_1 = uStack_9;
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_1ca6_callback(int param_1)
+
+{
+  undefined1 uStack_f;
+  undefined2 uStack_e;
+  undefined4 uStack_c;
+  
+  uStack_c = DAT_febee918;
+  uStack_e = DAT_febee89a;
+  uStack_f = DAT_febee819;
+  FUN_00070180(DAT_febee89a,0xfffe,&uStack_e);
+  FUN_00070192(uStack_c,0xfffffffe,&uStack_c);
+  FUN_0007016e(uStack_f,1,&uStack_f);
+  FUN_0006a574(uStack_e, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  FUN_0006a55c(uStack_c, ((undefined1 *)camry_host_ptr((uint32_t)(param_1 + 2))));
+  (*((undefined1 *)camry_host_ptr((uint32_t)(param_1 + 6)))) = uStack_f;
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_1ca7_callback(undefined4 param_1)
+
+{
+  undefined2 uStack_a;
+  
+  uStack_a = DAT_febee8a2;
+  FUN_00070180(DAT_febee8a2,0xffff,&uStack_a);
+  FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_1ca8_callback(undefined4 param_1)
+
+{
+  undefined2 uStack_a;
+  
+  uStack_a = (undefined2)((uint)DAT_febee89e * 100 >> 8);
+  FUN_00070180((uint)DAT_febee89e * 100 >> 8,0x9c4,&uStack_a);
+  FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0004f01c) */
+
+undefined4 f33_rdbi_1ca9_callback(undefined4 param_1)
+
+{
+  short sStack_a;
+  
+  sStack_a = (short)((DAT_febe6f00 * 100) / 0x80);
+  FUN_00070110((int)sStack_a,25000,0,&sStack_a);
+  FUN_0006a574(sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  return 0;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0004f056) */
+
+undefined4 f33_rdbi_1caa_callback(undefined4 param_1)
+
+{
+  short sStack_a;
+  
+  sStack_a = (short)((DAT_febe6f02 * 100) / 0x80);
+  FUN_00070110((int)sStack_a,25000,0,&sStack_a);
+  FUN_0006a574(sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
 }
 
@@ -2892,6 +3514,15 @@ undefined4 f33_rdbi_2012_callback(undefined4 param_1)
 
 {
   (*((bool *)camry_host_ptr((uint32_t)(param_1)))) = DAT_febee81e == 'Z';
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_2013_callback(undefined4 param_1)
+
+{
+  FUN_0006a574(DAT_febee8e2, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
 }
 

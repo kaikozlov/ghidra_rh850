@@ -478,6 +478,25 @@ undefined4 f33_return_const_0_81f62(void)
 
 
 
+undefined4 FUN_00081fa6(uint param_1,byte param_2,ushort param_3)
+
+{
+  int iVar1;
+  undefined4 uVar2;
+  
+  param_1 = param_1 & 0xffff;
+  uVar2 = 1;
+  if ((((((int8_t)DAT_febe4f3d) == -0x56) && (iVar1 = camry_host_addr(FUN_0007a32e()), iVar1 != 0)) &&
+      ((*((ushort *)camry_host_ptr((uint32_t)(iVar1 + 4)))) <= param_1)) &&
+     ((((int)(param_1 - ((uint)(*((byte *)camry_host_ptr((uint32_t)(iVar1 + 0xd)))) + (uint)(*((ushort *)camry_host_ptr((uint32_t)(iVar1 + 4)))))) < 0 &&
+       (param_2 < 2)) && (param_3 < 0x100)))) {
+    uVar2 = FUN_00081f66(((F33CanTpConfiguration *)camry_host_ptr((uint32_t)(iVar1))), param_1, param_2, param_3);
+  }
+  return uVar2;
+}
+
+
+
 /* Constant source: return 0; shape-classified from the canonical corpus. Callers receive this
    literal directly; its meaning is not recovered. */
 
@@ -858,6 +877,33 @@ void FUN_00083072(undefined1 param_1)
 
 {
   FUN_00083570(param_1);
+  return;
+}
+
+
+
+void FUN_00083098(undefined4 param_1,undefined1 param_2)
+
+{
+  FUN_00098f2c(((undefined *)camry_host_ptr((uint32_t)(param_1))), param_2);
+  return;
+}
+
+
+
+void FUN_000830a6(undefined4 param_1,undefined1 param_2)
+
+{
+  FUN_00098ef2(((undefined *)camry_host_ptr((uint32_t)(param_1))), param_2);
+  return;
+}
+
+
+
+void FUN_000830c0(undefined1 param_1,undefined4 param_2,undefined2 param_3)
+
+{
+  FUN_00098e80(param_1, ((char *)camry_host_ptr((uint32_t)(param_2))), param_3);
   return;
 }
 

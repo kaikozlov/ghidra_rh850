@@ -447,7 +447,347 @@ def _operand_end(code: str, start: int) -> int:
     return start + match.end()
 
 
+_INT_TYPES = {
+    "unsigned int", "int", "uint", "undefined4", "ulong", "long", "uint32_t",
+    "uint16_t", "uint8_t", "int32_t", "int16_t", "int8_t", "undefined2",
+    "undefined1", "undefined", "ushort", "byte", "uchar", "short", "char",
+    "unsigned", "signed", "bool", "code",
+}
+_DATA_ARRAYS: set[str] | None = None
+_DATA_SCALARS: set[str] | None = None
+
+
+def _data_name_kinds() -> tuple[set[str], set[str]]:
+    global _DATA_ARRAYS, _DATA_SCALARS
+    if _DATA_ARRAYS is None or _DATA_SCALARS is None:
+        arrays: set[str] = set()
+        scalars: set[str] = set()
+        for name, (_addr, _ctype, is_array) in _data_layouts().items():
+            (arrays if is_array else scalars).add(name)
+        scalars.update(_machine_registers())
+        _DATA_ARRAYS = arrays
+        _DATA_SCALARS = scalars
+    return _DATA_ARRAYS, _DATA_SCALARS
+
+
+def _declared_integers(signature: str, code: str) -> set[str]:
+    names: set[str] = set()
+    opening = signature.find("(")
+    closing = signature.rfind(")")
+    if 0 <= opening < closing:
+        body = signature[opening + 1:closing].strip()
+        if body and body != "void":
+            for part in _split_args(body):
+                if "*" in part or "[" in part:
+                    continue
+                match = re.search(r"([A-Za-z_][A-Za-z0-9_]*)\s*$", part.strip())
+                if match and match.group(1) not in _PRIMITIVE_TYPES:
+                    names.add(match.group(1))
+    for line in code.splitlines():
+        text = line.strip()
+        if not text.endswith(";") or "(" in text:
+            continue
+        text = text[:-1].strip()
+        type_match = re.match(
+            r"^(?:(?:extern|static|const|volatile|unsigned|signed|struct)\s+)*"
+            r"[A-Za-z_][A-Za-z0-9_]*\s+(.*)$",
+            text,
+        )
+        if type_match is None:
+            continue
+        for part in _split_args(type_match.group(1)):
+            if "*" in part or "[" in part:
+                continue
+            left = part.split("=", 1)[0].strip()
+            match = re.fullmatch(r"([A-Za-z_][A-Za-z0-9_]*)", left)
+            if match:
+                names.add(match.group(1))
+    return names
+
+
+def _kind_context(signature: str, code: str, pointers: set[str] | None = None):
+    """Classify an expression as pointer, integer, null, or unknown."""
+    pointers = _pointer_names(signature, code) if pointers is None else pointers
+    arrays = set(re.findall(
+        r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\[", signature + "\n" + code,
+    ))
+    data_arrays, data_scalars = _data_name_kinds()
+    arrays |= data_arrays
+    doubles = set(re.findall(
+        r"\*\s*\*\s*([A-Za-z_][A-Za-z0-9_]*)", signature + "\n" + code,
+    ))
+    integers = (_declared_integers(signature, code) | data_scalars) - pointers - arrays - doubles
+    functions = set(_function_entries())
+
+    def kind(expr: str) -> str:
+        return _expr_kind(
+            expr.strip(),
+            pointers=pointers,
+            arrays=arrays,
+            integers=integers,
+            functions=functions,
+            doubles=doubles,
+        )
+
+    return kind
+
+
+def _fully_wrapped(text: str) -> bool:
+    if not text.startswith("(") or not text.endswith(")"):
+        return False
+    try:
+        return _match_paren(text, 0) == len(text) - 1
+    except ValueError:
+        return False
+
+
+def _is_int_type(text: str) -> bool:
+    collapsed = " ".join(text.replace("*", " ").split())
+    return collapsed in _INT_TYPES or collapsed in {"unsigned int", "signed int", "unsigned long", "signed long"}
+
+
+def _is_pointer_type(text: str) -> bool:
+    return text.rstrip().endswith("*") and _looks_like_type(text)
+
+
+def _binary_ops(text: str) -> list[tuple[int, str]]:
+    ops: list[tuple[int, str]] = []
+    depth = 0
+    index = 0
+    while index < len(text):
+        if text.startswith("->", index):
+            index += 2
+            continue
+        if text.startswith(("<<", ">>"), index):
+            if depth == 0:
+                ops.append((index, text[index:index + 2]))
+            index += 2
+            continue
+        char = text[index]
+        if char in "([{":
+            depth += 1
+        elif char in ")]}":
+            depth -= 1
+        elif depth == 0 and char in "+-*/%&|^" and index > 0:
+            previous = index - 1
+            while previous >= 0 and text[previous] in " \t":
+                previous -= 1
+            if previous >= 0 and text[previous] not in "+-*/%&|^<>=!({[,:":
+                ops.append((index, char))
+        index += 1
+    return ops
+
+
+def _expr_kind(
+    text: str,
+    *,
+    pointers: set[str],
+    arrays: set[str],
+    integers: set[str],
+    functions: set[str],
+    doubles: set[str],
+) -> str:
+    text = text.strip()
+    if not text:
+        return "unknown"
+    while _fully_wrapped(text):
+        inner = text[1:-1].strip()
+        if _is_pointer_type(inner) or _is_int_type(inner):
+            break
+        text = inner
+    ops = _binary_ops(text)
+    if ops:
+        parts = [text[:ops[0][0]]]
+        for (start, _op), (end, _next) in zip(ops, ops[1:] + [(len(text), "")]):
+            parts.append(text[start + len(_op):end])
+        kinds = [
+            _expr_kind(
+                part,
+                pointers=pointers,
+                arrays=arrays,
+                integers=integers,
+                functions=functions,
+                doubles=doubles,
+            )
+            for part in parts
+        ]
+        folded = kinds[0]
+        for (_start, op), right in zip(ops, kinds[1:]):
+            folded = _fold_kind(op, folded, right)
+        return folded
+    if text[:1] in "-+~!":
+        inner = _expr_kind(
+            text[1:],
+            pointers=pointers,
+            arrays=arrays,
+            integers=integers,
+            functions=functions,
+            doubles=doubles,
+        )
+        if text[0] == "!":
+            return "integer" if inner != "unknown" else "unknown"
+        if inner == "pointer":
+            return "unknown"
+        return "integer" if inner == "null" else inner
+    if re.fullmatch(r"0x0+u?|0u?|NULL", text):
+        return "null"
+    if re.fullmatch(r"0x[0-9A-Fa-f]+u?|\d+u?", text):
+        return "integer"
+    if text.startswith("&"):
+        return "pointer"
+    if text.startswith("camry_host_ptr"):
+        return "pointer"
+    if text.startswith("camry_host_addr"):
+        return "integer"
+    if text.startswith("*"):
+        inner = text[1:].strip()
+        if _fully_wrapped(inner):
+            inner = inner[1:-1].strip()
+        if inner.startswith("("):
+            try:
+                end = _match_paren(inner, 0)
+            except ValueError:
+                return "unknown"
+            stars = inner[1:end].count("*")
+            if stars >= 2:
+                return "pointer"
+            if stars == 1:
+                return "integer"
+        return "unknown"
+    if text.startswith("("):
+        try:
+            end = _match_paren(text, 0)
+        except ValueError:
+            return "unknown"
+        inner = " ".join(text[1:end].split())
+        if _is_pointer_type(inner):
+            return "pointer"
+        if _is_int_type(inner):
+            return "integer"
+        return "unknown"
+    match = re.match(r"[A-Za-z_][A-Za-z0-9_]*", text)
+    if match is None:
+        return "unknown"
+    name = match.group(0)
+    rest = text[match.end():].lstrip()
+    if name in functions and name not in pointers and name not in integers:
+        return "pointer" if not rest else "unknown"
+    if name in pointers or name in arrays or name in integers or name.startswith(("DAT_", "UNK_", "PTR_")):
+        if not rest:
+            if name in pointers or name in arrays:
+                return "pointer"
+            return "integer"
+        if rest.startswith((".", "->")):
+            return "unknown"
+        if re.fullmatch(r"(?:\s*\[[^\[\]]*\])+", rest):
+            if name in doubles:
+                return "pointer" if rest.count("[") == 1 else "integer"
+            if name in arrays and name not in pointers:
+                return "unknown"
+            return "integer"
+        return "unknown"
+    return "unknown"
+
+
+def _fold_kind(op: str, left: str, right: str) -> str:
+    left = "integer" if left == "null" else left
+    right = "integer" if right == "null" else right
+    if left == "unknown" or right == "unknown":
+        return "unknown"
+    if op in {"+", "-"} and left == "pointer" and right == "integer":
+        return "pointer"
+    if op == "+" and right == "pointer" and left == "integer":
+        return "pointer"
+    if op == "-" and left == "pointer" and right == "pointer":
+        return "integer"
+    if left == "integer" and right == "integer":
+        return "integer"
+    return "unknown"
+
+
+def _param_type_list(params: str) -> list[str]:
+    body = " ".join(params.split()).strip()
+    if not body or body == "void":
+        return []
+    types: list[str] = []
+    for part in _split_args(body):
+        text = " ".join(part.split()).strip()
+        text = re.sub(r"\s*\[\s*\d*\s*\]", " *", text).strip()
+        match = re.fullmatch(r"(.*\W)([A-Za-z_][A-Za-z0-9_]*)$", text)
+        if match and match.group(2) not in _PRIMITIVE_TYPES and match.group(2) not in _INT_TYPES:
+            text = match.group(1).strip()
+        types.append(text)
+    return types
+
+
+def _signature_param_types(signature: str) -> list[str]:
+    opening = signature.find("(")
+    closing = signature.rfind(")")
+    if opening < 0 or closing < opening:
+        return []
+    return _param_type_list(signature[opening + 1:closing])
+
+
+def _hand_param_types() -> dict[str, list[str]]:
+    header = _strip_comments((ROOT / "include" / "camry.h").read_text(encoding="utf-8"))
+    header = re.sub(r"static inline\b.*?\{.*?\n\}", "", header, flags=re.S)
+    flat = re.sub(r"\s+", " ", header)
+    found: dict[str, list[str]] = {}
+    for match in re.finditer(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\(([^()]*)\)\s*;", flat):
+        found[match.group(1)] = _param_type_list(match.group(2))
+    found["camry_host_addr"] = ["const void *"]
+    return found
+
+
+def _rewrite_pointer_arguments(code: str, param_types: dict[str, list[str]]) -> str:
+    """Pass a firmware integer to a pointer parameter as a host pointer."""
+    brace = code.find("{")
+    if brace < 0:
+        return code
+    signature = _c_signature(code)
+    kind = _kind_context(signature, code)
+
+    def rewrite(text: str) -> str:
+        pieces: list[str] = []
+        cursor = 0
+        for match in _CALL.finditer(text):
+            if match.start() < cursor or match.group(1) in _SKIP_CALLS:
+                continue
+            try:
+                close = _match_paren(text, match.end() - 1)
+            except ValueError:
+                continue
+            inner = rewrite(text[match.end():close])
+            types = param_types.get(match.group(1))
+            if types:
+                args = _split_args(inner)
+                if not (len(args) == 1 and not args[0].strip()):
+                    changed = False
+                    rewritten_args: list[str] = []
+                    for index, arg in enumerate(args):
+                        if index >= len(types) or "*" not in types[index]:
+                            rewritten_args.append(arg)
+                            continue
+                        if kind(arg) != "integer":
+                            rewritten_args.append(arg)
+                            continue
+                        changed = True
+                        rewritten_args.append(
+                            f"(({types[index]})camry_host_ptr((uint32_t)({arg.strip()})))"
+                        )
+                    if changed:
+                        inner = ", ".join(rewritten_args)
+            pieces.append(text[cursor:match.end()])
+            pieces.append(inner)
+            cursor = close
+        pieces.append(text[cursor:])
+        return "".join(pieces)
+
+    return code[:brace] + rewrite(code[brace:])
+
+
 def _rewrite_pointer_to_int(code: str, pointers: set[str]) -> str:
+    kind = _kind_context(_c_signature(code), code, pointers)
     pieces: list[str] = []
     cursor = 0
     for match in _INT_CAST.finditer(code):
@@ -459,10 +799,10 @@ def _rewrite_pointer_to_int(code: str, pointers: set[str]) -> str:
         end = _operand_end(code, begin)
         if end == begin:
             continue
-        operand = code[begin:end]
         if end < len(code) and code[end] == "[":
             continue
-        if not _is_pointer_expr(operand, pointers):
+        operand = code[begin:end]
+        if kind(operand) != "pointer":
             continue
         pieces.append(code[cursor:match.start()])
         pieces.append(f"({match.group(1)})camry_host_addr({operand})")
@@ -1612,6 +1952,18 @@ def _compile_tree(functions: list[dict]) -> tuple[set[str], Counter[str], list[s
         rows_by_name[name] = row
     if not rewritten:
         return set(), Counter({"rewrite failed": len(failed_rewrite)}), failed_rewrite
+    param_types = {
+        name: _signature_param_types(signature) for name, signature in signatures.items()
+    }
+    param_types.update(_hand_param_types())
+    for name in list(rewritten):
+        try:
+            rewritten[name] = _rewrite_pointer_arguments(rewritten[name], param_types)
+        except (ValueError, IndexError, KeyError) as exc:
+            failed_rewrite.append(f"{name} {type(exc).__name__}")
+            del rewritten[name]
+            signatures.pop(name, None)
+            rows_by_name.pop(name, None)
 
     def shards_of(names: set[str]) -> dict[str, dict[int, dict]]:
         grouped: dict[str, dict[int, dict]] = {}

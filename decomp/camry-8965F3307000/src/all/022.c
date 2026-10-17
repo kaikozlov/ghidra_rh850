@@ -820,6 +820,35 @@ void FUN_0008a514(uint *param_1)
 
 
 
+undefined4 FUN_0008a538(void)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uint uVar3;
+  uint32_t puVar4;
+  uVar3 = DAT_febf1350;
+  uVar2 = DAT_febf1340;
+  uVar1 = DAT_febf1330;
+  puVar4 = 0xfebeb800u;
+  ICUSCTL = 1;
+  if (~DAT_febf1340 == DAT_febf1350) {
+    if (DAT_febf1330 < DAT_febf132c) {
+      FUN_0008a514(((uint *)camry_host_ptr((uint32_t)(DAT_febf1340))));
+      (*((uint *)camry_host_ptr((uint32_t)(puVar4 + 0x5b40)))) = uVar2 + 0x10;
+      (*((uint *)camry_host_ptr((uint32_t)(puVar4 + 0x5b50)))) = uVar3 - 0x10;
+      (*((uint *)camry_host_ptr((uint32_t)(puVar4 + 0x5b30)))) = uVar1 + 1;
+      return 0;
+    }
+  }
+  else {
+    DAT_febf136d = 1;
+  }
+  return 0x12;
+}
+
+
+
 void FUN_0008a58a(uint *param_1)
 
 {
@@ -838,6 +867,70 @@ void FUN_0008a58a(uint *param_1)
 
 
 
+undefined4 FUN_0008a5ae(void)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uint uVar3;
+  uint32_t puVar4;
+  uVar3 = DAT_febf1354;
+  uVar2 = DAT_febf1344;
+  uVar1 = DAT_febf1338;
+  puVar4 = 0xfebeb800u;
+  ICUSCTL = 2;
+  if (~DAT_febf1344 == DAT_febf1354) {
+    if (DAT_febf1338 < DAT_febf1334) {
+      FUN_0008a58a(((uint *)camry_host_ptr((uint32_t)(DAT_febf1344))));
+      (*((uint *)camry_host_ptr((uint32_t)(puVar4 + 0x5b44)))) = uVar2 + 0x10;
+      (*((uint *)camry_host_ptr((uint32_t)(puVar4 + 0x5b54)))) = uVar3 - 0x10;
+      (*((uint *)camry_host_ptr((uint32_t)(puVar4 + 0x5b38)))) = uVar1 + 1;
+      return 0;
+    }
+  }
+  else {
+    DAT_febf136d = 1;
+  }
+  return 0x12;
+}
+
+
+
+undefined4 FUN_0008a832(void)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uint uVar3;
+  uint32_t puVar4;
+  uint uVar5;
+  
+  uVar3 = DAT_febf1350;
+  uVar2 = DAT_febf1340;
+  uVar1 = DAT_febf1330;
+  puVar4 = 0xfebeb800u;
+  ICUSCTL = 1;
+  if ((~DAT_febf1340 == DAT_febf1350) && (~DAT_febf1348 == DAT_febf1358)) {
+    if (DAT_febf1330 < DAT_febf132c) {
+      uVar5 = DAT_febf1348;
+      if (DAT_febf1330 != DAT_febf132c - 1) {
+        uVar5 = DAT_febf1340;
+      }
+      FUN_0008a514(((uint *)camry_host_ptr((uint32_t)(uVar5))));
+      (*((uint *)camry_host_ptr((uint32_t)(puVar4 + 0x5b40)))) = uVar2 + 0x10;
+      (*((uint *)camry_host_ptr((uint32_t)(puVar4 + 0x5b50)))) = uVar3 - 0x10;
+      (*((uint *)camry_host_ptr((uint32_t)(puVar4 + 0x5b30)))) = uVar1 + 1;
+      return 0;
+    }
+  }
+  else {
+    DAT_febf136d = 1;
+  }
+  return 0x12;
+}
+
+
+
 void FUN_0008aa04(uint *param_1)
 
 {
@@ -850,6 +943,35 @@ void FUN_0008aa04(uint *param_1)
     param_1[1] = uVar1;
   }
   return;
+}
+
+
+
+undefined4 FUN_0008ab82(void)
+
+{
+  uint uVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  
+  uVar1 = DAT_febf1338;
+  puVar2 = 0xfebeb800u;
+  ICUSCTL = 2;
+  if ((~DAT_febf1344 == DAT_febf1354) && (~DAT_febf134c == DAT_febf135c)) {
+    if (DAT_febf1338 < DAT_febf1334) {
+      uVar3 = DAT_febf1344;
+      if (DAT_febf1338 != 0) {
+        uVar3 = DAT_febf134c;
+      }
+      FUN_0008a58a(((uint *)camry_host_ptr((uint32_t)(uVar3))));
+      (*((uint *)camry_host_ptr((uint32_t)(puVar2 + 0x5b38)))) = uVar1 + 1;
+      return 0;
+    }
+  }
+  else {
+    DAT_febf136d = 1;
+  }
+  return 0x12;
 }
 
 
@@ -1021,6 +1143,39 @@ void FUN_0008b134(void)
   f33_app_programming_admission_latched = '\0';
   DAT_febf3b1d = 0xff;
   return;
+}
+
+
+
+/* Exact wrapper ignores incomingr6 record pointer constructedby95B88; no consumed formal
+   arguments.8B1B2 admissionthen8B262 submissionusing ownzeroedword3B14. Successsets3B19=5A
+   andreturns10; anynonzero3B19 laterreturns10 withoutpollingcompletion. Constructed5D4C data
+   isnotdirectresidenthandoffrecord;65F5E usesfixedROM31788. No
+   completedprogramming/sessionpublication implied. */
+
+uint f33_app_programming_handoff_pending_join(void)
+
+{
+  uint uVar1;
+  uchar uVar2;
+  
+  uVar2 = f33_app_programming_pending_latch;
+  if (f33_app_programming_pending_latch == '\0') {
+    uVar1 = f33_app_programming_admit_and_stage();
+    if (uVar1 == 0) {
+      f33_app_programming_local_word = 0;
+      uVar1 = f33_app_programming_submit_local_word(((uint *)camry_host_ptr((uint32_t)((0xfebf3b14u)))));
+      if (uVar1 == 0) {
+        uVar1 = 10;
+        uVar2 = 'Z';
+      }
+    }
+  }
+  else {
+    uVar1 = 10;
+  }
+  f33_app_programming_pending_latch = uVar2;
+  return uVar1;
 }
 
 

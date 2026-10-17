@@ -1708,6 +1708,37 @@ void FUN_000ce8ca(void)
 
 
 
+void FUN_000ce912(char *param_1)
+
+{
+  bool bVar1;
+  int iVar2;
+  uint32_t puVar3;
+  short sVar4;
+  undefined2 uVar5;
+  int iVar6;
+  
+  puVar3 = 0xfebeb800u;
+  sVar4 = f33_abs_s16_wrapping(*(short *)(param_1 + 0x10));
+  iVar6 = (int)sVar4;
+  iVar2 = (int)**(short **)(param_1 + 4);
+  if (iVar6 - iVar2 < 0 != (iVar6 < 0 != iVar2 < 0 && iVar2 < 0 == iVar6 - iVar2 < 0)) {
+    bVar1 = false;
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(0x12b7))))) == '\x01') {
+      bVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(0x1300))))) == *param_1;
+    }
+    param_1[0xc] = bVar1;
+  }
+  uVar5 = 0x400;
+  if (param_1[0xc] == '\x01') {
+    uVar5 = FUN_000d07f2(((short *)camry_host_ptr((uint32_t)(*(undefined4 *)(param_1 + 8)))), iVar6);
+  }
+  *(undefined2 *)(param_1 + 0xe) = uVar5;
+  return;
+}
+
+
+
 /* Constant-block fill: 17 literal assignments into one contiguous cell block; shape-verified.
    Literals are default/reset values; cell meanings are not recovered. */
 

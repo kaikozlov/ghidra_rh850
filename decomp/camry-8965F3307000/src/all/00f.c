@@ -3457,6 +3457,36 @@ void FUN_0003efd4(void)
 
 
 
+/* f33_reset_terminal_monitor wrapper resetting exactly one monitor state
+   ((0xfebe760cu)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_coupled_sample_threshold_both(void)
+
+{
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xfebe760cu)))));
+  return;
+}
+
+
+
+void FUN_0003eff0(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xfebe760cu)))));
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x5044))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x5043))))) = 0;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x5042)))) = 0;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x5040)))) = 0;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x503e)))) = 0;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x503c)))) = 0;
+  return;
+}
+
+
+
 undefined4 FUN_0003f010(void)
 
 {
@@ -3649,6 +3679,34 @@ void f33_record_coupled_sample_threshold_both_failure(void)
 
 
 
+/* f33_reset_terminal_monitor wrapper resetting exactly one monitor state
+   ((0xfebe7614u)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_command_status_bit_clear_a(void)
+
+{
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xfebe7614u)))));
+  return;
+}
+
+
+
+void FUN_0003f2d6(void)
+
+{
+  DAT_febe67c8 = 0;
+  DAT_febe67c9 = 0;
+  DAT_febe67ca = 0;
+  DAT_febe67cc = 0;
+  DAT_febe67ce = 0;
+  DAT_febe67d0 = 0;
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xfebe7614u)))));
+  return;
+}
+
+
+
 undefined4 FUN_0003f2f6(void)
 
 {
@@ -3794,6 +3852,34 @@ void f33_record_command_status_bit_clear_a_failure(void)
 
 {
   f33_report_diagnostic_event_failure(0x74,0x32);
+  return;
+}
+
+
+
+/* f33_reset_terminal_monitor wrapper resetting exactly one monitor state
+   ((0xfebe761cu)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_command_status_bit_clear_b(void)
+
+{
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xfebe761cu)))));
+  return;
+}
+
+
+
+void FUN_0003f4ec(void)
+
+{
+  DAT_febe67d4 = 0;
+  DAT_febe67d5 = 0;
+  DAT_febe67d6 = 0;
+  DAT_febe67d8 = 0;
+  DAT_febe67da = 0;
+  DAT_febe67dc = 0;
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xfebe761cu)))));
   return;
 }
 
@@ -3949,6 +4035,31 @@ void f33_record_command_status_bit_clear_b_failure(void)
 
 
 
+/* f33_reset_terminal_monitor wrapper resetting exactly one monitor state
+   ((0xfebe7624u)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_bounded_sample_or_status_a(void)
+
+{
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xfebe7624u)))));
+  return;
+}
+
+
+
+void FUN_0003f702(void)
+
+{
+  DAT_febe67e0 = 0;
+  DAT_febe67e4 = 0;
+  DAT_febe67e2 = 0;
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xfebe7624u)))));
+  return;
+}
+
+
+
 /* Return readiness latch in r10:5A means admitted, not a void side-effect-only helper. Retain
    completed latch until explicit stage initializer; pending sequencing and counts per
    configured-family readiness contract. No hardware success is inferred from this software latch.
@@ -4026,6 +4137,31 @@ void f33_record_bounded_sample_or_status_a_failure(void)
 
 
 
+/* f33_reset_terminal_monitor wrapper resetting exactly one monitor state
+   ((0xfebe762cu)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_bounded_sample_or_status_b(void)
+
+{
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xfebe762cu)))));
+  return;
+}
+
+
+
+void FUN_0003f88e(void)
+
+{
+  DAT_febe67e8 = 0;
+  DAT_febe67ec = 0;
+  DAT_febe67ea = 0;
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xfebe762cu)))));
+  return;
+}
+
+
+
 /* Return readiness latch in r10:5A means admitted, not a void side-effect-only helper. Retain
    completed latch until explicit stage initializer; pending sequencing and counts per
    configured-family readiness contract. No hardware success is inferred from this software latch.
@@ -4098,6 +4234,33 @@ void f33_record_bounded_sample_or_status_b_failure(void)
 
 {
   f33_report_diagnostic_event_failure(0x8a,0x32);
+  return;
+}
+
+
+
+/* f33_reset_terminal_monitor wrapper resetting exactly one monitor state
+   ((0xfebe7634u)); whole-body shape-verified from the canonical
+   corpus. Per-instance semantics derive from the referenced state cell; not individually executed.
+    */
+
+void f33_reset_requested_state_sample_threshold_a(void)
+
+{
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xfebe7634u)))));
+  return;
+}
+
+
+
+void FUN_0003fa1a(void)
+
+{
+  DAT_febe763c = 0;
+  DAT_febe763d = 0;
+  DAT_febe763e = 0;
+  DAT_febe7640 = 0;
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xfebe7634u)))));
   return;
 }
 
@@ -4223,6 +4386,33 @@ void f33_record_requested_state_sample_threshold_a_failure(void)
 
 
 
+/* f33_reset_terminal_monitor wrapper resetting exactly one monitor state
+   ((0xfebe7644u)); whole-body shape-verified from the canonical
+   corpus. Per-instance semantics derive from the referenced state cell; not individually executed.
+    */
+
+void f33_reset_requested_state_sample_threshold_b(void)
+
+{
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xfebe7644u)))));
+  return;
+}
+
+
+
+void FUN_0003fbf4(void)
+
+{
+  DAT_febe764c = 0;
+  DAT_febe764d = 0;
+  DAT_febe764e = 0;
+  DAT_febe7650 = 0;
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xfebe7644u)))));
+  return;
+}
+
+
+
 bool FUN_0003fc10(void)
 
 {
@@ -4343,6 +4533,70 @@ void f33_record_requested_state_sample_threshold_b_failure(void)
 
 
 
+/* f33_reset_terminal_monitor wrapper resetting exactly one monitor state
+   ((0xfebe67f0u)); whole-body shape-verified from the canonical
+   corpus. Per-instance semantics derive from the referenced state cell; not individually executed.
+    */
+
+void f33_reset_asserted_state_sample_threshold_a(void)
+
+{
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xfebe67f0u)))));
+  return;
+}
+
+
+
+/* f33_reset_terminal_monitor wrapper resetting exactly one monitor state
+   ((0xfebe67f0u)); whole-body shape-verified from the canonical
+   corpus. Per-instance semantics derive from the referenced state cell; not individually executed.
+    */
+
+void f33_reset_asserted_state_sample_threshold_a_3fdce(void)
+
+{
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xfebe67f0u)))));
+  return;
+}
+
+
+
+/* Configured mode0209 channela monitor; 1 eight-byte states at67F0. Own qualification6764 bit0
+   holds state without reset. Gate asserted_zero (numeric states, no physical meaning); threshold
+   pass0/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot10 with
+   kind(s)0x1d; no confirmed source leaves previous action untouched. Callback table28448; failure
+   events0x9d. See configured-family matrix for readiness sequencing and exact predicate. */
+
+void f33_step_asserted_state_sample_threshold_a(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_0002bba4 == 'Z') {
+    puVar1 = 0xfebeb800u;
+    f33_force_unconfirmed_terminal_monitor_healthy
+              ((0xfebe67f0u),
+               (0x2b696u),
+               (0x28448u));
+  }
+  else if ((DAT_febe6764 & 1) == 0) {
+    puVar1 = 0xfebeb800u;
+    f33_step_terminal_monitor
+              (((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xfebe67f0u)))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b696u)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x28448u)))));
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x5010))))) == '\0') {
+    FUN_00032036(0x1e);
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x5010))))) == '\"') {
+    f33_retain_and_clear_fault_record(10);
+    f33_encode_fault_action_kind('\n','\x1d');
+    f33_select_current_fault_record(10);
+  }
+  return;
+}
+
+
+
 /* No-argument configured classifier. Gate asserted_zero: requested==2 &&observed==0
    &&(6620&(6<<b))==(2<<b) &&bit(661C,b+2)==1 &&bit(6628,b+1)==1 &&6614.bit0==0 &&65F0==5A. Closed
    gate returns44, otherwise22 iff 66B2<965 (configured equal thresholds in both3328 partitions),
@@ -4385,6 +4639,70 @@ void f33_record_asserted_state_sample_threshold_a_failure(void)
 
 {
   f33_report_diagnostic_event_failure(0x9d,0x32);
+  return;
+}
+
+
+
+/* f33_reset_terminal_monitor wrapper resetting exactly one monitor state
+   ((0xfebe67f8u)); whole-body shape-verified from the canonical
+   corpus. Per-instance semantics derive from the referenced state cell; not individually executed.
+    */
+
+void f33_reset_asserted_state_sample_threshold_b(void)
+
+{
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xfebe67f8u)))));
+  return;
+}
+
+
+
+/* f33_reset_terminal_monitor wrapper resetting exactly one monitor state
+   ((0xfebe67f8u)); whole-body shape-verified from the canonical
+   corpus. Per-instance semantics derive from the referenced state cell; not individually executed.
+    */
+
+void f33_reset_asserted_state_sample_threshold_b_3ff08(void)
+
+{
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xfebe67f8u)))));
+  return;
+}
+
+
+
+/* Configured mode0209 channelb monitor; 1 eight-byte states at67F8. Own qualification6764 bit1
+   holds state without reset. Gate asserted_zero (numeric states, no physical meaning); threshold
+   pass0/fail200 with strict crossings. Any confirmed22 retains/replaces shared slot11 with
+   kind(s)0x1e; no confirmed source leaves previous action untouched. Callback table28454; failure
+   events0xc7. See configured-family matrix for readiness sequencing and exact predicate. */
+
+void f33_step_asserted_state_sample_threshold_b(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_0002bba8 == 'Z') {
+    puVar1 = 0xfebeb800u;
+    f33_force_unconfirmed_terminal_monitor_healthy
+              ((0xfebe67f8u),
+               (0x2b69au),
+               (0x28454u));
+  }
+  else if ((DAT_febe6764 >> 1 & 1) == 0) {
+    puVar1 = 0xfebeb800u;
+    f33_step_terminal_monitor
+              (((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xfebe67f8u)))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b69au)))), ((F33TerminalMonitorCallbacks *)camry_host_ptr((uint32_t)((0x28454u)))));
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x5008))))) == '\0') {
+    FUN_00032050(0x1e);
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x5008))))) == '\"') {
+    f33_retain_and_clear_fault_record(0xb);
+    f33_encode_fault_action_kind('\v','\x1e');
+    f33_select_current_fault_record(0xb);
+  }
   return;
 }
 

@@ -1450,6 +1450,58 @@ void f33_publish_local_channel_a_monitor_status(uchar index,uint packed_status)
 
 
 
+/* f33_reset_latched_monitor wrapper resetting exactly one monitor state
+   ((0xfebe7b50u)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_45356(void)
+
+{
+  f33_reset_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b50u)))));
+  return;
+}
+
+
+
+/* f33_reset_latched_monitor wrapper resetting exactly one monitor state
+   ((0xfebe7b50u)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_45356_45346(void)
+
+{
+  f33_reset_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b50u)))));
+  return;
+}
+
+
+
+/* State7B50 -> slot7 index1. Qualification6764.bit0 holds confirmed state via6AE18; otherwise
+   predicate requires6624.bit0 and65F6=5A, then8284=5A fails. Limits200/200; event8E. Policy2BC54=0
+   in this image. */
+
+void f33_step_local_output_status_a_monitor(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_0002bc54 == 'Z') {
+    f33_reset_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b50u)))));
+  }
+  else if ((DAT_febe6764 & 1) == 0) {
+    f33_step_latched_monitor
+              (((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b50u)))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b9b4u)))), ((F33TwoSidedMonitorCallbacks *)camry_host_ptr((uint32_t)((0x28ac8u)))));
+  }
+  else {
+    f33_retain_disabled_latched_monitor
+              (((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b50u)))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b9b4u)))));
+  }
+  f33_publish_local_channel_a_monitor_status('\x01',(*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x3cb0)))));
+  return;
+}
+
+
+
 /* 6624.bit0 and65F6=5A admit;8284=5A returns22,otherwise11; inadmissible44.8284 is staged
    local383A.bit3. */
 
@@ -1485,6 +1537,58 @@ void f33_report_scalar_event_8e_failure(void)
 
 {
   f33_report_diagnostic_event_failure(0x8e,0x32);
+  return;
+}
+
+
+
+/* f33_reset_latched_monitor wrapper resetting exactly one monitor state
+   ((0xfebe7b5cu)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_45410(void)
+
+{
+  f33_reset_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b5cu)))));
+  return;
+}
+
+
+
+/* f33_reset_latched_monitor wrapper resetting exactly one monitor state
+   ((0xfebe7b5cu)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_45410_45400(void)
+
+{
+  f33_reset_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b5cu)))));
+  return;
+}
+
+
+
+/* State7B5C -> slot7 index0. Requires qualification bit0 clear andE820=5A; predicate
+   requires64DC.bit1/64D4.bit1 clear and65F6=5A, then8282=5A fails. Limits16/16; event77. Disabled
+   gate preserves confirmed state. */
+
+void f33_step_local_channel_mismatch_a_monitor(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_0002bc58 == 'Z') {
+    f33_reset_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b5cu)))));
+  }
+  else if (((DAT_febe6764 & 1) == 0) && (DAT_febee820 == 'Z')) {
+    f33_step_latched_monitor
+              (((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b5cu)))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b9b8u)))), ((F33TwoSidedMonitorCallbacks *)camry_host_ptr((uint32_t)((0x28afcu)))));
+  }
+  else {
+    f33_retain_disabled_latched_monitor
+              (((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b5cu)))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b9b8u)))));
+  }
+  f33_publish_local_channel_a_monitor_status('\0',(*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x3ca4)))));
   return;
 }
 
@@ -1602,6 +1706,57 @@ void f33_publish_local_channel_b_monitor_status(uchar index,uint packed_status)
 
 
 
+/* f33_reset_latched_monitor wrapper resetting exactly one monitor state
+   ((0xfebe7b6cu)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_45572(void)
+
+{
+  f33_reset_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b6cu)))));
+  return;
+}
+
+
+
+/* f33_reset_latched_monitor wrapper resetting exactly one monitor state
+   ((0xfebe7b6cu)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_45572_45562(void)
+
+{
+  f33_reset_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b6cu)))));
+  return;
+}
+
+
+
+/* State7B6C -> slot8 index1. Qualification6764.bit1 holds confirmed state; predicate
+   requires6624.bit1 and65F7=5A, then8283=5A fails. Limits200/200; event8F. */
+
+void f33_step_local_output_status_b_monitor(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_0002bc5c == 'Z') {
+    f33_reset_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b6cu)))));
+  }
+  else if ((DAT_febe6764 >> 1 & 1) == 0) {
+    f33_step_latched_monitor
+              (((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b6cu)))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b9bcu)))), ((F33TwoSidedMonitorCallbacks *)camry_host_ptr((uint32_t)((0x28b30u)))));
+  }
+  else {
+    f33_retain_disabled_latched_monitor
+              (((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b6cu)))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b9bcu)))));
+  }
+  f33_publish_local_channel_b_monitor_status('\x01',(*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x3c94)))));
+  return;
+}
+
+
+
 /* 6624.bit1 and65F7=5A admit;8283=5A fails22 else11; inadmissible44.8283 is local383A.bit2. */
 
 uint f33_classify_local_output_status_b(void)
@@ -1641,6 +1796,57 @@ void f33_report_scalar_event_8f_failure(void)
 
 
 
+/* f33_reset_latched_monitor wrapper resetting exactly one monitor state
+   ((0xfebe7b78u)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_4562a(void)
+
+{
+  f33_reset_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b78u)))));
+  return;
+}
+
+
+
+/* f33_reset_latched_monitor wrapper resetting exactly one monitor state
+   ((0xfebe7b78u)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_4562a_4561a(void)
+
+{
+  f33_reset_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b78u)))));
+  return;
+}
+
+
+
+/* State7B78 -> slot8 index0. Requires qualification bit1 clear andE820=5A; predicate
+   requires64DC.bit17/64D4.bit17 clear and65F7=5A, then8281=5A fails. Limits16/16; event73. */
+
+void f33_step_local_channel_mismatch_b_monitor(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_0002bc60 == 'Z') {
+    f33_reset_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b78u)))));
+  }
+  else if (((DAT_febe6764 >> 1 & 1) == 0) && (DAT_febee820 == 'Z')) {
+    f33_step_latched_monitor
+              (((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b78u)))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b9c0u)))), ((F33TwoSidedMonitorCallbacks *)camry_host_ptr((uint32_t)((0x28b64u)))));
+  }
+  else {
+    f33_retain_disabled_latched_monitor
+              (((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b78u)))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b9c0u)))));
+  }
+  f33_publish_local_channel_b_monitor_status('\0',(*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x3c88)))));
+  return;
+}
+
+
+
 /* Report event73 through51E2C/52A2A healthy-observed bitmap; does not clear current failure
    history. */
 
@@ -1659,6 +1865,60 @@ void f33_report_scalar_event_73_failure(void)
 
 {
   f33_report_diagnostic_event_failure(0x73,0x32);
+  return;
+}
+
+
+
+/* f33_reset_recoverable_monitor wrapper resetting exactly one monitor state
+   ((0xfebe7b84u)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_456fa(void)
+
+{
+  f33_reset_recoverable_monitor(((F33RecoverableMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b84u)))));
+  return;
+}
+
+
+
+/* f33_reset_recoverable_monitor wrapper resetting exactly one monitor state
+   ((0xfebe7b84u)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_456fa_456ea(void)
+
+{
+  f33_reset_recoverable_monitor(((F33RecoverableMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b84u)))));
+  return;
+}
+
+
+
+/* State7B84 -> slot6 index3. E820 admits recoverable qualifier with limits25/125/25. Reset/disabled
+   gate also clears admission count6868. Predicate relates E822/E823, receive803C/803E and
+   unsigned66B8; eventA5. */
+
+void f33_step_admitted_scalar_receive_condition_monitor(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_0002bc64 == 'Z') {
+    DAT_febe6868 = 0;
+    f33_reset_recoverable_monitor(((F33RecoverableMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b84u)))));
+  }
+  else if (DAT_febee820 == 'Z') {
+    f33_step_recoverable_monitor
+              (((F33RecoverableMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b84u)))), ((F33RecoverableMonitorLimits *)camry_host_ptr((uint32_t)((0x2b9c4u)))), ((F33RecoverableMonitorCallbacks *)camry_host_ptr((uint32_t)((0x28b98u)))));
+  }
+  else {
+    DAT_febe6868 = 0;
+    f33_retain_disabled_recoverable_monitor
+              (((F33RecoverableMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b84u)))), ((F33RecoverableMonitorLimits *)camry_host_ptr((uint32_t)((0x2b9c4u)))));
+  }
+  f33_publish_scalar_relation_monitor_status('\x03',(*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x3c7c)))));
   return;
 }
 
@@ -1745,6 +2005,58 @@ void f33_report_scalar_event_a5_pass(void)
 
 
 
+/* f33_reset_recoverable_monitor wrapper resetting exactly one monitor state
+   ((0xfebe7b90u)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_45838(void)
+
+{
+  f33_reset_recoverable_monitor(((F33RecoverableMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b90u)))));
+  return;
+}
+
+
+
+/* f33_reset_recoverable_monitor wrapper resetting exactly one monitor state
+   ((0xfebe7b90u)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_45838_45828(void)
+
+{
+  f33_reset_recoverable_monitor(((F33RecoverableMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b90u)))));
+  return;
+}
+
+
+
+/* State7B90 -> slot6 index0. Requires qualification bits0/1 clear andE820=5A, otherwise retain
+   confirmed state. Relation predicate uses unsigned66B8 against66AE/66B0 plus source-status gates.
+   Recoverable limits125/125/25; eventA2. */
+
+void f33_step_paired_scalar_relation_monitor(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_0002bc68 == 'Z') {
+    f33_reset_recoverable_monitor(((F33RecoverableMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b90u)))));
+  }
+  else if (((DAT_febe6764 & 3) == 0) && (DAT_febee820 == 'Z')) {
+    f33_step_recoverable_monitor
+              (((F33RecoverableMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b90u)))), ((F33RecoverableMonitorLimits *)camry_host_ptr((uint32_t)((0x2b9cau)))), ((F33RecoverableMonitorCallbacks *)camry_host_ptr((uint32_t)((0x28bd4u)))));
+  }
+  else {
+    f33_retain_disabled_recoverable_monitor
+              (((F33RecoverableMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b90u)))), ((F33RecoverableMonitorLimits *)camry_host_ptr((uint32_t)((0x2b9cau)))));
+  }
+  f33_publish_scalar_relation_monitor_status('\0',(*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x3c70)))));
+  return;
+}
+
+
+
 /* Any6751/52 or65C2/3/4/5 nonzero returns44. Otherwise66B8>4736 and either66AE/66B0<=4096
    returns22;66B8<=4736 and either peer<=4096 returns11; other combinations33. All raw values
    unsigned. */
@@ -1826,6 +2138,57 @@ void f33_report_scalar_event_a2_pass(void)
 
 
 
+/* f33_reset_latched_monitor wrapper resetting exactly one monitor state
+   ((0xfebe7b9cu)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_4599c(void)
+
+{
+  f33_reset_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b9cu)))));
+  return;
+}
+
+
+
+/* f33_reset_latched_monitor wrapper resetting exactly one monitor state
+   ((0xfebe7b9cu)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_4599c_4598c(void)
+
+{
+  f33_reset_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b9cu)))));
+  return;
+}
+
+
+
+/* State7B9C -> slot6 index1. Only qualification bit1 SET andE820=5A runs qualifier. Otherwise
+   report healthy-observed9E without clearing retained monitor state, then publish its low status
+   byte. Limits0/125; confirmed failure is latched until explicit reset. */
+
+void f33_step_qualified_scalar_relation_a_monitor(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_0002bc6c == 'Z') {
+    f33_reset_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b9cu)))));
+  }
+  else if (((DAT_febe6764 >> 1 & 1) == 0) || (DAT_febee820 != 'Z')) {
+    f33_report_diagnostic_healthy_observed(0x9e);
+  }
+  else {
+    f33_step_latched_monitor
+              (((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7b9cu)))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b9d0u)))), ((F33TwoSidedMonitorCallbacks *)camry_host_ptr((uint32_t)((0x28c10u)))));
+  }
+  f33_publish_scalar_relation_monitor_status('\x01',(*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x3c64)))));
+  return;
+}
+
+
+
 /* 6751 or65C2/4/5 nonzero returns44; otherwise unsigned66B8>4736 and66AE<=4096 returns22,else11. */
 
 uint f33_classify_qualified_scalar_relation_a(void)
@@ -1849,6 +2212,56 @@ void f33_report_scalar_event_9e_failure(void)
 
 {
   f33_report_diagnostic_event_failure(0x9e,400);
+  return;
+}
+
+
+
+/* f33_reset_latched_monitor wrapper resetting exactly one monitor state
+   ((0xfebe7ba8u)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_45a6c(void)
+
+{
+  f33_reset_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7ba8u)))));
+  return;
+}
+
+
+
+/* f33_reset_latched_monitor wrapper resetting exactly one monitor state
+   ((0xfebe7ba8u)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_45a6c_45a5c(void)
+
+{
+  f33_reset_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7ba8u)))));
+  return;
+}
+
+
+
+/* State7BA8 -> slot6 index2. Only qualification bit0 SET andE820=5A runs qualifier. Otherwise
+   healthy-observed9F leaves retained state unchanged. Limits0/125; raw source66B0 replaces66AE. */
+
+void f33_step_qualified_scalar_relation_b_monitor(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_0002bc70 == 'Z') {
+    f33_reset_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7ba8u)))));
+  }
+  else if (((DAT_febe6764 & 1) == 0) || (DAT_febee820 != 'Z')) {
+    f33_report_diagnostic_healthy_observed(0x9f);
+  }
+  else {
+    f33_step_latched_monitor
+              (((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebe7ba8u)))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0x2b9d4u)))), ((F33TwoSidedMonitorCallbacks *)camry_host_ptr((uint32_t)((0x28c44u)))));
+  }
+  f33_publish_scalar_relation_monitor_status('\x02',(*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x3c58)))));
   return;
 }
 
@@ -2195,6 +2608,58 @@ void FUN_00045e12(void)
 
 
 
+/* f33_reset_recoverable_monitor wrapper resetting exactly one monitor state
+   ((0xfebe7bdcu)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_45e74(void)
+
+{
+  f33_reset_recoverable_monitor(((F33RecoverableMonitorState *)camry_host_ptr((uint32_t)((0xfebe7bdcu)))));
+  return;
+}
+
+
+
+/* f33_reset_recoverable_monitor wrapper resetting exactly one monitor state
+   ((0xfebe7bdcu)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_45e74_45e64(void)
+
+{
+  f33_reset_recoverable_monitor(((F33RecoverableMonitorState *)camry_host_ptr((uint32_t)((0xfebe7bdcu)))));
+  return;
+}
+
+
+
+/* State7BDC -> slot18 index0. Qualification bit0 clear admits recoverable qualifier; otherwise
+   retain confirmed state. Raw unsigned6492 range1206..65231 inclusive. Pass/fail/recovery
+   limits25/25/25; event88. */
+
+void f33_step_raw_thermistor_range_a_monitor(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_0002bc74 == 'Z') {
+    f33_reset_recoverable_monitor(((F33RecoverableMonitorState *)camry_host_ptr((uint32_t)((0xfebe7bdcu)))));
+  }
+  else if ((DAT_febe6764 & 1) == 0) {
+    f33_step_recoverable_monitor
+              (((F33RecoverableMonitorState *)camry_host_ptr((uint32_t)((0xfebe7bdcu)))), ((F33RecoverableMonitorLimits *)camry_host_ptr((uint32_t)((0x2ba0cu)))), ((F33RecoverableMonitorCallbacks *)camry_host_ptr((uint32_t)((0x28c78u)))));
+  }
+  else {
+    f33_retain_disabled_recoverable_monitor
+              (((F33RecoverableMonitorState *)camry_host_ptr((uint32_t)((0xfebe7bdcu)))), ((F33RecoverableMonitorLimits *)camry_host_ptr((uint32_t)((0x2ba0cu)))));
+  }
+  f33_publish_thermistor_range_monitor_status('\0',(*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x3c24)))));
+  return;
+}
+
+
+
 /* Unsigned6492 inside inclusive1206..65231 returns11,otherwise22. LD.HU and unsigned branches prove
    raw-domain bounds, not signed temperatures. */
 
@@ -2239,6 +2704,57 @@ void f33_report_scalar_event_88_pass(void)
 
 {
   f33_report_diagnostic_event_pass(0x88);
+  return;
+}
+
+
+
+/* f33_reset_recoverable_monitor wrapper resetting exactly one monitor state
+   ((0xfebe7be8u)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_45f32(void)
+
+{
+  f33_reset_recoverable_monitor(((F33RecoverableMonitorState *)camry_host_ptr((uint32_t)((0xfebe7be8u)))));
+  return;
+}
+
+
+
+/* f33_reset_recoverable_monitor wrapper resetting exactly one monitor state
+   ((0xfebe7be8u)); whole-body shape-verified from the canonical corpus.
+   Per-instance semantics derive from the referenced state cell; not individually executed. */
+
+void f33_reset_scalar_monitor_45f32_45f22(void)
+
+{
+  f33_reset_recoverable_monitor(((F33RecoverableMonitorState *)camry_host_ptr((uint32_t)((0xfebe7be8u)))));
+  return;
+}
+
+
+
+/* State7BE8 -> slot18 index1. Qualification bit1 clear admits recoverable qualifier. Raw
+   unsigned6498 range1206..65231 inclusive; same25/25/25 limits; event85. */
+
+void f33_step_raw_thermistor_range_b_monitor(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_0002bc78 == 'Z') {
+    f33_reset_recoverable_monitor(((F33RecoverableMonitorState *)camry_host_ptr((uint32_t)((0xfebe7be8u)))));
+  }
+  else if ((DAT_febe6764 >> 1 & 1) == 0) {
+    f33_step_recoverable_monitor
+              (((F33RecoverableMonitorState *)camry_host_ptr((uint32_t)((0xfebe7be8u)))), ((F33RecoverableMonitorLimits *)camry_host_ptr((uint32_t)((0x2ba12u)))), ((F33RecoverableMonitorCallbacks *)camry_host_ptr((uint32_t)((0x28cb4u)))));
+  }
+  else {
+    f33_retain_disabled_recoverable_monitor
+              (((F33RecoverableMonitorState *)camry_host_ptr((uint32_t)((0xfebe7be8u)))), ((F33RecoverableMonitorLimits *)camry_host_ptr((uint32_t)((0x2ba12u)))));
+  }
+  f33_publish_thermistor_range_monitor_status('\x01',(*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x3c18)))));
   return;
 }
 
@@ -2400,6 +2916,62 @@ void f33_return_only_stub_4606c(void)
 void f33_return_only_stub_4606e(void)
 
 {
+  return;
+}
+
+
+
+void FUN_00046070(void)
+
+{
+  FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7c00u)))));
+  return;
+}
+
+
+
+void FUN_00046080(void)
+
+{
+  FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7c00u)))));
+  return;
+}
+
+
+
+void FUN_00046090(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_febe8a24 != 'Z') {
+    return;
+  }
+  if (DAT_0002bc7c == 'Z') {
+    FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7c00u)))));
+  }
+  else {
+    if ((DAT_febeeb85 == 'Z') && ((DAT_febe71ec >> 5 & 1) == 0)) {
+      puVar1 = 0xfebeb800u;
+      f33_step_escalating_monitor
+                (((F33EscalatingMonitorState *)camry_host_ptr((uint32_t)((0xfebe7c00u)))), (ushort *)((undefined *)camry_host_ptr(0x2ba20u)), 
+                 (uint *)&PTR_f33_classify_snapshot_status_a_00028cf0);
+      if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3bf0))))) == 'Z') {
+        f33_force_monitor_escalation
+                  (((F33EscalatingMonitorState *)camry_host_ptr((uint32_t)((0xfebe7c00u)))), (ushort *)((undefined *)camry_host_ptr(0x2ba20u)), 
+                   (uint *)&PTR_f33_classify_snapshot_status_a_00028cf0);
+      }
+      goto LAB_0004610e;
+    }
+    f33_retain_disabled_escalating_monitor(((F33EscalatingMonitorState *)camry_host_ptr((uint32_t)((0xfebe7c00u)))), (ushort *)((undefined *)camry_host_ptr(0x2ba20u)));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3bf0))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3bef))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3bee))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3bed))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3bec))))) = 0;
+LAB_0004610e:
+  f33_publish_shared_snapshot_monitor_status(0,(*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x3c00)))));
   return;
 }
 
@@ -2577,6 +3149,62 @@ void f33_report_diagnostic_event_failure_155_10_46334(void)
 
 {
   f33_report_diagnostic_event_failure(0x155,10);
+  return;
+}
+
+
+
+void FUN_00046346(void)
+
+{
+  FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7c1cu)))));
+  return;
+}
+
+
+
+void FUN_00046356(void)
+
+{
+  FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7c1cu)))));
+  return;
+}
+
+
+
+void FUN_00046366(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_febe8a24 != 'Z') {
+    return;
+  }
+  if (DAT_0002bc80 == 'Z') {
+    FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7c1cu)))));
+  }
+  else {
+    if ((DAT_febeeb85 == 'Z') && ((DAT_febe71ec >> 6 & 1) == 0)) {
+      puVar1 = 0xfebeb800u;
+      f33_step_escalating_monitor
+                (((F33EscalatingMonitorState *)camry_host_ptr((uint32_t)((0xfebe7c1cu)))), (ushort *)((undefined *)camry_host_ptr(0x2ba30u)), 
+                 (uint *)&PTR_f33_classify_snapshot_status_b_00028d34);
+      if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3bd4))))) == 'Z') {
+        f33_force_monitor_escalation
+                  (((F33EscalatingMonitorState *)camry_host_ptr((uint32_t)((0xfebe7c1cu)))), (ushort *)((undefined *)camry_host_ptr(0x2ba30u)), 
+                   (uint *)&PTR_f33_classify_snapshot_status_b_00028d34);
+      }
+      goto LAB_000463e4;
+    }
+    f33_retain_disabled_escalating_monitor(((F33EscalatingMonitorState *)camry_host_ptr((uint32_t)((0xfebe7c1cu)))), (ushort *)((undefined *)camry_host_ptr(0x2ba30u)));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3bd4))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3bd3))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3bd2))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3bd1))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3bd0))))) = 0;
+LAB_000463e4:
+  f33_publish_shared_snapshot_monitor_status(1,(*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x3be4)))));
   return;
 }
 
@@ -3197,6 +3825,62 @@ void f33_report_diagnostic_event_pass_50_46aee(void)
 
 
 
+void FUN_00046afe(void)
+
+{
+  FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7c74u)))));
+  return;
+}
+
+
+
+void FUN_00046b0e(void)
+
+{
+  FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7c74u)))));
+  return;
+}
+
+
+
+void FUN_00046b1e(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_febe8a24 != 'Z') {
+    return;
+  }
+  if (DAT_0002bc88 == 'Z') {
+    FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7c74u)))));
+  }
+  else {
+    if ((DAT_febeeb85 == 'Z') && ((DAT_febe71ec >> 5 & 1) == 0)) {
+      puVar1 = 0xfebeb800u;
+      f33_step_escalating_monitor
+                (((F33EscalatingMonitorState *)camry_host_ptr((uint32_t)((0xfebe7c74u)))), (ushort *)((undefined *)camry_host_ptr(0x2ba46u)), (uint *)&PTR_FUN_00028db4);
+      if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3b7c))))) == 'Z') {
+        f33_force_monitor_escalation
+                  (((F33EscalatingMonitorState *)camry_host_ptr((uint32_t)((0xfebe7c74u)))), (ushort *)((undefined *)camry_host_ptr(0x2ba46u)), (uint *)&PTR_FUN_00028db4)
+        ;
+      }
+      goto LAB_00046b9e;
+    }
+    f33_retain_disabled_escalating_monitor(((F33EscalatingMonitorState *)camry_host_ptr((uint32_t)((0xfebe7c74u)))), (ushort *)((undefined *)camry_host_ptr(0x2ba46u)));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3b7c))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3b7b))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3b7a))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3b79))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3b78))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3b77))))) = 0;
+LAB_00046b9e:
+  f33_publish_shared_snapshot_monitor_status(2,(*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x3b8c)))));
+  return;
+}
+
+
+
 undefined4 FUN_00046bac(void)
 
 {
@@ -3378,6 +4062,62 @@ void f33_report_diagnostic_event_failure_160_10_46df6(void)
 
 {
   f33_report_diagnostic_event_failure(0x160,10);
+  return;
+}
+
+
+
+void FUN_00046e08(void)
+
+{
+  FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7c90u)))));
+  return;
+}
+
+
+
+void FUN_00046e18(void)
+
+{
+  FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7c90u)))));
+  return;
+}
+
+
+
+void FUN_00046e28(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_febe8a24 != 'Z') {
+    return;
+  }
+  if (DAT_0002bc8c == 'Z') {
+    FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7c90u)))));
+  }
+  else {
+    if ((DAT_febeeb85 == 'Z') && ((DAT_febe71ec >> 6 & 1) == 0)) {
+      puVar1 = 0xfebeb800u;
+      f33_step_escalating_monitor
+                (((F33EscalatingMonitorState *)camry_host_ptr((uint32_t)((0xfebe7c90u)))), (ushort *)((undefined *)camry_host_ptr(0x2ba56u)), (uint *)&PTR_FUN_00028df8);
+      if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3b60))))) == 'Z') {
+        f33_force_monitor_escalation
+                  (((F33EscalatingMonitorState *)camry_host_ptr((uint32_t)((0xfebe7c90u)))), (ushort *)((undefined *)camry_host_ptr(0x2ba56u)), (uint *)&PTR_FUN_00028df8)
+        ;
+      }
+      goto LAB_00046ea8;
+    }
+    f33_retain_disabled_escalating_monitor(((F33EscalatingMonitorState *)camry_host_ptr((uint32_t)((0xfebe7c90u)))), (ushort *)((undefined *)camry_host_ptr(0x2ba56u)));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3b60))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3b5f))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3b5e))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3b5d))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3b5c))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3b5b))))) = 0;
+LAB_00046ea8:
+  f33_publish_shared_snapshot_monitor_status(3,(*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x3b70)))));
   return;
 }
 
@@ -3745,6 +4485,49 @@ void f33_publish_shared_snapshot_monitor_status(uint index,uint packed)
 
 
 
+void FUN_000473ec(void)
+
+{
+  FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7cc8u)))));
+  return;
+}
+
+
+
+void FUN_000473fc(void)
+
+{
+  FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7cc8u)))));
+  return;
+}
+
+
+
+void FUN_0004740c(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_febe8a24 == 'Z') {
+    if (DAT_0002bc90 == 'Z') {
+      FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7cc8u)))));
+    }
+    else if ((DAT_febeeb85 == 'Z') && ((DAT_febe71ec >> 5 & 1) == 0)) {
+      f33_step_escalating_monitor
+                (((F33EscalatingMonitorState *)camry_host_ptr((uint32_t)((0xfebe7cc8u)))), (ushort *)((undefined *)camry_host_ptr(0x2ba66u)), 
+                 (uint *)&PTR_f33_classify_snapshot_bit3_a_00028e3c);
+    }
+    else {
+      f33_retain_disabled_escalating_monitor(((F33EscalatingMonitorState *)camry_host_ptr((uint32_t)((0xfebe7cc8u)))), (ushort *)((undefined *)camry_host_ptr(0x2ba66u)))
+      ;
+    }
+    f33_publish_shared_snapshot_monitor_status(6,(*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x3b38)))));
+  }
+  return;
+}
+
+
+
 /* Exact slot0/1 callback predicate. Return11/22/33/44 protocol; software source, qualification and
    retained-snapshot conditions are not physical freshness guarantees. ChannelA bit3 counter-change
    predicate requires inclusive7DB2>=2125 and initial evidence admission. */
@@ -3785,6 +4568,49 @@ void f33_report_diagnostic_event_failure_16b_10_474a2(void)
 
 {
   f33_report_diagnostic_event_failure(0x16b,10);
+  return;
+}
+
+
+
+void FUN_000474b4(void)
+
+{
+  FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7cdcu)))));
+  return;
+}
+
+
+
+void FUN_000474c4(void)
+
+{
+  FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7cdcu)))));
+  return;
+}
+
+
+
+void FUN_000474d4(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_febe8a24 == 'Z') {
+    if (DAT_0002bc94 == 'Z') {
+      FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7cdcu)))));
+    }
+    else if ((DAT_febeeb85 == 'Z') && ((DAT_febe71ec >> 6 & 1) == 0)) {
+      f33_step_escalating_monitor
+                (((F33EscalatingMonitorState *)camry_host_ptr((uint32_t)((0xfebe7cdcu)))), (ushort *)((undefined *)camry_host_ptr(0x2ba76u)), 
+                 (uint *)&PTR_f33_classify_snapshot_bit3_b_00028e80);
+    }
+    else {
+      f33_retain_disabled_escalating_monitor(((F33EscalatingMonitorState *)camry_host_ptr((uint32_t)((0xfebe7cdcu)))), (ushort *)((undefined *)camry_host_ptr(0x2ba76u)))
+      ;
+    }
+    f33_publish_shared_snapshot_monitor_status(7,(*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x3b24)))));
+  }
   return;
 }
 
@@ -3835,6 +4661,24 @@ void f33_report_diagnostic_event_failure_16c_10_4756a(void)
 
 
 
+void FUN_0004757c(void)
+
+{
+  FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7cf0u)))));
+  return;
+}
+
+
+
+void FUN_0004758c(void)
+
+{
+  FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7cf0u)))));
+  return;
+}
+
+
+
 /* Exact slot0/1 callback predicate. Return11/22/33/44 protocol; software source, qualification and
    retained-snapshot conditions are not physical freshness guarantees. ChannelA ancillary
    status/sequence change uses strictly7DB2<2125, opposite main gate; no diagnostic callbacks. */
@@ -3880,6 +4724,24 @@ uint f33_classify_snapshot_low_gate_a(void)
 
 
 
+void FUN_00047682(void)
+
+{
+  FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7d04u)))));
+  return;
+}
+
+
+
+void FUN_00047692(void)
+
+{
+  FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7d04u)))));
+  return;
+}
+
+
+
 /* Exact slot0/1 callback predicate. Return11/22/33/44 protocol; software source, qualification and
    retained-snapshot conditions are not physical freshness guarantees. Parallel channelB ancillary
    low-gate change predicate; no diagnostic callbacks. */
@@ -3921,6 +4783,58 @@ uint f33_classify_snapshot_low_gate_b(void)
   DAT_febe7d16 = DAT_febe6336;
   DAT_febe7d17 = DAT_febe6337;
   return uVar2;
+}
+
+
+
+void FUN_00047788(void)
+
+{
+  FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7d18u)))));
+  return;
+}
+
+
+
+void FUN_00047798(void)
+
+{
+  FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7d18u)))));
+  return;
+}
+
+
+
+void FUN_000477a8(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_febe8a24 != 'Z') {
+    return;
+  }
+  if (DAT_0002bca0 == 'Z') {
+    FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7d18u)))));
+  }
+  else {
+    if ((DAT_febeeb85 == 'Z') && ((DAT_febe71ec >> 5 & 1) == 0)) {
+      puVar1 = 0xfebeb800u;
+      f33_step_escalating_monitor
+                (((F33EscalatingMonitorState *)camry_host_ptr((uint32_t)((0xfebe7d18u)))), (ushort *)((undefined *)camry_host_ptr(0x2baa6u)), 
+                 (uint *)&PTR_f33_classify_snapshot_bit2_a_00028f4c);
+      if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3ad8))))) == 'Z') {
+        f33_force_monitor_escalation
+                  (((F33EscalatingMonitorState *)camry_host_ptr((uint32_t)((0xfebe7d18u)))), (ushort *)((undefined *)camry_host_ptr(0x2baa6u)), 
+                   (uint *)&PTR_f33_classify_snapshot_bit2_a_00028f4c);
+      }
+      goto LAB_0004781c;
+    }
+    f33_retain_disabled_escalating_monitor(((F33EscalatingMonitorState *)camry_host_ptr((uint32_t)((0xfebe7d18u)))), (ushort *)((undefined *)camry_host_ptr(0x2baa6u)));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3ad8))))) = 0;
+LAB_0004781c:
+  f33_publish_shared_snapshot_monitor_status(8,(*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x3ae8)))));
+  return;
 }
 
 
@@ -4040,6 +4954,58 @@ void f33_report_diagnostic_event_failure_16e_10_47912(void)
 
 {
   f33_report_diagnostic_event_failure(0x16e,10);
+  return;
+}
+
+
+
+void FUN_00047924(void)
+
+{
+  FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7d2cu)))));
+  return;
+}
+
+
+
+void FUN_00047934(void)
+
+{
+  FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7d2cu)))));
+  return;
+}
+
+
+
+void FUN_00047944(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_febe8a24 != 'Z') {
+    return;
+  }
+  if (DAT_0002bca4 == 'Z') {
+    FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7d2cu)))));
+  }
+  else {
+    if ((DAT_febeeb85 == 'Z') && ((DAT_febe71ec >> 6 & 1) == 0)) {
+      puVar1 = 0xfebeb800u;
+      f33_step_escalating_monitor
+                (((F33EscalatingMonitorState *)camry_host_ptr((uint32_t)((0xfebe7d2cu)))), (ushort *)((undefined *)camry_host_ptr(0x2bab6u)), 
+                 (uint *)&PTR_f33_classify_snapshot_bit2_b_00028f90);
+      if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3ac4))))) == 'Z') {
+        f33_force_monitor_escalation
+                  (((F33EscalatingMonitorState *)camry_host_ptr((uint32_t)((0xfebe7d2cu)))), (ushort *)((undefined *)camry_host_ptr(0x2bab6u)), 
+                   (uint *)&PTR_f33_classify_snapshot_bit2_b_00028f90);
+      }
+      goto LAB_000479b8;
+    }
+    f33_retain_disabled_escalating_monitor(((F33EscalatingMonitorState *)camry_host_ptr((uint32_t)((0xfebe7d2cu)))), (ushort *)((undefined *)camry_host_ptr(0x2bab6u)));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3ac4))))) = 0;
+LAB_000479b8:
+  f33_publish_shared_snapshot_monitor_status(9,(*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x3ad4)))));
   return;
 }
 

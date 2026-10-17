@@ -49,6 +49,18 @@ uint f33_dcm_clear_diagnostic_service(uchar operation,F33DcmMessageContext *mess
 
 
 
+/* EventEB re-enters8C214 with retained group3BCC and existing28-byte message3BD4; no per-event
+   message pointer is stored. */
+
+void f33_dcm_resume_queued_clear_request(void)
+
+{
+  f33_dcm_join_clear_diagnostic_phases(DAT_febf3bcc, ((F33DcmMessageContext *)camry_host_ptr((uint32_t)((0xfebf3bd4u)))));
+  return;
+}
+
+
+
 void FUN_0008c318(void)
 
 {
@@ -118,6 +130,17 @@ bool FUN_0008c3c0(int param_1,ushort *param_2,undefined1 *param_3)
 
 
 
+/* EventEC re-enters8C4F8 with retained28-byte message3BFC. */
+
+void f33_dcm_resume_queued_dtc_count(void)
+
+{
+  FUN_0008c4f8(((F33DcmMessageContext *)camry_host_ptr((uint32_t)((0xfebf3bfcu)))));
+  return;
+}
+
+
+
 bool FUN_0008c790(int param_1,ushort *param_2,undefined1 *param_3)
 
 {
@@ -149,6 +172,18 @@ void f33_dcm_cancel_retained_dtc_list(void)
   FUN_0008c70c();
   f33_dcm_cancel_service_events(0xed,'\0');
   FUN_0009560e(1);
+  return;
+}
+
+
+
+/* EventED re-enters8C960 with existing28-byte message3F24 and retained local snapshot/scratch.
+   Dispatcher has already consumed the queue slot. */
+
+void f33_dcm_resume_queued_dtc_list(void)
+
+{
+  f33_dcm_advance_dtc_list_request(((F33DcmMessageContext *)camry_host_ptr((uint32_t)((0xfebf3f24u)))));
   return;
 }
 
@@ -523,6 +558,39 @@ code_r0x0008d868:
 
 
 
+/* Software AES128 single-block DECRYPT underROM20840 key, via876C4/864DE in shared196-byte498C
+   context; clearcontext87AC2 thenreturnstatus. */
+
+uint f33_app_security_decrypt_client_material(uchar *client_material,uchar *intermediate_key)
+
+{
+  uint uVar1;
+  
+  FUN_000876c4(f33_app_security_client_decryption_key, 0x10, ((uint *)camry_host_ptr((uint32_t)((0xfebf498cu)))));
+  uVar1 = FUN_000864de(client_material, intermediate_key, 0x10, ((uint *)camry_host_ptr((uint32_t)((0xfebf498cu)))));
+  FUN_00087ac2(((undefined4 *)camry_host_ptr((uint32_t)((0xfebf498cu)))));
+  return uVar1;
+}
+
+
+
+/* Software AES128 single-block ENCRYPT via876C4/863A0 inshared498C context;
+   clearentire196-bytecontext afterward. No SecOC secret, CMAC or hardwarecrypto command is used. */
+
+uint f33_app_security_encrypt_challenge
+               (uchar *intermediate_key,uchar *challenge,uchar *expected_key)
+
+{
+  uint uVar1;
+  
+  FUN_000876c4(intermediate_key, 0x10, ((uint *)camry_host_ptr((uint32_t)((0xfebf498cu)))));
+  uVar1 = FUN_000863a0(challenge,expected_key,0x10,(0xfebf498cu));
+  FUN_00087ac2(((undefined4 *)camry_host_ptr((uint32_t)((0xfebf498cu)))));
+  return uVar1;
+}
+
+
+
 /* Require active4958==5A; derive intermediate=AES128_DECRYPT(ROM20840,497A),
    expected=AES128_ENCRYPT(intermediate,495A). Early-exit16-byte compare returnsB on firstmismatch.
    Success clears495A/496A andactive4958, retains497A; publishesresult4959. Doesnotpublish security
@@ -753,6 +821,19 @@ void f33_dcm_cancel_retained_proprietary_operation(void)
 
 
 
+/* EventF1 re-enters8E3A2 with existing16-byte proprietary operation view48EC. Its response length
+   is separate from retained full DCM context493C; no new request/action is implied by this wrapper.
+    */
+
+void f33_dcm_resume_queued_proprietary_operation(void)
+
+{
+  f33_dcm_advance_proprietary_operation(((F33DiagProprietaryMessage *)camry_host_ptr((uint32_t)((0xfebf48ecu)))));
+  return;
+}
+
+
+
 /* ZXB R6/R7/R8/R9 at8E602..608; choose pending if either input is pending, otherwise local failure
    or nonzero side result after local success. MOV R9,R10 at8E620 and JMP LP guarantee full
    zero-extended32 result0..255. */
@@ -961,6 +1042,25 @@ void FUN_0008e7d0(uint param_1,undefined1 param_2)
 void f33_return_only_stub_8e7e0(void)
 
 {
+  return;
+}
+
+
+
+void FUN_0008e7e2(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  f33_secoc_tx_queue_head_pair[0] = 0;
+  f33_secoc_tx_queue_head_pair[1] = 0;
+  f33_memzero(((void *)camry_host_ptr((uint32_t)((0xfebe5458u)))), 8);
+  f33_memzero(((undefined *)camry_host_ptr((uint32_t)(puVar1 + -0x637c))), 0x24);
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x639c)))) = 0;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x639a)))) = 0;
+  f33_memzero(((undefined *)camry_host_ptr((uint32_t)(puVar1 + -0x6396))), 0x18);
+  f33_memzero(((undefined *)camry_host_ptr((uint32_t)(puVar1 + -0x6358))), 0x4c);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6398))))) = 0;
   return;
 }
 

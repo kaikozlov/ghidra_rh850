@@ -1893,6 +1893,35 @@ void f33_publish_health_coherence_fault_actions(void)
 
 
 
+/* Initialize only redundant B18E to0; preserve receive-generation B195/B196 and counters. Not a
+   cold application reset. */
+
+void f33_initialize_source_coherence_history(void)
+
+{
+  FUN_000d268c(0, ((byte *)camry_host_ptr((uint32_t)((0xfebeb18eu)))), ((byte *)camry_host_ptr((uint32_t)((0xfebeb18cu)))), ((undefined *)camry_host_ptr(0xfebeb18du)));
+  return;
+}
+
+
+
+/* Clear B198/B19A/B19C,B190/B191 and redundant summary; preserveB195/B196 and
+   separateB193/B194/B19E/B1A0. */
+
+void f33_reset_current_source_coherence_observations(void)
+
+{
+  DAT_febeb198 = 0;
+  DAT_febeb19a = 0;
+  DAT_febeb19c = 0;
+  DAT_febeb190 = 0;
+  f33_current_source_coherence_observations = '\0';
+  FUN_000d268c(0, ((byte *)camry_host_ptr((uint32_t)((0xfebeb18eu)))), ((byte *)camry_host_ptr((uint32_t)((0xfebeb18cu)))), ((undefined *)camry_host_ptr(0xfebeb18du)));
+  return;
+}
+
+
+
 /* BEDD5A,BEDE>=512,B084>=2304; strictB19C>200, otherwise reset0. Independent ofB196. */
 
 uint f33_qualify_secondary_received_status_delay(void)

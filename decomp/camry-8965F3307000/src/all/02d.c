@@ -1,6 +1,22 @@
 #include "common.h"
 
 
+/* ClearB198/B19A/B19C andB192; publishB18E&F4 clearingbits0/1/3 only. PreserveB191,B195/B196 and
+   separate sticky pair. */
+
+void f33_clear_source_coherence_reentry_history(void)
+
+{
+  DAT_febeb198 = 0;
+  DAT_febeb19a = 0;
+  DAT_febeb19c = 0;
+  DAT_febeb192 = 0;
+  FUN_000d268c(f33_source_coherence_history & 0xf4, ((byte *)camry_host_ptr((uint32_t)((0xfebeb18eu)))), ((byte *)camry_host_ptr((uint32_t)((0xfebeb18cu)))), ((undefined *)camry_host_ptr(0xfebeb18du)));
+  return;
+}
+
+
+
 /* Clear onlyB196. Invoked by qualifiedB20E11->22; does not rewriteB195. */
 
 void f33_close_health_receive_generation_qualification(void)

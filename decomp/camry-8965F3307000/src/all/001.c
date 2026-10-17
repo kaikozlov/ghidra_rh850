@@ -807,6 +807,33 @@ void f33_boot_transfer_timer_progress(void)
 
 
 
+/* Readyqueuebridgeonlywhenoperationclass1/2;u16lenfrom2AC4,ringsource2AC0orRAMcopyto2AB8,clear2ACBandadvanceaddress.
+    */
+
+void f33_boot_transfer_foreground_consume(void)
+
+{
+  uint32_t puVar1;
+  uint uVar2;
+  
+  puVar1 = 0xfebf9800u;
+  if ((f33_boot_operation_region_class == '\x01' || f33_boot_operation_region_class == '\x02') &&
+     (DAT_febf2acb == '\x01')) {
+    uVar2 = (uint)DAT_febf2ac4;
+    if (DAT_febf2aca == '\x02') {
+      f33_boot_append_program_input(((uchar *)camry_host_ptr((uint32_t)(DAT_febf2ac0))), DAT_febf2ac4);
+    }
+    else {
+      FUN_0000153a(((undefined1 *)camry_host_ptr((uint32_t)(DAT_febf2ac0))), ((undefined1 *)camry_host_ptr((uint32_t)(DAT_febf2ab8))), uVar2);
+    }
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6d35))))) = 0;
+    (*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x6d48)))) = (*((int *)camry_host_ptr((uint32_t)(puVar1 + -0x6d48)))) + uVar2;
+  }
+  return;
+}
+
+
+
 undefined4 FUN_00004f98(void)
 
 {
@@ -1021,6 +1048,17 @@ void f33_boot_negative_response(uchar sid,uchar nrc)
   DAT_febf2ad2 = nrc;
   f33_boot_response_submit(mode,((undefined *)camry_host_ptr(0xfebf2ad0u)),3);
   return;
+}
+
+
+
+bool FUN_0000526a(undefined4 param_1,undefined1 param_2,undefined1 param_3)
+
+{
+  int iVar1;
+  
+  iVar1 = FUN_00005060(((char *)camry_host_ptr((uint32_t)(param_1))), param_2, param_3);
+  return iVar1 == 0;
 }
 
 
@@ -2580,6 +2618,42 @@ void f33_boot_region_authentication_clear_activity(void)
 
 
 
+/* AES-128 single-block DECRYPT client_material under exactROMBFE8 key into intermediate_key;not
+   encryption andnotCMAC. Shared AES contextFEBF2D48
+   init7680,length16,decrypt7470,length16,clear76C6. Native AES known-answer and protocol-state
+   cases use explicit RAM. Service paths stop at674A before response/timer completion; direct
+   session invalidation cases return. No complete unlock or entropy claim. */
+
+void f33_boot_security_decrypt_client_material(uchar *client_material,uchar *intermediate_key)
+
+{
+  f33_boot_aes128_initialize_context
+            (f33_boot_security_client_decryption_key, '\x10', ((F33BootAes128Context *)camry_host_ptr((uint32_t)((0xfebf2d48u)))));
+  f33_boot_aes128_decrypt_block
+            (client_material, intermediate_key, '\x10', ((F33BootAes128Context *)camry_host_ptr((uint32_t)((0xfebf2d48u)))));
+  f33_boot_aes128_clear_context(((F33BootAes128Context *)camry_host_ptr((uint32_t)((0xfebf2d48u)))));
+  return;
+}
+
+
+
+/* AES-128 single-block encryption with16-byte key/input/output,using shared
+   contextFEBF2D48;clearsentire196-bytecontextafteroperation. r6key,r7plaintext,r8output;
+   noapplicationGP/SecOCsemantics. Native AES known-answer and protocol-state cases use explicit
+   RAM. Service paths stop at674A before response/timer completion; direct session invalidation
+   cases return. No complete unlock or entropy claim. */
+
+void f33_boot_security_encrypt_block(uchar *key,uchar *plaintext,uchar *ciphertext)
+
+{
+  f33_boot_aes128_initialize_context(key, '\x10', ((F33BootAes128Context *)camry_host_ptr((uint32_t)((0xfebf2d48u)))));
+  f33_boot_aes128_encrypt_block(plaintext, ciphertext, '\x10', ((F33BootAes128Context *)camry_host_ptr((uint32_t)((0xfebf2d48u)))));
+  f33_boot_aes128_clear_context(((F33BootAes128Context *)camry_host_ptr((uint32_t)((0xfebf2d48u)))));
+  return;
+}
+
+
+
 /* Expected key = AES128_ENCRYPT(AES128_DECRYPT(ROM[BFE8..BFF7], client_material), challenge).
    The16-byte intermediate is stack-local, not CMAC, hash or a seed-only mapping. Both operations
    clear the shared196-byte context; intermediate and expected-key stack buffers are not explicitly
@@ -2601,6 +2675,43 @@ void f33_boot_security_derive_expected_key
 
 
 
+/* Derive retained2D18=AES128_ENCRYPT(ROMBFD8,configured2D08),one16-byte block. Shared AES2D48
+   cleared196bytes afterward; configured/derived buffers retained. Distinct from SID27 BFE8 decrypt
+   derivation. */
+
+void f33_boot_image_derive_key(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebf9800u;
+  f33_boot_aes128_initialize_context
+            (f33_boot_image_key_derivation_key, '\x10', ((F33BootAes128Context *)camry_host_ptr((uint32_t)((0xfebf2d48u)))));
+  f33_boot_aes128_encrypt_block
+            (((undefined *)camry_host_ptr((uint32_t)(puVar1 + -0x6af8))),  ((undefined *)camry_host_ptr((uint32_t)(puVar1 + -0x6ae8))),  '\x10', ((F33BootAes128Context *)camry_host_ptr((uint32_t)((0xfebf2d48u)))));
+  f33_boot_aes128_clear_context(((F33BootAes128Context *)camry_host_ptr((uint32_t)((0xfebf2d48u)))));
+  return;
+}
+
+
+
+/* Initialize CBC2EF0 with derived key2D18/IV2CF8; initialize CMAC2C00 same key with zero chain then
+   derive CMAC subkeys. Wrapper ignores all statuses. Does not consume authentication prefix yet. */
+
+void f33_boot_image_initialize_contexts(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebf9800u;
+  f33_boot_aes128_cbc_initialize
+            (f33_boot_image_derived_key, '\x10', f33_boot_image_iv_and_authentication_prefix, '\x10', ((F33BootAes128CbcContext *)camry_host_ptr((uint32_t)((0xfebf2ef0u)))));
+  f33_boot_aes128_cmac_initialize
+            (f33_boot_image_derived_key,'\x10',((F33BootAes128CmacContext *)camry_host_ptr((uint32_t)(puVar1 + -0x6c00))));
+  f33_boot_aes128_cmac_derive_subkeys(((F33BootAes128CmacContext *)camry_host_ptr((uint32_t)(puVar1 + -0x6c00))));
+  return;
+}
+
+
+
 /* Derive image key7068 then initialize both CBC/CMAC709A. Reinitializes shared image contexts, not
    a per-transfer-chunk action. */
 
@@ -2614,6 +2725,21 @@ void f33_boot_image_crypto_initialize(void)
 
 
 
+/* Clear CBC2EF0 all228 bytes then CMAC2C00 all248 bytes. Retain IV/material/derived key/output and
+   authentication cursors; does not reset activity flags. */
+
+void f33_boot_image_clear_contexts(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebf9800u;
+  f33_boot_aes128_cbc_clear(((F33BootAes128CbcContext *)camry_host_ptr((uint32_t)((0xfebf2ef0u)))));
+  f33_boot_aes128_cmac_clear(((F33BootAes128CmacContext *)camry_host_ptr((uint32_t)(puVar1 + -0x6c00))));
+  return;
+}
+
+
+
 /* Forward to70E4, wiping CBC and CMAC contexts only. TransferExit6BD2 and routine completion6F04
    share this owner. */
 
@@ -2622,6 +2748,21 @@ void f33_boot_image_crypto_clear(void)
 {
   f33_boot_image_clear_contexts();
   return;
+}
+
+
+
+/* AES128-CBC decrypt one16-byte block with persistent2EF0 context through8162. Return0 success or1
+   failure; foreground6BDE ignores this return. */
+
+uint f33_boot_image_decrypt_block(uchar *ciphertext,uchar *plaintext)
+
+{
+  uint uVar1;
+  
+  uVar1 = f33_boot_aes128_cbc_decrypt_block(ciphertext, plaintext, '\x10', ((F33BootAes128CbcContext *)camry_host_ptr((uint32_t)((0xfebf2ef0u)))))
+  ;
+  return (uint)(uVar1 != 0);
 }
 
 

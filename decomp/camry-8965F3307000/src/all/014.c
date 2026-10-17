@@ -2882,7 +2882,7 @@ void f33_stage_diagnostic_history_record(void)
   do {
     iVar2 = iVar4 + 1;
     iVar1 = iVar4 + -7;
-    (*((undefined1 *)camry_host_ptr((uint32_t)((int)local_ac + iVar4)))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe5f71u + (uint32_t)(iVar4) * 1u))));
+    (*((undefined1 *)camry_host_ptr((uint32_t)((int)camry_host_addr(local_ac) + iVar4)))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe5f71u + (uint32_t)(iVar4) * 1u))));
     auStack_a4[iVar4] = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe5f79u + (uint32_t)(iVar4) * 1u))));
     iVar4 = iVar2;
   } while (((iVar1 < 0) || (iVar2 < 0)));

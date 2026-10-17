@@ -4322,6 +4322,40 @@ void f33_publish_owner1_limit_request(void)
 
 
 
+/* D1306resetofBCF4ten-bytestate. */
+
+void f33_initialize_lifecycle_difference_monitor(void)
+
+{
+  f33_reset_application_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebebcf4u)))));
+  return;
+}
+
+
+
+/* SameD1306resetofBCF4; separateentryowner. */
+
+void f33_reset_lifecycle_difference_monitor_entry(void)
+
+{
+  f33_reset_application_latched_monitor(((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebebcf4u)))));
+  return;
+}
+
+
+
+/* D1386(BCF4,AF050,AECA0),limits0/6; scheduledbyexistingmaskbit4. */
+
+void f33_step_lifecycle_difference_monitor(void)
+
+{
+  f33_step_application_latched_monitor
+            (((F33LatchedMonitorState *)camry_host_ptr((uint32_t)((0xfebebcf4u)))), ((F33MonitorLimits *)camry_host_ptr((uint32_t)((0xaf050u)))), ((F33TwoSidedMonitorCallbacks *)camry_host_ptr((uint32_t)((0xaeca0u)))));
+  return;
+}
+
+
+
 /* B1A4!=11->44. Else signedconvertedB02CminusB00C>=1920,BEDE>1280,BEF0==11->22; otherwise11. No
    physicalunit or OEMmeaning inferred. */
 

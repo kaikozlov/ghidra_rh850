@@ -26,6 +26,25 @@ uint f33_diag_routine_class01_98034(byte param_1,uchar *param_2)
 
 
 
+undefined4
+FUN_0009806a(undefined4 param_1,char param_2,undefined4 param_3,undefined4 param_4,
+            undefined4 param_5)
+
+{
+  undefined4 uVar1;
+  
+  if (param_2 == '\0') {
+    uVar1 = FUN_0008bc4a(param_1, 0x40, param_3, 0x31, ((uchar *)camry_host_ptr((uint32_t)(param_5))));
+  }
+  else {
+    uVar1 = 0;
+    FUN_0008b83c();
+  }
+  return uVar1;
+}
+
+
+
 /* UDS routine wrapper: guards on the two valid routine-control subfunctions, delegates to the
    application-class routine helper with a fixed class literal, and diverts other subfunctions to
    the negative-response path (8B83C). Shape-verified. */
@@ -291,6 +310,25 @@ uint f33_diag_routine_class02_982ac(byte param_1,uchar *param_2)
   else {
     uVar1 = 0;
     FUN_0008b83c();
+  }
+  return uVar1;
+}
+
+
+
+undefined4 FUN_00098590(short param_1,undefined4 param_2,undefined1 param_3,undefined4 param_4)
+
+{
+  undefined4 uVar1;
+  
+  if (param_1 == 0xf) {
+    uVar1 = f33_diag_routine_class02_98276(param_3, ((uchar *)camry_host_ptr((uint32_t)(param_4))));
+  }
+  else {
+    uVar1 = 0;
+    if (param_1 == 0x12) {
+      uVar1 = f33_diag_routine_class02_982ac(param_3, ((uchar *)camry_host_ptr((uint32_t)(param_4))));
+    }
   }
   return uVar1;
 }
