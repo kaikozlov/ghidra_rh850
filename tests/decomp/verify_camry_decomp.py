@@ -1073,10 +1073,15 @@ def main() -> int:
             mapped = materialize(scenario)
             ranges = [] if lifted or corpus else accessed_ranges(name, registers)
             limit = int(scenario.get("max_instructions") or 200000)
-            try:
+            if mapped is None and ranges:
+                continue
+            if mapped is not None:
+                memory, base = mapped
+                if any(not covers(base, len(memory), start, length) for start, length in ranges):
+                    continue
+
+            def attempt() -> None:
                 if mapped is None:
-                    if ranges:
-                        continue
                     regions = scenario_regions(scenario)
                     held = install_regions(library, code_view, len(codeflash), regions)
                     dcra, dcra_view = attach_dcra(library, name)
@@ -1091,9 +1096,6 @@ def main() -> int:
                     )
                     del held, dcra_view
                 else:
-                    memory, base = mapped
-                    if any(not covers(base, len(memory), start, length) for start, length in ranges):
-                        continue
                     view = view_of(memory) if memory else view_of(bytearray(b"\x00"))
                     install_address_space(library, code_view, len(codeflash), view, base, memory)
                     dcra, dcra_view = attach_dcra(library, name)
@@ -1107,12 +1109,32 @@ def main() -> int:
                         value_return=corpus_returns(form, name, signature) if corpus or lifted else None,
                     )
                     del dcra_view
-            except (AssertionError, OSError, ValueError, ctypes.ArgumentError) as exc:
+
+            read_fd, write_fd = os.pipe()
+            pid = os.fork()
+            if pid == 0:
+                os.close(read_fd)
+                signal.signal(signal.SIGALRM, lambda *_args: os._exit(1))
+                signal.alarm(30)
+                try:
+                    attempt()
+                except BaseException as exc:
+                    try:
+                        os.write(write_fd, str(exc).encode()[:400])
+                    except OSError:
+                        pass
+                    os._exit(1)
+                os._exit(0)
+            os.close(write_fd)
+            _pid, status = os.waitpid(pid, 0)
+            detail = os.read(read_fd, 400).decode(errors="replace")
+            os.close(read_fd)
+            if not (os.WIFEXITED(status) and os.WEXITSTATUS(status) == 0):
                 failed = True
-                print(f"FAIL {name} {scenario['name']} {exc}")
+                print(f"FAIL {name} {scenario['name']} {detail or 'aborted'}", flush=True)
                 continue
             executed[address] += 1
-            print(f"PASS {name} {scenario['name']}")
+            print(f"PASS {name} {scenario['name']}", flush=True)
     missing = [row["name"] for address, row in checked.items() if executed[address] == 0]
     if failed or missing:
         detail = "matched functions with no executed oracle: " + ", ".join(missing) if missing else "oracle mismatches"
