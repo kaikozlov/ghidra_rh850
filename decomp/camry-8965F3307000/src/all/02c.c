@@ -3025,7 +3025,7 @@ void FUN_000b394c(void)
   int local_10;
   
   puVar2 = 0xfebeb800u;
-  iVar5 = (int)DAT_febeb054;
+  iVar5 = (int)((int)(int16_t)DAT_febeb054);
   iVar1 = DAT_febeb150;
   uVar3 = DAT_febeb158;
   iVar4 = DAT_febeb14c;
@@ -3185,7 +3185,7 @@ void FUN_000b3b2e(void)
   
   iVar2 = DAT_febeafe8;
   puVar3 = 0xfebeb800u;
-  iVar1 = (int)DAT_febeb16c - (DAT_000af104 * DAT_febeb054) / 0x4000;
+  iVar1 = (int)((int)(int16_t)DAT_febeb16c) - (DAT_000af104 * ((int)(int16_t)DAT_febeb054)) / 0x4000;
   iVar4 = FUN_000b3920(iVar1 * (uint)DAT_febeb138,4,0xe1);
   (*((int *)camry_host_ptr((uint32_t)(puVar3 + -0x690)))) = iVar1;
   (*((int *)camry_host_ptr((uint32_t)(puVar3 + -0x68c)))) = -iVar4 - iVar2;

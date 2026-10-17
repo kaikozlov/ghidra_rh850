@@ -4281,7 +4281,7 @@ void f33_step_matched_state2_status_bit_triplet_b(void)
     goto LAB_0003ee06;
   }
   if ((DAT_febe6764 >> 1 & 1) != 0) goto LAB_0003ee06;
-  if ((DAT_febe67b8 == '\0') && ((DAT_febe64cc & 0x7fffffff) >> 0x1c == 0)) {
+  if ((DAT_febe67b8 == '\0') && (((int)DAT_febe64cc & 0x7fffffff) >> 0x1c == 0)) {
     if (DAT_febe67b9 < DAT_0002b6f2) {
       bVar3 = DAT_febe67b9 + 1;
       goto LAB_0003ed7e;

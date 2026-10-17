@@ -683,7 +683,7 @@ void FUN_000bc7ce(void)
   uVar1 = DAT_febeb084;
   puVar4 = 0xfebeb800u;
   puVar5 = ((undefined *)camry_host_ptr(0xfebeb800u));
-  iVar8 = (int)DAT_febeb00a;
+  iVar8 = (int)((int)(int16_t)DAT_febeb00a);
   uVar11 = DAT_febebdf0;
   cVar9 = DAT_febebded;
   if ((DAT_febeb1a7 == 'Z') && ((DAT_febeb20e == '\0' || (DAT_febeb20e == '3')))) {
@@ -3405,7 +3405,7 @@ void f33_refresh_first_health_source_cache(void)
   undefined4 uStack_c;
   
   puVar2 = 0xfebeb800u;
-  FUN_000d1222((int)DAT_febef194,&local_1c);
+  FUN_000d1222((int)((int)(int16_t)DAT_febef194),&local_1c);
   FUN_000d1d6e(local_1c,0x4000,&local_1c);
   uStack_10 = (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0x682))));
   uStack_c = (*((undefined4 *)camry_host_ptr((uint32_t)(puVar2 + 0x684))));
@@ -3711,8 +3711,8 @@ void FUN_000be846(void)
     }
   }
   if ((DAT_febeb11a == 0x400) && (DAT_febebe8d != 'Z')) {
-    iVar8 = (DAT_febef1c6 * 0x931) / 0x10;
-    local_2c = (DAT_febef1c8 * 0x931) / 0x10;
+    iVar8 = (((int)(int16_t)DAT_febef1c6) * 0x931) / 0x10;
+    local_2c = (((int)(int16_t)DAT_febef1c8) * 0x931) / 0x10;
     if (DAT_febef09c == '\0') {
       iVar8 = -iVar8;
       local_2c = -local_2c;

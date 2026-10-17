@@ -1255,7 +1255,7 @@ uint f33_faci_check_dataflash_addresses(void)
     uVar2 = 7;
   }
   uVar1 = FEADDR;
-  if (0x7fff < uVar1 + 3) {
+  if (0x7fff < (int)uVar1 + 3) {
     uVar2 = 7;
   }
   return uVar2;

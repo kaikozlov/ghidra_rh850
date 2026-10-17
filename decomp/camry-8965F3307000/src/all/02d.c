@@ -1264,10 +1264,10 @@ void f33_latch_qualified_health_entry_conditions(void)
   int iVar3;
   int iVar4;
   
-  iVar4 = (int)DAT_febeafdc;
+  iVar4 = (int)((int)(int16_t)DAT_febeafdc);
   if (iVar4 + 0x7fff < 0 == (-1 < iVar4 && iVar4 + 0x7fff < 0) && iVar4 != -0x7fff) {
     if (iVar4 < 0) {
-      iVar4 = (int)-DAT_febeafdc;
+      iVar4 = (int)-((int)(int16_t)DAT_febeafdc);
     }
   }
   else {
@@ -5659,7 +5659,7 @@ void FUN_000b7a12(void)
   
   iVar2 = DAT_febeb3c4;
   puVar5 = 0xfebeb800u;
-  local_14 = (DAT_febeac70 * 10) / 8;
+  local_14 = (((int)(int16_t)DAT_febeac70) * 10) / 8;
   FUN_000d1cf6(local_14,(int)DAT_000af480,-(int)DAT_000af480,&local_14);
   iVar4 = (int)DAT_000af47c;
   (*((short *)camry_host_ptr((uint32_t)(puVar5 + -0x45e)))) = (short)local_14;
@@ -6058,7 +6058,7 @@ undefined4 FUN_000b7de2(void)
   bVar2 = DAT_febeb3cd;
   iVar1 = DAT_febeafe8;
   puVar4 = 0xfebeb800u;
-  FUN_000d1178((int)DAT_febeafdc,&sStack_16);
+  FUN_000d1178((int)((int)(int16_t)DAT_febeafdc),&sStack_16);
   FUN_000d1194(iVar1 - iVar3,&iStack_14);
   iVar3 = (int)DAT_000af4a0;
   iVar1 = sStack_16 - iVar3;

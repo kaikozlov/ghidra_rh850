@@ -7,42 +7,42 @@
 void f33_snapshot_initialized_control_publications(void)
 
 {
-  DAT_febe643c = DAT_febee408;
-  DAT_febe6770 = DAT_febee408;
-  DAT_febe6772 = DAT_febee40a;
-  DAT_febe6774 = DAT_febee40c;
-  DAT_febe6776 = DAT_febee40e;
+  DAT_febe643c = ((int)(int16_t)DAT_febee408);
+  DAT_febe6770 = ((int)(int16_t)DAT_febee408);
+  DAT_febe6772 = ((int)(int16_t)DAT_febee40a);
+  DAT_febe6774 = ((int)(int16_t)DAT_febee40c);
+  DAT_febe6776 = ((int)(int16_t)DAT_febee40e);
   DAT_febe6768 = DAT_febee400;
-  DAT_febe6778 = DAT_febee410;
-  DAT_febe677a = DAT_febee412;
+  DAT_febe6778 = ((int)(int16_t)DAT_febee410);
+  DAT_febe677a = ((int)(int16_t)DAT_febee412);
   DAT_febe6769 = DAT_febee401;
   DAT_febe676a = DAT_febee402;
   DAT_febe676b = DAT_febee403;
   DAT_febe676c = DAT_febee404;
-  DAT_febe677c = DAT_febee414;
+  DAT_febe677c = ((int)(int16_t)DAT_febee414);
   DAT_febe676d = DAT_febee405;
-  DAT_febe677e = DAT_febee416;
+  DAT_febe677e = ((int)(int16_t)DAT_febee416);
   DAT_febe676e = DAT_febee406;
   DAT_febe6780 = DAT_febee418;
   DAT_febe676f = DAT_febee407;
   DAT_febe643b = DAT_febee407;
-  DAT_febe643e = DAT_febee40a;
-  DAT_febe6440 = DAT_febee40c;
-  DAT_febe6442 = DAT_febee40e;
-  DAT_febe678c = DAT_febee608;
+  DAT_febe643e = ((int)(int16_t)DAT_febee40a);
+  DAT_febe6440 = ((int)(int16_t)DAT_febee40c);
+  DAT_febe6442 = ((int)(int16_t)DAT_febee40e);
+  DAT_febe678c = ((int)(int16_t)DAT_febee608);
   DAT_febe6434 = DAT_febee400;
-  DAT_febe6444 = DAT_febee410;
-  DAT_febe6446 = DAT_febee412;
+  DAT_febe6444 = ((int)(int16_t)DAT_febee410);
+  DAT_febe6446 = ((int)(int16_t)DAT_febee412);
   DAT_febe6784 = DAT_febee600;
   DAT_febe6435 = DAT_febee401;
   DAT_febe6436 = DAT_febee402;
   DAT_febe6437 = DAT_febee403;
   DAT_febe6794 = DAT_febee610;
   DAT_febe6438 = DAT_febee404;
-  DAT_febe6448 = DAT_febee414;
+  DAT_febe6448 = ((int)(int16_t)DAT_febee414);
   DAT_febe6439 = DAT_febee405;
   DAT_febe6785 = DAT_febee601;
-  DAT_febe644a = DAT_febee416;
+  DAT_febe644a = ((int)(int16_t)DAT_febee416);
   DAT_febe643a = DAT_febee406;
   DAT_febe644c = DAT_febee418;
   DAT_febe6786 = DAT_febee602;
@@ -51,7 +51,7 @@ void f33_snapshot_initialized_control_publications(void)
   DAT_febe6788 = DAT_febee604;
   DAT_febe6789 = DAT_febee605;
   DAT_febe678a = DAT_febee606;
-  DAT_febe6790 = DAT_febee60c;
+  DAT_febe6790 = ((int)(int16_t)DAT_febee60c);
   return;
 }
 

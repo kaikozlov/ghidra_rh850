@@ -127,9 +127,9 @@ void f33_calculate_sixfold_current_correction(void)
   short sStack_1a;
   
   puVar4 = 0xfebeb800u;
-  iVar5 = (int)DAT_febe6dd6;
+  iVar5 = (int)((int)(int16_t)DAT_febe6dd6);
   iVar9 = (int)f33_actual_first_current_command;
-  uVar3 = (uint)((int)DAT_febe6dd6 * (int)DAT_febe6dd6 +
+  uVar3 = (uint)((int)((int)(int16_t)DAT_febe6dd6) * (int)((int)(int16_t)DAT_febe6dd6) +
                 (int)f33_actual_first_current_command * (int)f33_actual_first_current_command) >>
           0xd;
   if (0xffff < uVar3) {
@@ -146,8 +146,8 @@ void f33_calculate_sixfold_current_correction(void)
   else {
     DAT_febe6dbc = 0x400;
   }
-  uVar3 = (uint)DAT_febe5f36;
-  if ((int)(uVar3 + 0x7fff) < 0 == (-1 < (int)uVar3 && (int)(uVar3 + 0x7fff) < 0) &&
+  uVar3 = (uint)((int)(int16_t)DAT_febe5f36);
+  if ((int)((int)uVar3 + 0x7fff) < 0 == (-1 < (int)uVar3 && (int)((int)uVar3 + 0x7fff) < 0) &&
       uVar3 != 0xffff8001) {
     uVar12 = uVar3;
     if ((int)uVar3 < 0) {
@@ -170,7 +170,7 @@ void f33_calculate_sixfold_current_correction(void)
   sVar6 = -DAT_00031b84;
   iVar8 = (int)DAT_00031b84 - uVar3;
   iVar7 = (int)sVar6;
-  sVar10 = DAT_febe5f36;
+  sVar10 = ((int)(int16_t)DAT_febe5f36);
   if (iVar8 < 0 != (DAT_00031b84 < 0 != (int)uVar3 < 0 && (int)uVar3 < 0 == iVar8 < 0)) {
     sVar10 = DAT_00031b84;
   }
@@ -282,17 +282,17 @@ void f33_select_actual_and_feedback_first_current_baselines(void)
   int iVar1;
   int iVar2;
   
-  iVar2 = (int)DAT_febe6dec;
+  iVar2 = (int)((int)(int16_t)DAT_febe6dec);
   f33_actual_first_current_command = DAT_00031bf2;
   if ((DAT_00031bf0 != 'Z') &&
      (iVar1 = f33_additional_first_current_reference.output - iVar2,
-     f33_actual_first_current_command = DAT_febe6dec,
+     f33_actual_first_current_command = ((int)(int16_t)DAT_febe6dec),
      iVar1 < 0 !=
      (f33_additional_first_current_reference.output < 0 != iVar2 < 0 && iVar2 < 0 == iVar1 < 0))) {
     f33_actual_first_current_command = f33_additional_first_current_reference.output;
   }
   iVar1 = f33_current_reference_floor.selected_request - iVar2;
-  f33_first_current_feedback_baseline = DAT_febe6dec;
+  f33_first_current_feedback_baseline = ((int)(int16_t)DAT_febe6dec);
   if (iVar1 < 0 !=
       (f33_current_reference_floor.selected_request < 0 != iVar2 < 0 && iVar2 < 0 == iVar1 < 0)) {
     f33_first_current_feedback_baseline = f33_current_reference_floor.selected_request;
@@ -352,8 +352,8 @@ int f33_interpolate_current_curve(short first_component)
   int iVar10;
   
   iVar4 = (int)first_component;
-  uVar1 = (uint)DAT_febe6e0a;
-  if ((int)(uVar1 + 0x7fff) < 0 == (-1 < (int)uVar1 && (int)(uVar1 + 0x7fff) < 0) &&
+  uVar1 = (uint)((int)(int16_t)DAT_febe6e0a);
+  if ((int)((int)uVar1 + 0x7fff) < 0 == (-1 < (int)uVar1 && (int)((int)uVar1 + 0x7fff) < 0) &&
       uVar1 != 0xffff8001) {
     if ((int)uVar1 < 0) {
       uVar1 = -uVar1;
@@ -480,7 +480,7 @@ void FUN_000384d8(void)
   uint32_t puVar3;
   int iVar4;
   
-  sVar2 = DAT_febe6e0a;
+  sVar2 = ((int)(int16_t)DAT_febe6e0a);
   sVar1 = f33_actual_first_current_command;
   puVar3 = 0xfebeb800u;
   iVar4 = f33_interpolate_current_curve(f33_actual_first_current_command);
@@ -533,8 +533,8 @@ void f33_map_sampled_command_to_base_first_current(void)
   int iVar3;
   uint uVar4;
   
-  uVar1 = (uint)DAT_febe6e0a;
-  if ((int)(uVar1 + 0x7fff) < 0 == (-1 < (int)uVar1 && (int)(uVar1 + 0x7fff) < 0) &&
+  uVar1 = (uint)((int)(int16_t)DAT_febe6e0a);
+  if ((int)((int)uVar1 + 0x7fff) < 0 == (-1 < (int)uVar1 && (int)((int)uVar1 + 0x7fff) < 0) &&
       uVar1 != 0xffff8001) {
     if ((int)uVar1 < 0) {
       uVar1 = -uVar1;
@@ -670,13 +670,13 @@ void f33_update_additional_first_current_request(void)
   puVar4 = 0xfebeb800u;
   puVar7 = ((void *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x31ebcu + (uint32_t)(DAT_febee5c3 & 1) * 4u)))))));
   if ((DAT_febee741 == '\x11') || (DAT_febee741 == '\"')) {
-    if (DAT_febee744 + -0x7fff < 0 == (DAT_febee744 < 0 && -1 < DAT_febee744 + -0x7fff) &&
+    if ((int)DAT_febee744 + -0x7fff < 0 == ((int)DAT_febee744 < 0 && -1 < (int)DAT_febee744 + -0x7fff) &&
         DAT_febee744 != 0x7fff) {
       iVar5 = 0x7fff;
     }
     else {
       iVar5 = DAT_febee744;
-      if (DAT_febee744 + 0x7fff < 0 != (-1 < DAT_febee744 && DAT_febee744 + 0x7fff < 0)) {
+      if ((int)DAT_febee744 + 0x7fff < 0 != (-1 < (int)DAT_febee744 && (int)DAT_febee744 + 0x7fff < 0)) {
         iVar5 = -0x7fff;
       }
     }
@@ -1312,13 +1312,13 @@ void FUN_00038a58(void)
   int iVar3;
   int iVar4;
   
-  iVar2 = (int)DAT_febe6d82 + (int)DAT_febe6d80;
-  iVar4 = (int)DAT_febe6d7e + (int)DAT_febe6d7c;
+  iVar2 = (int)((int)(int16_t)DAT_febe6d82) + (int)((int)(int16_t)DAT_febe6d80);
+  iVar4 = (int)((int)(int16_t)DAT_febe6d7e) + (int)((int)(int16_t)DAT_febe6d7c);
   if ((DAT_febe71ec & 3) == 0) {
     iVar2 = iVar2 / 2;
     iVar4 = iVar4 / 2;
   }
-  iVar1 = (((iVar2 * (DAT_febe7d56 / 4) - iVar4 * (DAT_febe7d54 / 4)) / 0x8000) * 0x6883) / 0x2000;
+  iVar1 = (((iVar2 * (((int)(int16_t)DAT_febe7d56) / 4) - iVar4 * (((int)(int16_t)DAT_febe7d54) / 4)) / 0x8000) * 0x6883) / 0x2000;
   if (iVar1 + 0x7fff < 0 == (-1 < iVar1 && iVar1 + 0x7fff < 0) && iVar1 != -0x7fff) {
     iVar3 = iVar1;
     if (iVar1 + -0x7fff < 0 == (iVar1 < 0 && -1 < iVar1 + -0x7fff) && iVar1 != 0x7fff) {
@@ -1329,8 +1329,8 @@ void FUN_00038a58(void)
     iVar3 = -0x7fff;
   }
   DAT_febe6e58 = (short)iVar3;
-  iVar2 = ((((iVar4 / 2 + (iVar2 * 0x6eda) / 0x8000) * (int)(DAT_febe7d54 / 4) +
-            ((iVar4 * 0x6eda) / 0x8000 + -iVar2 / 2) * (int)(DAT_febe7d56 / 4)) / 0x8000) * 0x6883)
+  iVar2 = ((((iVar4 / 2 + (iVar2 * 0x6eda) / 0x8000) * (int)(((int)(int16_t)DAT_febe7d54) / 4) +
+            ((iVar4 * 0x6eda) / 0x8000 + -iVar2 / 2) * (int)(((int)(int16_t)DAT_febe7d56) / 4)) / 0x8000) * 0x6883)
           / 0x2000;
   if (iVar2 + 0x7fff < 0 == (-1 < iVar2 && iVar2 + 0x7fff < 0) && iVar2 != -0x7fff) {
     if (iVar2 + -0x7fff < 0 == (iVar2 < 0 && -1 < iVar2 + -0x7fff) && iVar2 != 0x7fff) {
@@ -1498,8 +1498,8 @@ void f33_transform_first_regulated_phase_commands(void)
   int iVar1;
   int iVar2;
   
-  iVar1 = ((((int)(DAT_febe7d56 / 4) * (int)DAT_febe6c40 -
-            (int)(DAT_febe7d54 / 4) * (int)DAT_febe6c42) / 0x8000) * 0x6883) / 0x2000;
+  iVar1 = ((((int)(((int)(int16_t)DAT_febe7d56) / 4) * (int)((int)(int16_t)DAT_febe6c40) -
+            (int)(((int)(int16_t)DAT_febe7d54) / 4) * (int)((int)(int16_t)DAT_febe6c42)) / 0x8000) * 0x6883) / 0x2000;
   if (iVar1 + 0x7fff < 0 == (-1 < iVar1 && iVar1 + 0x7fff < 0) && iVar1 != -0x7fff) {
     iVar2 = iVar1;
     if (iVar1 + -0x7fff < 0 == (iVar1 < 0 && -1 < iVar1 + -0x7fff) && iVar1 != 0x7fff) {
@@ -1510,10 +1510,10 @@ void f33_transform_first_regulated_phase_commands(void)
     iVar2 = -0x7fff;
   }
   DAT_febe6e68 = (short)iVar2;
-  iVar2 = (((((int)DAT_febe6c42 / 2 + (int)(short)((DAT_febe6c40 * 0x6eda) / 0x8000)) *
-             (int)(DAT_febe7d54 / 4) +
-            ((int)(short)((DAT_febe6c42 * 0x6eda) / 0x8000) + -(int)DAT_febe6c40 / 2) *
-            (int)(DAT_febe7d56 / 4)) / 0x8000) * 0x6883) / 0x2000;
+  iVar2 = (((((int)((int)(int16_t)DAT_febe6c42) / 2 + (int)(short)((((int)(int16_t)DAT_febe6c40) * 0x6eda) / 0x8000)) *
+             (int)(((int)(int16_t)DAT_febe7d54) / 4) +
+            ((int)(short)((((int)(int16_t)DAT_febe6c42) * 0x6eda) / 0x8000) + -(int)((int)(int16_t)DAT_febe6c40) / 2) *
+            (int)(((int)(int16_t)DAT_febe7d56) / 4)) / 0x8000) * 0x6883) / 0x2000;
   if (iVar2 + 0x7fff < 0 == (-1 < iVar2 && iVar2 + 0x7fff < 0) && iVar2 != -0x7fff) {
     if (iVar2 + -0x7fff < 0 == (iVar2 < 0 && -1 < iVar2 + -0x7fff) && iVar2 != 0x7fff) {
       DAT_febe6e6a = 0x7fff;
@@ -1588,8 +1588,8 @@ void f33_transform_second_regulated_phase_commands(void)
   int iVar1;
   int iVar2;
   
-  iVar1 = ((((int)(DAT_febe7d62 / 4) * (int)DAT_febe6c44 -
-            (int)(DAT_febe7d60 / 4) * (int)DAT_febe6c46) / 0x8000) * 0x6883) / 0x2000;
+  iVar1 = ((((int)(((int)(int16_t)DAT_febe7d62) / 4) * (int)((int)(int16_t)DAT_febe6c44) -
+            (int)(((int)(int16_t)DAT_febe7d60) / 4) * (int)((int)(int16_t)DAT_febe6c46)) / 0x8000) * 0x6883) / 0x2000;
   if (iVar1 + 0x7fff < 0 == (-1 < iVar1 && iVar1 + 0x7fff < 0) && iVar1 != -0x7fff) {
     iVar2 = iVar1;
     if (iVar1 + -0x7fff < 0 == (iVar1 < 0 && -1 < iVar1 + -0x7fff) && iVar1 != 0x7fff) {
@@ -1600,10 +1600,10 @@ void f33_transform_second_regulated_phase_commands(void)
     iVar2 = -0x7fff;
   }
   DAT_febe6e70 = (short)iVar2;
-  iVar2 = (((((int)DAT_febe6c46 / 2 + (int)(short)((DAT_febe6c44 * 0x6eda) / 0x8000)) *
-             (int)(DAT_febe7d60 / 4) +
-            ((int)(short)((DAT_febe6c46 * 0x6eda) / 0x8000) + -(int)DAT_febe6c44 / 2) *
-            (int)(DAT_febe7d62 / 4)) / 0x8000) * 0x6883) / 0x2000;
+  iVar2 = (((((int)((int)(int16_t)DAT_febe6c46) / 2 + (int)(short)((((int)(int16_t)DAT_febe6c44) * 0x6eda) / 0x8000)) *
+             (int)(((int)(int16_t)DAT_febe7d60) / 4) +
+            ((int)(short)((((int)(int16_t)DAT_febe6c46) * 0x6eda) / 0x8000) + -(int)((int)(int16_t)DAT_febe6c44) / 2) *
+            (int)(((int)(int16_t)DAT_febe7d62) / 4)) / 0x8000) * 0x6883) / 0x2000;
   if (iVar2 + 0x7fff < 0 == (-1 < iVar2 && iVar2 + 0x7fff < 0) && iVar2 != -0x7fff) {
     if (iVar2 + -0x7fff < 0 == (iVar2 < 0 && -1 < iVar2 + -0x7fff) && iVar2 != 0x7fff) {
       DAT_febe6e72 = 0x7fff;
@@ -1677,9 +1677,9 @@ void f33_scale_first_phase_codes(int scale,ushort *triplet)
   uint uVar5;
   uint uVar6;
   
-  DAT_febe6e90 = (DAT_febe6e3a * scale) / 0x400;
-  uVar6 = (DAT_febe6e3c * scale) / 0x400;
-  uVar1 = (DAT_febe6e3e * scale) / 0x400;
+  DAT_febe6e90 = (((int)(int16_t)DAT_febe6e3a) * scale) / 0x400;
+  uVar6 = (((int)(int16_t)DAT_febe6e3c) * scale) / 0x400;
+  uVar1 = (((int)(int16_t)DAT_febe6e3e) * scale) / 0x400;
   DAT_febe6e7c = DAT_00031e3c;
   DAT_febe6e86 = DAT_00031e3a;
   if (DAT_febe6d5c == '\0') {
@@ -1743,9 +1743,9 @@ void f33_scale_second_phase_codes(int scale,ushort *triplet)
   uint uVar5;
   uint uVar6;
   
-  DAT_febe6e9c = (DAT_febe6e4a * scale) / 0x400;
-  uVar6 = (DAT_febe6e4c * scale) / 0x400;
-  uVar1 = (DAT_febe6e4e * scale) / 0x400;
+  DAT_febe6e9c = (((int)(int16_t)DAT_febe6e4a) * scale) / 0x400;
+  uVar6 = (((int)(int16_t)DAT_febe6e4c) * scale) / 0x400;
+  uVar1 = (((int)(int16_t)DAT_febe6e4e) * scale) / 0x400;
   DAT_febe6e82 = DAT_00031e3c;
   DAT_febe6e8a = DAT_00031e3a;
   if (DAT_febe6d5d == '\0') {
@@ -1945,7 +1945,7 @@ int f33_current_reference_envelope_signed_product(void)
 {
   int local_8;
   
-  FUN_000706ae(DAT_febee744,(int)DAT_febee5c4,&local_8);
+  FUN_000706ae(DAT_febee744,(int)((int)(int16_t)DAT_febee5c4),&local_8);
   return local_8;
 }
 
@@ -2042,18 +2042,18 @@ uint f33_should_zero_ecu_source5_thermal_seed(ushort record_marker)
   
   if ((DAT_febe7bf8 & 0xff) == 0) {
     if ((DAT_febe7bf8 & 0xff00) != 0) {
-      DAT_febe6ed8 = (int)DAT_febe7dd0 - (int)DAT_febe7dce;
+      DAT_febe6ed8 = (int)((int)(int16_t)DAT_febe7dd0) - (int)((int)(int16_t)DAT_febe7dce);
       iVar1 = DAT_febe6ed8;
       goto LAB_000390b6;
     }
   }
   else if ((DAT_febe7bf8 & 0xff00) == 0) {
-    DAT_febe6edc = (int)DAT_febe7dd8 - (int)DAT_febe7dd6;
+    DAT_febe6edc = (int)((int)(int16_t)DAT_febe7dd8) - (int)((int)(int16_t)DAT_febe7dd6);
     iVar1 = DAT_febe6edc;
     goto LAB_000390b6;
   }
-  DAT_febe6ed8 = (int)DAT_febe7dd0 - (int)DAT_febe7dce;
-  DAT_febe6edc = (int)DAT_febe7dd8 - (int)DAT_febe7dd6;
+  DAT_febe6ed8 = (int)((int)(int16_t)DAT_febe7dd0) - (int)((int)(int16_t)DAT_febe7dce);
+  DAT_febe6edc = (int)((int)(int16_t)DAT_febe7dd8) - (int)((int)(int16_t)DAT_febe7dd6);
   iVar1 = DAT_febe6ed8;
   if (DAT_febe6edc - DAT_febe6ed8 < 0 !=
       (DAT_febe6edc < 0 != DAT_febe6ed8 < 0 && DAT_febe6ed8 < 0 == DAT_febe6edc - DAT_febe6ed8 < 0))
@@ -2230,7 +2230,7 @@ int f33_calculate_ecu_source5_thermal_estimate(void)
   iVar3 = DAT_febe6ec8;
   iVar2 = DAT_febe6ec4;
   puVar1 = 0xfebeb800u;
-  sStack_2e = DAT_febe6eae;
+  sStack_2e = ((int)(int16_t)DAT_febe6eae);
   state = f33_update_nonnegative_thermal_pole(DAT_febe6ec0,DAT_febe6ef0,(uint)DAT_0002b29a);
   iVar2 = f33_update_nonnegative_thermal_pole(iVar2,iVar7,(uint)DAT_0002b29c);
   iVar3 = f33_update_nonnegative_thermal_pole(iVar3,iVar7,(uint)DAT_0002b29e);
@@ -2591,30 +2591,30 @@ void f33_publish_thermal_history_record(void)
   
   puVar1 = 0xfebeb800u;
   if (DAT_febe7071 != '\0') {
-    local_3c = DAT_febe6f8e;
+    local_3c = ((int)(int16_t)DAT_febe6f8e);
     uStack_10 = 0;
-    uStack_3a = DAT_febe6f90;
-    uStack_38 = DAT_febe6f9e;
-    uStack_36 = DAT_febe6fa0;
-    uStack_34 = DAT_febe6f42;
-    uStack_32 = DAT_febe6f44;
-    uStack_30 = DAT_febe6f56;
-    uStack_2e = DAT_febe6f58;
-    uStack_2c = DAT_febe6f16;
-    uStack_2a = DAT_febe6f18;
-    uStack_24 = DAT_febe6eb2;
-    uStack_22 = DAT_febe6eb4;
-    uStack_20 = DAT_febe6eb6;
-    uStack_1e = DAT_febe6eb8;
-    uStack_1c = DAT_febe6eba;
-    uStack_1a = DAT_febe6ebc;
-    uStack_18 = DAT_febe6ff0;
-    uStack_16 = DAT_febe6ff2;
-    uStack_14 = DAT_febe7000;
-    uStack_12 = DAT_febe7002;
-    uStack_28 = DAT_febe707c;
-    uStack_26 = DAT_febe707a;
-    uStack_c = DAT_febee8ac;
+    uStack_3a = ((int)(int16_t)DAT_febe6f90);
+    uStack_38 = ((int)(int16_t)DAT_febe6f9e);
+    uStack_36 = ((int)(int16_t)DAT_febe6fa0);
+    uStack_34 = ((int)(int16_t)DAT_febe6f42);
+    uStack_32 = ((int)(int16_t)DAT_febe6f44);
+    uStack_30 = ((int)(int16_t)DAT_febe6f56);
+    uStack_2e = ((int)(int16_t)DAT_febe6f58);
+    uStack_2c = ((int)(int16_t)DAT_febe6f16);
+    uStack_2a = ((int)(int16_t)DAT_febe6f18);
+    uStack_24 = ((int)(int16_t)DAT_febe6eb2);
+    uStack_22 = ((int)(int16_t)DAT_febe6eb4);
+    uStack_20 = ((int)(int16_t)DAT_febe6eb6);
+    uStack_1e = ((int)(int16_t)DAT_febe6eb8);
+    uStack_1c = ((int)(int16_t)DAT_febe6eba);
+    uStack_1a = ((int)(int16_t)DAT_febe6ebc);
+    uStack_18 = ((int)(int16_t)DAT_febe6ff0);
+    uStack_16 = ((int)(int16_t)DAT_febe6ff2);
+    uStack_14 = ((int)(int16_t)DAT_febe7000);
+    uStack_12 = ((int)(int16_t)DAT_febe7002);
+    uStack_28 = ((int)(int16_t)DAT_febe707c);
+    uStack_26 = ((int)(int16_t)DAT_febe707a);
+    uStack_c = ((int)(int16_t)DAT_febee8ac);
     if (DAT_febe7bf8 == 0) {
       if (f33_thermal_history_qualification[0] == 0xa5) {
         uStack_a = 0xffff;
@@ -2626,10 +2626,10 @@ void f33_publish_thermal_history_record(void)
     else {
       uStack_a = 0x5aa5;
     }
-    uStack_8 = DAT_febe6f00;
-    uStack_6 = DAT_febe6f02;
-    DAT_febe6ee6 = DAT_febe6f00;
-    DAT_febe6ee8 = DAT_febe6f02;
+    uStack_8 = ((int)(int16_t)DAT_febe6f00);
+    uStack_6 = ((int)(int16_t)DAT_febe6f02);
+    DAT_febe6ee6 = ((int)(int16_t)DAT_febe6f00);
+    DAT_febe6ee8 = ((int)(int16_t)DAT_febe6f02);
     f33_nvm_set_record(6,(uint *)&local_3c);
     (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb6e4u + (uint32_t)((int)puVar1) * 1u)))) = 1;
   }
@@ -2786,8 +2786,8 @@ void f33_invalidate_thermal_history_record(void)
   uStack_26 = DAT_0002b5b0;
   uStack_c = 0x7f80;
   uStack_a = 0xa55a;
-  uStack_8 = DAT_febe6ee6;
-  uStack_6 = DAT_febe6ee8;
+  uStack_8 = ((int)(int16_t)DAT_febe6ee6);
+  uStack_6 = ((int)(int16_t)DAT_febe6ee8);
   f33_nvm_set_record(6,(uint *)&local_3c);
   return;
 }
@@ -2975,13 +2975,13 @@ void f33_update_thermal_drive_epoch_maxima(void)
   short sVar9;
   int iVar10;
   
-  sVar3 = DAT_febe6f08;
-  sVar4 = DAT_febe6f06;
+  sVar3 = ((int)(int16_t)DAT_febe6f08);
+  sVar4 = ((int)(int16_t)DAT_febe6f06);
   sVar9 = DAT_0002b30a;
   puVar5 = 0xfebeb800u;
-  iVar8 = (int)DAT_febe6f06;
-  iVar7 = (int)DAT_febe6f08;
-  iVar10 = (int)DAT_febe6f04;
+  iVar8 = (int)((int)(int16_t)DAT_febe6f06);
+  iVar7 = (int)((int)(int16_t)DAT_febe6f08);
+  iVar10 = (int)((int)(int16_t)DAT_febe6f04);
   state = f33_update_nonnegative_thermal_pole(DAT_febe6f0c,DAT_febe70b0,(uint)DAT_0002b308);
   iVar6 = f33_scale_thermal_contribution(state,sVar9,0x7fff,0);
   if (iVar10 - iVar6 < 0 == (iVar10 < 0 != iVar6 < 0 && iVar6 < 0 == iVar10 - iVar6 < 0) &&
@@ -3073,18 +3073,18 @@ uint f33_should_zero_ecu_source4_thermal_seed(ushort record_marker)
   
   if ((DAT_febe7bf8 & 0xff) == 0) {
     if ((DAT_febe7bf8 & 0xff00) != 0) {
-      DAT_febe6f28 = (int)DAT_febe7dd0 - (int)DAT_febe7dce;
+      DAT_febe6f28 = (int)((int)(int16_t)DAT_febe7dd0) - (int)((int)(int16_t)DAT_febe7dce);
       iVar1 = DAT_febe6f28;
       goto LAB_00039978;
     }
   }
   else if ((DAT_febe7bf8 & 0xff00) == 0) {
-    DAT_febe6f2c = (int)DAT_febe7dd8 - (int)DAT_febe7dd6;
+    DAT_febe6f2c = (int)((int)(int16_t)DAT_febe7dd8) - (int)((int)(int16_t)DAT_febe7dd6);
     iVar1 = DAT_febe6f2c;
     goto LAB_00039978;
   }
-  DAT_febe6f28 = (int)DAT_febe7dd0 - (int)DAT_febe7dce;
-  DAT_febe6f2c = (int)DAT_febe7dd8 - (int)DAT_febe7dd6;
+  DAT_febe6f28 = (int)((int)(int16_t)DAT_febe7dd0) - (int)((int)(int16_t)DAT_febe7dce);
+  DAT_febe6f2c = (int)((int)(int16_t)DAT_febe7dd8) - (int)((int)(int16_t)DAT_febe7dd6);
   iVar1 = DAT_febe6f28;
   if (DAT_febe6f2c - DAT_febe6f28 < 0 !=
       (DAT_febe6f2c < 0 != DAT_febe6f28 < 0 && DAT_febe6f28 < 0 == DAT_febe6f2c - DAT_febe6f28 < 0))
@@ -3241,13 +3241,13 @@ int f33_calculate_ecu_source4_thermal_estimate(void)
   iVar9 = DAT_febe70b0;
   iVar8 = DAT_febe6f24;
   iVar5 = DAT_febe6f20;
-  previous = DAT_febe6f12;
+  previous = ((int)(int16_t)DAT_febe6f12);
   puVar2 = 0xfebeb800u;
-  iVar1 = (int)DAT_febe64e2;
+  iVar1 = (int)((int)(int16_t)DAT_febe64e2);
   iVar6 = (int)DAT_0002b31c;
   if (iVar1 + 0x7fff < 0 == (-1 < iVar1 && iVar1 + 0x7fff < 0) && iVar1 != -0x7fff) {
     if (iVar1 < 0) {
-      iVar1 = (int)-DAT_febe64e2;
+      iVar1 = (int)-((int)(int16_t)DAT_febe64e2);
     }
   }
   else {
@@ -3431,18 +3431,18 @@ uint f33_should_zero_ecu_source2_thermal_seed(ushort record_marker)
   
   if ((DAT_febe7bf8 & 0xff) == 0) {
     if ((DAT_febe7bf8 & 0xff00) != 0) {
-      DAT_febe6f38 = (int)DAT_febe7dd0 - (int)DAT_febe7dce;
+      DAT_febe6f38 = (int)((int)(int16_t)DAT_febe7dd0) - (int)((int)(int16_t)DAT_febe7dce);
       iVar1 = DAT_febe6f38;
       goto LAB_00039c5a;
     }
   }
   else if ((DAT_febe7bf8 & 0xff00) == 0) {
-    DAT_febe6f3c = (int)DAT_febe7dd8 - (int)DAT_febe7dd6;
+    DAT_febe6f3c = (int)((int)(int16_t)DAT_febe7dd8) - (int)((int)(int16_t)DAT_febe7dd6);
     iVar1 = DAT_febe6f3c;
     goto LAB_00039c5a;
   }
-  DAT_febe6f38 = (int)DAT_febe7dd0 - (int)DAT_febe7dce;
-  DAT_febe6f3c = (int)DAT_febe7dd8 - (int)DAT_febe7dd6;
+  DAT_febe6f38 = (int)((int)(int16_t)DAT_febe7dd0) - (int)((int)(int16_t)DAT_febe7dce);
+  DAT_febe6f3c = (int)((int)(int16_t)DAT_febe7dd8) - (int)((int)(int16_t)DAT_febe7dd6);
   iVar1 = DAT_febe6f38;
   if (DAT_febe6f3c - DAT_febe6f38 < 0 !=
       (DAT_febe6f3c < 0 != DAT_febe6f38 < 0 && DAT_febe6f38 < 0 == DAT_febe6f3c - DAT_febe6f38 < 0))
@@ -3633,8 +3633,8 @@ int f33_update_ecu_source2_thermal_branch0(short upper,short lower,uchar alterna
   puVar2 = 0xfebeb800u;
   iVar7 = (int)lower;
   iVar8 = (int)upper;
-  iVar1 = (int)DAT_febe64e2;
-  sStack_2e = DAT_febe6f40;
+  iVar1 = (int)((int)(int16_t)DAT_febe64e2);
+  sStack_2e = ((int)(int16_t)DAT_febe6f40);
   gain = DAT_0002b38e;
   gain_00 = DAT_0002b38c;
   if (alternate_gains != '\0') {
@@ -3643,7 +3643,7 @@ int f33_update_ecu_source2_thermal_branch0(short upper,short lower,uchar alterna
   }
   if (iVar1 + 0x7fff < 0 == (-1 < iVar1 && iVar1 + 0x7fff < 0) && iVar1 != -0x7fff) {
     if (iVar1 < 0) {
-      iVar1 = (int)-DAT_febe64e2;
+      iVar1 = (int)-((int)(int16_t)DAT_febe64e2);
     }
   }
   else {
@@ -3659,7 +3659,7 @@ int f33_update_ecu_source2_thermal_branch0(short upper,short lower,uchar alterna
   }
   else {
     puVar2 = 0xfebeb800u;
-    FUN_00070304(((undefined *)camry_host_ptr(0x2b36cu)),DAT_febe668a & 0x7fff,&local_30);
+    FUN_00070304(((undefined *)camry_host_ptr(0x2b36cu)),((int)(int16_t)DAT_febe668a) & 0x7fff,&local_30);
   }
   divisor = f33_scale_thermal_divisor((uint)DAT_0002b396,(uint)local_30);
   divisor_00 = f33_scale_thermal_divisor((uint)DAT_0002b398,(uint)local_30);
@@ -3897,8 +3897,8 @@ int f33_update_ecu_source2_thermal_branch1(short upper,short lower,uchar alterna
   puVar2 = 0xfebeb800u;
   iVar7 = (int)lower;
   iVar8 = (int)upper;
-  iVar1 = (int)DAT_febe64e2;
-  sStack_2e = DAT_febe6f54;
+  iVar1 = (int)((int)(int16_t)DAT_febe64e2);
+  sStack_2e = ((int)(int16_t)DAT_febe6f54);
   gain = DAT_0002b3aa;
   gain_00 = DAT_0002b3a8;
   if (alternate_gains != '\0') {
@@ -3907,7 +3907,7 @@ int f33_update_ecu_source2_thermal_branch1(short upper,short lower,uchar alterna
   }
   if (iVar1 + 0x7fff < 0 == (-1 < iVar1 && iVar1 + 0x7fff < 0) && iVar1 != -0x7fff) {
     if (iVar1 < 0) {
-      iVar1 = (int)-DAT_febe64e2;
+      iVar1 = (int)-((int)(int16_t)DAT_febe64e2);
     }
   }
   else {
@@ -3923,7 +3923,7 @@ int f33_update_ecu_source2_thermal_branch1(short upper,short lower,uchar alterna
   }
   else {
     puVar2 = 0xfebeb800u;
-    FUN_00070304(((undefined *)camry_host_ptr(0x2b36cu)),DAT_febe6694 & 0x7fff,&local_30);
+    FUN_00070304(((undefined *)camry_host_ptr(0x2b36cu)),((int)(int16_t)DAT_febe6694) & 0x7fff,&local_30);
   }
   divisor = f33_scale_thermal_divisor((uint)DAT_0002b3b2,(uint)local_30);
   divisor_00 = f33_scale_thermal_divisor((uint)DAT_0002b3b4,(uint)local_30);
@@ -4312,16 +4312,16 @@ switchD_0003a386_default:
   }
   switch(source) {
   case '\x02':
-    iVar2 = (int)DAT_febe6f36;
+    iVar2 = (int)((int)(int16_t)DAT_febe6f36);
     break;
   case '\x03':
-    iVar2 = (int)DAT_febe6fe2;
+    iVar2 = (int)((int)(int16_t)DAT_febe6fe2);
     break;
   case '\x04':
-    iVar2 = (int)DAT_febe6f12;
+    iVar2 = (int)((int)(int16_t)DAT_febe6f12);
     break;
   case '\x05':
-    iVar2 = (int)DAT_febe6eae;
+    iVar2 = (int)((int)(int16_t)DAT_febe6eae);
     break;
   default:
     goto switchD_0003a386_default;
@@ -4553,18 +4553,18 @@ uint f33_should_zero_motor_thermal_seed(ushort record_marker)
   
   if ((DAT_febe7bf8 & 0xff) == 0) {
     if ((DAT_febe7bf8 & 0xff00) != 0) {
-      DAT_febe6f84 = (int)DAT_febe7dd0 - (int)DAT_febe7dce;
+      DAT_febe6f84 = (int)((int)(int16_t)DAT_febe7dd0) - (int)((int)(int16_t)DAT_febe7dce);
       iVar1 = DAT_febe6f84;
       goto LAB_0003a5b6;
     }
   }
   else if ((DAT_febe7bf8 & 0xff00) == 0) {
-    DAT_febe6f88 = (int)DAT_febe7dd8 - (int)DAT_febe7dd6;
+    DAT_febe6f88 = (int)((int)(int16_t)DAT_febe7dd8) - (int)((int)(int16_t)DAT_febe7dd6);
     iVar1 = DAT_febe6f88;
     goto LAB_0003a5b6;
   }
-  DAT_febe6f84 = (int)DAT_febe7dd0 - (int)DAT_febe7dce;
-  DAT_febe6f88 = (int)DAT_febe7dd8 - (int)DAT_febe7dd6;
+  DAT_febe6f84 = (int)((int)(int16_t)DAT_febe7dd0) - (int)((int)(int16_t)DAT_febe7dce);
+  DAT_febe6f88 = (int)((int)(int16_t)DAT_febe7dd8) - (int)((int)(int16_t)DAT_febe7dd6);
   iVar1 = DAT_febe6f84;
   if (DAT_febe6f88 - DAT_febe6f84 < 0 !=
       (DAT_febe6f88 < 0 != DAT_febe6f84 < 0 && DAT_febe6f84 < 0 == DAT_febe6f88 - DAT_febe6f84 < 0))
@@ -4775,15 +4775,15 @@ int f33_update_motor_thermal_branch0(short upper,short lower)
   iVar4 = DAT_febe70b4;
   iVar3 = DAT_febe6f98;
   iVar5 = DAT_febe6f94;
-  previous = DAT_febe6f8c;
+  previous = ((int)(int16_t)DAT_febe6f8c);
   puVar2 = 0xfebeb800u;
   iVar7 = (int)lower;
   iVar8 = (int)upper;
-  iVar1 = (int)DAT_febe64e2;
+  iVar1 = (int)((int)(int16_t)DAT_febe64e2);
   iVar6 = (int)DAT_0002b4c8;
   if (iVar1 + 0x7fff < 0 == (-1 < iVar1 && iVar1 + 0x7fff < 0) && iVar1 != -0x7fff) {
     if (iVar1 < 0) {
-      iVar1 = (int)-DAT_febe64e2;
+      iVar1 = (int)-((int)(int16_t)DAT_febe64e2);
     }
   }
   else {
@@ -4798,7 +4798,7 @@ int f33_update_motor_thermal_branch0(short upper,short lower)
   }
   else {
     puVar2 = 0xfebeb800u;
-    FUN_00070304(((undefined *)camry_host_ptr(0x2b490u)),DAT_febe668a & 0x7fff,&uStack_2a);
+    FUN_00070304(((undefined *)camry_host_ptr(0x2b490u)),((int)(int16_t)DAT_febe668a) & 0x7fff,&uStack_2a);
   }
   divisor = f33_scale_thermal_divisor((uint)DAT_0002b4c2,(uint)uStack_2a);
   divisor_00 = f33_scale_thermal_divisor((uint)DAT_0002b4c4,(uint)uStack_2a);
@@ -4917,15 +4917,15 @@ int f33_update_motor_thermal_branch1(short upper,short lower)
   iVar4 = DAT_febe70b8;
   iVar3 = DAT_febe6fa8;
   iVar5 = DAT_febe6fa4;
-  previous = DAT_febe6f9c;
+  previous = ((int)(int16_t)DAT_febe6f9c);
   puVar2 = 0xfebeb800u;
   iVar7 = (int)lower;
   iVar8 = (int)upper;
-  iVar1 = (int)DAT_febe64e2;
+  iVar1 = (int)((int)(int16_t)DAT_febe64e2);
   iVar6 = (int)DAT_0002b4dc;
   if (iVar1 + 0x7fff < 0 == (-1 < iVar1 && iVar1 + 0x7fff < 0) && iVar1 != -0x7fff) {
     if (iVar1 < 0) {
-      iVar1 = (int)-DAT_febe64e2;
+      iVar1 = (int)-((int)(int16_t)DAT_febe64e2);
     }
   }
   else {
@@ -4940,7 +4940,7 @@ int f33_update_motor_thermal_branch1(short upper,short lower)
   }
   else {
     puVar2 = 0xfebeb800u;
-    FUN_00070304(((undefined *)camry_host_ptr(0x2b490u)),DAT_febe6694 & 0x7fff,&uStack_2a);
+    FUN_00070304(((undefined *)camry_host_ptr(0x2b490u)),((int)(int16_t)DAT_febe6694) & 0x7fff,&uStack_2a);
   }
   divisor = f33_scale_thermal_divisor((uint)DAT_0002b4d6,(uint)uStack_2a);
   divisor_00 = f33_scale_thermal_divisor((uint)DAT_0002b4d8,(uint)uStack_2a);
@@ -5120,30 +5120,30 @@ uint f33_check_thermal_raw_estimate_margin(void)
   ushort uStack_1e;
   
   puVar2 = 0xfebeb800u;
-  iVar1 = (int)DAT_febe6fa2;
-  iVar8 = (int)DAT_febe6f92;
+  iVar1 = (int)((int)(int16_t)DAT_febe6fa2);
+  iVar8 = (int)((int)(int16_t)DAT_febe6f92);
   iVar5 = (int)DAT_0002fb54;
-  iVar7 = (int)DAT_febe6f4a;
-  iVar6 = (int)DAT_febe6fee;
+  iVar7 = (int)((int)(int16_t)DAT_febe6f4a);
+  iVar6 = (int)((int)(int16_t)DAT_febe6fee);
   if (iVar1 - iVar8 < 0 == (iVar1 < 0 != iVar8 < 0 && iVar8 < 0 == iVar1 - iVar8 < 0) &&
       iVar1 != iVar8) {
     iVar8 = iVar1;
   }
   iVar8 = iVar8 + iVar5 + (int)DAT_0002fb56;
-  iVar1 = (int)DAT_febe6f5e;
+  iVar1 = (int)((int)(int16_t)DAT_febe6f5e);
   if (iVar1 - iVar7 < 0 == (iVar1 < 0 != iVar7 < 0 && iVar7 < 0 == iVar1 - iVar7 < 0) &&
       iVar1 != iVar7) {
     iVar7 = iVar1;
   }
   iVar7 = iVar7 + iVar5 + (int)DAT_0002fb58;
-  iVar1 = (int)DAT_febe6ffe;
+  iVar1 = (int)((int)(int16_t)DAT_febe6ffe);
   if (iVar1 - iVar6 < 0 == (iVar1 < 0 != iVar6 < 0 && iVar6 < 0 == iVar1 - iVar6 < 0) &&
       iVar1 != iVar6) {
     iVar6 = iVar1;
   }
   iVar6 = iVar6 + iVar5 + (int)DAT_0002fb5a;
-  iVar1 = (int)DAT_0002fb5c + DAT_febe6f14 + iVar5;
-  iVar5 = (int)DAT_0002fb5e + DAT_febe6eb0 + iVar5;
+  iVar1 = (int)DAT_0002fb5c + ((int)(int16_t)DAT_febe6f14) + iVar5;
+  iVar5 = (int)DAT_0002fb5e + ((int)(int16_t)DAT_febe6eb0) + iVar5;
   if (iVar8 + 0x7fff < 0 == (-1 < iVar8 && iVar8 + 0x7fff < 0) && iVar8 != -0x7fff) {
     if (iVar8 + -0x7fff < 0 == (iVar8 < 0 && -1 < iVar8 + -0x7fff) && iVar8 != 0x7fff) {
       iVar8 = 0x7fff;
@@ -5433,18 +5433,18 @@ uint f33_should_zero_ecu_source3_thermal_seed(ushort record_marker)
   
   if ((DAT_febe7bf8 & 0xff) == 0) {
     if ((DAT_febe7bf8 & 0xff00) != 0) {
-      DAT_febe6fe4 = (int)DAT_febe7dd0 - (int)DAT_febe7dce;
+      DAT_febe6fe4 = (int)((int)(int16_t)DAT_febe7dd0) - (int)((int)(int16_t)DAT_febe7dce);
       iVar1 = DAT_febe6fe4;
       goto LAB_0003ad54;
     }
   }
   else if ((DAT_febe7bf8 & 0xff00) == 0) {
-    DAT_febe6fe8 = (int)DAT_febe7dd8 - (int)DAT_febe7dd6;
+    DAT_febe6fe8 = (int)((int)(int16_t)DAT_febe7dd8) - (int)((int)(int16_t)DAT_febe7dd6);
     iVar1 = DAT_febe6fe8;
     goto LAB_0003ad54;
   }
-  DAT_febe6fe4 = (int)DAT_febe7dd0 - (int)DAT_febe7dce;
-  DAT_febe6fe8 = (int)DAT_febe7dd8 - (int)DAT_febe7dd6;
+  DAT_febe6fe4 = (int)((int)(int16_t)DAT_febe7dd0) - (int)((int)(int16_t)DAT_febe7dce);
+  DAT_febe6fe8 = (int)((int)(int16_t)DAT_febe7dd8) - (int)((int)(int16_t)DAT_febe7dd6);
   iVar1 = DAT_febe6fe4;
   if (DAT_febe6fe8 - DAT_febe6fe4 < 0 !=
       (DAT_febe6fe8 < 0 != DAT_febe6fe4 < 0 && DAT_febe6fe4 < 0 == DAT_febe6fe8 - DAT_febe6fe4 < 0))
@@ -5587,15 +5587,15 @@ int f33_update_ecu_source3_thermal_branch0(short upper,short lower)
   
   iVar4 = DAT_febe6ff8;
   iVar3 = DAT_febe6ff4;
-  previous = DAT_febe6fec;
+  previous = ((int)(int16_t)DAT_febe6fec);
   iVar5 = DAT_febe6ef4;
   puVar2 = 0xfebeb800u;
   iVar7 = (int)lower;
   iVar8 = (int)upper;
-  iVar1 = (int)DAT_febe64e2;
+  iVar1 = (int)((int)(int16_t)DAT_febe64e2);
   if (iVar1 + 0x7fff < 0 == (-1 < iVar1 && iVar1 + 0x7fff < 0) && iVar1 != -0x7fff) {
     if (iVar1 < 0) {
-      iVar1 = (int)-DAT_febe64e2;
+      iVar1 = (int)-((int)(int16_t)DAT_febe64e2);
     }
   }
   else {
@@ -5702,15 +5702,15 @@ int f33_update_ecu_source3_thermal_branch1(short upper,short lower)
   
   iVar4 = DAT_febe7008;
   iVar3 = DAT_febe7004;
-  previous = DAT_febe6ffc;
+  previous = ((int)(int16_t)DAT_febe6ffc);
   iVar5 = DAT_febe6ef8;
   puVar2 = 0xfebeb800u;
   iVar7 = (int)lower;
   iVar8 = (int)upper;
-  iVar1 = (int)DAT_febe64e2;
+  iVar1 = (int)((int)(int16_t)DAT_febe64e2);
   if (iVar1 + 0x7fff < 0 == (-1 < iVar1 && iVar1 + 0x7fff < 0) && iVar1 != -0x7fff) {
     if (iVar1 < 0) {
-      iVar1 = (int)-DAT_febe64e2;
+      iVar1 = (int)-((int)(int16_t)DAT_febe64e2);
     }
   }
   else {
@@ -5880,10 +5880,10 @@ void FUN_0003b16c(void)
   int iVar7;
   undefined2 auStack_c [6];
   
-  sVar2 = DAT_febe7dce;
+  sVar2 = ((int)(int16_t)DAT_febe7dce);
   uVar3 = DAT_febe7bf8 & 0x33;
   if ((DAT_febe7bf8 & 0x33) == 0) {
-    iVar6 = (int)DAT_febe7dce;
+    iVar6 = (int)((int)(int16_t)DAT_febe7dce);
     if (DAT_febe7010 == 0x5a) {
       uVar4 = 1;
       do {
@@ -5908,7 +5908,7 @@ void FUN_0003b16c(void)
     }
   }
   else {
-    iVar6 = (int)DAT_febe7028;
+    iVar6 = (int)((int)(int16_t)DAT_febe7028);
     uVar3 = 0x5a;
   }
   iVar5 = (int)DAT_0002b58c;
@@ -5938,10 +5938,10 @@ void FUN_0003b1fa(void)
   int iVar7;
   undefined2 auStack_c [6];
   
-  sVar2 = DAT_febe7dd6;
+  sVar2 = ((int)(int16_t)DAT_febe7dd6);
   uVar3 = DAT_febe7bf8 & 0x3300;
   if ((DAT_febe7bf8 & 0x3300) == 0) {
-    iVar6 = (int)DAT_febe7dd6;
+    iVar6 = (int)((int)(int16_t)DAT_febe7dd6);
     if (DAT_febe7011 == 0x5a) {
       uVar4 = 1;
       do {
@@ -5966,7 +5966,7 @@ void FUN_0003b1fa(void)
     }
   }
   else {
-    iVar6 = (int)DAT_febe7034;
+    iVar6 = (int)((int)(int16_t)DAT_febe7034);
     uVar3 = 0x5a;
   }
   iVar5 = (int)DAT_0002b58c;

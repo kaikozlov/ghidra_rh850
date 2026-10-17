@@ -1920,7 +1920,7 @@ void f33_step_signed_constant_fit_sweep(short angle)
   short sStack_2e;
   
   puVar5 = 0xfebeb800u;
-  iVar2 = (int)DAT_febe5f36;
+  iVar2 = (int)((int)(int16_t)DAT_febe5f36);
   uStack_52 = f33_six_channel_fit_work.signed_initialized;
   uStack_51 = f33_six_channel_fit_work.state;
   sStack_44 = f33_six_channel_fit_work.signed_max[0];
@@ -1946,7 +1946,7 @@ void f33_step_signed_constant_fit_sweep(short angle)
   uVar6 = (uint)f33_six_channel_fit_work.first_gain[5];
   if (iVar2 + 0x7fff < 0 == (-1 < iVar2 && iVar2 + 0x7fff < 0) && iVar2 != -0x7fff) {
     if (iVar2 < 0) {
-      iVar2 = (int)-DAT_febe5f36;
+      iVar2 = (int)-((int)(int16_t)DAT_febe5f36);
     }
   }
   else {
@@ -2079,7 +2079,7 @@ LAB_000332fe:
         uVar6 = 0x80000001;
       }
     }
-    else if ((-1 < lVar1 && iVar4 != 0) || (uVar6 = uVar6 * iVar12, 0x7fffffff < uVar6)) {
+    else if ((-1 < lVar1 && iVar4 != 0) || (uVar6 = (int)uVar6 * iVar12, 0x7fffffff < (int)uVar6)) {
       uVar6 = 0x7fffffff;
     }
   }
@@ -3035,9 +3035,9 @@ uint f33_check_foreground_fit_bounds(void)
   int iVar6;
   
   uVar1 = 0;
-  iVar6 = (int)DAT_febe6566;
-  iVar5 = (int)DAT_febe6568;
-  iVar4 = (int)DAT_febe656a;
+  iVar6 = (int)((int)(int16_t)DAT_febe6566);
+  iVar5 = (int)((int)(int16_t)DAT_febe6568);
+  iVar4 = (int)((int)(int16_t)DAT_febe656a);
   iVar3 = (int)(short)f33_fit_parameters.candidate_bound_words[7];
   iVar2 = (int)(short)f33_fit_parameters.candidate_bound_words[6];
   if (((((((((f33_fit_parameters.candidate_bound_words[1] <= DAT_febe6542) &&
@@ -3085,15 +3085,15 @@ uint f33_check_foreground_fit_bounds(void)
            (iVar4 - iVar3 < 0 == (iVar4 < 0 != iVar3 < 0 && iVar3 < 0 == iVar4 - iVar3 < 0))) &&
           (iVar4 - iVar2 < 0 != (iVar4 < 0 != iVar2 < 0 && iVar2 < 0 == iVar4 - iVar2 < 0) ||
            iVar4 == iVar2)) &&
-         ((((iVar4 = (int)DAT_febe656c,
+         ((((iVar4 = (int)((int)(int16_t)DAT_febe656c),
             iVar4 - iVar3 < 0 == (iVar4 < 0 != iVar3 < 0 && iVar3 < 0 == iVar4 - iVar3 < 0) &&
             (iVar4 - iVar2 < 0 != (iVar4 < 0 != iVar2 < 0 && iVar2 < 0 == iVar4 - iVar2 < 0) ||
              iVar4 == iVar2)) &&
-           ((((iVar4 = (int)DAT_febe656e,
+           ((((iVar4 = (int)((int)(int16_t)DAT_febe656e),
               iVar4 - iVar3 < 0 == (iVar4 < 0 != iVar3 < 0 && iVar3 < 0 == iVar4 - iVar3 < 0) &&
               (((iVar4 - iVar2 < 0 != (iVar4 < 0 != iVar2 < 0 && iVar2 < 0 == iVar4 - iVar2 < 0) ||
                  iVar4 == iVar2 &&
-                (iVar4 = (int)DAT_febe6570,
+                (iVar4 = (int)((int)(int16_t)DAT_febe6570),
                 iVar4 - iVar3 < 0 == (iVar4 < 0 != iVar3 < 0 && iVar3 < 0 == iVar4 - iVar3 < 0))) &&
                (iVar4 - iVar2 < 0 != (iVar4 < 0 != iVar2 < 0 && iVar2 < 0 == iVar4 - iVar2 < 0) ||
                 iVar4 == iVar2)))) &&

@@ -1002,9 +1002,9 @@ void f33_publish_combined_assist_slope(void)
   int iVar2;
   
   iVar2 = (int)DAT_000af88c;
-  DAT_febebf18 = (((int)DAT_febebf36 - (int)DAT_febebf34) * (int)DAT_febec1a6) / 0x400 +
-                 (int)DAT_febebf34;
-  DAT_febebf1c = DAT_febec44e + DAT_febebf18;
+  DAT_febebf18 = (((int)((int)(int16_t)DAT_febebf36) - (int)((int)(int16_t)DAT_febebf34)) * (int)((int)(int16_t)DAT_febec1a6)) / 0x400 +
+                 (int)((int)(int16_t)DAT_febebf34);
+  DAT_febebf1c = ((int)(int16_t)DAT_febec44e) + DAT_febebf18;
   DAT_febebf40 = DAT_000af88c;
   if (DAT_febebf1c - iVar2 < 0 !=
       (DAT_febebf1c < 0 != iVar2 < 0 && iVar2 < 0 == DAT_febebf1c - iVar2 < 0) ||
@@ -1180,9 +1180,9 @@ void FUN_000c2e2a(void)
   short sVar2;
   
   DAT_febebf78 = -DAT_febeaeec;
-  DAT_febebf98 = DAT_febeadf2;
+  DAT_febebf98 = ((int)(int16_t)DAT_febeadf2);
   uVar1 = ((uint)DAT_febeae3a * 0x1e4) / 0x40000;
-  if ((uVar1 != 0) && (DAT_febebf70 = (int)DAT_febeadf2 << 4, uVar1 != 0)) {
+  if ((uVar1 != 0) && (DAT_febebf70 = (int)((int)(int16_t)DAT_febeadf2) << 4, uVar1 != 0)) {
     if (DAT_febebf70 == -0x80000000 && uVar1 == 0xffffffff) {
       DAT_febebf70 = -0x80000000;
     }
@@ -1190,14 +1190,14 @@ void FUN_000c2e2a(void)
       DAT_febebf70 = DAT_febebf70 / (int)uVar1;
     }
   }
-  DAT_febebf74 = (int)((int)DAT_febecc64 * (uint)DAT_febeae5a) / 0x2000;
-  DAT_febebf9a = DAT_febec172;
-  DAT_febebf9c = DAT_febec1a2;
+  DAT_febebf74 = (int)((int)((int)(int16_t)DAT_febecc64) * (uint)DAT_febeae5a) / 0x2000;
+  DAT_febebf9a = ((int)(int16_t)DAT_febec172);
+  DAT_febebf9c = ((int)(int16_t)DAT_febec1a2);
   sVar2 = (short)(((uint)DAT_febeae38 * 0x18) / 0x400);
   DAT_febebf7c = (int)(short)(((uint)DAT_febeae38 * 0x666) / 0x100000) * (int)(short)DAT_febeacc5 +
-                 (int)sVar2 * (int)DAT_febeadfe;
-  DAT_febebf50 = (int)sVar2 * (int)DAT_febeaed0;
-  DAT_febebf9e = DAT_febeae44;
+                 (int)sVar2 * (int)((int)(int16_t)DAT_febeadfe);
+  DAT_febebf50 = (int)sVar2 * (int)((int)(int16_t)DAT_febeaed0);
+  DAT_febebf9e = ((int)(int16_t)DAT_febeae44);
   return;
 }
 

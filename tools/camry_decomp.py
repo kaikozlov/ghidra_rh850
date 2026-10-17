@@ -3806,6 +3806,7 @@ _GP_PAIRS: dict[str, dict[int, int]] | None = None
 _GP_HITS: dict[str, set[int]] | None = None
 _DAT_TYPES: dict[int, str] | None = None
 _GP_OBJECTS: list[tuple[str, int, int, str]] | None = None
+_SIGNED_LOADS: dict[str, dict[int, int]] | None = None
 
 
 def _dat_types() -> dict[int, str]:
@@ -4051,6 +4052,221 @@ def _apply_gp_pairs(code: str, pairs: dict[int, int], hits: set[int] | None = No
     return code
 
 
+_LOAD_WIDTH = {"ld8s": 1, "ld8u": 1, "ld16s": 2, "ld16u": 2}
+_SIGN_EXTENDING = {"ld8s", "ld16s"}
+
+
+def _signed_load_map() -> dict[str, dict[int, int]]:
+    """Runtime addresses each function loads with a sign-extending byte or halfword.
+
+    An address also loaded zero-extended in that function is left alone.
+    """
+    global _SIGNED_LOADS
+    if _SIGNED_LOADS is not None:
+        return _SIGNED_LOADS
+    from tools.camry_lift import load_image, walk_symbol
+
+    image = load_image()
+    found: dict[str, dict[int, int]] = {}
+    for row in load_symbols():
+        fn = walk_symbol(image, row)
+        if fn is None:
+            continue
+        signed: dict[int, int] = {}
+        unsigned: set[int] = set()
+        holds_gp = {4}
+        shifted: dict[int, int] = {}
+        for inst in fn.insts:
+            parsed = _stmt_parts(inst.stmt) if inst.stmt else None
+            if parsed is None:
+                continue
+            name, args = parsed
+            if name == "mov" and len(args) >= 2 and isinstance(args[0], int):
+                dst, src = args[0], args[1]
+                if src in holds_gp:
+                    holds_gp.add(dst)
+                    shifted.pop(dst, None)
+                elif src in shifted:
+                    shifted[dst] = shifted[src]
+                    holds_gp.discard(dst)
+                else:
+                    holds_gp.discard(dst)
+                    shifted.pop(dst, None)
+                continue
+            if (
+                name == "movea"
+                and len(args) >= 3
+                and isinstance(args[0], int)
+                and isinstance(args[2], int)
+                and args[1] in holds_gp
+            ):
+                shifted[args[0]] = args[2]
+                holds_gp.discard(args[0])
+                continue
+            if name in _LOAD_WIDTH and len(args) >= 3 and isinstance(args[2], int):
+                base, disp = args[1], args[2]
+                addr = None
+                if base in holds_gp:
+                    addr = (_RUNTIME_GP + disp) & 0xFFFFFFFF
+                elif base in shifted:
+                    addr = (_RUNTIME_GP + shifted[base] + disp) & 0xFFFFFFFF
+                if addr is not None:
+                    if name in _SIGN_EXTENDING:
+                        signed[addr] = _LOAD_WIDTH[name]
+                    else:
+                        unsigned.add(addr)
+            if (
+                args
+                and isinstance(args[0], int)
+                and name not in {"st8", "st16", "st32", "cmp", "cmpi", "mov", "movea"}
+            ):
+                holds_gp.discard(args[0])
+                shifted.pop(args[0], None)
+        kept = {
+            addr: width for addr, width in signed.items() if addr not in unsigned
+        }
+        if kept:
+            found[row["name"]] = kept
+    _SIGNED_LOADS = found
+    return found
+
+
+def _comment_spans(code: str) -> list[tuple[int, int]]:
+    spans: list[tuple[int, int]] = []
+    index = 0
+    while index < len(code):
+        if code.startswith("/*", index):
+            end = code.find("*/", index + 2)
+            if end < 0:
+                spans.append((index, len(code)))
+                break
+            spans.append((index, end + 2))
+            index = end + 2
+            continue
+        if code.startswith("//", index):
+            end = code.find("\n", index)
+            end = len(code) if end < 0 else end
+            spans.append((index, end))
+            index = end
+            continue
+        index += 1
+    return spans
+
+
+def _in_comment(index: int, spans: list[tuple[int, int]]) -> bool:
+    for start, end in spans:
+        if start <= index < end:
+            return True
+        if start > index:
+            return False
+    return False
+
+
+def _cast_value_reads(code: str, name: str, cast: str) -> str:
+    """Sign-extend reads of an unsigned lvalue. Leave stores and existing signed casts."""
+    spans = _comment_spans(code)
+
+    def replace(match: re.Match[str]) -> str:
+        if _in_comment(match.start(), spans):
+            return match.group(0)
+        before = code[:match.start()]
+        after = code[match.end():]
+        if re.search(r"(?:&|\((?:int8_t|int16_t|short|char)\))\s*$", before):
+            return match.group(0)
+        if re.match(r"\s*(?:\+\+|--)", after):
+            return match.group(0)
+        if re.match(r"\s*[+\-*/%&|^]?=", after) and not re.match(
+            r"\s*(?:==|!=|<=|>=)", after
+        ):
+            return match.group(0)
+        return f"((int)({cast}){name})"
+
+    return re.sub(rf"\b{re.escape(name)}\b", replace, code)
+
+
+def _rewrite_signed_loads(code: str, signed: dict[int, int]) -> str:
+    if not signed:
+        return code
+    types = _dat_types()
+    for addr, width in sorted(signed.items()):
+        cast = "int8_t" if width == 1 else "int16_t"
+        macro = f"DAT_{addr:x}"
+        if types.get(addr) in {"uint8_t", "uint16_t"} and re.search(rf"\b{macro}\b", code):
+            code = _cast_value_reads(code, macro, cast)
+        ctype = "uint8_t" if width == 1 else "uint16_t"
+        pattern = (
+            rf"\(\*\(\(volatile\s+{ctype}\s+\*\)\s*camry_host_ptr\(0x0*{addr:x}u\)\)\)"
+        )
+        code = re.sub(
+            pattern,
+            f"(*((volatile {cast} *)camry_host_ptr(0x{addr:x}u)))",
+            code,
+            flags=re.IGNORECASE,
+        )
+    return code
+
+
+def _unsigned32_names(code: str) -> set[str]:
+    types = _dat_types()
+    names = {
+        match.group(0)
+        for match in re.finditer(r"\bDAT_([0-9A-Fa-f]+)\b", code)
+        if types.get(int(match.group(1), 16)) == "uint32_t"
+    }
+    names.update(
+        match.group(1)
+        for match in re.finditer(
+            r"\b(?:uint|uint32_t|unsigned(?:\s+int)?)\s+([A-Za-z_]\w*)\s*(?:=|;)",
+            code,
+        )
+    )
+    return names
+
+
+def _rewrite_unsigned_saturation(code: str) -> str:
+    """The 0x7fff clamp is a signed compare. A uint32 subject makes `< 0` false."""
+    if "0x7fff" not in code:
+        return code
+    names = _unsigned32_names(code)
+    if not names:
+        return code
+    ordered = sorted(names, key=len, reverse=True)
+
+    def rewrite_line(line: str) -> str:
+        if (
+            "0x7fff" not in line
+            or not re.search(r"[<>]", line)
+            or line.lstrip().startswith(("*", "/"))
+        ):
+            return line
+        for name in ordered:
+            def replace(match: re.Match[str], name: str = name) -> str:
+                before = line[:match.start()]
+                after = line[match.end():]
+                if before.rstrip().endswith("(int)"):
+                    return match.group(0)
+                if re.match(r"\s*[+\-*/%&|^]?=", after) and not re.match(
+                    r"\s*(?:==|!=|<=|>=)", after
+                ):
+                    return match.group(0)
+                return f"(int){name}"
+
+            line = re.sub(rf"\b{re.escape(name)}\b", replace, line)
+        return line
+
+    return "\n".join(rewrite_line(line) for line in code.split("\n"))
+
+
+def _rewrite_signed_values(code: str) -> str:
+    code = _rewrite_unsigned_saturation(code)
+    signature = _c_signature(code)
+    try:
+        name = _signature_name(signature)
+    except (AssertionError, ValueError):
+        return code
+    return _rewrite_signed_loads(code, _signed_load_map().get(name, {}))
+
+
 def _rewrite_runtime_gp(code: str) -> str:
     """Use the runtime gp for an address the bytes form as r4+disp.
 
@@ -4126,6 +4342,68 @@ def apply_runtime_gp() -> tuple[int, int]:
     return functions, files
 
 
+def apply_signed_values() -> tuple[int, int]:
+    """Sign-extend loads the bytes sign-extend, and clamp uint32 values as signed.
+
+    Equivalent functions keep the text they passed with.
+    """
+    blocked: set[str] = set()
+    allowed: set[str] = set()
+    by_name: dict[str, set[str]] = {}
+    for row in load_matched():
+        by_name.setdefault(row["name"], set()).add(row["status"])
+    for name, statuses in by_name.items():
+        if statuses & {"equivalent", "byte-matched"}:
+            blocked.add(name)
+        elif "converted" in statuses:
+            allowed.add(name)
+    loads = _signed_load_map()
+    functions = 0
+    files = 0
+    for path in sorted((ROOT / "src" / "all").glob("*.c")):
+        lines = path.read_text(encoding="utf-8").splitlines()
+        out: list[str] = []
+        index = 0
+        changed = False
+        while index < len(lines):
+            line = lines[index]
+            if (
+                not line.strip()
+                or line.startswith("#")
+                or line.startswith((" ", "\t", "/*", "//"))
+            ):
+                out.append(line)
+                index += 1
+                continue
+            start = index
+            while index < len(lines) and "{" not in lines[index]:
+                index += 1
+            if index >= len(lines):
+                out.extend(lines[start:])
+                break
+            depth = 0
+            while index < len(lines):
+                depth += lines[index].count("{") - lines[index].count("}")
+                index += 1
+                if depth <= 0:
+                    break
+            chunk = "\n".join(lines[start:index])
+            match = re.search(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\(", _c_signature(chunk))
+            name = match.group(1) if match else ""
+            if name in allowed and name not in blocked:
+                updated = _rewrite_unsigned_saturation(chunk)
+                updated = _rewrite_signed_loads(updated, loads.get(name, {}))
+                if updated != chunk:
+                    functions += 1
+                    changed = True
+                    chunk = updated
+            out.extend(chunk.split("\n"))
+        if changed:
+            path.write_text("\n".join(out) + "\n", encoding="utf-8")
+            files += 1
+    return functions, files
+
+
 def _rewrite_body(code: str) -> str:
     code = _strip_calling_convention(code)
     code = _widen_signature(code)
@@ -4161,6 +4439,7 @@ def _rewrite_body(code: str) -> str:
     code = _rewrite_wide_call_constants(code)
     code = _rewrite_icus(code)
     code = _rewrite_runtime_gp(code)
+    code = _rewrite_signed_values(code)
     return code
 
 

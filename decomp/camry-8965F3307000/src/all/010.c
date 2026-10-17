@@ -2760,7 +2760,7 @@ void f33_step_matched_state2_startup_triplet_b(void)
     goto LAB_00041d30;
   }
   if ((DAT_febe6764 >> 1 & 1) != 0) goto LAB_00041d30;
-  if ((DAT_febe6864 == '\0') && ((DAT_febe64cc & 0x7fffffff) >> 0x1c == 0)) {
+  if ((DAT_febe6864 == '\0') && (((int)DAT_febe64cc & 0x7fffffff) >> 0x1c == 0)) {
     if (DAT_febe6865 < DAT_0002b7de) {
       bVar3 = DAT_febe6865 + 1;
       goto LAB_00041ca8;
@@ -2959,10 +2959,10 @@ uint f33_classify_channel_negative_pair_a(void)
   int iVar2;
   
   iVar2 = (int)DAT_0002b80e;
-  iVar1 = DAT_febe7746 - iVar2;
-  if ((iVar1 < 0 != (DAT_febe7746 < 0 != iVar2 < 0 && iVar2 < 0 == iVar1 < 0)) &&
-     (iVar2 = (int)DAT_0002b810, iVar1 = DAT_febe7748 - iVar2,
-     iVar1 < 0 != (DAT_febe7748 < 0 != iVar2 < 0 && iVar2 < 0 == iVar1 < 0))) {
+  iVar1 = ((int)(int16_t)DAT_febe7746) - iVar2;
+  if ((iVar1 < 0 != (((int)(int16_t)DAT_febe7746) < 0 != iVar2 < 0 && iVar2 < 0 == iVar1 < 0)) &&
+     (iVar2 = (int)DAT_0002b810, iVar1 = ((int)(int16_t)DAT_febe7748) - iVar2,
+     iVar1 < 0 != (((int)(int16_t)DAT_febe7748) < 0 != iVar2 < 0 && iVar2 < 0 == iVar1 < 0))) {
     return 0x22;
   }
   return 0x11;
@@ -3013,10 +3013,10 @@ void FUN_00041fbe(void)
   int iVar2;
   int iVar3;
   
-  if (DAT_febe62f8 + 0x7fff < 0 == (-1 < DAT_febe62f8 && DAT_febe62f8 + 0x7fff < 0) &&
+  if ((int)DAT_febe62f8 + 0x7fff < 0 == (-1 < (int)DAT_febe62f8 && (int)DAT_febe62f8 + 0x7fff < 0) &&
       DAT_febe62f8 != -0x7fff) {
     iVar3 = DAT_febe62f8;
-    if (DAT_febe62f8 + -0x7fff < 0 == (DAT_febe62f8 < 0 && -1 < DAT_febe62f8 + -0x7fff) &&
+    if ((int)DAT_febe62f8 + -0x7fff < 0 == ((int)DAT_febe62f8 < 0 && -1 < (int)DAT_febe62f8 + -0x7fff) &&
         DAT_febe62f8 != 0x7fff) {
       iVar3 = 0x7fff;
     }
@@ -3024,10 +3024,10 @@ void FUN_00041fbe(void)
   else {
     iVar3 = -0x7fff;
   }
-  if (DAT_febe62fc + 0x7fff < 0 == (-1 < DAT_febe62fc && DAT_febe62fc + 0x7fff < 0) &&
+  if ((int)DAT_febe62fc + 0x7fff < 0 == (-1 < (int)DAT_febe62fc && (int)DAT_febe62fc + 0x7fff < 0) &&
       DAT_febe62fc != -0x7fff) {
     iVar2 = DAT_febe62fc;
-    if (DAT_febe62fc + -0x7fff < 0 == (DAT_febe62fc < 0 && -1 < DAT_febe62fc + -0x7fff) &&
+    if ((int)DAT_febe62fc + -0x7fff < 0 == ((int)DAT_febe62fc < 0 && -1 < (int)DAT_febe62fc + -0x7fff) &&
         DAT_febe62fc != 0x7fff) {
       iVar2 = 0x7fff;
     }
@@ -3035,10 +3035,10 @@ void FUN_00041fbe(void)
   else {
     iVar2 = -0x7fff;
   }
-  if (DAT_febe6300 + 0x7fff < 0 == (-1 < DAT_febe6300 && DAT_febe6300 + 0x7fff < 0) &&
+  if ((int)DAT_febe6300 + 0x7fff < 0 == (-1 < (int)DAT_febe6300 && (int)DAT_febe6300 + 0x7fff < 0) &&
       DAT_febe6300 != -0x7fff) {
     iVar1 = DAT_febe6300;
-    if (DAT_febe6300 + -0x7fff < 0 == (DAT_febe6300 < 0 && -1 < DAT_febe6300 + -0x7fff) &&
+    if ((int)DAT_febe6300 + -0x7fff < 0 == ((int)DAT_febe6300 < 0 && -1 < (int)DAT_febe6300 + -0x7fff) &&
         DAT_febe6300 != 0x7fff) {
       iVar1 = 0x7fff;
     }
@@ -3070,10 +3070,10 @@ void FUN_00042030(void)
   int iVar4;
   int iVar5;
   
-  if (DAT_febe62f8 + 0x7fff < 0 == (-1 < DAT_febe62f8 && DAT_febe62f8 + 0x7fff < 0) &&
+  if ((int)DAT_febe62f8 + 0x7fff < 0 == (-1 < (int)DAT_febe62f8 && (int)DAT_febe62f8 + 0x7fff < 0) &&
       DAT_febe62f8 != -0x7fff) {
     iVar2 = (int)(short)DAT_febe62f8;
-    if (DAT_febe62f8 + -0x7fff < 0 == (DAT_febe62f8 < 0 && -1 < DAT_febe62f8 + -0x7fff) &&
+    if ((int)DAT_febe62f8 + -0x7fff < 0 == ((int)DAT_febe62f8 < 0 && -1 < (int)DAT_febe62f8 + -0x7fff) &&
         DAT_febe62f8 != 0x7fff) {
       iVar2 = 0x7fff;
     }
@@ -3081,10 +3081,10 @@ void FUN_00042030(void)
   else {
     iVar2 = -0x7fff;
   }
-  if (DAT_febe62fc + 0x7fff < 0 == (-1 < DAT_febe62fc && DAT_febe62fc + 0x7fff < 0) &&
+  if ((int)DAT_febe62fc + 0x7fff < 0 == (-1 < (int)DAT_febe62fc && (int)DAT_febe62fc + 0x7fff < 0) &&
       DAT_febe62fc != -0x7fff) {
     iVar3 = (int)(short)DAT_febe62fc;
-    if (DAT_febe62fc + -0x7fff < 0 == (DAT_febe62fc < 0 && -1 < DAT_febe62fc + -0x7fff) &&
+    if ((int)DAT_febe62fc + -0x7fff < 0 == ((int)DAT_febe62fc < 0 && -1 < (int)DAT_febe62fc + -0x7fff) &&
         DAT_febe62fc != 0x7fff) {
       iVar3 = 0x7fff;
     }
@@ -3092,10 +3092,10 @@ void FUN_00042030(void)
   else {
     iVar3 = -0x7fff;
   }
-  if (DAT_febe6300 + 0x7fff < 0 == (-1 < DAT_febe6300 && DAT_febe6300 + 0x7fff < 0) &&
+  if ((int)DAT_febe6300 + 0x7fff < 0 == (-1 < (int)DAT_febe6300 && (int)DAT_febe6300 + 0x7fff < 0) &&
       DAT_febe6300 != -0x7fff) {
     iVar4 = (int)(short)DAT_febe6300;
-    if (DAT_febe6300 + -0x7fff < 0 == (DAT_febe6300 < 0 && -1 < DAT_febe6300 + -0x7fff) &&
+    if ((int)DAT_febe6300 + -0x7fff < 0 == ((int)DAT_febe6300 < 0 && -1 < (int)DAT_febe6300 + -0x7fff) &&
         DAT_febe6300 != 0x7fff) {
       iVar4 = 0x7fff;
     }
@@ -3105,29 +3105,29 @@ void FUN_00042030(void)
   }
   uVar1 = (uint)DAT_0002b812;
   if (uVar1 - 1 < 0xffff) {
-    iVar5 = (int)DAT_febe7770 * uVar1;
+    iVar5 = (int)((int)(int16_t)DAT_febe7770) * uVar1;
     iVar2 = iVar2 * uVar1;
   }
   else {
-    iVar5 = (int)DAT_febe7770 << 0x10;
+    iVar5 = (int)((int)(int16_t)DAT_febe7770) << 0x10;
     iVar2 = iVar2 << 0x10;
   }
   DAT_febe7778 = iVar2 + (DAT_febe7778 - iVar5);
   if (uVar1 - 1 < 0xffff) {
-    iVar2 = (int)DAT_febe7772 * uVar1;
+    iVar2 = (int)((int)(int16_t)DAT_febe7772) * uVar1;
     iVar3 = iVar3 * uVar1;
   }
   else {
-    iVar2 = (int)DAT_febe7772 << 0x10;
+    iVar2 = (int)((int)(int16_t)DAT_febe7772) << 0x10;
     iVar3 = iVar3 << 0x10;
   }
   DAT_febe777c = iVar3 + (DAT_febe777c - iVar2);
   if (uVar1 - 1 < 0xffff) {
-    iVar2 = (int)DAT_febe7774 * uVar1;
+    iVar2 = (int)((int)(int16_t)DAT_febe7774) * uVar1;
     iVar4 = iVar4 * uVar1;
   }
   else {
-    iVar2 = (int)DAT_febe7774 << 0x10;
+    iVar2 = (int)((int)(int16_t)DAT_febe7774) << 0x10;
     iVar4 = iVar4 << 0x10;
   }
   DAT_febe7770 = (short)(DAT_febe7778 / 0x10000);
@@ -3607,9 +3607,9 @@ uint f33_classify_channel_phase_sample_a(void)
   cVar3 = DAT_febe62e4;
   uVar2 = DAT_0002b83a;
   uVar1 = DAT_0002b834;
-  iVar8 = (int)DAT_febe77d8;
-  iVar7 = (int)DAT_febe62dc;
-  FUN_0006a522((int)DAT_febe77d6,&sStack_22);
+  iVar8 = (int)((int)(int16_t)DAT_febe77d8);
+  iVar7 = (int)((int)(int16_t)DAT_febe62dc);
+  FUN_0006a522((int)((int)(int16_t)DAT_febe77d6),&sStack_22);
   iVar5 = (int)sStack_22;
   iVar6 = (int)DAT_0002b830;
   if (cVar3 == '\0') {
@@ -4241,10 +4241,10 @@ uint f33_classify_channel_negative_pair_b(void)
   int iVar2;
   
   iVar2 = (int)DAT_0002b87e;
-  iVar1 = DAT_febe7856 - iVar2;
-  if ((iVar1 < 0 != (DAT_febe7856 < 0 != iVar2 < 0 && iVar2 < 0 == iVar1 < 0)) &&
-     (iVar2 = (int)DAT_0002b880, iVar1 = DAT_febe7858 - iVar2,
-     iVar1 < 0 != (DAT_febe7858 < 0 != iVar2 < 0 && iVar2 < 0 == iVar1 < 0))) {
+  iVar1 = ((int)(int16_t)DAT_febe7856) - iVar2;
+  if ((iVar1 < 0 != (((int)(int16_t)DAT_febe7856) < 0 != iVar2 < 0 && iVar2 < 0 == iVar1 < 0)) &&
+     (iVar2 = (int)DAT_0002b880, iVar1 = ((int)(int16_t)DAT_febe7858) - iVar2,
+     iVar1 < 0 != (((int)(int16_t)DAT_febe7858) < 0 != iVar2 < 0 && iVar2 < 0 == iVar1 < 0))) {
     return 0x22;
   }
   return 0x11;
@@ -4295,10 +4295,10 @@ void FUN_00042f7c(void)
   int iVar2;
   int iVar3;
   
-  if (DAT_febe6310 + 0x7fff < 0 == (-1 < DAT_febe6310 && DAT_febe6310 + 0x7fff < 0) &&
+  if ((int)DAT_febe6310 + 0x7fff < 0 == (-1 < (int)DAT_febe6310 && (int)DAT_febe6310 + 0x7fff < 0) &&
       DAT_febe6310 != -0x7fff) {
     iVar3 = DAT_febe6310;
-    if (DAT_febe6310 + -0x7fff < 0 == (DAT_febe6310 < 0 && -1 < DAT_febe6310 + -0x7fff) &&
+    if ((int)DAT_febe6310 + -0x7fff < 0 == ((int)DAT_febe6310 < 0 && -1 < (int)DAT_febe6310 + -0x7fff) &&
         DAT_febe6310 != 0x7fff) {
       iVar3 = 0x7fff;
     }
@@ -4306,10 +4306,10 @@ void FUN_00042f7c(void)
   else {
     iVar3 = -0x7fff;
   }
-  if (DAT_febe6314 + 0x7fff < 0 == (-1 < DAT_febe6314 && DAT_febe6314 + 0x7fff < 0) &&
+  if ((int)DAT_febe6314 + 0x7fff < 0 == (-1 < (int)DAT_febe6314 && (int)DAT_febe6314 + 0x7fff < 0) &&
       DAT_febe6314 != -0x7fff) {
     iVar2 = DAT_febe6314;
-    if (DAT_febe6314 + -0x7fff < 0 == (DAT_febe6314 < 0 && -1 < DAT_febe6314 + -0x7fff) &&
+    if ((int)DAT_febe6314 + -0x7fff < 0 == ((int)DAT_febe6314 < 0 && -1 < (int)DAT_febe6314 + -0x7fff) &&
         DAT_febe6314 != 0x7fff) {
       iVar2 = 0x7fff;
     }
@@ -4317,10 +4317,10 @@ void FUN_00042f7c(void)
   else {
     iVar2 = -0x7fff;
   }
-  if (DAT_febe6318 + 0x7fff < 0 == (-1 < DAT_febe6318 && DAT_febe6318 + 0x7fff < 0) &&
+  if ((int)DAT_febe6318 + 0x7fff < 0 == (-1 < (int)DAT_febe6318 && (int)DAT_febe6318 + 0x7fff < 0) &&
       DAT_febe6318 != -0x7fff) {
     iVar1 = DAT_febe6318;
-    if (DAT_febe6318 + -0x7fff < 0 == (DAT_febe6318 < 0 && -1 < DAT_febe6318 + -0x7fff) &&
+    if ((int)DAT_febe6318 + -0x7fff < 0 == ((int)DAT_febe6318 < 0 && -1 < (int)DAT_febe6318 + -0x7fff) &&
         DAT_febe6318 != 0x7fff) {
       iVar1 = 0x7fff;
     }
@@ -4352,10 +4352,10 @@ void FUN_00042fee(void)
   int iVar4;
   int iVar5;
   
-  if (DAT_febe6310 + 0x7fff < 0 == (-1 < DAT_febe6310 && DAT_febe6310 + 0x7fff < 0) &&
+  if ((int)DAT_febe6310 + 0x7fff < 0 == (-1 < (int)DAT_febe6310 && (int)DAT_febe6310 + 0x7fff < 0) &&
       DAT_febe6310 != -0x7fff) {
     iVar2 = (int)(short)DAT_febe6310;
-    if (DAT_febe6310 + -0x7fff < 0 == (DAT_febe6310 < 0 && -1 < DAT_febe6310 + -0x7fff) &&
+    if ((int)DAT_febe6310 + -0x7fff < 0 == ((int)DAT_febe6310 < 0 && -1 < (int)DAT_febe6310 + -0x7fff) &&
         DAT_febe6310 != 0x7fff) {
       iVar2 = 0x7fff;
     }
@@ -4363,10 +4363,10 @@ void FUN_00042fee(void)
   else {
     iVar2 = -0x7fff;
   }
-  if (DAT_febe6314 + 0x7fff < 0 == (-1 < DAT_febe6314 && DAT_febe6314 + 0x7fff < 0) &&
+  if ((int)DAT_febe6314 + 0x7fff < 0 == (-1 < (int)DAT_febe6314 && (int)DAT_febe6314 + 0x7fff < 0) &&
       DAT_febe6314 != -0x7fff) {
     iVar3 = (int)(short)DAT_febe6314;
-    if (DAT_febe6314 + -0x7fff < 0 == (DAT_febe6314 < 0 && -1 < DAT_febe6314 + -0x7fff) &&
+    if ((int)DAT_febe6314 + -0x7fff < 0 == ((int)DAT_febe6314 < 0 && -1 < (int)DAT_febe6314 + -0x7fff) &&
         DAT_febe6314 != 0x7fff) {
       iVar3 = 0x7fff;
     }
@@ -4374,10 +4374,10 @@ void FUN_00042fee(void)
   else {
     iVar3 = -0x7fff;
   }
-  if (DAT_febe6318 + 0x7fff < 0 == (-1 < DAT_febe6318 && DAT_febe6318 + 0x7fff < 0) &&
+  if ((int)DAT_febe6318 + 0x7fff < 0 == (-1 < (int)DAT_febe6318 && (int)DAT_febe6318 + 0x7fff < 0) &&
       DAT_febe6318 != -0x7fff) {
     iVar4 = (int)(short)DAT_febe6318;
-    if (DAT_febe6318 + -0x7fff < 0 == (DAT_febe6318 < 0 && -1 < DAT_febe6318 + -0x7fff) &&
+    if ((int)DAT_febe6318 + -0x7fff < 0 == ((int)DAT_febe6318 < 0 && -1 < (int)DAT_febe6318 + -0x7fff) &&
         DAT_febe6318 != 0x7fff) {
       iVar4 = 0x7fff;
     }
@@ -4387,29 +4387,29 @@ void FUN_00042fee(void)
   }
   uVar1 = (uint)DAT_0002b882;
   if (uVar1 - 1 < 0xffff) {
-    iVar5 = (int)DAT_febe7880 * uVar1;
+    iVar5 = (int)((int)(int16_t)DAT_febe7880) * uVar1;
     iVar2 = iVar2 * uVar1;
   }
   else {
-    iVar5 = (int)DAT_febe7880 << 0x10;
+    iVar5 = (int)((int)(int16_t)DAT_febe7880) << 0x10;
     iVar2 = iVar2 << 0x10;
   }
   DAT_febe7888 = iVar2 + (DAT_febe7888 - iVar5);
   if (uVar1 - 1 < 0xffff) {
-    iVar2 = (int)DAT_febe7882 * uVar1;
+    iVar2 = (int)((int)(int16_t)DAT_febe7882) * uVar1;
     iVar3 = iVar3 * uVar1;
   }
   else {
-    iVar2 = (int)DAT_febe7882 << 0x10;
+    iVar2 = (int)((int)(int16_t)DAT_febe7882) << 0x10;
     iVar3 = iVar3 << 0x10;
   }
   DAT_febe788c = iVar3 + (DAT_febe788c - iVar2);
   if (uVar1 - 1 < 0xffff) {
-    iVar2 = (int)DAT_febe7884 * uVar1;
+    iVar2 = (int)((int)(int16_t)DAT_febe7884) * uVar1;
     iVar4 = iVar4 * uVar1;
   }
   else {
-    iVar2 = (int)DAT_febe7884 << 0x10;
+    iVar2 = (int)((int)(int16_t)DAT_febe7884) << 0x10;
     iVar4 = iVar4 << 0x10;
   }
   DAT_febe7880 = (short)(DAT_febe7888 / 0x10000);
@@ -4959,9 +4959,9 @@ uint f33_classify_channel_phase_sample_b(void)
   cVar3 = DAT_febe62e5;
   uVar2 = DAT_0002b8aa;
   uVar1 = DAT_0002b8a4;
-  iVar8 = (int)DAT_febe78e8;
-  iVar7 = (int)DAT_febe62dc;
-  FUN_0006a522((int)DAT_febe78e6,&sStack_22);
+  iVar8 = (int)((int)(int16_t)DAT_febe78e8);
+  iVar7 = (int)((int)(int16_t)DAT_febe62dc);
+  FUN_0006a522((int)((int)(int16_t)DAT_febe78e6),&sStack_22);
   iVar5 = (int)sStack_22;
   iVar6 = (int)DAT_0002b8a0;
   if (cVar3 == '\0') {

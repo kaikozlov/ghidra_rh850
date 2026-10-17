@@ -34,7 +34,7 @@ void FUN_0004c000(void)
     DAT_febe8152 = 0;
   }
   else {
-    DAT_febe8152 = (short)((DAT_febe66a8 * 100) / 0x100);
+    DAT_febe8152 = (short)((((int)(int16_t)DAT_febe66a8) * 100) / 0x100);
     iVar2 = (int)DAT_febe8152;
     if (iVar2 + -1000 < 0 == (iVar2 < 0 && -1 < iVar2 + -1000) && iVar2 != 1000) {
       DAT_febe8152 = 1000;
@@ -45,7 +45,7 @@ void FUN_0004c000(void)
   }
   DAT_febe8158 = 0;
   if (uVar3 != 1) {
-    DAT_febe8158 = (undefined2)((DAT_febe6718 * -100) / 0x80);
+    DAT_febe8158 = (undefined2)((((int)(int16_t)DAT_febe6718) * -100) / 0x80);
   }
   return;
 }
@@ -420,7 +420,7 @@ void FUN_0004c380(void)
 {
   int iVar1;
   
-  iVar1 = (int)(DAT_febe6776 / 8);
+  iVar1 = (int)(((int)(int16_t)DAT_febe6776) / 8);
   if (iVar1 + -0x708 < 0 == (iVar1 < 0 && -1 < iVar1 + -0x708)) {
     iVar1 = 0x708;
   }
@@ -428,7 +428,7 @@ void FUN_0004c380(void)
     iVar1 = -0x708;
   }
   DAT_febe8166 = (short)iVar1;
-  iVar1 = (DAT_febe6776 * 0x652e) / 0x2000;
+  iVar1 = (((int)(int16_t)DAT_febe6776) * 0x652e) / 0x2000;
   if (iVar1 + -0x7fff < 0 == (iVar1 < 0 && -1 < iVar1 + -0x7fff)) {
     iVar1 = 0x7fff;
   }
@@ -687,8 +687,8 @@ void FUN_0004c650(void)
   bVar9 = DAT_febe80c9;
   uVar3 = f33_internal_source_admission_state;
   uVar8 = (uint)DAT_febee8cc;
-  iVar11 = (int)DAT_febee8dc;
-  iVar10 = (int)DAT_febe6790;
+  iVar11 = (int)((int)(int16_t)DAT_febee8dc);
+  iVar10 = (int)((int)(int16_t)DAT_febe6790);
   bVar7 = 0;
   uVar12 = 0;
   do {
@@ -912,17 +912,17 @@ void FUN_0004c97a(void)
   
   puVar4 = 0xfebeb800u;
   DAT_febe8c4c = 0;
-  DAT_febe8c32 = DAT_febe8136;
+  DAT_febe8c32 = ((int)(int8_t)DAT_febe8136);
   DAT_febe8c33 = DAT_febe8137;
-  DAT_febe8c24 = DAT_febe8164;
-  DAT_febe8c34 = DAT_febe8138;
-  DAT_febe8c26 = DAT_febe8166;
+  DAT_febe8c24 = ((int)(int16_t)DAT_febe8164);
+  DAT_febe8c34 = ((int)(int8_t)DAT_febe8138);
+  DAT_febe8c26 = ((int)(int16_t)DAT_febe8166);
   DAT_febe8c49 = DAT_febe8139;
   DAT_febe8c35 = DAT_febe80de;
   DAT_febe8c36 = DAT_febe80e3;
   DAT_febe8c37 = DAT_febe80e2;
-  DAT_febe8c38 = DAT_febe813a;
-  DAT_febe8c28 = DAT_febe8168;
+  DAT_febe8c38 = ((int)(int8_t)DAT_febe813a);
+  DAT_febe8c28 = ((int)(int16_t)DAT_febe8168);
   DAT_febe8c39 = DAT_febe813b;
   DAT_febe8c20 = DAT_febe8174;
   DAT_febe8c3a = DAT_febe813c;
@@ -930,7 +930,7 @@ void FUN_0004c97a(void)
   DAT_febe8c3c = DAT_febe813e;
   DAT_febe8c3d = DAT_febe813f;
   DAT_febe8c3e = DAT_febe817c;
-  DAT_febe8c2a = DAT_febe816a;
+  DAT_febe8c2a = ((int)(int16_t)DAT_febe816a);
   DAT_febe8c3f = DAT_febe80f6;
   DAT_febe8c40 = DAT_febe80f7;
   DAT_febe8c41 = DAT_febe80f8;
@@ -940,10 +940,10 @@ void FUN_0004c97a(void)
   DAT_febe8c45 = DAT_febe8141;
   DAT_febe8c4a = DAT_febe818e;
   DAT_febe8c4b = DAT_febe818d;
-  DAT_febe8c46 = DAT_febe8142;
+  DAT_febe8c46 = ((int)(int8_t)DAT_febe8142);
   DAT_febe8c47 = DAT_febe80e0;
-  DAT_febe8c2c = DAT_febe8156;
-  DAT_febe8c2e = DAT_febe816c;
+  DAT_febe8c2c = ((int)(int16_t)DAT_febe8156);
+  DAT_febe8c2e = ((int)(int16_t)DAT_febe816c);
   DAT_febe8c4d = DAT_febe8150;
   DAT_febe8c4e = DAT_febe8151;
   FUN_0007d31e(0,0,8,0,((undefined *)camry_host_ptr(0xfebe8c32u)));
@@ -2485,7 +2485,7 @@ undefined4 did_1035_steering_wheel_torque(undefined4 param_1)
   int local_c;
   
   if (DAT_febe6af0 == -0x5aa5a55b) {
-    local_c = (DAT_febe66a8 * 1000) / 0x100;
+    local_c = (((int)(int16_t)DAT_febe66a8) * 1000) / 0x100;
     FUN_0007012a(local_c,25000,(int)0xffff9e58,&local_c);
     iVar1 = (int)(short)local_c;
   }
@@ -2505,7 +2505,7 @@ undefined4 did_1036_steering_angle_velocity(undefined4 param_1)
 {
   short sStack_a;
   
-  sStack_a = (short)((DAT_febe66a4 * 0x168) / 0x400);
+  sStack_a = (short)((((int)(int16_t)DAT_febe66a4) * 0x168) / 0x400);
   FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
   FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
@@ -2518,8 +2518,8 @@ undefined4 did_1037_steering_angle(undefined4 param_1)
 {
   short sStack_a;
   
-  sStack_a = DAT_febe7d46;
-  FUN_00070110((int)DAT_febe7d46,0x7ff,(int)0xfffff800,&sStack_a);
+  sStack_a = ((int)(int16_t)DAT_febe7d46);
+  FUN_00070110((int)((int)(int16_t)DAT_febe7d46),0x7ff,(int)0xfffff800,&sStack_a);
   FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
 }
@@ -2572,7 +2572,7 @@ uint f33_rdbi_1063_callback(uchar *output)
 {
   short sStack_a;
   
-  sStack_a = (short)((DAT_febe7dda * 10) / 0x80);
+  sStack_a = (short)((((int)(int16_t)DAT_febe7dda) * 10) / 0x80);
   FUN_00070110((int)sStack_a,2000,(int)0xfffffe0c,&sStack_a);
   FUN_0006a5ac((int)sStack_a,output);
   return 0;
@@ -2598,7 +2598,7 @@ undefined4 f33_rdbi_1065_callback(undefined1 *param_1)
 {
   undefined1 uStack_9;
   
-  uStack_9 = 0 < DAT_febe678c;
+  uStack_9 = 0 < ((int)(int16_t)DAT_febe678c);
   FUN_0007016e(uStack_9,1,&uStack_9);
   *param_1 = uStack_9;
   return 0;
@@ -2642,7 +2642,7 @@ undefined4 f33_rdbi_1091_callback(undefined4 param_1)
 {
   int local_c;
   
-  local_c = (DAT_febe64f2 * 1000) / 0x100;
+  local_c = (((int)(int16_t)DAT_febe64f2) * 1000) / 0x100;
   FUN_0007012a(local_c,25000,(int)0xffff9e58,&local_c);
   FUN_0006a5ac((int)(short)local_c, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
@@ -2657,7 +2657,7 @@ undefined4 f33_rdbi_1092_callback(undefined4 param_1)
 {
   int local_c;
   
-  local_c = (DAT_febe64f4 * 1000) / 0x100;
+  local_c = (((int)(int16_t)DAT_febe64f4) * 1000) / 0x100;
   FUN_0007012a(local_c,25000,(int)0xffff9e58,&local_c);
   FUN_0006a5ac((int)(short)local_c, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
@@ -2672,7 +2672,7 @@ undefined4 f33_rdbi_1093_callback(undefined4 param_1)
 {
   int local_c;
   
-  local_c = (DAT_febe64f6 * 1000) / 0x100;
+  local_c = (((int)(int16_t)DAT_febe64f6) * 1000) / 0x100;
   FUN_0007012a(local_c,25000,(int)0xffff9e58,&local_c);
   FUN_0006a5ac((int)(short)local_c, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
@@ -2687,7 +2687,7 @@ undefined4 f33_rdbi_1094_callback(undefined4 param_1)
 {
   int local_c;
   
-  local_c = (DAT_febe64f8 * 1000) / 0x100;
+  local_c = (((int)(int16_t)DAT_febe64f8) * 1000) / 0x100;
   FUN_0007012a(local_c,25000,(int)0xffff9e58,&local_c);
   FUN_0006a5ac((int)(short)local_c, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
@@ -2754,7 +2754,7 @@ undefined4 f33_rdbi_10c1_callback(undefined4 param_1)
 {
   short sStack_a;
   
-  sStack_a = (short)((DAT_febe6654 * 100) / 0x80);
+  sStack_a = (short)((((int)(int16_t)DAT_febe6654) * 100) / 0x80);
   FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
   FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
@@ -2769,7 +2769,7 @@ undefined4 f33_rdbi_10c2_callback(undefined4 param_1)
 {
   short sStack_a;
   
-  sStack_a = (short)((DAT_febe6656 * 100) / 0x80);
+  sStack_a = (short)((((int)(int16_t)DAT_febe6656) * 100) / 0x80);
   FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
   FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
@@ -2784,7 +2784,7 @@ undefined4 f33_rdbi_10c3_callback(undefined4 param_1)
 {
   short sStack_a;
   
-  sStack_a = (short)((DAT_febe6658 * 100) / 0x80);
+  sStack_a = (short)((((int)(int16_t)DAT_febe6658) * 100) / 0x80);
   FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
   FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
@@ -2881,7 +2881,7 @@ undefined4 f33_rdbi_10f1_callback(undefined4 param_1)
 {
   short sStack_a;
   
-  sStack_a = (short)((DAT_febe665a * 100) / 0x80);
+  sStack_a = (short)((((int)(int16_t)DAT_febe665a) * 100) / 0x80);
   FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
   FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
@@ -2896,7 +2896,7 @@ undefined4 f33_rdbi_10f2_callback(undefined4 param_1)
 {
   short sStack_a;
   
-  sStack_a = (short)((DAT_febe665c * 100) / 0x80);
+  sStack_a = (short)((((int)(int16_t)DAT_febe665c) * 100) / 0x80);
   FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
   FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
@@ -2911,7 +2911,7 @@ undefined4 f33_rdbi_10f3_callback(undefined4 param_1)
 {
   short sStack_a;
   
-  sStack_a = (short)((DAT_febe665e * 100) / 0x80);
+  sStack_a = (short)((((int)(int16_t)DAT_febe665e) * 100) / 0x80);
   FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
   FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
@@ -3108,9 +3108,9 @@ undefined4 f33_rdbi_112e_callback(undefined4 param_1)
 {
   short sStack_a;
   
-  sStack_a = DAT_febee8e0;
+  sStack_a = ((int)(int16_t)DAT_febee8e0);
   if (DAT_febee885 == '\x02') {
-    FUN_00070110((int)DAT_febee8e0, 0x4957, camry_host_addr(((undefined *)camry_host_ptr(0xffffb6a9u))), &sStack_a);
+    FUN_00070110((int)((int)(int16_t)DAT_febee8e0), 0x4957, camry_host_addr(((undefined *)camry_host_ptr(0xffffb6a9u))), &sStack_a);
   }
   else {
     sStack_a = 19999;
@@ -3178,7 +3178,7 @@ undefined4 did_1151_motor_actual_current_q_axis(undefined4 param_1)
 {
   short sStack_a;
   
-  sStack_a = (short)((DAT_febe670e * 100) / 0x80);
+  sStack_a = (short)((((int)(int16_t)DAT_febe670e) * 100) / 0x80);
   FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
   FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
@@ -3193,7 +3193,7 @@ undefined4 did_1152_command_value_current_q_axis(undefined4 param_1)
 {
   short sStack_a;
   
-  sStack_a = (short)((DAT_febe6724 * 100) / 0x80);
+  sStack_a = (short)((((int)(int16_t)DAT_febe6724) * 100) / 0x80);
   FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
   FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
@@ -3208,7 +3208,7 @@ undefined4 did_1153_motor_actual_current_2_d_axis(undefined4 param_1)
 {
   short sStack_a;
   
-  sStack_a = (short)((DAT_febe670c * 100) / 0x80);
+  sStack_a = (short)((((int)(int16_t)DAT_febe670c) * 100) / 0x80);
   FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
   FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
@@ -3223,7 +3223,7 @@ undefined4 did_1154_command_value_current_2_d_axis(undefined4 param_1)
 {
   short sStack_a;
   
-  sStack_a = (short)((DAT_febe6726 * 100) / 0x80);
+  sStack_a = (short)((((int)(int16_t)DAT_febe6726) * 100) / 0x80);
   FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
   FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
@@ -3261,7 +3261,7 @@ undefined4 did_1156_final_motor_current_limited_q_axis(undefined4 param_1)
 {
   short sStack_a;
   
-  sStack_a = (short)((DAT_febe678c * 100) / 0x80);
+  sStack_a = (short)((((int)(int16_t)DAT_febe678c) * 100) / 0x80);
   FUN_00070110((int)sStack_a,0x7fff,0,&sStack_a);
   FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
@@ -3304,7 +3304,7 @@ undefined4 f33_rdbi_1183_callback(undefined1 *param_1)
 {
   short sStack_a;
   
-  sStack_a = DAT_febe8060 / 100;
+  sStack_a = ((int)(int16_t)DAT_febe8060) / 100;
   FUN_00070110((int)sStack_a,0xff,0,&sStack_a);
   *param_1 = (char)sStack_a;
   return 0;
@@ -3319,7 +3319,7 @@ undefined4 f33_rdbi_1184_callback(undefined1 *param_1)
 {
   short sStack_a;
   
-  sStack_a = DAT_febe8062 / 100;
+  sStack_a = ((int)(int16_t)DAT_febe8062) / 100;
   FUN_00070110((int)sStack_a,0xff,0,&sStack_a);
   *param_1 = (char)sStack_a;
   return 0;
@@ -3345,8 +3345,8 @@ undefined4 f33_rdbi_1186_callback(undefined4 param_1)
 {
   short sStack_a;
   
-  sStack_a = DAT_febe804a;
-  FUN_00070110((int)DAT_febe804a,0x7fff,(int)0xffff8000,&sStack_a);
+  sStack_a = ((int)(int16_t)DAT_febe804a);
+  FUN_00070110((int)((int)(int16_t)DAT_febe804a),0x7fff,(int)0xffff8000,&sStack_a);
   FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
 }
@@ -3522,7 +3522,7 @@ undefined4 did_1c02_command_value_torque(undefined4 param_1)
 {
   int local_c;
   
-  local_c = (((int)((int)DAT_febe6772 * (uint)DAT_febee8a6) / 0x2000) * 100) / 0x100;
+  local_c = (((int)((int)((int)(int16_t)DAT_febe6772) * (uint)DAT_febee8a6) / 0x2000) * 100) / 0x100;
   FUN_0007012a(local_c, 20000, camry_host_addr(((undefined *)camry_host_ptr(0xffffb1e0u))), &local_c);
   FUN_0006a5ac((int)(short)local_c, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
@@ -3570,7 +3570,7 @@ uint f33_rdbi_1c06_callback(uchar *output)
     sStack_a = 0x7fff;
   }
   else {
-    sStack_a = (short)((DAT_febe6f7a * 10) / 0x80);
+    sStack_a = (short)((((int)(int16_t)DAT_febe6f7a) * 10) / 0x80);
     FUN_00070110((int)sStack_a,2000,(int)0xfffffe0c,&sStack_a);
   }
   FUN_0006a5ac((int)sStack_a,output);
@@ -3594,7 +3594,7 @@ uint f33_rdbi_1c07_callback(uchar *output)
     sStack_a = 0x7fff;
   }
   else {
-    sStack_a = (short)((DAT_febe6f7c * 10) / 0x80);
+    sStack_a = (short)((((int)(int16_t)DAT_febe6f7c) * 10) / 0x80);
     FUN_00070110((int)sStack_a,2000,(int)0xfffffe0c,&sStack_a);
   }
   FUN_0006a5ac((int)sStack_a,output);
@@ -3649,7 +3649,7 @@ undefined4 f33_rdbi_1c32_callback(undefined4 param_1)
 {
   short sStack_a;
   
-  sStack_a = (short)((DAT_febee8c6 * 100) / 0x80);
+  sStack_a = (short)((((int)(int16_t)DAT_febee8c6) * 100) / 0x80);
   FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
   FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
@@ -3690,7 +3690,7 @@ undefined4 f33_rdbi_1c38_callback(undefined4 param_1)
 {
   short sStack_a;
   
-  sStack_a = (short)((DAT_febee8c2 * 100) / 0x80);
+  sStack_a = (short)((((int)(int16_t)DAT_febee8c2) * 100) / 0x80);
   FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
   FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
@@ -3731,7 +3731,7 @@ undefined4 f33_rdbi_1c3e_callback(undefined4 param_1)
 {
   short sStack_a;
   
-  sStack_a = (short)((DAT_febee8b6 * 100) / 0x80);
+  sStack_a = (short)((((int)(int16_t)DAT_febee8b6) * 100) / 0x80);
   FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
   FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
@@ -3772,7 +3772,7 @@ undefined4 f33_rdbi_1c44_callback(undefined4 param_1)
 {
   short sStack_a;
   
-  sStack_a = (short)((DAT_febee8ba * 100) / 0x80);
+  sStack_a = (short)((((int)(int16_t)DAT_febee8ba) * 100) / 0x80);
   FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
   FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
@@ -3800,7 +3800,7 @@ undefined4 f33_rdbi_1c4a_callback(undefined4 param_1)
 {
   short sStack_a;
   
-  sStack_a = (short)((DAT_febee8c2 * 100) / 0x80);
+  sStack_a = (short)((((int)(int16_t)DAT_febee8c2) * 100) / 0x80);
   FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
   FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
@@ -3841,7 +3841,7 @@ undefined4 f33_rdbi_1c50_callback(undefined4 param_1)
 {
   short sStack_a;
   
-  sStack_a = (short)((DAT_febee8c2 * 100) / 0x80);
+  sStack_a = (short)((((int)(int16_t)DAT_febee8c2) * 100) / 0x80);
   FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
   FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
@@ -3882,7 +3882,7 @@ undefined4 f33_rdbi_1c53_callback(undefined4 param_1)
 {
   short sStack_a;
   
-  sStack_a = (short)((DAT_febee8da * 100) / 0x80);
+  sStack_a = (short)((((int)(int16_t)DAT_febee8da) * 100) / 0x80);
   FUN_00070110((int)sStack_a,0x7fff,(int)0xffff8000,&sStack_a);
   FUN_0006a5ac((int)sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
@@ -4175,7 +4175,7 @@ undefined4 f33_rdbi_1ca9_callback(undefined4 param_1)
 {
   short sStack_a;
   
-  sStack_a = (short)((DAT_febe6f00 * 100) / 0x80);
+  sStack_a = (short)((((int)(int16_t)DAT_febe6f00) * 100) / 0x80);
   FUN_00070110((int)sStack_a,25000,0,&sStack_a);
   FUN_0006a574(sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;
@@ -4190,7 +4190,7 @@ undefined4 f33_rdbi_1caa_callback(undefined4 param_1)
 {
   short sStack_a;
   
-  sStack_a = (short)((DAT_febe6f02 * 100) / 0x80);
+  sStack_a = (short)((((int)(int16_t)DAT_febe6f02) * 100) / 0x80);
   FUN_00070110((int)sStack_a,25000,0,&sStack_a);
   FUN_0006a574(sStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
   return 0;

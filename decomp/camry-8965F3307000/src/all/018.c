@@ -1232,7 +1232,7 @@ undefined * FUN_0006131c(undefined2 *param_1)
   uVar1 = Ramffd82004;
   if (((uVar1 >> 7 & 1) == 0) && (uVar1 = Ramffd83004, (uVar1 & 0x7f) == 4)) {
     uVar1 = Ramffd83018;
-    if ((uVar1 & 0x7fffff) >> 0x10 != 0) {
+    if (((int)uVar1 & 0x7fffff) >> 0x10 != 0) {
       return ((undefined *)camry_host_ptr(0xa55au));
     }
     uVar2 = Ramffd83014;
