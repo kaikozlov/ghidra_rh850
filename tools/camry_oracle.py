@@ -1480,6 +1480,63 @@ def _reachable_stubs(
     return wanted
 
 
+def _refresh_text(existing: str, bodies: dict[str, str]) -> str:
+    """Replace converted support copies with the current src/all body.
+
+    Equivalent functions keep the text their oracles passed with. A converted
+    callee that was copied into oracle.c earlier still has Ghidra's gp, so the
+    verifier would fault on an address the scenario never mapped.
+    """
+    blocked: set[str] = set()
+    allowed: set[str] = set()
+    by_name: dict[str, set[str]] = {}
+    for row in load_matched():
+        by_name.setdefault(row["name"], set()).add(row["status"])
+    for name, statuses in by_name.items():
+        if statuses & {"equivalent", "byte-matched"}:
+            blocked.add(name)
+        elif "converted" in statuses:
+            allowed.add(name)
+    lines = existing.splitlines()
+    out: list[str] = []
+    index = 0
+    while index < len(lines):
+        line = lines[index]
+        if (
+            not line.strip()
+            or line.startswith("#")
+            or line.startswith((" ", "\t", "/*", "//"))
+        ):
+            out.append(line)
+            index += 1
+            continue
+        start = index
+        while index < len(lines) and "{" not in lines[index]:
+            index += 1
+        if index >= len(lines):
+            out.extend(lines[start:])
+            break
+        depth = 0
+        while index < len(lines):
+            depth += lines[index].count("{") - lines[index].count("}")
+            index += 1
+            if depth <= 0:
+                break
+        chunk = "\n".join(lines[start:index])
+        match = re.search(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\(", _c_signature(chunk))
+        name = match.group(1) if match else ""
+        fresh = bodies.get(name)
+        if (
+            name in allowed
+            and name not in blocked
+            and fresh is not None
+            and fresh.strip() != chunk.strip()
+        ):
+            chunk = fresh.strip()
+        out.extend(chunk.split("\n"))
+    return "\n".join(out).rstrip() + "\n"
+
+
 def _promote(
     planned: list[tuple[Planned, list[dict]]],
     support: list[str],
@@ -1488,6 +1545,7 @@ def _promote(
 ) -> None:
     oracle_path = ROOT / "src" / "oracle.c"
     existing = oracle_path.read_text(encoding="utf-8") if oracle_path.exists() else '#include "common.h"\n'
+    existing = _refresh_text(existing, bodies)
     # src/*.c is already linked by the verifier. Emitting those names again
     # fails the link with a duplicate symbol and drops the whole batch.
     have = _defined_lines(existing) | _src_definitions()

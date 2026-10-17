@@ -3797,12 +3797,15 @@ def _rewrite_icus(code: str) -> str:
 
 _GHIDRA_GP = 0xFEBF9800
 _RUNTIME_GP = 0xFEBEB800
+_GP_DELTA = (_GHIDRA_GP - _RUNTIME_GP) & 0xFFFFFFFF
 _GP_MEMORY = {
     "ld8s", "ld8u", "ld16s", "ld16u", "ld32",
     "st8", "st16", "st32", "movea",
 }
 _GP_PAIRS: dict[str, dict[int, int]] | None = None
+_GP_HITS: dict[str, set[int]] | None = None
 _DAT_TYPES: dict[int, str] | None = None
+_GP_OBJECTS: list[tuple[str, int, int, str]] | None = None
 
 
 def _dat_types() -> dict[int, str]:
@@ -3824,21 +3827,25 @@ def _dat_types() -> dict[int, str]:
 
 def _gp_address_map() -> dict[str, dict[int, int]]:
     """Ghidra gp+disp addresses whose bytes actually use r4, the runtime gp."""
-    global _GP_PAIRS
+    global _GP_PAIRS, _GP_HITS
     if _GP_PAIRS is not None:
         return _GP_PAIRS
     from tools.camry_lift import load_image, walk_symbol
 
     image = load_image()
     found: dict[str, dict[int, int]] = {}
+    hits: dict[str, set[int]] = {}
     for row in load_symbols():
         fn = walk_symbol(image, row)
         if fn is None:
             continue
         pairs: dict[int, int] = {}
+        touched: set[int] = set()
         immediates: set[int] = set()
         accesses: list[int] = []
         holds_gp = {4}
+        # gp plus an index. The displacement is still gp-relative.
+        indexed: set[int] = set()
         for inst in fn.insts:
             parsed = _stmt_parts(inst.stmt) if inst.stmt else None
             if parsed is None:
@@ -3848,22 +3855,39 @@ def _gp_address_map() -> dict[str, dict[int, int]]:
                 if isinstance(arg, int) and arg > 0xFFFF:
                     immediates.add(arg & 0xFFFFFFFF)
             if name == "mov" and len(args) >= 2 and isinstance(args[0], int):
-                if args[1] in holds_gp:
-                    holds_gp.add(args[0])
+                dst, src = args[0], args[1]
+                if src in holds_gp:
+                    holds_gp.add(dst)
+                    indexed.discard(dst)
+                elif src in indexed:
+                    indexed.add(dst)
+                    holds_gp.discard(dst)
                 else:
-                    holds_gp.discard(args[0])
+                    holds_gp.discard(dst)
+                    indexed.discard(dst)
                 continue
+            if name == "add" and len(args) >= 2 and isinstance(args[0], int):
+                dst, src = args[0], args[1]
+                if src in holds_gp or src in indexed:
+                    indexed.add(dst)
+                    holds_gp.discard(dst)
+                    continue
+                if dst in holds_gp or dst in indexed:
+                    indexed.add(dst)
+                    holds_gp.discard(dst)
+                    continue
+            gp_base = holds_gp | indexed
             if (
                 name in _GP_MEMORY
                 and len(args) >= 3
-                and args[1] in holds_gp
+                and args[1] in gp_base
                 and isinstance(args[2], int)
             ):
                 accesses.append(args[2])
             elif (
                 name in {"set1", "not1", "clr1", "tst1"}
                 and len(args) >= 2
-                and args[0] in holds_gp
+                and args[0] in gp_base
                 and isinstance(args[1], int)
             ):
                 accesses.append(args[1])
@@ -3873,22 +3897,91 @@ def _gp_address_map() -> dict[str, dict[int, int]]:
                 and name not in {"st8", "st16", "st32", "cmp", "cmpi"}
             ):
                 holds_gp.discard(args[0])
+                indexed.discard(args[0])
         for disp in accesses:
             ghidra = (_GHIDRA_GP + disp) & 0xFFFFFFFF
             runtime = (_RUNTIME_GP + disp) & 0xFFFFFFFF
             if ghidra not in immediates:
                 pairs[ghidra] = runtime
+                touched.add(ghidra)
         # The decompiler materializes gp as this immediate even when the bytes
         # only copy r4 into another register before the access.
         if _GHIDRA_GP not in immediates:
             pairs[_GHIDRA_GP] = _RUNTIME_GP
         if pairs:
             found[row["name"]] = pairs
+            if touched:
+                hits[row["name"]] = touched
     _GP_PAIRS = found
+    _GP_HITS = hits
     return found
 
 
-def _apply_gp_pairs(code: str, pairs: dict[int, int]) -> str:
+def _object_sizes() -> dict[str, tuple[int, int]]:
+    """Byte span of each named data object, from its declared type."""
+    cached = getattr(_object_sizes, "cached", None)
+    if cached is not None:
+        return cached
+    widths = {
+        "uint8_t": 1, "int8_t": 1, "uint16_t": 2, "int16_t": 2,
+        "uint32_t": 4, "int32_t": 4,
+    }
+    structs = _struct_rows()
+    found: dict[str, tuple[int, int]] = {}
+    for row in _load_jsonl(ROOT / "data.jsonl"):
+        type_name = row["type"].replace(" ", "")
+        if type_name.startswith("@"):
+            continue
+        base = type_name.split("[", 1)[0]
+        dims = [int(item) for item in re.findall(r"\[(\d+)\]", type_name)]
+        if base in structs:
+            elem = int(structs[base]["size"])
+        elif base in _ARRAY_ELEMENTS:
+            elem = _ARRAY_ELEMENTS[base][1]
+        elif base in _SCALAR_TYPES:
+            elem = widths.get(_SCALAR_TYPES[base], 1)
+        else:
+            elem = 1
+        size = elem
+        for dim in dims:
+            size *= dim
+        found[row["name"]] = (_address(row["addr"]), max(size, 1))
+    _object_sizes.cached = found
+    return found
+
+
+def _gp_objects() -> list[tuple[str, int, int, str]]:
+    """Named common.h objects in the Ghidra gp window: name, address, size, expression."""
+    global _GP_OBJECTS
+    if _GP_OBJECTS is not None:
+        return _GP_OBJECTS
+    sizes = _object_sizes()
+    found: list[tuple[str, int, int, str]] = []
+    header = ROOT / "src" / "all" / "common.h"
+    pattern = re.compile(
+        r"^#define\s+([A-Za-z_]\w*)\s+(.*camry_host_ptr\(0x([0-9A-Fa-f]+)u\).*)$"
+    )
+    if header.exists():
+        for line in header.read_text(encoding="utf-8").splitlines():
+            match = pattern.match(line.strip())
+            if match is None:
+                continue
+            name, expr, hex_addr = match.group(1), match.group(2), match.group(3)
+            addr = int(hex_addr, 16)
+            if name not in sizes or sizes[name][0] != addr:
+                continue
+            # A 16-bit displacement from the Ghidra gp reaches this object.
+            disp = (addr - _GHIDRA_GP) & 0xFFFFFFFF
+            if disp >= 0x80000000:
+                disp -= 0x100000000
+            if not -0x8000 <= disp < 0x8000:
+                continue
+            found.append((name, addr, sizes[name][1], expr))
+    _GP_OBJECTS = found
+    return found
+
+
+def _apply_gp_pairs(code: str, pairs: dict[int, int], hits: set[int] | None = None) -> str:
     types = _dat_types()
     for ghidra in sorted(pairs, key=lambda addr: -len(f"{addr:x}")):
         runtime = pairs[ghidra]
@@ -3900,11 +3993,36 @@ def _apply_gp_pairs(code: str, pairs: dict[int, int]) -> str:
             f"0x{runtime:x}",
             code,
         )
+        # A wider literal whose low half is this address, such as the
+        # decompiler packing gp into a 64-bit constant.
+        if len(hex_g) == 8:
+            def widen(match: re.Match[str], source: int = ghidra, dest: int = runtime) -> str:
+                value = int(match.group(0), 16)
+                if value <= 0xFFFFFFFF or (value & 0xFFFFFFFF) != source:
+                    return match.group(0)
+                return hex((value & ~0xFFFFFFFF) | dest)
+
+            code = re.sub(rf"(?i)\b0x[0-9a-f]*{hex_g}\b", widen, code)
         ctype = types.get(ghidra)
         if ctype is None:
             continue
         expr = f"(*((volatile {ctype} *)camry_host_ptr(0x{runtime:x}u)))"
         code = re.sub(rf"\bDAT_{hex_g}\b", expr, code)
+    if hits:
+        for name, addr, size, expr in _gp_objects():
+            if not any(addr <= hit < addr + size for hit in hits):
+                continue
+            if not re.search(rf"\b{re.escape(name)}\b", code):
+                continue
+            runtime = (addr - _GP_DELTA) & 0xFFFFFFFF
+            replacement = re.sub(
+                rf"0x0*{addr:x}u",
+                f"0x{runtime:x}u",
+                expr,
+                count=1,
+                flags=re.IGNORECASE,
+            )
+            code = re.sub(rf"\b{re.escape(name)}\b", replacement, code)
     return code
 
 
@@ -3922,7 +4040,7 @@ def _rewrite_runtime_gp(code: str) -> str:
     pairs = _gp_address_map().get(name)
     if not pairs:
         return code
-    return _apply_gp_pairs(code, pairs)
+    return _apply_gp_pairs(code, pairs, (_GP_HITS or {}).get(name))
 
 
 def apply_runtime_gp() -> tuple[int, int]:
@@ -3971,7 +4089,7 @@ def apply_runtime_gp() -> tuple[int, int]:
             match = re.search(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\(", _c_signature(chunk))
             name = match.group(1) if match else ""
             if name in allowed and name not in blocked and pairs.get(name):
-                updated = _apply_gp_pairs(chunk, pairs[name])
+                updated = _apply_gp_pairs(chunk, pairs[name], (_GP_HITS or {}).get(name))
                 if updated != chunk:
                     functions += 1
                     changed = True
