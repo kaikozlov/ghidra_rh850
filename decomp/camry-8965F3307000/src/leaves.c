@@ -1800,3 +1800,147 @@ void f33_nvm_publish_logical_result(
     camry_write8(0xfebf6000u + (handle << 1), result);
     f33_nvm_route_logical_result(handle, operation, result);
 }
+
+static int32_t gp_s16(int32_t displacement) {
+    return sign_half(camry_read16(camry_gp + (uint32_t)displacement));
+}
+
+static int32_t larger_s32(int32_t left, int32_t right) {
+    return left >= right ? left : right;
+}
+
+static int32_t saturate_symmetric_s16(int32_t value) {
+    if (value <= -32767)
+        return -32767;
+    if (value > 32767)
+        return 32767;
+    return sign_half((uint32_t)value);
+}
+
+/* 0x7025c. Points are int16 x, uint16 y, four bytes apart, ended by x == 32767.
+ * x is the low half of the argument. A point at or left of x returns its y.
+ * A later point above x interpolates from the previous point with signed
+ * DIVQ of the low 32 bits of the product. */
+static uint32_t map_s16_u16_points(uint32_t table, int32_t raw_x) {
+    int32_t x = sign_half((uint32_t)raw_x);
+    int32_t first_x = sign_half(camry_read16(table));
+    uint32_t index = 0u;
+    if (first_x == 32767 || first_x >= x)
+        return camry_read16(table + 2u);
+    for (;;) {
+        uint32_t point = table + (index << 2);
+        int32_t point_x = sign_half(camry_read16(point));
+        int32_t previous_x;
+        int32_t slope;
+        int32_t quotient;
+        uint32_t previous_y;
+        uint32_t point_y;
+        if (point_x == 32767)
+            return camry_read16(point - 2u);
+        if (point_x <= x) {
+            index += 1u;
+            continue;
+        }
+        previous_x = sign_half(camry_read16(point - 4u));
+        previous_y = camry_read16(point - 2u);
+        point_y = camry_read16(point + 2u);
+        slope = point_x - previous_x;
+        quotient = (int32_t)((int64_t)(x - previous_x) *
+                             (int64_t)((int32_t)point_y - (int32_t)previous_y));
+        if (slope != 0) {
+            if (quotient == (int32_t)0x80000000 && slope == -1)
+                quotient = (int32_t)0x80000000;
+            else
+                quotient = quotient / slope;
+        }
+        return (previous_y + (uint32_t)quotient) & 0xffffu;
+    }
+}
+
+static uint32_t f33_check_thermal_raw_estimate_margin(void) {
+    int32_t common = sign_half(camry_read16(0x2fb54u));
+    int32_t adjusted[5];
+    uint32_t mapped[5];
+    uint32_t tables[5] = {0x2b4e4u, 0x2b3c4u, 0x2b554u, 0x2b32cu, 0x2b2b8u};
+    uint32_t minimum;
+    uint32_t status = 0x5au;
+    uint32_t index;
+    uint32_t base = camry_gp - 18512u;
+    adjusted[0] = saturate_symmetric_s16(
+        larger_s32(gp_s16(-18526), gp_s16(-18542)) + common + sign_half(camry_read16(0x2fb56u)));
+    adjusted[1] = saturate_symmetric_s16(
+        larger_s32(gp_s16(-18594), gp_s16(-18614)) + common + sign_half(camry_read16(0x2fb58u)));
+    adjusted[2] = saturate_symmetric_s16(
+        larger_s32(gp_s16(-18434), gp_s16(-18450)) + common + sign_half(camry_read16(0x2fb5au)));
+    adjusted[3] = saturate_symmetric_s16(gp_s16(-18668) + common + sign_half(camry_read16(0x2fb5cu)));
+    adjusted[4] = saturate_symmetric_s16(gp_s16(-18768) + common + sign_half(camry_read16(0x2fb5eu)));
+    for (index = 0u; index < 5u; index += 1u)
+        mapped[index] = map_s16_u16_points(tables[index], adjusted[index]);
+    minimum = mapped[0];
+    for (index = 1u; index < 5u; index += 1u) {
+        if (mapped[index] < minimum)
+            minimum = mapped[index];
+    }
+    if (minimum >= camry_read16(0x2fb60u))
+        status = 0xa5u;
+    for (index = 0u; index < 5u; index += 1u)
+        camry_write16(base + 4u + (index << 1), (uint32_t)adjusted[index]);
+    for (index = 0u; index < 5u; index += 1u)
+        camry_write16(base + 14u + (index << 1), mapped[index]);
+    camry_write16(base + 24u, minimum);
+    camry_write8(base + 1u, status);
+    return status;
+}
+
+static uint32_t f33_check_thermal_contribution_count(void) {
+    int32_t groups[5];
+    uint32_t mapped[5];
+    uint32_t tables[5] = {0x2fb64u, 0x2fb78u, 0x2fb8cu, 0x2fba0u, 0x2fbb4u};
+    uint32_t maximum;
+    uint32_t status = 0x5au;
+    uint32_t index;
+    uint32_t base = camry_gp - 18512u;
+    uint32_t half = camry_read16(camry_gp - 20340u) >> 1;
+    groups[0] = larger_s32(
+        larger_s32(gp_s16(-18544), gp_s16(-18532 + 4)),
+        larger_s32(gp_s16(-18546), gp_s16(-18532 + 2)));
+    groups[1] = larger_s32(
+        larger_s32(gp_s16(-18622), gp_s16(-18604 + 2)),
+        larger_s32(gp_s16(-18620), gp_s16(-18604 + 4)));
+    groups[2] = larger_s32(
+        larger_s32(gp_s16(-18448), gp_s16(-18436 + 4)),
+        larger_s32(gp_s16(-18446), gp_s16(-18436 + 6)));
+    groups[3] = larger_s32(gp_s16(-18672 + 6), gp_s16(-18672 + 8));
+    groups[4] = gp_s16(-18772 + 6);
+    groups[4] = larger_s32(groups[4], gp_s16(-18772 + 8));
+    groups[4] = larger_s32(groups[4], gp_s16(-18772 + 10));
+    groups[4] = larger_s32(groups[4], gp_s16(-18772 + 12));
+    groups[4] = larger_s32(groups[4], gp_s16(-18772 + 14));
+    groups[4] = larger_s32(groups[4], gp_s16(-18772 + 16));
+    for (index = 0u; index < 5u; index += 1u)
+        mapped[index] = map_s16_u16_points(tables[index], groups[index]);
+    maximum = mapped[0];
+    for (index = 1u; index < 5u; index += 1u) {
+        if (mapped[index] > maximum)
+            maximum = mapped[index];
+    }
+    if (maximum < half)
+        status = 0xa5u;
+    for (index = 0u; index < 5u; index += 1u)
+        camry_write16(base + 26u + (index << 1), (uint32_t)groups[index]);
+    for (index = 0u; index < 5u; index += 1u)
+        camry_write16(base + 36u + (index << 1), mapped[index]);
+    camry_write16(base + 46u, maximum);
+    camry_write8(base + 2u, status);
+    return status;
+}
+
+void f33_update_thermal_history_qualification(void) {
+    uint32_t saved = camry_read16(camry_gp - 20636u);
+    uint32_t margin = f33_check_thermal_raw_estimate_margin();
+    uint32_t count = f33_check_thermal_contribution_count();
+    uint32_t status = 0x5au;
+    if (margin == 0xa5u && count == 0xa5u && saved == 0u)
+        status = 0xa5u;
+    camry_write8(camry_gp - 18512u, status);
+}

@@ -78,3 +78,4 @@
 {"addr": "0x6712c", "name": "f33_nvm_refresh_family2_record_status", "status": "equivalent"}
 {"addr": "0x355f6", "name": "f33_publish_learned_quad", "status": "equivalent"}
 {"addr": "0x3584a", "name": "f33_restore_learned_quad", "status": "equivalent"}
+{"addr": "0x3acc4", "name": "f33_update_thermal_history_qualification", "status": "equivalent"}

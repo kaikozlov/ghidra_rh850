@@ -130,3 +130,4 @@ uint32_t f33_check_learned_quad_bounds(void);
 uint32_t f33_nvm_enqueue_family0_read(uint32_t object);
 uint32_t f33_nvm_set_family0_record(uint32_t object, uint32_t source);
 void f33_update_thermal_release_envelope(void);
+void f33_update_thermal_history_qualification(void);
