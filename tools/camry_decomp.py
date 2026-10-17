@@ -1264,6 +1264,37 @@ def _unary_operand_end(code: str, index: int) -> int | None:
     return index + number.end()
 
 
+def _integer_constant_bits(expr: str) -> str | None:
+    """The bits of a Ghidra pointer cast of a literal, when that cast is a compare."""
+    text = expr.strip()
+    if re.fullmatch(r"0x[0-9A-Fa-f]+", text):
+        value = int(text, 16)
+    elif re.fullmatch(r"\d+", text):
+        value = int(text, 10)
+    else:
+        return None
+    if value > 0x7FFFFFFF:
+        return f"0x{value:x}u"
+    return text
+
+
+def _is_compare_operand(code: str, start: int, end: int) -> bool:
+    """True when [start, end) is the left or right side of a comparison."""
+    left = start - 1
+    while left >= 0 and code[left] in " \t\n":
+        left -= 1
+    if left >= 1 and code[left - 1:left + 1] in {"==", "!=", "<=", ">="}:
+        return True
+    if left >= 0 and code[left] in "<>" and code[left - 1:left + 1] not in {"->", ">>"}:
+        return True
+    right = end
+    while right < len(code) and code[right] in " \t\n":
+        right += 1
+    if code.startswith(("==", "!=", "<=", ">="), right):
+        return True
+    return right < len(code) and code[right] in "<>"
+
+
 def _rewrite_int_to_pointer(code: str, pointers: set[str]) -> str:
     pieces: list[str] = []
     cursor = 0
@@ -1336,6 +1367,15 @@ def _rewrite_int_to_pointer(code: str, pointers: set[str]) -> str:
         replace_at = deref_at if deref else open_paren
         if replace_at < cursor:
             search = star + 2
+            continue
+        # `(undefined *)0xffffffff` beside a signed divide is the divisor word
+        # compared with -1. A host pointer of that constant is not the cmp.
+        literal = None if deref else _integer_constant_bits(expr)
+        if literal is not None and _is_compare_operand(code, open_paren, end):
+            pieces.append(code[cursor:open_paren])
+            pieces.append(literal)
+            cursor = end
+            search = end
             continue
         pieces.append(code[cursor:replace_at])
         cast = f"({type_name} *)camry_host_ptr((uint32_t)({expr}))"

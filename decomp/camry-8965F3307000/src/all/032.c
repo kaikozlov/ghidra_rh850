@@ -1249,6 +1249,59 @@ void FUN_000c8ecc(void)
 }
 
 
+/* WARNING: Removing unreachable block (ram,0x000c8f42) */
+
+void FUN_000c8ef4(void)
+
+{
+  uint uVar1;
+  uint32_t puVar2;
+  short input;
+  short sVar3;
+  int iVar4;
+  int iVar6;
+  int iVar5;
+  
+  sVar3 = ((int)(int16_t)DAT_febec18a);
+  puVar2 = 0xfebeb800u;
+  uVar1 = (uint)DAT_febec156;
+  input = f33_abs_s16_wrapping(((int)(int16_t)DAT_febec18a));
+  iVar4 = f33_interpolate_signed_sentinel_curve(((short *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd37d0u + (uint32_t)(uVar1 & 3) * 4u)))))),input);
+  if (sVar3 < 0) {
+    iVar4 = -iVar4;
+  }
+  (*((int *)camry_host_ptr((uint32_t)(puVar2 + 0xd28)))) = iVar4;
+  iVar6 = 0;
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(0xd36))))) != '\0') {
+    iVar6 = (int)(short)((iVar4 * (*((short *)camry_host_ptr((uint32_t)(puVar2 + 0xd30)))) + 0x200) / 0x400);
+  }
+  (*((short *)camry_host_ptr((uint32_t)(puVar2 + 0xd32)))) = (short)iVar6;
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(0xdf4))))) == '\x01') {
+    sVar3 = f33_abs_s16_wrapping((*((short *)camry_host_ptr((uint32_t)(puVar2 + 0xdec)))));
+    iVar5 = (int)sVar3;
+    iVar4 = (int)DAT_000b0166;
+    if (iVar5 - iVar4 < 0 == (iVar5 < 0 != iVar4 < 0 && iVar4 < 0 == iVar5 - iVar4 < 0) &&
+        iVar5 != iVar4) {
+      iVar6 = 0;
+    }
+  }
+  iVar4 = (*((int *)camry_host_ptr((uint32_t)(puVar2 + 0xd2c)))) + (iVar6 - (*((short *)camry_host_ptr((uint32_t)(puVar2 + 0xd34)))));
+  (*((int *)camry_host_ptr((uint32_t)(puVar2 + 0xd2c)))) = iVar4;
+  iVar4 = iVar4 * 0x400;
+  if (PTR_LAB_000b015c != 0) {
+    if (iVar4 == -0x80000000 && PTR_LAB_000b015c == 0xffffffffu) {
+      iVar4 = 0;
+    }
+    else {
+      iVar4 = iVar4 / (int)PTR_LAB_000b015c;
+    }
+  }
+  (*((short *)camry_host_ptr((uint32_t)(puVar2 + 0xd34)))) = (short)iVar4;
+  return;
+}
+
+
+
 
 void FUN_000c8f90(void)
 
