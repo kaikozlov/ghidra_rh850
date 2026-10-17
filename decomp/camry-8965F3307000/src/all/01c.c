@@ -1289,6 +1289,22 @@ void FUN_00071e26(short param_1,uint param_2)
 
 
 
+void FUN_00071e88(uint param_1)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = 0;
+  if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebf60fau + (uint32_t)(param_1 & 0xff) * 1u)))) == '\x01') ||
+     (uVar1 = 1, (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebf60fau + (uint32_t)(param_1 & 0xff) * 1u)))) == '\x02')) {
+    ((void)((*((undefined2 *)camry_host_ptr((uint32_t)((int)&PTR_DAT_000273cc + (param_1 & 0xff) * 2))))), (void)(uVar1), f33_return_only_stub_747de())
+    ;
+  }
+  return;
+}
+
+
+
 void FUN_00071eb4(short param_1,uint param_2)
 
 {
@@ -1377,6 +1393,90 @@ void FUN_00071f82(undefined2 param_1,uint param_2)
     uVar1 = 5;
   }
   FUN_00071e88(uVar1);
+  return;
+}
+
+
+
+void FUN_00071ff2(undefined2 param_1)
+
+{
+  int iVar1;
+  
+  iVar1 = FUN_0007475a();
+  if (iVar1 == 0) {
+    ((void)(param_1), (void)(0x70), f33_return_only_stub_71ce0());
+  }
+  return;
+}
+
+
+
+void FUN_00072010(undefined2 param_1)
+
+{
+  int iVar1;
+  
+  iVar1 = FUN_0007475a();
+  if (iVar1 == 0) {
+    ((void)(param_1), (void)(0), f33_return_only_stub_71ce0());
+  }
+  return;
+}
+
+
+
+void FUN_0007203a(undefined2 param_1)
+
+{
+  int iVar1;
+  
+  iVar1 = FUN_0007476a();
+  if (iVar1 == 0) {
+    ((void)(param_1), (void)(0x70), f33_return_only_stub_71ce0());
+  }
+  return;
+}
+
+
+
+void FUN_00072058(undefined2 param_1)
+
+{
+  int iVar1;
+  
+  iVar1 = FUN_0007476a();
+  if (iVar1 == 0) {
+    ((void)(param_1), (void)(0), f33_return_only_stub_71ce0());
+  }
+  return;
+}
+
+
+
+void FUN_00072082(undefined2 param_1)
+
+{
+  int iVar1;
+  
+  iVar1 = FUN_0007475a();
+  if (iVar1 == 0) {
+    ((void)(param_1), (void)(0x77), f33_return_only_stub_71ce0());
+  }
+  return;
+}
+
+
+
+void FUN_000720a0(undefined2 param_1)
+
+{
+  int iVar1;
+  
+  iVar1 = FUN_0007475a();
+  if (iVar1 == 0) {
+    ((void)(param_1), (void)(0), f33_return_only_stub_71ce0());
+  }
   return;
 }
 
@@ -1541,6 +1641,24 @@ void thunk_FUN_0007275e(void)
 
 
 
+undefined4 FUN_0007285c(undefined2 param_1)
+
+{
+  int iVar1;
+  undefined4 uVar2;
+  char cStack_9;
+  
+  uVar2 = 0;
+  iVar1 = ((void)(param_1), (void)(&cStack_9), f33_return_const_1_71cf4());
+  if ((iVar1 == 0) && (cStack_9 == 'w')) {
+    FUN_0007211a(5);
+    uVar2 = 1;
+  }
+  return uVar2;
+}
+
+
+
 void FUN_00072888(char param_1)
 
 {
@@ -1646,6 +1764,34 @@ void FUN_00072c62(uint param_1,ushort param_2,uint param_3,uchar param_4,undefin
 
 
 
+void FUN_00072cba(undefined2 param_1,uint param_2,undefined1 param_3,uchar param_4,
+                 undefined1 param_5,char param_6)
+
+{
+  ushort logical_handle;
+  
+  logical_handle = DAT_febf6122;
+  ((void)(0), f33_return_only_stub_73c86());
+  FUN_0007211a(param_5);
+  if (param_2 == 0x2ece2284) {
+    FUN_00072010(logical_handle);
+  }
+  else if (param_2 == 0xea907101) {
+    FUN_00072058(logical_handle);
+  }
+  if (param_6 == '\x01') {
+    f33_nvm_publish_logical_result(logical_handle,param_2,param_4);
+  }
+  FUN_00071f82(logical_handle,param_2);
+  if (param_6 == '\x01') {
+    FUN_00072c62(logical_handle + 1,param_1,param_2,param_4,param_5);
+  }
+  FUN_0007289e(param_3);
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -1696,6 +1842,24 @@ char FUN_00072fc8(char param_1)
     return param_1;
   }
   return '\x01';
+}
+
+
+
+void FUN_00073024(uint param_1,char param_2)
+
+{
+  uchar result;
+  
+  if (param_2 != '\x16') {
+    FUN_000739e8();
+    f33_return_only_stub_73a06();
+    result = FUN_00072fc8(param_2);
+    f33_nvm_publish_logical_result(0,param_1,result);
+    FUN_00071eb4(0,param_1);
+  }
+  ((void)(0), FUN_000747d2());
+  return;
 }
 
 
@@ -1952,6 +2116,20 @@ void f33_return_only_stub_73ca0(void)
 void f33_return_only_stub_73ca2(void)
 
 {
+  return;
+}
+
+
+
+void FUN_00073cb0(ushort param_1,undefined4 param_2,undefined2 param_3,undefined4 param_4,
+                 undefined2 param_5)
+
+{
+  uint uVar1;
+  
+  uVar1 = f33_nvm_storage_handle(param_1);
+  FUN_000720f0(4);
+  ((void)(param_5), FUN_00076572(uVar1, param_3, param_4));
   return;
 }
 

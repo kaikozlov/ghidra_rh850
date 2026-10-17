@@ -146,6 +146,29 @@ void f33_return_only_stub_741ea(void)
 
 
 
+/* Accept2..123, additionally0 iff allow_zero==1. Otherwise call 71D88(14,0,api,A), whose exact body
+   returns0, then return1. No init gate. Accept low16 handle2..123, additionally0 iff allow_zero
+   low8==1. Otherwise call71D88 then return1. No RAM initialization gate. Public read/write pass
+   allow_zero0; invalid handles require no admin RAM. */
+
+uint f33_nvm_check_logical_handle(ushort logical_handle,uchar api,uchar allow_zero)
+
+{
+  uint uVar1;
+  
+  uVar1 = 1;
+  if (((logical_handle < 2) || ((ushort)(f33_nvm_logical_descriptor_count - 1) < logical_handle)) &&
+     ((allow_zero != '\x01' || (logical_handle != 0)))) {
+    ((void)(0x14), (void)(0), (void)(api), (void)(10), f33_return_const_0_71d88());
+  }
+  else {
+    uVar1 = 0;
+  }
+  return uVar1;
+}
+
+
+
 bool FUN_00074228(char param_1)
 
 {
@@ -153,6 +176,26 @@ bool FUN_00074228(char param_1)
     return param_1 != '\0';
   }
   return false;
+}
+
+
+
+/* Reject exactly logical result2 with return1; other byte values return0. Read logical result byte
+   and reject exactly2; return0 for other values. Independent of second-cell write-inhibit. */
+
+uint f33_nvm_check_not_pending(ushort logical_handle,uchar api)
+
+{
+  bool bVar1;
+  uchar uStack_d;
+  
+  uStack_d = '\x02';
+  f33_nvm_read_logical_result(logical_handle,&uStack_d);
+  bVar1 = uStack_d == '\x02';
+  if (bVar1) {
+    ((void)(0x14), (void)(0), (void)(api), (void)(0x15), f33_return_const_0_71d88());
+  }
+  return (uint)bVar1;
 }
 
 
@@ -184,6 +227,17 @@ undefined4 FUN_000742a2(ushort param_1,undefined1 param_2)
 
 
 
+bool FUN_000742ea(int param_1,undefined1 param_2)
+
+{
+  if (param_1 == 0) {
+    ((void)(0x14), (void)(0), (void)(param_2), (void)(0xe), f33_return_const_0_71d88());
+  }
+  return param_1 == 0;
+}
+
+
+
 undefined4 FUN_0007430c(ushort param_1,undefined4 param_2)
 
 {
@@ -203,6 +257,17 @@ undefined4 FUN_0007430c(ushort param_1,undefined4 param_2)
     }
   }
   return uVar3;
+}
+
+
+
+bool FUN_00074338(int param_1,undefined1 param_2)
+
+{
+  if (param_1 == 0) {
+    ((void)(0x14), (void)(0), (void)(param_2), (void)(0xf), f33_return_const_0_71d88());
+  }
+  return param_1 == 0;
 }
 
 
@@ -308,6 +373,20 @@ uint f33_nvm_check_write_request(ushort logical_handle,void *buffer)
     }
   }
   return uVar3;
+}
+
+
+
+bool FUN_00074468(undefined2 param_1,undefined1 param_2)
+
+{
+  int iVar1;
+  
+  iVar1 = ((void)(param_1), f33_return_const_0_745c4());
+  if (iVar1 == 0) {
+    ((void)(0x14), (void)(0), (void)(param_2), (void)(0x18), f33_return_const_0_71d88());
+  }
+  return iVar1 == 0;
 }
 
 
@@ -787,6 +866,24 @@ void FUN_00074b20(void)
     FUN_000781aa(0);
   }
   return;
+}
+
+
+
+uint FUN_00074b3c(void)
+
+{
+  uint32_t puVar1;
+  uint uVar2;
+  
+  puVar1 = 0x23dfcu;
+  f33_nvm_driver_block_latch = '\0';
+  FUN_000749e4();
+  FUN_000749fc();
+  ((void)(((undefined *)camry_host_ptr((uint32_t)(puVar1 + 0x3b34)))), FUN_00078500());
+  uVar2 = f33_nvm_translate_saved_driver_result();
+  FUN_000781aa(0);
+  return uVar2;
 }
 
 
@@ -1606,6 +1703,24 @@ undefined4 FUN_00075a78(undefined4 param_1,undefined4 param_2)
     uVar4 = FUN_000750b2(((undefined *)camry_host_ptr((uint32_t)(iVar3))), ((undefined4 *)camry_host_ptr((uint32_t)(param_2))));
   }
   return uVar4;
+}
+
+
+
+undefined4 FUN_00075ab8(undefined4 param_1,undefined4 param_2)
+
+{
+  int iVar1;
+  undefined4 uVar2;
+  
+  iVar1 = FUN_000783d4();
+  if (iVar1 == 1) {
+    uVar2 = 0x11;
+  }
+  else {
+    uVar2 = ((void)(iVar1), (void)(param_2), FUN_000750fe());
+  }
+  return uVar2;
 }
 
 
@@ -2614,6 +2729,56 @@ void FUN_00076e6a(ushort param_1,ushort param_2,int param_3)
 
 
 
+/* WARNING: Inlined function: f33_nvm_payload_length */
+
+void FUN_0007708c(ushort param_1,ushort param_2,uchar param_3)
+
+{
+  uint32_t puVar1;
+  uint uVar2;
+  uint uVar3;
+  
+  puVar1 = 0x23dfcu;
+  uVar3 = (uint)param_1;
+  if (uVar3 < f33_nvm_descriptor_count) {
+    DAT_febf6c44 = param_1;
+    uVar2 = f33_nvm_payload_page_count(param_1);
+    f33_nvm_payload_chunks_remaining = (ushort)uVar2;
+    DAT_febf6c24 = f33_nvm_record_offset(param_1,param_2,0);
+    uVar2 = FUN_0007786a(uVar3,DAT_febf6c24,param_3);
+    if ((uVar2 == 1) && (uVar2 = FUN_00076ff0(uVar3,DAT_febf6c24,param_3), uVar2 == 1)) {
+      if (f33_nvm_payload_chunks_remaining != 0) {
+        return;
+      }
+      if (0x20 < (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + uVar3 * 6 + 0x383a))))) {
+        uVar2 = f33_nvm_read_payload_checksum(param_1,DAT_febf6c24,param_3);
+      }
+    }
+    ((void)(uVar2), FUN_00077640());
+  }
+  return;
+}
+
+
+
+void FUN_0007712a(void)
+
+{
+  uint uVar1;
+  
+  uVar1 = FUN_00076ff0(DAT_febf6c44,DAT_febf6c24,0);
+  if (uVar1 == 1) {
+    if (f33_nvm_payload_chunks_remaining != 0) {
+      return;
+    }
+    uVar1 = f33_nvm_read_payload_checksum(DAT_febf6c44,DAT_febf6c24,'\0');
+  }
+  ((void)(uVar1), FUN_00077640());
+  return;
+}
+
+
+
 undefined2 FUN_0007729c(undefined2 *param_1)
 
 {
@@ -2696,6 +2861,19 @@ void FUN_00077370(void)
 
 
 
+void FUN_00077626(int param_1)
+
+{
+  if (param_1 == 1) {
+    param_1 = camry_host_addr(FUN_000775ca());
+  }
+  ((void)(param_1), FUN_0007849e());
+  FUN_000772f8();
+  return;
+}
+
+
+
 void FUN_00077640(void)
 
 {
@@ -2727,6 +2905,24 @@ undefined * FUN_000776fa(uint param_1,ushort param_2,uchar *param_3,uchar param_
     puVar1 = ((undefined *)camry_host_ptr((uint32_t)(0xfffc)));
   }
   return puVar1;
+}
+
+
+
+void FUN_00077824(void)
+
+{
+  uint uVar1;
+  
+  uVar1 = f33_nvm_read_payload_chunk(DAT_febf6c44,DAT_febf6c24,'\0');
+  if (uVar1 == 1) {
+    if (f33_nvm_payload_chunks_remaining != 0) {
+      return;
+    }
+    uVar1 = f33_nvm_read_payload_checksum(DAT_febf6c44,DAT_febf6c24,'\0');
+  }
+  ((void)(uVar1), FUN_00077640());
+  return;
 }
 
 
@@ -2765,6 +2961,19 @@ void thunk_FUN_000772f8(void)
 
 {
   FUN_000772f8();
+  return;
+}
+
+
+
+void FUN_00077968(int param_1)
+
+{
+  if (param_1 == 1) {
+    param_1 = camry_host_addr(FUN_00077910());
+  }
+  ((void)(param_1), FUN_0007849e());
+  thunk_FUN_000772f8();
   return;
 }
 

@@ -884,11 +884,46 @@ void FUN_00099004(undefined4 param_1,undefined1 *param_2)
 
 
 
+void FUN_00099126(int param_1,uint param_2,int param_3)
+
+{
+  uint uVar1;
+  
+  for (uVar1 = 0; uVar1 < (param_2 & 0xff); uVar1 = uVar1 + 1) {
+    (*((undefined1 *)camry_host_ptr((uint32_t)(uVar1 + param_3)))) = (*((undefined1 *)camry_host_ptr((uint32_t)(uVar1 + param_1))));
+  }
+  ((void)((param_2 & 0xff) + param_1), thunk_FUN_00082288());
+  return;
+}
+
+
+
 void FUN_000991b6(undefined4 *param_1,undefined4 *param_2)
 
 {
   *param_2 = *param_1;
   return;
+}
+
+
+
+uint FUN_00099226(int param_1,uint param_2)
+
+{
+  int iVar1;
+  uint uVar2;
+  
+  DCRA1CTL = '\0';
+  DCRA1COUT = 0xffffffff;
+  uVar2 = 0;
+  while (uVar2 < param_2 >> 2) {
+    iVar1 = uVar2 * 4;
+    uVar2 = uVar2 + 1;
+    DCRA1CIN = (*((uint *)camry_host_ptr((uint32_t)(iVar1 + param_1))));
+  }
+  ((void)(uVar2 * 4 + param_1), thunk_FUN_00082288());
+  uVar2 = DCRA1COUT;
+  return ~uVar2;
 }
 
 

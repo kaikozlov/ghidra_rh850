@@ -247,6 +247,52 @@ void f33_acknowledge_selected_mode_request(uchar request_id)
 
 
 
+/* Require66F1E NvM readiness first. Then return5A/resetB114 when all sampledB072..B075 zero or
+   retainedcount>=20. Otherwise replace8A70/8AD0 owners0/1 with20002 and increment;19\u219220 still
+   returns0. NvM not ready freezes counter even above20 and with zero snapshots. Counts are
+   invocations, not measuredtime. Native readiness compositions distinguish entry19 from20 and
+   verify busy NvM freezes the retained counter while a lower-priority mode request remains blocked.
+   Counts are invocations,not elapsed time. */
+
+uint f33_qualify_mode_restart_readiness(void)
+
+{
+  char cVar1;
+  char cVar2;
+  char cVar3;
+  char cVar4;
+  uint32_t puVar5;
+  uint uVar6;
+  byte bVar7;
+  
+  bVar7 = DAT_febeb114;
+  cVar4 = DAT_febeb075;
+  cVar3 = DAT_febeb074;
+  cVar2 = DAT_febeb073;
+  cVar1 = DAT_febeb072;
+  puVar5 = 0xfebeb800u;
+  uVar6 = f33_query_application_nvm_readiness();
+  if (uVar6 == 1) {
+    if (((((cVar1 == '\0') && (cVar3 == '\0')) && (cVar2 == '\0')) && (cVar4 == '\0')) ||
+       (DAT_000af3dc <= bVar7)) {
+      bVar7 = 0;
+      uVar6 = 0x5a;
+      goto LAB_000b17e6;
+    }
+    f33_set_channel_owner_request('\0',0x20002);
+    f33_set_channel_owner_request('\x01',0x20002);
+    ((void)(0), (void)(((undefined *)camry_host_ptr(0x20002u))), thunk_FUN_00056e66());
+    ((void)(1), (void)(((undefined *)camry_host_ptr(0x20002u))), thunk_FUN_00056e66());
+    bVar7 = bVar7 + 1;
+  }
+  uVar6 = 0;
+LAB_000b17e6:
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0x6ec))))) = bVar7;
+  return uVar6;
+}
+
+
+
 /* Clear redundantNvM gates0671/0672 viaFF010/FF024, transition0000 through realhooks, then publish
    foreground request8C08=A55A throughFEFC0/5889A. Not an immediate CPU reset or mode snapshot
    publish. Native0701 readiness branch takes the exact constant-zero selector, publishes mode0000
@@ -769,6 +815,548 @@ void f33_mode_hook_b1da0(void)
 
 
 
+/* Apply per-channel output-owner bundle for transition0200\u21920201;
+   onlychannelswithclearB082bitarechanged.
+   Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table.
+   Directenable: 0. Apply per-channel output-owner bundle for transition0200→0201; */
+
+void f33_apply_mode0201_entry_requests(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if ((DAT_febeb082 & 1) == 0) {
+    puVar1 = 0xfebeb800u;
+    f33_set_output_request_word((byte)DAT_febeb082 & 1,0x7001);
+    f33_clear_direct_output_bank0();
+    f33_set_channel_owner_request('\0',2);
+    ((void)(0), (void)(4), thunk_FUN_00056c26());
+    ((void)(0), (void)(2), thunk_FUN_00056e66());
+    ((void)(0), (void)(4), thunk_FUN_00056f14());
+    ((void)(0), (void)(0), thunk_FUN_000569ac());
+    ((void)(0), (void)(0x20), thunk_FUN_000568dc());
+    ((void)(0), (void)(0), thunk_FUN_00050c82());
+    ((void)(0), (void)(0xc), thunk_FUN_00056cda());
+  }
+  if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x77e))))) & 2) == 0) {
+    f33_set_output_request_word('\x01',0x70010000);
+    f33_clear_direct_output_bank1();
+    f33_set_channel_owner_request('\x01',0x20000);
+    ((void)(1), (void)(0x40000), thunk_FUN_00056c26());
+    ((void)(1), (void)(0x20000), thunk_FUN_00056e66());
+    ((void)(1), (void)(0x40000), thunk_FUN_00056f14());
+    ((void)(1), (void)(0), thunk_FUN_000569ac());
+    ((void)(1), (void)(0x200000), thunk_FUN_000568dc());
+    ((void)(1), (void)(0), thunk_FUN_00050c82());
+    ((void)(1), (void)(0xc0000), thunk_FUN_00056cda());
+  }
+  ((void)(0), (void)(3), thunk_FUN_0005693e());
+  return;
+}
+
+
+
+/* Apply per-channel output-owner bundle for transition0201\u21920202;
+   onlychannelswithclearB082bitarechanged.
+   Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table.
+   Directenable: 0. Apply per-channel output-owner bundle for transition0201→0202; */
+
+void f33_apply_mode0202_entry_requests(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if ((DAT_febeb082 & 1) == 0) {
+    puVar1 = 0xfebeb800u;
+    f33_set_output_request_word((byte)DAT_febeb082 & 1,0x7001);
+    f33_clear_direct_output_bank0();
+    f33_set_channel_owner_request('\0',2);
+    ((void)(0), (void)(4), thunk_FUN_00056c26());
+    ((void)(0), (void)(2), thunk_FUN_00056e66());
+    ((void)(0), (void)(4), thunk_FUN_00056f14());
+    ((void)(0), (void)(0), thunk_FUN_000569ac());
+    ((void)(0), (void)(2), thunk_FUN_000568dc());
+    ((void)(0), (void)(0), thunk_FUN_00050c82());
+    ((void)(0), (void)(0xc), thunk_FUN_00056cda());
+  }
+  if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x77e))))) & 2) == 0) {
+    f33_set_output_request_word('\x01',0x70010000);
+    f33_clear_direct_output_bank1();
+    f33_set_channel_owner_request('\x01',0x20000);
+    ((void)(1), (void)(0x40000), thunk_FUN_00056c26());
+    ((void)(1), (void)(0x20000), thunk_FUN_00056e66());
+    ((void)(1), (void)(0x40000), thunk_FUN_00056f14());
+    ((void)(1), (void)(0), thunk_FUN_000569ac());
+    ((void)(1), (void)(0x20000), thunk_FUN_000568dc());
+    ((void)(1), (void)(0), thunk_FUN_00050c82());
+    ((void)(1), (void)(0xc0000), thunk_FUN_00056cda());
+  }
+  ((void)(0), (void)(0), thunk_FUN_0005693e());
+  return;
+}
+
+
+
+/* Apply per-channel output-owner bundle for transition0202\u21920203;
+   onlychannelswithclearB082bitarechanged.
+   Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table.
+   Directenable: 0. Apply per-channel output-owner bundle for transition0202→0203; */
+
+void f33_apply_mode0203_entry_requests(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if ((DAT_febeb082 & 1) == 0) {
+    puVar1 = 0xfebeb800u;
+    f33_set_output_request_word((byte)DAT_febeb082 & 1,0x7001);
+    f33_clear_direct_output_bank0();
+    f33_set_channel_owner_request('\0',2);
+    ((void)(0), (void)(4), thunk_FUN_00056c26());
+    ((void)(0), (void)(2), thunk_FUN_00056e66());
+    ((void)(0), (void)(4), thunk_FUN_00056f14());
+    ((void)(0), (void)(0), thunk_FUN_000569ac());
+    ((void)(0), (void)(2), thunk_FUN_000568dc());
+    ((void)(0), (void)(1), thunk_FUN_00050c82());
+    ((void)(0), (void)(0xc), thunk_FUN_00056cda());
+  }
+  if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x77e))))) & 2) == 0) {
+    f33_set_output_request_word('\x01',0x70010000);
+    f33_clear_direct_output_bank1();
+    f33_set_channel_owner_request('\x01',0x20000);
+    ((void)(1), (void)(0x40000), thunk_FUN_00056c26());
+    ((void)(1), (void)(0x20000), thunk_FUN_00056e66());
+    ((void)(1), (void)(0x40000), thunk_FUN_00056f14());
+    ((void)(1), (void)(0), thunk_FUN_000569ac());
+    ((void)(1), (void)(0x20000), thunk_FUN_000568dc());
+    ((void)(1), (void)(1), thunk_FUN_00050c82());
+    ((void)(1), (void)(0xc0000), thunk_FUN_00056cda());
+  }
+  ((void)(0), (void)(0), thunk_FUN_0005693e());
+  return;
+}
+
+
+
+/* Apply per-channel output-owner bundle for transition0203\u21920204;
+   onlychannelswithclearB082bitarechanged.
+   Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table.
+   Directenable: 5A with AF3DE triplet. Apply per-channel output-owner bundle for
+   transition0203→0204; */
+
+void f33_apply_mode0204_entry_requests(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if ((DAT_febeb082 & 1) == 0) {
+    puVar1 = 0xfebeb800u;
+    f33_set_output_request_word((uchar)(DAT_febeb082 & 1),DAT_febeb082 & 1);
+    f33_set_direct_output_codes_bank0((ushort *)((undefined *)camry_host_ptr(0xaf3deu)));
+    f33_request_direct_output_bank0();
+    f33_set_channel_owner_request('\0',2);
+    ((void)(0), (void)(4), thunk_FUN_00056c26());
+    ((void)(0), (void)(2), thunk_FUN_00056e66());
+    ((void)(0), (void)(4), thunk_FUN_00056f14());
+    ((void)(0), (void)(0), thunk_FUN_000569ac());
+    ((void)(0), (void)(2), thunk_FUN_000568dc());
+    ((void)(0), (void)(1), thunk_FUN_00050c82());
+    ((void)(0), (void)(0xc), thunk_FUN_00056cda());
+  }
+  if (((*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x77e)))) & 2) == 0) {
+    f33_set_output_request_word('\x01',(*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x77e)))) & 2);
+    f33_set_direct_output_codes_bank1((ushort *)((undefined *)camry_host_ptr(0xaf3deu)));
+    f33_request_direct_output_bank1();
+    f33_set_channel_owner_request('\x01',0x20000);
+    ((void)(1), (void)(0x40000), thunk_FUN_00056c26());
+    ((void)(1), (void)(0x20000), thunk_FUN_00056e66());
+    ((void)(1), (void)(0x40000), thunk_FUN_00056f14());
+    ((void)(1), (void)(0), thunk_FUN_000569ac());
+    ((void)(1), (void)(0x20000), thunk_FUN_000568dc());
+    ((void)(1), (void)(1), thunk_FUN_00050c82());
+    ((void)(1), (void)(0xc0000), thunk_FUN_00056cda());
+  }
+  ((void)(0), (void)(0), thunk_FUN_0005693e());
+  return;
+}
+
+
+
+/* Apply per-channel output-owner bundle for transition0204\u21920205;
+   onlychannelswithclearB082bitarechanged.
+   Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table.
+   Directenable: 0. Apply per-channel output-owner bundle for transition0204→0205; */
+
+void f33_apply_mode0205_entry_requests(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if ((DAT_febeb082 & 1) == 0) {
+    puVar1 = 0xfebeb800u;
+    f33_set_output_request_word((byte)DAT_febeb082 & 1,0x7001);
+    f33_clear_direct_output_bank0();
+    f33_set_channel_owner_request('\0',2);
+    ((void)(0), (void)(4), thunk_FUN_00056c26());
+    ((void)(0), (void)(2), thunk_FUN_00056e66());
+    ((void)(0), (void)(4), thunk_FUN_00056f14());
+    ((void)(0), (void)(0), thunk_FUN_000569ac());
+    ((void)(0), (void)(2), thunk_FUN_000568dc());
+    ((void)(0), (void)(1), thunk_FUN_00050c82());
+    ((void)(0), (void)(0xc), thunk_FUN_00056cda());
+  }
+  if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x77e))))) & 2) == 0) {
+    f33_set_output_request_word('\x01',0x70010000);
+    f33_clear_direct_output_bank1();
+    f33_set_channel_owner_request('\x01',0x20000);
+    ((void)(1), (void)(0x40000), thunk_FUN_00056c26());
+    ((void)(1), (void)(0x20000), thunk_FUN_00056e66());
+    ((void)(1), (void)(0x40000), thunk_FUN_00056f14());
+    ((void)(1), (void)(0), thunk_FUN_000569ac());
+    ((void)(1), (void)(0x20000), thunk_FUN_000568dc());
+    ((void)(1), (void)(1), thunk_FUN_00050c82());
+    ((void)(1), (void)(0xc0000), thunk_FUN_00056cda());
+  }
+  ((void)(0), (void)(0), thunk_FUN_0005693e());
+  return;
+}
+
+
+
+/* Apply per-channel output-owner bundle for transition0205\u21920206;
+   onlychannelswithclearB082bitarechanged.
+   Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table.
+   Directenable: 0. Apply per-channel output-owner bundle for transition0205→0206; */
+
+void f33_apply_mode0206_entry_requests(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if ((DAT_febeb082 & 1) == 0) {
+    puVar1 = 0xfebeb800u;
+    f33_set_output_request_word((byte)DAT_febeb082 & 1,0x7001);
+    f33_clear_direct_output_bank0();
+    f33_set_channel_owner_request('\0',2);
+    ((void)(0), (void)(4), thunk_FUN_00056c26());
+    ((void)(0), (void)(2), thunk_FUN_00056e66());
+    ((void)(0), (void)(4), thunk_FUN_00056f14());
+    ((void)(0), (void)(0), thunk_FUN_000569ac());
+    ((void)(0), (void)(2), thunk_FUN_000568dc());
+    ((void)(0), (void)(1), thunk_FUN_00050c82());
+    ((void)(0), (void)(0xc), thunk_FUN_00056cda());
+  }
+  if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x77e))))) & 2) == 0) {
+    f33_set_output_request_word('\x01',0x70010000);
+    f33_clear_direct_output_bank1();
+    f33_set_channel_owner_request('\x01',0x20000);
+    ((void)(1), (void)(0x40000), thunk_FUN_00056c26());
+    ((void)(1), (void)(0x20000), thunk_FUN_00056e66());
+    ((void)(1), (void)(0x40000), thunk_FUN_00056f14());
+    ((void)(1), (void)(0), thunk_FUN_000569ac());
+    ((void)(1), (void)(0x20000), thunk_FUN_000568dc());
+    ((void)(1), (void)(1), thunk_FUN_00050c82());
+    ((void)(1), (void)(0xc0000), thunk_FUN_00056cda());
+  }
+  ((void)(0), (void)(0), thunk_FUN_0005693e());
+  return;
+}
+
+
+
+/* Apply per-channel output-owner bundle for transition0206\u21920207;
+   onlychannelswithclearB082bitarechanged.
+   Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table.
+   Directenable: 0. Apply per-channel output-owner bundle for transition0206→0207; */
+
+void f33_apply_mode0207_entry_requests(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if ((DAT_febeb082 & 1) == 0) {
+    puVar1 = 0xfebeb800u;
+    f33_set_output_request_word((byte)DAT_febeb082 & 1,0x7001);
+    f33_clear_direct_output_bank0();
+    f33_set_channel_owner_request('\0',2);
+    ((void)(0), (void)(4), thunk_FUN_00056c26());
+    ((void)(0), (void)(0), thunk_FUN_00056e66());
+    ((void)(0), (void)(0), thunk_FUN_00056f14());
+    ((void)(0), (void)(0), thunk_FUN_000569ac());
+    ((void)(0), (void)(2), thunk_FUN_000568dc());
+    ((void)(0), (void)(0), thunk_FUN_00050c82());
+    ((void)(0), (void)(0xc), thunk_FUN_00056cda());
+  }
+  if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x77e))))) & 2) == 0) {
+    f33_set_output_request_word('\x01',0x70010000);
+    f33_clear_direct_output_bank1();
+    f33_set_channel_owner_request('\x01',0x20000);
+    ((void)(1), (void)(0x40000), thunk_FUN_00056c26());
+    ((void)(1), (void)(0), thunk_FUN_00056e66());
+    ((void)(1), (void)(0), thunk_FUN_00056f14());
+    ((void)(1), (void)(0), thunk_FUN_000569ac());
+    ((void)(1), (void)(0x20000), thunk_FUN_000568dc());
+    ((void)(1), (void)(0), thunk_FUN_00050c82());
+    ((void)(1), (void)(0xc0000), thunk_FUN_00056cda());
+  }
+  ((void)(0), (void)(0), thunk_FUN_0005693e());
+  return;
+}
+
+
+
+/* Apply per-channel output-owner bundle for transition0207\u21920208;
+   onlychannelswithclearB082bitarechanged.
+   Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table.
+   Directenable: 0. Apply per-channel output-owner bundle for transition0207→0208; */
+
+void f33_apply_mode0208_entry_requests(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if ((DAT_febeb082 & 1) == 0) {
+    puVar1 = 0xfebeb800u;
+    f33_set_output_request_word((byte)DAT_febeb082 & 1,0x7001);
+    f33_clear_direct_output_bank0();
+    f33_set_channel_owner_request('\0',0);
+    ((void)(0), (void)(0), thunk_FUN_00056c26());
+    ((void)(0), (void)(0), thunk_FUN_00056e66());
+    ((void)(0), (void)(2), thunk_FUN_00056f14());
+    ((void)(0), (void)(2), thunk_FUN_000569ac());
+    ((void)(0), (void)(2), thunk_FUN_000568dc());
+    ((void)(0), (void)(0), thunk_FUN_00050c82());
+    ((void)(0), (void)(0xc), thunk_FUN_00056cda());
+  }
+  if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x77e))))) & 2) == 0) {
+    f33_set_output_request_word('\x01',0x70010000);
+    f33_clear_direct_output_bank1();
+    f33_set_channel_owner_request('\x01',0);
+    ((void)(1), (void)(0), thunk_FUN_00056c26());
+    ((void)(1), (void)(0), thunk_FUN_00056e66());
+    ((void)(1), (void)(0x20000), thunk_FUN_00056f14());
+    ((void)(1), (void)(0x20000), thunk_FUN_000569ac());
+    ((void)(1), (void)(0x20000), thunk_FUN_000568dc());
+    ((void)(1), (void)(0), thunk_FUN_00050c82());
+    ((void)(1), (void)(0xc0000), thunk_FUN_00056cda());
+  }
+  ((void)(0), (void)(0), thunk_FUN_0005693e());
+  return;
+}
+
+
+
+/* Apply per-channel output-owner bundle for transition0208\u21920209;
+   onlychannelswithclearB082bitarechanged.
+   Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table.
+   Directenable: 0. Apply per-channel output-owner bundle for transition0208→0209; */
+
+void f33_apply_mode0209_entry_requests(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if ((DAT_febeb082 & 1) == 0) {
+    puVar1 = 0xfebeb800u;
+    f33_set_output_request_word((byte)DAT_febeb082 & 1,0x7001);
+    f33_clear_direct_output_bank0();
+    f33_set_channel_owner_request('\0',0);
+    ((void)(0), (void)(2), thunk_FUN_00056c26());
+    ((void)(0), (void)(2), thunk_FUN_00056e66());
+    ((void)(0), (void)(4), thunk_FUN_00056f14());
+    ((void)(0), (void)(2), thunk_FUN_000569ac());
+    ((void)(0), (void)(2), thunk_FUN_000568dc());
+    ((void)(0), (void)(0), thunk_FUN_00050c82());
+    ((void)(0), (void)(0xc), thunk_FUN_00056cda());
+  }
+  if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x77e))))) & 2) == 0) {
+    f33_set_output_request_word('\x01',0x70010000);
+    f33_clear_direct_output_bank1();
+    f33_set_channel_owner_request('\x01',0);
+    ((void)(1), (void)(0x20000), thunk_FUN_00056c26());
+    ((void)(1), (void)(0x20000), thunk_FUN_00056e66());
+    ((void)(1), (void)(0x40000), thunk_FUN_00056f14());
+    ((void)(1), (void)(0x20000), thunk_FUN_000569ac());
+    ((void)(1), (void)(0x20000), thunk_FUN_000568dc());
+    ((void)(1), (void)(0), thunk_FUN_00050c82());
+    ((void)(1), (void)(0xc0000), thunk_FUN_00056cda());
+  }
+  ((void)(0), (void)(0), thunk_FUN_0005693e());
+  return;
+}
+
+
+
+/* Apply per-channel output-owner bundle for transition0209\u2192020A;
+   onlychannelswithclearB082bitarechanged.
+   Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table.
+   Directenable: 0. Apply per-channel output-owner bundle for transition0209→020A; */
+
+void f33_apply_mode020a_entry_requests(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if ((DAT_febeb082 & 1) == 0) {
+    puVar1 = 0xfebeb800u;
+    f33_set_output_request_word((byte)DAT_febeb082 & 1,0x7001);
+    f33_clear_direct_output_bank0();
+    f33_set_channel_owner_request('\0',0);
+    ((void)(0), (void)(0), thunk_FUN_00056c26());
+    ((void)(0), (void)(0), thunk_FUN_00056e66());
+    ((void)(0), (void)(4), thunk_FUN_00056f14());
+    ((void)(0), (void)(0), thunk_FUN_000569ac());
+    ((void)(0), (void)(2), thunk_FUN_000568dc());
+    ((void)(0), (void)(0), thunk_FUN_00050c82());
+    ((void)(0), (void)(0xc), thunk_FUN_00056cda());
+  }
+  if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x77e))))) & 2) == 0) {
+    f33_set_output_request_word('\x01',0x70010000);
+    f33_clear_direct_output_bank1();
+    f33_set_channel_owner_request('\x01',0);
+    ((void)(1), (void)(0), thunk_FUN_00056c26());
+    ((void)(1), (void)(0), thunk_FUN_00056e66());
+    ((void)(1), (void)(0x40000), thunk_FUN_00056f14());
+    ((void)(1), (void)(0), thunk_FUN_000569ac());
+    ((void)(1), (void)(0x20000), thunk_FUN_000568dc());
+    ((void)(1), (void)(0), thunk_FUN_00050c82());
+    ((void)(1), (void)(0xc0000), thunk_FUN_00056cda());
+  }
+  ((void)(0), (void)(3), thunk_FUN_0005693e());
+  return;
+}
+
+
+
+/* Apply per-channel output-owner bundle for transition020A\u2192020B;
+   onlychannelswithclearB082bitarechanged.
+   Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table.
+   Directenable: 0. Apply per-channel output-owner bundle for transition020A→020B; */
+
+void f33_apply_mode020b_entry_requests(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if ((DAT_febeb082 & 1) == 0) {
+    puVar1 = 0xfebeb800u;
+    f33_set_output_request_word((byte)DAT_febeb082 & 1,0x7001);
+    f33_clear_direct_output_bank0();
+    f33_set_channel_owner_request('\0',0);
+    ((void)(0), (void)(4), thunk_FUN_00056c26());
+    ((void)(0), (void)(0), thunk_FUN_00056e66());
+    ((void)(0), (void)(4), thunk_FUN_00056f14());
+    ((void)(0), (void)(0), thunk_FUN_000569ac());
+    ((void)(0), (void)(2), thunk_FUN_000568dc());
+    ((void)(0), (void)(0), thunk_FUN_00050c82());
+    ((void)(0), (void)(2), thunk_FUN_00056cda());
+  }
+  if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x77e))))) & 2) == 0) {
+    f33_set_output_request_word('\x01',0x70010000);
+    f33_clear_direct_output_bank1();
+    f33_set_channel_owner_request('\x01',0);
+    ((void)(1), (void)(0x40000), thunk_FUN_00056c26());
+    ((void)(1), (void)(0), thunk_FUN_00056e66());
+    ((void)(1), (void)(0x40000), thunk_FUN_00056f14());
+    ((void)(1), (void)(0), thunk_FUN_000569ac());
+    ((void)(1), (void)(0x20000), thunk_FUN_000568dc());
+    ((void)(1), (void)(0), thunk_FUN_00050c82());
+    ((void)(1), (void)(0x20000), thunk_FUN_00056cda());
+  }
+  ((void)(0), (void)(3), thunk_FUN_0005693e());
+  return;
+}
+
+
+
+/* Apply per-channel output-owner bundle for transition020B\u2192020C;
+   onlychannelswithclearB082bitarechanged.
+   Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table.
+   Directenable: 5A with AF3DE triplet. Apply per-channel output-owner bundle for
+   transition020B→020C; */
+
+void f33_apply_mode020c_entry_requests(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if ((DAT_febeb082 & 1) == 0) {
+    puVar1 = 0xfebeb800u;
+    f33_set_output_request_word((byte)DAT_febeb082 & 1,1);
+    f33_set_direct_output_codes_bank0((ushort *)((undefined *)camry_host_ptr(0xaf3deu)));
+    f33_request_direct_output_bank0();
+    f33_set_channel_owner_request('\0',0);
+    ((void)(0), (void)(4), thunk_FUN_00056c26());
+    ((void)(0), (void)(0), thunk_FUN_00056e66());
+    ((void)(0), (void)(4), thunk_FUN_00056f14());
+    ((void)(0), (void)(0), thunk_FUN_000569ac());
+    ((void)(0), (void)(2), thunk_FUN_000568dc());
+    ((void)(0), (void)(0), thunk_FUN_00050c82());
+    ((void)(0), (void)(2), thunk_FUN_00056cda());
+  }
+  if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x77e))))) & 2) == 0) {
+    f33_set_output_request_word('\x01',0x10000);
+    f33_set_direct_output_codes_bank1((ushort *)((undefined *)camry_host_ptr(0xaf3deu)));
+    f33_request_direct_output_bank1();
+    f33_set_channel_owner_request('\x01',0);
+    ((void)(1), (void)(0x40000), thunk_FUN_00056c26());
+    ((void)(1), (void)(0), thunk_FUN_00056e66());
+    ((void)(1), (void)(0x40000), thunk_FUN_00056f14());
+    ((void)(1), (void)(0), thunk_FUN_000569ac());
+    ((void)(1), (void)(0x20000), thunk_FUN_000568dc());
+    ((void)(1), (void)(0), thunk_FUN_00050c82());
+    ((void)(1), (void)(0x20000), thunk_FUN_00056cda());
+  }
+  ((void)(0), (void)(3), thunk_FUN_0005693e());
+  return;
+}
+
+
+
+/* Apply per-channel output-owner bundle for transition020C\u2192020D;
+   onlychannelswithclearB082bitarechanged.
+   Channel1masksshift16except50C82Boolean;shared5693Eowner0writtenlast. Exactbundle inphase_table.
+   Directenable: 5A with AF3E4 triplet. Apply per-channel output-owner bundle for
+   transition020C→020D; */
+
+void f33_apply_mode020d_entry_requests(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if ((DAT_febeb082 & 1) == 0) {
+    puVar1 = 0xfebeb800u;
+    f33_set_output_request_word((byte)DAT_febeb082 & 1,1);
+    f33_set_direct_output_codes_bank0((ushort *)((undefined *)camry_host_ptr(0xaf3e4u)));
+    f33_request_direct_output_bank0();
+    f33_set_channel_owner_request('\0',0);
+    ((void)(0), (void)(4), thunk_FUN_00056c26());
+    ((void)(0), (void)(0), thunk_FUN_00056e66());
+    ((void)(0), (void)(4), thunk_FUN_00056f14());
+    ((void)(0), (void)(0), thunk_FUN_000569ac());
+    ((void)(0), (void)(2), thunk_FUN_000568dc());
+    ((void)(0), (void)(0), thunk_FUN_00050c82());
+    ((void)(0), (void)(2), thunk_FUN_00056cda());
+  }
+  if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x77e))))) & 2) == 0) {
+    f33_set_output_request_word('\x01',0x10000);
+    f33_set_direct_output_codes_bank1((ushort *)((undefined *)camry_host_ptr(0xaf3e4u)));
+    f33_request_direct_output_bank1();
+    f33_set_channel_owner_request('\x01',0);
+    ((void)(1), (void)(0x40000), thunk_FUN_00056c26());
+    ((void)(1), (void)(0), thunk_FUN_00056e66());
+    ((void)(1), (void)(0x40000), thunk_FUN_00056f14());
+    ((void)(1), (void)(0), thunk_FUN_000569ac());
+    ((void)(1), (void)(0x20000), thunk_FUN_000568dc());
+    ((void)(1), (void)(0), thunk_FUN_00050c82());
+    ((void)(1), (void)(0x20000), thunk_FUN_00056cda());
+  }
+  ((void)(0), (void)(3), thunk_FUN_0005693e());
+  return;
+}
+
+
+
 /* Clear direct-enable bytes8B4C/8B4D, setB10F throughB32E0; when returnedselector!=1 request6, then
    alwaysrequest3.0200 takes3\u21920300 first; retained6 may subsequentlyjoin0500 unless
    higher-priorityrequests win. when returnedselector!=1 request6, then alwaysrequest3.0200
@@ -923,6 +1511,42 @@ switchD_000b2830_default:
 
 
 
+void FUN_000b29fa(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if ((DAT_febeb082 & 1) == 0) {
+    puVar1 = 0xfebeb800u;
+    f33_set_output_request_word((byte)DAT_febeb082 & 1,0x7001);
+    f33_clear_direct_output_bank0();
+    f33_set_channel_owner_request('\0',2);
+    ((void)(0), (void)(4), thunk_FUN_00056c26());
+    ((void)(0), (void)(2), thunk_FUN_00056e66());
+    ((void)(0), (void)(4), thunk_FUN_00056f14());
+    ((void)(0), (void)(0), thunk_FUN_000569ac());
+    ((void)(0), (void)(2), thunk_FUN_000568dc());
+    ((void)(0), (void)(0), thunk_FUN_00050c82());
+    ((void)(0), (void)(0xc), thunk_FUN_00056cda());
+  }
+  if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x77e))))) & 2) == 0) {
+    f33_set_output_request_word('\x01',0x70010000);
+    f33_clear_direct_output_bank1();
+    f33_set_channel_owner_request('\x01',0x20000);
+    ((void)(1), (void)(0x40000), thunk_FUN_00056c26());
+    ((void)(1), (void)(0x20000), thunk_FUN_00056e66());
+    ((void)(1), (void)(0x40000), thunk_FUN_00056f14());
+    ((void)(1), (void)(0), thunk_FUN_000569ac());
+    ((void)(1), (void)(0x20000), thunk_FUN_000568dc());
+    ((void)(1), (void)(0), thunk_FUN_00050c82());
+    ((void)(1), (void)(0xc0000), thunk_FUN_00056cda());
+  }
+  ((void)(0), (void)(0), thunk_FUN_0005693e());
+  return;
+}
+
+
+
 /* Far-call trampoline: prepare {lp},0 / jarl 0xB29FA / dispose 0,{lp},lp; byte-verified against the
    exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
    machine-verified; target semantics not recovered. */
@@ -931,6 +1555,46 @@ void thunk_FUN_000b29fa(void)
 
 {
   FUN_000b29fa();
+  return;
+}
+
+
+
+/* Sequential initializer chain: 6 unconditional calls and no other statements; shape-verified. The
+   called sequence is the function's entire behavior; chain family members differ in callee sets. */
+
+void f33_run_init_chain_b2ace(void)
+
+{
+  f33_set_output_request_word('\0',0x7001);
+  f33_set_output_request_word('\x01',0x70010000);
+  f33_clear_direct_output_enables();
+  ((void)(0), (void)(3), thunk_FUN_0005693e());
+  ((void)(0), (void)(2), thunk_FUN_000568dc());
+  ((void)(1), (void)(0x20000), thunk_FUN_000568dc());
+  return;
+}
+
+
+
+void FUN_000b2b0a(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  f33_set_output_request_word('\0',0x70017001);
+  f33_set_output_request_word('\x01',0x70017001);
+  f33_set_channel_owner_request('\0',0);
+  f33_set_channel_owner_request('\x01',0);
+  ((void)(0), (void)(0), thunk_FUN_00056e66());
+  ((void)(1), (void)(0), thunk_FUN_00056e66());
+  if (((*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x77e)))) & 1) == 0) {
+    ((void)((*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x77e)))) & 1), (void)(2), thunk_FUN_00056cda());
+  }
+  if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x77e))))) & 2) == 0) {
+    ((void)(1), (void)(0x20000), thunk_FUN_00056cda());
+  }
+  FUN_000bd8ea();
   return;
 }
 
@@ -1027,6 +1691,37 @@ void f33_mode_hook_b2bf6(void)
 
 
 
+/* Clear owners0/1 of8B2C/8A9C/8AE8/8A50/8A2C/8260, conditionally write8AA8=2/20000
+   forclearB082channelbits. Doesnotclear8A70/8AD0; top-level573FE separatelyclearsdirectenables. */
+
+void f33_apply_mode400_output_requests(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  f33_set_output_request_word('\0',0);
+  f33_set_output_request_word('\x01',0);
+  ((void)(0), (void)(0), thunk_FUN_00056c26());
+  ((void)(1), (void)(0), thunk_FUN_00056c26());
+  ((void)(0), (void)(0), thunk_FUN_00056f14());
+  ((void)(1), (void)(0), thunk_FUN_00056f14());
+  ((void)(0), (void)(0), thunk_FUN_000569ac());
+  ((void)(1), (void)(0), thunk_FUN_000569ac());
+  ((void)(0), (void)(0), thunk_FUN_000568dc());
+  ((void)(1), (void)(0), thunk_FUN_000568dc());
+  ((void)(0), (void)(0), thunk_FUN_00050c82());
+  ((void)(1), (void)(0), thunk_FUN_00050c82());
+  if (((*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x77e)))) & 1) == 0) {
+    ((void)((*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x77e)))) & 1), (void)(2), thunk_FUN_00056cda());
+  }
+  if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x77e))))) & 2) == 0) {
+    ((void)(1), (void)(0x20000), thunk_FUN_00056cda());
+  }
+  return;
+}
+
+
+
 /* Finalize diagnosticlog45CFC, clear8B2Cowners0/1, setclassifier82A9=5A. Oldlive mode
    remainsvisible until callercommitsnewmode. */
 
@@ -1048,6 +1743,16 @@ void f33_enter_mode400(void)
 void f33_mode_hook_b2ca2(void)
 
 {
+  return;
+}
+
+
+
+void FUN_000b2ca6(void)
+
+{
+  ((void)(2), (void)(2), thunk_FUN_00056b78());
+  ((void)(3), (void)(0x20000), thunk_FUN_00056b78());
   return;
 }
 
@@ -1171,12 +1876,81 @@ void f33_request_mode700_initial_step(void)
 
 
 
+/* Reportserviceaborts;publishretained thermal/records8,9,D and
+   conditionalrecords18/105;mark5F84.bit1
+   andqualified89D2[].bit1;setB250=5A;request38andconditionally39;finalizelog.
+   Set8A48owner0=3,8B2Cowners0/1=70017001, clear8AD0/8AE8/8A50/8A2C/8260owners0/1,8AA8=4/40000.
+   Doesnotclear8A70owners. */
+
+void f33_enter_mode700(void)
+
+{
+  f33_report_pending_service_aborts();
+  f33_publish_thermal_reference_record();
+  f33_publish_thermal_history_record();
+  FUN_000bd87e();
+  FUN_000bd8ea();
+  f33_stage_received_word_age_record13();
+  thunk_FUN_00052a10();
+  thunk_FUN_000562fa();
+  f33_consume_ba_retained_admission_count();
+  FUN_000b5eb0();
+  f33_request_mode701_snapshot_unless_health_selected();
+  f33_request_mode700_initial_step();
+  ((void)(0), (void)(3), thunk_FUN_0005693e());
+  f33_set_output_request_word('\0',0x70017001);
+  f33_set_output_request_word('\x01',0x70017001);
+  ((void)(0), (void)(0), thunk_FUN_00056e66());
+  ((void)(1), (void)(0), thunk_FUN_00056e66());
+  ((void)(0), (void)(0), thunk_FUN_00056f14());
+  ((void)(1), (void)(0), thunk_FUN_00056f14());
+  ((void)(0), (void)(0), thunk_FUN_000569ac());
+  ((void)(1), (void)(0), thunk_FUN_000569ac());
+  ((void)(0), (void)(0), thunk_FUN_000568dc());
+  ((void)(1), (void)(0), thunk_FUN_000568dc());
+  ((void)(0), (void)(0), thunk_FUN_00050c82());
+  ((void)(1), (void)(0), thunk_FUN_00050c82());
+  ((void)(0), (void)(4), thunk_FUN_00056cda());
+  ((void)(1), (void)(0x40000), thunk_FUN_00056cda());
+  return;
+}
+
+
+
 /* JMP LP with no state change; AEB00 table 0x700 exit. Exact-image hook, not a missing
    implementation. */
 
 void f33_mode_hook_b2e62(void)
 
 {
+  return;
+}
+
+
+
+/* Onlyif66F1E==1replace8A70owners0/1=20002,8A9C=4/40000,8AD0/8AE8=0,8AA8=4/40000,8A88owners2/3=2/20000.
+   NvMbusy leavesmaskstateunchanged; top-leveldirectenableclearstilloccurs. */
+
+void f33_apply_mode800_ready_output_requests(void)
+
+{
+  uint uVar1;
+  
+  uVar1 = f33_query_application_nvm_readiness();
+  if (uVar1 == 1) {
+    f33_set_channel_owner_request('\0',0x20002);
+    f33_set_channel_owner_request('\x01',0x20002);
+    ((void)(0), (void)(4), thunk_FUN_00056c26());
+    ((void)(1), (void)(0x40000), thunk_FUN_00056c26());
+    ((void)(0), (void)(0), thunk_FUN_00056e66());
+    ((void)(1), (void)(0), thunk_FUN_00056e66());
+    ((void)(0), (void)(0), thunk_FUN_00056f14());
+    ((void)(1), (void)(0), thunk_FUN_00056f14());
+    ((void)(0), (void)(4), thunk_FUN_00056cda());
+    ((void)(1), (void)(0x40000), thunk_FUN_00056cda());
+    ((void)(2), (void)(2), thunk_FUN_00056b78());
+    ((void)(3), (void)(0x20000), thunk_FUN_00056b78());
+  }
   return;
 }
 
@@ -1307,6 +2081,29 @@ void FUN_000b2fc6(void)
 
 
 
+void FUN_000b2fee(void)
+
+{
+  uint32_t puVar1;
+  undefined4 uVar2;
+  
+  puVar1 = 0xfebeb800u;
+  if (DAT_febef208 == -0x5aa5a55b) {
+    uVar2 = 0;
+  }
+  else {
+    puVar1 = 0xfebeb800u;
+    thunk_FUN_00035ad6();
+    uVar2 = 0x20;
+  }
+  ((void)(8), (void)(uVar2), thunk_FUN_0004d0a4());
+  FUN_000b7810();
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6f2))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6f2))))) & 0xfd;
+  return;
+}
+
+
+
 void FUN_000b301e(void)
 
 {
@@ -1318,78 +2115,43 @@ void FUN_000b301e(void)
 
 
 
-/* Family0500 selects events2A/2C/2E into0512/0522/0520. Submodes independently qualify completion
-   events and return0500. Accepted queue, selected submode, convergence, persistence and diagnostic
-   result are separate states. Family0500 dispatches service submodes0512/0522/0520 and separately
-   acknowledges completion events. Queue selection, physical convergence, persistence and result
-   publication remain distinct boundaries. */
-
-void f33_advance_service_family(void)
+void FUN_000b303e(void)
 
 {
-  uchar request_id;
-  ushort mode;
-  uint uVar1;
+  uint32_t puVar1;
+  undefined4 uVar2;
+  undefined4 uVar3;
+  byte bVar4;
   
-  if (DAT_febeb11a != 0x500) {
-    if (DAT_febeb11a == 0x512) {
-      FUN_000b2f8c();
-      uVar1 = f33_probe_pending_mode_request('+');
-      if (uVar1 == 1) {
-        FUN_000b2fb4();
-        f33_publish_live_application_mode(0x500);
-      }
-      request_id = '+';
-    }
-    else if (DAT_febeb11a == 0x520) {
-      FUN_000b301e();
-      uVar1 = f33_probe_pending_mode_request('/');
-      if (uVar1 == 1) {
-        FUN_000b303e();
-        f33_publish_live_application_mode(0x500);
-      }
-      request_id = '/';
-    }
-    else {
-      if (DAT_febeb11a != 0x522) {
-        return;
-      }
-      FUN_000b2fc6();
-      uVar1 = f33_probe_pending_mode_request('-');
-      if (uVar1 == 1) {
-        FUN_000b2fee();
-        f33_publish_live_application_mode(0x500);
-      }
-      request_id = '-';
-    }
-    goto LAB_000b317a;
-  }
-  FUN_000b2ee6();
-  uVar1 = f33_probe_pending_mode_request('*');
-  if (uVar1 == 1) {
-    mode = 0x512;
-LAB_000b311e:
-    f33_publish_live_application_mode(mode);
+  puVar1 = 0xfebeb800u;
+  if (DAT_febeb3d5 == '\x01') {
+    uVar2 = 0xc;
+    bVar4 = 4;
   }
   else {
-    uVar1 = f33_probe_pending_mode_request(',');
-    if (uVar1 == 1) {
-      thunk_FUN_000b77f4();
-      mode = 0x522;
-      goto LAB_000b311e;
+    bVar4 = 0x10;
+    if (DAT_febeb3d5 == '\x02') {
+      bVar4 = 8;
+      uVar2 = 0xe;
     }
-    uVar1 = f33_probe_pending_mode_request('.');
-    if (uVar1 == 1) {
-      FUN_000b2f5e();
-      mode = 0x520;
-      goto LAB_000b311e;
+    else {
+      uVar2 = 0xf;
     }
   }
-  f33_acknowledge_selected_mode_request('*');
-  f33_acknowledge_selected_mode_request(',');
-  request_id = '.';
-LAB_000b317a:
-  f33_acknowledge_selected_mode_request(request_id);
+  if (DAT_febeb3cb == '\x02') {
+    uVar3 = 0;
+  }
+  else {
+    uVar3 = 0x20;
+    if (DAT_febeb3cb == '\0') {
+      uVar3 = 0x30;
+    }
+  }
+  ((void)(uVar2), (void)(uVar3), thunk_FUN_0004d0a4());
+  FUN_000b856a();
+  FUN_000b83f2(0);
+  FUN_000b85a8(0);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6f2))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6f2))))) & ~bVar4;
   return;
 }
 
@@ -1400,6 +2162,52 @@ void FUN_000b3182(void)
 {
   if ((DAT_febeb10e & 2) != 0) {
     thunk_FUN_0003599e();
+  }
+  return;
+}
+
+
+
+/* For pending IDs1/3 report failure; IDs2/4 report cancellation only with their stop latch5A,
+   otherwise failure. Clear ID1 internal88 state. Does NOT clear pending bitsB10E. Report failure
+   for pending IDs1/3 and cancel-or-failure for IDs2/4 using their stop latches. Clear ID1
+   internal88 state but never clear pending bitmapB10E. */
+
+void f33_report_pending_service_aborts(void)
+
+{
+  byte bVar1;
+  byte bVar2;
+  byte bVar3;
+  char cVar4;
+  char cVar5;
+  undefined4 uVar6;
+  
+  cVar5 = DAT_febeb3dd;
+  cVar4 = DAT_febeb3dc;
+  bVar1 = DAT_febeb10e & 4;
+  bVar2 = DAT_febeb10e & 8;
+  bVar3 = DAT_febeb10e & 0x10;
+  if ((DAT_febeb10e >> 1 & 1) != 0) {
+    thunk_FUN_00035ad6();
+    ((void)(8), (void)(0x20), thunk_FUN_0004d0a4());
+  }
+  if (bVar1 != 0) {
+    uVar6 = 0x20;
+    if (cVar5 == 'Z') {
+      uVar6 = 0x30;
+    }
+    ((void)(0xc), (void)(uVar6), thunk_FUN_0004d0a4());
+  }
+  if (bVar2 != 0) {
+    ((void)(0xe), (void)(0x20), thunk_FUN_0004d0a4());
+  }
+  if (bVar3 != 0) {
+    uVar6 = 0x20;
+    if (cVar4 == 'Z') {
+      uVar6 = 0x30;
+    }
+    ((void)(0xf), (void)(uVar6), thunk_FUN_0004d0a4());
   }
   return;
 }
@@ -1572,6 +2380,23 @@ int f33_latch_ba_owner5_fast_release(void)
 void f33_return_only_stub_b33d8(void)
 
 {
+  return;
+}
+
+
+
+/* Set8B2Cowners0/1=70017001,8A70owners0/1=20002,8AD0owners0/1=20002.
+   Thisrequestsoutput-ownerstate,notphysicalpowerconfirmation.0900exitandsteadyworkersareempty. */
+
+void f33_enter_mode900(void)
+
+{
+  f33_set_output_request_word('\0',0x70017001);
+  f33_set_output_request_word('\x01',0x70017001);
+  f33_set_channel_owner_request('\0',0x20002);
+  f33_set_channel_owner_request('\x01',0x20002);
+  ((void)(0), (void)(((undefined *)camry_host_ptr(0x20002u))), thunk_FUN_00056e66());
+  ((void)(1), (void)(((undefined *)camry_host_ptr(0x20002u))), thunk_FUN_00056e66());
   return;
 }
 

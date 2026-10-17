@@ -163,6 +163,63 @@ undefined1 FUN_000782b2(void)
 
 
 
+/* WARNING: Type propagation algorithm not settling */
+
+void FUN_00078304(void)
+
+{
+  uint32_t puVar1;
+  undefined1 uVar2;
+  uint uVar3;
+  int local_34 [2];
+  undefined2 uStack_2c;
+  undefined2 uStack_2a;
+  undefined4 uStack_28;
+  undefined4 uStack_24;
+  undefined1 uStack_1c;
+  char cStack_1b;
+  int *piStack_18;
+  
+  puVar1 = 0x23dfcu;
+  local_34[0] = 1;
+  uVar3 = FUN_000782b2();
+  if (uVar3 < 2) {
+    uStack_24 = 0;
+    uStack_28 = 0;
+    uStack_2a = 0xffff;
+    uStack_2c = 0;
+    local_34[1] = 0xffffffff;
+    FUN_000782bc();
+    if (((int8_t)DAT_febf6c4f) == -1) {
+      DAT_febf6c4f = '\0';
+    }
+    uStack_1c = DAT_febf6c4e;
+    piStack_18 = local_34 + 1;
+    cStack_1b = DAT_febf6c4f;
+    uVar2 = ((void)(local_34), FUN_00078276(((byte *)camry_host_ptr((uint32_t)((*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + uVar3 * 4 + 0x3ec4))))))), &uStack_1c));
+    DAT_febf6c4f = 0xff;
+    if (local_34[0] != 1) {
+      FUN_00077ce8();
+      FUN_00077d14(local_34[0]);
+      f33_nvm_finish_physical_result();
+      f33_fill_constant_block_781e4();
+      FUN_000782de();
+      uVar2 = DAT_febf6c4e;
+    }
+  }
+  else {
+    DAT_febf6c4f = 0xff;
+    DAT_febf6c4d = 0xff;
+    DAT_febf6c4e = 0;
+    DAT_febf6c1c = 1;
+    uVar2 = DAT_febf6c4e;
+  }
+  DAT_febf6c4e = uVar2;
+  return;
+}
+
+
+
 void FUN_000783b6(undefined1 param_1)
 
 {
@@ -219,6 +276,27 @@ void FUN_000783e8(void)
   else {
     FUN_00074f4a();
   }
+  return;
+}
+
+
+
+void FUN_0007840c(void)
+
+{
+  FUN_000783e8();
+  ((void)(1), FUN_00078304());
+  return;
+}
+
+
+
+void FUN_00078466(void)
+
+{
+  FUN_000783e8();
+  ((void)(0), FUN_00078304());
+  FUN_0007841e();
   return;
 }
 
@@ -1452,6 +1530,15 @@ undefined4 FUN_00079444(void)
 
 
 
+void FUN_00079462(undefined2 param_1)
+
+{
+  ((void)(param_1), f33_return_only_stub_79d2c());
+  return;
+}
+
+
+
 /* Mask input16, call79D2E and normalize nonzero to1. Exact target hook always returns0, so this is
    not an additional live readiness check. Mask input16, call real79D2E and normalize nonzero to1.
    Exact hook always returns0; repeated native scheduler calls therefore pass this gate and reach
@@ -1671,6 +1758,24 @@ void f33_return_only_stub_796ba(void)
 void f33_return_only_stub_796bc(void)
 
 {
+  return;
+}
+
+
+
+void FUN_000796be(uint param_1)
+
+{
+  uint uVar1;
+  
+  uVar1 = DAT_febf6cb4;
+  if ((param_1 & 0xff) < 3) {
+    DAT_febf6cb4 = *(uint *)(((undefined *)camry_host_ptr(0x27cccu)) + (param_1 & 0xff) * 8) | DAT_febf6cb4;
+    FUN_000797f6();
+    if (uVar1 != DAT_febf6cb4) {
+      ((void)(((undefined *)camry_host_ptr(0xfebf6cb4u))), f33_return_only_stub_79d36());
+    }
+  }
   return;
 }
 
@@ -1924,6 +2029,29 @@ void FUN_00079bc0(undefined2 param_1,char param_2)
 
 
 
+void FUN_00079bfe(undefined4 param_1,char param_2)
+
+{
+  if ((param_2 != '\f') && (param_2 != '\r')) {
+    DAT_febf6cd8 = 0xff;
+  }
+  DAT_febf6cd6 = 0xffff;
+  ((void)(param_2), f33_return_only_stub_796ba());
+  return;
+}
+
+
+
+void FUN_00079c2a(undefined1 param_1)
+
+{
+  DAT_febf6cd8 = 0xff;
+  ((void)(param_1), f33_return_only_stub_796bc());
+  return;
+}
+
+
+
 void FUN_00079c42(undefined1 param_1)
 
 {
@@ -2057,6 +2185,33 @@ bool FUN_00079cc4(void)
 
 
 
+/* Request0693 exactly5A stores/returns55. Otherwise, if old6CDC!=0, call741D0->72248->73C4A->7664E
+   before storing/returning0. This exit can perform real cancellation/B3; it is not a pure flag
+   refresh. Otherwise old6CDC!=0 invokes741D0 cancellation before storing/returning0. Native non5A
+   request remains disabled and real shutdown mutates physical/active logical states. */
+
+uint f33_nvm_refresh_direct_probe_mode(void)
+
+{
+  int iVar1;
+  uint uVar2;
+  
+  iVar1 = ((void)(0), FUN_00079d46());
+  if (iVar1 == 0) {
+    if (f33_nvm_direct_operation_mode != '\0') {
+      FUN_000741d0();
+    }
+    uVar2 = 0;
+  }
+  else {
+    uVar2 = 0x55;
+  }
+  f33_nvm_direct_operation_mode = (uchar)uVar2;
+  return uVar2;
+}
+
+
+
 bool FUN_00079d12(void)
 
 {
@@ -2170,10 +2325,37 @@ bool FUN_00079d46(void)
 
 
 
+void FUN_00079d60(void)
+
+{
+  ((void)(0), FUN_0007a30e());
+  return;
+}
+
+
+
 void FUN_00079d7a(void)
 
 {
   f33_cantp_foreground_cycle();
+  return;
+}
+
+
+
+void FUN_00079d86(undefined1 param_1)
+
+{
+  ((void)(param_1), f33_return_only_stub_7b204());
+  return;
+}
+
+
+
+void FUN_00079d94(undefined1 param_1)
+
+{
+  ((void)(param_1), f33_return_only_stub_7b206());
   return;
 }
 
@@ -2238,6 +2420,25 @@ void FUN_00079dec(undefined2 param_1)
 
 
 
+/* Sequential initializer chain: 8 unconditional calls and no other statements; shape-verified. The
+   called sequence is the function's entire behavior; chain family members differ in callee sets. */
+
+void f33_run_init_chain_79dfa(void)
+
+{
+  FUN_0007c2ee();
+  ((void)(0), f33_return_only_stub_81588());
+  ((void)(0), FUN_00083f3e());
+  ((void)(0), FUN_0007f75a());
+  FUN_0007c478();
+  FUN_0007f250(0);
+  ((void)(0), FUN_0007c710());
+  FUN_00079d60();
+  return;
+}
+
+
+
 void FUN_00079e2c(void)
 
 {
@@ -2274,6 +2475,26 @@ void f33_run_init_chain_79e60(void)
   FUN_0007f27c();
   FUN_0007c748();
   thunk_FUN_0007b3a6();
+  return;
+}
+
+
+
+/* Sequential initializer chain: 9 unconditional calls and no other statements; shape-verified. The
+   called sequence is the function's entire behavior; chain family members differ in callee sets. */
+
+void f33_run_init_chain_79e84(void)
+
+{
+  FUN_0007c4c6();
+  ((void)(0), f33_return_only_stub_81588());
+  ((void)(0), FUN_00083f3e());
+  ((void)(0), FUN_0007f75a());
+  FUN_0007c478();
+  FUN_0007f250(0);
+  ((void)(0), FUN_0007c710());
+  FUN_00079d60();
+  FUN_0007c50a();
   return;
 }
 
@@ -2394,6 +2615,34 @@ void FUN_00079fba(uint param_1)
 
 
 
+void FUN_00079fda(uint param_1)
+
+{
+  param_1 = param_1 & 0xff;
+  if (param_1 < DAT_00021865) {
+    f33_upper_network_software_indication[param_1] = '\0';
+    FUN_00082eb0(param_1);
+    ((void)(param_1), f33_return_only_stub_7be48());
+  }
+  return;
+}
+
+
+
+void FUN_0007a002(uint param_1)
+
+{
+  param_1 = param_1 & 0xff;
+  if (param_1 < DAT_00021865) {
+    f33_upper_network_software_indication[param_1] = '\x01';
+    FUN_00082e94(param_1);
+    ((void)(param_1), f33_return_only_stub_7be46());
+  }
+  return;
+}
+
+
+
 void FUN_0007a02c(byte param_1)
 
 {
@@ -2499,6 +2748,32 @@ void FUN_0007a0fe(void)
 
 
 
+void FUN_0007a132(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  DAT_febe3df2 = 0xfd02;
+  FUN_0007a0dc();
+  FUN_00079f42();
+  FUN_0007bb9c();
+  f33_run_init_chain_79dfa();
+  ((void)(0), FUN_0007e782());
+  f33_return_only_stub_7be36();
+  f33_return_only_stub_7ee7e();
+  ((void)(0), FUN_0007d880());
+  FUN_0007a0fe();
+  ((void)(0), FUN_00082c9e());
+  ((void)(0), f33_return_only_stub_81590());
+  f33_return_only_stub_7be34();
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x7a0c))))) = 0xf;
+  FUN_0007c43c();
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x7a0e)))) = 0xfe01;
+  return;
+}
+
+
+
 void FUN_0007a18c(void)
 
 {
@@ -2524,6 +2799,31 @@ void FUN_0007a1b4(void)
   f33_return_only_stub_7ee80();
   FUN_00082d38();
   f33_return_only_stub_81592();
+  return;
+}
+
+
+
+void FUN_0007a1dc(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  DAT_febe3df2 = 0xfd02;
+  FUN_0007a0dc();
+  FUN_00079f42();
+  FUN_0007bb9c();
+  f33_run_init_chain_79e84();
+  ((void)(0), FUN_0007e782());
+  f33_return_only_stub_7be36();
+  f33_return_only_stub_7ee7e();
+  ((void)(0), FUN_0007d89e());
+  FUN_0007a0fe();
+  ((void)(0), FUN_00082c9e());
+  ((void)(0), f33_return_only_stub_81590());
+  f33_return_only_stub_7be34();
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x7a0c))))) = 0xf;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x7a0e)))) = 0xfe01;
   return;
 }
 
@@ -2810,6 +3110,31 @@ void FUN_0007b572(int param_1,undefined4 *param_2,char param_3)
 
 /* WARNING: Inlined function: f33_cantp_reset_transmit_owner */
 
+void FUN_0007b6f2(int param_1,undefined4 *param_2)
+
+{
+  char cVar1;
+  
+  cVar1 = *(char *)(param_2 + 2);
+  if (((cVar1 == -0x3d) || (cVar1 == -0x4c)) || (cVar1 == -0x79)) {
+    *(undefined2 *)(param_2 + 1) = 0xffff;
+    *param_2 = 0;
+    *(undefined1 *)(param_2 + 2) = 0xe1;
+    (*((undefined2 *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_2) + 6)))) = 0;
+    (*((undefined1 *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_2) + 9)))) = 0xff;
+    (*((undefined1 *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_2) + 10)))) = 0;
+    (*((undefined1 *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_2) + 0xb)))) = 0;
+    *(undefined1 *)(param_2 + 3) = 0;
+    ((void)((*((undefined2 *)camry_host_ptr((uint32_t)(param_1 + 10))))), f33_return_only_stub_7b246());
+    FUN_0007b46e((*((undefined2 *)camry_host_ptr((uint32_t)(param_1 + 8)))),1);
+  }
+  return;
+}
+
+
+
+/* WARNING: Inlined function: f33_cantp_reset_transmit_owner */
+
 void FUN_0007b72a(int param_1,undefined4 *param_2)
 
 {
@@ -2862,6 +3187,61 @@ void FUN_0007bb9c(void)
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6854))))) = 0;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6852))))) = bVar2;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6851))))) = bVar2 ^ 0xff;
+  return;
+}
+
+
+
+void FUN_0007bbc2(void)
+
+{
+  byte bVar1;
+  undefined1 uVar2;
+  uint32_t puVar3;
+  undefined4 uVar4;
+  uint uVar5;
+  
+  puVar3 = 0xfebeb800u;
+  uVar5 = (uint)DAT_febe4fac;
+  uVar4 = FUN_0007a2da();
+  bVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6852)))));
+  uVar2 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6851)))));
+  ((void)(uVar4), thunk_FUN_0006a4c4());
+  if (uVar5 != bVar1) {
+    uVar4 = FUN_0007a2da();
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6854))))) = bVar1;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6853))))) = uVar2;
+    ((void)(uVar4), thunk_FUN_0006a4c4());
+    uVar5 = 0;
+    do {
+      if ((1 << (uVar5 & 0x1f) & 0xffU & (uint)bVar1) == 0) {
+        uVar4 = 0;
+      }
+      else {
+        uVar4 = 2;
+      }
+      FUN_0007ea26(uVar5,uVar4);
+      uVar5 = uVar5 + 1;
+    } while (uVar5 < 8);
+  }
+  return;
+}
+
+
+
+void FUN_0007bc12(byte param_1,byte param_2)
+
+{
+  uint32_t puVar1;
+  undefined4 uVar2;
+  byte bVar3;
+  
+  puVar1 = 0xfebeb800u;
+  uVar2 = FUN_0007a2da();
+  bVar3 = (param_1 ^ 0xff) & (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6852))))) | param_1 & param_2;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6852))))) = bVar3;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6851))))) = bVar3 ^ 0xff;
+  ((void)(uVar2), thunk_FUN_0006a4c4());
   return;
 }
 
@@ -3186,6 +3566,26 @@ void f33_return_only_stub_7be52(void)
 void f33_return_only_stub_7be56(void)
 
 {
+  return;
+}
+
+
+
+void FUN_0007bed0(char param_1,undefined1 param_2,char param_3)
+
+{
+  undefined4 uVar1;
+  
+  param_1 = DAT_0002183d + param_1;
+  if (param_3 == '\x01') {
+    uVar1 = FUN_0007a2da();
+    FUN_0007a09c(param_1,0);
+    FUN_0007a074(param_1,param_2);
+    ((void)(uVar1), thunk_FUN_0006a4c4());
+  }
+  else {
+    FUN_0007a074(param_1,param_2);
+  }
   return;
 }
 

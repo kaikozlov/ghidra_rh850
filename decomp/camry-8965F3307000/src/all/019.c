@@ -1318,6 +1318,19 @@ void FUN_00065ac0(void)
 
 
 
+void FUN_00065c64(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  ((void)(0x40), (void)(0xb8), FUN_000659f8());
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x7c02))))) = 0;
+  ((void)(0x40), (void)(0xa8), FUN_000659f8());
+  return;
+}
+
+
+
 void FUN_00065cda(void)
 
 {
@@ -1359,6 +1372,19 @@ void FUN_00065d38(void)
   if ((DAT_febe39d9 & 1) != 0) {
     FUN_00065d14();
   }
+  return;
+}
+
+
+
+void FUN_00065d4a(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  ((void)(0x40), (void)(0xb8), FUN_000659f8());
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x7c03))))) = 0;
+  ((void)(0x40), (void)(0xa8), FUN_000659f8());
   return;
 }
 
@@ -1428,6 +1454,19 @@ void FUN_00065dd6(void)
     }
     FUN_00065d6e();
   }
+  return;
+}
+
+
+
+void FUN_00065e58(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  ((void)(0x40), (void)(0xb8), FUN_000659f8());
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x7c04))))) = 0;
+  ((void)(0x40), (void)(0xa8), FUN_000659f8());
   return;
 }
 
@@ -1665,6 +1704,68 @@ void f33_run_init_chain_664f6(void)
   FUN_0006639c();
   FUN_00066440();
   FUN_00066474();
+  return;
+}
+
+
+
+/* Orderedapplicationinitializationdispatcher,calledby637EE
+   withinterruptsdisabledbeforebootCRCgateandtimerstart. Lowlevelandsoftwareinitializersinclude66BC8
+   NvMacquisitioninitialization/boundedbootstrap,diagnostics/communications,664F6timerconfiguration,65F8Ebookkeeping,62BF6retainedclassification,6681Eclear5F28,and58804appstateinitialization/publication.
+   Noaggregatehardware-successreturnorrollbackexists;donotconflateinitializedstatewithacquireddataorphysicalreadiness.
+    */
+
+void f33_application_initialize_before_timer_start(void)
+
+{
+  FUN_000607d0();
+  FUN_00060766();
+  FUN_00060e5a();
+  f33_run_init_chain_60178();
+  FUN_00060c06();
+  FUN_00061ee8();
+  FUN_00061b56();
+  FUN_000623c0();
+  FUN_00061fce();
+  FUN_000611ee();
+  FUN_000613c8();
+  FUN_00061526();
+  FUN_0006165a();
+  FUN_000616fc();
+  FUN_000607f8();
+  FUN_00066bc8();
+  FUN_00089d3c();
+  ((void)(0), FUN_0008ed14());
+  f33_crypto_bank_initialize_mode();
+  f33_crypto_bank_initialize_work();
+  FUN_0006a440();
+  FUN_0007a132();
+  FUN_0008e74e();
+  f33_return_only_stub_6a322();
+  FUN_0008b120();
+  FUN_0008b070();
+  FUN_0008b134();
+  f33_fill_constant_block_8bfea();
+  FUN_0008c318();
+  FUN_0008c70c();
+  f33_fill_constant_block_8cb8c();
+  f33_fill_constant_block_8cef0();
+  FUN_0008b3d4();
+  FUN_0008d4ae();
+  f33_app_security_reset_challenge_material();
+  FUN_0008d9ca();
+  f33_reset_write_did_transaction();
+  f33_diag_reset_routine_class_state();
+  f33_fill_constant_block_8db22();
+  f33_fill_constant_block_8de1a();
+  FUN_0008e1e0();
+  FUN_00098f4c();
+  f33_crypto_bank_initialize_verification_report();
+  f33_run_init_chain_664f6();
+  FUN_00065f8e();
+  f33_startup_classify_retained_token();
+  FUN_0006681e();
+  f33_initialize_application_and_request_first_generation();
   return;
 }
 

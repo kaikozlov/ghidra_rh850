@@ -193,6 +193,51 @@ void f33_merge_fault_action_record(ushort *actions,uint slot)
 
 
 
+/* Hard action bit0 or gatedbit1 latchesB190 and requests event0 only when publishedEB9A==0.
+   Otherwise soft bit3 or gatedbit4 waits for8AC8/8ACB==0.71EC.bit15 qualifies bits1/4. A
+   still-present fault waiting for zero does not cancel; no action cancels event0. R6 action-mask
+   input; no DTC identity or universal shutdown inference. Route R6 fault-action bits: hard action
+   waits published zero output, soft action waits reduced channel flags, no action cancels event0.
+   Waiting fault does not cancel. Exact predicates depend on71EC.bit15; OEM fault names remain
+   unassigned. */
+
+void f33_route_fault_action_mode_request(uint actions)
+
+{
+  char cVar1;
+  char cVar2;
+  short sVar3;
+  ushort uVar4;
+  bool bVar5;
+  
+  sVar3 = DAT_febeeb9a;
+  cVar2 = DAT_febe8acb;
+  cVar1 = DAT_febe8ac8;
+  uVar4 = DAT_febe71ec & 0x8000;
+  if (((actions & 1) == 0) && (((DAT_febe71ec & 0x8000) == 0 || ((actions >> 1 & 1) == 0)))) {
+    if (((actions >> 3 & 1) == 0) &&
+       (((DAT_febe71ec & 0x8000) == 0 || (uVar4 = 0, (actions & 0x10) == 0)))) {
+      ((void)(uVar4), thunk_FUN_000b14d2());
+      return;
+    }
+    f33_latch_health_command_completion();
+    if (cVar1 != '\0') {
+      return;
+    }
+    bVar5 = cVar2 == '\0';
+  }
+  else {
+    f33_latch_health_command_completion();
+    bVar5 = sVar3 == 0;
+  }
+  if (bVar5) {
+    ((void)(0), thunk_FUN_000b15ac());
+  }
+  return;
+}
+
+
+
 /* Bits2/1/0 or bit15-qualified6/5/4 select status4/3/2 viaBACF8. Active status increments71F0 while
    <=317DE=50, so the retained ceiling is51. No action publishes (counter<=50), then resets the
    counter only if unsignedEB9A>22169. Prioritized action bits publish internal status4/3/2
@@ -273,6 +318,115 @@ void FUN_0003c44c(void)
   f33_set_output_request_word('\x06',0);
   f33_set_channel_owner_request('\x04',0);
   FUN_00056e66(4,0);
+  return;
+}
+
+
+
+/* Word3 routes event15, software substitutions, paired channel selections and owner-specific
+   validity actions. Bit15 publishes the4C5E8 flag for0351; it does not set71EC.bit15. Request
+   writes do not themselves prove hardware response. Ancillary actions route event15, substitutions,
+   channel and validity requests. Word3 bit15 reaches4C5E8/8143, distinct from the word4 qualifier.
+    */
+
+void f33_route_fault_ancillary_actions(uint actions)
+
+{
+  bool bVar1;
+  ushort uVar2;
+  uint uVar3;
+  ushort limit;
+  ushort limit_00;
+  undefined4 uVar4;
+  ushort uVar5;
+  
+  uVar2 = DAT_00031802;
+  limit_00 = DAT_00031800;
+  uVar5 = DAT_febe71ec & 0x8000;
+  if ((actions >> 0xc & 1) == 0) {
+    ((void)(0xf), thunk_FUN_000b14d2());
+  }
+  else {
+    thunk_FUN_000b15ac();
+  }
+  bVar1 = (actions & 2) == 0;
+  if (bVar1) {
+    f33_set_owner2_entry_inhibit(0);
+    f33_set_owner3_entry_inhibit(0);
+  }
+  else {
+    f33_set_owner2_entry_inhibit(1);
+    f33_set_owner3_entry_inhibit(1);
+  }
+  ((void)(!bVar1), thunk_FUN_000bc93a());
+  limit = limit_00;
+  if (((actions >> 2 & 1) == 0) && (limit = uVar2, (actions >> 3 & 1) == 0)) {
+    f33_release_output_code_limit_bank0('\x01');
+  }
+  else {
+    f33_set_output_code_limit_bank0('\x01',limit);
+  }
+  if (((actions >> 4 & 1) == 0) && (limit_00 = uVar2, (actions >> 5 & 1) == 0)) {
+    f33_release_output_code_limit_bank1('\x01');
+  }
+  else {
+    f33_set_output_code_limit_bank1('\x01',limit_00);
+  }
+  uVar3 = actions & 0x40;
+  if (((uVar3 == 0) || ((actions >> 7 & 1) != 0)) || (uVar5 == 0x8000)) {
+    if ((actions >> 7 & 1) != 0) {
+      if ((uVar3 != 0) || (uVar5 == 0x8000)) goto LAB_0003c76a;
+      uVar4 = 2;
+      goto LAB_0003c76c;
+    }
+    if ((uVar5 == 0x8000) && (uVar3 != 0)) {
+LAB_0003c76a:
+      uVar4 = 3;
+      goto LAB_0003c76c;
+    }
+  }
+  else {
+    uVar4 = 1;
+LAB_0003c76c:
+    FUN_0005693e(1,uVar4);
+  }
+  if ((((actions & 0x100) == 0) || ((actions >> 9 & 1) != 0)) || (uVar5 == 0x8000)) {
+    if ((actions >> 9 & 1) == 0) {
+      if (uVar5 != 0x8000) goto LAB_0003c7aa;
+    }
+    else if (((actions & 0x100) == 0) && (uVar5 != 0x8000)) {
+      uVar4 = 2;
+      goto LAB_0003c7a4;
+    }
+    uVar4 = 3;
+  }
+  else {
+    uVar4 = 1;
+  }
+LAB_0003c7a4:
+  FUN_0005719c(1,uVar4);
+LAB_0003c7aa:
+  uVar4 = 0x5a;
+  if ((actions >> 10 & 1) != 0) {
+    uVar4 = 0;
+  }
+  FUN_000570f4(2,uVar4);
+  uVar4 = 0x5a;
+  if ((actions >> 0xb & 1) != 0) {
+    uVar4 = 0;
+  }
+  FUN_00057106(2,uVar4);
+  if ((actions >> 0xd & 1) != 0) {
+    FUN_00056cda(2,4);
+  }
+  if ((actions >> 0xe & 1) != 0) {
+    FUN_00056cda(3,0x40000);
+  }
+  uVar4 = 0;
+  if ((actions & 0x8000) != 0) {
+    uVar4 = 0x5a;
+  }
+  FUN_0004c5e8(uVar4);
   return;
 }
 
@@ -1270,6 +1424,53 @@ void FUN_0003d336(void)
 
 {
   DAT_febe7475 = DAT_febe7486 == '\"';
+  return;
+}
+
+
+
+/* Rebuild slot16/kind16 from communication, receive-qualification and service-status sources.
+   Optional E824/7BBA gate affects7489 mask22, not44. Cache7475 is exact7486==22. Slot16 combines
+   receive invalidity/timeout, internal qualification and service status. Row1 invalid-only needs
+   E824/7BBA gate, timeout44 bypasses it; exact7486==22 cache differs from nonzero. */
+
+void f33_compose_communication_status_fault_actions(void)
+
+{
+  uint32_t puVar1;
+  byte status;
+  
+  puVar1 = 0xfebeb800u;
+  status = (byte)DAT_febe7f3a & 0x10;
+  if ((DAT_febe7f3a & 0x1010) == 0) {
+    thunk_FUN_000bef8e();
+  }
+  else {
+    status = 0x22;
+    ((void)(0), thunk_FUN_000bef80());
+  }
+  f33_set_communication_monitor_status(1,status);
+  f33_retain_and_clear_fault_record(0x10);
+  if ((((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbc83u + (uint32_t)((int)puVar1) * 1u)))) |
+       (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbc81u + (uint32_t)((int)puVar1) * 1u)))) |
+       (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbc7fu + (uint32_t)((int)puVar1) * 1u)))) |
+       (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbc7du + (uint32_t)((int)puVar1) * 1u)))) |
+       (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbc7cu + (uint32_t)((int)puVar1) * 1u)))) |
+       (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbc7au + (uint32_t)((int)puVar1) * 1u)))) | (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbc78u + (uint32_t)((int)puVar1) * 1u)))) | (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbc77u + (uint32_t)((int)puVar1) * 1u))))) &
+      0x22) == 0x22) {
+    f33_encode_fault_action_kind('\x10','\x16');
+  }
+  if ((((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x3024))))) == 'Z') || ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3c46))))) == 'Z')) &&
+     (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbc89u + (uint32_t)((int)puVar1) * 1u)))) & 0x22) == 0x22)) {
+    f33_encode_fault_action_kind('\x10','\x16');
+  }
+  if ((((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbc89u + (uint32_t)((int)puVar1) * 1u)))) | (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbc76u + (uint32_t)((int)puVar1) * 1u)))) | (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbc7cu + (uint32_t)((int)puVar1) * 1u)))))
+      & 0x44) == 0x44) {
+    f33_encode_fault_action_kind('\x10','\x16');
+  }
+  f33_select_current_fault_record(0x10);
+  FUN_0003d330();
+  FUN_0003d336();
   return;
 }
 

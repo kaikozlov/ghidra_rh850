@@ -1017,6 +1017,54 @@ void FUN_0004cf6c(void)
 
 
 
+/* Publish81AC from captured E826, published E8CC and4CF66. Specified transitions clear diagnostic
+   service/security state and event88; retained prior E826/7F97 detect transitions. Not atomic with
+   foreground DCM. */
+
+void f33_refresh_mode_diagnostic_admission(void)
+
+{
+  char cVar1;
+  char cVar2;
+  char cVar3;
+  char cVar4;
+  undefined1 uVar5;
+  uint32_t puVar6;
+  int iVar7;
+  uint uVar8;
+  
+  cVar4 = DAT_febee826;
+  cVar3 = DAT_febe81b0;
+  cVar2 = DAT_febe81ab;
+  cVar1 = DAT_febe7f97;
+  puVar6 = 0xfebeb800u;
+  uVar8 = (uint)DAT_febee8cc;
+  iVar7 = f33_return_const_5a_4cf66();
+  if ((((cVar4 == '\x11') || (cVar4 == '\"')) || (uVar8 < 0x104)) ||
+     ((iVar7 != 0x5a && ((iVar7 != 0xa5 || (2 < uVar8 - 0x700)))))) {
+    uVar5 = 0;
+  }
+  else {
+    uVar5 = 0x5a;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar6 + (uint32_t)(-0x3654))))) = uVar5;
+  if (((cVar4 == '\"') || ((cVar4 == '\0' && (cVar2 == '3')))) ||
+     ((cVar1 == '\0' && (cVar3 == 'Z')))) {
+    FUN_0008b120();
+    FUN_00091b50();
+    FUN_000917a4(0);
+    f33_run_init_chain_8e62a();
+    ((void)(0x88), thunk_FUN_000b9320());
+    FUN_0004cf6c();
+    FUN_0004d4bc();
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar6 + (uint32_t)(-0x3655))))) = cVar4;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar6 + (uint32_t)(-0x3650))))) = cVar1;
+  return;
+}
+
+
+
 void FUN_0004d03e(void)
 
 {
@@ -1471,6 +1519,28 @@ uchar f33_finish_proprietary_operation(uchar selected_index,uint *response_lengt
 
 
 
+/* Always8D66A clears app-SA active/result/challenge/copy/client. Only new1 or old1\u2192new40
+   clears8196/8197, requests event88 and clears nonrunning routine results. Network uses8196; do not
+   claim every session clears it. Only new1 or old1→new40 clears8196/8197, requests event88 and
+   clears nonrunning routine results. */
+
+void f33_diagnostic_session_changed_application(uchar old_session,uchar new_session)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  f33_app_security_reset_challenge_material();
+  if ((new_session == '\x01') || ((old_session == '\x01' && (new_session == '@')))) {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x366a))))) = 0;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3669))))) = 0;
+    ((void)(0x88), thunk_FUN_000b9320());
+    f33_diag_routine_clear_nonrunning_results('\0');
+  }
+  return;
+}
+
+
+
 /* Onlytarget2 rejectsunsignedE892>ROM318B0=384 withapplicationstatus0B\u2192NRC88 via8E6EC;
    equalityadmitted. Other targets admitted; the E892 load still occurs before target selection.
    r6current snapshotpassedby8B36E butnotreadhere. Onlytarget2 rejectsunsignedE892>ROM318B0=384
@@ -1505,6 +1575,33 @@ void FUN_0004d5fe(void)
 
 {
   f33_app_programming_mode_request_latched = '\0';
+  return;
+}
+
+
+
+/* Addressing819A==0 and81AE==0 requestsmajor9 viaB15AC thenlatches81AE=5A. Nonzeroaddressing branch
+   resets diagnostic owners; admission4D5D8 normally rejectsnonzerobeforethisstage, but
+   globaladdressing isretained/non-atomic. No directresident transfer, flashprogramming or
+   securityunlock here. */
+
+void f33_app_request_programming_transition(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_febe819a == '\0') {
+    if (f33_app_programming_mode_request_latched == '\0') {
+      ((void)(9), thunk_FUN_000b15ac());
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3652))))) = 0x5a;
+    }
+  }
+  else {
+    FUN_0008b120();
+    FUN_00091b50();
+    FUN_000917a4(0);
+    f33_run_init_chain_8e62a();
+  }
   return;
 }
 
@@ -3383,6 +3480,46 @@ undefined4 f33_rdbi_2002_callback(undefined1 *param_1)
 
 
 
+undefined4 f33_rdbi_2003_callback(undefined1 *param_1)
+
+{
+  undefined4 uVar1;
+  undefined1 uStack_9;
+  
+  if (DAT_febee849 == 'D') {
+    uVar1 = ((void)(7), f33_return_const_ff_b5ed4());
+    uStack_9 = (undefined1)uVar1;
+    FUN_0007016e(uVar1,0xff,&uStack_9);
+  }
+  else {
+    uStack_9 = 0xff;
+  }
+  *param_1 = uStack_9;
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_2004_callback(undefined1 *param_1)
+
+{
+  undefined4 uVar1;
+  undefined1 uStack_9;
+  
+  if (DAT_febee849 == 'D') {
+    uVar1 = ((void)(8), f33_return_const_ff_b5ed4());
+    uStack_9 = (undefined1)uVar1;
+    FUN_0007016e(uVar1,0xff,&uStack_9);
+  }
+  else {
+    uStack_9 = 0xff;
+  }
+  *param_1 = uStack_9;
+  return 0;
+}
+
+
+
 undefined4 f33_rdbi_2005_callback(undefined1 *param_1)
 
 {
@@ -3473,6 +3610,87 @@ undefined4 f33_rdbi_2009_callback(undefined1 *param_1)
 
 
 
+undefined4 f33_rdbi_200a_callback(undefined1 *param_1)
+
+{
+  undefined1 uStack_b;
+  undefined1 uStack_a;
+  undefined1 uStack_9;
+  
+  if (DAT_febee849 == 'D') {
+    uStack_b = ((void)(9), f33_return_const_ff_b5ed4());
+    uStack_a = ((void)(10), f33_return_const_ff_b5ed4());
+    uStack_9 = ((void)(0xb), f33_return_const_ff_b5ed4());
+    FUN_0007016e(uStack_b,0xff,&uStack_b);
+    FUN_0007016e(uStack_a,0xff,&uStack_a);
+    FUN_0007016e(uStack_9,0xff,&uStack_9);
+    *param_1 = uStack_b;
+    param_1[1] = uStack_a;
+  }
+  else {
+    uStack_9 = 0xff;
+    *param_1 = 0xff;
+    param_1[1] = 0xff;
+  }
+  param_1[2] = uStack_9;
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_200b_callback(undefined1 *param_1)
+
+{
+  undefined1 local_c;
+  undefined1 uStack_b;
+  undefined1 uStack_a;
+  undefined1 uStack_9;
+  
+  if (DAT_febee849 == 'D') {
+    local_c = ((void)(0), f33_return_const_ff_b5ed4());
+    uStack_b = ((void)(1), f33_return_const_ff_b5ed4());
+    uStack_a = ((void)(2), f33_return_const_ff_b5ed4());
+    uStack_9 = ((void)(3), f33_return_const_ff_b5ed4());
+    FUN_0007016e(local_c,0xff,&local_c);
+    FUN_0007016e(uStack_b,0xff,&uStack_b);
+    FUN_0007016e(uStack_a,0xff,&uStack_a);
+    FUN_0007016e(uStack_9,0xff,&uStack_9);
+    *param_1 = local_c;
+    param_1[1] = uStack_b;
+    param_1[2] = uStack_a;
+  }
+  else {
+    uStack_9 = 0xff;
+    *param_1 = 0xff;
+    param_1[1] = 0xff;
+    param_1[2] = 0xff;
+  }
+  param_1[3] = uStack_9;
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_200c_callback(undefined1 *param_1)
+
+{
+  undefined4 uVar1;
+  undefined1 uStack_9;
+  
+  if (DAT_febee849 == 'D') {
+    uVar1 = ((void)(4), f33_return_const_ff_b5ed4());
+    uStack_9 = (undefined1)uVar1;
+    FUN_0007016e(uVar1,0xff,&uStack_9);
+  }
+  else {
+    uStack_9 = 0xff;
+  }
+  *param_1 = uStack_9;
+  return 0;
+}
+
+
+
 undefined4 f33_rdbi_200d_callback(undefined1 *param_1)
 
 {
@@ -3481,6 +3699,46 @@ undefined4 f33_rdbi_200d_callback(undefined1 *param_1)
   uStack_9 = DAT_febee852;
   if (DAT_febee84a == 'Z') {
     FUN_0007016e(DAT_febee852,0xff,&uStack_9);
+  }
+  else {
+    uStack_9 = 0xff;
+  }
+  *param_1 = uStack_9;
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_200e_callback(undefined1 *param_1)
+
+{
+  undefined4 uVar1;
+  undefined1 uStack_9;
+  
+  if (DAT_febee849 == 'D') {
+    uVar1 = ((void)(6), f33_return_const_ff_b5ed4());
+    uStack_9 = (undefined1)uVar1;
+    FUN_0007016e(uVar1,0xff,&uStack_9);
+  }
+  else {
+    uStack_9 = 0xff;
+  }
+  *param_1 = uStack_9;
+  return 0;
+}
+
+
+
+undefined4 f33_rdbi_200f_callback(undefined1 *param_1)
+
+{
+  undefined4 uVar1;
+  undefined1 uStack_9;
+  
+  if (DAT_febee849 == 'D') {
+    uVar1 = ((void)(0xc), f33_return_const_ff_b5ed4());
+    uStack_9 = (undefined1)uVar1;
+    FUN_0007016e(uVar1,0xff,&uStack_9);
   }
   else {
     uStack_9 = 0xff;
@@ -3770,6 +4028,33 @@ void f33_publish_diagnostic_normal_tx_policy_request(uchar network_selector,ucha
   if ((disable_tx == '\0') || (uVar1 = '\x11', disable_tx == '\x01')) {
     f33_diagnostic_normal_tx_policy_request = uVar1;
   }
+  return;
+}
+
+
+
+/* 81AF11 ->35AA2,B9320(11),12;21->B9320(22),22. Invokedwhile81B2=2E10. */
+
+void f33_start_pending_write_mode_request(void)
+
+{
+  undefined1 uVar1;
+  uint32_t puVar2;
+  puVar2 = 0xfebeb800u;
+  if (DAT_febe81af == '\x11') {
+    puVar2 = 0xfebeb800u;
+    FUN_00035aa2();
+    ((void)(0x11), thunk_FUN_000b9320());
+    uVar1 = 0x12;
+  }
+  else {
+    if (DAT_febe81af != '!') {
+      return;
+    }
+    ((void)(0x22), thunk_FUN_000b9320());
+    uVar1 = 0x22;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3651))))) = uVar1;
   return;
 }
 

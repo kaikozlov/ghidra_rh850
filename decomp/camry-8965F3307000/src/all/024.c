@@ -174,6 +174,22 @@ FUN_000903f6(undefined2 param_1,undefined4 param_2,undefined4 param_3,undefined4
 
 
 
+undefined4 FUN_000904a6(void)
+
+{
+  undefined4 uVar1;
+  
+  if (DAT_febe55b8 == 0) {
+    uVar1 = ((void)(0), FUN_00090eac());
+  }
+  else {
+    uVar1 = 0;
+  }
+  return uVar1;
+}
+
+
+
 uint FUN_000904c0(void)
 
 {
@@ -1503,6 +1519,15 @@ void FUN_00092044(undefined1 param_1,undefined1 param_2)
 
 
 
+void FUN_00092054(undefined1 param_1,undefined1 param_2)
+
+{
+  ((void)(param_1), (void)(param_2), f33_return_const_0_9203c());
+  return;
+}
+
+
+
 void FUN_00092094(undefined1 param_1)
 
 {
@@ -1829,6 +1854,15 @@ void f33_dcm_stage_or_publish_session(uchar target,uchar defer)
     FUN_00091e12(0);
     f33_dcm_notify_session_publication((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x5ea3))))),target);
   }
+  return;
+}
+
+
+
+void FUN_000925a0(undefined1 param_1)
+
+{
+  ((void)(param_1), f33_return_const_0_9260c());
   return;
 }
 

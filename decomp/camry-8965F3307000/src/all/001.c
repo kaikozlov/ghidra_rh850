@@ -2067,6 +2067,40 @@ void FUN_0000636e(void)
 
 
 
+/* Status0capturesrawcountertimestamps,publishesexecuting2/substate0anddispatchesSID+length.Nonzerostatusabortsthereceive.
+    */
+
+void f33_boot_request_receive_complete(ushort channel,uchar status)
+
+{
+  uint32_t puVar1;
+  uint32_t puVar2;
+  undefined4 uVar3;
+  
+  puVar2 = 0xfebf9800u;
+  puVar1 = 0xfebf9800u;
+  if (status == '\0') {
+    uVar3 = ((void)(channel), FUN_00001d24());
+    (*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + -0x6c54)))) = uVar3;
+    (*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + -0x6c50)))) = uVar3;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6c46))))) = 2;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6c45))))) = 0;
+    f33_boot_dispatch_diagnostic_service((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6742))))),(*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x6748)))));
+  }
+  else {
+    if (DAT_febf2bbe == '\x01') {
+      puVar2 = 0xfebf9800u;
+      ((void)(f33_boot_active_sid), f33_return_only_stub_5284());
+    }
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x6c46))))) = 0;
+    uVar3 = FUN_00001d24();
+    (*((undefined4 *)camry_host_ptr((uint32_t)(puVar2 + -0x6c4c)))) = uVar3;
+  }
+  return;
+}
+
+
+
 void FUN_00006588(void)
 
 {
@@ -2106,6 +2140,37 @@ void f33_boot_diagnostic_timeout_progress(void)
       f33_boot_session_publish('\x01');
       uVar3 = FUN_00001d24();
       (*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + -0x6c4c)))) = uVar3;
+    }
+  }
+  return;
+}
+
+
+
+/* Duringresponse-pendingstate3onlyclearsinflightlock2BBC;othercompletionreleasesrequestownerandmayjointheterminalpath159E.
+    */
+
+void f33_boot_response_complete(ushort channel,uchar status)
+
+{
+  uint32_t puVar1;
+  undefined4 uVar2;
+  
+  puVar1 = 0xfebf9800u;
+  if (f33_boot_response_state == '\x03') {
+    f33_boot_response_pending_in_flight = '\0';
+  }
+  else {
+    f33_boot_request_state = '\0';
+    uVar2 = ((void)(channel), FUN_00001d24());
+    (*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + -0x6c4c)))) = uVar2;
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6c43))))) == '\x01') {
+      if (status == '\0') {
+        FUN_0000159e();
+      }
+      else {
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6c43))))) = 0;
+      }
     }
   }
   return;

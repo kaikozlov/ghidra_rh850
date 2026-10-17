@@ -775,24 +775,32 @@ def _rewrite_pointer_arguments(code: str, param_types: dict[str, list[str]]) -> 
                 continue
             inner = rewrite(text[match.end():close])
             types = param_types.get(match.group(1))
-            if types:
+            if types is not None:
                 args = _split_args(inner)
-                if not (len(args) == 1 and not args[0].strip()):
-                    changed = False
-                    rewritten_args: list[str] = []
-                    for index, arg in enumerate(args):
-                        if index >= len(types) or "*" not in types[index]:
-                            rewritten_args.append(arg)
-                            continue
-                        if kind(arg) != "integer":
-                            rewritten_args.append(arg)
-                            continue
-                        changed = True
-                        rewritten_args.append(
-                            f"(({types[index]})camry_host_ptr((uint32_t)({arg.strip()})))"
-                        )
-                    if changed:
-                        inner = ", ".join(rewritten_args)
+                if len(args) == 1 and not args[0].strip():
+                    args = []
+                extra = [arg for arg in args[len(types):] if arg.strip()]
+                args = args[:len(types)]
+                rewritten_args: list[str] = []
+                wrapped = False
+                for index, arg in enumerate(args):
+                    if "*" not in types[index] or kind(arg) != "integer":
+                        rewritten_args.append(arg)
+                        continue
+                    wrapped = True
+                    rewritten_args.append(
+                        f"(({types[index]})camry_host_ptr((uint32_t)({arg.strip()})))"
+                    )
+                if extra:
+                    # The callee signature does not read these. Keep their side effects.
+                    discarded = ", ".join(f"(void)({arg.strip()})" for arg in extra)
+                    kept = ", ".join(rewritten_args)
+                    pieces.append(text[cursor:match.start()])
+                    pieces.append(f"({discarded}, {match.group(1)}({kept}))")
+                    cursor = close + 1
+                    continue
+                if wrapped:
+                    inner = ", ".join(rewritten_args)
             pieces.append(text[cursor:match.end()])
             pieces.append(inner)
             cursor = close

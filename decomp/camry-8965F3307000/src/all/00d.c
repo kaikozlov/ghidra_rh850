@@ -314,6 +314,35 @@ uint f33_ba_enable_closed_gate_exception(uchar operation,uchar request_length,uc
 
 
 
+void FUN_00034ea4(int param_1,int param_2)
+
+{
+  uint uVar1;
+  undefined4 uVar2;
+  byte bStack_15;
+  undefined1 auStack_14 [8];
+  
+  uVar1 = 0;
+  do {
+    auStack_14[uVar1] = 0;
+    uVar1 = uVar1 + 1;
+  } while (uVar1 < 8);
+  FUN_0006a624(param_2,&bStack_15);
+  if ((param_2 < 0) || (8 < bStack_15)) {
+    uVar2 = 0xfffffffa;
+  }
+  else {
+    uVar2 = 0;
+    for (uVar1 = 0; uVar1 < bStack_15; uVar1 = uVar1 + 1 & 0xff) {
+      auStack_14[uVar1] = (*((undefined1 *)camry_host_ptr((uint32_t)(uVar1 + param_1))));
+    }
+  }
+  ((void)(auStack_14), FUN_0004d4ca(uVar2, bStack_15));
+  return;
+}
+
+
+
 int FUN_00035004(byte *param_1)
 
 {

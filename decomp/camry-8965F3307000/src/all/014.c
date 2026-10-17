@@ -130,6 +130,43 @@ uint f33_diag_routine_1002_admit(uchar control_type)
 
 
 
+/* start:35AA2 conditionally requests internal6AE2=22 normalization (only when6AF0 neitherFFFFFFFF
+   norA55A5AA5 and6ADD neither88 nor11 and6AE2!=11), thenB9320(44) writesAF47, unconditionally marks
+   result1,outlen0. ScheduledB9212 consumes44: ifAF46!=5A andB8D9C(1)==5A thenB8DDA(1) restarts
+   lifecycle groupB439;setsAF46=5A,AF44 active,consumesAF47 and reports selector2 success. This is
+   normalization acknowledgement, NOT lower group convergence. A rejected lower restart still sets
+   normalization flag and acknowledges. Later normalizer request88 clearsAF46. Result3 returns
+   byte,len1. Raw500AE..50886:
+   R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions.
+   Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32. */
+
+uint f33_diag_routine_1002_normalize_lifecycle
+               (uchar control_type,uchar *unused_input,ushort unused_input_length,uchar *output,
+               ushort *output_length)
+
+{
+  ushort uVar1;
+  uint32_t puVar2;
+  puVar2 = 0xfebeb800u;
+  if (control_type == '\x01') {
+    ((void)(1), (void)(unused_input), (void)(unused_input_length), FUN_00035aa2());
+    ((void)(0x44), thunk_FUN_000b9320());
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3663))))) = 1;
+    uVar1 = 0;
+  }
+  else {
+    if (control_type != '\x03') {
+      return 7;
+    }
+    *output = DAT_febe819d;
+    uVar1 = 1;
+  }
+  *output_length = uVar1;
+  return 0;
+}
+
+
+
 /* Raw501D0..50212;819Ainhibit,startFFFFpayload,819E==1duplicate;noinputlengthconsumed. */
 
 uint f33_diag_routine_1004_admit(uchar control_type,uchar *input)
@@ -154,6 +191,113 @@ uint f33_diag_routine_1004_admit(uchar control_type,uchar *input)
 
 
 
+/* start calls518E0 operation5 producer, translates return through4D118,marks result1 on0,len0. Idle
+   producer immediately5551A history initialization then lifecycle85;busy producer deduplicates5/6
+   in four slots or writes producer slot (no full acknowledgement). Parent-owned5F91C/5F972
+   scheduler and51A98 later apply global AA/A5 hold, then85 needs89C4==0 for selector3
+   success,otherwise failure20;dispatcher51A12 may start queued request afterwards. No persistent
+   success is implied by immediate callback return0. Raw500AE..50886:
+   R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions.
+   Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32. */
+
+uint f33_diag_routine_1004_request_history_rewrite
+               (uchar control_type,uchar *unused_input,ushort unused_input_length,uchar *output,
+               ushort *output_length)
+
+{
+  ushort uVar1;
+  int application_status;
+  uint uVar2;
+  
+  if (control_type == '\x01') {
+    application_status = ((void)(1), (void)(unused_input), (void)(unused_input_length), FUN_000518e0());
+    uVar2 = f33_diag_translate_application_request_status(application_status);
+    if (uVar2 == 0) {
+      DAT_febe819e = '\x01';
+    }
+    uVar1 = 0;
+  }
+  else {
+    if (control_type != '\x03') {
+      return 7;
+    }
+    uVar2 = 0;
+    *output = DAT_febe819e;
+    uVar1 = 1;
+  }
+  *output_length = uVar1;
+  return uVar2;
+}
+
+
+
+/* startB8DDA(0) initializes B438=11,counterB440=0 (with shared dependent reinitializers
+   whenB439!=11),result1,len0. B8D9C(0) checksB439 andB43A, notB438. B8B38 waits five status
+   wordsB2D4/B26C/B324/B490/B352 high bytes88;all low bytes22=>group22 and selector4
+   success;otherwisegroup44 andfail20. Waiting timeout setsB43C=5A but does not directly
+   acknowledge. Control type3 returns result byte,len1. Raw500AE..50886:
+   R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions.
+   Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32. */
+
+uint f33_diag_routine_1007_restart_lifecycle_group0
+               (uchar control_type,uchar *unused_input,ushort unused_input_length,uchar *output,
+               ushort *output_length)
+
+{
+  ushort uVar1;
+  uint32_t puVar2;
+  puVar2 = 0xfebeb800u;
+  if (control_type == '\x01') {
+    ((void)(0), (void)(unused_input), (void)(unused_input_length), thunk_FUN_000b8dda());
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3661))))) = 1;
+    uVar1 = 0;
+  }
+  else {
+    if (control_type != '\x03') {
+      return 7;
+    }
+    *output = DAT_febe819f;
+    uVar1 = 1;
+  }
+  *output_length = uVar1;
+  return 0;
+}
+
+
+
+/* startB8E52 restarts five dependencies,setsB43A=11,counterB442=0,result1,len0. B8CCE waits
+   B2CE/B25C/B302/B462/B334;all22=>selector5 success andgroup22;all no longer11 but not
+   all22=>failure20 andgroup44;otherwise waits withB43D timeout flag. Results byte,len1.
+   Raw500AE..50886:
+   R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions.
+   Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32. */
+
+uint f33_diag_routine_1008_restart_lifecycle_group2
+               (uchar control_type,uchar *unused_input,ushort unused_input_length,uchar *output,
+               ushort *output_length)
+
+{
+  ushort uVar1;
+  uint32_t puVar2;
+  puVar2 = 0xfebeb800u;
+  if (control_type == '\x01') {
+    ((void)(1), (void)(unused_input), (void)(unused_input_length), thunk_FUN_000b8e52());
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3660))))) = 1;
+    uVar1 = 0;
+  }
+  else {
+    if (control_type != '\x03') {
+      return 7;
+    }
+    *output = DAT_febe81a0;
+    uVar1 = 1;
+  }
+  *output_length = uVar1;
+  return 0;
+}
+
+
+
 /* 819A!=1;start result!=1 else8;results admitted;other7. No additional feature/E958 gate in THIS
    F33 raw precondition! Do not transfer Sienna semantics. Raw50152..5081E
    zxbR6andfullR10return0/5/7/8;gate details in companion recovery rows. */
@@ -172,6 +316,40 @@ uint f33_diag_routine_1009_admit(uchar control_type)
   else if (control_type != '\x03') {
     return 7;
   }
+  return 0;
+}
+
+
+
+/* startB69C6 resets B6990/B692A and setsB2C9=11,result1,len0. B6658 waitsB2C8/B2CA not22,thenB65CA
+   queues selector103 with first8 zero,last8 FF;state22 pollsFF0C4(103):exact10
+   success=>B2C9=44,selector6 success plus reinit;high20 remains pending;other=>state88 and
+   selector6 fail20. Results byte,len1. Admission, RAM reset and asynchronous selector103
+   persistence are distinct. Raw500AE..50886:
+   R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions.
+   Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32. */
+
+uint f33_diag_routine_1009_reset_record103
+               (uchar control_type,uchar *unused_input,ushort unused_input_length,uchar *output,
+               ushort *output_length)
+
+{
+  ushort uVar1;
+  uint32_t puVar2;
+  puVar2 = 0xfebeb800u;
+  if (control_type == '\x01') {
+    ((void)(1), (void)(unused_input), (void)(unused_input_length), thunk_FUN_000b69c6());
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x365f))))) = 1;
+    uVar1 = 0;
+  }
+  else {
+    if (control_type != '\x03') {
+      return 7;
+    }
+    *output = DAT_febe81a1;
+    uVar1 = 1;
+  }
+  *output_length = uVar1;
   return 0;
 }
 
@@ -228,6 +406,45 @@ LAB_0005042c:
 
 
 
+/* start35A96 sets6AE2=11 andreturns2;callback converts to0,result1,len0.357C0 later
+   requestsB3224(1),sets6ADD=88 on queued-1 or reportsselector8 failure. Existing
+   family0500\u21920522 acquisition, selector100 learned quad+marker and service cleanup ownership
+   in \u00a777.24 applies. This is not direct physical acquisition or immediate persistence. Results
+   byte,len1. Raw500AE..50886:
+   R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions.
+   Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32. Existing family0500→0522
+   acquisition, selector100 learned quad+marker and service cleanup ownership in §77.24 applies. */
+
+uint f33_diag_routine_1103_request_service1
+               (uchar control_type,uchar *unused_input,ushort unused_input_length,uchar *output,
+               ushort *output_length)
+
+{
+  ushort uVar1;
+  uint uVar2;
+  
+  if (control_type == '\x01') {
+    uVar2 = ((void)(1), (void)(unused_input), (void)(unused_input_length), FUN_00035a96());
+    if (uVar2 == 2) {
+      uVar2 = 0;
+      DAT_febe81a3 = '\x01';
+    }
+    uVar1 = 0;
+  }
+  else {
+    if (control_type != '\x03') {
+      return 7;
+    }
+    uVar2 = 0;
+    *output = DAT_febe81a3;
+    uVar1 = 1;
+  }
+  *output_length = uVar1;
+  return uVar2;
+}
+
+
+
 /* 819A!=1;start unsignedE892<=0200,thenresult!=1 else8;results allowed;other7. Raw50152..5081E
    zxbR6andfullR10return0/5/7/8;gate details in companion recovery rows. */
 
@@ -253,6 +470,41 @@ uint f33_diag_routine_1106_admit(uchar control_type)
 
 
 
+/* startB524A invokesB5EC6/B707A/B8FA8 andsetsB214=11,result1,len0. B51BE succeeds
+   onlyB311/B471/B256 all44\u2192group22 andselector9 success;when none remain11/22 but
+   notall44\u2192group44 andfail20;otherwise waits. No local callback persistence/done assumption.
+   Results byte,len1. Raw500AE..50886:
+   R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions.
+   Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32. B51BE succeeds
+   onlyB311/B471/B256 all44→group22 andselector9 success;when none remain11/22 but
+   notall44→group44 andfail20;otherwise waits. */
+
+uint f33_diag_routine_1106_restart_lifecycle_groups
+               (uchar control_type,uchar *unused_input,ushort unused_input_length,uchar *output,
+               ushort *output_length)
+
+{
+  ushort uVar1;
+  uint32_t puVar2;
+  puVar2 = 0xfebeb800u;
+  if (control_type == '\x01') {
+    ((void)(1), (void)(unused_input), (void)(unused_input_length), thunk_FUN_000b524a());
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x365c))))) = 1;
+    uVar1 = 0;
+  }
+  else {
+    if (control_type != '\x03') {
+      return 7;
+    }
+    *output = DAT_febe81a4;
+    uVar1 = 1;
+  }
+  *output_length = uVar1;
+  return 0;
+}
+
+
+
 /* 819A!=1;start result!=1 else8;no local speed gate;results allowed;other7. Raw50152..5081E
    zxbR6andfullR10return0/5/7/8;gate details in companion recovery rows. */
 
@@ -271,6 +523,45 @@ uint f33_diag_routine_1108_admit(uchar control_type)
     return 7;
   }
   return 0;
+}
+
+
+
+/* start517DC operation2 producer and4D118;on0 result1,len0. Idle51788 performs multi-owner
+   diagnostic reset/preservation then lifecycle82;busy deduplicates2/6 or writes producer slot,no
+   capacity acknowledgement. Existing diagnostic scheduler51A98 requires all four persistence
+   phaseszero for82 success;AA/A5 anygroup holds;other terminal phase yieldsfail20.
+   Aggregateoperation86 canack both selector3/A via4D0E8. Results byte,len1. Raw500AE..50886:
+   R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions.
+   Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32. */
+
+uint f33_diag_routine_1108_request_checkpoint_reset
+               (uchar control_type,uchar *unused_input,ushort unused_input_length,uchar *output,
+               ushort *output_length)
+
+{
+  ushort uVar1;
+  int application_status;
+  uint uVar2;
+  
+  if (control_type == '\x01') {
+    application_status = ((void)(1), (void)(unused_input), (void)(unused_input_length), FUN_000517dc());
+    uVar2 = f33_diag_translate_application_request_status(application_status);
+    if (uVar2 == 0) {
+      DAT_febe81a5 = '\x01';
+    }
+    uVar1 = 0;
+  }
+  else {
+    if (control_type != '\x03') {
+      return 7;
+    }
+    uVar2 = 0;
+    *output = DAT_febe81a5;
+    uVar1 = 1;
+  }
+  *output_length = uVar1;
+  return uVar2;
 }
 
 
@@ -352,6 +643,56 @@ uint f33_diag_routine_110a_admit(uchar control_type)
     return 7;
   }
   return 0;
+}
+
+
+
+/* startB3224(2),4D118;queued=>callback0,B85D0 clearsstoplatch,result1,len0. stop whenrunning1
+   callsB85BC (B3DD=5A,B3CB=0) but leavesresult1;when terminal nonzero clearsresult0;len0. Existing
+   family0520 kind1 engine, B303E completion and forcedexitB3194 apply. Results byte,len1.
+   Raw500AE..50886:
+   R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions.
+   Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32. */
+
+uint f33_diag_routine_110a_control_service2
+               (uchar control_type,uchar *unused_input,ushort unused_input_length,uchar *output,
+               ushort *output_length)
+
+{
+  ushort uVar1;
+  int application_status;
+  uint uVar2;
+  
+  if (control_type == '\x01') {
+    application_status = f33_queue_application_service('\x02');
+    uVar2 = f33_diag_translate_application_request_status(application_status);
+    if (uVar2 == 2) {
+      uVar2 = 0;
+      thunk_FUN_000b85d0();
+      DAT_febe81a7 = '\x01';
+    }
+    uVar1 = 0;
+  }
+  else if (control_type == '\x02') {
+    if (DAT_febe81a7 == '\x01') {
+      ((void)(2), (void)(unused_input), (void)(unused_input_length), thunk_FUN_000b85bc());
+    }
+    else {
+      DAT_febe81a7 = '\0';
+    }
+    uVar2 = 0;
+    uVar1 = 0;
+  }
+  else {
+    if (control_type != '\x03') {
+      return 7;
+    }
+    uVar2 = 0;
+    *output = DAT_febe81a7;
+    uVar1 = 1;
+  }
+  *output_length = uVar1;
+  return uVar2;
 }
 
 
@@ -480,6 +821,55 @@ uint f33_diag_routine_110d_admit(uchar control_type)
     return 7;
   }
   return 0;
+}
+
+
+
+/* startB3224(4),4D118 queued=>callback0,B85CA clearsstoplatch,result1,len0. stoprunning1 callsB85AE
+   settingB3DC=5A,B3CB=0,doesnotterminallycompleteresult;terminalnonzero clearsresult0.
+   Existing0520kind3 andB303E/forcedexit cleanup apply. Results byte,len1. Raw500AE..50886:
+   R6zxbcontrols1/2/3;R9output;fifthargumentatentrySP+0pointsu16length(st.h);return32-bitR10;inputargumentsunusedbytheseactions.
+   Result requestsproduce1byte;starts/stops0exceptcapabilitystarts32. */
+
+uint f33_diag_routine_110d_control_service4
+               (uchar control_type,uchar *unused_input,ushort unused_input_length,uchar *output,
+               ushort *output_length)
+
+{
+  ushort uVar1;
+  int application_status;
+  uint uVar2;
+  
+  if (control_type == '\x01') {
+    application_status = f33_queue_application_service('\x04');
+    uVar2 = f33_diag_translate_application_request_status(application_status);
+    if (uVar2 == 2) {
+      uVar2 = 0;
+      thunk_FUN_000b85ca();
+      DAT_febe81aa = '\x01';
+    }
+    uVar1 = 0;
+  }
+  else if (control_type == '\x02') {
+    if (DAT_febe81aa == '\x01') {
+      ((void)(2), (void)(unused_input), (void)(unused_input_length), thunk_FUN_000b85ae());
+    }
+    else {
+      DAT_febe81aa = '\0';
+    }
+    uVar2 = 0;
+    uVar1 = 0;
+  }
+  else {
+    if (control_type != '\x03') {
+      return 7;
+    }
+    uVar2 = 0;
+    *output = DAT_febe81aa;
+    uVar1 = 1;
+  }
+  *output_length = uVar1;
+  return uVar2;
 }
 
 

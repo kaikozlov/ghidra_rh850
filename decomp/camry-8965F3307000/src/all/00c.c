@@ -180,6 +180,25 @@ void f33_initialize_thermal_shutdown_counter(void)
 
 
 
+/* Increment688C while below688E and previous6FB0!=A5; otherwise request event27. Schedulers call
+   this before the current thermal qualification publication. Increment while count below limit and
+   previous6FB0!=A5; Scheduler consumes prior qualification before current model work. */
+
+void f33_step_thermal_shutdown_request(void)
+
+{
+  if ((f33_thermal_shutdown_count < f33_thermal_shutdown_count_limit) &&
+     (f33_thermal_history_qualification[0] != 0xa5)) {
+    f33_thermal_shutdown_count = f33_thermal_shutdown_count + 1;
+  }
+  else {
+    ((void)(0x27), thunk_FUN_000b15ac());
+  }
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */

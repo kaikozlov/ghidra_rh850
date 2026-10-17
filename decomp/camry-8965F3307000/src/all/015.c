@@ -1700,6 +1700,20 @@ void f33_return_only_stub_56788(void)
 
 
 
+void FUN_0005678a(void)
+
+{
+  int iVar1;
+  
+  iVar1 = FUN_00066f10();
+  if (iVar1 == 0) {
+    ((void)(0x12), thunk_FUN_000b15ac());
+  }
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -1719,6 +1733,20 @@ void f33_return_only_stub_567a2(void)
 void f33_return_only_stub_567a4(void)
 
 {
+  return;
+}
+
+
+
+void FUN_000567a6(void)
+
+{
+  uint uVar1;
+  
+  uVar1 = f33_application_nvm_is_ready();
+  if (uVar1 == 1) {
+    ((void)(0x28), thunk_FUN_000b15ac());
+  }
   return;
 }
 

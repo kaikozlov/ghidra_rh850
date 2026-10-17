@@ -1328,6 +1328,22 @@ undefined4 f33_return_const_0_6a3f0(void)
 
 
 
+undefined4 FUN_0006a3f4(undefined2 param_1)
+
+{
+  undefined4 uVar1;
+  
+  if (DAT_00028fd6 == 'Z') {
+    uVar1 = 0;
+  }
+  else {
+    uVar1 = ((void)(param_1), f33_return_const_0_6a3f0());
+  }
+  return uVar1;
+}
+
+
+
 void FUN_0006a410(void)
 
 {
