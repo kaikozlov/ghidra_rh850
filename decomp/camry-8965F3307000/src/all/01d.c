@@ -597,6 +597,28 @@ void FUN_0007477a(void)
 
 
 
+void FUN_00074790(void)
+
+{
+  int iVar1;
+  ushort uVar2;
+  undefined8 uVar3;
+  ushort uVar4;
+  
+  uVar2 = DAT_00027624;
+  uVar3 = 0x23dfc00000000;
+  for (uVar4 = 0; uVar4 < uVar2; uVar4 = uVar4 + 1) {
+    iVar1 = DAT_febf6b18;
+    if ((DAT_febf6b18 != 0) && (iVar1 = DAT_febf6b18 + -1, DAT_febf6b18 == 1)) {
+      (*(int (*)())*(code **)((int)((ulonglong)uVar3 >> 0x20) + 0x382c))(uVar4);
+    }
+    DAT_febf6b18 = iVar1;
+  }
+  return;
+}
+
+
+
 void FUN_000747c8(undefined4 param_1,undefined4 param_2)
 
 {

@@ -1108,6 +1108,29 @@ void FUN_00089428(void)
 
 
 
+void FUN_000894dc(undefined1 param_1)
+
+{
+  uint uVar1;
+  
+  uVar1 = DAT_febf1370;
+  if (((int8_t)DAT_febf1378) == -0x5b) {
+    if (DAT_febf1370 == ~DAT_febf1374) {
+      if ((DAT_febf1370 != 0) && ((*((int *)camry_host_ptr((uint32_t)(DAT_febf1370 + 4)))) != 0)) {
+        FUN_00089414();
+        (*(int (*)())*(code **)(uVar1 + 4))(param_1);
+      }
+    }
+    else {
+      DAT_febf1379 = 1;
+      FUN_00089414();
+    }
+  }
+  return;
+}
+
+
+
 void FUN_000895a4(void)
 
 {
@@ -1178,6 +1201,29 @@ void FUN_0008962e(void)
   thunk_FUN_0006a45e();
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x5b86))))) = 0xd2;
   thunk_FUN_0006a4c4();
+  return;
+}
+
+
+
+void FUN_000896e0(undefined1 param_1)
+
+{
+  uint uVar1;
+  
+  uVar1 = DAT_febf137c;
+  if (((int8_t)DAT_febf1384) == -0x5b) {
+    if (DAT_febf137c == ~DAT_febf1380) {
+      if ((DAT_febf137c != 0) && ((*((int *)camry_host_ptr((uint32_t)(DAT_febf137c + 4)))) != 0)) {
+        FUN_0008961a();
+        (*(int (*)())*(code **)(uVar1 + 4))(param_1);
+      }
+    }
+    else {
+      DAT_febf1385 = 1;
+      FUN_0008961a();
+    }
+  }
   return;
 }
 
@@ -1255,6 +1301,29 @@ void FUN_00089820(void)
 
 
 
+void FUN_000898ce(undefined1 param_1)
+
+{
+  uint uVar1;
+  
+  uVar1 = DAT_febf1388;
+  if (((int8_t)DAT_febf1390) == -0x5b) {
+    if (DAT_febf1388 == ~DAT_febf138c) {
+      if ((DAT_febf1388 != 0) && ((*((int *)camry_host_ptr((uint32_t)(DAT_febf1388 + 4)))) != 0)) {
+        FUN_0008980c();
+        (*(int (*)())*(code **)(uVar1 + 4))(param_1);
+      }
+    }
+    else {
+      DAT_febf1391 = 1;
+      FUN_0008980c();
+    }
+  }
+  return;
+}
+
+
+
 void FUN_00089996(void)
 
 {
@@ -1322,6 +1391,33 @@ void FUN_00089a0e(void)
   thunk_FUN_0006a45e();
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x5b9e))))) = 0xd2;
   thunk_FUN_0006a4c4();
+  return;
+}
+
+
+
+/* Only activeA5 with valid complemented retained descriptor and nonnull callback+4 delivers. Reset
+   channel before invoking saved callback(result). Pointer mismatch sets error1 and resets without
+   callback. Explicit software callback input is not an ICU-S hardware result. */
+
+void f33_crypto_key_job_deliver_completion(uchar result)
+
+{
+  uint uVar1;
+  
+  uVar1 = DAT_febf1394;
+  if (((int8_t)DAT_febf139c) == -0x5b) {
+    if (DAT_febf1394 == ~DAT_febf1398) {
+      if ((DAT_febf1394 != 0) && ((*((int *)camry_host_ptr((uint32_t)(DAT_febf1394 + 4)))) != 0)) {
+        FUN_000899fa();
+        (*(int (*)())*(code **)(uVar1 + 4))(result);
+      }
+    }
+    else {
+      DAT_febf139d = 1;
+      FUN_000899fa();
+    }
+  }
   return;
 }
 
@@ -1439,6 +1535,23 @@ undefined4 FUN_00089d08(undefined2 *param_1)
 
 
 
+void FUN_00089d18(void)
+
+{
+  undefined8 uVar1;
+  int iVar2;
+  uint uVar3;
+  
+  uVar1 = 0x23dfc00000000;
+  for (uVar3 = 0; iVar2 = (int)((ulonglong)uVar1 >> 0x20), uVar3 < (*((uint *)camry_host_ptr((uint32_t)(iVar2 + 0x4078))));
+      uVar3 = uVar3 + 1) {
+    (*(int (*)())*(code **)(uVar3 * 4 + iVar2 + 0x4094))();
+  }
+  return;
+}
+
+
+
 void FUN_00089e2c(char param_1,int *param_2)
 
 {
@@ -1456,6 +1569,56 @@ void FUN_00089e2c(char param_1,int *param_2)
   }
   param_2[2] = param_2[2] + 1;
   return;
+}
+
+
+
+undefined4 FUN_00089e72(undefined1 *param_1)
+
+{
+  undefined1 uVar1;
+  undefined8 uVar2;
+  int iVar3;
+  undefined4 uVar4;
+  uint uVar5;
+  int local_20;
+  int iStack_1c;
+  int iStack_18;
+  int iStack_14;
+  
+  uVar2 = 0x23dfc00000000;
+  if (param_1 == (undefined1 *)0x0) {
+    return 1;
+  }
+  iStack_1c = 0;
+  local_20 = 0;
+  iStack_14 = 0;
+  iStack_18 = 0;
+  for (uVar5 = 0; iVar3 = (int)((ulonglong)uVar2 >> 0x20), uVar5 < (*((uint *)camry_host_ptr((uint32_t)(iVar3 + 0x407c))));
+      uVar5 = uVar5 + 1) {
+    uVar4 = (*(int (*)())*(code **)(0x40a2u + uVar5 * 4 + iVar3 + 2))();
+    FUN_00089e2c(uVar4,&local_20);
+  }
+  if (iStack_18 != 0) {
+    uVar1 = 2;
+    goto LAB_00089eda;
+  }
+  if (iStack_14 == 0) {
+    if (local_20 == 0) {
+      if (iStack_1c != 0) {
+        uVar1 = 1;
+        goto LAB_00089eda;
+      }
+    }
+    else {
+      uVar1 = 0;
+      if (iStack_1c == 0) goto LAB_00089eda;
+    }
+  }
+  uVar1 = 3;
+LAB_00089eda:
+  *param_1 = uVar1;
+  return 0;
 }
 
 

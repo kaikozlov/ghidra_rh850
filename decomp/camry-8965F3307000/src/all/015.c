@@ -1054,6 +1054,66 @@ uint FUN_000558ae(short param_1,int param_2,uint param_3,ushort param_4)
 
 
 
+int FUN_0005598c(short param_1,short param_2,int param_3,char param_4)
+
+{
+  int iVar1;
+  uint uVar2;
+  int iVar3;
+  int iVar4;
+  ushort uVar5;
+  undefined1 uVar6;
+  ushort uVar7;
+  short *psVar8;
+  int iVar9;
+  ushort uStack_2a;
+  
+  uVar7 = 0;
+  iVar9 = 0;
+  uVar5 = 0;
+  psVar8 = (short *)((undefined *)camry_host_ptr(0xfebe86e4u));
+  if (param_4 == '\0') {
+    psVar8 = ((undefined *)camry_host_ptr(0xfebe8684u));
+  }
+  if ((param_3 != 0) && (iVar3 = camry_host_addr(FUN_00056664(&uStack_2a)), iVar3 != 0)) {
+    if ((param_1 == *psVar8) && ((param_2 == psVar8[0x23] || (param_2 == 0)))) {
+      uVar2 = 0;
+      do {
+        if (param_1 == *(short *)(((undefined *)camry_host_ptr(0x2ab70u)) + uVar2 * 8)) {
+          uVar5 = *(ushort *)(((undefined *)camry_host_ptr(0x2ab72u)) + uVar2 * 8);
+          break;
+        }
+        uVar2 = uVar2 + 1;
+      } while (uVar2 < 0x40);
+    }
+    if (uVar5 != 0) {
+      FUN_0006a574(psVar8[0x23], ((undefined1 *)camry_host_ptr((uint32_t)(param_3))));
+      iVar9 = 3;
+      for (uVar2 = 0; uVar2 < uStack_2a; uVar2 = uVar2 + 1 & 0xffff) {
+        iVar1 = uVar2 * 0x18 + iVar3;
+        if ((((*((ushort *)camry_host_ptr((uint32_t)(iVar1 + 0x14)))) & uVar5) != 0) &&
+           (iVar4 = FUN_00053190(uVar2,1), iVar4 == 0x5a)) {
+          uVar7 = uVar7 + 1;
+          FUN_0006a574((*((undefined2 *)camry_host_ptr((uint32_t)(iVar1 + 8)))), ((undefined1 *)camry_host_ptr((uint32_t)(iVar9 + param_3))));
+          (*((undefined1 *)camry_host_ptr((uint32_t)(iVar9 + 2 + param_3)))) = (*((undefined1 *)camry_host_ptr((uint32_t)(iVar1 + 0x16))));
+          (*(int (*)())*(code **)(iVar1 + 0xc))(param_4,iVar9 + 3 + param_3);
+          iVar9 = iVar9 + 3 + (uint)(*((byte *)camry_host_ptr((uint32_t)(iVar1 + 0x16))));
+        }
+      }
+      if (uVar7 < 0x100) {
+        uVar6 = (undefined1)uVar7;
+      }
+      else {
+        uVar6 = 0;
+      }
+      (*((undefined1 *)camry_host_ptr((uint32_t)(param_3 + 2)))) = uVar6;
+    }
+  }
+  return iVar9;
+}
+
+
+
 uint FUN_00055a76(undefined2 param_1,undefined2 param_2,int param_3,uint param_4)
 
 {

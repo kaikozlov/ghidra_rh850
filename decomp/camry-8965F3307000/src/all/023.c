@@ -1326,6 +1326,104 @@ void f33_dcm_resume_queued_proprietary_operation(void)
 
 
 
+/* 8E4C0 savesdid,4C2 indexptr;13-entry table25640. Fullr10 cmp3 at4F0 re-enters SAME index at4CA
+   via4F2; increments only4F6. Storesu16 index4FE. */
+
+uint f33_find_write_did_and_check_precondition(ushort *matched_index,ushort did)
+
+{
+  ushort *puVar1;
+  undefined8 uVar2;
+  int iVar3;
+  uint uVar4;
+  uint uVar5;
+  
+  uVar2 = 0x23dfc00000000;
+  uVar4 = 3;
+  uVar5 = 0;
+  do {
+    while( true ) {
+      iVar3 = (int)((ulonglong)uVar2 >> 0x20);
+      puVar1 = ((ushort *)camry_host_ptr((uint32_t)(uVar5 * 0xc + iVar3 + 0x1844)));
+      if ((did == *puVar1) && (*(int *)(puVar1 + 2) != 0)) break;
+      uVar5 = uVar5 + 1 & 0xffff;
+      if (0xc < uVar5) goto LAB_0008e4fe;
+    }
+    uVar4 = (*(int (*)())*(code **)((short)uVar5 * 0xc + iVar3 + 0x1848))();
+  } while (uVar4 == 3);
+LAB_0008e4fe:
+  *matched_index = (ushort)uVar5;
+  return uVar4;
+}
+
+
+
+/* 8E50A..510 savesargs;3B25==2 bypassescallback, usescompletion withFF->2;elseboundedfixedcallback.
+   Storeslateststatus8B7AE. */
+
+uint f33_dispatch_or_poll_write_did_action
+               (uchar completion_status,ushort matched_index,uchar *payload,ushort length)
+
+{
+  uint32_t puVar1;
+  int iVar2;
+  uint uVar3;
+  
+  uVar3 = (uint)completion_status;
+  puVar1 = 0x23dfcu;
+  iVar2 = FUN_0008b7a4();
+  if (iVar2 == 2) {
+    if (uVar3 == 0xff) {
+      uVar3 = 2;
+    }
+  }
+  else if ((matched_index < 0xd) && ((*((int *)camry_host_ptr((uint32_t)(puVar1 + (uint)matched_index * 0xc + 0x184c)))) != 0)) {
+    uVar3 = (*(int (*)())*(code **)(puVar1 + (short)matched_index * 0xc + 0x184c))(payload,length);
+  }
+  else {
+    uVar3 = 4;
+  }
+  FUN_0008b7ae(uVar3);
+  return uVar3;
+}
+
+
+
+/* 8E566/56C retainu16RID;56E zxbcontrol;594 ld.hu original fifthargument;5A0 indirectcall
+   row+4;5A4/A6 fullR10==3 re-enters sameindex;5AA only mismatch/null increments;5B4 writesu16index.
+    */
+
+uint f33_diag_routine_select_precondition
+               (ushort *callback_index,ushort rid,uchar control_type,uchar *input,
+               ushort input_length)
+
+{
+  ushort *puVar1;
+  undefined8 uVar2;
+  int iVar3;
+  uint uVar4;
+  uint uVar5;
+  
+  uVar2 = 0x23dfc00000000;
+  uVar4 = 3;
+  uVar5 = 0;
+  do {
+    while( true ) {
+      iVar3 = (int)((ulonglong)uVar2 >> 0x20);
+      puVar1 = ((ushort *)camry_host_ptr((uint32_t)(uVar5 * 0xc + iVar3 + 0x18e0)));
+      if ((rid == *puVar1) && (*(int *)(puVar1 + 2) != 0)) break;
+      uVar5 = uVar5 + 1 & 0xffff;
+      if (0x12 < uVar5) goto LAB_0008e5b4;
+    }
+    uVar4 = (*(int (*)())*(code **)((short)uVar5 * 0xc + iVar3 + 0x18e4))(control_type,input,input_length);
+  } while (uVar4 == 3);
+LAB_0008e5b4:
+  *callback_index = (ushort)uVar5;
+  return uVar4;
+}
+
+
+
 /* ZXB R6/R7/R8/R9 at8E602..608; choose pending if either input is pending, otherwise local failure
    or nonzero side result after local success. MOV R9,R10 at8E620 and JMP LP guarantee full
    zero-extended32 result0..255. */

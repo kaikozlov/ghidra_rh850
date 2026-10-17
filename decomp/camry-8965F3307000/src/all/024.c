@@ -1827,6 +1827,33 @@ uint f33_dcm_read_session_snapshot(uchar *session)
 
 
 
+/* Invoke ROM25F48 callbacks968CC and9704E in order, then92044\u21928B0DE\u21924D582/6A156. Network
+   restore effects owned by network slice. Security bits already cleared by publication callers;
+   challenge/client reset occurs later4D582. Invoke ROM25F48 callbacks968CC and9704E in order,
+   then92044→8B0DE→4D582/6A156. */
+
+void f33_dcm_notify_session_publication(uchar old_session,uchar new_session)
+
+{
+  int iVar1;
+  int iVar2;
+  undefined8 uVar3;
+  int iVar4;
+  
+  uVar3 = 0x23dfc00000000;
+  iVar4 = 0;
+  do {
+    (*(int (*)())*(code **)(iVar4 * 4 + (int)((ulonglong)uVar3 >> 0x20) + 0x214c))(old_session,new_session);
+    iVar2 = iVar4 + 1;
+    iVar1 = iVar4 + -1;
+    iVar4 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  FUN_00092044(old_session,new_session);
+  return;
+}
+
+
+
 /* Under98CDA/98CE6 store target595E and previous595D. defer==1 sets pending595F only; otherwise
    storecurrent595C, clearpending, then security0 and92518 callbacks outside critical section. Even
    same-session publication runs notifications. */

@@ -1396,6 +1396,58 @@ def _rewrite_firmware_bases(code: str) -> str:
     return _wrap_base_pointer_uses(code, names)
 
 
+def _function_address(operand: str) -> str:
+    """The address expression inside a Ghidra `*(code *)address` call."""
+    text = operand.strip()
+    while _fully_wrapped(text):
+        inner = text[1:-1].strip()
+        if _is_pointer_type(inner) or _is_int_type(inner):
+            break
+        text = inner
+    match = re.match(r"^\(\s*code\s*\*\s*\)\s*", text)
+    if match:
+        return text[match.end():].strip()
+    return text
+
+
+def _rewrite_indirect_calls(code: str) -> str:
+    """A call through `code *` is a call through a function pointer."""
+    pieces: list[str] = []
+    index = 0
+    while index < len(code):
+        if code[index] != "(":
+            pieces.append(code[index])
+            index += 1
+            continue
+        star = _skip_space(code, index + 1)
+        if star >= len(code) or code[star] != "*":
+            pieces.append(code[index])
+            index += 1
+            continue
+        try:
+            close = _match_paren(code, index)
+        except ValueError:
+            pieces.append(code[index])
+            index += 1
+            continue
+        call = _skip_space(code, close + 1)
+        if call >= len(code) or code[call] != "(":
+            pieces.append(code[index])
+            index += 1
+            continue
+        try:
+            arg_end = _match_paren(code, call)
+        except ValueError:
+            pieces.append(code[index])
+            index += 1
+            continue
+        operand = _rewrite_indirect_calls(code[star + 1:close])
+        arguments = _rewrite_indirect_calls(code[call + 1:arg_end])
+        pieces.append(f"(*(int (*)()){_function_address(operand)})({arguments})")
+        index = arg_end + 1
+    return "".join(pieces)
+
+
 def _rewrite_body(code: str) -> str:
     code = _strip_calling_convention(code)
     code = _rewrite_firmware_bases(code)
@@ -1413,6 +1465,7 @@ def _rewrite_body(code: str) -> str:
     code = _rewrite_function_indexes(code)
     code = _rewrite_function_values(code)
     code = _rewrite_signed_byte_compares(code)
+    code = _rewrite_indirect_calls(code)
     return code
 
 
@@ -1781,6 +1834,7 @@ _CC_FLAGS = [
     "-Wno-bitwise-op-parentheses", "-Wno-sign-compare", "-Wno-parentheses",
     "-Wno-pointer-sign", "-Wno-incompatible-pointer-types",
     "-Wno-unused-but-set-variable",
+    "-Wno-deprecated-non-prototype",
     "-ferror-limit=0",
     "-DCAMRY_HOST",
 ]

@@ -4370,6 +4370,60 @@ undefined4 FUN_00053168(int param_1,int param_2,ushort param_3,undefined1 *param
 
 
 
+/* Views0/1 serialize record numbers1/10 from configured75-field table2A364, with field gate and
+   view exclusion. Emit record number/count then identifier/length/payload. Return-1 on capacity
+   crossing; payload callbacks choose retained sources, not a new physical sample. */
+
+int f33_serialize_retained_capture_record(uchar record_view,uchar *output,ushort capacity)
+
+{
+  undefined2 *puVar1;
+  uchar *puVar2;
+  uchar uVar3;
+  int iVar4;
+  int iVar5;
+  uchar uVar6;
+  uint uVar7;
+  int iVar8;
+  ushort uStack_2a;
+  
+  iVar8 = 0;
+  uVar6 = '\0';
+  if (((record_view < 2) && (output != (uchar *)0x0)) &&
+     (iVar4 = camry_host_addr(FUN_00056664(&uStack_2a)), iVar4 != 0)) {
+    uVar3 = '\x10';
+    if (record_view == '\0') {
+      uVar3 = '\x01';
+    }
+    iVar8 = 2;
+    *output = uVar3;
+    for (uVar7 = 0; uVar7 < uStack_2a; uVar7 = uVar7 + 1 & 0xffff) {
+      if ((record_view == '\0') || ((*((char *)camry_host_ptr((uint32_t)(uVar7 * 0x18 + iVar4 + 2)))) == '\0')) {
+        puVar1 = ((undefined2 *)camry_host_ptr((uint32_t)(uVar7 * 0x18 + iVar4)));
+        iVar5 = (uint)*(byte *)(puVar1 + 0xb) + iVar8 + 3;
+        if ((int)((uint)capacity - iVar5) < 0 !=
+            (iVar5 < 0 && iVar5 < 0 == (int)((uint)capacity - iVar5) < 0)) {
+          iVar8 = -1;
+          break;
+        }
+        iVar5 = FUN_00053190(uVar7,0);
+        if (iVar5 == 0x5a) {
+          puVar2 = output + iVar8;
+          uVar6 = uVar6 + '\x01';
+          FUN_0006a574(*puVar1,puVar2);
+          puVar2[2] = *(uchar *)(puVar1 + 0xb);
+          (*(int (*)())*(code **)(puVar1 + 2))(record_view,puVar2 + 3);
+          iVar8 = iVar8 + (uint)*(byte *)(puVar1 + 0xb) + 3;
+        }
+      }
+    }
+    output[1] = uVar6;
+  }
+  return iVar8;
+}
+
+
+
 /* WARNING: Removing unreachable block (ram,0x0005353a) */
 
 int FUN_00053532(short param_1)

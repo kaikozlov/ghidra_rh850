@@ -1229,6 +1229,15 @@ void FUN_00003000(void)
 
 
 
+undefined4 FUN_00003460(int param_1,undefined4 param_2)
+
+{
+  (*(int (*)())*(code **)(param_1 + 4))(param_2);
+  return 0;
+}
+
+
+
 /* Search38 half-open intervals in39-word86EC boundary array. Write containing lower bound
    andreturn0; otherwisewriteF8000 andreturn1. */
 
@@ -1317,6 +1326,20 @@ uint f33_boot_get_flash_block_skip_flag(uint address)
     }
   }
   return (uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebf2954u + (uint32_t)(iVar3) * 1u))));
+}
+
+
+
+/* Invoke ROM86E4 pointerFEBF11F0, copied fromCF8560 by35E4, forwardingR6/R7 andreturningR10. This
+   ECC-backed blank check is distinct from programming callback[FEBF0FD0]. */
+
+uint f33_boot_check_relocated_blank_words(uint address,uint word_count)
+
+{
+  uint uVar1;
+  
+  uVar1 = (*(int (*)())f33_boot_relocated_blank_check_entry)(address,word_count);
+  return uVar1;
 }
 
 

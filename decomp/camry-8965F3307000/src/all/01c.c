@@ -1589,6 +1589,45 @@ void thunk_FUN_0007217e(void)
 
 
 
+uint FUN_000722d4(short param_1,uint param_2)
+
+{
+  undefined *puVar1;
+  int iVar2;
+  uint uVar3;
+  code *pcVar4;
+  
+  puVar1 = ((undefined *)camry_host_ptr(0x23dfcu));
+  param_2 = param_2 & 0xff;
+  iVar2 = FUN_00073c76();
+  if (iVar2 == 1) {
+    iVar2 = param_1 * 0x18;
+    if (param_2 == 4) {
+      uVar3 = FUN_00073a5c(DAT_febf6114, 0xff, ((uint *)camry_host_ptr((uint32_t)(0x3614u + (int)camry_host_addr(puVar1)))));
+      if ((byte)puVar1[iVar2 + 0x36d4] <= uVar3) {
+        return 4;
+      }
+      pcVar4 = *(code **)(uVar3 * 4 + *(int *)(puVar1 + iVar2 + 0x36d8));
+    }
+    else {
+      puVar1 = puVar1 + iVar2;
+      if (param_2 == 8) {
+        pcVar4 = *(code **)(((undefined *)camry_host_ptr(0x36dcu)) + (int)camry_host_addr(puVar1));
+      }
+      else if (param_2 == 0x20) {
+        pcVar4 = *(code **)(puVar1 + 0x36e4);
+      }
+      else {
+        pcVar4 = *(code **)(0x36deu + (int)camry_host_addr((puVar1 + 2)));
+      }
+    }
+    param_2 = (*(int (*)())pcVar4)();
+  }
+  return param_2;
+}
+
+
+
 bool FUN_00072418(void)
 
 {
@@ -2192,6 +2231,15 @@ void FUN_00073e54(void)
   if ((uVar1 >> 2 & 1) != 0) {
     FUN_00072108(5);
   }
+  return;
+}
+
+
+
+void FUN_00073eda(void)
+
+{
+  (*(int (*)())f33_nvm_selected_service_poll)();
   return;
 }
 
