@@ -2050,10 +2050,66 @@ static uint32_t f33_nvm_read_dataflash_words(
     return mapped;
 }
 
+static uint32_t f33_nvm_sync_access_blocked(void) {
+    if (camry_read8(0xfebf6b22u) != 0u)
+        return 1u;
+    return camry_read8(0xfebf6cb1u) == 0x80u ? 1u : 0u;
+}
+
 static uint32_t f33_nvm_sync_admission_result(void) {
-    if (f33_unimplemented_faci() == 1u)
+    if (f33_nvm_sync_access_blocked() == 1u)
         return 0xffff0000u;
-    return camry_read8(0xfebf6b23u) != 0u ? 1u : 0u;
+    if (camry_read8(0xfebf6b23u) == 0u)
+        return 1u;
+    return 0xfff9u;
+}
+
+static uint32_t FUN_0007867a(uint32_t byte_offset, uint32_t byte_count) {
+    (void)byte_offset;
+    (void)byte_count;
+    return f33_unimplemented_faci();
+}
+
+static uint32_t f33_nvm_submit_previous_erase_block(void) {
+    uint32_t result = f33_nvm_sync_admission_result();
+    uint32_t cursor;
+    uint32_t driver;
+    if (result != 1u)
+        return result;
+    f33_nvm_prepare_read_argument();
+    cursor = camry_read32(0xfebf6c30u) - 64u;
+    camry_write32(0xfebf6c30u, cursor);
+    driver = FUN_0007867a(cursor, 64u);
+    if (driver == 0u) {
+        camry_write32(0xfebf6c34u, camry_read32(camry_tp + 15144u));
+        return 2u;
+    }
+    return f33_nvm_translate_saved_driver_result();
+}
+
+static uint32_t f33_nvm_start_reverse_erase(
+    uint32_t byte_offset, uint32_t page_count, uint32_t callback_selector) {
+    uint32_t pages = page_count & 0xffffu;
+    uint32_t result;
+    camry_write32(0xfebf6c30u, byte_offset + (pages << 6));
+    result = f33_nvm_submit_previous_erase_block();
+    if (result == 2u) {
+        camry_write8(0xfebf6c59u, 1u);
+        camry_write8(0xfebf6c5au, callback_selector);
+        camry_write16(0xfebf6c48u, pages);
+    }
+    return result;
+}
+
+static uint32_t FUN_00077650(uint32_t byte_offset, uint32_t page_count) {
+    return f33_nvm_start_reverse_erase(byte_offset, page_count & 0xffffu, 1u);
+}
+
+uint32_t FUN_00077982(uint32_t handle) {
+    uint32_t narrowed = handle & 0xffffu;
+    if (camry_read16(camry_tp + 15148u) <= narrowed)
+        return 0xfffbu;
+    return FUN_00077650(f33_nvm_base_offset(narrowed), f33_nvm_allocation_pages(narrowed));
 }
 
 static uint32_t f33_nvm_read_with_optional_blank_check(

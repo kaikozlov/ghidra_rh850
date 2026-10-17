@@ -62,6 +62,7 @@ uint32_t f33_scale_u16_delta_s16_x4(uint32_t value, uint32_t origin, uint32_t ga
 uint32_t f33_nvm_payload_length(uint32_t handle);
 uint32_t f33_nvm_base_offset(uint32_t handle);
 uint32_t f33_nvm_allocation_pages(uint32_t handle);
+uint32_t FUN_00077982(uint32_t handle);
 uint32_t f33_nvm_record_offset(uint32_t handle, uint32_t allocation_index, uint32_t byte_offset);
 uint32_t f33_nvm_payload_page_count(uint32_t handle);
 uint32_t f33_nvm_payload_chunk_length(uint32_t handle, uint32_t payload_offset);

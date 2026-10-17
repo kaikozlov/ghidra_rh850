@@ -82,6 +82,7 @@ VALUE_RETURN = {
     "f33_nvm_submit_bulk_reads",
     "f33_nvm_step_initial_read_acquisition",
     "f33_nvm_step_acquisition_pass",
+    "FUN_00077982",
 }
 
 DCRA1_BASE = 0xFFD51000
@@ -167,6 +168,7 @@ def bind(library: ctypes.CDLL) -> None:
         "f33_nvm_storage_handle",
         "f33_nvm_advance_family0_request_index",
         "f33_nvm_advance_family1_request_index",
+        "FUN_00077982",
     ):
         getattr(library, name).argtypes = [u32]
         getattr(library, name).restype = u32
