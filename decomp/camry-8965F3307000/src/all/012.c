@@ -2647,7 +2647,7 @@ char FUN_00049b5c(char param_1)
 
 
 
-void FUN_00049bba(char param_1)
+uint FUN_00049bba(char param_1)
 
 {
   char cVar1;
@@ -2673,12 +2673,12 @@ void FUN_00049bba(char param_1)
       DAT_febe7f4e = '\0';
     }
   }
-  return;
+  return DAT_febe7f4e;
 }
 
 
 
-void FUN_00049c2c(char param_1)
+uint FUN_00049c2c(char param_1)
 
 {
   if (param_1 == 'Z') {
@@ -2690,7 +2690,7 @@ void FUN_00049c2c(char param_1)
            (DAT_febe7f64 = DAT_febe7f64 + 1, DAT_0002fbf4 < DAT_febe7f64)))) {
     DAT_febe7f4f = '\0';
   }
-  return;
+  return DAT_febe7f4f;
 }
 
 

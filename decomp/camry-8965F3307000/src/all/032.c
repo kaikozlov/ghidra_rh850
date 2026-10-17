@@ -1443,12 +1443,12 @@ void FUN_000c9124(void)
 /* WARNING: Removing unreachable block (ram,0x000c9154) */
 /* WARNING: Removing unreachable block (ram,0x000c9146) */
 
-void FUN_000c9134(short param_1)
+int FUN_000c9134(short param_1)
 
 {
   DAT_febec546 = (short)((int)((uint)DAT_febec544 * (int)param_1) / 0x400);
   DAT_febec54a = (short)((int)((uint)DAT_febec548 * (int)DAT_febec546) / 0x400);
-  return;
+  return (int)(short)DAT_febec54a;
 }
 
 

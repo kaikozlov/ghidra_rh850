@@ -665,7 +665,7 @@ uint FUN_0004c63c(void)
 
 
 
-void FUN_0004c650(void)
+uint FUN_0004c650(void)
 
 {
   int iVar1;
@@ -709,7 +709,7 @@ void FUN_0004c650(void)
     bVar9 = 0;
   }
   DAT_febe818a = bVar9;
-  return;
+  return DAT_febe818a;
 }
 
 
