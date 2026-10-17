@@ -2952,3 +2952,24 @@ uint32_t f33_priority_mask_enter(uint32_t requested_mask) {
 void f33_priority_mask_restore(uint32_t saved_mask) {
     camry_pmr = saved_mask;
 }
+
+uint32_t f33_dataflash_copy_words_ecc(
+    uint32_t dataflash_offset, uint32_t destination, uint32_t byte_count) {
+    uint32_t source = dataflash_offset + 0xff200000u;
+    uint32_t end = source + byte_count;
+    uint32_t status = 0u;
+    /* A store of 1 to DFERSTC clears DFERSTR. The oracle maps the status word. */
+    camry_write32(0xffc5b004u, 0u);
+    do {
+        camry_write32(destination, camry_read32(source));
+        uint32_t flags = camry_read32(0xffc5b004u);
+        if (flags != 0u) {
+            if ((flags & 2u) == 2u)
+                status = 6u;
+            camry_write32(0xffc5b004u, 0u);
+        }
+        source += 4u;
+        destination += 4u;
+    } while (source < end);
+    return status;
+}

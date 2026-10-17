@@ -91,6 +91,7 @@ VALUE_RETURN = {
     "FUN_00077982",
     "f33_faci_decode_completion_status",
     "f33_priority_mask_enter",
+    "f33_dataflash_copy_words_ecc",
 }
 
 DCRA1_BASE = 0xFFD51000
@@ -176,6 +177,8 @@ def bind(library: ctypes.CDLL) -> None:
     library.f33_scale_u16_delta_s16_x4.restype = u32
     library.f33_priority_mask_enter.argtypes = [u32]
     library.f33_priority_mask_enter.restype = u32
+    library.f33_dataflash_copy_words_ecc.argtypes = [u32, u32, u32]
+    library.f33_dataflash_copy_words_ecc.restype = u32
     library.f33_priority_mask_restore.argtypes = [u32]
     library.f33_priority_mask_restore.restype = None
     for name in (
@@ -452,10 +455,34 @@ def accessed_ranges(name: str, registers: dict) -> list[tuple[int, int]]:
     return []
 
 
+_DATAFLASH_BYTES: bytearray | None = None
+_DATAFLASH_VIEW = None
+
+
+def dataflash_view():
+    global _DATAFLASH_BYTES, _DATAFLASH_VIEW
+    if _DATAFLASH_VIEW is None:
+        metadata = resolve_target("camry-8965F3307000")[1]
+        _DATAFLASH_BYTES = bytearray((REPO_ROOT / metadata["dataflash"]).read_bytes())
+        _DATAFLASH_VIEW = view_of(_DATAFLASH_BYTES)
+    return _DATAFLASH_VIEW
+
+
+def install_dataflash(library: ctypes.CDLL) -> None:
+    metadata = resolve_target("camry-8965F3307000")[1]
+    u8p = ctypes.POINTER(ctypes.c_uint8)
+    library.camry_host_add(
+        int(metadata["dataflash_base"], 16),
+        ctypes.cast(dataflash_view(), u8p),
+        len(_DATAFLASH_BYTES),
+    )
+
+
 def install_address_space(library: ctypes.CDLL, code_view, code_size: int, view, base: int, memory: bytearray) -> None:
     u8p = ctypes.POINTER(ctypes.c_uint8)
     library.camry_host_reset()
     library.camry_host_add(0, ctypes.cast(code_view, u8p), code_size)
+    install_dataflash(library)
     if memory:
         library.camry_host_add(base & 0xFFFFFFFF, ctypes.cast(view, u8p), len(memory))
 
@@ -465,6 +492,7 @@ def install_regions(library: ctypes.CDLL, code_view, code_size: int, regions: li
     views = []
     library.camry_host_reset()
     library.camry_host_add(0, ctypes.cast(code_view, u8p), code_size)
+    install_dataflash(library)
     for base, data in regions:
         view = view_of(data)
         views.append(view)
@@ -679,6 +707,8 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
         return int(library.f33_force_unconfirmed_terminal_monitor_healthy(r6, r7, r8)) & 0xFFFFFFFF
     if name == "f33_priority_mask_enter":
         return int(library.f33_priority_mask_enter(r6)) & 0xFFFFFFFF
+    if name == "f33_dataflash_copy_words_ecc":
+        return int(library.f33_dataflash_copy_words_ecc(r6, r7, r8)) & 0xFFFFFFFF
     if name == "f33_priority_mask_restore":
         library.f33_priority_mask_restore(r6)
         return None

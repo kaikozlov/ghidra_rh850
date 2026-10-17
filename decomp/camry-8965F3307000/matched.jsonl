@@ -107,3 +107,4 @@
 {"addr": "0x512e4", "name": "f33_update_diagnostic_classifier_output", "status": "equivalent", "form": "corpus"}
 {"addr": "0x70a0a", "name": "f33_publish_redundant_u8", "status": "equivalent", "form": "corpus"}
 {"addr": "0x67e48", "name": "f33_nvm_enqueue_family1_read", "status": "equivalent", "form": "corpus"}
+{"addr": "0x78f28", "name": "f33_dataflash_copy_words_ecc", "status": "equivalent"}
