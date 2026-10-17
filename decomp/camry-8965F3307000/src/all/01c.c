@@ -1825,6 +1825,38 @@ void f33_spin_wait(uint outer_iterations)
 
 
 
+/* Initialize124 result bytes0. Set write-inhibit1 iff descriptor+A bit11 is clear and bit4 set,
+   otherwise2; all registered flags0 yield2. Clear scan halfword60F8. Initialize124 result bytes0
+   and second bytes from descriptor flags; all registered flags0 produce write-inhibit2. Clear60F8
+   halfword. Full initializer executed against nonzero RAM; no blanket reset assumption. */
+
+void f33_nvm_initialize_logical_cells(void)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uchar uVar3;
+  
+  uVar2 = 0;
+  do {
+    if ((((ushort)f33_nvm_logical_descriptors[uVar2].opaque_0a >> 0xb & 1) == 0) &&
+       ((f33_nvm_logical_descriptors[uVar2].opaque_0a & 0x10) != 0)) {
+      uVar3 = '\x01';
+    }
+    else {
+      uVar3 = '\x02';
+    }
+    uVar1 = uVar2 + 1;
+    f33_nvm_logical_results[uVar2].write_inhibit = uVar3;
+    f33_nvm_logical_results[uVar2].result = '\0';
+    uVar2 = uVar1;
+  } while (uVar1 < 0x7c);
+  DAT_febf60f8 = 0;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -1837,6 +1869,15 @@ void f33_return_only_stub_71ce0(void)
 
 
 
+void FUN_00071ce2(uint param_1,uchar param_2)
+
+{
+  f33_nvm_logical_results[param_1 & 0xffff].write_inhibit = param_2;
+  return;
+}
+
+
+
 /* Constant source: return 1; shape-classified from the canonical corpus. Callers receive this
    literal directly; its meaning is not recovered. */
 
@@ -1844,6 +1885,57 @@ undefined4 f33_return_const_1_71cf4(void)
 
 {
   return 1;
+}
+
+
+
+/* Zero-extend byte6001+2*low16(handle); no local bound. Zero-extend second logical-cell byte
+   at6001+2*low16(handle). No local handle bound. Native write gates distinguish exactly1
+   from0/2/FF. */
+
+uint f33_nvm_get_write_inhibit(ushort logical_handle)
+
+{
+  return (uint)f33_nvm_logical_results[logical_handle].write_inhibit;
+}
+
+
+
+/* Store result byte6000+2*low16(handle) through output; return0. No bound/null check. Copy logical
+   result byte through output and return0. No local bounds or null check. The pending gate consumes
+   this byte independently of write-inhibit. */
+
+uint f33_nvm_read_logical_result(ushort logical_handle,uchar *output)
+
+{
+  *output = f33_nvm_logical_results[logical_handle].result;
+  return 0;
+}
+
+
+
+void FUN_00071d3e(void)
+
+{
+  uint uVar1;
+  int iVar2;
+  uint uVar3;
+  
+  uVar3 = (uint)DAT_febf60f8;
+  iVar2 = 5;
+  do {
+    if (0x7b < uVar3) {
+      uVar3 = 0;
+    }
+    if (f33_nvm_logical_results[uVar3].result == '\x02') {
+      FUN_00072130();
+    }
+    uVar1 = uVar3 + 1;
+    uVar3 = uVar1 & 0xffff;
+    iVar2 = iVar2 + -1;
+  } while (iVar2 != 0);
+  DAT_febf60f8 = (short)uVar1;
+  return;
 }
 
 
@@ -1888,6 +1980,37 @@ void f33_nvm_notify_zero_handle_result(uint operation,uchar result)
   uVar2 = f33_lookup_u32_value_by_key(operation,0xff,(0x275ccu));
   if ((result != '\x02') && ((uintptr_t)(*(code **)(puVar1 + 0x2dfc))!=(uintptr_t)(f33_reset_vector))) {
     (*(int (*)())*(code **)(puVar1 + 0x2dfc))(uVar2 & 0xff,result);
+  }
+  return;
+}
+
+
+
+/* Descriptor+A bit5 optionally calls747DC, whose exact body is JMP LP; all124 registered rows clear
+   that bit. Result2 suppresses application notification. Otherwise nonNULL26BFC receives low8
+   lookup(operation,FF), low16 handle, low8 result. No local handle bound. Descriptor+A bit5
+   conditionally calls747DC; exact two-byte body isJMP LP and all124 registered rows clear the bit.
+   Result2 suppresses notification. Otherwise nonNULL26BFC receives low8 lookup(operation,FF), low16
+   logical and low8 result; registered target68E9E. No local logical bound. Native
+   accepted/unknown-marker/pending paths execute without replacement callees; no full asynchronous
+   scheduling claim. */
+
+void f33_nvm_notify_logical_result(ushort logical_handle,uint operation,uchar result)
+
+{
+  F33NvmApplicationResultCallback *pFVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  
+  pFVar1 = ((void *)camry_host_ptr((uint32_t)(f33_nvm_application_result_callback)));
+  puVar2 = 0x23dfcu;
+  if (((ushort)f33_nvm_logical_descriptors[logical_handle].opaque_0a >> 5 & 1) != 0) {
+    puVar2 = 0x23dfcu;
+    ((void)((uint)logical_handle), (void)(result), f33_return_only_stub_747dc());
+  }
+  if ((result != '\x02') && ((uintptr_t)(pFVar1)!=(uintptr_t)(f33_reset_vector))) {
+    uVar3 = f33_lookup_u32_value_by_key(operation, 0xff, camry_host_addr(((F33U32LookupTable *)camry_host_ptr((uint32_t)(puVar2 + 0x37d0)))));
+    (*(int (*)())pFVar1)((uchar)uVar3,logical_handle,result);
   }
   return;
 }
@@ -2753,6 +2876,25 @@ undefined4 thunk_FUN_0007275e(void)
 
 
 
+undefined4 FUN_0007282c(uint param_1,ushort param_2,undefined2 *param_3)
+
+{
+  uint uVar1;
+  
+  while( true ) {
+    uVar1 = param_1 & 0xffff;
+    if ((ushort)(f33_nvm_logical_descriptor_count - 1) < uVar1) {
+      return 1;
+    }
+    if (param_2 == (f33_nvm_logical_descriptors[uVar1].opaque_0a & param_2)) break;
+    param_1 = uVar1 + 1;
+  }
+  *param_3 = (short)param_1;
+  return 0;
+}
+
+
+
 undefined4 FUN_0007285c(undefined2 param_1)
 
 {
@@ -3573,6 +3715,18 @@ uint f33_nvm_check_slot_partition(ushort index,ushort queue)
 
 
 
+/* Zero-extend descriptor BYTE+1; no local handle bound or priority semantics. Read descriptor
+   BYTE+1 as zero-extended queue key. No local handle bound. Normal queue3+key; numeric priority
+   policy not established. */
+
+uint f33_nvm_queue_key(ushort logical_handle)
+
+{
+  return (uint)f33_nvm_logical_descriptors[logical_handle].queue_key;
+}
+
+
+
 bool FUN_00073334(uint param_1,short param_2)
 
 {
@@ -3680,6 +3834,26 @@ void FUN_00073440(uint param_1,uint param_2,undefined4 param_3,undefined4 param_
     FUN_00073424(((undefined4 *)camry_host_ptr((uint32_t)(param_4))), f33_nvm_queue_slots + auStack_e[0]);
   }
   return;
+}
+
+
+
+/* True only for queue_key0 and marker22AA8A36 or1C646989. Every registered descriptor has nonzero
+   key, so all use the normal pool. Reserved queue predicate: key0 and operation22AA8A36 or1C646989.
+   Every exact registered descriptor has nonzero key; native target read/write submissions use
+   normal pool. Unregistered key0 configuration is instruction-derived, not executed. */
+
+uint f33_nvm_uses_reserved_queue(ushort logical_handle,uint operation)
+
+{
+  uint uVar1;
+  
+  uVar1 = 0;
+  if ((f33_nvm_logical_descriptors[logical_handle].queue_key == '\0') &&
+     ((operation == 0x22aa8a36 || (operation == 0x1c646989)))) {
+    uVar1 = 1;
+  }
+  return uVar1;
 }
 
 
@@ -4206,6 +4380,33 @@ undefined4 FUN_00073cdc(ushort param_1,undefined4 param_2,undefined4 param_3)
   uVar1 = f33_nvm_storage_handle(param_1);
   FUN_000720f0(4);
   return FUN_000765fc(uVar1,param_3);
+}
+
+
+
+undefined4 FUN_00073cfe(void)
+
+{
+  int iVar1;
+  undefined4 uVar2;
+  
+  iVar1 = FUN_00073cb0((uint)f33_nvm_pending_operation.logical_handle,0,0,
+                       f33_nvm_pending_operation.buffer_08,
+                       f33_nvm_logical_descriptors[f33_nvm_pending_operation.logical_handle].
+                       payload_bytes);
+  if (iVar1 == 0) {
+    FUN_000720f0(0);
+    FUN_000720f0(1);
+    FUN_000720f0(7);
+    uVar2 = 4;
+    f33_nvm_operation_step = 0;
+  }
+  else {
+    uVar2 = 1;
+    FUN_00072108(4);
+    f33_nvm_operation_state = '\x01';
+  }
+  return uVar2;
 }
 
 

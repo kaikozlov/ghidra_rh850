@@ -3,7 +3,10 @@
 {"addr":"0xb144c","name":"f33_calibration_bank_bases","type":"u8*[2]"}
 {"addr":"0x869c","name":"f33_boot_interrupt_dispatch","type":"F33BootInterruptEntry[8]"}
 {"addr":"0x27928","name":"f33_nvm_descriptor_count","type":"u16"}
+{"addr":"0x27634","name":"f33_nvm_descriptors","type":"F33NvmDescriptor[123]"}
 {"addr":"0x26c08","name":"f33_nvm_logical_descriptor_count","type":"u16"}
+{"addr":"0x26c0c","name":"f33_nvm_logical_descriptors","type":"F33NvmLogicalDescriptor[124]"}
+{"addr":"0xfebf6000","name":"f33_nvm_logical_results","type":"F33NvmLogicalResultCell[124]"}
 {"addr":"0xfebf6aec","name":"f33_nvm_pending_operation","type":"F33NvmOperation"}
 {"addr":"0xfebf6afc","name":"f33_nvm_operation_phase","type":"u16"}
 {"addr":"0xfebf6afe","name":"f33_nvm_operation_step","type":"u16"}
@@ -34,6 +37,9 @@
 {"addr":"0xfebf0698","name":"f33_nvm_family1_copy_failure_masks","type":"u32[4]"}
 {"addr":"0x2ad8a","name":"f33_nvm_family0_request_cell_count","type":"u8"}
 {"addr":"0x2ad8b","name":"f33_nvm_family1_request_cell_count","type":"u8"}
+{"addr":"0x2ad8c","name":"f33_nvm_family0_ram_descriptors","type":"F33NvmFamily0RamDescriptor[32]"}
+{"addr":"0x2af0c","name":"f33_nvm_family1_ram_descriptors","type":"F33NvmFamily1RamDescriptor[16]"}
+{"addr":"0x2b010","name":"f33_nvm_logical_application_routes","type":"F33NvmApplicationRoute[124]"}
 {"addr":"0xfebf0689","name":"f33_nvm_family1_phase","type":"u8"}
 {"addr":"0xfebf068a","name":"f33_nvm_family1_write_retry","type":"u8"}
 {"addr":"0xfebf068c","name":"f33_nvm_family1_active_object","type":"u16"}

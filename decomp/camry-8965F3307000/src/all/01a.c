@@ -174,10 +174,205 @@ uint f33_nvm_begin_page_erase_span(uint first_page,uint page_count)
 
 
 
+/* Busy nonzero returnsFF. Otherwise map every enabled object's logical members; retain
+   minimum/maximum pages and logical owner of the first strictly greatest page. Add that owner's
+   chunk cost to the maximum; call6879C(min,low16(max+cost-min)). Return its result; zero sets
+   busyA5. Exact table computes page10C/count164. Native admitted proof stops BEFORE6879C; no
+   completed range operation. Map every enabled logical member; retain min/max pages and owner of
+   first strict maximum. Extent uses highest owner chunk cost; exact input produces min10C and164
+   pages. Native real mapping loops stop before6879C. Source return0 sets family busyA5. This proves
+   selected span, not accepted or completed physical operation. */
+
+uint f33_nvm_dispatch_family0_page_span(void)
+
+{
+  uint uVar1;
+  uint uVar2;
+  int iVar3;
+  undefined8 uVar4;
+  uint uVar5;
+  uint uVar6;
+  uint unaff_r24;
+  uint uVar7;
+  uint first_page;
+  uint uVar8;
+  uint uVar9;
+  ushort uStack_1e;
+  
+  uVar4 = 0xfebeb800;
+  if (f33_nvm_family0_busy == '\0') {
+    first_page = 0xffff;
+    uVar6 = 0;
+    for (uVar2 = 0; iVar3 = (int)uVar4, uVar2 < f33_nvm_family0_object_count;
+        uVar2 = uVar2 + 1 & 0xffff) {
+      uVar9 = (uint)f33_nvm_family0_ram_descriptors[uVar2].first_logical_handle;
+      if (uVar9 != 0xffff) {
+        iVar3 = f33_nvm_family0_ram_descriptors[uVar2].logical_count + uVar9;
+        for (; uVar9 <= (iVar3 - 1U & 0xffff); uVar9 = uVar9 + 1 & 0xffff) {
+          uVar5 = f33_nvm_get_logical_storage_page((ushort)uVar9,&uStack_1e);
+          uVar7 = unaff_r24;
+          uVar1 = uVar6;
+          uVar8 = first_page;
+          if (uVar5 == 0) {
+            uVar1 = (uint)uStack_1e;
+            uVar8 = uVar1;
+            if (first_page <= uVar1) {
+              uVar8 = first_page;
+            }
+            uVar7 = uVar9;
+            if (uVar1 <= uVar6) {
+              uVar7 = unaff_r24;
+              uVar1 = uVar6;
+            }
+          }
+          unaff_r24 = uVar7;
+          uVar6 = uVar1;
+          first_page = uVar8;
+        }
+      }
+    }
+    uVar2 = (ushort)(f33_nvm_family0_ram_descriptors
+                     [f33_nvm_logical_application_routes[unaff_r24].object].payload_bytes + 0x14) +
+            0x3f >> 6;
+    if (uVar2 < 2) {
+      uVar2 = 2;
+    }
+    uVar6 = f33_nvm_begin_page_erase_span(first_page,(uVar2 + uVar6) - first_page & 0xffff);
+    if (uVar6 == 0) {
+      (*((undefined1 *)camry_host_ptr((uint32_t)(iVar3 + 0x4e90)))) = 0xa5;
+    }
+  }
+  else {
+    uVar6 = 0xff;
+  }
+  return uVar6;
+}
+
+
+
+/* Busy nonzero returnsFF. Map enabled base/+4/+8 handles, accumulating min/max successful pages.
+   Call6879C(min,max+1-min); zero result sets busyA5. Exact table computes page1B0/count48. Native
+   admitted proof stops BEFORE6879C; no physical operation claim. Map each enabled base/+4/+8;
+   extent=max+1-min. Exact input produces min1B0 and48 pages. Native real mapping loops stop
+   before6879C. Source return0 sets family busyA5. This proves selected span, not accepted or
+   completed physical operation. */
+
+uint f33_nvm_dispatch_family1_page_span(void)
+
+{
+  ushort uVar1;
+  int iVar2;
+  undefined8 uVar3;
+  uint uVar4;
+  uint uVar5;
+  uint uVar6;
+  uint first_page;
+  uint uVar7;
+  uint uVar8;
+  uint uVar9;
+  ushort uStack_1a;
+  
+  uVar3 = 0xfebeb800;
+  if (f33_nvm_family1_busy == '\0') {
+    first_page = 0xffff;
+    uVar5 = 0;
+    for (uVar9 = 0; iVar2 = (int)uVar3, uVar9 < f33_nvm_family1_object_count;
+        uVar9 = uVar9 + 1 & 0xffff) {
+      uVar1 = f33_nvm_family1_ram_descriptors[uVar9].first_logical_handle;
+      if (uVar1 != 0xffff) {
+        uVar8 = 0;
+        uVar6 = uVar5;
+        uVar7 = first_page;
+        do {
+          uVar4 = f33_nvm_get_logical_storage_page((short)uVar8 * 4 + uVar1,&uStack_1a);
+          uVar5 = uVar6;
+          first_page = uVar7;
+          if (uVar4 == 0) {
+            uVar5 = (uint)uStack_1a;
+            first_page = uVar5;
+            if (uVar7 <= uVar5) {
+              first_page = uVar7;
+            }
+            if (uVar5 <= uVar6) {
+              uVar5 = uVar6;
+            }
+          }
+          uVar8 = uVar8 + 1;
+          uVar6 = uVar5;
+          uVar7 = first_page;
+        } while (uVar8 < 3);
+      }
+    }
+    uVar5 = f33_nvm_begin_page_erase_span(first_page,(uVar5 + 1) - first_page & 0xffff);
+    if (uVar5 == 0) {
+      (*((undefined1 *)camry_host_ptr((uint32_t)(iVar2 + 0x4e91)))) = 0xa5;
+    }
+  }
+  else {
+    uVar5 = 0xff;
+  }
+  return uVar5;
+}
+
+
+
 uchar FUN_00068924(void)
 
 {
   return f33_nvm_family0_busy;
+}
+
+
+
+/* Reject invalid/disabled object or last-member page-map error withFF before mode changes.
+   Otherwise base=(low16(mapped_last_page+offset)<<6); set0693=5A/reconcile once, probe count64-byte
+   chunks in ascending order. Continue only on class2; every other class yields0, including driver
+   errors, unlike68A6C. All2 or count0 yields5A. Clear/reconcile once, including real cancellation.
+   Native blank/nonblank, blocked, zero-count and invalid-object paths; explicit FACI inputs do not
+   prove blankness. Invalid/disabled object or last-member map error returnsFF before mode changes.
+   Start=(low16(mapped_last_page+offset)<<6), enter0693=5A/reconcile, probe ascending64-byte chunks,
+   then clear/reconcile with actual cancellation. any other class returns0 including lower driver
+   rejection. All2 or zero count returns5A. Native explicit blank/nonblank events, blocked probe,
+   zero count, invalid object and disabled caller. No payload publication or physical blankness
+   claim. */
+
+uint f33_nvm_classify_family0_chunks(ushort object,ushort chunk_offset,ushort chunk_count)
+
+{
+  undefined8 uVar1;
+  uint uVar2;
+  uint uVar3;
+  ushort uVar4;
+  uint uVar5;
+  ushort uStack_16;
+  
+  uVar1 = 0xfebeb800;
+  uVar2 = (uint)object;
+  uVar5 = 0xff;
+  if (uVar2 < f33_nvm_family0_object_count) {
+    if ((f33_nvm_family0_ram_descriptors[uVar2].first_logical_handle != 0xffff) &&
+       (uVar2 = f33_nvm_get_logical_storage_page
+                          ((f33_nvm_family0_ram_descriptors[uVar2].logical_count +
+                           f33_nvm_family0_ram_descriptors[uVar2].first_logical_handle) - 1,
+                           &uStack_16), uVar2 == 0)) {
+      uVar5 = 0x5a;
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x4e92u + (uint32_t)((int)uVar1 + 1))))) = (code)0x5a;
+      uVar2 = (uint)(ushort)(chunk_offset + uStack_16) << 6;
+      f33_nvm_poll_probe_mode();
+      uVar4 = 0;
+      while ((uVar4 < chunk_count && (uVar5 == 0x5a))) {
+        uVar3 = f33_nvm_classify_storage_range(0,uVar2,0x40);
+        if (uVar3 != 2) {
+          uVar5 = 0;
+        }
+        uVar4 = uVar4 + 1;
+        uVar2 = uVar2 + 0x40;
+      }
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x4e92u + (uint32_t)((int)uVar1 + 1))))) = (code)0x0;
+      f33_nvm_poll_probe_mode();
+    }
+  }
+  return uVar5;
 }
 
 
@@ -216,6 +411,154 @@ uchar FUN_00068a4a(void)
 
 {
   return f33_nvm_family1_busy;
+}
+
+
+
+/* Reject object>=16 or descriptor first_handleFFFF withFF before changing probe mode. Set0693=5A
+   and reconcile; translate logical base/+4/+8 through747E0 and classify64 bytes at page<<6.
+   Continue only on class2; all three2->5A, first3->0, mapping failure/other classes->FF. Clear0693
+   and reconcile on every admitted exit. That exit invokes real physical cancellation, can issue B3,
+   and sets logical phase8 if operation state2. No application payload publication; 0 is not
+   checksum/ECC integrity proof. Native first/last nonblank and all-blank cases use explicit FACI
+   completion and a separate cancellation completion. Low16 object<16 and enabled first handle;
+   probe64-byte pages for logical base/+4/+8. Continue on class2; three2->5A; first3->0; mapping
+   error or other class->FF. Admitted entry sets0693=5A/reconciles; exit clears/reconciles and
+   really cancels physical operation. Native4429 all-blank and2931/4933 first/last nonblank include
+   explicit separate B3 completion; active logical phase changes to8. No application payload
+   publication or checksum-validity claim. */
+
+uint f33_nvm_classify_family1_pages(ushort object)
+
+{
+  ushort logical_handle;
+  uint32_t puVar1;
+  uint uVar2;
+  uint uVar3;
+  ushort uStack_e;
+  
+  puVar1 = 0xfebeb800u;
+  uVar3 = 0xff;
+  if ((uint)f33_nvm_family1_object_count <= (uint)object) {
+    return 0xff;
+  }
+  logical_handle = f33_nvm_family1_ram_descriptors[object].first_logical_handle;
+  if (logical_handle == 0xffff) {
+    return 0xff;
+  }
+  f33_nvm_direct_operation_request = 'Z';
+  f33_nvm_poll_probe_mode();
+  uVar2 = f33_nvm_get_logical_storage_page(logical_handle,&uStack_e);
+  if (uVar2 != 0) goto LAB_00068b1e;
+  uVar2 = f33_nvm_classify_storage_range(0,(uint)uStack_e << 6,0x40);
+  if (uVar2 == 2) {
+    uVar2 = f33_nvm_get_logical_storage_page(logical_handle + 4,&uStack_e);
+    if (uVar2 != 0) goto LAB_00068b1e;
+    uVar2 = f33_nvm_classify_storage_range(0,(uint)uStack_e << 6,0x40);
+    if (uVar2 == 2) {
+      uVar2 = f33_nvm_get_logical_storage_page(logical_handle + 8,&uStack_e);
+      if (uVar2 != 0) goto LAB_00068b1e;
+      uVar2 = f33_nvm_classify_storage_range(0,(uint)uStack_e << 6,0x40);
+      if (uVar2 == 2) {
+        uVar3 = 0x5a;
+        goto LAB_00068b1e;
+      }
+    }
+  }
+  if (uVar2 == 3) {
+    uVar3 = 0;
+  }
+LAB_00068b1e:
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x4e92u + (uint32_t)((int)(puVar1 + 1)))))) = (code)0x0;
+  f33_nvm_poll_probe_mode();
+  return uVar3;
+}
+
+
+
+/* Resolve unchecked route object/descriptor. Nonzero result retries below2 via real73FE8,
+   increments shared0694 regardless enqueue result, returns0 before finalization; exhaustion clears
+   retry and skips copy. Success clears retry, reads sequence at fixed0C88, inverse trailer at
+   record+3C for payload<=56, else record+low16(payload+4); accept inverse match and no selection or
+   unsigned sequence delta<=C0000000. Copy exactly payload bytes from record+4 immediately, then
+   update sequence/selection. At handle>=low16(first+count-1), completion is5A iff any selection
+   exists elseA5, and return5A for either outcome; otherwise0. Native early/long publication, bad
+   inverse, delta boundary and retry rejection/exhaustion through68E9E. Shared0694 retry below2
+   increments despite real enqueue rejection and returns before finalization; success/exhaustion
+   clears retry. Fixed0C88 sequence header; payload/trailer use r8, trailer offset3C for length<=56
+   else low16(length+4). Inverse match plus no selection or unsigned delta<=C0000000 admits
+   immediate byte-exact copy and selection update. Final member publishes completion5A iff any
+   selection exists elseA5; both return5A and release busy through router. Native short/long, bad
+   inverse, delta boundary and retries; no physical flash restoration claim. */
+
+uint f33_nvm_handle_family0_read_result(uchar result,ushort logical_handle,uchar *record)
+
+{
+  ushort uVar1;
+  ushort uVar2;
+  uint uVar3;
+  uchar uVar4;
+  int iVar5;
+  uint32_t puVar6;
+  uchar *puVar7;
+  int iVar8;
+  uint uVar9;
+  uint uVar10;
+  code cVar11;
+  uint uVar12;
+  
+  uVar4 = f33_nvm_copy_read_retry;
+  puVar6 = 0xfebeb800u;
+  iVar8 = 0x5a;
+  uVar10 = (uint)f33_nvm_logical_application_routes[logical_handle].object;
+  uVar1 = f33_nvm_family0_ram_descriptors[uVar10].logical_count;
+  uVar2 = f33_nvm_family0_ram_descriptors[uVar10].first_logical_handle;
+  uVar9 = (uint)f33_nvm_family0_ram_descriptors[uVar10].payload_bytes;
+  iVar5 = 0;
+  if (result == '\0') {
+    cVar11 = (code)0x0;
+    iVar8 = 0;
+  }
+  else if (f33_nvm_copy_read_retry < 2) {
+    puVar6 = 0xfebeb800u;
+    f33_nvm_enqueue_read(logical_handle, camry_host_addr(record));
+    cVar11 = (code)(uVar4 + '\x01');
+    iVar5 = iVar8;
+  }
+  else {
+    cVar11 = (code)0x0;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x4e92u + (uint32_t)((int)(puVar6 + 2)))))) = cVar11;
+  if (iVar5 != 0x5a) {
+    if (iVar8 != 0x5a) {
+      uVar3 = (*((uint *)camry_host_ptr((uint32_t)(puVar6 + 0x5488))));
+      uVar12 = 0x3c;
+      if (0x38 < uVar9) {
+        uVar12 = uVar9 + 4 & 0xffff;
+      }
+      if ((*(uint *)(record + uVar12) ^ uVar3) == 0xffffffff) {
+        if (((*((short *)camry_host_ptr((uint32_t)(puVar6 + uVar10 * 2 + 0x4b68)))) == -1) ||
+           (uVar3 - (*((int *)camry_host_ptr((uint32_t)(puVar6 + uVar10 * 4 + 0x4ba8)))) < 0xc0000001)) {
+          puVar7 = ((void *)camry_host_ptr((uint32_t)(f33_nvm_family0_ram_descriptors[uVar10].buffer)));
+          for (iVar5 = 0; (int)(iVar5 - uVar9) < 0 != (iVar5 < 0 && -1 < (int)(iVar5 - uVar9));
+              iVar5 = iVar5 + 1) {
+            puVar7[iVar5] = record[iVar5 + 4];
+          }
+          (*((uint *)camry_host_ptr((uint32_t)(puVar6 + uVar10 * 4 + 0x4ba8)))) = uVar3;
+          (*((ushort *)camry_host_ptr((uint32_t)(puVar6 + uVar10 * 2 + 0x4b68)))) = logical_handle;
+        }
+      }
+    }
+    if ((uint)(ushort)((uVar1 + uVar2) - 1) <= (uint)logical_handle) {
+      cVar11 = (code)0xa5;
+      if ((*((short *)camry_host_ptr((uint32_t)(puVar6 + uVar10 * 2 + 0x4b68)))) != -1) {
+        cVar11 = (code)0x5a;
+      }
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x4b38u + (uint32_t)((int)(puVar6 + uVar10)))))) = cVar11;
+      return 0x5a;
+    }
+  }
+  return 0;
 }
 
 

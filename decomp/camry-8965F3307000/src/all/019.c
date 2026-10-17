@@ -4073,6 +4073,161 @@ LAB_000674ca:
 
 
 
+void FUN_000674dc(void)
+
+{
+  uchar uVar1;
+  ushort object;
+  uint32_t puVar2;
+  uint uVar3;
+  undefined1 uVar4;
+  uint uVar5;
+  
+  object = f33_nvm_family0_active_object;
+  uVar1 = f33_nvm_family0_phase;
+  puVar2 = 0xfebeb800u;
+  uVar5 = (uint)f33_nvm_family0_active_object;
+  uVar3 = f33_nvm_get_family0_completion(f33_nvm_family0_active_object);
+  if (uVar1 == '\x11') {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(0x4e7e))))) = 0xa5;
+  }
+  else {
+    if (uVar1 == '\"') {
+      if (f33_nvm_family0_object_count <= uVar5) goto LAB_00067596;
+      if (uVar3 == 0x5a) {
+        uVar4 = 0x10;
+      }
+      else {
+        uVar3 = f33_nvm_family0_chunk_cost(f33_nvm_family0_ram_descriptors[uVar5].payload_bytes);
+        uVar3 = f33_nvm_classify_family0_chunks
+                          (object,0,(short)uVar3 *
+                                    f33_nvm_family0_ram_descriptors[uVar5].logical_count);
+        uVar4 = 0x11;
+        if (uVar3 == 0) {
+          uVar4 = 0x30;
+          (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(0x4e7d))))) = 0x5a;
+        }
+      }
+    }
+    else {
+      if ((uVar1 != '3') || (f33_nvm_family0_object_count <= uVar5)) goto LAB_00067596;
+      uVar4 = 0x10;
+      if (uVar3 != 0x5a) {
+        uVar4 = 0x31;
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(0x4e7c))))) = 0x5a;
+      }
+    }
+    uVar3 = f33_nvm_family0_has_request_cell(object);
+    if (uVar3 == 1) {
+      uVar4 = 0x20;
+    }
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(uVar5 + 0x4b08))))) = uVar4;
+  }
+LAB_00067596:
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + 0x4e82)))) = 0xffff;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(0x4e80))))) = 0;
+  return;
+}
+
+
+
+/* Resume0676 with fresh charge0. Completion5A publishes status10 without charge or payload access.
+   Otherwise cost=low16(count*689DE(payload)); admit full object while cost+charge<=ROM18, charge
+   before 68946. Result0 publishes30 and latches067D=5A, including blocked reads; other full-object
+   results publish11. Stop before exceeding budget. Generic split branch requires fresh charge0 and
+   object cost>18; all32 registered costs<=12 make it unreachable here. Store cursor/offset and
+   halfword charge; return5A iff cursor>=32. Native disabled charge4, blocked valid-object charge6
+   and free completed-object publication. Completed5A objects publish10 for free without reading
+   payload. Other full objects charge low16(count*chunk_cost) before probing while cumulative
+   charge<=18. Probe0 publishes30 and latches067D5A even for blocked reads; other full results
+   publish11. Store cursor/offset and u16 charge; Generic split path requires fresh object cost>18;
+   all registered costs<=12 prove it unreachable for this image. Native disabled cost4 and blocked
+   valid cost6. */
+
+uint f33_nvm_classify_family0_pass(ushort *charged_out)
+
+{
+  undefined1 uVar1;
+  int iVar2;
+  uint uVar3;
+  undefined8 uVar4;
+  ushort chunk_offset;
+  uint uVar5;
+  uint uVar6;
+  uint uVar7;
+  uint uVar8;
+  ushort object;
+  uint uVar9;
+  
+  uVar4 = 0xfebeb800;
+  uVar9 = (uint)f33_nvm_family0_scan_cursor;
+  uVar6 = 0;
+  iVar2 = 0x5a;
+  uVar7 = 0;
+  uVar8 = 0;
+  do {
+    while( true ) {
+      uVar5 = (uint)f33_nvm_family0_object_count;
+      object = (ushort)uVar9;
+      if ((uVar5 <= uVar9) || (iVar2 == 0)) {
+        (*((ushort *)camry_host_ptr((uint32_t)((int)uVar4 + 0x4e76)))) = object;
+        (*((short *)camry_host_ptr((uint32_t)((int)uVar4 + 0x4e78)))) = (short)uVar8;
+        *charged_out = (ushort)uVar7;
+        if (uVar5 <= uVar9) {
+          uVar6 = 0x5a;
+        }
+        return uVar6;
+      }
+      uVar5 = f33_nvm_get_family0_completion(object);
+      if (uVar5 != 0x5a) break;
+      uVar1 = 0x10;
+LAB_0006764c:
+      (*((undefined1 *)camry_host_ptr((uint32_t)(uVar9 + (int)uVar4 + 0x4b08)))) = uVar1;
+      iVar2 = 0x5a;
+      uVar9 = uVar9 + 1 & 0xffff;
+    }
+    uVar8 = f33_nvm_family0_chunk_cost(f33_nvm_family0_ram_descriptors[uVar9].payload_bytes);
+    uVar3 = (uint)f33_nvm_classification_budget;
+    uVar5 = (int)(short)f33_nvm_family0_ram_descriptors[uVar9].logical_count * (int)(short)uVar8 &
+            0xffff;
+    if ((int)((uVar5 + uVar7) - uVar3) < 0 || uVar5 + uVar7 == uVar3) {
+      uVar8 = 0;
+      chunk_offset = 0;
+      uVar3 = uVar5;
+LAB_00067628:
+      uVar7 = uVar7 + uVar3 & 0xffff;
+      uVar5 = f33_nvm_classify_family0_chunks(object,chunk_offset,(ushort)uVar3);
+      if (uVar5 == 0) {
+        uVar1 = 0x30;
+        (*((undefined1 *)camry_host_ptr((uint32_t)((int)uVar4 + 0x4e7d)))) = 0x5a;
+      }
+      else {
+        if (uVar8 != 0) goto LAB_0006765e;
+        uVar1 = 0x11;
+      }
+      goto LAB_0006764c;
+    }
+    if (uVar7 == 0) {
+      chunk_offset = (*((ushort *)camry_host_ptr((uint32_t)((int)uVar4 + 0x4e78))));
+      uVar5 = uVar5 - chunk_offset;
+      if ((int)(uVar5 - uVar3) < 0 == ((int)uVar5 < 0 && -1 < (int)(uVar5 - uVar3)) &&
+          uVar5 != uVar3) {
+        uVar8 = uVar3 + chunk_offset & 0xffff;
+      }
+      else {
+        uVar3 = uVar5 & 0xffff;
+        uVar8 = 0;
+      }
+      goto LAB_00067628;
+    }
+    uVar8 = 0;
+LAB_0006765e:
+    iVar2 = 0;
+  } while( true );
+}
+
+
+
 /* Truncate both indices to low8. Return producer+1==(consumer==0?ROM cell_count65:consumer). No
    cell inspection; reserves one cell. */
 

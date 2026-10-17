@@ -264,6 +264,20 @@ uint f33_nvm_check_not_pending(ushort logical_handle,uchar api)
 
 
 
+bool FUN_00074274(uint param_1,undefined1 param_2)
+
+{
+  bool bVar1;
+  
+  bVar1 = ((ushort)f33_nvm_logical_descriptors[param_1 & 0xffff].opaque_0a >> 0xb & 1) != 0;
+  if (bVar1) {
+    ((void)(0x14), (void)(0), (void)(param_2), (void)(0x18), f33_return_const_0_71d88());
+  }
+  return bVar1;
+}
+
+
+
 undefined4 FUN_000742a2(ushort param_1,undefined1 param_2)
 
 {
@@ -354,6 +368,28 @@ bool FUN_0007436e(ushort param_1)
   
   uVar1 = f33_nvm_check_logical_handle(param_1,'\x10','\0');
   return uVar1 != 0;
+}
+
+
+
+/* NonNULL passes without descriptor or pointee access. NULL passes only modes2/4; registered mode1
+   rejects it. No alignment/extent validation. NonNULL buffer passes without descriptor/payload
+   read. all registered rows mode1 reject. No alignment or extent check; uninitialized odd-address
+   source admitted. */
+
+uint f33_nvm_check_buffer_argument(ushort logical_handle,void *buffer,uchar api)
+
+{
+  uint uVar1;
+  
+  uVar1 = 0;
+  if ((((uintptr_t)(buffer)==(uintptr_t)((void *)0x0)) &&
+      (f33_nvm_logical_descriptors[logical_handle].buffer_mode != '\x04')) &&
+     (f33_nvm_logical_descriptors[logical_handle].buffer_mode != '\x02')) {
+    ((void)(0x14), (void)(0), (void)(api), (void)(0xd), f33_return_const_0_71d88());
+    uVar1 = 1;
+  }
+  return uVar1;
 }
 
 
@@ -791,6 +827,21 @@ void FUN_00074872(int param_1,undefined1 param_2,uint param_3)
     (*((undefined1 *)camry_host_ptr((uint32_t)(uVar1 + param_1)))) = param_2;
   }
   return;
+}
+
+
+
+/* WARNING: This is an inlined function */
+/* Return unsigned byte27638+6*handle. The registered123 descriptors all contain zero. No local
+   handle bound check. LD.BU reads option byte27638+6*low16(handle), zero-extended inr10. All123
+   registered options are zero. Raw field offset and full register preservation established;
+   composed execution traverses the real getter. OEM option-bit meanings and nonzero registered
+   configurations are not recovered. */
+
+uint f33_nvm_descriptor_option(ushort handle)
+
+{
+  return (uint)f33_nvm_descriptors[handle].option;
 }
 
 
@@ -1474,6 +1525,24 @@ undefined4 FUN_00074efe(short param_1,undefined4 param_2,undefined4 param_3,unde
     FUN_00074ce8(uVar2);
   }
   return 0;
+}
+
+
+
+/* WARNING: Inlined function: f33_nvm_descriptor_option */
+
+uchar FUN_00074f2e(uint param_1)
+
+{
+  uchar uVar1;
+  
+  if ((param_1 & 0xffff) < (uint)f33_nvm_descriptor_count) {
+    uVar1 = f33_nvm_descriptors[param_1 & 0xffff].option;
+  }
+  else {
+    uVar1 = 0xff;
+  }
+  return uVar1;
 }
 
 
@@ -4066,6 +4135,31 @@ uint FUN_00076c6e(ushort param_1)
 
 
 
+/* WARNING: Inlined function: f33_nvm_payload_length */
+
+void FUN_00076cb2(int param_1)
+
+{
+  if (param_1 == 1) {
+    f33_nvm_payload_chunks_remaining = f33_nvm_payload_chunks_remaining - 1;
+    if (f33_nvm_payload_chunks_remaining == 0) {
+      if (0x20 < f33_nvm_descriptors[DAT_febf6c44].payload_bytes) {
+        param_1 = FUN_00076c6e(DAT_febf6c44);
+      }
+    }
+    else {
+      param_1 = FUN_00076be8((*((volatile uint16_t *)camry_host_ptr(0xfebf6c44u))));
+    }
+  }
+  if (param_1 != 2) {
+    ((void)(param_1), FUN_0007849e());
+    thunk_FUN_000772f8();
+  }
+  return;
+}
+
+
+
 void FUN_00076d02(void)
 
 {
@@ -4229,6 +4323,42 @@ void FUN_00076f4e(ushort param_1,ushort param_2,uchar *param_3,uchar param_4)
 
 /* WARNING: Inlined function: f33_nvm_payload_length */
 
+int FUN_00076ff0(ushort param_1,int param_2,undefined1 param_3)
+
+{
+  ushort uVar1;
+  uint uVar2;
+  uint uVar3;
+  int iVar4;
+  uchar auStack_5c [64];
+  
+  uVar1 = f33_nvm_descriptors[param_1].payload_bytes;
+  uVar2 = f33_nvm_payload_page_count(param_1);
+  uVar2 = (uVar2 - f33_nvm_payload_chunks_remaining) * 0x40;
+  uVar3 = f33_nvm_payload_chunk_length(param_1,(ushort)uVar2);
+  iVar4 = camry_host_addr(FUN_000776fa(param_2 + (uVar2 & 0xffff) + 4,uVar3,auStack_5c,param_3));
+  if (iVar4 == 1) {
+    if (uVar1 < 0x21) {
+      uVar2 = f33_nvm_sum_bytes((ushort)uVar3,auStack_5c);
+      f33_nvm_checksum_accumulator = f33_nvm_checksum_accumulator + uVar2 + 0xc000;
+      uVar2 = f33_nvm_header_checksum(((F33NvmRecordContext *)camry_host_ptr((uint32_t)((0xfebf6b80u)))));
+      if (uVar2 != (f33_nvm_checksum_accumulator & 0xffff)) {
+        iVar4 = 0xfffc;
+      }
+    }
+    else {
+      uVar2 = f33_nvm_sum_bytes((ushort)uVar3,auStack_5c);
+      f33_nvm_checksum_accumulator = f33_nvm_checksum_accumulator + uVar2;
+    }
+    f33_nvm_payload_chunks_remaining = f33_nvm_payload_chunks_remaining - 1;
+  }
+  return iVar4;
+}
+
+
+
+/* WARNING: Inlined function: f33_nvm_payload_length */
+
 void FUN_0007708c(ushort param_1,ushort param_2,uchar param_3)
 
 {
@@ -4272,6 +4402,46 @@ void FUN_0007712a(void)
     uVar1 = f33_nvm_read_payload_checksum(DAT_febf6c44,DAT_febf6c24,'\0');
   }
   ((void)(uVar1), FUN_00077640());
+  return;
+}
+
+
+
+/* WARNING: Inlined function: f33_nvm_payload_length */
+
+void FUN_00077170(ushort param_1)
+
+{
+  ushort uVar1;
+  uint uVar2;
+  undefined4 uVar3;
+  int iVar4;
+  uchar *puVar5;
+  uint uVar6;
+  
+  uVar1 = f33_nvm_descriptors[param_1].payload_bytes;
+  uVar2 = f33_nvm_record_offset(param_1,DAT_febf6c42,0);
+  uVar3 = thunk_FUN_0007490e((0xfebf6b80u));
+  FUN_000772a2(((undefined2 *)camry_host_ptr((uint32_t)((0xfebf6b80u)))), (uint)param_1);
+  if (uVar1 < 0x21) {
+    uVar1 = uVar1 + (uVar1 & 3);
+    iVar4 = camry_host_addr(FUN_000776fa(uVar2 + 4,uVar1,((undefined *)camry_host_ptr(0xfebf6b90u)),0));
+    if (iVar4 != 1) {
+      return;
+    }
+    puVar5 = (uchar *)thunk_FUN_0007490e((0xfebf6b80u));
+    uVar2 = f33_nvm_sum_bytes(2,puVar5);
+    uVar6 = f33_nvm_sum_bytes(uVar1,((undefined *)camry_host_ptr(0xfebf6b90u)));
+    f33_nvm_checksum_accumulator = f33_nvm_checksum_accumulator + uVar6 + uVar2 + 0xc000;
+    FUN_000772ae((0xfebf6b80u),f33_nvm_checksum_accumulator & 0xffff);
+  }
+  else {
+    FUN_000772ae((0xfebf6b80u),0);
+    puVar5 = (uchar *)thunk_FUN_0007490e((0xfebf6b80u));
+    uVar2 = f33_nvm_sum_bytes(2,puVar5);
+    f33_nvm_checksum_accumulator = f33_nvm_checksum_accumulator + uVar2;
+  }
+  FUN_00074c54(DAT_febf6c24, 4, ((uchar *)camry_host_ptr((uint32_t)(uVar3))), 9, 0);
   return;
 }
 
@@ -4461,6 +4631,40 @@ undefined * FUN_00077380(void)
 
 /* WARNING: Inlined function: f33_nvm_payload_length */
 
+uint FUN_000773fe(ushort param_1)
+
+{
+  ushort uVar1;
+  int iVar2;
+  uint uVar3;
+  uchar *puVar4;
+  int iVar5;
+  uint uVar6;
+  uint uVar7;
+  
+  iVar2 = DAT_febf6c24;
+  uVar1 = f33_nvm_descriptors[param_1].payload_bytes;
+  uVar3 = f33_nvm_payload_page_count(param_1);
+  uVar3 = (uVar3 - f33_nvm_payload_chunks_remaining) * 0x40;
+  uVar7 = uVar3 & 0xffff;
+  uVar3 = f33_nvm_payload_chunk_length(param_1,(ushort)uVar3);
+  if ((uVar1 & 3) != 0) {
+    FUN_00074872(camry_host_addr(((undefined *)camry_host_ptr(0xfebf6b90u))), 0, uVar3);
+    puVar4 = (uchar *)FUN_000772b4((0xfebf6b80u));
+    f33_copy_bytes_forward(((undefined *)camry_host_ptr(0xfebf6b90u)),puVar4,(uint)uVar1);
+    FUN_000772ba((0xfebf6b80u), camry_host_addr(((undefined *)camry_host_ptr(0xfebf6b90u))));
+  }
+  iVar5 = FUN_000772b4((0xfebf6b80u));
+  puVar4 = ((uchar *)camry_host_ptr((uint32_t)(uVar7 + iVar5)));
+  uVar6 = f33_nvm_sum_bytes((ushort)uVar3,puVar4);
+  f33_nvm_checksum_accumulator = f33_nvm_checksum_accumulator + uVar6;
+  return FUN_00074c54(iVar2 + uVar7 + 4,uVar3,puVar4,2,0);
+}
+
+
+
+/* WARNING: Inlined function: f33_nvm_payload_length */
+
 void FUN_000774ee(int param_1)
 
 {
@@ -4523,6 +4727,33 @@ void FUN_0007759a(int param_1)
 
 
 
+/* WARNING: Inlined function: f33_nvm_payload_length */
+
+undefined * FUN_000775ca(void)
+
+{
+  undefined4 uVar1;
+  int iVar2;
+  undefined *puVar3;
+  uchar auStack_10 [4];
+  
+  puVar3 = ((undefined *)camry_host_ptr(0xfffbu));
+  if (((uint)DAT_febf6c44 < (uint)f33_nvm_descriptor_count) &&
+     (puVar3 = (undefined *)
+               f33_nvm_read_with_optional_blank_check
+                         (DAT_febf6c24 + f33_nvm_descriptors[DAT_febf6c44].payload_bytes + 4,4,
+                          auStack_10,'\0'),(uintptr_t)(puVar3)==(uintptr_t)(((undefined *)camry_host_ptr((uint32_t)(0x1)))))) {
+    uVar1 = FUN_000772ea((0xfebf6b80u));
+    iVar2 = FUN_0007484a(uVar1, camry_host_addr(auStack_10), 4);
+    if (iVar2 != 0) {
+      puVar3 = ((undefined *)camry_host_ptr(0xfffdu));
+    }
+  }
+  return puVar3;
+}
+
+
+
 void FUN_00077626(int param_1)
 
 {
@@ -4554,6 +4785,39 @@ uint FUN_00077650(uint param_1,uint param_2)
 
 
 
+/* WARNING: Inlined function: f33_nvm_payload_length */
+
+uint FUN_00077660(uint param_1)
+
+{
+  ushort byte_count;
+  undefined4 uVar1;
+  uchar *puVar2;
+  uint uVar3;
+  uint uVar4;
+  
+  byte_count = f33_nvm_descriptors[param_1 & 0xffff].payload_bytes;
+  uVar1 = thunk_FUN_0007490e((0xfebf6b80u));
+  FUN_000772a2(((undefined2 *)camry_host_ptr((uint32_t)((0xfebf6b80u)))), param_1 & 0xffff);
+  if (byte_count < 0x21) {
+    puVar2 = (uchar *)thunk_FUN_0007490e((int)0xfebf6b80);
+    uVar3 = f33_nvm_sum_bytes(2,puVar2);
+    puVar2 = (uchar *)FUN_000772b4((0xfebf6b80u));
+    uVar4 = f33_nvm_sum_bytes(byte_count,puVar2);
+    f33_nvm_checksum_accumulator = f33_nvm_checksum_accumulator + uVar4 + uVar3 + 0xc000;
+    FUN_000772ae((0xfebf6b80u),f33_nvm_checksum_accumulator & 0xffff);
+  }
+  else {
+    FUN_000772ae((int)0xfebf6b80, 0x0);
+    puVar2 = (uchar *)thunk_FUN_0007490e((int)0xfebf6b80);
+    uVar3 = f33_nvm_sum_bytes(2,puVar2);
+    f33_nvm_checksum_accumulator = f33_nvm_checksum_accumulator + uVar3;
+  }
+  return FUN_00074c54(DAT_febf6c24, 4, ((uchar *)camry_host_ptr((uint32_t)(uVar1))), 3, 0);
+}
+
+
+
 undefined * FUN_000776fa(uint param_1,ushort param_2,uchar *param_3,uchar param_4)
 
 {
@@ -4566,6 +4830,62 @@ undefined * FUN_000776fa(uint param_1,ushort param_2,uchar *param_3,uchar param_
     puVar1 = ((undefined *)camry_host_ptr((uint32_t)(0xfffc)));
   }
   return puVar1;
+}
+
+
+
+/* WARNING: Inlined function: f33_nvm_payload_length */
+/* Read the next payload chunk through776FA. On success add its unsigned byte sum. For lengths<=32
+   addC000 and compare low16 against context.checksum16 before copying; mismatch returnsFFFC without
+   destination write or remaining-count decrement. Larger payloads copy before the later777CA
+   checksum check. Native proof includes post-read7775E boundaries and a complete captured16-byte
+   read through77B12 with explicit ICU-S/ECC/blank-check inputs. Full multi-chunk acquisition and
+   application restoration remain separate. Raw full-body dataflow plus post-read7775E boundaries
+   and complete captured16-byte read through77B12 with explicit hardware inputs. Small payload
+   addsC000 and checks low16 before copying; mismatchFFFC preserves destination and remaining count.
+   Large payload copies before777CA trailer validation. Full multi-chunk acquisition and application
+   restoration remain outside this proof. */
+
+uint f33_nvm_read_payload_chunk(ushort handle,uint record_offset,uchar read_option)
+
+{
+  ushort uVar1;
+  ushort payload_offset;
+  uint uVar2;
+  uint uVar3;
+  uint uVar4;
+  uint uVar5;
+  uint uVar6;
+  uchar auStack_64 [64];
+  
+  uVar1 = f33_nvm_descriptors[handle].payload_bytes;
+  uVar2 = (uint)uVar1;
+  uVar3 = f33_nvm_payload_page_count(handle);
+  uVar3 = (uVar3 - f33_nvm_payload_chunks_remaining) * 0x40;
+  payload_offset = (ushort)uVar3;
+  uVar4 = f33_nvm_payload_chunk_length(handle,payload_offset);
+  uVar3 = camry_host_addr(FUN_000776fa(record_offset + (uVar3 & 0xffff) + 4,uVar4,auStack_64,read_option));
+  if (uVar3 == 1) {
+    if (uVar2 < 0x21) {
+      uVar5 = f33_nvm_sum_bytes((ushort)uVar4,auStack_64);
+      uVar5 = f33_nvm_checksum_accumulator + uVar5 + 0xc000;
+      f33_nvm_checksum_accumulator = uVar5;
+      uVar6 = f33_nvm_header_checksum(((F33NvmRecordContext *)camry_host_ptr((uint32_t)((0xfebf6b80u)))));
+      if (uVar6 != (uVar5 & 0xffff)) {
+        return 0xfffc;
+      }
+    }
+    else {
+      uVar5 = f33_nvm_sum_bytes((ushort)uVar4,auStack_64);
+      f33_nvm_checksum_accumulator = f33_nvm_checksum_accumulator + uVar5;
+    }
+    if ((uVar1 & 3) == 0) {
+      uVar2 = uVar4;
+    }
+    f33_nvm_copy_payload_chunk(((F33NvmRecordContext *)camry_host_ptr((uint32_t)((0xfebf6b80u)))), payload_offset, (ushort)uVar2, auStack_64);
+    f33_nvm_payload_chunks_remaining = f33_nvm_payload_chunks_remaining - 1;
+  }
+  return uVar3;
 }
 
 
@@ -5178,6 +5498,29 @@ void thunk_FUN_00077df2(void)
 {
   FUN_00077df2();
   return;
+}
+
+
+
+/* WARNING: Inlined function: f33_nvm_allocation_pages */
+
+int FUN_00077e0a(uint param_1,uint param_2)
+
+{
+  uint uVar1;
+  int iVar2;
+  
+  uVar1 = (uint)f33_nvm_descriptors[param_1 & 0xffff].payload_bytes;
+  if (0x20 < uVar1) {
+    uVar1 = uVar1 + 4;
+  }
+  if (f33_nvm_descriptors[param_1 & 0xffff].option == '\0') {
+    iVar2 = uVar1 + 4;
+  }
+  else {
+    iVar2 = uVar1 + 0xc;
+  }
+  return (iVar2 + 0x40U & 0xffffffc0) + (param_2 & 0xff) * -4;
 }
 
 
