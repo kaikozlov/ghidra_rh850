@@ -1868,25 +1868,6 @@ void FUN_0009767c(ushort param_1,char param_2,int param_3)
 
 
 
-void FUN_00097a94(void)
-
-{
-  uint32_t puVar1;
-  int iVar2;
-  
-  puVar1 = 0xfebeb800u;
-  iVar2 = FUN_000955bc();
-  if (iVar2 == 1) {
-    FUN_00097822(2,puVar1 + -0x59e8,(*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x59ec)))),(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x59ea))))));
-    FUN_000955b6(0);
-  }
-  f33_dcm_invalidate_queued_event('\x06','\0');
-  FUN_0009560e(1);
-  return;
-}
-
-
-
 /* UDS routine wrapper: guards on the two valid routine-control subfunctions, delegates to the
    application-class routine helper with a fixed class literal, and diverts other subfunctions to
    the negative-response path (8B83C). Shape-verified. */

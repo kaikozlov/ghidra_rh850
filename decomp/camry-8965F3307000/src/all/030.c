@@ -1198,6 +1198,80 @@ void f33_select_external_reference_acquisition(void)
 
 
 
+/* BFC5!=0 clears model accumulators/count. Otherwise failed C045/C044/C042==5A, AD18==11
+   orADF4>=3840 gate HOLDS them. Qualified passes accumulate signed BF78/2000 and BF78%2000. At
+   incremented u16count>=2000 publish quotient-sum+remainder-sum/2000 and inverse/markers under
+   PMRFFC0, then CLEAR accumulators/count. Counts are invocations. Model quotient/remainder
+   window2000 preserves accumulators on interrupted qualification, clears on BFC5!=0, and clears
+   after protected reference publication. Successful publication does not retain the window. */
+
+void f33_accumulate_model_estimator_reference(void)
+
+{
+  undefined *puVar1;
+  ushort uVar2;
+  undefined *puVar3;
+  uint32_t puVar4;
+  undefined4 uVar5;
+  int iVar6;
+  uint uVar7;
+  int iVar8;
+  
+  puVar4 = 0xfebeb800u;
+  puVar3 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  puVar1 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  if (DAT_febebfc5 == '\0') {
+    iVar8 = DAT_febebfdc;
+    iVar6 = DAT_febebfe0;
+    uVar2 = DAT_febebfea;
+    if ((((DAT_febec045 != 'Z') || (DAT_febec044 != 'Z')) || (DAT_febec042 != 'Z')) ||
+       ((DAT_febead18 != '\x11' || (DAT_febeadf4 < DAT_000af57e)))) goto LAB_000c367c;
+    uVar7 = (uint)f33_estimator_reference_window;
+    uVar2 = (ushort)(DAT_febebfea + 1);
+    if (uVar7 == 0) {
+      iVar6 = 0x11;
+      iVar8 = DAT_febebf78;
+    }
+    else if (DAT_febebf78 == -0x80000000 && uVar7 == 0xffffffff) {
+      iVar6 = 0;
+      iVar8 = -0x80000000;
+    }
+    else {
+      iVar6 = DAT_febebf78 % (int)uVar7;
+      iVar8 = DAT_febebf78 / (int)uVar7;
+    }
+    iVar8 = DAT_febebfdc + iVar8;
+    iVar6 = DAT_febebfe0 + iVar6;
+    if ((DAT_febebfea + 1 & 0xffff) < uVar7) goto LAB_000c367c;
+    if (uVar7 != 0) {
+      if (iVar6 == -0x80000000 && uVar7 == 0xffffffff) {
+        iVar6 = -0x80000000;
+      }
+      else {
+        iVar6 = iVar6 / (int)uVar7;
+      }
+    }
+    uVar5 = FUN_000d1da0(0xffc0);
+    (*((int *)camry_host_ptr((uint32_t)(puVar4 + 0x7d4)))) = iVar6 + iVar8;
+    (*((int *)camry_host_ptr((uint32_t)(puVar4 + 0x7e4)))) = ~(iVar6 + iVar8);
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(0x7f0))))) = 0x5a;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(0x7f2))))) = 0xa5;
+    FUN_000d1dc6(uVar5);
+    puVar1 = ((undefined *)camry_host_ptr((uint32_t)(puVar4)));
+  }
+  puVar3 = puVar1;
+  iVar8 = 0;
+  iVar6 = 0;
+  uVar2 = 0;
+LAB_000c367c:
+  *(int *)(puVar3 + 0x7dc) = iVar8;
+  *(int *)(puVar3 + 0x7e0) = iVar6;
+  *(ushort *)(puVar3 + 0x7ea) = uVar2;
+  return;
+}
+
+
+
 /* Invalidate accepted-external markerBFF1, warmupBFE8, source markerBFFA and countBFF8 before model
    accumulation. A failed model qualifier can still retain its prior window. Model fallback clears
    external acceptance/warmup and source count/marker before model accumulation; model qualification
@@ -1797,57 +1871,6 @@ uint f33_estimator_mode2_constraint_b(void)
     uVar8 = 0x5a;
   }
   return uVar8;
-}
-
-
-
-/* Always compute/store three source constraintsC030..32. C0455A additionally requires both
-   AD3C/AD3F outside0/3, AD1811, BFB25A, BFB50 and absolute paired mean minusADF6 strictly
-   below1280. This is not the same gate as either consecutive window. Always publish three
-   constraint results; compositeC045 additionally requires admitted modes/source markers and
-   paired-mean axis difference strictly below1280. No consecutive-window counter. */
-
-void f33_qualify_estimator_source_constraints(void)
-
-{
-  char cVar1;
-  char cVar2;
-  char cVar3;
-  undefined1 uVar4;
-  uint32_t puVar5;
-  uint uVar6;
-  uint uVar7;
-  uint uVar8;
-  int iVar9;
-  uint uVar10;
-  
-  puVar5 = 0xfebeb800u;
-  uVar6 = f33_estimator_base_source_constraint();
-  uVar7 = f33_estimator_mode2_constraint_a();
-  uVar8 = f33_estimator_mode2_constraint_b();
-  if (((((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0xac4))))) != '\0') && ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0xac4))))) != '\x03')) && ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0xac1))))) != '\0')) &&
-     ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0xac1))))) != '\x03')) {
-    cVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0xae8)))));
-    cVar2 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(0x7b2)))));
-    cVar3 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(0x7b5)))));
-    uVar10 = (uint)f33_estimator_pair_axis_margin;
-    iVar9 = f33_abs_s32_wrapping
-                      (((uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar5 + 0x7a2)))) + (uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar5 + 0x7a4)))) >> 1)
-                       - (uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar5 + -0xa0a)))));
-    if (((((cVar2 == 'Z') && (cVar1 == '\x11')) &&
-         (((int)(iVar9 - uVar10) < 0 != (iVar9 < 0 && -1 < (int)(iVar9 - uVar10)) &&
-          ((cVar3 == '\0' && (uVar6 == 0x5a)))))) && (uVar7 == 0x5a)) && (uVar8 == 0x5a)) {
-      uVar4 = 0x5a;
-      goto LAB_000c3ec8;
-    }
-  }
-  uVar4 = 0;
-LAB_000c3ec8:
-  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(0x845))))) = uVar4;
-  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(0x830))))) = (char)uVar6;
-  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(0x831))))) = (char)uVar7;
-  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(0x832))))) = (char)uVar8;
-  return;
 }
 
 

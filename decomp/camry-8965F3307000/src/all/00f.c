@@ -715,6 +715,64 @@ void FUN_0003cd72(void)
 
 
 
+undefined1 FUN_0003cda8(void)
+
+{
+  uchar uVar1;
+  char cVar2;
+  char cVar3;
+  ushort uVar4;
+  undefined *puVar5;
+  undefined *puVar6;
+  undefined1 uVar8;
+  char cVar9;
+  uint32_t puVar7;
+  uVar4 = DAT_febee8cc;
+  cVar3 = DAT_febe7f6b;
+  cVar2 = DAT_febe7f6a;
+  uVar1 = f33_internal_source_admission_state;
+  uVar8 = DAT_febe745c;
+  puVar7 = 0xfebeb800u;
+  puVar6 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  cVar9 = DAT_febe745b;
+  puVar5 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  if (DAT_febe7f69 == 'Z') {
+    if (DAT_febe745b == 'Z') goto LAB_0003cdf8;
+    if (0x6ff < DAT_febee8cc) goto LAB_0003ce22;
+    puVar6 = ((undefined *)camry_host_ptr(0xfebeb800u));
+    f33_report_diagnostic_event_failure(0xa9,0x32);
+    cVar9 = 'Z';
+  }
+  else {
+    if (DAT_febe745b == 'Z') {
+      f33_report_diagnostic_event_pass(0xa9);
+      cVar9 = '\0';
+      puVar5 = ((undefined *)camry_host_ptr((uint32_t)(puVar7)));
+    }
+LAB_0003cdf8:
+    puVar6 = puVar5;
+    if (0x6ff < uVar4) goto LAB_0003ce22;
+  }
+  if (cVar2 == 'Z') {
+    f33_report_diagnostic_event_failure(0xb4,0x32);
+  }
+  if (cVar3 == 'Z') {
+    f33_report_diagnostic_event_failure(0xb9,0x32);
+  }
+LAB_0003ce22:
+  if (uVar1 == '\x03') {
+    uVar8 = 0x44;
+  }
+  else if (uVar1 == '\0') {
+    uVar8 = 0;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbc5bu + (uint32_t)((int)camry_host_addr(puVar6)) * 1u)))) = cVar9;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffbc5cu + (uint32_t)((int)camry_host_addr(puVar6)) * 1u)))) = uVar8;
+  return uVar8;
+}
+
+
+
 /* Compose six receive rows, bus-status adapters and internal7F68 summary. 7F68 modes1/2 retain the
    previous summary; mode3 publishes44. Compose receive rows, controller status adapters and
    internal7F68 summary; intermediate modes1/2 retain previous terminal summary. */
@@ -2904,6 +2962,38 @@ void f33_report_diagnostic_event_failure_112_10_3e56c(void)
 
 
 
+void FUN_0003e57e(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  DAT_febe75b4 = 0;
+  DAT_febe75b6 = 0;
+  f33_reset_terminal_monitor(f33_delayed_status_bit_triplet_a_states);
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbda4u + (uint32_t)((int)puVar1))))));
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbdacu + (uint32_t)((int)puVar1))))));
+  return;
+}
+
+
+
+void FUN_0003e5a6(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  DAT_febe67a5 = 0;
+  DAT_febe67a4 = 0;
+  DAT_febe67a6 = 0;
+  DAT_febe67a8 = 0;
+  f33_reset_terminal_monitor(f33_delayed_status_bit_triplet_a_states);
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbda4u + (uint32_t)((int)puVar1))))));
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbdacu + (uint32_t)((int)puVar1))))));
+  return;
+}
+
+
+
 /* Return readiness latch in r10:5A means admitted, not a void side-effect-only helper. Retain
    completed latch until explicit stage initializer; pending sequencing and counts per
    configured-family readiness contract. No hardware success is inferred from this software latch.
@@ -2981,6 +3071,38 @@ void f33_record_delayed_status_bit_triplet_a_failure(void)
 
 {
   f33_report_diagnostic_event_failure((uint)DAT_febe75b6,0x32);
+  return;
+}
+
+
+
+void FUN_0003e816(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  DAT_febe75d0 = 0;
+  DAT_febe75d2 = 0;
+  f33_reset_terminal_monitor(f33_delayed_status_bit_triplet_b_states);
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbdc0u + (uint32_t)((int)puVar1))))));
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbdc8u + (uint32_t)((int)puVar1))))));
+  return;
+}
+
+
+
+void FUN_0003e83e(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  DAT_febe67ad = 0;
+  DAT_febe67ac = 0;
+  DAT_febe67ae = 0;
+  DAT_febe67b0 = 0;
+  f33_reset_terminal_monitor(f33_delayed_status_bit_triplet_b_states);
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbdc0u + (uint32_t)((int)puVar1))))));
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbdc8u + (uint32_t)((int)puVar1))))));
   return;
 }
 
@@ -3068,6 +3190,36 @@ void f33_record_delayed_status_bit_triplet_b_failure(void)
 
 
 
+void FUN_0003eab4(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  DAT_febe75ec = 0;
+  DAT_febe75ee = 0;
+  f33_reset_terminal_monitor(f33_matched_state2_status_bit_triplet_a_states);
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbddcu + (uint32_t)((int)puVar1))))));
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbde4u + (uint32_t)((int)puVar1))))));
+  return;
+}
+
+
+
+void FUN_0003eadc(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  DAT_febe67b4 = 0;
+  DAT_febe67b5 = 0;
+  f33_reset_terminal_monitor(f33_matched_state2_status_bit_triplet_a_states);
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbddcu + (uint32_t)((int)puVar1))))));
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbde4u + (uint32_t)((int)puVar1))))));
+  return;
+}
+
+
+
 /* No-argument configured classifier. Gate off_both2: requested==2 &&observed==2
    &&(6620&(6<<b))==(4<<b) &&(661C&(6<<b))==(4<<b) &&bit(6628,b+1)==0 &&6614.bit0==0 &&
    own65F6/65F7==5A. Closed gate returns44, otherwise22 iff scratch_byte==5A, else11. Full threshold
@@ -3109,6 +3261,36 @@ void f33_record_matched_state2_status_bit_triplet_a_failure(void)
 
 {
   f33_report_diagnostic_event_failure((uint)DAT_febe75ee,0x32);
+  return;
+}
+
+
+
+void FUN_0003ece4(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  DAT_febe7608 = 0;
+  DAT_febe760a = 0;
+  f33_reset_terminal_monitor(f33_matched_state2_status_bit_triplet_b_states);
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbdf8u + (uint32_t)((int)puVar1))))));
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe00u + (uint32_t)((int)puVar1))))));
+  return;
+}
+
+
+
+void FUN_0003ed0c(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  DAT_febe67b8 = 0;
+  DAT_febe67b9 = 0;
+  f33_reset_terminal_monitor(f33_matched_state2_status_bit_triplet_b_states);
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbdf8u + (uint32_t)((int)puVar1))))));
+  f33_reset_terminal_monitor(((F33TerminalMonitorState *)camry_host_ptr((uint32_t)((0xffffbe00u + (uint32_t)((int)puVar1))))));
   return;
 }
 

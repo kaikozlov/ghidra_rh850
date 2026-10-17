@@ -2483,6 +2483,38 @@ void f33_copy_cell_block_cf3a2(void)
 
 
 
+void FUN_000cf442(void)
+
+{
+  char *pcVar1;
+  int iVar2;
+  uint32_t puVar3;
+  uint uVar4;
+  
+  puVar3 = 0xfebeb800u;
+  f33_copy_cell_block_cf3a2();
+  uVar4 = 0;
+  do {
+    iVar2 = uVar4 * 2;
+    pcVar1 = ((undefined *)camry_host_ptr((uint32_t)(puVar3 + iVar2 + 0x1342)));
+    if ((*pcVar1 == -0x5b) && (((int8_t)pcVar1[1]) != -1)) {
+      pcVar1[1] = pcVar1[1] + '\x01';
+    }
+    pcVar1 = ((undefined *)camry_host_ptr((uint32_t)(puVar3 + iVar2 + 0x1348)));
+    if ((*pcVar1 == -0x5b) && (((int8_t)pcVar1[1]) != -1)) {
+      pcVar1[1] = pcVar1[1] + '\x01';
+    }
+    pcVar1 = ((undefined *)camry_host_ptr((uint32_t)(puVar3 + iVar2 + 0x134e)));
+    if ((*pcVar1 == -0x5b) && (((int8_t)pcVar1[1]) != -1)) {
+      pcVar1[1] = pcVar1[1] + '\x01';
+    }
+    uVar4 = uVar4 + 1;
+  } while (uVar4 < 3);
+  return;
+}
+
+
+
 void FUN_000cf4a8(void)
 
 {

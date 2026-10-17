@@ -476,6 +476,70 @@ uint f33_ba_security_level_bit1_enabled(void)
 
 
 
+/* Require numerical security-level bit1 at every invocation. Phase0 exact BAENA requests
+   record18=count30 and105=markerA55A5AA5, ignoring admission returns. Phase5A joins cached statuses
+   and publishes gate/count on exact10. */
+
+int f33_ba_f7_request_enable(uchar configured_index,uchar *payload,uchar *response)
+
+{
+  uint32_t puVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  uint uVar4;
+  int iVar5;
+  uchar local_1c [8];
+  uint auStack_14 [2];
+  
+  puVar1 = 0xfebeb800u;
+  puVar2 = 0x23dfcu;
+  uVar3 = f33_ba_security_level_bit1_enabled();
+  if (uVar3 == 0x5a) {
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58b4))))) == '\0') {
+      uVar3 = f33_compare_ba_token_bytes(payload, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x2d46))), '\x05');
+      if (uVar3 == 1) {
+        iVar5 = 0;
+        local_1c[1] = 0;
+        local_1c[2] = '\0';
+        local_1c[3] = '\0';
+        local_1c[4] = '\0';
+        local_1c[5] = '\0';
+        local_1c[6] = '\0';
+        local_1c[7] = '\0';
+        local_1c[0] = f33_ba_retained_admission_count_limit;
+        f33_nvm_set_record(0x18,((uint *)camry_host_ptr((uint32_t)(local_1c))));
+        auStack_14[0] = 0xa55a5aa5;
+        auStack_14[1] = 0;
+        f33_nvm_set_record(0x105,auStack_14);
+      }
+      else {
+        iVar5 = -6;
+      }
+    }
+    else {
+      if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58b4))))) == 'Z') {
+        uVar3 = f33_nvm_get_record_status(0x105);
+        uVar4 = f33_nvm_get_record_status(0x18);
+        if ((uVar3 == 0x10) && (uVar4 == 0x10)) {
+          (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58b0))))) = f33_ba_retained_admission_count_limit;
+          (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58b1))))) = 0x5a;
+          return 0;
+        }
+        if ((uVar3 == 0x20 || uVar3 == 0x21) || (uVar4 == 0x20 || uVar4 == 0x21)) {
+          return -1;
+        }
+      }
+      iVar5 = -9;
+    }
+  }
+  else {
+    iVar5 = -0xe;
+  }
+  return iVar5;
+}
+
+
+
 /* Both cached statuses10 publish count30/gate5A and return0; either20/21 waits-1,otherwise-9. No
    token/security recheck or marker re-read; old success can satisfy rejected requests. */
 

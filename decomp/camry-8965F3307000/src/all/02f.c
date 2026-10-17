@@ -2893,6 +2893,122 @@ void f33_qualify_record8_admitted_observations
 
 
 
+/* Increment16-bittotal;strict>10failsbeforeobservations.
+   F0690permitsF06Ezero/nonzeroobservationcounts;statusnonzeroqualifiesinvalidcount>=8.
+   Result/completionpointersarepreservedacrossrealBF0AA. Native strict warmup with third admitted
+   observation commits record8 confirmation and real snapshot once; other outcomes remain static. */
+
+void f33_step_record8_confirmation_window(uchar *result,uchar *completed)
+
+{
+  ushort uVar1;
+  ushort uVar2;
+  undefined *puVar3;
+  ushort uVar5;
+  ushort local_10;
+  ushort uStack_e;
+  uint32_t puVar4;
+  uVar2 = DAT_000af42c;
+  uVar5 = DAT_000af42a;
+  puVar4 = 0xfebeb800u;
+  puVar3 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  uVar1 = f33_record8_confirmation_window_count + 1;
+  if (DAT_000af42a < uVar1) {
+    *completed = 'Z';
+    *result = '\0';
+  }
+  else {
+    if (DAT_febef069 == '\0') {
+      if (DAT_febef06e == '\0') {
+        local_10 = f33_record8_zero_observation_count + 1;
+        uStack_e = 0;
+      }
+      else {
+        local_10 = 0;
+        uStack_e = f33_record8_nonzero_observation_count + 1;
+      }
+      f33_qualify_record8_admitted_observations(result,completed,&local_10,&uStack_e);
+      puVar3 = ((undefined *)camry_host_ptr((uint32_t)(puVar4)));
+      uVar5 = 0;
+    }
+    else {
+      local_10 = 0;
+      uStack_e = 0;
+      puVar3 = ((undefined *)camry_host_ptr(0xfebeb800u));
+      uVar5 = f33_record8_invalid_observation_count + 1;
+      if (DAT_000af42c <= (ushort)(f33_record8_invalid_observation_count + 1)) {
+        *completed = 'Z';
+        *result = '\0';
+        uVar5 = uVar2;
+      }
+    }
+    *(ushort *)(puVar3 + 0x708) = local_10;
+    *(ushort *)(puVar3 + 0x70c) = uVar5;
+    *(ushort *)(puVar3 + 0x70a) = uStack_e;
+    uVar5 = uVar1;
+  }
+  *(ushort *)(puVar3 + 0x70e) = uVar5;
+  return;
+}
+
+
+
+/* OnceonlywhileinitialACED5A;strictincrementedwarmup>60;B080>4096rejects;F0015Aadmitswindowelseclearinnercounts.
+   OnoldBF040->newcompletion5AcommitBD86Eandsnapshot. Native strict warmup with third admitted
+   observation commits record8 confirmation and real snapshot once; other outcomes remain static. */
+
+void f33_advance_record8_startup_confirmation(void)
+
+{
+  ushort uVar1;
+  uchar uVar2;
+  uint32_t puVar3;
+  undefined *puVar4;
+  ushort uVar5;
+  uchar uStack_e;
+  uchar uStack_d;
+  
+  uVar2 = f33_record8_confirmation_complete;
+  uVar1 = DAT_000af428;
+  puVar3 = 0xfebeb800u;
+  puVar4 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  uStack_d = f33_record8_confirmation_result;
+  uStack_e = f33_record8_confirmation_complete;
+  if ((f33_record8_confirmation_complete == '\0') && (DAT_febeaced == 'Z')) {
+    uVar5 = f33_record8_confirmation_warmup_count + 1;
+    puVar4 = ((undefined *)camry_host_ptr(0xfebeb800u));
+    if (DAT_000af428 < (ushort)(f33_record8_confirmation_warmup_count + 1)) {
+      uVar5 = uVar1;
+      if (DAT_000af432 < DAT_febeb080) {
+        uStack_d = '\0';
+        uStack_e = 'Z';
+      }
+      else if (DAT_febef001 == 'Z') {
+        f33_step_record8_confirmation_window(&uStack_d,&uStack_e);
+        puVar4 = ((undefined *)camry_host_ptr((uint32_t)(puVar3)));
+      }
+      else {
+        f33_record8_zero_observation_count = 0;
+        f33_record8_nonzero_observation_count = 0;
+        f33_record8_invalid_observation_count = 0;
+        f33_record8_confirmation_window_count = 0;
+      }
+    }
+    *(ushort *)(puVar4 + 0x706) = uVar5;
+  }
+  else {
+    uStack_e = 'Z';
+  }
+  if ((uVar2 == '\0') && (uStack_e == 'Z')) {
+    FUN_000bd86e(uStack_d);
+  }
+  puVar4[0x705] = uStack_d;
+  puVar4[0x704] = uStack_e;
+  return;
+}
+
+
+
 /* CallBF18AonlyACEE==5A;closedgatefreezesallstate.
    Calledmode>=0101beforeoptionalhealthsourcecachegeneration. Native steady-prefix compositions
    distinguish entry199/200 qualification delay, fixed markers, unsigned scaling and gated record8

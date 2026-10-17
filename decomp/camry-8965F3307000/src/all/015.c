@@ -953,6 +953,32 @@ undefined4 FUN_0005578c(uint param_1)
 
 
 
+uint FUN_00055858(undefined2 param_1,int param_2,uint param_3)
+
+{
+  uint32_t puVar1;
+  int iVar2;
+  uint uVar3;
+  
+  puVar1 = 0xfebeb800u;
+  uVar3 = 0;
+  if ((DAT_febe86e6 != 0x1111) && (DAT_febe86e6 != 0x2222)) {
+    puVar1 = 0xfebeb800u;
+    uVar3 = FUN_00055836(param_1,param_2,((undefined *)camry_host_ptr(0xfebe86e4u)));
+  }
+  if (((*((short *)camry_host_ptr((uint32_t)(puVar1 + -0x317a)))) != 0x1111) && ((*((short *)camry_host_ptr((uint32_t)(puVar1 + -0x317a)))) != 0x2222)) {
+    iVar2 = FUN_00055836(param_1, uVar3 + param_2, ((undefined *)camry_host_ptr((uint32_t)(puVar1 + -0x317c))));
+    uVar3 = uVar3 + iVar2;
+  }
+  iVar2 = uVar3 - (param_3 & 0xffff);
+  if (iVar2 < 0 == ((int)uVar3 < 0 && -1 < iVar2) && uVar3 != (param_3 & 0xffff)) {
+    uVar3 = 0xffffffff;
+  }
+  return uVar3;
+}
+
+
+
 uint FUN_00055a76(undefined2 param_1,undefined2 param_2,int param_3,uint param_4)
 
 {
@@ -1087,6 +1113,15 @@ void f33_return_only_stub_564cc(void)
 
 {
   return;
+}
+
+
+
+F33CaptureFieldDescriptor * FUN_00056664(undefined2 *param_1)
+
+{
+  *param_1 = 0x4b;
+  return f33_capture_field_descriptor;
 }
 
 

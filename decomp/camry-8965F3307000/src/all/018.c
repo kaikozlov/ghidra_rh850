@@ -879,6 +879,68 @@ void FUN_000611ee(void)
 
 
 
+/* 389E5A admits local four-halfword MMIO read, CRC and6000 header check. At25 failed admitted
+   updates latch3840; healthy publication does not clear an already latched fault. Hardware packet
+   availability remains an explicit boundary. Local four-halfword MMIO packet, seven-byte CRC
+   and6000 header admission;25 failed admitted updates latch3840, healthy publication does not clear
+   latch. Real hardware availability unexecuted. */
+
+void f33_update_local_status_packet(void)
+
+{
+  ushort uVar1;
+  uint32_t puVar2;
+  int iVar3;
+  uint uVar4;
+  char cVar5;
+  char cVar6;
+  
+  puVar2 = 0xfebeb800u;
+  if (DAT_febe389e == 'Z') {
+    iVar3 = camry_host_addr(FUN_0006131c(((undefined *)camry_host_ptr(0xfebe382cu))));
+    cVar6 = 'D';
+    if (iVar3 == 0) {
+      uVar4 = FUN_000611fa(((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x7fd4))));
+      if ((byte)(*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x7fce)))) == uVar4) {
+        uVar1 = (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x7fd4)))) & 0xe000;
+        if (uVar1 == 0x6000) {
+          (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x7fc8)))) = (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x7fd4))));
+          (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x7fc2)))) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x7fce))));
+          cVar6 = '\0';
+          (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x7fc6)))) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x7fd2))));
+          (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x7fc4)))) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x7fd0))));
+        }
+        else {
+          cVar6 = '3';
+          if (uVar1 == 0x8000) {
+            cVar6 = '\"';
+          }
+        }
+      }
+      else {
+        cVar6 = '\x11';
+      }
+    }
+    cVar5 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x7fc0)))));
+    uVar1 = (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x7fcc))));
+    if (cVar5 != 'Z') {
+      if (cVar6 == '\0') {
+        uVar1 = 0;
+        cVar5 = '\0';
+      }
+      else if ((DAT_000315c8 <= uVar1) || (uVar1 = uVar1 + 1, DAT_000315c8 <= uVar1)) {
+        cVar5 = 'Z';
+      }
+    }
+    (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x7fcc)))) = uVar1;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x7fc0))))) = cVar5;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x7fca))))) = cVar6;
+  }
+  return;
+}
+
+
+
 byte FUN_000614b0(void)
 
 {
@@ -1079,6 +1141,51 @@ void FUN_000616fc(void)
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x7f62))))) = 0;
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x7fae)))) = 0;
   (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x7fb0)))) = (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x7fb0)))) & 0xff00 | uVar3;
+  return;
+}
+
+
+
+void FUN_0006174a(void)
+
+{
+  byte *pbVar1;
+  undefined1 uVar2;
+  uint uVar3;
+  uint32_t puVar4;
+  ushort uVar5;
+  int iVar6;
+  uint uVar7;
+  uint uVar8;
+  
+  puVar4 = 0xfebeb800u;
+  DAT_febe384a = 0x8000;
+  DAT_febe384c = 0;
+  DAT_febe384e = 0x98;
+  DAT_febe3850 = 0;
+  uVar3 = 8;
+  do {
+    pbVar1 = ((undefined *)camry_host_ptr(0xfebe3854u)) + uVar3;
+    uVar7 = uVar3 & 0xf;
+    uVar8 = uVar3 >> 4;
+    uVar3 = uVar3 + 1;
+    (*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe3850u + (uint32_t)(-uVar8) * 2u)))) = (*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe3850u + (uint32_t)(-uVar8) * 2u)))) | (ushort)((*pbVar1 & 1) << uVar7);
+  } while (uVar3 < 0x3d);
+  if (DAT_00031e80 == 'Z') {
+    DAT_febe384a = DAT_00031e78 & (DAT_febe384a | DAT_00031e70);
+    DAT_febe384c = DAT_00031e7a & (DAT_febe384c | DAT_00031e72);
+    DAT_febe384e = DAT_00031e7c & (DAT_febe384e | DAT_00031e74);
+    DAT_febe3850 = DAT_00031e7e & (DAT_febe3850 | DAT_00031e76);
+  }
+  uVar5 = FUN_000611fa(((undefined *)camry_host_ptr(0xfebe384au)));
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar4 + -0x7fb0)))) = (*((ushort *)camry_host_ptr((uint32_t)(puVar4 + -0x7fb0)))) & 0xff00 | uVar5;
+  iVar6 = FUN_00061372(((undefined *)camry_host_ptr((uint32_t)(puVar4 + -0x7fb6))));
+  uVar2 = 0;
+  if (iVar6 == 0) {
+    uVar2 = 0x5a;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x7f62))))) = uVar2;
+  (*((short *)camry_host_ptr((uint32_t)(puVar4 + -0x7fae)))) = (short)iVar6;
   return;
 }
 

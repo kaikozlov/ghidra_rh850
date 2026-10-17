@@ -2626,6 +2626,38 @@ void f33_boot_image_crypto_clear(void)
 
 
 
+/* Select fixed descriptor trailer; feed configured IV2CF8 as NONFINAL16-byte CMAC prefix into2D28;
+   on success seed cursor=start and last_block=start+length-16. Return0/1. No
+   length-multiple/minimum/alignment validation; context must already be initialized. Trailer is
+   stored even if prefix update fails. */
+
+uint f33_boot_image_authentication_begin(uint start,uint length)
+
+{
+  uint32_t puVar1;
+  uint uVar2;
+  uint uVar3;
+  uint uStack_14;
+  
+  puVar1 = 0xfebf9800u;
+  uVar3 = 1;
+  uVar2 = f33_boot_lookup_authentication_trailer(start,length,&uStack_14);
+  if (uVar2 == 0) {
+    (*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x6754)))) = uStack_14;
+    uVar2 = f33_boot_aes128_cmac_update_block
+                      (((undefined *)camry_host_ptr((uint32_t)(puVar1 + -0x6b08))), ((undefined *)camry_host_ptr((uint32_t)(puVar1 + -0x6ad8))), '\x10', 0, 
+                       ((F33BootAes128CmacContext *)camry_host_ptr((uint32_t)(puVar1 + -0x6c00))));
+    if (uVar2 == 0) {
+      (*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x6750)))) = start;
+      (*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x6758)))) = length + start + -0x10;
+      uVar3 = 0;
+    }
+  }
+  return uVar3;
+}
+
+
+
 void FUN_00007208(int param_1)
 
 {

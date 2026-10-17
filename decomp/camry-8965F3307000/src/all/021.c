@@ -1055,3 +1055,18 @@ void FUN_00087ef6(char param_1)
 }
 
 
+
+void FUN_00087f22(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  f33_memzero(((undefined *)camry_host_ptr(0xfebf10f4u)),0x78);
+  f33_memzero(((undefined *)camry_host_ptr((uint32_t)(puVar1 + 0x58d8))), 8);
+  (*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + 0x58e4)))) = 0xffffffff;
+  (*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + 0x58e0)))) = 0xffffffff;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x58f0))))) = 0xd2;
+  return;
+}
+
+

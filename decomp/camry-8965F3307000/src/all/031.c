@@ -108,41 +108,6 @@ void f33_filter_established_estimator_difference
 
 
 
-/* WARNING: Removing unreachable block (ram,0x000c417e) */
-/* Start from C0B4, not oldBFEC. Below curve ceiling60000, increment if candidate changed or wrapped
-   abs32(candidate-C080)<AE38/1024. Otherwise retain the input count, even above the ceiling.
-   Publish BFEC and diagnostic ceilingC066. Count starts fromC0B4 rather thanBFEC. Below flat60000
-   ceiling increment for changed candidate or strict center band; ceiling gates increment rather
-   than clamping. */
-
-void f33_advance_estimator_source_count(int candidate,int previous)
-
-{
-  int iVar1;
-  uint32_t puVar2;
-  uint uVar3;
-  int iVar4;
-  ushort uVar5;
-  uint uVar6;
-  
-  uVar5 = DAT_febec0b4;
-  puVar2 = 0xfebeb800u;
-  uVar6 = (uint)DAT_febec0b4;
-  uVar3 = FUN_000d0896(((undefined *)camry_host_ptr(0xaf7bau)),DAT_febeadf4);
-  iVar4 = f33_abs_s32_wrapping(candidate - (*((int *)camry_host_ptr((uint32_t)(puVar2 + 0x880)))));
-  iVar1 = (int)(f33_estimator_tracking_band_scale * (uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x9c8))))) / 0x400;
-  if ((uVar6 < uVar3) &&
-     ((iVar4 - iVar1 < 0 != (iVar4 < 0 != iVar1 < 0 && iVar1 < 0 == iVar4 - iVar1 < 0) ||
-      (candidate != previous)))) {
-    uVar5 = uVar5 + 1;
-  }
-  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0x7ec)))) = uVar5;
-  (*((short *)camry_host_ptr((uint32_t)(puVar2 + 0x866)))) = (short)uVar3;
-  return;
-}
-
-
-
 /* With BFC5==0, first copyC0B4->BFEE. QualifiersC045/C044/C042=5A, AD18=11 and unsignedADF4>=3840
    publishC074=low32(BF78-BFD4) and increment u16C064. Only count>100 runs bounded
    filter/source-count update, then pins100. Failed qualification resets warmup but holds
@@ -366,6 +331,63 @@ void f33_classify_estimator_source_band(void)
     }
   }
   DAT_febec06e = 0;
+  return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x000c44b4) */
+/* BFC5==0 andBFF0==5A compute low32 residualBF78-BFD4-C080. First C06F0 call latches C06E->C08B
+   andC06F5A without adopting the filter. Later calls adoptC04C and current band only when wrapped
+   abs32(residual)<=480*AE38/1024. Closed gate clears center only, retaining C06F/C08B/C05C. This is
+   separate from AD13's outer publication gate. First admitted call latches initialization/class
+   without center adoption. Later inclusive residual band adopts filter; closed source gate clears
+   only center. Distinct from outer publication gate. */
+
+void f33_follow_estimator_center(void)
+
+{
+  int value;
+  int iVar1;
+  undefined1 uVar2;
+  undefined *puVar3;
+  int iVar5;
+  int iVar6;
+  undefined1 uVar7;
+  char cVar8;
+  uint32_t puVar4;
+  uVar7 = DAT_febec08b;
+  iVar6 = DAT_febec080;
+  cVar8 = DAT_febec06f;
+  uVar2 = DAT_febec06e;
+  puVar4 = 0xfebeb800u;
+  puVar3 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  if ((DAT_febebfc5 == '\0') && (DAT_febebff0 == 'Z')) {
+    value = (DAT_febebf78 - DAT_febebfd4) - DAT_febec080;
+    if (DAT_febec06f == '\0') {
+      cVar8 = 'Z';
+      uVar7 = uVar2;
+      puVar3 = ((undefined *)camry_host_ptr(0xfebeb800u));
+    }
+    else {
+      iVar5 = f33_abs_s32_wrapping(value);
+      iVar1 = (int)(f33_estimator_center_adoption_scale * (uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar4 + -0x9c8))))) /
+              0x400;
+      puVar3 = ((undefined *)camry_host_ptr((uint32_t)(puVar4)));
+      if (iVar5 - iVar1 < 0 != (iVar5 < 0 != iVar1 < 0 && iVar1 < 0 == iVar5 - iVar1 < 0) ||
+          iVar5 == iVar1) {
+        iVar6 = (*((int *)camry_host_ptr((uint32_t)(puVar4 + 0x84c))));
+        uVar7 = uVar2;
+      }
+    }
+    *(int *)(puVar3 + 0x85c) = value;
+    puVar3[0x88b] = uVar7;
+    puVar3[0x86f] = cVar8;
+  }
+  else {
+    iVar6 = 0;
+  }
+  *(int *)(puVar3 + 0x880) = iVar6;
   return;
 }
 

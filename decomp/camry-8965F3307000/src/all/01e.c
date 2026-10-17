@@ -2343,6 +2343,18 @@ void FUN_0007a1b4(void)
 
 
 
+void FUN_0007a30e(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0x23dfcu;
+  FUN_0007b3a6();
+  FUN_0007b2c4(((undefined *)camry_host_ptr((uint32_t)(puVar1 + -0x118c))));
+  return;
+}
+
+
+
 F33CanTpConfiguration * FUN_0007a32e(void)
 
 {

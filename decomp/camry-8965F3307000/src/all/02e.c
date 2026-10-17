@@ -1744,6 +1744,84 @@ LAB_000b90c2:
 
 
 
+undefined4 FUN_000b90ca(uint param_1,byte param_2)
+
+{
+  int iVar1;
+  undefined *puVar2;
+  int iVar4;
+  char cVar5;
+  undefined4 uVar6;
+  char cVar7;
+  byte bVar8;
+  uint32_t puVar3;
+  iVar1 = DAT_febef208;
+  bVar8 = DAT_febeb496;
+  cVar7 = DAT_febeb495;
+  puVar3 = 0xfebeb800u;
+  puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  iVar4 = 0;
+  cVar5 = DAT_febeb494;
+  if (((DAT_febeb11a & 0xff00) == 0x100) || ((DAT_febeb11a & 0xff00) == 0x900)) {
+    uVar6 = 0xfffffffa;
+    goto LAB_000b917c;
+  }
+  if (DAT_febeb495 == 'Z') {
+    if (DAT_febef00f == 'D') {
+      uVar6 = 0;
+      cVar7 = '\0';
+      goto LAB_000b917c;
+    }
+    uVar6 = 0xffffffff;
+    if (DAT_febef00f == '\x11') goto LAB_000b917c;
+    uVar6 = 0xfffffff7;
+    cVar7 = '\0';
+    puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+LAB_000b916e:
+    if (iVar4 != 0x5a) goto LAB_000b917c;
+  }
+  else {
+    uVar6 = 0xffffffff;
+    puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+    if ((param_1 & 0x11) == 0x11) {
+      if (DAT_febef210 == 0) {
+        iVar4 = 0x5a;
+      }
+      else {
+        if (DAT_febeb494 == '\0') {
+          puVar3 = 0xfebeb800u;
+          thunk_FUN_00034bce();
+          cVar5 = 'Z';
+        }
+        iVar4 = 0;
+        puVar2 = ((undefined *)camry_host_ptr((uint32_t)(puVar3)));
+        bVar8 = bVar8 | param_2;
+      }
+    }
+    if ((param_1 & 0x22) != 0x22) goto LAB_000b916e;
+    if (iVar1 != 0) {
+      if (cVar7 == '\0') {
+        thunk_FUN_0003599e();
+        cVar7 = 'Z';
+        puVar2[-0x369] = 0x5a;
+        puVar2[-0x368] = param_2;
+      }
+      bVar8 = bVar8 | param_2;
+      goto LAB_000b917c;
+    }
+  }
+  if (param_2 == 1 || param_2 == 2) {
+    uVar6 = 0;
+  }
+LAB_000b917c:
+  puVar2[-0x36c] = cVar5;
+  puVar2[-0x36b] = cVar7;
+  puVar2[-0x36a] = bVar8;
+  return uVar6;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */

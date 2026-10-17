@@ -899,6 +899,108 @@ def _rewrite_base_address_sums(code: str, names: set[str]) -> str:
     return pattern.sub(replace, code)
 
 
+def _top_level_address(expr: str, names: set[str]) -> bool:
+    """True when the expression is a firmware base or base+/-offset, not a compare."""
+    text = expr.strip()
+    if "camry_host_ptr" in text or not text:
+        return False
+    while text.startswith("(") and text.endswith(")"):
+        try:
+            if _match_paren(text, 0) != len(text) - 1:
+                break
+        except ValueError:
+            break
+        text = text[1:-1].strip()
+    if any(re.fullmatch(name, text) for name in names):
+        return True
+    depth = 0
+    adds = False
+    other = False
+    for index, char in enumerate(text):
+        if char in "([{":
+            depth += 1
+        elif char in ")]}":
+            depth -= 1
+        elif depth != 0 or index == 0:
+            continue
+        elif char in "+-" and text[index - 1] not in "+-<>(":
+            adds = True
+        elif char in "<>!&|=?":
+            other = True
+    if other or not adds:
+        return False
+    return any(re.search(rf"\b{name}\b", text) for name in names)
+
+
+def _split_args(arguments: str) -> list[str]:
+    parts: list[str] = []
+    start = 0
+    depth = 0
+    for index, char in enumerate(arguments):
+        if char in "([{":
+            depth += 1
+        elif char in ")]}":
+            depth -= 1
+        elif char == "," and depth == 0:
+            parts.append(arguments[start:index])
+            start = index + 1
+    parts.append(arguments[start:])
+    return parts
+
+
+def _wrap_base_pointer_uses(code: str, names: set[str]) -> str:
+    """A uint32 firmware base passed or stored as a pointer is that address."""
+    if not names:
+        return code
+    pointers = {
+        match.group(1)
+        for match in re.finditer(
+            r"^\s*[A-Za-z_][A-Za-z0-9_ \t]*\*\s*([A-Za-z_][A-Za-z0-9_]*)\s*;\s*$",
+            code,
+            flags=re.M,
+        )
+    } - names
+
+    def wrap(expr: str) -> str:
+        return f"((undefined *)camry_host_ptr((uint32_t)({expr.strip()})))"
+
+    def assign(match: re.Match[str]) -> str:
+        lhs, rhs = match.group(1), match.group(2)
+        if lhs not in pointers or not _top_level_address(rhs, names):
+            return match.group(0)
+        return f"{lhs} = {wrap(rhs)};"
+
+    code = re.sub(
+        r"(?<![=<>!])\b([A-Za-z_][A-Za-z0-9_]*)\s*=(?!=)\s*([^;]*);",
+        assign,
+        code,
+    )
+
+    def wrap_calls(text: str) -> str:
+        pieces: list[str] = []
+        cursor = 0
+        for match in _CALL.finditer(text):
+            if match.start() < cursor or match.group(1) in _SKIP_CALLS:
+                continue
+            try:
+                close = _match_paren(text, match.end() - 1)
+            except ValueError:
+                continue
+            inner = wrap_calls(text[match.end():close])
+            args = _split_args(inner)
+            if any(_top_level_address(arg, names) for arg in args):
+                inner = ", ".join(
+                    wrap(arg) if _top_level_address(arg, names) else arg for arg in args
+                )
+            pieces.append(text[cursor:match.end()])
+            pieces.append(inner)
+            cursor = close
+        pieces.append(text[cursor:])
+        return "".join(pieces)
+
+    return wrap_calls(code)
+
+
 def _rewrite_firmware_bases(code: str) -> str:
     bases = _firmware_base_locals(code)
     if not bases:
@@ -916,8 +1018,10 @@ def _rewrite_firmware_bases(code: str) -> str:
             f"{name} = 0x{address:x}u;",
             code,
         )
-    code = _rewrite_base_subscripts(code, set(bases))
-    return _rewrite_base_address_sums(code, set(bases))
+    names = set(bases)
+    code = _rewrite_base_subscripts(code, names)
+    code = _rewrite_base_address_sums(code, names)
+    return _wrap_base_pointer_uses(code, names)
 
 
 def _rewrite_body(code: str) -> str:
@@ -991,6 +1095,8 @@ def _data_layouts() -> dict[str, tuple[int, str, bool]]:
             if element in _ARRAY_ELEMENTS:
                 ctype, _scale = _ARRAY_ELEMENTS[element]
                 found[row["name"]] = (addr, ctype, True)
+            elif re.fullmatch(r"[A-Z][A-Za-z0-9_]*", element):
+                found[row["name"]] = (addr, element, True)
             else:
                 found[row["name"]] = (addr, "uint8_t", False)
             continue
@@ -1205,6 +1311,9 @@ def _render_corpus(selected: dict[int, dict]) -> str:
         "",
     ]
     types = set(re.findall(r"\b([A-Z][A-Za-z0-9_]*)\s*\*", text))
+    for _name, (_addr, ctype, _is_array) in _data_layouts().items():
+        if re.fullmatch(r"[A-Z][A-Za-z0-9_]*", ctype):
+            types.add(ctype)
     for name in sorted(types):
         if name in _PRIMITIVE_TYPES or name in registers or name in data:
             continue
@@ -1354,6 +1463,9 @@ def _common_header(text: str, signatures: dict[str, str]) -> str:
         "",
     ]
     types = set(re.findall(r"\b([A-Z][A-Za-z0-9_]*)\s*\*", text))
+    for _name, (_addr, ctype, _is_array) in _data_layouts().items():
+        if re.fullmatch(r"[A-Z][A-Za-z0-9_]*", ctype):
+            types.add(ctype)
     emitted = False
     for name in sorted(types):
         if name in _PRIMITIVE_TYPES or name in registers or name in data or name in function_names:

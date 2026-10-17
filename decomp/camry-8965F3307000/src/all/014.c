@@ -566,6 +566,18 @@ void FUN_00050916(undefined1 param_1,undefined2 param_2,undefined2 param_3)
 
 
 
+/* Write exact count242 and return2927C, including leading0100/4FB10. Metadata membership is
+   distinct from kind0 plus current availability admission. */
+
+F33DidPublicationMetadata * f33_get_did_publication_metadata(ushort *count)
+
+{
+  *count = 0xf2;
+  return f33_did_publication_metadata;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */

@@ -950,6 +950,105 @@ void f33_begin_execution_profile_slot5(void)
 
 
 
+/* End slot2, exit adjustment4, parent adjustment117. Eight-entry u16 exclusive/inclusive
+   rings8D84/8D94. Exclusive subtracts accumulated child ticks modulo32; narrow u16 where
+   specified.31911==5A retains maximum independently per output; otherwise overwrite. No
+   timing-budget enforcement. */
+
+void f33_end_execution_profile_slot2(void)
+
+{
+  int iVar1;
+  ushort uVar2;
+  uchar uVar3;
+  uint32_t puVar4;
+  undefined *puVar5;
+  uint uVar6;
+  uint uVar7;
+  ushort uVar8;
+  int iVar9;
+  
+  puVar4 = 0xfebeb800u;
+  uVar6 = f33_priority_mask_enter(0xffc0);
+  uVar7 = f33_end_execution_profile('\x02',4,0x75);
+  iVar9 = (*((int *)camry_host_ptr((uint32_t)(puVar4 + -0x2a9c))));
+  puVar5 = ((undefined *)camry_host_ptr((uint32_t)(puVar4)));
+  f33_priority_mask_restore(uVar6);
+  uVar3 = f33_execution_profile_peak_hold;
+  uVar6 = (byte)puVar5[-0x2a5b] + 1 & 7;
+  puVar5[-0x2a5b] = (byte)uVar6;
+  iVar1 = uVar6 * 2;
+  uVar6 = uVar7 & 0xffff;
+  uVar8 = (ushort)(uVar7 - iVar9);
+  if (uVar3 == 'Z') {
+    uVar7 = uVar7 - iVar9 & 0xffff;
+    uVar2 = (*((ushort *)camry_host_ptr((uint32_t)(puVar4 + iVar1 + -0x2a7c))));
+    if (-1 < (int)(uVar2 - uVar7) && uVar2 != uVar7) {
+      uVar8 = uVar2;
+    }
+    (*((ushort *)camry_host_ptr((uint32_t)(puVar4 + iVar1 + -0x2a7c)))) = uVar8;
+    uVar7 = (uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar4 + iVar1 + -0x2a6c))));
+    if (-1 < (int)(uVar7 - uVar6) && uVar7 != uVar6) {
+      uVar6 = uVar7;
+    }
+  }
+  else {
+    (*((ushort *)camry_host_ptr((uint32_t)(puVar4 + iVar1 + -0x2a7c)))) = uVar8;
+  }
+  (*((short *)camry_host_ptr((uint32_t)(puVar4 + iVar1 + -0x2a6c)))) = (short)uVar6;
+  return;
+}
+
+
+
+/* End slot3, exit adjustment2, parent adjustment117. Ten-entry u32 exclusive/inclusive
+   rings8C60/8CCC. Exclusive subtracts accumulated child ticks modulo32; narrow u16 where
+   specified.31911==5A retains maximum independently per output; otherwise overwrite. No
+   timing-budget enforcement. */
+
+void f33_end_execution_profile_slot3(void)
+
+{
+  uint *puVar1;
+  uint uVar2;
+  uint32_t puVar3;
+  undefined *puVar4;
+  uint saved_mask;
+  uint uVar5;
+  int iVar6;
+  
+  puVar3 = 0xfebeb800u;
+  saved_mask = f33_priority_mask_enter(0xffc0);
+  uVar5 = f33_end_execution_profile('\x03',2,0x75);
+  uVar2 = uVar5 - (*((int *)camry_host_ptr((uint32_t)(puVar3 + -0x2a98))));
+  puVar4 = ((undefined *)camry_host_ptr((uint32_t)(puVar3)));
+  f33_priority_mask_restore(saved_mask);
+  if ((byte)puVar4[-0x2a5a] < 9) {
+    iVar6 = (byte)puVar4[-0x2a5a] + 1;
+  }
+  else {
+    iVar6 = 0;
+  }
+  puVar4[-0x2a5a] = (char)iVar6;
+  puVar1 = ((uint *)camry_host_ptr((uint32_t)(puVar3 + iVar6 * 4 + -0x2ba0)));
+  if (f33_execution_profile_peak_hold == 'Z') {
+    if (uVar2 < *puVar1) {
+      uVar2 = *puVar1;
+    }
+    *puVar1 = uVar2;
+    if (uVar5 < puVar1[0x1b]) {
+      uVar5 = puVar1[0x1b];
+    }
+  }
+  else {
+    *puVar1 = uVar2;
+  }
+  (*((uint *)camry_host_ptr((uint32_t)(puVar3 + iVar6 * 4 + -0x2b34)))) = uVar5;
+  return;
+}
+
+
+
 /* End slot4, exit adjustment64, parent adjustment154. Single u32 exclusive/inclusive
    samples8C88/8CF4. Exclusive subtracts accumulated child ticks modulo32; narrow u16 where
    specified.31911==5A retains maximum independently per output; otherwise overwrite. No
@@ -981,6 +1080,48 @@ void f33_end_execution_profile_slot4(void)
     (*((uint *)camry_host_ptr((uint32_t)(puVar2 + -0x2b78)))) = uVar1;
   }
   (*((uint *)camry_host_ptr((uint32_t)(puVar2 + -0x2b0c)))) = uVar3;
+  return;
+}
+
+
+
+/* End slot5, exit adjustment68, parent adjustment118. Sixteen-entry u32 exclusive/inclusive
+   rings8C8C/8CF8. Exclusive subtracts accumulated child ticks modulo32; narrow u16 where
+   specified.31911==5A retains maximum independently per output; otherwise overwrite. No
+   timing-budget enforcement. */
+
+void f33_end_execution_profile_slot5(void)
+
+{
+  int iVar1;
+  uint uVar2;
+  uint32_t puVar3;
+  undefined *puVar4;
+  uint uVar5;
+  uint uVar6;
+  
+  puVar3 = 0xfebeb800u;
+  uVar5 = f33_priority_mask_enter(0xffc0);
+  uVar6 = f33_end_execution_profile('\x05',0x44,0x76);
+  uVar2 = uVar6 - (*((int *)camry_host_ptr((uint32_t)(puVar3 + -0x2a90))));
+  puVar4 = ((undefined *)camry_host_ptr((uint32_t)(puVar3)));
+  f33_priority_mask_restore(uVar5);
+  uVar5 = (byte)puVar4[-0x2a59] + 1 & 0xf;
+  puVar4[-0x2a59] = (byte)uVar5;
+  iVar1 = uVar5 * 4;
+  if (f33_execution_profile_peak_hold == 'Z') {
+    if (uVar2 < (*((uint *)camry_host_ptr((uint32_t)(puVar3 + iVar1 + -0x2b74))))) {
+      uVar2 = (*((uint *)camry_host_ptr((uint32_t)(puVar3 + iVar1 + -0x2b74))));
+    }
+    (*((uint *)camry_host_ptr((uint32_t)(puVar3 + iVar1 + -0x2b74)))) = uVar2;
+    if (uVar6 < (*((uint *)camry_host_ptr((uint32_t)(puVar3 + iVar1 + -0x2b08))))) {
+      uVar6 = (*((uint *)camry_host_ptr((uint32_t)(puVar3 + iVar1 + -0x2b08))));
+    }
+  }
+  else {
+    (*((uint *)camry_host_ptr((uint32_t)(puVar3 + iVar1 + -0x2b74)))) = uVar2;
+  }
+  (*((uint *)camry_host_ptr((uint32_t)(puVar3 + iVar1 + -0x2b08)))) = uVar6;
   return;
 }
 
@@ -1079,6 +1220,48 @@ uint f33_read_execution_profile_slot5(void)
   iVar3 = (*((int *)camry_host_ptr((uint32_t)(puVar1 + -0x2a90))));
   f33_priority_mask_restore(saved_mask);
   return uVar2 - iVar3;
+}
+
+
+
+/* Reset four task-rate records at8DB0 and four DMA records at8DC0. DMA phase/sum/max become0 and
+   minFFFF; byte1 is untouched. */
+
+void f33_initialize_task_progress_supervision(void)
+
+{
+  undefined1 *puVar1;
+  int iVar2;
+  uint uVar3;
+  uint32_t puVar4;
+  puVar4 = 0xfebeb800u;
+  f33_reset_task_rate_window(f33_task_rate_windows);
+  f33_reset_task_rate_window(((F33TaskRateWindow *)camry_host_ptr((uint32_t)(puVar4 + -0x2a4c))));
+  f33_reset_task_rate_window(((F33TaskRateWindow *)camry_host_ptr((uint32_t)(puVar4 + -0x2a48))));
+  f33_reset_task_rate_window(((F33TaskRateWindow *)camry_host_ptr((uint32_t)(puVar4 + -0x2a44))));
+  uVar3 = 0;
+  do {
+    iVar2 = uVar3 * 8;
+    uVar3 = uVar3 + 1;
+    puVar1 = ((undefined *)camry_host_ptr((uint32_t)(puVar4 + iVar2 + -0x2a40)));
+    *puVar1 = 0;
+    *(undefined2 *)(puVar1 + 2) = 0;
+    *(undefined2 *)(puVar1 + 4) = 0;
+    *(undefined2 *)(puVar1 + 6) = 0xffff;
+  } while (uVar3 < 4);
+  return;
+}
+
+
+
+/* Apply real task-rate increment/upper-bound guard to state8DB0 using ROM30DC0. Runs before the
+   corresponding task body. */
+
+void f33_record_ch0_dispatch(void)
+
+{
+  f33_record_supervised_task_dispatch(f33_task_rate_windows,f33_task_rate_policies);
+  return;
 }
 
 
@@ -1683,53 +1866,6 @@ void FUN_00066b04(undefined1 param_1,undefined1 param_2,undefined2 param_3)
 
 
 
-/* Snapshot family phases before repairing0670/10A8/10CC with fallback0. Decoded5A returns0. Idle
-   acquisition with an active phase selects2 for family1 before1 for family0. Otherwise step66B16;
-   busy preserves current work. On idle completion,67B58==1 selects2, else 6740A==1 selects1, else
-   preserve work. Native hold repair/fallback and phase priority; request selectors have separate
-   native edge proofs. Decoded5A suppresses selection/progression. Idle acquisition with active
-   phase chooses family1 work2 ahead of family0 work1. Otherwise step acquisition; busy preserves
-   low8 current work, idle tries67B58 then6740A. Native repair/fallback and phase-priority branches;
-   request selectors have separate native edge proofs; complete initialized physical acquisition
-   remains separate. */
-
-uint f33_nvm_select_acquisition_work(uchar current_work)
-
-{
-  uint32_t puVar1;
-  uint uVar2;
-  uint uVar3;
-  uint uVar4;
-  
-  puVar1 = 0xfebeb800u;
-  uVar2 = f33_nvm_get_family0_phase();
-  uVar3 = f33_nvm_get_family1_phase();
-  uVar4 = f33_read_repair_redundant_u8(puVar1 + 0x4e70,puVar1 + 0x58a8,puVar1 + 0x58cc,'\0');
-  if (uVar4 == 0x5a) {
-    return 0;
-  }
-  if (((uVar2 == 0) && (uVar3 == 0)) || ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x4e73))))) != '\0')) {
-    uVar2 = f33_nvm_step_acquisition_pass();
-    if (uVar2 != 0) {
-      return (uint)current_work;
-    }
-    uVar2 = f33_nvm_select_family1_request();
-    if (uVar2 == 1) {
-      return 2;
-    }
-    uVar2 = f33_nvm_select_family0_request();
-    if (uVar2 != 1) {
-      return (uint)current_work;
-    }
-  }
-  else if (uVar3 != 0) {
-    return 2;
-  }
-  return 1;
-}
-
-
-
 char FUN_00066cc4(char param_1)
 
 {
@@ -1955,6 +2091,85 @@ void FUN_00067346(void)
 
 
 
+/* Recover indices first. Span flag5A calls687DE, ignores return and selects phase11/return1 without
+   dequeue. Empty ring returns0. Otherwise clear state/object but preserve+1, then advance consumer
+   BEFORE object/kind validation. Kind11 calls684D0, selects phase22; 22 always calls6853E,33 only
+   when completion!=5A; both select phase33. Ignore arm return; set active object/status21 and
+   return1. Unknown kind publishes32/returns0 without changing phase/active. Any matching remaining
+   cell overrides status20. Invalid object only consumes cell. Bulk dispatch beyond the
+   computed-span boundary is not proved. Recover indices. Span flag5A selects phase11/return1
+   despite real busy rejection. Ordinary dequeue clears state/object and advances consumer before
+   validation, preserving+1.11 selects read phase22;22 always attempts write,33 only if
+   completion!=5A, both phase33. status21/active/return1. Unknown kind status32/return0 preserves
+   phase/active; invalid object only consumes. Any remaining matching cell overrides20. Family0
+   empty ring does no checksum scan. Bulk operation after6879C remains bounded. */
+
+uint f33_nvm_select_family0_request(void)
+
+{
+  char *pcVar1;
+  char cVar2;
+  ushort object;
+  uint32_t puVar3;
+  uint uVar4;
+  uint uVar5;
+  undefined1 uVar6;
+  undefined1 uVar7;
+  byte bStack_16;
+  byte bStack_15;
+  
+  puVar3 = 0xfebeb800u;
+  f33_nvm_recover_family0_request_indices(&bStack_16,&bStack_15);
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(0x4e7e))))) == 'Z') {
+    f33_nvm_dispatch_family0_page_span();
+    uVar6 = 0x11;
+    uVar5 = 1;
+    goto LAB_000674ca;
+  }
+  uVar6 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(0x4e80)))));
+  uVar5 = 0;
+  if ((uint)bStack_16 == (uint)bStack_15) goto LAB_000674ca;
+  pcVar1 = ((undefined *)camry_host_ptr((uint32_t)(puVar3 + (uint)bStack_15 * 4 + 0x4c88)));
+  object = *(ushort *)(pcVar1 + 2);
+  cVar2 = *pcVar1;
+  pcVar1[2] = -1;
+  pcVar1[3] = -1;
+  *pcVar1 = -1;
+  uVar4 = f33_nvm_advance_family0_request_index(bStack_15);
+  bStack_15 = (byte)uVar4;
+  if ((uint)f33_nvm_family0_object_count <= (uint)object) goto LAB_000674ca;
+  if (cVar2 == '\x11') {
+    f33_nvm_arm_family0_read(object);
+    uVar6 = 0x22;
+LAB_000674aa:
+    uVar7 = 0x21;
+    (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + 0x4e82)))) = object;
+    uVar5 = 1;
+  }
+  else {
+    if ((cVar2 == '\"') || (cVar2 == '3')) {
+      uVar5 = f33_nvm_get_family0_completion(object);
+      if ((cVar2 == '\"') || (uVar5 != 0x5a)) {
+        f33_nvm_arm_family0_write(object);
+      }
+      uVar6 = 0x33;
+      goto LAB_000674aa;
+    }
+    uVar7 = 0x32;
+  }
+  uVar4 = f33_nvm_family0_has_request_cell(object);
+  if (uVar4 == 1) {
+    uVar7 = 0x20;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(object + 0x4b08))))) = uVar7;
+LAB_000674ca:
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(0x4e80))))) = uVar6;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(0x4e7b))))) = bStack_15;
+  return uVar5;
+}
+
+
+
 /* Truncate both indices to low8. Return producer+1==(consumer==0?ROM cell_count65:consumer). No
    cell inspection; reserves one cell. */
 
@@ -2042,6 +2257,82 @@ void FUN_00067a52(void)
 
 {
   f33_nvm_family1_scan_cursor = 0;
+  return;
+}
+
+
+
+/* Snapshot phase/object and queue indices. Phase11 sets0688=A5. Valid phase22/33 completion5A
+   publishes checksum seed then status10. Phase22 failure calls68A6C: zero->30, every other
+   result->11; no checksum publication. Phase33 failure increments retry below2, calls 6869E and
+   returns before cleanup regardless rearm result; exhaustion selects31. A matching request cell
+   overrides status to20 after any seed publication. Publish all status planes; clear phase,
+   preserve recovered producer index, set active objectFFFF. Invalid phase/object only cleans up.
+   Native real classifier/cancellation and accepted whole-write retry; explicit FACI events are not
+   physical blankness or programming proof. Phase11 sets0688A5. Valid phase22/33 completion5A
+   publishes seed/status10 before any pending-cell override20. Failed phase22 calls
+   real68A6C/cancellation: zero->30; all nonzero->11, with seeds untouched. Phase33 failure
+   increments retry below2 and returns before cleanup regardless rearm result; Cleanup clears phase,
+   preserves recovered producer and sets active objectFFFF; invalid phase/object skips publication.
+   Native prior boundaries plus composed all-blank/nonblank/blocked failure and accepted three-write
+   retry; explicit FACI inputs are not physical flash proof. */
+
+void f33_nvm_handle_family1_completion(void)
+
+{
+  ushort object;
+  uint32_t puVar1;
+  uint uVar2;
+  uchar uVar3;
+  uint uVar4;
+  uchar uStack_e;
+  uchar uStack_d;
+  
+  object = f33_nvm_family1_active_object;
+  uVar3 = f33_nvm_family1_phase;
+  puVar1 = 0xfebeb800u;
+  uVar4 = (uint)f33_nvm_family1_active_object;
+  f33_nvm_recover_family1_request_indices(&uStack_e,&uStack_d);
+  uVar2 = f33_nvm_get_family1_completion(object);
+  if (uVar3 == '\x11') {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x4e88))))) = 0xa5;
+    goto LAB_00067d82;
+  }
+  if (uVar3 == '\"') {
+    if (f33_nvm_family1_object_count <= uVar4) goto LAB_00067d82;
+    if (uVar2 == 0x5a) goto LAB_00067d38;
+    uVar2 = f33_nvm_classify_family1_pages(object);
+    uVar3 = '\x11';
+    if (uVar2 == 0) {
+      uVar3 = '0';
+    }
+  }
+  else {
+    if ((uVar3 != '3') || (f33_nvm_family1_object_count <= uVar4)) goto LAB_00067d82;
+    if (uVar2 == 0x5a) {
+LAB_00067d38:
+      uVar3 = '\x10';
+      f33_nvm_publish_family1_checksum(object);
+    }
+    else {
+      if ((byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x4e8a))))) < 2) {
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x4e8a))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x4e8a))))) + 1;
+        f33_nvm_submit_family1_write_copies(object);
+        return;
+      }
+      uVar3 = '1';
+    }
+  }
+  uVar2 = f33_nvm_family1_has_request_cell(object);
+  if (uVar2 == 1) {
+    uVar3 = ' ';
+  }
+  f33_publish_redundant_u8
+            (uVar3, ((undefined *)camry_host_ptr((uint32_t)(puVar1 + uVar4 + 0x4b28))), ((undefined *)camry_host_ptr((uint32_t)(puVar1 + uVar4 + 0x5888))), ((undefined *)camry_host_ptr((uint32_t)(puVar1 + uVar4 + 0x58ac))));
+LAB_00067d82:
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x4e89))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x4e86))))) = uStack_e;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + 0x4e8c)))) = 0xffff;
   return;
 }
 
@@ -2136,6 +2427,50 @@ uint f33_nvm_previous_family1_request(uint index)
     uVar1 = (uint)f33_nvm_family1_request_cell_count;
   }
   return uVar1 - 1 & 0xff;
+}
+
+
+
+/* Recover indices before full and low16 object<16 gates. Immediate predecessor kind11/object
+   duplicate returns1 without status publication, even for empty indices. Otherwise store
+   kind/object, advance producer and publish20/75/8A. Recovery can change both globals before
+   rejection; this routine finally republishes producer. No descriptor, completion or busy gate. */
+
+uint f33_nvm_enqueue_family1_read(uint object)
+
+{
+  byte index;
+  uint32_t puVar1;
+  uint uVar2;
+  uint producer;
+  uint uVar3;
+  byte bStack_e;
+  byte bStack_d;
+  
+  puVar1 = 0xfebeb800u;
+  uVar3 = object & 0xffff;
+  f33_nvm_recover_family1_request_indices(&bStack_e,&bStack_d);
+  index = bStack_e;
+  producer = (uint)bStack_e;
+  uVar2 = f33_nvm_family1_request_full(producer,(uint)bStack_d);
+  if ((uVar2 == 1) || (f33_nvm_family1_object_count <= uVar3)) {
+    uVar2 = 0;
+  }
+  else {
+    uVar2 = f33_nvm_previous_family1_request(producer);
+    if (((*((ushort *)camry_host_ptr((uint32_t)(0x4d8cu + (int)(puVar1 + uVar2 * 4) + 2)))) != uVar3) ||
+       ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x4d8cu + (uint32_t)((int)(puVar1 + uVar2 * 4)))))) != (code)0x11)) {
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x4d8cu + (uint32_t)((int)(puVar1 + producer * 4)))))) = (code)0x11;
+      (*((short *)camry_host_ptr((uint32_t)(puVar1 + producer * 4 + 0x4d8e)))) = (short)object;
+      uVar2 = f33_nvm_advance_family1_request_index(index);
+      bStack_e = (byte)uVar2;
+      f33_publish_redundant_u8
+                (' ', ((undefined *)camry_host_ptr((uint32_t)(puVar1 + uVar3 + 0x4b28))), ((undefined *)camry_host_ptr((uint32_t)(puVar1 + uVar3 + 0x5888))), ((undefined *)camry_host_ptr((uint32_t)(puVar1 + uVar3 + 0x58ac))));
+    }
+    uVar2 = 1;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x4e86))))) = bStack_e;
+  return uVar2;
 }
 
 

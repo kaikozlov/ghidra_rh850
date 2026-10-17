@@ -1248,6 +1248,45 @@ uint FUN_00049a98(undefined1 param_1,char param_2,char param_3)
 
 
 
+/* Snapshot8196/81CC;composechannelmonitor;enableonlystate2&&8196!=11&&81CC==5A,otherwiseissuedisableedge.
+   Publish7F3Asoftwarestatus. */
+
+void f33_reconcile_application_normal_network_policy(void)
+
+{
+  undefined1 uVar1;
+  undefined1 uVar2;
+  undefined1 uVar3;
+  uchar uVar4;
+  char cVar5;
+  uint32_t puVar6;
+  undefined *puVar7;
+  ushort uVar8;
+  short sVar9;
+  
+  cVar5 = DAT_febe81cc;
+  uVar4 = f33_diagnostic_normal_tx_policy_request;
+  puVar6 = 0xfebeb800u;
+  FUN_00049918();
+  FUN_0004996e(0);
+  puVar7 = ((undefined *)camry_host_ptr((uint32_t)(puVar6)));
+  if ((((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar6 + (uint32_t)(-0x38d4))))) == '\x02') && (uVar4 != '\x11')) && (cVar5 == 'Z')) {
+    FUN_00049a70(0);
+  }
+  else {
+    FUN_00049a48(0);
+  }
+  uVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar6 + (uint32_t)(-0x38d1)))));
+  uVar2 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar6 + (uint32_t)(-0x38cf)))));
+  uVar3 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar6 + (uint32_t)(-0x38d3)))));
+  uVar8 = FUN_00049a98((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar6 + (uint32_t)(-0x38d4))))),(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar6 + (uint32_t)(-0x38d2))))),(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar6 + (uint32_t)(-0x38d0))))));
+  sVar9 = FUN_00049a98(uVar3,uVar1,uVar2);
+  *(ushort *)(puVar7 + -0x38c6) = uVar8 | sVar9 << 8;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -1560,6 +1599,119 @@ void FUN_00049efe(void)
 void f33_return_only_stub_49f1e(void)
 
 {
+  return;
+}
+
+
+
+/* Configured source qualifier: local0 + predicate22 starts11 and shared mode1. Persistent22 with
+   entry count>=5 selects local22/shared2; entry persistence>=200 selects local44/shared3. Local11
+   resets on any predicate other than22, including inapplicable44. Local22 recovers on11 immediately
+   with configured recovery limit0; predicate44 resets counters only. Local44 recovers only after
+   entry healthy-count>=200; other predicates reset that recovery count. Direct shared7F68 writes
+   are ordered, not a max/OR reduction. */
+
+void f33_advance_dual_source_admission_qualification(void)
+
+{
+  ushort uVar1;
+  ushort uVar2;
+  uint32_t puVar3;
+  uint uVar4;
+  undefined *puVar5;
+  
+  puVar3 = 0xfebeb800u;
+  puVar5 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  if (DAT_febe7f6c == '\0') {
+    uVar4 = f33_classify_dual_internal_source_observations();
+    if (uVar4 != 0x22) {
+      return;
+    }
+    uVar2 = *(short *)(puVar5 + -0x388e) + 1;
+    *(ushort *)(puVar5 + -0x388e) = uVar2;
+    if (*(ushort *)(puVar5 + -0x388c) < uVar2) {
+      *(ushort *)(puVar5 + -0x388c) = uVar2;
+    }
+    puVar5[-0x3894] = 0x11;
+    FUN_0004a3fc();
+    return;
+  }
+  if (DAT_febe7f6c == '\x11') {
+    uVar4 = f33_classify_dual_internal_source_observations();
+    if (uVar4 == 0x22) {
+      uVar2 = (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x388e))));
+      if (DAT_0002bb0c <= uVar2) {
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x3894))))) = 0x22;
+        FUN_0004a40e();
+        return;
+      }
+      (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x388e)))) = uVar2 + 1;
+      if ((ushort)(uVar2 + 1) <= (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x388c))))) {
+        return;
+      }
+      (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x388c)))) = uVar2 + 1;
+      return;
+    }
+    puVar5 = ((undefined *)camry_host_ptr((uint32_t)(puVar3 + -0x3898)));
+    (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x388e)))) = 0;
+  }
+  else if (DAT_febe7f6c == '\"') {
+    uVar4 = f33_classify_dual_internal_source_observations();
+    uVar1 = DAT_0002bb10;
+    uVar2 = DAT_0002bb0e;
+    if (uVar4 == 0x22) {
+      uVar1 = (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x3888))));
+      (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x388a)))) = 0;
+      if (uVar2 <= uVar1) {
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x3894))))) = 0x44;
+        FUN_0004a416();
+        return;
+      }
+      (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x3888)))) = uVar1 + 1;
+      if ((ushort)(uVar1 + 1) <= (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x3886))))) {
+        return;
+      }
+      (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x3886)))) = uVar1 + 1;
+      return;
+    }
+    if (uVar4 != 0x11) {
+      if (uVar4 != 0x44) {
+        return;
+      }
+      (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x3888)))) = 0;
+      (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x388a)))) = 0;
+      return;
+    }
+    puVar5 = ((undefined *)camry_host_ptr((uint32_t)(puVar3 + -0x3898)));
+    (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x3888)))) = 0;
+    if ((*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x388a)))) < uVar1) {
+      (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x388a)))) = (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x388a)))) + 1;
+      return;
+    }
+    (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x388e)))) = 0;
+    (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x388a)))) = 0;
+  }
+  else {
+    if (DAT_febe7f6c != 'D') {
+      return;
+    }
+    uVar4 = f33_classify_dual_internal_source_observations();
+    if (uVar4 != 0x11) {
+      (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x3884)))) = 0;
+      return;
+    }
+    if ((*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x3884)))) < DAT_0002bb12) {
+      (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x3884)))) = (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x3884)))) + 1;
+      return;
+    }
+    puVar5 = ((undefined *)camry_host_ptr((uint32_t)(puVar3 + -0x3898)));
+    (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x388e)))) = 0;
+    (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x388a)))) = 0;
+    (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x3888)))) = 0;
+    (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + -0x3884)))) = 0;
+  }
+  puVar5[4] = 0;
+  FUN_0004a404();
   return;
 }
 
@@ -2919,6 +3071,28 @@ void f33_return_only_stub_4ae70(void)
 
 
 
+void FUN_0004ae72(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  
+  cVar1 = DAT_febe533e;
+  puVar2 = 0xfebeb800u;
+  if ((f33_internal_source_admission_state < 2) && (DAT_febe7ffa != DAT_febe533e)) {
+    puVar2 = 0xfebeb800u;
+    FUN_0007d12a(0x42,0x41,0x10,0,0,((undefined *)camry_host_ptr(0xfebe7ff8u)));
+    FUN_0007d12a(0x43, 0x43, 0x20, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x380c))));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3806))))) = cVar1;
+  uVar3 = f33_get_application_receive_status(1);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3805))))) = uVar3;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -2943,6 +3117,30 @@ void f33_return_only_stub_4aed4(void)
 
 
 
+void FUN_0004aed6(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  
+  cVar1 = DAT_febe533f;
+  puVar2 = 0xfebeb800u;
+  if ((f33_internal_source_admission_state < 2) && (DAT_febe8000 != DAT_febe533f)) {
+    puVar2 = 0xfebeb800u;
+    FUN_0007d12a(0x46,0x49,8,0,0,((undefined *)camry_host_ptr(0xfebe7ffcu)));
+    FUN_0007d12a(0x47, 0x4a, 4, 4, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3803))));
+    FUN_0007d12a(0x48, 0x4a, 4, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3802))));
+    FUN_0007d12a(0x49, 0x4b, 4, 4, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3801))));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3800))))) = cVar1;
+  uVar3 = f33_get_application_receive_status(2);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x37ff))))) = uVar3;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -2962,6 +3160,28 @@ void f33_return_only_stub_4af68(void)
 void f33_return_only_stub_4af6a(void)
 
 {
+  return;
+}
+
+
+
+void FUN_0004af6c(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  
+  cVar1 = DAT_febe5340;
+  puVar2 = 0xfebeb800u;
+  if ((f33_internal_source_admission_state < 2) && (DAT_febe8004 != DAT_febe5340)) {
+    puVar2 = 0xfebeb800u;
+    FUN_0007d12a(0x53,0x52,8,0,0,((undefined *)camry_host_ptr(0xfebe8002u)));
+    FUN_0007d12a(0x55, 0x54, 8, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37fb))));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x37fc))))) = cVar1;
+  uVar3 = f33_get_application_receive_status(3);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x37fd))))) = uVar3;
   return;
 }
 
@@ -3020,6 +3240,28 @@ void f33_return_only_stub_4afea(void)
 
 
 
+void FUN_0004afec(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  
+  cVar1 = DAT_febe534f;
+  puVar2 = 0xfebeb800u;
+  if ((f33_internal_source_admission_state < 2) && (DAT_febe8008 != DAT_febe534f)) {
+    puVar2 = 0xfebeb800u;
+    FUN_0007d12a(0x6e,0xc9,3,0,0,((undefined *)camry_host_ptr(0xfebe8006u)));
+    FUN_0007d12a(0x6a, 0xc9, 1, 6, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37f9))));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x37f8))))) = cVar1;
+  uVar3 = f33_get_application_receive_status(5);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x37f7))))) = uVar3;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -3039,6 +3281,28 @@ void f33_return_only_stub_4b04a(void)
 void f33_return_only_stub_4b04c(void)
 
 {
+  return;
+}
+
+
+
+void FUN_0004b04e(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  
+  cVar1 = DAT_febe5350;
+  puVar2 = 0xfebeb800u;
+  if ((f33_internal_source_admission_state < 2) && (DAT_febe800b != DAT_febe5350)) {
+    puVar2 = 0xfebeb800u;
+    FUN_0007d12a(0x79,0xd1,1,0,0,((undefined *)camry_host_ptr(0xfebe800cu)));
+    FUN_0007d12a(0x76, 0xcf, 1, 4, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37f3))));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x37f5))))) = cVar1;
+  uVar3 = f33_get_application_receive_status(6);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x37f6))))) = uVar3;
   return;
 }
 
@@ -3068,6 +3332,29 @@ void f33_return_only_stub_4b0ae(void)
 
 
 
+void FUN_0004b0b0(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  
+  cVar1 = DAT_febe5351;
+  puVar2 = 0xfebeb800u;
+  if ((f33_internal_source_admission_state < 2) && (DAT_febe8011 != DAT_febe5351)) {
+    puVar2 = 0xfebeb800u;
+    FUN_0007d12a(0x82,0xda,0xb,0,1,((undefined *)camry_host_ptr(0xfebe800eu)));
+    FUN_0007d12a(0x7c, 0xd7, 6, 2, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37ee))));
+    FUN_0007d12a(0x7e, 0xd8, 1, 3, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37ed))));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x37ef))))) = cVar1;
+  uVar3 = f33_get_application_receive_status(7);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x37f0))))) = uVar3;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -3092,6 +3379,28 @@ void f33_return_only_stub_4b12c(void)
 
 
 
+void FUN_0004b12e(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  
+  cVar1 = DAT_febe5352;
+  puVar2 = 0xfebeb800u;
+  if ((f33_internal_source_admission_state < 2) && (DAT_febe8017 != DAT_febe5352)) {
+    puVar2 = 0xfebeb800u;
+    FUN_0007d12a(0x86,0xdf,0x10,0,1,((undefined *)camry_host_ptr(0xfebe8014u)));
+    FUN_0007d12a(0x87, 0xe2, 1, 1, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37ea))));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x37e9))))) = cVar1;
+  uVar3 = f33_get_application_receive_status(8);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x37e8))))) = uVar3;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -3111,6 +3420,28 @@ void f33_return_only_stub_4b190(void)
 void f33_return_only_stub_4b192(void)
 
 {
+  return;
+}
+
+
+
+void FUN_0004b194(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  
+  cVar1 = DAT_febe5353;
+  puVar2 = 0xfebeb800u;
+  if ((f33_internal_source_admission_state < 2) && (DAT_febe801b != DAT_febe5353)) {
+    puVar2 = 0xfebeb800u;
+    FUN_0007d12a(0x8a,0xe7,8,0,0,((undefined *)camry_host_ptr(0xfebe8019u)));
+    FUN_0007d12a(0x8b, 0xe9, 1, 7, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37e6))));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x37e5))))) = cVar1;
+  uVar3 = f33_get_application_receive_status(9);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x37e4))))) = uVar3;
   return;
 }
 
@@ -3185,6 +3516,36 @@ void f33_return_only_stub_4b240(void)
 
 
 
+void FUN_0004b242(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  
+  cVar1 = DAT_febe5355;
+  puVar2 = 0xfebeb800u;
+  if ((f33_internal_source_admission_state < 2) && (DAT_febe802c != DAT_febe5355)) {
+    puVar2 = 0xfebeb800u;
+    FUN_0007d12a(0x90,0xf7,4,4,0,((undefined *)camry_host_ptr(0xfebe8022u)));
+    FUN_0007d12a(0x91, 0xf7, 4, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37dd))));
+    FUN_0007d12a(0x92, 0xf8, 4, 4, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37dc))));
+    FUN_0007d12a(0x93, 0xf8, 1, 3, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37db))));
+    FUN_0007d12a(0x99, 0xfb, 4, 4, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37da))));
+    FUN_0007d12a(0x96, 0xf9, 4, 4, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37d9))));
+    FUN_0007d12a(0x97, 0xf9, 4, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37d8))));
+    FUN_0007d12a(0x94, 0xf8, 2, 1, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37d7))));
+    FUN_0007d12a(0x98, 0xfa, 4, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37d6))));
+    FUN_0007d12a(0x9a, 0xfb, 4, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37d5))));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x37d4))))) = cVar1;
+  uVar3 = f33_get_application_receive_status(0xb);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x37d3))))) = uVar3;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -3204,6 +3565,35 @@ void f33_return_only_stub_4b374(void)
 void f33_return_only_stub_4b376(void)
 
 {
+  return;
+}
+
+
+
+/* Route30classical51E/8;only7F68<2andchanged5356decodefourfields.
+   Alwaysconsume5356->802Eandrefreshstatusselector12->802F,evenwithfrozendecode.802EfeedsF13F/BE7E.
+   Native ECU steady interval consumes route30 generation2 under gate3 without payload decoding,
+   then real58074 publishes generation and duplicated health inputs. */
+
+void f33_refresh_route30_health_inputs(void)
+
+{
+  uint32_t puVar1;
+  uchar uVar2;
+  
+  uVar2 = f33_route30_copy_generation;
+  puVar1 = 0xfebeb800u;
+  if ((f33_internal_source_admission_state < 2) &&
+     (f33_route30_consumed_generation != f33_route30_copy_generation)) {
+    puVar1 = 0xfebeb800u;
+    FUN_0007d12a(0x9d,0xff,1,7,0,((undefined *)camry_host_ptr(0xfebe8031u)));
+    FUN_0007d12a(0xa0, 0xff, 4, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar1 + -0x37d0))));
+    FUN_0007d12a(0xa6, 0x104, 2, 6, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar1 + -0x37ce))));
+    FUN_0007d12a(0xa3, 0x100, 4, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar1 + -0x37cd))));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x37d2))))) = uVar2;
+  uVar2 = f33_get_application_receive_status(0xc);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x37d1))))) = uVar2;
   return;
 }
 
@@ -3233,6 +3623,28 @@ void f33_return_only_stub_4b40c(void)
 
 
 
+void FUN_0004b40e(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  
+  cVar1 = DAT_febe5357;
+  puVar2 = 0xfebeb800u;
+  if ((f33_internal_source_admission_state < 2) && (DAT_febe8039 != DAT_febe5357)) {
+    puVar2 = 0xfebeb800u;
+    FUN_0007d12a(0xa9,0x10a,2,4,0,((undefined *)camry_host_ptr(0xfebe8038u)));
+    FUN_0007d12a(0xab, 0x10b, 0x20, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37cc))));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x37c7))))) = cVar1;
+  uVar3 = f33_get_application_receive_status(0xd);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x37c6))))) = uVar3;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -3252,6 +3664,28 @@ void f33_return_only_stub_4b46e(void)
 void f33_return_only_stub_4b470(void)
 
 {
+  return;
+}
+
+
+
+void FUN_0004b472(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  
+  cVar1 = DAT_febe5358;
+  puVar2 = 0xfebeb800u;
+  if ((f33_internal_source_admission_state < 2) && (DAT_febe803d != DAT_febe5358)) {
+    puVar2 = 0xfebeb800u;
+    FUN_0007d12a(0xac,0x10f,1,0,0,((undefined *)camry_host_ptr(0xfebe803bu)));
+    FUN_0007d12a(0xad, 0x110, 1, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37c4))));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x37c3))))) = cVar1;
+  uVar3 = f33_get_application_receive_status(0xe);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x37c2))))) = uVar3;
   return;
 }
 
@@ -3281,6 +3715,32 @@ void f33_return_only_stub_4b4d2(void)
 
 
 
+void FUN_0004b4d4(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  
+  cVar1 = DAT_febe5359;
+  puVar2 = 0xfebeb800u;
+  if ((f33_internal_source_admission_state < 2) && (DAT_febe8045 != DAT_febe5359)) {
+    puVar2 = 0xfebeb800u;
+    FUN_0007d12a(0xb1,0x119,8,0,0,((undefined *)camry_host_ptr(0xfebe803fu)));
+    FUN_0007d12a(0xb2, 0x11a, 8, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37c0))));
+    FUN_0007d12a(0xb3, 0x11b, 8, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37bf))));
+    FUN_0007d12a(0xb4, 0x11c, 8, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37be))));
+    FUN_0007d12a(0xb5, 0x11d, 8, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37bd))));
+    FUN_0007d12a(0xb6, 0x11e, 8, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37bc))));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x37bb))))) = cVar1;
+  uVar3 = f33_get_application_receive_status(0xf);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x37ba))))) = uVar3;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -3300,6 +3760,33 @@ void f33_return_only_stub_4b59a(void)
 void f33_return_only_stub_4b59c(void)
 
 {
+  return;
+}
+
+
+
+void FUN_0004b59e(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  
+  cVar1 = DAT_febe535b;
+  puVar2 = 0xfebeb800u;
+  if ((f33_internal_source_admission_state < 2) && (DAT_febe8051 != DAT_febe535b)) {
+    puVar2 = 0xfebeb800u;
+    FUN_0007d12a(0xbb,0x127,0xc,0,1,((undefined *)camry_host_ptr(0xfebe8048u)));
+    FUN_0007d12a(0xbc, 299, 4, 4, 1, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37b1))));
+    FUN_0007d12a(0xbd, 299, 0xc, 0, 1, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37b6))));
+    FUN_0007d12a(0xb8, 0x127, 1, 7, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37b4))));
+    FUN_0007d12a(0xb9, 0x127, 1, 6, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37b3))));
+    FUN_0007d12a(0xba, 0x127, 1, 5, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37b2))));
+    FUN_0007d12a(0xbe, 0x12d, 1, 3, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37b0))));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x37af))))) = cVar1;
+  uVar3 = f33_get_application_receive_status(0x11);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x37ae))))) = uVar3;
   return;
 }
 
@@ -3329,6 +3816,38 @@ void f33_return_only_stub_4b688(void)
 
 
 
+void FUN_0004b68a(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  
+  cVar1 = DAT_febe535c;
+  puVar2 = 0xfebeb800u;
+  if ((f33_internal_source_admission_state < 2) && (DAT_febe8068 != DAT_febe535c)) {
+    puVar2 = 0xfebeb800u;
+    FUN_0007d12a(0xc3,0x147,0xf,0,0,((undefined *)camry_host_ptr(0xfebe8054u)));
+    FUN_0004afcc(0, 0x1a6f, (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x37ac)))), ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37a4))));
+    FUN_0007d12a(0xc5, 0x149, 0xf, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37aa))));
+    FUN_0004afcc(0, 0x1a6f, (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x37aa)))), ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37a2))));
+    FUN_0007d12a(199, 0x14b, 0xf, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37a8))));
+    FUN_0004afcc(0, 0x1a6f, (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x37a8)))), ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37a0))));
+    FUN_0007d12a(0xc9, 0x14d, 0xf, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x37a6))));
+    FUN_0004afcc(0, 0x1a6f, (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x37a6)))), ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x379e))));
+    FUN_0007d12a(0xc2, 0x147, 1, 7, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x379c))));
+    FUN_0007d12a(0xc4, 0x149, 1, 7, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x379b))));
+    FUN_0007d12a(0xc6, 0x14b, 1, 7, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x379a))));
+    FUN_0007d12a(200, 0x14d, 1, 7, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3799))));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3798))))) = cVar1;
+  uVar3 = f33_get_application_receive_status(0x12);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3797))))) = uVar3;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -3348,6 +3867,30 @@ void f33_return_only_stub_4b7d2(void)
 void f33_return_only_stub_4b7d4(void)
 
 {
+  return;
+}
+
+
+
+void FUN_0004b7d6(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  
+  cVar1 = DAT_febe535d;
+  puVar2 = 0xfebeb800u;
+  if ((f33_internal_source_admission_state < 2) && (DAT_febe806e != DAT_febe535d)) {
+    puVar2 = 0xfebeb800u;
+    FUN_0007d12a(0xce,0x14f,1,3,0,((undefined *)camry_host_ptr(0xfebe806cu)));
+    FUN_0007d12a(0xca, 0x14f, 1, 7, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3793))));
+    FUN_0007d12a(0xd0, 0x151, 1, 3, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3790))));
+    FUN_0007d12a(0xd1, 0x151, 10, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3796))));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3792))))) = cVar1;
+  uVar3 = f33_get_application_receive_status(0x13);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3791))))) = uVar3;
   return;
 }
 
@@ -3377,6 +3920,29 @@ void f33_return_only_stub_4b86c(void)
 
 
 
+void FUN_0004b86e(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  
+  cVar1 = DAT_febe535e;
+  puVar2 = 0xfebeb800u;
+  if ((f33_internal_source_admission_state < 2) && (DAT_febe8077 != DAT_febe535e)) {
+    puVar2 = 0xfebeb800u;
+    FUN_0007d12a(0xd4,0x158,0x10,0,1,((undefined *)camry_host_ptr(0xfebe8072u)));
+    FUN_0007d12a(0xd5, 0x15a, 0x10, 0, 1, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x378c))));
+    FUN_0007d12a(0xd3, 0x157, 1, 3, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x378a))));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3789))))) = cVar1;
+  uVar3 = f33_get_application_receive_status(0x14);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3788))))) = uVar3;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -3396,6 +3962,34 @@ void f33_return_only_stub_4b8f0(void)
 void f33_return_only_stub_4b8f2(void)
 
 {
+  return;
+}
+
+
+
+void FUN_0004b8f4(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  
+  cVar1 = DAT_febe535f;
+  puVar2 = 0xfebeb800u;
+  if ((f33_internal_source_admission_state < 2) && (DAT_febe8080 != DAT_febe535f)) {
+    puVar2 = 0xfebeb800u;
+    FUN_0007d12a(0xd7,0x15f,5,3,0,((undefined *)camry_host_ptr(0xfebe8079u)));
+    FUN_0007d12a(0xd8, 0x15f, 1, 2, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3786))));
+    FUN_0007d12a(0xd9, 0x15f, 1, 1, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3785))));
+    FUN_0007d12a(0xdb, 0x160, 6, 2, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3784))));
+    FUN_0007d12a(0xdd, 0x160, 1, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3783))));
+    FUN_0007d12a(0xde, 0x161, 1, 6, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3782))));
+    FUN_0007d12a(0xdf, 0x161, 1, 5, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3781))));
+    FUN_0007d12a(0xe0, 0x161, 4, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x377e))));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3780))))) = cVar1;
+  uVar3 = f33_get_application_receive_status(0x15);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x377f))))) = uVar3;
   return;
 }
 
@@ -3425,6 +4019,39 @@ void f33_return_only_stub_4b9f2(void)
 
 
 
+void FUN_0004b9f4(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  
+  cVar1 = DAT_febe5360;
+  puVar2 = 0xfebeb800u;
+  if ((f33_internal_source_admission_state < 2) && (DAT_febe8097 != DAT_febe5360)) {
+    puVar2 = 0xfebeb800u;
+    FUN_0007d12a(0xe3,0x167,1,7,0,((undefined *)camry_host_ptr(0xfebe8090u)));
+    FUN_0007d12a(0xe4, 0x167, 1, 6, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x376f))));
+    FUN_0007d12a(0xe5, 0x167, 10, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x377c))));
+    FUN_0004afcc(0, 0x200, (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x377c)))), ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3776))));
+    FUN_0007d12a(0xe6, 0x169, 1, 7, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x376e))));
+    FUN_0007d12a(0xe7, 0x169, 1, 6, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x376d))));
+    FUN_0007d12a(0xe8, 0x169, 10, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x377a))));
+    FUN_0004afcc(0, 0x200, (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x377a)))), ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3774))));
+    FUN_0007d12a(0xe9, 0x16b, 1, 7, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x376c))));
+    FUN_0007d12a(0xea, 0x16b, 1, 6, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x376b))));
+    FUN_0007d12a(0xeb, 0x16b, 10, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3778))));
+    FUN_0004afcc(0, 0x200, (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x3778)))), ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3772))));
+    FUN_0007d12a(0xf1, 0x183, 4, 4, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x376a))));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3769))))) = cVar1;
+  uVar3 = f33_get_application_receive_status(0x16);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3768))))) = uVar3;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -3444,6 +4071,34 @@ void f33_return_only_stub_4bb5e(void)
 void f33_return_only_stub_4bb60(void)
 
 {
+  return;
+}
+
+
+
+void FUN_0004bb62(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  undefined1 uStack_9;
+  
+  cVar1 = DAT_febe5361;
+  puVar2 = 0xfebeb800u;
+  uStack_9 = DAT_febe80a0;
+  if ((f33_internal_source_admission_state < 2) && (DAT_febe80a4 != DAT_febe5361)) {
+    puVar2 = 0xfebeb800u;
+    FUN_0007d12a(0xf6,0x188,0x10,0,0,((undefined *)camry_host_ptr(0xfebe809au)));
+    FUN_0007d12a(0xf7, 0x18a, 0x10, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3764))));
+    FUN_0007d12a(0xf3,0x187,1,7,0,&uStack_9);
+    FUN_0007d12a(0xf4, 0x187, 1, 6, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x375f))));
+    FUN_0007d12a(0xf9, 0x1a3, 4, 4, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x375d))));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x375c))))) = cVar1;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3760))))) = uStack_9;
+  uVar3 = f33_get_application_receive_status(0x17);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x375b))))) = uVar3;
   return;
 }
 
@@ -3473,6 +4128,30 @@ void f33_return_only_stub_4bc26(void)
 
 
 
+void FUN_0004bc28(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  
+  cVar1 = DAT_febe5362;
+  puVar2 = 0xfebeb800u;
+  if ((f33_internal_source_admission_state < 2) && (DAT_febe80a6 != DAT_febe5362)) {
+    puVar2 = 0xfebeb800u;
+    FUN_0007d12a(0xfb,0x1a9,8,0,0,((undefined *)camry_host_ptr(0xfebe80a8u)));
+    FUN_0007d12a(0xfc, 0x1aa, 8, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3757))));
+    FUN_0007d12a(0xfd, 0x1ac, 8, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3756))));
+    FUN_0007d12a(0xfe, 0x1ad, 8, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3755))));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x375a))))) = cVar1;
+  uVar3 = f33_get_application_receive_status(0x18);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3759))))) = uVar3;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -3492,6 +4171,29 @@ void f33_return_only_stub_4bcbc(void)
 void f33_return_only_stub_4bcbe(void)
 
 {
+  return;
+}
+
+
+
+void FUN_0004bcc0(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  
+  cVar1 = DAT_febe5363;
+  puVar2 = 0xfebeb800u;
+  if ((f33_internal_source_admission_state < 2) && (DAT_febe80b5 != DAT_febe5363)) {
+    puVar2 = 0xfebeb800u;
+    FUN_0007d12a(0xff,0x1b1,0x12,6,1,((undefined *)camry_host_ptr(0xfebe80acu)));
+    FUN_0007d12a(0x100, 0x1b3, 1, 5, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x374c))));
+    FUN_0007d12a(0x101, 0x1b3, 0x12, 0, 1, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3750))));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x374b))))) = cVar1;
+  uVar3 = f33_get_application_receive_status(0x19);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x374a))))) = uVar3;
   return;
 }
 
@@ -3521,6 +4223,39 @@ void f33_return_only_stub_4bd44(void)
 
 
 
+void FUN_0004bd46(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  
+  cVar1 = DAT_febe5364;
+  puVar2 = 0xfebeb800u;
+  if ((f33_internal_source_admission_state < 2) && (DAT_febe80c8 != DAT_febe5364)) {
+    puVar2 = 0xfebeb800u;
+    FUN_0007d12a(0x105,0x1ba,6,0,0,((undefined *)camry_host_ptr(0xfebe80bcu)));
+    FUN_0007d12a(0x106, 0x1bb, 0x10, 0, 1, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3748))));
+    FUN_0007d12a(0x107, 0x1bd, 1, 7, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3735))));
+    FUN_0007d12a(0x108, 0x1bd, 3, 4, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3742))));
+    FUN_0007d12a(0x109, 0x1bd, 1, 2, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3740))));
+    FUN_0007d12a(0x10a, 0x1bd, 2, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x373f))));
+    FUN_0007d12a(0x10b, 0x1be, 2, 6, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x373e))));
+    FUN_0007d12a(0x10c, 0x1be, 6, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x373d))));
+    FUN_0007d12a(0x10d, 0x1bf, 8, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x373c))));
+    FUN_0007d12a(0x10e, 0x1c0, 8, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x373b))));
+    FUN_0007d12a(0x10f, 0x1c1, 1, 7, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x373a))));
+    FUN_0007d12a(0x110, 0x1c1, 1, 5, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3734))));
+    FUN_0007d12a(0x111, 0x1c1, 3, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3736))));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3738))))) = cVar1;
+  uVar3 = f33_get_application_receive_status(0x1a);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3737))))) = uVar3;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -3545,6 +4280,29 @@ void f33_return_only_stub_4bece(void)
 
 
 
+void FUN_0004bed0(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  
+  cVar1 = DAT_febe5365;
+  puVar2 = 0xfebeb800u;
+  if ((f33_internal_source_admission_state < 2) && (DAT_febe80cf != DAT_febe5365)) {
+    puVar2 = 0xfebeb800u;
+    FUN_0007d12a(0x114,0x1d7,8,0,0,((undefined *)camry_host_ptr(0xfebe80cdu)));
+    FUN_0007d12a(0x115, 0x1d8, 8, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x3732))));
+    FUN_0007d12a(0x116, 0x1d9, 8, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x372f))));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3731))))) = cVar1;
+  uVar3 = f33_get_application_receive_status(0x1b);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3730))))) = uVar3;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -3564,6 +4322,28 @@ void f33_return_only_stub_4bf4a(void)
 void f33_return_only_stub_4bf4c(void)
 
 {
+  return;
+}
+
+
+
+void FUN_0004bf4e(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uchar uVar3;
+  
+  cVar1 = DAT_febe5366;
+  puVar2 = 0xfebeb800u;
+  if ((f33_internal_source_admission_state < 2) && (DAT_febe80d4 != DAT_febe5366)) {
+    puVar2 = 0xfebeb800u;
+    FUN_0007d12a(0x118,0x1df,3,4,0,((undefined *)camry_host_ptr(0xfebe80d2u)));
+    FUN_0007d12a(0x119, 0x1df, 4, 0, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x372d))));
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x372c))))) = cVar1;
+  uVar3 = f33_get_application_receive_status(0x1c);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x372b))))) = uVar3;
   return;
 }
 

@@ -728,6 +728,44 @@ void f33_return_only_stub_4c7a8(void)
 
 
 
+void FUN_0004c7aa(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  
+  puVar2 = 0xfebeb800u;
+  DAT_febe8c53 = DAT_febe810b;
+  DAT_febe8c54 = DAT_febe810c;
+  DAT_febe8c55 = DAT_febe810d;
+  DAT_febe8c56 = DAT_febe810e;
+  DAT_febe8c57 = DAT_febe810f;
+  DAT_febe8c58 = DAT_febe8110;
+  DAT_febe8c59 = DAT_febe8111;
+  DAT_febe8c5a = DAT_febe8112;
+  FUN_0007d31e(0x2c,0x27,8,0,((undefined *)camry_host_ptr(0xfebe8c53u)));
+  FUN_0007d31e(0x2d, 0x28, 8, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x2bac))));
+  FUN_0007d31e(0x2e, 0x29, 8, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x2bab))));
+  FUN_0007d31e(0x2f, 0x2a, 8, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x2baa))));
+  FUN_0007d31e(0x30, 0x2b, 8, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x2ba9))));
+  FUN_0007d31e(0x31, 0x2c, 8, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x2ba8))));
+  FUN_0007d31e(0x32, 0x2d, 8, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x2ba7))));
+  FUN_0007d31e(0x33, 0x2e, 8, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x2ba6))));
+  cVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x386a)))));
+  uVar3 = FUN_0007d0ea(3);
+  if ((cVar1 == 'Z') && ((uVar3 >> 4 & 1) == 0)) {
+    FUN_0007e612(3);
+  }
+  else if ((cVar1 == '\0') && ((uVar3 >> 4 & 1) != 0)) {
+    FUN_0007e46a(3,0x40);
+    FUN_0007e696(3);
+  }
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -747,6 +785,34 @@ void f33_return_only_stub_4c8dc(void)
 void f33_return_only_stub_4c8de(void)
 
 {
+  return;
+}
+
+
+
+void FUN_0004c8e0(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  
+  puVar2 = 0xfebeb800u;
+  DAT_febe8c5d = 9;
+  DAT_febe8c5e = 0;
+  DAT_febe8c30 = 0;
+  FUN_0007d31e(0x34,0x2f,8,0,((undefined *)camry_host_ptr(0xfebe8c5du)));
+  FUN_0007d31e(0x35, 0x30, 1, 7, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x2ba2))));
+  FUN_0007d31e(0x36, 0x31, 0x10, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x2bd0))));
+  cVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x386a)))));
+  uVar3 = FUN_0007d0ea(4);
+  if ((cVar1 == 'Z') && ((uVar3 >> 4 & 1) == 0)) {
+    FUN_0007e612(4);
+  }
+  else if ((cVar1 == '\0') && ((uVar3 >> 4 & 1) != 0)) {
+    FUN_0007e46a(4,0x40);
+    FUN_0007e696(4);
+  }
   return;
 }
 
@@ -800,6 +866,37 @@ void f33_return_only_stub_4ce06(void)
 
 
 
+void FUN_0004ce08(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  
+  puVar2 = 0xfebeb800u;
+  DAT_febe8c4f = DAT_febe8105;
+  DAT_febe8c50 = DAT_febe8106;
+  DAT_febe8c51 = DAT_febe8107;
+  DAT_febe8c52 = DAT_febe8109;
+  FUN_0007d1dc(0x28,0x25,2,6,((undefined *)camry_host_ptr(0xfebe8c4fu)));
+  FUN_0007d1dc(0x29, 0x25, 3, 3, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x2bb0))));
+  FUN_0007d1dc(0x2a, 0x26, 3, 1, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x2baf))));
+  FUN_0007d1dc(0x2b, 0x26, 1, 0, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x2bae))));
+  cVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x386a)))));
+  uVar3 = FUN_0007d0ea(2);
+  if ((cVar1 == 'Z') && ((uVar3 >> 4 & 1) == 0)) {
+    FUN_0007e612(2);
+  }
+  else if ((cVar1 == '\0') && ((uVar3 >> 4 & 1) != 0)) {
+    FUN_0007e46a(2,0x40);
+    FUN_0007e46a(2,0x80);
+    FUN_0007e696(2);
+  }
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -819,6 +916,33 @@ void f33_return_only_stub_4cecc(void)
 void f33_return_only_stub_4cece(void)
 
 {
+  return;
+}
+
+
+
+void FUN_0004ced0(void)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  
+  puVar2 = 0xfebeb800u;
+  DAT_febe8c5b = DAT_febe8100;
+  DAT_febe8c5c = DAT_febe8101;
+  FUN_0007d1dc(0x26,0x22,3,5,((undefined *)camry_host_ptr(0xfebe8c5bu)));
+  FUN_0007d1dc(0x27, 0x22, 1, 4, ((undefined *)camry_host_ptr((uint32_t)(puVar2 + -0x2ba4))));
+  cVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x386a)))));
+  uVar3 = FUN_0007d0ea(1);
+  if ((cVar1 == 'Z') && ((uVar3 >> 4 & 1) == 0)) {
+    FUN_0007e612(1);
+  }
+  else if ((cVar1 == '\0') && ((uVar3 >> 4 & 1) != 0)) {
+    FUN_0007e46a(1,0x40);
+    FUN_0007e46a(1,0x80);
+    FUN_0007e696(1);
+  }
   return;
 }
 

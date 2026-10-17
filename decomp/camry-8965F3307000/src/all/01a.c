@@ -506,36 +506,6 @@ void f33_crypto_bank_advance_profile_qualification(void)
 
 
 
-/* For slot<2 wait in22 unless79B70 returns0F and direct NvM result is not1. Reset output
-   capacity48; submit configured command8 job0 with64 input bytes. Accepted0 yields33, other
-   results66. Physical readiness/crypto completion remain dependencies. */
-
-uint f33_crypto_bank_submit_key_material(uchar slot)
-
-{
-  uint32_t puVar1;
-  int iVar2;
-  uint uVar3;
-  
-  puVar1 = 0xfebeb800u;
-  if (slot < 2) {
-    iVar2 = FUN_00079b70();
-    uVar3 = f33_nvm_get_direct_operation_result();
-    if ((iVar2 != 0xf) || (uVar3 == 1)) {
-      return 0x22;
-    }
-    (*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + -0x679c)))) = 0x30;
-    iVar2 = FUN_00089a26(0,puVar1 + (uint)slot * 0x40 + -0x663a,0x40,0,
-                         puVar1 + (short)(ushort)slot * 0x30 + -0x65ba,puVar1 + -0x679c);
-    if (iVar2 == 0) {
-      return 0x33;
-    }
-  }
-  return 0x66;
-}
-
-
-
 /* Increment saturating16-bit timer. Above120 choose66; timeout while45 also publishes result1.
    States11/22 submit;44 starts optional verification;46 publishes result and becomes55. Store phase
    and timer after sequential transitions. */

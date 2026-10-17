@@ -90,6 +90,28 @@ void f33_initialize_generated_application_components(void)
 
 
 
+/* Clear restart token, redundant restart classification8C1A/B/C, counters8C16/17 and cadence8C19.
+   Initialize cold ECU acquisition58C9A and cold control-retained cellsBF91E viaFDC00, then
+   common58814. This path differs from warm5886C. */
+
+void f33_initialize_cold_application_state(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  f33_publish_redundant_u16(0,((undefined *)camry_host_ptr(0xfebe8c08u)),(ushort *)((undefined *)camry_host_ptr(0xfebe8c0au)),(ushort *)((undefined *)camry_host_ptr(0xfebe8c14u)));
+  f33_publish_redundant_u8('\0', ((undefined *)camry_host_ptr((uint32_t)(puVar1 + -0x2be6))), ((undefined *)camry_host_ptr((uint32_t)(puVar1 + -0x2be5))), ((undefined *)camry_host_ptr((uint32_t)(puVar1 + -0x2be4))));
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x2bea))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x2be9))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x2be7))))) = 0;
+  f33_initialize_cold_ecu_input_state();
+  FUN_000fdc00();
+  f33_initialize_generated_application_components();
+  return;
+}
+
+
+
 /* Clear four task last-mode words8C00/02/04/06 and set inverses8C0C/0E/10/12=FFFF, then
    common58814. Do not rerun58C9A/BF91E or reset task cadence/restart token. BF97A resets both live
    mode and publishedE8CC to0; acquired inputs and cold-owned health generation history survive.

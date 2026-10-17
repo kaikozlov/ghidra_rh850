@@ -1784,6 +1784,39 @@ int f33_calculate_ecu_source5_thermal_estimate(void)
 
 
 
+/* Only zero6EAC requires7DCC/7BF6 both5A and390FE restoration. Store calculated signedR10 low16
+   at6EAE; initialized updates do not require fresh admission bytes. Source5 six-pole update and
+   offset source2 feed real maps and selected-bank arbitration; composed interval requests zero
+   owner0 without touching other owners. */
+
+void f33_update_ecu_source5_thermal_estimate(void)
+
+{
+  undefined *puVar1;
+  undefined *puVar2;
+  int iVar4;
+  char cVar5;
+  uint32_t puVar3;
+  puVar3 = 0xfebeb800u;
+  puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  cVar5 = DAT_febe6eac;
+  puVar1 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  if (DAT_febe6eac == '\0') {
+    if ((DAT_febe7dcc != 'Z') || (DAT_febe7bf6 != 'Z')) goto LAB_0003936a;
+    f33_restore_ecu_source5_thermal_model();
+    cVar5 = 'Z';
+    puVar1 = ((undefined *)camry_host_ptr((uint32_t)(puVar3)));
+  }
+  puVar2 = puVar1;
+  iVar4 = f33_calculate_ecu_source5_thermal_estimate();
+  *(short *)(((undefined *)camry_host_ptr(0xffffb6aeu)) + (int)camry_host_addr(puVar2)) = (short)iVar4;
+LAB_0003936a:
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb6acu + (uint32_t)((int)camry_host_addr(puVar2)) * 1u)))) = cVar5;
+  return;
+}
+
+
+
 /* Constant-block fill: 12 literal assignments into one contiguous cell block; shape-verified.
    Literals are default/reset values; cell meanings are not recovered. */
 
@@ -1827,6 +1860,29 @@ void FUN_00039392(void)
 {
   DAT_febe6ee0 = 0x569a;
   DAT_febe6ee2 = 0x2b4d;
+  return;
+}
+
+
+
+/* Signed6EAE selects2B2B8/2B2D4 into6EE0/6EE2. Bank0 reaches5542 at18560, bank1 reaches0 at15216.
+   Distinct from flat motor/source3 maps and the signed current floor. Source5 maps reach5542
+   at18560 in bank0 and zero at15216 in bank1. Bank selection is not cross-bank minimization. */
+
+void f33_publish_ecu_source5_thermal_limit_maps(void)
+
+{
+  uint32_t puVar1;
+  int iVar2;
+  undefined2 local_c;
+  undefined2 uStack_a;
+  
+  puVar1 = 0xfebeb800u;
+  iVar2 = (int)DAT_febe6eae;
+  FUN_0007025c(f33_ecu_source5_current_curve_bank0,iVar2,&local_c);
+  FUN_0007025c(f33_ecu_source5_current_curve_bank1,iVar2,&uStack_a);
+  (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb6e0u + (uint32_t)((int)puVar1)))))) = local_c;
+  (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb6e2u + (uint32_t)((int)puVar1)))))) = uStack_a;
   return;
 }
 
@@ -2642,6 +2698,39 @@ int f33_calculate_ecu_source4_thermal_estimate(void)
 
 
 
+/* Only zero6F10 requires7DCC/7BF6 both5A and39A1C restoration. Then calculate adjusted estimate and
+   store real signedR10 low16 at6F12; nonzero marker bypasses initialization gates. Source4
+   initialized model updates despite absent initial validity markers. Zero contribution gains still
+   leave bias1536 plus selected offset feeding nonflat current maps. */
+
+void f33_update_ecu_source4_thermal_estimate(void)
+
+{
+  undefined *puVar1;
+  undefined *puVar2;
+  int iVar4;
+  char cVar5;
+  uint32_t puVar3;
+  puVar3 = 0xfebeb800u;
+  puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  cVar5 = DAT_febe6f10;
+  puVar1 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  if (DAT_febe6f10 == '\0') {
+    if ((DAT_febe7dcc != 'Z') || (DAT_febe7bf6 != 'Z')) goto LAB_00039b9a;
+    f33_restore_ecu_source4_thermal_model();
+    cVar5 = 'Z';
+    puVar1 = ((undefined *)camry_host_ptr((uint32_t)(puVar3)));
+  }
+  puVar2 = puVar1;
+  iVar4 = f33_calculate_ecu_source4_thermal_estimate();
+  *(short *)(((undefined *)camry_host_ptr(0xffffb712u)) + (int)camry_host_addr(puVar2)) = (short)iVar4;
+LAB_00039b9a:
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb710u + (uint32_t)((int)camry_host_addr(puVar2)) * 1u)))) = cVar5;
+  return;
+}
+
+
+
 void FUN_00039ba2(void)
 
 {
@@ -2674,6 +2763,29 @@ void FUN_00039bb2(void)
 {
   DAT_febe6f30 = 0x569a;
   DAT_febe6f32 = 0x2b4d;
+  return;
+}
+
+
+
+/* Signed6F12 selects2B32C/2B348 into6F30/6F32. Bank0 reaches5542 at16512 and bank1 reaches0
+   at16628. Zero pole gains do not disable this offset-driven derating path. Source4 maps are active
+   despite zero pole gains; bank0 reaches5542 at16512 and bank1 zero at16628. */
+
+void f33_publish_ecu_source4_thermal_limit_maps(void)
+
+{
+  uint32_t puVar1;
+  int iVar2;
+  undefined2 local_c;
+  undefined2 uStack_a;
+  
+  puVar1 = 0xfebeb800u;
+  iVar2 = (int)DAT_febe6f12;
+  FUN_0007025c(f33_ecu_source4_current_curve_bank0,iVar2,&local_c);
+  FUN_0007025c(f33_ecu_source4_current_curve_bank1,iVar2,&uStack_a);
+  (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb730u + (uint32_t)((int)puVar1)))))) = local_c;
+  (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb732u + (uint32_t)((int)puVar1)))))) = uStack_a;
   return;
 }
 
@@ -3345,6 +3457,30 @@ void FUN_0003a26c(void)
 
 
 
+/* Signed6F36 selects nonflat2B3C4/2B3E0 curves into6F68/6F6A. Bank0 reaches5542 at18560; bank1
+   reaches0 at19376. Signed-axis7FFF terminates; FFFF ordinate is not an endpoint. Source2 signed
+   estimate selects nonflat bank0/1 curves. Real final bank0 ordinate5542 and bank1 zero
+   breakpoint19376 precede the7FFF/FFFF terminator. */
+
+void f33_publish_ecu_source2_thermal_limit_maps(void)
+
+{
+  uint32_t puVar1;
+  int iVar2;
+  undefined2 local_c;
+  undefined2 uStack_a;
+  
+  puVar1 = 0xfebeb800u;
+  iVar2 = (int)DAT_febe6f36;
+  FUN_0007025c(f33_ecu_source2_current_curve_bank0,iVar2,&local_c);
+  FUN_0007025c(f33_ecu_source2_current_curve_bank1,iVar2,&uStack_a);
+  (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb768u + (uint32_t)((int)puVar1)))))) = local_c;
+  (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb76au + (uint32_t)((int)puVar1)))))) = uStack_a;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -3677,6 +3813,54 @@ LAB_0003a5b6:
     uVar2 = 0;
   }
   return uVar2;
+}
+
+
+
+/* Only uninitialized6F80==0 requires7DCC/7BF6 both5A and restore3A5D4. Nonzero marker continues
+   both branches without rechecking validity; publish signed maximum at6F82. Temperature estimation
+   and later current-limit mapping are separate operations. Motor model initialization alone
+   requires acquisition-valid markers. Initialized branches continue with absent markers and publish
+   signed maximum of actual R10 returns; maps/arbitration remain separate. */
+
+void f33_update_motor_thermal_estimate(void)
+
+{
+  short upper;
+  short lower;
+  undefined *puVar1;
+  undefined2 uVar2;
+  undefined *puVar3;
+  int iVar5;
+  int iVar6;
+  char cVar7;
+  uint32_t puVar4;
+  puVar4 = 0xfebeb800u;
+  puVar3 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  cVar7 = DAT_febe6f80;
+  puVar1 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  if (DAT_febe6f80 == '\0') {
+    if ((DAT_febe7dcc != 'Z') || (DAT_febe7bf6 != 'Z')) goto LAB_0003a6be;
+    f33_restore_motor_thermal_model();
+    cVar7 = 'Z';
+    puVar1 = ((undefined *)camry_host_ptr((uint32_t)(puVar4)));
+  }
+  puVar3 = puVar1;
+  lower = DAT_0002b4b2;
+  upper = DAT_0002b4b0;
+  iVar5 = f33_update_motor_thermal_branch0(DAT_0002b4b0,DAT_0002b4b2);
+  iVar6 = f33_update_motor_thermal_branch1(upper,lower);
+  if (iVar6 - iVar5 < 0 == (iVar6 < 0 != iVar5 < 0 && iVar5 < 0 == iVar6 - iVar5 < 0) &&
+      iVar6 != iVar5) {
+    uVar2 = (undefined2)iVar6;
+  }
+  else {
+    uVar2 = (undefined2)iVar5;
+  }
+  *(undefined2 *)(((undefined *)camry_host_ptr(0xffffb782u)) + (int)camry_host_addr(puVar3)) = uVar2;
+LAB_0003a6be:
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb780u + (uint32_t)((int)camry_host_addr(puVar3)) * 1u)))) = cVar7;
+  return;
 }
 
 
@@ -4080,6 +4264,148 @@ void f33_return_only_stub_3a9e8(void)
 
 
 
+/* Return real R10 A5 iff minimum of five bank0 maps>=21248. Map raw model maxima plus common10880
+   and margins803/3370/0/0/983 after symmetric32767 saturation. Publish adjusted inputs6FB4..6FBC,
+   maps6FBE..6FC6, minimum6FC8 and status6FB1. Five raw-estimate maxima plus fixed margins feed
+   bank0 maps; inclusive minimum21248 controls real R10/status6FB1. Ordinary offset bank is not the
+   input. */
+
+uint f33_check_thermal_raw_estimate_margin(void)
+
+{
+  int iVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  uint uVar4;
+  int iVar5;
+  int iVar6;
+  int iVar7;
+  int iVar8;
+  ushort uStack_26;
+  ushort uStack_24;
+  ushort uStack_22;
+  ushort uStack_20;
+  ushort uStack_1e;
+  
+  puVar2 = 0xfebeb800u;
+  iVar1 = (int)DAT_febe6fa2;
+  iVar8 = (int)DAT_febe6f92;
+  iVar5 = (int)DAT_0002fb54;
+  iVar7 = (int)DAT_febe6f4a;
+  iVar6 = (int)DAT_febe6fee;
+  if (iVar1 - iVar8 < 0 == (iVar1 < 0 != iVar8 < 0 && iVar8 < 0 == iVar1 - iVar8 < 0) &&
+      iVar1 != iVar8) {
+    iVar8 = iVar1;
+  }
+  iVar8 = iVar8 + iVar5 + (int)DAT_0002fb56;
+  iVar1 = (int)DAT_febe6f5e;
+  if (iVar1 - iVar7 < 0 == (iVar1 < 0 != iVar7 < 0 && iVar7 < 0 == iVar1 - iVar7 < 0) &&
+      iVar1 != iVar7) {
+    iVar7 = iVar1;
+  }
+  iVar7 = iVar7 + iVar5 + (int)DAT_0002fb58;
+  iVar1 = (int)DAT_febe6ffe;
+  if (iVar1 - iVar6 < 0 == (iVar1 < 0 != iVar6 < 0 && iVar6 < 0 == iVar1 - iVar6 < 0) &&
+      iVar1 != iVar6) {
+    iVar6 = iVar1;
+  }
+  iVar6 = iVar6 + iVar5 + (int)DAT_0002fb5a;
+  iVar1 = (int)DAT_0002fb5c + DAT_febe6f14 + iVar5;
+  iVar5 = (int)DAT_0002fb5e + DAT_febe6eb0 + iVar5;
+  if (iVar8 + 0x7fff < 0 == (-1 < iVar8 && iVar8 + 0x7fff < 0) && iVar8 != -0x7fff) {
+    if (iVar8 + -0x7fff < 0 == (iVar8 < 0 && -1 < iVar8 + -0x7fff) && iVar8 != 0x7fff) {
+      iVar8 = 0x7fff;
+    }
+    else {
+      iVar8 = (int)(short)iVar8;
+    }
+  }
+  else {
+    iVar8 = -0x7fff;
+  }
+  if (iVar7 + 0x7fff < 0 == (-1 < iVar7 && iVar7 + 0x7fff < 0) && iVar7 != -0x7fff) {
+    if (iVar7 + -0x7fff < 0 == (iVar7 < 0 && -1 < iVar7 + -0x7fff) && iVar7 != 0x7fff) {
+      iVar7 = 0x7fff;
+    }
+    else {
+      iVar7 = (int)(short)iVar7;
+    }
+  }
+  else {
+    iVar7 = -0x7fff;
+  }
+  if (iVar6 + 0x7fff < 0 == (-1 < iVar6 && iVar6 + 0x7fff < 0) && iVar6 != -0x7fff) {
+    if (iVar6 + -0x7fff < 0 == (iVar6 < 0 && -1 < iVar6 + -0x7fff) && iVar6 != 0x7fff) {
+      iVar6 = 0x7fff;
+    }
+    else {
+      iVar6 = (int)(short)iVar6;
+    }
+  }
+  else {
+    iVar6 = -0x7fff;
+  }
+  if (iVar1 + 0x7fff < 0 == (-1 < iVar1 && iVar1 + 0x7fff < 0) && iVar1 != -0x7fff) {
+    if (iVar1 + -0x7fff < 0 == (iVar1 < 0 && -1 < iVar1 + -0x7fff) && iVar1 != 0x7fff) {
+      iVar1 = 0x7fff;
+    }
+    else {
+      iVar1 = (int)(short)iVar1;
+    }
+  }
+  else {
+    iVar1 = -0x7fff;
+  }
+  if (iVar5 + 0x7fff < 0 == (-1 < iVar5 && iVar5 + 0x7fff < 0) && iVar5 != -0x7fff) {
+    if (iVar5 + -0x7fff < 0 == (iVar5 < 0 && -1 < iVar5 + -0x7fff) && iVar5 != 0x7fff) {
+      iVar5 = 0x7fff;
+    }
+    else {
+      iVar5 = (int)(short)iVar5;
+    }
+  }
+  else {
+    iVar5 = -0x7fff;
+  }
+  FUN_0007025c(((undefined *)camry_host_ptr(0x2b4e4u)),iVar8,&uStack_26);
+  FUN_0007025c(f33_ecu_source2_current_curve_bank0,iVar7,&uStack_24);
+  FUN_0007025c(((undefined *)camry_host_ptr(0x2b554u)),iVar6,&uStack_22);
+  FUN_0007025c(f33_ecu_source4_current_curve_bank0,iVar1,&uStack_20);
+  FUN_0007025c(f33_ecu_source5_current_curve_bank0,iVar5,&uStack_1e);
+  uVar4 = (uint)uStack_26;
+  uVar3 = 0x5a;
+  if ((int)(uStack_24 - uVar4) < 0) {
+    uVar4 = (uint)uStack_24;
+  }
+  if ((int)(uStack_22 - uVar4) < 0) {
+    uVar4 = (uint)uStack_22;
+  }
+  if ((int)(uStack_20 - uVar4) < 0) {
+    uVar4 = (uint)uStack_20;
+  }
+  if ((int)(uStack_1e - uVar4) < 0) {
+    uVar4 = (uint)uStack_1e;
+  }
+  if (DAT_0002fb60 <= uVar4) {
+    uVar3 = 0xa5;
+  }
+  (*((short *)camry_host_ptr((uint32_t)((0xffffb7b4u + (uint32_t)((int)puVar2)))))) = (short)iVar8;
+  (*((short *)camry_host_ptr((uint32_t)((0xffffb7b6u + (uint32_t)((int)puVar2)))))) = (short)iVar7;
+  (*((short *)camry_host_ptr((uint32_t)((0xffffb7b8u + (uint32_t)((int)puVar2)))))) = (short)iVar6;
+  (*((short *)camry_host_ptr((uint32_t)((0xffffb7bau + (uint32_t)((int)puVar2)))))) = (short)iVar1;
+  (*((short *)camry_host_ptr((uint32_t)((0xffffb7bcu + (uint32_t)((int)puVar2)))))) = (short)iVar5;
+  (*((ushort *)camry_host_ptr((uint32_t)((0xffffb7beu + (uint32_t)((int)puVar2)))))) = uStack_26;
+  (*((ushort *)camry_host_ptr((uint32_t)((0xffffb7c0u + (uint32_t)((int)puVar2)))))) = uStack_24;
+  (*((ushort *)camry_host_ptr((uint32_t)((0xffffb7c2u + (uint32_t)((int)puVar2)))))) = uStack_22;
+  (*((ushort *)camry_host_ptr((uint32_t)((0xffffb7c4u + (uint32_t)((int)puVar2)))))) = uStack_20;
+  (*((ushort *)camry_host_ptr((uint32_t)((0xffffb7c6u + (uint32_t)((int)puVar2)))))) = uStack_1e;
+  (*((short *)camry_host_ptr((uint32_t)((0xffffb7c8u + (uint32_t)((int)puVar2)))))) = (short)uVar4;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb7b1u + (uint32_t)((int)puVar2) * 1u)))) = (char)uVar3;
+  return uVar3;
+}
+
+
+
 /* Map maximum individual contribution of each model, then require maximum map output strictly below
    unsigned688C/2. Maps2FB64..2FBC7: motor/source3 flat125; source2/4/5 step125 to65534 at1229.
    Counter251 rejects equality,252 admits flat125. Publish maxima6FCA..6FD2, maps6FD4..6FDC,
@@ -4287,6 +4613,53 @@ LAB_0003ad54:
     uVar2 = 0;
   }
   return uVar2;
+}
+
+
+
+/* Uninitialized6FE0 requires7DCC/7BF6 both5A and restore3AD72. Otherwise update both branches and
+   publish signed maximum6FE2; source3 is a structural code, not an OEM component. ECU structural
+   source3 updates initialized branches without rechecking acquisition validity and publishes their
+   signed maximum. Native scheduler interval also executes real request maps. */
+
+void f33_update_ecu_source3_thermal_estimate(void)
+
+{
+  short upper;
+  short lower;
+  undefined *puVar1;
+  undefined2 uVar2;
+  undefined *puVar3;
+  int iVar5;
+  int iVar6;
+  char cVar7;
+  uint32_t puVar4;
+  puVar4 = 0xfebeb800u;
+  puVar3 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  cVar7 = DAT_febe6fe0;
+  puVar1 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  if (DAT_febe6fe0 == '\0') {
+    if ((DAT_febe7dcc != 'Z') || (DAT_febe7bf6 != 'Z')) goto LAB_0003ae5e;
+    f33_restore_ecu_source3_thermal_model();
+    cVar7 = 'Z';
+    puVar1 = ((undefined *)camry_host_ptr((uint32_t)(puVar4)));
+  }
+  puVar3 = puVar1;
+  lower = DAT_0002b51e;
+  upper = DAT_0002b51c;
+  iVar5 = f33_update_ecu_source3_thermal_branch0(DAT_0002b51c,DAT_0002b51e);
+  iVar6 = f33_update_ecu_source3_thermal_branch1(upper,lower);
+  if (iVar6 - iVar5 < 0 == (iVar6 < 0 != iVar5 < 0 && iVar5 < 0 == iVar6 - iVar5 < 0) &&
+      iVar6 != iVar5) {
+    uVar2 = (undefined2)iVar6;
+  }
+  else {
+    uVar2 = (undefined2)iVar5;
+  }
+  *(undefined2 *)(((undefined *)camry_host_ptr(0xffffb7e2u)) + (int)camry_host_addr(puVar3)) = uVar2;
+LAB_0003ae5e:
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb7e0u + (uint32_t)((int)camry_host_addr(puVar3)) * 1u)))) = cVar7;
+  return;
 }
 
 
@@ -5187,6 +5560,37 @@ LAB_0003b85a:
   if (((uVar2 & 0x22) == 0) || ((uVar2 & 0x2200) == 0)) {
     DAT_febe7058 = '\x03';
   }
+  return;
+}
+
+
+
+void FUN_0003b88e(void)
+
+{
+  undefined *puVar1;
+  undefined *puVar2;
+  int iVar4;
+  char cVar5;
+  uint32_t puVar3;
+  puVar3 = 0xfebeb800u;
+  puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  cVar5 = DAT_febe7072;
+  puVar1 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  if (DAT_febe7072 == '\0') {
+    if ((DAT_febe7dcc != 'Z') || (DAT_febe7bf6 != 'Z')) goto LAB_0003b8dc;
+    f33_restore_thermal_offset_terms();
+    cVar5 = 'Z';
+    puVar1 = ((undefined *)camry_host_ptr((uint32_t)(puVar3)));
+  }
+  puVar2 = puVar1;
+  iVar4 = f33_stage_dual_thermal_squared_inputs(DAT_0002b596,DAT_0002b598);
+  DAT_febe7074 = (undefined2)iVar4;
+  FUN_0003b76e();
+  FUN_0003b810();
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb871u + (uint32_t)((int)camry_host_addr(puVar2)) * 1u)))) = 0x5a;
+LAB_0003b8dc:
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb872u + (uint32_t)((int)camry_host_addr(puVar2)) * 1u)))) = cVar5;
   return;
 }
 

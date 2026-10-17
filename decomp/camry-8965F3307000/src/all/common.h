@@ -317,18 +317,27 @@ typedef struct DAT_febf6c44 DAT_febf6c44;
 typedef struct EIC_Register EIC_Register;
 typedef struct F228 F228;
 typedef struct F33AcquisitionGroupPair F33AcquisitionGroupPair;
+typedef struct F33BaConfiguredOperation F33BaConfiguredOperation;
 typedef struct F33BootAes128CbcContext F33BootAes128CbcContext;
 typedef struct F33BootAes128CmacContext F33BootAes128CmacContext;
 typedef struct F33BootAes128Context F33BootAes128Context;
 typedef struct F33BootAes128CtrContext F33BootAes128CtrContext;
 typedef struct F33BootChallengeExclusionRecord F33BootChallengeExclusionRecord;
+typedef struct F33BootChannelEntry F33BootChannelEntry;
 typedef struct F33BootCrcDescriptor F33BootCrcDescriptor;
+typedef struct F33BootDidEntry F33BootDidEntry;
 typedef struct F33BootInterruptCallback F33BootInterruptCallback;
 typedef struct F33BootInterruptEntry F33BootInterruptEntry;
 typedef struct F33BootPduInfo F33BootPduInfo;
+typedef struct F33BootRangePolicyEntry F33BootRangePolicyEntry;
+typedef struct F33BootRegionDescriptor F33BootRegionDescriptor;
+typedef struct F33BootRoutineEntry F33BootRoutineEntry;
+typedef struct F33BootServiceEntry F33BootServiceEntry;
+typedef struct F33BootTimerSlot F33BootTimerSlot;
 typedef struct F33CanDriverPdu F33CanDriverPdu;
 typedef struct F33CanIfTxRecord F33CanIfTxRecord;
 typedef struct F33CanQueueDescriptor F33CanQueueDescriptor;
+typedef struct F33CanTpChannelConfiguration F33CanTpChannelConfiguration;
 typedef struct F33CanTpConfiguration F33CanTpConfiguration;
 typedef struct F33CanTpFrameInfo F33CanTpFrameInfo;
 typedef struct F33CanTpRxConnection F33CanTpRxConnection;
@@ -336,17 +345,30 @@ typedef struct F33CanTpRxState F33CanTpRxState;
 typedef struct F33CanTpTxConnection F33CanTpTxConnection;
 typedef struct F33CanTpTxStatePrefix F33CanTpTxStatePrefix;
 typedef struct F33CaptureFieldDescriptor F33CaptureFieldDescriptor;
+typedef struct F33ChannelPortDescriptor F33ChannelPortDescriptor;
+typedef struct F33CommunicationChannelSelection F33CommunicationChannelSelection;
+typedef struct F33CurrentReferenceFeedbackCalibration F33CurrentReferenceFeedbackCalibration;
+typedef struct F33CurrentReferenceFeedbackState F33CurrentReferenceFeedbackState;
 typedef struct F33Curve16 F33Curve16;
+typedef struct F33CurvePointS16U16 F33CurvePointS16U16;
+typedef struct F33CurvePointU16S16 F33CurvePointU16S16;
+typedef struct F33DcmDidClass F33DcmDidClass;
 typedef struct F33DcmMessageContext F33DcmMessageContext;
+typedef struct F33DcmProtocolConfiguration F33DcmProtocolConfiguration;
+typedef struct F33DcmReceiveBufferConfiguration F33DcmReceiveBufferConfiguration;
 typedef struct F33DcmReceiveBufferState F33DcmReceiveBufferState;
+typedef struct F33DcmReceiveRoute F33DcmReceiveRoute;
 typedef struct F33DcmRequestRoute F33DcmRequestRoute;
 typedef struct F33DcmResponseNode F33DcmResponseNode;
 typedef struct F33DcmResponseQueue F33DcmResponseQueue;
 typedef struct F33DcmRetryInfo F33DcmRetryInfo;
+typedef struct F33DcmSecurityLevelConfig F33DcmSecurityLevelConfig;
 typedef struct F33DcmService F33DcmService;
 typedef struct F33DcmServiceCallback F33DcmServiceCallback;
 typedef struct F33DcmServiceList F33DcmServiceList;
 typedef struct F33DcmServiceSelection F33DcmServiceSelection;
+typedef struct F33DcmSessionTimingRow F33DcmSessionTimingRow;
+typedef struct F33DcmSoftwareTimer F33DcmSoftwareTimer;
 typedef struct F33DcmSubfunction F33DcmSubfunction;
 typedef struct F33DcmSubfunctionSelection F33DcmSubfunctionSelection;
 typedef struct F33DiagOutputView F33DiagOutputView;
@@ -355,29 +377,42 @@ typedef struct F33DiagSourceBuffer F33DiagSourceBuffer;
 typedef struct F33DiagnosticApplicationSample F33DiagnosticApplicationSample;
 typedef struct F33DiagnosticCapture F33DiagnosticCapture;
 typedef struct F33DidPublicationMetadata F33DidPublicationMetadata;
+typedef struct F33DmaProgressPolicy F33DmaProgressPolicy;
+typedef struct F33DmaProgressWindow F33DmaProgressWindow;
 typedef struct F33DriverChannelSoftwareState F33DriverChannelSoftwareState;
 typedef struct F33EscalatingMonitorState F33EscalatingMonitorState;
 typedef struct F33FractionalFollowing16 F33FractionalFollowing16;
 typedef struct F33FreshnessSlot F33FreshnessSlot;
 typedef struct F33FreshnessWire F33FreshnessWire;
+typedef struct F33GainSlewCalibration F33GainSlewCalibration;
 typedef struct F33GainSlewState F33GainSlewState;
 typedef struct F33LatchedMonitorState F33LatchedMonitorState;
+typedef struct F33ModeFamilyHooks F33ModeFamilyHooks;
 typedef struct F33MonitorAction F33MonitorAction;
 typedef struct F33MonitorCurrentRecord F33MonitorCurrentRecord;
 typedef struct F33MonitorLimits F33MonitorLimits;
 typedef struct F33MonitorRecoveryScratch F33MonitorRecoveryScratch;
 typedef struct F33NvmApplicationResultCallback F33NvmApplicationResultCallback;
+typedef struct F33NvmByteResultMap F33NvmByteResultMap;
 typedef struct F33NvmCommitContext F33NvmCommitContext;
+typedef struct F33NvmCopyStage F33NvmCopyStage;
+typedef struct F33NvmDiagnosticMaskMap F33NvmDiagnosticMaskMap;
 typedef struct F33NvmOperation F33NvmOperation;
+typedef struct F33NvmPhysicalResultClass F33NvmPhysicalResultClass;
 typedef struct F33NvmQueueHeader F33NvmQueueHeader;
 typedef struct F33NvmQueueSlot F33NvmQueueSlot;
 typedef struct F33NvmRecordContext F33NvmRecordContext;
 typedef struct F33PduInfo F33PduInfo;
+typedef struct F33PwmHalfwordStage F33PwmHalfwordStage;
+typedef struct F33PwmWordStage F33PwmWordStage;
 typedef struct F33RateObserverSample F33RateObserverSample;
 typedef struct F33RecoverableMonitorCallbacks F33RecoverableMonitorCallbacks;
 typedef struct F33RecoverableMonitorLimits F33RecoverableMonitorLimits;
 typedef struct F33RecoverableMonitorState F33RecoverableMonitorState;
+typedef struct F33RegulatorOutputEnvelopeCalibration F33RegulatorOutputEnvelopeCalibration;
+typedef struct F33RegulatorOutputEnvelopeState F33RegulatorOutputEnvelopeState;
 typedef struct F33RetainedControlProfile F33RetainedControlProfile;
+typedef struct F33RoutineCallbacks F33RoutineCallbacks;
 typedef struct F33SerialAcquisitionMasks F33SerialAcquisitionMasks;
 typedef struct F33SerialAcquisitionRecord F33SerialAcquisitionRecord;
 typedef struct F33SerialControllerStatus F33SerialControllerStatus;
@@ -389,6 +424,7 @@ typedef struct F33TwoSidedMonitorCallbacks F33TwoSidedMonitorCallbacks;
 typedef struct F33U32LookupTable F33U32LookupTable;
 typedef struct F33WindowedMonitorLimits F33WindowedMonitorLimits;
 typedef struct F33WindowedMonitorState F33WindowedMonitorState;
+typedef struct F33WriteDidCallbacks F33WriteDidCallbacks;
 typedef struct FEBE2000 FEBE2000;
 typedef struct PTR_DAT_000af824 PTR_DAT_000af824;
 typedef struct PTR_DAT_000af828 PTR_DAT_000af828;
@@ -552,16 +588,16 @@ typedef struct Saturate2 Saturate2;
 #define f33_app_security_comparison_result (*((volatile uint8_t *)camry_host_ptr(0xfebf4959u)))
 #define f33_app_security_delay_bits (*((volatile uint32_t *)camry_host_ptr(0xfebe5dc8u)))
 #define f33_app_security_issued_level (*((volatile uint8_t *)camry_host_ptr(0xfebe5dcdu)))
-#define f33_app_security_level_rows (*((volatile uint8_t *)camry_host_ptr(0x26164u)))
+#define f33_app_security_level_rows ((volatile F33DcmSecurityLevelConfig *)camry_host_ptr(0x26164u))
 #define f33_app_security_seed_callback_succeeded (*((volatile uint8_t *)camry_host_ptr(0xfebe5dceu)))
 #define f33_app_security_selected_row (*((volatile uint8_t *)camry_host_ptr(0xfebe5dccu)))
-#define f33_app_session_timing_rows (*((volatile uint8_t *)camry_host_ptr(0x26122u)))
+#define f33_app_session_timing_rows ((volatile F33DcmSessionTimingRow *)camry_host_ptr(0x26122u))
 #define f33_application_receive_status ((volatile uint8_t *)camry_host_ptr(0xfebe7f0eu))
 #define f33_asserted_state_sample_threshold_a_states (*((volatile uint8_t *)camry_host_ptr(0xfebe67f0u)))
 #define f33_asserted_state_sample_threshold_b_states (*((volatile uint8_t *)camry_host_ptr(0xfebe67f8u)))
 #define f33_ba_application_work (*((volatile uint8_t *)camry_host_ptr(0xfebe5f4cu)))
 #define f33_ba_operation_count (*((volatile uint8_t *)camry_host_ptr(0x27ec0u)))
-#define f33_ba_operations (*((volatile uint8_t *)camry_host_ptr(0x27ec4u)))
+#define f33_ba_operations ((volatile F33BaConfiguredOperation *)camry_host_ptr(0x27ec4u))
 #define f33_ba_retained_admission_count_limit (*((volatile uint8_t *)camry_host_ptr(0x30f1du)))
 #define f33_ba_tzclr_raw_input_limit (*((volatile uint16_t *)camry_host_ptr(0x30f1eu)))
 #define f33_baseline_sample_threshold_a_states (*((volatile uint8_t *)camry_host_ptr(0xfebe7674u)))
@@ -571,9 +607,9 @@ typedef struct Saturate2 Saturate2;
 #define f33_boot_authentication_data_cursor (*((volatile uint32_t *)camry_host_ptr(0xfebf30b0u)))
 #define f33_boot_authentication_last_block (*((volatile uint32_t *)camry_host_ptr(0xfebf30a8u)))
 #define f33_boot_authentication_trailer_cursor (*((volatile uint32_t *)camry_host_ptr(0xfebf30acu)))
-#define f33_boot_diagnostic_channels (*((volatile uint8_t *)camry_host_ptr(0x8f04u)))
-#define f33_boot_diagnostic_identifiers (*((volatile uint8_t *)camry_host_ptr(0x8f14u)))
-#define f33_boot_diagnostic_services (*((volatile uint8_t *)camry_host_ptr(0x8e54u)))
+#define f33_boot_diagnostic_channels ((volatile F33BootChannelEntry *)camry_host_ptr(0x8f04u))
+#define f33_boot_diagnostic_identifiers ((volatile F33BootDidEntry *)camry_host_ptr(0x8f14u))
+#define f33_boot_diagnostic_services ((volatile F33BootServiceEntry *)camry_host_ptr(0x8e54u))
 #define f33_boot_diagnostic_session (*((volatile uint8_t *)camry_host_ptr(0xfebf2b0eu)))
 #define f33_boot_download_state (*((volatile uint8_t *)camry_host_ptr(0xfebf2b13u)))
 #define f33_boot_flash_block_boundaries ((volatile uint32_t *)camry_host_ptr(0x86ecu))
@@ -581,9 +617,9 @@ typedef struct Saturate2 Saturate2;
 #define f33_boot_image_derived_key ((volatile uint8_t *)camry_host_ptr(0xfebf2d18u))
 #define f33_boot_image_iv_and_authentication_prefix ((volatile uint8_t *)camry_host_ptr(0xfebf2cf8u))
 #define f33_boot_image_key_derivation_key ((volatile uint8_t *)camry_host_ptr(0xbfd8u))
-#define f33_boot_interrupt_dispatch (*((volatile uint8_t *)camry_host_ptr(0x869cu)))
+#define f33_boot_interrupt_dispatch ((volatile F33BootInterruptEntry *)camry_host_ptr(0x869cu))
 #define f33_boot_operation_region_class (*((volatile uint8_t *)camry_host_ptr(0xfebf2b17u)))
-#define f33_boot_regions (*((volatile uint8_t *)camry_host_ptr(0x8e00u)))
+#define f33_boot_regions ((volatile F33BootRegionDescriptor *)camry_host_ptr(0x8e00u))
 #define f33_boot_relocated_blank_check_entry (*((volatile uint32_t *)camry_host_ptr(0x86e4u)))
 #define f33_boot_request_append_index (*((volatile uint16_t *)camry_host_ptr(0xfebf2bb8u)))
 #define f33_boot_request_length (*((volatile uint16_t *)camry_host_ptr(0xfebf30b8u)))
@@ -601,18 +637,18 @@ typedef struct Saturate2 Saturate2;
 #define f33_boot_security_request_subfunction (*((volatile uint8_t *)camry_host_ptr(0xfebf2b54u)))
 #define f33_boot_security_response_challenge ((volatile uint8_t *)camry_host_ptr(0xfebf2b44u))
 #define f33_boot_security_state (*((volatile uint8_t *)camry_host_ptr(0xfebf2b0fu)))
-#define f33_boot_service_range_policy (*((volatile uint8_t *)camry_host_ptr(0x8da0u)))
+#define f33_boot_service_range_policy ((volatile F33BootRangePolicyEntry *)camry_host_ptr(0x8da0u))
 #define f33_boot_service_session_constants ((volatile uint8_t *)camry_host_ptr(0x8ef4u))
 #define f33_boot_terminal_after_response (*((volatile uint8_t *)camry_host_ptr(0xfebf2bbdu)))
-#define f33_boot_timer_slots (*((volatile uint8_t *)camry_host_ptr(0xfebf2938u)))
+#define f33_boot_timer_slots ((volatile F33BootTimerSlot *)camry_host_ptr(0xfebf2938u))
 #define f33_bounded_sample_or_status_a_states (*((volatile uint8_t *)camry_host_ptr(0xfebe7624u)))
 #define f33_bounded_sample_or_status_b_states (*((volatile uint8_t *)camry_host_ptr(0xfebe762cu)))
 #define f33_calibration_bank_bases ((volatile uint32_t *)camry_host_ptr(0xb144cu))
 #define f33_can_tx_queue_cursors ((volatile uint16_t *)camry_host_ptr(0xfebe48dau))
 #define f33_cantp_rx_flow_parameters_with_complements ((volatile uint16_t *)camry_host_ptr(0xfebe4fa0u))
 #define f33_cantp_shared_frame_scratch ((volatile uint8_t *)camry_host_ptr(0xfebe4efcu))
-#define f33_capture_field_descriptor (*((volatile uint8_t *)camry_host_ptr(0x2a364u)))
-#define f33_channel_ports (*((volatile uint8_t *)camry_host_ptr(0x312fcu)))
+#define f33_capture_field_descriptor ((volatile F33CaptureFieldDescriptor *)camry_host_ptr(0x2a364u))
+#define f33_channel_ports ((volatile F33ChannelPortDescriptor *)camry_host_ptr(0x312fcu))
 #define f33_channel_request_state (*((volatile uint8_t *)camry_host_ptr(0xfebe8a68u)))
 #define f33_classifier_age_release_threshold (*((volatile uint16_t *)camry_host_ptr(0x30e46u)))
 #define f33_classifier_primary_age_threshold (*((volatile uint16_t *)camry_host_ptr(0x30e40u)))
@@ -686,8 +722,8 @@ typedef struct Saturate2 Saturate2;
 #define f33_current_correction_coefficient_a (*((volatile int16_t *)camry_host_ptr(0x31b86u)))
 #define f33_current_correction_coefficient_b (*((volatile int16_t *)camry_host_ptr(0x31b8cu)))
 #define f33_current_correction_phase_slope (*((volatile int16_t *)camry_host_ptr(0x31b96u)))
-#define f33_current_reference_feedback (*((volatile uint8_t *)camry_host_ptr(0xfebe6b50u)))
-#define f33_current_reference_feedback_calibration (*((volatile uint8_t *)camry_host_ptr(0x31950u)))
+#define f33_current_reference_feedback ((volatile F33CurrentReferenceFeedbackState *)camry_host_ptr(0xfebe6b50u))
+#define f33_current_reference_feedback_calibration ((volatile F33CurrentReferenceFeedbackCalibration *)camry_host_ptr(0x31950u))
 #define f33_current_reference_floor (*((volatile uint8_t *)camry_host_ptr(0xfebe6d88u)))
 #define f33_current_reference_floor_calibration (*((volatile uint8_t *)camry_host_ptr(0x31b2cu)))
 #define f33_current_reference_qualification (*((volatile uint16_t *)camry_host_ptr(0x31944u)))
@@ -699,7 +735,7 @@ typedef struct Saturate2 Saturate2;
 #define f33_dcm_communication_lifetime (*((volatile uint16_t *)camry_host_ptr(0xfebe5df0u)))
 #define f33_dcm_communication_local_state (*((volatile uint8_t *)camry_host_ptr(0xfebf459du)))
 #define f33_dcm_current_dispatch_receive_slot (*((volatile uint16_t *)camry_host_ptr(0xfebe59e2u)))
-#define f33_dcm_did_class (*((volatile uint8_t *)camry_host_ptr(0x2603cu)))
+#define f33_dcm_did_class ((volatile F33DcmDidClass *)camry_host_ptr(0x2603cu))
 #define f33_dcm_displaced_transmit_id (*((volatile uint16_t *)camry_host_ptr(0xfebe59e8u)))
 #define f33_dcm_dtc_count_message (*((volatile uint32_t *)camry_host_ptr(0xfebf3bfcu)))
 #define f33_dcm_dtc_list_message (*((volatile uint32_t *)camry_host_ptr(0xfebf3f24u)))
@@ -716,44 +752,44 @@ typedef struct Saturate2 Saturate2;
 #define f33_dcm_pending_transport_accepted (*((volatile uint8_t *)camry_host_ptr(0xfebe59eau)))
 #define f33_dcm_proprietary_continuation (*((volatile uint8_t *)camry_host_ptr(0xfebf48e4u)))
 #define f33_dcm_proprietary_retained_message (*((volatile uint32_t *)camry_host_ptr(0xfebf493cu)))
-#define f33_dcm_protocol_configuration (*((volatile uint8_t *)camry_host_ptr(0x25ec0u)))
+#define f33_dcm_protocol_configuration ((volatile F33DcmProtocolConfiguration *)camry_host_ptr(0x25ec0u))
 #define f33_dcm_read_current_did (*((volatile uint16_t *)camry_host_ptr(0xfebe5d7cu)))
 #define f33_dcm_read_did_count (*((volatile uint16_t *)camry_host_ptr(0xfebe5d80u)))
 #define f33_dcm_read_did_cursor (*((volatile uint16_t *)camry_host_ptr(0xfebe5d7eu)))
 #define f33_dcm_read_message (*((volatile uint32_t *)camry_host_ptr(0xfebe5d84u)))
 #define f33_dcm_read_route_kind (*((volatile uint8_t *)camry_host_ptr(0xfebe5d7au)))
 #define f33_dcm_read_selected_class (*((volatile uint16_t *)camry_host_ptr(0xfebe5d78u)))
-#define f33_dcm_receive_buffer_configuration (*((volatile uint8_t *)camry_host_ptr(0x25e90u)))
-#define f33_dcm_receive_buffer_state (*((volatile uint8_t *)camry_host_ptr(0xfebe59f0u)))
-#define f33_dcm_receive_route (*((volatile uint8_t *)camry_host_ptr(0x25ee8u)))
+#define f33_dcm_receive_buffer_configuration ((volatile F33DcmReceiveBufferConfiguration *)camry_host_ptr(0x25e90u))
+#define f33_dcm_receive_buffer_state ((volatile F33DcmReceiveBufferState *)camry_host_ptr(0xfebe59f0u))
+#define f33_dcm_receive_route ((volatile F33DcmReceiveRoute *)camry_host_ptr(0x25ee8u))
 #define f33_dcm_request_phase (*((volatile uint8_t *)camry_host_ptr(0xfebe5960u)))
-#define f33_dcm_response_node (*((volatile uint8_t *)camry_host_ptr(0xfebe5984u)))
+#define f33_dcm_response_node ((volatile F33DcmResponseNode *)camry_host_ptr(0xfebe5984u))
 #define f33_dcm_response_queue (*((volatile uint32_t *)camry_host_ptr(0xfebe5970u)))
 #define f33_dcm_retained_p2_star_raw (*((volatile uint16_t *)camry_host_ptr(0xfebe59d8u)))
-#define f33_dcm_service_lists (*((volatile uint8_t *)camry_host_ptr(0x25c0cu)))
-#define f33_dcm_service_rows (*((volatile uint8_t *)camry_host_ptr(0x25c54u)))
+#define f33_dcm_service_lists ((volatile F33DcmServiceList *)camry_host_ptr(0x25c0cu))
+#define f33_dcm_service_rows ((volatile F33DcmService *)camry_host_ptr(0x25c54u))
 #define f33_dcm_shared_response_buffer ((volatile uint8_t *)camry_host_ptr(0xfebe5a20u))
 #define f33_dcm_snapshot_identifiers_message (*((volatile uint32_t *)camry_host_ptr(0xfebf4248u)))
 #define f33_dcm_snapshot_record_message (*((volatile uint32_t *)camry_host_ptr(0xfebf457cu)))
-#define f33_dcm_software_timers (*((volatile uint8_t *)camry_host_ptr(0xfebe5e74u)))
+#define f33_dcm_software_timers ((volatile F33DcmSoftwareTimer *)camry_host_ptr(0xfebe5e74u))
 #define f33_dcm_zero_overall_timeout (*((volatile uint8_t *)camry_host_ptr(0xfebe59ecu)))
 #define f33_dcm_zero_p2_deadline (*((volatile uint8_t *)camry_host_ptr(0xfebe59ebu)))
-#define f33_delayed_status_bit_triplet_a_states (*((volatile uint8_t *)camry_host_ptr(0xfebe759cu)))
-#define f33_delayed_status_bit_triplet_b_states (*((volatile uint8_t *)camry_host_ptr(0xfebe75b8u)))
+#define f33_delayed_status_bit_triplet_a_states ((volatile F33TerminalMonitorState *)camry_host_ptr(0xfebe759cu))
+#define f33_delayed_status_bit_triplet_b_states ((volatile F33TerminalMonitorState *)camry_host_ptr(0xfebe75b8u))
 #define f33_derived_classified_current_dtc_bitmap ((volatile uint32_t *)camry_host_ptr(0xfebe6054u))
 #define f33_derived_current_dtc_bitmap ((volatile uint32_t *)camry_host_ptr(0xfebe602cu))
 #define f33_derived_retained_dtc_bitmap ((volatile uint32_t *)camry_host_ptr(0xfebe6040u))
 #define f33_diag_proprietary_message (*((volatile uint32_t *)camry_host_ptr(0xfebf48ecu)))
-#define f33_diagnostic_capture_slots (*((volatile uint8_t *)camry_host_ptr(0xfebe82dcu)))
+#define f33_diagnostic_capture_slots ((volatile F33DiagnosticCapture *)camry_host_ptr(0xfebe82dcu))
 #define f33_diagnostic_normal_tx_policy_request (*((volatile uint8_t *)camry_host_ptr(0xfebe8196u)))
-#define f33_did_publication_metadata (*((volatile uint8_t *)camry_host_ptr(0x2927cu)))
+#define f33_did_publication_metadata ((volatile F33DidPublicationMetadata *)camry_host_ptr(0x2927cu))
 #define f33_direct_output_codes_bank0 ((volatile uint16_t *)camry_host_ptr(0xfebe8b4eu))
 #define f33_direct_output_codes_bank1 ((volatile uint16_t *)camry_host_ptr(0xfebe8b54u))
 #define f33_direct_output_request_enables ((volatile uint8_t *)camry_host_ptr(0xfebe8b4cu))
 #define f33_directional_rate_filter_denominator (*((volatile int32_t *)camry_host_ptr(0xaffd8u)))
-#define f33_dma_progress_policies (*((volatile uint8_t *)camry_host_ptr(0x30dccu)))
+#define f33_dma_progress_policies ((volatile F33DmaProgressPolicy *)camry_host_ptr(0x30dccu))
 #define f33_driver_bus_off_observation_latch ((volatile uint8_t *)camry_host_ptr(0xfebe5010u))
-#define f33_driver_channel_software_states (*((volatile uint8_t *)camry_host_ptr(0xfebe5020u)))
+#define f33_driver_channel_software_states ((volatile F33DriverChannelSoftwareState *)camry_host_ptr(0xfebe5020u))
 #define f33_driver_to_logical_controller_map ((volatile uint8_t *)camry_host_ptr(0x21978u))
 #define f33_dtc_count_local_tuple_scratch ((volatile uint8_t *)camry_host_ptr(0xfebf3c18u))
 #define f33_dtc_iteration_catalogue_cursor (*((volatile uint16_t *)camry_host_ptr(0xfebe81b6u)))
@@ -763,12 +799,12 @@ typedef struct Saturate2 Saturate2;
 #define f33_dtc_requested_status_mask (*((volatile uint8_t *)camry_host_ptr(0xfebe8198u)))
 #define f33_dtc_setting_inhibit_request (*((volatile uint8_t *)camry_host_ptr(0xfebe8197u)))
 #define f33_dtc_status_iteration_snapshot ((volatile uint8_t *)camry_host_ptr(0xfebe5f87u))
-#define f33_ecu_source2_current_curve_bank0 (*((volatile uint8_t *)camry_host_ptr(0x2b3c4u)))
-#define f33_ecu_source2_current_curve_bank1 (*((volatile uint8_t *)camry_host_ptr(0x2b3e0u)))
-#define f33_ecu_source4_current_curve_bank0 (*((volatile uint8_t *)camry_host_ptr(0x2b32cu)))
-#define f33_ecu_source4_current_curve_bank1 (*((volatile uint8_t *)camry_host_ptr(0x2b348u)))
-#define f33_ecu_source5_current_curve_bank0 (*((volatile uint8_t *)camry_host_ptr(0x2b2b8u)))
-#define f33_ecu_source5_current_curve_bank1 (*((volatile uint8_t *)camry_host_ptr(0x2b2d4u)))
+#define f33_ecu_source2_current_curve_bank0 ((volatile F33CurvePointS16U16 *)camry_host_ptr(0x2b3c4u))
+#define f33_ecu_source2_current_curve_bank1 ((volatile F33CurvePointS16U16 *)camry_host_ptr(0x2b3e0u))
+#define f33_ecu_source4_current_curve_bank0 ((volatile F33CurvePointS16U16 *)camry_host_ptr(0x2b32cu))
+#define f33_ecu_source4_current_curve_bank1 ((volatile F33CurvePointS16U16 *)camry_host_ptr(0x2b348u))
+#define f33_ecu_source5_current_curve_bank0 ((volatile F33CurvePointS16U16 *)camry_host_ptr(0x2b2b8u))
+#define f33_ecu_source5_current_curve_bank1 ((volatile F33CurvePointS16U16 *)camry_host_ptr(0x2b2d4u))
 #define f33_estimator_center_adoption_scale (*((volatile int32_t *)camry_host_ptr(0xaf76cu)))
 #define f33_estimator_group_release_window (*((volatile uint16_t *)camry_host_ptr(0xaf620u)))
 #define f33_estimator_lower_band_default (*((volatile uint16_t *)camry_host_ptr(0xaf7ceu)))
@@ -804,14 +840,14 @@ typedef struct Saturate2 Saturate2;
 #define f33_learned_quad_rom_bounds (*((volatile uint32_t *)camry_host_ptr(0xaef5cu)))
 #define f33_learned_quad_runtime_bounds (*((volatile uint32_t *)camry_host_ptr(0xfebee8e8u)))
 #define f33_logical_controller_request_cache ((volatile uint16_t *)camry_host_ptr(0xfebe48d8u))
-#define f33_matched_state2_startup_triplet_a_states (*((volatile uint8_t *)camry_host_ptr(0xfebe770cu)))
-#define f33_matched_state2_startup_triplet_b_states (*((volatile uint8_t *)camry_host_ptr(0xfebe7728u)))
+#define f33_matched_state2_startup_triplet_a_states ((volatile F33TerminalMonitorState *)camry_host_ptr(0xfebe770cu))
+#define f33_matched_state2_startup_triplet_b_states ((volatile F33TerminalMonitorState *)camry_host_ptr(0xfebe7728u))
 #define f33_matched_state2_status_bit_a_states (*((volatile uint8_t *)camry_host_ptr(0xfebe7664u)))
 #define f33_matched_state2_status_bit_b_states (*((volatile uint8_t *)camry_host_ptr(0xfebe766cu)))
-#define f33_matched_state2_status_bit_triplet_a_states (*((volatile uint8_t *)camry_host_ptr(0xfebe75d4u)))
-#define f33_matched_state2_status_bit_triplet_b_states (*((volatile uint8_t *)camry_host_ptr(0xfebe75f0u)))
+#define f33_matched_state2_status_bit_triplet_a_states ((volatile F33TerminalMonitorState *)camry_host_ptr(0xfebe75d4u))
+#define f33_matched_state2_status_bit_triplet_b_states ((volatile F33TerminalMonitorState *)camry_host_ptr(0xfebe75f0u))
 #define f33_mode600_stimulus_fit_work (*((volatile uint8_t *)camry_host_ptr(0xfebe6a60u)))
-#define f33_mode_family_hooks (*((volatile uint8_t *)camry_host_ptr(0xaeb00u)))
+#define f33_mode_family_hooks ((volatile F33ModeFamilyHooks *)camry_host_ptr(0xaeb00u))
 #define f33_monitor_current_active_calibration (*((volatile uint8_t *)camry_host_ptr(0xfebe6904u)))
 #define f33_monitor_current_dynamic_reference_plane ((volatile int16_t *)camry_host_ptr(0xfebe7e78u))
 #define f33_monitor_current_first_midpoint_plane ((volatile int16_t *)camry_host_ptr(0xfebe7e90u))
@@ -856,7 +892,7 @@ typedef struct Saturate2 Saturate2;
 #define f33_nvm_family1_copy_failure_masks ((volatile uint32_t *)camry_host_ptr(0xfebf0698u))
 #define f33_nvm_family1_object_count (*((volatile uint16_t *)camry_host_ptr(0x2ad72u)))
 #define f33_nvm_family1_phase (*((volatile uint8_t *)camry_host_ptr(0xfebf0689u)))
-#define f33_nvm_family1_read_stages (*((volatile uint8_t *)camry_host_ptr(0xfebf0b08u)))
+#define f33_nvm_family1_read_stages ((volatile F33NvmCopyStage *)camry_host_ptr(0xfebf0b08u))
 #define f33_nvm_family1_request_cell_count (*((volatile uint8_t *)camry_host_ptr(0x2ad8bu)))
 #define f33_nvm_family1_scan_cursor (*((volatile uint16_t *)camry_host_ptr(0xfebf068eu)))
 #define f33_nvm_family1_span_request (*((volatile uint8_t *)camry_host_ptr(0xfebf0688u)))
@@ -873,8 +909,8 @@ typedef struct Saturate2 Saturate2;
 #define f33_nvm_pending_operation (*((volatile uint32_t *)camry_host_ptr(0xfebf6aecu)))
 #define f33_nvm_physical_attempt_flags (*((volatile uint8_t *)camry_host_ptr(0xfebf6b73u)))
 #define f33_nvm_physical_result_state (*((volatile uint8_t *)camry_host_ptr(0xfebf6b76u)))
-#define f33_nvm_queue_headers (*((volatile uint8_t *)camry_host_ptr(0xfebf68e8u)))
-#define f33_nvm_queue_slots (*((volatile uint8_t *)camry_host_ptr(0xfebf6128u)))
+#define f33_nvm_queue_headers ((volatile F33NvmQueueHeader *)camry_host_ptr(0xfebf68e8u))
+#define f33_nvm_queue_slots ((volatile F33NvmQueueSlot *)camry_host_ptr(0xfebf6128u))
 #define f33_nvm_read_buffer_override (*((volatile uint32_t *)camry_host_ptr(0xfebf6b08u)))
 #define f33_nvm_record_context (*((volatile uint32_t *)camry_host_ptr(0xfebf6b80u)))
 #define f33_nvm_region_first_page (*((volatile uint16_t *)camry_host_ptr(0x27cc8u)))
@@ -909,16 +945,16 @@ typedef struct Saturate2 Saturate2;
 #define f33_owner8_normal_release_coefficient (*((volatile uint32_t *)camry_host_ptr(0xaefa4u)))
 #define f33_paired_source_monitor_status ((volatile uint8_t *)camry_host_ptr(0xfebe755cu))
 #define f33_paired_source_monitor_transition ((volatile uint8_t *)camry_host_ptr(0xfebe756au))
-#define f33_phase_compensation_gain_curve (*((volatile uint8_t *)camry_host_ptr(0x2bd10u)))
+#define f33_phase_compensation_gain_curve ((volatile F33CurvePointS16U16 *)camry_host_ptr(0x2bd10u))
 #define f33_phase_forced_offset (*((volatile uint16_t *)camry_host_ptr(0x31ae4u)))
-#define f33_phase_lower_modulation_offset_curve (*((volatile uint8_t *)camry_host_ptr(0x2c118u)))
+#define f33_phase_lower_modulation_offset_curve ((volatile F33CurvePointS16U16 *)camry_host_ptr(0x2c118u))
 #define f33_phase_modulation_first_energy_threshold (*((volatile uint32_t *)camry_host_ptr(0x31ae8u)))
 #define f33_phase_modulation_second_energy_threshold (*((volatile uint32_t *)camry_host_ptr(0x31aecu)))
 #define f33_phase_offset_selector (*((volatile uint8_t *)camry_host_ptr(0xfebe6d6cu)))
 #define f33_phase_offset_selector_counter (*((volatile uint16_t *)camry_host_ptr(0xfebe6d6eu)))
 #define f33_phase_offset_selector_override (*((volatile uint8_t *)camry_host_ptr(0x31b18u)))
 #define f33_phase_offset_selector_period (*((volatile uint16_t *)camry_host_ptr(0x31b26u)))
-#define f33_phase_upper_modulation_offset_curve (*((volatile uint8_t *)camry_host_ptr(0x2bf14u)))
+#define f33_phase_upper_modulation_offset_curve ((volatile F33CurvePointS16U16 *)camry_host_ptr(0x2bf14u))
 #define f33_previous_health_receive_generation (*((volatile uint8_t *)camry_host_ptr(0xfebeb195u)))
 #define f33_profile_config_axis_lower ((volatile uint16_t *)camry_host_ptr(0xaedecu))
 #define f33_profile_config_axis_upper ((volatile uint16_t *)camry_host_ptr(0xaede2u))
@@ -1002,7 +1038,7 @@ typedef struct Saturate2 Saturate2;
 #define f33_published_route31_numeric_scalar (*((volatile uint32_t *)camry_host_ptr(0xfebef218u)))
 #define f33_pwm_compare_offset (*((volatile uint16_t *)camry_host_ptr(0x3166eu)))
 #define f33_pwm_compare_span (*((volatile uint16_t *)camry_host_ptr(0x3166cu)))
-#define f33_pwm_halfword_stages (*((volatile uint8_t *)camry_host_ptr(0xfebe38a0u)))
+#define f33_pwm_halfword_stages ((volatile F33PwmHalfwordStage *)camry_host_ptr(0xfebe38a0u))
 #define f33_received_packed_decimal_fields ((volatile uint8_t *)camry_host_ptr(0xfebebe66u))
 #define f33_received_qualification_startup_count (*((volatile uint16_t *)camry_host_ptr(0xfebebec6u)))
 #define f33_received_retained_word (*((volatile uint16_t *)camry_host_ptr(0xfebebe6eu)))
@@ -1015,8 +1051,8 @@ typedef struct Saturate2 Saturate2;
 #define f33_record8_invalid_observation_count (*((volatile uint16_t *)camry_host_ptr(0xfebebf0cu)))
 #define f33_record8_nonzero_observation_count (*((volatile uint16_t *)camry_host_ptr(0xfebebf0au)))
 #define f33_record8_zero_observation_count (*((volatile uint16_t *)camry_host_ptr(0xfebebf08u)))
-#define f33_regulator_output_envelope_calibrations (*((volatile uint8_t *)camry_host_ptr(0x319e0u)))
-#define f33_regulator_output_envelopes (*((volatile uint8_t *)camry_host_ptr(0xfebe6be8u)))
+#define f33_regulator_output_envelope_calibrations ((volatile F33RegulatorOutputEnvelopeCalibration *)camry_host_ptr(0x319e0u))
+#define f33_regulator_output_envelopes ((volatile F33RegulatorOutputEnvelopeState *)camry_host_ptr(0xfebe6be8u))
 #define f33_requested_state_sample_threshold_a_states (*((volatile uint8_t *)camry_host_ptr(0xfebe7634u)))
 #define f33_requested_state_sample_threshold_b_states (*((volatile uint8_t *)camry_host_ptr(0xfebe7644u)))
 #define f33_retained_fit_coefficients (*((volatile uint16_t *)camry_host_ptr(0xfebe6a84u)))
@@ -1024,18 +1060,18 @@ typedef struct Saturate2 Saturate2;
 #define f33_route30_copy_generation (*((volatile uint8_t *)camry_host_ptr(0xfebe5356u)))
 #define f33_route30_receive_status (*((volatile uint8_t *)camry_host_ptr(0xfebe802fu)))
 #define f33_route31_numeric_scalar (*((volatile uint32_t *)camry_host_ptr(0xfebe8034u)))
-#define f33_routine_callbacks (*((volatile uint8_t *)camry_host_ptr(0x256dcu)))
+#define f33_routine_callbacks ((volatile F33RoutineCallbacks *)camry_host_ptr(0x256dcu))
 #define f33_sample_difference_window_a_states (*((volatile uint8_t *)camry_host_ptr(0xfebe7654u)))
 #define f33_sample_difference_window_b_states (*((volatile uint8_t *)camry_host_ptr(0xfebe765cu)))
-#define f33_sample_range_triplet_a_states (*((volatile uint8_t *)camry_host_ptr(0xfebe7694u)))
-#define f33_sample_range_triplet_b_states (*((volatile uint8_t *)camry_host_ptr(0xfebe76b4u)))
+#define f33_sample_range_triplet_a_states ((volatile F33TerminalMonitorState *)camry_host_ptr(0xfebe7694u))
+#define f33_sample_range_triplet_b_states ((volatile F33TerminalMonitorState *)camry_host_ptr(0xfebe76b4u))
 #define f33_scaled_staged_byte_a (*((volatile uint16_t *)camry_host_ptr(0xfebebe54u)))
 #define f33_scaled_staged_byte_b (*((volatile uint16_t *)camry_host_ptr(0xfebebe56u)))
 #define f33_secoc_crypto_qualification (*((volatile uint8_t *)camry_host_ptr(0xfebe5502u)))
 #define f33_secoc_tx_application_snapshot ((volatile uint8_t *)camry_host_ptr(0xfebe5488u))
 #define f33_secoc_tx_queue_head_pair ((volatile uint16_t *)camry_host_ptr(0xfebe5460u))
 #define f33_serial_acquisition_failure_counter_snapshot ((volatile uint8_t *)camry_host_ptr(0xfebe5f29u))
-#define f33_serial_acquisition_retained_records (*((volatile uint8_t *)camry_host_ptr(0xfebe38d0u)))
+#define f33_serial_acquisition_retained_records ((volatile F33SerialAcquisitionRecord *)camry_host_ptr(0xfebe38d0u))
 #define f33_service_current_owner_exclusions (*((volatile uint32_t *)camry_host_ptr(0xaecd4u)))
 #define f33_shared_condition_status ((volatile uint8_t *)camry_host_ptr(0xfebe79dcu))
 #define f33_shared_second_axis_envelope (*((volatile int16_t *)camry_host_ptr(0xfebe6ce4u)))
@@ -1048,15 +1084,15 @@ typedef struct Saturate2 Saturate2;
 #define f33_snapshot_identifier_local_scratch ((volatile uint8_t *)camry_host_ptr(0xfebf4264u))
 #define f33_source_coherence_history (*((volatile uint8_t *)camry_host_ptr(0xfebeb18eu)))
 #define f33_startup_spin_iteration_count (*((volatile uint32_t *)camry_host_ptr(0x30d8cu)))
-#define f33_startup_status_bit_triplet_a_states (*((volatile uint8_t *)camry_host_ptr(0xfebe76d4u)))
-#define f33_startup_status_bit_triplet_b_states (*((volatile uint8_t *)camry_host_ptr(0xfebe76f0u)))
-#define f33_switched_signed_request_curve (*((volatile uint8_t *)camry_host_ptr(0x31b5cu)))
-#define f33_task_rate_policies (*((volatile uint8_t *)camry_host_ptr(0x30dc0u)))
-#define f33_task_rate_windows (*((volatile uint8_t *)camry_host_ptr(0xfebe8db0u)))
+#define f33_startup_status_bit_triplet_a_states ((volatile F33TerminalMonitorState *)camry_host_ptr(0xfebe76d4u))
+#define f33_startup_status_bit_triplet_b_states ((volatile F33TerminalMonitorState *)camry_host_ptr(0xfebe76f0u))
+#define f33_switched_signed_request_curve ((volatile F33CurvePointU16S16 *)camry_host_ptr(0x31b5cu))
+#define f33_task_rate_policies ((volatile F33TaskRatePolicy *)camry_host_ptr(0x30dc0u))
+#define f33_task_rate_windows ((volatile F33TaskRateWindow *)camry_host_ptr(0xfebe8db0u))
 #define f33_thermal_history_qualification ((volatile uint8_t *)camry_host_ptr(0xfebe6fb0u))
 #define f33_thermal_shutdown_count (*((volatile uint16_t *)camry_host_ptr(0xfebe688cu)))
 #define f33_thermal_shutdown_count_limit (*((volatile uint16_t *)camry_host_ptr(0xfebe688eu)))
-#define f33_torque_memory_gain_calibrations (*((volatile uint8_t *)camry_host_ptr(0xd2fb8u)))
+#define f33_torque_memory_gain_calibrations ((volatile F33GainSlewCalibration *)camry_host_ptr(0xd2fb8u))
 #define f33_upper_network_software_indication ((volatile uint8_t *)camry_host_ptr(0xfebe3df0u))
 #define DAT_000088c0 (*((volatile uint16_t *)camry_host_ptr(0x88c0u)))
 #define DAT_000088c2 (*((volatile uint16_t *)camry_host_ptr(0x88c2u)))
