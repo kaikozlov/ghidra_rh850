@@ -426,17 +426,31 @@ def _execute(target_name: str, scenario_paths: Sequence[Path]) -> dict[str, Any]
     return batch
 
 
-def run_many(
+def capture_many(
     target_name: str, scenario_paths: Sequence[Path], output_dir: Path,
 ) -> list[dict[str, Any]]:
+    """Run a batch and return every report, including failed checks.
+
+    The differential harness reads the machine's actual registers and bytes.
+    A mismatched placeholder check is data, not a batch abort.
+    """
     output_dir = _absolute_input(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     batch = _execute(target_name, scenario_paths)
     reports = batch["reports"]
+    if len(reports) != len(scenario_paths):
+        raise P1MEMachineError("batch report count drifted")
     for scenario_path, report in zip(scenario_paths, reports, strict=True):
         output = output_dir / f"{Path(scenario_path).stem}.report.json"
         output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
         report["report_path"] = str(output)
+    return reports
+
+
+def run_many(
+    target_name: str, scenario_paths: Sequence[Path], output_dir: Path,
+) -> list[dict[str, Any]]:
+    reports = capture_many(target_name, scenario_paths, output_dir)
     failures = [report for report in reports if not report.get("passed")]
     if failures:
         raise P1MEMachineError("; ".join(_failure_summary(report) for report in failures))

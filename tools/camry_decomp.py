@@ -5202,6 +5202,12 @@ def cmd_corpus(_args: argparse.Namespace) -> int:
     return 0 if not failures or compiled else 1
 
 
+def cmd_oracle(_args: argparse.Namespace) -> int:
+    from tools.camry_oracle import run_oracles
+
+    return run_oracles()
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -5212,6 +5218,11 @@ def main(argv: list[str] | None = None) -> int:
     status.set_defaults(func=cmd_status)
     corpus = sub.add_parser("corpus", help="compile every decompiler body and rank the failures")
     corpus.set_defaults(func=cmd_corpus)
+    oracle = sub.add_parser(
+        "oracle",
+        help="compare converted leaves with original bytes and mark only agreements",
+    )
+    oracle.set_defaults(func=cmd_oracle)
     args = parser.parse_args(argv)
     return args.func(args)
 

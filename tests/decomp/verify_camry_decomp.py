@@ -7,6 +7,7 @@ import json
 import os
 import signal
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -126,25 +127,30 @@ def load_oracles() -> list[dict]:
 def compile_sources(directory: Path, optimize: str = "-O2") -> ctypes.CDLL:
     library = directory / "libcamry.dylib"
     sources = sorted((ROOT / "src").glob("*.c"))
-    subprocess.run(
+    result = subprocess.run(
         [
             "cc", "-std=c11", optimize, "-Wall", "-Wextra", "-Werror", "-fwrapv",
             "-Wno-unused-variable", "-Wno-unused-parameter",
             "-Wno-unused-function", "-Wno-unused-label",
             "-Wno-pointer-to-int-cast", "-Wno-int-to-pointer-cast",
-            "-Wno-bitwise-op-parentheses",             "-Wno-sign-compare", "-Wno-parentheses",
+            "-Wno-bitwise-op-parentheses", "-Wno-sign-compare", "-Wno-parentheses",
             "-Wno-pointer-sign", "-Wno-incompatible-pointer-types",
             "-Wno-unused-but-set-variable",
+            "-Wno-uninitialized", "-Wno-deprecated-non-prototype",
             "-DCAMRY_HOST",
             "-I", str(INCLUDE),
+            "-I", str(ROOT / "src" / "all"),
             "-dynamiclib", "-o", str(library),
             *[str(path) for path in sources],
             str(HOST_MEM),
         ],
-        check=True,
+        check=False,
         text=True,
         capture_output=True,
     )
+    if result.returncode != 0:
+        sys.stderr.write(result.stderr or result.stdout)
+        raise SystemExit(result.returncode)
     return ctypes.CDLL(library)
 
 
@@ -781,16 +787,30 @@ def call_corpus(library: ctypes.CDLL, name: str, signature: str, registers: dict
         function.restype = None
         function(*args)
         return None
-    function.restype = u32
+    if "*" in return_type:
+        function.restype = ctypes.c_void_p
+        result = function(*args)
+        if not result:
+            return 0
+        library.camry_host_addr.argtypes = [ctypes.c_void_p]
+        library.camry_host_addr.restype = u32
+        return int(library.camry_host_addr(result)) & 0xFFFFFFFF
+    if return_type in {"byte", "uchar", "uint8_t", "undefined1", "char", "bool"}:
+        function.restype = ctypes.c_uint8
+    elif return_type in {"ushort", "short", "uint16_t", "int16_t", "undefined2"}:
+        function.restype = ctypes.c_uint16
+    else:
+        function.restype = u32
     return int(function(*args)) & 0xFFFFFFFF
 
 
-def corpus_returns(form: str | None, name: str) -> bool | None:
+def corpus_returns(form: str | None, name: str, signature: str | None = None) -> bool | None:
     if form == "lifted":
         return True
     if form != "corpus":
         return None
-    return_type, _params = parse_signature(SIGNATURES[name], name)
+    text = signature or SIGNATURES[name]
+    return_type, _params = parse_signature(text, name)
     return return_type != "void"
 
 
@@ -803,11 +823,12 @@ def call_matched(
     limit: int,
     view,
     base: int,
+    signature: str | None = None,
 ) -> int | None:
     if form == "lifted":
         return call_lifted(library, address, registers, limit)
     if form == "corpus":
-        return call_corpus(library, name, SIGNATURES[name], registers)
+        return call_corpus(library, name, signature or SIGNATURES[name], registers)
     return call_function(library, name, view, base, registers)
 
 
@@ -1044,6 +1065,7 @@ def main() -> int:
                 continue
             name = checked[address]["name"]
             form = checked[address].get("form")
+            signature = checked[address].get("signature")
             lifted = form == "lifted"
             corpus = form == "corpus"
             registers = scenario.get("registers", {})
@@ -1059,11 +1081,11 @@ def main() -> int:
                 if lifted and dcra is None and 1 + len(regions) < 8:
                     dcra, dcra_view = attach_dcra_window(library)
                 returned = call_matched(
-                    library, form, address, name, registers, limit, None, 0,
+                    library, form, address, name, registers, limit, None, 0, signature,
                 )
                 check_results(
                     scenario, name, None, 0, with_pmr(library, registers), returned, regions, codeflash, dcra,
-                    value_return=corpus_returns(form, name) if corpus or lifted else None,
+                    value_return=corpus_returns(form, name, signature) if corpus or lifted else None,
                 )
                 del held, dcra_view
             else:
@@ -1076,11 +1098,11 @@ def main() -> int:
                 if lifted and dcra is None:
                     dcra, dcra_view = attach_dcra_window(library)
                 returned = call_matched(
-                    library, form, address, name, registers, limit, view, base,
+                    library, form, address, name, registers, limit, view, base, signature,
                 )
                 check_results(
                     scenario, name, memory, base, with_pmr(library, registers), returned, codeflash=codeflash, dcra=dcra,
-                    value_return=corpus_returns(form, name) if corpus or lifted else None,
+                    value_return=corpus_returns(form, name, signature) if corpus or lifted else None,
                 )
                 del dcra_view
             executed[address] += 1
