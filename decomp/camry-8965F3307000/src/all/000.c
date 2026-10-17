@@ -537,6 +537,49 @@ void f33_boot_resident_service_iteration(void)
 
 
 
+/* Run port/config,retainedECM snapshot,ECM reset and boundedclock controls before119E validates
+   both image regions/ECC/magic. Return0 calls the full-width application entry pointer atFFDB8
+   (registered20880) with no diagnostic dwell or local pointer-range guard. Failure resetsINTC
+   controls,sets2908=FF andeight subsequentwords=FFFFFFFF,then enters resident1398. Any application
+   return halts1402. This branch is distinct from deliberate9F00 programming transfer. */
+
+void f33_boot_select_application_or_resident(void)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  uint32_t puVar4;
+  uint uVar5;
+  
+  puVar4 = 0xfebf9800u;
+  FUN_00000c9a();
+  FUN_00000e54();
+  FUN_00000f80();
+  FUN_000010c6();
+  uVar5 = f33_boot_validate_application_images();
+  if (uVar5 == 0) {
+    (*(int (*)())camry_host_ptr((uint32_t)(PTR_f33_application_entry_000ffdb8)))();
+  }
+  else {
+    FUN_00001206();
+    (*((undefined4 *)camry_host_ptr((uint32_t)(puVar4 + -0x6ef8)))) = 0xff;
+    iVar3 = 1;
+    do {
+      (*((undefined4 *)camry_host_ptr((uint32_t)(puVar4 + iVar3 * 4 + -0x6ef8)))) = 0xffffffff;
+      iVar2 = iVar3 + 1;
+      iVar1 = iVar3 + -8;
+      iVar3 = iVar2;
+    } while (((iVar1 < 0) || (iVar2 < 0)));
+    f33_boot_resident_main();
+  }
+  do {
+                    /* WARNING: Do nothing block with infinite loop */
+  } while( true );
+}
+
+
+
 void FUN_00001478(undefined4 *param_1,undefined4 *param_2,int param_3)
 
 {

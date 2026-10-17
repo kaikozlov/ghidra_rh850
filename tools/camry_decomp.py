@@ -1448,10 +1448,23 @@ def _rewrite_indirect_calls(code: str) -> str:
             index += 1
             continue
         call = _skip_space(code, close + 1)
+        replace_at = index
+        # `*(code *)addr` is rewritten to `(*((code *)camry_host_ptr(addr)))` before
+        # this pass, leaving the call parentheses one level further out.
         if call >= len(code) or code[call] != "(":
-            pieces.append(code[index])
-            index += 1
-            continue
+            if (
+                index > 0
+                and code[index - 1] == "("
+                and close + 1 < len(code)
+                and code[close + 1] == ")"
+                and "code" in code[star + 1:close]
+            ):
+                call = _skip_space(code, close + 2)
+                replace_at = index - 1
+            if call >= len(code) or code[call] != "(":
+                pieces.append(code[index])
+                index += 1
+                continue
         try:
             arg_end = _match_paren(code, call)
         except ValueError:
@@ -1460,6 +1473,8 @@ def _rewrite_indirect_calls(code: str) -> str:
             continue
         operand = _rewrite_indirect_calls(code[star + 1:close])
         arguments = _rewrite_indirect_calls(code[call + 1:arg_end])
+        if replace_at < index and pieces:
+            pieces.pop()
         pieces.append(f"(*(int (*)()){_function_address(operand)})({arguments})")
         index = arg_end + 1
     return "".join(pieces)

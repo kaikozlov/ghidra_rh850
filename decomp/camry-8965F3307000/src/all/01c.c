@@ -1638,6 +1638,24 @@ uint f33_nvm_service_uninitialized(void)
 
 
 
+void FUN_0007215a(undefined2 param_1)
+
+{
+  (*(int (*)())camry_host_ptr((uint32_t)(PTR_f33_return_const_0_68f6e_00026c04)))(param_1);
+  return;
+}
+
+
+
+void FUN_0007216c(undefined2 param_1)
+
+{
+  (*(int (*)())camry_host_ptr((uint32_t)(PTR_f33_return_const_0_68f6a_00026c00)))(param_1);
+  return;
+}
+
+
+
 /* Far-call trampoline: prepare {lp},0 / jarl 0x7217E / dispose 0,{lp},lp; byte-verified against the
    exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
    machine-verified; target semantics not recovered. */

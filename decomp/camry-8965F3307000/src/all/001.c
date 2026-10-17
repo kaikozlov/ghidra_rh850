@@ -272,6 +272,40 @@ uint f33_boot_program_input_has_insufficient_space(ushort requested_length)
 
 
 
+/* Skipcallbackonlyif34DA(currentblock)==1. Otherwise42F6 optionallystagescounter;
+   call[FEBF0FD0](block,0,1,&status), thenonstatus0 andstagedcounter call(pointer,29A0,0,&status).
+   Any nonzero statusreturns1, else0. Boot-phase dynamicdriverboundary; overlapping
+   applicationNvMglobalisnotcallee. */
+
+uint f33_boot_erase_current_block_preserving_counter(void)
+
+{
+  undefined4 uVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  uint uVar4;
+  char cStack_11;
+  
+  puVar2 = 0xfebf9800u;
+  uVar4 = 0;
+  uVar3 = f33_boot_get_flash_block_skip_flag(DAT_febf2980);
+  if (uVar3 != 1) {
+    uVar3 = f33_boot_stage_preserved_program_counter();
+    uVar1 = (*((volatile uint32_t *)camry_host_ptr(0xfebf0fd0u)));
+    (*(int (*)())camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr(0xfebf0fd0u)))))((*((undefined4 *)camry_host_ptr((uint32_t)(puVar2 + -0x6e80)))),0,1,&cStack_11)
+    ;
+    if ((cStack_11 != '\0') ||
+       ((uVar3 == 0 &&
+        ((*(int (*)())camry_host_ptr((uint32_t)(uVar1)))((*((undefined4 *)camry_host_ptr((uint32_t)(puVar2 + -0x6e6c)))),puVar2 + -0x6e60,0,&cStack_11),
+        cStack_11 != '\0')))) {
+      uVar4 = 1;
+    }
+  }
+  return uVar4;
+}
+
+
+
 /* Copylow16length bytes from1800 ring,wrapconsumerat1100,publish299Aaftercopy.
    Caller43BEchecksavailability; no localcapacitycheck. Native wrapped16-byte input is consumed in
    order and paddedFF; exact counter-block exclusion avoids driver dispatch. Other programming paths
@@ -295,6 +329,45 @@ void f33_boot_consume_program_input(uchar *destination,ushort length)
   }
   DAT_febf299a = (short)uVar2;
   return;
+}
+
+
+
+/* Return2withoutmutation iflow16length>ringoccupancy. Otherwiseconsumeinto29A0,padFF to256
+   usingfullsignedlength comparison, theninvoke[FEBF0FD0](cursor,buffer,0,&status)
+   unlesscursor==2994counterblock. Returnbool(status!=0); skippedcounterblockreturns0.
+   Consumptionprecedesdevicefailure;4428supplieslength<=256. Native wrapped16-byte input is consumed
+   in order and paddedFF; exact counter-block exclusion avoids driver dispatch. Other programming
+   paths remain static. */
+
+uint f33_boot_stage_and_program_input_chunk(uint length)
+
+{
+  uint32_t puVar1;
+  uint uVar2;
+  uint uVar3;
+  uchar *destination;
+  char cStack_11;
+  
+  puVar1 = 0xfebf9800u;
+  uVar3 = 2;
+  uVar2 = f33_boot_program_input_occupancy();
+  if ((length & 0xffff) <= uVar2) {
+    destination = ((undefined *)camry_host_ptr((uint32_t)(puVar1 + -0x6e60)));
+    f33_boot_consume_program_input(destination,(ushort)length);
+    for (; (int)(length - 0x100) < 0 != ((int)length < 0 && -1 < (int)(length - 0x100));
+        length = length + 1) {
+      destination[length] = 0xff;
+    }
+    if ((*((int *)camry_host_ptr((uint32_t)(puVar1 + -0x6e74)))) == (*((int *)camry_host_ptr((uint32_t)(puVar1 + -0x6e6c))))) {
+      cStack_11 = '\0';
+    }
+    else {
+      (*(int (*)())camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr(0xfebf0fd0u)))))((*((int *)camry_host_ptr((uint32_t)(puVar1 + -0x6e74)))),destination,0,&cStack_11);
+    }
+    uVar3 = (uint)(cStack_11 != '\0');
+  }
+  return uVar3;
 }
 
 
