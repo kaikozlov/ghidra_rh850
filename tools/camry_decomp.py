@@ -4057,7 +4057,54 @@ def _rewrite_runtime_tp(code: str) -> str:
     pairs = _tp_address_map().get(name)
     if not pairs:
         return code
-    return _apply_gp_pairs(code, pairs)
+    return _rewrite_addressed_macros(_apply_gp_pairs(code, pairs), pairs)
+
+
+_NAMED_MACROS: list[tuple[str, int, str]] | None = None
+
+
+def _named_macros() -> list[tuple[str, int, str]]:
+    """common.h symbols whose replacement is a firmware address."""
+    global _NAMED_MACROS
+    if _NAMED_MACROS is not None:
+        return _NAMED_MACROS
+    header = ROOT / "src" / "all" / "common.h"
+    found: list[tuple[str, int, str]] = []
+    if header.exists():
+        pattern = re.compile(
+            r"^#define\s+([A-Za-z_][A-Za-z0-9_]*)\s+"
+            r"(\(\*\(\(volatile\s+.+?\s+\*\)\s*camry_host_ptr\(0x([0-9A-Fa-f]+)u\)\)\)"
+            r"|\(\(volatile\s+.+?\s+\*\)\s*camry_host_ptr\(0x([0-9A-Fa-f]+)u\)\))\s*$"
+        )
+        for line in header.read_text(encoding="utf-8").splitlines():
+            match = pattern.match(line.strip())
+            if match is None:
+                continue
+            address = int(match.group(3) or match.group(4), 16)
+            found.append((match.group(1), address, match.group(0).split(None, 2)[2]))
+    _NAMED_MACROS = found
+    return found
+
+
+def _rewrite_addressed_macros(code: str, pairs: dict[int, int]) -> str:
+    """A named symbol hides the address `_apply_gp_pairs` would retarget."""
+    for name, address, expansion in _named_macros():
+        runtime = pairs.get(address)
+        if runtime is None or runtime == address:
+            continue
+        if re.search(rf"\b{re.escape(name)}\b", code) is None:
+            continue
+        updated, count = re.subn(
+            rf"0x{address:x}u",
+            f"0x{runtime:x}u",
+            expansion,
+            count=1,
+            flags=re.IGNORECASE,
+        )
+        if count != 1:
+            continue
+        code = re.sub(rf"\b{re.escape(name)}\b", lambda _match: updated, code)
+    return code
 
 
 _PTR_SCALES: dict[int, int] | None = None
@@ -4494,7 +4541,10 @@ def _rewrite_runtime_gp(code: str) -> str:
     pairs = _gp_address_map().get(name)
     if not pairs:
         return code
-    return _apply_gp_pairs(code, pairs, (_GP_HITS or {}).get(name))
+    return _rewrite_addressed_macros(
+        _apply_gp_pairs(code, pairs, (_GP_HITS or {}).get(name)),
+        pairs,
+    )
 
 
 def apply_runtime_gp() -> tuple[int, int]:
