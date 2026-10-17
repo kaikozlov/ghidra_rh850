@@ -712,6 +712,19 @@ undefined4 FUN_00001d24(void)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0x14A2 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000014a2(void)
+
+{
+  FUN_000014a2();
+  return;
+}
+
+
+
 void FUN_00001e10(void)
 
 {
@@ -723,6 +736,19 @@ void FUN_00001e10(void)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0x1E10 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00001e10(void)
+
+{
+  FUN_00001e10();
+  return;
+}
+
+
+
 void FUN_00001e36(void)
 
 {
@@ -730,6 +756,22 @@ void FUN_00001e36(void)
   do {
                     /* WARNING: Do nothing block with infinite loop */
   } while( true );
+}
+
+
+
+/* Dispatch entry for EIIC 1087: TAUJ0 channel2 per P1M-E R01UH0585EJ0120 interrupt table, page284.
+   Calls 1CE8, then 1E04, then 14A2; state byte FEBF2904 == 2 enters services, state1 returns. The
+   full state1 interrupt return was executed without replacing callees. Boot callback for EIIC1087:
+   TAUJ0 channel2 per P1M-E R01UH0585EJ0120 page284. Calls1CE8 ->1E04 ->14A2; state byteFEBF2904==2
+   enters services while state1 returns. Exact state1 chain and interrupt return executed without
+   callee replacement; state2 services and physical scheduling are not exercised. */
+
+void f33_boot_tauj0_ch2_callback(void)
+
+{
+  thunk_FUN_000014a2();
+  return;
 }
 
 

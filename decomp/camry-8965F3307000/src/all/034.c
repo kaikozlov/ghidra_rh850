@@ -1410,6 +1410,141 @@ void FUN_000d0d7c(void)
 
 
 
+void FUN_000d0eec(void)
+
+{
+  byte bVar1;
+  
+  bVar1 = DAT_febeacbc;
+  f33_qualify_assist_surface_transition();
+  FUN_000c566c();
+  FUN_000c5778();
+  FUN_000c5884();
+  FUN_000c956a();
+  if ((bVar1 & 8) != 0) {
+    FUN_000c58b8();
+    FUN_000c5910();
+    FUN_000c5956();
+    FUN_000c5f38();
+    FUN_000c74e2();
+    FUN_000c9ba6();
+    FUN_000cc66e();
+    FUN_000c7966();
+    FUN_000c8ecc();
+    FUN_000c8a78();
+    FUN_000c6f86();
+    FUN_000c713c();
+    f33_update_nonlinear_torque_speed_gain();
+    f33_update_angle_rate_compensation_speed_gain();
+    f33_update_directional_rate_speed_gain();
+    FUN_000c82a8();
+    FUN_000c9a5c();
+    FUN_000c9258();
+    FUN_000c91f2();
+    f33_update_torque_memory_speed_gain();
+    FUN_000d06fa();
+  }
+  if ((bVar1 >> 4 & 1) != 0) {
+    FUN_000c81f8();
+  }
+  if ((bVar1 & 4) != 0) {
+    FUN_000d0716();
+  }
+  if ((bVar1 & 2) != 0) {
+    FUN_000c71b6();
+    FUN_000c2cc0();
+    f33_run_raw_estimator_cycle();
+  }
+  f33_update_angle_rate_compensation();
+  FUN_000c9650();
+  FUN_000c9caa();
+  FUN_000c9d18();
+  FUN_000c98ae();
+  FUN_000c9812();
+  FUN_000c973a();
+  FUN_000c9a84();
+  FUN_000c9e44();
+  FUN_000c9eea();
+  FUN_000c9d86();
+  FUN_000c854a();
+  FUN_000c9b04();
+  FUN_000c6af6();
+  FUN_000c878a();
+  thunk_FUN_000cefa4();
+  FUN_000cf04a();
+  FUN_000cc514();
+  FUN_000cc1b6();
+  FUN_000cc32a();
+  FUN_000cc3be();
+  FUN_000cc43a();
+  FUN_000cc07a();
+  FUN_000cc114();
+  FUN_000cc130();
+  FUN_000cb2a2();
+  FUN_000cb5e4();
+  FUN_000cb45e();
+  FUN_000cb81c();
+  FUN_000cb9e2();
+  FUN_000cb82c();
+  FUN_000cbb66();
+  FUN_000cbc80();
+  FUN_000cbcb8();
+  FUN_000cbd64();
+  FUN_000cbe28();
+  FUN_000cb246();
+  FUN_000cb2f8();
+  FUN_000cb396();
+  FUN_000cb3f4();
+  f33_update_angle_feedback_offset_and_publication();
+  FUN_000ceb92();
+  FUN_000ce8ca();
+  f33_run_init_chain_cef0e();
+  FUN_000cef26();
+  FUN_000cec72();
+  f33_update_selected_angle_target();
+  FUN_000ce6cc();
+  f33_shape_angle_controller_target();
+  f33_publish_angle_controller_target_triplicate();
+  f33_update_angle_controller_output_envelope();
+  FUN_000cf5de();
+  f33_update_torque_memory_gain();
+  FUN_000c7a18();
+  FUN_000c9124();
+  FUN_000c6d4e();
+  FUN_000c890e();
+  FUN_000c666c();
+  FUN_000c7d14();
+  FUN_000c7dd4();
+  FUN_000cfda0();
+  FUN_000cfe64();
+  if ((bVar1 & 8) != 0) {
+    FUN_000c7b34();
+    FUN_000cffa2();
+  }
+  if ((bVar1 & 2) != 0) {
+    FUN_000c92b2();
+    FUN_000c9314();
+    FUN_000c945e();
+    FUN_000cc5ac();
+    FUN_000cc5da();
+    FUN_000cc6ba();
+    FUN_000cc878();
+    FUN_000c84f8();
+    FUN_000c6aa4();
+    FUN_000c7912();
+  }
+  if ((bVar1 & 4) != 0) {
+    f33_qualify_opposed_rate_direction();
+    f33_filter_directional_rate_compensation();
+    FUN_000c8e1c();
+    FUN_000c8ef4();
+  }
+  FUN_000d0d7c();
+  return;
+}
+
+
+
 void FUN_000d10d4(void)
 
 {
@@ -1439,10 +1574,62 @@ void FUN_000d1100(void)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0xD0BDA / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000d0bda(void)
+
+{
+  FUN_000d0bda();
+  return;
+}
+
+
+
 void FUN_000d1118(void)
 
 {
   f33_run_observer_publication_slice();
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0xD0EEC / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000d0eec(void)
+
+{
+  FUN_000d0eec();
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0xD10E4 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000d10e4(void)
+
+{
+  FUN_000d10e4();
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0xD10D4 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000d10d4(void)
+
+{
+  FUN_000d10d4();
   return;
 }
 
@@ -1461,6 +1648,19 @@ void FUN_000d1160(void)
 
 {
   f33_snapshot_retained_estimator_projection();
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0xD0D6C / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000d0d6c(void)
+
+{
+  FUN_000d0d6c();
   return;
 }
 
@@ -2075,6 +2275,68 @@ undefined4 FUN_000d27e8(uint param_1,uint *param_2,uint *param_3,uint *param_4)
 
 
 
+undefined8 FUN_000d2834(uint param_1,uint param_2,uint param_3,uint param_4)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uint uVar3;
+  uint uVar4;
+  uint uVar5;
+  uint uVar6;
+  
+  uVar6 = param_1 & 0xffff;
+  uVar5 = param_3 & 0xffff;
+  param_3 = param_3 >> 0x10;
+  param_1 = param_1 >> 0x10;
+  uVar3 = uVar6 * (param_4 & 0xffff);
+  uVar1 = (uVar6 * uVar5 >> 0x10) + (uVar6 * param_3 & 0xffff) + (param_1 * uVar5 & 0xffff);
+  uVar4 = (param_2 & 0xffff) * uVar5;
+  uVar2 = (uVar6 * param_3 >> 0x10) + (uVar3 & 0xffff) + (param_1 * uVar5 >> 0x10) +
+          (param_1 * param_3 & 0xffff) + (uVar4 & 0xffff) + (uVar1 >> 0x10);
+  return CONCAT44(((uVar3 >> 0x10) + uVar6 * (param_4 >> 0x10) + (param_1 * param_3 >> 0x10) +
+                   param_1 * (param_4 & 0xffff) + (uVar4 >> 0x10) + (param_2 & 0xffff) * param_3 +
+                   (param_2 >> 0x10) * uVar5 + (uVar2 >> 0x10)) * 0x10000 | uVar2 & 0xffff,
+                  uVar1 * 0x10000 | uVar6 * uVar5 & 0xffff);
+}
+
+
+
+ulonglong FUN_000d28ea(uint param_1,int param_2,uint param_3,int param_4)
+
+{
+  bool bVar1;
+  uint uVar2;
+  uint uVar3;
+  ulonglong uVar4;
+  
+  if (param_2 != 0 || param_4 != 0) {
+    bVar1 = param_2 < 0;
+    uVar2 = param_1;
+    if (bVar1) {
+      uVar2 = -param_1;
+      param_2 = -(uint)(param_1 != 0) - param_2;
+    }
+    uVar3 = param_3;
+    if (param_4 < 0) {
+      uVar3 = -param_3;
+      param_4 = -(uint)(param_3 != 0) - param_4;
+      bVar1 = !bVar1;
+    }
+    uVar4 = FUN_000d2d86(uVar2,param_2,uVar3,param_4);
+    if (bVar1) {
+      uVar4 = CONCAT44(-(uint)((int)uVar4 != 0) - (int)(uVar4 >> 0x20),-(int)uVar4);
+    }
+    return uVar4;
+  }
+  if (param_3 != 0) {
+    param_1 = param_1 / param_3;
+  }
+  return (ulonglong)param_1;
+}
+
+
+
 uint FUN_000d2942(uint param_1,uint param_2,uint param_3,uint param_4)
 
 {
@@ -2332,6 +2594,28 @@ LAB_000d2c7a:
     }
   }
   return param_1;
+}
+
+
+
+undefined8 FUN_000d2da0(uint param_1,uint param_2,uint param_3)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uint uVar3;
+  
+  uVar3 = 0;
+  uVar2 = 0;
+  if (param_3 < 0x40) {
+    uVar1 = param_3 - 0x20;
+    uVar3 = param_2 >> (uVar1 & 0x1f);
+    if ((int)uVar1 < 0) {
+      uVar2 = param_2 >> (param_3 & 0x1f);
+      uVar3 = (param_2 << (~uVar1 & 0x1f)) << 1 | param_1 >> (param_3 & 0x1f);
+    }
+  }
+  return CONCAT44(uVar2,uVar3);
 }
 
 

@@ -1756,6 +1756,26 @@ void f33_return_only_stub_567c8(void)
 
 
 
+void FUN_000567ca(void)
+
+{
+  undefined *puVar1;
+  int iVar2;
+  char cVar3;
+  
+  cVar3 = DAT_febe8a28;
+  puVar1 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  if ((DAT_febe8a28 == '\0') &&
+     (puVar1 = ((undefined *)camry_host_ptr(0xfebeb800u)), iVar2 = FUN_00062e12(), iVar2 == -0x5aa55aa6)) {
+    FUN_00051cf6(0x20,0x32);
+    cVar3 = 'Z';
+  }
+  puVar1[-0x2dd8] = cVar3;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */

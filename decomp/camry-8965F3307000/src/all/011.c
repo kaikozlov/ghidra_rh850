@@ -5502,6 +5502,19 @@ void FUN_00047d78(void)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0x47D78 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00047d78(void)
+
+{
+  FUN_00047d78();
+  return;
+}
+
+
+
 /* WARNING: Removing unreachable block (ram,0x00047de4) */
 /* When enabled==5A subtract signed-byte circular interpolation at A0C0+256*bank. Index255 wraps
    to0; signed division256 truncates toward zero. Return narrowed signed16 phase. Enabled5A
@@ -5705,6 +5718,45 @@ void FUN_00047eb8(void)
 void f33_return_only_stub_47f96(void)
 
 {
+  return;
+}
+
+
+
+void FUN_00047f98(void)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uint uVar3;
+  uint uVar4;
+  uint uVar5;
+  uint32_t puVar6;
+  int iVar7;
+  uint uVar8;
+  
+  puVar6 = 0xfebeb800u;
+  iVar7 = FUN_000588b6();
+  if (iVar7 == 0) {
+    uVar1 = (uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar6 + -0x35f4)))) * (uint)DAT_0002fbe2;
+    uVar2 = (uint)DAT_0002fbe2 * (uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar6 + -0x35f2))));
+    uVar3 = (uint)DAT_0002fbe4;
+    uVar4 = (uint)DAT_0002fbe6;
+    uVar8 = (uint)DAT_0002fbea;
+    uVar5 = (uint)DAT_0002fbe8;
+    (*((short *)camry_host_ptr((uint32_t)(puVar6 + -0x3a4c)))) = (short)((*((ushort *)camry_host_ptr((uint32_t)(puVar6 + -0x35da)))) * uVar8 >> 0x10);
+    (*((short *)camry_host_ptr((uint32_t)(puVar6 + -0x3a50)))) = (short)(uVar5 * (*((ushort *)camry_host_ptr((uint32_t)(puVar6 + -0x35f0)))) >> 0x10);
+    (*((short *)camry_host_ptr((uint32_t)(puVar6 + -0x3a54)))) = (short)(uVar4 * (*((ushort *)camry_host_ptr((uint32_t)(puVar6 + -0x35de)))) >> 0x10);
+    (*((short *)camry_host_ptr((uint32_t)(puVar6 + -0x3a56)))) = (short)(uVar3 * (*((ushort *)camry_host_ptr((uint32_t)(puVar6 + -0x35e0)))) >> 0x10);
+    (*((short *)camry_host_ptr((uint32_t)(puVar6 + -0x3a58)))) = (short)(uVar2 >> 0x10);
+    (*((short *)camry_host_ptr((uint32_t)(puVar6 + -0x3a5a)))) = (short)(uVar1 >> 0x10);
+    (*((uint *)camry_host_ptr((uint32_t)(puVar6 + -0x3a38)))) = uVar5 * (*((ushort *)camry_host_ptr((uint32_t)(puVar6 + -0x35f0)))) & 0xffff0000;
+    (*((uint *)camry_host_ptr((uint32_t)(puVar6 + -0x3a3c)))) = uVar4 * (*((ushort *)camry_host_ptr((uint32_t)(puVar6 + -0x35de)))) & 0xffff0000;
+    (*((uint *)camry_host_ptr((uint32_t)(puVar6 + -0x3a40)))) = uVar3 * (*((ushort *)camry_host_ptr((uint32_t)(puVar6 + -0x35e0)))) & 0xffff0000;
+    (*((uint *)camry_host_ptr((uint32_t)(puVar6 + -0x3a44)))) = uVar2 & 0xffff0000;
+    (*((uint *)camry_host_ptr((uint32_t)(puVar6 + -0x3a48)))) = uVar1 & 0xffff0000;
+    (*((short *)camry_host_ptr((uint32_t)(puVar6 + -0x3a4a)))) = (short)((*((ushort *)camry_host_ptr((uint32_t)(puVar6 + -0x35d8)))) * uVar8 >> 0x10);
+  }
   return;
 }
 

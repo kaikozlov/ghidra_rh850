@@ -1629,6 +1629,22 @@ void f33_return_only_stub_39058(void)
 
 
 
+void FUN_0003905a(void)
+
+{
+  uint32_t puVar1;
+  int iVar2;
+  
+  puVar1 = 0xfebeb800u;
+  iVar2 = FUN_000588b6();
+  if (iVar2 == 0) {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb6acu + (uint32_t)((int)puVar1) * 1u)))) = 0;
+  }
+  return;
+}
+
+
+
 /* Same strict32000/marker0/source-byte selection; histories6ED8/6EDC. Caller39126 loads record+32
    intoR6 and preserves it through the39152 call; no invented NvM return argument. Source5 marker
    argument is loaded from record+32 into R6 and preserved through caller; it is not an invented
@@ -2515,6 +2531,22 @@ void f33_return_only_stub_3991a(void)
 
 
 
+void FUN_0003991c(void)
+
+{
+  uint32_t puVar1;
+  int iVar2;
+  
+  puVar1 = 0xfebeb800u;
+  iVar2 = FUN_000588b6();
+  if (iVar2 == 0) {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb710u + (uint32_t)((int)puVar1) * 1u)))) = 0;
+  }
+  return;
+}
+
+
+
 /* Same strict32000/marker0/source-byte selection; selected difference histories6F28/6F2C. Source4
    matching conditional-zero predicate retains the unselected history and requires strict32000 plus
    marker0. */
@@ -2798,6 +2830,22 @@ void f33_publish_ecu_source4_thermal_limit_maps(void)
 void f33_return_only_stub_39bfc(void)
 
 {
+  return;
+}
+
+
+
+void FUN_00039bfe(void)
+
+{
+  uint32_t puVar1;
+  int iVar2;
+  
+  puVar1 = 0xfebeb800u;
+  iVar2 = FUN_000588b6();
+  if (iVar2 == 0) {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb734u + (uint32_t)((int)puVar1) * 1u)))) = 0;
+  }
   return;
 }
 
@@ -3773,6 +3821,22 @@ void f33_return_only_stub_3a558(void)
 
 
 
+void FUN_0003a55a(void)
+
+{
+  uint32_t puVar1;
+  int iVar2;
+  
+  puVar1 = 0xfebeb800u;
+  iVar2 = FUN_000588b6();
+  if (iVar2 == 0) {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb780u + (uint32_t)((int)puVar1) * 1u)))) = 0;
+  }
+  return;
+}
+
+
+
 /* Same strict32000/marker0/source-byte selection; selected histories6F84/6F88. Motor conditional
    zero predicate uses the shared marker0 and selected signed-difference>32000 contract with
    independent histories. */
@@ -4573,6 +4637,22 @@ void f33_return_only_stub_3acf6(void)
 
 
 
+void FUN_0003acf8(void)
+
+{
+  uint32_t puVar1;
+  int iVar2;
+  
+  puVar1 = 0xfebeb800u;
+  iVar2 = FUN_000588b6();
+  if (iVar2 == 0) {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb7e0u + (uint32_t)((int)puVar1) * 1u)))) = 0;
+  }
+  return;
+}
+
+
+
 /* Same strict32000/marker0/source-byte selection; selected histories6FE4/6FE8. Source3 conditional
    zero predicate has matching byte-selection and strict-boundary semantics with separate retained
    histories. */
@@ -5355,6 +5435,54 @@ void FUN_0003b4dc(void)
 void f33_return_only_stub_3b500(void)
 
 {
+  return;
+}
+
+
+
+void FUN_0003b502(void)
+
+{
+  int iVar1;
+  int iVar2;
+  uint32_t puVar3;
+  int iVar4;
+  
+  puVar3 = 0xfebeb800u;
+  iVar4 = FUN_000588b6();
+  if (iVar4 == 0) {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb858u + (uint32_t)((int)puVar3) * 1u)))) = 0;
+    iVar4 = 0;
+    do {
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe7059u + (uint32_t)(iVar4) * 1u)))) = 0;
+      iVar2 = iVar4 + 1;
+      iVar1 = iVar4 + -7;
+      iVar4 = iVar2;
+    } while (((iVar1 < 0) || (iVar2 < 0)));
+    iVar4 = 0;
+    do {
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe7061u + (uint32_t)(iVar4) * 1u)))) = 0;
+      iVar2 = iVar4 + 1;
+      iVar1 = iVar4 + -7;
+      iVar4 = iVar2;
+    } while (((iVar1 < 0) || (iVar2 < 0)));
+    iVar4 = 0;
+    do {
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe7069u + (uint32_t)(iVar4) * 1u)))) = 0;
+      iVar2 = iVar4 + 1;
+      iVar1 = iVar4 + -7;
+      iVar4 = iVar2;
+    } while (((iVar1 < 0) || (iVar2 < 0)));
+    iVar4 = 0;
+    do {
+      iVar2 = iVar4 + 1;
+      *(undefined4 *)(((undefined *)camry_host_ptr(0xfebe7090u)) + iVar4 * 4) = 0;
+      iVar1 = iVar4 + -7;
+      iVar4 = iVar2;
+    } while (((iVar1 < 0) || (iVar2 < 0)));
+    DAT_febe7071 = 0;
+    DAT_febe7072 = 0;
+  }
   return;
 }
 

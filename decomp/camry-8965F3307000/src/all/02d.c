@@ -3017,6 +3017,19 @@ void f33_return_only_stub_b6d70(void)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0xB6D72 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000b6d72(void)
+
+{
+  FUN_000b6d72();
+  return;
+}
+
+
+
 void FUN_000b6e3c(void)
 
 {

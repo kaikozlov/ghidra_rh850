@@ -1170,6 +1170,58 @@ int FUN_00087b74(undefined4 param_1,undefined1 param_2,undefined4 *param_3,char 
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0x8844E / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_0008844e(void)
+
+{
+  FUN_0008844e();
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x884EA / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000884ea(void)
+
+{
+  FUN_000884ea();
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x886E0 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000886e0(void)
+
+{
+  FUN_000886e0();
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x7995C / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_0007995c(void)
+
+{
+  FUN_0007995c();
+  return;
+}
+
+
+
 void FUN_00087ef6(char param_1)
 
 {

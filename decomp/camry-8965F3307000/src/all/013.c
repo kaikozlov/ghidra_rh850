@@ -948,6 +948,19 @@ void FUN_0004ced0(void)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0x4D4BC / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_0004d4bc(void)
+
+{
+  FUN_0004d4bc();
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */

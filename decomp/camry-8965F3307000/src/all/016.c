@@ -144,6 +144,25 @@ void FUN_0005889a(void)
 
 
 
+undefined4 FUN_000588b6(void)
+
+{
+  int iVar1;
+  undefined4 uVar2;
+  uchar uStack_5;
+  
+  iVar1 = f33_vote_redundant_u8(((undefined *)camry_host_ptr(0xfebe8c1au)),((undefined *)camry_host_ptr(0xfebe8c1bu)),((undefined *)camry_host_ptr(0xfebe8c1cu)),&uStack_5);
+  if ((uStack_5 == 0xa5) || (iVar1 == -0xd)) {
+    uVar2 = 0x5a;
+  }
+  else {
+    uVar2 = 0;
+  }
+  return uVar2;
+}
+
+
+
 /* Save PMR; setFFC0; copy ECU inputs through5C7B6 and control inputs throughFDC28; restore
    entryPMR. The caller subsequently runs CH1 transition/steady workers. */
 
@@ -223,6 +242,14 @@ void f33_snapshot_foreground_inputs(void)
   FUN_000fdc8c();
   FUN_000701a6(uVar1);
   return;
+}
+
+
+
+undefined1 FUN_00058c84(void)
+
+{
+  return DAT_febe8c19;
 }
 
 

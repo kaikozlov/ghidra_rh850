@@ -534,6 +534,23 @@ undefined1 FUN_000821d0(void)
 
 
 
+void FUN_00082288(undefined4 param_1)
+
+{
+  DAT_febe5000 = param_1;
+  return;
+}
+
+
+
+undefined4 FUN_0008228e(void)
+
+{
+  return DAT_febe5000;
+}
+
+
+
 void FUN_00082294(void)
 
 {
@@ -820,6 +837,30 @@ undefined4 FUN_00082bd2(char param_1,int param_2,short *param_3)
 
 
 
+undefined4 FUN_00082c62(int param_1,short *param_2)
+
+{
+  short sVar1;
+  short sVar2;
+  undefined4 uVar3;
+  
+  sVar2 = DAT_00022acc;
+  sVar1 = *param_2;
+  *param_2 = 2;
+  uVar3 = 1;
+  if ((sVar1 == sVar2) && ((*((char *)camry_host_ptr((uint32_t)(param_1 + 3)))) == '\0')) {
+    FUN_00082288((*((undefined4 *)camry_host_ptr((uint32_t)(param_1 + 4)))));
+    uVar3 = 0;
+    *param_2 = 1;
+  }
+  else {
+    (*((undefined1 *)camry_host_ptr((uint32_t)(param_1 + 1)))) = 0x21;
+  }
+  return uVar3;
+}
+
+
+
 void FUN_00082e54(char param_1)
 
 {
@@ -877,6 +918,19 @@ void FUN_00083072(undefined1 param_1)
 
 {
   FUN_00083570(param_1);
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x8228E / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_0008228e(void)
+
+{
+  FUN_0008228e();
   return;
 }
 

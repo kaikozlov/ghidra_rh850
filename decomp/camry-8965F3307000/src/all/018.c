@@ -500,6 +500,32 @@ uint f33_read_dma_progress_delta(uchar channel)
 
 
 
+void FUN_00060a6a(byte *param_1)
+
+{
+  int iVar1;
+  byte bVar2;
+  undefined2 uVar3;
+  uint *puVar4;
+  
+  if (*param_1 < 0x10) {
+    iVar1 = (uint)*param_1 * 0x40;
+    uVar3 = *(undefined2 *)(param_1 + 0x14);
+    (*((undefined4 *)camry_host_ptr((uint32_t)(iVar1 + -0x7bf0)))) = *(undefined4 *)(param_1 + 0x18);
+    (*((undefined4 *)camry_host_ptr((uint32_t)(iVar1 + -0x7bec)))) = *(undefined4 *)(param_1 + 0x1c);
+    (*((uint *)camry_host_ptr((uint32_t)(iVar1 + -0x7be8)))) = CONCAT22(*(undefined2 *)(param_1 + 0x16),uVar3);
+    bVar2 = param_1[3];
+    if ((*((uint *)camry_host_ptr((uint32_t)(iVar1 + -0x7bd0)))) != (uint)bVar2) {
+      puVar4 = ((uint *)camry_host_ptr((uint32_t)(iVar1 + -0x7bd0)));
+      *puVar4 = *puVar4 & 0xfe;
+      *puVar4 = (uint)bVar2;
+    }
+  }
+  return;
+}
+
+
+
 void FUN_00060aa8(void)
 
 {
@@ -2080,6 +2106,14 @@ void FUN_00062df0(void)
     f33_startup_publish_image_identity_check();
   }
   return;
+}
+
+
+
+undefined4 FUN_00062e12(void)
+
+{
+  return DAT_febf0668;
 }
 
 

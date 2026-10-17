@@ -1103,6 +1103,57 @@ void FUN_0006a1ac(undefined2 param_1)
 
 
 
+/* WARNING: Inlined function: f33_crypto_bank_profile_count */
+/* Store low/high16 at5054/5056. For state11 and configured low ID0, saturating-increment
+   zero-status507E or nonzero-status5080. High16 remains inR6 across exact6915A leaf; no extra
+   callback argument. */
+
+void f33_crypto_bank_record_profile_status(uint packed_status)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uint uVar3;
+  uchar uVar4;
+  uint uVar5;
+  uchar *puVar6;
+  
+  uVar5 = packed_status & 0xffff;
+  uVar2 = packed_status >> 0x10;
+  uVar3 = (uint)f33_crypto_config_profile_count;
+  if (2 < uVar3) {
+    uVar3 = 2;
+  }
+  uVar1 = 0;
+  while( true ) {
+    DAT_febe5056 = (undefined2)(packed_status >> 0x10);
+    DAT_febe5054 = (undefined2)packed_status;
+    if (uVar3 <= uVar1) break;
+    if ((f33_crypto_profile_phase[uVar1] == '\x11') && (uVar5 == DAT_00025840)) {
+      if (uVar2 == 0) {
+        puVar6 = f33_crypto_profile_zero_status_count + uVar1;
+        uVar4 = *puVar6;
+        if (uVar4 != 0xff) {
+          uVar4 = uVar4 + '\x01';
+        }
+      }
+      else {
+        puVar6 = f33_crypto_profile_nonzero_status_count + uVar1;
+        uVar4 = *puVar6;
+        if (uVar4 != 0xff) {
+          uVar4 = uVar4 + '\x01';
+        }
+      }
+      *puVar6 = uVar4;
+      packed_status = CONCAT22(DAT_febe5056,DAT_febe5054);
+    }
+    uVar1 = uVar1 + 1 & 0xff;
+  }
+  return;
+}
+
+
+
 void FUN_0006a280(undefined2 param_1)
 
 {

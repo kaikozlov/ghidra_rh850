@@ -260,6 +260,19 @@ undefined4 FUN_00094f3a(undefined2 param_1)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0x95500 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00095500(void)
+
+{
+  FUN_00095500();
+  return;
+}
+
+
+
 int FUN_000950c0(short param_1,undefined1 param_2,undefined1 *param_3)
 
 {
@@ -433,6 +446,101 @@ undefined4 FUN_000952ba(undefined4 param_1,byte param_2,ushort *param_3)
 
 
 
+uint FUN_000952d0(ushort param_1,uchar *param_2,byte param_3,ushort *param_4,uchar *param_5)
+
+{
+  uint uVar1;
+  
+  if (param_3 < 2) {
+    uVar1 = f33_did_read_application_adapter(param_2,param_4,param_5,param_1);
+  }
+  else {
+    uVar1 = 0;
+    if (param_3 == 2) {
+      thunk_FUN_0008b3d4();
+    }
+  }
+  return uVar1;
+}
+
+
+
+uint FUN_00095300(ushort param_1,uchar *param_2,byte param_3,ushort *param_4,uchar *param_5)
+
+{
+  uint uVar1;
+  
+  if (param_3 < 2) {
+    uVar1 = f33_did_read_application_adapter(param_2,param_4,param_5,param_1);
+  }
+  else {
+    uVar1 = 0;
+    if (param_3 == 2) {
+      thunk_FUN_0008b3d4();
+    }
+  }
+  return uVar1;
+}
+
+
+
+uint FUN_00095330(ushort param_1,uchar *param_2,byte param_3,ushort *param_4,uchar *param_5)
+
+{
+  uint uVar1;
+  
+  if (param_3 < 2) {
+    uVar1 = f33_did_read_application_adapter(param_2,param_4,param_5,param_1);
+  }
+  else {
+    uVar1 = 0;
+    if (param_3 == 2) {
+      thunk_FUN_0008b3d4();
+    }
+  }
+  return uVar1;
+}
+
+
+
+uint FUN_00095360(ushort param_1,uchar *param_2,byte param_3,ushort *param_4,uchar *param_5)
+
+{
+  uint uVar1;
+  
+  if (param_3 < 2) {
+    uVar1 = f33_did_read_application_adapter(param_2,param_4,param_5,param_1);
+  }
+  else {
+    uVar1 = 0;
+    if (param_3 == 2) {
+      thunk_FUN_0008b3d4();
+    }
+  }
+  return uVar1;
+}
+
+
+
+uint FUN_00095390(ushort param_1,uchar *param_2,byte param_3,ushort *param_4,uchar *param_5)
+
+{
+  uint uVar1;
+  
+  if (param_3 < 2) {
+    uVar1 = f33_did_read_application_adapter(param_2,param_4,param_5,param_1);
+  }
+  else {
+    uVar1 = 0;
+    if (param_3 == 2) {
+      thunk_FUN_0008b3d4();
+    }
+  }
+  return uVar1;
+}
+
+
+
 uint FUN_000953c0(ushort param_1,uchar *param_2,byte param_3,ushort param_4,uchar *param_5)
 
 {
@@ -528,6 +636,19 @@ bool FUN_000954ee(short param_1)
     DAT_febe5d23 = 0;
   }
   return param_1 != 0;
+}
+
+
+
+undefined4 FUN_00095500(void)
+
+{
+  uint uVar1;
+  
+  for (uVar1 = (uint)DAT_00026018; uVar1 != 0; uVar1 = uVar1 - 1) {
+    DAT_febe5d23 = 0;
+  }
+  return 0;
 }
 
 
@@ -710,6 +831,53 @@ undefined4 FUN_00095808(undefined1 param_1)
 
 
 
+undefined4 FUN_0009586c(undefined4 *param_1)
+
+{
+  undefined4 *puVar1;
+  uint32_t puVar2;
+  ushort did;
+  uchar nrc;
+  uint uVar3;
+  undefined4 uVar4;
+  undefined4 *puVar5;
+  byte bStack_d;
+  
+  puVar2 = 0xfebeb800u;
+  FUN_0009560e(0);
+  puVar1 = ((undefined4 *)camry_host_ptr((uint32_t)(puVar2 + -0x5ad0)));
+  puVar5 = param_1 + 7;
+  do {
+    uVar4 = *param_1;
+    param_1 = param_1 + 1;
+    *puVar1 = uVar4;
+    puVar1 = puVar1 + 1;
+  } while (puVar5 != param_1);
+  FUN_000955b6(0);
+  if ((*((uint *)camry_host_ptr((uint32_t)(puVar2 + -0x5acc)))) < 3) {
+    nrc = '\x13';
+  }
+  else {
+    did = CONCAT11(**(undefined1 **)(puVar2 + -0x5ad0),(*(undefined1 **)(puVar2 + -0x5ad0))[1]);
+    (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x5ad2)))) = did;
+    uVar3 = f33_dcm_resolve_did_group(did,'\x01',((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x5ad4))),&bStack_d);
+    if (uVar3 == 0) {
+      if ((bStack_d >> 2 & 1) != 0) {
+        uVar4 = FUN_00095808(0);
+        return uVar4;
+      }
+    }
+    else if (uVar3 != 1) {
+      return 0;
+    }
+    nrc = '1';
+  }
+  f33_dcm_report_negative_or_pending(((F33DcmMessageContext *)camry_host_ptr((uint32_t)(puVar2 + -0x5ad0))),nrc);
+  return 0;
+}
+
+
+
 /* 0 starts9586C,2 cancels958F4; all paths meaningful r10. */
 
 uint f33_dcm_write_did_service(uchar operation,F33DcmMessageContext *message)
@@ -877,6 +1045,17 @@ uint f33_dcm_session_64_callback(uchar operation,F33DcmMessageContext *message)
   
   uVar1 = f33_dcm_session_operation(operation,message,'@');
   return uVar1;
+}
+
+
+
+undefined4 FUN_00095d4e(char param_1)
+
+{
+  if (param_1 == '\0') {
+    thunk_FUN_0008b134();
+  }
+  return 0;
 }
 
 
@@ -1164,6 +1343,25 @@ void FUN_000965ee(void)
 {
   FUN_00096410(1);
   return;
+}
+
+
+
+undefined4
+FUN_000965fc(char param_1,undefined1 param_2,undefined4 param_3,undefined4 param_4,
+            undefined4 param_5,undefined4 param_6)
+
+{
+  undefined4 uVar1;
+  
+  if (param_1 == '\x02') {
+    thunk_FUN_0008d4ae();
+    uVar1 = 0;
+  }
+  else {
+    uVar1 = FUN_0008d546(param_1, param_2, param_3, param_4, ((uchar *)camry_host_ptr((uint32_t)(param_5))), ((undefined1 *)camry_host_ptr((uint32_t)(param_6))));
+  }
+  return uVar1;
 }
 
 

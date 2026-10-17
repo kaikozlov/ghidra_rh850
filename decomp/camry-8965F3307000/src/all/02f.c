@@ -533,6 +533,105 @@ undefined4 FUN_000bd8ba(void)
 
 
 
+undefined4 FUN_000bd8ea(void)
+
+{
+  uint32_t puVar1;
+  undefined1 local_2c;
+  undefined1 uStack_2b;
+  undefined1 uStack_2a;
+  undefined1 uStack_29;
+  undefined1 uStack_28;
+  undefined1 uStack_27;
+  undefined1 uStack_26;
+  undefined1 uStack_25;
+  undefined1 uStack_24;
+  undefined1 uStack_23;
+  undefined1 uStack_22;
+  undefined1 uStack_21;
+  undefined1 uStack_20;
+  undefined1 uStack_1f;
+  undefined1 uStack_1e;
+  undefined1 uStack_1d;
+  undefined1 uStack_1c;
+  undefined1 uStack_1b;
+  undefined1 uStack_1a;
+  undefined1 uStack_19;
+  undefined2 uStack_18;
+  undefined2 uStack_16;
+  undefined1 uStack_14;
+  undefined1 uStack_13;
+  undefined1 uStack_12;
+  undefined1 uStack_11;
+  undefined1 uStack_10;
+  undefined1 uStack_f;
+  undefined1 uStack_e;
+  undefined1 uStack_d;
+  undefined1 uStack_c;
+  undefined1 uStack_b;
+  undefined1 uStack_a;
+  undefined1 uStack_9;
+  undefined1 uStack_8;
+  undefined1 uStack_7;
+  undefined1 uStack_6;
+  undefined1 uStack_5;
+  
+  puVar1 = 0xfebeb800u;
+  thunk_FUN_000d0d6c();
+  uStack_28 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xb0b)))));
+  uStack_29 = 0;
+  uStack_d = 0;
+  local_2c = (undefined1)(*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x9f0))));
+  uStack_2b = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xb11)))));
+  uStack_5 = 0;
+  uStack_27 = (undefined1)(*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x9ec))));
+  uStack_26 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xb0e)))));
+  uStack_2a = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xb10)))));
+  uStack_25 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xb0d)))));
+  uStack_24 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xb0c)))));
+  uStack_23 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xb00)))));
+  uStack_22 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xaff)))));
+  uStack_21 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xafe)))));
+  uStack_18 = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x9ea))));
+  uStack_20 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xaf6)))));
+  uStack_1f = (undefined1)(*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x9d4))));
+  uStack_1e = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xaf4)))));
+  uStack_1d = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xaf3)))));
+  uStack_1c = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xaf2)))));
+  uStack_1b = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xaf1)))));
+  uStack_1a = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xaf0)))));
+  uStack_19 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xaef)))));
+  uStack_16 = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x9ca))));
+  uStack_14 = (undefined1)(*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x996))));
+  uStack_13 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xa9e)))));
+  uStack_12 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xa9d)))));
+  uStack_11 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xa9f)))));
+  uStack_10 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xa9b)))));
+  uStack_f = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xa9a)))));
+  uStack_e = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xa9c)))));
+  uStack_c = (undefined1)(*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x994))));
+  uStack_b = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xa97)))));
+  uStack_a = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xa96)))));
+  uStack_9 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xa98)))));
+  uStack_8 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xa94)))));
+  uStack_7 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xa93)))));
+  uStack_6 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xa95)))));
+  FUN_000ff09c(9,&local_2c);
+  return 1;
+}
+
+
+
+void FUN_000bdb48(void)
+
+{
+  thunk_FUN_000d10e4();
+  FUN_000bd8ea();
+  return;
+}
+
+
+
 /* f33_report_diagnostic_event_failure(param_1 & 0xffff,0x32); whole-body shape-verified. The
    literal is the encoded diagnostic event, not a recovered OEM name. */
 

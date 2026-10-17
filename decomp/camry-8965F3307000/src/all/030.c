@@ -306,6 +306,62 @@ void FUN_000c2000(undefined4 param_1,uint param_2)
 
 
 
+void FUN_000c2044(undefined4 param_1,uint param_2,uint param_3)
+
+{
+  param_3 = param_3 & 0xffff;
+  param_2 = param_2 & 0xffff;
+  if (0x102 < param_2) {
+    if (param_3 < 0x103) {
+      f33_return_only_stub_bdb96();
+    }
+    FUN_000bdb98();
+  }
+  if (param_2 - 0x200 < 0x323) {
+    if (param_3 - 0x200 < 0x323) {
+      f33_publish_owner2_deficit_limit_request();
+    }
+    else {
+      f33_reset_owner2_deficit_request();
+      f33_publish_owner2_deficit_limit_request();
+      f33_return_only_stub_bc5fc();
+    }
+    FUN_000bc5fe();
+  }
+  if (0x1ff < param_2) {
+    if (param_3 < 0x200) {
+      f33_reset_owner1_limit_request();
+      f33_publish_owner1_limit_request();
+      f33_return_only_stub_bb7f8();
+    }
+    else {
+      f33_publish_owner1_limit_request();
+    }
+    f33_publish_other_current_limit();
+  }
+  if (param_2 - 0x300 < 0x223) {
+    if (0x222 < param_3 - 0x300) {
+      thunk_FUN_000d0bda();
+    }
+    f33_run_init_chain_bca62();
+  }
+  if (0x101 < param_2) {
+    if (param_3 < 0x102) {
+      f33_return_only_stub_bdfa8();
+      f33_return_only_stub_bdfaa();
+      f33_return_only_stub_be212();
+    }
+    else {
+      f33_return_only_stub_bdfaa();
+    }
+    f33_return_only_stub_be214();
+  }
+  f33_fill_constant_block_bf2f8();
+  return;
+}
+
+
+
 void FUN_000c20f6(undefined4 param_1,uint param_2)
 
 {
@@ -329,6 +385,586 @@ void FUN_000c20f6(undefined4 param_1,uint param_2)
     f33_return_only_stub_be214();
   }
   f33_fill_constant_block_bf2f8();
+  return;
+}
+
+
+
+/* Use low16 new/old captured mode to run crossing-only initializers plus admitted steady
+   components, with cadence bits1/4 controlling slower work. Health is active above0100; current
+   limit producers above01FF; projectionBCD62 only0300..0522. Reconcile/advance live mode after
+   producers, then publishBF3AA; later workers still use captured arguments. */
+
+void f33_dispatch_control_foreground_transition
+               (uint cadence_mask,uint captured_mode,uint previous_mode)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uint uVar3;
+  
+  uVar2 = captured_mode & 0xffff;
+  uVar3 = previous_mode & 0xffff;
+  if (0xff < uVar2) {
+    if (uVar3 < 0x100) {
+      f33_return_only_stub_be324();
+      f33_condition_staged_offset_scalar();
+      f33_return_only_stub_be302();
+    }
+    else {
+      f33_condition_staged_offset_scalar();
+    }
+    f33_scale_staged_byte_pair_to_control_raw();
+  }
+  if (0x100 < uVar2) {
+    if (uVar3 < 0x101) {
+      f33_return_only_stub_bea54();
+      f33_update_delayed_received_startup_qualification();
+      f33_return_only_stub_bf0a8();
+    }
+    else {
+      f33_update_delayed_received_startup_qualification();
+    }
+    f33_update_initialized_record8_confirmation();
+    uVar1 = cadence_mask & 2;
+    if (uVar3 < 0x101) {
+      f33_seed_health_received_source_filter();
+      if (uVar1 != 0) {
+        f33_refresh_health_received_source_generation();
+      }
+      f33_return_only_stub_becce();
+      if (uVar1 != 0) {
+        FUN_000bed90();
+      }
+      FUN_000bef22();
+      if (uVar1 != 0) {
+        FUN_000bef3e();
+      }
+      FUN_000beda2();
+      if (uVar1 != 0) {
+        FUN_000bef10();
+      }
+      f33_return_only_stub_be80c();
+      if (uVar1 != 0) {
+        FUN_000be80e();
+      }
+      f33_return_only_stub_be844();
+      if (uVar1 != 0) {
+        FUN_000be846();
+      }
+      f33_return_only_stub_bef9a();
+      if (uVar1 != 0) {
+        FUN_000bef9c();
+      }
+      f33_return_only_stub_befd4();
+      if (uVar1 != 0) {
+        FUN_000befd6();
+      }
+      f33_return_only_stub_be796();
+    }
+    else if (uVar1 != 0) {
+      f33_refresh_health_received_source_generation();
+      FUN_000bed90();
+      FUN_000bef3e();
+      FUN_000bef10();
+      FUN_000be80e();
+      FUN_000be846();
+      FUN_000bef9c();
+      FUN_000befd6();
+    }
+    FUN_000be7fa();
+  }
+  if (0x101 < uVar2) {
+    if (uVar3 < 0x102) {
+      f33_initialize_received_word_age_from_record13();
+    }
+    f33_refresh_received_control_metadata();
+  }
+  if (0xff < uVar2) {
+    if (uVar3 < 0x100) {
+      f33_fill_constant_block_bdba8();
+    }
+    FUN_000bdbe0();
+  }
+  if (0x102 < uVar2) {
+    if (uVar3 < 0x103) {
+      FUN_000bdd22();
+      FUN_000bde16();
+      f33_return_only_stub_bdb86();
+      f33_return_only_stub_bdb88();
+      f33_return_only_stub_bdb8c();
+    }
+    else {
+      FUN_000bde16();
+      f33_return_only_stub_bdb88();
+    }
+    FUN_000bdb8e();
+  }
+  if (0x101 < uVar2) {
+    if (uVar3 < 0x102) {
+      FUN_000b918e();
+      FUN_000b92f0();
+      FUN_000b8fe2();
+    }
+    else {
+      FUN_000b92f0();
+    }
+    f33_monitor_pending_learned_record_updates();
+  }
+  if (0x102 < uVar2) {
+    uVar1 = cadence_mask & 2;
+    if (uVar3 < 0x103) {
+      f33_return_only_stub_b8b36();
+      FUN_000b8d8c();
+      thunk_FUN_000b6d72();
+      if (uVar1 != 0) {
+        f33_run_init_chain_b7054();
+      }
+      FUN_000b70d8();
+      if (uVar1 != 0) {
+        FUN_000b722c();
+      }
+      FUN_000b6c2a();
+      if (uVar1 != 0) {
+        FUN_000b6d20();
+      }
+      FUN_000b6a38();
+      if (uVar1 != 0) {
+        FUN_000b6b9a();
+      }
+      FUN_000b8f74();
+      if (uVar1 != 0) {
+        thunk_FUN_000b8f4a();
+      }
+      f33_return_only_stub_b8fcc();
+      if (uVar1 != 0) {
+        f33_return_only_stub_b8fce();
+      }
+      f33_return_only_stub_b8f3a();
+      if (uVar1 != 0) {
+        f33_fill_constant_block_b8f16();
+      }
+      f33_return_only_stub_b8ec8();
+      if (uVar1 != 0) {
+        f33_fill_constant_block_b8eca();
+      }
+      f33_return_only_stub_b7354();
+      if (uVar1 != 0) {
+        f33_return_only_stub_b7356();
+      }
+      f33_return_only_stub_b733e();
+      if (uVar1 != 0) {
+        f33_fill_constant_block_b7314();
+      }
+      f33_return_only_stub_b72c0();
+      if (uVar1 != 0) {
+        f33_fill_constant_block_b72c2();
+      }
+      FUN_000b8e9a();
+      if (uVar1 != 0) {
+        thunk_FUN_000b8e8e();
+      }
+      FUN_000b61e0();
+      f33_run_init_chain_b690a();
+      FUN_000b532a();
+      FUN_000b53c2();
+      f33_return_only_stub_b50aa();
+    }
+    else {
+      FUN_000b8d8c();
+      if (uVar1 != 0) {
+        f33_run_init_chain_b7054();
+        FUN_000b722c();
+        FUN_000b6d20();
+        FUN_000b6b9a();
+        thunk_FUN_000b8f4a();
+        f33_return_only_stub_b8fce();
+        f33_fill_constant_block_b8f16();
+        f33_fill_constant_block_b8eca();
+        if (uVar1 != 0) {
+          f33_return_only_stub_b7356();
+          f33_fill_constant_block_b7314();
+          f33_fill_constant_block_b72c2();
+          thunk_FUN_000b8e8e();
+        }
+      }
+      f33_run_init_chain_b690a();
+      FUN_000b53c2();
+    }
+    f33_run_init_chain_b5232();
+  }
+  if (uVar2 == 0x522) {
+    if (uVar3 == 0x522) {
+      FUN_000b7728();
+    }
+    else {
+      f33_fill_constant_block_b7716();
+      FUN_000b7728();
+      FUN_000b738c();
+    }
+    if ((cadence_mask >> 1 & 1) != 0) {
+      FUN_000b73cc();
+    }
+  }
+  if (0x102 < uVar2) {
+    if (uVar3 < 0x103) {
+      f33_return_only_stub_b3a54();
+      f33_run_init_chain_b3bd2();
+      FUN_000b389c();
+      FUN_000b38d2();
+      f33_return_only_stub_b391e();
+      FUN_000b3a42();
+      f33_return_only_stub_b342e();
+    }
+    else {
+      f33_run_init_chain_b3bd2();
+      FUN_000b38d2();
+      FUN_000b3a42();
+    }
+    FUN_000b37da();
+  }
+  if (0x100 < uVar2) {
+    if (uVar3 < 0x101) {
+      f33_reset_current_source_coherence_observations();
+      f33_update_source_coherence_history();
+      f33_reset_health_record_lifecycle_entry();
+      f33_advance_health_record_lifecycle();
+      f33_return_only_stub_b480a();
+      f33_update_qualified_health_source_policy();
+      f33_reset_qualified_health_state_entry();
+      f33_advance_qualified_health_state();
+      FUN_000b4538();
+      FUN_000b47c0();
+      FUN_000b47d6();
+      FUN_000b47de();
+      f33_return_only_stub_b3c6a();
+    }
+    else {
+      f33_update_source_coherence_history();
+      f33_advance_health_record_lifecycle();
+      f33_update_qualified_health_source_policy();
+      f33_advance_qualified_health_state();
+      FUN_000b47c0();
+      FUN_000b47de();
+    }
+    f33_publish_health_coherence_fault_actions();
+    if (uVar3 < 0x101) {
+      FUN_000b431a();
+    }
+    f33_update_health_status_delay_summaries();
+  }
+  if (uVar2 - 0x200 < 0x323) {
+    if (uVar3 - 0x200 < 0x323) {
+      f33_qualify_owner3_shutdown_signal();
+      f33_publish_owner3_shutdown_request();
+      if ((cadence_mask & 2) != 0) {
+        FUN_000bc7ce();
+      }
+    }
+    else {
+      f33_reset_owner3_signal_qualification();
+      f33_qualify_owner3_shutdown_signal();
+      f33_reset_owner3_shutdown_request();
+      f33_publish_owner3_shutdown_request();
+      f33_fill_constant_block_bc7be();
+      if ((cadence_mask & 2) != 0) {
+        FUN_000bc7ce();
+      }
+      f33_fill_constant_block_bc648();
+    }
+    FUN_000bc65e();
+  }
+  if (0x1ff < uVar2) {
+    uVar1 = cadence_mask & 0x10;
+    if (uVar3 < 0x200) {
+      FUN_000bb95e();
+      if (uVar1 != 0) {
+        FUN_000bbf8a();
+      }
+      f33_return_only_stub_bad00();
+      f33_stage_absolute_limit_seeds();
+      f33_reset_owner5_release_state();
+      f33_publish_owner5_limit_request();
+      f33_reset_owner4_release_state();
+      f33_publish_owner4_limit_request();
+      f33_reset_owner8_release_state();
+      f33_publish_owner8_limit_request();
+      f33_reset_owner6_calibration_envelope();
+      f33_update_owner6_calibration_envelope();
+      f33_reset_owner1_qualification_state();
+      f33_qualify_owner1_limit_state();
+      f33_reset_lifecycle_difference_monitor_entry();
+      if (uVar1 != 0) {
+        f33_step_lifecycle_difference_monitor();
+      }
+      FUN_000bb87a();
+      f33_update_thermal_release_envelope();
+      f33_return_only_stub_ba8ae();
+    }
+    else {
+      if (uVar1 != 0) {
+        FUN_000bbf8a();
+      }
+      f33_stage_absolute_limit_seeds();
+      f33_publish_owner5_limit_request();
+      f33_publish_owner4_limit_request();
+      f33_publish_owner8_limit_request();
+      f33_update_owner6_calibration_envelope();
+      f33_qualify_owner1_limit_state();
+      if (uVar1 != 0) {
+        f33_step_lifecycle_difference_monitor();
+      }
+      f33_update_thermal_release_envelope();
+    }
+    FUN_000ba8b0();
+  }
+  if (uVar2 - 0x300 < 0x223) {
+    if (uVar3 - 0x300 < 0x223) {
+      f33_refresh_foreground_control_projection();
+    }
+    else {
+      FUN_000bcd22();
+      f33_refresh_foreground_control_projection();
+      f33_return_only_stub_b9328();
+    }
+    if ((cadence_mask >> 1 & 1) != 0) {
+      f33_run_control_profile_qualification();
+    }
+  }
+  if (0xff < uVar2) {
+    if (uVar3 < 0x100) {
+      f33_return_only_stub_b9bc0();
+    }
+    if ((cadence_mask >> 1 & 1) != 0) {
+      f33_run_control_profile_retention();
+    }
+    if (uVar3 < 0x100) {
+      FUN_000b14b2();
+      f33_reconcile_mode_requests();
+      f33_reset_mode_readiness_counter();
+    }
+    else {
+      f33_reconcile_mode_requests();
+    }
+    f33_advance_application_mode();
+  }
+  if (0x102 < uVar2) {
+    if (uVar3 < 0x103) {
+      f33_return_only_stub_b784a();
+    }
+    FUN_000b78d0();
+  }
+  if (uVar2 == 0x520) {
+    if (uVar3 == 0x520) {
+      FUN_000b83ba();
+    }
+    else {
+      f33_return_only_stub_b7c80();
+      FUN_000b83ba();
+      f33_fill_constant_block_b87e2();
+    }
+    FUN_000b885c();
+  }
+  if (0x102 < uVar2) {
+    if (uVar3 < 0x103) {
+      FUN_000b85d8();
+    }
+    FUN_000b8622();
+  }
+  if (uVar2 - 0x200 < 0x323) {
+    if (0x322 < uVar3 - 0x200) {
+      f33_return_only_stub_b797e();
+    }
+    FUN_000b7980();
+  }
+  if (uVar2 == 0x520) {
+    if (uVar3 == 0x520) {
+      FUN_000b89e0();
+    }
+    else {
+      f33_fill_constant_block_b8896();
+      FUN_000b89e0();
+      f33_fill_constant_block_b7ae4();
+    }
+    FUN_000b7c2c();
+  }
+  if (0x101 < uVar2) {
+    if (uVar3 < 0x102) {
+      f33_return_only_stub_bdf80();
+      f33_return_only_stub_bdf82();
+      f33_return_only_stub_be130();
+      f33_return_only_stub_be132();
+      f33_return_only_stub_be1f4();
+      f33_return_only_stub_be1f6();
+      f33_return_only_stub_be28a();
+    }
+    else {
+      f33_return_only_stub_bdf82();
+      f33_return_only_stub_be132();
+      f33_return_only_stub_be1f6();
+    }
+    f33_return_only_stub_be28c();
+  }
+  if (0xff < uVar2) {
+    if (uVar3 < 0x100) {
+      f33_return_only_stub_bf24a();
+    }
+    f33_refresh_acquired_scalar_status_publication();
+  }
+  f33_publish_foreground_control_outputs();
+  return;
+}
+
+
+
+/* Run components admitted by low16 captured mode and cadence bits, without crossing initializers.
+   Health above0100 precedes nonthermal/thermal limit producers above01FF; projection
+   only0300..0522. Reconcile/advance live mode, then publishBF3AA even when capturedmode0. No atomic
+   change of other task generations. */
+
+void f33_dispatch_control_foreground_steady(uint cadence_mask,uint captured_mode)
+
+{
+  uint uVar1;
+  
+  uVar1 = captured_mode & 0xffff;
+  if (0xff < uVar1) {
+    f33_condition_staged_offset_scalar();
+    f33_scale_staged_byte_pair_to_control_raw();
+  }
+  if (0x100 < uVar1) {
+    f33_update_delayed_received_startup_qualification();
+    f33_update_initialized_record8_confirmation();
+    if ((cadence_mask >> 1 & 1) != 0) {
+      f33_refresh_health_received_source_generation();
+      FUN_000bed90();
+      FUN_000bef3e();
+      FUN_000bef10();
+      FUN_000be80e();
+      FUN_000be846();
+      FUN_000bef9c();
+      FUN_000befd6();
+    }
+    FUN_000be7fa();
+  }
+  if (0x101 < uVar1) {
+    f33_refresh_received_control_metadata();
+  }
+  if (0xff < uVar1) {
+    FUN_000bdbe0();
+  }
+  if (0x102 < uVar1) {
+    FUN_000bde16();
+    f33_return_only_stub_bdb88();
+    FUN_000bdb8e();
+  }
+  if (0x101 < uVar1) {
+    FUN_000b92f0();
+    f33_monitor_pending_learned_record_updates();
+  }
+  if (0x102 < uVar1) {
+    FUN_000b8d8c();
+    if ((cadence_mask & 2) != 0) {
+      f33_run_init_chain_b7054();
+      FUN_000b722c();
+      FUN_000b6d20();
+      FUN_000b6b9a();
+      thunk_FUN_000b8f4a();
+      f33_return_only_stub_b8fce();
+      f33_fill_constant_block_b8f16();
+      f33_fill_constant_block_b8eca();
+      if ((cadence_mask & 2) != 0) {
+        f33_return_only_stub_b7356();
+        f33_fill_constant_block_b7314();
+        f33_fill_constant_block_b72c2();
+        thunk_FUN_000b8e8e();
+      }
+    }
+    f33_run_init_chain_b690a();
+    FUN_000b53c2();
+    f33_run_init_chain_b5232();
+  }
+  if ((uVar1 == 0x522) && (FUN_000b7728(), (cadence_mask >> 1 & 1) != 0)) {
+    FUN_000b73cc();
+  }
+  if (0x102 < uVar1) {
+    f33_run_init_chain_b3bd2();
+    FUN_000b38d2();
+    FUN_000b3a42();
+    FUN_000b37da();
+  }
+  if (0x100 < uVar1) {
+    f33_update_source_coherence_history();
+    f33_advance_health_record_lifecycle();
+    f33_update_qualified_health_source_policy();
+    f33_advance_qualified_health_state();
+    FUN_000b47c0();
+    FUN_000b47de();
+    f33_publish_health_coherence_fault_actions();
+    f33_update_health_status_delay_summaries();
+  }
+  if (uVar1 - 0x200 < 0x323) {
+    f33_qualify_owner3_shutdown_signal();
+    f33_publish_owner3_shutdown_request();
+    if ((cadence_mask >> 1 & 1) != 0) {
+      FUN_000bc7ce();
+    }
+    FUN_000bc65e();
+  }
+  if (0x1ff < uVar1) {
+    if ((cadence_mask & 0x10) != 0) {
+      FUN_000bbf8a();
+    }
+    f33_stage_absolute_limit_seeds();
+    f33_publish_owner5_limit_request();
+    f33_publish_owner4_limit_request();
+    f33_publish_owner8_limit_request();
+    f33_update_owner6_calibration_envelope();
+    f33_qualify_owner1_limit_state();
+    if ((cadence_mask & 0x10) != 0) {
+      f33_step_lifecycle_difference_monitor();
+    }
+    f33_update_thermal_release_envelope();
+    FUN_000ba8b0();
+  }
+  if ((uVar1 - 0x300 < 0x223) &&
+     (f33_refresh_foreground_control_projection(), (cadence_mask >> 1 & 1) != 0)) {
+    f33_run_control_profile_qualification();
+  }
+  if (0xff < uVar1) {
+    if ((cadence_mask >> 1 & 1) != 0) {
+      f33_run_control_profile_retention();
+    }
+    f33_reconcile_mode_requests();
+    f33_advance_application_mode();
+  }
+  if (0x102 < uVar1) {
+    FUN_000b78d0();
+  }
+  if (uVar1 == 0x520) {
+    FUN_000b83ba();
+    FUN_000b885c();
+  }
+  if (0x102 < uVar1) {
+    FUN_000b8622();
+  }
+  if (uVar1 - 0x200 < 0x323) {
+    FUN_000b7980();
+  }
+  if (uVar1 == 0x520) {
+    FUN_000b89e0();
+    FUN_000b7c2c();
+  }
+  if (0x101 < uVar1) {
+    f33_return_only_stub_bdf82();
+    f33_return_only_stub_be132();
+    f33_return_only_stub_be1f6();
+    f33_return_only_stub_be28c();
+  }
+  if (0xff < uVar1) {
+    f33_refresh_acquired_scalar_status_publication();
+  }
+  f33_publish_foreground_control_outputs();
   return;
 }
 

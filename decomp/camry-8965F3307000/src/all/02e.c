@@ -1500,6 +1500,19 @@ void FUN_000b8e9a(void)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0xB8E8E / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000b8e8e(void)
+
+{
+  FUN_000b8e8e();
+  return;
+}
+
+
+
 /* Single constant publisher: DAT_febeb462 = 0; Shape-classified from the canonical corpus; the
    target cell is not yet named, so the written state's meaning is unknown. */
 
@@ -1598,6 +1611,19 @@ void FUN_000b8f74(void)
   FUN_000b8f4a();
   f33_report_diagnostic_event_pass(0x20);
   f33_report_diagnostic_event_pass(0x120);
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0xB8F4A / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000b8f4a(void)
+
+{
+  FUN_000b8f4a();
   return;
 }
 

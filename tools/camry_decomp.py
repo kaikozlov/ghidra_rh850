@@ -165,6 +165,22 @@ def _strip_comments(code: str) -> str:
     return re.sub(r"/\*.*?\*/", "", code, flags=re.S)
 
 
+def _opening_brace(code: str) -> int:
+    """Body brace. Comments may contain `{lp}` before the function itself."""
+    index = 0
+    while index < len(code):
+        if code.startswith("/*", index):
+            end = code.find("*/", index + 2)
+            if end < 0:
+                return -1
+            index = end + 2
+            continue
+        if code[index] == "{":
+            return index
+        index += 1
+    return -1
+
+
 def _match_paren(code: str, opening: int) -> int:
     depth = 0
     for index in range(opening, len(code)):
@@ -741,7 +757,7 @@ def _hand_param_types() -> dict[str, list[str]]:
 
 def _rewrite_pointer_arguments(code: str, param_types: dict[str, list[str]]) -> str:
     """Pass a firmware integer to a pointer parameter as a host pointer."""
-    brace = code.find("{")
+    brace = _opening_brace(code)
     if brace < 0:
         return code
     signature = _c_signature(code)
@@ -1151,11 +1167,19 @@ def _rewrite_thunk_calls(code: str) -> str:
         return code
     name = match.group(1)
     target = name[len("thunk_"):]
-    head, sep, body = code.partition("{")
-    if not sep:
+    brace = _opening_brace(code)
+    if brace < 0:
         return code
-    body = re.sub(rf"\b{name}\b", target, body)
-    return head + sep + body
+    body = re.sub(rf"\b{name}\b", target, code[brace:])
+    return code[:brace] + body
+
+
+def _strip_calling_convention(code: str) -> str:
+    """Drop a Ghidra convention token sitting between the return type and the name."""
+    brace = _opening_brace(code)
+    if brace < 0:
+        return code
+    return re.sub(r"\b__[A-Za-z_][A-Za-z0-9_]*\b", "", code[:brace]) + code[brace:]
 
 
 _BYTE_POINTER = r"(?:undefined1|undefined|byte|uchar|char|code|bool)"
@@ -1365,6 +1389,7 @@ def _rewrite_firmware_bases(code: str) -> str:
 
 
 def _rewrite_body(code: str) -> str:
+    code = _strip_calling_convention(code)
     code = _rewrite_firmware_bases(code)
     signature = _c_signature(code)
     pointers = _pointer_names(signature, code)
@@ -1845,8 +1870,71 @@ def _common_header(text: str, signatures: dict[str, str]) -> str:
     lines.append("")
     for name in sorted(signatures):
         lines.append(signatures[name] + ";")
+    lines.extend(_loose_declarations(text, set(signatures) | _prototype_names()))
     lines.append("")
     return "\n".join(lines) + "\n"
+
+
+_PSEUDO_MACROS = {
+    "__disable_irq": "#define __disable_irq() ((void)0)",
+    "__enable_irq": "#define __enable_irq() ((void)0)",
+    "halt_baddata": "#define halt_baddata() ((void)0)",
+    "builtin_memcpy": "#define builtin_memcpy(dst, src, count) __builtin_memcpy((dst), (src), (count))",
+    "CONCAT11": "#define CONCAT11(hi, lo) ((uint32_t)(((uint32_t)(hi) & 0xffu) << 8) | ((uint32_t)(lo) & 0xffu))",
+    "CONCAT12": "#define CONCAT12(hi, lo) ((uint32_t)(((uint32_t)(hi) & 0xffu) << 16) | ((uint32_t)(lo) & 0xffffu))",
+    "CONCAT13": "#define CONCAT13(hi, lo) ((uint32_t)(((uint32_t)(hi) & 0xffu) << 24) | ((uint32_t)(lo) & 0xffffffu))",
+    "CONCAT21": "#define CONCAT21(hi, lo) ((uint32_t)(((uint32_t)(hi) & 0xffffu) << 8) | ((uint32_t)(lo) & 0xffu))",
+    "CONCAT22": "#define CONCAT22(hi, lo) ((uint32_t)(((uint32_t)(hi) & 0xffffu) << 16) | ((uint32_t)(lo) & 0xffffu))",
+    "CONCAT31": "#define CONCAT31(hi, lo) ((uint32_t)(((uint32_t)(hi) & 0xffffffu) << 8) | ((uint32_t)(lo) & 0xffu))",
+    "CONCAT44": "#define CONCAT44(hi, lo) (((uint64_t)(hi) << 32) | (uint32_t)(lo))",
+    "SUB41": "#define SUB41(left, right) ((uint32_t)(left) - (uint32_t)(right))",
+    "SUB42": "#define SUB42(left, right) ((uint32_t)(left) - (uint32_t)(right))",
+    "SUB51": "#define SUB51(left, right) ((uint32_t)(left) - (uint32_t)(right))",
+}
+
+
+_NOT_FUNCTIONS = _PRIMITIVE_TYPES | _INT_TYPES | {
+    "floor", "trunc", "ceil", "fabs", "sqrt", "memset", "memcpy", "memcmp",
+    "malloc", "free", "abs", "labs",
+}
+
+
+def _loose_declarations(text: str, declared: set[str]) -> list[str]:
+    """A call with no prototype is still compiled; pseudo-ops expand, the rest are declared."""
+    text = _strip_comments(text)
+    called = {
+        match.group(1)
+        for match in _CALL.finditer(text)
+    } - declared - _SKIP_CALLS - _NOT_FUNCTIONS
+    if not called:
+        return []
+    lines = [""]
+    for name in sorted(name for name in called if name in _PSEUDO_MACROS):
+        lines.append(_PSEUDO_MACROS[name])
+        called.remove(name)
+    arities: dict[str, set[int]] = {}
+    for match in _CALL.finditer(text):
+        name = match.group(1)
+        if name not in called:
+            continue
+        try:
+            close = _match_paren(text, match.end() - 1)
+        except ValueError:
+            continue
+        parts = _split_args(text[match.end():close])
+        count = 0 if len(parts) == 1 and not parts[0].strip() else len(parts)
+        arities.setdefault(name, set()).add(count)
+    for name in sorted(called):
+        if name.startswith(("DAT_", "UNK_", "PTR_", "LAB_")):
+            continue
+        counts = arities.get(name) or {0}
+        if counts == {0}:
+            lines.append(f"int {name}(void);")
+        else:
+            width = max(counts)
+            formals = ", ".join(["int"] * width)
+            lines.append(f"int {name}({formals});")
+    return lines
 
 
 def _compile_file(path: Path) -> subprocess.CompletedProcess[str]:

@@ -42,6 +42,19 @@ void f33_nvm_service_application_cycle(void)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0x72F84 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00072f84(void)
+
+{
+  FUN_00072f84();
+  return;
+}
+
+
+
 /* Return if79470(14) or72148 rejects. Otherwise79A50,79C9E; only mode result0
    invokes73B2C(1),72EEA. Then79C4C(mode_result!=0),79A94. Native uninitialized exit, initialized
    quiet scan/wrap, mode blocking and explicit terminal phases8/10/20. Queued work is bounded
@@ -615,6 +628,14 @@ undefined4 FUN_0007490a(undefined4 param_1)
 
 
 
+undefined4 FUN_0007490e(undefined4 param_1)
+
+{
+  return param_1;
+}
+
+
+
 /* Paired constant publisher: DAT_febf6b20 = 0xff; and DAT_febf6b21 = 0xff;; shape-classified from
    the canonical corpus. Target cells not yet named. */
 
@@ -765,6 +786,19 @@ void FUN_00074b20(void)
     FUN_00074aca(iVar1);
     FUN_000781aa(0);
   }
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x74B3C / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00074b3c(void)
+
+{
+  FUN_00074b3c();
   return;
 }
 
@@ -1126,6 +1160,17 @@ void f33_fill_constant_block_74fa2(void)
 
 
 
+undefined4 FUN_00074fe6(void)
+
+{
+  f33_fill_constant_block_74fa2();
+  thunk_FUN_000772f8();
+  thunk_FUN_00077df2();
+  return 1;
+}
+
+
+
 /* Sequential initializer chain: 4 unconditional calls and no other statements; shape-verified. The
    called sequence is the function's entire behavior; chain family members differ in callee sets. */
 
@@ -1176,16 +1221,6 @@ undefined4 FUN_000752fa(undefined4 param_1,int *param_2)
     uVar4 = 0;
   }
   return uVar4;
-}
-
-
-
-void FUN_000753cc(void)
-
-{
-  FUN_00074f72();
-  FUN_00075376();
-  return;
 }
 
 
@@ -1268,16 +1303,6 @@ undefined4 FUN_00075510(undefined4 param_1,undefined4 param_2)
 
 
 
-void FUN_00075584(void)
-
-{
-  FUN_00074f72();
-  FUN_0007552e();
-  return;
-}
-
-
-
 undefined4 FUN_00075642(void)
 
 {
@@ -1354,6 +1379,16 @@ void FUN_000756b2(void)
 
 
 
+void FUN_00075708(void)
+
+{
+  thunk_FUN_00077824();
+  FUN_00075642();
+  return;
+}
+
+
+
 void FUN_00075718(void)
 
 {
@@ -1366,6 +1401,16 @@ void FUN_00075718(void)
   uVar3 = FUN_00077cde();
   DAT_febf6c55 = 0;
   FUN_00076f4e(uVar2, uVar1, ((uchar *)camry_host_ptr((uint32_t)(uVar3))), 0);
+  FUN_0007568e();
+  return;
+}
+
+
+
+void FUN_00075750(void)
+
+{
+  thunk_FUN_00077824();
   FUN_0007568e();
   return;
 }
@@ -1434,6 +1479,24 @@ void FUN_00075818(undefined4 param_1,undefined4 param_2)
 
 
 
+void FUN_00075892(void)
+
+{
+  int iVar1;
+  
+  iVar1 = FUN_00077c64();
+  if (iVar1 == 1) {
+    FUN_0007712a();
+  }
+  else {
+    thunk_FUN_00077824();
+  }
+  FUN_00075760();
+  return;
+}
+
+
+
 void FUN_000758b0(undefined4 param_1,undefined4 param_2)
 
 {
@@ -1459,11 +1522,19 @@ void FUN_000758b0(undefined4 param_1,undefined4 param_2)
 
 
 
-void FUN_00075982(void)
+void FUN_00075902(undefined4 param_1,undefined4 param_2)
 
 {
-  FUN_00074f72();
-  FUN_00075928();
+  int iVar1;
+  
+  iVar1 = FUN_00077c64();
+  if (iVar1 == 1) {
+    FUN_0007712a();
+  }
+  else {
+    thunk_FUN_00077824();
+  }
+  FUN_000757a4(iVar1, ((undefined4 *)camry_host_ptr((uint32_t)(param_2))));
   return;
 }
 
@@ -1535,16 +1606,6 @@ undefined4 FUN_00075a78(undefined4 param_1,undefined4 param_2)
     uVar4 = FUN_000750b2(((undefined *)camry_host_ptr((uint32_t)(iVar3))), ((undefined4 *)camry_host_ptr((uint32_t)(param_2))));
   }
   return uVar4;
-}
-
-
-
-void FUN_00075b32(void)
-
-{
-  FUN_00074f72();
-  FUN_00075ad8();
-  return;
 }
 
 
@@ -1644,16 +1705,6 @@ undefined4 FUN_00075d88(undefined4 param_1,int *param_2)
 
 
 
-void FUN_00075f64(void)
-
-{
-  FUN_00074f72();
-  FUN_00075f1e();
-  return;
-}
-
-
-
 undefined4 FUN_00075fe4(undefined4 param_1,int *param_2)
 
 {
@@ -1745,11 +1796,13 @@ undefined4 FUN_000760a6(undefined4 param_1,undefined4 param_2)
 
 
 
-void FUN_0007611c(void)
+void FUN_000761e6(void)
 
 {
-  FUN_00074f72();
-  FUN_000760c6();
+  DAT_febf6c56 = 0;
+  DAT_febf6c57 = 0;
+  DAT_febf6c58 = 0;
+  thunk_FUN_000772f8();
   return;
 }
 
@@ -1849,16 +1902,6 @@ undefined4 FUN_0007638a(char param_1)
 
 
 
-void FUN_000763f0(void)
-
-{
-  FUN_0007637e();
-  FUN_000763a4();
-  return;
-}
-
-
-
 /* Single constant publisher: DAT_febf6c56 = 0; Shape-classified from the canonical corpus; the
    target cell is not yet named, so the written state's meaning is unknown. */
 
@@ -1892,6 +1935,16 @@ undefined4 FUN_00076456(void)
 
 
 
+void FUN_000764b2(void)
+
+{
+  thunk_FUN_00077824();
+  FUN_00076456();
+  return;
+}
+
+
+
 /* Single constant publisher: DAT_febf6b77 = 1; Shape-classified from the canonical corpus; the
    target cell is not yet named, so the written state's meaning is unknown. */
 
@@ -1909,6 +1962,25 @@ void FUN_000764ce(void)
 {
   f33_nvm_physical_result_state = '\0';
   FUN_000764c2();
+  return;
+}
+
+
+
+/* Sequential initializer chain: 8 unconditional calls and no other statements; shape-verified. The
+   called sequence is the function's entire behavior; chain family members differ in callee sets. */
+
+void f33_run_init_chain_764e2(void)
+
+{
+  f33_nvm_initialize_dataflash_read_controls();
+  FUN_000764ce();
+  thunk_FUN_00076782();
+  FUN_000781a0();
+  FUN_00077c32();
+  thunk_FUN_00074b3c();
+  FUN_000782de();
+  f33_return_only_stub_7936c();
   return;
 }
 
@@ -2018,6 +2090,48 @@ void f33_nvm_cancel_physical_operation(void)
 
 
 
+undefined4 FUN_00076688(void)
+
+{
+  int iVar1;
+  undefined4 uVar2;
+  
+  iVar1 = FUN_00077c64();
+  if (iVar1 == 1 || iVar1 == 2) {
+    uVar2 = 2;
+  }
+  else if ((DAT_febf6b77 == '\0') || (iVar1 = FUN_00074e6e(), iVar1 != 1 && iVar1 != 2)) {
+    uVar2 = 1;
+  }
+  else {
+    uVar2 = 3;
+  }
+  return uVar2;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x76688 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00076688(void)
+
+{
+  FUN_00076688();
+  return;
+}
+
+
+
+uchar FUN_000766c6(void)
+
+{
+  return f33_nvm_physical_result_state;
+}
+
+
+
 void FUN_000766f4(void)
 
 {
@@ -2065,6 +2179,19 @@ void f33_nvm_publish_physical_class(uchar result_class)
     f33_nvm_report_physical_class(result_class);
     f33_return_only_stub_73ca2();
   }
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x764C2 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000764c2(void)
+
+{
+  FUN_000764c2();
   return;
 }
 
@@ -2388,6 +2515,45 @@ void f33_nvm_report_class_byte(uchar result_class)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0x79432 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00079432(void)
+
+{
+  FUN_00079432();
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x79444 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00079444(void)
+
+{
+  FUN_00079444();
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x76782 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00076782(void)
+
+{
+  FUN_00076782();
+  return;
+}
+
+
+
 /* Zero-extend low8 and forward through769F6 to the class-mask mapper. Zero-extend low8 class
    then769F6. Verified within the complete physical result finalization path; no logical event
    callback here. */
@@ -2415,6 +2581,16 @@ void FUN_00076af4(void)
 {
   FUN_00076794();
   FUN_0007679e();
+  return;
+}
+
+
+
+void FUN_00076d02(void)
+
+{
+  FUN_0007849e();
+  thunk_FUN_000772f8();
   return;
 }
 
@@ -2485,6 +2661,15 @@ void FUN_000772e4(int param_1,undefined4 param_2)
 
 {
   (*((undefined4 *)camry_host_ptr((uint32_t)(param_1 + 0xc)))) = param_2;
+  return;
+}
+
+
+
+void FUN_000772ea(int param_1)
+
+{
+  FUN_0007490e(param_1 + 0xc);
   return;
 }
 
@@ -2563,6 +2748,41 @@ void FUN_000778d2(int param_1,undefined4 param_2)
 
 
 
+void FUN_000778d8(int param_1)
+
+{
+  FUN_0007490e(param_1 + 4);
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x772F8 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000772f8(void)
+
+{
+  FUN_000772f8();
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x77824 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00077824(void)
+
+{
+  FUN_00077824();
+  return;
+}
+
+
+
 /* Paired constant publisher: DAT_febf6c4a = 0; and DAT_febf6c38 = 0xffff;; shape-classified from
    the canonical corpus. Target cells not yet named. */
 
@@ -2571,6 +2791,26 @@ void FUN_00077bd8(void)
 {
   DAT_febf6c4a = 0;
   DAT_febf6c38 = 0xffff;
+  return;
+}
+
+
+
+/* Zero6C4C,6C10,6C4B; set6C3C=FFFF; store identity(0) into6C14/6C18. Preserve published result6C1C,
+   selector6C4A and unrelated fields. Native whole-context canaries verify cleanup after both
+   dispatched and rejected results. Zero6C4C/6C10/6C4B and identity-zero6C14/6C18; set6C3CFFFF.
+   Preserve published6C1C and selector6C4A. Whole-context native canaries cover dispatched and
+   rejected completion cleanup. */
+
+void f33_nvm_reset_completion_context(void)
+
+{
+  f33_nvm_completion_side_status = '\0';
+  f33_nvm_completion_raw_result = 0;
+  f33_nvm_completion_storage_handle = 0xffff;
+  f33_nvm_completion_mode = '\0';
+  DAT_febf6c14 = FUN_0007490a(0);
+  DAT_febf6c18 = FUN_0007490e(0);
   return;
 }
 
@@ -2812,6 +3052,19 @@ void FUN_00077df2(void)
 
 {
   DAT_febf6c2c = 0xffffffff;
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x77DF2 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00077df2(void)
+
+{
+  FUN_00077df2();
   return;
 }
 

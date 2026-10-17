@@ -365,6 +365,19 @@ void f33_return_only_stub_3226a(void)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0x32398 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00032398(void)
+
+{
+  FUN_00032398();
+  return;
+}
+
+
+
 void FUN_000324d6(int param_1)
 
 {
@@ -647,6 +660,19 @@ void FUN_00032c86(void)
   DAT_febe6959 = 0;
   DAT_febe695c = 0;
   DAT_febe695a = 0;
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x32C86 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00032c86(void)
+
+{
+  FUN_00032c86();
   return;
 }
 

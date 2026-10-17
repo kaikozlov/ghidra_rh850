@@ -1556,6 +1556,49 @@ void f33_run_ch2_application_task(void)
 
 
 
+/* Foreground polls and clears EIC136.bit12; a flag is not a counted backlog. Optional31910==5A
+   hooks bracket bookkeeping, alternate-context physical NvM pump,667E6 subsystem cycle and
+   alternate-context66CF6 application NvM cycle. Increment39DB after completion. Relative order is
+   exact; execution time and missed-tick behavior are not a periodic-job guarantee. */
+
+void FUN_00066062(void)
+
+{
+  byte bVar1;
+  undefined8 uVar2;
+  int iVar3;
+  char *pcVar4;
+  
+  uVar2 = 0xfebeb800;
+  do {
+    do {
+      bVar1 = (*((volatile uint8_t *)camry_host_ptr(0xffffb111u)));
+    } while ((bVar1 & 0x10) == 0);
+    bVar1 = (*((volatile uint8_t *)camry_host_ptr(0xffffb111u)));
+    (*((volatile uint8_t *)camry_host_ptr(0xffffb111u))) = bVar1 & 0xef;
+    iVar3 = 0;
+    if (f33_execution_profiling_enabled == 'Z') {
+      f33_begin_execution_profile_slot5();
+      iVar3 = 0x5a;
+    }
+    f33_record_foreground_dispatch();
+    FUN_00071378();
+    thunk_FUN_00068318();
+    FUN_00071398();
+    f33_foreground_subsystem_cycle();
+    FUN_00071378();
+    f33_nvm_application_cycle();
+    FUN_00071398();
+    if (iVar3 == 0x5a) {
+      f33_end_execution_profile_slot5();
+    }
+    pcVar4 = ((char *)camry_host_ptr((uint32_t)((int)uVar2 + -0x7e25)));
+    *pcVar4 = *pcVar4 + '\x01';
+  } while( true );
+}
+
+
+
 void FUN_0006639c(void)
 
 {
@@ -1696,6 +1739,32 @@ void f33_foreground_subsystem_cycle(void)
   f33_crypto_bank_maintain_terminal_states();
   f33_dispatch_foreground_mode_generation();
   FUN_00066512();
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x8583E / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_0008583e(void)
+
+{
+  FUN_0008583e();
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x83F30 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00083f30(void)
+
+{
+  FUN_00083f30();
   return;
 }
 
@@ -2076,6 +2145,19 @@ uint f33_platform_restart_selector_constant_zero(void)
 
 {
   return 0;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x68318 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00068318(void)
+
+{
+  FUN_00068318();
+  return;
 }
 
 

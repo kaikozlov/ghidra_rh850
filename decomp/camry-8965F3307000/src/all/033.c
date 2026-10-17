@@ -2117,6 +2117,19 @@ void FUN_000cefa4(void)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0xCEFA4 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000cefa4(void)
+
+{
+  FUN_000cefa4();
+  return;
+}
+
+
+
 /* Single constant publisher: DAT_febecb00 = 7; Shape-classified from the canonical corpus; the
    target cell is not yet named, so the written state's meaning is unknown. */
 

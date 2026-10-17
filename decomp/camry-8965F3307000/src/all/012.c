@@ -1127,6 +1127,26 @@ void f33_return_only_stub_498f4(void)
 
 
 
+void FUN_000498f6(void)
+
+{
+  undefined2 uVar1;
+  uint32_t puVar2;
+  int iVar3;
+  
+  puVar2 = 0xfebeb800u;
+  iVar3 = FUN_000588b6();
+  uVar1 = DAT_000317b6;
+  if (iVar3 == 0) {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x38cc))))) = 0;
+    (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x38b8)))) = 0;
+    (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x38b6)))) = uVar1;
+  }
+  return;
+}
+
+
+
 void FUN_00049918(void)
 
 {

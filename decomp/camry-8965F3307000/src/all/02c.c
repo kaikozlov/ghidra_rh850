@@ -247,6 +247,335 @@ void f33_acknowledge_selected_mode_request(uchar request_id)
 
 
 
+/* Clear redundantNvM gates0671/0672 viaFF010/FF024, transition0000 through realhooks, then publish
+   foreground request8C08=A55A throughFEFC0/5889A. Not an immediate CPU reset or mode snapshot
+   publish. Native0701 readiness branch takes the exact constant-zero selector, publishes mode0000
+   and redundant foreground restart,without transition0800 or hardware reset. */
+
+void f33_request_foreground_restart_from_mode(void)
+
+{
+  thunk_FUN_00066f84();
+  thunk_FUN_00066fba();
+  f33_transition_application_mode(0);
+  thunk_FUN_0005889a();
+  return;
+}
+
+
+
+/* Repair live mode, run at most one current-family internal transition, then family-prioritized
+   major requests. Low IDs acknowledge only selected/complement-qualified pending winner; losing low
+   pending requests retain.0701 pending2 can suppress10/7 until NvM/output snapshot readiness;
+   exactFF038 constant0 then requests foreground restart through mode0000, not0800. All families
+   except0200 clear direct-enable8B4C/4D. Mode publicationE8CC is separate. Native major-mode
+   compositions verify programming before lower service,0701 wait at19/software restart at20,and0800
+   pending2 suppressing7 during NvM busy. Remaining major/submode branches are static
+   reconstruction. */
+
+void f33_advance_application_mode(void)
+
+{
+  uint32_t puVar1;
+  uchar uVar2;
+  ushort uVar3;
+  uint uVar4;
+  uint uVar5;
+  uint uVar6;
+  
+  puVar1 = 0xfebeb800u;
+  f33_repair_live_application_mode();
+  uVar3 = (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x6e6)))) & 0xff00;
+  if (uVar3 == 0x100) {
+    f33_clear_direct_output_enables();
+    f33_advance_mode100_substate();
+    uVar6 = f33_probe_pending_mode_request('\0');
+    if (uVar6 == 1) {
+      uVar3 = 0x700;
+LAB_000b1894:
+      f33_transition_application_mode(uVar3);
+    }
+    else {
+      uVar6 = f33_probe_pending_mode_request('\t');
+      if (uVar6 == 1) {
+        uVar3 = 0x900;
+        goto LAB_000b1894;
+      }
+      uVar6 = f33_probe_pending_mode_request('\x05');
+      if (uVar6 == 1) {
+        uVar3 = 0x200;
+        goto LAB_000b1894;
+      }
+    }
+    f33_acknowledge_selected_mode_request('\0');
+    uVar2 = '\x05';
+  }
+  else {
+    if (uVar3 == 0x200) {
+      f33_advance_mode200_output_sequence();
+      uVar6 = f33_probe_pending_mode_request('\0');
+      if ((uVar6 == 1) || (uVar6 = f33_probe_pending_mode_request('\x01'), uVar6 == 1)) {
+        uVar3 = 0x700;
+LAB_000b18e0:
+        f33_transition_application_mode(uVar3);
+      }
+      else {
+        uVar6 = f33_probe_pending_mode_request('\t');
+        if (uVar6 == 1) {
+          uVar3 = 0x900;
+          goto LAB_000b18e0;
+        }
+        uVar6 = f33_probe_pending_mode_request('\x03');
+        if (uVar6 == 1) {
+          uVar3 = 0x300;
+          goto LAB_000b18e0;
+        }
+      }
+      f33_acknowledge_selected_mode_request('\0');
+      f33_acknowledge_selected_mode_request('\x01');
+      f33_acknowledge_selected_mode_request('\t');
+      uVar2 = '\x03';
+      goto LAB_000b1bf6;
+    }
+    if (uVar3 == 0x300) {
+      f33_clear_direct_output_enables();
+      f33_advance_mode300_substate();
+      uVar6 = f33_probe_pending_mode_request('\0');
+      if ((uVar6 == 1) || (uVar6 = f33_probe_pending_mode_request('\x01'), uVar6 == 1)) {
+        uVar3 = 0x700;
+LAB_000b194c:
+        f33_transition_application_mode(uVar3);
+      }
+      else {
+        uVar6 = f33_probe_pending_mode_request('\t');
+        if (uVar6 == 1) {
+          uVar3 = 0x900;
+          goto LAB_000b194c;
+        }
+        uVar6 = f33_probe_pending_mode_request('\x06');
+        if (uVar6 == 1) {
+          uVar3 = 0x500;
+          goto LAB_000b194c;
+        }
+        uVar6 = f33_probe_pending_mode_request('\f');
+        if (uVar6 == 1) {
+          uVar3 = 0x400;
+          goto LAB_000b194c;
+        }
+      }
+      f33_acknowledge_selected_mode_request('\0');
+      f33_acknowledge_selected_mode_request('\x01');
+      f33_acknowledge_selected_mode_request('\t');
+      f33_acknowledge_selected_mode_request('\f');
+      uVar2 = '\x06';
+      goto LAB_000b1bf6;
+    }
+    if (uVar3 == 0x400) {
+      f33_clear_direct_output_enables();
+      f33_apply_mode400_output_requests();
+      uVar6 = f33_probe_pending_mode_request('\0');
+      if ((uVar6 == 1) || (uVar6 = f33_probe_pending_mode_request('\x01'), uVar6 == 1)) {
+LAB_000b19b4:
+        uVar3 = 0x700;
+LAB_000b19c8:
+        f33_transition_application_mode(uVar3);
+      }
+      else {
+        uVar6 = f33_probe_pending_mode_request('\t');
+        if (uVar6 == 1) {
+          uVar3 = 0x900;
+          goto LAB_000b19c8;
+        }
+        uVar6 = f33_probe_pending_mode_request('\x06');
+        if (uVar6 == 1) {
+          uVar3 = 0x500;
+          goto LAB_000b19c8;
+        }
+        uVar6 = f33_probe_pending_mode_request('\v');
+        if (uVar6 == 1) goto LAB_000b19b4;
+        uVar6 = f33_probe_pending_mode_request('\a');
+        if (uVar6 == 1) {
+          uVar3 = 0x600;
+          goto LAB_000b19c8;
+        }
+      }
+      f33_acknowledge_selected_mode_request('\0');
+      f33_acknowledge_selected_mode_request('\x01');
+      f33_acknowledge_selected_mode_request('\t');
+      f33_acknowledge_selected_mode_request('\x06');
+      uVar2 = '\v';
+LAB_000b19e6:
+      f33_acknowledge_selected_mode_request(uVar2);
+      uVar2 = '\a';
+      goto LAB_000b1bf6;
+    }
+    if (uVar3 == 0x500) {
+      f33_clear_direct_output_enables();
+      f33_advance_service_family();
+      uVar6 = f33_probe_pending_mode_request('\0');
+      if ((uVar6 == 1) || (uVar6 = f33_probe_pending_mode_request('\x01'), uVar6 == 1)) {
+        uVar3 = 0x700;
+LAB_000b1b5a:
+        f33_transition_application_mode(uVar3);
+      }
+      else {
+        uVar6 = f33_probe_pending_mode_request('\t');
+        if (uVar6 == 1) {
+          uVar3 = 0x900;
+          goto LAB_000b1b5a;
+        }
+        uVar6 = f33_probe_pending_mode_request('\x04');
+        if (uVar6 == 1) {
+          uVar3 = 0x300;
+          if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x65c))))) != '\0') {
+            uVar3 = 0x400;
+          }
+          goto LAB_000b1b5a;
+        }
+        uVar6 = f33_probe_pending_mode_request('\a');
+        if (uVar6 == 1) {
+          uVar3 = 0x600;
+          goto LAB_000b1b5a;
+        }
+      }
+      f33_acknowledge_selected_mode_request('\0');
+      f33_acknowledge_selected_mode_request('\x01');
+      f33_acknowledge_selected_mode_request('\t');
+      uVar2 = '\x04';
+      goto LAB_000b19e6;
+    }
+    if (uVar3 != 0x600) {
+      if (uVar3 == 0x700) {
+        f33_clear_direct_output_enables();
+        uVar6 = f33_advance_mode700_substate();
+        uVar4 = f33_probe_pending_mode_request('\x02');
+        uVar5 = f33_probe_pending_mode_request('\0');
+        if (uVar5 == 1) {
+LAB_000b1a64:
+          uVar3 = 0x800;
+LAB_000b1a78:
+          f33_transition_application_mode(uVar3);
+        }
+        else {
+          uVar5 = f33_probe_pending_mode_request('\t');
+          if (uVar5 == 1) {
+            uVar3 = 0x900;
+            goto LAB_000b1a78;
+          }
+          if ((uVar6 == 0) && (uVar4 == 1)) {
+            if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6eb))))) != 'Z') {
+              thunk_FUN_000515e6();
+              (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6eb))))) = 0x5a;
+            }
+            uVar6 = f33_qualify_mode_restart_readiness();
+            if (uVar6 == 0x5a) {
+              uVar6 = f33_get_mode_restart_hardware_selector();
+              if (uVar6 == 0x5a) goto LAB_000b1a64;
+              f33_request_foreground_restart_from_mode();
+              f33_acknowledge_selected_mode_request('\x02');
+            }
+          }
+          else {
+            uVar6 = f33_probe_pending_mode_request('\n');
+            if (uVar6 == 1) goto LAB_000b1a64;
+            uVar6 = f33_probe_pending_mode_request('\a');
+            if (uVar6 == 1) {
+              uVar3 = 0x600;
+              goto LAB_000b1a78;
+            }
+          }
+        }
+        f33_acknowledge_selected_mode_request('\0');
+        f33_acknowledge_selected_mode_request('\t');
+        f33_acknowledge_selected_mode_request('\a');
+        uVar2 = '\n';
+        goto LAB_000b1bf6;
+      }
+      if (uVar3 != 0x800) {
+        if (uVar3 != 0x900) {
+          return;
+        }
+        f33_clear_direct_output_enables();
+        f33_return_only_stub_b33d8();
+        uVar6 = f33_probe_pending_mode_request('\x0e');
+        if (uVar6 == 1) {
+          f33_transition_application_mode(0x800);
+        }
+        uVar2 = '\x0e';
+        goto LAB_000b1bf6;
+      }
+      f33_clear_direct_output_enables();
+      f33_apply_mode800_ready_output_requests();
+      uVar6 = f33_probe_pending_mode_request('\x0f');
+      if (uVar6 == 1) {
+        FUN_000ff0d8();
+      }
+      else {
+        uVar6 = f33_probe_pending_mode_request('\t');
+        if (uVar6 == 1) {
+          uVar3 = 0x900;
+LAB_000b1aee:
+          f33_transition_application_mode(uVar3);
+        }
+        else {
+          uVar6 = f33_probe_pending_mode_request('\x02');
+          if (uVar6 == 1) {
+            thunk_FUN_000515d4();
+            uVar6 = f33_qualify_mode_restart_readiness();
+            if (uVar6 == 0x5a) {
+              thunk_FUN_0006163e();
+              f33_acknowledge_selected_mode_request('\x02');
+            }
+          }
+          else {
+            uVar6 = f33_probe_pending_mode_request('\a');
+            if (uVar6 == 1) {
+              uVar3 = 0x600;
+              goto LAB_000b1aee;
+            }
+          }
+        }
+      }
+      f33_acknowledge_selected_mode_request('\x0f');
+      uVar2 = '\t';
+      goto LAB_000b19e6;
+    }
+    f33_clear_direct_output_enables();
+    f33_return_only_stub_b32f2();
+    uVar6 = f33_probe_pending_mode_request('\0');
+    if (uVar6 == 1) {
+LAB_000b1bc4:
+      uVar3 = 0x700;
+LAB_000b1bd8:
+      f33_transition_application_mode(uVar3);
+    }
+    else {
+      uVar6 = f33_probe_pending_mode_request('\r');
+      if (uVar6 == 1) {
+LAB_000b1bd4:
+        uVar3 = 0x900;
+        goto LAB_000b1bd8;
+      }
+      uVar6 = f33_probe_pending_mode_request('\b');
+      if ((uVar6 == 1) || (uVar6 = f33_probe_pending_mode_request('\x01'), uVar6 == 1))
+      goto LAB_000b1bc4;
+      uVar6 = f33_probe_pending_mode_request('\t');
+      if (uVar6 == 1) goto LAB_000b1bd4;
+    }
+    f33_acknowledge_selected_mode_request('\0');
+    f33_acknowledge_selected_mode_request('\b');
+    f33_acknowledge_selected_mode_request('\x01');
+    uVar2 = '\r';
+  }
+  f33_acknowledge_selected_mode_request(uVar2);
+  uVar2 = '\t';
+LAB_000b1bf6:
+  f33_acknowledge_selected_mode_request(uVar2);
+  return;
+}
+
+
+
 /* Index low8(request_id), without a local bounds check. Clear only5AA5; preserve pendingA55A and
    every other value. Cancellation after materialization therefore does not revoke an unaccepted
    request. Clear only acknowledged5AA5 slots. Cancellation does not revoke an already materialized
@@ -356,6 +685,62 @@ void FUN_000b1cf2(void)
 
 {
   FUN_000b15ac(5);
+  return;
+}
+
+
+
+/* Exact0100\u21920101(event17)\u21920102(18)\u21920103(19);0103 event20 requests major5. Internal
+   events acknowledge independently of selected majorID.0100/0103 self-request their next
+   internalevent;0101 waits NvM acquisition phase0 via5678A.
+   Exact0100→0101(event17)→0102(18)→0103(19);0103 event20 requests major5. */
+
+void f33_advance_mode100_substate(void)
+
+{
+  uchar request_id;
+  uint uVar1;
+  
+  switch(DAT_febeb11a) {
+  case 0x100:
+    FUN_000b1c84();
+    uVar1 = f33_probe_pending_mode_request('\x11');
+    if (uVar1 == 1) {
+      FUN_000b1c96();
+      f33_publish_live_application_mode(0x101);
+    }
+    request_id = '\x11';
+    break;
+  case 0x101:
+    uVar1 = f33_probe_pending_mode_request('\x12');
+    if (uVar1 == 1) {
+      FUN_000b1cae();
+      FUN_000b1cc2();
+      f33_publish_live_application_mode(0x102);
+    }
+    request_id = '\x12';
+    break;
+  case 0x102:
+    uVar1 = f33_probe_pending_mode_request('\x13');
+    if (uVar1 == 1) {
+      thunk_FUN_000d10d4();
+      f33_publish_live_application_mode(0x103);
+    }
+    request_id = '\x13';
+    break;
+  case 0x103:
+    FUN_000b1ce0();
+    uVar1 = f33_probe_pending_mode_request('\x14');
+    if (uVar1 == 1) {
+      FUN_000b1cf2();
+    }
+    request_id = '\x14';
+    break;
+  default:
+    goto switchD_000b1d10_default;
+  }
+  f33_acknowledge_selected_mode_request(request_id);
+switchD_000b1d10_default:
   return;
 }
 
@@ -533,6 +918,19 @@ void f33_advance_mode200_output_sequence(void)
   }
   f33_acknowledge_selected_mode_request(request_id);
 switchD_000b2830_default:
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0xB29FA / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000b29fa(void)
+
+{
+  FUN_000b29fa();
   return;
 }
 
@@ -840,6 +1238,19 @@ void FUN_000b2ee6(void)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0xB77F4 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000b77f4(void)
+
+{
+  FUN_000b77f4();
+  return;
+}
+
+
+
 void FUN_000b2f5e(void)
 
 {
@@ -875,6 +1286,16 @@ void FUN_000b2f8c(void)
 
 
 
+void FUN_000b2fb4(void)
+
+{
+  DAT_febeb10e = DAT_febeb10e & 0xfe;
+  thunk_FUN_00032c86();
+  return;
+}
+
+
+
 void FUN_000b2fc6(void)
 
 {
@@ -892,6 +1313,83 @@ void FUN_000b301e(void)
   if (((DAT_febeb3cb == '\x02') || (DAT_febeb3cb == '\x03')) || (DAT_febeb3cb == '\0')) {
     FUN_000b15ac(0x2f);
   }
+  return;
+}
+
+
+
+/* Family0500 selects events2A/2C/2E into0512/0522/0520. Submodes independently qualify completion
+   events and return0500. Accepted queue, selected submode, convergence, persistence and diagnostic
+   result are separate states. Family0500 dispatches service submodes0512/0522/0520 and separately
+   acknowledges completion events. Queue selection, physical convergence, persistence and result
+   publication remain distinct boundaries. */
+
+void f33_advance_service_family(void)
+
+{
+  uchar request_id;
+  ushort mode;
+  uint uVar1;
+  
+  if (DAT_febeb11a != 0x500) {
+    if (DAT_febeb11a == 0x512) {
+      FUN_000b2f8c();
+      uVar1 = f33_probe_pending_mode_request('+');
+      if (uVar1 == 1) {
+        FUN_000b2fb4();
+        f33_publish_live_application_mode(0x500);
+      }
+      request_id = '+';
+    }
+    else if (DAT_febeb11a == 0x520) {
+      FUN_000b301e();
+      uVar1 = f33_probe_pending_mode_request('/');
+      if (uVar1 == 1) {
+        FUN_000b303e();
+        f33_publish_live_application_mode(0x500);
+      }
+      request_id = '/';
+    }
+    else {
+      if (DAT_febeb11a != 0x522) {
+        return;
+      }
+      FUN_000b2fc6();
+      uVar1 = f33_probe_pending_mode_request('-');
+      if (uVar1 == 1) {
+        FUN_000b2fee();
+        f33_publish_live_application_mode(0x500);
+      }
+      request_id = '-';
+    }
+    goto LAB_000b317a;
+  }
+  FUN_000b2ee6();
+  uVar1 = f33_probe_pending_mode_request('*');
+  if (uVar1 == 1) {
+    mode = 0x512;
+LAB_000b311e:
+    f33_publish_live_application_mode(mode);
+  }
+  else {
+    uVar1 = f33_probe_pending_mode_request(',');
+    if (uVar1 == 1) {
+      thunk_FUN_000b77f4();
+      mode = 0x522;
+      goto LAB_000b311e;
+    }
+    uVar1 = f33_probe_pending_mode_request('.');
+    if (uVar1 == 1) {
+      FUN_000b2f5e();
+      mode = 0x520;
+      goto LAB_000b311e;
+    }
+  }
+  f33_acknowledge_selected_mode_request('*');
+  f33_acknowledge_selected_mode_request(',');
+  request_id = '.';
+LAB_000b317a:
+  f33_acknowledge_selected_mode_request(request_id);
   return;
 }
 

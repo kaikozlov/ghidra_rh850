@@ -1476,6 +1476,19 @@ uint f33_nvm_service_uninitialized(void)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0x7217E / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_0007217e(void)
+
+{
+  FUN_0007217e();
+  return;
+}
+
+
+
 bool FUN_00072418(void)
 
 {
@@ -1502,12 +1515,70 @@ void FUN_00072632(void)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0x72646 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00072646(void)
+
+{
+  FUN_00072646();
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x7275E / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_0007275e(void)
+
+{
+  FUN_0007275e();
+  return;
+}
+
+
+
 void FUN_00072888(char param_1)
 
 {
   if ((param_1 != '\0') && (param_1 != '\x04')) {
     DAT_febf6120 = 1;
   }
+  return;
+}
+
+
+
+undefined4 FUN_000729c2(void)
+
+{
+  int iVar1;
+  undefined4 uVar2;
+  
+  iVar1 = FUN_00072418();
+  if (iVar1 == 0) {
+    uVar2 = FUN_00072958();
+  }
+  else {
+    uVar2 = 2;
+    DAT_febf6114 = 0x3f721401;
+  }
+  return uVar2;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x729C2 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000729c2(void)
+
+{
+  FUN_000729c2();
   return;
 }
 
@@ -1795,6 +1866,19 @@ void f33_nvm_select_service_poll(uchar full_service)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0x766C6 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000766c6(void)
+
+{
+  FUN_000766c6();
+  return;
+}
+
+
+
 /* Call physical cancellation7664E first; then if6B00==2 set6AFC=8. 72248 calls this before
    inspecting its own module marker. Native classifier mode exit exercises the active and inactive
    logical-operation cases. Physical cancellation7664E first; if logical state6B00==2 set
@@ -1930,6 +2014,34 @@ void FUN_00073e54(void)
   if ((uVar1 >> 2 & 1) != 0) {
     FUN_00072108(5);
   }
+  return;
+}
+
+
+
+/* Actual full initializer executes5772 instructions under explicit RAM preconditions. Initialize
+   logical cells, buffer overrides, abortF0, pending/active records and queues. Preserve
+   service-state bytes,6126,6B14 and padding.7477A clears the same6B18 word once in this target. No
+   implied blanket zeroing or reset-path completion. Full logical initializer5772 native
+   instructions. Exact6000..6B1F comparison includes initialized records/pools/counters and
+   preserved service bytes,6126,6B14,padding. Does not stand in for reset-to-application execution.
+    */
+
+void f33_nvm_initialize_logical_module(void)
+
+{
+  FUN_0007477a();
+  f33_nvm_initialize_logical_cells();
+  f33_return_only_stub_745bc();
+  f33_return_only_stub_745be();
+  FUN_000745c8();
+  FUN_00071d7c();
+  f33_nvm_initialize_operation();
+  thunk_FUN_0007217e();
+  f33_nvm_initialize_queues();
+  f33_return_only_stub_72e2c();
+  f33_return_only_stub_741ea();
+  FUN_00079462(0x14);
   return;
 }
 

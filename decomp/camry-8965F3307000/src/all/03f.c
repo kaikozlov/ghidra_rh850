@@ -11,6 +11,19 @@ void FUN_000fc2a0(void)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0xFCC9C / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000fcc9c(void)
+
+{
+  FUN_000fcc9c();
+  return;
+}
+
+
+
 void FUN_000fc3cc(void)
 
 {
@@ -32,11 +45,37 @@ void FUN_000fc462(void)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0xFD562 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000fd562(void)
+
+{
+  FUN_000fd562();
+  return;
+}
+
+
+
 void FUN_000fc4f8(void)
 
 {
   FUN_000fcc4e();
   FUN_000fcc9c();
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0xFCC00 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000fcc00(void)
+
+{
+  FUN_000fcc00();
   return;
 }
 
@@ -417,6 +456,32 @@ void f33_record103_byte_write_thunk(uchar selector,uchar value)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0xFC3CC / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000fc3cc(void)
+
+{
+  FUN_000fc3cc();
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0xFC462 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000fc462(void)
+
+{
+  FUN_000fc462();
+  return;
+}
+
+
+
 /* TransparentthunkB85A2 from5006A. */
 
 void f33_set_service_qualification_mode_thunk(uchar mode)
@@ -556,6 +621,45 @@ void thunk_FUN_0004841e(void)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0x5889A / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_0005889a(void)
+
+{
+  FUN_0005889a();
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x588B6 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000588b6(void)
+
+{
+  FUN_000588b6();
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x58C84 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00058c84(void)
+
+{
+  FUN_00058c84();
+  return;
+}
+
+
+
 /* Tail-call66F1E and preserve its full R10 readiness result. No independent hardware power or
    persistence assertion. */
 
@@ -570,6 +674,32 @@ uint f33_query_application_nvm_readiness(void)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0x66F84 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00066f84(void)
+
+{
+  FUN_00066f84();
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x66FBA / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00066fba(void)
+
+{
+  FUN_00066fba();
+  return;
+}
+
+
+
 /* Tail-wrapper66FEE returns0 inexactimage.0701event2-ready therefore takesB17EE
    softwareforegroundrestart; return5A alternative0800edgeisnotreachablethroughthistarget. */
 
@@ -580,6 +710,32 @@ uint f33_get_mode_restart_hardware_selector(void)
   
   uVar1 = f33_platform_restart_selector_constant_zero();
   return uVar1;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x66FD4 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00066fd4(void)
+
+{
+  FUN_00066fd4();
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x66EF4 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00066ef4(void)
+
+{
+  FUN_00066ef4();
+  return;
 }
 
 
@@ -611,6 +767,19 @@ void FUN_000ff0d8(void)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0x6163E / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_0006163e(void)
+
+{
+  FUN_0006163e();
+  return;
+}
+
+
+
 void thunk_FUN_00052a10(void)
 
 {
@@ -633,6 +802,19 @@ void thunk_FUN_00035ad6(void)
 
 {
   FUN_00035ad6();
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x62E12 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00062e12(void)
+
+{
+  FUN_00062e12();
   return;
 }
 

@@ -622,6 +622,98 @@ uint f33_dcm_validate_event_id(uchar event_id)
 
 
 
+/* Validate low8 event ID, append one byte to the31-slot counted ring and wrap producer30 to0.
+   Return0 accepted,1 invalid,2 full. Duplicates are retained; tombstones still occupy capacity. No
+   inline callback or init-marker gate. */
+
+uint f33_dcm_enqueue_event(uchar event_id)
+
+{
+  byte bVar1;
+  byte bVar2;
+  uint32_t puVar3;
+  uint uVar4;
+  char cVar5;
+  uint uVar6;
+  
+  puVar3 = 0xfebeb800u;
+  uVar6 = 1;
+  uVar4 = f33_dcm_validate_event_id(event_id);
+  if (uVar4 == 0) {
+    thunk_FUN_0006a45e();
+    bVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x59ad)))));
+    if (bVar1 < 0x1f) {
+      bVar2 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x59af)))));
+      uVar4 = (uint)bVar2;
+      uVar6 = 0;
+      if (uVar4 < 0x1f) {
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(uVar4 - 0x59ac))))) = event_id;
+      }
+      cVar5 = '\0';
+      if (uVar4 < 0x1e) {
+        cVar5 = bVar2 + 1;
+      }
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x59af))))) = cVar5;
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x59ad))))) = bVar1 + 1;
+    }
+    else {
+      uVar6 = 2;
+    }
+    thunk_FUN_0006a4c4();
+  }
+  return uVar6;
+}
+
+
+
+/* Scan current occupied slots from consumer and replace matching bytes withFF under the existing
+   critical pair. Only first_only==1 stops at first match; other values invalidate all. Return0
+   matched,1 invalid ID,3 absent. Indices and occupancy are unchanged. */
+
+uint f33_dcm_invalidate_queued_event(uchar event_id,uchar first_only)
+
+{
+  byte bVar1;
+  bool bVar2;
+  uint32_t puVar3;
+  uint uVar4;
+  uint uVar5;
+  byte bVar6;
+  
+  puVar3 = 0xfebeb800u;
+  bVar6 = 0;
+  bVar2 = false;
+  uVar5 = 1;
+  uVar4 = f33_dcm_validate_event_id(event_id);
+  if (uVar4 == 0) {
+    uVar5 = 3;
+    thunk_FUN_0006a45e();
+    bVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x59ad)))));
+    uVar4 = (uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x59ae)))));
+    do {
+      if (bVar1 <= bVar6) break;
+      bVar6 = bVar6 + 1;
+      if ((uVar4 < 0x1f) && (event_id == (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(uVar4 - 0x59ac))))))) {
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(uVar4 - 0x59ac))))) = 0xff;
+        if (first_only == '\x01') {
+          bVar2 = true;
+        }
+        uVar5 = 0;
+      }
+      if (uVar4 < 0x1e) {
+        uVar4 = uVar4 + 1 & 0xff;
+      }
+      else {
+        uVar4 = 0;
+      }
+    } while (!bVar2);
+    thunk_FUN_0006a4c4();
+  }
+  return uVar5;
+}
+
+
+
 /* Forward low8 event ID to989EC; callers discard enqueue status. No retry, coalescing or callback
    execution is added. */
 
@@ -641,6 +733,75 @@ void f33_dcm_cancel_service_events(uchar event_id,uchar first_only)
 
 {
   f33_dcm_invalidate_queued_event(event_id,first_only);
+  return;
+}
+
+
+
+/* For low8 slot<9 write remaining=(duration+quantum5-1) modulo32 and active1 under the existing
+   priority-mask pair. Rearming overwrites rather than accumulates; zero duration arms remaining4.
+    */
+
+void f33_dcm_arm_software_timer(uchar timer_slot,uint duration)
+
+{
+  uint32_t puVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  
+  uVar3 = (uint)timer_slot;
+  puVar1 = 0xfebeb800u;
+  puVar2 = 0x23dfcu;
+  if (uVar3 < 9) {
+    thunk_FUN_0006a45e();
+    (*((uint *)camry_host_ptr((uint32_t)(puVar1 + uVar3 * 8 + -0x598c)))) = (*((int *)camry_host_ptr((uint32_t)(puVar2 + 0x2cf0)))) + -1 + duration;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(uVar3 * 8 + -0x5988))))) = 1;
+    thunk_FUN_0006a4c4();
+  }
+  return;
+}
+
+
+
+/* For low8 slot<9 clear only active under the existing priority-mask pair. Leave remaining and
+   already queued events unchanged; inactive or invalid slots have no callback. */
+
+void f33_dcm_cancel_software_timer(uchar timer_slot)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (timer_slot < 9) {
+    thunk_FUN_0006a45e();
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)((uint)timer_slot * 8 + -0x5988))))) = 0;
+    thunk_FUN_0006a4c4();
+  }
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x6A45E / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_0006a45e(void)
+
+{
+  FUN_0006a45e();
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x6A4C4 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_0006a4c4(void)
+
+{
+  FUN_0006a4c4();
   return;
 }
 

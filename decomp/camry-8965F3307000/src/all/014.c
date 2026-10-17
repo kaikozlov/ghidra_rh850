@@ -1,6 +1,20 @@
 #include "common.h"
 
 
+/* 5002C/2E loads,50030 shl8,50032or;B8A4C fullu16setterB418;owner0/status0. */
+
+uint f33_write_2013_service_numeric_target(uchar *payload,ushort unused_length)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  f33_set_service_numeric_target_thunk(CONCAT11(*payload,payload[1]));
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x364e)))) = 0;
+  return 0;
+}
+
+
+
 /* Exact40-byte identity4FFFE, GNU decoded50042..50068;receive-status80A5 separate
    fromgeneration80A4. */
 
@@ -1635,6 +1649,45 @@ void f33_age_classifier_groups(void)
 
 
 
+/* Return5A for zero6AF0, E8533/4, E854FF, E85511, sentinel33333333 inE91C/E924/E92C or62E12
+   resultA55AA55A; otherwise0. Structural classifier priority, not a recovered OEM fault name.
+   Application zero/status/sentinel predicates select structural classifier priority3. No recovered
+   OEM fault identity or permission semantics. */
+
+uint f33_classifier_selector3_predicate(void)
+
+{
+  int iVar1;
+  char cVar2;
+  char cVar3;
+  char cVar4;
+  int iVar5;
+  int iVar6;
+  int iVar7;
+  int iVar8;
+  uint uVar9;
+  
+  iVar7 = DAT_febee92c;
+  iVar6 = DAT_febee924;
+  iVar5 = DAT_febee91c;
+  cVar4 = DAT_febee855;
+  cVar3 = DAT_febee854;
+  cVar2 = DAT_febee853;
+  iVar1 = DAT_febe6af0;
+  iVar8 = FUN_00062e12();
+  if (((((iVar1 == 0) || (cVar2 == '\x03' || cVar2 == '\x04')) || (cVar3 == -1)) ||
+      ((cVar4 == '\x11' || (iVar5 == 0x33333333)))) ||
+     ((iVar6 == 0x33333333 || ((iVar7 == 0x33333333 || (iVar8 == -0x5aa55aa6)))))) {
+    uVar9 = 0x5a;
+  }
+  else {
+    uVar9 = 0;
+  }
+  return uVar9;
+}
+
+
+
 /* Each E857/8/9==22 asserts its82B1/2/3 latch; rising edges set82A4.bit5 and activity82A75A. Other
    values clear that latch. Return5A while any source equals22. Rising status22 on any E857/8/9
    source sets classifier bit5 and activity; continued22 returns5A without refreshing the edge
@@ -2258,6 +2311,60 @@ undefined4 FUN_00051866(void)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0x5551A / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_0005551a(void)
+
+{
+  FUN_0005551a();
+  return;
+}
+
+
+
+undefined4 FUN_000518e0(void)
+
+{
+  uint uVar1;
+  uint32_t puVar2;
+  int iVar3;
+  
+  puVar2 = 0xfebeb800u;
+  if (DAT_febe82d4 == '\0') {
+    DAT_febe82d4 = '\x05';
+    thunk_FUN_0005551a();
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x352c))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x352c))))) | 0x80;
+  }
+  else if ((((int8_t)DAT_febe82d4) != -0x7b) && (((int8_t)DAT_febe82d4) != -0x7a)) {
+    iVar3 = 0;
+    uVar1 = 0;
+    do {
+      if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe82d8u + (uint32_t)(uVar1) * 1u)))) == '\x05') || ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe82d8u + (uint32_t)(uVar1) * 1u)))) == '\x06')) {
+        iVar3 = 0x5a;
+      }
+      uVar1 = uVar1 + 1 & 0xff;
+    } while ((uVar1 < 4) && (iVar3 != 0x5a));
+    if (iVar3 == 0) {
+      uVar1 = (uint)DAT_febe82d6;
+      if (3 < uVar1) {
+        uVar1 = 0;
+      }
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe82d8u + (uint32_t)(uVar1) * 1u)))) = 5;
+      if (uVar1 < 3) {
+        DAT_febe82d6 = (char)uVar1 + 1;
+      }
+      else {
+        DAT_febe82d6 = 0;
+      }
+    }
+  }
+  return 0;
+}
+
+
+
 void FUN_00051962(void)
 
 {
@@ -2652,6 +2759,54 @@ void f33_report_diagnostic_event_pass(uint event)
     }
   }
   return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x54662 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00054662(void)
+
+{
+  FUN_00054662();
+  return;
+}
+
+
+
+undefined4 FUN_00051dbe(void)
+
+{
+  uint uVar1;
+  uint32_t puVar2;
+  puVar2 = 0xfebeb800u;
+  if (DAT_febe82d4 == '\0') {
+    DAT_febe82d4 = '\x03';
+    thunk_FUN_00054662();
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x352c))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x352c))))) | 0x80;
+  }
+  else if (((int8_t)DAT_febe82d4) != -0x7d) {
+    uVar1 = 0;
+    do {
+      if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe82d8u + (uint32_t)(uVar1) * 1u)))) == '\x03') break;
+      uVar1 = uVar1 + 1;
+    } while (uVar1 < 4);
+    if (uVar1 == 4) {
+      if (3 < DAT_febe82d6) {
+        DAT_febe82d6 = 0;
+      }
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe82d8u + (uint32_t)(DAT_febe82d6) * 1u)))) = 3;
+      if (DAT_febe82d6 < 3) {
+        DAT_febe82d6 = DAT_febe82d6 + 1;
+      }
+      else {
+        DAT_febe82d6 = 0;
+      }
+    }
+  }
+  return 0;
 }
 
 
@@ -3547,6 +3702,23 @@ void f33_clear_diagnostic_supplement(uchar *destination)
 
 
 
+void FUN_00052aa6(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  f33_clear_diagnostic_supplement((uchar *)((undefined *)camry_host_ptr(0xfebe85acu)));
+  f33_copy_diagnostic_capture
+            (((F33DiagnosticCapture *)camry_host_ptr((uint32_t)(puVar1 + -0x3524))),(F33DiagnosticCapture *)((undefined *)camry_host_ptr(0x2a1f4u)));
+  f33_copy_diagnostic_capture
+            (((F33DiagnosticCapture *)camry_host_ptr((uint32_t)(puVar1 + -0x3434))),(F33DiagnosticCapture *)((undefined *)camry_host_ptr(0x2a1f4u)));
+  f33_copy_diagnostic_capture
+            (((F33DiagnosticCapture *)camry_host_ptr((uint32_t)(puVar1 + -0x3344))),(F33DiagnosticCapture *)((undefined *)camry_host_ptr(0x2a1f4u)));
+  return;
+}
+
+
+
 /* Objects1/2/3 use trackers6157..59: high20 pending, high10 success, other failure. Only after no
    tracker1 remains clear trackers and publish aggregate6150=0/55. Capture objects1/2/3 share
    all-peer terminal barrier and high-nibble status classification; aggregate0/55 only after no
@@ -3735,6 +3907,36 @@ void f33_copy_diagnostic_supplement(uchar *destination,uchar *source)
     uVar2 = uVar2 + 1;
     *(undefined4 *)(destination + iVar1) = *(undefined4 *)(source + iVar1);
   } while (uVar2 < 0x12);
+  return;
+}
+
+
+
+void FUN_00053092(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  DAT_febe6150 = 0xaa;
+  DAT_febe615a = 0x5a;
+  DAT_febe6166 = 0;
+  DAT_febe6151 = 0;
+  f33_copy_diagnostic_capture(f33_diagnostic_capture_slots,(F33DiagnosticCapture *)((undefined *)camry_host_ptr(0x2a1f4u)));
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56ac))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56ac))))) | 4;
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x337d))))) == '\"') {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56ae))))) = 0;
+    f33_copy_diagnostic_capture
+              (((F33DiagnosticCapture *)camry_host_ptr((uint32_t)(puVar1 + -0x3434))),(F33DiagnosticCapture *)((undefined *)camry_host_ptr(0x2a1f4u)));
+  }
+  else {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x337d))))) = 0x44;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56ab))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56ab))))) | 4;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56ad))))) = 0;
+  f33_copy_diagnostic_capture
+            (((F33DiagnosticCapture *)camry_host_ptr((uint32_t)(puVar1 + -0x3344))),(F33DiagnosticCapture *)((undefined *)camry_host_ptr(0x2a1f4u)));
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56aa))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56aa))))) | 4;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x56b0))))) = 0xa5;
   return;
 }
 

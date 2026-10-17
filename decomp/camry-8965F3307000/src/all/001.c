@@ -2255,6 +2255,19 @@ void f33_boot_programming_prepare(void)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0x5158 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00005158(void)
+
+{
+  FUN_00005158();
+  return;
+}
+
+
+
 /* Enabledgateveneerpreservesr9fourthargumentto6374;returns1whendisabled. */
 
 uint f33_boot_transport_request_admit

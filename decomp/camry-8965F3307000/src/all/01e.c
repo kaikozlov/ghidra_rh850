@@ -26,6 +26,18 @@ void FUN_00078010(undefined2 param_1,undefined1 *param_2)
 
 
 
+undefined4 FUN_0007812a(void)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_000789e2();
+  thunk_FUN_000764c2();
+  return uVar1;
+}
+
+
+
 void FUN_0007813e(undefined1 param_1)
 
 {
@@ -1407,6 +1419,39 @@ bool FUN_00079420(void)
 
 
 
+bool FUN_00079432(void)
+
+{
+  int iVar1;
+  
+  iVar1 = f33_return_const_0_79d24();
+  return iVar1 != 0;
+}
+
+
+
+undefined4 FUN_00079444(void)
+
+{
+  int iVar1;
+  undefined4 uVar2;
+  
+  uVar2 = 1;
+  iVar1 = FUN_00079b5c();
+  if (iVar1 != 0xc) {
+    iVar1 = f33_return_const_0_79d28();
+    if (iVar1 == 0) {
+      uVar2 = 0;
+    }
+    else {
+      uVar2 = 1;
+    }
+  }
+  return uVar2;
+}
+
+
+
 /* Mask input16, call79D2E and normalize nonzero to1. Exact target hook always returns0, so this is
    not an additional live readiness check. Mask input16, call real79D2E and normalize nonzero to1.
    Exact hook always returns0; repeated native scheduler calls therefore pass this gate and reach
@@ -1760,6 +1805,19 @@ void FUN_000799b0(void)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0x799B0 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000799b0(void)
+
+{
+  FUN_000799b0();
+  return;
+}
+
+
+
 void FUN_000799da(void)
 
 {
@@ -1770,6 +1828,19 @@ void FUN_000799da(void)
     FUN_0007814c();
   }
   FUN_0007987e(0);
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x799DA / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_000799da(void)
+
+{
+  FUN_000799da();
   return;
 }
 
@@ -2167,6 +2238,47 @@ void FUN_00079dec(undefined2 param_1)
 
 
 
+void FUN_00079e2c(void)
+
+{
+  byte bVar1;
+  uint32_t puVar2;
+  byte logical_controller;
+  
+  puVar2 = 0x23dfcu;
+  FUN_0007c4a2();
+  bVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x25c0)))));
+  for (logical_controller = 0; logical_controller < bVar1;
+      logical_controller = logical_controller + 1) {
+    f33_request_logical_controller_run_stop(logical_controller,'\x03');
+  }
+  FUN_0007fac6();
+  FUN_0007f27c();
+  FUN_0007c748();
+  thunk_FUN_0007b3a6();
+  return;
+}
+
+
+
+/* Sequential initializer chain: 7 unconditional calls and no other statements; shape-verified. The
+   called sequence is the function's entire behavior; chain family members differ in callee sets. */
+
+void f33_run_init_chain_79e60(void)
+
+{
+  FUN_0007c4a2();
+  FUN_00084160();
+  f33_return_only_stub_8158e();
+  FUN_0007fac6();
+  FUN_0007f27c();
+  FUN_0007c748();
+  thunk_FUN_0007b3a6();
+  return;
+}
+
+
+
 void FUN_00079eba(void)
 
 {
@@ -2225,6 +2337,19 @@ void f33_run_init_chain_79f16(void)
   FUN_00080c88();
   FUN_0007c93e();
   FUN_0007f33c();
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x79D7A / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00079d7a(void)
+
+{
+  FUN_00079d7a();
   return;
 }
 
@@ -2404,6 +2529,24 @@ void FUN_0007a1b4(void)
 
 
 
+undefined4 FUN_0007a2da(void)
+
+{
+  thunk_FUN_0006a45e();
+  return 0;
+}
+
+
+
+undefined4 FUN_0007a2f4(void)
+
+{
+  thunk_FUN_0006a45e();
+  return 0;
+}
+
+
+
 void FUN_0007a30e(void)
 
 {
@@ -2411,6 +2554,19 @@ void FUN_0007a30e(void)
   puVar1 = 0x23dfcu;
   FUN_0007b3a6();
   FUN_0007b2c4(((undefined *)camry_host_ptr((uint32_t)(puVar1 + -0x118c))));
+  return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x7B3A6 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_0007b3a6(void)
+
+{
+  FUN_0007b3a6();
   return;
 }
 
