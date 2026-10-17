@@ -496,6 +496,38 @@ LAB_000085fa:
 
 
 
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+void FUN_00008628(void)
+
+{
+  uint uVar1;
+  undefined1 uVar2;
+  undefined4 uVar3;
+  
+  uVar3 = FUN_0000851c(0xffff);
+  FUN_000084f8(camry_host_addr(f33_nvm_family0_read_record + 0x3a4));
+  (*((volatile uint8_t *)camry_host_ptr(0xffc59008u))) = 1;
+  uVar2 = (*((volatile uint8_t *)camry_host_ptr(0xffc59008u)));
+  __synchronize();
+  __synchronize();
+  SELFID0 = (*((volatile int32_t *)camry_host_ptr(0xff300050u)));
+  SELFID1 = (*((volatile int32_t *)camry_host_ptr(0xff300054u)));
+  SELFID2 = (*((volatile int32_t *)camry_host_ptr(0xff300058u)));
+  SELFID3 = (*((volatile int32_t *)camry_host_ptr(0xff30005cu)));
+  uVar1 = SELFID3;
+  __synchronize();
+  (*((volatile uint8_t *)camry_host_ptr(0xffc59008u))) = 0;
+  uVar2 = (*((volatile uint8_t *)camry_host_ptr(0xffc59008u)));
+  __synchronize();
+  __synchronize();
+  FUN_000084f8(0);
+  FUN_00008542(uVar3);
+  return;
+}
+
+
+
 /* WARNING: This function may have set the stack pointer */
 /* WARNING: Removing unreachable block (ram,0x00009f28) */
 /* WARNING: Removing unreachable block (ram,0x00009f0a) */

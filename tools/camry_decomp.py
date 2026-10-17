@@ -1426,10 +1426,12 @@ def _rewrite_int_to_pointer(code: str, pointers: set[str]) -> str:
             continue
         # `(undefined *)0xffffffff` beside a signed divide is the divisor word
         # compared with -1. A host pointer of that constant is not the cmp.
+        # `(undefined *)(0xfec00000 - length)` is the same: the cmp is on the
+        # address bits, and a host pointer of the sum is a different value.
         literal = None if deref else _integer_constant_bits(expr)
-        if literal is not None and _is_compare_operand(code, open_paren, end):
+        if not deref and _is_compare_operand(code, open_paren, end):
             pieces.append(code[cursor:open_paren])
-            pieces.append(literal)
+            pieces.append(literal if literal is not None else f"(uint32_t)({expr})")
             cursor = end
             search = end
             continue
@@ -6574,6 +6576,111 @@ def _rewrite_nested_pointer_fields(code: str) -> str:
     return "".join(pieces)
 
 
+def _span_is_bare_compare(code: str, start: int, end: int) -> bool:
+    """True when [start, end) is an address compare, not a pointer use.
+
+    `param + (length - 1)` is still the address register: a byte pointer
+    adds that many bytes. A dereference, call, or subscript is not.
+    """
+    right = end
+    while right < len(code) and code[right] in " \t\n":
+        right += 1
+    if (
+        right < len(code)
+        and code[right] in "+-"
+        and not code.startswith(("+=", "-=", "++", "--"), right)
+    ):
+        end = _expr_end_bound(code, right)
+    for _ in range(6):
+        left = start - 1
+        while left >= 0 and code[left] in " \t\n":
+            left -= 1
+        if left >= 0 and code[left] in "*&[.":
+            return False
+        if left >= 1 and code[left - 1:left + 1] == "->":
+            return False
+        right = end
+        while right < len(code) and code[right] in " \t\n":
+            right += 1
+        if right < len(code) and code[right] in "[(":
+            return False
+        if _is_compare_operand(code, start, end):
+            return True
+        if left < 0 or right >= len(code) or code[left] != "(" or code[right] != ")":
+            return False
+        start, end = left, right + 1
+    return False
+
+
+def _parameter_is_address_word(body: str, name: str) -> bool:
+    """A byte-pointer parameter the bytes only compare, never load through."""
+    found = False
+    for match in re.finditer(rf"\b{re.escape(name)}\b", body):
+        found = True
+        if not _span_is_bare_compare(body, match.start(), match.end()):
+            return False
+    return found
+
+
+def _rewrite_address_parameters(code: str) -> str:
+    """`undefined *param` that is only compared is the address register.
+
+    Callers pass `camry_host_ptr` of that register because the prototype is a
+    pointer. The `cmp` is on the register, so the compare uses the firmware
+    address `camry_host_addr` recovers. The prototype stays a pointer.
+    """
+    brace = _opening_brace(code)
+    if brace < 0:
+        return code
+    signature, body = code[:brace], code[brace:]
+    opening = signature.find("(")
+    closing = signature.rfind(")")
+    if opening < 0 or closing < opening:
+        return code
+    params = signature[opening + 1:closing]
+    names = [
+        match.group(1)
+        for match in re.finditer(
+            r"\b(?:undefined1|undefined|byte|uchar|char|code)\s*\*\s*"
+            r"([A-Za-z_][A-Za-z0-9_]*)",
+            params,
+        )
+        if _parameter_is_address_word(body, match.group(1))
+    ]
+    for name in names:
+        pieces: list[str] = []
+        cursor = 0
+        for match in re.finditer(rf"\b{re.escape(name)}\b", body):
+            if match.start() < cursor:
+                continue
+            if not _span_is_bare_compare(body, match.start(), match.end()):
+                continue
+            pieces.append(body[cursor:match.start()])
+            pieces.append(f"(uint32_t)camry_host_addr({name})")
+            cursor = match.end()
+        pieces.append(body[cursor:])
+        body = "".join(pieces)
+    return signature + body
+
+
+def _rewrite_dat_scalars(code: str) -> str:
+    """`_DAT_ff300050` is the word at that address, not an undeclared name."""
+    widths = _access_widths()
+    # A word `_DAT_` is Ghidra's untyped scalar. Signed compares (`b6`/`lt`)
+    # read it as int32; storing those bits into a uint32 register keeps them.
+    types = {1: "uint8_t", 2: "uint16_t", 4: "int32_t"}
+
+    def replace(match: re.Match[str]) -> str:
+        address = int(match.group(1), 16)
+        bucket = widths.get(address)
+        ctype = types.get(bucket or 0)
+        if ctype is None:
+            return match.group(0)
+        return f"(*((volatile {ctype} *)camry_host_ptr(0x{address:x}u)))"
+
+    return re.sub(r"\b_DAT_([0-9A-Fa-f]+)\b", replace, code)
+
+
 def _rewrite_terminal_labels(code: str) -> str:
     """A label as the last statement of a block needs an empty statement after it."""
     return re.sub(
@@ -6634,6 +6741,8 @@ def _rewrite_body(code: str) -> str:
     code = _rewrite_late_pointer_fields(code)
     code = _rewrite_pointer_assignments(code, firmware=True)
     code = _rewrite_signed_byte_compares(code)
+    code = _rewrite_dat_scalars(code)
+    code = _rewrite_address_parameters(code)
     code = _rewrite_terminal_labels(code)
     return code
 

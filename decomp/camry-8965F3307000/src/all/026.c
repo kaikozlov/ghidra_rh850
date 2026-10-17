@@ -1000,6 +1000,37 @@ undefined4 f33_return_const_5_98eee(void)
   return 5;
 }
 
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+undefined4 FUN_00098ef2(undefined *param_1,uint param_2)
+
+{
+  int iVar1;
+  
+  iVar1 = 0;
+  while( true ) {
+    if (iVar1 - (*((volatile int32_t *)camry_host_ptr(0x2b218u))) < 0 ==
+        (iVar1 < 0 != (*((volatile int32_t *)camry_host_ptr(0x2b218u))) < 0 && (*((volatile int32_t *)camry_host_ptr(0x2b218u))) < 0 == iVar1 - (*((volatile int32_t *)camry_host_ptr(0x2b218u))) < 0)) {
+      return 0;
+    }
+    if (((uint32_t)camry_host_addr(param_1) <= (*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x29258u + (uint32_t)(iVar1 * 2) * 4u))))) &&
+       ((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x29254u + (uint32_t)(iVar1 * 2) * 4u)))) <= (uint32_t)camry_host_addr(param_1) + ((param_2 & 0xff) - 1))) break;
+    iVar1 = iVar1 + 1;
+  }
+  return 1;
+}
+
+bool FUN_00098f2c(undefined *param_1,uint param_2)
+
+{
+  if (PTR_DAT_0002b21c <= (uint32_t)camry_host_addr(param_1)) {
+    return PTR_DAT_0002b220 < (uint32_t)camry_host_addr(param_1) + ((param_2 & 0xff) - 1);
+  }
+  return true;
+}
+
+
+
 
 
 void FUN_00098f4c(void)

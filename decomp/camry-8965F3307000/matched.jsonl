@@ -509,7 +509,7 @@
 {"addr": "0x851c", "name": "FUN_0000851c", "status": "equivalent", "form": "corpus", "signature": "uint FUN_0000851c(int param_1)"}
 {"addr": "0x8542", "name": "FUN_00008542", "status": "equivalent", "form": "corpus", "signature": "void FUN_00008542(undefined4 param_1)"}
 {"addr": "0x8560", "name": "FUN_00008560", "status": "converted"}
-{"addr": "0x8628", "name": "FUN_00008628", "status": "unconvertible"}
+{"addr": "0x8628", "name": "FUN_00008628", "status": "converted"}
 {"addr": "0x9f00", "name": "f33_application_transfer_to_boot_context", "status": "converted"}
 {"addr": "0x20880", "name": "f33_application_entry", "status": "converted"}
 {"addr": "0x31ed0", "name": "FUN_00031ed0", "status": "equivalent", "form": "corpus", "signature": "int FUN_00031ed0(uchar param_1)"}
@@ -2347,9 +2347,9 @@
 {"addr": "0x4fba0", "name": "f33_rdbi_1f00_callback", "status": "converted"}
 {"addr": "0x4fbb8", "name": "f33_rdbi_2000_callback", "status": "converted"}
 {"addr": "0x4fbd0", "name": "f33_rdbi_f100_callback", "status": "converted"}
-{"addr": "0x4fbe8", "name": "FUN_0004fbe8", "status": "unconvertible"}
+{"addr": "0x4fbe8", "name": "FUN_0004fbe8", "status": "converted"}
 {"addr": "0x4fc2c", "name": "FUN_0004fc2c", "status": "converted"}
-{"addr": "0x4fc48", "name": "FUN_0004fc48", "status": "unconvertible"}
+{"addr": "0x4fc48", "name": "FUN_0004fc48", "status": "converted"}
 {"addr": "0x4fc8e", "name": "f33_read_configured_application_memory", "status": "equivalent", "form": "corpus", "signature": "uint f33_read_configured_application_memory(uchar *address_record,uchar *output,ushort length)"}
 {"addr": "0x4fd04", "name": "f33_communication_request_sample_above_limit", "status": "equivalent", "form": "corpus", "signature": "uint f33_communication_request_sample_above_limit(void)"}
 {"addr": "0x4fd18", "name": "f33_publish_diagnostic_normal_tx_policy_request", "status": "equivalent", "form": "corpus", "signature": "void f33_publish_diagnostic_normal_tx_policy_request(uchar network_selector,uchar disable_tx)"}
@@ -3001,7 +3001,7 @@
 {"addr": "0x612dc", "name": "FUN_000612dc", "status": "equivalent", "form": "corpus", "signature": "uint FUN_000612dc(void)"}
 {"addr": "0x6131c", "name": "FUN_0006131c", "status": "equivalent", "form": "corpus", "signature": "undefined * FUN_0006131c(undefined2 *param_1)"}
 {"addr": "0x61372", "name": "FUN_00061372", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00061372(ushort *param_1)"}
-{"addr": "0x613c8", "name": "FUN_000613c8", "status": "unconvertible"}
+{"addr": "0x613c8", "name": "FUN_000613c8", "status": "converted"}
 {"addr": "0x61404", "name": "f33_update_local_status_packet", "status": "equivalent", "form": "corpus", "signature": "void f33_update_local_status_packet(void)"}
 {"addr": "0x614b0", "name": "FUN_000614b0", "status": "equivalent", "form": "corpus", "signature": "byte FUN_000614b0(void)"}
 {"addr": "0x614d4", "name": "FUN_000614d4", "status": "converted"}
@@ -5799,8 +5799,8 @@
 {"addr": "0x98e66", "name": "thunk_FUN_0006a4c4", "status": "equivalent", "form": "corpus", "signature": "void thunk_FUN_0006a4c4(void)"}
 {"addr": "0x98e80", "name": "FUN_00098e80", "status": "equivalent", "form": "corpus", "signature": "undefined1 FUN_00098e80(undefined1 param_1,char *param_2,undefined2 param_3)"}
 {"addr": "0x98eee", "name": "f33_return_const_5_98eee", "status": "equivalent", "form": "corpus", "signature": "undefined4 f33_return_const_5_98eee(void)"}
-{"addr": "0x98ef2", "name": "FUN_00098ef2", "status": "unconvertible"}
-{"addr": "0x98f2c", "name": "FUN_00098f2c", "status": "unconvertible"}
+{"addr": "0x98ef2", "name": "FUN_00098ef2", "status": "converted"}
+{"addr": "0x98f2c", "name": "FUN_00098f2c", "status": "converted"}
 {"addr": "0x98f4c", "name": "FUN_00098f4c", "status": "equivalent", "form": "corpus", "signature": "void FUN_00098f4c(void)"}
 {"addr": "0x98f6e", "name": "FUN_00098f6e", "status": "equivalent", "form": "corpus", "signature": "void FUN_00098f6e(int param_1,char param_2,undefined1 param_3)"}
 {"addr": "0x98fba", "name": "FUN_00098fba", "status": "equivalent", "form": "corpus", "signature": "undefined4 FUN_00098fba(undefined4 param_1,short param_2)"}

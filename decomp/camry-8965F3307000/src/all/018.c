@@ -1270,6 +1270,29 @@ undefined4 FUN_00061372(ushort *param_1)
 
 
 
+/* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
+
+ushort FUN_000613c8(void)
+
+{
+  uint32_t puVar1;
+  ushort uVar2;
+  
+  puVar1 = 0xfebeb800u;
+  (*((volatile uint16_t *)camry_host_ptr(0xfebe3838u))) = 0x6400;
+  DAT_febe383a = 0;
+  DAT_febe383c = 0xf000;
+  DAT_febe383e = 0;
+  uVar2 = FUN_000611fa(((undefined *)camry_host_ptr(0xfebe3838u)));
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x7fcc)))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x7fc0))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x7fca))))) = 0;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x7fc2)))) = (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x7fc2)))) & 0xff00 | uVar2;
+  return uVar2;
+}
+
+
+
 /* 389E5A admits local four-halfword MMIO read, CRC and6000 header check. At25 failed admitted
    updates latch3840; healthy publication does not clear an already latched fault. Hardware packet
    availability remains an explicit boundary. Local four-halfword MMIO packet, seven-byte CRC
