@@ -173,6 +173,43 @@ uint f33_dcm_join_clear_diagnostic_phases(uint group,F33DcmMessageContext *messa
 
 
 
+/* Require exactly3 remaining bytes, assemble big-endian24 group and retain message3BD4. Application
+   validation accepts onlyFFFFFF; accepted group enters existing asynchronous clear owner1410. */
+
+uint f33_dcm_begin_clear_diagnostic_request(F33DcmMessageContext *message)
+
+{
+  uint uVar1;
+  uint group;
+  byte *pbVar2;
+  
+  FUN_0009560e(0);
+  f33_dcm_clear_message.request = message->request;
+  DAT_febf3bcc = 0;
+  f33_dcm_clear_message.request_length = message->request_length;
+  f33_dcm_clear_message.response = message->response;
+  f33_dcm_clear_message.response_length = message->response_length;
+  f33_dcm_clear_message.addressing_kind = message->addressing_kind;
+  f33_dcm_clear_message.suppress_positive = message->suppress_positive;
+  f33_dcm_clear_message.response_capacity = message->response_capacity;
+  f33_dcm_clear_message.service_id = message->service_id;
+  f33_dcm_clear_message.service_list_selector = message->service_list_selector;
+  if (message->request_length == 3) {
+    pbVar2 = ((void *)camry_host_ptr((uint32_t)(message->request)));
+    group = (uint)pbVar2[2] | (uint)pbVar2[1] << 8 | (uint)*pbVar2 << 0x10;
+    uVar1 = f33_dcm_join_clear_diagnostic_phases(group, ((F33DcmMessageContext *)camry_host_ptr((uint32_t)((0xfebf3bd4u)))));
+  }
+  else {
+    uVar1 = 0;
+    group = 0;
+    f33_dcm_report_negative_or_pending(((F33DcmMessageContext *)camry_host_ptr((uint32_t)((0xfebf3bd4u)))), '\x13');
+  }
+  DAT_febf3bcc = group;
+  return uVar1;
+}
+
+
+
 void FUN_0008c2c4(void)
 
 {
@@ -249,6 +286,17 @@ void FUN_0008c368(void)
 
 
 
+void FUN_0008c384(uchar param_1)
+
+{
+  ((uint8_t *)camry_host_ptr((uint32_t)(f33_dcm_dtc_count_message.response)))[f33_dcm_dtc_count_message.response_length] = param_1;
+  ((uint8_t *)camry_host_ptr((uint32_t)(f33_dcm_dtc_count_message.response)))[f33_dcm_dtc_count_message.response_length + 1] = '\x01';
+  f33_dcm_dtc_count_message.response_length = f33_dcm_dtc_count_message.response_length + 2;
+  return;
+}
+
+
+
 /* Forward status mask to4D69C and retain unmasked byte3BF5. Preserve returnedR10 through final
    store/dispose; caller8C66A checks it. */
 
@@ -281,6 +329,22 @@ bool FUN_0008c3c0(int param_1,ushort *param_2,undefined1 *param_3)
   }
   *param_3 = (char)uVar1;
   return uVar1 != 0;
+}
+
+
+
+/* Append big-endian16-bit count and increment body length by2. Caller19/01 only tests capacity!=0
+   before writing its4-byte body; shared transport allocation is larger but this is not a
+   general4-byte caller-capacity guard. */
+
+void f33_append_dtc_count(ushort count)
+
+{
+  ((uint8_t *)camry_host_ptr((uint32_t)(f33_dcm_dtc_count_message.response)))[f33_dcm_dtc_count_message.response_length] =
+       (uchar)(count >> 8);
+  ((uint8_t *)camry_host_ptr((uint32_t)(f33_dcm_dtc_count_message.response)))[f33_dcm_dtc_count_message.response_length + 1] = (uchar)count;
+  f33_dcm_dtc_count_message.response_length = f33_dcm_dtc_count_message.response_length + 2;
+  return;
 }
 
 
@@ -374,12 +438,122 @@ LAB_0008c600:
 
 
 
+undefined4 FUN_0008c622(void)
+
+{
+  uchar nrc;
+  uint uVar1;
+  undefined4 uVar2;
+  uchar auStack_11 [5];
+  
+  auStack_11[0] = '\0';
+  FUN_0009560e(0);
+  if (f33_dcm_dtc_count_message.request_length == 1) {
+    if (f33_dcm_dtc_count_message.response_capacity == 0) {
+      return 0;
+    }
+    uVar1 = f33_get_dtc_status_availability_mask(auStack_11);
+    if (uVar1 == 0) {
+      FUN_0008c384(auStack_11[0]);
+      if (*((uint8_t *)camry_host_ptr((uint32_t)(f33_dcm_dtc_count_message.request))) == '\0') {
+        f33_append_dtc_count(0);
+        f33_dcm_report_positive_response(((F33DcmMessageContext *)camry_host_ptr((uint32_t)((0xfebf3bfcu)))));
+        return 0;
+      }
+      uVar1 = f33_begin_dtc_count_iteration(*((uint8_t *)camry_host_ptr((uint32_t)(f33_dcm_dtc_count_message.request))));
+      if (uVar1 == 0) {
+        uVar2 = FUN_0008c4f8(((F33DcmMessageContext *)camry_host_ptr((uint32_t)((0xfebf3bfcu)))));
+        return uVar2;
+      }
+    }
+    nrc = '!';
+  }
+  else {
+    nrc = '\x13';
+  }
+  f33_dcm_report_negative_or_pending(((F33DcmMessageContext *)camry_host_ptr((uint32_t)((0xfebf3bfcu)))), nrc);
+  return 0;
+}
+
+
+
+/* DTC count operation callback. Retain advanced message for operation0; nonzero operations
+   reset/cancel module state. Response submission is not acknowledgement or durable completion. */
+
+uint f33_dcm_read_dtc_count_service(uchar operation,F33DcmMessageContext *message)
+
+{
+  uint uVar1;
+  
+  f33_dcm_dtc_count_message.request = message->request;
+  f33_dcm_dtc_count_message.request_length = message->request_length;
+  f33_dcm_dtc_count_message.response = message->response;
+  f33_dcm_dtc_count_message.response_length = message->response_length;
+  f33_dcm_dtc_count_message.addressing_kind = message->addressing_kind;
+  f33_dcm_dtc_count_message.suppress_positive = message->suppress_positive;
+  f33_dcm_dtc_count_message.response_capacity = message->response_capacity;
+  f33_dcm_dtc_count_message.service_id = message->service_id;
+  f33_dcm_dtc_count_message.service_list_selector = message->service_list_selector;
+  if (operation == '\0') {
+    uVar1 = FUN_0008c622();
+  }
+  else {
+    uVar1 = 0;
+    FUN_0008c368();
+  }
+  return uVar1;
+}
+
+
+
 /* EventEC re-enters8C4F8 with retained28-byte message3BFC. */
 
 void f33_dcm_resume_queued_dtc_count(void)
 
 {
   FUN_0008c4f8(((F33DcmMessageContext *)camry_host_ptr((uint32_t)((0xfebf3bfcu)))));
+  return;
+}
+
+
+
+void FUN_0008c70c(void)
+
+{
+  uint uVar1;
+  
+  f33_dtc_list_continuation.side_status = 0xff;
+  f33_dtc_list_continuation.yielded = '\0';
+  f33_dtc_list_continuation.scratch_length = 0;
+  f33_dtc_list_continuation.local_result = '\0';
+  f33_dtc_list_continuation.requested_mask = '\0';
+  f33_dtc_list_continuation.phase = '\0';
+  uVar1 = 0;
+  do {
+    f33_dtc_list_local_tuple_scratch[uVar1] = '\0';
+    uVar1 = uVar1 + 1;
+  } while (uVar1 < 0x300);
+  f33_dtc_list_continuation.side_result = '\0';
+  return;
+}
+
+
+
+void FUN_0008c75c(uchar param_1)
+
+{
+  ((uint8_t *)camry_host_ptr((uint32_t)(f33_dcm_dtc_list_message.response)))[f33_dcm_dtc_list_message.response_length] = param_1;
+  f33_dcm_dtc_list_message.response_length = f33_dcm_dtc_list_message.response_length + 1;
+  return;
+}
+
+
+
+void FUN_0008c778(uchar param_1)
+
+{
+  f33_begin_filtered_dtc_iteration(param_1);
+  f33_dtc_list_continuation.requested_mask = param_1;
   return;
 }
 
@@ -406,6 +580,104 @@ bool FUN_0008c790(int param_1,ushort *param_2,undefined1 *param_3)
 
 
 
+/* Collect local tuples and poll side source; always queueED before the first ready result. A later
+   ready call merges retained scratch, retaining only complete tuples that fit, then calls95644.
+   Clear continuation only after that API returns. A later derived-status generation does not
+   replace the already collected local snapshot; direct native re-entry is not proof of OS event
+   dispatch. queueED before first ready result. Later ready call merges retained scratch and only
+   complete tuples that fit, then calls95644. Clear continuation after that API returns. Later
+   derived-status generation does not replace the collected snapshot; direct native re-entry does
+   not prove OS event dispatch. */
+
+uint f33_dcm_advance_dtc_list_request(F33DcmMessageContext *message)
+
+{
+  uint uVar1;
+  ushort uVar2;
+  uchar uVar3;
+  uchar uVar4;
+  int iVar5;
+  uchar uVar6;
+  uint uVar7;
+  uchar uStack_44;
+  uchar uStack_43;
+  ushort uStack_42;
+  F33DiagSourceBuffer FStack_40;
+  F33DiagSourceBuffer FStack_38;
+  uchar auStack_30 [8];
+  
+  uVar4 = f33_dtc_list_continuation.yielded;
+  uVar3 = f33_dtc_list_continuation.requested_mask;
+  uVar6 = f33_dtc_list_continuation.phase;
+  uVar2 = f33_dtc_list_continuation.opaque_00;
+  iVar5 = 0;
+  uStack_42 = f33_dtc_list_continuation.scratch_length;
+  uVar7 = (uint)f33_dtc_list_continuation.side_result;
+  uStack_44 = f33_dtc_list_continuation.local_result;
+  uStack_43 = f33_dtc_list_continuation.side_status;
+  if (f33_dtc_list_continuation.phase == '\0') {
+    uVar6 = '\x02';
+    auStack_30[0] = f33_dtc_list_continuation.requested_mask;
+    uVar7 = ((void)(0x28000200), (void)(2), (void)(1), (void)(auStack_30), (void)(&uStack_43), f33_return_const_0_8b10c());
+    while ((uStack_44 != '\x01' && (iVar5 != 1))) {
+      iVar5 = FUN_0008c790(camry_host_addr(f33_dtc_list_local_tuple_scratch), &uStack_42, &uStack_44);
+    }
+  }
+  else if (f33_dtc_list_continuation.phase == '\x02') {
+    if (uVar7 == 2) {
+      uVar7 = ((void)(1), (void)(2), f33_return_const_0_8b110());
+    }
+    while ((uStack_44 != '\x01' && (iVar5 != 1))) {
+      iVar5 = FUN_0008c790(camry_host_addr(f33_dtc_list_local_tuple_scratch), &uStack_42, &uStack_44);
+    }
+  }
+  else {
+    uStack_44 = '\x01';
+    uVar7 = 1;
+    uStack_42 = 0;
+    uVar2 = 0;
+  }
+  if ((uStack_44 == '\x02') || (uVar7 == 2)) {
+    f33_dcm_post_service_event(0xed);
+  }
+  else {
+    if (uVar4 != '\0') {
+      FStack_38.bytes = camry_host_addr(f33_dtc_list_local_tuple_scratch);
+      FStack_40.status = (uchar)uVar7;
+      FStack_40.bytes = 0;
+      FStack_38.length = uStack_42;
+      FStack_40.length = 0;
+      FStack_38.status = uStack_44;
+      f33_merge_dtc_list_sources(&FStack_38,&FStack_40);
+      f33_dcm_report_positive_response(message);
+      uVar6 = '\0';
+      uVar2 = 0;
+      uVar7 = 0;
+      uStack_42 = 0;
+      uVar3 = '\0';
+      uStack_44 = '\0';
+      uVar4 = '\0';
+      uVar1 = 0;
+      goto LAB_0008ca68;
+    }
+    f33_dcm_post_service_event(0xed);
+    uVar4 = 'Z';
+  }
+  uVar1 = 10;
+LAB_0008ca68:
+  f33_dtc_list_continuation.opaque_00 = uVar2;
+  f33_dtc_list_continuation.side_result = (uchar)uVar7;
+  f33_dtc_list_continuation.requested_mask = uVar3;
+  f33_dtc_list_continuation.scratch_length = uStack_42;
+  f33_dtc_list_continuation.phase = uVar6;
+  f33_dtc_list_continuation.yielded = uVar4;
+  f33_dtc_list_continuation.local_result = uStack_44;
+  f33_dtc_list_continuation.side_status = uStack_43;
+  return uVar1;
+}
+
+
+
 /* Reset DTC-list scratch/phase/yield state, tombstone all queuedED slots and release shared
    diagnostic continuation token through9560E(1). Ring occupancy is retained until dispatch pops
    tombstones. */
@@ -417,6 +689,35 @@ void f33_dcm_cancel_retained_dtc_list(void)
   f33_dcm_cancel_service_events(0xed,'\0');
   FUN_0009560e(1);
   return;
+}
+
+
+
+/* DTC list operation callback. Retain advanced message for operation0; nonzero operations
+   reset/cancel module state. Response submission is not acknowledgement or durable completion. */
+
+uint f33_dcm_read_dtc_list_service(uchar operation,F33DcmMessageContext *message)
+
+{
+  uint uVar1;
+  
+  f33_dcm_dtc_list_message.request = message->request;
+  f33_dcm_dtc_list_message.request_length = message->request_length;
+  f33_dcm_dtc_list_message.response = message->response;
+  f33_dcm_dtc_list_message.response_length = message->response_length;
+  f33_dcm_dtc_list_message.addressing_kind = message->addressing_kind;
+  f33_dcm_dtc_list_message.suppress_positive = message->suppress_positive;
+  f33_dcm_dtc_list_message.response_capacity = message->response_capacity;
+  f33_dcm_dtc_list_message.service_id = message->service_id;
+  f33_dcm_dtc_list_message.service_list_selector = message->service_list_selector;
+  if (operation == '\0') {
+    uVar1 = FUN_0008ca8a();
+  }
+  else {
+    uVar1 = 0;
+    f33_dcm_cancel_retained_dtc_list();
+  }
+  return uVar1;
 }
 
 
@@ -491,6 +792,125 @@ undefined4 FUN_0008cbc4(int param_1,ushort *param_2,undefined1 *param_3)
 
 
 
+uint FUN_0008ccb8(void)
+
+{
+  int iVar1;
+  uint uVar2;
+  ushort uVar3;
+  char cVar4;
+  uint uVar5;
+  ushort uVar6;
+  uchar uStack_45;
+  undefined1 uStack_44;
+  undefined1 uStack_43;
+  ushort uStack_42;
+  ushort uStack_40;
+  ushort uStack_3e;
+  F33DiagOutputView FStack_3c;
+  F33DiagSourceBuffer FStack_2c;
+  F33DiagSourceBuffer FStack_24;
+  
+  cVar4 = DAT_febf4246;
+  uVar3 = DAT_febf4242;
+  uVar6 = DAT_febf4240;
+  uVar5 = (uint)DAT_febf4245;
+  uStack_45 = DAT_febf4244;
+  uStack_44 = DAT_febf4247;
+  FStack_2c.detail = '\0';
+  if (DAT_febf4246 == '\0') {
+    uStack_42 = 0;
+    cVar4 = '\x02';
+    iVar1 = 0;
+    while ((uStack_45 != '\x01' && (iVar1 != 0x5a))) {
+      iVar1 = FUN_0008cbc4(camry_host_addr(f33_snapshot_identifier_local_scratch), &uStack_42, &uStack_45);
+    }
+    uVar6 = uVar6 + uStack_42;
+    uStack_43 = 3;
+    uVar5 = ((void)(0x30000300), (void)(2), (void)(1), (void)(&uStack_43), (void)(&uStack_44), f33_return_const_0_8b10c());
+  }
+  else if (DAT_febf4246 == '\x02') {
+    if (DAT_febf4244 == '\x02') {
+      uStack_42 = DAT_febf4240;
+      iVar1 = 0;
+      while ((uStack_45 != '\x01' && (iVar1 != 0x5a))) {
+        iVar1 = FUN_0008cbc4(camry_host_addr(f33_snapshot_identifier_local_scratch), &uStack_42, &uStack_45);
+      }
+      uVar6 = uVar6 + uStack_42;
+    }
+    if ((uVar5 == 2) && (uVar5 = ((void)(1), (void)(2), (void)(uStack_44), f33_return_const_0_8b110()), uVar5 != 2)) {
+      uVar3 = 0;
+    }
+  }
+  else {
+    uVar5 = 1;
+    uStack_45 = '\x01';
+    uVar6 = 0;
+    uVar3 = 0;
+  }
+  if ((uStack_45 == '\x02') || (uVar5 == 2)) {
+    f33_dcm_post_service_event(0xee);
+    uVar2 = 10;
+  }
+  else {
+    FStack_24.status = uStack_45;
+    FStack_2c.status = (uchar)uVar5;
+    FStack_24.bytes = camry_host_addr(f33_snapshot_identifier_local_scratch);
+    uVar5 = 0;
+    FStack_3c.bytes = f33_dcm_snapshot_identifiers_message.response;
+    FStack_2c.bytes = 0;
+    uStack_40 = (ushort)f33_dcm_snapshot_identifiers_message.response_length;
+    FStack_3c.length = camry_host_addr(&uStack_40);
+    uStack_3e = (ushort)f33_dcm_snapshot_identifiers_message.response_capacity;
+    FStack_3c.capacity = camry_host_addr(&uStack_3e);
+    FStack_2c.length = uVar3;
+    FStack_24.length = uVar6;
+    uVar2 = f33_merge_snapshot_identifier_sources(&FStack_24,&FStack_2c,&FStack_3c);
+    f33_dcm_snapshot_identifiers_message.response_length = (uint)uStack_40;
+    f33_dcm_snapshot_identifiers_message.response_capacity = (uint)uStack_3e;
+    f33_dcm_report_positive_response(((F33DcmMessageContext *)camry_host_ptr((uint32_t)((0xfebf4248u)))));
+    uVar3 = 0;
+    uStack_45 = '\0';
+    uVar6 = 0;
+    cVar4 = '\0';
+    uStack_44 = 0xff;
+  }
+  DAT_febf4245 = (char)uVar5;
+  DAT_febf4240 = uVar6;
+  DAT_febf4242 = uVar3;
+  DAT_febf4244 = uStack_45;
+  DAT_febf4246 = cVar4;
+  DAT_febf4247 = uStack_44;
+  return uVar2;
+}
+
+
+
+undefined4 FUN_0008ce20(void)
+
+{
+  int iVar1;
+  undefined4 uVar2;
+  undefined2 uStack_e;
+  
+  uVar2 = 0;
+  uStack_e = 0;
+  FUN_0009560e(0);
+  f33_dcm_snapshot_identifiers_message.response_length = 0;
+  if (f33_dcm_snapshot_identifiers_message.request_length == 0) {
+    iVar1 = ((void)(0x11), (void)(&uStack_e), f33_return_const_0_8cbc0());
+    if (iVar1 == 0) {
+      uVar2 = FUN_0008ccb8();
+    }
+  }
+  else {
+    f33_dcm_report_negative_or_pending(((F33DcmMessageContext *)camry_host_ptr((uint32_t)((0xfebf4248u)))), '\x13');
+  }
+  return uVar2;
+}
+
+
+
 void FUN_0008ce68(void)
 
 {
@@ -498,6 +918,36 @@ void FUN_0008ce68(void)
   FUN_0009560e(1);
   f33_fill_constant_block_8cb8c();
   return;
+}
+
+
+
+/* Snapshot identifiers operation callback. Retain advanced message for operation0; nonzero
+   operations reset/cancel module state. Response submission is not acknowledgement or durable
+   completion. */
+
+uint f33_dcm_read_snapshot_identifiers_service(uchar operation,F33DcmMessageContext *message)
+
+{
+  uint uVar1;
+  
+  f33_dcm_snapshot_identifiers_message.request = message->request;
+  f33_dcm_snapshot_identifiers_message.request_length = message->request_length;
+  f33_dcm_snapshot_identifiers_message.response = message->response;
+  f33_dcm_snapshot_identifiers_message.response_length = message->response_length;
+  f33_dcm_snapshot_identifiers_message.addressing_kind = message->addressing_kind;
+  f33_dcm_snapshot_identifiers_message.suppress_positive = message->suppress_positive;
+  f33_dcm_snapshot_identifiers_message.response_capacity = message->response_capacity;
+  f33_dcm_snapshot_identifiers_message.service_id = message->service_id;
+  f33_dcm_snapshot_identifiers_message.service_list_selector = message->service_list_selector;
+  if (operation == '\0') {
+    uVar1 = FUN_0008ce20();
+  }
+  else {
+    uVar1 = 0;
+    FUN_0008ce68();
+  }
+  return uVar1;
 }
 
 
@@ -627,6 +1077,59 @@ undefined4 FUN_0008d0e6(char *param_1,int param_2,int *param_3)
 
 
 
+uint FUN_0008d366(void)
+
+{
+  uint uVar1;
+  int iVar2;
+  uint uVar3;
+  uint uVar4;
+  uint uVar5;
+  uint uVar6;
+  
+  uVar3 = 0;
+  FUN_0009560e(0);
+  uVar6 = 0;
+  uVar5 = 0;
+  uVar4 = 0;
+  FUN_000955b6(0);
+  if (f33_dcm_snapshot_record_message.request_length == 4) {
+    if (3 < f33_dcm_snapshot_record_message.response_capacity) {
+      uVar6 = (uint)((uint8_t *)camry_host_ptr((uint32_t)(f33_dcm_snapshot_record_message.request)))[2] |
+              (uint)((uint8_t *)camry_host_ptr((uint32_t)(f33_dcm_snapshot_record_message.request)))[1] << 8 |
+              (uint)*((uint8_t *)camry_host_ptr((uint32_t)(f33_dcm_snapshot_record_message.request))) << 0x10;
+      uVar1 = (uint)((uint8_t *)camry_host_ptr((uint32_t)(f33_dcm_snapshot_record_message.request)))[3];
+      if (uVar1 == 0xff) {
+        uVar4 = 0x5a;
+        uVar1 = uVar5;
+      }
+      FUN_000955b6(1);
+      iVar2 = FUN_0008d15e(uVar6,uVar1,uVar4);
+      if (iVar2 == 10) {
+        uVar3 = 10;
+        uVar5 = uVar1;
+      }
+      else {
+        uVar3 = 0;
+        f33_fill_constant_block_8cef0();
+        FUN_000955b6(0);
+        uVar4 = uVar3;
+        uVar5 = uVar3;
+        uVar6 = uVar3;
+      }
+    }
+  }
+  else {
+    f33_dcm_report_negative_or_pending(((F33DcmMessageContext *)camry_host_ptr((uint32_t)((0xfebf457cu)))), '\x13');
+  }
+  DAT_febf4564 = uVar6;
+  DAT_febf4573 = (char)uVar5;
+  DAT_febf4574 = (char)uVar4;
+  return uVar3;
+}
+
+
+
 void FUN_0008d3fa(void)
 
 {
@@ -634,6 +1137,37 @@ void FUN_0008d3fa(void)
   FUN_0009560e(1);
   f33_fill_constant_block_8cef0();
   return;
+}
+
+
+
+/* Snapshot records operation callback. Retain advanced message for operation0; nonzero operations
+   reset/cancel module state. Response submission is not acknowledgement or durable completion.
+   Exact capacity4 path reaches95626 with NRC0 and consequently submits a positive header-only
+   response through CanTp length acceptance; not NRC14 or a transmitted negative response. */
+
+uint f33_dcm_read_snapshot_by_dtc_service(uchar operation,F33DcmMessageContext *message)
+
+{
+  uint uVar1;
+  
+  f33_dcm_snapshot_record_message.request = message->request;
+  f33_dcm_snapshot_record_message.request_length = message->request_length;
+  f33_dcm_snapshot_record_message.response = message->response;
+  f33_dcm_snapshot_record_message.response_length = message->response_length;
+  f33_dcm_snapshot_record_message.addressing_kind = message->addressing_kind;
+  f33_dcm_snapshot_record_message.suppress_positive = message->suppress_positive;
+  f33_dcm_snapshot_record_message.response_capacity = message->response_capacity;
+  f33_dcm_snapshot_record_message.service_id = message->service_id;
+  f33_dcm_snapshot_record_message.service_list_selector = message->service_list_selector;
+  if (operation == '\0') {
+    uVar1 = FUN_0008d366();
+  }
+  else {
+    uVar1 = 0;
+    FUN_0008d3fa();
+  }
+  return uVar1;
 }
 
 
@@ -1027,6 +1561,117 @@ uchar FUN_0008d9b6(void)
 
 
 
+void FUN_0008d9ca(void)
+
+{
+  f33_dcm_communication_local_state.last_tx_disable_bit = '\0';
+  f33_dcm_communication_local_state.last_mapped_mode = '\0';
+  f33_dcm_communication_local_state.retained_subnet = '\0';
+  f33_dcm_communication_local_state.action_state = '\0';
+  f33_dcm_communication_local_state.lower_status = '\0';
+  f33_dcm_communication_local_state.application_status = '\0';
+  f33_dcm_communication_local_state.admission_result = '\x01';
+  f33_dcm_communication_local_state.side_status = 0xff;
+  return;
+}
+
+
+
+/* Idle45A0andE892<=384 admit;busy/strictunsignedgreaterreject22.
+   Stagehighnibbleandactionstate;459Drecordsadmission. */
+
+uint f33_admit_application_communication_request
+               (uchar subfunction,uchar communication_type,ushort node,uchar *nrc)
+
+{
+  uint uVar1;
+  byte bVar2;
+  
+  bVar2 = f33_dcm_communication_local_state.retained_subnet;
+  if (f33_dcm_communication_local_state.action_state == '\0') {
+    bVar2 = communication_type >> 4;
+    uVar1 = f33_communication_request_sample_above_limit();
+    f33_dcm_communication_local_state.action_state = uVar1 != 1;
+    if ((bool)f33_dcm_communication_local_state.action_state) {
+      uVar1 = 0;
+      goto LAB_0008da52;
+    }
+  }
+  uVar1 = 1;
+  *nrc = '\"';
+LAB_0008da52:
+  f33_dcm_communication_local_state.admission_result = (uchar)uVar1;
+  f33_dcm_communication_local_state.retained_subnet = bVar2;
+  return uVar1;
+}
+
+
+
+/* WARNING: Inlined function: f33_diag_routine_local_dispatch_enabled */
+/* WARNING: Removing unreachable block (ram,0x0008dab2) */
+/* RealR10merge status;state1loweradapterisexactreturn0,dispatchgatefixed5A,then4FD18publishes8196.
+   Retainlastmappedmode/bit0aftercompletion. */
+
+uint f33_apply_and_complete_communication_policy_request(uchar channel,uchar mapped_mode)
+
+{
+  uchar lower_status;
+  uint uVar1;
+  uchar network_selector;
+  byte disable_tx;
+  uchar uVar2;
+  uchar application_status;
+  uchar uStack_23;
+  uchar uStack_22;
+  byte bStack_21;
+  
+  network_selector = f33_dcm_communication_local_state.retained_subnet;
+  uVar2 = f33_dcm_communication_local_state.action_state;
+  application_status = f33_dcm_communication_local_state.application_status;
+  disable_tx = mapped_mode & 1;
+  uStack_23 = f33_dcm_communication_local_state.side_status;
+  if (f33_dcm_communication_local_state.action_state == '\x01') {
+    uVar2 = '\x02';
+    uStack_22 = f33_dcm_communication_local_state.retained_subnet;
+    bStack_21 = disable_tx;
+    lower_status = ((void)(0x60000001), (void)(10), (void)(2), (void)(&uStack_22), (void)(&uStack_23), f33_return_const_0_8b10c());
+  }
+  else {
+    if (f33_dcm_communication_local_state.action_state != '\x02') {
+      application_status = '\0';
+      lower_status = '\0';
+      goto LAB_0008daea;
+    }
+    lower_status = f33_dcm_communication_local_state.lower_status;
+    if (f33_dcm_communication_local_state.lower_status == '\n') {
+      lower_status = ((void)(0), (void)(10), f33_return_const_0_8b110());
+    }
+    if (application_status != '\n') goto LAB_0008daea;
+  }
+  f33_publish_diagnostic_normal_tx_policy_request(network_selector,disable_tx);
+  application_status = '\0';
+LAB_0008daea:
+  uVar1 = f33_merge_two_diagnostic_statuses(application_status,lower_status,'\0','\n');
+  if (uVar1 != 10) {
+    uVar1 = 0;
+    application_status = '\0';
+    lower_status = '\0';
+    uVar2 = '\0';
+    network_selector = '\0';
+    uStack_23 = 0xff;
+  }
+  f33_dcm_communication_local_state.application_status = application_status;
+  f33_dcm_communication_local_state.lower_status = lower_status;
+  f33_dcm_communication_local_state.action_state = uVar2;
+  f33_dcm_communication_local_state.retained_subnet = network_selector;
+  f33_dcm_communication_local_state.side_status = uStack_23;
+  f33_dcm_communication_local_state.last_mapped_mode = mapped_mode;
+  f33_dcm_communication_local_state.last_tx_disable_bit = disable_tx;
+  return uVar1;
+}
+
+
+
 /* Constant-block fill: 9 literal assignments into one contiguous cell block; shape-verified.
    Literals are default/reset values; cell meanings are not recovered. */
 
@@ -1388,6 +2033,176 @@ LAB_0008e06c:
 
 
 
+void FUN_0008e1e0(void)
+
+{
+  f33_dcm_proprietary_continuation.selected_index = '\0';
+  f33_dcm_proprietary_continuation.side_result = '\x01';
+  f33_dcm_proprietary_continuation.application_result = '\x01';
+  f33_dcm_proprietary_continuation.phase = '\0';
+  f33_dcm_proprietary_continuation.side_status = 0xff;
+  return;
+}
+
+
+
+/* WARNING: Inlined function: f33_diag_routine_local_dispatch_enabled */
+/* Start phase0 or poll phase1 with existing local/side status merge. Preserve selected index and
+   module results;phase2 returns0 for the finish join without restarting the start action. */
+
+uint f33_dcm_join_proprietary_start(F33DiagProprietaryMessage *message,uchar *selected_index)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uchar lower_status;
+  uchar uVar3;
+  uint uVar4;
+  uchar uVar5;
+  uchar uStack_1d;
+  
+  uVar3 = f33_dcm_proprietary_continuation.application_result;
+  uStack_1d = f33_dcm_proprietary_continuation.side_status;
+  if (f33_dcm_proprietary_continuation.phase == '\0') {
+    uVar4 = 0;
+    do {
+      uVar2 = message->request_length;
+      uVar3 = '\0';
+      if (uVar4 < (uVar2 & 0xff)) {
+        uVar3 = ((uint8_t *)camry_host_ptr((uint32_t)(message->request)))[uVar4];
+      }
+      uVar1 = uVar4 + 1;
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebf48fcu + (uint32_t)(uVar4) * 1u)))) = uVar3;
+      uVar4 = uVar1;
+    } while (uVar1 < 0x40);
+    lower_status = ((void)(0xe0000000), (void)(2), (void)(uVar2 & 0xffff), (void)(((undefined *)camry_host_ptr(0xfebf48fcu))), (void)(&uStack_1d), f33_return_const_0_8b10c());
+  }
+  else {
+    if (f33_dcm_proprietary_continuation.phase != '\x01') {
+      return 0;
+    }
+    lower_status = f33_dcm_proprietary_continuation.side_result;
+    if (f33_dcm_proprietary_continuation.side_result == '\x02') {
+      lower_status = ((void)(0x22), (void)(2), f33_return_const_0_8b110());
+    }
+    if (uVar3 != '\x02') goto LAB_0008e2ae;
+  }
+  uVar3 = f33_begin_proprietary_operation('\0',message,selected_index);
+LAB_0008e2ae:
+  uVar5 = '\x01';
+  uVar4 = f33_merge_two_diagnostic_statuses(uVar3,lower_status,'\0','\x02');
+  if ((uVar4 != 2) && (uVar3 = uVar5, lower_status = uVar5, uVar4 != 0)) {
+    uVar5 = '\0';
+  }
+  f33_dcm_proprietary_continuation.application_result = uVar3;
+  f33_dcm_proprietary_continuation.side_result = lower_status;
+  f33_dcm_proprietary_continuation.phase = uVar5;
+  f33_dcm_proprietary_continuation.side_status = uStack_1d;
+  return uVar4;
+}
+
+
+
+/* WARNING: Inlined function: f33_diag_routine_local_dispatch_enabled */
+/* WARNING: Removing unreachable block (ram,0x0008e33c) */
+/* Join local fixed finish callback and exact side stub0. Preserve full mergeR10 through status
+   stores and dispose; caller8E3A2 compares0/2/other for completion/pending/error. No fake side
+   completion needed. */
+
+uint f33_proprietary_operation_finish_join(uchar selected_index,uint *response_length)
+
+{
+  bool bVar1;
+  uint uVar2;
+  uchar uVar3;
+  uchar lower_status;
+  uchar application_status;
+  uint uVar4;
+  uchar uVar5;
+  uchar uStack_1d;
+  
+  uVar3 = f33_dcm_proprietary_continuation.side_status;
+  lower_status = f33_dcm_proprietary_continuation.side_result;
+  application_status = f33_dcm_proprietary_continuation.application_result;
+  uVar5 = f33_dcm_proprietary_continuation.phase;
+  uStack_1d = f33_dcm_proprietary_continuation.side_status;
+  uVar4 = 0;
+  do {
+    uVar2 = uVar4 + 1;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebf48fcu + (uint32_t)(uVar4) * 1u)))) = 0;
+    uVar4 = uVar2;
+  } while (uVar2 < 0x40);
+  if (uVar5 == '\x01') {
+    uVar5 = '\x02';
+    lower_status = ((void)(0xe0000001), (void)(2), (void)(0), (void)(((undefined *)camry_host_ptr(0xfebf48fcu))), (void)(&uStack_1d), f33_return_const_0_8b10c());
+  }
+  else {
+    if (uVar5 != '\x02') {
+      application_status = '\x01';
+      lower_status = '\x01';
+      goto LAB_0008e376;
+    }
+    if (lower_status == '\x02') {
+      lower_status = ((void)(0x22), (void)(2), (void)(uVar3), (void)(((undefined *)camry_host_ptr(0xfebf48fcu))), f33_return_const_0_8b110());
+    }
+    if (application_status != '\x02') goto LAB_0008e376;
+  }
+  application_status = f33_finish_proprietary_operation(selected_index,response_length);
+LAB_0008e376:
+  uVar4 = f33_merge_two_diagnostic_statuses(application_status,lower_status,'\0','\x02');
+  bVar1 = uVar4 != 2;
+  if (bVar1) {
+    application_status = '\x01';
+  }
+  f33_dcm_proprietary_continuation.application_result = application_status;
+  if (bVar1) {
+    lower_status = '\x01';
+  }
+  f33_dcm_proprietary_continuation.side_result = lower_status;
+  if (bVar1) {
+    uVar5 = '\0';
+  }
+  f33_dcm_proprietary_continuation.phase = uVar5;
+  f33_dcm_proprietary_continuation.side_status = uStack_1d;
+  return uVar4;
+}
+
+
+
+/* Join retained proprietary start/finish state. Merged2 postsF1;0 echoes retained command and
+   completes message;other statuses select negative response. Re-entry retains module state rather
+   than restarting the application action. */
+
+void f33_dcm_advance_proprietary_operation(F33DiagProprietaryMessage *message)
+
+{
+  uint uVar1;
+  uchar uStack_11;
+  uint uStack_10;
+  
+  uStack_10 = 0;
+  uStack_11 = f33_dcm_proprietary_continuation.selected_index;
+  uVar1 = f33_dcm_join_proprietary_start(message,&uStack_11);
+  if (uVar1 == 0) {
+    uVar1 = f33_proprietary_operation_finish_join(uStack_11,&uStack_10);
+  }
+  if (uVar1 == 2) {
+    f33_dcm_post_service_event(0xf1);
+  }
+  else if (uVar1 == 0) {
+    *((uint8_t *)camry_host_ptr((uint32_t)(message->response))) = *((uint8_t *)camry_host_ptr((uint32_t)(f33_dcm_proprietary_retained_message.request)));
+    message->response_length = DAT_0002fc00 + uStack_10;
+    f33_dcm_complete_proprietary_message(message);
+  }
+  else {
+    f33_dcm_reject_proprietary_message(message,(uchar)uVar1);
+  }
+  f33_dcm_proprietary_continuation.selected_index = uStack_11;
+  return;
+}
+
+
+
 /* Tombstone all queuedF1 slots and reset selected index, phase and module result bytes
    through8E1E0. Does not revoke BA application/requester ownership or undo an earlier record
    request. */
@@ -1398,6 +2213,38 @@ void f33_dcm_cancel_retained_proprietary_operation(void)
   f33_dcm_cancel_service_events(0xf1,'\0');
   FUN_0008e1e0();
   return;
+}
+
+
+
+/* Operation0 copies interpreted full-context fields to493C and first four words to
+   existing16-byte48EC operation view, then enters8E3A2. Nonzero operations cancel queuedF1/module
+   continuation without copying the incoming cleared main context. Return0; operation state is
+   retained separately. */
+
+uint f33_dcm_proprietary_operation_service(uchar operation,F33DcmMessageContext *message)
+
+{
+  if (operation == '\0') {
+    f33_dcm_proprietary_retained_message.request = message->request;
+    f33_dcm_proprietary_retained_message.request_length = message->request_length;
+    f33_dcm_proprietary_retained_message.response = message->response;
+    f33_dcm_proprietary_retained_message.response_length = message->response_length;
+    f33_dcm_proprietary_retained_message.addressing_kind = message->addressing_kind;
+    f33_dcm_proprietary_retained_message.suppress_positive = message->suppress_positive;
+    f33_dcm_proprietary_retained_message.response_capacity = message->response_capacity;
+    f33_dcm_proprietary_retained_message.service_id = message->service_id;
+    f33_dcm_proprietary_retained_message.service_list_selector = message->service_list_selector;
+    f33_diag_proprietary_message.request = message->request;
+    f33_diag_proprietary_message.request_length = message->request_length;
+    f33_diag_proprietary_message.response = message->response;
+    f33_diag_proprietary_message.response_length = message->response_length;
+    f33_dcm_advance_proprietary_operation(((F33DiagProprietaryMessage *)camry_host_ptr((uint32_t)((0xfebf48ecu)))));
+  }
+  else {
+    f33_dcm_cancel_retained_proprietary_operation();
+  }
+  return 0;
 }
 
 

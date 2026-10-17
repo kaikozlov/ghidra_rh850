@@ -1,6 +1,70 @@
 #include "common.h"
 
 
+/* Refresh curve floor first. MarkerEAD0=5AA5A55A resets both feedback banks and selects0. Otherwise
+   healthy banks select min(staged6E1A,6E1C); bit0 selects bank1/resetbank0, else bit1 selects
+   bank0/resetbank1. Both bits therefore take bit0 precedence, not neutral fallback. Clamp selected
+   request at upper0 then lower curve floor6D8C, publish6D8A. Reset leaves staged snapshot/ratio
+   intact. Exact forced-override31B2C is0. */
+
+void f33_select_feedback_bounded_first_current_request(void)
+
+{
+  short sVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  int iVar4;
+  int iVar5;
+  short sVar6;
+  int iVar7;
+  
+  puVar2 = 0xfebeb800u;
+  uVar3 = f33_current_reference_curve_feedback_magnitude();
+  f33_update_current_reference_curve_floor((ushort)uVar3);
+  sVar6 = (*((short *)camry_host_ptr((uint32_t)((0xffffb58cu + (uint32_t)((int)puVar2))))));
+  iVar5 = (int)sVar6;
+  if ((*((int *)camry_host_ptr((uint32_t)(puVar2 + 0x32d0)))) == 0x5aa5a55a) {
+    iVar7 = 0;
+    f33_reset_bank0_current_reference_feedback();
+  }
+  else {
+    iVar7 = (int)(*((short *)camry_host_ptr((uint32_t)((0xffffb61au + (uint32_t)((int)puVar2))))));
+    iVar4 = (int)(*((short *)camry_host_ptr((uint32_t)((0xffffb61cu + (uint32_t)((int)puVar2))))));
+    if (((*((ushort *)camry_host_ptr((uint32_t)((0xffffb9ecu + (uint32_t)((int)puVar2)))))) & 3) == 0) {
+      if (iVar4 - iVar7 < 0 != (iVar4 < 0 != iVar7 < 0 && iVar7 < 0 == iVar4 - iVar7 < 0)) {
+        iVar7 = iVar4;
+      }
+      goto LAB_00038130;
+    }
+    if (((*((ushort *)camry_host_ptr((uint32_t)((0xffffb9ecu + (uint32_t)((int)puVar2)))))) & 1) != 0) {
+      f33_reset_bank0_current_reference_feedback();
+      iVar7 = iVar4;
+      goto LAB_00038130;
+    }
+  }
+  f33_reset_bank1_current_reference_feedback();
+LAB_00038130:
+  sVar1 = f33_current_reference_floor_calibration.forced_request;
+  if (f33_current_reference_floor_calibration.force_enabled == '\x01') {
+    f33_reset_bank0_current_reference_feedback();
+    f33_reset_bank1_current_reference_feedback();
+    sVar6 = sVar1;
+  }
+  else {
+    iVar4 = (int)f33_current_reference_floor_calibration.request_upper;
+    if (iVar4 - iVar7 < 0 != (iVar4 < 0 != iVar7 < 0 && iVar7 < 0 == iVar4 - iVar7 < 0)) {
+      iVar7 = iVar4;
+    }
+    if (iVar7 - iVar5 < 0 == (iVar7 < 0 != iVar5 < 0 && iVar5 < 0 == iVar7 - iVar5 < 0)) {
+      sVar6 = (short)iVar7;
+    }
+  }
+  (*((short *)camry_host_ptr((uint32_t)((0xffffb58au + (uint32_t)((int)puVar2)))))) = sVar6;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -202,6 +266,37 @@ void f33_return_only_stub_3835a(void)
 void f33_return_only_stub_3835c(void)
 
 {
+  return;
+}
+
+
+
+/* Publish actual first-axis6DC8=min(base map6DEC,additional bound6DFA), except exact disabled
+   override31BF0=0. Separately publish feedback baseline6DCA=min(base map6DEC,pre-additional
+   request6D8A). These can differ; paired feedback uses6DCA, not final6DC8. Native scaled-release
+   composition verifies this distinction. */
+
+void f33_select_actual_and_feedback_first_current_baselines(void)
+
+{
+  int iVar1;
+  int iVar2;
+  
+  iVar2 = (int)DAT_febe6dec;
+  f33_actual_first_current_command = DAT_00031bf2;
+  if ((DAT_00031bf0 != 'Z') &&
+     (iVar1 = f33_additional_first_current_reference.output - iVar2,
+     f33_actual_first_current_command = DAT_febe6dec,
+     iVar1 < 0 !=
+     (f33_additional_first_current_reference.output < 0 != iVar2 < 0 && iVar2 < 0 == iVar1 < 0))) {
+    f33_actual_first_current_command = f33_additional_first_current_reference.output;
+  }
+  iVar1 = f33_current_reference_floor.selected_request - iVar2;
+  f33_first_current_feedback_baseline = DAT_febe6dec;
+  if (iVar1 < 0 !=
+      (f33_current_reference_floor.selected_request < 0 != iVar2 < 0 && iVar2 < 0 == iVar1 < 0)) {
+    f33_first_current_feedback_baseline = f33_current_reference_floor.selected_request;
+  }
   return;
 }
 
@@ -494,6 +589,57 @@ void f33_return_only_stub_38580(void)
 
 {
   return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x00038592) */
+/* Multiply signed input by signed gain6DF0, divide toward zero by128 and return signed low16 inR10.
+   Publish prior output, quotient and unsaturated difference/pass-through observables; no actual
+   slew clamp occurs in this image. Native bank1 gain69 case checks return use by385C4. */
+
+short f33_scale_additional_first_current_request(short request)
+
+{
+  f33_additional_first_current_reference.previous_output =
+       f33_additional_first_current_reference.output;
+  f33_additional_first_current_reference.scaled_request =
+       (short)(((int)f33_additional_first_current_reference.gain_q7 * (int)request) / 0x80);
+  f33_additional_first_current_reference.delta =
+       f33_additional_first_current_reference.scaled_request -
+       f33_additional_first_current_reference.output;
+  f33_additional_first_current_reference.delta_passthrough =
+       f33_additional_first_current_reference.delta;
+  f33_additional_first_current_reference.candidate =
+       f33_additional_first_current_reference.delta + f33_additional_first_current_reference.output;
+  return f33_additional_first_current_reference.delta +
+         f33_additional_first_current_reference.output;
+}
+
+
+
+/* Return max(retained curve floor6D8C,min(signed input,ROM31B30=0)). Clamp occurs after38582
+   signed16 narrowing. */
+
+short f33_clamp_additional_first_current_request(short request)
+
+{
+  int iVar1;
+  int iVar2;
+  short sVar3;
+  int iVar4;
+  
+  iVar2 = (int)request;
+  iVar4 = (int)f33_current_reference_floor.curve_floor;
+  iVar1 = (int)f33_current_reference_floor_calibration.request_upper;
+  if (iVar1 - iVar2 < 0 != (iVar1 < 0 != iVar2 < 0 && iVar2 < 0 == iVar1 - iVar2 < 0)) {
+    iVar2 = iVar1;
+  }
+  sVar3 = f33_current_reference_floor.curve_floor;
+  if (iVar2 - iVar4 < 0 == (iVar2 < 0 != iVar4 < 0 && iVar4 < 0 == iVar2 - iVar4 < 0)) {
+    sVar3 = (short)iVar2;
+  }
+  return sVar3;
 }
 
 

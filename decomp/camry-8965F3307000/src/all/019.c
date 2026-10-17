@@ -863,6 +863,102 @@ short FUN_00064d2c(void)
 
 
 
+/* Clear sample rings, start ticks, child accumulators and idle state. Active context and seven
+   parent bytes become6 (idle); separate slot4 scalar samples are cleared too. Profiling data is not
+   the independently active task-rate supervisor. */
+
+void f33_initialize_execution_profiles(void)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  
+  iVar3 = 0;
+  do {
+    iVar2 = iVar3 + 1;
+    f33_execution_profiles.ch2_exclusive[iVar3] = 0;
+    iVar1 = iVar3 + -9;
+    iVar3 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  f33_execution_profiles.slot4_exclusive = 0;
+  iVar3 = 0;
+  do {
+    iVar2 = iVar3 + 1;
+    f33_execution_profiles.foreground_exclusive[iVar3] = 0;
+    iVar1 = iVar3 + -0xf;
+    iVar3 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  iVar3 = 0;
+  do {
+    iVar2 = iVar3 + 1;
+    f33_execution_profiles.ch2_inclusive[iVar3] = 0;
+    iVar1 = iVar3 + -9;
+    iVar3 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  f33_execution_profiles.slot4_inclusive = 0;
+  iVar3 = 0;
+  do {
+    iVar2 = iVar3 + 1;
+    f33_execution_profiles.foreground_inclusive[iVar3] = 0;
+    iVar1 = iVar3 + -0xf;
+    iVar3 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  f33_execution_profiles.idle_previous = 0;
+  f33_execution_profiles.idle_accumulated = 0;
+  f33_execution_profiles.idle_last = 0;
+  iVar3 = 0;
+  do {
+    iVar2 = iVar3 + 1;
+    f33_execution_profiles.start[iVar3] = 0;
+    iVar1 = iVar3 + -5;
+    iVar3 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  iVar3 = 0;
+  do {
+    iVar2 = iVar3 + 1;
+    f33_execution_profiles.child_ticks[iVar3] = 0;
+    iVar1 = iVar3 + -5;
+    iVar3 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  iVar3 = 0;
+  do {
+    iVar2 = iVar3 + 1;
+    f33_execution_profiles.ch0_inclusive[iVar3] = 0;
+    iVar1 = iVar3 + -7;
+    iVar3 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  iVar3 = 0;
+  do {
+    iVar2 = iVar3 + 1;
+    f33_execution_profiles.ch1_exclusive[iVar3] = 0;
+    iVar1 = iVar3 + -7;
+    iVar3 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  iVar3 = 0;
+  do {
+    iVar2 = iVar3 + 1;
+    f33_execution_profiles.ch1_inclusive[iVar3] = 0;
+    iVar1 = iVar3 + -7;
+    iVar3 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  f33_execution_profiles.active = '\x06';
+  f33_execution_profiles.ring_heads[0] = '\0';
+  f33_execution_profiles.ring_heads[1] = '\0';
+  f33_execution_profiles.ring_heads[2] = '\0';
+  f33_execution_profiles.ring_heads[3] = '\0';
+  iVar3 = 0;
+  do {
+    iVar2 = iVar3 + 1;
+    f33_execution_profiles.parent[iVar3] = '\x06';
+    iVar1 = iVar3 + -6;
+    iVar3 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  return;
+}
+
+
+
 /* WARNING: This is an inlined function */
 /* Return bitwise complement of u32[FFE51010]. Exact LD.W/NOT/JMP only alter R1/R10 and arithmetic
    flags; preserve incoming R6/R7/R8 for profile adapters. Inline this real leaf to repair
@@ -875,6 +971,44 @@ uint f33_read_inverted_profile_counter(void)
   
   uVar1 = DAT_ffe51010;
   return ~uVar1;
+}
+
+
+
+/* WARNING: Inlined function: f33_read_inverted_profile_counter */
+/* Read inverted counter, save prior active context in parent[slot], select slot and record adjusted
+   start. If prior context6, add7 and accumulate idle delta; slot5 publishes/reset idle
+   accumulation, choosing MIN with prior sample when31911==5A. Clear child ticks. Arithmetic
+   wraps32; no local slot bound. */
+
+void f33_begin_execution_profile(uchar slot,int entry_adjust)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uint uVar3;
+  
+  uVar3 = (uint)slot;
+  uVar1 = DAT_ffe51010;
+  uVar1 = ~uVar1 - entry_adjust;
+  f33_execution_profiles.parent[uVar3] = f33_execution_profiles.active;
+  if (f33_execution_profiles.active == '\x06') {
+    uVar1 = uVar1 + 7;
+    uVar2 = f33_execution_profiles.idle_accumulated + (uVar1 - f33_execution_profiles.idle_previous)
+    ;
+    f33_execution_profiles.idle_accumulated = uVar2;
+    if (uVar3 == 5) {
+      if ((f33_execution_profile_peak_hold == 'Z') && (f33_execution_profiles.idle_last < uVar2)) {
+        uVar2 = f33_execution_profiles.idle_last;
+      }
+      f33_execution_profiles.idle_accumulated = 0;
+      f33_execution_profiles.idle_last = uVar2;
+    }
+  }
+  f33_execution_profiles.active = slot;
+  f33_execution_profiles.start[uVar3] = uVar1;
+  f33_execution_profiles.child_ticks[uVar3] = 0;
+  return;
 }
 
 
@@ -945,6 +1079,64 @@ void f33_begin_execution_profile_slot5(void)
   saved_mask = f33_priority_mask_enter(0xffc0);
   f33_begin_execution_profile('\x05',0x1f);
   f33_priority_mask_restore(saved_mask);
+  return;
+}
+
+
+
+/* WARNING: Inlined function: f33_read_inverted_profile_counter */
+/* Restore active context from parent[slot]. Return (counter-exit_adjust)-start[slot] modulo32.
+   Parent6 updates idle previous tick; other parents accumulate elapsed+parent_adjust in child
+   ticks. Real R7/R8 inputs survive the counter leaf; no fake extra return registers. */
+
+uint f33_end_execution_profile(uchar slot,int exit_adjust,uint parent_adjust)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uint uVar3;
+  
+  f33_execution_profiles.active = f33_execution_profiles.parent[slot];
+  uVar3 = (uint)f33_execution_profiles.active;
+  uVar2 = DAT_ffe51010;
+  uVar1 = (~uVar2 - exit_adjust) - f33_execution_profiles.start[slot];
+  uVar2 = ~uVar2 - exit_adjust;
+  if (uVar3 != 6) {
+    f33_execution_profiles.child_ticks[uVar3] =
+         f33_execution_profiles.child_ticks[uVar3] + parent_adjust + uVar1;
+    uVar2 = f33_execution_profiles.idle_previous;
+  }
+  f33_execution_profiles.idle_previous = uVar2;
+  return uVar1;
+}
+
+
+
+/* End slot0, exit adjustment-19, parent adjustment81. Eight-entry u16 inclusive ring8D74. Exclusive
+   subtracts accumulated child ticks modulo32; narrow u16 where specified.31911==5A retains maximum
+   independently per output; otherwise overwrite. No timing-budget enforcement. */
+
+void f33_end_execution_profile_slot0(void)
+
+{
+  uchar uVar1;
+  uint uVar2;
+  uint32_t puVar3;
+  uint uVar4;
+  uint uVar5;
+  
+  puVar3 = 0xfebeb800u;
+  uVar4 = f33_end_execution_profile('\0',-0x13,0x51);
+  uVar1 = f33_execution_profile_peak_hold;
+  uVar4 = uVar4 & 0xffff;
+  uVar2 = (byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x2a5c))))) + 1 & 7;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x2a5c))))) = (byte)uVar2;
+  if ((uVar1 == 'Z') &&
+     (uVar5 = (uint)f33_execution_profiles.ch0_inclusive[uVar2],
+     -1 < (int)(uVar5 - uVar4) && uVar5 != uVar4)) {
+    uVar4 = uVar5;
+  }
+  f33_execution_profiles.ch0_inclusive[uVar2] = (ushort)uVar4;
   return;
 }
 
@@ -1123,6 +1315,21 @@ void f33_end_execution_profile_slot5(void)
   }
   (*((uint *)camry_host_ptr((uint32_t)(puVar3 + iVar1 + -0x2b08)))) = uVar6;
   return;
+}
+
+
+
+/* WARNING: Inlined function: f33_read_inverted_profile_counter */
+/* Return (inverted counter-exit_adjust)-start[low8(slot)] modulo32. ZXB before leaf call, then
+   preserved R6/R7 determine index/adjustment. No slot validation or physical time conversion. */
+
+uint f33_read_adjusted_profile_elapsed(uchar slot,int exit_adjust)
+
+{
+  uint uVar1;
+  
+  uVar1 = DAT_ffe51010;
+  return (~uVar1 - exit_adjust) - f33_execution_profiles.start[slot];
 }
 
 

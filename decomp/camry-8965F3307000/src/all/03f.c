@@ -122,6 +122,26 @@ void FUN_000fcc00(void)
 
 
 
+void FUN_000fcc4e(void)
+
+{
+  DAT_febef308 = f33_monitor_current_staged_calibration.marker;
+  DAT_febef300 = f33_internal_source_admission_state;
+  DAT_febef304 = DAT_febe7f3a;
+  DAT_febef30c = DAT_febe6af0;
+  DAT_febef310 = DAT_febe6ac4;
+  DAT_febef314 = DAT_febe6abc;
+  DAT_febef318 = DAT_febe6ac0;
+  DAT_febef301 = DAT_febe6878;
+  DAT_febef306 = DAT_febe8152;
+  DAT_febef302 = DAT_febe80a5;
+  DAT_febef303 = DAT_febe80a0;
+  DAT_febef31c = DAT_febe68b4;
+  return;
+}
+
+
+
 void FUN_000fcc9c(void)
 
 {
@@ -199,6 +219,45 @@ void f33_copy_cell_block_fd456(void)
   DAT_febeeac2 = DAT_febeb112;
   DAT_febeeace = DAT_febeae86;
   DAT_febeeac3 = DAT_febead9e;
+  return;
+}
+
+
+
+void FUN_000fd49e(void)
+
+{
+  DAT_febeeb24 = f33_learned_quad_rom_bounds.pair1_upper;
+  DAT_febeeb28 = f33_learned_quad_rom_bounds.pair1_lower;
+  DAT_febeeb2c = f33_learned_quad_rom_bounds.pair2_upper;
+  DAT_febeeb30 = f33_learned_quad_rom_bounds.pair2_lower;
+  DAT_febeeb34 = DAT_000aef6c;
+  DAT_febeeb38 = DAT_000aef70;
+  DAT_febeeb3c = DAT_000aef74;
+  DAT_febeeb40 = DAT_000aef78;
+  DAT_febeeb00 = DAT_febebe9b;
+  DAT_febeeb0a = DAT_febebe82;
+  DAT_febeeb01 = DAT_febebe78;
+  DAT_febeeb0c = DAT_febebee2;
+  DAT_febeeb44 = f33_received_word_unchanged_age;
+  DAT_febeeb0e = f33_received_retained_word;
+  DAT_febeeb02 = DAT_febebe60;
+  DAT_febeeb10 = DAT_febeb384;
+  DAT_febeeb12 = DAT_febeb142;
+  DAT_febeeb14 = DAT_febeb13c;
+  DAT_febeeb16 = DAT_febeae12;
+  DAT_febeeb03 = DAT_febeacf1;
+  DAT_febeeb18 = DAT_febeae58;
+  DAT_febeeb04 = DAT_febead39;
+  DAT_febeeb1a = DAT_febeae36;
+  DAT_febeeb05 = DAT_febead0a;
+  DAT_febeeb06 = DAT_febeacf5;
+  DAT_febeeb1c = DAT_febeae16;
+  DAT_febeeb1e = DAT_febeb11a;
+  DAT_febeeb07 = DAT_febead93;
+  DAT_febeeb08 = DAT_febebeb8;
+  DAT_febeeb20 = DAT_febeaecc;
+  DAT_febeeb22 = DAT_febeb38a;
   return;
 }
 

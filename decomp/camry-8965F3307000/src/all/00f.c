@@ -285,6 +285,47 @@ LAB_0003c308:
 
 
 
+void FUN_0003c310(void)
+
+{
+  uchar uVar1;
+  uchar uVar2;
+  uint uVar3;
+  uint32_t puVar4;
+  byte bVar5;
+  byte bVar6;
+  
+  uVar3 = f33_output_request_status;
+  uVar2 = f33_channel_request_state.channel1_state;
+  uVar1 = f33_channel_request_state.channel0_state;
+  bVar5 = DAT_febe71e8;
+  bVar6 = DAT_febe71e5;
+  puVar4 = 0xfebeb800u;
+  f33_set_channel_owner_request('\x02',0x20002);
+  if ((uVar1 == '\0') && (uVar2 == '\0')) {
+    if (bVar6 < DAT_000317d5) {
+      bVar6 = bVar6 + 1;
+    }
+    else {
+      f33_cancel_terminal_output_ramp();
+      f33_set_output_request_word('\x02',0x70017001);
+      if ((uVar3 & 0x70017001) == 0x70017001) {
+        if (bVar5 < DAT_000317d6) {
+          bVar5 = bVar5 + 1;
+        }
+        else {
+          FUN_00056e66(2, camry_host_addr(((undefined *)camry_host_ptr(0x20002u))));
+        }
+      }
+    }
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb9e5u + (uint32_t)((int)puVar4) * 1u)))) = bVar6;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb9e8u + (uint32_t)((int)puVar4) * 1u)))) = bVar5;
+  return;
+}
+
+
+
 void FUN_0003c386(void)
 
 {
@@ -299,6 +340,31 @@ void FUN_0003c386(void)
 
 
 
+void FUN_0003c3b2(void)
+
+{
+  uchar uVar1;
+  uint32_t puVar2;
+  byte bVar3;
+  
+  uVar1 = f33_channel_request_state.channel0_state;
+  bVar3 = DAT_febe71e6;
+  puVar2 = 0xfebeb800u;
+  f33_set_channel_owner_request('\x03',2);
+  if (uVar1 == '\0') {
+    if (bVar3 < DAT_000317d5) {
+      bVar3 = bVar3 + 1;
+    }
+    else {
+      f33_set_output_request_word('\x05',0x7001);
+    }
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb9e6u + (uint32_t)((int)puVar2) * 1u)))) = bVar3;
+  return;
+}
+
+
+
 void FUN_0003c3ec(void)
 
 {
@@ -306,6 +372,31 @@ void FUN_0003c3ec(void)
   f33_set_output_request_word('\x05',0);
   f33_set_channel_owner_request('\x03',0);
   FUN_00056e66(3,0);
+  return;
+}
+
+
+
+void FUN_0003c410(void)
+
+{
+  uchar uVar1;
+  uint32_t puVar2;
+  byte bVar3;
+  
+  uVar1 = f33_channel_request_state.channel1_state;
+  bVar3 = DAT_febe71e7;
+  puVar2 = 0xfebeb800u;
+  f33_set_channel_owner_request('\x04',0x20000);
+  if (uVar1 == '\0') {
+    if (bVar3 < DAT_000317d5) {
+      bVar3 = bVar3 + 1;
+    }
+    else {
+      f33_set_output_request_word('\x06',0x70010000);
+    }
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb9e7u + (uint32_t)((int)puVar2) * 1u)))) = bVar3;
   return;
 }
 
@@ -4457,6 +4548,21 @@ void f33_record_coupled_sample_threshold_both_failure(void)
 
 
 
+/* Failing-count predicate: returns diagnostic status 0x11 while the referenced monitor state holds
+   a nonzero failing sample count, otherwise 0. Shape-verified; the claim is bounded to this exact
+   comparison. */
+
+undefined4 f33_status_failing_coupled_sample_threshold_both_states(void)
+
+{
+  if (f33_coupled_sample_threshold_both_states.failing_count != 0) {
+    return 0x11;
+  }
+  return 0;
+}
+
+
+
 /* f33_reset_terminal_monitor wrapper resetting exactly one monitor state
    ((0xfebe7614u)); whole-body shape-verified from the canonical corpus.
    Per-instance semantics derive from the referenced state cell; not individually executed. */
@@ -4674,6 +4780,21 @@ void f33_record_command_status_bit_clear_a_failure(void)
 {
   f33_report_diagnostic_event_failure(0x74,0x32);
   return;
+}
+
+
+
+/* Failing-count predicate: returns diagnostic status 0x11 while the referenced monitor state holds
+   a nonzero failing sample count, otherwise 0. Shape-verified; the claim is bounded to this exact
+   comparison. */
+
+undefined4 f33_status_failing_command_status_bit_clear_a_states(void)
+
+{
+  if (f33_command_status_bit_clear_a_states.failing_count != 0) {
+    return 0x11;
+  }
+  return 0;
 }
 
 
@@ -4899,6 +5020,21 @@ void f33_record_command_status_bit_clear_b_failure(void)
 
 
 
+/* Failing-count predicate: returns diagnostic status 0x11 while the referenced monitor state holds
+   a nonzero failing sample count, otherwise 0. Shape-verified; the claim is bounded to this exact
+   comparison. */
+
+undefined4 f33_status_failing_command_status_bit_clear_b_states(void)
+
+{
+  if (f33_command_status_bit_clear_b_states.failing_count != 0) {
+    return 0x11;
+  }
+  return 0;
+}
+
+
+
 /* f33_reset_terminal_monitor wrapper resetting exactly one monitor state
    ((0xfebe7624u)); whole-body shape-verified from the canonical corpus.
    Per-instance semantics derive from the referenced state cell; not individually executed. */
@@ -5053,6 +5189,21 @@ void f33_record_bounded_sample_or_status_a_failure(void)
 
 
 
+/* Failing-count predicate: returns diagnostic status 0x11 while the referenced monitor state holds
+   a nonzero failing sample count, otherwise 0. Shape-verified; the claim is bounded to this exact
+   comparison. */
+
+undefined4 f33_status_failing_bounded_sample_or_status_a_states(void)
+
+{
+  if (f33_bounded_sample_or_status_a_states.failing_count != 0) {
+    return 0x11;
+  }
+  return 0;
+}
+
+
+
 /* f33_reset_terminal_monitor wrapper resetting exactly one monitor state
    ((0xfebe762cu)); whole-body shape-verified from the canonical corpus.
    Per-instance semantics derive from the referenced state cell; not individually executed. */
@@ -5203,6 +5354,21 @@ void f33_record_bounded_sample_or_status_b_failure(void)
 {
   f33_report_diagnostic_event_failure(0x8a,0x32);
   return;
+}
+
+
+
+/* Failing-count predicate: returns diagnostic status 0x11 while the referenced monitor state holds
+   a nonzero failing sample count, otherwise 0. Shape-verified; the claim is bounded to this exact
+   comparison. */
+
+undefined4 f33_status_failing_bounded_sample_or_status_b_states(void)
+
+{
+  if (f33_bounded_sample_or_status_b_states.failing_count != 0) {
+    return 0x11;
+  }
+  return 0;
 }
 
 
@@ -5398,6 +5564,21 @@ void f33_record_requested_state_sample_threshold_a_failure(void)
 
 
 
+/* Failing-count predicate: returns diagnostic status 0x11 while the referenced monitor state holds
+   a nonzero failing sample count, otherwise 0. Shape-verified; the claim is bounded to this exact
+   comparison. */
+
+undefined4 f33_status_failing_requested_state_sample_threshold_a_states(void)
+
+{
+  if (f33_requested_state_sample_threshold_a_states.failing_count != 0) {
+    return 0x11;
+  }
+  return 0;
+}
+
+
+
 /* f33_reset_terminal_monitor wrapper resetting exactly one monitor state
    ((0xfebe7644u)); whole-body shape-verified from the canonical
    corpus. Per-instance semantics derive from the referenced state cell; not individually executed.
@@ -5589,6 +5770,21 @@ void f33_record_requested_state_sample_threshold_b_failure(void)
 
 
 
+/* Failing-count predicate: returns diagnostic status 0x11 while the referenced monitor state holds
+   a nonzero failing sample count, otherwise 0. Shape-verified; the claim is bounded to this exact
+   comparison. */
+
+undefined4 f33_status_failing_requested_state_sample_threshold_b_states(void)
+
+{
+  if (f33_requested_state_sample_threshold_b_states.failing_count != 0) {
+    return 0x11;
+  }
+  return 0;
+}
+
+
+
 /* f33_reset_terminal_monitor wrapper resetting exactly one monitor state
    ((0xfebe67f0u)); whole-body shape-verified from the canonical
    corpus. Per-instance semantics derive from the referenced state cell; not individually executed.
@@ -5696,6 +5892,21 @@ void f33_record_asserted_state_sample_threshold_a_failure(void)
 {
   f33_report_diagnostic_event_failure(0x9d,0x32);
   return;
+}
+
+
+
+/* Failing-count predicate: returns diagnostic status 0x11 while the referenced monitor state holds
+   a nonzero failing sample count, otherwise 0. Shape-verified; the claim is bounded to this exact
+   comparison. */
+
+undefined4 f33_status_failing_asserted_state_sample_threshold_a_states(void)
+
+{
+  if (f33_asserted_state_sample_threshold_a_states.failing_count != 0) {
+    return 0x11;
+  }
+  return 0;
 }
 
 

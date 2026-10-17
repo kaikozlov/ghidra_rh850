@@ -2812,6 +2812,41 @@ void FUN_00076e6a(ushort param_1,ushort param_2,int param_3)
 
 
 
+/* WARNING: Inlined function: f33_nvm_set_read_destination */
+/* WARNING: Inlined function: f33_nvm_payload_length */
+
+void FUN_00076f4e(ushort param_1,ushort param_2,uchar *param_3,uchar param_4)
+
+{
+  uint32_t puVar1;
+  uint uVar2;
+  uint uVar3;
+  
+  puVar1 = 0x23dfcu;
+  uVar3 = (uint)param_1;
+  if ((uVar3 < f33_nvm_descriptor_count) && (param_3 != (uchar *)0x0)) {
+    f33_nvm_record_context.destination_buffer = camry_host_addr(param_3);
+    DAT_febf6c44 = param_1;
+    uVar2 = f33_nvm_payload_page_count(param_1);
+    f33_nvm_payload_chunks_remaining = (ushort)uVar2;
+    DAT_febf6c24 = f33_nvm_record_offset(param_1,param_2,0);
+    uVar2 = FUN_0007786a(uVar3,DAT_febf6c24,0);
+    if ((uVar2 == 1) &&
+       (uVar2 = f33_nvm_read_payload_chunk(param_1,DAT_febf6c24,param_4), uVar2 == 1)) {
+      if (f33_nvm_payload_chunks_remaining != 0) {
+        return;
+      }
+      if (0x20 < (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + uVar3 * 6 + 0x383a))))) {
+        uVar2 = f33_nvm_read_payload_checksum(param_1,DAT_febf6c24,param_4);
+      }
+    }
+    ((void)(uVar2), FUN_00077640());
+  }
+  return;
+}
+
+
+
 /* WARNING: Inlined function: f33_nvm_payload_length */
 
 void FUN_0007708c(ushort param_1,ushort param_2,uchar param_3)
@@ -3114,6 +3149,57 @@ void FUN_00077968(int param_1)
   }
   ((void)(param_1), FUN_0007849e());
   thunk_FUN_000772f8();
+  return;
+}
+
+
+
+/* WARNING: Inlined function: f33_nvm_bind_record_context */
+/* WARNING: Inlined function: f33_nvm_set_read_destination */
+/* WARNING: Inlined function: f33_nvm_base_offset */
+/* WARNING: Inlined function: f33_nvm_payload_length */
+/* Reject low16(handle)>=123 or NULL destination before setup. Bind the contexts, set remaining
+   chunks/base, then read marker with option1 regardless of caller option. Admit header and first
+   payload chunk; return pending if chunks remain. Otherwise check the large checksum when length>32
+   and publish status through77640. Entry does not reset the checksum accumulator. Complete
+   captured16-byte record execution covers explicit blank/nonblank hardware results, destination
+   canaries and completion cleanup; full multi-chunk and application request/notification closure
+   remain separate. Begin physical record read for low16 handle<123 and nonNULL destination. Bind
+   contexts; marker always uses read option1; header/payload use caller option. Return pending if
+   chunks remain; otherwise publish status and clear active handle/base/accumulator. Complete
+   captured16-byte paths cover blank rejection and nonblank copy with both completion banks.
+   Explicit hardware outcomes; not complete multi-chunk or application notification/consensus proof.
+    */
+
+void f33_nvm_begin_record_read(ushort handle,uchar *destination,uchar read_option)
+
+{
+  uint32_t puVar1;
+  uint uVar2;
+  uint uVar3;
+  
+  puVar1 = 0x23dfcu;
+  uVar3 = (uint)handle;
+  if ((uVar3 < f33_nvm_descriptor_count) && (destination != (uchar *)0x0)) {
+    f33_nvm_commit_context.record = (0xfebf6b80u);
+    f33_nvm_record_context.destination_buffer = camry_host_addr(destination);
+    DAT_febf6c44 = handle;
+    uVar2 = f33_nvm_payload_page_count(handle);
+    f33_nvm_payload_chunks_remaining = (ushort)uVar2;
+    DAT_febf6c24 = (uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar1 + uVar3 * 6 + 0x3838)))) << 6;
+    uVar2 = FUN_00077aa8(uVar3,DAT_febf6c24,1);
+    if ((uVar2 == 1) &&
+       ((uVar2 = FUN_0007786a(uVar3,DAT_febf6c24,read_option), uVar2 == 1 &&
+        (uVar2 = f33_nvm_read_payload_chunk(handle,DAT_febf6c24,read_option), uVar2 == 1)))) {
+      if (f33_nvm_payload_chunks_remaining != 0) {
+        return;
+      }
+      if (0x20 < (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + uVar3 * 6 + 0x383a))))) {
+        uVar2 = f33_nvm_read_payload_checksum(handle,DAT_febf6c24,read_option);
+      }
+    }
+    ((void)(uVar2), FUN_00077640());
+  }
   return;
 }
 

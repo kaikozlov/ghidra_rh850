@@ -2388,6 +2388,19 @@ void f33_return_only_stub_569c0(void)
 
 
 
+void FUN_000569c2(void)
+
+{
+  f33_channel_request_state.owner_requests[0] = 2;
+  f33_channel_request_state.owner_requests[1] = 0x20000;
+  f33_channel_request_state.owner_requests[2] = (uint)0x20002u;
+  f33_channel_request_state.owner_requests[3] = (uint)0x20002u;
+  f33_channel_request_state.owner_requests[4] = (uint)0x20002u;
+  return;
+}
+
+
+
 /* Consume full R6. Bits1/17 select the requested rather than reference level for channels0/1. Both
    bits set, or the entire mask zero, also performs an early paired write before the per-channel
    writes. Preserve those repeated effects and their order; no physical channel identity is
@@ -2446,6 +2459,116 @@ uint f33_read_channel_mismatch_mask(void)
     uVar1 = uVar1 | 0x20000;
   }
   return uVar1;
+}
+
+
+
+void FUN_00056a48(void)
+
+{
+  if ((f33_channel_request_state.observed_mismatch & 2) == 0) {
+    f33_channel_request_state.channel0_mismatch_calls = '\0';
+    if (f33_channel_request_state.channel0_match_calls < DAT_000318f8) {
+      f33_channel_request_state.channel0_match_calls =
+           f33_channel_request_state.channel0_match_calls + '\x01';
+      f33_channel_request_state.channel0_state = '\x03';
+    }
+    else {
+      f33_channel_request_state.channel0_state = '\x02';
+    }
+  }
+  else {
+    f33_channel_request_state.channel0_match_calls = '\0';
+    if (f33_channel_request_state.channel0_mismatch_calls < DAT_000318f9) {
+      f33_channel_request_state.channel0_mismatch_calls =
+           f33_channel_request_state.channel0_mismatch_calls + '\x01';
+      f33_channel_request_state.channel0_state = '\x01';
+    }
+    else {
+      f33_channel_request_state.channel0_state = '\0';
+    }
+  }
+  return;
+}
+
+
+
+void FUN_00056a8c(void)
+
+{
+  if ((f33_channel_request_state.observed_mismatch & 0x20000) == 0) {
+    f33_channel_request_state.channel1_mismatch_calls = '\0';
+    if (f33_channel_request_state.channel1_match_calls < DAT_000318f8) {
+      f33_channel_request_state.channel1_match_calls =
+           f33_channel_request_state.channel1_match_calls + '\x01';
+      f33_channel_request_state.channel1_state = '\x03';
+    }
+    else {
+      f33_channel_request_state.channel1_state = '\x02';
+    }
+  }
+  else {
+    f33_channel_request_state.channel1_match_calls = '\0';
+    if (f33_channel_request_state.channel1_mismatch_calls < DAT_000318f9) {
+      f33_channel_request_state.channel1_mismatch_calls =
+           f33_channel_request_state.channel1_mismatch_calls + '\x01';
+      f33_channel_request_state.channel1_state = '\x01';
+    }
+    else {
+      f33_channel_request_state.channel1_state = '\0';
+    }
+  }
+  return;
+}
+
+
+
+/* OR-reduce five owner masks, apply the combined mask through569DA, then read GPIO mismatch
+   through56A26 and qualify both channels through56A48/56A8C. Exact ROM318F8/F9 thresholds are zero:
+   qualification directly selects state2 for matching reference, state0 otherwise. The formal R6
+   contract on569DA preserves the real OR-reduction in recovered C. OR five owner masks then apply
+   outputs, observe input mismatch, and qualify both channels. Exact zero ROM thresholds select
+   state2 match/state0 mismatch immediately; physical settling and OEM pin roles are not proved. */
+
+void f33_update_channel_requests(void)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  uint32_t puVar4;
+  uint uVar5;
+  
+  puVar4 = 0xfebeb800u;
+  uVar5 = 0;
+  iVar3 = 0;
+  do {
+    iVar2 = iVar3 + 1;
+    uVar5 = uVar5 | f33_channel_request_state.owner_requests[iVar3];
+    iVar1 = iVar3 + -4;
+    iVar3 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  f33_apply_channel_request_mask(uVar5);
+  uVar5 = f33_read_channel_mismatch_mask();
+  (*((uint *)camry_host_ptr((uint32_t)(puVar4 + -0x2d7c)))) = uVar5;
+  FUN_00056a48();
+  FUN_00056a8c();
+  return;
+}
+
+
+
+/* Replace one of five owner masks when low8(owner)<5. Clearing one owner does not clear other
+   owners. Replace one owner mask for low-byte owner<5. Other owners remain; request publication is
+   not immediate hardware state. */
+
+void f33_set_channel_owner_request(uchar owner,uint request_mask)
+
+{
+  if (owner < 5) {
+    f33_channel_request_state.owner_requests[owner] = request_mask;
+  }
+  return;
 }
 
 
@@ -2582,6 +2705,40 @@ void FUN_00056bc0(uint param_1)
     DAT_febe3880 = 0xff;
     DAT_febe3881 = 0;
   }
+  return;
+}
+
+
+
+void FUN_00056be2(void)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  uint32_t puVar4;
+  uint uVar5;
+  
+  puVar4 = 0xfebeb800u;
+  if ((f33_channel_request_state.observed_mismatch >> 1 & 1) == 0) {
+    uVar5 = 0;
+  }
+  else {
+    uVar5 = 4;
+  }
+  if ((f33_channel_request_state.observed_mismatch >> 0x11 & 1) != 0) {
+    uVar5 = uVar5 | 0x40000;
+  }
+  iVar3 = 0;
+  do {
+    iVar2 = iVar3 + 1;
+    uVar5 = uVar5 | (*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xfebe8a9cu + (uint32_t)(iVar3) * 4u))));
+    iVar1 = iVar3 + -1;
+    iVar3 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  FUN_00056b9e(uVar5);
+  FUN_00056bc0(uVar5);
+  (*((uint *)camry_host_ptr((uint32_t)(puVar4 + -0x2d5c)))) = uVar5;
   return;
 }
 
@@ -3410,6 +3567,46 @@ void FUN_0005711a(void)
     iVar1 = iVar3 + -1;
     iVar3 = iVar2;
   } while (((iVar1 < 0) || (iVar2 < 0)));
+  return;
+}
+
+
+
+void FUN_00057130(void)
+
+{
+  int iVar1;
+  int iVar2;
+  uint uVar3;
+  int iVar4;
+  
+  uVar3 = 0;
+  iVar4 = 0;
+  do {
+    iVar2 = iVar4 + 1;
+    uVar3 = uVar3 | *(uint *)(((undefined *)camry_host_ptr(0xfebe8b1cu)) + iVar4 * 4);
+    iVar1 = iVar4 + -1;
+    iVar4 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  if (((uVar3 >> 0x10 & 1) == 0) &&
+     ((((uVar3 & 1) == 0 || ((f33_channel_request_state.observed_mismatch & 2) == 0)) ||
+      ((DAT_febe8ae4 & 2) == 0)))) {
+    DAT_febe8b18 = 0;
+    DAT_febe387b = 0;
+  }
+  else {
+    DAT_febe8b18 = 1;
+    DAT_febe387b = 0xff;
+  }
+  if (((uVar3 & 0x20000) == 0) &&
+     ((((uVar3 >> 1 & 1) == 0 || ((f33_channel_request_state.observed_mismatch >> 0x11 & 1) == 0))
+      || ((DAT_febe8ae4 >> 0x11 & 1) == 0)))) {
+    DAT_febe387a = 0;
+  }
+  else {
+    DAT_febe8b18 = DAT_febe8b18 | 2;
+    DAT_febe387a = 0xff;
+  }
   return;
 }
 
@@ -4710,6 +4907,48 @@ void FUN_00057ebc(void)
 void f33_return_only_stub_57efc(void)
 
 {
+  return;
+}
+
+
+
+void FUN_00057f00(void)
+
+{
+  DAT_febeee1c = DAT_febe7db0;
+  DAT_febeee00 = DAT_febe7bbc;
+  DAT_febeee01 = DAT_febe79e5;
+  DAT_febeee02 = DAT_febe686c;
+  DAT_febeee1e = DAT_febe71ec;
+  DAT_febeee20 = DAT_febe7db2;
+  DAT_febeee03 = f33_shared_snapshot_status[0];
+  DAT_febeee04 = f33_shared_snapshot_status[1];
+  DAT_febeee05 = f33_shared_snapshot_status[2];
+  DAT_febeee06 = f33_shared_snapshot_status[3];
+  DAT_febeee07 = f33_shared_snapshot_status[4];
+  DAT_febeee08 = f33_shared_snapshot_status[5];
+  DAT_febeee09 = f33_shared_snapshot_status[6];
+  DAT_febeee0a = f33_shared_snapshot_status[7];
+  DAT_febeee0b = f33_shared_snapshot_status[8];
+  DAT_febeee0c = f33_shared_snapshot_status[9];
+  DAT_febeee0d = f33_shared_snapshot_status[10];
+  DAT_febeee0e = f33_channel_request_state.channel0_state;
+  DAT_febeee0f = DAT_febe8ac8;
+  DAT_febeee22 = DAT_febe7da6;
+  DAT_febeee10 = f33_channel_request_state.channel1_state;
+  DAT_febeee11 = DAT_febe8acb;
+  DAT_febeee16 = 0;
+  DAT_febeee17 = 0;
+  DAT_febeee24 = DAT_febe7da8;
+  DAT_febeee18 = 0;
+  DAT_febeee19 = 0;
+  DAT_febeee1a = 0;
+  DAT_febeee28 = f33_output_request_status;
+  DAT_febeee12 = DAT_febe8a24;
+  DAT_febeee26 = DAT_febe71f2;
+  DAT_febeee13 = DAT_febe7569;
+  DAT_febeee14 = DAT_febe7567;
+  DAT_febeee15 = DAT_febe7568;
   return;
 }
 

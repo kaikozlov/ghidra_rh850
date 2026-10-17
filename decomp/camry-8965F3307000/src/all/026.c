@@ -602,6 +602,78 @@ undefined4 f33_return_const_0_98936(void)
 
 
 
+/* Reset producer, consumer and occupied-slot count only; retained slot bytes are not cleared.
+   Common DCM initialization calls this before enabling foreground dispatch. */
+
+void f33_dcm_reset_event_ring(void)
+
+{
+  f33_dcm_event_ring.producer = '\0';
+  f33_dcm_event_ring.consumer = '\0';
+  f33_dcm_event_ring.occupied_slots = '\0';
+  return;
+}
+
+
+
+/* Snapshot entry occupied-slot count, pop that many FIFO slots under the existing OS priority-mask
+   pair, and invoke configured callbacks after restoring the mask. FF tombstones consume budget. New
+   tail entries remain beyond the original generation under normal ring invariants; this is a
+   slot-count budget, not an execution-time bound. */
+
+void f33_dcm_dispatch_entry_event_generation(void)
+
+{
+  uchar uVar1;
+  uint uVar2;
+  uint32_t puVar3;
+  uint32_t puVar4;
+  char cVar5;
+  code *pcVar6;
+  byte bVar7;
+  uint uVar8;
+  
+  uVar1 = f33_dcm_event_ring.occupied_slots;
+  puVar3 = 0xfebeb800u;
+  puVar4 = 0x23dfcu;
+  uVar8 = 0xff;
+  bVar7 = 0;
+LAB_000989c4:
+  do {
+    do {
+      if (uVar1 <= bVar7) {
+        return;
+      }
+      bVar7 = bVar7 + 1;
+      thunk_FUN_0006a45e();
+      uVar2 = (uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x59ae)))));
+      if (uVar2 < 0x1f) {
+        uVar8 = (uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(uVar2 - 0x59ac)))));
+      }
+      cVar5 = '\0';
+      if (uVar2 < 0x1e) {
+        cVar5 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x59ae))))) + 1;
+      }
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x59ae))))) = cVar5;
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x59ad))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x59ad))))) + -1;
+      thunk_FUN_0006a4c4();
+    } while (uVar8 == 0xff);
+    if (0xea < uVar8) goto LAB_000989ac;
+  } while (0x2c < uVar8);
+  pcVar6 = *(code **)(puVar4 + uVar8 * 4 + 0x2d1c);
+  goto LAB_000989c0;
+LAB_000989ac:
+  uVar2 = uVar8 + 0x15 & 0xff;
+  if (uVar2 < 8) {
+    pcVar6 = *(code **)(puVar4 + uVar2 * 4 + 0x2cfc);
+LAB_000989c0:
+    (*(int (*)())pcVar6)(uVar8);
+  }
+  goto LAB_000989c4;
+}
+
+
+
 /* Return0 for IDs00..2B or EB..F1 using configured extended count7; return1 otherwise. Validation
    does not check whether the selected ROM callback pointer is nonnull. */
 

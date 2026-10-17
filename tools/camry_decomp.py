@@ -1550,6 +1550,9 @@ def _data_layouts() -> dict[str, tuple[int, str, bool]]:
             else:
                 found[row["name"]] = (addr, "uint8_t", False)
             continue
+        if re.fullmatch(r"[A-Z][A-Za-z0-9_]*", type_name) and type_name in _struct_rows():
+            found[row["name"]] = (addr, type_name, False)
+            continue
         ctype = _SCALAR_TYPES.get(type_name) or _scalar_type(addr, "uint8_t")
         found[row["name"]] = (addr, ctype, False)
     _DATA_LAYOUTS = found
@@ -2016,9 +2019,10 @@ def _struct_bindings(code: str) -> tuple[dict[str, str], set[str]]:
     found: dict[str, str] = {}
     pointers: set[str] = set()
     for name, (_addr, ctype, is_array) in _data_layouts().items():
-        if is_array and ctype in structs:
+        if ctype in structs:
             found[name] = ctype
-            pointers.add(name)
+            if is_array:
+                pointers.add(name)
     for match in re.finditer(
         r"\b([A-Z][A-Za-z0-9_]*)\s*(\*+)?\s*([A-Za-z_][A-Za-z0-9_]*)\s*[,;=)]",
         code,

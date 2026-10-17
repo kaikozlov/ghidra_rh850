@@ -2043,6 +2043,21 @@ void FUN_000798e6(void)
 
 
 
+void FUN_0007995c(void)
+
+{
+  if ((f33_nvm_service_guards.service == '\0') || (f33_nvm_service_guards.paired_call == '\0')) {
+    f33_nvm_service_guards.deferred = '\0';
+    FUN_00079d38(1);
+  }
+  else {
+    FUN_0007990e();
+  }
+  return;
+}
+
+
+
 void FUN_000799b0(void)
 
 {
@@ -2091,6 +2106,105 @@ void thunk_FUN_000799da(void)
 
 {
   FUN_000799da();
+  return;
+}
+
+
+
+void FUN_00079a0e(void)
+
+{
+  DAT_febf6cd4 = 0xff;
+  DAT_febf6cd3 = 0xff;
+  DAT_febf6cd2 = 1;
+  f33_nvm_service_guards.deferred = 0xff;
+  f33_nvm_service_guards.paired_call = '\x01';
+  f33_nvm_service_guards.service = '\x01';
+  FUN_0007987e(0);
+  return;
+}
+
+
+
+/* Only when6CCD==1 AND6CCE==1, set6CCF=FF; otherwise preserve it. Set6CCFFF only if6CCD==1
+   and6CCE==1. Native all-exact-one consumption and either guard zero preservation. No inferred
+   mutex or interrupt behavior. */
+
+void f33_nvm_consume_deferred_guard(void)
+
+{
+  if ((f33_nvm_service_guards.service == '\x01') && (f33_nvm_service_guards.paired_call == '\x01'))
+  {
+    f33_nvm_service_guards.deferred = 0xff;
+  }
+  return;
+}
+
+
+
+/* Call79A32 BEFORE storing6CCD=0. No lock or interrupt semantics inferred. Call79A32 before
+   clearing6CCD. Native quiet and admission boundary expose ordering and service guard0, with real
+   downstream calls. */
+
+void f33_nvm_enter_service_guard(void)
+
+{
+  f33_nvm_consume_deferred_guard();
+  f33_nvm_service_guards.service = '\0';
+  return;
+}
+
+
+
+/* Only when6CCD==1 AND6CCE==1: call7990E if6CCF==0, then storeFF. Native non-notifying branches and
+   exact7990E entry; its body is a separate dependency, not a substituted callback. Require both
+   guard bytes exactly1. Under that condition call real7990E only for pending6CCF0, then set6CCFFF.
+   Native no-notification branches and boundary at7990E before its body; no replacement callback. */
+
+void f33_nvm_finish_deferred_guard(void)
+
+{
+  if ((f33_nvm_service_guards.service == '\x01') && (f33_nvm_service_guards.paired_call == '\x01'))
+  {
+    if (f33_nvm_service_guards.deferred == '\0') {
+      FUN_0007990e();
+    }
+    f33_nvm_service_guards.deferred = 0xff;
+  }
+  return;
+}
+
+
+
+/* Store6CCD=1 then call79A64. Deferred7990E branch remains bounded at entry. Set6CCD1 then
+   call79A64. Native second guard0 prevents notification/latch consumption; both1 plus pending0
+   reaches real7990E. Deferred dependency body remains outside this proof. */
+
+void f33_nvm_leave_service_guard(void)
+
+{
+  f33_nvm_service_guards.service = '\x01';
+  f33_nvm_finish_deferred_guard();
+  return;
+}
+
+
+
+void FUN_00079aaa(void)
+
+{
+  f33_nvm_consume_deferred_guard();
+  f33_nvm_service_guards.paired_call = '\0';
+  return;
+}
+
+
+
+void FUN_00079abe(void)
+
+{
+  f33_nvm_service_guards.paired_call = '\x01';
+  f33_nvm_finish_deferred_guard();
   return;
 }
 

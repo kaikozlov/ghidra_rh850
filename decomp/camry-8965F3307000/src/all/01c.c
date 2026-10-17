@@ -2535,6 +2535,23 @@ undefined4 FUN_00073a5c(int param_1,undefined4 param_2,uint *param_3)
 
 
 
+/* Copy only fields+0,+4,+8,+C intoFEBF6AEC. Do not copy the two padding bytes or adjacent dispatch
+   state. Copy request fields+0/+4/+8/+C intoFEBF6AEC; leave padding+6/+7 untouched. Executed as the
+   real callee of73AFC with distinct input/global padding. No whole-structure memcpy or validation.
+    */
+
+void f33_nvm_copy_operation(F33NvmOperation *request)
+
+{
+  f33_nvm_pending_operation.operation = request->operation;
+  f33_nvm_pending_operation.logical_handle = request->logical_handle;
+  f33_nvm_pending_operation.buffer_08 = request->buffer_08;
+  f33_nvm_pending_operation.buffer_0c = request->buffer_0c;
+  return;
+}
+
+
+
 /* Zero-extend low8 and call73EEE. Initialized74164 selects the nonzero branch. Zero-extend low8
    argument and call73EEE; no independent policy or pointer invocation. Real initialized service
    chooses nonzero poll selector; behavior established with callee bytes and composed execution. */
@@ -2556,6 +2573,25 @@ void thunk_FUN_000766c6(void)
 
 {
   FUN_000766c6();
+  return;
+}
+
+
+
+void FUN_00073c14(void)
+
+{
+  uint uVar1;
+  
+  if (f33_nvm_operation_state == '\x02') {
+    uVar1 = FUN_00073a5c(f33_nvm_pending_operation.operation,0xffffffff,((undefined *)camry_host_ptr(0x2758cu)));
+    if (uVar1 < 2) {
+      FUN_00073ba0(uVar1);
+    }
+    else {
+      FUN_00072130();
+    }
+  }
   return;
 }
 

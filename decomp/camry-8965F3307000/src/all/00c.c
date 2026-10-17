@@ -789,6 +789,177 @@ void f33_return_only_stub_32722(void)
 
 
 
+/* Compare all18 active/staged signed halfwords; return5A iff any differ, else0. Comparison precedes
+   range validation in32876. */
+
+uint f33_monitor_current_coefficients_differ(void)
+
+{
+  uint uVar1;
+  
+  if (((((((f33_monitor_current_active_calibration.coefficients.negative_residual_gain[0] ==
+            f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[0]) &&
+          (f33_monitor_current_active_calibration.coefficients.negative_residual_gain[1] ==
+           f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[1])) &&
+         (f33_monitor_current_active_calibration.coefficients.negative_residual_gain[2] ==
+          f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[2])) &&
+        ((f33_monitor_current_active_calibration.coefficients.negative_residual_gain[3] ==
+          f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[3] &&
+         (f33_monitor_current_active_calibration.coefficients.negative_residual_gain[4] ==
+          f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[4])))) &&
+       ((f33_monitor_current_active_calibration.coefficients.negative_residual_gain[5] ==
+         f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[5] &&
+        ((f33_monitor_current_active_calibration.coefficients.nonnegative_residual_gain[0] ==
+          f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[0] &&
+         (f33_monitor_current_active_calibration.coefficients.nonnegative_residual_gain[1] ==
+          f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[1])))))) &&
+      (f33_monitor_current_active_calibration.coefficients.nonnegative_residual_gain[2] ==
+       f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[2])) &&
+     (((((f33_monitor_current_active_calibration.coefficients.nonnegative_residual_gain[3] ==
+          f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[3] &&
+         (f33_monitor_current_active_calibration.coefficients.nonnegative_residual_gain[4] ==
+          f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[4])) &&
+        (f33_monitor_current_active_calibration.coefficients.nonnegative_residual_gain[5] ==
+         f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[5])) &&
+       (((f33_monitor_current_active_calibration.coefficients.bias[0] ==
+          f33_monitor_current_staged_calibration.coefficients.bias[0] &&
+         (f33_monitor_current_active_calibration.coefficients.bias[1] ==
+          f33_monitor_current_staged_calibration.coefficients.bias[1])) &&
+        ((f33_monitor_current_active_calibration.coefficients.bias[2] ==
+          f33_monitor_current_staged_calibration.coefficients.bias[2] &&
+         ((f33_monitor_current_active_calibration.coefficients.bias[3] ==
+           f33_monitor_current_staged_calibration.coefficients.bias[3] &&
+          (f33_monitor_current_active_calibration.coefficients.bias[4] ==
+           f33_monitor_current_staged_calibration.coefficients.bias[4])))))))) &&
+      (f33_monitor_current_active_calibration.coefficients.bias[5] ==
+       f33_monitor_current_staged_calibration.coefficients.bias[5])))) {
+    uVar1 = 0;
+  }
+  else {
+    uVar1 = 0x5a;
+  }
+  return uVar1;
+}
+
+
+
+/* Copy staged negative/nonnegative gain arrays and biases into active6906/6912/691E. Does not
+   publish source marker or changed/error bytes. */
+
+void f33_adopt_monitor_current_coefficients(void)
+
+{
+  f33_monitor_current_active_calibration.coefficients.negative_residual_gain[0] =
+       f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[0];
+  f33_monitor_current_active_calibration.coefficients.negative_residual_gain[1] =
+       f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[1];
+  f33_monitor_current_active_calibration.coefficients.negative_residual_gain[2] =
+       f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[2];
+  f33_monitor_current_active_calibration.coefficients.negative_residual_gain[3] =
+       f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[3];
+  f33_monitor_current_active_calibration.coefficients.negative_residual_gain[4] =
+       f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[4];
+  f33_monitor_current_active_calibration.coefficients.negative_residual_gain[5] =
+       f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[5];
+  f33_monitor_current_active_calibration.coefficients.nonnegative_residual_gain[0] =
+       f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[0];
+  f33_monitor_current_active_calibration.coefficients.nonnegative_residual_gain[1] =
+       f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[1];
+  f33_monitor_current_active_calibration.coefficients.nonnegative_residual_gain[2] =
+       f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[2];
+  f33_monitor_current_active_calibration.coefficients.nonnegative_residual_gain[3] =
+       f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[3];
+  f33_monitor_current_active_calibration.coefficients.nonnegative_residual_gain[4] =
+       f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[4];
+  f33_monitor_current_active_calibration.coefficients.nonnegative_residual_gain[5] =
+       f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[5];
+  f33_monitor_current_active_calibration.coefficients.bias[0] =
+       f33_monitor_current_staged_calibration.coefficients.bias[0];
+  f33_monitor_current_active_calibration.coefficients.bias[1] =
+       f33_monitor_current_staged_calibration.coefficients.bias[1];
+  f33_monitor_current_active_calibration.coefficients.bias[2] =
+       f33_monitor_current_staged_calibration.coefficients.bias[2];
+  f33_monitor_current_active_calibration.coefficients.bias[3] =
+       f33_monitor_current_staged_calibration.coefficients.bias[3];
+  f33_monitor_current_active_calibration.coefficients.bias[4] =
+       f33_monitor_current_staged_calibration.coefficients.bias[4];
+  f33_monitor_current_active_calibration.coefficients.bias[5] =
+       f33_monitor_current_staged_calibration.coefficients.bias[5];
+  return;
+}
+
+
+
+/* Set all12 active gains to signedBE36=-16842 and all six biases0. Does not clear6904/6905 status
+   bytes. */
+
+void f33_reset_active_monitor_current_coefficients(void)
+
+{
+  f33_monitor_current_active_calibration.coefficients.negative_residual_gain[0] = -0x41ca;
+  f33_monitor_current_active_calibration.coefficients.negative_residual_gain[1] = -0x41ca;
+  f33_monitor_current_active_calibration.coefficients.negative_residual_gain[2] = -0x41ca;
+  f33_monitor_current_active_calibration.coefficients.negative_residual_gain[3] = -0x41ca;
+  f33_monitor_current_active_calibration.coefficients.negative_residual_gain[4] = -0x41ca;
+  f33_monitor_current_active_calibration.coefficients.negative_residual_gain[5] = -0x41ca;
+  f33_monitor_current_active_calibration.coefficients.nonnegative_residual_gain[0] = -0x41ca;
+  f33_monitor_current_active_calibration.coefficients.nonnegative_residual_gain[1] = -0x41ca;
+  f33_monitor_current_active_calibration.coefficients.nonnegative_residual_gain[2] = -0x41ca;
+  f33_monitor_current_active_calibration.coefficients.nonnegative_residual_gain[3] = -0x41ca;
+  f33_monitor_current_active_calibration.coefficients.nonnegative_residual_gain[4] = -0x41ca;
+  f33_monitor_current_active_calibration.coefficients.nonnegative_residual_gain[5] = -0x41ca;
+  f33_monitor_current_active_calibration.coefficients.bias[0] = 0;
+  f33_monitor_current_active_calibration.coefficients.bias[1] = 0;
+  f33_monitor_current_active_calibration.coefficients.bias[2] = 0;
+  f33_monitor_current_active_calibration.coefficients.bias[3] = 0;
+  f33_monitor_current_active_calibration.coefficients.bias[4] = 0;
+  f33_monitor_current_active_calibration.coefficients.bias[5] = 0;
+  return;
+}
+
+
+
+/* Only8A18==5A acts. Valid6954=A55A5AA5 and busy692D=0: compare; equal skips validation and
+   publishes statuses0/0; changed validates, adopts on0 or resets active defaults on5A. Invalid
+   marker/busy resets active coefficients but retains previous changed/error bytes. Stage and source
+   marker are not invalidated by range rejection. */
+
+void f33_update_active_monitor_current_calibration(void)
+
+{
+  uint32_t puVar1;
+  uint uVar2;
+  uint uVar3;
+  
+  puVar1 = 0xfebeb800u;
+  if (DAT_febe8a18 != 'Z') {
+    return;
+  }
+  uVar3 = (uint)f33_monitor_current_active_calibration.changed;
+  uVar2 = (uint)f33_monitor_current_active_calibration.range_error;
+  if ((f33_monitor_current_staged_calibration.marker == 0xa55a5aa5) &&
+     (f33_monitor_current_staged_calibration.busy == '\0')) {
+    puVar1 = 0xfebeb800u;
+    uVar3 = f33_monitor_current_coefficients_differ();
+    if (uVar3 != 0x5a) {
+      uVar2 = 0;
+      goto LAB_000328c6;
+    }
+    uVar2 = f33_get_staged_monitor_current_range_status();
+    if (uVar2 == 0) {
+      f33_adopt_monitor_current_coefficients();
+      goto LAB_000328c6;
+    }
+  }
+  f33_reset_active_monitor_current_coefficients();
+LAB_000328c6:
+  (*((char *)camry_host_ptr((uint32_t)((int)(0xffffb104u + (uint32_t)((int)puVar1)))))) = (char)uVar3;
+  (*((char *)camry_host_ptr((uint32_t)((int)0xffffb104u + (int)(puVar1 + 1))))) = (char)uVar2;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -796,6 +967,153 @@ void f33_return_only_stub_32722(void)
 void f33_return_only_stub_328d2(void)
 
 {
+  return;
+}
+
+
+
+/* Return0 iff all12 gains are inclusively[-20912,-14080] and all six biases
+   inclusively[-1835,1835]; otherwise5A. Signed16 calibration bounds30EA0..30EA6; no state mutation.
+    */
+
+uint f33_validate_staged_monitor_current_coefficients(void)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  int iVar4;
+  int iVar5;
+  int iVar6;
+  uint uVar7;
+  int iVar8;
+  int iVar9;
+  int iVar10;
+  int iVar11;
+  int iVar12;
+  int iVar13;
+  int iVar14;
+  int iVar15;
+  int iVar16;
+  int iVar17;
+  int iVar18;
+  int iVar19;
+  int iVar20;
+  int iVar21;
+  
+  iVar15 = (int)f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[0];
+  iVar14 = (int)f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[1];
+  iVar13 = (int)f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[2];
+  iVar12 = (int)f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[0];
+  iVar11 = (int)f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[1];
+  iVar10 = (int)f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[2];
+  iVar5 = (int)f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[3];
+  iVar4 = (int)f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[4];
+  iVar3 = (int)f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[5];
+  iVar2 = (int)f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[3];
+  iVar21 = (int)f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[4];
+  iVar20 = (int)f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[5];
+  iVar9 = (int)f33_monitor_current_staged_calibration.coefficients.bias[0];
+  iVar8 = (int)f33_monitor_current_staged_calibration.coefficients.bias[1];
+  iVar6 = (int)f33_monitor_current_staged_calibration.coefficients.bias[2];
+  iVar19 = (int)f33_monitor_current_staged_calibration.coefficients.bias[3];
+  iVar18 = (int)f33_monitor_current_staged_calibration.coefficients.bias[4];
+  iVar17 = (int)f33_monitor_current_staged_calibration.coefficients.bias[5];
+  iVar1 = (int)f33_monitor_current_gain_bias_bounds[0];
+  if (((((((iVar15 - iVar1 < 0 == (iVar15 < 0 != iVar1 < 0 && iVar1 < 0 == iVar15 - iVar1 < 0) &&
+            iVar15 != iVar1) ||
+          (iVar16 = (int)f33_monitor_current_gain_bias_bounds[1],
+          iVar15 - iVar16 < 0 != (iVar15 < 0 != iVar16 < 0 && iVar16 < 0 == iVar15 - iVar16 < 0)))
+         || (iVar12 - iVar1 < 0 == (iVar12 < 0 != iVar1 < 0 && iVar1 < 0 == iVar12 - iVar1 < 0) &&
+             iVar12 != iVar1)) ||
+        ((iVar12 - iVar16 < 0 != (iVar12 < 0 != iVar16 < 0 && iVar16 < 0 == iVar12 - iVar16 < 0) ||
+         (iVar14 - iVar1 < 0 == (iVar14 < 0 != iVar1 < 0 && iVar1 < 0 == iVar14 - iVar1 < 0) &&
+          iVar14 != iVar1)))) ||
+       ((iVar14 - iVar16 < 0 != (iVar14 < 0 != iVar16 < 0 && iVar16 < 0 == iVar14 - iVar16 < 0) ||
+        ((iVar11 - iVar1 < 0 == (iVar11 < 0 != iVar1 < 0 && iVar1 < 0 == iVar11 - iVar1 < 0) &&
+          iVar11 != iVar1 ||
+         (iVar11 - iVar16 < 0 != (iVar11 < 0 != iVar16 < 0 && iVar16 < 0 == iVar11 - iVar16 < 0)))))
+       )) || (iVar13 - iVar1 < 0 == (iVar13 < 0 != iVar1 < 0 && iVar1 < 0 == iVar13 - iVar1 < 0) &&
+              iVar13 != iVar1)) ||
+     ((((((iVar13 - iVar16 < 0 != (iVar13 < 0 != iVar16 < 0 && iVar16 < 0 == iVar13 - iVar16 < 0) ||
+          (iVar10 - iVar1 < 0 == (iVar10 < 0 != iVar1 < 0 && iVar1 < 0 == iVar10 - iVar1 < 0) &&
+           iVar10 != iVar1)) ||
+         (iVar10 - iVar16 < 0 != (iVar10 < 0 != iVar16 < 0 && iVar16 < 0 == iVar10 - iVar16 < 0)))
+        || (((iVar5 - iVar1 < 0 == (iVar5 < 0 != iVar1 < 0 && iVar1 < 0 == iVar5 - iVar1 < 0) &&
+              iVar5 != iVar1 ||
+             (iVar5 - iVar16 < 0 != (iVar5 < 0 != iVar16 < 0 && iVar16 < 0 == iVar5 - iVar16 < 0)))
+            || ((iVar2 - iVar1 < 0 == (iVar2 < 0 != iVar1 < 0 && iVar1 < 0 == iVar2 - iVar1 < 0) &&
+                 iVar2 != iVar1 ||
+                ((iVar2 - iVar16 < 0 !=
+                  (iVar2 < 0 != iVar16 < 0 && iVar16 < 0 == iVar2 - iVar16 < 0) ||
+                 (iVar4 - iVar1 < 0 == (iVar4 < 0 != iVar1 < 0 && iVar1 < 0 == iVar4 - iVar1 < 0) &&
+                  iVar4 != iVar1)))))))) ||
+       ((((iVar4 - iVar16 < 0 != (iVar4 < 0 != iVar16 < 0 && iVar16 < 0 == iVar4 - iVar16 < 0) ||
+          (((iVar21 - iVar1 < 0 == (iVar21 < 0 != iVar1 < 0 && iVar1 < 0 == iVar21 - iVar1 < 0) &&
+             iVar21 != iVar1 ||
+            (iVar21 - iVar16 < 0 != (iVar21 < 0 != iVar16 < 0 && iVar16 < 0 == iVar21 - iVar16 < 0))
+            ) || (iVar3 - iVar1 < 0 == (iVar3 < 0 != iVar1 < 0 && iVar1 < 0 == iVar3 - iVar1 < 0) &&
+                  iVar3 != iVar1)))) ||
+         (((iVar3 - iVar16 < 0 != (iVar3 < 0 != iVar16 < 0 && iVar16 < 0 == iVar3 - iVar16 < 0) ||
+           (iVar20 - iVar1 < 0 == (iVar20 < 0 != iVar1 < 0 && iVar1 < 0 == iVar20 - iVar1 < 0) &&
+            iVar20 != iVar1)) ||
+          (((iVar20 - iVar16 < 0 != (iVar20 < 0 != iVar16 < 0 && iVar16 < 0 == iVar20 - iVar16 < 0)
+            || ((iVar1 = (int)f33_monitor_current_gain_bias_bounds[2],
+                iVar9 - iVar1 < 0 == (iVar9 < 0 != iVar1 < 0 && iVar1 < 0 == iVar9 - iVar1 < 0) &&
+                iVar9 != iVar1 ||
+                (iVar2 = (int)f33_monitor_current_gain_bias_bounds[3],
+                iVar9 - iVar2 < 0 != (iVar9 < 0 != iVar2 < 0 && iVar2 < 0 == iVar9 - iVar2 < 0)))))
+           || (iVar8 - iVar1 < 0 == (iVar8 < 0 != iVar1 < 0 && iVar1 < 0 == iVar8 - iVar1 < 0) &&
+               iVar8 != iVar1)))))) ||
+        ((((iVar8 - iVar2 < 0 != (iVar8 < 0 != iVar2 < 0 && iVar2 < 0 == iVar8 - iVar2 < 0) ||
+           (iVar6 - iVar1 < 0 == (iVar6 < 0 != iVar1 < 0 && iVar1 < 0 == iVar6 - iVar1 < 0) &&
+            iVar6 != iVar1)) ||
+          (iVar6 - iVar2 < 0 != (iVar6 < 0 != iVar2 < 0 && iVar2 < 0 == iVar6 - iVar2 < 0))) ||
+         ((iVar19 - iVar1 < 0 == (iVar19 < 0 != iVar1 < 0 && iVar1 < 0 == iVar19 - iVar1 < 0) &&
+           iVar19 != iVar1 ||
+          (iVar19 - iVar2 < 0 != (iVar19 < 0 != iVar2 < 0 && iVar2 < 0 == iVar19 - iVar2 < 0))))))))
+       ) || (((iVar18 - iVar1 < 0 == (iVar18 < 0 != iVar1 < 0 && iVar1 < 0 == iVar18 - iVar1 < 0) &&
+               iVar18 != iVar1 ||
+              ((iVar18 - iVar2 < 0 != (iVar18 < 0 != iVar2 < 0 && iVar2 < 0 == iVar18 - iVar2 < 0)
+               || (iVar17 - iVar1 < 0 ==
+                   (iVar17 < 0 != iVar1 < 0 && iVar1 < 0 == iVar17 - iVar1 < 0) && iVar17 != iVar1))
+              )) || (iVar17 - iVar2 < 0 !=
+                     (iVar17 < 0 != iVar2 < 0 && iVar2 < 0 == iVar17 - iVar2 < 0))))))) {
+    uVar7 = 0x5a;
+  }
+  else {
+    uVar7 = 0;
+  }
+  return uVar7;
+}
+
+
+
+/* WARNING: This is an inlined function */
+/* Set staged12 gains to-16842 and six biases0. Exact leaf changesR1/EP and preservesR10, which32A76
+   returns from preceding validation. Inline real p-code to preserve this ABI fact. */
+
+void f33_reset_staged_monitor_current_coefficients(void)
+
+{
+  f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[0] = -0x41ca;
+  f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[1] = -0x41ca;
+  f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[2] = -0x41ca;
+  f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[3] = -0x41ca;
+  f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[4] = -0x41ca;
+  f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[5] = -0x41ca;
+  f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[0] = -0x41ca;
+  f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[1] = -0x41ca;
+  f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[2] = -0x41ca;
+  f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[3] = -0x41ca;
+  f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[4] = -0x41ca;
+  f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[5] = -0x41ca;
+  f33_monitor_current_staged_calibration.coefficients.bias[0] = 0;
+  f33_monitor_current_staged_calibration.coefficients.bias[1] = 0;
+  f33_monitor_current_staged_calibration.coefficients.bias[2] = 0;
+  f33_monitor_current_staged_calibration.coefficients.bias[3] = 0;
+  f33_monitor_current_staged_calibration.coefficients.bias[4] = 0;
+  f33_monitor_current_staged_calibration.coefficients.bias[5] = 0;
   return;
 }
 
@@ -894,6 +1212,94 @@ uint f33_reload_monitor_current_calibration_marker(void)
     }
   }
   return 0x5aa5a55a;
+}
+
+
+
+/* When6501==5A and source marker valid, set busy5A, reload via32AF0 and clear busy only on valid
+   return; invalid return reports0124/failure32. Other admission states clear busy and retain
+   marker. Active coefficients are adopted separately later. */
+
+void f33_refresh_monitor_current_calibration(void)
+
+{
+  uint32_t puVar1;
+  uint uVar2;
+  undefined1 uVar3;
+  
+  puVar1 = 0xfebeb800u;
+  uVar3 = 0;
+  uVar2 = f33_monitor_current_staged_calibration.marker;
+  if ((DAT_febe6501 == 'Z') && (f33_monitor_current_staged_calibration.marker == 0xa55a5aa5)) {
+    uVar3 = 0x5a;
+    f33_monitor_current_staged_calibration.busy = 'Z';
+    puVar1 = 0xfebeb800u;
+    uVar2 = f33_reload_monitor_current_calibration_marker();
+    if (uVar2 == 0xa55a5aa5) {
+      uVar3 = 0;
+    }
+    else {
+      f33_report_diagnostic_event_failure(0x124,0x32);
+    }
+  }
+  (*((uint *)camry_host_ptr((uint32_t)((int)(0xffffb154u + (uint32_t)((int)puVar1)))))) = uVar2;
+  (*((undefined1 *)camry_host_ptr((uint32_t)((int)0xffffb12cu + (int)(puVar1 + 1))))) = uVar3;
+  return;
+}
+
+
+
+/* Serialize bank1 then bank0 coefficients after valid record marker and call setter0200. Ignore
+   setter admission result; unconditionally publish valid6954 afterward. This marker is neither
+   setter acceptance nor durability, and later getter still reads ROMA000. */
+
+void f33_submit_monitor_current_calibration_record(void)
+
+{
+  uint32_t puVar1;
+  uint local_30;
+  short sStack_2c;
+  short sStack_2a;
+  short sStack_28;
+  short sStack_26;
+  short sStack_24;
+  short sStack_22;
+  short sStack_20;
+  short sStack_1e;
+  short sStack_1c;
+  short sStack_1a;
+  short sStack_18;
+  short sStack_16;
+  short sStack_14;
+  short sStack_12;
+  short sStack_10;
+  short sStack_e;
+  short sStack_c;
+  short sStack_a;
+  
+  puVar1 = 0xfebeb800u;
+  local_30 = 0xa55a5aa5;
+  sStack_1a = f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[0];
+  sStack_18 = f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[1];
+  sStack_16 = f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[2];
+  sStack_2c = f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[3];
+  sStack_2a = f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[4];
+  sStack_28 = f33_monitor_current_staged_calibration.coefficients.negative_residual_gain[5];
+  sStack_14 = f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[0];
+  sStack_12 = f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[1];
+  sStack_10 = f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[2];
+  sStack_26 = f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[3];
+  sStack_24 = f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[4];
+  sStack_22 = f33_monitor_current_staged_calibration.coefficients.nonnegative_residual_gain[5];
+  sStack_e = f33_monitor_current_staged_calibration.coefficients.bias[0];
+  sStack_c = f33_monitor_current_staged_calibration.coefficients.bias[1];
+  sStack_a = f33_monitor_current_staged_calibration.coefficients.bias[2];
+  sStack_20 = f33_monitor_current_staged_calibration.coefficients.bias[3];
+  sStack_1e = f33_monitor_current_staged_calibration.coefficients.bias[4];
+  sStack_1c = f33_monitor_current_staged_calibration.coefficients.bias[5];
+  f33_nvm_set_record(0x200,&local_30);
+  (*((undefined4 *)camry_host_ptr((uint32_t)((int)(0xffffb154u + (uint32_t)((int)puVar1)))))) = 0xa55a5aa5;
+  return;
 }
 
 
@@ -1030,6 +1436,1241 @@ void f33_return_only_stub_32d24(void)
 
 
 
+/* Wrapped signed16 angle delta accumulates signed32 directional extrema; max-min>=65536 increments
+   wrapping byte span count. Return0/5A/A5; does not update previous-angle itself. */
+
+uint f33_track_fit_angular_coverage(short angle,uchar required_spans)
+
+{
+  int iVar1;
+  uint uVar2;
+  int iVar3;
+  int iVar4;
+  
+  iVar1 = (int)(short)(angle - f33_six_channel_fit_work.previous_angle);
+  f33_six_channel_fit_work.coverage_sum = f33_six_channel_fit_work.coverage_sum + iVar1;
+  iVar3 = f33_six_channel_fit_work.coverage_max;
+  if ((((-1 < iVar1) || (-1 < f33_six_channel_fit_work.coverage_sum)) ||
+      (iVar4 = f33_six_channel_fit_work.coverage_sum,
+      f33_six_channel_fit_work.coverage_sum - f33_six_channel_fit_work.coverage_min < 0 ==
+      (f33_six_channel_fit_work.coverage_sum < 0 != f33_six_channel_fit_work.coverage_min < 0 &&
+      f33_six_channel_fit_work.coverage_min < 0 ==
+      f33_six_channel_fit_work.coverage_sum - f33_six_channel_fit_work.coverage_min < 0))) &&
+     (((iVar4 = f33_six_channel_fit_work.coverage_min, 0 < iVar1 &&
+       (0 < f33_six_channel_fit_work.coverage_sum)) &&
+      (iVar3 = f33_six_channel_fit_work.coverage_sum,
+      f33_six_channel_fit_work.coverage_sum - f33_six_channel_fit_work.coverage_max < 0 !=
+      (f33_six_channel_fit_work.coverage_sum < 0 != f33_six_channel_fit_work.coverage_max < 0 &&
+      f33_six_channel_fit_work.coverage_max < 0 ==
+      f33_six_channel_fit_work.coverage_sum - f33_six_channel_fit_work.coverage_max < 0) ||
+      f33_six_channel_fit_work.coverage_sum == f33_six_channel_fit_work.coverage_max)))) {
+    iVar3 = f33_six_channel_fit_work.coverage_max;
+  }
+  uVar2 = 0;
+  iVar1 = (iVar3 - iVar4) + -0x10000;
+  if (iVar1 < 0 == (iVar3 - iVar4 < 0 && -1 < iVar1)) {
+    f33_six_channel_fit_work.coverage_sum = 0;
+    f33_six_channel_fit_work.coverage_count = f33_six_channel_fit_work.coverage_count + 1;
+    iVar4 = 0;
+    iVar3 = 0;
+    uVar2 = 0x5a;
+    if (required_spans <= f33_six_channel_fit_work.coverage_count) {
+      uVar2 = 0xa5;
+    }
+  }
+  f33_six_channel_fit_work.coverage_min = iVar4;
+  f33_six_channel_fit_work.coverage_max = iVar3;
+  return uVar2;
+}
+
+
+
+/* Admission gates from raw retained5F36 and7DB0; invalid gate clears phase-init only. Six unsigned
+   Q16 recurrences track literal32768, seed all extrema/outputs32768 and use exact gain11258. Calls
+   angular coverage threshold5; final coverage changes root state11->22. */
+
+void f33_step_unsigned_literal_fit_sweep(short angle)
+
+{
+  ushort uVar1;
+  ushort uVar2;
+  ushort uVar3;
+  int iVar4;
+  uint32_t puVar5;
+  uint uVar6;
+  uint uVar7;
+  int iVar8;
+  uint uVar9;
+  uint uVar10;
+  uint uVar11;
+  uint uVar12;
+  uint uVar13;
+  uint uVar14;
+  uint uVar15;
+  uint uVar16;
+  uchar local_4c;
+  uchar uStack_4b;
+  ushort uStack_4a;
+  ushort uStack_48;
+  ushort uStack_46;
+  ushort uStack_44;
+  ushort uStack_42;
+  ushort uStack_40;
+  ushort uStack_3e;
+  ushort uStack_3c;
+  ushort uStack_3a;
+  ushort uStack_38;
+  ushort uStack_36;
+  ushort uStack_34;
+  ushort uStack_32;
+  ushort uStack_30;
+  ushort uStack_2e;
+  
+  puVar5 = 0xfebeb800u;
+  iVar4 = (int)DAT_febe5f36;
+  uStack_2e = f33_six_channel_fit_work.unsigned_min[5];
+  uStack_4a = f33_six_channel_fit_work.unsigned_previous[3];
+  uStack_48 = f33_six_channel_fit_work.unsigned_previous[4];
+  uStack_46 = f33_six_channel_fit_work.unsigned_previous[5];
+  uStack_38 = f33_six_channel_fit_work.unsigned_min[0];
+  uStack_36 = f33_six_channel_fit_work.unsigned_min[1];
+  uStack_34 = f33_six_channel_fit_work.unsigned_min[2];
+  uStack_32 = f33_six_channel_fit_work.unsigned_min[3];
+  uStack_30 = f33_six_channel_fit_work.unsigned_min[4];
+  local_4c = f33_six_channel_fit_work.unsigned_initialized;
+  uStack_4b = f33_six_channel_fit_work.state;
+  uStack_44 = f33_six_channel_fit_work.unsigned_max[0];
+  uStack_42 = f33_six_channel_fit_work.unsigned_max[1];
+  uStack_40 = f33_six_channel_fit_work.unsigned_max[2];
+  uStack_3e = f33_six_channel_fit_work.unsigned_max[3];
+  uStack_3c = f33_six_channel_fit_work.unsigned_max[4];
+  uStack_3a = f33_six_channel_fit_work.unsigned_max[5];
+  if (iVar4 + 0x7fff < 0 == (-1 < iVar4 && iVar4 + 0x7fff < 0) && iVar4 != -0x7fff) {
+    if (iVar4 < 0) {
+      iVar4 = (int)-DAT_febe5f36;
+    }
+  }
+  else {
+    iVar4 = 0x7fff;
+  }
+  if (((DAT_febe7db0 < f33_fit_parameters.qualifier_lower) ||
+      (f33_fit_parameters.qualifier_upper < DAT_febe7db0)) ||
+     (iVar8 = (int)f33_fit_parameters.magnitude_upper,
+     iVar4 - iVar8 < 0 == (iVar4 < 0 != iVar8 < 0 && iVar8 < 0 == iVar4 - iVar8 < 0) &&
+     iVar4 != iVar8)) {
+    local_4c = '\0';
+  }
+  else {
+    uVar7 = 0x80000000;
+    if (f33_six_channel_fit_work.unsigned_initialized == '\0') {
+      uVar16 = 0x8000;
+      uStack_4a = 0x8000;
+      uStack_48 = 0x8000;
+      uStack_46 = 0x8000;
+      uVar10 = 0x8000;
+      uStack_44 = 0x8000;
+      uVar9 = 0x8000;
+      uStack_42 = 0x8000;
+      uStack_40 = 0x8000;
+      uStack_3e = 0x8000;
+      uStack_3c = 0x8000;
+      uStack_3a = 0x8000;
+      uStack_38 = 0x8000;
+      uStack_36 = 0x8000;
+      uStack_34 = 0x8000;
+      uStack_32 = 0x8000;
+      uStack_30 = 0x8000;
+      uStack_2e = 0x8000;
+      f33_six_channel_fit_work.coverage_count = '\0';
+      f33_six_channel_fit_work.coverage_sum = 0;
+      f33_six_channel_fit_work.coverage_min = 0;
+      f33_six_channel_fit_work.coverage_max = 0;
+      local_4c = 'Z';
+      uVar11 = uVar7;
+      uVar12 = uVar7;
+      uVar13 = uVar7;
+      uVar14 = uVar7;
+      uVar15 = uVar7;
+    }
+    else {
+      iVar4 = (uint)f33_fit_parameters.unsigned_filter_half_gain * 2;
+      uVar6 = iVar4 - 1;
+      if (uVar6 < 0xffff) {
+        uVar15 = (uint)f33_fit_parameters.unsigned_filter_half_gain * 0x10000 +
+                 (f33_six_channel_fit_work.unsigned_q16[0] -
+                 (uint)f33_six_channel_fit_work.unsigned_previous[0] * iVar4);
+      }
+      else {
+        uVar15 = f33_six_channel_fit_work.unsigned_q16[0] +
+                 (uint)f33_six_channel_fit_work.unsigned_previous[0] * -0x10000 + 0x80000000;
+      }
+      uVar16 = uVar15 >> 0x10;
+      if (uVar6 < 0xffff) {
+        uVar14 = (uint)f33_fit_parameters.unsigned_filter_half_gain * 0x10000 +
+                 (f33_six_channel_fit_work.unsigned_q16[1] -
+                 (uint)f33_six_channel_fit_work.unsigned_previous[1] * iVar4);
+      }
+      else {
+        uVar14 = f33_six_channel_fit_work.unsigned_q16[1] +
+                 (uint)f33_six_channel_fit_work.unsigned_previous[1] * -0x10000 + 0x80000000;
+      }
+      uVar10 = uVar14 >> 0x10;
+      if (uVar6 < 0xffff) {
+        uVar13 = (uint)f33_fit_parameters.unsigned_filter_half_gain * 0x10000 +
+                 (f33_six_channel_fit_work.unsigned_q16[2] -
+                 (uint)f33_six_channel_fit_work.unsigned_previous[2] * iVar4);
+      }
+      else {
+        uVar13 = f33_six_channel_fit_work.unsigned_q16[2] +
+                 (uint)f33_six_channel_fit_work.unsigned_previous[2] * -0x10000 + 0x80000000;
+      }
+      uVar9 = uVar13 >> 0x10;
+      if (uVar6 < 0xffff) {
+        uVar12 = (uint)f33_fit_parameters.unsigned_filter_half_gain * 0x10000 +
+                 (f33_six_channel_fit_work.unsigned_q16[3] -
+                 (uint)f33_six_channel_fit_work.unsigned_previous[3] * iVar4);
+      }
+      else {
+        uVar12 = f33_six_channel_fit_work.unsigned_q16[3] +
+                 (uint)f33_six_channel_fit_work.unsigned_previous[3] * -0x10000 + 0x80000000;
+      }
+      uStack_4a = (ushort)(uVar12 >> 0x10);
+      if (uVar6 < 0xffff) {
+        uVar11 = (uint)f33_fit_parameters.unsigned_filter_half_gain * 0x10000 +
+                 (f33_six_channel_fit_work.unsigned_q16[4] -
+                 (uint)f33_six_channel_fit_work.unsigned_previous[4] * iVar4);
+      }
+      else {
+        uVar11 = f33_six_channel_fit_work.unsigned_q16[4] +
+                 (uint)f33_six_channel_fit_work.unsigned_previous[4] * -0x10000 + 0x80000000;
+      }
+      uStack_48 = (ushort)(uVar11 >> 0x10);
+      if (uVar6 < 0xffff) {
+        iVar8 = (uint)f33_fit_parameters.unsigned_filter_half_gain << 0x10;
+        uVar7 = f33_six_channel_fit_work.unsigned_q16[5] -
+                (uint)f33_six_channel_fit_work.unsigned_previous[5] * iVar4;
+      }
+      else {
+        iVar8 = f33_six_channel_fit_work.unsigned_q16[5] +
+                (uint)f33_six_channel_fit_work.unsigned_previous[5] * -0x10000;
+      }
+      uVar7 = iVar8 + uVar7;
+      uVar6 = uVar7 >> 0x10;
+      uStack_46 = (ushort)(uVar7 >> 0x10);
+      uVar1 = (ushort)(uVar15 >> 0x10);
+      if (-1 < (int)(uVar16 - f33_six_channel_fit_work.unsigned_max[0]) &&
+          uVar16 != f33_six_channel_fit_work.unsigned_max[0]) {
+        uStack_44 = uVar1;
+      }
+      uVar2 = (ushort)(uVar14 >> 0x10);
+      if (-1 < (int)(uVar10 - f33_six_channel_fit_work.unsigned_max[1]) &&
+          uVar10 != f33_six_channel_fit_work.unsigned_max[1]) {
+        uStack_42 = uVar2;
+      }
+      uVar3 = (ushort)(uVar13 >> 0x10);
+      if (-1 < (int)(uVar9 - f33_six_channel_fit_work.unsigned_max[2]) &&
+          uVar9 != f33_six_channel_fit_work.unsigned_max[2]) {
+        uStack_40 = uVar3;
+      }
+      if (-1 < (int)((uint)uStack_4a - (uint)f33_six_channel_fit_work.unsigned_max[3]) &&
+          (uint)uStack_4a != (uint)f33_six_channel_fit_work.unsigned_max[3]) {
+        uStack_3e = uStack_4a;
+      }
+      if (-1 < (int)((uint)uStack_48 - (uint)f33_six_channel_fit_work.unsigned_max[4]) &&
+          (uint)uStack_48 != (uint)f33_six_channel_fit_work.unsigned_max[4]) {
+        uStack_3c = uStack_48;
+      }
+      if (-1 < (int)(uVar6 - f33_six_channel_fit_work.unsigned_max[5]) &&
+          uVar6 != f33_six_channel_fit_work.unsigned_max[5]) {
+        uStack_3a = uStack_46;
+      }
+      if ((int)(uVar16 - f33_six_channel_fit_work.unsigned_min[0]) < 0) {
+        uStack_38 = uVar1;
+      }
+      if ((int)(uVar10 - f33_six_channel_fit_work.unsigned_min[1]) < 0) {
+        uStack_36 = uVar2;
+      }
+      if ((int)(uVar9 - f33_six_channel_fit_work.unsigned_min[2]) < 0) {
+        uStack_34 = uVar3;
+      }
+      if ((int)((uint)uStack_4a - (uint)f33_six_channel_fit_work.unsigned_min[3]) < 0) {
+        uStack_32 = uStack_4a;
+      }
+      if ((int)((uint)uStack_48 - (uint)f33_six_channel_fit_work.unsigned_min[4]) < 0) {
+        uStack_30 = uStack_48;
+      }
+      if ((int)(uVar6 - f33_six_channel_fit_work.unsigned_min[5]) < 0) {
+        uStack_2e = uStack_46;
+      }
+    }
+    puVar5 = 0xfebeb800u;
+    uVar6 = f33_track_fit_angular_coverage(angle,f33_fit_parameters.unsigned_coverage_spans);
+    f33_six_channel_fit_work.unsigned_q16[5] = uVar7;
+    f33_six_channel_fit_work.unsigned_q16[4] = uVar11;
+    f33_six_channel_fit_work.unsigned_q16[3] = uVar12;
+    f33_six_channel_fit_work.unsigned_q16[2] = uVar13;
+    f33_six_channel_fit_work.unsigned_q16[1] = uVar14;
+    f33_six_channel_fit_work.unsigned_q16[0] = uVar15;
+    f33_six_channel_fit_work.unsigned_previous[0] = (ushort)uVar16;
+    f33_six_channel_fit_work.unsigned_previous[1] = (ushort)uVar10;
+    f33_six_channel_fit_work.unsigned_previous[2] = (ushort)uVar9;
+    if (uVar6 == 0xa5) {
+      uStack_4b = '\"';
+    }
+  }
+  (*((uchar *)camry_host_ptr((uint32_t)((int)(0xffffb162u + (uint32_t)((int)puVar5)))))) = local_4c;
+  (*((uchar *)camry_host_ptr((uint32_t)((int)(0xffffb160u + (uint32_t)((int)puVar5)))))) = uStack_4b;
+  f33_six_channel_fit_work.unsigned_max[0] = uStack_44;
+  f33_six_channel_fit_work.unsigned_max[1] = uStack_42;
+  f33_six_channel_fit_work.unsigned_max[2] = uStack_40;
+  f33_six_channel_fit_work.unsigned_max[3] = uStack_3e;
+  f33_six_channel_fit_work.unsigned_max[4] = uStack_3c;
+  f33_six_channel_fit_work.unsigned_max[5] = uStack_3a;
+  f33_six_channel_fit_work.unsigned_min[0] = uStack_38;
+  f33_six_channel_fit_work.unsigned_min[1] = uStack_36;
+  f33_six_channel_fit_work.unsigned_min[2] = uStack_34;
+  f33_six_channel_fit_work.unsigned_min[3] = uStack_32;
+  f33_six_channel_fit_work.unsigned_min[4] = uStack_30;
+  f33_six_channel_fit_work.unsigned_min[5] = uStack_2e;
+  f33_six_channel_fit_work.unsigned_previous[3] = uStack_4a;
+  f33_six_channel_fit_work.unsigned_previous[5] = uStack_46;
+  f33_six_channel_fit_work.unsigned_previous[4] = uStack_48;
+  return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x000335a0) */
+/* WARNING: Removing unreachable block (ram,0x0003356a) */
+/* WARNING: Removing unreachable block (ram,0x00033538) */
+/* WARNING: Removing unreachable block (ram,0x00033504) */
+/* WARNING: Removing unreachable block (ram,0x000334de) */
+/* WARNING: Removing unreachable block (ram,0x000334b8) */
+/* WARNING: Removing unreachable block (ram,0x00033354) */
+/* WARNING: Removing unreachable block (ram,0x00033350) */
+/* WARNING: Removing unreachable block (ram,0x0003334c) */
+/* WARNING: Removing unreachable block (ram,0x00033348) */
+/* WARNING: Removing unreachable block (ram,0x00033344) */
+/* WARNING: Removing unreachable block (ram,0x00033340) */
+/* WARNING: Removing unreachable block (ram,0x000331b6) */
+/* WARNING: Removing unreachable block (ram,0x000331b2) */
+/* WARNING: Removing unreachable block (ram,0x000331ae) */
+/* WARNING: Removing unreachable block (ram,0x000331aa) */
+/* WARNING: Removing unreachable block (ram,0x000331a6) */
+/* WARNING: Removing unreachable block (ram,0x000331a2) */
+/* Derive six signed channels from retained first gains/centers and literal32768, not live sample
+   channels. Symmetric saturation, signed division and six Q16 recurrences use truncation toward
+   zero. Same input gates and coverage threshold5 advance33->44. */
+
+void f33_step_signed_constant_fit_sweep(short angle)
+
+{
+  longlong lVar1;
+  int iVar2;
+  int iVar3;
+  int iVar4;
+  uint32_t puVar5;
+  uint uVar6;
+  uint uVar7;
+  uint uVar8;
+  uint uVar9;
+  uint uVar10;
+  uint uVar11;
+  int iVar12;
+  int iVar13;
+  int iVar14;
+  int iVar15;
+  int iVar16;
+  int iVar17;
+  int iVar18;
+  int iVar19;
+  int iVar20;
+  short sVar21;
+  short sVar22;
+  short sVar23;
+  short sVar24;
+  short sVar25;
+  short sVar26;
+  uchar uStack_52;
+  uchar uStack_51;
+  int iStack_50;
+  int iStack_4c;
+  int iStack_48;
+  short sStack_44;
+  short sStack_42;
+  short sStack_40;
+  short sStack_3e;
+  short sStack_3c;
+  short sStack_3a;
+  short sStack_38;
+  short sStack_36;
+  short sStack_34;
+  short sStack_32;
+  short sStack_30;
+  short sStack_2e;
+  
+  puVar5 = 0xfebeb800u;
+  iVar2 = (int)DAT_febe5f36;
+  uStack_52 = f33_six_channel_fit_work.signed_initialized;
+  uStack_51 = f33_six_channel_fit_work.state;
+  sStack_44 = f33_six_channel_fit_work.signed_max[0];
+  sStack_38 = f33_six_channel_fit_work.signed_min[0];
+  sStack_36 = f33_six_channel_fit_work.signed_min[1];
+  sStack_34 = f33_six_channel_fit_work.signed_min[2];
+  sStack_32 = f33_six_channel_fit_work.signed_min[3];
+  sStack_30 = f33_six_channel_fit_work.signed_min[4];
+  sStack_2e = f33_six_channel_fit_work.signed_min[5];
+  sStack_40 = f33_six_channel_fit_work.signed_max[2];
+  sStack_3e = f33_six_channel_fit_work.signed_max[3];
+  sStack_3c = f33_six_channel_fit_work.signed_max[4];
+  sStack_3a = f33_six_channel_fit_work.signed_max[5];
+  iStack_50 = f33_six_channel_fit_work.signed_q16[3];
+  iStack_4c = f33_six_channel_fit_work.signed_q16[4];
+  iStack_48 = f33_six_channel_fit_work.signed_q16[5];
+  sStack_42 = f33_six_channel_fit_work.signed_max[1];
+  uVar11 = (uint)f33_six_channel_fit_work.first_gain[0];
+  uVar10 = (uint)f33_six_channel_fit_work.first_gain[1];
+  uVar9 = (uint)f33_six_channel_fit_work.first_gain[2];
+  uVar8 = (uint)f33_six_channel_fit_work.first_gain[3];
+  uVar7 = (uint)f33_six_channel_fit_work.first_gain[4];
+  uVar6 = (uint)f33_six_channel_fit_work.first_gain[5];
+  if (iVar2 + 0x7fff < 0 == (-1 < iVar2 && iVar2 + 0x7fff < 0) && iVar2 != -0x7fff) {
+    if (iVar2 < 0) {
+      iVar2 = (int)-DAT_febe5f36;
+    }
+  }
+  else {
+    iVar2 = 0x7fff;
+  }
+  if (((DAT_febe7db0 < f33_fit_parameters.qualifier_lower) ||
+      (f33_fit_parameters.qualifier_upper < DAT_febe7db0)) ||
+     (iVar17 = (int)f33_fit_parameters.magnitude_upper,
+     iVar2 - iVar17 < 0 == (iVar2 < 0 != iVar17 < 0 && iVar17 < 0 == iVar2 - iVar17 < 0) &&
+     iVar2 != iVar17)) {
+    uStack_52 = '\0';
+    goto LAB_00033638;
+  }
+  iVar2 = (int)(0x8000 - (uint)f33_six_channel_fit_work.first_center[0]) / 4;
+  iVar17 = (int)(0x8000 - (uint)f33_six_channel_fit_work.first_center[1]) / 4;
+  iVar15 = (int)(0x8000 - (uint)f33_six_channel_fit_work.first_center[2]) / 4;
+  iVar14 = (int)(0x8000 - (uint)f33_six_channel_fit_work.first_center[3]) / 4;
+  iVar3 = (int)(0x8000 - (uint)f33_six_channel_fit_work.first_center[4]) / 4;
+  iVar12 = (int)(0x8000 - (uint)f33_six_channel_fit_work.first_center[5]) / 4;
+  if ((uVar11 == 0) || (iVar2 == 0)) {
+    iVar2 = 0;
+  }
+  else {
+    lVar1 = (longlong)iVar2 * (longlong)(int)uVar11;
+    iVar4 = (int)((ulonglong)lVar1 >> 0x20);
+    if (iVar2 < 0) {
+      iVar4 = iVar4 + 1;
+      if ((iVar4 < 0 == (-1 < lVar1 && iVar4 < 0)) && (0x80000000 < uVar11 * iVar2))
+      goto LAB_000331fe;
+      iVar2 = -0x7fffffff;
+    }
+    else if ((lVar1 < 0 || iVar4 == 0) && (uVar11 * iVar2 < 0x80000000)) {
+LAB_000331fe:
+      iVar2 = uVar11 * iVar2;
+    }
+    else {
+      iVar2 = 0x7fffffff;
+    }
+  }
+  if ((uVar10 == 0) || (iVar17 == 0)) {
+    iVar17 = 0;
+  }
+  else {
+    lVar1 = (longlong)iVar17 * (longlong)(int)uVar10;
+    iVar4 = (int)((ulonglong)lVar1 >> 0x20);
+    if (iVar17 < 0) {
+      iVar4 = iVar4 + 1;
+      if ((iVar4 < 0 == (-1 < lVar1 && iVar4 < 0)) && (0x80000000 < uVar10 * iVar17))
+      goto LAB_0003323e;
+      iVar17 = -0x7fffffff;
+    }
+    else if ((lVar1 < 0 || iVar4 == 0) && (uVar10 * iVar17 < 0x80000000)) {
+LAB_0003323e:
+      iVar17 = uVar10 * iVar17;
+    }
+    else {
+      iVar17 = 0x7fffffff;
+    }
+  }
+  if ((uVar9 == 0) || (iVar15 == 0)) {
+    iVar15 = 0;
+  }
+  else {
+    lVar1 = (longlong)iVar15 * (longlong)(int)uVar9;
+    iVar4 = (int)((ulonglong)lVar1 >> 0x20);
+    if (iVar15 < 0) {
+      iVar4 = iVar4 + 1;
+      if ((iVar4 < 0 == (-1 < lVar1 && iVar4 < 0)) && (0x80000000 < uVar9 * iVar15))
+      goto LAB_0003327e;
+      iVar15 = -0x7fffffff;
+    }
+    else if ((lVar1 < 0 || iVar4 == 0) && (uVar9 * iVar15 < 0x80000000)) {
+LAB_0003327e:
+      iVar15 = uVar9 * iVar15;
+    }
+    else {
+      iVar15 = 0x7fffffff;
+    }
+  }
+  if ((uVar8 == 0) || (iVar14 == 0)) {
+    iVar14 = 0;
+  }
+  else {
+    lVar1 = (longlong)iVar14 * (longlong)(int)uVar8;
+    iVar4 = (int)((ulonglong)lVar1 >> 0x20);
+    if (iVar14 < 0) {
+      iVar4 = iVar4 + 1;
+      if ((iVar4 < 0 == (-1 < lVar1 && iVar4 < 0)) && (0x80000000 < uVar8 * iVar14))
+      goto LAB_000332be;
+      iVar14 = -0x7fffffff;
+    }
+    else if ((lVar1 < 0 || iVar4 == 0) && (uVar8 * iVar14 < 0x80000000)) {
+LAB_000332be:
+      iVar14 = uVar8 * iVar14;
+    }
+    else {
+      iVar14 = 0x7fffffff;
+    }
+  }
+  if ((uVar7 == 0) || (iVar3 == 0)) {
+    iVar3 = 0;
+  }
+  else {
+    lVar1 = (longlong)iVar3 * (longlong)(int)uVar7;
+    iVar4 = (int)((ulonglong)lVar1 >> 0x20);
+    if (iVar3 < 0) {
+      iVar4 = iVar4 + 1;
+      if ((iVar4 < 0 == (-1 < lVar1 && iVar4 < 0)) && (0x80000000 < uVar7 * iVar3))
+      goto LAB_000332fe;
+      iVar3 = -0x7fffffff;
+    }
+    else if ((lVar1 < 0 || iVar4 == 0) && (uVar7 * iVar3 < 0x80000000)) {
+LAB_000332fe:
+      iVar3 = uVar7 * iVar3;
+    }
+    else {
+      iVar3 = 0x7fffffff;
+    }
+  }
+  if ((uVar6 == 0) || (iVar12 == 0)) {
+    uVar6 = 0;
+  }
+  else {
+    lVar1 = (longlong)iVar12 * (longlong)(int)uVar6;
+    iVar4 = (int)((ulonglong)lVar1 >> 0x20);
+    if (iVar12 < 0) {
+      iVar4 = iVar4 + 1;
+      if ((iVar4 < 0 != (-1 < lVar1 && iVar4 < 0)) || (uVar6 = uVar6 * iVar12, uVar6 < 0x80000001))
+      {
+        uVar6 = 0x80000001;
+      }
+    }
+    else if ((-1 < lVar1 && iVar4 != 0) || (uVar6 = uVar6 * iVar12, 0x7fffffff < uVar6)) {
+      uVar6 = 0x7fffffff;
+    }
+  }
+  iVar4 = iVar3 / 0x8000 + iVar2 / 0x8000;
+  iVar20 = (int)uVar6 / 0x8000 + iVar17 / 0x8000;
+  iVar12 = iVar4 - iVar20;
+  iVar20 = iVar20 + iVar4;
+  iVar3 = iVar3 / 0x8000 + iVar15 / 0x8000;
+  iVar15 = iVar15 / 0x8000 + iVar2 / 0x8000;
+  iVar4 = iVar14 / 0x8000 + iVar17 / 0x8000;
+  iVar14 = (int)uVar6 / 0x8000 + iVar14 / 0x8000;
+  iVar2 = iVar15 - iVar4;
+  iVar17 = iVar3 - iVar14;
+  iVar4 = iVar4 + iVar15;
+  iVar14 = iVar14 + iVar3;
+  if (iVar12 + 0x7fff < 0 == (-1 < iVar12 && iVar12 + 0x7fff < 0) && iVar12 != -0x7fff) {
+    if (iVar12 + -0x7fff < 0 == (iVar12 < 0 && -1 < iVar12 + -0x7fff) && iVar12 != 0x7fff) {
+      iVar15 = 0x7fff;
+    }
+    else {
+      iVar15 = (int)(short)iVar12;
+    }
+  }
+  else {
+    iVar15 = -0x7fff;
+  }
+  if (iVar20 + 0x7fff < 0 == (-1 < iVar20 && iVar20 + 0x7fff < 0) && iVar20 != -0x7fff) {
+    if (iVar20 + -0x7fff < 0 == (iVar20 < 0 && -1 < iVar20 + -0x7fff) && iVar20 != 0x7fff) {
+      iVar3 = 0x7fff;
+    }
+    else {
+      iVar3 = (int)(short)iVar20;
+    }
+  }
+  else {
+    iVar3 = -0x7fff;
+  }
+  if (iVar2 + 0x7fff < 0 == (-1 < iVar2 && iVar2 + 0x7fff < 0) && iVar2 != -0x7fff) {
+    if (iVar2 + -0x7fff < 0 == (iVar2 < 0 && -1 < iVar2 + -0x7fff) && iVar2 != 0x7fff) {
+      iVar2 = 0x7fff;
+    }
+    else {
+      iVar2 = (int)(short)iVar2;
+    }
+  }
+  else {
+    iVar2 = -0x7fff;
+  }
+  if (iVar4 + 0x7fff < 0 == (-1 < iVar4 && iVar4 + 0x7fff < 0) && iVar4 != -0x7fff) {
+    if (iVar4 + -0x7fff < 0 == (iVar4 < 0 && -1 < iVar4 + -0x7fff) && iVar4 != 0x7fff) {
+      iVar12 = 0x7fff;
+    }
+    else {
+      iVar12 = (int)(short)iVar4;
+    }
+  }
+  else {
+    iVar12 = -0x7fff;
+  }
+  if (iVar17 + 0x7fff < 0 == (-1 < iVar17 && iVar17 + 0x7fff < 0) && iVar17 != -0x7fff) {
+    iVar4 = (int)(short)iVar17;
+    if (iVar17 + -0x7fff < 0 == (iVar17 < 0 && -1 < iVar17 + -0x7fff) && iVar17 != 0x7fff) {
+      iVar4 = 0x7fff;
+    }
+  }
+  else {
+    iVar4 = -0x7fff;
+  }
+  if (iVar14 + 0x7fff < 0 == (-1 < iVar14 && iVar14 + 0x7fff < 0) && iVar14 != -0x7fff) {
+    iVar17 = (int)(short)iVar14;
+    if (iVar14 + -0x7fff < 0 == (iVar14 < 0 && -1 < iVar14 + -0x7fff) && iVar14 != 0x7fff) {
+      iVar17 = 0x7fff;
+    }
+  }
+  else {
+    iVar17 = -0x7fff;
+  }
+  if (f33_six_channel_fit_work.signed_initialized == '\0') {
+    sStack_3a = (short)iVar17;
+    sStack_3c = (short)iVar4;
+    sStack_3e = (short)iVar12;
+    sStack_40 = (short)iVar2;
+    sStack_42 = (short)iVar3;
+    sStack_44 = (short)iVar15;
+    iStack_50 = iVar12 << 0x10;
+    iVar18 = iVar2 << 0x10;
+    iVar19 = iVar3 << 0x10;
+    iVar20 = iVar15 << 0x10;
+    iStack_4c = iVar4 << 0x10;
+    iStack_48 = iVar17 << 0x10;
+    f33_six_channel_fit_work.coverage_max = 0;
+    f33_six_channel_fit_work.coverage_min = 0;
+    f33_six_channel_fit_work.coverage_sum = 0;
+    f33_six_channel_fit_work.coverage_count = '\0';
+    uStack_52 = 'Z';
+    sStack_38 = sStack_44;
+    sStack_36 = sStack_42;
+    sStack_34 = sStack_40;
+    sStack_32 = sStack_3e;
+    sStack_30 = sStack_3c;
+    sStack_2e = sStack_3a;
+  }
+  else {
+    iVar14 = (uint)f33_fit_parameters.signed_filter_half_gain * 2;
+    uVar6 = iVar14 - 1;
+    if (uVar6 < 0xffff) {
+      iVar20 = f33_six_channel_fit_work.signed_previous[0] * iVar14;
+      iVar15 = iVar15 * iVar14;
+    }
+    else {
+      iVar20 = (int)f33_six_channel_fit_work.signed_previous[0] << 0x10;
+      iVar15 = iVar15 << 0x10;
+    }
+    iVar20 = iVar15 + (f33_six_channel_fit_work.signed_q16[0] - iVar20);
+    sVar26 = (short)(iVar20 / 0x10000);
+    iVar15 = (int)sVar26;
+    if (uVar6 < 0xffff) {
+      iVar19 = f33_six_channel_fit_work.signed_previous[1] * iVar14;
+      iVar3 = iVar3 * iVar14;
+    }
+    else {
+      iVar19 = (int)f33_six_channel_fit_work.signed_previous[1] << 0x10;
+      iVar3 = iVar3 << 0x10;
+    }
+    iVar19 = iVar3 + (f33_six_channel_fit_work.signed_q16[1] - iVar19);
+    sVar25 = (short)(iVar19 / 0x10000);
+    iVar3 = (int)sVar25;
+    if (uVar6 < 0xffff) {
+      iVar18 = f33_six_channel_fit_work.signed_previous[2] * iVar14;
+      iVar2 = iVar2 * iVar14;
+    }
+    else {
+      iVar18 = (int)f33_six_channel_fit_work.signed_previous[2] << 0x10;
+      iVar2 = iVar2 << 0x10;
+    }
+    iVar18 = iVar2 + (f33_six_channel_fit_work.signed_q16[2] - iVar18);
+    sVar24 = (short)(iVar18 / 0x10000);
+    iVar2 = (int)sVar24;
+    if (uVar6 < 0xffff) {
+      iVar16 = f33_six_channel_fit_work.signed_previous[3] * iVar14;
+      iVar12 = iVar12 * iVar14;
+    }
+    else {
+      iVar16 = (int)f33_six_channel_fit_work.signed_previous[3] << 0x10;
+      iVar12 = iVar12 << 0x10;
+    }
+    iStack_50 = iVar12 + (f33_six_channel_fit_work.signed_q16[3] - iVar16);
+    sVar23 = (short)(iStack_50 / 0x10000);
+    iVar12 = (int)sVar23;
+    if (uVar6 < 0xffff) {
+      iVar16 = f33_six_channel_fit_work.signed_previous[4] * iVar14;
+      iVar4 = iVar4 * iVar14;
+    }
+    else {
+      iVar16 = (int)f33_six_channel_fit_work.signed_previous[4] << 0x10;
+      iVar4 = iVar4 << 0x10;
+    }
+    iStack_4c = iVar4 + (f33_six_channel_fit_work.signed_q16[4] - iVar16);
+    sVar22 = (short)(iStack_4c / 0x10000);
+    iVar4 = (int)sVar22;
+    if (uVar6 < 0xffff) {
+      iVar16 = f33_six_channel_fit_work.signed_previous[5] * iVar14;
+      iVar17 = iVar17 * iVar14;
+    }
+    else {
+      iVar16 = (int)f33_six_channel_fit_work.signed_previous[5] << 0x10;
+      iVar17 = iVar17 << 0x10;
+    }
+    iVar14 = (int)f33_six_channel_fit_work.signed_max[0];
+    iVar13 = (int)f33_six_channel_fit_work.signed_max[1];
+    iStack_48 = iVar17 + (f33_six_channel_fit_work.signed_q16[5] - iVar16);
+    iVar16 = (int)f33_six_channel_fit_work.signed_max[2];
+    if (iVar15 - iVar14 < 0 == (iVar15 < 0 != iVar14 < 0 && iVar14 < 0 == iVar15 - iVar14 < 0) &&
+        iVar15 != iVar14) {
+      sStack_44 = sVar26;
+    }
+    sVar21 = (short)(iStack_48 / 0x10000);
+    iVar17 = (int)sVar21;
+    iVar14 = (int)f33_six_channel_fit_work.signed_max[3];
+    if (iVar3 - iVar13 < 0 == (iVar3 < 0 != iVar13 < 0 && iVar13 < 0 == iVar3 - iVar13 < 0) &&
+        iVar3 != iVar13) {
+      sStack_42 = sVar25;
+    }
+    iVar13 = (int)f33_six_channel_fit_work.signed_max[4];
+    if (iVar2 - iVar16 < 0 == (iVar2 < 0 != iVar16 < 0 && iVar16 < 0 == iVar2 - iVar16 < 0) &&
+        iVar2 != iVar16) {
+      sStack_40 = sVar24;
+    }
+    iVar16 = (int)f33_six_channel_fit_work.signed_max[5];
+    if (iVar12 - iVar14 < 0 == (iVar12 < 0 != iVar14 < 0 && iVar14 < 0 == iVar12 - iVar14 < 0) &&
+        iVar12 != iVar14) {
+      sStack_3e = sVar23;
+    }
+    iVar14 = (int)f33_six_channel_fit_work.signed_min[0];
+    if (iVar4 - iVar13 < 0 == (iVar4 < 0 != iVar13 < 0 && iVar13 < 0 == iVar4 - iVar13 < 0) &&
+        iVar4 != iVar13) {
+      sStack_3c = sVar22;
+    }
+    iVar13 = (int)f33_six_channel_fit_work.signed_min[1];
+    if (iVar17 - iVar16 < 0 == (iVar17 < 0 != iVar16 < 0 && iVar16 < 0 == iVar17 - iVar16 < 0) &&
+        iVar17 != iVar16) {
+      sStack_3a = sVar21;
+    }
+    iVar16 = (int)f33_six_channel_fit_work.signed_min[2];
+    if (iVar15 - iVar14 < 0 != (iVar15 < 0 != iVar14 < 0 && iVar14 < 0 == iVar15 - iVar14 < 0)) {
+      sStack_38 = sVar26;
+    }
+    iVar14 = (int)f33_six_channel_fit_work.signed_min[3];
+    if (iVar3 - iVar13 < 0 != (iVar3 < 0 != iVar13 < 0 && iVar13 < 0 == iVar3 - iVar13 < 0)) {
+      sStack_36 = sVar25;
+    }
+    iVar13 = (int)f33_six_channel_fit_work.signed_min[4];
+    if (iVar2 - iVar16 < 0 != (iVar2 < 0 != iVar16 < 0 && iVar16 < 0 == iVar2 - iVar16 < 0)) {
+      sStack_34 = sVar24;
+    }
+    iVar16 = (int)f33_six_channel_fit_work.signed_min[5];
+    if (iVar12 - iVar14 < 0 != (iVar12 < 0 != iVar14 < 0 && iVar14 < 0 == iVar12 - iVar14 < 0)) {
+      sStack_32 = sVar23;
+    }
+    if (iVar4 - iVar13 < 0 != (iVar4 < 0 != iVar13 < 0 && iVar13 < 0 == iVar4 - iVar13 < 0)) {
+      sStack_30 = sVar22;
+    }
+    if (iVar17 - iVar16 < 0 != (iVar17 < 0 != iVar16 < 0 && iVar16 < 0 == iVar17 - iVar16 < 0)) {
+      sStack_2e = sVar21;
+    }
+  }
+  puVar5 = 0xfebeb800u;
+  uVar6 = f33_track_fit_angular_coverage(angle,f33_fit_parameters.signed_coverage_spans);
+  f33_six_channel_fit_work.signed_q16[2] = iVar18;
+  f33_six_channel_fit_work.signed_q16[1] = iVar19;
+  f33_six_channel_fit_work.signed_q16[0] = iVar20;
+  f33_six_channel_fit_work.signed_previous[0] = (short)iVar15;
+  f33_six_channel_fit_work.signed_previous[1] = (short)iVar3;
+  f33_six_channel_fit_work.signed_previous[2] = (short)iVar2;
+  f33_six_channel_fit_work.signed_previous[3] = (short)iVar12;
+  f33_six_channel_fit_work.signed_previous[4] = (short)iVar4;
+  f33_six_channel_fit_work.signed_previous[5] = (short)iVar17;
+  if (uVar6 == 0xa5) {
+    uStack_51 = 'D';
+  }
+LAB_00033638:
+  (*((uchar *)camry_host_ptr((uint32_t)((int)0xffffb162u + (int)(puVar5 + 1))))) = uStack_52;
+  (*((uchar *)camry_host_ptr((uint32_t)((int)(0xffffb160u + (uint32_t)((int)puVar5)))))) = uStack_51;
+  f33_six_channel_fit_work.signed_max[0] = sStack_44;
+  f33_six_channel_fit_work.signed_max[1] = sStack_42;
+  f33_six_channel_fit_work.signed_max[2] = sStack_40;
+  f33_six_channel_fit_work.signed_max[3] = sStack_3e;
+  f33_six_channel_fit_work.signed_max[4] = sStack_3c;
+  f33_six_channel_fit_work.signed_max[5] = sStack_3a;
+  f33_six_channel_fit_work.signed_min[0] = sStack_38;
+  f33_six_channel_fit_work.signed_min[1] = sStack_36;
+  f33_six_channel_fit_work.signed_min[2] = sStack_34;
+  f33_six_channel_fit_work.signed_min[3] = sStack_32;
+  f33_six_channel_fit_work.signed_min[4] = sStack_30;
+  f33_six_channel_fit_work.signed_min[5] = sStack_2e;
+  f33_six_channel_fit_work.signed_q16[3] = iStack_50;
+  f33_six_channel_fit_work.signed_q16[4] = iStack_4c;
+  f33_six_channel_fit_work.signed_q16[5] = iStack_48;
+  return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x00033962) */
+/* WARNING: Removing unreachable block (ram,0x0003395e) */
+/* WARNING: Removing unreachable block (ram,0x0003395a) */
+/* WARNING: Removing unreachable block (ram,0x00033956) */
+/* WARNING: Removing unreachable block (ram,0x00033952) */
+/* WARNING: Removing unreachable block (ram,0x0003394e) */
+/* WARNING: Removing unreachable block (ram,0x0003394a) */
+/* WARNING: Removing unreachable block (ram,0x00033946) */
+/* WARNING: Removing unreachable block (ram,0x00033942) */
+/* WARNING: Removing unreachable block (ram,0x00033936) */
+/* WARNING: Removing unreachable block (ram,0x00033932) */
+/* WARNING: Removing unreachable block (ram,0x0003390a) */
+/* Mode0512/0600 six-channel numerical-fit controller; active6961=5A, states0/11/22/33/44/55/66.
+   Prior-angle update occurs even while inactive or phase-admission fails. First sweep follows
+   literal0x8000, not acquired samples; numerical success is not physical calibration. Terminal flag
+   clears on next invocation. Interior33966 shares this function frame; it is not an independent
+   ABI. Interior33966 shares this frame, not an independent ABI. */
+
+void f33_step_six_channel_fit(void)
+
+{
+  short sVar1;
+  uint uVar2;
+  uint uVar3;
+  undefined *puVar4;
+  uint32_t puVar5;
+  int iVar6;
+  int iVar7;
+  int iVar8;
+  int iVar9;
+  uint uVar10;
+  uint uVar11;
+  uint uVar12;
+  int iVar13;
+  uint uVar14;
+  int iVar15;
+  int iVar16;
+  uint uVar17;
+  uint uVar18;
+  uint uVar19;
+  uchar uVar20;
+  int iVar21;
+  int iVar22;
+  int iVar23;
+  int iVar24;
+  int iVar25;
+  ushort local_44;
+  ushort uStack_42;
+  ushort uStack_40;
+  short sStack_3e;
+  short sStack_3c;
+  short sStack_3a;
+  ushort uStack_38;
+  ushort uStack_36;
+  ushort uStack_34;
+  ushort uStack_32;
+  ushort uStack_30;
+  ushort uStack_2e;
+  
+  sVar1 = (short)DAT_febe7d94;
+  uVar20 = f33_six_channel_fit_work.active;
+  puVar5 = 0xfebeb800u;
+  puVar4 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  if (f33_six_channel_fit_work.active == 'Z') {
+    if (f33_six_channel_fit_work.state == '\0') {
+      f33_six_channel_fit_work.unsigned_initialized = '\0';
+      f33_six_channel_fit_work.state = '\x11';
+      f33_six_channel_fit_work.signed_initialized = '\0';
+      f33_six_channel_fit_work.coverage_count = '\0';
+      f33_six_channel_fit_work.coverage_sum = 0;
+      f33_six_channel_fit_work.coverage_min = 0;
+      f33_six_channel_fit_work.coverage_max = 0;
+    }
+    else if (f33_six_channel_fit_work.state == '\x11') {
+      puVar4 = ((undefined *)camry_host_ptr(0xfebeb800u));
+      f33_step_unsigned_literal_fit_sweep((short)DAT_febe7d94);
+    }
+    else if (f33_six_channel_fit_work.state == '\"') {
+      iVar6 = (uint)f33_six_channel_fit_work.unsigned_max[0] -
+              (uint)f33_six_channel_fit_work.unsigned_min[0];
+      uStack_38 = f33_six_channel_fit_work.first_gain[0];
+      uStack_36 = f33_six_channel_fit_work.first_gain[1];
+      uStack_34 = f33_six_channel_fit_work.first_gain[2];
+      uStack_32 = f33_six_channel_fit_work.first_gain[3];
+      iVar7 = (uint)f33_six_channel_fit_work.unsigned_max[1] -
+              (uint)f33_six_channel_fit_work.unsigned_min[1];
+      uStack_30 = f33_six_channel_fit_work.first_gain[4];
+      iVar8 = (uint)f33_six_channel_fit_work.unsigned_max[2] -
+              (uint)f33_six_channel_fit_work.unsigned_min[2];
+      uStack_2e = f33_six_channel_fit_work.first_gain[5];
+      iVar9 = (uint)f33_six_channel_fit_work.unsigned_max[3] -
+              (uint)f33_six_channel_fit_work.unsigned_min[3];
+      iVar13 = (uint)f33_six_channel_fit_work.unsigned_max[4] -
+               (uint)f33_six_channel_fit_work.unsigned_min[4];
+      iVar15 = (uint)f33_six_channel_fit_work.unsigned_max[5] -
+               (uint)f33_six_channel_fit_work.unsigned_min[5];
+      if ((((iVar6 < 1) || (iVar7 < 1)) || (iVar8 < 1)) ||
+         (((iVar9 < 1 || (iVar13 < 1)) || (iVar15 < 1)))) {
+        f33_six_channel_fit_work.state = 'f';
+      }
+      else {
+        uVar18 = (uint)f33_fit_parameters.first_gain_numerator;
+        uVar17 = uVar18 << 0xf;
+        uVar11 = uVar17;
+        if (iVar8 != 0) {
+          if (uVar18 == 0x10000 && iVar8 == -1) {
+            uVar11 = 0x80000000;
+          }
+          else {
+            uVar11 = (int)uVar17 / iVar8;
+          }
+        }
+        uVar3 = uVar17;
+        if (iVar9 != 0) {
+          if (uVar18 == 0x10000 && iVar9 == -1) {
+            uVar3 = 0x80000000;
+          }
+          else {
+            uVar3 = (int)uVar17 / iVar9;
+          }
+        }
+        uVar19 = uVar17;
+        if (iVar6 != 0) {
+          if (uVar18 == 0x10000 && iVar6 == -1) {
+            uVar19 = 0x80000000;
+          }
+          else {
+            uVar19 = (int)uVar17 / iVar6;
+          }
+        }
+        uVar2 = (uint)f33_fit_parameters.gain_upper;
+        uVar14 = uVar17;
+        if (iVar7 != 0) {
+          if (uVar18 == 0x10000 && iVar7 == -1) {
+            uVar14 = 0x80000000;
+          }
+          else {
+            uVar14 = (int)uVar17 / iVar7;
+          }
+        }
+        uVar10 = uVar17;
+        if (iVar13 != 0) {
+          if (uVar18 == 0x10000 && iVar13 == -1) {
+            uVar10 = 0x80000000;
+          }
+          else {
+            uVar10 = (int)uVar17 / iVar13;
+          }
+        }
+        if (iVar15 != 0) {
+          if (uVar18 == 0x10000 && iVar15 == -1) {
+            uVar17 = 0x80000000;
+          }
+          else {
+            uVar17 = (int)uVar17 / iVar15;
+          }
+        }
+        uVar18 = (uint)f33_fit_parameters.gain_lower;
+        if ((int)(uVar2 - uVar19) < 0 !=
+            ((int)uVar19 < 0 && (int)uVar19 < 0 == (int)(uVar2 - uVar19) < 0)) {
+          uVar19 = uVar2;
+        }
+        uVar12 = uVar18;
+        if ((int)(uVar19 - uVar18) < 0 == ((int)uVar19 < 0 && -1 < (int)(uVar19 - uVar18))) {
+          uVar12 = uVar19;
+        }
+        uStack_38 = (ushort)uVar12;
+        if ((int)(uVar2 - uVar14) < 0 !=
+            ((int)uVar14 < 0 && (int)uVar14 < 0 == (int)(uVar2 - uVar14) < 0)) {
+          uVar14 = uVar2;
+        }
+        uVar19 = uVar18;
+        if ((int)(uVar14 - uVar18) < 0 == ((int)uVar14 < 0 && -1 < (int)(uVar14 - uVar18))) {
+          uVar19 = uVar14;
+        }
+        uStack_36 = (ushort)uVar19;
+        if ((int)(uVar2 - uVar11) < 0 !=
+            ((int)uVar11 < 0 && (int)uVar11 < 0 == (int)(uVar2 - uVar11) < 0)) {
+          uVar11 = uVar2;
+        }
+        uVar19 = uVar18;
+        if ((int)(uVar11 - uVar18) < 0 == ((int)uVar11 < 0 && -1 < (int)(uVar11 - uVar18))) {
+          uVar19 = uVar11;
+        }
+        uStack_34 = (ushort)uVar19;
+        if ((int)(uVar2 - uVar3) < 0 !=
+            ((int)uVar3 < 0 && (int)uVar3 < 0 == (int)(uVar2 - uVar3) < 0)) {
+          uVar3 = uVar2;
+        }
+        uVar11 = uVar18;
+        if ((int)(uVar3 - uVar18) < 0 == ((int)uVar3 < 0 && -1 < (int)(uVar3 - uVar18))) {
+          uVar11 = uVar3;
+        }
+        uStack_32 = (ushort)uVar11;
+        if ((int)(uVar2 - uVar10) < 0 !=
+            ((int)uVar10 < 0 && (int)uVar10 < 0 == (int)(uVar2 - uVar10) < 0)) {
+          uVar10 = uVar2;
+        }
+        uVar11 = uVar18;
+        if ((int)(uVar10 - uVar18) < 0 == ((int)uVar10 < 0 && -1 < (int)(uVar10 - uVar18))) {
+          uVar11 = uVar10;
+        }
+        uStack_30 = (ushort)uVar11;
+        if ((int)(uVar2 - uVar17) < 0 !=
+            ((int)uVar17 < 0 && (int)uVar17 < 0 == (int)(uVar2 - uVar17) < 0)) {
+          uVar17 = uVar2;
+        }
+        if ((int)(uVar17 - uVar18) < 0 == ((int)uVar17 < 0 && -1 < (int)(uVar17 - uVar18))) {
+          uVar18 = uVar17;
+        }
+        uStack_2e = (ushort)uVar18;
+        f33_six_channel_fit_work.first_center[0] =
+             (ushort)((uint)f33_six_channel_fit_work.unsigned_min[0] +
+                      (uint)f33_six_channel_fit_work.unsigned_max[0] >> 1);
+        f33_six_channel_fit_work.first_center[1] =
+             (ushort)((uint)f33_six_channel_fit_work.unsigned_min[1] +
+                      (uint)f33_six_channel_fit_work.unsigned_max[1] >> 1);
+        f33_six_channel_fit_work.first_center[2] =
+             (ushort)((uint)f33_six_channel_fit_work.unsigned_min[2] +
+                      (uint)f33_six_channel_fit_work.unsigned_max[2] >> 1);
+        f33_six_channel_fit_work.first_center[3] =
+             (ushort)((uint)f33_six_channel_fit_work.unsigned_min[3] +
+                      (uint)f33_six_channel_fit_work.unsigned_max[3] >> 1);
+        f33_six_channel_fit_work.first_center[4] =
+             (ushort)((uint)f33_six_channel_fit_work.unsigned_min[4] +
+                      (uint)f33_six_channel_fit_work.unsigned_max[4] >> 1);
+        f33_six_channel_fit_work.first_center[5] =
+             (ushort)((uint)f33_six_channel_fit_work.unsigned_min[5] +
+                      (uint)f33_six_channel_fit_work.unsigned_max[5] >> 1);
+        f33_six_channel_fit_work.state = '3';
+      }
+      f33_six_channel_fit_work.first_gain[0] = uStack_38;
+      f33_six_channel_fit_work.first_gain[3] = uStack_32;
+      f33_six_channel_fit_work.first_gain[4] = uStack_30;
+      f33_six_channel_fit_work.first_gain[1] = uStack_36;
+      f33_six_channel_fit_work.first_gain[2] = uStack_34;
+      f33_six_channel_fit_work.first_gain[5] = uStack_2e;
+    }
+    else if (f33_six_channel_fit_work.state == '3') {
+      puVar4 = ((undefined *)camry_host_ptr(0xfebeb800u));
+      f33_step_signed_constant_fit_sweep((short)DAT_febe7d94);
+    }
+    else if (f33_six_channel_fit_work.state == 'D') {
+      iVar8 = (int)f33_six_channel_fit_work.signed_max[0];
+      iVar6 = (int)f33_six_channel_fit_work.signed_max[1];
+      iVar24 = (int)f33_six_channel_fit_work.signed_max[2];
+      iVar16 = (int)f33_six_channel_fit_work.signed_min[0];
+      iVar15 = (int)f33_six_channel_fit_work.signed_min[1];
+      iVar13 = (int)f33_six_channel_fit_work.signed_min[2];
+      local_44 = f33_six_channel_fit_work.component_angle[0];
+      uStack_42 = f33_six_channel_fit_work.component_angle[1];
+      uStack_36 = f33_six_channel_fit_work.second_gain[1];
+      uStack_40 = f33_six_channel_fit_work.component_angle[2];
+      uStack_30 = f33_six_channel_fit_work.second_gain[4];
+      uStack_2e = f33_six_channel_fit_work.second_gain[5];
+      uStack_34 = f33_six_channel_fit_work.second_gain[2];
+      uStack_32 = f33_six_channel_fit_work.second_gain[3];
+      sStack_3e = (short)(((int)f33_six_channel_fit_work.signed_min[3] +
+                          (int)f33_six_channel_fit_work.signed_max[3]) / 2);
+      uStack_38 = f33_six_channel_fit_work.second_gain[0];
+      sStack_3a = (short)(((int)f33_six_channel_fit_work.signed_min[5] +
+                          (int)f33_six_channel_fit_work.signed_max[5]) / 2);
+      iVar9 = (int)(short)((iVar8 - iVar16) / 2);
+      sStack_3c = (short)(((int)f33_six_channel_fit_work.signed_min[4] +
+                          (int)f33_six_channel_fit_work.signed_max[4]) / 2);
+      iVar7 = (int)(short)((iVar6 - iVar15) / 2);
+      iVar25 = (int)(short)((iVar24 - iVar13) / 2);
+      iVar23 = (int)(short)(((int)f33_six_channel_fit_work.signed_max[3] -
+                            (int)f33_six_channel_fit_work.signed_min[3]) / 2);
+      iVar22 = (int)(short)(((int)f33_six_channel_fit_work.signed_max[4] -
+                            (int)f33_six_channel_fit_work.signed_min[4]) / 2);
+      iVar21 = (int)(short)(((int)f33_six_channel_fit_work.signed_max[5] -
+                            (int)f33_six_channel_fit_work.signed_min[5]) / 2);
+      if (((iVar9 < 1) || (iVar7 < 1)) ||
+         ((iVar25 < 1 || (((iVar23 < 1 || (iVar22 < 1)) || (iVar21 < 1)))))) {
+        f33_six_channel_fit_work.state = 'f';
+        puVar4 = ((undefined *)camry_host_ptr(0xfebeb800u));
+      }
+      else {
+        uVar3 = (uint)f33_fit_parameters.gain_upper;
+        uVar19 = (uint)f33_fit_parameters.gain_lower;
+        uVar18 = (uint)f33_fit_parameters.second_gain_numerator;
+        uVar17 = uVar18 << 0xf;
+        uVar11 = uVar17;
+        if (iVar9 != 0) {
+          if (uVar18 == 0x10000 && iVar9 == -1) {
+            uVar11 = 0x80000000;
+          }
+          else {
+            uVar11 = (int)uVar17 / iVar9;
+          }
+        }
+        uVar14 = uVar17;
+        if (iVar7 != 0) {
+          if (uVar18 == 0x10000 && iVar7 == -1) {
+            uVar14 = 0x80000000;
+          }
+          else {
+            uVar14 = (int)uVar17 / iVar7;
+          }
+        }
+        uVar2 = uVar17;
+        if (iVar25 != 0) {
+          if (uVar18 == 0x10000 && iVar25 == -1) {
+            uVar2 = 0x80000000;
+          }
+          else {
+            uVar2 = (int)uVar17 / iVar25;
+          }
+        }
+        uVar10 = uVar17;
+        if (iVar23 != 0) {
+          if (uVar18 == 0x10000 && iVar23 == -1) {
+            uVar10 = 0x80000000;
+          }
+          else {
+            uVar10 = (int)uVar17 / iVar23;
+          }
+        }
+        uVar12 = uVar17;
+        if (iVar22 != 0) {
+          if (uVar18 == 0x10000 && iVar22 == -1) {
+            uVar12 = 0x80000000;
+          }
+          else {
+            uVar12 = (int)uVar17 / iVar22;
+          }
+        }
+        if (iVar21 != 0) {
+          if (uVar18 == 0x10000 && iVar21 == -1) {
+            uVar17 = 0x80000000;
+          }
+          else {
+            uVar17 = (int)uVar17 / iVar21;
+          }
+        }
+        if ((int)(uVar3 - uVar11) < 0 !=
+            ((int)uVar11 < 0 && (int)uVar11 < 0 == (int)(uVar3 - uVar11) < 0)) {
+          uVar11 = uVar3;
+        }
+        uVar18 = uVar19;
+        if ((int)(uVar11 - uVar19) < 0 == ((int)uVar11 < 0 && -1 < (int)(uVar11 - uVar19))) {
+          uVar18 = uVar11;
+        }
+        uStack_38 = (ushort)uVar18;
+        if ((int)(uVar3 - uVar14) < 0 !=
+            ((int)uVar14 < 0 && (int)uVar14 < 0 == (int)(uVar3 - uVar14) < 0)) {
+          uVar14 = uVar3;
+        }
+        uVar18 = uVar19;
+        if ((int)(uVar14 - uVar19) < 0 == ((int)uVar14 < 0 && -1 < (int)(uVar14 - uVar19))) {
+          uVar18 = uVar14;
+        }
+        uStack_36 = (ushort)uVar18;
+        if ((int)(uVar3 - uVar2) < 0 !=
+            ((int)uVar2 < 0 && (int)uVar2 < 0 == (int)(uVar3 - uVar2) < 0)) {
+          uVar2 = uVar3;
+        }
+        uVar18 = uVar19;
+        if ((int)(uVar2 - uVar19) < 0 == ((int)uVar2 < 0 && -1 < (int)(uVar2 - uVar19))) {
+          uVar18 = uVar2;
+        }
+        uStack_34 = (ushort)uVar18;
+        if ((int)(uVar3 - uVar10) < 0 !=
+            ((int)uVar10 < 0 && (int)uVar10 < 0 == (int)(uVar3 - uVar10) < 0)) {
+          uVar10 = uVar3;
+        }
+        uVar18 = uVar19;
+        if ((int)(uVar10 - uVar19) < 0 == ((int)uVar10 < 0 && -1 < (int)(uVar10 - uVar19))) {
+          uVar18 = uVar10;
+        }
+        uStack_32 = (ushort)uVar18;
+        if ((int)(uVar3 - uVar12) < 0 !=
+            ((int)uVar12 < 0 && (int)uVar12 < 0 == (int)(uVar3 - uVar12) < 0)) {
+          uVar12 = uVar3;
+        }
+        uVar18 = uVar19;
+        if ((int)(uVar12 - uVar19) < 0 == ((int)uVar12 < 0 && -1 < (int)(uVar12 - uVar19))) {
+          uVar18 = uVar12;
+        }
+        uStack_30 = (ushort)uVar18;
+        if ((int)(uVar3 - uVar17) < 0 !=
+            ((int)uVar17 < 0 && (int)uVar17 < 0 == (int)(uVar3 - uVar17) < 0)) {
+          uVar17 = uVar3;
+        }
+        uStack_2e = f33_fit_parameters.gain_lower;
+        if ((int)(uVar17 - uVar19) < 0 == ((int)uVar17 < 0 && -1 < (int)(uVar17 - uVar19))) {
+          uStack_2e = (ushort)uVar17;
+        }
+        FUN_00070be0(iVar7,iVar9,&local_44);
+        FUN_00070be0(iVar23,iVar25,&uStack_42);
+        FUN_00070be0(iVar21,iVar22,&uStack_40);
+        f33_six_channel_fit_work.state = 'U';
+        puVar4 = ((undefined *)camry_host_ptr((uint32_t)(puVar5)));
+      }
+      f33_six_channel_fit_work.second_gain[5] = uStack_2e;
+      f33_six_channel_fit_work.second_center[0] = (short)((iVar16 + iVar8) / 2);
+      f33_six_channel_fit_work.second_center[1] = (short)((iVar15 + iVar6) / 2);
+      f33_six_channel_fit_work.second_center[2] = (short)((iVar13 + iVar24) / 2);
+      f33_six_channel_fit_work.second_gain[0] = uStack_38;
+      f33_six_channel_fit_work.second_gain[1] = uStack_36;
+      f33_six_channel_fit_work.second_center[3] = sStack_3e;
+      f33_six_channel_fit_work.second_gain[2] = uStack_34;
+      f33_six_channel_fit_work.second_gain[3] = uStack_32;
+      f33_six_channel_fit_work.second_gain[4] = uStack_30;
+      f33_six_channel_fit_work.second_center[4] = sStack_3c;
+      f33_six_channel_fit_work.component_angle[0] = local_44;
+      f33_six_channel_fit_work.second_center[5] = sStack_3a;
+      f33_six_channel_fit_work.component_angle[1] = uStack_42;
+      f33_six_channel_fit_work.component_angle[2] = uStack_40;
+    }
+    else if ((f33_six_channel_fit_work.state == 'U') || (f33_six_channel_fit_work.state == 'f')) {
+      uVar20 = '\0';
+    }
+    else {
+      f33_six_channel_fit_work.state = 'f';
+    }
+  }
+  (*((short *)camry_host_ptr((uint32_t)((int)0xffffb166u + (int)camry_host_addr(puVar4))))) = sVar1;
+  (*((uchar *)camry_host_ptr((uint32_t)((int)0xffffb160u + (int)camry_host_addr((puVar4 + 1)))))) = uVar20;
+  return;
+}
+
+
+
+/* Set state6960=0 and active6961=5A only; does not erase prior fits before subsequent phase
+   initialization. */
+
+void f33_begin_six_channel_fit(void)
+
+{
+  f33_six_channel_fit_work.state = '\0';
+  f33_six_channel_fit_work.active = 'Z';
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -1049,6 +2690,157 @@ void f33_return_only_stub_33ab2(void)
 void f33_return_only_stub_33ab4(void)
 
 {
+  return;
+}
+
+
+
+/* Compare all27 halfwords of6A26 publication with6A84 retained candidate. Return0 identical,5A
+   changed; not a calibration-health verdict. */
+
+uint f33_compare_retained_fit_coefficients(void)
+
+{
+  uint uVar1;
+  
+  if (((((((f33_published_fit_coefficients.first_center[0] ==
+            f33_retained_fit_coefficients.first_center[0]) &&
+          (f33_published_fit_coefficients.first_center[1] ==
+           f33_retained_fit_coefficients.first_center[1])) &&
+         (f33_published_fit_coefficients.first_center[2] ==
+          f33_retained_fit_coefficients.first_center[2])) &&
+        ((f33_published_fit_coefficients.first_center[3] ==
+          f33_retained_fit_coefficients.first_center[3] &&
+         (f33_published_fit_coefficients.first_center[4] ==
+          f33_retained_fit_coefficients.first_center[4])))) &&
+       (f33_published_fit_coefficients.first_center[5] ==
+        f33_retained_fit_coefficients.first_center[5])) &&
+      (((((f33_published_fit_coefficients.first_gain[0] ==
+           f33_retained_fit_coefficients.first_gain[0] &&
+          (f33_published_fit_coefficients.first_gain[1] ==
+           f33_retained_fit_coefficients.first_gain[1])) &&
+         ((f33_published_fit_coefficients.first_gain[2] ==
+           f33_retained_fit_coefficients.first_gain[2] &&
+          (((f33_published_fit_coefficients.first_gain[3] ==
+             f33_retained_fit_coefficients.first_gain[3] &&
+            (f33_published_fit_coefficients.first_gain[4] ==
+             f33_retained_fit_coefficients.first_gain[4])) &&
+           (f33_published_fit_coefficients.first_gain[5] ==
+            f33_retained_fit_coefficients.first_gain[5])))))) &&
+        (((f33_published_fit_coefficients.second_center[0] ==
+           f33_retained_fit_coefficients.second_center[0] &&
+          (f33_published_fit_coefficients.second_center[1] ==
+           f33_retained_fit_coefficients.second_center[1])) &&
+         ((f33_published_fit_coefficients.second_center[2] ==
+           f33_retained_fit_coefficients.second_center[2] &&
+          ((((f33_published_fit_coefficients.second_center[3] ==
+              f33_retained_fit_coefficients.second_center[3] &&
+             (f33_published_fit_coefficients.second_center[4] ==
+              f33_retained_fit_coefficients.second_center[4])) &&
+            ((f33_published_fit_coefficients.second_center[5] ==
+              f33_retained_fit_coefficients.second_center[5] &&
+             (((f33_published_fit_coefficients.second_gain[0] ==
+                f33_retained_fit_coefficients.second_gain[0] &&
+               (f33_published_fit_coefficients.second_gain[1] ==
+                f33_retained_fit_coefficients.second_gain[1])) &&
+              (f33_published_fit_coefficients.second_gain[2] ==
+               f33_retained_fit_coefficients.second_gain[2])))))) &&
+           ((f33_published_fit_coefficients.second_gain[3] ==
+             f33_retained_fit_coefficients.second_gain[3] &&
+            (f33_published_fit_coefficients.second_gain[4] ==
+             f33_retained_fit_coefficients.second_gain[4])))))))))) &&
+       (f33_published_fit_coefficients.second_gain[5] ==
+        f33_retained_fit_coefficients.second_gain[5])))) &&
+     (((f33_published_fit_coefficients.component_angle[0] ==
+        f33_retained_fit_coefficients.component_angle[0] &&
+       (f33_published_fit_coefficients.component_angle[1] ==
+        f33_retained_fit_coefficients.component_angle[1])) &&
+      (f33_published_fit_coefficients.component_angle[2] ==
+       f33_retained_fit_coefficients.component_angle[2])))) {
+    uVar1 = 0;
+  }
+  else {
+    uVar1 = 0x5a;
+  }
+  return uVar1;
+}
+
+
+
+/* Copy grouped centers/gains/angles6A84..6AB8 to6A26..6A5A after coherence admission; no physical
+   calibration transformation. */
+
+void f33_copy_retained_fit_coefficients(void)
+
+{
+  f33_published_fit_coefficients.first_center[0] = f33_retained_fit_coefficients.first_center[0];
+  f33_published_fit_coefficients.first_center[1] = f33_retained_fit_coefficients.first_center[1];
+  f33_published_fit_coefficients.first_center[2] = f33_retained_fit_coefficients.first_center[2];
+  f33_published_fit_coefficients.first_center[3] = f33_retained_fit_coefficients.first_center[3];
+  f33_published_fit_coefficients.first_center[4] = f33_retained_fit_coefficients.first_center[4];
+  f33_published_fit_coefficients.first_center[5] = f33_retained_fit_coefficients.first_center[5];
+  f33_published_fit_coefficients.first_gain[0] = f33_retained_fit_coefficients.first_gain[0];
+  f33_published_fit_coefficients.first_gain[1] = f33_retained_fit_coefficients.first_gain[1];
+  f33_published_fit_coefficients.first_gain[2] = f33_retained_fit_coefficients.first_gain[2];
+  f33_published_fit_coefficients.first_gain[3] = f33_retained_fit_coefficients.first_gain[3];
+  f33_published_fit_coefficients.first_gain[4] = f33_retained_fit_coefficients.first_gain[4];
+  f33_published_fit_coefficients.first_gain[5] = f33_retained_fit_coefficients.first_gain[5];
+  f33_published_fit_coefficients.second_center[0] = f33_retained_fit_coefficients.second_center[0];
+  f33_published_fit_coefficients.second_center[1] = f33_retained_fit_coefficients.second_center[1];
+  f33_published_fit_coefficients.second_center[2] = f33_retained_fit_coefficients.second_center[2];
+  f33_published_fit_coefficients.second_center[3] = f33_retained_fit_coefficients.second_center[3];
+  f33_published_fit_coefficients.second_center[4] = f33_retained_fit_coefficients.second_center[4];
+  f33_published_fit_coefficients.second_center[5] = f33_retained_fit_coefficients.second_center[5];
+  f33_published_fit_coefficients.second_gain[0] = f33_retained_fit_coefficients.second_gain[0];
+  f33_published_fit_coefficients.second_gain[1] = f33_retained_fit_coefficients.second_gain[1];
+  f33_published_fit_coefficients.second_gain[2] = f33_retained_fit_coefficients.second_gain[2];
+  f33_published_fit_coefficients.second_gain[3] = f33_retained_fit_coefficients.second_gain[3];
+  f33_published_fit_coefficients.second_gain[4] = f33_retained_fit_coefficients.second_gain[4];
+  f33_published_fit_coefficients.second_gain[5] = f33_retained_fit_coefficients.second_gain[5];
+  f33_published_fit_coefficients.component_angle[0] =
+       f33_retained_fit_coefficients.component_angle[0];
+  f33_published_fit_coefficients.component_angle[1] =
+       f33_retained_fit_coefficients.component_angle[1];
+  f33_published_fit_coefficients.component_angle[2] =
+       f33_retained_fit_coefficients.component_angle[2];
+  return;
+}
+
+
+
+/* Default published first centers/gains and second gains to8000, second centers0, angles2000.
+   Retained source6A84 and marker remain independent. */
+
+void f33_reset_published_fit_coefficients(void)
+
+{
+  f33_published_fit_coefficients.first_center[0] = 0x8000;
+  f33_published_fit_coefficients.first_center[1] = 0x8000;
+  f33_published_fit_coefficients.first_center[2] = 0x8000;
+  f33_published_fit_coefficients.first_center[3] = 0x8000;
+  f33_published_fit_coefficients.first_center[4] = 0x8000;
+  f33_published_fit_coefficients.first_center[5] = 0x8000;
+  f33_published_fit_coefficients.first_gain[0] = 0x8000;
+  f33_published_fit_coefficients.first_gain[1] = 0x8000;
+  f33_published_fit_coefficients.first_gain[2] = 0x8000;
+  f33_published_fit_coefficients.first_gain[3] = 0x8000;
+  f33_published_fit_coefficients.first_gain[4] = 0x8000;
+  f33_published_fit_coefficients.first_gain[5] = 0x8000;
+  f33_published_fit_coefficients.second_gain[0] = 0x8000;
+  f33_published_fit_coefficients.second_gain[1] = 0x8000;
+  f33_published_fit_coefficients.second_gain[2] = 0x8000;
+  f33_published_fit_coefficients.second_gain[3] = 0x8000;
+  f33_published_fit_coefficients.second_gain[4] = 0x8000;
+  f33_published_fit_coefficients.second_gain[5] = 0x8000;
+  f33_published_fit_coefficients.second_center[0] = 0;
+  f33_published_fit_coefficients.second_center[1] = 0;
+  f33_published_fit_coefficients.second_center[2] = 0;
+  f33_published_fit_coefficients.second_center[3] = 0;
+  f33_published_fit_coefficients.second_center[4] = 0;
+  f33_published_fit_coefficients.second_center[5] = 0;
+  f33_published_fit_coefficients.component_angle[0] = 0x2000;
+  f33_published_fit_coefficients.component_angle[1] = 0x2000;
+  f33_published_fit_coefficients.component_angle[2] = 0x2000;
   return;
 }
 
@@ -1114,6 +2906,96 @@ void FUN_00033d32(void)
   DAT_febe6a5c = 0;
   DAT_febe6a5d = 0;
   return;
+}
+
+
+
+/* Check foreground snapshot, not mutable worker arrays. Returns5A for accepted and0 otherwise.
+   Exact configured unsigned bounds are full0..65535 and signed centers full-32768..32767; therefore
+   not a meaningful physical calibration validation. */
+
+uint f33_check_foreground_fit_bounds(void)
+
+{
+  uint uVar1;
+  int iVar2;
+  int iVar3;
+  int iVar4;
+  int iVar5;
+  int iVar6;
+  
+  uVar1 = 0;
+  iVar6 = (int)DAT_febe6566;
+  iVar5 = (int)DAT_febe6568;
+  iVar4 = (int)DAT_febe656a;
+  iVar3 = (int)(short)f33_fit_parameters.candidate_bound_words[7];
+  iVar2 = (int)(short)f33_fit_parameters.candidate_bound_words[6];
+  if (((((((((f33_fit_parameters.candidate_bound_words[1] <= DAT_febe6542) &&
+            (DAT_febe6542 <= f33_fit_parameters.candidate_bound_words[0])) &&
+           (f33_fit_parameters.candidate_bound_words[1] <= DAT_febe6544)) &&
+          ((DAT_febe6544 <= f33_fit_parameters.candidate_bound_words[0] &&
+           (f33_fit_parameters.candidate_bound_words[1] <= DAT_febe6546)))) &&
+         (DAT_febe6546 <= f33_fit_parameters.candidate_bound_words[0])) &&
+        (((f33_fit_parameters.candidate_bound_words[1] <= DAT_febe6548 &&
+          (DAT_febe6548 <= f33_fit_parameters.candidate_bound_words[0])) &&
+         ((f33_fit_parameters.candidate_bound_words[1] <= DAT_febe654a &&
+          (((DAT_febe654a <= f33_fit_parameters.candidate_bound_words[0] &&
+            (f33_fit_parameters.candidate_bound_words[1] <= DAT_febe654c)) &&
+           (DAT_febe654c <= f33_fit_parameters.candidate_bound_words[0])))))))) &&
+       (((((f33_fit_parameters.candidate_bound_words[3] <= DAT_febe654e &&
+           (DAT_febe654e <= f33_fit_parameters.candidate_bound_words[2])) &&
+          ((f33_fit_parameters.candidate_bound_words[3] <= DAT_febe6550 &&
+           (((DAT_febe6550 <= f33_fit_parameters.candidate_bound_words[2] &&
+             (f33_fit_parameters.candidate_bound_words[3] <= DAT_febe6552)) &&
+            ((DAT_febe6552 <= f33_fit_parameters.candidate_bound_words[2] &&
+             (((f33_fit_parameters.candidate_bound_words[3] <= DAT_febe6554 &&
+               (DAT_febe6554 <= f33_fit_parameters.candidate_bound_words[2])) &&
+              (f33_fit_parameters.candidate_bound_words[3] <= DAT_febe6556)))))))))) &&
+         ((DAT_febe6556 <= f33_fit_parameters.candidate_bound_words[2] &&
+          (f33_fit_parameters.candidate_bound_words[3] <= DAT_febe6558)))) &&
+        (DAT_febe6558 <= f33_fit_parameters.candidate_bound_words[2])))) &&
+      (((((f33_fit_parameters.candidate_bound_words[5] <= DAT_febe655a &&
+          (DAT_febe655a <= f33_fit_parameters.candidate_bound_words[4])) &&
+         ((f33_fit_parameters.candidate_bound_words[5] <= DAT_febe655c &&
+          ((((DAT_febe655c <= f33_fit_parameters.candidate_bound_words[4] &&
+             (f33_fit_parameters.candidate_bound_words[5] <= DAT_febe655e)) &&
+            (DAT_febe655e <= f33_fit_parameters.candidate_bound_words[4])) &&
+           ((f33_fit_parameters.candidate_bound_words[5] <= DAT_febe6560 &&
+            (DAT_febe6560 <= f33_fit_parameters.candidate_bound_words[4])))))))) &&
+        (f33_fit_parameters.candidate_bound_words[5] <= DAT_febe6562)) &&
+       (((DAT_febe6562 <= f33_fit_parameters.candidate_bound_words[4] &&
+         (f33_fit_parameters.candidate_bound_words[5] <= DAT_febe6564)) &&
+        ((DAT_febe6564 <= f33_fit_parameters.candidate_bound_words[4] &&
+         (((iVar6 - iVar3 < 0 == (iVar6 < 0 != iVar3 < 0 && iVar3 < 0 == iVar6 - iVar3 < 0) &&
+           (iVar6 - iVar2 < 0 != (iVar6 < 0 != iVar2 < 0 && iVar2 < 0 == iVar6 - iVar2 < 0) ||
+            iVar6 == iVar2)) &&
+          (iVar5 - iVar3 < 0 == (iVar5 < 0 != iVar3 < 0 && iVar3 < 0 == iVar5 - iVar3 < 0)))))))))))
+     && ((((iVar5 - iVar2 < 0 != (iVar5 < 0 != iVar2 < 0 && iVar2 < 0 == iVar5 - iVar2 < 0) ||
+            iVar5 == iVar2 &&
+           (iVar4 - iVar3 < 0 == (iVar4 < 0 != iVar3 < 0 && iVar3 < 0 == iVar4 - iVar3 < 0))) &&
+          (iVar4 - iVar2 < 0 != (iVar4 < 0 != iVar2 < 0 && iVar2 < 0 == iVar4 - iVar2 < 0) ||
+           iVar4 == iVar2)) &&
+         ((((iVar4 = (int)DAT_febe656c,
+            iVar4 - iVar3 < 0 == (iVar4 < 0 != iVar3 < 0 && iVar3 < 0 == iVar4 - iVar3 < 0) &&
+            (iVar4 - iVar2 < 0 != (iVar4 < 0 != iVar2 < 0 && iVar2 < 0 == iVar4 - iVar2 < 0) ||
+             iVar4 == iVar2)) &&
+           ((((iVar4 = (int)DAT_febe656e,
+              iVar4 - iVar3 < 0 == (iVar4 < 0 != iVar3 < 0 && iVar3 < 0 == iVar4 - iVar3 < 0) &&
+              (((iVar4 - iVar2 < 0 != (iVar4 < 0 != iVar2 < 0 && iVar2 < 0 == iVar4 - iVar2 < 0) ||
+                 iVar4 == iVar2 &&
+                (iVar4 = (int)DAT_febe6570,
+                iVar4 - iVar3 < 0 == (iVar4 < 0 != iVar3 < 0 && iVar3 < 0 == iVar4 - iVar3 < 0))) &&
+               (iVar4 - iVar2 < 0 != (iVar4 < 0 != iVar2 < 0 && iVar2 < 0 == iVar4 - iVar2 < 0) ||
+                iVar4 == iVar2)))) &&
+             ((f33_fit_parameters.candidate_bound_words[9] <= DAT_febe6572 &&
+              (DAT_febe6572 <= f33_fit_parameters.candidate_bound_words[8])))) &&
+            (f33_fit_parameters.candidate_bound_words[9] <= DAT_febe6574)))) &&
+          (((DAT_febe6574 <= f33_fit_parameters.candidate_bound_words[8] &&
+            (f33_fit_parameters.candidate_bound_words[9] <= DAT_febe6576)) &&
+           (DAT_febe6576 <= f33_fit_parameters.candidate_bound_words[8])))))))) {
+    uVar1 = 0x5a;
+  }
+  return uVar1;
 }
 
 
@@ -1217,6 +3099,40 @@ uint f33_request_six_channel_fit(void)
 void f33_return_only_stub_33fa8(void)
 
 {
+  return;
+}
+
+
+
+/* State10; clear request-valid, means, stimulus, timer, sample count and both32-bit sums. Retain
+   active6A61;343F0 sets it5A before calling here. */
+
+void f33_initialize_mode600_stimulus_fit(void)
+
+{
+  f33_mode600_stimulus_fit_work.state = '\x10';
+  f33_mode600_stimulus_fit_work.stimulus_valid = '\0';
+  f33_mode600_stimulus_fit_work.positive_mean = 0;
+  f33_mode600_stimulus_fit_work.negative_mean = 0;
+  f33_mode600_stimulus_fit_work.stimulus = 0;
+  f33_mode600_stimulus_fit_work.hold_count = 0;
+  f33_mode600_stimulus_fit_work.sample_count = 0;
+  f33_mode600_stimulus_fit_work.folded_angle_sum = 0;
+  f33_mode600_stimulus_fit_work.signed_component_sum = 0;
+  return;
+}
+
+
+
+/* Only clear6A61/6A62 and set state6A60=10. Preserve remaining means/stimulus/counters/sums.
+   Existing mode0600 exit owner calls this and retains its name/contract. */
+
+void f33_cancel_mode600_stimulus_fit(void)
+
+{
+  f33_mode600_stimulus_fit_work.active = '\0';
+  f33_mode600_stimulus_fit_work.stimulus_valid = '\0';
+  f33_mode600_stimulus_fit_work.state = '\x10';
   return;
 }
 

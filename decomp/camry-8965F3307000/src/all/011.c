@@ -4679,6 +4679,36 @@ void FUN_0004758c(void)
 
 
 
+void FUN_0004759c(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_febe8a24 == 'Z') {
+    if (DAT_0002bc98 == 'Z') {
+      puVar1 = 0xfebeb800u;
+      FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7cf0u)))));
+    }
+    else if ((DAT_febeeb85 == 'Z') && ((DAT_febe71ec >> 5 & 1) == 0)) {
+      puVar1 = 0xfebeb800u;
+      f33_step_escalating_monitor
+                (((F33EscalatingMonitorState *)camry_host_ptr((uint32_t)((0xfebe7cf0u)))), (ushort *)((undefined *)camry_host_ptr(0x2ba86u)), 
+                 (uint *)&PTR_f33_classify_snapshot_low_gate_a_00028ec4);
+    }
+    else {
+      f33_shared_snapshot_monitor_4.packed_status = 0;
+      f33_shared_snapshot_monitor_4.passing_count = 0;
+      f33_shared_snapshot_monitor_4.failing_count = 0;
+      f33_shared_snapshot_monitor_4.recovery_count = 0;
+      f33_shared_snapshot_monitor_4.elapsed_count = 0;
+    }
+    f33_publish_shared_snapshot_monitor_status(4,(*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x3b10)))));
+  }
+  return;
+}
+
+
+
 /* Exact slot0/1 callback predicate. Return11/22/33/44 protocol; software source, qualification and
    retained-snapshot conditions are not physical freshness guarantees. ChannelA ancillary
    status/sequence change uses strictly7DB2<2125, opposite main gate; no diagnostic callbacks. */
@@ -4737,6 +4767,36 @@ void FUN_00047692(void)
 
 {
   FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7d04u)))));
+  return;
+}
+
+
+
+void FUN_000476a2(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_febe8a24 == 'Z') {
+    if (DAT_0002bc9c == 'Z') {
+      puVar1 = 0xfebeb800u;
+      FUN_0006b98a(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe7d04u)))));
+    }
+    else if ((DAT_febeeb85 == 'Z') && ((DAT_febe71ec >> 6 & 1) == 0)) {
+      puVar1 = 0xfebeb800u;
+      f33_step_escalating_monitor
+                (((F33EscalatingMonitorState *)camry_host_ptr((uint32_t)((0xfebe7d04u)))), (ushort *)((undefined *)camry_host_ptr(0x2ba96u)), 
+                 (uint *)&PTR_f33_classify_snapshot_low_gate_b_00028f08);
+    }
+    else {
+      f33_shared_snapshot_monitor_5.packed_status = 0;
+      f33_shared_snapshot_monitor_5.passing_count = 0;
+      f33_shared_snapshot_monitor_5.failing_count = 0;
+      f33_shared_snapshot_monitor_5.recovery_count = 0;
+      f33_shared_snapshot_monitor_5.elapsed_count = 0;
+    }
+    f33_publish_shared_snapshot_monitor_status(5,(*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x3afc)))));
+  }
   return;
 }
 

@@ -1901,6 +1901,49 @@ LAB_0009612a:
 
 
 
+undefined4 FUN_00096244(void)
+
+{
+  undefined2 uVar1;
+  ushort uVar2;
+  uchar *puVar3;
+  uint32_t puVar4;
+  int iVar5;
+  undefined1 uStack_16;
+  undefined1 uStack_15;
+  undefined2 uStack_14;
+  undefined2 uStack_12;
+  
+  puVar3 = ((void *)camry_host_ptr((uint32_t)(f33_dcm_read_message.response)));
+  uVar2 = f33_dcm_read_current_did;
+  puVar4 = 0xfebeb800u;
+  uStack_12 = 0;
+  uStack_15 = 0;
+  uStack_14 = 0;
+  uStack_16 = 1;
+  iVar5 = FUN_000955bc();
+  if (iVar5 == 1) {
+    uVar1 = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar4 + -0x5a88))));
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x5a86))))) == '\x01') {
+      FUN_0009445a(uVar1,uVar2,2,&uStack_16);
+      FUN_0009449e(uVar1,uVar2,2,&uStack_14);
+      FUN_00094526(uVar1,uVar2,puVar3,2,&uStack_14,&uStack_15);
+      f33_dcm_invalidate_queued_event('\x04','\0');
+      f33_dcm_invalidate_queued_event('\x1f','\0');
+    }
+    else {
+      FUN_000946c6(uVar1, camry_host_addr(puVar3), 2, &uStack_14, &uStack_15, camry_host_addr(&uStack_12));
+    }
+    f33_dcm_invalidate_queued_event('\x05','\0');
+    FUN_000955b6(0);
+  }
+  f33_dcm_invalidate_queued_event('$','\0');
+  FUN_0009560e(1);
+  return 0;
+}
+
+
+
 /* Operation0 admits configured SID22;2 cancels retained read continuation. Other operations
    return0. Message snapshot, read preparation and serialization are separate from response
    delivery. */
@@ -2145,6 +2188,74 @@ void f33_dcm_security_initialize_delays(void)
 
 
 
+/* Calls96B98(level,retainedrequest,op,response,&NRC) before delay/current-security tests. Return0
+   sets5DCE=1; delay mask then clears token/NRC37. Otherwise already-unlocked samelevel zeroes16
+   response and token0, else tokenlevel. Stages16-byte response. Return1 clears token and uses
+   callbackNRC;10 supportsgeneric pending but actual callbacks never10. */
+
+uint f33_dcm_security_seed_callback_join(uchar level,uchar operation)
+
+{
+  uint uVar1;
+  uint32_t puVar2;
+  uint32_t puVar3;
+  uchar uVar4;
+  int iVar5;
+  uint uVar6;
+  uchar uStack_12;
+  uchar uStack_11;
+  
+  uVar4 = f33_app_security_selected_row;
+  puVar2 = 0xfebeb800u;
+  puVar3 = 0x23dfcu;
+  uVar6 = (uint)f33_app_security_selected_row;
+  uStack_12 = '\0';
+  if (uVar6 < 2) {
+    uStack_11 = '\0';
+    iVar5 = FUN_00096b98(level, f33_app_dcm_security_message.request, operation, 
+                         f33_app_dcm_security_message.response, camry_host_addr(&uStack_11));
+    if (iVar5 == 0) {
+      FUN_000955b6(0);
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x5a32))))) = 1;
+      if (((*((uint *)camry_host_ptr((uint32_t)(puVar2 + -0x5a38)))) & 1 << (uVar6 & 0x1f)) == 0) {
+        f33_dcm_get_security_level(&uStack_12);
+        uVar6 = (*((uint *)camry_host_ptr((uint32_t)(puVar3 + (short)(ushort)uVar4 * 0x18 + 0x2378))));
+        if (level == uStack_12) {
+          for (uVar1 = 0; uVar1 < uVar6; uVar1 = uVar1 + 1) {
+            (*((undefined1 *)camry_host_ptr((uint32_t)(*(int *)(puVar2 + -0x5a24) + uVar1)))) = 0;
+          }
+          level = '\0';
+        }
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x5a33))))) = level;
+        (*((uint *)camry_host_ptr((uint32_t)(puVar2 + -0x5a20)))) = uVar6;
+        f33_dcm_report_positive_response(((F33DcmMessageContext *)camry_host_ptr((uint32_t)(puVar2 + -0x5a2c))));
+        return 0;
+      }
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x5a33))))) = 0;
+      uVar4 = '7';
+    }
+    else {
+      if (iVar5 != 1) {
+        if (iVar5 != 10) {
+          FUN_000955b6(0);
+          (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x5a33))))) = 0;
+          return 0;
+        }
+        FUN_000955b6(1);
+        f33_dcm_enqueue_event('\x0f');
+        return 10;
+      }
+      FUN_000955b6(0);
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x5a33))))) = 0;
+      uVar4 = uStack_11;
+    }
+    f33_dcm_report_negative_or_pending(((F33DcmMessageContext *)camry_host_ptr((uint32_t)(puVar2 + -0x5a2c))),uVar4);
+  }
+  return 0;
+}
+
+
+
 void FUN_00096768(void)
 
 {
@@ -2154,6 +2265,89 @@ void FUN_00096768(void)
                security_level,'\x01');
   }
   return;
+}
+
+
+
+/* Application0 clears selected failures, publishes security via91E12, clears token, stageszero-body
+   response BEFORE95644. ApplicationB saturating increments; belowthreshold2 NRC35 else armraw10000
+   timer7/8, setdelaybit andNRC36. Failures/challenge retained. Callback1 usesNRC;10genericpending
+   only, actualcallbacks never10. */
+
+uint f33_dcm_security_key_callback_join(uchar level,uchar operation)
+
+{
+  byte bVar1;
+  byte bVar2;
+  uint32_t puVar3;
+  uint32_t puVar4;
+  F33DcmMessageContext *message;
+  uchar uVar5;
+  int iVar6;
+  uint uVar7;
+  uchar uStack_11;
+  
+  uVar5 = f33_app_security_selected_row;
+  puVar3 = 0xfebeb800u;
+  puVar4 = 0x23dfcu;
+  uVar7 = (uint)f33_app_security_selected_row;
+  if (uVar7 < 2) {
+    uStack_11 = '\0';
+    iVar6 = FUN_00096bce(level, f33_app_dcm_security_message.request, operation, camry_host_addr(&uStack_11));
+    if (iVar6 == 0) {
+      FUN_000955b6(0);
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(uVar7 - 0x5a31))))) = 0;
+      FUN_00091e12(level);
+      (*((undefined4 *)camry_host_ptr((uint32_t)(puVar3 + -0x5a20)))) = 0;
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x5a33))))) = 0;
+      f33_dcm_report_positive_response(((F33DcmMessageContext *)camry_host_ptr((uint32_t)(puVar3 + -0x5a2c))));
+    }
+    else {
+      if (iVar6 == 1) {
+        FUN_000955b6(0);
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x5a33))))) = 0;
+        message = ((F33DcmMessageContext *)camry_host_ptr((uint32_t)(puVar3 + -0x5a2c)));
+        uVar5 = uStack_11;
+      }
+      else {
+        if (iVar6 == 10) {
+          FUN_000955b6(1);
+          f33_dcm_enqueue_event('\x10');
+          return 10;
+        }
+        if (iVar6 != 0xb) {
+          FUN_000955b6(0);
+          (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x5a33))))) = 0;
+          return 0;
+        }
+        FUN_000955b6(0);
+        bVar2 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(uVar7 - 0x5a31)))));
+        if (bVar2 != 0xff) {
+          bVar1 = bVar2 + 1;
+          bVar2 = bVar2 + 1;
+          (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(uVar7 - 0x5a31))))) = bVar1;
+        }
+        if (bVar2 < (byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)((short)(ushort)uVar5 * 0x18 + 0x237d)))))) {
+          (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x5a33))))) = 0;
+          message = ((F33DcmMessageContext *)camry_host_ptr((uint32_t)(puVar3 + -0x5a2c)));
+          uVar5 = '5';
+        }
+        else {
+          if ((*((int *)camry_host_ptr((uint32_t)(puVar4 + (short)(ushort)uVar5 * 0x18 + 0x236c)))) != 0) {
+            f33_dcm_arm_software_timer
+                      ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(uVar7 * 2 + 0x235d))))),
+                       (*((uint *)camry_host_ptr((uint32_t)(puVar4 + (short)(ushort)uVar5 * 0x18 + 0x236c)))));
+            FUN_00096622(uVar7,1);
+          }
+          (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x5a33))))) = 0;
+          message = ((F33DcmMessageContext *)camry_host_ptr((uint32_t)(puVar3 + -0x5a2c)));
+          uVar5 = '6';
+        }
+      }
+      f33_dcm_report_negative_or_pending(message,uVar5);
+    }
+  }
+  return 0;
 }
 
 
@@ -2398,6 +2592,87 @@ uint f33_dcm_security_sub4_callback(uchar operation,F33DcmMessageContext *messag
   
   uVar1 = f33_dcm_security_key_operation('\x04',operation,message);
   return uVar1;
+}
+
+
+
+/* Exactconfiguration admitslow1/high0 only; optional4/5nodepaths are unconfigured. */
+
+uint f33_dcm_validate_configured_communication_selection
+               (uchar subfunction,uchar communication_class,uchar subnet,ushort node)
+
+{
+  uchar uVar1;
+  ushort uVar2;
+  uint uVar3;
+  uint uVar4;
+  
+  uVar4 = 1;
+  uVar1 = f33_dcm_communication_configuration.normal_enabled;
+  if ((((communication_class == '\x01') ||
+       (uVar1 = f33_dcm_communication_configuration.nm_enabled, communication_class == '\x02')) ||
+      ((communication_class == '\x03' &&
+       (f33_dcm_communication_configuration.normal_enabled == '\x01')))) && (uVar1 == '\x01')) {
+    if (subnet != '\0') {
+      if (subnet == '\x0f') {
+        if (f33_dcm_communication_configuration.current_network_enabled != '\x01') {
+          return uVar4;
+        }
+      }
+      else {
+        uVar2 = 0;
+        while( true ) {
+          if (f33_dcm_communication_configuration.subnet_count <= uVar2) {
+            return uVar4;
+          }
+          if (((*((uchar *)camry_host_ptr((uint32_t)((int)f33_dcm_communication_configuration.subnets + (short)uVar2 * 3 + 1))))
+               == subnet) &&
+             ((*((char *)camry_host_ptr((uint32_t)((int)f33_dcm_communication_configuration.subnets + (short)uVar2 * 3)))) ==
+              '\x01')) break;
+          uVar2 = uVar2 + 1 & 0xff;
+        }
+      }
+    }
+    if (subfunction == '\x04' || subfunction == '\x05') {
+      uVar3 = 0;
+      while( true ) {
+        if ((ushort)(*((volatile uint16_t *)camry_host_ptr(0x261cau))) <= uVar3) {
+          return uVar4;
+        }
+        if (((*((ushort *)camry_host_ptr((uint32_t)((int)f33_dcm_communication_configuration.nodes + uVar3 * 4 + 2)))) == node) &&
+           ((*((char *)camry_host_ptr((uint32_t)((int)f33_dcm_communication_configuration.nodes + uVar3 * 4)))) == '\x01')) break;
+        uVar3 = uVar3 + 1 & 0xffff;
+      }
+    }
+    return 0;
+  }
+  return uVar4;
+}
+
+
+
+void FUN_00096ca4(char param_1,short param_2,char param_3,undefined1 param_4)
+
+{
+  int iVar1;
+  uint uVar2;
+  
+  if (param_1 == '\x04' || param_1 == '\x05') {
+    for (uVar2 = 0; uVar2 < (ushort)(*((volatile uint16_t *)camry_host_ptr(0x261cau)));
+        uVar2 = uVar2 + 1 & 0xffff) {
+      iVar1 = uVar2 * 4;
+      if ((((*((short *)camry_host_ptr((uint32_t)((int)f33_dcm_communication_configuration.nodes + iVar1 + 2)))) == param_2) &&
+          ((*((char *)camry_host_ptr((uint32_t)((int)f33_dcm_communication_configuration.nodes + iVar1)))) == '\x01')) &&
+         ((*((char *)camry_host_ptr((uint32_t)((int)f33_dcm_communication_configuration.nodes + iVar1 + 1)))) == param_3))
+      goto LAB_00096cf6;
+    }
+  }
+  else {
+LAB_00096cf6:
+    ((void)(param_3), (void)(param_4), f33_return_const_0_9713a());
+    ((void)(param_3), (void)(param_4), f33_return_only_stub_97138());
+  }
+  return;
 }
 
 

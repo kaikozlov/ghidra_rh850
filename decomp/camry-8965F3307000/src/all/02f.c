@@ -3781,6 +3781,266 @@ void f33_return_only_stub_bf3a6(void)
 
 
 
+/* Publish control/health/current-limit state intoE800+ and copy immutable calibration bounds.
+   Includes liveB11A\u2192E8CC after the mode arbiter. Central transition/steady workers call this
+   last even for mode0; common initializationBF97A does not. Includes liveB11A→E8CC after the mode
+   arbiter. */
+
+void f33_publish_foreground_control_outputs(void)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  
+  DAT_febee88e = DAT_000aeff6;
+  f33_learned_quad_runtime_bounds.pair1_upper = f33_learned_quad_rom_bounds.pair1_upper;
+  f33_learned_quad_runtime_bounds.pair1_lower = f33_learned_quad_rom_bounds.pair1_lower;
+  f33_learned_quad_runtime_bounds.pair2_upper = f33_learned_quad_rom_bounds.pair2_upper;
+  f33_learned_quad_runtime_bounds.pair2_lower = f33_learned_quad_rom_bounds.pair2_lower;
+  DAT_febee8f8 = DAT_000aef6c;
+  DAT_febee8fc = DAT_000aef70;
+  DAT_febee900 = DAT_000aef74;
+  DAT_febee904 = DAT_000aef78;
+  DAT_febee800 = DAT_febeb1d5;
+  DAT_febee801 = DAT_febebe9b;
+  DAT_febee802 = DAT_febebe9c;
+  DAT_febee803 = DAT_febebe99;
+  DAT_febee804 = DAT_febebe9a;
+  DAT_febee805 = DAT_febebe9f;
+  DAT_febee806 = DAT_febebea0;
+  iVar3 = 0;
+  do {
+    iVar2 = iVar3 + 1;
+    iVar1 = iVar3 + -9;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebee807u + (uint32_t)(iVar3) * 1u)))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebebeaeu + (uint32_t)(iVar3) * 1u))));
+    iVar3 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  DAT_febee908 = DAT_febebed4;
+  DAT_febee890 = DAT_febebe82;
+  DAT_febee811 = DAT_febebe78;
+  DAT_febee892 = DAT_febebede;
+  DAT_febee812 = DAT_febebef0;
+  DAT_febee894 = DAT_febebee2;
+  DAT_febee90c = f33_received_word_unchanged_age;
+  DAT_febee896 = f33_received_retained_word;
+  DAT_febee813 = DAT_febebe64;
+  DAT_febee910 = f33_received_typed_scalar;
+  DAT_febee814 = DAT_febebe62;
+  DAT_febee815 = DAT_febebe60;
+  iVar3 = 0;
+  do {
+    iVar2 = iVar3 + 1;
+    iVar1 = iVar3 + -1;
+    (*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xfebee914u + (uint32_t)(iVar3) * 4u)))) = (*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xfebebe4cu + (uint32_t)(iVar3) * 4u))));
+    iVar3 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  iVar3 = 0;
+  do {
+    iVar2 = iVar3 + 1;
+    iVar1 = iVar3 + -1;
+    (*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebee898u + (uint32_t)(iVar3) * 2u)))) = (*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebebe42u + (uint32_t)(iVar3) * 2u))));
+    iVar3 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  iVar3 = 0;
+  do {
+    iVar2 = iVar3 + 1;
+    iVar1 = iVar3 + -1;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebee816u + (uint32_t)(iVar3) * 1u)))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebebe36u + (uint32_t)(iVar3) * 1u))));
+    iVar3 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  iVar3 = 0;
+  do {
+    iVar2 = iVar3 + 1;
+    iVar1 = iVar3 + -1;
+    (*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebee89cu + (uint32_t)(iVar3) * 2u)))) = (*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebebe3eu + (uint32_t)(iVar3) * 2u))));
+    iVar3 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  iVar3 = 0;
+  do {
+    iVar2 = iVar3 + 1;
+    iVar1 = iVar3 + -1;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebee818u + (uint32_t)(iVar3) * 1u)))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebebe34u + (uint32_t)(iVar3) * 1u))));
+    iVar3 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  iVar3 = 0;
+  do {
+    iVar2 = iVar3 + 1;
+    iVar1 = iVar3 + -1;
+    (*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebee8a0u + (uint32_t)(iVar3) * 2u)))) = (*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebebe3au + (uint32_t)(iVar3) * 2u))));
+    iVar3 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  DAT_febee81a = DAT_febeaf44;
+  DAT_febee91c = DAT_febeb314;
+  DAT_febee920 = DAT_febeb30c;
+  DAT_febee81b = DAT_febeb307;
+  DAT_febee924 = DAT_febeb474;
+  DAT_febee81c = DAT_febeb467;
+  DAT_febee81d = DAT_febeb33b;
+  DAT_febee928 = DAT_febeb218;
+  DAT_febee8a4 = DAT_febeb384;
+  DAT_febee8a6 = DAT_febeb142;
+  DAT_febee8a8 = DAT_febeb138;
+  DAT_febee8aa = DAT_febeb13c;
+  DAT_febee81e = DAT_febeb18f;
+  DAT_febee81f = DAT_febeb1a4;
+  DAT_febee820 = DAT_febeb1a7;
+  DAT_febee821 = DAT_febeb1a6;
+  DAT_febee822 = DAT_febeb1ca;
+  DAT_febee823 = DAT_febeb1c9;
+  DAT_febee824 = DAT_febeb1ce;
+  DAT_febee825 = DAT_febeb1d1;
+  DAT_febee826 = DAT_febeb20e;
+  DAT_febee827 = DAT_febeb1bd;
+  DAT_febee828 = DAT_febeb1bc;
+  DAT_febee829 = DAT_febeb1c4;
+  DAT_febee82a = DAT_febeb1a8;
+  DAT_febee82b = DAT_febebde4;
+  DAT_febee8ac = DAT_febebd7e;
+  DAT_febee8ae = DAT_febebccc;
+  DAT_febee8b0 = DAT_febebcc2;
+  DAT_febee8b2 = DAT_febebcd6;
+  DAT_febee8b4 = DAT_febebca6;
+  DAT_febee82c = DAT_febebca4;
+  DAT_febee8b6 = DAT_febeae12;
+  DAT_febee82d = DAT_febeacf1;
+  DAT_febee8b8 = DAT_febeae10;
+  DAT_febee82e = DAT_febead14;
+  DAT_febee82f = DAT_febead47;
+  DAT_febee830 = DAT_febead33;
+  DAT_febee8ba = DAT_febeae58;
+  DAT_febee831 = DAT_febead39;
+  DAT_febee832 = DAT_febead44;
+  DAT_febee833 = DAT_febead43;
+  DAT_febee834 = DAT_febead42;
+  DAT_febee835 = DAT_febead45;
+  DAT_febee836 = DAT_febead15;
+  DAT_febee837 = DAT_febead17;
+  DAT_febee838 = DAT_febead46;
+  DAT_febee839 = DAT_febead0b;
+  DAT_febee8bc = DAT_febeae5c;
+  DAT_febee83a = DAT_febead4b;
+  DAT_febee83b = DAT_febead49;
+  DAT_febee83c = DAT_febead4a;
+  DAT_febee83d = DAT_febead48;
+  DAT_febee83e = DAT_febead60;
+  DAT_febee8be = DAT_febeae6a;
+  DAT_febee83f = DAT_febead67;
+  DAT_febee8c0 = DAT_febeae6c;
+  DAT_febee8c2 = DAT_febeae6e;
+  DAT_febee8c4 = DAT_febeae2c;
+  DAT_febee8c6 = DAT_febeae36;
+  DAT_febee840 = DAT_febead0a;
+  DAT_febee841 = DAT_febeacf7;
+  DAT_febee842 = DAT_febeacf5;
+  DAT_febee843 = DAT_febeacf8;
+  DAT_febee8c8 = DAT_febeae14;
+  DAT_febee8ca = DAT_febeae16;
+  DAT_febee844 = DAT_febeacf6;
+  DAT_febee845 = DAT_febead09;
+  DAT_febee846 = DAT_febead16;
+  DAT_febee8cc = DAT_febeb11a;
+  DAT_febee847 = DAT_febeb112;
+  DAT_febee848 = DAT_febebf10;
+  DAT_febee849 = DAT_febeb252;
+  DAT_febee84a = DAT_febeb2cd;
+  DAT_febee84b = DAT_febeb2c0;
+  DAT_febee84c = DAT_febeb2c1;
+  DAT_febee84d = DAT_febeb2c2;
+  DAT_febee84e = DAT_febeb2c3;
+  DAT_febee84f = DAT_febeb2c4;
+  DAT_febee850 = DAT_febeb2c5;
+  DAT_febee851 = DAT_febeb2c6;
+  DAT_febee852 = DAT_febeb2c7;
+  DAT_febee92c = DAT_febeb478;
+  DAT_febee853 = DAT_febeb358;
+  DAT_febee854 = DAT_febeb37e;
+  DAT_febee855 = DAT_febeb25a;
+  DAT_febee856 = DAT_febeaf49;
+  DAT_febee857 = DAT_febeb300;
+  DAT_febee858 = DAT_febeb45f;
+  DAT_febee859 = DAT_febeb32f;
+  DAT_febee85a = DAT_febeaf45;
+  DAT_febee872 = 0;
+  DAT_febee873 = 0;
+  DAT_febee874 = 0;
+  DAT_febee85b = DAT_febeaf4a;
+  DAT_febee875 = 0;
+  DAT_febee876 = 0;
+  DAT_febee877 = 0;
+  DAT_febee930 = DAT_febeaf10;
+  DAT_febee878 = 0;
+  DAT_febee85c = DAT_febead8f;
+  DAT_febee85d = DAT_febead90;
+  DAT_febee85e = DAT_febead91;
+  DAT_febee85f = DAT_febead92;
+  DAT_febee860 = DAT_febead93;
+  DAT_febee861 = DAT_febead94;
+  DAT_febee862 = DAT_febead95;
+  DAT_febee863 = DAT_febead96;
+  DAT_febee8ce = DAT_febeae82;
+  DAT_febee864 = DAT_febead97;
+  DAT_febee865 = DAT_febeb04c;
+  DAT_febee866 = DAT_febebe06;
+  DAT_febee934 = DAT_febeaf14;
+  DAT_febee8d0 = DAT_febeae80;
+  DAT_febee8d2 = DAT_febebcb0;
+  DAT_febee867 = f33_received_packed_decimal_fields[0];
+  DAT_febee868 = f33_received_packed_decimal_fields[1];
+  DAT_febee869 = f33_received_packed_decimal_fields[2];
+  DAT_febee86a = f33_received_packed_decimal_fields[3];
+  DAT_febee86b = f33_received_packed_decimal_fields[4];
+  DAT_febee86c = f33_received_packed_decimal_fields[5];
+  DAT_febee86d = DAT_febebeb8;
+  DAT_febee8d4 = DAT_febeae84;
+  DAT_febee86e = f33_source_coherence_history;
+  DAT_febee86f = DAT_febebe9e;
+  DAT_febee870 = DAT_febebe9d;
+  DAT_febee8d6 = DAT_febeae86;
+  DAT_febee871 = DAT_febead9e;
+  DAT_febee879 = DAT_febead9f;
+  DAT_febee87a = DAT_febeada0;
+  DAT_febee87b = DAT_febeada1;
+  DAT_febee87c = DAT_febeada9;
+  DAT_febee87d = DAT_febeadab;
+  DAT_febee87e = DAT_febeb1cd;
+  DAT_febee87f = DAT_febeb1d7;
+  DAT_febee8d8 = DAT_febeb13e;
+  DAT_febee938 = DAT_febeaf2c;
+  DAT_febee8da = DAT_febeaecc;
+  DAT_febee8dc = DAT_febebd9e;
+  DAT_febee880 = DAT_febeadca;
+  DAT_febee881 = DAT_febeadce;
+  DAT_febee93c = DAT_febeaf30;
+  DAT_febee940 = DAT_febeaf34;
+  DAT_febee944 = DAT_febeaf38;
+  DAT_febee8de = DAT_febeaece;
+  DAT_febee882 = DAT_febeadc8;
+  DAT_febee883 = DAT_febeadd7;
+  DAT_febee8e0 = DAT_febeb38a;
+  DAT_febee884 = DAT_febeb3d1;
+  DAT_febee885 = DAT_febeb388;
+  DAT_febee8e2 = DAT_febeb418;
+  DAT_febee886 = DAT_febeb3d2;
+  DAT_febee948 = DAT_febeb148;
+  DAT_febee887 = DAT_febeb16b;
+  DAT_febee888 = DAT_febeb144;
+  DAT_febee94c = DAT_febeb158;
+  DAT_febee8e4 = DAT_febeaed2;
+  DAT_febee8e6 = DAT_febeaed4;
+  DAT_febee889 = DAT_febeb3ca;
+  DAT_febee88a = DAT_febeb3d7;
+  DAT_febee88b = DAT_febeb3d8;
+  DAT_febee950 = DAT_febeb3f8;
+  DAT_febee88c = DAT_febeadde;
+  DAT_febee88d = DAT_febeaddf;
+  DAT_febee958 = 0;
+  DAT_febee954 = DAT_febeb150;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */

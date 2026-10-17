@@ -731,6 +731,26 @@ void FUN_0009136c(F33DcmMessageContext *param_1)
 
 
 
+/* Zero main message pointers, lengths, addressing, suppression, capacity, SID and selector; opaque
+   padding is untouched. Cancellation invokes this before operation2. */
+
+void f33_dcm_reset_message_context(void)
+
+{
+  f33_dcm_message_context.request = 0;
+  f33_dcm_message_context.request_length = 0;
+  f33_dcm_message_context.response = 0;
+  f33_dcm_message_context.response_length = 0;
+  f33_dcm_message_context.addressing_kind = '\0';
+  f33_dcm_message_context.suppress_positive = '\0';
+  f33_dcm_message_context.response_capacity = 0;
+  f33_dcm_message_context.service_id = '\0';
+  f33_dcm_message_context.service_list_selector = 0;
+  return;
+}
+
+
+
 void FUN_000913b6(void)
 
 {
@@ -2278,6 +2298,18 @@ void f33_dcm_publish_security_level(uchar level)
 
 
 
+void FUN_000924e8(void)
+
+{
+  f33_app_dcm_session_snapshot.current = '\x01';
+  f33_app_dcm_session_snapshot.previous = '\x01';
+  f33_app_dcm_session_snapshot.target = '\x01';
+  f33_app_dcm_session_snapshot.pending_publication = '\0';
+  return;
+}
+
+
+
 /* Copy current595C under the recovered critical section and return0; session membership is checked
    by callers. */
 
@@ -2381,6 +2413,25 @@ void f33_dcm_commit_or_discard_staged_session(uchar commit)
     (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x5ea1))))) = 0;
   }
   thunk_FUN_0006a4c4();
+  return;
+}
+
+
+
+/* When595F==1, clear published security, invoke92518(old595D,target595E), then clearpending. Does
+   not itself storecurrent session. Called at completed-response joins, independently of SID10 exact
+   immediate policy. */
+
+void f33_dcm_finish_staged_session_notifications(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (f33_app_dcm_session_snapshot.pending_publication == '\x01') {
+    FUN_00091e12(0);
+    f33_dcm_notify_session_publication((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x5ea3))))),(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x5ea2))))));
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x5ea1))))) = 0;
+  }
   return;
 }
 
@@ -2673,6 +2724,18 @@ F33DcmResponseQueue * f33_dcm_get_response_queue(void)
 
 
 
+/* WARNING: Inlined function: f33_dcm_get_response_queue */
+
+void FUN_00092a74(uchar param_1,uchar param_2)
+
+{
+  f33_dcm_response_queue.notification_result = param_1;
+  f33_dcm_response_queue.pending_notification = param_2;
+  return;
+}
+
+
+
 void FUN_00092a86(undefined1 param_1)
 
 {
@@ -2681,6 +2744,47 @@ void FUN_00092a86(undefined1 param_1)
   thunk_FUN_0006a45e();
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x5e9c))))) = param_1;
   thunk_FUN_0006a4c4();
+  return;
+}
+
+
+
+/* Initialize shared response cursor/capacity and fixed sentinel plus four response nodes:
+   positive0,negative1,silent3,pending10. Reset forced/explicit pending flags5965/5966; do not erase
+   handler-retained request copies. */
+
+void f33_dcm_reset_response_queue(void)
+
+{
+  undefined4 *puVar1;
+  uint32_t puVar2;
+  puVar2 = 0xfebeb800u;
+  f33_dcm_pending_negative_response[0] = '\0';
+  f33_dcm_final_negative_response[0] = '\0';
+  f33_dcm_response_queue.remaining_length = 0;
+  f33_dcm_response_queue.copy_cursor = 0;
+  FUN_00093ce6(((undefined4 *)camry_host_ptr((uint32_t)(0xfebe5978))));
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x5e9a))))) = 0;
+  (*((undefined4 *)camry_host_ptr((uint32_t)(puVar2 + -0x5e68)))) = (*((undefined4 *)camry_host_ptr((uint32_t)(puVar2 + -0x5e88))));
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x5e9b))))) = 0;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x5e44)))) = 0;
+  (*((undefined4 *)camry_host_ptr((uint32_t)(puVar2 + -0x5e48)))) = 0;
+  *(uchar **)(puVar2 + -0x5e38) = f33_dcm_pending_negative_response;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x5e50))))) = 1;
+  *(uchar **)(puVar2 + -0x5e58) = f33_dcm_final_negative_response;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x5e60))))) = 0;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x5e64)))) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x5e84))));
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x5e40))))) = 3;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x5e34)))) = 3;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x5e54)))) = 3;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x5e30))))) = 0x10;
+  puVar1 = ((undefined4 *)camry_host_ptr((uint32_t)(puVar2 + -0x5e7c)));
+  *(undefined4 **)(puVar2 + -0x5e90) = puVar1;
+  *(undefined4 **)(puVar2 + -0x5e8c) = puVar1;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x5e74)))) = 0;
+  (*((undefined4 *)camry_host_ptr((uint32_t)(puVar2 + -0x5e78)))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x5e70))))) = 0;
+  *puVar1 = 0;
   return;
 }
 
@@ -2801,6 +2905,32 @@ undefined4 FUN_00092c46(uint param_1)
     uVar2 = 1;
   }
   return uVar2;
+}
+
+
+
+/* WARNING: Inlined function: f33_dcm_get_response_queue */
+
+undefined4 FUN_00092d38(undefined1 *param_1)
+
+{
+  undefined1 uVar1;
+  int iVar2;
+  undefined4 uVar3;
+  
+  iVar2 = FUN_00092bc2(((undefined4 *)camry_host_ptr((uint32_t)((0xfebe5970u)))));
+  if (iVar2 == 0) {
+    uVar1 = 0xff;
+    uVar3 = 0;
+  }
+  else {
+    f33_dcm_response_queue.copy_cursor = camry_host_addr(*(uchar **)(iVar2 + 4));
+    uVar3 = 0xfebe5978;
+    f33_dcm_response_queue.remaining_length = (*((ushort *)camry_host_ptr((uint32_t)(iVar2 + 8))));
+    uVar1 = (*((undefined1 *)camry_host_ptr((uint32_t)(iVar2 + 0xc))));
+  }
+  *param_1 = uVar1;
+  return uVar3;
 }
 
 
@@ -3089,6 +3219,21 @@ int FUN_00093696(undefined1 *param_1)
     FUN_00092bd8();
   }
   return iVar2;
+}
+
+
+
+/* WARNING: Inlined function: f33_dcm_get_response_queue */
+/* Read current response-queue root+10/+11 and store through preserved incomingR6/R7 pointers. Does
+   not clear the latch. Caller91C92 selects final notification versus operation3 from this snapshot.
+    */
+
+void f33_dcm_snapshot_response_notification(uchar *result,uchar *pending_notification)
+
+{
+  *result = f33_dcm_response_queue.notification_result;
+  *pending_notification = f33_dcm_response_queue.pending_notification;
+  return;
 }
 
 

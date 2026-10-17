@@ -13,6 +13,21 @@ void f33_record_asserted_state_sample_threshold_b_failure(void)
 
 
 
+/* Failing-count predicate: returns diagnostic status 0x11 while the referenced monitor state holds
+   a nonzero failing sample count, otherwise 0. Shape-verified; the claim is bounded to this exact
+   comparison. */
+
+undefined4 f33_status_failing_asserted_state_sample_threshold_b_states(void)
+
+{
+  if (f33_asserted_state_sample_threshold_b_states.failing_count != 0) {
+    return 0x11;
+  }
+  return 0;
+}
+
+
+
 /* f33_reset_terminal_monitor wrapper resetting exactly one monitor state
    ((0xfebe7654u)); whole-body shape-verified from the canonical corpus.
    Per-instance semantics derive from the referenced state cell; not individually executed. */
@@ -199,6 +214,21 @@ void f33_record_sample_difference_window_a_failure(void)
 
 
 
+/* Failing-count predicate: returns diagnostic status 0x11 while the referenced monitor state holds
+   a nonzero failing sample count, otherwise 0. Shape-verified; the claim is bounded to this exact
+   comparison. */
+
+undefined4 f33_status_failing_sample_difference_window_a_states(void)
+
+{
+  if (f33_sample_difference_window_a_states.failing_count != 0) {
+    return 0x11;
+  }
+  return 0;
+}
+
+
+
 /* f33_reset_terminal_monitor wrapper resetting exactly one monitor state
    ((0xfebe765cu)); whole-body shape-verified from the canonical corpus.
    Per-instance semantics derive from the referenced state cell; not individually executed. */
@@ -381,6 +411,21 @@ void f33_record_sample_difference_window_b_failure(void)
 {
   f33_report_diagnostic_event_failure(0xb8,0x32);
   return;
+}
+
+
+
+/* Failing-count predicate: returns diagnostic status 0x11 while the referenced monitor state holds
+   a nonzero failing sample count, otherwise 0. Shape-verified; the claim is bounded to this exact
+   comparison. */
+
+undefined4 f33_status_failing_sample_difference_window_b_states(void)
+
+{
+  if (f33_sample_difference_window_b_states.failing_count != 0) {
+    return 0x11;
+  }
+  return 0;
 }
 
 
@@ -617,6 +662,21 @@ void f33_record_matched_state2_status_bit_a_failure(void)
 {
   f33_report_diagnostic_event_failure(0x78,0x32);
   return;
+}
+
+
+
+/* Failing-count predicate: returns diagnostic status 0x11 while the referenced monitor state holds
+   a nonzero failing sample count, otherwise 0. Shape-verified; the claim is bounded to this exact
+   comparison. */
+
+undefined4 f33_status_failing_matched_state2_status_bit_a_states(void)
+
+{
+  if (f33_matched_state2_status_bit_a_states.failing_count != 0) {
+    return 0x11;
+  }
+  return 0;
 }
 
 
@@ -858,6 +918,21 @@ void f33_record_matched_state2_status_bit_b_failure(void)
 
 
 
+/* Failing-count predicate: returns diagnostic status 0x11 while the referenced monitor state holds
+   a nonzero failing sample count, otherwise 0. Shape-verified; the claim is bounded to this exact
+   comparison. */
+
+undefined4 f33_status_failing_matched_state2_status_bit_b_states(void)
+
+{
+  if (f33_matched_state2_status_bit_b_states.failing_count != 0) {
+    return 0x11;
+  }
+  return 0;
+}
+
+
+
 /* f33_reset_terminal_monitor wrapper resetting exactly one monitor state
    ((0xfebe7674u)); whole-body shape-verified from the canonical corpus.
    Per-instance semantics derive from the referenced state cell; not individually executed. */
@@ -997,6 +1072,21 @@ void f33_record_baseline_sample_threshold_a_failure(void)
 
 
 
+/* Failing-count predicate: returns diagnostic status 0x11 while the referenced monitor state holds
+   a nonzero failing sample count, otherwise 0. Shape-verified; the claim is bounded to this exact
+   comparison. */
+
+undefined4 f33_status_failing_baseline_sample_threshold_a_states(void)
+
+{
+  if (f33_baseline_sample_threshold_a_states.failing_count != 0) {
+    return 0x11;
+  }
+  return 0;
+}
+
+
+
 /* f33_reset_terminal_monitor wrapper resetting exactly one monitor state
    ((0xfebe767cu)); whole-body shape-verified from the canonical corpus.
    Per-instance semantics derive from the referenced state cell; not individually executed. */
@@ -1132,6 +1222,21 @@ void f33_record_baseline_sample_threshold_b_failure(void)
 {
   f33_report_diagnostic_event_failure(0xc6,0x32);
   return;
+}
+
+
+
+/* Failing-count predicate: returns diagnostic status 0x11 while the referenced monitor state holds
+   a nonzero failing sample count, otherwise 0. Shape-verified; the claim is bounded to this exact
+   comparison. */
+
+undefined4 f33_status_failing_baseline_sample_threshold_b_states(void)
+
+{
+  if (f33_baseline_sample_threshold_b_states.failing_count != 0) {
+    return 0x11;
+  }
+  return 0;
 }
 
 
@@ -1388,6 +1493,21 @@ void f33_record_observed_state_sample_regions_a_failure(void)
 
 
 
+/* Failing-count predicate: returns diagnostic status 0x11 while the referenced monitor state holds
+   a nonzero failing sample count, otherwise 0. Shape-verified; the claim is bounded to this exact
+   comparison. */
+
+undefined4 f33_status_failing_observed_state_sample_regions_a_states(void)
+
+{
+  if (f33_observed_state_sample_regions_a_states.failing_count != 0) {
+    return 0x11;
+  }
+  return 0;
+}
+
+
+
 /* f33_reset_terminal_monitor wrapper resetting exactly one monitor state
    ((0xfebe768cu)); whole-body shape-verified from the canonical
    corpus. Per-instance semantics derive from the referenced state cell; not individually executed.
@@ -1636,6 +1756,21 @@ void f33_record_observed_state_sample_regions_b_failure(void)
 {
   f33_report_diagnostic_event_failure(0xba,0x32);
   return;
+}
+
+
+
+/* Failing-count predicate: returns diagnostic status 0x11 while the referenced monitor state holds
+   a nonzero failing sample count, otherwise 0. Shape-verified; the claim is bounded to this exact
+   comparison. */
+
+undefined4 f33_status_failing_observed_state_sample_regions_b_states(void)
+
+{
+  if (f33_observed_state_sample_regions_b_states.failing_count != 0) {
+    return 0x11;
+  }
+  return 0;
 }
 
 

@@ -1,6 +1,338 @@
 #include "common.h"
 
 
+/* WARNING: Removing unreachable block (ram,0x0003433a) */
+/* Family0600 active5A sequencer: positive and negative1280 stimulus, bounded delayed angle
+   averaging and independent signed component sum, paired correction staging, mean agreement, queued
+   records0208/0209. Abort response-6 resets live request but retains count/sums. Completion polls
+   only RAM marker. */
+
+void f33_step_mode600_stimulus_fit(void)
+
+{
+  uint uVar1;
+  short sVar2;
+  uint uVar3;
+  int iVar4;
+  undefined *puVar5;
+  uint32_t puVar8;
+  int iVar9;
+  int iVar10;
+  int iVar11;
+  int iVar12;
+  uint uVar13;
+  ushort uVar14;
+  uint uVar15;
+  uchar uStack_25;
+  uchar uStack_24;
+  uchar uStack_23;
+  short sStack_22;
+  short sStack_20;
+  ushort uStack_1e;
+  short sStack_1c;
+  short sStack_1a;
+  short asStack_18 [2];
+  uint32_t puVar6;
+  uint32_t puVar7;
+  uVar13 = f33_mode600_stimulus_fit_work.signed_component_sum;
+  iVar12 = f33_mode600_stimulus_fit_work.folded_angle_sum;
+  uVar14 = f33_mode600_stimulus_fit_work.sample_count;
+  puVar8 = 0xfebeb800u;
+  puVar7 = 0xfebeb800u;
+  puVar6 = 0xfebeb800u;
+  puVar5 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  uStack_24 = f33_mode600_stimulus_fit_work.active;
+  if ((DAT_febeeacc & 0xff00) != 0x600) {
+    return;
+  }
+  if (f33_mode600_stimulus_fit_work.active != 'Z') {
+    return;
+  }
+  iVar9 = (int)f33_mode600_stimulus_fit_work.positive_mean;
+  iVar10 = (int)f33_mode600_stimulus_fit_work.negative_mean;
+  uStack_25 = f33_mode600_stimulus_fit_work.stimulus_valid;
+  sStack_1c = f33_mode600_stimulus_fit_work.stimulus;
+  sStack_22 = f33_mode600_stimulus_fit_work.positive_mean;
+  sStack_20 = f33_mode600_stimulus_fit_work.negative_mean;
+  uStack_1e = f33_mode600_stimulus_fit_work.hold_count;
+  uVar15 = (uint)f33_mode600_stimulus_fit_work.sample_count;
+  uStack_23 = f33_mode600_stimulus_fit_work.state;
+  if ((f33_fit_parameters.mode600_input_upper < DAT_febeeac4) ||
+     (DAT_febe7db0 < f33_fit_parameters.mode600_qualifier_lower)) goto switchD_000340ae_caseD_15;
+  if (0x1f < f33_mode600_stimulus_fit_work.state) {
+    if (0x20 < f33_mode600_stimulus_fit_work.state) {
+      if (f33_mode600_stimulus_fit_work.state != '!') {
+        if (f33_mode600_stimulus_fit_work.state < 0x23) goto switchD_000340ae_caseD_12;
+        if (f33_mode600_stimulus_fit_work.state == '#') goto switchD_000340ae_caseD_13;
+        if (f33_mode600_stimulus_fit_work.state == '$') goto switchD_000340ae_caseD_14;
+        if (f33_mode600_stimulus_fit_work.state == '&') goto switchD_000340ae_caseD_16;
+        if (f33_mode600_stimulus_fit_work.state == '1') {
+          iVar4 = iVar9 - iVar10;
+          if (iVar9 - iVar10 < 0) {
+            iVar4 = -iVar4;
+          }
+          iVar11 = (int)f33_fit_parameters.pass_difference_limit;
+          if (iVar4 - iVar11 < 0 != (iVar4 < 0 != iVar11 < 0 && iVar11 < 0 == iVar4 - iVar11 < 0) ||
+              iVar4 == iVar11) {
+            uVar3 = 0;
+            do {
+              uVar1 = uVar3 + 1;
+              asStack_18[uVar3] = -(short)((iVar10 + iVar9) / 2);
+              uVar3 = uVar1;
+            } while (uVar1 < 2);
+            f33_stage_pair_correction('\0',asStack_18);
+            f33_queue_pair_correction_records();
+            uStack_23 = 0xff;
+            puVar5 = ((undefined *)camry_host_ptr((uint32_t)(puVar8)));
+            goto LAB_00034204;
+          }
+        }
+        else if (f33_mode600_stimulus_fit_work.state == 0xff) {
+          if (DAT_febe68b4 == -0x5aa5a55b) {
+            uStack_24 = '\0';
+            uStack_25 = '\0';
+            uStack_23 = '\x10';
+            puVar5 = ((undefined *)camry_host_ptr((uint32_t)(puVar7)));
+            FUN_00034ea4(0,0);
+            f33_cancel_mode600_stimulus_fit();
+          }
+          goto LAB_000343b2;
+        }
+        goto switchD_000340ae_caseD_15;
+      }
+      goto switchD_000340ae_caseD_11;
+    }
+    uVar15 = 0;
+    do {
+      uVar3 = uVar15 + 1;
+      asStack_18[uVar15] = 0;
+      uVar15 = uVar3;
+    } while (uVar3 < 2);
+    puVar5 = ((undefined *)camry_host_ptr((uint32_t)(puVar7)));
+    f33_stage_pair_correction('\0',asStack_18);
+    sStack_1c = -f33_fit_parameters.stimulus;
+    uStack_23 = '!';
+LAB_0003415e:
+    uStack_1e = 0;
+    uStack_25 = 'Z';
+    goto LAB_000343b2;
+  }
+  switch(f33_mode600_stimulus_fit_work.state) {
+  case '\x10':
+    sStack_20 = 0;
+    sStack_22 = 0;
+    uVar15 = 0;
+    do {
+      uVar3 = uVar15 + 1;
+      asStack_18[uVar15] = 0;
+      uVar15 = uVar3;
+    } while (uVar3 < 2);
+    puVar5 = ((undefined *)camry_host_ptr((uint32_t)(puVar7)));
+    f33_stage_pair_correction('\0',asStack_18);
+    sStack_1c = f33_fit_parameters.stimulus;
+    uStack_23 = '\x11';
+    goto LAB_0003415e;
+  case '\x11':
+switchD_000340ae_caseD_11:
+    if (f33_fit_parameters.initial_hold_calls <= f33_mode600_stimulus_fit_work.hold_count) {
+      uVar15 = 0;
+      iVar12 = 0;
+      uStack_23 = '\"';
+      puVar5 = ((undefined *)camry_host_ptr(0xfebeb800u));
+      if (f33_mode600_stimulus_fit_work.state == '\x11') {
+        uStack_23 = '\x12';
+      }
+LAB_00034204:
+      uVar14 = (ushort)uVar15;
+      goto LAB_000343b2;
+    }
+    break;
+  case '\x12':
+switchD_000340ae_caseD_12:
+    iVar9 = (int)f33_fit_parameters.sample_admission;
+    iVar10 = (int)DAT_febe5f36;
+    if (f33_mode600_stimulus_fit_work.state == '\x12') {
+      if (iVar10 - iVar9 < 0 == (iVar10 < 0 != iVar9 < 0 && iVar9 < 0 == iVar10 - iVar9 < 0)) {
+LAB_000341a0:
+        uVar3 = (uint)f33_fit_parameters.sample_count;
+        if (uVar15 < uVar3) {
+          uVar14 = f33_mode600_stimulus_fit_work.sample_count + 1;
+          puVar5 = ((undefined *)camry_host_ptr(0xfebeb800u));
+          FUN_00070be0((int)(short)(DAT_febe6c44 + DAT_febe6c40),
+                       (int)(short)(DAT_febe6c46 + DAT_febe6c42),&sStack_1a);
+          iVar9 = (int)sStack_1a;
+          if (iVar9 + -0x4000 < 0 == (iVar9 < 0 && -1 < iVar9 + -0x4000) && iVar9 != 0x4000) {
+            iVar9 = iVar9 + -0x8000;
+          }
+          else if (iVar9 + 0x4000 < 0 != (-1 < iVar9 && iVar9 + 0x4000 < 0)) {
+            iVar9 = iVar9 + 0x8000;
+          }
+          iVar12 = iVar12 + iVar9;
+          goto LAB_000343b2;
+        }
+        iVar9 = f33_mode600_stimulus_fit_work.folded_angle_sum;
+        if (uVar3 != 0) {
+          if (f33_mode600_stimulus_fit_work.folded_angle_sum == -0x80000000 && uVar3 == 0xffffffff)
+          {
+            iVar9 = 0;
+          }
+          else {
+            iVar9 = f33_mode600_stimulus_fit_work.folded_angle_sum / (int)uVar3;
+          }
+        }
+        sVar2 = (short)iVar9;
+        iVar9 = (int)sVar2;
+        if (iVar9 + 0x7fff < 0 == (-1 < iVar9 && iVar9 + 0x7fff < 0) && iVar9 != -0x7fff) {
+          if (iVar9 < 0) {
+            iVar9 = (int)-sVar2;
+          }
+        }
+        else {
+          iVar9 = 0x7fff;
+        }
+        iVar10 = (int)f33_fit_parameters.folded_angle_limit;
+        if (iVar9 - iVar10 < 0 != (iVar9 < 0 != iVar10 < 0 && iVar10 < 0 == iVar9 - iVar10 < 0) ||
+            iVar9 == iVar10) {
+          uStack_1e = 0;
+          uVar3 = 0;
+          if (f33_mode600_stimulus_fit_work.state == '\x12') {
+            do {
+              uVar1 = uVar3 + 1;
+              asStack_18[uVar3] = -sVar2;
+              uVar3 = uVar1;
+            } while (uVar1 < 2);
+            sStack_22 = sVar2;
+            f33_stage_pair_correction('\0',asStack_18);
+            uStack_23 = '\x13';
+            puVar5 = ((undefined *)camry_host_ptr((uint32_t)(puVar7)));
+          }
+          else {
+            do {
+              uVar1 = uVar3 + 1;
+              asStack_18[uVar3] = -sVar2;
+              uVar3 = uVar1;
+            } while (uVar1 < 2);
+            sStack_20 = sVar2;
+            f33_stage_pair_correction('\0',asStack_18);
+            uStack_23 = '#';
+            puVar5 = ((undefined *)camry_host_ptr((uint32_t)(puVar6)));
+          }
+          goto LAB_00034204;
+        }
+      }
+    }
+    else {
+      iVar4 = -iVar9;
+      if (iVar10 + iVar9 < 0 != (iVar10 < 0 != iVar4 < 0 && iVar4 < 0 == iVar10 + iVar9 < 0) ||
+          iVar10 == iVar4) goto LAB_000341a0;
+    }
+  default:
+switchD_000340ae_caseD_15:
+    puVar5 = ((undefined *)camry_host_ptr(0xfebeb800u));
+    f33_abort_mode600_stimulus_fit
+              (&uStack_24,&uStack_25,&sStack_1c,&uStack_1e,&sStack_22,&sStack_20,&uStack_23);
+    goto LAB_000343b2;
+  case '\x13':
+switchD_000340ae_caseD_13:
+    if (f33_fit_parameters.recheck_hold_calls <= f33_mode600_stimulus_fit_work.hold_count) {
+      uVar13 = 0;
+      uStack_23 = '$';
+      uVar15 = uVar13;
+      puVar5 = ((undefined *)camry_host_ptr(0xfebeb800u));
+      if (f33_mode600_stimulus_fit_work.state == '\x13') {
+        uStack_23 = '\x14';
+        uVar15 = 0;
+      }
+      goto LAB_00034204;
+    }
+    break;
+  case '\x14':
+switchD_000340ae_caseD_14:
+    iVar9 = (int)DAT_febe5f36;
+    if (iVar9 + 0x7fff < 0 == (-1 < iVar9 && iVar9 + 0x7fff < 0) && iVar9 != -0x7fff) {
+      if (iVar9 < 0) {
+        iVar9 = (int)-DAT_febe5f36;
+      }
+    }
+    else {
+      iVar9 = 0x7fff;
+    }
+    iVar10 = (int)f33_fit_parameters.sample_admission;
+    if (iVar9 - iVar10 < 0 == (iVar9 < 0 != iVar10 < 0 && iVar10 < 0 == iVar9 - iVar10 < 0)) {
+      if (uVar15 < f33_fit_parameters.sample_count) {
+        uVar14 = f33_mode600_stimulus_fit_work.sample_count + 1;
+        uVar13 = f33_mode600_stimulus_fit_work.signed_component_sum +
+                 (int)DAT_febe6c44 + (int)DAT_febe6c40;
+        goto LAB_000343b2;
+      }
+      if (f33_mode600_stimulus_fit_work.signed_component_sum + 0x7fffffff < 0 ==
+          (-1 < f33_mode600_stimulus_fit_work.signed_component_sum &&
+          f33_mode600_stimulus_fit_work.signed_component_sum + 0x7fffffff < 0) &&
+          f33_mode600_stimulus_fit_work.signed_component_sum != -0x7fffffff) {
+        iVar9 = f33_mode600_stimulus_fit_work.signed_component_sum;
+        if (f33_mode600_stimulus_fit_work.signed_component_sum < 0) {
+          iVar9 = -f33_mode600_stimulus_fit_work.signed_component_sum;
+        }
+      }
+      else {
+        iVar9 = 0x7fffffff;
+      }
+      iVar10 = (int)f33_fit_parameters.component_mean_limit * (uint)f33_fit_parameters.sample_count;
+      if (iVar9 - iVar10 < 0 != (iVar9 < 0 != iVar10 < 0 && iVar10 < 0 == iVar9 - iVar10 < 0) ||
+          iVar9 == iVar10) {
+        sStack_1c = 0;
+        uStack_23 = '&';
+        uStack_25 = 'Z';
+        uStack_1e = 0;
+        puVar5 = ((undefined *)camry_host_ptr(0xfebeb800u));
+        if (f33_mode600_stimulus_fit_work.state == '\x14') {
+          uStack_23 = '\x16';
+        }
+        goto LAB_00034204;
+      }
+    }
+    goto switchD_000340ae_caseD_15;
+  case '\x16':
+switchD_000340ae_caseD_16:
+    if (f33_fit_parameters.release_hold_calls <= f33_mode600_stimulus_fit_work.hold_count) {
+      uStack_23 = '1';
+      puVar5 = ((undefined *)camry_host_ptr(0xfebeb800u));
+      if (f33_mode600_stimulus_fit_work.state == '\x16') {
+        uStack_23 = ' ';
+      }
+      goto LAB_00034204;
+    }
+  }
+  uStack_1e = f33_mode600_stimulus_fit_work.hold_count + 1;
+LAB_000343b2:
+  *(ushort *)(((undefined *)camry_host_ptr(0xffffb26cu)) + (int)camry_host_addr(puVar5)) = uVar14;
+  *(short *)(((undefined *)camry_host_ptr(0xffffb268u)) + (int)camry_host_addr(puVar5)) = sStack_1c;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb261u + (uint32_t)((int)camry_host_addr(puVar5)) * 1u)))) = uStack_24;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb262u + (uint32_t)((int)camry_host_addr(puVar5)) * 1u)))) = uStack_25;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb260u + (uint32_t)((int)camry_host_addr(puVar5)) * 1u)))) = uStack_23;
+  *(short *)(((undefined *)camry_host_ptr(0xffffb264u)) + (int)camry_host_addr(puVar5)) = sStack_22;
+  *(short *)(((undefined *)camry_host_ptr(0xffffb266u)) + (int)camry_host_addr(puVar5)) = sStack_20;
+  *(int *)(((undefined *)camry_host_ptr(0xffffb270u)) + (int)camry_host_addr(puVar5)) = iVar12;
+  *(uint *)(((undefined *)camry_host_ptr(0xffffb274u)) + (int)camry_host_addr(puVar5)) = uVar13;
+  *(ushort *)(((undefined *)camry_host_ptr(0xffffb26au)) + (int)camry_host_addr(puVar5)) = uStack_1e;
+  return;
+}
+
+
+
+/* Set active6A61=5A then full initializer33FAA and return0. No registered call/xref was recovered;
+   keep admission boundary unresolved rather than claiming diagnostic reachability. */
+
+uint f33_begin_mode600_stimulus_fit(void)
+
+{
+  f33_mode600_stimulus_fit_work.active = 'Z';
+  f33_initialize_mode600_stimulus_fit();
+  return 0;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -9,6 +341,101 @@ void f33_return_only_stub_34406(void)
 
 {
   return;
+}
+
+
+
+/* Return5A for invalid retained6A84..6AB8,0 valid. Unlike permissive foreground candidate check,
+   exact retained gains24097..32768, first centers31623..33913, signed second centers-286..286 and
+   angles8118..8374. Does not mutate retained values. */
+
+uint f33_check_retained_fit_bounds(void)
+
+{
+  int iVar1;
+  uint uVar2;
+  int iVar3;
+  int iVar4;
+  int iVar5;
+  int iVar6;
+  int iVar7;
+  int iVar8;
+  int iVar9;
+  
+  iVar1 = (int)f33_retained_fit_coefficients.second_center[0];
+  iVar9 = (int)f33_retained_fit_coefficients.second_center[1];
+  iVar8 = (int)f33_retained_fit_coefficients.second_center[2];
+  iVar7 = (int)f33_retained_fit_coefficients.second_center[3];
+  iVar6 = (int)f33_retained_fit_coefficients.second_center[4];
+  iVar5 = (int)f33_retained_fit_coefficients.second_center[5];
+  if (((((((((DAT_00030ef6 < f33_retained_fit_coefficients.first_gain[0]) ||
+            (f33_retained_fit_coefficients.first_gain[0] < DAT_00030ef8)) ||
+           (DAT_00030ef6 < f33_retained_fit_coefficients.first_gain[1])) ||
+          ((f33_retained_fit_coefficients.first_gain[1] < DAT_00030ef8 ||
+           (DAT_00030efe < f33_retained_fit_coefficients.first_center[0])))) ||
+         (f33_retained_fit_coefficients.first_center[0] < DAT_00030f00)) ||
+        (((DAT_00030efe < f33_retained_fit_coefficients.first_center[1] ||
+          (f33_retained_fit_coefficients.first_center[1] < DAT_00030f00)) ||
+         ((DAT_00030ef6 < f33_retained_fit_coefficients.first_gain[2] ||
+          (((f33_retained_fit_coefficients.first_gain[2] < DAT_00030ef8 ||
+            (DAT_00030ef6 < f33_retained_fit_coefficients.first_gain[3])) ||
+           (f33_retained_fit_coefficients.first_gain[3] < DAT_00030ef8)))))))) ||
+       (((((DAT_00030efe < f33_retained_fit_coefficients.first_center[2] ||
+           (f33_retained_fit_coefficients.first_center[2] < DAT_00030f00)) ||
+          ((DAT_00030efe < f33_retained_fit_coefficients.first_center[3] ||
+           (((f33_retained_fit_coefficients.first_center[3] < DAT_00030f00 ||
+             (DAT_00030ef6 < f33_retained_fit_coefficients.first_gain[4])) ||
+            ((f33_retained_fit_coefficients.first_gain[4] < DAT_00030ef8 ||
+             (((DAT_00030ef6 < f33_retained_fit_coefficients.first_gain[5] ||
+               (f33_retained_fit_coefficients.first_gain[5] < DAT_00030ef8)) ||
+              (DAT_00030efe < f33_retained_fit_coefficients.first_center[4])))))))))) ||
+         ((f33_retained_fit_coefficients.first_center[4] < DAT_00030f00 ||
+          (DAT_00030efe < f33_retained_fit_coefficients.first_center[5])))) ||
+        (f33_retained_fit_coefficients.first_center[5] < DAT_00030f00)))) ||
+      (((((DAT_00030efa < f33_retained_fit_coefficients.second_gain[0] ||
+          (f33_retained_fit_coefficients.second_gain[0] < DAT_00030efc)) ||
+         ((DAT_00030efa < f33_retained_fit_coefficients.second_gain[1] ||
+          ((((f33_retained_fit_coefficients.second_gain[1] < DAT_00030efc ||
+             (iVar4 = (int)DAT_00030f02,
+             iVar1 - iVar4 < 0 == (iVar1 < 0 != iVar4 < 0 && iVar4 < 0 == iVar1 - iVar4 < 0) &&
+             iVar1 != iVar4)) ||
+            (iVar3 = (int)DAT_00030f04,
+            iVar1 - iVar3 < 0 != (iVar1 < 0 != iVar3 < 0 && iVar3 < 0 == iVar1 - iVar3 < 0))) ||
+           ((iVar9 - iVar4 < 0 == (iVar9 < 0 != iVar4 < 0 && iVar4 < 0 == iVar9 - iVar4 < 0) &&
+             iVar9 != iVar4 ||
+            (iVar9 - iVar3 < 0 != (iVar9 < 0 != iVar3 < 0 && iVar3 < 0 == iVar9 - iVar3 < 0)))))))))
+        || (DAT_00030f06 < f33_retained_fit_coefficients.component_angle[0])) ||
+       (((f33_retained_fit_coefficients.component_angle[0] < DAT_00030f08 ||
+         (DAT_00030efa < f33_retained_fit_coefficients.second_gain[2])) ||
+        ((f33_retained_fit_coefficients.second_gain[2] < DAT_00030efc ||
+         (((DAT_00030efa < f33_retained_fit_coefficients.second_gain[3] ||
+           (f33_retained_fit_coefficients.second_gain[3] < DAT_00030efc)) ||
+          (iVar8 - iVar4 < 0 == (iVar8 < 0 != iVar4 < 0 && iVar4 < 0 == iVar8 - iVar4 < 0) &&
+           iVar8 != iVar4)))))))))) ||
+     ((((iVar8 - iVar3 < 0 != (iVar8 < 0 != iVar3 < 0 && iVar3 < 0 == iVar8 - iVar3 < 0) ||
+        (iVar7 - iVar4 < 0 == (iVar7 < 0 != iVar4 < 0 && iVar4 < 0 == iVar7 - iVar4 < 0) &&
+         iVar7 != iVar4)) ||
+       (iVar7 - iVar3 < 0 != (iVar7 < 0 != iVar3 < 0 && iVar3 < 0 == iVar7 - iVar3 < 0))) ||
+      ((((DAT_00030f06 < f33_retained_fit_coefficients.component_angle[1] ||
+         (f33_retained_fit_coefficients.component_angle[1] < DAT_00030f08)) ||
+        ((((DAT_00030efa < f33_retained_fit_coefficients.second_gain[4] ||
+           (((f33_retained_fit_coefficients.second_gain[4] < DAT_00030efc ||
+             (DAT_00030efa < f33_retained_fit_coefficients.second_gain[5])) ||
+            (f33_retained_fit_coefficients.second_gain[5] < DAT_00030efc)))) ||
+          ((iVar6 - iVar4 < 0 == (iVar6 < 0 != iVar4 < 0 && iVar4 < 0 == iVar6 - iVar4 < 0) &&
+            iVar6 != iVar4 ||
+           (iVar6 - iVar3 < 0 != (iVar6 < 0 != iVar3 < 0 && iVar3 < 0 == iVar6 - iVar3 < 0))))) ||
+         (iVar5 - iVar4 < 0 == (iVar5 < 0 != iVar4 < 0 && iVar4 < 0 == iVar5 - iVar4 < 0) &&
+          iVar5 != iVar4)))) ||
+       (((iVar5 - iVar3 < 0 != (iVar5 < 0 != iVar3 < 0 && iVar3 < 0 == iVar5 - iVar3 < 0) ||
+         (DAT_00030f06 < f33_retained_fit_coefficients.component_angle[2])) ||
+        (f33_retained_fit_coefficients.component_angle[2] < DAT_00030f08)))))))) {
+    uVar2 = 0x5a;
+  }
+  else {
+    uVar2 = 0;
+  }
+  return uVar2;
 }
 
 
@@ -226,6 +653,110 @@ void FUN_00034858(void)
 
 
 
+/* Copy foreground centers/gains/angles into retained6A84..6AB8, serialize64-byte0202 record
+   markerA55A5AA5 plus reserved zero, enqueue setter; publish6A7A=44 and6ABC marker immediately. Do
+   not interpret immediate software marker as durable write success. */
+
+void f33_publish_fit_candidate_record(void)
+
+{
+  uint32_t puVar1;
+  uint auStack_6c [2];
+  ushort uStack_64;
+  ushort uStack_62;
+  ushort uStack_60;
+  ushort uStack_5e;
+  ushort uStack_5c;
+  ushort uStack_5a;
+  ushort uStack_58;
+  ushort uStack_56;
+  ushort uStack_54;
+  ushort uStack_52;
+  ushort uStack_50;
+  ushort uStack_4e;
+  short sStack_4c;
+  short sStack_4a;
+  ushort uStack_48;
+  ushort uStack_46;
+  ushort uStack_44;
+  short sStack_42;
+  short sStack_40;
+  ushort uStack_3e;
+  ushort uStack_3c;
+  ushort uStack_3a;
+  short sStack_38;
+  short sStack_36;
+  ushort uStack_34;
+  ushort uStack_32;
+  ushort uStack_30;
+  undefined2 uStack_2e;
+  
+  puVar1 = 0xfebeb800u;
+  f33_retained_fit_coefficients.first_center[0] = DAT_febe654e;
+  f33_retained_fit_coefficients.first_center[1] = DAT_febe6550;
+  f33_retained_fit_coefficients.first_gain[0] = DAT_febe6542;
+  f33_retained_fit_coefficients.first_gain[1] = DAT_febe6544;
+  f33_retained_fit_coefficients.first_center[2] = DAT_febe6552;
+  f33_retained_fit_coefficients.first_center[3] = DAT_febe6554;
+  f33_retained_fit_coefficients.first_gain[2] = DAT_febe6546;
+  f33_retained_fit_coefficients.first_gain[3] = DAT_febe6548;
+  f33_retained_fit_coefficients.first_center[4] = DAT_febe6556;
+  f33_retained_fit_coefficients.first_center[5] = DAT_febe6558;
+  f33_retained_fit_coefficients.first_gain[4] = DAT_febe654a;
+  f33_retained_fit_coefficients.first_gain[5] = DAT_febe654c;
+  f33_retained_fit_coefficients.second_center[0] = DAT_febe6566;
+  f33_retained_fit_coefficients.second_center[1] = DAT_febe6568;
+  f33_retained_fit_coefficients.second_gain[0] = DAT_febe655a;
+  f33_retained_fit_coefficients.second_gain[1] = DAT_febe655c;
+  f33_retained_fit_coefficients.component_angle[0] = DAT_febe6572;
+  f33_retained_fit_coefficients.second_center[2] = DAT_febe656a;
+  f33_retained_fit_coefficients.second_center[3] = DAT_febe656c;
+  f33_retained_fit_coefficients.second_gain[2] = DAT_febe655e;
+  f33_retained_fit_coefficients.second_gain[3] = DAT_febe6560;
+  f33_retained_fit_coefficients.component_angle[1] = DAT_febe6574;
+  f33_retained_fit_coefficients.second_center[4] = DAT_febe656e;
+  f33_retained_fit_coefficients.second_center[5] = DAT_febe6570;
+  f33_retained_fit_coefficients.second_gain[4] = DAT_febe6562;
+  f33_retained_fit_coefficients.second_gain[5] = DAT_febe6564;
+  f33_retained_fit_coefficients.component_angle[2] = DAT_febe6576;
+  auStack_6c[1] = 0;
+  auStack_6c[0] = 0xa55a5aa5;
+  uStack_62 = DAT_febe6550;
+  uStack_64 = DAT_febe654e;
+  uStack_52 = DAT_febe6558;
+  sStack_4a = DAT_febe6568;
+  uStack_48 = DAT_febe655a;
+  uStack_60 = DAT_febe6542;
+  uStack_5e = DAT_febe6544;
+  uStack_5c = DAT_febe6552;
+  uStack_5a = DAT_febe6554;
+  uStack_58 = DAT_febe6546;
+  uStack_56 = DAT_febe6548;
+  uStack_54 = DAT_febe6556;
+  uStack_50 = DAT_febe654a;
+  uStack_4e = DAT_febe654c;
+  sStack_4c = DAT_febe6566;
+  uStack_46 = DAT_febe655c;
+  uStack_44 = DAT_febe6572;
+  sStack_42 = DAT_febe656a;
+  sStack_40 = DAT_febe656c;
+  uStack_3e = DAT_febe655e;
+  uStack_3c = DAT_febe6560;
+  uStack_3a = DAT_febe6574;
+  sStack_38 = DAT_febe656e;
+  sStack_36 = DAT_febe6570;
+  uStack_34 = DAT_febe6562;
+  uStack_32 = DAT_febe6564;
+  uStack_30 = DAT_febe6576;
+  uStack_2e = 0;
+  f33_nvm_set_record(0x202,auStack_6c);
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb27au + (uint32_t)((int)puVar1) * 1u)))) = 0x44;
+  (*((undefined4 *)camry_host_ptr((uint32_t)((0xffffb2bcu + (uint32_t)((int)puVar1)))))) = 0xa55a5aa5;
+  return;
+}
+
+
+
 void FUN_00034bce(void)
 
 {
@@ -394,6 +925,37 @@ void f33_reload_ba_admission_records(void)
 
 
 
+/* Only phase5F4C==5A reinvokes retained start with null payload and stack response. Pending-1
+   retains phase; terminal reports to4D4CA and clears phase. Recovered direct writers
+   initialize/clear phase only; no phase-arming producer is established. */
+
+void f33_poll_ba_retained_start(void)
+
+{
+  uint32_t puVar1;
+  uint uVar2;
+  int iVar3;
+  uchar uVar4;
+  uchar auStack_4f [63];
+  
+  puVar1 = 0xfebeb800u;
+  uVar4 = '\0';
+  uVar2 = (uint)f33_ba_application_work.selected_index;
+  if (f33_ba_application_work.retained_start_phase == 'Z') {
+    iVar3 = (*(int (*)())f33_ba_operations[uVar2].start)(f33_ba_application_work.selected_index,(uchar *)0x0,auStack_4f);
+    if (iVar3 != -1) {
+      if (-1 < iVar3) {
+        uVar4 = f33_ba_operations[uVar2].response_body_length;
+      }
+      ((void)(auStack_4f), FUN_0004d4ca(iVar3, uVar4));
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58b4))))) = 0;
+    }
+  }
+  return;
+}
+
+
+
 /* Compare zero-extended low8 length bytes exactly; return1 on equality,0 on first mismatch. No
    independent source-size validation. */
 
@@ -516,6 +1078,76 @@ int f33_ba_f1_latch_selector3(void)
 
 
 
+/* Phase0 requires TMPCL; phase5A returns-1 while either thermal tracker1,0 only when
+   bothFF,otherwise-6. This start does not reset thermal state. */
+
+int f33_ba_f3_validate_tmpcl(uchar configured_index,uchar *payload,uchar *response)
+
+{
+  uint uVar1;
+  
+  if (f33_ba_application_work.retained_start_phase == '\0') {
+    uVar1 = f33_compare_ba_token_bytes
+                      (payload,"TMPCLJTRM1JTRM2BADISBAENATZCLRJTRM3VSPDASINC",'\x05');
+    if (uVar1 == 1) {
+      return 0;
+    }
+  }
+  else if (f33_ba_application_work.retained_start_phase == 'Z') {
+    if ((DAT_febe6ee4 == '\x01') || (DAT_febe7de4 == '\x01')) {
+      return -1;
+    }
+    if ((((int8_t)DAT_febe6ee4) == -1) && (((int8_t)DAT_febe7de4) == -1)) {
+      return 0;
+    }
+  }
+  return -6;
+}
+
+
+
+/* Configured F3 finish callback. Phase0 resets squared-drive/model state, requests records6/5 and
+   arms5F51=5A while returning-1. Wait for both trackers to leave1; bothFF return0,other terminal
+   combination-6; clear phase on terminal. Tracker arming ignores store admission; no durable-clear
+   proof. Existing thermal/record ownership retained; static reconstruction, no separate native
+   execution claim. */
+
+int f33_service_clear_thermal_history(void)
+
+{
+  uint32_t puVar1;
+  int iVar2;
+  
+  puVar1 = 0xfebeb800u;
+  if (f33_ba_application_work.thermal_clear_phase == '\0') {
+    FUN_0003ba78();
+    f33_reset_thermal_models_and_history_record();
+    f33_publish_thermal_reference_record();
+    iVar2 = -1;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58af))))) = 0x5a;
+  }
+  else if (f33_ba_application_work.thermal_clear_phase == 'Z') {
+    if ((DAT_febe6ee4 == '\x01') || (DAT_febe7de4 == '\x01')) {
+      iVar2 = -1;
+    }
+    else {
+      if ((((int8_t)DAT_febe6ee4) == -1) && (((int8_t)DAT_febe7de4) == -1)) {
+        iVar2 = 0;
+      }
+      else {
+        iVar2 = -6;
+      }
+      f33_ba_application_work.thermal_clear_phase = '\0';
+    }
+  }
+  else {
+    iVar2 = -6;
+  }
+  return iVar2;
+}
+
+
+
 /* Exact JTRM1 requests internal selector5 admission in allowed modes; start does not setB112. */
 
 int f33_ba_f4_validate_jtrm1(uchar configured_index,uchar *payload,uchar *response)
@@ -574,6 +1206,54 @@ int f33_ba_f5_latch_selector6(void)
   
   iVar1 = f33_latch_internal_ba_selector(6);
   return iVar1;
+}
+
+
+
+/* Phase0 exact BADIS requests zero record18 and105, ignoring admissions. Phase5A polls both cached
+   statuses: exact10 clears live gate/count,20/21 waits-1,otherwise-9. */
+
+int f33_ba_f6_request_disable(uchar configured_index,uchar *payload,uchar *response)
+
+{
+  uint32_t puVar1;
+  uint uVar2;
+  uint uVar3;
+  undefined1 local_18;
+  undefined1 uStack_17;
+  undefined2 uStack_16;
+  undefined4 uStack_14;
+  uint auStack_10 [2];
+  
+  puVar1 = 0xfebeb800u;
+  if (f33_ba_application_work.retained_start_phase == '\0') {
+    uVar2 = f33_compare_ba_token_bytes(payload,"BADISBAENATZCLRJTRM3VSPDASINC",'\x05');
+    if (uVar2 == 1) {
+      uStack_14 = 0;
+      uStack_16 = 0;
+      uStack_17 = 0;
+      local_18 = 0;
+      f33_nvm_set_record(0x18,(uint *)&local_18);
+      auStack_10[1] = 0;
+      auStack_10[0] = 0;
+      f33_nvm_set_record(0x105,auStack_10);
+      return 0;
+    }
+    return -6;
+  }
+  if (f33_ba_application_work.retained_start_phase == 'Z') {
+    uVar2 = f33_nvm_get_record_status(0x105);
+    uVar3 = f33_nvm_get_record_status(0x18);
+    if ((uVar2 == 0x10) && (uVar3 == 0x10)) {
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58b0))))) = 0;
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58b1))))) = 0;
+      return 0;
+    }
+    if ((uVar2 == 0x20 || uVar2 == 0x21) || (uVar3 == 0x20 || uVar3 == 0x21)) {
+      return -1;
+    }
+  }
+  return -9;
 }
 
 
@@ -804,6 +1484,20 @@ int f33_ba_fa_stage_unsigned_override(uchar configured_index,uchar *payload,ucha
 
 
 
+/* Return real B33BC(5F52) R10=0; setB116=5A andB117=staged unsigned byte. ScheduledBEE2C later
+   selects zero-extendedB117<<7. */
+
+int f33_ba_fa_latch_unsigned_override(void)
+
+{
+  int iVar1;
+  
+  iVar1 = f33_latch_ba_unsigned_override(f33_ba_application_work.staged_unsigned_override);
+  return iVar1;
+}
+
+
+
 /* Exact ASINC returns0,otherwise-6. No mutation in start. */
 
 int f33_ba_fb_validate_asinc(uchar configured_index,uchar *payload,uchar *response)
@@ -834,6 +1528,51 @@ int f33_ba_fb_latch_owner5_fast_release(void)
   
   iVar1 = f33_latch_ba_owner5_fast_release();
   return iVar1;
+}
+
+
+
+/* Called by mode0700 entry, not an inferred timer or ignition event. If gate and count are nonzero,
+   decrement low8 count, request record18; reaching0 also clears gate and requests zero record105.
+   Ignore setter return and publish decremented RAM regardless. Gate5A/count0 remains unchanged. */
+
+void f33_consume_ba_retained_admission_count(void)
+
+{
+  uint32_t puVar1;
+  uchar uVar2;
+  uchar uVar3;
+  char local_1c [8];
+  uint auStack_14 [2];
+  
+  puVar1 = 0xfebeb800u;
+  uVar2 = f33_ba_application_work.admission;
+  uVar3 = f33_ba_application_work.remaining_mode700_entries;
+  if ((f33_ba_application_work.admission != '\0') &&
+     (f33_ba_application_work.remaining_mode700_entries != '\0')) {
+    local_1c[0] = f33_ba_application_work.remaining_mode700_entries + 0xff;
+    local_1c[1] = 0;
+    uVar3 = f33_ba_application_work.remaining_mode700_entries + 0xff;
+    if (uVar3 == '\0') {
+      uVar2 = '\0';
+    }
+    local_1c[2] = '\0';
+    local_1c[3] = '\0';
+    local_1c[4] = '\0';
+    local_1c[5] = '\0';
+    local_1c[6] = '\0';
+    local_1c[7] = '\0';
+    puVar1 = 0xfebeb800u;
+    f33_nvm_set_record(0x18,((uint *)camry_host_ptr((uint32_t)(local_1c))));
+    if (uVar2 == '\0') {
+      auStack_14[0] = 0;
+      auStack_14[1] = 0;
+      f33_nvm_set_record(0x105,auStack_14);
+    }
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58b0))))) = uVar3;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58b1))))) = uVar2;
+  return;
 }
 
 
@@ -1991,6 +2730,69 @@ void f33_return_only_stub_36298(void)
 
 
 
+/* Unsigned EB94 window[8960,38400), plus abs(s16 63D4)>=2347 or abs63D4>=1630 and abs63D8>=2048,
+   forms predicate5A. Rising predicate OR prior active5A with count<3000 admits only if7568/E603
+   zero,71EC&1FF zero andEB83=11. Predicate is published even on denied activation. Failed admission
+   clears active/count; admitted count increments only below3000. A new edge at3000 can retain
+   active for that invocation without restarting the budget. Raw invocation count and sampled
+   qualifiers have no assigned physical units. */
+
+void f33_update_transient_current_reference_qualification(void)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  uchar uVar4;
+  int iVar5;
+  
+  iVar2 = (int)DAT_febe63d8;
+  iVar5 = (int)DAT_febe63d4;
+  if (((DAT_febeeb94 < f33_current_reference_qualification.window_lower_inclusive) ||
+      (f33_current_reference_qualification.window_upper_exclusive <= DAT_febeeb94)) ||
+     (((iVar3 = (int)f33_current_reference_qualification.first_absolute_threshold,
+       iVar5 - iVar3 < 0 != (iVar5 < 0 != iVar3 < 0 && iVar3 < 0 == iVar5 - iVar3 < 0) &&
+       (iVar1 = -iVar3,
+       iVar5 + iVar3 < 0 == (iVar5 < 0 != iVar1 < 0 && iVar1 < 0 == iVar5 + iVar3 < 0) &&
+       iVar5 != iVar1)) &&
+      (((iVar3 = (int)f33_current_reference_qualification.first_combined_threshold,
+        iVar5 - iVar3 < 0 != (iVar5 < 0 != iVar3 < 0 && iVar3 < 0 == iVar5 - iVar3 < 0) &&
+        (iVar1 = -iVar3,
+        iVar5 + iVar3 < 0 == (iVar5 < 0 != iVar1 < 0 && iVar1 < 0 == iVar5 + iVar3 < 0) &&
+        iVar5 != iVar1)) ||
+       ((iVar5 = (int)f33_current_reference_qualification.second_combined_threshold,
+        iVar2 - iVar5 < 0 != (iVar2 < 0 != iVar5 < 0 && iVar5 < 0 == iVar2 - iVar5 < 0) &&
+        (iVar3 = -iVar5,
+        iVar2 + iVar5 < 0 == (iVar2 < 0 != iVar3 < 0 && iVar3 < 0 == iVar2 + iVar5 < 0) &&
+        iVar2 != iVar3)))))))) {
+    uVar4 = '\0';
+  }
+  else {
+    uVar4 = 'Z';
+  }
+  if (((((f33_current_reference_transient.previous_predicate == '\0') && (uVar4 == 'Z')) ||
+       ((f33_current_reference_transient.active == 'Z' &&
+        (f33_current_reference_transient.invocation_count <
+         f33_current_reference_qualification.count_limit)))) &&
+      (((DAT_febe7568 == '\0' && (DAT_febee603 == '\0')) && ((DAT_febe71ec & 0x1ff) == 0)))) &&
+     (DAT_febeeb83 == '\x11')) {
+    f33_current_reference_transient.active = 'Z';
+    if (f33_current_reference_transient.invocation_count <
+        f33_current_reference_qualification.count_limit) {
+      f33_current_reference_transient.invocation_count =
+           f33_current_reference_transient.invocation_count + 1;
+    }
+  }
+  else {
+    f33_current_reference_transient.active = '\0';
+    f33_current_reference_transient.invocation_count = 0;
+  }
+  f33_current_reference_transient.previous_predicate = uVar4;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -2035,6 +2837,177 @@ void f33_initialize_bank0_current_reference_feedback(void)
 
 
 
+/* WARNING: Removing unreachable block (ram,0x000364d4) */
+/* WARNING: Removing unreachable block (ram,0x00036442) */
+/* WARNING: Removing unreachable block (ram,0x0003643e) */
+/* WARNING: Removing unreachable block (ram,0x00036432) */
+/* WARNING: Removing unreachable block (ram,0x000363f8) */
+/* Use prior unclipped second-axis regulator output: saturating signed16 absolute magnitude*1024
+   divided by min(bank envelope,shared6CE4). Zero denominator selects1024; ratio clamps0..1024.
+   Error922-ratio clamps-1024..1024 and halves toward zero when71EC&3. Gains6144/-1228,
+   or30720/-6144 for transient5A; exact optional gain-scaling flag0. Correction is
+   low32(gain0*error-gain1*previous_error), added to prior6DCA*32768 with symmetric signed32
+   saturation. Transient path then clamps the relative delta to +/-41943040 and re-adds baseline
+   without another saturation. Global bounds[-726474424,0], division toward zero by32768 and
+   signed16 publication follow. Normal mode retains old transient delta. Native scheduled
+   composition checks independent histories and zero-denominator behavior. */
+
+void f33_update_bank0_current_reference_feedback(void)
+
+{
+  short sVar1;
+  int iVar3;
+  int iVar4;
+  int iVar5;
+  int iVar6;
+  int iVar7;
+  short sVar2;
+  
+  iVar5 = (int)f33_shared_second_axis_envelope;
+  iVar6 = (int)f33_regulator_output_envelopes[0].second_upper;
+  iVar3 = f33_regulator_output_envelopes[0].second_unclipped;
+  if (f33_regulator_output_envelopes[0].second_unclipped + -0x7fff < 0 ==
+      (f33_regulator_output_envelopes[0].second_unclipped < 0 &&
+      -1 < f33_regulator_output_envelopes[0].second_unclipped + -0x7fff)) {
+    iVar3 = 0x7fff;
+  }
+  if (iVar3 + 0x7fff < 0 != (-1 < iVar3 && iVar3 + 0x7fff < 0)) {
+    iVar3 = -0x7fff;
+  }
+  iVar4 = (int)(short)iVar3;
+  iVar7 = iVar6;
+  if (((f33_current_reference_feedback_calibration[0].bypass_shared_ceiling == '\0') &&
+      (f33_current_reference_feedback_calibration[0].shared_ceiling_enabled != '\0')) &&
+     (iVar7 = iVar5,
+     iVar5 - iVar6 < 0 == (iVar5 < 0 != iVar6 < 0 && iVar6 < 0 == iVar5 - iVar6 < 0) &&
+     iVar5 != iVar6)) {
+    iVar7 = iVar6;
+  }
+  if (iVar4 + 0x7fff < 0 == (-1 < iVar4 && iVar4 + 0x7fff < 0) && iVar4 != -0x7fff) {
+    if (iVar4 < 0) {
+      iVar4 = (int)(short)-(short)iVar3;
+    }
+  }
+  else {
+    iVar4 = 0x7fff;
+  }
+  if (iVar7 == 0) {
+    iVar4 = (int)f33_current_reference_feedback_calibration[0].ratio_upper;
+  }
+  else {
+    iVar4 = iVar4 << 10;
+    if (iVar7 != 0) {
+      if (iVar4 == -0x80000000 && iVar7 == -1) {
+        iVar4 = -0x80000000;
+      }
+      else {
+        iVar4 = iVar4 / iVar7;
+      }
+    }
+  }
+  iVar3 = (int)f33_current_reference_feedback_calibration[0].ratio_upper;
+  if (iVar3 - iVar4 < 0 != (iVar3 < 0 != iVar4 < 0 && iVar4 < 0 == iVar3 - iVar4 < 0)) {
+    iVar4 = iVar3;
+  }
+  if (iVar4 < 0) {
+    iVar4 = 0;
+  }
+  f33_current_reference_feedback[0].ratio = (short)iVar4;
+  iVar5 = (int)f33_current_reference_feedback_calibration[0].ratio_target - (int)(short)iVar4;
+  if (iVar3 - iVar5 < 0 != (iVar3 < 0 != iVar5 < 0 && iVar5 < 0 == iVar3 - iVar5 < 0)) {
+    iVar5 = iVar3;
+  }
+  f33_current_reference_feedback[0].error =
+       (int)f33_current_reference_feedback_calibration[0].error_lower;
+  if (iVar5 - f33_current_reference_feedback[0].error < 0 ==
+      (iVar5 < 0 != f33_current_reference_feedback[0].error < 0 &&
+      f33_current_reference_feedback[0].error < 0 ==
+      iVar5 - f33_current_reference_feedback[0].error < 0)) {
+    f33_current_reference_feedback[0].error = iVar5;
+  }
+  if ((DAT_febe71ec & 3) != 0) {
+    f33_current_reference_feedback[0].error = f33_current_reference_feedback[0].error / 2;
+  }
+  sVar1 = f33_current_reference_feedback_calibration[0].normal_current_gain;
+  sVar2 = f33_current_reference_feedback_calibration[0].normal_previous_gain;
+  if (f33_current_reference_transient.active == 'Z') {
+    sVar1 = f33_current_reference_feedback_calibration[0].transient_current_gain;
+    sVar2 = f33_current_reference_feedback_calibration[0].transient_previous_gain;
+  }
+  f33_current_reference_feedback[0].previous_gain = (int)sVar2;
+  f33_current_reference_feedback[0].current_gain = (int)sVar1;
+  if (f33_current_reference_feedback_calibration[0].error_gain_scaling_enabled == 'Z') {
+    iVar3 = f33_current_reference_feedback_calibration[0].nonpositive_error_gain_scale;
+    if (0 < f33_current_reference_feedback[0].error) {
+      iVar3 = f33_current_reference_feedback_calibration[0].positive_error_gain_scale;
+    }
+    iVar3 = (f33_current_reference_feedback[0].error * iVar3) / 0x1000;
+    f33_current_reference_feedback[0].current_gain =
+         (f33_current_reference_feedback[0].current_gain * iVar3) / 0x1000;
+    f33_current_reference_feedback[0].previous_gain =
+         (f33_current_reference_feedback[0].previous_gain * iVar3) / 0x1000;
+  }
+  iVar6 = (int)f33_first_current_feedback_baseline;
+  iVar5 = iVar6 * 0x8000;
+  iVar3 = f33_current_reference_feedback[0].current_gain * f33_current_reference_feedback[0].error -
+          f33_current_reference_feedback[0].previous_gain *
+          f33_current_reference_feedback[0].previous_error;
+  if (iVar5 < 1) {
+    if ((iVar3 < 1) &&
+       (iVar4 = iVar6 * -0x8000 + -0x7fffffff,
+       iVar4 - iVar3 < 0 == (iVar4 < 0 != iVar3 < 0 && iVar3 < 0 == iVar4 - iVar3 < 0) &&
+       iVar4 != iVar3)) {
+      iVar3 = -0x7fffffff;
+      goto LAB_00036494;
+    }
+  }
+  else if ((0 < iVar3) &&
+          (iVar7 = iVar6 * -0x8000 + 0x7fffffff, iVar4 = iVar7 - iVar3,
+          iVar4 < 0 != (iVar7 < 0 != iVar3 < 0 && iVar3 < 0 == iVar4 < 0))) {
+    iVar3 = 0x7fffffff;
+    goto LAB_00036494;
+  }
+  iVar3 = iVar3 + iVar5;
+LAB_00036494:
+  f33_current_reference_feedback[0].saturated_base_plus_delta = iVar3;
+  if (f33_current_reference_transient.active == 'Z') {
+    iVar3 = iVar3 + iVar6 * -0x8000;
+    if (f33_current_reference_feedback_calibration[0].transient_delta_upper - iVar3 < 0 !=
+        (f33_current_reference_feedback_calibration[0].transient_delta_upper < 0 != iVar3 < 0 &&
+        iVar3 < 0 == f33_current_reference_feedback_calibration[0].transient_delta_upper - iVar3 < 0
+        )) {
+      iVar3 = f33_current_reference_feedback_calibration[0].transient_delta_upper;
+    }
+    f33_current_reference_feedback[0].retained_transient_delta =
+         f33_current_reference_feedback_calibration[0].transient_delta_lower;
+    if (iVar3 - f33_current_reference_feedback_calibration[0].transient_delta_lower < 0 ==
+        (iVar3 < 0 != f33_current_reference_feedback_calibration[0].transient_delta_lower < 0 &&
+        f33_current_reference_feedback_calibration[0].transient_delta_lower < 0 ==
+        iVar3 - f33_current_reference_feedback_calibration[0].transient_delta_lower < 0)) {
+      f33_current_reference_feedback[0].retained_transient_delta = iVar3;
+    }
+    iVar3 = f33_current_reference_feedback[0].retained_transient_delta + iVar5;
+  }
+  f33_current_reference_feedback[0].request_before_global_clamp = iVar3;
+  if (f33_current_reference_feedback_calibration[0].request_upper_q15 - iVar3 < 0 !=
+      (f33_current_reference_feedback_calibration[0].request_upper_q15 < 0 != iVar3 < 0 &&
+      iVar3 < 0 == f33_current_reference_feedback_calibration[0].request_upper_q15 - iVar3 < 0)) {
+    iVar3 = f33_current_reference_feedback_calibration[0].request_upper_q15;
+  }
+  f33_current_reference_feedback[0].previous_error = (short)f33_current_reference_feedback[0].error;
+  iVar5 = f33_current_reference_feedback_calibration[0].request_lower_q15;
+  if (iVar3 - f33_current_reference_feedback_calibration[0].request_lower_q15 < 0 ==
+      (iVar3 < 0 != f33_current_reference_feedback_calibration[0].request_lower_q15 < 0 &&
+      f33_current_reference_feedback_calibration[0].request_lower_q15 < 0 ==
+      iVar3 - f33_current_reference_feedback_calibration[0].request_lower_q15 < 0)) {
+    iVar5 = iVar3;
+  }
+  f33_current_reference_feedback[0].request = (short)(iVar5 / 0x8000);
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -2074,6 +3047,177 @@ void f33_initialize_bank1_current_reference_feedback(void)
 
 {
   f33_reset_bank1_current_reference_feedback();
+  return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0003666c) */
+/* WARNING: Removing unreachable block (ram,0x000365da) */
+/* WARNING: Removing unreachable block (ram,0x000365d6) */
+/* WARNING: Removing unreachable block (ram,0x000365ca) */
+/* WARNING: Removing unreachable block (ram,0x00036590) */
+/* Use prior unclipped second-axis regulator output: saturating signed16 absolute magnitude*1024
+   divided by min(bank envelope,shared6CE4). Zero denominator selects1024; ratio clamps0..1024.
+   Error922-ratio clamps-1024..1024 and halves toward zero when71EC&3. Gains6144/-1228,
+   or30720/-6144 for transient5A; exact optional gain-scaling flag0. Correction is
+   low32(gain0*error-gain1*previous_error), added to prior6DCA*32768 with symmetric signed32
+   saturation. Transient path then clamps the relative delta to +/-41943040 and re-adds baseline
+   without another saturation. Global bounds[-726474424,0], division toward zero by32768 and
+   signed16 publication follow. Normal mode retains old transient delta. Native scheduled
+   composition checks independent histories and zero-denominator behavior. */
+
+void f33_update_bank1_current_reference_feedback(void)
+
+{
+  short sVar1;
+  int iVar3;
+  int iVar4;
+  int iVar5;
+  int iVar6;
+  int iVar7;
+  short sVar2;
+  
+  iVar5 = (int)f33_shared_second_axis_envelope;
+  iVar6 = (int)f33_regulator_output_envelopes[1].second_upper;
+  iVar3 = f33_regulator_output_envelopes[1].second_unclipped;
+  if (f33_regulator_output_envelopes[1].second_unclipped + -0x7fff < 0 ==
+      (f33_regulator_output_envelopes[1].second_unclipped < 0 &&
+      -1 < f33_regulator_output_envelopes[1].second_unclipped + -0x7fff)) {
+    iVar3 = 0x7fff;
+  }
+  if (iVar3 + 0x7fff < 0 != (-1 < iVar3 && iVar3 + 0x7fff < 0)) {
+    iVar3 = -0x7fff;
+  }
+  iVar4 = (int)(short)iVar3;
+  iVar7 = iVar6;
+  if (((f33_current_reference_feedback_calibration[1].bypass_shared_ceiling == '\0') &&
+      (f33_current_reference_feedback_calibration[1].shared_ceiling_enabled != '\0')) &&
+     (iVar7 = iVar5,
+     iVar5 - iVar6 < 0 == (iVar5 < 0 != iVar6 < 0 && iVar6 < 0 == iVar5 - iVar6 < 0) &&
+     iVar5 != iVar6)) {
+    iVar7 = iVar6;
+  }
+  if (iVar4 + 0x7fff < 0 == (-1 < iVar4 && iVar4 + 0x7fff < 0) && iVar4 != -0x7fff) {
+    if (iVar4 < 0) {
+      iVar4 = (int)(short)-(short)iVar3;
+    }
+  }
+  else {
+    iVar4 = 0x7fff;
+  }
+  if (iVar7 == 0) {
+    iVar4 = (int)f33_current_reference_feedback_calibration[1].ratio_upper;
+  }
+  else {
+    iVar4 = iVar4 << 10;
+    if (iVar7 != 0) {
+      if (iVar4 == -0x80000000 && iVar7 == -1) {
+        iVar4 = -0x80000000;
+      }
+      else {
+        iVar4 = iVar4 / iVar7;
+      }
+    }
+  }
+  iVar3 = (int)f33_current_reference_feedback_calibration[1].ratio_upper;
+  if (iVar3 - iVar4 < 0 != (iVar3 < 0 != iVar4 < 0 && iVar4 < 0 == iVar3 - iVar4 < 0)) {
+    iVar4 = iVar3;
+  }
+  if (iVar4 < 0) {
+    iVar4 = 0;
+  }
+  f33_current_reference_feedback[1].ratio = (short)iVar4;
+  iVar5 = (int)f33_current_reference_feedback_calibration[1].ratio_target - (int)(short)iVar4;
+  if (iVar3 - iVar5 < 0 != (iVar3 < 0 != iVar5 < 0 && iVar5 < 0 == iVar3 - iVar5 < 0)) {
+    iVar5 = iVar3;
+  }
+  f33_current_reference_feedback[1].error =
+       (int)f33_current_reference_feedback_calibration[1].error_lower;
+  if (iVar5 - f33_current_reference_feedback[1].error < 0 ==
+      (iVar5 < 0 != f33_current_reference_feedback[1].error < 0 &&
+      f33_current_reference_feedback[1].error < 0 ==
+      iVar5 - f33_current_reference_feedback[1].error < 0)) {
+    f33_current_reference_feedback[1].error = iVar5;
+  }
+  if ((DAT_febe71ec & 3) != 0) {
+    f33_current_reference_feedback[1].error = f33_current_reference_feedback[1].error / 2;
+  }
+  sVar1 = f33_current_reference_feedback_calibration[1].normal_current_gain;
+  sVar2 = f33_current_reference_feedback_calibration[1].normal_previous_gain;
+  if (f33_current_reference_transient.active == 'Z') {
+    sVar1 = f33_current_reference_feedback_calibration[1].transient_current_gain;
+    sVar2 = f33_current_reference_feedback_calibration[1].transient_previous_gain;
+  }
+  f33_current_reference_feedback[1].previous_gain = (int)sVar2;
+  f33_current_reference_feedback[1].current_gain = (int)sVar1;
+  if (f33_current_reference_feedback_calibration[1].error_gain_scaling_enabled == 'Z') {
+    iVar3 = f33_current_reference_feedback_calibration[1].nonpositive_error_gain_scale;
+    if (0 < f33_current_reference_feedback[1].error) {
+      iVar3 = f33_current_reference_feedback_calibration[1].positive_error_gain_scale;
+    }
+    iVar3 = (f33_current_reference_feedback[1].error * iVar3) / 0x1000;
+    f33_current_reference_feedback[1].current_gain =
+         (f33_current_reference_feedback[1].current_gain * iVar3) / 0x1000;
+    f33_current_reference_feedback[1].previous_gain =
+         (f33_current_reference_feedback[1].previous_gain * iVar3) / 0x1000;
+  }
+  iVar6 = (int)f33_first_current_feedback_baseline;
+  iVar5 = iVar6 * 0x8000;
+  iVar3 = f33_current_reference_feedback[1].current_gain * f33_current_reference_feedback[1].error -
+          f33_current_reference_feedback[1].previous_gain *
+          f33_current_reference_feedback[1].previous_error;
+  if (iVar5 < 1) {
+    if ((iVar3 < 1) &&
+       (iVar4 = iVar6 * -0x8000 + -0x7fffffff,
+       iVar4 - iVar3 < 0 == (iVar4 < 0 != iVar3 < 0 && iVar3 < 0 == iVar4 - iVar3 < 0) &&
+       iVar4 != iVar3)) {
+      iVar3 = -0x7fffffff;
+      goto LAB_0003662c;
+    }
+  }
+  else if ((0 < iVar3) &&
+          (iVar7 = iVar6 * -0x8000 + 0x7fffffff, iVar4 = iVar7 - iVar3,
+          iVar4 < 0 != (iVar7 < 0 != iVar3 < 0 && iVar3 < 0 == iVar4 < 0))) {
+    iVar3 = 0x7fffffff;
+    goto LAB_0003662c;
+  }
+  iVar3 = iVar3 + iVar5;
+LAB_0003662c:
+  f33_current_reference_feedback[1].saturated_base_plus_delta = iVar3;
+  if (f33_current_reference_transient.active == 'Z') {
+    iVar3 = iVar3 + iVar6 * -0x8000;
+    if (f33_current_reference_feedback_calibration[1].transient_delta_upper - iVar3 < 0 !=
+        (f33_current_reference_feedback_calibration[1].transient_delta_upper < 0 != iVar3 < 0 &&
+        iVar3 < 0 == f33_current_reference_feedback_calibration[1].transient_delta_upper - iVar3 < 0
+        )) {
+      iVar3 = f33_current_reference_feedback_calibration[1].transient_delta_upper;
+    }
+    f33_current_reference_feedback[1].retained_transient_delta =
+         f33_current_reference_feedback_calibration[1].transient_delta_lower;
+    if (iVar3 - f33_current_reference_feedback_calibration[1].transient_delta_lower < 0 ==
+        (iVar3 < 0 != f33_current_reference_feedback_calibration[1].transient_delta_lower < 0 &&
+        f33_current_reference_feedback_calibration[1].transient_delta_lower < 0 ==
+        iVar3 - f33_current_reference_feedback_calibration[1].transient_delta_lower < 0)) {
+      f33_current_reference_feedback[1].retained_transient_delta = iVar3;
+    }
+    iVar3 = f33_current_reference_feedback[1].retained_transient_delta + iVar5;
+  }
+  f33_current_reference_feedback[1].request_before_global_clamp = iVar3;
+  if (f33_current_reference_feedback_calibration[1].request_upper_q15 - iVar3 < 0 !=
+      (f33_current_reference_feedback_calibration[1].request_upper_q15 < 0 != iVar3 < 0 &&
+      iVar3 < 0 == f33_current_reference_feedback_calibration[1].request_upper_q15 - iVar3 < 0)) {
+    iVar3 = f33_current_reference_feedback_calibration[1].request_upper_q15;
+  }
+  f33_current_reference_feedback[1].previous_error = (short)f33_current_reference_feedback[1].error;
+  iVar5 = f33_current_reference_feedback_calibration[1].request_lower_q15;
+  if (iVar3 - f33_current_reference_feedback_calibration[1].request_lower_q15 < 0 ==
+      (iVar3 < 0 != f33_current_reference_feedback_calibration[1].request_lower_q15 < 0 &&
+      f33_current_reference_feedback_calibration[1].request_lower_q15 < 0 ==
+      iVar3 - f33_current_reference_feedback_calibration[1].request_lower_q15 < 0)) {
+    iVar5 = iVar3;
+  }
+  f33_current_reference_feedback[1].request = (short)(iVar5 / 0x8000);
   return;
 }
 
@@ -4381,6 +5525,101 @@ uint f33_current_reference_curve_feedback_magnitude(void)
     return uVar2;
   }
   return 0x7fff;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x000380b2) */
+/* WARNING: Removing unreachable block (ram,0x0003806a) */
+/* WARNING: Removing unreachable block (ram,0x00038038) */
+/* Transient5A uses unsigned-axis/signed-ordinate31B5C; ordinary mode interpolates signed2C31E
+   ordinates in128-count intervals and applies floor6F7E. Halve toward zero when71EC&3. Leaving
+   transient seeds Q16 accumulator from previous output and enables filtering. While active
+   A=low32(A-old_output*K+raw*K),K=304; publish trunc(A/65536). Signed16(raw-old_output)<=128
+   releases directly to raw, not an absolute-delta test. Accumulator/filtered candidate are updated
+   before release; inactive filtering retains those fields. */
+
+void f33_update_current_reference_curve_floor(ushort feedback_magnitude)
+
+{
+  uchar uVar1;
+  short sVar2;
+  ushort uVar3;
+  int iVar4;
+  uint32_t puVar5;
+  uint uVar6;
+  int iVar7;
+  short sVar8;
+  int iVar9;
+  int iVar10;
+  uchar uVar11;
+  short sStack_1a;
+  
+  uVar3 = DAT_febe71ec;
+  iVar7 = f33_current_reference_floor.accumulator_q16;
+  sVar2 = f33_current_reference_floor.curve_floor;
+  uVar11 = f33_current_reference_floor.filter_active;
+  uVar1 = f33_current_reference_transient.active;
+  puVar5 = 0xfebeb800u;
+  iVar10 = (int)f33_current_reference_floor.curve_floor;
+  if (f33_current_reference_transient.active == 'Z') {
+    puVar5 = 0xfebeb800u;
+    FUN_000702b0(f33_switched_signed_request_curve,(uint)feedback_magnitude,&sStack_1a);
+  }
+  else {
+    uVar6 = (uint)(feedback_magnitude >> 7);
+    if (uVar6 < 0xff) {
+      iVar9 = (int)(short)(*(short *)(((undefined *)camry_host_ptr(0x2c31eu)) + uVar6 * 4) +
+                          (short)((int)((feedback_magnitude & 0x7f) *
+                                       ((int)*(short *)(((undefined *)camry_host_ptr(0x2c31eu)) + (uVar6 + 1) * 4) -
+                                       (int)*(short *)(((undefined *)camry_host_ptr(0x2c31eu)) + uVar6 * 4))) / 0x80));
+    }
+    else {
+      iVar9 = 0;
+    }
+    sStack_1a = (short)iVar9;
+    if (f33_current_reference_floor.previous_transient == 'Z') {
+      iVar7 = iVar10 << 0x10;
+      uVar11 = 'Z';
+    }
+    iVar4 = (int)DAT_febe6f7e;
+    if (iVar4 - iVar9 < 0 == (iVar4 < 0 != iVar9 < 0 && iVar9 < 0 == iVar4 - iVar9 < 0) &&
+        iVar4 != iVar9) {
+      sStack_1a = DAT_febe6f7e;
+    }
+  }
+  if ((uVar3 & 3) != 0) {
+    sStack_1a = sStack_1a / 2;
+  }
+  (*((short *)camry_host_ptr((uint32_t)((0xffffb58eu + (uint32_t)((int)puVar5)))))) = sStack_1a;
+  sVar8 = sStack_1a;
+  if (uVar11 == 'Z') {
+    uVar6 = (uint)f33_current_reference_floor_calibration.filter_coefficient;
+    if (uVar6 - 1 < 0xffff) {
+      iVar10 = iVar10 * uVar6;
+      iVar9 = (int)sStack_1a * uVar6;
+    }
+    else {
+      iVar10 = iVar10 << 0x10;
+      iVar9 = (int)sStack_1a << 0x10;
+    }
+    iVar9 = iVar9 + (iVar7 - iVar10);
+    (*((int *)camry_host_ptr((uint32_t)((0xffffb598u + (uint32_t)((int)puVar5)))))) = iVar9;
+    iVar7 = (int)f33_current_reference_floor_calibration.release_delta_threshold;
+    iVar10 = (int)(short)(sStack_1a - sVar2);
+    sVar8 = (short)(iVar9 / 0x10000);
+    (*((short *)camry_host_ptr((uint32_t)((0xffffb592u + (uint32_t)((int)puVar5)))))) = sVar8;
+    (*((short *)camry_host_ptr((uint32_t)((0xffffb590u + (uint32_t)((int)puVar5)))))) = sStack_1a - sVar2;
+    if (iVar10 - iVar7 < 0 != (iVar10 < 0 != iVar7 < 0 && iVar7 < 0 == iVar10 - iVar7 < 0) ||
+        iVar10 == iVar7) {
+      uVar11 = '\0';
+      sVar8 = sStack_1a;
+    }
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb588u + (uint32_t)((int)puVar5) * 1u)))) = uVar1;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb589u + (uint32_t)((int)puVar5) * 1u)))) = uVar11;
+  (*((short *)camry_host_ptr((uint32_t)((0xffffb58cu + (uint32_t)((int)puVar5)))))) = sVar8;
+  return;
 }
 
 
