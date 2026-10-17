@@ -3403,12 +3403,11 @@ void FUN_00062e1e(undefined4 param_1, undefined4 param_2, undefined4 param_3, un
   uint uVar1;
   uint uVar2;
   uint uVar3;
-  uint in_PSW;
-  uint in_FPEC;
-  uint in_RBASE;
-  uint in_EBASE;
-  uint in_FPIPR;
-  uint in_ISPR;
+  uint in_FPEC = 0;
+  uint in_RBASE = 0;
+  uint in_EBASE = 0;
+  uint in_FPIPR = 0;
+  uint in_ISPR = 0;
   
   if ((in_FPEC & 1) != 0) {
     uVar1 = in_FPIPR & 0x1f;
@@ -3421,8 +3420,8 @@ void FUN_00062e1e(undefined4 param_1, undefined4 param_2, undefined4 param_3, un
     }
     uVar3 = PMR;
     if ((((uVar3 & 1 << uVar2) == 0) && ((in_ISPR & (1 << uVar1 + 1) - 1U & 0xffff) == 0)) &&
-       ((in_PSW & 0x80) == 0)) {
-      if (((in_PSW & 0xbfffffd0) >> 0xf & 1) == 0) {
+       ((camry_psw & 0x80) == 0)) {
+      if (((camry_psw & 0xbfffffd0) >> 0xf & 1) == 0) {
         in_EBASE = in_RBASE;
       }
       (*(int (*)())camry_host_ptr((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();
@@ -3910,12 +3909,11 @@ void f33_startup_coordinator(void)
 {
   uint uVar1;
   uint uVar2;
-  uint in_PSW;
-  uint in_FPEC;
-  uint in_RBASE;
-  uint in_EBASE;
-  uint in_FPIPR;
-  uint in_ISPR;
+  uint in_FPEC = 0;
+  uint in_RBASE = 0;
+  uint in_EBASE = 0;
+  uint in_FPIPR = 0;
+  uint in_ISPR = 0;
   
   f33_application_context_init();
   f33_clear_application_ram_4k();
@@ -3951,8 +3949,8 @@ void f33_startup_coordinator(void)
     }
     uVar2 = PMR;
     if ((((uVar2 & 1 << uVar1) == 0) && ((in_ISPR & (1 << in_FPIPR + 1) - 1U & 0xffff) == 0)) &&
-       ((in_PSW & 0x80) == 0)) {
-      if (((in_PSW & 0xbfffffdf) >> 0xf & 1) == 0) {
+       ((camry_psw & 0x80) == 0)) {
+      if (((camry_psw & 0xbfffffdf) >> 0xf & 1) == 0) {
         in_EBASE = in_RBASE;
       }
       (*(int (*)())camry_host_ptr((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();

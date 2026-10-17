@@ -79,6 +79,7 @@ REASONS = {
     "switch": "a computed switch target is not a fixed closure edge",
     "trap": "rie or fetrap leaves ordinary function return and has no host counterpart",
     "system-register": "ldsr, stsr, di, or ei is visible to the bytes, and the host library does not define those intrinsics",
+    "uninitialized-register": "the machine read a system register this scenario does not initialize",
     "host-intrinsic": "the converted body calls a compiler intrinsic the host library does not define",
     "external-branch": "control leaves the decoded function without a direct call, so the closure is incomplete",
     "large-callee": "a direct callee is above 16384 bytes, so its closure is not inlined",
@@ -212,6 +213,15 @@ def _load_bodies() -> tuple[dict[str, str], set[str]]:
     return bodies, duplicates
 
 
+_HOST_INTRINSICS = ("__disable_irq", "__enable_irq", "__synchronize")
+
+
+def _unmodeled_intrinsic(body: str) -> bool:
+    for name in _HOST_INTRINSICS:
+        body = body.replace(name, "")
+    return "__" in body
+
+
 def _static_block(fn) -> str | None:
     for inst in fn.insts:
         if inst.kind == "abort":
@@ -222,8 +232,6 @@ def _static_block(fn) -> str | None:
             return "indirect-call" if inst.kind == "jarl_ind" else "switch"
         if inst.kind == "jmp" and inst.reg not in {0, 31}:
             return "indirect-call"
-        if "ldsr" in inst.stmt or "stsr" in inst.stmt or inst.text in {"di", "ei"}:
-            return "system-register"
     return None
 
 
@@ -252,6 +260,7 @@ class _Machine:
         self.fill = 0
         self.run = Run()
         self.regs = [0] * 32
+        self.sr = [[0] * 32 for _ in range(8)]
         self.root = 0
         self.in_root = False
 
@@ -262,6 +271,10 @@ class _Machine:
         self.ep_stack = False
         self.stack_regs = {3}
         self.regs = [SENTINEL] * 32
+        # Same reset the P1M-E machine applies: PSW.ID set, every other
+        # system register zero. stsr of PSW packs the live condition flags.
+        self.sr = [[0] * 32 for _ in range(8)]
+        self.sr[0][5] = 0x20
         self.regs[0] = 0
         self.regs[3] = ENTRY_SP
         self.regs[4] = GP
@@ -308,6 +321,10 @@ class _Machine:
         nxt = inst.addr + inst.size
         kind = inst.kind
         if kind == "nop":
+            if inst.text == "di":
+                self.sr[0][5] |= 0x20
+            elif inst.text == "ei":
+                self.sr[0][5] &= ~0x20
             return self._sequential(fn, nxt)
         if kind == "br":
             return self._jump(fn, inst.target)
@@ -425,6 +442,35 @@ class _Machine:
         self.stack_regs.discard(reg)
         if stack:
             self.stack_regs.add(reg)
+
+    def _pack_psw(self) -> int:
+        z, s, ov, cy = self.flags
+        sat = (self.sr[0][5] >> 4) & 1
+        return (self.sr[0][5] & ~0x1F) | z | (s << 1) | (ov << 2) | (cy << 3) | (sat << 4)
+
+    def _write_psw(self, value: int) -> None:
+        value = _u32(value)
+        self.sr[0][5] = value
+        self.flags = [value & 1, (value >> 1) & 1, (value >> 2) & 1, (value >> 3) & 1]
+
+    def _op_ldsr(self, src: int, ident: int, sel: int) -> None:
+        if not (0 <= sel < 8 and 0 <= ident < 32):
+            return
+        # ISPR writes are ignored unless INTCFG bit 0 is set.
+        if sel == 2 and ident == 10 and (self.sr[2][13] & 1) == 0:
+            return
+        value = self.regs[src]
+        if sel == 0 and ident == 5:
+            self._write_psw(value)
+            return
+        self.sr[sel][ident] = value
+
+    def _op_stsr(self, dst: int, ident: int, sel: int) -> None:
+        if not (0 <= sel < 8 and 0 <= ident < 32):
+            self._write_reg(dst, 0)
+            return
+        value = self._pack_psw() if sel == 0 and ident == 5 else self.sr[sel][ident]
+        self._write_reg(dst, value)
 
     def _alu(self, stmt: str) -> None:
         match = re.match(r"camry_([A-Za-z0-9_]+)\((.*)\);?$", stmt)
@@ -1878,7 +1924,7 @@ def run_oracles() -> int:
             reject("no-converted-body", name)
             continue
         body = bodies[name]
-        if "__" in body:
+        if _unmodeled_intrinsic(body):
             reject("host-intrinsic", name)
             continue
         fn = functions.get(address)

@@ -5057,16 +5057,15 @@ uint FUN_0000721e(int param_1)
   int iVar3;
   undefined4 uVar4;
   uint uVar5;
-  uint in_PSW;
-  uint in_FPEC;
-  uint in_RBASE;
-  uint in_EBASE;
-  uint in_FPIPR;
-  uint in_ISPR;
+  uint in_FPEC = 0;
+  uint in_RBASE = 0;
+  uint in_EBASE = 0;
+  uint in_FPIPR = 0;
+  uint in_ISPR = 0;
   
   iVar3 = PMR;
   if (iVar3 - param_1 < 0 != (iVar3 < 0 != param_1 < 0 && param_1 < 0 == iVar3 - param_1 < 0)) {
-    if ((in_PSW & 0x20) == 0) {
+    if ((camry_psw & 0x20) == 0) {
       __disable_irq();
       PMR = param_1;
       if ((in_FPEC & 1) != 0) {
@@ -5083,8 +5082,8 @@ uint FUN_0000721e(int param_1)
         }
         uVar5 = PMR;
         if ((((uVar5 & 1 << uVar2) == 0) && ((in_ISPR & (1 << uVar1 + 1) - 1U & 0xffff) == 0)) &&
-           ((in_PSW & 0x80) == 0)) {
-          if (((in_PSW & 0xbfffffd0) >> 0xf & 1) == 0) {
+           ((camry_psw & 0x80) == 0)) {
+          if (((camry_psw & 0xbfffffd0) >> 0xf & 1) == 0) {
             in_EBASE = in_RBASE;
           }
           (*(int (*)())camry_host_ptr((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();
@@ -5105,8 +5104,8 @@ uint FUN_0000721e(int param_1)
         }
         uVar5 = PMR;
         if ((((uVar5 & 1 << uVar2) == 0) && ((in_ISPR & (1 << uVar1 + 1) - 1U & 0xffff) == 0)) &&
-           ((in_PSW & 0xa0) == 0)) {
-          if (((in_PSW & 0xbfffffb0) >> 0xf & 1) == 0) {
+           ((camry_psw & 0xa0) == 0)) {
+          if (((camry_psw & 0xbfffffb0) >> 0xf & 1) == 0) {
             in_EBASE = in_RBASE;
           }
           (*(int (*)())camry_host_ptr((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();
@@ -5129,14 +5128,13 @@ void FUN_00007244(undefined4 param_1)
   uint uVar2;
   undefined4 uVar3;
   uint uVar4;
-  uint in_PSW;
-  uint in_FPEC;
-  uint in_RBASE;
-  uint in_EBASE;
-  uint in_FPIPR;
-  uint in_ISPR;
+  uint in_FPEC = 0;
+  uint in_RBASE = 0;
+  uint in_EBASE = 0;
+  uint in_FPIPR = 0;
+  uint in_ISPR = 0;
   
-  if ((in_PSW >> 5 & 1) == 0) {
+  if ((camry_psw >> 5 & 1) == 0) {
     __disable_irq();
     PMR = param_1;
     if ((in_FPEC & 1) != 0) {
@@ -5153,8 +5151,8 @@ void FUN_00007244(undefined4 param_1)
       }
       uVar4 = PMR;
       if ((((uVar4 & 1 << uVar2) == 0) && ((in_ISPR & (1 << uVar1 + 1) - 1U & 0xffff) == 0)) &&
-         ((in_PSW & 0x80) == 0)) {
-        if (((in_PSW & 0xbfffffd0) >> 0xf & 1) == 0) {
+         ((camry_psw & 0x80) == 0)) {
+        if (((camry_psw & 0xbfffffd0) >> 0xf & 1) == 0) {
           in_EBASE = in_RBASE;
         }
         (*(int (*)())camry_host_ptr((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();
@@ -5175,8 +5173,8 @@ void FUN_00007244(undefined4 param_1)
       }
       uVar4 = PMR;
       if ((((uVar4 & 1 << uVar2) == 0) && ((in_ISPR & (1 << uVar1 + 1) - 1U & 0xffff) == 0)) &&
-         ((in_PSW & 0xa0) == 0)) {
-        if (((in_PSW & 0xbfffffb0) >> 0xf & 1) == 0) {
+         ((camry_psw & 0xa0) == 0)) {
+        if (((camry_psw & 0xbfffffb0) >> 0xf & 1) == 0) {
           in_EBASE = in_RBASE;
         }
         (*(int (*)())camry_host_ptr((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();

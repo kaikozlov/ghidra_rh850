@@ -11,6 +11,7 @@ uint32_t camry_gp;
 uint32_t camry_tp;
 uint32_t camry_sp;
 uint32_t camry_pmr;
+uint32_t camry_psw = 0x20u;
 
 void f33_pwm_initialize_compare_stages(uint32_t compare) {
     uint32_t value = compare & 0xffffu;

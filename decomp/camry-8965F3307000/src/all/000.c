@@ -52,18 +52,17 @@ void f33_boot_eiint_context(void)
   undefined4 extraout_r8;
   undefined4 in_r9;
   undefined4 extraout_r9;
-  uint in_EIPSW;
-  uint in_PSW;
+  uint in_EIPSW = 0;
   uint uVar4;
-  uint in_FPEC;
-  uint in_EIIC;
-  uint in_RBASE;
-  uint in_EBASE;
-  uint in_FPIPR;
-  uint in_ISPR;
-  uint in_INTCFG;
+  uint in_FPEC = 0;
+  uint in_EIIC = 0;
+  uint in_RBASE = 0;
+  uint in_EBASE = 0;
+  uint in_FPIPR = 0;
+  uint in_ISPR = 0;
+  uint in_INTCFG = 0;
   
-  uVar4 = in_PSW & 0xffffffd0;
+  uVar4 = camry_psw & 0xffffffd0;
   if ((in_FPEC & 1) != 0) {
     uVar1 = in_FPIPR & 0x1f;
     if (0xf < uVar1) {
@@ -75,11 +74,11 @@ void f33_boot_eiint_context(void)
     }
     uVar3 = PMR;
     if ((((uVar3 & 1 << uVar2) == 0) && ((in_ISPR & (1 << uVar1 + 1) - 1U & 0xffff) == 0)) &&
-       ((in_PSW & 0x80) == 0)) {
+       ((camry_psw & 0x80) == 0)) {
       in_FPEC = 0;
       uVar4 = 0x40;
       uVar1 = in_EBASE;
-      if ((in_PSW & 0x8000) == 0) {
+      if ((camry_psw & 0x8000) == 0) {
         uVar1 = in_RBASE;
       }
       (*(int (*)())camry_host_ptr((uint32_t)((uVar1 & 0xfffffe00) + 0x70)))();
@@ -1148,12 +1147,11 @@ void f33_boot_resident_main(void)
 {
   uint uVar1;
   uint uVar2;
-  uint in_PSW;
-  uint in_FPEC;
-  uint in_RBASE;
-  uint in_EBASE;
-  uint in_FPIPR;
-  uint in_ISPR;
+  uint in_FPEC = 0;
+  uint in_RBASE = 0;
+  uint in_EBASE = 0;
+  uint in_FPIPR = 0;
+  uint in_ISPR = 0;
   
   f33_boot_resident_initialize();
   FUN_00007244(0);
@@ -1168,8 +1166,8 @@ void f33_boot_resident_main(void)
     }
     uVar2 = PMR;
     if ((((uVar2 & 1 << uVar1) == 0) && ((in_ISPR & (1 << in_FPIPR + 1) - 1U & 0xffff) == 0)) &&
-       ((in_PSW & 0x80) == 0)) {
-      if (((in_PSW & 0xbfffffdf) >> 0xf & 1) == 0) {
+       ((camry_psw & 0x80) == 0)) {
+      if (((camry_psw & 0xbfffffdf) >> 0xf & 1) == 0) {
         in_EBASE = in_RBASE;
       }
       (*(int (*)())camry_host_ptr((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();

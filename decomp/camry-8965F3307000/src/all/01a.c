@@ -1041,20 +1041,19 @@ uint f33_crypto_bank_run_startup_verification(void)
   uint32_t puVar3;
   int iVar4;
   undefined4 uVar5;
-  uint in_PSW;
   uint uVar6;
-  uint in_FPEC;
-  uint in_RBASE;
-  uint in_EBASE;
-  uint in_FPIPR;
-  uint in_ISPR;
+  uint in_FPEC = 0;
+  uint in_RBASE = 0;
+  uint in_EBASE = 0;
+  uint in_FPIPR = 0;
+  uint in_ISPR = 0;
   char cStack_21;
   undefined4 uStack_20;
   undefined1 uStack_1c;
   
   puVar3 = 0x23dfcu;
   cStack_21 = '\x01';
-  uVar6 = in_PSW & 0xfffffff0 | (uint)(f33_crypto_config_fixed_verification_enable == 'Z');
+  uVar6 = camry_psw & 0xfffffff0 | (uint)(f33_crypto_config_fixed_verification_enable == 'Z');
   if ((bool)((byte)uVar6 & 1)) {
     iVar4 = FUN_00089c5a(0, camry_host_addr(((undefined *)camry_host_ptr(0x21604u))));
     uVar6 = uVar6 & 0xfffffff0 | (uint)(iVar4 == 0);

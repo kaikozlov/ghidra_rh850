@@ -4404,6 +4404,87 @@ def apply_signed_values() -> tuple[int, int]:
     return functions, files
 
 
+_SYSREG_INPUTS = (
+    "in_FPEC", "in_EBASE", "in_RBASE", "in_FPIPR", "in_ISPR", "in_INTCFG",
+    "in_EIPSW", "in_EIIC", "in_FEPSW", "in_CTPC", "in_CTPSW",
+)
+
+
+def _rewrite_system_inputs(code: str) -> str:
+    """Read PSW from the host register, and zero Ghidra's other sysreg inputs.
+
+    Those locals are not arguments. The bytes read the system-register file,
+    which this scenario resets to zero except PSW.ID.
+    """
+    code = re.sub(r"^[ \t]*uint in_PSW;[ \t]*\n", "", code, flags=re.M)
+    code = re.sub(r"\bin_PSW\b", "camry_psw", code)
+    for name in _SYSREG_INPUTS:
+        code = re.sub(
+            rf"^([ \t]*uint {name});[ \t]*$",
+            rf"\1 = 0;",
+            code,
+            flags=re.M,
+        )
+    return code
+
+
+def apply_system_inputs() -> tuple[int, int]:
+    """Point converted PSW reads at camry_psw. Equivalent bodies stay as they passed."""
+    blocked: set[str] = set()
+    allowed: set[str] = set()
+    by_name: dict[str, set[str]] = {}
+    for row in load_matched():
+        by_name.setdefault(row["name"], set()).add(row["status"])
+    for name, statuses in by_name.items():
+        if statuses & {"equivalent", "byte-matched"}:
+            blocked.add(name)
+        elif "converted" in statuses:
+            allowed.add(name)
+    functions = 0
+    files = 0
+    for path in sorted((ROOT / "src" / "all").glob("*.c")):
+        lines = path.read_text(encoding="utf-8").splitlines()
+        out: list[str] = []
+        index = 0
+        changed = False
+        while index < len(lines):
+            line = lines[index]
+            if (
+                not line.strip()
+                or line.startswith("#")
+                or line.startswith((" ", "\t", "/*", "//"))
+            ):
+                out.append(line)
+                index += 1
+                continue
+            start = index
+            while index < len(lines) and "{" not in lines[index]:
+                index += 1
+            if index >= len(lines):
+                out.extend(lines[start:])
+                break
+            depth = 0
+            while index < len(lines):
+                depth += lines[index].count("{") - lines[index].count("}")
+                index += 1
+                if depth <= 0:
+                    break
+            chunk = "\n".join(lines[start:index])
+            match = re.search(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\(", _c_signature(chunk))
+            name = match.group(1) if match else ""
+            if name in allowed and name not in blocked:
+                updated = _rewrite_system_inputs(chunk)
+                if updated != chunk:
+                    functions += 1
+                    changed = True
+                    chunk = updated
+            out.extend(chunk.split("\n"))
+        if changed:
+            path.write_text("\n".join(out) + "\n", encoding="utf-8")
+            files += 1
+    return functions, files
+
+
 def _rewrite_body(code: str) -> str:
     code = _strip_calling_convention(code)
     code = _widen_signature(code)
@@ -4440,6 +4521,7 @@ def _rewrite_body(code: str) -> str:
     code = _rewrite_icus(code)
     code = _rewrite_runtime_gp(code)
     code = _rewrite_signed_values(code)
+    code = _rewrite_system_inputs(code)
     return code
 
 
@@ -5474,8 +5556,8 @@ def _common_header(text: str, signatures: dict[str, str]) -> str:
 
 
 _PSEUDO_MACROS = {
-    "__disable_irq": "#define __disable_irq() ((void)0)",
-    "__enable_irq": "#define __enable_irq() ((void)0)",
+    "__disable_irq": "#define __disable_irq() (camry_psw |= 0x20u)",
+    "__enable_irq": "#define __enable_irq() (camry_psw &= ~0x20u)",
     "halt_baddata": "#define halt_baddata() ((void)0)",
     "builtin_memcpy": "#define builtin_memcpy(dst, src, count) __builtin_memcpy((dst), (src), (count))",
     "CONCAT11": "#define CONCAT11(hi, lo) ((uint32_t)(((uint32_t)(hi) & 0xffu) << 8) | ((uint32_t)(lo) & 0xffu))",

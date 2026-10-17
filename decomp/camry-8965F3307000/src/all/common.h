@@ -19319,8 +19319,8 @@ void thunk_FUN_000fd562(void);
 #define CONCAT44(hi, lo) (((uint64_t)(hi) << 32) | (uint32_t)(lo))
 #define SUB42(left, right) ((uint32_t)(left) - (uint32_t)(right))
 #define SUB51(left, right) ((uint32_t)(left) - (uint32_t)(right))
-#define __disable_irq() ((void)0)
-#define __enable_irq() ((void)0)
+#define __disable_irq() (camry_psw |= 0x20u)
+#define __enable_irq() (camry_psw &= ~0x20u)
 #define builtin_memcpy(dst, src, count) __builtin_memcpy((dst), (src), (count))
 #define halt_baddata() ((void)0)
 

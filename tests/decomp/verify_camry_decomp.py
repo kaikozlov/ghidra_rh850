@@ -750,6 +750,7 @@ def parse_signature(signature: str, name: str) -> tuple[str, list[str]]:
 
 def load_pmr(library: ctypes.CDLL, registers: dict) -> None:
     ctypes.c_uint32.in_dll(library, "camry_pmr").value = int(registers.get("PMR", "0"), 16) & 0xFFFFFFFF
+    ctypes.c_uint32.in_dll(library, "camry_psw").value = int(registers.get("PSW", "0x20"), 16) & 0xFFFFFFFF
 
 
 def with_pmr(library: ctypes.CDLL, registers: dict) -> dict:

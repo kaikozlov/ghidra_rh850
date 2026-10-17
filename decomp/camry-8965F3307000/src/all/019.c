@@ -2394,17 +2394,16 @@ undefined4 FUN_00065bd4(undefined4 param_1,undefined4 param_2,undefined4 param_3
   uint uVar1;
   uint32_t puVar2;
   undefined4 in_r10;
-  uint in_FEPSW;
-  uint in_PSW;
+  uint in_FEPSW = 0;
   uint uVar3;
-  uint in_FPEC;
-  uint in_RBASE;
-  uint in_EBASE;
-  uint in_FPIPR;
-  uint in_ISPR;
-  uint in_INTCFG;
+  uint in_FPEC = 0;
+  uint in_RBASE = 0;
+  uint in_EBASE = 0;
+  uint in_FPIPR = 0;
+  uint in_ISPR = 0;
+  uint in_INTCFG = 0;
   
-  uVar3 = in_PSW & 0xfffffff0;
+  uVar3 = camry_psw & 0xfffffff0;
   puVar2 = 0xfebeb800u;
   FUN_00065ac0();
   ((void)(0x40), (void)(0xb8), FUN_000659f8());

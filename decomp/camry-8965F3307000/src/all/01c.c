@@ -196,14 +196,13 @@ void FUN_000701a6(undefined4 param_1)
   uint uVar2;
   undefined4 uVar3;
   uint uVar4;
-  uint in_PSW;
-  uint in_FPEC;
-  uint in_RBASE;
-  uint in_EBASE;
-  uint in_FPIPR;
-  uint in_ISPR;
+  uint in_FPEC = 0;
+  uint in_RBASE = 0;
+  uint in_EBASE = 0;
+  uint in_FPIPR = 0;
+  uint in_ISPR = 0;
   
-  if ((in_PSW >> 5 & 1) == 0) {
+  if ((camry_psw >> 5 & 1) == 0) {
     __disable_irq();
     PMR = param_1;
     if ((in_FPEC & 1) != 0) {
@@ -220,8 +219,8 @@ void FUN_000701a6(undefined4 param_1)
       }
       uVar4 = PMR;
       if ((((uVar4 & 1 << uVar2) == 0) && ((in_ISPR & (1 << uVar1 + 1) - 1U & 0xffff) == 0)) &&
-         ((in_PSW & 0x80) == 0)) {
-        if (((in_PSW & 0xbfffffd0) >> 0xf & 1) == 0) {
+         ((camry_psw & 0x80) == 0)) {
+        if (((camry_psw & 0xbfffffd0) >> 0xf & 1) == 0) {
           in_EBASE = in_RBASE;
         }
         (*(int (*)())camry_host_ptr((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();
@@ -242,8 +241,8 @@ void FUN_000701a6(undefined4 param_1)
       }
       uVar4 = PMR;
       if ((((uVar4 & 1 << uVar2) == 0) && ((in_ISPR & (1 << uVar1 + 1) - 1U & 0xffff) == 0)) &&
-         ((in_PSW & 0xa0) == 0)) {
-        if (((in_PSW & 0xbfffffb0) >> 0xf & 1) == 0) {
+         ((camry_psw & 0xa0) == 0)) {
+        if (((camry_psw & 0xbfffffb0) >> 0xf & 1) == 0) {
           in_EBASE = in_RBASE;
         }
         (*(int (*)())camry_host_ptr((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();
@@ -1434,13 +1433,12 @@ undefined4 FUN_00071322(void)
   uint uVar1;
   uint uVar2;
   uint uVar3;
-  uint in_PSW;
-  uint in_FPEC;
-  uint in_RBASE;
-  uint in_EBASE;
-  uint in_FPIPR;
-  uint in_ISPR;
-  uint in_INTCFG;
+  uint in_FPEC = 0;
+  uint in_RBASE = 0;
+  uint in_EBASE = 0;
+  uint in_FPIPR = 0;
+  uint in_ISPR = 0;
+  uint in_INTCFG = 0;
   uint in_stack_00000018;
   undefined4 in_stack_00000030;
   undefined4 in_stack_00000034;
@@ -1449,7 +1447,7 @@ undefined4 FUN_00071322(void)
   undefined4 in_stack_00000040;
   
   __disable_irq();
-  if (((in_PSW >> 6 & 1) == 0) && ((in_INTCFG & 1) == 0)) {
+  if (((camry_psw >> 6 & 1) == 0) && ((in_INTCFG & 1) == 0)) {
     in_ISPR = in_ISPR & in_ISPR - 1;
   }
   if ((in_FPEC & 1) != 0) {
@@ -1516,17 +1514,16 @@ undefined4 FUN_00071508(void)
   uint uVar3;
   int extraout_r2;
   undefined4 uVar4;
-  uint in_PSW;
   uint uVar5;
-  uint in_FPEC;
-  uint in_RBASE;
-  uint in_EBASE;
-  uint in_FPIPR;
-  uint in_ISPR;
-  uint in_INTCFG;
+  uint in_FPEC = 0;
+  uint in_RBASE = 0;
+  uint in_EBASE = 0;
+  uint in_FPIPR = 0;
+  uint in_ISPR = 0;
+  uint in_INTCFG = 0;
   
   __synchronize();
-  uVar5 = in_PSW & 0xffffffd0;
+  uVar5 = camry_psw & 0xffffffd0;
   if ((in_FPEC & 1) != 0) {
     uVar1 = in_FPIPR & 0x1f;
     if (0xf < uVar1) {
@@ -1538,11 +1535,11 @@ undefined4 FUN_00071508(void)
     }
     uVar3 = PMR;
     if ((((uVar3 & 1 << uVar2) == 0) && ((in_ISPR & (1 << uVar1 + 1) - 1U & 0xffff) == 0)) &&
-       ((in_PSW & 0x80) == 0)) {
+       ((camry_psw & 0x80) == 0)) {
       in_FPEC = 0;
       uVar5 = 0x40;
       uVar1 = in_EBASE;
-      if ((in_PSW & 0x8000) == 0) {
+      if ((camry_psw & 0x8000) == 0) {
         uVar1 = in_RBASE;
       }
       (*(int (*)())camry_host_ptr((uint32_t)((uVar1 & 0xfffffe00) + 0x70)))();
@@ -1628,18 +1625,17 @@ void FUN_0007162e(void)
   uchar uVar2;
   int iVar3;
   int iVar4;
-  uint in_EIPSW;
-  uint in_PSW;
+  uint in_EIPSW = 0;
   uint uVar5;
   uint uVar6;
-  uint in_FPEC;
-  uint in_RBASE;
-  uint in_EBASE;
-  uint in_FPIPR;
-  uint in_ISPR;
-  uint in_INTCFG;
+  uint in_FPEC = 0;
+  uint in_RBASE = 0;
+  uint in_EBASE = 0;
+  uint in_FPIPR = 0;
+  uint in_ISPR = 0;
+  uint in_INTCFG = 0;
   
-  uVar5 = in_PSW & 0xfffffff0 | (uint)(DAT_febf3401 == 'Z');
+  uVar5 = camry_psw & 0xfffffff0 | (uint)(DAT_febf3401 == 'Z');
   if (!(bool)((byte)uVar5 & 1)) {
     iVar3 = 8;
     do {

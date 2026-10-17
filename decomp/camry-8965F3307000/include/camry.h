@@ -44,6 +44,7 @@ static inline uint8_t *camry_host_ptr(uint32_t address) {
 extern uint32_t camry_gp;
 extern uint32_t camry_tp;
 extern uint32_t camry_pmr;
+extern uint32_t camry_psw;
 
 void *f33_memcpy_forward(void *destination, void *source, uint32_t byte_count);
 void f33_memzero(void *destination, uint32_t byte_count);
