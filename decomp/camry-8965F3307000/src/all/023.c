@@ -2483,6 +2483,29 @@ LAB_0008e5b4:
 
 
 
+/* 8E5C0/C2/C4 zxh/zxb/zxh;5C8 bounds19;5D6+5F6 row+8;5E2+5EC loadoriginalstackarg6/5
+   andshuffle5argcallback;5FA indirectcall. Native dispatch through real callbacks verifies a stop
+   request leaves the running result pending while setting cancellation, and a busy
+   diagnostic-history owner queues a request without claiming completion. Other RIDs remain
+   statically reconstructed. */
+
+uint f33_diag_routine_dispatch_action
+               (ushort callback_index,uchar control_type,uchar *input,ushort input_length,
+               uchar *output,ushort *output_length)
+
+{
+  uint uVar1;
+  
+  uVar1 = 3;
+  if ((callback_index < 0x13) && (f33_routine_callbacks[callback_index].action != 0x0u))
+  {
+    uVar1 = (*(int (*)())f33_routine_callbacks[(short)callback_index].action)(control_type,input,input_length,output,output_length);
+  }
+  return uVar1;
+}
+
+
+
 /* ZXB R6/R7/R8/R9 at8E602..608; choose pending if either input is pending, otherwise local failure
    or nonzero side result after local success. MOV R9,R10 at8E620 and JMP LP guarantee full
    zero-extended32 result0..255. */

@@ -408,6 +408,76 @@ undefined4 FUN_00088574(void)
 
 
 
+void FUN_000885b2(char param_1)
+
+{
+  code *pcVar1;
+  uint uVar2;
+  uint32_t puVar3;
+  int iVar4;
+  uint uVar5;
+  
+  uVar2 = DAT_febf118c;
+  pcVar1 = ((void *)camry_host_ptr((uint32_t)(DAT_febf1180)));
+  puVar3 = 0xfebeb800u;
+  if (((int8_t)DAT_febf1190) == -0x1f) {
+    if (param_1 == '\0') {
+      DAT_febf1174 = 0;
+      DAT_febf1190 = 0xc3;
+      return;
+    }
+    if (param_1 != '\x01') {
+      return;
+    }
+    DAT_febf1170 = 0;
+    DAT_febf1190 = 0xd2;
+    return;
+  }
+  uVar5 = ~(uint)DAT_febf1180;
+  if (((int8_t)DAT_febf1190) != -0x2e) {
+    return;
+  }
+  if (param_1 == '\0') {
+    DAT_febf1174 = 0;
+    DAT_febf1190 = -0x3d;
+    if (DAT_febf117c == 0x0u) {
+      DAT_febf1174 = 0;
+      DAT_febf1190 = 0xc3;
+      return;
+    }
+    if (~(uint)DAT_febf117c == DAT_febf1188) {
+      puVar3 = 0xfebeb800u;
+      iVar4 = (*(int (*)())DAT_febf117c)();
+      if (iVar4 == 0) {
+        return;
+      }
+      if ((uintptr_t)(pcVar1)==(uintptr_t)(f33_reset_vector)) {
+        return;
+      }
+      if (uVar5 == uVar2) goto LAB_0008863e;
+    }
+  }
+  else {
+    if (param_1 == '\x01') {
+      return;
+    }
+    if (DAT_febf1180 == 0x0u) {
+      return;
+    }
+    if (uVar5 == DAT_febf118c) {
+      iVar4 = 1;
+      DAT_febf1190 = -0x1f;
+LAB_0008863e:
+      (*(int (*)())pcVar1)(iVar4);
+      return;
+    }
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(0x5991))))) = 1;
+  return;
+}
+
+
+
 int FUN_0008864e(void)
 
 {
@@ -468,6 +538,38 @@ undefined4 FUN_000886e0(void)
     uVar2 = 2;
   }
   return uVar2;
+}
+
+
+
+void FUN_00088700(void)
+
+{
+  if (DAT_febf1194 != 0x0u) {
+    if (~(uint)DAT_febf1194 == DAT_febf1198) {
+      (*(int (*)())DAT_febf1194)();
+    }
+    else {
+      DAT_febf1191 = 1;
+    }
+  }
+  return;
+}
+
+
+
+void FUN_00088726(void)
+
+{
+  if (DAT_febf1194 != 0x0u) {
+    if (~(uint)DAT_febf1194 == DAT_febf1198) {
+      (*(int (*)())DAT_febf1194)();
+    }
+    else {
+      DAT_febf1191 = 1;
+    }
+  }
+  return;
 }
 
 

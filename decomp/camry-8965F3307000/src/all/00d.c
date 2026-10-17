@@ -998,6 +998,82 @@ uint f33_ba_enable_closed_gate_exception(uchar operation,uchar request_length,uc
 
 
 
+/* Require admission5A or exact F7/BAENA exception, then scan ten fixed16-byte rows. Require length6
+   and call fixed start; retain index even for negative result. Closed gate returns-13,
+   unknown/null-3, wrong length-6. All configured result lengths are0. */
+
+int f33_dispatch_ba_configured_start
+              (uchar request_length,uchar *request,uchar *response,uchar *selected_index)
+
+{
+  uchar operation;
+  bool bVar1;
+  uchar phase;
+  undefined8 uVar2;
+  uint uVar3;
+  int iVar4;
+  
+  uVar2 = 0xfebeb800;
+  operation = *request;
+  bVar1 = false;
+  iVar4 = 0;
+  uVar3 = f33_ba_enable_closed_gate_exception(operation,request_length,request + 1);
+  if (((*((char *)camry_host_ptr((uint32_t)((int)uVar2 + -0x58b1)))) == 'Z') || (uVar3 == 0x5a)) {
+    for (uVar3 = 0; uVar3 < f33_ba_operation_count; uVar3 = uVar3 + 1 & 0xff) {
+      if (f33_ba_operations[uVar3].operation == operation) {
+        bVar1 = true;
+        if (f33_ba_operations[uVar3].request_length == request_length) {
+          iVar4 = -3;
+          if (f33_ba_operations[uVar3].start != 0x0u) {
+            phase = (uchar)uVar3;
+            iVar4 = (*(int (*)())f33_ba_operations[uVar3].start)(phase,request + 1,response);
+            (*((uchar *)camry_host_ptr((uint32_t)((int)uVar2 + -0x58b3)))) = phase;
+            *selected_index = phase;
+          }
+        }
+        else {
+          iVar4 = -6;
+        }
+      }
+    }
+    if (!bVar1) {
+      iVar4 = -3;
+    }
+  }
+  else {
+    iVar4 = -0xd;
+  }
+  return iVar4;
+}
+
+
+
+/* Call fixed finish indexed by low8 without a local bounds check. Nonnegative result writes
+   full32-bit configured length0 and latches5F53=5A. Negative result preserves length and latch.
+   Preserve real signedR10 from finish callbacks. */
+
+int f33_dispatch_ba_configured_finish(uchar configured_index,uint *response_length)
+
+{
+  uint32_t puVar1;
+  int iVar2;
+  
+  puVar1 = 0xfebeb800u;
+  if (f33_ba_operations[configured_index].finish == 0x0u) {
+    iVar2 = -3;
+  }
+  else {
+    iVar2 = (*(int (*)())f33_ba_operations[configured_index].finish)();
+    if (-1 < iVar2) {
+      *response_length = (uint)f33_ba_operations[configured_index].response_body_length;
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58ad))))) = 0x5a;
+    }
+  }
+  return iVar2;
+}
+
+
+
 void FUN_00034ea4(int param_1,int param_2)
 
 {
@@ -1023,6 +1099,81 @@ void FUN_00034ea4(int param_1,int param_2)
   }
   ((void)(auStack_14), FUN_0004d4ca(uVar2, bStack_15));
   return;
+}
+
+
+
+int FUN_00034f00(uint param_1,int param_2)
+
+{
+  uchar uVar1;
+  uint uVar2;
+  int iVar3;
+  uint uVar4;
+  uint uVar5;
+  uint local_2c;
+  uint uStack_28;
+  uint auStack_24 [2];
+  
+  param_1 = param_1 & 0xff;
+  iVar3 = 0;
+  uVar1 = f33_ba_operations[param_1].numeric_format;
+  if (f33_ba_operations[param_1].numeric_source != 0x0u) {
+    (*(int (*)())f33_ba_operations[param_1].numeric_source)(&local_2c,&uStack_28);
+    if (uStack_28 != 0) {
+      uVar4 = 2;
+      auStack_24[0] = local_2c;
+      goto LAB_00034f56;
+    }
+    if (local_2c != 0) {
+      auStack_24[0] = local_2c;
+      uVar4 = 1;
+      uStack_28 = 0;
+      goto LAB_00034f56;
+    }
+  }
+  uVar4 = 0;
+  uStack_28 = 0;
+  auStack_24[0] = 0;
+LAB_00034f56:
+  auStack_24[1] = uStack_28;
+  uVar5 = 0;
+  do {
+    if (uVar4 <= uVar5) {
+      return iVar3;
+    }
+    if (iVar3 == 0) {
+      if (uVar1 == '\x01') {
+LAB_00034fa6:
+        (*((char *)camry_host_ptr((uint32_t)(uVar5 + param_2)))) = (char)auStack_24[uVar5];
+      }
+      else if (uVar1 == '\x02') {
+        FUN_0006a574((short)auStack_24[uVar5], ((undefined1 *)camry_host_ptr((uint32_t)(uVar5 * 2 + param_2))));
+      }
+      else if (uVar1 == '\x04') {
+        FUN_0006a55c(auStack_24[uVar5], ((undefined1 *)camry_host_ptr((uint32_t)(uVar5 * 4 + param_2))));
+      }
+      else {
+        if (uVar1 == '\t') goto LAB_00034fa6;
+        if (uVar1 == '\n') {
+          FUN_0006a5ac((int)(short)auStack_24[uVar5], ((undefined1 *)camry_host_ptr((uint32_t)(uVar5 * 2 + param_2))));
+        }
+        else if (uVar1 == '\f') {
+          FUN_0006a594(auStack_24[uVar5], ((undefined1 *)camry_host_ptr((uint32_t)(uVar5 * 4 + param_2))));
+        }
+        else {
+          iVar3 = -6;
+        }
+      }
+    }
+    else {
+      for (uVar2 = 0; uVar2 < f33_ba_operations[param_1].response_body_length;
+          uVar2 = uVar2 + 1 & 0xff) {
+        (*((undefined1 *)camry_host_ptr((uint32_t)(uVar2 + param_2)))) = 0;
+      }
+    }
+    uVar5 = uVar5 + 1 & 0xff;
+  } while( true );
 }
 
 

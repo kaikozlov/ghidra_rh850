@@ -1946,7 +1946,8 @@ def _rewrite_pointer_compares(code: str, pointers: set[str]) -> str:
     A stored routine compared with `f33_reset_vector`, and a RAM walk
     compared with a differently typed end pointer, are address compares.
     """
-    entries = set(_function_entries())
+    entry_addresses = _function_entries()
+    entries = set(entry_addresses)
     pieces: list[str] = []
     cursor = 0
     index = 0
@@ -1972,18 +1973,38 @@ def _rewrite_pointer_compares(code: str, pointers: set[str]) -> str:
             continue
         right_end = _expr_end_bound(code, index + len(op))
         raw_right = code[index + len(op):right_end]
-        if not (
-            _comparison_operand_is_pointer(raw_left, pointers, entries)
-            and _comparison_operand_is_pointer(raw_right, pointers, entries)
-        ):
+        left_pointer = _comparison_operand_is_pointer(raw_left, pointers, entries)
+        right_pointer = _comparison_operand_is_pointer(raw_right, pointers, entries)
+        if left_pointer and right_pointer:
+            pieces.append(code[cursor:left_at])
+            pieces.append(f"(uintptr_t)({raw_left.strip()})")
+            pieces.append(op)
+            pieces.append(f"(uintptr_t)({raw_right.strip()})")
+            cursor = right_end
+            index = right_end
+            continue
+        # A uint32 field compared with a function designator is the entry address.
+        left_name = raw_left.strip()
+        right_name = raw_right.strip()
+        left_entry = entry_addresses.get(left_name) if re.fullmatch(
+            r"[A-Za-z_][A-Za-z0-9_]*", left_name,
+        ) else None
+        right_entry = entry_addresses.get(right_name) if re.fullmatch(
+            r"[A-Za-z_][A-Za-z0-9_]*", right_name,
+        ) else None
+        if left_entry is not None and not right_pointer:
+            pieces.append(code[cursor:left_at])
+            pieces.append(f"0x{left_entry:x}u ")
+            cursor = index
             index += len(op)
             continue
-        pieces.append(code[cursor:left_at])
-        pieces.append(f"(uintptr_t)({raw_left.strip()})")
-        pieces.append(op)
-        pieces.append(f"(uintptr_t)({raw_right.strip()})")
-        cursor = right_end
-        index = right_end
+        if right_entry is not None and not left_pointer:
+            pieces.append(code[cursor:index + len(op)])
+            pieces.append(f" 0x{right_entry:x}u")
+            cursor = right_end
+            index = right_end
+            continue
+        index += len(op)
     pieces.append(code[cursor:])
     return "".join(pieces)
 

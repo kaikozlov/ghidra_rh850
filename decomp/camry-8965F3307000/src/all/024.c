@@ -1077,6 +1077,25 @@ LAB_0009162a:
 
 
 
+/* If callback exists, zero main message5630 then invoke operation2. Clear NRC5624 and active state
+   afterward. Retained handler copies/application effects are independent. */
+
+void f33_dcm_cancel_active_service(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (f33_dcm_active_service_callback != 0x0u) {
+    f33_dcm_reset_message_context();
+    (*(int (*)())*(code **)(puVar1 + -0x61d8))(2,puVar1 + -0x61d0);
+  }
+  FUN_000912b8();
+  f33_dcm_clear_active_service();
+  return;
+}
+
+
+
 /* Return the retained28-byte message context5630; not an opaque scalar. */
 
 F33DcmMessageContext * f33_dcm_get_message_context(void)
@@ -1103,10 +1122,32 @@ undefined1 FUN_00091694(undefined1 *param_1)
 
 
 
+bool FUN_0009169a(void)
+
+{
+  return f33_dcm_active_service_callback != 0x0u;
+}
+
+
+
 undefined1 FUN_000916a6(void)
 
 {
   return DAT_febe562d;
+}
+
+
+
+/* Invoke active callback with operation3 and5630 when nonnull; no inferred completion or physical
+   result. */
+
+void f33_dcm_notify_active_service_operation_three(void)
+
+{
+  if (f33_dcm_active_service_callback != 0x0u) {
+    (*(int (*)())f33_dcm_active_service_callback)('\x03',(0xfebe5630u));
+  }
+  return;
 }
 
 
@@ -1155,6 +1196,14 @@ undefined4 FUN_000916ec(char param_1,ushort param_2,char param_3)
     }
   }
   return 0;
+}
+
+
+
+bool FUN_0009177c(void)
+
+{
+  return f33_dcm_active_service_callback == 0x0u;
 }
 
 
