@@ -1072,6 +1072,43 @@ byte FUN_000614b0(void)
 
 
 
+void FUN_000614d4(void)
+
+{
+  int iVar1;
+  undefined8 uVar2;
+  int iVar3;
+  uint uVar4;
+  byte bVar5;
+  undefined2 local_14;
+  undefined2 uStack_12;
+  undefined2 uStack_10;
+  undefined2 uStack_e;
+  
+  uVar2 = 0xfebeb800;
+  bVar5 = 0;
+  do {
+    iVar3 = camry_host_addr(FUN_0006131c(&local_14));
+    f33_spin_wait(1);
+    iVar1 = (int)uVar2;
+    if (iVar3 == 0) {
+      uVar4 = FUN_000611fa(&local_14);
+      if ((byte)uStack_e != uVar4) {
+        return;
+      }
+      (*((undefined2 *)camry_host_ptr((uint32_t)(iVar1 + -0x7fc8)))) = local_14;
+      (*((undefined2 *)camry_host_ptr((uint32_t)(iVar1 + -0x7fc6)))) = uStack_12;
+      (*((undefined2 *)camry_host_ptr((uint32_t)(iVar1 + -0x7fc2)))) = uStack_e;
+      (*((undefined2 *)camry_host_ptr((uint32_t)(iVar1 + -0x7fc4)))) = uStack_10;
+      return;
+    }
+    bVar5 = bVar5 + 1;
+  } while (bVar5 < 0xc9);
+  return;
+}
+
+
+
 void FUN_00061526(void)
 
 {
@@ -2768,6 +2805,37 @@ void FUN_00062af4(int param_1)
   uVar1 = f33_count_transfer_entries('\x0e');
   uVar2 = FUN_000606da(DAT_00030f40 + uVar1);
   (*((undefined2 *)camry_host_ptr((uint32_t)(param_1 + 2)))) = uVar2;
+  return;
+}
+
+
+
+void FUN_00062b32(int param_1)
+
+{
+  int iVar1;
+  undefined2 *puVar2;
+  int iVar3;
+  uint uVar4;
+  int iVar5;
+  undefined2 local_14;
+  undefined2 uStack_12;
+  undefined2 uStack_10;
+  undefined2 uStack_e;
+  
+  iVar5 = 0;
+  do {
+    uVar4 = f33_read_transfer_descriptor_head((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x3125cu + (uint32_t)((short)iVar5 * 0x28) * 1u)))));
+    FUN_00060c60(iVar5,uVar4 < iVar5 * 0x30 + 0xfeef9110U,&local_14);
+    iVar3 = iVar5 + 1;
+    puVar2 = ((undefined2 *)camry_host_ptr((uint32_t)(iVar5 * 8 + param_1)));
+    iVar1 = iVar5 + -1;
+    *puVar2 = uStack_10;
+    puVar2[1] = uStack_e;
+    puVar2[2] = uStack_12;
+    puVar2[3] = local_14;
+    iVar5 = iVar3;
+  } while (((iVar1 < 0) || (iVar3 < 0)));
   return;
 }
 

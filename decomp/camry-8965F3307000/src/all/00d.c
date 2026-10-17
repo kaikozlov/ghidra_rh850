@@ -1044,6 +1044,47 @@ int FUN_00035010(byte *param_1)
 
 
 
+undefined4 FUN_00035028(uint param_1,undefined1 *param_2,undefined1 *param_3)
+
+{
+  uchar uVar1;
+  undefined2 *extraout_r8;
+  undefined2 *extraout_r8_00;
+  undefined4 *extraout_r8_01;
+  undefined2 uVar2;
+  undefined4 uVar3;
+  
+  uVar1 = f33_ba_operations[param_1 & 0xff].numeric_format;
+  if (uVar1 == '\x01') {
+    *param_3 = *param_2;
+  }
+  else if (uVar1 == '\x02') {
+    uVar2 = FUN_00035004(param_2);
+    *extraout_r8 = uVar2;
+  }
+  else {
+    if (uVar1 != '\x04') {
+      if (uVar1 == '\t') {
+        *param_3 = *param_2;
+        return 0;
+      }
+      if (uVar1 == '\n') {
+        uVar2 = FUN_00035004(param_2);
+        *extraout_r8_00 = uVar2;
+        return 0;
+      }
+      if (uVar1 != '\f') {
+        return 0xfffffffa;
+      }
+    }
+    uVar3 = FUN_00035010(param_2);
+    *extraout_r8_01 = uVar3;
+  }
+  return 0;
+}
+
+
+
 /* Exact JTEKM requests internal selector3 admission in modes0400/0500/0700..0702/0800; no latch
    mutation at start. */
 

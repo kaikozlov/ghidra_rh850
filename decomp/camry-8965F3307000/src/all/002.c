@@ -97,6 +97,78 @@ void FUN_0000814e(int param_1)
 
 
 
+/* Require length16 and AES.valid1; decrypt ciphertext to16-byte local, XOR previous_ciphertext
+   at+C4 into output, then copy original input into previous_ciphertext. Return0/FF. Input/output
+   aliasing not generally supported inside primitive;6BDE uses separate local output then copies
+   back, preserving in-place transfer chain. */
+
+uint f33_boot_aes128_cbc_decrypt_block
+               (uchar *ciphertext,uchar *plaintext,uchar length,F33BootAes128CbcContext *context)
+
+{
+  uint uVar1;
+  byte local_20;
+  byte bStack_1f;
+  byte bStack_1e;
+  byte bStack_1d;
+  byte bStack_1c;
+  byte bStack_1b;
+  byte bStack_1a;
+  byte bStack_19;
+  byte bStack_18;
+  byte bStack_17;
+  byte bStack_16;
+  byte bStack_15;
+  byte bStack_14;
+  byte bStack_13;
+  byte bStack_12;
+  byte bStack_11;
+  
+  if (((length == '\x10') && ((context->aes).valid == '\x01')) &&
+     (uVar1 = f33_boot_aes128_decrypt_block(ciphertext,&local_20,'\x10',&context->aes), uVar1 == 0))
+  {
+    *plaintext = context->previous_ciphertext[0] ^ local_20;
+    plaintext[1] = context->previous_ciphertext[1] ^ bStack_1f;
+    plaintext[2] = context->previous_ciphertext[2] ^ bStack_1e;
+    plaintext[3] = context->previous_ciphertext[3] ^ bStack_1d;
+    plaintext[4] = context->previous_ciphertext[4] ^ bStack_1c;
+    plaintext[5] = context->previous_ciphertext[5] ^ bStack_1b;
+    plaintext[6] = context->previous_ciphertext[6] ^ bStack_1a;
+    plaintext[7] = context->previous_ciphertext[7] ^ bStack_19;
+    plaintext[8] = context->previous_ciphertext[8] ^ bStack_18;
+    plaintext[9] = context->previous_ciphertext[9] ^ bStack_17;
+    plaintext[10] = context->previous_ciphertext[10] ^ bStack_16;
+    plaintext[0xb] = context->previous_ciphertext[0xb] ^ bStack_15;
+    plaintext[0xc] = context->previous_ciphertext[0xc] ^ bStack_14;
+    plaintext[0xd] = context->previous_ciphertext[0xd] ^ bStack_13;
+    plaintext[0xe] = context->previous_ciphertext[0xe] ^ bStack_12;
+    plaintext[0xf] = context->previous_ciphertext[0xf] ^ bStack_11;
+    context->previous_ciphertext[0] = *ciphertext;
+    context->previous_ciphertext[1] = ciphertext[1];
+    context->previous_ciphertext[2] = ciphertext[2];
+    context->previous_ciphertext[3] = ciphertext[3];
+    context->previous_ciphertext[4] = ciphertext[4];
+    context->previous_ciphertext[5] = ciphertext[5];
+    context->previous_ciphertext[6] = ciphertext[6];
+    context->previous_ciphertext[7] = ciphertext[7];
+    context->previous_ciphertext[8] = ciphertext[8];
+    context->previous_ciphertext[9] = ciphertext[9];
+    context->previous_ciphertext[10] = ciphertext[10];
+    context->previous_ciphertext[0xb] = ciphertext[0xb];
+    context->previous_ciphertext[0xc] = ciphertext[0xc];
+    context->previous_ciphertext[0xd] = ciphertext[0xd];
+    context->previous_ciphertext[0xe] = ciphertext[0xe];
+    context->previous_ciphertext[0xf] = ciphertext[0xf];
+    uVar1 = 0;
+  }
+  else {
+    uVar1 = 0xff;
+  }
+  return uVar1;
+}
+
+
+
 /* Require low8 key/IV lengths16; clear AES.valid, copyIV to+C4, initialize AES base under key,
    setvalid1 on success. Return0/FF. Fifth argument callerSP+0/calleeSP+8. Does not initialize
    unused final16 bytes of228-byte clear allocation. */

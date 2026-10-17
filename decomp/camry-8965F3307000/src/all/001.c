@@ -1,6 +1,21 @@
 #include "common.h"
 
 
+void FUN_0000400a(uint param_1)
+
+{
+  undefined1 uStack_1a;
+  undefined1 uStack_19;
+  undefined4 uStack_18;
+  undefined1 auStack_14 [8];
+  
+  FUN_00003f96((param_1 & 0x7f) >> 4, param_1 & 0xf, camry_host_addr(&uStack_18), camry_host_addr(&uStack_1a), &uStack_19, auStack_14);
+  FUN_00004678(param_1 & 0xffff,uStack_18,uStack_1a,uStack_19,auStack_14);
+  return;
+}
+
+
+
 /* WARNING: This is an inlined function */
 /* Length0returns1 unchanged. Otherwise alignaddressdown512, add low9bits tolength modulo32,
    fillthat manyFF prefixbytes in1800 ring; publishproducer=prefix,consumer0 andreturn0. Realleaf
@@ -1563,6 +1578,29 @@ void FUN_00005158(void)
 
 {
   DAT_febf2b10 = 1;
+  return;
+}
+
+
+
+void FUN_00005160(void)
+
+{
+  char cVar1;
+  bool bVar2;
+  uint32_t puVar3;
+  int local_c;
+  
+  cVar1 = DAT_0000bff8;
+  puVar3 = 0xfebf9800u;
+  FUN_00001514(camry_host_addr(&local_c), 1);
+  if ((local_c == 0xff) || (((int8_t)DAT_000ffdb0) == -1)) {
+    bVar2 = cVar1 != -1;
+  }
+  else {
+    bVar2 = true;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6ceb))))) = bVar2;
   return;
 }
 
@@ -3437,6 +3475,53 @@ void f33_boot_request_receive_complete(ushort channel,uchar status)
 
 
 
+/* Matchchannelrecord8F04/8F0C,forceextendedsession3andreadsubfunction/suppressionfromhandoffword4/5,thenadmit/append/complete10request.
+    */
+
+void f33_boot_diagnostic_replay_handoff_session(void)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  ushort channel;
+  int in_r6;
+  uint uVar4;
+  ushort local_14;
+  uchar uStack_12;
+  byte bStack_11;
+  F33BootPduInfo FStack_10;
+  
+  iVar3 = 0;
+  do {
+    if ((*((uint *)camry_host_ptr((uint32_t)(in_r6 + 4)))) == f33_boot_diagnostic_channels[iVar3].handoff_selector) {
+      uStack_12 = '\x10';
+      bStack_11 = (*((byte *)camry_host_ptr((uint32_t)(in_r6 + 0x10))));
+      if ((*((char *)camry_host_ptr((uint32_t)(in_r6 + 0x14)))) != '\0') {
+        bStack_11 = bStack_11 | 0x80;
+      }
+      FUN_00005148();
+      FStack_10.data = camry_host_addr(&uStack_12);
+      FStack_10.length = 2;
+      channel = (ushort)iVar3;
+      uVar4 = f33_boot_request_admit(channel,&FStack_10,2,&local_14);
+      if (((uVar4 == 0) && (1 < local_14)) &&
+         (uVar4 = f33_boot_request_append(channel,&FStack_10,&local_14), uVar4 == 0)) {
+        f33_boot_request_receive_complete(channel,'\0');
+      }
+      return;
+    }
+    iVar2 = iVar3 + 1;
+    iVar1 = iVar3 + -1;
+    iVar3 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  do {
+                    /* WARNING: Do nothing block with infinite loop */
+  } while( true );
+}
+
+
+
 void FUN_00006588(void)
 
 {
@@ -3869,6 +3954,24 @@ void f33_boot_service_reject_configured(ushort request_length)
   FUN_000067b0(&uStack_5,1);
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6c3b))))) = uStack_5;
   FUN_0000699c(0x7f);
+  return;
+}
+
+
+
+/* Enablesonlyhandofftag0orFF;noapplicationDCMinitialization. */
+
+void f33_boot_diagnostic_enable_from_handoff(void)
+
+{
+  int local_c;
+  
+  DAT_febf2bd0 = 0;
+  FUN_00001514(camry_host_addr(&local_c), 1);
+  if ((local_c == 0) || (local_c == 0xff)) {
+    DAT_febf2bd0 = 1;
+    FUN_000014be(0);
+  }
   return;
 }
 
@@ -5109,6 +5212,86 @@ void FUN_00007a16(int param_1)
     pbVar1[0xc] = local_4[3];
   } while (uVar8 < 4);
   return;
+}
+
+
+
+/* Require length16, valid context and counter not allFF. Encrypt counter, XOR16 input bytes into
+   output, increment counter as128-bit big-endian. Return0 orFF. R8 length andR9 context remain live
+   for7352; not an arbitrary-length streaming API. */
+
+uint f33_boot_aes128_ctr_transform_block
+               (uchar *input,uchar *output,uchar length,F33BootAes128CtrContext *context)
+
+{
+  uchar *puVar1;
+  int iVar2;
+  uchar uVar3;
+  uint uVar4;
+  int iVar5;
+  uchar *plaintext;
+  byte local_20;
+  byte bStack_1f;
+  byte bStack_1e;
+  byte bStack_1d;
+  byte bStack_1c;
+  byte bStack_1b;
+  byte bStack_1a;
+  byte bStack_19;
+  byte bStack_18;
+  byte bStack_17;
+  byte bStack_16;
+  byte bStack_15;
+  byte bStack_14;
+  byte bStack_13;
+  byte bStack_12;
+  byte bStack_11;
+  
+  if ((((length == '\x10') && ((context->aes).valid == '\x01')) &&
+      ((plaintext = context->counter_be, *(int *)context->counter_be != -1 ||
+       (((*(int *)(context->counter_be + 4) != -1 || (*(int *)(context->counter_be + 8) != -1)) ||
+        (*(int *)(context->counter_be + 0xc) != -1)))))) &&
+     (uVar4 = f33_boot_aes128_encrypt_block(plaintext,&local_20,'\x10',&context->aes), uVar4 == 0))
+  {
+    *output = *input ^ local_20;
+    output[1] = input[1] ^ bStack_1f;
+    output[2] = input[2] ^ bStack_1e;
+    output[3] = input[3] ^ bStack_1d;
+    output[4] = input[4] ^ bStack_1c;
+    output[5] = input[5] ^ bStack_1b;
+    output[6] = input[6] ^ bStack_1a;
+    output[7] = input[7] ^ bStack_19;
+    output[8] = input[8] ^ bStack_18;
+    output[9] = input[9] ^ bStack_17;
+    output[10] = input[10] ^ bStack_16;
+    output[0xb] = input[0xb] ^ bStack_15;
+    output[0xc] = input[0xc] ^ bStack_14;
+    output[0xd] = input[0xd] ^ bStack_13;
+    output[0xe] = input[0xe] ^ bStack_12;
+    output[0xf] = input[0xf] ^ bStack_11;
+    iVar5 = 3;
+    do {
+      iVar2 = iVar5 * 4;
+      uVar3 = plaintext[iVar2 + 3];
+      plaintext[iVar2 + 3] = uVar3 + '\x01';
+      if (((uchar)(uVar3 + '\x01') == '\0') &&
+         (uVar3 = plaintext[iVar2 + 2], plaintext[iVar2 + 2] = uVar3 + '\x01',
+         (uchar)(uVar3 + '\x01') == '\0')) {
+        puVar1 = plaintext + iVar2;
+        uVar3 = puVar1[1];
+        puVar1[1] = uVar3 + '\x01';
+        if ((uchar)(uVar3 + '\x01') == '\0') {
+          *puVar1 = *puVar1 + '\x01';
+        }
+      }
+      uVar4 = 0;
+    } while ((*(int *)(plaintext + iVar5 * 4) == 0) &&
+            (iVar2 = iVar5 + -1, iVar5 = iVar5 + -1, -1 < iVar2));
+  }
+  else {
+    uVar4 = 0xff;
+  }
+  return uVar4;
 }
 
 

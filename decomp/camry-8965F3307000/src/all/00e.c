@@ -3840,6 +3840,71 @@ uint f33_choose_thermal_limit_source
 
 
 
+/* WARNING: Inlined function: f33_choose_thermal_limit_source */
+/* Reduce sources2,4,5,3 in that order, with later equal minima winning. Bank0 reads
+   6F68/6F30/6EE0/700C; nonzero bank reads their +2 partners. Null source returns nominal 22170
+   or11085 without reading the limits. Reduce ECU thermal limit sources2/4/5/3 with later-wins
+   equality, independently by bank. Null source pointer returns nominal22170/11085 without reading
+   candidate limits. */
+
+uint f33_select_ecu_thermal_limit(uchar *source,uchar bank)
+
+{
+  uint32_t puVar1;
+  uint32_t puVar2;
+  ushort uVar3;
+  uchar *extraout_r8;
+  uchar *source_00;
+  uchar *source_01;
+  uchar *extraout_r8_00;
+  ushort uVar4;
+  uint uVar5;
+  
+  uVar4 = DAT_febe6f6a;
+  uVar3 = DAT_febe6f68;
+  puVar2 = 0xfebeb800u;
+  puVar1 = 0xfebeb800u;
+  if (source == (uchar *)0x0) {
+    if (bank == '\0') {
+      uVar5 = 0x569a;
+    }
+    else {
+      uVar5 = 0x2b4d;
+    }
+  }
+  else {
+    if (bank == '\0') {
+      *source = '\x02';
+      uVar4 = DAT_febe6f30;
+      if ((source != (uchar *)0x0) && (DAT_febe6f30 <= uVar3)) {
+        *source = '\x04';
+        uVar3 = uVar4;
+      }
+                    /* WARNING: Could not inline here */
+      uVar5 = f33_choose_thermal_limit_source(uVar3,DAT_febe6ee0,source,'\x05');
+      uVar4 = (ushort)uVar5;
+      uVar3 = (*((ushort *)camry_host_ptr((uint32_t)((0xffffb80cu + (uint32_t)((int)puVar1))))));
+      source_00 = extraout_r8;
+    }
+    else {
+      *source = '\x02';
+                    /* WARNING: Could not inline here */
+      uVar5 = f33_choose_thermal_limit_source(uVar4,DAT_febe6f32,source,'\x04');
+                    /* WARNING: Could not inline here */
+      uVar5 = f33_choose_thermal_limit_source
+                        ((ushort)uVar5,(*((ushort *)camry_host_ptr((uint32_t)((0xffffb6e2u + (uint32_t)((int)puVar2)))))),source_01,'\x05');
+      uVar4 = (ushort)uVar5;
+      uVar3 = (*((ushort *)camry_host_ptr((uint32_t)((0xffffb80eu + (uint32_t)((int)puVar2))))));
+      source_00 = extraout_r8_00;
+    }
+                    /* WARNING: Could not inline here */
+    uVar5 = f33_choose_thermal_limit_source(uVar4,uVar3,source_00,'\x03');
+  }
+  return uVar5;
+}
+
+
+
 /* Only limit below bank nominal22170/11085 and source2/3/4/5 publishes its source and signed
    temperature6F36/6FE2/6F12/6EAE. Otherwise publish source0 and return0; null output returns0
    without a write. Not selection of the globally strongest motor limit. Below bank nominal only,

@@ -3242,6 +3242,32 @@ void f33_cantp_foreground_cycle(void)
 
 
 
+/* Require initialized markerAA and configured CanIf receive range0804..0806. Widen descriptor
+   length16 into internal frame length32 and dispatch SF/FF/CF or flow control; frame bytes remain
+   caller-owned during this call. */
+
+void f33_cantp_receive_can_frame(ushort canif_receive_id,F33PduInfo *pdu)
+
+{
+  uint uVar1;
+  undefined4 *extraout_r7;
+  int iVar2;
+  undefined4 local_14;
+  uint uStack_10;
+  
+  uVar1 = (uint)canif_receive_id;
+  if ((((((int8_t)DAT_febe4f3d) == -0x56) && (iVar2 = camry_host_addr(FUN_0007a32e()), iVar2 != 0)) &&
+      ((*((ushort *)camry_host_ptr((uint32_t)(iVar2 + 8)))) <= uVar1)) &&
+     ((int)(uVar1 - ((uint)(*((byte *)camry_host_ptr((uint32_t)(iVar2 + 0xf)))) + (uint)(*((ushort *)camry_host_ptr((uint32_t)(iVar2 + 8)))))) < 0)) {
+    local_14 = *extraout_r7;
+    uStack_10 = (uint)*(ushort *)(extraout_r7 + 1);
+    FUN_0007a4e4(((F33CanTpConfiguration *)camry_host_ptr((uint32_t)(iVar2))), &local_14, uVar1);
+  }
+  return;
+}
+
+
+
 /* Release retained receive ID, remaining bytes, countdown, wait count, sequence and FC state.
    Preserve admission generation byte+0F; it qualifies a surrounding foreground reset. */
 
@@ -3266,6 +3292,23 @@ void FUN_0007a79e(undefined2 param_1,undefined1 param_2)
 
 {
   FUN_00081a00(param_1,param_2);
+  return;
+}
+
+
+
+/* Reset transport receive owner before forwarding the supplied aggregate result through PduR to the
+   configured upper receive indication. Result0 is aggregate software receive success, not service
+   completion. */
+
+void f33_cantp_finish_receive_aggregate
+               (F33CanTpRxConnection *connection,F33CanTpRxState *state,uchar result)
+
+{
+  undefined4 extraout_r8;
+  
+  f33_cantp_reset_receive_owner(state);
+  FUN_0007a79e(connection->upper_receive_id,extraout_r8);
   return;
 }
 
@@ -3533,6 +3576,37 @@ void f33_cantp_deliver_single_frame(F33CanTpRxConnection *connection,F33CanTpFra
 
 
 
+void FUN_0007adf8(int *param_1,F33CanTpRxConnection *param_2,F33CanTpFrameInfo *param_3)
+
+{
+  byte bVar1;
+  uint32_t puVar2;
+  int extraout_r8;
+  uint uVar3;
+  int iVar4;
+  
+  puVar2 = 0xfebeb800u;
+  uVar3 = f33_cantp_reject_single_frame_extent(param_2,param_3);
+  if ((uVar3 == 0) &&
+     (iVar4 = ((void)(param_2->receive_id), (void)(param_2->canif_receive_id), (void)((*((undefined1 *)camry_host_ptr((uint32_t)(extraout_r8 + 4))))), (void)(param_3->data), f33_return_const_0_81f62()), iVar4 == 0)) {
+    bVar1 = param_2->channel_state_index;
+    if (((*((char *)camry_host_ptr((uint32_t)((short)(ushort)bVar1 * 0xc + *param_1 + 8)))) == '\x01') &&
+       (((int8_t)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)((uint)bVar1 * 0x20 + -0x68b8)))))) != -0x1f)) {
+      iVar4 = FUN_0007abe6(param_1, camry_host_addr(param_2));
+    }
+    else {
+      iVar4 = FUN_0007ac9c(param_1, camry_host_addr(param_2));
+    }
+    if (iVar4 == 0) {
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)((uint)bVar1 * 0x20 + -0x68a1))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)((uint)bVar1 * 0x20 + -0x68a1))))) + '\x01';
+      f33_cantp_deliver_single_frame(param_2,param_3);
+    }
+  }
+  return;
+}
+
+
+
 /* Retain remaining total minus first-frame payload, expected SN1, DLC and capacity-poll state69.
    Start upper receive before copying the first6 configured bytes; upper return3 records
    FC-overflowD2, other refusal resets. */
@@ -3579,6 +3653,38 @@ void f33_cantp_begin_first_frame_receive
   }
   else {
     f33_cantp_reset_receive_owner(state);
+  }
+  return;
+}
+
+
+
+void FUN_0007af76(int *param_1,F33CanTpRxConnection *param_2,F33CanTpFrameInfo *param_3)
+
+{
+  byte bVar1;
+  uint32_t puVar2;
+  int extraout_r8;
+  uint uVar3;
+  int iVar4;
+  
+  puVar2 = 0xfebeb800u;
+  uVar3 = f33_cantp_reject_first_frame_extent(param_2,param_3);
+  if ((uVar3 == 0) &&
+     (iVar4 = ((void)(param_2->receive_id), (void)(param_2->canif_receive_id), (void)((*((undefined1 *)camry_host_ptr((uint32_t)(extraout_r8 + 4))))), (void)(param_3->data), f33_return_const_0_81f62()), iVar4 == 0)) {
+    bVar1 = param_2->channel_state_index;
+    if (((*((char *)camry_host_ptr((uint32_t)((short)(ushort)bVar1 * 0xc + *param_1 + 8)))) == '\x01') &&
+       (((int8_t)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)((uint)bVar1 * 0x20 + -0x68b8)))))) != -0x1f)) {
+      iVar4 = FUN_0007abe6(param_1, camry_host_addr(param_2));
+    }
+    else {
+      iVar4 = FUN_0007ac9c(param_1, camry_host_addr(param_2));
+    }
+    if (iVar4 == 0) {
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)((uint)bVar1 * 0x20 + -0x68a1))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)((uint)bVar1 * 0x20 + -0x68a1))))) + '\x01';
+      f33_cantp_begin_first_frame_receive
+                (param_2,param_3,((F33CanTpRxState *)camry_host_ptr((uint32_t)(puVar2 + (uint)bVar1 * 0x20 + -0x68b0))));
+    }
   }
   return;
 }

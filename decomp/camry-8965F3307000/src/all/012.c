@@ -1994,6 +1994,45 @@ void f33_fill_constant_block_495a4(void)
 
 
 
+void FUN_000495b6(void)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  ushort local_18 [4];
+  undefined2 uStack_10;
+  undefined2 uStack_e;
+  undefined2 auStack_c [4];
+  undefined2 uStack_4;
+  undefined2 uStack_2;
+  
+  if (DAT_febeeba6 < 0x300) {
+    local_18[0] = DAT_febe8212;
+    local_18[1] = DAT_febe8214;
+    local_18[2] = DAT_febe8216;
+    local_18[3] = DAT_febe8218;
+    uStack_10 = DAT_febe821a;
+    uStack_e = DAT_febe821c;
+    iVar3 = 0;
+    do {
+      iVar2 = iVar3 + 1;
+      iVar1 = iVar3 + -5;
+      auStack_c[iVar3] = (short)((uint)local_18[iVar3] * 0x1e06 >> 0x10);
+      iVar3 = iVar2;
+    } while (((iVar1 < 0) || (iVar2 < 0)));
+    DAT_febe7e9c = auStack_c[0];
+    DAT_febe7e9e = auStack_c[1];
+    DAT_febe7ea0 = auStack_c[2];
+    DAT_febe7ea2 = auStack_c[3];
+    DAT_febe7ea4 = uStack_4;
+    DAT_febe7ea6 = uStack_2;
+  }
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -2549,6 +2588,38 @@ void f33_fill_constant_block_49b3c(void)
   DAT_febe7f5e = 0xff;
   DAT_febe7f5f = 0xff;
   return;
+}
+
+
+
+char FUN_00049b5c(char param_1)
+
+{
+  uint32_t puVar1;
+  char extraout_r6;
+  char cVar2;
+  ushort uVar3;
+  
+  puVar1 = 0xfebeb800u;
+  if (((param_1 == DAT_febe7f53) || (param_1 == '3')) || (DAT_febe7f53 == '\"')) {
+    cVar2 = DAT_febe7f4c;
+    uVar3 = DAT_febe7f60;
+    if (((param_1 != '\x11') && (DAT_febe7f4c == 'Z')) &&
+       ((DAT_0002fbf0 < DAT_febe7f60 || (uVar3 = DAT_febe7f60 + 1, DAT_0002fbf0 < uVar3)))) {
+      cVar2 = '\0';
+    }
+  }
+  else {
+    puVar1 = 0xfebeb800u;
+    f33_fill_constant_block_49b3c();
+    cVar2 = 'Z';
+    uVar3 = 0;
+    param_1 = extraout_r6;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x38b4))))) = cVar2;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x38a0)))) = uVar3;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x38ad))))) = param_1;
+  return cVar2;
 }
 
 

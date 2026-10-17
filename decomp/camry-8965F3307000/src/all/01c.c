@@ -834,6 +834,96 @@ uint FUN_00070bb2(uint param_1,int param_2)
 
 
 
+undefined4 FUN_00070be0(short param_1,short param_2,short *param_3)
+
+{
+  int iVar1;
+  bool bVar2;
+  short sVar3;
+  uint uVar4;
+  uint uVar5;
+  uint uVar6;
+  short *extraout_r8;
+  short *extraout_r8_00;
+  short sVar7;
+  uint uVar8;
+  
+  uVar5 = (uint)param_1;
+  uVar8 = (uint)param_2;
+  uVar6 = uVar5;
+  if ((int)uVar5 < 0) {
+    uVar6 = -uVar5;
+  }
+  uVar4 = uVar8;
+  if ((int)uVar8 < 0) {
+    uVar4 = -uVar8;
+  }
+  iVar1 = uVar6 - uVar4;
+  bVar2 = (int)uVar6 < 0 != (int)uVar4 < 0 && (int)uVar4 < 0 == iVar1 < 0;
+  if (iVar1 < 0 == bVar2) {
+    if (iVar1 < 0 != bVar2 || uVar6 == uVar4) {
+      if ((int)uVar8 < 0) {
+        sVar7 = -0x6000;
+        if (-1 < (int)uVar5) {
+          sVar7 = 0x6000;
+        }
+      }
+      else {
+        sVar7 = -0x2000;
+        if (-1 < (int)uVar5) {
+          sVar7 = 0x2000;
+        }
+      }
+      goto LAB_00070c7c;
+    }
+    uVar4 = uVar4 << 0x10;
+    if (uVar6 != 0) {
+      uVar4 = uVar4 / uVar6;
+    }
+    sVar7 = FUN_00070bb2(uVar4 & 0xffff, camry_host_addr(((undefined *)camry_host_ptr(0x21618u))));
+    param_3 = extraout_r8;
+    if ((int)uVar5 < 0) {
+      if (-1 < (int)uVar8) {
+        sVar7 = sVar7 + -0x4000;
+        goto LAB_00070c7c;
+      }
+      sVar3 = -0x4000;
+    }
+    else {
+      if ((int)uVar8 < 0) {
+        sVar7 = sVar7 + 0x4000;
+        goto LAB_00070c7c;
+      }
+      sVar3 = 0x4000;
+    }
+  }
+  else {
+    uVar6 = uVar6 << 0x10;
+    if (uVar4 != 0) {
+      uVar6 = uVar6 / uVar4;
+    }
+    sVar7 = FUN_00070bb2(uVar6 & 0xffff, camry_host_addr(((undefined *)camry_host_ptr(0x21618u))));
+    param_3 = extraout_r8_00;
+    if ((int)uVar8 < 0) {
+      sVar3 = -0x8000;
+      if ((int)uVar5 < 0) {
+        sVar7 = sVar7 + -0x8000;
+        goto LAB_00070c7c;
+      }
+    }
+    else {
+      if (-1 < (int)uVar5) goto LAB_00070c7c;
+      sVar3 = 0;
+    }
+  }
+  sVar7 = sVar3 - sVar7;
+LAB_00070c7c:
+  *param_3 = sVar7;
+  return 0;
+}
+
+
+
 /* Truncate classification to8 bits.11 increments scratch recovery_count at+10 while<=limit; strict
    crossing clears halfwords0/2/4/8/10/12/16 and returns0,else44000022.22/44 clear recovery_count
    and return22; other classifications return22 preserving it. Scratch+6 high-water survives.
@@ -1160,6 +1250,46 @@ undefined4 FUN_00071232(char param_1,undefined2 *param_2,ushort *param_3)
 
 
 
+void FUN_000712ce(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4)
+
+{
+  undefined4 in_r2;
+  undefined4 in_r10;
+  undefined4 in_r11;
+  undefined4 in_r12;
+  undefined4 in_r13;
+  undefined4 in_r14;
+  undefined4 in_r15;
+  undefined4 in_r16;
+  undefined4 in_r17;
+  undefined4 in_r18;
+  undefined4 in_r19;
+  int in_ep;
+  undefined4 in_CTPC;
+  undefined4 in_CTPSW;
+  
+  (*((undefined4 *)camry_host_ptr((uint32_t)(in_ep + 100)))) = in_r19;
+  (*((undefined4 *)camry_host_ptr((uint32_t)(in_ep + 0x60)))) = in_r18;
+  (*((undefined4 *)camry_host_ptr((uint32_t)(in_ep + 0x5c)))) = in_r17;
+  (*((undefined4 *)camry_host_ptr((uint32_t)(in_ep + 0x58)))) = in_r16;
+  (*((undefined4 *)camry_host_ptr((uint32_t)(in_ep + 0x54)))) = in_r15;
+  (*((undefined4 *)camry_host_ptr((uint32_t)(in_ep + 0x50)))) = in_r14;
+  (*((undefined4 *)camry_host_ptr((uint32_t)(in_ep + 0x4c)))) = in_r13;
+  (*((undefined4 *)camry_host_ptr((uint32_t)(in_ep + 0x48)))) = in_r12;
+  (*((undefined4 *)camry_host_ptr((uint32_t)(in_ep + 0x44)))) = in_r11;
+  (*((undefined4 *)camry_host_ptr((uint32_t)(in_ep + 0x40)))) = in_r10;
+  (*((undefined4 *)camry_host_ptr((uint32_t)(in_ep + 0x3c)))) = param_4;
+  (*((undefined4 *)camry_host_ptr((uint32_t)(in_ep + 0x38)))) = param_3;
+  (*((undefined4 *)camry_host_ptr((uint32_t)(in_ep + 0x34)))) = param_2;
+  (*((undefined4 *)camry_host_ptr((uint32_t)(in_ep + 0x30)))) = param_1;
+  (*((undefined4 *)camry_host_ptr((uint32_t)(in_ep + 0x24)))) = in_r2;
+  (*((undefined4 *)camry_host_ptr((uint32_t)(in_ep + 0x10)))) = in_CTPSW;
+  (*((undefined4 *)camry_host_ptr((uint32_t)(in_ep + 0xc)))) = in_CTPC;
+  return;
+}
+
+
+
 /* WARNING: This function may have set the stack pointer */
 /* NONORDINARY PAIRED ABI: PUSHSP r1..ep saves120 bytes on original stack; r2 retains saved-frame
    SP, SP becomes FEBE2800, r20 preserves continuation, profile selectorROM31684=1 goes to65984. No
@@ -1171,6 +1301,21 @@ void FUN_00071378(void)
 {
   f33_apply_mpu_attribute_profile(DAT_00031684);
   return;
+}
+
+
+
+/* PAIRED ABI exit: apply profileROM31683=0, restore SP from r2, restore r1..ep and return through
+   preserved continuation. LP is outside the saved register range. Exact assembly, not ordinary C
+   stack effects, defines this contract. */
+
+undefined8 FUN_00071398(void)
+
+{
+  int extraout_r2;
+  
+  f33_apply_mpu_attribute_profile(DAT_00031683);
+  return CONCAT44((*((undefined4 *)camry_host_ptr((uint32_t)(extraout_r2 + 0x4c)))),(*((undefined4 *)camry_host_ptr((uint32_t)(extraout_r2 + 0x50)))));
 }
 
 
@@ -1923,6 +2068,27 @@ void f33_return_only_stub_72e2c(void)
 
 
 
+void FUN_00072e70(void)
+
+{
+  int iVar1;
+  undefined4 local_14;
+  undefined2 uStack_10;
+  
+  iVar1 = FUN_0007347e(&local_14);
+  if ((iVar1 == 0) || (iVar1 = FUN_00073978(&local_14), iVar1 == 0)) {
+    FUN_0007220e(&local_14);
+    FUN_000747c8(0,5);
+    FUN_00071e26(uStack_10,local_14);
+  }
+  else {
+    FUN_00071d3e();
+  }
+  return;
+}
+
+
+
 bool FUN_00072eac(uint *param_1)
 
 {
@@ -2009,6 +2175,26 @@ char FUN_00072fc8(char param_1)
     return param_1;
   }
   return '\x01';
+}
+
+
+
+void FUN_00072fde(undefined2 param_1,undefined4 param_2,char param_3)
+
+{
+  uint operation;
+  uchar result;
+  int iVar1;
+  undefined4 local_28;
+  ushort uStack_24;
+  
+  if ((param_3 != '\x16') && (iVar1 = FUN_00073784(param_1, param_2, camry_host_addr(&local_28)), iVar1 == 0)) {
+    result = ((void)(local_28), FUN_00072fc8(param_3));
+    f33_nvm_publish_logical_result(uStack_24,operation,result);
+    FUN_00071eb4(param_1,param_2);
+  }
+  ((void)(0), FUN_000747d2());
+  return;
 }
 
 
@@ -2379,6 +2565,25 @@ void FUN_00073424(undefined4 *param_1,undefined4 *param_2)
 
 
 
+void FUN_00073440(uint param_1,uint param_2,undefined4 param_3,undefined4 param_4)
+
+{
+  undefined4 extraout_r8;
+  uint uVar1;
+  int iVar2;
+  ushort auStack_e [3];
+  
+  auStack_e[0] = 0xffff;
+  uVar1 = f33_nvm_queue_index(param_1 & 0xffff,param_2 & 0xffff);
+  iVar2 = FUN_000733da(uVar1,extraout_r8,auStack_e);
+  if (iVar2 == 0) {
+    FUN_00073424(((undefined4 *)camry_host_ptr((uint32_t)(param_4))), f33_nvm_queue_slots + auStack_e[0]);
+  }
+  return;
+}
+
+
+
 /* Empty tail sets head; otherwise validate old tail partition and link its next. Set tail=index and
    new nextFFFF. Return0 or1 on old-tail failure. Does not validate new index or head/tail
    consistency. TailFFFF sets head; otherwise validate old tail partition and link old tail.next.
@@ -2504,6 +2709,25 @@ uint f33_nvm_enqueue_pooled_operation(F33NvmOperation *operation)
   }
   FUN_00072130();
   return 1;
+}
+
+
+
+void FUN_00073748(ushort param_1,ushort param_2,undefined4 param_3)
+
+{
+  undefined4 *extraout_r7;
+  uint uVar1;
+  
+  uVar1 = f33_nvm_append_queue_slot(param_1,param_2);
+  if (uVar1 == 0) {
+    FUN_00073424(((undefined4 *)camry_host_ptr((uint32_t)(param_3))), f33_nvm_queue_slots + param_2);
+    *extraout_r7 = 0x9da70ae7;
+    extraout_r7[1] = 0;
+    extraout_r7[2] = 0;
+    *(undefined2 *)(extraout_r7 + 3) = 0xffff;
+  }
+  return;
 }
 
 

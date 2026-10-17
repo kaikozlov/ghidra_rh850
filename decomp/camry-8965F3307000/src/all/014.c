@@ -4065,6 +4065,39 @@ uint f33_get_diagnostic_event_state(uint event)
 
 
 
+/* Starting index1 refreshes160 status bytes at5F87 from derived DTC banks and healthy-observed
+   events, then scans configured nonzero DTCs. Later cursor reads use that status generation rather
+   than rebuilding each item. */
+
+uint f33_scan_dtc_status_snapshot(uchar mask,uint *dtc,uchar *status,ushort start_index)
+
+{
+  byte bVar1;
+  uint *extraout_r7;
+  byte *extraout_r8;
+  uint uVar2;
+  
+  uVar2 = (uint)start_index;
+  if (uVar2 == 1) {
+    f33_build_dtc_status_snapshot(f33_dtc_status_iteration_snapshot);
+    status = extraout_r8;
+    dtc = extraout_r7;
+  }
+  while( true ) {
+    if (0x9f < uVar2) {
+      return 0;
+    }
+    bVar1 = f33_dtc_status_iteration_snapshot[uVar2];
+    if (((mask & bVar1) != 0) && (*(uint *)(((undefined *)camry_host_ptr(0x30850u)) + uVar2 * 8) != 0)) break;
+    uVar2 = uVar2 + 1;
+  }
+  *dtc = *(uint *)(((undefined *)camry_host_ptr(0x30850u)) + uVar2 * 8);
+  *status = bVar1;
+  return uVar2;
+}
+
+
+
 undefined4 FUN_00052830(int param_1)
 
 {
@@ -4903,6 +4936,48 @@ int f33_serialize_retained_capture_record(uchar record_view,uchar *output,ushort
 
 
 
+void FUN_00053298(undefined4 param_1,char param_2,undefined4 param_3,ushort param_4)
+
+{
+  int iVar1;
+  uint32_t puVar2;
+  uchar record_view;
+  int extraout_r6;
+  uchar *output;
+  int iVar3;
+  char acStack_15 [9];
+  
+  puVar2 = 0xfebeb800u;
+  FUN_00053168(param_1,param_3,param_4,acStack_15);
+  if (acStack_15[0] == '\0') {
+    iVar1 = 0;
+    if ((*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x33a4)))) < 0x180) {
+      iVar1 = *(int *)(((undefined *)camry_host_ptr(0x30850u)) +
+                      (uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x2fc52u + (uint32_t)((uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x33a4)))) * 8) * 1u)))) * 8);
+    }
+    iVar3 = 0;
+    if ((*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x33a2)))) < 0x180) {
+      iVar3 = *(int *)(((undefined *)camry_host_ptr(0x30850u)) +
+                      (uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x2fc52u + (uint32_t)((uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x33a2)))) * 8) * 1u)))) * 8);
+    }
+    if ((iVar1 == iVar3) && (extraout_r6 == iVar1)) {
+      if (param_2 == '\x01') {
+        record_view = '\0';
+      }
+      else {
+        if (param_2 != '\x10') {
+          return;
+        }
+        record_view = '\x01';
+      }
+      f33_serialize_retained_capture_record(record_view,output,param_4);
+    }
+  }
+  return;
+}
+
+
+
 /* WARNING: Removing unreachable block (ram,0x0005353a) */
 
 int FUN_00053532(short param_1)
@@ -5022,6 +5097,32 @@ uint FUN_00053a2c(short param_1)
     uVar1 = 0;
   }
   return uVar1 & 0xff;
+}
+
+
+
+void FUN_00053a4e(void)
+
+{
+  undefined1 *extraout_r7;
+  undefined1 uVar1;
+  
+  uVar1 = FUN_00053a2c((int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 178u)))));
+  *extraout_r7 = uVar1;
+  return;
+}
+
+
+
+void FUN_00053a62(void)
+
+{
+  undefined1 *extraout_r7;
+  undefined1 uVar1;
+  
+  uVar1 = FUN_00053a2c((int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 180u)))));
+  *extraout_r7 = uVar1;
+  return;
 }
 
 

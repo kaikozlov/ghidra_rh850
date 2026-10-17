@@ -1964,6 +1964,25 @@ LAB_0004d786:
 
 
 
+undefined4 FUN_0004d79a(undefined4 param_1,undefined4 param_2,undefined1 *param_3)
+
+{
+  int iVar1;
+  undefined4 uVar2;
+  undefined1 uStack_9;
+  
+  if ((param_3 == (undefined1 *)0x0) || (iVar1 = FUN_00052922(param_1, camry_host_addr(&uStack_9)), iVar1 != 0x5a)) {
+    uVar2 = 1;
+  }
+  else {
+    uVar2 = 0;
+    *param_3 = uStack_9;
+  }
+  return uVar2;
+}
+
+
+
 /* Use selected metadata index81B8 and invoke fixed record+4 reader; out-of-range returns3. Length
    and availability selection are separate operations. */
 
@@ -4534,6 +4553,48 @@ void FUN_0004fc2c(uint param_1,int param_2,int param_3)
     (*((undefined1 *)camry_host_ptr((uint32_t)(iVar2 + param_3)))) = (*((undefined1 *)camry_host_ptr((uint32_t)(iVar2 + param_2))));
   }
   return;
+}
+
+
+
+/* Require1..255 bytes. Memory family1 copies allowed local-RAM bytes after five overlap exclusions;
+   family2 uses bounded DataFlash read after two exclusions. Other family/range returns3, bad
+   length/read failure4. */
+
+uint f33_read_configured_application_memory(uchar *address_record,uchar *output,ushort length)
+
+{
+  uint extraout_r6;
+  int iVar1;
+  int iVar2;
+  uint uVar3;
+  
+  uVar3 = (uint)length;
+  iVar2 = (uint)address_record[4] +
+          (uint)address_record[3] * 0x100 +
+          (uint)address_record[2] * 0x10000 + (uint)address_record[1] * 0x1000000;
+  if (uVar3 - 1 < 0xff) {
+    if (*address_record == '\x01') {
+      iVar1 = FUN_0004fbe8(((undefined *)camry_host_ptr((uint32_t)(iVar2))), uVar3);
+      if (iVar1 == 0x5a) {
+        FUN_0004fc2c(uVar3, iVar2, camry_host_addr(output));
+        return 0;
+      }
+    }
+    else if ((*address_record == '\x02') && (iVar2 = FUN_0004fc48(((undefined *)camry_host_ptr((uint32_t)(iVar2))), uVar3), iVar2 == 0x5a)) {
+      iVar2 = FUN_00066e7c(extraout_r6 & 0xffff, camry_host_addr(output), uVar3);
+      if (iVar2 == 0) {
+        return 0;
+      }
+      goto LAB_0004fcfa;
+    }
+    uVar3 = 3;
+  }
+  else {
+LAB_0004fcfa:
+    uVar3 = 4;
+  }
+  return uVar3;
 }
 
 

@@ -1004,6 +1004,24 @@ void FUN_0007cdda(undefined1 param_1,uint param_2)
 
 
 
+void FUN_0007cf44(void)
+
+{
+  byte bVar1;
+  uchar selected_network;
+  byte bVar2;
+  
+  bVar1 = DAT_00021ba8;
+  for (bVar2 = 0; bVar2 < bVar1; bVar2 = bVar2 + 1) {
+    FUN_0007cdc2(bVar2);
+    f33_update_selected_network_fault_recovery(selected_network);
+    FUN_0007cf12(bVar2);
+  }
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */

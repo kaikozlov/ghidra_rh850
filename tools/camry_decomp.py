@@ -2258,6 +2258,7 @@ _CC_FLAGS = [
     "-Wno-bitwise-op-parentheses", "-Wno-sign-compare", "-Wno-parentheses",
     "-Wno-pointer-sign", "-Wno-incompatible-pointer-types",
     "-Wno-unused-but-set-variable",
+    "-Wno-uninitialized",
     "-Wno-deprecated-non-prototype",
     "-ferror-limit=0",
     "-DCAMRY_HOST",

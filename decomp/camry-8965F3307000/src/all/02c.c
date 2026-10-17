@@ -2950,6 +2950,43 @@ void f33_return_only_stub_b391e(void)
 
 
 
+/* WARNING: Removing unreachable block (ram,0x000b392a) */
+
+int FUN_000b3920(int param_1,int param_2,int param_3)
+
+{
+  int iVar1;
+  int in_r17;
+  int iVar2;
+  
+  if (param_3 == 0) {
+    return 0;
+  }
+  iVar2 = (param_1 / 0x10000) * 0x10000;
+  if (param_3 != 0) {
+    if (iVar2 == -0x80000000 && param_3 == -1) {
+      iVar2 = -0x80000000;
+      in_r17 = 0;
+    }
+    else {
+      in_r17 = iVar2 % param_3;
+      iVar2 = iVar2 / param_3;
+    }
+  }
+  iVar1 = (param_1 % 0x10000 + in_r17) * param_2;
+  if (param_3 != 0) {
+    if (iVar1 == -0x80000000 && param_3 == -1) {
+      iVar1 = -0x80000000;
+    }
+    else {
+      iVar1 = iVar1 / param_3;
+    }
+  }
+  return iVar1 + iVar2 * param_2;
+}
+
+
+
 /* WARNING: Removing unreachable block (ram,0x000b39c0) */
 
 void FUN_000b394c(void)

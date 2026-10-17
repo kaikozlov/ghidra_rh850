@@ -1679,6 +1679,22 @@ undefined4 FUN_0006586a(void)
 
 
 
+undefined8 FUN_0006595e(void)
+
+{
+  uint32_t puVar1;
+  undefined4 in_r10;
+  undefined4 in_r11;
+  
+  puVar1 = 0xfebeb800u;
+  ((void)(0x40), (void)(0xb8), FUN_000659f8());
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x7c00))))) = 0;
+  ((void)(0x40), (void)(0xa8), FUN_000659f8());
+  return CONCAT44(in_r11,in_r10);
+}
+
+
+
 /* Load MPAT0..15 from31708+64*low8(selector), then SYNCI/SYNCP. No index validation and no
    region-bound writes. Assembly system-register effects are authoritative; decompiler formerly
    exposed only the incidental last load in R10 as a false getter result. Apply MPAT0..15 attributes
@@ -1714,6 +1730,21 @@ void FUN_00065ac0(void)
   __synchronize();
   __synchronize();
   return;
+}
+
+
+
+/* Assembly MPAT0..15 restore with persistent SP delta+64, paired with65AC0. Restores the
+   interrupted MPU profile, including foreground profile1. */
+
+undefined4 FUN_00065b4a(void)
+
+{
+  undefined4 in_stack_00000000;
+  
+  __synchronize();
+  __synchronize();
+  return in_stack_00000000;
 }
 
 
@@ -2278,6 +2309,151 @@ void FUN_0006681e(void)
 
 {
   DAT_febe5f28 = 0;
+  return;
+}
+
+
+
+/* Buffer twelve halfwords through6217E, then permute
+   group0[0:3],group8[0:3],group0[3:6],group8[3:6] to5EC8..5EDE. Then629A2 copies cached serial
+   triplets/counters and publish5F12/14/16,5F1C/1E/20,5F29..30. Does NOT write5F18/1A/22/24
+   ancillary masks. Sequential stores, no validity gate or atomic cross-source generation. Native
+   evidence covers explicit software continuations and a synthetic post-getter publication join, not
+   descriptor acquisition or the intact fast task. */
+
+void f33_publish_fast_acquisition_inputs(void)
+
+{
+  uint32_t puVar1;
+  F33SerialAcquisitionRecord local_34;
+  undefined2 uStack_28;
+  undefined2 uStack_26;
+  undefined2 uStack_24;
+  undefined1 local_22;
+  undefined1 uStack_21;
+  undefined1 uStack_20;
+  undefined1 uStack_1f;
+  F33AcquisitionGroupPair FStack_1c;
+  
+  puVar1 = 0xfebeb800u;
+  f33_copy_acquisition_group_pair(&FStack_1c);
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x5938)))) = FStack_1c.group0[0];
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x5936)))) = FStack_1c.group0[1];
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x5934)))) = FStack_1c.group0[2];
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x592c)))) = FStack_1c.group0[3];
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x592a)))) = FStack_1c.group0[4];
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x5928)))) = FStack_1c.group0[5];
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x5932)))) = FStack_1c.group8[0];
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x5930)))) = FStack_1c.group8[1];
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x592e)))) = FStack_1c.group8[2];
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x5926)))) = FStack_1c.group8[3];
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x5924)))) = FStack_1c.group8[4];
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x5922)))) = FStack_1c.group8[5];
+  f33_copy_cached_serial_acquisition_records(&local_34);
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x58ee)))) = local_34.field14_0;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x58ec)))) = local_34.field14_1;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x58ea)))) = local_34.field12;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58d7))))) = local_34.rx_count_failures;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58d6))))) = local_34.rx_or_tx_failures;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58d5))))) = local_34.crc_failures;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58d4))))) = local_34.sequence_failures;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x58e4)))) = uStack_28;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x58e2)))) = uStack_26;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x58e0)))) = uStack_24;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58d3))))) = local_22;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58d2))))) = uStack_21;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58d1))))) = uStack_20;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58d0))))) = uStack_1f;
+  return;
+}
+
+
+
+/* On odd5F28 consume two slot records through62B32 and publish5F02..5F10; increment5F28 on every
+   call. Software one-of-two cadence, not proof that hardware supplied a new frame. Odd5F28 runs
+   acquisition aggregation and publishes5F02..5F10; every call increments5F28. Later
+   parity-derived8A1C is software cadence rather than fresh-frame evidence. */
+
+void f33_consume_rsent_sensor_slots(void)
+
+{
+  uint32_t puVar1;
+  undefined2 local_14;
+  undefined2 uStack_12;
+  undefined2 uStack_10;
+  undefined2 uStack_e;
+  undefined2 uStack_c;
+  undefined2 uStack_a;
+  undefined2 uStack_8;
+  undefined2 uStack_6;
+  
+  puVar1 = 0xfebeb800u;
+  if ((DAT_febe5f28 & 1) != 0) {
+    puVar1 = 0xfebeb800u;
+    FUN_00062b32(camry_host_addr(&local_14));
+    (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x58fe)))) = local_14;
+    (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x58fc)))) = uStack_12;
+    (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x58fa)))) = uStack_10;
+    (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x58f8)))) = uStack_e;
+    (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x58f6)))) = uStack_c;
+    (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x58f4)))) = uStack_a;
+    (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x58f2)))) = uStack_8;
+    (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x58f0)))) = uStack_6;
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58d8))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58d8))))) + '\x01';
+  return;
+}
+
+
+
+/* Compose62ABC,62B18,6294E into5EE0..5F24 and cached380A/B into5F26/27. 6294E rotates serial mask
+   windows and publishes5F18/1A/22/24;66824 does not write these masks. The range and mask fields
+   are staged generations, not an atomic physical measurement. Compose transfer-group
+   copies62ABC,62B18,6294E into5EE0..5F24, and copy cached380A/B to5F26/27. The range
+   fields5EEA/C/E/5EF0 and later81D6/8/A/C are staged generations, not an atomic physical
+   measurement. 6294E separately rotates four-slot masks and publishes5F18/1A/22/24; numeric/counter
+   producer66824 does not own those fields. */
+
+void f33_publish_acquisition_diagnostic_snapshot(void)
+
+{
+  uint32_t puVar1;
+  F33SerialAcquisitionMasks local_2c;
+  undefined2 uStack_28;
+  undefined2 uStack_26;
+  undefined2 uStack_24;
+  undefined2 uStack_22;
+  ushort uStack_16;
+  undefined2 uStack_14;
+  undefined2 uStack_12;
+  undefined2 uStack_10;
+  undefined2 uStack_e;
+  undefined2 uStack_c;
+  undefined2 uStack_a;
+  undefined2 local_8;
+  undefined2 uStack_6;
+  
+  puVar1 = 0xfebeb800u;
+  f33_copy_acquisition_diagnostic_samples(&uStack_16);
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x5920)))) = uStack_e;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x591e)))) = uStack_14;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x591c)))) = uStack_a;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x591a)))) = uStack_16;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x5918)))) = uStack_c;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x5916)))) = uStack_12;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x5914)))) = uStack_10;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x5912)))) = local_8;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x5910)))) = uStack_6;
+  FUN_00062b18(camry_host_addr(&uStack_24));
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x5902)))) = uStack_24;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x5900)))) = uStack_22;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58da))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x7ff6)))));
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58d9))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x7ff5)))));
+  f33_rotate_and_copy_serial_acquisition_masks(&local_2c);
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x58e8)))) = local_2c.first;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x58e6)))) = local_2c.second;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x58de)))) = uStack_28;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x58dc)))) = uStack_26;
   return;
 }
 

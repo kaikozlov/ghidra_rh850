@@ -2300,6 +2300,137 @@ undefined4 FUN_0008277a(void)
 
 
 
+undefined4 FUN_000827b4(int param_1,short *param_2)
+
+{
+  short sVar1;
+  char cVar2;
+  bool bVar3;
+  short sVar4;
+  undefined1 uVar5;
+  uint uVar6;
+  uint32_t puVar7;
+  int extraout_r6;
+  int iVar8;
+  bool bVar9;
+  uint uVar10;
+  
+  sVar4 = DAT_00022ada;
+  puVar7 = 0xfebeb800u;
+  sVar1 = *param_2;
+  *param_2 = 2;
+  if (sVar1 == sVar4) {
+    cVar2 = (*((char *)camry_host_ptr((uint32_t)(param_1 + 1))));
+    uVar10 = (uint)DAT_00022ae7;
+    if (cVar2 == '\0') {
+      FUN_00082330();
+LAB_00082820:
+      *param_2 = 1;
+      return 0;
+    }
+    if (cVar2 == '\x01') {
+      iVar8 = FUN_0008277a();
+      param_1 = extraout_r6;
+      if (iVar8 == 1) {
+        for (uVar6 = 0; uVar6 < uVar10; uVar6 = uVar6 + 1 & 0xff) {
+          iVar8 = uVar6 * 8;
+          if (((byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(iVar8 + -0x6b1f))))) >> 2 & 1) != 0) {
+            (*((undefined2 *)camry_host_ptr((uint32_t)(puVar7 + iVar8 + -0x6b22)))) = 0;
+            (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(iVar8 + -0x6b1f))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(iVar8 + -0x6b1f))))) & 0xfb | 1;
+          }
+        }
+        FUN_0008268c();
+        goto LAB_00082820;
+      }
+    }
+    else {
+      if (cVar2 != '\x02') {
+        uVar5 = 0x27;
+        goto LAB_00082876;
+      }
+      bVar3 = false;
+      bVar9 = false;
+      for (uVar6 = 0; uVar6 < uVar10; uVar6 = uVar6 + 1 & 0xff) {
+        if (((byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe4ce1u + (uint32_t)(uVar6 * 8) * 1u)))) >> 2 & 1) == 0) {
+          if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe4ce1u + (uint32_t)(uVar6 * 8) * 1u)))) & 1) != 0) {
+            bVar3 = true;
+          }
+        }
+        else {
+          (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe4ce1u + (uint32_t)(uVar6 * 8) * 1u)))) = 0;
+          bVar9 = true;
+        }
+      }
+      if (bVar9) {
+        if (!bVar3) {
+          DAT_febe500a = DAT_febe500a & 0x7f;
+        }
+        *param_2 = 1;
+        return 0;
+      }
+    }
+    uVar5 = 0x2a;
+  }
+  else {
+    uVar5 = 0x21;
+  }
+LAB_00082876:
+  (*((undefined1 *)camry_host_ptr((uint32_t)(param_1 + 1)))) = uVar5;
+  return 1;
+}
+
+
+
+undefined4 FUN_00082880(int param_1,short *param_2)
+
+{
+  ushort uVar1;
+  short sVar2;
+  short sVar3;
+  undefined1 uVar4;
+  uint uVar5;
+  uint32_t puVar6;
+  undefined2 *extraout_r7;
+  int iVar7;
+  
+  sVar3 = DAT_00022ad0;
+  puVar6 = 0xfebeb800u;
+  sVar2 = *param_2;
+  *param_2 = 2;
+  if (sVar2 == sVar3) {
+    uVar1 = (*((ushort *)camry_host_ptr((uint32_t)(param_1 + 2))));
+    if ((uint)uVar1 < (uint)DAT_00022ae7) {
+      iVar7 = (uVar1 & 0xff) * 8;
+      DAT_febe500b = 0;
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe4ce1u + (uint32_t)(iVar7) * 1u)))) = 0;
+      *(undefined2 *)(((undefined *)camry_host_ptr(0xfebe4cdcu)) + iVar7) = 0;
+      *(undefined2 *)(((undefined *)camry_host_ptr(0xfebe4cdeu)) + iVar7) = 0;
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe4ce0u + (uint32_t)(iVar7) * 1u)))) = 0;
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe4ce2u + (uint32_t)(iVar7) * 1u)))) = 0xff;
+      iVar7 = (int)(short)(ushort)DAT_00022ae8 * (int)(short)(ushort)DAT_00022ae9;
+      uVar5 = (int)(short)iVar7 * (int)(short)uVar1;
+      for (; iVar7 != 0; iVar7 = iVar7 + -1) {
+        *(undefined1 **)(((undefined *)camry_host_ptr(0xfebe4cfcu)) + (uVar5 & 0xffff) * 4) = ((undefined *)camry_host_ptr(0xfebe500bu));
+        uVar5 = (uVar5 & 0xffff) + 1;
+      }
+      iVar7 = FUN_00082494();
+      if (iVar7 == 0) {
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar6 + (uint32_t)(-0x67f6))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar6 + (uint32_t)(-0x67f6))))) & 0x7f;
+      }
+      *extraout_r7 = 1;
+      return 0;
+    }
+    uVar4 = 0x22;
+  }
+  else {
+    uVar4 = 0x21;
+  }
+  (*((undefined1 *)camry_host_ptr((uint32_t)(param_1 + 1)))) = uVar4;
+  return 1;
+}
+
+
+
 undefined4 FUN_000829ce(int param_1,short *param_2)
 
 {

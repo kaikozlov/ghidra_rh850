@@ -3163,6 +3163,24 @@ void f33_select_and_stage_control_profile(uchar slot)
 
 
 
+/* Update sticky age, gated integral and metadata, then stage working profile. Preserve slot
+   argument throughBA134 intoBA224. */
+
+void f33_refresh_control_profile_working(uchar slot)
+
+{
+  uchar slot_00;
+  
+  f33_age_control_profile_source_latch(slot);
+  f33_integrate_control_profile_unsigned_source(slot);
+  f33_refresh_control_profile_packed_metadata(slot);
+  f33_refresh_control_profile_scalar_metadata(slot);
+  f33_select_and_stage_control_profile(slot_00);
+  return;
+}
+
+
+
 /* Copy all numerical and seven metadata fields from working slot to first retained bank. Caller
    controls locking; this copy does not store validity or elapsed-source marker. */
 
