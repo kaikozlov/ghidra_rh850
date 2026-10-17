@@ -44,8 +44,10 @@ from tests.decomp.verify_camry_decomp import (
 )
 
 TARGET = "camry-8965F3307000"
-MAX_BODY = 128
-STEP_LIMIT = 12000
+MAX_BODY = 16384
+STEP_LIMIT = 20000
+SCRATCH = 0xFEBE0000
+SCRATCH_SIZE = 4
 SENTINEL = 0x11111111
 STOP = 0x798
 GP = 0xFEBEB800
@@ -66,7 +68,7 @@ FAIL_KINDS = {
 }
 
 REASONS = {
-    "large": "this batch harnesses functions of at most 128 bytes; larger bodies stay converted",
+    "large": "this run harnesses functions of at most 16384 bytes; larger bodies stay converted",
     "outside-codeflash": "the entry is outside the CodeFlash image the machine executes",
     "undecoded": "the lifter cannot walk every byte of the function, so the harness has no instruction list",
     "no-converted-body": "the converted C is not in src/all (a hand prototype or a dropped body), so the host check has nothing to call",
@@ -78,7 +80,7 @@ REASONS = {
     "system-register": "ldsr, stsr, di, or ei is visible to the bytes, and the host library does not define those intrinsics",
     "host-intrinsic": "the converted body calls a compiler intrinsic the host library does not define",
     "external-branch": "control leaves the decoded function without a direct call, so the closure is incomplete",
-    "large-callee": "a direct callee is above 128 bytes, so this is not a small closure",
+    "large-callee": "a direct callee is above 16384 bytes, so its closure is not inlined",
     "unmodeled": "the harness interpreter does not fold this operation and will not invent the address it computes",
     "mmio": "the address is outside codeflash, dataflash, and RAM; the P1M-E model faults on that uninitialized peripheral",
     "ram-alias": "the access uses the PE1 local-RAM alias at 0xFEDE0000; the host check maps only 0xFEBE0000",
@@ -91,9 +93,9 @@ REASONS = {
     "argument-window": "a pointer argument walks past the 1024-byte harness buffer",
     "stack-arguments": "the converted signature has more than four parameters, which the host check does not pass",
     "fallthrough": "execution leaves the function without returning through lp",
-    "instruction-budget": "the closure did not return within the instruction budget",
+    "instruction-budget": "the closure did not return within 20000 instructions",
     "region-cap": "the host check has eight regions and codeflash plus dataflash already use two; the remaining accesses do not fit",
-    "no-observable": "the bytes do not write r10 or caller-visible memory, so a scenario would not check anything",
+    "no-observable": "the bytes do not write r10 or caller-visible memory, and the unchanged local-RAM scratch does not fit the host region cap",
     "uninitialized-read": "the machine read a byte the harness did not initialize",
     "simulator": "the P1M-E machine did not return a report for this scenario",
     "harness-drift": "the machine's result does not match the harness interpreter, so the scenario window is not trusted",
@@ -138,6 +140,7 @@ class Planned:
     body: str
     runs: list[Run]
     calls: set[int]
+    windows: list[tuple[int, int]]
 
 
 def _u32(value: int) -> int:
@@ -868,6 +871,40 @@ def _windows(runs: list[Run], pointers: list[bool] | None = None) -> list[tuple[
     return windows
 
 
+def _cover(windows: list[tuple[int, int]], addr: int, size: int) -> str:
+    end = addr + size
+    for base, span in windows:
+        if base <= addr and end <= base + span:
+            return "full"
+        if not (end <= base or addr >= base + span):
+            return "partial"
+    return "none"
+
+
+def _attach_scratch(windows: list[tuple[int, int]]) -> list[tuple[int, int]]:
+    cover = _cover(windows, SCRATCH, SCRATCH_SIZE)
+    if cover == "full":
+        return windows
+    if cover == "partial" or len(windows) >= 6:
+        raise Harness("no-observable")
+    return [*windows, (SCRATCH, SCRATCH_SIZE)]
+
+
+def _scenario_windows(runs: list[Run], pointers: list[bool]) -> list[tuple[int, int]]:
+    windows = _windows(runs, pointers)
+    if any(_observable(run) for run in runs):
+        return windows
+    return _attach_scratch(windows)
+
+
+def _region_fill(scenario: dict, address: int) -> int | None:
+    for region in scenario.get("memory", []):
+        base = int(region["address"], 16)
+        if base <= address < base + int(region["size"]):
+            return int(region["fill"]) & 0xFF
+    return None
+
+
 def _write_spans(run: Run) -> list[tuple[int, int]]:
     spans = [
         (addr, size)
@@ -911,13 +948,22 @@ def _scenario(name: str, address: int, run: Run, fill: int, params: list[tuple[b
             "register": label,
             "equals": "0x0",
         })
-    for addr, size in _write_spans(run):
+    spans = _write_spans(run)
+    for addr, size in spans:
         checks.append({
             "name": f"mem-{addr:x}",
             "kind": "memory",
             "address": hex(addr),
             "size": size,
             "equals_hex": "00" * size,
+        })
+    if not spans and _cover(windows, SCRATCH, SCRATCH_SIZE) == "full":
+        checks.append({
+            "name": f"mem-{SCRATCH:x}",
+            "kind": "memory",
+            "address": hex(SCRATCH),
+            "size": SCRATCH_SIZE,
+            "equals_hex": "00" * SCRATCH_SIZE,
         })
     return {
         "schema": "rh850-p1me-machine-scenario-v2",
@@ -1242,7 +1288,9 @@ def _promote(
 ) -> None:
     oracle_path = ROOT / "src" / "oracle.c"
     existing = oracle_path.read_text(encoding="utf-8") if oracle_path.exists() else '#include "common.h"\n'
-    have = _defined_lines(existing)
+    # src/*.c is already linked by the verifier. Emitting those names again
+    # fails the link with a duplicate symbol and drops the whole batch.
+    have = _defined_lines(existing) | _src_definitions()
     parts = [existing.rstrip(), ""]
     for name in support:
         if name in have:
@@ -1325,7 +1373,7 @@ def _keep_verified(
     runnable = [(item, rows) for item, rows in passed if item.name in kept]
     for item, _rows in passed:
         if item.name not in kept:
-            reject("host-link", item.name)
+            reject("host-link", item.name, address=item.address)
     if not runnable:
         return []
     _restore(snapshots)
@@ -1337,13 +1385,13 @@ def _keep_verified(
     named = [item for item, _rows in runnable if item.name in error]
     if named and len(named) < len(runnable):
         for item in named:
-            reject("verifier", item.name)
+            reject("verifier", item.name, address=item.address)
         examples["verifier"] = error[:180]
         rest = [(item, rows) for item, rows in runnable if item not in named]
         return _keep_verified(rest, snapshots, bodies, defined, symbols, macros, reject, examples)
     if len(runnable) == 1 or "FAIL " not in error:
         for item, _rows in runnable:
-            reject("verifier", item.name)
+            reject("verifier", item.name, address=item.address)
         examples["verifier"] = error[:180]
         return []
     mid = len(runnable) // 2
@@ -1370,12 +1418,16 @@ def run_oracles() -> int:
     examples: dict[str, str] = {}
     planned: list[Planned] = []
     hand = _prototype_names()
-    rejected: set[str] = set()
+    seen: set[object] = set()
+    focus = {"addr": None}
 
-    def reject(kind: str, name: str, detail: str = "") -> None:
-        if name in rejected:
+    def reject(kind: str, name: str, detail: str = "", address: int | None = None) -> None:
+        key = address if address is not None else focus["addr"]
+        if key is None:
+            key = name
+        if key in seen:
             return
-        rejected.add(name)
+        seen.add(key)
         label = f"{kind} {detail}".strip() if kind == "unmodeled" else kind
         counts[label] += 1
         examples.setdefault(label, name)
@@ -1393,6 +1445,7 @@ def run_oracles() -> int:
             continue
         converted += 1
         name = row["name"]
+        focus["addr"] = address
         if address >= len(code):
             reject("outside-codeflash", name)
             continue
@@ -1444,11 +1497,8 @@ def run_oracles() -> int:
         if preserved:
             reject(preserved, name)
             continue
-        if not any(_observable(run) for run in runs):
-            reject("no-observable", name)
-            continue
         try:
-            windows = _windows(runs, pointers)
+            windows = _scenario_windows(runs, pointers)
         except Harness as exc:
             reject(exc.kind, name, exc.detail)
             continue
@@ -1456,8 +1506,9 @@ def run_oracles() -> int:
         if any(functions[target].name not in bodies for target in calls if target in functions):
             reject("no-converted-body", name)
             continue
-        planned.append(Planned(address, name, signature, body, runs, calls))
+        planned.append(Planned(address, name, signature, body, runs, calls, windows))
 
+    focus["addr"] = None
     print(f"harnessed {len(planned)}", flush=True)
     needed = []
     for item in planned:
@@ -1512,7 +1563,7 @@ def run_oracles() -> int:
         library, _kept = fit([name for name in needed if name not in dropped])
         if library is None:
             for item in planned:
-                reject("host-compile", item.name)
+                reject("host-compile", item.name, address=item.address)
             _print_summary(verified, converted, unconvertible, counts, examples, 0, 0)
             return 0
         runnable = []
@@ -1521,7 +1572,7 @@ def run_oracles() -> int:
             closure.add(item.name)
             if closure & dropped:
                 if item.name not in dropped:
-                    reject("host-link", item.name)
+                    reject("host-link", item.name, address=item.address)
                 continue
             runnable.append(item)
         if not runnable:
@@ -1537,7 +1588,7 @@ def run_oracles() -> int:
         owners = []
         for item in runnable:
             pointers = _params_of(item.signature, item.name)
-            windows = _windows(item.runs, pointers)
+            windows = item.windows
             for index, (fill, run) in enumerate(zip((0, 0xA5), item.runs)):
                 params = [
                     (pointer, 0 if index == 0 or pointer else ordinal + 1)
@@ -1579,7 +1630,7 @@ def run_oracles() -> int:
                     if kind is None and useful_oracle(final):
                         saved.append(final)
                 if kind is not None:
-                    reject(kind, item.name)
+                    reject(kind, item.name, address=item.address)
                     if kind in FAIL_KINDS:
                         fail += 1
                     ok = False
@@ -1587,7 +1638,7 @@ def run_oracles() -> int:
             if ok and saved:
                 passed.append((item, saved))
             elif ok:
-                reject("no-observable", item.name)
+                reject("no-observable", item.name, address=item.address)
         del library
 
     if not passed:
@@ -1609,13 +1660,16 @@ def run_oracles() -> int:
     kept, support = _linkable(
         [item.name for item, _rows in final], bodies, defined, symbols_names, macros,
     )
+    for item, _rows in final:
+        if item.name not in kept:
+            reject("host-link", item.name, address=item.address)
     final = [(item, rows) for item, rows in final if item.name in kept]
     _promote(final, support, bodies)
     verifier = _verify()
     if verifier is not None:
         _restore(snapshots)
         for item, _rows in final:
-            reject("verifier", item.name)
+            reject("verifier", item.name, address=item.address)
         examples["verifier"] = verifier[:180]
         _print_summary(verified, converted, unconvertible, counts, examples, 0, fail)
         return 1
@@ -1668,6 +1722,12 @@ def _judge(item: Planned, run: Run, scenario: dict, report: dict) -> str | None:
             return "uninitialized-read"
         if actual != _hex_bytes(run, addr, size):
             return "harness-drift"
+    scratch_name = f"mem-{SCRATCH:x}"
+    if not _write_spans(run) and scratch_name in checks:
+        actual = checks[scratch_name].get("actual")
+        fill = _region_fill(scenario, SCRATCH)
+        if fill is None or not actual or actual == "unavailable" or actual != f"{fill:02x}" * SCRATCH_SIZE:
+            return "harness-drift"
     return_type, _params = parse_signature(item.signature, item.name)
     bytes_return = sim_r10 != SENTINEL
     if not bytes_return and return_type != "void":
@@ -1698,6 +1758,15 @@ def _finalize(item: Planned, run: Run, scenario: dict, report: dict) -> dict:
             "address": hex(addr),
             "size": size,
             "equals_hex": checks[f"mem-{addr:x}"]["actual"],
+        })
+    scratch = checks.get(f"mem-{SCRATCH:x}", {}).get("actual")
+    if not _write_spans(run) and scratch and scratch != "unavailable":
+        saved_checks.append({
+            "name": f"write {SCRATCH:x}",
+            "kind": "memory",
+            "address": hex(SCRATCH),
+            "size": SCRATCH_SIZE,
+            "equals_hex": scratch,
         })
     saved["checks"] = saved_checks
     return saved
