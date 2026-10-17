@@ -802,7 +802,7 @@ uint f33_dcm_invoke_request_policy
       }
       uStack_2e = '\0';
       uStack_2d = service_id;
-      uVar6 = (*(int (*)())*puVar2)(service_id,puVar4,uVar6 & 0xffff,bVar5,
+      uVar6 = (*(int (*)())camry_indirect((uint32_t)(*puVar2)))(service_id,puVar4,uVar6 & 0xffff,bVar5,
                                  message->service_list_selector,&uStack_2e);
       if (uVar6 != 0) {
         uVar3 = uVar6;
@@ -956,10 +956,10 @@ uint f33_dcm_deliver_response_notification(uchar result,uchar pending_notificati
     }
     uVar4 = FUN_0009168e();
     if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x1dfc))))) == '\x01') && ((*((int *)camry_host_ptr((uint32_t)(0x1e04u + (int)puVar1)))) != 0)) {
-      (*(int (*)())**(undefined4 **)(0x1e04u + (int)puVar1))(uVar4,pFVar2->addressing_kind,pFVar2->service_list_selector,result);
+      (*(int (*)())camry_indirect((uint32_t)(**(undefined4 **)(0x1e04u + (int)puVar1))))(uVar4,pFVar2->addressing_kind,pFVar2->service_list_selector,result);
     }
     if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x1dfd))))) == '\x01') && ((*((int *)camry_host_ptr((uint32_t)(puVar1 + 0x1e0c)))) != 0)) {
-      (*(int (*)())**(undefined4 **)(puVar1 + 0x1e0c))(uVar4,pFVar2->addressing_kind,pFVar2->service_list_selector,result);
+      (*(int (*)())camry_indirect((uint32_t)(**(undefined4 **)(puVar1 + 0x1e0c))))(uVar4,pFVar2->addressing_kind,pFVar2->service_list_selector,result);
     }
     f33_dcm_clear_active_service();
     FUN_000912b8();
@@ -1159,7 +1159,7 @@ void f33_dcm_cancel_active_service(void)
   puVar1 = 0xfebeb800u;
   if (f33_dcm_active_service_callback != 0x0u) {
     f33_dcm_reset_message_context();
-    (*(int (*)())*(code **)(puVar1 + -0x61d8))(2,puVar1 + -0x61d0);
+    (*(int (*)())camry_indirect((uint32_t)(((code *)(uintptr_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(puVar1 + -0x61d8))))))))(2,puVar1 + -0x61d0);
   }
   FUN_000912b8();
   f33_dcm_clear_active_service();
@@ -1217,7 +1217,7 @@ void f33_dcm_notify_active_service_operation_three(void)
 
 {
   if (f33_dcm_active_service_callback != 0x0u) {
-    (*(int (*)())f33_dcm_active_service_callback)('\x03',(0xfebe5630u));
+    (*(int (*)())camry_indirect((uint32_t)(f33_dcm_active_service_callback)))('\x03',(0xfebe5630u));
   }
   return;
 }
@@ -2677,7 +2677,7 @@ undefined4 f33_dcm_notify_session_publication(uchar old_session,uchar new_sessio
   uVar3 = 0x23dfc00000000;
   iVar4 = 0;
   do {
-    (*(int (*)())*(code **)(iVar4 * 4 + (int)((ulonglong)uVar3 >> 0x20) + 0x214c))(old_session,new_session);
+    (*(int (*)())camry_indirect((uint32_t)(((code *)(uintptr_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(iVar4 * 4 + (int)((ulonglong)uVar3 >> 0x20) + 0x214c))))))))(old_session,new_session);
     iVar2 = iVar4 + 1;
     iVar1 = iVar4 + -1;
     iVar4 = iVar2;

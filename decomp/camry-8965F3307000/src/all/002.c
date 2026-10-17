@@ -245,7 +245,7 @@ void f33_boot_ram_dispatch(int param_1)
        ((*((int *)camry_host_ptr((uint32_t)(f33_nvm_family0_read_record + iVar1 * 8 + 0x278)))) == param_1)) break;
     iVar1 = iVar1 + 1;
   }
-  (*(int (*)())*(code **)(f33_nvm_family0_read_record + iVar1 * 8 + 0x27c))();
+  (*(int (*)())camry_indirect((uint32_t)(((code *)(uintptr_t)(*((volatile uint32_t *)(f33_nvm_family0_read_record + iVar1 * 8 + 0x27c)))))))();
   return;
 }
 

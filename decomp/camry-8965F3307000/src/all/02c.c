@@ -235,8 +235,8 @@ void f33_transition_application_mode(ushort new_mode)
 
 {
   if ((DAT_febeb11a < 0xa00) && (new_mode < 0xa00)) {
-    (*(int (*)())f33_mode_family_hooks[DAT_febeb11a >> 8].exit)();
-    (*(int (*)())f33_mode_family_hooks[new_mode >> 8].entry)();
+    (*(int (*)())camry_indirect((uint32_t)(f33_mode_family_hooks[DAT_febeb11a >> 8].exit)))();
+    (*(int (*)())camry_indirect((uint32_t)(f33_mode_family_hooks[new_mode >> 8].entry)))();
     f33_publish_live_application_mode(new_mode);
   }
   return;

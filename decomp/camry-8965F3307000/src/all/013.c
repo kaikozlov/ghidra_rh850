@@ -1412,7 +1412,7 @@ void FUN_0004d1a4(int param_1,uint param_2)
     pFVar1 = pFVar5 + iVar6;
     uVar3 = pFVar1->did;
     if (((pFVar1->route_kind == '\0') && ((uVar3 & 0xff) == 0)) &&
-       (((uintptr_t)(pFVar1->available)==(uintptr_t)(f33_reset_vector)|| (uVar4 = (*(int (*)())pFVar1->available)(), uVar4 == 0x5a))))
+       (((uint32_t)(pFVar1->available) == 0u|| (uVar4 = (*(int (*)())camry_indirect((uint32_t)(pFVar1->available)))(), uVar4 == 0x5a))))
     {
       uVar4 = (int)(uint)uVar3 >> 0xb;
       if (uVar4 < (param_2 & 0xff)) {
@@ -2145,7 +2145,7 @@ uint f33_read_selected_did_payload(uchar *output,ushort length)
   puVar1 = 0xfebeb800u;
   pFVar2 = f33_get_did_publication_metadata(&uStack_e);
   if ((uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x3648)))) < (uint)uStack_e) {
-    uVar3 = (*(int (*)())pFVar2[(*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x3648))))].reader)(output,length);
+    uVar3 = (*(int (*)())camry_indirect((uint32_t)(pFVar2[(*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x3648))))].reader)))(output,length);
   }
   else {
     uVar3 = 3;

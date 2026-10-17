@@ -1063,7 +1063,7 @@ int f33_dispatch_ba_configured_finish(uchar configured_index,uint *response_leng
     iVar2 = -3;
   }
   else {
-    iVar2 = (*(int (*)())f33_ba_operations[configured_index].finish)();
+    iVar2 = (*(int (*)())camry_indirect((uint32_t)(f33_ba_operations[configured_index].finish)))();
     if (-1 < iVar2) {
       *response_length = (uint)f33_ba_operations[configured_index].response_body_length;
       (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58ad))))) = 0x5a;

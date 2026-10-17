@@ -1066,7 +1066,7 @@ void FUN_00074aca(uint param_1)
       }
     }
     FUN_000749fc();
-    (*(int (*)())*(code **)(puVar1 + uVar2 * 4 + 0x3be8))(param_1);
+    (*(int (*)())camry_indirect((uint32_t)(((code *)(uintptr_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(puVar1 + uVar2 * 4 + 0x3be8))))))))(param_1);
   }
   return;
 }

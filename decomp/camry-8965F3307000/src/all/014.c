@@ -5162,8 +5162,8 @@ undefined4 FUN_00053190(uint param_1,char param_2)
     }
     if ((*((int *)camry_host_ptr((uint32_t)(iVar3 + 4)))) != 0) {
       uVar2 = 0x5a;
-      if ((uintptr_t)(*(code **)(iVar1 + 0x10))!=(uintptr_t)(f33_reset_vector)) {
-        uVar2 = (*(int (*)())*(code **)(iVar1 + 0x10))();
+      if ((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(iVar1 + 0x10))))) != 0u) {
+        uVar2 = (*(int (*)())camry_indirect((uint32_t)(((code *)(uintptr_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(iVar1 + 0x10))))))))();
       }
     }
   }
