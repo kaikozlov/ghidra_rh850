@@ -715,6 +715,18 @@ uint32_t f33_icus20_read_bit0(void) {
     return value != 0u ? 1u : 0u;
 }
 
+uint32_t f33_faci_decode_completion_status(void) {
+    uint32_t fstatr;
+    if ((camry_read8(0xffa100d4u) & 1u) != 0u && camry_read8(0xfebf6cacu) == 3u)
+        return 5u;
+    fstatr = camry_read32(0xffa10080u);
+    if ((fstatr << 10) != 0u)
+        return 3u;
+    if ((fstatr & 0x2000u) != 0u)
+        return 4u;
+    return 0u;
+}
+
 uint32_t f33_nvm_lookup_byte_result(uint32_t key, uint32_t rows, uint32_t row_count) {
     uint32_t narrowed = key & 0xffu;
     uint32_t index = 0;

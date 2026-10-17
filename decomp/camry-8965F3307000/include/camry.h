@@ -112,6 +112,7 @@ void f33_nvm_set_secondary_result_state(uint32_t state);
 uint32_t f33_nvm_get_secondary_result(void);
 uint32_t f33_nvm_get_direct_operation_result(void);
 uint32_t f33_icus20_read_bit0(void);
+uint32_t f33_faci_decode_completion_status(void);
 uint32_t f33_nvm_lookup_byte_result(uint32_t key, uint32_t rows, uint32_t row_count);
 uint32_t f33_nvm_translate_read_driver_result(uint32_t driver_result);
 uint32_t f33_nvm_translate_saved_driver_result(void);

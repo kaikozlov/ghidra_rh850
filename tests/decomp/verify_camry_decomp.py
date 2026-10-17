@@ -83,6 +83,7 @@ VALUE_RETURN = {
     "f33_nvm_step_initial_read_acquisition",
     "f33_nvm_step_acquisition_pass",
     "FUN_00077982",
+    "f33_faci_decode_completion_status",
 }
 
 DCRA1_BASE = 0xFFD51000
@@ -190,6 +191,8 @@ def bind(library: ctypes.CDLL) -> None:
     library.f33_nvm_set_secondary_result_state.restype = None
     library.f33_icus20_read_bit0.argtypes = []
     library.f33_icus20_read_bit0.restype = u32
+    library.f33_faci_decode_completion_status.argtypes = []
+    library.f33_faci_decode_completion_status.restype = u32
     library.f33_nvm_lookup_byte_result.argtypes = [u32, u32, u32]
     library.f33_nvm_lookup_byte_result.restype = u32
     library.f33_nvm_translate_read_driver_result.argtypes = [u32]
@@ -521,6 +524,8 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
         return None
     if name == "f33_icus20_read_bit0":
         return int(library.f33_icus20_read_bit0()) & 0xFFFFFFFF
+    if name == "f33_faci_decode_completion_status":
+        return int(library.f33_faci_decode_completion_status()) & 0xFFFFFFFF
     if name == "f33_nvm_lookup_byte_result":
         return int(library.f33_nvm_lookup_byte_result(r6, r7, r8)) & 0xFFFFFFFF
     if name == "f33_nvm_translate_saved_driver_result":

@@ -93,3 +93,4 @@
 {"addr": "0x66b16", "name": "f33_nvm_step_acquisition_pass", "status": "equivalent"}
 {"addr": "0x66b96", "name": "f33_nvm_run_bounded_initial_acquisition", "status": "equivalent"}
 {"addr": "0x77982", "name": "FUN_00077982", "status": "equivalent"}
+{"addr": "0x79044", "name": "f33_faci_decode_completion_status", "status": "equivalent"}
