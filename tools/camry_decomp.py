@@ -4159,6 +4159,8 @@ def _common_header(text: str, signatures: dict[str, str]) -> str:
         ("stop_pending", 0x3EC1),
         ("running_software_state", 0x57A8),
         ("stopped_software_state", 0x6B94),
+        ("initialized", 0x6D92),
+        ("uninitialized", 0x6E91),
     ):
         if name not in function_names and re.search(rf"\b{name}\b", text):
             lines.append(f"#define {name} 0x{value:x}")

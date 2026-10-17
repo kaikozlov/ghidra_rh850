@@ -4508,6 +4508,67 @@ void FUN_00083f30(void)
 
 
 
+void FUN_00083f3e(void)
+
+{
+  uint32_t puVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  int iVar4;
+  uint uVar5;
+  
+  puVar1 = 0xfebeb800u;
+  puVar2 = 0x23dfcu;
+  uVar5 = (uint)DAT_00022e41;
+  for (uVar3 = 0; uVar3 < uVar5; uVar3 = uVar3 + 1 & 0xff) {
+    f33_driver_channel_software_states[uVar3] = uninitialized;
+  }
+  FUN_000850c2();
+  FUN_0008359c();
+  iVar4 = FUN_00084652();
+  uVar3 = 0;
+  if (iVar4 == 0) {
+    for (; uVar3 < uVar5; uVar3 = uVar3 + 1 & 0xff) {
+      if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(uVar3 * 4 + -4000))))) == '\0') {
+        (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + uVar3 * 2 + -0x67e0)))) = 0x6d92;
+      }
+    }
+  }
+  return;
+}
+
+
+
+undefined4 FUN_00083f9a(uint param_1)
+
+{
+  int iVar1;
+  
+  param_1 = param_1 & 0xff;
+  if (f33_driver_channel_software_states[param_1] == initialized) {
+    iVar1 = FUN_00084760(param_1);
+    if (iVar1 != 0) {
+      return 2;
+    }
+    iVar1 = ((void)(param_1), f33_return_const_1_83c98());
+    if (iVar1 != 1) {
+      return 1;
+    }
+    FUN_000835c6(param_1);
+    ((void)(param_1), FUN_00084fea());
+    f33_driver_channel_software_states[param_1] = stopped_software_state;
+  }
+  else {
+    if (f33_driver_channel_software_states[param_1] != stopped_software_state) {
+      return 1;
+    }
+    FUN_000837ac(param_1);
+  }
+  return 0;
+}
+
+
+
 /* 0start/1stop;stage3BC4/3EC1beforephysicalhelpers;return0includespending.
    Commit57A8/6B94onlyafterzerohelperresult;7FB5Cindicationisempty. */
 

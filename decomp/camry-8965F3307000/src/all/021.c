@@ -112,6 +112,17 @@ bool FUN_000841e6(undefined1 param_1,undefined2 param_2)
 
 
 
+bool FUN_000841fc(uint param_1)
+
+{
+  if (f33_driver_channel_software_states[param_1 & 0xff] != initialized) {
+    return f33_driver_channel_software_states[param_1 & 0xff] != stopped_software_state;
+  }
+  return false;
+}
+
+
+
 void FUN_00084274(uint param_1)
 
 {

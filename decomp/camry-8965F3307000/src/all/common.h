@@ -2362,12 +2362,14 @@ _Static_assert(sizeof(RSCFD_CFSTS) == 4, "cfsts");
 #define f33_nvm_family0_ram_descriptors ((volatile F33NvmFamily0RamDescriptor *)camry_host_ptr(0x2ad8cu))
 #define f33_nvm_family0_read_record ((volatile uint8_t *)camry_host_ptr(0xfebf0c88u))
 #define f33_nvm_family0_request_cell_count (*((volatile uint8_t *)camry_host_ptr(0x2ad8au)))
+#define f33_nvm_family0_request_cells ((volatile F33NvmRequestCell *)camry_host_ptr(0xfebf0488u))
 #define f33_nvm_family0_request_consumer (*((volatile uint8_t *)camry_host_ptr(0xfebf067bu)))
 #define f33_nvm_family0_request_producer (*((volatile uint8_t *)camry_host_ptr(0xfebf067au)))
 #define f33_nvm_family0_scan_cursor (*((volatile uint16_t *)camry_host_ptr(0xfebf0676u)))
 #define f33_nvm_family0_selected_logical_handles ((volatile uint16_t *)camry_host_ptr(0xfebf0368u))
 #define f33_nvm_family0_sequences ((volatile uint32_t *)camry_host_ptr(0xfebf03a8u))
 #define f33_nvm_family0_span_request (*((volatile uint8_t *)camry_host_ptr(0xfebf067eu)))
+#define f33_nvm_family0_status ((volatile uint8_t *)camry_host_ptr(0xfebf0308u))
 #define f33_nvm_family0_write_record ((volatile uint8_t *)camry_host_ptr(0xfebf0708u))
 #define f33_nvm_family1_active_object (*((volatile uint16_t *)camry_host_ptr(0xfebf068cu)))
 #define f33_nvm_family1_busy (*((volatile uint8_t *)camry_host_ptr(0xfebf0691u)))
@@ -2381,6 +2383,7 @@ _Static_assert(sizeof(RSCFD_CFSTS) == 4, "cfsts");
 #define f33_nvm_family1_scan_cursor (*((volatile uint16_t *)camry_host_ptr(0xfebf068eu)))
 #define f33_nvm_family1_span_request (*((volatile uint8_t *)camry_host_ptr(0xfebf0688u)))
 #define f33_nvm_family1_write_stage (*((volatile F33NvmCopyStage *)camry_host_ptr(0xfebf06a8u)))
+#define f33_nvm_family2_descriptors ((volatile F33NvmFamily2Descriptor *)camry_host_ptr(0x2af8cu))
 #define f33_nvm_family2_object_count (*((volatile uint16_t *)camry_host_ptr(0x2ad74u)))
 #define f33_nvm_initial_read_token (*((volatile uint8_t *)camry_host_ptr(0xfebf0692u)))
 #define f33_nvm_logical_application_routes ((volatile F33NvmApplicationRoute *)camry_host_ptr(0x2b010u))
@@ -11611,6 +11614,8 @@ extern volatile uint32_t ICCTRL;
 #define stop_pending 0x3ec1
 #define running_software_state 0x57a8
 #define stopped_software_state 0x6b94
+#define initialized 0x6d92
+#define uninitialized 0x6e91
 typedef union { uint32_t raw; struct { uint32_t BUSY:1; uint32_t _pad:31; }; } ICUS_Status;
 typedef union { uint32_t raw; struct { uint32_t CMD:8; uint32_t reserved_8_15:8; uint32_t KEY_SLOT:16; }; } ICUS_Command;
 #define Ramffc0a000 (*((volatile uint32_t *)camry_host_ptr(0xffc0a000u)))

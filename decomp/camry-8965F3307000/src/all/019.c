@@ -3987,6 +3987,40 @@ void thunk_FUN_00068318(void)
 
 
 
+/* For each registered family2 descriptor, clear setter flag, publish00/55/AA status and zero
+   payload whole words in RAM. Preserve gaps and trailing bytes. No ROM-default copy or CRC
+   computation. */
+
+void f33_nvm_initialize_family2_ram(void)
+
+{
+  ushort uVar1;
+  uint uVar2;
+  int iVar3;
+  undefined8 uVar4;
+  uint *puVar5;
+  int iVar6;
+  
+  uVar4 = 0xfebeb800;
+  for (iVar6 = 0;
+      (int)(iVar6 - (uint)f33_nvm_family2_object_count) < 0 !=
+      (iVar6 < 0 && -1 < (int)(iVar6 - (uint)f33_nvm_family2_object_count)); iVar6 = iVar6 + 1) {
+    iVar3 = (int)uVar4;
+    (*((undefined1 *)camry_host_ptr((uint32_t)(iVar6 + iVar3 + 0x4e5b)))) = 0;
+    f33_publish_redundant_u8
+              ('\0',((uchar *)camry_host_ptr((uint32_t)(iVar3 + 0x4e50 + iVar6))),((uchar *)camry_host_ptr((uint32_t)(iVar3 + 0x5898 + iVar6))),
+               ((uchar *)camry_host_ptr((uint32_t)(iVar3 + 0x58bc + iVar6))));
+    uVar1 = f33_nvm_family2_descriptors[iVar6].payload_bytes;
+    puVar5 = ((void *)camry_host_ptr((uint32_t)(f33_nvm_family2_descriptors[iVar6].ram_buffer)));
+    for (uVar2 = 0; uVar2 < uVar1 >> 2; uVar2 = uVar2 + 1 & 0xffff) {
+      puVar5[uVar2] = 0;
+    }
+  }
+  return;
+}
+
+
+
 /* For11 groups, repair status triplet with fallback30. Exact10 bypasses CRC; other values
    call67090, retry exactly once only on non10, then publish last status across all planes. Real
    all-recompute sweep publishes10,30,10,30,10,10,10,10,10,10,10 with399 CIN writes. Status10 bypass
@@ -4024,6 +4058,32 @@ void f33_nvm_refresh_family2_status(void)
 
 
 
+/* Low16 object bound before source. Copy payload whole words into descriptor RAM, set flag5A and
+   publish10/45/BA. Return1, invalid0. No ROM CRC or flash programming; no flag reader recovered. */
+
+uint f33_nvm_set_family2_record(uint object,uint *source)
+
+{
+  uint uVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  
+  puVar2 = 0xfebeb800u;
+  uVar3 = object & 0xffff;
+  uVar1 = (uint)f33_nvm_family2_object_count;
+  if (uVar3 < uVar1) {
+    f33_copy_whole_words
+              (((uint32_t *)camry_host_ptr((uint32_t)(f33_nvm_family2_descriptors[uVar3].ram_buffer))), source, 
+               f33_nvm_family2_descriptors[uVar3].payload_bytes);
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(uVar3 + 0x4e5b))))) = 0x5a;
+    f33_publish_redundant_u8
+              ('\x10', ((undefined *)camry_host_ptr((uint32_t)(puVar2 + uVar3 + 0x4e50))), ((undefined *)camry_host_ptr((uint32_t)(puVar2 + uVar3 + 0x5898))), ((undefined *)camry_host_ptr((uint32_t)(puVar2 + uVar3 + 0x58bc))));
+  }
+  return (uint)(uVar3 < uVar1);
+}
+
+
+
 /* If FLMDCNT.bit0 is clear, return. Otherwise enter PMRFFFF, attempt at most three A5/0/FFFFFFFF/0
    protected sequences, read back control, SYNCP and inspect FLMDPS.bit0; restore prior PMR. No
    final success result. Manual pp2869-2874 identifies internal pull control, not actual pin level
@@ -4056,12 +4116,83 @@ void f33_select_flmd0_internal_pulldown(void)
 
 
 
+void FUN_000672c0(void)
+
+{
+  uchar *puVar1;
+  ushort uVar2;
+  int iVar3;
+  uchar *puVar4;
+  uint uVar5;
+  
+  for (iVar3 = 0;
+      (int)(iVar3 - (uint)f33_nvm_family0_request_cell_count) < 0 !=
+      (iVar3 < 0 && -1 < (int)(iVar3 - (uint)f33_nvm_family0_request_cell_count)); iVar3 = iVar3 + 1
+      ) {
+    f33_nvm_family0_request_cells[iVar3].object = 0xffff;
+    f33_nvm_family0_request_cells[iVar3].state = 0xff;
+  }
+  for (iVar3 = 0;
+      (int)(iVar3 - (uint)f33_nvm_family0_object_count) < 0 !=
+      (iVar3 < 0 && -1 < (int)(iVar3 - (uint)f33_nvm_family0_object_count)); iVar3 = iVar3 + 1) {
+    f33_nvm_family0_status[iVar3] = '\0';
+    uVar2 = f33_nvm_family0_ram_descriptors[iVar3].payload_bytes;
+    puVar4 = ((void *)camry_host_ptr((uint32_t)(f33_nvm_family0_ram_descriptors[iVar3].buffer)));
+    for (uVar5 = 0; uVar5 < uVar2 >> 2; uVar5 = uVar5 + 1 & 0xffff) {
+      puVar1 = puVar4 + uVar5 * 4;
+      puVar1[0] = '\0';
+      puVar1[1] = '\0';
+      puVar1[2] = '\0';
+      puVar1[3] = '\0';
+    }
+  }
+  f33_nvm_family0_probe_offset = 0;
+  f33_nvm_family0_scan_cursor = 0;
+  DAT_febf0684 = 0;
+  f33_nvm_family0_active_object = 0xffff;
+  f33_nvm_family0_phase = '\0';
+  DAT_febf067f = 0;
+  f33_nvm_family0_span_request = '\0';
+  f33_nvm_family0_classification_latch = '\0';
+  DAT_febf067c = 0;
+  f33_nvm_family0_request_consumer = '\0';
+  f33_nvm_family0_request_producer = '\0';
+  return;
+}
+
+
+
 void FUN_00067346(void)
 
 {
   f33_nvm_family0_scan_cursor = 0;
   f33_nvm_family0_probe_offset = 0;
   return;
+}
+
+
+
+/* Scan all65 object halfwords at048A+4*i for low16 object; return1 on first match else0. Ignore
+   state, queue indices and empty sentinel meaning. Native duplicate outside the active interval
+   overrides the selector's status even when that cell's state isFF. Scan all65 object halfwords
+   at048A+4*i for low16 requested object; return1 first match else0. Ignore state and
+   producer/consumer indices. Real selector sees a stateFF duplicate outside the active interval and
+   overrides status32 to20. No local object bound or special FFFF interpretation. */
+
+uint f33_nvm_family0_has_request_cell(ushort object)
+
+{
+  uint uVar1;
+  
+  uVar1 = 0;
+  while( true ) {
+    if (f33_nvm_family0_request_cell_count <= uVar1) {
+      return 0;
+    }
+    if (f33_nvm_family0_request_cells[uVar1].object == object) break;
+    uVar1 = uVar1 + 1 & 0xff;
+  }
+  return 1;
 }
 
 
@@ -4368,6 +4499,24 @@ bool FUN_00067894(void)
   }
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(0x4e7e))))) = uVar1;
   return uStack_6 == uStack_5;
+}
+
+
+
+undefined4 FUN_00067984(void)
+
+{
+  uint uVar1;
+  
+  uVar1 = 0;
+  while( true ) {
+    if (f33_nvm_family0_object_count <= uVar1) {
+      return 1;
+    }
+    if ((f33_nvm_family0_status[uVar1] & 0xf0) == 0x20) break;
+    uVar1 = uVar1 + 1 & 0xffff;
+  }
+  return 0;
 }
 
 
