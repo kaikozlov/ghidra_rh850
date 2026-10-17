@@ -15,8 +15,9 @@ tools/test camry_decomp
 map. `oracles.jsonl` is the retained machine scenarios of the original bytes,
 one JSON object per line, with the old per-scenario essays removed.
 
-Add a function by writing C, adding its address to `matched.jsonl`, and
-checking it against the oracles whose memory and return values are that
-function's contract. Peripheral-rejection scenarios stay in `oracles.jsonl`
+`tools/decomp corpus` compiles decompiler bodies into `src/corpus.c` and
+appends a function to `matched.jsonl` only after its retained oracles pass.
+Hand-written C is listed the same way: add the function, its address, and
+check the oracles whose memory and return values are that function's contract. Peripheral-rejection scenarios stay in `oracles.jsonl`
 as original-byte evidence; they are not a substitute for the C. Do not add
 a coverage ledger, a review spreadsheet, or a narrative section either.

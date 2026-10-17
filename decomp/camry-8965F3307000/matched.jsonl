@@ -94,3 +94,5 @@
 {"addr": "0x66b96", "name": "f33_nvm_run_bounded_initial_acquisition", "status": "equivalent"}
 {"addr": "0x77982", "name": "FUN_00077982", "status": "equivalent"}
 {"addr": "0x79044", "name": "f33_faci_decode_completion_status", "status": "equivalent"}
+{"addr": "0x4a298", "name": "f33_update_internal_source_admission_lifecycle", "status": "equivalent", "form": "corpus"}
+{"addr": "0xb451a", "name": "f33_update_health_status_delay_summaries", "status": "equivalent", "form": "corpus"}
