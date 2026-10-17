@@ -287,7 +287,7 @@ def _rewrite_indexed(code: str) -> str:
             end = _match_bracket(code, match.end() - 1)
         except ValueError:
             continue
-        index = code[match.end():end]
+        index = _rewrite_indexed(code[match.end():end])
         addr = int(match.group(2), 16)
         scale = _access_widths().get(addr, 1)
         if scale not in widths:
@@ -302,10 +302,126 @@ def _rewrite_indexed(code: str) -> str:
     return "".join(pieces)
 
 
-def _rewrite_addresses(code: str) -> str:
+_ADDR_TOKEN = re.compile(r"&(?:LAB|DAT|UNK)_([0-9A-Fa-f]+)")
+
+
+def _compare_after(code: str, index: int) -> tuple[str | None, int]:
+    index = _skip_space(code, index)
+    for op in ("<=", ">=", "==", "!="):
+        if code.startswith(op, index):
+            return op, index
+    if index < len(code) and code[index] in "<>":
+        nxt = code[index + 1] if index + 1 < len(code) else ""
+        if nxt not in "<=>":
+            return code[index], index
+    return None, index
+
+
+def _compare_before(code: str, index: int) -> tuple[str | None, int]:
+    index -= 1
+    while index >= 0 and code[index] in " \t\n\r":
+        index -= 1
+    if index < 0:
+        return None, index
+    if index >= 1 and code[index - 1:index + 1] in ("<=", ">=", "==", "!="):
+        return code[index - 1:index + 1], index - 1
+    if code[index] in "<>" and (index == 0 or code[index - 1] not in "<>"):
+        return code[index], index
+    return None, index
+
+
+def _expr_end_bound(code: str, start: int) -> int:
+    depth = 0
+    index = _skip_space(code, start)
+    while index < len(code):
+        if code.startswith(("<<", ">>"), index):
+            index += 2
+            continue
+        char = code[index]
+        if char in "([{":
+            depth += 1
+        elif char in ")]}":
+            if depth == 0:
+                break
+            depth -= 1
+        elif depth == 0 and (
+            char in ";,?:<>"
+            or code.startswith("||", index)
+            or code.startswith("&&", index)
+            or code.startswith("==", index)
+            or code.startswith("!=", index)
+        ):
+            break
+        index += 1
+    return index
+
+
+def _expr_before(code: str, op_index: int) -> str:
+    depth = 0
+    start = op_index
+    index = op_index
+    while index > 0:
+        index -= 1
+        if code.startswith(("<<", ">>"), index):
+            start = index
+            continue
+        char = code[index]
+        if char in ")]}":
+            depth += 1
+        elif char in "([{":
+            if depth == 0:
+                start = index + 1
+                break
+            depth -= 1
+        elif depth == 0 and (
+            char in ";,?:<>"
+            or (index > 0 and code.startswith(("||", "&&", "==", "!="), index - 1))
+        ):
+            start = index + 1
+            break
+        start = index
+    return code[start:op_index]
+
+
+def _address_compared_as_integer(code: str, match: re.Match[str], pointers: set[str]) -> bool:
+    _op, op_at = _compare_after(code, match.end())
+    if _op is not None:
+        end = _expr_end_bound(code, op_at + len(_op))
+        operand = code[op_at + len(_op):end].strip()
+        if operand and not _is_pointer_expr(operand, pointers):
+            return True
+    _op, op_at = _compare_before(code, match.start())
+    if _op is not None:
+        operand = _expr_before(code, op_at).strip()
+        if operand and not _is_pointer_expr(operand, pointers):
+            return True
+    return False
+
+
+def _rewrite_address_compares(code: str, pointers: set[str]) -> str:
+    pieces: list[str] = []
+    cursor = 0
+    for match in _ADDR_TOKEN.finditer(code):
+        if match.start() < cursor:
+            continue
+        try:
+            integer = _address_compared_as_integer(code, match, pointers)
+        except ValueError:
+            integer = False
+        if not integer:
+            continue
+        pieces.append(code[cursor:match.start()])
+        pieces.append(f"0x{int(match.group(1), 16):x}u")
+        cursor = match.end()
+    pieces.append(code[cursor:])
+    return "".join(pieces)
+
+
+def _rewrite_addresses(code: str, pointers: set[str]) -> str:
     def integer_cast(match: re.Match[str]) -> str:
         return f"({match.group(1)})0x{int(match.group(2), 16):x}u"
 
+    code = _rewrite_address_compares(code, pointers)
     code = re.sub(
         r"\((unsigned int|int|uint|undefined4|ulong|long)\)\s*"
         r"&(?:LAB|DAT|UNK)_([0-9A-Fa-f]+)",
@@ -314,7 +430,7 @@ def _rewrite_addresses(code: str) -> str:
     )
     return re.sub(
         r"&(?:LAB|DAT|UNK)_([0-9A-Fa-f]+)",
-        lambda match: f"((void *)camry_host_ptr(0x{int(match.group(1), 16):x}u))",
+        lambda match: f"((undefined *)camry_host_ptr(0x{int(match.group(1), 16):x}u))",
         code,
     )
 
@@ -419,15 +535,74 @@ def _rewrite_int_to_pointer(code: str, pointers: set[str]) -> str:
     return "".join(pieces)
 
 
+def _returns_pointer(signature: str) -> bool:
+    return "*" in signature.split("(", 1)[0]
+
+
+def _rewrite_pointer_calls(code: str, pointers: set[str]) -> str:
+    returns = _pointer_return_names()
+    pieces: list[str] = []
+    cursor = 0
+    pattern = re.compile(
+        r"\b([A-Za-z_][A-Za-z0-9_]*)\s*=\s*([A-Za-z_][A-Za-z0-9_]*)\s*\("
+    )
+    for match in pattern.finditer(code):
+        if match.start() < cursor:
+            continue
+        lhs, callee = match.group(1), match.group(2)
+        if lhs in pointers or callee not in returns:
+            continue
+        equals = code.find("=", match.start())
+        if equals > 0 and code[equals - 1] in "=!<>":
+            continue
+        try:
+            close = _match_paren(code, match.end() - 1)
+        except ValueError:
+            continue
+        pieces.append(code[cursor:match.start()])
+        pieces.append(f"{lhs} = camry_host_addr({callee}{code[match.end() - 1:close + 1]})")
+        cursor = close + 1
+    pieces.append(code[cursor:])
+    return "".join(pieces)
+
+
+def _rewrite_function_indexes(code: str) -> str:
+    entries = _function_entries()
+    pieces: list[str] = []
+    cursor = 0
+    pattern = re.compile(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\[")
+    for match in pattern.finditer(code):
+        if match.start() < cursor:
+            continue
+        addr = entries.get(match.group(1))
+        if addr is None:
+            continue
+        try:
+            end = _match_bracket(code, match.end() - 1)
+        except ValueError:
+            continue
+        index = code[match.end():end]
+        pieces.append(code[cursor:match.start()])
+        pieces.append(
+            "(*((volatile uint8_t *)camry_host_ptr((uint32_t)"
+            f"(0x{addr:x}u + (uint32_t)({index})))))"
+        )
+        cursor = end + 1
+    pieces.append(code[cursor:])
+    return "".join(pieces)
+
+
 def _rewrite_body(code: str) -> str:
     signature = _c_signature(code)
     pointers = _pointer_names(signature, code)
     code = _IDIOM.sub(r"((\1 < 0) || (\2 < 0))", code)
     code = _rewrite_indexed(code)
-    code = _rewrite_addresses(code)
-    code = _rewrite_named_addresses(code)
+    code = _rewrite_addresses(code, pointers)
+    code = _rewrite_named_addresses(code, pointer_return=_returns_pointer(signature))
     code = _rewrite_pointer_to_int(code, pointers)
     code = _rewrite_int_to_pointer(code, pointers)
+    code = _rewrite_pointer_calls(code, pointers)
+    code = _rewrite_function_indexes(code)
     return code
 
 
@@ -498,7 +673,7 @@ def _absolute_names() -> dict[str, int]:
     return names
 
 
-def _rewrite_named_addresses(code: str) -> str:
+def _rewrite_named_addresses(code: str, *, pointer_return: bool = False) -> str:
     names = _absolute_names()
 
     def replace(match: re.Match[str]) -> str:
@@ -507,7 +682,48 @@ def _rewrite_named_addresses(code: str) -> str:
             return match.group(0)
         return f"(0x{addr:x}u)"
 
+    if pointer_return:
+        def returned(match: re.Match[str]) -> str:
+            addr = names.get(match.group(1))
+            if addr is None:
+                return match.group(0)
+            return f"return ((undefined *)camry_host_ptr(0x{addr:x}u))"
+
+        code = re.sub(r"return\s+&([A-Za-z_][A-Za-z0-9_]*)\b", returned, code)
     return re.sub(r"&([A-Za-z_][A-Za-z0-9_]*)\b", replace, code)
+
+
+_FUNCTION_ENTRIES: dict[str, int] | None = None
+_POINTER_RETURNS: set[str] | None = None
+
+
+def _corpus_functions() -> list[dict]:
+    from tools.project.analysis_target import target as resolve_target
+    from tools.project.pseudo import load_corpus
+
+    metadata = resolve_target(TARGET)[1]
+    _meta, functions = load_corpus(REPO_ROOT / metadata["decompiler_corpus"])
+    return functions
+
+
+def _function_entries() -> dict[str, int]:
+    global _FUNCTION_ENTRIES
+    if _FUNCTION_ENTRIES is None:
+        _FUNCTION_ENTRIES = {
+            row["name"]: int(row["entry_addr"], 16) for row in _corpus_functions()
+        }
+    return _FUNCTION_ENTRIES
+
+
+def _pointer_return_names() -> set[str]:
+    global _POINTER_RETURNS
+    if _POINTER_RETURNS is None:
+        _POINTER_RETURNS = {
+            row["name"]
+            for row in _corpus_functions()
+            if _returns_pointer(_c_signature(row["decompiled_c"]))
+        }
+    return _POINTER_RETURNS
 
 
 _ACCESS_WIDTHS: dict[int, int] | None = None

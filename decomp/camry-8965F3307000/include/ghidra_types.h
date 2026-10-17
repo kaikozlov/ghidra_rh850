@@ -10,6 +10,7 @@
 
 typedef uint8_t byte;
 typedef uint8_t uchar;
+typedef uint8_t code;
 typedef uint8_t undefined;
 typedef uint8_t undefined1;
 typedef uint16_t undefined2;
