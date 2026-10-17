@@ -94,7 +94,7 @@ REASONS = {
     "stack-arguments": "the converted signature has more than four parameters, which the host check does not pass",
     "fallthrough": "execution leaves the function without returning through lp",
     "instruction-budget": "the closure did not return within 20000 instructions",
-    "region-cap": "the host check has eight regions and codeflash plus dataflash already use two; the remaining accesses do not fit",
+    "region-cap": "the host check has eight regions and codeflash plus dataflash already use two; accesses outside the merged local and global RAM banks do not fit",
     "no-observable": "the bytes do not write r10 or caller-visible memory, and the unchanged local-RAM scratch does not fit the host region cap",
     "uninitialized-read": "the machine read a byte the harness did not initialize",
     "simulator": "the P1M-E machine did not return a report for this scenario",
@@ -828,8 +828,19 @@ def _clusters(spans: list[tuple[int, int]], gap: int) -> list[tuple[int, int]]:
     return packed
 
 
+def _span(spans: list[tuple[int, int]]) -> tuple[int, int] | None:
+    if not spans:
+        return None
+    start = min(addr for addr, _size in spans)
+    end = max(addr + size for addr, size in spans)
+    return start, end - start
+
+
 def _windows(runs: list[Run], pointers: list[bool] | None = None) -> list[tuple[int, int]]:
-    reads: list[tuple[int, int]] = []
+    """One window per RAM bank. Separate clusters overflow the host's eight regions."""
+    local: list[tuple[int, int]] = []
+    glob: list[tuple[int, int]] = []
+    other: list[tuple[int, int]] = []
     stack = False
     arg = False
     for run in runs:
@@ -838,11 +849,14 @@ def _windows(runs: list[Run], pointers: list[bool] | None = None) -> list[tuple[
                 stack = True
             elif ARG_BASE <= addr and addr + size <= ARG_BASE + ARG_COUNT * ARG_STRIDE:
                 arg = True
+            elif _space(addr, size) == "local":
+                local.append((addr, size))
+            elif _space(addr, size) == "global":
+                glob.append((addr, size))
             else:
-                reads.append((addr, size))
-    windows = []
+                other.append((addr, size))
     if stack:
-        windows.append((STACK_LO, STACK_HI - STACK_LO))
+        local.append((STACK_LO, STACK_HI - STACK_LO))
     pointer_slots = [
         ARG_BASE + index * ARG_STRIDE
         for index, is_pointer in enumerate(pointers or [])
@@ -858,11 +872,12 @@ def _windows(runs: list[Run], pointers: list[bool] | None = None) -> list[tuple[
         touched.extend(pointer_slots)
         last = max(touched)
         slot = (last - ARG_BASE) // ARG_STRIDE + 1
-        windows.append((ARG_BASE, slot * ARG_STRIDE))
-    packed = _clusters(reads, 16)
+        local.append((ARG_BASE, slot * ARG_STRIDE))
+    windows = [window for window in (_span(local), _span(glob)) if window is not None]
+    packed = _clusters(other, 16)
     if len(windows) + len(packed) > 6 and packed:
-        start = min(addr for addr, _size in reads)
-        end = max(addr + size for addr, size in reads)
+        start = min(addr for addr, _size in other)
+        end = max(addr + size for addr, size in other)
         if end - start <= 0x2000:
             packed = [(start, end - start)]
     if len(windows) + len(packed) > 6:
@@ -1083,6 +1098,21 @@ def _c_calls(body: str) -> set[str]:
         name for name in re.findall(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\(", body)
         if name not in _CALL_WORDS
     }
+
+
+def _body_closure(roots: list[str], bodies: dict[str, str]) -> list[str]:
+    """Functions the host must link, including calls the scenario did not take."""
+    needed: list[str] = []
+    seen: set[str] = set()
+    pending = list(roots)
+    while pending:
+        name = pending.pop()
+        if name in seen or name not in bodies:
+            continue
+        seen.add(name)
+        needed.append(name)
+        pending.extend(callee for callee in _c_calls(bodies[name]) if callee not in seen)
+    return needed
 
 
 def _defined_lines(text: str) -> set[str]:
@@ -1564,14 +1594,7 @@ def run_oracles() -> int:
 
     focus["addr"] = None
     print(f"harnessed {len(planned)}", flush=True)
-    needed = []
-    for item in planned:
-        for address in item.calls | {item.address}:
-            fn = functions.get(address)
-            if fn is None or fn.name not in bodies:
-                continue
-            if fn.name not in needed:
-                needed.append(fn.name)
+    needed = _body_closure([item.name for item in planned], bodies)
     # Keep only roots whose whole executed closure is in the compiled set.
     dropped: set[str] = set()
     with tempfile.TemporaryDirectory(prefix="camry-oracle-") as directory:
