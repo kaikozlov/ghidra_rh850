@@ -24,6 +24,7 @@ from tools.camry_decomp import (
     ROOT,
     _c_signature,
     _prototype_names,
+    _stmt_parts,
     load_matched,
     load_symbols,
 )
@@ -798,6 +799,50 @@ def _params_of(signature: str, name: str) -> list[bool]:
     if len(params) > 4:
         raise Harness("stack-arguments")
     return ["*" in param for param in params]
+
+
+def _pointer_bases(fn, pointers: list[bool]) -> list[bool]:
+    """An integer parameter the bytes use as an address still needs a mapped buffer."""
+    pointed = list(pointers)
+    origin: dict[int, int] = {}
+    memory = {"ld8s", "ld8u", "ld16s", "ld16u", "ld32", "st8", "st16", "st32"}
+    for inst in fn.insts:
+        parsed = _stmt_parts(inst.stmt) if inst.stmt else None
+        if parsed is None:
+            continue
+        name, args = parsed
+        if name == "mov" and len(args) >= 2 and isinstance(args[0], int):
+            src = args[1]
+            origin[args[0]] = origin.get(src, src) if isinstance(src, int) else -1
+            continue
+        if name == "add" and len(args) >= 2 and isinstance(args[0], int):
+            src = origin.get(args[1], args[1]) if isinstance(args[1], int) else -1
+            dst = origin.get(args[0], args[0])
+            if isinstance(src, int) and 6 <= src <= 9:
+                origin[args[0]] = src
+            elif isinstance(dst, int) and 6 <= dst <= 9:
+                origin[args[0]] = dst
+            else:
+                origin.pop(args[0], None)
+            continue
+        base = None
+        if name in memory and len(args) >= 2 and isinstance(args[1], int):
+            base = args[1]
+        elif name in {"set1", "not1", "clr1", "tst1"} and args and isinstance(args[0], int):
+            base = args[0]
+        if base is not None:
+            src = origin.get(base, base)
+            if isinstance(src, int) and 6 <= src <= 9:
+                index = src - 6
+                if index < len(pointed):
+                    pointed[index] = True
+        if (
+            args
+            and isinstance(args[0], int)
+            and name not in {"st8", "st16", "st32", "cmp", "cmpi", "mov", "add"}
+        ):
+            origin.pop(args[0], None)
+    return pointed
 
 
 def _return_width(return_type: str) -> int:
@@ -1834,7 +1879,7 @@ def run_oracles() -> int:
             continue
         try:
             signature = _c_signature(body)
-            pointers = _params_of(signature, name)
+            pointers = _pointer_bases(fn, _params_of(signature, name))
         except (AssertionError, Harness, ValueError) as exc:
             reject(getattr(exc, "kind", "stack-arguments"), name, getattr(exc, "detail", ""))
             continue
