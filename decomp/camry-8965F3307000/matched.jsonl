@@ -81,3 +81,4 @@
 {"addr": "0x3acc4", "name": "f33_update_thermal_history_qualification", "status": "equivalent"}
 {"addr": "0x7324c", "name": "f33_nvm_initialize_queues", "status": "equivalent"}
 {"addr": "0x73260", "name": "f33_nvm_reset_queues_notifying", "status": "equivalent"}
+{"addr": "0x7358c", "name": "f33_nvm_pop_queue_head", "status": "equivalent"}

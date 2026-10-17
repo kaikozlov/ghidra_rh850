@@ -133,3 +133,4 @@ void f33_update_thermal_release_envelope(void);
 void f33_update_thermal_history_qualification(void);
 void f33_nvm_initialize_queues(void);
 void f33_nvm_reset_queues_notifying(void);
+uint32_t f33_nvm_pop_queue_head(uint32_t queue, uint32_t index);

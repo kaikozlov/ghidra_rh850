@@ -2056,3 +2056,46 @@ void f33_nvm_reset_queues_notifying(void) {
     f33_nvm_reset_pooled_queues(1u);
     f33_nvm_reset_zero_handle_operation(1u);
 }
+
+static uint32_t f33_nvm_check_queue_empty(uint32_t header, uint8_t *empty) {
+    uint32_t head = camry_read16(header);
+    uint32_t tail = camry_read16(header + 2u);
+    if (head == 0xffffu) {
+        if (tail == 0xffffu) {
+            *empty = 1u;
+            return 0u;
+        }
+    } else if (tail != 0xffffu) {
+        *empty = 0u;
+        return 0u;
+    }
+    f33_nvm_record_invalid_reset();
+    return 1u;
+}
+
+static uint32_t f33_nvm_check_slot_partition(uint32_t index, uint32_t queue) {
+    uint32_t slot = index & 0xffffu;
+    uint32_t id = queue & 0xffffu;
+    uint32_t lower = (id == 0u || id == 2u) ? 0x7au : 0u;
+    uint32_t upper = (id == 0u || id == 2u) ? 0x7au : 0x79u;
+    if (slot > upper || slot < lower) {
+        f33_nvm_record_invalid_reset();
+        return 1u;
+    }
+    return 0u;
+}
+
+uint32_t f33_nvm_pop_queue_head(uint32_t queue, uint32_t index) {
+    uint32_t id = queue & 0xffffu;
+    uint32_t header = 0xfebf68e8u + (id << 2);
+    uint8_t empty = 0u;
+    uint32_t head;
+    if (f33_nvm_check_queue_empty(header, &empty) != 0u || empty != 0u)
+        return 1u;
+    head = camry_read16(header);
+    if (f33_nvm_check_slot_partition(head, id) != 0u)
+        return 1u;
+    f33_nvm_unlink_queue_slot(header, head, 0xffffu);
+    camry_write16(index, head);
+    return 0u;
+}
