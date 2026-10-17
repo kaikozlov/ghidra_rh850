@@ -121438,3 +121438,102 @@ ushort f33_dcm_select_response_deadline(uchar use_retained,uchar use_current_ses
   }
   return uVar2;
 }
+
+uint FUN_00049bba(char param_1)
+
+{
+  char cVar1;
+  
+  if ((param_1 == '3') || (DAT_febe66b8 < DAT_00030e38)) {
+    cVar1 = 'Z';
+  }
+  else {
+    cVar1 = '\0';
+  }
+  if (DAT_febe66ac != '\0') {
+    if (cVar1 == 'Z') {
+      DAT_febe7f62 = 0;
+      DAT_febe7f4e = 'Z';
+      DAT_febe7f4d = 'Z';
+    }
+    else if (DAT_febe7f4d == 'Z') {
+      DAT_febe7f4d = '\0';
+    }
+    else if ((DAT_febe7f4e == 'Z') &&
+            ((DAT_0002fbf2 < DAT_febe7f62 ||
+             (DAT_febe7f62 = DAT_febe7f62 + 1, DAT_0002fbf2 < DAT_febe7f62)))) {
+      DAT_febe7f4e = '\0';
+    }
+  }
+  return DAT_febe7f4e;
+}
+
+uint FUN_00049c2c(char param_1)
+
+{
+  if (param_1 == 'Z') {
+    DAT_febe7f64 = 0;
+    DAT_febe7f4f = 'Z';
+  }
+  else if ((DAT_febe7f4f == 'Z') &&
+          ((DAT_0002fbf4 < DAT_febe7f64 ||
+           (DAT_febe7f64 = DAT_febe7f64 + 1, DAT_0002fbf4 < DAT_febe7f64)))) {
+    DAT_febe7f4f = '\0';
+  }
+  return DAT_febe7f4f;
+}
+
+uint FUN_0004c650(void)
+
+{
+  int iVar1;
+  byte bVar2;
+  uchar uVar3;
+  char cVar4;
+  char cVar5;
+  char cVar6;
+  byte bVar7;
+  uint uVar8;
+  byte bVar9;
+  int iVar10;
+  int iVar11;
+  uint uVar12;
+  
+  cVar6 = DAT_febee87e;
+  cVar5 = DAT_febee812;
+  cVar4 = DAT_febe818c;
+  bVar9 = DAT_febe80c9;
+  uVar3 = f33_internal_source_admission_state;
+  uVar8 = (uint)DAT_febee8cc;
+  iVar11 = (int)((int)(int16_t)DAT_febee8dc);
+  iVar10 = (int)((int)(int16_t)DAT_febe6790);
+  bVar7 = 0;
+  uVar12 = 0;
+  do {
+    bVar2 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe817du + (uint32_t)(uVar12) * 1u))));
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe817du + (uint32_t)(uVar12) * 1u)))) = 0;
+    uVar12 = uVar12 + 1;
+    bVar7 = bVar7 | bVar2;
+  } while (uVar12 < 10);
+  if ((((((uVar8 & 0xff00) - 0x100 < 0x201) || (cVar6 == 'Z')) ||
+       (iVar1 = iVar11 + -0x569a, ((iVar1 < 0) || (iVar11 < 0)))) ||
+      (iVar11 = iVar10 + -0x569a, ((iVar11 < 0) || (iVar10 < 0)))) ||
+     (((uVar3 != '\0' && (uVar3 != '\x01')) ||
+      ((cVar5 != '\x11' || ((DAT_febe8188 = bVar9 & 1, (bVar9 & 1) != 0 || (bVar7 == 0x5a)))))))) {
+    DAT_febe8188 = 0x5a;
+  }
+  bVar9 = DAT_febe8188;
+  if ((DAT_febe818a != 'Z') && (cVar4 != '\0')) {
+    bVar9 = 0;
+  }
+  DAT_febe818a = bVar9;
+  return DAT_febe818a;
+}
+
+int FUN_000c9134(short param_1)
+
+{
+  DAT_febec546 = (short)((int)((uint)DAT_febec544 * (int)param_1) / 0x400);
+  DAT_febec54a = (short)((int)((uint)DAT_febec548 * (int)DAT_febec546) / 0x400);
+  return (int)(short)DAT_febec54a;
+}
