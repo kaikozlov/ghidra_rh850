@@ -3067,6 +3067,27 @@ def _rewrite_saved_pmr(code: str) -> str:
     return head + body
 
 
+def _rewrite_icus(code: str) -> str:
+    """The status word's low bit is BUSY. The command word is CMD, bits 8–15, then the slot."""
+    declared = {
+        match.group(1)
+        for match in re.finditer(
+            r"\bICUS_(?:Status|Command)\s+([A-Za-z_][A-Za-z0-9_]*)\s*;",
+            code,
+        )
+    }
+    code = re.sub(r"\bICUSCMD\s*=\s*\(ICUS_Command\)", "ICUSCMD = (uint32_t)", code)
+    for name in sorted(declared, key=len, reverse=True):
+        code = re.sub(
+            rf"\bICUSCMD\s*=\s*{re.escape(name)}\s*;",
+            f"ICUSCMD = {name}.raw;",
+            code,
+        )
+        code = re.sub(rf"\(\s*uint\s*\)\s*{re.escape(name)}\b", f"{name}.raw", code)
+        code = re.sub(rf"\b{re.escape(name)}\s*=(?!=)", f"{name}.raw =", code)
+    return code
+
+
 def _rewrite_body(code: str) -> str:
     code = _strip_calling_convention(code)
     code = _widen_signature(code)
@@ -3097,6 +3118,7 @@ def _rewrite_body(code: str) -> str:
     code = _rewrite_indirect_calls(code)
     code = _rewrite_pointer_compares(code, pointers)
     code = _rewrite_wide_call_constants(code)
+    code = _rewrite_icus(code)
     return code
 
 
@@ -4079,6 +4101,15 @@ def _common_header(text: str, signatures: dict[str, str]) -> str:
     ):
         if name not in function_names and re.search(rf"\b{name}\b", text):
             lines.append(f"#define {name} 0x{value:x}")
+    if re.search(r"\bICUS_Status\b", text):
+        lines.append(
+            "typedef union { uint32_t raw; struct { uint32_t BUSY:1; uint32_t _pad:31; }; } ICUS_Status;"
+        )
+    if re.search(r"\bICUS_Command\b", text):
+        lines.append(
+            "typedef union { uint32_t raw; struct { uint32_t CMD:8;"
+            " uint32_t reserved_8_15:8; uint32_t KEY_SLOT:16; }; } ICUS_Command;"
+        )
     ram_widths = _call_facts()["ram"]
     ram_types = {1: "uint8_t", 2: "uint16_t", 4: "uint32_t"}
     for name in sorted(set(re.findall(r"\b(Ram[0-9A-Fa-f]+)\b", text))):

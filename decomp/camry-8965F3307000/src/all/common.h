@@ -11605,6 +11605,8 @@ _Static_assert(sizeof(RSCFD_CFSTS) == 4, "cfsts");
 #define stop_pending 0x3ec1
 #define running_software_state 0x57a8
 #define stopped_software_state 0x6b94
+typedef union { uint32_t raw; struct { uint32_t BUSY:1; uint32_t _pad:31; }; } ICUS_Status;
+typedef union { uint32_t raw; struct { uint32_t CMD:8; uint32_t reserved_8_15:8; uint32_t KEY_SLOT:16; }; } ICUS_Command;
 #define Ramffc0a000 (*((volatile uint32_t *)camry_host_ptr(0xffc0a000u)))
 #define Ramffc0a004 (*((volatile uint32_t *)camry_host_ptr(0xffc0a004u)))
 #define Ramffc0a008 (*((volatile uint32_t *)camry_host_ptr(0xffc0a008u)))

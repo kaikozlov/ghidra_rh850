@@ -2714,6 +2714,121 @@ undefined4 FUN_0008a5ae(void)
 
 
 
+undefined4 FUN_0008a63c(undefined4 *param_1)
+
+{
+  ICUS_Status IVar1;
+  uint uVar2;
+  undefined4 uVar3;
+  uint uVar4;
+  uint uVar5;
+  uint uVar6;
+  uint *puVar7;
+  uint uVar8;
+  
+  if (DAT_febf136c == '\0') {
+    return 0x10;
+  }
+  if ((((uintptr_t)(param_1)!=(uintptr_t)((undefined4 *)0x0)) && (puVar7 = (uint *)*param_1,(uintptr_t)(puVar7)!=(uintptr_t)((uint *)0x0))) &&
+     ((uintptr_t)((uint *)param_1[1])!=(uintptr_t)((uint *)0x0))) {
+    uVar8 = puVar7[1];
+    uVar6 = puVar7[3];
+    if ((((uVar8 != 0) && (puVar7[2] < 0xf)) &&
+        ((uVar4 = *puVar7, uVar4 != 0 && (uVar5 = *(uint *)param_1[1], uVar5 != 0)))) &&
+       ((uVar6 == 0 || (uVar6 == 1)))) {
+      if (uVar6 == 0) {
+        uVar6 = 1;
+      }
+      else {
+        uVar6 = 3;
+      }
+      uVar3 = 2;
+      if (((((int8_t)DAT_febf136c) == -0x1f) && (IVar1.raw = ICUSSTS, IVar1.BUSY == 0)) &&
+         (uVar2 = ICUSSTS2, (uVar2 & 3) == 0)) {
+        DAT_febf1350 = ~uVar4;
+        uVar3 = 0;
+        ICUSPARAM = uVar8;
+        DAT_febf131c = camry_host_addr(FUN_0008a538);
+        DAT_febf1354 = ~uVar5;
+        DAT_febf1360 = 0xfff75ac7;
+        DAT_febf1330 = 0;
+        DAT_febf1364 = 0xfff75a51;
+        DAT_febf1338 = 0;
+        DAT_febf1368 = 0xfff759ff;
+        DAT_febf1320 = camry_host_addr(FUN_0008a5ae);
+        DAT_febf1324 = camry_host_addr(((undefined *)camry_host_ptr(0x8a600u)));
+        DAT_febf136c = -0x2e;
+        DAT_febf1328 = uVar6;
+        DAT_febf132c = uVar8;
+        DAT_febf1334 = uVar8;
+        DAT_febf1340 = uVar4;
+        DAT_febf1344 = uVar5;
+      }
+      ICUSCMD = (uint32_t)(uVar6 | puVar7[2] << 0x10);
+      return uVar3;
+    }
+  }
+  return 0x11;
+}
+
+
+
+undefined4 FUN_0008a720(undefined4 *param_1)
+
+{
+  ICUS_Status IVar1;
+  uint uVar2;
+  uint uVar3;
+  undefined4 uVar4;
+  uint uVar5;
+  uint uVar6;
+  uint *puVar7;
+  
+  if (DAT_febf136c == '\0') {
+    return 0x10;
+  }
+  if ((((uintptr_t)(param_1)!=(uintptr_t)((undefined4 *)0x0)) && (puVar7 = (uint *)*param_1,(uintptr_t)(puVar7)!=(uintptr_t)((uint *)0x0))) &&
+     ((uintptr_t)((uint *)param_1[1])!=(uintptr_t)((uint *)0x0))) {
+    uVar3 = puVar7[1];
+    if (((puVar7[2] < 0xf) && ((uVar5 = *puVar7, uVar5 != 0 || (uVar3 == 0)))) &&
+       (uVar6 = *(uint *)param_1[1], uVar6 != 0)) {
+      uVar4 = 2;
+      if (((((int8_t)DAT_febf136c) == -0x1f) && (IVar1.raw = ICUSSTS, IVar1.BUSY == 0)) &&
+         (uVar2 = ICUSSTS2, (uVar2 & 3) == 0)) {
+        DAT_febf132c = 0x2000000;
+        if (uVar3 < 0xffffff81) {
+          DAT_febf132c = uVar3 + 0x7f >> 7;
+        }
+        DAT_febf1334 = 1;
+        DAT_febf1350 = ~uVar5;
+        uVar4 = 0;
+        DAT_febf1330 = 0;
+        DAT_febf1354 = ~uVar6;
+        DAT_febf1328 = 5;
+        ICUSDAT = 0;
+        DAT_febf131c = camry_host_addr(FUN_0008a538);
+        ICUSDAT = uVar3 >> 0x18 | uVar3 >> 8 & 0xff00 | (uVar3 & 0xff00) << 8 | uVar3 << 0x18;
+        DAT_febf1360 = 0xfff75ac7;
+        ICUSDAT = 0;
+        DAT_febf1364 = 0xfff75a51;
+        DAT_febf1338 = 0;
+        DAT_febf1368 = 0xfff759ff;
+        ICUSDAT = 0;
+        DAT_febf1320 = camry_host_addr(FUN_0008a5ae);
+        DAT_febf1324 = camry_host_addr(((undefined *)camry_host_ptr(0x8a600u)));
+        DAT_febf136c = -0x2e;
+        DAT_febf1340 = uVar5;
+        DAT_febf1344 = uVar6;
+      }
+      ICUSCMD = (uint32_t)(puVar7[2] << 0x10 | 5);
+      return uVar4;
+    }
+  }
+  return 0x11;
+}
+
+
+
 undefined4 FUN_0008a832(void)
 
 {
@@ -2777,6 +2892,67 @@ undefined4 FUN_0008a898(void)
 
 
 
+undefined4 FUN_0008a8e4(int *param_1)
+
+{
+  ICUS_Status IVar1;
+  uint *puVar2;
+  uint uVar3;
+  undefined4 uVar4;
+  uint uVar5;
+  uint uVar6;
+  uint uVar7;
+  uint uVar8;
+  
+  if (DAT_febf136c == '\0') {
+    return 0x10;
+  }
+  if ((((uintptr_t)(param_1)!=(uintptr_t)((int *)0x0)) && (puVar2 = (uint *)*param_1,(uintptr_t)(puVar2)!=(uintptr_t)((uint *)0x0))) &&
+     (uVar5 = param_1[1], uVar5 != 0)) {
+    uVar3 = puVar2[1];
+    if ((((puVar2[4] < 0xf) && (puVar2[3] < 0x80)) &&
+        ((uVar6 = *puVar2, uVar6 != 0 || (uVar3 == 0)))) && (uVar7 = puVar2[2], uVar7 != 0)) {
+      IVar1.raw = ICUSSTS;
+      uVar4 = 2;
+      uVar8 = ICUSSTS2;
+      if (((((int8_t)DAT_febf136c) == -0x1f) && (IVar1.BUSY == 0)) && ((uVar8 & 3) == 0)) {
+        uVar8 = 0x2000000;
+        if (uVar3 < 0xffffff81) {
+          uVar8 = uVar3 + 0x7f >> 7;
+        }
+        ICUSDAT = 0;
+        DAT_febf1334 = 1;
+        DAT_febf132c = uVar8 + 1;
+        ICUSDAT = uVar3 >> 0x18 | uVar3 >> 8 & 0xff00 | (uVar3 & 0xff00) << 8 | uVar3 << 0x18;
+        DAT_febf1350 = ~uVar6;
+        DAT_febf1338 = 0;
+        DAT_febf1358 = ~uVar7;
+        DAT_febf1330 = 0;
+        DAT_febf1354 = ~uVar5;
+        DAT_febf1328 = 7;
+        DAT_febf131c = camry_host_addr(FUN_0008a832);
+        DAT_febf1320 = camry_host_addr(FUN_0008a898);
+        DAT_febf1360 = 0xfff757cd;
+        ICUSDAT = puVar2[3];
+        DAT_febf1364 = 0xfff75767;
+        DAT_febf1324 = camry_host_addr(((undefined *)camry_host_ptr(0x8a600u)));
+        DAT_febf1368 = 0xfff759ff;
+        ICUSDAT = 0;
+        DAT_febf136c = -0x2e;
+        uVar4 = 0;
+        DAT_febf1340 = uVar6;
+        DAT_febf1344 = uVar5;
+        DAT_febf1348 = uVar7;
+      }
+      ICUSCMD = (uint32_t)(puVar2[4] << 0x10 | 7);
+      return uVar4;
+    }
+  }
+  return 0x11;
+}
+
+
+
 void FUN_0008aa04(uint *param_1)
 
 {
@@ -2809,6 +2985,54 @@ void FUN_0008aa1c(uint *param_1)
 
 
 
+undefined4 FUN_0008aa6a(uint *param_1)
+
+{
+  ICUS_Status IVar1;
+  uint uVar2;
+  uint32_t puVar3;
+  undefined4 uVar4;
+  uint uVar5;
+  uint uVar6;
+  
+  puVar3 = 0xfebeb800u;
+  if (DAT_febf136c == '\0') {
+    uVar4 = 0x10;
+  }
+  else if ((((uintptr_t)(param_1)==(uintptr_t)((uint *)0x0)) || (uVar6 = *param_1, uVar6 == 0)) ||
+          (uVar5 = param_1[1], uVar5 == 0)) {
+    uVar4 = 2;
+  }
+  else {
+    uVar4 = 2;
+    if (((((int8_t)DAT_febf136c) == -0x1f) && (IVar1.raw = ICUSSTS, IVar1.BUSY == 0)) &&
+       (uVar2 = ICUSSTS2, (uVar2 & 3) == 0)) {
+      FUN_0008aa4a();
+      (*((undefined4 *)camry_host_ptr((uint32_t)(puVar3 + 0x5b2c)))) = 4;
+      (*((undefined4 *)camry_host_ptr((uint32_t)(puVar3 + 0x5b34)))) = 3;
+      (*((undefined4 *)camry_host_ptr((uint32_t)(puVar3 + 0x5b30)))) = 0;
+      (*((uint *)camry_host_ptr((uint32_t)(puVar3 + 0x5b50)))) = ~uVar6;
+      uVar4 = 0;
+      (*((undefined4 *)camry_host_ptr((uint32_t)(puVar3 + 0x5b38)))) = 0;
+      (*((uint *)camry_host_ptr((uint32_t)(puVar3 + 0x5b54)))) = ~uVar5;
+      (*((undefined4 *)camry_host_ptr((uint32_t)(puVar3 + 0x5b28)))) = 8;
+      *(code **)(puVar3 + 0x5b1c) = FUN_0008a538;
+      (*((uint *)camry_host_ptr((uint32_t)(puVar3 + 0x5b40)))) = uVar6;
+      (*((undefined4 *)camry_host_ptr((uint32_t)(puVar3 + 0x5b60)))) = 0xfff75ac7;
+      (*((uint *)camry_host_ptr((uint32_t)(puVar3 + 0x5b44)))) = uVar5;
+      (*((undefined4 *)camry_host_ptr((uint32_t)(puVar3 + 0x5b64)))) = 0xfff75a51;
+      *(code **)(puVar3 + 0x5b20) = FUN_0008a5ae;
+      (*((undefined4 *)camry_host_ptr((uint32_t)(puVar3 + 0x5b68)))) = 0xfff759ff;
+      *(undefined1 **)(puVar3 + 0x5b24) = ((undefined *)camry_host_ptr(0x8a600u));
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(0x5b6c))))) = 0xd2;
+    }
+    ICUSCMD = (uint32_t)0x8;
+  }
+  return uVar4;
+}
+
+
+
 undefined4 FUN_0008ab82(void)
 
 {
@@ -2834,6 +3058,37 @@ undefined4 FUN_0008ab82(void)
     DAT_febf136d = 1;
   }
   return 0x12;
+}
+
+
+
+undefined4 FUN_0008aca8(void)
+
+{
+  ICUS_Status IVar1;
+  
+  IVar1.raw = ICUSSTS;
+  if (DAT_febf136c == '\0') {
+    return 0x10;
+  }
+  if ((((int8_t)DAT_febf136c) != -0x1f) && (((int8_t)DAT_febf136c) != -0x3d)) {
+    if (((int8_t)DAT_febf136c) != -0x2e) {
+      return 2;
+    }
+    if (IVar1.BUSY != 0) {
+      DAT_febf1320 = 0;
+      DAT_febf131c = 0;
+      ICUSCMD = (uint32_t)0x3f;
+      DAT_febf1364 = 0xffffffff;
+      DAT_febf1324 = camry_host_addr(((undefined *)camry_host_ptr(0x8a600u)));
+      DAT_febf1360 = 0xffffffff;
+      DAT_febf1368 = 0xfff759ff;
+      DAT_febf1328 = 0x3f;
+      DAT_febf136c = 0xc3;
+      return 0;
+    }
+  }
+  return 1;
 }
 
 
@@ -2882,6 +3137,36 @@ uint FUN_0008ad7a(void)
 
 
 
+undefined4 FUN_0008ada8(void)
+
+{
+  ICUS_Command IVar1;
+  int iVar2;
+  undefined4 uVar3;
+  uint32_t puVar4;
+  int iVar5;
+  
+  iVar2 = DAT_febf133c;
+  puVar4 = 0xfebeb800u;
+  IVar1.raw = ICUSCMD;
+  if ((((IVar1.raw & 0xffff) == 0x7000) && (DAT_febf133c == 1)) ||
+     (((IVar1.raw & 0xffff) == 0x7100 && (DAT_febf133c == 2)))) {
+    ICUSCTL = 3;
+    iVar5 = FUN_0008ad7a();
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(0x5b6c))))) = 0xe1;
+    uVar3 = 1;
+    if (((iVar2 == 1) && (iVar5 != 0)) || ((iVar2 == 2 && (iVar5 != 0x100c)))) {
+      uVar3 = 2;
+    }
+  }
+  else {
+    uVar3 = 0x12;
+  }
+  return uVar3;
+}
+
+
+
 void FUN_0008ae02(undefined4 *param_1)
 
 {
@@ -2893,6 +3178,26 @@ void FUN_0008ae02(undefined4 *param_1)
   DAT_febf1364 = 0xffffffff;
   DAT_febf1368 = 0xfff75257;
   return;
+}
+
+
+
+undefined4 FUN_0008aed6(uint param_1)
+
+{
+  ICUS_Command IVar1;
+  
+  IVar1.raw = ICUSCMD;
+  if ((DAT_febf136c == '\0') || (((int8_t)DAT_febf136c) == -0x1f)) {
+    return 0x10;
+  }
+  if ((((int8_t)DAT_febf136c) != -0x2e) && (((int8_t)DAT_febf136c) != -0x3d)) {
+    return 2;
+  }
+  if ((IVar1.raw & 0xffff) != param_1) {
+    return 0x12;
+  }
+  return 0;
 }
 
 
