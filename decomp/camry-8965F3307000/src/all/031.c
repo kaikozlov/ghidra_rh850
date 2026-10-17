@@ -4680,6 +4680,20 @@ void FUN_000c78cc(void)
 
 
 
+void FUN_000c78f2(short param_1,undefined1 param_2)
+
+{
+  undefined4 extraout_r7;
+  
+  ((void)((int)param_1), (void)(param_2), FUN_000c772a());
+  FUN_000c7770((int)(short)param_1, (uint)(byte)param_2);
+  FUN_000c786c(extraout_r7);
+  FUN_000c78cc();
+  return;
+}
+
+
+
 void FUN_000c7912(void)
 
 {

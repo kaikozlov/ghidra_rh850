@@ -2065,6 +2065,31 @@ undefined4 f33_return_const_0_81f62(void)
 
 
 
+undefined4
+FUN_00081f66(F33CanTpConfiguration *param_1,ushort param_2,char param_3,undefined2 param_4)
+
+{
+  uint32_t puVar1;
+  F33CanTpRxConnection *pFVar2;
+  undefined4 uVar3;
+  
+  puVar1 = 0xfebeb800u;
+  uVar3 = 1;
+  pFVar2 = f33_cantp_find_receive_connection(param_1,param_2);
+  if (param_2 != (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + (uint)pFVar2->channel_state_index * 0x20 + -0x68ac))))) {
+    if (param_3 == '\x01') {
+      FUN_0007a84c(pFVar2, (uint)(ushort)param_4);
+    }
+    else {
+      FUN_0007a89a(pFVar2,param_4);
+    }
+    uVar3 = 0;
+  }
+  return uVar3;
+}
+
+
+
 undefined4 FUN_00081fa6(uint param_1,byte param_2,ushort param_3)
 
 {
@@ -3386,6 +3411,19 @@ bool FUN_00083072(undefined1 param_1)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0x82288 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_00082288(undefined4 param_1)
+
+{
+  FUN_00082288(param_1);
+  return;
+}
+
+
+
 /* Far-call trampoline: prepare {lp},0 / jarl 0x8228E / dispose 0,{lp},lp; byte-verified against the
    exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
    machine-verified; target semantics not recovered. */
@@ -3418,6 +3456,21 @@ undefined1 FUN_000830c0(undefined1 param_1,undefined4 param_2,undefined2 param_3
 
 {
   return FUN_00098e80(param_1, ((char *)camry_host_ptr((uint32_t)(param_2))), param_3);
+}
+
+
+
+void FUN_0008312e(uint param_1, undefined4 param_2)
+
+{
+  uint uVar1;
+  
+  uVar1 = (uint)DAT_00022abc;
+  param_1 = param_1 & 0x7ff;
+  if ((uVar1 <= param_1) && (param_1 < (uVar1 * 2 & 0xff))) {
+    FUN_000830d0(param_1 - uVar1 & 0xff, ((int *)camry_host_ptr((uint32_t)(param_2))));
+  }
+  return;
 }
 
 

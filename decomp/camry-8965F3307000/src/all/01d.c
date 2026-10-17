@@ -1096,6 +1096,29 @@ int FUN_00074bb4(uint param_1)
 
 
 
+uint FUN_00074bbc(undefined4 param_1,undefined2 param_2, undefined4 param_3)
+
+{
+  uint32_t puVar1;
+  int iVar2;
+  uint uVar3;
+  
+  puVar1 = 0x23dfcu;
+  FUN_000749ae();
+  iVar2 = FUN_00078566(param_1, param_3, (uint)(ushort)param_2);
+  if (iVar2 == 0) {
+    iVar2 = FUN_00074bb4(param_2);
+    FUN_00074a82((*((int *)camry_host_ptr((uint32_t)(0x3b20u + (int)(puVar1 + 4))))) * iVar2);
+    uVar3 = 2;
+  }
+  else {
+    uVar3 = f33_nvm_translate_saved_driver_result();
+  }
+  return uVar3;
+}
+
+
+
 undefined4 FUN_00074bf2(void)
 
 {
@@ -1142,7 +1165,7 @@ uint FUN_00074c54(undefined4 param_1,uint param_2,uchar *param_3,undefined1 para
     if (param_5 == '\x01') {
       iVar2 = thunk_FUN_00079432();
       if (iVar2 == 0) {
-        uVar1 = FUN_00074bbc(param_1, (uint)(ushort)param_2);
+        uVar1 = FUN_00074bbc(param_1, (uint)(ushort)param_2, (int)0xfebf6bd0);
         if (uVar1 == 2) {
           FUN_000781aa(1);
           DAT_febf6c59 = 2;
@@ -1154,7 +1177,7 @@ uint FUN_00074c54(undefined4 param_1,uint param_2,uchar *param_3,undefined1 para
       uVar1 = ((void)(((undefined *)camry_host_ptr(0xfebf6bd0u))), FUN_00074c20(param_1, param_2));
     }
     else {
-      uVar1 = ((void)(((undefined *)camry_host_ptr(0xfebf6bd0u))), FUN_00074bbc(param_1, param_2));
+      uVar1 = FUN_00074bbc(param_1, param_2, camry_host_addr(((undefined *)camry_host_ptr(0xfebf6bd0u))));
     }
   }
   if (uVar1 == 2) {
@@ -1302,7 +1325,7 @@ void FUN_00074db8(void)
     }
     iVar2 = thunk_FUN_00079432();
     if (iVar2 == 0) {
-      iVar2 = ((void)(((undefined *)camry_host_ptr(0xfebf6b28u))), FUN_00074bbc(DAT_febf6b68, DAT_febf6b6c));
+      iVar2 = FUN_00074bbc(DAT_febf6b68, DAT_febf6b6c, camry_host_addr(((undefined *)camry_host_ptr(0xfebf6b28u))));
       if (iVar2 == 2) {
         FUN_000781aa(1);
         goto LAB_00074e14;
@@ -1438,6 +1461,23 @@ undefined4 FUN_00074ede(char param_1)
 
 
 
+undefined4 FUN_00074efe(short param_1,undefined4 param_2,undefined4 param_3,undefined1 param_4)
+
+{
+  int iVar1;
+  undefined4 uVar2;
+  
+  iVar1 = FUN_000781da();
+  if ((iVar1 != 1) && (param_1 == 0x5c)) {
+    FUN_000749c6(param_4);
+    uVar2 = FUN_00074ede((uint)(byte)param_4);
+    FUN_00074ce8(uVar2);
+  }
+  return 0;
+}
+
+
+
 void FUN_00074f4a(void)
 
 {
@@ -1530,6 +1570,36 @@ undefined4 FUN_00074fe6(void)
 
 
 
+void FUN_00075008(undefined4 param_1)
+
+{
+  FUN_000783ca(param_1);
+  FUN_000783c0(1);
+  return;
+}
+
+
+
+void FUN_0007501a(undefined4 param_1)
+
+{
+  FUN_000783ca(param_1);
+  FUN_000783c0(2);
+  return;
+}
+
+
+
+void FUN_0007502c(undefined4 param_1)
+
+{
+  FUN_000783ca(param_1);
+  DAT_febf6c55 = 1;
+  return;
+}
+
+
+
 /* Sequential initializer chain: 4 unconditional calls and no other statements; shape-verified. The
    called sequence is the function's entire behavior; chain family members differ in callee sets. */
 
@@ -1608,6 +1678,23 @@ undefined4 FUN_000750b2(undefined *param_1,undefined4 *param_2)
     *param_2 = camry_host_addr(((undefined *)camry_host_ptr(0xfffbu)));
   }
   return 0;
+}
+
+
+
+undefined4 FUN_000750fe(undefined4 param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  if (DAT_febf6c52 < DAT_0002792b) {
+    DAT_febf6c52 = DAT_febf6c52 + 1;
+    uVar1 = 0xf;
+  }
+  else {
+    uVar1 = FUN_000750b2(((undefined *)camry_host_ptr((uint32_t)(param_1))), ((undefined4 *)camry_host_ptr((uint32_t)(param_2))));
+  }
+  return uVar1;
 }
 
 
@@ -1768,6 +1855,27 @@ undefined4 FUN_00075376(int param_1,int *param_2)
 
 
 
+undefined4 FUN_000753cc(undefined4 param_1, undefined4 param_2)
+
+{
+  FUN_00074f72();
+  return FUN_00075376(param_1, ((int *)camry_host_ptr((uint32_t)(param_2))));
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x75376 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+undefined4 thunk_FUN_00075376(undefined4 param_1, undefined4 param_2)
+
+{
+  return FUN_00075376(param_1, ((int *)camry_host_ptr((uint32_t)(param_2))));
+}
+
+
+
 uint FUN_0007543c(uint param_1)
 
 {
@@ -1876,6 +1984,27 @@ undefined4 FUN_0007552e(int param_1,int *param_2)
     uVar6 = 0;
   }
   return uVar6;
+}
+
+
+
+undefined4 FUN_00075584(undefined4 param_1, undefined4 param_2)
+
+{
+  FUN_00074f72();
+  return FUN_0007552e(param_1, ((int *)camry_host_ptr((uint32_t)(param_2))));
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x7552E / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+undefined4 thunk_FUN_0007552e(undefined4 param_1, undefined4 param_2)
+
+{
+  return FUN_0007552e(param_1, ((int *)camry_host_ptr((uint32_t)(param_2))));
 }
 
 
@@ -2180,6 +2309,27 @@ undefined4 FUN_00075928(int param_1,undefined4 param_2)
 
 
 
+undefined4 FUN_00075982(undefined4 param_1, undefined4 param_2)
+
+{
+  FUN_00074f72();
+  return FUN_00075928(param_1, param_2);
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x75928 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+undefined4 thunk_FUN_00075928(undefined4 param_1, undefined4 param_2)
+
+{
+  return FUN_00075928(param_1, param_2);
+}
+
+
+
 undefined4 FUN_000759e2(undefined4 param_1,undefined4 param_2)
 
 {
@@ -2261,7 +2411,7 @@ undefined4 FUN_00075ab8(undefined4 param_1,undefined4 param_2)
     uVar2 = 0x11;
   }
   else {
-    uVar2 = ((void)(iVar1), (void)(param_2), FUN_000750fe());
+    uVar2 = FUN_000750fe(iVar1,param_2);
   }
   return uVar2;
 }
@@ -2297,6 +2447,27 @@ undefined4 FUN_00075ad8(int param_1,undefined4 param_2)
     uVar6 = FUN_000750b2(((undefined *)camry_host_ptr((uint32_t)(iVar3))), ((undefined4 *)camry_host_ptr((uint32_t)(param_2))));
   }
   return uVar6;
+}
+
+
+
+undefined4 FUN_00075b32(undefined4 param_1, undefined4 param_2)
+
+{
+  FUN_00074f72();
+  return FUN_00075ad8(param_1, param_2);
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x75AD8 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+undefined4 thunk_FUN_00075ad8(undefined4 param_1, undefined4 param_2)
+
+{
+  return FUN_00075ad8(param_1, param_2);
 }
 
 
@@ -2582,6 +2753,27 @@ undefined4 FUN_00075ef4(undefined4 param_1,undefined4 *param_2)
 
 
 
+undefined4 FUN_00075f64(undefined4 param_1, undefined4 param_2)
+
+{
+  FUN_00074f72();
+  return FUN_00075f1e(param_1, ((int *)camry_host_ptr((uint32_t)(param_2))));
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x75F1E / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+undefined4 thunk_FUN_00075f1e(undefined4 param_1, undefined4 param_2)
+
+{
+  return FUN_00075f1e(param_1, ((int *)camry_host_ptr((uint32_t)(param_2))));
+}
+
+
+
 undefined4 FUN_00075fb0(undefined *param_1,undefined4 *param_2)
 
 {
@@ -2728,6 +2920,27 @@ undefined4 FUN_000760c6(int param_1,int *param_2)
 
 
 
+undefined4 FUN_0007611c(undefined4 param_1, undefined4 param_2)
+
+{
+  FUN_00074f72();
+  return FUN_000760c6(param_1, ((int *)camry_host_ptr((uint32_t)(param_2))));
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x760C6 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+undefined4 thunk_FUN_000760c6(undefined4 param_1, undefined4 param_2)
+
+{
+  return FUN_000760c6(param_1, ((int *)camry_host_ptr((uint32_t)(param_2))));
+}
+
+
+
 undefined4 FUN_00076138(undefined4 *param_1)
 
 {
@@ -2772,6 +2985,36 @@ undefined4 FUN_0007620a(void)
 {
   FUN_000761e6();
   return 1;
+}
+
+
+
+void FUN_00076224(undefined4 param_1)
+
+{
+  FUN_000783ca(param_1);
+  FUN_000783c0(1);
+  return;
+}
+
+
+
+void FUN_00076236(undefined4 param_1)
+
+{
+  FUN_000783ca(param_1);
+  FUN_000783c0(2);
+  return;
+}
+
+
+
+void FUN_00076248(undefined4 param_1)
+
+{
+  FUN_000783ca(param_1);
+  DAT_febf6c58 = 1;
+  return;
 }
 
 
@@ -2912,6 +3155,27 @@ undefined4 FUN_000763a4(int param_1,int *param_2)
     uVar6 = 0;
   }
   return uVar6;
+}
+
+
+
+undefined4 FUN_000763f0(undefined4 param_1, undefined4 param_2)
+
+{
+  FUN_0007637e();
+  return FUN_000763a4(param_1, ((int *)camry_host_ptr((uint32_t)(param_2))));
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x763A4 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+undefined4 thunk_FUN_000763a4(undefined4 param_1, undefined4 param_2)
+
+{
+  return FUN_000763a4(param_1, ((int *)camry_host_ptr((uint32_t)(param_2))));
 }
 
 
@@ -3704,7 +3968,7 @@ undefined * FUN_00076b1c(void)
   puVar3 = ((undefined *)camry_host_ptr(0xfffbu));
   if ((DAT_febf6c44 < f33_nvm_descriptor_count) &&
      (puVar3 = (undefined *)f33_nvm_read_with_optional_blank_check(DAT_febf6c24,4,auStack_c,'\0'),(uintptr_t)(puVar3)==(uintptr_t)(((undefined *)camry_host_ptr((uint32_t)(0x1)))))) {
-    uVar1 = ((void)((0xfebf6b80u)), thunk_FUN_0007490e());
+    uVar1 = thunk_FUN_0007490e((0xfebf6b80u));
     iVar2 = FUN_0007484a(uVar1, camry_host_addr(auStack_c), 2);
     if (iVar2 != 0) {
       puVar3 = ((undefined *)camry_host_ptr(0xfffdu));
@@ -3899,7 +4163,7 @@ uint FUN_00076ec4(void)
 {
   undefined4 uVar1;
   
-  uVar1 = ((void)((0xfebf6b80u)), thunk_FUN_0007490e());
+  uVar1 = thunk_FUN_0007490e((0xfebf6b80u));
   FUN_000772a2(((undefined2 *)camry_host_ptr((uint32_t)((0xfebf6b80u)))), 0xffff);
   FUN_000772ae((0xfebf6b80u),0xffff);
   return FUN_00074c54(DAT_febf6c24, 4, ((uchar *)camry_host_ptr((uint32_t)(uVar1))), 6, 0);
@@ -4009,6 +4273,18 @@ void FUN_0007712a(void)
   }
   ((void)(uVar1), FUN_00077640());
   return;
+}
+
+
+
+/* Far-call trampoline: prepare {lp},0 / jarl 0x7490E / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+undefined4 thunk_FUN_0007490e(undefined4 param_1)
+
+{
+  return FUN_0007490e(param_1);
 }
 
 
@@ -4194,7 +4470,7 @@ undefined * FUN_00077548(void)
   puVar3 = ((undefined *)camry_host_ptr(0xfffbu));
   if ((DAT_febf6c44 < f33_nvm_descriptor_count) &&
      (puVar3 = (undefined *)f33_nvm_read_with_optional_blank_check(DAT_febf6c24,4,auStack_c,'\0'),(uintptr_t)(puVar3)==(uintptr_t)(((undefined *)camry_host_ptr((uint32_t)(0x1)))))) {
-    uVar1 = ((void)((0xfebf6b80u)), thunk_FUN_0007490e());
+    uVar1 = thunk_FUN_0007490e((0xfebf6b80u));
     iVar2 = FUN_0007484a(uVar1, camry_host_addr(auStack_c), 4);
     if (iVar2 != 0) {
       puVar3 = ((undefined *)camry_host_ptr(0xfffdu));
@@ -4328,7 +4604,7 @@ int FUN_0007786a(uint param_1,undefined4 param_2,undefined1 param_3)
   uint uVar2;
   uint uVar3;
   
-  source = (uchar *)((void)((0xfebf6b80u)), thunk_FUN_0007490e());
+  source = (uchar *)thunk_FUN_0007490e((0xfebf6b80u));
   iVar1 = camry_host_addr(FUN_000776fa(param_2,4,source,param_3));
   if (iVar1 == 1) {
     uVar2 = FUN_0007729c(((undefined2 *)camry_host_ptr((uint32_t)((0xfebf6b80u)))));

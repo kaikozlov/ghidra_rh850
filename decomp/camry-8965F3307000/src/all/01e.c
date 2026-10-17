@@ -313,7 +313,7 @@ void FUN_00078304(void)
     uStack_1c = DAT_febf6c4e;
     piStack_18 = local_34 + 1;
     cStack_1b = DAT_febf6c4f;
-    uVar2 = ((void)(local_34), FUN_00078276(((byte *)camry_host_ptr((uint32_t)((*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + uVar3 * 4 + 0x3ec4))))))), &uStack_1c));
+    uVar2 = FUN_00078276(((byte *)camry_host_ptr((uint32_t)((*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + uVar3 * 4 + 0x3ec4))))))), &uStack_1c, camry_host_addr(local_34));
     DAT_febf6c4f = 0xff;
     if (local_34[0] != 1) {
       FUN_00077ce8();
@@ -3535,6 +3535,45 @@ void f33_cantp_foreground_cycle(void)
 
 
 
+void FUN_0007a4e4(F33CanTpConfiguration *param_1,F33CanTpFrameInfo *param_2,ushort param_3)
+
+{
+  byte bVar1;
+  uint32_t puVar2;
+  F33CanTpConfiguration *configuration;
+  F33CanTpRxConnection *connection;
+  F33CanTpTxConnection *connection_00;
+  
+  puVar2 = 0x23dfcu;
+  if (param_2->length < 2) {
+    return;
+  }
+  connection = f33_cantp_find_receive_frame_connection(param_1, param_3, ((uchar *)camry_host_ptr((uint32_t)(param_2->data))));
+  if ((uintptr_t)(connection)!=(uintptr_t)((F33CanTpRxConnection *)0x0)) {
+    bVar1 = ((uint8_t *)camry_host_ptr((uint32_t)(param_2->data)))[(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(connection->addressing_format - 0x1264)))))] & 0xf0;
+    if ((((uint8_t *)camry_host_ptr((uint32_t)(param_2->data)))[(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(connection->addressing_format - 0x1264)))))] & 0xf0) == 0) {
+      FUN_0007adf8(param_1, connection, param_2);
+      return;
+    }
+    if (bVar1 == 0x10) {
+      FUN_0007af76(param_1, connection, param_2);
+      return;
+    }
+    if (bVar1 == 0x20) {
+      f33_cantp_handle_consecutive_receive(connection,param_2);
+      return;
+    }
+  }
+  connection_00 = f33_cantp_find_flow_control_connection(configuration, param_3, ((uchar *)camry_host_ptr((uint32_t)(param_2->data))));
+  if (((uintptr_t)(connection_00)!=(uintptr_t)((F33CanTpTxConnection *)0x0)) &&
+     ((((uint8_t *)camry_host_ptr((uint32_t)(param_2->data)))[(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(connection_00->addressing_format - 0x1264)))))] & 0xf0) == 0x30)) {
+    f33_cantp_handle_flow_control(connection_00,param_2);
+  }
+  return;
+}
+
+
+
 /* Require initialized markerAA and configured CanIf receive range0804..0806. Widen descriptor
    length16 into internal frame length32 and dispatch SF/FF/CF or flow control; frame bytes remain
    caller-owned during this call. */
@@ -3767,6 +3806,74 @@ uint f33_cantp_queue_receive_flow_control
   local_c.data = camry_host_addr(f33_cantp_shared_frame_scratch);
   uVar1 = f33_cantp_submit_can_frame(connection->canif_fc_transmit_id,&local_c);
   return uVar1;
+}
+
+
+
+/* Query upper capacity with a zero-length copy, choose CTS or timed WAIT, and enforce configured
+   wait-frame limit. Upper overflow stateD2 queues FC32. State5A/countdownN_Ar+2 precedes lower
+   frame confirmation. */
+
+void f33_cantp_poll_receive_capacity_and_flow
+               (F33CanTpRxConnection *connection,F33CanTpRxState *state)
+
+{
+  ushort uVar1;
+  uint32_t puVar2;
+  uint32_t puVar3;
+  F33CanTpRxConnection *connection_00;
+  int extraout_r6;
+  uchar block_size;
+  uchar stmin;
+  ushort uVar4;
+  uint uVar5;
+  uint local_28;
+  F33CanTpFrameInfo FStack_24;
+  
+  puVar2 = 0xfebeb800u;
+  puVar3 = 0x23dfcu;
+  uVar4 = state->wait_frame_count;
+  uVar5 = (uint)state->flow_status_marker;
+  block_size = FUN_0007a862(connection);
+  stmin = FUN_0007a8b0(connection);
+  if (uVar5 == 0xe1) {
+    FStack_24.length = 0;
+    FStack_24.data = 0;
+    local_28 = 0;
+    uVar5 = f33_cantp_copy_upper_receive_bytes((*((ushort *)camry_host_ptr((uint32_t)(extraout_r6 + 8)))),&FStack_24,&local_28);
+    if (uVar5 != 0) goto LAB_0007aa86;
+    uVar5 = f33_cantp_select_receive_flow_status
+                      (state->remaining_length,local_28,
+                       '\a' - (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(connection_00->addressing_format - 0x1264))))),block_size);
+    if (uVar5 == 0xf0) goto LAB_0007aa5c;
+    if (state->timeout_ticks != 0) {
+      return;
+    }
+    if (connection_00->wait_frame_limit <= uVar4) goto LAB_0007aa86;
+    uVar4 = uVar4 + 1;
+  }
+  else {
+    if (uVar5 != 0xd2) {
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x68c4))))) = 0xf;
+      f33_cantp_reset_receive_owner(state);
+      return;
+    }
+LAB_0007aa5c:
+    uVar4 = 0;
+  }
+  state->state = 'Z';
+  uVar1 = connection_00->frame_confirmation_timeout_raw;
+  state->flow_status_marker = (byte)uVar5;
+  state->wait_frame_count = uVar4;
+  state->block_remaining = block_size;
+  state->timeout_ticks = uVar1 + 2;
+  uVar5 = f33_cantp_queue_receive_flow_control(connection_00,(byte)uVar5 & 0xf,block_size,stmin);
+  if (uVar5 == 0) {
+    return;
+  }
+LAB_0007aa86:
+  f33_cantp_finish_receive_aggregate(connection_00,state,'\x01');
+  return;
 }
 
 

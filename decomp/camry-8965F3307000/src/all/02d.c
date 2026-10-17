@@ -4536,6 +4536,16 @@ LAB_000b715a:
 
 
 
+undefined2 FUN_000b71e2(undefined2 param_1)
+
+{
+  ((void)(param_1), FUN_000b70e2());
+  FUN_000b7108();
+  return FUN_000b7186((uint)(ushort)param_1);
+}
+
+
+
 undefined ** FUN_000b71f8(uint param_1)
 
 {

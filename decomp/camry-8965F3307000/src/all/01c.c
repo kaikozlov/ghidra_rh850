@@ -3155,6 +3155,20 @@ bool FUN_00072eac(uint *param_1)
 
 
 
+void FUN_00072ed4(undefined4 param_1)
+
+{
+  int iVar1;
+  
+  iVar1 = FUN_00072eac(((uint *)camry_host_ptr((uint32_t)(param_1))));
+  if (iVar1 == 1) {
+    FUN_00072248(0);
+  }
+  return;
+}
+
+
+
 /* Snapshot via721C6. Idle:73C76==1 calls72E70, otherwise abort72130 (lower operation state2).
    Active status1 calls72ED4; status2 skips it. Always finish723D6. Native quiet scans,
    ascending-header admission bounded before726C4, phase08 queue retention and explicit10/20
@@ -3183,7 +3197,7 @@ void f33_nvm_service_scheduler(void)
     }
   }
   else if (uVar1 != 2) {
-    ((void)(&FStack_14), FUN_00072ed4());
+    FUN_00072ed4(camry_host_addr(&FStack_14));
   }
   FUN_000723d6();
   return;

@@ -2220,6 +2220,14 @@ uint FUN_00095cf2(void)
 
 
 
+uint FUN_00095cfe(undefined1 param_1, undefined4 param_2)
+
+{
+  return FUN_0008b36e(param_1, ((uchar *)camry_host_ptr((uint32_t)(param_2))));
+}
+
+
+
 /* Configured SID10 operation callback for target0x01; forwards operation/message plus fixed target
    inr8 to95C52. Callback return is ignored by existing F33DcmServiceCallback dispatcher. No direct
    hardware transition. */

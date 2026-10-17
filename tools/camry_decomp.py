@@ -2046,7 +2046,12 @@ def _rewrite_wide_call_constants(code: str) -> str:
 
 
 _FAIL = ("fail",)
-_TRACKED = (6, 7, 8, 9, 10)
+# r1–r31. r6–r9 enter as the incoming arguments; the rest start unknown.
+_TRACKED = tuple(range(1, 32))
+# GHS RH850: r3–r5 (sp/gp/tp) and r20–r29 survive a call. r6–r9 survive only
+# when this particular callee never writes them. r10 is then the return value.
+_CALLER_KILLED = {1, 2, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 30, 31}
+_ARG_CLOBBERS: dict[int, set[int]] | None = None
 _NO_WRITE = {
     "cmp", "tst", "cmpi", "st8", "st16", "st32", "set1", "not1", "clr1", "tst1",
     "set1r", "not1r", "clr1r", "tst1r", "ldsr",
@@ -2106,15 +2111,51 @@ def _write_origin(state: dict[int, set], reg: int | None, origin: tuple) -> None
         state[reg] = {origin}
 
 
+def _entry_state() -> dict[int, set]:
+    state = {reg: {_FAIL} for reg in _TRACKED}
+    for reg in (6, 7, 8, 9):
+        state[reg] = {("entry", reg, "")}
+    return state
+
+
+def _fold_imm(name: str, base: int, imm: int) -> int | None:
+    base &= 0xFFFFFFFF
+    if name == "movhi":
+        return (base + ((imm & 0xFFFFFFFF) << 16)) & 0xFFFFFFFF
+    if name == "andi":
+        return base & (imm & 0xFFFFFFFF)
+    if name == "ori":
+        return base | (imm & 0xFFFFFFFF)
+    if name == "xori":
+        return base ^ (imm & 0xFFFFFFFF)
+    if name in {"addi", "movea"}:
+        return (base + imm) & 0xFFFFFFFF
+    return None
+
+
 def _transfer(state: dict[int, set], inst) -> dict[int, set]:
     cur = {reg: set(values) for reg, values in state.items()}
-    if inst.kind in {"jarl", "callt"}:
-        for reg in (6, 7, 8, 9):
-            cur[reg] = {_FAIL}
-        if inst.kind == "jarl" and inst.link != 10:
-            cur[10] = {("call", inst.target)}
+    if inst.kind == "jarl":
+        killed = set(_CALLER_KILLED)
+        clobbers = _ARG_CLOBBERS
+        if clobbers is not None and inst.target in clobbers:
+            killed |= clobbers[inst.target]
         else:
+            killed.update((6, 7, 8, 9))
+        if inst.link:
+            killed.add(inst.link)
+        for reg in killed:
+            if reg in cur:
+                cur[reg] = {_FAIL}
+        if inst.link != 10 and 10 in cur:
+            cur[10] = {("call", inst.target)}
+        elif 10 in cur:
             cur[10] = {_FAIL}
+        return cur
+    if inst.kind == "callt":
+        for reg in _CALLER_KILLED | {6, 7, 8, 9}:
+            if reg in cur:
+                cur[reg] = {_FAIL}
         return cur
     if inst.kind == "loop" and inst.reg in cur:
         cur[inst.reg] = {_FAIL}
@@ -2166,6 +2207,13 @@ def _transfer(state: dict[int, set], inst) -> dict[int, set]:
                 value = 0
             cur[dst] = {("imm", value)}
             return cur
+        if src in cur and imm is not None and len(cur[src]) == 1 and dst in cur:
+            item = next(iter(cur[src]))
+            if item[0] == "imm":
+                folded = _fold_imm(name, item[1], imm)
+                if folded is not None:
+                    cur[dst] = {("imm", folded)}
+                    return cur
         if name == "andi" and dst == src and dst in cur and imm in {0xFF, 0xFFFF} and len(cur[dst]) == 1:
             cur[dst] = {_narrow(next(iter(cur[dst])), "byte" if imm == 0xFF else "ushort")}
             return cur
@@ -2197,9 +2245,7 @@ def _transfer(state: dict[int, set], inst) -> dict[int, set]:
 
 
 def _function_origins(fn) -> dict[int, dict[int, set]]:
-    incoming: dict[int, dict[int, set]] = {
-        fn.entry: {reg: {("entry", reg, "")} if reg != 10 else {_FAIL} for reg in _TRACKED},
-    }
+    incoming: dict[int, dict[int, set]] = {fn.entry: _entry_state()}
     work = [fn.entry]
     index_of = {inst.addr: index for index, inst in enumerate(fn.insts)}
     while work:
@@ -2348,9 +2394,253 @@ def _access_width(text: str) -> int | None:
     return None
 
 
+def _direct_arg_writes(fn) -> tuple[set[int], list[int], bool]:
+    """r6–r9 this function writes itself, and the direct calls it makes."""
+    written: set[int] = set()
+    calls: list[int] = []
+    has_callt = False
+    blank = {reg: {("live",)} for reg in (6, 7, 8, 9)}
+    for inst in fn.insts:
+        if inst.kind == "callt":
+            has_callt = True
+            continue
+        if inst.kind == "jarl":
+            if inst.target:
+                calls.append(inst.target)
+            continue
+        after = _transfer(blank, inst)
+        for reg in (6, 7, 8, 9):
+            if after.get(reg) != blank[reg]:
+                written.add(reg)
+    return written, calls, has_callt
+
+
+def _arg_clobber_map(
+    writes: dict[int, set[int]],
+    calls: dict[int, list[int]],
+    callt: set[int],
+) -> dict[int, set[int]]:
+    """r6–r9 a function kills, including through the calls it makes."""
+    cache: dict[int, set[int]] = {}
+
+    def clobber(addr: int, stack: set[int]) -> set[int]:
+        if addr in cache:
+            return cache[addr]
+        if addr in stack or addr not in writes or addr in callt:
+            return {6, 7, 8, 9}
+        stack.add(addr)
+        found = set(writes[addr])
+        for target in calls.get(addr, ()):
+            found |= clobber(target, stack)
+        stack.remove(addr)
+        cache[addr] = found
+        return found
+
+    for addr in writes:
+        clobber(addr, set())
+    return cache
+
+
+def _value_of_call(body: str, pos: int, callee: str) -> str | None:
+    """Variable that still holds the latest `var = callee(...)` before pos."""
+    assign = None
+    pattern = re.compile(rf"\b([A-Za-z_][A-Za-z0-9_]*)\s*=\s*{re.escape(callee)}\s*\(")
+    for match in pattern.finditer(body, 0, pos):
+        assign = match
+    if assign is None:
+        return None
+    try:
+        close = _match_paren(body, assign.end() - 1)
+    except ValueError:
+        return None
+    if not body[close + 1:pos].lstrip().startswith(";"):
+        return None
+    if re.search(rf"\b{re.escape(callee)}\s*\(", body[close:pos]):
+        return None
+    name = assign.group(1)
+    if re.search(rf"\b{re.escape(name)}\s*=(?!=)", body[close:pos]):
+        return None
+    return name
+
+
+def _last_declarator(head: str, name: str) -> tuple[int, int] | None:
+    chars = list(head)
+    index = 0
+    while index < len(chars):
+        if chars[index] == "/" and index + 1 < len(chars) and chars[index + 1] == "*":
+            end = head.find("*/", index + 2)
+            end = len(chars) if end < 0 else end + 2
+            for cursor in range(index, end):
+                chars[cursor] = " "
+            index = end
+            continue
+        index += 1
+    matches = list(re.finditer(rf"\b{re.escape(name)}\s*\(", "".join(chars)))
+    if len(matches) != 1:
+        return None
+    open_at = matches[0].end() - 1
+    try:
+        return open_at, _match_paren(head, open_at)
+    except ValueError:
+        return None
+
+
+def _prepared_body(code: str) -> tuple[str, str, list[tuple[str, int, int]]] | None:
+    code = _strip_calling_convention(code)
+    brace = _opening_brace(code)
+    if brace < 0:
+        return None
+    signature = _c_signature(code)
+    body = code[brace:]
+    return signature, body, _direct_calls(body)
+
+
+def _forwarded_param_counts(
+    corpus: dict[str, dict],
+    origins: dict[str, dict],
+    sites: dict[str, dict[int, list[int]]],
+    entries: dict[str, int],
+    arity: dict[str, int],
+    params: dict[str, int],
+    hand: set[str],
+) -> dict[str, int]:
+    """How many parameters a function needs so a forwarded entry register has a name.
+
+    The count grows only when every compiled caller can already pass the new
+    registers, from an immediate or from a parameter that caller already has.
+    """
+    prepared: dict[str, tuple[str, str, list[tuple[str, int, int]]]] = {}
+    wanted: dict[str, int] = {}
+    for name, row in corpus.items():
+        if name in hand:
+            continue
+        parsed = _prepared_body(row["decompiled_c"])
+        if parsed is None:
+            continue
+        prepared[name] = parsed
+        if name not in origins:
+            continue
+        signature, body, events = parsed
+        stripped = _strip_calling_convention(row["decompiled_c"])
+        brace = _opening_brace(stripped)
+        if brace < 0 or _last_declarator(stripped[:brace], name) is None:
+            continue
+        nparams = params.get(name, len(_param_names(signature)))
+        state = origins[name]
+        grouped = sites.get(name) or {}
+        counts: dict[int, int] = {}
+        usable_events = []
+        for callee, open_at, close in events:
+            entry = entries.get(callee)
+            if entry is None:
+                continue
+            counts[entry] = counts.get(entry, 0) + 1
+            usable_events.append((callee, open_at, close, entry))
+        highest = nparams
+        cursor: dict[int, int] = {}
+        for callee, open_at, close, entry in usable_events:
+            existing = _split_args(body[open_at + 1:close])
+            if len(existing) == 1 and not existing[0].strip():
+                existing = []
+            slot = cursor.get(entry, 0)
+            cursor[entry] = slot + 1
+            if counts[entry] != len(grouped.get(entry, ())):
+                continue
+            if slot >= len(grouped.get(entry, ())):
+                continue
+            addr = grouped[entry][slot]
+            # Same cap the call rewrite uses: a register the callee does not
+            # read is not an argument we can recover.
+            need = min(arity.get(callee, 0), params.get(callee, 0))
+            if len(existing) >= need:
+                continue
+            for reg in range(6 + len(existing), 6 + need):
+                origin = state.get(addr, {}).get(reg, set())
+                if len(origin) != 1:
+                    continue
+                item = next(iter(origin))
+                if item[0] == "entry" and item[1] - 6 >= nparams:
+                    highest = max(highest, item[1] - 5)
+        if highest > nparams:
+            wanted[name] = highest
+    blocked: set[str] = set()
+    for name, (signature, body, events) in prepared.items():
+        params_here = _param_names(signature)
+        types_here = _signature_param_types(signature)
+        state = origins.get(name) or {}
+        grouped = sites.get(name) or {}
+        counts = {}
+        usable_events = []
+        for callee, open_at, close in events:
+            if callee not in wanted:
+                continue
+            entry = entries.get(callee)
+            if entry is None:
+                continue
+            counts[entry] = counts.get(entry, 0) + 1
+            usable_events.append((callee, open_at, close, entry))
+        cursor = {}
+        for callee, open_at, close, entry in usable_events:
+            if callee in blocked:
+                continue
+            existing = _split_args(body[open_at + 1:close])
+            if len(existing) == 1 and not existing[0].strip():
+                existing = []
+            slot = cursor.get(entry, 0)
+            cursor[entry] = slot + 1
+            if counts[entry] != len(grouped.get(entry, ())):
+                blocked.add(callee)
+                continue
+            if slot >= len(grouped.get(entry, ())):
+                blocked.add(callee)
+                continue
+            addr = grouped[entry][slot]
+            old_count = params.get(callee, 0)
+            for reg in range(6 + old_count, 6 + wanted[callee]):
+                if reg - 6 < len(existing):
+                    continue
+                if _emit_origin(state.get(addr, {}).get(reg, set()), params_here, types_here) is None:
+                    blocked.add(callee)
+                    break
+    return {name: count for name, count in wanted.items() if name not in blocked}
+
+
+def _widen_signature(code: str) -> str:
+    """Give a forwarded incoming register the parameter the bytes already pass."""
+    brace = _opening_brace(code)
+    if brace < 0:
+        return code
+    signature = _c_signature(code)
+    name = _signature_name(signature)
+    facts = _call_facts()
+    if name in facts["hand"]:
+        return code
+    target = facts["params"].get(name, 0)
+    current = _param_names(signature)
+    if target <= len(current):
+        return code
+    found = _last_declarator(code[:brace], name)
+    if found is None:
+        return code
+    open_at, close = found
+    inside = code[open_at + 1:close]
+    stripped = _strip_comments(inside).strip()
+    names = set(current)
+    added: list[str] = []
+    for index in range(len(current), target):
+        param = f"param_{index + 1}"
+        if param in names:
+            param = f"param_{index + 1}_in"
+        names.add(param)
+        added.append(f"undefined4 {param}")
+    extra = ", ".join(added)
+    replacement = extra if not stripped or stripped == "void" else inside.rstrip() + ", " + extra
+    return code[:open_at + 1] + replacement + code[close:]
+
+
 def _call_facts() -> dict:
     """Argument registers and r10 at each direct call, from the function bytes."""
-    global _CALL_FACTS
+    global _CALL_FACTS, _ARG_CLOBBERS
     if _CALL_FACTS is not None:
         return _CALL_FACTS
     from tools.camry_lift import decode_at, load_image, walk_symbol
@@ -2364,10 +2654,23 @@ def _call_facts() -> dict:
     sites: dict[str, dict[int, list[int]]] = {}
     ret_target: dict[str, int] = {}
     arity: dict[str, int] = {}
+    walked = []
+    direct_writes: dict[int, set[int]] = {}
+    direct_calls: dict[int, list[int]] = {}
+    callt: set[int] = set()
     for row in symbols:
         fn = walk_symbol(image, row)
         if fn is None:
             continue
+        walked.append((row, fn))
+        addr = int(row["addr"], 16)
+        written, calls, has_callt = _direct_arg_writes(fn)
+        direct_writes[addr] = written
+        direct_calls[addr] = calls
+        if has_callt:
+            callt.add(addr)
+    _ARG_CLOBBERS = _arg_clobber_map(direct_writes, direct_calls, callt)
+    for row, fn in walked:
         state = _function_origins(fn)
         origins[row["name"]] = state
         grouped: dict[int, list[int]] = {}
@@ -2444,6 +2747,16 @@ def _call_facts() -> dict:
 
     for name in list(trailing):
         resolve(name, set())
+    widened = _forwarded_param_counts(
+        corpus, origins, sites, entries, arity, params, hand_names
+    )
+    need = {
+        name: min(arity.get(name, 0), count)
+        for name, count in params.items()
+    }
+    for name, count in widened.items():
+        params[name] = count
+        need[name] = count
     ram: dict[int, set[int]] = {}
     for row in functions:
         for ref in row.get("data_references") or []:
@@ -2461,10 +2774,13 @@ def _call_facts() -> dict:
             ram.setdefault(address, set()).add(width)
     _CALL_FACTS = {
         "entries": entries,
+        "names": names_at,
         "origins": origins,
         "sites": sites,
         "arity": arity,
         "params": params,
+        "need": need,
+        "hand": hand_names,
         "planned": planned,
         "ram": {addr: next(iter(widths)) for addr, widths in ram.items() if len(widths) == 1},
     }
@@ -2609,7 +2925,7 @@ def _rewrite_recovered_arguments(code: str) -> str:
         existing = _split_args(body[open_at + 1:close])
         if len(existing) == 1 and not existing[0].strip():
             existing = []
-        need = min(facts["arity"].get(name, 0), facts["params"].get(name, 0))
+        need = facts["need"].get(name, 0)
         slot = cursor_at[entry]
         cursor_at[entry] = slot + 1
         if len(existing) >= need:
@@ -2617,7 +2933,12 @@ def _rewrite_recovered_arguments(code: str) -> str:
         addr = grouped[entry][slot]
         recovered: list[str] = []
         for reg in range(6 + len(existing), 6 + need):
-            expr = _emit_origin(state.get(addr, {}).get(reg, set()), params, types)
+            origin = state.get(addr, {}).get(reg, set())
+            expr = _emit_origin(origin, params, types)
+            if expr is None and len(origin) == 1 and next(iter(origin))[0] == "call":
+                callee = facts["names"].get(next(iter(origin))[1])
+                if callee:
+                    expr = _value_of_call(body, open_at, callee)
             if expr is None:
                 recovered = []
                 break
@@ -2660,6 +2981,7 @@ def _rewrite_returned_call(code: str) -> str:
 
 def _rewrite_body(code: str) -> str:
     code = _strip_calling_convention(code)
+    code = _widen_signature(code)
     code = _rewrite_recovered_arguments(code)
     code = _rewrite_returned_call(code)
     code = _rewrite_firmware_bases(code)

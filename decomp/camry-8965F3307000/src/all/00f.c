@@ -1046,6 +1046,41 @@ void FUN_0003cc74(byte param_1,uchar param_2)
 
 
 
+/* Six280A4 rows join monitor bank, status selector and diagnostic event. All exact-image mode
+   bytesA5 admit publication. Preserve real R7 status dataflow3CCD6..3CCF4. Six exact280A4 rows join
+   status selectors, raw receive PDU descriptors and diagnostic events; R7 carries actual receive
+   status, omitted by former prototype. */
+
+void f33_update_configured_receive_fault_banks(void)
+
+{
+  int iVar1;
+  uchar bank;
+  char cVar2;
+  char cVar3;
+  uchar status;
+  uint uVar4;
+  
+  cVar3 = DAT_febee806;
+  uVar4 = 0;
+  do {
+    iVar1 = uVar4 * 8;
+    bank = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x280a8u + (uint32_t)(iVar1) * 1u))));
+    status = f33_get_application_receive_status((uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x280a9u + (uint32_t)(iVar1) * 1u)))));
+    cVar2 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x280aau + (uint32_t)(iVar1) * 1u))));
+    if ((((int8_t)cVar2) == -0x5b) || ((cVar2 == '\0' && (cVar3 == '\0')))) {
+      f33_publish_receive_fault_bank(bank,status);
+    }
+    else if ((cVar2 == 'Z') && (cVar3 == 'Z')) {
+      FUN_0003cc74(bank, status);
+    }
+    uVar4 = uVar4 + 1;
+  } while (uVar4 < 6);
+  return;
+}
+
+
+
 void FUN_0003cd16(void)
 
 {

@@ -3355,6 +3355,46 @@ undefined1 FUN_00062e18(void)
 
 
 
+void FUN_00062e1e(undefined4 param_1, undefined4 param_2, undefined4 param_3, undefined4 param_4)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uint uVar3;
+  uint in_PSW;
+  uint in_FPEC;
+  uint in_RBASE;
+  uint in_EBASE;
+  uint in_FPIPR;
+  uint in_ISPR;
+  
+  if ((in_FPEC & 1) != 0) {
+    uVar1 = in_FPIPR & 0x1f;
+    if (0xf < uVar1) {
+      uVar1 = 0x10;
+    }
+    uVar2 = uVar1;
+    if (0xf < uVar1) {
+      uVar2 = 0xf;
+    }
+    uVar3 = PMR;
+    if ((((uVar3 & 1 << uVar2) == 0) && ((in_ISPR & (1 << uVar1 + 1) - 1U & 0xffff) == 0)) &&
+       ((in_PSW & 0x80) == 0)) {
+      if (((in_PSW & 0xbfffffd0) >> 0xf & 1) == 0) {
+        in_EBASE = in_RBASE;
+      }
+      (*(int (*)())camry_host_ptr((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();
+    }
+  }
+  __enable_irq();
+  FUN_000712ce(param_1, param_2, param_3, param_4);
+  do {
+                    /* WARNING: Do nothing block with infinite loop */
+  } while( true );
+}
+
+
+
 void FUN_00062e44(ushort *param_1,ushort param_2)
 
 {

@@ -1091,7 +1091,7 @@ uint f33_serialize_selected_proprietary_event(uchar *output,ushort *length)
         if (DAT_febe81ad != 3) {
           return 10;
         }
-        uVar1 = ((void)(output), (void)(uVar2), FUN_00055c6e(DAT_febe81ba, DAT_febe81bc));
+        uVar1 = FUN_00055c6e(DAT_febe81ba, DAT_febe81bc, camry_host_addr(output), uVar2);
       }
       if ((-1 < (int)uVar1) &&
          ((int)(uVar1 - uVar2) < 0 != ((int)uVar1 < 0 && -1 < (int)(uVar1 - uVar2)) ||
@@ -5209,6 +5209,176 @@ void f33_capture_slot_dispatch_53354(undefined4 param_1,uchar *param_2)
 
 
 
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_533a0(ushort param_1, undefined4 param_2)
+
+{
+  uint uVar1;
+  
+  uVar1 = (uint)(*((ushort *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                 (short)(param_1 & 0xff) * 0x48 + 0x38)))) * 10 >> 7;
+  if (2999 < uVar1) {
+    uVar1 = 3000;
+  }
+  FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_533cc(ushort param_1, undefined4 param_2)
+
+{
+  ushort uVar1;
+  
+  uVar1 = (*((ushort *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix + (short)(param_1 & 0xff) * 0x48 + 0x3a))));
+  if (0x31ff < uVar1) {
+    uVar1 = 0x3200;
+  }
+  FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53408(ushort param_1, undefined4 param_2)
+
+{
+  uint uVar1;
+  
+  uVar1 = (uint)(*((ushort *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                 (short)(param_1 & 0xff) * 0x48 + 0x3e)))) * 100 >> 8;
+  if (0x9c3 < uVar1) {
+    uVar1 = 0x9c4;
+  }
+  FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0005344c) */
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53434(ushort param_1, undefined4 param_2)
+
+{
+  int iVar1;
+  
+  iVar1 = ((*((short *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                     (short)(param_1 & 0xff) * 0x48 + 0xc)))) * 1000) / 0x100;
+  if (iVar1 + -25000 < 0 == (iVar1 < 0 && -1 < iVar1 + -25000)) {
+    iVar1 = 25000;
+  }
+  if (iVar1 + 25000 < 0 != (-1 < iVar1 && iVar1 + 25000 < 0)) {
+    iVar1 = -25000;
+  }
+  FUN_0006a5ac((int)(short)iVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x00053488) */
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53470(ushort param_1, undefined4 param_2)
+
+{
+  int iVar1;
+  
+  iVar1 = (int)(short)(((*((short *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                                  (short)(param_1 & 0xff) * 0x48 + 8)))) * 0x168) / 0x400);
+  if (iVar1 + -0x7fff < 0 == (iVar1 < 0 && -1 < iVar1 + -0x7fff)) {
+    iVar1 = 0x7fff;
+  }
+  if (iVar1 + 0x7fff < 0 != (-1 < iVar1 && iVar1 + 0x7fff < 0)) {
+    iVar1 = -0x7fff;
+  }
+  FUN_0006a5ac(iVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_534ac(ushort param_1, undefined4 param_2)
+
+{
+  int iVar1;
+  
+  iVar1 = (int)(*((short *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                         (short)(param_1 & 0xff) * 0x48 + 0x40))));
+  if (iVar1 + -0x7ff < 0 == (iVar1 < 0 && -1 < iVar1 + -0x7ff)) {
+    iVar1 = 0x7ff;
+  }
+  if (iVar1 + 0x800 < 0 != (-1 < iVar1 && iVar1 + 0x800 < 0)) {
+    iVar1 = -0x800;
+  }
+  FUN_0006a5ac(iVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_534da(ushort param_1, undefined4 param_2)
+
+{
+  uint uVar1;
+  
+  uVar1 = (uint)(*((ushort *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                 (short)(param_1 & 0xff) * 0x48 + 10)))) * 100 >> 8;
+  if (0x9c3 < uVar1) {
+    uVar1 = 0x9c4;
+  }
+  FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53506(ushort param_1, undefined4 param_2)
+
+{
+  uint uVar1;
+  
+  uVar1 = (uint)(*((ushort *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                 (short)(param_1 & 0xff) * 0x48 + 0x36)))) * 100 >> 8;
+  if (0x9c3 < uVar1) {
+    uVar1 = 0x9c4;
+  }
+  FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
 /* WARNING: Removing unreachable block (ram,0x0005353a) */
 
 int FUN_00053532(short param_1)
@@ -5224,6 +5394,68 @@ int FUN_00053532(short param_1)
     iVar1 = -500;
   }
   return iVar1;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53558(undefined4 param_1, undefined4 param_2)
+
+{
+  int iVar1;
+  undefined4 uVar2;
+  int iVar3;
+  
+  iVar1 = (int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 222u))));
+  iVar3 = (int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 150u))));
+  if (iVar1 - iVar3 < 0 == (iVar1 < 0 != iVar3 < 0 && iVar3 < 0 == iVar1 - iVar3 < 0) &&
+      iVar1 != iVar3) {
+    iVar3 = iVar1;
+  }
+  uVar2 = FUN_00053532(iVar3);
+  FUN_0006a5ac(uVar2, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53578(undefined4 param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = 0x7fff;
+  if (f33_diagnostic_capture_slots[1].ecu_thermal_source != '\0') {
+    uVar1 = FUN_00053532((int)f33_diagnostic_capture_slots[1].ecu_thermal_estimate);
+  }
+  FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_5359a(undefined4 param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = 0x7fff;
+  if (f33_diagnostic_capture_slots[1].motor_thermal_active != '\0') {
+    uVar1 = FUN_00053532((int)f33_diagnostic_capture_slots[1].motor_thermal_estimate);
+  }
+  FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
 }
 
 
@@ -5247,6 +5479,70 @@ int FUN_00053608(short param_1)
 
 
 
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_5362e(undefined4 param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053608((int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 164u)))));
+  FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53644(undefined4 param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053608((int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 166u)))));
+  FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_5365a(undefined4 param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053608((int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 168u)))));
+  FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53670(undefined4 param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053608((int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 170u)))));
+  FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
 /* WARNING: Removing unreachable block (ram,0x0005368e) */
 
 int FUN_00053686(short param_1)
@@ -5266,6 +5562,57 @@ int FUN_00053686(short param_1)
 
 
 
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_536ac(ushort param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053686((int)(*((short *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                                      (short)(param_1 & 0xff) * 0x48 + 0x1c)))));
+  FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_536ca(ushort param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053686((int)(*((short *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                                      (short)(param_1 & 0xff) * 0x48 + 0x1e)))));
+  FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_536e8(ushort param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053686((int)(*((short *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                                      (short)(param_1 & 0xff) * 0x48 + 0x20)))));
+  FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
 uint FUN_00053706(uint param_1)
 
 {
@@ -5280,6 +5627,57 @@ uint FUN_00053706(uint param_1)
 
 
 
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53722(ushort param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053706((*((undefined2 *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                        (short)(param_1 & 0xff) * 0x48 + 0x28)))));
+  FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53740(ushort param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053706((*((undefined2 *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                        (short)(param_1 & 0xff) * 0x48 + 0x2a)))));
+  FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_5375e(ushort param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053706((*((undefined2 *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                        (short)(param_1 & 0xff) * 0x48 + 0x2c)))));
+  FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
 uint FUN_0005377c(uint param_1)
 
 {
@@ -5290,6 +5688,319 @@ uint FUN_0005377c(uint param_1)
     uVar1 = 10000;
   }
   return uVar1;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53794(ushort param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_0005377c((*((undefined2 *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                        (short)(param_1 & 0xff) * 0x48 + 0x10)))));
+  FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_537b2(ushort param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_0005377c((*((undefined2 *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                        (short)(param_1 & 0xff) * 0x48 + 0x12)))));
+  FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_537d0(ushort param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_0005377c((*((undefined2 *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                        (short)(param_1 & 0xff) * 0x48 + 0x14)))));
+  FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_537ee(ushort param_1, undefined4 param_2)
+
+{
+  uint uVar1;
+  
+  uVar1 = (uint)(*((ushort *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                 (short)(param_1 & 0xff) * 0x48 + 0x34)))) * 100 >> 8;
+  if (0x9c3 < uVar1) {
+    uVar1 = 0x9c4;
+  }
+  FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_5381a(ushort param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053686((int)(*((short *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                                      (short)(param_1 & 0xff) * 0x48 + 0x22)))));
+  FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53838(ushort param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053686((int)(*((short *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                                      (short)(param_1 & 0xff) * 0x48 + 0x24)))));
+  FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53856(ushort param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053686((int)(*((short *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                                      (short)(param_1 & 0xff) * 0x48 + 0x26)))));
+  FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53874(ushort param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053706((*((undefined2 *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                        (short)(param_1 & 0xff) * 0x48 + 0x2e)))));
+  FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53892(ushort param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053706((*((undefined2 *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                        (short)(param_1 & 0xff) * 0x48 + 0x30)))));
+  FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_538b0(ushort param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053706((*((undefined2 *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                        (short)(param_1 & 0xff) * 0x48 + 0x32)))));
+  FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_538ce(ushort param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_0005377c((*((undefined2 *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                        (short)(param_1 & 0xff) * 0x48 + 0x16)))));
+  FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_538ec(ushort param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_0005377c((*((undefined2 *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                        (short)(param_1 & 0xff) * 0x48 + 0x18)))));
+  FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_5390a(ushort param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_0005377c((*((undefined2 *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                        (short)(param_1 & 0xff) * 0x48 + 0x1a)))));
+  FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53928(ushort param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053686((int)(*((short *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                                      (short)(param_1 & 0xff) * 0x48 + 4)))));
+  FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53946(ushort param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053686((int)(*((short *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                                      (short)(param_1 & 0xff) * 0x48 + 6)))));
+  FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53964(ushort param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053686((int)(*((short *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                                      (short)(param_1 & 0xff) * 0x48 + 0xe)))));
+  FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53982(ushort param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053686((int)(*((short *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
+                                      (short)(param_1 & 0xff) * 0x48 + 0x3c)))));
+  FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_539a0(ushort param_1, undefined4 param_2)
+
+{
+  undefined *puVar1;
+  
+  puVar1 = ((undefined *)camry_host_ptr((uint32_t)((uint)*(ushort *)
+                   (f33_diagnostic_capture_slots[1].profile_prefix + (short)(param_1 & 0xff) * 0x48)
+            * 36000 >> 0x10)));
+  if ((uintptr_t)(((undefined *)camry_host_ptr(0x8c9fu)))<(uintptr_t)(puVar1)) {
+    puVar1 = ((undefined *)camry_host_ptr(0x8ca0u));
+  }
+  FUN_0006a574(camry_host_addr(puVar1), ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
 }
 
 
@@ -5358,6 +6069,87 @@ void FUN_00053a62(void)
 
 
 
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53a76(undefined4 param_1, undefined4 param_2)
+
+{
+  undefined2 uVar1;
+  
+  uVar1 = (*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 174u))));
+  if (29999 < (ushort)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 174u))))) {
+    (*((uint8_t *)((uint8_t *)&uVar1 + 0u))) = '0';
+    (*((uint8_t *)((uint8_t *)&uVar1 + 1u))) = 'u';
+  }
+  FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53a92(undefined4 param_1, undefined4 param_2)
+
+{
+  int iVar1;
+  
+  iVar1 = (int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 176u))));
+  if (iVar1 + -0x7fff < 0 == (iVar1 < 0 && -1 < iVar1 + -0x7fff)) {
+    iVar1 = 0x7fff;
+  }
+  if (iVar1 + 0x7fff < 0 != (-1 < iVar1 && iVar1 + 0x7fff < 0)) {
+    iVar1 = -0x7fff;
+  }
+  FUN_0006a5ac(iVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x00053ad8) */
+/* WARNING: Removing unreachable block (ram,0x00053acc) */
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53ab8(undefined4 param_1, undefined4 param_2)
+
+{
+  undefined2 *puVar1;
+  
+  puVar1 = ((undefined2 *)camry_host_ptr((uint32_t)((((int)((int)(short)f33_diagnostic_capture_slots[1].selected_sample * (uint)DAT_febee8a6
+                   ) / 0x2000) * 100) / 0x100)));
+  if ((int)0xffffb1e0u + (int)camry_host_addr(puVar1) < 0 ==
+      ((int)camry_host_addr(puVar1) < 0 && -1 < (int)0xffffb1e0u + (int)camry_host_addr(puVar1))) {
+    puVar1 = ((undefined2 *)camry_host_ptr((uint32_t)(0x4e20)));
+  }
+  if ((int)camry_host_addr((puVar1 + 10000)) < 0 != (-1 < (int)camry_host_addr(puVar1) && (int)camry_host_addr((puVar1 + 10000)) < 0)) {
+    puVar1 = ((undefined *)camry_host_ptr(0xffffb1e0u));
+  }
+  FUN_0006a5ac((int)(short)puVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53afc(undefined4 param_1, undefined4 param_2)
+
+{
+  FUN_0006a574((*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 148u)))), ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
 /* WARNING: Removing unreachable block (ram,0x00053b24) */
 
 int FUN_00053b1c(short param_1)
@@ -5373,6 +6165,102 @@ int FUN_00053b1c(short param_1)
     iVar1 = -0x7fff;
   }
   return iVar1;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53b42(undefined4 param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053b1c((int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 162u)))));
+  FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53b68(undefined4 param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053b1c((int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 158u)))));
+  FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53b8e(undefined4 param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053b1c((int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 154u)))));
+  FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53bb4(undefined4 param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053b1c((int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 172u)))));
+  FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53bda(undefined4 param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053b1c((int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 194u)))));
+  FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53c00(undefined4 param_1, undefined4 param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = FUN_00053b1c((int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 198u)))));
+  FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
 }
 
 
@@ -5425,6 +6313,58 @@ void f33_capture_slot_dispatch_53c68(undefined4 param_1,undefined4 param_2)
              ((uint)(ushort)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 206u)))) * 36000 >> 0x10);
   FUN_00070180((uint)(ushort)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 206u)))) * 36000 >> 0x10, camry_host_addr(((undefined *)camry_host_ptr(0x8ca0u))), &uStack_a);
   FUN_0006a574(uStack_a, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53c9a(undefined4 param_1, undefined4 param_2)
+
+{
+  FUN_0006a574((*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 208u)))), ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53caa(undefined4 param_1, undefined4 param_2)
+
+{
+  FUN_0006a574((*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 210u)))), ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53cba(undefined4 param_1, undefined4 param_2)
+
+{
+  FUN_0006a574((*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 212u)))), ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53cca(undefined4 param_1, undefined4 param_2)
+
+{
+  FUN_0006a574((*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 214u)))), ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
   return;
 }
 

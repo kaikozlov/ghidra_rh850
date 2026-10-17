@@ -489,6 +489,19 @@ uint FUN_00098850(uchar param_1,uchar param_2,ushort param_3,ushort param_4)
 
 
 
+/* Far-call trampoline: prepare {lp},0 / jarl 0x8E074 / dispose 0,{lp},lp; byte-verified against the
+   exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
+   machine-verified; target semantics not recovered. */
+
+void thunk_FUN_0008e074(undefined4 param_1, undefined4 param_2, undefined4 param_3)
+
+{
+  FUN_0008e074(param_1, ((uint *)camry_host_ptr((uint32_t)(param_2))),  param_3);
+  return;
+}
+
+
+
 /* Sequential initializer chain: 5 unconditional calls and no other statements; shape-verified. The
    called sequence is the function's entire behavior; chain family members differ in callee sets. */
 
@@ -1117,7 +1130,7 @@ undefined4 FUN_0009901a(int param_1,short param_2)
       uVar5 = 0x5a;
       local_18[1] = 0;
       FUN_00099004(*(undefined4 *)(((undefined *)camry_host_ptr(0x2b22cu)) + uVar6 * 8),auStack_14);
-      ((void)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x2b228u + (uint32_t)(uVar6 * 2) * 4u))))), thunk_FUN_00082288());
+      thunk_FUN_00082288((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x2b228u + (uint32_t)(uVar6 * 2) * 4u)))));
     }
     else {
       uVar4 = 0x22;
@@ -1137,7 +1150,7 @@ void FUN_00099126(int param_1,uint param_2,int param_3)
   for (uVar1 = 0; uVar1 < (param_2 & 0xff); uVar1 = uVar1 + 1) {
     (*((undefined1 *)camry_host_ptr((uint32_t)(uVar1 + param_3)))) = (*((undefined1 *)camry_host_ptr((uint32_t)(uVar1 + param_1))));
   }
-  ((void)((param_2 & 0xff) + param_1), thunk_FUN_00082288());
+  thunk_FUN_00082288((param_2 & 0xff) + param_1);
   return;
 }
 
@@ -1166,7 +1179,7 @@ uint FUN_00099226(int param_1,uint param_2)
     uVar2 = uVar2 + 1;
     DCRA1CIN = (*((uint *)camry_host_ptr((uint32_t)(iVar1 + param_1))));
   }
-  ((void)(uVar2 * 4 + param_1), thunk_FUN_00082288());
+  thunk_FUN_00082288(uVar2 * 4 + param_1);
   uVar2 = DCRA1COUT;
   return ~uVar2;
 }

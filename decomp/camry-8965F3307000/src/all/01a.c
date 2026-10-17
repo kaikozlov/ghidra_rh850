@@ -1682,6 +1682,25 @@ undefined4 FUN_0006a32c(ushort param_1,uint *param_2)
 
 
 
+void FUN_0006a3be(undefined2 param_1, undefined4 param_2)
+
+{
+  uint32_t puVar1;
+  int iVar2;
+  
+  puVar1 = 0x23dfcu;
+  iVar2 = 0;
+  if (DAT_00028fd6 != 'Z') {
+    iVar2 = ((void)(param_1), f33_return_const_0_6a328());
+  }
+  if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x51d8u + (uint32_t)((int)(puVar1 + 3)))))) == (code)0x5a) && (iVar2 == 0)) {
+    FUN_0006a32c(param_1, ((uint *)camry_host_ptr((uint32_t)(param_2))));
+  }
+  return;
+}
+
+
+
 /* Constant source: return 0; shape-classified from the canonical corpus. Callers receive this
    literal directly; its meaning is not recovered. */
 

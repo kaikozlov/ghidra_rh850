@@ -262,6 +262,26 @@ void FUN_000883a2(undefined1 param_1)
 
 
 
+void FUN_000883cc(undefined4 param_1)
+
+{
+  int iVar1;
+  int iVar2;
+  
+  iVar1 = FUN_0008ae2e(((undefined4 *)camry_host_ptr((uint32_t)(param_1))));
+  iVar2 = 0x9c4;
+  do {
+    if (iVar1 != 0) {
+      return;
+    }
+    iVar1 = FUN_0008af10();
+    iVar2 = iVar2 + -1;
+  } while (iVar2 != 0);
+  return;
+}
+
+
+
 void FUN_00088436(void)
 
 {

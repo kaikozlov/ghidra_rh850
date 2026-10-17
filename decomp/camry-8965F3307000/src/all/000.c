@@ -4052,3 +4052,31 @@ void FUN_00003f78(short param_1,int param_2)
 }
 
 
+
+bool FUN_00003f96(undefined1 param_1,uint param_2,undefined4 param_3,undefined4 param_4,
+                 byte *param_5,uint *param_6)
+
+{
+  short extraout_r6;
+  uint *extraout_r8;
+  byte *extraout_r9;
+  int iVar1;
+  uint uVar2;
+  uint uVar3;
+  
+  iVar1 = FUN_00003f60(param_1, (uint)(byte)param_2);
+  if (iVar1 != 0) {
+    FUN_00003f78((uint)(byte)param_1, (uint)(byte)param_2);
+    uVar3 = (param_2 & 0xff) + extraout_r6 * 3 & 0xff;
+    uVar2 = (*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xffd23400u + (uint32_t)(uVar3 * 4) * 32u))));
+    *extraout_r9 = (byte)(uVar2 >> 0x1f);
+    *extraout_r8 = uVar2 & 0x1fffffff;
+    *param_5 = (byte)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xffd23400u + (uint32_t)(uVar3 * 4) * 32u + 4u)))) >> 0x1c);
+    *param_6 = (*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xffd23400u + (uint32_t)(uVar3 * 4) * 32u + 12u))));
+    param_6[1] = (*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xffd23400u + (uint32_t)(uVar3 * 4) * 32u + 16u))));
+    (*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xffd201d8u + (uint32_t)(uVar3) * 4u)))) = 0xff;
+  }
+  return iVar1 == 0;
+}
+
+
