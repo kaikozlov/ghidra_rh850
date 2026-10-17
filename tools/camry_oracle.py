@@ -1142,7 +1142,21 @@ def _unbuffer_stderr() -> None:
         return
 
 
+def _bind_host(library: ctypes.CDLL) -> None:
+    u8p = ctypes.POINTER(ctypes.c_uint8)
+    u32 = ctypes.c_uint32
+    library.camry_host_reset.argtypes = []
+    library.camry_host_reset.restype = None
+    library.camry_host_add.argtypes = [u32, u8p, u32]
+    library.camry_host_add.restype = None
+    library.camry_host_ptr.argtypes = [u32]
+    library.camry_host_ptr.restype = u8p
+    library.camry_host_addr.argtypes = [ctypes.c_void_p]
+    library.camry_host_addr.restype = u32
+
+
 def _host_child(library: ctypes.CDLL, planned: Planned, scenario: dict, code: bytes) -> None:
+    _bind_host(library)
     mapped = materialize(scenario)
     code_view = view_of(bytearray(code))
     if mapped is None:
