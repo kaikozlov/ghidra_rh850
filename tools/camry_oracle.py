@@ -101,7 +101,7 @@ REASONS = {
     "harness-drift": "the machine's result does not match the harness interpreter, so the scenario window is not trusted",
     "host-unmapped": "the converted C dereferenced an address the scenario did not map",
     "host-fault": "the converted C aborted in the host check",
-    "host-link": "the converted closure does not link; the missing callee is outside this batch",
+    "host-link": "the converted closure calls a function that has no body and no prototype, so the host library cannot link it",
     "host-compile": "the converted body does not compile in the host check",
     "trace-cap": "the machine stopped recording memory accesses at 4096, so the write set is incomplete",
     "dropped-return": "this function writes r10 and the converted C is void; a callee's leftover r10 is not a return",
@@ -1042,18 +1042,34 @@ def _sim_chunks(paths: list[Path]) -> list[dict]:
     return reports
 
 
-def _compile(directory: Path, names: list[str], bodies: dict[str, str]) -> tuple[ctypes.CDLL | None, str]:
+def _compile(
+    directory: Path,
+    names: list[str],
+    bodies: dict[str, str],
+    stubs: dict[str, str] | None = None,
+) -> tuple[ctypes.CDLL | None, str]:
     source = directory / "candidates.c"
-    support = directory / "support.c"
+    stub_path = directory / "stubs.c"
     library = directory / "liboracle.dylib"
-    support.write_text(
-        "unsigned camry_gp, camry_tp, camry_sp, camry_pmr;\n",
-        encoding="utf-8",
-    )
+    defined = _src_definitions()
     parts = ['#include "common.h"', ""]
+    emitted = set()
     for name in names:
+        if name in defined or name in emitted or name not in bodies:
+            continue
+        emitted.add(name)
         parts.append(bodies[name])
     source.write_text("\n".join(parts) + "\n", encoding="utf-8")
+    stub_text = ['#include <stdlib.h>', '#include "common.h"', ""]
+    for name, signature in sorted((stubs or {}).items()):
+        if name in defined or name in emitted:
+            continue
+        stub_text.append(signature.rstrip())
+        stub_text.append("{")
+        stub_text.append("  abort();")
+        stub_text.append("}")
+        stub_text.append("")
+    stub_path.write_text("\n".join(stub_text) + "\n", encoding="utf-8")
     result = subprocess.run(
         [
             "cc", "-std=c11", "-O2", "-Wall", "-Wextra", "-Werror", "-fwrapv",
@@ -1068,7 +1084,8 @@ def _compile(directory: Path, names: list[str], bodies: dict[str, str]) -> tuple
             "-I", str(ROOT / "include"),
             "-I", str(ROOT / "src" / "all"),
             "-dynamiclib", "-o", str(library),
-            str(source), str(support), str(HOST_MEM),
+            str(source), str(stub_path), str(HOST_MEM),
+            *[str(path) for path in _src_paths()],
         ],
         text=True,
         capture_output=True,
@@ -1129,7 +1146,7 @@ def _defined_lines(text: str) -> set[str]:
     while index < len(lines):
         raw = lines[index]
         index += 1
-        if not raw or raw[0] in " \t#/*}":
+        if not raw or raw[0] in " \t#/*}" or raw.startswith("static"):
             continue
         buf = raw.strip()
         while index < len(lines) and "{" not in buf and ";" not in buf:
@@ -1154,13 +1171,57 @@ def _defined_lines(text: str) -> set[str]:
     return names
 
 
+def _src_paths() -> list[Path]:
+    return sorted(path for path in (ROOT / "src").glob("*.c") if path.name != "oracle.c")
+
+
 def _src_definitions() -> set[str]:
+    cached = getattr(_src_definitions, "cached", None)
+    if cached is not None:
+        return cached
     names: set[str] = set()
-    for path in (ROOT / "src").glob("*.c"):
-        if path.name == "oracle.c":
-            continue
+    for path in _src_paths():
         names.update(_defined_lines(path.read_text(encoding="utf-8")))
+    _src_definitions.cached = names
     return names
+
+
+def _prototypes() -> dict[str, str]:
+    """Declarator text from common.h, without the trailing semicolon."""
+    header = ROOT / "src" / "all" / "common.h"
+    if not header.exists():
+        return {}
+    found: dict[str, str] = {}
+    buf = ""
+    for line in header.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if not buf and (
+            not stripped
+            or stripped.startswith(("#", "//", "/*", "*"))
+            or stripped.startswith(("typedef", "struct", "enum", "union"))
+        ):
+            continue
+        buf = f"{buf} {stripped}".strip()
+        if not buf.endswith(";"):
+            if len(buf) > 800:
+                buf = ""
+            continue
+        match = re.search(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\([^;]*\)\s*;$", buf)
+        if match:
+            found[match.group(1)] = buf[:-1].rstrip()
+        buf = ""
+    return found
+
+
+def _undefined_symbols(log: str) -> list[str]:
+    missing = re.findall(r'"_([^"]+)", referenced from:', log)
+    if not missing:
+        missing = re.findall(r"undefined reference to [`']_?([^']+)'", log)
+    seen: list[str] = []
+    for name in missing:
+        if name not in seen:
+            seen.append(name)
+    return seen
 
 
 def _macro_names() -> set[str]:
@@ -1341,10 +1402,33 @@ def _host_compare(
     return "host-fault"
 
 
+def _reachable_stubs(
+    planned: list[tuple[Planned, list[dict]]],
+    support: list[str],
+    bodies: dict[str, str],
+    stubs: dict[str, str],
+) -> list[str]:
+    wanted: list[str] = []
+    seen: set[str] = set()
+    pending = list(support) + [item.name for item, _rows in planned]
+    while pending:
+        name = pending.pop()
+        if name in seen:
+            continue
+        seen.add(name)
+        for callee in _c_calls(bodies.get(name, "")):
+            if callee in stubs and callee not in wanted:
+                wanted.append(callee)
+            elif callee in bodies:
+                pending.append(callee)
+    return wanted
+
+
 def _promote(
     planned: list[tuple[Planned, list[dict]]],
     support: list[str],
     bodies: dict[str, str],
+    stubs: dict[str, str] | None = None,
 ) -> None:
     oracle_path = ROOT / "src" / "oracle.c"
     existing = oracle_path.read_text(encoding="utf-8") if oracle_path.exists() else '#include "common.h"\n'
@@ -1363,6 +1447,17 @@ def _promote(
             continue
         parts.append(item.body.rstrip())
         parts.append("")
+        have.add(item.name)
+    for name in _reachable_stubs(planned, support, bodies, stubs or {}):
+        if name in have:
+            continue
+        signature = stubs[name]
+        parts.append(signature.rstrip())
+        parts.append("{")
+        parts.append("  __builtin_trap();")
+        parts.append("}")
+        parts.append("")
+        have.add(name)
     oracle_path.write_text("\n".join(parts).rstrip() + "\n", encoding="utf-8")
 
     matched_path = ROOT / "matched.jsonl"
@@ -1429,6 +1524,7 @@ def _keep_verified(
     macros: set[str],
     reject,
     examples: dict[str, str],
+    stubs: dict[str, str] | None = None,
 ) -> list[tuple[Planned, list[dict]]]:
     if not passed:
         return []
@@ -1442,7 +1538,7 @@ def _keep_verified(
     if not runnable:
         return []
     _restore(snapshots)
-    _promote(runnable, support, bodies)
+    _promote(runnable, support, bodies, stubs)
     error = _verify()
     if error is None:
         return runnable
@@ -1470,7 +1566,7 @@ def _keep_verified(
             examples["verifier"] = error[:180]
             rest = [(item, rows) for item, rows in runnable if item not in bad]
             return _keep_verified(
-                rest, snapshots, bodies, defined, symbols, macros, reject, examples,
+                rest, snapshots, bodies, defined, symbols, macros, reject, examples, stubs,
             )
     named = [item for item, _rows in runnable if item.name in error]
     if named and len(named) < len(runnable):
@@ -1478,15 +1574,15 @@ def _keep_verified(
             reject("verifier", item.name, address=item.address)
         examples["verifier"] = error[:180]
         rest = [(item, rows) for item, rows in runnable if item not in named]
-        return _keep_verified(rest, snapshots, bodies, defined, symbols, macros, reject, examples)
+        return _keep_verified(rest, snapshots, bodies, defined, symbols, macros, reject, examples, stubs)
     if len(runnable) == 1 or "FAIL " not in error:
         for item, _rows in runnable:
             reject("verifier", item.name, address=item.address)
         examples["verifier"] = error[:180]
         return []
     mid = len(runnable) // 2
-    left = _keep_verified(runnable[:mid], snapshots, bodies, defined, symbols, macros, reject, examples)
-    right = _keep_verified(runnable[mid:], snapshots, bodies, defined, symbols, macros, reject, examples)
+    left = _keep_verified(runnable[:mid], snapshots, bodies, defined, symbols, macros, reject, examples, stubs)
+    right = _keep_verified(runnable[mid:], snapshots, bodies, defined, symbols, macros, reject, examples, stubs)
     return left + right
 
 
@@ -1603,15 +1699,35 @@ def run_oracles() -> int:
     needed = _body_closure([item.name for item in planned], bodies)
     # Keep only roots whose whole executed closure is in the compiled set.
     dropped: set[str] = set()
+    stubs: dict[str, str] = {}
+    prototypes = _prototypes()
     with tempfile.TemporaryDirectory(prefix="camry-oracle-") as directory:
         directory_path = Path(directory)
         def fit(names: list[str]) -> tuple[ctypes.CDLL | None, list[str]]:
             names = [name for name in names if name not in dropped]
             if not names:
                 return None, []
-            compiled, log = _compile(directory_path, names, bodies)
+            compiled, log = _compile(directory_path, names, bodies, stubs)
             if compiled is not None:
                 return compiled, names
+            missing = _undefined_symbols(log)
+            defined_now = _src_definitions()
+            extra = [
+                name for name in missing
+                if name in bodies and name not in defined_now
+                and name not in dropped and name not in names
+            ]
+            if extra:
+                return fit(names + extra)
+            fresh = {
+                name: prototypes[name]
+                for name in missing
+                if name not in bodies and name not in defined_now
+                and name not in stubs and name in prototypes
+            }
+            if fresh:
+                stubs.update(fresh)
+                return fit(names)
             linked = _drop_unlinked(names, bodies, log)
             if linked:
                 for name in linked:
@@ -1732,10 +1848,12 @@ def run_oracles() -> int:
         path: path.read_text(encoding="utf-8") if path.exists() else None
         for path in (ROOT / "matched.jsonl", ROOT / "oracles.jsonl", ROOT / "src" / "oracle.c")
     }
-    defined = _src_definitions()
+    defined = _src_definitions() | set(stubs)
     symbols_names = {row["name"] for row in symbols}
     macros = _macro_names()
-    final = _keep_verified(passed, snapshots, bodies, defined, symbols_names, macros, reject, examples)
+    final = _keep_verified(
+        passed, snapshots, bodies, defined, symbols_names, macros, reject, examples, stubs,
+    )
     _restore(snapshots)
     if not final:
         _print_summary(verified, converted, unconvertible, counts, examples, 0, fail)
@@ -1747,7 +1865,7 @@ def run_oracles() -> int:
         if item.name not in kept:
             reject("host-link", item.name, address=item.address)
     final = [(item, rows) for item, rows in final if item.name in kept]
-    _promote(final, support, bodies)
+    _promote(final, support, bodies, stubs)
     verifier = _verify()
     if verifier is not None:
         _restore(snapshots)
