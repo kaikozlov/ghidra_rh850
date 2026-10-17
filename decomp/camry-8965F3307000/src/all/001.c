@@ -316,6 +316,36 @@ uint f33_boot_program_input_has_insufficient_space(ushort requested_length)
 
 
 
+/* Ifnonzero2994 lies in[currentblock,nextboundary), stage32-bitcounter+1modulo32
+   then63FFFFFFFFwords in29A0;return0. Otherwisereturn1unchanged. Counterblockpreservation,
+   notrequestpayload. */
+
+uint f33_boot_stage_preserved_program_counter(void)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  uint uVar4;
+  
+  uVar4 = 1;
+  if ((((*((volatile uint32_t *)camry_host_ptr(0xfebe4994u))) != 0) && ((*((volatile uint32_t *)camry_host_ptr(0xfebe4980u))) <= (*((volatile uint32_t *)camry_host_ptr(0xfebe4994u))))) &&
+     ((*((volatile uint32_t *)camry_host_ptr(0xfebe4994u))) < (*((volatile uint32_t *)camry_host_ptr(0xfebe4988u))))) {
+    (*((volatile uint32_t *)camry_host_ptr(0xfebe49a0u))) = (*((volatile int32_t *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr(0xfebe4994u))))))) + 1;
+    iVar3 = 1;
+    do {
+      (*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xfebe49a0u + (uint32_t)(iVar3) * 4u)))) = 0xffffffff;
+      iVar2 = iVar3 + 1;
+      iVar1 = iVar3 + -0x3f;
+      iVar3 = iVar2;
+    } while (((iVar1 < 0) || (iVar2 < 0)));
+    uVar4 = 0;
+  }
+  return uVar4;
+}
+
+
+
 /* Skipcallbackonlyif34DA(currentblock)==1. Otherwise42F6 optionallystagescounter;
    call[FEBF0FD0](block,0,1,&status), thenonstatus0 andstagedcounter call(pointer,29A0,0,&status).
    Any nonzero statusreturns1, else0. Boot-phase dynamicdriverboundary; overlapping

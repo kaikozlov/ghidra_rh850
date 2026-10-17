@@ -3731,6 +3731,36 @@ uint f33_dcm_check_communication_application_admission
 }
 
 
+/* Actual26B18[26h]callback at26BB0;resume5DF8/5DF2/5DF3. Event26hnotahardwaretimer. */
+
+void f33_dcm_resume_queued_communication_request(void)
+
+{
+  uint uVar1;
+  ushort node;
+  
+  if (f33_dcm_communication_lifetime.subfunction < 6) {
+    uVar1 = *((uint8_t *)camry_host_ptr((uint32_t)(f33_dcm_communication_lifetime.retained_message.request))) & 0xf;
+    if (uVar1 - 1 < 3) {
+      node = 0;
+      if (f33_dcm_communication_lifetime.subfunction == '\x04' ||
+          f33_dcm_communication_lifetime.subfunction == '\x05') {
+        node = CONCAT11(((uint8_t *)camry_host_ptr((uint32_t)(f33_dcm_communication_lifetime.retained_message.request)))[1],
+                        ((uint8_t *)camry_host_ptr((uint32_t)(f33_dcm_communication_lifetime.retained_message.request)))[2]);
+      }
+      f33_dcm_complete_or_queue_communication_request
+                ((uchar)((int)(uint)*((uint8_t *)camry_host_ptr((uint32_t)(f33_dcm_communication_lifetime.retained_message.request))) >> 4),
+                 f33_dcm_communication_lifetime.subfunction,node,
+                 (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x261abu + (uint32_t)((short)(ushort)f33_dcm_communication_lifetime.subfunction * 3 + uVar1) * 1u)))),
+                 f33_dcm_communication_lifetime.resume_row);
+    }
+  }
+  return;
+}
+
+
+
+
 
 uint FUN_00097128(uchar param_1,uchar param_2)
 

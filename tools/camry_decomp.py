@@ -1003,6 +1003,10 @@ def _expr_kind(
         return field_kind
     if name in functions and name not in pointers and name not in integers:
         return "pointer" if not rest else "unknown"
+    # A uint32 slot macro is the firmware pointer word, even when the
+    # decompiler also subscripts it. `(int)DAT` is that word, not a host pointer.
+    if not rest and name in _uint32_slot_names():
+        return "integer"
     if name in pointers or name in arrays or name in integers or name.startswith(("DAT_", "UNK_", "PTR_")):
         if not rest:
             if name in pointers or name in arrays:
@@ -5530,6 +5534,442 @@ def _rewrite_loaded_pointer_subscripts(code: str) -> str:
     return "".join(pieces)
 
 
+_POINTEE_WIDTH = {
+    "char": ("uint8_t", 1),
+    "byte": ("uint8_t", 1),
+    "uchar": ("uint8_t", 1),
+    "undefined1": ("uint8_t", 1),
+    "undefined": ("uint8_t", 1),
+    "code": ("uint8_t", 1),
+    "ushort": ("uint16_t", 2),
+    "short": ("int16_t", 2),
+    "undefined2": ("uint16_t", 2),
+    "int": ("int32_t", 4),
+    "uint": ("uint32_t", 4),
+    "undefined4": ("uint32_t", 4),
+    "ulong": ("uint32_t", 4),
+    "long": ("int32_t", 4),
+    "unsigned int": ("uint32_t", 4),
+}
+_POINTEE_ALT = (
+    "undefined1|undefined2|undefined4|unsigned int|undefined|uchar|ushort|ulong|"
+    "byte|char|code|short|uint|int|long"
+)
+_BYTE_DECL = re.compile(
+    r"^(?:(?:static|const|volatile|extern|unsigned|signed)\s+)*"
+    r"(char|byte|uchar|undefined1|undefined)\s+(.+)$"
+)
+
+
+def _is_deref_star(code: str, index: int) -> bool:
+    if index < 0 or index >= len(code) or code[index] != "*":
+        return False
+    prev = index - 1
+    while prev >= 0 and code[prev] in " \t":
+        prev -= 1
+    if prev < 0:
+        return True
+    # `(byte)*slot` is a dereference. `) * slot` is multiplication.
+    if code[prev] == ")":
+        return code[index - 1] == ")"
+    return code[prev] in "\n;{}(,=*&!~?:["
+
+
+def _stored_pointer_pointees(code: str) -> dict[str, tuple[str, int]]:
+    """`(char *)` / `(int *)` on a uint32 slot is the width of `*slot`."""
+    slots = _uint32_slot_names()
+    found: dict[str, tuple[str, int] | None] = {}
+
+    def add(name: str, type_name: str) -> None:
+        width = _POINTEE_WIDTH.get(type_name)
+        if width is None or name not in slots:
+            return
+        previous = found.get(name, width)
+        found[name] = width if previous == width else None
+
+    compared = re.compile(
+        rf"\b([A-Za-z_][A-Za-z0-9_]*)\s*(?:==|!=|<=|>=|<|>)\s*"
+        rf"\(\s*({_POINTEE_ALT})\s*\*\s*\)\s*(?:0x0+|0+)\b"
+    )
+    compared_left = re.compile(
+        rf"\(\s*({_POINTEE_ALT})\s*\*\s*\)\s*(?:0x0+|0+)\s*"
+        rf"(?:==|!=|<=|>=|<|>)\s*([A-Za-z_][A-Za-z0-9_]*)\b"
+    )
+    cast = re.compile(
+        rf"\(\s*({_POINTEE_ALT})\s*\*\s*\)\s*([A-Za-z_][A-Za-z0-9_]*)\b"
+    )
+    for match in compared.finditer(code):
+        add(match.group(1), match.group(2))
+    for match in compared_left.finditer(code):
+        add(match.group(2), match.group(1))
+    for match in cast.finditer(code):
+        add(match.group(2), match.group(1))
+    return {name: width for name, width in found.items() if width is not None}
+
+
+def _byte_destinations(code: str) -> dict[str, tuple[str, int]]:
+    found: dict[str, tuple[str, int]] = {}
+    widths = {
+        "char": ("uint8_t", 1),
+        "byte": ("uint8_t", 1),
+        "uchar": ("uint8_t", 1),
+        "undefined1": ("uint8_t", 1),
+        "undefined": ("uint8_t", 1),
+    }
+    for line in code.splitlines():
+        text = line.strip()
+        if not text.endswith(";") or "(" in text:
+            continue
+        match = _BYTE_DECL.match(text[:-1].strip())
+        if match is None:
+            continue
+        width = widths[match.group(1)]
+        for part in match.group(2).split(","):
+            name = re.match(r"\s*([A-Za-z_][A-Za-z0-9_]*)\s*$", part.split("=", 1)[0])
+            if name:
+                found[name.group(1)] = width
+    for name, _address, expansion in _named_macros():
+        match = re.match(r"\(\*\(\(volatile\s+(uint8_t|int8_t)\s+\*\)", expansion)
+        if match:
+            found[name] = (match.group(1), 1)
+    return found
+
+
+def _value_cast_width(code: str, star: int) -> tuple[str, int] | None:
+    """`(byte)*slot` names the load width. A widening `(uint)*` does not."""
+    index = star - 1
+    while index >= 0 and code[index] in " \t\n\r":
+        index -= 1
+    if index < 0 or code[index] != ")":
+        return None
+    depth = 0
+    cursor = index
+    while cursor >= 0:
+        if code[cursor] == ")":
+            depth += 1
+        elif code[cursor] == "(":
+            depth -= 1
+            if depth == 0:
+                inner = " ".join(code[cursor + 1:index].split())
+                if "*" in inner:
+                    return None
+                width = _POINTEE_WIDTH.get(inner)
+                if width is not None and width[1] <= 2:
+                    return width
+                return None
+        cursor -= 1
+    return None
+
+
+def _compared_with_char(code: str, end: int) -> bool:
+    nxt = _skip_space(code, end)
+    if not code.startswith(("==", "!="), nxt):
+        return False
+    rhs = _skip_space(code, nxt + 2)
+    return re.match(r"'(?:\\.|[^'\\])'", code[rhs:]) is not None
+
+
+def _assigned_byte(code: str, star: int, destinations: dict[str, tuple[str, int]]) -> tuple[str, int] | None:
+    index = star - 1
+    while index >= 0 and code[index] in " \t\n\r":
+        index -= 1
+    if index < 1 or code[index] != "=" or code[index - 1] in "=!<>":
+        return None
+    cursor = index - 1
+    while cursor >= 0 and code[cursor] in " \t\n\r":
+        cursor -= 1
+    end = cursor + 1
+    while cursor >= 0 and (code[cursor].isalnum() or code[cursor] == "_"):
+        cursor -= 1
+    name = code[cursor + 1:end]
+    if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", name):
+        return None
+    bound = cursor
+    while bound >= 0 and code[bound] in " \t\n\r":
+        bound -= 1
+    if bound >= 0 and code[bound] not in ";{},(":
+        return None
+    return destinations.get(name)
+
+
+def _load_is_whole_rhs(code: str, end: int) -> bool:
+    nxt = _skip_space(code, end)
+    return nxt >= len(code) or code[nxt] in ";,)"
+
+
+def _anon_load_width(
+    code: str, star: int, end: int, destinations: dict[str, tuple[str, int]],
+) -> tuple[str, int] | None:
+    cast = _value_cast_width(code, star)
+    if cast is not None:
+        return cast
+    if _compared_with_char(code, end):
+        return ("uint8_t", 1)
+    if _load_is_whole_rhs(code, end):
+        assigned = _assigned_byte(code, star, destinations)
+        if assigned is not None and assigned[1] == 1:
+            return assigned
+    return None
+
+
+def _typed_load(addr: str, ctype: str) -> str:
+    return f"(*((volatile {ctype} *)camry_host_ptr((uint32_t)({addr}))))"
+
+
+def _slot_deref(code: str, star: int, slots: set[str]) -> tuple[str, int] | None:
+    at = _skip_space(code, star + 1)
+    match = re.match(r"[A-Za-z_][A-Za-z0-9_]*", code[at:])
+    if match is None or match.group(0) not in slots:
+        return None
+    end = at + match.end()
+    nxt = _skip_space(code, end)
+    if nxt < len(code) and code[nxt] == "[":
+        return None
+    return match.group(0), end
+
+
+def _word_deref(code: str, star: int) -> int | None:
+    at = _skip_space(code, star + 1)
+    if at >= len(code) or code[at] != "(":
+        return None
+    try:
+        end = _match_paren(code, at)
+    except ValueError:
+        return None
+    if _is_word_load(code[at:end + 1]):
+        return end + 1
+    return None
+
+
+def _slot_widths(
+    code: str,
+    pointees: dict[str, tuple[str, int]],
+    destinations: dict[str, tuple[str, int]],
+) -> dict[str, tuple[str, int]]:
+    slots = _uint32_slot_names()
+    widths = {name: width for name, width in pointees.items() if name in slots}
+    conflicts: set[str] = set()
+    index = 0
+    while index < len(code):
+        if not _is_deref_star(code, index):
+            index += 1
+            continue
+        parsed = _slot_deref(code, index, slots)
+        if parsed is None:
+            index += 1
+            continue
+        name, end = parsed
+        width = pointees.get(name) or _anon_load_width(code, index, end, destinations)
+        if width is not None:
+            previous = widths.get(name)
+            if previous is not None and previous != width:
+                conflicts.add(name)
+            else:
+                widths[name] = width
+        index = end
+    for name in conflicts:
+        widths.pop(name, None)
+    return widths
+
+
+def _rewrite_stored_pointer_loads(code: str, pointees: dict[str, tuple[str, int]]) -> str:
+    """`*DAT` and `*(&PTR)[i]` load through the pointer word those expressions are.
+
+    The slot macro is already the firmware address. The width is the pointer
+    cast, a `(byte)*` cast, a character compare, or a byte destination.
+    """
+    destinations = _byte_destinations(code)
+    widths = _slot_widths(code, pointees, destinations)
+    slots = set(widths)
+    spans = _comment_spans(code)
+    pieces: list[str] = []
+    cursor = 0
+    index = 0
+    while index < len(code):
+        if _span_contains(spans, index):
+            index += 1
+            continue
+        if _is_deref_star(code, index):
+            parsed = _slot_deref(code, index, slots)
+            if parsed is not None:
+                name, end = parsed
+                pieces.append(code[cursor:index])
+                pieces.append(_typed_load(name, widths[name][0]))
+                cursor = end
+                index = end
+                continue
+            word_end = _word_deref(code, index)
+            if word_end is not None:
+                width = _anon_load_width(code, index, word_end, destinations)
+                if width is not None:
+                    at = _skip_space(code, index + 1)
+                    pieces.append(code[cursor:index])
+                    pieces.append(_typed_load(code[at:word_end], width[0]))
+                    cursor = word_end
+                    index = word_end
+                    continue
+        if index == 0 or not (code[index - 1].isalnum() or code[index - 1] == "_"):
+            match = re.match(r"[A-Za-z_][A-Za-z0-9_]*", code[index:])
+            if (
+                match is not None
+                and match.group(0) in widths
+                and not _amp_before(code, index)
+            ):
+                name = match.group(0)
+                nxt = _skip_space(code, index + len(name))
+                if nxt < len(code) and code[nxt] == "[":
+                    try:
+                        end = _match_bracket(code, nxt)
+                    except ValueError:
+                        end = -1
+                    if end >= 0:
+                        inner = _rewrite_stored_pointer_loads(code[nxt + 1:end], pointees)
+                        ctype, size = widths[name]
+                        pieces.append(code[cursor:index])
+                        pieces.append(_typed_load(
+                            f"({name}) + (uint32_t)({inner}) * {size}u",
+                            ctype,
+                        ))
+                        cursor = end + 1
+                        index = cursor
+                        continue
+        index += 1
+    pieces.append(code[cursor:])
+    return "".join(pieces)
+
+
+def _amp_before(code: str, index: int) -> bool:
+    cursor = index - 1
+    while cursor >= 0 and code[cursor] in " \t\n\r":
+        cursor -= 1
+    return cursor >= 0 and code[cursor] == "&"
+
+
+def _find_field(struct: dict | None, name: str) -> dict | None:
+    if struct is None:
+        return None
+    for field in struct["fields"]:
+        if field["name"] == name:
+            return field
+    return None
+
+
+def _receiver_chain(code: str, op_at: int) -> tuple[int, list[tuple[str, str]]] | None:
+    """Fields before the operator at `op_at`, root first."""
+    index = op_at - 1
+    while index >= 0 and code[index] in " \t\n\r":
+        index -= 1
+    parts: list[tuple[str, str]] = []
+    while index >= 0:
+        end = index + 1
+        while index >= 0 and (code[index].isalnum() or code[index] == "_"):
+            index -= 1
+        name = code[index + 1:end]
+        if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", name):
+            return None
+        cursor = index
+        while cursor >= 0 and code[cursor] in " \t\n\r":
+            cursor -= 1
+        if cursor >= 1 and code.startswith("->", cursor - 1):
+            parts.append(("->", name))
+            index = cursor - 2
+            while index >= 0 and code[index] in " \t\n\r":
+                index -= 1
+            continue
+        if cursor >= 0 and code[cursor] == ".":
+            parts.append((".", name))
+            index = cursor - 1
+            while index >= 0 and code[index] in " \t\n\r":
+                index -= 1
+            continue
+        parts.append(("", name))
+        parts.reverse()
+        return index + 1, parts
+    return None
+
+
+def _chain_struct(
+    parts: list[tuple[str, str]],
+    var_types: dict[str, str],
+    struct_pointers: set[str],
+    structs: dict[str, dict],
+) -> str | None:
+    if not parts or parts[0][0] != "":
+        return None
+    current = var_types.get(parts[0][1])
+    if current is None:
+        return None
+    current_ptr = parts[0][1] in struct_pointers
+    for op, name in parts[1:]:
+        if (current_ptr and op != "->") or (not current_ptr and op != "."):
+            return None
+        field = _find_field(structs.get(current), name)
+        if field is None:
+            return None
+        base, stars, array = _ghidra_base(field["type"])
+        if stars or array or base not in structs:
+            return None
+        current = base
+        current_ptr = False
+    if current_ptr:
+        return None
+    return current
+
+
+def _rewrite_nested_pointer_fields(code: str) -> str:
+    """`obj.nested.pointer_field[i]` uses the layout pointee, one field past a struct."""
+    pointed = _pointer_field_types()
+    if not pointed:
+        return code
+    by_field: dict[str, dict[str, str]] = {}
+    for (struct, field), element in pointed.items():
+        by_field.setdefault(field, {})[struct] = element
+    var_types, struct_pointers = _struct_bindings(code)
+    if not var_types:
+        return code
+    structs = _struct_rows()
+    pattern = re.compile(
+        r"(?:->|\.)\s*("
+        + "|".join(re.escape(name) for name in sorted(by_field, key=len, reverse=True))
+        + r")\b"
+    )
+    spans = _comment_spans(code)
+    pieces: list[str] = []
+    cursor = 0
+    for match in pattern.finditer(code):
+        if match.start() < cursor or _span_contains(spans, match.start()):
+            continue
+        if _enclosing_call(code, match.start(), "camry_host_ptr"):
+            continue
+        chain = _receiver_chain(code, match.start())
+        if chain is None:
+            continue
+        start, parts = chain
+        if len(parts) < 2:
+            continue
+        struct = _chain_struct(parts, var_types, struct_pointers, structs)
+        element = by_field[match.group(1)].get(struct) if struct else None
+        if element is None:
+            continue
+        nxt = _skip_space(code, match.end())
+        star = start - 1
+        while star >= 0 and code[star] in " \t\n\r":
+            star -= 1
+        deref = star >= 0 and _is_deref_star(code, star)
+        arithmetic = (
+            nxt < len(code)
+            and code[nxt] in "+-"
+            and not (nxt + 1 < len(code) and code[nxt + 1] in "=+-")
+        )
+        if not (deref or arithmetic or (nxt < len(code) and code[nxt] == "[")):
+            continue
+        pieces.append(code[cursor:start])
+        pieces.append(_host_pointer(code[start:match.end()], element))
+        cursor = match.end()
+    pieces.append(code[cursor:])
+    return "".join(pieces)
+
+
 def _rewrite_body(code: str) -> str:
     code = _strip_calling_convention(code)
     code = _widen_signature(code)
@@ -5561,9 +6001,12 @@ def _rewrite_body(code: str) -> str:
     code = _rewrite_struct_fields(code)
     code = _rewrite_pointer_assignments(code)
     code = _rewrite_indirect_calls(code)
+    pointees = _stored_pointer_pointees(code)
     code = _rewrite_pointer_compares(code, pointers)
     code = _rewrite_wide_call_constants(code)
     code = _rewrite_icus(code)
+    code = _rewrite_nested_pointer_fields(code)
+    code = _rewrite_stored_pointer_loads(code, pointees)
     code = _rewrite_runtime_gp(code)
     code = _rewrite_signed_values(code)
     code = _rewrite_system_inputs(code)
@@ -6369,6 +6812,21 @@ def _uint32_array_names() -> set[str]:
         for name, _address, expansion in _named_macros()
         if expansion.startswith("((volatile uint32_t *)camry_host_ptr(")
     }
+
+
+_UINT32_SLOTS: set[str] | None = None
+
+
+def _uint32_slot_names() -> set[str]:
+    """common.h macros that load one stored pointer word."""
+    global _UINT32_SLOTS
+    if _UINT32_SLOTS is None:
+        _UINT32_SLOTS = {
+            name
+            for name, _address, expansion in _named_macros()
+            if expansion.startswith("(*((volatile uint32_t *)camry_host_ptr(")
+        }
+    return _UINT32_SLOTS
 
 
 def _split_additive(text: str) -> list[str]:
