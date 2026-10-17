@@ -408,6 +408,29 @@ void FUN_0007840c(void)
 
 
 
+void FUN_0007841e(void)
+
+{
+  if (0 < DAT_febf6c20) {
+    DAT_febf6c20 = DAT_febf6c20 - (uint)DAT_0002792a;
+    if (0 < DAT_febf6c20) {
+      return;
+    }
+    FUN_00077ce8();
+    FUN_00077d14(0xfffa);
+    f33_nvm_finish_physical_result();
+    if (0 < DAT_febf6c20) {
+      return;
+    }
+  }
+  f33_fill_constant_block_781e4();
+  FUN_000782de();
+  FUN_00074e94();
+  return;
+}
+
+
+
 void FUN_00078466(void)
 
 {
@@ -1718,11 +1741,10 @@ void FUN_00079388(void)
 
 
 
-void FUN_0007939c(undefined2 param_1,undefined1 param_2,undefined1 param_3,undefined1 param_4)
+undefined4 FUN_0007939c(undefined2 param_1,undefined1 param_2,undefined1 param_3,undefined1 param_4)
 
 {
-  FUN_00074efe(param_1,param_2,param_3,param_4);
-  return;
+  return FUN_00074efe(param_1,param_2,param_3,param_4);
 }
 
 
@@ -2070,6 +2092,44 @@ void FUN_000796f4(uint param_1)
 
 
 
+undefined4 FUN_00079780(uint param_1,undefined2 *param_2)
+
+{
+  int iVar1;
+  undefined4 uVar2;
+  
+  param_1 = param_1 & 0xff;
+  uVar2 = 1;
+  iVar1 = FUN_00079848((uint)(byte)param_1, camry_host_addr(param_2));
+  if ((iVar1 == 0) &&
+     (((param_1 - 6 < 3 || (param_1 == 0xc || param_1 == 0xd)) || (param_1 - 0x16 < 3)))) {
+    *param_2 = DAT_febf6cbc;
+    *(uint *)(param_2 + 2) = f33_nvm_service_diagnostic_mask;
+    uVar2 = 0;
+  }
+  return uVar2;
+}
+
+
+
+undefined4 FUN_000797c2(char param_1,undefined2 *param_2)
+
+{
+  int iVar1;
+  undefined4 uVar2;
+  
+  uVar2 = 1;
+  iVar1 = FUN_00079848((uint)(byte)param_1, camry_host_addr(param_2));
+  if ((iVar1 == 0) && (param_1 == '\f' || param_1 == '\r')) {
+    *param_2 = DAT_febf6cc4;
+    *(uint *)(param_2 + 2) = f33_nvm_service_cd_diagnostic_mask;
+    uVar2 = 0;
+  }
+  return uVar2;
+}
+
+
+
 void FUN_000797f6(void)
 
 {
@@ -2184,6 +2244,21 @@ void FUN_0007995c(void)
   }
   else {
     FUN_0007990e();
+  }
+  return;
+}
+
+
+
+void FUN_0007998a(undefined1 param_1)
+
+{
+  if (DAT_febf6cd2 == '\0') {
+    DAT_febf6cd3 = 1;
+    DAT_febf6cd4 = param_1;
+  }
+  else {
+    FUN_000798ca((uint)(byte)param_1);
   }
   return;
 }
@@ -2407,6 +2482,28 @@ undefined2 FUN_00079b66(void)
 
 
 
+undefined4 FUN_00079b70(void)
+
+{
+  int iVar1;
+  undefined4 uVar2;
+  
+  iVar1 = FUN_000741a0();
+  if (iVar1 == 2) {
+    uVar2 = 0x1e;
+  }
+  else if ((iVar1 == 4) ||
+          ((iVar1 = FUN_00079c94(), iVar1 == 0 && (iVar1 = thunk_FUN_00076688(), iVar1 != 1)))) {
+    uVar2 = 0xf0;
+  }
+  else {
+    uVar2 = 0xf;
+  }
+  return uVar2;
+}
+
+
+
 void FUN_00079bc0(undefined2 param_1,char param_2)
 
 {
@@ -2415,6 +2512,16 @@ void FUN_00079bc0(undefined2 param_1,char param_2)
   }
   DAT_febf6cd6 = param_1;
   FUN_00079662(param_2);
+  return;
+}
+
+
+
+void FUN_00079be8(undefined1 param_1)
+
+{
+  DAT_febf6cd8 = param_1;
+  FUN_0007969a((uint)(byte)param_1);
   return;
 }
 
@@ -2784,29 +2891,26 @@ uint f33_pdur_cantp_transmit_adapter(ushort transmit_id,F33PduInfo *response)
 
 
 
-void FUN_00079dcc(undefined2 param_1)
+uint FUN_00079dcc(undefined2 param_1)
 
 {
-  FUN_0007a38c(param_1);
-  return;
+  return FUN_0007a38c(param_1);
 }
 
 
 
-void FUN_00079dda(undefined2 param_1,undefined1 param_2,undefined2 param_3)
+undefined4 FUN_00079dda(undefined2 param_1,undefined1 param_2,undefined2 param_3)
 
 {
-  FUN_00081fa6(param_1,param_2,param_3);
-  return;
+  return FUN_00081fa6(param_1,param_2,param_3);
 }
 
 
 
-void FUN_00079dec(undefined2 param_1)
+uint FUN_00079dec(undefined2 param_1)
 
 {
-  FUN_0007a3ca(param_1);
-  return;
+  return FUN_0007a3ca(param_1);
 }
 
 
@@ -4043,6 +4147,73 @@ LAB_0007b05c:
 
 
 
+/* Copy min(remaining,frameDLC-addressOffset-1) bytes to upper owner. Advance modulo16 sequence and
+   block countdown for nonfinal CF; block exhaustion schedules another FC. Zero remaining completes
+   aggregate reception, excluding CAN padding. */
+
+void f33_cantp_append_consecutive_receive
+               (F33CanTpRxConnection *connection,F33CanTpFrameInfo *frame,F33CanTpRxState *state)
+
+{
+  ushort uVar1;
+  F33CanTpRxConnection *extraout_r6;
+  F33CanTpRxConnection *pFVar2;
+  F33CanTpRxState *extraout_r8;
+  F33CanTpRxState *pFVar3;
+  int iVar4;
+  uint uVar5;
+  uint uVar6;
+  uchar uVar7;
+  uint uVar8;
+  uint local_2c;
+  F33CanTpFrameInfo FStack_28;
+  
+  uVar8 = state->remaining_length;
+  uVar6 = (byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x22b98u + (uint32_t)(connection->addressing_format) * 1u)))) + 1 & 0xff;
+  uVar5 = (byte)frame->length - uVar6 & 0xff;
+  pFVar2 = connection;
+  pFVar3 = state;
+  FStack_28.length = uVar8 & 0xff;
+  if (uVar5 < uVar8) {
+    uVar7 = state->block_remaining;
+    state->expected_sequence_number =
+         ((uint8_t *)camry_host_ptr((uint32_t)(frame->data)))[(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x22b98u + (uint32_t)(connection->addressing_format) * 1u))))] + 1 & 0xf;
+    if (uVar7 != '\0') {
+      uVar7 = uVar7 + 0xff;
+    }
+    iVar4 = FUN_0007a862(connection);
+    if ((iVar4 == 0) || (uVar7 != '\0')) {
+      extraout_r8->state = 'K';
+      uVar1 = extraout_r6->consecutive_receive_timeout_raw + 2;
+    }
+    else {
+      extraout_r8->state = 'i';
+      uVar1 = extraout_r6->buffer_wait_timeout_raw;
+      extraout_r8->flow_status_marker = 0xe1;
+      uVar1 = uVar1 - 3;
+    }
+    extraout_r8->timeout_ticks = uVar1;
+    extraout_r8->block_remaining = uVar7;
+    pFVar2 = extraout_r6;
+    pFVar3 = extraout_r8;
+    FStack_28.length = uVar5;
+  }
+  FStack_28.data = frame->data;
+  uVar8 = uVar8 - FStack_28.length;
+  uVar1 = pFVar2->upper_receive_id;
+  pFVar3->remaining_length = uVar8;
+  local_2c = 0;
+  FStack_28.data = FStack_28.data + uVar6;
+  uVar5 = f33_cantp_copy_upper_receive_bytes(uVar1,&FStack_28,&local_2c);
+  uVar7 = '\x01';
+  if ((uVar5 != 0) || (uVar7 = '\0', uVar8 == 0)) {
+    f33_cantp_finish_receive_aggregate(connection,state,uVar7);
+  }
+  return;
+}
+
+
+
 /* Accept matching RxID in4B or early5A/F0, validate extent/sequence and append payload. Early CF
    may consume a CTS before its lower confirmation; exact cancel hook is no-op. */
 
@@ -5180,6 +5351,28 @@ undefined1 FUN_0007bcde(uint param_1)
     return (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x21869u + (uint32_t)(param_1 & 0xff) * 1u))));
   }
   return 0;
+}
+
+
+
+void FUN_0007bcf4(byte param_1)
+
+{
+  if (param_1 < DAT_00021865) {
+    FUN_0007e4ea((uint)(byte)param_1);
+  }
+  return;
+}
+
+
+
+void FUN_0007bd0a(byte param_1)
+
+{
+  if (param_1 < DAT_00021865) {
+    FUN_0007e4fe((uint)(byte)param_1);
+  }
+  return;
 }
 
 

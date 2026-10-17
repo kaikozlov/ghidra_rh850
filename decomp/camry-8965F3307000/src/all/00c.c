@@ -1,42 +1,38 @@
 #include "common.h"
 
 
-void FUN_00031ed0(uchar param_1)
+int FUN_00031ed0(uchar param_1)
 
 {
-  f33_publish_redundant_u8(param_1,((undefined *)camry_host_ptr(0xfebe6884u)),((undefined *)camry_host_ptr(0xfebe6880u)),((undefined *)camry_host_ptr(0xfebe6882u)));
-  return;
+  return f33_publish_redundant_u8(param_1,((undefined *)camry_host_ptr(0xfebe6884u)),((undefined *)camry_host_ptr(0xfebe6880u)),((undefined *)camry_host_ptr(0xfebe6882u)));
 }
 
 
 
-void FUN_00031eea(uchar param_1)
+int FUN_00031eea(uchar param_1)
 
 {
-  f33_publish_redundant_u8(param_1,((undefined *)camry_host_ptr(0xfebe6885u)),((undefined *)camry_host_ptr(0xfebe6881u)),((undefined *)camry_host_ptr(0xfebe6883u)));
-  return;
+  return f33_publish_redundant_u8(param_1,((undefined *)camry_host_ptr(0xfebe6885u)),((undefined *)camry_host_ptr(0xfebe6881u)),((undefined *)camry_host_ptr(0xfebe6883u)));
 }
 
 
 
-void FUN_00031f04(void)
+int FUN_00031f04(void)
 
 {
   FUN_00031ed0(0);
-  FUN_00031eea(0);
-  return;
+  return FUN_00031eea(0);
 }
 
 
 
-void FUN_00031f18(void)
+int FUN_00031f18(void)
 
 {
   DAT_febe6886 = 0;
   DAT_febe6888 = 0;
   FUN_00031ed0(0);
-  FUN_00031eea(0);
-  return;
+  return FUN_00031eea(0);
 }
 
 

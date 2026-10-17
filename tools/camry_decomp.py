@@ -2045,8 +2045,623 @@ def _rewrite_wide_call_constants(code: str) -> str:
     return rewrite(code)
 
 
+_FAIL = ("fail",)
+_TRACKED = (6, 7, 8, 9, 10)
+_NO_WRITE = {
+    "cmp", "tst", "cmpi", "st8", "st16", "st32", "set1", "not1", "clr1", "tst1",
+    "set1r", "not1r", "clr1r", "tst1r", "ldsr",
+}
+_DEST0 = {
+    "mov", "movi", "not", "or", "xor", "and", "add", "sub", "subr", "addi",
+    "addi_imm5", "ori", "xori", "andi", "movea", "movhi", "satadd", "satsub",
+    "satsubr", "sataddi", "satsubi", "mulh", "divh2", "shl_imm", "shr", "sar_imm",
+    "zxb", "zxh", "sxb", "sxh", "mulhi", "mulhi5", "setf", "sasf", "ld8s", "ld8u",
+    "ld16s", "ld16u", "ld32", "cmov", "cmovi", "sbf", "adf", "shl_reg", "shr_reg",
+    "sar_reg", "satadd3", "satsub3", "stsr", "pop",
+}
+_NARROW = {"zxb": "byte", "zxh": "ushort", "sxb": "sbyte", "sxh": "short"}
+_CALL_FACTS: dict | None = None
+
+
+def _stmt_parts(stmt: str) -> tuple[str, list[int | None]] | None:
+    match = re.match(r"camry_([A-Za-z0-9_]+)\((.*)\)\s*;?$", stmt.strip())
+    if match is None:
+        return None
+    args: list[int | None] = []
+    for part in match.group(2).split(","):
+        text = part.strip().rstrip("uU")
+        if re.fullmatch(r"0x[0-9A-Fa-f]+", text):
+            args.append(int(text, 16))
+        elif re.fullmatch(r"-?\d+", text):
+            args.append(int(text))
+        else:
+            args.append(None)
+    return match.group(1), args
+
+
+def _narrow(origin: tuple, cast: str) -> tuple:
+    if origin[0] == "imm":
+        value = origin[1] & 0xFFFFFFFF
+        if cast in {"byte", "sbyte"}:
+            value &= 0xFF
+            if cast == "sbyte" and value >= 0x80:
+                value -= 0x100
+        else:
+            value &= 0xFFFF
+            if cast == "short" and value >= 0x8000:
+                value -= 0x10000
+        return ("imm", value & 0xFFFFFFFF)
+    if origin[0] == "entry":
+        previous = origin[2]
+        if previous == "byte" and cast == "ushort":
+            cast = "byte"
+        elif previous == "sbyte" and cast == "short":
+            cast = "sbyte"
+        return ("entry", origin[1], cast)
+    return _FAIL
+
+
+def _write_origin(state: dict[int, set], reg: int | None, origin: tuple) -> None:
+    if reg in state:
+        state[reg] = {origin}
+
+
+def _transfer(state: dict[int, set], inst) -> dict[int, set]:
+    cur = {reg: set(values) for reg, values in state.items()}
+    if inst.kind in {"jarl", "callt"}:
+        for reg in (6, 7, 8, 9):
+            cur[reg] = {_FAIL}
+        if inst.kind == "jarl" and inst.link != 10:
+            cur[10] = {("call", inst.target)}
+        else:
+            cur[10] = {_FAIL}
+        return cur
+    if inst.kind == "loop" and inst.reg in cur:
+        cur[inst.reg] = {_FAIL}
+        return cur
+    if inst.kind == "dispose":
+        mask = inst.mask
+        bit = 0
+        while mask:
+            if mask & 1 and bit in cur:
+                cur[bit] = {_FAIL}
+            mask >>= 1
+            bit += 1
+        if 3 in cur:
+            cur[3] = {_FAIL}
+        return cur
+    parsed = _stmt_parts(inst.stmt) if inst.stmt else None
+    if parsed is None:
+        return cur
+    name, args = parsed
+    if name in {"prepare", "sp_add", "pushsp"}:
+        return cur
+    if name == "popsp" and len(args) >= 2 and args[0] is not None and args[1] is not None:
+        if 0 <= args[0] <= args[1] <= 31:
+            for reg in range(args[0], args[1] + 1):
+                if reg in cur and reg != 3:
+                    cur[reg] = {_FAIL}
+        return cur
+    if name in _NO_WRITE:
+        return cur
+    if name == "mov" and args:
+        src = args[1] if len(args) > 1 else None
+        if src == 0:
+            _write_origin(cur, args[0], ("imm", 0))
+        elif src in cur:
+            cur[args[0]] = set(cur[src])
+        else:
+            _write_origin(cur, args[0], _FAIL)
+        return cur
+    if name == "movi" and args and args[1] is not None:
+        _write_origin(cur, args[0], ("imm", args[1] & 0xFFFFFFFF))
+        return cur
+    if name in {"ori", "xori", "addi", "movea", "movhi", "andi"} and len(args) >= 3:
+        dst, src, imm = args[0], args[1], args[2]
+        if src == 0 and imm is not None and dst in cur:
+            value = imm & 0xFFFFFFFF
+            if name == "movhi":
+                value = (imm << 16) & 0xFFFFFFFF
+            if name == "andi":
+                value = 0
+            cur[dst] = {("imm", value)}
+            return cur
+        if name == "andi" and dst == src and dst in cur and imm in {0xFF, 0xFFFF} and len(cur[dst]) == 1:
+            cur[dst] = {_narrow(next(iter(cur[dst])), "byte" if imm == 0xFF else "ushort")}
+            return cur
+        _write_origin(cur, dst, _FAIL)
+        return cur
+    if name in _NARROW and args and args[0] in cur and len(cur[args[0]]) == 1:
+        cur[args[0]] = {_narrow(next(iter(cur[args[0]])), _NARROW[name])}
+        return cur
+    if name in _DEST0 and args:
+        _write_origin(cur, args[0], _FAIL)
+        return cur
+    if name in {"bsw", "bsh", "hsw", "hsh", "sch0r", "sch1r", "sch0l", "sch1l"} and len(args) > 1:
+        _write_origin(cur, args[1], _FAIL)
+        return cur
+    if name in {"muli", "mului", "mul"}:
+        _write_origin(cur, args[0] if args else None, _FAIL)
+        if len(args) > 1:
+            _write_origin(cur, args[1], _FAIL)
+        return cur
+    if name == "div3":
+        _write_origin(cur, args[0] if args else None, _FAIL)
+        if len(args) > 2:
+            _write_origin(cur, args[2], _FAIL)
+        return cur
+    for reg in list(cur):
+        if reg in args:
+            cur[reg] = {_FAIL}
+    return cur
+
+
+def _function_origins(fn) -> dict[int, dict[int, set]]:
+    incoming: dict[int, dict[int, set]] = {
+        fn.entry: {reg: {("entry", reg, "")} if reg != 10 else {_FAIL} for reg in _TRACKED},
+    }
+    work = [fn.entry]
+    index_of = {inst.addr: index for index, inst in enumerate(fn.insts)}
+    while work:
+        addr = work.pop()
+        inst = fn.insts[index_of[addr]]
+        cur = _transfer(incoming[addr], inst)
+        nxt = None
+        index = index_of[addr]
+        if index + 1 < len(fn.insts) and fn.insts[index + 1].addr == addr + inst.size:
+            nxt = fn.insts[index + 1].addr
+        if inst.kind == "b":
+            succs = [item for item in (inst.target, nxt) if item is not None and (item == nxt or item in fn.sites)]
+            is_ret = False
+        elif inst.kind in {"br", "jr"}:
+            if inst.target in fn.sites:
+                succs = [inst.target]
+                is_ret = False
+            else:
+                succs = []
+                is_ret = True
+        elif inst.kind == "loop":
+            succs = [item for item in (inst.target, nxt) if item is not None and (item == nxt or item in fn.sites)]
+            is_ret = False
+        elif inst.kind in {"jmp", "jmpdisp", "switch", "dispose", "abort"}:
+            succs = []
+            is_ret = True
+        else:
+            succs = [nxt] if nxt is not None else []
+            is_ret = False
+        if is_ret:
+            incoming.setdefault(("ret", addr), incoming[addr])
+        for succ in succs:
+            if succ not in index_of:
+                continue
+            old = incoming.get(succ)
+            if old is None:
+                incoming[succ] = {reg: set(values) for reg, values in cur.items()}
+                work.append(succ)
+                continue
+            changed = False
+            for reg in _TRACKED:
+                merged = old[reg] | cur[reg]
+                if merged != old[reg]:
+                    old[reg] = merged
+                    changed = True
+            if changed:
+                work.append(succ)
+    return incoming
+
+
+def _param_names(signature: str) -> list[str]:
+    opening = signature.find("(")
+    closing = signature.rfind(")")
+    if opening < 0 or closing < opening:
+        return []
+    body = signature[opening + 1:closing].strip()
+    if not body or body == "void":
+        return []
+    names = []
+    for part in _split_args(body):
+        match = re.search(r"([A-Za-z_][A-Za-z0-9_]*)\s*$", part.strip())
+        names.append(match.group(1) if match else "")
+    return names
+
+
+def _signature_name(signature: str) -> str:
+    match = re.search(r"([A-Za-z_][A-Za-z0-9_]*)\s*\(", signature)
+    return match.group(1) if match else ""
+
+
+def _return_type_of(signature: str, name: str) -> str:
+    index = signature.find(name + "(")
+    if index < 0:
+        return ""
+    return " ".join(signature[:index].split())
+
+
+def _emit_origin(origin: set, params: list[str], types: list[str]) -> str | None:
+    if len(origin) != 1:
+        return None
+    item = next(iter(origin))
+    if item[0] == "imm":
+        value = item[1] & 0xFFFFFFFF
+        if value >= 0x80000000:
+            return f"(int)0x{value:x}"
+        return f"0x{value:x}"
+    if item[0] != "entry":
+        return None
+    index = item[1] - 6
+    if index < 0 or index >= len(params) or not params[index]:
+        return None
+    if item[2] and index < len(types) and "*" in types[index]:
+        return None
+    name = params[index]
+    cast = item[2]
+    if cast == "byte":
+        return f"(uint)(byte){name}"
+    if cast == "ushort":
+        return f"(uint)(ushort){name}"
+    if cast == "sbyte":
+        return f"(int)(char){name}"
+    if cast == "short":
+        return f"(int)(short){name}"
+    return name
+
+
+def _trailing_call_span(code: str) -> tuple[str, int, int] | None:
+    """A lone `return;` whose previous statement is a call.
+
+    The returned indexes are relative to the function body, including its brace.
+    """
+    brace = _opening_brace(code)
+    if brace < 0:
+        return None
+    body = code[brace:]
+    returns = list(re.finditer(r"\breturn\s*;", body))
+    if len(returns) != 1:
+        return None
+    ret = returns[0]
+    call_end = body.rfind(";", 0, ret.start())
+    if call_end < 0:
+        return None
+    prev = call_end - 1
+    while prev >= 0 and body[prev] not in ";{}":
+        prev -= 1
+    statement = _strip_comments(body[prev + 1:call_end]).strip()
+    if re.search(r"(?<![=<>!])=(?!=)", statement):
+        return None
+    if not re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*\s*\(.*\)", statement, flags=re.S):
+        return None
+    return statement, prev + 1, ret.end()
+
+
+def _trailing_call(code: str) -> str | None:
+    span = _trailing_call_span(code)
+    return None if span is None else span[0]
+
+
+def _access_width(text: str) -> int | None:
+    if re.search(r"\.(?:bu|b)\b", text):
+        return 1
+    if re.search(r"\.(?:hu|h)\b", text):
+        return 2
+    if re.search(r"\.w\b", text):
+        return 4
+    return None
+
+
+def _call_facts() -> dict:
+    """Argument registers and r10 at each direct call, from the function bytes."""
+    global _CALL_FACTS
+    if _CALL_FACTS is not None:
+        return _CALL_FACTS
+    from tools.camry_lift import decode_at, load_image, walk_symbol
+    from tools.project.pseudo import load_corpus
+
+    image = load_image()
+    symbols = load_symbols()
+    entries = {row["name"]: int(row["addr"], 16) for row in symbols}
+    names_at = {addr: name for name, addr in entries.items()}
+    origins: dict[str, dict] = {}
+    sites: dict[str, dict[int, list[int]]] = {}
+    ret_target: dict[str, int] = {}
+    arity: dict[str, int] = {}
+    for row in symbols:
+        fn = walk_symbol(image, row)
+        if fn is None:
+            continue
+        state = _function_origins(fn)
+        origins[row["name"]] = state
+        grouped: dict[int, list[int]] = {}
+        for inst in fn.insts:
+            if inst.kind in {"jarl", "jr"} and inst.target in names_at:
+                grouped.setdefault(inst.target, []).append(inst.addr)
+        sites[row["name"]] = grouped
+        targets = []
+        for inst in fn.insts:
+            key = ("ret", inst.addr)
+            if key not in state:
+                continue
+            origin = state[key].get(10, set())
+            if inst.kind in {"jr", "br"} and inst.target not in fn.sites:
+                origin = {("call", inst.target)}
+            targets.append(origin)
+        if targets and all(len(item) == 1 and next(iter(item))[0] == "call" for item in targets):
+            called = {next(iter(item))[1] for item in targets}
+            if len(called) == 1 and None not in called:
+                ret_target[row["name"]] = next(iter(called))
+        arity[row["name"]] = _argument_arity(fn, state)
+    _meta, functions = load_corpus(
+        REPO_ROOT / "data" / "generated" / TARGET / "decompilations.jsonl"
+    )
+    corpus: dict[str, dict] = {}
+    for row in functions:
+        corpus.setdefault(row["name"], row)
+    hand_types = _hand_param_types()
+    hand_names = set(hand_types)
+    params: dict[str, int] = {}
+    returns: dict[str, str] = {}
+    for name, row in corpus.items():
+        signature = _c_signature(_strip_calling_convention(row["decompiled_c"]))
+        if name in hand_types:
+            params[name] = len(hand_types[name])
+        else:
+            params[name] = len(_signature_param_types(signature))
+        returns[name] = _return_type_of(signature, name)
+    header = _strip_comments((ROOT / "include" / "camry.h").read_text(encoding="utf-8"))
+    for match in re.finditer(
+        r"^([A-Za-z_][A-Za-z0-9_ \t\*]*?)\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(",
+        header,
+        flags=re.M,
+    ):
+        returns[match.group(2)] = " ".join(match.group(1).split())
+    trailing: dict[str, str] = {}
+    for name, row in corpus.items():
+        if name in hand_names or returns.get(name) != "void":
+            continue
+        statement = _trailing_call(_strip_calling_convention(row["decompiled_c"]))
+        if statement is None:
+            continue
+        callee = re.match(r"[A-Za-z_][A-Za-z0-9_]*", statement)
+        if callee is None or callee.group(0) not in entries:
+            continue
+        if ret_target.get(name) != entries[callee.group(0)]:
+            continue
+        trailing[name] = callee.group(0)
+    planned: dict[str, str] = {}
+
+    def resolve(name: str, stack: set[str]) -> str:
+        if name in planned:
+            return planned[name]
+        current = returns.get(name, "void")
+        if name in hand_names or current != "void" or name not in trailing:
+            return current or "void"
+        if name in stack:
+            return "undefined4"
+        inner = resolve(trailing[name], stack | {name})
+        if not inner or inner == "void" or "(" in inner:
+            return "void"
+        planned[name] = inner
+        return inner
+
+    for name in list(trailing):
+        resolve(name, set())
+    ram: dict[int, set[int]] = {}
+    for row in functions:
+        for ref in row.get("data_references") or []:
+            try:
+                address = int(ref["to_addr"], 16)
+                origin = int(ref["from_addr"], 16)
+            except (KeyError, TypeError, ValueError):
+                continue
+            inst = decode_at(image, origin)
+            if inst is None:
+                continue
+            width = _access_width(inst.text)
+            if width is None:
+                continue
+            ram.setdefault(address, set()).add(width)
+    _CALL_FACTS = {
+        "entries": entries,
+        "origins": origins,
+        "sites": sites,
+        "arity": arity,
+        "params": params,
+        "planned": planned,
+        "ram": {addr: next(iter(widths)) for addr, widths in ram.items() if len(widths) == 1},
+    }
+    return _CALL_FACTS
+
+
+def _argument_arity(fn, state: dict) -> int:
+    """Highest r6-r9 whose incoming value reaches a read."""
+    index_of = {inst.addr: index for index, inst in enumerate(fn.insts)}
+    read: set[int] = set()
+    for addr, regs in state.items():
+        if not isinstance(addr, int) or addr not in index_of:
+            continue
+        inst = fn.insts[index_of[addr]]
+        for reg in (6, 7, 8, 9):
+            origin = regs.get(reg, ())
+            if not any(item[0] == "entry" and item[1] == reg for item in origin):
+                continue
+            if _reads_reg(inst, reg):
+                read.add(reg)
+    if not read:
+        return 0
+    return max(read) - 5
+
+
+def _reads_reg(inst, reg: int) -> bool:
+    if inst.kind in {"jmp", "switch", "jmpdisp"} and inst.reg == reg:
+        return True
+    if inst.kind == "loop" and inst.reg == reg:
+        return True
+    if inst.kind == "dispose" and inst.ret == reg:
+        return True
+    parsed = _stmt_parts(inst.stmt) if inst.stmt else None
+    if parsed is None:
+        return False
+    name, args = parsed
+    if name in {"mov", "not", "addi", "movea", "movhi", "ori", "xori", "andi", "mulhi", "satsubi"}:
+        return len(args) > 1 and args[1] == reg
+    if name in {"or", "xor", "and", "add", "sub", "subr", "cmp", "tst", "satadd", "satsub", "satsubr", "mulh", "divh2"}:
+        return reg in args[:2]
+    if name in _NARROW or name in {"addi_imm5", "cmpi", "shl_imm", "shr", "sar_imm", "mulhi5", "sataddi", "sasf"}:
+        return args and args[0] == reg
+    if name in {"ld8s", "ld8u", "ld16s", "ld16u", "ld32"}:
+        return len(args) > 1 and args[1] == reg
+    if name in {"st8", "st16", "st32", "set1r", "not1r", "clr1r", "tst1r"}:
+        return reg in args[:2]
+    if name in {"set1", "not1", "clr1", "tst1", "ldsr"}:
+        return args and args[0] == reg
+    if name == "cmovi":
+        return len(args) > 1 and args[1] == reg
+    if name == "cmov":
+        return reg in args[1:3]
+    if name in {"sbf", "adf"}:
+        return reg in args[1:3]
+    if name in {"shl_reg", "shr_reg", "sar_reg"}:
+        return reg in args[1:3]
+    if name in {"muli", "mului"}:
+        return args and args[0] == reg
+    if name == "mul":
+        return reg in args[2:4]
+    if name == "div3":
+        return reg in args[:2]
+    if name in {"pushsp", "popsp"}:
+        return len(args) >= 2 and args[0] is not None and args[1] is not None and args[0] <= reg <= args[1]
+    return False
+
+
+def _direct_calls(code: str) -> list[tuple[str, int, int]]:
+    """Calls in execution order: a nested call closes before the call around it."""
+    events: list[tuple[str, int, int]] = []
+    stack: list[tuple[str, int, int]] = []
+    depth = 0
+    index = 0
+    while index < len(code):
+        if code.startswith("/*", index):
+            end = code.find("*/", index + 2)
+            index = len(code) if end < 0 else end + 2
+            continue
+        char = code[index]
+        if char == "(":
+            depth += 1
+            index += 1
+            continue
+        if char == ")":
+            if stack and stack[-1][1] == depth:
+                name, _depth, open_at = stack.pop()
+                events.append((name, open_at, index))
+            depth = max(0, depth - 1)
+            index += 1
+            continue
+        match = re.match(r"[A-Za-z_][A-Za-z0-9_]*", code[index:])
+        if match is None:
+            index += 1
+            continue
+        name = match.group(0)
+        nxt = index + match.end()
+        while nxt < len(code) and code[nxt] in " \t\n\r":
+            nxt += 1
+        if nxt < len(code) and code[nxt] == "(" and name not in _SKIP_CALLS:
+            depth += 1
+            stack.append((name, depth, nxt))
+            index = nxt + 1
+            continue
+        index = index + match.end()
+    return events
+
+
+def _rewrite_recovered_arguments(code: str) -> str:
+    """A call that omits a register the callee reads gets that register's value."""
+    brace = _opening_brace(code)
+    if brace < 0:
+        return code
+    signature = _c_signature(code)
+    caller = _signature_name(signature)
+    facts = _call_facts()
+    grouped = facts["sites"].get(caller)
+    state = facts["origins"].get(caller)
+    if not grouped or state is None:
+        return code
+    params = _param_names(signature)
+    types = _signature_param_types(signature)
+    body = code[brace:]
+    events = [
+        (name, open_at, close)
+        for name, open_at, close in _direct_calls(body)
+        if facts["entries"].get(name) is not None
+    ]
+    counts: dict[int, int] = {}
+    for name, _open_at, _close in events:
+        entry = facts["entries"][name]
+        counts[entry] = counts.get(entry, 0) + 1
+    usable = {
+        entry for entry, count in counts.items()
+        if count == len(grouped.get(entry, ()))
+    }
+    cursor_at = {entry: 0 for entry in usable}
+    edits: list[tuple[int, str]] = []
+    for name, open_at, close in events:
+        entry = facts["entries"][name]
+        if entry not in usable:
+            continue
+        existing = _split_args(body[open_at + 1:close])
+        if len(existing) == 1 and not existing[0].strip():
+            existing = []
+        need = min(facts["arity"].get(name, 0), facts["params"].get(name, 0))
+        slot = cursor_at[entry]
+        cursor_at[entry] = slot + 1
+        if len(existing) >= need:
+            continue
+        addr = grouped[entry][slot]
+        recovered: list[str] = []
+        for reg in range(6 + len(existing), 6 + need):
+            expr = _emit_origin(state.get(addr, {}).get(reg, set()), params, types)
+            if expr is None:
+                recovered = []
+                break
+            recovered.append(expr)
+        if not recovered:
+            continue
+        joiner = "" if not existing else ", "
+        edits.append((close, joiner + ", ".join(recovered)))
+    if not edits:
+        return code
+    pieces: list[str] = []
+    cursor = 0
+    for close, text in sorted(edits):
+        pieces.append(body[cursor:close])
+        pieces.append(text)
+        cursor = close
+    pieces.append(body[cursor:])
+    return code[:brace] + "".join(pieces)
+
+
+def _rewrite_returned_call(code: str) -> str:
+    """A void function whose r10 at every return is one call returns that call."""
+    signature = _c_signature(code)
+    name = _signature_name(signature)
+    new_type = _call_facts()["planned"].get(name)
+    span = _trailing_call_span(code)
+    if not new_type or span is None or _return_type_of(signature, name) != "void":
+        return code
+    statement, start, ret_end = span
+    brace = _opening_brace(code)
+    head, body = code[:brace], code[brace:]
+    declarator = list(re.finditer(rf"\bvoid(\s+{re.escape(name)}\s*\()", head))
+    if len(declarator) != 1:
+        return code
+    found = declarator[0]
+    head = head[:found.start()] + new_type + found.group(1) + head[found.end():]
+    body = body[:start] + "\n  return " + statement + ";" + body[ret_end:]
+    return head + body
+
+
 def _rewrite_body(code: str) -> str:
     code = _strip_calling_convention(code)
+    code = _rewrite_recovered_arguments(code)
+    code = _rewrite_returned_call(code)
     code = _rewrite_firmware_bases(code)
     signature = _c_signature(code)
     pointers = _pointer_names(signature, code)
@@ -3039,6 +3654,20 @@ def _common_header(text: str, signatures: dict[str, str]) -> str:
     ))):
         lines.append(
             f"#define {match} (*((volatile uint32_t *)camry_host_ptr(0x{int(addr_text, 16):x}u)))"
+        )
+    if re.search(r"\bPMR\b", text):
+        lines.append("#define PMR camry_pmr")
+    ram_widths = _call_facts()["ram"]
+    ram_types = {1: "uint8_t", 2: "uint16_t", 4: "uint32_t"}
+    for name in sorted(set(re.findall(r"\b(Ram[0-9A-Fa-f]+)\b", text))):
+        if name in function_names or name in registers or name in data:
+            continue
+        address = int(name[3:], 16)
+        width = ram_widths.get(address)
+        if width not in ram_types:
+            continue
+        lines.append(
+            f"#define {name} (*((volatile {ram_types[width]} *)camry_host_ptr(0x{address:x}u)))"
         )
     lines.append("")
     for name in sorted(signatures):

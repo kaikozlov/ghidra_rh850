@@ -524,12 +524,11 @@ void f33_return_only_stub_58802(void)
 /* Run cold software initialization58828, then request redundant8C08=A55A. This runs inside666BC
    before timers; it is not physical reset or an aggregate hardware-success gate. */
 
-void f33_initialize_application_and_request_first_generation(void)
+int f33_initialize_application_and_request_first_generation(void)
 
 {
   f33_initialize_cold_application_state();
-  FUN_0005889a();
-  return;
+  return FUN_0005889a();
 }
 
 
@@ -596,11 +595,10 @@ void f33_reinitialize_application_for_foreground_restart(void)
 
 
 
-void FUN_0005889a(void)
+int FUN_0005889a(void)
 
 {
-  f33_publish_redundant_u16(0xa55a,((undefined *)camry_host_ptr(0xfebe8c08u)),(ushort *)((undefined *)camry_host_ptr(0xfebe8c0au)),(ushort *)((undefined *)camry_host_ptr(0xfebe8c14u)));
-  return;
+  return f33_publish_redundant_u16(0xa55a,((undefined *)camry_host_ptr(0xfebe8c08u)),(ushort *)((undefined *)camry_host_ptr(0xfebe8c0au)),(ushort *)((undefined *)camry_host_ptr(0xfebe8c14u)));
 }
 
 

@@ -404,6 +404,24 @@ void FUN_000846f2(ushort param_1)
 
 
 
+undefined4 FUN_00084760(uint param_1)
+
+{
+  undefined4 uVar1;
+  
+  param_1 = param_1 & 0xff;
+  uVar1 = 2;
+  if ((((*((uint *)camry_host_ptr((uint32_t)(PTR_GSTS_00023044)))) & 0xf) < 2) &&
+     (((*((uint *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x22ef8u + (uint32_t)((short)param_1 * 0x1d) * 4u))))))) & 7) == 1)) {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe5026u + (uint32_t)(param_1) * 1u)))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x22eabu + (uint32_t)(param_1) * 1u))));
+    FUN_000846f2((uint)(byte)param_1);
+    uVar1 = 0;
+  }
+  return uVar1;
+}
+
+
+
 void FUN_000847a4(void)
 
 {
@@ -595,6 +613,46 @@ undefined4 FUN_00084a5e(undefined1 param_1)
 
 
 
+undefined4 FUN_00084a92(uint param_1)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  short sVar4;
+  undefined4 uVar5;
+  
+  sVar4 = (short)(param_1 & 0xff);
+  iVar1 = (int)sVar4;
+  iVar2 = (int)sVar4;
+  (*((uint *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x22f34u + (uint32_t)(iVar1 * 0x1d) * 4u))))))) = (uint)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x233b8u + (uint32_t)(iVar2 * 0xd) * 4u)))) & 0xfffffffe;
+  (*((uint *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x22f34u + (uint32_t)(iVar1 * 0x1d) * 4u)))) + 4)))) =
+       (uint)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x233bcu + (uint32_t)(iVar2 * 0xd) * 4u)))) & 0xfffffffe;
+  (*((uint *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x22f34u + (uint32_t)(iVar1 * 0x1d) * 4u)))) + 8)))) = (*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x233c0u + (uint32_t)(iVar2 * 0xd) * 4u)))) & 0xfffffffe;
+  (*((uint *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x22f34u + (uint32_t)(iVar1 * 0x1d) * 4u))))))) = (uint)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x233b8u + (uint32_t)(iVar2 * 0xd) * 4u)))) & 0xfffffff8;
+  (*((uint *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x22f34u + (uint32_t)(iVar1 * 0x1d) * 4u)))) + 4)))) =
+       (uint)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x233bcu + (uint32_t)(iVar2 * 0xd) * 4u)))) & 0xfffffff8;
+  (*((uint *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x22f34u + (uint32_t)(iVar1 * 0x1d) * 4u)))) + 8)))) = (*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x233c0u + (uint32_t)(iVar2 * 0xd) * 4u)))) & 0xfffffff8;
+  (*((undefined4 *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x22f2cu + (uint32_t)(iVar1 * 0x1d) * 4u))))))) = 1;
+  (*((undefined4 *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x22f2cu + (uint32_t)(iVar1 * 0x1d) * 4u)))) + 4)))) = 1;
+  (*((undefined4 *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x22f2cu + (uint32_t)(iVar1 * 0x1d) * 4u)))) + 8)))) = 1;
+  iVar3 = (param_1 & 0xff) * 4;
+  (*((uint *)camry_host_ptr((uint32_t)(PTR_DAT_00023060 + iVar3)))) = (*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x233d8u + (uint32_t)(iVar2 * 0xd) * 4u)))) & 0xfffffffe;
+  (*((uint *)camry_host_ptr((uint32_t)(PTR_DAT_00023060 + iVar3)))) = (*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x233d8u + (uint32_t)(iVar2 * 0xd) * 4u)))) & 0xfffffffc;
+  (*((undefined4 *)camry_host_ptr((uint32_t)(PTR_DAT_00023064 + iVar3)))) = 1;
+  uVar5 = 2;
+  FUN_00084420((uint)(byte)param_1);
+  if (((*((uint *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x22ef8u + (uint32_t)(iVar1 * 0x1d) * 4u))))))) & 7) == 1) {
+    uVar5 = 0;
+    (*((undefined2 *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x22edcu + (uint32_t)(iVar1 * 0x1d) * 4u))))))) = 0;
+    (*((undefined4 *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x22f14u + (uint32_t)(iVar1 * 0x1d) * 4u))))))) = 0;
+    (*((undefined4 *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x22f20u + (uint32_t)(iVar1 * 0x1d) * 4u))))))) = 0;
+  }
+  return uVar5;
+}
+
+
+
 undefined4 FUN_00084b74(uint param_1)
 
 {
@@ -722,6 +780,36 @@ undefined4 FUN_00084e16(void)
 
 
 
+undefined4 FUN_00084e44(byte param_1)
+
+{
+  byte bVar1;
+  uint32_t puVar2;
+  int iVar3;
+  undefined4 uVar4;
+  byte bVar5;
+  
+  puVar2 = 0x23dfcu;
+  iVar3 = FUN_00084c2c((uint)(byte)param_1);
+  if (iVar3 != 0) {
+    bVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0xf58)))));
+    for (bVar5 = 0; bVar5 < bVar1; bVar5 = bVar5 + 1) {
+      if (bVar5 != param_1) {
+        FUN_000842a0(bVar5);
+        FUN_00083cd6(bVar5);
+      }
+    }
+    iVar3 = FUN_00084e16();
+    if (iVar3 != 0) {
+      return 2;
+    }
+  }
+  uVar4 = FUN_00084de6(param_1);
+  return uVar4;
+}
+
+
+
 undefined4 FUN_00084e8c(undefined1 param_1)
 
 {
@@ -737,6 +825,27 @@ undefined4 FUN_00084e8c(undefined1 param_1)
     uVar2 = FUN_0008488c(param_1);
   }
   return uVar2;
+}
+
+
+
+undefined4 FUN_00084ec0(uint param_1)
+
+{
+  int iVar1;
+  int iVar2;
+  undefined4 uVar3;
+  
+  iVar2 = (param_1 & 0xff) * 4;
+  uVar3 = 2;
+  iVar1 = (int)(short)(param_1 & 0xff);
+  if (((((*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x22ee0u + (uint32_t)(iVar1 * 0x1d) * 4u))))))) &
+        (*(ushort *)(((undefined *)camry_host_ptr(0x22ebeu)) + iVar2) | *(ushort *)(((undefined *)camry_host_ptr(0x22ebcu)) + iVar2))) == 0) &&
+      (((*((uint *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x22f2cu + (uint32_t)(iVar1 * 0x1d) * 4u))))))) & 1) != 0)) &&
+     (((*((uint *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x22f2cu + (uint32_t)(iVar1 * 0x1d) * 4u)))) + 4)))) & 1) != 0)) {
+    uVar3 = FUN_00084a92((uint)(byte)param_1);
+  }
+  return uVar3;
 }
 
 
@@ -966,6 +1075,27 @@ undefined4 FUN_00085286(uint param_1,uint param_2,uint param_3,int *param_4)
 
 
 
+void FUN_00085800(ushort param_1)
+
+{
+  int iVar1;
+  
+  param_1 = param_1 & 0xff;
+  if (((*((uint *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x22ef8u + (uint32_t)((short)param_1 * 0x1d) * 4u))))))) & 7) == 0) {
+    iVar1 = FUN_00085714(param_1,0);
+    if (iVar1 != 0) {
+      FUN_00083b14(param_1);
+    }
+  }
+  else {
+    FUN_00083a34((uint)(byte)param_1);
+  }
+  FUN_00085938();
+  return;
+}
+
+
+
 void FUN_0008583e(void)
 
 {
@@ -1000,11 +1130,10 @@ undefined4 FUN_00085940(undefined4 param_1,char param_2,undefined4 param_3)
 
 
 
-void FUN_00085964(undefined4 param_1,undefined4 param_2)
+undefined4 FUN_00085964(undefined4 param_1,undefined4 param_2)
 
 {
-  FUN_00087c40(((undefined *)camry_host_ptr(0x234dcu)), ((uint *)camry_host_ptr((uint32_t)(param_1))), 0x10, param_2);
-  return;
+  return FUN_00087c40(((undefined *)camry_host_ptr(0x234dcu)), ((uint *)camry_host_ptr((uint32_t)(param_1))), 0x10, param_2);
 }
 
 
@@ -1720,15 +1849,82 @@ int FUN_00087b74(undefined4 param_1,undefined1 param_2,undefined4 *param_3,char 
 
 
 
+undefined4 FUN_00087c40(uint *param_1,uint *param_2,undefined1 param_3,int param_4)
+
+{
+  int iVar1;
+  char cVar2;
+  int iVar3;
+  undefined4 uVar4;
+  char *pcVar5;
+  undefined4 local_20;
+  undefined4 uStack_1c;
+  undefined4 uStack_18;
+  undefined4 uStack_14;
+  
+  if ((((((*((int *)camry_host_ptr((uint32_t)(param_4 + 0xd4)))) == -1) && ((*((int *)camry_host_ptr((uint32_t)(param_4 + 0xd8)))) == -1)) &&
+       ((*((int *)camry_host_ptr((uint32_t)(param_4 + 0xdc)))) == -1)) && ((*((int *)camry_host_ptr((uint32_t)(param_4 + 0xe0)))) == -1)) ||
+     (iVar3 = FUN_000863a0(((undefined4 *)camry_host_ptr((uint32_t)(param_4 + 0xd4))), &local_20, param_3,  param_4), iVar3 != 0)) {
+    uVar4 = 0xff;
+  }
+  else {
+    if ((((uint)camry_host_addr(param_2) & 3) == 0) && (((uint)camry_host_addr(param_1) & 3) == 0)) {
+      *param_2 = *param_1 ^ local_20;
+      param_2[1] = param_1[1] ^ uStack_1c;
+      param_2[2] = param_1[2] ^ uStack_18;
+      param_2[3] = param_1[3] ^ uStack_14;
+    }
+    else {
+      *(byte *)param_2 = (byte)*param_1 ^ (byte)local_20;
+      (*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_2) + 1)))) = (*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_1) + 1)))) ^ (*((uint8_t *)((uint8_t *)&local_20 + 1u)));
+      (*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_2) + 2)))) = (*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_1) + 2)))) ^ (*((uint8_t *)((uint8_t *)&local_20 + 2u)));
+      (*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_2) + 3)))) = (*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_1) + 3)))) ^ (*((uint8_t *)((uint8_t *)&local_20 + 3u)));
+      *(byte *)(param_2 + 1) = (byte)param_1[1] ^ (byte)uStack_1c;
+      (*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_2) + 5)))) = (*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_1) + 5)))) ^ (*((uint8_t *)((uint8_t *)&uStack_1c + 1u)));
+      (*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_2) + 6)))) = (*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_1) + 6)))) ^ (*((uint8_t *)((uint8_t *)&uStack_1c + 2u)));
+      (*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_2) + 7)))) = (*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_1) + 7)))) ^ (*((uint8_t *)((uint8_t *)&uStack_1c + 3u)));
+      *(byte *)(param_2 + 2) = (byte)param_1[2] ^ (byte)uStack_18;
+      (*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_2) + 9)))) = (*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_1) + 9)))) ^ (*((uint8_t *)((uint8_t *)&uStack_18 + 1u)));
+      (*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_2) + 10)))) = (*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_1) + 10)))) ^ (*((uint8_t *)((uint8_t *)&uStack_18 + 2u)));
+      (*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_2) + 0xb)))) = (*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_1) + 0xb)))) ^ (*((uint8_t *)((uint8_t *)&uStack_18 + 3u)));
+      *(byte *)(param_2 + 3) = (byte)param_1[3] ^ (byte)uStack_14;
+      (*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_2) + 0xd)))) = (*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_1) + 0xd)))) ^ (*((uint8_t *)((uint8_t *)&uStack_14 + 1u)));
+      (*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_2) + 0xe)))) = (*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_1) + 0xe)))) ^ (*((uint8_t *)((uint8_t *)&uStack_14 + 2u)));
+      (*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_2) + 0xf)))) = (*((byte *)camry_host_ptr((uint32_t)((int)camry_host_addr(param_1) + 0xf)))) ^ (*((uint8_t *)((uint8_t *)&uStack_14 + 3u)));
+    }
+    iVar3 = 3;
+    do {
+      iVar1 = iVar3 * 4 + param_4;
+      pcVar5 = ((char *)camry_host_ptr((uint32_t)(iVar1 + 0xd7)));
+      cVar2 = *pcVar5 + '\x01';
+      *pcVar5 = cVar2;
+      if ((cVar2 == '\0') &&
+         (pcVar5 = ((char *)camry_host_ptr((uint32_t)(iVar1 + 0xd6))), cVar2 = *pcVar5 + '\x01', *pcVar5 = cVar2, cVar2 == '\0')
+         ) {
+        iVar1 = iVar3 * 4 + param_4;
+        cVar2 = (*((char *)camry_host_ptr((uint32_t)(iVar1 + 0xd5)))) + '\x01';
+        (*((char *)camry_host_ptr((uint32_t)(iVar1 + 0xd5)))) = cVar2;
+        if (cVar2 == '\0') {
+          (*((char *)camry_host_ptr((uint32_t)(iVar1 + 0xd4)))) = (*((char *)camry_host_ptr((uint32_t)(iVar1 + 0xd4)))) + '\x01';
+        }
+      }
+    } while (((*((int *)camry_host_ptr((uint32_t)(iVar3 * 4 + param_4 + 0xd4)))) == 0) &&
+            (iVar1 = iVar3 + -1, iVar3 = iVar3 + -1, -1 < iVar1));
+    uVar4 = 0;
+  }
+  return uVar4;
+}
+
+
+
 /* Far-call trampoline: prepare {lp},0 / jarl 0x8844E / dispose 0,{lp},lp; byte-verified against the
    exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
    machine-verified; target semantics not recovered. */
 
-void thunk_FUN_0008844e(void)
+undefined4 thunk_FUN_0008844e(void)
 
 {
-  FUN_0008844e();
-  return;
+  return FUN_0008844e();
 }
 
 
@@ -1737,11 +1933,10 @@ void thunk_FUN_0008844e(void)
    exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
    machine-verified; target semantics not recovered. */
 
-void thunk_FUN_000884ea(void)
+undefined4 thunk_FUN_000884ea(void)
 
 {
-  FUN_000884ea();
-  return;
+  return FUN_000884ea();
 }
 
 
@@ -1750,11 +1945,10 @@ void thunk_FUN_000884ea(void)
    exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
    machine-verified; target semantics not recovered. */
 
-void thunk_FUN_000886e0(void)
+undefined4 thunk_FUN_000886e0(void)
 
 {
-  FUN_000886e0();
-  return;
+  return FUN_000886e0();
 }
 
 

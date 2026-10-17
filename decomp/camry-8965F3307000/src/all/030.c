@@ -2054,6 +2054,56 @@ void f33_snapshot_retained_estimator_projection(void)
 
 
 
+/* Conditionally copyC07C/countC0B4 toAF04/AE0E using observer state, acceptance and prior
+   snapshotBFFA/BFF8. Some BFFA5A branches hold values while publishingACEC5A; qualification is not
+   freshness. Observed reset first clearsC07C/BFFA. Conditional projection/count publication depends
+   on prior marker/count and observer state. Some retained-marker paths hold values while asserting
+   qualification; qualification is not a fresh-copy witness. */
+
+void f33_publish_retained_estimator_projection(void)
+
+{
+  char cVar1;
+  ushort uVar2;
+  undefined1 uVar3;
+  uint32_t puVar4;
+  undefined4 uVar5;
+  
+  puVar4 = 0xfebeb800u;
+  uVar5 = FUN_000d1da0(0xffc0);
+  uVar2 = (*((ushort *)camry_host_ptr((uint32_t)(puVar4 + 0x8b4))));
+  cVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(0x890)))));
+  FUN_000d1dc6(uVar5);
+  if (cVar1 == 'Z') {
+    (*((undefined4 *)camry_host_ptr((uint32_t)(puVar4 + 0x87c)))) = 0;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(0x7fa))))) = 0;
+  }
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(0x7fa))))) == 'Z') {
+    cVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(0x88e)))));
+    if ((((cVar1 == '\x11') || (cVar1 == '\"')) && ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(0x7f1))))) == 'Z')) &&
+       ((*((ushort *)camry_host_ptr((uint32_t)(puVar4 + 0x7f8)))) <= uVar2)) goto LAB_000c385e;
+    if (((cVar1 == '\0') && ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(0x7f1))))) == 'Z')) && ((*((ushort *)camry_host_ptr((uint32_t)(puVar4 + 0x7f8)))) <= uVar2))
+    goto LAB_000c3870;
+  }
+  else {
+    if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(0x7fa))))) != '\0') ||
+       ((((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(0x88e))))) != '\x11' && ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(0x88e))))) != '\"')) || ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(0x7f1))))) != 'Z')))) {
+LAB_000c3870:
+      uVar3 = 0;
+      goto LAB_000c3872;
+    }
+LAB_000c385e:
+    (*((ushort *)camry_host_ptr((uint32_t)(puVar4 + -0x9f2)))) = uVar2;
+    (*((undefined4 *)camry_host_ptr((uint32_t)(puVar4 + -0x8fc)))) = (*((undefined4 *)camry_host_ptr((uint32_t)(puVar4 + 0x87c))));
+  }
+  uVar3 = 0x5a;
+LAB_000c3872:
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0xb14))))) = uVar3;
+  return;
+}
+
+
+
 /* Constant-block fill: 35 literal assignments into one contiguous cell block; shape-verified.
    Literals are default/reset values; cell meanings are not recovered. */
 

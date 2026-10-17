@@ -1876,6 +1876,62 @@ void f33_return_only_stub_355f4(void)
 
 
 
+void FUN_000356c8(void)
+
+{
+  undefined2 uVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  uint uVar4;
+  undefined1 uVar5;
+  uint local_1c [4];
+  
+  puVar2 = 0xfebeb800u;
+  uVar3 = f33_nvm_get_record(0x100, camry_host_addr(local_1c));
+  if (uVar3 == 0x10) {
+    if (local_1c[0] != 0) {
+      if (local_1c[0] == 0xa55a5aa5) {
+        f33_publish_learned_quad();
+        uVar3 = f33_check_learned_quad_bounds();
+        if (uVar3 == 0) {
+          uVar5 = 0x44;
+          f33_report_diagnostic_healthy_observed(0x128);
+          uVar4 = f33_get_diagnostic_event_state(0xe);
+          uVar3 = local_1c[0];
+          if ((uVar4 & 1) == 0) {
+            FUN_000524be(0xe);
+          }
+          else {
+            f33_report_diagnostic_event_pass(0xe);
+          }
+          goto LAB_0003575c;
+        }
+      }
+LAB_00035746:
+      uVar3 = 0x5aa5a55a;
+      uVar5 = 0x22;
+      f33_report_diagnostic_event_failure(0x128,0x32);
+      goto LAB_0003575c;
+    }
+    f33_report_diagnostic_healthy_observed(0x128);
+  }
+  else {
+    if (uVar3 != 0x11) goto LAB_00035746;
+    local_1c[0] = 0;
+  }
+  uVar5 = 0x44;
+  FUN_00051d38(0xe,10,0x32);
+  uVar3 = local_1c[0];
+LAB_0003575c:
+  uVar1 = DAT_00030e30;
+  (*((uint *)camry_host_ptr((uint32_t)((0xffffb2f0u + (uint32_t)((int)puVar2)))))) = uVar3;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb2e0u + (uint32_t)((int)puVar2) * 1u)))) = uVar5;
+  (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb2e4u + (uint32_t)((int)puVar2)))))) = uVar1;
+  return;
+}
+
+
+
 void FUN_00035772(ushort param_1,ushort param_2,ushort param_3,ushort param_4)
 
 {

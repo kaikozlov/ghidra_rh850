@@ -2225,6 +2225,44 @@ void FUN_00089d18(void)
 
 
 
+void FUN_00089d3c(void)
+
+{
+  uint32_t puVar1;
+  int iVar2;
+  
+  puVar1 = 0xfebeb800u;
+  iVar2 = thunk_FUN_0008844e();
+  if (iVar2 == 0) {
+    FUN_00089d18();
+  }
+  (*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + 0x5bc0)))) = 0;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + 0x5bc8)))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x5bca))))) = 1;
+  return;
+}
+
+
+
+void FUN_00089d5e(void)
+
+{
+  uint32_t puVar1;
+  int iVar2;
+  
+  puVar1 = 0xfebeb800u;
+  iVar2 = thunk_FUN_000884ea();
+  if (iVar2 == 0) {
+    FUN_00089d18();
+  }
+  (*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + 0x5bc0)))) = 0;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + 0x5bc8)))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x5bca))))) = 1;
+  return;
+}
+
+
+
 int FUN_00089d80(void)
 
 {
@@ -2253,6 +2291,31 @@ int FUN_00089d80(void)
   }
   (*((uint *)camry_host_ptr((uint32_t)(puVar1 + 0x5bc0)))) = uVar4 + 1;
   return iVar3;
+}
+
+
+
+void FUN_00089dec(void)
+
+{
+  undefined8 uVar1;
+  int iVar2;
+  uint uVar3;
+  
+  uVar1 = 0x23dfcfebeb800;
+  iVar2 = thunk_FUN_000886e0();
+  if (iVar2 == 0) {
+    iVar2 = ((void)(0), FUN_00089d80());
+  }
+  (*((short *)camry_host_ptr((uint32_t)((int)uVar1 + 0x5bc8)))) = (short)iVar2;
+  if (iVar2 != 0) {
+    FUN_00089dd6(iVar2);
+  }
+  for (uVar3 = 0; iVar2 = (int)((ulonglong)uVar1 >> 0x20), uVar3 < (*((uint *)camry_host_ptr((uint32_t)(iVar2 + 0x4074))));
+      uVar3 = uVar3 + 1) {
+    (*(int (*)())*(code **)(uVar3 * 4 + iVar2 + 0x4084))();
+  }
+  return;
 }
 
 
@@ -3143,7 +3206,7 @@ uint f33_app_programming_handoff_pending_join(void)
 
 
 
-void FUN_0008b36e(uchar param_1,uchar *param_2)
+uint FUN_0008b36e(uchar param_1,uchar *param_2)
 
 {
   uint uVar1;
@@ -3151,8 +3214,7 @@ void FUN_0008b36e(uchar param_1,uchar *param_2)
   
   f33_dcm_get_session(&uStack_d);
   uVar1 = f33_app_session_transition_precondition(uStack_d,param_1);
-  f33_diagnostic_status_to_nrc((uchar)uVar1,param_2);
-  return;
+  return f33_diagnostic_status_to_nrc((uchar)uVar1,param_2);
 }
 
 

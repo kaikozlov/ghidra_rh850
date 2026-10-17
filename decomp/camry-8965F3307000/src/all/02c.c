@@ -138,16 +138,15 @@ undefined4 FUN_000b15ac(uint param_1)
 /* Commit liveB11A with XOR5555/B0A0 and XORAAAA/B0A4 throughD26D0 priority-protected redundant
    publisher. Does not publishE8CC. */
 
-void f33_publish_live_application_mode(ushort mode)
+undefined4 f33_publish_live_application_mode(ushort mode)
 
 {
-  FUN_000d26d0(mode,((undefined *)camry_host_ptr(0xfebeb11au)),((undefined *)camry_host_ptr(0xfebeb0a0u)),((undefined *)camry_host_ptr(0xfebeb0a4u)));
-  return;
+  return FUN_000d26d0(mode,((undefined *)camry_host_ptr(0xfebeb11au)),((undefined *)camry_host_ptr(0xfebeb0a0u)),((undefined *)camry_host_ptr(0xfebeb0a4u)));
 }
 
 
 
-void FUN_000b163a(void)
+undefined4 FUN_000b163a(void)
 
 {
   int iVar1;
@@ -165,8 +164,7 @@ void FUN_000b163a(void)
   DAT_febeb0a6 = 0xff;
   DAT_febeb11c = 0;
   DAT_febeb0a2 = 0xffff;
-  f33_publish_live_application_mode(DAT_febeb11a);
-  return;
+  return f33_publish_live_application_mode(DAT_febeb11a);
 }
 
 
@@ -315,14 +313,13 @@ LAB_000b17e6:
    publish. Native0701 readiness branch takes the exact constant-zero selector, publishes mode0000
    and redundant foreground restart,without transition0800 or hardware reset. */
 
-void f33_request_foreground_restart_from_mode(void)
+int f33_request_foreground_restart_from_mode(void)
 
 {
   thunk_FUN_00066f84();
   thunk_FUN_00066fba();
   f33_transition_application_mode(0);
-  thunk_FUN_0005889a();
-  return;
+  return thunk_FUN_0005889a();
 }
 
 
@@ -706,10 +703,24 @@ undefined2 FUN_000b1c64(void)
 
 
 
-void FUN_000b1c84(void)
+undefined4 FUN_000b1c84(void)
 
 {
-  FUN_000b15ac(0x11);
+  return FUN_000b15ac(0x11);
+}
+
+
+
+void FUN_000b1c96(void)
+
+{
+  int iVar1;
+  
+  thunk_FUN_00066fd4();
+  iVar1 = thunk_FUN_000588b6();
+  if (iVar1 != 0) {
+    thunk_FUN_00066ef4();
+  }
   return;
 }
 
@@ -726,29 +737,26 @@ void FUN_000b1cae(void)
 
 
 
-void FUN_000b1cc2(void)
+undefined4 FUN_000b1cc2(void)
 
 {
-  FUN_000b15ac(0x13);
-  return;
+  return FUN_000b15ac(0x13);
 }
 
 
 
-void FUN_000b1ce0(void)
+undefined4 FUN_000b1ce0(void)
 
 {
-  FUN_000b15ac(0x14);
-  return;
+  return FUN_000b15ac(0x14);
 }
 
 
 
-void FUN_000b1cf2(void)
+undefined4 FUN_000b1cf2(void)
 
 {
-  FUN_000b15ac(5);
-  return;
+  return FUN_000b15ac(5);
 }
 
 
@@ -1379,7 +1387,7 @@ void f33_apply_mode020d_entry_requests(void)
    higher-priorityrequests win. when returnedselector!=1 request6, then alwaysrequest3.0200
    takes3→0300 first; */
 
-void f33_complete_mode200_output_sequence(void)
+undefined4 f33_complete_mode200_output_sequence(void)
 
 {
   uint uVar1;
@@ -1389,8 +1397,7 @@ void f33_complete_mode200_output_sequence(void)
   if (uVar1 != 1) {
     FUN_000b15ac(6);
   }
-  FUN_000b15ac(3);
-  return;
+  return FUN_000b15ac(3);
 }
 
 
@@ -1594,7 +1601,7 @@ void f33_run_init_chain_b2ace(void)
 
 
 
-void FUN_000b2b0a(void)
+undefined4 FUN_000b2b0a(void)
 
 {
   uint32_t puVar1;
@@ -1611,8 +1618,7 @@ void FUN_000b2b0a(void)
   if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x77e))))) & 2) == 0) {
     ((void)(1), (void)(0x20000), thunk_FUN_00056cda());
   }
-  FUN_000bd8ea();
-  return;
+  return FUN_000bd8ea();
 }
 
 
@@ -1641,11 +1647,10 @@ void f33_step_mode301_invocation_counter(void)
 
 
 
-void FUN_000b2b90(void)
+undefined4 FUN_000b2b90(void)
 
 {
-  FUN_000b15ac(0xc);
-  return;
+  return FUN_000b15ac(0xc);
 }
 
 
@@ -1781,22 +1786,20 @@ void FUN_000b2ca6(void)
    independent record5/6 and gated estimator8 publications. Native scenarios distinguish real queue
    admission from tracker arming; record8 explicitly disabled. */
 
-void f33_snapshot_retained_control_records(void)
+undefined4 f33_snapshot_retained_control_records(void)
 
 {
   f33_publish_thermal_reference_record();
   f33_publish_thermal_history_record();
-  FUN_000bd87e();
-  return;
+  return FUN_000bd87e();
 }
 
 
 
-void FUN_000b2cd6(void)
+undefined4 FUN_000b2cd6(void)
 
 {
-  FUN_000b15ac(10);
-  return;
+  return FUN_000b15ac(10);
 }
 
 
@@ -3310,11 +3313,10 @@ void f33_publish_health_coherence_fault_actions(void)
 /* Initialize only redundant B18E to0; preserve receive-generation B195/B196 and counters. Not a
    cold application reset. */
 
-void f33_initialize_source_coherence_history(void)
+undefined4 f33_initialize_source_coherence_history(void)
 
 {
-  FUN_000d268c(0, ((byte *)camry_host_ptr((uint32_t)((0xfebeb18eu)))), ((byte *)camry_host_ptr((uint32_t)((0xfebeb18cu)))), ((undefined *)camry_host_ptr(0xfebeb18du)));
-  return;
+  return FUN_000d268c(0, ((byte *)camry_host_ptr((uint32_t)((0xfebeb18eu)))), ((byte *)camry_host_ptr((uint32_t)((0xfebeb18cu)))), ((undefined *)camry_host_ptr(0xfebeb18du)));
 }
 
 
@@ -3322,7 +3324,7 @@ void f33_initialize_source_coherence_history(void)
 /* Clear B198/B19A/B19C,B190/B191 and redundant summary; preserveB195/B196 and
    separateB193/B194/B19E/B1A0. */
 
-void f33_reset_current_source_coherence_observations(void)
+undefined4 f33_reset_current_source_coherence_observations(void)
 
 {
   DAT_febeb198 = 0;
@@ -3330,8 +3332,7 @@ void f33_reset_current_source_coherence_observations(void)
   DAT_febeb19c = 0;
   DAT_febeb190 = 0;
   f33_current_source_coherence_observations = '\0';
-  FUN_000d268c(0, ((byte *)camry_host_ptr((uint32_t)((0xfebeb18eu)))), ((byte *)camry_host_ptr((uint32_t)((0xfebeb18cu)))), ((undefined *)camry_host_ptr(0xfebeb18du)));
-  return;
+  return FUN_000d268c(0, ((byte *)camry_host_ptr((uint32_t)((0xfebeb18eu)))), ((byte *)camry_host_ptr((uint32_t)((0xfebeb18cu)))), ((undefined *)camry_host_ptr(0xfebeb18du)));
 }
 
 

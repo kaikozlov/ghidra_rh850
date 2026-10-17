@@ -92,11 +92,10 @@ uint f33_secoc_lower_tx(ushort pdu,F33PduInfo *info)
 
 
 
-void FUN_000901e8(undefined2 param_1)
+undefined4 FUN_000901e8(undefined2 param_1)
 
 {
-  FUN_0008160c(param_1);
-  return;
+  return FUN_0008160c(param_1);
 }
 
 
@@ -821,6 +820,56 @@ uint f33_dcm_invoke_request_policy
 
 
 
+/* Select disposition0 positive,1 negative,2 suppressed positive,3 silent negative. Exact
+   flag26AEB=0 disallows responses to SID bit6. Prior pending acceptance59EA bypasses
+   suppress-positive and functional NRC suppression, not SID-bit6 filtering. */
+
+void f33_dcm_select_response_disposition(F33DcmMessageContext *message)
+
+{
+  char cVar1;
+  undefined *puVar2;
+  uchar disposition;
+  uint uVar3;
+  int iVar4;
+  int iVar5;
+  
+  puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  if ((DAT_00026aeb == '\x01') ||
+     (puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u)), uVar3 = FUN_0009168e(), (uVar3 >> 6 & 1) == 0)) {
+    iVar4 = FUN_00091bf2();
+    iVar5 = thunk_FUN_00093d9a();
+    cVar1 = puVar2[-0x61dc];
+    if (cVar1 == '\0') {
+      disposition = '\0';
+      if ((iVar4 == 0) &&
+         ((message->suppress_positive != '\0' ||
+          ((message->addressing_kind == '\x01' && (iVar5 == 1)))))) {
+        disposition = '\x02';
+      }
+    }
+    else {
+      disposition = '\x01';
+      if (((iVar4 == 0) && (message->addressing_kind == '\x01')) &&
+         ((cVar1 == '\x11' ||
+          ((((cVar1 == '\x12' || (cVar1 == '1')) || (cVar1 == '~')) ||
+           ((cVar1 == '\x7f' || (iVar5 == 1)))))))) {
+        disposition = '\x03';
+      }
+    }
+  }
+  else if (puVar2[-0x61dc] == '\0') {
+    disposition = '\x02';
+  }
+  else {
+    disposition = '\x03';
+  }
+  f33_dcm_stage_final_response(message,disposition);
+  return;
+}
+
+
+
 /* Copy remaining request length/routing to main5630, add retained prefix count to body length, then
    select and stage final disposition. Does not itself mean transport confirmation. */
 
@@ -1208,29 +1257,26 @@ bool FUN_0009177c(void)
 
 
 
-void FUN_00091788(undefined1 param_1)
+undefined4 FUN_00091788(undefined1 param_1)
 
 {
-  FUN_00092094(param_1);
-  return;
+  return FUN_00092094(param_1);
 }
 
 
 
-void FUN_00091796(undefined1 param_1)
+undefined4 FUN_00091796(undefined1 param_1)
 
 {
-  FUN_000920a2(param_1);
-  return;
+  return FUN_000920a2(param_1);
 }
 
 
 
-void FUN_000917a4(undefined1 param_1)
+undefined4 FUN_000917a4(undefined1 param_1)
 
 {
-  FUN_000920b0(param_1);
-  return;
+  return FUN_000920b0(param_1);
 }
 
 
@@ -1563,7 +1609,7 @@ void FUN_00091b08(uchar param_1,uchar param_2)
    diagnostic transportstate0, run91A24 and no-op925A0. Timer5 callback91B78 reaches this path. No
    physical reset or ECU power action. */
 
-void f33_dcm_restore_default_session(void)
+undefined4 f33_dcm_restore_default_session(void)
 
 {
   uint uVar1;
@@ -1578,8 +1624,7 @@ void f33_dcm_restore_default_session(void)
   FUN_00092610(0);
   thunk_FUN_0006a4c4();
   FUN_00091a24();
-  FUN_000925a0(1);
-  return;
+  return FUN_000925a0(1);
 }
 
 
@@ -1603,11 +1648,26 @@ undefined4 FUN_00091b50(void)
 
 
 
-void FUN_00091b78(void)
+undefined4 FUN_00091b78(void)
 
 {
-  f33_dcm_restore_default_session();
-  return;
+  return f33_dcm_restore_default_session();
+}
+
+
+
+undefined4 FUN_00091bd2(int param_1)
+
+{
+  undefined4 uVar1;
+  
+  if (param_1 == 0) {
+    uVar1 = 0;
+  }
+  else {
+    uVar1 = FUN_00093a70(((undefined1 *)camry_host_ptr((uint32_t)(param_1))));
+  }
+  return uVar1;
 }
 
 
@@ -1616,11 +1676,10 @@ void FUN_00091b78(void)
    exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
    machine-verified; target semantics not recovered. */
 
-void thunk_FUN_00093c60(void)
+ushort thunk_FUN_00093c60(void)
 
 {
-  FUN_00093c60();
-  return;
+  return FUN_00093c60();
 }
 
 
@@ -1638,11 +1697,10 @@ undefined4 FUN_00091bf2(void)
 
 
 
-void FUN_00091c82(uchar param_1,uchar param_2)
+uint FUN_00091c82(uchar param_1,uchar param_2)
 
 {
-  f33_dcm_deliver_response_notification(param_1,param_2);
-  return;
+  return f33_dcm_deliver_response_notification(param_1,param_2);
 }
 
 
@@ -1651,7 +1709,7 @@ void FUN_00091c82(uchar param_1,uchar param_2)
    finishes staged-session notifications before observers; pending flag preserves callback and
    invokes operation3. */
 
-void f33_dcm_run_queued_response_notification(void)
+uint f33_dcm_run_queued_response_notification(void)
 
 {
   int iVar1;
@@ -1669,8 +1727,7 @@ void f33_dcm_run_queued_response_notification(void)
     }
   }
   f33_dcm_finish_staged_session_notifications();
-  f33_dcm_deliver_response_notification(uStack_6,uStack_5);
-  return;
+  return f33_dcm_deliver_response_notification(uStack_6,uStack_5);
 }
 
 
@@ -1829,11 +1886,10 @@ void FUN_00091e12(uchar param_1)
    exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
    machine-verified; target semantics not recovered. */
 
-void thunk_FUN_00093d9a(void)
+undefined1 thunk_FUN_00093d9a(void)
 
 {
-  FUN_00093d9a();
-  return;
+  return FUN_00093d9a();
 }
 
 
@@ -1880,7 +1936,7 @@ void FUN_00091e6e(void)
 
 
 
-void FUN_00091e7a(void)
+undefined4 FUN_00091e7a(void)
 
 {
   uint uVar1;
@@ -1893,8 +1949,7 @@ void FUN_00091e7a(void)
     uVar1 = uVar1 + 1;
   } while (uVar1 < 3);
   thunk_FUN_0006a4c4();
-  FUN_000925a0(1);
-  return;
+  return FUN_000925a0(1);
 }
 
 
@@ -2012,11 +2067,10 @@ void FUN_00091f90(void)
 
 
 
-void FUN_00091f9c(undefined1 param_1)
+undefined4 FUN_00091f9c(undefined1 param_1)
 
 {
-  FUN_000925a0(param_1);
-  return;
+  return FUN_000925a0(param_1);
 }
 
 
@@ -2107,20 +2161,18 @@ undefined4 f33_return_const_0_92040(void)
 
 
 
-void FUN_00092044(undefined1 param_1,undefined1 param_2)
+undefined4 FUN_00092044(undefined1 param_1,undefined1 param_2)
 
 {
-  FUN_0009202a(param_1,param_2);
-  return;
+  return FUN_0009202a(param_1,param_2);
 }
 
 
 
-void FUN_00092054(undefined1 param_1,undefined1 param_2)
+undefined4 FUN_00092054(undefined1 param_1,undefined1 param_2)
 
 {
-  ((void)(param_1), (void)(param_2), f33_return_const_0_9203c());
-  return;
+  return ((void)(param_1), (void)(param_2), f33_return_const_0_9203c());
 }
 
 
@@ -2151,29 +2203,26 @@ void FUN_00092064(uchar param_1,ushort *param_2,ushort *param_3,ushort *param_4)
 
 
 
-void FUN_00092094(undefined1 param_1)
+undefined4 FUN_00092094(undefined1 param_1)
 
 {
-  FUN_00091826(param_1);
-  return;
+  return FUN_00091826(param_1);
 }
 
 
 
-void FUN_000920a2(undefined1 param_1)
+undefined4 FUN_000920a2(undefined1 param_1)
 
 {
-  FUN_00091838(param_1);
-  return;
+  return FUN_00091838(param_1);
 }
 
 
 
-void FUN_000920b0(undefined1 param_1)
+undefined4 FUN_000920b0(undefined1 param_1)
 
 {
-  FUN_0009184a(param_1);
-  return;
+  return FUN_0009184a(param_1);
 }
 
 
@@ -2376,12 +2425,11 @@ void f33_return_only_stub_922e8(void)
 /* Timer6 callback tombstones all pending event0 slots then appends one fresh event0. Occupancy is
    not compacted and both statuses are discarded, so a full ring can reject the fresh append. */
 
-void f33_dcm_post_receive_dispatch_after_delay(void)
+uint f33_dcm_post_receive_dispatch_after_delay(void)
 
 {
   f33_dcm_invalidate_queued_event('\0','\0');
-  f33_dcm_enqueue_event('\0');
-  return;
+  return f33_dcm_enqueue_event('\0');
 }
 
 
@@ -2595,7 +2643,7 @@ uint f33_dcm_read_session_snapshot(uchar *session)
    challenge/client reset occurs later4D582. Invoke ROM25F48 callbacks968CC and9704E in order,
    then92044→8B0DE→4D582/6A156. */
 
-void f33_dcm_notify_session_publication(uchar old_session,uchar new_session)
+undefined4 f33_dcm_notify_session_publication(uchar old_session,uchar new_session)
 
 {
   int iVar1;
@@ -2611,8 +2659,7 @@ void f33_dcm_notify_session_publication(uchar old_session,uchar new_session)
     iVar1 = iVar4 + -1;
     iVar4 = iVar2;
   } while (((iVar1 < 0) || (iVar2 < 0)));
-  FUN_00092044(old_session,new_session);
-  return;
+  return FUN_00092044(old_session,new_session);
 }
 
 
@@ -2649,11 +2696,10 @@ void f33_dcm_stage_or_publish_session(uchar target,uchar defer)
 
 
 
-void FUN_000925a0(undefined1 param_1)
+undefined4 FUN_000925a0(undefined1 param_1)
 
 {
-  ((void)(param_1), f33_return_const_0_9260c());
-  return;
+  return ((void)(param_1), f33_return_const_0_9260c());
 }
 
 
@@ -3224,7 +3270,7 @@ void f33_run_init_chain_92bfe(void)
 
 /* WARNING: Inlined function: f33_dcm_get_response_queue */
 
-void FUN_00092c1e(uchar param_1)
+uint FUN_00092c1e(uchar param_1)
 
 {
   uchar disposition;
@@ -3235,8 +3281,7 @@ void FUN_00092c1e(uchar param_1)
   if (iVar1 != 0) {
     disposition = (*((uchar *)camry_host_ptr((uint32_t)(iVar1 + 0xc))));
   }
-  f33_dcm_map_response_delivery_result(disposition,param_1);
-  return;
+  return f33_dcm_map_response_delivery_result(disposition,param_1);
 }
 
 
@@ -3253,6 +3298,59 @@ undefined4 FUN_00092c46(uint param_1)
     uVar2 = 1;
   }
   return uVar2;
+}
+
+
+
+/* Timer1 stops processing timers. Final/queued-final states notify failure, service/pending states
+   cancel operation2, then release receive/session joins and reset queue. Lower cancellation is
+   requested only in the specified in-flight states. */
+
+void f33_dcm_transport_watchdog_expired(void)
+
+{
+  int iVar1;
+  int iVar2;
+  undefined4 uVar3;
+  undefined4 uVar4;
+  
+  iVar1 = FUN_00092b34();
+  iVar2 = FUN_00092b66();
+  uVar3 = FUN_00093e82();
+  uVar4 = FUN_00093c60();
+  f33_dcm_cancel_software_timer('\x03');
+  f33_dcm_cancel_software_timer('\x04');
+  f33_dcm_cancel_software_timer('\x02');
+  if (iVar2 == 0) {
+    FUN_00091b08(1,0);
+  }
+  if (((iVar1 == 0x21 || iVar1 == 0x22) || (iVar1 == 0x31 || iVar1 == 0x32)) || (iVar1 == 0x40)) {
+    FUN_00091f64(0);
+    f33_dcm_restart_inactivity_after_request();
+    FUN_00091938(uVar4,1);
+    if (iVar1 == 0x31 || iVar1 == 0x32) {
+      f33_run_init_chain_92bfe();
+    }
+    uVar4 = FUN_00092c1e(1);
+    FUN_00091c82(uVar4,0);
+    if ((iVar1 == 0x40) || (iVar1 == 0x31 || iVar1 == 0x32)) {
+      FUN_00092a1e(uVar3);
+    }
+  }
+  else if (((iVar1 == 0x10 || iVar1 == 0x11) || (iVar1 == 0x20)) ||
+          ((iVar1 - 0x23U < 3 || (iVar1 - 0x23U == 0xd)))) {
+    FUN_00091e6e();
+    iVar2 = FUN_00092c46(iVar1);
+    if ((iVar2 == 1) || (iVar1 == 0x24)) {
+      FUN_00092a1e(uVar3);
+    }
+    FUN_00091f64(0);
+    f33_dcm_restart_inactivity_after_request();
+    FUN_00091938(uVar4,1);
+  }
+  f33_dcm_reset_response_queue();
+  FUN_00092a9c();
+  return;
 }
 
 
@@ -3337,6 +3435,71 @@ void FUN_00092de8(undefined1 param_1)
 {
   FUN_00091f64(0);
   FUN_00092dd2(param_1);
+  return;
+}
+
+
+
+/* Try9296A; accepted response retains queue until confirmation. Communication unavailability queues
+   retry2B/state21 unless forced pending forbids it. Suppression/refusal complete software ownership
+   without proving delivery. */
+
+void f33_dcm_try_final_response(ushort transmit_id,F33PduInfo *response,uchar disposition)
+
+{
+  bool bVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  undefined4 uVar4;
+  int iVar5;
+  undefined4 uVar6;
+  
+  puVar2 = 0xfebeb800u;
+  bVar1 = false;
+  uVar6 = 1;
+  uVar3 = f33_dcm_submit_transport_response(transmit_id,response,disposition);
+  if (uVar3 == 0) {
+    return;
+  }
+  if (uVar3 == 0x82) {
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x5e9b))))) == '\x01') {
+      FUN_00091f64(0);
+      bVar1 = true;
+    }
+    else {
+      uVar3 = f33_dcm_enqueue_event('+');
+      if (uVar3 == 0) {
+        FUN_00092a86(0x21);
+        return;
+      }
+      uVar4 = FUN_00092c1e(1);
+      FUN_00092de8(uVar4);
+    }
+    f33_dcm_cancel_software_timer('\x03');
+    f33_dcm_cancel_software_timer('\x04');
+    f33_dcm_cancel_software_timer('\x02');
+    if (!bVar1) {
+      return;
+    }
+  }
+  else {
+    if (uVar3 == 0x84) {
+      uVar6 = 0;
+      if (disposition == '\x02') {
+        FUN_00091f64(1);
+        FUN_00091f90();
+        goto LAB_00092e9e;
+      }
+    }
+    else if ((uVar3 == 0x81) && (iVar5 = FUN_00092b66(), iVar5 == 0)) {
+      FUN_00091b08(1,0);
+      goto LAB_00092e9e;
+    }
+    FUN_00091f64(0);
+  }
+LAB_00092e9e:
+  uVar6 = FUN_00092c1e(uVar6);
+  FUN_00092dd2(uVar6);
   return;
 }
 
@@ -3651,6 +3814,126 @@ void f33_dcm_snapshot_response_notification(uchar *result,uchar *pending_notific
   *result = f33_dcm_response_queue.notification_result;
   *pending_notification = f33_dcm_response_queue.pending_notification;
   return;
+}
+
+
+
+/* Use overall phase, protocol identity and existing receive owner to accept/reset slot; pause S3
+   for admitted active-session receive. Mark receive-in-progress separately from service/dispatch
+   ownership. */
+
+uint f33_dcm_claim_receive_slot(ushort receive_slot)
+
+{
+  ushort owner_slot;
+  int iVar1;
+  uint uVar2;
+  
+  iVar1 = FUN_00092624();
+  if (iVar1 == 0) {
+LAB_0009378e:
+    iVar1 = FUN_00093e32(receive_slot);
+    if (iVar1 != 1) goto LAB_000937a2;
+  }
+  else {
+    if (iVar1 != 1) {
+      iVar1 = FUN_00094014(receive_slot);
+      if (iVar1 == 1) {
+        return 0;
+      }
+      goto LAB_0009378e;
+    }
+    iVar1 = FUN_00093e32((uint)(ushort)receive_slot);
+    if (iVar1 != 1) {
+      iVar1 = FUN_00094014(receive_slot);
+      if (iVar1 != 1) {
+        owner_slot = FUN_0009400e();
+        uVar2 = f33_dcm_compare_protocol_priority(receive_slot,owner_slot);
+        if (uVar2 != 2) goto LAB_000937a2;
+      }
+      f33_dcm_cancel_software_timer('\x05');
+      FUN_00093f4e(receive_slot,1);
+      goto LAB_000937a2;
+    }
+  }
+  FUN_00093c9a(receive_slot,1);
+LAB_000937a2:
+  FUN_00093e5c(receive_slot,1);
+  return 1;
+}
+
+
+
+/* Functional exact3E80 during active-session phase1 takes receive shortcut. Otherwise arbitrate
+   candidate against pending owner, cancel/release displaced reception or queue service-cancellation
+   event28 for higher-priority protocol. */
+
+uint f33_dcm_arbitrate_completed_receive(ushort receive_slot)
+
+{
+  short *psVar1;
+  int iVar2;
+  undefined8 uVar3;
+  undefined4 uVar4;
+  int iVar5;
+  uint uVar6;
+  char cStack_19;
+  short sStack_18;
+  char acStack_16 [6];
+  
+  uVar3 = 0x23dfc00000000;
+  acStack_16[0] = '\0';
+  sStack_18 = 0;
+  cStack_19 = '\0';
+  iVar5 = FUN_00091b84((uint)(ushort)receive_slot);
+  if (iVar5 == 1) {
+    iVar5 = FUN_00092624();
+    uVar6 = 0;
+    if (iVar5 == 1) {
+      uVar6 = 0x20;
+    }
+  }
+  else {
+    uVar4 = FUN_0009400e();
+    uVar6 = FUN_000937b0(receive_slot, uVar4, camry_host_addr(&sStack_18), &cStack_19);
+  }
+  if (uVar6 == 0x20) {
+    FUN_00093c9a(receive_slot,1);
+    uVar4 = 1;
+  }
+  else {
+    if (uVar6 != 0) {
+      for (iVar5 = 0; iVar2 = (int)cStack_19,
+          iVar5 - iVar2 < 0 != (iVar5 < 0 != iVar2 < 0 && iVar2 < 0 == iVar5 - iVar2 < 0);
+          iVar5 = (int)(char)((char)iVar5 + '\x01')) {
+        psVar1 = ((short *)camry_host_ptr((uint32_t)(acStack_16 + iVar5 * 4 + -2)));
+        if (acStack_16[iVar5 * 4] == '\0') {
+          iVar2 = (int)((ulonglong)uVar3 >> 0x20);
+          if ((*((char *)camry_host_ptr((uint32_t)(*(short *)(*psVar1 * 0xc + iVar2 + 0x20ec) * 0x14 + iVar2 + 0x20d5)))) ==
+              '\x01') {
+            f33_dcm_enqueue_event('\'');
+            FUN_0009405c(*psVar1);
+            FUN_00093ef6(*psVar1,1);
+          }
+        }
+        else {
+          thunk_FUN_000935b6();
+        }
+        FUN_00093c9a(*psVar1,1);
+      }
+      if (uVar6 != 0x13) {
+        return uVar6;
+      }
+      f33_dcm_invalidate_queued_event('*','\0');
+      f33_dcm_enqueue_event('*');
+      FUN_00091a24();
+      return 0x13;
+    }
+    uVar4 = FUN_00093f5a(receive_slot);
+    FUN_00093c9a(receive_slot,1);
+  }
+  FUN_00091f26(receive_slot,uVar4);
+  return uVar6;
 }
 
 

@@ -244,11 +244,10 @@ uint f33_dcm_clear_diagnostic_service(uchar operation,F33DcmMessageContext *mess
 /* EventEB re-enters8C214 with retained group3BCC and existing28-byte message3BD4; no per-event
    message pointer is stored. */
 
-void f33_dcm_resume_queued_clear_request(void)
+uint f33_dcm_resume_queued_clear_request(void)
 
 {
-  f33_dcm_join_clear_diagnostic_phases(DAT_febf3bcc, ((F33DcmMessageContext *)camry_host_ptr((uint32_t)((0xfebf3bd4u)))));
-  return;
+  return f33_dcm_join_clear_diagnostic_phases(DAT_febf3bcc, ((F33DcmMessageContext *)camry_host_ptr((uint32_t)((0xfebf3bd4u)))));
 }
 
 
@@ -508,11 +507,10 @@ uint f33_dcm_read_dtc_count_service(uchar operation,F33DcmMessageContext *messag
 
 /* EventEC re-enters8C4F8 with retained28-byte message3BFC. */
 
-void f33_dcm_resume_queued_dtc_count(void)
+undefined4 f33_dcm_resume_queued_dtc_count(void)
 
 {
-  FUN_0008c4f8(((F33DcmMessageContext *)camry_host_ptr((uint32_t)((0xfebf3bfcu)))));
-  return;
+  return FUN_0008c4f8(((F33DcmMessageContext *)camry_host_ptr((uint32_t)((0xfebf3bfcu)))));
 }
 
 
@@ -725,11 +723,10 @@ uint f33_dcm_read_dtc_list_service(uchar operation,F33DcmMessageContext *message
 /* EventED re-enters8C960 with existing28-byte message3F24 and retained local snapshot/scratch.
    Dispatcher has already consumed the queue slot. */
 
-void f33_dcm_resume_queued_dtc_list(void)
+uint f33_dcm_resume_queued_dtc_list(void)
 
 {
-  f33_dcm_advance_dtc_list_request(((F33DcmMessageContext *)camry_host_ptr((uint32_t)((0xfebf3f24u)))));
-  return;
+  return f33_dcm_advance_dtc_list_request(((F33DcmMessageContext *)camry_host_ptr((uint32_t)((0xfebf3f24u)))));
 }
 
 
@@ -998,11 +995,10 @@ uint f33_dcm_read_snapshot_identifiers_service(uchar operation,F33DcmMessageCont
 
 /* EventEE re-enters8CCB8 using that module's retained state and existing message4248. */
 
-void f33_dcm_resume_queued_snapshot_identifiers(void)
+uint f33_dcm_resume_queued_snapshot_identifiers(void)
 
 {
-  FUN_0008ccb8();
-  return;
+  return FUN_0008ccb8();
 }
 
 
@@ -1519,6 +1515,77 @@ void f33_fill_counter_sample_pairs(uchar *output,uchar length)
 
 
 
+/* Up to2 timer-derived candidates: sample16 bytes, initializeCTR(timerkey,counter0),
+   outputAES_timerkey(0), reinitializeCTR(output,currentcounter1), then outputAES_output(1).
+   Clear228-byteCTRcontext4A50. Exclusion checkzero/FF and activehistory496A. If
+   transformedcandidates fail, rawlasttimerkey is ALSO checked; accepted raw fallback
+   updateschallenge/copy/active. Unlike resident6F22, invalid raw fallback returns failure rather
+   than unconditionalsuccess. A prior library-failure marker isnotreseton retry, so not every second
+   attempt is independent. */
+
+uint f33_app_security_generate_challenge(uchar *seed_out)
+
+{
+  uchar *puVar1;
+  uchar *puVar2;
+  uint uVar3;
+  uint uVar4;
+  int iVar5;
+  int iVar6;
+  int iVar7;
+  int iVar8;
+  uint uVar9;
+  uchar local_30 [16];
+  
+  uVar9 = 0;
+  iVar6 = 0xff;
+  iVar8 = 0;
+  iVar7 = 2;
+  do {
+    f33_fill_counter_sample_pairs(local_30,'\x10');
+    FUN_00085940(camry_host_addr(local_30), 0x10, (0xfebf4a50u));
+    iVar5 = FUN_00085964(camry_host_addr(seed_out), (0xfebf4a50u));
+    if (iVar5 == 0) {
+      iVar6 = FUN_0008597c(camry_host_addr(seed_out), 0x10, (0xfebf4a50u));
+    }
+    else {
+      iVar8 = 0xff;
+    }
+    if ((iVar6 == 0) && (iVar8 == 0)) {
+      iVar8 = FUN_00085964(camry_host_addr(seed_out), (0xfebf4a50u));
+    }
+    else {
+      iVar8 = 0xff;
+    }
+    FUN_000859a8(((undefined4 *)camry_host_ptr((uint32_t)((0xfebf4a50u)))));
+  } while (((iVar8 != 0) || (uVar9 = FUN_0008d6d6(camry_host_addr(seed_out)), uVar9 == 0)) &&
+          (iVar7 = iVar7 + -1, iVar7 != 0));
+  if (uVar9 != 0x5a) {
+    uVar9 = 0;
+    do {
+      puVar1 = local_30 + uVar9;
+      puVar2 = seed_out + uVar9;
+      uVar9 = uVar9 + 1;
+      *puVar2 = *puVar1;
+    } while (uVar9 < 0x10);
+    uVar9 = FUN_0008d6d6(camry_host_addr(seed_out));
+    if (uVar9 != 0x5a) {
+      return uVar9;
+    }
+  }
+  uVar4 = 0;
+  do {
+    uVar3 = uVar4 + 1;
+    f33_app_security_challenge[uVar4] = seed_out[uVar4];
+    f33_app_security_challenge_duplicate[uVar4] = seed_out[uVar4];
+    uVar4 = uVar3;
+  } while (uVar3 < 0x10);
+  f33_app_security_challenge_active = 'Z';
+  return uVar9;
+}
+
+
+
 /* Always copy16 client bytes to497A. If4958==0 or retainedchallenge allzero generate8D74A;
    failureNRC22. Otherwise copyexisting challenge495A toseed_out unchanged. Delay/current-security
    gating occurs later96692. No CMAC or ICU-S ownership. */
@@ -1964,6 +2031,60 @@ LAB_0008dd00:
 
 
 
+void FUN_0008dd54(undefined4 param_1)
+
+{
+  int iVar1;
+  
+  iVar1 = FUN_0008db8c(((F33DcmMessageContext *)camry_host_ptr((uint32_t)(param_1))));
+  if (iVar1 == 0) {
+    FUN_0008dc7c(((F33DcmMessageContext *)camry_host_ptr((uint32_t)(param_1))));
+  }
+  return;
+}
+
+
+
+/* Operation0 forwards fixed selection1 and requires zero remaining bytes; other operations reset
+   module continuation. Application action clears8197, not stored diagnostic histories. */
+
+uint f33_dcm_enable_dtc_setting_service(uchar operation,F33DcmMessageContext *message)
+
+{
+  uint uVar1;
+  
+  if (operation == '\0') {
+    uVar1 = FUN_0008dd6c(1, message);
+  }
+  else {
+    uVar1 = 0;
+    FUN_0008db70();
+  }
+  return uVar1;
+}
+
+
+
+/* Operation0 forwards fixed selection2 and requires zero remaining bytes; other operations reset
+   continuation. Application action requests8197=5A; grouped status propagation occurs later. */
+
+uint f33_dcm_disable_dtc_setting_service(uchar operation,F33DcmMessageContext *message)
+
+{
+  uint uVar1;
+  
+  if (operation == '\0') {
+    uVar1 = FUN_0008dd6c(2, message);
+  }
+  else {
+    uVar1 = 0;
+    FUN_0008db70();
+  }
+  return uVar1;
+}
+
+
+
 /* EventF0 re-enters8DD54 with retained28-byte message45B4. */
 
 void f33_dcm_resume_queued_dtc_setting(void)
@@ -1995,6 +2116,22 @@ void f33_fill_constant_block_8de1a(void)
   DAT_febf45df = 1;
   DAT_febf45de = 0;
   return;
+}
+
+
+
+/* Retain bounded selector/IDs at45D0/45D2/45DC and publish selection through50916. IDs index event
+   data catalogue, not callback addresses. */
+
+uint f33_begin_proprietary_event_selection
+               (uchar operation,uchar selector,ushort event_id,ushort subselector)
+
+{
+  DAT_febf45d0 = event_id;
+  DAT_febf45d2 = subselector;
+  DAT_febf45dc = selector;
+  FUN_00050916((uint)(byte)selector, (uint)(ushort)event_id, (uint)(ushort)subselector);
+  return 0;
 }
 
 
@@ -3259,6 +3396,25 @@ int FUN_0008ede6(undefined2 param_1)
 
 
 
+uint FUN_0008ee16(char param_1,int param_2)
+
+{
+  uint uVar1;
+  
+  uVar1 = 1;
+  if ((((int16_t)DAT_febe54f4) == -0x1ff) && (param_2 != 0)) {
+    if (param_1 == -1) {
+      uVar1 = f33_secoc_publish_crypto_qualification((*((uchar *)camry_host_ptr((uint32_t)(param_2 + 4)))));
+    }
+    else {
+      uVar1 = FUN_0008f148((uint)(byte)param_1, ((int *)camry_host_ptr((uint32_t)(param_2))));
+    }
+  }
+  return uVar1;
+}
+
+
+
 void FUN_0008ee7c(undefined2 param_1,int *param_2)
 
 {
@@ -3450,11 +3606,10 @@ void FUN_0008eff8(void)
    exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
    machine-verified; target semantics not recovered. */
 
-void thunk_FUN_0008fa86(void)
+undefined4 thunk_FUN_0008fa86(void)
 
 {
-  FUN_0008fa86();
-  return;
+  return FUN_0008fa86();
 }
 
 
@@ -3463,11 +3618,44 @@ void thunk_FUN_0008fa86(void)
    exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
    machine-verified; target semantics not recovered. */
 
-void thunk_FUN_0008f2fc(void)
+int thunk_FUN_0008f2fc(void)
 
 {
-  FUN_0008f2fc();
-  return;
+  return FUN_0008f2fc();
+}
+
+
+
+undefined4 FUN_0008f05e(undefined1 *param_1)
+
+{
+  undefined1 uVar1;
+  int iVar2;
+  int iVar3;
+  undefined4 uVar4;
+  
+  uVar4 = 1;
+  if ((uintptr_t)(param_1)!=(uintptr_t)((undefined1 *)0x0)) {
+    uVar4 = 0;
+    if (((int16_t)DAT_febe54f4) == -0x1ff) {
+      iVar2 = thunk_FUN_0008fa86();
+      iVar3 = thunk_FUN_0008f2fc();
+      if ((iVar2 == 2) || (iVar3 == 2)) {
+        uVar1 = 2;
+      }
+      else if ((iVar2 == 3) || (iVar3 == 3)) {
+        uVar1 = 3;
+      }
+      else {
+        uVar1 = 1;
+      }
+    }
+    else {
+      uVar1 = 0;
+    }
+    *param_1 = uVar1;
+  }
+  return uVar4;
 }
 
 
@@ -3977,6 +4165,66 @@ void FUN_0008f596(ushort param_1)
     FUN_0008f546(uVar3,0x103);
   }
   return;
+}
+
+
+
+short FUN_0008f60e(ushort param_1,short param_2)
+
+{
+  uint uVar1;
+  undefined4 uVar2;
+  short sVar3;
+  
+  uVar1 = (uint)param_1;
+  if (DAT_febe551a < *(ushort *)(((undefined *)camry_host_ptr(0x25858u)) + (short)param_1 * 0x50)) {
+    sVar3 = 0x103;
+    if (((int8_t)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe5524u + (uint32_t)(uVar1) * 1u))))) == -0x3d) {
+      DAT_febe551a = DAT_febe551a + 1;
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe5524u + (uint32_t)(uVar1) * 1u)))) = -0x4c;
+      DAT_febe5518 = 0;
+      sVar3 = param_2;
+    }
+    if (param_2 == 0x201) {
+      uVar2 = 2;
+    }
+    else {
+      uVar2 = 1;
+    }
+    FUN_0008f4d0(uVar1,uVar2);
+  }
+  else {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe5524u + (uint32_t)(uVar1) * 1u)))) = 0x96;
+    FUN_0008f596((uint)(ushort)param_1);
+    sVar3 = 0x102;
+  }
+  return sVar3;
+}
+
+
+
+undefined2 FUN_0008f6b2(ushort param_1,undefined2 param_2)
+
+{
+  uint uVar1;
+  undefined2 uVar2;
+  
+  uVar1 = (uint)param_1;
+  if (DAT_febe5518 < *(ushort *)(((undefined *)camry_host_ptr(0x25876u)) + (short)param_1 * 0x50)) {
+    uVar2 = 0x103;
+    if (((int8_t)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe5524u + (uint32_t)(uVar1) * 1u))))) == -0x3d) {
+      DAT_febe5518 = DAT_febe5518 + 1;
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe5524u + (uint32_t)(uVar1) * 1u)))) = -0x4c;
+      uVar2 = param_2;
+    }
+    FUN_0008f4d0(uVar1,1);
+  }
+  else {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe5524u + (uint32_t)(uVar1) * 1u)))) = 0x96;
+    FUN_0008f596((uint)(ushort)param_1);
+    uVar2 = 0x102;
+  }
+  return uVar2;
 }
 
 

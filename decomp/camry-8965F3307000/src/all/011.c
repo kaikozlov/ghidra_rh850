@@ -2815,7 +2815,7 @@ void FUN_00045d98(void)
 
 
 
-void FUN_00045e12(void)
+uint FUN_00045e12(void)
 
 {
   undefined2 local_1c;
@@ -2849,8 +2849,7 @@ void FUN_00045e12(void)
   uStack_18 = 0;
   uStack_13 = 0;
   uStack_b = 0;
-  f33_nvm_set_record(0xc,(uint *)&local_1c);
-  return;
+  return f33_nvm_set_record(0xc,(uint *)&local_1c);
 }
 
 

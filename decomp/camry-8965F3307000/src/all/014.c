@@ -3288,6 +3288,20 @@ void FUN_00051cf6(byte param_1,undefined2 param_2)
 
 
 
+void FUN_00051d38(uint param_1,undefined1 param_2,ushort param_3)
+
+{
+  if (DAT_febee85a == '\0') {
+    f33_report_diagnostic_event_failure(param_1 & 0xffff,param_3);
+  }
+  else {
+    FUN_00051cf6(param_2, (uint)(ushort)param_3);
+  }
+  return;
+}
+
+
+
 /* Same event/lifecycle admission as failure. Read ENTRY current bit, invoke bitmap pass, then
    release the descriptor's classifier when entry bit was set. Thus5F85==AA can inhibit bitmap
    mutation without inhibiting classifier decrement. Pass uses entry current bit for classifier
@@ -5135,6 +5149,66 @@ void FUN_00053298(undefined4 param_1,char param_2,undefined4 param_3,ushort para
 
 
 
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53316(undefined4 param_1,int param_2)
+
+{
+  bool bVar1;
+  undefined2 uVar2;
+  undefined4 uVar3;
+  
+  uVar2 = (*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 186u))));
+  if (0xfffe < (ushort)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 186u))))) {
+    (*((uint8_t *)((uint8_t *)&uVar2 + 0u))) = 0xff;
+    (*((uint8_t *)((uint8_t *)&uVar2 + 1u))) = 0xff;
+  }
+  uVar3 = (*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 188u))));
+  if ((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 188u)))) == -1) {
+    (*((uint8_t *)((uint8_t *)&uVar3 + 0u))) = 0xff;
+    (*((uint8_t *)((uint8_t *)&uVar3 + 1u))) = 0xff;
+    (*((uint8_t *)((uint8_t *)&uVar3 + 2u))) = 0xff;
+    (*((uint8_t *)((uint8_t *)&uVar3 + 3u))) = 0xff;
+  }
+  bVar1 = f33_diagnostic_capture_slots[1].extended_middle[6] != '\0';
+  FUN_0006a574(uVar2, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  FUN_0006a55c(uVar3, ((undefined1 *)camry_host_ptr((uint32_t)(param_2 + 2))));
+  (*((bool *)camry_host_ptr((uint32_t)(param_2 + 6)))) = bVar1;
+  return;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53354(undefined4 param_1,uchar *param_2)
+
+{
+  undefined4 uVar1;
+  uchar uVar2;
+  
+  uVar1 = (*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 200u))));
+  if (0xf423fu < (uint)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 200u))))) {
+    (*((uint8_t *)((uint8_t *)&uVar1 + 0u))) = '\0';
+    (*((uint8_t *)((uint8_t *)&uVar1 + 1u))) = '\0';
+    (*((uint8_t *)((uint8_t *)&uVar1 + 2u))) = '\0';
+    (*((uint8_t *)((uint8_t *)&uVar1 + 3u))) = '\0';
+  }
+  uVar2 = f33_diagnostic_capture_slots[1].extended_middle[7];
+  if (1 < f33_diagnostic_capture_slots[1].extended_middle[7]) {
+    uVar2 = '\x02';
+  }
+  FUN_0006a55c(uVar1, param_2);
+  *param_2 = uVar2;
+  return;
+}
+
+
+
 /* WARNING: Removing unreachable block (ram,0x0005353a) */
 
 int FUN_00053532(short param_1)
@@ -5299,6 +5373,23 @@ int FUN_00053b1c(short param_1)
     iVar1 = -0x7fff;
   }
   return iVar1;
+}
+
+
+
+/* Capture-slot field dispatch: reads one field from a diagnostic capture slot record and passes it
+   through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
+    */
+
+void f33_capture_slot_dispatch_53c16(undefined4 param_1,int param_2)
+
+{
+  undefined4 uVar1;
+  
+  uVar1 = (*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 228u))));
+  FUN_0006a55c((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 224u)))), ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
+  FUN_0006a55c(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2 + 4))));
+  return;
 }
 
 

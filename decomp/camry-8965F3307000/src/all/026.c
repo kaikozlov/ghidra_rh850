@@ -789,11 +789,10 @@ uint f33_dcm_invalidate_queued_event(uchar event_id,uchar first_only)
 /* Forward low8 event ID to989EC; callers discard enqueue status. No retry, coalescing or callback
    execution is added. */
 
-void f33_dcm_post_service_event(uchar event_id)
+uint f33_dcm_post_service_event(uchar event_id)
 
 {
-  f33_dcm_enqueue_event(event_id);
-  return;
+  return f33_dcm_enqueue_event(event_id);
 }
 
 
@@ -801,11 +800,10 @@ void f33_dcm_post_service_event(uchar event_id)
 /* Forward low8 arguments to98A44; cancellation tombstones entries without reclaiming occupied
    slots. */
 
-void f33_dcm_cancel_service_events(uchar event_id,uchar first_only)
+uint f33_dcm_cancel_service_events(uchar event_id,uchar first_only)
 
 {
-  f33_dcm_invalidate_queued_event(event_id,first_only);
-  return;
+  return f33_dcm_invalidate_queued_event(event_id,first_only);
 }
 
 
@@ -936,6 +934,46 @@ void thunk_FUN_0006a4c4(void)
 {
   FUN_0006a4c4();
   return;
+}
+
+
+
+undefined1 FUN_00098e80(undefined1 param_1,char *param_2,undefined2 param_3)
+
+{
+  int iVar1;
+  int iVar2;
+  uint32_t puVar3;
+  int iVar4;
+  int iVar5;
+  undefined1 uVar6;
+  
+  puVar3 = 0x23dfcu;
+  if (DAT_00030d68 == '\0') {
+    iVar4 = FUN_00083072(param_1);
+    uVar6 = 0;
+    if (iVar4 == 0) {
+      iVar4 = 0;
+      do {
+        if (*param_2 == (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(iVar4 * 8 + 0x7454)))))) {
+          iVar5 = (*(int (*)())*(code **)(puVar3 + iVar4 * 8 + 0x7454 + 4))(param_2,param_3);
+          uVar6 = 1;
+          break;
+        }
+        iVar2 = iVar4 + 1;
+        iVar1 = iVar4 + -6;
+        iVar5 = 0;
+        iVar4 = iVar2;
+      } while (((iVar1 < 0) || (iVar2 < 0)));
+      if (iVar5 == 0x5a) {
+        FUN_0008300e(param_1, camry_host_addr(((undefined *)camry_host_ptr(0xfebe5ebcu))), 8);
+      }
+    }
+  }
+  else {
+    uVar6 = 1;
+  }
+  return uVar6;
 }
 
 

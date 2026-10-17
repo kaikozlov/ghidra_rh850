@@ -359,6 +359,49 @@ void FUN_000c84bc(void)
 
 
 
+void FUN_000c84dc(undefined2 param_1,undefined1 param_2)
+
+{
+  FUN_000c8350(param_1, (uint)(byte)param_2);
+  FUN_000c843a(param_2);
+  FUN_000c84bc();
+  return;
+}
+
+
+
+void FUN_000c84f8(void)
+
+{
+  undefined1 uVar1;
+  uint32_t puVar2;
+  short sVar3;
+  undefined4 uVar4;
+  int iVar5;
+  int iVar6;
+  
+  puVar2 = 0xfebeb800u;
+  uVar4 = FUN_000d1da0(0xffc0);
+  uVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(0x88e)))));
+  iVar6 = (*((int *)camry_host_ptr((uint32_t)(puVar2 + 0x884))));
+  FUN_000d1dc6(uVar4);
+  if (iVar6 + -0x7fff < 0 == (iVar6 < 0 && -1 < iVar6 + -0x7fff) && iVar6 != 0x7fff) {
+    iVar5 = 0x7fff;
+  }
+  else {
+    iVar5 = (int)(short)iVar6;
+    if (iVar6 + 0x7fff < 0 != (-1 < iVar6 && iVar6 + 0x7fff < 0)) {
+      iVar5 = -0x7fff;
+    }
+  }
+  sVar3 = f33_abs_s16_wrapping((short)iVar5);
+  FUN_000c82c2(sVar3,iVar5);
+  FUN_000c84dc(sVar3,uVar1);
+  return;
+}
+
+
+
 void FUN_000c854a(void)
 
 {
@@ -1346,6 +1389,42 @@ void FUN_000c9258(void)
   iVar3 = f33_interpolate_unsigned_axis_sentinel_curve
                     (((ushort *)camry_host_ptr((uint32_t)(f33_calibration_bank_bases[(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xbc4))))) & 1] + iVar3 + 0x21ec))),input);
   (*((short *)camry_host_ptr((uint32_t)(puVar1 + 0xd94)))) = (short)iVar3;
+  return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x000c92ce) */
+
+void FUN_000c92b2(void)
+
+{
+  short value;
+  uint32_t puVar1;
+  short sVar2;
+  short sVar3;
+  undefined4 uVar4;
+  int iVar5;
+  
+  puVar1 = 0xfebeb800u;
+  uVar4 = FUN_000d1da0(0xffc0);
+  sVar3 = (*((short *)camry_host_ptr((uint32_t)(puVar1 + 0x79a))));
+  value = (*((short *)camry_host_ptr((uint32_t)(puVar1 + 0xda2))));
+  FUN_000d1dc6(uVar4);
+  sVar2 = f33_abs_s16_wrapping(sVar3 / 2);
+  iVar5 = f33_interpolate_signed_sentinel_curve((short *)((undefined *)camry_host_ptr(0xb12f0u)),sVar2);
+  sVar2 = (short)iVar5;
+  if (sVar3 / 2 < 0) {
+    sVar2 = -sVar2;
+  }
+  (*((short *)camry_host_ptr((uint32_t)(puVar1 + 0xd96)))) = sVar2;
+  sVar3 = f33_abs_s16_wrapping(value);
+  iVar5 = f33_interpolate_signed_sentinel_curve((short *)((undefined *)camry_host_ptr(0xb1304u)),sVar3);
+  sVar3 = (short)iVar5;
+  if (value < 0) {
+    sVar3 = -sVar3;
+  }
+  (*((short *)camry_host_ptr((uint32_t)(puVar1 + 0xd98)))) = sVar3;
   return;
 }
 

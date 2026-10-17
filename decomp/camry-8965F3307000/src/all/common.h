@@ -11593,6 +11593,609 @@ _Static_assert(sizeof(RSCFD_CFSTS) == 4, "cfsts");
 #define PTR_f33_return_only_stub_8176e_00021e68 (*((volatile uint32_t *)camry_host_ptr(0x21e68u)))
 #define PTR_f33_return_only_stub_81d2e_00021e6c (*((volatile uint32_t *)camry_host_ptr(0x21e6cu)))
 #define PTR_f33_return_only_stub_81d2e_00021f24 (*((volatile uint32_t *)camry_host_ptr(0x21f24u)))
+#define PMR camry_pmr
+#define Ramffc0a000 (*((volatile uint32_t *)camry_host_ptr(0xffc0a000u)))
+#define Ramffc0a004 (*((volatile uint32_t *)camry_host_ptr(0xffc0a004u)))
+#define Ramffc0a008 (*((volatile uint32_t *)camry_host_ptr(0xffc0a008u)))
+#define Ramffc0a00c (*((volatile uint32_t *)camry_host_ptr(0xffc0a00cu)))
+#define Ramffc10100 (*((volatile uint16_t *)camry_host_ptr(0xffc10100u)))
+#define Ramffc10104 (*((volatile uint32_t *)camry_host_ptr(0xffc10104u)))
+#define Ramffc10110 (*((volatile uint16_t *)camry_host_ptr(0xffc10110u)))
+#define Ramffc10114 (*((volatile uint16_t *)camry_host_ptr(0xffc10114u)))
+#define Ramffc10120 (*((volatile uint32_t *)camry_host_ptr(0xffc10120u)))
+#define Ramffc10124 (*((volatile uint32_t *)camry_host_ptr(0xffc10124u)))
+#define Ramffc12044 (*((volatile uint32_t *)camry_host_ptr(0xffc12044u)))
+#define Ramffc12048 (*((volatile uint32_t *)camry_host_ptr(0xffc12048u)))
+#define Ramffc1204c (*((volatile uint32_t *)camry_host_ptr(0xffc1204cu)))
+#define Ramffc12050 (*((volatile uint32_t *)camry_host_ptr(0xffc12050u)))
+#define Ramffc120cc (*((volatile uint32_t *)camry_host_ptr(0xffc120ccu)))
+#define Ramffc120f8 (*((volatile uint32_t *)camry_host_ptr(0xffc120f8u)))
+#define Ramffc12100 (*((volatile uint32_t *)camry_host_ptr(0xffc12100u)))
+#define Ramffc12104 (*((volatile uint32_t *)camry_host_ptr(0xffc12104u)))
+#define Ramffc12110 (*((volatile uint32_t *)camry_host_ptr(0xffc12110u)))
+#define Ramffc12118 (*((volatile uint32_t *)camry_host_ptr(0xffc12118u)))
+#define Ramffc12178 (*((volatile uint32_t *)camry_host_ptr(0xffc12178u)))
+#define Ramffc2000c (*((volatile uint16_t *)camry_host_ptr(0xffc2000cu)))
+#define Ramffc24014 (*((volatile uint32_t *)camry_host_ptr(0xffc24014u)))
+#define Ramffc24018 (*((volatile uint32_t *)camry_host_ptr(0xffc24018u)))
+#define Ramffc24028 (*((volatile uint32_t *)camry_host_ptr(0xffc24028u)))
+#define Ramffc40000 (*((volatile uint32_t *)camry_host_ptr(0xffc40000u)))
+#define Ramffc40004 (*((volatile uint32_t *)camry_host_ptr(0xffc40004u)))
+#define Ramffc40008 (*((volatile uint32_t *)camry_host_ptr(0xffc40008u)))
+#define Ramffc4000c (*((volatile uint32_t *)camry_host_ptr(0xffc4000cu)))
+#define Ramffc40010 (*((volatile uint32_t *)camry_host_ptr(0xffc40010u)))
+#define Ramffc40014 (*((volatile uint32_t *)camry_host_ptr(0xffc40014u)))
+#define Ramffc40018 (*((volatile uint32_t *)camry_host_ptr(0xffc40018u)))
+#define Ramffc4001c (*((volatile uint32_t *)camry_host_ptr(0xffc4001cu)))
+#define Ramffc40020 (*((volatile uint32_t *)camry_host_ptr(0xffc40020u)))
+#define Ramffc40024 (*((volatile uint32_t *)camry_host_ptr(0xffc40024u)))
+#define Ramffc40028 (*((volatile uint32_t *)camry_host_ptr(0xffc40028u)))
+#define Ramffc4002c (*((volatile uint32_t *)camry_host_ptr(0xffc4002cu)))
+#define Ramffc40030 (*((volatile uint32_t *)camry_host_ptr(0xffc40030u)))
+#define Ramffc40034 (*((volatile uint32_t *)camry_host_ptr(0xffc40034u)))
+#define Ramffc40038 (*((volatile uint32_t *)camry_host_ptr(0xffc40038u)))
+#define Ramffc4003c (*((volatile uint32_t *)camry_host_ptr(0xffc4003cu)))
+#define Ramffc40040 (*((volatile uint32_t *)camry_host_ptr(0xffc40040u)))
+#define Ramffc40044 (*((volatile uint32_t *)camry_host_ptr(0xffc40044u)))
+#define Ramffc40048 (*((volatile uint32_t *)camry_host_ptr(0xffc40048u)))
+#define Ramffc4004c (*((volatile uint32_t *)camry_host_ptr(0xffc4004cu)))
+#define Ramffc40050 (*((volatile uint32_t *)camry_host_ptr(0xffc40050u)))
+#define Ramffc40054 (*((volatile uint32_t *)camry_host_ptr(0xffc40054u)))
+#define Ramffc40058 (*((volatile uint32_t *)camry_host_ptr(0xffc40058u)))
+#define Ramffc4005c (*((volatile uint32_t *)camry_host_ptr(0xffc4005cu)))
+#define Ramffc40060 (*((volatile uint32_t *)camry_host_ptr(0xffc40060u)))
+#define Ramffc40064 (*((volatile uint32_t *)camry_host_ptr(0xffc40064u)))
+#define Ramffc40068 (*((volatile uint32_t *)camry_host_ptr(0xffc40068u)))
+#define Ramffc4006c (*((volatile uint32_t *)camry_host_ptr(0xffc4006cu)))
+#define Ramffc40070 (*((volatile uint32_t *)camry_host_ptr(0xffc40070u)))
+#define Ramffc40074 (*((volatile uint32_t *)camry_host_ptr(0xffc40074u)))
+#define Ramffc40078 (*((volatile uint32_t *)camry_host_ptr(0xffc40078u)))
+#define Ramffc4007c (*((volatile uint32_t *)camry_host_ptr(0xffc4007cu)))
+#define Ramffc40080 (*((volatile uint32_t *)camry_host_ptr(0xffc40080u)))
+#define Ramffc40084 (*((volatile uint32_t *)camry_host_ptr(0xffc40084u)))
+#define Ramffc40088 (*((volatile uint32_t *)camry_host_ptr(0xffc40088u)))
+#define Ramffc4008c (*((volatile uint32_t *)camry_host_ptr(0xffc4008cu)))
+#define Ramffc40090 (*((volatile uint32_t *)camry_host_ptr(0xffc40090u)))
+#define Ramffc40094 (*((volatile uint32_t *)camry_host_ptr(0xffc40094u)))
+#define Ramffc40098 (*((volatile uint32_t *)camry_host_ptr(0xffc40098u)))
+#define Ramffc4009c (*((volatile uint32_t *)camry_host_ptr(0xffc4009cu)))
+#define Ramffc400b0 (*((volatile uint32_t *)camry_host_ptr(0xffc400b0u)))
+#define Ramffc400b4 (*((volatile uint32_t *)camry_host_ptr(0xffc400b4u)))
+#define Ramffc400b8 (*((volatile uint32_t *)camry_host_ptr(0xffc400b8u)))
+#define Ramffc400bc (*((volatile uint32_t *)camry_host_ptr(0xffc400bcu)))
+#define Ramffc400c0 (*((volatile uint32_t *)camry_host_ptr(0xffc400c0u)))
+#define Ramffc400c4 (*((volatile uint32_t *)camry_host_ptr(0xffc400c4u)))
+#define Ramffc400c8 (*((volatile uint32_t *)camry_host_ptr(0xffc400c8u)))
+#define Ramffc400cc (*((volatile uint32_t *)camry_host_ptr(0xffc400ccu)))
+#define Ramffc400d0 (*((volatile uint32_t *)camry_host_ptr(0xffc400d0u)))
+#define Ramffc400d4 (*((volatile uint32_t *)camry_host_ptr(0xffc400d4u)))
+#define Ramffc400d8 (*((volatile uint32_t *)camry_host_ptr(0xffc400d8u)))
+#define Ramffc400dc (*((volatile uint32_t *)camry_host_ptr(0xffc400dcu)))
+#define Ramffc400e0 (*((volatile uint32_t *)camry_host_ptr(0xffc400e0u)))
+#define Ramffc400e4 (*((volatile uint32_t *)camry_host_ptr(0xffc400e4u)))
+#define Ramffc400e8 (*((volatile uint32_t *)camry_host_ptr(0xffc400e8u)))
+#define Ramffc400ec (*((volatile uint32_t *)camry_host_ptr(0xffc400ecu)))
+#define Ramffc400f0 (*((volatile uint32_t *)camry_host_ptr(0xffc400f0u)))
+#define Ramffc400f4 (*((volatile uint32_t *)camry_host_ptr(0xffc400f4u)))
+#define Ramffc400f8 (*((volatile uint32_t *)camry_host_ptr(0xffc400f8u)))
+#define Ramffc400fc (*((volatile uint32_t *)camry_host_ptr(0xffc400fcu)))
+#define Ramffc40100 (*((volatile uint32_t *)camry_host_ptr(0xffc40100u)))
+#define Ramffc40104 (*((volatile uint32_t *)camry_host_ptr(0xffc40104u)))
+#define Ramffc40108 (*((volatile uint32_t *)camry_host_ptr(0xffc40108u)))
+#define Ramffc4010c (*((volatile uint32_t *)camry_host_ptr(0xffc4010cu)))
+#define Ramffc40110 (*((volatile uint32_t *)camry_host_ptr(0xffc40110u)))
+#define Ramffc40114 (*((volatile uint32_t *)camry_host_ptr(0xffc40114u)))
+#define Ramffc40118 (*((volatile uint32_t *)camry_host_ptr(0xffc40118u)))
+#define Ramffc4011c (*((volatile uint32_t *)camry_host_ptr(0xffc4011cu)))
+#define Ramffc40120 (*((volatile uint32_t *)camry_host_ptr(0xffc40120u)))
+#define Ramffc40124 (*((volatile uint32_t *)camry_host_ptr(0xffc40124u)))
+#define Ramffc40128 (*((volatile uint32_t *)camry_host_ptr(0xffc40128u)))
+#define Ramffc4012c (*((volatile uint32_t *)camry_host_ptr(0xffc4012cu)))
+#define Ramffc40800 (*((volatile uint32_t *)camry_host_ptr(0xffc40800u)))
+#define Ramffc40804 (*((volatile uint32_t *)camry_host_ptr(0xffc40804u)))
+#define Ramffc40808 (*((volatile uint32_t *)camry_host_ptr(0xffc40808u)))
+#define Ramffc49000 (*((volatile uint32_t *)camry_host_ptr(0xffc49000u)))
+#define Ramffc49004 (*((volatile uint32_t *)camry_host_ptr(0xffc49004u)))
+#define Ramffc49008 (*((volatile uint32_t *)camry_host_ptr(0xffc49008u)))
+#define Ramffc4900c (*((volatile uint32_t *)camry_host_ptr(0xffc4900cu)))
+#define Ramffc49010 (*((volatile uint32_t *)camry_host_ptr(0xffc49010u)))
+#define Ramffc49014 (*((volatile uint32_t *)camry_host_ptr(0xffc49014u)))
+#define Ramffc49018 (*((volatile uint32_t *)camry_host_ptr(0xffc49018u)))
+#define Ramffc4901c (*((volatile uint32_t *)camry_host_ptr(0xffc4901cu)))
+#define Ramffc49020 (*((volatile uint32_t *)camry_host_ptr(0xffc49020u)))
+#define Ramffc49024 (*((volatile uint32_t *)camry_host_ptr(0xffc49024u)))
+#define Ramffc49028 (*((volatile uint32_t *)camry_host_ptr(0xffc49028u)))
+#define Ramffc4902c (*((volatile uint32_t *)camry_host_ptr(0xffc4902cu)))
+#define Ramffc49030 (*((volatile uint32_t *)camry_host_ptr(0xffc49030u)))
+#define Ramffc49034 (*((volatile uint32_t *)camry_host_ptr(0xffc49034u)))
+#define Ramffc49038 (*((volatile uint32_t *)camry_host_ptr(0xffc49038u)))
+#define Ramffc4903c (*((volatile uint32_t *)camry_host_ptr(0xffc4903cu)))
+#define Ramffc49040 (*((volatile uint32_t *)camry_host_ptr(0xffc49040u)))
+#define Ramffc49044 (*((volatile uint32_t *)camry_host_ptr(0xffc49044u)))
+#define Ramffc49048 (*((volatile uint32_t *)camry_host_ptr(0xffc49048u)))
+#define Ramffc4904c (*((volatile uint32_t *)camry_host_ptr(0xffc4904cu)))
+#define Ramffc49050 (*((volatile uint32_t *)camry_host_ptr(0xffc49050u)))
+#define Ramffc49054 (*((volatile uint32_t *)camry_host_ptr(0xffc49054u)))
+#define Ramffc49058 (*((volatile uint32_t *)camry_host_ptr(0xffc49058u)))
+#define Ramffc4905c (*((volatile uint32_t *)camry_host_ptr(0xffc4905cu)))
+#define Ramffc49060 (*((volatile uint32_t *)camry_host_ptr(0xffc49060u)))
+#define Ramffc49064 (*((volatile uint32_t *)camry_host_ptr(0xffc49064u)))
+#define Ramffc49068 (*((volatile uint32_t *)camry_host_ptr(0xffc49068u)))
+#define Ramffc4906c (*((volatile uint32_t *)camry_host_ptr(0xffc4906cu)))
+#define Ramffc49070 (*((volatile uint32_t *)camry_host_ptr(0xffc49070u)))
+#define Ramffc49074 (*((volatile uint32_t *)camry_host_ptr(0xffc49074u)))
+#define Ramffc49078 (*((volatile uint32_t *)camry_host_ptr(0xffc49078u)))
+#define Ramffc4907c (*((volatile uint32_t *)camry_host_ptr(0xffc4907cu)))
+#define Ramffc4c000 (*((volatile uint32_t *)camry_host_ptr(0xffc4c000u)))
+#define Ramffc4c004 (*((volatile uint32_t *)camry_host_ptr(0xffc4c004u)))
+#define Ramffc4c008 (*((volatile uint32_t *)camry_host_ptr(0xffc4c008u)))
+#define Ramffc4c00c (*((volatile uint32_t *)camry_host_ptr(0xffc4c00cu)))
+#define Ramffc4c010 (*((volatile uint32_t *)camry_host_ptr(0xffc4c010u)))
+#define Ramffc4c014 (*((volatile uint32_t *)camry_host_ptr(0xffc4c014u)))
+#define Ramffc4c018 (*((volatile uint32_t *)camry_host_ptr(0xffc4c018u)))
+#define Ramffc4c01c (*((volatile uint32_t *)camry_host_ptr(0xffc4c01cu)))
+#define Ramffc4c020 (*((volatile uint32_t *)camry_host_ptr(0xffc4c020u)))
+#define Ramffc4c024 (*((volatile uint32_t *)camry_host_ptr(0xffc4c024u)))
+#define Ramffc4c028 (*((volatile uint32_t *)camry_host_ptr(0xffc4c028u)))
+#define Ramffc4c02c (*((volatile uint32_t *)camry_host_ptr(0xffc4c02cu)))
+#define Ramffc4c040 (*((volatile uint32_t *)camry_host_ptr(0xffc4c040u)))
+#define Ramffc4c044 (*((volatile uint32_t *)camry_host_ptr(0xffc4c044u)))
+#define Ramffc4c048 (*((volatile uint32_t *)camry_host_ptr(0xffc4c048u)))
+#define Ramffc4c04c (*((volatile uint32_t *)camry_host_ptr(0xffc4c04cu)))
+#define Ramffc4c050 (*((volatile uint32_t *)camry_host_ptr(0xffc4c050u)))
+#define Ramffc4c054 (*((volatile uint32_t *)camry_host_ptr(0xffc4c054u)))
+#define Ramffc4c058 (*((volatile uint32_t *)camry_host_ptr(0xffc4c058u)))
+#define Ramffc4c05c (*((volatile uint32_t *)camry_host_ptr(0xffc4c05cu)))
+#define Ramffc4c070 (*((volatile uint32_t *)camry_host_ptr(0xffc4c070u)))
+#define Ramffc4c074 (*((volatile uint32_t *)camry_host_ptr(0xffc4c074u)))
+#define Ramffc4c078 (*((volatile uint32_t *)camry_host_ptr(0xffc4c078u)))
+#define Ramffc4c07c (*((volatile uint32_t *)camry_host_ptr(0xffc4c07cu)))
+#define Ramffc4ca00 (*((volatile uint32_t *)camry_host_ptr(0xffc4ca00u)))
+#define Ramffc5a000 (*((volatile uint32_t *)camry_host_ptr(0xffc5a000u)))
+#define Ramffc5a004 (*((volatile uint32_t *)camry_host_ptr(0xffc5a004u)))
+#define Ramffc5a008 (*((volatile uint32_t *)camry_host_ptr(0xffc5a008u)))
+#define Ramffc5a00c (*((volatile uint32_t *)camry_host_ptr(0xffc5a00cu)))
+#define Ramffc5a020 (*((volatile uint32_t *)camry_host_ptr(0xffc5a020u)))
+#define Ramffc5a024 (*((volatile uint32_t *)camry_host_ptr(0xffc5a024u)))
+#define Ramffc5a028 (*((volatile uint32_t *)camry_host_ptr(0xffc5a028u)))
+#define Ramffc5a02c (*((volatile uint32_t *)camry_host_ptr(0xffc5a02cu)))
+#define Ramffc5a030 (*((volatile uint32_t *)camry_host_ptr(0xffc5a030u)))
+#define Ramffc5a034 (*((volatile uint32_t *)camry_host_ptr(0xffc5a034u)))
+#define Ramffc5a038 (*((volatile uint32_t *)camry_host_ptr(0xffc5a038u)))
+#define Ramffc5a03c (*((volatile uint32_t *)camry_host_ptr(0xffc5a03cu)))
+#define Ramffc5a040 (*((volatile uint32_t *)camry_host_ptr(0xffc5a040u)))
+#define Ramffc5a044 (*((volatile uint32_t *)camry_host_ptr(0xffc5a044u)))
+#define Ramffc5a048 (*((volatile uint32_t *)camry_host_ptr(0xffc5a048u)))
+#define Ramffc5a04c (*((volatile uint32_t *)camry_host_ptr(0xffc5a04cu)))
+#define Ramffc5a050 (*((volatile uint32_t *)camry_host_ptr(0xffc5a050u)))
+#define Ramffc5a054 (*((volatile uint32_t *)camry_host_ptr(0xffc5a054u)))
+#define Ramffc5a058 (*((volatile uint32_t *)camry_host_ptr(0xffc5a058u)))
+#define Ramffc5a05c (*((volatile uint32_t *)camry_host_ptr(0xffc5a05cu)))
+#define Ramffc60408 (*((volatile uint32_t *)camry_host_ptr(0xffc60408u)))
+#define Ramffc6040c (*((volatile uint32_t *)camry_host_ptr(0xffc6040cu)))
+#define Ramffc61408 (*((volatile uint32_t *)camry_host_ptr(0xffc61408u)))
+#define Ramffc6140c (*((volatile uint32_t *)camry_host_ptr(0xffc6140cu)))
+#define Ramffc61450 (*((volatile uint32_t *)camry_host_ptr(0xffc61450u)))
+#define Ramffc62c00 (*((volatile uint32_t *)camry_host_ptr(0xffc62c00u)))
+#define Ramffc62c04 (*((volatile uint32_t *)camry_host_ptr(0xffc62c04u)))
+#define Ramffc62c08 (*((volatile uint32_t *)camry_host_ptr(0xffc62c08u)))
+#define Ramffc63400 (*((volatile uint32_t *)camry_host_ptr(0xffc63400u)))
+#define Ramffc63404 (*((volatile uint32_t *)camry_host_ptr(0xffc63404u)))
+#define Ramffc63408 (*((volatile uint32_t *)camry_host_ptr(0xffc63408u)))
+#define Ramffc64000 (*((volatile uint32_t *)camry_host_ptr(0xffc64000u)))
+#define Ramffc64004 (*((volatile uint32_t *)camry_host_ptr(0xffc64004u)))
+#define Ramffc64008 (*((volatile uint32_t *)camry_host_ptr(0xffc64008u)))
+#define Ramffc64100 (*((volatile uint32_t *)camry_host_ptr(0xffc64100u)))
+#define Ramffc64104 (*((volatile uint32_t *)camry_host_ptr(0xffc64104u)))
+#define Ramffc64200 (*((volatile uint32_t *)camry_host_ptr(0xffc64200u)))
+#define Ramffc64e00 (*((volatile uint32_t *)camry_host_ptr(0xffc64e00u)))
+#define Ramffc65400 (*((volatile uint32_t *)camry_host_ptr(0xffc65400u)))
+#define Ramffc65404 (*((volatile uint32_t *)camry_host_ptr(0xffc65404u)))
+#define Ramffc65408 (*((volatile uint32_t *)camry_host_ptr(0xffc65408u)))
+#define Ramffc6540c (*((volatile uint32_t *)camry_host_ptr(0xffc6540cu)))
+#define Ramffc65604 (*((volatile uint32_t *)camry_host_ptr(0xffc65604u)))
+#define Ramffc66000 (*((volatile uint32_t *)camry_host_ptr(0xffc66000u)))
+#define Ramffc66004 (*((volatile uint32_t *)camry_host_ptr(0xffc66004u)))
+#define Ramffc66008 (*((volatile uint32_t *)camry_host_ptr(0xffc66008u)))
+#define Ramffc66400 (*((volatile uint32_t *)camry_host_ptr(0xffc66400u)))
+#define Ramffc66404 (*((volatile uint32_t *)camry_host_ptr(0xffc66404u)))
+#define Ramffc66408 (*((volatile uint32_t *)camry_host_ptr(0xffc66408u)))
+#define Ramffc67004 (*((volatile uint32_t *)camry_host_ptr(0xffc67004u)))
+#define Ramffc67008 (*((volatile uint32_t *)camry_host_ptr(0xffc67008u)))
+#define Ramffc67404 (*((volatile uint32_t *)camry_host_ptr(0xffc67404u)))
+#define Ramffc67408 (*((volatile uint32_t *)camry_host_ptr(0xffc67408u)))
+#define Ramffc67804 (*((volatile uint32_t *)camry_host_ptr(0xffc67804u)))
+#define Ramffc67808 (*((volatile uint32_t *)camry_host_ptr(0xffc67808u)))
+#define Ramffc68404 (*((volatile uint32_t *)camry_host_ptr(0xffc68404u)))
+#define Ramffc68408 (*((volatile uint32_t *)camry_host_ptr(0xffc68408u)))
+#define Ramffc6a000 (*((volatile uint32_t *)camry_host_ptr(0xffc6a000u)))
+#define Ramffc6a004 (*((volatile uint32_t *)camry_host_ptr(0xffc6a004u)))
+#define Ramffc6a008 (*((volatile uint32_t *)camry_host_ptr(0xffc6a008u)))
+#define Ramffc6c000 (*((volatile uint32_t *)camry_host_ptr(0xffc6c000u)))
+#define Ramffc6c004 (*((volatile uint32_t *)camry_host_ptr(0xffc6c004u)))
+#define Ramffc6c008 (*((volatile uint32_t *)camry_host_ptr(0xffc6c008u)))
+#define Ramffc70000 (*((volatile uint32_t *)camry_host_ptr(0xffc70000u)))
+#define Ramffc70004 (*((volatile uint32_t *)camry_host_ptr(0xffc70004u)))
+#define Ramffc70040 (*((volatile uint32_t *)camry_host_ptr(0xffc70040u)))
+#define Ramffc70044 (*((volatile uint32_t *)camry_host_ptr(0xffc70044u)))
+#define Ramffc70080 (*((volatile uint32_t *)camry_host_ptr(0xffc70080u)))
+#define Ramffc70084 (*((volatile uint32_t *)camry_host_ptr(0xffc70084u)))
+#define Ramffc700c0 (*((volatile uint32_t *)camry_host_ptr(0xffc700c0u)))
+#define Ramffc700c4 (*((volatile uint32_t *)camry_host_ptr(0xffc700c4u)))
+#define Ramffc71100 (*((volatile uint32_t *)camry_host_ptr(0xffc71100u)))
+#define Ramffc71104 (*((volatile uint32_t *)camry_host_ptr(0xffc71104u)))
+#define Ramffc71200 (*((volatile uint32_t *)camry_host_ptr(0xffc71200u)))
+#define Ramffc71204 (*((volatile uint32_t *)camry_host_ptr(0xffc71204u)))
+#define Ramffcda000 (*((volatile uint32_t *)camry_host_ptr(0xffcda000u)))
+#define Ramffcda004 (*((volatile uint32_t *)camry_host_ptr(0xffcda004u)))
+#define Ramffcda008 (*((volatile uint32_t *)camry_host_ptr(0xffcda008u)))
+#define Ramffcda010 (*((volatile uint32_t *)camry_host_ptr(0xffcda010u)))
+#define Ramffcda014 (*((volatile uint32_t *)camry_host_ptr(0xffcda014u)))
+#define Ramffcda018 (*((volatile uint32_t *)camry_host_ptr(0xffcda018u)))
+#define Ramffcda030 (*((volatile uint32_t *)camry_host_ptr(0xffcda030u)))
+#define Ramffcda034 (*((volatile uint32_t *)camry_host_ptr(0xffcda034u)))
+#define Ramffd50000 (*((volatile uint32_t *)camry_host_ptr(0xffd50000u)))
+#define Ramffd50004 (*((volatile uint32_t *)camry_host_ptr(0xffd50004u)))
+#define Ramffd82004 (*((volatile uint32_t *)camry_host_ptr(0xffd82004u)))
+#define Ramffd82008 (*((volatile uint16_t *)camry_host_ptr(0xffd82008u)))
+#define Ramffd82010 (*((volatile uint32_t *)camry_host_ptr(0xffd82010u)))
+#define Ramffd82014 (*((volatile uint16_t *)camry_host_ptr(0xffd82014u)))
+#define Ramffd83004 (*((volatile uint32_t *)camry_host_ptr(0xffd83004u)))
+#define Ramffd83008 (*((volatile uint32_t *)camry_host_ptr(0xffd83008u)))
+#define Ramffd83014 (*((volatile uint16_t *)camry_host_ptr(0xffd83014u)))
+#define Ramffd83018 (*((volatile uint32_t *)camry_host_ptr(0xffd83018u)))
+#define Ramffd83040 (*((volatile uint16_t *)camry_host_ptr(0xffd83040u)))
+#define Ramffd83044 (*((volatile uint32_t *)camry_host_ptr(0xffd83044u)))
+#define Ramffd83048 (*((volatile uint32_t *)camry_host_ptr(0xffd83048u)))
+#define Ramffd8304c (*((volatile uint32_t *)camry_host_ptr(0xffd8304cu)))
+#define Ramffd83050 (*((volatile uint32_t *)camry_host_ptr(0xffd83050u)))
+#define Ramffd83054 (*((volatile uint32_t *)camry_host_ptr(0xffd83054u)))
+#define Ramffd83058 (*((volatile uint32_t *)camry_host_ptr(0xffd83058u)))
+#define Ramffd8305c (*((volatile uint32_t *)camry_host_ptr(0xffd8305cu)))
+#define Ramffd83060 (*((volatile uint32_t *)camry_host_ptr(0xffd83060u)))
+#define Ramffd83068 (*((volatile uint16_t *)camry_host_ptr(0xffd83068u)))
+#define Ramffd8306c (*((volatile uint16_t *)camry_host_ptr(0xffd8306cu)))
+#define Ramffd83070 (*((volatile uint16_t *)camry_host_ptr(0xffd83070u)))
+#define Ramffd83074 (*((volatile uint16_t *)camry_host_ptr(0xffd83074u)))
+#define Ramffdd0010 (*((volatile uint16_t *)camry_host_ptr(0xffdd0010u)))
+#define Ramffdd0014 (*((volatile uint16_t *)camry_host_ptr(0xffdd0014u)))
+#define Ramffdd0018 (*((volatile uint16_t *)camry_host_ptr(0xffdd0018u)))
+#define Ramffdd1000 (*((volatile uint32_t *)camry_host_ptr(0xffdd1000u)))
+#define Ramffdd1004 (*((volatile uint32_t *)camry_host_ptr(0xffdd1004u)))
+#define Ramffdd100c (*((volatile uint32_t *)camry_host_ptr(0xffdd100cu)))
+#define Ramffdd1020 (*((volatile uint32_t *)camry_host_ptr(0xffdd1020u)))
+#define Ramffdd1024 (*((volatile uint32_t *)camry_host_ptr(0xffdd1024u)))
+#define Ramffdd102c (*((volatile uint32_t *)camry_host_ptr(0xffdd102cu)))
+#define Ramffdd1040 (*((volatile uint16_t *)camry_host_ptr(0xffdd1040u)))
+#define Ramffdd1044 (*((volatile uint16_t *)camry_host_ptr(0xffdd1044u)))
+#define Ramffdd1060 (*((volatile uint16_t *)camry_host_ptr(0xffdd1060u)))
+#define Ramffdd1064 (*((volatile uint16_t *)camry_host_ptr(0xffdd1064u)))
+#define Ramffddd000 (*((volatile uint32_t *)camry_host_ptr(0xffddd000u)))
+#define Ramffddd004 (*((volatile uint32_t *)camry_host_ptr(0xffddd004u)))
+#define Ramffddd008 (*((volatile uint32_t *)camry_host_ptr(0xffddd008u)))
+#define Ramffddd00c (*((volatile uint32_t *)camry_host_ptr(0xffddd00cu)))
+#define Ramffddd010 (*((volatile uint32_t *)camry_host_ptr(0xffddd010u)))
+#define Ramffddd014 (*((volatile uint32_t *)camry_host_ptr(0xffddd014u)))
+#define Ramffddd018 (*((volatile uint32_t *)camry_host_ptr(0xffddd018u)))
+#define Ramffddd01c (*((volatile uint32_t *)camry_host_ptr(0xffddd01cu)))
+#define Ramffddd020 (*((volatile uint32_t *)camry_host_ptr(0xffddd020u)))
+#define Ramffddd024 (*((volatile uint32_t *)camry_host_ptr(0xffddd024u)))
+#define Ramffddd028 (*((volatile uint32_t *)camry_host_ptr(0xffddd028u)))
+#define Ramffddd02c (*((volatile uint32_t *)camry_host_ptr(0xffddd02cu)))
+#define Ramffddd030 (*((volatile uint32_t *)camry_host_ptr(0xffddd030u)))
+#define Ramffddd034 (*((volatile uint32_t *)camry_host_ptr(0xffddd034u)))
+#define Ramffddd038 (*((volatile uint32_t *)camry_host_ptr(0xffddd038u)))
+#define Ramffddd03c (*((volatile uint32_t *)camry_host_ptr(0xffddd03cu)))
+#define Ramffddd040 (*((volatile uint32_t *)camry_host_ptr(0xffddd040u)))
+#define Ramffddd044 (*((volatile uint32_t *)camry_host_ptr(0xffddd044u)))
+#define Ramffddd048 (*((volatile uint32_t *)camry_host_ptr(0xffddd048u)))
+#define Ramffddd04c (*((volatile uint32_t *)camry_host_ptr(0xffddd04cu)))
+#define Ramffddd050 (*((volatile uint32_t *)camry_host_ptr(0xffddd050u)))
+#define Ramffddd054 (*((volatile uint32_t *)camry_host_ptr(0xffddd054u)))
+#define Ramffddd058 (*((volatile uint32_t *)camry_host_ptr(0xffddd058u)))
+#define Ramffddd05c (*((volatile uint32_t *)camry_host_ptr(0xffddd05cu)))
+#define Ramffddd060 (*((volatile uint32_t *)camry_host_ptr(0xffddd060u)))
+#define Ramffddd064 (*((volatile uint32_t *)camry_host_ptr(0xffddd064u)))
+#define Ramffddd068 (*((volatile uint32_t *)camry_host_ptr(0xffddd068u)))
+#define Ramffddd06c (*((volatile uint32_t *)camry_host_ptr(0xffddd06cu)))
+#define Ramffddd070 (*((volatile uint32_t *)camry_host_ptr(0xffddd070u)))
+#define Ramffddd074 (*((volatile uint32_t *)camry_host_ptr(0xffddd074u)))
+#define Ramffddd078 (*((volatile uint32_t *)camry_host_ptr(0xffddd078u)))
+#define Ramffddd07c (*((volatile uint32_t *)camry_host_ptr(0xffddd07cu)))
+#define Ramffddd080 (*((volatile uint32_t *)camry_host_ptr(0xffddd080u)))
+#define Ramffddd084 (*((volatile uint32_t *)camry_host_ptr(0xffddd084u)))
+#define Ramffddd088 (*((volatile uint32_t *)camry_host_ptr(0xffddd088u)))
+#define Ramffddd08c (*((volatile uint32_t *)camry_host_ptr(0xffddd08cu)))
+#define Ramffddd090 (*((volatile uint32_t *)camry_host_ptr(0xffddd090u)))
+#define Ramffddd094 (*((volatile uint32_t *)camry_host_ptr(0xffddd094u)))
+#define Ramffddd098 (*((volatile uint32_t *)camry_host_ptr(0xffddd098u)))
+#define Ramffddd09c (*((volatile uint32_t *)camry_host_ptr(0xffddd09cu)))
+#define Ramffddd0a0 (*((volatile uint32_t *)camry_host_ptr(0xffddd0a0u)))
+#define Ramffddd0a4 (*((volatile uint32_t *)camry_host_ptr(0xffddd0a4u)))
+#define Ramffddd0a8 (*((volatile uint32_t *)camry_host_ptr(0xffddd0a8u)))
+#define Ramffddd0ac (*((volatile uint32_t *)camry_host_ptr(0xffddd0acu)))
+#define Ramffddd0b0 (*((volatile uint32_t *)camry_host_ptr(0xffddd0b0u)))
+#define Ramffddd0b4 (*((volatile uint32_t *)camry_host_ptr(0xffddd0b4u)))
+#define Ramffddd0b8 (*((volatile uint32_t *)camry_host_ptr(0xffddd0b8u)))
+#define Ramffddd0bc (*((volatile uint32_t *)camry_host_ptr(0xffddd0bcu)))
+#define Ramffddd0c0 (*((volatile uint32_t *)camry_host_ptr(0xffddd0c0u)))
+#define Ramffddd0c4 (*((volatile uint32_t *)camry_host_ptr(0xffddd0c4u)))
+#define Ramffddd0c8 (*((volatile uint32_t *)camry_host_ptr(0xffddd0c8u)))
+#define Ramffddd0cc (*((volatile uint32_t *)camry_host_ptr(0xffddd0ccu)))
+#define Ramffddd0d0 (*((volatile uint32_t *)camry_host_ptr(0xffddd0d0u)))
+#define Ramffddd0d4 (*((volatile uint32_t *)camry_host_ptr(0xffddd0d4u)))
+#define Ramffddd0d8 (*((volatile uint32_t *)camry_host_ptr(0xffddd0d8u)))
+#define Ramffddd0dc (*((volatile uint32_t *)camry_host_ptr(0xffddd0dcu)))
+#define Ramffddd0e0 (*((volatile uint32_t *)camry_host_ptr(0xffddd0e0u)))
+#define Ramffddd0e4 (*((volatile uint32_t *)camry_host_ptr(0xffddd0e4u)))
+#define Ramffddd0e8 (*((volatile uint32_t *)camry_host_ptr(0xffddd0e8u)))
+#define Ramffddd0ec (*((volatile uint32_t *)camry_host_ptr(0xffddd0ecu)))
+#define Ramffddd0f0 (*((volatile uint32_t *)camry_host_ptr(0xffddd0f0u)))
+#define Ramffddd0f4 (*((volatile uint32_t *)camry_host_ptr(0xffddd0f4u)))
+#define Ramffddd0f8 (*((volatile uint32_t *)camry_host_ptr(0xffddd0f8u)))
+#define Ramffddd0fc (*((volatile uint32_t *)camry_host_ptr(0xffddd0fcu)))
+#define Ramffddd100 (*((volatile uint32_t *)camry_host_ptr(0xffddd100u)))
+#define Ramffddd104 (*((volatile uint32_t *)camry_host_ptr(0xffddd104u)))
+#define Ramffddd108 (*((volatile uint32_t *)camry_host_ptr(0xffddd108u)))
+#define Ramffddd10c (*((volatile uint32_t *)camry_host_ptr(0xffddd10cu)))
+#define Ramffddd110 (*((volatile uint32_t *)camry_host_ptr(0xffddd110u)))
+#define Ramffddd114 (*((volatile uint32_t *)camry_host_ptr(0xffddd114u)))
+#define Ramffddd118 (*((volatile uint32_t *)camry_host_ptr(0xffddd118u)))
+#define Ramffddd11c (*((volatile uint32_t *)camry_host_ptr(0xffddd11cu)))
+#define Ramffddd120 (*((volatile uint32_t *)camry_host_ptr(0xffddd120u)))
+#define Ramffddd124 (*((volatile uint32_t *)camry_host_ptr(0xffddd124u)))
+#define Ramffddd128 (*((volatile uint32_t *)camry_host_ptr(0xffddd128u)))
+#define Ramffddd12c (*((volatile uint32_t *)camry_host_ptr(0xffddd12cu)))
+#define Ramffddd130 (*((volatile uint32_t *)camry_host_ptr(0xffddd130u)))
+#define Ramffddd134 (*((volatile uint32_t *)camry_host_ptr(0xffddd134u)))
+#define Ramffddd138 (*((volatile uint32_t *)camry_host_ptr(0xffddd138u)))
+#define Ramffddd13c (*((volatile uint32_t *)camry_host_ptr(0xffddd13cu)))
+#define Ramffddd140 (*((volatile uint32_t *)camry_host_ptr(0xffddd140u)))
+#define Ramffddd144 (*((volatile uint32_t *)camry_host_ptr(0xffddd144u)))
+#define Ramffddd148 (*((volatile uint32_t *)camry_host_ptr(0xffddd148u)))
+#define Ramffddd14c (*((volatile uint32_t *)camry_host_ptr(0xffddd14cu)))
+#define Ramffddd150 (*((volatile uint32_t *)camry_host_ptr(0xffddd150u)))
+#define Ramffddd154 (*((volatile uint32_t *)camry_host_ptr(0xffddd154u)))
+#define Ramffddd158 (*((volatile uint32_t *)camry_host_ptr(0xffddd158u)))
+#define Ramffddd15c (*((volatile uint32_t *)camry_host_ptr(0xffddd15cu)))
+#define Ramffddd160 (*((volatile uint32_t *)camry_host_ptr(0xffddd160u)))
+#define Ramffddd164 (*((volatile uint32_t *)camry_host_ptr(0xffddd164u)))
+#define Ramffddd168 (*((volatile uint32_t *)camry_host_ptr(0xffddd168u)))
+#define Ramffddd16c (*((volatile uint32_t *)camry_host_ptr(0xffddd16cu)))
+#define Ramffddd170 (*((volatile uint32_t *)camry_host_ptr(0xffddd170u)))
+#define Ramffddd174 (*((volatile uint32_t *)camry_host_ptr(0xffddd174u)))
+#define Ramffddd178 (*((volatile uint32_t *)camry_host_ptr(0xffddd178u)))
+#define Ramffddd17c (*((volatile uint32_t *)camry_host_ptr(0xffddd17cu)))
+#define Ramffddd180 (*((volatile uint32_t *)camry_host_ptr(0xffddd180u)))
+#define Ramffddd184 (*((volatile uint32_t *)camry_host_ptr(0xffddd184u)))
+#define Ramffddd188 (*((volatile uint32_t *)camry_host_ptr(0xffddd188u)))
+#define Ramffddd18c (*((volatile uint32_t *)camry_host_ptr(0xffddd18cu)))
+#define Ramffddd190 (*((volatile uint32_t *)camry_host_ptr(0xffddd190u)))
+#define Ramffddd194 (*((volatile uint32_t *)camry_host_ptr(0xffddd194u)))
+#define Ramffddd198 (*((volatile uint32_t *)camry_host_ptr(0xffddd198u)))
+#define Ramffddd19c (*((volatile uint32_t *)camry_host_ptr(0xffddd19cu)))
+#define Ramffddd1a0 (*((volatile uint32_t *)camry_host_ptr(0xffddd1a0u)))
+#define Ramffddd1a4 (*((volatile uint32_t *)camry_host_ptr(0xffddd1a4u)))
+#define Ramffddd1a8 (*((volatile uint32_t *)camry_host_ptr(0xffddd1a8u)))
+#define Ramffddd1ac (*((volatile uint32_t *)camry_host_ptr(0xffddd1acu)))
+#define Ramffddd1b0 (*((volatile uint32_t *)camry_host_ptr(0xffddd1b0u)))
+#define Ramffddd1b4 (*((volatile uint32_t *)camry_host_ptr(0xffddd1b4u)))
+#define Ramffddd1b8 (*((volatile uint32_t *)camry_host_ptr(0xffddd1b8u)))
+#define Ramffddd1bc (*((volatile uint32_t *)camry_host_ptr(0xffddd1bcu)))
+#define Ramffddd1c0 (*((volatile uint32_t *)camry_host_ptr(0xffddd1c0u)))
+#define Ramffddd1c4 (*((volatile uint32_t *)camry_host_ptr(0xffddd1c4u)))
+#define Ramffddd1c8 (*((volatile uint32_t *)camry_host_ptr(0xffddd1c8u)))
+#define Ramffddd1cc (*((volatile uint32_t *)camry_host_ptr(0xffddd1ccu)))
+#define Ramffddd1d0 (*((volatile uint32_t *)camry_host_ptr(0xffddd1d0u)))
+#define Ramffddd1d4 (*((volatile uint32_t *)camry_host_ptr(0xffddd1d4u)))
+#define Ramffddd1d8 (*((volatile uint32_t *)camry_host_ptr(0xffddd1d8u)))
+#define Ramffddd1dc (*((volatile uint32_t *)camry_host_ptr(0xffddd1dcu)))
+#define Ramffddd1e0 (*((volatile uint32_t *)camry_host_ptr(0xffddd1e0u)))
+#define Ramffddd1e4 (*((volatile uint32_t *)camry_host_ptr(0xffddd1e4u)))
+#define Ramffddd1e8 (*((volatile uint32_t *)camry_host_ptr(0xffddd1e8u)))
+#define Ramffddd1ec (*((volatile uint32_t *)camry_host_ptr(0xffddd1ecu)))
+#define Ramffddd1f0 (*((volatile uint32_t *)camry_host_ptr(0xffddd1f0u)))
+#define Ramffddd1f4 (*((volatile uint32_t *)camry_host_ptr(0xffddd1f4u)))
+#define Ramffddd1f8 (*((volatile uint32_t *)camry_host_ptr(0xffddd1f8u)))
+#define Ramffddd1fc (*((volatile uint32_t *)camry_host_ptr(0xffddd1fcu)))
+#define Ramffddd200 (*((volatile uint32_t *)camry_host_ptr(0xffddd200u)))
+#define Ramffddd204 (*((volatile uint32_t *)camry_host_ptr(0xffddd204u)))
+#define Ramffddd208 (*((volatile uint32_t *)camry_host_ptr(0xffddd208u)))
+#define Ramffddd20c (*((volatile uint32_t *)camry_host_ptr(0xffddd20cu)))
+#define Ramffddd210 (*((volatile uint32_t *)camry_host_ptr(0xffddd210u)))
+#define Ramffddd214 (*((volatile uint32_t *)camry_host_ptr(0xffddd214u)))
+#define Ramffddd218 (*((volatile uint32_t *)camry_host_ptr(0xffddd218u)))
+#define Ramffddd21c (*((volatile uint32_t *)camry_host_ptr(0xffddd21cu)))
+#define Ramffddd220 (*((volatile uint32_t *)camry_host_ptr(0xffddd220u)))
+#define Ramffddd224 (*((volatile uint32_t *)camry_host_ptr(0xffddd224u)))
+#define Ramffddd228 (*((volatile uint32_t *)camry_host_ptr(0xffddd228u)))
+#define Ramffddd22c (*((volatile uint32_t *)camry_host_ptr(0xffddd22cu)))
+#define Ramffddd230 (*((volatile uint32_t *)camry_host_ptr(0xffddd230u)))
+#define Ramffddd234 (*((volatile uint32_t *)camry_host_ptr(0xffddd234u)))
+#define Ramffddd238 (*((volatile uint32_t *)camry_host_ptr(0xffddd238u)))
+#define Ramffddd23c (*((volatile uint32_t *)camry_host_ptr(0xffddd23cu)))
+#define Ramffddd240 (*((volatile uint32_t *)camry_host_ptr(0xffddd240u)))
+#define Ramffddd244 (*((volatile uint32_t *)camry_host_ptr(0xffddd244u)))
+#define Ramffddd248 (*((volatile uint32_t *)camry_host_ptr(0xffddd248u)))
+#define Ramffddd24c (*((volatile uint32_t *)camry_host_ptr(0xffddd24cu)))
+#define Ramffddd250 (*((volatile uint32_t *)camry_host_ptr(0xffddd250u)))
+#define Ramffddd254 (*((volatile uint32_t *)camry_host_ptr(0xffddd254u)))
+#define Ramffddd258 (*((volatile uint32_t *)camry_host_ptr(0xffddd258u)))
+#define Ramffddd25c (*((volatile uint32_t *)camry_host_ptr(0xffddd25cu)))
+#define Ramffddd260 (*((volatile uint32_t *)camry_host_ptr(0xffddd260u)))
+#define Ramffddd264 (*((volatile uint32_t *)camry_host_ptr(0xffddd264u)))
+#define Ramffddd268 (*((volatile uint32_t *)camry_host_ptr(0xffddd268u)))
+#define Ramffddd26c (*((volatile uint32_t *)camry_host_ptr(0xffddd26cu)))
+#define Ramffddd270 (*((volatile uint32_t *)camry_host_ptr(0xffddd270u)))
+#define Ramffddd274 (*((volatile uint32_t *)camry_host_ptr(0xffddd274u)))
+#define Ramffddd278 (*((volatile uint32_t *)camry_host_ptr(0xffddd278u)))
+#define Ramffddd27c (*((volatile uint32_t *)camry_host_ptr(0xffddd27cu)))
+#define Ramffddd800 (*((volatile uint32_t *)camry_host_ptr(0xffddd800u)))
+#define Ramffddd804 (*((volatile uint32_t *)camry_host_ptr(0xffddd804u)))
+#define Ramffddd808 (*((volatile uint32_t *)camry_host_ptr(0xffddd808u)))
+#define Ramffe20000 (*((volatile uint16_t *)camry_host_ptr(0xffe20000u)))
+#define Ramffe20004 (*((volatile uint16_t *)camry_host_ptr(0xffe20004u)))
+#define Ramffe2000c (*((volatile uint16_t *)camry_host_ptr(0xffe2000cu)))
+#define Ramffe20014 (*((volatile uint16_t *)camry_host_ptr(0xffe20014u)))
+#define Ramffe20020 (*((volatile uint16_t *)camry_host_ptr(0xffe20020u)))
+#define Ramffe20038 (*((volatile uint16_t *)camry_host_ptr(0xffe20038u)))
+#define Ramffe20058 (*((volatile uint16_t *)camry_host_ptr(0xffe20058u)))
+#define Ramffe2005c (*((volatile uint16_t *)camry_host_ptr(0xffe2005cu)))
+#define Ramffe201c8 (*((volatile uint16_t *)camry_host_ptr(0xffe201c8u)))
+#define Ramffe20200 (*((volatile uint16_t *)camry_host_ptr(0xffe20200u)))
+#define Ramffe20204 (*((volatile uint16_t *)camry_host_ptr(0xffe20204u)))
+#define Ramffe2020c (*((volatile uint16_t *)camry_host_ptr(0xffe2020cu)))
+#define Ramffe20214 (*((volatile uint16_t *)camry_host_ptr(0xffe20214u)))
+#define Ramffe20220 (*((volatile uint16_t *)camry_host_ptr(0xffe20220u)))
+#define Ramffe20238 (*((volatile uint16_t *)camry_host_ptr(0xffe20238u)))
+#define Ramffe20240 (*((volatile uint16_t *)camry_host_ptr(0xffe20240u)))
+#define Ramffe20260 (*((volatile uint16_t *)camry_host_ptr(0xffe20260u)))
+#define Ramffe20264 (*((volatile uint16_t *)camry_host_ptr(0xffe20264u)))
+#define Ramffe20268 (*((volatile uint16_t *)camry_host_ptr(0xffe20268u)))
+#define Ramffe2026c (*((volatile uint16_t *)camry_host_ptr(0xffe2026cu)))
+#define Ramffe21000 (*((volatile uint16_t *)camry_host_ptr(0xffe21000u)))
+#define Ramffe21004 (*((volatile uint16_t *)camry_host_ptr(0xffe21004u)))
+#define Ramffe2100c (*((volatile uint16_t *)camry_host_ptr(0xffe2100cu)))
+#define Ramffe21014 (*((volatile uint16_t *)camry_host_ptr(0xffe21014u)))
+#define Ramffe21058 (*((volatile uint16_t *)camry_host_ptr(0xffe21058u)))
+#define Ramffe2105c (*((volatile uint16_t *)camry_host_ptr(0xffe2105cu)))
+#define Ramffe211c8 (*((volatile uint16_t *)camry_host_ptr(0xffe211c8u)))
+#define Ramffe21200 (*((volatile uint16_t *)camry_host_ptr(0xffe21200u)))
+#define Ramffe21204 (*((volatile uint16_t *)camry_host_ptr(0xffe21204u)))
+#define Ramffe2120c (*((volatile uint16_t *)camry_host_ptr(0xffe2120cu)))
+#define Ramffe21214 (*((volatile uint16_t *)camry_host_ptr(0xffe21214u)))
+#define Ramffe21240 (*((volatile uint16_t *)camry_host_ptr(0xffe21240u)))
+#define Ramffe21260 (*((volatile uint16_t *)camry_host_ptr(0xffe21260u)))
+#define Ramffe21264 (*((volatile uint16_t *)camry_host_ptr(0xffe21264u)))
+#define Ramffe21268 (*((volatile uint16_t *)camry_host_ptr(0xffe21268u)))
+#define Ramffe2126c (*((volatile uint16_t *)camry_host_ptr(0xffe2126cu)))
+#define Ramffe221c8 (*((volatile uint16_t *)camry_host_ptr(0xffe221c8u)))
+#define Ramfff80104 (*((volatile uint32_t *)camry_host_ptr(0xfff80104u)))
+#define Ramfff80200 (*((volatile uint32_t *)camry_host_ptr(0xfff80200u)))
+#define Ramfff94000 (*((volatile uint32_t *)camry_host_ptr(0xfff94000u)))
+#define Ramfff94004 (*((volatile uint32_t *)camry_host_ptr(0xfff94004u)))
+#define Ramfff94008 (*((volatile uint32_t *)camry_host_ptr(0xfff94008u)))
+#define Ramfff9400c (*((volatile uint32_t *)camry_host_ptr(0xfff9400cu)))
+#define Ramfff94010 (*((volatile uint32_t *)camry_host_ptr(0xfff94010u)))
+#define Ramfff94014 (*((volatile uint32_t *)camry_host_ptr(0xfff94014u)))
+#define Ramfff94018 (*((volatile uint32_t *)camry_host_ptr(0xfff94018u)))
+#define Ramfff9401c (*((volatile uint32_t *)camry_host_ptr(0xfff9401cu)))
+#define Ramfff94020 (*((volatile uint32_t *)camry_host_ptr(0xfff94020u)))
+#define Ramfff94024 (*((volatile uint32_t *)camry_host_ptr(0xfff94024u)))
+#define Ramfff94028 (*((volatile uint32_t *)camry_host_ptr(0xfff94028u)))
+#define Ramfff9402c (*((volatile uint32_t *)camry_host_ptr(0xfff9402cu)))
+#define Ramfff94030 (*((volatile uint32_t *)camry_host_ptr(0xfff94030u)))
+#define Ramfff94034 (*((volatile uint32_t *)camry_host_ptr(0xfff94034u)))
+#define Ramfff94038 (*((volatile uint32_t *)camry_host_ptr(0xfff94038u)))
+#define Ramfff9403c (*((volatile uint32_t *)camry_host_ptr(0xfff9403cu)))
+#define Ramfff94040 (*((volatile uint32_t *)camry_host_ptr(0xfff94040u)))
+#define Ramfff94044 (*((volatile uint32_t *)camry_host_ptr(0xfff94044u)))
+#define Ramfff94048 (*((volatile uint32_t *)camry_host_ptr(0xfff94048u)))
+#define Ramfff9404c (*((volatile uint32_t *)camry_host_ptr(0xfff9404cu)))
+#define Ramfff94050 (*((volatile uint32_t *)camry_host_ptr(0xfff94050u)))
+#define Ramfff94054 (*((volatile uint32_t *)camry_host_ptr(0xfff94054u)))
+#define Ramfff94058 (*((volatile uint32_t *)camry_host_ptr(0xfff94058u)))
+#define Ramfff9405c (*((volatile uint32_t *)camry_host_ptr(0xfff9405cu)))
+#define Ramfff94060 (*((volatile uint32_t *)camry_host_ptr(0xfff94060u)))
+#define Ramfff94064 (*((volatile uint32_t *)camry_host_ptr(0xfff94064u)))
+#define Ramfff94068 (*((volatile uint32_t *)camry_host_ptr(0xfff94068u)))
+#define Ramfff9406c (*((volatile uint32_t *)camry_host_ptr(0xfff9406cu)))
+#define Ramfff94070 (*((volatile uint32_t *)camry_host_ptr(0xfff94070u)))
+#define Ramfff94074 (*((volatile uint32_t *)camry_host_ptr(0xfff94074u)))
+#define Ramfff94078 (*((volatile uint32_t *)camry_host_ptr(0xfff94078u)))
+#define Ramfff9407c (*((volatile uint32_t *)camry_host_ptr(0xfff9407cu)))
+#define Ramfff94080 (*((volatile uint32_t *)camry_host_ptr(0xfff94080u)))
+#define Ramfff94084 (*((volatile uint32_t *)camry_host_ptr(0xfff94084u)))
+#define Ramfff94088 (*((volatile uint32_t *)camry_host_ptr(0xfff94088u)))
+#define Ramfff9408c (*((volatile uint32_t *)camry_host_ptr(0xfff9408cu)))
+#define Ramfff94090 (*((volatile uint32_t *)camry_host_ptr(0xfff94090u)))
+#define Ramfff94094 (*((volatile uint32_t *)camry_host_ptr(0xfff94094u)))
+#define Ramfff94098 (*((volatile uint32_t *)camry_host_ptr(0xfff94098u)))
+#define Ramfff9409c (*((volatile uint32_t *)camry_host_ptr(0xfff9409cu)))
+#define Ramfff940a0 (*((volatile uint32_t *)camry_host_ptr(0xfff940a0u)))
+#define Ramfff940a4 (*((volatile uint32_t *)camry_host_ptr(0xfff940a4u)))
+#define Ramfff940a8 (*((volatile uint32_t *)camry_host_ptr(0xfff940a8u)))
+#define Ramfff940ac (*((volatile uint32_t *)camry_host_ptr(0xfff940acu)))
+#define Ramfff940b0 (*((volatile uint32_t *)camry_host_ptr(0xfff940b0u)))
+#define Ramfff940b4 (*((volatile uint32_t *)camry_host_ptr(0xfff940b4u)))
+#define Ramfff940b8 (*((volatile uint32_t *)camry_host_ptr(0xfff940b8u)))
+#define Ramfff940bc (*((volatile uint32_t *)camry_host_ptr(0xfff940bcu)))
+#define Ramfff940c0 (*((volatile uint32_t *)camry_host_ptr(0xfff940c0u)))
+#define Ramfff940c4 (*((volatile uint32_t *)camry_host_ptr(0xfff940c4u)))
+#define Ramfff940c8 (*((volatile uint32_t *)camry_host_ptr(0xfff940c8u)))
+#define Ramfff940cc (*((volatile uint32_t *)camry_host_ptr(0xfff940ccu)))
+#define Ramfff940d0 (*((volatile uint32_t *)camry_host_ptr(0xfff940d0u)))
+#define Ramfff940d4 (*((volatile uint32_t *)camry_host_ptr(0xfff940d4u)))
+#define Ramfff940d8 (*((volatile uint32_t *)camry_host_ptr(0xfff940d8u)))
+#define Ramfff940dc (*((volatile uint32_t *)camry_host_ptr(0xfff940dcu)))
+#define Ramfff940e0 (*((volatile uint32_t *)camry_host_ptr(0xfff940e0u)))
+#define Ramfff940e4 (*((volatile uint32_t *)camry_host_ptr(0xfff940e4u)))
+#define Ramfff940e8 (*((volatile uint32_t *)camry_host_ptr(0xfff940e8u)))
+#define Ramfff940ec (*((volatile uint32_t *)camry_host_ptr(0xfff940ecu)))
+#define Ramfff94100 (*((volatile uint32_t *)camry_host_ptr(0xfff94100u)))
+#define Ramfff94104 (*((volatile uint32_t *)camry_host_ptr(0xfff94104u)))
+#define Ramfff94108 (*((volatile uint32_t *)camry_host_ptr(0xfff94108u)))
+#define Ramfff9410c (*((volatile uint32_t *)camry_host_ptr(0xfff9410cu)))
+#define Ramfff94110 (*((volatile uint32_t *)camry_host_ptr(0xfff94110u)))
+#define Ramfff94114 (*((volatile uint32_t *)camry_host_ptr(0xfff94114u)))
+#define Ramfff94118 (*((volatile uint32_t *)camry_host_ptr(0xfff94118u)))
+#define Ramfff9411c (*((volatile uint32_t *)camry_host_ptr(0xfff9411cu)))
+#define Ramfff94120 (*((volatile uint32_t *)camry_host_ptr(0xfff94120u)))
+#define Ramfff94124 (*((volatile uint32_t *)camry_host_ptr(0xfff94124u)))
+#define Ramfff94128 (*((volatile uint32_t *)camry_host_ptr(0xfff94128u)))
+#define Ramfff9412c (*((volatile uint32_t *)camry_host_ptr(0xfff9412cu)))
+#define Ramfff94130 (*((volatile uint32_t *)camry_host_ptr(0xfff94130u)))
+#define Ramfff94134 (*((volatile uint32_t *)camry_host_ptr(0xfff94134u)))
+#define Ramfff94138 (*((volatile uint32_t *)camry_host_ptr(0xfff94138u)))
+#define Ramfff9413c (*((volatile uint32_t *)camry_host_ptr(0xfff9413cu)))
+#define Ramfff94140 (*((volatile uint32_t *)camry_host_ptr(0xfff94140u)))
+#define Ramfff94144 (*((volatile uint32_t *)camry_host_ptr(0xfff94144u)))
+#define Ramfff94148 (*((volatile uint32_t *)camry_host_ptr(0xfff94148u)))
+#define Ramfff9414c (*((volatile uint32_t *)camry_host_ptr(0xfff9414cu)))
+#define Ramfff94150 (*((volatile uint32_t *)camry_host_ptr(0xfff94150u)))
+#define Ramfff94154 (*((volatile uint32_t *)camry_host_ptr(0xfff94154u)))
+#define Ramfff94158 (*((volatile uint32_t *)camry_host_ptr(0xfff94158u)))
+#define Ramfff9415c (*((volatile uint32_t *)camry_host_ptr(0xfff9415cu)))
+#define Ramfff94800 (*((volatile uint32_t *)camry_host_ptr(0xfff94800u)))
+#define Ramfff94804 (*((volatile uint32_t *)camry_host_ptr(0xfff94804u)))
+#define Ramfff94808 (*((volatile uint32_t *)camry_host_ptr(0xfff94808u)))
+#define Ramfff99000 (*((volatile uint32_t *)camry_host_ptr(0xfff99000u)))
+#define Ramfff99004 (*((volatile uint32_t *)camry_host_ptr(0xfff99004u)))
+#define Ramfffa0000 (*((volatile uint32_t *)camry_host_ptr(0xfffa0000u)))
+#define Ramfffa0004 (*((volatile uint32_t *)camry_host_ptr(0xfffa0004u)))
+#define Ramfffa0008 (*((volatile uint32_t *)camry_host_ptr(0xfffa0008u)))
+#define Ramfffa000c (*((volatile uint32_t *)camry_host_ptr(0xfffa000cu)))
+#define Ramfffee680 (*((volatile uint32_t *)camry_host_ptr(0xfffee680u)))
+#define Ramfffee684 (*((volatile uint32_t *)camry_host_ptr(0xfffee684u)))
+#define Ramfffee688 (*((volatile uint32_t *)camry_host_ptr(0xfffee688u)))
+#define Ramfffee690 (*((volatile uint32_t *)camry_host_ptr(0xfffee690u)))
+#define Ramfffee694 (*((volatile uint32_t *)camry_host_ptr(0xfffee694u)))
+#define Ramfffee698 (*((volatile uint32_t *)camry_host_ptr(0xfffee698u)))
+#define Ramfffee6a0 (*((volatile uint32_t *)camry_host_ptr(0xfffee6a0u)))
+#define Ramfffee6a4 (*((volatile uint32_t *)camry_host_ptr(0xfffee6a4u)))
+#define Ramfffee6a8 (*((volatile uint32_t *)camry_host_ptr(0xfffee6a8u)))
+#define Ramfffee6b0 (*((volatile uint32_t *)camry_host_ptr(0xfffee6b0u)))
+#define Ramfffee6b4 (*((volatile uint32_t *)camry_host_ptr(0xfffee6b4u)))
+#define Ramfffee6b8 (*((volatile uint32_t *)camry_host_ptr(0xfffee6b8u)))
+#define Ramfffee6c0 (*((volatile uint32_t *)camry_host_ptr(0xfffee6c0u)))
+#define Ramfffee6c4 (*((volatile uint32_t *)camry_host_ptr(0xfffee6c4u)))
+#define Ramfffee6c8 (*((volatile uint32_t *)camry_host_ptr(0xfffee6c8u)))
+#define Ramfffee6d0 (*((volatile uint32_t *)camry_host_ptr(0xfffee6d0u)))
+#define Ramfffee6d4 (*((volatile uint32_t *)camry_host_ptr(0xfffee6d4u)))
+#define Ramfffee6d8 (*((volatile uint32_t *)camry_host_ptr(0xfffee6d8u)))
+#define Ramfffee6e0 (*((volatile uint32_t *)camry_host_ptr(0xfffee6e0u)))
+#define Ramfffee6e4 (*((volatile uint32_t *)camry_host_ptr(0xfffee6e4u)))
+#define Ramfffee6e8 (*((volatile uint32_t *)camry_host_ptr(0xfffee6e8u)))
+#define Ramfffee6f0 (*((volatile uint32_t *)camry_host_ptr(0xfffee6f0u)))
+#define Ramfffee6f4 (*((volatile uint32_t *)camry_host_ptr(0xfffee6f4u)))
+#define Ramfffee6f8 (*((volatile uint32_t *)camry_host_ptr(0xfffee6f8u)))
+#define Ramfffee980 (*((volatile uint16_t *)camry_host_ptr(0xfffee980u)))
+#define Ramfffee982 (*((volatile uint16_t *)camry_host_ptr(0xfffee982u)))
+#define Ramfffee988 (*((volatile uint32_t *)camry_host_ptr(0xfffee988u)))
+#define Ramffff7a04 (*((volatile uint32_t *)camry_host_ptr(0xffff7a04u)))
+#define Ramffff7a08 (*((volatile uint32_t *)camry_host_ptr(0xffff7a08u)))
+#define Ramffff8000 (*((volatile uint32_t *)camry_host_ptr(0xffff8000u)))
+#define Ramffff80a0 (*((volatile uint32_t *)camry_host_ptr(0xffff80a0u)))
 
 void FUN_00000770(void);
 void FUN_00000780(void);
@@ -11626,7 +12229,7 @@ void FUN_0000159e(void);
 void FUN_000015b4(void);
 uint FUN_000015c0(ushort *param_1);
 undefined4 FUN_00001626(ushort *param_1);
-void FUN_0000167c(int param_1);
+undefined4 FUN_0000167c(int param_1);
 undefined * FUN_0000169c(undefined2 *param_1);
 void FUN_000016f2(void);
 void FUN_000017c8(void);
@@ -11647,7 +12250,7 @@ void FUN_00001e7a(void);
 void FUN_00001e88(void);
 void FUN_00001e96(void);
 void FUN_00001ea4(void);
-void FUN_00001ec0(undefined2 param_1,undefined4 *param_2);
+undefined4 FUN_00001ec0(undefined2 param_1,undefined4 *param_2);
 undefined4 FUN_00001ede(undefined2 param_1);
 void FUN_00001f0c(char *param_1);
 void FUN_00001f60(uint param_1,uint param_2,undefined2 param_3);
@@ -11830,10 +12433,10 @@ void FUN_0000851c(int param_1);
 void FUN_00008542(undefined4 param_1);
 undefined4 FUN_00008560(int *param_1,uint param_2);
 void FUN_00008628(void);
-void FUN_00031ed0(uchar param_1);
-void FUN_00031eea(uchar param_1);
-void FUN_00031f04(void);
-void FUN_00031f18(void);
+int FUN_00031ed0(uchar param_1);
+int FUN_00031eea(uchar param_1);
+int FUN_00031f04(void);
+int FUN_00031f18(void);
 void FUN_00031f36(void);
 void FUN_00031f80(void);
 void FUN_00032036(uint param_1);
@@ -12168,7 +12771,7 @@ void FUN_0004523e(void);
 void FUN_00045256(void);
 void FUN_00045cfc(void);
 void FUN_00045d98(void);
-void FUN_00045e12(void);
+uint FUN_00045e12(void);
 void FUN_00046070(void);
 void FUN_00046080(void);
 void FUN_00046090(void);
@@ -12234,7 +12837,7 @@ void FUN_00048230(void);
 void FUN_0004825c(void);
 void FUN_000483b6(void);
 void FUN_000483bc(void);
-void FUN_0004841e(void);
+uint FUN_0004841e(void);
 void FUN_0004867e(void);
 void FUN_00048d32(void);
 void FUN_000495b6(void);
@@ -12442,9 +13045,9 @@ undefined2 FUN_0005470c(uint param_1);
 void FUN_00054724(uint param_1);
 void FUN_00054746(void);
 void FUN_00054818(byte param_1,undefined1 *param_2);
-void FUN_00054950(void);
+uint FUN_00054950(void);
 void FUN_000549c8(void);
-void FUN_00054a24(void);
+uint FUN_00054a24(void);
 void FUN_00054a90(int param_1,int param_2);
 void FUN_00054aac(int param_1,int param_2);
 void FUN_00054ac6(void);
@@ -12595,7 +13198,7 @@ void FUN_00057e26(void);
 void FUN_00057eb4(void);
 void FUN_00057ebc(void);
 void FUN_00057f00(void);
-void FUN_0005889a(void);
+int FUN_0005889a(void);
 undefined4 FUN_000588b6(void);
 void FUN_000588e8(void);
 void FUN_0005899e(void);
@@ -12677,7 +13280,7 @@ void FUN_000614d4(void);
 void FUN_00061526(void);
 void FUN_00061554(void);
 void FUN_000615be(void);
-void FUN_0006163e(void);
+int FUN_0006163e(void);
 void FUN_0006165a(void);
 void FUN_00061664(void);
 void FUN_000616fc(void);
@@ -12764,7 +13367,7 @@ int FUN_000646d6(char param_1);
 void FUN_000647ea(char param_1);
 short FUN_00064882(void);
 int FUN_000648ae(void);
-void FUN_00064986(void);
+int FUN_00064986(void);
 void FUN_000649f6(char param_1);
 int FUN_00064a90(void);
 int FUN_00064af4(void);
@@ -12817,11 +13420,11 @@ char FUN_00066cc4(char param_1);
 int FUN_00066e7c(uint param_1,int param_2,uint param_3);
 void FUN_00066ef4(void);
 undefined1 FUN_00066f10(void);
-void FUN_00066f68(void);
-void FUN_00066f84(void);
-void FUN_00066f9e(void);
-void FUN_00066fba(void);
-void FUN_00066fd4(void);
+int FUN_00066f68(void);
+int FUN_00066f84(void);
+int FUN_00066f9e(void);
+int FUN_00066fba(void);
+int FUN_00066fd4(void);
 void FUN_000672c0(void);
 void FUN_00067346(void);
 void FUN_000674dc(void);
@@ -12971,38 +13574,38 @@ void FUN_0007250e(undefined2 param_1,char param_2);
 undefined4 FUN_0007252c(undefined1 param_1);
 void FUN_0007258c(undefined1 param_1);
 undefined4 FUN_000725ce(void);
-void FUN_00072632(void);
+undefined4 FUN_00072632(void);
 undefined4 FUN_00072646(void);
 undefined4 FUN_000726c4(void);
 undefined4 FUN_00072710(void);
 undefined4 FUN_0007275e(void);
-void FUN_000727b2(void);
+undefined4 FUN_000727b2(void);
 undefined4 FUN_000727d2(void);
 undefined4 FUN_0007282c(uint param_1,ushort param_2,undefined2 *param_3);
 undefined4 FUN_0007285c(undefined2 param_1);
 void FUN_00072888(char param_1);
 undefined4 FUN_0007289e(undefined1 param_1);
 undefined4 FUN_000728d2(undefined2 param_1);
-void FUN_00072920(ushort param_1,undefined1 param_2);
+undefined4 FUN_00072920(ushort param_1,undefined1 param_2);
 undefined4 FUN_00072958(void);
 undefined4 FUN_000729c2(void);
 void FUN_000729e8(void);
 undefined4 FUN_00072a76(undefined2 param_1,undefined1 param_2);
 void FUN_00072ad4(undefined2 param_1,undefined1 param_2);
 undefined4 FUN_00072b0c(void);
-void FUN_00072b76(void);
-void FUN_00072bae(undefined1 param_1,undefined1 param_2);
-void FUN_00072c2c(void);
-void FUN_00072c3e(void);
-void FUN_00072c50(void);
+undefined4 FUN_00072b76(void);
+undefined4 FUN_00072bae(undefined1 param_1,undefined1 param_2);
+undefined4 FUN_00072c2c(void);
+undefined4 FUN_00072c3e(void);
+undefined4 FUN_00072c50(void);
 void FUN_00072c62(uint param_1,ushort param_2,uint param_3,uchar param_4,undefined1 param_5);
-void FUN_00072cba(undefined2 param_1,uint param_2,undefined1 param_3,uchar param_4, undefined1 param_5,char param_6);
-void FUN_00072d48(void);
-void FUN_00072d70(void);
-void FUN_00072d94(void);
-void FUN_00072dba(void);
-void FUN_00072de2(void);
-void FUN_00072e06(void);
+undefined4 FUN_00072cba(undefined2 param_1,uint param_2,undefined1 param_3,uchar param_4, undefined1 param_5,char param_6);
+undefined4 FUN_00072d48(void);
+undefined4 FUN_00072d70(void);
+undefined4 FUN_00072d94(void);
+undefined4 FUN_00072dba(void);
+undefined4 FUN_00072de2(void);
+undefined4 FUN_00072e06(void);
 uint FUN_00072e2e(uint param_1,ushort param_2,void *param_3,void *param_4);
 void FUN_00072e70(void);
 bool FUN_00072eac(uint *param_1);
@@ -13038,8 +13641,8 @@ void FUN_00073ba0(int param_1);
 void FUN_00073c14(void);
 uchar FUN_00073c6c(void);
 undefined1 FUN_00073c76(void);
-void FUN_00073cb0(ushort param_1,undefined4 param_2,undefined2 param_3,undefined4 param_4, undefined2 param_5);
-void FUN_00073cdc(ushort param_1,undefined4 param_2,undefined4 param_3);
+undefined4 FUN_00073cb0(ushort param_1,undefined4 param_2,undefined2 param_3,undefined4 param_4, undefined2 param_5);
+undefined4 FUN_00073cdc(ushort param_1,undefined4 param_2,undefined4 param_3);
 undefined4 FUN_00073cfe(void);
 void FUN_00073d5a(void);
 ushort FUN_00073daa(void);
@@ -13133,7 +13736,7 @@ undefined4 FUN_0007521c(undefined4 param_1,int *param_2);
 undefined4 FUN_00075282(char param_1,undefined4 *param_2);
 undefined4 FUN_000752fa(undefined4 param_1,int *param_2);
 undefined4 FUN_00075376(int param_1,int *param_2);
-void FUN_000753cc(void);
+undefined4 FUN_000753cc(void);
 undefined4 FUN_000753e8(undefined4 param_1,int *param_2);
 uint FUN_0007543c(uint param_1);
 undefined4 FUN_0007544a(undefined4 param_1,int *param_2);
@@ -13141,34 +13744,34 @@ undefined4 FUN_0007547e(undefined4 param_1,int *param_2);
 undefined4 FUN_000754d6(undefined4 param_1,int *param_2);
 undefined4 FUN_00075510(undefined4 param_1,undefined4 param_2);
 undefined4 FUN_0007552e(int param_1,int *param_2);
-void FUN_00075584(void);
+undefined4 FUN_00075584(void);
 undefined4 FUN_000755a0(undefined4 param_1,undefined4 *param_2);
 undefined4 FUN_00075642(void);
 uint FUN_00075678(uint param_1);
 undefined4 FUN_0007568e(void);
 void FUN_000756b2(void);
-void FUN_00075708(void);
-void FUN_00075718(void);
-void FUN_00075750(void);
+undefined4 FUN_00075708(void);
+undefined4 FUN_00075718(void);
+undefined4 FUN_00075750(void);
 undefined4 FUN_00075760(void);
 undefined4 FUN_000757a4(char param_1,undefined4 *param_2);
 void FUN_00075818(undefined4 param_1,undefined4 param_2);
-void FUN_00075892(void);
-void FUN_000758b0(undefined4 param_1,undefined4 param_2);
-void FUN_00075902(undefined4 param_1,undefined4 param_2);
+undefined4 FUN_00075892(void);
+undefined4 FUN_000758b0(undefined4 param_1,undefined4 param_2);
+undefined4 FUN_00075902(undefined4 param_1,undefined4 param_2);
 undefined4 FUN_00075928(int param_1,undefined4 param_2);
-void FUN_00075982(void);
+undefined4 FUN_00075982(void);
 undefined4 FUN_0007599e(undefined4 param_1,undefined4 param_2);
 undefined4 FUN_000759e2(undefined4 param_1,undefined4 param_2);
 undefined4 FUN_00075a1a(undefined4 param_1,undefined4 param_2);
 undefined4 FUN_00075a78(undefined4 param_1,undefined4 param_2);
 undefined4 FUN_00075ab8(undefined4 param_1,undefined4 param_2);
 undefined4 FUN_00075ad8(int param_1,undefined4 param_2);
-void FUN_00075b32(void);
+undefined4 FUN_00075b32(void);
 undefined1 FUN_00075b4e(undefined4 *param_1);
 void FUN_00075bb6(undefined4 param_1,undefined4 param_2);
-void FUN_00075bfe(undefined2 param_1,undefined1 param_2);
-void FUN_00075c1c(undefined2 param_1);
+undefined * FUN_00075bfe(undefined2 param_1,undefined1 param_2);
+undefined * FUN_00075c1c(undefined2 param_1);
 void FUN_00075c34(undefined2 param_1);
 undefined4 FUN_00075c54(undefined4 param_1,int *param_2);
 undefined4 FUN_00075c76(undefined4 param_1,undefined4 *param_2);
@@ -13191,7 +13794,7 @@ undefined4 FUN_00075ea8(undefined4 param_1,undefined4 *param_2);
 undefined4 FUN_00075ed2(undefined4 param_1,int *param_2);
 undefined4 FUN_00075ef4(undefined4 param_1,undefined4 *param_2);
 undefined4 FUN_00075f1e(int param_1,int *param_2);
-void FUN_00075f64(void);
+undefined4 FUN_00075f64(void);
 undefined4 FUN_00075f80(undefined4 param_1,undefined4 *param_2);
 undefined4 FUN_00075fb0(undefined *param_1,undefined4 *param_2);
 undefined4 FUN_00075fe4(undefined4 param_1,int *param_2);
@@ -13199,7 +13802,7 @@ undefined4 FUN_00076018(undefined4 param_1,int *param_2);
 undefined4 FUN_00076072(undefined4 param_1,int *param_2);
 undefined4 FUN_000760a6(undefined4 param_1,undefined4 param_2);
 undefined4 FUN_000760c6(int param_1,int *param_2);
-void FUN_0007611c(void);
+undefined4 FUN_0007611c(void);
 undefined4 FUN_00076138(undefined4 *param_1);
 undefined4 FUN_0007618e(undefined4 param_1,undefined4 *param_2);
 void FUN_000761e6(void);
@@ -13217,12 +13820,12 @@ undefined4 FUN_00076360(undefined4 param_1,undefined4 param_2);
 void FUN_0007637e(void);
 undefined4 FUN_0007638a(char param_1);
 undefined4 FUN_000763a4(int param_1,int *param_2);
-void FUN_000763f0(void);
+undefined4 FUN_000763f0(void);
 void FUN_0007640c(void);
 undefined4 FUN_00076416(undefined4 param_1,undefined4 param_2);
 undefined4 FUN_00076456(void);
-void FUN_0007648a(void);
-void FUN_000764b2(void);
+undefined4 FUN_0007648a(void);
+undefined4 FUN_000764b2(void);
 void FUN_000764c2(void);
 void FUN_000764ce(void);
 undefined2 FUN_0007650c(undefined2 param_1);
@@ -13252,9 +13855,9 @@ void FUN_00076ae6(void);
 void FUN_00076af4(void);
 undefined * FUN_00076b1c(void);
 undefined * FUN_00076b6e(void);
-void FUN_00076be8(ushort param_1);
+uint FUN_00076be8(ushort param_1);
 void FUN_00076c3e(int param_1);
-void FUN_00076c6e(ushort param_1);
+uint FUN_00076c6e(ushort param_1);
 void FUN_00076cb2(int param_1);
 void FUN_00076d02(void);
 void FUN_00076d12(ushort param_1);
@@ -13262,7 +13865,7 @@ void FUN_00076dac(int param_1);
 void FUN_00076e06(int param_1);
 undefined * FUN_00076e36(ushort param_1,ushort param_2);
 void FUN_00076e6a(ushort param_1,ushort param_2,int param_3);
-void FUN_00076ec4(void);
+uint FUN_00076ec4(void);
 undefined * FUN_00076f04(ushort param_1,ushort param_2);
 void FUN_00076f4e(ushort param_1,ushort param_2,uchar *param_3,uchar param_4);
 int FUN_00076ff0(ushort param_1,int param_2,undefined1 param_3);
@@ -13276,26 +13879,26 @@ void FUN_000772ae(int param_1,undefined2 param_2);
 undefined4 FUN_000772b4(int param_1);
 void FUN_000772ba(int param_1,undefined4 param_2);
 void FUN_000772e4(int param_1,undefined4 param_2);
-void FUN_000772ea(int param_1);
+undefined4 FUN_000772ea(int param_1);
 void FUN_000772f8(void);
 void FUN_00077370(void);
 undefined * FUN_00077380(void);
-void FUN_000773fe(ushort param_1);
-void FUN_0007749e(ushort param_1);
+uint FUN_000773fe(ushort param_1);
+uint FUN_0007749e(ushort param_1);
 void FUN_000774ee(int param_1);
 undefined * FUN_00077548(void);
 void FUN_0007759a(int param_1);
 undefined * FUN_000775ca(void);
 void FUN_00077626(int param_1);
 void FUN_00077640(void);
-void FUN_00077650(uint param_1,uint param_2);
-void FUN_00077660(uint param_1);
+uint FUN_00077650(uint param_1,uint param_2);
+uint FUN_00077660(uint param_1);
 undefined * FUN_000776fa(uint param_1,ushort param_2,uchar *param_3,uchar param_4);
 void FUN_00077824(void);
 int FUN_0007786a(uint param_1,undefined4 param_2,undefined1 param_3);
 undefined4 FUN_000778cc(int param_1);
 void FUN_000778d2(int param_1,undefined4 param_2);
-void FUN_000778d8(int param_1);
+undefined4 FUN_000778d8(int param_1);
 undefined * FUN_00077910(void);
 void FUN_00077968(int param_1);
 void FUN_000779b2(ushort param_1,int param_2);
@@ -13381,7 +13984,7 @@ bool FUN_00078d9e(uint param_1,uint param_2,int param_3);
 bool FUN_00078dca(int param_1,int param_2);
 undefined1 FUN_00078e10(void);
 uint FUN_00078e2a(undefined4 *param_1,uint param_2,uint param_3);
-void FUN_00078f7a(void);
+uint FUN_00078f7a(void);
 undefined4 FUN_00078f92(char *param_1);
 undefined4 FUN_00079026(void);
 bool FUN_00079084(char *param_1);
@@ -13399,7 +14002,7 @@ void FUN_000792c0(void);
 undefined1 FUN_000792dc(void);
 void FUN_00079316(void);
 void FUN_00079388(void);
-void FUN_0007939c(undefined2 param_1,undefined1 param_2,undefined1 param_3,undefined1 param_4);
+undefined4 FUN_0007939c(undefined2 param_1,undefined1 param_2,undefined1 param_3,undefined1 param_4);
 undefined4 FUN_000793c8(undefined1 *param_1);
 void FUN_000793dc(undefined1 *param_1);
 bool FUN_00079420(void);
@@ -13457,9 +14060,9 @@ void FUN_00079d86(undefined1 param_1);
 void FUN_00079d94(undefined1 param_1);
 void FUN_00079da2(ushort param_1);
 void FUN_00079db0(ushort param_1,F33PduInfo *param_2);
-void FUN_00079dcc(undefined2 param_1);
-void FUN_00079dda(undefined2 param_1,undefined1 param_2,undefined2 param_3);
-void FUN_00079dec(undefined2 param_1);
+uint FUN_00079dcc(undefined2 param_1);
+undefined4 FUN_00079dda(undefined2 param_1,undefined1 param_2,undefined2 param_3);
+uint FUN_00079dec(undefined2 param_1);
 void FUN_00079e2c(void);
 void FUN_00079eba(void);
 void FUN_00079eca(void);
@@ -13751,7 +14354,7 @@ undefined1 FUN_000813e4(uint param_1);
 undefined1 FUN_0008144e(uint param_1);
 void FUN_00081530(uint param_1,char param_2);
 void FUN_0008156c(uint param_1);
-void FUN_0008157a(undefined1 param_1);
+undefined1 FUN_0008157a(undefined1 param_1);
 undefined4 FUN_0008160c(ushort param_1);
 void FUN_00081640(uint param_1);
 undefined4 FUN_000816bc(uint param_1);
@@ -13835,13 +14438,13 @@ void FUN_00082f44(undefined1 param_1,int param_2,undefined2 param_3);
 void FUN_00082fc0(undefined1 param_1,undefined4 param_2,undefined2 param_3);
 void FUN_00082fec(uint param_1,undefined4 param_2,undefined2 param_3);
 undefined4 FUN_0008300e(byte param_1,int param_2,uint param_3);
-void FUN_00083072(undefined1 param_1);
-void FUN_00083098(undefined4 param_1,undefined1 param_2);
-void FUN_000830a6(undefined4 param_1,undefined1 param_2);
-void FUN_000830c0(undefined1 param_1,undefined4 param_2,undefined2 param_3);
+bool FUN_00083072(undefined1 param_1);
+bool FUN_00083098(undefined4 param_1,undefined1 param_2);
+undefined4 FUN_000830a6(undefined4 param_1,undefined1 param_2);
+undefined1 FUN_000830c0(undefined1 param_1,undefined4 param_2,undefined2 param_3);
 void FUN_000830d0(undefined1 param_1,int *param_2);
 void FUN_0008312e(uint param_1);
-void FUN_00083158(ushort param_1,uchar *param_2,ushort param_3);
+uint FUN_00083158(ushort param_1,uchar *param_2,ushort param_3);
 bool FUN_00083172(void);
 void FUN_0008317e(int param_1);
 void FUN_000831be(uint param_1,undefined1 param_2,undefined1 param_3);
@@ -13958,7 +14561,7 @@ void FUN_0008583e(void);
 void FUN_0008584c(uint param_1);
 void FUN_00085938(void);
 undefined4 FUN_00085940(undefined4 param_1,char param_2,undefined4 param_3);
-void FUN_00085964(undefined4 param_1,undefined4 param_2);
+undefined4 FUN_00085964(undefined4 param_1,undefined4 param_2);
 undefined4 FUN_0008597c(undefined4 param_1,char param_2,int param_3);
 void FUN_000859a8(undefined4 *param_1);
 void FUN_00085a5c(uint *param_1);
@@ -14103,7 +14706,7 @@ void FUN_0008b0de(uchar param_1,uchar param_2);
 void FUN_0008b120(void);
 void FUN_0008b134(void);
 int FUN_0008b17e(void);
-void FUN_0008b36e(uchar param_1,uchar *param_2);
+uint FUN_0008b36e(uchar param_1,uchar *param_2);
 void FUN_0008b3d4(void);
 void FUN_0008b3e8(void);
 uint FUN_0008b41a(char param_1,uchar *param_2,int *param_3);
@@ -14247,7 +14850,7 @@ void FUN_0008fed0(short param_1,int param_2,uint *param_3);
 undefined4 FUN_0008ffda(short param_1);
 int FUN_000900ea(void);
 undefined4 FUN_00090146(void);
-void FUN_000901e8(undefined2 param_1);
+undefined4 FUN_000901e8(undefined2 param_1);
 void FUN_000901f6(undefined2 param_1);
 void FUN_00090204(undefined2 param_1);
 void FUN_00090212(void);
@@ -14293,9 +14896,9 @@ undefined1 FUN_000916a6(void);
 bool FUN_000916c6(char param_1,undefined4 *param_2);
 undefined4 FUN_000916ec(char param_1,ushort param_2,char param_3);
 bool FUN_0009177c(void);
-void FUN_00091788(undefined1 param_1);
-void FUN_00091796(undefined1 param_1);
-void FUN_000917a4(undefined1 param_1);
+undefined4 FUN_00091788(undefined1 param_1);
+undefined4 FUN_00091796(undefined1 param_1);
+undefined4 FUN_000917a4(undefined1 param_1);
 void FUN_000917b2(void);
 void FUN_000917d0(char param_1,undefined1 param_2);
 undefined4 FUN_00091826(undefined1 param_1);
@@ -14310,11 +14913,11 @@ void FUN_00091ac2(undefined1 param_1);
 void FUN_00091ad0(undefined1 param_1);
 void FUN_00091b08(uchar param_1,uchar param_2);
 undefined4 FUN_00091b50(void);
-void FUN_00091b78(void);
-void FUN_00091b84(short param_1);
+undefined4 FUN_00091b78(void);
+bool FUN_00091b84(short param_1);
 undefined4 FUN_00091bd2(int param_1);
 undefined4 FUN_00091bf2(void);
-void FUN_00091c82(uchar param_1,uchar param_2);
+uint FUN_00091c82(uchar param_1,uchar param_2);
 void FUN_00091cd2(undefined1 param_1,undefined1 param_2);
 void FUN_00091d20(void);
 void FUN_00091d80(void);
@@ -14324,28 +14927,28 @@ void FUN_00091e12(uchar param_1);
 bool FUN_00091e2c(void);
 bool FUN_00091e52(void);
 void FUN_00091e6e(void);
-void FUN_00091e7a(void);
+undefined4 FUN_00091e7a(void);
 void FUN_00091f0e(void);
 void FUN_00091f26(uint param_1,char param_2);
 void FUN_00091f64(uchar param_1);
 void FUN_00091f72(undefined1 param_1);
 void FUN_00091f90(void);
-void FUN_00091f9c(undefined1 param_1);
+undefined4 FUN_00091f9c(undefined1 param_1);
 void FUN_00091faa(void);
 void FUN_00091fbe(void);
 undefined4 FUN_0009202a(undefined1 param_1,undefined1 param_2);
-void FUN_00092044(undefined1 param_1,undefined1 param_2);
-void FUN_00092054(undefined1 param_1,undefined1 param_2);
+undefined4 FUN_00092044(undefined1 param_1,undefined1 param_2);
+undefined4 FUN_00092054(undefined1 param_1,undefined1 param_2);
 void FUN_00092064(uchar param_1,ushort *param_2,ushort *param_3,ushort *param_4);
-void FUN_00092094(undefined1 param_1);
-void FUN_000920a2(undefined1 param_1);
-void FUN_000920b0(undefined1 param_1);
+undefined4 FUN_00092094(undefined1 param_1);
+undefined4 FUN_000920a2(undefined1 param_1);
+undefined4 FUN_000920b0(undefined1 param_1);
 void FUN_00092300(void);
 void FUN_0009238c(void);
 void FUN_000923de(undefined2 param_1);
 void FUN_000923ec(void);
 void FUN_000924e8(void);
-void FUN_000925a0(undefined1 param_1);
+undefined4 FUN_000925a0(undefined1 param_1);
 void FUN_00092602(void);
 void FUN_00092610(uchar param_1);
 void FUN_00092616(void);
@@ -14366,7 +14969,7 @@ undefined1 FUN_00092b66(void);
 int * FUN_00092b98(undefined4 *param_1);
 undefined4 FUN_00092bc2(undefined4 *param_1);
 void FUN_00092bd8(void);
-void FUN_00092c1e(uchar param_1);
+uint FUN_00092c1e(uchar param_1);
 undefined4 FUN_00092c46(uint param_1);
 undefined4 FUN_00092d38(undefined1 *param_1);
 undefined4 FUN_00092d72(void);
@@ -14462,7 +15065,7 @@ undefined4 FUN_00094f94(char param_1,int *param_2,undefined2 param_3,undefined1 
 undefined4 FUN_00094fea(ushort param_1,char param_2,undefined2 param_3,undefined1 *param_4);
 int FUN_0009502a(undefined2 param_1,undefined1 param_2,undefined1 *param_3);
 int FUN_000950c0(short param_1,undefined1 param_2,undefined1 *param_3);
-void FUN_0009512c(void);
+undefined4 FUN_0009512c(void);
 undefined4 FUN_000951b8(ushort param_1,byte param_2,undefined4 param_3);
 undefined4 FUN_000951da(ushort param_1,byte param_2,undefined4 param_3);
 undefined4 FUN_000951fc(ushort param_1,byte param_2,undefined4 param_3);
@@ -14500,40 +15103,40 @@ undefined4 FUN_000957c8(void);
 undefined4 FUN_00095808(undefined1 param_1);
 undefined4 FUN_0009586c(undefined4 *param_1);
 undefined4 FUN_000958f4(undefined4 *param_1);
-void FUN_0009599c(void);
-void FUN_000959aa(void);
-void FUN_000959b8(void);
+undefined4 FUN_0009599c(void);
+undefined4 FUN_000959aa(void);
+undefined4 FUN_000959b8(void);
 void FUN_00095a06(void);
 uint FUN_00095a14(char param_1,F33DcmMessageContext *param_2);
 void FUN_00095c86(undefined4 param_1,undefined4 param_2,char param_3);
-void FUN_00095cf2(void);
-void FUN_00095cfe(undefined1 param_1);
+uint FUN_00095cf2(void);
+uint FUN_00095cfe(undefined1 param_1);
 undefined4 FUN_00095d4e(char param_1);
 int FUN_00095d60(undefined1 param_1);
 uint FUN_00095e76(undefined1 param_1);
 uint FUN_00095f78(void);
 undefined4 FUN_00096244(void);
-void FUN_00096312(void);
-void FUN_00096320(char param_1);
-void FUN_00096336(void);
+uint FUN_00096312(void);
+uint FUN_00096320(char param_1);
+uint FUN_00096336(void);
 bool FUN_00096344(uint param_1,uint param_2);
 undefined4 FUN_00096388(uint param_1);
 undefined4 FUN_00096410(byte param_1);
 undefined4 FUN_000964b0(undefined4 *param_1);
 void FUN_00096582(void);
-void FUN_000965ee(void);
+undefined4 FUN_000965ee(void);
 undefined4 FUN_000965fc(char param_1,undefined1 param_2,undefined4 param_3,undefined4 param_4, undefined4 param_5,undefined4 param_6);
 void FUN_00096622(uint param_1,char param_2);
 void FUN_00096768(void);
 void FUN_0009687c(void);
 void FUN_000968c6(void);
-void FUN_00096b28(uchar *param_1,undefined4 param_2,uchar *param_3,uchar *param_4);
-void FUN_00096b3c(uchar *param_1);
+uint FUN_00096b28(uchar *param_1,undefined4 param_2,uchar *param_3,uchar *param_4);
+uint FUN_00096b3c(uchar *param_1);
 undefined4 FUN_00096b98(char param_1,undefined4 param_2,undefined1 param_3,undefined4 param_4, undefined4 param_5);
 undefined4 FUN_00096bce(char param_1,undefined4 param_2,undefined1 param_3,undefined4 param_4);
 void FUN_00096ca4(char param_1,short param_2,char param_3,undefined1 param_4);
 undefined4 FUN_00096d0a(char param_1,short param_2,char param_3,undefined1 param_4);
-void FUN_00097128(uchar param_1,uchar param_2);
+uint FUN_00097128(uchar param_1,uchar param_2);
 bool FUN_00097172(ushort param_1,undefined2 *param_2);
 undefined4 FUN_000971e8(ushort param_1);
 undefined4 FUN_0009726c(ushort param_1);
@@ -14545,9 +15148,9 @@ undefined4 FUN_00097822(char param_1,undefined4 param_2,ushort param_3,char para
 undefined4 FUN_00097912(undefined4 param_1,undefined1 *param_2,undefined1 *param_3);
 undefined4 FUN_000979a2(undefined4 *param_1);
 void FUN_00097a94(void);
-void FUN_00097aca(void);
+undefined4 FUN_00097aca(void);
 undefined4 FUN_00097ae4(char param_1,undefined4 param_2);
-void FUN_00097b12(void);
+undefined4 FUN_00097b12(void);
 undefined4 FUN_00097c98(char param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4);
 uint FUN_00097f24(uint param_1,byte param_2,uchar *param_3);
 undefined4 FUN_0009806a(undefined4 param_1,char param_2,undefined4 param_3,undefined4 param_4, undefined4 param_5);
@@ -14591,21 +15194,21 @@ void FUN_000b149c(void);
 void FUN_000b14b2(void);
 undefined4 FUN_000b14d2(uint param_1);
 undefined4 FUN_000b15ac(uint param_1);
-void FUN_000b163a(void);
+undefined4 FUN_000b163a(void);
 undefined2 FUN_000b1c34(uint param_1);
 bool FUN_000b1c40(void);
 undefined2 FUN_000b1c64(void);
-void FUN_000b1c84(void);
+undefined4 FUN_000b1c84(void);
 void FUN_000b1c96(void);
 void FUN_000b1cae(void);
-void FUN_000b1cc2(void);
-void FUN_000b1ce0(void);
-void FUN_000b1cf2(void);
+undefined4 FUN_000b1cc2(void);
+undefined4 FUN_000b1ce0(void);
+undefined4 FUN_000b1cf2(void);
 void FUN_000b29fa(void);
-void FUN_000b2b0a(void);
-void FUN_000b2b90(void);
+undefined4 FUN_000b2b0a(void);
+undefined4 FUN_000b2b90(void);
 void FUN_000b2ca6(void);
-void FUN_000b2cd6(void);
+undefined4 FUN_000b2cd6(void);
 void FUN_000b2ee6(void);
 void FUN_000b2f5e(void);
 void FUN_000b2f8c(void);
@@ -14665,9 +15268,9 @@ void FUN_000b53c2(void);
 void FUN_000b53d2(void);
 void FUN_000b5440(uint param_1,uint param_2);
 void FUN_000b5498(void);
-void FUN_000b5586(void);
+uint FUN_000b5586(void);
 void FUN_000b55c0(void);
-void FUN_000b5682(void);
+uint FUN_000b5682(void);
 void FUN_000b56ae(void);
 undefined4 FUN_000b5760(uint param_1,char param_2);
 void FUN_000b57a4(uint param_1,byte *param_2,byte param_3,char param_4);
@@ -14705,7 +15308,7 @@ undefined2 FUN_000b6414(undefined2 param_1);
 undefined ** FUN_000b64c8(uint param_1);
 void FUN_000b651e(void);
 void FUN_000b655e(void);
-void FUN_000b65ca(void);
+uint FUN_000b65ca(void);
 void FUN_000b65f4(void);
 void FUN_000b6624(void);
 void FUN_000b67cc(void);
@@ -14731,11 +15334,11 @@ void FUN_000b6cc8(void);
 void FUN_000b6d20(void);
 void FUN_000b6d72(void);
 void FUN_000b6dfa(void);
-void FUN_000b6e3c(void);
+uint FUN_000b6e3c(void);
 void FUN_000b6e58(void);
-void FUN_000b6f0c(void);
+uint FUN_000b6f0c(void);
 void FUN_000b6f24(void);
-void FUN_000b6fa8(void);
+uint FUN_000b6fa8(void);
 void FUN_000b6fc4(void);
 void FUN_000b706c(undefined4 param_1);
 void FUN_000b707a(void);
@@ -14745,7 +15348,7 @@ void FUN_000b70d8(void);
 void FUN_000b70e2(void);
 void FUN_000b7108(void);
 undefined2 FUN_000b7186(undefined2 param_1);
-void FUN_000b71e2(undefined2 param_1);
+undefined2 FUN_000b71e2(undefined2 param_1);
 undefined ** FUN_000b71f8(uint param_1);
 void FUN_000b722c(void);
 void FUN_000b726c(void);
@@ -14882,17 +15485,17 @@ undefined4 FUN_000bd87e(void);
 undefined4 FUN_000bd8ba(void);
 undefined4 FUN_000bd8ea(void);
 void FUN_000bd9da(void);
-void FUN_000bdb48(void);
+undefined4 FUN_000bdb48(void);
 void FUN_000bdb8e(void);
 void FUN_000bdb98(void);
-void FUN_000bdbbe(void);
+uint FUN_000bdbbe(void);
 void FUN_000bdbe0(void);
 undefined4 FUN_000bdcb8(undefined4 param_1);
-void FUN_000bdcfe(void);
+uint FUN_000bdcfe(void);
 void FUN_000bdd22(void);
-void FUN_000bddba(void);
+uint FUN_000bddba(void);
 void FUN_000bde16(void);
-void FUN_000bdf24(void);
+uint FUN_000bdf24(void);
 void FUN_000be1f8(undefined4 param_1,short param_2);
 void FUN_000be216(undefined1 *param_1);
 void FUN_000be28e(undefined1 *param_1);
@@ -15167,8 +15770,8 @@ void FUN_000cdff8(void);
 int FUN_000ce0ae(void);
 void FUN_000ce384(void);
 void FUN_000ce3aa(void);
-void FUN_000ce454(undefined2 param_1);
-void FUN_000ce486(undefined2 param_1);
+uint FUN_000ce454(undefined2 param_1);
+uint FUN_000ce486(undefined2 param_1);
 void FUN_000ce4b8(undefined2 param_1);
 void FUN_000ce4da(char param_1,undefined2 param_2);
 void FUN_000ce51c(void);
@@ -15319,9 +15922,9 @@ void FUN_000fdd2c(undefined1 param_1,undefined2 param_2);
 void FUN_000fdd40(uint param_1,uint param_2,uint param_3);
 void FUN_000fdd54(uint param_1,uint param_2);
 void FUN_000fdd68(void);
-void FUN_000ff09c(uint param_1,uint *param_2);
-void FUN_000ff0b0(uint param_1,uint *param_2);
-void FUN_000ff0c4(uint param_1);
+uint FUN_000ff09c(uint param_1,uint *param_2);
+uint32_t FUN_000ff0b0(uint param_1,uint *param_2);
+uint FUN_000ff0c4(uint param_1);
 void FUN_000ff0d8(void);
 void FUN_febf12b8(void);
 undefined4 did_1035_steering_wheel_torque(undefined4 param_1);
@@ -15397,7 +16000,7 @@ void f33_advance_mode200_output_sequence(void);
 void f33_advance_mode300_substate(void);
 uint f33_advance_mode700_substate(void);
 void f33_advance_phase_offset_selector(void);
-void f33_advance_qualified_health_state(void);
+undefined4 f33_advance_qualified_health_state(void);
 uint f33_advance_receive_timeout(uint selector);
 void f33_advance_record8_startup_confirmation(void);
 void f33_advance_second_source_admission_qualification(void);
@@ -15425,7 +16028,7 @@ void f33_append_dtc_count(ushort count);
 uint f33_append_dtc_tuple_if_fits(uchar *tuple);
 void f33_application_context_init(void);
 void f33_application_entry(void);
-void f33_application_initialize_before_timer_start(void);
+int f33_application_initialize_before_timer_start(void);
 uint f33_application_nvm_is_ready(void);
 void f33_application_transfer_to_boot_context(uint *handoff_record);
 uint f33_apply_and_complete_communication_policy_request(uchar channel,uchar mapped_mode);
@@ -15510,7 +16113,7 @@ uint f33_boot_aes128_encrypt_block (uchar *plaintext,uchar *ciphertext,uchar len
 void f33_boot_aes128_expand_round_keys(uchar *key,uchar *round_keys);
 uint f33_boot_aes128_initialize_context(uchar *key,uchar key_length,F33BootAes128Context *context);
 void f33_boot_append_program_input(uchar *source,ushort length);
-void f33_boot_authentication_crypto_initialize(void);
+uint f33_boot_authentication_crypto_initialize(void);
 void f33_boot_block_transform_clear_activity(void);
 uint f33_boot_block_transform_submit(ushort length,uchar *source,uchar *destination);
 void f33_boot_cache_set_enabled(uchar enabled);
@@ -15544,10 +16147,10 @@ uint f33_boot_image_authentication_begin(uint start,uint length);
 uint f33_boot_image_authentication_step(void);
 void f33_boot_image_clear_contexts(void);
 void f33_boot_image_crypto_clear(void);
-void f33_boot_image_crypto_initialize(void);
+uint f33_boot_image_crypto_initialize(void);
 uint f33_boot_image_decrypt_block(uchar *ciphertext,uchar *plaintext);
 void f33_boot_image_derive_key(void);
-void f33_boot_image_initialize_contexts(void);
+uint f33_boot_image_initialize_contexts(void);
 uint f33_boot_lookup_authentication_trailer(uint start,uint length,uint *trailer_address);
 uint f33_boot_lookup_completion_marker(uint start,uint length,uint *marker_address);
 void f33_boot_negative_response(uchar sid,uchar nrc);
@@ -15625,7 +16228,7 @@ void f33_boot_tauj0_ch2_callback(void);
 void f33_boot_transfer_block_transform_progress(void);
 void f33_boot_transfer_compare_progress(void);
 void f33_boot_transfer_crypto_clear(void);
-void f33_boot_transfer_crypto_initialize(void);
+uint f33_boot_transfer_crypto_initialize(void);
 void f33_boot_transfer_foreground_consume(void);
 void f33_boot_transfer_timer_progress(void);
 void f33_boot_transport_receive_complete(ushort channel,uchar status);
@@ -15895,7 +16498,7 @@ void f33_clear_published_estimator_state(void);
 void f33_clear_reserved_monitor_action_slot(void);
 void f33_clear_retained_estimator_and_request_reset(void);
 void f33_clear_second_event_history(void);
-void f33_clear_source_coherence_reentry_history(void);
+undefined4 f33_clear_source_coherence_reentry_history(void);
 void f33_close_health_receive_generation_qualification(void);
 void f33_commit_rate_observer(void);
 uint f33_communication_request_sample_above_limit(void);
@@ -15904,7 +16507,7 @@ uint f33_compare_retained_fit_coefficients(void);
 void f33_compensate_first_regulated_phases(void);
 void f33_compensate_second_regulated_phases(void);
 void f33_complete_diagnostic_request_and_dispatch(void);
-void f33_complete_mode200_output_sequence(void);
+undefined4 f33_complete_mode200_output_sequence(void);
 void f33_complete_queued_can_tx(ushort controller_route);
 void f33_compose_angle_controller_prelimit_output(void);
 void f33_compose_angle_controller_terms(void);
@@ -15980,14 +16583,14 @@ uint f33_crypto_bank_mac_completed(uchar result);
 void f33_crypto_bank_maintain_terminal_states(void);
 uint f33_crypto_bank_profile_count(void);
 void f33_crypto_bank_publish_observation_window(void);
-void f33_crypto_bank_publish_verification_result(void);
+uint f33_crypto_bank_publish_verification_result(void);
 uint f33_crypto_bank_read_direct_result(uchar *output,ushort length);
 void f33_crypto_bank_record_profile_status(uint packed_status);
 void f33_crypto_bank_reset_configured_profiles(void);
 void f33_crypto_bank_retire_collected_update(void);
 void f33_crypto_bank_retire_direct_update(void);
 void f33_crypto_bank_retire_test_operation(void);
-void f33_crypto_bank_run_startup_verification(void);
+uint f33_crypto_bank_run_startup_verification(void);
 void f33_crypto_bank_snapshot_key_generations(void);
 void f33_crypto_bank_snapshot_test_generations(void);
 uint f33_crypto_bank_stage_direct_request (uchar *input,ushort input_length,uchar *output,ushort output_length);
@@ -16016,7 +16619,7 @@ void f33_dcm_cancel_active_service(void);
 void f33_dcm_cancel_communication_continuation(void);
 void f33_dcm_cancel_retained_dtc_list(void);
 void f33_dcm_cancel_retained_proprietary_operation(void);
-void f33_dcm_cancel_service_events(uchar event_id,uchar first_only);
+uint f33_dcm_cancel_service_events(uchar event_id,uchar first_only);
 void f33_dcm_cancel_software_timer(uchar timer_slot);
 uint f33_dcm_check_communication_application_admission (uchar subfunction,uchar communication_type,ushort node,uchar *nrc);
 uint f33_dcm_check_read_did_policy_and_length(void);
@@ -16063,10 +16666,10 @@ uint f33_dcm_join_proprietary_start(F33DiagProprietaryMessage *message,uchar *se
 uint f33_dcm_map_response_delivery_result(uchar disposition,uchar transport_result);
 void f33_dcm_notify_active_service_operation_three(void);
 void f33_dcm_notify_communication_session_change(uchar old_session,uchar new_session);
-void f33_dcm_notify_session_publication(uchar old_session,uchar new_session);
+undefined4 f33_dcm_notify_session_publication(uchar old_session,uchar new_session);
 void f33_dcm_p2_response_deadline(uchar service_id);
-void f33_dcm_post_receive_dispatch_after_delay(void);
-void f33_dcm_post_service_event(uchar event_id);
+uint f33_dcm_post_receive_dispatch_after_delay(void);
+uint f33_dcm_post_service_event(uchar event_id);
 uint f33_dcm_preflight_read_did_body(uchar operation);
 uint f33_dcm_probe_did_metadata(ushort did);
 void f33_dcm_programming_deferred_event(void);
@@ -16095,16 +16698,16 @@ uint f33_dcm_resolve_read_did_route(void);
 uint f33_dcm_resolve_service (F33DcmMessageContext *message,F33DcmServiceSelection *selection, uchar *has_subfunction,uchar *negative_response);
 uint f33_dcm_resolve_subfunction (F33DcmMessageContext *message,F33DcmSubfunctionSelection *selection, uchar *negative_response);
 void f33_dcm_restart_inactivity_after_request(void);
-void f33_dcm_restore_default_session(void);
-void f33_dcm_resume_queued_clear_request(void);
+undefined4 f33_dcm_restore_default_session(void);
+uint f33_dcm_resume_queued_clear_request(void);
 void f33_dcm_resume_queued_communication_request(void);
-void f33_dcm_resume_queued_dtc_count(void);
-void f33_dcm_resume_queued_dtc_list(void);
+undefined4 f33_dcm_resume_queued_dtc_count(void);
+uint f33_dcm_resume_queued_dtc_list(void);
 void f33_dcm_resume_queued_dtc_setting(void);
 void f33_dcm_resume_queued_proprietary_operation(void);
-void f33_dcm_resume_queued_snapshot_identifiers(void);
+uint f33_dcm_resume_queued_snapshot_identifiers(void);
 void f33_dcm_resume_queued_snapshot_record(void);
-void f33_dcm_run_queued_response_notification(void);
+uint f33_dcm_run_queued_response_notification(void);
 void f33_dcm_run_scheduled_request(void);
 uint f33_dcm_security_cancel_key(uchar subfunction,uchar operation);
 uint f33_dcm_security_cancel_seed(uchar subfunction,uchar operation);
@@ -16431,7 +17034,7 @@ uint f33_get_selected_network_software_mode(uchar network,uchar *mode);
 uint f33_get_staged_monitor_current_range_status(void);
 uint f33_icus20_second_read_bit0(void);
 void f33_initialize_angle_rate_compensation(void);
-void f33_initialize_application_and_request_first_generation(void);
+int f33_initialize_application_and_request_first_generation(void);
 void f33_initialize_assist_surface_selection(void);
 void f33_initialize_assist_torque_conditioner(void);
 void f33_initialize_bank0_current_reference_feedback(void);
@@ -16446,7 +17049,7 @@ void f33_initialize_ecu_application_work_state(void);
 void f33_initialize_execution_profiles(void);
 void f33_initialize_fixed_received_markers(void);
 void f33_initialize_generated_application_components(void);
-void f33_initialize_health_record_lifecycle(void);
+undefined4 f33_initialize_health_record_lifecycle(void);
 void f33_initialize_lifecycle_difference_monitor(void);
 void f33_initialize_mode600_stimulus_fit(void);
 void f33_initialize_nonlinear_torque_compensation(void);
@@ -16454,14 +17057,14 @@ void f33_initialize_output_code_limit_requests(void);
 void f33_initialize_owner1_persisted_admission(void);
 void f33_initialize_phase_offset_selector(void);
 void f33_initialize_phase_output_slots(void);
-void f33_initialize_qualified_health_state(void);
+undefined4 f33_initialize_qualified_health_state(void);
 void f33_initialize_received_word_age_from_record13(void);
 void f33_initialize_retained_estimator_qualification(void);
 void f33_initialize_secondary_estimator_stability(void);
 void f33_initialize_serial_acquisition_channel(uchar channel);
 void f33_initialize_service_engine(uchar kind);
 void f33_initialize_shared_second_axis_envelope(void);
-void f33_initialize_source_coherence_history(void);
+undefined4 f33_initialize_source_coherence_history(void);
 void f33_initialize_task_progress_supervision(void);
 void f33_initialize_terminal_output_ramp(void);
 void f33_initialize_thermal_shutdown_counter(void);
@@ -16473,7 +17076,7 @@ int f33_interpolate_current_curve(short first_component);
 void f33_interpolate_selected_angle_target(void);
 int f33_interpolate_signed_sentinel_curve(short *points,short input);
 int f33_interpolate_unsigned_axis_sentinel_curve(ushort *points,ushort input);
-void f33_invalidate_thermal_history_record(void);
+uint f33_invalidate_thermal_history_record(void);
 uint f33_is_health_or_command_completion_observed(void);
 void f33_latch_availability_override(void);
 int f33_latch_ba_owner5_fast_release(void);
@@ -16707,7 +17310,7 @@ void f33_publish_foreground_ecu_outputs(void);
 void f33_publish_health_coherence_fault_actions(void);
 void f33_publish_health_lifecycle_mode_indicator(void);
 void f33_publish_internal_source_observation_admission(void);
-void f33_publish_live_application_mode(ushort mode);
+undefined4 f33_publish_live_application_mode(ushort mode);
 void f33_publish_local_channel_a_monitor_status(uchar index,uint packed_status);
 void f33_publish_local_channel_b_monitor_status(uchar index,uint packed_status);
 void f33_publish_local_channel_monitor_actions_a(void);
@@ -17219,7 +17822,7 @@ void f33_report_scalar_event_d7_healthy_observed(void);
 uint f33_request_diagnostic_clear(void);
 void f33_request_direct_output_bank0(void);
 void f33_request_direct_output_bank1(void);
-void f33_request_foreground_restart_from_mode(void);
+int f33_request_foreground_restart_from_mode(void);
 uint f33_request_logical_controller_run_stop(uchar logical_controller,uchar requested_mode);
 void f33_request_mode700_initial_step(void);
 void f33_request_mode701_snapshot_unless_health_selected(void);
@@ -17255,8 +17858,8 @@ void f33_reset_command_status_bit_clear_b(void);
 void f33_reset_context_and_startup(void);
 void f33_reset_control_profile_interval(uchar slot);
 void f33_reset_coupled_sample_threshold_both(void);
-void f33_reset_current_source_coherence_observations(void);
-void f33_reset_health_record_lifecycle_entry(void);
+undefined4 f33_reset_current_source_coherence_observations(void);
+undefined4 f33_reset_health_record_lifecycle_entry(void);
 void f33_reset_latched_monitor(F33LatchedMonitorState *state);
 void f33_reset_latched_monitor_febe7040(void);
 void f33_reset_latched_monitor_febe7040_3b3c0(void);
@@ -18108,7 +18711,7 @@ void f33_run_init_chain_52de4(void);
 void f33_run_init_chain_5fa12(void);
 void f33_run_init_chain_60178(void);
 void f33_run_init_chain_60bda(undefined1 param_1);
-void f33_run_init_chain_632c8(void);
+undefined8 f33_run_init_chain_632c8(void);
 void f33_run_init_chain_6385c(void);
 void f33_run_init_chain_6484e(void);
 void f33_run_init_chain_664f6(void);
@@ -18256,7 +18859,7 @@ void f33_snapshot_initialized_control_publications(void);
 void f33_snapshot_local_status_link_flags(void);
 void f33_snapshot_monitor_inputs(void);
 void f33_snapshot_preserved_current_events(ushort *events);
-void f33_snapshot_retained_control_records(void);
+undefined4 f33_snapshot_retained_control_records(void);
 void f33_snapshot_retained_estimator_projection(void);
 void f33_spin_wait(uint outer_iterations);
 void f33_stage_absolute_limit_seeds(void);
@@ -18274,7 +18877,7 @@ void f33_stage_output_bank1_phase_mask(uchar mask);
 uint f33_stage_output_request_phase_masks(uint request);
 int f33_stage_pair_correction(uchar selector,short *values);
 void f33_stage_phase_output_history(void);
-void f33_stage_received_word_age_record13(void);
+uint f33_stage_received_word_age_record13(void);
 void f33_stage_record102_mode_write(uint encoded_mode);
 void f33_stage_record103_byte_write(uchar selector,uchar value);
 void f33_start_mode100_after_foreground_restart(void);
@@ -18578,69 +19181,69 @@ void thunk_FUN_00056c26(void);
 void thunk_FUN_00056cda(void);
 void thunk_FUN_00056e66(void);
 void thunk_FUN_00056f14(void);
-void thunk_FUN_0005889a(void);
-void thunk_FUN_000588b6(void);
-void thunk_FUN_00058c84(void);
-void thunk_FUN_0006163e(void);
-void thunk_FUN_00062e12(void);
+int thunk_FUN_0005889a(void);
+undefined4 thunk_FUN_000588b6(void);
+undefined1 thunk_FUN_00058c84(void);
+int thunk_FUN_0006163e(void);
+undefined4 thunk_FUN_00062e12(void);
 void thunk_FUN_00066ef4(void);
-void thunk_FUN_00066f84(void);
-void thunk_FUN_00066fba(void);
-void thunk_FUN_00066fd4(void);
+int thunk_FUN_00066f84(void);
+int thunk_FUN_00066fba(void);
+int thunk_FUN_00066fd4(void);
 void thunk_FUN_00068318(void);
 void thunk_FUN_0006a45e(void);
 void thunk_FUN_0006a4c4(void);
 void thunk_FUN_0007217e(void);
-void thunk_FUN_00072646(void);
-void thunk_FUN_0007275e(void);
-void thunk_FUN_000729c2(void);
+undefined4 thunk_FUN_00072646(void);
+undefined4 thunk_FUN_0007275e(void);
+undefined4 thunk_FUN_000729c2(void);
 void thunk_FUN_00072f84(void);
-void thunk_FUN_0007490e(void);
-void thunk_FUN_00074b3c(void);
-void thunk_FUN_00075376(void);
-void thunk_FUN_0007552e(void);
-void thunk_FUN_00075928(void);
-void thunk_FUN_00075ad8(void);
-void thunk_FUN_00075f1e(void);
-void thunk_FUN_000760c6(void);
-void thunk_FUN_000763a4(void);
+undefined4 thunk_FUN_0007490e(void);
+uint thunk_FUN_00074b3c(void);
+undefined4 thunk_FUN_00075376(void);
+undefined4 thunk_FUN_0007552e(void);
+undefined4 thunk_FUN_00075928(void);
+undefined4 thunk_FUN_00075ad8(void);
+undefined4 thunk_FUN_00075f1e(void);
+undefined4 thunk_FUN_000760c6(void);
+undefined4 thunk_FUN_000763a4(void);
 void thunk_FUN_000764c2(void);
-void thunk_FUN_00076688(void);
-void thunk_FUN_000766c6(void);
+undefined4 thunk_FUN_00076688(void);
+uchar thunk_FUN_000766c6(void);
 void thunk_FUN_00076782(void);
 void thunk_FUN_000772f8(void);
 void thunk_FUN_00077824(void);
 void thunk_FUN_00077df2(void);
-void thunk_FUN_00079432(void);
-void thunk_FUN_00079444(void);
+bool thunk_FUN_00079432(void);
+undefined4 thunk_FUN_00079444(void);
 void thunk_FUN_0007995c(void);
 void thunk_FUN_000799b0(void);
 void thunk_FUN_000799da(void);
 void thunk_FUN_00079d7a(void);
-void thunk_FUN_0007a2da(void);
+undefined4 thunk_FUN_0007a2da(void);
 void thunk_FUN_0007b3a6(void);
 void thunk_FUN_0007ef9c(void);
 void thunk_FUN_00082288(void);
-void thunk_FUN_0008228e(void);
+undefined4 thunk_FUN_0008228e(void);
 void thunk_FUN_00083f30(void);
 void thunk_FUN_0008583e(void);
-void thunk_FUN_0008844e(void);
-void thunk_FUN_000884ea(void);
-void thunk_FUN_000886e0(void);
+undefined4 thunk_FUN_0008844e(void);
+undefined4 thunk_FUN_000884ea(void);
+undefined4 thunk_FUN_000886e0(void);
 void thunk_FUN_0008b060(void);
 void thunk_FUN_0008b134(void);
 void thunk_FUN_0008b3d4(void);
 void thunk_FUN_0008d4ae(void);
 void thunk_FUN_0008e074(void);
 void thunk_FUN_0008ed14(void);
-void thunk_FUN_0008f2fc(void);
+int thunk_FUN_0008f2fc(void);
 void thunk_FUN_0008f3ca(void);
-void thunk_FUN_0008fa86(void);
+undefined4 thunk_FUN_0008fa86(void);
 void thunk_FUN_0009136c(void);
 void thunk_FUN_000935b6(void);
-void thunk_FUN_00093c60(void);
-void thunk_FUN_00093d9a(void);
-void thunk_FUN_00095500(void);
+ushort thunk_FUN_00093c60(void);
+undefined1 thunk_FUN_00093d9a(void);
+undefined4 thunk_FUN_00095500(void);
 void thunk_FUN_000b14d2(void);
 void thunk_FUN_000b15ac(void);
 void thunk_FUN_000b1c64(void);

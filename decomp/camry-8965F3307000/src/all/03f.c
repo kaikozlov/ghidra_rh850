@@ -684,11 +684,10 @@ void thunk_FUN_0004841e(void)
    exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
    machine-verified; target semantics not recovered. */
 
-void thunk_FUN_0005889a(void)
+int thunk_FUN_0005889a(void)
 
 {
-  FUN_0005889a();
-  return;
+  return FUN_0005889a();
 }
 
 
@@ -697,11 +696,10 @@ void thunk_FUN_0005889a(void)
    exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
    machine-verified; target semantics not recovered. */
 
-void thunk_FUN_000588b6(void)
+undefined4 thunk_FUN_000588b6(void)
 
 {
-  FUN_000588b6();
-  return;
+  return FUN_000588b6();
 }
 
 
@@ -710,11 +708,10 @@ void thunk_FUN_000588b6(void)
    exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
    machine-verified; target semantics not recovered. */
 
-void thunk_FUN_00058c84(void)
+undefined1 thunk_FUN_00058c84(void)
 
 {
-  FUN_00058c84();
-  return;
+  return FUN_00058c84();
 }
 
 
@@ -737,11 +734,10 @@ uint f33_query_application_nvm_readiness(void)
    exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
    machine-verified; target semantics not recovered. */
 
-void thunk_FUN_00066f84(void)
+int thunk_FUN_00066f84(void)
 
 {
-  FUN_00066f84();
-  return;
+  return FUN_00066f84();
 }
 
 
@@ -750,11 +746,10 @@ void thunk_FUN_00066f84(void)
    exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
    machine-verified; target semantics not recovered. */
 
-void thunk_FUN_00066fba(void)
+int thunk_FUN_00066fba(void)
 
 {
-  FUN_00066fba();
-  return;
+  return FUN_00066fba();
 }
 
 
@@ -777,11 +772,10 @@ uint f33_get_mode_restart_hardware_selector(void)
    exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
    machine-verified; target semantics not recovered. */
 
-void thunk_FUN_00066fd4(void)
+int thunk_FUN_00066fd4(void)
 
 {
-  FUN_00066fd4();
-  return;
+  return FUN_00066fd4();
 }
 
 
@@ -799,29 +793,26 @@ void thunk_FUN_00066ef4(void)
 
 
 
-void FUN_000ff09c(uint param_1,uint *param_2)
+uint FUN_000ff09c(uint param_1,uint *param_2)
 
 {
-  f33_nvm_set_record(param_1 & 0xffff,param_2);
-  return;
+  return f33_nvm_set_record(param_1 & 0xffff,param_2);
 }
 
 
 
-void FUN_000ff0b0(uint param_1,uint *param_2)
+uint32_t FUN_000ff0b0(uint param_1,uint *param_2)
 
 {
-  f33_nvm_get_record(param_1 & 0xffff, camry_host_addr(param_2));
-  return;
+  return f33_nvm_get_record(param_1 & 0xffff, camry_host_addr(param_2));
 }
 
 
 
-void FUN_000ff0c4(uint param_1)
+uint FUN_000ff0c4(uint param_1)
 
 {
-  f33_nvm_get_record_status(param_1 & 0xffff);
-  return;
+  return f33_nvm_get_record_status(param_1 & 0xffff);
 }
 
 
@@ -839,11 +830,10 @@ void FUN_000ff0d8(void)
    exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
    machine-verified; target semantics not recovered. */
 
-void thunk_FUN_0006163e(void)
+int thunk_FUN_0006163e(void)
 
 {
-  FUN_0006163e();
-  return;
+  return FUN_0006163e();
 }
 
 
@@ -879,11 +869,10 @@ void thunk_FUN_00035ad6(void)
    exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
    machine-verified; target semantics not recovered. */
 
-void thunk_FUN_00062e12(void)
+undefined4 thunk_FUN_00062e12(void)
 
 {
-  FUN_00062e12();
-  return;
+  return FUN_00062e12();
 }
 
 

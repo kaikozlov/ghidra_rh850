@@ -250,3 +250,237 @@ void f33_boot_ram_dispatch(int param_1)
 }
 
 
+
+void FUN_000084f8(uint param_1)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uint uVar3;
+  uint in_PSW;
+  uint in_FPEC;
+  uint in_RBASE;
+  uint in_FPIPR;
+  uint in_ISPR;
+  
+  if ((in_PSW & 0x20) == 0) {
+    __disable_irq();
+    __synchronize();
+    if ((in_FPEC & 1) != 0) {
+      uVar1 = in_FPIPR & 0x1f;
+      if (0xf < uVar1) {
+        uVar1 = 0x10;
+      }
+      uVar2 = uVar1;
+      if (0xf < uVar1) {
+        uVar2 = 0xf;
+      }
+      uVar3 = PMR;
+      if ((((uVar3 & 1 << uVar2) == 0) && ((in_ISPR & (1 << uVar1 + 1) - 1U & 0xffff) == 0)) &&
+         ((in_PSW & 0x80) == 0)) {
+        if (((in_PSW & 0xbfffffd0) >> 0xf & 1) == 0) {
+          param_1 = in_RBASE;
+        }
+        (*(int (*)())camry_host_ptr((uint32_t)((param_1 & 0xfffffe00) + 0x70)))();
+      }
+    }
+    __enable_irq();
+  }
+  else {
+    __synchronize();
+  }
+  return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x00008530) */
+
+void FUN_0000851c(int param_1)
+
+{
+  uint uVar1;
+  uint uVar2;
+  int iVar3;
+  undefined4 uVar4;
+  uint uVar5;
+  uint in_PSW;
+  uint in_FPEC;
+  uint in_RBASE;
+  uint in_EBASE;
+  uint in_FPIPR;
+  uint in_ISPR;
+  
+  iVar3 = PMR;
+  if (iVar3 - param_1 < 0 != (iVar3 < 0 != param_1 < 0 && param_1 < 0 == iVar3 - param_1 < 0)) {
+    if ((in_PSW & 0x20) == 0) {
+      __disable_irq();
+      PMR = param_1;
+      if ((in_FPEC & 1) != 0) {
+        uVar4 = PMR;
+      }
+      if ((in_FPEC & 1) != 0) {
+        uVar1 = in_FPIPR & 0x1f;
+        if (0xf < uVar1) {
+          uVar1 = 0x10;
+        }
+        uVar2 = uVar1;
+        if (0xf < uVar1) {
+          uVar2 = 0xf;
+        }
+        uVar5 = PMR;
+        if ((((uVar5 & 1 << uVar2) == 0) && ((in_ISPR & (1 << uVar1 + 1) - 1U & 0xffff) == 0)) &&
+           ((in_PSW & 0x80) == 0)) {
+          if (((in_PSW & 0xbfffffd0) >> 0xf & 1) == 0) {
+            in_EBASE = in_RBASE;
+          }
+          (*(int (*)())camry_host_ptr((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();
+        }
+      }
+      __enable_irq();
+    }
+    else {
+      PMR = param_1;
+      if ((in_FPEC & 1) != 0) {
+        uVar1 = in_FPIPR & 0x1f;
+        if (0xf < uVar1) {
+          uVar1 = 0x10;
+        }
+        uVar2 = uVar1;
+        if (0xf < uVar1) {
+          uVar2 = 0xf;
+        }
+        uVar5 = PMR;
+        if ((((uVar5 & 1 << uVar2) == 0) && ((in_ISPR & (1 << uVar1 + 1) - 1U & 0xffff) == 0)) &&
+           ((in_PSW & 0xa0) == 0)) {
+          if (((in_PSW & 0xbfffffb0) >> 0xf & 1) == 0) {
+            in_EBASE = in_RBASE;
+          }
+          (*(int (*)())camry_host_ptr((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();
+        }
+      }
+    }
+    __synchronize();
+  }
+  return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x0000854e) */
+
+void FUN_00008542(undefined4 param_1)
+
+{
+  uint uVar1;
+  uint uVar2;
+  undefined4 uVar3;
+  uint uVar4;
+  uint in_PSW;
+  uint in_FPEC;
+  uint in_RBASE;
+  uint in_EBASE;
+  uint in_FPIPR;
+  uint in_ISPR;
+  
+  if ((in_PSW >> 5 & 1) == 0) {
+    __disable_irq();
+    PMR = param_1;
+    if ((in_FPEC & 1) != 0) {
+      uVar3 = PMR;
+    }
+    if ((in_FPEC & 1) != 0) {
+      uVar1 = in_FPIPR & 0x1f;
+      if (0xf < uVar1) {
+        uVar1 = 0x10;
+      }
+      uVar2 = uVar1;
+      if (0xf < uVar1) {
+        uVar2 = 0xf;
+      }
+      uVar4 = PMR;
+      if ((((uVar4 & 1 << uVar2) == 0) && ((in_ISPR & (1 << uVar1 + 1) - 1U & 0xffff) == 0)) &&
+         ((in_PSW & 0x80) == 0)) {
+        if (((in_PSW & 0xbfffffd0) >> 0xf & 1) == 0) {
+          in_EBASE = in_RBASE;
+        }
+        (*(int (*)())camry_host_ptr((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();
+      }
+    }
+    __enable_irq();
+  }
+  else {
+    PMR = param_1;
+    if ((in_FPEC & 1) != 0) {
+      uVar1 = in_FPIPR & 0x1f;
+      if (0xf < uVar1) {
+        uVar1 = 0x10;
+      }
+      uVar2 = uVar1;
+      if (0xf < uVar1) {
+        uVar2 = 0xf;
+      }
+      uVar4 = PMR;
+      if ((((uVar4 & 1 << uVar2) == 0) && ((in_ISPR & (1 << uVar1 + 1) - 1U & 0xffff) == 0)) &&
+         ((in_PSW & 0xa0) == 0)) {
+        if (((in_PSW & 0xbfffffb0) >> 0xf & 1) == 0) {
+          in_EBASE = in_RBASE;
+        }
+        (*(int (*)())camry_host_ptr((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();
+      }
+    }
+  }
+  __synchronize();
+  return;
+}
+
+
+
+/* WARNING: This function may have set the stack pointer */
+/* WARNING: Removing unreachable block (ram,0x00009f28) */
+/* WARNING: Removing unreachable block (ram,0x00009f0a) */
+/* Assembly nonreturning application-to-boot context transfer,not a reset. Preserve r6
+   handoff-record pointer;DI,PMRFFFF,clear SEGFLAG/SEGADDR/SEGCONT atFFFEE982/988/980 (hardware
+   manual Table3.77); setPSW18020,EBASE1,INTBP0,SPFEBE8000,GPFEBF9800,TP869C,MPM0,then148E. Does not
+   run1404 RAM sweeps or119E application validation. Parent65F5E suppliesROM31788. Ordinary
+   return/stack assumptions are invalid. Assembly nonreturning application-to-boot context transfer,
+   not reset. Preserve r6 record pointer; DI/PMRFFFF, clear SEGFLAG/SEGADDR/SEGCONT
+   atFFFEE982/988/980 (P1M-E manual Table3.77), then
+   PSW18020/EBASE1/INTBP0/SPFEBE8000/GPFEBF9800/TP869C/MPM0 and148E. No1404 RAM sweeps or119E
+   validation. Native prefix reaches the unmodeled SEGFLAG write at9F16; subsequent handoff remains
+   static reconstruction. */
+
+void f33_application_transfer_to_boot_context(uint *handoff_record)
+
+{
+  undefined4 uVar1;
+  undefined2 uVar2;
+  uint in_FPEC;
+  
+  __disable_irq();
+  PMR = 0xffff;
+  if ((in_FPEC & 1) != 0) {
+    uVar1 = PMR;
+  }
+  __synchronize();
+  Ramfffee982 = 0;
+  Ramfffee988 = 0;
+  Ramfffee980 = 0;
+  uVar2 = Ramfffee980;
+  __synchronize();
+  __synchronize();
+  if ((in_FPEC & 1) != 0) {
+    uVar1 = PMR;
+  }
+  __synchronize();
+  __synchronize();
+  __synchronize();
+  __synchronize();
+  __synchronize();
+  f33_boot_resident_enter_with_record(handoff_record);
+  do {
+                    /* WARNING: Do nothing block with infinite loop */
+  } while( true );
+}
+
+

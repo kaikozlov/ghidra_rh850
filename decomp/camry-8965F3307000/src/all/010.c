@@ -4107,6 +4107,28 @@ void f33_reset_windowed_monitor_febe7844_42c9a(void)
 
 
 
+void FUN_00042caa(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_0002bbfc == 'Z') {
+    f33_reset_windowed_monitor((F33WindowedMonitorState *)((undefined *)camry_host_ptr(0xfebe7844u)));
+  }
+  else if (((DAT_febe71ec & 1) == 0) && (DAT_febeeb85 == 'Z')) {
+    f33_step_windowed_monitor
+              ((F33WindowedMonitorState *)((undefined *)camry_host_ptr(0xfebe7844u)),(F33WindowedMonitorLimits *)((undefined *)camry_host_ptr(0x2b806u)),
+               (F33TwoSidedMonitorCallbacks *)&PTR_f33_classify_channel_sample_sum_a_00028648);
+  }
+  else {
+    FUN_0006ae48(((undefined *)camry_host_ptr(0xfebe7844u)), ((ushort *)camry_host_ptr((uint32_t)(0x2b806))));
+  }
+  f33_set_channel_monitor_status_a(3,(uchar)(*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + -0x3fbc)))));
+  return;
+}
+
+
+
 /* f33_report_diagnostic_healthy_observed(0x41); whole-body shape-verified. The literal is the
    encoded diagnostic event, not a recovered OEM name. */
 
@@ -5429,6 +5451,28 @@ void f33_reset_windowed_monitor_febe7954_43c5e(void)
 
 {
   f33_reset_windowed_monitor((F33WindowedMonitorState *)((undefined *)camry_host_ptr(0xfebe7954u)));
+  return;
+}
+
+
+
+void FUN_00043c6e(void)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0xfebeb800u;
+  if (DAT_0002bc18 == 'Z') {
+    f33_reset_windowed_monitor((F33WindowedMonitorState *)((undefined *)camry_host_ptr(0xfebe7954u)));
+  }
+  else if (((DAT_febe71ec >> 1 & 1) == 0) && (DAT_febeeb85 == 'Z')) {
+    f33_step_windowed_monitor
+              ((F33WindowedMonitorState *)((undefined *)camry_host_ptr(0xfebe7954u)),(F33WindowedMonitorLimits *)((undefined *)camry_host_ptr(0x2b876u)),
+               (F33TwoSidedMonitorCallbacks *)&PTR_f33_classify_channel_sample_sum_b_000287bc);
+  }
+  else {
+    FUN_0006ae48(((undefined *)camry_host_ptr(0xfebe7954u)), ((ushort *)camry_host_ptr((uint32_t)(0x2b876))));
+  }
+  f33_set_channel_monitor_status_b(3,(uchar)(*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + -0x3eac)))));
   return;
 }
 

@@ -393,7 +393,7 @@ void f33_publish_thermal_reference_record(void)
 
 
 
-void FUN_0004841e(void)
+uint FUN_0004841e(void)
 
 {
   undefined2 local_c;
@@ -403,8 +403,7 @@ void FUN_0004841e(void)
   local_c = 32000;
   uStack_a = 32000;
   uStack_8 = 0;
-  f33_nvm_set_record(5,(uint *)&local_c);
-  return;
+  return f33_nvm_set_record(5,(uint *)&local_c);
 }
 
 
@@ -2471,6 +2470,30 @@ LAB_00049a1c:
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe7f2eu + (uint32_t)(uVar2) * 1u)))) = cVar7;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe7f30u + (uint32_t)(uVar2) * 1u)))) = uVar5;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe7f2cu + (uint32_t)(uVar2) * 1u)))) = uVar4;
+  return;
+}
+
+
+
+void FUN_00049a48(uint param_1)
+
+{
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe7f35u + (uint32_t)(param_1 & 0xff) * 1u)))) != '\"') {
+    FUN_0007bc56((uint)(byte)param_1);
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe7f35u + (uint32_t)(param_1 & 0xff) * 1u)))) = 0x22;
+  return;
+}
+
+
+
+void FUN_00049a70(uint param_1)
+
+{
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe7f35u + (uint32_t)(param_1 & 0xff) * 1u)))) != '\x11') {
+    FUN_0007bc8a((uint)(byte)param_1);
+  }
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe7f35u + (uint32_t)(param_1 & 0xff) * 1u)))) = 0x11;
   return;
 }
 

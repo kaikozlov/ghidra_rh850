@@ -471,6 +471,76 @@ void f33_crypto_bank_reset_configured_profiles(void)
 
 
 
+/* Initialize verification result1. Only ROM30D67==5A enters fixed-vector command7 sequence, with
+   explicit interrupt/priority handling. Exact gate0 skips hardware work and reports result==0
+   through8EE16(FF). Not an established key-validity proof. */
+
+uint f33_crypto_bank_run_startup_verification(void)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uint32_t puVar3;
+  int iVar4;
+  undefined4 uVar5;
+  uint in_PSW;
+  uint uVar6;
+  uint in_FPEC;
+  uint in_RBASE;
+  uint in_EBASE;
+  uint in_FPIPR;
+  uint in_ISPR;
+  char cStack_21;
+  undefined4 uStack_20;
+  undefined1 uStack_1c;
+  
+  puVar3 = 0x23dfcu;
+  cStack_21 = '\x01';
+  uVar6 = in_PSW & 0xfffffff0 | (uint)(f33_crypto_config_fixed_verification_enable == 'Z');
+  if ((bool)((byte)uVar6 & 1)) {
+    iVar4 = FUN_00089c5a(0, camry_host_addr(((undefined *)camry_host_ptr(0x21604u))));
+    uVar6 = uVar6 & 0xfffffff0 | (uint)(iVar4 == 0);
+    if ((bool)((byte)uVar6 & 1)) {
+      iVar4 = FUN_00089c8c(iVar4, camry_host_addr(((undefined *)camry_host_ptr((uint32_t)(puVar3 + -0x2818)))),  0x10);
+      uVar6 = uVar6 & 0xfffffff0 | (uint)(iVar4 == 0);
+      if ((bool)((byte)uVar6 & 1)) {
+        uVar5 = FUN_000701a0();
+        f33_priority_mask_restore(0);
+        if ((in_FPEC & 1) != 0) {
+          in_FPIPR = in_FPIPR & 0x1f;
+          if (0xf < in_FPIPR) {
+            in_FPIPR = 0x10;
+          }
+          uVar1 = in_FPIPR;
+          if (0xf < in_FPIPR) {
+            uVar1 = 0xf;
+          }
+          uVar2 = PMR;
+          if ((((uVar2 & 1 << uVar1) == 0) && ((in_ISPR & (1 << in_FPIPR + 1) - 1U & 0xffff) == 0))
+             && ((uVar6 & 0x80) == 0)) {
+            if (((uVar6 & 0xbfffffdf) >> 0xf & 1) == 0) {
+              in_EBASE = in_RBASE;
+            }
+            (*(int (*)())camry_host_ptr((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();
+          }
+        }
+        __enable_irq();
+        iVar4 = FUN_00089c98(0, camry_host_addr(((undefined *)camry_host_ptr((uint32_t)(puVar3 + -0x2808)))),  0x10, camry_host_addr(&cStack_21));
+        __disable_irq();
+        FUN_000701a6(uVar5);
+        if (iVar4 == 0) goto LAB_000691fe;
+      }
+    }
+    cStack_21 = '\x01';
+  }
+LAB_000691fe:
+  uStack_20 = 1;
+  uStack_1c = cStack_21 == '\0';
+  return FUN_0008ee16(0xff, camry_host_addr(&uStack_20));
+}
+
+
+
 /* Run startup verification publication then clear accumulated observation count505C. Exact gate0
    does not issue a crypto command. */
 
@@ -534,7 +604,7 @@ void f33_crypto_bank_advance_profile_qualification(void)
 /* Pass record{word1,byte(result509D==0)} to initialized SecOC API8EE16 with IDFF. Boolean
    publication is separate from ICU-S command completion. */
 
-void f33_crypto_bank_publish_verification_result(void)
+uint f33_crypto_bank_publish_verification_result(void)
 
 {
   undefined4 local_18;
@@ -542,8 +612,7 @@ void f33_crypto_bank_publish_verification_result(void)
   
   local_18 = 1;
   uStack_14 = f33_crypto_verification_result == '\0';
-  FUN_0008ee16(0xff, camry_host_addr(&local_18));
-  return;
+  return FUN_0008ee16(0xff, camry_host_addr(&local_18));
 }
 
 

@@ -4127,11 +4127,10 @@ void f33_boot_transport_response_complete(ushort channel,uchar status)
 /* SID34 optional-transform setup forwards70D4; derives image key and resets BOTH CBC/CMAC contexts.
     */
 
-void f33_boot_transfer_crypto_initialize(void)
+uint f33_boot_transfer_crypto_initialize(void)
 
 {
-  f33_boot_image_crypto_initialize();
-  return;
+  return f33_boot_image_crypto_initialize();
 }
 
 
@@ -4377,11 +4376,10 @@ void FUN_00006ea2(void)
 /* Routine CRC-success path initializes image key/BOTH CBC-CMAC contexts via70D4 before
    authentication submission. */
 
-void f33_boot_authentication_crypto_initialize(void)
+uint f33_boot_authentication_crypto_initialize(void)
 
 {
-  f33_boot_image_crypto_initialize();
-  return;
+  return f33_boot_image_crypto_initialize();
 }
 
 
@@ -4537,7 +4535,7 @@ void f33_boot_image_derive_key(void)
 /* Initialize CBC2EF0 with derived key2D18/IV2CF8; initialize CMAC2C00 same key with zero chain then
    derive CMAC subkeys. Wrapper ignores all statuses. Does not consume authentication prefix yet. */
 
-void f33_boot_image_initialize_contexts(void)
+uint f33_boot_image_initialize_contexts(void)
 
 {
   uint32_t puVar1;
@@ -4546,8 +4544,7 @@ void f33_boot_image_initialize_contexts(void)
             (f33_boot_image_derived_key, '\x10', f33_boot_image_iv_and_authentication_prefix, '\x10', ((F33BootAes128CbcContext *)camry_host_ptr((uint32_t)((0xfebf2ef0u)))));
   f33_boot_aes128_cmac_initialize
             (f33_boot_image_derived_key,'\x10',((F33BootAes128CmacContext *)camry_host_ptr((uint32_t)(puVar1 + -0x6c00))));
-  f33_boot_aes128_cmac_derive_subkeys(((F33BootAes128CmacContext *)camry_host_ptr((uint32_t)(puVar1 + -0x6c00))));
-  return;
+  return f33_boot_aes128_cmac_derive_subkeys(((F33BootAes128CmacContext *)camry_host_ptr((uint32_t)(puVar1 + -0x6c00))));
 }
 
 
@@ -4555,12 +4552,11 @@ void f33_boot_image_initialize_contexts(void)
 /* Derive image key7068 then initialize both CBC/CMAC709A. Reinitializes shared image contexts, not
    a per-transfer-chunk action. */
 
-void f33_boot_image_crypto_initialize(void)
+uint f33_boot_image_crypto_initialize(void)
 
 {
   f33_boot_image_derive_key();
-  f33_boot_image_initialize_contexts();
-  return;
+  return f33_boot_image_initialize_contexts();
 }
 
 
@@ -4661,6 +4657,148 @@ void FUN_00007208(int param_1)
 
 
 
+/* WARNING: Removing unreachable block (ram,0x00007232) */
+
+void FUN_0000721e(int param_1)
+
+{
+  uint uVar1;
+  uint uVar2;
+  int iVar3;
+  undefined4 uVar4;
+  uint uVar5;
+  uint in_PSW;
+  uint in_FPEC;
+  uint in_RBASE;
+  uint in_EBASE;
+  uint in_FPIPR;
+  uint in_ISPR;
+  
+  iVar3 = PMR;
+  if (iVar3 - param_1 < 0 != (iVar3 < 0 != param_1 < 0 && param_1 < 0 == iVar3 - param_1 < 0)) {
+    if ((in_PSW & 0x20) == 0) {
+      __disable_irq();
+      PMR = param_1;
+      if ((in_FPEC & 1) != 0) {
+        uVar4 = PMR;
+      }
+      if ((in_FPEC & 1) != 0) {
+        uVar1 = in_FPIPR & 0x1f;
+        if (0xf < uVar1) {
+          uVar1 = 0x10;
+        }
+        uVar2 = uVar1;
+        if (0xf < uVar1) {
+          uVar2 = 0xf;
+        }
+        uVar5 = PMR;
+        if ((((uVar5 & 1 << uVar2) == 0) && ((in_ISPR & (1 << uVar1 + 1) - 1U & 0xffff) == 0)) &&
+           ((in_PSW & 0x80) == 0)) {
+          if (((in_PSW & 0xbfffffd0) >> 0xf & 1) == 0) {
+            in_EBASE = in_RBASE;
+          }
+          (*(int (*)())camry_host_ptr((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();
+        }
+      }
+      __enable_irq();
+    }
+    else {
+      PMR = param_1;
+      if ((in_FPEC & 1) != 0) {
+        uVar1 = in_FPIPR & 0x1f;
+        if (0xf < uVar1) {
+          uVar1 = 0x10;
+        }
+        uVar2 = uVar1;
+        if (0xf < uVar1) {
+          uVar2 = 0xf;
+        }
+        uVar5 = PMR;
+        if ((((uVar5 & 1 << uVar2) == 0) && ((in_ISPR & (1 << uVar1 + 1) - 1U & 0xffff) == 0)) &&
+           ((in_PSW & 0xa0) == 0)) {
+          if (((in_PSW & 0xbfffffb0) >> 0xf & 1) == 0) {
+            in_EBASE = in_RBASE;
+          }
+          (*(int (*)())camry_host_ptr((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();
+        }
+      }
+    }
+    __synchronize();
+  }
+  return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x00007250) */
+
+void FUN_00007244(undefined4 param_1)
+
+{
+  uint uVar1;
+  uint uVar2;
+  undefined4 uVar3;
+  uint uVar4;
+  uint in_PSW;
+  uint in_FPEC;
+  uint in_RBASE;
+  uint in_EBASE;
+  uint in_FPIPR;
+  uint in_ISPR;
+  
+  if ((in_PSW >> 5 & 1) == 0) {
+    __disable_irq();
+    PMR = param_1;
+    if ((in_FPEC & 1) != 0) {
+      uVar3 = PMR;
+    }
+    if ((in_FPEC & 1) != 0) {
+      uVar1 = in_FPIPR & 0x1f;
+      if (0xf < uVar1) {
+        uVar1 = 0x10;
+      }
+      uVar2 = uVar1;
+      if (0xf < uVar1) {
+        uVar2 = 0xf;
+      }
+      uVar4 = PMR;
+      if ((((uVar4 & 1 << uVar2) == 0) && ((in_ISPR & (1 << uVar1 + 1) - 1U & 0xffff) == 0)) &&
+         ((in_PSW & 0x80) == 0)) {
+        if (((in_PSW & 0xbfffffd0) >> 0xf & 1) == 0) {
+          in_EBASE = in_RBASE;
+        }
+        (*(int (*)())camry_host_ptr((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();
+      }
+    }
+    __enable_irq();
+  }
+  else {
+    PMR = param_1;
+    if ((in_FPEC & 1) != 0) {
+      uVar1 = in_FPIPR & 0x1f;
+      if (0xf < uVar1) {
+        uVar1 = 0x10;
+      }
+      uVar2 = uVar1;
+      if (0xf < uVar1) {
+        uVar2 = 0xf;
+      }
+      uVar4 = PMR;
+      if ((((uVar4 & 1 << uVar2) == 0) && ((in_ISPR & (1 << uVar1 + 1) - 1U & 0xffff) == 0)) &&
+         ((in_PSW & 0xa0) == 0)) {
+        if (((in_PSW & 0xbfffffb0) >> 0xf & 1) == 0) {
+          in_EBASE = in_RBASE;
+        }
+        (*(int (*)())camry_host_ptr((uint32_t)((in_EBASE & 0xfffffe00) + 0x70)))();
+      }
+    }
+  }
+  __synchronize();
+  return;
+}
+
+
+
 char FUN_00007262(char param_1)
 
 {
@@ -4756,6 +4894,72 @@ void f33_boot_security_clear_candidate_context(F33BootAes128CtrContext *context)
 {
   f33_boot_aes128_ctr_clear(context);
   return;
+}
+
+
+
+/* SoftwareAES128singleblock:requirelength16andcontext.valid1;row-orientedstateat+B0,10rounds,noMixColumnsinlastround,outputstandardcolumnorder.Return0success,FFinvalid.Exact-leaflive-registerpreservation
+   matters:7B42callswithr8=16/r9contextalreadylive. Native AES known-answer and protocol-state cases
+   use explicit RAM. Service paths stop at674A before response/timer completion; direct session
+   invalidation cases return. No complete unlock or entropy claim. */
+
+uint f33_boot_aes128_encrypt_block
+               (uchar *plaintext,uchar *ciphertext,uchar length,F33BootAes128Context *context)
+
+{
+  byte bVar1;
+  uint uVar2;
+  
+  if ((length == '\x10') && (context->valid == '\x01')) {
+    context->round = '\0';
+    context->row_order_state[0] = *plaintext;
+    context->row_order_state[4] = plaintext[1];
+    context->row_order_state[8] = plaintext[2];
+    context->row_order_state[0xc] = plaintext[3];
+    context->row_order_state[1] = plaintext[4];
+    context->row_order_state[5] = plaintext[5];
+    context->row_order_state[9] = plaintext[6];
+    context->row_order_state[0xd] = plaintext[7];
+    context->row_order_state[2] = plaintext[8];
+    context->row_order_state[6] = plaintext[9];
+    context->row_order_state[10] = plaintext[10];
+    context->row_order_state[0xe] = plaintext[0xb];
+    context->row_order_state[3] = plaintext[0xc];
+    context->row_order_state[7] = plaintext[0xd];
+    context->row_order_state[0xb] = plaintext[0xe];
+    context->row_order_state[0xf] = plaintext[0xf];
+    while( true ) {
+      FUN_000076da(camry_host_addr(context));
+      bVar1 = context->round + 1;
+      context->round = bVar1;
+      FUN_000077a8(camry_host_addr(context));
+      FUN_0000786e(camry_host_addr(context));
+      if (9 < bVar1) break;
+      FUN_00007896(camry_host_addr(context));
+    }
+    FUN_000076da(camry_host_addr(context));
+    uVar2 = 0;
+    *ciphertext = context->row_order_state[0];
+    ciphertext[1] = context->row_order_state[4];
+    ciphertext[2] = context->row_order_state[8];
+    ciphertext[3] = context->row_order_state[0xc];
+    ciphertext[4] = context->row_order_state[1];
+    ciphertext[5] = context->row_order_state[5];
+    ciphertext[6] = context->row_order_state[9];
+    ciphertext[7] = context->row_order_state[0xd];
+    ciphertext[8] = context->row_order_state[2];
+    ciphertext[9] = context->row_order_state[6];
+    ciphertext[10] = context->row_order_state[10];
+    ciphertext[0xb] = context->row_order_state[0xe];
+    ciphertext[0xc] = context->row_order_state[3];
+    ciphertext[0xd] = context->row_order_state[7];
+    ciphertext[0xe] = context->row_order_state[0xb];
+    ciphertext[0xf] = context->row_order_state[0xf];
+  }
+  else {
+    uVar2 = 0xff;
+  }
+  return uVar2;
 }
 
 
