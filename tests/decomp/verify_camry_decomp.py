@@ -70,6 +70,8 @@ VALUE_RETURN = {
     "f33_nvm_check_family2_rom_crc",
     "f33_nvm_get_family2_rom_record",
     "f33_nvm_get_record",
+    "f33_nvm_refresh_family2_record_status",
+    "f33_restore_learned_quad",
 }
 
 DCRA1_BASE = 0xFFD51000
@@ -78,6 +80,7 @@ DCRA_CALLS = {
     "f33_dcra1_crc_raw_words",
     "f33_nvm_check_family2_rom_crc",
     "f33_nvm_get_family2_rom_record",
+    "f33_nvm_refresh_family2_record_status",
 }
 
 ROM_TABLES = (
@@ -256,6 +259,12 @@ def bind(library: ctypes.CDLL) -> None:
     library.f33_nvm_get_family2_rom_record.restype = u32
     library.f33_nvm_get_record.argtypes = [u32, u32]
     library.f33_nvm_get_record.restype = u32
+    library.f33_nvm_refresh_family2_record_status.argtypes = [u32]
+    library.f33_nvm_refresh_family2_record_status.restype = u32
+    library.f33_publish_learned_quad.argtypes = []
+    library.f33_publish_learned_quad.restype = None
+    library.f33_restore_learned_quad.argtypes = []
+    library.f33_restore_learned_quad.restype = u32
     library.f33_curve16_interpolate_with_slope.argtypes = [u32, u32, u32]
     library.f33_curve16_interpolate_with_slope.restype = u32
     library.f33_update_thermal_release_envelope.argtypes = []
@@ -404,6 +413,7 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
     r9 = int(registers.get("r9", "0"), 16)
     ctypes.c_uint32.in_dll(library, "camry_gp").value = int(registers.get("gp", "0"), 16) & 0xFFFFFFFF
     ctypes.c_uint32.in_dll(library, "camry_tp").value = int(registers.get("tp", "0"), 16) & 0xFFFFFFFF
+    ctypes.c_uint32.in_dll(library, "camry_sp").value = int(registers.get("sp", "0"), 16) & 0xFFFFFFFF
     u8p = ctypes.POINTER(ctypes.c_uint8)
     u32p = ctypes.POINTER(ctypes.c_uint32)
     if name == "f33_memcpy_forward":
@@ -561,6 +571,11 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
         return int(library.f33_nvm_get_family2_rom_record(r6, r7)) & 0xFFFFFFFF
     if name == "f33_nvm_get_record":
         return int(library.f33_nvm_get_record(r6, r7)) & 0xFFFFFFFF
+    if name == "f33_publish_learned_quad":
+        library.f33_publish_learned_quad()
+        return None
+    if name == "f33_restore_learned_quad":
+        return int(library.f33_restore_learned_quad()) & 0xFFFFFFFF
     if name == "f33_curve16_interpolate_with_slope":
         return int(library.f33_curve16_interpolate_with_slope(r6, r7, r8)) & 0xFFFFFFFF
     if name == "f33_force_unconfirmed_terminal_monitor_healthy":

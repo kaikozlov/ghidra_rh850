@@ -9,6 +9,7 @@
 
 uint32_t camry_gp;
 uint32_t camry_tp;
+uint32_t camry_sp;
 
 void f33_pwm_initialize_compare_stages(uint32_t compare) {
     uint32_t value = compare & 0xffffu;
@@ -428,6 +429,22 @@ uint32_t f33_nvm_get_record(uint32_t selector, uint32_t destination) {
     if (family == 0x200u)
         return f33_nvm_get_family2_rom_record(object, destination);
     return 0xffu;
+}
+
+uint32_t f33_nvm_refresh_family2_record_status(uint32_t object) {
+    uint32_t index = object & 0xffffu;
+    uint32_t residue;
+    if (index >= camry_read16((3u << 16) - 21132u))
+        return 0u;
+    residue = f33_nvm_check_family2_rom_crc(index);
+    if (residue != 0x10u)
+        residue = f33_nvm_check_family2_rom_crc(index);
+    f33_publish_redundant_u8(
+        residue,
+        camry_gp + index + 20048u,
+        camry_gp + index + 22680u,
+        camry_gp + index + 22716u);
+    return 1u;
 }
 
 void f33_nvm_initialize_family1_application(void) {
@@ -1210,6 +1227,33 @@ uint32_t f33_check_learned_quad_bounds(void) {
         || third > upper_b || third < lower_b || fourth > upper_b || fourth < lower_b)
         return 0x5au;
     return 0;
+}
+
+void f33_publish_learned_quad(void) {
+    uint32_t buffer = camry_sp - 16u;
+    uint32_t source = camry_tp - 11564u;
+    uint32_t offset;
+    uint32_t status;
+    for (offset = 0u; offset < 16u; offset += 4u)
+        camry_write32(buffer + offset, camry_read32(source + offset));
+    status = f33_nvm_get_record(0x100u, buffer);
+    if (status != 0x10u)
+        return;
+    camry_write16(camry_gp - 19738u, camry_read16(buffer + 4u));
+    camry_write16(camry_gp - 19736u, camry_read16(buffer + 6u));
+    camry_write16(camry_gp - 19734u, camry_read16(buffer + 8u));
+    camry_write16(camry_gp - 19732u, camry_read16(buffer + 10u));
+}
+
+uint32_t f33_restore_learned_quad(void) {
+    uint32_t buffer = camry_sp - 16u;
+    uint32_t status = f33_nvm_get_record(0x100u, buffer);
+    if (status == 0x10u && camry_read32(buffer) == 0xa55a5aa5u) {
+        f33_publish_learned_quad();
+        if (f33_check_learned_quad_bounds() == 0u)
+            return 0xa55a5aa5u;
+    }
+    return 0x5aa5a55au;
 }
 
 static uint32_t f33_nvm_family0_request_full(uint32_t producer, uint32_t consumer) {

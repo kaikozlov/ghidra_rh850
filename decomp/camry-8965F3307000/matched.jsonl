@@ -75,3 +75,6 @@
 {"addr": "0x67090", "name": "f33_nvm_check_family2_rom_crc", "status": "equivalent"}
 {"addr": "0x67208", "name": "f33_nvm_get_family2_rom_record", "status": "equivalent"}
 {"addr": "0x66dfc", "name": "f33_nvm_get_record", "status": "equivalent"}
+{"addr": "0x6712c", "name": "f33_nvm_refresh_family2_record_status", "status": "equivalent"}
+{"addr": "0x355f6", "name": "f33_publish_learned_quad", "status": "equivalent"}
+{"addr": "0x3584a", "name": "f33_restore_learned_quad", "status": "equivalent"}

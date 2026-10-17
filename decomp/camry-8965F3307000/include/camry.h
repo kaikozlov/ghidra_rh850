@@ -5,8 +5,8 @@
 /* Camry 8965F3307000 application prototypes. A function lives here once its
  * C is checked against the original bytes. Names are the symbol-map names.
  *
- * camry_read/camry_write are the absolute 32-bit address space. camry_gp and
- * camry_tp are the ABI gp and tp registers.
+ * camry_read/camry_write are the absolute 32-bit address space. camry_gp,
+ * camry_tp, and camry_sp are the ABI gp, tp, and entry sp registers.
  */
 
 #ifdef CAMRY_HOST
@@ -84,6 +84,9 @@ uint32_t f33_dcra1_crc_raw_words(uint32_t source, uint32_t byte_count, uint32_t 
 uint32_t f33_nvm_check_family2_rom_crc(uint32_t group);
 uint32_t f33_nvm_get_family2_rom_record(uint32_t object, uint32_t destination);
 uint32_t f33_nvm_get_record(uint32_t selector, uint32_t destination);
+uint32_t f33_nvm_refresh_family2_record_status(uint32_t object);
+void f33_publish_learned_quad(void);
+uint32_t f33_restore_learned_quad(void);
 void f33_nvm_initialize_family1_application(void);
 void f33_nvm_publish_logical_result(uint32_t logical_handle, uint32_t operation, uint32_t result);
 uint32_t f33_read_repair_redundant_u8(
