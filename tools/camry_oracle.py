@@ -105,7 +105,7 @@ REASONS = {
     "host-link": "the converted closure calls a function that has no body and no prototype, so the host library cannot link it",
     "host-compile": "the converted body does not compile in the host check",
     "trace-cap": "the machine stopped recording memory accesses at 4096, so the write set is incomplete",
-    "dropped-return": "this function writes r10 and the converted C is void; a callee's leftover r10 is not a return",
+    "dropped-return": "a caller reads r10 after this call and the converted C is void",
     "invented-return": "the bytes leave the incoming r10 alone and the converted C returns a value",
     "return-mismatch": "the host return does not equal the original r10",
     "memory-mismatch": "a caller-visible memory write differs",
@@ -1463,12 +1463,16 @@ def _host_child(library: ctypes.CDLL, planned: Planned, scenario: dict, code: by
             if returned is None:
                 raise Harness("dropped-return")
             if returned != expected:
-                raise Harness("return-mismatch")
+                raise Harness("return-mismatch", f"host {returned:#x} bytes {expected:#x}")
         elif check.get("kind") == "memory":
             address = int(check["address"], 16)
             size = int(check["size"])
-            if read_regions(images, address, size).hex() != check["equals_hex"]:
-                raise Harness("memory-mismatch")
+            actual = read_regions(images, address, size).hex()
+            if actual != check["equals_hex"]:
+                raise Harness(
+                    "memory-mismatch",
+                    f"{address:#x} host {actual} bytes {check['equals_hex']}",
+                )
     covered = []
     for check in scenario["checks"]:
         if check.get("kind") != "memory":
@@ -1482,7 +1486,7 @@ def _host_child(library: ctypes.CDLL, planned: Planned, scenario: dict, code: by
             address = base + offset
             if any(start <= address < end for start, end in covered):
                 continue
-            raise Harness("memory-mismatch")
+            raise Harness("memory-mismatch", f"{address:#x} extra {new:02x} was {old:02x}")
 
 
 def _host_compare(
@@ -1502,7 +1506,7 @@ def _host_compare(
         try:
             _host_child(library, planned, scenario, code)
         except Harness as exc:
-            os.write(write_fd, exc.kind.encode())
+            os.write(write_fd, f"{exc.kind} {exc.detail}".encode()[:400])
             os._exit(1)
         except BaseException as exc:
             os.write(write_fd, str(exc).encode()[:400])
@@ -1516,6 +1520,8 @@ def _host_compare(
         return None
     for kind in FAIL_KINDS:
         if kind in detail:
+            if kind in {"memory-mismatch", "return-mismatch"}:
+                print(f"disagree {kind} {planned.name} {detail[:180]}", flush=True)
             return kind
     if "unmapped" in detail or "outside" in detail:
         return "host-unmapped"
@@ -1824,6 +1830,8 @@ def run_oracles() -> int:
         fn = walk_symbol(code, row)
         if fn is not None:
             functions[fn.entry] = fn
+    global _CONSUMED_RETURNS
+    _CONSUMED_RETURNS = _returns_read_by_callers(functions)
     machine = _Machine(code, data, data_base, functions)
     counts: Counter[str] = Counter()
     examples: dict[str, str] = {}
@@ -2099,6 +2107,8 @@ def run_oracles() -> int:
                     if kind is None and useful_oracle(final):
                         saved.append(final)
                 if kind is not None:
+                    if kind == "dropped-return":
+                        print(f"disagree dropped-return {item.name} {item.address:#x}", flush=True)
                     reject(kind, item.name, address=item.address)
                     if kind in FAIL_KINDS:
                         fail += 1
@@ -2156,6 +2166,74 @@ def run_oracles() -> int:
     return 0
 
 
+_R10_DEST = {
+    "mov", "movi", "movea", "movhi", "add", "sub", "subr", "or", "xor", "and", "not",
+    "addi", "addi_imm5", "ld8s", "ld8u", "ld16s", "ld16u", "ld32",
+    "mul", "mulh", "mulhi", "muli", "mului", "div3", "divh2",
+    "shl_imm", "shr", "sar", "shr_reg", "sar_reg", "shl_reg",
+    "satadd", "satsub", "satsubr", "sataddi", "satsubi", "satadd3", "satsub3",
+    "cmov", "adf", "sbf",
+}
+_R10_UPDATE = {"addi_imm5", "sxh", "zxh", "sxb", "zxb", "shr", "sar", "shl_imm"}
+_CONSUMED_RETURNS: set[int] = set()
+
+
+# The last operand is an immediate, not a register. A displacement of 10 is not r10.
+_IMM_TAIL = {
+    "ld8s", "ld8u", "ld16s", "ld16u", "ld32",
+    "st8", "st16", "st32",
+    "addi", "cmpi", "movi", "movea", "movhi",
+    "mulhi", "muli", "mului", "addi_imm5", "shl_imm", "shr", "sar",
+    "sataddi", "satsubi",
+}
+
+
+def _reg_args(op: str, args: list) -> list:
+    if op in _IMM_TAIL and args:
+        return list(args[:-1])
+    return list(args)
+
+
+def _r10_effects(inst: Inst) -> tuple[bool, bool]:
+    """Whether this instruction reads r10 and whether it writes r10."""
+    if inst.kind in {"jarl", "jarl_ind"} and inst.link == 10:
+        return False, True
+    parsed = _stmt_parts(inst.stmt) if inst.stmt else None
+    if parsed is None:
+        return False, False
+    op, args = parsed
+    regs = [arg for arg in _reg_args(op, args) if arg is not None]
+    if op in {"cmp", "cmpi", "tst"}:
+        return 10 in regs, False
+    if op in {"st8", "st16", "st32", "set1", "not1", "clr1", "tst1"}:
+        return bool(regs) and regs[0] == 10, False
+    if op in _R10_UPDATE and regs and regs[0] == 10:
+        return True, True
+    if op in _R10_DEST and regs and regs[0] == 10:
+        return 10 in regs[1:], True
+    if op in _R10_DEST:
+        return 10 in regs[1:], False
+    return False, False
+
+
+def _returns_read_by_callers(functions: dict[int, object]) -> set[int]:
+    """Entries whose r10 a direct caller reads before replacing it."""
+    consumed: set[int] = set()
+    for fn in functions.values():
+        insts = fn.insts
+        for index, inst in enumerate(insts):
+            if inst.kind != "jarl":
+                continue
+            for nxt in insts[index + 1:index + 21]:
+                reads, writes = _r10_effects(nxt)
+                if reads:
+                    consumed.add(inst.target)
+                    break
+                if writes or nxt.kind in {"jarl", "jarl_ind", "jmp", "dispose"}:
+                    break
+    return consumed
+
+
 def _judge(item: Planned, run: Run, scenario: dict, report: dict) -> str | None:
     if not report or report.get("termination_reason") in {None, "simulator"}:
         return "simulator"
@@ -2203,7 +2281,12 @@ def _judge(item: Planned, run: Run, scenario: dict, report: dict) -> str | None:
     bytes_return = sim_r10 != SENTINEL
     if not bytes_return and return_type != "void":
         return "invented-return"
-    if bytes_return and return_type == "void" and run.root_r10:
+    if (
+        bytes_return
+        and return_type == "void"
+        and run.root_r10
+        and item.address in _CONSUMED_RETURNS
+    ):
         return "dropped-return"
     return None
 
