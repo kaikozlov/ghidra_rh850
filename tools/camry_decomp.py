@@ -8,6 +8,9 @@ import json
 import re
 import subprocess
 import sys
+import tempfile
+from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from tools import REPO_ROOT
@@ -117,20 +120,20 @@ def cmd_identity(args: argparse.Namespace) -> int:
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_bytes(image)
         report["output"] = str(destination)
+    report.pop("matched", None)
     print(json.dumps(report, indent=2))
     return 0
 
 
 def cmd_status(_args: argparse.Namespace) -> int:
     _, report = identity_image()
+    rows = report.pop("matched")
     named = sum(1 for row in load_symbols() if not row["name"].startswith("FUN_"))
     report["named_functions"] = named
-    report["equivalent_functions"] = sum(
-        1 for row in report["matched"] if row["status"] == "equivalent"
-    )
-    report["byte_matched_functions"] = sum(
-        1 for row in report["matched"] if row["status"] == "byte-matched"
-    )
+    report["equivalent_functions"] = sum(1 for row in rows if row["status"] == "equivalent")
+    report["byte_matched_functions"] = sum(1 for row in rows if row["status"] == "byte-matched")
+    report["converted_functions"] = sum(1 for row in rows if row["status"] == "converted")
+    report["unconvertible_functions"] = sum(1 for row in rows if row["status"] == "unconvertible")
     print(json.dumps(report, indent=2))
     return 0
 
@@ -815,7 +818,110 @@ def _rewrite_thunk_calls(code: str) -> str:
     return head + sep + body
 
 
+_BYTE_POINTER = r"(?:undefined1|undefined|byte|uchar|char|code|bool)"
+
+
+def _firmware_base_locals(code: str) -> dict[str, int]:
+    """Byte pointers assigned only from one `&LAB/DAT/UNK` hold that firmware address.
+
+    `camry_host_ptr` of the base aborts when the scenario maps `base+disp` and
+    not the base. Later reads and stores use the summed address.
+    """
+    declared = {
+        match.group(1)
+        for match in re.finditer(
+            rf"^\s*{_BYTE_POINTER}\s+\*\s*([A-Za-z_][A-Za-z0-9_]*)\s*;\s*$",
+            code,
+            flags=re.M,
+        )
+    }
+    bases: dict[str, int] = {}
+    for name in declared:
+        addresses: list[int] = []
+        bare = True
+        for match in re.finditer(
+            rf"(?<![=<>!])\b{name}\s*=(?!=)\s*([^;]*);",
+            code,
+        ):
+            token = re.fullmatch(
+                r"&(?:LAB|DAT|UNK)_([0-9A-Fa-f]+)",
+                match.group(1).strip(),
+            )
+            if token is None:
+                bare = False
+                break
+            addresses.append(int(token.group(1), 16))
+        if bare and addresses and len(set(addresses)) == 1:
+            bases[name] = addresses[0]
+    return bases
+
+
+def _rewrite_base_subscripts(code: str, names: set[str]) -> str:
+    if not names:
+        return code
+    pattern = re.compile(
+        r"\b(" + "|".join(sorted(names, key=len, reverse=True)) + r")\s*\["
+    )
+    pieces: list[str] = []
+    cursor = 0
+    for match in pattern.finditer(code):
+        if match.start() < cursor:
+            continue
+        try:
+            end = _match_bracket(code, match.end() - 1)
+        except ValueError:
+            continue
+        index = _rewrite_base_subscripts(code[match.end():end], names)
+        pieces.append(code[cursor:match.start()])
+        pieces.append(
+            "(*((volatile uint8_t *)camry_host_ptr((uint32_t)("
+            f"{match.group(1)} + (uint32_t)({index})))))"
+        )
+        cursor = end + 1
+    pieces.append(code[cursor:])
+    return "".join(pieces)
+
+
+def _rewrite_base_address_sums(code: str, names: set[str]) -> str:
+    if not names:
+        return code
+    name_alt = "|".join(sorted(names, key=len, reverse=True))
+    pattern = re.compile(
+        rf"&(?:LAB|DAT|UNK)_([0-9A-Fa-f]+)\s*\+\s*(\(int\))?\s*\b({name_alt})\b"
+    )
+
+    def replace(match: re.Match[str]) -> str:
+        address = int(match.group(1), 16)
+        cast = match.group(2) or ""
+        name = match.group(3)
+        return f"(0x{address:x}u + (uint32_t)({cast}{name}))"
+
+    return pattern.sub(replace, code)
+
+
+def _rewrite_firmware_bases(code: str) -> str:
+    bases = _firmware_base_locals(code)
+    if not bases:
+        return code
+    for name, address in bases.items():
+        code = re.sub(
+            rf"^(\s*){_BYTE_POINTER}\s+\*\s*{name}\s*;\s*$",
+            rf"\1uint32_t {name};",
+            code,
+            count=1,
+            flags=re.M,
+        )
+        code = re.sub(
+            rf"(?<![=<>!])\b{name}\s*=\s*&(?:LAB|DAT|UNK)_[0-9A-Fa-f]+\s*;",
+            f"{name} = 0x{address:x}u;",
+            code,
+        )
+    code = _rewrite_base_subscripts(code, set(bases))
+    return _rewrite_base_address_sums(code, set(bases))
+
+
 def _rewrite_body(code: str) -> str:
+    code = _rewrite_firmware_bases(code)
     signature = _c_signature(code)
     pointers = _pointer_names(signature, code)
     code = _rewrite_bitfields(code)
@@ -1185,105 +1291,376 @@ def _compile_corpus(destination: Path) -> subprocess.CompletedProcess[str]:
     )
 
 
+_CC_FLAGS = [
+    "-std=c11", "-c", "-O2", "-Wall", "-Wextra", "-Werror", "-fwrapv",
+    "-Wno-unused-variable", "-Wno-unused-parameter",
+    "-Wno-unused-function", "-Wno-unused-label",
+    "-Wno-pointer-to-int-cast", "-Wno-int-to-pointer-cast",
+    "-Wno-bitwise-op-parentheses", "-Wno-sign-compare", "-Wno-parentheses",
+    "-Wno-pointer-sign", "-Wno-incompatible-pointer-types",
+    "-Wno-unused-but-set-variable",
+    "-ferror-limit=0",
+    "-DCAMRY_HOST",
+]
+_CHECKED_STATUS = {"equivalent", "byte-matched"}
+_TREE = ROOT / "src" / "all"
+
+
+def _prefer_bodies(functions: list[dict]) -> dict[str, dict]:
+    chosen: dict[str, dict] = {}
+    for row in functions:
+        current = chosen.get(row["name"])
+        if current is not None and _self_call_count(row) > _self_call_count(current):
+            continue
+        chosen[row["name"]] = row
+    return chosen
+
+
+def _failure_class(message: str) -> str:
+    match = re.search(r"use of undeclared identifier '([^']+)'", message)
+    if match:
+        ident = match.group(1)
+        if re.fullmatch(r"unaff_\w+", ident):
+            shape = "unaff_*"
+        elif re.fullmatch(r"extraout_\w+", ident):
+            shape = "extraout_*"
+        elif re.fullmatch(r"in_r\d+", ident):
+            shape = "in_r*"
+        elif ident.startswith("Ram"):
+            shape = "Ram*"
+        elif ident.startswith(("CONCAT", "SUB", "SBORROW", "OVERFLOW")):
+            shape = ident.split("_", 1)[0] + "*"
+        elif ident.startswith("in_"):
+            shape = ident
+        else:
+            shape = ident
+        return f"undeclared identifier {shape}"
+    text = re.sub(r"\(aka '[^']*'\)", "", message)
+    text = re.sub(r"'[^']*'", "'…'", text)
+    text = re.sub(r"\b0x[0-9A-Fa-f]+\b", "N", text)
+    text = re.sub(r"\b\d+\b", "N", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    return text[:200]
+
+
+def _common_header(text: str, signatures: dict[str, str]) -> str:
+    registers = _machine_registers()
+    data = _data_symbols()
+    function_names = set(signatures)
+    lines = [
+        "/* Generated by tools/decomp corpus. */",
+        '#include "camry.h"',
+        '#include "ghidra_types.h"',
+        "",
+    ]
+    types = set(re.findall(r"\b([A-Z][A-Za-z0-9_]*)\s*\*", text))
+    emitted = False
+    for name in sorted(types):
+        if name in _PRIMITIVE_TYPES or name in registers or name in data or name in function_names:
+            continue
+        lines.append(f"typedef struct {name} {name};")
+        emitted = True
+    if emitted:
+        lines.append("")
+    widths = {1: "uint8_t", 2: "uint16_t", 4: "uint32_t"}
+    for name, row in sorted(registers.items()):
+        if name in function_names or re.search(rf"\b{name}\b", text) is None:
+            continue
+        ctype = widths.get(int(row.get("size") or 4), "uint32_t")
+        lines.append(
+            f"#define {name} (*((volatile {ctype} *)camry_host_ptr(0x{int(row['address']):x}u)))"
+        )
+    for name, (addr, ctype, is_array) in sorted(_data_layouts().items()):
+        if name in registers or name in function_names or re.search(rf"\b{name}\b", text) is None:
+            continue
+        if is_array:
+            lines.append(f"#define {name} ((volatile {ctype} *)camry_host_ptr(0x{addr:x}u))")
+        else:
+            lines.append(
+                f"#define {name} (*((volatile {ctype} *)camry_host_ptr(0x{addr:x}u)))"
+            )
+    for match in sorted(set(re.findall(r"\b((?:DAT|UNK)_[0-9A-Fa-f]+)\b", text))):
+        addr = int(match.split("_", 1)[1], 16)
+        lines.append(
+            f"#define {match} (*((volatile {_scalar_type(addr)} *)camry_host_ptr(0x{addr:x}u)))"
+        )
+    for match, addr_text in sorted(set(re.findall(
+        r"\b(PTR_[A-Za-z0-9_]*_([0-9A-Fa-f]+))\b", text,
+    ))):
+        lines.append(
+            f"#define {match} (*((volatile uint32_t *)camry_host_ptr(0x{int(addr_text, 16):x}u)))"
+        )
+    lines.append("")
+    for name in sorted(signatures):
+        lines.append(signatures[name] + ";")
+    lines.append("")
+    return "\n".join(lines) + "\n"
+
+
+def _compile_file(path: Path) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        ["cc", *_CC_FLAGS, "-I", str(ROOT / "include"), "-o", "/dev/null", str(path)],
+        text=True,
+        capture_output=True,
+    )
+
+
+def _isolate_errors(name: str, body: str, directory: Path) -> list[str]:
+    path = directory / f"one-{name}.c"
+    path.write_text('#include "common.h"\n\n' + body, encoding="utf-8")
+    result = _compile_file(path)
+    path.unlink(missing_ok=True)
+    if result.returncode == 0:
+        return []
+    messages = [
+        line.split("error:", 1)[1].strip()
+        for line in (result.stderr or "").splitlines()
+        if "error:" in line
+    ]
+    return messages or [(result.stderr or "compile failed")[:300]]
+
+
+def _shard_errors(
+    path: Path, selected: dict[int, dict], rendered: str,
+) -> dict[str, list[str]]:
+    result = _compile_file(path)
+    found: dict[str, list[str]] = {}
+    if result.returncode == 0:
+        return found
+    for line in (result.stderr or "").splitlines():
+        if "error:" not in line:
+            continue
+        match = re.search(rf"{re.escape(path.name)}:(\d+):", line)
+        if match is None:
+            found.setdefault("", []).append(line.split("error:", 1)[1].strip())
+            continue
+        name = _function_at_line(selected, rendered, int(match.group(1)))
+        message = line.split("error:", 1)[1].strip()
+        found.setdefault(name or "", []).append(message)
+    if result.returncode != 0 and not found:
+        found[""] = [(result.stderr or "compile failed")[:500]]
+    return found
+
+
+def _write_statuses(compiled_names: set[str]) -> tuple[int, int, int]:
+    path = ROOT / "matched.jsonl"
+    kept: list[str] = []
+    kept_addrs: set[int] = set()
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        row = json.loads(line)
+        if row.get("status") in _CHECKED_STATUS:
+            kept.append(line)
+            kept_addrs.add(_address(row["addr"]))
+    hand = _prototype_names()
+    extra: list[dict] = []
+    converted = 0
+    unconvertible = 0
+    for symbol in load_symbols():
+        addr = _address(symbol["addr"])
+        if addr in kept_addrs:
+            continue
+        status = "converted" if symbol["name"] in compiled_names or symbol["name"] in hand else "unconvertible"
+        if status == "converted":
+            converted += 1
+        else:
+            unconvertible += 1
+        extra.append({
+            "addr": hex(addr),
+            "name": symbol["name"],
+            "status": status,
+        })
+    extra.sort(key=lambda row: int(row["addr"], 16))
+    payload = kept + [
+        json.dumps(row, separators=(", ", ": "))
+        for row in extra
+    ]
+    path.write_text("\n".join(payload) + "\n", encoding="utf-8")
+    return len(kept), converted, unconvertible
+
+
+def _compile_tree(functions: list[dict]) -> tuple[set[str], Counter[str], list[str]]:
+    hand = _prototype_names()
+    chosen = _prefer_bodies(functions)
+    rewritten: dict[str, str] = {}
+    signatures: dict[str, str] = {}
+    rows_by_name: dict[str, dict] = {}
+    failed_rewrite: list[str] = []
+    for name, row in chosen.items():
+        if name in hand:
+            continue
+        try:
+            body = _rewrite_body(row["decompiled_c"])
+            signatures[name] = _c_signature(body)
+        except (ValueError, IndexError, KeyError) as exc:
+            failed_rewrite.append(f"{name} {type(exc).__name__}")
+            continue
+        rewritten[name] = body
+        rows_by_name[name] = row
+    if not rewritten:
+        return set(), Counter({"rewrite failed": len(failed_rewrite)}), failed_rewrite
+
+    def shards_of(names: set[str]) -> dict[str, dict[int, dict]]:
+        grouped: dict[str, dict[int, dict]] = {}
+        for name in names:
+            row = rows_by_name[name]
+            addr = int(row["entry_addr"], 16)
+            grouped.setdefault(f"{addr >> 14:03x}", {})[addr] = row
+        return grouped
+
+    def prototype_at(header: str, line_number: int) -> str | None:
+        rows = header.splitlines()
+        if line_number < 1 or line_number > len(rows):
+            return None
+        match = re.search(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\(", rows[line_number - 1])
+        if match is None or match.group(1) not in active:
+            return None
+        return match.group(1)
+
+    with tempfile.TemporaryDirectory(prefix="camry-tree-") as tmp:
+        root = Path(tmp)
+        active = set(rewritten)
+        hidden: set[str] = set()
+        blame: dict[str, list[str]] = {}
+        header_errors: list[str] = []
+        text = "\n".join(rewritten[name] for name in sorted(rewritten))
+        for _round in range(8):
+            header_errors = []
+            print(f"compile {_round + 1} {len(active)}")
+            header = _common_header(
+                text, {name: signatures[name] for name in signatures if name not in hidden},
+            )
+            (root / "common.h").write_text(header, encoding="utf-8")
+            probe = root / "probe.c"
+            probe.write_text('#include "common.h"\n', encoding="utf-8")
+            probe_result = _compile_file(probe)
+            dropped: set[str] = set()
+            if probe_result.returncode != 0:
+                header_errors = []
+                for line in (probe_result.stderr or "").splitlines():
+                    if "error:" not in line:
+                        continue
+                    message = line.split("error:", 1)[1].strip()
+                    match = re.search(r"common\.h:(\d+):", line)
+                    name = prototype_at(header, int(match.group(1))) if match else None
+                    if name:
+                        dropped.add(name)
+                        hidden.add(name)
+                        blame[name] = [message]
+                    else:
+                        header_errors.append(message)
+                if dropped:
+                    active -= dropped
+                    print(f"dropped {len(dropped)}")
+                    continue
+                break
+            grouped = shards_of(active - dropped)
+            rendered_shards: dict[str, tuple[Path, dict[int, dict], str]] = {}
+            for shard, selected in grouped.items():
+                parts = ['#include "common.h"', ""]
+                for addr in sorted(selected):
+                    parts.append(rewritten[selected[addr]["name"]])
+                    if not rewritten[selected[addr]["name"]].endswith("\n"):
+                        parts.append("")
+                rendered = "\n".join(parts) + "\n"
+                path = root / f"{shard}.c"
+                path.write_text(rendered, encoding="utf-8")
+                rendered_shards[shard] = (path, selected, rendered)
+            suspects: list[tuple[str, str]] = []
+            shard_blame: dict[str, list[str]] = {}
+            with ThreadPoolExecutor(max_workers=8) as pool:
+                compiled = pool.map(
+                    lambda item: (item[0], _shard_errors(*item[1])),
+                    rendered_shards.items(),
+                )
+                for shard, errors in compiled:
+                    selected = rendered_shards[shard][1]
+                    if not errors:
+                        continue
+                    if set(errors) == {""}:
+                        header_errors.extend(errors[""])
+                        continue
+                    for name, messages in errors.items():
+                        if name:
+                            shard_blame.setdefault(name, []).extend(messages)
+                    for row in selected.values():
+                        suspects.append((row["name"], rewritten[row["name"]]))
+            if header_errors and not suspects and not dropped:
+                break
+            print(f"isolate {len(suspects)}")
+            with ThreadPoolExecutor(max_workers=8) as pool:
+                isolated = pool.map(
+                    lambda item: (item[0], _isolate_errors(item[0], item[1], root)),
+                    suspects,
+                )
+                for name, messages in isolated:
+                    if messages:
+                        dropped.add(name)
+                        blame[name] = messages
+            if not dropped:
+                for name, messages in shard_blame.items():
+                    if name in active:
+                        dropped.add(name)
+                        blame[name] = messages
+            header_errors = []
+            if not dropped:
+                break
+            active -= dropped
+            print(f"dropped {len(dropped)}")
+        else:
+            header_errors.append("compile did not converge")
+        classes: Counter[str] = Counter()
+        if failed_rewrite:
+            classes["rewrite failed"] = len(failed_rewrite)
+        for name, messages in blame.items():
+            if name in active or not messages:
+                continue
+            for kind in {_failure_class(message) for message in messages}:
+                classes[kind] += 1
+        if header_errors:
+            for message in header_errors[:12]:
+                print(f"header {message}")
+            return set(), classes, failed_rewrite + [f"header {message}" for message in header_errors[:12]]
+        _TREE.mkdir(parents=True, exist_ok=True)
+        for stale in _TREE.glob("*"):
+            stale.unlink()
+        (_TREE / "common.h").write_text(
+            _common_header(
+                text, {name: signatures[name] for name in signatures if name not in hidden},
+            ),
+            encoding="utf-8",
+        )
+        for shard, selected in shards_of(active).items():
+            parts = ['#include "common.h"', ""]
+            for addr in sorted(selected):
+                parts.append(rewritten[selected[addr]["name"]])
+            (_TREE / f"{shard}.c").write_text("\n".join(parts) + "\n", encoding="utf-8")
+        return active, classes, failed_rewrite
+
+
 def cmd_corpus(_args: argparse.Namespace) -> int:
-    from tests.decomp.verify_camry_decomp import screen_corpus
-    from tools.project.analysis_target import target as resolve_target
     from tools.project.pseudo import load_corpus
 
     metadata = resolve_target(TARGET)[1]
     _meta, functions = load_corpus(REPO_ROOT / metadata["decompiler_corpus"])
-    matched_rows = load_matched()
-    defined = {row["name"] for row in matched_rows if row.get("form") != "corpus"}
-    defined |= _prototype_names()
-    previous = {_address(row["addr"]) for row in matched_rows if row.get("form") == "corpus"}
-    banned: set[str] = set()
-    selected = _select_corpus(functions, defined, banned)
-    print(f"corpus candidates {len(selected)}")
-    destination = ROOT / "src" / "corpus.c"
-    if not selected:
-        destination.unlink(missing_ok=True)
-        print("compiled 0 corpus functions")
-        return 0
-    rendered = _render_corpus(selected)
-    destination.write_text(rendered, encoding="utf-8")
-    for _attempt in range(80):
-        result = _compile_corpus(destination)
-        if result.returncode == 0:
-            break
-        rendered = destination.read_text(encoding="utf-8")
-        dropped = set()
-        for line in (result.stderr or "").splitlines():
-            match = re.search(r"corpus\.c:(\d+):", line)
-            if match is None:
-                continue
-            name = _function_at_line(selected, rendered, int(match.group(1)))
-            if name:
-                dropped.add(name)
-        if not dropped:
-            sys.stderr.write(result.stderr or "")
-            return 1
-        banned |= dropped
-        print(f"dropped {len(dropped)}")
-        selected = _select_corpus(functions, defined, banned)
-        rendered = _render_corpus(selected)
-        destination.write_text(rendered, encoding="utf-8")
-        if not selected:
-            destination.unlink(missing_ok=True)
-            print("compiled 0 corpus functions")
-            return 0
+    print(f"functions {len(functions)}")
+    compiled, classes, failures = _compile_tree(functions)
+    header_failed = any(item.startswith("header ") for item in failures)
+    if header_failed:
+        verified = converted = unconvertible = 0
     else:
-        sys.stderr.write("corpus C did not compile\n")
-        return 1
-    print(f"compiled {len(selected)} corpus functions")
-    rows = [
-        {
-            "addr": addr,
-            "name": row["name"],
-            "signature": _c_signature(row["decompiled_c"]),
-        }
-        for addr, row in selected.items()
-        if addr in _oracle_addresses()
-    ]
-    passed = screen_corpus(rows)
-    passed_addrs = {int(row["addr"]) for row in passed}
-    lost = previous - passed_addrs
-    if lost:
-        restore = _select_corpus(functions, defined, banned, roots=previous)
-        if restore:
-            destination.write_text(_render_corpus(restore), encoding="utf-8")
-        sys.stderr.write(
-            "previously checked corpus functions failed: "
-            + ", ".join(hex(addr) for addr in sorted(lost))
-            + "\n"
-        )
-        return 1
-    kept = _select_corpus(functions, defined, banned, roots=passed_addrs)
-    if not kept:
-        destination.unlink(missing_ok=True)
-        print("oracle-checked 0 corpus functions")
-        return 0
-    destination.write_text(_render_corpus(kept), encoding="utf-8")
-    result = _compile_corpus(destination)
-    if result.returncode != 0:
-        sys.stderr.write(result.stderr or "")
-        return 1
-    matched_path = ROOT / "matched.jsonl"
-    existing = {_address(row["addr"]) for row in load_matched()}
-    with matched_path.open("a", encoding="utf-8") as handle:
-        for addr in sorted(passed_addrs & set(kept)):
-            if addr in existing:
-                continue
-            handle.write(json.dumps(
-                {
-                    "addr": hex(addr),
-                    "name": kept[addr]["name"],
-                    "status": "equivalent",
-                    "form": "corpus",
-                },
-                separators=(", ", ": "),
-            ) + "\n")
-    print(f"oracle-checked {len(passed_addrs & set(kept))} corpus functions")
-    return 0
+        verified, converted, unconvertible = _write_statuses(compiled)
+    print(f"compiled {len(compiled)}")
+    print(f"oracle-verified {verified}")
+    print(f"converted-unverified {converted}")
+    print(f"unconvertible {unconvertible}")
+    if failures:
+        print(f"rewrite-failed {len(failures)}")
+    print("failure classes:")
+    for kind, count in classes.most_common(30):
+        print(f"  {count:5d}  {kind}")
+    return 0 if not failures or compiled else 1
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -1294,7 +1671,7 @@ def main(argv: list[str] | None = None) -> int:
     identity.set_defaults(func=cmd_identity)
     status = sub.add_parser("status", help="print image and matched-function counts")
     status.set_defaults(func=cmd_status)
-    corpus = sub.add_parser("corpus", help="compile decompiler bodies that close over existing C")
+    corpus = sub.add_parser("corpus", help="compile every decompiler body and rank the failures")
     corpus.set_defaults(func=cmd_corpus)
     args = parser.parse_args(argv)
     return args.func(args)

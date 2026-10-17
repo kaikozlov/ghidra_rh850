@@ -1372,7 +1372,11 @@ def report() -> None:
     symbols = load_symbols()
     decoded, unknown = decode_all(image, symbols)
     liftable = liftable_set(decoded)
-    matched = {int(row["addr"], 16) for row in load_matched()}
+    matched = {
+        int(row["addr"], 16)
+        for row in load_matched()
+        if row.get("status") in {"equivalent", "byte-matched"}
+    }
     oracles = []
     with (ROOT / "oracles.jsonl").open(encoding="utf-8") as handle:
         for line in handle:
@@ -1409,7 +1413,11 @@ def main() -> int:
     decoded, _unknown = decode_all(image, symbols)
     liftable = liftable_set(decoded)
     matched_rows = load_matched()
-    matched = {int(row["addr"], 16) for row in matched_rows}
+    matched = {
+        int(row["addr"], 16)
+        for row in matched_rows
+        if row.get("status") in {"equivalent", "byte-matched"}
+    }
     oracles = []
     with (ROOT / "oracles.jsonl").open(encoding="utf-8") as handle:
         for line in handle:

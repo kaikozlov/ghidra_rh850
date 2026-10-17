@@ -1017,12 +1017,16 @@ def main() -> int:
         )
     matched = {int(row["addr"], 16): row for row in load_matched()}
     symbol_names = {int(row["addr"], 16): row["name"] for row in load_symbols()}
+    checked_status = {"equivalent", "byte-matched"}
     for address, row in matched.items():
         if symbol_names.get(address) != row["name"]:
             raise SystemExit(f"matched name drift at {row['addr']}")
-        if row["status"] not in {"equivalent", "byte-matched"}:
+        if row["status"] not in checked_status | {"converted", "unconvertible"}:
             raise SystemExit(f"unknown match status {row['status']}")
-    executed = {address: 0 for address in matched}
+    checked = {
+        address: row for address, row in matched.items() if row["status"] in checked_status
+    }
+    executed = {address: 0 for address in checked}
     metadata = resolve_target("camry-8965F3307000")[1]
     codeflash = bytearray((REPO_ROOT / metadata["codeflash"]).read_bytes())
     with tempfile.TemporaryDirectory(prefix="camry-decomp-") as directory:
@@ -1036,10 +1040,10 @@ def main() -> int:
             if entry.get("scope") != "resolved-address":
                 continue
             address = int(entry["address"], 16)
-            if address not in matched or not useful_oracle(scenario):
+            if address not in checked or not useful_oracle(scenario):
                 continue
-            name = matched[address]["name"]
-            form = matched[address].get("form")
+            name = checked[address]["name"]
+            form = checked[address].get("form")
             lifted = form == "lifted"
             corpus = form == "corpus"
             registers = scenario.get("registers", {})
@@ -1081,10 +1085,10 @@ def main() -> int:
                 del dcra_view
             executed[address] += 1
             print(f"PASS {name} {scenario['name']}")
-    missing = [row["name"] for address, row in matched.items() if executed[address] == 0]
+    missing = [row["name"] for address, row in checked.items() if executed[address] == 0]
     if missing:
         raise SystemExit("matched functions with no executed oracle: " + ", ".join(missing))
-    print(f"PASS matched functions: {len(matched)}")
+    print(f"PASS matched functions: {len(checked)}")
     return 0
 
 
