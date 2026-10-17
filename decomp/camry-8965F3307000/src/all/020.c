@@ -12,6 +12,51 @@ undefined4 FUN_00080066(byte param_1,undefined2 param_2)
 
 
 
+/* Scan retained queues and attempt hardware admission; separate from COM publication and queue-copy
+   generation. */
+
+void f33_service_can_tx_queues(uchar controller)
+
+{
+  F33CanQueueDescriptor *descriptor;
+  byte bVar1;
+  byte bVar2;
+  uint uVar3;
+  uint32_t puVar4;
+  undefined *puVar5;
+  undefined *puVar6;
+  uint uVar7;
+  undefined4 uVar8;
+  ushort uVar9;
+  
+  uVar7 = (uint)controller;
+  puVar4 = 0xfebeb800u;
+  puVar6 = ((undefined *)camry_host_ptr(0x23dfcu));
+  bVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x21972u + (uint32_t)(uVar7) * 1u))));
+  for (uVar9 = 0; uVar9 < bVar1; uVar9 = uVar9 + 1 & 0xff) {
+    descriptor = ((F33CanQueueDescriptor *)camry_host_ptr((uint32_t)((short)uVar9 * 10 + *(int *)(puVar6 + uVar7 * 4 + -0x2518))));
+    bVar2 = descriptor->hardware_group;
+    puVar5 = puVar6;
+    uVar8 = FUN_0007a2da();
+    if ((*((char *)camry_host_ptr((uint32_t)(*(int *)(puVar6 + uVar7 * 4 + -0x2514) + (uint)bVar2)))) != 'Z') {
+      uVar3 = (uint)descriptor->queue_index;
+      if ((((4 < (*((ushort *)camry_host_ptr((uint32_t)(puVar4 + uVar3 * 6 + -0x6f22))))) &&
+           ((int)(((*((ushort *)camry_host_ptr((uint32_t)(puVar4 + uVar3 * 6 + -0x6f24)))) + 2) - (uint)descriptor->capacity_words
+                 ) < 0 ||
+            (*((ushort *)camry_host_ptr((uint32_t)(puVar4 + uVar3 * 6 + -0x6f24)))) + 2 == (uint)descriptor->capacity_words)) &&
+          ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(uVar3 - 0x6efc))))) == 'i')) && ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(uVar3 - 0x6ef7))))) == '\0')) {
+        f33_attempt_queued_can_tx
+                  (controller,(uchar)uVar9,descriptor,((ushort *)camry_host_ptr((uint32_t)(puVar4 + uVar3 * 6 + -0x6f26))));
+      }
+    }
+    puVar6 = puVar5;
+    ((void)(uVar8), thunk_FUN_0006a4c4());
+  }
+  return;
+}
+
+
+
 void FUN_000802ee(void)
 
 {
@@ -68,6 +113,43 @@ bool FUN_0008037a(uint param_1,byte param_2)
     }
   }
   return bVar1;
+}
+
+
+
+void FUN_000803b0(byte param_1,uchar param_2)
+
+{
+  F33CanQueueDescriptor *descriptor;
+  byte bVar1;
+  bool bVar2;
+  uint uVar3;
+  uint32_t puVar4;
+  uint32_t puVar5;
+  ushort uVar6;
+  
+  puVar4 = 0xfebeb800u;
+  puVar5 = 0x23dfcu;
+  bVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x21972u + (uint32_t)(param_1) * 1u))));
+  bVar2 = false;
+  uVar6 = 0;
+  while ((uVar6 < bVar1 && (!bVar2))) {
+    descriptor = ((F33CanQueueDescriptor *)camry_host_ptr((uint32_t)((short)uVar6 * 10 + *(int *)(puVar5 + (uint)param_1 * 4 + -0x2518))));
+    if ((descriptor->completion_policy == '\0') && (param_2 == descriptor->hardware_group)) {
+      uVar3 = (uint)descriptor->queue_index;
+      if ((((4 < (*((ushort *)camry_host_ptr((uint32_t)(puVar4 + uVar3 * 6 + -0x6f22))))) &&
+           ((int)(((*((ushort *)camry_host_ptr((uint32_t)(puVar4 + uVar3 * 6 + -0x6f24)))) + 2) - (uint)descriptor->capacity_words
+                 ) < 0 ||
+            (*((ushort *)camry_host_ptr((uint32_t)(puVar4 + uVar3 * 6 + -0x6f24)))) + 2 == (uint)descriptor->capacity_words)) &&
+          ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(uVar3 - 0x6efc))))) == 'i')) && ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(uVar3 - 0x6ef7))))) == '\0')) {
+        bVar2 = true;
+        f33_attempt_queued_can_tx
+                  (param_1,(uchar)uVar6,descriptor,((ushort *)camry_host_ptr((uint32_t)(puVar4 + uVar3 * 6 + -0x6f26))));
+      }
+    }
+    uVar6 = uVar6 + 1 & 0xff;
+  }
+  return;
 }
 
 

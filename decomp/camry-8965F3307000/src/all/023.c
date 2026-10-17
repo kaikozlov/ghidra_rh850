@@ -792,6 +792,50 @@ undefined4 FUN_0008cbc4(int param_1,ushort *param_2,undefined1 *param_3)
 
 
 
+/* Copy each nonempty source only if its whole length fits u16 capacity. Compare first24-bit DTCs to
+   avoid duplicate second source; do not merge snapshot record numbers or publish partial source
+   bytes. */
+
+uint f33_merge_snapshot_identifier_sources
+               (F33DiagSourceBuffer *local,F33DiagSourceBuffer *side,F33DiagOutputView *output)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uint uVar3;
+  uint uVar4;
+  uint uVar5;
+  uint uVar6;
+  byte *pbVar7;
+  
+  uVar6 = 0;
+  uVar1 = 0;
+  uVar5 = (uint)local->length;
+  uVar4 = (uint)side->length;
+  uVar3 = (uint)*((uint16_t *)camry_host_ptr((uint32_t)(output->capacity)));
+  if ((local->status == '\x01') || (side->status == '\x01')) {
+    if ((uVar5 != 0) && (uVar2 = uVar1, uVar5 <= uVar3)) {
+      for (; pbVar7 = ((void *)camry_host_ptr((uint32_t)(local->bytes))), uVar2 < uVar5; uVar2 = uVar2 + 1 & 0xffff) {
+        ((uint8_t *)camry_host_ptr((uint32_t)(output->bytes)))[uVar2] = pbVar7[uVar2];
+      }
+      uVar1 = (uint)pbVar7[2] | (uint)pbVar7[1] << 8 | (uint)*pbVar7 << 0x10;
+      uVar6 = uVar2;
+    }
+    if (((uVar4 != 0) && ((int)((uVar5 + uVar4) - uVar3) < 0 || uVar5 + uVar4 == uVar3)) &&
+       (pbVar7 = ((void *)camry_host_ptr((uint32_t)(side->bytes))),
+       uVar1 != ((uint)pbVar7[2] | (uint)pbVar7[1] << 8 | (uint)*pbVar7 << 0x10))) {
+      for (uVar1 = 0; uVar1 < uVar4; uVar1 = uVar1 + 1 & 0xffff) {
+        ((uint8_t *)camry_host_ptr((uint32_t)(output->bytes)))[uVar6 + uVar1] = ((uint8_t *)camry_host_ptr((uint32_t)(side->bytes)))[uVar1];
+      }
+      uVar6 = uVar6 + uVar1;
+    }
+  }
+  *((uint16_t *)camry_host_ptr((uint32_t)(output->length))) = (ushort)uVar6;
+  return 0;
+}
+
+
+
 uint FUN_0008ccb8(void)
 
 {

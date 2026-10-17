@@ -953,6 +953,28 @@ void FUN_000913b6(void)
 
 
 
+/* Initialize28-byte5630 context from two eight-byte PduInfo descriptors. Request and response
+   extents read as unsigned16; response length and suppression reset. */
+
+void f33_dcm_initialize_message_context
+               (ushort service_list_selector,uchar addressing_kind,F33PduInfo *request,
+               F33PduInfo *response)
+
+{
+  f33_dcm_message_context.request = camry_host_addr(((void *)camry_host_ptr((uint32_t)(request->data))));
+  f33_dcm_message_context.response_length = 0;
+  f33_dcm_message_context.addressing_kind = addressing_kind;
+  f33_dcm_message_context.request_length = (uint)request->length;
+  f33_dcm_message_context.suppress_positive = '\0';
+  f33_dcm_message_context.service_id = '\0';
+  f33_dcm_message_context.response = camry_host_addr(((void *)camry_host_ptr((uint32_t)(response->data))));
+  f33_dcm_message_context.service_list_selector = service_list_selector;
+  f33_dcm_message_context.response_capacity = (uint)response->length;
+  return;
+}
+
+
+
 void FUN_000913ea(undefined1 param_1)
 
 {

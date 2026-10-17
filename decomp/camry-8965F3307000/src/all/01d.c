@@ -3253,6 +3253,18 @@ void FUN_000772a2(undefined2 *param_1,undefined2 param_2)
 
 
 
+/* Load context+2 as unsigned16 and zero-extend to r10. Six-byte getter loads context+2 as
+   unsigned16 and zero-extends into r10. The real getter participates in post-read small-record
+   checksum acceptance and rejection; high-bit-set checksum is not a signed return. */
+
+uint f33_nvm_header_checksum(F33NvmRecordContext *context)
+
+{
+  return (uint)context->checksum16;
+}
+
+
+
 void FUN_000772ae(int param_1,undefined2 param_2)
 
 {

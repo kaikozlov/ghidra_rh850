@@ -1823,6 +1823,30 @@ void FUN_0006a624(uint param_1,undefined1 *param_2)
 
 
 
+/* WARNING: Removing unreachable block (ram,0x0006a668) */
+/* Use coefficient1..65535, otherwise65536. Compute low32 accumulator +
+   coefficient*(target-previous); publish signed division by65536 narrowed16, not SAR rounding.
+   Eight-byte previous/target/accumulator record. Coefficient outside1..65535 becomes65536; low32
+   fractional recurrence publishes signed truncation by65536 narrowed16. */
+
+void f33_follow_s16_fractional
+               (F33FractionalFollowing16 *state,uint coefficient,short *output,int *new_accumulator)
+
+{
+  int iVar1;
+  
+  if (0xfffe < coefficient - 1) {
+    coefficient = 0x10000;
+  }
+  iVar1 = (int)state->target * coefficient +
+          (state->accumulator - (int)state->previous * coefficient);
+  *new_accumulator = iVar1;
+  *output = (short)(iVar1 / 0x10000);
+  return;
+}
+
+
+
 void FUN_0006a678(ushort *param_1,int param_2,undefined2 *param_3,int *param_4)
 
 {
@@ -1850,6 +1874,86 @@ void f33_reset_terminal_monitor(F33TerminalMonitorState *state)
   state->failing_count = 0;
   state->failing_high_water = 0;
   return;
+}
+
+
+
+/* Inputs r6 state*,r7 two uint16 thresholds*,r8 three-pointer callback table*. Test fail>threshold
+   first => status22 with no predicate or callback. Else pass>threshold => status0 with no predicate
+   or callback. Else call table[0].11 clears fail and increments pass; crossing strict
+   pass>threshold sets0 and calls table[1] once.22 clears pass and increments fail, updates
+   highwater max; crossing fail>threshold sets22 and calls table[2] once.44 or any other
+   classification storesFF and preserves all counters/highwater. Result r10 always11, not stored
+   status. No automatic recovery from either terminal state before explicit reset. Native exact-mode
+   range compositions distinguish count==200 from strict failure crossing and preserve the previous
+   action until confirmation. Other configured predicates remain statically reconstructed. */
+
+uint f33_step_terminal_monitor
+               (F33TerminalMonitorState *state,F33MonitorLimits *thresholds,
+               F33TerminalMonitorCallbacks *callbacks)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uint uVar3;
+  F33MonitorAction *pFVar4;
+  ushort uVar5;
+  uchar uVar6;
+  uchar uVar7;
+  uint uVar8;
+  uint uVar9;
+  
+  uVar9 = (uint)state->failing_count;
+  uVar2 = (uint)thresholds->failing_limit;
+  uVar8 = (uint)state->passing_count;
+  uVar5 = state->failing_high_water;
+  if ((int)(uVar9 - uVar2) < 0 || uVar9 == uVar2) {
+    uVar3 = (uint)thresholds->passing_limit;
+    if ((int)(uVar8 - uVar3) < 0 || uVar8 == uVar3) {
+      uVar6 = 0xff;
+      uVar1 = (*(int (*)())callbacks->classify)();
+      if (uVar1 == 0x11) {
+        uVar9 = 0;
+        if (((int)(uVar8 - uVar3) < 0 || uVar8 == uVar3) &&
+           (uVar8 = uVar8 + 1, (int)(uVar8 - uVar3) < 0 || uVar8 == uVar3)) goto LAB_0006a732;
+        pFVar4 = ((void *)camry_host_ptr((uint32_t)(callbacks->healthy_observed)));
+        uVar7 = '\0';
+        uVar6 = '\0';
+      }
+      else {
+        if (uVar1 != 0x22) goto LAB_0006a732;
+        uVar8 = 0;
+        if ((int)(uVar9 - uVar2) < 0 || uVar9 == uVar2) {
+          uVar9 = uVar9 + 1;
+        }
+        uVar3 = uVar9;
+        if (-1 < (int)(uVar5 - uVar9)) {
+          uVar3 = (uint)uVar5;
+        }
+        uVar5 = (ushort)uVar3;
+        if ((int)(uVar9 - uVar2) < 0 || uVar9 == uVar2) goto LAB_0006a732;
+        pFVar4 = ((void *)camry_host_ptr((uint32_t)(callbacks->failed)));
+        uVar7 = '\"';
+        uVar6 = '\"';
+      }
+      if ((uintptr_t)(pFVar4)!=(uintptr_t)(f33_reset_vector)) {
+        (*(int (*)())pFVar4)();
+        uVar6 = uVar7;
+      }
+    }
+    else {
+      uVar6 = '\0';
+    }
+  }
+  else {
+    uVar6 = '\"';
+  }
+LAB_0006a732:
+  state->status = uVar6;
+  state->passing_count = (ushort)uVar8;
+  state->failing_count = (ushort)uVar9;
+  state->failing_high_water = uVar5;
+  return 0x11;
 }
 
 

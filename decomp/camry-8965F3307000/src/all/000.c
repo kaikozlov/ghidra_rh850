@@ -1694,6 +1694,46 @@ void FUN_00002aca(undefined1 param_1)
 
 
 
+/* Checksresidenttransportenabled,selector<2,length2..8;routesPCI0/10/20/30usingexact8D50config.PDUisnotcompletedrequestdata.
+   Native real SF admission copies10 02 without padding, preserving the live capacity pointer; stops
+   before timer capture/service dispatch. */
+
+void f33_boot_transport_receive_frame(ushort selector,F33BootPduInfo *pdu)
+
+{
+  F33BootInterruptEntry *pFVar1;
+  uint uVar2;
+  uchar *puVar3;
+  uint uVar4;
+  char cStack_d;
+  
+  pFVar1 = f33_boot_interrupt_dispatch;
+  uVar4 = (uint)pdu->length;
+  if (((DAT_febf2930 != '\0') && (selector < 2)) && (uVar4 - 2 < 7)) {
+    puVar3 = ((void *)camry_host_ptr((uint32_t)(pdu->data)));
+    cStack_d = -0x10;
+    uVar2 = FUN_00002284(selector,puVar3,&cStack_d);
+    if ((uVar2 < 2) &&
+       (((*((char *)camry_host_ptr((uint32_t)((int)&pFVar1[(short)uVar2 * 3 + 0xd7].eiic + 1)))) == '\0' || (uVar4 == 8)))) {
+      if (cStack_d == '\0') {
+        FUN_0000242a(uVar2, uVar4, camry_host_addr(puVar3));
+      }
+      else if (cStack_d == '\x10') {
+        FUN_000027d8(uVar2, uVar4, camry_host_addr(puVar3));
+      }
+      else if (cStack_d == ' ') {
+        FUN_00002946(uVar2, uVar4, camry_host_addr(puVar3));
+      }
+      else if (cStack_d == '0') {
+        FUN_00002ae4(uVar2, uVar4, camry_host_addr(puVar3));
+      }
+    }
+  }
+  return;
+}
+
+
+
 undefined1 FUN_00002e32(short param_1)
 
 {

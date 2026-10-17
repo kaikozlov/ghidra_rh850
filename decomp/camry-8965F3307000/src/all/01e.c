@@ -3271,6 +3271,25 @@ F33CanTpConfiguration * FUN_0007a32e(void)
 
 
 
+uint FUN_0007a334(ushort param_1,uint param_2)
+
+{
+  F33CanTpConfiguration *configuration;
+  uint uVar1;
+  
+  uVar1 = 1;
+  if ((((((int8_t)DAT_febe4f3d) == -0x56) &&
+       (configuration = (F33CanTpConfiguration *)FUN_0007a32e(),(uintptr_t)(configuration)!=(uintptr_t)((F33CanTpConfiguration *)0x0))) &&
+      ((uint)configuration->first_transmit_id <= (uint)param_1)) &&
+     ((int)((uint)param_1 -
+           ((uint)configuration->transmit_count + (uint)configuration->first_transmit_id)) < 0)) {
+    uVar1 = f33_cantp_accept_transmit_length(configuration,param_1,param_2);
+  }
+  return uVar1;
+}
+
+
+
 /* Read response length at+4 and pass to7A334; propagate real R10 result. Does not copy payload. */
 
 uint f33_cantp_transmit_descriptor(ushort transmit_id,F33PduInfo *response)
@@ -3279,6 +3298,44 @@ uint f33_cantp_transmit_descriptor(ushort transmit_id,F33PduInfo *response)
   uint uVar1;
   
   uVar1 = FUN_0007a334(transmit_id,response->length);
+  return uVar1;
+}
+
+
+
+uint FUN_0007a38c(ushort param_1)
+
+{
+  F33CanTpConfiguration *configuration;
+  uint uVar1;
+  
+  uVar1 = 1;
+  if ((((((int8_t)DAT_febe4f3d) == -0x56) &&
+       (configuration = (F33CanTpConfiguration *)FUN_0007a32e(),(uintptr_t)(configuration)!=(uintptr_t)((F33CanTpConfiguration *)0x0))) &&
+      ((uint)configuration->first_transmit_id <= (uint)param_1)) &&
+     ((int)((uint)param_1 -
+           ((uint)configuration->transmit_count + (uint)configuration->first_transmit_id)) < 0)) {
+    uVar1 = f33_cantp_cancel_transmit_owner(configuration,param_1);
+  }
+  return uVar1;
+}
+
+
+
+uint FUN_0007a3ca(ushort param_1)
+
+{
+  F33CanTpConfiguration *configuration;
+  uint uVar1;
+  
+  uVar1 = 1;
+  if ((((((int8_t)DAT_febe4f3d) == -0x56) &&
+       (configuration = (F33CanTpConfiguration *)FUN_0007a32e(),(uintptr_t)(configuration)!=(uintptr_t)((F33CanTpConfiguration *)0x0))) &&
+      ((uint)configuration->first_receive_id <= (uint)param_1)) &&
+     ((int)((uint)param_1 -
+           ((uint)configuration->receive_count + (uint)configuration->first_receive_id)) < 0)) {
+    uVar1 = f33_cantp_cancel_receive_owner(configuration,param_1);
+  }
   return uVar1;
 }
 
@@ -3318,6 +3375,42 @@ void f33_cantp_receive_can_frame(ushort canif_receive_id,F33PduInfo *pdu)
     local_14 = *extraout_r7;
     uStack_10 = (uint)*(ushort *)(extraout_r7 + 1);
     FUN_0007a4e4(((F33CanTpConfiguration *)camry_host_ptr((uint32_t)(iVar2))), &local_14, uVar1);
+  }
+  return;
+}
+
+
+
+/* Require initialized marker and configured confirmation range0800..0803; prefer matching active Tx
+   connection, else active receive FC owner. Per-frame progression and aggregate application
+   completion remain distinct. */
+
+void f33_cantp_confirm_can_frame(ushort canif_confirmation_id)
+
+{
+  F33CanTpConfiguration *configuration;
+  F33CanTpConfiguration *configuration_00;
+  F33CanTpTxConnection *connection;
+  F33CanTpRxConnection *connection_00;
+  
+  if ((((((int8_t)DAT_febe4f3d) == -0x56) &&
+       (configuration_00 = (F33CanTpConfiguration *)FUN_0007a32e(),(uintptr_t)(configuration_00)!=(uintptr_t)((F33CanTpConfiguration *)0x0))) &&
+      ((uint)configuration_00->first_canif_confirmation_id <= (uint)canif_confirmation_id)) &&
+     ((int)((uint)canif_confirmation_id -
+           ((uint)configuration_00->canif_confirmation_count +
+           (uint)configuration_00->first_canif_confirmation_id)) < 0)) {
+    connection = f33_cantp_find_active_transmit_confirmation(configuration_00,canif_confirmation_id)
+    ;
+    if ((uintptr_t)(connection)==(uintptr_t)((F33CanTpTxConnection *)0x0)) {
+      connection_00 =
+           f33_cantp_find_active_receive_confirmation(configuration,canif_confirmation_id);
+      if ((uintptr_t)(connection_00)!=(uintptr_t)((F33CanTpRxConnection *)0x0)) {
+        f33_cantp_confirm_receive_flow_control(connection_00);
+      }
+    }
+    else {
+      f33_cantp_handle_frame_confirmation(connection);
+    }
   }
   return;
 }
@@ -3370,6 +3463,50 @@ void f33_cantp_finish_receive_aggregate
 
 
 
+/* Cancel matching active receive work in FC/wait states, but refuse state4B when remaining bytes
+   fit one final CF. Exact lower cancel hook7B246 is a no-op; upper failure/reset is separate. */
+
+uint f33_cantp_cancel_receive_owner(F33CanTpConfiguration *configuration,ushort receive_id)
+
+{
+  int iVar1;
+  char cVar2;
+  uint32_t puVar3;
+  uint32_t puVar4;
+  F33CanTpRxConnection *connection;
+  uint uVar5;
+  F33CanTpRxState *state;
+  
+  puVar3 = 0xfebeb800u;
+  puVar4 = 0x23dfcu;
+  uVar5 = 1;
+  connection = f33_cantp_find_receive_connection(configuration,receive_id);
+  iVar1 = (uint)connection->channel_state_index * 0x20;
+  state = ((F33CanTpRxState *)camry_host_ptr((uint32_t)(puVar3 + iVar1 + -0x68b0)));
+  if (receive_id == (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + iVar1 + -0x68ac))))) {
+    cVar2 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(iVar1 + -0x68a6)))));
+    if (cVar2 == 'K') {
+      if (state->remaining_length <=
+          (8 - ((byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(connection->addressing_format - 0x1264))))) + 1) & 0xff)) {
+        return 1;
+      }
+    }
+    else if (cVar2 == 'Z') {
+      ((void)(connection->canif_fc_transmit_id), f33_return_only_stub_7b246());
+    }
+    else if (cVar2 != 'i') {
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x68c4))))) = 0xf;
+      f33_cantp_reset_receive_owner(state);
+      return 1;
+    }
+    f33_cantp_finish_receive_aggregate(connection,state,'\x01');
+    uVar5 = 0;
+  }
+  return uVar5;
+}
+
+
+
 /* Accumulate capacity shifted by each set bit of block_size, truncating the sum to16 bits. This
    computes configured CF payload capacity times BS; it is not an empty delay loop. */
 
@@ -3413,6 +3550,43 @@ uint f33_cantp_select_receive_flow_status
     uVar2 = 0xf0;
   }
   return uVar2;
+}
+
+
+
+/* Construct PCI30|status plus BS/STmin in shared frame scratch and submit actual CanIf route. Exact
+   physical rows pad to8 with00; return actual software enqueue status. */
+
+uint f33_cantp_queue_receive_flow_control
+               (F33CanTpRxConnection *connection,uchar flow_status,uchar block_size,uchar stmin)
+
+{
+  uint uVar1;
+  F33CanTpFrameInfo local_c;
+  
+  f33_cantp_shared_frame_scratch[3] = DAT_00022c46;
+  f33_cantp_shared_frame_scratch[4] = DAT_00022c46;
+  f33_cantp_shared_frame_scratch[5] = DAT_00022c46;
+  f33_cantp_shared_frame_scratch[6] = DAT_00022c46;
+  f33_cantp_shared_frame_scratch[7] = DAT_00022c46;
+  uVar1 = (uint)connection->addressing_format;
+  if (uVar1 == 4) {
+    f33_cantp_shared_frame_scratch[0] = connection->flow_control_address_byte;
+  }
+  else if (uVar1 == 2 || uVar1 == 3) {
+    f33_cantp_shared_frame_scratch[0] = connection->extended_flow_address_byte;
+  }
+  uVar1 = (uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x22b98u + (uint32_t)(uVar1) * 1u))));
+  f33_cantp_shared_frame_scratch[uVar1] = flow_status | 0x30;
+  f33_cantp_shared_frame_scratch[uVar1 + 1] = block_size;
+  local_c.length = 8;
+  f33_cantp_shared_frame_scratch[uVar1 + 2] = stmin;
+  if (connection->pad_flow_control_to_eight == '\0') {
+    local_c.length = uVar1 + 3 & 0xff;
+  }
+  local_c.data = camry_host_addr(f33_cantp_shared_frame_scratch);
+  uVar1 = f33_cantp_submit_can_frame(connection->canif_fc_transmit_id,&local_c);
+  return uVar1;
 }
 
 
@@ -3789,6 +3963,74 @@ uint f33_cantp_reject_consecutive_frame
 LAB_0007b05c:
   f33_cantp_finish_receive_aggregate(connection,state,(uchar)uVar4);
   return uVar4;
+}
+
+
+
+/* Accept matching RxID in4B or early5A/F0, validate extent/sequence and append payload. Early CF
+   may consume a CTS before its lower confirmation; exact cancel hook is no-op. */
+
+void f33_cantp_handle_consecutive_receive(F33CanTpRxConnection *connection,F33CanTpFrameInfo *frame)
+
+{
+  uchar uVar1;
+  uint uVar2;
+  uint uVar3;
+  
+  uVar2 = (uint)connection->channel_state_index;
+  uVar1 = ((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar2 * 2].state;
+  if ((((uVar1 == 'Z') && (((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar2 * 2].flow_status_marker == 0xf0)) ||
+      (uVar1 == 'K')) &&
+     ((connection->receive_id == ((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar2 * 2].receive_id &&
+      (uVar3 = f33_cantp_reject_consecutive_frame
+                         (connection, frame, ((F33CanTpRxState *)camry_host_ptr((uint32_t)((0xfebe4f50u) + uVar2 * 2)))), uVar3 == 0)))) {
+    if (uVar1 != 'K') {
+      ((void)(connection->canif_fc_transmit_id), f33_return_only_stub_7b246());
+    }
+    f33_cantp_append_consecutive_receive(connection, frame, ((F33CanTpRxState *)camry_host_ptr((uint32_t)((0xfebe4f50u) + uVar2 * 2))));
+  }
+  return;
+}
+
+
+
+/* CTS confirmation moves5A/F0 to4B with N_Cr+2; WAIT moves5A/E1 to69 with N_Br-3. Overflow5A/D2
+   retires local state without inventing an upper receive claim. */
+
+void f33_cantp_confirm_receive_flow_control(F33CanTpRxConnection *connection)
+
+{
+  uchar uVar1;
+  uint uVar2;
+  
+  uVar2 = (uint)connection->channel_state_index;
+  uVar1 = ((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar2 * 2].state;
+  if (uVar1 == 'K') {
+    return;
+  }
+  if (uVar1 == 'Z') {
+    uVar1 = ((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar2 * 2].flow_status_marker;
+    if (uVar1 == 0xf0) {
+      ((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar2 * 2].state = 'K';
+      ((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar2 * 2].timeout_ticks =
+           connection->consecutive_receive_timeout_raw + 2;
+      return;
+    }
+    if (uVar1 == 0xe1) {
+      ((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar2 * 2].state = 'i';
+      ((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar2 * 2].timeout_ticks = connection->buffer_wait_timeout_raw - 3;
+      ((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar2 * 2].flow_status_marker = 0xe1;
+      return;
+    }
+    if (uVar1 == 0xd2) goto LAB_0007b1fc;
+  }
+  else if (uVar1 == 'i') {
+    return;
+  }
+  DAT_febe4f3c = 0xf;
+LAB_0007b1fc:
+  f33_cantp_reset_receive_owner(((F33CanTpRxState *)camry_host_ptr((uint32_t)((0xfebe4f50u) + uVar2 * 2))));
+  return;
 }
 
 
@@ -4301,6 +4543,102 @@ void FUN_0007b72a(int param_1,undefined4 *param_2)
 
 
 
+/* WARNING: Inlined function: f33_cantp_write_transmit_address_byte */
+/* Acquire up to7 configured bytes and build modulo16 CF; pad only final frame to8. Success consumes
+   remaining and block allowance before enqueue in87/N_As+2. Upper busy2 preserves96 for retry;
+   other copy/enqueue refusal reports aggregate failure. */
+
+void f33_cantp_build_and_queue_consecutive_frame
+               (F33CanTpTxConnection *connection,F33CanTpTxStatePrefix *state)
+
+{
+  byte bVar1;
+  ushort uVar2;
+  uchar uVar3;
+  uint uVar4;
+  uint32_t puVar5;
+  undefined4 uVar6;
+  uint uVar7;
+  uint uVar8;
+  uint uVar9;
+  uint uVar10;
+  byte bVar11;
+  uint local_30;
+  F33CanTpFrameInfo FStack_2c;
+  
+  puVar5 = 0x23dfcu;
+  uVar3 = connection->addressing_format;
+  if (uVar3 == '\x04') {
+    f33_cantp_shared_frame_scratch[0] = connection->address_byte;
+  }
+  else if (uVar3 == '\x02' || uVar3 == '\x03') {
+    f33_cantp_shared_frame_scratch[0] = connection->extended_transmit_address_byte;
+  }
+  bVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x22b98u + (uint32_t)(connection->addressing_format) * 1u))));
+  if (state->sequence_number == 0xff) {
+    bVar11 = 1;
+  }
+  else {
+    bVar11 = state->sequence_number + 1 & 0xf;
+  }
+  f33_cantp_shared_frame_scratch[bVar1] = bVar11 | 0x20;
+  uVar9 = (uint)connection->frame_capacity;
+  uVar8 = state->remaining_or_accepted_length;
+  uVar10 = bVar1 + 1 & 0xff;
+  uVar4 = uVar9 - uVar10 & 0xff;
+  if (uVar4 < uVar8) {
+    uVar8 = uVar8 - uVar4;
+  }
+  else {
+    uVar4 = uVar8 & 0xff;
+    uVar8 = 0;
+    uVar9 = uVar10 + uVar4 & 0xff;
+    if (connection->pad_frames_to_eight == '\x01') {
+      uVar9 = 8;
+    }
+  }
+  FStack_2c.data = camry_host_addr(f33_cantp_shared_frame_scratch + uVar10);
+  local_30 = 0;
+  FStack_2c.length = uVar4;
+  uVar7 = f33_cantp_copy_upper_transmit_bytes(connection->upper_response_id,&FStack_2c,&local_30);
+  if (uVar7 == 0) {
+    uVar3 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0x11b6)))));
+    while (uVar10 = uVar10 + uVar4 & 0xff, uVar10 < uVar9) {
+      f33_cantp_shared_frame_scratch[uVar10] = uVar3;
+      uVar4 = 1;
+    }
+    FStack_2c.data = camry_host_addr(f33_cantp_shared_frame_scratch);
+    if (state->state == 0x96) {
+      state->state = 0x87;
+      uVar2 = connection->frame_confirmation_timeout_raw;
+      state->sequence_number = bVar11;
+      state->remaining_or_accepted_length = uVar8;
+      state->timeout_ticks = uVar2 + 2;
+      uVar3 = state->block_remaining;
+      if (uVar3 != '\0') {
+        uVar3 = uVar3 + 0xff;
+      }
+      state->block_remaining = uVar3;
+    }
+    FStack_2c.length = uVar9;
+    uVar8 = f33_cantp_submit_can_frame(connection->canif_frame_id,&FStack_2c);
+    uVar6 = 0x87;
+    if (uVar8 == 0) {
+      return;
+    }
+  }
+  else {
+    uVar6 = 0x96;
+    if (uVar7 == 2) {
+      return;
+    }
+  }
+  FUN_0007b572(camry_host_addr(connection), state, uVar6);
+  return;
+}
+
+
+
 /* WARNING: Inlined function: f33_cantp_reset_transmit_owner */
 
 void FUN_0007b848(int param_1,undefined4 *param_2)
@@ -4506,6 +4844,138 @@ void f33_cantp_capture_initial_flow_parameters
     state->block_size = block_size;
     state->spacing_ticks = uVar1;
   }
+  return;
+}
+
+
+
+/* CTS reloads block remaining and enters96/N_Cs-3; WAIT entersA5/N_Bs+2; OVERFLOW aborts aggregate.
+   No received-WAIT counter is imposed on transmit work. */
+
+void f33_cantp_apply_flow_control(F33CanTpTxConnection *connection,F33CanTpFrameInfo *frame)
+
+{
+  byte *pbVar1;
+  uint uVar2;
+  ushort uVar3;
+  
+  uVar2 = (uint)connection->channel_state_index;
+  pbVar1 = ((void *)camry_host_ptr((uint32_t)(frame->data + (byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x22b98u + (uint32_t)(connection->addressing_format) * 1u)))))));
+  if ((*pbVar1 & 0xf) == 0) {
+    f33_cantp_capture_initial_flow_parameters
+              (((F33CanTpTxStatePrefix *)camry_host_ptr((uint32_t)((0xfebe4f40u) + uVar2 * 2))), pbVar1[1], pbVar1[2]);
+    ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar2 * 2].block_remaining =
+         ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar2 * 2].block_size;
+    ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar2 * 2].state = 0x96;
+    uVar3 = connection->consecutive_copy_timeout_raw - 3;
+  }
+  else {
+    if ((*pbVar1 & 0xf) != 1) {
+      f33_cantp_finish_transmit_aggregate
+                (connection, ((F33CanTpTxStatePrefix *)camry_host_ptr((uint32_t)((0xfebe4f40u) + uVar2 * 2))), '\x01');
+      return;
+    }
+    ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar2 * 2].state = 0xa5;
+    uVar3 = connection->flow_control_timeout_raw + 2;
+  }
+  ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar2 * 2].timeout_ticks = uVar3;
+  return;
+}
+
+
+
+/* Accept matching TxID whileB4/A5 or87 at a nonfinal exhausted nonzero block. Valid FC can advance
+   an unconfirmed FF/CF; exact lower cancellation is no-op. Ignore FC outside those qualified
+   ownership states. */
+
+void f33_cantp_handle_flow_control(F33CanTpTxConnection *connection,F33CanTpFrameInfo *frame)
+
+{
+  uchar uVar1;
+  uint uVar2;
+  
+  uVar2 = (uint)connection->channel_state_index;
+  uVar1 = ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar2 * 2].state;
+  if ((((uVar1 == 0xb4) || (uVar1 == 0xa5)) ||
+      ((uVar1 == 0x87 &&
+       (((((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar2 * 2].block_remaining == '\0' &&
+         (((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar2 * 2].block_size != '\0')) &&
+        (((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar2 * 2].remaining_or_accepted_length != 0)))))) &&
+     ((((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar2 * 2].transmit_id == connection->transmit_id &&
+      (uVar2 = f33_cantp_reject_flow_control_frame
+                         (connection, frame, ((F33CanTpTxStatePrefix *)camry_host_ptr((uint32_t)((0xfebe4f40u) + uVar2 * 2)))), uVar2 == 0))))
+  {
+    if (uVar1 != 0xa5) {
+      ((void)(connection->canif_frame_id), f33_return_only_stub_7b246());
+    }
+    f33_cantp_apply_flow_control(connection,frame);
+  }
+  return;
+}
+
+
+
+/* WARNING: Inlined function: f33_cantp_reset_transmit_owner */
+/* CanIf software confirmation advances single/multi-frame state. Only completed aggregate transport
+   clears channel and reports upper result0; intermediate frames may wait for flow-control or
+   spacing. */
+
+void f33_cantp_handle_frame_confirmation(F33CanTpTxConnection *connection)
+
+{
+  uchar uVar1;
+  uint uVar2;
+  F33CanTpTxStatePrefix *state;
+  
+  uVar2 = (uint)connection->channel_state_index;
+  uVar1 = ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar2 * 2].state;
+  state = ((void *)camry_host_ptr((uint32_t)((0xfebe4f40u) + uVar2 * 2)));
+  if (uVar1 == 'x') {
+    return;
+  }
+  if (uVar1 == 0x87) {
+    if (state->remaining_or_accepted_length != 0) {
+      if ((((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar2 * 2].block_remaining != '\0') ||
+         (((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar2 * 2].block_size == '\0')) {
+        ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar2 * 2].state = 'x';
+        ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar2 * 2].timeout_ticks =
+             (ushort)((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar2 * 2].spacing_ticks;
+        return;
+      }
+      goto LAB_0007bb80;
+    }
+  }
+  else {
+    if (uVar1 == 0x96) {
+      return;
+    }
+    if (uVar1 == 0xa5) {
+      return;
+    }
+    if (uVar1 == 0xb4) {
+LAB_0007bb80:
+      ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar2 * 2].state = 0xa5;
+      ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar2 * 2].timeout_ticks =
+           connection->flow_control_timeout_raw + 2;
+      return;
+    }
+    if (uVar1 != 0xc3) {
+      if (uVar1 == 0xd2) {
+        return;
+      }
+      DAT_febe4f3c = 0xf;
+      ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar2 * 2].transmit_id = 0xffff;
+      state->remaining_or_accepted_length = 0;
+      ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar2 * 2].state = 0xe1;
+      ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar2 * 2].timeout_ticks = 0;
+      ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar2 * 2].sequence_number = 0xff;
+      ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar2 * 2].block_remaining = '\0';
+      ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar2 * 2].block_size = '\0';
+      ((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar2 * 2].spacing_ticks = '\0';
+      return;
+    }
+  }
+  f33_cantp_finish_transmit_aggregate(connection,state,'\0');
   return;
 }
 

@@ -1082,6 +1082,20 @@ def _rewrite_pointer_to_int(code: str, pointers: set[str]) -> str:
         end = _operand_end(code, begin)
         if end == begin:
             continue
+        # `(uint)pdu->length` casts the field. The base alone is not the operand.
+        while True:
+            arrow = _skip_space(code, end)
+            if code.startswith("->", arrow):
+                step = 2
+            elif arrow < len(code) and code[arrow] == ".":
+                step = 1
+            else:
+                break
+            field_at = _skip_space(code, arrow + step)
+            field = re.match(r"[A-Za-z_][A-Za-z0-9_]*", code[field_at:])
+            if field is None:
+                break
+            end = field_at + field.end()
         if end < len(code) and code[end] == "[":
             continue
         operand = code[begin:end]

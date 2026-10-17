@@ -1429,6 +1429,44 @@ void FUN_0004d222(int param_1,uint param_2)
 
 
 
+/* Clear output then set MSB-first bits for kind0 metadata strictly above page base and below
+   base+256, with null/5A availability callback. Bitmap is generated from current availability, not
+   a cached guarantee that a later read succeeds. */
+
+void f33_serialize_available_did_bitmap(ushort did_page,uchar *output,ushort length)
+
+{
+  F33DidPublicationMetadata *pFVar1;
+  uint uVar2;
+  F33DidPublicationMetadata *pFVar3;
+  uint uVar4;
+  int iVar5;
+  ushort uStack_26;
+  
+  for (uVar2 = 0; uVar2 < length; uVar2 = uVar2 + 1 & 0xffff) {
+    output[uVar2] = '\0';
+  }
+  pFVar3 = f33_get_did_publication_metadata(&uStack_26);
+  for (iVar5 = 0;
+      (int)(iVar5 - (uint)uStack_26) < 0 != (iVar5 < 0 && -1 < (int)(iVar5 - (uint)uStack_26));
+      iVar5 = iVar5 + 1) {
+    pFVar1 = pFVar3 + iVar5;
+    uVar2 = (uint)pFVar1->did;
+    if ((((pFVar1->route_kind == '\0') && ((did_page & 0xff00) < uVar2)) &&
+        (uVar2 < ((did_page & 0xff00) + 0x100 & 0xffff))) &&
+       (((uintptr_t)(pFVar1->available)==(uintptr_t)(f33_reset_vector)|| (uVar4 = (*(int (*)())pFVar1->available)(), uVar4 == 0x5a))))
+    {
+      uVar4 = (int)(uVar2 - 1 & 0xff) >> 3;
+      if (uVar4 < (length & 0xff)) {
+        output[uVar4] = output[uVar4] | (byte)(0x80 >> (uVar2 - 1 & 7));
+      }
+    }
+  }
+  return;
+}
+
+
+
 void FUN_0004d308(uint param_1,int param_2,uint param_3)
 
 {
@@ -3759,6 +3797,172 @@ undefined4 f33_rdbi_1cab_callback(undefined4 param_1,undefined2 param_2)
 {
   FUN_00052972(param_1,param_2);
   return 0;
+}
+
+
+
+/* Serialize45 bytes big-endian: clamp signed source groups, signed32 scaled word to16 bits, signed
+   feedback groups to\u00b125000 and kind to3. This serializer applies no record-validity gate by
+   itself; unsigned16/32 all-ones checks preserve their bit patterns. Serialize45 bytes big-endian:
+   clamp signed source groups, signed32 scaled word to16 bits, signed feedback groups to±25000 and
+   kind to3. */
+
+void f33_serialize_retained_control_profile(uchar *output,F33RetainedControlProfile *profile)
+
+{
+  short sVar1;
+  short sVar2;
+  int iVar3;
+  int iVar4;
+  int iVar5;
+  int iVar6;
+  int iVar7;
+  int iVar8;
+  int iVar9;
+  int iVar10;
+  int iVar11;
+  int iVar12;
+  int iVar13;
+  uint uVar14;
+  ushort uVar15;
+  ushort uVar16;
+  ushort uVar17;
+  ushort uVar18;
+  byte bVar19;
+  short sStack_34;
+  
+  iVar3 = (int)profile->capture_value;
+  if (iVar3 + -0x7fff < 0 == (iVar3 < 0 && -1 < iVar3 + -0x7fff)) {
+    iVar3 = 0x7fff;
+  }
+  iVar4 = (int)profile->received_composite;
+  if (iVar4 + -0x7fff < 0 == (iVar4 < 0 && -1 < iVar4 + -0x7fff)) {
+    iVar4 = 0x7fff;
+  }
+  uVar18 = profile->integrated_source;
+  if (0xfffe < uVar18) {
+    uVar18 = 0xffff;
+  }
+  uVar17 = profile->elapsed_groups;
+  if (0xfffe < uVar17) {
+    uVar17 = 0xffff;
+  }
+  iVar5 = profile->scaled_f228;
+  if (iVar5 + -0x7fff < 0 == (iVar5 < 0 && -1 < iVar5 + -0x7fff)) {
+    iVar5 = 0x7fff;
+  }
+  if (iVar5 + 0x8000 < 0 != (-1 < iVar5 && iVar5 + 0x8000 < 0)) {
+    iVar5 = -0x8000;
+  }
+  uVar16 = profile->source_u16_max;
+  if (0xfffe < uVar16) {
+    uVar16 = 0xffff;
+  }
+  uVar15 = profile->source_u16_mean;
+  if (0xfffe < uVar15) {
+    uVar15 = 0xffff;
+  }
+  iVar6 = (int)profile->f1c6_max;
+  if (iVar6 + -0x1ff < 0 == (iVar6 < 0 && -1 < iVar6 + -0x1ff)) {
+    iVar6 = 0x1ff;
+  }
+  if (iVar6 + 0x200 < 0 != (-1 < iVar6 && iVar6 + 0x200 < 0)) {
+    iVar6 = -0x200;
+  }
+  iVar7 = (int)profile->f1c6_mean;
+  if (iVar7 + -0x1ff < 0 == (iVar7 < 0 && -1 < iVar7 + -0x1ff)) {
+    iVar7 = 0x1ff;
+  }
+  if (iVar7 + 0x200 < 0 != (-1 < iVar7 && iVar7 + 0x200 < 0)) {
+    iVar7 = -0x200;
+  }
+  iVar8 = (int)profile->f1c8_max;
+  if (iVar8 + -0x1ff < 0 == (iVar8 < 0 && -1 < iVar8 + -0x1ff)) {
+    iVar8 = 0x1ff;
+  }
+  if (iVar8 + 0x200 < 0 != (-1 < iVar8 && iVar8 + 0x200 < 0)) {
+    iVar8 = -0x200;
+  }
+  iVar9 = (int)profile->f1c8_mean;
+  if (iVar9 + -0x1ff < 0 == (iVar9 < 0 && -1 < iVar9 + -0x1ff)) {
+    iVar9 = 0x1ff;
+  }
+  if (iVar9 + 0x200 < 0 != (-1 < iVar9 && iVar9 + 0x200 < 0)) {
+    iVar9 = -0x200;
+  }
+  iVar10 = (int)profile->f1ca_max;
+  if (iVar10 + -0x12d4 < 0 == (iVar10 < 0 && -1 < iVar10 + -0x12d4)) {
+    iVar10 = 0x12d4;
+  }
+  if (iVar10 + 0x12d4 < 0 != (-1 < iVar10 && iVar10 + 0x12d4 < 0)) {
+    iVar10 = -0x12d4;
+  }
+  iVar11 = (int)profile->f1ca_mean;
+  if (iVar11 + -0x12d4 < 0 == (iVar11 < 0 && -1 < iVar11 + -0x12d4)) {
+    iVar11 = 0x12d4;
+  }
+  if (iVar11 + 0x12d4 < 0 != (-1 < iVar11 && iVar11 + 0x12d4 < 0)) {
+    iVar11 = -0x12d4;
+  }
+  sVar1 = profile->scaled_ae5c_max;
+  iVar12 = sVar1 + -0x7fff;
+  if (iVar12 < 0 == (sVar1 < 0 && -1 < iVar12)) {
+    sVar1 = 0x7fff;
+  }
+  sVar2 = profile->scaled_ae5c_min;
+  iVar12 = sVar2 + -0x7fff;
+  if (iVar12 < 0 == (sVar2 < 0 && -1 < iVar12)) {
+    sVar2 = 0x7fff;
+  }
+  iVar12 = (int)profile->scaled_b054_max;
+  if (iVar12 + -25000 < 0 == (iVar12 < 0 && -1 < iVar12 + -25000)) {
+    iVar12 = 25000;
+  }
+  if (iVar12 + 25000 < 0 != (-1 < iVar12 && iVar12 + 25000 < 0)) {
+    iVar12 = -25000;
+  }
+  iVar13 = (int)profile->scaled_b054_mean;
+  if (iVar13 + -25000 < 0 == (iVar13 < 0 && -1 < iVar13 + -25000)) {
+    iVar13 = 25000;
+  }
+  if (iVar13 + 25000 < 0 != (-1 < iVar13 && iVar13 + 25000 < 0)) {
+    iVar13 = -25000;
+  }
+  uVar14 = profile->route31_scalar;
+  bVar19 = profile->scalar_kind;
+  if (uVar14 == 0xffffffff) {
+    uVar14 = 0xffffffff;
+  }
+  if (2 < bVar19) {
+    bVar19 = 3;
+  }
+  FUN_0006a5ac(iVar3,output);
+  FUN_0006a5ac(iVar4,output + 2);
+  FUN_0006a574(uVar18,output + 4);
+  FUN_0006a574(uVar17,output + 6);
+  sStack_34 = (short)iVar5;
+  FUN_0006a5ac((int)sStack_34,output + 8);
+  FUN_0006a574(uVar16,output + 10);
+  FUN_0006a574(uVar15,output + 0xc);
+  FUN_0006a5ac((int)(short)iVar6,output + 0xe);
+  FUN_0006a5ac((int)(short)iVar7,output + 0x10);
+  FUN_0006a5ac((int)(short)iVar8,output + 0x12);
+  FUN_0006a5ac((int)(short)iVar9,output + 0x14);
+  FUN_0006a5ac((int)(short)iVar10,output + 0x16);
+  FUN_0006a5ac((int)(short)iVar11,output + 0x18);
+  FUN_0006a5ac((int)sVar1,output + 0x1a);
+  FUN_0006a5ac((int)sVar2,output + 0x1c);
+  FUN_0006a5ac(iVar12,output + 0x1e);
+  FUN_0006a5ac(iVar13,output + 0x20);
+  FUN_0006a55c(uVar14,output + 0x22);
+  output[0x26] = bVar19;
+  output[0x27] = profile->packed_metadata[0];
+  output[0x28] = profile->packed_metadata[1];
+  output[0x29] = profile->packed_metadata[2];
+  output[0x2a] = profile->packed_metadata[3];
+  output[0x2b] = profile->packed_metadata[4];
+  output[0x2c] = profile->packed_metadata[5];
+  return;
 }
 
 
