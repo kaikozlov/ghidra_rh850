@@ -209,7 +209,7 @@
 {"addr": "0x2b8a", "name": "f33_boot_transport_receive_frame", "status": "converted"}
 {"addr": "0x2c16", "name": "FUN_00002c16", "status": "converted"}
 {"addr": "0x2cd4", "name": "FUN_00002cd4", "status": "converted"}
-{"addr": "0x2d88", "name": "FUN_00002d88", "status": "unconvertible"}
+{"addr": "0x2d88", "name": "FUN_00002d88", "status": "converted"}
 {"addr": "0x2e32", "name": "FUN_00002e32", "status": "converted"}
 {"addr": "0x2e86", "name": "FUN_00002e86", "status": "unconvertible"}
 {"addr": "0x2ecc", "name": "FUN_00002ecc", "status": "converted"}
@@ -4573,7 +4573,7 @@
 {"addr": "0x80f6c", "name": "FUN_00080f6c", "status": "converted"}
 {"addr": "0x81072", "name": "FUN_00081072", "status": "converted"}
 {"addr": "0x810f2", "name": "FUN_000810f2", "status": "unconvertible"}
-{"addr": "0x811be", "name": "FUN_000811be", "status": "unconvertible"}
+{"addr": "0x811be", "name": "FUN_000811be", "status": "converted"}
 {"addr": "0x81200", "name": "FUN_00081200", "status": "converted"}
 {"addr": "0x81290", "name": "FUN_00081290", "status": "converted"}
 {"addr": "0x812be", "name": "FUN_000812be", "status": "converted"}
@@ -4697,7 +4697,7 @@
 {"addr": "0x830a6", "name": "FUN_000830a6", "status": "converted"}
 {"addr": "0x830b4", "name": "f33_return_const_5_98eee", "status": "converted"}
 {"addr": "0x830c0", "name": "FUN_000830c0", "status": "converted"}
-{"addr": "0x830d0", "name": "FUN_000830d0", "status": "unconvertible"}
+{"addr": "0x830d0", "name": "FUN_000830d0", "status": "converted"}
 {"addr": "0x8312e", "name": "FUN_0008312e", "status": "converted"}
 {"addr": "0x83156", "name": "f33_return_only_stub_83156", "status": "converted"}
 {"addr": "0x83158", "name": "FUN_00083158", "status": "converted"}
@@ -5084,7 +5084,7 @@
 {"addr": "0x8d4ae", "name": "FUN_0008d4ae", "status": "converted"}
 {"addr": "0x8d4d4", "name": "thunk_FUN_0008d4ae", "status": "converted"}
 {"addr": "0x8d4e0", "name": "FUN_0008d4e0", "status": "converted"}
-{"addr": "0x8d4f6", "name": "FUN_0008d4f6", "status": "unconvertible"}
+{"addr": "0x8d4f6", "name": "FUN_0008d4f6", "status": "converted"}
 {"addr": "0x8d546", "name": "FUN_0008d546", "status": "converted"}
 {"addr": "0x8d66a", "name": "f33_app_security_reset_challenge_material", "status": "converted"}
 {"addr": "0x8d6a4", "name": "FUN_0008d6a4", "status": "converted"}

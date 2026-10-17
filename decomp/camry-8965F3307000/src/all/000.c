@@ -2983,6 +2983,42 @@ int FUN_00002cd4(ushort param_1,int param_2)
 
 
 
+undefined4 FUN_00002d88(short param_1,int param_2)
+
+{
+  char cVar1;
+  uint uVar2;
+  undefined4 uVar3;
+  uint uVar4;
+  
+  uVar4 = (uint)(*((ushort *)camry_host_ptr((uint32_t)(param_2 + 4))));
+  uVar3 = 1;
+  if ((((DAT_febf2930 != '\0') && (param_1 == 0)) && (uVar4 - 1 < 0xfff)) &&
+     ((cVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebf2931u + (uint32_t)(DAT_00008d83) * 1u)))), cVar1 == '\0' ||
+      ((((cVar1 != 'I' && (cVar1 != 'J')) && ((cVar1 != 'L' && ((cVar1 != 'Q' && (cVar1 != 'R'))))))
+       && ((cVar1 != 'T' &&
+           ((((((cVar1 != 'a' && (((int8_t)cVar1) != -0x77)) && (((int8_t)cVar1) != -0x76)) &&
+              ((((int8_t)cVar1) != -0x74 && (((int8_t)cVar1) != -0x6f)))) &&
+             ((((int8_t)cVar1) != -0x6e && ((((int8_t)cVar1) != -0x5f && (((int8_t)cVar1) != -0x5e)))))) && (((int8_t)cVar1) != -0x5c)))))))
+      ))) {
+    if (DAT_00008d80 == '\x04') {
+      uVar2 = 6;
+    }
+    else {
+      uVar2 = 7;
+    }
+    if (uVar2 < uVar4) {
+      uVar3 = FUN_00002c16((uint)(ushort)param_1, (*((volatile uint16_t *)(((uint8_t *)camry_host_ptr((uint32_t)(param_2))) + (4)))));
+    }
+    else {
+      uVar3 = FUN_00002cd4(0,uVar4);
+    }
+  }
+  return uVar3;
+}
+
+
+
 undefined1 FUN_00002e32(short param_1)
 
 {

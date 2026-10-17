@@ -2292,6 +2292,11 @@ def _transfer(state: dict[int, set], inst) -> dict[int, set]:
             width, signed = loaded[name]
             _write_origin(cur, args[0], ("mem", width, addr, signed))
             return cur
+        if base is not None and len(base) == 1 and next(iter(base))[0] == "entry":
+            width, signed = loaded[name]
+            held = next(iter(base))
+            _write_origin(cur, args[0], ("deref", held[1], args[2], width, signed))
+            return cur
     if name in _NARROW and args and args[0] in cur and len(cur[args[0]]) == 1:
         cur[args[0]] = {_narrow(next(iter(cur[args[0]])), _NARROW[name])}
         return cur
@@ -2409,6 +2414,20 @@ def _emit_origin(origin: set, params: list[str], types: list[str]) -> str | None
         width, addr, signed = item[1], item[2] & 0xFFFFFFFF, item[3]
         ctype = {1: "uint8_t", 2: "uint16_t", 4: "uint32_t"}[width]
         expr = f"(*((volatile {ctype} *)camry_host_ptr(0x{addr:x}u)))"
+        if signed and width == 1:
+            return f"(int)(int8_t){expr}"
+        if signed and width == 2:
+            return f"(int)(int16_t){expr}"
+        return expr
+    if item[0] == "deref":
+        reg, disp, width, signed = item[1], item[2], item[3], item[4]
+        index = reg - 6
+        if index < 0 or index >= len(params) or not params[index]:
+            return None
+        ctype = {1: "uint8_t", 2: "uint16_t", 4: "uint32_t"}[width]
+        expr = (
+            f"(*((volatile {ctype} *)((uint8_t *)({params[index]}) + ({int(disp)}))))"
+        )
         if signed and width == 1:
             return f"(int)(int8_t){expr}"
         if signed and width == 2:

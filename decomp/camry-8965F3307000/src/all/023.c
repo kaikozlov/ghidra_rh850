@@ -1356,6 +1356,33 @@ undefined4 FUN_0008d4e0(char param_1)
 
 
 
+undefined4 FUN_0008d4f6(char param_1,char *param_2,int *param_3)
+
+{
+  uint uVar1;
+  undefined4 uVar2;
+  undefined1 uVar3;
+  undefined1 *puVar4;
+  
+  if (*param_2 == '\0') {
+    uVar2 = 0;
+    if ((param_1 == '\0') && (uVar1 = 0, *(int *)(param_2 + 4) != 0)) {
+      for (; uVar1 < *(ushort *)(param_2 + 2); uVar1 = uVar1 + 1 & 0xffff) {
+        (*((undefined1 *)camry_host_ptr((uint32_t)(*param_3 + uVar1)))) = (*((undefined1 *)camry_host_ptr((uint32_t)(*(int *)(param_2 + 4) + uVar1))));
+      }
+    }
+  }
+  else {
+    puVar4 = (undefined1 *)param_3[3];
+    uVar3 = FUN_0008d4e0((*((volatile uint8_t *)((uint8_t *)(param_2) + (0)))));
+    *puVar4 = uVar3;
+    uVar2 = 2;
+  }
+  return uVar2;
+}
+
+
+
 undefined4
 FUN_0008d546(undefined4 param_1,byte param_2,undefined4 param_3,uint param_4,uchar *param_5,
             undefined1 *param_6)
