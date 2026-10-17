@@ -3075,6 +3075,62 @@ void FUN_00092946(uint param_1)
 
 
 
+/* Dispositions>1 except10/11 bypass lower transmission and return84. Check communication; propagate
+   lower refusal as81, unavailable as82, pending-inhibited as83. Zero lower return arms watchdog1;
+   pending10 also sets59EA. Software acceptance is not CAN transmission. */
+
+uint f33_dcm_submit_transport_response(ushort transmit_id,F33PduInfo *response,uchar disposition)
+
+{
+  uint32_t puVar1;
+  undefined4 uVar2;
+  int iVar3;
+  uint uVar4;
+  
+  puVar1 = 0x23dfcu;
+  uVar4 = 0;
+  if ((disposition == '\x10') || (disposition == '\x11')) {
+    puVar1 = 0x23dfcu;
+    iVar3 = FUN_00093d2e();
+    if (iVar3 != 0) {
+      return 0x83;
+    }
+  }
+  else if (1 < disposition) {
+    FUN_00093c94(0);
+    f33_dcm_cancel_software_timer('\x03');
+    f33_dcm_cancel_software_timer('\x04');
+    f33_dcm_cancel_software_timer('\x02');
+    return 0x84;
+  }
+  uVar2 = FUN_00093c60();
+  iVar3 = FUN_0009185c(uVar2,0);
+  if (iVar3 == 1) {
+    if ((disposition != '\x10') && (disposition != '\x11')) {
+      FUN_00093c94(0);
+      f33_dcm_cancel_software_timer('\x03');
+      f33_dcm_cancel_software_timer('\x04');
+      f33_dcm_cancel_software_timer('\x02');
+    }
+    ((void)(response), FUN_00092a52(transmit_id));
+    if (iVar3 == 0) {
+      if (disposition == '\x10') {
+        FUN_00093c94(1);
+      }
+      f33_dcm_arm_software_timer('\x01',(*((uint *)camry_host_ptr((uint32_t)(puVar1 + 0x2088)))));
+    }
+    else {
+      uVar4 = 0x81;
+    }
+  }
+  else {
+    uVar4 = 0x82;
+  }
+  return uVar4;
+}
+
+
+
 void FUN_00092a1e(undefined2 param_1)
 
 {

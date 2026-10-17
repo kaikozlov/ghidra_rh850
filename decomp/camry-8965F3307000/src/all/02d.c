@@ -2295,6 +2295,57 @@ void FUN_000b5868(uint param_1,int param_2)
 
 
 
+void FUN_000b5886(void)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  undefined1 uStack_13;
+  undefined1 uStack_12;
+  undefined1 uStack_11;
+  
+  DAT_febeb24f = 0;
+  iVar3 = 0;
+  do {
+    iVar2 = iVar3 + 1;
+    (*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xfebeb270u + (uint32_t)(iVar3) * 4u)))) = 0;
+    iVar1 = iVar3 + -6;
+    iVar3 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  uStack_13 = 1;
+  uStack_12 = 0;
+  uStack_11 = 0xff;
+  FUN_000b5868(0, camry_host_addr(&uStack_13));
+  uStack_13 = 1;
+  uStack_12 = 0;
+  uStack_11 = 0xff;
+  FUN_000b5868(1, camry_host_addr(&uStack_13));
+  uStack_13 = 1;
+  uStack_12 = 0;
+  uStack_11 = 0xff;
+  FUN_000b5868(2, camry_host_addr(&uStack_13));
+  uStack_13 = 1;
+  uStack_12 = 0;
+  uStack_11 = 0xff;
+  FUN_000b5868(3, camry_host_addr(&uStack_13));
+  uStack_13 = 1;
+  uStack_12 = 0;
+  uStack_11 = 0xff;
+  FUN_000b5868(4, camry_host_addr(&uStack_13));
+  uStack_13 = 1;
+  uStack_12 = 0;
+  uStack_11 = 0xff;
+  FUN_000b5868(5, camry_host_addr(&uStack_13));
+  uStack_13 = 1;
+  uStack_12 = 0;
+  uStack_11 = 0xff;
+  FUN_000b5868(6, camry_host_addr(&uStack_13));
+  return;
+}
+
+
+
 void FUN_000b5910(undefined1 param_1)
 
 {
@@ -3060,6 +3111,50 @@ void FUN_000b6142(uint param_1,int param_2)
   uVar2 = (*((undefined1 *)camry_host_ptr((uint32_t)(param_2 + 2))));
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebeb293u + (uint32_t)(iVar1) * 1u)))) = 0;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebeb292u + (uint32_t)(iVar1) * 1u)))) = uVar2;
+  return;
+}
+
+
+
+void FUN_000b6160(void)
+
+{
+  undefined1 uStack_13;
+  undefined1 uStack_12;
+  undefined1 uStack_11;
+  
+  uStack_13 = 1;
+  uStack_12 = 0;
+  uStack_11 = 0xff;
+  FUN_000b6142(0, camry_host_addr(&uStack_13));
+  uStack_13 = 1;
+  uStack_12 = 0;
+  uStack_11 = 0xff;
+  FUN_000b6142(1, camry_host_addr(&uStack_13));
+  uStack_13 = 1;
+  uStack_12 = 0;
+  uStack_11 = 0xff;
+  FUN_000b6142(2, camry_host_addr(&uStack_13));
+  uStack_13 = 1;
+  uStack_12 = 0;
+  uStack_11 = 0xff;
+  FUN_000b6142(3, camry_host_addr(&uStack_13));
+  uStack_13 = 1;
+  uStack_12 = 0;
+  uStack_11 = 0xff;
+  FUN_000b6142(4, camry_host_addr(&uStack_13));
+  uStack_13 = 1;
+  uStack_12 = 0;
+  uStack_11 = 0xff;
+  FUN_000b6142(5, camry_host_addr(&uStack_13));
+  uStack_13 = 1;
+  uStack_12 = 0;
+  uStack_11 = 0xff;
+  FUN_000b6142(6, camry_host_addr(&uStack_13));
+  uStack_13 = 1;
+  uStack_12 = 0;
+  uStack_11 = 0xff;
+  FUN_000b6142(7, camry_host_addr(&uStack_13));
   return;
 }
 

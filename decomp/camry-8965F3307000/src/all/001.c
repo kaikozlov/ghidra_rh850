@@ -4726,6 +4726,30 @@ void FUN_00006e54(void)
 
 
 
+void FUN_00006e60(void)
+
+{
+  uint32_t puVar1;
+  undefined4 uVar2;
+  
+  puVar1 = 0xfebf9800u;
+  uVar2 = FUN_0000721e(0xffff);
+  if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6c05))))) != '\x01') || (1 < (byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6c08))))))) goto LAB_00006e98;
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6c08))))) == 0) {
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-27999))))) == '\x01') goto LAB_00006e98;
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-28000))))) != '\0') {
+      FUN_00006e54();
+      goto LAB_00006e98;
+    }
+  }
+  FUN_00006e4a();
+LAB_00006e98:
+  FUN_00007244(uVar2);
+  return;
+}
+
+
+
 /* Paired constant publisher: DAT_febf2bfa = 0; and DAT_febf2bfb = 0;; shape-classified from the
    canonical corpus. Target cells not yet named. */
 

@@ -653,14 +653,14 @@ void FUN_0004c5fe(void)
 
 
 
-void FUN_0004c63c(void)
+uint FUN_0004c63c(void)
 
 {
   DAT_febe8187 = 0;
   if (DAT_febee836 == '\x01') {
     DAT_febe8187 = 0x5a;
   }
-  return;
+  return DAT_febe8187;
 }
 
 
@@ -714,7 +714,7 @@ void FUN_0004c650(void)
 
 
 
-void FUN_0004c6e6(void)
+uint FUN_0004c6e6(void)
 
 {
   DAT_febe8189 = DAT_febe80c9 & 2;
@@ -723,7 +723,7 @@ void FUN_0004c6e6(void)
      ((DAT_febee857 == '\"' || ((DAT_febee858 == '\"' || (DAT_febee859 == '\"')))))) {
     DAT_febe8189 = 0x5a;
   }
-  return;
+  return DAT_febe8189;
 }
 
 

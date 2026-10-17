@@ -2985,6 +2985,23 @@ void FUN_0008aa1c(uint *param_1)
 
 
 
+void FUN_0008aa4a(void)
+
+{
+  uint local_c;
+  uint uStack_8;
+  
+  local_c = 0;
+  uStack_8 = 0;
+  FUN_0008aa04(&local_c);
+  local_c = local_c | 1;
+  uStack_8 = uStack_8 | 1;
+  FUN_0008aa1c(&local_c);
+  return;
+}
+
+
+
 undefined4 FUN_0008aa6a(uint *param_1)
 
 {

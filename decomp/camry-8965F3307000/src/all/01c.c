@@ -3273,6 +3273,32 @@ void f33_return_only_stub_72e2c(void)
 
 
 
+uint FUN_00072e2e(uint param_1,ushort param_2,void *param_3,void *param_4)
+
+{
+  uint uVar1;
+  F33NvmOperation local_20;
+  
+  local_20.operation = param_1;
+  local_20.logical_handle = param_2;
+  local_20.buffer_08 = camry_host_addr(param_3);
+  local_20.buffer_0c = camry_host_addr(param_4);
+  FUN_000720d6();
+  if (param_2 == 0) {
+    uVar1 = FUN_000739a8(&local_20);
+  }
+  else {
+    uVar1 = f33_nvm_enqueue_pooled_operation(&local_20);
+  }
+  FUN_000720e2();
+  if (uVar1 == 0) {
+    f33_nvm_publish_logical_result(param_2,param_1,'\x02');
+  }
+  return uVar1;
+}
+
+
+
 void FUN_00072e70(void)
 
 {
@@ -3398,6 +3424,32 @@ void FUN_00072f76(undefined1 param_1)
 
 {
   FUN_00072248(param_1);
+  return;
+}
+
+
+
+void FUN_00072f84(void)
+
+{
+  uint uVar1;
+  F33NvmOperation FStack_18;
+  
+  uVar1 = f33_nvm_snapshot_scheduler_operation(&FStack_18);
+  f33_nvm_reset_notification_exclusion = 0xffff;
+  if (uVar1 != 0) {
+    f33_nvm_reset_notification_exclusion = FStack_18.logical_handle;
+  }
+  f33_nvm_reset_queues_notifying();
+  if (uVar1 != 0) {
+    if (FStack_18.logical_handle == 0) {
+      FUN_000739a8(&FStack_18);
+    }
+    else {
+      f33_nvm_enqueue_pooled_operation(&FStack_18);
+    }
+  }
+  FUN_00072248(2);
   return;
 }
 

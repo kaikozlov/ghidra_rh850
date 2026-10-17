@@ -2103,12 +2103,18 @@ def _rewrite_wide_call_constants(code: str) -> str:
 
 
 _FAIL = ("fail",)
+_NO_GPR_WRITE = {
+    "cmp", "cmpi", "tst", "tst1", "tst1r",
+    "st8", "st16", "st32",
+    "set1", "not1", "clr1", "set1r", "not1r", "clr1r",
+}
 # r1–r31. r6–r9 enter as the incoming arguments; the rest start unknown.
 _TRACKED = tuple(range(1, 32))
 # GHS RH850: r3–r5 (sp/gp/tp) and r20–r29 survive a call. r6–r9 survive only
 # when this particular callee never writes them. r10 is then the return value.
 _CALLER_KILLED = {1, 2, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 30, 31}
 _ARG_CLOBBERS: dict[int, set[int]] | None = None
+_R10_PRESERVE: set[int] = set()
 _NO_WRITE = {
     "cmp", "tst", "cmpi", "st8", "st16", "st32", "set1", "not1", "clr1", "tst1",
     "set1r", "not1r", "clr1r", "tst1r", "ldsr",
@@ -2176,7 +2182,18 @@ def _entry_state() -> dict[int, set]:
     state = {reg: {_FAIL} for reg in _TRACKED}
     for reg in (6, 7, 8, 9):
         state[reg] = {("entry", reg, "")}
+    # r3 is the stack pointer. Its displacement is from the value at entry.
+    state[3] = {("sp", 0)}
     return state
+
+
+def _shift_sp(origin: set, delta: int) -> set | None:
+    if len(origin) != 1:
+        return None
+    item = next(iter(origin))
+    if item[0] != "sp":
+        return None
+    return {("sp", item[1] + delta)}
 
 
 def _fold_imm(name: str, base: int, imm: int) -> int | None:
@@ -2205,12 +2222,15 @@ def _transfer(state: dict[int, set], inst) -> dict[int, set]:
             killed.update((6, 7, 8, 9))
         if inst.link:
             killed.add(inst.link)
+        # A callee that never writes r10 leaves the caller's return register alone.
+        if inst.target in _R10_PRESERVE:
+            killed.discard(10)
         for reg in killed:
             if reg in cur:
                 cur[reg] = {_FAIL}
-        if inst.link != 10 and 10 in cur:
+        if 10 in killed and inst.link != 10 and 10 in cur:
             cur[10] = {("call", inst.target)}
-        elif 10 in cur:
+        elif 10 in killed and 10 in cur:
             cur[10] = {_FAIL}
         return cur
     if inst.kind == "callt":
@@ -2236,13 +2256,37 @@ def _transfer(state: dict[int, set], inst) -> dict[int, set]:
     if parsed is None:
         return cur
     name, args = parsed
-    if name in {"prepare", "sp_add", "pushsp"}:
+    if name == "prepare" and len(args) >= 2 and args[0] is not None and args[1] is not None and 3 in cur:
+        saved = sum(1 for reg in range(20, 32) if args[0] & (1 << reg))
+        shifted = _shift_sp(cur[3], -4 * (saved + args[1]))
+        if shifted is not None:
+            cur[3] = shifted
+            mode = args[2] if len(args) > 2 else 0
+            if mode == 1 and 30 in cur:
+                cur[30] = set(shifted)
+            elif mode in {2, 3, 4} and 30 in cur:
+                imm = args[3] if len(args) > 3 and args[3] is not None else 0
+                if mode == 3:
+                    imm = (imm & 0xFFFFFFFF) << 16
+                cur[30] = {("imm", imm & 0xFFFFFFFF)}
+        return cur
+    if name == "pushsp" and len(args) >= 2 and args[0] is not None and args[1] is not None and 3 in cur:
+        if args[0] <= args[1]:
+            shifted = _shift_sp(cur[3], -4 * (args[1] - args[0] + 1))
+            if shifted is not None:
+                cur[3] = shifted
         return cur
     if name == "popsp" and len(args) >= 2 and args[0] is not None and args[1] is not None:
         if 0 <= args[0] <= args[1] <= 31:
             for reg in range(args[0], args[1] + 1):
                 if reg in cur and reg != 3:
                     cur[reg] = {_FAIL}
+            if 3 in cur:
+                shifted = _shift_sp(cur[3], 4 * (args[1] - args[0] + 1))
+                if shifted is not None:
+                    cur[3] = shifted
+        return cur
+    if name in _NO_GPR_WRITE:
         return cur
     if name in _NO_WRITE:
         return cur
@@ -2275,6 +2319,9 @@ def _transfer(state: dict[int, set], inst) -> dict[int, set]:
                 if folded is not None:
                     cur[dst] = {("imm", folded)}
                     return cur
+            if item[0] == "sp" and name in {"addi", "movea"}:
+                cur[dst] = {("sp", item[1] + imm)}
+                return cur
         if name == "andi" and dst == src and dst in cur and imm in {0xFF, 0xFFFF} and len(cur[dst]) == 1:
             cur[dst] = {_narrow(next(iter(cur[dst])), "byte" if imm == 0xFF else "ushort")}
             return cur
@@ -2297,6 +2344,9 @@ def _transfer(state: dict[int, set], inst) -> dict[int, set]:
             held = next(iter(base))
             _write_origin(cur, args[0], ("deref", held[1], args[2], width, signed))
             return cur
+        # A load writes its destination only. The base register stays live.
+        _write_origin(cur, args[0], _FAIL)
+        return cur
     if name in _NARROW and args and args[0] in cur and len(cur[args[0]]) == 1:
         cur[args[0]] = {_narrow(next(iter(cur[args[0]])), _NARROW[name])}
         return cur
@@ -2739,9 +2789,48 @@ def _widen_signature(code: str) -> str:
     return code[:open_at + 1] + replacement + code[close:]
 
 
+def _writes_r10(fn) -> bool:
+    """True when an instruction in this function, not one of its callees, writes r10."""
+    for inst in fn.insts:
+        if inst.kind in {"jarl", "jr", "callt", "jmp", "br", "b", "dispose"}:
+            continue
+        parsed = _stmt_parts(inst.stmt) if inst.stmt else None
+        if parsed is None:
+            continue
+        name, args = parsed
+        if not args or name in _NO_GPR_WRITE or name in {"prepare", "pushsp", "popsp"}:
+            continue
+        if name in {"bsw", "bsh", "hsw", "hsh", "sch0r", "sch1r", "sch0l", "sch1l"}:
+            dests = [args[1] if len(args) > 1 else None]
+        elif name == "mul" and len(args) >= 2:
+            dests = args[:2]
+        elif name == "div3" and len(args) >= 3:
+            dests = [args[0], args[2]]
+        else:
+            dests = [args[0]]
+        if 10 in dests:
+            return True
+    return False
+
+
+def _r10_preservers(
+    direct: set[int], calls: dict[int, list[int]], callt: set[int],
+) -> set[int]:
+    """Functions whose own bytes and callees leave the caller's r10 unchanged."""
+    preserve = {addr for addr in calls if addr not in direct and addr not in callt}
+    changed = True
+    while changed:
+        changed = False
+        for addr in list(preserve):
+            if any(target not in preserve for target in calls.get(addr, ())):
+                preserve.discard(addr)
+                changed = True
+    return preserve
+
+
 def _call_facts() -> dict:
     """Argument registers and r10 at each direct call, from the function bytes."""
-    global _CALL_FACTS, _ARG_CLOBBERS
+    global _CALL_FACTS, _ARG_CLOBBERS, _R10_PRESERVE
     if _CALL_FACTS is not None:
         return _CALL_FACTS
     from tools.camry_lift import decode_at, load_image, walk_symbol
@@ -2755,11 +2844,13 @@ def _call_facts() -> dict:
     sites: dict[str, dict[int, list[int]]] = {}
     ret_target: dict[str, int] = {}
     saved_pmr: set[str] = set()
+    stored_r10: set[str] = set()
     arity: dict[str, int] = {}
     walked = []
     direct_writes: dict[int, set[int]] = {}
     direct_calls: dict[int, list[int]] = {}
     callt: set[int] = set()
+    direct_r10: set[int] = set()
     for row in symbols:
         fn = walk_symbol(image, row)
         if fn is None:
@@ -2771,7 +2862,10 @@ def _call_facts() -> dict:
         direct_calls[addr] = calls
         if has_callt:
             callt.add(addr)
+        if _writes_r10(fn):
+            direct_r10.add(addr)
     _ARG_CLOBBERS = _arg_clobber_map(direct_writes, direct_calls, callt)
+    _R10_PRESERVE = _r10_preservers(direct_r10, direct_calls, callt)
     for row, fn in walked:
         state = _function_origins(fn)
         origins[row["name"]] = state
@@ -2814,6 +2908,21 @@ def _call_facts() -> dict:
         if pmr_origins and all(len(item) == 1 and next(iter(item)) == ("sreg", 11, 2) for item in pmr_origins):
             saved_pmr.add(row["name"])
         arity[row["name"]] = _argument_arity(fn, state)
+        ret_addrs = [key[1] for key in state if isinstance(key, tuple) and key[0] == "ret"]
+        if len(ret_addrs) == 1:
+            ret_at = ret_addrs[0]
+            index = next((i for i, inst in enumerate(fn.insts) if inst.addr == ret_at), None)
+            if index:
+                prev = fn.insts[index - 1]
+                parsed = _stmt_parts(prev.stmt) if prev.stmt else None
+                if (
+                    prev.addr + prev.size == ret_at
+                    and parsed is not None
+                    and parsed[0] in {"st8", "st16", "st32"}
+                    and parsed[1]
+                    and parsed[1][0] == 10
+                ):
+                    stored_r10.add(row["name"])
     _meta, functions = load_corpus(
         REPO_ROOT / "data" / "generated" / TARGET / "decompilations.jsonl"
     )
@@ -2905,6 +3014,9 @@ def _call_facts() -> dict:
         "hand": hand_names,
         "planned": planned,
         "saved_pmr": saved_pmr,
+        "preserves": {names_at[addr] for addr in _R10_PRESERVE if addr in names_at},
+        "returns": returns,
+        "stored_r10": stored_r10,
         "ram": {addr: next(iter(widths)) for addr, widths in ram.items() if len(widths) == 1},
     }
     return _CALL_FACTS
@@ -3011,6 +3123,169 @@ def _direct_calls(code: str) -> list[tuple[str, int, int]]:
     return events
 
 
+def _stack_local(code: str, delta: int) -> str | None:
+    """The Ghidra local whose address is entry-SP + delta."""
+    if delta >= 0:
+        return None
+    suffix = format(-delta, "x")
+    names: list[str] = []
+    for match in re.finditer(
+        rf"\b([A-Za-z_][A-Za-z0-9_]*Stack_{suffix}|local_{suffix})\b",
+        code,
+    ):
+        name = match.group(1)
+        if name in names:
+            continue
+        if re.search(rf"\b{re.escape(name)}\s*(?:\[[^\]]*\])?\s*;", code):
+            names.append(name)
+    if len(names) != 1:
+        return None
+    name = names[0]
+    if re.search(rf"\b{re.escape(name)}\s*\[", code):
+        return name
+    return f"&{name}"
+
+
+def _assignment_prefix(body: str, open_at: int) -> tuple[str, int, int] | None:
+    """`var = ` immediately before the call whose '(' is open_at."""
+    cursor = open_at
+    while cursor > 0 and body[cursor - 1] in " \t\n\r":
+        cursor -= 1
+    while cursor > 0 and (body[cursor - 1].isalnum() or body[cursor - 1] == "_"):
+        cursor -= 1
+    name_start = cursor
+    while cursor > 0 and body[cursor - 1] in " \t\n\r":
+        cursor -= 1
+    if cursor == 0 or body[cursor - 1] != "=":
+        return None
+    equals = cursor - 1
+    if equals > 0 and body[equals - 1] in "=<>!":
+        return None
+    cursor = equals
+    while cursor > 0 and body[cursor - 1] in " \t\n\r":
+        cursor -= 1
+    var_end = cursor
+    while cursor > 0 and (body[cursor - 1].isalnum() or body[cursor - 1] == "_"):
+        cursor -= 1
+    var = body[cursor:var_end]
+    if not var or var in _PRIMITIVE_TYPES or var in _INT_TYPES:
+        return None
+    return var, cursor, name_start
+
+
+def _produced_type(facts: dict, name: str) -> str:
+    if name in facts["saved_pmr"]:
+        return "uint"
+    planned = facts["planned"].get(name)
+    if planned:
+        return planned
+    return facts["returns"].get(name, "void")
+
+
+def _rewrite_preserved_results(code: str) -> str:
+    """An assignment of a call that leaves r10 alone belongs to the earlier call."""
+    brace = _opening_brace(code)
+    if brace < 0:
+        return code
+    caller = _signature_name(_c_signature(code))
+    facts = _call_facts()
+    grouped = facts["sites"].get(caller)
+    state = facts["origins"].get(caller)
+    if not grouped or state is None:
+        return code
+    body = code[brace:]
+    events = [
+        (name, open_at, close)
+        for name, open_at, close in _direct_calls(body)
+        if facts["entries"].get(name) is not None
+    ]
+    counts: dict[int, int] = {}
+    for name, _open_at, _close in events:
+        entry = facts["entries"][name]
+        counts[entry] = counts.get(entry, 0) + 1
+    usable = {
+        entry for entry, count in counts.items()
+        if count == len(grouped.get(entry, ()))
+    }
+    cursor_at = {entry: 0 for entry in usable}
+    paired: list[tuple[str, int, int, int | None]] = []
+    for name, open_at, close in events:
+        entry = facts["entries"][name]
+        addr = None
+        if entry in usable:
+            slot = cursor_at[entry]
+            cursor_at[entry] = slot + 1
+            sites = grouped.get(entry, ())
+            if slot < len(sites):
+                addr = sites[slot]
+        paired.append((name, open_at, close, addr))
+    edits: list[tuple[int, int, str]] = []
+    claimed: set[int] = set()
+    for index, (name, open_at, close, addr) in enumerate(paired):
+        if name not in facts["preserves"] or addr is None:
+            continue
+        assigned = _assignment_prefix(body, open_at)
+        if assigned is None or not body[close + 1:].lstrip().startswith(";"):
+            continue
+        var, prefix_start, prefix_end = assigned
+        origin = state.get(addr, {}).get(10, set())
+        if len(origin) != 1 or next(iter(origin))[0] != "call":
+            continue
+        producer = facts["names"].get(next(iter(origin))[1])
+        if not producer:
+            continue
+        earlier = None
+        for previous in paired[:index]:
+            if previous[0] == producer and previous[3] is not None:
+                earlier = previous
+        if earlier is None:
+            continue
+        between = body[earlier[2]:prefix_start]
+        killed = False
+        for found in re.finditer(rf"\b{re.escape(var)}\s*=(?!=)\s*([A-Za-z_][A-Za-z0-9_]*)?", between):
+            rhs = found.group(1)
+            if rhs is None or rhs not in facts["preserves"]:
+                killed = True
+                break
+        if killed:
+            continue
+        earlier_assigned = _assignment_prefix(body, earlier[1])
+        if earlier_assigned is not None and earlier_assigned[0] == var:
+            edits.append((prefix_start, prefix_end, ""))
+            continue
+        if earlier_assigned is not None or _produced_type(facts, producer) == "void":
+            continue
+        if not body[earlier[2] + 1:].lstrip().startswith(";"):
+            continue
+        # A cast or dereference on the left is already an assignment.
+        statement_start = earlier[2]
+        while statement_start > 0 and body[statement_start - 1] not in ";{}":
+            statement_start -= 1
+        if "=" in body[statement_start:earlier[1]]:
+            continue
+        name_start = earlier[1]
+        while name_start > 0 and body[name_start - 1] in " \t\n\r":
+            name_start -= 1
+        name_start -= len(producer)
+        if body[name_start:name_start + len(producer)] != producer or name_start in claimed:
+            continue
+        claimed.add(name_start)
+        edits.append((name_start, name_start, f"{var} = "))
+        edits.append((prefix_start, prefix_end, ""))
+    if not edits:
+        return code
+    pieces: list[str] = []
+    cursor = 0
+    for start, end, text in sorted(edits):
+        if start < cursor:
+            return code
+        pieces.append(body[cursor:start])
+        pieces.append(text)
+        cursor = end
+    pieces.append(body[cursor:])
+    return code[:brace] + "".join(pieces)
+
+
 def _rewrite_recovered_arguments(code: str) -> str:
     """A call that omits a register the callee reads gets that register's value."""
     brace = _opening_brace(code)
@@ -3058,6 +3333,8 @@ def _rewrite_recovered_arguments(code: str) -> str:
         for reg in range(6 + len(existing), 6 + need):
             origin = state.get(addr, {}).get(reg, set())
             expr = _emit_origin(origin, params, types)
+            if expr is None and len(origin) == 1 and next(iter(origin))[0] == "sp":
+                expr = _stack_local(code, next(iter(origin))[1])
             if expr is None and len(origin) == 1 and next(iter(origin))[0] == "call":
                 callee = facts["names"].get(next(iter(origin))[1])
                 if callee:
@@ -3120,6 +3397,39 @@ def _saved_pmr_variable(body: str) -> str | None:
     return name
 
 
+def _rewrite_stored_result(code: str) -> str:
+    """A void function that stores r10 and returns it yields that stored object."""
+    signature = _c_signature(code)
+    name = _signature_name(signature)
+    facts = _call_facts()
+    if (
+        name not in facts["stored_r10"]
+        or name in facts["hand"]
+        or name in facts["saved_pmr"]
+        or facts["planned"].get(name)
+        or _return_type_of(signature, name) != "void"
+    ):
+        return code
+    brace = _opening_brace(code)
+    if brace < 0:
+        return code
+    head, body = code[:brace], code[brace:]
+    lhss = list(dict.fromkeys(re.findall(
+        r"^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=(?!=)",
+        body,
+        flags=re.M,
+    )))
+    returns = list(re.finditer(r"\breturn\s*;", body))
+    declarator = list(re.finditer(rf"\bvoid(\s+{re.escape(name)}\s*\()", head))
+    if len(lhss) != 1 or len(returns) != 1 or not declarator:
+        return code
+    for found in reversed(declarator):
+        head = head[:found.start()] + "uint" + found.group(1) + head[found.end():]
+    ret = returns[0]
+    body = body[:ret.start()] + f"return {lhss[0]};" + body[ret.end():]
+    return head + body
+
+
 def _rewrite_saved_pmr(code: str) -> str:
     """A void function whose r10 is the PMR it read returns that saved value."""
     signature = _c_signature(code)
@@ -3167,9 +3477,11 @@ def _rewrite_icus(code: str) -> str:
 def _rewrite_body(code: str) -> str:
     code = _strip_calling_convention(code)
     code = _widen_signature(code)
+    code = _rewrite_preserved_results(code)
     code = _rewrite_recovered_arguments(code)
     code = _rewrite_returned_call(code)
     code = _rewrite_saved_pmr(code)
+    code = _rewrite_stored_result(code)
     code = _rewrite_firmware_bases(code)
     signature = _c_signature(code)
     pointers = _pointer_names(signature, code)

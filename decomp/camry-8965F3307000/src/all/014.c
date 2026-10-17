@@ -2636,6 +2636,24 @@ void FUN_000515d4(void)
 
 
 
+void FUN_000515e6(void)
+
+{
+  uint32_t puVar1;
+  uint saved_mask;
+  
+  puVar1 = 0xfebeb800u;
+  saved_mask = f33_priority_mask_enter(0xff00);
+  f33_reset_classifier_counts_and_flags();
+  FUN_000515d4();
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3557))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3550))))) = 0x5a;
+  f33_priority_mask_restore(saved_mask);
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -6144,7 +6162,7 @@ uint FUN_00053a2c(short param_1)
 
 
 
-void FUN_00053a4e(void)
+uint FUN_00053a4e(void)
 
 {
   undefined1 *extraout_r7;
@@ -6152,12 +6170,12 @@ void FUN_00053a4e(void)
   
   uVar1 = FUN_00053a2c((int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 178u)))));
   *extraout_r7 = uVar1;
-  return;
+  return uVar1;
 }
 
 
 
-void FUN_00053a62(void)
+uint FUN_00053a62(void)
 
 {
   undefined1 *extraout_r7;
@@ -6165,7 +6183,7 @@ void FUN_00053a62(void)
   
   uVar1 = FUN_00053a2c((int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 180u)))));
   *extraout_r7 = uVar1;
-  return;
+  return uVar1;
 }
 
 

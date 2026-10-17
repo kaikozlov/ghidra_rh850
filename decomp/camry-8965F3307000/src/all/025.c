@@ -4164,6 +4164,80 @@ void FUN_0009767c(ushort param_1,char param_2,int param_3)
 
 
 
+undefined4 FUN_00097822(char param_1,undefined4 param_2,ushort param_3,char param_4)
+
+{
+  uint uVar1;
+  uint uVar2;
+  uint32_t puVar3;
+  int iVar4;
+  undefined4 uVar5;
+  uchar uStack_31;
+  undefined4 auStack_30 [4];
+  undefined4 uStack_20;
+  undefined4 uStack_1c;
+  undefined2 uStack_18;
+  byte bStack_16;
+  undefined1 uStack_15;
+  
+  puVar3 = 0xfebeb800u;
+  uVar5 = 0;
+  if (param_3 < DAT_00026492) {
+    uStack_31 = '\0';
+    uVar2 = 0;
+    do {
+      uVar1 = uVar2 + 1;
+      auStack_30[uVar2] = 0;
+      uVar2 = uVar1;
+    } while (uVar1 < 4);
+    bStack_16 = 0;
+    uStack_15 = 0;
+    uStack_20 = 0;
+    uStack_1c = 0;
+    uStack_18 = 0;
+    if (param_1 != '\x02') {
+      puVar3 = 0xfebeb800u;
+      FUN_000974b0(((int *)camry_host_ptr((uint32_t)(param_2))), param_3, param_4, camry_host_addr(auStack_30));
+    }
+    if (param_4 == '\x01') {
+      iVar4 = FUN_0009847a((uint)(ushort)param_3,  auStack_30,  (uint)(byte)param_1, camry_host_addr(&uStack_31));
+    }
+    else if (param_4 == '\x02') {
+      iVar4 = FUN_00098590((uint)(ushort)param_3, camry_host_addr(auStack_30),  (uint)(byte)param_1, camry_host_addr(&uStack_31));
+    }
+    else {
+      iVar4 = FUN_000982e4(param_3, auStack_30, param_1, camry_host_addr(&uStack_31));
+    }
+    if (param_1 != '\x02') {
+      if (iVar4 == 0) {
+        FUN_000955b6(0);
+        FUN_0009767c(param_3, param_4, camry_host_addr(auStack_30 + bStack_16));
+        f33_dcm_report_positive_response(((F33DcmMessageContext *)camry_host_ptr((uint32_t)(puVar3 + -0x59e8))));
+      }
+      else if (iVar4 == 1) {
+        FUN_000955b6(0);
+        f33_dcm_report_negative_or_pending(((F33DcmMessageContext *)camry_host_ptr((uint32_t)(puVar3 + -0x59e8))),uStack_31);
+      }
+      else if (iVar4 == 10) {
+        FUN_000955b6(1);
+        f33_dcm_enqueue_event('\x06');
+        uVar5 = 10;
+      }
+      else if (iVar4 == 0xc) {
+        FUN_000955b6(1);
+        f33_dcm_report_negative_or_pending(((F33DcmMessageContext *)camry_host_ptr((uint32_t)(puVar3 + -0x59e8))),'x');
+        uVar5 = 0xc;
+      }
+      else {
+        FUN_000955b6(0);
+      }
+    }
+  }
+  return uVar5;
+}
+
+
+
 undefined4 FUN_000979a2(undefined4 *param_1)
 
 {

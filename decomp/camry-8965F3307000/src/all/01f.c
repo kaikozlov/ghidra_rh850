@@ -2387,6 +2387,91 @@ void FUN_0007dee6(uint param_1)
 
 
 
+/* Sample live COM after admission. Lower return2 maps to-19 and retains pending; other lower
+   failures and success consume both pending classes. Exact normal descriptors bypass optional COM
+   scratch/callout. Native periodic dispatch distinguishes lower2 (keep pending) from protected21
+   (consume pending), with real callees. Event-class precedence remains static. */
+
+int f33_dispatch_one_com_tx(uchar group)
+
+{
+  uchar *puVar1;
+  byte bVar2;
+  uint uVar3;
+  uint32_t puVar4;
+  uint32_t puVar5;
+  undefined *puVar6;
+  uint uVar7;
+  undefined4 uVar8;
+  int iVar9;
+  int iVar10;
+  uint uVar11;
+  uint uVar12;
+  ushort uStack_26;
+  F33PduInfo FStack_24;
+  
+  uVar7 = (uint)group;
+  puVar4 = 0xfebeb800u;
+  puVar5 = 0x23dfcu;
+  uVar8 = FUN_0007a2da();
+  iVar9 = f33_select_admissible_com_tx(group,&uStack_26);
+  ((void)(uVar8), thunk_FUN_0006a4c4());
+  if (iVar9 == -0x14) {
+    return -0x14;
+  }
+  uVar12 = (uint)uStack_26;
+  FStack_24.length = (*((ushort *)camry_host_ptr((uint32_t)(puVar5 + uVar12 * 8 + -0x1738))));
+  uVar11 = (uint)FStack_24.length;
+  bVar2 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(uVar12 * 8 + -0x1735)))));
+  puVar1 = ((undefined *)camry_host_ptr((uint32_t)(puVar4 + ((*((ushort *)camry_host_ptr((uint32_t)(puVar5 + uVar12 * 2 + -0x15bc)))) - 0x6db8))));
+  puVar6 = ((undefined *)camry_host_ptr((uint32_t)(puVar5)));
+  FStack_24.data = camry_host_addr(puVar1);
+  if ((bVar2 >> 5 & 1) == 0) {
+LAB_0007dfa8:
+    uVar11 = f33_route_com_tx(uStack_26,&FStack_24);
+    if (uVar11 == 2) {
+      iVar9 = -0x13;
+      goto LAB_0007e03c;
+    }
+  }
+  else {
+    uVar8 = thunk_FUN_0007a2da();
+    for (uVar3 = 0; uVar3 < uVar11; uVar3 = uVar3 + 1 & 0xffff) {
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(uVar3 - 0x6dc0))))) = puVar1[uVar3];
+    }
+    ((void)(uVar8), thunk_FUN_0006a4c4());
+    FStack_24.data = puVar4 + -0x6dc0;
+    iVar10 = ((void)(uStack_26), (void)(&FStack_24), f33_return_const_1_7e77e());
+    if (iVar10 == 1) goto LAB_0007dfa8;
+    uVar11 = 1;
+  }
+  iVar10 = 0x40;
+  if (iVar9 == 2) {
+    iVar10 = 0x80;
+  }
+  if (uVar11 == 0) {
+    if ((bVar2 >> 4 & 1) != 0) {
+      (*(int (*)())*(code **)(puVar6 + uVar7 * 4 + -0x21f4))(uStack_26,&FStack_24);
+    }
+    FUN_0007de9e(uStack_26,iVar10);
+    if ((iVar10 == 0x80) && (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(uVar12 * 8 + -0x1736))))) & 2) != 0)) {
+      (*(int (*)())*(code **)(puVar6 + -0x21b8))(uVar7);
+    }
+    (*(int (*)())*(code **)(puVar6 + -0x21ec))(uStack_26,iVar10);
+  }
+  uVar8 = FUN_0007a2da();
+  FUN_0007dee6(uStack_26);
+  ((void)(uVar8), thunk_FUN_0006a4c4());
+  if ((bVar2 & 1) != 0) {
+    ((void)(uVar7), (void)(uStack_26), (void)(iVar10), f33_return_only_stub_7e4e6());
+  }
+LAB_0007e03c:
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0x684f))))) = 0;
+  return iVar9;
+}
+
+
+
 void FUN_0007e046(uint param_1,uint param_2)
 
 {
