@@ -1150,6 +1150,11 @@ def _rewrite_int_to_pointer(code: str, pointers: set[str]) -> str:
             expr = code[after + 1:end - 1]
         elif code[after].isalpha() or code[after] == "_":
             end = _operand_end(code, after)
+            # `(undefined *)name()` casts the return value. The call binds tighter
+            # than the cast, so the name is not a firmware address.
+            if _skip_space(code, end) < len(code) and code[_skip_space(code, end)] == "(":
+                search = star + 2
+                continue
             expr = code[after:end]
         elif code[after] == "0":
             number = re.match(r"0x[0-9A-Fa-f]+|0", code[after:])

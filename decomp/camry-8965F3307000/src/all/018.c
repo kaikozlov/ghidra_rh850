@@ -2876,6 +2876,54 @@ void f33_startup_classify_retained_token(void)
 
 
 
+uint FUN_00062cd4(void)
+
+{
+  char cVar1;
+  char cVar2;
+  char cVar3;
+  char cVar4;
+  char cVar5;
+  char cVar6;
+  undefined *puVar7;
+  undefined *puVar8;
+  uint uVar9;
+  
+  cVar6 = DAT_febe39bf;
+  cVar5 = DAT_febe39be;
+  cVar4 = DAT_febe39bd;
+  cVar3 = DAT_febe39bc;
+  cVar2 = DAT_febe3846;
+  cVar1 = DAT_febe3840;
+  uVar9 = 0;
+  puVar7 = (undefined *)FUN_00064d00();
+  puVar8 = (undefined *)FUN_00064d2c();
+  if ((cVar2 == 'Z') || (cVar1 == 'Z')) {
+    uVar9 = 1;
+  }
+  if (puVar7 == ((undefined *)camry_host_ptr(0xa55au))) {
+    uVar9 = uVar9 | 0x1000;
+  }
+  if (puVar8 == ((undefined *)camry_host_ptr(0xa55au))) {
+    uVar9 = uVar9 | 0x10000;
+  }
+  if (cVar3 == 'Z') {
+    uVar9 = uVar9 | 0x100000;
+  }
+  if (cVar4 == 'Z') {
+    uVar9 = uVar9 | 0x10000000;
+  }
+  if (cVar5 == 'Z') {
+    uVar9 = uVar9 | 0x80000000;
+  }
+  if (cVar6 == 'Z') {
+    uVar9 = uVar9 | 0x10;
+  }
+  return uVar9;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */

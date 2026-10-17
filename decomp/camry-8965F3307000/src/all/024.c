@@ -2725,6 +2725,71 @@ undefined4 FUN_0009262c(int *param_1,char *param_2,int *param_3)
 
 
 
+/* Require matching configured confirmation ID and state30/31/32/40. Copy response cursor bytes into
+   lower buffer, advance pointer/decrement16-bit length; retry descriptors may rewind. Rearm
+   watchdog1. This copy is not final confirmation. */
+
+uint f33_dcm_copy_transmit_data
+               (ushort transmit_id,F33PduInfo *chunk,F33DcmRetryInfo *retry,ushort *available)
+
+{
+  uint32_t puVar1;
+  int *piVar2;
+  uint uVar3;
+  undefined4 uVar4;
+  int iVar5;
+  uint uVar6;
+  
+  puVar1 = 0x23dfcu;
+  uVar6 = 0;
+  piVar2 = (int *)f33_return_const_febe5978_93690();
+  uVar3 = FUN_00093ebc();
+  if ((uVar3 == transmit_id) && (chunk != (F33PduInfo *)0x0)) {
+    uVar4 = FUN_00092b34();
+    iVar5 = FUN_00092c46(uVar4);
+    if (iVar5 == 1) {
+      f33_dcm_cancel_software_timer('\x01');
+      if (chunk->length == 0) {
+        if (available == (ushort *)0x0) {
+          uVar6 = 1;
+        }
+        else {
+          *available = *(ushort *)(piVar2 + 1);
+          if ((retry != (F33DcmRetryInfo *)0x0) && (retry->retry_kind == '\0')) {
+            *(undefined2 *)(piVar2 + 1) = 0;
+            *available = 0;
+          }
+        }
+      }
+      else {
+        if (retry == (F33DcmRetryInfo *)0x0) {
+          if (*(ushort *)(piVar2 + 1) < chunk->length) {
+            uVar6 = 2;
+          }
+          else {
+            for (uVar3 = 0; uVar3 < chunk->length; uVar3 = uVar3 + 1 & 0xffff) {
+              ((uint8_t *)camry_host_ptr((uint32_t)(chunk->data)))[uVar3] = (*((uchar *)camry_host_ptr((uint32_t)(*piVar2 + uVar3))));
+            }
+            *(short *)(piVar2 + 1) = (short)piVar2[1] - (short)uVar3;
+            *piVar2 = *piVar2 + uVar3;
+          }
+        }
+        else {
+          uVar6 = FUN_0009262c(chunk,retry,piVar2);
+        }
+        if (available != (ushort *)0x0) {
+          *available = *(ushort *)(piVar2 + 1);
+        }
+      }
+      f33_dcm_arm_software_timer('\x01',(*((uint *)camry_host_ptr((uint32_t)(puVar1 + 0x2088)))));
+      return uVar6;
+    }
+  }
+  return 1;
+}
+
+
+
 /* Positive0 maps success/failure0/1; negative1 maps2/3; suppressed positive2 always0; other
    dispositions including silent3 and pending10 map2. Return is four-valued, not bool. */
 
@@ -3230,6 +3295,35 @@ void FUN_00092eae(ushort param_1,F33PduInfo *param_2)
       FUN_00091b08(1,0);
     }
     FUN_00092dd2(3);
+  }
+  return;
+}
+
+
+
+void FUN_00092f08(void)
+
+{
+  undefined4 uVar1;
+  F33PduInfo *response;
+  int iVar2;
+  uchar uStack_d;
+  
+  uStack_d = '\0';
+  uVar1 = FUN_00093e82();
+  response = (F33PduInfo *)FUN_00092d38(&uStack_d);
+  if (response != (F33PduInfo *)0x0) {
+    iVar2 = FUN_00092b34();
+    if (iVar2 == 0x21) {
+      FUN_00092a86(0x40);
+      f33_dcm_try_final_response((ushort)uVar1,response,uStack_d);
+    }
+    else if (iVar2 == 0x22) {
+      f33_dcm_cancel_software_timer('\x03');
+      f33_dcm_cancel_software_timer('\x04');
+      FUN_00092a86(0x40);
+      FUN_00092eae(uVar1,response);
+    }
   }
   return;
 }

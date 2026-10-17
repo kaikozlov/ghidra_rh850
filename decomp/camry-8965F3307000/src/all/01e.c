@@ -26,6 +26,62 @@ void FUN_00078010(undefined2 param_1,undefined1 *param_2)
 
 
 
+void FUN_0007805e(undefined *param_1)
+
+{
+  uchar auStack_8 [4];
+  
+  if ((param_1 != ((undefined *)camry_host_ptr((uint32_t)(0xffff)))) &&
+     (param_1 = (undefined *)f33_nvm_read_with_optional_blank_check(DAT_febf6c2c,4,auStack_8,'\x01')
+     , param_1 == ((undefined *)camry_host_ptr((uint32_t)(0x3))))) {
+    param_1 = ((undefined *)camry_host_ptr(0xfffdu));
+  }
+  ((void)(param_1), FUN_0007849e());
+  return;
+}
+
+
+
+undefined * FUN_0007808c(ushort param_1,ushort param_2,char param_3)
+
+{
+  uint byte_offset;
+  undefined4 uVar1;
+  undefined *puVar2;
+  undefined4 uVar3;
+  
+  puVar2 = ((undefined *)camry_host_ptr(0x23dfcu));
+  FUN_0007490a(0);
+  if (param_3 == '\x02') {
+    byte_offset = FUN_00077e0a(param_1,2);
+    uVar1 = FUN_0007490a(camry_host_addr(puVar2 + 0x3e7c));
+    uVar3 = 1;
+  }
+  else if (param_3 == '\x01') {
+    byte_offset = FUN_00077e0a(param_1,1);
+    uVar1 = FUN_0007490a(0x3e80u + (int)camry_host_addr(puVar2));
+    uVar3 = 1;
+  }
+  else {
+    if (param_3 != '\x03') {
+      return ((undefined *)camry_host_ptr(0xfffbu));
+    }
+    byte_offset = FUN_00077e0a(param_1,3);
+    uVar1 = FUN_0007490a(camry_host_addr(puVar2 + 0x3e84));
+    uVar3 = 0;
+  }
+  if (param_1 < *(ushort *)(puVar2 + 0x3b2c)) {
+    DAT_febf6c2c = f33_nvm_record_offset(param_1,param_2,byte_offset);
+    puVar2 = (undefined *)FUN_00074c54(DAT_febf6c2c, 4, ((uchar *)camry_host_ptr((uint32_t)(uVar1))), 0, uVar3);
+  }
+  else {
+    puVar2 = ((undefined *)camry_host_ptr(0xfffbu));
+  }
+  return puVar2;
+}
+
+
+
 undefined4 FUN_0007812a(void)
 
 {
@@ -4285,6 +4341,96 @@ void f33_cantp_open_consecutive_copy_window
   if (state->state == 'x') {
     state->timeout_ticks = uVar2;
     state->state = 0x96;
+  }
+  return;
+}
+
+
+
+/* WARNING: Inlined function: f33_cantp_reset_transmit_owner */
+/* Scheduled task resolves acceptedD2 to single/first-frame construction, obtains upper bytes,
+   submits CanIf frame and advances segmented transport states. Timeout paths clear channel and
+   report upper failure. */
+
+void f33_cantp_run_transmit_channels(void)
+
+{
+  char cVar1;
+  short sVar2;
+  byte bVar3;
+  undefined8 uVar4;
+  F33CanTpTxConnection *connection;
+  F33CanTpTxConnection *connection_00;
+  F33CanTpTxStatePrefix *state;
+  F33CanTpConfiguration *configuration;
+  int iVar5;
+  uint total_length;
+  uint uVar6;
+  F33CanTpTxConnection *unaff_r27;
+  F33CanTpTxStatePrefix *state_00;
+  
+  uVar4 = 0xfebeb800;
+  if ((((int8_t)DAT_febe4f3d) == -0x56) &&
+     (configuration = (F33CanTpConfiguration *)FUN_0007a32e(),
+     configuration != (F33CanTpConfiguration *)0x0)) {
+    bVar3 = configuration->channel_count;
+    for (uVar6 = 0; uVar6 < bVar3; uVar6 = uVar6 + 1 & 0xff) {
+      iVar5 = uVar6 * 0x20 + (int)uVar4;
+      state_00 = ((F33CanTpTxStatePrefix *)camry_host_ptr((uint32_t)(iVar5 + -0x68c0)));
+      cVar1 = (*((char *)camry_host_ptr((uint32_t)(iVar5 + -0x68b8))));
+      total_length = state_00->remaining_or_accepted_length;
+      sVar2 = (*((short *)camry_host_ptr((uint32_t)(iVar5 + -0x68ba))));
+      if (((((cVar1 == 'x') || (cVar1 == -0x79)) || (cVar1 == -0x6a)) ||
+          ((cVar1 == -0x5b || (cVar1 == -0x4c)))) || ((cVar1 == -0x3d || (cVar1 == -0x2e)))) {
+        unaff_r27 = f33_cantp_find_transmit_connection(configuration,(*((ushort *)camry_host_ptr((uint32_t)(iVar5 + -0x68bc)))));
+        if (unaff_r27 != (F33CanTpTxConnection *)0x0) goto LAB_0007b916;
+LAB_0007b908:
+        (*((undefined1 *)camry_host_ptr((uint32_t)((int)uVar4 + -0x68c4)))) = 0xf;
+        (*((undefined2 *)camry_host_ptr((uint32_t)(iVar5 + -0x68bc)))) = 0xffff;
+        state_00->remaining_or_accepted_length = 0;
+        (*((undefined1 *)camry_host_ptr((uint32_t)(iVar5 + -0x68b8)))) = 0xe1;
+        (*((undefined2 *)camry_host_ptr((uint32_t)(iVar5 + -0x68ba)))) = 0;
+        (*((undefined1 *)camry_host_ptr((uint32_t)(iVar5 + -0x68b7)))) = 0xff;
+        (*((undefined1 *)camry_host_ptr((uint32_t)(iVar5 + -0x68b6)))) = 0;
+        (*((undefined1 *)camry_host_ptr((uint32_t)(iVar5 + -0x68b5)))) = 0;
+        (*((undefined1 *)camry_host_ptr((uint32_t)(iVar5 + -0x68b4)))) = 0;
+      }
+      else {
+        if (cVar1 != -0x1f) goto LAB_0007b908;
+LAB_0007b916:
+        if (cVar1 != -0x1f) {
+          if (cVar1 == -0x2e) {
+            iVar5 = FUN_0007b3b6(camry_host_addr(unaff_r27), total_length);
+            if (iVar5 == 0) {
+              f33_cantp_build_and_queue_single_frame(connection,state_00,(uchar)total_length);
+            }
+            else {
+              f33_cantp_build_and_queue_first_frame(connection,state_00,total_length);
+            }
+          }
+          else if (((cVar1 == -0x3d) || (cVar1 == -0x4c)) || (cVar1 == -0x79)) {
+            if (sVar2 == 0) {
+              FUN_0007b6f2(camry_host_addr(unaff_r27), state_00);
+            }
+          }
+          else if (cVar1 == -0x5b) {
+            if (sVar2 == 0) {
+              FUN_0007b72a(camry_host_addr(unaff_r27), state_00);
+            }
+          }
+          else if (cVar1 == -0x6a) {
+            f33_cantp_build_and_queue_consecutive_frame(unaff_r27,state_00);
+            if (sVar2 == 0) {
+              FUN_0007b848(camry_host_addr(unaff_r27), state_00);
+            }
+          }
+          else if (sVar2 == 0) {
+            f33_cantp_open_consecutive_copy_window(unaff_r27,state_00);
+            f33_cantp_build_and_queue_consecutive_frame(connection_00,state);
+          }
+        }
+      }
+    }
   }
   return;
 }
