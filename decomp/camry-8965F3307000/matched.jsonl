@@ -99,3 +99,4 @@
 {"addr": "0x411a", "name": "f33_boot_submit_erase_program_stream", "status": "equivalent", "form": "corpus"}
 {"addr": "0x55fc", "name": "f33_boot_security_invalidate_handshake", "status": "equivalent", "form": "corpus"}
 {"addr": "0xc419c", "name": "f33_track_established_estimator_difference", "status": "equivalent", "form": "corpus"}
+{"addr": "0xbe5aa", "name": "f33_refresh_received_control_metadata", "status": "equivalent", "form": "corpus"}

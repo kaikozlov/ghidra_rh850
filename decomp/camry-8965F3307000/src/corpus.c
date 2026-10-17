@@ -11,6 +11,12 @@
 #define f33_estimator_tracking_step_scale (*((volatile int32_t *)camry_host_ptr(0xaf764u)))
 #define f33_estimator_tracking_warmup (*((volatile uint16_t *)camry_host_ptr(0xaf772u)))
 #define f33_internal_source_admission_state (*((volatile uint8_t *)camry_host_ptr(0xfebe7f68u)))
+#define f33_published_internal_source_admission_state (*((volatile uint8_t *)camry_host_ptr(0xfebef000u)))
+#define f33_published_route31_numeric_scalar (*((volatile uint32_t *)camry_host_ptr(0xfebef218u)))
+#define f33_received_packed_decimal_fields ((volatile uint8_t *)camry_host_ptr(0xfebebe66u))
+#define f33_received_retained_word (*((volatile uint16_t *)camry_host_ptr(0xfebebe6eu)))
+#define f33_received_typed_scalar (*((volatile uint32_t *)camry_host_ptr(0xfebebe74u)))
+#define f33_received_word_unchanged_age (*((volatile uint32_t *)camry_host_ptr(0xfebebe70u)))
 #define DAT_0002bb04 (*((volatile uint16_t *)camry_host_ptr(0x2bb04u)))
 #define DAT_0002bb06 (*((volatile uint16_t *)camry_host_ptr(0x2bb06u)))
 #define DAT_0002bb08 (*((volatile uint16_t *)camry_host_ptr(0x2bb08u)))
@@ -83,6 +89,13 @@
 #define DAT_febeb1b8 (*((volatile uint16_t *)camry_host_ptr(0xfebeb1b8u)))
 #define DAT_febeb1ba (*((volatile uint16_t *)camry_host_ptr(0xfebeb1bau)))
 #define DAT_febeb1bd (*((volatile uint8_t *)camry_host_ptr(0xfebeb1bdu)))
+#define DAT_febeb20e (*((volatile uint8_t *)camry_host_ptr(0xfebeb20eu)))
+#define DAT_febebe60 (*((volatile uint8_t *)camry_host_ptr(0xfebebe60u)))
+#define DAT_febebe61 (*((volatile uint8_t *)camry_host_ptr(0xfebebe61u)))
+#define DAT_febebe62 (*((volatile uint8_t *)camry_host_ptr(0xfebebe62u)))
+#define DAT_febebe63 (*((volatile uint8_t *)camry_host_ptr(0xfebebe63u)))
+#define DAT_febebe65 (*((volatile uint8_t *)camry_host_ptr(0xfebebe65u)))
+#define DAT_febebe6c (*((volatile uint8_t *)camry_host_ptr(0xfebebe6cu)))
 #define DAT_febebe9c (*((volatile uint8_t *)camry_host_ptr(0xfebebe9cu)))
 #define DAT_febebf78 (*((volatile uint32_t *)camry_host_ptr(0xfebebf78u)))
 #define DAT_febebfc5 (*((volatile uint8_t *)camry_host_ptr(0xfebebfc5u)))
@@ -99,9 +112,23 @@
 #define DAT_febec080 (*((volatile uint32_t *)camry_host_ptr(0xfebec080u)))
 #define DAT_febec08e (*((volatile uint8_t *)camry_host_ptr(0xfebec08eu)))
 #define DAT_febec0b4 (*((volatile uint16_t *)camry_host_ptr(0xfebec0b4u)))
+#define DAT_febef038 (*((volatile uint8_t *)camry_host_ptr(0xfebef038u)))
+#define DAT_febef039 (*((volatile uint8_t *)camry_host_ptr(0xfebef039u)))
 #define DAT_febef04c (*((volatile uint8_t *)camry_host_ptr(0xfebef04cu)))
 #define DAT_febef04e (*((volatile uint8_t *)camry_host_ptr(0xfebef04eu)))
 #define DAT_febef058 (*((volatile uint8_t *)camry_host_ptr(0xfebef058u)))
+#define DAT_febef065 (*((volatile uint8_t *)camry_host_ptr(0xfebef065u)))
+#define DAT_febef066 (*((volatile uint8_t *)camry_host_ptr(0xfebef066u)))
+#define DAT_febef067 (*((volatile uint8_t *)camry_host_ptr(0xfebef067u)))
+#define DAT_febef0f1 (*((volatile uint8_t *)camry_host_ptr(0xfebef0f1u)))
+#define DAT_febef0f2 (*((volatile uint8_t *)camry_host_ptr(0xfebef0f2u)))
+#define DAT_febef0f3 (*((volatile uint8_t *)camry_host_ptr(0xfebef0f3u)))
+#define DAT_febef0f4 (*((volatile uint8_t *)camry_host_ptr(0xfebef0f4u)))
+#define DAT_febef0f5 (*((volatile uint8_t *)camry_host_ptr(0xfebef0f5u)))
+#define DAT_febef0f6 (*((volatile uint8_t *)camry_host_ptr(0xfebef0f6u)))
+#define DAT_febef0f7 (*((volatile uint8_t *)camry_host_ptr(0xfebef0f7u)))
+#define DAT_febef0f8 (*((volatile uint8_t *)camry_host_ptr(0xfebef0f8u)))
+#define DAT_febef18a (*((volatile uint16_t *)camry_host_ptr(0xfebef18au)))
 #define DAT_febf2998 (*((volatile uint16_t *)camry_host_ptr(0xfebf2998u)))
 #define DAT_febf299a (*((volatile uint16_t *)camry_host_ptr(0xfebf299au)))
 #define DAT_febf2aa1 (*((volatile uint8_t *)camry_host_ptr(0xfebf2aa1u)))
@@ -132,6 +159,11 @@ uint f33_classify_received_status_delay(void);
 void f33_update_second_health_status_window(uint classification);
 void f33_publish_current_and_held_health_windows(void);
 void f33_update_health_status_delay_summaries(void);
+void f33_condition_received_word_and_age(uchar policy);
+void f33_condition_received_typed_scalar(uchar policy);
+uint f33_validate_packed_decimal_byte(uchar packed_value);
+void f33_condition_received_packed_decimal_fields(uchar policy);
+void f33_refresh_received_control_metadata(void);
 void f33_filter_established_estimator_difference (int difference,int *filtered_difference,int *new_accumulator);
 void f33_advance_estimator_source_count(int candidate,int previous);
 void f33_track_established_estimator_difference(void);
@@ -250,7 +282,7 @@ uint f33_boot_submit_erase_program_stream(uint address,uint length)
   uint uStack_18;
   int iStack_14;
   
-  puVar3 = ((void *)camry_host_ptr(0xfebf9800u));
+  puVar3 = ((undefined *)camry_host_ptr(0xfebf9800u));
   uVar5 = 1;
   if (DAT_febf2aa1 == '\0') {
     if (length == 0) {
@@ -390,8 +422,8 @@ void f33_advance_dual_source_admission_qualification(void)
   uint uVar4;
   undefined *puVar5;
   
-  puVar3 = ((void *)camry_host_ptr(0xfebeb800u));
-  puVar5 = ((void *)camry_host_ptr(0xfebeb800u));
+  puVar3 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  puVar5 = ((undefined *)camry_host_ptr(0xfebeb800u));
   if (DAT_febe7f6c == '\0') {
     uVar4 = f33_classify_dual_internal_source_observations();
     if (uVar4 != 0x22) {
@@ -503,8 +535,8 @@ void f33_advance_first_source_admission_qualification(void)
   undefined *puVar4;
   uint uVar5;
   
-  puVar4 = ((void *)camry_host_ptr(0xfebeb800u));
-  puVar3 = ((void *)camry_host_ptr(0xfebeb800u));
+  puVar4 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  puVar3 = ((undefined *)camry_host_ptr(0xfebeb800u));
   if (DAT_febe7f6d == '\0') {
     uVar5 = f33_classify_first_internal_source_observation();
     if (uVar5 != 0x22) {
@@ -597,7 +629,7 @@ void f33_advance_second_source_admission_qualification(void)
   undefined *puVar3;
   uint uVar4;
   
-  puVar3 = ((void *)camry_host_ptr(0xfebeb800u));
+  puVar3 = ((undefined *)camry_host_ptr(0xfebeb800u));
   if (DAT_febe7f6e == '\0') {
     uVar4 = f33_classify_second_internal_source_observation();
     if (uVar4 != 0x22) {
@@ -613,7 +645,7 @@ void f33_advance_second_source_admission_qualification(void)
     return;
   }
   if (DAT_febe7f6e == '\x11') {
-    puVar3 = ((void *)camry_host_ptr(0xfebeb800u));
+    puVar3 = ((undefined *)camry_host_ptr(0xfebeb800u));
     uVar4 = f33_classify_second_internal_source_observation();
     if (uVar4 == 0x22) {
       uVar2 = *(ushort *)(puVar3 + -0x3878);
@@ -704,7 +736,7 @@ void f33_update_internal_source_admission_lifecycle(void)
 {
   undefined *puVar1;
   
-  puVar1 = ((void *)camry_host_ptr(0xfebeb800u));
+  puVar1 = ((undefined *)camry_host_ptr(0xfebeb800u));
   DAT_febe7f6f = 0;
   if (DAT_febe7f2c == '\x01' || DAT_febe7f2c == '\x02') {
     DAT_febe7f6f = 0x5a;
@@ -979,7 +1011,7 @@ void f33_update_health_status_delay_summaries(void)
   undefined1 uVar7;
   ushort uVar8;
   
-  puVar4 = ((void *)camry_host_ptr(0xfebeb800u));
+  puVar4 = ((undefined *)camry_host_ptr(0xfebeb800u));
   classification = f33_classify_received_status_delay();
   uVar6 = *(ushort *)(puVar4 + -0x64e);
   if (puVar4[0x69c] == 'Z') {
@@ -1046,6 +1078,211 @@ LAB_000b4420:
 
 
 
+/* Hold5A;resetseedA5;adoptadmittedfreshnonFFFFF18A;resetageonlyonchangedvalue,otherwiseadd5withFFFFFFFEsentinelhandling.
+   AlwaysconsumeF039generation. Native hold composition retains all three metadata values despite
+   invalid statuses while consuming their generation edges. Nonheld arithmetic/validation remains
+   static. */
+
+void f33_condition_received_word_and_age(uchar policy)
+
+{
+  int iVar1;
+  undefined1 uVar2;
+  
+  if (policy != 'Z') {
+    uVar2 = 0;
+    if (policy != 0xa5) {
+      uVar2 = DAT_febebe60;
+    }
+    iVar1 = 0;
+    if ((((DAT_febef039 != DAT_febebe61) && (DAT_febef038 == '\0')) && (DAT_febef18a != 0xffff)) &&
+       (f33_published_internal_source_admission_state < 2)) {
+      if (f33_received_retained_word != DAT_febef18a) {
+        iVar1 = 0x5a;
+      }
+      uVar2 = 1;
+      f33_received_retained_word = DAT_febef18a;
+    }
+    if (0xfffffffd < f33_received_word_unchanged_age) {
+      f33_received_word_unchanged_age = 0;
+    }
+    DAT_febebe60 = uVar2;
+    if (iVar1 == 0x5a) {
+      f33_received_word_unchanged_age = 0;
+    }
+    else if (f33_received_word_unchanged_age < 0xfffffff9) {
+      f33_received_word_unchanged_age = f33_received_word_unchanged_age + 5;
+    }
+    else {
+      f33_received_word_unchanged_age = 0xfffffffe;
+    }
+  }
+  DAT_febebe61 = DAT_febef039;
+  return;
+}
+
+
+
+/* Hold5A;resetA5;invalidstatusclears;admittednewgenerationadoptsuint32F218<=999999withtype1/2,otherwisezero.
+   AlwaysconsumeF066generation;BE74isnotapointer. Native hold composition retains all three metadata
+   values despite invalid statuses while consuming their generation edges. Nonheld
+   arithmetic/validation remains static. */
+
+void f33_condition_received_typed_scalar(uchar policy)
+
+{
+  if (policy != 'Z') {
+    if (policy == 0xa5) {
+      DAT_febebe62 = '\0';
+      f33_received_typed_scalar = 0;
+    }
+    if ((DAT_febef065 != '\0') ||
+       (((DAT_febef066 != DAT_febebe63 && (f33_published_internal_source_admission_state < 2)) &&
+        ((0xf423fu < f33_published_route31_numeric_scalar ||
+         ((DAT_febebe62 = DAT_febef067,
+          f33_received_typed_scalar = f33_published_route31_numeric_scalar, DAT_febef067 != '\x01'
+          && (DAT_febef067 != '\x02')))))))) {
+      f33_received_typed_scalar = 0;
+      DAT_febebe62 = '\0';
+    }
+  }
+  DAT_febebe63 = DAT_febef066;
+  return;
+}
+
+
+
+/* Returnunchangedlow8R6whenbothnibblesaredecimaldigits,elsefullR10=FF. Validationonly,noconversion.
+    */
+
+uint f33_validate_packed_decimal_byte(uchar packed_value)
+
+{
+  uint uVar1;
+  
+  uVar1 = (uint)packed_value;
+  if (((uVar1 & 0xf) < 10) && ((uVar1 & 0xf0) < 0xa0)) {
+    return uVar1;
+  }
+  return 0xff;
+}
+
+
+
+/* Hold5A/resetA5;invalidstatusorinvalidfreshsix-membertuple->allFF.
+   Nibbledigitsandrawbyteboundsretainedwithoutdecimalconversion;alwaysconsumeF0F7generation. Native
+   hold composition retains all three metadata values despite invalid statuses while consuming their
+   generation edges. Nonheld arithmetic/validation remains static. */
+
+void f33_condition_received_packed_decimal_fields(uchar policy)
+
+{
+  uchar packed_value;
+  uchar packed_value_00;
+  uchar packed_value_01;
+  uchar packed_value_02;
+  uchar packed_value_03;
+  char cVar1;
+  undefined *puVar2;
+  uint uVar3;
+  uint uVar4;
+  uint uVar5;
+  uint uVar6;
+  uint uVar7;
+  uint uVar8;
+  
+  cVar1 = DAT_febef0f7;
+  packed_value_03 = DAT_febef0f6;
+  packed_value_02 = DAT_febef0f5;
+  packed_value_01 = DAT_febef0f4;
+  packed_value_00 = DAT_febef0f3;
+  packed_value = DAT_febef0f2;
+  puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  if (policy == 'Z') goto LAB_000be5a2;
+  if (policy == 0xa5) {
+    uVar8 = 0xffffffff;
+    uVar7 = 0xffffffff;
+    uVar6 = 0xffffffff;
+    uVar5 = 0xffffffff;
+    uVar4 = 0xffffffff;
+    uVar3 = 0xffffffff;
+  }
+  else {
+    uVar8 = (uint)f33_received_packed_decimal_fields[0];
+    uVar7 = (uint)f33_received_packed_decimal_fields[1];
+    uVar6 = (uint)f33_received_packed_decimal_fields[2];
+    uVar5 = (uint)f33_received_packed_decimal_fields[3];
+    uVar4 = (uint)f33_received_packed_decimal_fields[4];
+    uVar3 = (uint)f33_received_packed_decimal_fields[5];
+  }
+  puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  if (DAT_febef0f8 == '\0') {
+    puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+    if ((DAT_febef0f7 != DAT_febebe6c) && (f33_published_internal_source_admission_state < 2)) {
+      puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+      uVar8 = f33_validate_packed_decimal_byte(DAT_febef0f1);
+      uVar7 = f33_validate_packed_decimal_byte(packed_value);
+      uVar6 = f33_validate_packed_decimal_byte(packed_value_00);
+      uVar5 = f33_validate_packed_decimal_byte(packed_value_01);
+      uVar4 = f33_validate_packed_decimal_byte(packed_value_02);
+      uVar3 = f33_validate_packed_decimal_byte(packed_value_03);
+      if (((0x38 < uVar8) || (((0x11 < uVar7 - 1 || (0x30 < uVar6 - 1)) || (0x23 < uVar5)))) ||
+         ((0x59 < uVar4 || (0x59 < uVar3)))) goto LAB_000be586;
+    }
+  }
+  else {
+LAB_000be586:
+    uVar8 = 0xffffffff;
+    uVar7 = 0xffffffff;
+    uVar6 = 0xffffffff;
+    uVar5 = 0xffffffff;
+    uVar4 = 0xffffffff;
+    uVar3 = 0xffffffff;
+  }
+  puVar2[0x666] = (char)uVar8;
+  puVar2[0x667] = (char)uVar7;
+  puVar2[0x668] = (char)uVar6;
+  puVar2[0x669] = (char)uVar5;
+  puVar2[0x66a] = (char)uVar4;
+  puVar2[0x66b] = (char)uVar3;
+LAB_000be5a2:
+  puVar2[0x66c] = cVar1;
+  return;
+}
+
+
+
+/* B20E11/33selecthold5A;prior33->0selectresetA5;else0.
+   Callthreeconditioners;saveB20EandpublishBE64=5A. Native hold composition retains all three
+   metadata values despite invalid statuses while consuming their generation edges. Nonheld
+   arithmetic/validation remains static. */
+
+void f33_refresh_received_control_metadata(void)
+
+{
+  undefined *puVar1;
+  uchar policy;
+  
+  puVar1 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  if ((DAT_febeb20e == '3') || (DAT_febeb20e == '\x11')) {
+    policy = 'Z';
+  }
+  else if ((DAT_febebe65 == '3') && (DAT_febeb20e == '\0')) {
+    policy = 0xa5;
+  }
+  else {
+    policy = '\0';
+  }
+  DAT_febebe65 = DAT_febeb20e;
+  f33_condition_received_word_and_age(policy);
+  f33_condition_received_typed_scalar(policy);
+  f33_condition_received_packed_decimal_fields(policy);
+  puVar1[0x664] = 0x5a;
+  return;
+}
+
+
+
 /* WARNING: Removing unreachable block (ram,0x000c412c) */
 /* WARNING: Removing unreachable block (ram,0x000c4118) */
 /* WARNING: Removing unreachable block (ram,0x000c40a2) */
@@ -1071,7 +1308,7 @@ void f33_filter_established_estimator_difference
   int iVar7;
   int iVar8;
   
-  puVar3 = ((void *)camry_host_ptr(0xfebeb800u));
+  puVar3 = ((undefined *)camry_host_ptr(0xfebeb800u));
   iVar7 = (int)(f33_estimator_tracking_band_scale * (uint)DAT_febeae38) / 0x400;
   iVar2 = (int)(f33_estimator_tracking_step_scale * (uint)DAT_febeae38) / 0x400;
   iVar5 = DAT_febec080 - iVar7;
@@ -1085,13 +1322,13 @@ void f33_filter_established_estimator_difference
     iVar7 = difference;
   }
   if (DAT_febec08e == '\"') {
-    puVar4 = ((void *)camry_host_ptr(0xaf7a6u));
+    puVar4 = ((undefined *)camry_host_ptr(0xaf7a6u));
   }
   else if (DAT_febec08e == '\x11') {
-    puVar4 = ((void *)camry_host_ptr(0xaf792u));
+    puVar4 = ((undefined *)camry_host_ptr(0xaf792u));
   }
   else {
-    puVar4 = ((void *)camry_host_ptr(0xaf77eu));
+    puVar4 = ((undefined *)camry_host_ptr(0xaf77eu));
   }
   DAT_febec048 = iVar7;
   iVar5 = FUN_000d0896(puVar4,DAT_febeadf6);
@@ -1139,9 +1376,9 @@ void f33_advance_estimator_source_count(int candidate,int previous)
   uint uVar6;
   
   uVar5 = DAT_febec0b4;
-  puVar2 = ((void *)camry_host_ptr(0xfebeb800u));
+  puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
   uVar6 = (uint)DAT_febec0b4;
-  uVar3 = FUN_000d0896(((void *)camry_host_ptr(0xaf7bau)),DAT_febeadf4);
+  uVar3 = FUN_000d0896(((undefined *)camry_host_ptr(0xaf7bau)),DAT_febeadf4);
   iVar4 = f33_abs_s32_wrapping(candidate - *(int *)(puVar2 + 0x880));
   iVar1 = (int)(f33_estimator_tracking_band_scale * (uint)*(ushort *)(puVar2 + -0x9c8)) / 0x400;
   if ((uVar6 < uVar3) &&
@@ -1176,7 +1413,7 @@ void f33_track_established_estimator_difference(void)
   
   previous = DAT_febec04c;
   uVar1 = f33_estimator_tracking_warmup;
-  puVar2 = ((void *)camry_host_ptr(0xfebeb800u));
+  puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
   if (DAT_febebfc5 == '\0') {
     DAT_febebfee = DAT_febec0b4;
     local_14 = DAT_febec078;
@@ -1186,7 +1423,7 @@ void f33_track_established_estimator_difference(void)
       DAT_febec074 = DAT_febebf78 - DAT_febebfd4;
       uVar3 = DAT_febec064 + 1U;
       if (f33_estimator_tracking_warmup < (ushort)(DAT_febec064 + 1U)) {
-        puVar2 = ((void *)camry_host_ptr(0xfebeb800u));
+        puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
         f33_filter_established_estimator_difference(DAT_febec074,&iStack_10,&local_14);
         f33_advance_estimator_source_count(iStack_10,previous);
         uVar3 = uVar1;
