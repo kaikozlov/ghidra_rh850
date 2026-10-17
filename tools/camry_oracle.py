@@ -885,12 +885,34 @@ def _params_of(signature: str, name: str) -> list[bool]:
     return ["*" in param for param in params]
 
 
-def _pointer_bases(fn, pointers: list[bool]) -> list[bool]:
-    """An integer parameter the bytes use as an address still needs a mapped buffer."""
+_VOLATILE_REGS = (1, 2, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 30, 31)
+_POINTER_MAP: dict[int, list[bool]] | None = None
+
+
+def _param_source(origin: dict[int, int], reg: int) -> int | None:
+    if reg in origin:
+        value = origin[reg]
+        if isinstance(value, int) and 6 <= value <= 9:
+            return value - 6
+        return None
+    if 6 <= reg <= 9:
+        return reg - 6
+    return None
+
+
+def _local_pointer_bases(fn, pointers: list[bool]) -> tuple[list[bool], list[tuple[int, list[int | None]]]]:
+    """Pointer parameters this function uses, and the parameter each direct call passes."""
     pointed = list(pointers)
     origin: dict[int, int] = {}
+    calls: list[tuple[int, list[int | None]]] = []
     memory = {"ld8s", "ld8u", "ld16s", "ld16u", "ld32", "st8", "st16", "st32"}
     for inst in fn.insts:
+        if inst.kind in {"jarl", "jarl_ind"}:
+            if inst.kind == "jarl" and inst.target:
+                calls.append((inst.target, [_param_source(origin, reg) for reg in (6, 7, 8, 9)]))
+            for reg in _VOLATILE_REGS:
+                origin.pop(reg, None)
+            continue
         parsed = _stmt_parts(inst.stmt) if inst.stmt else None
         if parsed is None:
             continue
@@ -899,7 +921,14 @@ def _pointer_bases(fn, pointers: list[bool]) -> list[bool]:
             src = args[1]
             origin[args[0]] = origin.get(src, src) if isinstance(src, int) else -1
             continue
-        if name == "add" and len(args) >= 2 and isinstance(args[0], int):
+        if name == "addi_imm5" and args and isinstance(args[0], int):
+            src = origin.get(args[0], args[0])
+            if isinstance(src, int) and 6 <= src <= 9:
+                origin[args[0]] = src
+            else:
+                origin.pop(args[0], None)
+            continue
+        if name in {"add", "addi", "movea"} and len(args) >= 2 and isinstance(args[0], int):
             src = origin.get(args[1], args[1]) if isinstance(args[1], int) else -1
             dst = origin.get(args[0], args[0])
             if isinstance(src, int) and 6 <= src <= 9:
@@ -923,9 +952,73 @@ def _pointer_bases(fn, pointers: list[bool]) -> list[bool]:
         if (
             args
             and isinstance(args[0], int)
-            and name not in {"st8", "st16", "st32", "cmp", "cmpi", "mov", "add"}
+            and name not in {"st8", "st16", "st32", "cmp", "cmpi", "mov", "add", "addi", "movea", "addi_imm5"}
         ):
             origin.pop(args[0], None)
+    return pointed, calls
+
+
+def _pointer_map() -> dict[int, list[bool]]:
+    """Parameters that are pointers here or in a direct callee."""
+    global _POINTER_MAP
+    if _POINTER_MAP is not None:
+        return _POINTER_MAP
+    from tools.camry_lift import load_image, walk_symbol
+
+    image = load_image()
+    bodies, _duplicates = _load_bodies()
+    functions = {}
+    signatures: dict[int, list[bool]] = {}
+    for row in load_symbols():
+        fn = walk_symbol(image, row)
+        if fn is None:
+            continue
+        functions[fn.entry] = fn
+        body = bodies.get(row["name"])
+        if body is None:
+            signatures[fn.entry] = []
+            continue
+        try:
+            signatures[fn.entry] = _params_of(_c_signature(body), row["name"])
+        except (AssertionError, Harness, ValueError):
+            signatures[fn.entry] = []
+    local: dict[int, list[bool]] = {}
+    calls: dict[int, list[tuple[int, list[int | None]]]] = {}
+    for entry, fn in functions.items():
+        seed = signatures.get(entry, [])
+        pointed, sites = _local_pointer_bases(fn, seed)
+        width = max(4, len(pointed))
+        flags = [False] * width
+        for index, flag in enumerate(pointed):
+            flags[index] = flag
+        local[entry] = flags
+        calls[entry] = sites
+    changed = True
+    while changed:
+        changed = False
+        for entry, sites in calls.items():
+            flags = local[entry]
+            for target, args in sites:
+                callee = local.get(target)
+                if callee is None:
+                    continue
+                for index, source in enumerate(args):
+                    if source is None or index >= len(callee) or source >= len(flags):
+                        continue
+                    if callee[index] and not flags[source]:
+                        flags[source] = True
+                        changed = True
+    _POINTER_MAP = local
+    return local
+
+
+def _pointer_bases(fn, pointers: list[bool]) -> list[bool]:
+    """An integer parameter the bytes use as an address still needs a mapped buffer."""
+    pointed = list(pointers)
+    extra = _pointer_map().get(fn.entry, [])
+    for index, flag in enumerate(extra):
+        if flag and index < len(pointed):
+            pointed[index] = True
     return pointed
 
 
