@@ -113745,3 +113745,82 @@ void FUN_000067b0(undefined1 *param_1,uint param_2)
   (*((volatile uint16_t *)camry_host_ptr(0xfebe4bb8u))) = 0;
   return;
 }
+
+void f33_fill_constant_block_1f24(void)
+
+{
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4937u))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4936u))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4935u))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4934u))) = 0;
+  (*((volatile uint16_t *)camry_host_ptr(0xfebe492cu))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4933u))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4932u))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4931u))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4930u))) = 0xa5;
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe492fu))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe492eu))) = 0;
+  return;
+}
+
+void FUN_00004a90(void)
+
+{
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4ab2u))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4ab1u))) = 0;
+  return;
+}
+
+void f33_fill_constant_block_4f9e(void)
+
+{
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4ac6u))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4ac7u))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4ac8u))) = 0;
+  (*((volatile uint32_t *)camry_host_ptr(0xfebe4ab8u))) = (*((volatile uint32_t *)camry_host_ptr(0xfebe4b00u)));
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4ac9u))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4acbu))) = 0;
+  (*((volatile uint32_t *)camry_host_ptr(0xfebe4abcu))) = (*((volatile uint32_t *)camry_host_ptr(0xfebe4b04u)));
+  return;
+}
+
+void FUN_00005c4a(void)
+
+{
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4b69u))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4b6au))) = 0;
+  return;
+}
+
+void FUN_00006300(void)
+
+{
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4ba1u))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4ba2u))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4ba3u))) = 0;
+  return;
+}
+
+void FUN_00006e4a(void)
+
+{
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4bfau))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4bfbu))) = 0;
+  return;
+}
+
+void FUN_00006e54(void)
+
+{
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4bfau))) = 1;
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4bfbu))) = 0;
+  return;
+}
+
+void FUN_00006ea2(void)
+
+{
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4bfau))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr(0xfebe4bfbu))) = 0;
+  return;
+}
