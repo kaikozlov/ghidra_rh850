@@ -80,6 +80,10 @@ uint32_t f33_nvm_get_family1_completion(uint32_t object);
 uint32_t f33_nvm_get_family1_record(uint32_t object, uint32_t destination);
 uint32_t f33_nvm_get_family1_status(uint32_t object);
 uint32_t f33_nvm_get_family2_status(uint32_t object);
+uint32_t f33_dcra1_crc_raw_words(uint32_t source, uint32_t byte_count, uint32_t raw_seed);
+uint32_t f33_nvm_check_family2_rom_crc(uint32_t group);
+uint32_t f33_nvm_get_family2_rom_record(uint32_t object, uint32_t destination);
+uint32_t f33_nvm_get_record(uint32_t selector, uint32_t destination);
 void f33_nvm_initialize_family1_application(void);
 void f33_nvm_publish_logical_result(uint32_t logical_handle, uint32_t operation, uint32_t result);
 uint32_t f33_read_repair_redundant_u8(

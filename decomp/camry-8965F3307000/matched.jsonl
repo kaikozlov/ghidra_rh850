@@ -71,3 +71,7 @@
 {"addr": "0xbb88c", "name": "f33_update_thermal_release_envelope", "status": "equivalent"}
 {"addr": "0xc29b2", "name": "f33_curve16_interpolate_with_slope", "status": "equivalent"}
 {"addr": "0x71d0a", "name": "f33_nvm_publish_logical_result", "status": "equivalent"}
+{"addr": "0x67060", "name": "f33_dcra1_crc_raw_words", "status": "equivalent"}
+{"addr": "0x67090", "name": "f33_nvm_check_family2_rom_crc", "status": "equivalent"}
+{"addr": "0x67208", "name": "f33_nvm_get_family2_rom_record", "status": "equivalent"}
+{"addr": "0x66dfc", "name": "f33_nvm_get_record", "status": "equivalent"}

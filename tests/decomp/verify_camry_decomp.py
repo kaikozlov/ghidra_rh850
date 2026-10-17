@@ -66,6 +66,18 @@ VALUE_RETURN = {
     "f33_check_learned_quad_bounds",
     "f33_nvm_enqueue_family0_read",
     "f33_nvm_set_family0_record",
+    "f33_dcra1_crc_raw_words",
+    "f33_nvm_check_family2_rom_crc",
+    "f33_nvm_get_family2_rom_record",
+    "f33_nvm_get_record",
+}
+
+DCRA1_BASE = 0xFFD51000
+DCRA1_SIZE = 0x24
+DCRA_CALLS = {
+    "f33_dcra1_crc_raw_words",
+    "f33_nvm_check_family2_rom_crc",
+    "f33_nvm_get_family2_rom_record",
 }
 
 ROM_TABLES = (
@@ -236,6 +248,14 @@ def bind(library: ctypes.CDLL) -> None:
     library.f33_nvm_enqueue_family0_read.restype = u32
     library.f33_nvm_set_family0_record.argtypes = [u32, u32]
     library.f33_nvm_set_family0_record.restype = u32
+    library.f33_dcra1_crc_raw_words.argtypes = [u32, u32, u32]
+    library.f33_dcra1_crc_raw_words.restype = u32
+    library.f33_nvm_check_family2_rom_crc.argtypes = [u32]
+    library.f33_nvm_check_family2_rom_crc.restype = u32
+    library.f33_nvm_get_family2_rom_record.argtypes = [u32, u32]
+    library.f33_nvm_get_family2_rom_record.restype = u32
+    library.f33_nvm_get_record.argtypes = [u32, u32]
+    library.f33_nvm_get_record.restype = u32
     library.f33_curve16_interpolate_with_slope.argtypes = [u32, u32, u32]
     library.f33_curve16_interpolate_with_slope.restype = u32
     library.f33_update_thermal_release_envelope.argtypes = []
@@ -535,6 +555,12 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
         return None
     if name == "f33_nvm_set_family0_record":
         return int(library.f33_nvm_set_family0_record(r6, r7)) & 0xFFFFFFFF
+    if name == "f33_dcra1_crc_raw_words":
+        return int(library.f33_dcra1_crc_raw_words(r6, r7, r8)) & 0xFFFFFFFF
+    if name == "f33_nvm_get_family2_rom_record":
+        return int(library.f33_nvm_get_family2_rom_record(r6, r7)) & 0xFFFFFFFF
+    if name == "f33_nvm_get_record":
+        return int(library.f33_nvm_get_record(r6, r7)) & 0xFFFFFFFF
     if name == "f33_curve16_interpolate_with_slope":
         return int(library.f33_curve16_interpolate_with_slope(r6, r7, r8)) & 0xFFFFFFFF
     if name == "f33_force_unconfirmed_terminal_monitor_healthy":
@@ -542,6 +568,19 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
     if name in VALUE_RETURN:
         return int(getattr(library, name)(r6)) & 0xFFFFFFFF
     raise AssertionError(f"no C call for {name}")
+
+
+def attach_dcra(library: ctypes.CDLL, name: str):
+    if name not in DCRA_CALLS:
+        return None, None
+    window = bytearray(DCRA1_SIZE)
+    view = view_of(window)
+    library.camry_host_add(
+        DCRA1_BASE,
+        ctypes.cast(view, ctypes.POINTER(ctypes.c_uint8)),
+        DCRA1_SIZE,
+    )
+    return window, view
 
 
 def check_results(
@@ -553,6 +592,7 @@ def check_results(
     returned: int | None,
     regions: list[tuple[int, bytearray]] | None = None,
     codeflash: bytes | None = None,
+    dcra: bytearray | None = None,
 ) -> None:
     memory_checks = 0
     r10_checks = 0
@@ -588,7 +628,9 @@ def check_results(
         memory_checks += 1
         address = int(check["address"], 16)
         size = check["size"]
-        if regions is not None:
+        if dcra is not None and DCRA1_BASE <= address and address + size <= DCRA1_BASE + len(dcra):
+            actual = bytes(dcra[address - DCRA1_BASE : address - DCRA1_BASE + size])
+        elif regions is not None:
             actual = read_regions(regions, address, size)
         else:
             actual = bytes(image[address - base : address - base + size])
@@ -661,17 +703,24 @@ def main() -> int:
                     continue
                 regions = scenario_regions(scenario)
                 held = install_regions(library, code_view, len(codeflash), regions)
+                dcra, dcra_view = attach_dcra(library, name)
                 returned = call_function(library, name, None, 0, registers)
-                check_results(scenario, name, None, 0, registers, returned, regions, codeflash)
-                del held
+                check_results(
+                    scenario, name, None, 0, registers, returned, regions, codeflash, dcra,
+                )
+                del held, dcra_view
             else:
                 memory, base = mapped
                 if any(not covers(base, len(memory), start, length) for start, length in ranges):
                     continue
                 view = view_of(memory) if memory else view_of(bytearray(b"\x00"))
                 install_address_space(library, code_view, len(codeflash), view, base, memory)
+                dcra, dcra_view = attach_dcra(library, name)
                 returned = call_function(library, name, view, base, registers)
-                check_results(scenario, name, memory, base, registers, returned, codeflash=codeflash)
+                check_results(
+                    scenario, name, memory, base, registers, returned, codeflash=codeflash, dcra=dcra,
+                )
+                del dcra_view
             executed[address] += 1
             print(f"PASS {name} {scenario['name']}")
     missing = [row["name"] for address, row in matched.items() if executed[address] == 0]

@@ -345,6 +345,91 @@ uint32_t f33_nvm_get_family2_status(uint32_t object) {
         0x10u);
 }
 
+static uint32_t crc32_word(uint32_t state, uint32_t word) {
+    uint32_t byte_index;
+    for (byte_index = 0u; byte_index < 4u; byte_index++) {
+        uint32_t bit;
+        state ^= (word >> (byte_index * 8u)) & 0xffu;
+        for (bit = 0u; bit < 8u; bit++) {
+            uint32_t mask = -(state & 1u);
+            state = (state >> 1) ^ (0xedb88320u & mask);
+        }
+    }
+    return state;
+}
+
+uint32_t f33_dcra1_crc_raw_words(uint32_t source, uint32_t byte_count, uint32_t raw_seed) {
+    uint32_t words = byte_count >> 2;
+    uint32_t index;
+    uint32_t state = raw_seed;
+    camry_write8(0xffd51020u, 0);
+    for (index = 0u; index < words; index++) {
+        uint32_t word = camry_read32(source + (index << 2));
+        camry_write32(0xffd51000u, word);
+        state = crc32_word(state, word);
+    }
+    camry_write32(0xffd51004u, state ^ 0xffffffffu);
+    return state;
+}
+
+uint32_t f33_nvm_check_family2_rom_crc(uint32_t group) {
+    uint32_t index = group & 0xffffu;
+    uint32_t descriptor = 0x2af8cu + index * 12u;
+    uint32_t bytes = (camry_read16(descriptor) + 4u) & 0xffffu;
+    uint32_t residue = f33_dcra1_crc_raw_words(
+        camry_read32(descriptor + 8u), bytes, 0xffffffffu);
+    return residue == 0u ? 0x10u : 0x30u;
+}
+
+static void copy_record_words(uint32_t destination, uint32_t source, uint32_t byte_count) {
+    uint32_t offset;
+    for (offset = 0u; offset < (byte_count >> 2); offset = (offset + 1u) & 0xffffu)
+        camry_write32(destination + (offset << 2), camry_read32(source + (offset << 2)));
+}
+
+static uint32_t f33_nvm_get_family0_record(uint32_t object, uint32_t destination) {
+    uint32_t index = object & 0xffffu;
+    uint32_t descriptor;
+    if (index >= camry_read16(0x2ad70u))
+        return 0xffu;
+    descriptor = 0x2ad8cu + index * 12u;
+    copy_record_words(destination, camry_read32(descriptor + 8u), camry_read16(descriptor));
+    return camry_read8(camry_gp + index + 19208u);
+}
+
+uint32_t f33_nvm_get_family2_rom_record(uint32_t object, uint32_t destination) {
+    uint32_t index = object & 0xffffu;
+    uint32_t descriptor;
+    uint32_t residue;
+    if (index >= camry_read16((3u << 16) - 21132u))
+        return 0xffu;
+    residue = f33_nvm_check_family2_rom_crc(index);
+    if (residue != 0x10u)
+        residue = f33_nvm_check_family2_rom_crc(index);
+    f33_publish_redundant_u8(
+        residue,
+        camry_gp + index + 20048u,
+        camry_gp + index + 22680u,
+        camry_gp + index + 22716u);
+    if (residue == 0x10u) {
+        descriptor = 0x2af8cu + index * 12u;
+        copy_record_words(destination, camry_read32(descriptor + 8u), camry_read16(descriptor));
+    }
+    return residue;
+}
+
+uint32_t f33_nvm_get_record(uint32_t selector, uint32_t destination) {
+    uint32_t family = selector & 0xff00u;
+    uint32_t object = selector & 0xffu;
+    if (family == 0u)
+        return f33_nvm_get_family0_record(object, destination);
+    if (family == 0x100u)
+        return f33_nvm_get_family1_record(object, destination);
+    if (family == 0x200u)
+        return f33_nvm_get_family2_rom_record(object, destination);
+    return 0xffu;
+}
+
 void f33_nvm_initialize_family1_application(void) {
     uint32_t requests = camry_read8((3u << 16) - 21109u);
     uint32_t objects = camry_read16((3u << 16) - 21134u);
