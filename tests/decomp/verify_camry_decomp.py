@@ -76,6 +76,7 @@ VALUE_RETURN = {
     "f33_nvm_enqueue_read",
     "f33_nvm_enqueue_write",
     "f33_nvm_arm_family0_read",
+    "f33_nvm_arm_family0_write",
     "f33_nvm_submit_family1_read_copies",
 }
 
@@ -288,6 +289,8 @@ def bind(library: ctypes.CDLL) -> None:
     library.f33_nvm_enqueue_write.restype = u32
     library.f33_nvm_arm_family0_read.argtypes = [u32]
     library.f33_nvm_arm_family0_read.restype = u32
+    library.f33_nvm_arm_family0_write.argtypes = [u32]
+    library.f33_nvm_arm_family0_write.restype = u32
     library.f33_nvm_submit_family1_read_copies.argtypes = [u32]
     library.f33_nvm_submit_family1_read_copies.restype = u32
     library.f33_force_unconfirmed_terminal_monitor_healthy.argtypes = [u32, u32, u32]

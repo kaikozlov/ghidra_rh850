@@ -137,4 +137,5 @@ uint32_t f33_nvm_pop_queue_head(uint32_t queue, uint32_t index);
 uint32_t f33_nvm_enqueue_read(uint32_t logical, uint32_t destination);
 uint32_t f33_nvm_enqueue_write(uint32_t logical, uint32_t source);
 uint32_t f33_nvm_arm_family0_read(uint32_t object);
+uint32_t f33_nvm_arm_family0_write(uint32_t object);
 uint32_t f33_nvm_submit_family1_read_copies(uint32_t object);

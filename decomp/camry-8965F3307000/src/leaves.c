@@ -1719,6 +1719,63 @@ uint32_t f33_nvm_arm_family0_read(uint32_t object) {
     return result;
 }
 
+uint32_t f33_nvm_arm_family0_write(uint32_t object) {
+    uint32_t index = object & 0xffffu;
+    uint32_t descriptor = 0x2ad8cu + index * 12u;
+    uint32_t first = camry_read16(descriptor + 4u);
+    uint32_t result = 0xffu;
+    if (camry_read8(camry_gp + 0x4e90u) == 0u && first != 0xffffu) {
+        uint32_t count = camry_read16(descriptor + 2u);
+        uint32_t end = (first + count - 1u) & 0xffffu;
+        uint32_t selected = camry_read16(camry_gp + (index << 1) + 0x4b68u);
+        uint32_t handle = first;
+        uint32_t source;
+        uint32_t payload;
+        uint32_t sequence;
+        uint32_t record;
+        uint32_t offset;
+        uint32_t trailer;
+        uint32_t inverse;
+        if (selected != 0xffffu) {
+            uint32_t next = (selected + 1u) & 0xffffu;
+            if (next <= end)
+                handle = next;
+        }
+        source = camry_read32(descriptor + 8u);
+        payload = camry_read16(descriptor);
+        sequence = camry_read32(camry_gp + (index << 2) + 0x4ba8u) + 1u;
+        record = camry_gp + 0x4f08u;
+        camry_write8(record + 1u, sequence >> 8);
+        camry_write8(record + 2u, sequence >> 16);
+        camry_write8(record + 3u, sequence >> 24);
+        camry_write8(record, sequence);
+        offset = 0u;
+        while (offset < payload) {
+            camry_write8(record + 4u + offset, camry_read8(source + offset));
+            offset = (offset + 1u) & 0xffffu;
+        }
+        if (payload < 57u) {
+            while (offset < 56u) {
+                camry_write8(record + 4u + offset, 0u);
+                offset += 1u;
+            }
+        }
+        trailer = (offset + 4u) & 0xffffu;
+        inverse = ~sequence;
+        record += trailer;
+        camry_write8(record, inverse);
+        camry_write8(record + 1u, inverse >> 8);
+        camry_write8(record + 2u, inverse >> 16);
+        camry_write8(record + 3u, inverse >> 24);
+        (void)f33_nvm_enqueue_write(handle, camry_gp + 0x4f08u);
+        camry_write32(camry_gp + (index << 2) + 0x4ba8u, sequence);
+        camry_write8(camry_gp + index + 0x4b38u, 0xffu);
+        camry_write8(camry_gp + 0x4e90u, 0xffu);
+        result = 0u;
+    }
+    return result;
+}
+
 uint32_t f33_nvm_submit_family1_read_copies(uint32_t object) {
     uint32_t index = object & 0xffffu;
     uint32_t descriptor = 0x2af0cu + (index << 3);
