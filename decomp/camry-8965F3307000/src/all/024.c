@@ -4698,3 +4698,114 @@ void FUN_00093f66(int param_1,ushort *param_2,char param_3)
 }
 
 
+/* Search service-list u16 indices into24-byte rows; no own zero-request-length guard. Store
+   selected row before session/security checks. NRC11 absent,7F session rejection,33 security
+   rejection. Subfunction flag only when configured byte1 and SID!=31. */
+
+uint f33_dcm_resolve_service
+               (F33DcmMessageContext *message,F33DcmServiceSelection *selection,
+               uchar *has_subfunction,uchar *negative_response)
+
+{
+  uchar uVar1;
+  F33DcmService *pFVar2;
+  uint uVar3;
+  F33DcmServiceList *pFVar4;
+  
+  *has_subfunction = '\0';
+  pFVar2 = (F33DcmService *)0x0;
+  *negative_response = '\0';
+  selection->service = 0;
+  uVar3 = 0;
+  do {
+    pFVar4 = ((void *)camry_host_ptr((uint32_t)(selection->list)));
+    if (pFVar4->count <= uVar3) {
+LAB_00090ffa:
+      if ((uintptr_t)(pFVar2)==(uintptr_t)((F33DcmService *)0x0)) {
+        *negative_response = '\x11';
+      }
+      else {
+        if ((pFVar2->has_subfunctions == '\x01') && (pFVar2->sid != '1')) {
+          *has_subfunction = '\x01';
+        }
+        uVar3 = f33_dcm_check_session_list
+                          (((uint8_t *)camry_host_ptr((uint32_t)(((F33DcmService *)camry_host_ptr((uint32_t)(selection->service)))->sessions))),((F33DcmService *)camry_host_ptr((uint32_t)(selection->service)))->session_count);
+        if (uVar3 == 0) {
+          uVar3 = f33_dcm_check_security_list
+                            (((uint8_t *)camry_host_ptr((uint32_t)(((F33DcmService *)camry_host_ptr((uint32_t)(selection->service)))->security))),((F33DcmService *)camry_host_ptr((uint32_t)(selection->service)))->security_count);
+          if (uVar3 == 0) {
+            return 0;
+          }
+          uVar1 = '3';
+        }
+        else {
+          uVar1 = '\x7f';
+        }
+        *negative_response = uVar1;
+      }
+      return 1;
+    }
+    if (*((uint8_t *)camry_host_ptr((uint32_t)(message->request))) == f33_dcm_service_rows[(short)((uint16_t *)camry_host_ptr((uint32_t)(pFVar4->indices)))[uVar3]].sid) {
+      pFVar2 = f33_dcm_service_rows + (short)((uint16_t *)camry_host_ptr((uint32_t)(pFVar4->indices)))[uVar3];
+      selection->service = camry_host_addr(pFVar2);
+      goto LAB_00090ffa;
+    }
+    uVar3 = uVar3 + 1 & 0xffff;
+  } while( true );
+}
+
+
+/* Select request byte1 masked7F among16-byte rows. Actual load precedes length>=2 check. NRC13
+   short,12 absent,7E session rejection,33 security rejection; selected pointer published before
+   policy checks. */
+
+uint f33_dcm_resolve_subfunction
+               (F33DcmMessageContext *message,F33DcmSubfunctionSelection *selection,
+               uchar *negative_response)
+
+{
+  uchar uVar1;
+  uchar *puVar2;
+  F33DcmSubfunction *pFVar3;
+  uint uVar4;
+  F33DcmSubfunction *pFVar5;
+  
+  *negative_response = '\0';
+  puVar2 = ((void *)camry_host_ptr((uint32_t)(message->request)));
+  selection->subfunction = 0;
+  pFVar3 = ((F33DcmSubfunction *)camry_host_ptr((uint32_t)(((F33DcmService *)camry_host_ptr((uint32_t)(selection->service)))->subfunctions)));
+  if (message->request_length < 2) {
+    uVar1 = '\x13';
+  }
+  else {
+    for (uVar4 = 0; pFVar5 = (F33DcmSubfunction *)0x0, uVar4 < ((F33DcmService *)camry_host_ptr((uint32_t)(selection->service)))->subfunction_count
+        ; uVar4 = uVar4 + 1 & 0xff) {
+      pFVar5 = pFVar3 + uVar4;
+      if (((uintptr_t)(pFVar3 + uVar4)!=(uintptr_t)((F33DcmSubfunction *)0x0)) &&
+         ((uintptr_t)((puVar2[1] & 0x7f))==(uintptr_t)(pFVar5->subfunction))) {
+        selection->subfunction = camry_host_addr(pFVar5);
+        break;
+      }
+    }
+    if ((uintptr_t)(pFVar5)!=(uintptr_t)((F33DcmSubfunction *)0x0)) {
+      uVar4 = f33_dcm_check_session_list(((uchar *)camry_host_ptr((uint32_t)(pFVar5->sessions))), pFVar5->session_count);
+      if (uVar4 == 0) {
+        uVar4 = f33_dcm_check_security_list
+                          (((uint8_t *)camry_host_ptr((uint32_t)(((F33DcmSubfunction *)camry_host_ptr((uint32_t)(selection->subfunction)))->security))),((F33DcmSubfunction *)camry_host_ptr((uint32_t)(selection->subfunction)))->security_count);
+        if (uVar4 == 0) {
+          return 0;
+        }
+        uVar1 = '3';
+      }
+      else {
+        uVar1 = '~';
+      }
+      *negative_response = uVar1;
+      return 1;
+    }
+    uVar1 = '\x12';
+  }
+  *negative_response = uVar1;
+  return 1;
+}
+

@@ -6027,3 +6027,223 @@ void FUN_0007bf60(void)
 }
 
 
+/* Scan configured channel Rx rows by+4 CanIf ID and optional address byte; return first matching
+   row or null. Exact configuration uses normal addressing. */
+
+F33CanTpRxConnection *
+f33_cantp_find_receive_frame_connection
+          (F33CanTpConfiguration *configuration,ushort canif_receive_id,uchar *frame_bytes)
+
+{
+  F33CanTpRxConnection *pFVar1;
+  uchar uVar2;
+  ushort uVar3;
+  F33CanTpRxConnection *pFVar4;
+  uint uVar5;
+  
+  pFVar4 = (F33CanTpRxConnection *)0x0;
+  uVar3 = 0;
+  do {
+    if ((configuration->channel_count <= uVar3) || ((uintptr_t)(pFVar4)!=(uintptr_t)((F33CanTpRxConnection *)0x0))) {
+      return pFVar4;
+    }
+    uVar5 = 0;
+    while ((uVar5 < ((F33CanTpChannelConfiguration *)camry_host_ptr((uint32_t)(configuration->channel_rows)))[(short)uVar3].receive_count &&
+           ((uintptr_t)(pFVar4)==(uintptr_t)((F33CanTpRxConnection *)0x0)))) {
+      pFVar1 = ((F33CanTpRxConnection *)camry_host_ptr((uint32_t)(((F33CanTpChannelConfiguration *)camry_host_ptr((uint32_t)(configuration->channel_rows)))[(short)uVar3].receive_rows))) + uVar5;
+      if (canif_receive_id == pFVar1->canif_receive_id) {
+        if (1 < pFVar1->addressing_format) {
+          if (pFVar1->addressing_format == 4) {
+            uVar2 = pFVar1->receive_address_byte;
+          }
+          else {
+            uVar2 = pFVar1->extended_flow_address_byte;
+          }
+          if (*frame_bytes != uVar2) goto LAB_0007a466;
+        }
+        pFVar4 = pFVar1;
+      }
+LAB_0007a466:
+      uVar5 = uVar5 + 1 & 0xff;
+    }
+    uVar3 = uVar3 + 1 & 0xff;
+  } while( true );
+}
+
+
+/* Scan configured Tx rows by+6 flow-control receive ID and optional address byte; return matching
+   connection or null. */
+
+F33CanTpTxConnection *
+f33_cantp_find_flow_control_connection
+          (F33CanTpConfiguration *configuration,ushort canif_receive_id,uchar *frame_bytes)
+
+{
+  F33CanTpTxConnection *pFVar1;
+  uchar uVar2;
+  ushort uVar3;
+  F33CanTpTxConnection *pFVar4;
+  uint uVar5;
+  
+  pFVar4 = (F33CanTpTxConnection *)0x0;
+  uVar3 = 0;
+  do {
+    if ((configuration->channel_count <= uVar3) || ((uintptr_t)(pFVar4)!=(uintptr_t)((F33CanTpTxConnection *)0x0))) {
+      return pFVar4;
+    }
+    uVar5 = 0;
+    while ((uVar5 < ((F33CanTpChannelConfiguration *)camry_host_ptr((uint32_t)(configuration->channel_rows)))[(short)uVar3].transmit_count &&
+           ((uintptr_t)(pFVar4)==(uintptr_t)((F33CanTpTxConnection *)0x0)))) {
+      pFVar1 = ((F33CanTpTxConnection *)camry_host_ptr((uint32_t)(((F33CanTpChannelConfiguration *)camry_host_ptr((uint32_t)(configuration->channel_rows)))[(short)uVar3].transmit_rows))) + uVar5;
+      if (canif_receive_id == pFVar1->flow_control_receive_id) {
+        if (1 < pFVar1->addressing_format) {
+          if (pFVar1->addressing_format == 4) {
+            uVar2 = pFVar1->flow_control_address_byte;
+          }
+          else {
+            uVar2 = pFVar1->extended_transmit_address_byte;
+          }
+          if (*frame_bytes != uVar2) goto LAB_0007a4ca;
+        }
+        pFVar4 = pFVar1;
+      }
+LAB_0007a4ca:
+      uVar5 = uVar5 + 1 & 0xff;
+    }
+    uVar3 = uVar3 + 1 & 0xff;
+  } while( true );
+}
+
+
+/* Find connection whose+4 confirmation ID matches and whose+2 TxID owns that channel. An unclaimed
+   channel never receives aggregate transmit completion. */
+
+F33CanTpTxConnection *
+f33_cantp_find_active_transmit_confirmation
+          (F33CanTpConfiguration *configuration,ushort canif_confirmation_id)
+
+{
+  F33CanTpTxConnection *pFVar1;
+  F33CanTpTxConnection *pFVar2;
+  uint uVar3;
+  uint uVar4;
+  
+  uVar4 = 0;
+  pFVar2 = (F33CanTpTxConnection *)0x0;
+  while ((uVar4 < configuration->channel_count && ((uintptr_t)(pFVar2)==(uintptr_t)((F33CanTpTxConnection *)0x0)))) {
+    pFVar1 = pFVar2;
+    if (((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar4 * 2].transmit_id != 0xffff) {
+      for (uVar3 = 0;
+          (pFVar1 = pFVar2, uVar3 < ((F33CanTpChannelConfiguration *)camry_host_ptr((uint32_t)(configuration->channel_rows)))[(short)uVar4].transmit_count &&
+          ((pFVar1 = ((F33CanTpTxConnection *)camry_host_ptr((uint32_t)(((F33CanTpChannelConfiguration *)camry_host_ptr((uint32_t)(configuration->channel_rows)))[(short)uVar4].transmit_rows))) + uVar3,
+           canif_confirmation_id != pFVar1->canif_confirmation_id ||
+           (((volatile F33CanTpTxStatePrefix *)camry_host_ptr(0xfebe4f40u))[uVar4 * 2].transmit_id != pFVar1->transmit_id))));
+          uVar3 = uVar3 + 1 & 0xff) {
+      }
+    }
+    uVar4 = uVar4 + 1 & 0xff;
+    pFVar2 = pFVar1;
+  }
+  return pFVar2;
+}
+
+
+/* Find configured Rx FC-confirmation row matching+6 ID and the channel retained receive ID. */
+
+F33CanTpRxConnection *
+f33_cantp_find_active_receive_confirmation
+          (F33CanTpConfiguration *configuration,ushort canif_confirmation_id)
+
+{
+  F33CanTpRxConnection *pFVar1;
+  F33CanTpRxConnection *pFVar2;
+  uint uVar3;
+  uint uVar4;
+  
+  uVar4 = 0;
+  pFVar2 = (F33CanTpRxConnection *)0x0;
+  while ((uVar4 < configuration->channel_count && ((uintptr_t)(pFVar2)==(uintptr_t)((F33CanTpRxConnection *)0x0)))) {
+    pFVar1 = pFVar2;
+    if (((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar4 * 2].receive_id != 0xffff) {
+      for (uVar3 = 0;
+          (pFVar1 = pFVar2, uVar3 < ((F33CanTpChannelConfiguration *)camry_host_ptr((uint32_t)(configuration->channel_rows)))[(short)uVar4].receive_count &&
+          ((pFVar1 = ((F33CanTpRxConnection *)camry_host_ptr((uint32_t)(((F33CanTpChannelConfiguration *)camry_host_ptr((uint32_t)(configuration->channel_rows)))[(short)uVar4].receive_rows))) + uVar3,
+           canif_confirmation_id != pFVar1->canif_fc_confirmation_id ||
+           (((volatile F33CanTpRxState *)camry_host_ptr(0xfebe4f50u))[uVar4 * 2].receive_id != pFVar1->receive_id))));
+          uVar3 = uVar3 + 1 & 0xff) {
+      }
+    }
+    uVar4 = uVar4 + 1 & 0xff;
+    pFVar2 = pFVar1;
+  }
+  return pFVar2;
+}
+
+
+/* Range-check namespaced receive ID0802..0804 and scan configured Rx rows by+2 ID; return matching
+   pointer or null. */
+
+F33CanTpRxConnection *
+f33_cantp_find_receive_connection(F33CanTpConfiguration *configuration,ushort receive_id)
+
+{
+  uint uVar1;
+  uint uVar2;
+  F33CanTpRxConnection *pFVar3;
+  F33CanTpRxConnection *pFVar4;
+  ushort uVar5;
+  
+  uVar2 = (uint)receive_id;
+  pFVar3 = (F33CanTpRxConnection *)0x0;
+  if ((configuration->first_receive_id <= uVar2) &&
+     ((int)(uVar2 - ((uint)configuration->receive_count + (uint)configuration->first_receive_id)) <
+      0)) {
+    uVar5 = 0;
+    while ((uVar5 < configuration->channel_count && ((uintptr_t)(pFVar3)==(uintptr_t)((F33CanTpRxConnection *)0x0)))) {
+      uVar1 = 0;
+      while ((pFVar4 = pFVar3, uVar1 < ((F33CanTpChannelConfiguration *)camry_host_ptr((uint32_t)(configuration->channel_rows)))[(short)uVar5].receive_count &&
+             (pFVar4 = ((F33CanTpRxConnection *)camry_host_ptr((uint32_t)(((F33CanTpChannelConfiguration *)camry_host_ptr((uint32_t)(configuration->channel_rows)))[(short)uVar5].receive_rows))) + uVar1,
+             uVar2 != pFVar4->receive_id))) {
+        uVar1 = uVar1 + 1 & 0xff;
+      }
+      uVar5 = uVar5 + 1 & 0xff;
+      pFVar3 = pFVar4;
+    }
+  }
+  return pFVar3;
+}
+
+
+/* Range-check namespaced ID then scan configured channel Tx rows by+2 ID; return matching pointer
+   or null. Exact instructions preserve R10=0 until match. */
+
+F33CanTpTxConnection *
+f33_cantp_find_transmit_connection(F33CanTpConfiguration *configuration,ushort transmit_id)
+
+{
+  uint uVar1;
+  uint uVar2;
+  F33CanTpTxConnection *pFVar3;
+  F33CanTpTxConnection *pFVar4;
+  ushort uVar5;
+  
+  uVar2 = (uint)transmit_id;
+  pFVar3 = (F33CanTpTxConnection *)0x0;
+  if ((configuration->first_transmit_id <= uVar2) &&
+     ((int)(uVar2 - ((uint)configuration->transmit_count + (uint)configuration->first_transmit_id))
+      < 0)) {
+    uVar5 = 0;
+    while ((uVar5 < configuration->channel_count && ((uintptr_t)(pFVar3)==(uintptr_t)((F33CanTpTxConnection *)0x0)))) {
+      uVar1 = 0;
+      while ((pFVar4 = pFVar3, uVar1 < ((F33CanTpChannelConfiguration *)camry_host_ptr((uint32_t)(configuration->channel_rows)))[(short)uVar5].transmit_count &&
+             (pFVar4 = ((F33CanTpTxConnection *)camry_host_ptr((uint32_t)(((F33CanTpChannelConfiguration *)camry_host_ptr((uint32_t)(configuration->channel_rows)))[(short)uVar5].transmit_rows))) + uVar1,
+             uVar2 != pFVar4->transmit_id))) {
+        uVar1 = uVar1 + 1 & 0xff;
+      }
+      uVar5 = uVar5 + 1 & 0xff;
+      pFVar3 = pFVar4;
+    }
+  }
+  return pFVar3;
+}
+

@@ -4981,3 +4981,79 @@ void FUN_00083a34(uint param_1)
   *puVar3 = 0;
   return;
 }
+
+
+/* Validate retained record/inverse and bounds, pass queued payload to85112. Rejection marks3C
+   without consuming occupancy; admission marks hardware group and queue5A. */
+
+void f33_attempt_queued_can_tx
+               (uchar controller,uchar route_index,F33CanQueueDescriptor *descriptor,ushort *cursors
+               )
+
+{
+  undefined1 uVar1;
+  int iVar2;
+  uint32_t puVar3;
+  uint uVar4;
+  undefined *puVar5;
+  undefined *puVar6;
+  int iVar7;
+  uint uVar8;
+  uint uVar9;
+  undefined *puVar10;
+  uint *puVar11;
+  F33CanDriverPdu local_34;
+  
+  puVar5 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  puVar3 = 0x23dfcu;
+  uVar9 = (uint)controller;
+  puVar6 = ((undefined *)camry_host_ptr((uint32_t)((uint)descriptor->queue_index)));
+  puVar10 = ((undefined *)camry_host_ptr((uint32_t)((uint)descriptor->hardware_group)));
+  uVar8 = (uint)cursors[1];
+  iVar7 = 0x69;
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x218e8u + (uint32_t)(uVar9) * 4u)))) + (uint32_t)((int)camry_host_addr(puVar10)))))) != '<') {
+    FUN_0007f5ba(uVar9, camry_host_addr(puVar10));
+  }
+  puVar11 = ((uint *)camry_host_ptr((uint32_t)(uVar8 * 4 + *(int *)(puVar3 + (int)camry_host_addr(puVar6) * 4 + -0x23a8))));
+  uVar4 = *puVar11;
+  if ((puVar11[1] ^ uVar4) != 0xffffffff) goto LAB_00080250;
+  if (uVar4 == 0xffffffff) {
+    puVar11 = *(uint **)(puVar3 + (int)camry_host_addr(puVar6) * 4 + -0x23a8);
+    uVar8 = 0;
+    uVar4 = *puVar11;
+    if ((puVar11[1] ^ uVar4) != 0xffffffff) goto LAB_00080250;
+  }
+  iVar2 = 5;
+  if (8 < (uVar4 & 0xff)) {
+    iVar2 = ((int)((uVar4 & 0xff) + 7) >> 3) * 2 + 3;
+  }
+  uVar8 = iVar2 + uVar8 + 2;
+  if ((int)(uVar8 - descriptor->capacity_words) < 0 || uVar8 == descriptor->capacity_words) {
+    local_34.confirmation_handle = CONCAT11(route_index,controller);
+    local_34.raw_id = puVar11[2];
+    local_34.data = camry_host_addr((uchar *)(puVar11 + 3));
+    local_34.length = (uchar)uVar4;
+    uVar8 = f33_driver_admit_can_tx
+                      ((*((ushort *)camry_host_ptr((uint32_t)((uint)route_index * 10 + *(int *)(puVar3 + uVar9 * 4 + -0x2518) + 6)))),
+                       &local_34);
+    if (uVar8 != 0) goto LAB_00080222;
+    uVar1 = 0x5a;
+    puVar5 = puVar5 + -0x6efc;
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x218e8u + (uint32_t)(uVar9) * 4u)))) + (uint32_t)((int)camry_host_addr(puVar10)))))) = 0x5a;
+  }
+  else {
+    iVar7 = 0xc3;
+LAB_00080222:
+    puVar6 = ((void *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x218e8u + (uint32_t)(uVar9) * 4u)))))));
+    uVar1 = 0x3c;
+    puVar5 = puVar10;
+  }
+  puVar6[(int)camry_host_addr(puVar5)] = uVar1;
+  if (iVar7 != 0xc3) {
+    return;
+  }
+LAB_00080250:
+  FUN_00080d2a(uVar9);
+  return;
+}
+

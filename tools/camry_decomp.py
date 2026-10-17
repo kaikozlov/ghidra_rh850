@@ -333,6 +333,42 @@ def _match_bracket(code: str, opening: int) -> int:
     raise ValueError("unbalanced bracket")
 
 
+def _match_bracket_back(code: str, closing: int) -> int:
+    depth = 0
+    for index in range(closing, -1, -1):
+        if code[index] == "]":
+            depth += 1
+        elif code[index] == "[":
+            depth -= 1
+            if depth == 0:
+                return index
+    raise ValueError("unbalanced bracket")
+
+
+def _enclosing_call(code: str, pos: int, name: str) -> bool:
+    """True when `pos` sits inside a call to `name`."""
+    depth = 0
+    index = pos
+    while index >= 0:
+        char = code[index]
+        if char == ")":
+            depth += 1
+        elif char == "(":
+            if depth == 0:
+                cursor = index - 1
+                while cursor >= 0 and code[cursor] in " \t\n\r":
+                    cursor -= 1
+                end = cursor
+                while cursor >= 0 and (code[cursor].isalnum() or code[cursor] == "_"):
+                    cursor -= 1
+                if code[cursor + 1:end + 1] == name:
+                    return True
+            else:
+                depth -= 1
+        index -= 1
+    return False
+
+
 def _rewrite_indexed(code: str) -> str:
     pieces: list[str] = []
     cursor = 0
@@ -5535,6 +5571,8 @@ def _rewrite_body(code: str) -> str:
     code = _rewrite_runtime_tp(code)
     code = _rewrite_scaled_table(code)
     code = _rewrite_loaded_pointer_subscripts(code)
+    code = _rewrite_late_pointer_fields(code)
+    code = _rewrite_pointer_assignments(code, firmware=True)
     return code
 
 
@@ -6236,7 +6274,7 @@ def _host_pointer(access: str, pointed: str) -> str:
     return f"(({pointed} *)camry_host_ptr((uint32_t)({access})))"
 
 
-def _assignment_sites(code: str) -> list[int]:
+def _assignment_sites(code: str, *, nested: bool = False) -> list[int]:
     spans = _comment_spans(code)
     sites: list[int] = []
     depth = 0
@@ -6256,7 +6294,7 @@ def _assignment_sites(code: str) -> list[int]:
         elif char == ")":
             depth -= 1
         elif (
-            depth == 0
+            (nested or depth == 0)
             and char == "="
             and not _span_contains(spans, index)
             and (index == 0 or code[index - 1] not in "=!<>+-*/%&|^")
@@ -6303,7 +6341,163 @@ def _integer_pointer_targets(signature: str, code: str) -> set[str]:
     return set(pattern.findall(signature + "\n" + code))
 
 
-def _rewrite_pointer_assignments(code: str) -> str:
+def _uint32_array_names() -> set[str]:
+    """common.h macros that are a `uint32_t` table, so a subscript loads one word."""
+    return {
+        name
+        for name, _address, expansion in _named_macros()
+        if expansion.startswith("((volatile uint32_t *)camry_host_ptr(")
+    }
+
+
+def _split_additive(text: str) -> list[str]:
+    parts: list[str] = []
+    depth = 0
+    start = 0
+    index = 0
+    while index < len(text):
+        char = text[index]
+        if char in "([{":
+            depth += 1
+        elif char in ")]}":
+            depth -= 1
+        elif depth == 0 and char in "+-" and index > 0:
+            previous = index - 1
+            while previous >= 0 and text[previous] in " \t":
+                previous -= 1
+            if previous >= 0 and text[previous] not in "+-*/%&|^<>=!({[,:":
+                parts.append(text[start:index].strip())
+                start = index + 1
+        index += 1
+    parts.append(text[start:].strip())
+    return parts
+
+
+def _is_word_load(text: str) -> bool:
+    needle = "(*((volatile uint32_t *)camry_host_ptr("
+    if not text.startswith(needle):
+        return False
+    open_paren = len("(*((volatile uint32_t *)camry_host_ptr")
+    try:
+        close = _match_paren(text, open_paren)
+    except ValueError:
+        return False
+    return text[close + 1:].strip() == "))"
+
+
+def _is_uint32_subscript(text: str, arrays: set[str]) -> bool:
+    match = re.match(r"([A-Za-z_][A-Za-z0-9_]*)\s*\[", text)
+    if match is None or match.group(1) not in arrays:
+        return False
+    try:
+        end = _match_bracket(text, match.end() - 1)
+    except ValueError:
+        return False
+    return text[end + 1:].strip() == ""
+
+
+def _is_firmware_address(expr: str, arrays: set[str], kind) -> bool:
+    """One loaded firmware word, plus integer byte offsets."""
+    parts = _split_additive(expr.strip())
+    if not parts or any(not part for part in parts):
+        return False
+    words = 0
+    for part in parts:
+        if _is_word_load(part) or _is_uint32_subscript(part, arrays):
+            words += 1
+        elif kind(part) != "integer":
+            return False
+    return words == 1
+
+
+def _used_as_firmware_bits(code: str, name: str) -> bool:
+    """The name is added inside `camry_host_ptr`, so it still holds an address word."""
+    for match in re.finditer(rf"\b{re.escape(name)}\b", code):
+        if _enclosing_call(code, match.start(), "camry_host_addr"):
+            continue
+        if _enclosing_call(code, match.start(), "camry_host_ptr"):
+            return True
+    return False
+
+
+def _cast_struct_access(code: str, op_at: int) -> tuple[int, str] | None:
+    """`((Struct *)expr)[index].field` starts at the outer paren."""
+    index = op_at - 1
+    while index >= 0 and code[index] in " \t\n\r":
+        index -= 1
+    while index >= 0 and code[index] == "]":
+        try:
+            index = _match_bracket_back(code, index) - 1
+        except ValueError:
+            return None
+        while index >= 0 and code[index] in " \t\n\r":
+            index -= 1
+    if index < 0 or code[index] != ")":
+        return None
+    try:
+        open_paren = _match_paren_back(code, index)
+    except ValueError:
+        return None
+    inner = code[open_paren + 1:index].strip()
+    if not inner.startswith("("):
+        return None
+    try:
+        cast_end = _match_paren(inner, 0)
+    except ValueError:
+        return None
+    cast = " ".join(inner[1:cast_end].split())
+    if not cast.endswith("*"):
+        return None
+    struct = " ".join(
+        cast[:-1].replace("volatile", " ").replace("const", " ").replace("struct", " ").split()
+    )
+    if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", struct) is None:
+        return None
+    return open_paren, struct
+
+
+def _rewrite_late_pointer_fields(code: str) -> str:
+    """A cast row's pointer field is a firmware address indexed in elements.
+
+    `((Channel *)base)[i].receive_rows + n` is the bytes' `shl` by the row size.
+    The field is a uint32 in the C struct, so the add would otherwise be a byte add.
+    """
+    pointed = _pointer_field_types()
+    if not pointed:
+        return code
+    by_field: dict[str, dict[str, str]] = {}
+    for (struct, field), element in pointed.items():
+        by_field.setdefault(field, {})[struct] = element
+    pattern = re.compile(
+        r"(?:->|\.)\s*(" + "|".join(re.escape(name) for name in sorted(by_field, key=len, reverse=True)) + r")\b"
+    )
+    pieces: list[str] = []
+    cursor = 0
+    for match in pattern.finditer(code):
+        if match.start() < cursor:
+            continue
+        if _enclosing_call(code, match.start(), "camry_host_ptr"):
+            continue
+        found = _cast_struct_access(code, match.start())
+        if found is None:
+            continue
+        start, struct = found
+        element = by_field[match.group(1)].get(struct)
+        if element is None:
+            continue
+        nxt = _skip_space(code, match.end())
+        if nxt >= len(code) or code[nxt] not in "+-,;)[":
+            continue
+        if code[nxt] in "+-" and nxt + 1 < len(code) and code[nxt + 1] in "=+-":
+            continue
+        pieces.append(code[cursor:start])
+        pieces.append(_host_pointer(code[start:match.end()], element))
+        cursor = match.end()
+    pieces.append(code[cursor:])
+    return "".join(pieces)
+
+
+def _rewrite_pointer_assignments(code: str, *, firmware: bool = False) -> str:
     """Store a firmware address in a pointer, and a pointer into an integer."""
     brace = _opening_brace(code)
     if brace < 0:
@@ -6311,10 +6505,12 @@ def _rewrite_pointer_assignments(code: str) -> str:
     signature = _c_signature(code)
     kind = _kind_context(signature, code)
     integer_targets = _integer_pointer_targets(signature, code)
+    arrays = _uint32_array_names() if firmware else set()
     body = code[brace:]
     replacements: list[tuple[int, int, str]] = []
-    for site in _assignment_sites(body):
-        lhs_at = _scan_side(body, site - 1, -1, ",;{}")
+    lhs_stops = ",;{}:" if firmware else ",;{}"
+    for site in _assignment_sites(body, nested=firmware):
+        lhs_at = _scan_side(body, site - 1, -1, lhs_stops)
         rhs_at = _scan_side(body, site + 1, 1, ",;")
         lhs = body[lhs_at:site].strip()
         rhs = body[site + 1:rhs_at].strip()
@@ -6325,6 +6521,22 @@ def _rewrite_pointer_assignments(code: str) -> str:
         deref = re.fullmatch(r"\*\s*([A-Za-z_][A-Za-z0-9_]*)", lhs)
         if lhs_kind == "unknown" and deref and deref.group(1) in integer_targets:
             lhs_kind = "integer"
+        if (
+            firmware
+            and lhs_kind == "pointer"
+            and _is_firmware_address(rhs, arrays, kind)
+        ):
+            ident = re.search(r"[A-Za-z_][A-Za-z0-9_]*", lhs)
+            if ident and _used_as_firmware_bits(body, ident.group(0)):
+                continue
+            replacements.append((
+                site + 1,
+                rhs_at,
+                f" ((void *)camry_host_ptr((uint32_t)({rhs})))",
+            ))
+            continue
+        if firmware:
+            continue
         if lhs_kind == "pointer" and rhs_kind == "integer":
             replacements.append((
                 site + 1,

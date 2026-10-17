@@ -5543,3 +5543,54 @@ void f33_update_angle_rate_compensation(void)
 }
 
 
+undefined4 FUN_000c713c(void)
+
+{
+  ushort input;
+  uchar *puVar1;
+  uint32_t puVar2;
+  int iVar3;
+  int iVar4;
+  int iVar5;
+  undefined4 uVar6;
+  
+  input = DAT_febeadf6;
+  puVar2 = 0xfebeb800u;
+  iVar5 = (DAT_febec156 & 3) * 0x24;
+  DAT_febec38a = (undefined2)(DAT_febec156 & 3);
+  puVar1 = ((void *)camry_host_ptr((uint32_t)(f33_calibration_bank_bases[DAT_febeac3c & 1])));
+  iVar3 = f33_interpolate_unsigned_axis_sentinel_curve
+                    ((ushort *)(puVar1 + iVar5 + 0x13ac),DAT_febeadf6);
+  iVar4 = f33_interpolate_unsigned_axis_sentinel_curve((ushort *)(puVar1 + iVar5 + 0x143c),input);
+  iVar5 = f33_interpolate_unsigned_axis_sentinel_curve((ushort *)(puVar1 + iVar5 + 0x131c),input);
+  uVar6 = FUN_000d1da0(0xffc0);
+  (*((short *)camry_host_ptr((uint32_t)(puVar2 + 0xb72)))) = (short)iVar3;
+  (*((short *)camry_host_ptr((uint32_t)(puVar2 + 0xb74)))) = (short)iVar4;
+  (*((short *)camry_host_ptr((uint32_t)(puVar2 + 0xb76)))) = (short)iVar5;
+  FUN_000d1dc6(uVar6);
+  return uVar6;
+}
+
+
+void FUN_000c74e2(void)
+
+{
+  ushort input;
+  uint uVar1;
+  uchar *puVar2;
+  uint32_t puVar3;
+  int iVar4;
+  
+  input = DAT_febeadf6;
+  puVar3 = 0xfebeb800u;
+  uVar1 = (uint)DAT_febec156;
+  iVar4 = f33_interpolate_unsigned_axis_sentinel_curve
+                    (((ushort *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xb1454u + (uint32_t)(DAT_febeac3c & 1) * 4u)))) + 0x30))),DAT_febeadf6);
+  puVar2 = ((void *)camry_host_ptr((uint32_t)(f33_calibration_bank_bases[(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0xbc4))))) & 1])));
+  (*((short *)camry_host_ptr((uint32_t)(puVar3 + 0xbb0)))) = (short)iVar4;
+  iVar4 = f33_interpolate_unsigned_axis_sentinel_curve
+                    ((ushort *)(puVar2 + (uVar1 & 3) * 0x24 + 0x14cc),input);
+  (*((short *)camry_host_ptr((uint32_t)(puVar3 + 0xbb2)))) = (short)iVar4;
+  return;
+}
+
