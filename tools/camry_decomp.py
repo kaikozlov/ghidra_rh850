@@ -3943,6 +3943,123 @@ def _gp_address_map() -> dict[str, dict[int, int]]:
     return found
 
 
+# Ghidra folds r5 against the boot table. The harness r5 is the application tp.
+_GHIDRA_TP = 0x869C
+_RUNTIME_TP = 0x23DFC
+_TP_PAIRS: dict[str, dict[int, int]] | None = None
+
+
+def _tp_address_map() -> dict[str, dict[int, int]]:
+    """Ghidra tp+disp addresses whose bytes actually use r5, the harness tp."""
+    global _TP_PAIRS
+    if _TP_PAIRS is not None:
+        return _TP_PAIRS
+    from tools.camry_lift import load_image, walk_symbol
+
+    image = load_image()
+    found: dict[str, dict[int, int]] = {}
+    for row in load_symbols():
+        fn = walk_symbol(image, row)
+        if fn is None:
+            continue
+        pairs: dict[int, int] = {}
+        immediates: set[int] = set()
+        accesses: list[int] = []
+        holds = {5}
+        shifted: dict[int, int] = {}
+        for inst in fn.insts:
+            parsed = _stmt_parts(inst.stmt) if inst.stmt else None
+            if parsed is None:
+                continue
+            name, args = parsed
+            for arg in args:
+                if isinstance(arg, int) and arg > 0xFFFF:
+                    immediates.add(arg & 0xFFFFFFFF)
+            if name == "mov" and len(args) >= 2 and isinstance(args[0], int):
+                dst, src = args[0], args[1]
+                if src in holds:
+                    holds.add(dst)
+                    shifted.pop(dst, None)
+                elif src in shifted:
+                    shifted[dst] = shifted[src]
+                    holds.discard(dst)
+                else:
+                    holds.discard(dst)
+                    shifted.pop(dst, None)
+                continue
+            if (
+                name == "movea"
+                and len(args) >= 3
+                and isinstance(args[0], int)
+                and isinstance(args[2], int)
+                and args[1] in holds
+            ):
+                shifted[args[0]] = args[2]
+                holds.discard(args[0])
+                continue
+            if name == "add" and len(args) >= 2 and isinstance(args[0], int):
+                dst, src = args[0], args[1]
+                if src in shifted and dst not in holds:
+                    shifted[dst] = shifted[src]
+                    holds.discard(dst)
+                    continue
+                if dst in shifted and src not in holds:
+                    continue
+                if src in holds or dst in holds:
+                    holds.add(dst)
+                    shifted.pop(dst, None)
+                    continue
+            if (
+                name in _GP_MEMORY
+                and len(args) >= 3
+                and isinstance(args[2], int)
+            ):
+                if args[1] in holds:
+                    accesses.append(args[2])
+                elif args[1] in shifted:
+                    accesses.append(shifted[args[1]] + args[2])
+            elif (
+                name in {"set1", "not1", "clr1", "tst1"}
+                and len(args) >= 2
+                and isinstance(args[1], int)
+                and args[0] in holds
+            ):
+                accesses.append(args[1])
+            if (
+                args
+                and isinstance(args[0], int)
+                and name not in {
+                    "st8", "st16", "st32", "cmp", "cmpi",
+                    "ld8s", "ld8u", "ld16s", "ld16u", "ld32",
+                    "add", "movea", "mov",
+                }
+            ):
+                holds.discard(args[0])
+                shifted.pop(args[0], None)
+        for disp in accesses:
+            ghidra = (_GHIDRA_TP + disp) & 0xFFFFFFFF
+            runtime = (_RUNTIME_TP + disp) & 0xFFFFFFFF
+            if ghidra not in immediates:
+                pairs[ghidra] = runtime
+        if pairs:
+            found[row["name"]] = pairs
+    _TP_PAIRS = found
+    return found
+
+
+def _rewrite_runtime_tp(code: str) -> str:
+    """Use the harness tp for an address the bytes form as r5+disp."""
+    signature = _c_signature(code)
+    try:
+        name = _signature_name(signature)
+    except (AssertionError, ValueError):
+        return code
+    pairs = _tp_address_map().get(name)
+    if not pairs:
+        return code
+    return _apply_gp_pairs(code, pairs)
+
+
 def _object_sizes() -> dict[str, tuple[int, int]]:
     """Byte span of each named data object, from its declared type."""
     cached = getattr(_object_sizes, "cached", None)
@@ -4515,6 +4632,461 @@ def _rewrite_indirect_dispatch(code: str) -> str:
     return "".join(pieces)
 
 
+def _pointer_macro_names() -> set[str]:
+    """Object macros that expand to a host pointer, not a loaded word."""
+    cached = getattr(_pointer_macro_names, "cached", None)
+    if cached is not None:
+        return cached
+    found: set[str] = set()
+    header = ROOT / "src" / "all" / "common.h"
+    if header.exists():
+        for line in header.read_text(encoding="utf-8").splitlines():
+            match = re.match(r"#define\s+([A-Za-z_]\w*)\s+(.+)$", line.strip())
+            if match is None or "(" in match.group(1):
+                continue
+            expr = match.group(2).lstrip()
+            if "camry_host_ptr" in expr and expr.startswith("(") and not expr.startswith("(*"):
+                found.add(match.group(1))
+    _pointer_macro_names.cached = found
+    return found
+
+
+def _scalar_names(code: str) -> set[str]:
+    """Locals and parameters whose values are integers, including firmware addresses."""
+    pointers = _pointer_names(_c_signature(code), code)
+    pattern = re.compile(
+        r"\b(?:volatile\s+)?(?:unsigned\s+|signed\s+)?"
+        r"(?:int|uint|short|ushort|char|byte|uchar|bool|long|ulong|ulonglong|longlong|"
+        r"undefined[1248]?|uint(?:8|16|32|64)_t|int(?:8|16|32|64)_t|uintptr_t|size_t)"
+        r"\s+([A-Za-z_][A-Za-z0-9_]*)\s*(?:;|,|\))"
+    )
+    return {match.group(1) for match in pattern.finditer(code)} - pointers
+
+
+def _is_integer_address(expr: str, scalars: set[str], pointers: set[str], pointer_macros: set[str]) -> bool:
+    """True when `expr` is a firmware address, not a pointer into the host mapping."""
+    text = expr.strip()
+    while _fully_wrapped(text):
+        text = text[1:-1].strip()
+    if text.startswith("(*((volatile uint32_t *)") or text.startswith("*((volatile uint32_t *)"):
+        return True
+    if re.match(r"^(?:0x[0-9A-Fa-f]+|\d+)", text):
+        return True
+    cast = re.match(
+        r"^\(\s*(?:unsigned\s+|signed\s+)?(?:int|uint|short|ushort|char|byte|uchar|"
+        r"long|ulong|ulonglong|longlong|undefined[1248]?|uint(?:8|16|32|64)_t|"
+        r"int(?:8|16|32|64)_t)\s*\)\s*",
+        text,
+    )
+    if cast:
+        return _is_integer_address(text[cast.end():], scalars, pointers, pointer_macros)
+    if text.startswith("("):
+        return False
+    match = re.match(r"[A-Za-z_][A-Za-z0-9_]*", text)
+    if match is None:
+        return False
+    base = match.group(0)
+    if base in pointers or base in pointer_macros:
+        return False
+    return base in scalars
+
+
+def _split_address_of(text: str) -> tuple[str, str] | None:
+    """Split `&designator + byte_offset` into the designator (with `&`) and the offset."""
+    if not text.startswith("&"):
+        return None
+    index = 1
+    if index >= len(text) or not (text[index].isalpha() or text[index] == "_"):
+        return None
+    while index < len(text) and (text[index].isalnum() or text[index] == "_"):
+        index += 1
+    while index < len(text):
+        if text[index].isspace():
+            if text[index:].lstrip().startswith(("+", "-")):
+                break
+            index += 1
+            continue
+        if text[index] == "[":
+            try:
+                index = _match_bracket(text, index) + 1
+            except ValueError:
+                return None
+            continue
+        if text[index] == ".":
+            index += 1
+            while index < len(text) and (text[index].isalnum() or text[index] == "_"):
+                index += 1
+            continue
+        break
+    base = text[:index].rstrip()
+    offset = text[index:].strip()
+    if offset.startswith("+"):
+        offset = offset[1:].strip()
+    elif offset and not offset.startswith("-"):
+        return None
+    return base, offset
+
+
+def _rewrite_host_rewrap(code: str) -> str:
+    """`camry_host_ptr` of a host pointer's low 32 bits is not a firmware address.
+
+    `&object + byte_offset` is already inside the mapped region. Casting it
+    through `int` and back aborts in `camry_host_ptr`.
+    """
+    needle = "camry_host_ptr((uint32_t)((int)&"
+    pieces: list[str] = []
+    index = 0
+    while True:
+        found = code.find(needle, index)
+        if found < 0:
+            pieces.append(code[index:])
+            break
+        opening = found + len("camry_host_ptr")
+        try:
+            closing = _match_paren(code, opening)
+        except ValueError:
+            pieces.append(code[index:found + 1])
+            index = found + 1
+            continue
+        inner = code[opening + 1:closing].strip()
+        arith = inner[len("(uint32_t)"):].strip() if inner.startswith("(uint32_t)(") else ""
+        if _fully_wrapped(arith):
+            arith = arith[1:-1].strip()
+        split = _split_address_of(arith[len("(int)"):]) if arith.startswith("(int)&") else None
+        if split is None:
+            pieces.append(code[index:closing + 1])
+            index = closing + 1
+            continue
+        base, offset = split
+        pieces.append(code[index:found])
+        if offset:
+            pieces.append(f"((uint8_t *){base} + ({offset}))")
+        else:
+            pieces.append(f"((uint8_t *){base})")
+        index = closing + 1
+    return "".join(pieces)
+
+
+def _match_paren_back(code: str, closing: int) -> int:
+    depth = 0
+    for index in range(closing, -1, -1):
+        if code[index] == ")":
+            depth += 1
+        elif code[index] == "(":
+            depth -= 1
+            if depth == 0:
+                return index
+    raise ValueError("unbalanced parenthesis")
+
+
+def _firmware_word(expr: str, scalars: set[str], pointers: set[str], pointer_macros: set[str]) -> str:
+    """The 32-bit firmware address an expression was trying to use as a code pointer."""
+    text = expr.strip()
+    while _fully_wrapped(text):
+        text = text[1:-1].strip()
+    cast = re.match(r"^\(\s*code\s*\*\s*\)\s*", text)
+    if cast:
+        text = text[cast.end():].strip()
+        while _fully_wrapped(text):
+            text = text[1:-1].strip()
+        if text.startswith("camry_host_ptr("):
+            try:
+                closing = _match_paren(text, len("camry_host_ptr"))
+            except ValueError:
+                return text
+            argument = text[len("camry_host_ptr") + 1:closing].strip()
+            if argument.startswith("(uint32_t)(") and argument.endswith(")"):
+                argument = argument[len("(uint32_t)"):].strip()
+                if _fully_wrapped(argument):
+                    argument = argument[1:-1].strip()
+            return argument
+        return text
+    if text.startswith("*(code **)("):
+        try:
+            closing = _match_paren(text, len("*(code **)(") - 1)
+        except ValueError:
+            return text
+        address = text[len("*(code **)("):closing]
+        return _memory_word(address, scalars, pointers, pointer_macros)
+    return text
+
+
+def _memory_word(expr: str, scalars: set[str], pointers: set[str], pointer_macros: set[str]) -> str:
+    if _is_integer_address(expr, scalars, pointers, pointer_macros):
+        return f"(*((volatile uint32_t *)camry_host_ptr((uint32_t)({expr}))))"
+    return f"(*((volatile uint32_t *)({expr})))"
+
+
+def _rewrite_reset_compares(code: str) -> str:
+    """A stored callback compared with the reset vector is a firmware address compared with zero.
+
+    `f33_reset_vector` is address 0. The converted C was comparing a host pointer
+    with the compiled function.
+    """
+    scalars = _scalar_names(code)
+    pointers = _pointer_names(_c_signature(code), code)
+    pointer_macros = _pointer_macro_names()
+    marker = "(uintptr_t)(f33_reset_vector)"
+    pieces: list[str] = []
+    index = 0
+    while True:
+        found = code.find(marker, index)
+        if found < 0:
+            pieces.append(code[index:])
+            break
+        cursor = found - 1
+        while cursor >= 0 and code[cursor] in " \t":
+            cursor -= 1
+        if cursor < 1 or code[cursor] != "=" or code[cursor - 1] not in {"=", "!"}:
+            pieces.append(code[index:found + len(marker)])
+            index = found + len(marker)
+            continue
+        operator = "!=" if code[cursor - 1] == "!" else "=="
+        close = cursor - 2
+        while close >= 0 and code[close] in " \t":
+            close -= 1
+        if close < 0 or code[close] != ")":
+            pieces.append(code[index:found + len(marker)])
+            index = found + len(marker)
+            continue
+        try:
+            opening = _match_paren_back(code, close)
+        except ValueError:
+            pieces.append(code[index:found + len(marker)])
+            index = found + len(marker)
+            continue
+        prefix = "(uintptr_t)"
+        if code[max(0, opening - len(prefix)):opening] != prefix:
+            pieces.append(code[index:found + len(marker)])
+            index = found + len(marker)
+            continue
+        inner = code[opening + 1:close]
+        word = _firmware_word(inner, scalars, pointers, pointer_macros)
+        pieces.append(code[index:opening - len(prefix)])
+        pieces.append(f"(uint32_t)({word}) {operator} 0u")
+        index = found + len(marker)
+    return "".join(pieces)
+
+
+def _rewrite_code_loads(code: str) -> str:
+    """`*(code **)(firmware_address)` reads a word. It is not a host dereference."""
+    scalars = _scalar_names(code)
+    pointers = _pointer_names(_c_signature(code), code)
+    pointer_macros = _pointer_macro_names()
+    needle = "*(code **)("
+    pieces: list[str] = []
+    index = 0
+    while True:
+        found = code.find(needle, index)
+        if found < 0:
+            pieces.append(code[index:])
+            break
+        opening = found + len(needle) - 1
+        try:
+            closing = _match_paren(code, opening)
+        except ValueError:
+            pieces.append(code[index:found + 1])
+            index = found + 1
+            continue
+        expr = code[opening + 1:closing]
+        word = _memory_word(expr, scalars, pointers, pointer_macros)
+        after = closing + 1
+        while after < len(code) and code[after] in " \t\n":
+            after += 1
+        if after < len(code) and code[after] == "=" and not code.startswith("==", after):
+            depth = 0
+            end = None
+            for cursor in range(after + 1, len(code)):
+                char = code[cursor]
+                if char == "(":
+                    depth += 1
+                elif char == ")":
+                    depth -= 1
+                elif char == ";" and depth == 0:
+                    end = cursor
+                    break
+            if end is None:
+                pieces.append(code[index:closing + 1])
+                index = closing + 1
+                continue
+            rhs = code[after + 1:end].strip()
+            entry = _function_entries().get(rhs)
+            value = f"0x{entry:x}u" if entry is not None else f"(uint32_t)({rhs})"
+            pieces.append(code[index:found])
+            pieces.append(f"{word} = {value}")
+            index = end
+            continue
+        pieces.append(code[index:found])
+        pieces.append(f"((code *)(uintptr_t){word})")
+        index = closing + 1
+    return "".join(pieces)
+
+
+_FIRMWARE_CALL = "(*(int (*)())"
+
+
+def _rewrite_firmware_call_wrap(code: str) -> str:
+    """Call the compiled function named by a firmware address.
+
+    The address is a `uint32_t` field, a table word, or a `code *` that still
+    holds that word. It is not a host function pointer.
+    """
+    pieces: list[str] = []
+    index = 0
+    while True:
+        found = code.find(_FIRMWARE_CALL, index)
+        if found < 0:
+            pieces.append(code[index:])
+            break
+        start = found + len(_FIRMWARE_CALL)
+        depth = 0
+        end = None
+        for cursor in range(start, len(code)):
+            char = code[cursor]
+            if char == "(":
+                depth += 1
+            elif char == ")":
+                if depth == 0:
+                    end = cursor
+                    break
+                depth -= 1
+        if end is None:
+            pieces.append(code[index:found + 1])
+            index = found + 1
+            continue
+        expr = code[start:end].strip()
+        if expr.startswith("camry_indirect("):
+            pieces.append(code[index:end + 1])
+            index = end + 1
+            continue
+        pieces.append(code[index:found])
+        pieces.append(f"(*(int (*)())camry_indirect((uint32_t)({expr}))")
+        index = end
+    return "".join(pieces)
+
+
+def _rewrite_firmware_pointers(code: str) -> str:
+    code = _rewrite_host_rewrap(code)
+    code = _rewrite_reset_compares(code)
+    code = _rewrite_code_loads(code)
+    code = _rewrite_indirect_dispatch(code)
+    return _rewrite_firmware_call_wrap(code)
+
+
+def apply_firmware_pointers() -> tuple[int, int]:
+    """Retarget converted calls and host-pointer rewraps. Equivalent bodies stay."""
+    blocked: set[str] = set()
+    allowed: set[str] = set()
+    by_name: dict[str, set[str]] = {}
+    for row in load_matched():
+        by_name.setdefault(row["name"], set()).add(row["status"])
+    for name, statuses in by_name.items():
+        if statuses & {"equivalent", "byte-matched"}:
+            blocked.add(name)
+        elif "converted" in statuses:
+            allowed.add(name)
+    functions = 0
+    files = 0
+    for path in sorted((ROOT / "src" / "all").glob("*.c")):
+        lines = path.read_text(encoding="utf-8").splitlines()
+        out: list[str] = []
+        index = 0
+        changed = False
+        while index < len(lines):
+            line = lines[index]
+            if (
+                not line.strip()
+                or line.startswith("#")
+                or line.startswith((" ", "\t", "/*", "//"))
+            ):
+                out.append(line)
+                index += 1
+                continue
+            start = index
+            while index < len(lines) and "{" not in lines[index]:
+                index += 1
+            if index >= len(lines):
+                out.extend(lines[start:])
+                break
+            depth = 0
+            while index < len(lines):
+                depth += lines[index].count("{") - lines[index].count("}")
+                index += 1
+                if depth <= 0:
+                    break
+            chunk = "\n".join(lines[start:index])
+            match = re.search(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\(", _c_signature(chunk))
+            name = match.group(1) if match else ""
+            if name in allowed and name not in blocked:
+                updated = _rewrite_firmware_pointers(chunk)
+                if updated != chunk:
+                    functions += 1
+                    changed = True
+                    chunk = updated
+            out.extend(chunk.split("\n"))
+        if changed:
+            path.write_text("\n".join(out) + "\n", encoding="utf-8")
+            files += 1
+    return functions, files
+
+
+def apply_runtime_tp() -> tuple[int, int]:
+    """Retarget converted tp-relative addresses. Equivalent bodies stay."""
+    blocked: set[str] = set()
+    allowed: set[str] = set()
+    by_name: dict[str, set[str]] = {}
+    for row in load_matched():
+        by_name.setdefault(row["name"], set()).add(row["status"])
+    for name, statuses in by_name.items():
+        if statuses & {"equivalent", "byte-matched"}:
+            blocked.add(name)
+        elif "converted" in statuses:
+            allowed.add(name)
+    functions = 0
+    files = 0
+    for path in sorted((ROOT / "src" / "all").glob("*.c")):
+        lines = path.read_text(encoding="utf-8").splitlines()
+        out: list[str] = []
+        index = 0
+        changed = False
+        while index < len(lines):
+            line = lines[index]
+            if (
+                not line.strip()
+                or line.startswith("#")
+                or line.startswith((" ", "\t", "/*", "//"))
+            ):
+                out.append(line)
+                index += 1
+                continue
+            start = index
+            while index < len(lines) and "{" not in lines[index]:
+                index += 1
+            if index >= len(lines):
+                out.extend(lines[start:])
+                break
+            depth = 0
+            while index < len(lines):
+                depth += lines[index].count("{") - lines[index].count("}")
+                index += 1
+                if depth <= 0:
+                    break
+            chunk = "\n".join(lines[start:index])
+            match = re.search(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\(", _c_signature(chunk))
+            name = match.group(1) if match else ""
+            if name in allowed and name not in blocked:
+                updated = _rewrite_runtime_tp(chunk)
+                if updated != chunk:
+                    functions += 1
+                    changed = True
+                    chunk = updated
+            out.extend(chunk.split("\n"))
+        if changed:
+            path.write_text("\n".join(out) + "\n", encoding="utf-8")
+            files += 1
+    return functions, files
+
+
 def apply_indirect_dispatch() -> tuple[int, int]:
     """Point converted firmware-address calls at camry_indirect. Equivalent bodies stay."""
     blocked: set[str] = set()
@@ -4671,7 +5243,8 @@ def _rewrite_body(code: str) -> str:
     code = _rewrite_runtime_gp(code)
     code = _rewrite_signed_values(code)
     code = _rewrite_system_inputs(code)
-    code = _rewrite_indirect_dispatch(code)
+    code = _rewrite_firmware_pointers(code)
+    code = _rewrite_runtime_tp(code)
     return code
 
 

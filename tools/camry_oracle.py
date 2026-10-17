@@ -2039,7 +2039,10 @@ def run_oracles() -> int:
 
     focus["addr"] = None
     print(f"harnessed {len(planned)}", flush=True)
-    needed = _body_closure([item.name for item in planned], bodies)
+    # A function-pointer target is not a textual call. Link every converted
+    # body so camry_indirect can reach it. Names already defined in src/*.c
+    # are skipped by the compiler.
+    needed = list(bodies)
     # Keep only roots whose whole executed closure is in the compiled set.
     dropped: set[str] = set()
     stubs: dict[str, str] = {}
