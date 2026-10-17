@@ -1042,16 +1042,51 @@ def _sim_chunks(paths: list[Path]) -> list[dict]:
     return reports
 
 
+def _object_definitions() -> list[tuple[str, str]]:
+    """Definitions for extern objects declared in common.h."""
+    cached = getattr(_object_definitions, "cached", None)
+    if cached is not None:
+        return cached
+    header = ROOT / "src" / "all" / "common.h"
+    found: list[tuple[str, str]] = []
+    if header.exists():
+        pattern = re.compile(
+            r"extern\s+((?:volatile\s+)?(?:u?int(?:8|16|32|64)_t|unsigned|int)\s+\*?\s*)"
+            r"([A-Za-z_][A-Za-z0-9_]*)\s*;\s*$"
+        )
+        for line in header.read_text(encoding="utf-8").splitlines():
+            match = pattern.match(line.strip())
+            if match:
+                found.append((match.group(2), f"{match.group(1)}{match.group(2)};"))
+    _object_definitions.cached = found
+    return found
+
+
+def _diagnostic(log: str) -> str:
+    for line in log.splitlines():
+        text = line.strip()
+        if (
+            "error:" in text
+            or "duplicate symbol" in text
+            or "Undefined symbols" in text
+            or "undefined reference" in text
+        ):
+            return text[:220]
+    lines = [line.strip() for line in log.splitlines() if line.strip()]
+    return (lines[0][:220] if lines else "unknown")
+
+
 def _compile(
     directory: Path,
     names: list[str],
     bodies: dict[str, str],
     stubs: dict[str, str] | None = None,
+    provided: set[str] | None = None,
 ) -> tuple[ctypes.CDLL | None, str]:
     source = directory / "candidates.c"
     stub_path = directory / "stubs.c"
     library = directory / "liboracle.dylib"
-    defined = _src_definitions()
+    defined = _src_definitions() | (provided or set())
     parts = ['#include "common.h"', ""]
     emitted = set()
     for name in names:
@@ -1069,6 +1104,8 @@ def _compile(
         stub_text.append("  abort();")
         stub_text.append("}")
         stub_text.append("")
+    for _name, decl in _object_definitions():
+        stub_text.append(decl)
     stub_path.write_text("\n".join(stub_text) + "\n", encoding="utf-8")
     result = subprocess.run(
         [
@@ -1165,8 +1202,13 @@ def _defined_lines(text: str) -> set[str]:
         head = buf.split("{", 1)[0]
         if "{" not in buf or ";" in head:
             continue
-        match = re.match(r"[A-Za-z_][\w\s\*]*\s([A-Za-z_][A-Za-z0-9_]*)\s*\(", head)
-        if match:
+        # The declarator is the identifier immediately before '('. A pointer
+        # return such as `void *name(` has no space for a type-then-name match.
+        paren = head.find("(")
+        if paren < 0:
+            continue
+        match = re.search(r"([A-Za-z_][A-Za-z0-9_]*)\s*$", head[:paren])
+        if match and match.group(1) not in _CALL_WORDS:
             names.add(match.group(1))
     return names
 
@@ -1276,13 +1318,23 @@ def _linkable(
     return kept, support
 
 
-def _error_names(log: str, names: list[str], bodies: dict[str, str]) -> list[str]:
+def _error_names(
+    log: str,
+    names: list[str],
+    bodies: dict[str, str],
+    skip: set[str] | None = None,
+) -> list[str]:
     lines = [int(number) for number in re.findall(r"candidates\.c:(\d+):", log)]
     if not lines:
         return []
+    defined = _src_definitions() | (skip or set())
     cursor = 3
     spans = []
+    emitted: set[str] = set()
     for name in names:
+        if name in defined or name in emitted or name not in bodies:
+            continue
+        emitted.add(name)
         spans.append((cursor, name))
         cursor += bodies[name].count("\n") + 1
     found = []
@@ -1458,6 +1510,14 @@ def _promote(
         parts.append("}")
         parts.append("")
         have.add(name)
+    text = "\n".join(parts)
+    for name, decl in _object_definitions():
+        if name in have or re.search(rf"^{re.escape(decl)}$", text, re.M):
+            continue
+        if re.search(rf"\b{re.escape(name)}\b", text):
+            parts.append(decl)
+            parts.append("")
+            have.add(name)
     oracle_path.write_text("\n".join(parts).rstrip() + "\n", encoding="utf-8")
 
     matched_path = ROOT / "matched.jsonl"
@@ -1701,24 +1761,47 @@ def run_oracles() -> int:
     dropped: set[str] = set()
     stubs: dict[str, str] = {}
     prototypes = _prototypes()
+    provided: set[str] = set()
+    failed_states: set[tuple[frozenset[str], frozenset[str], frozenset[str]]] = set()
     with tempfile.TemporaryDirectory(prefix="camry-oracle-") as directory:
         directory_path = Path(directory)
+        def state_of(names: list[str]) -> tuple[frozenset[str], frozenset[str], frozenset[str]]:
+            return (frozenset(names), frozenset(stubs), frozenset(provided))
+
         def fit(names: list[str]) -> tuple[ctypes.CDLL | None, list[str]]:
-            names = [name for name in names if name not in dropped]
+            names = list(dict.fromkeys(name for name in names if name not in dropped))
             if not names:
                 return None, []
-            compiled, log = _compile(directory_path, names, bodies, stubs)
+            state = state_of(names)
+            if state in failed_states:
+                for name in names:
+                    dropped.add(name)
+                    reject("host-compile", name)
+                return None, []
+            compiled, log = _compile(directory_path, names, bodies, stubs, provided)
             if compiled is not None:
                 return compiled, names
+            failed_states.add(state)
             missing = _undefined_symbols(log)
-            defined_now = _src_definitions()
+            defined_now = _src_definitions() | provided
             extra = [
                 name for name in missing
                 if name in bodies and name not in defined_now
                 and name not in dropped and name not in names
             ]
             if extra:
-                return fit(names + extra)
+                grown = list(dict.fromkeys(names + extra))
+                if state_of(grown) not in failed_states:
+                    return fit(grown)
+                # The real bodies recreate a set that already failed. Stub the
+                # callees so this slice can link, and keep going.
+                for name in extra:
+                    if name in prototypes and name not in stubs:
+                        stubs[name] = prototypes[name]
+                        dropped.add(name)
+                        reject("host-link", name)
+                if any(name in stubs for name in extra):
+                    return fit(names)
             fresh = {
                 name: prototypes[name]
                 for name in missing
@@ -1728,35 +1811,57 @@ def run_oracles() -> int:
             if fresh:
                 stubs.update(fresh)
                 return fit(names)
+            dupes: list[str] = []
+            for name in re.findall(
+                r"(?:duplicate symbol '_|redefinition of ')([A-Za-z_][A-Za-z0-9_]*)",
+                log,
+            ):
+                if name not in dupes:
+                    dupes.append(name)
+            if dupes:
+                acted = False
+                for name in dupes:
+                    if name in stubs:
+                        del stubs[name]
+                        acted = True
+                    if name not in provided:
+                        provided.add(name)
+                        acted = True
+                if acted:
+                    return fit(names)
             linked = _drop_unlinked(names, bodies, log)
             if linked:
                 for name in linked:
                     dropped.add(name)
                     reject("host-link", name)
                 return fit(names)
-            bad = _error_names(log, names, bodies)
+            bad = _error_names(log, names, bodies, provided)
             if bad:
                 for name in bad:
                     dropped.add(name)
                     reject("host-compile", name)
                 return fit(names)
             if len(names) == 1:
-                print(log[-800:], flush=True)
+                print(_diagnostic(log), flush=True)
                 dropped.add(names[0])
                 reject("host-compile", names[0])
                 return None, []
             mid = len(names) // 2
-            print(f"compile split {len(names)}", flush=True)
+            print(f"compile split {len(names)} {_diagnostic(log)}", flush=True)
             left_lib, left = fit(names[:mid])
             right_lib, right = fit(names[mid:])
             del left_lib, right_lib
-            union = left + right
-            if len(union) == len([name for name in names if name not in dropped]):
-                print(log[-800:], flush=True)
-                for name in names:
-                    dropped.add(name)
-                    reject("host-compile", name)
-                return None, []
+            union = list(dict.fromkeys(left + right))
+            remaining = [name for name in names if name not in dropped]
+            if len(union) == len(remaining) or state_of(union) in failed_states:
+                prefer, discard = (left, right) if len(left) >= len(right) else (right, left)
+                for name in discard:
+                    if name not in prefer and name not in dropped:
+                        dropped.add(name)
+                        reject("host-compile", name)
+                if not prefer:
+                    return None, []
+                return fit(prefer)
             return fit(union)
 
         library, _kept = fit([name for name in needed if name not in dropped])
