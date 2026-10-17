@@ -85,7 +85,7 @@ REASONS = {
     "external-branch": "control leaves the decoded function without a direct call, so the closure is incomplete",
     "large-callee": "a direct callee is above 16384 bytes, so its closure is not inlined",
     "unmodeled": "the harness interpreter does not fold this operation and will not invent the address it computes",
-    "mmio": "the address is outside codeflash, dataflash, and RAM; the P1M-E model faults on that uninitialized peripheral",
+    "mmio": "the access is outside codeflash, dataflash, RAM, and the peripheral file",
     "ram-alias": "the access uses the PE1 local-RAM alias at 0xFEDE0000; the host check maps only 0xFEBE0000",
     "code-extension": "the access is in the extended codeflash window, which this image does not contain",
     "code-write": "the bytes write CodeFlash, which the machine keeps immutable",
@@ -158,20 +158,30 @@ def _sext(value: int, bits: int) -> int:
     return _u32(value)
 
 
+_MAPPED = (
+    ("code", 0, 0x100000),
+    ("code-ext", 0x01000000, 0x01008000),
+    ("local", 0xFEBE0000, 0xFEC00000),
+    ("alias", 0xFEDE0000, 0xFEE00000),
+    ("global", 0xFEEF8000, 0xFEF08000),
+    ("data", 0xFF200000, 0xFF208000),
+)
+_HOST_PTR = re.compile(r"camry_host_ptr\(\s*(0x[0-9A-Fa-f]+)")
+
+
 def _space(addr: int, size: int) -> str:
     end = addr + size
-    windows = (
-        ("code", 0, 0x100000),
-        ("code-ext", 0x01000000, 0x01008000),
-        ("local", 0xFEBE0000, 0xFEC00000),
-        ("alias", 0xFEDE0000, 0xFEE00000),
-        ("global", 0xFEEF8000, 0xFEF08000),
-        ("data", 0xFF200000, 0xFF208000),
-    )
-    for name, start, stop in windows:
+    for name, start, stop in _MAPPED:
         if start <= addr and end <= stop:
             return name
     return "mmio"
+
+
+def _covers_mapped(start: int, end: int) -> bool:
+    for _name, left, right in _MAPPED:
+        if start < right and left < end:
+            return True
+    return False
 
 
 def _load_bodies() -> tuple[dict[str, str], set[str]]:
@@ -810,8 +820,6 @@ class _Machine:
             raise Harness("ram-alias")
         if space == "code-ext":
             raise Harness("code-extension")
-        if space == "mmio":
-            raise Harness("mmio")
         return space
 
     def _read_ram(self, addr: int, size: int, signed: bool, base: int) -> int:
@@ -820,7 +828,7 @@ class _Machine:
         if image is None:
             if kind in {"code", "data", "code-ext"}:
                 raise Harness("code-extension")
-            if kind not in {"stack", "arg", "local", "global"}:
+            if kind not in {"stack", "arg", "local", "global", "mmio"}:
                 raise Harness("mmio")
             raw = 0
             for offset in range(size):
@@ -828,7 +836,7 @@ class _Machine:
             self.run.reads.add((addr, size))
         else:
             raw = image
-        if kind in {"local", "global", "stack", "arg"}:
+        if kind in {"local", "global", "stack", "arg", "mmio"}:
             self.run.reads.add((addr, size))
         return _sext(raw, size * 8) if signed else raw
 
@@ -846,7 +854,7 @@ class _Machine:
             raise Harness("code-write")
         if kind == "data":
             raise Harness("dataflash-write")
-        if kind not in {"stack", "arg", "local", "global"}:
+        if kind not in {"stack", "arg", "local", "global", "mmio"}:
             raise Harness("mmio")
         for offset in range(size):
             self.run.memory[addr + offset] = (value >> (8 * offset)) & 0xFF
@@ -1005,11 +1013,11 @@ def _windows(runs: list[Run], pointers: list[bool] | None = None) -> list[tuple[
     glob = _cover_objects(glob)
     other = _cover_objects(other)
     windows = [window for window in (_span(local), _span(glob)) if window is not None]
-    packed = _clusters(other, 16)
+    packed = _clusters(other, 0x400)
     if len(windows) + len(packed) > 6 and packed:
         start = min(addr for addr, _size in other)
         end = max(addr + size for addr, size in other)
-        if end - start <= 0x2000:
+        if end - start <= 0x10000 and not _covers_mapped(start, end):
             packed = [(start, end - start)]
     if len(windows) + len(packed) > 6:
         raise Harness("region-cap")
@@ -1034,6 +1042,17 @@ def _attach_scratch(windows: list[tuple[int, int]]) -> list[tuple[int, int]]:
     if cover == "partial" or len(windows) >= 6:
         raise Harness("no-observable")
     return [*windows, (SCRATCH, SCRATCH_SIZE)]
+
+
+def _note_mmio_bases(runs: list[Run], texts: list[str]) -> None:
+    """The bytes may touch a field while the C takes the object's base pointer."""
+    for text in texts:
+        for match in _HOST_PTR.finditer(text):
+            addr = int(match.group(1), 16)
+            if _space(addr, 1) != "mmio":
+                continue
+            for run in runs:
+                run.reads.add((addr, 1))
 
 
 def _scenario_windows(runs: list[Run], pointers: list[bool]) -> list[tuple[int, int]]:
@@ -1120,6 +1139,7 @@ def _scenario(name: str, address: int, run: Run, fill: int, params: list[tuple[b
         "gpr_fill": hex(SENTINEL),
         "registers": registers,
         "stop_addresses": [hex(STOP)],
+        "peripheral_file": True,
         "memory": [
             {"address": hex(base), "size": size, "fill": fill, "evidence": "generated"}
             for base, size in windows
@@ -1978,6 +1998,12 @@ def run_oracles() -> int:
         if preserved:
             reject(preserved, name)
             continue
+        texts = [body]
+        for target in set().union(*(run.calls for run in runs)):
+            callee = functions.get(target)
+            if callee is not None and callee.name in bodies:
+                texts.append(bodies[callee.name])
+        _note_mmio_bases(runs, texts)
         try:
             windows = _scenario_windows(runs, pointers)
         except Harness as exc:

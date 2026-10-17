@@ -274,7 +274,7 @@ def load_scenario(path: Path) -> dict[str, Any]:
     allowed = {
         "schema", "name", "entry", "max_instructions", "reset", "stop_addresses",
         "gpr_fill", "registers", "memory", "pre_reset_memory", "artifacts", "checks",
-        "expected_fault", "events",
+        "expected_fault", "events", "peripheral_file",
     }
     required = {"schema", "name", "entry", "max_instructions", "stop_addresses", "checks"}
     _require_keys(raw, allowed=allowed, required=required, context=str(scenario_path))
@@ -290,6 +290,9 @@ def load_scenario(path: Path) -> dict[str, Any]:
         if not isinstance(fill, str):
             raise P1MEMachineError(f"{scenario_path}: gpr_fill must be an integer string")
         registers = {**dict.fromkeys(GPR_NAMES, fill), **registers}
+    peripheral_file = raw.get("peripheral_file", False)
+    if not isinstance(peripheral_file, bool):
+        raise P1MEMachineError(f"{scenario_path}: peripheral_file must be a boolean")
     expected_fault = raw.get("expected_fault")
     if expected_fault is not None:
         if not isinstance(expected_fault, dict):
@@ -319,6 +322,8 @@ def load_scenario(path: Path) -> dict[str, Any]:
         "expected_fault": expected_fault,
         "events": _validate_events(raw.get("events", []), f"{scenario_path}.events"),
     }
+    if peripheral_file:
+        normalized["peripheral_file"] = True
     return normalized
 
 

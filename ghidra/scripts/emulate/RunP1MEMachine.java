@@ -319,6 +319,7 @@ public class RunP1MEMachine extends GhidraScript {
         List<CheckDef> checks = new ArrayList<>();
         List<ExternalEvent> events = new ArrayList<>();
         ExpectedFault expected_fault;
+        boolean peripheral_file;
     }
 
     static final class RunContract {
@@ -428,6 +429,7 @@ public class RunP1MEMachine extends GhidraScript {
         PcodeEmulator emulator;
         AddressSpace memorySpace;
         boolean internalWrite;
+        boolean peripheralFile;
 
         Model(SleighLanguage language, MachineSpec spec, Trace trace) {
             this.language = language;
@@ -721,6 +723,11 @@ public class RunP1MEMachine extends GhidraScript {
                 trace.access("read", pc(thread), address, size, region.evidence);
                 return;
             }
+            if (peripheralFile) {
+                // Scenario checks compare these bytes. Keeping them out of the
+                // access trace leaves the 4096-entry cap for RAM traffic.
+                return;
+            }
             RegisterDef register = register(address, size);
             if (register == null) {
                 throw fault("unmapped-read", thread, address, size, "read", "unknown",
@@ -757,6 +764,9 @@ public class RunP1MEMachine extends GhidraScript {
                         region.evidence, "direct write prohibited for region: " + region.name);
                 }
                 trace.access("write", pc(thread), address, size, region.evidence);
+                return;
+            }
+            if (peripheralFile) {
                 return;
             }
             RegisterDef register = register(address, size);
@@ -1499,7 +1509,7 @@ public class RunP1MEMachine extends GhidraScript {
                     }
                 }
             }
-            handleRegisterWrite(thread, address, size, value);
+            if (!peripheralFile) handleRegisterWrite(thread, address, size, value);
         }
 
         void initializeResetRegisters() {
@@ -1582,12 +1592,33 @@ public class RunP1MEMachine extends GhidraScript {
             trace.deviceEvents.add(event);
         }
 
+        boolean overlapsRegion(long address, int size) {
+            long end = address + Integer.toUnsignedLong(size);
+            for (RegionDef candidate : regions) {
+                if (Long.compareUnsigned(address, candidate.end_exclusive) < 0
+                        && Long.compareUnsigned(candidate.start, end) < 0) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         void initializeMemory(long address, byte[] value, String evidence) {
             RegionDef region = region(address, value.length);
             RegisterDef register = register(address, value.length);
             if (region == null && register == null) {
-                throw new IllegalArgumentException("scenario initializes unmapped state at "
-                    + hex32(address) + " size=" + value.length);
+                if (!peripheralFile || overlapsRegion(address, value.length)) {
+                    throw new IllegalArgumentException("scenario initializes unmapped state at "
+                        + hex32(address) + " size=" + value.length);
+                }
+                setMemory(address, value);
+                JsonObject peripheral = new JsonObject();
+                peripheral.addProperty("kind", "scenario-initialization");
+                peripheral.addProperty("address", hex32(address));
+                peripheral.addProperty("size", value.length);
+                peripheral.addProperty("evidence", evidence == null ? "scenario" : evidence);
+                trace.deviceEvents.add(peripheral);
+                return;
             }
             if (region != null
                     && (region.name.startsWith("codeflash") || region.name.equals("dataflash"))) {
@@ -1747,6 +1778,31 @@ public class RunP1MEMachine extends GhidraScript {
                         new byte[(int) reinitLength]);
                 }
                 return set;
+            }
+            if (model.peripheralFile && reason != Reason.INSPECT && reinitAddress != null
+                    && reinitAddress.getAddressSpace().equals(model.memorySpace)) {
+                boolean outside = set.getNumAddresses() > 0;
+                for (AddressRange range : set.getAddressRanges()) {
+                    long rangeLength = range.getLength();
+                    if (rangeLength <= 0 || rangeLength > 4096
+                            || model.region(range.getMinAddress().getOffset(), (int) rangeLength) != null) {
+                        outside = false;
+                        break;
+                    }
+                }
+                if (outside) {
+                    PcodeExecutorStatePiece<A, byte[]> concrete =
+                        PcodeStateCallbacks.checkValueDomain(piece, byte[].class);
+                    if (concrete == null) {
+                        throw new IllegalStateException(
+                            "RH850 machine requires concrete memory state");
+                    }
+                    for (AddressRange range : set.getAddressRanges()) {
+                        int rangeLength = (int) range.getLength();
+                        concrete.setVar(range.getMinAddress(), rangeLength, false, new byte[rangeLength]);
+                    }
+                    return set;
+                }
             }
             Address address = set.getMinAddress();
             if (address == null) {
@@ -2173,6 +2229,7 @@ public class RunP1MEMachine extends GhidraScript {
             scenario.entry, codeflash, parseUnsigned(contract.target.codeflash.base));
         Trace trace = new Trace();
         Model model = new Model(language, machineSpec, trace);
+        model.peripheralFile = scenario.peripheral_file;
         Callbacks callbacks = new Callbacks(language, model);
         PcodeEmulator emulator = new PcodeEmulator(language, callbacks) {
             @Override
@@ -2261,7 +2318,7 @@ public class RunP1MEMachine extends GhidraScript {
     private void validateScenarioJson(JsonObject scenarioJson) {
         requireKeys(scenarioJson, Set.of("schema", "name", "entry", "max_instructions",
             "stop_addresses", "registers", "memory", "pre_reset_memory", "artifacts", "checks",
-            "expected_fault", "reset", "events"), "scenario");
+            "expected_fault", "reset", "events", "peripheral_file"), "scenario");
         JsonObject entry = scenarioJson.getAsJsonObject("entry");
         if ("resolved-address".equals(entry.get("scope").getAsString())) {
             requireKeys(entry, Set.of("role", "scope", "address"), "entry selector");

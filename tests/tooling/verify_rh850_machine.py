@@ -598,6 +598,68 @@ def check_execution_event_boundaries(output_root: Path) -> None:
         print(f"PASS {path.stem}: {kind} faults at the external-event boundary")
 
 
+def check_peripheral_file(output_root: Path) -> None:
+    """Opted-in peripheral space reads back the last store and keeps scripted bytes.
+
+    Without the flag, 0xFF000000 stays an unmapped write. The flag is the
+    differential harness's model of a peripheral register file.
+    """
+    output_dir = output_root / "peripheral-file"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    scenario = {
+        "schema": "rh850-p1me-machine-scenario-v2",
+        "name": "peripheral-readback",
+        "entry": PORTABLE_STORE_SELECTOR,
+        "max_instructions": 20,
+        "stop_addresses": ["0x00010000"],
+        "gpr_fill": "0",
+        "peripheral_file": True,
+        "registers": {
+            "sp": "0xFEBE2000",
+            "gp": "0xFEBEB800",
+            "tp": "0x00023DFC",
+            "r6": "0xFF000000",
+            "r7": "0x5A",
+            "lp": "0x00010000",
+            "PSW": "0",
+            "PMR": "0",
+        },
+        "memory": [{
+            "address": "0xFF000000",
+            "size": 2,
+            "fill": 0x11,
+            "evidence": "scripted peripheral bytes around the store",
+        }],
+        "checks": [
+            {
+                "name": "stored byte reads back",
+                "kind": "memory",
+                "address": "0xFF000000",
+                "size": 1,
+                "equals_hex": "5a",
+            },
+            {
+                "name": "unread peripheral byte stays scripted",
+                "kind": "memory",
+                "address": "0xFF000001",
+                "size": 1,
+                "equals_hex": "11",
+            },
+        ],
+    }
+    path = output_dir / "peripheral-readback.json"
+    path.write_text(json.dumps(scenario, indent=2) + "\n", encoding="utf-8")
+    run([
+        str(REPO_ROOT / "tools/rh850"), "test", "firmware",
+        "camry-8965F3307000", str(path),
+        "--output-dir", str(output_dir),
+    ])
+    report = json.loads((output_dir / "peripheral-readback.report.json").read_text(encoding="utf-8"))
+    if report.get("passed") is not True or report.get("termination_reason") != "stop-address":
+        raise AssertionError(f"peripheral read-back did not execute: {report!r}")
+    print("PASS peripheral file reads back the last write and keeps scripted bytes")
+
+
 def check_register_input_boundaries(output_root: Path) -> None:
     """External device input cannot alter CPU registers or issue device commands."""
     output_dir = output_root / "register-input-boundaries"
@@ -651,6 +713,7 @@ def main() -> int:
         check_event_schema_rejections(output_root)
         check_execution_event_boundaries(output_root)
         check_register_input_boundaries(output_root)
+        check_peripheral_file(output_root)
     print("PASS specification-backed multi-target RH850/P1M-E machine")
     return 0
 
