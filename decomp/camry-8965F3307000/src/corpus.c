@@ -2,6 +2,7 @@
 #include "camry.h"
 #include "ghidra_types.h"
 
+#define f33_application_receive_status ((volatile uint8_t *)camry_host_ptr(0xfebe7f0eu))
 #define f33_boot_flash_block_boundaries ((volatile uint32_t *)camry_host_ptr(0x86ecu))
 #define f33_boot_security_challenge ((volatile uint8_t *)camry_host_ptr(0xfebf2b24u))
 #define f33_boot_security_handshake_state (*((volatile uint8_t *)camry_host_ptr(0xfebf2b55u)))
@@ -11,6 +12,11 @@
 #define f33_estimator_tracking_step_scale (*((volatile int32_t *)camry_host_ptr(0xaf764u)))
 #define f33_estimator_tracking_warmup (*((volatile uint16_t *)camry_host_ptr(0xaf772u)))
 #define f33_internal_source_admission_state (*((volatile uint8_t *)camry_host_ptr(0xfebe7f68u)))
+#define f33_nvm_completion_mode (*((volatile uint8_t *)camry_host_ptr(0xfebf6c4bu)))
+#define f33_nvm_completion_raw_result (*((volatile uint32_t *)camry_host_ptr(0xfebf6c10u)))
+#define f33_nvm_completion_side_status (*((volatile uint8_t *)camry_host_ptr(0xfebf6c4cu)))
+#define f33_nvm_completion_storage_handle (*((volatile uint16_t *)camry_host_ptr(0xfebf6c3cu)))
+#define f33_nvm_physical_attempt_flags (*((volatile uint8_t *)camry_host_ptr(0xfebf6b73u)))
 #define f33_published_internal_source_admission_state (*((volatile uint8_t *)camry_host_ptr(0xfebef000u)))
 #define f33_published_route31_numeric_scalar (*((volatile uint32_t *)camry_host_ptr(0xfebef218u)))
 #define f33_received_packed_decimal_fields ((volatile uint8_t *)camry_host_ptr(0xfebebe66u))
@@ -49,6 +55,9 @@
 #define DAT_febe66b8 (*((volatile uint16_t *)camry_host_ptr(0xfebe66b8u)))
 #define DAT_febe6764 (*((volatile uint16_t *)camry_host_ptr(0xfebe6764u)))
 #define DAT_febe7f2c (*((volatile uint8_t *)camry_host_ptr(0xfebe7f2cu)))
+#define DAT_febe7f50 (*((volatile uint8_t *)camry_host_ptr(0xfebe7f50u)))
+#define DAT_febe7f51 (*((volatile uint8_t *)camry_host_ptr(0xfebe7f51u)))
+#define DAT_febe7f52 (*((volatile uint8_t *)camry_host_ptr(0xfebe7f52u)))
 #define DAT_febe7f69 (*((volatile uint8_t *)camry_host_ptr(0xfebe7f69u)))
 #define DAT_febe7f6a (*((volatile uint8_t *)camry_host_ptr(0xfebe7f6au)))
 #define DAT_febe7f6b (*((volatile uint8_t *)camry_host_ptr(0xfebe7f6bu)))
@@ -132,12 +141,22 @@
 #define DAT_febf2998 (*((volatile uint16_t *)camry_host_ptr(0xfebf2998u)))
 #define DAT_febf299a (*((volatile uint16_t *)camry_host_ptr(0xfebf299au)))
 #define DAT_febf2aa1 (*((volatile uint8_t *)camry_host_ptr(0xfebf2aa1u)))
+#define DAT_febf6c14 (*((volatile uint32_t *)camry_host_ptr(0xfebf6c14u)))
+#define DAT_febf6c18 (*((volatile uint32_t *)camry_host_ptr(0xfebf6c18u)))
+#define DAT_febf6c20 (*((volatile uint32_t *)camry_host_ptr(0xfebf6c20u)))
 
 uint f33_boot_find_flash_block_start(uint address,uint *block_start);
 uint f33_boot_find_flash_block_end(uint address,uint *block_end);
 uint f33_boot_select_operation_blocks(uint address,uint length,uint *first_block,uint *last_block);
 uint f33_boot_submit_erase_program_stream(uint address,uint length);
 void f33_boot_security_invalidate_handshake(void);
+uchar f33_classify_receive_monitor_admission(uint channel,uint group,uint selector);
+uint f33_advance_receive_timeout(uint selector);
+uint f33_retain_receive_timeout(uint selector);
+undefined4 FUN_000497dc(uint param_1);
+undefined4 FUN_000497f4(uint param_1);
+void f33_update_application_receive_statuses(void);
+uchar f33_get_grouped_status_byte(uint selector);
 void f33_fill_constant_block_49ec6(void);
 void f33_fill_constant_block_49eda(void);
 void f33_fill_constant_block_49eec(void);
@@ -155,6 +174,19 @@ void FUN_0004a40e(void);
 void FUN_0004a416(void);
 void FUN_0004a426(void);
 void FUN_0004a436(void);
+void f33_return_only_stub_73ca0(void);
+void f33_return_only_stub_73ca2(void);
+undefined4 FUN_0007490a(undefined4 param_1);
+undefined4 FUN_0007490e(undefined4 param_1);
+void f33_nvm_publish_physical_class(uchar result_class);
+void f33_nvm_mark_physical_attempt_error(void);
+void f33_nvm_report_class_byte(uchar result_class);
+void f33_nvm_report_physical_class(uchar result_class);
+void f33_nvm_reset_completion_context(void);
+void f33_nvm_mark_non_success_result(void);
+void f33_nvm_report_completion_side_status(void);
+void f33_nvm_finish_physical_result(void);
+void FUN_000783de(undefined4 param_1);
 uint f33_classify_received_status_delay(void);
 void f33_update_second_health_status_window(uint classification);
 void f33_publish_current_and_held_health_windows(void);
@@ -350,6 +382,219 @@ void f33_boot_security_invalidate_handshake(void)
   }
   f33_boot_security_handshake_state = '\x01';
   return;
+}
+
+
+
+/* Channel1/2, grouped status, group enable/bypass11 and E82A gates. Separate return2 retains prior
+   monitor state instead of declaring healthy. Channel/group/status/E82A admission has separate
+   retain result2; disabled monitoring is not uniformly a healthy observation. */
+
+uchar f33_classify_receive_monitor_admission(uint channel,uint group,uint selector)
+
+{
+  char cVar1;
+  char cVar2;
+  code cVar3;
+  undefined *puVar4;
+  uchar uVar5;
+  
+  puVar4 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  cVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe7f2eu + (uint32_t)(channel & 0xff) * 1u))));
+  cVar2 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe7f2cu + (uint32_t)(channel & 0xff) * 1u))));
+  uVar5 = f33_get_grouped_status_byte(selector & 0xff);
+  cVar3 = (code)0x5a;
+  if ((group & 0xff) != 0xb) {
+    cVar3 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x3000u + (uint32_t)((int)camry_host_addr((puVar4 + (group & 0xff) + 7)))))));
+  }
+  if ((((cVar2 != '\x01' && cVar2 != '\x02') || (uVar5 != '\0')) || (cVar3 != (code)0x5a)) ||
+     (uVar5 = '\0', puVar4[0x302a] != '\0')) {
+    if (cVar1 == 'Z') {
+      uVar5 = '\x02';
+    }
+    else {
+      uVar5 = '\x01';
+    }
+  }
+  return uVar5;
+}
+
+
+
+/* Raw marker5A drives strict counter>threshold timeout; other marker clears. Confirmed timeout
+   retention is distinct from raw invalidity. Raw marker5A advances timeout counter and confirms
+   only strictly above descriptor threshold; non5A clears counter. */
+
+uint f33_advance_receive_timeout(uint selector)
+
+{
+  int iVar1;
+  int iVar2;
+  ushort uVar3;
+  uint uVar4;
+  
+  iVar1 = (selector & 0xff) * 8;
+  iVar2 = (selector & 0xff) * 2;
+  uVar3 = *(ushort *)(((undefined *)camry_host_ptr(0xfebe7eb4u)) + iVar2);
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe52d8u + (uint32_t)((byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x28fe4u + (uint32_t)(iVar1) * 1u))))) * 1u)))) == 'Z') {
+    if ((*(ushort *)(((undefined *)camry_host_ptr(0x28fe8u)) + iVar1) < uVar3) ||
+       (uVar3 = uVar3 + 1, *(ushort *)(((undefined *)camry_host_ptr(0x28fe8u)) + iVar1) < uVar3)) {
+      uVar4 = 0x22;
+    }
+    else {
+      uVar4 = 0x11;
+    }
+  }
+  else {
+    uVar4 = 0;
+    uVar3 = 0;
+  }
+  *(ushort *)(((undefined *)camry_host_ptr(0xfebe7eb4u)) + iVar2) = uVar3;
+  return uVar4;
+}
+
+
+
+/* Raw marker5A drives strict counter>threshold timeout; other marker clears. Confirmed timeout
+   retention is distinct from raw invalidity. Confirmed receive timeout remains while marker5A;
+   other marker clears it independently of raw nonzero invalidity. */
+
+uint f33_retain_receive_timeout(uint selector)
+
+{
+  char cVar1;
+  uint uVar2;
+  undefined2 uVar3;
+  
+  uVar2 = 0x22;
+  uVar3 = *(undefined2 *)(((undefined *)camry_host_ptr(0xfebe7eb4u)) + (selector & 0xff) * 2);
+  cVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe52d8u + (uint32_t)((byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x28fe4u + (uint32_t)((selector & 0xff) * 8) * 1u))))) * 1u))));
+  if (cVar1 != 'Z') {
+    uVar3 = 0;
+  }
+  *(undefined2 *)(((undefined *)camry_host_ptr(0xfebe7eb4u)) + (selector & 0xff) * 2) = uVar3;
+  if (cVar1 != 'Z') {
+    uVar2 = 0;
+  }
+  return uVar2;
+}
+
+
+
+undefined4 FUN_000497dc(uint param_1)
+
+{
+  f33_application_receive_status[param_1 & 0xff] = '\x01';
+  *(undefined2 *)(((undefined *)camry_host_ptr(0xfebe7eb4u)) + (param_1 & 0xff) * 2) = 0;
+  return 0;
+}
+
+
+
+undefined4 FUN_000497f4(uint param_1)
+
+{
+  int iVar1;
+  undefined *puVar2;
+  uchar uVar3;
+  undefined4 uVar4;
+  undefined1 uVar5;
+  uint uVar6;
+  
+  puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  param_1 = param_1 & 0xff;
+  iVar1 = param_1 * 8;
+  uVar6 = (uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe7ef0u + (uint32_t)(param_1) * 1u))));
+  uVar3 = f33_classify_receive_monitor_admission
+                    ((uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x28fe5u + (uint32_t)(iVar1) * 1u)))),(uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x28fe7u + (uint32_t)(iVar1) * 1u)))),param_1);
+  if (uVar3 == '\0') {
+    if ((uVar6 == 0) || (uVar6 == 0x11)) {
+      uVar6 = f33_advance_receive_timeout(param_1);
+    }
+    else if (uVar6 == 0x22) {
+LAB_00049868:
+      uVar6 = f33_retain_receive_timeout(param_1);
+    }
+    else {
+      uVar6 = FUN_000497dc(param_1);
+    }
+LAB_00049872:
+    if (uVar6 == 0x22) {
+      uVar4 = 2;
+      uVar5 = 0x22;
+      goto LAB_00049880;
+    }
+  }
+  else {
+    if (uVar3 == '\x02') goto LAB_00049872;
+    if ((uVar6 != 0) && (uVar6 != 0x11)) {
+      if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x28fe6u + (uint32_t)(iVar1) * 1u)))) == 'Z') goto LAB_00049868;
+      goto LAB_00049872;
+    }
+    uVar6 = 0;
+    *(undefined2 *)(puVar2 + param_1 * 2 + -0x394c) = 0;
+  }
+  uVar5 = (undefined1)uVar6;
+  uVar4 = 0;
+LAB_00049880:
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe7ef0u + (uint32_t)(param_1) * 1u)))) = uVar5;
+  return uVar4;
+}
+
+
+
+/* Rebuild30 status bytes: raw-marker-nonzero bit0 plus confirmed-timeout bit1. Admission can
+   preserve old state; status generation is not a timestamp. All30 receive-status rows join raw
+   marker nonzero with separately confirmed timeout. Exact threshold equality remains invalid-only;
+   next count confirms stale status. */
+
+void f33_update_application_receive_statuses(void)
+
+{
+  int iVar1;
+  int iVar2;
+  char cVar3;
+  undefined8 uVar4;
+  byte bVar5;
+  int iVar6;
+  
+  uVar4 = 0xfebeb800;
+  iVar6 = 0;
+  do {
+    cVar3 = (*((char *)camry_host_ptr((uint32_t)((uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x28fe4u + (uint32_t)(iVar6 * 8) * 1u)))) + (int)uVar4 + -0x6528))));
+    if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x2bca8u + (uint32_t)(iVar6) * 1u)))) == 'Z') || (*(short *)(((undefined *)camry_host_ptr(0x28fe8u)) + iVar6 * 8) == -1)) {
+      bVar5 = 0;
+    }
+    else {
+      bVar5 = FUN_000497f4(iVar6);
+    }
+    iVar2 = iVar6 + 1;
+    (*((byte *)camry_host_ptr((uint32_t)((int)uVar4 + iVar6 + -0x38f2)))) = bVar5 | cVar3 != '\0';
+    iVar1 = iVar6 + -0x1d;
+    iVar6 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  return;
+}
+
+
+
+/* Low8 selector<30 reads290DA+8*selector: values1/2 select7F51/7F52; other rows or out-of-range
+   selectors return7F50. These are staged status bytes, not event IDs. Low8 selector<30
+   reads290DA+8*selector:1/2 route to7F51/52, otherwise7F50. Return is a staged status byte, not
+   event identity or physical freshness. */
+
+uchar f33_get_grouped_status_byte(uint selector)
+
+{
+  if ((selector & 0xff) < 0x1e) {
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x290dau + (uint32_t)((selector & 0xff) * 8) * 1u)))) == '\x01') {
+      return DAT_febe7f51;
+    }
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x290dau + (uint32_t)((selector & 0xff) * 8) * 1u)))) == '\x02') {
+      return DAT_febe7f52;
+    }
+  }
+  return DAT_febe7f50;
 }
 
 
@@ -874,6 +1119,228 @@ void FUN_0004a436(void)
 {
   f33_internal_source_admission_state = '\x03';
   DAT_febe7f6b = 0x5a;
+  return;
+}
+
+
+
+/* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
+   Referenced placeholder implementing no behavior; structural classification, not individually
+   executed. */
+
+void f33_return_only_stub_73ca0(void)
+
+{
+  return;
+}
+
+
+
+/* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
+   Referenced placeholder implementing no behavior; structural classification, not individually
+   executed. */
+
+void f33_return_only_stub_73ca2(void)
+
+{
+  return;
+}
+
+
+
+undefined4 FUN_0007490a(undefined4 param_1)
+
+{
+  return param_1;
+}
+
+
+
+undefined4 FUN_0007490e(undefined4 param_1)
+
+{
+  return param_1;
+}
+
+
+
+/* Low8 class0 sets6B76=0 and calls76ACE. Class83 sets4; other nonzero classes set1, report the
+   class and call76ADA. Their73CA0/73CA2 targets are JMPLP leaves, not logical publication. Extra
+   r7/r8/r9 prepared by77D66 are not consumed in this implementation. Class0 sets result-state0;83
+   sets4; other nonzero sets1 and reports class. Actual completion hooks terminate at
+   JMPLP73CA0/73CA2; this is not logical/application publication. Extra prepared r7-r9 are unused.
+    */
+
+void f33_nvm_publish_physical_class(uchar result_class)
+
+{
+  uchar state;
+  
+  if (result_class == '\0') {
+    f33_nvm_set_physical_result_state('\0');
+    f33_return_only_stub_73ca0();
+  }
+  else {
+    if (result_class == 0x83) {
+      state = '\x04';
+    }
+    else {
+      state = '\x01';
+    }
+    f33_nvm_set_physical_result_state(state);
+    f33_nvm_report_physical_class(result_class);
+    f33_return_only_stub_73ca2();
+  }
+  return;
+}
+
+
+
+/* SET1 bit0 of6B73; preserve other bits. Invoked before completion dispatch gates. SET1 bit0 of6B73
+   preserves other bits. Real completion path exercises it before mode/handle dispatch gating. */
+
+void f33_nvm_mark_physical_attempt_error(void)
+
+{
+  f33_nvm_physical_attempt_flags = f33_nvm_physical_attempt_flags | 1;
+  return;
+}
+
+
+
+/* Zero-extend low8 then forward to76A3A; no independent event or callback semantics. Zero-extend
+   low8 class and forward to76A3A. Actual composed native result reaches translated sticky mask; no
+   independent event meaning assigned. */
+
+void f33_nvm_report_class_byte(uchar result_class)
+
+{
+  f33_nvm_accumulate_result_class(result_class);
+  return;
+}
+
+
+
+/* Zero-extend low8 and forward through769F6 to the class-mask mapper. Zero-extend low8 class
+   then769F6. Verified within the complete physical result finalization path; no logical event
+   callback here. */
+
+void f33_nvm_report_physical_class(uchar result_class)
+
+{
+  f33_nvm_report_class_byte(result_class);
+  return;
+}
+
+
+
+/* Zero6C4C,6C10,6C4B; set6C3C=FFFF; store identity(0) into6C14/6C18. Preserve published result6C1C,
+   selector6C4A and unrelated fields. Native whole-context canaries verify cleanup after both
+   dispatched and rejected results. Zero6C4C/6C10/6C4B and identity-zero6C14/6C18; set6C3CFFFF.
+   Preserve published6C1C and selector6C4A. Whole-context native canaries cover dispatched and
+   rejected completion cleanup. */
+
+void f33_nvm_reset_completion_context(void)
+
+{
+  f33_nvm_completion_side_status = '\0';
+  f33_nvm_completion_raw_result = 0;
+  f33_nvm_completion_storage_handle = 0xffff;
+  f33_nvm_completion_mode = '\0';
+  DAT_febf6c14 = FUN_0007490a(0);
+  DAT_febf6c18 = FUN_0007490e(0);
+  return;
+}
+
+
+
+/* Full32 completion result6C10!=1 sets6B73.bit0 through7697E; no other gate. Full32 current
+   result6C10!=1 sets6B73.bit0. No mode/handle gate; exact result1 preserves the flags byte. */
+
+void f33_nvm_mark_non_success_result(void)
+
+{
+  if (f33_nvm_completion_raw_result != 1) {
+    f33_nvm_mark_physical_attempt_error();
+  }
+  return;
+}
+
+
+
+/* Side byte6C4C==1 calls76A1C(1);==2 calls76A1C(0); others do nothing. 77D66 calls this before
+   validating completion mode/handle. Side byte6C4C1 calls76A1C(1);2 calls76A1C(0); otherwise no
+   call. Native side diagnostics occur even when the later mode/handle dispatch gate rejects. */
+
+void f33_nvm_report_completion_side_status(void)
+
+{
+  uint status;
+  
+  status = 0;
+  if ((f33_nvm_completion_side_status == '\x02') ||
+     (status = 1, f33_nvm_completion_side_status == '\x01')) {
+    f33_nvm_accumulate_side_status(status);
+  }
+  return;
+}
+
+
+
+/* Mark non1 result, scan8 full32 rows at27C38, default classFD; report side status before dispatch
+   gates. Modes1/2 and storage handle<123 call76722. Mode1 loads6C14 into r7; mode2 loads6C18; no
+   pointee is read by the consumer. Always zero6C20 and reset completion context, even on invalid
+   mode/handle. Native both columns, unknown fullword, last/invalid handle, side effects and
+   preserved gaps. Eight full32 result rows at27C38; mode1 uses+4 else+5; unmatched classFD. Report
+   side status before allowing only modes1/2 and handle<123 into76722. Always zero6C20/reset
+   completion context. Both columns and all rows executed; no payload dereference or logical
+   publication. */
+
+void f33_nvm_finish_physical_result(void)
+
+{
+  int iVar1;
+  uint *puVar2;
+  int iVar3;
+  int iVar4;
+  undefined *puVar5;
+  uchar result_class;
+  
+  puVar5 = ((undefined *)camry_host_ptr(0x23dfcu));
+  f33_nvm_mark_non_success_result();
+  result_class = 0xfd;
+  iVar4 = 0;
+  do {
+    puVar2 = (uint *)(puVar5 + iVar4 * 8 + 0x3e3c);
+    if (*puVar2 == f33_nvm_completion_raw_result) {
+      if (f33_nvm_completion_mode == '\x01') {
+        result_class = (uchar)puVar2[1];
+      }
+      else {
+        result_class = (*((uchar *)camry_host_ptr((uint32_t)((int)camry_host_addr(puVar2) + 5))));
+      }
+      break;
+    }
+    iVar3 = iVar4 + 1;
+    iVar1 = iVar4 + -7;
+    iVar4 = iVar3;
+  } while (((iVar1 < 0) || (iVar3 < 0)));
+  f33_nvm_report_completion_side_status();
+  if (((f33_nvm_completion_mode == '\x01') || (f33_nvm_completion_mode == '\x02')) &&
+     (f33_nvm_completion_storage_handle < *(ushort *)(puVar5 + 0x3b2c))) {
+    f33_nvm_publish_physical_class(result_class);
+  }
+  FUN_000783de(0);
+  f33_nvm_reset_completion_context();
+  return;
+}
+
+
+
+void FUN_000783de(undefined4 param_1)
+
+{
+  DAT_febf6c20 = param_1;
   return;
 }
 
