@@ -989,7 +989,11 @@ def _cover_objects(spans: list[tuple[int, int]]) -> list[tuple[int, int]]:
     return covered
 
 
-def _windows(runs: list[Run], pointers: list[bool] | None = None) -> list[tuple[int, int]]:
+def _windows(
+    runs: list[Run],
+    pointers: list[bool] | None = None,
+    cover: list[int] | None = None,
+) -> list[tuple[int, int]]:
     """One window per RAM bank. Separate clusters overflow the host's eight regions."""
     local: list[tuple[int, int]] = []
     glob: list[tuple[int, int]] = []
@@ -1008,6 +1012,13 @@ def _windows(runs: list[Run], pointers: list[bool] | None = None) -> list[tuple[
                 glob.append((addr, size))
             else:
                 other.append((addr, size))
+    for addr in cover or []:
+        if _space(addr, 1) == "local":
+            local.append((addr, 1))
+        elif _space(addr, 1) == "global":
+            glob.append((addr, 1))
+        else:
+            other.append((addr, 1))
     if stack:
         local.append((STACK_LO, STACK_HI - STACK_LO))
     pointer_slots = [
@@ -1072,8 +1083,12 @@ def _note_mmio_bases(runs: list[Run], texts: list[str]) -> None:
                 run.reads.add((addr, 1))
 
 
-def _scenario_windows(runs: list[Run], pointers: list[bool]) -> list[tuple[int, int]]:
-    windows = _windows(runs, pointers)
+def _scenario_windows(
+    runs: list[Run],
+    pointers: list[bool],
+    cover: list[int] | None = None,
+) -> list[tuple[int, int]]:
+    windows = _windows(runs, pointers, cover)
     if any(_observable(run) for run in runs):
         return windows
     return _attach_scratch(windows)
@@ -2022,8 +2037,14 @@ def run_oracles() -> int:
             if callee is not None and callee.name in bodies:
                 texts.append(bodies[callee.name])
         _note_mmio_bases(runs, texts)
+        # The bytes address gp+disp. The C holds camry_host_ptr(gp) and indexes it.
+        cover = (
+            [GP]
+            if any("camry_host_ptr(0xfebeb800u)" in text for text in texts)
+            else None
+        )
         try:
-            windows = _scenario_windows(runs, pointers)
+            windows = _scenario_windows(runs, pointers, cover)
         except Harness as exc:
             reject(exc.kind, name, exc.detail)
             continue
