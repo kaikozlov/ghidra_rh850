@@ -1519,14 +1519,121 @@ static uint32_t f33_nvm_check_read_request(uint32_t logical, uint32_t buffer) {
     return 1u;
 }
 
-static uint32_t f33_nvm_enqueue_pooled_operation(uint32_t request) {
-    (void)request;
+typedef struct {
+    uint32_t operation;
+    uint16_t handle;
+    uint16_t unused;
+    uint32_t first_buffer;
+    uint32_t second_buffer;
+} F33QueueRequest;
+
+static void f33_nvm_record_invalid_reset(void);
+static uint32_t f33_nvm_check_slot_partition(uint32_t index, uint32_t queue);
+static uint32_t f33_nvm_pop_queue_head_to(uint32_t queue, uint16_t *index);
+
+static uint32_t f33_nvm_route_byte(uint32_t handle) {
+    return camry_read8(camry_tp + ((handle & 0xffffu) << 4) + 0x2e11u);
+}
+
+static uint32_t f33_nvm_uses_reserved_queue(uint32_t handle, uint32_t operation) {
+    if (f33_nvm_route_byte(handle) != 0u)
+        return 0u;
+    if (operation == 0x22aa8a36u || operation == 0x1c646989u)
+        return 1u;
+    return 0u;
+}
+
+static void f33_nvm_mark_queue_service(uint32_t code) {
+    camry_write8(0xfebf60fau + (code & 0xffu), 2u);
+}
+
+static uint32_t f33_nvm_append_queue_slot(uint32_t queue, uint32_t index) {
+    uint32_t id = queue & 0xffffu;
+    uint32_t slot = index & 0xffffu;
+    uint32_t header = 0xfebf68e8u + (id << 2);
+    uint32_t tail = camry_read16(header + 2u);
+    if (tail == 0xffffu) {
+        camry_write16(header, slot);
+    } else if (f33_nvm_check_slot_partition(tail, id) != 0u) {
+        return 1u;
+    } else {
+        camry_write16(0xfebf6128u + (tail << 4) + 14u, slot);
+    }
+    camry_write16(header + 2u, slot);
+    camry_write16(0xfebf6128u + (slot << 4) + 14u, 0xffffu);
+    return 0u;
+}
+
+static void f33_nvm_copy_operation_to_slot(uint32_t slot, const F33QueueRequest *request) {
+    camry_write32(slot, request->operation);
+    camry_write16(slot + 12u, request->handle);
+    camry_write32(slot + 4u, request->first_buffer);
+    camry_write32(slot + 8u, request->second_buffer);
+}
+
+static uint32_t f33_nvm_append_operation(
+    uint32_t queue, uint32_t index, const F33QueueRequest *request) {
+    uint32_t status = f33_nvm_append_queue_slot(queue, index);
+    if (status != 0u)
+        return status;
+    f33_nvm_copy_operation_to_slot(0xfebf6128u + ((index & 0xffffu) << 4), request);
+    return 0u;
+}
+
+static uint32_t f33_nvm_enqueue_pooled_operation(const F33QueueRequest *request) {
+    uint32_t handle = request->handle;
+    uint16_t slot = 0xffffu;
+    uint32_t selector;
+    uint32_t base;
+    uint32_t offset;
+    uint32_t free_count;
+    uint32_t used_count;
+    uint32_t status;
+    if (f33_nvm_uses_reserved_queue(handle, request->operation) == 1u) {
+        selector = 0u;
+        base = 2u;
+        offset = 0u;
+        free_count = 0xfebf6ae4u;
+        used_count = 0xfebf6ae8u;
+    } else {
+        selector = 1u;
+        base = 3u;
+        offset = f33_nvm_route_byte(handle);
+        free_count = 0xfebf6ae6u;
+        used_count = 0xfebf6aeau;
+    }
+    status = f33_nvm_pop_queue_head_to(selector, &slot);
+    if (status == 0u) {
+        uint32_t address = 0xfebf6128u + ((uint32_t)slot << 4);
+        if (camry_read32(address) != 0x9da70ae7u) {
+            f33_nvm_record_invalid_reset();
+            return 1u;
+        }
+        status = f33_nvm_append_operation((base + offset) & 0xffffu, slot, request);
+        if (status != 0u)
+            return status;
+        camry_write16(free_count, (camry_read16(free_count) - 1u) & 0xffffu);
+        camry_write16(used_count, (camry_read16(used_count) + 1u) & 0xffffu);
+        return 0u;
+    }
+    if (camry_read16(free_count) == 0u) {
+        f33_nvm_mark_queue_service(3u);
+        return 1u;
+    }
+    f33_nvm_record_invalid_reset();
     return 1u;
 }
 
-static uint32_t f33_nvm_enqueue_zero_handle_operation(uint32_t request) {
-    (void)request;
-    return 1u;
+static uint32_t f33_nvm_enqueue_zero_handle_operation(const F33QueueRequest *request) {
+    if (camry_read32(0xfebf68d8u) != 0x9da70ae7u) {
+        f33_nvm_mark_queue_service(3u);
+        return 1u;
+    }
+    camry_write32(0xfebf68d8u, request->operation);
+    camry_write16(0xfebf68dcu, request->handle);
+    camry_write32(0xfebf68e0u, request->first_buffer);
+    camry_write32(0xfebf68e4u, request->second_buffer);
+    return 0u;
 }
 
 static void f33_nvm_finish_queued_operation(uint32_t selector) {
@@ -1538,24 +1645,25 @@ void f33_nvm_publish_logical_result(uint32_t logical_handle, uint32_t operation,
 static uint32_t f33_nvm_queue_operation(
     uint32_t operation, uint32_t logical, uint32_t buffer, uint32_t other) {
     uint32_t handle = logical & 0xffffu;
-    uint32_t request = 0xfebe1fd0u;
+    F33QueueRequest request;
     uint32_t status;
-    camry_write32(request, operation);
-    camry_write16(request + 4u, handle);
-    camry_write32(request + 8u, buffer);
-    camry_write32(request + 12u, other);
+    request.operation = operation;
+    request.handle = (uint16_t)handle;
+    request.unused = 0u;
+    request.first_buffer = buffer;
+    request.second_buffer = other;
     camry_write8(0xfebf60fdu, 1u);
     if (handle == 0u)
-        status = f33_nvm_enqueue_zero_handle_operation(request);
+        status = f33_nvm_enqueue_zero_handle_operation(&request);
     else
-        status = f33_nvm_enqueue_pooled_operation(request);
+        status = f33_nvm_enqueue_pooled_operation(&request);
     f33_nvm_finish_queued_operation(3u);
     if (status == 0u)
         f33_nvm_publish_logical_result(handle, operation, 2u);
     return status;
 }
 
-static uint32_t f33_nvm_enqueue_read(uint32_t logical, uint32_t destination) {
+uint32_t f33_nvm_enqueue_read(uint32_t logical, uint32_t destination) {
     uint32_t handle = logical & 0xffffu;
     uint32_t status = 1u;
     if (f33_nvm_check_read_request(handle, destination) == 0u)
@@ -2085,7 +2193,7 @@ static uint32_t f33_nvm_check_slot_partition(uint32_t index, uint32_t queue) {
     return 0u;
 }
 
-uint32_t f33_nvm_pop_queue_head(uint32_t queue, uint32_t index) {
+static uint32_t f33_nvm_pop_queue_head_to(uint32_t queue, uint16_t *index) {
     uint32_t id = queue & 0xffffu;
     uint32_t header = 0xfebf68e8u + (id << 2);
     uint8_t empty = 0u;
@@ -2096,6 +2204,14 @@ uint32_t f33_nvm_pop_queue_head(uint32_t queue, uint32_t index) {
     if (f33_nvm_check_slot_partition(head, id) != 0u)
         return 1u;
     f33_nvm_unlink_queue_slot(header, head, 0xffffu);
-    camry_write16(index, head);
+    *index = (uint16_t)head;
     return 0u;
+}
+
+uint32_t f33_nvm_pop_queue_head(uint32_t queue, uint32_t index) {
+    uint16_t slot = 0u;
+    uint32_t status = f33_nvm_pop_queue_head_to(queue, &slot);
+    if (status == 0u)
+        camry_write16(index, slot);
+    return status;
 }
