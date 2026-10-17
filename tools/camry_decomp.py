@@ -566,6 +566,168 @@ def _rewrite_pointer_calls(code: str, pointers: set[str]) -> str:
     return "".join(pieces)
 
 
+def _negative_byte_constant(expr: str) -> int | None:
+    text = expr.strip()
+    while text.startswith("(") and text.endswith(")"):
+        try:
+            if _match_paren(text, 0) != len(text) - 1:
+                break
+        except ValueError:
+            break
+        text = text[1:-1].strip()
+    if re.fullmatch(r"-0x[0-9A-Fa-f]+|-\d+", text) is None:
+        return None
+    value = int(text, 0)
+    if -128 <= value <= -1:
+        return value
+    return None
+
+
+def _pointer_element_widths(code: str) -> dict[str, int]:
+    sizes = {
+        "undefined1": 1, "undefined": 1, "byte": 1, "uchar": 1, "char": 1, "code": 1,
+        "undefined2": 2, "ushort": 2, "short": 2,
+        "undefined4": 4, "uint": 4, "ulong": 4, "int": 4,
+        "undefined8": 8,
+    }
+    found: dict[str, int] = {}
+    pattern = re.compile(
+        r"\b(undefined[1248]|undefined|byte|uchar|ushort|short|uint|ulong|int|char|code)\s*"
+        r"\*\s*([A-Za-z_][A-Za-z0-9_]*)"
+    )
+    for match in pattern.finditer(code):
+        width = sizes.get(match.group(1))
+        if width is not None:
+            found[match.group(2)] = width
+    return found
+
+
+def _is_byte_deref(text: str) -> bool:
+    if not (text.startswith("(*") and text.endswith(")")):
+        return False
+    try:
+        if _match_paren(text, 0) != len(text) - 1:
+            return False
+    except ValueError:
+        return False
+    inner = text[1:-1].strip()
+    return re.match(
+        r"^\*\(\((?:volatile\s+)?(?:byte|uchar|undefined1|undefined|uint8_t|char|code)\s*\*\)",
+        inner,
+    ) is not None
+
+
+def _byte_lvalues(code: str) -> tuple[set[str], dict[str, int]]:
+    scalars: set[str] = set()
+    elements = {
+        name: width
+        for name, width in _pointer_element_widths(code).items()
+        if width == 1
+    }
+    for match in re.finditer(r"\b((?:DAT|UNK)_[0-9A-Fa-f]+)\b", code):
+        address = int(match.group(1).split("_", 1)[1], 16)
+        if _access_widths().get(address) == 1:
+            scalars.add(match.group(1))
+    for name, (_addr, ctype, is_array) in _data_layouts().items():
+        if ctype != "uint8_t":
+            continue
+        if is_array:
+            elements[name] = 1
+        else:
+            scalars.add(name)
+    return scalars, elements
+
+
+def _is_unsigned_byte_lvalue(text: str, scalars: set[str], elements: dict[str, int]) -> bool:
+    if re.match(r"^\(\s*int8_t\s*\)", text):
+        return False
+    if text in scalars:
+        return True
+    match = re.fullmatch(r"([A-Za-z_][A-Za-z0-9_]*)\s*\[(.*)\]", text, flags=re.S)
+    if match and elements.get(match.group(1)) == 1:
+        return True
+    return _is_byte_deref(text)
+
+
+def _cast_unsigned_byte(raw: str, scalars: set[str], elements: dict[str, int]) -> str | None:
+    text = raw.strip()
+    if _negative_byte_constant(text) is not None:
+        return None
+    if not _is_unsigned_byte_lvalue(text, scalars, elements):
+        return None
+    prefix = raw[:len(raw) - len(raw.lstrip())]
+    suffix = raw[len(raw.rstrip()):]
+    return f"{prefix}((int8_t){text}){suffix}"
+
+
+def _rewrite_signed_byte_compares(code: str) -> str:
+    """Ghidra spells an 8-bit compare against 0xAA as `!= -0x56`.
+
+    A uint8 lvalue promotes to a non-negative int, so that compare is
+    tautological. Casting the byte to int8_t keeps the bit-pattern test.
+    """
+    scalars, elements = _byte_lvalues(code)
+    pieces: list[str] = []
+    cursor = 0
+    index = 0
+    while index < len(code):
+        if code.startswith(("<<", ">>"), index):
+            index += 2
+            continue
+        op = next(
+            (item for item in ("<=", ">=", "==", "!=", "<", ">") if code.startswith(item, index)),
+            None,
+        )
+        if op is None:
+            index += 1
+            continue
+        raw_left = _expr_before(code, index)
+        left_at = index - len(raw_left)
+        if left_at < cursor:
+            index += len(op)
+            continue
+        right_end = _expr_end_bound(code, index + len(op))
+        raw_right = code[index + len(op):right_end]
+        left_constant = _negative_byte_constant(raw_left.strip())
+        right_constant = _negative_byte_constant(raw_right.strip())
+        if right_constant is not None:
+            cast = _cast_unsigned_byte(raw_left, scalars, elements)
+            if cast is not None:
+                pieces.append(code[cursor:left_at])
+                pieces.append(cast)
+                cursor = index
+                index += len(op)
+                continue
+        if left_constant is not None:
+            cast = _cast_unsigned_byte(raw_right, scalars, elements)
+            if cast is not None:
+                pieces.append(code[cursor:index + len(op)])
+                pieces.append(cast)
+                cursor = right_end
+                index = right_end
+                continue
+        index += len(op)
+    pieces.append(code[cursor:])
+    return "".join(pieces)
+
+
+def _rewrite_function_values(code: str) -> str:
+    """A function designator used in address arithmetic is its entry address.
+
+    `movea 19852, gp` is `gp + entry`, which Ghidra spells as
+    `function_name + (int)pointer`.
+    """
+    entries = _function_entries()
+
+    def replace(match: re.Match[str]) -> str:
+        address = entries.get(match.group(1))
+        if address is None:
+            return match.group(0)
+        return f"0x{address:x}u"
+
+    return re.sub(r"\b([A-Za-z_][A-Za-z0-9_]*)\b(?=\s*[+\-][^=+\-])", replace, code)
+
+
 def _rewrite_function_indexes(code: str) -> str:
     entries = _function_entries()
     pieces: list[str] = []
@@ -603,6 +765,8 @@ def _rewrite_body(code: str) -> str:
     code = _rewrite_int_to_pointer(code, pointers)
     code = _rewrite_pointer_calls(code, pointers)
     code = _rewrite_function_indexes(code)
+    code = _rewrite_function_values(code)
+    code = _rewrite_signed_byte_compares(code)
     return code
 
 

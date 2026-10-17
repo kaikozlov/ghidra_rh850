@@ -20,6 +20,8 @@
 #define f33_nvm_completion_raw_result (*((volatile uint32_t *)camry_host_ptr(0xfebf6c10u)))
 #define f33_nvm_completion_side_status (*((volatile uint8_t *)camry_host_ptr(0xfebf6c4cu)))
 #define f33_nvm_completion_storage_handle (*((volatile uint16_t *)camry_host_ptr(0xfebf6c3cu)))
+#define f33_nvm_family1_object_count (*((volatile uint16_t *)camry_host_ptr(0x2ad72u)))
+#define f33_nvm_family1_request_cell_count (*((volatile uint8_t *)camry_host_ptr(0x2ad8bu)))
 #define f33_nvm_physical_attempt_flags (*((volatile uint8_t *)camry_host_ptr(0xfebf6b73u)))
 #define f33_published_internal_source_admission_state (*((volatile uint8_t *)camry_host_ptr(0xfebef000u)))
 #define f33_published_route31_numeric_scalar (*((volatile uint32_t *)camry_host_ptr(0xfebef218u)))
@@ -212,6 +214,9 @@ uint f33_classifier_selector3_predicate(void);
 uint f33_update_classifier_status22_edges(void);
 void f33_update_diagnostic_classifier_output(void);
 undefined4 FUN_00062e12(void);
+uint f33_nvm_family1_request_full(uint producer,uint consumer);
+uint f33_nvm_previous_family1_request(uint index);
+uint f33_nvm_enqueue_family1_read(uint object);
 int f33_publish_redundant_u8(uchar value,uchar *raw,uchar *xor55,uchar *xorAA);
 void f33_return_only_stub_73ca0(void);
 void f33_return_only_stub_73ca2(void);
@@ -1622,6 +1627,84 @@ undefined4 FUN_00062e12(void)
 
 {
   return DAT_febf0668;
+}
+
+
+
+/* Truncate both indices to low8. Return producer+1==(consumer==0?ROM cell_count49:consumer). No
+   cell inspection; reserves one cell. */
+
+uint f33_nvm_family1_request_full(uint producer,uint consumer)
+
+{
+  uint uVar1;
+  
+  uVar1 = consumer & 0xff;
+  if (uVar1 == 0) {
+    uVar1 = (uint)f33_nvm_family1_request_cell_count;
+  }
+  return (uint)((producer & 0xff) + 1 == uVar1);
+}
+
+
+
+/* Return zero-extended low8 predecessor, with zero wrapping to ROM cell_count49 minus1. No general
+   index validation. */
+
+uint f33_nvm_previous_family1_request(uint index)
+
+{
+  uint uVar1;
+  
+  uVar1 = index & 0xff;
+  if (uVar1 == 0) {
+    uVar1 = (uint)f33_nvm_family1_request_cell_count;
+  }
+  return uVar1 - 1 & 0xff;
+}
+
+
+
+/* Recover indices before full and low16 object<16 gates. Immediate predecessor kind11/object
+   duplicate returns1 without status publication, even for empty indices. Otherwise store
+   kind/object, advance producer and publish20/75/8A. Recovery can change both globals before
+   rejection; this routine finally republishes producer. No descriptor, completion or busy gate. */
+
+uint f33_nvm_enqueue_family1_read(uint object)
+
+{
+  byte index;
+  undefined *puVar1;
+  uint uVar2;
+  uint producer;
+  uint uVar3;
+  byte bStack_e;
+  byte bStack_d;
+  
+  puVar1 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  uVar3 = object & 0xffff;
+  f33_nvm_recover_family1_request_indices(&bStack_e,&bStack_d);
+  index = bStack_e;
+  producer = (uint)bStack_e;
+  uVar2 = f33_nvm_family1_request_full(producer,(uint)bStack_d);
+  if ((uVar2 == 1) || (f33_nvm_family1_object_count <= uVar3)) {
+    uVar2 = 0;
+  }
+  else {
+    uVar2 = f33_nvm_previous_family1_request(producer);
+    if (((*((ushort *)camry_host_ptr((uint32_t)(0x4d8cu + (int)camry_host_addr((puVar1 + uVar2 * 4)) + 2)))) != uVar3) ||
+       ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x4d8cu + (uint32_t)((int)camry_host_addr((puVar1 + uVar2 * 4))))))) != (code)0x11)) {
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x4d8cu + (uint32_t)((int)camry_host_addr((puVar1 + producer * 4))))))) = (code)0x11;
+      *(short *)(puVar1 + producer * 4 + 0x4d8e) = (short)object;
+      uVar2 = f33_nvm_advance_family1_request_index(index);
+      bStack_e = (byte)uVar2;
+      f33_publish_redundant_u8
+                (' ',puVar1 + uVar3 + 0x4b28,puVar1 + uVar3 + 0x5888,puVar1 + uVar3 + 0x58ac);
+    }
+    uVar2 = 1;
+  }
+  puVar1[0x4e86] = bStack_e;
+  return uVar2;
 }
 
 
