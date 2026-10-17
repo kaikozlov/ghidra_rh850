@@ -632,7 +632,9 @@ def cmd_corpus(_args: argparse.Namespace) -> int:
 
     metadata = resolve_target(TARGET)[1]
     _meta, functions = load_corpus(REPO_ROOT / metadata["decompiler_corpus"])
-    defined = {row["name"] for row in load_matched()}
+    matched_rows = load_matched()
+    defined = {row["name"] for row in matched_rows if row.get("form") != "corpus"}
+    previous = {_address(row["addr"]) for row in matched_rows if row.get("form") == "corpus"}
     banned: set[str] = set()
     selected = _select_corpus(functions, defined, banned)
     print(f"corpus candidates {len(selected)}")
@@ -683,6 +685,17 @@ def cmd_corpus(_args: argparse.Namespace) -> int:
     ]
     passed = screen_corpus(rows)
     passed_addrs = {int(row["addr"]) for row in passed}
+    lost = previous - passed_addrs
+    if lost:
+        restore = _select_corpus(functions, defined, banned, roots=previous)
+        if restore:
+            destination.write_text(_render_corpus(restore), encoding="utf-8")
+        sys.stderr.write(
+            "previously checked corpus functions failed: "
+            + ", ".join(hex(addr) for addr in sorted(lost))
+            + "\n"
+        )
+        return 1
     kept = _select_corpus(functions, defined, banned, roots=passed_addrs)
     if not kept:
         destination.unlink(missing_ok=True)
