@@ -2041,10 +2041,29 @@ def _data_layouts() -> dict[str, tuple[int, str, bool]]:
     global _DATA_LAYOUTS
     if _DATA_LAYOUTS is not None:
         return _DATA_LAYOUTS
+    rows = list(_load_jsonl(ROOT / "data.jsonl"))
+    by_addr = {_address(row["addr"]): row for row in rows}
+
+    def concrete_type(type_name: str, seen: set[int]) -> str:
+        """`@0xADDR` is the type of the object already defined at that address."""
+        type_name = type_name.replace(" ", "")
+        if not type_name.startswith("@"):
+            return type_name
+        try:
+            addr = _address(type_name[1:])
+        except ValueError:
+            return type_name
+        if addr in seen:
+            return type_name
+        dest = by_addr.get(addr)
+        if dest is None:
+            return type_name
+        return concrete_type(dest["type"], seen | {addr})
+
     found: dict[str, tuple[int, str, bool]] = {}
-    for row in _load_jsonl(ROOT / "data.jsonl"):
+    for row in rows:
         addr = _address(row["addr"])
-        type_name = row["type"].replace(" ", "")
+        type_name = concrete_type(row["type"], set())
         if "[" in type_name:
             element = type_name.split("[", 1)[0]
             if element in _ARRAY_ELEMENTS:

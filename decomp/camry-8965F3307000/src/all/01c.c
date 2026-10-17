@@ -1882,6 +1882,23 @@ void FUN_0007216c(undefined2 param_1)
 
 
 
+void FUN_0007217e(void)
+
+{
+  f33_nvm_scheduler_phase = '\x01';
+  DAT_febf6114 = 0x9da70ae7;
+  f33_nvm_scheduler_operation.operation = 0x9da70ae7;
+  f33_nvm_scheduler_operation.logical_handle = 0xffff;
+  f33_nvm_scheduler_operation.buffer_08 = 0;
+  f33_nvm_scheduler_operation.buffer_0c = 0;
+  DAT_febf6120 = 0;
+  DAT_febf6122 = 0xffff;
+  DAT_febf6125 = 0;
+  return;
+}
+
+
+
 /* Far-call trampoline: prepare {lp},0 / jarl 0x7217E / dispose 0,{lp},lp; byte-verified against the
    exact image. Forwards with registers and stack unchanged; marked as a thunk. Forwarding shape
    machine-verified; target semantics not recovered. */
@@ -1891,6 +1908,107 @@ void thunk_FUN_0007217e(void)
 {
   FUN_0007217e();
   return;
+}
+
+
+
+/* Marker9DA70AE7 returns0 without output writes or remaining record reads. Otherwise return2 for
+   phases08/10/20,1 for other phases; copy marker, logical handle and two pointers, preserving
+   output padding+6. SETF and MOV establish full32 return. Native idle and terminal compositions.
+   Read marker6104; sentinel9DA70AE7 returns0 before other record reads/output stores. Otherwise
+   return2 for phases08/10/20,1 for other active phases, and copy marker/handle/readptr/writeptr
+   preserving output+6 padding. SETFNE/MOV establish full32 return. Native idle and terminal
+   compositions; ordinary-active return1 is raw-code evidence. */
+
+uint f33_nvm_snapshot_scheduler_operation(F33NvmOperation *output)
+
+{
+  ushort uVar1;
+  uint uVar2;
+  
+  uVar1 = f33_nvm_scheduler_operation.logical_handle;
+  uVar2 = (uint)(f33_nvm_scheduler_operation.operation != 0x9da70ae7);
+  if (f33_nvm_scheduler_operation.operation != 0x9da70ae7) {
+    if (((f33_nvm_scheduler_phase == '\b') || (f33_nvm_scheduler_phase == '\x10')) ||
+       (f33_nvm_scheduler_phase == ' ')) {
+      uVar2 = 2;
+    }
+    output->operation = f33_nvm_scheduler_operation.operation;
+    output->logical_handle = uVar1;
+    output->buffer_08 = f33_nvm_scheduler_operation.buffer_08;
+    output->buffer_0c = f33_nvm_scheduler_operation.buffer_0c;
+  }
+  return uVar2;
+}
+
+
+
+bool FUN_0007220e(uint *param_1)
+
+{
+  bool bVar1;
+  
+  bVar1 = f33_nvm_scheduler_operation.operation != 0x9da70ae7;
+  if (!bVar1) {
+    f33_nvm_scheduler_operation.operation = *param_1;
+    f33_nvm_scheduler_phase = '\x01';
+    f33_nvm_scheduler_operation.logical_handle = (ushort)param_1[1];
+    f33_nvm_scheduler_operation.buffer_08 = camry_host_addr((void *)param_1[2]);
+    f33_nvm_scheduler_operation.buffer_0c = camry_host_addr((void *)param_1[3]);
+  }
+  return bVar1;
+}
+
+
+
+void FUN_00072248(char param_1)
+
+{
+  uchar uVar1;
+  bool bVar2;
+  
+  f33_nvm_cancel_logical_operation();
+  if (f33_nvm_scheduler_operation.operation == 0x9da70ae7) {
+    return;
+  }
+  if (param_1 == '\0') {
+    if (f33_nvm_scheduler_phase == ' ') {
+      return;
+    }
+    uVar1 = '\b';
+    bVar2 = f33_nvm_scheduler_phase == '\x10';
+  }
+  else {
+    if (param_1 == '\x02') {
+      f33_nvm_scheduler_phase = ' ';
+      return;
+    }
+    uVar1 = '\x10';
+    bVar2 = f33_nvm_scheduler_phase == ' ';
+  }
+  if (!bVar2) {
+    f33_nvm_scheduler_phase = uVar1;
+    return;
+  }
+  return;
+}
+
+
+
+undefined4 FUN_00072298(int param_1)
+
+{
+  ushort uVar1;
+  undefined4 uVar2;
+  
+  uVar2 = 1;
+  uVar1 = f33_nvm_scheduler_operation.logical_handle;
+  if ((((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x27408u + (uint32_t)(param_1) * 1u)))) != '\0') &&
+      (uVar1 = DAT_febf6122, f33_nvm_scheduler_phase == '\x01')) ||
+     ((uVar1 <= (ushort)(f33_nvm_logical_descriptor_count - 1) && (1 < uVar1)))) {
+    uVar2 = 0;
+  }
+  return uVar2;
 }
 
 
@@ -1934,6 +2052,62 @@ uint FUN_000722d4(short param_1,uint param_2)
 
 
 
+void FUN_00072342(undefined4 param_1)
+
+{
+  uint32_t puVar1;
+  uint uVar2;
+  uint uVar3;
+  code *pcVar4;
+  int iVar5;
+  
+  uVar3 = (uint)f33_nvm_scheduler_phase;
+  puVar1 = 0x23dfcu;
+  if (uVar3 == 1) {
+    pcVar4 = ((code *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x274ccu + (uint32_t)((short)param_1 * 6) * 4u))))));
+  }
+  else {
+    if (uVar3 != 2) goto LAB_0007239a;
+    uVar2 = FUN_00073a5c(DAT_febf6114,0xff,((undefined *)camry_host_ptr(0x27410u)));
+    iVar5 = (short)param_1 * 0x18;
+    if ((byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(iVar5 + 0x36d4))))) <= uVar2) goto LAB_0007239a;
+    pcVar4 = *(code **)(uVar2 * 4 + (*((int *)camry_host_ptr((uint32_t)(puVar1 + iVar5 + 0x36d8)))));
+  }
+  uVar3 = (*(int (*)())pcVar4)();
+LAB_0007239a:
+  FUN_00073c14();
+  if ((((uVar3 == 4) || (uVar3 == 8)) || (uVar3 == 0x10)) || (uVar3 == 0x20)) {
+    uVar3 = FUN_000722d4(param_1,uVar3);
+  }
+  if (uVar3 == 1) {
+    f33_nvm_scheduler_operation.operation = 0x9da70ae7;
+  }
+  f33_nvm_scheduler_phase = (uchar)uVar3;
+  return;
+}
+
+
+
+void FUN_000723d6(void)
+
+{
+  uint uVar1;
+  int iVar2;
+  
+  if (f33_nvm_scheduler_operation.operation != 0x9da70ae7) {
+    uVar1 = FUN_00073a5c(f33_nvm_scheduler_operation.operation,0xff,((undefined *)camry_host_ptr(0x27400u)));
+    if ((uVar1 < 8) && (iVar2 = FUN_00072298(uVar1), iVar2 == 0)) {
+      FUN_00072342(uVar1);
+    }
+    else {
+      FUN_00072130();
+    }
+  }
+  return;
+}
+
+
+
 bool FUN_00072418(void)
 
 {
@@ -1951,11 +2125,110 @@ bool FUN_00072418(void)
 
 
 
+undefined4 FUN_0007243c(undefined1 param_1)
+
+{
+  uint uVar1;
+  ushort uVar2;
+  
+  uVar2 = f33_nvm_scheduler_operation.logical_handle;
+  uVar1 = f33_nvm_scheduler_operation.operation;
+  FUN_00071f82(f33_nvm_scheduler_operation.logical_handle,f33_nvm_scheduler_operation.operation);
+  FUN_00072fde(uVar2,uVar1,param_1);
+  DAT_febf6114 = 0x9da70ae7;
+  return 1;
+}
+
+
+
+undefined4 FUN_00072474(void)
+
+{
+  ushort uVar1;
+  uint uVar2;
+  undefined4 uVar3;
+  F33NvmOperation local_18;
+  
+  uVar1 = f33_nvm_scheduler_operation.logical_handle;
+  local_18.operation = 1;
+  local_18.buffer_0c = 0;
+  local_18.logical_handle = f33_nvm_scheduler_operation.logical_handle;
+  local_18.buffer_08 = DAT_febf6118;
+  uVar2 = f33_nvm_submit_operation(camry_host_addr(&local_18));
+  if (uVar2 == 0) {
+    uVar3 = 4;
+    DAT_febf6114 = 0xa1a62093;
+  }
+  else {
+    FUN_00072010(uVar1);
+    uVar3 = FUN_0007243c(1);
+  }
+  return uVar3;
+}
+
+
+
+undefined4 FUN_0007252c(undefined1 param_1)
+
+{
+  ushort uVar1;
+  int iVar2;
+  undefined4 uVar3;
+  
+  uVar1 = f33_nvm_scheduler_operation.logical_handle;
+  iVar2 = FUN_0007465a(f33_nvm_scheduler_operation.logical_handle);
+  if (iVar2 == 0) {
+    FUN_0007250e(uVar1,param_1);
+  }
+  else {
+    if (iVar2 != 1) {
+      if (iVar2 != 2) {
+        return 2;
+      }
+      DAT_febf6114 = 0x22aa8a36;
+      return 2;
+    }
+    FUN_00072108(4);
+    FUN_0007211a(1);
+    FUN_00072010(uVar1);
+    param_1 = 1;
+  }
+  uVar3 = FUN_0007243c(param_1);
+  return uVar3;
+}
+
+
+
 void FUN_00072632(void)
 
 {
   FUN_0007252c(DAT_febf6125);
   return;
+}
+
+
+
+undefined4 FUN_000726c4(void)
+
+{
+  ushort uVar1;
+  void *pvVar2;
+  int iVar3;
+  undefined4 uVar4;
+  
+  pvVar2 = ((void *)camry_host_ptr((uint32_t)(f33_nvm_scheduler_operation.buffer_0c)));
+  uVar1 = f33_nvm_scheduler_operation.logical_handle;
+  FUN_00071f28(f33_nvm_scheduler_operation.logical_handle,f33_nvm_scheduler_operation.operation);
+  iVar3 = FUN_00072418();
+  if (iVar3 == 0) {
+    FUN_0007202c(uVar1,pvVar2);
+    uVar4 = FUN_00072646();
+  }
+  else {
+    uVar4 = 2;
+    DAT_febf6114 = 0x3f721401;
+  }
+  return uVar4;
 }
 
 
@@ -1968,6 +2241,76 @@ void thunk_FUN_00072646(void)
 
 {
   FUN_00072646();
+  return;
+}
+
+
+
+undefined4 FUN_00072710(void)
+
+{
+  uint32_t puVar1;
+  int iVar2;
+  undefined4 uVar3;
+  uint uVar4;
+  
+  puVar1 = 0x23dfcu;
+  uVar4 = (uint)f33_nvm_scheduler_operation.logical_handle;
+  iVar2 = FUN_00073c6c();
+  if (iVar2 == 0) {
+    if (((*((ushort *)camry_host_ptr((uint32_t)(puVar1 + uVar4 * 0x10 + 0x2e1a)))) >> 0xb & 1) != 0) {
+      FUN_00071ce2(uVar4,1);
+    }
+    FUN_0007203a(uVar4);
+  }
+  else {
+    if (iVar2 != 1) {
+      return 2;
+    }
+    FUN_00072058(uVar4);
+  }
+  uVar3 = FUN_0007243c(iVar2);
+  return uVar3;
+}
+
+
+
+undefined4 FUN_0007275e(void)
+
+{
+  ushort uVar1;
+  undefined4 uVar2;
+  int iVar3;
+  
+  uVar1 = f33_nvm_scheduler_operation.logical_handle;
+  iVar3 = FUN_0007465a(f33_nvm_scheduler_operation.logical_handle);
+  if (iVar3 == 0) {
+    FUN_00072082(uVar1);
+    uVar2 = 0;
+  }
+  else {
+    if (iVar3 != 1) {
+      if (iVar3 != 2) {
+        return 2;
+      }
+      DAT_febf6114 = 0xa1a62093;
+      return 2;
+    }
+    FUN_0007211a(1);
+    FUN_000720a0(uVar1);
+    uVar2 = 1;
+  }
+  uVar2 = FUN_0007243c(uVar2);
+  return uVar2;
+}
+
+
+
+void FUN_000727b2(void)
+
+{
+  ((void)(f33_nvm_scheduler_operation.logical_handle), (void)(DAT_febf6118), f33_return_const_1_745c0());
+  FUN_0007275e();
   return;
 }
 
@@ -2015,6 +2358,54 @@ void FUN_00072888(char param_1)
 
 
 
+undefined4 FUN_0007289e(undefined1 param_1)
+
+{
+  FUN_00073024(f33_nvm_scheduler_operation.operation,param_1);
+  DAT_febf6122 = 0xffff;
+  DAT_febf6120 = 0;
+  DAT_febf6114 = 0x9da70ae7;
+  return 1;
+}
+
+
+
+undefined4 FUN_000728d2(undefined2 param_1)
+
+{
+  int iVar1;
+  undefined4 uVar2;
+  undefined2 uStack_a;
+  
+  iVar1 = FUN_0007282c(param_1,0x100,&uStack_a);
+  if (iVar1 == 0) {
+    uVar2 = 2;
+    DAT_febf6122 = uStack_a;
+    FUN_00071f28(uStack_a,f33_nvm_scheduler_operation.operation);
+    DAT_febf6114 = 0x3f721401;
+  }
+  else {
+    uVar2 = FUN_0007289e(DAT_febf6120);
+  }
+  return uVar2;
+}
+
+
+
+void FUN_00072920(ushort param_1,undefined1 param_2)
+
+{
+  uchar result;
+  
+  FUN_00072888(param_2);
+  f33_nvm_publish_logical_result(param_1,f33_nvm_scheduler_operation.operation,result);
+  FUN_00071f82(param_1,f33_nvm_scheduler_operation.operation);
+  FUN_000728d2(param_1 + 1);
+  return;
+}
+
+
+
 undefined4 FUN_000729c2(void)
 
 {
@@ -2030,6 +2421,45 @@ undefined4 FUN_000729c2(void)
     DAT_febf6114 = 0x3f721401;
   }
   return uVar2;
+}
+
+
+
+void FUN_000729e8(void)
+
+{
+  ushort uVar1;
+  bool bVar2;
+  short sVar3;
+  int iVar4;
+  ushort uVar5;
+  ushort uVar6;
+  ushort uStack_1e;
+  
+  sVar3 = 2;
+  uVar5 = 2;
+  bVar2 = false;
+  DAT_febf6120 = 0;
+  uVar6 = 2;
+  uVar1 = f33_nvm_logical_descriptor_count - 1;
+  while ((uVar6 <= uVar1 && (iVar4 = FUN_0007282c(sVar3,0x100,&uStack_1e), iVar4 == 0))) {
+    f33_nvm_publish_logical_result(uStack_1e,f33_nvm_scheduler_operation.operation,'\x02');
+    if (!bVar2) {
+      bVar2 = true;
+      uVar5 = uStack_1e;
+    }
+    uVar6 = uVar6 + 1;
+    sVar3 = uStack_1e + 1;
+  }
+  if (bVar2) {
+    DAT_febf6122 = uVar5;
+    FUN_00071f28(uVar5,f33_nvm_scheduler_operation.operation);
+    FUN_000729c2();
+  }
+  else {
+    FUN_0007289e(DAT_febf6120);
+  }
+  return;
 }
 
 
@@ -2051,6 +2481,31 @@ void FUN_00072b76(void)
 
 {
   FUN_00072a76(DAT_febf6122,DAT_febf6125);
+  return;
+}
+
+
+
+void FUN_00072bae(undefined1 param_1,undefined1 param_2)
+
+{
+  uint uVar1;
+  ushort uVar2;
+  
+  uVar2 = f33_nvm_scheduler_operation.logical_handle;
+  uVar1 = f33_nvm_scheduler_operation.operation;
+  ((void)(0), f33_return_only_stub_73c86());
+  FUN_0007211a(param_2);
+  if ((uVar1 == 0xa1a62093) || (uVar1 == 0xb6e96af1)) {
+    FUN_00072010(uVar2);
+  }
+  else if ((uVar1 == 0x22aa8a36) || (uVar1 == 0x1c646989)) {
+    FUN_00072058(uVar2);
+  }
+  else if ((uVar1 == 0xb9145954) || (uVar1 == 0x9c1f8709)) {
+    FUN_000720a0(uVar2);
+  }
+  FUN_0007243c(param_1);
   return;
 }
 
@@ -2132,6 +2587,60 @@ void FUN_00072cba(undefined2 param_1,uint param_2,undefined1 param_3,uchar param
     FUN_00072c62(logical_handle + 1,param_1,param_2,param_4,param_5);
   }
   FUN_0007289e(param_3);
+  return;
+}
+
+
+
+void FUN_00072d48(void)
+
+{
+  FUN_00072cba(0x100,f33_nvm_scheduler_operation.operation,0x16,6,8,1);
+  return;
+}
+
+
+
+void FUN_00072d70(void)
+
+{
+  FUN_00072cba(0x100,f33_nvm_scheduler_operation.operation,0x26,1,0,1);
+  return;
+}
+
+
+
+void FUN_00072d94(void)
+
+{
+  FUN_00072cba(0x100,f33_nvm_scheduler_operation.operation,0x36,6,6,1);
+  return;
+}
+
+
+
+void FUN_00072dba(void)
+
+{
+  FUN_00072cba(0x200,f33_nvm_scheduler_operation.operation,0x16,6,8,1);
+  return;
+}
+
+
+
+void FUN_00072de2(void)
+
+{
+  FUN_00072cba(0x200,f33_nvm_scheduler_operation.operation,0x26,1,0,1);
+  return;
+}
+
+
+
+void FUN_00072e06(void)
+
+{
+  FUN_00072cba(0x200,f33_nvm_scheduler_operation.operation,0x36,6,6,1);
   return;
 }
 
@@ -2479,6 +2988,26 @@ void f33_nvm_reset_pooled_queues(uchar notify)
   f33_nvm_normal_free_count = 0x7a;
   f33_nvm_reserved_used_count = 0;
   f33_nvm_normal_used_count = 0;
+  return;
+}
+
+
+
+/* When notify==1 and marker nonfree, call73078(handle0,old marker). Then marker9DA70AE7,
+   logicalFFFF, NULL buffers; preserve padding+6. Separate logical-zero operation at68D8. Mode1 and
+   nonfree marker invoke73078(0,old marker), then reset marker/handle/buffers preserving padding+6.
+   Not pooled-slot layout. */
+
+void f33_nvm_reset_zero_handle_operation(uchar notify)
+
+{
+  if ((notify == '\x01') && (f33_nvm_zero_handle_operation.operation != 0x9da70ae7)) {
+    f33_nvm_notify_reset_result(0,f33_nvm_zero_handle_operation.operation);
+  }
+  f33_nvm_zero_handle_operation.operation = 0x9da70ae7;
+  f33_nvm_zero_handle_operation.logical_handle = 0xffff;
+  f33_nvm_zero_handle_operation.buffer_08 = 0;
+  f33_nvm_zero_handle_operation.buffer_0c = 0;
   return;
 }
 
@@ -2883,6 +3412,53 @@ int FUN_00073878(undefined2 param_1,uint param_2,ushort *param_3)
     *param_3 = uStack_18;
   }
   return iVar3;
+}
+
+
+
+undefined4 FUN_00073978(uint *param_1)
+
+{
+  if (f33_nvm_zero_handle_operation.operation != 0x9da70ae7) {
+    *param_1 = f33_nvm_zero_handle_operation.operation;
+    *(ushort *)(param_1 + 1) = f33_nvm_zero_handle_operation.logical_handle;
+    param_1[2] = (uint)f33_nvm_zero_handle_operation.buffer_08;
+    param_1[3] = (uint)f33_nvm_zero_handle_operation.buffer_0c;
+    return 0;
+  }
+  return 1;
+}
+
+
+
+bool FUN_000739a8(uint *param_1)
+
+{
+  bool bVar1;
+  
+  bVar1 = f33_nvm_zero_handle_operation.operation != 0x9da70ae7;
+  if (bVar1) {
+    FUN_00072108(3);
+  }
+  else {
+    f33_nvm_zero_handle_operation.operation = *param_1;
+    f33_nvm_zero_handle_operation.logical_handle = (ushort)param_1[1];
+    f33_nvm_zero_handle_operation.buffer_08 = camry_host_addr((void *)param_1[2]);
+    f33_nvm_zero_handle_operation.buffer_0c = camry_host_addr((void *)param_1[3]);
+  }
+  return bVar1;
+}
+
+
+
+void FUN_000739e8(void)
+
+{
+  f33_nvm_zero_handle_operation.operation = 0x9da70ae7;
+  f33_nvm_zero_handle_operation.logical_handle = 0xffff;
+  f33_nvm_zero_handle_operation.buffer_08 = 0;
+  f33_nvm_zero_handle_operation.buffer_0c = 0;
+  return;
 }
 
 
