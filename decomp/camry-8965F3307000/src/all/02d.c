@@ -4297,7 +4297,7 @@ void thunk_FUN_000b6d72(void)
 
 
 
-void FUN_000b6dfa(void)
+int FUN_000b6dfa(void)
 
 {
   uint32_t puVar1;
@@ -4314,7 +4314,7 @@ void FUN_000b6dfa(void)
     iVar3 = 0x33333333;
   }
   (*((int *)camry_host_ptr((uint32_t)(puVar1 + -0x4ec)))) = iVar3;
-  return;
+  return iVar2;
 }
 
 
@@ -4857,7 +4857,7 @@ void f33_return_only_stub_b7372(void)
 
 
 
-void FUN_000b7374(void)
+int FUN_000b7374(void)
 
 {
   uint32_t puVar1;
@@ -4866,7 +4866,7 @@ void FUN_000b7374(void)
   puVar1 = 0xfebeb800u;
   iVar2 = thunk_FUN_00062e12();
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x4ac))))) = iVar2 == 0;
-  return;
+  return iVar2;
 }
 
 

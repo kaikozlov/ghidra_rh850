@@ -1547,7 +1547,7 @@ uchar FUN_00074f2e(uint param_1)
 
 
 
-void FUN_00074f4a(void)
+int FUN_00074f4a(void)
 
 {
   undefined4 uVar1;
@@ -1565,7 +1565,7 @@ void FUN_00074f4a(void)
     }
   }
   FUN_000783b6(uVar1);
-  return;
+  return iVar2;
 }
 
 
@@ -1800,6 +1800,42 @@ undefined4 FUN_00075122(char param_1,ushort param_2,undefined4 *param_3)
     *param_3 = camry_host_addr(((undefined *)camry_host_ptr(0xfffbu)));
   }
   return uVar2;
+}
+
+
+
+/* WARNING: Inlined function: f33_nvm_descriptor_option */
+
+undefined4 FUN_0007521c(undefined4 param_1,int *param_2)
+
+{
+  uint32_t puVar1;
+  int iVar2;
+  uint uVar3;
+  undefined4 uVar4;
+  undefined1 uStack_d;
+  
+  puVar1 = 0x23dfcu;
+  uVar4 = 0xff;
+  iVar2 = FUN_00077c64();
+  uStack_d = 0xff;
+  if (iVar2 != 0) {
+    uVar3 = FUN_00077c9e();
+    if (uVar3 < (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + 0x3b2c))))) {
+      DAT_febf6c50 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)((uVar3 & 0xffff) * 6 + 0x383c)))));
+      iVar2 = FUN_00078010(uVar3,&uStack_d);
+      if (iVar2 == 1) {
+        uVar4 = FUN_0007518a(uVar3,uStack_d,param_2);
+        return uVar4;
+      }
+      *param_2 = iVar2;
+    }
+    else {
+      *param_2 = (int)0xfffbu;
+    }
+    uVar4 = 0;
+  }
+  return uVar4;
 }
 
 
@@ -4440,7 +4476,7 @@ void FUN_0007708c(ushort param_1,ushort param_2,uchar param_3)
 
 
 
-void FUN_0007712a(void)
+uint FUN_0007712a(void)
 
 {
   uint uVar1;
@@ -4448,12 +4484,12 @@ void FUN_0007712a(void)
   uVar1 = FUN_00076ff0(DAT_febf6c44,DAT_febf6c24,0);
   if (uVar1 == 1) {
     if (f33_nvm_payload_chunks_remaining != 0) {
-      return;
+      return uVar1;
     }
     uVar1 = f33_nvm_read_payload_checksum(DAT_febf6c44,DAT_febf6c24,'\0');
   }
   ((void)(uVar1), FUN_00077640());
-  return;
+  return uVar1;
 }
 
 
@@ -4976,7 +5012,7 @@ uint f33_nvm_read_payload_checksum(ushort handle,uint record_offset,uchar read_o
 
 
 
-void FUN_00077824(void)
+uint FUN_00077824(void)
 
 {
   uint uVar1;
@@ -4984,12 +5020,12 @@ void FUN_00077824(void)
   uVar1 = f33_nvm_read_payload_chunk(DAT_febf6c44,DAT_febf6c24,'\0');
   if (uVar1 == 1) {
     if (f33_nvm_payload_chunks_remaining != 0) {
-      return;
+      return uVar1;
     }
     uVar1 = f33_nvm_read_payload_checksum(DAT_febf6c44,DAT_febf6c24,'\0');
   }
   ((void)(uVar1), FUN_00077640());
-  return;
+  return uVar1;
 }
 
 

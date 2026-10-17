@@ -1310,7 +1310,7 @@ void FUN_000014a2(void)
 
 
 
-void FUN_000014be(uint param_1)
+undefined4 FUN_000014be(uint param_1)
 
 {
   uint32_t puVar1;
@@ -1320,12 +1320,12 @@ void FUN_000014be(uint param_1)
   uVar2 = FUN_0000721e(0xffff);
   (*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x6f00)))) = (*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x6f00)))) | 1 << (param_1 & 0x1f);
   FUN_00007244(uVar2);
-  return;
+  return uVar2;
 }
 
 
 
-void FUN_000014e8(uint param_1)
+undefined4 FUN_000014e8(uint param_1)
 
 {
   uint32_t puVar1;
@@ -1335,7 +1335,7 @@ void FUN_000014e8(uint param_1)
   uVar2 = FUN_0000721e(0xffff);
   (*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x6f00)))) = (*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x6f00)))) & ~(1 << (param_1 & 0x1f));
   FUN_00007244(uVar2);
-  return;
+  return uVar2;
 }
 
 
@@ -1520,7 +1520,7 @@ undefined * FUN_0000169c(undefined2 *param_1)
 
 
 
-void FUN_000016f2(void)
+uint FUN_000016f2(void)
 
 {
   undefined1 uVar1;
@@ -1584,7 +1584,7 @@ void FUN_000016f2(void)
                     /* WARNING: Do nothing block with infinite loop */
     } while( true );
   }
-  return;
+  return uVar3;
 }
 
 
@@ -1684,7 +1684,7 @@ undefined4 FUN_00001d24(void)
 
 
 
-void FUN_00001d2c(ushort param_1,uint param_2,int param_3,undefined1 param_4)
+int FUN_00001d2c(ushort param_1,uint param_2,int param_3,undefined1 param_4)
 
 {
   int *piVar1;
@@ -1701,7 +1701,7 @@ void FUN_00001d2c(ushort param_1,uint param_2,int param_3,undefined1 param_4)
   *piVar1 = (param_2 & 0xffff) * 20000 + iVar4;
   *(undefined1 *)(piVar1 + 2) = 1;
   FUN_00007244(uVar3);
-  return;
+  return iVar4;
 }
 
 
@@ -3840,7 +3840,7 @@ void FUN_000037bc(int param_1,int param_2)
 
 
 
-void FUN_000037e4(uint param_1)
+undefined4 FUN_000037e4(uint param_1)
 
 {
   uint32_t puVar1;
@@ -3854,7 +3854,7 @@ void FUN_000037e4(uint param_1)
     FUN_000037bc(uVar2,param_1 & 0xf);
   }
   FUN_00007244(uVar3);
-  return;
+  return uVar3;
 }
 
 

@@ -732,7 +732,7 @@ undefined4 FUN_000b1c84(void)
 
 
 
-void FUN_000b1c96(void)
+int FUN_000b1c96(void)
 
 {
   int iVar1;
@@ -742,7 +742,7 @@ void FUN_000b1c96(void)
   if (iVar1 != 0) {
     thunk_FUN_00066ef4();
   }
-  return;
+  return iVar1;
 }
 
 
@@ -1972,7 +1972,7 @@ void f33_mode_hook_b2e62(void)
 /* Onlyif66F1E==1replace8A70owners0/1=20002,8A9C=4/40000,8AD0/8AE8=0,8AA8=4/40000,8A88owners2/3=2/20000.
    NvMbusy leavesmaskstateunchanged; top-leveldirectenableclearstilloccurs. */
 
-void f33_apply_mode800_ready_output_requests(void)
+uint f33_apply_mode800_ready_output_requests(void)
 
 {
   uint uVar1;
@@ -1992,7 +1992,7 @@ void f33_apply_mode800_ready_output_requests(void)
     thunk_FUN_00056b78(2,2);
     thunk_FUN_00056b78(3,0x20000);
   }
-  return;
+  return uVar1;
 }
 
 
@@ -2917,7 +2917,7 @@ void FUN_000b389c(void)
 
 /* WARNING: Removing unreachable block (ram,0x000b3906) */
 
-void FUN_000b38d2(void)
+undefined4 FUN_000b38d2(void)
 
 {
   ushort uVar1;
@@ -2945,7 +2945,7 @@ void FUN_000b38d2(void)
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x6c2)))) = uVar5;
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x6be)))) = uVar5;
   FUN_000d1dc6(uVar3);
-  return;
+  return uVar3;
 }
 
 

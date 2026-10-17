@@ -1294,7 +1294,7 @@ uint f33_dcm_read_snapshot_by_dtc_service(uchar operation,F33DcmMessageContext *
 /* EventEF polls8D15E with retained4564/4573/4574. Result10 retains them; other results reset the
    snapshot module through8CEF0 and clear those retained inputs. */
 
-void f33_dcm_resume_queued_snapshot_record(void)
+int f33_dcm_resume_queued_snapshot_record(void)
 
 {
   int iVar1;
@@ -1315,7 +1315,7 @@ void f33_dcm_resume_queued_snapshot_record(void)
   DAT_febf4564 = uVar2;
   DAT_febf4573 = uVar4;
   DAT_febf4574 = uVar3;
-  return;
+  return iVar1;
 }
 
 
@@ -4446,7 +4446,7 @@ undefined2 FUN_0008f6b2(ushort param_1,undefined2 param_2)
 
 
 
-void FUN_0008f70e(uint param_1)
+int FUN_0008f70e(uint param_1)
 
 {
   uint32_t puVar1;
@@ -4459,7 +4459,7 @@ void FUN_0008f70e(uint param_1)
     f33_memzero(((undefined *)camry_host_ptr((uint32_t)(puVar1 + -0x62d8))), 0x40);
     (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)((param_1 & 0xffff) - 0x62dc))))) = 0xe1;
   }
-  return;
+  return iVar2;
 }
 
 
@@ -4830,7 +4830,7 @@ undefined2 FUN_0008fd04(undefined4 param_1,undefined2 param_2)
 
 
 
-void FUN_0008fd5c(undefined2 param_1)
+int FUN_0008fd5c(undefined2 param_1)
 
 {
   uint32_t puVar1;
@@ -4843,7 +4843,7 @@ void FUN_0008fd5c(undefined2 param_1)
     f33_memzero(((undefined *)camry_host_ptr((uint32_t)(puVar1 + -0x6284))), 0x3c);
     (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6298))))) = 0xe1;
   }
-  return;
+  return iVar2;
 }
 
 

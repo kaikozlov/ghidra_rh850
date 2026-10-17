@@ -3024,7 +3024,7 @@ void f33_run_init_chain_664f6(void)
 
 
 
-void FUN_00066512(void)
+uint FUN_00066512(void)
 
 {
   ushort uVar1;
@@ -3059,7 +3059,7 @@ void FUN_00066512(void)
   bVar2 = TAUJ0TO;
   TAUJ0TO = bVar2 & 0xf0;
   f33_priority_mask_restore(saved_mask);
-  return;
+  return saved_mask;
 }
 
 

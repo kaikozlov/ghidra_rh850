@@ -664,7 +664,7 @@ void FUN_000588e8(void)
 /* Save PMR; setFFC0; copy ECU inputs through5C7B6 and control inputs throughFDC28; restore
    entryPMR. The caller subsequently runs CH1 transition/steady workers. */
 
-void f33_snapshot_ch1_inputs(void)
+undefined4 f33_snapshot_ch1_inputs(void)
 
 {
   undefined4 uVar1;
@@ -674,7 +674,7 @@ void f33_snapshot_ch1_inputs(void)
   FUN_0005c7b6();
   f33_copy_cell_block_c1b24();
   FUN_000701a6(uVar1);
-  return;
+  return uVar1;
 }
 
 
@@ -719,7 +719,7 @@ void FUN_0005899e(void)
 /* Save PMR; FFC0 protects5CA3A/FDC3C acquisition snapshot; FF80 protects5CF1C/FDC50 control
    snapshot; restore entryPMR. These are ordered windows, not an all-task atomic generation. */
 
-void f33_snapshot_ch2_inputs(void)
+undefined4 f33_snapshot_ch2_inputs(void)
 
 {
   undefined4 uVar1;
@@ -732,7 +732,7 @@ void f33_snapshot_ch2_inputs(void)
   f33_copy_cell_block_5cf1c();
   FUN_000fdc50();
   FUN_000701a6(uVar1);
-  return;
+  return uVar1;
 }
 
 
@@ -799,7 +799,7 @@ void FUN_00058ad8(void)
    snapshot and not physical input freshness. FFC0→5D12C/FDC64 acquisition views,
    FF80→5D5E0/FDC78 control views, FF00→5D6DC/FDC8C monitor/health/service views; */
 
-void f33_snapshot_foreground_inputs(void)
+undefined4 f33_snapshot_foreground_inputs(void)
 
 {
   undefined4 uVar1;
@@ -815,7 +815,7 @@ void f33_snapshot_foreground_inputs(void)
   f33_snapshot_monitor_inputs();
   FUN_000fdc8c();
   FUN_000701a6(uVar1);
-  return;
+  return uVar1;
 }
 
 

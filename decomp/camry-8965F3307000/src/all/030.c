@@ -1058,7 +1058,7 @@ undefined4 FUN_000c2ca0(uint param_1,uint param_2)
 
 
 
-void FUN_000c2cc0(void)
+undefined1 FUN_000c2cc0(void)
 
 {
   byte bVar1;
@@ -1084,7 +1084,7 @@ void FUN_000c2cc0(void)
   }
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(0x74b))))) = uVar2;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(0x74c))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0xa24))))) != '\x02';
-  return;
+  return uVar4;
 }
 
 
@@ -1567,7 +1567,7 @@ void FUN_000c330c(void)
    then publish referenceBFD4->ABA0 separately from sampleBFD8->BF88, differenceC074->BF8C and
    centerC080->BF90, with source/status/limit copies. */
 
-void f33_publish_raw_estimator_state(void)
+undefined4 f33_publish_raw_estimator_state(void)
 
 {
   undefined1 uVar1;
@@ -1630,7 +1630,7 @@ void f33_publish_raw_estimator_state(void)
   (*((undefined4 *)camry_host_ptr((uint32_t)(puVar19 + 0x794)))) = uVar6;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar19 + (uint32_t)(0x7c3))))) = uVar2;
   FUN_000d1dc6(uVar20);
-  return;
+  return uVar20;
 }
 
 
@@ -1640,7 +1640,7 @@ void f33_publish_raw_estimator_state(void)
    reference/source/status/limit copies does not itself reset underlying acquisition referenceBFD4.
     */
 
-void f33_clear_published_estimator_state(void)
+undefined4 f33_clear_published_estimator_state(void)
 
 {
   uint32_t puVar1;
@@ -1667,12 +1667,12 @@ void f33_clear_published_estimator_state(void)
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x7c2))))) = 0;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x7c3))))) = 0;
   FUN_000d1dc6(uVar2);
-  return;
+  return uVar2;
 }
 
 
 
-void FUN_000c3444(void)
+undefined4 FUN_000c3444(void)
 
 {
   uint32_t puVar1;
@@ -1696,7 +1696,7 @@ void FUN_000c3444(void)
   (*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + 0x7e0)))) = 0;
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + 0x7ec)))) = 0;
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + 0x7ee)))) = 0;
-  return;
+  return uVar2;
 }
 
 
@@ -2060,7 +2060,7 @@ void f33_snapshot_retained_estimator_projection(void)
    on prior marker/count and observer state. Some retained-marker paths hold values while asserting
    qualification; qualification is not a fresh-copy witness. */
 
-void f33_publish_retained_estimator_projection(void)
+undefined4 f33_publish_retained_estimator_projection(void)
 
 {
   char cVar1;
@@ -2099,7 +2099,7 @@ LAB_000c385e:
   uVar3 = 0x5a;
 LAB_000c3872:
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar4 + (uint32_t)(-0xb14))))) = uVar3;
-  return;
+  return uVar5;
 }
 
 

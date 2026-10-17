@@ -2765,7 +2765,7 @@ LAB_00045d7e:
 
 
 
-void FUN_00045d98(void)
+uint FUN_00045d98(void)
 
 {
   undefined4 *puVar1;
@@ -2810,7 +2810,7 @@ void FUN_00045d98(void)
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x3c36))))) = uStack_c;
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x3c2e)))) = uStack_a;
   (*((undefined4 *)camry_host_ptr((uint32_t)(puVar2 + -0x3c28)))) = uStack_8;
-  return;
+  return uVar3;
 }
 
 
@@ -3894,7 +3894,7 @@ void FUN_00046982(void)
 
 
 
-void FUN_00046994(void)
+uint FUN_00046994(void)
 
 {
   short sVar1;
@@ -3948,7 +3948,7 @@ void FUN_00046994(void)
   DAT_febe686c = cVar9;
   DAT_febe6870 = sVar8;
   f33_priority_mask_restore(saved_mask);
-  return;
+  return saved_mask;
 }
 
 
@@ -5590,7 +5590,7 @@ int FUN_00047b6a(void)
 /* WARNING: Removing unreachable block (ram,0x00047bd6) */
 /* WARNING: Removing unreachable block (ram,0x00047bd2) */
 
-void FUN_00047b70(void)
+short FUN_00047b70(void)
 
 {
   short sVar1;
@@ -5716,7 +5716,7 @@ void FUN_00047b70(void)
     uVar7 = 0x8000;
   }
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar5 + -0x3a9e)))) = uVar7;
-  return;
+  return sVar6;
 }
 
 
@@ -6029,7 +6029,7 @@ void f33_return_only_stub_47f96(void)
 
 
 
-void FUN_00047f98(void)
+int FUN_00047f98(void)
 
 {
   uint uVar1;
@@ -6063,7 +6063,7 @@ void FUN_00047f98(void)
     (*((uint *)camry_host_ptr((uint32_t)(puVar6 + -0x3a48)))) = uVar1 & 0xffff0000;
     (*((short *)camry_host_ptr((uint32_t)(puVar6 + -0x3a4a)))) = (short)((*((ushort *)camry_host_ptr((uint32_t)(puVar6 + -0x35d8)))) * uVar8 >> 0x10);
   }
-  return;
+  return iVar7;
 }
 
 

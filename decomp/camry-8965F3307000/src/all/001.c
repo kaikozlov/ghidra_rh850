@@ -1821,7 +1821,7 @@ void FUN_000051c8(void)
 
 /* Prioritymaskedpublicationof2B0Efollowed55FCsecurityhandshakereset. */
 
-void f33_boot_session_publish(uchar session)
+undefined4 f33_boot_session_publish(uchar session)
 
 {
   uint32_t puVar1;
@@ -1832,7 +1832,7 @@ void f33_boot_session_publish(uchar session)
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6cf2))))) = session;
   f33_boot_security_invalidate_handshake();
   FUN_00007244(uVar2);
-  return;
+  return uVar2;
 }
 
 
@@ -3465,7 +3465,7 @@ void FUN_0000630c(void)
 
 
 
-void FUN_00006320(void)
+undefined4 FUN_00006320(void)
 
 {
   uint32_t puVar1;
@@ -3482,7 +3482,7 @@ void FUN_00006320(void)
   (*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + -0x6c4c)))) = uVar2;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6c43))))) = 0;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6c41))))) = 0;
-  return;
+  return uVar2;
 }
 
 
@@ -4726,7 +4726,7 @@ void FUN_00006e54(void)
 
 
 
-void FUN_00006e60(void)
+undefined4 FUN_00006e60(void)
 
 {
   uint32_t puVar1;
@@ -4745,7 +4745,7 @@ void FUN_00006e60(void)
   FUN_00006e4a();
 LAB_00006e98:
   FUN_00007244(uVar2);
-  return;
+  return uVar2;
 }
 
 

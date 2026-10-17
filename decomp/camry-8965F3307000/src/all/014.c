@@ -1752,7 +1752,7 @@ void f33_return_only_stub_50c98(void)
    packed8298,clear829C. In particular8284/8282/8283/8281 reflect383A bits3/9/2/8. These are
    software cached status-link fields, not CAN wire joins or independent freshness proof. */
 
-void f33_snapshot_local_status_link_flags(void)
+undefined4 f33_snapshot_local_status_link_flags(void)
 
 {
   ushort uVar1;
@@ -2041,7 +2041,7 @@ void f33_snapshot_local_status_link_flags(void)
   DAT_febe8298 = uVar32 | uVar20 | uVar21 | uVar22 | uVar23 | uVar6 | uVar7 | uVar8 | uVar24 |
                  uVar25 | uVar26 | uVar27 | uVar28 | uVar9 | uVar10 | uVar11 | uVar12 | uVar13 |
                  uVar14 | uVar15 | uVar16 | uVar17 | uVar18 | uVar19 | uVar29 | uVar30 | uVar31;
-  return;
+  return uVar5;
 }
 
 
@@ -2074,7 +2074,7 @@ void FUN_00050fae(void)
    select wrapping16-bit counters and latched flags under PMRFF00; unknown class does nothing.
    Class2 counter82BA and flags82A3/A5.bit0 are distinct from control fault records. */
 
-void f33_assert_diagnostic_classifier(uchar classification)
+uint f33_assert_diagnostic_classifier(uchar classification)
 
 {
   uint32_t puVar1;
@@ -2132,7 +2132,7 @@ LAB_0005107a:
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3558))))) = 0x5a;
 LAB_000510ac:
   f33_priority_mask_restore(saved_mask);
-  return;
+  return saved_mask;
 }
 
 
@@ -2185,7 +2185,7 @@ uchar f33_update_classifier_status_latch(void)
    reset then increment age; strict expiry and unsigned stagedE8B0>=22170 clear whole flag group.
    Over-threshold age holds; active counters and event bitmaps untouched. */
 
-void f33_age_classifier_flag_group(uchar *flags,uchar *activity,ushort *age,ushort threshold)
+uint f33_age_classifier_flag_group(uchar *flags,uchar *activity,ushort *age,ushort threshold)
 
 {
   ushort uVar1;
@@ -2211,7 +2211,7 @@ void f33_age_classifier_flag_group(uchar *flags,uchar *activity,ushort *age,usho
   *activity = uVar4;
   *age = uVar2;
   f33_priority_mask_restore(saved_mask);
-  return;
+  return saved_mask;
 }
 
 
@@ -2220,7 +2220,7 @@ void f33_age_classifier_flag_group(uchar *flags,uchar *activity,ushort *age,usho
    protects updates; histories and active class counts are untouched. Retained flag-group aging uses
    same consumed-marker and strict-expiry rules with600 invocations, without E8B0 gate. */
 
-void f33_age_classifier_retained_flags(void)
+uint f33_age_classifier_retained_flags(void)
 
 {
   ushort uVar1;
@@ -2247,7 +2247,7 @@ void f33_age_classifier_retained_flags(void)
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x3558))))) = cVar5;
   (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + -0x3532)))) = uVar2;
   f33_priority_mask_restore(saved_mask);
-  return;
+  return saved_mask;
 }
 
 
@@ -2527,7 +2527,7 @@ LAB_00051482:
    here; classifier aging/projection remains a separate operation. Decrement selected classifier
    counter only when nonzero; leave class flags latched for separate aging/projection. */
 
-void f33_release_diagnostic_classifier(uchar classification)
+uint f33_release_diagnostic_classifier(uchar classification)
 
 {
   uint32_t puVar1;
@@ -2579,7 +2579,7 @@ void f33_release_diagnostic_classifier(uchar classification)
     (*((short *)camry_host_ptr((uint32_t)(puVar1 + -0x3530)))) = (*((short *)camry_host_ptr((uint32_t)(puVar1 + -0x3530)))) + -1;
   }
   f33_priority_mask_restore(saved_mask);
-  return;
+  return saved_mask;
 }
 
 
@@ -2636,7 +2636,7 @@ void FUN_000515d4(void)
 
 
 
-void FUN_000515e6(void)
+uint FUN_000515e6(void)
 
 {
   uint32_t puVar1;
@@ -2649,7 +2649,7 @@ void FUN_000515e6(void)
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3557))))) = 0;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x3550))))) = 0x5a;
   f33_priority_mask_restore(saved_mask);
-  return;
+  return saved_mask;
 }
 
 
@@ -4469,7 +4469,7 @@ void FUN_00052972(int param_1,uint param_2)
 
 
 
-void FUN_00052a10(void)
+uint FUN_00052a10(void)
 
 {
   uint32_t puVar1;
@@ -4479,7 +4479,7 @@ void FUN_00052a10(void)
   saved_mask = f33_priority_mask_enter(0xff00);
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x587c))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x587c))))) | 2;
   f33_priority_mask_restore(saved_mask);
-  return;
+  return saved_mask;
 }
 
 
@@ -4571,7 +4571,7 @@ void FUN_00052aa6(void)
 
 
 
-void FUN_00052ad4(void)
+uint FUN_00052ad4(void)
 
 {
   bool bVar1;
@@ -4597,7 +4597,7 @@ void FUN_00052ad4(void)
     bVar1 = (*((short *)camry_host_ptr((uint32_t)(puVar2 + -0x32b2)))) != 0;
   }
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x56ad))))) = bVar1;
-  return;
+  return uVar3;
 }
 
 
@@ -5521,7 +5521,7 @@ int FUN_00053532(short param_1)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_53558(undefined4 param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_53558(undefined4 param_1, undefined4 param_2)
 
 {
   int iVar1;
@@ -5536,7 +5536,7 @@ void f33_capture_slot_dispatch_53558(undefined4 param_1, undefined4 param_2)
   }
   uVar2 = FUN_00053532(iVar3);
   FUN_0006a5ac(uVar2, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar2;
 }
 
 
@@ -5602,14 +5602,14 @@ int FUN_00053608(short param_1)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_5362e(undefined4 param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_5362e(undefined4 param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
   
   uVar1 = FUN_00053608((int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 164u)))));
   FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -5618,14 +5618,14 @@ void f33_capture_slot_dispatch_5362e(undefined4 param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_53644(undefined4 param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_53644(undefined4 param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
   
   uVar1 = FUN_00053608((int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 166u)))));
   FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -5634,14 +5634,14 @@ void f33_capture_slot_dispatch_53644(undefined4 param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_5365a(undefined4 param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_5365a(undefined4 param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
   
   uVar1 = FUN_00053608((int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 168u)))));
   FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -5650,14 +5650,14 @@ void f33_capture_slot_dispatch_5365a(undefined4 param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_53670(undefined4 param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_53670(undefined4 param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
   
   uVar1 = FUN_00053608((int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 170u)))));
   FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -5685,7 +5685,7 @@ int FUN_00053686(short param_1)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_536ac(ushort param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_536ac(ushort param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
@@ -5693,7 +5693,7 @@ void f33_capture_slot_dispatch_536ac(ushort param_1, undefined4 param_2)
   uVar1 = FUN_00053686((int)(*((short *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
                                       (short)(param_1 & 0xff) * 0x48 + 0x1c)))));
   FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -5702,7 +5702,7 @@ void f33_capture_slot_dispatch_536ac(ushort param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_536ca(ushort param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_536ca(ushort param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
@@ -5710,7 +5710,7 @@ void f33_capture_slot_dispatch_536ca(ushort param_1, undefined4 param_2)
   uVar1 = FUN_00053686((int)(*((short *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
                                       (short)(param_1 & 0xff) * 0x48 + 0x1e)))));
   FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -5719,7 +5719,7 @@ void f33_capture_slot_dispatch_536ca(ushort param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_536e8(ushort param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_536e8(ushort param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
@@ -5727,7 +5727,7 @@ void f33_capture_slot_dispatch_536e8(ushort param_1, undefined4 param_2)
   uVar1 = FUN_00053686((int)(*((short *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
                                       (short)(param_1 & 0xff) * 0x48 + 0x20)))));
   FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -5750,7 +5750,7 @@ uint FUN_00053706(uint param_1)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_53722(ushort param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_53722(ushort param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
@@ -5758,7 +5758,7 @@ void f33_capture_slot_dispatch_53722(ushort param_1, undefined4 param_2)
   uVar1 = FUN_00053706((*((undefined2 *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
                         (short)(param_1 & 0xff) * 0x48 + 0x28)))));
   FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -5767,7 +5767,7 @@ void f33_capture_slot_dispatch_53722(ushort param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_53740(ushort param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_53740(ushort param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
@@ -5775,7 +5775,7 @@ void f33_capture_slot_dispatch_53740(ushort param_1, undefined4 param_2)
   uVar1 = FUN_00053706((*((undefined2 *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
                         (short)(param_1 & 0xff) * 0x48 + 0x2a)))));
   FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -5784,7 +5784,7 @@ void f33_capture_slot_dispatch_53740(ushort param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_5375e(ushort param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_5375e(ushort param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
@@ -5792,7 +5792,7 @@ void f33_capture_slot_dispatch_5375e(ushort param_1, undefined4 param_2)
   uVar1 = FUN_00053706((*((undefined2 *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
                         (short)(param_1 & 0xff) * 0x48 + 0x2c)))));
   FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -5815,7 +5815,7 @@ uint FUN_0005377c(uint param_1)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_53794(ushort param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_53794(ushort param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
@@ -5823,7 +5823,7 @@ void f33_capture_slot_dispatch_53794(ushort param_1, undefined4 param_2)
   uVar1 = FUN_0005377c((*((undefined2 *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
                         (short)(param_1 & 0xff) * 0x48 + 0x10)))));
   FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -5832,7 +5832,7 @@ void f33_capture_slot_dispatch_53794(ushort param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_537b2(ushort param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_537b2(ushort param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
@@ -5840,7 +5840,7 @@ void f33_capture_slot_dispatch_537b2(ushort param_1, undefined4 param_2)
   uVar1 = FUN_0005377c((*((undefined2 *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
                         (short)(param_1 & 0xff) * 0x48 + 0x12)))));
   FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -5849,7 +5849,7 @@ void f33_capture_slot_dispatch_537b2(ushort param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_537d0(ushort param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_537d0(ushort param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
@@ -5857,7 +5857,7 @@ void f33_capture_slot_dispatch_537d0(ushort param_1, undefined4 param_2)
   uVar1 = FUN_0005377c((*((undefined2 *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
                         (short)(param_1 & 0xff) * 0x48 + 0x14)))));
   FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -5886,7 +5886,7 @@ void f33_capture_slot_dispatch_537ee(ushort param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_5381a(ushort param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_5381a(ushort param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
@@ -5894,7 +5894,7 @@ void f33_capture_slot_dispatch_5381a(ushort param_1, undefined4 param_2)
   uVar1 = FUN_00053686((int)(*((short *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
                                       (short)(param_1 & 0xff) * 0x48 + 0x22)))));
   FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -5903,7 +5903,7 @@ void f33_capture_slot_dispatch_5381a(ushort param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_53838(ushort param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_53838(ushort param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
@@ -5911,7 +5911,7 @@ void f33_capture_slot_dispatch_53838(ushort param_1, undefined4 param_2)
   uVar1 = FUN_00053686((int)(*((short *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
                                       (short)(param_1 & 0xff) * 0x48 + 0x24)))));
   FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -5920,7 +5920,7 @@ void f33_capture_slot_dispatch_53838(ushort param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_53856(ushort param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_53856(ushort param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
@@ -5928,7 +5928,7 @@ void f33_capture_slot_dispatch_53856(ushort param_1, undefined4 param_2)
   uVar1 = FUN_00053686((int)(*((short *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
                                       (short)(param_1 & 0xff) * 0x48 + 0x26)))));
   FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -5937,7 +5937,7 @@ void f33_capture_slot_dispatch_53856(ushort param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_53874(ushort param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_53874(ushort param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
@@ -5945,7 +5945,7 @@ void f33_capture_slot_dispatch_53874(ushort param_1, undefined4 param_2)
   uVar1 = FUN_00053706((*((undefined2 *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
                         (short)(param_1 & 0xff) * 0x48 + 0x2e)))));
   FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -5954,7 +5954,7 @@ void f33_capture_slot_dispatch_53874(ushort param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_53892(ushort param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_53892(ushort param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
@@ -5962,7 +5962,7 @@ void f33_capture_slot_dispatch_53892(ushort param_1, undefined4 param_2)
   uVar1 = FUN_00053706((*((undefined2 *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
                         (short)(param_1 & 0xff) * 0x48 + 0x30)))));
   FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -5971,7 +5971,7 @@ void f33_capture_slot_dispatch_53892(ushort param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_538b0(ushort param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_538b0(ushort param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
@@ -5979,7 +5979,7 @@ void f33_capture_slot_dispatch_538b0(ushort param_1, undefined4 param_2)
   uVar1 = FUN_00053706((*((undefined2 *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
                         (short)(param_1 & 0xff) * 0x48 + 0x32)))));
   FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -5988,7 +5988,7 @@ void f33_capture_slot_dispatch_538b0(ushort param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_538ce(ushort param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_538ce(ushort param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
@@ -5996,7 +5996,7 @@ void f33_capture_slot_dispatch_538ce(ushort param_1, undefined4 param_2)
   uVar1 = FUN_0005377c((*((undefined2 *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
                         (short)(param_1 & 0xff) * 0x48 + 0x16)))));
   FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -6005,7 +6005,7 @@ void f33_capture_slot_dispatch_538ce(ushort param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_538ec(ushort param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_538ec(ushort param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
@@ -6013,7 +6013,7 @@ void f33_capture_slot_dispatch_538ec(ushort param_1, undefined4 param_2)
   uVar1 = FUN_0005377c((*((undefined2 *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
                         (short)(param_1 & 0xff) * 0x48 + 0x18)))));
   FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -6022,7 +6022,7 @@ void f33_capture_slot_dispatch_538ec(ushort param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_5390a(ushort param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_5390a(ushort param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
@@ -6030,7 +6030,7 @@ void f33_capture_slot_dispatch_5390a(ushort param_1, undefined4 param_2)
   uVar1 = FUN_0005377c((*((undefined2 *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
                         (short)(param_1 & 0xff) * 0x48 + 0x1a)))));
   FUN_0006a574(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -6039,7 +6039,7 @@ void f33_capture_slot_dispatch_5390a(ushort param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_53928(ushort param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_53928(ushort param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
@@ -6047,7 +6047,7 @@ void f33_capture_slot_dispatch_53928(ushort param_1, undefined4 param_2)
   uVar1 = FUN_00053686((int)(*((short *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
                                       (short)(param_1 & 0xff) * 0x48 + 4)))));
   FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -6056,7 +6056,7 @@ void f33_capture_slot_dispatch_53928(ushort param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_53946(ushort param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_53946(ushort param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
@@ -6064,7 +6064,7 @@ void f33_capture_slot_dispatch_53946(ushort param_1, undefined4 param_2)
   uVar1 = FUN_00053686((int)(*((short *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
                                       (short)(param_1 & 0xff) * 0x48 + 6)))));
   FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -6073,7 +6073,7 @@ void f33_capture_slot_dispatch_53946(ushort param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_53964(ushort param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_53964(ushort param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
@@ -6081,7 +6081,7 @@ void f33_capture_slot_dispatch_53964(ushort param_1, undefined4 param_2)
   uVar1 = FUN_00053686((int)(*((short *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
                                       (short)(param_1 & 0xff) * 0x48 + 0xe)))));
   FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -6090,7 +6090,7 @@ void f33_capture_slot_dispatch_53964(ushort param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_53982(ushort param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_53982(ushort param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
@@ -6098,7 +6098,7 @@ void f33_capture_slot_dispatch_53982(ushort param_1, undefined4 param_2)
   uVar1 = FUN_00053686((int)(*((short *)camry_host_ptr((uint32_t)(f33_diagnostic_capture_slots[1].profile_prefix +
                                       (short)(param_1 & 0xff) * 0x48 + 0x3c)))));
   FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -6292,14 +6292,14 @@ int FUN_00053b1c(short param_1)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_53b42(undefined4 param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_53b42(undefined4 param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
   
   uVar1 = FUN_00053b1c((int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 162u)))));
   FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -6308,14 +6308,14 @@ void f33_capture_slot_dispatch_53b42(undefined4 param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_53b68(undefined4 param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_53b68(undefined4 param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
   
   uVar1 = FUN_00053b1c((int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 158u)))));
   FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -6324,14 +6324,14 @@ void f33_capture_slot_dispatch_53b68(undefined4 param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_53b8e(undefined4 param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_53b8e(undefined4 param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
   
   uVar1 = FUN_00053b1c((int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 154u)))));
   FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -6340,14 +6340,14 @@ void f33_capture_slot_dispatch_53b8e(undefined4 param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_53bb4(undefined4 param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_53bb4(undefined4 param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
   
   uVar1 = FUN_00053b1c((int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 172u)))));
   FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -6356,14 +6356,14 @@ void f33_capture_slot_dispatch_53bb4(undefined4 param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_53bda(undefined4 param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_53bda(undefined4 param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
   
   uVar1 = FUN_00053b1c((int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 194u)))));
   FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 
@@ -6372,14 +6372,14 @@ void f33_capture_slot_dispatch_53bda(undefined4 param_1, undefined4 param_2)
    through a fixed transform to one dispatch callee; shape-verified family of per-field accessors.
     */
 
-void f33_capture_slot_dispatch_53c00(undefined4 param_1, undefined4 param_2)
+undefined4 f33_capture_slot_dispatch_53c00(undefined4 param_1, undefined4 param_2)
 
 {
   undefined4 uVar1;
   
   uVar1 = FUN_00053b1c((int)(short)(*((volatile uint16_t *)camry_host_ptr((uint32_t)(0xfebe82dcu + (uint32_t)(1) * 240u + 198u)))));
   FUN_0006a5ac(uVar1, ((undefined1 *)camry_host_ptr((uint32_t)(param_2))));
-  return;
+  return uVar1;
 }
 
 

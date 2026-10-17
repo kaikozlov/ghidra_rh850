@@ -2098,19 +2098,19 @@ undefined4 FUN_00091f9c(undefined1 param_1)
 
 
 
-void FUN_00091faa(void)
+undefined4 FUN_00091faa(void)
 
 {
   undefined4 uVar1;
   
   uVar1 = FUN_00093c60();
   FUN_00093c9a(uVar1,0);
-  return;
+  return uVar1;
 }
 
 
 
-void FUN_00091fbe(void)
+undefined4 FUN_00091fbe(void)
 
 {
   undefined4 uVar1;
@@ -2127,7 +2127,7 @@ void FUN_00091fbe(void)
   FUN_00092602();
   FUN_00091ab8();
   thunk_FUN_0006a4c4();
-  return;
+  return uVar3;
 }
 
 
@@ -2494,7 +2494,7 @@ void FUN_00092300(void)
 
 
 
-void FUN_0009238c(void)
+undefined4 FUN_0009238c(void)
 
 {
   short *psVar1;
@@ -2510,7 +2510,7 @@ void FUN_0009238c(void)
                  *(int *)(*(int *)((uint)(ushort)psVar1[1] * 4 +
                                   *(int *)(puVar2 + *psVar1 * 0x14 + 0x20c4)) + 4) + 6)))));
   FUN_00093ef6(uVar3,0);
-  return;
+  return uVar3;
 }
 
 
@@ -3131,7 +3131,7 @@ uint f33_dcm_submit_transport_response(ushort transmit_id,F33PduInfo *response,u
 
 
 
-void FUN_00092a1e(undefined2 param_1)
+short FUN_00092a1e(undefined2 param_1)
 
 {
   uint32_t puVar1;
@@ -3143,7 +3143,7 @@ void FUN_00092a1e(undefined2 param_1)
     FUN_00092a60(param_1);
   }
   f33_dcm_cancel_software_timer('\x01');
-  return;
+  return sVar2;
 }
 
 
@@ -3278,7 +3278,7 @@ undefined1 FUN_00092b34(void)
 
 
 
-void FUN_00092b4a(void)
+int FUN_00092b4a(void)
 
 {
   int iVar1;
@@ -3288,7 +3288,7 @@ void FUN_00092b4a(void)
     f33_dcm_reset_response_queue();
     FUN_00092a86(0x10);
   }
-  return;
+  return iVar1;
 }
 
 

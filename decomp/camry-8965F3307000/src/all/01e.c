@@ -1,7 +1,7 @@
 #include "common.h"
 
 
-void FUN_00078010(undefined2 param_1,undefined1 *param_2)
+int FUN_00078010(undefined2 param_1,undefined1 *param_2)
 
 {
   undefined1 uVar1;
@@ -21,7 +21,7 @@ void FUN_00078010(undefined2 param_1,undefined1 *param_2)
     }
     *param_2 = uVar1;
   }
-  return;
+  return iVar2;
 }
 
 
@@ -1084,7 +1084,7 @@ uint FUN_00078bfa(void)
 
 /* WARNING: Inlined function: f33_store_u16 */
 
-void FUN_00078c12(void)
+int FUN_00078c12(void)
 
 {
   int iVar1;
@@ -1093,7 +1093,7 @@ void FUN_00078c12(void)
   if (iVar1 == 1) {
     FSUINITR = 0x2d00;
   }
-  return;
+  return iVar1;
 }
 
 
@@ -1613,7 +1613,7 @@ bool FUN_000792a6(void)
 
 /* WARNING: Inlined function: f33_store_u8 */
 
-void FUN_000792c0(void)
+int FUN_000792c0(void)
 
 {
   int iVar1;
@@ -1622,7 +1622,7 @@ void FUN_000792c0(void)
   if (iVar1 == 1) {
     FACI_COMMAND_AREA = 0xd0;
   }
-  return;
+  return iVar1;
 }
 
 
@@ -5452,7 +5452,7 @@ LAB_0007bb80:
 
 
 
-void FUN_0007bb9c(void)
+byte FUN_0007bb9c(void)
 
 {
   uint32_t puVar1;
@@ -5464,7 +5464,7 @@ void FUN_0007bb9c(void)
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6854))))) = 0;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6852))))) = bVar2;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6851))))) = bVar2 ^ 0xff;
-  return;
+  return bVar2;
 }
 
 
@@ -5506,7 +5506,7 @@ void FUN_0007bbc2(void)
 
 
 
-void FUN_0007bc12(byte param_1,byte param_2)
+undefined4 FUN_0007bc12(byte param_1,byte param_2)
 
 {
   uint32_t puVar1;
@@ -5519,7 +5519,7 @@ void FUN_0007bc12(byte param_1,byte param_2)
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6852))))) = bVar3;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x6851))))) = bVar3 ^ 0xff;
   ((void)(uVar2), thunk_FUN_0006a4c4());
-  return;
+  return uVar2;
 }
 
 

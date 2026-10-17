@@ -82,7 +82,7 @@ void FUN_00084160(void)
 
 
 
-void FUN_000841a6(uint param_1)
+int FUN_000841a6(uint param_1)
 
 {
   int iVar1;
@@ -96,7 +96,7 @@ void FUN_000841a6(uint param_1)
     f33_driver_channel_software_states[param_1] = stopped_software_state;
   }
   FUN_000835c6(param_1);
-  return;
+  return iVar1;
 }
 
 
@@ -123,7 +123,7 @@ bool FUN_000841fc(uint param_1)
 
 
 
-void FUN_00084274(uint param_1)
+int FUN_00084274(uint param_1)
 
 {
   int iVar1;
@@ -133,7 +133,7 @@ void FUN_00084274(uint param_1)
   if (iVar1 == 0) {
     f33_driver_channel_software_states[param_1 & 0xff] = stopped_software_state;
   }
-  return;
+  return iVar1;
 }
 
 
@@ -177,7 +177,7 @@ void FUN_000842dc(void)
 
 
 
-void FUN_000842fe(void)
+undefined4 FUN_000842fe(void)
 
 {
   ushort uVar1;
@@ -197,7 +197,7 @@ void FUN_000842fe(void)
     uVar5 = **(uint **)(puVar3 + -0xdb8);
   }
   ((void)(uVar4), thunk_FUN_0006a4c4());
-  return;
+  return uVar4;
 }
 
 
@@ -253,7 +253,7 @@ void FUN_0008433c(void)
 
 
 
-void FUN_00084420(ushort param_1)
+undefined4 FUN_00084420(ushort param_1)
 
 {
   int iVar1;
@@ -274,7 +274,7 @@ void FUN_00084420(ushort param_1)
     uVar5 = (*((uint *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x22ef8u + (uint32_t)(iVar1 * 0x1d) * 4u)))))));
   }
   ((void)(uVar4), thunk_FUN_0006a4c4());
-  return;
+  return uVar4;
 }
 
 

@@ -168,14 +168,14 @@ void FUN_0004c216(undefined1 param_1)
 
 
 
-void FUN_0004c238(void)
+undefined4 FUN_0004c238(void)
 
 {
   undefined4 uVar1;
   
   uVar1 = FUN_0004c1c0();
   FUN_0004c216(uVar1);
-  return;
+  return uVar1;
 }
 
 

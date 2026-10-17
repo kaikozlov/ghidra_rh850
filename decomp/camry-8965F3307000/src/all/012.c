@@ -186,7 +186,7 @@ void f33_return_only_stub_4825a(void)
 
 
 
-void FUN_0004825c(void)
+uint FUN_0004825c(void)
 
 {
   uint32_t puVar1;
@@ -218,7 +218,7 @@ LAB_000482a4:
   (*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x3a24)))) = (uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x536e)))) << 0x10;
   (*((short *)camry_host_ptr((uint32_t)(puVar1 + -0x3a28)))) = (*((uint16_t *)((uint8_t *)&local_c + 2u)));
   (*((uint *)camry_host_ptr((uint32_t)(puVar1 + -0x3a20)))) = (uint)(*((ushort *)camry_host_ptr((uint32_t)(puVar1 + -0x5368)))) << 0x10;
-  return;
+  return uVar2;
 }
 
 
@@ -2364,7 +2364,7 @@ void f33_return_only_stub_498f4(void)
 
 
 
-void FUN_000498f6(void)
+int FUN_000498f6(void)
 
 {
   undefined2 uVar1;
@@ -2379,7 +2379,7 @@ void FUN_000498f6(void)
     (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x38b8)))) = 0;
     (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x38b6)))) = uVar1;
   }
-  return;
+  return iVar3;
 }
 
 

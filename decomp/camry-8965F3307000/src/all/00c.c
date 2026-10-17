@@ -534,7 +534,7 @@ void thunk_FUN_00032398(void)
    index bound. Native index0 proves ROM source despite conflicting setter-like RAM; OEM meaning
    unnamed. */
 
-void f33_publish_family2_group8_halfword(uint index)
+uint f33_publish_family2_group8_halfword(uint index)
 
 {
   int iVar1;
@@ -556,12 +556,12 @@ void f33_publish_family2_group8_halfword(uint index)
     uVar2 = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + iVar1 + -0x5132))));
   }
   *(undefined2 *)(((undefined *)camry_host_ptr(0xfebe68aau)) + (index & 0xff) * 2) = uVar2;
-  return;
+  return uVar4;
 }
 
 
 
-void FUN_0003249a(uint param_1)
+uint FUN_0003249a(uint param_1)
 
 {
   int iVar1;
@@ -579,7 +579,7 @@ void FUN_0003249a(uint param_1)
     (*((undefined2 *)camry_host_ptr((uint32_t)((int)0xffffb0b0u + (int)(puVar2 + iVar1))))) =
          (*((undefined2 *)camry_host_ptr((uint32_t)((int)&uStack_10 + iVar1))));
   }
-  return;
+  return uVar3;
 }
 
 
@@ -590,6 +590,53 @@ void FUN_000324d6(int param_1)
   if ((DAT_febe68b4 != 0x5aa5a55a) && (param_1 == 0x5aa5a55a)) {
     f33_report_diagnostic_event_failure(0x123,0x32);
   }
+  return;
+}
+
+
+
+void FUN_000324fc(uint param_1)
+
+{
+  char cVar1;
+  uint32_t puVar2;
+  int extraout_r10;
+  int iVar3;
+  undefined1 uVar4;
+  undefined1 uVar5;
+  undefined4 uVar6;
+  
+  puVar2 = 0xfebeb800u;
+  param_1 = param_1 & 0xff;
+  uVar5 = 0;
+  uVar4 = 0;
+  cVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe66c2u + (uint32_t)(param_1) * 1u))));
+  uVar6 = DAT_febe68b4;
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe66c0u + (uint32_t)(param_1) * 1u)))) == 'Z') {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe68a5u + (uint32_t)(param_1) * 1u)))) = 0x5a;
+    puVar2 = 0xfebeb800u;
+    f33_publish_family2_group8_halfword(param_1);
+    uVar6 = 0x5aa5a55a;
+    uVar5 = 0x5a;
+    if (extraout_r10 == 0x10) {
+      uVar6 = 0xa55a5aa5;
+      uVar5 = 0;
+    }
+  }
+  if (cVar1 == 'Z') {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe68a7u + (uint32_t)(param_1) * 1u)))) = 0x5a;
+    iVar3 = FUN_0003249a(param_1);
+    uVar6 = 0x5aa5a55a;
+    uVar4 = 0x5a;
+    if (iVar3 == 0x10) {
+      uVar6 = 0xa55a5aa5;
+      uVar4 = 0;
+    }
+  }
+  FUN_000324d6(uVar6);
+  (*((undefined4 *)camry_host_ptr((uint32_t)((int)(0xffffb0b4u + (uint32_t)((int)puVar2)))))) = uVar6;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe68a5u + (uint32_t)(param_1) * 1u)))) = uVar5;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe68a7u + (uint32_t)(param_1) * 1u)))) = uVar4;
   return;
 }
 
@@ -972,7 +1019,7 @@ void f33_return_only_stub_328d2(void)
    coefficients only on status10; serialized bank1 precedes bank0, while RAM arrays group both banks
    by sign/bias. Getter reads immutable ROMA000, not setter RAMF5D0; no atomic two-read claim. */
 
-void f33_copy_monitor_calibration_from_rom_record(void)
+uint f33_copy_monitor_calibration_from_rom_record(void)
 
 {
   uint *puVar1;
@@ -1030,7 +1077,7 @@ void f33_copy_monitor_calibration_from_rom_record(void)
     (*((undefined2 *)camry_host_ptr((uint32_t)((int)(0xffffb14eu + (uint32_t)((int)puVar2)))))) = uStack_1e;
     (*((undefined2 *)camry_host_ptr((uint32_t)((int)(0xffffb150u + (uint32_t)((int)puVar2)))))) = uStack_1c;
   }
-  return;
+  return uVar3;
 }
 
 

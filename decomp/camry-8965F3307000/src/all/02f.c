@@ -1567,7 +1567,7 @@ void f33_refresh_foreground_control_projection(void)
 
 
 
-void FUN_000bd81e(void)
+int FUN_000bd81e(void)
 
 {
   undefined1 uVar1;
@@ -1593,7 +1593,7 @@ void FUN_000bd81e(void)
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0xb13))))) = uVar1;
   FUN_000d1160();
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0xb12))))) = 0x5a;
-  return;
+  return iVar3;
 }
 
 
@@ -1742,7 +1742,7 @@ undefined4 FUN_000bd8ea(void)
 
 
 
-void FUN_000bd9da(void)
+int FUN_000bd9da(void)
 
 {
   undefined2 uVar1;
@@ -1870,7 +1870,7 @@ void FUN_000bd9da(void)
     (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0xa93))))) = uStack_7;
   }
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0xa95))))) = uStack_6;
-  return;
+  return iVar4;
 }
 
 
@@ -2197,7 +2197,7 @@ void f33_return_only_stub_bdd20(void)
 
 
 
-void FUN_000bdd22(void)
+int FUN_000bdd22(void)
 
 {
   undefined4 *puVar1;
@@ -2254,7 +2254,7 @@ void FUN_000bdd22(void)
     (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + 0x63c)))) = uStack_c;
   }
   DAT_febebe40 = uStack_a;
-  return;
+  return iVar3;
 }
 
 
@@ -3100,7 +3100,7 @@ void f33_return_only_stub_be38a(void)
 /* Readlogicalrecord13;onlyresult10adoptsword+0andage+4,otherwiseclearboth.
    Notamodetierreentryage-reset. */
 
-void f33_initialize_received_word_age_from_record13(void)
+int f33_initialize_received_word_age_from_record13(void)
 
 {
   uint32_t puVar1;
@@ -3122,7 +3122,7 @@ void f33_initialize_received_word_age_from_record13(void)
   }
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + 0x66e)))) = uVar3;
   (*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + 0x670)))) = uStack_8;
-  return;
+  return iVar2;
 }
 
 

@@ -115,7 +115,7 @@ void f33_filter_established_estimator_difference
    ceiling increment for changed candidate or strict center band; ceiling gates increment rather
    than clamping. */
 
-void f33_advance_estimator_source_count(int candidate,int previous)
+int f33_advance_estimator_source_count(int candidate,int previous)
 
 {
   int iVar1;
@@ -138,7 +138,7 @@ void f33_advance_estimator_source_count(int candidate,int previous)
   }
   (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0x7ec)))) = uVar5;
   (*((short *)camry_host_ptr((uint32_t)(puVar2 + 0x866)))) = (short)uVar3;
-  return;
+  return iVar4;
 }
 
 
@@ -202,7 +202,7 @@ LAB_000c4236:
    strict warmup>10. AdditionalC0DE commits predicted sample and center projection; failure holds
    acceptance/output while clearing warmup. */
 
-void f33_predict_estimator_source_sample(ushort *warmup,uchar *accepted,int *projection)
+uint f33_predict_estimator_source_sample(ushort *warmup,uchar *accepted,int *projection)
 
 {
   int iVar1;
@@ -270,7 +270,7 @@ void f33_predict_estimator_source_sample(ushort *warmup,uchar *accepted,int *pro
   *warmup = uVar21;
   *accepted = uVar19;
   *projection = iVar20;
-  return;
+  return uVar17;
 }
 
 
@@ -1036,7 +1036,7 @@ void FUN_000c4b4e(void)
 
 
 
-void FUN_000c4b8c(void)
+undefined4 FUN_000c4b8c(void)
 
 {
   uint32_t puVar1;
@@ -1061,7 +1061,7 @@ void FUN_000c4b8c(void)
   (*((int *)camry_host_ptr((uint32_t)(puVar1 + 0x8cc)))) = iVar3;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x8d0))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x88e)))));
   FUN_000d1dc6(uVar2);
-  return;
+  return uVar2;
 }
 
 
@@ -1714,7 +1714,7 @@ void f33_update_torque_memory_band_amplitude(void)
    zero residual; in-band motion retains memory and excursions move the band. Zero scalar gives zero
    raw correction; speed and retained gains each narrow before final +/-256 clamp. */
 
-void f33_update_torque_memory_correction(void)
+short f33_update_torque_memory_correction(void)
 
 {
   int iVar1;
@@ -1778,7 +1778,7 @@ void f33_update_torque_memory_correction(void)
     sVar8 = (short)iVar1;
   }
   (*((short *)camry_host_ptr((uint32_t)(puVar4 + 0x946)))) = sVar8;
-  return;
+  return sVar5;
 }
 
 
@@ -1852,7 +1852,7 @@ void f33_initialize_assist_surface_selection(void)
    request snapshots plus six signed wrapped-magnitude gates qualify mismatch. Exact B1172zero
    immediately asserts C154 and clears count; no nonzero debounce is established. */
 
-void f33_qualify_assist_surface_transition(void)
+short f33_qualify_assist_surface_transition(void)
 
 {
   short sVar1;
@@ -1943,7 +1943,7 @@ void f33_qualify_assist_surface_transition(void)
 LAB_000c5496:
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar9 + (uint32_t)(0x954))))) = uVar20;
   (*((short *)camry_host_ptr((uint32_t)(puVar9 + 0x952)))) = sVar21;
-  return;
+  return sVar10;
 }
 
 
@@ -2327,7 +2327,7 @@ void f33_fill_constant_block_c589e(void)
 
 
 
-void FUN_000c5910(void)
+undefined4 FUN_000c5910(void)
 
 {
   uint32_t puVar1;
@@ -2341,7 +2341,7 @@ void FUN_000c5910(void)
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + 0x9a8)))) = local_8;
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + 0x9aa)))) = uStack_6;
   FUN_000d1dc6(uVar2);
-  return;
+  return uVar2;
 }
 
 
@@ -3522,7 +3522,7 @@ void FUN_000c675c(ushort param_1,short param_2,char param_3)
 /* WARNING: Removing unreachable block (ram,0x000c6a52) */
 /* WARNING: Removing unreachable block (ram,0x000c6a06) */
 
-void FUN_000c69ec(char param_1)
+undefined2 FUN_000c69ec(char param_1)
 
 {
   uint32_t puVar1;
@@ -3556,7 +3556,7 @@ LAB_000c6a44:
   uVar3 = FUN_000c66b4((int)(short)(((int)DAT_febec2d6 * (int)DAT_febeabac) / 0x400));
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + 0xabe)))) = uVar3;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0xadf))))) = cVar4;
-  return;
+  return uVar3;
 }
 
 
@@ -4010,7 +4010,7 @@ void FUN_000c6e7e(void)
 /* WARNING: Removing unreachable block (ram,0x000c6f40) */
 /* WARNING: Removing unreachable block (ram,0x000c6f34) */
 
-void FUN_000c6f1e(void)
+int FUN_000c6f1e(void)
 
 {
   uint32_t puVar1;
@@ -4021,7 +4021,7 @@ void FUN_000c6f1e(void)
   iVar2 = f33_apply_internal_assist_attenuation((DAT_febec344 * DAT_febec376) / 0x400);
   (*((int *)camry_host_ptr((uint32_t)(puVar1 + 0xb48)))) = iVar2;
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + 0xb96)))) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + 0xb76))));
-  return;
+  return iVar2;
 }
 
 
@@ -4408,7 +4408,7 @@ void f33_fill_constant_block_c73c4(void)
 /* Signed C23C lookup at B11D2 times bank-specific combined-slope map and retained C3B0 gain;
    publish signed32 C3A4. */
 
-void f33_map_first_model_derivative_compensation(void)
+int f33_map_first_model_derivative_compensation(void)
 
 {
   short input;
@@ -4430,7 +4430,7 @@ void f33_map_first_model_derivative_compensation(void)
                     (((short *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xb1454u + (uint32_t)((byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0xbc4))))) & 1) * 4u)))) + 0xc))),input);
   (*((int *)camry_host_ptr((uint32_t)(puVar2 + 0xba4)))) =
        ((((int)(short)iVar4 * (int)sVar3) / 0x400) * (int)(*((short *)camry_host_ptr((uint32_t)(puVar2 + 0xbb0))))) / 0x400;
-  return;
+  return iVar4;
 }
 
 
@@ -4440,7 +4440,7 @@ void f33_map_first_model_derivative_compensation(void)
 /* Signed C23E lookup at B11E6, narrow its C3B2-scaled product before B11AE slope scaling; publish
    signed32 ABB0. */
 
-void f33_map_second_model_derivative_compensation(void)
+int f33_map_second_model_derivative_compensation(void)
 
 {
   short input;
@@ -4465,7 +4465,7 @@ void f33_map_second_model_derivative_compensation(void)
   (*((int *)camry_host_ptr((uint32_t)(puVar2 + -0xc50)))) =
        ((int)(short)iVar4 * (int)(short)(((int)sVar3 * (int)(*((short *)camry_host_ptr((uint32_t)(puVar2 + 0xbb2))))) / 0x400)) /
        0x400;
-  return;
+  return iVar4;
 }
 
 
@@ -5367,7 +5367,7 @@ void f33_update_nonlinear_torque_speed_gain(void)
    scheduler compositions verify high-magnitude4876 publication and negative112 interpolation
    through retained speed gain614 to-46. Other inputs remain statically reconstructed. */
 
-void f33_update_nonlinear_torque_compensation(void)
+ushort f33_update_nonlinear_torque_compensation(void)
 
 {
   int iVar1;
@@ -5417,7 +5417,7 @@ void f33_update_nonlinear_torque_compensation(void)
   (*((short *)camry_host_ptr((uint32_t)(puVar4 + 0xc44)))) = sVar6;
   (*((short *)camry_host_ptr((uint32_t)(puVar4 + 0xc46)))) = sVar7;
   (*((short *)camry_host_ptr((uint32_t)(puVar4 + 0xc4c)))) = sVar9;
-  return;
+  return uVar5;
 }
 
 
@@ -5427,7 +5427,7 @@ void f33_update_nonlinear_torque_compensation(void)
 /* Use AFDA8 indexed by abs(C128)>>5, else2713. Narrow speed-scaled slope; AC2B5A publishes C44E
    zero, otherwise scale by AC6E/1024. */
 
-void f33_update_nonlinear_torque_slope(void)
+ushort f33_update_nonlinear_torque_slope(void)
 
 {
   char cVar1;
@@ -5457,7 +5457,7 @@ void f33_update_nonlinear_torque_slope(void)
     uVar5 = (undefined2)(((int)sVar2 * (int)sVar4) / 0x400);
   }
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar6 + 0xc4e)))) = uVar5;
-  return;
+  return uVar7;
 }
 
 

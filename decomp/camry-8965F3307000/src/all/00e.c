@@ -7,7 +7,7 @@
    request at upper0 then lower curve floor6D8C, publish6D8A. Reset leaves staged snapshot/ratio
    intact. Exact forced-override31B2C is0. */
 
-void f33_select_feedback_bounded_first_current_request(void)
+uint f33_select_feedback_bounded_first_current_request(void)
 
 {
   short sVar1;
@@ -60,7 +60,7 @@ LAB_00038130:
     }
   }
   (*((short *)camry_host_ptr((uint32_t)((0xffffb58au + (uint32_t)((int)puVar2)))))) = sVar6;
-  return;
+  return uVar3;
 }
 
 
@@ -2013,7 +2013,7 @@ void f33_return_only_stub_39058(void)
 
 
 
-void FUN_0003905a(void)
+int FUN_0003905a(void)
 
 {
   uint32_t puVar1;
@@ -2024,7 +2024,7 @@ void FUN_0003905a(void)
   if (iVar2 == 0) {
     (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb6acu + (uint32_t)((int)puVar1) * 1u)))) = 0;
   }
-  return;
+  return iVar2;
 }
 
 
@@ -2827,7 +2827,7 @@ int FUN_0003975a(short param_1,short param_2)
 
 
 
-void FUN_00039768(void)
+int FUN_00039768(void)
 
 {
   uint32_t puVar1;
@@ -2857,7 +2857,7 @@ void FUN_00039768(void)
   (*((short *)camry_host_ptr((uint32_t)((0xffffb6eeu + (uint32_t)((int)puVar1)))))) = (short)iStack_24;
   (*((short *)camry_host_ptr((uint32_t)((0xffffb6ecu + (uint32_t)((int)puVar1)))))) = (short)local_28;
   (*((int *)camry_host_ptr((uint32_t)((0xffffb6fcu + (uint32_t)((int)puVar1)))))) = iStack_24 + local_28;
-  return;
+  return iVar2;
 }
 
 
@@ -2918,7 +2918,7 @@ void f33_return_only_stub_3985a(void)
    exact10 without markerA55A rejection; otherwise clear pair. History admission differs from model
    terms. */
 
-void f33_restore_thermal_drive_epoch_maxima(void)
+uint f33_restore_thermal_drive_epoch_maxima(void)
 
 {
   uint *puVar1;
@@ -2948,7 +2948,7 @@ void f33_restore_thermal_drive_epoch_maxima(void)
     uStack_6 = 0;
   }
   (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb708u + (uint32_t)((int)puVar2)))))) = uStack_6;
-  return;
+  return uVar3;
 }
 
 
@@ -3044,7 +3044,7 @@ void f33_return_only_stub_3991a(void)
 
 
 
-void FUN_0003991c(void)
+int FUN_0003991c(void)
 
 {
   uint32_t puVar1;
@@ -3055,7 +3055,7 @@ void FUN_0003991c(void)
   if (iVar2 == 0) {
     (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb710u + (uint32_t)((int)puVar1) * 1u)))) = 0;
   }
-  return;
+  return iVar2;
 }
 
 
@@ -3400,7 +3400,7 @@ void f33_return_only_stub_39bfc(void)
 
 
 
-void FUN_00039bfe(void)
+int FUN_00039bfe(void)
 
 {
   uint32_t puVar1;
@@ -3411,7 +3411,7 @@ void FUN_00039bfe(void)
   if (iVar2 == 0) {
     (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb734u + (uint32_t)((int)puVar1) * 1u)))) = 0;
   }
-  return;
+  return iVar2;
 }
 
 
@@ -4524,7 +4524,7 @@ void f33_return_only_stub_3a558(void)
 
 
 
-void FUN_0003a55a(void)
+int FUN_0003a55a(void)
 
 {
   uint32_t puVar1;
@@ -4535,7 +4535,7 @@ void FUN_0003a55a(void)
   if (iVar2 == 0) {
     (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb780u + (uint32_t)((int)puVar1) * 1u)))) = 0;
   }
-  return;
+  return iVar2;
 }
 
 
@@ -4825,7 +4825,7 @@ int f33_update_motor_thermal_branch0(short upper,short lower)
 
 
 
-void FUN_0003a808(short param_1)
+undefined4 FUN_0003a808(short param_1)
 
 {
   uint32_t puVar1;
@@ -4835,7 +4835,7 @@ void FUN_0003a808(short param_1)
   uVar2 = FUN_0003a6c6((int)param_1,(int)DAT_0002b4bc);
   (*((undefined4 *)camry_host_ptr((uint32_t)((0xffffb794u + (uint32_t)((int)puVar1)))))) = uVar2;
   (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb78cu + (uint32_t)((int)puVar1)))))) = 0x3480;
-  return;
+  return uVar2;
 }
 
 
@@ -4967,7 +4967,7 @@ int f33_update_motor_thermal_branch1(short upper,short lower)
 
 
 
-void FUN_0003a94a(short param_1)
+undefined4 FUN_0003a94a(short param_1)
 
 {
   uint32_t puVar1;
@@ -4977,7 +4977,7 @@ void FUN_0003a94a(short param_1)
   uVar2 = FUN_0003a6c6((int)param_1,(int)DAT_0002b4d0);
   (*((undefined4 *)camry_host_ptr((uint32_t)((0xffffb7a4u + (uint32_t)((int)puVar1)))))) = uVar2;
   (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb79cu + (uint32_t)((int)puVar1)))))) = 0x3480;
-  return;
+  return uVar2;
 }
 
 
@@ -5404,7 +5404,7 @@ void f33_return_only_stub_3acf6(void)
 
 
 
-void FUN_0003acf8(void)
+int FUN_0003acf8(void)
 
 {
   uint32_t puVar1;
@@ -5415,7 +5415,7 @@ void FUN_0003acf8(void)
   if (iVar2 == 0) {
     (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb7e0u + (uint32_t)((int)puVar1) * 1u)))) = 0;
   }
-  return;
+  return iVar2;
 }
 
 

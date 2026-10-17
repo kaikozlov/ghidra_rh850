@@ -340,7 +340,7 @@ void FUN_000c82c2(ushort param_1,short param_2)
 /* WARNING: Removing unreachable block (ram,0x000c84a6) */
 /* WARNING: Removing unreachable block (ram,0x000c8456) */
 
-void FUN_000c843a(char param_1)
+undefined2 FUN_000c843a(char param_1)
 
 {
   int iVar1;
@@ -378,7 +378,7 @@ LAB_000c8496:
   uVar4 = FUN_000c7e1c((int)(short)((int)(iVar3 * (uint)DAT_febeabc4) / 0x400));
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0xc3e)))) = uVar4;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(0xc9d))))) = cVar5;
-  return;
+  return uVar4;
 }
 
 
@@ -902,7 +902,7 @@ void FUN_000c8ab2(void)
 /* WARNING: Removing unreachable block (ram,0x000c8b8e) */
 /* WARNING: Removing unreachable block (ram,0x000c8b66) */
 
-void FUN_000c8af2(void)
+undefined4 FUN_000c8af2(void)
 
 {
   uint uVar1;
@@ -942,7 +942,7 @@ void FUN_000c8af2(void)
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(0xd20))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(0x8d0)))));
   (*((undefined4 *)camry_host_ptr((uint32_t)(puVar2 + 0xce8)))) = (*((undefined4 *)camry_host_ptr((uint32_t)(puVar2 + -0xc38))));
   FUN_000d1dc6(uVar5);
-  return;
+  return uVar5;
 }
 
 
@@ -1498,7 +1498,7 @@ void f33_fill_constant_block_c9160(void)
 
 
 
-void FUN_000c91f2(void)
+int FUN_000c91f2(void)
 
 {
   ushort input;
@@ -1517,7 +1517,7 @@ void FUN_000c91f2(void)
                     (((ushort *)camry_host_ptr((uint32_t)(f33_calibration_bank_bases[(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xbc4))))) & 1] + iVar3 + 0x20cc))),input);
   (*((short *)camry_host_ptr((uint32_t)(puVar1 + -0xc24)))) = (short)iVar3;
   (*((short *)camry_host_ptr((uint32_t)(puVar1 + 0xd92)))) = (*((short *)camry_host_ptr((uint32_t)(puVar1 + 0xd90)))) + (short)iVar3 + 1;
-  return;
+  return iVar2;
 }
 
 
@@ -1950,7 +1950,7 @@ void FUN_000c9650(void)
 /* Native composed release clears the gain sub-state and advances retained accumulator3072 to2560
    using exact6144 coefficients; gain512 decays to426 rather than clearing immediately. */
 
-void FUN_000c973a(void)
+short FUN_000c973a(void)
 
 {
   char cVar1;
@@ -2010,7 +2010,7 @@ LAB_000c978e:
   if (iVar4 + -0x14 < 0 != (iVar4 < 0 && -1 < iVar4 + -0x14) || iVar4 == 0x14) {
     (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + 0xdb8)))) = (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + 0xdba))));
   }
-  return;
+  return sVar3;
 }
 
 
@@ -2327,7 +2327,7 @@ void FUN_000c9ba6(void)
 /* WARNING: Removing unreachable block (ram,0x000c9c60) */
 /* WARNING: Removing unreachable block (ram,0x000c9c2e) */
 
-void FUN_000c9bce(void)
+ushort FUN_000c9bce(void)
 
 {
   char cVar1;
@@ -2372,7 +2372,7 @@ void FUN_000c9bce(void)
   }
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar7 + 0xdf0)))) = uVar2;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar7 + (uint32_t)(0xdea))))) = cVar1;
-  return;
+  return uVar8;
 }
 
 
@@ -2441,7 +2441,7 @@ void FUN_000c9caa(void)
 
 
 
-void FUN_000c9d18(void)
+short FUN_000c9d18(void)
 
 {
   bool bVar1;
@@ -2478,7 +2478,7 @@ void FUN_000c9d18(void)
     f33_report_diagnostic_event_failure_ffff_32_bdb64(0xc9);
     (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar6 + (uint32_t)(0xdf9))))) = 1;
   }
-  return;
+  return sVar7;
 }
 
 
@@ -2757,7 +2757,7 @@ void FUN_000ca04e(void)
 
 
 
-void FUN_000ca124(void)
+short FUN_000ca124(void)
 
 {
   int iVar1;
@@ -2789,7 +2789,7 @@ void FUN_000ca124(void)
     f33_report_diagnostic_event_failure_ffff_32_bdb64(0x110);
     (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(0xe2c))))) = 1;
   }
-  return;
+  return sVar6;
 }
 
 
@@ -2896,7 +2896,7 @@ void FUN_000ca242(void)
 
 
 
-void FUN_000ca312(short param_1,short param_2)
+undefined4 FUN_000ca312(short param_1,short param_2)
 
 {
   uint32_t puVar1;
@@ -2909,7 +2909,7 @@ void FUN_000ca312(short param_1,short param_2)
   (*((short *)camry_host_ptr((uint32_t)(puVar1 + 0xe98)))) = -1 - param_1;
   (*((short *)camry_host_ptr((uint32_t)(puVar1 + 0xe96)))) = -1 - param_2;
   FUN_000d1dc6(uVar2);
-  return;
+  return uVar2;
 }
 
 
@@ -3109,7 +3109,7 @@ void FUN_000ca716(void)
 
 /* WARNING: Removing unreachable block (ram,0x000caace) */
 
-void FUN_000caaa2(void)
+undefined4 FUN_000caaa2(void)
 
 {
   uint32_t puVar1;
@@ -3168,7 +3168,7 @@ void FUN_000caaa2(void)
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0xf02))))) = 0;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0xf26))))) = (char)(*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + 0xeba))));
   FUN_000d1dc6(uVar2);
-  return;
+  return uVar2;
 }
 
 
@@ -3520,7 +3520,7 @@ void FUN_000cb2f8(void)
 
 
 
-void FUN_000cb396(void)
+short FUN_000cb396(void)
 
 {
   int iVar1;
@@ -3548,12 +3548,12 @@ void FUN_000cb396(void)
       (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(0xf97))))) = 1;
     }
   }
-  return;
+  return sVar6;
 }
 
 
 
-void FUN_000cb3f4(void)
+uint FUN_000cb3f4(void)
 
 {
   ushort uVar1;
@@ -3580,7 +3580,7 @@ void FUN_000cb3f4(void)
     (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + 0xf3e)))) = 0;
     (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(0xf98))))) = 0;
   }
-  return;
+  return uVar4;
 }
 
 
@@ -3645,7 +3645,7 @@ void FUN_000cb45e(void)
 
 
 
-void FUN_000cb516(short param_1,short param_2)
+undefined4 FUN_000cb516(short param_1,short param_2)
 
 {
   uint32_t puVar1;
@@ -3658,7 +3658,7 @@ void FUN_000cb516(short param_1,short param_2)
   (*((short *)camry_host_ptr((uint32_t)(puVar1 + 0xfac)))) = -1 - param_1;
   (*((short *)camry_host_ptr((uint32_t)(puVar1 + 0xfaa)))) = -1 - param_2;
   FUN_000d1dc6(uVar2);
-  return;
+  return uVar2;
 }
 
 
@@ -3862,7 +3862,7 @@ uint FUN_000cb9c8(void)
 
 /* WARNING: Removing unreachable block (ram,0x000cbaac) */
 
-void FUN_000cba80(void)
+undefined4 FUN_000cba80(void)
 
 {
   uint32_t puVar1;
@@ -3913,7 +3913,7 @@ void FUN_000cba80(void)
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + 0x101a)))) = 0;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0xffe))))) = 0;
   FUN_000d1dc6(uVar2);
-  return;
+  return uVar2;
 }
 
 

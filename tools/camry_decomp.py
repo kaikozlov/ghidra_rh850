@@ -2115,6 +2115,7 @@ _TRACKED = tuple(range(1, 32))
 _CALLER_KILLED = {1, 2, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 30, 31}
 _ARG_CLOBBERS: dict[int, set[int]] | None = None
 _R10_PRESERVE: set[int] = set()
+_CHECKED_NAMES: set[str] | None = None
 _NO_WRITE = {
     "cmp", "tst", "cmpi", "st8", "st16", "st32", "set1", "not1", "clr1", "tst1",
     "set1r", "not1r", "clr1r", "tst1r", "ldsr",
@@ -2813,6 +2814,53 @@ def _writes_r10(fn) -> bool:
     return False
 
 
+def _counter_imms(fn) -> set[int] | None:
+    """Immediates written into r10 when the only later updates are in place.
+
+    A loop that counts in r10 (`movi` then `addi_imm5` and a narrow) leaves
+    `fail` in the origin lattice because the add is not folded across the
+    back edge. The immediate is still the counter's start value.
+    """
+    imms: set[int] = set()
+    saw_add = False
+    for inst in fn.insts:
+        if inst.kind in {"jarl", "jr", "callt"}:
+            return None
+        parsed = _stmt_parts(inst.stmt) if inst.stmt else None
+        if parsed is None:
+            continue
+        name, args = parsed
+        if not args or name in _NO_GPR_WRITE or name in {"prepare", "pushsp", "popsp"}:
+            continue
+        if name in {"bsw", "bsh", "hsw", "hsh", "sch0r", "sch1r", "sch0l", "sch1l"}:
+            dest = args[1] if len(args) > 1 else None
+        elif name == "mul" and len(args) >= 2:
+            dest = None if 10 in args[:2] else args[0]
+            if 10 in args[:2]:
+                return None
+        elif name == "div3" and len(args) >= 3 and 10 in {args[0], args[2]}:
+            return None
+        else:
+            dest = args[0]
+        if dest != 10:
+            continue
+        if name == "movi" and len(args) > 1 and args[1] is not None:
+            imms.add(args[1] & 0xFFFFFFFF)
+            continue
+        if name == "mov" and len(args) > 1 and args[1] == 0:
+            imms.add(0)
+            continue
+        if name == "addi_imm5":
+            saw_add = True
+            continue
+        if name in _NARROW:
+            continue
+        return None
+    if not saw_add or not imms:
+        return None
+    return imms
+
+
 def _r10_preservers(
     direct: set[int], calls: dict[int, list[int]], callt: set[int],
 ) -> set[int]:
@@ -2843,8 +2891,10 @@ def _call_facts() -> dict:
     origins: dict[str, dict] = {}
     sites: dict[str, dict[int, list[int]]] = {}
     ret_target: dict[str, int] = {}
+    ret_r10: dict[str, list[set]] = {}
     saved_pmr: set[str] = set()
     stored_r10: set[str] = set()
+    counters: dict[str, set[int]] = {}
     arity: dict[str, int] = {}
     walked = []
     direct_writes: dict[int, set[int]] = {}
@@ -2864,6 +2914,9 @@ def _call_facts() -> dict:
             callt.add(addr)
         if _writes_r10(fn):
             direct_r10.add(addr)
+        imms = _counter_imms(fn)
+        if imms is not None:
+            counters[row["name"]] = imms
     _ARG_CLOBBERS = _arg_clobber_map(direct_writes, direct_calls, callt)
     _R10_PRESERVE = _r10_preservers(direct_r10, direct_calls, callt)
     for row, fn in walked:
@@ -2901,6 +2954,7 @@ def _call_facts() -> dict:
                     origin = {("call", next(iter(held))[1])}
             targets.append(origin)
             pmr_origins.append(origin)
+        ret_r10[row["name"]] = targets
         if targets and all(len(item) == 1 and next(iter(item))[0] == "call" for item in targets):
             called = {next(iter(item))[1] for item in targets}
             if len(called) == 1 and None not in called:
@@ -3016,6 +3070,8 @@ def _call_facts() -> dict:
         "saved_pmr": saved_pmr,
         "preserves": {names_at[addr] for addr in _R10_PRESERVE if addr in names_at},
         "returns": returns,
+        "ret_r10": ret_r10,
+        "counters": counters,
         "stored_r10": stored_r10,
         "ram": {addr: next(iter(widths)) for addr, widths in ram.items() if len(widths) == 1},
     }
@@ -3430,6 +3486,181 @@ def _rewrite_stored_result(code: str) -> str:
     return head + body
 
 
+_HELD_TYPES = {
+    "int", "uint", "long", "ulong", "short", "ushort", "char", "uchar", "byte",
+    "sbyte", "undefined", "undefined1", "undefined2", "undefined4", "bool",
+}
+
+
+def _const_value(text: str) -> int | None:
+    match = re.fullmatch(r"(0x[0-9A-Fa-f]+|-?\d+)[uUlL]*", text.strip())
+    if match is None:
+        return None
+    token = match.group(1)
+    value = int(token, 16) if token.lower().startswith("0x") else int(token)
+    return value & 0xFFFFFFFF
+
+
+def _held_assignments(body: str, var: str) -> list[str]:
+    found: list[str] = []
+    for match in re.finditer(rf"(?<![\w.]){re.escape(var)}\s*=(?!=)", body):
+        if match.start() and body[match.start() - 1] in ".>":
+            continue
+        found.append(body[match.end():_rhs_end(body, match.end())].strip())
+    return found
+
+
+def _declared_scalar(body: str, var: str) -> str | None:
+    """The function-scope scalar type of `var`, when it has one declaration."""
+    types: list[str] = []
+    depth = 0
+    index = 0
+    while index < len(body):
+        if body.startswith("/*", index):
+            end = body.find("*/", index + 2)
+            index = len(body) if end < 0 else end + 2
+            continue
+        char = body[index]
+        if char == "{":
+            depth += 1
+            index += 1
+            continue
+        if char == "}":
+            depth = max(0, depth - 1)
+            index += 1
+            continue
+        if depth == 1:
+            match = re.match(
+                rf"([A-Za-z_][A-Za-z0-9_]*)\s+{re.escape(var)}\s*;",
+                body[index:],
+            )
+            if match and (index == 0 or body[index - 1] in " \t\n\r{(;"):
+                types.append(match.group(1))
+                index += match.end()
+                continue
+        index += 1
+    if len(types) != 1 or types[0] not in _HELD_TYPES:
+        return None
+    return types[0]
+
+
+def _assignment_token(rhs: str, var: str) -> tuple:
+    value = _const_value(rhs)
+    if value is not None:
+        return ("imm", value)
+    if re.match(rf"(?:\([^)]*\)\s*)*{re.escape(var)}\b", rhs):
+        return ("self",)
+    call = re.fullmatch(
+        r"(?:\([^)]*\)\s*)?([A-Za-z_][A-Za-z0-9_]*)\s*\(.*\)",
+        rhs,
+        flags=re.S,
+    )
+    if call and call.group(1) not in {"if", "for", "while", "switch", "return", "sizeof"}:
+        return ("call", call.group(1))
+    return ("other",)
+
+
+def _held_local(body: str, needed: set[tuple]) -> tuple[str, str] | None:
+    """The one local whose assignments are exactly `needed`, and nothing else."""
+    if not needed:
+        return None
+    names = {
+        match.group(1)
+        for match in re.finditer(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*=(?!=)", body)
+    }
+    found: list[tuple[str, str]] = []
+    for var in names:
+        tokens = {_assignment_token(rhs, var) for rhs in _held_assignments(body, var)}
+        if tokens != needed:
+            continue
+        typ = _declared_scalar(body, var)
+        if typ is None:
+            continue
+        found.append((var, typ))
+    if len(found) != 1:
+        return None
+    var = found[0][0]
+    for match in re.finditer(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\(", body):
+        callee = match.group(1)
+        if ("call", callee) not in needed:
+            continue
+        prev = max(
+            body.rfind(";", 0, match.start()),
+            body.rfind("{", 0, match.start()),
+            body.rfind("}", 0, match.start()),
+        )
+        if not re.search(r"(?<![=<>!])=(?!=)", body[prev + 1:match.start()]):
+            return None
+    return found[0]
+
+
+def _rewrite_held_result(code: str) -> str:
+    """A void function whose r10 is one local at every return returns that local."""
+    signature = _c_signature(code)
+    name = _signature_name(signature)
+    facts = _call_facts()
+    if (
+        name in facts["hand"]
+        or name in _checked_names()
+        or name in facts["saved_pmr"]
+        or name in facts["stored_r10"]
+        or facts["planned"].get(name)
+        or _return_type_of(signature, name) != "void"
+    ):
+        return code
+    brace = _opening_brace(code)
+    if brace < 0:
+        return code
+    head, body = code[:brace], code[brace:]
+    if not re.search(r"\breturn\s*;", body) or re.search(r"\breturn\b(?!\s*;)", body):
+        return code
+    origins = facts["ret_r10"].get(name) or []
+    flat: set = set()
+    for origin in origins:
+        flat |= origin
+    held = None
+    if flat and all(item[0] in {"imm", "call"} for item in flat):
+        needed = set()
+        for item in flat:
+            if item[0] == "imm":
+                needed.add(("imm", item[1] & 0xFFFFFFFF))
+                continue
+            callee = facts["names"].get(item[1])
+            if not callee:
+                needed = set()
+                break
+            needed.add(("call", callee))
+        held = _held_local(body, needed)
+    elif name in facts["counters"]:
+        imms = facts["counters"][name]
+        if flat and all(
+            item[0] == "fail" or (item[0] == "imm" and (item[1] & 0xFFFFFFFF) in imms)
+            for item in flat
+        ):
+            held = _held_local(body, {("imm", value) for value in imms} | {("self",)})
+    if held is None:
+        return code
+    var, typ = held
+    declarator = list(re.finditer(rf"\bvoid(\s+{re.escape(name)}\s*\()", head))
+    if not declarator:
+        return code
+    for found in reversed(declarator):
+        head = head[:found.start()] + typ + found.group(1) + head[found.end():]
+    body = re.sub(r"\breturn\s*;", f"return {var};", body)
+    return head + body
+
+
+def _checked_names() -> set[str]:
+    global _CHECKED_NAMES
+    if _CHECKED_NAMES is None:
+        _CHECKED_NAMES = {
+            row["name"]
+            for row in load_matched()
+            if row.get("status") in {"equivalent", "byte-matched"}
+        }
+    return _CHECKED_NAMES
+
+
 def _rewrite_saved_pmr(code: str) -> str:
     """A void function whose r10 is the PMR it read returns that saved value."""
     signature = _c_signature(code)
@@ -3482,6 +3713,7 @@ def _rewrite_body(code: str) -> str:
     code = _rewrite_returned_call(code)
     code = _rewrite_saved_pmr(code)
     code = _rewrite_stored_result(code)
+    code = _rewrite_held_result(code)
     code = _rewrite_firmware_bases(code)
     signature = _c_signature(code)
     pointers = _pointer_names(signature, code)

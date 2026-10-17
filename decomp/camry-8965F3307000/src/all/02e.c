@@ -667,7 +667,7 @@ void f33_return_only_stub_b85d6(void)
 
 
 
-void FUN_000b85d8(void)
+int FUN_000b85d8(void)
 
 {
   undefined1 uVar1;
@@ -695,7 +695,7 @@ void FUN_000b85d8(void)
   }
   (*((undefined4 *)camry_host_ptr((uint32_t)(puVar2 + -0x408)))) = uVar4;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x40c))))) = uVar1;
-  return;
+  return iVar3;
 }
 
 
@@ -902,7 +902,7 @@ uint FUN_000b8742(char param_1)
    Kinds1/2 preserve zero secondary flag through real leaf effects. Snapshot and motor-family
    qualification are separate stages. */
 
-void f33_publish_service_engine_substitution(void)
+undefined2 f33_publish_service_engine_substitution(void)
 
 {
   uint32_t puVar1;
@@ -993,7 +993,7 @@ LAB_000b87b8:
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x404))))) = cVar4;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x403))))) = uVar3;
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x402)))) = local_e;
-  return;
+  return uVar2;
 }
 
 
@@ -2101,7 +2101,7 @@ void f33_return_only_stub_b918c(void)
 
 
 
-void FUN_000b918e(void)
+int FUN_000b918e(void)
 
 {
   undefined1 uVar1;
@@ -2132,7 +2132,7 @@ void FUN_000b918e(void)
   uVar1 = 0x5a;
 LAB_000b91e6:
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x8bb))))) = uVar1;
-  return;
+  return iVar3;
 }
 
 
@@ -4507,7 +4507,7 @@ uint f33_force_owner4_zero_request(void)
 /* BCBD1 nominal,2 k250 decay,3 k6550 decay,4 zero,others conditional quadratic release; publish
    owner4 and BCC2. */
 
-void f33_publish_owner4_limit_request(void)
+uint f33_publish_owner4_limit_request(void)
 
 {
   uint32_t puVar1;
@@ -4538,7 +4538,7 @@ void f33_publish_owner4_limit_request(void)
 LAB_000bace6:
   f33_set_current_limit_request(4,uVar2);
   (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + 0x4c2)))) = uVar2;
-  return;
+  return uVar3;
 }
 
 
@@ -4767,7 +4767,7 @@ LAB_000bae8e:
 /* B082&3 chooses qualification-floor path; otherwise retained quadraticrelease. Publish owner8
    andBCD6. */
 
-void f33_publish_owner8_limit_request(void)
+uint f33_publish_owner8_limit_request(void)
 
 {
   uint32_t puVar1;
@@ -4785,7 +4785,7 @@ void f33_publish_owner8_limit_request(void)
   }
   f33_set_current_limit_request(8,limit);
   (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + 0x4d6)))) = limit;
-  return;
+  return uVar2;
 }
 
 
@@ -5790,7 +5790,7 @@ void f33_return_only_stub_bb7f8(void)
    reduction. Publish bound and signed min(owner6,owner9) under PMRFF80, with distinct status and
    later route marker. */
 
-void f33_publish_other_current_limit(void)
+undefined4 f33_publish_other_current_limit(void)
 
 {
   int iVar1;
@@ -5835,7 +5835,7 @@ void f33_publish_other_current_limit(void)
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0x8c3))))) = cVar2;
   FUN_000d1dc6(uVar7);
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(-0x8c2))))) = uVar9;
-  return;
+  return uVar7;
 }
 
 
@@ -5876,7 +5876,7 @@ void f33_return_only_stub_bb95c(void)
 
 
 
-void FUN_000bb95e(void)
+int FUN_000bb95e(void)
 
 {
   uint32_t puVar1;
@@ -5889,12 +5889,12 @@ void FUN_000bb95e(void)
     (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x555))))) = 0;
     (*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + 0x590)))) = 0x7fff;
   }
-  return;
+  return iVar2;
 }
 
 
 
-void FUN_000bb97c(void)
+int FUN_000bb97c(void)
 
 {
   undefined1 uVar1;
@@ -5926,7 +5926,7 @@ void FUN_000bb97c(void)
   }
   (*((short *)camry_host_ptr((uint32_t)(puVar3 + 0x57e)))) = local_c;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(0x556))))) = uVar1;
-  return;
+  return iVar4;
 }
 
 
@@ -6339,7 +6339,7 @@ void FUN_000bbe26(void)
 
 /* WARNING: Removing unreachable block (ram,0x000bbf06) */
 
-void FUN_000bbe7a(void)
+undefined4 FUN_000bbe7a(void)
 
 {
   char cVar1;
@@ -6413,7 +6413,7 @@ void FUN_000bbe7a(void)
   (*((short *)camry_host_ptr((uint32_t)(puVar4 + 0x580)))) = sStack_26;
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar4 + 0x582)))) = uStack_24;
   FUN_000d1dc6(uVar5);
-  return;
+  return uVar5;
 }
 
 

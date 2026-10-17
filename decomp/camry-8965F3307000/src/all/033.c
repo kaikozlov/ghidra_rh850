@@ -416,7 +416,7 @@ void f33_fill_constant_block_cc596(void)
 
 
 
-void FUN_000cc5ac(void)
+undefined4 FUN_000cc5ac(void)
 
 {
   uint32_t puVar1;
@@ -428,7 +428,7 @@ void FUN_000cc5ac(void)
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x108f))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x88f)))));
   (*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + 0x1068)))) = (*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + 0x8cc))));
   FUN_000d1dc6(uVar2);
-  return;
+  return uVar2;
 }
 
 
@@ -1324,7 +1324,7 @@ void FUN_000cd590(void)
 
 
 
-void FUN_000cd5ea(void)
+undefined2 FUN_000cd5ea(void)
 
 {
   int iVar1;
@@ -1351,7 +1351,7 @@ void FUN_000cd5ea(void)
   (*((undefined2 *)camry_host_ptr((uint32_t)(0x1206u + (int)puVar4)))) = uVar7;
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar4 + 0x1218)))) = uVar2;
   (*((undefined2 *)camry_host_ptr((uint32_t)(0x121au + (int)puVar4)))) = uVar3;
-  return;
+  return uVar7;
 }
 
 
@@ -1427,7 +1427,7 @@ int FUN_000cd8e0(void)
 /* WARNING: Removing unreachable block (ram,0x000cd9d8) */
 /* WARNING: Removing unreachable block (ram,0x000cd9b0) */
 
-void FUN_000cd932(void)
+int FUN_000cd932(void)
 
 {
   int iVar1;
@@ -1490,7 +1490,7 @@ void FUN_000cd932(void)
   (*((int *)camry_host_ptr((uint32_t)(puVar8 + 0x11d8)))) = iVar12;
   (*((int *)camry_host_ptr((uint32_t)(puVar8 + 0x10f4)))) = iVar11;
   (*((int *)camry_host_ptr((uint32_t)(puVar8 + 0x10f8)))) = iVar7;
-  return;
+  return iVar10;
 }
 
 
@@ -1826,7 +1826,7 @@ void FUN_000cde26(void)
 /* WARNING: Removing unreachable block (ram,0x000cdf84) */
 /* WARNING: Removing unreachable block (ram,0x000cdf76) */
 
-void FUN_000cdebc(void)
+int FUN_000cdebc(void)
 
 {
   byte bVar1;
@@ -1887,7 +1887,7 @@ void FUN_000cdebc(void)
   (*((int *)camry_host_ptr((uint32_t)(puVar5 + 0x1130)))) = iVar9;
   (*((short *)camry_host_ptr((uint32_t)(puVar5 + 0x1256)))) = (short)iVar10;
   (*((short *)camry_host_ptr((uint32_t)(puVar5 + 0x1258)))) = (short)iVar11;
-  return;
+  return iVar6;
 }
 
 
@@ -1914,7 +1914,7 @@ void f33_compose_angle_controller_terms(void)
 /* WARNING: Removing unreachable block (ram,0x000ce07c) */
 /* WARNING: Removing unreachable block (ram,0x000ce068) */
 
-void FUN_000cdff8(void)
+int FUN_000cdff8(void)
 
 {
   int iVar1;
@@ -1966,7 +1966,7 @@ void FUN_000cdff8(void)
   (*((short *)camry_host_ptr((uint32_t)(puVar3 + 0x123e)))) = sVar8;
   (*((short *)camry_host_ptr((uint32_t)(puVar3 + 0x127a)))) = sVar8;
   (*((short *)camry_host_ptr((uint32_t)(puVar3 + 0x1288)))) = sVar8;
-  return;
+  return iVar6;
 }
 
 
@@ -2021,7 +2021,7 @@ int FUN_000ce0ae(void)
    suppress following limiting update while unsignedAE02<128. Compose rate/feedforward/feedback;
    active nonzero modes hold output and suppress limiting update for unsignedAE02<128. */
 
-void f33_compose_angle_controller_prelimit_output(void)
+int f33_compose_angle_controller_prelimit_output(void)
 
 {
   byte bVar1;
@@ -2094,7 +2094,7 @@ void f33_compose_angle_controller_prelimit_output(void)
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar9 + (uint32_t)(0x129b))))) = uVar2;
   (*((short *)camry_host_ptr((uint32_t)(puVar9 + 0x1234)))) = (short)iVar11;
   (*((short *)camry_host_ptr((uint32_t)(puVar9 + 0x1264)))) = (short)iVar15;
-  return;
+  return iVar11;
 }
 
 
@@ -2329,7 +2329,7 @@ void FUN_000ce6cc(void)
    apply sign-selected curve scaling before target publication; ordinary knot factors1024 are not
    universal curve replacement. */
 
-void f33_shape_angle_controller_target(void)
+int f33_shape_angle_controller_target(void)
 
 {
   short value;
@@ -2357,7 +2357,7 @@ void f33_shape_angle_controller_target(void)
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + 0x122e)))) = uVar3;
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + 0x1280)))) = uVar3;
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + 0x128e)))) = uVar3;
-  return;
+  return iVar2;
 }
 
 
@@ -2832,7 +2832,7 @@ void FUN_000cecd6(void)
 
 
 
-void FUN_000ced28(void)
+short FUN_000ced28(void)
 
 {
   undefined1 uVar1;
@@ -2869,12 +2869,12 @@ void FUN_000ced28(void)
   (*((ushort *)camry_host_ptr((uint32_t)(puVar3 + 0x12e2)))) = uVar8;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(0x12f6))))) = uVar1;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(0x12f7))))) = bVar7;
-  return;
+  return sVar4;
 }
 
 
 
-void FUN_000ceda4(void)
+short FUN_000ceda4(void)
 
 {
   int iVar1;
@@ -2910,7 +2910,7 @@ void FUN_000ceda4(void)
   (*((ushort *)camry_host_ptr((uint32_t)(puVar5 + 0x12e6)))) = uVar9;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(0x12f8))))) = uVar3;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(0x12f9))))) = bVar8;
-  return;
+  return sVar6;
 }
 
 
@@ -4278,7 +4278,7 @@ char FUN_000cfe14(void)
 
 
 
-void FUN_000cfe64(void)
+undefined4 FUN_000cfe64(void)
 
 {
   uint32_t puVar1;
@@ -4293,7 +4293,7 @@ void FUN_000cfe64(void)
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x13ea))))) = uVar2;
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x13eb))))) = uVar3;
   FUN_000d1dc6(uVar4);
-  return;
+  return uVar4;
 }
 
 

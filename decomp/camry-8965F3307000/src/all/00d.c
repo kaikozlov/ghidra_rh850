@@ -443,7 +443,7 @@ uint f33_check_retained_fit_bounds(void)
 /* Under existing FFC0 priority mask, default retained first centers/gains and second gains8000,
    second centers0 and angles2000; does not imply accepted physical calibration. */
 
-void f33_reset_retained_fit_coefficients(void)
+uint f33_reset_retained_fit_coefficients(void)
 
 {
   uint32_t puVar1;
@@ -479,7 +479,7 @@ void f33_reset_retained_fit_coefficients(void)
   (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb2b2u + (uint32_t)((int)puVar1)))))) = 0x8000;
   (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb2b8u + (uint32_t)((int)puVar1)))))) = 0x2000;
   f33_priority_mask_restore(saved_mask);
-  return;
+  return saved_mask;
 }
 
 
@@ -896,7 +896,7 @@ void f33_return_only_stub_34cce(void)
    count>30 clears gate and count. Valid count0 preserves marker-derived gate. RAM publication, not
    a physical flash read. */
 
-void f33_reload_ba_admission_records(void)
+uint f33_reload_ba_admission_records(void)
 
 {
   uint32_t puVar1;
@@ -920,7 +920,7 @@ void f33_reload_ba_admission_records(void)
   }
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58b0))))) = local_18[0];
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0x58b1))))) = uVar3;
-  return;
+  return uVar2;
 }
 
 

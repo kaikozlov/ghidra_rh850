@@ -1194,7 +1194,7 @@ LAB_0003ce22:
    previous summary; mode3 publishes44. Compose receive rows, controller status adapters and
    internal7F68 summary; intermediate modes1/2 retain previous terminal summary. */
 
-void f33_update_communication_qualification_monitors(void)
+uchar f33_update_communication_qualification_monitors(void)
 
 {
   uchar status;
@@ -1204,7 +1204,7 @@ void f33_update_communication_qualification_monitors(void)
   FUN_0003cd72();
   status = FUN_0003cda8();
   f33_set_communication_monitor_status(0,status);
-  return;
+  return status;
 }
 
 
@@ -4418,7 +4418,7 @@ void f33_return_only_stub_3ef1a(void)
    evaluates27 per-root getters of FAIL COUNTS at state+4 (not status), then530FC(9,11) if any fail
    count nonzero. */
 
-void f33_publish_configured_monitor_failure_count_summary(void)
+int f33_publish_configured_monitor_failure_count_summary(void)
 
 {
   uchar status;
@@ -4487,7 +4487,7 @@ void f33_publish_configured_monitor_failure_count_summary(void)
     status = '\x11';
   }
   f33_set_diagnostic_cache_blocker('\t',status);
-  return;
+  return iVar27;
 }
 
 

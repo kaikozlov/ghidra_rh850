@@ -734,7 +734,7 @@ void FUN_000d06fa(void)
 
 /* WARNING: Removing unreachable block (ram,0x000d073a) */
 
-void FUN_000d0716(void)
+undefined4 FUN_000d0716(void)
 
 {
   int iVar1;
@@ -758,7 +758,7 @@ void FUN_000d0716(void)
   (*((short *)camry_host_ptr((uint32_t)(puVar3 + 0x149c)))) = (short)iVar7;
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + 0x149e)))) = uVar5;
   FUN_000d1dc6(uVar6);
-  return;
+  return uVar6;
 }
 
 
@@ -1259,7 +1259,7 @@ void FUN_000d0bda(void)
    qualifier BFC5 into AC08 and protected observer rate/state C084/C08E into AC1C/AC09. Separate
    snapshots do not form one atomic whole-control generation. */
 
-void f33_publish_rate_observer_interface(void)
+undefined4 f33_publish_rate_observer_interface(void)
 
 {
   uint32_t puVar1;
@@ -1271,7 +1271,7 @@ void f33_publish_rate_observer_interface(void)
   (*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + -0xbe4)))) = (*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + 0x884))));
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(-0xbf7))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar1 + (uint32_t)(0x88e)))));
   FUN_000d1dc6(uVar2);
-  return;
+  return uVar2;
 }
 
 

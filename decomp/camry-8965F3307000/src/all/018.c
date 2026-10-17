@@ -1204,7 +1204,7 @@ void FUN_00061260(void)
 
 
 
-void FUN_000612dc(void)
+uint FUN_000612dc(void)
 
 {
   uint uVar1;
@@ -1218,7 +1218,7 @@ void FUN_000612dc(void)
   uVar1 = Ramffc12104;
   Ramffc12104 = uVar1 & 0xfff2ff88 | 0x60;
   f33_priority_mask_restore(saved_mask);
-  return;
+  return saved_mask;
 }
 
 
@@ -1547,7 +1547,7 @@ void FUN_00061664(void)
 
 
 
-void FUN_000616fc(void)
+ushort FUN_000616fc(void)
 
 {
   uint uVar1;
@@ -1568,7 +1568,7 @@ void FUN_000616fc(void)
   (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x7f62))))) = 0;
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + -0x7fae)))) = 0;
   (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x7fb0)))) = (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + -0x7fb0)))) & 0xff00 | uVar3;
-  return;
+  return uVar3;
 }
 
 
@@ -1618,7 +1618,7 @@ void FUN_0006174a(void)
 
 
 
-void FUN_00061836(undefined2 *param_1)
+undefined2 FUN_00061836(undefined2 *param_1)
 
 {
   uint32_t puVar1;
@@ -1634,7 +1634,7 @@ void FUN_00061836(undefined2 *param_1)
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x7f6a)))) = param_1[1];
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x7f68)))) = param_1[2];
   (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + -0x7f66)))) = param_1[3];
-  return;
+  return uVar3;
 }
 
 
@@ -1888,7 +1888,7 @@ void FUN_00061b22(void)
 
 
 
-void FUN_00061b90(void)
+uint FUN_00061b90(void)
 
 {
   int iVar1;
@@ -1931,7 +1931,7 @@ void FUN_00061b90(void)
     }
     uVar9 = uVar9 + 1;
   } while (uVar9 < 2);
-  return;
+  return saved_mask;
 }
 
 
@@ -2269,7 +2269,7 @@ ushort f33_select_acquisition_six_entry_base(ushort count,ushort capacity)
    out-of-range returns0. Native evidence covers explicit software continuations and a synthetic
    post-getter publication join, not descriptor acquisition or the intact fast task. */
 
-void f33_copy_acquisition_group0_samples(F33AcquisitionGroupPair *output)
+uint f33_copy_acquisition_group0_samples(F33AcquisitionGroupPair *output)
 
 {
   int iVar1;
@@ -2288,7 +2288,7 @@ void f33_copy_acquisition_group0_samples(F33AcquisitionGroupPair *output)
     iVar1 = iVar5 + -5;
     iVar5 = iVar2;
   } while (((iVar1 < 0) || (iVar2 < 0)));
-  return;
+  return uVar4;
 }
 
 
@@ -2299,7 +2299,7 @@ void f33_copy_acquisition_group0_samples(F33AcquisitionGroupPair *output)
    out-of-range returns0. Native evidence covers explicit software continuations and a synthetic
    post-getter publication join, not descriptor acquisition or the intact fast task. */
 
-void f33_copy_acquisition_group8_samples(F33AcquisitionGroupPair *output)
+uint f33_copy_acquisition_group8_samples(F33AcquisitionGroupPair *output)
 
 {
   int iVar1;
@@ -2318,7 +2318,7 @@ void f33_copy_acquisition_group8_samples(F33AcquisitionGroupPair *output)
     iVar1 = iVar5 + -5;
     iVar5 = iVar2;
   } while (((iVar1 < 0) || (iVar2 < 0)));
-  return;
+  return uVar4;
 }
 
 
@@ -3086,7 +3086,7 @@ void FUN_00062a16(uint param_1,uint param_2,ushort param_3)
 /* Write four destination halfwords using group6 count/base plus four ROM30F20 byte indices and60630
    getter. No physical channel identity or freshness is added. */
 
-void f33_copy_transfer_group6_samples(ushort *destination)
+ushort f33_copy_transfer_group6_samples(ushort *destination)
 
 {
   int iVar1;
@@ -3104,7 +3104,7 @@ void f33_copy_transfer_group6_samples(ushort *destination)
     iVar1 = iVar5 + -3;
     iVar5 = iVar2;
   } while (((iVar1 < 0) || (iVar2 < 0)));
-  return;
+  return uVar4;
 }
 
 
@@ -3112,7 +3112,7 @@ void f33_copy_transfer_group6_samples(ushort *destination)
 /* Write five halfwords at destination+8 using group14 count/base plus ROM30F44 indices and606DA
    getter. The first four halfwords are preserved. */
 
-void f33_copy_transfer_group14_samples(ushort *destination)
+ushort f33_copy_transfer_group14_samples(ushort *destination)
 
 {
   int iVar1;
@@ -3130,7 +3130,7 @@ void f33_copy_transfer_group14_samples(ushort *destination)
     iVar1 = iVar5 + -4;
     iVar5 = iVar2;
   } while (((iVar1 < 0) || (iVar2 < 0)));
-  return;
+  return uVar4;
 }
 
 
@@ -3189,7 +3189,7 @@ void FUN_00062b18(int param_1)
 
 
 
-void FUN_00062b32(int param_1)
+uint FUN_00062b32(int param_1)
 
 {
   int iVar1;
@@ -3215,7 +3215,7 @@ void FUN_00062b32(int param_1)
     puVar2[3] = local_14;
     iVar5 = iVar3;
   } while (((iVar1 < 0) || (iVar3 < 0)));
-  return;
+  return uVar4;
 }
 
 
