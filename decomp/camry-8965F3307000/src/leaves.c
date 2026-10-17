@@ -1697,6 +1697,28 @@ uint32_t f33_nvm_enqueue_write(uint32_t logical, uint32_t source) {
     return f33_nvm_queue_operation(0x22aa8a36u, handle, 0u, source);
 }
 
+uint32_t f33_nvm_arm_family0_read(uint32_t object) {
+    uint32_t index = object & 0xffffu;
+    uint32_t descriptor = 0x2ad8cu + index * 12u;
+    uint32_t first = camry_read16(descriptor + 4u);
+    uint32_t result = 0xffu;
+    if (camry_read8(camry_gp + 0x4e90u) == 0u && first != 0xffffu) {
+        uint32_t count = camry_read16(descriptor + 2u);
+        uint32_t end = (first + count - 1u) & 0xffffu;
+        uint32_t handle = first;
+        while (handle <= end) {
+            (void)f33_nvm_enqueue_read(handle, camry_gp + 0x5488u);
+            handle = (handle + 1u) & 0xffffu;
+        }
+        camry_write16(camry_gp + (index << 1) + 0x4b68u, 0xffffu);
+        camry_write8(camry_gp + index + 0x4b38u, 0xffu);
+        camry_write8(camry_gp + 0x4e90u, 0xffu);
+        camry_write32(camry_gp + (index << 2) + 0x4ba8u, 0u);
+        result = 0u;
+    }
+    return result;
+}
+
 static uint32_t f33_nvm_get_family0_completion(uint32_t object) {
     uint32_t index = object & 0xffffu;
     uint32_t count = camry_read16((3u << 16) - 21136u);
