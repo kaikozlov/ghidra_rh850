@@ -7,6 +7,10 @@
 #define f33_boot_security_challenge ((volatile uint8_t *)camry_host_ptr(0xfebf2b24u))
 #define f33_boot_security_handshake_state (*((volatile uint8_t *)camry_host_ptr(0xfebf2b55u)))
 #define f33_boot_security_state (*((volatile uint8_t *)camry_host_ptr(0xfebf2b0fu)))
+#define f33_classifier_age_release_threshold (*((volatile uint16_t *)camry_host_ptr(0x30e46u)))
+#define f33_classifier_primary_age_threshold (*((volatile uint16_t *)camry_host_ptr(0x30e40u)))
+#define f33_classifier_retained_age_threshold (*((volatile uint16_t *)camry_host_ptr(0x30e44u)))
+#define f33_classifier_secondary_age_threshold (*((volatile uint16_t *)camry_host_ptr(0x30e42u)))
 #define f33_current_source_coherence_observations (*((volatile uint8_t *)camry_host_ptr(0xfebeb191u)))
 #define f33_estimator_tracking_band_scale (*((volatile int32_t *)camry_host_ptr(0xaf760u)))
 #define f33_estimator_tracking_step_scale (*((volatile int32_t *)camry_host_ptr(0xaf764u)))
@@ -42,6 +46,8 @@
 #define DAT_0002bce8 (*((volatile uint8_t *)camry_host_ptr(0x2bce8u)))
 #define DAT_0002bce9 (*((volatile uint8_t *)camry_host_ptr(0x2bce9u)))
 #define DAT_0002bcea (*((volatile uint8_t *)camry_host_ptr(0x2bceau)))
+#define DAT_00030e48 (*((volatile uint16_t *)camry_host_ptr(0x30e48u)))
+#define DAT_00030e4a (*((volatile uint16_t *)camry_host_ptr(0x30e4au)))
 #define DAT_000aefb4 (*((volatile uint16_t *)camry_host_ptr(0xaefb4u)))
 #define DAT_000aefb6 (*((volatile uint16_t *)camry_host_ptr(0xaefb6u)))
 #define DAT_000aefb8 (*((volatile uint16_t *)camry_host_ptr(0xaefb8u)))
@@ -54,6 +60,7 @@
 #define DAT_febe66b0 (*((volatile uint16_t *)camry_host_ptr(0xfebe66b0u)))
 #define DAT_febe66b8 (*((volatile uint16_t *)camry_host_ptr(0xfebe66b8u)))
 #define DAT_febe6764 (*((volatile uint16_t *)camry_host_ptr(0xfebe6764u)))
+#define DAT_febe6af0 (*((volatile uint32_t *)camry_host_ptr(0xfebe6af0u)))
 #define DAT_febe7f2c (*((volatile uint8_t *)camry_host_ptr(0xfebe7f2cu)))
 #define DAT_febe7f50 (*((volatile uint8_t *)camry_host_ptr(0xfebe7f50u)))
 #define DAT_febe7f51 (*((volatile uint8_t *)camry_host_ptr(0xfebe7f51u)))
@@ -82,6 +89,15 @@
 #define DAT_febe7f8c (*((volatile uint16_t *)camry_host_ptr(0xfebe7f8cu)))
 #define DAT_febe7f8e (*((volatile uint16_t *)camry_host_ptr(0xfebe7f8eu)))
 #define DAT_febe7f90 (*((volatile uint16_t *)camry_host_ptr(0xfebe7f90u)))
+#define DAT_febe82a3 (*((volatile uint8_t *)camry_host_ptr(0xfebe82a3u)))
+#define DAT_febe82a4 (*((volatile uint8_t *)camry_host_ptr(0xfebe82a4u)))
+#define DAT_febe82a5 (*((volatile uint8_t *)camry_host_ptr(0xfebe82a5u)))
+#define DAT_febe82a7 (*((volatile uint8_t *)camry_host_ptr(0xfebe82a7u)))
+#define DAT_febe82af (*((volatile uint8_t *)camry_host_ptr(0xfebe82afu)))
+#define DAT_febe82b1 (*((volatile uint8_t *)camry_host_ptr(0xfebe82b1u)))
+#define DAT_febe82b2 (*((volatile uint8_t *)camry_host_ptr(0xfebe82b2u)))
+#define DAT_febe82b3 (*((volatile uint8_t *)camry_host_ptr(0xfebe82b3u)))
+#define DAT_febe82b4 (*((volatile uint8_t *)camry_host_ptr(0xfebe82b4u)))
 #define DAT_febead18 (*((volatile uint8_t *)camry_host_ptr(0xfebead18u)))
 #define DAT_febeadf4 (*((volatile uint16_t *)camry_host_ptr(0xfebeadf4u)))
 #define DAT_febeadf6 (*((volatile uint16_t *)camry_host_ptr(0xfebeadf6u)))
@@ -121,6 +137,17 @@
 #define DAT_febec080 (*((volatile uint32_t *)camry_host_ptr(0xfebec080u)))
 #define DAT_febec08e (*((volatile uint8_t *)camry_host_ptr(0xfebec08eu)))
 #define DAT_febec0b4 (*((volatile uint16_t *)camry_host_ptr(0xfebec0b4u)))
+#define DAT_febee827 (*((volatile uint8_t *)camry_host_ptr(0xfebee827u)))
+#define DAT_febee853 (*((volatile uint8_t *)camry_host_ptr(0xfebee853u)))
+#define DAT_febee854 (*((volatile uint8_t *)camry_host_ptr(0xfebee854u)))
+#define DAT_febee855 (*((volatile uint8_t *)camry_host_ptr(0xfebee855u)))
+#define DAT_febee857 (*((volatile uint8_t *)camry_host_ptr(0xfebee857u)))
+#define DAT_febee858 (*((volatile uint8_t *)camry_host_ptr(0xfebee858u)))
+#define DAT_febee859 (*((volatile uint8_t *)camry_host_ptr(0xfebee859u)))
+#define DAT_febee8b0 (*((volatile uint16_t *)camry_host_ptr(0xfebee8b0u)))
+#define DAT_febee91c (*((volatile uint32_t *)camry_host_ptr(0xfebee91cu)))
+#define DAT_febee924 (*((volatile uint32_t *)camry_host_ptr(0xfebee924u)))
+#define DAT_febee92c (*((volatile uint32_t *)camry_host_ptr(0xfebee92cu)))
 #define DAT_febef038 (*((volatile uint8_t *)camry_host_ptr(0xfebef038u)))
 #define DAT_febef039 (*((volatile uint8_t *)camry_host_ptr(0xfebef039u)))
 #define DAT_febef04c (*((volatile uint8_t *)camry_host_ptr(0xfebef04cu)))
@@ -138,6 +165,7 @@
 #define DAT_febef0f7 (*((volatile uint8_t *)camry_host_ptr(0xfebef0f7u)))
 #define DAT_febef0f8 (*((volatile uint8_t *)camry_host_ptr(0xfebef0f8u)))
 #define DAT_febef18a (*((volatile uint16_t *)camry_host_ptr(0xfebef18au)))
+#define DAT_febf0668 (*((volatile uint32_t *)camry_host_ptr(0xfebf0668u)))
 #define DAT_febf2998 (*((volatile uint16_t *)camry_host_ptr(0xfebf2998u)))
 #define DAT_febf299a (*((volatile uint16_t *)camry_host_ptr(0xfebf299au)))
 #define DAT_febf2aa1 (*((volatile uint8_t *)camry_host_ptr(0xfebf2aa1u)))
@@ -174,6 +202,17 @@ void FUN_0004a40e(void);
 void FUN_0004a416(void);
 void FUN_0004a426(void);
 void FUN_0004a436(void);
+void f33_assert_diagnostic_classifier(uchar classification);
+void FUN_000510b6(void);
+uchar f33_update_classifier_status_latch(void);
+void f33_age_classifier_flag_group(uchar *flags,uchar *activity,ushort *age,ushort threshold);
+void f33_age_classifier_retained_flags(void);
+void f33_age_classifier_groups(void);
+uint f33_classifier_selector3_predicate(void);
+uint f33_update_classifier_status22_edges(void);
+void f33_update_diagnostic_classifier_output(void);
+undefined4 FUN_00062e12(void);
+int f33_publish_redundant_u8(uchar value,uchar *raw,uchar *xor55,uchar *xorAA);
 void f33_return_only_stub_73ca0(void);
 void f33_return_only_stub_73ca2(void);
 undefined4 FUN_0007490a(undefined4 param_1);
@@ -1120,6 +1159,498 @@ void FUN_0004a436(void)
   f33_internal_source_admission_state = '\x03';
   DAT_febe7f6b = 0x5a;
   return;
+}
+
+
+
+/* Descriptor class2/4/8/0F/10/20/40/80/F0 selects its16-bit counter and class-specific latches.
+   Counter increments wrap16; not saturating. Unknown classes make no update. Descriptor classes
+   select wrapping16-bit counters and latched flags under PMRFF00; unknown class does nothing.
+   Class2 counter82BA and flags82A3/A5.bit0 are distinct from control fault records. */
+
+void f33_assert_diagnostic_classifier(uchar classification)
+
+{
+  undefined *puVar1;
+  uint saved_mask;
+  
+  puVar1 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  saved_mask = f33_priority_mask_enter(0xff00);
+  if (classification == '\x02') {
+    puVar1[-0x355d] = puVar1[-0x355d] | 1;
+    puVar1[-0x355b] = puVar1[-0x355b] | 1;
+    *(short *)(puVar1 + -0x3546) = *(short *)(puVar1 + -0x3546) + 1;
+  }
+  else {
+    if (classification != '\x04') {
+      if (classification == '\b') {
+        puVar1[-0x355c] = puVar1[-0x355c] | 8;
+        *(short *)(puVar1 + -0x3542) = *(short *)(puVar1 + -0x3542) + 1;
+      }
+      else if (classification == '\x0f') {
+        puVar1[-0x355c] = puVar1[-0x355c] | 4;
+        *(short *)(puVar1 + -0x3540) = *(short *)(puVar1 + -0x3540) + 1;
+      }
+      else if (classification == '\x10') {
+        puVar1[-0x355c] = puVar1[-0x355c] | 0x10;
+        *(short *)(puVar1 + -0x353e) = *(short *)(puVar1 + -0x353e) + 1;
+      }
+      else {
+        if (classification == ' ') {
+          *(short *)(puVar1 + -0x353c) = *(short *)(puVar1 + -0x353c) + 1;
+        }
+        else {
+          if (classification == '@') {
+            puVar1[-0x355c] = puVar1[-0x355c] | 0x40;
+            *(short *)(puVar1 + -0x353a) = *(short *)(puVar1 + -0x353a) + 1;
+            goto LAB_0005107a;
+          }
+          if (classification == 0x80) {
+            *(short *)(puVar1 + -0x3538) = *(short *)(puVar1 + -0x3538) + 1;
+            goto LAB_000510ac;
+          }
+          if (classification != 0xf0) goto LAB_000510ac;
+          *(short *)(puVar1 + -0x3530) = *(short *)(puVar1 + -0x3530) + 1;
+        }
+        puVar1[-0x355c] = puVar1[-0x355c] | 0x20;
+      }
+LAB_0005107a:
+      puVar1[-0x3559] = 0x5a;
+      goto LAB_000510ac;
+    }
+    puVar1[-0x355d] = puVar1[-0x355d] | 2;
+    puVar1[-0x355b] = puVar1[-0x355b] | 2;
+    *(short *)(puVar1 + -0x3544) = *(short *)(puVar1 + -0x3544) + 1;
+  }
+  puVar1[-0x355a] = 0x5a;
+  puVar1[-0x3558] = 0x5a;
+LAB_000510ac:
+  f33_priority_mask_restore(saved_mask);
+  return;
+}
+
+
+
+void FUN_000510b6(void)
+
+{
+  char cVar1;
+  undefined *puVar2;
+  
+  puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  cVar1 = DAT_febe82af;
+  if ((DAT_febe82af != 'Z') && (cVar1 = '\0', (DAT_febe6764 & 0x8000) != 0)) {
+    puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+    f33_assert_diagnostic_classifier('\x02');
+    cVar1 = 'Z';
+  }
+  puVar2[-0x3551] = cVar1;
+  return;
+}
+
+
+
+/* Return/store actual R10 byte82B4. Zero latch asserts5A only for7F515A; nonzero latch clears only
+   when7F51 andE827 are both zero. Caller512E4 uses nonzero, not equality5A. Real R10 byte is both
+   stored82B4 and consumed by512E4. Zero latch asserts only for7F515A; nonzero latch clears only
+   with7F51/E827 zero. */
+
+uchar f33_update_classifier_status_latch(void)
+
+{
+  if (DAT_febe82b4 == '\0') {
+    if (DAT_febe7f51 == 'Z') {
+      DAT_febe82b4 = 'Z';
+    }
+    else {
+      DAT_febe82b4 = '\0';
+    }
+  }
+  else if ((DAT_febe7f51 == '\0') && (DAT_febee827 == '\0')) {
+    DAT_febe82b4 = '\0';
+  }
+  return DAT_febe82b4;
+}
+
+
+
+/* Snapshot unsignedE8B0 before PMRFF00. Consume activity5A and reset age, then increment while
+   age<=threshold. Clear whole flag group only for age>threshold andE8B0>=22170. Consumed activity
+   leaves age1; already-over-threshold age holds. No class-counter decrement. Consume activity5A,
+   reset then increment age; strict expiry and unsigned stagedE8B0>=22170 clear whole flag group.
+   Over-threshold age holds; active counters and event bitmaps untouched. */
+
+void f33_age_classifier_flag_group(uchar *flags,uchar *activity,ushort *age,ushort threshold)
+
+{
+  ushort uVar1;
+  ushort uVar2;
+  uint saved_mask;
+  uchar uVar3;
+  uchar uVar4;
+  
+  uVar1 = DAT_febee8b0;
+  saved_mask = f33_priority_mask_enter(0xff00);
+  uVar4 = *activity;
+  uVar2 = *age;
+  uVar3 = *flags;
+  if (uVar4 == 'Z') {
+    uVar4 = '\0';
+    uVar2 = 0;
+  }
+  if (((threshold < uVar2) || (uVar2 = uVar2 + 1, threshold < uVar2)) &&
+     (f33_classifier_age_release_threshold <= uVar1)) {
+    uVar3 = '\0';
+  }
+  *flags = uVar3;
+  *activity = uVar4;
+  *age = uVar2;
+  f33_priority_mask_restore(saved_mask);
+  return;
+}
+
+
+
+/* Same activity/strict age contract for82A5/82A8/82CE with exact600, but noE8B0 gate. PMRFF00
+   protects updates; histories and active class counts are untouched. Retained flag-group aging uses
+   same consumed-marker and strict-expiry rules with600 invocations, without E8B0 gate. */
+
+void f33_age_classifier_retained_flags(void)
+
+{
+  ushort uVar1;
+  ushort uVar2;
+  undefined *puVar3;
+  uint saved_mask;
+  undefined1 uVar4;
+  char cVar5;
+  
+  uVar1 = f33_classifier_retained_age_threshold;
+  puVar3 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  saved_mask = f33_priority_mask_enter(0xff00);
+  uVar2 = *(ushort *)(puVar3 + -0x3532);
+  cVar5 = puVar3[-0x3558];
+  uVar4 = puVar3[-0x355b];
+  if (cVar5 == 'Z') {
+    cVar5 = '\0';
+    uVar2 = 0;
+  }
+  if ((uVar1 < uVar2) || (uVar2 = uVar2 + 1, uVar1 < uVar2)) {
+    uVar4 = 0;
+  }
+  puVar3[-0x355b] = uVar4;
+  puVar3[-0x3558] = cVar5;
+  *(ushort *)(puVar3 + -0x3532) = uVar2;
+  f33_priority_mask_restore(saved_mask);
+  return;
+}
+
+
+
+/* Snapshot flagsA4/A5, then age nonzero groups in A3,A5,A4 order. Exact thresholds 200/600/200 are
+   invocation counts, not elapsed time or event-bitmap aging. SnapshotA4/A5 flags and age nonzero
+   groups inA3,A5,A4 order. Individual PMR sections are not one atomic classifier snapshot. */
+
+void f33_age_classifier_groups(void)
+
+{
+  char cVar1;
+  char cVar2;
+  
+  cVar2 = DAT_febe82a5;
+  cVar1 = DAT_febe82a4;
+  if (DAT_febe82a3 != '\0') {
+    f33_age_classifier_flag_group
+              ((uchar *)((undefined *)camry_host_ptr(0xfebe82a3u)),((undefined *)camry_host_ptr(0xfebe82a6u)),((undefined *)camry_host_ptr(0xfebe82cau)),
+               f33_classifier_primary_age_threshold);
+  }
+  if (cVar2 != '\0') {
+    f33_age_classifier_retained_flags();
+  }
+  if (cVar1 != '\0') {
+    f33_age_classifier_flag_group
+              ((uchar *)((undefined *)camry_host_ptr(0xfebe82a4u)),((undefined *)camry_host_ptr(0xfebe82a7u)),((undefined *)camry_host_ptr(0xfebe82ccu)),
+               f33_classifier_secondary_age_threshold);
+  }
+  return;
+}
+
+
+
+/* Return5A for zero6AF0, E8533/4, E854FF, E85511, sentinel33333333 inE91C/E924/E92C or62E12
+   resultA55AA55A; otherwise0. Structural classifier priority, not a recovered OEM fault name.
+   Application zero/status/sentinel predicates select structural classifier priority3. No recovered
+   OEM fault identity or permission semantics. */
+
+uint f33_classifier_selector3_predicate(void)
+
+{
+  int iVar1;
+  char cVar2;
+  char cVar3;
+  char cVar4;
+  int iVar5;
+  int iVar6;
+  int iVar7;
+  int iVar8;
+  uint uVar9;
+  
+  iVar7 = DAT_febee92c;
+  iVar6 = DAT_febee924;
+  iVar5 = DAT_febee91c;
+  cVar4 = DAT_febee855;
+  cVar3 = DAT_febee854;
+  cVar2 = DAT_febee853;
+  iVar1 = DAT_febe6af0;
+  iVar8 = FUN_00062e12();
+  if (((((iVar1 == 0) || (cVar2 == '\x03' || cVar2 == '\x04')) || (cVar3 == -1)) ||
+      ((cVar4 == '\x11' || (iVar5 == 0x33333333)))) ||
+     ((iVar6 == 0x33333333 || ((iVar7 == 0x33333333 || (iVar8 == -0x5aa55aa6)))))) {
+    uVar9 = 0x5a;
+  }
+  else {
+    uVar9 = 0;
+  }
+  return uVar9;
+}
+
+
+
+/* Each E857/8/9==22 asserts its82B1/2/3 latch; rising edges set82A4.bit5 and activity82A75A. Other
+   values clear that latch. Return5A while any source equals22. Rising status22 on any E857/8/9
+   source sets classifier bit5 and activity; continued22 returns5A without refreshing the edge
+   marker. Other values release individual latches. */
+
+uint f33_update_classifier_status22_edges(void)
+
+{
+  uint uVar1;
+  
+  if (DAT_febee857 == '\"') {
+    if (DAT_febe82b1 == '\0') {
+      DAT_febe82b1 = 'Z';
+      DAT_febe82a4 = DAT_febe82a4 | 0x20;
+      DAT_febe82a7 = 0x5a;
+    }
+    uVar1 = 0x5a;
+  }
+  else {
+    uVar1 = 0;
+    DAT_febe82b1 = '\0';
+  }
+  if (DAT_febee858 == '\"') {
+    if (DAT_febe82b2 == '\0') {
+      DAT_febe82b2 = 'Z';
+      DAT_febe82a4 = DAT_febe82a4 | 0x20;
+      DAT_febe82a7 = 0x5a;
+    }
+    uVar1 = 0x5a;
+  }
+  else {
+    DAT_febe82b2 = '\0';
+  }
+  if (DAT_febee859 == '\"') {
+    if (DAT_febe82b3 == '\0') {
+      DAT_febe82b3 = 'Z';
+      DAT_febe82a4 = DAT_febe82a4 | 0x20;
+      DAT_febe82a7 = 0x5a;
+    }
+    uVar1 = 0x5a;
+  }
+  else {
+    DAT_febe82b3 = '\0';
+  }
+  return uVar1;
+}
+
+
+
+/* Update bank predicate, snapshot active counts, update status latch, then age flags. Select using
+   pre-aging counts and post-aging flags plus application predicates; publish selector82A0 and its
+   five-byte2A19C row. Cleared age flags do not imply cleared active counts or event histories.
+   Stateful selectors1/2 have separate counters82B6/82B8. Pre-aging active-counter snapshots and
+   post-aging flags select five-byte ROM output row. Native equality/expiry cases preserve active
+   class2 and all event histories despite bitmap inhibition. */
+
+void f33_update_diagnostic_classifier_output(void)
+
+{
+  char cVar1;
+  byte bVar2;
+  undefined1 uVar3;
+  short sVar4;
+  short sVar5;
+  short sVar6;
+  char cVar7;
+  char cVar8;
+  char cVar9;
+  char cVar10;
+  char cVar11;
+  short sVar12;
+  short sVar13;
+  short sVar14;
+  short sVar15;
+  short sVar16;
+  short sVar17;
+  ushort uVar18;
+  undefined *puVar19;
+  uchar uVar20;
+  uint uVar21;
+  uint uVar22;
+  char cVar23;
+  char cVar24;
+  ushort uVar25;
+  ushort uVar26;
+  int iVar27;
+  
+  puVar19 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  FUN_000510b6();
+  sVar12 = *(short *)(puVar19 + -0x3540);
+  sVar4 = *(short *)(puVar19 + -0x3546);
+  sVar5 = *(short *)(puVar19 + -0x3544);
+  sVar6 = *(short *)(puVar19 + -0x3542);
+  sVar13 = *(short *)(puVar19 + -0x353e);
+  sVar14 = *(short *)(puVar19 + -0x353c);
+  sVar15 = *(short *)(puVar19 + -0x3530);
+  sVar16 = *(short *)(puVar19 + -0x353a);
+  cVar7 = puVar19[0x301a];
+  cVar8 = puVar19[0x301d];
+  cVar1 = puVar19[-0x3557];
+  cVar24 = puVar19[-0x355e];
+  cVar23 = puVar19[-0x355f];
+  uVar26 = *(ushort *)(puVar19 + -0x3548);
+  uVar25 = *(ushort *)(puVar19 + -0x354a);
+  cVar9 = puVar19[-0x3550];
+  sVar17 = *(short *)(puVar19 + -0x3538);
+  cVar10 = puVar19[0x301b];
+  cVar11 = puVar19[0x301c];
+  uVar20 = f33_update_classifier_status_latch();
+  f33_age_classifier_groups();
+  uVar21 = f33_classifier_selector3_predicate();
+  uVar22 = f33_update_classifier_status22_edges();
+  if (cVar24 == 'Z') {
+    if (cVar23 == 'Z') {
+      uVar25 = uVar25 + 1;
+      uVar18 = 1;
+      if (DAT_00030e48 < uVar25) {
+        cVar23 = '\0';
+      }
+    }
+    else {
+      uVar26 = uVar26 + 1;
+      uVar18 = 2;
+      if (DAT_00030e4a <= uVar26) {
+        cVar24 = '\0';
+      }
+    }
+  }
+  else {
+    bVar2 = puVar19[-0x355c];
+    if (uVar21 == 0x5a) {
+      uVar18 = 3;
+    }
+    else if ((sVar4 == 0) && ((puVar19[-0x355d] & 1) == 0)) {
+      if ((sVar5 == 0) && (((byte)puVar19[-0x355d] >> 1 & 1) == 0)) {
+        if ((sVar13 == 0) && ((bVar2 >> 4 & 1) == 0)) {
+          if ((((sVar14 == 0) && (sVar15 == 0)) && (uVar22 != 0x5a)) && ((bVar2 >> 5 & 1) == 0)) {
+            if ((sVar16 == 0) && ((bVar2 >> 6 & 1) == 0)) {
+              if ((sVar12 == 0) && ((bVar2 >> 2 & 1) == 0)) {
+                if ((sVar6 == 0) && (uVar18 = bVar2 & 8, (bVar2 & 8) == 0)) {
+                  if ((cVar7 == '\x01') && (cVar9 != 'Z')) {
+                    uVar18 = 0xf;
+                    goto LAB_00051482;
+                  }
+                  if ((((cVar1 == 'Z') && (cVar10 != 'Z')) && (cVar11 != 'Z')) &&
+                     ((cVar8 != 'Z' && (sVar17 == 0)))) goto LAB_00051482;
+                }
+                else if (uVar20 == '\0') {
+                  uVar18 = 0xd;
+                  goto LAB_00051482;
+                }
+              }
+              else if (uVar20 == '\0') {
+                uVar18 = 0xe;
+                goto LAB_00051482;
+              }
+              uVar18 = 0x10;
+            }
+            else {
+              uVar18 = 0xc;
+            }
+          }
+          else {
+            uVar18 = 0xb;
+          }
+        }
+        else {
+          uVar18 = 10;
+        }
+      }
+      else if (((byte)puVar19[-0x355b] >> 1 & 1) == 0) {
+        uVar18 = 9;
+      }
+      else {
+        uVar18 = 8;
+      }
+    }
+    else if ((puVar19[-0x355b] & 1) == 0) {
+      uVar18 = 7;
+    }
+    else {
+      uVar18 = 6;
+    }
+  }
+LAB_00051482:
+  iVar27 = (short)uVar18 * 5;
+  puVar19[-0x3552] = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x2a19cu + (uint32_t)(iVar27) * 1u))));
+  puVar19[-0x3556] = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x2a19du + (uint32_t)(iVar27) * 1u))));
+  puVar19[-0x3555] = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x2a19eu + (uint32_t)(iVar27) * 1u))));
+  puVar19[-0x3554] = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x2a19fu + (uint32_t)(iVar27) * 1u))));
+  uVar3 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x2a1a0u + (uint32_t)(iVar27) * 1u))));
+  puVar19[-0x3560] = (char)uVar18;
+  puVar19[-0x355e] = cVar24;
+  puVar19[-0x3553] = uVar3;
+  puVar19[-0x355f] = cVar23;
+  *(ushort *)(puVar19 + -0x3548) = uVar26;
+  *(ushort *)(puVar19 + -0x354a) = uVar25;
+  return;
+}
+
+
+
+undefined4 FUN_00062e12(void)
+
+{
+  return DAT_febf0668;
+}
+
+
+
+/* Any NULL destination returns-1 before all stores. Otherwise publish low8(value), value^55,
+   value^AA in that order under the FFC0 priority-mask pair and return0. No alias rejection; the
+   three stores are not asserted atomic against every interrupt source. Otherwise write low8(value),
+   value^55 and value^AA in that order under the real PMRFFC0 enter/restore pair, then return0.
+   Upper value bits discarded; no alias rejection. Sweep covers each NULL position and both ID
+   states; not globally atomic storage. */
+
+int f33_publish_redundant_u8(uchar value,uchar *raw,uchar *xor55,uchar *xorAA)
+
+{
+  int iVar1;
+  uint saved_mask;
+  
+  if (((raw == (uchar *)0x0) || (xor55 == (uchar *)0x0)) || (xorAA == (uchar *)0x0)) {
+    iVar1 = -1;
+  }
+  else {
+    saved_mask = f33_priority_mask_enter(0xffc0);
+    *raw = value;
+    *xor55 = value ^ 0x55;
+    *xorAA = value ^ 0xaa;
+    f33_priority_mask_restore(saved_mask);
+    iVar1 = 0;
+  }
+  return iVar1;
 }
 
 
