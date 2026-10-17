@@ -2325,6 +2325,25 @@ void f33_fill_constant_block_c589e(void)
   return;
 }
 
+undefined4 FUN_000c58b8(void)
+
+{
+  uint32_t puVar1;
+  undefined4 uVar2;
+  undefined2 local_8;
+  undefined2 uStack_6;
+  
+  puVar1 = 0xfebeb800u;
+  FUN_000d097a(((ushort *)camry_host_ptr((uint32_t)(f33_calibration_bank_bases[DAT_febeac3c & 1] + (DAT_febec156 & 3) * 0x12 + 0x9c4))), 
+               DAT_febeadf6, &local_8, &uStack_6);
+  uVar2 = FUN_000d1da0(0xffc0);
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + 0x9a4)))) = local_8;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + 0x9a6)))) = uStack_6;
+  FUN_000d1dc6(uVar2);
+  return uVar2;
+}
+
+
 
 
 undefined4 FUN_000c5910(void)
@@ -2343,6 +2362,25 @@ undefined4 FUN_000c5910(void)
   FUN_000d1dc6(uVar2);
   return uVar2;
 }
+
+undefined4 FUN_000c5956(void)
+
+{
+  uint32_t puVar1;
+  undefined4 uVar2;
+  undefined2 local_8;
+  undefined2 uStack_6;
+  
+  puVar1 = 0xfebeb800u;
+  FUN_000d097a(((ushort *)camry_host_ptr((uint32_t)(f33_calibration_bank_bases[DAT_febeac3c & 1] + (DAT_febec156 & 3) * 0x12 + 0xa0c))), 
+               DAT_febeadf6, &local_8, &uStack_6);
+  uVar2 = FUN_000d1da0(0xffc0);
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + 0x9ac)))) = local_8;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + 0x9ae)))) = uStack_6;
+  FUN_000d1dc6(uVar2);
+  return uVar2;
+}
+
 
 
 
@@ -4220,6 +4258,25 @@ void f33_bound_nonlinear_and_moving_assist(void)
   }
   return;
 }
+
+undefined4 FUN_000c6f86(void)
+
+{
+  uint32_t puVar1;
+  undefined4 uVar2;
+  undefined2 local_8;
+  undefined2 uStack_6;
+  
+  puVar1 = 0xfebeb800u;
+  FUN_000d097a(((ushort *)camry_host_ptr((uint32_t)(f33_calibration_bank_bases[DAT_febeac3c & 1] + (DAT_febec156 & 3) * 0x12 + 0x12d4))), 
+               DAT_febeadf6, &local_8, &uStack_6);
+  uVar2 = FUN_000d1da0(0xffc0);
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + 0xb64)))) = local_8;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + 0xb66)))) = uStack_6;
+  FUN_000d1dc6(uVar2);
+  return uVar2;
+}
+
 
 
 

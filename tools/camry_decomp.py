@@ -738,6 +738,12 @@ def _expr_before(code: str, op_index: int) -> str:
             depth -= 1
         elif depth == 0 and char == ">" and index > 0 and code[index - 1] == "-":
             pass
+        elif depth == 0 and char == "=":
+            prev = code[index - 1] if index else ""
+            nxt = code[index + 1] if index + 1 < len(code) else ""
+            if prev not in "=!<>" and nxt != "=":
+                start = index + 1
+                break
         elif depth == 0 and (
             char in ";,?:<>"
             or (index > 0 and code.startswith(("||", "&&", "==", "!="), index - 1))
@@ -1061,6 +1067,9 @@ def _expr_kind(
         if re.fullmatch(r"(?:\s*\[[^\[\]]*\])+", rest):
             if name in doubles:
                 return "pointer" if rest.count("[") == 1 else "integer"
+            # A uint32 table subscript is the loaded word, an integer address.
+            if name in _uint32_array_names() or name in _uint32_slot_names():
+                return "integer"
             if name in arrays and name not in pointers:
                 return "unknown"
             return "integer"
@@ -6624,6 +6633,7 @@ def _rewrite_body(code: str) -> str:
     code = _rewrite_pointer_word_indexes(code)
     code = _rewrite_late_pointer_fields(code)
     code = _rewrite_pointer_assignments(code, firmware=True)
+    code = _rewrite_signed_byte_compares(code)
     code = _rewrite_terminal_labels(code)
     return code
 

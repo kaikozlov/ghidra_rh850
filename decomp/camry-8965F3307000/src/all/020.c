@@ -4272,6 +4272,46 @@ void FUN_0008366e(uint param_1)
   return;
 }
 
+undefined1 FUN_0008367c(uint param_1)
+
+{
+  byte bVar1;
+  byte bVar2;
+  int iVar3;
+  undefined1 uVar4;
+  
+  bVar2 = DAT_00022e40;
+  param_1 = param_1 & 0xff;
+  uVar4 = 1;
+  if (f33_driver_channel_software_states[param_1] == stopped_software_state) {
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe5016u + (uint32_t)(param_1) * 1u)))) == 'Z') {
+      bVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe5013u + (uint32_t)(param_1) * 1u))));
+      if (bVar1 < DAT_00022e40) {
+        iVar3 = FUN_00083956(param_1,bVar1);
+        if (iVar3 == 1) {
+          (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe5016u + (uint32_t)(param_1) * 1u)))) = 0x3c;
+        }
+        else {
+          (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe5013u + (uint32_t)(param_1) * 1u)))) = bVar1 + 1;
+          if ((byte)(bVar1 + 1) < bVar2) {
+            uVar4 = 2;
+          }
+          else {
+            ((void)(param_1), FUN_00084fea());
+            uVar4 = 0;
+            (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe5016u + (uint32_t)(param_1) * 1u)))) = 0x96;
+          }
+        }
+      }
+    }
+    else {
+      uVar4 = ((int8_t)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe5016u + (uint32_t)(param_1) * 1u))))) != -0x6a;
+    }
+  }
+  return uVar4;
+}
+
+
 
 
 void FUN_00083702(undefined1 param_1)
@@ -4501,6 +4541,20 @@ undefined4 FUN_00083956(uint param_1,undefined1 param_2)
   }
   return 0;
 }
+
+bool FUN_00083a04(uint param_1)
+
+{
+  bool bVar1;
+  
+  bVar1 = ((int8_t)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe501cu + (uint32_t)(param_1 & 0xff) * 1u))))) == -0x5b;
+  if (!bVar1) {
+    (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe501cu + (uint32_t)(param_1 & 0xff) * 1u)))) = -0x5b;
+  }
+  return ((int)(uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe5026u + (uint32_t)(param_1 & 0xff) * 1u)))) >> 4) +
+         ((byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe5026u + (uint32_t)(param_1 & 0xff) * 1u)))) & 0xf) == 0xf && bVar1;
+}
+
 
 
 
