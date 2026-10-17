@@ -39,6 +39,7 @@ static inline void camry_write32(uint32_t address, uint32_t value) {
 
 extern uint32_t camry_gp;
 extern uint32_t camry_tp;
+extern uint32_t camry_pmr;
 
 void *f33_memcpy_forward(void *destination, void *source, uint32_t byte_count);
 void f33_memzero(void *destination, uint32_t byte_count);
@@ -146,3 +147,5 @@ uint32_t f33_nvm_submit_bulk_reads(void);
 uint32_t f33_nvm_step_initial_read_acquisition(void);
 uint32_t f33_nvm_step_acquisition_pass(void);
 void f33_nvm_run_bounded_initial_acquisition(void);
+uint32_t f33_priority_mask_enter(uint32_t requested_mask);
+void f33_priority_mask_restore(uint32_t saved_mask);

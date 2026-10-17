@@ -10,6 +10,7 @@
 uint32_t camry_gp;
 uint32_t camry_tp;
 uint32_t camry_sp;
+uint32_t camry_pmr;
 
 void f33_pwm_initialize_compare_stages(uint32_t compare) {
     uint32_t value = compare & 0xffffu;
@@ -2937,4 +2938,15 @@ uint32_t f33_nvm_pop_queue_head(uint32_t queue, uint32_t index) {
     if (status == 0u)
         camry_write16(index, slot);
     return status;
+}
+
+uint32_t f33_priority_mask_enter(uint32_t requested_mask) {
+    uint32_t previous = camry_pmr;
+    if ((int32_t)previous < (int32_t)requested_mask)
+        camry_pmr = requested_mask;
+    return previous;
+}
+
+void f33_priority_mask_restore(uint32_t saved_mask) {
+    camry_pmr = saved_mask;
 }

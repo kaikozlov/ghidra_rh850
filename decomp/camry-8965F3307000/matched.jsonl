@@ -102,3 +102,5 @@
 {"addr": "0xbe5aa", "name": "f33_refresh_received_control_metadata", "status": "equivalent", "form": "corpus"}
 {"addr": "0x49888", "name": "f33_update_application_receive_statuses", "status": "equivalent", "form": "corpus"}
 {"addr": "0x77d66", "name": "f33_nvm_finish_physical_result", "status": "equivalent", "form": "corpus"}
+{"addr": "0x701c4", "name": "f33_priority_mask_enter", "status": "equivalent"}
+{"addr": "0x701ea", "name": "f33_priority_mask_restore", "status": "equivalent"}

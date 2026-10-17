@@ -90,6 +90,7 @@ VALUE_RETURN = {
     "f33_nvm_step_acquisition_pass",
     "FUN_00077982",
     "f33_faci_decode_completion_status",
+    "f33_priority_mask_enter",
 }
 
 DCRA1_BASE = 0xFFD51000
@@ -173,6 +174,10 @@ def bind(library: ctypes.CDLL) -> None:
     library.f33_nvm_family0_chunk_cost.restype = u32
     library.f33_scale_u16_delta_s16_x4.argtypes = [u32, u32, u32]
     library.f33_scale_u16_delta_s16_x4.restype = u32
+    library.f33_priority_mask_enter.argtypes = [u32]
+    library.f33_priority_mask_enter.restype = u32
+    library.f33_priority_mask_restore.argtypes = [u32]
+    library.f33_priority_mask_restore.restype = None
     for name in (
         "f33_nvm_payload_length",
         "f33_nvm_base_offset",
@@ -475,6 +480,7 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
     ctypes.c_uint32.in_dll(library, "camry_gp").value = int(registers.get("gp", "0"), 16) & 0xFFFFFFFF
     ctypes.c_uint32.in_dll(library, "camry_tp").value = int(registers.get("tp", "0"), 16) & 0xFFFFFFFF
     ctypes.c_uint32.in_dll(library, "camry_sp").value = int(registers.get("sp", "0"), 16) & 0xFFFFFFFF
+    load_pmr(library, registers)
     u8p = ctypes.POINTER(ctypes.c_uint8)
     u32p = ctypes.POINTER(ctypes.c_uint32)
     if name == "f33_memcpy_forward":
@@ -667,6 +673,11 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
         return int(library.f33_curve16_interpolate_with_slope(r6, r7, r8)) & 0xFFFFFFFF
     if name == "f33_force_unconfirmed_terminal_monitor_healthy":
         return int(library.f33_force_unconfirmed_terminal_monitor_healthy(r6, r7, r8)) & 0xFFFFFFFF
+    if name == "f33_priority_mask_enter":
+        return int(library.f33_priority_mask_enter(r6)) & 0xFFFFFFFF
+    if name == "f33_priority_mask_restore":
+        library.f33_priority_mask_restore(r6)
+        return None
     if name in VALUE_RETURN:
         return int(getattr(library, name)(r6)) & 0xFFFFFFFF
     raise AssertionError(f"no C call for {name}")
@@ -696,10 +707,21 @@ def parse_signature(signature: str, name: str) -> tuple[str, list[str]]:
     return return_type, params
 
 
+def load_pmr(library: ctypes.CDLL, registers: dict) -> None:
+    ctypes.c_uint32.in_dll(library, "camry_pmr").value = int(registers.get("PMR", "0"), 16) & 0xFFFFFFFF
+
+
+def with_pmr(library: ctypes.CDLL, registers: dict) -> dict:
+    observed = dict(registers)
+    observed["PMR"] = f"{ctypes.c_uint32.in_dll(library, 'camry_pmr').value:#x}"
+    return observed
+
+
 def call_corpus(library: ctypes.CDLL, name: str, signature: str, registers: dict) -> int | None:
     ctypes.c_uint32.in_dll(library, "camry_gp").value = int(registers.get("gp", "0"), 16) & 0xFFFFFFFF
     ctypes.c_uint32.in_dll(library, "camry_tp").value = int(registers.get("tp", "0"), 16) & 0xFFFFFFFF
     ctypes.c_uint32.in_dll(library, "camry_sp").value = int(registers.get("sp", "0"), 16) & 0xFFFFFFFF
+    load_pmr(library, registers)
     return_type, params = parse_signature(signature, name)
     if len(params) > 4:
         raise AssertionError(f"{name} has stack arguments")
@@ -758,6 +780,7 @@ def call_lifted(library: ctypes.CDLL, address: int, registers: dict, limit: int)
     ctypes.c_uint32.in_dll(library, "camry_gp").value = int(registers.get("gp", "0"), 16) & 0xFFFFFFFF
     ctypes.c_uint32.in_dll(library, "camry_tp").value = int(registers.get("tp", "0"), 16) & 0xFFFFFFFF
     ctypes.c_uint32.in_dll(library, "camry_sp").value = int(registers.get("sp", "0"), 16) & 0xFFFFFFFF
+    load_pmr(library, registers)
     ctypes.c_uint32.in_dll(library, "camry_step_limit").value = limit
     ctypes.c_uint32.in_dll(library, "camry_lift_psw").value = int(registers.get("PSW", "0x20"), 16) & 0xFFFFFFFF
     return int(library.camry_lift_run(
@@ -884,7 +907,7 @@ def _run_corpus_scenario(library, scenario, name, signature, codeflash: bytes) -
         install_regions(library, code_view, len(codeflash), regions)
         returned = call_corpus(library, name, signature, registers)
         check_results(
-            scenario, name, None, 0, registers, returned, regions, codeflash,
+            scenario, name, None, 0, with_pmr(library, registers), returned, regions, codeflash,
             value_return=value_return,
         )
         return
@@ -893,7 +916,7 @@ def _run_corpus_scenario(library, scenario, name, signature, codeflash: bytes) -
     install_address_space(library, code_view, len(codeflash), view, base, memory)
     returned = call_corpus(library, name, signature, registers)
     check_results(
-        scenario, name, memory, base, registers, returned, codeflash=codeflash,
+        scenario, name, memory, base, with_pmr(library, registers), returned, codeflash=codeflash,
         value_return=value_return,
     )
 
@@ -1000,7 +1023,7 @@ def main() -> int:
                     library, form, address, name, registers, limit, None, 0,
                 )
                 check_results(
-                    scenario, name, None, 0, registers, returned, regions, codeflash, dcra,
+                    scenario, name, None, 0, with_pmr(library, registers), returned, regions, codeflash, dcra,
                     value_return=corpus_returns(form, name) if corpus or lifted else None,
                 )
                 del held, dcra_view
@@ -1017,7 +1040,7 @@ def main() -> int:
                     library, form, address, name, registers, limit, view, base,
                 )
                 check_results(
-                    scenario, name, memory, base, registers, returned, codeflash=codeflash, dcra=dcra,
+                    scenario, name, memory, base, with_pmr(library, registers), returned, codeflash=codeflash, dcra=dcra,
                     value_return=corpus_returns(form, name) if corpus or lifted else None,
                 )
                 del dcra_view
