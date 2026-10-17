@@ -16,6 +16,7 @@ uint32_t camry_read32(uint32_t address);
 void camry_write8(uint32_t address, uint32_t value);
 void camry_write16(uint32_t address, uint32_t value);
 void camry_write32(uint32_t address, uint32_t value);
+uint8_t *camry_host_ptr(uint32_t address);
 #else
 static inline uint32_t camry_read8(uint32_t address) {
     return *(volatile uint8_t *)(uintptr_t)address;
@@ -34,6 +35,9 @@ static inline void camry_write16(uint32_t address, uint32_t value) {
 }
 static inline void camry_write32(uint32_t address, uint32_t value) {
     *(volatile uint32_t *)(uintptr_t)address = value;
+}
+static inline uint8_t *camry_host_ptr(uint32_t address) {
+    return (uint8_t *)(uintptr_t)address;
 }
 #endif
 
@@ -117,8 +121,8 @@ uint32_t f33_faci_decode_completion_status(void);
 uint32_t f33_nvm_lookup_byte_result(uint32_t key, uint32_t rows, uint32_t row_count);
 uint32_t f33_nvm_translate_read_driver_result(uint32_t driver_result);
 uint32_t f33_nvm_translate_saved_driver_result(void);
-void f33_nvm_recover_family0_request_indices(uint32_t producer_out, uint32_t consumer_out);
-void f33_nvm_recover_family1_request_indices(uint32_t producer_out, uint32_t consumer_out);
+void f33_nvm_recover_family0_request_indices(uint8_t *producer_out, uint8_t *consumer_out);
+void f33_nvm_recover_family1_request_indices(uint8_t *producer_out, uint8_t *consumer_out);
 void f33_freshness_encode_wire(uint32_t freshness, uint32_t wire, uint32_t bit_capacity);
 void f33_freshness_decode_wire(uint32_t wire, uint32_t bit_length, uint32_t freshness);
 uint32_t f33_freshness_select_reset_candidate(uint32_t received, uint32_t search);

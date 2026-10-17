@@ -750,8 +750,8 @@ uint32_t f33_nvm_translate_saved_driver_result(void) {
 }
 
 static void recover_request_indices(
-    uint32_t producer_out,
-    uint32_t consumer_out,
+    uint8_t *producer_out,
+    uint8_t *consumer_out,
     uint32_t indices,
     uint32_t count_address,
     uint32_t cell0) {
@@ -760,8 +760,8 @@ static void recover_request_indices(
     uint32_t count = camry_read8(count_address);
     uint32_t index;
     if (producer < count && consumer < count) {
-        camry_write8(producer_out, producer);
-        camry_write8(consumer_out, consumer);
+        *producer_out = (uint8_t)producer;
+        *consumer_out = (uint8_t)consumer;
         return;
     }
     producer = 0;
@@ -778,13 +778,13 @@ static void recover_request_indices(
         }
         index = (index + 1u) & 0xffu;
     }
-    camry_write8(producer_out, producer);
-    camry_write8(consumer_out, consumer);
+    *producer_out = (uint8_t)producer;
+    *consumer_out = (uint8_t)consumer;
     camry_write8(indices, producer);
     camry_write8(indices + 1u, consumer);
 }
 
-void f33_nvm_recover_family0_request_indices(uint32_t producer_out, uint32_t consumer_out) {
+void f33_nvm_recover_family0_request_indices(uint8_t *producer_out, uint8_t *consumer_out) {
     recover_request_indices(
         producer_out,
         consumer_out,
@@ -793,7 +793,7 @@ void f33_nvm_recover_family0_request_indices(uint32_t producer_out, uint32_t con
         camry_gp + 19594u);
 }
 
-void f33_nvm_recover_family1_request_indices(uint32_t producer_out, uint32_t consumer_out) {
+void f33_nvm_recover_family1_request_indices(uint8_t *producer_out, uint8_t *consumer_out) {
     recover_request_indices(
         producer_out,
         consumer_out,
@@ -1291,7 +1291,8 @@ uint32_t f33_nvm_enqueue_family0_read(uint32_t object) {
     uint32_t previous;
     uint32_t cell;
 
-    f33_nvm_recover_family0_request_indices(indices, indices + 1u);
+    f33_nvm_recover_family0_request_indices(
+        camry_host_ptr(indices), camry_host_ptr(indices + 1u));
     producer = camry_read8(indices);
     if (f33_nvm_family0_request_full(producer, camry_read8(indices + 1u)) == 1u
         || handle >= camry_read16(0x2ad70u)) {
@@ -1346,7 +1347,8 @@ uint32_t f33_nvm_set_family0_record(uint32_t object, uint32_t source) {
     uint32_t descriptor;
     uint32_t slot;
 
-    f33_nvm_recover_family0_request_indices(indices, indices + 1u);
+    f33_nvm_recover_family0_request_indices(
+        camry_host_ptr(indices), camry_host_ptr(indices + 1u));
     producer = camry_read8(indices);
     consumer = camry_read8(indices + 1u);
     if (f33_nvm_family0_request_full(producer, consumer) == 1u
