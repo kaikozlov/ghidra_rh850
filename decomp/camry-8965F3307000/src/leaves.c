@@ -1719,6 +1719,24 @@ uint32_t f33_nvm_arm_family0_read(uint32_t object) {
     return result;
 }
 
+uint32_t f33_nvm_submit_family1_read_copies(uint32_t object) {
+    uint32_t index = object & 0xffffu;
+    uint32_t descriptor = 0x2af0cu + (index << 3);
+    uint32_t first = camry_read16(descriptor + 2u);
+    uint32_t result = 0xffu;
+    if (camry_read8(camry_gp + 0x4e91u) == 0u && first != 0xffffu) {
+        uint32_t slot = index & 3u;
+        uint32_t stage = camry_gp + 0x5308u + slot * 96u;
+        (void)f33_nvm_enqueue_read(first, stage);
+        (void)f33_nvm_enqueue_read((first + 4u) & 0xffffu, stage + 32u);
+        (void)f33_nvm_enqueue_read((first + 8u) & 0xffffu, stage + 64u);
+        camry_write8(camry_gp + 0x4e91u, 0xffu);
+        camry_write32(camry_gp + 0x4e98u + (slot << 2), 0x005a5a5au);
+        result = 0u;
+    }
+    return result;
+}
+
 static uint32_t f33_nvm_get_family0_completion(uint32_t object) {
     uint32_t index = object & 0xffffu;
     uint32_t count = camry_read16((3u << 16) - 21136u);
