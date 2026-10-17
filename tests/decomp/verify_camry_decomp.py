@@ -1056,6 +1056,7 @@ def main() -> int:
         check_rom(library)
         print("PASS rom tables match CodeFlash")
         code_view = view_of(codeflash)
+        failed = False
         for scenario in load_oracles():
             entry = scenario.get("entry", {})
             if entry.get("scope") != "resolved-address":
@@ -1072,44 +1073,50 @@ def main() -> int:
             mapped = materialize(scenario)
             ranges = [] if lifted or corpus else accessed_ranges(name, registers)
             limit = int(scenario.get("max_instructions") or 200000)
-            if mapped is None:
-                if ranges:
-                    continue
-                regions = scenario_regions(scenario)
-                held = install_regions(library, code_view, len(codeflash), regions)
-                dcra, dcra_view = attach_dcra(library, name)
-                if lifted and dcra is None and 1 + len(regions) < 8:
-                    dcra, dcra_view = attach_dcra_window(library)
-                returned = call_matched(
-                    library, form, address, name, registers, limit, None, 0, signature,
-                )
-                check_results(
-                    scenario, name, None, 0, with_pmr(library, registers), returned, regions, codeflash, dcra,
-                    value_return=corpus_returns(form, name, signature) if corpus or lifted else None,
-                )
-                del held, dcra_view
-            else:
-                memory, base = mapped
-                if any(not covers(base, len(memory), start, length) for start, length in ranges):
-                    continue
-                view = view_of(memory) if memory else view_of(bytearray(b"\x00"))
-                install_address_space(library, code_view, len(codeflash), view, base, memory)
-                dcra, dcra_view = attach_dcra(library, name)
-                if lifted and dcra is None:
-                    dcra, dcra_view = attach_dcra_window(library)
-                returned = call_matched(
-                    library, form, address, name, registers, limit, view, base, signature,
-                )
-                check_results(
-                    scenario, name, memory, base, with_pmr(library, registers), returned, codeflash=codeflash, dcra=dcra,
-                    value_return=corpus_returns(form, name, signature) if corpus or lifted else None,
-                )
-                del dcra_view
+            try:
+                if mapped is None:
+                    if ranges:
+                        continue
+                    regions = scenario_regions(scenario)
+                    held = install_regions(library, code_view, len(codeflash), regions)
+                    dcra, dcra_view = attach_dcra(library, name)
+                    if lifted and dcra is None and 1 + len(regions) < 8:
+                        dcra, dcra_view = attach_dcra_window(library)
+                    returned = call_matched(
+                        library, form, address, name, registers, limit, None, 0, signature,
+                    )
+                    check_results(
+                        scenario, name, None, 0, with_pmr(library, registers), returned, regions, codeflash, dcra,
+                        value_return=corpus_returns(form, name, signature) if corpus or lifted else None,
+                    )
+                    del held, dcra_view
+                else:
+                    memory, base = mapped
+                    if any(not covers(base, len(memory), start, length) for start, length in ranges):
+                        continue
+                    view = view_of(memory) if memory else view_of(bytearray(b"\x00"))
+                    install_address_space(library, code_view, len(codeflash), view, base, memory)
+                    dcra, dcra_view = attach_dcra(library, name)
+                    if lifted and dcra is None:
+                        dcra, dcra_view = attach_dcra_window(library)
+                    returned = call_matched(
+                        library, form, address, name, registers, limit, view, base, signature,
+                    )
+                    check_results(
+                        scenario, name, memory, base, with_pmr(library, registers), returned, codeflash=codeflash, dcra=dcra,
+                        value_return=corpus_returns(form, name, signature) if corpus or lifted else None,
+                    )
+                    del dcra_view
+            except (AssertionError, OSError, ValueError, ctypes.ArgumentError) as exc:
+                failed = True
+                print(f"FAIL {name} {scenario['name']} {exc}")
+                continue
             executed[address] += 1
             print(f"PASS {name} {scenario['name']}")
     missing = [row["name"] for address, row in checked.items() if executed[address] == 0]
-    if missing:
-        raise SystemExit("matched functions with no executed oracle: " + ", ".join(missing))
+    if failed or missing:
+        detail = "matched functions with no executed oracle: " + ", ".join(missing) if missing else "oracle mismatches"
+        raise SystemExit(detail)
     print(f"PASS matched functions: {len(checked)}")
     return 0
 

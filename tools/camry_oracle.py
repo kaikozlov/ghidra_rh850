@@ -1373,10 +1373,15 @@ def _verify() -> str | None:
         capture_output=True,
         check=False,
     )
+    log_path = REPO_ROOT / "build" / "tmp" / "camry-oracle-verify.log"
+    log_path.parent.mkdir(parents=True, exist_ok=True)
+    log_path.write_text((result.stderr or "") + "\n" + (result.stdout or ""), encoding="utf-8")
     if result.returncode == 0:
         return None
-    tail = ((result.stderr or "") + "\n" + (result.stdout or "")).strip().splitlines()
-    return " | ".join(tail[-24:])
+    err = [line for line in (result.stderr or "").splitlines() if line.strip()]
+    fails = [line for line in (result.stdout or "").splitlines() if line.startswith("FAIL ")]
+    shown = (err[-4:] + fails) or (result.stdout or "").strip().splitlines()[-6:]
+    return " | ".join(shown)
 
 
 def _keep_verified(
