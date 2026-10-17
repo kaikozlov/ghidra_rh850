@@ -1745,6 +1745,24 @@ void FUN_0004d4c4(void)
 
 
 
+void FUN_0004d4ca(uint param_1,uint param_2)
+
+{
+  param_2 = param_2 & 0xff;
+  if (((int16_t)DAT_febe81b2) == -0x45f0) {
+    DAT_febe8194 = 0;
+    DAT_febe81b2 = -0x4600;
+    if ((int)param_1 < 0) {
+      param_2 = param_1;
+    }
+    DAT_febe8195 = 0x5a;
+    DAT_febe81c0 = param_2;
+  }
+  return;
+}
+
+
+
 undefined1 FUN_0004d4f2(int param_1)
 
 {

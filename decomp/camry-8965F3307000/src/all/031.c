@@ -1909,7 +1909,7 @@ void f33_qualify_assist_surface_transition(void)
   sVar11 = f33_abs_s16_wrapping(value);
   iVar17 = (int)sVar11;
   if ((((((cVar5 == 'D') && (cVar8 != 'U')) || ((cVar6 == '\x11' && (cVar8 != 'w')))) ||
-       (((cVar6 == '\"' && (cVar8 != 'D')) || ((cVar6 == '3' && (cVar8 != -0x78)))))) ||
+       (((cVar6 == '\"' && (cVar8 != 'D')) || ((cVar6 == '3' && (((int8_t)cVar8) != -0x78)))))) ||
       ((cVar6 == '\0' && (cVar8 != '\0')))) &&
      (iVar18 = (int)sVar21,
      iVar12 - iVar18 < 0 != (iVar12 < 0 != iVar18 < 0 && iVar18 < 0 == iVar12 - iVar18 < 0) ||

@@ -3336,6 +3336,45 @@ void f33_reset_current_source_coherence_observations(void)
 
 
 
+/* R6 counter; R7 packed byte status,byte qualifier,uint16 threshold; R8 current tag; R9 expected;
+   fifth argument low byte at incomingSP. Armed!=5A preserves count and returns0. Otherwise
+   exactA5/status0/B084>=2304/tag match or33333333/FFFFFFFF; strict uint16 count>limit. FullR10=0/1.
+   Native packed register/stack ABI crosses strict channel threshold and preserves a disabled
+   counter; receive-edge admission and sticky/current separation remain distinct. */
+
+uint f33_qualify_packed_channel_zero_status
+               (ushort *count,uint packed_status_qualifier_limit,uint current_tag,uint expected_tag,
+               uchar generation_armed)
+
+{
+  ushort uVar1;
+  uint uVar2;
+  undefined1 uStack_c;
+  undefined1 uStack_b;
+  undefined2 uStack_a;
+  
+  uVar2 = 0;
+  if (generation_armed == 'Z') {
+    uStack_b = (char)(packed_status_qualifier_limit >> 8);
+    if ((((((int8_t)uStack_b) == -0x5b) && (DAT_000aefa8 <= DAT_febeb084)) &&
+        (uStack_c = (char)packed_status_qualifier_limit, uStack_c == '\0')) &&
+       (((current_tag == 0x33333333 || (current_tag == 0xffffffff)) || (current_tag == expected_tag)
+        ))) {
+      uVar1 = *count;
+      uStack_a = (ushort)(packed_status_qualifier_limit >> 0x10);
+      if ((uStack_a < uVar1) || (*count = uVar1 + 1, uStack_a < (ushort)(uVar1 + 1))) {
+        uVar2 = 1;
+      }
+    }
+    else {
+      *count = 0;
+    }
+  }
+  return uVar2;
+}
+
+
+
 /* BEDD5A,BEDE>=512,B084>=2304; strictB19C>200, otherwise reset0. Independent ofB196. */
 
 uint f33_qualify_secondary_received_status_delay(void)

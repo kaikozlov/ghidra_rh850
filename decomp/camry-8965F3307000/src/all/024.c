@@ -23,7 +23,7 @@ int FUN_000900ea(void)
     thunk_FUN_0006a4c4();
     sVar4 = sVar4 + 1;
     if (iVar2 != 0) break;
-    if (cVar3 != -0x5b) {
+    if (((int8_t)cVar3) != -0x5b) {
       iVar2 = FUN_0008fd90(uStack_16);
       if (iVar2 == 0) {
         iVar2 = FUN_0008ffda(uStack_16);
@@ -57,8 +57,8 @@ undefined4 FUN_00090146(void)
     thunk_FUN_0006a4c4();
   }
   cVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x6298)))));
-  if ((((((cVar1 == -0x6a) || (cVar1 == -0x5b)) || (cVar1 == -0x4c)) ||
-       ((cVar1 == -0x3d || (cVar1 == -0x2e)))) || (cVar1 == -0x1f)) &&
+  if ((((((((int8_t)cVar1) == -0x6a) || (((int8_t)cVar1) == -0x5b)) || (((int8_t)cVar1) == -0x4c)) ||
+       ((((int8_t)cVar1) == -0x3d || (((int8_t)cVar1) == -0x2e)))) || (((int8_t)cVar1) == -0x1f)) &&
      (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x6297))))) == 'Z' || (((int8_t)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0x6297)))))) == -0x5b)))) {
     uVar4 = 0;
   }

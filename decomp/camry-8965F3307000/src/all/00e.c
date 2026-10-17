@@ -7213,7 +7213,7 @@ char FUN_0003bd8e(uint param_1)
   if ((param_1 & 0xff) < 3) {
     saved_mask = f33_priority_mask_enter(0xffc0);
     cVar2 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe7104u + (uint32_t)(param_1 & 0xff) * 1u))));
-    if (cVar2 != -1) {
+    if (((int8_t)cVar2) != -1) {
       cVar1 = cVar2 + '\x01';
       cVar2 = cVar2 + '\x01';
       (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe7104u + (uint32_t)(param_1 & 0xff) * 1u)))) = cVar1;

@@ -4492,6 +4492,84 @@ void FUN_00043148(void)
 
 
 
+/* Parallel ROM286B0 residual classifier with7DA8 gate and7B36FFFF pass marker. Unsigned minimum
+   remains an independent conjunct of the pass branch. Parallel residual classifier uses independent
+   channel gate/pass marker and matching ROM limits; physical source identity remains unassigned. */
+
+uint f33_classify_channel_residual_b(void)
+
+{
+  ushort uVar1;
+  short sVar2;
+  int iVar3;
+  int iVar4;
+  int iVar5;
+  int iVar6;
+  int iVar7;
+  
+  iVar7 = (int)DAT_febe78c8;
+  iVar3 = (int)DAT_febe629e;
+  if (iVar7 + 0x7fff < 0 == (-1 < iVar7 && iVar7 + 0x7fff < 0) && iVar7 != -0x7fff) {
+    if (iVar7 < 0) {
+      iVar7 = (int)-DAT_febe78c8;
+    }
+  }
+  else {
+    iVar7 = 0x7fff;
+  }
+  if (iVar3 + 0x7fff < 0 == (-1 < iVar3 && iVar3 + 0x7fff < 0) && iVar3 != -0x7fff) {
+    if (iVar3 < 0) {
+      iVar3 = (int)-DAT_febe629e;
+    }
+  }
+  else {
+    iVar3 = 0x7fff;
+  }
+  if (DAT_febe78cc + 0x7fffffff < 0 == (-1 < DAT_febe78cc && DAT_febe78cc + 0x7fffffff < 0) &&
+      DAT_febe78cc != -0x7fffffff) {
+    iVar4 = DAT_febe78cc;
+    if (DAT_febe78cc < 0) {
+      iVar4 = -DAT_febe78cc;
+    }
+  }
+  else {
+    iVar4 = 0x7fffffff;
+  }
+  if ((DAT_febe78c4 == '\0') && ((f33_output_request_status & 0x40004) == 0)) {
+    uVar1 = DAT_0002b890;
+    sVar2 = DAT_0002b88e;
+    if (DAT_febeeb88 != 'Z') {
+      uVar1 = DAT_0002b88c;
+      sVar2 = DAT_0002b88a;
+    }
+    iVar6 = (int)sVar2;
+    iVar5 = (int)DAT_0002b886;
+    if ((((iVar7 - iVar5 < 0 != (iVar7 < 0 != iVar5 < 0 && iVar5 < 0 == iVar7 - iVar5 < 0)) &&
+         (iVar5 = (int)DAT_0002b888,
+         iVar4 - iVar5 < 0 == (iVar4 < 0 != iVar5 < 0 && iVar5 < 0 == iVar4 - iVar5 < 0) &&
+         iVar4 != iVar5)) &&
+        (iVar3 - iVar6 < 0 != (iVar3 < 0 != iVar6 < 0 && iVar6 < 0 == iVar3 - iVar6 < 0) ||
+         iVar3 == iVar6)) && (uVar1 <= DAT_febe7da8)) {
+      return 0x22;
+    }
+    iVar5 = (int)DAT_0002b892;
+    if ((((iVar7 - iVar5 < 0 != (iVar7 < 0 != iVar5 < 0 && iVar5 < 0 == iVar7 - iVar5 < 0)) &&
+         (iVar7 = (int)DAT_0002b894,
+         iVar4 - iVar7 < 0 != (iVar4 < 0 != iVar7 < 0 && iVar7 < 0 == iVar4 - iVar7 < 0) ||
+         iVar4 == iVar7)) &&
+        ((DAT_febeeb88 == '\0' &&
+         ((iVar7 = (int)DAT_0002b896,
+          iVar3 - iVar7 < 0 != (iVar3 < 0 != iVar7 < 0 && iVar7 < 0 == iVar3 - iVar7 < 0) ||
+          iVar3 == iVar7 && (DAT_0002b898 <= DAT_febe7da8)))))) && (((int16_t)DAT_febe7b36) == -1)) {
+      return 0x11;
+    }
+    return 0x33;
+  }
+  return 0x44;
+}
+
+
+
 /* f33_report_diagnostic_healthy_observed((uint)DAT_febe78c6); whole-body shape-verified. The
    literal is the encoded diagnostic event, not a recovered OEM name. */
 

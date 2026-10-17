@@ -1446,7 +1446,7 @@ void f33_boot_service_tester_present(ushort request_length)
   do {
     if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6cf2))))) == (*((char *)camry_host_ptr((uint32_t)((int)&pFVar4[0x10c].eiic + iVar6 + 1))))) {
       if (1 < request_length) {
-        if ((cStack_d != '\0') && (cStack_d != -0x80)) {
+        if ((cStack_d != '\0') && (((int8_t)cStack_d) != -0x80)) {
           uVar5 = 0x12;
           goto LAB_0000502c;
         }
@@ -2952,7 +2952,7 @@ LAB_0000604e:
   cVar2 = (*((char *)camry_host_ptr((uint32_t)((int)camry_host_addr(pFVar7) + iVar11 + 0x882))));
   payload_offset = 2;
   bVar4 = false;
-  if (cVar2 != -1) {
+  if (((int8_t)cVar2) != -1) {
     (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar6 + (uint32_t)(-0x6c90))))) = cVar2;
     payload_offset = 3;
   }

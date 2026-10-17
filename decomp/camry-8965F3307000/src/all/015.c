@@ -617,7 +617,7 @@ LAB_000548b8:
       iVar8 = iVar1;
     } while (0 < iVar1);
     cVar10 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe8644u + (uint32_t)(iVar11) * 1u))));
-    if (cVar10 != -1) {
+    if (((int8_t)cVar10) != -1) {
       cVar10 = cVar10 + '\x01';
     }
     DAT_febe8672 = uVar7;

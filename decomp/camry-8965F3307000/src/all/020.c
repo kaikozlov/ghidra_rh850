@@ -717,7 +717,7 @@ uint FUN_00080dc0(uint param_1)
   if (cVar2 != 'U') {
     uVar7 = uVar7 | 0x200;
   }
-  if (cVar3 == -0x5b) {
+  if (((int8_t)cVar3) == -0x5b) {
     uVar7 = uVar7 | 0x10;
   }
   else if (cVar3 == 'Z') {
@@ -3665,7 +3665,7 @@ undefined4 FUN_00083956(uint param_1,undefined1 param_2)
       }
     }
   }
-  else if ((cVar1 != 'i') && (cVar1 != -0x5b)) {
+  else if ((cVar1 != 'i') && (((int8_t)cVar1) != -0x5b)) {
     uVar5 = (uint)DAT_00022ea4;
     for (uVar2 = 0; uVar2 < uVar5; uVar2 = uVar2 + 1 & 0xff) {
       (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe5019u + (uint32_t)(uVar2) * 1u)))) = 0x96;
@@ -3792,7 +3792,7 @@ void FUN_00083c9c(uint param_1)
   uint uVar3;
   
   cVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe5019u + (uint32_t)(param_1 & 0xff) * 1u))));
-  if ((cVar1 == 'Z') || (cVar1 == -0x6a)) {
+  if ((cVar1 == 'Z') || (((int8_t)cVar1) == -0x6a)) {
     uVar3 = (uint)DAT_00022ea4;
     for (uVar2 = 0; uVar2 < uVar3; uVar2 = uVar2 + 1 & 0xff) {
       (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe5019u + (uint32_t)(uVar2) * 1u)))) = 0x69;

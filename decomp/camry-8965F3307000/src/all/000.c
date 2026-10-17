@@ -1803,13 +1803,13 @@ void FUN_00002f1c(undefined2 param_1)
       FUN_00002e86(0);
       return;
     }
-    if (cVar1 != -0x77) {
-      if (cVar1 == -0x76) {
+    if (((int8_t)cVar1) != -0x77) {
+      if (((int8_t)cVar1) == -0x76) {
         (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6ecf))))) = 0;
         f33_boot_transport_response_complete((ushort)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(-0x6ece))))),'\0');
         return;
       }
-      if (cVar1 != -0x74) {
+      if (((int8_t)cVar1) != -0x74) {
         return;
       }
       FUN_00002ecc(0);

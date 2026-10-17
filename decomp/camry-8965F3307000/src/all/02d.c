@@ -1923,7 +1923,7 @@ void FUN_000b57a4(uint param_1,byte *param_2,byte param_3,char param_4)
   iVar6 = (*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xfebeb270u + (uint32_t)(param_1) * 4u))));
   bVar8 = bVar3;
   bVar9 = bVar2;
-  if (cVar10 != -1) {
+  if (((int8_t)cVar10) != -1) {
     if ((param_3 & DAT_000aeb89) == 0) {
       cVar10 = -1;
       iVar6 = FUN_000b5760(param_1,0xff);
@@ -2673,7 +2673,7 @@ void FUN_000b61f4(uint param_1,byte *param_2,byte param_3)
   bVar2 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebeb292u + (uint32_t)(iVar1) * 1u))));
   uVar6 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebeb293u + (uint32_t)(iVar1) * 1u))));
   bVar9 = bVar2;
-  if (cVar8 != -1) {
+  if (((int8_t)cVar8) != -1) {
     if ((param_3 & DAT_000aec5d) == 0) {
       cVar8 = -1;
       uVar6 = 0;

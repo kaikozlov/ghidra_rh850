@@ -1255,7 +1255,7 @@ def _rewrite_pointer_calls(code: str, pointers: set[str]) -> str:
     return "".join(pieces)
 
 
-def _negative_byte_constant(expr: str) -> int | None:
+def _negative_constant(expr: str) -> int | None:
     text = expr.strip()
     while text.startswith("(") and text.endswith(")"):
         try:
@@ -1267,7 +1267,7 @@ def _negative_byte_constant(expr: str) -> int | None:
     if re.fullmatch(r"-0x[0-9A-Fa-f]+|-\d+", text) is None:
         return None
     value = int(text, 0)
-    if -128 <= value <= -1:
+    if -32768 <= value <= -1:
         return value
     return None
 
@@ -1291,77 +1291,101 @@ def _pointer_element_widths(code: str) -> dict[str, int]:
     return found
 
 
-def _is_byte_deref(text: str) -> bool:
+def _deref_width(text: str) -> int | None:
     if not (text.startswith("(*") and text.endswith(")")):
-        return False
+        return None
     try:
         if _match_paren(text, 0) != len(text) - 1:
-            return False
+            return None
     except ValueError:
-        return False
+        return None
     inner = text[1:-1].strip()
-    return re.match(
-        r"^\*\(\((?:volatile\s+)?(?:byte|uchar|undefined1|undefined|uint8_t|char|code)\s*\*\)",
+    match = re.match(
+        r"^\*\(\((?:volatile\s+)?(byte|uchar|undefined1|undefined|uint8_t|char|code|"
+        r"ushort|undefined2|uint16_t)\s*\*\)",
         inner,
-    ) is not None
+    )
+    if match is None:
+        return None
+    return 1 if match.group(1) in {
+        "byte", "uchar", "undefined1", "undefined", "uint8_t", "char", "code",
+    } else 2
 
 
-def _byte_lvalues(code: str) -> tuple[set[str], dict[str, int]]:
-    scalars: set[str] = set()
+def _narrow_lvalues(code: str) -> tuple[dict[str, int], dict[str, int]]:
+    """Unsigned 8- and 16-bit lvalues. Wider unsigned values do not promote."""
+    scalars: dict[str, int] = {}
     elements = {
         name: width
         for name, width in _pointer_element_widths(code).items()
-        if width == 1
+        if width in (1, 2)
     }
-    for match in re.finditer(r"\b((?:DAT|UNK)_[0-9A-Fa-f]+)\b", code):
-        address = int(match.group(1).split("_", 1)[1], 16)
-        if _access_widths().get(address) == 1:
-            scalars.add(match.group(1))
+    local = re.compile(
+        r"\b(undefined1|undefined2|undefined|byte|uchar|ushort|char|code|bool)\s+"
+        r"([A-Za-z_][A-Za-z0-9_]*)\s*;"
+    )
+    for match in local.finditer(code):
+        scalars[match.group(2)] = 1 if match.group(1) not in {"undefined2", "ushort"} else 2
     for name, (_addr, ctype, is_array) in _data_layouts().items():
-        if ctype != "uint8_t":
+        width = {"uint8_t": 1, "uint16_t": 2}.get(ctype)
+        if width is None:
             continue
         if is_array:
-            elements[name] = 1
+            elements[name] = width
         else:
-            scalars.add(name)
+            scalars[name] = width
     return scalars, elements
 
 
-def _is_unsigned_byte_lvalue(text: str, scalars: set[str], elements: dict[str, int]) -> bool:
-    if re.match(r"^\(\s*int8_t\s*\)", text):
-        return False
-    if text in scalars:
-        return True
-    match = re.fullmatch(r"([A-Za-z_][A-Za-z0-9_]*)\s*\[(.*)\]", text, flags=re.S)
-    if match and elements.get(match.group(1)) == 1:
-        return True
-    return _is_byte_deref(text)
-
-
-def _cast_unsigned_byte(raw: str, scalars: set[str], elements: dict[str, int]) -> str | None:
-    text = raw.strip()
-    if _negative_byte_constant(text) is not None:
+def _narrow_width(text: str, scalars: dict[str, int], elements: dict[str, int]) -> int | None:
+    if re.match(r"^\(\s*int(?:8|16)_t\s*\)", text):
         return None
-    if not _is_unsigned_byte_lvalue(text, scalars, elements):
+    if text in scalars:
+        return scalars[text]
+    match = re.fullmatch(r"(?:DAT|UNK)_([0-9A-Fa-f]+)", text)
+    if match:
+        width = _access_widths().get(int(match.group(1), 16))
+        return width if width in (1, 2) else None
+    match = re.fullmatch(r"([A-Za-z_][A-Za-z0-9_]*)\s*\[(.*)\]", text, flags=re.S)
+    if match and elements.get(match.group(1)) in (1, 2):
+        return elements[match.group(1)]
+    return _deref_width(text)
+
+
+def _cast_unsigned_narrow(
+    raw: str, scalars: dict[str, int], elements: dict[str, int], constant: int,
+) -> str | None:
+    text = raw.strip()
+    if _negative_constant(text) is not None:
+        return None
+    width = _narrow_width(text, scalars, elements)
+    if width not in (1, 2):
+        return None
+    if constant < (-128 if width == 1 else -32768):
         return None
     prefix = raw[:len(raw) - len(raw.lstrip())]
     suffix = raw[len(raw.rstrip()):]
-    return f"{prefix}((int8_t){text}){suffix}"
+    cast = "int8_t" if width == 1 else "int16_t"
+    return f"{prefix}(({cast}){text}){suffix}"
 
 
 def _rewrite_signed_byte_compares(code: str) -> str:
-    """Ghidra spells an 8-bit compare against 0xAA as `!= -0x56`.
+    """Ghidra spells a narrow unsigned compare against 0xAA as `!= -0x56`.
 
-    A uint8 lvalue promotes to a non-negative int, so that compare is
-    tautological. Casting the byte to int8_t keeps the bit-pattern test.
+    A uint8 or uint16 lvalue promotes to a non-negative int, so a negative
+    constant compare is tautological. Casting to the signed width keeps the
+    bit-pattern test.
     """
-    scalars, elements = _byte_lvalues(code)
+    scalars, elements = _narrow_lvalues(code)
     pieces: list[str] = []
     cursor = 0
     index = 0
     while index < len(code):
         if code.startswith(("<<", ">>"), index):
             index += 2
+            continue
+        if code[index] == ">" and index > 0 and code[index - 1] == "-":
+            index += 1
             continue
         op = next(
             (item for item in ("<=", ">=", "==", "!=", "<", ">") if code.startswith(item, index)),
@@ -1377,10 +1401,10 @@ def _rewrite_signed_byte_compares(code: str) -> str:
             continue
         right_end = _expr_end_bound(code, index + len(op))
         raw_right = code[index + len(op):right_end]
-        left_constant = _negative_byte_constant(raw_left.strip())
-        right_constant = _negative_byte_constant(raw_right.strip())
+        left_constant = _negative_constant(raw_left.strip())
+        right_constant = _negative_constant(raw_right.strip())
         if right_constant is not None:
-            cast = _cast_unsigned_byte(raw_left, scalars, elements)
+            cast = _cast_unsigned_narrow(raw_left, scalars, elements, right_constant)
             if cast is not None:
                 pieces.append(code[cursor:left_at])
                 pieces.append(cast)
@@ -1388,7 +1412,7 @@ def _rewrite_signed_byte_compares(code: str) -> str:
                 index += len(op)
                 continue
         if left_constant is not None:
-            cast = _cast_unsigned_byte(raw_right, scalars, elements)
+            cast = _cast_unsigned_narrow(raw_right, scalars, elements, left_constant)
             if cast is not None:
                 pieces.append(code[cursor:index + len(op)])
                 pieces.append(cast)

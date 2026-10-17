@@ -2502,6 +2502,27 @@ void f33_step_paired_source_difference_monitors_a(void)
 
 
 
+/* Changed bit fails under admission and primary-zero; pass requires whole7554 zero, ownFFFF marker
+   and own qualification bit clear, otherwise33. */
+
+uint f33_classify_paired_source_delayed_difference_aa(void)
+
+{
+  if (((DAT_febe7bc2 != 'Z') && (DAT_febe7bc3 != 'Z')) ||
+     (f33_paired_source_monitor_status[0] != '\0')) {
+    return 0x44;
+  }
+  if ((DAT_febe7554 & 1) != 0) {
+    return 0x22;
+  }
+  if (((DAT_febe7554 == 0) && (((int16_t)DAT_febe7b44) == -1)) && ((DAT_febe71ec >> 7 & 1) == 0)) {
+    return 0x11;
+  }
+  return 0x33;
+}
+
+
+
 /* f33_report_diagnostic_healthy_observed(0x29); whole-body shape-verified. The literal is the
    encoded diagnostic event, not a recovered OEM name. */
 
@@ -2525,6 +2546,27 @@ void FUN_0003db4e(void)
   }
   f33_report_diagnostic_event_failure(event,10);
   return;
+}
+
+
+
+/* Changed bit fails under admission and primary-zero; pass requires whole7554 zero, ownFFFF marker
+   and own qualification bit clear, otherwise33. */
+
+uint f33_classify_paired_source_delayed_difference_ab(void)
+
+{
+  if (((DAT_febe7bc2 != 'Z') && (DAT_febe7bc3 != 'Z')) ||
+     (f33_paired_source_monitor_status[0] != '\0')) {
+    return 0x44;
+  }
+  if ((DAT_febe7554 >> 1 & 1) != 0) {
+    return 0x22;
+  }
+  if (((DAT_febe7554 == 0) && (((int16_t)DAT_febe7b44) == -1)) && ((DAT_febe71ec >> 7 & 1) == 0)) {
+    return 0x11;
+  }
+  return 0x33;
 }
 
 
@@ -2610,6 +2652,27 @@ void f33_step_paired_source_difference_monitors_b(void)
 
 
 
+/* Changed bit fails under admission and primary-zero; pass requires whole7554 zero, ownFFFF marker
+   and own qualification bit clear, otherwise33. */
+
+uint f33_classify_paired_source_delayed_difference_ba(void)
+
+{
+  if (((DAT_febe7bc2 != 'Z') && (DAT_febe7bc3 != 'Z')) ||
+     (f33_paired_source_monitor_status[1] != '\0')) {
+    return 0x44;
+  }
+  if ((DAT_febe7554 >> 4 & 1) != 0) {
+    return 0x22;
+  }
+  if (((DAT_febe7554 == 0) && (((int16_t)DAT_febe7b46) == -1)) && ((DAT_febe71ec >> 8 & 1) == 0)) {
+    return 0x11;
+  }
+  return 0x33;
+}
+
+
+
 /* f33_report_diagnostic_healthy_observed(0x2b); whole-body shape-verified. The literal is the
    encoded diagnostic event, not a recovered OEM name. */
 
@@ -2633,6 +2696,27 @@ void FUN_0003dcda(void)
   }
   f33_report_diagnostic_event_failure(event,10);
   return;
+}
+
+
+
+/* Changed bit fails under admission and primary-zero; pass requires whole7554 zero, ownFFFF marker
+   and own qualification bit clear, otherwise33. */
+
+uint f33_classify_paired_source_delayed_difference_bb(void)
+
+{
+  if (((DAT_febe7bc2 != 'Z') && (DAT_febe7bc3 != 'Z')) ||
+     (f33_paired_source_monitor_status[1] != '\0')) {
+    return 0x44;
+  }
+  if ((DAT_febe7554 >> 5 & 1) != 0) {
+    return 0x22;
+  }
+  if (((DAT_febe7554 == 0) && (((int16_t)DAT_febe7b46) == -1)) && ((DAT_febe71ec >> 8 & 1) == 0)) {
+    return 0x11;
+  }
+  return 0x33;
 }
 
 
