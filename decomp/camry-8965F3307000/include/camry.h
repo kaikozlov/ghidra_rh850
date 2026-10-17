@@ -153,5 +153,9 @@ uint32_t f33_nvm_step_acquisition_pass(void);
 void f33_nvm_run_bounded_initial_acquisition(void);
 uint32_t f33_priority_mask_enter(uint32_t requested_mask);
 void f33_priority_mask_restore(uint32_t saved_mask);
+uint32_t FUN_000d1da0(uint32_t requested_mask);
+void FUN_000d1dc6(uint32_t saved_mask);
+void FUN_0006a45e(void);
+void FUN_0006a4c4(void);
 uint32_t f33_dataflash_copy_words_ecc(
     uint32_t dataflash_offset, uint32_t destination, uint32_t byte_count);

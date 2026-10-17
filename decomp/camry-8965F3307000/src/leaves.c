@@ -2953,6 +2953,41 @@ void f33_priority_mask_restore(uint32_t saved_mask) {
     camry_pmr = saved_mask;
 }
 
+uint32_t FUN_000d1da0(uint32_t requested_mask) {
+    return f33_priority_mask_enter(requested_mask);
+}
+
+void FUN_000d1dc6(uint32_t saved_mask) {
+    f33_priority_mask_restore(saved_mask);
+}
+
+void FUN_0006a45e(void) {
+    uint32_t previous = camry_pmr;
+    uint32_t count;
+    if ((int32_t)previous >= (int32_t)0xff00)
+        return;
+    count = camry_read32(camry_gp - 0x7e24u);
+    if (count < 0x100u) {
+        camry_write32(camry_gp - 0x7e24u, count + 1u);
+        camry_write32(camry_gp + (count << 2) - 0x7e20u, previous);
+    }
+    camry_pmr = 0xff00u;
+}
+
+void FUN_0006a4c4(void) {
+    uint32_t count = camry_read32(camry_gp - 0x7e24u);
+    uint32_t slot;
+    uint32_t saved;
+    if (count == 0u)
+        return;
+    count -= 1u;
+    slot = camry_gp + (count << 2) - 0x7e20u;
+    saved = camry_read32(slot);
+    camry_write32(slot, 0xffffu);
+    camry_write32(camry_gp - 0x7e24u, count);
+    camry_pmr = saved;
+}
+
 uint32_t f33_dataflash_copy_words_ecc(
     uint32_t dataflash_offset, uint32_t destination, uint32_t byte_count) {
     uint32_t source = dataflash_offset + 0xff200000u;

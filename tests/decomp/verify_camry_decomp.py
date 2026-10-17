@@ -134,6 +134,7 @@ def compile_sources(directory: Path, optimize: str = "-O2") -> ctypes.CDLL:
             "-Wno-pointer-to-int-cast", "-Wno-int-to-pointer-cast",
             "-Wno-bitwise-op-parentheses",             "-Wno-sign-compare", "-Wno-parentheses",
             "-Wno-pointer-sign", "-Wno-incompatible-pointer-types",
+            "-Wno-unused-but-set-variable",
             "-DCAMRY_HOST",
             "-I", str(INCLUDE),
             "-dynamiclib", "-o", str(library),

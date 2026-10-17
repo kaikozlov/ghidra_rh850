@@ -141,7 +141,7 @@ _SKIP_CALLS = {
     "camry_host_ptr", "camry_host_addr", "__synchronize",
 }
 _BLOCK = re.compile(
-    r"->|\.[A-Za-z_]|\bcode\s*\*|"
+    r"->|\.[A-Za-z]|\bcode\s*\*|"
     r"\((?:unsigned int|int|uint|undefined4|ulong|long)\)\s*\(\s*&|"
     r"\b(?:unaff_|extraout_|in_r\d+|in_E|in_PSW|in_FPEC|"
     r"CONCAT|SUB4|SBORROW|OVERFLOW)"
@@ -754,9 +754,72 @@ def _rewrite_function_indexes(code: str) -> str:
     return "".join(pieces)
 
 
+_BITFIELD = re.compile(r"\b([A-Za-z_][A-Za-z0-9_]*)\._(\d+)_(\d+)_")
+_BIT_WIDTHS = {1: "uint8_t", 2: "uint16_t", 4: "uint32_t"}
+_LOCAL_SIZES = {
+    "undefined1": 1, "byte": 1, "uchar": 1, "char": 1, "code": 1, "bool": 1,
+    "undefined": 1,
+    "undefined2": 2, "ushort": 2, "short": 2,
+    "undefined4": 4, "uint": 4, "int": 4, "ulong": 4,
+    "undefined8": 8, "ulonglong": 8, "longlong": 8,
+}
+
+
+def _local_sizes(code: str) -> dict[str, int]:
+    sizes: dict[str, int] = {}
+    pattern = re.compile(
+        r"\b(undefined[1248]|undefined|byte|uchar|ushort|short|uint|ulong|ulonglong|"
+        r"longlong|int|char|code|bool)\s+([A-Za-z_][A-Za-z0-9_]*)\s*;"
+    )
+    for match in pattern.finditer(code):
+        width = _LOCAL_SIZES.get(match.group(1))
+        if width is not None:
+            sizes[match.group(2)] = width
+    return sizes
+
+
+def _rewrite_bitfields(code: str) -> str:
+    """Ghidra `name._offset_size_` is a byte overlay, not a struct field."""
+    addresses = _absolute_names()
+    locals = _local_sizes(code)
+
+    def replace(match: re.Match[str]) -> str:
+        name = match.group(1)
+        offset = int(match.group(2))
+        size = int(match.group(3))
+        ctype = _BIT_WIDTHS.get(size)
+        if ctype is None:
+            return match.group(0)
+        address = addresses.get(name)
+        if address is not None:
+            target = (address + offset) & 0xFFFFFFFF
+            return f"(*((volatile {ctype} *)camry_host_ptr(0x{target:x}u)))"
+        if locals.get(name, -1) < offset + size:
+            return match.group(0)
+        return f"(*(({ctype} *)((uint8_t *)&{name} + {offset}u)))"
+
+    return _BITFIELD.sub(replace, code)
+
+
+def _rewrite_thunk_calls(code: str) -> str:
+    signature = _c_signature(code)
+    match = re.search(r"\b(thunk_[A-Za-z_][A-Za-z0-9_]*)\s*\(", signature)
+    if match is None:
+        return code
+    name = match.group(1)
+    target = name[len("thunk_"):]
+    head, sep, body = code.partition("{")
+    if not sep:
+        return code
+    body = re.sub(rf"\b{name}\b", target, body)
+    return head + sep + body
+
+
 def _rewrite_body(code: str) -> str:
     signature = _c_signature(code)
     pointers = _pointer_names(signature, code)
+    code = _rewrite_bitfields(code)
+    code = _rewrite_thunk_calls(code)
     code = _IDIOM.sub(r"((\1 < 0) || (\2 < 0))", code)
     code = _rewrite_indexed(code)
     code = _rewrite_addresses(code, pointers)
@@ -958,6 +1021,15 @@ def _oracle_addresses() -> set[int]:
     return found
 
 
+def _prototype_names() -> set[str]:
+    header = (ROOT / "include" / "camry.h").read_text(encoding="utf-8")
+    return set(re.findall(
+        r"^[A-Za-z_][A-Za-z0-9_ \t\*]*\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(",
+        header,
+        flags=re.M,
+    ))
+
+
 def _self_call_count(row: dict) -> int:
     return sum(
         1
@@ -1104,6 +1176,7 @@ def _compile_corpus(destination: Path) -> subprocess.CompletedProcess[str]:
             "-Wno-pointer-to-int-cast", "-Wno-int-to-pointer-cast",
             "-Wno-bitwise-op-parentheses",             "-Wno-sign-compare", "-Wno-parentheses",
             "-Wno-pointer-sign", "-Wno-incompatible-pointer-types",
+            "-Wno-unused-but-set-variable",
             "-DCAMRY_HOST", "-I", str(ROOT / "include"),
             "-o", "/dev/null", str(destination),
         ],
@@ -1121,6 +1194,7 @@ def cmd_corpus(_args: argparse.Namespace) -> int:
     _meta, functions = load_corpus(REPO_ROOT / metadata["decompiler_corpus"])
     matched_rows = load_matched()
     defined = {row["name"] for row in matched_rows if row.get("form") != "corpus"}
+    defined |= _prototype_names()
     previous = {_address(row["addr"]) for row in matched_rows if row.get("form") == "corpus"}
     banned: set[str] = set()
     selected = _select_corpus(functions, defined, banned)
