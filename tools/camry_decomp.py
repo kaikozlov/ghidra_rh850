@@ -794,6 +794,14 @@ def _oracle_addresses() -> set[int]:
     return found
 
 
+def _self_call_count(row: dict) -> int:
+    return sum(
+        1
+        for match in _CALL.finditer(_strip_comments(row["decompiled_c"]))
+        if match.group(1) == row["name"]
+    )
+
+
 def _select_corpus(
     functions: list[dict],
     defined: set[str],
@@ -801,13 +809,16 @@ def _select_corpus(
     roots: set[int] | None = None,
 ) -> dict[int, dict]:
     by_addr = {int(row["entry_addr"], 16): row for row in functions}
-    eligible = {
-        row["name"]: row
-        for row in functions
-        if row["name"] not in defined
-        and row["name"] not in banned
-        and _eligible(row["decompiled_c"])
-    }
+    eligible: dict[str, dict] = {}
+    for row in functions:
+        if row["name"] in defined or row["name"] in banned or not _eligible(row["decompiled_c"]):
+            continue
+        current = eligible.get(row["name"])
+        # Same-name tail calls are `mov target; jmp [r12]` and decompile as a self-call.
+        # Keep the body that does not call itself.
+        if current is not None and _self_call_count(row) > _self_call_count(current):
+            continue
+        eligible[row["name"]] = row
     changed = True
     while changed:
         changed = False
