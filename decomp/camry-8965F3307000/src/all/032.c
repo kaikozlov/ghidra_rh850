@@ -2763,6 +2763,44 @@ void FUN_000ca312(short param_1,short param_2)
 
 
 
+void FUN_000ca344(void)
+
+{
+  byte bVar1;
+  uint32_t puVar2;
+  puVar2 = 0xfebeb800u;
+  DAT_febec68a = 0;
+  DAT_febec6a0 = 0;
+  DAT_febec6b1 = 0;
+  DAT_febec6b0 = 0;
+  DAT_febec69f = 0;
+  DAT_febec6af = 0;
+  DAT_febec6ae = 1;
+  DAT_febec6a1 = 0;
+  DAT_febec68e = DAT_000b048a * (ushort)DAT_000b0493;
+  DAT_febec6ad = 0;
+  DAT_febec6ac = 0;
+  DAT_febec690 = DAT_000b049a * (ushort)DAT_000b0496;
+  DAT_febec6ab = 0;
+  DAT_febec6aa = 0;
+  DAT_febec688 = 0;
+  FUN_000ca312((*((volatile uint16_t *)camry_host_ptr(0xb049au))), (*((volatile uint16_t *)camry_host_ptr(0xb048au))));
+  (*((short *)camry_host_ptr((uint32_t)(puVar2 + 0xe92)))) = DAT_000b048a;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(0xea2))))) = DAT_000b0493;
+  (*((short *)camry_host_ptr((uint32_t)(puVar2 + 0xe94)))) = DAT_000b049a;
+  bVar1 = DAT_000b0496;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + 0xe9c)))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(0xea3))))) = bVar1;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar2 + 0xe9a)))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(0xe9e))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(0xea5))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(0xea4))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(0xeaf)))));
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(0xea6))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(0xeaf)))));
+  return;
+}
+
+
+
 void FUN_000ca3f6(void)
 
 {
@@ -3469,6 +3507,41 @@ void FUN_000cb516(short param_1,short param_2)
   (*((short *)camry_host_ptr((uint32_t)(puVar1 + 0xfac)))) = -1 - param_1;
   (*((short *)camry_host_ptr((uint32_t)(puVar1 + 0xfaa)))) = -1 - param_2;
   FUN_000d1dc6(uVar2);
+  return;
+}
+
+
+
+void FUN_000cb548(void)
+
+{
+  short sVar1;
+  byte bVar2;
+  uint32_t puVar3;
+  puVar3 = 0xfebeb800u;
+  DAT_febec79c = 0;
+  DAT_febec7be = 0;
+  DAT_febec7a2 = DAT_000b04c4 * (ushort)DAT_000b04cd;
+  DAT_febec7b4 = 0;
+  DAT_febec7b5 = 0;
+  DAT_febec7bf = 0;
+  DAT_febec7a4 = DAT_000b04d4 * (ushort)DAT_000b04d0;
+  DAT_febec7c0 = 0;
+  DAT_febec7b3 = 0;
+  DAT_febec79e = 0;
+  FUN_000cb516((*((volatile uint16_t *)camry_host_ptr(0xb04d4u))), (*((volatile uint16_t *)camry_host_ptr(0xb04c4u))));
+  sVar1 = DAT_000b04c4;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(0xfb9))))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(0xfb2))))) = 0;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + 0xfae)))) = 0;
+  (*((short *)camry_host_ptr((uint32_t)(puVar3 + 0xfa6)))) = sVar1;
+  bVar2 = DAT_000b04cd;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar3 + 0xfb0)))) = 0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(0xfb6))))) = bVar2;
+  (*((short *)camry_host_ptr((uint32_t)(puVar3 + 0xfa8)))) = DAT_000b04d4;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(0xfb7))))) = DAT_000b04d0;
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(0xfba))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(0xfb5)))));
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(0xfb8))))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar3 + (uint32_t)(0xfb5)))));
   return;
 }
 

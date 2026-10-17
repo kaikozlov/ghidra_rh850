@@ -2103,6 +2103,10 @@ def _narrow(origin: tuple, cast: str) -> tuple:
         elif previous == "sbyte" and cast == "short":
             cast = "sbyte"
         return ("entry", origin[1], cast)
+    if origin[0] == "mem" and not origin[3]:
+        width = origin[1]
+        if cast == "byte" and width == 1 or cast == "ushort" and width <= 2:
+            return origin
     return _FAIL
 
 
@@ -2223,6 +2227,14 @@ def _transfer(state: dict[int, set], inst) -> dict[int, set]:
         # stsr sr11, rN, 2 reads PMR. The value is the register's new origin.
         _write_origin(cur, args[0], ("sreg", 11, 2))
         return cur
+    if name in {"ld8s", "ld8u", "ld16s", "ld16u", "ld32"} and len(args) >= 3 and args[2] is not None:
+        loaded = {"ld8s": (1, True), "ld8u": (1, False), "ld16s": (2, True), "ld16u": (2, False), "ld32": (4, False)}
+        base = cur.get(args[1]) if args[1] is not None else None
+        if base is not None and len(base) == 1 and next(iter(base))[0] == "imm":
+            addr = (next(iter(base))[1] + args[2]) & 0xFFFFFFFF
+            width, signed = loaded[name]
+            _write_origin(cur, args[0], ("mem", width, addr, signed))
+            return cur
     if name in _NARROW and args and args[0] in cur and len(cur[args[0]]) == 1:
         cur[args[0]] = {_narrow(next(iter(cur[args[0]])), _NARROW[name])}
         return cur
@@ -2336,6 +2348,15 @@ def _emit_origin(origin: set, params: list[str], types: list[str]) -> str | None
         if value >= 0x80000000:
             return f"(int)0x{value:x}"
         return f"0x{value:x}"
+    if item[0] == "mem":
+        width, addr, signed = item[1], item[2] & 0xFFFFFFFF, item[3]
+        ctype = {1: "uint8_t", 2: "uint16_t", 4: "uint32_t"}[width]
+        expr = f"(*((volatile {ctype} *)camry_host_ptr(0x{addr:x}u)))"
+        if signed and width == 1:
+            return f"(int)(int8_t){expr}"
+        if signed and width == 2:
+            return f"(int)(int16_t){expr}"
+        return expr
     if item[0] != "entry":
         return None
     index = item[1] - 6

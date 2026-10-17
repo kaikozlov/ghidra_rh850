@@ -3913,7 +3913,7 @@
 {"addr": "0x77380", "name": "FUN_00077380", "status": "converted"}
 {"addr": "0x773fe", "name": "FUN_000773fe", "status": "unconvertible"}
 {"addr": "0x7749e", "name": "FUN_0007749e", "status": "unconvertible"}
-{"addr": "0x774ee", "name": "FUN_000774ee", "status": "unconvertible"}
+{"addr": "0x774ee", "name": "FUN_000774ee", "status": "converted"}
 {"addr": "0x77548", "name": "FUN_00077548", "status": "converted"}
 {"addr": "0x7759a", "name": "FUN_0007759a", "status": "converted"}
 {"addr": "0x775ca", "name": "FUN_000775ca", "status": "unconvertible"}
@@ -6896,7 +6896,7 @@
 {"addr": "0xca1a8", "name": "FUN_000ca1a8", "status": "converted"}
 {"addr": "0xca242", "name": "FUN_000ca242", "status": "converted"}
 {"addr": "0xca312", "name": "FUN_000ca312", "status": "converted"}
-{"addr": "0xca344", "name": "FUN_000ca344", "status": "unconvertible"}
+{"addr": "0xca344", "name": "FUN_000ca344", "status": "converted"}
 {"addr": "0xca3f6", "name": "FUN_000ca3f6", "status": "converted"}
 {"addr": "0xca550", "name": "FUN_000ca550", "status": "converted"}
 {"addr": "0xca558", "name": "FUN_000ca558", "status": "converted"}
@@ -6915,7 +6915,7 @@
 {"addr": "0xcb3f4", "name": "FUN_000cb3f4", "status": "converted"}
 {"addr": "0xcb45e", "name": "FUN_000cb45e", "status": "converted"}
 {"addr": "0xcb516", "name": "FUN_000cb516", "status": "converted"}
-{"addr": "0xcb548", "name": "FUN_000cb548", "status": "unconvertible"}
+{"addr": "0xcb548", "name": "FUN_000cb548", "status": "converted"}
 {"addr": "0xcb5e4", "name": "FUN_000cb5e4", "status": "converted"}
 {"addr": "0xcb664", "name": "FUN_000cb664", "status": "converted"}
 {"addr": "0xcb73a", "name": "FUN_000cb73a", "status": "converted"}

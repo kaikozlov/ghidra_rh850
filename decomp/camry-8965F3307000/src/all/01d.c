@@ -4459,6 +4459,33 @@ undefined * FUN_00077380(void)
 
 
 
+/* WARNING: Inlined function: f33_nvm_payload_length */
+
+void FUN_000774ee(int param_1)
+
+{
+  uint32_t puVar1;
+  puVar1 = 0x23dfcu;
+  if ((param_1 == 1) && (param_1 = camry_host_addr(FUN_00077380()), param_1 == 1)) {
+    f33_nvm_payload_chunks_remaining = f33_nvm_payload_chunks_remaining - 1;
+    if (f33_nvm_payload_chunks_remaining == 0) {
+      if (0x20 < (*((ushort *)camry_host_ptr((uint32_t)(puVar1 + (uint)DAT_febf6c44 * 6 + 0x383a))))) {
+        param_1 = FUN_0007749e(DAT_febf6c44);
+      }
+    }
+    else {
+      param_1 = FUN_000773fe((*((volatile uint16_t *)camry_host_ptr(0xfebf6c44u))));
+    }
+  }
+  if (param_1 != 2) {
+    ((void)(param_1), FUN_0007849e());
+    FUN_000772f8();
+  }
+  return;
+}
+
+
+
 undefined * FUN_00077548(void)
 
 {
