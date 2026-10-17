@@ -1917,6 +1917,24 @@ void FUN_00003256(char *param_1)
 
 
 
+void FUN_000032a0(char *param_1)
+
+{
+  uint uVar1;
+  
+  uVar1 = 0;
+  do {
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x8d90u + (uint32_t)(uVar1 * 8) * 1u)))) == *param_1) {
+      (*(int (*)())camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x8d94u + (uint32_t)(uVar1 * 2) * 4u))))))(*param_1,*(undefined2 *)(param_1 + 4));
+      return;
+    }
+    uVar1 = uVar1 + 1;
+  } while (uVar1 < 2);
+  return;
+}
+
+
+
 /* Return0/write class byte for first permitted8DA0 range, else1/output unchanged. Require nonzero
    length and unsigned start<=end after modulo32 end=start+length-1. Check kind-mask bit(kind&31)
    and inclusive bounds. Actual classes:0 CodeFlash windows10000..17DFF/18000..FFDFF;1 RAM

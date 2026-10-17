@@ -1,6 +1,89 @@
 #include "common.h"
 
 
+/* WARNING: Removing unreachable block (ram,0x000d00de) */
+/* WARNING: Removing unreachable block (ram,0x000d0096) */
+/* WARNING: Removing unreachable block (ram,0x000d0074) */
+
+void FUN_000d0030(void)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  
+  iVar2 = -DAT_febeac24;
+  DAT_febecc22 = (short)(*((int *)camry_host_ptr((uint32_t)((int)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xb148cu + (uint32_t)(DAT_febeac3c & 1) * 4u)))) + 8))));
+  iVar1 = (int)DAT_febecc22;
+  if (DAT_febecc20 == '\0') {
+    DAT_febecc20 = '\x01';
+    DAT_febecc08 = iVar2;
+  }
+  iVar3 = (int)DAT_febecc1c;
+  DAT_febecc00 = ((int)DAT_febecc1a * (int)DAT_febecc18) / 0x400;
+  if (iVar3 == 0) {
+    DAT_febecc04 = 0;
+    DAT_febecc00 = 0;
+  }
+  else {
+    DAT_febecc04 = (DAT_febecc00 << 0x12) / 0x168;
+    if (iVar3 != 0) {
+      if (DAT_febecc04 == -0x80000000 && iVar3 == -1) {
+        DAT_febecc04 = -0x80000000;
+      }
+      else {
+        DAT_febecc04 = DAT_febecc04 / iVar3;
+      }
+    }
+  }
+  DAT_febecc0c = DAT_febecc08 + DAT_febeac24;
+  if (DAT_febecc0c - DAT_febecc04 < 0 ==
+      (DAT_febecc0c < 0 != DAT_febecc04 < 0 && DAT_febecc04 < 0 == DAT_febecc0c - DAT_febecc04 < 0)
+      && DAT_febecc0c != DAT_febecc04) {
+    DAT_febecc08 = DAT_febecc04 + iVar2;
+    DAT_febecc10 = DAT_febecc00;
+  }
+  else if (DAT_febecc0c + DAT_febecc04 < 0 ==
+           (DAT_febecc0c < 0 != -DAT_febecc04 < 0 &&
+           -DAT_febecc04 < 0 == DAT_febecc0c + DAT_febecc04 < 0)) {
+    DAT_febecc10 = (DAT_febecc0c * iVar3 * 0x168) / 0x40000;
+  }
+  else {
+    DAT_febecc08 = iVar2 - DAT_febecc04;
+    DAT_febecc10 = -DAT_febecc00;
+  }
+  DAT_febecc14 = (DAT_febecc14 + DAT_febecc10) - (int)DAT_febecc1e;
+  iVar3 = (*((int *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xb148cu + (uint32_t)(DAT_febeac3c & 1) * 4u)))))));
+  iVar2 = DAT_febecc14 * 0x400;
+  if (iVar3 != 0) {
+    if (iVar2 == -0x80000000 && iVar3 == -1) {
+      iVar2 = 0;
+    }
+    else {
+      iVar2 = iVar2 / iVar3;
+    }
+  }
+  iVar3 = (int)(short)iVar2;
+  DAT_febecc1e = (short)iVar2;
+  if (DAT_febecbec == '\x01') {
+    if (iVar3 - iVar1 < 0 != (iVar3 < 0 != iVar1 < 0 && iVar1 < 0 == iVar3 - iVar1 < 0) ||
+        iVar3 == iVar1) {
+      iVar2 = -iVar1;
+      if (iVar3 + iVar1 < 0 == (iVar3 < 0 != iVar2 < 0 && iVar2 < 0 == iVar3 + iVar1 < 0) &&
+          iVar3 != iVar2) {
+        iVar2 = iVar3;
+      }
+      DAT_febecc22 = (short)iVar2;
+    }
+  }
+  else {
+    DAT_febecc22 = 0;
+  }
+  return;
+}
+
+
+
 void FUN_000d0120(void)
 
 {

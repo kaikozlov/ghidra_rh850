@@ -1038,7 +1038,7 @@ undefined4 FUN_0009901a(int param_1,short param_2)
       uVar5 = 0x5a;
       local_18[1] = 0;
       FUN_00099004(*(undefined4 *)(((undefined *)camry_host_ptr(0x2b22cu)) + uVar6 * 8),auStack_14);
-      ((void)((&PTR_DAT_0002b228)[uVar6 * 2]), thunk_FUN_00082288());
+      ((void)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x2b228u + (uint32_t)(uVar6 * 2) * 4u))))), thunk_FUN_00082288());
     }
     else {
       uVar4 = 0x22;

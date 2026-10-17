@@ -4627,6 +4627,88 @@ void f33_return_only_stub_377ec(void)
 
 
 
+/* For E741=11/22 use signed-axis70208 curve selected byE5C3&1 and supplied absolute magnitude;
+   otherwise choose configured default. Publish6CE2.37840 supplies the saturated absolute E744 in
+   actualR6. */
+
+void f33_map_additional_second_axis_envelope(short magnitude)
+
+{
+  uint32_t puVar1;
+  undefined2 uStack_6;
+  
+  puVar1 = 0xfebeb800u;
+  if ((DAT_febee741 == '\x11') || (DAT_febee741 == '\"')) {
+    puVar1 = 0xfebeb800u;
+    FUN_00070208(((short *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x31eacu + (uint32_t)(DAT_febee5c3 & 1) * 4u))))))), (int)magnitude, &uStack_6);
+  }
+  else {
+    uStack_6 = (*((undefined2 *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x31ea4u + (uint32_t)(DAT_febee5c3 & 1) * 4u)))) + 2))));
+  }
+  (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb4e2u + (uint32_t)((int)puVar1)))))) = uStack_6;
+  return;
+}
+
+
+
+/* Only8A20==1 refreshes. Saturate s32 E744 to +/-32767, take abs, store6CE0 and pass actualR6
+   to377EE. Choose mapped6CE2 only when qualifier6EA8=5A, otherwise20480; lower-bound by selected
+   signed calibration and publish6CE4. Closed gate retains all state; paired first-axis feedback
+   consumes this prior envelope. */
+
+void f33_refresh_shared_second_axis_envelope(void)
+
+{
+  short sVar1;
+  byte bVar2;
+  short sVar3;
+  int iVar4;
+  uint32_t puVar5;
+  int iVar6;
+  
+  puVar5 = 0xfebeb800u;
+  if (DAT_febe8a20 == '\x01') {
+    if (DAT_febee744 + -0x7fff < 0 == (DAT_febee744 < 0 && -1 < DAT_febee744 + -0x7fff) &&
+        DAT_febee744 != 0x7fff) {
+      DAT_febe6ce0 = 0x7fff;
+    }
+    else {
+      iVar4 = DAT_febee744;
+      if (DAT_febee744 + 0x7fff < 0 != (-1 < DAT_febee744 && DAT_febee744 + 0x7fff < 0)) {
+        iVar4 = -0x7fff;
+      }
+      DAT_febe6ce0 = (short)iVar4;
+      iVar4 = (int)DAT_febe6ce0;
+      if (iVar4 + 0x7fff < 0 == (-1 < iVar4 && iVar4 + 0x7fff < 0) && iVar4 != -0x7fff) {
+        if (DAT_febe6ce0 < 0) {
+          DAT_febe6ce0 = -DAT_febe6ce0;
+        }
+      }
+      else {
+        DAT_febe6ce0 = 0x7fff;
+      }
+    }
+    f33_map_additional_second_axis_envelope(DAT_febe6ce0);
+    sVar1 = DAT_000317ac;
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xffffb6a8u + (uint32_t)((int)puVar5) * 1u)))) == 'Z') {
+      sVar1 = (*((short *)camry_host_ptr((uint32_t)((0xffffb4e2u + (uint32_t)((int)puVar5))))));
+    }
+    iVar4 = (int)sVar1;
+    bVar2 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar5 + (uint32_t)(0x2dc3)))));
+    (*((int *)camry_host_ptr((uint32_t)((0xffffb4e8u + (uint32_t)((int)puVar5)))))) = iVar4;
+    sVar3 = (*((short *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x31ea4u + (uint32_t)(bVar2 & 1) * 4u)))))));
+    iVar6 = (int)sVar3;
+    if (iVar4 - iVar6 < 0 == (iVar4 < 0 != iVar6 < 0 && iVar6 < 0 == iVar4 - iVar6 < 0) &&
+        iVar4 != iVar6) {
+      sVar3 = sVar1;
+    }
+    (*((short *)camry_host_ptr((uint32_t)((0xffffb4e4u + (uint32_t)((int)puVar5)))))) = sVar3;
+  }
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */

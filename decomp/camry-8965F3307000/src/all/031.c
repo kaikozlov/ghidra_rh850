@@ -1334,6 +1334,46 @@ void f33_condition_assist_torque(void)
 
 
 
+/* WARNING: Removing unreachable block (ram,0x000c4ee2) */
+/* Produce C114 from previous BF40 before current base surface/slope publication. Caller AC31
+   admission can retain this coefficient while torque recurrences advance. Conditioner blend C114
+   consumes previous BF40; caller generation admission can hold it while input recurrences and base
+   assistance advance. */
+
+void f33_update_torque_conditioner_slope_blend(void)
+
+{
+  short sVar1;
+  uint32_t puVar2;
+  short sVar3;
+  int iVar4;
+  short *points;
+  int iVar5;
+  
+  sVar1 = DAT_febebf40;
+  puVar2 = 0xfebeb800u;
+  iVar5 = (int)DAT_febec1aa;
+  iVar4 = (int)DAT_febec1a8 + (DAT_febec156 & 3) * 2;
+  points = ((short *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd2f3cu + (uint32_t)(iVar4) * 4u))))));
+  iVar4 = f33_interpolate_signed_sentinel_curve(((short *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd2f38u + (uint32_t)(iVar4) * 4u)))))),DAT_febebf40);
+  (*((short *)camry_host_ptr((uint32_t)(puVar2 + 0x91a)))) = (short)iVar4;
+  iVar4 = f33_interpolate_signed_sentinel_curve(points,sVar1);
+  (*((short *)camry_host_ptr((uint32_t)(puVar2 + 0x918)))) = (short)iVar4;
+  sVar3 = (short)(((iVar4 - (*((short *)camry_host_ptr((uint32_t)(puVar2 + 0x91a))))) * iVar5) / 0x400) +
+          (*((short *)camry_host_ptr((uint32_t)(puVar2 + 0x91a))));
+  iVar4 = (int)sVar3;
+  (*((short *)camry_host_ptr((uint32_t)(puVar2 + 0x916)))) = sVar3;
+  sVar1 = 0x400;
+  if ((iVar4 + -0x400 < 0 != (iVar4 < 0 && -1 < iVar4 + -0x400) || iVar4 == 0x400) &&
+     (sVar1 = sVar3, iVar4 < 1)) {
+    sVar1 = 0;
+  }
+  (*((short *)camry_host_ptr((uint32_t)(puVar2 + 0x914)))) = sVar1;
+  return;
+}
+
+
+
 /* WARNING: Removing unreachable block (ram,0x000c4f5c) */
 /* WARNING: Removing unreachable block (ram,0x000c4f58) */
 /* Threshold is unsigned AC84 only for ADFA.high0500 and AC41==5A, otherwise signed AC4C. Previous
@@ -2287,6 +2327,25 @@ void f33_fill_constant_block_c589e(void)
 
 
 
+void FUN_000c5910(void)
+
+{
+  uint32_t puVar1;
+  undefined4 uVar2;
+  undefined2 local_8;
+  undefined2 uStack_6;
+  
+  puVar1 = 0xfebeb800u;
+  FUN_000d097a(((ushort *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd30e8u + (uint32_t)(DAT_febec156 & 3) * 4u))))))), DAT_febeadf6, &local_8, &uStack_6);
+  uVar2 = FUN_000d1da0(0xffc0);
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + 0x9a8)))) = local_8;
+  (*((undefined2 *)camry_host_ptr((uint32_t)(puVar1 + 0x9aa)))) = uStack_6;
+  FUN_000d1dc6(uVar2);
+  return;
+}
+
+
+
 /* Constant-block fill: 53 literal assignments into one contiguous cell block; shape-verified.
    Literals are default/reset values; cell meanings are not recovered. */
 
@@ -2346,6 +2405,106 @@ void f33_fill_constant_block_c59ae(void)
   DAT_febec232 = 0;
   DAT_febec234 = 0;
   DAT_febec236 = 0;
+  return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x000c5c0a) */
+/* WARNING: Removing unreachable block (ram,0x000c5bd0) */
+/* WARNING: Removing unreachable block (ram,0x000c5bba) */
+/* WARNING: Removing unreachable block (ram,0x000c5bac) */
+/* WARNING: Removing unreachable block (ram,0x000c5b98) */
+/* WARNING: Removing unreachable block (ram,0x000c5b94) */
+/* WARNING: Removing unreachable block (ram,0x000c5b90) */
+/* WARNING: Removing unreachable block (ram,0x000c5b4a) */
+/* WARNING: Removing unreachable block (ram,0x000c5b40) */
+/* WARNING: Removing unreachable block (ram,0x000c5b32) */
+/* WARNING: Removing unreachable block (ram,0x000c5b24) */
+/* WARNING: Removing unreachable block (ram,0x000c5b16) */
+
+void FUN_000c5a84(void)
+
+{
+  bool bVar1;
+  int iVar2;
+  int iVar3;
+  int iVar4;
+  int iVar5;
+  short sVar6;
+  int iVar7;
+  int *piVar8;
+  
+  iVar5 = (int)DAT_febec22c;
+  iVar7 = (int)DAT_000afb20;
+  DAT_febec1d4 = DAT_febec1c8;
+  DAT_febec1d8 = DAT_febec1cc;
+  DAT_febec234 = 0;
+  sVar6 = DAT_000afb20;
+  if ((iVar5 - iVar7 < 0 != (iVar5 < 0 != iVar7 < 0 && iVar7 < 0 == iVar5 - iVar7 < 0) ||
+       iVar5 == iVar7) &&
+     (iVar7 = iVar5 + DAT_000afb20, bVar1 = -(int)DAT_000afb20 < 0, sVar6 = DAT_febec22c,
+     iVar7 < 0 != (iVar5 < 0 != bVar1 && bVar1 == iVar7 < 0))) {
+    sVar6 = -DAT_000afb20;
+  }
+  piVar8 = ((int *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xb1454u + (uint32_t)(DAT_febeac3c & 1) * 4u))))));
+  iVar4 = *piVar8;
+  iVar5 = DAT_febec1c0 - (iVar4 * DAT_febec22a - piVar8[1] * (int)DAT_febec22e) / 2;
+  iVar7 = DAT_febec1c8 -
+          ((DAT_febec1d0 * (*((short *)camry_host_ptr((uint32_t)((int)camry_host_addr(piVar8) + 10))))) / 2 +
+          ((short)piVar8[2] * DAT_febec1cc) / 2 + DAT_febec1c0) / 0x800;
+  iVar2 = (int)DAT_febec20a - (int)(short)(DAT_febec1c8 / 0x40);
+  iVar3 = -DAT_000afb08;
+  if ((((iVar5 + DAT_000afb08 < 0 ==
+         (iVar5 < 0 != iVar3 < 0 && iVar3 < 0 == iVar5 + DAT_000afb08 < 0) && iVar5 != iVar3) &&
+       (iVar5 - DAT_000afb08 < 0 !=
+        (iVar5 < 0 != DAT_000afb08 < 0 && DAT_000afb08 < 0 == iVar5 - DAT_000afb08 < 0))) &&
+      (iVar5 = -DAT_000afb0c,
+      iVar7 + DAT_000afb0c < 0 == (iVar7 < 0 != iVar5 < 0 && iVar5 < 0 == iVar7 + DAT_000afb0c < 0)
+      && iVar7 != iVar5)) &&
+     (((iVar7 - DAT_000afb0c < 0 !=
+        (iVar7 < 0 != DAT_000afb0c < 0 && DAT_000afb0c < 0 == iVar7 - DAT_000afb0c < 0) &&
+       (iVar5 = -DAT_000afb18,
+       iVar2 + DAT_000afb18 < 0 == (iVar2 < 0 != iVar5 < 0 && iVar5 < 0 == iVar2 + DAT_000afb18 < 0)
+       && iVar2 != iVar5)) &&
+      (iVar2 - DAT_000afb18 < 0 !=
+       (iVar2 < 0 != DAT_000afb18 < 0 && DAT_000afb18 < 0 == iVar2 - DAT_000afb18 < 0))))) {
+    DAT_febec1c0 = (iVar4 * DAT_febeac44 - piVar8[1] * (int)sVar6) / 2;
+    iVar5 = ((*((short *)camry_host_ptr((uint32_t)((int)camry_host_addr(piVar8) + 10)))) * DAT_febec1cc) / 2 +
+            ((short)piVar8[2] * DAT_febec1c8) / 2 + DAT_febec1c0;
+  }
+  else {
+    DAT_febec234 = 1;
+    DAT_febec1c0 = (iVar4 * DAT_febeac44) / 2;
+    iVar5 = DAT_febec1c0;
+  }
+  DAT_febec1c4 = iVar5 / 0x800;
+  DAT_febec1d0 = DAT_febec1cc;
+  DAT_febec1cc = DAT_febec1c8;
+  DAT_febec1c8 = DAT_febec1c4;
+  DAT_febec208 = DAT_febec200;
+  DAT_febec20a = (short)(DAT_febec1c4 / 0x40);
+  DAT_febec23a = DAT_febec238;
+  if (DAT_febec238 == '\0') {
+    DAT_febec238 = '\x01';
+    DAT_febec1b8 = 0;
+  }
+  else {
+    DAT_febec1b8 = (int)DAT_febec20a - (int)DAT_febec200;
+  }
+  DAT_febec1b0 = (DAT_febec1b8 * 0x4e2) / 0x10;
+  if (DAT_febec1b0 + -0x7fff < 0 == (DAT_febec1b0 < 0 && -1 < DAT_febec1b0 + -0x7fff) &&
+      DAT_febec1b0 != 0x7fff) {
+    DAT_febec204 = 0x7fff;
+  }
+  else {
+    DAT_febec204 = (undefined2)DAT_febec1b0;
+    if (DAT_febec1b0 + 0x7fff < 0 != (-1 < DAT_febec1b0 && DAT_febec1b0 + 0x7fff < 0)) {
+      DAT_febec204 = 0x8001;
+    }
+  }
+  DAT_febec200 = DAT_febec20a;
+  DAT_febec236 = DAT_febec236 | DAT_febec234;
   return;
 }
 
@@ -3118,6 +3277,90 @@ void f33_fill_constant_block_c65f0(void)
 
 
 
+/* WARNING: This is an inlined function */
+/* Same12-byte state and preserved R6 as C5106, feeding CE8DA. Exact94-byte body differs only in ROM
+   pointer/global displacements; calibration values remain producer-local. Inline real p-code so the
+   shared helper's typed argument remains connected in every caller. Prepare common gain state for
+   retained C2A4; exact body matches C5106 outside ROM/global displacement fields and preserves R6
+   into shared step. Local calibration meaning remains separate. */
+
+void f33_prepare_gain_parameters_c2a4(F33GainSlewState *state,uint mode)
+
+{
+  int iVar1;
+  ushort uVar2;
+  uchar uVar3;
+  ushort uVar4;
+  ushort uVar5;
+  ushort uVar6;
+  
+  if ((mode & 0xff) < 7) {
+    uVar3 = '\x02';
+    iVar1 = (short)(DAT_febeac3c & 1) * 7 + (mode & 0xff);
+    uVar2 = *(ushort *)(((undefined *)camry_host_ptr(0xd3130u)) + iVar1 * 0x10);
+    uVar6 = (*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd312cu + (uint32_t)(iVar1 * 4) * 4u)))))));
+    uVar5 = (*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd3134u + (uint32_t)(iVar1 * 4) * 4u)))))));
+    uVar4 = (*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd3128u + (uint32_t)(iVar1 * 4) * 4u)))))));
+  }
+  else {
+    uVar3 = '\x01';
+    uVar2 = DAT_febec29c;
+    uVar6 = DAT_febec2a0;
+    uVar5 = DAT_febec2a2;
+    uVar4 = DAT_febec29e;
+  }
+  state->down_step = uVar6;
+  state->up_step = uVar5;
+  state->down_target = uVar4;
+  state->up_target = uVar2;
+  state->direction = uVar3;
+  return;
+}
+
+
+
+/* WARNING: Inlined function: f33_prepare_gain_parameters_c2a4 */
+
+void FUN_000c666c(void)
+
+{
+  int iVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  F33GainSlewState local_10;
+  
+  puVar2 = 0xfebeb800u;
+  uVar3 = 7;
+  if (DAT_febecab7 == '\x01') {
+    uVar3 = (uint)DAT_febecb00;
+  }
+  local_10.current = DAT_febec2a4;
+  if (uVar3 < 7) {
+    local_10.direction = '\x02';
+    iVar1 = (short)(DAT_febeac3c & 1) * 7 + uVar3;
+    local_10.up_target = *(ushort *)(((undefined *)camry_host_ptr(0xd3130u)) + iVar1 * 0x10);
+    local_10.down_step = (*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd312cu + (uint32_t)(iVar1 * 4) * 4u)))))));
+    local_10.up_step = (*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd3134u + (uint32_t)(iVar1 * 4) * 4u)))))));
+    local_10.down_target = (*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd3128u + (uint32_t)(iVar1 * 4) * 4u)))))));
+  }
+  else {
+    local_10.direction = '\x01';
+    local_10.up_target = DAT_febec29c;
+    local_10.down_step = DAT_febec2a0;
+    local_10.up_step = DAT_febec2a2;
+    local_10.down_target = DAT_febec29e;
+  }
+  f33_step_retained_unsigned_gain(&local_10);
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0xaa0)))) = local_10.down_step;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0xaa2)))) = local_10.up_step;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0xa9e)))) = local_10.down_target;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0xa9c)))) = local_10.up_target;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0xaa4)))) = local_10.current;
+  return;
+}
+
+
+
 /* WARNING: Removing unreachable block (ram,0x000c66c2) */
 
 void FUN_000c66b4(short param_1)
@@ -3412,6 +3655,89 @@ void FUN_000c6be0(void)
   } while (((iVar1 < 0) || (iVar2 < 0)));
   DAT_febec2f6 = 0x400;
   DAT_febec2e8 = 0;
+  return;
+}
+
+
+
+/* WARNING: This is an inlined function */
+/* Same12-byte state and preserved R6 as C5106, feeding CE8DA. Exact94-byte body differs only in ROM
+   pointer/global displacements; calibration values remain producer-local. Inline real p-code so the
+   shared helper's typed argument remains connected in every caller. Prepare common gain state for
+   C2F4 with retained/default mode path and preserved R6; target values remain producer-local. */
+
+void f33_prepare_gain_parameters_c2f4(F33GainSlewState *state,uint mode)
+
+{
+  int iVar1;
+  ushort uVar2;
+  uchar uVar3;
+  ushort uVar4;
+  ushort uVar5;
+  ushort uVar6;
+  
+  if ((mode & 0xff) < 7) {
+    uVar3 = '\x02';
+    iVar1 = (short)(DAT_febeac3c & 1) * 7 + (mode & 0xff);
+    uVar2 = *(ushort *)(((undefined *)camry_host_ptr(0xd3210u)) + iVar1 * 0x10);
+    uVar6 = (*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd320cu + (uint32_t)(iVar1 * 4) * 4u)))))));
+    uVar5 = (*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd3214u + (uint32_t)(iVar1 * 4) * 4u)))))));
+    uVar4 = (*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd3208u + (uint32_t)(iVar1 * 4) * 4u)))))));
+  }
+  else {
+    uVar3 = '\x01';
+    uVar2 = DAT_febec2ec;
+    uVar6 = DAT_febec2f0;
+    uVar5 = DAT_febec2f2;
+    uVar4 = DAT_febec2ee;
+  }
+  state->down_step = uVar6;
+  state->up_step = uVar5;
+  state->down_target = uVar4;
+  state->up_target = uVar2;
+  state->direction = uVar3;
+  return;
+}
+
+
+
+/* WARNING: Inlined function: f33_prepare_gain_parameters_c2f4 */
+
+void FUN_000c6c82(void)
+
+{
+  int iVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  F33GainSlewState local_10;
+  
+  puVar2 = 0xfebeb800u;
+  uVar3 = 7;
+  if (DAT_febecab7 == '\x01') {
+    uVar3 = (uint)DAT_febecb00;
+  }
+  local_10.current = DAT_febec2f4;
+  if (uVar3 < 7) {
+    local_10.direction = '\x02';
+    iVar1 = (short)(DAT_febeac3c & 1) * 7 + uVar3;
+    local_10.up_target = *(ushort *)(((undefined *)camry_host_ptr(0xd3210u)) + iVar1 * 0x10);
+    local_10.down_step = (*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd320cu + (uint32_t)(iVar1 * 4) * 4u)))))));
+    local_10.up_step = (*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd3214u + (uint32_t)(iVar1 * 4) * 4u)))))));
+    local_10.down_target = (*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd3208u + (uint32_t)(iVar1 * 4) * 4u)))))));
+  }
+  else {
+    local_10.direction = '\x01';
+    local_10.up_target = DAT_febec2ec;
+    local_10.down_step = DAT_febec2f0;
+    local_10.up_step = DAT_febec2f2;
+    local_10.down_target = DAT_febec2ee;
+  }
+  f33_step_retained_unsigned_gain(&local_10);
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0xaf0)))) = local_10.down_step;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0xaf2)))) = local_10.up_step;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0xaee)))) = local_10.down_target;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0xaec)))) = local_10.up_target;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0xaf4)))) = local_10.current;
   return;
 }
 
@@ -4016,7 +4342,7 @@ void f33_map_first_model_derivative_compensation(void)
     sVar3 = -sVar3;
   }
   iVar4 = f33_interpolate_signed_sentinel_curve
-                    (((short *)camry_host_ptr((uint32_t)((&PTR_PTR_000b1454)[(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0xbc4))))) & 1] + 0xc))),input);
+                    (((short *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xb1454u + (uint32_t)((byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(puVar2 + (uint32_t)(-0xbc4))))) & 1) * 4u)))) + 0xc))),input);
   (*((int *)camry_host_ptr((uint32_t)(puVar2 + 0xba4)))) =
        ((((int)(short)iVar4 * (int)sVar3) / 0x400) * (int)(*((short *)camry_host_ptr((uint32_t)(puVar2 + 0xbb0))))) / 0x400;
   return;
@@ -4344,6 +4670,90 @@ void f33_fill_constant_block_c79a0(void)
 
 
 
+/* WARNING: This is an inlined function */
+/* Same12-byte state and preserved R6 as C5106, feeding CE8DA. Exact94-byte body differs only in ROM
+   pointer/global displacements; calibration values remain producer-local. Inline real p-code so the
+   shared helper's typed argument remains connected in every caller. Prepare common gain state for
+   C3F4; pointer/inline-field loads and preserved R6 are instruction-equivalent to C5106 outside
+   known displacements. */
+
+void f33_prepare_gain_parameters_c3f4(F33GainSlewState *state,uint mode)
+
+{
+  int iVar1;
+  ushort uVar2;
+  uchar uVar3;
+  ushort uVar4;
+  ushort uVar5;
+  ushort uVar6;
+  
+  if ((mode & 0xff) < 7) {
+    uVar3 = '\x02';
+    iVar1 = (short)(DAT_febeac3c & 1) * 7 + (mode & 0xff);
+    uVar2 = *(ushort *)(((undefined *)camry_host_ptr(0xd3398u)) + iVar1 * 0x10);
+    uVar6 = (*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd3394u + (uint32_t)(iVar1 * 4) * 4u)))))));
+    uVar5 = **(ushort **)(((undefined *)camry_host_ptr(0xd339cu)) + iVar1 * 0x10);
+    uVar4 = (*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd3390u + (uint32_t)(iVar1 * 4) * 4u)))))));
+  }
+  else {
+    uVar3 = '\x01';
+    uVar2 = DAT_febec3ec;
+    uVar6 = DAT_febec3f0;
+    uVar5 = DAT_febec3f2;
+    uVar4 = DAT_febec3ee;
+  }
+  state->down_step = uVar6;
+  state->up_step = uVar5;
+  state->down_target = uVar4;
+  state->up_target = uVar2;
+  state->direction = uVar3;
+  return;
+}
+
+
+
+/* WARNING: Inlined function: f33_prepare_gain_parameters_c3f4 */
+
+void FUN_000c7a18(void)
+
+{
+  int iVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  F33GainSlewState local_10;
+  
+  puVar2 = 0xfebeb800u;
+  uVar3 = 7;
+  if (DAT_febecab7 == '\x01') {
+    uVar3 = (uint)DAT_febecb00;
+  }
+  local_10.current = DAT_febec3f4;
+  if (uVar3 < 7) {
+    local_10.direction = '\x02';
+    iVar1 = (short)(DAT_febeac3c & 1) * 7 + uVar3;
+    local_10.up_target = *(ushort *)(((undefined *)camry_host_ptr(0xd3398u)) + iVar1 * 0x10);
+    local_10.down_step = (*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd3394u + (uint32_t)(iVar1 * 4) * 4u)))))));
+    local_10.up_step = **(ushort **)(((undefined *)camry_host_ptr(0xd339cu)) + iVar1 * 0x10);
+    local_10.down_target = (*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd3390u + (uint32_t)(iVar1 * 4) * 4u)))))));
+  }
+  else {
+    local_10.direction = '\x01';
+    local_10.up_target = DAT_febec3ec;
+    local_10.down_step = DAT_febec3f0;
+    local_10.up_step = DAT_febec3f2;
+    local_10.down_target = DAT_febec3ee;
+  }
+  f33_step_retained_unsigned_gain(&local_10);
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0xbf0)))) = local_10.down_step;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0xbf2)))) = local_10.up_step;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0xbee)))) = local_10.down_target;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0xbec)))) = local_10.up_target;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0xbf4)))) = local_10.current;
+  return;
+}
+
+
+
 /* WARNING: Removing unreachable block (ram,0x000c7a6e) */
 
 int FUN_000c7a60(short param_1)
@@ -4560,6 +4970,89 @@ void f33_initialize_three_term_compensation(void)
 
 
 
+/* WARNING: This is an inlined function */
+/* Same12-byte state and preserved R6 as C5106, feeding CE8DA. Exact94-byte body differs only in ROM
+   pointer/global displacements; calibration values remain producer-local. Inline real p-code so the
+   shared helper's typed argument remains connected in every caller. Prepare common gain state for
+   C42C; preserve actual stack-state pointer across preparation into shared unsigned step. */
+
+void f33_prepare_gain_parameters_c42c(F33GainSlewState *state,uint mode)
+
+{
+  int iVar1;
+  ushort uVar2;
+  uchar uVar3;
+  ushort uVar4;
+  ushort uVar5;
+  ushort uVar6;
+  
+  if ((mode & 0xff) < 7) {
+    uVar3 = '\x02';
+    iVar1 = (short)(DAT_febeac3c & 1) * 7 + (mode & 0xff);
+    uVar2 = *(ushort *)(((undefined *)camry_host_ptr(0xd3478u)) + iVar1 * 0x10);
+    uVar6 = (*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd3474u + (uint32_t)(iVar1 * 4) * 4u)))))));
+    uVar5 = **(ushort **)(((undefined *)camry_host_ptr(0xd347cu)) + iVar1 * 0x10);
+    uVar4 = (*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd3470u + (uint32_t)(iVar1 * 4) * 4u)))))));
+  }
+  else {
+    uVar3 = '\x01';
+    uVar2 = DAT_febec424;
+    uVar6 = DAT_febec428;
+    uVar5 = DAT_febec42a;
+    uVar4 = DAT_febec426;
+  }
+  state->down_step = uVar6;
+  state->up_step = uVar5;
+  state->down_target = uVar4;
+  state->up_target = uVar2;
+  state->direction = uVar3;
+  return;
+}
+
+
+
+/* WARNING: Inlined function: f33_prepare_gain_parameters_c42c */
+
+void FUN_000c7d14(void)
+
+{
+  int iVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  F33GainSlewState local_10;
+  
+  puVar2 = 0xfebeb800u;
+  uVar3 = 7;
+  if (DAT_febecab7 == '\x01') {
+    uVar3 = (uint)DAT_febecb00;
+  }
+  local_10.current = DAT_febec42c;
+  if (uVar3 < 7) {
+    local_10.direction = '\x02';
+    iVar1 = (short)(DAT_febeac3c & 1) * 7 + uVar3;
+    local_10.up_target = *(ushort *)(((undefined *)camry_host_ptr(0xd3478u)) + iVar1 * 0x10);
+    local_10.down_step = (*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd3474u + (uint32_t)(iVar1 * 4) * 4u)))))));
+    local_10.up_step = **(ushort **)(((undefined *)camry_host_ptr(0xd347cu)) + iVar1 * 0x10);
+    local_10.down_target = (*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd3470u + (uint32_t)(iVar1 * 4) * 4u)))))));
+  }
+  else {
+    local_10.direction = '\x01';
+    local_10.up_target = DAT_febec424;
+    local_10.down_step = DAT_febec428;
+    local_10.up_step = DAT_febec42a;
+    local_10.down_target = DAT_febec426;
+  }
+  f33_step_retained_unsigned_gain(&local_10);
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0xc28)))) = local_10.down_step;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0xc2a)))) = local_10.up_step;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0xc26)))) = local_10.down_target;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0xc24)))) = local_10.up_target;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0xc2c)))) = local_10.current;
+  return;
+}
+
+
+
 /* WARNING: Removing unreachable block (ram,0x000c7d6a) */
 /* Unsigned C42C gain times signed16 R6, divide1024, SXH R10, store C42E and return it. Signed16 R6
    scaled by unsigned C42C then division1024 and SXH. Store C42E and return the same signed16 value;
@@ -4570,6 +5063,89 @@ short f33_scale_rate_assist_term(short value)
 {
   DAT_febec42e = (short)((int)((uint)DAT_febec42c * (int)value) / 0x400);
   return DAT_febec42e;
+}
+
+
+
+/* WARNING: This is an inlined function */
+/* Same12-byte state and preserved R6 as C5106, feeding CE8DA. Exact94-byte body differs only in ROM
+   pointer/global displacements; calibration values remain producer-local. Inline real p-code so the
+   shared helper's typed argument remains connected in every caller. Prepare common gain state for
+   C438 with separate calibration/global tuple and unchanged R6 calling contract. */
+
+void f33_prepare_gain_parameters_c438(F33GainSlewState *state,uint mode)
+
+{
+  int iVar1;
+  ushort uVar2;
+  uchar uVar3;
+  ushort uVar4;
+  ushort uVar5;
+  ushort uVar6;
+  
+  if ((mode & 0xff) < 7) {
+    uVar3 = '\x02';
+    iVar1 = (short)(DAT_febeac3c & 1) * 7 + (mode & 0xff);
+    uVar2 = *(ushort *)(((undefined *)camry_host_ptr(0xd3558u)) + iVar1 * 0x10);
+    uVar6 = (*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd3554u + (uint32_t)(iVar1 * 4) * 4u)))))));
+    uVar5 = **(ushort **)(((undefined *)camry_host_ptr(0xd355cu)) + iVar1 * 0x10);
+    uVar4 = (*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd3550u + (uint32_t)(iVar1 * 4) * 4u)))))));
+  }
+  else {
+    uVar3 = '\x01';
+    uVar2 = DAT_febec430;
+    uVar6 = DAT_febec434;
+    uVar5 = DAT_febec436;
+    uVar4 = DAT_febec432;
+  }
+  state->down_step = uVar6;
+  state->up_step = uVar5;
+  state->down_target = uVar4;
+  state->up_target = uVar2;
+  state->direction = uVar3;
+  return;
+}
+
+
+
+/* WARNING: Inlined function: f33_prepare_gain_parameters_c438 */
+
+void FUN_000c7dd4(void)
+
+{
+  int iVar1;
+  uint32_t puVar2;
+  uint uVar3;
+  F33GainSlewState local_10;
+  
+  puVar2 = 0xfebeb800u;
+  uVar3 = 7;
+  if (DAT_febecab7 == '\x01') {
+    uVar3 = (uint)DAT_febecb00;
+  }
+  local_10.current = DAT_febec438;
+  if (uVar3 < 7) {
+    local_10.direction = '\x02';
+    iVar1 = (short)(DAT_febeac3c & 1) * 7 + uVar3;
+    local_10.up_target = *(ushort *)(((undefined *)camry_host_ptr(0xd3558u)) + iVar1 * 0x10);
+    local_10.down_step = (*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd3554u + (uint32_t)(iVar1 * 4) * 4u)))))));
+    local_10.up_step = **(ushort **)(((undefined *)camry_host_ptr(0xd355cu)) + iVar1 * 0x10);
+    local_10.down_target = (*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd3550u + (uint32_t)(iVar1 * 4) * 4u)))))));
+  }
+  else {
+    local_10.direction = '\x01';
+    local_10.up_target = DAT_febec430;
+    local_10.down_step = DAT_febec434;
+    local_10.up_step = DAT_febec436;
+    local_10.down_target = DAT_febec432;
+  }
+  f33_step_retained_unsigned_gain(&local_10);
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0xc34)))) = local_10.down_step;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0xc36)))) = local_10.up_step;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0xc32)))) = local_10.down_target;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0xc30)))) = local_10.up_target;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar2 + 0xc38)))) = local_10.current;
+  return;
 }
 
 

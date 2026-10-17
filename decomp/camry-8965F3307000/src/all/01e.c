@@ -367,7 +367,7 @@ void FUN_0007847c(void)
 
 {
   if (DAT_febf6c4d < 2) {
-    (*(int (*)())*(code **)((&PTR_DAT_00027cc0)[DAT_febf6c4d] + 0x18))();
+    (*(int (*)())*(code **)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x27cc0u + (uint32_t)(DAT_febf6c4d) * 4u)))) + 0x18))();
   }
   return;
 }
@@ -378,7 +378,7 @@ void FUN_0007849e(void)
 
 {
   if (DAT_febf6c4d < 2) {
-    (*(int (*)())*(code **)((&PTR_DAT_00027cc0)[DAT_febf6c4d] + 0x1c))();
+    (*(int (*)())*(code **)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x27cc0u + (uint32_t)(DAT_febf6c4d) * 4u)))) + 0x1c))();
   }
   return;
 }
@@ -389,7 +389,7 @@ void FUN_000784c0(void)
 
 {
   if (DAT_febf6c4d < 2) {
-    (*(int (*)())*(code **)((&PTR_DAT_00027cc0)[DAT_febf6c4d] + 0x20))();
+    (*(int (*)())*(code **)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x27cc0u + (uint32_t)(DAT_febf6c4d) * 4u)))) + 0x20))();
   }
   return;
 }
@@ -4355,7 +4355,7 @@ undefined4 FUN_0007bc56(uint param_1)
   param_1 = param_1 & 0xff;
   uVar1 = 0x11;
   if ((param_1 < DAT_00021865) && ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x21869u + (uint32_t)(param_1) * 1u)))) != '\0')) {
-    uVar1 = (*(int (*)())*(code **)(&PTR_PTR_0002186c)[(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x21867u + (uint32_t)(param_1) * 1u))))])();
+    uVar1 = (*(int (*)())*(code **)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x2186cu + (uint32_t)((byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x21867u + (uint32_t)(param_1) * 1u))))) * 4u)))))();
   }
   return uVar1;
 }
@@ -4370,7 +4370,7 @@ undefined4 FUN_0007bc8a(uint param_1)
   param_1 = param_1 & 0xff;
   uVar1 = 0x11;
   if ((param_1 < DAT_00021865) && ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x21869u + (uint32_t)(param_1) * 1u)))) != '\0')) {
-    uVar1 = (*(int (*)())*(code **)((&PTR_PTR_0002186c)[(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x21867u + (uint32_t)(param_1) * 1u))))] + 4))();
+    uVar1 = (*(int (*)())*(code **)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x2186cu + (uint32_t)((byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x21867u + (uint32_t)(param_1) * 1u))))) * 4u)))) + 4))();
   }
   return uVar1;
 }

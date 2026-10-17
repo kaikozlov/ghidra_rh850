@@ -1948,6 +1948,47 @@ void f33_latch_estimator_external_sample(void)
 
 
 
+/* Without BFF0==5A retain BFEC/BFEE. With valid reference and BFFA==5A map BFF8 through AF570[BFB8]
+   into both. Otherwise selectAF582 or mode2AF584; BOTH exact defaults are8000 (little-endian401F),
+   not320/500. No local BFB8 bounds check. Until reference valid retain limits; then external marker
+   selects curve byBFB8/BFF8 or defaults. Exact AF582/AF584 are both8000, not320/500. No local
+   curve-index bound. */
+
+void f33_update_estimator_source_limits(void)
+
+{
+  uint32_t puVar1;
+  undefined *puVar2;
+  ushort uVar3;
+  ushort uVar4;
+  
+  puVar1 = 0xfebeb800u;
+  puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  uVar3 = DAT_febebfec;
+  uVar4 = DAT_febebfee;
+  if (DAT_febebff0 == 'Z') {
+    if (DAT_febebffa == 'Z') {
+      uVar3 = FUN_000d0896(((ushort *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xaf570u + (uint32_t)(DAT_febebfb8) * 4u))))))), DAT_febebff8);
+      puVar2 = ((undefined *)camry_host_ptr((uint32_t)(puVar1)));
+      uVar4 = uVar3;
+    }
+    else {
+      puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+      uVar3 = f33_estimator_source_limit_default;
+      uVar4 = f33_estimator_source_limit_default;
+      if (DAT_febead3c == '\x02') {
+        uVar3 = f33_estimator_source_limit_mode2;
+        uVar4 = f33_estimator_source_limit_mode2;
+      }
+    }
+  }
+  *(ushort *)(puVar2 + 0x7ec) = uVar3;
+  *(ushort *)(puVar2 + 0x7ee) = uVar4;
+  return;
+}
+
+
+
 /* BFB6!=5A clears accepted marker, both acquisition counters and model accumulators. Otherwise
    AD3C==0/3 holds state; every other byte admits selection. Mode2 choosesAF7D0, othersAF7CE
    (both1). BFFA/BFAF==5A and BFF8>=threshold accept the external sample; otherwise select model
@@ -2054,6 +2095,74 @@ void f33_fill_constant_block_c387a(void)
   DAT_febec030 = 0;
   DAT_febec031 = 0;
   DAT_febec032 = 0;
+  return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x000c39b6) */
+/* WARNING: Removing unreachable block (ram,0x000c39f0) */
+/* Always refresh five C0B4-indexed scalesC00C..14; exact maps are flat1024. Only AD18==11 refreshes
+   axisADF6 maps and composite thresholdsC016..28. AD3F==2 selects separate but numerically
+   identical curves:584,218,102,384,40. Other AD18 holds those thresholds. Source-count scales
+   always refresh and are flat1024; axis/composite thresholds update only forAD1811, otherwise hold.
+   Mode-selected curves are separate but numerically identical. */
+
+void f33_refresh_estimator_qualifier_thresholds(void)
+
+{
+  bool bVar1;
+  char cVar2;
+  char cVar3;
+  ushort input;
+  undefined2 uVar4;
+  uint32_t puVar5;
+  ushort uVar6;
+  int iVar7;
+  int iVar8;
+  int iVar9;
+  int iVar10;
+  int iVar11;
+  int iVar12;
+  int iVar13;
+  int iVar14;
+  int iVar15;
+  
+  uVar4 = DAT_febec0b4;
+  input = DAT_febeadf6;
+  cVar3 = DAT_febead3f;
+  cVar2 = DAT_febead18;
+  puVar5 = 0xfebeb800u;
+  iVar7 = FUN_000d0896(((undefined *)camry_host_ptr(0xaf634u)),DAT_febec0b4);
+  iVar8 = FUN_000d0896(((undefined *)camry_host_ptr(0xaf648u)),uVar4);
+  iVar9 = FUN_000d0896(((undefined *)camry_host_ptr(0xaf65cu)),uVar4);
+  iVar10 = FUN_000d0896(((undefined *)camry_host_ptr(0xaf670u)),uVar4);
+  uVar6 = FUN_000d0896(((undefined *)camry_host_ptr(0xaf684u)),uVar4);
+  if (cVar2 == '\x11') {
+    bVar1 = cVar3 == '\x02';
+    iVar11 = FUN_000d0896(((ushort *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd2f10u + (uint32_t)(bVar1) * 4u))))))), input);
+    iVar12 = f33_interpolate_unsigned_axis_sentinel_curve
+                       (((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd2f18u + (uint32_t)(bVar1) * 4u)))))),input);
+    iVar13 = FUN_000d0896(((ushort *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd2f20u + (uint32_t)(bVar1) * 4u))))))), input);
+    iVar14 = f33_interpolate_unsigned_axis_sentinel_curve
+                       (((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd2f28u + (uint32_t)(bVar1) * 4u)))))),input);
+    iVar15 = FUN_000d0896(((ushort *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0xd2f30u + (uint32_t)(bVar1) * 4u))))))), input);
+    (*((short *)camry_host_ptr((uint32_t)(puVar5 + 0x81e)))) = (short)iVar15;
+    (*((short *)camry_host_ptr((uint32_t)(puVar5 + 0x820)))) = (short)((uint)(iVar11 * iVar7) >> 10);
+    (*((short *)camry_host_ptr((uint32_t)(puVar5 + 0x816)))) = (short)iVar11;
+    (*((short *)camry_host_ptr((uint32_t)(puVar5 + 0x822)))) = (short)((iVar12 * iVar8) / 0x400);
+    (*((short *)camry_host_ptr((uint32_t)(puVar5 + 0x824)))) = (short)((uint)(iVar13 * iVar9) >> 10);
+    (*((short *)camry_host_ptr((uint32_t)(puVar5 + 0x818)))) = (short)iVar12;
+    (*((short *)camry_host_ptr((uint32_t)(puVar5 + 0x826)))) = (short)((iVar14 * iVar10) / 0x400);
+    (*((short *)camry_host_ptr((uint32_t)(puVar5 + 0x828)))) = (short)(iVar15 * (uint)uVar6 >> 10);
+    (*((short *)camry_host_ptr((uint32_t)(puVar5 + 0x81a)))) = (short)iVar13;
+    (*((short *)camry_host_ptr((uint32_t)(puVar5 + 0x81c)))) = (short)iVar14;
+  }
+  (*((short *)camry_host_ptr((uint32_t)(puVar5 + 0x80c)))) = (short)iVar7;
+  (*((short *)camry_host_ptr((uint32_t)(puVar5 + 0x80e)))) = (short)iVar8;
+  (*((short *)camry_host_ptr((uint32_t)(puVar5 + 0x810)))) = (short)iVar9;
+  (*((short *)camry_host_ptr((uint32_t)(puVar5 + 0x812)))) = (short)iVar10;
+  (*((ushort *)camry_host_ptr((uint32_t)(puVar5 + 0x814)))) = uVar6;
   return;
 }
 

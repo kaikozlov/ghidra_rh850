@@ -762,8 +762,43 @@ void FUN_00060d52(uint param_1)
   if (param_1 < 2) {
     for (uVar1 = 0; uVar1 < (byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x31411u + (uint32_t)((short)param_1 * 0x50) * 1u)))); uVar1 = uVar1 + 1 & 0xff)
     {
-      (*((undefined2 *)camry_host_ptr((uint32_t)((&PTR_DAT_000313fc)[param_1] + uVar1 * 2)))) = 0;
+      (*((undefined2 *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x313fcu + (uint32_t)(param_1) * 4u)))) + uVar1 * 2)))) = 0;
     }
+  }
+  return;
+}
+
+
+
+void FUN_00060d8c(ushort param_1)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  
+  if ((param_1 & 0xff) < 2) {
+    iVar1 = (int)(short)(param_1 & 0xff);
+    iVar3 = iVar1 * 0x50;
+    iVar2 = (uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x3140cu + (uint32_t)(iVar3) * 1u)))) * 0x2000;
+    (*((undefined1 *)camry_host_ptr((uint32_t)(iVar2 + -0x280000)))) = 0;
+    *(undefined **)(iVar2 + -0x27fff0) = ((void *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x31424u + (uint32_t)(iVar1 * 0x14) * 4u)))))));
+    (*((undefined2 *)camry_host_ptr((uint32_t)(iVar2 + -0x27ffec)))) = *(undefined2 *)(((undefined *)camry_host_ptr(0x31428u)) + iVar3);
+    (*((undefined2 *)camry_host_ptr((uint32_t)(iVar2 + -0x27efc0)))) = *(undefined2 *)(((undefined *)camry_host_ptr(0x3142cu)) + iVar3);
+    *(undefined **)(iVar2 + -0x27efbc) = ((void *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x31434u + (uint32_t)(iVar1 * 0x14) * 4u)))))));
+    (*((undefined4 *)camry_host_ptr((uint32_t)(iVar2 + -0x27efb8)))) = *(undefined4 *)(((undefined *)camry_host_ptr(0x31438u)) + iVar3);
+    (*((undefined4 *)camry_host_ptr((uint32_t)(iVar2 + -0x27efb4)))) = *(undefined4 *)(((undefined *)camry_host_ptr(0x3143cu)) + iVar3);
+    (*((undefined4 *)camry_host_ptr((uint32_t)(iVar2 + -0x27efb0)))) = *(undefined4 *)(((undefined *)camry_host_ptr(0x31440u)) + iVar3);
+    (*((undefined4 *)camry_host_ptr((uint32_t)(iVar2 + -0x27efac)))) = *(undefined4 *)(((undefined *)camry_host_ptr(0x31444u)) + iVar3);
+    (*((undefined4 *)camry_host_ptr((uint32_t)(iVar2 + -0x27efa8)))) = *(undefined4 *)(((undefined *)camry_host_ptr(0x31448u)) + iVar3);
+    (*((undefined4 *)camry_host_ptr((uint32_t)(iVar2 + -0x27efa4)))) = *(undefined4 *)(((undefined *)camry_host_ptr(0x3144cu)) + iVar3);
+    (*((undefined4 *)camry_host_ptr((uint32_t)(iVar2 + -0x27efa0)))) = *(undefined4 *)(((undefined *)camry_host_ptr(0x31450u)) + iVar3);
+    (*((undefined2 *)camry_host_ptr((uint32_t)(iVar2 + -0x27ef98)))) = *(undefined2 *)(((undefined *)camry_host_ptr(0x31454u)) + iVar3);
+    (*((undefined2 *)camry_host_ptr((uint32_t)(iVar2 + -0x27ef94)))) = *(undefined2 *)(((undefined *)camry_host_ptr(0x31456u)) + iVar3);
+    (*((undefined2 *)camry_host_ptr((uint32_t)(iVar2 + -0x27ef90)))) = *(undefined2 *)(((undefined *)camry_host_ptr(0x31458u)) + iVar3);
+    (*((undefined2 *)camry_host_ptr((uint32_t)(iVar2 + -0x27ef8c)))) = *(undefined2 *)(((undefined *)camry_host_ptr(0x3145au)) + iVar3);
+    (*((undefined2 *)camry_host_ptr((uint32_t)(iVar2 + -0x27fff8)))) = *(undefined2 *)(((undefined *)camry_host_ptr(0x3142au)) + iVar3);
+    (*((undefined *)camry_host_ptr((uint32_t)(iVar2 + -0x280000)))) = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x31420u + (uint32_t)(iVar3) * 1u))));
   }
   return;
 }
@@ -877,6 +912,35 @@ undefined4 FUN_00060f7c(ushort param_1,uint param_2)
     }
   }
   return 0x5a;
+}
+
+
+
+/* Channel<2 and offset<=configured_capacity-count: copy countu16 words from ROM313FC[channel] FIFO;
+   caller uses capacity20 and count5. No wrap, clear, cursor advance, status check or return
+   verdict; rejected bounds leave destination unchanged. Native evidence covers explicit software
+   continuations and a synthetic post-getter publication join, not descriptor acquisition or the
+   intact fast task. */
+
+void f33_copy_serial_fifo_words(uchar channel,ushort *output,uchar offset,uchar count)
+
+{
+  uint uVar1;
+  uint uVar2;
+  undefined *puVar3;
+  
+  uVar2 = (uint)offset;
+  if (channel < 2) {
+    puVar3 = ((void *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x313fcu + (uint32_t)(channel) * 4u)))))));
+    uVar1 = (uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x31411u + (uint32_t)((short)(ushort)channel * 0x50) * 1u)))) - (uint)count;
+    if ((int)(uVar2 - uVar1) < 0 != ((int)uVar1 < 0 && (int)uVar1 < 0 == (int)(uVar2 - uVar1) < 0)
+        || uVar2 == uVar1) {
+      for (uVar1 = 0; uVar1 < count; uVar1 = uVar1 + 1 & 0xff) {
+        output[uVar1] = *(ushort *)(puVar3 + (uVar2 + uVar1) * 2);
+      }
+    }
+  }
+  return;
 }
 
 

@@ -1075,6 +1075,50 @@ def _rewrite_pointer_to_int(code: str, pointers: set[str]) -> str:
     return "".join(pieces)
 
 
+def _rewrite_explicit_fields(code: str) -> str:
+    """`&label.field_0xN` is the byte at that label plus N, not a C member."""
+    def replace(match: re.Match[str]) -> str:
+        address = _symbol_address(match.group(1))
+        if address is None:
+            return match.group(0)
+        target = (address + int(match.group(2), 16)) & 0xFFFFFFFF
+        return f"(0x{target:x}u)"
+
+    return re.sub(
+        r"&([A-Za-z_][A-Za-z0-9_]*)\.field_0x([0-9A-Fa-f]+)",
+        replace,
+        code,
+    )
+
+
+def _rewrite_pointer_tables(code: str) -> str:
+    """`(&PTR_...)[index]` loads a firmware pointer from a 4-byte slot.
+
+    The disassembly scales the decompiler's index by 4 (`shl 2`, or a multiply
+    that already includes that 4). The value in the slot is the pointee address.
+    """
+    pieces: list[str] = []
+    cursor = 0
+    pattern = re.compile(r"\(&(PTR_[A-Za-z0-9_]*_([0-9A-Fa-f]+))\)\s*\[")
+    for match in pattern.finditer(code):
+        if match.start() < cursor:
+            continue
+        try:
+            end = _match_bracket(code, match.end() - 1)
+        except ValueError:
+            continue
+        index = _rewrite_pointer_tables(code[match.end():end])
+        address = int(match.group(2), 16)
+        pieces.append(code[cursor:match.start()])
+        pieces.append(
+            "(*((volatile uint32_t *)camry_host_ptr((uint32_t)"
+            f"(0x{address:x}u + (uint32_t)({index}) * 4u))))"
+        )
+        cursor = end + 1
+    pieces.append(code[cursor:])
+    return "".join(pieces)
+
+
 def _rewrite_int_to_pointer(code: str, pointers: set[str]) -> str:
     pieces: list[str] = []
     cursor = 0
@@ -1824,7 +1868,9 @@ def _rewrite_body(code: str) -> str:
     code = _rewrite_addresses(code, pointers)
     code = _rewrite_device_pointer_add(code)
     code = _rewrite_symbol_indexes(code)
+    code = _rewrite_explicit_fields(code)
     code = _rewrite_named_addresses(code, pointer_return=_returns_pointer(signature))
+    code = _rewrite_pointer_tables(code)
     code = _rewrite_pointer_to_int(code, pointers)
     code = _rewrite_int_to_pointer(code, pointers)
     code = _rewrite_pointer_calls(code, pointers)

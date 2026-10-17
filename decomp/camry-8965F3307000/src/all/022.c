@@ -1800,6 +1800,38 @@ void FUN_00089d18(void)
 
 
 
+int FUN_00089d80(void)
+
+{
+  uint32_t puVar1;
+  uint32_t puVar2;
+  int iVar3;
+  uint uVar4;
+  
+  puVar1 = 0xfebeb800u;
+  puVar2 = 0x23dfcu;
+  if (DAT_febf13ca == '\x01') {
+    DAT_febf13ca = '\0';
+    DAT_febf13c4 = 0;
+  }
+  uVar4 = DAT_febf13c0;
+  if (DAT_00027e7c <= DAT_febf13c0) {
+    uVar4 = 0;
+  }
+  iVar3 = (*(int (*)())camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x27eb0u + (uint32_t)(uVar4) * 4u))))))();
+  if (iVar3 == 2) {
+    (*((undefined4 *)camry_host_ptr((uint32_t)(puVar1 + 0x5bc4)))) = (*((undefined4 *)camry_host_ptr((uint32_t)(puVar2 + 0x4080))));
+  }
+  if ((*((int *)camry_host_ptr((uint32_t)(puVar1 + 0x5bc4)))) != 0) {
+    iVar3 = 2;
+    (*((int *)camry_host_ptr((uint32_t)(puVar1 + 0x5bc4)))) = (*((int *)camry_host_ptr((uint32_t)(puVar1 + 0x5bc4)))) + -1;
+  }
+  (*((uint *)camry_host_ptr((uint32_t)(puVar1 + 0x5bc0)))) = uVar4 + 1;
+  return iVar3;
+}
+
+
+
 void FUN_00089e2c(char param_1,int *param_2)
 
 {

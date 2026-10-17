@@ -644,6 +644,60 @@ short f33_clamp_additional_first_current_request(short request)
 
 
 
+/* Select gain calibration by E5C3&1. E741=11/22 maps saturated abs(s32 E744); other states use
+   default128. Exact bank0 curve is flat128; bank1 decreases128 to0 between5287 and6809.
+   With31B2C!=1,31D40=1 and6EA8=5A, scale6D8A through38582 then re-clamp385A8; otherwise retain
+   unscaled6D8A. Publish6DFA. E744 is a staged AC1C copy, not independently identified external CAN
+   authority. */
+
+void f33_update_additional_first_current_request(void)
+
+{
+  uchar uVar1;
+  char cVar2;
+  uchar uVar3;
+  uint32_t puVar4;
+  int iVar5;
+  short sVar6;
+  undefined *puVar7;
+  undefined2 local_1c;
+  undefined2 uStack_1a;
+  
+  uVar3 = f33_additional_current_envelope_qualified;
+  sVar6 = f33_current_reference_floor.selected_request;
+  cVar2 = DAT_00031d40;
+  uVar1 = f33_current_reference_floor_calibration.force_enabled;
+  puVar4 = 0xfebeb800u;
+  puVar7 = ((void *)camry_host_ptr((uint32_t)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x31ebcu + (uint32_t)(DAT_febee5c3 & 1) * 4u)))))));
+  if ((DAT_febee741 == '\x11') || (DAT_febee741 == '\"')) {
+    if (DAT_febee744 + -0x7fff < 0 == (DAT_febee744 < 0 && -1 < DAT_febee744 + -0x7fff) &&
+        DAT_febee744 != 0x7fff) {
+      iVar5 = 0x7fff;
+    }
+    else {
+      iVar5 = DAT_febee744;
+      if (DAT_febee744 + 0x7fff < 0 != (-1 < DAT_febee744 && DAT_febee744 + 0x7fff < 0)) {
+        iVar5 = -0x7fff;
+      }
+    }
+    puVar4 = 0xfebeb800u;
+    FUN_0006a522((int)(short)iVar5,&local_1c);
+    FUN_000702b0(puVar7,local_1c,&uStack_1a);
+  }
+  else {
+    uStack_1a = (*((undefined2 *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x31eb4u + (uint32_t)(DAT_febee5c3 & 1) * 4u)))))));
+  }
+  (*((undefined2 *)camry_host_ptr((uint32_t)((0xffffb5f0u + (uint32_t)((int)puVar4)))))) = uStack_1a;
+  if (((uVar1 != '\x01') && (cVar2 == '\x01')) && (uVar3 == 'Z')) {
+    sVar6 = f33_scale_additional_first_current_request(sVar6);
+    sVar6 = f33_clamp_additional_first_current_request(sVar6);
+  }
+  (*((short *)camry_host_ptr((uint32_t)((0xffffb5fau + (uint32_t)((int)puVar4)))))) = sVar6;
+  return;
+}
+
+
+
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
    Referenced placeholder implementing no behavior; structural classification, not individually
    executed. */
@@ -1768,6 +1822,35 @@ int f33_current_reference_envelope_signed_product(void)
   
   FUN_000706ae(DAT_febee744,(int)DAT_febee5c4,&local_8);
   return local_8;
+}
+
+
+
+/* Admit5A for E741=0 or E741=11/22 with positive supplied product; require EAC0!=11 or unsignedEAC6
+   below selected threshold, plusE740/E742 zero. Exact317B0=0 does not force rejection; EAC2=5A
+   does. This is numerical envelope qualification, not engagement authority. */
+
+uint f33_qualify_additional_current_reference_envelope(int signed_product)
+
+{
+  uint uVar1;
+  
+  if (((((DAT_febee741 == '\x11') || (DAT_febee741 == '\"')) && (0 < signed_product)) ||
+      (DAT_febee741 == '\0')) &&
+     (((DAT_febeeac0 != '\x11' || (DAT_febeeac6 < (*((ushort *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x31ec4u + (uint32_t)(DAT_febee5c3 & 1) * 4u)))))))))
+      && ((DAT_febee740 == '\0' && (DAT_febee742 == '\0')))))) {
+    uVar1 = 0x5a;
+  }
+  else {
+    uVar1 = 0;
+  }
+  if (DAT_000317b0 == 'Z') {
+    uVar1 = 0;
+  }
+  if (DAT_febeeac2 == 'Z') {
+    uVar1 = 0;
+  }
+  return uVar1;
 }
 
 

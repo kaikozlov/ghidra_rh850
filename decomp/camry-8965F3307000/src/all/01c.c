@@ -1609,7 +1609,7 @@ void FUN_00072108(uint param_1)
 void FUN_0007211a(uint param_1)
 
 {
-  f33_nvm_accumulate_diagnostic_mask((uint)(&PTR_DAT_000273dc)[param_1 & 0xff]);
+  f33_nvm_accumulate_diagnostic_mask((uint)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x273dcu + (uint32_t)(param_1 & 0xff) * 4u)))));
   return;
 }
 
@@ -2650,6 +2650,38 @@ void thunk_FUN_000766c6(void)
 
 {
   FUN_000766c6();
+  return;
+}
+
+
+
+void FUN_00073ba0(int param_1)
+
+{
+  uint uVar1;
+  int iVar2;
+  uint uVar3;
+  code *pcVar4;
+  
+  uVar3 = (uint)f33_nvm_operation_phase;
+  if (uVar3 == 1) {
+    pcVar4 = ((code *)camry_host_ptr((uint32_t)(*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x275acu + (uint32_t)(param_1 * 4) * 4u))))));
+  }
+  else {
+    uVar1 = uVar3;
+    if (uVar3 != 2) goto LAB_00073bee;
+    if ((uint)*(ushort *)(((undefined *)camry_host_ptr(0x275b0u)) + param_1 * 0x10) <= (uint)f33_nvm_operation_step)
+    goto LAB_00073bee;
+    pcVar4 = *(code **)((*((volatile uint32_t *)camry_host_ptr((uint32_t)(0x275b4u + (uint32_t)(param_1 * 4) * 4u)))) + (uint)f33_nvm_operation_step * 4);
+  }
+  uVar1 = (*(int (*)())pcVar4)();
+LAB_00073bee:
+  FUN_00073eda();
+  iVar2 = FUN_00073b46(param_1,uVar1);
+  if ((uVar3 != 1) && (iVar2 == 1)) {
+    f33_nvm_pending_operation.operation = 0xffffffff;
+  }
+  f33_nvm_operation_phase = (ushort)iVar2;
   return;
 }
 
