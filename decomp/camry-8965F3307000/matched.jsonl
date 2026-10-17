@@ -87,3 +87,4 @@
 {"addr": "0x684d0", "name": "f33_nvm_arm_family0_read", "status": "equivalent"}
 {"addr": "0x6853e", "name": "f33_nvm_arm_family0_write", "status": "equivalent"}
 {"addr": "0x68626", "name": "f33_nvm_submit_family1_read_copies", "status": "equivalent"}
+{"addr": "0x6869e", "name": "f33_nvm_submit_family1_write_copies", "status": "equivalent"}
