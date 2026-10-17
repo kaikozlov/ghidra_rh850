@@ -1888,6 +1888,46 @@ uint32_t f33_nvm_submit_bulk_reads(void) {
     return attempted == 0u ? 0u : 0xffu;
 }
 
+static uint32_t f33_nvm_driver_gate_hook(void) {
+    return 0u;
+}
+
+static uint32_t f33_nvm_driver_gate_rejected(uint32_t service) {
+    (void)(service & 0xffffu);
+    return f33_nvm_driver_gate_hook() == 0u ? 0u : 1u;
+}
+
+static uint32_t f33_nvm_service_uninitialized(void) {
+    return camry_read8(0xfebf6102u) == 0xf0u ? 0u : 1u;
+}
+
+static void f33_nvm_service_logical_and_physical_driver(void) {
+    if (f33_nvm_driver_gate_rejected(20u) != 0u)
+        return;
+    if (f33_nvm_service_uninitialized() != 0u)
+        return;
+}
+
+static void f33_nvm_service_acquisition_driver(void) {
+    f33_nvm_service_logical_and_physical_driver();
+}
+
+uint32_t f33_nvm_step_initial_read_acquisition(void) {
+    uint32_t token = camry_read8(camry_gp + 0x4e92u);
+    if (token == 0x5au)
+        token = f33_nvm_submit_bulk_reads();
+    if (token != 0u) {
+        uint32_t steps = camry_read16(0x2ad78u);
+        while (steps != 0u) {
+            f33_nvm_service_acquisition_driver();
+            steps -= 1u;
+        }
+        token = f33_nvm_retain_token_while_reads_pending(token);
+    }
+    camry_write8(camry_gp + 0x4e92u, token);
+    return token;
+}
+
 static uint32_t f33_nvm_get_family0_completion(uint32_t object) {
     uint32_t index = object & 0xffffu;
     uint32_t count = camry_read16((3u << 16) - 21136u);

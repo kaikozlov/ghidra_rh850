@@ -141,3 +141,4 @@ uint32_t f33_nvm_arm_family0_write(uint32_t object);
 uint32_t f33_nvm_submit_family1_read_copies(uint32_t object);
 uint32_t f33_nvm_submit_family1_write_copies(uint32_t object);
 uint32_t f33_nvm_submit_bulk_reads(void);
+uint32_t f33_nvm_step_initial_read_acquisition(void);
