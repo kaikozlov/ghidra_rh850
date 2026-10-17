@@ -271,6 +271,10 @@ def bind(library: ctypes.CDLL) -> None:
     library.f33_update_thermal_release_envelope.restype = None
     library.f33_update_thermal_history_qualification.argtypes = []
     library.f33_update_thermal_history_qualification.restype = None
+    library.f33_nvm_initialize_queues.argtypes = []
+    library.f33_nvm_initialize_queues.restype = None
+    library.f33_nvm_reset_queues_notifying.argtypes = []
+    library.f33_nvm_reset_queues_notifying.restype = None
     library.f33_force_unconfirmed_terminal_monitor_healthy.argtypes = [u32, u32, u32]
     library.f33_force_unconfirmed_terminal_monitor_healthy.restype = u32
     library.f33_nvm_read_buffer.argtypes = [u32]
@@ -567,6 +571,12 @@ def call_function(library: ctypes.CDLL, name: str, view, base: int, registers: d
         return None
     if name == "f33_update_thermal_history_qualification":
         library.f33_update_thermal_history_qualification()
+        return None
+    if name == "f33_nvm_initialize_queues":
+        library.f33_nvm_initialize_queues()
+        return None
+    if name == "f33_nvm_reset_queues_notifying":
+        library.f33_nvm_reset_queues_notifying()
         return None
     if name == "f33_nvm_set_family0_record":
         return int(library.f33_nvm_set_family0_record(r6, r7)) & 0xFFFFFFFF

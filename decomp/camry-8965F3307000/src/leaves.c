@@ -1944,3 +1944,115 @@ void f33_update_thermal_history_qualification(void) {
         status = 0xa5u;
     camry_write8(camry_gp - 18512u, status);
 }
+
+static void f33_nvm_clear_queue_headers(void) {
+    uint32_t index = 0u;
+    while (index < 127u) {
+        uint32_t header = 0xfebf68e8u + (index << 2);
+        camry_write16(header, 0xffffu);
+        camry_write16(header + 2u, 0xffffu);
+        index += 1u;
+    }
+}
+
+static void f33_nvm_notify_reset_result(uint32_t logical, uint32_t operation) {
+    uint32_t handle = logical & 0xffffu;
+    if (handle != camry_read16(0xfebf6126u))
+        f33_nvm_publish_logical_result(handle, operation, 6u);
+}
+
+/* 0x796be then 0x797f6. Code 0..2 merges one ROM mask word into FEBF6CB4
+ * and accumulates the paired value for every hit among the three rows. */
+static void f33_nvm_merge_reset_status(uint32_t code) {
+    uint32_t narrowed = code & 0xffu;
+    uint32_t base = 0xfebf6cb4u;
+    uint32_t saved;
+    uint32_t state;
+    uint32_t accumulated = 0u;
+    uint32_t index;
+    if (narrowed >= 3u)
+        return;
+    saved = camry_read32(base);
+    camry_write32(base, saved | camry_read32(camry_tp + (narrowed << 3) + 16080u));
+    camry_write32(base + 4u, 0u);
+    state = camry_read32(base);
+    for (index = 0u; index < 3u; index += 1u) {
+        uint32_t row = camry_tp + (index << 3) + 16080u;
+        if ((state & camry_read32(row)) != 0u)
+            accumulated |= camry_read32(row + 4u);
+        camry_write32(base + 4u, accumulated);
+    }
+}
+
+static void f33_nvm_record_invalid_reset(void) {
+    f33_nvm_merge_reset_status(2u);
+    camry_write8(0xfebf6102u, 15u);
+}
+
+static void f33_nvm_reset_slot_range(uint32_t queue, uint32_t first, uint32_t last, uint32_t notify) {
+    uint32_t index = first & 0xffffu;
+    uint32_t end = last & 0xffffu;
+    uint32_t limit = (camry_read16(camry_tp + 11788u) - 1u) & 0xffffu;
+    uint32_t header = 0xfebf68e8u + ((queue & 0xffffu) << 2);
+    camry_write16(header, index);
+    camry_write16(header + 2u, end);
+    while (index <= end) {
+        uint32_t slot = 0xfebf6128u + (index << 4);
+        uint32_t next = (index + 1u) & 0xffffu;
+        if (notify != 0u) {
+            uint32_t operation = camry_read32(slot);
+            if (operation != 0x9da70ae7u) {
+                uint32_t logical = camry_read16(slot + 12u);
+                if (logical > limit || logical < 2u)
+                    f33_nvm_record_invalid_reset();
+                else
+                    f33_nvm_notify_reset_result(logical, operation);
+            }
+        }
+        camry_write32(slot, 0x9da70ae7u);
+        camry_write32(slot + 4u, 0u);
+        camry_write32(slot + 8u, 0u);
+        camry_write16(slot + 12u, 0xffffu);
+        camry_write16(slot + 14u, next);
+        if (index == end)
+            break;
+        index = next;
+    }
+    camry_write16(0xfebf6128u + (end << 4) + 14u, 0xffffu);
+}
+
+static void f33_nvm_reset_pooled_queues(uint32_t notify) {
+    uint32_t mode = notify & 0xffu;
+    f33_nvm_clear_queue_headers();
+    if (mode == 1u) {
+        f33_nvm_reset_slot_range(0u, 0x7au, 0x7au, 1u);
+        f33_nvm_reset_slot_range(1u, 0u, 0x79u, 1u);
+    } else {
+        f33_nvm_reset_slot_range(0u, 0x7au, 0x7au, 0u);
+        f33_nvm_reset_slot_range(1u, 0u, 0x79u, 0u);
+    }
+    camry_write16(0xfebf6ae4u, 1u);
+    camry_write16(0xfebf6ae6u, 0x7au);
+    camry_write16(0xfebf6ae8u, 0u);
+    camry_write16(0xfebf6aeau, 0u);
+}
+
+static void f33_nvm_reset_zero_handle_operation(uint32_t notify) {
+    uint32_t operation = camry_read32(0xfebf68d8u);
+    if ((notify & 0xffu) == 1u && operation != 0x9da70ae7u)
+        f33_nvm_notify_reset_result(0u, operation);
+    camry_write32(0xfebf68d8u, 0x9da70ae7u);
+    camry_write16(0xfebf68dcu, 0xffffu);
+    camry_write32(0xfebf68e0u, 0u);
+    camry_write32(0xfebf68e4u, 0u);
+}
+
+void f33_nvm_initialize_queues(void) {
+    f33_nvm_reset_pooled_queues(0u);
+    f33_nvm_reset_zero_handle_operation(0u);
+}
+
+void f33_nvm_reset_queues_notifying(void) {
+    f33_nvm_reset_pooled_queues(1u);
+    f33_nvm_reset_zero_handle_operation(1u);
+}

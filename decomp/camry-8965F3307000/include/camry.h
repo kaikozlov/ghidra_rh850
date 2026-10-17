@@ -131,3 +131,5 @@ uint32_t f33_nvm_enqueue_family0_read(uint32_t object);
 uint32_t f33_nvm_set_family0_record(uint32_t object, uint32_t source);
 void f33_update_thermal_release_envelope(void);
 void f33_update_thermal_history_qualification(void);
+void f33_nvm_initialize_queues(void);
+void f33_nvm_reset_queues_notifying(void);
