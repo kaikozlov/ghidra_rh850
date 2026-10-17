@@ -141,10 +141,10 @@ _SKIP_CALLS = {
     "camry_host_ptr", "camry_host_addr", "__synchronize",
 }
 _BLOCK = re.compile(
-    r"->|\.[A-Za-z_]|\(&(?:DAT|UNK|PTR)_[0-9A-Fa-f]+\)\[|\bcode\s*\*|"
+    r"->|\.[A-Za-z_]|\bcode\s*\*|"
     r"\((?:unsigned int|int|uint|undefined4|ulong|long)\)\s*\(\s*&|"
     r"\b(?:unaff_|extraout_|in_r\d+|in_E|in_PSW|in_FPEC|"
-    r"CONCAT|SUB4|SBORROW|OVERFLOW)\b"
+    r"CONCAT|SUB4|SBORROW|OVERFLOW)"
 )
 _INT_CAST = re.compile(r"\((unsigned int|int|uint|undefined4|ulong|long)\)")
 _IDIOM = re.compile(
@@ -263,6 +263,45 @@ def _skip_space(code: str, index: int) -> int:
     return index
 
 
+def _match_bracket(code: str, opening: int) -> int:
+    depth = 0
+    for index in range(opening, len(code)):
+        if code[index] == "[":
+            depth += 1
+        elif code[index] == "]":
+            depth -= 1
+            if depth == 0:
+                return index
+    raise ValueError("unbalanced bracket")
+
+
+def _rewrite_indexed(code: str) -> str:
+    pieces: list[str] = []
+    cursor = 0
+    pattern = re.compile(r"\(&(DAT|UNK|LAB)_([0-9A-Fa-f]+)\)\s*\[")
+    widths = {1: "uint8_t", 2: "uint16_t", 4: "uint32_t"}
+    for match in pattern.finditer(code):
+        if match.start() < cursor:
+            continue
+        try:
+            end = _match_bracket(code, match.end() - 1)
+        except ValueError:
+            continue
+        index = code[match.end():end]
+        addr = int(match.group(2), 16)
+        scale = _access_widths().get(addr, 1)
+        if scale not in widths:
+            scale = 1
+        pieces.append(code[cursor:match.start()])
+        pieces.append(
+            f"(*((volatile {widths[scale]} *)camry_host_ptr((uint32_t)"
+            f"(0x{addr:x}u + (uint32_t)({index}) * {scale}u))))"
+        )
+        cursor = end + 1
+    pieces.append(code[cursor:])
+    return "".join(pieces)
+
+
 def _rewrite_addresses(code: str) -> str:
     def integer_cast(match: re.Match[str]) -> str:
         return f"({match.group(1)})0x{int(match.group(2), 16):x}u"
@@ -302,6 +341,8 @@ def _rewrite_pointer_to_int(code: str, pointers: set[str]) -> str:
         if end == begin:
             continue
         operand = code[begin:end]
+        if end < len(code) and code[end] == "[":
+            continue
         if not _is_pointer_expr(operand, pointers):
             continue
         pieces.append(code[cursor:match.start()])
@@ -382,7 +423,9 @@ def _rewrite_body(code: str) -> str:
     signature = _c_signature(code)
     pointers = _pointer_names(signature, code)
     code = _IDIOM.sub(r"((\1 < 0) || (\2 < 0))", code)
+    code = _rewrite_indexed(code)
     code = _rewrite_addresses(code)
+    code = _rewrite_named_addresses(code)
     code = _rewrite_pointer_to_int(code, pointers)
     code = _rewrite_int_to_pointer(code, pointers)
     return code
@@ -412,11 +455,59 @@ def _machine_registers() -> dict[str, dict]:
     return found
 
 
+_SCALAR_TYPES = {
+    "u8": "uint8_t", "byte": "uint8_t", "uchar": "uint8_t", "s8": "int8_t",
+    "u16": "uint16_t", "ushort": "uint16_t", "s16": "int16_t",
+    "u32": "uint32_t", "uint": "uint32_t", "s32": "int32_t",
+    "u8*": "uint32_t", "void*": "uint32_t",
+}
+_ARRAY_ELEMENTS = {
+    "u8": ("uint8_t", 1), "s8": ("int8_t", 1),
+    "u16": ("uint16_t", 2), "s16": ("int16_t", 2),
+    "u32": ("uint32_t", 4), "s32": ("int32_t", 4),
+    "u8*": ("uint32_t", 4),
+}
+
+
 def _data_symbols() -> dict[str, int]:
-    found = {}
+    return {name: addr for name, (addr, _ctype, _array) in _data_layouts().items()}
+
+
+def _data_layouts() -> dict[str, tuple[int, str, bool]]:
+    found: dict[str, tuple[int, str, bool]] = {}
     for row in _load_jsonl(ROOT / "data.jsonl"):
-        found[row["name"]] = _address(row["addr"])
+        addr = _address(row["addr"])
+        type_name = row["type"].replace(" ", "")
+        if "[" in type_name:
+            element = type_name.split("[", 1)[0]
+            if element in _ARRAY_ELEMENTS:
+                ctype, _scale = _ARRAY_ELEMENTS[element]
+                found[row["name"]] = (addr, ctype, True)
+            else:
+                found[row["name"]] = (addr, "uint8_t", False)
+            continue
+        ctype = _SCALAR_TYPES.get(type_name) or _scalar_type(addr, "uint8_t")
+        found[row["name"]] = (addr, ctype, False)
     return found
+
+
+def _absolute_names() -> dict[str, int]:
+    names = _data_symbols()
+    for name, row in _machine_registers().items():
+        names[name] = int(row["address"])
+    return names
+
+
+def _rewrite_named_addresses(code: str) -> str:
+    names = _absolute_names()
+
+    def replace(match: re.Match[str]) -> str:
+        addr = names.get(match.group(1))
+        if addr is None:
+            return match.group(0)
+        return f"(0x{addr:x}u)"
+
+    return re.sub(r"&([A-Za-z_][A-Za-z0-9_]*)\b", replace, code)
 
 
 _ACCESS_WIDTHS: dict[int, int] | None = None
@@ -559,15 +650,19 @@ def _render_corpus(selected: dict[int, dict]) -> str:
         lines.append(
             f"#define {name} (*((volatile {ctype} *)camry_host_ptr(0x{int(row['address']):x}u)))"
         )
-    for name, addr in sorted(data.items()):
+    for name, (addr, ctype, is_array) in sorted(_data_layouts().items()):
         if name in registers or re.search(rf"\b{name}\b", text) is None:
             continue
         if any(row["name"] == name for row in selected.values()):
             continue
-        lines.append(
-            f"#define {name} (*((volatile {_scalar_type(addr, 'uint8_t')} *)"
-            f"camry_host_ptr(0x{addr:x}u)))"
-        )
+        if is_array:
+            lines.append(
+                f"#define {name} ((volatile {ctype} *)camry_host_ptr(0x{addr:x}u))"
+            )
+        else:
+            lines.append(
+                f"#define {name} (*((volatile {ctype} *)camry_host_ptr(0x{addr:x}u)))"
+            )
     for match in sorted(set(re.findall(r"\b((?:DAT|UNK)_[0-9A-Fa-f]+)\b", text))):
         addr = int(match.split("_", 1)[1], 16)
         lines.append(
@@ -616,7 +711,8 @@ def _compile_corpus(destination: Path) -> subprocess.CompletedProcess[str]:
             "-Wno-unused-variable", "-Wno-unused-parameter",
             "-Wno-unused-function", "-Wno-unused-label",
             "-Wno-pointer-to-int-cast", "-Wno-int-to-pointer-cast",
-            "-Wno-bitwise-op-parentheses",
+            "-Wno-bitwise-op-parentheses",             "-Wno-sign-compare", "-Wno-parentheses",
+            "-Wno-pointer-sign", "-Wno-incompatible-pointer-types",
             "-DCAMRY_HOST", "-I", str(ROOT / "include"),
             "-o", "/dev/null", str(destination),
         ],
