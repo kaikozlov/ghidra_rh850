@@ -48,7 +48,7 @@ def u32(data: bytes, off: int) -> int:
     return struct.unpack_from("<I", data, off)[0]
 
 
-def did_table(data: bytes, base: int, count: int = 241) -> tuple[list[int], list[int]]:
+def did_table(data: bytes, base: int, count: int) -> tuple[list[int], list[int]]:
     dids, callbacks = [], []
     for i in range(count):
         row = base + i * 16
@@ -112,10 +112,13 @@ def build() -> dict:
     camry_tp = struct.unpack_from("<I", camry_ctx, 32)[0]
     crown_tp = struct.unpack_from("<I", crown_ctx, 32)[0]
 
-    crown_dids, crown_callbacks = did_table(crown, 0x28FA8)
-    camry_dids, camry_callbacks = did_table(camry, 0x2928C)
-    if crown_dids != camry_dids or crown_dids[0] != 0x0101 or crown_dids[-1] != 0xF18C:
-        raise SystemExit("Crown/Camry RDBI DID membership drift")
+    # Independently recovered getters: Crown 0x4FE86 and Camry 0x50990 each
+    # return 0xF2 records, starting with DID 0100. This compares metadata
+    # membership, not dynamic read admission or availability.
+    crown_dids, crown_callbacks = did_table(crown, 0x28F98, 242)
+    camry_dids, camry_callbacks = did_table(camry, 0x2927C, 242)
+    if crown_dids != camry_dids or crown_dids[0] != 0x0100 or crown_dids[-1] != 0xF18C:
+        raise SystemExit("Crown/Camry DID metadata membership drift")
     deltas = collections.Counter(c - f for c, f in zip(crown_callbacks, camry_callbacks))
 
     roots = {}
@@ -157,9 +160,10 @@ def build() -> dict:
         "rdbi": {
             "count": len(crown_dids),
             "unique_callbacks": len(set(crown_callbacks)),
-            "crown_table": "0x00028FA8",
-            "camry_table": "0x0002928C",
+            "crown_table": "0x00028F98",
+            "camry_table": "0x0002927C",
             "did_membership_identical": True,
+            "membership_boundary": "Complete metadata membership only; not currently readable DID admission.",
             "callback_delta_histogram": {str(k): v for k, v in sorted(deltas.items(), key=lambda kv: (-kv[1], kv[0]))},
         },
         "c7_ingress_boundary": {

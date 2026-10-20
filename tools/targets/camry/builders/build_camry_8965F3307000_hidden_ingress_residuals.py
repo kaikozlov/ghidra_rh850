@@ -3,8 +3,8 @@
 
 E1 is the bounded register-arithmetic STORE-address false-negative class left by
 canonical Ghidra references.  The target-native HighFunction census is promoted
-as an image/script-bound generated input, then every candidate family is closed
-against exact target constants and call/config bounds from the canonical corpus.
+as an image/script/corpus-bound generated input, then every candidate family is
+closed against exact target constants and call/config bounds from that corpus.
 
 E2 is the DMAC destination-register rewrite class.  The same STORE resolver is
 run against every channel's two destination registers; exact decompilation then
@@ -87,7 +87,7 @@ def bind(rows: dict[int, dict], image: bytes, entries: set[int] | list[int]) -> 
 
 
 def literal_call_args(rows: dict[int, dict], callee: int) -> list[int]:
-    token = f"FUN_{callee:08x}("
+    token = str(rows[callee]["name"]) + "("
     vals: list[int] = []
     rx = re.compile(re.escape(token) + r"(?:\(.*?\)|[^,])*?\(?\s*(0x[0-9a-fA-F]+|\d+)\s*,")
     for entry, row in rows.items():
@@ -149,33 +149,40 @@ def refresh_census(path: Path, audit_output: Path) -> None:
     old["candidates"] = rows
     old["candidate_functions"] = candidate_functions
     old["summary"] = summary
+    old["canonical_corpus"] = {
+        "path": str(CORPUS.relative_to(ROOT)),
+        "sha256": sha(CORPUS.read_bytes()),
+    }
     path.write_text(json.dumps(old, indent=2, sort_keys=True) + "\n")
 
 
-def census_summary(c: dict, *, candidates: int, functions: int) -> None:
+def census_summary(c: dict, *, corpus_functions: int, corpus_sha256: str) -> None:
     need(c["schema"] == "camry-8965f3307000-computed-store-target-census-v1", "computed-store schema drift")
     need(c["target"] == {"software_id": "8965F3307000", "codeflash_sha256": IMAGE_SHA256}, "computed-store target drift")
     expected_sha = sha(SCRIPT.read_bytes())
     need(c["ghidra_script"] == {"path": "ghidra/scripts/investigate/AuditComputedStoreTargets.java", "sha256": expected_sha}, "computed-store script identity drift")
-    need(c["summary"] == {
-        "candidateFunctions": functions,
-        "candidates": candidates,
-        "functions": 7178,
-        "knownRangeStores": 5438,
-        "stores": 14059,
-    }, "computed-store census denominator drift")
+    need(c.get("canonical_corpus") == {
+        "path": str(CORPUS.relative_to(ROOT)),
+        "sha256": corpus_sha256,
+    }, "computed-store census is stale; rerun both audits against the matching rebuilt project")
+    summary = c["summary"]
+    need(summary["functions"] == corpus_functions, "computed-store audit did not cover the canonical function set")
+    need(summary["candidates"] == len(c["candidates"]), "computed-store candidate count/output mismatch")
+    functions = {row["function"] for row in c["candidates"]}
+    need(functions == set(c["candidate_functions"]), "computed-store candidate function/output mismatch")
+    need(summary["candidateFunctions"] == len(functions), "computed-store candidate-function count/output mismatch")
 
 
 def build() -> dict:
     image = IMAGE.read_bytes()
     need(len(image) == 0x100000 and sha(image) == IMAGE_SHA256, "exact F33 image drift")
     rows, total = load_function_corpus(CORPUS)
-    need(total == 7178, f"F33 corpus denominator drift: {total}")
+    corpus_sha256 = sha(CORPUS.read_bytes())
 
     e1 = load_json(E1)
     e2 = load_json(E2)
-    census_summary(e1, candidates=103, functions=49)
-    census_summary(e2, candidates=5, functions=3)
+    census_summary(e1, corpus_functions=total, corpus_sha256=corpus_sha256)
+    census_summary(e2, corpus_functions=total, corpus_sha256=corpus_sha256)
     e1_funcs = {int(x, 16) for x in e1["candidate_functions"]}
     e2_funcs = {int(x, 16) for x in e2["candidate_functions"]}
     need(e1_funcs == E1_FUNCTIONS, f"E1 candidate function set drift: {sorted(e1_funcs ^ E1_FUNCTIONS)}")
@@ -220,7 +227,7 @@ def build() -> dict:
         need("< 0x60" in ctext(rows, entry), f"{entry:#x} 0x60 bound drift")
     t = ctext(rows, 0x8E912)
     need("param_2 < 3" in t and "param_1 == 1" in t, "three-node diagnostic list bound drift")
-    need("FUN_0008e8a0(1,0" in ctext(rows, 0x8F98C).replace(" ", ""), "8F98C list source drift")
+    need(f"{rows[0x8E8A0]['name']}(1,0" in ctext(rows, 0x8F98C).replace(" ", ""), "8F98C list source drift")
 
     # E1-E: the storage/logical-block family is exactly three state rows and all
     # writer entry points recover their index through that three-row domain.
@@ -233,11 +240,24 @@ def build() -> dict:
     # E1-F: five-channel motor/diagnostic snapshot family and three-element CBxx
     # diagnostic helpers.
     need("while (uVar1 < 5)" in ctext(rows, 0xBA642), "BA642 five-channel bound drift")
-    need("thunk_FUN_000bef80(0)" in ctext(rows, 0x3D348), "BEF80 literal index drift")
+    need(f"{rows[0xFDDA4]['name']}(0)" in ctext(rows, 0x3D348), "BEF80 literal index drift")
     need("DAT_febec628 < 0x13" in ctext(rows, 0xCA242), "CA242 ring bound drift")
     need("DAT_febec740 < 0x13" in ctext(rows, 0xCB45E), "CB45E ring bound drift")
     for entry in (0xCF4DA, 0xCF4F8, 0xCF51C):
         need("< 3" in ctext(rows, entry), f"{entry:#x} three-entry bound drift")
+
+    # The refreshed 7,336-function census no longer emits 69EAC as a candidate.
+    # Retain its independent instruction bound: R28 is clamped to64 before any
+    # state-dependent branch; 69F14 stores at GP-663A+index only while unsigned
+    # index<R28. Caller-selected outputs remain outside this known-base closure.
+    for start, encoded in (
+        (0x69EB0, "07e009e806d0dc00dd00"),
+        (0x69ECC, "1c06bfffb90520e64000"),
+        (0x69F00, "000ab50d0198da99939f010001f0c4f1410ac1005e9fc699fc09d1f5"),
+    ):
+        expected = bytes.fromhex(encoded)
+        need(image[start:start + len(expected)] == expected,
+             f"direct crypto-request copy bound drift at {start:#x}")
 
     # E2: destination registers are +0x04 and +0x14 in every 0x40-byte channel.
     # The computed-target census finds only control-register accesses at modulo
@@ -264,13 +284,15 @@ def build() -> dict:
     plus14_writers = sorted(entry for entry, row in rows.items() if plus14_store.search(str(row.get("decompiled_c", ""))))
     need(plus04_writers == [0x6082C], f"DMAC +04 writer set drift: {plus04_writers}")
     need(plus14_writers == [0x6082C, 0x60A6A], f"DMAC +14 writer set drift: {plus14_writers}")
-    need("return *(undefined4 *)((param_1 & 0xff) * 0x40 + -0x7bfc);" in ctext(rows, 0x6091E), "DMAC +04 reader drift")
+    # ZXB r6; SHL 6,r6; LD.W -0x7bfc[r6],r10; JMP lp. The accessor's
+    # named uint return and uchar argument do not alter this read-only dataflow.
+    need(image[0x6091E:0x60928] == bytes.fromhex("8600c632265705847f00"), "DMAC +04 reader instruction drift")
 
     # Runtime updater 60A6A has only four callers, and all callsites pass one of
     # seven fixed CodeFlash descriptor families. Bind each table byte-for-byte.
     runtime_callers = []
     for entry, row in rows.items():
-        if entry != 0x60A6A and "FUN_00060a6a(" in str(row.get("decompiled_c", "")):
+        if entry != 0x60A6A and re.search(rf"\b{re.escape(rows[0x60A6A]['name'])}\(", str(row.get("decompiled_c", ""))):
             runtime_callers.append(entry)
     runtime_callers = sorted(runtime_callers)
     need(runtime_callers == [0x60462, 0x60C20, 0x61B90, 0x628B2], f"60A6A caller set drift: {runtime_callers}")
@@ -297,7 +319,7 @@ def build() -> dict:
         0x8E862, 0x8E8A0, 0x8E912, 0x8E9C6, 0x8F746, 0x8F906, 0x8F98C,
         0x93ABA, 0x93C60, 0x93C66, 0x93F0E, 0xBA224, 0xBA25E, 0xBA336,
         0xBA5A0, 0xBA642, 0x6082C, 0x6091E, 0x60A6A, 0x60462, 0x60C20,
-        0x61B90, 0x628B2,
+        0x61B90, 0x628B2, 0x69EAC,
     }
 
     return {
@@ -323,7 +345,7 @@ def build() -> dict:
                 {"name": "cbxx_diagnostic_state", "functions": [hx(x) for x in (0xCA242,0xCB45E,0xCF4DA,0xCF4F8,0xCF51C)], "bound": "CA242/CB45E ring indices are <=0x13 and CF4xx helpers are <3; writes remain below the steering-command CCxx region"},
             ],
             "result": "zero recovered register-arithmetic STORE path can land on any audited steering command/current target once exact runtime/configuration index bounds are applied",
-            "boundary": "unknown/unbounded pointer stores and memory-safety bugs are not promoted to impossible; this closes VAR-084 E1 specifically, not arbitrary pointer corruption",
+            "boundary": "unknown/unbounded pointer stores and memory-safety bugs are not promoted to impossible; this closes VAR-084 E1 specifically, not arbitrary pointer corruption. Prior candidate 69EAC is absent from the refreshed census; its independently byte-bound copy remains confined to FEBE51C6..FEBE5205.",
         },
         "e2_dmac_destination_reprogramming": {
             "status": "closed_within_recovered_application_dataflow",

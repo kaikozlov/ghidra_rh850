@@ -118,6 +118,23 @@ $UV python -m tools.targets.camry.analysis.plot_camry_20260930_vmc_status \
   and `--inventory` (see each module's `--help`) instead of any new wrapper
   script.
 
+The F33 B6/gate reconciliation also scans retained rlogs and needs an external
+reader environment, including `capnp`. Its `--openpilot-root` is the parent
+exposing the `openpilot` Python package, rather than the source-tree argument in
+the extraction example above. For a checkout with an existing `.venv`, run the
+registered producer from this repository root:
+
+```bash
+../kai-openpilot/.venv/bin/python \
+  -m tools.targets.camry.analysis.analyze_camry_f33_b6_gate_log_reconciliation \
+  --openpilot-root ../kai-openpilot
+```
+
+Supply `--log-root` when the retained corpus is elsewhere. The ordinary
+repository Python environment is not assumed to contain the external reader's
+dependencies. Retain reader corruption warnings as evidence limits; do not
+repair raw captures or reinterpret regeneration as a new vehicle observation.
+
 ### Gear and READY evidence
 
 Regenerate the controlled Camry selector evidence without external inputs:
@@ -342,6 +359,12 @@ working copy, run `tools/g stop` afterward. To promote a finished working copy
 into the committed snapshot, run `make finalize-project` for the selected target
 (daemon stop, target-specific verification, and snapshot promotion).
 
+After editing a Java script used by a persistent bridge, cleanly stop the
+relevant target bridge before verifying the changed behavior. A loaded script
+can retain the previous implementation even after its source changes:
+`tools/gtarget camry-8965F3307000 stop`. The next command starts a fresh runtime.
+This reload is distinct from rebuilding or promoting the working database.
+
 ### Persistent mechanical annotations (legacy Sienna ledger)
 
 Simple function renames, data labels, and listing comments for the legacy Sienna
@@ -402,7 +425,7 @@ tools/pseudo --target sienna-8965B4512000 0x6fec   # explicit legacy-Sienna corp
 # disposable/live project and raw disassembly.
 make pseudocode                          # rebuild the ignored build/out/pseudocode/*.c view for the selected target
 rg 'ICUSCMD' build/out/pseudocode
-rg 'f33_rdbi' build/out/pseudocode
+rg 'rdbi' build/out/pseudocode
 ```
 
 ## Task-oriented tooling discovery
@@ -668,18 +691,38 @@ make verify-project-parity        # exact working-project inventory vs baseline
 ```
 
 The processor fixtures cover all four language profiles. Their optional
-whole-program audits and the live semantic-coverage ledger are legacy-Sienna
-checks, not selected-target-generic suites. For a fresh disposable Sienna project:
+whole-program audits remain legacy-Sienna checks:
 
 ```bash
-make verify-processor PROJECT_DIR="$PWD/build/work/sienna-rebuild"
-GHIDRA_ANALYSIS_TARGET=sienna-8965B4512000 \
-  make verify-semantic-coverage-live PROJECT_DIR="$PWD/build/work/sienna-rebuild"
+make verify-processor TARGET=sienna-8965B4512000 PROJECT_DIR="$PWD/build/work/sienna-rebuild"
 ```
 
-Use the actual rebuilt directory; neither command rebuilds it. The explicit
-target environment selects Sienna for the coverage exporter even when the
-registry default is another target.
+Camry `8965F3307000` decompilation lives in
+[decomp/camry-8965F3307000](../decomp/camry-8965F3307000/README.md).
+Use `tools/toyota decomp --help` to discover the reconstruction workflow.
+`tools/toyota decomp status` validates the original image and symbol ranges;
+it is not a C-to-RH850 byte-match check. `source NAME_OR_ADDRESS` prints canonical
+reconstructed C and its owning path without requiring generated candidates.
+`corpus`, `oracle`, and `lift report|emit|check` use the same dispatcher. Matched C,
+source precedence, and retained-bank rollback use `tools/test camry_decomp`;
+this is a local suite because uncached event timing requires Ghidra replay.
+
+The reconstruction guide distinguishes canonical C and declarations from ignored
+candidate/lift output under `build/out/targets/camry-8965F3307000/decomp/`.
+Retained original-byte scenarios remain inputs. Tooling and
+the reusable native runtime live in `tools/targets/camry/decomp/`; test entry
+points live in `tests/targets/camry/`. Keep small source changes separate from
+expensive corpus/project snapshot promotions, and promote snapshots at deliberate
+reproducible checkpoints through the lifecycle below.
+
+Semantic coverage and outside-function discovery remain the legacy Sienna CSV
+pipeline. Those two generators are pinned to the Sienna work project:
+
+```bash
+make generate-semantic-coverage
+make generate-function-discovery
+make verify-semantic-coverage-live TARGET=sienna-8965B4512000 PROJECT_DIR="$PWD/build/work/project"
+```
 
 `verification.toml` lists suites and external prerequisites. It does not
 assign tests to changed files. Broad sweeps and Ghidra rebuilds are release or
@@ -762,7 +805,9 @@ the P1M-E device profile, and `ApplyP1MSfrTypes` — plus the target's registere
 context script (`device_profile_script`, e.g. `ApplyCamryF33DeviceProfile.java`),
 then stage their registered seed scripts (`entry_seed_script`,
 `diagnostic_seed_script`, `recovered_seed_script`, plus the target's
-`function_seeds` CSV) as their own durable analysis commits, and end with the
+`function_seeds` CSV) as their own durable analysis commits. Camry's recovered
+seed only repairs structural code and data boundaries. Function names and C
+are owned by `decomp/camry-8965F3307000/`. All first-class targets end with the
 same `-noanalysis` `ApplyCallingConventions` finalizer. Exact-target scripts do
 not maintain a second hardware map.
 
@@ -805,15 +850,39 @@ not maintain a second hardware map.
    it catches equal-count substitutions and annotation drift that floors miss.
 
 When a deliberate seed/annotation change alters the inventory, run
-`make update-project-baseline PROJECT_DIR_A=/abs/rebuild-a
-PROJECT_DIR_B=/abs/rebuild-b`. The update fails unless two independent fresh
+`make update-project-baseline TARGET=camry-8965F3307000 PROJECT_DIR_A=/abs/rebuild-a
+PROJECT_DIR_B=/abs/rebuild-b` (select the actual target). The update fails unless two independent fresh
 rebuilds produce byte-identical canonical inventories. Review the tracked diff,
 then rerun `make verify-project-parity`. Ordinary verification never updates the
 baseline.
 
-The whole-image corpus is the decompilation source; use `tools/pseudo` to read
-functions. `data/semantic_review_status.csv` retains human review conclusions.
-The semantic coverage/ranking tools provide navigation, not additional proof.
+Run fresh A/B rebuilds sequentially when sharing the default isolated Ghidra
+home: each rebuild reinstalls the shared `GhidraFindcrypt` extension directory.
+Independent reproduction means separate fresh project imports, not concurrent
+extension bootstrap.
+
+The whole-image corpus is Ghidra output for reading a function; use
+`tools/pseudo --target TARGET`. Camry understanding that is being recompiled
+lives in `decomp/camry-8965F3307000/src/`. The legacy `semantic_reviews` CSV
+still owns curated conclusions for Sienna, and `function_discovery_reviews`
+owns adjudicated outside-function clusters. Exporters regenerate the
+corresponding summaries. Structural coverage/ranking provides navigation, not
+additional proof.
+
+For Camry `camry-8965F3307000`, the E1/E2 computed-store censuses also depend on
+the canonical corpus, not only the firmware hash. After promoting a changed
+corpus, run `ghidra/scripts/investigate/AuditComputedStoreTargets.java` through
+`tools/gtarget camry-8965F3307000 script run` against the matching rebuilt working
+project. Supply each census artifact's `targets` list after `--`, separately for
+`camry_8965F3307000_computed_store_target_census.json` and
+`camry_8965F3307000_dmac_destination_computed_store_census.json` in
+`data/generated/`. Retain each script's stdout or single-result JSON wrapper,
+then run
+`uv run python -m tools.targets.camry.builders.build_camry_8965F3307000_hidden_ingress_residuals
+--refresh-e1-output E1_OUTPUT --refresh-e2-output E2_OUTPUT`.
+The producer binds the refreshed censuses to the corpus hash and rejects stale
+inputs. Do not relabel old audit output or repin aggregate totals to bypass that
+dependency; changed candidate families require analysis before closure.
 
 ## CI
 

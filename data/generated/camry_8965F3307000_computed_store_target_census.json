@@ -199,7 +199,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F44",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe4f44),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1))",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f40),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0x4)",
       "store": "0x0007B2E4"
     },
     {
@@ -216,7 +216,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F49",
-      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4f49),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1)",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f40),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0x9)",
       "store": "0x0007B2E6"
     },
     {
@@ -233,7 +233,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F54",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe4f54),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1))",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f50),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0x4)",
       "store": "0x0007B2EA"
     },
     {
@@ -250,7 +250,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F5C",
-      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4f5c),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1)",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f50),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0xc)",
       "store": "0x0007B2EC"
     },
     {
@@ -267,7 +267,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F40",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe4f40),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1))",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f40),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0x0)",
       "store": "0x0007B2EE"
     },
     {
@@ -284,7 +284,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F46",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe4f46),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1))",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f40),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0x6)",
       "store": "0x0007B2F2"
     },
     {
@@ -301,7 +301,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F48",
-      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4f48),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1)",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f40),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0x8)",
       "store": "0x0007B2F4"
     },
     {
@@ -318,7 +318,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F4A",
-      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4f4a),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1)",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f40),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0xa)",
       "store": "0x0007B2F6"
     },
     {
@@ -335,7 +335,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F4B",
-      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4f4b),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1)",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f40),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0xb)",
       "store": "0x0007B2F8"
     },
     {
@@ -352,7 +352,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F4C",
-      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4f4c),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1)",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f40),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0xc)",
       "store": "0x0007B2FA"
     },
     {
@@ -369,7 +369,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F4D",
-      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4f4d),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1)",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f40),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0xd)",
       "store": "0x0007B2FC"
     },
     {
@@ -386,7 +386,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F4E",
-      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4f4e),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1)",
+      "pointer_expression": "PTRADD(PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f40),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0xd),0x1,0x1)",
       "store": "0x0007B2FE"
     },
     {
@@ -403,7 +403,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F4F",
-      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4f4f),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1)",
+      "pointer_expression": "PTRADD(PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f40),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0xd),0x2,0x1)",
       "store": "0x0007B300"
     },
     {
@@ -420,7 +420,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F50",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe4f50),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1))",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f50),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0x0)",
       "store": "0x0007B302"
     },
     {
@@ -437,7 +437,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F56",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe4f56),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1))",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f50),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0x6)",
       "store": "0x0007B304"
     },
     {
@@ -454,7 +454,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F58",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe4f58),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1))",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f50),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0x8)",
       "store": "0x0007B306"
     },
     {
@@ -471,7 +471,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F5A",
-      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4f5a),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1)",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f50),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0xa)",
       "store": "0x0007B308"
     },
     {
@@ -488,7 +488,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F5B",
-      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4f5b),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1)",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f50),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0xb)",
       "store": "0x0007B30A"
     },
     {
@@ -505,7 +505,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F5D",
-      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4f5d),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1)",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f50),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0xd)",
       "store": "0x0007B30C"
     },
     {
@@ -522,7 +522,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F5E",
-      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4f5e),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1)",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f50),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0xe)",
       "store": "0x0007B30E"
     },
     {
@@ -539,7 +539,7 @@
         "0xFEBE6E0A"
       ],
       "lo": "0xFEBE4F5F",
-      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4f5f),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x20),0x1)",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe4f50),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x74, 4),0x1),0xff)),0x2),0x10),0xf)",
       "store": "0x0007B310"
     },
     {
@@ -586,7 +586,7 @@
         "0xFEBEEF8E"
       ],
       "lo": "0xFEBE4978",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe4978),INT_MULT(INT_AND((register, 0x18, 4),0xffff),0x2),0x1))",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4978),INT_AND((register, 0x18, 4),0xffff),0x2)",
       "store": "0x0007DDD2"
     },
     {
@@ -633,7 +633,7 @@
         "0xFEBEEF8E"
       ],
       "lo": "0xFEBE4978",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe4978),INT_MULT(MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x4, 4),0x1),0xffff)),0x2),0x1))",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4978),MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x4, 4),0x1),0xffff)),0x2)",
       "store": "0x0007E374"
     },
     {
@@ -680,7 +680,7 @@
         "0xFEBEEF8E"
       ],
       "lo": "0xFEBE48DA",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe48da),INT_MULT(INT_AND((register, 0x1c, 4),0xffff),0x6),0x1))",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe48da),INT_MULT(INT_ZEXT((register, 0x1c, 2)),0x3),0x2)",
       "store": "0x0007FCB2"
     },
     {
@@ -727,7 +727,7 @@
         "0xFEBEEF8E"
       ],
       "lo": "0xFEBE48DE",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe48de),INT_MULT(INT_AND((register, 0x1c, 4),0xffff),0x6),0x1))",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe48da),INT_ADD(INT_MULT(INT_ZEXT((register, 0x1c, 2)),0x3),0x2),0x2)",
       "store": "0x0007FCB4"
     },
     {
@@ -1761,7 +1761,7 @@
         "0xFEBEEF8E"
       ],
       "lo": "0xFEBE59F0",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe59f0),INT_MULT(INT_AND((register, 0x18, 4),0xffff),0x10),0x1))",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe59f0),INT_AND((register, 0x18, 4),0xffff),0x10),0x0)",
       "store": "0x00093C80"
     },
     {
@@ -1808,7 +1808,7 @@
         "0xFEBEEF8E"
       ],
       "lo": "0xFEBE59FA",
-      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe59fa),INT_MULT(INT_AND((register, 0x18, 4),0xffff),0x10),0x1)",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe59f0),INT_AND((register, 0x18, 4),0xffff),0x10),0xa)",
       "store": "0x00093CBA"
     },
     {
@@ -1855,7 +1855,7 @@
         "0xFEBEEF8E"
       ],
       "lo": "0xFEBE59F0",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe59f0),INT_MULT(INT_AND((register, 0x18, 4),0xffff),0x10),0x1))",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe59f0),INT_AND((register, 0x18, 4),0xffff),0x10),0x0)",
       "store": "0x00093CBC"
     },
     {
@@ -1902,7 +1902,7 @@
         "0xFEBEEF8E"
       ],
       "lo": "0xFEBE59F4",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe59f4),INT_MULT(INT_AND((register, 0x18, 4),0xffff),0x10),0x1))",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe59f0),INT_AND((register, 0x18, 4),0xffff),0x10),0x4)",
       "store": "0x00093CC6"
     },
     {
@@ -1949,7 +1949,7 @@
         "0xFEBEEF8E"
       ],
       "lo": "0xFEBE59FC",
-      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe59fc),INT_MULT(INT_AND((register, 0x18, 4),0xffff),0x10),0x1)",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe59f0),INT_AND((register, 0x18, 4),0xffff),0x10),0xc)",
       "store": "0x00093CC8"
     },
     {
@@ -1996,7 +1996,7 @@
         "0xFEBEEF8E"
       ],
       "lo": "0xFEBE59F8",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe59f8),INT_MULT(INT_AND((register, 0x18, 4),0xffff),0x10),0x1))",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe59f0),INT_AND((register, 0x18, 4),0xffff),0x10),0x8)",
       "store": "0x00093CCA"
     },
     {
@@ -2043,7 +2043,7 @@
         "0xFEBEEF8E"
       ],
       "lo": "0xFEBE59F0",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe59f0),INT_MULT(INT_AND((register, 0x18, 4),0xffff),0x10),0x1))",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe59f0),INT_ZEXT((register, 0x18, 2)),0x10),0x0)",
       "store": "0x00093E06"
     },
     {
@@ -2090,7 +2090,7 @@
         "0xFEBEEF8E"
       ],
       "lo": "0xFEBE59F4",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe59f4),INT_MULT(INT_AND((register, 0x18, 4),0xffff),0x10),0x1))",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe59f0),INT_ZEXT((register, 0x18, 2)),0x10),0x4)",
       "store": "0x00093E20"
     },
     {
@@ -2137,7 +2137,7 @@
         "0xFEBEEF8E"
       ],
       "lo": "0xFEBE59F8",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe59f8),INT_MULT(INT_AND((register, 0x18, 4),0xffff),0x10),0x1))",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe59f0),INT_ZEXT((register, 0x18, 2)),0x10),0x8)",
       "store": "0x00093E2A"
     },
     {
@@ -2184,7 +2184,7 @@
         "0xFEBEEF8E"
       ],
       "lo": "0xFEBE59F0",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebe59f0),INT_MULT(INT_AND((register, 0x18, 4),0xffff),0x10),0x1))",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe59f0),INT_AND((register, 0x18, 4),0xffff),0x10),0x0)",
       "store": "0x00093E74"
     },
     {
@@ -2231,7 +2231,7 @@
         "0xFEBEEF8E"
       ],
       "lo": "0xFEBE59FA",
-      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe59fa),INT_MULT(INT_AND((register, 0x18, 4),0xffff),0x10),0x1)",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe59f0),INT_AND((register, 0x18, 4),0xffff),0x10),0xa)",
       "store": "0x00093E7C"
     },
     {
@@ -2278,7 +2278,7 @@
         "0xFEBEEF8E"
       ],
       "lo": "0xFEBE59FB",
-      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe59fb),INT_MULT(INT_AND((register, 0x18, 4),0xffff),0x10),0x1)",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe59f0),INT_AND((register, 0x18, 4),0xffff),0x10),0xb)",
       "store": "0x00093EFC"
     },
     {
@@ -2325,7 +2325,7 @@
         "0xFEBEEF8E"
       ],
       "lo": "0xFEBE59FC",
-      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe59fc),INT_MULT(INT_AND((register, 0x18, 4),0xffff),0x10),0x1)",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe59f0),INT_AND((register, 0x18, 4),0xffff),0x10),0xc)",
       "store": "0x00093F54"
     },
     {
@@ -2382,7 +2382,7 @@
         "0xFEBEBF3C"
       ],
       "lo": "0xFEBEBB4C",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebb4c),INT_MULT(INT_AND((register, 0x18, 4),0xff),0x4),0x1))",
+      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebb4c),INT_MULT(INT_ZEXT((register, 0x18, 1)),0x4),0x1))",
       "store": "0x000B9D54"
     },
     {
@@ -2392,7 +2392,7 @@
         "0xFEBEBF3C"
       ],
       "lo": "0xFEBEBB60",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebb60),INT_MULT(INT_AND((register, 0x18, 4),0xff),0x4),0x1))",
+      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebb60),INT_MULT(INT_ZEXT((register, 0x18, 1)),0x4),0x1))",
       "store": "0x000B9DEC"
     },
     {
@@ -2402,7 +2402,7 @@
         "0xFEBEBF3C"
       ],
       "lo": "0xFEBEBB74",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebb74),INT_MULT(INT_AND((register, 0x18, 4),0xff),0x4),0x1))",
+      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebb74),INT_MULT(INT_ZEXT((register, 0x18, 1)),0x4),0x1))",
       "store": "0x000B9DF4"
     },
     {
@@ -2412,7 +2412,7 @@
         "0xFEBEBF3C"
       ],
       "lo": "0xFEBEBBB0",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebbb0),INT_MULT(INT_AND((register, 0x18, 4),0xff),0x4),0x1))",
+      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebbb0),INT_MULT(INT_ZEXT((register, 0x18, 1)),0x4),0x1))",
       "store": "0x000B9E9A"
     },
     {
@@ -2422,7 +2422,7 @@
         "0xFEBEBF3C"
       ],
       "lo": "0xFEBEBBC4",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebbc4),INT_MULT(INT_AND((register, 0x18, 4),0xff),0x4),0x1))",
+      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebbc4),INT_MULT(INT_ZEXT((register, 0x18, 1)),0x4),0x1))",
       "store": "0x000B9EA2"
     },
     {
@@ -2432,7 +2432,7 @@
         "0xFEBEBF3C"
       ],
       "lo": "0xFEBEBB88",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebb88),INT_MULT(INT_AND((register, 0x18, 4),0xff),0x4),0x1))",
+      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebb88),INT_MULT(INT_ZEXT((register, 0x18, 1)),0x4),0x1))",
       "store": "0x000B9F38"
     },
     {
@@ -2442,7 +2442,7 @@
         "0xFEBEBF3C"
       ],
       "lo": "0xFEBEBB9C",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebb9c),INT_MULT(INT_AND((register, 0x18, 4),0xff),0x4),0x1))",
+      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebb9c),INT_MULT(INT_ZEXT((register, 0x18, 1)),0x4),0x1))",
       "store": "0x000B9F40"
     },
     {
@@ -2452,7 +2452,7 @@
         "0xFEBEBF3C"
       ],
       "lo": "0xFEBEBBDC",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebbdc),INT_MULT(INT_AND((register, 0x18, 4),0xff),0x4),0x1))",
+      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebbdc),INT_MULT(INT_ZEXT((register, 0x18, 1)),0x4),0x1))",
       "store": "0x000BA0C0"
     },
     {
@@ -2462,7 +2462,7 @@
         "0xFEBEBF3C"
       ],
       "lo": "0xFEBEBBF0",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebbf0),INT_MULT(INT_AND((register, 0x18, 4),0xff),0x4),0x1))",
+      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebbf0),INT_MULT(INT_ZEXT((register, 0x18, 1)),0x4),0x1))",
       "store": "0x000BA168"
     },
     {
@@ -2472,7 +2472,7 @@
         "0xFEBEBF3C"
       ],
       "lo": "0xFEBEBC04",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebc04),INT_MULT(INT_AND((register, 0x18, 4),0xff),0x4),0x1))",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebebc04),INT_ZEXT((register, 0x18, 1)),0x4)",
       "store": "0x000BA19E"
     },
     {
@@ -2482,7 +2482,7 @@
         "0xFEBEBF3C"
       ],
       "lo": "0xFEBEBC18",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebc18),INT_MULT(INT_AND((register, 0x18, 4),0xff),0x4),0x1))",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebebc18),INT_ZEXT((register, 0x18, 1)),0x4)",
       "store": "0x000BA1F6"
     },
     {
@@ -2492,7 +2492,7 @@
         "0xFEBEBF3C"
       ],
       "lo": "0xFEBEBC2C",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebc2c),INT_MULT(INT_AND((register, 0x18, 4),0xff),0x4),0x1))",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebebc2c),INT_ZEXT((register, 0x18, 1)),0x4)",
       "store": "0x000BA2B6"
     },
     {
@@ -2502,7 +2502,7 @@
         "0xFEBEBF3C"
       ],
       "lo": "0xFEBEBC68",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebc68),INT_MULT(INT_AND((register, 0x18, 4),0xff),0x4),0x1))",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebebc68),INT_ZEXT((register, 0x18, 1)),0x4)",
       "store": "0x000BA308"
     },
     {
@@ -2512,7 +2512,7 @@
         "0xFEBEBF3C"
       ],
       "lo": "0xFEBEBC54",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebc54),INT_MULT(INT_AND((register, 0x18, 4),0xff),0x4),0x1))",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebebc2c),INT_ADD(INT_ZEXT((register, 0x18, 1)),0xa),0x4)",
       "store": "0x000BA3CC"
     },
     {
@@ -2522,7 +2522,7 @@
         "0xFEBEBF3C"
       ],
       "lo": "0xFEBEBC90",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebc90),INT_MULT(INT_AND((register, 0x18, 4),0xff),0x4),0x1))",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebebc68),INT_ADD(INT_ZEXT((register, 0x18, 1)),0xa),0x4)",
       "store": "0x000BA40C"
     },
     {
@@ -2532,7 +2532,7 @@
         "0xFEBEBF3C"
       ],
       "lo": "0xFEBEBC40",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebc40),INT_MULT(INT_AND((register, 0x18, 4),0xff),0x4),0x1))",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebebc2c),INT_ADD(INT_ZEXT((register, 0x18, 1)),0x5),0x4)",
       "store": "0x000BA468"
     },
     {
@@ -2542,7 +2542,7 @@
         "0xFEBEBF3C"
       ],
       "lo": "0xFEBEBC7C",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebc7c),INT_MULT(INT_AND((register, 0x18, 4),0xff),0x4),0x1))",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebebc68),INT_ADD(INT_ZEXT((register, 0x18, 1)),0x5),0x4)",
       "store": "0x000BA4BE"
     },
     {
@@ -2552,7 +2552,7 @@
         "0xFEBEBF3C"
       ],
       "lo": "0xFEBEBC54",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebc54),INT_MULT(INT_AND((register, 0x18, 4),0xff),0x4),0x1))",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebebc2c),INT_ADD(INT_ZEXT((register, 0x18, 1)),0xa),0x4)",
       "store": "0x000BA51E"
     },
     {
@@ -2562,7 +2562,7 @@
         "0xFEBEBF3C"
       ],
       "lo": "0xFEBEBC90",
-      "pointer_expression": "CAST(PTRADD(PTRSUB(0x0,0xfebebc90),INT_MULT(INT_AND((register, 0x18, 4),0xff),0x4),0x1))",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebebc68),INT_ADD(INT_ZEXT((register, 0x18, 1)),0xa),0x4)",
       "store": "0x000BA572"
     },
     {
@@ -2802,6 +2802,10 @@
       "store": "0x000CF564"
     }
   ],
+  "canonical_corpus": {
+    "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
+    "sha256": "e3ac4e094422d68757173a48b2a7a4d9ca85187ce324e7a9e1ac0ce2410e82b8"
+  },
   "ghidra_script": {
     "path": "ghidra/scripts/investigate/AuditComputedStoreTargets.java",
     "sha256": "eb1c8c95ff08239ee520f0e2ae1a32f6b02fd02117317d0b733ef329f164d3c6"
@@ -2812,9 +2816,9 @@
   "summary": {
     "candidateFunctions": 49,
     "candidates": 103,
-    "functions": 7178,
-    "knownRangeStores": 5438,
-    "stores": 14059
+    "functions": 7336,
+    "knownRangeStores": 5432,
+    "stores": 14134
   },
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",

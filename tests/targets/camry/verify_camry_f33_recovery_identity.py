@@ -18,11 +18,13 @@ def main() -> int:
     assert len(image) == 0x100000
 
     app_dids = {}
-    for index in range(241):
-        address = 0x2928C + 16 * index
+    # Complete metadata membership; lookup still applies kind/availability gates.
+    for index in range(242):
+        address = 0x2927C + 16 * index
         did, width, callback = struct.unpack_from("<HHI", image, address)
         assert did not in app_dids
         app_dids[did] = (width, callback)
+    assert app_dids[0x0100] == (32, 0x4FB10)
     assert app_dids[0xF181] == (33, 0x4FA26)
     assert app_dids[0xF186] == (1, 0x4FA7C)
 

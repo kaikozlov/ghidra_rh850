@@ -7,7 +7,7 @@
         "0xFEBE8298",
         "0xFEBE829C"
       ],
-      "sha256": "2e10c5a4a8746761268c3fcd5b97360e13f9e82ff604a7bc8b3734202f99240e"
+      "sha256": "413661d80021f51fcbe67f49b4889815d3c902077ea78de0296a98d7a1ba645b"
     },
     "gtsplus_rows": [
       {
@@ -421,8 +421,8 @@
       "interpretation": "Exact F33 normal application CAN handling is channel/controller-1-only in the recovered interrupt wrappers, and B6 is accepted inside that same controller-1 rule span. A second private F33 application CAN controller is not supported by this target-native configuration.",
       "normal_rx_interrupt_wrapper": {
         "body_hex": "800721000132bfffbcff40063f00",
-        "call": "FUN_00083EF2(1)",
-        "decompiled_c_sha256": "1bc2f2953f6f8bc48cfe37727c76e7c8fed3522501627acdc3c6139f1de529f1",
+        "call": "service_channel_receive_or_status_and_sync_83ef2(1)",
+        "decompiled_c_sha256": "2e31b225ee68bd0cbc3327f9bc7bd9e5a7740c1d72ebcc92ebe774d9e80e4096",
         "entry": "0x00083F30"
       },
       "normal_tx_ids": [
@@ -434,8 +434,8 @@
       ],
       "normal_tx_interrupt_wrapper": {
         "body_hex": "800721000132bfffbcff40063f00",
-        "call": "FUN_00085800(1)",
-        "decompiled_c_sha256": "cbf840aa9f432fbbe2b90f62e941c592566e484c4914f9ddb7040d36ecfc382c",
+        "call": "service_channel_transmit_completions_and_sync_85800(1)",
+        "decompiled_c_sha256": "c527cd07f84be4027bc6ae7ffa3b12a5680425ecd6c20564e0a2883778755e82",
         "entry": "0x0008583E"
       },
       "normal_tx_table": "0x00021F58"
@@ -1305,7 +1305,7 @@
         "record_index": 144
       }
     ],
-    "f33_total_data_ids": 241,
+    "f33_total_data_ids": 242,
     "gtsplus_named_f33_data_ids": 121,
     "named_data_ids": [
       {
@@ -4089,8 +4089,8 @@
   "sources": {
     "f33_decompiler_corpus": {
       "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
-      "sha256": "e17dcec4c17ae7e77d0143b4e098604a13740e0c1f845f4409b1a8cf5e98d37c",
-      "size": 12230674
+      "sha256": "e3ac4e094422d68757173a48b2a7a4d9ca85187ce324e7a9e1ac0ce2410e82b8",
+      "size": 54762154
     },
     "gts_emps": {
       "path": "software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/GTSPlus/NA/DB/Gen/EMPS_P5.ddb",
@@ -4131,8 +4131,13 @@
   "target": {
     "codeflash_path": "firmware/camry-8965F3307000/CodeFlash.bin",
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-    "rdbi_record_count": 241,
-    "rdbi_table_offset": "0x02928C",
+    "rdbi_membership_boundary": "Complete DID metadata, not currently readable DID admission. 0x4D36E selects kind byte +0x0C == 0 and requires an absent availability callback or a callback result of 0x5A.",
+    "rdbi_record_count": 242,
+    "rdbi_record_kind_counts": {
+      "0": 196,
+      "1": 46
+    },
+    "rdbi_table_offset": "0x02927C",
     "software_id": "8965F3307000"
   }
 }

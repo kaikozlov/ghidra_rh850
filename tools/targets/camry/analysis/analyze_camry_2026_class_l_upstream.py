@@ -357,7 +357,7 @@ def analyze_drive(label: str, path: Path, accepted: set[int], census_intervals: 
             "raw_stage": {"sig229": "FEBE8084", "sig232": "FEBE8086", "sig235": "FEBE8088"},
             "recentered_stage": {"sig229": "FEBE808A", "sig232": "FEBE808C", "sig235": "FEBE808E"},
             "flags_stage": "FEBE8090..FEBE8095", "sig241_stage": "FEBE8096",
-            "freshness": "FEBE8097 + FUN_000498e0(0x16)",
+            "freshness": "FEBE8097 + receive-status selector0x16 through 0x498E0",
             "distribution": ("FUN_00058074: FEBE808A->FEBEF1C6, FEBE808C->FEBEF1C8, FEBE808E->FEBEF1CA, "
                              "flags->FEBEF0A4..FEBEF0AE; runtime constants FEBEF098=FEBEF099=0, "
                              "FEBEF09C=1, FEBEF0AA=0"),

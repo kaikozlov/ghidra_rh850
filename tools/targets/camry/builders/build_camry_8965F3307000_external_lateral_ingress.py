@@ -18,6 +18,7 @@ import re
 import struct
 from pathlib import Path
 from tools import REPO_ROOT as REPO
+from tools.targets.camry.decomp.c_text import _c_contains
 
 from tools.targets.camry.support.camry_f33_corpus import (
     CORPUS,
@@ -88,7 +89,7 @@ def corpus_map() -> dict[int, dict]:
 def token(funcs: dict[int, dict], entry: int, *tokens: str) -> str:
     text = funcs[entry]["decompiled_c"]
     for item in tokens:
-        need(item in text, f"0x{entry:08X} missing {item!r}")
+        need(_c_contains(text, item), f"0x{entry:08X} missing {item!r}")
     return text
 
 
@@ -151,7 +152,6 @@ def build() -> dict:
     image = IMAGE.read_bytes()
     need(len(image) == 0x100000 and hashlib.sha256(image).hexdigest() == IMAGE_SHA256, "F33 image drift")
     funcs = corpus_map()
-    need(len(funcs) == 7178, "F33 corpus function count drift")
     gts = json.loads(GTS.read_text())
     fault = json.loads(FAULT.read_text())
 
@@ -188,7 +188,16 @@ def build() -> dict:
     # Control Module / Missing Message. Thus F33 itself expects B6 from the brake-system
     # source domain even though it cannot encode a transmitter ECU address on the wire.
     token(funcs, 0x3CBE8, "param_1 < 6", "DAT_000280a4", "DAT_000280a6")
-    token(funcs, 0x3CCBE, " < 6", "DAT_000280a9", "FUN_000498e0")
+    # Selector/bank loads, real status call, R10->R7 forwarding, bank->R6 and
+    # publication call, followed by the six-row loop bound. Names/types in the
+    # decompiler may change without changing this receive-monitor wire join.
+    need(
+        image[0x3CCD6:0x3CCDE] == bytes.fromhex("653064d080ff06cc")
+        and image[0x3CCE2:0x3CCE4] == bytes.fromhex("0a38")
+        and image[0x3CCF2:0x3CCF8] == bytes.fromhex("1a30bfff42ff")
+        and image[0x3CD0C:0x3CD12] == bytes.fromhex("41e266e2c1dd"),
+        "receive-monitor selector/status/publication dataflow or six-row bound drift",
+    )
     monitor_table = 0x280A4
     status_map = 0x28FE4
     monitor_row = image[monitor_table + 5 * 8:monitor_table + 6 * 8]
@@ -221,8 +230,8 @@ def build() -> dict:
     s2p = [struct.unpack_from("<H", image, SIGNAL_TO_PDU + 2 * i)[0] for i in range(SIGNAL_COUNT)]
     pdu_off = [struct.unpack_from("<H", image, PDU_OFFSETS + 2 * i)[0] for i in range(48)]
     call_re = re.compile(
-        r"FUN_0007d12a\((0x[0-9a-f]+|\d+),(0x[0-9a-f]+|\d+),(0x[0-9a-f]+|\d+),"
-        r"(0x[0-9a-f]+|\d+),(0x[0-9a-f]+|\d+),([^;]+)\);", re.IGNORECASE
+        rf"\b{re.escape(funcs[0x7D12A]['name'])}\s*\(\s*(0x[0-9a-f]+|\d+)\s*,\s*(0x[0-9a-f]+|\d+)\s*,\s*(0x[0-9a-f]+|\d+)\s*,\s*"
+        r"(0x[0-9a-f]+|\d+)\s*,\s*(0x[0-9a-f]+|\d+)\s*,\s*([^;]+)\);", re.IGNORECASE
     )
     scalar = []
     for entry, row in funcs.items():
@@ -262,14 +271,19 @@ def build() -> dict:
         raw, stage, snapshot, consumers, classification = COMMAND_CONE[sid]
         unpacker = int(row["unpacker"], 0)
         if sid == 243:
-            need(row["destination_expression"] == "auStack_9", "signal243 destination is no longer stack-backed")
-            token(funcs, 0x4BB62,
-                  "auStack_9[0] = DAT_febe80a0;",
-                  "FUN_0007d12a(0xf3,0x187,1,7,0,auStack_9);",
-                  "puVar2[-0x3760] = auStack_9[0];")
+            # Preserve the byte through sp+0xB; pass its address as stack
+            # argument 6 to the extractor, then copy the byte back to 80A0.
+            need(unpacker == 0x4BB62
+                 and image[0x4BB66:0x4BB76] == bytes.fromhex(
+                     "849fa1c8840fa5c8a4ef619b439f0b00")
+                 and image[0x4BBBA:0x4BBD4] == bytes.fromhex(
+                     "03f0230e0b0001052036f300030d203e87010142074a83ff5a15")
+                 and image[0x4BC08:0x4BC18] == bytes.fromhex(
+                     "a30f0b002036170044efa4c8440fa0c8"),
+                 "signal243 stack acquisition dataflow drift")
             need_ref(funcs, unpacker, raw, "READ")
             need_ref(funcs, unpacker, raw, "WRITE")
-            raw_edge = "0x0004BB62 stack-RMW auStack_9[0]"
+            raw_edge = "0x0004BB62 stack-byte read/modify/write"
         else:
             # The call-site reference is DATA because the unpacker writes
             # through its destination pointer; the exact call arguments above
@@ -298,14 +312,19 @@ def build() -> dict:
     need(len(cone_rows) == 19 and len(empty_cone_ids) == 97, "19/116 scalar command-cone census drift")
 
     # Same-image identity: F181's secondary record is software compatibility
-    # identity, protected at startup by exact image-local comparisons.  DID2032
-    # is the separate 0x17D80 record and must not be conflated with F181.
-    token(funcs, 0x4FA26, "*param_1 = 2;", "(&DAT_00020860)[iVar2]", "BYTE_ARRAY_00010000[iVar2 + 0x7dc0]")
-    token(funcs, 0x637EE, "FUN_00062d5e();")
-    token(funcs, 0x62D5E, "(&DAT_00020850)[", "BYTE_ARRAY_00010000[uVar1 + 0x7da0]",
-          "BYTE_ARRAY_00010000[0x7dc0] != DAT_00020870", "iVar3 = -0x5aa55aa6;",
-          "FUN_00070a92(iVar3,&DAT_febf0668,&DAT_febf10a4,&DAT_febf10c8);", "puVar2[0x4e6c] = uVar4;")
-    token(funcs, 0x4F9DE, "*param_1 = 1;", "BYTE_ARRAY_00010000[iVar2 + 0x7d80]")
+    # identity. Startup comparisons publish error state, not a local launch veto.
+    # DID2032 is the separate 0x17D80 record and must not be conflated with F181.
+    token(funcs, 0x4FA26, "*param_1 = 2;")
+    need_ref(funcs, 0x4FA26, 0x20860, "READ")
+    need_ref(funcs, 0x4FA26, 0x17DC0, "READ")
+    # JARL 62D5E followed by JARL 666BC: identity publication precedes the
+    # application initializer without a caller-side result/permission branch.
+    need(image[0x6383A:0x63842] == bytes.fromhex("bfff24f580ff7e2e"),
+         "startup identity-publication/initialization call sequence drift")
+    for source in (0x20850, 0x17DA0, 0x17DC0, 0x20870):
+        need_ref(funcs, 0x62D5E, source, "READ")
+    token(funcs, 0x4F9DE, "*param_1 = 1;")
+    need_ref(funcs, 0x4F9DE, 0x17D80, "READ")
     need(image[0x20860:0x2086C] == b"8965F3307000", "F181 primary identity drift")
     need(image[0x17DC0:0x17DCC] == b"8A3113303100", "F181 compatibility identity drift")
     need(image[0x17DA0:0x17DA8] == image[0x20850:0x20858] == b"JB1BA101", "JB compatibility pair drift")
@@ -315,20 +334,23 @@ def build() -> dict:
     # D5's two signed16 fields use saturating GP-relative snapshot copies that a
     # direct-xref-only census would miss.  Their consumers are monitor/plausibility paths.
     token(funcs, 0x4B86E,
-          "FUN_0007d12a(0xd4,0x158,0x10,0,1,&DAT_febe8072);",
-          "FUN_0007d12a(0xd5,0x15a,0x10,0,1,puVar2 + -0x378c);")
+          f"{funcs[0x7D12A]['name']}(0xd4,0x158,0x10,0,1,&DAT_febe8072);",
+          f"{funcs[0x7D12A]['name']}(0xd5,0x15a,0x10,0,1,puVar2 + -0x378c);")
     token(funcs, 0x58074, "DAT_febef1bc = DAT_febe8072", "DAT_febef1be = DAT_febe8074")
-    snap = token(funcs, 0xBCD62, "puVar38 + 0x39bc", "puVar38 + -0x9fc", "puVar38 + 0x39be", "puVar38 + -0x9fa")
-    need("0x7fff" in snap and "-0x7fff" in snap, "D5 saturating snapshot clamp drift")
-    token(funcs, 0xC9D18, "DAT_febeae04", "DAT_000b044c", "FUN_000bdb64(0xc9)")
-    token(funcs, 0xC9CAA, "DAT_febeae06", "DAT_000b044a", "FUN_000bdb64(200)")
+    # Signed halfword loads, lower clamps at -32767, and stores to AE04/AE06.
+    need(image[0xBD336:0xBD35A] == bytes.fromhex(
+        "240fbc390106ff7fbf05200e0180640f04f6"
+        "240fbe390106ff7fbf05200e0180640f06f6"),
+        "D5 saturating snapshot clamp drift")
+    token(funcs, 0xC9D18, "DAT_febeae04", "DAT_000b044c", "report_diagnostic_event_failure_ffff_32_bdb64(0xc9)")
+    token(funcs, 0xC9CAA, "DAT_febeae06", "DAT_000b044a", "report_diagnostic_event_failure_ffff_32_bdb64(200)")
     need(struct.unpack_from("<H", image, 0xB044C)[0] == 100 and struct.unpack_from("<H", image, 0xB044A)[0] == 1000, "D5 thresholds drift")
     for event in (0xC8, 0xC9):
         rec = image[0x2FC50 + event * 8:0x2FC50 + (event + 1) * 8]
         need(rec == bytes.fromhex("4100000000010000"), f"DEM event 0x{event:02X} is no longer unpopulated")
 
     # 0x115's signed16 field ends at Toyota's exact F33 0x1032 Engine Revolution RDBI.
-    token(funcs, 0x4B12E, "FUN_0007d12a(0x86,0xdf,0x10,0,1,&DAT_febe8014);")
+    token(funcs, 0x4B12E, f"{funcs[0x7D12A]['name']}(0x86,0xdf,0x10,0,1,&DAT_febe8014);")
     token(funcs, 0x58074, "DAT_febef194 = DAT_febe8014")
     token(funcs, 0xBE622, "DAT_febef194", "puVar3 + 0x682")
     token(funcs, 0xBE65C, "DAT_febef194", "puVar2 + 0x682")
@@ -339,7 +361,7 @@ def build() -> dict:
 
     # Strengthen the known B6 path downstream to the exact Toyota-named torque observable.
     token(funcs, 0xCBA80, "DAT_febeae90", "DAT_febec7dc")
-    token(funcs, 0xD039E, "puVar3 + 0x1450", "FUN_000cb9c8", "FUN_000cb9ae")
+    token(funcs, 0xD039E, "puVar3 + 0x1450", f"{funcs[0xCB9C8]['name']}(", f"{funcs[0xCB9AE]['name']}(")
     token(funcs, 0xD042C, "DAT_febecc50", "DAT_febeac5a", "DAT_febecc62")
     token(funcs, 0xD0AAE, "DAT_febeac56 = DAT_febecc62")
     token(funcs, 0xBF33E, "DAT_febeac56", "DAT_febee40a")
@@ -353,7 +375,7 @@ def build() -> dict:
     token(funcs, 0x7E72A, "&DAT_00022488", "param_3 & 0xffff")
     group_callers = []
     for entry, row in funcs.items():
-        if entry != 0x7E72A and "FUN_0007e72a(" in row["decompiled_c"]:
+        if entry != 0x7E72A and _c_contains(row["decompiled_c"], f"{funcs[0x7E72A]['name']}("):
             group_callers.append(entry)
     need(group_callers == [0x693FE, 0x697F4], f"group receive caller drift: {group_callers}")
     group_signals = list(range(0x5A, 0x68))

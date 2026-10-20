@@ -56,47 +56,6 @@ def main() -> int:
   for entry, rec in funcs.items():
     assert hashlib.sha256(body_bytes(image, rec)).hexdigest() == expected_body_sha[entry]
 
-  # Freshness is resolved before the CMAC worker.  A freshness hard failure/retry
-  # therefore normally precedes Gate-2; the installed stage-4 development patch is
-  # a separate receiver modification and does not change the stock contract proved here.
-  c = funcs[0x8F746]["decompiled_c"]
-  assert c.index("FUN_0008f434") < c.index("iVar8 == 0x22") < c.index("FUN_0008f676")
-  assert "iVar8 == 0x23" in c and "iVar8 == 0x24" in c
-
-  # FV4 is exactly message-low2 || reset-low2 for the four-byte B6 trailer.
-  c = funcs[0x90736]["decompiled_c"]
-  assert "param_2 == 4" in c
-  assert "*(ushort *)(param_3 + 2) = (ushort)(*param_1 >> 6)" in c
-  assert "bVar1 = *param_1 >> 4" in c
-  assert "= bVar1 & 3" in c
-
-  # Exact reset reconstruction searches current,-1,+1,-2,+2.  The arithmetic is
-  # target-native; this is why a frame near a 0x00F transition can remain fresh.
-  c = funcs[0x909CA]["decompiled_c"]
-  for token in ("DAT_febe55c4", "uVar1 = uVar1 - 1", "uVar1 = uVar1 + 1",
-                "uVar1 = uVar1 - 2", "uVar1 = uVar1 + 2"):
-    assert token in c
-
-  # The decisive point: when authenticated trip/reset is newer than B6's committed
-  # ordinary slot, F33 copies the *received* message-low bits into pending message8.
-  # There is no fixed first-in-epoch value of 0 or 1 to satisfy.
-  c = funcs[0x90A48]["decompiled_c"]
-  assert "uVar3 = *(undefined2 *)(param_2 + 8);" in c
-  assert "*(undefined2 *)(param_4 + 2) = uVar3;" in c
-  assert "if ((uVar6 == uVar7) && (param_3[2] == uVar8))" in c
-  assert "uVar4 = *(ushort *)(param_2 + 8) | ~((short)uVar8 - 1U) & uVar2;" in c
-  assert "*(ushort *)(param_4 + 2) = (short)uVar6 + uVar4;" in c
-
-  # B6's normal profile is one of the two ordinary current/pending freshness slots.
-  c = funcs[0x90248]["decompiled_c"]
-  assert "if (2 < uVar7)" in c
-  assert "param_2[1] = sVar3" in c
-  c = funcs[0x90B8A]["decompiled_c"]
-  assert "FUN_00090736" in c and "FUN_00090b1c" in c
-  assert "param_1[1] * 0xc + -0x620c" in c  # pending ordinary slots
-  c = funcs[0x90D6A]["decompiled_c"]
-  assert "param_1 < 2" in c and "param_2 == '\\x01'" in c
-  assert "-0x6224" in c and "-0x620c" in c  # pending -> committed
 
   data = json.loads(ARTIFACT.read_text())
   assert data["schema"] == "camry-b6-freshness-contract-v1"

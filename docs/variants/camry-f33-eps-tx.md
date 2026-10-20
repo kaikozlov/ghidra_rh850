@@ -47,7 +47,7 @@ The five PDU descriptors at `0x226C0` are:
 0x4C8: cycle=196  length=8
 ```
 
-The exact F33 foreground scheduler is 5.000 ms, so those descriptor periods directly produce the cycle times above.
+At the registered nominal80MHz timer domain, the foreground interval is5ms and these descriptor counts produce the nominal cycle times above. They are invocation-count scheduling, not a measured execution-time, backlog or jitter guarantee.
 
 All five belong to the same generated-COM Tx I-PDU group. The group starts at PDU0, contains five PDUs, and every member has communication mask `0x10`. The retained PE1 RAM snapshot proves that this is not merely dormant configuration:
 
@@ -67,6 +67,42 @@ There is also an important direct-pack distinction:
 - `0x030`, `0x4A3`, and `0x4C8` use the raw pack helper `0x7D31E`; their direct packers do not themselves create a change-triggered transmit request.
 
 The normal application packers are live, not dead configuration: the F33 application task reaches all five through the normal source-preparation/packing sequence.
+
+### 2.1 Payload generation is not transmit admission
+
+The 2026-10-15 reconstruction separates live COM storage, pending requests and
+accepted snapshots. Application pack roots `5F464/5F91C` call the normal packers
+when their mode argument exceedsFF. Packers such as `4C97A/4CED0` snapshot
+application fields and pack the live COM image **before** handling inhibition.
+The five images begin at `FEBE4A48`, offsets0/32/36/39/47. Individual pack
+helpers have their own critical sections; this is not an atomic whole-PDU
+snapshot across interrupts.
+
+Application state `7F96==5A` asserts the per-PDU inhibit through `7E612`;
+zero releases it through `7E696`. Other values take neither transition.
+Release can cancel pending request classes: `4CED0` cancels both40/80,
+whereas `4C97A` cancels the periodic class. This is separate from communication
+group activation and does not prevent a newer payload from being produced.
+
+Under module state `3DF2==FE01`, `7A254` reaches scheduler `7E13A`.
+It applies group transitions, services countdowns, then dispatches.
+Exact `21C5E=1` bounds attempts per group per invocation. Admission `7DCA0`
+requires a permitted pending class, zero minimum-delay countdown, intersecting
+current group membership, and a valid inverse inhibit pair with the PDU bit clear.
+Event pending takes precedence over periodic pending.
+The relevant generations are separate:
+
+- PDU flags493E, periodic countdowns496E and minimum-delay countdowns4978.
+- Inhibit bitmap/inverse4A34/35.
+- Periodic/event pending4A39/3A and desired/current group masks4A3B/3C.
+- Event/periodic admission enables4A3D/3E.
+
+Group disable clears both pending classes, applies flags`&3B`, and zeros both
+countdowns. Enable clears pending, applies flags`|84`, and arms configured
+offsets plus one. Neither transition copies or clears the payload.
+Dispatcher `7DF14` reads the live COM pointer **after admission**; the exact
+normal descriptor flags3 bypass its optional scratch/callout branch.
+
 
 ## 3. Lower routing and hardware transmit objects
 
@@ -90,6 +126,63 @@ CanIf then separates the FD and classic messages onto sibling hardware objects o
 | `0x351`, `0x394`, `0x4A3`, `0x4C8` | 1 / HTH1 | 50 | node 1 / mailbox 3 | `0x853AA` classic-CAN writer |
 
 The retained HTH-state snapshot is `5A 69 69 69 69`: HTH0 happened to be active/in-flight while HTH1 was idle. `0x69` is a normal idle/available state in this driver state machine; it is **not evidence that the classic Tx handle is disabled**.
+
+### 3.1 Queue ownership, busy results and the hardware boundary
+
+The exact ABI carries `F33PduInfo {data*,length:u16,opaque:u16}` in `r7`
+through PduR/SecOC forwarding. Missing second arguments in the old decompilation
+were not missing firmware arguments. `7FEF8` also has a consequential `r10`
+return: default1 or the result of `7FD46`, not void.
+
+For ordinary classic traffic, `7FD46` first copies up to64 bytes into scratch
+`4FB2` and calls its configured callback, **before** checking controller state,
+route and queue capacity. Admission requires controller sentinels
+`48D8==57A8`, `4903==5A`, `48FE==5555` and valid routing.
+Queue1 has capacity7 words at descriptor21AD6, buffer3E2C and cursor triple48E0.
+The exercised classic record occupies five words.
+
+Queue-full return2 occurs before queue writes, leaving old queued content and
+cursors intact even though scratch now contains the newer source. `7DF14`
+maps this to−19 and **retains the COM pending request**. A later attempt
+samples the then-current COM image; there is no separate COM retry snapshot.
+Successful admission and other lower failure codes consume both pending classes.
+
+Protected PDU0 instead enters `8ED8E`: module54F4 must beFE01, descriptor/data
+nonnull, source mapped to0 and length inside4..32. `8FABA` requires claim state
+`5568/69=E1/5A`, changes it toD2/A5 and increments generation556A **before**
+copying. For a32-byte image, `8E9C6` copies28 application bytes into5488,
+initializes slot5458 and then publishes head/inverse5460/62.
+The four-byte trailer is outside this copy.
+
+Occupied-generation rejection21 occurs before copying: old protected snapshot,
+descriptor, head and generation remain unchanged. Unlike classic queue-full2,
+this result **consumes the COM pending request**; newer live COM remains for
+a later opportunity. This preservation is specific to the outer occupied claim:
+an internal malformed queue can fail after `8E9C6` has copied application data.
+
+Queue service `8025A→8015C` passes retained queue payload to `85112`, not live
+COM storage. Driver rejection marks hardware group3C without consuming the
+record. Admission marks group and queue5A; later `8043C` advances the read
+cursor and subtracts occupancy. State3C does not consume that record.
+The eventual RSCAN boundary is `852FE`: ID/control/payload stores precede the
+byte1 request at `8539E..853A4` to `CFDTMC[channel][mailbox]`.
+The channel1 request base isFFD20224. Classic admission checks
+`CFDTMSTS & 1E`; FD additionally checks retained nibble consistency.
+Request storage and software admission are not proof of physical delivery.
+
+Native compositions execute the real scheduler for classic admission
+(`camry_f33_tx_publication_classic_due_enqueues_snapshot`), classic queue-full
+retention (`camry_f33_tx_publication_classic_full_retains_queued_content`),
+protected application-only copying
+(`camry_f33_tx_publication_protected_due_copies_application_only`) and occupied
+protected-generation rejection
+(`camry_f33_tx_publication_protected_busy_preserves_generation`). Those
+scenarios are retained in `decomp/camry-8965F3307000/oracles.jsonl`.
+All passed with real callees and explicit RAM, without firmware overlays or
+hardware-model extension. Group transitions, queue wrapping/large-record paths,
+concurrent interrupts, MAC completion and physical transmission are not covered
+by these executions.
+
 
 ## 4. `0x030`: protected EPS control-status / feedback PDU
 
@@ -332,9 +425,18 @@ Therefore the precise current statement is:
 
 > `0x351`, `0x394`, `0x4A3`, and `0x4C8` are genuine, scheduler-armed EPS transmit PDUs in exact F33 firmware, but they have not been observed in the retained external CAN captures we currently possess.
 
-The final reason for that static/runtime-vs-capture discrepancy is not yet statically closed. The **leading topology hypothesis** is selective forwarding at the EBU/arbitration junction between the EPS-native chassis segment and the Bus-4 segment visible to Panda/FRC: the EPS transmits all five PDUs locally, while the EBU forwards `0x030` onto Bus 4 because upstream ADAS consumers need its steering-wheel-torque/control-status information and does not forward the four classic sibling status PDUs because they have no Bus-4 consumer. Under that model, the retained captures are observing the far side of a selective gateway rather than the EPS's native transmit segment.
+The reason for this runtime-versus-capture discrepancy remains unresolved.
+Selective forwarding at the EBU/arbitration junction is a **hypothesis**:
+under that model, the EPS sends the classic PDUs locally but the junction only
+forwards0x030 to the Panda-visible segment. The retained evidence does not
+establish that per-PDU local transmission premise.
 
-This interpretation fits all currently recovered evidence: the generated-COM scheduler, PduR, CanIf, and lower driver objects are live inside the EPS, yet only `0x030` appears at our external Bus-4 observation point. It remains a **hypothesis**, not a recovered routing fact, until the EBU RX→TX/gateway table or equivalent junction logic is reconstructed. The practical next question is therefore not “why does the EPS fail to send these four PDUs?” but **“which EPS-origin PDUs does the EBU/arbitration junction forward onto Bus 4?”** We should not paper over the discrepancy with a fabricated EPS-side “disabled” flag: the retained HTH idle state is normal, and the firmware evidence says the transmit routes are live.
+Armed timers, valid routes and an idle HTH do not independently prove queue
+admission, driver progress or completion. The lifecycle above retains distinct
+software failure boundaries. Identity-bound witnesses are still needed across
+the classic queue/driver path and external routing; a fabricated EPS “disabled”
+flag is not an explanation either. The later lower-driver sender experiment
+establishes its own bounded transaction, not every stock classic-PDU lifecycle.
 
 ## 11. Consequence for DBC work
 

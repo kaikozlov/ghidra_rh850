@@ -20,8 +20,8 @@
           "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nuint FUN_00078bfa(void)\n\n{\n  uint uVar1;\n  \n  uVar1 = FUN_00078ae0(&DAT_ffa10080);\n  return (uVar1 & 0x8000) >> 0xf;\n}\n\n",
-      "decompiled_c_sha256": "59610bf8778f74c8d10716c2d3be5d0063b42d50b8ee302b1170e660a1ee3c06",
+      "decompiled_c": "\nuint read_fstatr_ready_bit_78bfa(void)\n\n{\n  uint uVar1;\n  \n  uVar1 = load_u32(&FSTATR);\n  return (uVar1 & 0x8000) >> 0xf;\n}\n\n",
+      "decompiled_c_sha256": "a8d2e9f26e24cf547a517d9c33c2153d25b19ab35354dc89a8753d2effc1b85b",
       "entry": "0x00078BFA"
     },
     {
@@ -41,10 +41,24 @@
           "ref_type": "PARAM",
           "to_addr": "0xffa10080",
           "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00078c4c",
+          "operand_index": 0,
+          "ref_type": "PARAM",
+          "to_addr": "0xffa10010",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00078c60",
+          "operand_index": 2,
+          "ref_type": "PARAM",
+          "to_addr": "0xffa20000",
+          "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nvoid FUN_00078c30(void)\n\n{\n  uint uVar1;\n  int iVar2;\n  \n  uVar1 = FUN_00078ae0(&DAT_ffa10080);\n  if (((uVar1 & 0x4000) == 0x4000) && (iVar2 = FUN_00078ad4(0xffa10010), iVar2 != 0x10)) {\n    FUN_00078ae6();\n  }\n  FUN_00078ae6(0xffa20000,0x50);\n  return;\n}\n\n",
-      "decompiled_c_sha256": "9c358bb7b66c6bb647017c826827c031c166b329b0cefe907ea34a389324beb8",
+      "decompiled_c": "\nvoid faci_clear_error_status_78c30(void)\n\n{\n  uchar *destination;\n  uint uVar1;\n  \n  uVar1 = load_u32(&FSTATR);\n  if (((uVar1 & 0x4000) == 0x4000) && (uVar1 = load_u8(&FASTAT), uVar1 != 0x10)) {\n    store_u8(destination,'\\x10');\n  }\n  store_u8(&FACI_COMMAND_AREA,'P');\n  return;\n}\n\n",
+      "decompiled_c_sha256": "a83421c767d82efe8c7f8b3acfb43353b172d4371140f64997b5f004a6dff6a2",
       "entry": "0x00078C30"
     },
     {
@@ -66,10 +80,17 @@
           "to_space": "ram"
         },
         {
-          "from_addr": "0x00078d22",
+          "from_addr": "0x00078d02",
           "operand_index": 0,
           "ref_type": "PARAM",
-          "to_addr": "0x00008000",
+          "to_addr": "0xffa10010",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00078d16",
+          "operand_index": 2,
+          "ref_type": "PARAM",
+          "to_addr": "0xffa20000",
           "to_space": "ram"
         },
         {
@@ -78,17 +99,10 @@
           "ref_type": "PARAM",
           "to_addr": "0xffa10080",
           "to_space": "ram"
-        },
-        {
-          "from_addr": "0x00078d2a",
-          "operand_index": 0,
-          "ref_type": "PARAM",
-          "to_addr": "0x00008000",
-          "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nundefined4 FUN_00078ce6(void)\n\n{\n  uint uVar1;\n  int iVar2;\n  undefined4 uVar3;\n  \n  uVar1 = FUN_00078ae0(&DAT_ffa10080);\n  if (((uVar1 & 0x4000) == 0x4000) && (iVar2 = FUN_00078ad4(0xffa10010), iVar2 != 0x10)) {\n    FUN_00078ae6();\n  }\n  FUN_00078ae6(0xffa20000,0xb3);\n  uVar1 = FUN_000793f0(&DAT_ffa10080,0x8000,0x8000,0xe5);\n  if (uVar1 < 2) {\n    uVar3 = 0;\n  }\n  else {\n    uVar3 = 8;\n  }\n  return uVar3;\n}\n\n",
-      "decompiled_c_sha256": "38cced88343bb4874e29c9a2b49afe11a4cab236ec88282547c79c951f18cfa7",
+      "decompiled_c": "\nuint faci_force_stop_and_poll(void)\n\n{\n  uchar *destination;\n  uint uVar1;\n  \n  uVar1 = load_u32(&FSTATR);\n  if (((uVar1 & 0x4000) == 0x4000) && (uVar1 = load_u8(&FASTAT), uVar1 != 0x10)) {\n    store_u8(destination,'\\x10');\n  }\n  store_u8(&FACI_COMMAND_AREA,0xb3);\n  uVar1 = poll_word_masks(&FSTATR,0x8000,0x8000,0xe5);\n  if (uVar1 < 2) {\n    uVar1 = 0;\n  }\n  else {\n    uVar1 = 8;\n  }\n  return uVar1;\n}\n\n",
+      "decompiled_c_sha256": "c3e9c5082a33c79b85ba3c01a657400279c17f14094598f881a1311122d425db",
       "entry": "0x00078CE6"
     },
     {
@@ -103,15 +117,43 @@
       "body_size": 156,
       "data_references": [
         {
+          "from_addr": "0x00078e40",
+          "operand_index": 0,
+          "ref_type": "PARAM",
+          "to_addr": "0xffa10030",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00078e54",
+          "operand_index": 2,
+          "ref_type": "PARAM",
+          "to_addr": "0xffa20000",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00078e84",
+          "operand_index": 2,
+          "ref_type": "PARAM",
+          "to_addr": "0xffa20000",
+          "to_space": "ram"
+        },
+        {
           "from_addr": "0x00078e8e",
           "operand_index": 0,
           "ref_type": "PARAM",
           "to_addr": "0xffa10080",
           "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00078eb4",
+          "operand_index": 2,
+          "ref_type": "PARAM",
+          "to_addr": "0xffa20000",
+          "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nint FUN_00078e2a(undefined4 *param_1,undefined4 param_2,uint param_3)\n\n{\n  undefined4 uVar1;\n  int extraout_r6;\n  int extraout_r7;\n  uint uVar2;\n  int iVar3;\n  uint uVar4;\n  uint uVar5;\n  undefined2 local_20 [6];\n  \n  uVar4 = 0;\n  FUN_00078e10();\n  FUN_00078af2(0xffa10030,param_2);\n  FUN_00078af2(extraout_r6 + 4,extraout_r7 + param_3 + -1);\n  FUN_00078ae6(0xffa20000,0xe8);\n  FUN_00078ae6();\n  do {\n    uVar1 = *param_1;\n    param_1 = param_1 + 1;\n    local_20[0] = (short)uVar1;\n    uVar4 = uVar4 + 1;\n    local_20[1] = (short)((uint)uVar1 >> 0x10);\n    for (uVar5 = 0; uVar5 < param_3 >> 1; uVar5 = uVar5 + 1) {\n      FUN_00078aec(0xffa20000,local_20[uVar5]);\n      uVar2 = FUN_00078ae0(&DAT_ffa10080);\n      if ((uVar2 & 0x400) != 0) {\n        return 7;\n      }\n    }\n  } while (uVar4 < param_3 >> 2);\n  iVar3 = FUN_00078de2();\n  if (iVar3 == 1) {\n    FUN_00078ae6(0xffa20000,0xd0);\n  }\n  return iVar3;\n}\n\n",
-      "decompiled_c_sha256": "f05489aee9d410744497d387a1f9fd3e701ff91f3ee3579dd5c8ac6867bccb82",
+      "decompiled_c": "\nuint faci_submit_program_halfwords_78e2a(undefined4 *param_1,uint param_2,uint param_3)\n\n{\n  undefined4 uVar1;\n  int extraout_r6;\n  uchar *destination;\n  int extraout_r7;\n  uint uVar2;\n  uint uVar3;\n  uint uVar4;\n  ushort local_20 [4];\n  \n  uVar3 = 0;\n  clear_eic379_high_byte_and_sync_78e10();\n  store_u32(&FSADDR,param_2);\n  store_u32((uint *)(extraout_r6 + 4),(extraout_r7 + param_3) - 1);\n  store_u8(&FACI_COMMAND_AREA,0xe8);\n  store_u8(destination,(uchar)(param_3 >> 1));\n  do {\n    uVar1 = *param_1;\n    param_1 = param_1 + 1;\n    local_20[0] = (ushort)uVar1;\n    uVar3 = uVar3 + 1;\n    local_20[1] = (short)((uint)uVar1 >> 0x10);\n    for (uVar4 = 0; uVar4 < param_3 >> 1; uVar4 = uVar4 + 1) {\n      store_u16((ushort *)&FACI_COMMAND_AREA,local_20[uVar4]);\n      uVar2 = load_u32(&FSTATR);\n      if ((uVar2 >> 10 & 1) != 0) {\n        return 7;\n      }\n    }\n  } while (uVar3 < param_3 >> 2);\n  uVar3 = faci_check_dataflash_addresses();\n  if (uVar3 == 1) {\n    store_u8(&FACI_COMMAND_AREA,0xd0);\n  }\n  return uVar3;\n}\n\n",
+      "decompiled_c_sha256": "8af6deb7755deb5688cdc85c95903ab204debfa31cb9be616775538df984b72f",
       "entry": "0x00078E2A"
     },
     {
@@ -133,8 +175,8 @@
           "to_space": "ram"
         }
       ],
-      "decompiled_c": "\nundefined4 FUN_00079026(void)\n\n{\n  uint uVar1;\n  undefined4 uVar2;\n  \n  uVar1 = FUN_00078ae0(&DAT_ffa10080);\n  if ((uVar1 & 0x24068) == 0) {\n    uVar2 = 0;\n  }\n  else {\n    uVar2 = 7;\n  }\n  return uVar2;\n}\n\n",
-      "decompiled_c_sha256": "76f9ae222a710cb1654e09be96abab2a0ef0b3a57b15d78bd1b715d55a5b16dd",
+      "decompiled_c": "\nundefined4 faci_map_fstatr_error_mask_to_seven_79026(void)\n\n{\n  uint uVar1;\n  undefined4 uVar2;\n  \n  uVar1 = load_u32(&FSTATR);\n  if ((uVar1 & 0x24068) == 0) {\n    uVar2 = 0;\n  }\n  else {\n    uVar2 = 7;\n  }\n  return uVar2;\n}\n\n",
+      "decompiled_c_sha256": "ea96d80a353f5db311fcf19985aba62dd86f312285c4dc5b7ba3532d1dbb3bff",
       "entry": "0x00079026"
     }
   ],
@@ -145,5 +187,5 @@
   },
   "schema": "camry-8965f3307000-flash-backend-evidence-v1",
   "software_id": "8965F3307000",
-  "source_corpus_sha256": "f33efdbecac7d2d8ee8589ae8492d828451f5f1523aa43c72f672597c77fa8d1"
+  "source_corpus_sha256": "e3ac4e094422d68757173a48b2a7a4d9ca85187ce324e7a9e1ac0ce2410e82b8"
 }

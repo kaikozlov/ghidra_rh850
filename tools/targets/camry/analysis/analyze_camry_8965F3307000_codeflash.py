@@ -3,7 +3,10 @@
 from __future__ import annotations
 from tools.targets.camry.support import camry_f33_corpus as f33
 from tools import REPO_ROOT
-import argparse, hashlib, json, math, struct
+from tools.targets.camry.builders.build_camry_8965F3307000_command_cone_ingress import exact_pairs
+from tools.project.decompiler_evidence import load_function_corpus
+from tools.targets.camry.decomp.c_text import _c_contains
+import argparse, hashlib, json, math, re, struct
 from pathlib import Path
 from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
 from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
@@ -75,7 +78,7 @@ def profile(b: bytes, index: int) -> dict:
     }
 
 def need(text: str, *tokens: str) -> None:
-    missing = [token for token in tokens if token not in text]
+    missing = [token for token in tokens if not _c_contains(text, token)]
     if missing:
         raise ValueError(f'missing target-native decompiler tokens: {missing}')
 
@@ -102,6 +105,7 @@ def main() -> int:
     if evid['image']['sha256'] != sha(image) or evid['function_count'] != 27:
         raise ValueError('target-native decompiler evidence identity drift')
     funcs = {int(row['entry'], 16): row for row in evid['functions']}
+    corpus, _ = load_function_corpus(f33.CORPUS)
     for entry, row in funcs.items():
         body = body_bytes(image, row)
         if sha(body) != row['body_sha256']:
@@ -139,11 +143,9 @@ def main() -> int:
     # CodeFlash 0x22488.  Prefer the canonical Ghidra data-reference graph over
     # decompiler-local `unaff_tp` spelling, which disappears once TP is seeded.
     scalar_row = funcs[0x7D12A]
-    scalar = scalar_row['decompiled_c']
     scalar_refs = {int(r['to_addr'], 16) for r in scalar_row.get('data_references', [])}
     if 0x22488 not in scalar_refs:
         raise ValueError('Camry signal-to-PDU table reference drift')
-    need(scalar, 'param_3 - 1', '*(short *)param_6')
     signal_count = (PDU_TABLE - SIGNAL_TO_PDU) // 2
     signal_to_pdu = [u16(image, SIGNAL_TO_PDU + i * 2) for i in range(signal_count)]
     pdu44_signals = [i for i, pdu_id in enumerate(signal_to_pdu) if pdu_id == 44]
@@ -170,22 +172,26 @@ def main() -> int:
         (273, 0x1C1, 3, 0, False, 'gp-0x3736'),
     ]
     for sid, off, bits, start, signed, _ in extracts:
-        token = f'FUN_0007d12a(0x{sid:x},0x{off:x},'
-        need(unpack, token)
+        pattern = rf"\b{re.escape(corpus[0x7D12A]['name'])}\s*\(0x{sid:x},0x{off:x},"
+        if not re.search(pattern, unpack):
+            raise ValueError(f'Camry B6 signal {sid} extraction call drift')
     unpack_refs = {int(r['to_addr'], 16) for r in funcs[0x4BD46].get('data_references', [])}
     if not {0xFEBE80BC, 0xFEBE80B8}.issubset(unpack_refs):
         raise ValueError('Camry B6 signal 261/262 destination reference drift')
 
     # Raw -> staging -> snapshot -> target-conditioning/plausibility consumers.
-    stage = funcs[0x58074]['decompiled_c']; snap = funcs[0xBCD62]['decompiled_c']
+    stage = funcs[0x58074]['decompiled_c']
+    snapshot_pairs = set(exact_pairs(0xBCD62, funcs))
     preprocess = funcs[0xCCF0E]['decompiled_c']; clamp = funcs[0xCCFB2]['decompiled_c']; plaus = funcs[0xCEE7C]['decompiled_c']
     selector_decode = funcs[0xCEFFC]['decompiled_c']; selector_aux = funcs[0xCB73A]['decompiled_c']
     need(stage, 'DAT_febef130 = DAT_febe80bc;', 'DAT_febef1fa = DAT_febe80b8;')
-    need(snap, '*(undefined2 *)(puVar38 + -0x970) = *(undefined2 *)(puVar38 + 0x39fa);',
-         'puVar38[-0xa50] = puVar38[0x3930];')
+    if not {(0xFEBEF1FA, 0xFEBEAE90), (0xFEBEF130, 0xFEBEADB0)} <= snapshot_pairs:
+        raise ValueError('Camry B6 snapshot edge drift')
     need(preprocess, 'iVar1 = DAT_febeae90 * 2;', '0x7fff', '-0x7fff', 'DAT_febec8b4')
     need(clamp, 'DAT_febec8b4', 'DAT_febec9fe', 'DAT_febeca00', 'DAT_febec8b8')
-    need(plaus, 'sVar4 = *(short *)(puVar12 + -0x970);', 'FUN_000d0970((int)sVar4)')
+    need(plaus, 'sVar4 = *(short *)(puVar12 + -0x970);')
+    if not re.search(rf"\b{re.escape(corpus[0xD0970]['name'])}\s*\(\(int\)sVar4\)", plaus):
+        raise ValueError('Camry target plausibility helper call drift')
     need(selector_decode, "DAT_febeadb0 == '\\x01'", "DAT_febeadb0 == '\\x04'", "DAT_febeadb0 == '\\n'", "DAT_febeadb0 == '\\v'", "DAT_febeadb0 == '\\x12'", "DAT_febeadb0 == '\\x13'")
     need(selector_aux, "DAT_febeadb0 == '1'")
 
@@ -199,24 +205,32 @@ def main() -> int:
         raise ValueError('Camry 0x025/PDU35 geometry drift')
     measured_unpack = funcs[0x4B59E]['decompiled_c']; measured_stage = funcs[0x47AE0]['decompiled_c']
     did1037 = funcs[0x4DBF8]['decompiled_c']; measured_combine = funcs[0xB3B06]['decompiled_c']
-    measured_condition = funcs[0xCE9EA]['decompiled_c']; measured_vote = funcs[0xCEADA]['decompiled_c']
+    measured_vote = funcs[0xCEADA]['decompiled_c']
     comparator = funcs[0xCD128]['decompiled_c']
-    need(measured_unpack,
-         'FUN_0007d12a(0xbb,0x127,0xc,0,1,&DAT_febe8048);',
-         'FUN_0007d12a(0xbc,299,4,4,1,puVar2 + -0x37b1);')
-    need(measured_stage, 'FUN_0006a5fa((int)DAT_febe8048,auStack_e);',
-         '*(undefined2 *)(puVar5 + -0x3aba) = auStack_e[0];')
+    for arguments in ('0xbb,0x127,0xc,0,1,&DAT_febe8048);',
+                      '0xbc,299,4,4,1,puVar2 + -0x37b1);'):
+        if not re.search(rf"\b{re.escape(corpus[0x7D12A]['name'])}\s*\({re.escape(arguments)}", measured_unpack):
+            raise ValueError('Camry measured-angle extraction call drift')
+    if not re.search(rf"\b{re.escape(corpus[0x6A5FA]['name'])}\s*\(\(int\)DAT_febe8048,", measured_stage):
+        raise ValueError('Camry measured-angle staging helper call drift')
     did1037_row = image[0x293AC:0x293BC]
     if did1037_row != bytes.fromhex('37100200f8db04000000000000000000'):
         raise ValueError('Camry DID1037 row drift')
-    need(did1037, 'asStack_a[0] = DAT_febe7d46;', 'FUN_00070110', 'FUN_0006a5ac')
+    need(did1037, 'DAT_febe7d46', corpus[0x70110]['name'], corpus[0x6A5AC]['name'])
     need(stage, 'DAT_febef1a0 = DAT_febe8048;', 'DAT_febef06f = DAT_febe804f;')
-    need(snap,
-         '*(undefined2 *)(puVar38 + -0xa02) = *(undefined2 *)(puVar38 + 0x39a0);',
-         'puVar38[-0xb3b] = puVar38[0x386f];')
+    if not {(0xFEBEF1A0, 0xFEBEADFE), (0xFEBEF06F, 0xFEBEACC5)} <= snapshot_pairs:
+        raise ValueError('Camry measured-angle snapshot edge drift')
     need(measured_combine, 'DAT_febeb16c = DAT_febef1a0 * 0xf + (short)DAT_febef06f;')
-    need(measured_condition, '((int)DAT_febeacc5 + DAT_febeadfe * 0xf) * 0x6fb) / 0x200;',
-         'iVar13 = iVar12 * 2 - iVar1;')
+    # Pin the input scaling and measured*2 - scaled result to instructions,
+    # not the decompiler's inferred temporary names or expression folding.
+    for address, encoded in (
+        (0xCEA26, "240ffef520e6fb060437c5f424d75ef684bf4df5e10e0f00"
+                    "a4cf4df524b722f6c1d224af24f6c131e6e72002200e0002e1e7fc02"),
+        (0xCEAB0, "1ad8bcd9"),
+    ):
+        expected = bytes.fromhex(encoded)
+        if image[address:address + len(expected)] != expected:
+            raise ValueError(f'Camry measured-angle conditioning arithmetic drift at {address:#x}')
     need(measured_vote, 'iVar2 = DAT_febeae5e * 2 - iVar2;', 'DAT_febecad2', 'DAT_febecad4', 'DAT_febecad6')
     need(comparator,
          'DAT_febec8b8', 'DAT_febec9a0', 'DAT_febec9cc',
@@ -230,11 +244,22 @@ def main() -> int:
     controller_mrad_per_b6_count = controller_deg_per_b6_count * math.pi / 180 * 1000
 
     # Target-native SecOC worker chain and command-7 ICU job programming.
-    rx_ind = funcs[0x8EE7C]['decompiled_c']; lookup = funcs[0x8F2B0]['decompiled_c']; verify = funcs[0x8F746]['decompiled_c']; cmd7 = funcs[0x8A8E4]['decompiled_c']
-    need(rx_ind, 'FUN_0008f2b0', 'FUN_0008f34a')
+    rx_ind = funcs[0x8EE7C]['decompiled_c']; lookup = funcs[0x8F2B0]['decompiled_c']; verify = funcs[0x8F746]['decompiled_c']
+    need(rx_ind, corpus[0x8F2B0]['name'], corpus[0x8F34A]['name'])
     need(lookup, '(&DAT_0002587c)[(short)uVar1 * 0x28]', 'if (2 < uVar1)', 'uVar1 < 3')
-    need(verify, 'FUN_0008f434', 'FUN_0008ecb2', 'FUN_0008f676', '*(undefined4 *)(puVar1 + -0x62d8) = 0x24;')
-    need(cmd7, 'DAT_ffc5d000 = puVar2[4] << 0x10 | 7;')
+    need(verify, *(corpus[entry]['name'] for entry in (0x8F434, 0x8ECB2, 0x8F676)),
+         '*(undefined4 *)(puVar1 + -0x62d8) = 0x24;')
+    command_row = corpus[0x8A8E4]
+    command_write_pcs = {
+        int(ref['from_addr'], 16) for ref in command_row['data_references']
+        if int(ref['to_addr'], 16) == 0xFFC5D000 and ref['ref_type'] == 'WRITE'
+    }
+    if not any(
+        loc['kind'] == 'statement' and int(loc['pc'], 16) in command_write_pcs
+        and _c_contains(command_row['decompiled_c'][loc['start']:loc['end']], '[4] << 0x10 | 7')
+        for loc in command_row['c_locations']
+    ):
+        raise ValueError('Camry command-7 ICUS register programming drift')
 
     stages = {row['name']: row for row in run['stages']}
     out = {

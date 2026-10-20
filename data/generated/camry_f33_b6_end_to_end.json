@@ -172,643 +172,643 @@
     "0x035C4C": {
       "body_sha256": "205df4739724fda0b8e0e8c09e44df61b42568bc5c92e9673462d3801db70b2a",
       "body_size": 156,
-      "decompiled_c_sha256": "9504bb6536cb2cbca2f9ef662d0ccf5fdd597a0d4a49db5643ae896cbbbf3764",
+      "decompiled_c_sha256": "182b0ea13faa065b46a4a89bf53546f364e131b283281612118560b2934a2cb1",
       "role": "EE40C motor-side selection"
     },
     "0x038162": {
       "body_sha256": "fe6b7eff71c8177b1441e1db3851e074a6c6536bfe54267c36ba4054407d8037",
       "body_size": 504,
-      "decompiled_c_sha256": "c04eb61d1816c7173891958f4313f6c4609c3302faad5d866d938317f826b242",
+      "decompiled_c_sha256": "44773909b93614498afa0f8ab8728f8fcbaad8ed1ae2d3b632621295da8bbb1c",
       "role": "downstream motor-current processing"
     },
     "0x03835E": {
       "body_sha256": "5b3e60f24a390be1019d3b7028211c3cdec2c69f45596d0e9e02b52672055f2e",
       "body_size": 52,
-      "decompiled_c_sha256": "ac88022150252864e408f16260310d49058d068efcb6ba859dcfb46101261455",
+      "decompiled_c_sha256": "7c4c001173c6d7279336f1d02e62c9c6e19e33ad292d5a38a35479010b765538",
       "role": "motor-current bound stage"
     },
     "0x0384D8": {
       "body_sha256": "91c5e85b853c58aec231c10bd3e185c3550c72ae2f3190632fa5f54d1d105696",
       "body_size": 38,
-      "decompiled_c_sha256": "e04359f9266b1d47f6fa43190e60727d34e1c4ea3a9a55f881809063820b3423",
+      "decompiled_c_sha256": "8a357530b7e3fc6d17249d5d013c33ac817c3fd783ce4f40799f427433e333ef",
       "role": "signed motor-current command stage"
     },
     "0x038502": {
       "body_sha256": "41eb9c6e202e6d80cb9d353888696fb3a1a5ebff1323ed4fab2b3c7be3dc04cc",
       "body_size": 124,
-      "decompiled_c_sha256": "8484f4c3c0ea0781201bfa803a6c352000b0e7f8f70359bac7037b6bc550f604",
+      "decompiled_c_sha256": "838530c074364d5ec9fc3e807e8a23a1885292f1586d1402b183214b07e56ce9",
       "role": "motor-current command magnitude map"
     },
     "0x0387BA": {
       "body_sha256": "3905e9a7baf70cab8a7217a0bc4393dc9337d792f3f58f73841492ad3b4c1f14",
       "body_size": 16,
-      "decompiled_c_sha256": "0fdc170735f93ffc368da7c83be1dcc69774701636efbf8e3c83c468d4ecac31",
+      "decompiled_c_sha256": "e13d096e122b7110749513c031d3d73bc224f014fca7837ca30324ca1dc3e407",
       "role": "selected command to motor current model"
     },
     "0x04BD46": {
       "body_sha256": "db4f6577d4a3250c7277730ee2f3c3e3fb71ffa83c6103ff1cd4c5b982f65b62",
       "body_size": 390,
-      "decompiled_c_sha256": "6276e8aafdd85f37619cff2c474ffadf71e60dfada9a26a16b39ad04c7c08368",
+      "decompiled_c_sha256": "730c13e454b7aea369baeb80750b38918af4b1fef7b6ec3f84cc063fdd91c37b",
       "role": "generated-COM PDU44 application unpacker"
     },
     "0x0572E6": {
       "body_sha256": "bf123243292fe77411ac6e24c10610435382ba3d1e215a9a5c2625c1798962f6",
       "body_size": 148,
-      "decompiled_c_sha256": "4bf90bc6ac558353cc33ac4f09048546ff80ed85b64fc452e0d93eac95e4ae70",
+      "decompiled_c_sha256": "51ac02e98b20dd5e14e33d653e97b9897fb0836c25434aca228053d36f993387",
       "role": "internal steering actuator-state aggregate producer"
     },
     "0x058074": {
       "body_sha256": "0c4d0104e4c90a5679e8a9fc567485460ce8a0710d4cbb61518d5e6498880057",
       "body_size": 1934,
-      "decompiled_c_sha256": "b3e729c48f7dcd290cc53ab4cec63dc8da88265b50056ec0589d2ab9d44d5807",
+      "decompiled_c_sha256": "eb3c8d31b876d26daaeda9dab8c45cc045f3bf089328ada17d9571a649045752",
       "role": "generated-COM stage copier"
     },
     "0x05899E": {
       "body_sha256": "360298ede4783a29bd5efa86937ccc0199571d3283b2116bd2d2601489c636f4",
       "body_size": 126,
-      "decompiled_c_sha256": "47fd5b4d9018dc19ab4170fc22e345a9f0c590c12a751510711a2b3cd32766d6",
+      "decompiled_c_sha256": "6bcc07e5910b49ca1bab6543538a18a6b28138737fabbc083c31c4767ba310b4",
       "role": "shared command task coordinator"
     },
     "0x058B5E": {
       "body_sha256": "0c6eb6b596dfffdc298158d0ae8928ae17ba244ba1716fcd7119b357170351d9",
       "body_size": 294,
-      "decompiled_c_sha256": "d59eaefb795deaf43e04c8ca2ff7757d6ee6150ab7967020be1ca0f3ed00cd55",
+      "decompiled_c_sha256": "0af89ac73f6849914930d876b8f5d26b00e8a5642c7152a9ae8ecd93204531f9",
       "role": "generated-COM/application task coordinator"
     },
     "0x05DF5C": {
       "body_sha256": "c496bf67475b688190f244ba164ea1535d676539ef21bb7bce020729b4c7546f",
       "body_size": 676,
-      "decompiled_c_sha256": "eec4675aa33566e18a7f27569013f0bff0e51ae642b62c79e998593c3b80ee84",
+      "decompiled_c_sha256": "7075529972c8470c71dbe7fc888725a12906e4a13d794172f261ad835bab15cb",
       "role": "motor-model scheduler aggregate"
     },
     "0x065FEA": {
       "body_sha256": "8f9ddeeee60d272e09d956ba8c3cd1ddfd8040d55da5a6cce030408375b2fa03",
       "body_size": 60,
-      "decompiled_c_sha256": "0f155fa512b11312975b36065cffed5a2409048474f05644fe711836d3dd0b6c",
+      "decompiled_c_sha256": "bff259ee72186d4f2c92d518ee9a01997289438bda255db61641c89502f1cda9",
       "role": "shared command cyclic task root"
     },
     "0x066062": {
       "body_sha256": "b08f13a1f1d02c86eb0f461268b1ffd0ee6196907e31201c4b045bf8990f83dc",
       "body_size": 92,
-      "decompiled_c_sha256": "9ca4f5cb901dd7770f0c7ef8cc6bb994a25472605da5b1240d72691eaeb7abd1",
+      "decompiled_c_sha256": "c633b56767137a7c70bd9385f16b8ab43b36c059c33d85a3dc1f976eaa4e5f46",
       "role": "communications/application cyclic task root"
     },
     "0x06679E": {
       "body_sha256": "2799dc80b6170e177b6728d658bf5d9d35bcfa4bafcbacc65056df2f26cca134",
       "body_size": 24,
-      "decompiled_c_sha256": "d65e47f0ed4f5bd3f51c52105d8a29644ecf6500ba8af0d735ad1eadb9bcfc06",
+      "decompiled_c_sha256": "9f5002423c2ec6d4b2cc5c182238fa5954a805aecd58d389491e15371ae6a4d9",
       "role": "shared command task wrapper"
     },
     "0x0667E6": {
       "body_sha256": "96d89859e02738c11ddd556d055628f6e75a1e0b88c8f129e2dba902a34a5307",
       "body_size": 32,
-      "decompiled_c_sha256": "4c93b2b1eac009afbe06ba81cfb0e025fc2ee98c2afb2be84867c13692ecf16c",
+      "decompiled_c_sha256": "ad14bb094922a02813e586905fe74f10e10eb6f9ba9898f111bb27a8d90856b1",
       "role": "communications/application aggregate"
     },
     "0x07D800": {
       "body_sha256": "2fabcd172911f9fb0fa807666c7c851537ee45975d43cd6fef343f9ccd0c25e8",
       "body_size": 4,
-      "decompiled_c_sha256": "78656bf3701f15883586f8fc9ef7c75b233b7ffcb88ca8e9fc1b47e7071b8939",
+      "decompiled_c_sha256": "c55ce5bddb8e5cdfe396b10e5de3a1ff293a6df995c5872b008916a4e8c2da66",
       "role": "route44 configured guard"
     },
     "0x081CA6": {
       "body_sha256": "2b7c5736393c68204635d71cf7306a67685445f4451aeae9f29516e75cdbb4f5",
       "body_size": 112,
-      "decompiled_c_sha256": "5ac6f1b17bf6c0c0cfface11d0d907cc1c0b0ad94e925ac36ff491f029020de8",
+      "decompiled_c_sha256": "b95f0c771dd54b080cf9e23c6b7409efb2840ac5e455fd183cb30fb3848ddb06",
       "role": "PduR upper-route dispatcher"
     },
     "0x088FC0": {
       "body_sha256": "885e8edb09d35f0cedea452efa003b4807344487e6394ba156b32491d6eaabd2",
       "body_size": 172,
-      "decompiled_c_sha256": "7d2cb6e4984c649b78e76c13c93eb9186783cbcab64d55fbd1c9ccfa0f951a49",
+      "decompiled_c_sha256": "9799d52b3faf76058ab1bad6c97d3aa53be2da3227a2184700f050d946b0f422",
       "role": "ICU-S operation descriptor builder"
     },
     "0x089646": {
       "body_sha256": "4eec6679c98796dc7414b3706482e4fb6d89d6e503bab1f9a113f8a90879af7d",
       "body_size": 148,
-      "decompiled_c_sha256": "73937ba34283d1b5966b3b3515eceff00cc857f08ac1e62122bb6068f5f76525",
+      "decompiled_c_sha256": "64f1c85035f3d9975af296b9fb8dcad5d36b0a2df24583cfcaa0d9a5df01138a",
       "role": "ICU-S command dispatcher"
     },
     "0x089C98": {
       "body_sha256": "139547a74d2b9affed13921621766da441817167bf42b4d78f0545b3eb9b7965",
       "body_size": 98,
-      "decompiled_c_sha256": "f5e1f966a6f4772c99fe7dd5e82597c936e6f5ab38a3b0a1340ef007eeef32a4",
+      "decompiled_c_sha256": "6f951702a727014ac3851a88ccce5e69bc990825e1d798735300928ae96bc580",
       "role": "ICU-S synchronous operation wrapper"
     },
     "0x08E772": {
       "body_sha256": "d216bc64825096ddf60a10f32c6110a939b1cab7ba066c1bf7891e58cbafd46f",
       "body_size": 30,
-      "decompiled_c_sha256": "6c18ae579750c6955cd7151f3df30c598b4f3db8dcb9062f817552cb8626e1e2",
+      "decompiled_c_sha256": "8be9d99404063f667ed961064df08ae2ffff4028106f72edc7e013d8ae7ad9fa",
       "role": "COM route generation/age update"
     },
     "0x08E9C6": {
       "body_sha256": "6b400bd052e65702face2c4b5322f5015806d14f350e1a4789d9cadc98a56864",
       "body_size": 218,
-      "decompiled_c_sha256": "8f1b7f81dc3d8bdf83d9b868a5aa7a8e37fd09a15bae905172ccdd154851f6e9",
+      "decompiled_c_sha256": "9ee50bc7cf00896c5254fc592f81ce5b049af3797f9e04ba37280aafdf9a1628",
       "role": "SecOC level-1 queue insert/copy"
     },
     "0x08ECB2": {
       "body_sha256": "d1e16041f8e55bec3173a949a783c8dfe9742447c88a3c737fd23e253c4064eb",
       "body_size": 98,
-      "decompiled_c_sha256": "114a7cf4b6ad8380b17f528d12b215486587f759357c71259f7b261b2b63ee71",
+      "decompiled_c_sha256": "79632589d452f266f83850eb76a1ac884ca22dc994d127f5d918cdc0659237b3",
       "role": "SecOC authentication-input builder"
     },
     "0x08EE7C": {
       "body_sha256": "3e113bff721b8ff9bd851cf58707757fd44b31943ad56b6265ba93e4cdfe6690",
       "body_size": 62,
-      "decompiled_c_sha256": "3a45ab77ef32f118861141ba7e401a9c6e620e3234811e3b63fd2bdc9732e777",
+      "decompiled_c_sha256": "402a466fbab5ed53e79a533fa1f3be58c09df64b35fc0afb21b07224ca20355f",
       "role": "SecOC secured-PDU ingress"
     },
     "0x08F19A": {
       "body_sha256": "4493ed372daab2a3ebe3f1b3db0711dccba925a90a30c22f24f6f907a0822311",
       "body_size": 54,
-      "decompiled_c_sha256": "952e53cc389e671f9f8a766264f2ffcda05afe69005718c036d68f8c7f4c3a57",
+      "decompiled_c_sha256": "8887815cbae4d14654f1f56edce3836ba823b2a8d28231bfc7dce61a7f6c37d5",
       "role": "authenticated sync snapshot"
     },
     "0x08F34A": {
       "body_sha256": "50c9e2538c46e5bdc9dbbae5e48cdfc248536b9ee3439765b240a81e1c38d0b4",
       "body_size": 128,
-      "decompiled_c_sha256": "e36612358290af98f3d9dfae795686fd93d0787dd22dc3225b5910e8e12790bb",
+      "decompiled_c_sha256": "c3a304aa1fdc74b68ec2f4bca36eefe10f20be1e448f2d927c44071fa12587a0",
       "role": "SecOC receive-state/queue wrapper"
     },
     "0x08F434": {
       "body_sha256": "23baff101c49428738e2bc8273c7a2fdda32598028fa5665fb8a90d060286bc4",
       "body_size": 156,
-      "decompiled_c_sha256": "b10b7ffd20e8b46b47f0bd80a2901b2877cc0c1112ee5b77db36e21846afcba9",
+      "decompiled_c_sha256": "3a7eeb1ca510db377370d15061c03090c228561b6d6e6722cf9faa92b96bbf50",
       "role": "FV4/MAC28 extractor"
     },
     "0x08F546": {
       "body_sha256": "721f10f71fbf32b5dcada657c963d8034397217950d97088a0af54a6d6a84006",
       "body_size": 80,
-      "decompiled_c_sha256": "59ad5cdf9e97f151594a2b0f3bd106d3acf8192b72d4f92e3c9929028d2fcc12",
+      "decompiled_c_sha256": "c3b3a6cd7ed0e631abeb0c121be6c8b7b35142caee0bd457c383998821ed7641",
       "role": "verified upper-PDU delivery"
     },
     "0x08F676": {
       "body_sha256": "ce3c560d619403915125698d1dc10f3a8c6c301eb6d8ba32ebb98f9d1bacf68f",
       "body_size": 60,
-      "decompiled_c_sha256": "f9c51907efd6a219b7517ce52a24c8f587fe500377a06d91e53fd221f2db2c74",
+      "decompiled_c_sha256": "c6f43ec86c4827d795976a18062e3f9b384884b83173afe958d130228cd526aa",
       "role": "ICU-S verify wrapper"
     },
     "0x08F746": {
       "body_sha256": "4cb7b08ada0b7e058aed4e9f44083b931a920427548e6d29abeb4f523e4fd1b7",
       "body_size": 396,
-      "decompiled_c_sha256": "e9a646c79a017e031eb6be6588769d797a77a959e9059b1a9eba2cc34799c8cb",
+      "decompiled_c_sha256": "7e22034d6be392db0ab1c462ed50ccdd89ff0265c1d65cf5973b52d8116e113b",
       "role": "SecOC verification coordinator"
     },
     "0x08F8D2": {
       "body_sha256": "758aab3b401cb94bcb88cd8e04de103fa37c85de872d2ee6b1652ab53a3ab636",
       "body_size": 52,
-      "decompiled_c_sha256": "b664263081cb86463df4dbc4b42ee290bf31677ab62cd7f5edc26924e242e61b",
+      "decompiled_c_sha256": "6f136042a6f00c26f303c876ab4d412d5d9b5de068da4dc67eadec645f1b424e",
       "role": "post-crypto profile callback dispatcher"
     },
     "0x08F906": {
       "body_sha256": "860fc368a14af6365d6ee17c3bbaa4723a157b9c6f4a14023f888c51b42d3be4",
       "body_size": 134,
-      "decompiled_c_sha256": "69454108d244fe090fedce77eb5f83eb02aa3bcd922f0772952ed0d3dc4b23f0",
+      "decompiled_c_sha256": "dfcfe894b9354fc76227ba7fc09ad3f831d4f3f02bf53e49efb7a56dcb24a957",
       "role": "root result / Gate-2 coordinator"
     },
     "0x090204": {
       "body_sha256": "6386fa98f892fa79d74a4eb150319cbd6572b1649adaa42880b848e32899ce8a",
       "body_size": 14,
-      "decompiled_c_sha256": "c2c1167f63572db9800a150523157bc673e26210a29f2dc77392e1b797b8ab1a",
+      "decompiled_c_sha256": "2967c065099d75de006d22a2b68cf9e4c0b3790c8f7fc112cc6c08834ae59cf7",
       "role": "upper PduR indication shim"
     },
     "0x090248": {
       "body_sha256": "45bf715e450ba5263edaf86b14822b07f5fe49a8bd318198f9a4dbd75ea2ac45",
       "body_size": 104,
-      "decompiled_c_sha256": "46aec1c727e44f372b20e4c54723d3a434980eb6e5c66e1359a30c5f5d442d1d",
+      "decompiled_c_sha256": "878de177399c5447f2863ecfc9360961065990886caceba3d0922957f5091901",
       "role": "freshness slot resolver"
     },
     "0x0909CA": {
       "body_sha256": "d1cb5ad7edcb0043ea74dae46a90015a6eadeb58199dff3c06cfa56c65252f7f",
       "body_size": 126,
-      "decompiled_c_sha256": "283dd36dad62b99e6d184a856b4d85160b85bcba99555ab86b98c394b4002973",
+      "decompiled_c_sha256": "6a550f1d827cd3e66daa61c4f8588f592e168a2554aa13ce08aecd0b5c2e30a3",
       "role": "reset-counter candidate search"
     },
     "0x090A48": {
       "body_sha256": "bf0be72eb4cef2e510cc57b6b1f1c089aa760cb8f14cb0c6aa1337c91ae8ddd3",
       "body_size": 212,
-      "decompiled_c_sha256": "e2f6f856aab9f08167d8fc01e94885d2f36614f5997d8760cc09dde78ef68e8c",
+      "decompiled_c_sha256": "ae8a0554febdb2b2424aab0d04e0083630d9750b2bb648092e913fd206911937",
       "role": "message-counter/freshness reconstruction"
     },
     "0x090B1C": {
       "body_sha256": "2204f55e2a6c3d524c76e245c298df39306401d179e92274c7bd5adec0c61fca",
       "body_size": 110,
-      "decompiled_c_sha256": "cac52be6a2bf58df915e00b56abd84fb9cc50824633fa9efe961c36fc502e6be",
+      "decompiled_c_sha256": "516d782db335ff9174b8a9fcc5b6f6a468a5e5973a6959d511f062fabb1fa137",
       "role": "same-epoch freshness comparison"
     },
     "0x090B8A": {
       "body_sha256": "cbf0a4dbcfd4ac88cfe0d54f2657f2874d1fbea48b872404743d3b86e99eccd4",
       "body_size": 212,
-      "decompiled_c_sha256": "9ced5df0817bffb4b54a395a144222db40edc6a85b1b424db399c71d6e5b2c6d",
+      "decompiled_c_sha256": "af2fbd49ee62d33cc0b82b894279a886a586e409e624e138664494848fae7f9c",
       "role": "freshness candidate selector"
     },
     "0x090D6A": {
       "body_sha256": "35f2d6793551e9624ea98bcad296eda11c060b891faf9e25ec34e6d8ff9a2906",
       "body_size": 52,
-      "decompiled_c_sha256": "acedfac930d4f5d9b52bea19847347f3754874bddb3f4f2d2474f8e83def8796",
+      "decompiled_c_sha256": "5cc6e13ac5fe11f5f21c617b31092ac6cee0ef9f35c1bd59b53b7e0e8033db6c",
       "role": "pending-to-committed freshness commit"
     },
     "0x0B330A": {
       "body_sha256": "57e7129d5fc4edfeab51ed39524904a5bae055f6635a504735defdd18dbbd63c",
       "body_size": 130,
-      "decompiled_c_sha256": "3a7be01a4e622b203d1f1410526ef2a2414724d820930e780b5e0f33c30ce66f",
+      "decompiled_c_sha256": "e26c410422868cbccc27d126d1664eac2577f9225a35a73253e189b3fb386860",
       "role": "diagnostic/service branch clear API"
     },
     "0x0B338C": {
       "body_sha256": "ee0c05615ba42f59d658e590937b6ce94201a200a42a191f5e0964f017116e6e",
       "body_size": 48,
-      "decompiled_c_sha256": "8d9cf5a2ff23529cbfdb11853524e33990ef0382c64f20884b505efe07c727a7",
+      "decompiled_c_sha256": "60a6c742a69e7bbbadce7640c97d918146cb3509ddca57aff96d267aaa91a5a2",
       "role": "diagnostic/service branch set API"
     },
     "0x0B4B6C": {
       "body_sha256": "e6e3002b373546a633c97a259f34b9c7c027926f686ae75507f11b4ab1792419",
       "body_size": 224,
-      "decompiled_c_sha256": "be3197ebd36b68a2ffea422ef84480ee4cbd8b6b4666c49f4695694d3d740a22",
+      "decompiled_c_sha256": "9e5d5ac765f6f19bbd8a8d1cd91fb3fd05fe3cd5e4cec89a9b9accfd1d10708f",
       "role": "common command output-scale ramp"
     },
     "0x0B4EF4": {
       "body_sha256": "b20256b5c4e34da3169f00396359e8e974760b6411e29781a2860192458dabac",
       "body_size": 94,
-      "decompiled_c_sha256": "0b5896c514fedb4abff5b6f2220be073542513cd79eee59627301331e8bbe0b4",
+      "decompiled_c_sha256": "e9af50d2c7a13f02e757d229d5f18ff246385c1f96e861cc4266413ffd418412",
       "role": "common command output-scale coordinator"
     },
     "0x0BCAA6": {
       "body_sha256": "971f50c0bd3fc1a62def879d53093851a798307343cd4ad2118ead06f2975d20",
       "body_size": 306,
-      "decompiled_c_sha256": "0e120fb6608d613c77c6a19bed3906c8363614845b517ae0dfb8dd29eecb1b06",
+      "decompiled_c_sha256": "5f4ae976b85cc34981295419f7d6d634d4894ca91b605c2565f871f5b8a667d1",
       "role": "common steering actuator-enable/inhibit decoder"
     },
     "0x0BCBD8": {
       "body_sha256": "22b33f44a6db046970510e99d0930a0c744f6783850eac8c7ad362d12b6ac35a",
       "body_size": 298,
-      "decompiled_c_sha256": "4165a85346733c02cfa15b159a2862747fd497c98f3a64a0bcb8a38e7330184f",
+      "decompiled_c_sha256": "ed485f3791b0e0a37026ee3c99b6404eff140f25ca167270fa907b13171634ac",
       "role": "common command-state snapshot"
     },
     "0x0BCD02": {
       "body_sha256": "420dc629af9b35e33f7bc62f62f4017eaec7bf5ea470ff5a2d41f7046ec51ccb",
       "body_size": 20,
-      "decompiled_c_sha256": "7132192e9a15a8135aad2e519714f96a91d8aa724405c22e5ff16bea5efae114",
+      "decompiled_c_sha256": "3b959a65ea16c1f89852bb4d1876f47295f192bb03e756380d66660a43a45bf4",
       "role": "shared command snapshot/coordinator wrapper"
     },
     "0x0BCD62": {
       "body_sha256": "76d78c2605f902e96eb723f662d9fba543b1d1db85aedf62b9b3894b8c0220aa",
       "body_size": 2748,
-      "decompiled_c_sha256": "19bf7567411c639b46708348553e5183d492431751af42f570855b4661508793",
+      "decompiled_c_sha256": "f075bd6298ad24fc32f70f1f032b6274f54b61ab9a627890ee2062e660987afa",
       "role": "application snapshot + cooperative-controller wrapper"
     },
     "0x0BF33E": {
       "body_sha256": "9b9630058698cbf7e528c55345a3c4b0f51a42549c89d1b21da8da7d6ed6dedd",
       "body_size": 104,
-      "decompiled_c_sha256": "5439f5f6eaf6f9740389af3fe78e9b0b45cfc805580a1fc45524c22ff43dbeae",
+      "decompiled_c_sha256": "49b7ca790991b27239bac9ef18ba05a83bbebff662471f90f8f154b1f63c57ee",
       "role": "command/current mirror"
     },
     "0x0C1F7A": {
       "body_sha256": "fbfb8c51a516c55a44bcf76145bddf955775f8ff571f298cf7cbb6402c80b477",
       "body_size": 134,
-      "decompiled_c_sha256": "5e7c99529b96d9989e20c62c4659b56ae3378f65bb82968791d64658cc473b25",
+      "decompiled_c_sha256": "349f6165c18f03a567f644b12bf803d8bdfb2cfe75b3462b481eed565bfda6c5",
       "role": "transition-mode command task"
     },
     "0x0C2000": {
       "body_sha256": "63736037e7ac683ccf6bbf7d8fd393f74e9a88b94c0ae399547f61c66db51002",
       "body_size": 68,
-      "decompiled_c_sha256": "a0a1bc36b72aa2bff3cfe42f8ed1b95faba0f44a2a7b6fb6e7a62fbab2dc0b06",
+      "decompiled_c_sha256": "bd8cc39041b8c2f876fff17e8e328e753f0126498326fddb62cb90ba70bcf713",
       "role": "steady-mode command task"
     },
     "0x0CA558": {
       "body_sha256": "a8f494d7d08f21131589df9b1adcb31f9435092bbff9e409443b2f922c56d659",
       "body_size": 188,
-      "decompiled_c_sha256": "e228ba49cae7429a6cc4f68836cbdd638bf259639a96c16976f99d40e46707b6",
+      "decompiled_c_sha256": "df782b5d04d233e0fc00ddbeeebbbeb83076d7e9db4ecca33a7bcf6c03c09179",
       "role": "B6 signal271 sibling-state readiness gate"
     },
     "0x0CA614": {
       "body_sha256": "d94931cebc53126f817febc51513e0a71a05591e0038c29f8ae3d5b83ab1a17b",
       "body_size": 258,
-      "decompiled_c_sha256": "2d71ce15af85e4fa61564e51737d0d2ad5410064e3c171b871cd807d57464f01",
+      "decompiled_c_sha256": "26479678f0f93d6a2d144b051cba40489922d0eb084ad6450d0da4fca98fae58",
       "role": "ADB0 0x19/0x1B state gate"
     },
     "0x0CAAA2": {
       "body_sha256": "cfc07532129bfa4fe84684af97047584669a72b48dda611c0c56fa543525dbdb",
       "body_size": 276,
-      "decompiled_c_sha256": "24afec84567500438608fa83babc99c0cc49937b695da9a74f3e9b08c6a75200",
+      "decompiled_c_sha256": "d4d8c072417d35ace769718853d2cc7b124bf94bcdc8ffd59cf9cf354dfa884f",
       "role": "ADB0 0x19/0x1B target-angle state initializer"
     },
     "0x0CB0FC": {
       "body_sha256": "f09f7ca3eba91e1e425e661e852c0610c9f48723791c7a0d0c4e09b391381d7a",
       "body_size": 236,
-      "decompiled_c_sha256": "daeaa9f760073aaa86590b13fae1931b7700ecf463ef29499c8cc8ef1f2d87d4",
+      "decompiled_c_sha256": "dd8a3bc4cd0764267382c68b0b0f3fb5d87f97db3a9f1af84937f2f10e8e9c71",
       "role": "B6 signal267 state-mode processor"
     },
     "0x0CB2A2": {
       "body_sha256": "47e9e6d34d89dbc5acf04e9d944a274745c7ece794ce514024cfd9a471460c26",
       "body_size": 86,
-      "decompiled_c_sha256": "c3931e8c7d01853ff2f923b97c60935aedc4e007ad06994da4c9591d247350b0",
+      "decompiled_c_sha256": "2e184bf83d0b16355f978ddb05d1047346b85e23e4acf64cb5cd4191b41137b1",
       "role": "B6 route-health readiness flags"
     },
     "0x0CB664": {
       "body_sha256": "4f271a0bbd5185f192a9e98ecd4199333dfa8caf3e9ecfb39b5c743b9d6cc388",
       "body_size": 214,
-      "decompiled_c_sha256": "6a2f98e562cfe1983c52094cbedb8d6d246de7b65c68e3acb20214784e71162c",
+      "decompiled_c_sha256": "14593f90cd1bc89e1904ce7a96e7cb3655cd9d947bf30ed9beccd9f6ce5f83e9",
       "role": "special-0x31 transient companion qualification"
     },
     "0x0CB73A": {
       "body_sha256": "7f7324938d9d266f3e374ded2f494f0fb7c0366efcc2a39c15ec620e28014cb1",
       "body_size": 226,
-      "decompiled_c_sha256": "d987954c99f5cf12a2d5fc4f6be9754a18fb7292adedeb2b8dbad0cf0cf3078f",
+      "decompiled_c_sha256": "e63bc266429990e5b83489652c778cc06fc1d2e25248355a21b1591372665b53",
       "role": "special-0x31 transient activation state"
     },
     "0x0CBB66": {
       "body_sha256": "ea547c863e4e2ecd9f6001acb26f7eab3d109a91d820a734b3d14ff2da5a19a3",
       "body_size": 282,
-      "decompiled_c_sha256": "d1d4f0f811e2e50c42280db6b82219d944b576904e73103ce6536a66bef097b7",
+      "decompiled_c_sha256": "4e3305f691121285f49cbab0c110ef5205331f46701ba7dbb1a9cc2ae81f6d6f",
       "role": "B6 target-angle conditioning"
     },
     "0x0CCDF8": {
       "body_sha256": "45cf097f8be599c362fee1a0ce99620765de7d7f881c8fb5569d7271e05a7468",
       "body_size": 188,
-      "decompiled_c_sha256": "3ab9c5b170df58c1a890237dc87b16cb1f50f8ecb10e5c364a455220dc98105a",
+      "decompiled_c_sha256": "b296a03b67a4d473c4b344004d61765a19056acb796955e6f319bcfa6a70f5a0",
       "role": "cooperative supervisor output conditioning"
     },
     "0x0CCF0E": {
       "body_sha256": "f5a250c7631463c3446661d0084dc80810d9c6ca49609fd334175507f1707cd9",
       "body_size": 164,
-      "decompiled_c_sha256": "9ae5e4afbe80bcbaff3e2ee8b2a91b654102eb22f40d233995860993bb25a6ec",
+      "decompiled_c_sha256": "918e0be4932b8c4b23fdc50c76baea3fd7052c78900ca7dbb6b9e5592e0ccc7b",
       "role": "B6 target-angle scale/continuity"
     },
     "0x0CCFB2": {
       "body_sha256": "1d89d80f813fba9da521a9984ce9b335200b66832f371b620a92053b4c100047",
       "body_size": 128,
-      "decompiled_c_sha256": "3bf2c461409a44ff97396056555fc3544c07221fce6b81859677ad6d2ad87c7f",
+      "decompiled_c_sha256": "52c0ddd8d64240a407b17431624cf070fd3ea2bce4ab1109b08f30112ee4f39e",
       "role": "B6 target-angle per-step limiter"
     },
     "0x0CD128": {
       "body_sha256": "4ea271ee3c13dee80ee2712b8a82fb23c5c3ef1d3b5fb2e58c3d088e0e2a2671",
       "body_size": 376,
-      "decompiled_c_sha256": "821c6c3ddc1010c247382e830cec56e5b54af9cbef9e0c474dfeafb5c346a3a4",
+      "decompiled_c_sha256": "a8a53880724fd71e82b5f166f1d60e2cd3f2ede7e724b12d4446d6bf3a0dc180",
       "role": "target-minus-measured controller"
     },
     "0x0CDA20": {
       "body_sha256": "5544519f0d68f69e32f1aa6e1a0ce56a487cf29aa8288239746b79ff9418f5be",
       "body_size": 192,
-      "decompiled_c_sha256": "9a9518f23d425e7721f8514454193434cb537f346965208349e1a80931a67635",
+      "decompiled_c_sha256": "6f4421bfa64edabbd4f82fb9cfd29a496edf5120a6029e36e1a56440b9ab8a23",
       "role": "B6 sig265-controlled supervisor term"
     },
     "0x0CDFF8": {
       "body_sha256": "c98e0bccbb22324f1f4d55db3666683ad4b8167f689fa9d7d1e27e92d8a47d25",
       "body_size": 182,
-      "decompiled_c_sha256": "bf74f3d353522d75462dc64fd8e015636cb17faae3ae09af3e92810e6ab66ca7",
+      "decompiled_c_sha256": "fb4cbb59dd5ce6c1e46af1b8856ddb6b01775a12b2269b5f96e57d0a5abd9278",
       "role": "B6 sig270-weighted supervisor"
     },
     "0x0CE144": {
       "body_sha256": "e8e705ee619f6ba492e9c5f59847dacb914977cf7983c3f7edbcf05e343444e7",
       "body_size": 298,
-      "decompiled_c_sha256": "c8bedd90f4e54ed2db513502b3756d08fe47094e9a16429ff07c92e08868c481",
+      "decompiled_c_sha256": "9100ec34032afb256d50456193b04476fcc315faa7964367f47c0e2a2bcb28ec",
       "role": "bank-selected cooperative supervisor"
     },
     "0x0CE3AA": {
       "body_sha256": "79982dca675d0187026a4e6ee2ddb3cbba818c98981d1edb6a1d218ecfe0e676",
       "body_size": 170,
-      "decompiled_c_sha256": "cf04c57b3661a6971bcd3ac23afc62702f4c805c03c47e4c09e1360ec9f3910c",
+      "decompiled_c_sha256": "6ff905cf755bc09e151297108b853e3e724f7c0536403362f253f2927d09209e",
       "role": "B6 sig269-weighted supervisor"
     },
     "0x0CE51C": {
       "body_sha256": "0e8a4638af7a265c554d0ed8530de554fe4d38abe5613c9ce924cd2457a64463",
       "body_size": 120,
-      "decompiled_c_sha256": "89aea7b6a237f7b44e972696d40fa13de746ad848e26fa39b6e7db46a1d6548d",
+      "decompiled_c_sha256": "28b4a086a92d21cc9a22154e5ad5ce1155e53fccb34469e320a56453570a24f7",
       "role": "cooperative supervisor limit selection"
     },
     "0x0CE594": {
       "body_sha256": "3f65c2dfea68424ed95624e3797e8a0c478def774a781e6bcbe9a14ba2fcfc4e",
       "body_size": 312,
-      "decompiled_c_sha256": "dfa181025a89fb96d9661305be8dca92efac2dc557668122d4bbb4258ae745b0",
+      "decompiled_c_sha256": "491bf2875c64b3f3c4c8e359b5e4549808fc324b95618f7fb574387831eb4170",
       "role": "cooperative supervisor shaping"
     },
     "0x0CE6F4": {
       "body_sha256": "48271f642ac3b97a6c69295487439a0fb7addb7f1ee8f3666e3eef03aa8a4748",
       "body_size": 92,
-      "decompiled_c_sha256": "f2c280bca7b18857dc5dcc2a7918ea1dc4060c4c204988a0306ea307af23ee8b",
+      "decompiled_c_sha256": "638f9b82e5f34e4c4f783691494cc6beecef545652a7686e2e0062f01a22741e",
       "role": "cooperative supervisor consolidation"
     },
     "0x0CE772": {
       "body_sha256": "d3cdbb8206cae1180c9cc820d78961ec53ea626983ffd83c207c98f69ccbdc1d",
       "body_size": 52,
-      "decompiled_c_sha256": "887705b7182d561de671c1265d8fa39aa150205f6975a01332b94b97162750f5",
+      "decompiled_c_sha256": "9955ef9b2f19578a4c732ecfb1c7b4472b2820f242d097ce4dce99a1c7a01c74",
       "role": "cooperative readiness permissive helper"
     },
     "0x0CE7A6": {
       "body_sha256": "8c8dda296e9d91a2e5a60393df54e1f05e37e1647684d290318af90772e359d7",
       "body_size": 88,
-      "decompiled_c_sha256": "3cfe2b2b19c62d81ff57c383a7cde99d59febc5841f8d3ce3e699e9f5a9db81e",
+      "decompiled_c_sha256": "6ac83e18b54f1c52e2831fa9a4741f752286333bacaa02e3b990477dd822e7f7",
       "role": "cooperative readiness inhibit helper"
     },
     "0x0CE7FE": {
       "body_sha256": "65c2dd052a03003e44355e3c92b61bd850bcf52ab5561abc88de608dc5e648c0",
       "body_size": 56,
-      "decompiled_c_sha256": "7c36d609a5404797da80bb82189e62d02b1832121ce969a17b906271420ffbc2",
+      "decompiled_c_sha256": "7cd6e0587639f3bb4de6d576b0a5e59bd86b7e9e7589dd5f8885475d8d762d72",
       "role": "cooperative readiness state"
     },
     "0x0CE836": {
       "body_sha256": "344dd77c2dee1b130540b35adedcbb9512b587c6e0f7f0d0782a0b1e9f12bf41",
       "body_size": 148,
-      "decompiled_c_sha256": "26c010e32ac6933820b3b69946b71e4b5ac98a0a0b66ed82672897bd5e7b866c",
+      "decompiled_c_sha256": "9d4f8bd98ff6f97f93857663244e79f9cd36bf1e766e0a8eefb99273ee764d1a",
       "role": "cooperative activation/ramp state"
     },
     "0x0CEC8A": {
       "body_sha256": "49d4f14976a242d282134f651b9c964617806e46150deaeaf8cec94c27938163",
       "body_size": 76,
-      "decompiled_c_sha256": "0d014f0744a3b09b7c0111bb62283e9969bf36c58e2a71a6fa1342dc18aacbd9",
+      "decompiled_c_sha256": "53a2ecf6ee2d1967bb36cd773287f23ff2b4eafab07870910a85cd583ae319dc",
       "role": "B6 application sequence delta"
     },
     "0x0CECD6": {
       "body_sha256": "2aed8a7ce1ca39769c97c1b473bff1e02176889c637212fb17dff78ad2b4dd43",
       "body_size": 82,
-      "decompiled_c_sha256": "cba388e3642f8adf29f593c73e353d0e8eb911a547372f139a3eebd52d461bc4",
+      "decompiled_c_sha256": "ef703410c8a346fa7da4ba552535684ae70ba91d61c2d95fce0a705c1660e7b0",
       "role": "sequence-dependent persistence state"
     },
     "0x0CEE20": {
       "body_sha256": "4189bb45f70adcf3eab8c0da0cb3526e226818fde134156bc84949ab00f46873",
       "body_size": 38,
-      "decompiled_c_sha256": "06f6fd50e77a39bed681fe97b143695a7339242dc12ddd003a6a52db6ec36fee",
+      "decompiled_c_sha256": "dc2a83409b47f9c1f5d210779983cd9e993df58a5d8a80f8650c428b8145c766",
       "role": "cooperative threshold dwell aggregate"
     },
     "0x0CEE7C": {
       "body_sha256": "6daac14656be82660ae0a31d48004351866f760162b7f5b1b1af77c22ee340ce",
       "body_size": 146,
-      "decompiled_c_sha256": "4f3dce0879fe3ca7ed35f55271aa122d0e701dbbbb536d4a87f4acc4dcc4cb5c",
+      "decompiled_c_sha256": "c15d91779dd0e300cd4f422e87b2b75208a353790274395765f9b73c783f8bd5",
       "role": "cooperative target-angle inhibit synthesis"
     },
     "0x0CEF26": {
       "body_sha256": "2e0335c9f729c98cbfcce664ee8ac94ea94f8d0c654763b96d572dc9e3082b8f",
       "body_size": 126,
-      "decompiled_c_sha256": "5eff30b62bd6aff2be7d6298f788fccc3575799002b8c0de23534b901788f594",
+      "decompiled_c_sha256": "006650a83c324f6009195d5be2c2648b6a3c196aace71ea8268764bee626e057",
       "role": "cooperative persistence/fault supervisor"
     },
     "0x0CEFA4": {
       "body_sha256": "685ba14acb09eef538bdee93aff263b5945e80ed70df7be0bd712b9e348eaed2",
       "body_size": 68,
-      "decompiled_c_sha256": "c267a73afc30ad26badbdda24d56cb5ae6b70cc20b63cfb276d7837cae643d46",
+      "decompiled_c_sha256": "cb5fbb3618fcda0bc77526fcef3dd97def9b258de6fe5444a81873957d8b1e68",
       "role": "B6 profile health synthesis"
     },
     "0x0CEFFC": {
       "body_sha256": "551e4f9d934fa59020839ad2bb9d0019f744cebe580558f3ef5c129b0821f5da",
       "body_size": 78,
-      "decompiled_c_sha256": "c35a062da1e28ebb5b328de01be83a277a88752390c383e311093881e5a6f5df",
+      "decompiled_c_sha256": "aa7858a9dc0afa753920b81d771346483365bd8ae1afc5ceed3d856c3b826804",
       "role": "Target Lateral ID to cooperative bank"
     },
     "0x0CF0B6": {
       "body_sha256": "2ab99fe2bb17a21fe93bf8b598061bcd35434a334c5ff4a186aa1b835d74d2c7",
       "body_size": 52,
-      "decompiled_c_sha256": "7509fd187b8bf5a76a143e82d4e20e7831aad39a9919f9ea1df60e4b816e38f3",
+      "decompiled_c_sha256": "3cb24fe36382a535d6150ea362fd93735979d0587f2c1fa9d3e3bbbadc505438",
       "role": "cooperative gain-state selector"
     },
     "0x0CF0EA": {
       "body_sha256": "7877ddc6853710214edd1fd93e12f51a08dbde900dc541acc286e0bad96916db",
       "body_size": 94,
-      "decompiled_c_sha256": "9c04a4d5cdbda0a632f9b84bc90dbc745a62536d0c0eedc948e7c84f15533cbe",
+      "decompiled_c_sha256": "28d426af92e87b0649e9096d2ac882d20aedaef9e3cd2eb9d4c8dcfaafffe407",
       "role": "cooperative gain-rate calibration load"
     },
     "0x0CF148": {
       "body_sha256": "69362bbbc374f98398617a91545b147e4b9a0353a40be0205c4a1dff7d7ad197",
       "body_size": 228,
-      "decompiled_c_sha256": "0f0c7620bba3af95b5cca93446ce8c6fdcd4f5cc2d6b7a22e5e22a2b8bc119a3",
+      "decompiled_c_sha256": "90cc1fe62a0ce4573af0751146b5e105985d96a5b833c1fafef6a72e0b22106d",
       "role": "cooperative gain ramp CB20"
     },
     "0x0CF22C": {
       "body_sha256": "a500cacf1aa86c88f8130c5a83cd2afc7a4b23db0ff323c9fa68bca923055aab",
       "body_size": 74,
-      "decompiled_c_sha256": "562ff7989afad1d4d53ed6a1a1be14beb1596f1f571ae21c5f74191cb3cc910f",
+      "decompiled_c_sha256": "c312dd453b53612460214855fc83ca2c681cdad9f6baa2aeded739b4040a0e34",
       "role": "cooperative controller output select CB08"
     },
     "0x0CF276": {
       "body_sha256": "83ee6b6b22ff968c01a943492629725f5952214a305f58b5fe3846424f165060",
       "body_size": 60,
-      "decompiled_c_sha256": "b505b764a2d728140f9d67f6f6ee2482eb8172d914bc00573beece0a6a6912d0",
+      "decompiled_c_sha256": "f21bf91cbcf8cba94fe8bc31fcf4d74fe93082d8f4333f7bcc54c59c72032b60",
       "role": "cooperative output slew/magnitude limits"
     },
     "0x0CF2B2": {
       "body_sha256": "ac1e88a5f7a5620c751302d7b76d9cb7d2f14246cf49349ee429acb33559493b",
       "body_size": 138,
-      "decompiled_c_sha256": "aa91599107bc3f4dd69f7c6b2ea390e9fde048c8843c2f8ffcd17abca96ca12e",
+      "decompiled_c_sha256": "0eab77080878ca8a6421c1c272d0f2b7222f04738b810380d99ddecb4e7d35d3",
       "role": "final cooperative contribution CB38"
     },
     "0x0CFDA0": {
       "body_sha256": "2d5e966e707fef202903503c886141ff941709accacf879c09f8186f7650a328",
       "body_size": 52,
-      "decompiled_c_sha256": "5e10b8020e3e40cbb52a60648fb1de3999b457c0c84571724284ab114bc72f90",
+      "decompiled_c_sha256": "cc3a161162c39186f5b34c60df7ed9d01959296624d094c1119c58a704b68bed",
       "role": "B6 sig273 health-qualified publication"
     },
     "0x0D0218": {
       "body_sha256": "a509a296f50e426acede52ea4730ae44322e4d9fe309e8c93c553a5c674307b1",
       "body_size": 108,
-      "decompiled_c_sha256": "a828b79715c81640a7ede3f37edbe85a58465e9c1a8361129a39cb29d42eba33",
+      "decompiled_c_sha256": "878fad66e73f3a41c6c15d08da021fd3f97c2d6773f43bc9d55c22091ce7f806",
       "role": "ordinary EPS command sum"
     },
     "0x0D0284": {
       "body_sha256": "b4eadcf0a0f2d412955c6ed2776087bccac004c30a96401894801ba943676f71",
       "body_size": 86,
-      "decompiled_c_sha256": "10b9a5c39b0c8b342f92cbad28074ace6d9d66e5630039026effebcd4925dc87",
+      "decompiled_c_sha256": "705bb655f49a4f7ecb6f1d67a6333429469c17aac44abc819adcda04240042f9",
       "role": "shared command scale/clamp"
     },
     "0x0D02DA": {
       "body_sha256": "edb65881363e0b33f0a565d075c487c6cf94f785e0a9590e8743eff834eee238",
       "body_size": 168,
-      "decompiled_c_sha256": "2b0e04e2ce1fe5179136658f214d536024bc58bb9126d86a2e2c544432c4ea03",
+      "decompiled_c_sha256": "4854c6114d33d9ed2cf67e6683de1a30f090ccf67379ed9c08f20136fec59c9e",
       "role": "shared command filter/slew"
     },
     "0x0D0382": {
       "body_sha256": "96837ab292b7bf15c16a7467e3f0aae870d4d426087f7ce701f1e1ae0ae7dbfe",
       "body_size": 28,
-      "decompiled_c_sha256": "4c9ef2be0d0fc7633937345b501be1cd2463681b268843ebe2eb675ea93c7302",
+      "decompiled_c_sha256": "6a6658b22de547be9267a1de7a4bfab3b9663a264e96b6e4bd1925092f0eb85e",
       "role": "shared command saturation"
     },
     "0x0D039E": {
       "body_sha256": "993f8f98ca99f2370ae504726245106eda7443287bea6834ba32b757da35539e",
       "body_size": 142,
-      "decompiled_c_sha256": "b1b5b46545b5729aba8b13184fd0652deeffe5bfc9a84b2d29ed2a01bc82c597",
+      "decompiled_c_sha256": "5e653d5481c2361879fb1948ab3a15ce717e9f8292528749d77ccfe0d9628e7a",
       "role": "shared command + local damping composition"
     },
     "0x0D042C": {
       "body_sha256": "5cec1b3bd6f5bbbce2832ae7ff417f75db1e11f053d568c143f8a48ee13539e5",
       "body_size": 80,
-      "decompiled_c_sha256": "3d59d9771c66e6bb670a825a21d96f39e92fbb393825134321ccace032d5b7da",
+      "decompiled_c_sha256": "3e619439682626b3d89567e17e4b5f8cce5112dd1de1153ead50474ebdf2f8ec",
       "role": "shared output scaling + common actuator gate"
     },
     "0x0D047C": {
       "body_sha256": "b7995271dcae87283b114788eb9719f086ea7ef78fde1e73ed9fa7336cec3e4c",
       "body_size": 48,
-      "decompiled_c_sha256": "b515c8173254fcf4d71e57598d1306f271a50e16beddcbf30e3d4ff56b24408b",
+      "decompiled_c_sha256": "3f81094805c7095dcc3c63b8cb8a8c2049c6c72bb731e602066a2010a546e8ea",
       "role": "internal post-gate override"
     },
     "0x0D04F0": {
       "body_sha256": "66c5d3774e93ea762c7f16544ca7dd8901473a35c13159f996d69d2e8e2a057f",
       "body_size": 56,
-      "decompiled_c_sha256": "a54c1319d08ce159d0ba8bbabdc5485d1d3b8c86613ab16055eeaac4560cd44d",
+      "decompiled_c_sha256": "98d78c8bac5717087f9c69924bb1982835aced8060a7db4b7ba7445da4570b5e",
       "role": "internal override state initialization"
     },
     "0x0D0528": {
       "body_sha256": "d8f7a4ec12e908abaff3e0e9fb747a53cf772142dce8e38a33f5108766b86954",
       "body_size": 140,
-      "decompiled_c_sha256": "09788ef0313f71d793260c0b13e5c59254f315e0b03a82d2ab7aeb163e589f13",
+      "decompiled_c_sha256": "c09b3345f370676e5f6ee3a36bf2d4b398a50f2241e280fdc248ec262ead9042",
       "role": "internal override trigger"
     },
     "0x0D05B4": {
       "body_sha256": "cdd7c7c6a94461b1b04b880018c912a48feaafa2edd1bbd27d36f510ba5f65d9",
       "body_size": 152,
-      "decompiled_c_sha256": "a2a226bf1725fc9aad0a0b9c8cdf0ddda3296c5a1703ecd74a41a1060ebb0845",
+      "decompiled_c_sha256": "15185e1de1faece391f13ad1637d08dad340d253cee7bfaeb2d7c84b6a21cae6",
       "role": "internal override monitor"
     },
     "0x0D064C": {
       "body_sha256": "ef8152a5716ee1d9ff78b4449a1deb6963602c148d3aeec1ea4bb98925d6f764",
       "body_size": 40,
-      "decompiled_c_sha256": "671d5357f2f470538c167c5fff52737fa5f27a8b32be64d28e424ab84ae3aff9",
+      "decompiled_c_sha256": "3150f7a357853e90ffa6867e43f6983fedd55c36510e79321f0e447cbdd4e268",
       "role": "internal override debounce"
     },
     "0x0D0674": {
       "body_sha256": "ec9bcdb10dfd708d8e342efbd4d71e55675463d7147d0b0122a00d7b4b4fc5fc",
       "body_size": 98,
-      "decompiled_c_sha256": "47996810a46389fc63b0c3944a691fbe3bb375d8bbfe9069834c115db11c603e",
+      "decompiled_c_sha256": "60a11f713d363cffe8a11bf6c74cfb8adc7c5b9bf3fc18b4ace487ad9c96dfb5",
       "role": "internal override output construction"
     },
     "0x0D06D6": {
       "body_sha256": "34f08369e95c0db8e107f1ad001b485d08fcaa5c96d084f7537a9f751064aa73",
       "body_size": 20,
-      "decompiled_c_sha256": "b9b1829769ea6f32b4f67a154d84c2cb1eaa6d1b13aba3ce5ce6370c82c1c545",
+      "decompiled_c_sha256": "c553da73d4554775051b40cac0e0503e0e24f27b3288d670751bde3360c7df91",
       "role": "internal override aggregate"
     },
     "0x0D0AAE": {
       "body_sha256": "0eda7671aa6175f44503e1b9e6c42e1fb1c255fa4e4c0391269eefe40b61e01a",
       "body_size": 72,
-      "decompiled_c_sha256": "51d93da1f70ed9e57c8ba1220658f8903420cd64dfda2ebb2a7e01c60335b597",
+      "decompiled_c_sha256": "1cd6cec04bd319c6ff12ef9018a7a8ade2067c997820a3a99bcb3ad553f491ed",
       "role": "shared command snapshot"
     },
     "0x0D0AF6": {
       "body_sha256": "2eda8a4e734a3cd248c83c9cd41f906e0191ee48afa5ba72a73640da00823fc9",
       "body_size": 228,
-      "decompiled_c_sha256": "68fb362fae94cf8a89c3e602ca0a77b0da17dd40794402abfbbbf3b7263eb414",
+      "decompiled_c_sha256": "2b524374caa5085f15447a62bc59e5bfb75457c8aa68189693728aa94b9a0327",
       "role": "shared command aggregate"
     },
     "0x0D0EEC": {
       "body_sha256": "e58077923617544434467a6d0279d5037aa2cf1398960ef0fe62126f37e23231",
       "body_size": 488,
-      "decompiled_c_sha256": "1e972cafb3e6afc4d60a0cbff2c63596f7dda6bdb87dc1bb53de2dd94b6e4f17",
+      "decompiled_c_sha256": "b6f1ceb628105875fd97d3e32b75eca90ab773ec0186156b74062066556dcefa",
       "role": "cooperative-controller aggregate"
     },
     "0x0D1100": {
       "body_sha256": "c73c370a83bd7615ef8132cd415ed3bdc754e2c2b80da9a86027dacfe4d4476d",
       "body_size": 12,
-      "decompiled_c_sha256": "0016b809d7b5893fa70a03adf9d669076c377306ef0a887c412c285f6b3092d5",
+      "decompiled_c_sha256": "7fb57be1a830f26300e61ac6088ee78dbcc08c3cf6981271a0c3bde456d61d27",
       "role": "shared command wrapper"
     },
     "0x0D1130": {
       "body_sha256": "8eae5b4c5639b3c38aba7e7b0b7aa1fd432462c4c0e09990261c9ae8bfe460f8",
       "body_size": 12,
-      "decompiled_c_sha256": "526319c6c40e4f6754d30f928f71997026d0dd1d27181556932efeb2b589fe5d",
+      "decompiled_c_sha256": "20503a7fb3882b19384de1d0388a25b66caf69c6692b921f7a9037218ee0740b",
       "role": "cooperative-controller wrapper"
     },
     "0x0FCC00": {
       "body_sha256": "aa16c246aab1e45e5ab0c548e641efbd18e508de7ebf6811c181acac7f4382e9",
       "body_size": 78,
-      "decompiled_c_sha256": "a463ef04dd237b4e2fa451bc9cf6333bdedb318978d2bd19354bc4c917a0b11f",
+      "decompiled_c_sha256": "5174aa406435ab2b40e5bbbee2f02a74c3451acdcaceee329183a5a704408c4c",
       "role": "internal system-state snapshot to EEF90"
     }
   },
@@ -988,9 +988,13 @@
         "0x03777E",
         "0x037E48",
         "0x03C310",
+        "0x0422B8",
         "0x0423BC",
+        "0x042BEE",
         "0x042D04",
+        "0x043276",
         "0x04337A",
+        "0x043BB0",
         "0x043CC8",
         "0x0571B4",
         "0x057F00",
@@ -3004,7 +3008,7 @@
     }
   ],
   "target": {
-    "canonical_function_count": 7178,
+    "canonical_function_count": 7336,
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "software_id": "8965F3307000"
   }

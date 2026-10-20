@@ -103,10 +103,17 @@ def cmd_capabilities(_args: argparse.Namespace) -> int:
         "eps-isolated-probe": "mode/liveness probe of an isolated EPS-side CAN segment",
         "e2e-p05": ["crc", "check", "protect", "recover-data-id"],
         "ram": ["list", "build", "onboard", "kit"],
+        "decomp": ["status", "source", "corpus", "oracle", "lift"],
         "targets": {name: len(target_capabilities(name)) for name in TARGETS},
     }
     print(json.dumps(payload, indent=2, sort_keys=True))
     return 0
+
+
+def cmd_decomp(args: argparse.Namespace) -> int:
+    from tools.targets.camry.decomp.cli import main as decomp_main
+
+    return decomp_main(args.args)
 
 
 def cmd_gts(args: argparse.Namespace) -> int:
@@ -260,6 +267,10 @@ def build_parser() -> argparse.ArgumentParser:
     q.add_argument("args", nargs=argparse.REMAINDER)
     q.set_defaults(func=cmd_gts)
 
+    q = sub.add_parser("decomp", help="Camry 8965F3307000 C reconstruction", add_help=False)
+    q.add_argument("args", nargs=argparse.REMAINDER)
+    q.set_defaults(func=cmd_decomp)
+
     q = sub.add_parser("secoc", help="Toyota classic-CAN SecOC tools")
     q.add_argument("surface", choices=("oracle", "session", "sign", "sync"))
     q.add_argument("args", nargs=argparse.REMAINDER)
@@ -351,6 +362,8 @@ def main() -> int:
     # their implementation parsers own the option grammar.
     if command == "gts":
         return cmd_gts(argparse.Namespace(args=argv[1:]))
+    if command == "decomp":
+        return cmd_decomp(argparse.Namespace(args=argv[1:]))
     if command == "secoc" and len(argv) >= 2 and argv[1] not in {"-h", "--help"}:
         surface = argv[1]
         if surface not in {"oracle", "session", "sign", "sync"}:

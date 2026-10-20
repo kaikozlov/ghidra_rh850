@@ -87,6 +87,39 @@ fixture includes `MCFG0`, `PMR`, `MCC`, and `CDBCR` transfers and asserts the
 decoded operand register, so a future name/selection regression fails before
 project analysis.
 
+G3M cache-control reads are not ordinary register round trips. **CDBCR.CDBCLR**
+bit 1 is write-only/read-as-zero (R01US0123EJ0140 Table 3-64, p.110): `STSR`
+masks that bit without discarding `LDSR` command writes. **ICCTRL.ICHCLR** bit 8
+instead reads one until hardware completes clearing (Table 3-60, p.106).
+Both registers use native `register_data` volatility: ICCTRL observations must
+remain hardware-dependent, and CDBCR command/control writes must remain
+externally observable. This is not a complete reserved-bit, cache-content or
+completion-timing model. G4MH is not assigned this G3M protocol: E2x-FCC2
+Table 3.79 (p.345) specifies that its ICHCLR reads zero.
+
+The processor fixture embeds the exact 136 bytes of Camry `8965F3307000`
+function `0x3614`. It exercises both modes with an explicit environment-supplied
+completion event, checks the shared return separately from opaque `SYNCI`, and
+requires reachable high-IR command writes, nonconstant ICCTRL polls and return.
+It does not test rendered C wording. The cache correction first shipped with
+G3M registration **0.10**.
+
+**PMR** also uses native `register_data` volatility: its writes change the
+interrupt-priority ceiling even when no subsequent software read consumes the
+value (R01US0123EJ0140 Table 3-33, p.75). Previously the decompiler could discard
+those writes from Camry's `0x701C4`/`0x701EA` helpers. The processor fixture now
+embeds their exact 68 bytes, executes eighteen lower/equal/higher-mask,
+signed-comparison and unconditional-restore cases across both incoming ID states,
+and checks reachable high-IR PMR writes, old-mask-dependent branching and return.
+The execution cases seed `FPEC=0`; they do not simulate interrupt timing or prove
+pending-FPI behavior. The existing architecture-level FPI path remains intact.
+No new userop or firmware-specific instruction exception was introduced.
+
+This PMR observability correction increments G3M registration to **0.11**.
+Fresh Camry rebuilds retain both conditional-enter and unconditional-restore PMR
+writes in the rendered functions. Cached instructions in an older working
+project are not post-fix evidence; use a fresh rebuild and regenerated corpus.
+
 `EIC136`/`EIC292`/`EIC293` remain memory-mapped peripheral registers at
 `0xFFFFB110` / `0xFFFFB248` / `0xFFFFB24A`, accessed via `ld.w`/`st.w`, not
 `ldsr`/`stsr`. They belong to the device profile and are not system-register
@@ -356,15 +389,17 @@ itself changed only inventory-version metadata; the compiled language and
 semantic project rows were unchanged at that milestone. Later P1M-E
 hardware-spec and G3M-instruction corrections intentionally change the
 processor language and persisted semantics; the current source fingerprint and
-compiled-SLA hash live in `data/processor_manifest.baseline.json` and are
-restated in the latest audit round below. Two independent clean rebuilds of
-every registered target agree under each compiled language. See
+compiled-SLA hash live in `data/processor_manifest.baseline.json`. At the recorded
+migration milestones, two independent clean rebuilds of every then-registered
+target agreed. The 2026-10-14 cache correction refreshes Camry; other target
+snapshots retain their recorded processor identities and require a rebuild before
+using the corrected cache semantics. See
 [the migration journal](../history/2026-09/GHIDRA_12_1_4_MIGRATION_2026-09-21.md)
 for the earlier version-only migration evidence.
 
 ## Exact project parity
 
-The current normalized project inventory has **7,090 functions, 197,726
+The legacy Sienna normalized project inventory has **7,090 functions, 197,726
 instructions, and 8,813 symbols**. Aggregate floors remain useful as a fast
 collapse detector, but they cannot detect equal-count substitutions. The deterministic
 `ExportProjectInventory.java` exporter therefore records path-free Ghidra and
@@ -384,13 +419,14 @@ spurious functions when `ghidra/scripts/investigate` was present.
 Whole-image structural function inventory (not full semantic understanding):
 
 - Exporter: `ghidra/scripts/verify/ExportSemanticCoverageLedger.java`
-  (read-only headless against `build/work/project/` only).
-- Generator: `make generate-semantic-coverage` /
-  `tools/project/export_ghidra_project.sh semantic-coverage`
-- Artifacts: `data/semantic_coverage_ledger.csv` and
-  `data/semantic_coverage_summary.json`
-- Gate: `tests/tooling/verify_semantic_coverage.py` (runs in the
-  `tools/test full` / `local` sweeps, not core)
+  (read-only, executable-hash-bound, against disposable `build/work/` projects).
+- Generator: `make generate-semantic-coverage TARGET=... PROJECT_DIR=...`;
+  commands and lifecycle are owned by [WORKFLOW](../WORKFLOW.md#verification).
+- Artifact/review paths: `data/analysis_targets.json` fields
+  `semantic_coverage_ledger`, `semantic_coverage_summary`, and `semantic_reviews`.
+  Legacy Sienna retains its top-level paths; Camry uses its target directory.
+- Gate: `tests/tooling/verify_semantic_coverage.py` checks all registered coverage
+  targets, including equality with each canonical function-entry inventory.
 
 Each CSV row is one discovered function, sorted by entry address, with Ghidra
 discovery and name provenance, calling convention, caller/callee counts,
@@ -415,14 +451,15 @@ DATA reference into CodeFlash that is not a function entry (scalars included),
 not a table-only classifier. The ledger deliberately does **not** claim that
 every function is behaviorally understood.
 
-Current review counts are generated in `data/semantic_coverage_summary.json`.
-The curated conclusions live in `data/semantic_review_status.csv`; automatic
-decompilation-only entries are not counted as reviews. The earlier selected
-sweep and corrected-graph re-audit remain in the
+Review counts are generated in each target's registered summary. Curated
+conclusions are separate inputs; automatic decompilation-only entries are not
+counted as reviews. Camry's reconstruction evidence and remaining boundaries are
+owned by [its report](../variants/camry-2026-live-baseline.md#77-2026-10-14-whole-image-semantic-reconstruction).
+The earlier Sienna selected sweep and corrected-graph re-audit remain in the
 [historical report](../history/2026-08/CORRECTED_GRAPH_REAUDIT_2026-08-11.md).
 
-This in-function inventory is not an executable denominator. After importing
-the upstream function-start patterns, the separate outside-function exporter
+This in-function inventory is not an executable denominator. For **Sienna**,
+after importing the upstream function-start patterns, the outside-function exporter
 records 900 conservative candidate runs containing 7,186 decoded instructions
 in 18,138 bytes: 281 orphan decoded runs and 619 pointer-referenced runs, all
 unresolved. Two independent four-stage rebuilds converge at 7,090 functions /

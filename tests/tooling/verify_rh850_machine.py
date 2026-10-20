@@ -35,14 +35,13 @@ def run(command: list[str], *, expect_success: bool = True) -> subprocess.Comple
 
 
 def fixture_batches() -> list[tuple[str, list[Path]]]:
+    if not FIXTURE_ROOT.is_dir():
+        return []
     batches: list[tuple[str, list[Path]]] = []
     for target_dir in sorted(path for path in FIXTURE_ROOT.iterdir() if path.is_dir()):
         scenarios = sorted(target_dir.glob("*.json"))
-        if not scenarios:
-            raise AssertionError(f"target fixture directory is empty: {target_dir}")
-        batches.append((target_dir.name, scenarios))
-    if not batches:
-        raise AssertionError("no target machine fixtures discovered")
+        if scenarios:
+            batches.append((target_dir.name, scenarios))
     return batches
 
 
@@ -173,11 +172,9 @@ def check_fault_check_error_boundary(output_root: Path) -> None:
     """Original execution fault must survive failing postcondition inspections.
 
     The retained byte-store primitive faults on an unmapped destination before
-    any RAM write lands, so both postcondition checks inspect memory that was
-    never initialized. The runner must publish the per-scenario report with the
-    execution fault at the top, a termination_reason that reflects that fault,
-    and one structured inspection error per failing check instead of throwing
-    away or replacing the report.
+    any RAM write lands. Ordinary checks and the second operand of a memory-equal
+    check inspect uninitialized RAM. The report must retain the execution fault
+    and publish each structured inspection error, not fabricate equal bytes.
     """
     scenario = {
         "schema": "rh850-p1me-machine-scenario-v2",
@@ -196,7 +193,10 @@ def check_fault_check_error_boundary(output_root: Path) -> None:
             "PSW": "0",
             "PMR": "0",
         },
-        "memory": [],
+        "memory": [{
+            "address": "0xFEBE0100", "hex": "5a",
+            "evidence": "initialized first operand; comparison source remains uninitialized",
+        }],
         "artifacts": [],
         "checks": [
             {
@@ -212,6 +212,13 @@ def check_fault_check_error_boundary(output_root: Path) -> None:
                 "address": "0xFEEF8000",
                 "size": 1,
                 "equals_hex": "00",
+            },
+            {
+                "name": "comparison requires initialized second operand",
+                "kind": "memory-equal",
+                "address": "0xFEBE0100",
+                "source_address": "0xFEBE0104",
+                "size": 1,
             },
         ],
         "expected_fault": {
@@ -262,6 +269,40 @@ def check_fault_check_error_boundary(output_root: Path) -> None:
                 f"consumer failure summary dropped {fragment!r}:\n{proc.stderr}"
             )
     print("PASS original execution fault survives failing uninitialized-RAM inspection checks")
+
+
+def check_memory_equality_failure(output_root: Path) -> None:
+    """A real store producing different bytes must fail a memory-equal check."""
+    scenario = {
+        "schema": "rh850-p1me-machine-scenario-v2",
+        "name": "memory-equal-detects-different-bytes",
+        "entry": PORTABLE_STORE_SELECTOR,
+        "max_instructions": 20,
+        "stop_addresses": ["0x00010000"],
+        "gpr_fill": "0",
+        "registers": {"r6": "0xFEBE0100", "r7": "0x12", "lp": "0x00010000"},
+        "memory": [{
+            "address": "0xFEBE0104", "hex": "13",
+            "evidence": "comparison byte differs from the real firmware store's input",
+        }],
+        "checks": [{
+            "name": "different stored and source byte",
+            "kind": "memory-equal", "address": "0xFEBE0100",
+            "source_address": "0xFEBE0104", "size": 1,
+        }],
+    }
+    path = output_root / "memory-equal-different.json"
+    path.write_text(json.dumps(scenario, indent=2) + "\n", encoding="utf-8")
+    run([
+        str(REPO_ROOT / "tools/rh850"), "test", "firmware",
+        "camry-8965F3307000", str(path), "--output-dir", str(output_root),
+    ], expect_success=False)
+    report = json.loads((output_root / "memory-equal-different.report.json").read_text())
+    check = report["checks"][0]
+    if (report.get("passed") is not False or check.get("passed") is not False
+            or check.get("actual") != "different" or "error" in check):
+        raise AssertionError(f"unequal initialized bytes must fail comparison: {report!r}")
+    print("PASS memory-equal detects different initialized bytes")
 
 
 def check_event_schema_rejections(output_root: Path) -> None:
@@ -342,6 +383,38 @@ def check_event_schema_rejections(output_root: Path) -> None:
                 "evidence": "scenario: invalid overflowing asynchronous completion",
                 "address": "0xFFFFFFFF",
                 "data_hex": "0000",
+            },
+        ),
+        (
+            "register-input-empty-name",
+            {
+                "kind": "register-input", "after_instructions": 0,
+                "register": "", "value": "0",
+                "evidence": "scenario: unnamed external register input",
+            },
+        ),
+        (
+            "register-input-bool-value",
+            {
+                "kind": "register-input", "after_instructions": 0,
+                "register": "ICUSREG20", "value": True,
+                "evidence": "scenario: boolean is not an integer-string input",
+            },
+        ),
+        (
+            "register-input-negative",
+            {
+                "kind": "register-input", "after_instructions": 0,
+                "register": "ICUSREG20", "value": "-1",
+                "evidence": "scenario: negative device input",
+            },
+        ),
+        (
+            "register-input-overflow",
+            {
+                "kind": "register-input", "after_instructions": 0,
+                "register": "ICUSREG20", "value": "0x100000000",
+                "evidence": "scenario: oversized device input",
             },
         ),
         (
@@ -525,6 +598,108 @@ def check_execution_event_boundaries(output_root: Path) -> None:
         print(f"PASS {path.stem}: {kind} faults at the external-event boundary")
 
 
+def check_peripheral_file(output_root: Path) -> None:
+    """Opted-in peripheral space reads back the last store and keeps scripted bytes.
+
+    Without the flag, 0xFF000000 stays an unmapped write. The flag is the
+    differential harness's model of a peripheral register file.
+    """
+    output_dir = output_root / "peripheral-file"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    scenario = {
+        "schema": "rh850-p1me-machine-scenario-v2",
+        "name": "peripheral-readback",
+        "entry": PORTABLE_STORE_SELECTOR,
+        "max_instructions": 20,
+        "stop_addresses": ["0x00010000"],
+        "gpr_fill": "0",
+        "peripheral_file": True,
+        "registers": {
+            "sp": "0xFEBE2000",
+            "gp": "0xFEBEB800",
+            "tp": "0x00023DFC",
+            "r6": "0xFF000000",
+            "r7": "0x5A",
+            "lp": "0x00010000",
+            "PSW": "0",
+            "PMR": "0",
+        },
+        "memory": [{
+            "address": "0xFF000000",
+            "size": 2,
+            "fill": 0x11,
+            "evidence": "scripted peripheral bytes around the store",
+        }],
+        "checks": [
+            {
+                "name": "stored byte reads back",
+                "kind": "memory",
+                "address": "0xFF000000",
+                "size": 1,
+                "equals_hex": "5a",
+            },
+            {
+                "name": "unread peripheral byte stays scripted",
+                "kind": "memory",
+                "address": "0xFF000001",
+                "size": 1,
+                "equals_hex": "11",
+            },
+        ],
+    }
+    path = output_dir / "peripheral-readback.json"
+    path.write_text(json.dumps(scenario, indent=2) + "\n", encoding="utf-8")
+    run([
+        str(REPO_ROOT / "tools/rh850"), "test", "firmware",
+        "camry-8965F3307000", str(path),
+        "--output-dir", str(output_dir),
+    ])
+    report = json.loads((output_dir / "peripheral-readback.report.json").read_text(encoding="utf-8"))
+    if report.get("passed") is not True or report.get("termination_reason") != "stop-address":
+        raise AssertionError(f"peripheral read-back did not execute: {report!r}")
+    print("PASS peripheral file reads back the last write and keeps scripted bytes")
+
+
+def check_register_input_boundaries(output_root: Path) -> None:
+    """External device input cannot alter CPU registers or issue device commands."""
+    output_dir = output_root / "register-input-boundaries"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    for name, register, value in (
+        ("cpu-register", "PC", "0x100"),
+        ("write-only-command", "DFERSTC", "1"),
+        ("byte-register-overflow", "FPMON", "0x100"),
+        ("dcra-internal-state", "DCRA1COUT", "0"),
+        ("flmd-internal-state", "FLMDCNT", "1"),
+    ):
+        scenario = {
+            "schema": "rh850-p1me-machine-scenario-v2",
+            "name": f"reject-register-input-{name}",
+            "entry": PORTABLE_STORE_SELECTOR,
+            "max_instructions": 4,
+            "stop_addresses": ["0x00010000"],
+            "gpr_fill": "0",
+            "registers": {"lp": "0x00010000"},
+            "checks": [],
+            "events": [{
+                "kind": "register-input", "after_instructions": 0,
+                "register": register, "value": value,
+                "evidence": "scenario: invalid external device input boundary",
+            }],
+        }
+        path = output_dir / f"{name}.json"
+        path.write_text(json.dumps(scenario, indent=2) + "\n", encoding="utf-8")
+        run([
+            str(REPO_ROOT / "tools/rh850"), "test", "firmware",
+            "camry-8965F3307000", str(path), "--output-dir", str(output_dir),
+        ], expect_success=False)
+        report = json.loads((output_dir / f"{path.stem}.report.json").read_text())
+        if (report.get("passed") is not False
+                or report.get("termination_reason") != "runner-error"
+                or report.get("error", {}).get("type") != "IllegalArgumentException"):
+            raise AssertionError(f"{name}: device-input boundary did not reject the scenario")
+        print(f"PASS register-input {name} rejected at device-model boundary")
+
+
 def main() -> int:
     run([str(REPO_ROOT / "tools/rh850"), "model", "check"])
     with tempfile.TemporaryDirectory(prefix="verify-rh850-machine-", dir=REPO_ROOT / "build/tmp") as tmp:
@@ -534,8 +709,11 @@ def main() -> int:
         check_schema_rejection(output_root)
         check_executable_overlay_rejection(output_root)
         check_fault_check_error_boundary(output_root)
+        check_memory_equality_failure(output_root)
         check_event_schema_rejections(output_root)
         check_execution_event_boundaries(output_root)
+        check_register_input_boundaries(output_root)
+        check_peripheral_file(output_root)
     print("PASS specification-backed multi-target RH850/P1M-E machine")
     return 0
 

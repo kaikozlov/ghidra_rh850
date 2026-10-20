@@ -1,15 +1,17 @@
 //@author kaikozlov
 //@category Emulation
 // Execute exact registered RH850/P1M-E firmware with strict machine-state provenance.
-// Args: <absolute-run-contract-json> <absolute-report-json>
+// Args: <absolute-run-contract-json> <absolute-report-json> [--instruction-trace]
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.stream.JsonWriter;
 import ghidra.app.plugin.processors.sleigh.SleighLanguage;
 import ghidra.app.script.GhidraScript;
+import ghidra.framework.model.DomainObjectException;
 import ghidra.pcode.emu.PcodeEmulationCallbacks;
 import ghidra.pcode.emu.PcodeEmulator;
 import ghidra.pcode.emu.PcodeMachine;
@@ -27,14 +29,19 @@ import ghidra.program.model.address.Address;
 import ghidra.program.model.address.AddressRange;
 import ghidra.program.model.address.AddressSetView;
 import ghidra.program.model.address.AddressSpace;
+import ghidra.program.model.lang.InstructionPrototype;
+import ghidra.program.model.lang.ProcessorContextImpl;
 import ghidra.program.model.lang.Register;
 import ghidra.program.model.lang.RegisterValue;
+import ghidra.program.model.mem.ByteMemBufferImpl;
+import ghidra.program.model.mem.MemoryAccessException;
 import ghidra.program.model.listing.Function;
 import ghidra.program.model.listing.FunctionIterator;
 import ghidra.program.model.listing.Instruction;
 import ghidra.program.model.listing.InstructionIterator;
 import ghidra.program.model.pcode.PcodeOp;
 import ghidra.program.model.scalar.Scalar;
+import java.io.BufferedWriter;
 import java.nio.charset.StandardCharsets;
 
 import java.nio.file.Files;
@@ -142,6 +149,12 @@ public class RunP1MEMachine extends GhidraScript {
         String secondary_status_register;
         String access_register;
         String history_register;
+        String start_address_register;
+        String end_address_register;
+        String mode_register;
+        String emulation_register;
+        String enable_register;
+        String secondary_enable_register;
         String reload_prefix;
         String counter_prefix;
         Long payload_address;
@@ -227,6 +240,7 @@ public class RunP1MEMachine extends GhidraScript {
         String kind;
         String register;
         String address;
+        String source_address;
         Integer size;
         String operation;
         String equals;
@@ -283,6 +297,8 @@ public class RunP1MEMachine extends GhidraScript {
         long after_instructions;
         String evidence;
         String address;
+        String register;
+        String value;
         Long p_bus_cycles;
         Integer fifo;
         Integer channel;
@@ -310,6 +326,15 @@ public class RunP1MEMachine extends GhidraScript {
         List<CheckDef> checks = new ArrayList<>();
         List<ExternalEvent> events = new ArrayList<>();
         ExpectedFault expected_fault;
+        boolean peripheral_file;
+        List<String> bounded_entries;
+        List<BoundedEdge> bounded_edges;
+    }
+
+    static final class BoundedEdge {
+        String pc;
+        String target;
+        String entry;
     }
 
     static final class RunContract {
@@ -321,18 +346,79 @@ public class RunP1MEMachine extends GhidraScript {
     }
 
     static final class Trace {
+        private static final int TRACE_CHUNK_SIZE = 16384;
+        private static final int MAX_TRACE_ENTRIES = 16777216;
+        final boolean instructionTraceEnabled;
+        final List<int[]> instructionPcs = new ArrayList<>();
+        final List<long[]> instructionTicks = new ArrayList<>();
+        final List<JsonObject> instructionShortcuts = new ArrayList<>();
+        int instructionTraceSize;
         long instructions;
         final List<Long> recentPcs = new ArrayList<>();
         final Set<Long> executed = new HashSet<>();
         final Map<String, Long> syncCounts = new LinkedHashMap<>();
         final List<JsonObject> memoryAccesses = new ArrayList<>();
         final List<JsonObject> deviceEvents = new ArrayList<>();
+        final Set<Long> writtenBytes = new HashSet<>();
+        boolean traceLostAddress;
 
-        Trace() {
+        Trace(boolean instructionTraceEnabled) {
+            this.instructionTraceEnabled = instructionTraceEnabled;
             syncCounts.put("SYNCE", 0L);
             syncCounts.put("SYNCM", 0L);
             syncCounts.put("SYNCP", 0L);
             syncCounts.put("SYNCI", 0L);
+        }
+
+        void enterInstruction(long pc) {
+            if (!instructionTraceEnabled) return;
+            if (instructionTraceSize >= MAX_TRACE_ENTRIES) {
+                throw new IllegalStateException(
+                    "complete instruction trace exceeds " + MAX_TRACE_ENTRIES + " entries");
+            }
+            int chunk = instructionTraceSize / TRACE_CHUNK_SIZE;
+            int offset = instructionTraceSize % TRACE_CHUNK_SIZE;
+            if (offset == 0) {
+                try {
+                    instructionPcs.add(new int[TRACE_CHUNK_SIZE]);
+                    instructionTicks.add(new long[TRACE_CHUNK_SIZE]);
+                }
+                catch (OutOfMemoryError error) {
+                    throw new IllegalStateException("cannot allocate complete instruction trace", error);
+                }
+            }
+            if ((pc & ~0xffffffffL) != 0) {
+                throw new IllegalStateException("instruction trace PC outside 32-bit address space");
+            }
+            instructionPcs.get(chunk)[offset] = (int) pc;
+            instructionTicks.get(chunk)[offset] = instructions;
+            instructionTraceSize++;
+        }
+
+        void shortcut(String kind, long pc, long resumePc) {
+            if (!instructionTraceEnabled) return;
+            if (instructionShortcuts.size() >= 16384) {
+                throw new IllegalStateException("complete instruction shortcut trace exceeds 16384 entries");
+            }
+            JsonObject row = new JsonObject();
+            row.addProperty("kind", kind);
+            row.addProperty("pc", hex32(pc));
+            row.addProperty("resume_pc", hex32(resumePc));
+            row.addProperty("instruction", instructions);
+            instructionShortcuts.add(row);
+        }
+
+        void writeInstructionTrace(JsonWriter writer) throws Exception {
+            writer.beginArray();
+            for (int index = 0; index < instructionTraceSize; index++) {
+                int chunk = index / TRACE_CHUNK_SIZE;
+                int offset = index % TRACE_CHUNK_SIZE;
+                writer.beginObject();
+                writer.name("pc").value(hex32(Integer.toUnsignedLong(instructionPcs.get(chunk)[offset])));
+                writer.name("instruction").value(instructionTicks.get(chunk)[offset]);
+                writer.endObject();
+            }
+            writer.endArray();
         }
 
         void sync(String operation) {
@@ -340,10 +426,27 @@ public class RunP1MEMachine extends GhidraScript {
         }
 
         void access(String kind, long pc, long address, int size, String evidence) {
-            if (memoryAccesses.size() >= 4096) return;
+            if (memoryAccesses.size() >= 1048576) {
+                // A poll that rewrites the same slots does not hide a later
+                // store. A write to an address the trace never recorded does.
+                if ("write".equals(kind)) {
+                    for (int offset = 0; offset < size; offset++) {
+                        if (!writtenBytes.contains(address + offset)) {
+                            traceLostAddress = true;
+                            return;
+                        }
+                    }
+                }
+                return;
+            }
+            if ("write".equals(kind)) {
+                for (int offset = 0; offset < size; offset++)
+                    writtenBytes.add(address + offset);
+            }
             JsonObject row = new JsonObject();
             row.addProperty("kind", kind);
             row.addProperty("pc", hex32(pc));
+            row.addProperty("instruction", instructions);
             row.addProperty("address", hex32(address));
             row.addProperty("size", size);
             row.addProperty("evidence", evidence);
@@ -385,6 +488,8 @@ public class RunP1MEMachine extends GhidraScript {
         static final long FSTATR_ILGLERR = 0x4000;
         static final long FSTATR_STATUS_CLEAR_MASK = 0x3703c;
         static final long FSTATR_COMMAND_LOCK_MASK = 0x27068;
+        static final long FSTATR_FORCED_STOP_CLEAR_MASK = FSTATR_STATUS_CLEAR_MASK | 0x8b40;
+        static final long FSTATR_CORRECTION_MASK = 0x10014;
         static final long RSCFD_TX_RAM_BASE = 0xFFD24000L;
         static final long RSCFD_TX_RECORD_SIZE = 0x20L;
 
@@ -400,11 +505,15 @@ public class RunP1MEMachine extends GhidraScript {
         static final int[] FIFO_DEPTHS = {0, 4, 8, 16, 32, 48, 64, 128};
         static final int[] PAYLOAD_LENGTHS = {8, 12, 16, 20, 24, 32, 48, 64};
         RegisterDef timerStart;
+        RegionDef dataFlash;
         long[] timerRemainders;
         List<ExternalEvent> externalEvents = List.of();
         int nextExternalEvent;
         long registerBeforeWrite;
-        final List<Integer> faciSequence = new ArrayList<>();
+        int faciPendingCommand;
+        boolean dcraSeeded;
+        int flmdStage;
+        long flmdDesired;
         final Map<String, List<RegionDef>> aliases = new HashMap<>();
         final PriorityQueue<ScheduledEvent> scheduledEvents = new PriorityQueue<>(
             Comparator.comparingLong((ScheduledEvent event) -> event.tick)
@@ -413,6 +522,23 @@ public class RunP1MEMachine extends GhidraScript {
         PcodeEmulator emulator;
         AddressSpace memorySpace;
         boolean internalWrite;
+        boolean peripheralFile;
+        boolean peripheralPollBusy;
+        // Same threshold as tools/camry_oracle.py PERIPHERAL_POLL_READS.
+        static final int PERIPHERAL_POLL_READS = 4096;
+        // Same count as tools/camry_oracle.py ICCTRL_BUSY_READS.
+        static final int ICCTRL_BUSY_READS = 4;
+        int icctrlBusyReads;
+        final Map<Long, Integer> peripheralPolls = new HashMap<>();
+        long entrySp = -1;
+        final List<long[]> scenarioFills = new ArrayList<>();
+        final Set<Long> boundedEntries = new HashSet<>();
+        final Map<Long, long[]> boundedEdges = new HashMap<>();
+        final Map<Long, ArrayDeque<long[]>> boundedFrames = new HashMap<>();
+        long scenarioEntry = -1;
+        static final String[] BOUNDED_SAVED = {
+            "r20", "r21", "r22", "r23", "r24", "r25", "r26", "r27", "r28", "r29", "ep", "lp",
+        };
 
         Model(SleighLanguage language, MachineSpec spec, Trace trace) {
             this.language = language;
@@ -433,6 +559,7 @@ public class RunP1MEMachine extends GhidraScript {
             }
             registers.sort(Comparator.comparingLong(row -> row.address));
             for (RegionDef region : regions) {
+                if ("dataflash".equals(region.name)) dataFlash = region;
                 if (region.alias_group != null) {
                     aliases.computeIfAbsent(region.alias_group, ignored -> new ArrayList<>()).add(region);
                 }
@@ -519,6 +646,37 @@ public class RunP1MEMachine extends GhidraScript {
             Register register = language.getRegister(name);
             if (register == null) throw new IllegalArgumentException("unknown processor register: " + name);
             thread.getState().setVar(register, bytes(value, register.getNumBytes(), language.isBigEndian()));
+        }
+
+        void noteBoundedCall(PcodeThread<byte[]> thread, Instruction instruction) {
+            // A jarl into a rewritten loop saves the caller's frame. The
+            // back-edge returns there after one iteration, as the host does.
+            if (!"jarl".equals(instruction.getMnemonicString())) return;
+            long next = pc(thread);
+            if (!boundedEntries.contains(next) || next == scenarioEntry) return;
+            long[] saved = new long[1 + BOUNDED_SAVED.length];
+            saved[0] = processorRegister(thread, "sp");
+            for (int index = 0; index < BOUNDED_SAVED.length; index++) {
+                saved[index + 1] = processorRegister(thread, BOUNDED_SAVED[index]);
+            }
+            boundedFrames.computeIfAbsent(next, key -> new ArrayDeque<>()).push(saved);
+        }
+
+        boolean returnBoundedCallee(PcodeThread<byte[]> thread) {
+            long[] edge = boundedEdges.get(pc(thread));
+            if (edge == null || edge[1] == scenarioEntry || !trace.executed.contains(edge[0])) {
+                return false;
+            }
+            ArrayDeque<long[]> frames = boundedFrames.get(edge[1]);
+            if (frames == null || frames.isEmpty()) return false;
+            long[] saved = frames.pop();
+            trace.shortcut("bounded-callee-return", pc(thread), saved[saved.length - 1]);
+            processorRegister(thread, "sp", saved[0]);
+            for (int index = 0; index < BOUNDED_SAVED.length; index++) {
+                processorRegister(thread, BOUNDED_SAVED[index], saved[index + 1]);
+            }
+            thread.overrideCounter(memorySpace.getAddress(saved[saved.length - 1]));
+            return true;
         }
 
         void requestInterrupt(PcodeThread<byte[]> thread, int channel) {
@@ -695,7 +853,20 @@ public class RunP1MEMachine extends GhidraScript {
                     throw fault("read-prohibited", thread, address, size, "read",
                         region.evidence, "region is not software-readable: " + region.name);
                 }
+                if ("dataflash".equals(region.name)
+                        && (registerValue(registersByName.get("DFECCCTL")) != 0
+                            || registerValue(registersByName.get("DFTSTCTL")) != 0)) {
+                    throw fault("unsupported-dataflash-ecc-mode", thread, address, size, "read",
+                        "manual:R01UH0585EJ0120 Tables31.18 and31.25",
+                        "DataFlash payload reads are modeled only with normal ECC enabled and test mode disabled");
+                }
                 trace.access("read", pc(thread), address, size, region.evidence);
+                return;
+            }
+            if (peripheralFile) {
+                // Scenario checks compare these bytes. Keeping them out of the
+                // access trace reserves its capacity for RAM traffic.
+                scriptPeripheralPoll(thread, address, size);
                 return;
             }
             RegisterDef register = register(address, size);
@@ -711,6 +882,14 @@ public class RunP1MEMachine extends GhidraScript {
                 throw fault("read-prohibited", thread, address, size, "read",
                     register.evidence, "register is not software-readable: " + register.name);
             }
+            if ("dcra-seed".equals(register.trigger)) {
+                RegisterDef control = requiredRegister(register.name, "mode", register.mode_register);
+                if (registerValue(control) != 0) {
+                    throw fault("unsupported-dcra-mode", thread, control.address,
+                        control.size, "read", control.evidence,
+                        "COUT read XOR is modeled only for POL=00 ISZ=00");
+                }
+            }
             trace.access("read", pc(thread), address, size, register.evidence);
         }
 
@@ -722,10 +901,20 @@ public class RunP1MEMachine extends GhidraScript {
             if (region != null) {
                 if (!region.access.contains("w") || region.name.startsWith("codeflash")
                         || region.name.equals("dataflash")) {
+                    // The bytes replace a jmp [lp] stub (halfword 0x007f) and then
+                    // read it back. Every other codeflash store stays prohibited.
+                    if (region.name.startsWith("codeflash") && size == 2 && (address & 1) == 0
+                            && unsigned(memory(thread, address, 2)) == 0x7fL) {
+                        trace.access("write", pc(thread), address, size, region.evidence);
+                        return;
+                    }
                     throw fault("write-prohibited", thread, address, size, "write",
                         region.evidence, "direct write prohibited for region: " + region.name);
                 }
                 trace.access("write", pc(thread), address, size, region.evidence);
+                return;
+            }
+            if (peripheralFile) {
                 return;
             }
             RegisterDef register = register(address, size);
@@ -744,10 +933,73 @@ public class RunP1MEMachine extends GhidraScript {
             validateDeviceWrite(thread, register, value);
             if ((register.fifo_index != null && receiveFifos.containsKey(register.fifo_index)
                     && receiveFifos.get(register.fifo_index).status == register)
-                    || ("intc_eic".equals(register.behavior) && register.reset != null)) {
+                    || ("intc_eic".equals(register.behavior) && register.reset != null)
+                    || "faci-address".equals(register.trigger)
+                    || "faci-dataflash-mode".equals(register.trigger)
+                    || "dataflash-ecc-control".equals(register.trigger)
+                    || "dataflash-ecc-test".equals(register.trigger)
+                    || "flmd-control".equals(register.trigger)) {
                 registerBeforeWrite = unsigned(memory(thread, register.address, register.size));
             }
             trace.access("write", pc(thread), address, size, register.evidence);
+        }
+
+        void scriptIcctrl(PcodeThread<byte[]> thread) {
+            long value = processorRegister(thread, "ICCTRL");
+            if ((value & 0x100L) == 0) {
+                icctrlBusyReads = 0;
+                return;
+            }
+            icctrlBusyReads += 1;
+            if (icctrlBusyReads != ICCTRL_BUSY_READS) return;
+            processorRegister(thread, "ICCTRL", value & ~0x100L);
+            icctrlBusyReads = 0;
+        }
+
+        void completeCountedDelay(PcodeThread<byte[]> thread) {
+            long pc = pc(thread);
+            long exit = pc == 0x7210L ? 0x721cL : pc == 0x71c70L ? 0x71c7cL : pc == 0x71c88L ? 0x71c94L : -1L;
+            if (exit < 0) return;
+            trace.shortcut("counted-delay", pc, exit);
+            processorRegister(thread, "r12", 0);
+            processorRegister(thread, "r13", 0);
+            long psw = processorRegister(thread, "PSW");
+            processorRegister(thread, "PSW", (psw & ~0xfL) | 0x9L);
+            thread.overrideCounter(language.getDefaultSpace().getAddress(exit));
+        }
+
+        void scriptPeripheralPoll(PcodeThread<byte[]> thread, long address, int size) {
+            if (peripheralPollBusy || size <= 0 || size > 4) return;
+            if (Long.compareUnsigned(address, 0xff000000L) < 0
+                    || (Long.compareUnsigned(address, 0xff200000L) >= 0
+                        && Long.compareUnsigned(address, 0xff208000L) < 0)) {
+                return;
+            }
+            int count = peripheralPolls.getOrDefault(address, 0) + 1;
+            peripheralPolls.put(address, count);
+            if (count != PERIPHERAL_POLL_READS
+                    && !(size == 1 && count == PERIPHERAL_POLL_READS * 2)) return;
+            peripheralPollBusy = true;
+            try {
+                byte[] current;
+                try {
+                    current = memory(thread, address, size);
+                } catch (RuntimeException ex) {
+                    current = new byte[size];
+                }
+                boolean nonzero = false;
+                for (byte piece : current) {
+                    if (piece != 0) nonzero = true;
+                }
+                byte[] next = new byte[size];
+                // A byte is all-ones, then zero. A word still flips.
+                if (size == 1)
+                    Arrays.fill(next, count == PERIPHERAL_POLL_READS ? (byte) 0xff : (byte) 0);
+                else if (!nonzero) Arrays.fill(next, (byte) 0xff);
+                setMemory(address, next);
+            } finally {
+                peripheralPollBusy = false;
+            }
         }
 
         void resetRegion(RegionDef region, String resetClass) {
@@ -831,27 +1083,69 @@ public class RunP1MEMachine extends GhidraScript {
 
         void validateDeviceWrite(PcodeThread<byte[]> thread, RegisterDef register,
                                  byte[] value) {
+            if ("flmd".equals(register.behavior)) {
+                long incoming = unsigned(value);
+                boolean valid = "flmd-command".equals(register.trigger)
+                    ? flmdStage == 0 && incoming == 0xa5
+                    : "flmd-control".equals(register.trigger)
+                        && (flmdStage == 1 && incoming <= 1
+                            || flmdStage == 2 && incoming == (flmdDesired ^ 0xffffffffL)
+                            || flmdStage == 3 && incoming == flmdDesired);
+                if (!valid) {
+                    throw fault("unsupported-flmd-sequence", thread, register.address,
+                        value.length, "write", register.evidence,
+                        "only uninterrupted A5/value/full-word-inverse/value writes are modeled; malformed-sequence error timing is not modeled");
+                }
+            }
+            if ("dcra".equals(register.behavior)) {
+                RegisterDef control = "dcra-control".equals(register.trigger) ? register
+                    : requiredRegister(register.name, "mode", register.mode_register);
+                long mode = control == register ? unsigned(value) : registerValue(control);
+                if (mode != 0) {
+                    throw fault("unsupported-dcra-mode", thread, control.address,
+                        control.size, "write", control.evidence,
+                        "only DCRA1 POL=00 ISZ=00 is modeled; reserved bits must be zero");
+                }
+                if ("dcra-input".equals(register.trigger)) {
+                    if (!dcraSeeded) {
+                        throw fault("uninitialized-dcra-seed", thread, register.address,
+                            value.length, "write", register.evidence,
+                            "DCRAnCOUT must be explicitly seeded before the first input word");
+                    }
+                    RegisterDef output = requiredRegister(register.name, "status", register.status_register);
+                    memory(thread, output.address, output.size);
+                }
+            }
             if ("faci-command".equals(register.trigger)) {
-                int command = value[0] & 0xff;
-                if (command != 0x50) {
-                    throw fault("unsupported-faci-command", thread, register.address,
-                        value.length, "write", register.evidence,
-                        String.format("FACI command 0x%02X has no implemented state transition",
-                            command));
-                }
+                validateFaciWrite(thread, register, value);
+            }
+            if ("faci-address".equals(register.trigger)) {
                 RegisterDef status = requiredRegister(register.name, "status", register.status_register);
-                long statusValue = unsigned(memory(thread, status.address, status.size));
-                if ((statusValue & FSTATR_FRDY) == 0) {
-                    throw fault("faci-not-ready", thread, register.address,
+                memory(thread, status.address, status.size);
+            }
+            if ("faci-dataflash-mode".equals(register.trigger)) {
+                RegisterDef status = requiredRegister(register.name, "status", register.status_register);
+                long previous = unsigned(memory(thread, register.address, register.size));
+                long incoming = unsigned(value);
+                if ((unsigned(memory(thread, status.address, status.size)) & FSTATR_FRDY) != 0
+                        && (previous != 0 && previous != 0x80
+                            || (incoming >>> 8) == 0xaa
+                                && (incoming & 0xff) != 0 && (incoming & 0xff) != 0x80)) {
+                    throw fault("unsupported-faci-mode", thread, register.address,
                         value.length, "write", register.evidence,
-                        "FACI status-clear command requires FSTATR.FRDY=1");
+                        "mode transitions are bounded to read/DataFlash P/E; CodeFlash/FWE and illegal-mode errors are not modeled");
                 }
-                RegisterDef accessStatus = requiredRegister(
-                    register.name, "access-status", register.access_register);
-                RegisterDef commandHistory = requiredRegister(
-                    register.name, "history", register.history_register);
-                memory(thread, accessStatus.address, accessStatus.size);
-                memory(thread, commandHistory.address, commandHistory.size);
+            }
+            if ("faci-normal-emulation".equals(register.trigger)
+                    && (unsigned(value) != 0 || unsigned(memory(thread, register.address, register.size)) != 0)) {
+                throw fault("unsupported-faci-emulation", thread, register.address,
+                    value.length, "write", register.evidence,
+                    "only unchanged normal FLEMU mode is modeled; OCD write permission is not inferred");
+            }
+            if ("dataflash-read-cycle".equals(register.trigger) && (unsigned(value) & 0xf) < 3) {
+                throw fault("prohibited-dataflash-read-cycle", thread, register.address,
+                    value.length, "write", register.evidence,
+                    "EEPRDCYCL codes0..2 are prohibited; no timing behavior is synthesized");
             }
             if ("icus-command".equals(register.trigger) && (unsigned(value) & 0xffff) != 5) {
                 throw fault("unsupported-icus-command", thread, register.address,
@@ -1112,6 +1406,7 @@ public class RunP1MEMachine extends GhidraScript {
                     case "can-rx": receiveFrame(thread, input); break;
                     case "interrupt": requestInterrupt(thread, input.channel); break;
                     case "memory-write": externalMemoryWrite(input); break;
+                    case "register-input": externalRegisterInput(input); break;
                     default: throw new IllegalArgumentException("unknown external event " + input.kind);
                 }
             }
@@ -1155,9 +1450,83 @@ public class RunP1MEMachine extends GhidraScript {
             });
         }
 
+        void validateFaciWrite(PcodeThread<byte[]> thread, RegisterDef register, byte[] value) {
+            int command = value[0] & 0xff;
+            if (command != 0x50 && command != 0x71 && command != 0xd0 && command != 0xb3) {
+                throw fault("unsupported-faci-command", thread, register.address,
+                    value.length, "write", register.evidence,
+                    String.format("FACI command 0x%02X has no implemented state transition", command));
+            }
+            if ((command == 0xd0 && faciPendingCommand != 0x71)
+                    || (command != 0xd0 && faciPendingCommand != 0)) {
+                throw fault("unsupported-faci-sequence", thread, register.address,
+                    value.length, "write", register.evidence,
+                    "supported sequences are 50, B3 and DataFlash blank-check 71,D0; stop during a partial prefix is not modeled");
+            }
+            RegisterDef status = requiredRegister(register.name, "status", register.status_register);
+            if (command != 0xb3
+                    && (unsigned(memory(thread, status.address, status.size)) & FSTATR_FRDY) == 0) {
+                throw fault("faci-not-ready", thread, register.address,
+                    value.length, "write", register.evidence, "FACI command requires FSTATR.FRDY=1");
+            }
+            RegisterDef access = requiredRegister(register.name, "access-status", register.access_register);
+            RegisterDef history = requiredRegister(register.name, "history", register.history_register);
+            long accessValue = unsigned(memory(thread, access.address, access.size));
+            memory(thread, history.address, history.size);
+            RegisterDef control = requiredRegister(register.name, "control", register.control_register);
+            long controlValue = unsigned(memory(thread, control.address, control.size)) & 0x81;
+            if (command == 0x50 || command == 0xb3) {
+                if (controlValue != 1 && controlValue != 0x80) {
+                    throw fault("unsupported-faci-mode", thread, register.address,
+                        value.length, "write", register.evidence,
+                        "FACI status clear/forced stop requires CodeFlash or DataFlash P/E mode");
+                }
+                if (command == 0xb3) {
+                    RegisterDef emulation = requiredRegister(
+                        register.name, "emulation", register.emulation_register);
+                    if (unsigned(memory(thread, emulation.address, emulation.size)) != 0) {
+                        throw fault("unsupported-faci-emulation", thread, register.address,
+                            value.length, "write", register.evidence,
+                            "forced stop is bounded to normal FLEMU mode");
+                    }
+                }
+                return;
+            }
+            RegisterDef mode = requiredRegister(register.name, "mode", register.mode_register);
+            RegisterDef emulation = requiredRegister(register.name, "emulation", register.emulation_register);
+            RegisterDef start = requiredRegister(register.name, "start-address", register.start_address_register);
+            RegisterDef end = requiredRegister(register.name, "end-address", register.end_address_register);
+            RegisterDef enable = requiredRegister(register.name, "enable", register.enable_register);
+            RegisterDef secondaryEnable = requiredRegister(
+                register.name, "secondary-enable", register.secondary_enable_register);
+            if ((accessValue & FASTAT_CMDLK) != 0
+                    || controlValue != 0x80
+                    || unsigned(memory(thread, mode.address, mode.size)) != 0
+                    || unsigned(memory(thread, emulation.address, emulation.size)) != 0
+                    || unsigned(memory(thread, enable.address, enable.size)) != 1
+                    || unsigned(memory(thread, secondaryEnable.address, secondaryEnable.size)) != 1) {
+                throw fault("unsupported-faci-mode", thread, register.address,
+                    value.length, "write", register.evidence,
+                    "blank-check submission requires both FHVE enables, unlocked DataFlash P/E, incremental, normal mode");
+            }
+            if (command == 0x71) return; // Address validation belongs to complete command submission.
+            long first = unsigned(memory(thread, start.address, start.size)) & 0x7fffc;
+            long last = unsigned(memory(thread, end.address, end.size)) & 0x7fffc;
+            if (dataFlash == null) throw new IllegalStateException("FACI blank check lacks DataFlash region");
+            if (first > last || last + 4 > dataFlash.size || last - first + 4 > 0x10000) {
+                throw fault("unsupported-faci-range", thread, register.address,
+                    value.length, "write", register.evidence,
+                    "blank-check range must be ordered and contained in the registered DataFlash region");
+            }
+        }
+
         void handleFaciWrite(PcodeThread<byte[]> thread, RegisterDef register, byte[] value) {
             int command = value[0] & 0xff;
-            if (command != 0x50) {
+            if (command == 0x71) {
+                faciPendingCommand = command;
+                return;
+            }
+            if (command != 0x50 && command != 0xd0 && command != 0xb3) {
                 throw new IllegalStateException("FACI write validation was bypassed");
             }
             RegisterDef statusRegister = requiredRegister(
@@ -1167,26 +1536,47 @@ public class RunP1MEMachine extends GhidraScript {
             RegisterDef historyRegister = requiredRegister(
                 register.name, "history", register.history_register);
             long status = unsigned(memory(statusRegister.address, statusRegister.size));
-            long accessStatus = unsigned(memory(accessRegister.address, accessRegister.size));
-            long commandHistory = unsigned(memory(historyRegister.address, historyRegister.size));
-            long nextStatus = status & ~FSTATR_STATUS_CLEAR_MASK;
-            if ((accessStatus & FASTAT_ACCESS_ERROR_MASK) != 0) {
-                nextStatus |= FSTATR_ILGLERR;
+            JsonArray sequence = new JsonArray();
+            if (command == 0xd0) {
+                sequence.add(faciPendingCommand);
+                setRegisterValue(historyRegister.name, 0xd071);
+                setRegisterValue(statusRegister.name, status & ~FSTATR_FRDY);
+                // Completion, blankness and first-nonblank address require external inputs.
             }
-            long nextAccessStatus = (nextStatus & FSTATR_COMMAND_LOCK_MASK) != 0
-                ? accessStatus | FASTAT_CMDLK : accessStatus & ~FASTAT_CMDLK;
-            faciSequence.add(command);
-            setRegisterValue(historyRegister.name, (command << 8) | ((commandHistory >>> 8) & 0xff));
-            setRegisterValue(statusRegister.name, nextStatus);
-            setRegisterValue(accessRegister.name, nextAccessStatus);
+            else {
+                long accessStatus = unsigned(memory(accessRegister.address, accessRegister.size));
+                long commandHistory = unsigned(memory(historyRegister.address, historyRegister.size));
+                long nextStatus;
+                long nextAccessStatus;
+                if (command == 0xb3) {
+                    // Manual4.2/4.7: clear at acceptance, but never synthesize completion.
+                    // ILGLERR is temporarily clear even with CFAE/DFAE; CMDLK persists.
+                    nextStatus = status & ~FSTATR_FORCED_STOP_CLEAR_MASK;
+                    nextAccessStatus = (accessStatus & FASTAT_ACCESS_ERROR_MASK) != 0
+                        ? accessStatus : accessStatus & ~FASTAT_CMDLK;
+                    if ((status & FSTATR_CORRECTION_MASK) != 0) nextAccessStatus &= ~1L;
+                }
+                else {
+                    nextStatus = status & ~FSTATR_STATUS_CLEAR_MASK;
+                    if ((accessStatus & FASTAT_ACCESS_ERROR_MASK) != 0) nextStatus |= FSTATR_ILGLERR;
+                    nextAccessStatus = (nextStatus & FSTATR_COMMAND_LOCK_MASK) != 0
+                        ? accessStatus | FASTAT_CMDLK : accessStatus & ~FASTAT_CMDLK;
+                }
+                setRegisterValue(historyRegister.name, (command << 8) | ((commandHistory >>> 8) & 0xff));
+                setRegisterValue(statusRegister.name, nextStatus);
+                setRegisterValue(accessRegister.name, nextAccessStatus);
+            }
+            sequence.add(command);
             JsonObject event = new JsonObject();
             event.addProperty("kind", register.trigger);
             event.addProperty("pc", hex32(pc(thread)));
             event.addProperty("command", String.format("0x%02X", command));
-            event.add("sequence", GSON.toJsonTree(faciSequence));
+            event.add("sequence", sequence);
+            event.addProperty("transition", command == 0xd0 ? "blank-check-started"
+                : command == 0xb3 ? "forced-stop-started" : "status-cleared");
             event.addProperty("evidence", register.source_ref);
             trace.deviceEvents.add(event);
-            faciSequence.clear();
+            faciPendingCommand = 0;
         }
 
         void handleIcusWrite(PcodeThread<byte[]> thread, RegisterDef register, byte[] value) {
@@ -1205,6 +1595,17 @@ public class RunP1MEMachine extends GhidraScript {
             setRegisterValue(secondary.name, 0);
         }
 
+        void handleDcraInput(RegisterDef register, byte[] value) {
+            RegisterDef output = requiredRegister(register.name, "status", register.status_register);
+            // R01UH0585EJ0120 pp2845–2846,2850–2851: LSB first, reflected
+            // 04C11DB7 polynomial; COUT reads expose internal state XOR FFFFFFFF.
+            int crc = ~(int) registerValue(output) ^ (int) unsigned(value);
+            for (int bit = 0; bit < 32; bit++) {
+                crc = (crc >>> 1) ^ ((crc & 1) != 0 ? 0xedb88320 : 0);
+            }
+            setRegisterValue(output.name, Integer.toUnsignedLong(~crc));
+        }
+
         void handleRegisterWrite(PcodeThread<byte[]> thread, long address, int size, byte[] value) {
             RegisterDef register = register(address, size);
             if (register == null) return;
@@ -1217,8 +1618,76 @@ public class RunP1MEMachine extends GhidraScript {
             handleReceiveWrite(thread, register, value);
             if (register.trigger == null) return;
             switch (register.trigger) {
+                case "flmd-command":
+                    flmdStage = 1;
+                    break;
+                case "flmd-control":
+                    if (flmdStage == 3) {
+                        flmdStage = 0;
+                        RegisterDef status = requiredRegister(register.name, "status", register.status_register);
+                        setRegisterValue(status.name, 0);
+                    }
+                    else {
+                        if (flmdStage == 1) flmdDesired = unsigned(value);
+                        flmdStage++;
+                        setRegisterValue(register.name, registerBeforeWrite);
+                    }
+                    break;
+                case "dcra-control":
+                    break; // Only unchanged CTL=00 is accepted; it does not reset the CRC.
+                case "dcra-seed":
+                    // Writes initialize raw state; reads apply the hardware's final XOR.
+                    setRegisterValue(register.name, unsigned(value) ^ 0xffffffffL);
+                    dcraSeeded = true;
+                    break;
+                case "dcra-input": handleDcraInput(register, value); break;
                 case "rscfd-transmit": handleRscfdWrite(thread, register, value); break;
                 case "faci-command": handleFaciWrite(thread, register, value); break;
+                case "faci-address":
+                    RegisterDef addressStatus = requiredRegister(register.name, "status", register.status_register);
+                    setRegisterValue(register.name, (registerValue(addressStatus) & FSTATR_FRDY) != 0
+                        ? unsigned(value) & ~3L : registerBeforeWrite);
+                    break;
+                case "faci-dataflash-mode": {
+                    RegisterDef modeStatus = requiredRegister(register.name, "status", register.status_register);
+                    long incoming = unsigned(value);
+                    long next = registerBeforeWrite;
+                    if ((registerValue(modeStatus) & FSTATR_FRDY) != 0) {
+                        next = (incoming >>> 8) == 0xaa && registerBeforeWrite == 0
+                            ? incoming & 0x80 : 0;
+                    }
+                    setRegisterValue(register.name, next);
+                    break;
+                }
+                case "faci-normal-emulation":
+                    break; // Validated zero-to-zero write; no OCD-mode behavior is inferred.
+                case "faci-enable":
+                    setRegisterValue(register.name, unsigned(value) & 1);
+                    break;
+                case "dataflash-ecc-clear":
+                    // Only writes covering the low ERRCLR bit act on status.
+                    if (address == register.address && (unsigned(value) & 1) != 0) {
+                        RegisterDef status = requiredRegister(
+                            register.name, "status", register.status_register);
+                        setRegisterValue(status.name, registerValue(status) & ~3L);
+                    }
+                    break;
+                case "dataflash-read-cycle":
+                    setRegisterValue(register.name, unsigned(value) & 0xf);
+                    break;
+                case "dataflash-ecc-control":
+                case "dataflash-ecc-test": {
+                    long incoming = unsigned(value);
+                    long writable = "dataflash-ecc-control".equals(register.trigger) ? 3 : 1;
+                    // Upper-halfword writes cannot carry the low-halfword protection key.
+                    long next = address == register.address && (incoming & 0xc000) == 0x4000
+                        ? incoming & writable : registerBeforeWrite;
+                    setRegisterValue(register.name, next & writable);
+                    break;
+                }
+                case "dataflash-ecc-notification":
+                    setRegisterValue(register.name, registerValue(register) & 7);
+                    break;
                 case "icus-command": handleIcusWrite(thread, register, value); break;
                 case "tauj-start":
                 case "tauj-stop": handleTaujWrite(thread, register, value); break;
@@ -1246,13 +1715,49 @@ public class RunP1MEMachine extends GhidraScript {
                     }
                 }
             }
-            handleRegisterWrite(thread, address, size, value);
+            if (!peripheralFile) handleRegisterWrite(thread, address, size, value);
         }
 
         void initializeResetRegisters() {
+            dcraSeeded = false;
+            flmdStage = 0;
             for (RegisterDef register : registers) {
                 if (register.reset == null) continue;
                 setMemory(register.address, bytes(register.reset, register.size, language.isBigEndian()));
+            }
+        }
+
+        void clearPreparedFrame(PcodeThread<byte[]> thread, Instruction instruction) {
+            // Same rule as the harness: a prepare frame inside the stack window
+            // is this call's locals, so an earlier frame's bytes are not still there.
+            if (entrySp < 0) return;
+            byte[] raw;
+            try {
+                raw = instruction.getBytes();
+            }
+            catch (MemoryAccessException exc) {
+                return;
+            }
+            if (raw == null || raw.length < 2) return;
+            int slots = ((raw[0] & 0xff) | ((raw[1] & 0xff) << 8)) >> 1 & 0x1f;
+            if (slots == 0) return;
+            long sp = processorRegister(thread, "sp");
+            long lo = entrySp - 0x1000L;
+            long hi = entrySp + 0x200L;
+            for (int offset = 0; offset < (slots << 2); offset++) {
+                long addr = (sp + offset) & 0xffffffffL;
+                if (Long.compareUnsigned(addr, lo) < 0 || Long.compareUnsigned(addr, hi) >= 0)
+                    continue;
+                int fill = -1;
+                for (long[] row : scenarioFills) {
+                    if (Long.compareUnsigned(addr, row[0]) >= 0
+                            && Long.compareUnsigned(addr, row[1]) < 0) {
+                        fill = (int) row[2];
+                        break;
+                    }
+                }
+                if (fill < 0) continue;
+                setMemory(addr, new byte[] {(byte) fill});
             }
         }
 
@@ -1292,12 +1797,68 @@ public class RunP1MEMachine extends GhidraScript {
             trace.deviceEvents.add(event);
         }
 
+        void externalRegisterInput(ExternalEvent input) {
+            RegisterDef register = registersByName.get(input.register);
+            if (register == null || !register.access.contains("r")) {
+                throw new IllegalArgumentException(
+                    "external register-input requires a mapped readable device register: "
+                    + input.register);
+            }
+            if ("dcra".equals(register.behavior)) {
+                throw new IllegalArgumentException(
+                    "DCRA has no external input pins; register-input cannot inject CRC state: "
+                    + input.register);
+            }
+            if ("flmd".equals(register.behavior)) {
+                throw new IllegalArgumentException(
+                    "register-input cannot inject protected FLMD control or sequence status: "
+                    + input.register);
+            }
+            long value = parseUnsigned(input.value);
+            long maximum = register.size >= 4 ? 0xffffffffL
+                : (1L << (register.size * 8)) - 1;
+            if (Long.compareUnsigned(value, maximum) > 0) {
+                throw new IllegalArgumentException(
+                    "external register-input exceeds register width: " + input.register);
+            }
+            setRegisterValue(register.name, value);
+            JsonObject event = new JsonObject();
+            event.addProperty("kind", "external-register-input");
+            event.addProperty("register", register.name);
+            event.addProperty("address", hex32(register.address));
+            event.addProperty("value", hex32(value));
+            event.addProperty("scheduler_tick", trace.instructions);
+            event.addProperty("evidence", input.evidence);
+            trace.deviceEvents.add(event);
+        }
+
+        boolean overlapsRegion(long address, int size) {
+            long end = address + Integer.toUnsignedLong(size);
+            for (RegionDef candidate : regions) {
+                if (Long.compareUnsigned(address, candidate.end_exclusive) < 0
+                        && Long.compareUnsigned(candidate.start, end) < 0) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         void initializeMemory(long address, byte[] value, String evidence) {
             RegionDef region = region(address, value.length);
             RegisterDef register = register(address, value.length);
             if (region == null && register == null) {
-                throw new IllegalArgumentException("scenario initializes unmapped state at "
-                    + hex32(address) + " size=" + value.length);
+                if (!peripheralFile || overlapsRegion(address, value.length)) {
+                    throw new IllegalArgumentException("scenario initializes unmapped state at "
+                        + hex32(address) + " size=" + value.length);
+                }
+                setMemory(address, value);
+                JsonObject peripheral = new JsonObject();
+                peripheral.addProperty("kind", "scenario-initialization");
+                peripheral.addProperty("address", hex32(address));
+                peripheral.addProperty("size", value.length);
+                peripheral.addProperty("evidence", evidence == null ? "scenario" : evidence);
+                trace.deviceEvents.add(peripheral);
+                return;
             }
             if (region != null
                     && (region.name.startsWith("codeflash") || region.name.equals("dataflash"))) {
@@ -1368,9 +1929,21 @@ public class RunP1MEMachine extends GhidraScript {
         @Override
         public void beforeExecuteInstruction(PcodeThread<byte[]> thread,
                                              Instruction instruction, PcodeProgram program) {
+            model.trace.enterInstruction(instruction.getAddress().getOffset());
             model.requireExecute(
                 thread, instruction.getAddress().getOffset(), instruction.getLength());
+            thread.getState().getVar(model.memorySpace, instruction.getAddress().getOffset(),
+                instruction.getLength(), true, Reason.EXECUTE_READ);
             String mnemonic = instruction.getMnemonicString();
+            if ("stsr".equals(mnemonic)) {
+                for (int operand = 0; operand < instruction.getNumOperands(); operand++) {
+                    Register system = instruction.getRegister(operand);
+                    if (system != null && "ICCTRL".equals(system.getName())) {
+                        model.scriptIcctrl(thread);
+                        break;
+                    }
+                }
+            }
             interruptReturn = "eiret".equals(mnemonic);
             automaticPriorityReturn = interruptReturn
                 && (model.processorRegister(thread, "PSW") & 0x40) == 0
@@ -1428,8 +2001,12 @@ public class RunP1MEMachine extends GhidraScript {
                 case "synci" -> model.trace.sync("SYNCI");
                 default -> { }
             }
+            if ("prepare".equals(instruction.getMnemonicString())) {
+                model.clearPreparedFrame(thread, instruction);
+            }
             model.trace.instructions++;
             model.trace.executed.add(instruction.getAddress().getOffset());
+            model.noteBoundedCall(thread, instruction);
             model.trace.recentPcs.add(instruction.getAddress().getOffset());
             if (model.trace.recentPcs.size() > 16) model.trace.recentPcs.remove(0);
             model.dispatchDueEvents();
@@ -1439,6 +2016,13 @@ public class RunP1MEMachine extends GhidraScript {
         public <A, U> AddressSetView readUninitialized(PcodeThread<byte[]> thread,
                 PcodeExecutorStatePiece<A, U> piece, AddressSetView set, Reason reason) {
             Address reinitAddress = set.getMinAddress();
+            // The decoder buffers ahead. Returning the unchanged set lets the
+            // byte state expose only its initialized prefix, without filling RAM.
+            // The complete decoded instruction is checked again before execution.
+            if (reason == Reason.EXECUTE_DECODE && reinitAddress != null
+                    && reinitAddress.getAddressSpace().equals(model.memorySpace)) {
+                return set;
+            }
             if (reinitAddress != null && reason == Reason.RE_INIT
                     && reinitAddress.getAddressSpace().isRegisterSpace()) {
                 PcodeExecutorStatePiece<A, byte[]> concrete =
@@ -1457,6 +2041,31 @@ public class RunP1MEMachine extends GhidraScript {
                         new byte[(int) reinitLength]);
                 }
                 return set;
+            }
+            if (model.peripheralFile && reason != Reason.INSPECT && reinitAddress != null
+                    && reinitAddress.getAddressSpace().equals(model.memorySpace)) {
+                boolean outside = set.getNumAddresses() > 0;
+                for (AddressRange range : set.getAddressRanges()) {
+                    long rangeLength = range.getLength();
+                    if (rangeLength <= 0 || rangeLength > 4096
+                            || model.region(range.getMinAddress().getOffset(), (int) rangeLength) != null) {
+                        outside = false;
+                        break;
+                    }
+                }
+                if (outside) {
+                    PcodeExecutorStatePiece<A, byte[]> concrete =
+                        PcodeStateCallbacks.checkValueDomain(piece, byte[].class);
+                    if (concrete == null) {
+                        throw new IllegalStateException(
+                            "RH850 machine requires concrete memory state");
+                    }
+                    for (AddressRange range : set.getAddressRanges()) {
+                        int rangeLength = (int) range.getLength();
+                        concrete.setVar(range.getMinAddress(), rangeLength, false, new byte[rangeLength]);
+                    }
+                    return set;
+                }
             }
             Address address = set.getMinAddress();
             if (address == null) {
@@ -1619,7 +2228,8 @@ public class RunP1MEMachine extends GhidraScript {
     }
 
     private ResolvedEntry resolveEntry(
-            EntrySelector selector, byte[] codeflash, long imageBase) throws Exception {
+            EntrySelector selector, byte[] codeflash, long imageBase,
+            Model model, PcodeThread<byte[]> thread, Scenario scenario) throws Exception {
         if (selector == null || selector.role == null || selector.role.isBlank()) {
             throw new IllegalArgumentException("entry selector is incomplete");
         }
@@ -1629,18 +2239,48 @@ public class RunP1MEMachine extends GhidraScript {
             }
             long resolved = parseUnsigned(selector.address);
             if (resolved < imageBase || resolved >= imageBase + codeflash.length) {
-                throw new IllegalArgumentException(
-                    "resolved entry leaves CodeFlash: " + hex32(resolved));
-            }
-            Instruction instruction = currentProgram.getListing().getInstructionAt(
-                currentProgram.getLanguage().getDefaultSpace().getAddress(resolved));
-            if (instruction == null) {
-                throw new IllegalArgumentException(
-                    "resolved entry is not an instruction: " + hex32(resolved));
+                RegionDef region = model.region(resolved, 2);
+                int available = 0;
+                for (MemoryInit init : scenario.memory) {
+                    long base = parseUnsigned(init.address);
+                    int size = init.hex == null ? init.size : parseHex(init.hex).length;
+                    if (resolved >= base && resolved < base + size) {
+                        available = init.hex == null ? 0 : (int) Math.min(16, base + size - resolved);
+                    }
+                }
+                if (region == null || !region.executable || !"rw".equals(region.access)
+                        || available < 2) {
+                    throw new IllegalArgumentException(
+                        "resolved entry lacks initialized executable RAM: " + hex32(resolved));
+                }
+                byte[] window = model.memory(thread, resolved, available);
+                SleighLanguage language = (SleighLanguage) currentProgram.getLanguage();
+                InstructionPrototype prototype = language.parse(
+                    new ByteMemBufferImpl(language.getDefaultSpace().getAddress(resolved),
+                        window, language.isBigEndian()),
+                    new ProcessorContextImpl(language), false);
+                int length = prototype.getLength();
+                if (length > available || model.region(resolved, length) != region) {
+                    throw new IllegalArgumentException(
+                        "resolved RAM entry instruction leaves initialized region: " + hex32(resolved));
+                }
+                String instructionHash = sha256(Arrays.copyOf(window, length));
+                JsonObject proof = new JsonObject();
+                proof.addProperty("role", selector.role);
+                proof.addProperty("scope", selector.scope);
+                proof.addProperty("source", "scenario-initialized executable RAM");
+                proof.addProperty("candidate_count", 1);
+                proof.addProperty("base_address", hex32(resolved));
+                proof.addProperty("offset", 0);
+                proof.addProperty("resolved_address", hex32(resolved));
+                proof.addProperty("matched_code_sha256", instructionHash);
+                proof.addProperty("entry_instruction_sha256", instructionHash);
+                return new ResolvedEntry(resolved, proof);
             }
             int offset = Math.toIntExact(resolved - imageBase);
+            int length = entryInstructionLength(codeflash, imageBase, resolved);
             String instructionHash = sha256(Arrays.copyOfRange(
-                codeflash, offset, offset + instruction.getLength()));
+                codeflash, offset, offset + length));
             JsonObject proof = new JsonObject();
             proof.addProperty("role", selector.role);
             proof.addProperty("scope", selector.scope);
@@ -1676,13 +2316,9 @@ public class RunP1MEMachine extends GhidraScript {
         if (resolved < imageBase || resolved >= imageBase + codeflash.length) {
             throw new IllegalArgumentException("resolved entry leaves CodeFlash: " + hex32(resolved));
         }
-        Instruction entryInstruction = currentProgram.getListing().getInstructionAt(
-            currentProgram.getLanguage().getDefaultSpace().getAddress(resolved));
-        if (entryInstruction == null) {
-            throw new IllegalArgumentException("resolved entry is not an instruction: " + hex32(resolved));
-        }
         int bodyOffset = Math.toIntExact(match.address - imageBase);
         int entryOffset = Math.toIntExact(resolved - imageBase);
+        int entryLength = entryInstructionLength(codeflash, imageBase, resolved);
         JsonObject proof = new JsonObject();
         proof.addProperty("role", selector.role);
         proof.addProperty("scope", selector.scope);
@@ -1694,8 +2330,34 @@ public class RunP1MEMachine extends GhidraScript {
         proof.addProperty("matched_code_sha256", sha256(Arrays.copyOfRange(
             codeflash, bodyOffset, bodyOffset + match.bodySize)));
         proof.addProperty("entry_instruction_sha256", sha256(Arrays.copyOfRange(
-            codeflash, entryOffset, entryOffset + entryInstruction.getLength())));
+            codeflash, entryOffset, entryOffset + entryLength)));
         return new ResolvedEntry(resolved, proof);
+    }
+
+    private int entryInstructionLength(byte[] codeflash, long imageBase, long resolved)
+            throws Exception {
+        Address address = currentProgram.getLanguage().getDefaultSpace().getAddress(resolved);
+        try {
+            Instruction instruction = currentProgram.getListing().getInstructionAt(address);
+            if (instruction != null) {
+                return instruction.getLength();
+            }
+        }
+        catch (DomainObjectException exc) {
+        }
+        SleighLanguage language = (SleighLanguage) currentProgram.getLanguage();
+        int offset = Math.toIntExact(resolved - imageBase);
+        int window = Math.min(16, codeflash.length - offset);
+        if (window <= 0) {
+            throw new IllegalArgumentException(
+                "resolved entry leaves CodeFlash: " + hex32(resolved));
+        }
+        byte[] bytes = Arrays.copyOfRange(codeflash, offset, offset + window);
+        InstructionPrototype prototype = language.parse(
+            new ByteMemBufferImpl(address, bytes, language.isBigEndian()),
+            new ProcessorContextImpl(language),
+            false);
+        return prototype.getLength();
     }
 
 
@@ -1736,6 +2398,9 @@ public class RunP1MEMachine extends GhidraScript {
                 }
                 value = new byte[init.size];
                 Arrays.fill(value, (byte) (init.fill & 0xff));
+                model.scenarioFills.add(new long[] {
+                    address, address + init.size, init.fill & 0xff
+                });
             }
             model.initializeMemory(address, value, init.evidence);
         }
@@ -1745,6 +2410,9 @@ public class RunP1MEMachine extends GhidraScript {
                                     SleighLanguage language, Scenario scenario) throws Exception {
         for (Map.Entry<String, String> row : scenario.registers.entrySet()) {
             setRegister(thread, language, row.getKey(), parseUnsigned(row.getValue()));
+        }
+        if (scenario.registers.containsKey("sp")) {
+            model.entrySp = parseUnsigned(scenario.registers.get("sp"));
         }
         initializeMemoryRows(model, scenario.memory);
         for (ArtifactLoad load : scenario.artifacts) {
@@ -1796,6 +2464,19 @@ public class RunP1MEMachine extends GhidraScript {
                         for (byte b : value) text.append(String.format("%02x", b & 0xff));
                         actual = text.toString();
                         passed = actual.equalsIgnoreCase(check.equals_hex);
+                        break;
+                    }
+                    case "memory-equal": {
+                        if (check.size == null || check.size <= 0) {
+                            throw new IllegalArgumentException("memory-equal check requires positive size");
+                        }
+                        byte[] value = model.emulator.getSharedState().getVar(model.memorySpace,
+                            parseUnsigned(check.address), check.size, true, Reason.INSPECT);
+                        byte[] source = model.emulator.getSharedState().getVar(model.memorySpace,
+                            parseUnsigned(check.source_address), check.size, true, Reason.INSPECT);
+                        passed = java.util.Arrays.equals(value, source);
+                        expected = "equal";
+                        actual = passed ? "equal" : "different";
                         break;
                     }
                     case "sync-count": {
@@ -1859,17 +2540,23 @@ public class RunP1MEMachine extends GhidraScript {
         report.add("recent_pcs", recent);
         report.add("sync_counts", GSON.toJsonTree(trace.syncCounts));
         report.add("memory_accesses", GSON.toJsonTree(trace.memoryAccesses));
+        report.addProperty("trace_lost_address", trace.traceLostAddress);
         report.add("device_events", GSON.toJsonTree(trace.deviceEvents));
+        if (trace.instructionTraceEnabled) {
+            report.addProperty("instruction_trace_semantics",
+                "entered instructions in callback order; instruction is the retired count before "
+                + "entry (terminal fault/halt may not retire); modeled shortcuts do not retire "
+                + "or synthesize instructions and appear separately in instruction_trace_shortcuts");
+            report.add("instruction_trace_shortcuts", GSON.toJsonTree(trace.instructionShortcuts));
+        }
         return report;
     }
 
     private JsonObject runScenario(
             RunContract contract, MachineSpec machineSpec, SleighLanguage language,
-            Scenario scenario, byte[] codeflash, byte[] dataflash) throws Exception {
-        ResolvedEntry resolved = resolveEntry(
-            scenario.entry, codeflash, parseUnsigned(contract.target.codeflash.base));
-        Trace trace = new Trace();
+            Scenario scenario, byte[] codeflash, byte[] dataflash, Trace trace) throws Exception {
         Model model = new Model(language, machineSpec, trace);
+        model.peripheralFile = scenario.peripheral_file;
         Callbacks callbacks = new Callbacks(language, model);
         PcodeEmulator emulator = new PcodeEmulator(language, callbacks) {
             @Override
@@ -1888,6 +2575,9 @@ public class RunP1MEMachine extends GhidraScript {
         initializeMemoryRows(model, scenario.pre_reset_memory);
         model.applyReset(scenario.reset);
         initializeScenario(model, thread, language, scenario);
+        ResolvedEntry resolved = resolveEntry(
+            scenario.entry, codeflash, parseUnsigned(contract.target.codeflash.base),
+            model, thread, scenario);
 
         model.externalEvents = new ArrayList<>(scenario.events);
         model.externalEvents.sort(Comparator.comparingLong(event -> event.after_instructions));
@@ -1895,15 +2585,30 @@ public class RunP1MEMachine extends GhidraScript {
         thread.overrideContextWithDefault();
         Set<Long> stops = new HashSet<>();
         for (String value : scenario.stop_addresses) stops.add(parseUnsigned(value));
+        if (scenario.bounded_entries != null) {
+            for (String value : scenario.bounded_entries) {
+                model.boundedEntries.add(parseUnsigned(value));
+            }
+        }
+        if (scenario.bounded_edges != null) {
+            for (BoundedEdge edge : scenario.bounded_edges) {
+                model.boundedEdges.put(parseUnsigned(edge.pc), new long[] {
+                    parseUnsigned(edge.target), parseUnsigned(edge.entry),
+                });
+            }
+        }
+        model.scenarioEntry = resolved.address;
 
         MachineFault fault = null;
         MachineHalt halt = null;
         try {
             while (trace.instructions < scenario.max_instructions
                     && !stops.contains(thread.getCounter().getOffset())) {
+                if (model.returnBoundedCallee(thread)) continue;
                 model.dispatchDueEvents();
                 model.dispatchExternalEvents(thread);
                 model.deliverInterrupt(thread);
+                model.completeCountedDelay(thread);
                 thread.stepInstruction();
             }
         }
@@ -1958,7 +2663,8 @@ public class RunP1MEMachine extends GhidraScript {
     private void validateScenarioJson(JsonObject scenarioJson) {
         requireKeys(scenarioJson, Set.of("schema", "name", "entry", "max_instructions",
             "stop_addresses", "registers", "memory", "pre_reset_memory", "artifacts", "checks",
-            "expected_fault", "reset", "events"), "scenario");
+            "expected_fault", "reset", "events", "peripheral_file",
+            "bounded_entries", "bounded_edges"), "scenario");
         JsonObject entry = scenarioJson.getAsJsonObject("entry");
         if ("resolved-address".equals(entry.get("scope").getAsString())) {
             requireKeys(entry, Set.of("role", "scope", "address"), "entry selector");
@@ -1974,12 +2680,50 @@ public class RunP1MEMachine extends GhidraScript {
         }
     }
 
+    private void writeBatchReport(Path path, JsonObject batch, List<Trace> traces) throws Exception {
+        try (BufferedWriter output = Files.newBufferedWriter(path, StandardCharsets.UTF_8);
+                JsonWriter writer = new JsonWriter(output)) {
+            writer.setIndent("  ");
+            writer.beginObject();
+            for (Map.Entry<String, JsonElement> field : batch.entrySet()) {
+                writer.name(field.getKey());
+                if (!"reports".equals(field.getKey())) {
+                    GSON.toJson(field.getValue(), writer);
+                    continue;
+                }
+                writer.beginArray();
+                JsonArray reports = field.getValue().getAsJsonArray();
+                for (int index = 0; index < reports.size(); index++) {
+                    writer.beginObject();
+                    for (Map.Entry<String, JsonElement> reportField :
+                            reports.get(index).getAsJsonObject().entrySet()) {
+                        writer.name(reportField.getKey());
+                        GSON.toJson(reportField.getValue(), writer);
+                    }
+                    Trace trace = traces.get(index);
+                    if (trace != null && trace.instructionTraceEnabled) {
+                        writer.name("instruction_trace");
+                        trace.writeInstructionTrace(writer);
+                    }
+                    writer.endObject();
+                }
+                writer.endArray();
+            }
+            writer.endObject();
+            writer.flush();
+            output.newLine();
+        }
+    }
+
     @Override
     protected void run() throws Exception {
         String[] args = getScriptArgs();
-        if (args.length != 2) {
-            throw new IllegalArgumentException("expected contract JSON and report JSON paths");
+        if (args.length < 2 || args.length > 3
+                || (args.length == 3 && !"--instruction-trace".equals(args[2]))) {
+            throw new IllegalArgumentException(
+                "expected contract JSON and report JSON paths [--instruction-trace]");
         }
+        boolean instructionTraceEnabled = args.length == 3;
         Path contractPath = Path.of(args[0]);
         Path reportPath = Path.of(args[1]);
         JsonObject contractJson = GSON.fromJson(Files.readString(contractPath), JsonObject.class);
@@ -2029,12 +2773,14 @@ public class RunP1MEMachine extends GhidraScript {
             ? null : loadImage(contract.target.dataflash, "DataFlash");
 
         JsonArray reports = new JsonArray();
+        List<Trace> traces = new ArrayList<>();
         boolean passed = true;
         for (Scenario scenario : contract.scenarios) {
             JsonObject report;
+            Trace trace = new Trace(instructionTraceEnabled);
             try {
                 report = runScenario(
-                    contract, machineSpec, language, scenario, codeflash, dataflash);
+                    contract, machineSpec, language, scenario, codeflash, dataflash, trace);
             }
             catch (Exception exc) {
                 report = new JsonObject();
@@ -2049,8 +2795,10 @@ public class RunP1MEMachine extends GhidraScript {
                 error.addProperty("type", exc.getClass().getSimpleName());
                 error.addProperty("detail", exc.getMessage());
                 report.add("error", error);
+                trace = null; // Runner errors explicitly fail rather than publish an incomplete trace.
             }
             reports.add(report);
+            traces.add(trace);
             passed &= report.get("passed").getAsBoolean();
         }
         JsonObject batch = new JsonObject();
@@ -2060,7 +2808,7 @@ public class RunP1MEMachine extends GhidraScript {
         batch.addProperty("passed", passed);
         batch.add("reports", reports);
         Files.createDirectories(reportPath.getParent());
-        Files.writeString(reportPath, GSON.toJson(batch) + "\n");
+        writeBatchReport(reportPath, batch, traces);
         println("P1ME_MACHINE_REPORT=" + reportPath);
         println("P1ME_MACHINE_RESULT=" + (passed ? "PASS" : "FAIL"));
         if (!passed) throw new IllegalStateException("P1M-E machine batch failed; see " + reportPath);

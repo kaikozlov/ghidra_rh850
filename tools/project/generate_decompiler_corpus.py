@@ -43,6 +43,48 @@ def normalize_c(code: str) -> str:
     return code.replace("\r\n", "\n").replace("\r", "\n")
 
 
+def canonical_c_locations(raw: dict[str, Any]) -> list[dict[str, Any]]:
+    """Validate exact Unicode character spans and preserve them across LF normalization."""
+    locations = raw["c_locations"]
+    source = raw.get("decompiled_c")
+    if not isinstance(locations, list) or not isinstance(source, str):
+        raise ValueError("c_locations requires an array and string decompiled_c")
+    boundaries: list[int | None] | None = None
+    if "\r" in source:
+        boundaries = [0]
+        offset = 0
+        for index, char in enumerate(source):
+            if char == "\r" and index + 1 < len(source) and source[index + 1] == "\n":
+                boundaries.append(None)
+            else:
+                offset += 1
+                boundaries.append(offset)
+    result = []
+    for index, location in enumerate(locations):
+        if not isinstance(location, dict) or set(location) != {"start", "end", "pc", "kind", "op"}:
+            raise ValueError(f"invalid c_locations record {index}")
+        start, end = location["start"], location["end"]
+        if type(start) is not int or type(end) is not int or not 0 <= start < end <= len(source):
+            raise ValueError(f"invalid c_locations span {index}: {start!r}:{end!r}")
+        pc, kind = location["pc"], location["kind"]
+        if not isinstance(pc, str) or re.fullmatch(r"0x[0-9a-f]{8}", pc) is None:
+            raise ValueError(f"invalid c_locations PC {index}: {pc!r}")
+        if kind not in ("statement", "token"):
+            raise ValueError(f"invalid c_locations kind {index}: {kind!r}")
+        operation = location["op"]
+        if not isinstance(operation, str) or re.fullmatch(r"[A-Z][A-Z0-9_]*", operation) is None:
+            raise ValueError(f"invalid c_locations operation {index}: {operation!r}")
+        if boundaries is not None:
+            start, end = boundaries[start], boundaries[end]
+            if start is None or end is None or start >= end:
+                raise ValueError(f"c_locations span {index} splits a CRLF")
+        result.append({"start": start, "end": end, "pc": pc, "kind": kind, "op": operation})
+    result.sort(key=lambda location: (
+        location["start"], location["end"], location["kind"], int(location["pc"], 16),
+    ))
+    return result
+
+
 def run_checked(command: list[str], *, env: dict[str, str] | None = None) -> subprocess.CompletedProcess[str]:
     completed = subprocess.run(
         command,
@@ -239,6 +281,11 @@ def canonicalize_records(
             "decompiled_c_sha256": hashlib.sha256(code.encode()).hexdigest(),
             "decompiled_c": code,
         })
+        if "c_locations" in raw:
+            try:
+                records[-1]["c_locations"] = canonical_c_locations(raw)
+            except ValueError as exc:
+                identity_errors.append(f"{entry}: {exc}")
 
     missing = sorted(set(inventory_functions) - seen)
     if missing:

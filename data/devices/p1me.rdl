@@ -14,6 +14,12 @@ property status_register { type = string; component = reg; };
 property secondary_status_register { type = string; component = reg; };
 property access_register { type = string; component = reg; };
 property history_register { type = string; component = reg; };
+property start_address_register { type = string; component = reg; };
+property end_address_register { type = string; component = reg; };
+property mode_register { type = string; component = reg; };
+property emulation_register { type = string; component = reg; };
+property enable_register { type = string; component = reg; };
+property secondary_enable_register { type = string; component = reg; };
 property reload_prefix { type = string; component = reg; };
 property counter_prefix { type = string; component = reg; };
 property interrupt_channel { type = longint unsigned; component = reg; };
@@ -56,6 +62,49 @@ addrmap p1me {
         executable=true; reset_policy="STAC_GRAM for Application Reset 1"; reset_control="STAC_GRAM";
         reset_rules="power-on:force;system-1-cvm:force;system-1-pin:force;system-2:force;application-1:controlled";
     } global_ram @ 0xFEEF8000;
+
+    // Protected internal FLMD0 pull selection; this does not model the external pin level.
+    reg {
+        regwidth=32; accesswidth=32; desc="FLMD0 internal pull selection; protected A5/value/inverse/value sequence";
+        evidence="manual"; source_ref="R01UH0585EJ0120 pages2870-2871 Tables35.8-35.9"; behavior="flmd";
+        trigger="flmd-control"; status_register="FLMDPS";
+        field { sw=rw; reset=0; } value[31:0];
+    } FLMDCNT @ 0xFFA00000;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="FLMD write-protection command; only complete valid sequences are modeled";
+        evidence="manual"; source_ref="R01UH0585EJ0120 pages2871-2873 Table35.10"; behavior="flmd";
+        trigger="flmd-command";
+        field { sw=w; reset=0; } value[31:0];
+    } FLMDPCMD @ 0xFFA00004;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="FLMD write-sequence error monitor; bit0 cleared by successful protected update";
+        evidence="manual"; source_ref="R01UH0585EJ0120 pages2871,2874 Table35.11"; behavior="flmd";
+        field { sw=r; reset=0; } value[31:0];
+    } FLMDPS @ 0xFFA00008;
+
+    // Exact Camry consumer 00067060 uses only DCRA1, CTL=00 (32-bit Ethernet/32-bit input).
+    reg {
+        regwidth=32; accesswidth=32; desc="DCRA1 CRC input; 32-bit register accesses only";
+        evidence="manual"; source_ref="R01UH0585EJ0120 pages2844,2849 Table33.7"; behavior="dcra";
+        trigger="dcra-input"; status_register="DCRA1COUT"; mode_register="DCRA1CTL";
+        field { sw=rw; reset=0; } value[31:0];
+    } DCRA1CIN @ 0xFFD51000;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="DCRA1 CRC data; reads XOR the internal Ethernet CRC state with FFFFFFFF";
+        evidence="manual"; source_ref="R01UH0585EJ0120 page2850 Table33.8 and page2852 Table33.10"; behavior="dcra";
+        trigger="dcra-seed"; mode_register="DCRA1CTL";
+        field { sw=rw; reset=0; } value[31:0];
+    } DCRA1COUT @ 0xFFD51004;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="DCRA1 control; model supports only POL=00 ISZ=00, other modes fault";
+        evidence="manual"; source_ref="R01UH0585EJ0120 page2851 Table33.9"; behavior="dcra";
+        trigger="dcra-control";
+        field { sw=rw; reset=0; } value[7:0];
+    } DCRA1CTL @ 0xFFD51020;
 
     reg {
         regwidth=32; accesswidth=32; desc="Self-programming ID input word 0";
@@ -113,14 +162,16 @@ addrmap p1me {
 
     reg {
         regwidth=32; accesswidth=32; desc="FACI command start address";
-        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
-        field { sw=rw; } value[31:0];
+        evidence="manual"; source_ref="R01UH0615EJ0120 page14 Table4.5"; behavior="faci";
+        trigger="faci-address"; status_register="FSTATR";
+        field { sw=rw; reset=0; } value[31:0];
     } FSADDR @ 0xFFA10030;
 
     reg {
         regwidth=32; accesswidth=32; desc="FACI command end address";
-        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
-        field { sw=rw; } value[31:0];
+        evidence="manual"; source_ref="R01UH0615EJ0120 page15 Table4.6"; behavior="faci";
+        trigger="faci-address"; status_register="FSTATR";
+        field { sw=rw; reset=0; } value[31:0];
     } FEADDR @ 0xFFA10034;
 
     reg {
@@ -132,8 +183,9 @@ addrmap p1me {
 
     reg {
         regwidth=16; accesswidth=16; desc="Flash program-or-erase mode entry";
-        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
-        field { sw=rw; } value[15:0];
+        evidence="manual"; source_ref="R01UH0615EJ0120 pages21-22 Table4.8"; behavior="faci";
+        trigger="faci-dataflash-mode"; status_register="FSTATR";
+        field { sw=rw; reset=0; } value[15:0];
     } FENTRYR @ 0xFFA10084;
 
     reg {
@@ -209,6 +261,13 @@ addrmap p1me {
     } FPCKAR @ 0xFFA100E4;
 
     reg {
+        regwidth=8; accesswidth=8; desc="Flash emulation control; only unchanged normal mode is modeled, not OCD-controlled error/timing emulation";
+        evidence="manual"; source_ref="R01UH0615EJ0120 page35 Table4.22"; behavior="faci";
+        trigger="faci-normal-emulation";
+        field { sw=rw; reset=0; } value[7:0];
+    } FLEMU @ 0xFFA100F0;
+
+    reg {
         regwidth=16; accesswidth=16; desc="Flash ECC encoder monitor";
         evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
         field { sw=r; } value[15:0];
@@ -228,8 +287,11 @@ addrmap p1me {
 
     reg {
         regwidth=8; accesswidth=8; desc="FACI command-issuing area";
-        evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
+        evidence="manual"; source_ref="R01UH0615EJ0120 pages10-11,14-20,28,45-47,66-68"; behavior="faci";
         trigger="faci-command"; status_register="FSTATR"; access_register="FASTAT"; history_register="FCMDR";
+        control_register="FENTRYR"; mode_register="FBCCNT"; emulation_register="FLEMU";
+        start_address_register="FSADDR"; end_address_register="FEADDR";
+        enable_register="FHVE15"; secondary_enable_register="FHVE3";
         field { sw=w; } value[7:0];
     } FACI_COMMAND_AREA @ 0xFFA20000;
 
@@ -238,6 +300,47 @@ addrmap p1me {
         evidence="manual"; source_ref="R01UH0615EJ0120 sections 3.3 and 4"; behavior="faci";
         field { sw=rw; } value[15:0];
     } BFASELR @ 0xFFC59008;
+
+    reg {
+        regwidth=8; accesswidth=8; desc="DataFlash read-cycle code; low4 bits, codes0..2 prohibited; model does not synthesize timing";
+        evidence="manual"; source_ref="R01UH0585EJ0120 page2876 Table35.13"; behavior="storage";
+        trigger="dataflash-read-cycle";
+        field { sw=rw; reset=0xF; } value[7:0];
+    } EEPRDCYCL @ 0xFFC59810;
+
+    reg {
+        regwidth=32; accesswidth=16; access_widths="2,4"; desc="DataFlash ECC control; PROT[15:14]=01 permits low2-bit update, protection bits read0";
+        evidence="manual"; source_ref="R01UH0585EJ0120 page2539 Table31.18"; behavior="storage";
+        trigger="dataflash-ecc-control";
+        field { sw=rw; reset=0; } value[31:0];
+    } DFECCCTL @ 0xFFC5B000;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="DataFlash ECC status: bit0 SEDF and bit1 DEDF; error generation is an explicit external input";
+        evidence="manual"; source_ref="R01UH0585EJ0120 page2540 Table31.19"; behavior="storage";
+        field { sw=r; reset=0; } value[31:0];
+    } DFERSTR @ 0xFFC5B004;
+
+    reg {
+        regwidth=32; accesswidth=8; access_widths="1,2,4"; desc="DataFlash ECC status clear: writing low-bit ERRCLR=1 clears SEDF/DEDF; zero has no effect";
+        evidence="manual"; source_ref="R01UH0585EJ0120 page2541 Table31.20"; behavior="storage";
+        trigger="dataflash-ecc-clear"; status_register="DFERSTR";
+        field { sw=w; reset=0; } value[31:0];
+    } DFERSTC @ 0xFFC5B008;
+
+    reg {
+        regwidth=32; accesswidth=8; access_widths="1,2,4"; desc="DataFlash ECC notification enables EOVFIE/DEDIE/SEDIE in low3 bits; ECM delivery not synthesized";
+        evidence="manual"; source_ref="R01UH0585EJ0120 page2544 Table31.23"; behavior="storage";
+        trigger="dataflash-ecc-notification";
+        field { sw=rw; reset=6; } value[31:0];
+    } DFERRINT @ 0xFFC5B014;
+
+    reg {
+        regwidth=32; accesswidth=16; access_widths="2,4"; desc="DataFlash ECC test control; PROT[15:14]=01 permits ECCTST bit0 update, protection bits read0";
+        evidence="manual"; source_ref="R01UH0585EJ0120 page2546 Table31.25"; behavior="storage";
+        trigger="dataflash-ecc-test";
+        field { sw=rw; reset=0; } value[31:0];
+    } DFTSTCTL @ 0xFFC5B01C;
 
     reg {
         regwidth=32; accesswidth=32; desc="ICU-S command register; recovered MAC generate writes (selector<<16)|5 and CMAC verify writes (selector<<16)|7";
@@ -281,6 +384,12 @@ addrmap p1me {
         evidence="recovered"; source_ref="Exact target CodeFlash command setup at 0x0008A63C"; behavior="icus_recovered";
         field { sw=rw; } value[31:0];
     } ICUSPARAM @ 0xFFC5D01C;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="ICU-S offset20 word: exact Camry readers consume bit0; model permits observed word reads only, without a hardware reset value or bit meaning";
+        evidence="recovered"; source_ref="Camry8965F3307000 792FC reads twice through78AE0;8B018 reads directly. R01UH0585EJ0120 p64 directs Security specification inquiries to the distributor"; behavior="icus_recovered";
+        field { sw=r; } value[31:0];
+    } ICUSREG20 @ 0xFFC5D020;
 
     reg {
         regwidth=32; accesswidth=32; desc="ICU-S control/acknowledgement word written by recovered callbacks and reset paths";
@@ -1611,4 +1720,18 @@ addrmap p1me {
         access_widths="1,2";
         field { sw=rw; reset=0x8F; } value[15:0];
     } EIC379 @ 0xFFFFB2F6;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Flash program/erase/blank-check software enable, bit0; reset excludes application reset 1";
+        evidence="manual"; source_ref="R01UH0585EJ0120 page2878 Table35.16"; behavior="faci";
+        trigger="faci-enable";
+        field { sw=rw; reset=0; } value[31:0];
+    } FHVE3 @ 0xFFF82410;
+
+    reg {
+        regwidth=32; accesswidth=32; desc="Flash program/erase/blank-check software enable, bit0; both FHVE controls must be one";
+        evidence="manual"; source_ref="R01UH0585EJ0120 page2877 Tables35.14-35.15"; behavior="faci";
+        trigger="faci-enable";
+        field { sw=rw; reset=0; } value[31:0];
+    } FHVE15 @ 0xFFF8A430;
 };

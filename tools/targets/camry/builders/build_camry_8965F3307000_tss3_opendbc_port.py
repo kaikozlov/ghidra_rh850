@@ -10,7 +10,8 @@ import struct
 from pathlib import Path
 
 REPO = REPO_ROOT
-from tools.targets.camry.support.camry_f33_corpus import IMAGE, IMAGE_SHA256, body_bytes  # noqa: E402
+from tools.project.decompiler_evidence import load_function_corpus  # noqa: E402
+from tools.targets.camry.support.camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256, body_bytes  # noqa: E402
 EVID = REPO / "data/generated/camry_8965F3307000_tss3_tx_decompiler_evidence.json"
 OUT = REPO / "data/generated/camry_8965F3307000_tss3_opendbc_port.json"
 NESTED_OPENDDBC_COMMIT = "ab60fd95d8a7b566e10ed1cf59738292f3498932"
@@ -62,6 +63,7 @@ def build() -> dict:
     need(evid["function_count"] == 16, "Tx evidence function count drift")
 
     funcs = {int(row["entry"], 16): row for row in evid["functions"]}
+    corpus, _ = load_function_corpus(CORPUS)
     need(len(funcs) == 16, "duplicate/missing Tx evidence functions")
     for entry, row in funcs.items():
         need(sha(body_bytes(image, row)) == row["body_sha256"], f"body hash drift 0x{entry:08X}")
@@ -109,15 +111,15 @@ def build() -> dict:
     # Target-native generated pack helpers and exact carrier fields.
     need_tokens(funcs, 0x7D1DC, "&DAT_00022488 + (param_1 & 0xffff) * 2", " < 0x11)", "(param_2 & 0xffff) - 0x6db8")
     need_tokens(funcs, 0x4CED0,
-                "FUN_0007d1dc(0x26,0x22,3,5", "FUN_0007d1dc(0x27,0x22,1,4", "FUN_0007d0ea(1)")
+                f"{corpus[0x7D1DC]['name']}(0x26,0x22,3,5", f"{corpus[0x7D1DC]['name']}(0x27,0x22,1,4", f"{corpus[0x7D0EA]['name']}(1)")
     need_tokens(funcs, 0x4CE08,
-                "FUN_0007d1dc(0x28,0x25,2,6", "FUN_0007d1dc(0x29,0x25,3,3",
-                "FUN_0007d1dc(0x2a,0x26,3,1", "FUN_0007d1dc(0x2b,0x26,1,0", "FUN_0007d0ea(2)")
+                f"{corpus[0x7D1DC]['name']}(0x28,0x25,2,6", f"{corpus[0x7D1DC]['name']}(0x29,0x25,3,3",
+                f"{corpus[0x7D1DC]['name']}(0x2a,0x26,3,1", f"{corpus[0x7D1DC]['name']}(0x2b,0x26,1,0", f"{corpus[0x7D0EA]['name']}(2)")
     need_tokens(funcs, 0x4C7AA,
-                "FUN_0007d31e(0x2c,0x27,8,0", "FUN_0007d31e(0x33,0x2e,8,0", "FUN_0007d0ea(3)")
+                f"{corpus[0x7D31E]['name']}(0x2c,0x27,8,0", f"{corpus[0x7D31E]['name']}(0x33,0x2e,8,0", f"{corpus[0x7D0EA]['name']}(3)")
     need_tokens(funcs, 0x4C97A,
-                "FUN_0007d31e(0,0,8,0", "FUN_0007d31e(0x21,0x16,0x10,0",
-                "FUN_0007d31e(10,7,8,0", "FUN_0007d0ea(0)")
+                f"{corpus[0x7D31E]['name']}(0,0,8,0", f"{corpus[0x7D31E]['name']}(0x21,0x16,0x10,0",
+                f"{corpus[0x7D31E]['name']}(10,7,8,0", f"{corpus[0x7D0EA]['name']}(0)")
 
     source = need_tokens(funcs, 0x4C000,
                          "DAT_febe66a8", "* 100) / 0x100", "DAT_febe8152 = 1000", "DAT_febe8152 = -1000",
@@ -141,8 +143,8 @@ def build() -> dict:
                             "DAT_febe6d78 = iVar2 + iVar4", "DAT_febe6d72 = (short)iVar5")
     mapped = need_tokens(funcs, 0x38678,
                          "DAT_00031d44", "DAT_00031d46", "DAT_00031d48", "DAT_00031d4a", "DAT_00031d4c",
-                         "(&PTR_DAT_000210f4)", "if ((int)param_1 < 1)")
-    publish = need_tokens(funcs, 0x3879E, "DAT_febe6d78", "DAT_febe6d70", "FUN_00038678")
+                         "(&PTR_DAT_000210f4)", "if (value < 1)")
+    publish = need_tokens(funcs, 0x3879E, "DAT_febe6d78", "DAT_febe6d70", "lookup_signed_five_map_signal")
     tx030_source = need_tokens(funcs, 0x4C490,
                                "-0x50e8", "-0x3694")
     need(all(token in aggregate for token in ("DAT_febe6d70", "DAT_febe6d72", "DAT_febe6d78")),

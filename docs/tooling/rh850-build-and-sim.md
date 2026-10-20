@@ -226,7 +226,7 @@ The machine has one owner for each layer:
    access policy, reset rules, evidence class, and peripheral trigger
    relationships. Generated JSON/CSV files are projections, not competing
    sources. Java dispatches generated trigger/reset metadata; it does not select
-   TAUJ, RSCFD, FACI, or ICU-S behavior by register-name tables.
+   TAUJ, RSCFD, FACI, DataFlash ECC, or ICU-S behavior by register-name tables.
 3. `data/analysis_targets.json` supplies exact MCU, processor language,
    CodeFlash identity, and optional DataFlash identity. It is not a capability
    whitelist.
@@ -285,8 +285,11 @@ flowchart LR
 |Interrupts|Arbitrate modeled EIC requests using EIMK, PSW.ID/NP, PMR, ISPR, priority, and channel-number tie-break; save EIPC/EIPSW/EIIC and select direct or INTBP vectors; invalidate the load-link reservation.|Implemented for modeled EIINT channels. Edge acceptance clears EIRF; level requests remain until their source clears. Native `EIRET` applies automatic ISPR release when pre-return EP=0 and INTCFG.ISPC=0; protected software ISPR writes are ignored. Reserved channels without a supported reset contract fault on injection.|
 |TAUJ|Progress software-triggered interval timers from explicit P-Bus cycles, applying CK0–CK2 prescalers, retaining fractional progress, reloading on underflow, and raising the channel request.|Implemented for the bounded TAUJ0 interval path, including MD0 immediate-start requests. CK3/BRS and other timer modes fault rather than invent behavior. Clock events are functional stimulus, not CPU/silicon timing.|
 |RSCFD|Retain the exact registered signer response resources plus the diagnostic transmit buffer; model common receive FIFOs 3 and 5 using generated control/status/window/pointer/interrupt relationships.|Transmit events identify the buffer derived from the modeled message-RAM address. Receive inputs explicitly start **post-filter**. Mode/enable gates, payload capacity, queue depth, overflow, interrupt threshold, sticky flags, oldest-message windows, and native pointer pops are modeled. CAN1's receive level is the OR of modeled FIFO sources. Acceptance-filter execution, global RFIFOs, arbitration, bus timing, and error-state evolution are not modeled.|
-|FACI / CodeFlash|CodeFlash fetches execute from immutable registered image bytes. Scenario overlays and ordinary writes are rejected. Only the exact status-clear command has a modeled FACI transition.|Bounded implementation. Unsupported FACI commands fault before side effects; erase/program, protection, sequencer timing, and cache-coherency behavior remain unimplemented.|
-|ICU-S|Expose only recovered registers and exact command-five/callback transitions. Treat supplied output words as scenario state, not generated cryptography.|Implemented within that recovered boundary. No provisioned-key or AES-CMAC silicon claim.|
+|FACI / CodeFlash|Keep image bytes immutable. Model status clear in P/E mode, forced-stop `B3` acceptance, and incremental DataFlash blank-check submission `71,D0`, including both FHVE enables, keyed read/DataFlash mode transitions, address-register readback and busy-write suppression.|Bounded implementation. Stop/blank-check submission clears `FRDY`; completion requires explicit inputs. Stop accepts ready/busy/locked/reissued states in normal P/E mode, without requiring blank-check FHVE gates. No dump-derived blankness, automatic ready interrupt, erase/program, CodeFlash/FWE entry, OCD emulation, partial-prefix stop or sequencer timing. Unsupported commands/modes/ranges fault before the current write.|
+|DataFlash ECC/read controls|Use manual-backed `DFERSTR`/`DFERSTC` widths/reset and low-bit error clearing; keyed `DFECCCTL`/`DFTSTCTL` fields, masked `DFERRINT`, and `EEPRDCYCL` codes3..F.|Bounded implementation. Protection keys read zero; rejected keys preserve prior fields. Codes0..2 fault as prohibited. Non-normal ECC/test-mode payload reads fault rather than silently using ordinary dump bytes. Error flags remain explicit inputs; no ECC generation/correction, test-bit payload, error-address capture, overflow, ECM delivery or flash timing is synthesized.|
+|DCRA1|Use generated CIN/COUT/CTL relationships for the exact Camry `0x67060` register sequence: CTL=00, explicit seed, and whole-word input.|Bounded implementation from R01UH0585EJ0120 pp2844–2852. Only the 32-bit Ethernet polynomial with 32-bit input is modeled; other modes/reserved-bit writes and input before an explicit seed fault. No timing, other DCRA units, or external CRC-result injection.|
+|FLMD|Execute the protected `FLMDPCMD=A5`, desired/full-word inverse/desired sequence controlling `FLMDCNT.bit0`.|Bounded nominal protocol from R01UH0585EJ0120 pp2869–2874. Word-only accesses, protected commit and successful error-status clearing are modeled. Malformed sequences fault at the model boundary; hardware error timing, same-module interruption and the external FLMD0 pin level are not synthesized.|
+|ICU-S|Expose only recovered registers and exact command-five/callback transitions. Treat supplied output words and the opaque offset20 word as scenario state, not generated cryptography or readiness.|Implemented within that recovered boundary. Offset20 has no assumed reset and supports only observed word reads; physical write semantics and bit meaning remain unknown. No provisioned-key or AES-CMAC silicon claim.|
 |Integration|Expose model generation through `tools/rh850 model update` and `tools/rh850 model check`, and batched execution through `tools/rh850 test firmware`; bind identity through the existing target registry; retain one JSON report per scenario under `build/out/`.|Implemented. No parallel capability manifest, target whitelist, project lifecycle, backend selector, or legacy CLI alias exists.|
 |Verification|Resolve every signer component from raw bytes and generate one functional scenario set for every registered signer target; retain target-specific fixtures only for device-model regression and negative cases.|`tools/test rh850_firmware` runs all generated signer scenarios on Camry, Crown, and both Corolla images, then the retained machine-boundary fixtures. `make verify-processor` requires this gate after the synthetic instruction fixture. GNU simulation remains an independent backend and raw-image build check.|
 
@@ -311,18 +314,96 @@ Progress:
 The functional model currently covers PE1/self LocalRAM aliasing,
 STAC-controlled Application/System reset RAM rules, G3M alignment and MPU
 overlap permissions, per-register MMIO access widths, TAUJ0 interval progression,
-EIINT delivery, common receive FIFOs, recovered RSCFD transmit buffers, the FACI
-status-clear command, and the explicitly recovered ICU-S surface. Unknown MMIO,
+EIINT delivery, common receive FIFOs, recovered RSCFD transmit buffers, FACI
+status clear, forced-stop acceptance and DataFlash blank-check submission,
+DataFlash ECC/read controls, DCRA1 CRC, protected FLMD pull selection,
+and the explicitly recovered ICU-S surface. Unknown MMIO,
 illegal widths, uninitialized state, and unsupported FACI commands are hard
 faults carrying PC, address, size, access kind, and evidence provenance.
 A known register without a behavior model remains ordinary typed storage; it
 does not acquire invented side effects.
+
+DCRA1 is a hardware CRC model, not a shortcut for a firmware CRC function.
+R01UH0585EJ0120 Table33.4 (p2844) locates `CIN`, `COUT`, and `CTL` at
+`FFD51000`, `FFD51004`, and `FFD51020`; Tables33.7–33.9 (pp2849–2851)
+require word, word, and byte accesses respectively. The supported `CTL=00`
+mode consumes input bit0 first, using the reflected `0xEDB88320` form of
+the p2845 Ethernet polynomial. A `COUT` write seeds the **raw** shift state;
+a read exposes that state XOR `FFFFFFFF` (Table33.8, p2850). The reset
+read value is zero, corresponding to raw state `FFFFFFFF` (Table33.10,
+p2852). Thus Camry `0x67060`'s final complement cancels the hardware read
+XOR: its return is raw state, not the usual final-XOR CRC32 value.
+It consumes only `length >> 2` words and ignores trailing bytes.
+
+The `camry_f33_crc_*` scenarios retain actual `0x67060`, ROM-default
+integrity selector `0x67090`, and composed status-repair sweep `0x670C4`
+instructions. Registered descriptors at `0x2AF8C` have length at `+0`,
+RAM pointer at `+4`, and the **ROM** pointer used by `0x67090` at `+8`.
+Their independent expectations use the manual's serial feedback circuit
+and immutable registered CodeFlash bytes, not injected CRC results.
+Printed page numbers above equal one-based PDF page indices for this manual.
+
+FLMD support removes a real execution boundary in Camry's application-cycle
+maintenance: `0x67276` previously faulted at `0x6727E` reading `FFA00000`.
+The manual identifies word registers `FLMDCNT`, `FLMDPCMD`, and `FLMDPS`
+at `FFA00000/04/08`. The model retains the previous control value until the
+complete protected sequence, including inversion of reserved bits, succeeds;
+successful completion clears the sequence-error status. It does not replace
+the firmware routine or inject register results. Native scenarios exercise
+idle and protected-update paths, a stopped pre-commit prefix, access policy
+and explicit model-boundary faults.
+
+`FLMDCNT` selects an **internal pull**, not the actual FLMD0 pin level.
+Malformed-protocol faults are not emulated `FLMDPS` errors, and do not prove
+hardware retry timing. External `register-input` cannot bypass protection by
+injecting FLMD control/status. FACI erase/program execution remains a separate
+unsupported boundary; this bank does not grant modeled programming permission.
 
 ICU-S is intentionally marked `recovered`: the public P1M-E manual names the
 block but does not publish its full register or cryptographic semantics. The
 model executes the stock command-five submit and native input/output callbacks,
 but supplied ICU-S data words are scenario inputs. It does not claim to derive
 a provisioned key or emulate the hardware AES-CMAC implementation.
+The offset20 word (`ICUSREG20`) specifically requires an explicit preload or
+scheduled register input. Its two-read and one-read Camry consumers establish
+bit extraction, not a hardware busy/ready contract. The Ghidra profile maps the
+manual's 32-byte DataFlash ECC bank and exact one-byte `EEPRDCYCL` window as
+volatile; this does not grant the machine access to registers absent from its
+generated definition. P1M-E hardware manual Tables31.18/31.23/31.25 and35.13
+define the protected fields, notification enables and read-cycle encodings.
+The Camry `0x7936E` leaf and complete `0x681F8` initializer execute against
+these controls. The latter requires explicit ICU-S/access-status inputs and
+forced-stop completion; its lower rejection path does not undo the earlier
+RAM initialization or report an initialization result to its caller.
+
+FACI blank checking is deliberately nonmutating and input-driven. Renesas flash
+manual R01UH0615EJ0120 §6.3.15 says erased-but-unprogrammed DataFlash reads are
+undefined; captured `FF` bytes do not establish physical blankness. The model
+accepts `71,D0` only in normal, incremental DataFlash P/E mode with both
+`FHVE15` and `FHVE3` enabled. `D0` clears `FSTATR.FRDY` and records `FCMDR=D071`;
+it does not set `FBCSTAT`, `FPSADDR`, completion time or an interrupt request.
+Supply result/completion through `register-input` events. Command-history
+visibility during an incomplete prefix is not modeled.
+
+Forced stop follows the flash manual's Tables4.2/4.7/4.15 and §6.3.14.
+`B3` shifts command history, clears the documented start-cleared error,
+suspension and ready bits, and clears `CMDLK` only when `CFAE/DFAE` are clear.
+With access-error flags, `ILGLERR` is temporarily clear during processing but
+`CMDLK` persists; the completion input must include any reasserted error.
+`ECRCT` clears when the corresponding correction flags were set. Buffer-empty
+status and final completion remain external; neither is assigned a latency.
+The real Camry `0x78CE6` routine returns8 after229 unsuccessful polling reads
+without a completion input, rather than receiving a fabricated success.
+
+`FSADDR`/`FEADDR` discard their read-only low two bits and ignore busy writes
+(flash manual pp14–15). `FENTRYR` key bits read zero; writes while busy are
+ignored. In the supported read/DataFlash states, a bad key clears the mode,
+and a ready write while already in P/E clears it rather than re-entering
+(pp21–22). CodeFlash/FWE transitions and illegal-mode error generation remain
+outside this model. `FLEMU` supports only an unchanged zero write: no OCD
+permission or debug emulation is inferred. FHVE registers expose bit0
+(hardware manual pp2877–2878); fresh-machine reset values do not establish
+reset-class retention of an existing peripheral state.
 
 Check that all projections match the source without rewriting them:
 
@@ -379,18 +460,11 @@ The generated suite has no calibration-named JSON inputs:
 |ICU-S output callback|structural callback role plus dump-relative output state|four supplied output words, cursor advance, and acknowledgement|
 
 `tools/test rh850_firmware` requires these scenarios to pass on every
-registered signer target: Camry, Crown, Corolla F, and Corolla H. Target-owned
-fixtures under `tests/fixtures/rh850/machine/` are retained only for
-device-model boundaries and negative behavior, not as a target compatibility
-matrix.
+registered signer target: Camry, Crown, Corolla F, and Corolla H.
 
-Individual retained model scenarios remain available by registered target:
-
-```bash
-tools/rh850 test firmware camry-8965F3307000 \
-  tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_faci_command.json \
-  tests/fixtures/rh850/machine/camry-8965F3307000/camry_f33_application_reset.json
-```
+Camry's retained original-byte scenarios are one JSON object per line in
+`decomp/camry-8965F3307000/oracles.jsonl`. `tools/test camry_decomp` checks the
+functions whose C is listed in that tree's `matched.jsonl`.
 
 Each report embeds the resolved run contract: unique candidate count or
 dump-contract source, resolved entry, exact entry-instruction hash,
@@ -414,9 +488,24 @@ External `events` require `kind`, nonnegative `after_instructions`, and
   deterministic asynchronous write to modeled writable RAM. It is explicit
   scenario state and does not invoke CPU-store callbacks or imply hardware
   timing.
+- `register-input`: a generated device `register` name and unsigned integer-string
+  `value` (at most32 bits and fitting that register's width). The register must
+  be mapped and software-readable. This supplies external device state without
+  invoking CPU-store callbacks or command triggers. Existing model logic can
+  subsequently consume that supplied state. CPU-register names, write-only
+  commands and oversized values are rejected. Report events
+  identify these as `external-register-input`, not firmware writes or inferred
+  peripheral completion. Ordinary `memory-write` remains RAM-only.
 
 Stop addresses are terminal: events scheduled after reaching a stop are not
 executed. Unsupported modes and missing state remain faults.
+
+The `memory-equal` check compares `size` positive bytes at `address` with bytes
+at `source_address` in the same final machine state. It reports `equal` or
+`different`, not the compared bytes. Use this to check a destination against
+registered DataFlash without copying captured payload/key material into a
+golden fixture. Like ordinary memory checks, read failures are check errors,
+not successful comparisons.
 
 The functional profile establishes instruction, register, memory, and
 modeled-device behavior only. It makes no cycle-timing, silicon, vehicle, or

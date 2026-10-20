@@ -268,16 +268,22 @@ public class AssertProjectInvariants extends GhidraScript {
         }
         requireBlock("GlobalRAM_A", 0xFEEF8000L, 0x8000L, true, true, true, false);
         requireBlock("GlobalRAM_B", 0xFEF00000L, 0x8000L, true, true, true, false);
+        requireBlock("SFR_DATAFLASH_READ_CYCLE", 0xFFC59810L, 0x1L, true, true, false, true);
+        requireBlock("SFR_DATAFLASH_ECC", 0xFFC5B000L, 0x20L, true, true, false, true);
         requireBlock("SFR_CODEFLASH_ECC", 0xFFC62000L, 0x500L, true, true, false, true);
         requireBlock("SFR_STAC", 0xFFF81000L, 0x1000L, true, true, false, true);
         requireBlock("SFR_FACI", 0xFFA10000L, 0x200L, true, true, false, true);
         requireBlock("SFR_FACI_COMMAND", 0xFFA20000L, 0x4L, true, true, false, true);
+        requireBlock("SFR_FHVE3", 0xFFF82410L, 0x4L, true, true, false, true);
+        requireBlock("SFR_FHVE15", 0xFFF8A430L, 0x4L, true, true, false, true);
         requireBlock("SFR_ECM_MASTER", 0xFFD60000L, 0x100L, true, true, false, true);
         requireBlock("SFR_ECM_CHECKER", 0xFFD61000L, 0x100L, true, true, false, true);
         requireBlock("SFR_ECM_COMMON", 0xFFD62000L, 0x100L, true, true, false, true);
         requireBlock("SFR_TAUJ", 0xFFE50000L, 0x3000L, true, true, false, true);
         requireBlock("SFR_EIC", 0xFFFFB000L, 0x1000L, true, true, false, true);
         requireBlock("SFR_RSCFD", 0xFFD20000L, 0x10000L, true, true, false, true);
+        requireBlock("SFR_DCRA1", 0xFFD51000L, 0x21L, true, true, false, true);
+        requireBlock("SFR_FLMD", 0xFFA00000L, 0xCL, true, true, false, true);
         requireBlock("SFR_ICUS", 0xFFC5D000L, 0x1000L, true, true, false, true);
 
         // Evidence-backed SFR labels from data/p1m_sfr_labels.csv.

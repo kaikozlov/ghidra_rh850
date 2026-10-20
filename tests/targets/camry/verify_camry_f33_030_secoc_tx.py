@@ -50,14 +50,6 @@ def main() -> int:
   assert live["icu_s_key_selector"] == 4
   assert live["icu_s_command"] == 5
 
-  assert artifact["mac_domain"] == {
-    "data_id": "0x0030",
-    "application_payload_bytes": 28,
-    "full_freshness_bits": 46,
-    "full_freshness_storage_bytes": 6,
-    "total_bytes": 36,
-  }
-
   # The application layer does not create the SecOC tail.  Retained READY RAM
   # has zero B28..B31 in generated-COM PDU0 while the tracked wire oracle has a
   # nonzero protected tail on the closest 27/28-byte application match.

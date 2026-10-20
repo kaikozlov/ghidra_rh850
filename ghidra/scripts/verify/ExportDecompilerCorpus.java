@@ -1,6 +1,16 @@
 //@author kaikozlov
 //@category Verification
 // Export one deterministic JSONL record for every recovered function's decompilation.
+import ghidra.app.decompiler.ClangFieldToken;
+import ghidra.app.decompiler.ClangFuncNameToken;
+import ghidra.app.decompiler.ClangLabelToken;
+import ghidra.app.decompiler.ClangLine;
+import ghidra.app.decompiler.ClangNode;
+import ghidra.app.decompiler.ClangStatement;
+import ghidra.app.decompiler.ClangToken;
+import ghidra.app.decompiler.ClangTypeToken;
+import ghidra.app.decompiler.ClangVariableToken;
+import ghidra.app.decompiler.PrettyPrinter;
 import ghidra.app.decompiler.DecompInterface;
 import ghidra.app.decompiler.DecompileResults;
 import ghidra.app.script.GhidraScript;
@@ -9,12 +19,19 @@ import ghidra.program.model.listing.Function;
 import ghidra.program.model.listing.FunctionIterator;
 import ghidra.program.model.listing.Instruction;
 import ghidra.program.model.listing.InstructionIterator;
+import ghidra.program.model.pcode.PcodeOp;
+import ghidra.program.model.symbol.IllegalCharCppTransformer;
 import ghidra.program.model.symbol.Reference;
 import ghidra.program.model.symbol.RefType;
 import java.io.BufferedWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
 
 public class ExportDecompilerCorpus extends GhidraScript {
@@ -91,6 +108,101 @@ public class ExportDecompilerCorpus extends GhidraScript {
         out.append(']');
         return out.toString();
     }
+    private static final class CLocation {
+        final int start;
+        int end;
+        final Address pc;
+        final String kind;
+        final String op;
+
+        CLocation(int start, int end, Address pc, String kind, String op) {
+            this.start = start;
+            this.end = end;
+            this.pc = pc;
+            this.kind = kind;
+            this.op = op;
+        }
+    }
+
+    private static Address operationAddress(PcodeOp op) {
+        if (op == null) return null;
+        Address address = op.getSeqnum().getTarget();
+        return address != null && address.isMemoryAddress() ? address : null;
+    }
+
+    private static String normalizeC(String text) {
+        return text.replace("\r\n", "\n").replace('\r', '\n');
+    }
+
+    private static String cLocationsJson(PrettyPrinter printer, String code) {
+        IllegalCharCppTransformer transformer = new IllegalCharCppTransformer();
+        StringBuilder rendered = new StringBuilder();
+        List<CLocation> locations = new ArrayList<>();
+        Map<ClangStatement, CLocation> statements = new IdentityHashMap<>();
+        int offset = 0;
+        for (ClangLine line : printer.getLines()) {
+            String indent = line.getIndentString();
+            rendered.append(indent);
+            offset += indent.codePointCount(0, indent.length());
+            for (ClangToken token : line.getAllTokens()) {
+                // Exactly PrettyPrinter.getText's symbol transformation, not a
+                // source-text search. Offsets count Unicode characters, as in Python.
+                String text = token.getText();
+                boolean clean = token instanceof ClangFuncNameToken
+                    || token instanceof ClangVariableToken || token instanceof ClangTypeToken
+                    || token instanceof ClangFieldToken || token instanceof ClangLabelToken;
+                if (clean && token.getSyntaxType() != ClangToken.CONST_COLOR) {
+                    text = transformer.simplify(text);
+                }
+                text = normalizeC(text);
+                int start = offset;
+                rendered.append(text);
+                offset += text.codePointCount(0, text.length());
+                if (start == offset) continue;
+                Address pc = operationAddress(token.getPcodeOp());
+                if (pc != null) locations.add(new CLocation(
+                    start, offset, pc, "token", token.getPcodeOp().getMnemonic()));
+                // A statement can wrap lines and contain nested token groups.
+                // Its extent is all rendered descendant tokens, not an address interval.
+                for (ClangNode node = token.Parent(); node != null; node = node.Parent()) {
+                    if (!(node instanceof ClangStatement)) continue;
+                    ClangStatement statement = (ClangStatement) node;
+                    Address statementPc = operationAddress(statement.getPcodeOp());
+                    if (statementPc == null) continue;
+                    CLocation location = statements.get(statement);
+                    if (location == null) {
+                        location = new CLocation(
+                            start, offset, statementPc, "statement", statement.getPcodeOp().getMnemonic());
+                        statements.put(statement, location);
+                        locations.add(location);
+                    }
+                    else location.end = offset;
+                }
+            }
+            rendered.append('\n');
+            offset++;
+        }
+        // Fail closed if Ghidra's rendering convention ever changes.
+        if (!rendered.toString().equals(code)) {
+            throw new IllegalStateException("PrettyPrinter token rendering does not match emitted C");
+        }
+        locations.sort(Comparator.comparingInt((CLocation location) -> location.start)
+            .thenComparingInt(location -> location.end)
+            .thenComparing(location -> location.kind)
+            .thenComparingLong(location -> location.pc.getOffset()));
+        StringBuilder out = new StringBuilder("[");
+        for (CLocation location : locations) {
+            if (out.length() > 1) out.append(',');
+            out.append("{\"start\":").append(location.start)
+                .append(",\"end\":").append(location.end)
+                .append(",\"pc\":").append(jsonString(
+                    String.format("0x%08x", location.pc.getOffset())))
+                .append(",\"kind\":").append(jsonString(location.kind))
+                .append(",\"op\":").append(jsonString(location.op)).append('}');
+        }
+        return out.append(']').toString();
+    }
+
 
     @Override
     public void run() throws Exception {
@@ -124,14 +236,18 @@ public class ExportDecompilerCorpus extends GhidraScript {
                 boolean completed = false;
                 String error = "";
                 String code = "";
+                String locations = null;
                 try {
                     DecompileResults results = decompiler.decompileFunction(
                         function, timeoutSeconds, monitor
                     );
                     completed = results != null && results.decompileCompleted()
-                        && results.getDecompiledFunction() != null;
+                        && results.getCCodeMarkup() != null;
                     if (completed) {
-                        code = results.getDecompiledFunction().getC();
+                        PrettyPrinter printer = new PrettyPrinter(
+                            function, results.getCCodeMarkup(), new IllegalCharCppTransformer());
+                        code = normalizeC(printer.print().getC());
+                        locations = cLocationsJson(printer, code);
                     }
                     else if (results == null) {
                         error = "decompiler returned null results";
@@ -143,6 +259,9 @@ public class ExportDecompilerCorpus extends GhidraScript {
                 }
                 catch (Throwable throwable) {
                     error = errorText(throwable);
+                    completed = false;
+                    code = "";
+                    locations = null;
                 }
 
                 String signature = null;
@@ -173,6 +292,9 @@ public class ExportDecompilerCorpus extends GhidraScript {
                 record.append("\"decompile_completed\":").append(completed).append(',');
                 record.append("\"decompile_error\":").append(jsonString(error)).append(',');
                 record.append("\"data_references\":").append(dataReferencesJson(function)).append(',');
+                if (locations != null) {
+                    record.append("\"c_locations\":").append(locations).append(',');
+                }
                 record.append("\"decompiled_c\":").append(jsonString(code));
                 record.append('}');
                 writer.write(record.toString());

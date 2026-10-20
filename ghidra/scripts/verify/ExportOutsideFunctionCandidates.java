@@ -113,8 +113,12 @@ public class ExportOutsideFunctionCandidates extends GhidraScript {
     @Override
     public void run() throws Exception {
         String[] args = getScriptArgs();
-        if (args.length != 1) {
-            throw new IllegalArgumentException("expected absolute CSV output path");
+        if (args.length != 3) {
+            throw new IllegalArgumentException(
+                "expected absolute CSV output path, target ID, and executable SHA-256");
+        }
+        if (!args[2].equalsIgnoreCase(currentProgram.getExecutableSHA256())) {
+            throw new IllegalStateException("selected target does not match project executable");
         }
         Path output = Path.of(args[0]);
         if (!output.isAbsolute()) {
@@ -137,7 +141,7 @@ public class ExportOutsideFunctionCandidates extends GhidraScript {
         collectReferenceTargets();
         collectAlignedPointerTargets();
         collectDecodedOrphanRuns();
-        collectValidatedDispatch2B3F0();
+        if ("sienna-8965B4512000".equals(args[1])) collectValidatedDispatch2B3F0();
 
         List<Candidate> rows = new ArrayList<>();
         for (Candidate candidate : candidates.values()) {

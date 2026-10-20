@@ -196,7 +196,7 @@
             "combination": "FUN_000be846 (active when DAT_FEBEB11A==0x400 and FEBEBE8D!='Z'): with the pinned runtime constants the output reduces to FEBEBE96 = clamp(((sig232-512)*0x931/0x10)/0x10, +/-DAT_000af3f8=+/-3763); the sig229 term enters only via FEBEF0AA&2 (clear here); pre-clamp +/-DAT_000af3f0=+/-409600; validity outputs FEBEBE90..FEBEBE94",
             "distribution": "FUN_00058074: FEBE808A->FEBEF1C6, FEBE808C->FEBEF1C8, FEBE808E->FEBEF1CA, flags->FEBEF0A4..FEBEF0AE; runtime constants FEBEF098=FEBEF099=0, FEBEF09C=1, FEBEF0AA=0",
             "flags_stage": "FEBE8090..FEBE8095",
-            "freshness": "FEBE8097 + FUN_000498e0(0x16)",
+            "freshness": "FEBE8097 + receive-status selector0x16 through 0x498E0",
             "integrator": "FUN_000bcd66 (FEBEB800-0x9F4): FEBEAE0C = FEBEBE96; FUN_000c310e (gated DAT_FEBEBFB1=='Z'): FEBEBF58 += FEBEAE0C - FEBEBFA0; FEBEBFA0 = FEBEBF58*0x400/PTR_LAB_000af564 (8672)",
             "raw_stage": {
               "sig229": "FEBE8084",
@@ -465,7 +465,7 @@
             "combination": "FUN_000be846 (active when DAT_FEBEB11A==0x400 and FEBEBE8D!='Z'): with the pinned runtime constants the output reduces to FEBEBE96 = clamp(((sig232-512)*0x931/0x10)/0x10, +/-DAT_000af3f8=+/-3763); the sig229 term enters only via FEBEF0AA&2 (clear here); pre-clamp +/-DAT_000af3f0=+/-409600; validity outputs FEBEBE90..FEBEBE94",
             "distribution": "FUN_00058074: FEBE808A->FEBEF1C6, FEBE808C->FEBEF1C8, FEBE808E->FEBEF1CA, flags->FEBEF0A4..FEBEF0AE; runtime constants FEBEF098=FEBEF099=0, FEBEF09C=1, FEBEF0AA=0",
             "flags_stage": "FEBE8090..FEBE8095",
-            "freshness": "FEBE8097 + FUN_000498e0(0x16)",
+            "freshness": "FEBE8097 + receive-status selector0x16 through 0x498E0",
             "integrator": "FUN_000bcd66 (FEBEB800-0x9F4): FEBEAE0C = FEBEBE96; FUN_000c310e (gated DAT_FEBEBFB1=='Z'): FEBEBF58 += FEBEAE0C - FEBEBFA0; FEBEBFA0 = FEBEBF58*0x400/PTR_LAB_000af564 (8672)",
             "raw_stage": {
               "sig229": "FEBE8084",
@@ -652,7 +652,7 @@
     ],
     "ingress": {
       "path": "data/generated/camry_8965F3307000_external_lateral_ingress.json",
-      "sha256": "f3de23392c15673a90e8fdd1f16564ed7345719ab5cd9d4c6c78eba0de573ec9"
+      "sha256": "726c443b53cfa0ce2054ffe93b692143d94055ba5cdb699b2c5381914dddaef1"
     }
   }
 }

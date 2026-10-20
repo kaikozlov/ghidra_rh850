@@ -81,7 +81,7 @@ from exploit.followups.xcp_daq_probe import (  # noqa: E402
     write_daq_request,
 )
 
-SCHEMA = "camry-f33-steering-state-capture-v2"
+SCHEMA = "camry-f33-steering-state-capture-v3"
 EXPECTED_F181_HEX = "023839363546333330373030300000000038413331313333303331303000000000"
 PANDA_BUS = 0
 ELM327_PARAM = 1
@@ -148,9 +148,9 @@ COMMAND_FUNNEL = Profile(
         Field("CC60_limited", 0xFEBECC60, 2, True, "D0382 limited CC4E"),
         Field("CC50_pre_scale", 0xFEBECC50, 2, True, "D039E pre-scale steering-command value"),
         Field("AC5A_scale", 0xFEBEAC5A, 2, False, "D042C unsigned scale multiplier"),
-        Field("AC4C_slew_limit", 0xFEBEAC4C, 2, True, "D042C symmetric CC62-to-CC66 limit"),
-        Field("CC62_pre_slew", 0xFEBECC62, 2, True, "D042C scaled command; Command Value Torque diagnostic sibling"),
-        Field("CC66_post_slew", 0xFEBECC66, 2, True, "D042C post-limit/post-gate command"),
+        Field("AC4C_amplitude_limit", 0xFEBEAC4C, 2, True, "D042C symmetric amplitude limit; not a slew rate"),
+        Field("CC62_pre_clamp_gate", 0xFEBECC62, 2, True, "D042C scaled command before final amplitude clamp/gate; diagnostic sibling"),
+        Field("CC66_clamped_gated", 0xFEBECC66, 2, True, "D042C amplitude-clamped command, zero when AC29==0 or AC2A!=0"),
         Field("CC64_selected", 0xFEBECC64, 2, True, "D047C selected command entering output snapshot"),
         Field("AC54_motor_branch", 0xFEBEAC54, 2, True, "D0AAE motor-driving branch copied from CC64"),
         Field("AC56_diag_branch", 0xFEBEAC56, 2, True, "D0AAE diagnostic sibling copied from CC62"),

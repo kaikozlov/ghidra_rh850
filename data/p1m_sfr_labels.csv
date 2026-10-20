@@ -1,4 +1,7 @@
 address,name,size,access,comment
+0xFFA00000,FLMDCNT,4,rw,FLMD0 internal pull selection; protected A5/value/inverse/value sequence
+0xFFA00004,FLMDPCMD,4,w,FLMD write-protection command; only complete valid sequences are modeled
+0xFFA00008,FLMDPS,4,r,FLMD write-sequence error monitor; bit0 cleared by successful protected update
 0xFFA08000,SELFID0,4,w,Self-programming ID input word 0
 0xFFA08004,SELFID1,4,w,Self-programming ID input word 1
 0xFFA08008,SELFID2,4,w,Self-programming ID input word 2
@@ -24,11 +27,18 @@ address,name,size,access,comment
 0xFFA100D8,FPSADDR,4,r,First programmed DataFlash address
 0xFFA100E0,FCPSR,2,rw,Flash sequencer process switch
 0xFFA100E4,FPCKAR,2,rw,Flash sequencer processing-clock notification
+0xFFA100F0,FLEMU,1,rw,"Flash emulation control; only unchanged normal mode is modeled, not OCD-controlled error/timing emulation"
 0xFFA10100,FECCEMON,2,r,Flash ECC encoder monitor
 0xFFA10104,FECCTMD,2,rw,Flash ECC test-mode control
 0xFFA10108,FDMYECC,2,rw,Flash dummy ECC value
 0xFFA20000,FACI_COMMAND_AREA,1,w,FACI command-issuing area
 0xFFC59008,BFASELR,2,rw,Boot-flash area selector
+0xFFC59810,EEPRDCYCL,1,rw,"DataFlash read-cycle code; low4 bits, codes0..2 prohibited; model does not synthesize timing"
+0xFFC5B000,DFECCCTL,4,rw,"DataFlash ECC control; PROT[15:14]=01 permits low2-bit update, protection bits read0"
+0xFFC5B004,DFERSTR,4,r,DataFlash ECC status: bit0 SEDF and bit1 DEDF; error generation is an explicit external input
+0xFFC5B008,DFERSTC,4,w,DataFlash ECC status clear: writing low-bit ERRCLR=1 clears SEDF/DEDF; zero has no effect
+0xFFC5B014,DFERRINT,4,rw,DataFlash ECC notification enables EOVFIE/DEDIE/SEDIE in low3 bits; ECM delivery not synthesized
+0xFFC5B01C,DFTSTCTL,4,rw,"DataFlash ECC test control; PROT[15:14]=01 permits ECCTST bit0 update, protection bits read0"
 0xFFC5D000,ICUSCMD,4,rw,ICU-S command register; recovered MAC generate writes (selector<<16)|5 and CMAC verify writes (selector<<16)|7
 0xFFC5D004,ICUSDAT,4,rw,ICU-S data/parameter word written beside ICUSCMD (firmware role)
 0xFFC5D008,ICUSOUT,4,rw,ICU-S output word consumed by recovered completion callbacks
@@ -36,6 +46,7 @@ address,name,size,access,comment
 0xFFC5D014,ICUSSTS2,4,rw,ICU-S companion status; driver polls low bits with ICUSSTS
 0xFFC5D018,ICUSIRQSTS,4,rw,ICU-S interrupt/status word read by the recovered service dispatcher
 0xFFC5D01C,ICUSPARAM,4,rw,ICU-S operation parameter written by recovered command setup
+0xFFC5D020,ICUSREG20,4,r,"ICU-S offset20 word: exact Camry readers consume bit0; model permits observed word reads only, without a hardware reset value or bit meaning"
 0xFFC5D024,ICUSCTL,4,rw,ICU-S control/acknowledgement word written by recovered callbacks and reset paths
 0xFFC62000,UCFERRINT,4,rw,CodeFlash error-information control
 0xFFC62004,UCFSERSTCLR,4,w,CodeFlash ECC single-error status clear
@@ -136,6 +147,9 @@ address,name,size,access,comment
 0xFFD24408,CFDTMFDSTS_CH1_16,4,rw,Application CAN1 Tx buffer n=16 FD pointer/status word
 0xFFD2440C,CFDTMDF0_CH1_16,4,rw,Application CAN1 Tx buffer n=16 data bytes 0..3
 0xFFD24410,CFDTMDF1_CH1_16,4,rw,Application CAN1 Tx buffer n=16 data bytes 4..7
+0xFFD51000,DCRA1CIN,4,rw,DCRA1 CRC input; 32-bit register accesses only
+0xFFD51004,DCRA1COUT,4,rw,DCRA1 CRC data; reads XOR the internal Ethernet CRC state with FFFFFFFF
+0xFFD51020,DCRA1CTL,1,rw,"DCRA1 control; model supports only POL=00 ISZ=00, other modes fault"
 0xFFD60000,ECMMESET,1,w,ECM master error-source set trigger
 0xFFD60004,ECMMECLR,1,w,ECM master error-source clear trigger
 0xFFD60008,ECMMESSTR0,4,r,ECM master error-source status 0
@@ -217,10 +231,12 @@ address,name,size,access,comment
 0xFFE71188,TSG31CMPUE,4,rw,TSG31 bit-extended HT-PWM U-phase compare register
 0xFFF81420,STAC_GRAM,4,rw,RAM initialization mode control for Global RAM; reset value 0x00000003
 0xFFF81520,STAC_LM0,4,rw,RAM initialization mode control for Local RAM; reset value 0x00000003
+0xFFF82410,FHVE3,4,rw,"Flash program/erase/blank-check software enable, bit0; reset excludes application reset 1"
 0xFFF88818,CLKD3DIV,4,rw,EXTCLK1O divider; boot writes 0x50 for divide by 80
 0xFFF8881C,CLKD3STAT,4,r,EXTCLK1O divider status; boot polls synchronization and active state
 0xFFF890C0,CKSC3C,4,rw,EXTCLK1O source selector; source 4 is CLK_LSB
 0xFFF890C8,CKSC3S,4,r,EXTCLK1O selected-source status; boot polls until source 4 is active
+0xFFF8A430,FHVE15,4,rw,"Flash program/erase/blank-check software enable, bit0; both FHVE controls must be one"
 0xFFF91200,ADCG0DIR00,4,r,ADCG0 data supplementary information register 00; DMA source for sample ring
 0xFFF92200,ADCG1DIR00,4,r,ADCG1 data supplementary information register 00; DMA source for sample ring
 0xFFFEEA10,EIC8,2,rw,"ECM maskable-error interrupt control (EIINT 8); EIRF bit 12, EIMK bit 7, EITB bit 6, EIP[3:0], EICT bit 15; synchronous edge detection"

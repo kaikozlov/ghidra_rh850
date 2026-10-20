@@ -160,167 +160,167 @@
   "function_evidence": {
     "0x04C000": {
       "body_size": 232,
-      "decompiled_c_sha256": "056c62bb9124635b83b637f0a82de38fc086794c89fcdc7d48e27d3bf5080201",
+      "decompiled_c_sha256": "6a660266027b3647b04ebfca478f1d41e5244dd05299abf183ebdff8bef28a93",
       "role": "0x030/0x4A3 inhibit and feedback preparation"
     },
     "0x04C14E": {
       "body_size": 114,
-      "decompiled_c_sha256": "3d41ad2e170910481c567f7ff582814aaebf9cf826ef513637573c89a9cc722e",
+      "decompiled_c_sha256": "34d94c59ce4604809f8d276a1045224aa635f41864b5225a7ad989e29cbdc8f2",
       "role": "0x4A3 application staging"
     },
     "0x04C1C0": {
       "body_size": 86,
-      "decompiled_c_sha256": "4caccd7f20f01298e61d87fe0ec281d5d20de1265ded064f76625744ce367f58",
+      "decompiled_c_sha256": "c8ebea1a4cd8f25c4f38280f94286d1b61b46f3b2cce45e401b676feff8e98a5",
       "role": "0x351 debounce/state preparation"
     },
     "0x04C216": {
       "body_size": 34,
-      "decompiled_c_sha256": "0d369cf6e9354020c0cb08932364624ed1bada9d3d51be1e3e786e670cd9712c",
+      "decompiled_c_sha256": "bd6e384e3caf8ee6dc30412b297e948f0c0b338e8c08a11c8c1c67a0e44ce052",
       "role": "0x351 status/force producer"
     },
     "0x04C24A": {
       "body_size": 74,
-      "decompiled_c_sha256": "81fcbefdcb1ee4c1e07ab63c6c36719dcda43ac51d00a6062995a28d7902bdc7",
+      "decompiled_c_sha256": "f3a06d5bf88e06265cf05b6d0c6f7c3937f9ced556f2695dadfbb72805987df2",
       "role": "0x394 classifier projection"
     },
     "0x04C294": {
       "body_size": 10,
-      "decompiled_c_sha256": "10cda3933316841369448beff2f9f14085e6afcdc25e6605f519fcae39ed6489",
+      "decompiled_c_sha256": "ca8fab4f6d309609bc81e6bba8ea3a260a6d18195abeff3f36d262d6de73890a",
       "role": "0x030 status snapshot"
     },
     "0x04C2DC": {
       "body_size": 56,
-      "decompiled_c_sha256": "b1bad6c4539cc40d11bd869da1535e4b7c24b5959294c4f06d5447bd6964c773",
+      "decompiled_c_sha256": "e5942860db62e181d88bbe00c64f12c446f50b3d49b98523d10fbf5ec9843b82",
       "role": "0x030 cooperative-status projection"
     },
     "0x04C380": {
       "body_size": 82,
-      "decompiled_c_sha256": "fc5000e925c8531ed7ac400c8ae9922a60e0f498bc47806ef5f6577936afeb7b",
+      "decompiled_c_sha256": "cf671426223f3bcfa3ffe0c5f2f26446fb9c05f62b9df6cc1436860779316872",
       "role": "0x030 signed feedback scaling"
     },
     "0x04C3D2": {
       "body_size": 190,
-      "decompiled_c_sha256": "b3e61aad1a1a06547cd97687ecbed380953cd7d96c96650db1ea28cea67eef0b",
+      "decompiled_c_sha256": "5fbd3ab6f386803ee07d6503734e796d3013307b180cee021cac468549c2696f",
       "role": "0x030 position/status projection"
     },
     "0x04C490": {
       "body_size": 256,
-      "decompiled_c_sha256": "cef5d8c0c577037ed39b41d14773771eff99d69f9f7401f85d60d1fc173ef1ee",
+      "decompiled_c_sha256": "4f6a0b41f5e2f390553cf714797fcaf9c1c5ba4973abf1e1aa3500acb8a0cdee",
       "role": "0x030 torque/current staging"
     },
     "0x04C738": {
       "body_size": 58,
-      "decompiled_c_sha256": "635d332fad7e9eef33f2713932e7fd1c6f56b8b7cf84937a0b035e037322f9bc",
+      "decompiled_c_sha256": "a614b9672b42849da8d7615b8382c99e5485cc55eaeb50dac77f159b8acfa2b1",
       "role": "0x030 supervisory code producer"
     },
     "0x04C772": {
       "body_size": 18,
-      "decompiled_c_sha256": "c96af2c753a0b9f3fcecf256152da03afc45912c36f2b03c427fbba57e84561a",
+      "decompiled_c_sha256": "b7ba59709cee9447d35b3e92df36e21ed641d59da7951301cf5bc848751d3fea",
       "role": "0x030 status-byte staging"
     },
     "0x04C7AA": {
       "body_size": 306,
-      "decompiled_c_sha256": "ab259783060a3f87cd006a5c4615065991f82e50c04969f70a725c6e62946608",
+      "decompiled_c_sha256": "136735fea0db04129c0fbffaa8dd460ae781ff0ca7e8ae27045d9d64e983cf0a",
       "role": "0x4A3 generated-COM packer"
     },
     "0x04C8E0": {
       "body_size": 150,
-      "decompiled_c_sha256": "da63ad02a5e95a585955bb21e6c35ad70cc8346d5f92e5627623e2503469d122",
+      "decompiled_c_sha256": "26f43da3c2d02c34facbf47fad04166d657bd441d0af1cd837813ef6a403f405",
       "role": "0x4C8 generated-COM packer"
     },
     "0x04C97A": {
       "body_size": 1162,
-      "decompiled_c_sha256": "5e83dc88dea32e3a8dee514d83b52dcbf4f4a332f315d41ef0d6cb03e66eac9d",
+      "decompiled_c_sha256": "8875e740045466fcb96766228bcae3a0ef8b3ac7f07f3384276f33a312fa798f",
       "role": "0x030 generated-COM packer"
     },
     "0x04CE08": {
       "body_size": 196,
-      "decompiled_c_sha256": "451ab8acb3c42f8f0d1a99467228af88ae1c7a463d1be0ee3ce9e78bda618699",
+      "decompiled_c_sha256": "6bf10fc15f82805266150a476c78c3b7cd427c2d66011f0d6a115504e2824ff6",
       "role": "0x394 generated-COM packer"
     },
     "0x04CED0": {
       "body_size": 136,
-      "decompiled_c_sha256": "cef8e623fa51e32bf2e3664c29045daa75730e5bd87ae4c1a068b573e8b105e3",
+      "decompiled_c_sha256": "ff9ec156a04ab7806faf99ed51f1ce077be9e37af3348b4ae186d623cebc6b17",
       "role": "0x351 generated-COM packer"
     },
     "0x07BC42": {
       "body_size": 20,
-      "decompiled_c_sha256": "98d9fbb467c996b265606c4128bf2f41541fe74598ee23685059d1510fb6323d",
+      "decompiled_c_sha256": "ad979c0102af8c2f096641e7fb6d98ab95e0e9043c1771310bd74ff6092e8005",
       "role": "validated BswM/communication group-mask reader"
     },
     "0x07BF60": {
       "body_size": 176,
-      "decompiled_c_sha256": "e04a4b04fabe8f9946e7de983da0375101aed5d7bc8240e4590557be021e7273",
+      "decompiled_c_sha256": "b0a3af1129f6b81cccd824ee84c50a35d0b5f5dc8ef07851b68156302cae981f",
       "role": "generated-COM group-mask distributor"
     },
     "0x07D1DC": {
       "body_size": 322,
-      "decompiled_c_sha256": "ad279ef8da3f955f9da9ac90c421ba39128800a80698fb91937e9da256d42ce3",
+      "decompiled_c_sha256": "cc196edbef921be1960488241d06b93cd5de04abb7cc7c3bdf6a3309ef700b9d",
       "role": "generated-COM change-aware pack helper"
     },
     "0x07D31E": {
       "body_size": 184,
-      "decompiled_c_sha256": "7a982355ab0bf7d694cc74162ed8ff9a796762f725f2fc98468f2067487c789e",
+      "decompiled_c_sha256": "65b43831150b467658fde173531b03c8bfb48cd0d90e464e840c3e4c213d36dc",
       "role": "generated-COM raw pack helper"
     },
     "0x07D8AE": {
       "body_size": 520,
-      "decompiled_c_sha256": "c18b424099d66cbe8e5576edae1db687dd36babe840ef3981ee3880df68c7b1d",
+      "decompiled_c_sha256": "f3f7f7aa2793e45a1464ba6e89d41f6ea80e9fc50596c9c2a5a8cfc06c712b96",
       "role": "generated-COM group activation / timer arming"
     },
     "0x07DB0C": {
       "body_size": 404,
-      "decompiled_c_sha256": "93b27c62b11f388a6b108c161bfcd5585d69ad1ff484137a057e7b57fbfafdc7",
+      "decompiled_c_sha256": "d3d94a10d00a5809f799d3ddb95c244dc27bc7bf04d6633bd6787a9f26bce5a6",
       "role": "generated-COM cyclic timer service"
     },
     "0x07DF14": {
       "body_size": 306,
-      "decompiled_c_sha256": "50e24497e87fb2eec5c875c824174579677b5e28a9e3351457af9673c7d929b1",
+      "decompiled_c_sha256": "4b9576c6d121f02ba17112d0da18d9f9c5ac831b657573698f98c88f743624fe",
       "role": "generated-COM transmit dispatcher"
     },
     "0x07E13A": {
       "body_size": 92,
-      "decompiled_c_sha256": "bfd91449dc42859e81f1619d9688e0b2a3b613a0ea47da8a0f0e83cf2542eb3d",
+      "decompiled_c_sha256": "9b7b7e717388358d05dfcbc266684ffbffe7c4ff29ec453265460a6c86df8b05",
       "role": "generated-COM pending-transmit service"
     },
     "0x07FEF8": {
       "body_size": 160,
-      "decompiled_c_sha256": "ece2f1afed3065c3750956310ce983fc178bcb78b2e84eb4e4c0a98f1d2fb1ac",
+      "decompiled_c_sha256": "b812c248e87afaedc08420addab8d32d3f0ce6a591d46fb5600f062b448887ef",
       "role": "direct CanIf transmit class dispatcher"
     },
     "0x0805C6": {
       "body_size": 222,
-      "decompiled_c_sha256": "79851728605e65eaa0b11cb16271b5a6db1a3e8471677af29da07c9a78b08e39",
+      "decompiled_c_sha256": "57fe701242e0b1acdf23607072922974cc042bde6e306ac56ac9b8dc37d5892e",
       "role": "CanIf HTH runtime initialization"
     },
     "0x081A7E": {
       "body_size": 26,
-      "decompiled_c_sha256": "01d68e17a84f0ac1fc78bc75b4a5165d2731a1fe3b0d1df5f37e743d92e58e24",
+      "decompiled_c_sha256": "15c512b00e3eb625b859487fc775d531d22732cb789a4af9b97ae2432da97136",
       "role": "PduR transmit shim"
     },
     "0x081AB2": {
       "body_size": 112,
-      "decompiled_c_sha256": "ba98827d8813f52896eb5b7715b74d605d96bb5c4272ce21850b179f30cb2b1d",
+      "decompiled_c_sha256": "ae3fcbfd436bb86cfbf1d3b17705bf43ea635463e6cecf99b9ec9ddcfb6587b6",
       "role": "PduR lower-route dispatcher"
     },
     "0x085112": {
       "body_size": 166,
-      "decompiled_c_sha256": "25cfdad736e35e7812434953fe8fb60d0eb5039e7ffdde89a9b7c903a3fbc9ef",
+      "decompiled_c_sha256": "7ca832d47f11538a2a39705b8443d01cc0623bb21dbfb132c759d647c718302c",
       "role": "lower CAN driver transmit dispatcher"
     },
     "0x0853AA": {
       "body_size": 244,
-      "decompiled_c_sha256": "542466141fedb57d99bbef39d597d3f24d846d7e9a97c640a048aa35954891ed",
+      "decompiled_c_sha256": "82cecb955cb93907187d6a5c158e45175068d437fdaa45254859028fdc5652cd",
       "role": "classic CAN transmit writer"
     },
     "0x08549E": {
       "body_size": 342,
-      "decompiled_c_sha256": "26e22500d21e7e89f0d54101d47193e3fd1688af801a3eb5b2b8e2f0c54df7bc",
+      "decompiled_c_sha256": "2b1bcda7b7f9ce141be69001f30084555a3fc82cefac5e0ea08e81bfb66e62f9",
       "role": "CAN-FD transmit writer"
     },
     "0x08ED8E": {
       "body_size": 88,
-      "decompiled_c_sha256": "e8bb8fed4db2363f1bc10a04e5edc8c412d0b1097c3ae8aeb86f15d10b4c4a99",
+      "decompiled_c_sha256": "92fc77cc654aee84cb19902dbc9d675e808f80aaaeed5f7d469100961690bc89",
       "role": "SecOC transmit ingress"
     }
   },
@@ -753,7 +753,7 @@
       ],
       "can_fd": true,
       "can_id": "0x030",
-      "configured_only_note": "signals 36, 37 and 283 are assigned to PDU0 by the exact signal->PDU table but no literal call to either generated pack helper exists anywhere in the 7,178-function canonical corpus; no wire field is invented for them",
+      "configured_only_note": "signals 36, 37 and 283 are assigned to PDU0 by the exact signal->PDU table but no literal call to either generated pack helper exists anywhere in the 7,336-function canonical corpus; no wire field is invented for them",
       "configured_without_direct_pack_call": [
         36,
         37,

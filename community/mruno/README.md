@@ -315,6 +315,8 @@ this detects a wrong Python/openpilot environment before vehicle access. This
 host inspection gap did not cause the recorded October timeouts because those
 runs reached Panda, programming, and application F181.
 
+**2026-10-16 cross-vehicle audit: remaining live discriminators.** Current universal C signer firmware contracts resolve primary lower CAN response HTH 50/resource 6 on Crown, 53/resource 6 on Camry and 50/resource 6 on Corolla. All registered images independently resolve classic functional `0x777` acceptance, software ring producer, common TAUJ0 5-ms period, native 46-bit freshness encoder and type1/selector4 synchronous command-5 wrapper. This is exact-byte-derived portability evidence, not live Crown request-signer success. Crown's September B6 helper established live slot4 signing but did not exercise the current helper's GlobalRAM code, four raw-ring fragments, independent `0x008A` freshness epoch/message counter or separate `0x7A9` egress. The Oct 10–12 host records do not measure those stages. In particular, the older host's apparent release-Panda `allOutput` failure is not a complete explanation for ELM-labeled retries without the newer `signer_session` witness. The current stock-primary mailbox removes a potential resource-7 availability dependency but does not establish that the prior alternate resource was ID-invalid. Evaluate the current session telemetry and resident counts in order; no new speculative Crown payload/flash modification is justified by these logs.
+
 The next result must retain the current `signer_session` and
 `resident_state_after_probe` objects. Their boundary is diagnostic:
 

@@ -13,241 +13,241 @@
     "0x035C4C": {
       "body_sha256": "205df4739724fda0b8e0e8c09e44df61b42568bc5c92e9673462d3801db70b2a",
       "body_size": 156,
-      "decompiled_c_sha256": "9504bb6536cb2cbca2f9ef662d0ccf5fdd597a0d4a49db5643ae896cbbbf3764",
+      "decompiled_c_sha256": "182b0ea13faa065b46a4a89bf53546f364e131b283281612118560b2934a2cb1",
       "role": "motor-driving EE40C consumer"
     },
     "0x05899E": {
       "body_sha256": "360298ede4783a29bd5efa86937ccc0199571d3283b2116bd2d2601489c636f4",
       "body_size": 126,
-      "decompiled_c_sha256": "47fd5b4d9018dc19ab4170fc22e345a9f0c590c12a751510711a2b3cd32766d6",
+      "decompiled_c_sha256": "6bcc07e5910b49ca1bab6543538a18a6b28138737fabbc083c31c4767ba310b4",
       "role": "state-transition/steady-state scheduler"
     },
     "0x0BCD02": {
       "body_sha256": "420dc629af9b35e33f7bc62f62f4017eaec7bf5ea470ff5a2d41f7046ec51ccb",
       "body_size": 20,
-      "decompiled_c_sha256": "7132192e9a15a8135aad2e519714f96a91d8aa724405c22e5ff16bea5efae114",
+      "decompiled_c_sha256": "3b959a65ea16c1f89852bb4d1876f47295f192bb03e756380d66660a43a45bf4",
       "role": "shared snapshot plus command-composition invocation"
     },
     "0x0BCD62": {
       "body_sha256": "76d78c2605f902e96eb723f662d9fba543b1d1db85aedf62b9b3894b8c0220aa",
       "body_size": 2748,
-      "decompiled_c_sha256": "19bf7567411c639b46708348553e5183d492431751af42f570855b4661508793",
+      "decompiled_c_sha256": "f075bd6298ad24fc32f70f1f032b6274f54b61ab9a627890ee2062e660987afa",
       "role": "input snapshot plus B6 supervisor invocation"
     },
     "0x0BF33E": {
       "body_sha256": "9b9630058698cbf7e528c55345a3c4b0f51a42549c89d1b21da8da7d6ed6dedd",
       "body_size": 104,
-      "decompiled_c_sha256": "5439f5f6eaf6f9740389af3fe78e9b0b45cfc805580a1fc45524c22ff43dbeae",
+      "decompiled_c_sha256": "49b7ca790991b27239bac9ef18ba05a83bbebff662471f90f8f154b1f63c57ee",
       "role": "command-model/current mirror"
     },
     "0x0C1F7A": {
       "body_sha256": "fbfb8c51a516c55a44bcf76145bddf955775f8ff571f298cf7cbb6402c80b477",
       "body_size": 134,
-      "decompiled_c_sha256": "5e7c99529b96d9989e20c62c4659b56ae3378f65bb82968791d64658cc473b25",
+      "decompiled_c_sha256": "349f6165c18f03a567f644b12bf803d8bdfb2cfe75b3462b481eed565bfda6c5",
       "role": "state transition command-composition caller"
     },
     "0x0C2000": {
       "body_sha256": "63736037e7ac683ccf6bbf7d8fd393f74e9a88b94c0ae399547f61c66db51002",
       "body_size": 68,
-      "decompiled_c_sha256": "a0a1bc36b72aa2bff3cfe42f8ed1b95faba0f44a2a7b6fb6e7a62fbab2dc0b06",
+      "decompiled_c_sha256": "bd8cc39041b8c2f876fff17e8e328e753f0126498326fddb62cb90ba70bcf713",
       "role": "steady-state command-composition caller"
     },
     "0x0CA614": {
       "body_sha256": "d94931cebc53126f817febc51513e0a71a05591e0038c29f8ae3d5b83ab1a17b",
       "body_size": 258,
-      "decompiled_c_sha256": "2d71ce15af85e4fa61564e51737d0d2ad5410064e3c171b871cd807d57464f01",
+      "decompiled_c_sha256": "26479678f0f93d6a2d144b051cba40489922d0eb084ad6450d0da4fca98fae58",
       "role": "ADB0 0x19/0x1B state gate"
     },
     "0x0CB73A": {
       "body_sha256": "7f7324938d9d266f3e374ded2f494f0fb7c0366efcc2a39c15ec620e28014cb1",
       "body_size": 226,
-      "decompiled_c_sha256": "d987954c99f5cf12a2d5fc4f6be9754a18fb7292adedeb2b8dbad0cf0cf3078f",
+      "decompiled_c_sha256": "e63bc266429990e5b83489652c778cc06fc1d2e25248355a21b1591372665b53",
       "role": "special 0x31 transient gate"
     },
     "0x0CBB66": {
       "body_sha256": "ea547c863e4e2ecd9f6001acb26f7eab3d109a91d820a734b3d14ff2da5a19a3",
       "body_size": 282,
-      "decompiled_c_sha256": "d1d4f0f811e2e50c42280db6b82219d944b576904e73103ce6536a66bef097b7",
+      "decompiled_c_sha256": "4e3305f691121285f49cbab0c110ef5205331f46701ba7dbb1a9cc2ae81f6d6f",
       "role": "B6 target-angle input conditioning"
     },
     "0x0CBC80": {
       "body_sha256": "5a1a79943f880d9f649e8a79c60af36521021b94c0d983bafc70f2686876a7ab",
       "body_size": 56,
-      "decompiled_c_sha256": "36caab1731c239f4232b1b8b66a5c10903426e803c64d093124d632df38542fa",
+      "decompiled_c_sha256": "a25768fff08d27ff592e413a992806d1b8e5d2159b0ff23578cd6de322b3188c",
       "role": "local measured-angle-rate state"
     },
     "0x0CBF9E": {
       "body_sha256": "8e7e3059ae33cc76049f06c503b2b46d943c9a0e20938cc01d6cc98906a7cf10",
       "body_size": 154,
-      "decompiled_c_sha256": "52c312f1c2a62539647c35ad95e0f59f3ded0d08c236490443d22dcbac918532",
+      "decompiled_c_sha256": "8509aadb1f9118d4e30936888a0a57ca856e3a2daefdb9433e734c20359908a7",
       "role": "local C81A damping/assist addend"
     },
     "0x0CCDF8": {
       "body_sha256": "45cf097f8be599c362fee1a0ce99620765de7d7f881c8fb5569d7271e05a7468",
       "body_size": 188,
-      "decompiled_c_sha256": "3ab9c5b170df58c1a890237dc87b16cb1f50f8ecb10e5c364a455220dc98105a",
+      "decompiled_c_sha256": "b296a03b67a4d473c4b344004d61765a19056acb796955e6f319bcfa6a70f5a0",
       "role": "B6 supervisor output conditioning"
     },
     "0x0CCF0E": {
       "body_sha256": "f5a250c7631463c3446661d0084dc80810d9c6ca49609fd334175507f1707cd9",
       "body_size": 164,
-      "decompiled_c_sha256": "9ae5e4afbe80bcbaff3e2ee8b2a91b654102eb22f40d233995860993bb25a6ec",
+      "decompiled_c_sha256": "918e0be4932b8c4b23fdc50c76baea3fd7052c78900ca7dbb6b9e5592e0ccc7b",
       "role": "B6 target-angle scale/continuity stage"
     },
     "0x0CCFB2": {
       "body_sha256": "1d89d80f813fba9da521a9984ce9b335200b66832f371b620a92053b4c100047",
       "body_size": 128,
-      "decompiled_c_sha256": "3bf2c461409a44ff97396056555fc3544c07221fce6b81859677ad6d2ad87c7f",
+      "decompiled_c_sha256": "52c0ddd8d64240a407b17431624cf070fd3ea2bce4ab1109b08f30112ee4f39e",
       "role": "B6 target-angle supervisor staging"
     },
     "0x0CD128": {
       "body_sha256": "4ea271ee3c13dee80ee2712b8a82fb23c5c3ef1d3b5fb2e58c3d088e0e2a2671",
       "body_size": 376,
-      "decompiled_c_sha256": "821c6c3ddc1010c247382e830cec56e5b54af9cbef9e0c474dfeafb5c346a3a4",
+      "decompiled_c_sha256": "a8a53880724fd71e82b5f166f1d60e2cd3f2ede7e724b12d4446d6bf3a0dc180",
       "role": "target-minus-measured B6 controller"
     },
     "0x0CDFD4": {
       "body_sha256": "0653e4405a2c317bcf4c21808a7eb30782ea6a48bab33ec6a8d5cc3e8e628199",
       "body_size": 36,
-      "decompiled_c_sha256": "de2988559579141efcac80ad1437c293161502b353e309db7b763dd061dd3c70",
+      "decompiled_c_sha256": "8f749c1c208ea0e9f80191ff2c82d6dfebad97c9231611cb0884e0fdc3ed58c9",
       "role": "B6-bank controller aggregate"
     },
     "0x0CDFF8": {
       "body_sha256": "c98e0bccbb22324f1f4d55db3666683ad4b8167f689fa9d7d1e27e92d8a47d25",
       "body_size": 182,
-      "decompiled_c_sha256": "bf74f3d353522d75462dc64fd8e015636cb17faae3ae09af3e92810e6ab66ca7",
+      "decompiled_c_sha256": "fb4cbb59dd5ce6c1e46af1b8856ddb6b01775a12b2269b5f96e57d0a5abd9278",
       "role": "mode-selected B6 supervisor"
     },
     "0x0CE144": {
       "body_sha256": "e8e705ee619f6ba492e9c5f59847dacb914977cf7983c3f7edbcf05e343444e7",
       "body_size": 298,
-      "decompiled_c_sha256": "c8bedd90f4e54ed2db513502b3756d08fe47094e9a16429ff07c92e08868c481",
+      "decompiled_c_sha256": "9100ec34032afb256d50456193b04476fcc315faa7964367f47c0e2a2bcb28ec",
       "role": "mode-selected B6 supervisor"
     },
     "0x0CE384": {
       "body_sha256": "6fcc846f9218e5aa029f81e8789bcca55d43bdbe5638b3eb27447f38299a862f",
       "body_size": 38,
-      "decompiled_c_sha256": "de2667e4516eee76d0473b9ec83faa4ef88f0768fb255ebddfc7bff80fbcfbce",
-      "role": "default-bank versus B6-bank controller dispatch"
+      "decompiled_c_sha256": "5256106dcdd55cdbfe97177c090656ff64f5ff83061493c064698bc6274086e7",
+      "role": "mode7 reset versus active angle-controller dispatch"
     },
     "0x0CE6F4": {
       "body_sha256": "48271f642ac3b97a6c69295487439a0fb7addb7f1ee8f3666e3eef03aa8a4748",
       "body_size": 92,
-      "decompiled_c_sha256": "f2c280bca7b18857dc5dcc2a7918ea1dc4060c4c204988a0306ea307af23ee8b",
+      "decompiled_c_sha256": "638f9b82e5f34e4c4f783691494cc6beecef545652a7686e2e0062f01a22741e",
       "role": "B6 supervisor consolidation"
     },
     "0x0CEFFC": {
       "body_sha256": "551e4f9d934fa59020839ad2bb9d0019f744cebe580558f3ef5c129b0821f5da",
       "body_size": 78,
-      "decompiled_c_sha256": "c35a062da1e28ebb5b328de01be83a277a88752390c383e311093881e5a6f5df",
+      "decompiled_c_sha256": "aa7858a9dc0afa753920b81d771346483365bd8ae1afc5ceed3d856c3b826804",
       "role": "Target Lateral ID to controller bank"
     },
     "0x0CF148": {
       "body_sha256": "69362bbbc374f98398617a91545b147e4b9a0353a40be0205c4a1dff7d7ad197",
       "body_size": 228,
-      "decompiled_c_sha256": "0f0c7620bba3af95b5cca93446ce8c6fdcd4f5cc2d6b7a22e5e22a2b8bc119a3",
+      "decompiled_c_sha256": "90cc1fe62a0ce4573af0751146b5e105985d96a5b833c1fafef6a72e0b22106d",
       "role": "B6 supervisor gain state"
     },
     "0x0CF22C": {
       "body_sha256": "a500cacf1aa86c88f8130c5a83cd2afc7a4b23db0ff323c9fa68bca923055aab",
       "body_size": 74,
-      "decompiled_c_sha256": "562ff7989afad1d4d53ed6a1a1be14beb1596f1f571ae21c5f74191cb3cc910f",
+      "decompiled_c_sha256": "c312dd453b53612460214855fc83ca2c681cdad9f6baa2aeded739b4040a0e34",
       "role": "B6 supervisor source selection to CB08"
     },
     "0x0CF276": {
       "body_sha256": "83ee6b6b22ff968c01a943492629725f5952214a305f58b5fe3846424f165060",
       "body_size": 60,
-      "decompiled_c_sha256": "b505b764a2d728140f9d67f6f6ee2482eb8172d914bc00573beece0a6a6912d0",
+      "decompiled_c_sha256": "f21bf91cbcf8cba94fe8bc31fcf4d74fe93082d8f4333f7bcc54c59c72032b60",
       "role": "mode-bank limits"
     },
     "0x0CF2B2": {
       "body_sha256": "ac1e88a5f7a5620c751302d7b76d9cb7d2f14246cf49349ee429acb33559493b",
       "body_size": 138,
-      "decompiled_c_sha256": "aa91599107bc3f4dd69f7c6b2ea390e9fde048c8843c2f8ffcd17abca96ca12e",
+      "decompiled_c_sha256": "0eab77080878ca8a6421c1c272d0f2b7222f04738b810380d99ddecb4e7d35d3",
       "role": "B6 supervisor ramp to CB38"
     },
     "0x0D0218": {
       "body_sha256": "a509a296f50e426acede52ea4730ae44322e4d9fe309e8c93c553a5c674307b1",
       "body_size": 108,
-      "decompiled_c_sha256": "a828b79715c81640a7ede3f37edbe85a58465e9c1a8361129a39cb29d42eba33",
+      "decompiled_c_sha256": "878fad66e73f3a41c6c15d08da021fd3f97c2d6773f43bc9d55c22091ce7f806",
       "role": "ordinary assist sum including CB38"
     },
     "0x0D0284": {
       "body_sha256": "b4eadcf0a0f2d412955c6ed2776087bccac004c30a96401894801ba943676f71",
       "body_size": 86,
-      "decompiled_c_sha256": "10b9a5c39b0c8b342f92cbad28074ace6d9d66e5630039026effebcd4925dc87",
+      "decompiled_c_sha256": "705bb655f49a4f7ecb6f1d67a6333429469c17aac44abc819adcda04240042f9",
       "role": "shared command scale/clamp"
     },
     "0x0D02DA": {
       "body_sha256": "edb65881363e0b33f0a565d075c487c6cf94f785e0a9590e8743eff834eee238",
       "body_size": 168,
-      "decompiled_c_sha256": "2b0e04e2ce1fe5179136658f214d536024bc58bb9126d86a2e2c544432c4ea03",
+      "decompiled_c_sha256": "4854c6114d33d9ed2cf67e6683de1a30f090ccf67379ed9c08f20136fec59c9e",
       "role": "shared command slew/filter"
     },
     "0x0D0382": {
       "body_sha256": "96837ab292b7bf15c16a7467e3f0aae870d4d426087f7ce701f1e1ae0ae7dbfe",
       "body_size": 28,
-      "decompiled_c_sha256": "4c9ef2be0d0fc7633937345b501be1cd2463681b268843ebe2eb675ea93c7302",
+      "decompiled_c_sha256": "6a6658b22de547be9267a1de7a4bfab3b9663a264e96b6e4bd1925092f0eb85e",
       "role": "shared command saturation"
     },
     "0x0D039E": {
       "body_sha256": "993f8f98ca99f2370ae504726245106eda7443287bea6834ba32b757da35539e",
       "body_size": 142,
-      "decompiled_c_sha256": "b1b5b46545b5729aba8b13184fd0652deeffe5bfc9a84b2d29ed2a01bc82c597",
+      "decompiled_c_sha256": "5e653d5481c2361879fb1948ab3a15ce717e9f8292528749d77ccfe0d9628e7a",
       "role": "shared base plus local addend composition"
     },
     "0x0D042C": {
       "body_sha256": "5cec1b3bd6f5bbbce2832ae7ff417f75db1e11f053d568c143f8a48ee13539e5",
       "body_size": 80,
-      "decompiled_c_sha256": "3d59d9771c66e6bb670a825a21d96f39e92fbb393825134321ccace032d5b7da",
-      "role": "shared pre-slew command output"
+      "decompiled_c_sha256": "3e619439682626b3d89567e17e4b5f8cce5112dd1de1153ead50474ebdf2f8ec",
+      "role": "shared command scale/amplitude-clamp/gate"
     },
     "0x0D047C": {
       "body_sha256": "b7995271dcae87283b114788eb9719f086ea7ef78fde1e73ed9fa7336cec3e4c",
       "body_size": 48,
-      "decompiled_c_sha256": "b515c8173254fcf4d71e57598d1306f271a50e16beddcbf30e3d4ff56b24408b",
-      "role": "shared post-slew/override output"
+      "decompiled_c_sha256": "3f81094805c7095dcc3c63b8cb8a8c2049c6c72bb731e602066a2010a546e8ea",
+      "role": "shared final command/override selection"
     },
     "0x0D0674": {
       "body_sha256": "ec9bcdb10dfd708d8e342efbd4d71e55675463d7147d0b0122a00d7b4b4fc5fc",
       "body_size": 98,
-      "decompiled_c_sha256": "47996810a46389fc63b0c3944a691fbe3bb375d8bbfe9069834c115db11c603e",
+      "decompiled_c_sha256": "60a11f713d363cffe8a11bf6c74cfb8adc7c5b9bf3fc18b4ace487ad9c96dfb5",
       "role": "internal CC94/CC98 override writer"
     },
     "0x0D06D6": {
       "body_sha256": "34f08369e95c0db8e107f1ad001b485d08fcaa5c96d084f7537a9f751064aa73",
       "body_size": 20,
-      "decompiled_c_sha256": "b9b1829769ea6f32b4f67a154d84c2cb1eaa6d1b13aba3ce5ce6370c82c1c545",
+      "decompiled_c_sha256": "c553da73d4554775051b40cac0e0503e0e24f27b3288d670751bde3360c7df91",
       "role": "internal override aggregate"
     },
     "0x0D0AAE": {
       "body_sha256": "0eda7671aa6175f44503e1b9e6c42e1fb1c255fa4e4c0391269eefe40b61e01a",
       "body_size": 72,
-      "decompiled_c_sha256": "51d93da1f70ed9e57c8ba1220658f8903420cd64dfda2ebb2a7e01c60335b597",
+      "decompiled_c_sha256": "1cd6cec04bd319c6ff12ef9018a7a8ade2067c997820a3a99bcb3ad553f491ed",
       "role": "shared command snapshot"
     },
     "0x0D0AF6": {
       "body_sha256": "2eda8a4e734a3cd248c83c9cd41f906e0191ee48afa5ba72a73640da00823fc9",
       "body_size": 228,
-      "decompiled_c_sha256": "68fb362fae94cf8a89c3e602ca0a77b0da17dd40794402abfbbbf3b7263eb414",
+      "decompiled_c_sha256": "2b524374caa5085f15447a62bc59e5bfb75457c8aa68189693728aa94b9a0327",
       "role": "shared command-composition coordinator"
     },
     "0x0D0EEC": {
       "body_sha256": "e58077923617544434467a6d0279d5037aa2cf1398960ef0fe62126f37e23231",
       "body_size": 488,
-      "decompiled_c_sha256": "1e972cafb3e6afc4d60a0cbff2c63596f7dda6bdb87dc1bb53de2dd94b6e4f17",
+      "decompiled_c_sha256": "b6f1ceb628105875fd97d3e32b75eca90ab773ec0186156b74062066556dcefa",
       "role": "B6 supervisor cyclic coordinator"
     },
     "0x0D1100": {
       "body_sha256": "c73c370a83bd7615ef8132cd415ed3bdc754e2c2b80da9a86027dacfe4d4476d",
       "body_size": 12,
-      "decompiled_c_sha256": "0016b809d7b5893fa70a03adf9d669076c377306ef0a887c412c285f6b3092d5",
+      "decompiled_c_sha256": "7fb57be1a830f26300e61ac6088ee78dbcc08c3cf6981271a0c3bde456d61d27",
       "role": "shared command-composition wrapper"
     },
     "0x0D1130": {
       "body_sha256": "8eae5b4c5639b3c38aba7e7b0b7aa1fd432462c4c0e09990261c9ae8bfe460f8",
       "body_size": 12,
-      "decompiled_c_sha256": "526319c6c40e4f6754d30f928f71997026d0dd1d27181556932efeb2b589fe5d",
+      "decompiled_c_sha256": "20503a7fb3882b19384de1d0388a25b66caf69c6692b921f7a9037218ee0740b",
       "role": "B6 supervisor coordinator wrapper"
     }
   },
@@ -263,7 +263,7 @@
     "ordinary_eps_terms_remain_in_id11_composition": true,
     "stock_request_plane_boundary": "This proves EPS-side composition. It does not mean F33 literally adds the upstream 0x08A angle: exact F33 receives neither 0x08A nor 0x081. The Toyota/FRC request-to-chassis authority handoff is a separate upstream/local provenance question."
   },
-  "schema": "camry-f33-b6-command-composition-v1",
+  "schema": "camry-f33-b6-command-composition-v2",
   "selector_census": {
     "ADB0_address": "0xFEBEADB0",
     "ADB0_decompiled_functions": [
@@ -744,12 +744,12 @@
     "c81a_is_local_not_raw_b6_target": true,
     "d0218_adds_cb38_to_ordinary_terms": true,
     "d039e_retains_shared_base_and_local_addend": true,
+    "final_override_is_internal_not_b6_selected": true,
     "id11_does_not_arm_ca614_state_gate": true,
     "id11_does_not_arm_special_transient": true,
     "id11_maps_to_bank2": true,
     "motor_snapshot_uses_same_cc64": true,
     "no_cb00_function_directly_writes_or_reads_final_funnel": true,
-    "post_slew_override_is_internal_not_b6_selected": true,
     "shared_command_coordinator_always_calls_same_funnel": true
   },
   "shared_funnel_direct_references": {
@@ -1004,7 +1004,7 @@
   },
   "target": {
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-    "corpus_function_count": 7178,
+    "corpus_function_count": 7336,
     "software_id": "8965F3307000"
   }
 }

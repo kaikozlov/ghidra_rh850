@@ -7,6 +7,7 @@ from typing import Any
 
 from tools import REPO_ROOT
 from tools.project import analysis_target
+from tools.project.generate_decompiler_corpus import canonical_c_locations, load_inventory
 
 REPO=REPO_ROOT
 BUILD=REPO/'build'; BUILD_WORK=BUILD/'work'; BUILD_LOGS=BUILD/'logs'; BUILD_TMP=BUILD/'tmp'
@@ -17,15 +18,6 @@ def run(cmd:list[str],env=None):
     r=subprocess.run(cmd,cwd=REPO,env=env,capture_output=True,text=True)
     if r.returncode: raise SystemExit(f"command failed ({r.returncode}): {' '.join(cmd)}\n{r.stdout}\n{r.stderr}")
     return r
-def load_inventory(path:Path):
-    meta=None; funcs={}; totals=None
-    for line in path.read_text().splitlines():
-        r=json.loads(line); k=r['record']
-        if k=='meta':meta=r
-        elif k=='function': funcs[f"0x{int(r['entry']['offset'],16):08x}"]=r
-        elif k=='totals':totals=r
-    if meta is None or totals is None or totals['functions']!=len(funcs): raise SystemExit('invalid target inventory baseline')
-    return meta,funcs,totals
 def canonicalize(raw:Path,inv:dict[str,dict[str,Any]]):
     out=[]; seen=set(); errors=[]; failures=[]
     for n,line in enumerate(raw.read_text().splitlines(),1):
@@ -45,6 +37,9 @@ def canonicalize(raw:Path,inv:dict[str,dict[str,Any]]):
         refs.sort(key=lambda q:(int(q['from_addr'],16),int(q['to_addr'],16),q['to_space'],q['ref_type'],q['operand_index']))
         ranges=[{'min':f"0x{int(z['min']['offset'],16):08x}",'max':f"0x{int(z['max']['offset'],16):08x}",'space':z['min']['space']} for z in x['body_ranges']]
         out.append({'record':'function','entry_addr':e,'address_space':r.get('address_space'),'name':r.get('name'),'signature':r.get('signature'),'calling_convention':r.get('calling_convention'),'body_size':r.get('body_size'),'body_ranges':ranges,'is_thunk':r.get('is_thunk'),'decompile_completed':True,'decompile_error':'','data_references':refs,'decompiled_c_sha256':hashlib.sha256(code.encode()).hexdigest(),'decompiled_c':code})
+        if 'c_locations' in r:
+            try: out[-1]['c_locations'] = canonical_c_locations(r)
+            except ValueError as ex: errors.append(f'{e}: {ex}')
     missing=sorted(set(inv)-seen)
     if missing:errors.append(f'missing {len(missing)} inventory functions')
     if errors:raise SystemExit('target corpus identity errors:\n  '+'\n  '.join(errors[:30]))

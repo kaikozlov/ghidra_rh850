@@ -17,6 +17,7 @@ recorded vehicle demonstration establish different things.
 | Understand project scope and evidence | [Project overview](docs/OVERVIEW.md) |
 | Set up tools or work with Ghidra | [Workflow](docs/WORKFLOW.md) |
 | Find target-specific conclusions | [Variant reports](docs/variants/README.md) |
+| Read reconstructed Camry C or change reconstruction tooling | [Camry reconstruction](decomp/camry-8965F3307000/README.md) |
 | Review Camry capabilities and remaining qualification | [Capability matrix](docs/variants/camry-2026-capability-matrix.md) |
 | Choose the next investigation | [Priorities](docs/status/PRIORITIES.md) |
 | Look up a prior claim or correction | `tools/know QUERY` |
@@ -87,6 +88,7 @@ or supported vehicles.
 |---|---|
 | `firmware/` | Canonical full or explicitly bounded partial firmware inputs |
 | `projects/` | Committed Ghidra snapshots; never open these with Ghidra |
+| `decomp/` | Target-local reconstructed C, curated types/symbols, and retained original-byte scenarios |
 | `targets/`, `community/` | Target-bound captures, manifests, and attributed external evidence |
 | `data/` | Curated evidence tables and generated artifacts; regenerate generated files |
 | `tools/` | Public commands and capability/target-scoped implementations |

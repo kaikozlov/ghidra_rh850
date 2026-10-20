@@ -71,7 +71,7 @@
         "subbus_sequence": "0x33"
       },
       "path": "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json",
-      "sha256": "0714517d26befb64b16c505e5be568a8383f1ce13832a7220133076a0a9b31d8",
+      "sha256": "ecaf10a9fda9ea7be54bb08bb11f9bb37fafbf6264a3ef653c8fdc62e79e73e1",
       "skid": {
         "bus_index": 32,
         "bus_name": "Bus 4",
@@ -87,265 +87,265 @@
     "0x0004BD46": {
       "body_sha256": "db4f6577d4a3250c7277730ee2f3c3e3fb71ffa83c6103ff1cd4c5b982f65b62",
       "body_size": 390,
-      "decompiled_c_sha256": "6276e8aafdd85f37619cff2c474ffadf71e60dfada9a26a16b39ad04c7c08368",
+      "decompiled_c_sha256": "730c13e454b7aea369baeb80750b38918af4b1fef7b6ec3f84cc063fdd91c37b",
       "role": "generated-COM route44 unpacker"
     },
     "0x00066026": {
       "body_sha256": "da415cc00b1daa8fceb5e10e2c6ee095d54d03a4906e24bbbd0678b360fb386f",
       "body_size": 60,
-      "decompiled_c_sha256": "3c4ca6ecc2f9155e9aa295c5808ec4659376e3d95b21621a010f75359e74ea53",
+      "decompiled_c_sha256": "15bfaa74a858bf099025ddfe25c894729e14fdbe9462b1f7c4539f5c54a73f5a",
       "role": "interrupt dispatch aggregate"
     },
     "0x000667B6": {
       "body_sha256": "14f79d49ceb6a6eb8b9089f4ca4416a08dafcb623822a33cf9529cd24fce730c",
       "body_size": 48,
-      "decompiled_c_sha256": "8908e3d8c76c00691d7da6e3491b101390776c626b0f3a8e48ba972ae5068224",
+      "decompiled_c_sha256": "9f68e3763a074158be56bd34048e77dc4ffe08a9cf3b8f4900633fe3f4d33686",
       "role": "CAN receive interrupt task"
     },
     "0x000667E6": {
       "body_sha256": "96d89859e02738c11ddd556d055628f6e75a1e0b88c8f129e2dba902a34a5307",
       "body_size": 32,
-      "decompiled_c_sha256": "4c93b2b1eac009afbe06ba81cfb0e025fc2ee98c2afb2be84867c13692ecf16c",
+      "decompiled_c_sha256": "ad14bb094922a02813e586905fe74f10e10eb6f9ba9898f111bb27a8d90856b1",
       "role": "foreground communications/application aggregate"
     },
     "0x0006A32C": {
       "body_sha256": "ea189420fd5f497573b1a378591da15abe3e6e1eecfd8bd3da5d357eff618352",
       "body_size": 146,
-      "decompiled_c_sha256": "73c13e10230fb7b4799093b809fd033cc8723de43eb61b84249a79cfeb287b2a",
+      "decompiled_c_sha256": "fba0ed795109e20a206ac76dbe243b905977c106c3d67bd4c6eb267193d1c459",
       "role": "legacy Toyota checksum evaluator"
     },
     "0x0006A3BE": {
       "body_sha256": "227c8ab097ee8448e441c6a8c8095396e122c250996dc20b07fb2439646514b9",
       "body_size": 50,
-      "decompiled_c_sha256": "c0b4452a66f6fb1a34cfea339128dc14e76813585f9604da1d43f1a04534243f",
+      "decompiled_c_sha256": "391aba95b0fb26245dcef692fa98f5ccced3421ec9f2391cc7be5082db2ea4d7",
       "role": "legacy Toyota checksum dispatcher"
     },
     "0x0006A410": {
       "body_sha256": "9883350c72f1aece48249802b83b4672b54508971b3f131f8378bfb1f4b31bb1",
       "body_size": 16,
-      "decompiled_c_sha256": "809e3caef3613e00f814a8adaca9ddbca1a9f72417e20ca7fbccd9e2aee927ec",
+      "decompiled_c_sha256": "2779338773da7247963988683ade761fc4428e0ac0d91040219fa02ab56d6128",
       "role": "foreground SecOC aggregate wrapper"
     },
     "0x00071508": {
       "body_sha256": "0a68ffc255d72f4c3429e63355652dbedd2857d6961910d52be1d635a85a0691",
       "body_size": 170,
-      "decompiled_c_sha256": "7a6015b78384b6c65f9c050de59e617bba3b52bd166e9befbd53d4addff3f7ba",
+      "decompiled_c_sha256": "7e7fd305dd77817a13503a71e12ae0c1d3e2416708947007e075a5283a8a393e",
       "role": "controller-1 receive interrupt wrapper"
     },
     "0x00079EBA": {
       "body_sha256": "9d46b1b7ef07a544237e026c51240a7a9a09486ce282e499007c79d11d051655",
       "body_size": 16,
-      "decompiled_c_sha256": "a7d1f4f7669fc6d1b568821e757e10de7be286e767b8bd48bf928addefe189e6",
+      "decompiled_c_sha256": "450b7673ed4896591ba92159f65956c8b276e1c5d9c5263b51c69cc24404b7f5",
       "role": "RSCFD hardware receive aggregate"
     },
     "0x00079EDE": {
       "body_sha256": "c13bd6248633f1b6e69410a75cf6eef47fba52fb322f9723a3461d818df70383",
       "body_size": 56,
-      "decompiled_c_sha256": "e46df78f289f101ddaeedc2fa874da13793f96a08edd5311f3743fd7f882e27e",
+      "decompiled_c_sha256": "9510739b6e1ff7ff702d49abfcfaeefd58f5b03c58babb50dadefc1b83e47b3a",
       "role": "software Rx ring foreground drain aggregate"
     },
     "0x0007A232": {
       "body_sha256": "453a4c503a8e55bdd237d403628b8431d0860462006b9d290ec506583a8881a1",
       "body_size": 34,
-      "decompiled_c_sha256": "5a7968f5f4385183e6f40976f60eb78eae823a22c60359ff554d5101f968665c",
+      "decompiled_c_sha256": "4a62154a2a349f0295d9007ed8026a8d096b16b0def6123afdc4f14c1ab286e4",
       "role": "CAN receive interrupt state gate"
     },
     "0x0007A254": {
       "body_sha256": "30a60286baf7fbc844f1fcd156ead38429f9cbcc9a4e412d94fdf0b58ca06ef8",
       "body_size": 116,
-      "decompiled_c_sha256": "4be26d36568622ffb8bb90b640f096e4706d391d6961380b016c72cd2ffdce95",
+      "decompiled_c_sha256": "13e8640d2f8f080d1d2f875e4185db4d356a985c4898c8e8d42f3a0633510208",
       "role": "foreground CAN/PduR/SecOC aggregate"
     },
     "0x0007D72C": {
       "body_sha256": "ab6c3514c592e1a007d7d38abf723d22b905037b3ae7132cdcc5c1c73ec5b239",
       "body_size": 212,
-      "decompiled_c_sha256": "ba786b971d3ac964fffff0f49111e32230c4bf80fadfff7a4391e108f1fdba93",
+      "decompiled_c_sha256": "52271c16971d3121600ed5ff7f069202ecceb5c1664d74c978d5438e88b6a072",
       "role": "generated-COM receive callback"
     },
     "0x00080884": {
       "body_sha256": "c0de6567d5050a5e20668ab20d35fc09b6858402f6313512122a466d388ce7a7",
       "body_size": 82,
-      "decompiled_c_sha256": "5c3876309b7aba9771e2f771122d805fcb8a2f3c4c51af8549534dbc91c33aaf",
+      "decompiled_c_sha256": "24b9d2fba6d02f8158703ffc59fc39f3f829bfb0e7694bd758da5d87b9808859",
       "role": "software Rx callback fanout"
     },
     "0x000808D6": {
       "body_sha256": "32d2a5120a17b88d913a27eb0458c8143cd62f3f663304dbd4bdf590c4865a7c",
       "body_size": 296,
-      "decompiled_c_sha256": "582aa002d8afe874814f932beafeb8b51da2139b4c9f625c50d3f5a4a9846ef3",
+      "decompiled_c_sha256": "66c683e41871c4b36faa7fa6a68abb4cdae6734c6b419bdb620496c8960b3443",
       "role": "software Rx ring drain"
     },
     "0x000809FE": {
       "body_sha256": "ef763eddd79af93b61cb6d2ced5bfc34aa1dd6d23e97701d1e3b83606657e1ed",
       "body_size": 76,
-      "decompiled_c_sha256": "a3699733b4aefb6617a0a76ed0c3601e71bd1ec8f55330f90c43fe03537bf061",
+      "decompiled_c_sha256": "01f9a35a35f0c602b5aae4ccf87fe273895370dea8401b0633f3d367ff69e505",
       "role": "software Rx ring controller loop"
     },
     "0x00080A4A": {
       "body_sha256": "1766a98c93308777908f3ae71f2753385a001f094f7fe92475ebe91173269543",
       "body_size": 248,
-      "decompiled_c_sha256": "5d9f137c2b4ab0f03e05ee5804e9ef1db18385475171bd329d4c2d8a16447145",
+      "decompiled_c_sha256": "306b11962f333da0711c5a098da63a2ec7a3214a8433718af1b31d056d3b6799",
       "role": "software Rx ring writer"
     },
     "0x00080B42": {
       "body_sha256": "d2ae5e4e46d9f7437fb93fc98c0482ed417b10c1bab71a59cea54bc44f131696",
       "body_size": 128,
-      "decompiled_c_sha256": "9385d1364276ce3ca646923249799794bbf58aaa5516534e5c9fb29dbc839191",
+      "decompiled_c_sha256": "a936de9db22f7910a8e813bd92eb4ab24f2eedce4c3eed9dbf22a0ada47ba47e",
       "role": "generic Rx admission/ring writer"
     },
     "0x000810F2": {
       "body_sha256": "b5cfa2ca048a5c88f3e0379d5c0b0288b58e3e30366d95d00355ec41ea37a452",
       "body_size": 204,
-      "decompiled_c_sha256": "0b2ee182e9cdfebf7c50801001df497886253972d69a72919aec0d804d310834",
+      "decompiled_c_sha256": "3266b2d65af0846ebfea8db3ac322e04fe38dd4538f146524090507aed8405ce",
       "role": "normal CanIf Rx callback"
     },
     "0x00081CA6": {
       "body_sha256": "2b7c5736393c68204635d71cf7306a67685445f4451aeae9f29516e75cdbb4f5",
       "body_size": 112,
-      "decompiled_c_sha256": "5ac6f1b17bf6c0c0cfface11d0d907cc1c0b0ad94e925ac36ff491f029020de8",
+      "decompiled_c_sha256": "b95f0c771dd54b080cf9e23c6b7409efb2840ac5e455fd183cb30fb3848ddb06",
       "role": "PduR upper-route dispatcher"
     },
     "0x00081D16": {
       "body_sha256": "97953f7a164485d9b8b58aa74121e3e37e735fc864e907778084d3b021d28929",
       "body_size": 24,
-      "decompiled_c_sha256": "29bf9e34b41877d16cb54d6e5e0d343ab9695ba5e756a0f35dfafef4fa3097e5",
+      "decompiled_c_sha256": "c69f2d4f8a7607e1b2da6bf90a7f365747a40d2504d2292026d80f3f5e32578a",
       "role": "PduR lower-route shim"
     },
     "0x00081D30": {
       "body_sha256": "10182dc0838fac121551d4dea3a9d10f19781b00a8d790c38c3e689f995154a7",
       "body_size": 172,
-      "decompiled_c_sha256": "d57d7b3299a9dc7a034c9a6a1a01974064eef050fecf763cf9b8fffc0405703d",
+      "decompiled_c_sha256": "d5d3eb4425b111485f55f73d69cb579fd51e296912405fdb1c69e08e75116f7b",
       "role": "PduR lower-route dispatcher"
     },
     "0x00083CE4": {
       "body_sha256": "204492f084aaab604d5a9c3cec289be492dcb5bfb67aaaf98d986d06f596f4a2",
       "body_size": 48,
-      "decompiled_c_sha256": "674a6d96f144ca1ac0f7121a2eaeafeda81c6bc619cdc5f98ca9f081e97c99ec",
+      "decompiled_c_sha256": "68f070f22b9e7cfcd23db9ed7e03695f24dc10b9c2a4ff13290c529718413035",
       "role": "RSCFD group receive loop"
     },
     "0x00083D14": {
       "body_sha256": "69ec2adb5816e5ed4723c9dd9dbafa71f1ee1e005a3f2d823c3889e033589324",
       "body_size": 44,
-      "decompiled_c_sha256": "6708a6374bf15347314ba16472c6495cf62173865a6e66da2d894edefb38eb0a",
+      "decompiled_c_sha256": "a6ed1ca5bb51be8545d00204a338d98a1e90d12c8b60dd74ddba11328f739928",
       "role": "RSCFD rule-to-generic-Rx adapter"
     },
     "0x00083E0C": {
       "body_sha256": "4be598c25cb77a04f365b0285d4f77255bb0e39d499b6df171f48223357049f3",
       "body_size": 206,
-      "decompiled_c_sha256": "fc40ce38d035cb3727bec35bc1eeb3c9ec0406e95eae117e3329f8afe1dbe45a",
+      "decompiled_c_sha256": "a575fd58af9d8cd52d6e3f491d75d36c19288d31c4e97139397d10fe8b3db724",
       "role": "RSCFD FIFO drain"
     },
     "0x00083EDA": {
       "body_sha256": "1fadb1ab277e22a8f906d430cd26b5c897cff0459461578654da9a2ad02e7263",
       "body_size": 24,
-      "decompiled_c_sha256": "06f40e49bb18de5ad832c2289d3dd16011ad3628c64ba467d44501fb00899bad",
+      "decompiled_c_sha256": "1ca064c91fc0211e1a405c7b198c49e004e20f07df58e918c7714c6bbbbc9453",
       "role": "RSCFD group receive wrapper"
     },
     "0x000847A4": {
       "body_sha256": "c547bafb72d3b9e29161df03317926141e8396936c00c1610931d4e9c9e2a5e6",
       "body_size": 120,
-      "decompiled_c_sha256": "42816576b4e9fdaecafa822d268f69021432880d2c339a2e59aebbdfbda6dfb5",
+      "decompiled_c_sha256": "5d5dfe7b10bef94bfc79c1bceeeac8678dec610861f52e9e3c55159632c32de1",
       "role": "RSCFD global acceptance-filter programmer"
     },
     "0x0008E772": {
       "body_sha256": "d216bc64825096ddf60a10f32c6110a939b1cab7ba066c1bf7891e58cbafd46f",
       "body_size": 30,
-      "decompiled_c_sha256": "6c18ae579750c6955cd7151f3df30c598b4f3db8dcb9062f817552cb8626e1e2",
+      "decompiled_c_sha256": "8be9d99404063f667ed961064df08ae2ffff4028106f72edc7e013d8ae7ad9fa",
       "role": "generated-COM generation update"
     },
     "0x0008E862": {
       "body_sha256": "05ecc3e9977835b273ea0b2434788b8d8b5f7af2d3313052145bb376eb32ee56",
       "body_size": 62,
-      "decompiled_c_sha256": "42d884ff6732dabf4dedd526ca283b582c5d73b0b51df7b9142f41d940a4ccc5",
+      "decompiled_c_sha256": "272708ccce871d3642d7f685dfa82673d302b743b810c4ac12b631115369e3f8",
       "role": "SecOC queue-family resolver"
     },
     "0x0008E8A0": {
       "body_sha256": "d10a3216d91ed3c5b692b7efc3796426165932fdd47988417a9d0f4d8398e329",
       "body_size": 114,
-      "decompiled_c_sha256": "93bc425b9f991a549a6a1bf4e30b1a145ded5d90b2eab3cd474093cd1d293aa0",
+      "decompiled_c_sha256": "cc2b31a26ebecd36400078e03438a71c201971f06aa7b98336ec700bae697fad",
       "role": "SecOC queue head selector"
     },
     "0x0008E912": {
       "body_sha256": "2e1cf22d14565fc959eb39709a8e1c7d8e9e23f9af5cd802b50f954ae75ffd38",
       "body_size": 66,
-      "decompiled_c_sha256": "45e30f43ee6034b7f35de1c7749b654932a22c9ef0cde100fecb0dcff4efcd4b",
+      "decompiled_c_sha256": "929cd7347f0e76e4e0253f50846d168b4f5c5768a20e1c36d78e00ab7b8baafe",
       "role": "SecOC profile queue geometry resolver"
     },
     "0x0008E9C6": {
       "body_sha256": "6b400bd052e65702face2c4b5322f5015806d14f350e1a4789d9cadc98a56864",
       "body_size": 218,
-      "decompiled_c_sha256": "8f1b7f81dc3d8bdf83d9b868a5aa7a8e37fd09a15bae905172ccdd154851f6e9",
+      "decompiled_c_sha256": "9ee50bc7cf00896c5254fc592f81ce5b049af3797f9e04ba37280aafdf9a1628",
       "role": "SecOC queue insert/copy"
     },
     "0x0008ED8E": {
       "body_sha256": "e6c911e4b184c893852edc5bdb6d4def70c576e874c9ad9882dbe9e03ca58697",
       "body_size": 88,
-      "decompiled_c_sha256": "e8bb8fed4db2363f1bc10a04e5edc8c412d0b1097c3ae8aeb86f15d10b4c4a99",
+      "decompiled_c_sha256": "92fc77cc654aee84cb19902dbc9d675e808f80aaaeed5f7d469100961690bc89",
       "role": "opposite queue-family public ingress"
     },
     "0x0008EE7C": {
       "body_sha256": "3e113bff721b8ff9bd851cf58707757fd44b31943ad56b6265ba93e4cdfe6690",
       "body_size": 62,
-      "decompiled_c_sha256": "3a45ab77ef32f118861141ba7e401a9c6e620e3234811e3b63fd2bdc9732e777",
+      "decompiled_c_sha256": "402a466fbab5ed53e79a533fa1f3be58c09df64b35fc0afb21b07224ca20355f",
       "role": "SecOC secured-PDU ingress"
     },
     "0x0008EF84": {
       "body_sha256": "5e77a544e80caf61935cef232d3c1bbbb5bb89a1fb1dfa6ede4cde694629fbcc",
       "body_size": 66,
-      "decompiled_c_sha256": "a0c0d97b5d70bafeaf9f641008a0c9b95e181247a72b58667c02f0c835b529c7",
+      "decompiled_c_sha256": "f266c94107aa8a6c11737d5874f69528f8a1533491a78d1d69d0d3afcc5323a3",
       "role": "SecOC receive queue consumer loop"
     },
     "0x0008EFF8": {
       "body_sha256": "4c8105aaa818faa8723ec89a090f6811ab388f88e937190499d7bd9547e7fb88",
       "body_size": 70,
-      "decompiled_c_sha256": "9d8635dd22b779777dcfaad7b476cc527e60c356455f090b9b99bece1e06ac34",
+      "decompiled_c_sha256": "64544f04db13f6a63b3d1f454277c34242085aecfbc70fd5758535ca12894254",
       "role": "SecOC foreground receive aggregate"
     },
     "0x0008F2B0": {
       "body_sha256": "8c4628c36ed7162aa08be34f83bf2950b8f784c7071ea6765e58297342410d6d",
       "body_size": 76,
-      "decompiled_c_sha256": "0c8e4f6cb72b72675e2442c16b87ff9c43f7db8d51761f61fe006fec2914621b",
+      "decompiled_c_sha256": "8ea7ab51986fb673a624b42208d8315e8730ba78697cc6f51fca759c4755854b",
       "role": "SecOC route-to-profile resolver"
     },
     "0x0008F34A": {
       "body_sha256": "50c9e2538c46e5bdc9dbbae5e48cdfc248536b9ee3439765b240a81e1c38d0b4",
       "body_size": 128,
-      "decompiled_c_sha256": "e36612358290af98f3d9dfae795686fd93d0787dd22dc3225b5910e8e12790bb",
+      "decompiled_c_sha256": "c3a304aa1fdc74b68ec2f4bca36eefe10f20be1e448f2d927c44071fa12587a0",
       "role": "SecOC receive queue wrapper"
     },
     "0x0008F546": {
       "body_sha256": "721f10f71fbf32b5dcada657c963d8034397217950d97088a0af54a6d6a84006",
       "body_size": 80,
-      "decompiled_c_sha256": "59ad5cdf9e97f151594a2b0f3bd106d3acf8192b72d4f92e3c9929028d2fcc12",
+      "decompiled_c_sha256": "c3b3a6cd7ed0e631abeb0c121be6c8b7b35142caee0bd457c383998821ed7641",
       "role": "verified upper-PDU delivery"
     },
     "0x0008F746": {
       "body_sha256": "4cb7b08ada0b7e058aed4e9f44083b931a920427548e6d29abeb4f523e4fd1b7",
       "body_size": 396,
-      "decompiled_c_sha256": "e9a646c79a017e031eb6be6588769d797a77a959e9059b1a9eba2cc34799c8cb",
+      "decompiled_c_sha256": "7e22034d6be392db0ab1c462ed50ccdd89ff0265c1d65cf5973b52d8116e113b",
       "role": "SecOC freshness/auth verification coordinator"
     },
     "0x0008F906": {
       "body_sha256": "860fc368a14af6365d6ee17c3bbaa4723a157b9c6f4a14023f888c51b42d3be4",
       "body_size": 134,
-      "decompiled_c_sha256": "69454108d244fe090fedce77eb5f83eb02aa3bcd922f0772952ed0d3dc4b23f0",
+      "decompiled_c_sha256": "dfcfe894b9354fc76227ba7fc09ad3f831d4f3f02bf53e49efb7a56dcb24a957",
       "role": "SecOC post-verify delivery gate"
     },
     "0x0008F98C": {
       "body_sha256": "f05b334c3f7b1a28cd80a4cd04acde7cd7d726a65ae427b2fd47c30d5108ed7b",
       "body_size": 58,
-      "decompiled_c_sha256": "43650ebe23d12efa6f695801bcf2911f75d30a48e621974350b1b16295a8427b",
+      "decompiled_c_sha256": "3be0f513c2a4b4932201e4a3edb69acf94a0ab8decc0a5acfe0c94f5906f7cb4",
       "role": "SecOC one-PDU verify/deliver transaction"
     },
     "0x0008FABA": {
       "body_sha256": "e937244dfdbef8ec132299da455ddf9d6f5ff5cad5defed1b0485592a3b4aefd",
       "body_size": 152,
-      "decompiled_c_sha256": "e70e87c8353c5c41320cd62a41454c90a5873ebabf583d0337a3259a53031131",
+      "decompiled_c_sha256": "5b095652caf855ae0250e44985309766bdcbf3115756359434689e36168b1e67",
       "role": "opposite queue-family insertion helper"
     },
     "0x00090204": {
       "body_sha256": "6386fa98f892fa79d74a4eb150319cbd6572b1649adaa42880b848e32899ce8a",
       "body_size": 14,
-      "decompiled_c_sha256": "c2c1167f63572db9800a150523157bc673e26210a29f2dc77392e1b797b8ab1a",
+      "decompiled_c_sha256": "2967c065099d75de006d22a2b68cf9e4c0b3790c8f7fc112cc6c08834ae59cf7",
       "role": "upper PduR indication shim"
     }
   },
@@ -537,8 +537,8 @@
     "Joined to the Sep-10 ID63 marker experiment, the direct Panda B6 disappears before successful F33 controller1 decode/CanIf admission while native B6 continues to reach the same family1/profile2 queue."
   ],
   "target": {
-    "canonical_function_count": 7178,
-    "canonical_inventory_sha256": "9a8f80dfff2237d1aa6a4af26a7e4adfd5152f586ba38d5dae2c592f40627322",
+    "canonical_function_count": 7336,
+    "canonical_inventory_sha256": "db15f153f7d2401f23d1f4de578aab020209f121435291dcbb1d55be4862fbc2",
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
     "software_id": "8965F3307000"
   }

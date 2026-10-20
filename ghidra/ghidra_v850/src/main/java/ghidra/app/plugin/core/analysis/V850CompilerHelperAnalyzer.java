@@ -90,10 +90,12 @@ import ghidra.program.model.data.FunctionDefinitionDataType;
 import ghidra.program.model.data.IntegerDataType;
 import ghidra.program.model.data.LongLongDataType;
 import ghidra.program.model.data.ParameterDefinitionImpl;
+import ghidra.program.model.data.PointerDataType;
 import ghidra.program.model.data.Undefined8DataType;
 import ghidra.program.model.data.UnsignedIntegerDataType;
 import ghidra.program.model.data.UnsignedLongLongDataType;
 import ghidra.program.model.data.WordDataType;
+import ghidra.program.model.data.VoidDataType;
 import ghidra.program.model.lang.InjectPayload;
 import ghidra.program.model.lang.Register;
 import ghidra.program.model.listing.Data;
@@ -129,9 +131,9 @@ public class V850CompilerHelperAnalyzer extends AbstractAnalyzer {
 	/** Module data path of the shared GHS call-fixup fragment (sole source). */
 	private static final String FRAGMENT_PATH = "languages/v850_helper_callfixups.xml";
 
-	/** Helper families, mirroring the public IDA SDK nec850 classification. */
+	/** Save/restore families follow the public IDA SDK; copies are body-proven. */
 	enum HelperKind {
-		GCC_SAVE, GCC_RETURN, GHS_SAVE, GHS_LOAD, GHS_CALLT_SAVE, GHS_CALLT_LOAD
+		GCC_SAVE, GCC_RETURN, GHS_SAVE, GHS_LOAD, GHS_CALLT_SAVE, GHS_CALLT_LOAD, FIXED_WORD_COPY
 	}
 
 	/** Recognition result shared by the body matchers and the name grammar. */
@@ -499,7 +501,7 @@ public class V850CompilerHelperAnalyzer extends AbstractAnalyzer {
 		for (Address a : sites) {
 			monitor.checkCancelled();
 			Function existing = listing.getFunctionAt(a);
-			if (existing != null && existing.isInline()) {
+			if (existing != null && existing.isInline() && matchFixedWordCopy(program, a) == null) {
 				continue;
 			}
 			if (!isIndependentEntry(program, a)) {
@@ -571,6 +573,10 @@ public class V850CompilerHelperAnalyzer extends AbstractAnalyzer {
 			case "ld.w":
 				return matchGccReturn(program, a);
 			case "mov": {
+				HelperInfo copy = matchFixedWordCopy(program, a);
+				if (copy != null) {
+					return copy;
+				}
 				Object[] op0 = i0.getOpObjects(0);
 				if (firstRegister(op0) != null) {
 					return matchGhsSave(program, a);
@@ -587,6 +593,70 @@ public class V850CompilerHelperAnalyzer extends AbstractAnalyzer {
 				return matchGhsCalltLoad(program, a);
 			default:
 				return null;
+		}
+	}
+
+	// mov 0,r19; loop: mov r19,r1; shl 2,r1; mov r1,ep;
+	// add r6,ep; add r7,r1; add 1,r19; ld.w 0[r1],r1.
+	private static final int[] WORD_COPY_PREFIX = { 0x9a00, 0x0813, 0x0ac2, 0xf001,
+		0xf1c6, 0x09c7, 0x9a41, 0x0f21, 0x0001 };
+
+	/**
+	 * Exact indexed word-copy loops with r6/r7 as unchanged destination/source.
+	 * Ordinary call ABI clobbers lose these live arguments in callers. Apply a
+	 * body-proven local convention: native hard-model inlining cannot expand
+	 * the same looping helper twice in one caller. Keep both real calls.
+	 */
+	private HelperInfo matchFixedWordCopy(Program program, Address entry) {
+		Function function = program.getListing().getFunctionAt(entry);
+		if (function == null) {
+			return null;
+		}
+		AddressSetView body = function.getBody();
+		long size = body.getNumAddresses();
+		if (body.getNumAddressRanges() != 1 || !body.getMinAddress().equals(entry) ||
+			(size != 26 && size != 28)) {
+			return null;
+		}
+		try {
+			for (int i = 0; i < WORD_COPY_PREFIX.length; i++) {
+				if ((program.getMemory().getShort(entry.add(i * 2), false) & 0xffff) !=
+					WORD_COPY_PREFIX[i]) {
+					return null;
+				}
+			}
+			int comparison = program.getMemory().getShort(entry.add(18), false) & 0xffff;
+			int count;
+			int storeOffset;
+			int branch;
+			if (size == 26) {
+				// cmp N,r19; sst.w r1,0[ep]; bc loop; jmp [lp].
+				count = comparison & 0x1f;
+				if ((comparison & 0xffe0) != 0x9a60 || count == 0 || count > 15) {
+					return null;
+				}
+				storeOffset = 20;
+				branch = 0xf5e1;
+			}
+			else {
+				// addi -N,r19,r0; sst.w r1,0[ep]; bnc loop; jmp [lp].
+				// The result is discarded, not written to an argument.
+				count = -program.getMemory().getShort(entry.add(20), false);
+				if (comparison != 0x0613 || count <= 0) {
+					return null;
+				}
+				storeOffset = 22;
+				branch = 0xf5d9;
+			}
+			if ((program.getMemory().getShort(entry.add(storeOffset), false) & 0xffff) != 0x0d01 ||
+				(program.getMemory().getShort(entry.add(storeOffset + 2), false) & 0xffff) != branch ||
+				(program.getMemory().getShort(entry.add(storeOffset + 4), false) & 0xffff) != 0x007f) {
+				return null;
+			}
+			return new HelperInfo(entry, "__v850_copy_words_" + count, HelperKind.FIXED_WORD_COPY);
+		}
+		catch (ghidra.program.model.mem.MemoryAccessException e) {
+			return null;
 		}
 	}
 
@@ -1402,11 +1472,64 @@ public class V850CompilerHelperAnalyzer extends AbstractAnalyzer {
 			return;
 		}
 		rename(program, info.entry, info.name, log);
+		if (info.kind == HelperKind.FIXED_WORD_COPY) {
+			applyWordCopyContract(program, function, monitor);
+			return;
+		}
 		if (!function.isInline()) {
 			// The helper body is the ground truth: inlining splices its real
 			// store/stack/return p-code into every caller, including the GHS
 			// dynamic locals allocation read through the link register.
 			function.setInline(true);
+		}
+	}
+
+	private static final String WORD_COPY_CONVENTION = "__v850_copy_words";
+
+	/** This convention belongs only to complete instruction-proven copy bodies. */
+	private void applyWordCopyContract(Program program, Function function, TaskMonitor monitor) {
+		StringBuilder xml = new StringBuilder("<prototype name=\"" + WORD_COPY_CONVENTION +
+			"\" extrapop=\"0\" stackshift=\"0\"><input>");
+		for (String reg : new String[] { "r6", "r7" }) {
+			xml.append("<pentry minsize=\"4\" maxsize=\"4\"><register name=\"")
+				.append(reg).append("\"/></pentry>");
+		}
+		xml.append("</input><output></output><unaffected>");
+		for (String reg : GPRS) {
+			if (!reg.equals("r0") && !reg.equals("r1") && !reg.equals("r19") && !reg.equals("ep")) {
+				xml.append("<register name=\"").append(reg).append("\"/>");
+			}
+		}
+		xml.append("</unaffected><killedbycall><register name=\"r1\"/>" +
+			"<register name=\"r19\"/><register name=\"ep\"/></killedbycall></prototype>");
+		String document = xml.toString();
+		Options options = program.getOptions(SpecExtension.SPEC_EXTENSION);
+		try {
+			if (!document.equals(options.getString("prototype_" + WORD_COPY_CONVENTION, null))) {
+				new SpecExtension(program).addReplaceCompilerSpecExtension(document, monitor);
+			}
+			function.setInline(false);
+			function.setCallingConvention(WORD_COPY_CONVENTION);
+			if (function.getSignatureSource() == SourceType.DEFAULT ||
+				function.getSignatureSource() == SourceType.ANALYSIS) {
+				DataTypeManager dtm = program.getDataTypeManager();
+				FunctionDefinitionDataType signature =
+					new FunctionDefinitionDataType(function.getName(), dtm);
+				signature.setCallingConvention(WORD_COPY_CONVENTION);
+				signature.setReturnType(VoidDataType.dataType);
+				DataType pointer = new PointerDataType(UnsignedIntegerDataType.dataType, dtm);
+				signature.setArguments(new ParameterDefinitionImpl[] {
+					new ParameterDefinitionImpl("destination", pointer, null),
+					new ParameterDefinitionImpl("source", pointer, null) });
+				if (!new ApplyFunctionSignatureCmd(function.getEntryPoint(), signature,
+					SourceType.ANALYSIS).applyTo(program, monitor)) {
+					throw new IllegalStateException("Unable to apply copy helper signature");
+				}
+			}
+		}
+		catch (Exception e) {
+			throw new IllegalStateException("V850 helper: cannot apply word-copy convention at " +
+				function.getEntryPoint(), e);
 		}
 	}
 

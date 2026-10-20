@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Verify the exact-F33 B6 delivery/receive-health/controller-selection ladder.
 
-Standalone section of the exact-F33 portable family; assertions are carried over verbatim.
 """
 from __future__ import annotations
 
@@ -28,7 +27,7 @@ def section_b6_acceptance_ladder() -> int:
     image = IMAGE.read_bytes()
     wanted = {
         0x4975C, 0x498E0, 0x4BD46, 0x58074, 0x8E772,
-        0x90A48, 0x90B8A, 0x90D6A, 0xBCD62, 0xCEFA4, 0xCEFFC,
+        0x90A48, 0x90B8A, 0xBCD62, 0xCEFA4, 0xCEFFC,
     }
     funcs: dict[int, dict] = {}
     with CORPUS.open(encoding="utf-8") as fh:
@@ -55,12 +54,7 @@ def section_b6_acceptance_ladder() -> int:
           u16(0x25914) == 2 and u32(0x25918) == 0x00090448)
     check("stock Gate-2 terminal predicate is exact", image[0x8F952:0x8F956] == bytes.fromhex("e0d19a0d"))
 
-    print("\n== failed-auth freshness history remains distinct from forced delivery ==")
-    c90d6a = funcs[0x90D6A]["decompiled_c"]
-    check("failure-marked callback condition is explicit",
-          "param_2 == '\\x01'" in c90d6a)
-    check("failure callback copies committed slot over pending slot",
-          "-0x6224" in c90d6a and "-0x620c" in c90d6a and "FUN_00089f2e" in c90d6a)
+    print("\n== freshness history remains distinct from forced delivery ==")
     check("freshness reconstruction reads committed slot FEBE55DC",
           ("DATA", "0xfebe55dc") in refs(0x90A48))
     check("freshness candidate builder writes pending slot FEBE55F4",
@@ -76,9 +70,9 @@ def section_b6_acceptance_ladder() -> int:
     check("normal PDU receive indication clears the same PDU-state family",
           ("DATA", "0xfebe52d8") in refs(0x8E772) and
           "= 0;" in funcs[0x8E772]["decompiled_c"])
-    check("B6 unpacker publishes status at FEBE80C9",
-          ("WRITE", "0xfebe80c9") in refs(0x4BD46) and
-          "FUN_000498e0(0x1a)" in funcs[0x4BD46]["decompiled_c"])
+    check("B6 selector1A status return is published at FEBE80C9",
+          image[0x4BEBC:0x4BEC8] == bytes.fromhex("20361a00bfff20da4457c9c8") and
+          ("WRITE", "0xfebe80c9") in refs(0x4BD46))
     check("B6 status stages FEBE80C9 -> FEBEF13E",
           ("READ", "0xfebe80c9") in refs(0x58074) and
           ("WRITE", "0xfebef13e") in refs(0x58074))

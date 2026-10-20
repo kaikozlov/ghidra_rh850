@@ -101,7 +101,7 @@ verify-processor:
 
 # Full local gate: firmware suites + SLEIGH + processor audits + exact parity.
 verify-semantic-coverage-live:
-	$(PYTHON) tests/tooling/verify_semantic_coverage_live.py --project-dir "$(PROJECT_DIR)"
+	$(PYTHON) tests/tooling/verify_semantic_coverage_live.py --target "$(TARGET)" --project-dir "$(PROJECT_DIR)"
 
 verify-ghidra: verify-full verify-sleigh verify-processor verify-semantic-coverage-live verify-project-parity
 
@@ -138,6 +138,7 @@ generate-application-transmit:
 generate-processor-fixture:
 	$(PYTHON) -m tools.testing.processor.build_processor_fixture
 
+# Sienna-owned inventories. Camry has no outside-function or semantic-coverage fields.
 generate-function-discovery:
 	GHIDRA_ANALYSIS_TARGET="$(LEGACY_SIENNA_TARGET)" PROJECT_DIR="$(LEGACY_SIENNA_PROJECT_DIR)" tools/project/export_ghidra_project.sh outside-functions
 

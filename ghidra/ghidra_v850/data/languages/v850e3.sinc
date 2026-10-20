@@ -175,7 +175,14 @@ attach variables [ SR0004_d SR1115_d ] [
 :stsr SR0004_5, R1115, 5  is op0510=0x3F & R1115 & SR0004_5 & op0004<16; op1626=0x40 & op2731=0x05 { R1115 = SR0004_5; }
 :stsr SR0004_6, R1115, 6  is op0510=0x3F & R1115 & SR0004_6; op1626=0x40 & op2731=0x06 { R1115 = SR0004_6; }
 :stsr SR0004_7, R1115, 7  is op0510=0x3F & R1115 & SR0004_7; op1626=0x40 & op2731=0x07 { R1115 = SR0004_7; }
+@if defined(V850SIMD)
 :stsr SR0004_d, R1115, 13 is op0510=0x3F & R1115 & SR0004_d; op1626=0x40 & op2731=0x0D { R1115 = SR0004_d; }
+@else
+# G3M Table 3-64: CDBCLR is a write-only command, not completion status.
+# Keep the LDSR write (including the command) but never read back bit 1.
+# This is not the asynchronous ICCTRL.ICHCLR protocol (Table 3-60).
+:stsr SR0004_d, R1115, 13 is op0510=0x3F & R1115 & SR0004_d; op1626=0x40 & op2731=0x0D { R1115 = SR0004_d & 0xfffffffd; }
+@endif
 
 # LDSR reg2, regID, selId -- implemented RH850G3M selection IDs
 :ldsr R0004, SR1115_4, 4  is op0510=0x3F & SR1115_4 & R0004; op1626=0x20 & op2731=0x04 { SR1115_4 = R0004; }

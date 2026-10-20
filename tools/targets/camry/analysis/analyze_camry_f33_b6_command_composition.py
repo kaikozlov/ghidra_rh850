@@ -72,7 +72,7 @@ FUNCTIONS = {
   0x0CCF0E: "B6 target-angle scale/continuity stage",
   0x0CCFB2: "B6 target-angle supervisor staging",
   0x0CEFFC: "Target Lateral ID to controller bank",
-  0x0CE384: "default-bank versus B6-bank controller dispatch",
+  0x0CE384: "mode7 reset versus active angle-controller dispatch",
   0x0CDFD4: "B6-bank controller aggregate",
   0x0CD128: "target-minus-measured B6 controller",
   0x0CDFF8: "mode-selected B6 supervisor",
@@ -91,10 +91,10 @@ FUNCTIONS = {
   0x0D02DA: "shared command slew/filter",
   0x0D0382: "shared command saturation",
   0x0D039E: "shared base plus local addend composition",
-  0x0D042C: "shared pre-slew command output",
+  0x0D042C: "shared command scale/amplitude-clamp/gate",
   0x0D06D6: "internal override aggregate",
   0x0D0674: "internal CC94/CC98 override writer",
-  0x0D047C: "shared post-slew/override output",
+  0x0D047C: "shared final command/override selection",
   0x0D0AAE: "shared command snapshot",
   0x0BF33E: "command-model/current mirror",
   0x0D0EEC: "B6 supervisor cyclic coordinator",
@@ -162,16 +162,14 @@ def analyze() -> dict[str, Any]:
   if image_sha != EXPECTED_SHA256:
     raise RuntimeError(f"exact F33 CodeFlash SHA mismatch: {image_sha}")
   corpus = load_corpus()
-  if len(corpus) != 7178:
-    raise RuntimeError(f"canonical corpus function count drift: {len(corpus)}")
   missing = set(FUNCTIONS) - set(corpus)
   if missing:
     raise RuntimeError(f"missing semantic functions: {[hex(x) for x in sorted(missing)]}")
 
   f = {entry: corpus[entry]["decompiled_c"] for entry in FUNCTIONS}
 
-  # Exhaustive selector census: every function in the complete 7178-function
-  # corpus containing CB00/ADB0, plus exact direct references.
+  # Exhaustive selector census across the registered canonical corpus:
+  # functions containing CB00/ADB0, plus exact direct references.
   cb00_funcs = funcs_referencing(corpus, "DAT_febecb00")
   adb0_funcs = funcs_referencing(corpus, "DAT_febeadb0")
   cb00_refs = refs_to(corpus, CB00)
@@ -229,8 +227,14 @@ def analyze() -> dict[str, Any]:
       "decompiled_c_sha256": rec["decompiled_c_sha256"],
     }
 
-  # Semantic predicates are all mechanically checked against the canonical
-  # decompilation, while body hashes bind those statements to exact CodeFlash.
+  # Keep concrete producer/consumer edges independent of typed-array spelling.
+  controller_refs = {
+    entry: {(int(ref["to_addr"], 16), ref["ref_type"])
+            for ref in corpus[entry].get("data_references", [])}
+    for entry in (0xCCDF8, 0xCF22C, 0xCF2B2)
+  }
+  # Instruction/dataflow predicates and corpus semantics are bound to the
+  # exact CodeFlash identity; native compositions separately exercise behavior.
   semantic_checks = {
     "id11_maps_to_bank2": (
       "DAT_febeadb0 == '\\v'" in f[0xCEFFC]
@@ -258,15 +262,18 @@ def analyze() -> dict[str, Any]:
       and all(x in f[0xCD128] for x in ("DAT_febec8b8", "DAT_febec9a0", "DAT_febec9cc", "DAT_febecb00"))
     ),
     "bank2_uses_b6_controller_not_default_branch": (
-      "(DAT_febecb00 & 7) == 7" in f[0xCE384]
-      and "FUN_000cdfd4();" in f[0xCE384]
-      and "FUN_000cdff8();" in f[0xCE384]
-      and "FUN_000ce144();" in f[0xCE384]
+      # CB00&7==7 branches to CE26E reset; non7 calls CDFD4, CDFF8, CE144.
+      image[0xCE388:0xCE3A6] == bytes.fromhex(
+        "840f0113c10e0700670a820dbfff40fcbfff60fcbfffa8fdb505bfffccfe"
+      )
     ),
     "b6_supervisor_reaches_cb38": (
-      all(x in f[0xCCDF8] for x in ("DAT_febecaa6", "DAT_febecaa8", "DAT_febecaaa"))
-      and "DAT_febecb08" in f[0xCF22C]
-      and all(x in f[0xCF2B2] for x in ("DAT_febecb08", "DAT_febecb20", "DAT_febecb38"))
+      all((address, "WRITE") in controller_refs[0xCCDF8]
+          and (address, "READ") in controller_refs[0xCF22C]
+          for address in (0xFEBECAA6, 0xFEBECAA8, 0xFEBECAAA))
+      and (0xFEBECB08, "WRITE") in controller_refs[0xCF22C]
+      and {(0xFEBECB08, "READ"), (0xFEBECB20, "READ"), (CB38, "WRITE")}
+          <= controller_refs[0xCF2B2]
     ),
     "d0218_adds_cb38_to_ordinary_terms": (
       all(x in f[0xD0218] for x in (
@@ -275,13 +282,13 @@ def analyze() -> dict[str, Any]:
       ))
     ),
     "shared_command_coordinator_always_calls_same_funnel": (
-      all(f"FUN_{entry:08x}();" in f[0xD0AF6] for entry in (0xD0218, 0xD0284, 0xD02DA, 0xD0382, 0xD039E, 0xD042C, 0xD06D6, 0xD047C, 0xD0AAE))
+      all(f"{corpus[entry]['name']}();" in f[0xD0AF6] for entry in (0xD0218, 0xD0284, 0xD02DA, 0xD0382, 0xD039E, 0xD042C, 0xD06D6, 0xD047C, 0xD0AAE))
       and "DAT_febecb00" not in f[0xD0AF6]
       and "DAT_febeadb0" not in f[0xD0AF6]
     ),
     "d039e_retains_shared_base_and_local_addend": (
-      "FUN_000cb9c8()" in f[0xD039E]
-      and "FUN_000cb9ae()" in f[0xD039E]
+      f"{corpus[0xCB9C8]['name']}()" in f[0xD039E]
+      and f"{corpus[0xCB9AE]['name']}()" in f[0xD039E]
       and "puVar3 + 0x101a" in f[0xD039E]  # C81A
       and "puVar3 + 0x1460" in f[0xD039E]  # CC60
       and "puVar3 + 0x1450" in f[0xD039E]  # CC50
@@ -293,7 +300,7 @@ def analyze() -> dict[str, Any]:
       and "DAT_febeae90" not in f[0xCBF9E]
     ),
     "no_cb00_function_directly_writes_or_reads_final_funnel": not cb00_final_refs,
-    "post_slew_override_is_internal_not_b6_selected": (
+    "final_override_is_internal_not_b6_selected": (
       all(x in f[0xD047C] for x in ("DAT_febecc66", "DAT_febecc94", "DAT_febecc98", "DAT_febecc64"))
       and "DAT_febecb00" not in f[0xD047C] and "DAT_febeadb0" not in f[0xD047C]
       and "DAT_febecb00" not in f[0xD0674] and "DAT_febeadb0" not in f[0xD0674]
@@ -305,10 +312,10 @@ def analyze() -> dict[str, Any]:
       and "DAT_febee40c" in f[0x35C4C]
     ),
     "b6_supervisor_and_shared_composition_have_distinct_wrappers": (
-      "FUN_000d0eec();" in f[0xD1130]
-      and "FUN_000d1130();" in f[0xBCD62]
-      and "FUN_000d0af6();" in f[0xD1100]
-      and "FUN_000d1100();" in f[0xBCD02]
+      f"{corpus[0xD0EEC]['name']}();" in f[0xD1130]
+      and f"{corpus[0xD1130]['name']}();" in f[0xBCD62]
+      and f"{corpus[0xD0AF6]['name']}();" in f[0xD1100]
+      and f"{corpus[0xD1100]['name']}();" in f[0xBCD02]
     ),
   }
   if not all(semantic_checks.values()):
@@ -330,7 +337,7 @@ def analyze() -> dict[str, Any]:
     raise RuntimeError(f"shared funnel writer census drift: {funnel_writers}")
 
   return {
-    "schema": "camry-f33-b6-command-composition-v1",
+    "schema": "camry-f33-b6-command-composition-v2",
     "target": {
       "software_id": "8965F3307000",
       "codeflash_sha256": image_sha,

@@ -11,7 +11,8 @@ import struct
 from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
 
-from tools.targets.camry.support.camry_f33_corpus import IMAGE, IMAGE_SHA256
+from tools.project.decompiler_evidence import load_function_corpus
+from tools.targets.camry.support.camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256
 
 REPO = REPO_ROOT
 EVID = REPO / "data/generated/camry_8965F3307000_fault_status_decompiler_evidence.json"
@@ -83,6 +84,7 @@ def build() -> dict:
     need(tx["schema"] == "camry-8965f3307000-tss3-opendbc-port-v1", "F33 Tx contract drift")
 
     funcs = {int(row["entry"], 16): row for row in evid["functions"]}
+    corpus, _ = load_function_corpus(CORPUS)
     need(len(funcs) == 10, "fault evidence duplicate/missing functions")
     for entry, row in funcs.items():
         need(sha(image[entry:entry + int(row["body_size"])]) == row["body_sha256"], f"body hash drift 0x{entry:08X}")
@@ -91,16 +93,16 @@ def build() -> dict:
     token(funcs, 0x50FC8, "puVar1 + -0x3546", "puVar1 + -0x3544", "puVar1 + -0x3542",
           "puVar1 + -0x3540", "puVar1 + -0x353e", "puVar1 + -0x353c",
           "puVar1 + -0x353a", "puVar1 + -0x3538", "puVar1 + -0x3530")
-    token(funcs, 0x510B6, "DAT_febe6764", "& 0x8000", "FUN_00050fc8(2)")
-    token(funcs, 0x5110A, "DAT_febee8b0", "DAT_00030e46 <= uVar1", "param_4 < uVar2")
-    token(funcs, 0x5116C, "DAT_00030e44", "puVar3 + -0x3532")
-    token(funcs, 0x511B6, "DAT_00030e40", "DAT_00030e42", "FUN_0005116c")
-    classifier = token(funcs, 0x512E4, "FUN_000510b6", "FUN_00051266", "DAT_00030e48", "DAT_00030e4a",
-                       "(&DAT_0002a19c)[iVar21]", "puVar19[-0x3560]", "uVar18 = 6", "uVar18 = 7",
+    token(funcs, 0x510B6, "DAT_febe6764", "& 0x8000", "assert_diagnostic_classifier('\\x02')")
+    token(funcs, 0x5110A, "DAT_febee8b0", "classifier_age_release_threshold <= uVar1", "threshold < uVar2")
+    token(funcs, 0x5116C, "classifier_retained_age_threshold", "puVar3 + -0x3532")
+    token(funcs, 0x511B6, "classifier_primary_age_threshold", "classifier_secondary_age_threshold", "age_classifier_retained_flags")
+    classifier = token(funcs, 0x512E4, f"{corpus[0x510B6]['name']}(", "update_classifier_status_latch", "DAT_00030e48", "DAT_00030e4a",
+                       "(&DAT_0002a19c)[iVar27]", "puVar19[-0x3560]", "uVar18 = 6", "uVar18 = 7",
                        "uVar18 = 8", "uVar18 = 9", "uVar18 = 10", "uVar18 = 0xb", "uVar18 = 0xc",
                        "uVar18 = 0xd", "uVar18 = 0xe", "uVar18 = 0xf", "uVar18 = 0x10")
     need("uVar18 = 0;" not in classifier, "unexpected explicit state-0 assignment; deepest fallthrough semantics changed")
-    token(funcs, 0x51592, "DAT_00030e40", "DAT_00030e42", "DAT_00030e44")
+    token(funcs, 0x51592, "classifier_primary_age_threshold", "classifier_secondary_age_threshold", "classifier_retained_age_threshold")
 
     # Exact target state table and wire projection.
     state_raw = image[STATE_TABLE:STATE_TABLE + STATE_ROWS * 5]

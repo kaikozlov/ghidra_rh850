@@ -262,7 +262,7 @@ def scan_route(LogReader, route_name: str, files: list[tuple[int, Path]]) -> dic
       },
       'ACCC': {
         'direct_road_proxy': False,
-        'static_source': 'FEBE80A5 = FUN_000498E0(0x17) generated status -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar',
+        'static_source': 'FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar',
         'road_bound': 'continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself',
       },
       'CAFC': {
@@ -317,13 +317,13 @@ def static_proof() -> dict[str, Any]:
     0xD0D7C: 'DAT_febead42 = DAT_febecafc',
     0xBF3AA: 'DAT_febee834 = DAT_febead42',
     0x4C2DC: 'DAT_febe80ec = DAT_febee834',
-    0x4C97A: 'FUN_0007d31e(0x19,0x10,1,0,puVar3 + -0x2bbd)',
+    0x4C97A: 'DAT_febe8c43 = DAT_febe80ec',
   }
   cad9_tokens = {
     0xD0D7C: 'DAT_febead4b = DAT_febecad9',
     0xBF3AA: 'DAT_febee83a = DAT_febead4b',
     0x4C2DC: 'DAT_febe80e0 = DAT_febee83a',
-    0x4C97A: 'FUN_0007d31e(0x1f,0x13,1,0,puVar3 + -0x2bb9)',
+    0x4C97A: 'DAT_febe8c47 = DAT_febe80e0',
   }
   for addr, token in cafc_tokens.items():
     if token not in funcs[addr]:
@@ -331,6 +331,16 @@ def static_proof() -> dict[str, Any]:
   for addr, token in cad9_tokens.items():
     if token not in funcs[addr]:
       raise RuntimeError(f'CAD9 mirror drift at {addr:#x}: {token}')
+  # Exact call setup: GP-relative source pointer in stack argument5,
+  # signal ID, byte offset, width1 and bit0 in r6..r9, then call7D31E.
+  image = f33.IMAGE.read_bytes()
+  for address, expected in (
+      (0x4CC74, '240e43d420361900630f0100203e10000142004a83ff9606'),
+      (0x4CD04, '240e47d420361f00630f0100203e13000142004a83ff0606'),
+  ):
+    encoded = bytes.fromhex(expected)
+    if image[address:address + len(encoded)] != encoded:
+      raise RuntimeError(f'F33 status-bit packing instruction drift at {address:#x}')
   return {
     'ACCD': chain,
     'ADBF': {

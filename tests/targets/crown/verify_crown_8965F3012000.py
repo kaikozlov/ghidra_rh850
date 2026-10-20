@@ -33,7 +33,20 @@ x = json.loads(ART.read_text())
 check("boot core transfers byte-for-byte", x["raw_identity"]["boot_core_0_9200_identical"] and x["raw_identity"]["first_differing_offset"] == "0x00A004")
 check("application entry stays 0x20880", x["raw_identity"]["application_entry_pointer_same"] and x["raw_identity"]["application_entry_pointer"] == "0x00020880")
 check("all three recovered crypto roots transfer", all(v["identical"] for v in x["crypto_roots"].values()))
-check("RDBI DID surface transfers exactly", x["rdbi"]["did_membership_identical"])
+cf = CF.read_bytes()
+camry = (ROOT / "firmware/camry-8965F3307000/CodeFlash.bin").read_bytes()
+check("independent getters return complete DID metadata geometry",
+      cf[0x4FE86:0x4FE96] == bytes.fromhex("06f0200ef200800c2a06988f02007f00")
+      and camry[0x50990:0x509A0] == bytes.fromhex("06f0200ef200800c2a067c9202007f00")
+      and x["rdbi"]["crown_table"] == "0x00028F98"
+      and x["rdbi"]["camry_table"] == "0x0002927C"
+      and x["rdbi"]["count"] == 242)
+check("full DID metadata membership transfers including leading 0100",
+      x["rdbi"]["did_membership_identical"]
+      and cf[0x28F98:0x28F9C] == camry[0x2927C:0x29280] == bytes.fromhex("00012000")
+      and all(cf[0x28F98 + i * 16:0x28F9C + i * 16]
+              == camry[0x2927C + i * 16:0x29280 + i * 16]
+              for i in range(242)))
 check("Crown context loader only changes TP immediate", x["application_context"]["differing_byte_offsets"] == [32,33] and x["application_context"]["crown_tp"] == "0x00023C98")
 check("command5 wrapper/dispatcher/payload packer raw bodies transfer", all(k in x["exact_body_mappings"] for k in ("command5_sync_wrapper","command5_dispatcher","freshness48_packer")))
 c7 = x["c7_ingress_boundary"]

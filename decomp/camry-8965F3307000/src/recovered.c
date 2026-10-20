@@ -1,0 +1,2580 @@
+/* Curated recovered C; macros and bodies are maintained independently of generated candidates. */
+#include "camry.h"
+#include "ghidra_types.h"
+
+#define application_receive_status ((volatile uint8_t *)camry_host_ptr(0xfebe7f0eu))
+#define boot_flash_block_boundaries ((volatile uint32_t *)camry_host_ptr(camry_tp + 80u))
+#define boot_security_challenge ((volatile uint8_t *)camry_host_ptr(0xfebf2b24u))
+#define boot_security_handshake_state (*((volatile uint8_t *)camry_host_ptr(0xfebf2b55u)))
+#define boot_security_state (*((volatile uint8_t *)camry_host_ptr(0xfebf2b0fu)))
+#define classifier_age_release_threshold (*((volatile uint16_t *)camry_host_ptr(0x30e46u)))
+#define classifier_primary_age_threshold (*((volatile uint16_t *)camry_host_ptr(0x30e40u)))
+#define classifier_retained_age_threshold (*((volatile uint16_t *)camry_host_ptr(0x30e44u)))
+#define classifier_secondary_age_threshold (*((volatile uint16_t *)camry_host_ptr(0x30e42u)))
+#define current_source_coherence_observations (*((volatile uint8_t *)camry_host_ptr(0xfebeb191u)))
+#define estimator_tracking_band_scale (*((volatile int32_t *)camry_host_ptr(0xaf760u)))
+#define estimator_tracking_step_scale (*((volatile int32_t *)camry_host_ptr(0xaf764u)))
+#define estimator_tracking_warmup (*((volatile uint16_t *)camry_host_ptr(0xaf772u)))
+#define internal_source_admission_state (*((volatile uint8_t *)camry_host_ptr(0xfebe7f68u)))
+#define nvm_completion_mode (*((volatile uint8_t *)camry_host_ptr(0xfebf6c4bu)))
+#define nvm_completion_raw_result (*((volatile uint32_t *)camry_host_ptr(0xfebf6c10u)))
+#define nvm_completion_side_status (*((volatile uint8_t *)camry_host_ptr(0xfebf6c4cu)))
+#define nvm_completion_storage_handle (*((volatile uint16_t *)camry_host_ptr(0xfebf6c3cu)))
+#define nvm_family1_object_count (*((volatile uint16_t *)camry_host_ptr(0x2ad72u)))
+#define nvm_family1_request_cell_count (*((volatile uint8_t *)camry_host_ptr(0x2ad8bu)))
+#define nvm_physical_attempt_flags (*((volatile uint8_t *)camry_host_ptr(0xfebf6b73u)))
+#define published_internal_source_admission_state (*((volatile uint8_t *)camry_host_ptr(0xfebef000u)))
+#define published_route31_numeric_scalar (*((volatile uint32_t *)camry_host_ptr(0xfebef218u)))
+#define received_packed_decimal_fields ((volatile uint8_t *)camry_host_ptr(0xfebebe66u))
+#define received_retained_word (*((volatile uint16_t *)camry_host_ptr(0xfebebe6eu)))
+#define received_typed_scalar (*((volatile uint32_t *)camry_host_ptr(0xfebebe74u)))
+#define received_word_unchanged_age (*((volatile uint32_t *)camry_host_ptr(0xfebebe70u)))
+#define DAT_0002bb04 (*((volatile uint16_t *)camry_host_ptr(0x2bb04u)))
+#define DAT_0002bb06 (*((volatile uint16_t *)camry_host_ptr(0x2bb06u)))
+#define DAT_0002bb08 (*((volatile uint16_t *)camry_host_ptr(0x2bb08u)))
+#define DAT_0002bb0a (*((volatile uint16_t *)camry_host_ptr(0x2bb0au)))
+#define DAT_0002bb0c (*((volatile uint16_t *)camry_host_ptr(0x2bb0cu)))
+#define DAT_0002bb0e (*((volatile uint16_t *)camry_host_ptr(0x2bb0eu)))
+#define DAT_0002bb10 (*((volatile uint16_t *)camry_host_ptr(0x2bb10u)))
+#define DAT_0002bb12 (*((volatile uint16_t *)camry_host_ptr(0x2bb12u)))
+#define DAT_0002bb14 (*((volatile uint16_t *)camry_host_ptr(0x2bb14u)))
+#define DAT_0002bb16 (*((volatile uint16_t *)camry_host_ptr(0x2bb16u)))
+#define DAT_0002bb18 (*((volatile uint16_t *)camry_host_ptr(0x2bb18u)))
+#define DAT_0002bb1a (*((volatile uint16_t *)camry_host_ptr(0x2bb1au)))
+#define DAT_0002bb1c (*((volatile uint16_t *)camry_host_ptr(0x2bb1cu)))
+#define DAT_0002bb1e (*((volatile uint16_t *)camry_host_ptr(0x2bb1eu)))
+#define DAT_0002bb20 (*((volatile uint16_t *)camry_host_ptr(0x2bb20u)))
+#define DAT_0002bb22 (*((volatile uint16_t *)camry_host_ptr(0x2bb22u)))
+#define DAT_0002bce8 (*((volatile uint8_t *)camry_host_ptr(0x2bce8u)))
+#define DAT_0002bce9 (*((volatile uint8_t *)camry_host_ptr(0x2bce9u)))
+#define DAT_0002bcea (*((volatile uint8_t *)camry_host_ptr(0x2bceau)))
+#define DAT_00030e48 (*((volatile uint16_t *)camry_host_ptr(0x30e48u)))
+#define DAT_00030e4a (*((volatile uint16_t *)camry_host_ptr(0x30e4au)))
+#define DAT_000aefb4 (*((volatile uint16_t *)camry_host_ptr(0xaefb4u)))
+#define DAT_000aefb6 (*((volatile uint16_t *)camry_host_ptr(0xaefb6u)))
+#define DAT_000aefb8 (*((volatile uint16_t *)camry_host_ptr(0xaefb8u)))
+#define DAT_000aefba (*((volatile uint16_t *)camry_host_ptr(0xaefbau)))
+#define DAT_000aefbc (*((volatile uint16_t *)camry_host_ptr(0xaefbcu)))
+#define DAT_000aefbe (*((volatile uint16_t *)camry_host_ptr(0xaefbeu)))
+#define DAT_000af770 (*((volatile uint16_t *)camry_host_ptr(0xaf770u)))
+#define DAT_febe66ac (*((volatile uint8_t *)camry_host_ptr(0xfebe66acu)))
+#define DAT_febe66ae (*((volatile uint16_t *)camry_host_ptr(0xfebe66aeu)))
+#define DAT_febe66b0 (*((volatile uint16_t *)camry_host_ptr(0xfebe66b0u)))
+#define DAT_febe66b8 (*((volatile uint16_t *)camry_host_ptr(0xfebe66b8u)))
+#define DAT_febe6764 (*((volatile uint16_t *)camry_host_ptr(0xfebe6764u)))
+#define DAT_febe6af0 (*((volatile uint32_t *)camry_host_ptr(0xfebe6af0u)))
+#define DAT_febe7f2c (*((volatile uint8_t *)camry_host_ptr(0xfebe7f2cu)))
+#define DAT_febe7f50 (*((volatile uint8_t *)camry_host_ptr(0xfebe7f50u)))
+#define DAT_febe7f51 (*((volatile uint8_t *)camry_host_ptr(0xfebe7f51u)))
+#define DAT_febe7f52 (*((volatile uint8_t *)camry_host_ptr(0xfebe7f52u)))
+#define DAT_febe7f69 (*((volatile uint8_t *)camry_host_ptr(0xfebe7f69u)))
+#define DAT_febe7f6a (*((volatile uint8_t *)camry_host_ptr(0xfebe7f6au)))
+#define DAT_febe7f6b (*((volatile uint8_t *)camry_host_ptr(0xfebe7f6bu)))
+#define DAT_febe7f6c (*((volatile uint8_t *)camry_host_ptr(0xfebe7f6cu)))
+#define DAT_febe7f6d (*((volatile uint8_t *)camry_host_ptr(0xfebe7f6du)))
+#define DAT_febe7f6e (*((volatile uint8_t *)camry_host_ptr(0xfebe7f6eu)))
+#define DAT_febe7f6f (*((volatile uint8_t *)camry_host_ptr(0xfebe7f6fu)))
+#define DAT_febe7f70 (*((volatile uint8_t *)camry_host_ptr(0xfebe7f70u)))
+#define DAT_febe7f72 (*((volatile uint16_t *)camry_host_ptr(0xfebe7f72u)))
+#define DAT_febe7f74 (*((volatile uint16_t *)camry_host_ptr(0xfebe7f74u)))
+#define DAT_febe7f76 (*((volatile uint16_t *)camry_host_ptr(0xfebe7f76u)))
+#define DAT_febe7f78 (*((volatile uint16_t *)camry_host_ptr(0xfebe7f78u)))
+#define DAT_febe7f7a (*((volatile uint16_t *)camry_host_ptr(0xfebe7f7au)))
+#define DAT_febe7f7c (*((volatile uint16_t *)camry_host_ptr(0xfebe7f7cu)))
+#define DAT_febe7f7e (*((volatile uint16_t *)camry_host_ptr(0xfebe7f7eu)))
+#define DAT_febe7f80 (*((volatile uint16_t *)camry_host_ptr(0xfebe7f80u)))
+#define DAT_febe7f82 (*((volatile uint16_t *)camry_host_ptr(0xfebe7f82u)))
+#define DAT_febe7f84 (*((volatile uint16_t *)camry_host_ptr(0xfebe7f84u)))
+#define DAT_febe7f86 (*((volatile uint16_t *)camry_host_ptr(0xfebe7f86u)))
+#define DAT_febe7f88 (*((volatile uint16_t *)camry_host_ptr(0xfebe7f88u)))
+#define DAT_febe7f8a (*((volatile uint16_t *)camry_host_ptr(0xfebe7f8au)))
+#define DAT_febe7f8c (*((volatile uint16_t *)camry_host_ptr(0xfebe7f8cu)))
+#define DAT_febe7f8e (*((volatile uint16_t *)camry_host_ptr(0xfebe7f8eu)))
+#define DAT_febe7f90 (*((volatile uint16_t *)camry_host_ptr(0xfebe7f90u)))
+#define DAT_febe82a3 (*((volatile uint8_t *)camry_host_ptr(0xfebe82a3u)))
+#define DAT_febe82a4 (*((volatile uint8_t *)camry_host_ptr(0xfebe82a4u)))
+#define DAT_febe82a5 (*((volatile uint8_t *)camry_host_ptr(0xfebe82a5u)))
+#define DAT_febe82a7 (*((volatile uint8_t *)camry_host_ptr(0xfebe82a7u)))
+#define DAT_febe82af (*((volatile uint8_t *)camry_host_ptr(0xfebe82afu)))
+#define DAT_febe82b1 (*((volatile uint8_t *)camry_host_ptr(0xfebe82b1u)))
+#define DAT_febe82b2 (*((volatile uint8_t *)camry_host_ptr(0xfebe82b2u)))
+#define DAT_febe82b3 (*((volatile uint8_t *)camry_host_ptr(0xfebe82b3u)))
+#define DAT_febe82b4 (*((volatile uint8_t *)camry_host_ptr(0xfebe82b4u)))
+#define DAT_febead18 (*((volatile uint8_t *)camry_host_ptr(0xfebead18u)))
+#define DAT_febeadf4 (*((volatile uint16_t *)camry_host_ptr(0xfebeadf4u)))
+#define DAT_febeadf6 (*((volatile uint16_t *)camry_host_ptr(0xfebeadf6u)))
+#define DAT_febeae38 (*((volatile uint16_t *)camry_host_ptr(0xfebeae38u)))
+#define DAT_febeb084 (*((volatile uint16_t *)camry_host_ptr(0xfebeb084u)))
+#define DAT_febeb1a8 (*((volatile uint8_t *)camry_host_ptr(0xfebeb1a8u)))
+#define DAT_febeb1a9 (*((volatile uint8_t *)camry_host_ptr(0xfebeb1a9u)))
+#define DAT_febeb1aa (*((volatile uint8_t *)camry_host_ptr(0xfebeb1aau)))
+#define DAT_febeb1ab (*((volatile uint8_t *)camry_host_ptr(0xfebeb1abu)))
+#define DAT_febeb1ac (*((volatile uint8_t *)camry_host_ptr(0xfebeb1acu)))
+#define DAT_febeb1ad (*((volatile uint8_t *)camry_host_ptr(0xfebeb1adu)))
+#define DAT_febeb1b4 (*((volatile uint16_t *)camry_host_ptr(0xfebeb1b4u)))
+#define DAT_febeb1b6 (*((volatile uint16_t *)camry_host_ptr(0xfebeb1b6u)))
+#define DAT_febeb1b8 (*((volatile uint16_t *)camry_host_ptr(0xfebeb1b8u)))
+#define DAT_febeb1ba (*((volatile uint16_t *)camry_host_ptr(0xfebeb1bau)))
+#define DAT_febeb1bd (*((volatile uint8_t *)camry_host_ptr(0xfebeb1bdu)))
+#define DAT_febeb20e (*((volatile uint8_t *)camry_host_ptr(0xfebeb20eu)))
+#define DAT_febebe60 (*((volatile uint8_t *)camry_host_ptr(0xfebebe60u)))
+#define DAT_febebe61 (*((volatile uint8_t *)camry_host_ptr(0xfebebe61u)))
+#define DAT_febebe62 (*((volatile uint8_t *)camry_host_ptr(0xfebebe62u)))
+#define DAT_febebe63 (*((volatile uint8_t *)camry_host_ptr(0xfebebe63u)))
+#define DAT_febebe65 (*((volatile uint8_t *)camry_host_ptr(0xfebebe65u)))
+#define DAT_febebe6c (*((volatile uint8_t *)camry_host_ptr(0xfebebe6cu)))
+#define DAT_febebe9c (*((volatile uint8_t *)camry_host_ptr(0xfebebe9cu)))
+#define DAT_febebf78 (*((volatile uint32_t *)camry_host_ptr(0xfebebf78u)))
+#define DAT_febebfc5 (*((volatile uint8_t *)camry_host_ptr(0xfebebfc5u)))
+#define DAT_febebfd4 (*((volatile uint32_t *)camry_host_ptr(0xfebebfd4u)))
+#define DAT_febebfee (*((volatile uint16_t *)camry_host_ptr(0xfebebfeeu)))
+#define DAT_febec042 (*((volatile uint8_t *)camry_host_ptr(0xfebec042u)))
+#define DAT_febec044 (*((volatile uint8_t *)camry_host_ptr(0xfebec044u)))
+#define DAT_febec045 (*((volatile uint8_t *)camry_host_ptr(0xfebec045u)))
+#define DAT_febec048 (*((volatile uint32_t *)camry_host_ptr(0xfebec048u)))
+#define DAT_febec04c (*((volatile uint32_t *)camry_host_ptr(0xfebec04cu)))
+#define DAT_febec064 (*((volatile uint16_t *)camry_host_ptr(0xfebec064u)))
+#define DAT_febec074 (*((volatile uint32_t *)camry_host_ptr(0xfebec074u)))
+#define DAT_febec078 (*((volatile uint32_t *)camry_host_ptr(0xfebec078u)))
+#define DAT_febec080 (*((volatile uint32_t *)camry_host_ptr(0xfebec080u)))
+#define DAT_febec08e (*((volatile uint8_t *)camry_host_ptr(0xfebec08eu)))
+#define DAT_febec0b4 (*((volatile uint16_t *)camry_host_ptr(0xfebec0b4u)))
+#define DAT_febee827 (*((volatile uint8_t *)camry_host_ptr(0xfebee827u)))
+#define DAT_febee853 (*((volatile uint8_t *)camry_host_ptr(0xfebee853u)))
+#define DAT_febee854 (*((volatile uint8_t *)camry_host_ptr(0xfebee854u)))
+#define DAT_febee855 (*((volatile uint8_t *)camry_host_ptr(0xfebee855u)))
+#define DAT_febee857 (*((volatile uint8_t *)camry_host_ptr(0xfebee857u)))
+#define DAT_febee858 (*((volatile uint8_t *)camry_host_ptr(0xfebee858u)))
+#define DAT_febee859 (*((volatile uint8_t *)camry_host_ptr(0xfebee859u)))
+#define DAT_febee8b0 (*((volatile uint16_t *)camry_host_ptr(0xfebee8b0u)))
+#define DAT_febee91c (*((volatile uint32_t *)camry_host_ptr(0xfebee91cu)))
+#define DAT_febee924 (*((volatile uint32_t *)camry_host_ptr(0xfebee924u)))
+#define DAT_febee92c (*((volatile uint32_t *)camry_host_ptr(0xfebee92cu)))
+#define DAT_febef038 (*((volatile uint8_t *)camry_host_ptr(0xfebef038u)))
+#define DAT_febef039 (*((volatile uint8_t *)camry_host_ptr(0xfebef039u)))
+#define DAT_febef04c (*((volatile uint8_t *)camry_host_ptr(0xfebef04cu)))
+#define DAT_febef04e (*((volatile uint8_t *)camry_host_ptr(0xfebef04eu)))
+#define DAT_febef058 (*((volatile uint8_t *)camry_host_ptr(0xfebef058u)))
+#define DAT_febef065 (*((volatile uint8_t *)camry_host_ptr(0xfebef065u)))
+#define DAT_febef066 (*((volatile uint8_t *)camry_host_ptr(0xfebef066u)))
+#define DAT_febef067 (*((volatile uint8_t *)camry_host_ptr(0xfebef067u)))
+#define DAT_febef0f1 (*((volatile uint8_t *)camry_host_ptr(0xfebef0f1u)))
+#define DAT_febef0f2 (*((volatile uint8_t *)camry_host_ptr(0xfebef0f2u)))
+#define DAT_febef0f3 (*((volatile uint8_t *)camry_host_ptr(0xfebef0f3u)))
+#define DAT_febef0f4 (*((volatile uint8_t *)camry_host_ptr(0xfebef0f4u)))
+#define DAT_febef0f5 (*((volatile uint8_t *)camry_host_ptr(0xfebef0f5u)))
+#define DAT_febef0f6 (*((volatile uint8_t *)camry_host_ptr(0xfebef0f6u)))
+#define DAT_febef0f7 (*((volatile uint8_t *)camry_host_ptr(0xfebef0f7u)))
+#define DAT_febef0f8 (*((volatile uint8_t *)camry_host_ptr(0xfebef0f8u)))
+#define DAT_febef18a (*((volatile uint16_t *)camry_host_ptr(0xfebef18au)))
+#define DAT_febf0668 (*((volatile uint32_t *)camry_host_ptr(0xfebf0668u)))
+#define DAT_febf2998 (*((volatile uint16_t *)camry_host_ptr(0xfebf2998u)))
+#define DAT_febf299a (*((volatile uint16_t *)camry_host_ptr(0xfebf299au)))
+#define DAT_febf2aa1 (*((volatile uint8_t *)camry_host_ptr(0xfebf2aa1u)))
+#define DAT_febf6c14 (*((volatile uint32_t *)camry_host_ptr(0xfebf6c14u)))
+#define DAT_febf6c18 (*((volatile uint32_t *)camry_host_ptr(0xfebf6c18u)))
+#define DAT_febf6c20 (*((volatile uint32_t *)camry_host_ptr(0xfebf6c20u)))
+
+uint boot_find_flash_block_start(uint address,uint *block_start);
+uint boot_find_flash_block_end(uint address,uint *block_end);
+uint boot_select_operation_blocks(uint address,uint length,uint *first_block,uint *last_block);
+uint boot_submit_erase_program_stream(uint address,uint length);
+void boot_security_invalidate_handshake(void);
+uchar classify_receive_monitor_admission(uint channel,uint group,uint selector);
+uint advance_receive_timeout(uint selector);
+uint retain_receive_timeout(uint selector);
+undefined4 reset_indexed_receive_timeout_counter_497dc(uint param_1);
+undefined4 step_indexed_receive_timeout_monitor_497f4(uint param_1);
+void update_application_receive_statuses(void);
+uchar get_grouped_status_byte(uint selector);
+void fill_constant_block_49ec6(void);
+void fill_constant_block_49eda(void);
+void fill_constant_block_49eec(void);
+void advance_dual_source_admission_qualification(void);
+void advance_first_source_admission_qualification(void);
+void advance_second_source_admission_qualification(void);
+void publish_internal_source_observation_admission(void);
+void update_internal_source_admission_lifecycle(void);
+uint classify_dual_internal_source_observations(void);
+uint classify_first_internal_source_observation(void);
+uint classify_second_internal_source_observation(void);
+void set_internal_source_admission_state_one_4a3fc(void);
+void clear_internal_source_admission_state_and_flag69_4a404(void);
+void set_internal_source_admission_state_two_4a40e(void);
+void set_admission_state_three_and_latch_flag69_4a416(void);
+void set_admission_state_three_and_latch_flag6a_4a426(void);
+void set_admission_state_three_and_latch_flag6b_4a436(void);
+void assert_diagnostic_classifier(uchar classification);
+void latch_classifier2_on_6764_top_bit_510b6(void);
+uchar update_classifier_status_latch(void);
+void age_classifier_flag_group(uchar *flags,uchar *activity,ushort *age,ushort threshold);
+void age_classifier_retained_flags(void);
+void age_classifier_groups(void);
+uint classifier_selector3_predicate(void);
+uint update_classifier_status22_edges(void);
+void update_diagnostic_classifier_output(void);
+undefined4 get_identity_word_febf0668_62e12(void);
+uint nvm_family1_request_full(uint producer,uint consumer);
+uint nvm_previous_family1_request(uint index);
+uint nvm_enqueue_family1_read(uint object);
+int publish_redundant_u8(uchar value,uchar *raw,uchar *xor55,uchar *xorAA);
+void return_only_stub_73ca0(void);
+void return_only_stub_73ca2(void);
+undefined4 return_argument_word_7490a(undefined4 param_1);
+undefined4 return_argument_word_7490e(undefined4 param_1);
+void nvm_publish_physical_class(uchar result_class);
+void nvm_mark_physical_attempt_error(void);
+void nvm_report_class_byte(uchar result_class);
+void nvm_report_physical_class(uchar result_class);
+void nvm_reset_completion_context(void);
+void nvm_mark_non_success_result(void);
+void nvm_report_completion_side_status(void);
+void nvm_finish_physical_result(void);
+void nvm_set_state_machine_timeout_783de(undefined4 param_1);
+uint classify_received_status_delay(void);
+void update_second_health_status_window(uint classification);
+void publish_current_and_held_health_windows(void);
+void update_health_status_delay_summaries(void);
+void condition_received_word_and_age(uchar policy);
+void condition_received_typed_scalar(uchar policy);
+uint validate_packed_decimal_byte(uchar packed_value);
+void condition_received_packed_decimal_fields(uchar policy);
+void refresh_received_control_metadata(void);
+void filter_established_estimator_difference (int difference,int *filtered_difference,int *new_accumulator);
+void advance_estimator_source_count(int candidate,int previous);
+void track_established_estimator_difference(void);
+uint interpolate_unsigned16_axis_and_values_d0896(ushort *param_1,uint param_2);
+int abs_s32_wrapping(int value);
+
+
+/* Search38 half-open intervals in the 39-word table at tp+80. Write containing lower bound
+   andreturn0; otherwisewriteF8000 andreturn1. */
+
+uint boot_find_flash_block_start(uint address,uint *block_start)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  uint uVar4;
+  uint uVar5;
+  
+  uVar5 = 0xf8000;
+  uVar4 = 1;
+  iVar3 = 0;
+  while( true ) {
+    if ((boot_flash_block_boundaries[iVar3] <= address) &&
+       (address < boot_flash_block_boundaries[iVar3 + 1])) break;
+    iVar2 = iVar3 + 1;
+    iVar1 = iVar3 + -0x25;
+    iVar3 = iVar2;
+    if (iVar1 < 0 == (iVar2 < 0 && -1 < iVar1)) {
+LAB_000034a2:
+      *block_start = uVar5;
+      return uVar4;
+    }
+  }
+  uVar4 = 0;
+  uVar5 = boot_flash_block_boundaries[iVar3];
+  goto LAB_000034a2;
+}
+
+
+
+/* Search the same tp+80 intervals. Write containing upper bound andreturn0; otherwisewrite100000
+   andreturn1. */
+
+uint boot_find_flash_block_end(uint address,uint *block_end)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  uint uVar4;
+  uint uVar5;
+  
+  uVar5 = 0x100000;
+  uVar4 = 1;
+  iVar3 = 0;
+  while ((address < boot_flash_block_boundaries[iVar3] ||
+         (boot_flash_block_boundaries[iVar3 + 1] <= address))) {
+    iVar2 = iVar3 + 1;
+    iVar1 = iVar3 + -0x25;
+    iVar3 = iVar2;
+    if (iVar1 < 0 == (iVar2 < 0 && -1 < iVar1)) {
+LAB_000034d4:
+      *block_end = uVar5;
+      return uVar4;
+    }
+  }
+  uVar4 = 0;
+  uVar5 = boot_flash_block_boundaries[iVar3 + 1];
+  goto LAB_000034d4;
+}
+
+
+
+/* Rejectlength0 orfailedfirst3474 lookup. Lookup modulo32lastaddress, ignoresecondlookupreturn,
+   andreturn(last_block<first_block). An out-of-range lastaddress can use3474 fallbackF8000; this is
+   not complete region validation. */
+
+uint boot_select_operation_blocks(uint address,uint length,uint *first_block,uint *last_block)
+
+{
+  uint uVar1;
+  uint uVar2;
+  
+  uVar2 = 1;
+  if (length != 0) {
+    uVar1 = boot_find_flash_block_start(address,first_block);
+    if (uVar1 == 0) {
+      boot_find_flash_block_start((length + address) - 1,last_block);
+      uVar2 = (uint)(*last_block < *first_block);
+    }
+  }
+  return uVar2;
+}
+
+
+
+/* WARNING: Inlined function: boot_prepare_aligned_input_ring */
+/* Rejectbusy2AA1.40A2prepares512-aligned ringbefore40E0rangeadmission. Onaccept
+   setmode0,currentblock/nextboundary,writecursor,paddedremaining,result1,busy1;
+   clearfinal/cancel/pause. Retain prior2994counter-block selection.0accepted/1rejected;
+   notflashcompletion. Native combined admission verifies retained original range, aligned prefix
+   and pending state; no flash completion. */
+
+uint boot_submit_erase_program_stream(uint address,uint length)
+
+{
+  bool bVar1;
+  int iVar2;
+  undefined *puVar3;
+  uint uVar4;
+  uint uVar5;
+  uint local_24;
+  uint uStack_20;
+  uint uStack_1c;
+  uint uStack_18;
+  int iStack_14;
+  
+  puVar3 = ((undefined *)camry_host_ptr(0xfebf9800u));
+  uVar5 = 1;
+  if (DAT_febf2aa1 == '\0') {
+    if (length == 0) {
+      bVar1 = true;
+    }
+    else {
+      uStack_18 = address & 0xfffffe00;
+      uVar4 = address & 0x1ff;
+      iStack_14 = uVar4 + length;
+      for (iVar2 = 0; (int)(iVar2 - uVar4) < 0 != (iVar2 < 0 && -1 < (int)(iVar2 - uVar4));
+          iVar2 = iVar2 + 1) {
+        (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebf1800u + (uint32_t)(iVar2) * 1u)))) = 0xff;
+      }
+      DAT_febf2998 = (undefined2)uVar4;
+      bVar1 = false;
+      DAT_febf299a = 0;
+    }
+    if ((!bVar1) &&
+       (uVar4 = boot_select_operation_blocks(address,length,&local_24,&uStack_20), uVar4 == 0))
+    {
+      *(uint *)(puVar3 + -0x6e74) = uStack_18;
+      *(uint *)(puVar3 + -0x6e80) = local_24;
+      *(int *)(puVar3 + -0x6e70) = iStack_14;
+      boot_find_flash_block_end(local_24,&uStack_1c);
+      puVar3[-28000] = 1;
+      puVar3[-27999] = 1;
+      puVar3[-0x6e64] = 0;
+      uVar5 = 0;
+      *(uint *)(puVar3 + -0x6e78) = uStack_1c;
+      puVar3[-0x6e63] = 0;
+      puVar3[-0x6e62] = 0;
+      puVar3[-0x6e61] = 0;
+    }
+  }
+  return uVar5;
+}
+
+
+
+/* Calledbyprioritymasked51D8sessionpublication.Ifhandshake1:securityunchanged;handshake2:clear16challengebyteswithoutwritingsecurity;otherstates(includingaccepted3):security1.Thenhandshake1.Retainsclient,responsecache,failcount,delay/history.
+   Native AES known-answer and protocol-state cases use explicit RAM. Service paths stop at674A
+   before response/timer completion; direct session invalidation cases return. No complete unlock or
+   entropy claim. */
+
+void boot_security_invalidate_handshake(void)
+
+{
+  int iVar1;
+  int iVar2;
+  int iVar3;
+  
+  if (boot_security_handshake_state != '\x01') {
+    if (boot_security_handshake_state == '\x02') {
+      iVar3 = 0;
+      do {
+        boot_security_challenge[iVar3] = '\0';
+        iVar2 = iVar3 + 1;
+        iVar1 = iVar3 + -0xf;
+        iVar3 = iVar2;
+      } while (((iVar1 < 0) || (iVar2 < 0)));
+    }
+    else {
+      boot_security_state = '\x01';
+    }
+  }
+  boot_security_handshake_state = '\x01';
+  return;
+}
+
+
+
+/* Channel1/2, grouped status, group enable/bypass11 and E82A gates. Separate return2 retains prior
+   monitor state instead of declaring healthy. Channel/group/status/E82A admission has separate
+   retain result2; disabled monitoring is not uniformly a healthy observation. */
+
+uchar classify_receive_monitor_admission(uint channel,uint group,uint selector)
+
+{
+  char cVar1;
+  char cVar2;
+  code cVar3;
+  undefined *puVar4;
+  uchar uVar5;
+  
+  puVar4 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  cVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe7f2eu + (uint32_t)(channel & 0xff) * 1u))));
+  cVar2 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe7f2cu + (uint32_t)(channel & 0xff) * 1u))));
+  uVar5 = get_grouped_status_byte(selector & 0xff);
+  cVar3 = (code)0x5a;
+  if ((group & 0xff) != 0xb) {
+    cVar3 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x3000u + (uint32_t)((int)camry_host_addr((puVar4 + (group & 0xff) + 7)))))));
+  }
+  if ((((cVar2 != '\x01' && cVar2 != '\x02') || (uVar5 != '\0')) || (cVar3 != (code)0x5a)) ||
+     (uVar5 = '\0', puVar4[0x302a] != '\0')) {
+    if (cVar1 == 'Z') {
+      uVar5 = '\x02';
+    }
+    else {
+      uVar5 = '\x01';
+    }
+  }
+  return uVar5;
+}
+
+
+
+/* Raw marker5A drives strict counter>threshold timeout; other marker clears. Confirmed timeout
+   retention is distinct from raw invalidity. Raw marker5A advances timeout counter and confirms
+   only strictly above descriptor threshold; non5A clears counter. */
+
+uint advance_receive_timeout(uint selector)
+
+{
+  int iVar1;
+  int iVar2;
+  ushort uVar3;
+  uint uVar4;
+  
+  iVar1 = (selector & 0xff) * 8;
+  iVar2 = (selector & 0xff) * 2;
+  uVar3 = *(ushort *)(((undefined *)camry_host_ptr(0xfebe7eb4u)) + iVar2);
+  if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe52d8u + (uint32_t)((byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x28fe4u + (uint32_t)(iVar1) * 1u))))) * 1u)))) == 'Z') {
+    if ((*(ushort *)(((undefined *)camry_host_ptr(0x28fe8u)) + iVar1) < uVar3) ||
+       (uVar3 = uVar3 + 1, *(ushort *)(((undefined *)camry_host_ptr(0x28fe8u)) + iVar1) < uVar3)) {
+      uVar4 = 0x22;
+    }
+    else {
+      uVar4 = 0x11;
+    }
+  }
+  else {
+    uVar4 = 0;
+    uVar3 = 0;
+  }
+  *(ushort *)(((undefined *)camry_host_ptr(0xfebe7eb4u)) + iVar2) = uVar3;
+  return uVar4;
+}
+
+
+
+/* Raw marker5A drives strict counter>threshold timeout; other marker clears. Confirmed timeout
+   retention is distinct from raw invalidity. Confirmed receive timeout remains while marker5A;
+   other marker clears it independently of raw nonzero invalidity. */
+
+uint retain_receive_timeout(uint selector)
+
+{
+  char cVar1;
+  uint uVar2;
+  undefined2 uVar3;
+  
+  uVar2 = 0x22;
+  uVar3 = *(undefined2 *)(((undefined *)camry_host_ptr(0xfebe7eb4u)) + (selector & 0xff) * 2);
+  cVar1 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe52d8u + (uint32_t)((byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x28fe4u + (uint32_t)((selector & 0xff) * 8) * 1u))))) * 1u))));
+  if (cVar1 != 'Z') {
+    uVar3 = 0;
+  }
+  *(undefined2 *)(((undefined *)camry_host_ptr(0xfebe7eb4u)) + (selector & 0xff) * 2) = uVar3;
+  if (cVar1 != 'Z') {
+    uVar2 = 0;
+  }
+  return uVar2;
+}
+
+
+
+undefined4 reset_indexed_receive_timeout_counter_497dc(uint param_1)
+
+{
+  application_receive_status[param_1 & 0xff] = '\x01';
+  *(undefined2 *)(((undefined *)camry_host_ptr(0xfebe7eb4u)) + (param_1 & 0xff) * 2) = 0;
+  return 0;
+}
+
+
+
+undefined4 step_indexed_receive_timeout_monitor_497f4(uint param_1)
+
+{
+  int iVar1;
+  undefined *puVar2;
+  uchar uVar3;
+  undefined4 uVar4;
+  undefined1 uVar5;
+  uint uVar6;
+  
+  puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  param_1 = param_1 & 0xff;
+  iVar1 = param_1 * 8;
+  uVar6 = (uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe7ef0u + (uint32_t)(param_1) * 1u))));
+  uVar3 = classify_receive_monitor_admission
+                    ((uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x28fe5u + (uint32_t)(iVar1) * 1u)))),(uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x28fe7u + (uint32_t)(iVar1) * 1u)))),param_1);
+  if (uVar3 == '\0') {
+    if ((uVar6 == 0) || (uVar6 == 0x11)) {
+      uVar6 = advance_receive_timeout(param_1);
+    }
+    else if (uVar6 == 0x22) {
+LAB_00049868:
+      uVar6 = retain_receive_timeout(param_1);
+    }
+    else {
+      uVar6 = reset_indexed_receive_timeout_counter_497dc(param_1);
+    }
+LAB_00049872:
+    if (uVar6 == 0x22) {
+      uVar4 = 2;
+      uVar5 = 0x22;
+      goto LAB_00049880;
+    }
+  }
+  else {
+    if (uVar3 == '\x02') goto LAB_00049872;
+    if ((uVar6 != 0) && (uVar6 != 0x11)) {
+      if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x28fe6u + (uint32_t)(iVar1) * 1u)))) == 'Z') goto LAB_00049868;
+      goto LAB_00049872;
+    }
+    uVar6 = 0;
+    *(undefined2 *)(puVar2 + param_1 * 2 + -0x394c) = 0;
+  }
+  uVar5 = (undefined1)uVar6;
+  uVar4 = 0;
+LAB_00049880:
+  (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0xfebe7ef0u + (uint32_t)(param_1) * 1u)))) = uVar5;
+  return uVar4;
+}
+
+
+
+/* Rebuild30 status bytes: raw-marker-nonzero bit0 plus confirmed-timeout bit1. Admission can
+   preserve old state; status generation is not a timestamp. All30 receive-status rows join raw
+   marker nonzero with separately confirmed timeout. Exact threshold equality remains invalid-only;
+   next count confirms stale status. */
+
+void update_application_receive_statuses(void)
+
+{
+  int iVar1;
+  int iVar2;
+  char cVar3;
+  undefined8 uVar4;
+  byte bVar5;
+  int iVar6;
+  
+  uVar4 = 0xfebeb800;
+  iVar6 = 0;
+  do {
+    cVar3 = (*((char *)camry_host_ptr((uint32_t)((uint)(byte)(*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x28fe4u + (uint32_t)(iVar6 * 8) * 1u)))) + (int)uVar4 + -0x6528))));
+    if (((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x2bca8u + (uint32_t)(iVar6) * 1u)))) == 'Z') || (*(short *)(((undefined *)camry_host_ptr(0x28fe8u)) + iVar6 * 8) == -1)) {
+      bVar5 = 0;
+    }
+    else {
+      bVar5 = step_indexed_receive_timeout_monitor_497f4(iVar6);
+    }
+    iVar2 = iVar6 + 1;
+    (*((byte *)camry_host_ptr((uint32_t)((int)uVar4 + iVar6 + -0x38f2)))) = bVar5 | cVar3 != '\0';
+    iVar1 = iVar6 + -0x1d;
+    iVar6 = iVar2;
+  } while (((iVar1 < 0) || (iVar2 < 0)));
+  return;
+}
+
+
+
+/* Low8 selector<30 reads290DA+8*selector: values1/2 select7F51/7F52; other rows or out-of-range
+   selectors return7F50. These are staged status bytes, not event IDs. Low8 selector<30
+   reads290DA+8*selector:1/2 route to7F51/52, otherwise7F50. Return is a staged status byte, not
+   event identity or physical freshness. */
+
+uchar get_grouped_status_byte(uint selector)
+
+{
+  if ((selector & 0xff) < 0x1e) {
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x290dau + (uint32_t)((selector & 0xff) * 8) * 1u)))) == '\x01') {
+      return DAT_febe7f51;
+    }
+    if ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x290dau + (uint32_t)((selector & 0xff) * 8) * 1u)))) == '\x02') {
+      return DAT_febe7f52;
+    }
+  }
+  return DAT_febe7f50;
+}
+
+
+
+/* Constant-block fill: 7 literal assignments into one contiguous cell block; shape-verified.
+   Literals are default/reset values; cell meanings are not recovered. */
+
+void fill_constant_block_49ec6(void)
+
+{
+  DAT_febe7f6c = 0;
+  DAT_febe7f72 = 0;
+  DAT_febe7f74 = 0;
+  DAT_febe7f76 = 0;
+  DAT_febe7f78 = 0;
+  DAT_febe7f7a = 0;
+  DAT_febe7f7c = 0;
+  return;
+}
+
+
+
+/* Constant-block fill: 6 literal assignments into one contiguous cell block; shape-verified.
+   Literals are default/reset values; cell meanings are not recovered. */
+
+void fill_constant_block_49eda(void)
+
+{
+  DAT_febe7f6d = 0;
+  DAT_febe7f7e = 0;
+  DAT_febe7f80 = 0;
+  DAT_febe7f82 = 0;
+  DAT_febe7f84 = 0;
+  DAT_febe7f86 = 0;
+  return;
+}
+
+
+
+/* Constant-block fill: 6 literal assignments into one contiguous cell block; shape-verified.
+   Literals are default/reset values; cell meanings are not recovered. */
+
+void fill_constant_block_49eec(void)
+
+{
+  DAT_febe7f6e = 0;
+  DAT_febe7f88 = 0;
+  DAT_febe7f8a = 0;
+  DAT_febe7f8c = 0;
+  DAT_febe7f8e = 0;
+  DAT_febe7f90 = 0;
+  return;
+}
+
+
+
+/* Configured source qualifier: local0 + predicate22 starts11 and shared mode1. Persistent22 with
+   entry count>=5 selects local22/shared2; entry persistence>=200 selects local44/shared3. Local11
+   resets on any predicate other than22, including inapplicable44. Local22 recovers on11 immediately
+   with configured recovery limit0; predicate44 resets counters only. Local44 recovers only after
+   entry healthy-count>=200; other predicates reset that recovery count. Direct shared7F68 writes
+   are ordered, not a max/OR reduction. */
+
+void advance_dual_source_admission_qualification(void)
+
+{
+  ushort uVar1;
+  ushort uVar2;
+  undefined *puVar3;
+  uint uVar4;
+  undefined *puVar5;
+  
+  puVar3 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  puVar5 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  if (DAT_febe7f6c == '\0') {
+    uVar4 = classify_dual_internal_source_observations();
+    if (uVar4 != 0x22) {
+      return;
+    }
+    uVar2 = *(short *)(puVar5 + -0x388e) + 1;
+    *(ushort *)(puVar5 + -0x388e) = uVar2;
+    if (*(ushort *)(puVar5 + -0x388c) < uVar2) {
+      *(ushort *)(puVar5 + -0x388c) = uVar2;
+    }
+    puVar5[-0x3894] = 0x11;
+    set_internal_source_admission_state_one_4a3fc();
+    return;
+  }
+  if (DAT_febe7f6c == '\x11') {
+    uVar4 = classify_dual_internal_source_observations();
+    if (uVar4 == 0x22) {
+      uVar2 = *(ushort *)(puVar3 + -0x388e);
+      if (DAT_0002bb0c <= uVar2) {
+        puVar3[-0x3894] = 0x22;
+        set_internal_source_admission_state_two_4a40e();
+        return;
+      }
+      *(ushort *)(puVar3 + -0x388e) = uVar2 + 1;
+      if ((ushort)(uVar2 + 1) <= *(ushort *)(puVar3 + -0x388c)) {
+        return;
+      }
+      *(ushort *)(puVar3 + -0x388c) = uVar2 + 1;
+      return;
+    }
+    puVar5 = puVar3 + -0x3898;
+    *(undefined2 *)(puVar3 + -0x388e) = 0;
+  }
+  else if (DAT_febe7f6c == '\"') {
+    uVar4 = classify_dual_internal_source_observations();
+    uVar1 = DAT_0002bb10;
+    uVar2 = DAT_0002bb0e;
+    if (uVar4 == 0x22) {
+      uVar1 = *(ushort *)(puVar3 + -0x3888);
+      *(undefined2 *)(puVar3 + -0x388a) = 0;
+      if (uVar2 <= uVar1) {
+        puVar3[-0x3894] = 0x44;
+        set_admission_state_three_and_latch_flag69_4a416();
+        return;
+      }
+      *(ushort *)(puVar3 + -0x3888) = uVar1 + 1;
+      if ((ushort)(uVar1 + 1) <= *(ushort *)(puVar3 + -0x3886)) {
+        return;
+      }
+      *(ushort *)(puVar3 + -0x3886) = uVar1 + 1;
+      return;
+    }
+    if (uVar4 != 0x11) {
+      if (uVar4 != 0x44) {
+        return;
+      }
+      *(undefined2 *)(puVar3 + -0x3888) = 0;
+      *(undefined2 *)(puVar3 + -0x388a) = 0;
+      return;
+    }
+    puVar5 = puVar3 + -0x3898;
+    *(undefined2 *)(puVar3 + -0x3888) = 0;
+    if (*(ushort *)(puVar3 + -0x388a) < uVar1) {
+      *(ushort *)(puVar3 + -0x388a) = *(ushort *)(puVar3 + -0x388a) + 1;
+      return;
+    }
+    *(undefined2 *)(puVar3 + -0x388e) = 0;
+    *(undefined2 *)(puVar3 + -0x388a) = 0;
+  }
+  else {
+    if (DAT_febe7f6c != 'D') {
+      return;
+    }
+    uVar4 = classify_dual_internal_source_observations();
+    if (uVar4 != 0x11) {
+      *(undefined2 *)(puVar3 + -0x3884) = 0;
+      return;
+    }
+    if (*(ushort *)(puVar3 + -0x3884) < DAT_0002bb12) {
+      *(ushort *)(puVar3 + -0x3884) = *(ushort *)(puVar3 + -0x3884) + 1;
+      return;
+    }
+    puVar5 = puVar3 + -0x3898;
+    *(undefined2 *)(puVar3 + -0x388e) = 0;
+    *(undefined2 *)(puVar3 + -0x388a) = 0;
+    *(undefined2 *)(puVar3 + -0x3888) = 0;
+    *(undefined2 *)(puVar3 + -0x3884) = 0;
+  }
+  puVar5[4] = 0;
+  clear_internal_source_admission_state_and_flag69_4a404();
+  return;
+}
+
+
+
+/* Configured source qualifier: local0 + predicate22 starts11 and shared mode1. Persistent22 with
+   entry count>=5 selects local22/shared2; entry persistence>=200 selects local44/shared3. Local11
+   resets on any predicate other than22, including inapplicable44. Local22 recovers on11 immediately
+   with configured recovery limit0; predicate44 resets counters only. Local44 has no ordinary
+   recovery branch; cause latch7F6A is set on entry. Direct shared7F68 writes are ordered, not a
+   max/OR reduction. */
+
+void advance_first_source_admission_qualification(void)
+
+{
+  ushort uVar1;
+  ushort uVar2;
+  undefined *puVar3;
+  undefined *puVar4;
+  uint uVar5;
+  
+  puVar4 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  puVar3 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  if (DAT_febe7f6d == '\0') {
+    uVar5 = classify_first_internal_source_observation();
+    if (uVar5 != 0x22) {
+      return;
+    }
+    uVar2 = *(short *)(puVar3 + -0x3882) + 1;
+    *(ushort *)(puVar3 + -0x3882) = uVar2;
+    if (*(ushort *)(puVar3 + -0x3880) < uVar2) {
+      *(ushort *)(puVar3 + -0x3880) = uVar2;
+    }
+    puVar3[-0x3893] = 0x11;
+    set_internal_source_admission_state_one_4a3fc();
+    return;
+  }
+  if (DAT_febe7f6d == '\x11') {
+    uVar5 = classify_first_internal_source_observation();
+    if (uVar5 == 0x22) {
+      uVar2 = *(ushort *)(puVar4 + -0x3882);
+      if (DAT_0002bb14 <= uVar2) {
+        puVar4[-0x3893] = 0x22;
+        set_internal_source_admission_state_two_4a40e();
+        return;
+      }
+      *(ushort *)(puVar4 + -0x3882) = uVar2 + 1;
+      if ((ushort)(uVar2 + 1) <= *(ushort *)(puVar4 + -0x3880)) {
+        return;
+      }
+      *(ushort *)(puVar4 + -0x3880) = uVar2 + 1;
+      return;
+    }
+    *(undefined2 *)(puVar4 + -0x3882) = 0;
+  }
+  else {
+    if (DAT_febe7f6d != '\"') {
+      return;
+    }
+    uVar5 = classify_first_internal_source_observation();
+    uVar1 = DAT_0002bb18;
+    uVar2 = DAT_0002bb16;
+    if (uVar5 == 0x22) {
+      uVar1 = *(ushort *)(puVar4 + -0x387c);
+      *(undefined2 *)(puVar4 + -0x387e) = 0;
+      if (uVar2 <= uVar1) {
+        puVar4[-0x3893] = 0x44;
+        set_admission_state_three_and_latch_flag6a_4a426();
+        return;
+      }
+      *(ushort *)(puVar4 + -0x387c) = uVar1 + 1;
+      if ((ushort)(uVar1 + 1) <= *(ushort *)(puVar4 + -0x387a)) {
+        return;
+      }
+      *(ushort *)(puVar4 + -0x387a) = uVar1 + 1;
+      return;
+    }
+    if (uVar5 != 0x11) {
+      if (uVar5 != 0x44) {
+        return;
+      }
+      *(undefined2 *)(puVar4 + -0x387c) = 0;
+      *(undefined2 *)(puVar4 + -0x387e) = 0;
+      return;
+    }
+    *(undefined2 *)(puVar4 + -0x387c) = 0;
+    if (*(ushort *)(puVar4 + -0x387e) < uVar1) {
+      *(ushort *)(puVar4 + -0x387e) = *(ushort *)(puVar4 + -0x387e) + 1;
+      return;
+    }
+    *(undefined2 *)(puVar4 + -0x3882) = 0;
+    *(undefined2 *)(puVar4 + -0x387e) = 0;
+  }
+  puVar4[-0x3893] = 0;
+  clear_internal_source_admission_state_and_flag69_4a404();
+  return;
+}
+
+
+
+/* Configured source qualifier: local0 + predicate22 starts11 and shared mode1. Persistent22 with
+   entry count>=5 selects local22/shared2; entry persistence>=200 selects local44/shared3. Local11
+   resets on any predicate other than22, including inapplicable44. Local22 recovers on11 immediately
+   with configured recovery limit0; predicate44 resets counters only. Local44 has no ordinary
+   recovery branch; cause latch7F6B is set on entry. Direct shared7F68 writes are ordered, not a
+   max/OR reduction. */
+
+void advance_second_source_admission_qualification(void)
+
+{
+  ushort uVar1;
+  ushort uVar2;
+  undefined *puVar3;
+  uint uVar4;
+  
+  puVar3 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  if (DAT_febe7f6e == '\0') {
+    uVar4 = classify_second_internal_source_observation();
+    if (uVar4 != 0x22) {
+      return;
+    }
+    uVar2 = *(ushort *)(puVar3 + -0x3878) + 1;
+    *(ushort *)(puVar3 + -0x3878) = uVar2;
+    if (*(ushort *)(puVar3 + -0x3876) < uVar2) {
+      *(ushort *)(puVar3 + -0x3876) = uVar2;
+    }
+    puVar3[-0x3892] = 0x11;
+    set_internal_source_admission_state_one_4a3fc();
+    return;
+  }
+  if (DAT_febe7f6e == '\x11') {
+    puVar3 = ((undefined *)camry_host_ptr(0xfebeb800u));
+    uVar4 = classify_second_internal_source_observation();
+    if (uVar4 == 0x22) {
+      uVar2 = *(ushort *)(puVar3 + -0x3878);
+      if (DAT_0002bb1a <= uVar2) {
+        puVar3[-0x3892] = 0x22;
+        set_internal_source_admission_state_two_4a40e();
+        return;
+      }
+      *(ushort *)(puVar3 + -0x3878) = uVar2 + 1;
+      if ((ushort)(uVar2 + 1) <= *(ushort *)(puVar3 + -0x3876)) {
+        return;
+      }
+      *(ushort *)(puVar3 + -0x3876) = uVar2 + 1;
+      return;
+    }
+    *(undefined2 *)(puVar3 + -0x3878) = 0;
+  }
+  else {
+    if (DAT_febe7f6e != '\"') {
+      return;
+    }
+    uVar4 = classify_second_internal_source_observation();
+    uVar1 = DAT_0002bb1e;
+    uVar2 = DAT_0002bb1c;
+    if (uVar4 == 0x22) {
+      uVar1 = *(ushort *)(puVar3 + -0x3872);
+      *(undefined2 *)(puVar3 + -0x3874) = 0;
+      if (uVar2 <= uVar1) {
+        puVar3[-0x3892] = 0x44;
+        set_admission_state_three_and_latch_flag6b_4a436();
+        return;
+      }
+      *(ushort *)(puVar3 + -0x3872) = uVar1 + 1;
+      if ((ushort)(uVar1 + 1) <= *(ushort *)(puVar3 + -0x3870)) {
+        return;
+      }
+      *(ushort *)(puVar3 + -0x3870) = uVar1 + 1;
+      return;
+    }
+    if (uVar4 != 0x11) {
+      if (uVar4 != 0x44) {
+        return;
+      }
+      *(undefined2 *)(puVar3 + -0x3872) = 0;
+      *(undefined2 *)(puVar3 + -0x3874) = 0;
+      return;
+    }
+    *(undefined2 *)(puVar3 + -0x3872) = 0;
+    if (*(ushort *)(puVar3 + -0x3874) < uVar1) {
+      *(ushort *)(puVar3 + -0x3874) = *(ushort *)(puVar3 + -0x3874) + 1;
+      return;
+    }
+    *(undefined2 *)(puVar3 + -0x3878) = 0;
+    *(undefined2 *)(puVar3 + -0x3874) = 0;
+  }
+  puVar3[-0x3892] = 0;
+  clear_internal_source_admission_state_and_flag69_4a404();
+  return;
+}
+
+
+
+/* 7F70=5Aonlyunsigned66B8in2304..4096and7F68not2/3;otherwise0. IndependentlypublishedF001. */
+
+void publish_internal_source_observation_admission(void)
+
+{
+  if (((DAT_febe66b8 < DAT_0002bb22) || (DAT_0002bb20 < DAT_febe66b8)) ||
+     (internal_source_admission_state == '\x02' || internal_source_admission_state == '\x03'
+     )) {
+    DAT_febe7f70 = 0;
+  }
+  else {
+    DAT_febe7f70 = 0x5a;
+  }
+  return;
+}
+
+
+
+/* Set7F6Ffrom7F2C1/2,runthreeconfiguredobservationfamiliesinorder,then7F70admission.
+   Shared7F68isorderedlastwriter,notwirepayloadoraggregateOR. Native ordered qualifiers leave first
+   local44 intact while later healthy local11 resets shared7F68; not a max/OR reduction or physical
+   source claim. */
+
+void update_internal_source_admission_lifecycle(void)
+
+{
+  undefined *puVar1;
+  
+  puVar1 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  DAT_febe7f6f = 0;
+  if (DAT_febe7f2c == '\x01' || DAT_febe7f2c == '\x02') {
+    DAT_febe7f6f = 0x5a;
+  }
+  if (DAT_0002bce8 == 'Z') {
+    fill_constant_block_49ec6();
+    puVar1[-0x3898] = 0;
+  }
+  else {
+    advance_dual_source_admission_qualification();
+  }
+  if (DAT_0002bce9 == 'Z') {
+    fill_constant_block_49eda();
+    puVar1[-0x3898] = 0;
+  }
+  else {
+    advance_first_source_admission_qualification();
+  }
+  if (DAT_0002bcea == 'Z') {
+    fill_constant_block_49eec();
+    puVar1[-0x3898] = 0;
+  }
+  else {
+    advance_second_source_admission_qualification();
+  }
+  publish_internal_source_observation_admission();
+  return;
+}
+
+
+
+/* Return44for6764lowqualificationbitsorclosed7F6F;22foravailable66B8outside2304..4096andboth66AE/66B0below2304orbothabove4096;else11.
+    */
+
+uint classify_dual_internal_source_observations(void)
+
+{
+  if (((DAT_febe6764 & 3) != 0) || (DAT_febe7f6f != 'Z')) {
+    return 0x44;
+  }
+  if (((DAT_febe66ac != '\0') && ((DAT_febe66b8 < DAT_0002bb06 || (DAT_0002bb04 < DAT_febe66b8))))
+     && (((DAT_febe66ae < DAT_0002bb0a && (DAT_febe66b0 < DAT_0002bb0a)) ||
+         ((DAT_0002bb08 < DAT_febe66ae && (DAT_0002bb08 < DAT_febe66b0)))))) {
+    return 0x22;
+  }
+  return 0x11;
+}
+
+
+
+/* Requires6764.bit1and7F6F5A,else44;available66B8outside2304..4096plus66AEoutsidefails22;else11. */
+
+uint classify_first_internal_source_observation(void)
+
+{
+  if ((((byte)DAT_febe6764 & 2) == 0) || (DAT_febe7f6f != 'Z')) {
+    return 0x44;
+  }
+  if (((DAT_febe66ac != '\0') && ((DAT_febe66b8 < DAT_0002bb06 || (DAT_0002bb04 < DAT_febe66b8))))
+     && ((DAT_febe66ae < DAT_0002bb0a || (DAT_0002bb08 < DAT_febe66ae)))) {
+    return 0x22;
+  }
+  return 0x11;
+}
+
+
+
+/* Requires6764.bit0and7F6F5A,else44;available66B8outside2304..4096plus66B0outsidefails22;else11. */
+
+uint classify_second_internal_source_observation(void)
+
+{
+  if ((((byte)DAT_febe6764 & 1) == 0) || (DAT_febe7f6f != 'Z')) {
+    return 0x44;
+  }
+  if (((DAT_febe66ac != '\0') && ((DAT_febe66b8 < DAT_0002bb06 || (DAT_0002bb04 < DAT_febe66b8))))
+     && ((DAT_febe66b0 < DAT_0002bb0a || (DAT_0002bb08 < DAT_febe66b0)))) {
+    return 0x22;
+  }
+  return 0x11;
+}
+
+
+
+void set_internal_source_admission_state_one_4a3fc(void)
+
+{
+  internal_source_admission_state = '\x01';
+  return;
+}
+
+
+
+void clear_internal_source_admission_state_and_flag69_4a404(void)
+
+{
+  internal_source_admission_state = '\0';
+  DAT_febe7f69 = 0;
+  return;
+}
+
+
+
+void set_internal_source_admission_state_two_4a40e(void)
+
+{
+  internal_source_admission_state = '\x02';
+  return;
+}
+
+
+
+void set_admission_state_three_and_latch_flag69_4a416(void)
+
+{
+  internal_source_admission_state = '\x03';
+  DAT_febe7f69 = 0x5a;
+  return;
+}
+
+
+
+void set_admission_state_three_and_latch_flag6a_4a426(void)
+
+{
+  internal_source_admission_state = '\x03';
+  DAT_febe7f6a = 0x5a;
+  return;
+}
+
+
+
+void set_admission_state_three_and_latch_flag6b_4a436(void)
+
+{
+  internal_source_admission_state = '\x03';
+  DAT_febe7f6b = 0x5a;
+  return;
+}
+
+
+
+/* Descriptor class2/4/8/0F/10/20/40/80/F0 selects its16-bit counter and class-specific latches.
+   Counter increments wrap16; not saturating. Unknown classes make no update. Descriptor classes
+   select wrapping16-bit counters and latched flags under PMRFF00; unknown class does nothing.
+   Class2 counter82BA and flags82A3/A5.bit0 are distinct from control fault records. */
+
+void assert_diagnostic_classifier(uchar classification)
+
+{
+  undefined *puVar1;
+  uint saved_mask;
+  
+  puVar1 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  saved_mask = priority_mask_enter(0xff00);
+  if (classification == '\x02') {
+    puVar1[-0x355d] = puVar1[-0x355d] | 1;
+    puVar1[-0x355b] = puVar1[-0x355b] | 1;
+    *(short *)(puVar1 + -0x3546) = *(short *)(puVar1 + -0x3546) + 1;
+  }
+  else {
+    if (classification != '\x04') {
+      if (classification == '\b') {
+        puVar1[-0x355c] = puVar1[-0x355c] | 8;
+        *(short *)(puVar1 + -0x3542) = *(short *)(puVar1 + -0x3542) + 1;
+      }
+      else if (classification == '\x0f') {
+        puVar1[-0x355c] = puVar1[-0x355c] | 4;
+        *(short *)(puVar1 + -0x3540) = *(short *)(puVar1 + -0x3540) + 1;
+      }
+      else if (classification == '\x10') {
+        puVar1[-0x355c] = puVar1[-0x355c] | 0x10;
+        *(short *)(puVar1 + -0x353e) = *(short *)(puVar1 + -0x353e) + 1;
+      }
+      else {
+        if (classification == ' ') {
+          *(short *)(puVar1 + -0x353c) = *(short *)(puVar1 + -0x353c) + 1;
+        }
+        else {
+          if (classification == '@') {
+            puVar1[-0x355c] = puVar1[-0x355c] | 0x40;
+            *(short *)(puVar1 + -0x353a) = *(short *)(puVar1 + -0x353a) + 1;
+            goto LAB_0005107a;
+          }
+          if (classification == 0x80) {
+            *(short *)(puVar1 + -0x3538) = *(short *)(puVar1 + -0x3538) + 1;
+            goto LAB_000510ac;
+          }
+          if (classification != 0xf0) goto LAB_000510ac;
+          *(short *)(puVar1 + -0x3530) = *(short *)(puVar1 + -0x3530) + 1;
+        }
+        puVar1[-0x355c] = puVar1[-0x355c] | 0x20;
+      }
+LAB_0005107a:
+      puVar1[-0x3559] = 0x5a;
+      goto LAB_000510ac;
+    }
+    puVar1[-0x355d] = puVar1[-0x355d] | 2;
+    puVar1[-0x355b] = puVar1[-0x355b] | 2;
+    *(short *)(puVar1 + -0x3544) = *(short *)(puVar1 + -0x3544) + 1;
+  }
+  puVar1[-0x355a] = 0x5a;
+  puVar1[-0x3558] = 0x5a;
+LAB_000510ac:
+  priority_mask_restore(saved_mask);
+  return;
+}
+
+
+
+void latch_classifier2_on_6764_top_bit_510b6(void)
+
+{
+  char cVar1;
+  undefined *puVar2;
+  
+  puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  cVar1 = DAT_febe82af;
+  if ((DAT_febe82af != 'Z') && (cVar1 = '\0', (DAT_febe6764 & 0x8000) != 0)) {
+    puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+    assert_diagnostic_classifier('\x02');
+    cVar1 = 'Z';
+  }
+  puVar2[-0x3551] = cVar1;
+  return;
+}
+
+
+
+/* Return/store actual R10 byte82B4. Zero latch asserts5A only for7F515A; nonzero latch clears only
+   when7F51 andE827 are both zero. Caller512E4 uses nonzero, not equality5A. Real R10 byte is both
+   stored82B4 and consumed by512E4. Zero latch asserts only for7F515A; nonzero latch clears only
+   with7F51/E827 zero. */
+
+uchar update_classifier_status_latch(void)
+
+{
+  if (DAT_febe82b4 == '\0') {
+    if (DAT_febe7f51 == 'Z') {
+      DAT_febe82b4 = 'Z';
+    }
+    else {
+      DAT_febe82b4 = '\0';
+    }
+  }
+  else if ((DAT_febe7f51 == '\0') && (DAT_febee827 == '\0')) {
+    DAT_febe82b4 = '\0';
+  }
+  return DAT_febe82b4;
+}
+
+
+
+/* Snapshot unsignedE8B0 before PMRFF00. Consume activity5A and reset age, then increment while
+   age<=threshold. Clear whole flag group only for age>threshold andE8B0>=22170. Consumed activity
+   leaves age1; already-over-threshold age holds. No class-counter decrement. Consume activity5A,
+   reset then increment age; strict expiry and unsigned stagedE8B0>=22170 clear whole flag group.
+   Over-threshold age holds; active counters and event bitmaps untouched. */
+
+void age_classifier_flag_group(uchar *flags,uchar *activity,ushort *age,ushort threshold)
+
+{
+  ushort uVar1;
+  ushort uVar2;
+  uint saved_mask;
+  uchar uVar3;
+  uchar uVar4;
+  
+  uVar1 = DAT_febee8b0;
+  saved_mask = priority_mask_enter(0xff00);
+  uVar4 = *activity;
+  uVar2 = *age;
+  uVar3 = *flags;
+  if (uVar4 == 'Z') {
+    uVar4 = '\0';
+    uVar2 = 0;
+  }
+  if (((threshold < uVar2) || (uVar2 = uVar2 + 1, threshold < uVar2)) &&
+     (classifier_age_release_threshold <= uVar1)) {
+    uVar3 = '\0';
+  }
+  *flags = uVar3;
+  *activity = uVar4;
+  *age = uVar2;
+  priority_mask_restore(saved_mask);
+  return;
+}
+
+
+
+/* Same activity/strict age contract for82A5/82A8/82CE with exact600, but noE8B0 gate. PMRFF00
+   protects updates; histories and active class counts are untouched. Retained flag-group aging uses
+   same consumed-marker and strict-expiry rules with600 invocations, without E8B0 gate. */
+
+void age_classifier_retained_flags(void)
+
+{
+  ushort uVar1;
+  ushort uVar2;
+  undefined *puVar3;
+  uint saved_mask;
+  undefined1 uVar4;
+  char cVar5;
+  
+  uVar1 = classifier_retained_age_threshold;
+  puVar3 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  saved_mask = priority_mask_enter(0xff00);
+  uVar2 = *(ushort *)(puVar3 + -0x3532);
+  cVar5 = puVar3[-0x3558];
+  uVar4 = puVar3[-0x355b];
+  if (cVar5 == 'Z') {
+    cVar5 = '\0';
+    uVar2 = 0;
+  }
+  if ((uVar1 < uVar2) || (uVar2 = uVar2 + 1, uVar1 < uVar2)) {
+    uVar4 = 0;
+  }
+  puVar3[-0x355b] = uVar4;
+  puVar3[-0x3558] = cVar5;
+  *(ushort *)(puVar3 + -0x3532) = uVar2;
+  priority_mask_restore(saved_mask);
+  return;
+}
+
+
+
+/* Snapshot flagsA4/A5, then age nonzero groups in A3,A5,A4 order. Exact thresholds 200/600/200 are
+   invocation counts, not elapsed time or event-bitmap aging. SnapshotA4/A5 flags and age nonzero
+   groups inA3,A5,A4 order. Individual PMR sections are not one atomic classifier snapshot. */
+
+void age_classifier_groups(void)
+
+{
+  char cVar1;
+  char cVar2;
+  
+  cVar2 = DAT_febe82a5;
+  cVar1 = DAT_febe82a4;
+  if (DAT_febe82a3 != '\0') {
+    age_classifier_flag_group
+              ((uchar *)((undefined *)camry_host_ptr(0xfebe82a3u)),((undefined *)camry_host_ptr(0xfebe82a6u)),((undefined *)camry_host_ptr(0xfebe82cau)),
+               classifier_primary_age_threshold);
+  }
+  if (cVar2 != '\0') {
+    age_classifier_retained_flags();
+  }
+  if (cVar1 != '\0') {
+    age_classifier_flag_group
+              ((uchar *)((undefined *)camry_host_ptr(0xfebe82a4u)),((undefined *)camry_host_ptr(0xfebe82a7u)),((undefined *)camry_host_ptr(0xfebe82ccu)),
+               classifier_secondary_age_threshold);
+  }
+  return;
+}
+
+
+
+/* Return5A for zero6AF0, E8533/4, E854FF, E85511, sentinel33333333 inE91C/E924/E92C or62E12
+   resultA55AA55A; otherwise0. Structural classifier priority, not a recovered OEM fault name.
+   Application zero/status/sentinel predicates select structural classifier priority3. No recovered
+   OEM fault identity or permission semantics. */
+
+uint classifier_selector3_predicate(void)
+
+{
+  int iVar1;
+  char cVar2;
+  char cVar3;
+  char cVar4;
+  int iVar5;
+  int iVar6;
+  int iVar7;
+  int iVar8;
+  uint uVar9;
+  
+  iVar7 = DAT_febee92c;
+  iVar6 = DAT_febee924;
+  iVar5 = DAT_febee91c;
+  cVar4 = DAT_febee855;
+  cVar3 = DAT_febee854;
+  cVar2 = DAT_febee853;
+  iVar1 = DAT_febe6af0;
+  iVar8 = get_identity_word_febf0668_62e12();
+  if (((((iVar1 == 0) || (cVar2 == '\x03' || cVar2 == '\x04')) || (cVar3 == -1)) ||
+      ((cVar4 == '\x11' || (iVar5 == 0x33333333)))) ||
+     ((iVar6 == 0x33333333 || ((iVar7 == 0x33333333 || (iVar8 == -0x5aa55aa6)))))) {
+    uVar9 = 0x5a;
+  }
+  else {
+    uVar9 = 0;
+  }
+  return uVar9;
+}
+
+
+
+/* Each E857/8/9==22 asserts its82B1/2/3 latch; rising edges set82A4.bit5 and activity82A75A. Other
+   values clear that latch. Return5A while any source equals22. Rising status22 on any E857/8/9
+   source sets classifier bit5 and activity; continued22 returns5A without refreshing the edge
+   marker. Other values release individual latches. */
+
+uint update_classifier_status22_edges(void)
+
+{
+  uint uVar1;
+  
+  if (DAT_febee857 == '\"') {
+    if (DAT_febe82b1 == '\0') {
+      DAT_febe82b1 = 'Z';
+      DAT_febe82a4 = DAT_febe82a4 | 0x20;
+      DAT_febe82a7 = 0x5a;
+    }
+    uVar1 = 0x5a;
+  }
+  else {
+    uVar1 = 0;
+    DAT_febe82b1 = '\0';
+  }
+  if (DAT_febee858 == '\"') {
+    if (DAT_febe82b2 == '\0') {
+      DAT_febe82b2 = 'Z';
+      DAT_febe82a4 = DAT_febe82a4 | 0x20;
+      DAT_febe82a7 = 0x5a;
+    }
+    uVar1 = 0x5a;
+  }
+  else {
+    DAT_febe82b2 = '\0';
+  }
+  if (DAT_febee859 == '\"') {
+    if (DAT_febe82b3 == '\0') {
+      DAT_febe82b3 = 'Z';
+      DAT_febe82a4 = DAT_febe82a4 | 0x20;
+      DAT_febe82a7 = 0x5a;
+    }
+    uVar1 = 0x5a;
+  }
+  else {
+    DAT_febe82b3 = '\0';
+  }
+  return uVar1;
+}
+
+
+
+/* Update bank predicate, snapshot active counts, update status latch, then age flags. Select using
+   pre-aging counts and post-aging flags plus application predicates; publish selector82A0 and its
+   five-byte2A19C row. Cleared age flags do not imply cleared active counts or event histories.
+   Stateful selectors1/2 have separate counters82B6/82B8. Pre-aging active-counter snapshots and
+   post-aging flags select five-byte ROM output row. Native equality/expiry cases preserve active
+   class2 and all event histories despite bitmap inhibition. */
+
+void update_diagnostic_classifier_output(void)
+
+{
+  char cVar1;
+  byte bVar2;
+  undefined1 uVar3;
+  short sVar4;
+  short sVar5;
+  short sVar6;
+  char cVar7;
+  char cVar8;
+  char cVar9;
+  char cVar10;
+  char cVar11;
+  short sVar12;
+  short sVar13;
+  short sVar14;
+  short sVar15;
+  short sVar16;
+  short sVar17;
+  ushort uVar18;
+  undefined *puVar19;
+  uchar uVar20;
+  uint uVar21;
+  uint uVar22;
+  char cVar23;
+  char cVar24;
+  ushort uVar25;
+  ushort uVar26;
+  int iVar27;
+  
+  puVar19 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  latch_classifier2_on_6764_top_bit_510b6();
+  sVar12 = *(short *)(puVar19 + -0x3540);
+  sVar4 = *(short *)(puVar19 + -0x3546);
+  sVar5 = *(short *)(puVar19 + -0x3544);
+  sVar6 = *(short *)(puVar19 + -0x3542);
+  sVar13 = *(short *)(puVar19 + -0x353e);
+  sVar14 = *(short *)(puVar19 + -0x353c);
+  sVar15 = *(short *)(puVar19 + -0x3530);
+  sVar16 = *(short *)(puVar19 + -0x353a);
+  cVar7 = puVar19[0x301a];
+  cVar8 = puVar19[0x301d];
+  cVar1 = puVar19[-0x3557];
+  cVar24 = puVar19[-0x355e];
+  cVar23 = puVar19[-0x355f];
+  uVar26 = *(ushort *)(puVar19 + -0x3548);
+  uVar25 = *(ushort *)(puVar19 + -0x354a);
+  cVar9 = puVar19[-0x3550];
+  sVar17 = *(short *)(puVar19 + -0x3538);
+  cVar10 = puVar19[0x301b];
+  cVar11 = puVar19[0x301c];
+  uVar20 = update_classifier_status_latch();
+  age_classifier_groups();
+  uVar21 = classifier_selector3_predicate();
+  uVar22 = update_classifier_status22_edges();
+  if (cVar24 == 'Z') {
+    if (cVar23 == 'Z') {
+      uVar25 = uVar25 + 1;
+      uVar18 = 1;
+      if (DAT_00030e48 < uVar25) {
+        cVar23 = '\0';
+      }
+    }
+    else {
+      uVar26 = uVar26 + 1;
+      uVar18 = 2;
+      if (DAT_00030e4a <= uVar26) {
+        cVar24 = '\0';
+      }
+    }
+  }
+  else {
+    bVar2 = puVar19[-0x355c];
+    if (uVar21 == 0x5a) {
+      uVar18 = 3;
+    }
+    else if ((sVar4 == 0) && ((puVar19[-0x355d] & 1) == 0)) {
+      if ((sVar5 == 0) && (((byte)puVar19[-0x355d] >> 1 & 1) == 0)) {
+        if ((sVar13 == 0) && ((bVar2 >> 4 & 1) == 0)) {
+          if ((((sVar14 == 0) && (sVar15 == 0)) && (uVar22 != 0x5a)) && ((bVar2 >> 5 & 1) == 0)) {
+            if ((sVar16 == 0) && ((bVar2 >> 6 & 1) == 0)) {
+              if ((sVar12 == 0) && ((bVar2 >> 2 & 1) == 0)) {
+                if ((sVar6 == 0) && (uVar18 = bVar2 & 8, (bVar2 & 8) == 0)) {
+                  if ((cVar7 == '\x01') && (cVar9 != 'Z')) {
+                    uVar18 = 0xf;
+                    goto LAB_00051482;
+                  }
+                  if ((((cVar1 == 'Z') && (cVar10 != 'Z')) && (cVar11 != 'Z')) &&
+                     ((cVar8 != 'Z' && (sVar17 == 0)))) goto LAB_00051482;
+                }
+                else if (uVar20 == '\0') {
+                  uVar18 = 0xd;
+                  goto LAB_00051482;
+                }
+              }
+              else if (uVar20 == '\0') {
+                uVar18 = 0xe;
+                goto LAB_00051482;
+              }
+              uVar18 = 0x10;
+            }
+            else {
+              uVar18 = 0xc;
+            }
+          }
+          else {
+            uVar18 = 0xb;
+          }
+        }
+        else {
+          uVar18 = 10;
+        }
+      }
+      else if (((byte)puVar19[-0x355b] >> 1 & 1) == 0) {
+        uVar18 = 9;
+      }
+      else {
+        uVar18 = 8;
+      }
+    }
+    else if ((puVar19[-0x355b] & 1) == 0) {
+      uVar18 = 7;
+    }
+    else {
+      uVar18 = 6;
+    }
+  }
+LAB_00051482:
+  iVar27 = (short)uVar18 * 5;
+  puVar19[-0x3552] = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x2a19cu + (uint32_t)(iVar27) * 1u))));
+  puVar19[-0x3556] = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x2a19du + (uint32_t)(iVar27) * 1u))));
+  puVar19[-0x3555] = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x2a19eu + (uint32_t)(iVar27) * 1u))));
+  puVar19[-0x3554] = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x2a19fu + (uint32_t)(iVar27) * 1u))));
+  uVar3 = (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x2a1a0u + (uint32_t)(iVar27) * 1u))));
+  puVar19[-0x3560] = (char)uVar18;
+  puVar19[-0x355e] = cVar24;
+  puVar19[-0x3553] = uVar3;
+  puVar19[-0x355f] = cVar23;
+  *(ushort *)(puVar19 + -0x3548) = uVar26;
+  *(ushort *)(puVar19 + -0x354a) = uVar25;
+  return;
+}
+
+
+
+undefined4 get_identity_word_febf0668_62e12(void)
+
+{
+  return DAT_febf0668;
+}
+
+
+
+/* Truncate both indices to low8. Return producer+1==(consumer==0?ROM cell_count49:consumer). No
+   cell inspection; reserves one cell. */
+
+uint nvm_family1_request_full(uint producer,uint consumer)
+
+{
+  uint uVar1;
+  
+  uVar1 = consumer & 0xff;
+  if (uVar1 == 0) {
+    uVar1 = (uint)nvm_family1_request_cell_count;
+  }
+  return (uint)((producer & 0xff) + 1 == uVar1);
+}
+
+
+
+/* Return zero-extended low8 predecessor, with zero wrapping to ROM cell_count49 minus1. No general
+   index validation. */
+
+uint nvm_previous_family1_request(uint index)
+
+{
+  uint uVar1;
+  
+  uVar1 = index & 0xff;
+  if (uVar1 == 0) {
+    uVar1 = (uint)nvm_family1_request_cell_count;
+  }
+  return uVar1 - 1 & 0xff;
+}
+
+
+
+/* Recover indices before full and low16 object<16 gates. Immediate predecessor kind11/object
+   duplicate returns1 without status publication, even for empty indices. Otherwise store
+   kind/object, advance producer and publish20/75/8A. Recovery can change both globals before
+   rejection; this routine finally republishes producer. No descriptor, completion or busy gate. */
+
+uint nvm_enqueue_family1_read(uint object)
+
+{
+  byte index;
+  undefined *puVar1;
+  uint uVar2;
+  uint producer;
+  uint uVar3;
+  byte bStack_e;
+  byte bStack_d;
+  
+  puVar1 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  uVar3 = object & 0xffff;
+  nvm_recover_family1_request_indices(&bStack_e,&bStack_d);
+  index = bStack_e;
+  producer = (uint)bStack_e;
+  uVar2 = nvm_family1_request_full(producer,(uint)bStack_d);
+  if ((uVar2 == 1) || (nvm_family1_object_count <= uVar3)) {
+    uVar2 = 0;
+  }
+  else {
+    uVar2 = nvm_previous_family1_request(producer);
+    if (((*((ushort *)camry_host_ptr((uint32_t)(0x4d8cu + (int)camry_host_addr((puVar1 + uVar2 * 4)) + 2)))) != uVar3) ||
+       ((*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x4d8cu + (uint32_t)((int)camry_host_addr((puVar1 + uVar2 * 4))))))) != (code)0x11)) {
+      (*((volatile uint8_t *)camry_host_ptr((uint32_t)(0x4d8cu + (uint32_t)((int)camry_host_addr((puVar1 + producer * 4))))))) = (code)0x11;
+      *(short *)(puVar1 + producer * 4 + 0x4d8e) = (short)object;
+      uVar2 = nvm_advance_family1_request_index(index);
+      bStack_e = (byte)uVar2;
+      publish_redundant_u8
+                (' ',puVar1 + uVar3 + 0x4b28,puVar1 + uVar3 + 0x5888,puVar1 + uVar3 + 0x58ac);
+    }
+    uVar2 = 1;
+  }
+  puVar1[0x4e86] = bStack_e;
+  return uVar2;
+}
+
+
+
+/* Any NULL destination returns-1 before all stores. Otherwise publish low8(value), value^55,
+   value^AA in that order under the FFC0 priority-mask pair and return0. No alias rejection; the
+   three stores are not asserted atomic against every interrupt source. Otherwise write low8(value),
+   value^55 and value^AA in that order under the real PMRFFC0 enter/restore pair, then return0.
+   Upper value bits discarded; no alias rejection. Sweep covers each NULL position and both ID
+   states; not globally atomic storage. */
+
+int publish_redundant_u8(uchar value,uchar *raw,uchar *xor55,uchar *xorAA)
+
+{
+  int iVar1;
+  uint saved_mask;
+  
+  if (((raw == (uchar *)0x0) || (xor55 == (uchar *)0x0)) || (xorAA == (uchar *)0x0)) {
+    iVar1 = -1;
+  }
+  else {
+    saved_mask = priority_mask_enter(0xffc0);
+    *raw = value;
+    *xor55 = value ^ 0x55;
+    *xorAA = value ^ 0xaa;
+    priority_mask_restore(saved_mask);
+    iVar1 = 0;
+  }
+  return iVar1;
+}
+
+
+
+/* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
+   Referenced placeholder implementing no behavior; structural classification, not individually
+   executed. */
+
+void return_only_stub_73ca0(void)
+
+{
+  return;
+}
+
+
+
+/* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
+   Referenced placeholder implementing no behavior; structural classification, not individually
+   executed. */
+
+void return_only_stub_73ca2(void)
+
+{
+  return;
+}
+
+
+
+undefined4 return_argument_word_7490a(undefined4 param_1)
+
+{
+  return param_1;
+}
+
+
+
+undefined4 return_argument_word_7490e(undefined4 param_1)
+
+{
+  return param_1;
+}
+
+
+
+/* Low8 class0 sets6B76=0 and calls76ACE. Class83 sets4; other nonzero classes set1, report the
+   class and call76ADA. Their73CA0/73CA2 targets are JMPLP leaves, not logical publication. Extra
+   r7/r8/r9 prepared by77D66 are not consumed in this implementation. Class0 sets result-state0;83
+   sets4; other nonzero sets1 and reports class. Actual completion hooks terminate at
+   JMPLP73CA0/73CA2; this is not logical/application publication. Extra prepared r7-r9 are unused.
+    */
+
+void nvm_publish_physical_class(uchar result_class)
+
+{
+  uchar state;
+  
+  if (result_class == '\0') {
+    nvm_set_physical_result_state('\0');
+    return_only_stub_73ca0();
+  }
+  else {
+    if (result_class == 0x83) {
+      state = '\x04';
+    }
+    else {
+      state = '\x01';
+    }
+    nvm_set_physical_result_state(state);
+    nvm_report_physical_class(result_class);
+    return_only_stub_73ca2();
+  }
+  return;
+}
+
+
+
+/* SET1 bit0 of6B73; preserve other bits. Invoked before completion dispatch gates. SET1 bit0 of6B73
+   preserves other bits. Real completion path exercises it before mode/handle dispatch gating. */
+
+void nvm_mark_physical_attempt_error(void)
+
+{
+  nvm_physical_attempt_flags = nvm_physical_attempt_flags | 1;
+  return;
+}
+
+
+
+/* Zero-extend low8 then forward to76A3A; no independent event or callback semantics. Zero-extend
+   low8 class and forward to76A3A. Actual composed native result reaches translated sticky mask; no
+   independent event meaning assigned. */
+
+void nvm_report_class_byte(uchar result_class)
+
+{
+  nvm_accumulate_result_class(result_class);
+  return;
+}
+
+
+
+/* Zero-extend low8 and forward through769F6 to the class-mask mapper. Zero-extend low8 class
+   then769F6. Verified within the complete physical result finalization path; no logical event
+   callback here. */
+
+void nvm_report_physical_class(uchar result_class)
+
+{
+  nvm_report_class_byte(result_class);
+  return;
+}
+
+
+
+/* Zero6C4C,6C10,6C4B; set6C3C=FFFF; store identity(0) into6C14/6C18. Preserve published result6C1C,
+   selector6C4A and unrelated fields. Native whole-context canaries verify cleanup after both
+   dispatched and rejected results. Zero6C4C/6C10/6C4B and identity-zero6C14/6C18; set6C3CFFFF.
+   Preserve published6C1C and selector6C4A. Whole-context native canaries cover dispatched and
+   rejected completion cleanup. */
+
+void nvm_reset_completion_context(void)
+
+{
+  nvm_completion_side_status = '\0';
+  nvm_completion_raw_result = 0;
+  nvm_completion_storage_handle = 0xffff;
+  nvm_completion_mode = '\0';
+  DAT_febf6c14 = return_argument_word_7490a(0);
+  DAT_febf6c18 = return_argument_word_7490e(0);
+  return;
+}
+
+
+
+/* Full32 completion result6C10!=1 sets6B73.bit0 through7697E; no other gate. Full32 current
+   result6C10!=1 sets6B73.bit0. No mode/handle gate; exact result1 preserves the flags byte. */
+
+void nvm_mark_non_success_result(void)
+
+{
+  if (nvm_completion_raw_result != 1) {
+    nvm_mark_physical_attempt_error();
+  }
+  return;
+}
+
+
+
+/* Side byte6C4C==1 calls76A1C(1);==2 calls76A1C(0); others do nothing. 77D66 calls this before
+   validating completion mode/handle. Side byte6C4C1 calls76A1C(1);2 calls76A1C(0); otherwise no
+   call. Native side diagnostics occur even when the later mode/handle dispatch gate rejects. */
+
+void nvm_report_completion_side_status(void)
+
+{
+  uint status;
+  
+  status = 0;
+  if ((nvm_completion_side_status == '\x02') ||
+     (status = 1, nvm_completion_side_status == '\x01')) {
+    nvm_accumulate_side_status(status);
+  }
+  return;
+}
+
+
+
+/* Mark non1 result, scan8 full32 rows at27C38, default classFD; report side status before dispatch
+   gates. Modes1/2 and storage handle<123 call76722. Mode1 loads6C14 into r7; mode2 loads6C18; no
+   pointee is read by the consumer. Always zero6C20 and reset completion context, even on invalid
+   mode/handle. Native both columns, unknown fullword, last/invalid handle, side effects and
+   preserved gaps. Eight full32 result rows at27C38; mode1 uses+4 else+5; unmatched classFD. Report
+   side status before allowing only modes1/2 and handle<123 into76722. Always zero6C20/reset
+   completion context. Both columns and all rows executed; no payload dereference or logical
+   publication. */
+
+void nvm_finish_physical_result(void)
+
+{
+  int iVar1;
+  uint *puVar2;
+  int iVar3;
+  int iVar4;
+  undefined *puVar5;
+  uchar result_class;
+  
+  puVar5 = ((undefined *)camry_host_ptr(0x23dfcu));
+  nvm_mark_non_success_result();
+  result_class = 0xfd;
+  iVar4 = 0;
+  do {
+    puVar2 = (uint *)(puVar5 + iVar4 * 8 + 0x3e3c);
+    if (*puVar2 == nvm_completion_raw_result) {
+      if (nvm_completion_mode == '\x01') {
+        result_class = (uchar)puVar2[1];
+      }
+      else {
+        result_class = (*((uchar *)camry_host_ptr((uint32_t)((int)camry_host_addr(puVar2) + 5))));
+      }
+      break;
+    }
+    iVar3 = iVar4 + 1;
+    iVar1 = iVar4 + -7;
+    iVar4 = iVar3;
+  } while (((iVar1 < 0) || (iVar3 < 0)));
+  nvm_report_completion_side_status();
+  if (((nvm_completion_mode == '\x01') || (nvm_completion_mode == '\x02')) &&
+     (nvm_completion_storage_handle < *(ushort *)(puVar5 + 0x3b2c))) {
+    nvm_publish_physical_class(result_class);
+  }
+  nvm_set_state_machine_timeout_783de(0);
+  nvm_reset_completion_context();
+  return;
+}
+
+
+
+void nvm_set_state_machine_timeout_783de(undefined4 param_1)
+
+{
+  DAT_febf6c20 = param_1;
+  return;
+}
+
+
+
+/* F058 bit0 clear resetsB1B4 and returns0; otherwise return1 until strict count>268, then3.
+   Confirmed count holds. R10 is reused across the following first-window helper. otherwise1 until
+   strict count>268 then3. Confirmed count holds; native composed case forwards classifier3 through
+   both windows. Verified only for the composed current/held inhibition case; other branches remain
+   static reconstruction. */
+
+uint classify_received_status_delay(void)
+
+{
+  uint uVar1;
+  
+  if ((DAT_febef058 & 1) == 0) {
+    uVar1 = 0;
+    DAT_febeb1b4 = 0;
+  }
+  else {
+    uVar1 = 1;
+    if ((0x10c < DAT_febeb1b4) || (DAT_febeb1b4 = DAT_febeb1b4 + 1, 0x10c < DAT_febeb1b4)) {
+      uVar1 = 3;
+    }
+  }
+  return uVar1;
+}
+
+
+
+/* CompanionB1AC/B1AD window. Initial F04E1 branch uses B191/classification inhibition; alternate
+   F04C!=0/B1BD5A branch does not. Distinct1200/2000 active counters and200-observation held
+   release. Second current/held window: initial branch uses B191/classifier inhibition, alternate
+   branch does not. Native case verifies original classifier3 inhibits second window after
+   destructive first-helper R6 use. Verified only for the composed current/held inhibition case;
+   other branches remain static reconstruction. */
+
+void update_second_health_status_window(uint classification)
+
+{
+  if (DAT_febebe9c == 'Z') {
+    if (DAT_febef04e == '\x01') {
+      if ((DAT_febeb1b6 < DAT_000aefbc) &&
+         ((DAT_febeb084 < DAT_000aefb6 ||
+          (((current_source_coherence_observations & 1) == 0 &&
+           (((current_source_coherence_observations >> 1 & 1) == 0 ||
+            ((classification >> 1 & 1) == 0)))))))) {
+        if (DAT_febeb1b6 == 0) {
+          DAT_febeb1ad = 0x5a;
+          DAT_febeb1ac = 0x5a;
+          DAT_febeb1ba = 0;
+        }
+        DAT_febeb1b6 = DAT_febeb1b6 + 1;
+        return;
+      }
+    }
+    else {
+      if ((DAT_febef04c == '\0') || (DAT_febeb1bd != 'Z')) {
+        if (DAT_febeb1ba < DAT_000aefba) {
+          DAT_febeb1ba = DAT_febeb1ba + 1;
+        }
+        else {
+          DAT_febeb1ad = 0;
+        }
+        goto LAB_000b44ce;
+      }
+      if (DAT_febeb1b8 < DAT_000aefbe) {
+        if (DAT_febeb1b8 == 0) {
+          DAT_febeb1ad = 0x5a;
+          DAT_febeb1ac = 0x5a;
+        }
+        DAT_febeb1b8 = DAT_febeb1b8 + 1;
+        return;
+      }
+    }
+    DAT_febeb1ad = 0;
+  }
+  else {
+    DAT_febeb1ad = 0;
+LAB_000b44ce:
+    DAT_febeb1b6 = 0;
+    DAT_febeb1b8 = 0;
+  }
+  DAT_febeb1ac = 0;
+  return;
+}
+
+
+
+/* Rebuild B1A8 from currentB1AA/B1AC, B1A9 from heldB1AB/B1AD. Current inhibits owner1
+   qualification; held selects owner6 source override. No meaningful scalar return contract. Publish
+   B1A8 from current andB1A9 from held source windows. Native composition clears both after
+   classified inhibition; outer scalar return is not part of contract. Verified only for the
+   composed current/held inhibition case; other branches remain static reconstruction. */
+
+void publish_current_and_held_health_windows(void)
+
+{
+  if ((DAT_febeb1aa == 'Z') || (DAT_febeb1ac == 'Z')) {
+    DAT_febeb1a8 = 0x5a;
+  }
+  else {
+    DAT_febeb1a8 = 0;
+  }
+  if ((DAT_febeb1ab == 'Z') || (DAT_febeb1ad == 'Z')) {
+    DAT_febeb1a9 = 0x5a;
+  }
+  else {
+    DAT_febeb1a9 = 0;
+  }
+  return;
+}
+
+
+
+/* WARNING: Inlined function: update_first_health_status_window */
+/* B4346 classification0/1/3 is retainedinR10 acrossB4370(noR10write), thenpassedtoB4430;
+   B4370maydestructivelyshiftR6. BothfeedB44E0current/heldsummaries. Do
+   notinventsecondpermissionreturn. Composed real classifier3 survives first window inR10 despite
+   destructiveR6 bit tests, inhibits second window, and publishes cleared current/held summaries.
+   Inline actual B4370 p-code; do not invent a fresh return or use post-callR6. Other window
+   branches remain static reconstruction. */
+
+void update_health_status_delay_summaries(void)
+
+{
+  char cVar1;
+  byte bVar2;
+  ushort uVar3;
+  undefined *puVar4;
+  uint classification;
+  undefined1 uVar5;
+  ushort uVar6;
+  undefined1 uVar7;
+  ushort uVar8;
+  
+  puVar4 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  classification = classify_received_status_delay();
+  uVar6 = *(ushort *)(puVar4 + -0x64e);
+  if (puVar4[0x69c] == 'Z') {
+    cVar1 = puVar4[0x384d];
+    uVar7 = puVar4[-0x656];
+    uVar5 = puVar4[-0x655];
+    uVar3 = *(ushort *)(puVar4 + -0x652);
+    uVar8 = *(ushort *)(puVar4 + -0x650);
+    bVar2 = puVar4[-0x66f];
+    if (cVar1 == '\x04') {
+      if ((uVar3 < DAT_000aefb4) &&
+         ((*(ushort *)(puVar4 + -0x77c) < DAT_000aefb6 ||
+          (((bVar2 & 1) == 0 && (((bVar2 >> 1 & 1) == 0 || ((classification >> 1 & 1) == 0)))))))) {
+        if (uVar3 == 0) {
+          uVar5 = 0x5a;
+          uVar7 = 0x5a;
+          uVar6 = 0;
+        }
+        uVar3 = uVar3 + 1;
+        goto LAB_000b4420;
+      }
+    }
+    else {
+      if ((cVar1 != '\x02' && cVar1 != '\x03') || (puVar4[0x384c] == '\0')) {
+        if (uVar6 < DAT_000aefba) {
+          uVar6 = uVar6 + 1;
+        }
+        else {
+          uVar5 = 0;
+        }
+        goto LAB_000b441e;
+      }
+      if ((uVar8 < DAT_000aefb8) &&
+         ((*(ushort *)(puVar4 + -0x77c) < DAT_000aefb6 ||
+          (((bVar2 & 1) == 0 && (((bVar2 >> 1 & 1) == 0 || ((classification >> 1 & 1) == 0)))))))) {
+        if (uVar8 == 0) {
+          uVar5 = 0x5a;
+          uVar7 = 0x5a;
+        }
+        uVar8 = uVar8 + 1;
+        goto LAB_000b4420;
+      }
+    }
+    uVar7 = 0;
+    uVar5 = 0;
+  }
+  else {
+    uVar5 = 0;
+LAB_000b441e:
+    uVar7 = 0;
+    uVar3 = 0;
+    uVar8 = 0;
+  }
+LAB_000b4420:
+  puVar4[-0x656] = uVar7;
+  puVar4[-0x655] = uVar5;
+  *(ushort *)(puVar4 + -0x652) = uVar3;
+  *(ushort *)(puVar4 + -0x650) = uVar8;
+  *(ushort *)(puVar4 + -0x64e) = uVar6;
+  update_second_health_status_window(classification);
+  publish_current_and_held_health_windows();
+  return;
+}
+
+
+
+/* Hold5A;resetseedA5;adoptadmittedfreshnonFFFFF18A;resetageonlyonchangedvalue,otherwiseadd5withFFFFFFFEsentinelhandling.
+   AlwaysconsumeF039generation. Native hold composition retains all three metadata values despite
+   invalid statuses while consuming their generation edges. Nonheld arithmetic/validation remains
+   static. */
+
+void condition_received_word_and_age(uchar policy)
+
+{
+  int iVar1;
+  undefined1 uVar2;
+  
+  if (policy != 'Z') {
+    uVar2 = 0;
+    if (policy != 0xa5) {
+      uVar2 = DAT_febebe60;
+    }
+    iVar1 = 0;
+    if ((((DAT_febef039 != DAT_febebe61) && (DAT_febef038 == '\0')) && (DAT_febef18a != 0xffff)) &&
+       (published_internal_source_admission_state < 2)) {
+      if (received_retained_word != DAT_febef18a) {
+        iVar1 = 0x5a;
+      }
+      uVar2 = 1;
+      received_retained_word = DAT_febef18a;
+    }
+    if (0xfffffffd < received_word_unchanged_age) {
+      received_word_unchanged_age = 0;
+    }
+    DAT_febebe60 = uVar2;
+    if (iVar1 == 0x5a) {
+      received_word_unchanged_age = 0;
+    }
+    else if (received_word_unchanged_age < 0xfffffff9) {
+      received_word_unchanged_age = received_word_unchanged_age + 5;
+    }
+    else {
+      received_word_unchanged_age = 0xfffffffe;
+    }
+  }
+  DAT_febebe61 = DAT_febef039;
+  return;
+}
+
+
+
+/* Hold5A;resetA5;invalidstatusclears;admittednewgenerationadoptsuint32F218<=999999withtype1/2,otherwisezero.
+   AlwaysconsumeF066generation;BE74isnotapointer. Native hold composition retains all three metadata
+   values despite invalid statuses while consuming their generation edges. Nonheld
+   arithmetic/validation remains static. */
+
+void condition_received_typed_scalar(uchar policy)
+
+{
+  if (policy != 'Z') {
+    if (policy == 0xa5) {
+      DAT_febebe62 = '\0';
+      received_typed_scalar = 0;
+    }
+    if ((DAT_febef065 != '\0') ||
+       (((DAT_febef066 != DAT_febebe63 && (published_internal_source_admission_state < 2)) &&
+        ((0xf423fu < published_route31_numeric_scalar ||
+         ((DAT_febebe62 = DAT_febef067,
+          received_typed_scalar = published_route31_numeric_scalar, DAT_febef067 != '\x01'
+          && (DAT_febef067 != '\x02')))))))) {
+      received_typed_scalar = 0;
+      DAT_febebe62 = '\0';
+    }
+  }
+  DAT_febebe63 = DAT_febef066;
+  return;
+}
+
+
+
+/* Returnunchangedlow8R6whenbothnibblesaredecimaldigits,elsefullR10=FF. Validationonly,noconversion.
+    */
+
+uint validate_packed_decimal_byte(uchar packed_value)
+
+{
+  uint uVar1;
+  
+  uVar1 = (uint)packed_value;
+  if (((uVar1 & 0xf) < 10) && ((uVar1 & 0xf0) < 0xa0)) {
+    return uVar1;
+  }
+  return 0xff;
+}
+
+
+
+/* Hold5A/resetA5;invalidstatusorinvalidfreshsix-membertuple->allFF.
+   Nibbledigitsandrawbyteboundsretainedwithoutdecimalconversion;alwaysconsumeF0F7generation. Native
+   hold composition retains all three metadata values despite invalid statuses while consuming their
+   generation edges. Nonheld arithmetic/validation remains static. */
+
+void condition_received_packed_decimal_fields(uchar policy)
+
+{
+  uchar packed_value;
+  uchar packed_value_00;
+  uchar packed_value_01;
+  uchar packed_value_02;
+  uchar packed_value_03;
+  char cVar1;
+  undefined *puVar2;
+  uint uVar3;
+  uint uVar4;
+  uint uVar5;
+  uint uVar6;
+  uint uVar7;
+  uint uVar8;
+  
+  cVar1 = DAT_febef0f7;
+  packed_value_03 = DAT_febef0f6;
+  packed_value_02 = DAT_febef0f5;
+  packed_value_01 = DAT_febef0f4;
+  packed_value_00 = DAT_febef0f3;
+  packed_value = DAT_febef0f2;
+  puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  if (policy == 'Z') goto LAB_000be5a2;
+  if (policy == 0xa5) {
+    uVar8 = 0xffffffff;
+    uVar7 = 0xffffffff;
+    uVar6 = 0xffffffff;
+    uVar5 = 0xffffffff;
+    uVar4 = 0xffffffff;
+    uVar3 = 0xffffffff;
+  }
+  else {
+    uVar8 = (uint)received_packed_decimal_fields[0];
+    uVar7 = (uint)received_packed_decimal_fields[1];
+    uVar6 = (uint)received_packed_decimal_fields[2];
+    uVar5 = (uint)received_packed_decimal_fields[3];
+    uVar4 = (uint)received_packed_decimal_fields[4];
+    uVar3 = (uint)received_packed_decimal_fields[5];
+  }
+  puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  if (DAT_febef0f8 == '\0') {
+    puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+    if ((DAT_febef0f7 != DAT_febebe6c) && (published_internal_source_admission_state < 2)) {
+      puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+      uVar8 = validate_packed_decimal_byte(DAT_febef0f1);
+      uVar7 = validate_packed_decimal_byte(packed_value);
+      uVar6 = validate_packed_decimal_byte(packed_value_00);
+      uVar5 = validate_packed_decimal_byte(packed_value_01);
+      uVar4 = validate_packed_decimal_byte(packed_value_02);
+      uVar3 = validate_packed_decimal_byte(packed_value_03);
+      if (((0x38 < uVar8) || (((0x11 < uVar7 - 1 || (0x30 < uVar6 - 1)) || (0x23 < uVar5)))) ||
+         ((0x59 < uVar4 || (0x59 < uVar3)))) goto LAB_000be586;
+    }
+  }
+  else {
+LAB_000be586:
+    uVar8 = 0xffffffff;
+    uVar7 = 0xffffffff;
+    uVar6 = 0xffffffff;
+    uVar5 = 0xffffffff;
+    uVar4 = 0xffffffff;
+    uVar3 = 0xffffffff;
+  }
+  puVar2[0x666] = (char)uVar8;
+  puVar2[0x667] = (char)uVar7;
+  puVar2[0x668] = (char)uVar6;
+  puVar2[0x669] = (char)uVar5;
+  puVar2[0x66a] = (char)uVar4;
+  puVar2[0x66b] = (char)uVar3;
+LAB_000be5a2:
+  puVar2[0x66c] = cVar1;
+  return;
+}
+
+
+
+/* B20E11/33selecthold5A;prior33->0selectresetA5;else0.
+   Callthreeconditioners;saveB20EandpublishBE64=5A. Native hold composition retains all three
+   metadata values despite invalid statuses while consuming their generation edges. Nonheld
+   arithmetic/validation remains static. */
+
+void refresh_received_control_metadata(void)
+
+{
+  undefined *puVar1;
+  uchar policy;
+  
+  puVar1 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  if ((DAT_febeb20e == '3') || (DAT_febeb20e == '\x11')) {
+    policy = 'Z';
+  }
+  else if ((DAT_febebe65 == '3') && (DAT_febeb20e == '\0')) {
+    policy = 0xa5;
+  }
+  else {
+    policy = '\0';
+  }
+  DAT_febebe65 = DAT_febeb20e;
+  condition_received_word_and_age(policy);
+  condition_received_typed_scalar(policy);
+  condition_received_packed_decimal_fields(policy);
+  puVar1[0x664] = 0x5a;
+  return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x000c412c) */
+/* WARNING: Removing unreachable block (ram,0x000c4118) */
+/* WARNING: Removing unreachable block (ram,0x000c40a2) */
+/* WARNING: Removing unreachable block (ram,0x000c409e) */
+/* WARNING: Removing unreachable block (ram,0x000c40f8) */
+/* Clip difference around C080 by AE38/1024. StateC08E selects curveAF77E/AF792/AF7A6 atADF6;
+   gain=8192/curve, or8192 when zero. Clamp low32 error*low16(gain) to +/-8*AE38; add signed
+   increment/4 to GLOBAL C078, publish accumulator/2048 through output pointer. Arithmetic is low32,
+   not a saturating integral; third pointer is output-only. Clip around center; curve-derived low16
+   gain and bounded low32 step feed global accumulatorC078. Third pointer is output-only. Signed
+   divisions by4 and2048 remain separate. */
+
+void filter_established_estimator_difference
+               (int difference,int *filtered_difference,int *new_accumulator)
+
+{
+  int iVar1;
+  int iVar2;
+  undefined *puVar3;
+  undefined1 *puVar4;
+  int iVar5;
+  uint uVar6;
+  int iVar7;
+  int iVar8;
+  
+  puVar3 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  iVar7 = (int)(estimator_tracking_band_scale * (uint)DAT_febeae38) / 0x400;
+  iVar2 = (int)(estimator_tracking_step_scale * (uint)DAT_febeae38) / 0x400;
+  iVar5 = DAT_febec080 - iVar7;
+  iVar7 = iVar7 + DAT_febec080;
+  if ((difference - iVar7 < 0 !=
+       (difference < 0 != iVar7 < 0 && iVar7 < 0 == difference - iVar7 < 0) || difference == iVar7)
+     && (iVar7 = iVar5,
+        difference - iVar5 < 0 ==
+        (difference < 0 != iVar5 < 0 && iVar5 < 0 == difference - iVar5 < 0) && difference != iVar5)
+     ) {
+    iVar7 = difference;
+  }
+  if (DAT_febec08e == '\"') {
+    puVar4 = ((undefined *)camry_host_ptr(0xaf7a6u));
+  }
+  else if (DAT_febec08e == '\x11') {
+    puVar4 = ((undefined *)camry_host_ptr(0xaf792u));
+  }
+  else {
+    puVar4 = ((undefined *)camry_host_ptr(0xaf77eu));
+  }
+  DAT_febec048 = iVar7;
+  iVar5 = interpolate_unsigned16_axis_and_values_d0896(puVar4,DAT_febeadf6);
+  uVar6 = 0x2000;
+  if (iVar5 != 0) {
+    uVar6 = 0x2000 / iVar5;
+  }
+  iVar1 = (iVar7 - *filtered_difference) * (uVar6 & 0xffff);
+  iVar7 = iVar1 - iVar2;
+  iVar8 = iVar2;
+  if (iVar7 < 0 != (iVar1 < 0 != iVar2 < 0 && iVar2 < 0 == iVar7 < 0) || iVar7 == 0) {
+    iVar8 = -iVar2;
+    iVar2 = iVar1 + iVar2;
+    if (iVar2 < 0 == (iVar1 < 0 != iVar8 < 0 && iVar8 < 0 == iVar2 < 0) && iVar2 != 0) {
+      iVar8 = iVar1;
+    }
+  }
+  *(short *)(puVar3 + 0x860) = (short)iVar5;
+  *(short *)(puVar3 + 0x862) = (short)uVar6;
+  iVar2 = *(int *)(puVar3 + 0x878) + iVar8 / 4;
+  *filtered_difference = iVar2 / 0x800;
+  *new_accumulator = iVar2;
+  *(int *)(puVar3 + 0x850) = iVar1;
+  *(int *)(puVar3 + 0x854) = iVar8;
+  return;
+}
+
+
+
+/* WARNING: Removing unreachable block (ram,0x000c417e) */
+/* Start from C0B4, not oldBFEC. Below curve ceiling60000, increment if candidate changed or wrapped
+   abs32(candidate-C080)<AE38/1024. Otherwise retain the input count, even above the ceiling.
+   Publish BFEC and diagnostic ceilingC066. Count starts fromC0B4 rather thanBFEC. Below flat60000
+   ceiling increment for changed candidate or strict center band; ceiling gates increment rather
+   than clamping. */
+
+void advance_estimator_source_count(int candidate,int previous)
+
+{
+  int iVar1;
+  undefined *puVar2;
+  uint uVar3;
+  int iVar4;
+  ushort uVar5;
+  uint uVar6;
+  
+  uVar5 = DAT_febec0b4;
+  puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  uVar6 = (uint)DAT_febec0b4;
+  uVar3 = interpolate_unsigned16_axis_and_values_d0896(((undefined *)camry_host_ptr(0xaf7bau)),DAT_febeadf4);
+  iVar4 = abs_s32_wrapping(candidate - *(int *)(puVar2 + 0x880));
+  iVar1 = (int)(estimator_tracking_band_scale * (uint)*(ushort *)(puVar2 + -0x9c8)) / 0x400;
+  if ((uVar6 < uVar3) &&
+     ((iVar4 - iVar1 < 0 != (iVar4 < 0 != iVar1 < 0 && iVar1 < 0 == iVar4 - iVar1 < 0) ||
+      (candidate != previous)))) {
+    uVar5 = uVar5 + 1;
+  }
+  *(ushort *)(puVar2 + 0x7ec) = uVar5;
+  *(short *)(puVar2 + 0x866) = (short)uVar3;
+  return;
+}
+
+
+
+/* With BFC5==0, first copyC0B4->BFEE. QualifiersC045/C044/C042=5A, AD18=11 and unsignedADF4>=3840
+   publishC074=low32(BF78-BFD4) and increment u16C064. Only count>100 runs bounded
+   filter/source-count update, then pins100. Failed qualification resets warmup but holds
+   C04C/C078/C074; BFC5!=0 instead clears filter/accumulator and warmup. Established tracking
+   publishes difference before consecutive warmup exceeds100. Qualifier interruption resets warmup
+   but holds filter/difference; BFEE refresh precedes admission. BFC5 instead clears
+   filter/accumulator. */
+
+void track_established_estimator_difference(void)
+
+{
+  ushort uVar1;
+  int previous;
+  undefined *puVar2;
+  ushort uVar3;
+  int local_14;
+  int iStack_10;
+  
+  previous = DAT_febec04c;
+  uVar1 = estimator_tracking_warmup;
+  puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+  if (DAT_febebfc5 == '\0') {
+    DAT_febebfee = DAT_febec0b4;
+    local_14 = DAT_febec078;
+    iStack_10 = DAT_febec04c;
+    if ((((DAT_febec045 == 'Z') && (DAT_febec044 == 'Z')) && (DAT_febec042 == 'Z')) &&
+       ((DAT_febead18 == '\x11' && (DAT_000af770 <= DAT_febeadf4)))) {
+      DAT_febec074 = DAT_febebf78 - DAT_febebfd4;
+      uVar3 = DAT_febec064 + 1U;
+      if (estimator_tracking_warmup < (ushort)(DAT_febec064 + 1U)) {
+        puVar2 = ((undefined *)camry_host_ptr(0xfebeb800u));
+        filter_established_estimator_difference(DAT_febec074,&iStack_10,&local_14);
+        advance_estimator_source_count(iStack_10,previous);
+        uVar3 = uVar1;
+      }
+      goto LAB_000c4236;
+    }
+  }
+  else {
+    iStack_10 = 0;
+    local_14 = 0;
+  }
+  uVar3 = 0;
+LAB_000c4236:
+  *(ushort *)(puVar2 + 0x864) = uVar3;
+  *(int *)(puVar2 + 0x84c) = iStack_10;
+  *(int *)(puVar2 + 0x878) = local_14;
+  return;
+}
+
+
+
+uint interpolate_unsigned16_axis_and_values_d0896(ushort *param_1,uint param_2)
+
+{
+  ushort *puVar1;
+  int iVar2;
+  int iVar3;
+  uint uVar4;
+  
+  param_2 = param_2 & 0xffff;
+  if ((*param_1 != 0xffff) && (*param_1 < param_2)) {
+    iVar2 = 0;
+    while( true ) {
+      puVar1 = param_1 + iVar2 * 2;
+      uVar4 = (uint)*puVar1;
+      if (uVar4 == 0xffff) {
+        return (uint)puVar1[-1];
+      }
+      if (param_2 <= uVar4) break;
+      iVar2 = iVar2 + 1;
+    }
+    iVar2 = uVar4 - puVar1[-2];
+    iVar3 = (param_2 - puVar1[-2]) * ((uint)puVar1[1] - (uint)puVar1[-1]);
+    if (iVar2 != 0) {
+      if (iVar3 == -0x80000000 && iVar2 == -1) {
+        iVar3 = 0;
+      }
+      else {
+        iVar3 = iVar3 / iVar2;
+      }
+    }
+    return (uint)puVar1[-1] + iVar3 & 0xffff;
+  }
+  return (uint)param_1[1];
+}
+
+
+
+/* Return positive input unchanged, otherwise low32 negation. INT32_MIN remains negative. C
+   unary-minus spelling does not establish a nonnegative result over all32-bit inputs. Signed32
+   absolute-value negation wraps at INT32_MIN. Tracking predicates must not assume every return is
+   nonnegative. */
+
+int abs_s32_wrapping(int value)
+
+{
+  if (value < 1) {
+    value = -value;
+  }
+  return value;
+}
+
+

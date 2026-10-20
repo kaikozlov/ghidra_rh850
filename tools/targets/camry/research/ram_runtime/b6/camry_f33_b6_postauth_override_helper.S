@@ -2,8 +2,8 @@
  *
  * Entry is a tail replacement for FUN_000667E6 after the target receive task.
  * The high resident already owns the stock aggregate stack frame. This helper:
- *   1. runs the stock SecOC/result publication task,
- *   2. runs the normal communications follow-up,
+ *   1. runs the stock DCM worker/timer/event aggregate,
+ *   2. runs the normal foreground maintenance phase,
  *   3. rewrites only authenticated route44 raw-COM B3..B9 while C7 is live,
  *   4. resumes the stock application/control aggregate and final tail.
  *
@@ -12,9 +12,9 @@
     .section .text
     .global _helper_entry
 _helper_entry:
-    /* Native secured PDU -> verified upper delivery -> route44 raw COM. */
-    jarl32 secoc_aggregate, lp
-    jarl32 comm_after_secoc, lp
+    /* SecOC/route44 delivery already ran inside upstream 7A254, via 6A410. */
+    jarl32 dcm_foreground, lp
+    jarl32 foreground_maintenance, lp
 
     /* Count observed route44 publications. The generation is specific to PDU44. */
     mov 0, r10                    /* this foreground tick published a new native B6 */

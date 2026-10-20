@@ -29,9 +29,8 @@ with tempfile.TemporaryDirectory() as td:
   check("artifact regenerates byte-exact", out.exists() and out.read_bytes() == ART.read_bytes())
 
 j = json.loads(ART.read_text())
-check("schema and exact firmware are pinned",
-      j["schema"] == "camry-f33-b6-command-composition-v1"
-      and j["target"]["software_id"] == "8965F3307000"
+check("exact firmware identity is pinned",
+      j["target"]["software_id"] == "8965F3307000"
       and j["target"]["codeflash_sha256"] == "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7")
 
 sel = j["selector_census"]
@@ -75,7 +74,7 @@ check("B6 target controller reaches CB38 inside D0218",
 check("same command coordinator/funnel remains active",
       checks["shared_command_coordinator_always_calls_same_funnel"]
       and checks["d039e_retains_shared_base_and_local_addend"]
-      and checks["post_slew_override_is_internal_not_b6_selected"])
+      and checks["final_override_is_internal_not_b6_selected"])
 
 writers = j["shared_funnel_writer_census"]
 check("shared funnel has one runtime writer per stage plus reset/init writers",

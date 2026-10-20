@@ -80,8 +80,8 @@ public class ApplyCamryF33DeviceProfile extends GhidraScript {
         setRange("gp",0xFEBEB800L,0x00020000L,0x00100000L);
         setRange("tp",0x00023DFCL,0x00020000L,0x00100000L);
         setPoint("sp",0xFEBE2000L,0x00020880L);
-        label(0x20880L,"f33_application_entry","Exact F33 application entry wrapper -> startup coordinator 0x637EE");
-        label(0x715B4L,"f33_application_context_init","Exact F33 context loader: INTBP=20200 EBASE=20000 GP=FEBEB800 TP=23DFC SP=FEBE2000");
+        label(0x20880L,"application_entry","Exact F33 application entry wrapper -> startup coordinator 0x637EE");
+        label(0x715B4L,"application_context_init","Exact F33 context loader: INTBP=20200 EBASE=20000 GP=FEBEB800 TP=23DFC SP=FEBE2000");
         println("ApplyCamryF33DeviceProfile: exact image and target-native application context applied");
     }
 }

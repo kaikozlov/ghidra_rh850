@@ -18,7 +18,7 @@ Profiles:
   application-rx-consumers     Export application Rx consumer audit CSV
   application-tx-producers     Export Tx refs and build producer evidence CSV
   outside-functions            Export/adjudicate outside-function census + summary
-  semantic-coverage            Export/review semantic coverage ledger + summary
+  semantic-coverage            Semantic coverage summary (derived tables, or legacy CSV review)
   project-inventory            Export normalized project inventory (build/out or build/tmp only)
 
 PROJECT_DIR defaults to the selected target's registered work_dir. Profile-specific environment
@@ -50,6 +50,7 @@ TARGET_FIELD() { python3 "$ROOT/tools/project/analysis_target.py" "$ANALYSIS_TAR
 PROJECT_NAME=$(TARGET_FIELD project_name)
 PROGRAM_NAME=$(TARGET_FIELD program_name)
 CODEFLASH="$ROOT/$(TARGET_FIELD codeflash)"
+EXPECTED_SHA=$(TARGET_FIELD codeflash_sha256)
 PROJECT_DIR="${PROJECT_DIR:-$ROOT/$(TARGET_FIELD work_dir)}"
 
 resolve_path() {
@@ -110,23 +111,25 @@ case "$PROFILE" in
     ;;
   outside-functions)
     (($# <= 2)) || { usage >&2; exit 2; }
-    PRIMARY_OUT=$(resolve_path "${1:-${CSV_OUT:-$ROOT/data/outside_function_candidates.csv}}")
-    SECONDARY_OUT=$(resolve_path "${2:-${SUMMARY_OUT:-$ROOT/data/outside_function_summary.json}}")
+    PRIMARY_OUT=$(resolve_path "${1:-${CSV_OUT:-$ROOT/$(TARGET_FIELD outside_function_candidates)}}")
+    SECONDARY_OUT=$(resolve_path "${2:-${SUMMARY_OUT:-$ROOT/$(TARGET_FIELD outside_function_summary)}}")
+    REVIEWS="$ROOT/$(TARGET_FIELD function_discovery_reviews)"
     LABEL="outside-function-candidates"
     LOG_NAME="generate-outside-function-candidates.log"
     SUCCESS_MARKER="ExportOutsideFunctionCandidates: wrote "
     POST_SCRIPT="ExportOutsideFunctionCandidates.java"
-    POST_ARGS=("$PRIMARY_OUT")
+    POST_ARGS=("$PRIMARY_OUT" "$ANALYSIS_TARGET" "$EXPECTED_SHA")
     ;;
   semantic-coverage)
     (($# <= 2)) || { usage >&2; exit 2; }
-    PRIMARY_OUT=$(resolve_path "${1:-${CSV_OUT:-$ROOT/data/semantic_coverage_ledger.csv}}")
-    SECONDARY_OUT=$(resolve_path "${2:-${SUMMARY_OUT:-$ROOT/data/semantic_coverage_summary.json}}")
+    PRIMARY_OUT=$(resolve_path "${1:-${CSV_OUT:-$ROOT/$(TARGET_FIELD semantic_coverage_ledger)}}")
+    SECONDARY_OUT=$(resolve_path "${2:-${SUMMARY_OUT:-$ROOT/$(TARGET_FIELD semantic_coverage_summary)}}")
+    REVIEWS="$ROOT/$(TARGET_FIELD semantic_reviews)"
     LABEL="semantic-coverage"
     LOG_NAME="generate-semantic-coverage.log"
     SUCCESS_MARKER="ExportSemanticCoverageLedger: wrote "
     POST_SCRIPT="ExportSemanticCoverageLedger.java"
-    POST_ARGS=("$PRIMARY_OUT")
+    POST_ARGS=("$PRIMARY_OUT" "$ANALYSIS_TARGET" "$EXPECTED_SHA")
     ;;
   project-inventory)
     (($# <= 1)) || { usage >&2; exit 2; }
@@ -184,7 +187,7 @@ case "$PROFILE" in
   outside-functions)
     python3 "$ROOT/tools/project/apply_function_discovery_adjudications.py" \
       --candidates "$PRIMARY_OUT" \
-      --reviews "$ROOT/data/function_discovery_reviewed_clusters.csv" \
+      --reviews "$REVIEWS" \
       --firmware "$CODEFLASH"
     python3 - "$PRIMARY_OUT" "$SECONDARY_OUT" <<'PY'
 import csv
@@ -215,7 +218,7 @@ PY
   semantic-coverage)
     python3 "$ROOT/tools/project/apply_semantic_review_status.py" \
       --ledger "$PRIMARY_OUT" \
-      --reviews "$ROOT/data/semantic_review_status.csv"
+      --reviews "$REVIEWS"
     python3 - "$PRIMARY_OUT" "$SECONDARY_OUT" <<'PY'
 import csv
 import json

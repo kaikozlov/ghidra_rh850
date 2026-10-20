@@ -1,6 +1,5 @@
 {
   "function_entries": [
-    "0x0004D17A",
     "0x0004D582",
     "0x0005088A",
     "0x00066806",
@@ -154,25 +153,19 @@
     "0x0008584C",
     "0x00085938",
     "0x0008B0DE",
-    "0x0008B0FC",
     "0x0008D66A",
     "0x0008E7BA",
     "0x0008F108",
-    "0x00090EFA",
-    "0x00090EFE",
-    "0x00090F14",
     "0x000912B8",
     "0x000912BE",
     "0x00091386",
     "0x0009139E",
-    "0x000913F0",
     "0x0009165E",
     "0x00091688",
     "0x0009168E",
     "0x0009169A",
     "0x000916AC",
     "0x000916C6",
-    "0x000916EC",
     "0x0009185C",
     "0x00091938",
     "0x00091A24",
@@ -277,11 +270,6 @@
     "0x0009560E",
     "0x00095650",
     "0x00095C86",
-    "0x000968CC",
-    "0x0009704E",
-    "0x00097138",
-    "0x0009713A",
-    "0x0009713E",
     "0x000989CC",
     "0x000989EC",
     "0x00098A44",
@@ -308,14 +296,15 @@
     "0x000B9320",
     "0x000FDE08"
   ],
-  "function_rows_sha256": "c21183a410b4cb72df87f9fc1eab41be590c7316568f5c5895420ae9279004aa",
+  "function_rows_sha256": "712c8b8291e20668a8c3ac6dd532640c6143ee17943e4e3869b3bb86ec7e153e",
   "ghidra_script": "ghidra/scripts/investigate/AuditCallConeStores.java",
   "pointer_parameter_dependent": {
-    "function_count": 76,
+    "function_count": 77,
     "functions": [
       "0x0007A77E",
       "0x0007B18A",
       "0x0007B452",
+      "0x0007B9AC",
       "0x0007BB0E",
       "0x0007CD60",
       "0x0007EAD0",
@@ -390,8 +379,8 @@
       "0x00098B3A",
       "0x00098B6A"
     ],
-    "rows_sha256": "b518fc6e5e165f9e7a017d12b2fe80d260f4bab33afe1e32e84b0fe491fc2277",
-    "store_count": 283
+    "rows_sha256": "3634d458644eb2d0990d76ac6ee99092df9b476979d7a848a6b6ce9879717c21",
+    "store_count": 299
   },
   "roots": [
     "0x0007BBC2",
@@ -412,13 +401,13 @@
   ],
   "schema": "camry-8965f3307000-prefault-control-flow-store-audit-v1",
   "scope": "Direct-call closure rooted at pre-fault normal/XCP receive, CAN1 RX/TX/periodic service, CanIf, and all six resolved DCM transport callbacks. Indirect callback targets are closed separately by exact route-table analysis.",
-  "store_rows_sha256": "62133e1bb21dc74c9421ae1d620433643ddd72f0eca97c60cf4716927f82670d",
+  "store_rows_sha256": "0e482a0d586472609cde4871f5a04b08578b85f8c318fa5789dbadafbd44c8e1",
   "summary": {
-    "computed": 366,
-    "functions": 307,
+    "computed": 380,
+    "functions": 295,
     "ranged": 56,
-    "stores": 412,
-    "unknown": 307
+    "stores": 426,
+    "unknown": 321
   },
   "target": "camry-8965F3307000"
 }

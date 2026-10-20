@@ -168,11 +168,11 @@ def _validate_checks(rows: Any, context: str) -> list[dict[str, Any]]:
             raise P1MEMachineError(f"{item_context}: expected an object")
         _require_keys(
             row,
-            allowed={"name", "kind", "register", "address", "size", "operation", "equals", "equals_hex"},
+            allowed={"name", "kind", "register", "address", "source_address", "size", "operation", "equals", "equals_hex"},
             required={"name", "kind"},
             context=item_context,
         )
-        if row["kind"] not in {"register", "memory", "sync-count", "event-count"}:
+        if row["kind"] not in {"register", "memory", "memory-equal", "sync-count", "event-count"}:
             raise P1MEMachineError(f"{item_context}.kind: unsupported check kind")
     return normalized
 
@@ -184,6 +184,7 @@ def _validate_events(rows: Any, context: str) -> list[dict[str, Any]]:
         "can-rx": {"fifo", "can_id", "data_hex", "extended", "fd", "boundary", "label", "timestamp"},
         "interrupt": {"channel"},
         "memory-write": {"address", "data_hex"},
+        "register-input": {"register", "value"},
     }
     for index, row in enumerate(normalized):
         item_context = f"{context}[{index}]"
@@ -195,6 +196,7 @@ def _validate_events(rows: Any, context: str) -> list[dict[str, Any]]:
             "can-rx": {"fifo", "can_id", "data_hex", "boundary"},
             "interrupt": {"channel"},
             "memory-write": {"address", "data_hex"},
+            "register-input": {"register", "value"},
         }[kind]
         _require_keys(
             row,
@@ -211,6 +213,16 @@ def _validate_events(rows: Any, context: str) -> list[dict[str, Any]]:
         elif kind == "interrupt":
             if type(row["channel"]) is not int or not 0 <= row["channel"] < 512:
                 raise P1MEMachineError(f"{item_context}: invalid interrupt channel")
+        elif kind == "register-input":
+            if not isinstance(row["register"], str) or not row["register"]:
+                raise P1MEMachineError(f"{item_context}: register name must be a nonempty string")
+            try:
+                value = int(row["value"], 0)
+            except (ValueError, TypeError) as exc:
+                raise P1MEMachineError(f"{item_context}: invalid register input value") from exc
+            if not 0 <= value <= 0xFFFFFFFF:
+                raise P1MEMachineError(f"{item_context}: register input exceeds 32-bit range")
+            row["value"] = hex(value)
         elif kind == "memory-write":
             try:
                 address = int(row["address"], 0)
@@ -262,7 +274,8 @@ def load_scenario(path: Path) -> dict[str, Any]:
     allowed = {
         "schema", "name", "entry", "max_instructions", "reset", "stop_addresses",
         "gpr_fill", "registers", "memory", "pre_reset_memory", "artifacts", "checks",
-        "expected_fault", "events",
+        "expected_fault", "events", "peripheral_file",
+        "bounded_entries", "bounded_edges",
     }
     required = {"schema", "name", "entry", "max_instructions", "stop_addresses", "checks"}
     _require_keys(raw, allowed=allowed, required=required, context=str(scenario_path))
@@ -278,6 +291,22 @@ def load_scenario(path: Path) -> dict[str, Any]:
         if not isinstance(fill, str):
             raise P1MEMachineError(f"{scenario_path}: gpr_fill must be an integer string")
         registers = {**dict.fromkeys(GPR_NAMES, fill), **registers}
+    peripheral_file = raw.get("peripheral_file", False)
+    if not isinstance(peripheral_file, bool):
+        raise P1MEMachineError(f"{scenario_path}: peripheral_file must be a boolean")
+    bounded_entries = raw.get("bounded_entries", [])
+    if not isinstance(bounded_entries, list) or any(not isinstance(item, str) for item in bounded_entries):
+        raise P1MEMachineError(f"{scenario_path}: bounded_entries must be a list of addresses")
+    bounded_edges = raw.get("bounded_edges", [])
+    if not isinstance(bounded_edges, list):
+        raise P1MEMachineError(f"{scenario_path}: bounded_edges must be a list")
+    for edge in bounded_edges:
+        if (
+            not isinstance(edge, dict)
+            or set(edge) != {"pc", "target", "entry"}
+            or any(not isinstance(edge[key], str) for key in ("pc", "target", "entry"))
+        ):
+            raise P1MEMachineError(f"{scenario_path}: bounded edge must name pc, target, and entry")
     expected_fault = raw.get("expected_fault")
     if expected_fault is not None:
         if not isinstance(expected_fault, dict):
@@ -307,6 +336,12 @@ def load_scenario(path: Path) -> dict[str, Any]:
         "expected_fault": expected_fault,
         "events": _validate_events(raw.get("events", []), f"{scenario_path}.events"),
     }
+    if peripheral_file:
+        normalized["peripheral_file"] = True
+    if bounded_entries:
+        normalized["bounded_entries"] = bounded_entries
+    if bounded_edges:
+        normalized["bounded_edges"] = bounded_edges
     return normalized
 
 
@@ -414,17 +449,31 @@ def _execute(target_name: str, scenario_paths: Sequence[Path]) -> dict[str, Any]
     return batch
 
 
-def run_many(
+def capture_many(
     target_name: str, scenario_paths: Sequence[Path], output_dir: Path,
 ) -> list[dict[str, Any]]:
+    """Run a batch and return every report, including failed checks.
+
+    The differential harness reads the machine's actual registers and bytes.
+    A mismatched placeholder check is data, not a batch abort.
+    """
     output_dir = _absolute_input(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     batch = _execute(target_name, scenario_paths)
     reports = batch["reports"]
+    if len(reports) != len(scenario_paths):
+        raise P1MEMachineError("batch report count drifted")
     for scenario_path, report in zip(scenario_paths, reports, strict=True):
         output = output_dir / f"{Path(scenario_path).stem}.report.json"
         output.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
         report["report_path"] = str(output)
+    return reports
+
+
+def run_many(
+    target_name: str, scenario_paths: Sequence[Path], output_dir: Path,
+) -> list[dict[str, Any]]:
+    reports = capture_many(target_name, scenario_paths, output_dir)
     failures = [report for report in reports if not report.get("passed")]
     if failures:
         raise P1MEMachineError("; ".join(_failure_summary(report) for report in failures))

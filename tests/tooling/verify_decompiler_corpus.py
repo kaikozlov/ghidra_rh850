@@ -9,6 +9,7 @@ import tempfile
 from pathlib import Path
 
 from tools import REPO_ROOT
+from tools.project.generate_decompiler_corpus import load_inventory
 REPO = REPO_ROOT
 CORPUS = REPO / "data/generated/decompilations.jsonl"
 INVENTORY = REPO / "data/ghidra_project_inventory.baseline.jsonl"
@@ -141,6 +142,30 @@ check(
     and "lacks project_inventory_sha256 provenance" in unpinned_probe.stderr,
     unpinned_probe.stderr.strip(),
 )
+with tempfile.TemporaryDirectory() as td:
+    phase_inventory = Path(td) / "phases.jsonl"
+    phase_records = [
+        {"record": "meta"},
+        {"record": "function", "entry": {"space": "ram", "offset": "00001000"}},
+        {"record": "function", "entry": {"space": "boot", "offset": "00002000"}},
+        {"record": "memory_block", "overlay": True, "start": {"space": "boot"}},
+        {"record": "totals", "functions": 2},
+    ]
+    phase_inventory.write_text("\n".join(map(json.dumps, phase_records)) + "\n")
+    _meta, phase_functions, totals = load_inventory(phase_inventory)
+    check("relocated functions retain their address-space identities in the corpus",
+          set(phase_functions) == {"0x00001000", "0x00002000"}
+          and phase_functions["0x00002000"]["entry"]["space"] == "boot"
+          and totals["functions"] == 2)
+    phase_records[2]["entry"]["offset"] = "00001000"
+    phase_inventory.write_text("\n".join(map(json.dumps, phase_records)) + "\n")
+    try:
+        load_inventory(phase_inventory)
+    except SystemExit:
+        duplicate_rejected = True
+    else:
+        duplicate_rejected = False
+    check("ambiguous numeric addresses are rejected rather than merging phases", duplicate_rejected)
 search = subprocess.run(
     [str(PSEUDO), "security_access", "--list", "--corpus", str(CORPUS)],
     cwd=REPO,

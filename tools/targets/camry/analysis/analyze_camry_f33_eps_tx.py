@@ -183,7 +183,8 @@ def read_corpus() -> dict[int, dict[str, Any]]:
 
 
 def direct_signal_calls(rows: dict[int, dict[str, Any]]) -> dict[int, list[str]]:
-    pattern = re.compile(r"FUN_0007d(?:31e|1dc)\((0x[0-9a-f]+|\d+)")
+    callees = "|".join(re.escape(rows[entry]["name"]) for entry in (0x7D31E, 0x7D1DC))
+    pattern = re.compile(rf"\b(?:{callees})\((0x[0-9a-f]+|\d+)")
     hits: dict[int, list[str]] = defaultdict(list)
     for entry, rec in rows.items():
         for match in pattern.finditer(rec.get("decompiled_c", "")):

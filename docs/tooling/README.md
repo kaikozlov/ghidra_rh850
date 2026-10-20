@@ -55,6 +55,8 @@ The small command surface to remember is:
 | Broad gates | `tools/test core` / `full` / `local` |
 | Discover/query configured targets | `tools/gtarget list`, `tools/gtarget show TARGET`, `tools/gtarget TARGET ...` |
 | Discover Corolla target workflows | `tools/toyota target list corolla` |
+| Camry reconstruction | `tools/toyota decomp --help` |
+| Locate effective reconstructed Camry C | `tools/toyota decomp source NAME_OR_ADDRESS` — [source ownership](../../decomp/camry-8965F3307000/README.md#source-and-evidence-ownership) |
 | Discover cross-variant evidence modes | `tools/toyota variant list` |
 | Discover working-project export profiles | `tools/project/export_ghidra_project.sh list` |
 
@@ -152,8 +154,8 @@ duplicate the generated-artifacts table.
 The public surface is consolidated even when the underlying proof logic is not.
 A target-specific extractor or builder may remain a separate implementation when
 it genuinely encodes a different analysis, but it lives under the target/domain
-namespace and is discoverable through `tools/toyota target list ...` or
-`tools/artifact`. Do not promote those implementation filenames back into the
+namespace and is discoverable through `tools/toyota capabilities`,
+`tools/toyota target list ...`, or `tools/artifact`. Do not promote implementation filenames into the
 root command surface.
 
 The same rule applies to Techstream: parsers/extractors remain separate where

@@ -1,7 +1,7 @@
 {
   "processor": "v850e3:LE:32:default",
   "binary": "rh850_semantic_fixture.bin",
-  "size": 412,
+  "size": 416,
   "cases": [
     {
       "name": "sld.b",
@@ -902,6 +902,13 @@
       "size": 4,
       "bytes": "e3d76001",
       "mnemonic_prefix": "syscall"
+    },
+    {
+      "name": "sbfc",
+      "addr": 412,
+      "size": 4,
+      "bytes": "e657825b",
+      "mnemonic_prefix": "sbfc"
     }
   ]
 }

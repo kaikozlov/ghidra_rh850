@@ -82,8 +82,8 @@ cc1720: "gt"	is op1720=0xF		{ tmp:1 = !($(PSW_S) ^^ $(PSW_OV) || $(PSW_Z));	expo
 	local res:4 = R1115 - R0004 - lsb;
 	set_S_Z (res);
 	local sA = R0004 s< 0; local sB = R1115 s< 0; local sR = res s< 0;
-	$(PSW_OV) = (sA != sB) && (sB == sR);
-	$(PSW_CY) = (R1115 < (R0004 + lsb));
+	$(PSW_OV) = (sA != sB) && (sB != sR);
+	$(PSW_CY) = (R1115 < R0004) || ((R1115 - R0004) < lsb);
 	R2731 = res;
 }
 # ADF cccc, reg1, reg2, reg3

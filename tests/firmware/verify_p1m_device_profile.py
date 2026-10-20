@@ -16,11 +16,18 @@ WINDOWS = {
     "SFR_FACI": (0xFFA10000, 0x200),
     "SFR_FACI_COMMAND": (0xFFA20000, 0x4),
     "SFR_FACI_CONFIG": (0xFFC59000, 0x100),
+    "SFR_FHVE3": (0xFFF82410, 0x4),
+    "SFR_FHVE15": (0xFFF8A430, 0x4),
     "SFR_EIC": (0xFFFFB000, 0x1000),
     # CPU-internal register page (PE guard, EI level interrupt controls
     # EIC8/EIC9/EIC16..); manual SFR list rows marked "CPU", e.g. FFFEEA10 H.
     "SFR_CPU_INTERNAL": (0xFFFEE000, 0x1000),
     "SFR_RSCFD": (0xFFD20000, 0x10000),
+    "SFR_DCRA1": (0xFFD51000, 0x21),
+    "SFR_FLMD": (0xFFA00000, 0xC),
+    "SFR_DATAFLASH_READ_CYCLE": (0xFFC59810, 0x1),
+    # P1M-E Table31.17: the complete DataFlash ECC bank, not a whole SFR page.
+    "SFR_DATAFLASH_ECC": (0xFFC5B000, 0x20),
     "SFR_ICUS": (0xFFC5D000, 0x1000),
     "SFR_CODEFLASH_ECC": (0xFFC62000, 0x500),
     "SFR_STAC": (0xFFF81000, 0x1000),

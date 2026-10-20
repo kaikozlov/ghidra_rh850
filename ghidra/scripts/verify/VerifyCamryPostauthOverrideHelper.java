@@ -24,8 +24,8 @@ public class VerifyCamryPostauthOverrideHelper extends GhidraScript {
     private static final long PUB_OBSERVED = 0xfebf0279L;
     private static final long LEASE = 0xfebf02d4L;
     private static final long CACHED_TARGET = 0xfebf02d6L;
-    private static final long SECOC_AGG = 0x000988c2L;
-    private static final long COMM_AFTER = 0x00069e7cL;
+    private static final long DCM_MAIN = 0x000988c2L;
+    private static final long MAINTENANCE = 0x00069e7cL;
     private static final long APP_AGG = 0x00058b5eL;
     private static final long AGG_FINAL = 0x00066512L;
     private final List<String> passed = new ArrayList<>();
@@ -56,7 +56,7 @@ public class VerifyCamryPostauthOverrideHelper extends GhidraScript {
     private void runTick(EmulatorHelper e, int tag, int seq, int target, int generation) throws Exception {
         put8(e, DCM_TAG, tag); put8(e, DCM_SEQ, seq); put16be(e, DCM_TARGET, target); put8(e, ROUTE_GEN, generation);
         e.writeRegister("PC", BASE); e.writeRegister("gp", GP); e.writeRegister("sp", 0xfebe1800L); e.writeRegister("lp", 0x10000L);
-        long[] expected = {SECOC_AGG, COMM_AFTER, APP_AGG, AGG_FINAL};
+        long[] expected = {DCM_MAIN, MAINTENANCE, APP_AGG, AGG_FINAL};
         int call = 0;
         for (int i = 0; i < 500; i++) {
             long pc = e.readRegister("PC").longValue() & 0xffffffffL;

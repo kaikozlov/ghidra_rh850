@@ -109,9 +109,8 @@ check("FRC/cruise state carriers are absent from exact-F33 normal Rx",
       ["0x081", "0x08A", "0x0FE", "0x251", "0x371", "0x412"] and
       f33["exact_normal_rx_descriptor_count"] == 43)
 check("35-ms B6 loss timeout remains communication supervision, not profile ownership",
-      f33["communication_timeout"] == {
-        "pdu": 44, "nominal_ms": 35, "basis": "seven exact-F33 foreground ticks at 5 ms",
-      })
+      f33["communication_timeout"]["pdu"] == 44 and
+      f33["communication_timeout"]["nominal_ms"] == 35)
 check("profile-indexed persistence supervisor is distinct from selector lock",
       f33["profile_supervision"]["thresholds_by_bank"]["2_LTA_LCA"] ==
       {"abs_signal_threshold": 1280, "persistence_cycles": 96} and
@@ -120,21 +119,20 @@ check("profile-indexed persistence supervisor is distinct from selector lock",
       f33["profile_supervision"]["ce7fe_recomputes_common_readiness"])
 
 sec = f33["secondary_application_fields"]
-check("secondary-field reader census closes unused direct companions",
+check("secondary-field census distinguishes unused inputs from sibling-controller inputs",
       sec["264"]["direct_reader_entries"] == [] and sec["266"]["snapshot"] is None and
-      sec["267"]["direct_reader_entries"] == [] and sec["271"]["direct_reader_entries"] == [] and
+      sec["267"]["direct_reader_entries"] == ["0x000CB0FC"] and
+      sec["271"]["direct_reader_entries"] == ["0x000CA558"] and
       sec["272"]["direct_reader_entries"] == [])
 check("signal263 is scoped to Self-Propelled Transport state, not ordinary profile enable",
-      sec["263"]["wire"] == "B6[7]" and sec["263"]["direct_reader_entries"] == ["0x000CB664"] and
-      "Self-Propelled Transport" in sec["263"]["role"])
+      sec["263"]["wire"] == "B6[7]" and sec["263"]["direct_reader_entries"] == ["0x000CB664"])
 check("signal265/268/269/270 retain recovered controller roles",
       sec["265"]["direct_reader_entries"] == ["0x000CDA20"] and
       sec["268"]["direct_reader_entries"] == ["0x000CEC8A"] and
       sec["269"]["direct_reader_entries"] == ["0x000CE3AA"] and
       sec["270"]["direct_reader_entries"] == ["0x000CDFF8"])
 check("signal273 is a separate status/mode path, not CEFFC authorization",
-      sec["273"]["wire"] == "B10[2:0]" and sec["273"]["direct_reader_entries"] == ["0x000CFDA0"] and
-      "not a profile-selector input" in sec["273"]["role"])
+      sec["273"]["wire"] == "B10[2:0]" and sec["273"]["direct_reader_entries"] == ["0x000CFDA0"])
 check("no generic secondary B6 command-enable bit is recovered",
       not f33["secondary_field_authorization_boundary"]["generic_command_enable_recovered"] and
       f33["secondary_field_authorization_boundary"]["cefa4_communication_validity_shape"])

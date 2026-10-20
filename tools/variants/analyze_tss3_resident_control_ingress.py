@@ -17,7 +17,6 @@ from tools import REPO_ROOT
 import argparse
 import hashlib
 import json
-import re
 import struct
 from pathlib import Path
 
@@ -50,6 +49,7 @@ TARGETS = {
             "copy_engine": 0x93DE8,
             "receive_drain": 0x79EDE,
         },
+        "response_critical_adapters": (0x98cf2, 0x98cfe),
         "xcp_staging": 0xFEBE4C34,
         "xcp_live_status": "live-proven-to-staging-and-road-proven-C7-steering",
     },
@@ -70,6 +70,7 @@ TARGETS = {
             "copy_engine": 0x8D0F8,
             "receive_drain": 0x7744A,
         },
+        "response_critical_adapters": (0x92002, 0x9200e),
         "xcp_staging": 0xFEBE4B20,
         "xcp_live_status": "firmware-configured-current-signer-carrier-live-command5-unvalidated",
     },
@@ -90,6 +91,7 @@ TARGETS = {
             "copy_engine": 0x8D0F8,
             "receive_drain": 0x7744A,
         },
+        "response_critical_adapters": (0x92002, 0x9200e),
         "xcp_staging": 0xFEBE4B20,
         "xcp_live_status": "firmware-configured-current-signer-carrier-live-command5-unvalidated",
     },
@@ -110,6 +112,7 @@ TARGETS = {
             "copy_engine": 0x91888,
             "receive_drain": 0x792EE,
         },
+        "response_critical_adapters": (0x967aa, 0x967b6),
         "xcp_staging": None,
         "xcp_live_status": "production-family5-disabled",
     },
@@ -217,19 +220,67 @@ def load_corpus(path: Path) -> dict[int, dict]:
     return out
 
 
-def normalized_decomp(rows: dict[int, dict], address: int) -> str:
-    code = rows[address].get("decompiled_c", "")
-    return re.sub(r"FUN_[0-9a-fA-F]+", "FUN_ADDR", code)
+def instruction_evidence(image: bytes, cfg: dict, rows: dict[int, dict]) -> dict:
+    # Exact machine gates survive naming, typing and decompiler-expression changes.
+    # Offsets are instruction boundaries checked against the target-native listing.
+    specs = {
+        'service_lookup': (194, (
+            (0x62, "e009822d", 'Null descriptor takes the unsupported-service branch'),
+            (0xb4, "200e1100490f0000", 'Unsupported service stores NRC11 through the error pointer'),
+        )),
+        'response_selector': (144, (
+            (0x54, "013ae0e1fa159d9f1100619aba150106effff20d0106eeffc20d0106cfff920d010682ffe205010681ffb2056152aa05033a", 'Functional kind1 with NRC11/12/31/7E/7F selects silent disposition3'),
+        )),
+        'response_action': (50, (
+            (0x4, "07e006e89c00", 'Retain the response pointer and byte disposition'),
+            (0x10, "80ff32096252ca0d033080ffea1f3d0f0d001c380330630f040080ffec16", 'Gate response state2, narrow body extent to16 bits, then enqueue'),
+        )),
+        'response_machine': (320, (
+            (0xa, "c7deff00ea0d06e80132bfff6efd1df0000d0ae06a0f050072086a0f0800e50d61daea050232bfff52fd0ae0f5050332bfff48fd4adf", 'Select positive, negative or silent node and retain disposition'),
+            (0x44, "bffff8f60a06d0ffca0d", 'State30 branches to append behind in-flight pending'),
+            (0x5e, "20363100b51d", 'Appended final advances to state31'),
+        )),
+        'copy_engine': (74, (
+            (0xa, "0095410a938f0100c100419a528f0000009541920195", 'Copy each byte and advance the destination cursor'),
+            (0x32, "72080052d209820c7408e79f0500b309840c680f0000", 'Advance used length and subtract remaining capacity'),
+        )),
+    }
+    evidence = {}
+    for key, (size, checks) in specs.items():
+        address = cfg["functions"][key]
+        row = rows[address]
+        expected_range = [{"min": f"0x{address:08x}", "max": f"0x{address + size - 1:08x}", "space": "ram"}]
+        if row["body_ranges"] != expected_range:
+            raise ValueError(f"{key} instruction body boundary drift at {address:#x}")
+        checked = []
+        for offset, encoded, meaning in checks:
+            expected = bytes.fromhex(encoded)
+            at = address + offset
+            if image[at:at + len(expected)] != expected:
+                raise ValueError(f"{key} instruction invariant failed at {at:#x}: {meaning}")
+            checked.append({"address": hx(at), "bytes": encoded, "meaning": meaning})
+        evidence[key] = {"address": hx(address), "body_size": size,
+                         "body_sha256": sha256(image[address:address + size]), "checks": checked}
+    return evidence
 
 
-def require_tokens(rows: dict[int, dict], address: int, tokens: tuple[str, ...], label: str) -> str:
-    if address not in rows:
-        raise ValueError(f"{label} missing from decompiler corpus: {address:#x}")
-    code = rows[address].get("decompiled_c", "")
-    missing = [token for token in tokens if token not in code]
-    if missing:
-        raise ValueError(f"{label} semantic tokens missing at {address:#x}: {missing}")
-    return rows[address]["decompiled_c_sha256"]
+def response_machine_shape(image: bytes, cfg: dict) -> tuple[bytes, list[dict]]:
+    address = cfg["functions"]["response_machine"]
+    body = bytearray(image[address:address + 320])
+    enter, leave = cfg["response_critical_adapters"]
+    relocated = []
+    # Only these four checked JARL displacements differ. Never erase arbitrary
+    # call operands or ignore opcodes/state/field accesses when comparing bodies.
+    for offset, destination in ((0x4E, enter), (0x5A, leave), (0x104, enter), (0x120, leave)):
+        displacement = destination - (address + offset)
+        if not 0 <= displacement <= 0xFFFF or displacement & 1:
+            raise ValueError("response critical-section call is outside its checked encoding")
+        expected = b"\x80\xff" + struct.pack("<H", displacement)
+        if body[offset:offset + 4] != expected:
+            raise ValueError(f"response critical-section call drift at {address + offset:#x}")
+        relocated.append({"address": hx(address + offset), "target": hx(destination), "bytes": expected.hex()})
+        body[offset + 2:offset + 4] = b"\x00\x00"
+    return bytes(body), relocated
 
 
 def request_types(data: bytes, buffer_table: int) -> tuple[list[int], list[int]]:
@@ -274,27 +325,8 @@ def analyze_target(name: str, cfg: dict) -> dict:
     cantp = find_cantp_functional_record(image)
     cantp_words = [u16(image, cantp + i * 2) for i in range(16)]
 
-    lookup_sha = require_tokens(
-        corpus, cfg["functions"]["service_lookup"],
-        ("*param_4 = 0x11", "return 1;"), f"{name} service lookup",
-    )
-    response_sha = require_tokens(
-        corpus, cfg["functions"]["response_selector"],
-        ("param_1 + 0x10", "cVar1 == '\\x11'", "uVar3 = 3"), f"{name} functional response selector",
-    )
-    action_sha = require_tokens(
-        corpus, cfg["functions"]["response_action"],
-        ("uStack_10 = (undefined2)*(undefined4 *)(param_1 + 0xc)",), f"{name} response action",
-    )
-    machine_sha = require_tokens(
-        corpus, cfg["functions"]["response_machine"],
-        ("uVar5 = extraout_r7 & 0xff", "if (uVar5 == 0)", "else if (uVar5 == 1)",
-         "*(char *)(iVar3 + 0xc) = (char)extraout_r7"), f"{name} response machine",
-    )
-    copy_sha = require_tokens(
-        corpus, cfg["functions"]["copy_engine"],
-        ("*(undefined1 *)*piVar1 = uVar3",), f"{name} DCM copy engine",
-    )
+    instructions = instruction_evidence(image, cfg, corpus)
+    _, relocated_calls = response_machine_shape(image, cfg)
 
     enabled = cfg["xcp_staging"] is not None
     family_routes = find_xcp_family_routes(image, enabled)
@@ -350,12 +382,10 @@ def analyze_target(name: str, cfg: dict) -> dict:
             },
             "functions": {k: hx(v) for k, v in cfg["functions"].items()},
             "decompiler_semantic_hashes": {
-                "service_lookup": lookup_sha,
-                "response_selector": response_sha,
-                "response_action": action_sha,
-                "response_machine": machine_sha,
-                "copy_engine": copy_sha,
+                key: corpus[cfg["functions"][key]]["decompiled_c_sha256"] for key in instructions
             },
+            "instruction_evidence": instructions,
+            "response_machine_relocated_calls": relocated_calls,
             "resident_sampling_boundary": (
                 f"after receive drain {hx(cfg['functions']['receive_drain'])}; complete N-SDU is already copied by the "
                 "PduR/DCM receive callbacks, while service dispatch/unsupported-SID handling is a separate DCM-main path"
@@ -392,16 +422,16 @@ def build() -> dict:
     if not all(row["identical"] for row in hf_ranges):
         raise ValueError(f"Corolla H/F diagnostic transport body drift: {hf_ranges}")
 
-    normalized_response_actions = {
-        name: normalized_decomp(load_corpus(REPO / cfg["corpus"]), cfg["functions"]["response_action"])
-        for name, cfg in TARGETS.items()
-    }
-    normalized_response_machines = {
-        name: normalized_decomp(load_corpus(REPO / cfg["corpus"]), cfg["functions"]["response_machine"])
-        for name, cfg in TARGETS.items()
-    }
-    if len(set(normalized_response_actions.values())) != 1 or len(set(normalized_response_machines.values())) != 1:
-        raise ValueError("functional response suppression machinery is not structurally identical across targets")
+    response_actions = set()
+    response_machines = set()
+    for cfg in TARGETS.values():
+        image = (REPO / cfg["codeflash"]).read_bytes()
+        address = cfg["functions"]["response_action"]
+        response_actions.add(image[address:address + 50])
+        shape, _ = response_machine_shape(image, cfg)
+        response_machines.add(shape)
+    if len(response_actions) != 1 or len(response_machines) != 1:
+        raise ValueError("functional response instruction structures differ beyond checked call relocations")
 
     return {
         "schema": "toyota-tss3-resident-control-ingress-matrix-v1",

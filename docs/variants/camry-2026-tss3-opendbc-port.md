@@ -2031,8 +2031,10 @@ One runtime boundary remains explicit rather than guessed: retained PE1 RAM prov
 five normal PDUs were scheduler-armed, while retained external CAN captures expose
 `0x030` but not the four classic sibling PDUs. The classic messages use a valid sibling
 HTH on the same lower driver node; idle HTH state `0x69` is not a disabled flag. The
-reason for the capture/runtime discrepancy is therefore left unresolved below CanIf or
-in external topology/capture visibility. Deterministic evidence is
+reason for the capture/runtime discrepancy remains unresolved across CanIf/driver
+execution and external topology/capture visibility; armed timers are not
+per-frame completion witnesses. The [transmit lifecycle](camry-f33-eps-tx.md#31-queue-ownership-busy-results-and-the-hardware-boundary)
+keeps those boundaries separate. Deterministic inventory evidence is
 `data/generated/camry_8965F3307000_eps_tx.json` and suite `camry_f33_eps_tx`.
 
 ## 2. Canonical first-class source-reference census
@@ -3173,7 +3175,7 @@ decisive stock-source discriminator:
 | `CBE8` | 2 | final short contribution |
 | `CC48` | 4 | complete `D0218` summed output |
 
-This is the exact ordinary B6-inactive sum recovered from `FUN_000D0218`; no candidate
+This is the exact ordinary B6-inactive sum recovered from `D0218`; no candidate
 term is omitted. A stock ID11/ID18 capture synchronized with native `0x08A/0x081/0x030`
 therefore answers whether one of the previously unnamed EPS-internal terms changes with
 Toyota lateral authority, or whether `CC48` changes without a corresponding recovered
@@ -3187,11 +3189,11 @@ The second profile follows the numeric result through the physical command funne
 | `CC4C`, `CC4E` | 4 | `D0284` bounded/scaled value, then `D02DA` slew result |
 | `AC52`, `CC60` | 4 | `D0382` limit and limited value |
 | `CC50` | 2 | `D039E` pre-scale command |
-| `AC5A`, `AC4C` | 4 | `D042C` scale and symmetric slew/limit inputs |
-| `CC62`, `CC66`, `CC64` | 6 | pre-slew, post-slew/gate, and selected command |
+| `AC5A`, `AC4C` | 4 | `D042C` scale and symmetric amplitude-limit inputs |
+| `CC62`, `CC66`, `CC64` | 6 | pre-final-clamp/gate, amplitude-clamped/gated, and selected command |
 | `AC54`, `AC56` | 4 | motor-driving `CC64` mirror and diagnostic `CC62` sibling |
 
-`FUN_000D0AF6` calls these stages in order: `D0218 -> D0284 -> D02DA -> D0382 ->
+`D0AF6` calls these stages in order: `D0218 -> D0284 -> D02DA -> D0382 ->
 D039E -> D042C -> D06D6 -> D047C -> D0AAE`. The default `full-path` profile is the
 unique union of the two tables: **52 bytes**, with `CC48` sampled once, emitted as eight
 ODTs across lists 0 and 1 during the same event-worker invocation. ODT reads are still
@@ -3203,6 +3205,13 @@ which the observer retains as an opaque wrapping hardware timer when present. Th
 current Comma/Panda binding returns `(address, data, bus)` and therefore exposes no
 `busTime`; the observer records null/empty timing evidence rather than dropping those
 frames. Host timestamps remain correlation aids rather than physical CAN ordering.
+
+Planner schema `camry-f33-steering-state-capture-v3` names these fields
+`AC4C_amplitude_limit`, `CC62_pre_clamp_gate`, and `CC66_clamped_gated`.
+Earlier planner labels incorrectly attributed slew limiting to `D042C`;
+the actual slew/filter is `D02DA`. Addresses and byte geometry are unchanged,
+and retained captures are not rewritten. See the exact arithmetic and alternate
+history-selection boundary in [the control-pipeline report](camry-2026-live-baseline.md#34-exact-f33-commandcurrent-pipeline-and-cross-rate-publication).
 
 The recovered profile geometry remains deterministic: a full sample would be eight
 classic-CAN DTOs if XCP command dispatch were enabled. On stock exact F33, however,

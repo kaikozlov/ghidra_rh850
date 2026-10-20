@@ -315,6 +315,14 @@ tests = ["tests/firmware/verify_p1m_device_profile.py"]
 [suite.rh850_firmware]
 tests = ["tests/tooling/verify_rh850_machine.py"]
 
+[suite.camry_decomp]
+tests = [
+  "tests/targets/camry/verify_camry_decomp.py",
+  "tests/targets/camry/verify_camry_decomp_sources.py",
+]
+# Event-driven retained scenarios replay Ghidra timing when the local cache is absent.
+modes = ["local"]
+
 [suite.rh850_payload]
 tests = ["tests/tooling/verify_rh850_payload.py"]
 
@@ -354,7 +362,7 @@ tests = ["tests/tooling/verify_semantic_coverage.py"]
 [suite.semantic_coverage_live]
 tests = ["tests/tooling/verify_semantic_coverage_live.py"]
 modes = ["local"]
-args = ["--project-dir", "build/work/project"]
+args = ["--target", "sienna-8965B4512000", "--project-dir", "build/work/project"]
 
 [suite.semantic_review_promotions]
 tests = ["tests/tooling/verify_semantic_review_promotions.py"]

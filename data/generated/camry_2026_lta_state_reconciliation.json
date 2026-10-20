@@ -2090,8 +2090,8 @@
     "interpretation": "0x08A carries a lateral-request representation and 0x371/0x412 carry state/display evidence; none is exact-F33 normal-CAN ingress. This does not imply that stock LTA must be transformed into B6 before F33 can steer.",
     "source": {
       "path": "data/generated/camry_8965F3307000_external_lateral_ingress.json",
-      "sha256": "cf1a1ea385506983029869c9e802288d690f1241cd51fe32d4c92a8dc87b7393",
-      "size": 34363
+      "sha256": "d3957a67e0d7851f0c75f75c1d469d87ae8d76306770938204199d891e581a35",
+      "size": 34606
     },
     "state_carriers_absent": {
       "0x08A": true,

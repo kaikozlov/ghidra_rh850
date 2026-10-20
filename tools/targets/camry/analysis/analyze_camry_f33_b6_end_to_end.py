@@ -10,9 +10,11 @@ from __future__ import annotations
 
 from tools.targets.camry.support import camry_f33_corpus as f33
 from tools import REPO_ROOT
+from tools.targets.camry.builders.build_camry_8965F3307000_command_cone_ingress import exact_pairs
 import argparse
 import hashlib
 import json
+import re
 import struct
 from pathlib import Path
 from typing import Any
@@ -224,8 +226,6 @@ def analyze() -> dict[str, Any]:
   if h(image) != EXPECTED_SHA256:
     raise RuntimeError("exact F33 CodeFlash identity drift")
   corpus = load_corpus()
-  if len(corpus) != 7178:
-    raise RuntimeError(f"canonical corpus function count drift: {len(corpus)}")
   missing = sorted(set(FUNCTIONS) - set(corpus))
   if missing:
     raise RuntimeError(f"missing functions: {[hex(x) for x in missing]}")
@@ -401,50 +401,96 @@ def analyze() -> dict[str, Any]:
     if gate_source_census[name]["writers"] != expected:
       raise RuntimeError(f"{name} writer drift: {gate_source_census[name]['writers']}")
 
+  snapshot_pairs = set(exact_pairs(0xBCD62, corpus))
+  stage_pairs = set(exact_pairs(0x58074, corpus))
+  # Numeric references survive recovered array types. The native controller
+  # compositions separately check retained gain, terminal fade and clamp order.
+  controller_refs = {
+    entry: {(int(ref["to_addr"], 16), ref["ref_type"])
+            for ref in corpus[entry].get("data_references", [])}
+    for entry in (0xCF148, 0xCF2B2)
+  }
+  # BCE30..BCE48 maps global COM states 0/2 unchanged, 3->4, others->1
+  # into r29; BD00A..BD00C publishes r29 at the recovered ACBD reference.
+  # CEFA8..CEFE0 calls grouped-status selectors 0x11/0x1A, inhibits when
+  # their OR equals 0x5A, otherwise publishes each route-status == 0.
+  # These are instruction/dataflow guards, not decompiler-local spellings.
   checks = {
-    "secoc_ingress_state_and_pointer_checks": all(x in c[0x8EE7C] for x in ("DAT_febe54f4 == -0x1ff", "param_2 != (int *)0x0", "FUN_0008f34a")),
-    "queue_wrapper_calls_insert": "FUN_0008e9c6(1" in c[0x8F34A],
-    "queue_insert_copies_secured_payload": "FUN_00089f2e(local_34 + iStack_20,*param_3);" in c[0x8E9C6] and "*puVar1 = *(undefined2 *)(param_3 + 1);" in c[0x8E9C6],
-    "worker_extracts_auth_then_freshness_then_crypto": all(x in c[0x8F746] for x in ("FUN_0008f434", "FUN_0008ecb2", "FUN_0008f676")),
+    "secoc_ingress_state_and_pointer_checks": all(x in c[0x8EE7C] for x in ("DAT_febe54f4 == -0x1ff", "param_2 != (int *)0x0", corpus[0x8F34A]["name"])),
+    "queue_wrapper_calls_insert": re.search(rf"\b{re.escape(corpus[0x8E9C6]['name'])}\s*\(1", c[0x8F34A]) is not None,
+    "queue_insert_copies_secured_payload": f33.queue_copy_precedes_publication(image),
+    "worker_extracts_auth_then_freshness_then_crypto": all(corpus[a]["name"] in c[0x8F746] for a in (0x8F434, 0x8ECB2, 0x8F676)),
     "freshness_profile2_slot1": b6_freshness_slot == 1 and all(x in c[0x90248] for x in ("param_1 == *(short *)(iVar2 + 0x1a5e)", "*(char *)(iVar2 + 0x1a55) != '\\x01'", "sVar8 = sVar8 + 1")),
     "freshness_candidate_search_has_plus_minus_two": all(x in c[0x909CA] for x in ("+ 1", "- 1", "+ 2", "- 2")),
-    "upper_delivery_reaches_pdur": "FUN_00090204" in c[0x8F546] and "FUN_00081ca6" in c[0x90204],
+    "upper_delivery_reaches_pdur": corpus[0x90204]["name"] in c[0x8F546] and corpus[0x81CA6]["name"] in c[0x90204],
     "route44_guard_unconditional": "return 1;" in c[0x7D800],
     "route_generation_update": "DAT_febe5338" in c[0x8E772] and "DAT_febe52d8" in c[0x8E772],
-    "app_unpack_requires_new_generation_and_global_state": "DAT_febe7f68 < 2" in c[0x4BD46] and "DAT_febe80c8 != DAT_febe5364" in c[0x4BD46],
-    "stage_maps_b6_core_fields": all(x in c[0x58074] for x in ("DAT_febef130 = DAT_febe80bc", "DAT_febef1fa = DAT_febe80b8", "DAT_febef138 = DAT_febe80c4", "DAT_febef139 = DAT_febe80c5", "DAT_febef000 = DAT_febe7f68")),
-    "snapshot_maps_b6_fields": all(x in c[0xBCD62] for x in ("puVar38[-0xa50] = puVar38[0x3930]", "*(undefined2 *)(puVar38 + -0x970) = *(undefined2 *)(puVar38 + 0x39fa)", "puVar38[-0xa23] = puVar38[0x3955]", "puVar38[-0xa45] = puVar38[0x3934]", "puVar38[-0xa44] = puVar38[0x3937]", "puVar38[-0xa43] = puVar38[0x3938]", "puVar38[-0xa42] = puVar38[0x3939]", "puVar38[-0xa47] = puVar38[0x393e]")),
-    "global_com_state_normalizes_to_acbd": all(x in c[0xBCD62] for x in ("cVar1 = puVar38[0x3800]", "cVar21 = cVar1", "cVar21 = '\\x04'", "cVar21 = '\\x01'", "puVar38[-0xb43] = cVar21")) or all(x in c[0xBCD62] for x in ("cVar1 = puVar38[0x3800]", "cVar44 = cVar1", "cVar44 = '\\x04'", "cVar44 = '\\x01'", "puVar38[-0xb43] = cVar44")),
-    "b6_health_requires_status_zero": all(x in c[0xCEFA4] for x in ("FUN_000bdb76(0x11)", "FUN_000bdb76(0x1a)", "puVar2[0x12ff] = bVar1 && puVar2[-0xa47] == '\\0'")),
+    "app_unpack_requires_new_generation_and_global_state": f33.b6_unpack_generation_gate(image),
+    "stage_maps_b6_core_fields": {
+      (0xFEBE80BC, 0xFEBEF130), (0xFEBE80B8, 0xFEBEF1FA),
+      (0xFEBE80C4, 0xFEBEF138), (0xFEBE80C5, 0xFEBEF139),
+      (0xFEBE7F68, 0xFEBEF000),
+    } <= stage_pairs,
+    "snapshot_maps_b6_fields": all(
+      (int(field["stage"], 16), int(field["snapshot"], 16)) in snapshot_pairs
+      for field in FIELD_MAP if field["snapshot"]
+    ) and (0xFEBEF13E, 0xFEBEADB9) in snapshot_pairs,
+    "global_com_state_normalizes_to_acbd": (
+      image[0xBCE30:0xBCE4A] == bytes.fromhex("84d70138e0d1f20562d2d20563d2d20501eac5051ae8a50504ea")
+      and image[0xBD00A:0xBD00E] == bytes.fromhex("06f081eb")
+      and any(int(ref["from_addr"], 16) == 0xBD00C
+              and int(ref["to_addr"], 16) == 0xFEBEACBD and ref["ref_type"] == "WRITE"
+              for ref in corpus[0xBCD62]["data_references"])
+    ),
+    "b6_health_requires_status_zero": f33.b6_route_health_gate(image),
     "id11_maps_bank2_only_when_health_and_acbd_allow": all(x in c[0xCEFFC] for x in ("DAT_febecb00 = 7", "DAT_febeacbd == '\\0'", "DAT_febecaff == '\\x01'", "DAT_febeadb0 == '\\v'", "DAT_febecb00 = 2")),
     "id11_does_not_arm_ca614_state_gate": all(x in c[0xCA614] for x in ("DAT_febeadb0 != '\\x19'", "DAT_febeadb0 != '\\x1b'")) and "DAT_febeadb0 == '\\v'" not in c[0xCA614],
     "sig263_is_special_0x31_transient_condition_not_id11_gate": all(x in c[0xCB664] for x in ("DAT_febeaddd == '\\0'", "DAT_febeaddd != '\\0'", "DAT_febec7b4")) and all(x in c[0xCB73A] for x in ("DAT_febec7b4", "DAT_febeadb0 == '1'", "DAT_febec7bf = '\\x01'")),
-    "ca614_sibling_state_initializes_from_target_angle": "FUN_000caaa2();" in c[0xCA614] and "DAT_febec6d8 = (undefined2)((DAT_febeae90 * 0x27) / 0x400);" in c[0xCAAA2],
+    "ca614_sibling_state_initializes_from_target_angle": f"{corpus[0xCAAA2]['name']}();" in c[0xCA614] and "DAT_febec6d8 = (undefined2)((DAT_febeae90 * 0x27) / 0x400);" in c[0xCAAA2],
     "signal267_drives_sibling_state_mode": "DAT_febeadc2 == '\\x02'" in c[0xCB0FC] and "DAT_febec6ec" in c[0xCB0FC],
     "signal271_participates_sibling_state_readiness": "DAT_febeadc1 != '\\0'" in c[0xCA558] and "DAT_febec6a1" in c[0xCA558],
-    "sig265_one_suppresses_controller_term": "DAT_febeadbb != '\\x01'" in c[0xCDA20] and "FUN_000d0a06" in c[0xCDA20],
+    "sig265_one_suppresses_controller_term": "DAT_febeadbb != '\\x01'" in c[0xCDA20] and corpus[0xD0A06]["name"] in c[0xCDA20],
     "route_status_participates_readiness": "puVar4[-0xa47] == '\\0'" in c[0xCB2A2],
     "app_sequence_is_independent_modulo_counter": all(x in c[0xCEC8A] for x in ("DAT_febeadbc", "DAT_febecada", "DAT_000b0620", "DAT_000b0622")),
     "sig270_scales_supervisor": "DAT_febeadbe" in c[0xCDFF8] and "/ 100" in c[0xCDFF8],
     "sig269_scales_supervisor": "DAT_febeadbd" in c[0xCE3AA] and "/ 100" in c[0xCE3AA],
     "sig273_is_health_qualified_publication": "puVar1[0x13f2] = puVar1[-0xa27]" in c[0xCFDA0] and "puVar1[-0xa47] != '\\0'" in c[0xCFDA0],
     "target_controller_is_target_minus_measured": all(x in c[0xCD128] for x in ("DAT_febec8b8", "DAT_febecb00", "DAT_febec8e0")),
-    "gain_ramp_exists": all(x in c[0xCF148] for x in ("DAT_febecb20", "DAT_febecb22", "DAT_febecb24", "DAT_febecb26", "DAT_febecb28")),
-    "final_b6_term_is_gain_slew_magnitude_limited": all(x in c[0xCF2B2] for x in ("DAT_febecb08", "DAT_febecb20", "DAT_febecb2c", "DAT_febecb2e", "DAT_febecb38")),
+    "gain_ramp_exists": (
+      all((address, "READ") in controller_refs[0xCF148]
+          for address in (0xFEBECB20, 0xFEBECB22, 0xFEBECB24, 0xFEBECB26, 0xFEBECB28))
+      and {(0xFEBECB04, "WRITE"), (0xFEBECB20, "WRITE")} <= controller_refs[0xCF148]
+    ),
+    "final_b6_term_is_gain_slew_magnitude_limited": (
+      all((address, "READ") in controller_refs[0xCF2B2]
+          for address in (0xFEBECB08, 0xFEBECB20, 0xFEBECB2C, 0xFEBECB2E))
+      and (0xFEBECB38, "WRITE") in controller_refs[0xCF2B2]
+    ),
     "ordinary_sum_adds_b6_term_only_in_normal_branch": all(x in c[0xD0218] for x in ("DAT_febeac2b == 'Z'", "DAT_febec7bf != '\\x01'", "DAT_febecb38", "DAT_febec5ee", "DAT_febecc48")),
     "ac2b_is_internal_diagnostic_service_gate": "DAT_febeb112 = 0x5a" in c[0xB338C] and "DAT_febeb112 = 0" in c[0xB330A] and "DAT_febeac2b = DAT_febeb112" in c[0xBCBD8],
     "ac5a_is_internal_ramped_scale": "DAT_febeac5a = DAT_febeb1f8" in c[0xBCBD8] and "DAT_febeb1f8" in c[0xB4B6C] and "0x400" in c[0xB4EF4],
     "d042c_multiplies_by_ac5a": "DAT_febecc62 = (short)((int)((int)DAT_febecc50 * (uint)DAT_febeac5a) / 0x400);" in c[0xD042C],
     "common_actuator_gate_can_zero_command": all(x in c[0xD042C] for x in ("DAT_febeac29", "DAT_febeac2a", "DAT_febecc66 = 0")),
-    "ac29_ac2a_derive_internal_system_state": "0x70017001" in c[0xBCAA6] and "0x40004" in c[0xBCAA6] and "DAT_febeef90 = DAT_febe8b28" in c[0xFCC00],
-    "8b28_is_computed_internal_status_aggregate": "*(uint *)(puVar4 + -0x2cd8) = uVar5" in c[0x572E6] and "FUN_000571b4" in c[0x572E6] and "FUN_0005721c" in c[0x572E6],
+    "ac29_ac2a_derive_internal_system_state": (
+      "0x70017001" in c[0xBCAA6] and "0x40004" in c[0xBCAA6]
+      # EP=GP+3780; LD.W GP-2CD8 into r1; SST.W r1 at EP+10.
+      # This is the actual 8B28 -> EF90 copy, independent of global names.
+      and image[0xFCC2A:0xFCC3A] == bytes.fromhex("24f6803784038503860c240f29d3090d")
+    ),
+    "8b28_is_computed_internal_status_aggregate": (
+      # Zero r28, OR eight words at GP-2CDC+8+4*i, pass that request
+      # to571B4/5721C, OR both results into preserved r29, publish8B28.
+      image[0x572EA:0x57312] == bytes.fromhex(
+        "00e2249e24d31c0801f0c2f2d3f1410a049512e1680a96fd1c30bfffb0fe0ae81c30bfff10ff0ae9"
+      ) and image[0x57372:0x57376] == bytes.fromhex("64ef29d3")
+    ),
     "internal_override_trigger_and_replacement_are_exact": "DAT_febecc98 = uVar7" in c[0xD0528] and "DAT_febecc94 = -DAT_febecc80" in c[0xD0674] and all(x in c[0xD047C] for x in ("DAT_febecc98", "DAT_febecc94", "DAT_febecc64")),
     "motor_side_can_substitute_internal_bounded_source": all(x in c[0x35C4C] for x in ("DAT_febee40c", "DAT_febee780 == 'Z'", "DAT_febee406 == 'Z'", "DAT_febe6af4 = -sVar1")),
     "motor_mirror_path": "DAT_febee40c = DAT_febeac54" in c[0xBF33E] and "DAT_febe6af4 = -sVar1" in c[0x35C4C] and "DAT_febe6e0a = DAT_febe6af4" in c[0x387BA],
-    "motor_scheduler_runs_current_chain_in_order": all(f"FUN_{a:08x}();" in c[0x5DF5C] for a in (0x387BA, 0x38502, 0x3835E, 0x384D8, 0x38162)),
-    "separate_cyclic_roots": "FUN_0006679e" in c[0x65FEA] and "FUN_000667e6" in c[0x66062],
-    "application_task_contains_unpack_stage_snapshot_controller": all(x in c[0x58B5E] for x in ("FUN_0005ec24", "FUN_0005f610")) and "FUN_000d1130" in c[0xBCD62],
-    "command_task_contains_common_gate_and_motor_mirror": "FUN_000bcaa6" in c[0xBCD02] and "FUN_000d1100" in c[0xBCD02] and "FUN_000bf33e" in c[0xC2000],
+    "motor_scheduler_runs_current_chain_in_order": all(f"{corpus[a]['name']}();" in c[0x5DF5C] for a in (0x387BA, 0x38502, 0x3835E, 0x384D8, 0x38162)),
+    "separate_cyclic_roots": corpus[0x6679E]["name"] in c[0x65FEA] and corpus[0x667E6]["name"] in c[0x66062],
+    "application_task_contains_unpack_stage_snapshot_controller": all(corpus[a]["name"] in c[0x58B5E] for a in (0x5EC24, 0x5F610)) and corpus[0xD1130]["name"] in c[0xBCD62],
+    "command_task_contains_common_gate_and_motor_mirror": all(corpus[a]["name"] in c[0xBCD02] for a in (0xBCAA6, 0xD1100)) and corpus[0xBF33E]["name"] in c[0xC2000],
   }
   if not all(checks.values()):
     raise RuntimeError(f"semantic checks failed: {[k for k,v in checks.items() if not v]}")

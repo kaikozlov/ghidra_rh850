@@ -1,0 +1,308 @@
+"""Register-transfer C emission for lifted functions and gap thunks."""
+from __future__ import annotations
+
+from pathlib import Path
+
+from .. import tree
+from .decode import Inst
+from .graph import LiftedFn
+
+
+LIFTED_C = tree.OUTPUT / "lifted.c"
+
+
+DISPATCH = r"""
+static void camry_dispatch(uint32_t target, uint32_t return_to) {
+    uint32_t lo = 0;
+    uint32_t hi = camry_range_count;
+    while (lo < hi) {
+        uint32_t mid = lo + (hi - lo) / 2u;
+        if (target < camry_ranges[mid].start)
+            hi = mid;
+        else if (target >= camry_ranges[mid].end)
+            lo = mid + 1u;
+        else {
+            camry_ranges[mid].fn(target, return_to);
+            return;
+        }
+    }
+    fprintf(stderr, "unlifted target %#x\n", target);
+    abort();
+}
+"""
+
+RUNNER = r"""
+uint32_t camry_lift_psw = 0x20u;
+
+uint32_t camry_lift_run(uint32_t entry, uint32_t r6, uint32_t r7, uint32_t r8, uint32_t r9, uint32_t lp) {
+    int index;
+    camry_steps = 0;
+    for (index = 0; index < 32; index += 1)
+        camry_R[index] = 0;
+    camry_R[3] = camry_sp;
+    camry_R[4] = camry_gp;
+    camry_R[5] = camry_tp;
+    camry_R[6] = r6;
+    camry_R[7] = r7;
+    camry_R[8] = r8;
+    camry_R[9] = r9;
+    camry_R[31] = lp;
+    apply_psw(camry_lift_psw);
+    camry_dispatch(entry, lp);
+    camry_sp = camry_R[3];
+    camry_gp = camry_R[4];
+    camry_tp = camry_R[5];
+    camry_psw = pack_psw();
+    return camry_R[10];
+}
+"""
+
+
+def _emit_gap_cfg(fn: LiftedFn, tails: set[int]) -> list[str]:
+    sites = set(fn.sites)
+    ordered = sorted(fn.insts, key=lambda inst: inst.addr)
+    boot = 1 if fn.entry < 0x20000 else 0
+    lines = [
+        f"static uint32_t {fn.name}(uint32_t r6, uint32_t r7, uint32_t r8, uint32_t r9) {{",
+        f"    camry_gap_enter(r6, r7, r8, r9, {boot});",
+        f"    goto L{fn.entry:08x};",
+    ]
+
+    def land(target: int) -> str:
+        if target in sites:
+            return f"goto L{target:08x};"
+        if target not in tails:
+            raise SystemExit(f"gap {fn.entry:#x} leaves to {target:#x}")
+        name = f"camry_gap_{target:08x}"
+        return f"return {name}(camry_R[6], camry_R[7], camry_R[8], camry_R[9]);"
+
+    for inst in ordered:
+        lines.append(f"L{inst.addr:08x}:")
+        lines.append("    camry_step();")
+        if inst.kind in {"alu", "nop"}:
+            if inst.stmt:
+                lines.append(f"    {inst.stmt}")
+            lines.append(f"    {land(inst.addr + inst.size)}")
+            continue
+        if inst.kind == "jmp":
+            lines.append("    camry_sp = camry_R[3];")
+            lines.append("    camry_psw = pack_psw();")
+            lines.append("    return camry_R[10];")
+            continue
+        if inst.kind == "br" or (inst.kind == "b" and inst.cc == 5):
+            lines.append(f"    {land(inst.target)}")
+            continue
+        fall = inst.addr + inst.size
+        lines.append(f"    if (camry_take({inst.cc})) {{ {land(inst.target)} }}")
+        lines.append(f"    {land(fall)}")
+    lines.append("}")
+    return lines
+
+
+def emit_gap_thunks(thunks: list[LiftedFn]) -> str:
+    """Host bodies for gap thunks. Same camry_read/camry_write the oracle uses."""
+    lines = [
+        "static void camry_gap_enter(uint32_t r6, uint32_t r7, uint32_t r8, uint32_t r9, int boot) {",
+        "    int i;",
+        "    for (i = 0; i < 32; i++) camry_R[i] = 0;",
+        "    camry_R[3] = camry_sp;",
+        "    camry_R[4] = boot ? 0xfebf9800u : 0xfebeb800u;",
+        "    camry_R[5] = boot ? 0x869cu : 0x23dfcu;",
+        "    camry_R[6] = r6; camry_R[7] = r7; camry_R[8] = r8; camry_R[9] = r9;",
+        "    camry_R[10] = 0x11111111u;",
+        "    apply_psw(camry_psw);",
+        "}",
+    ]
+    tails = {fn.entry for fn in thunks}
+    branched = any(inst.kind in {"b", "br"} for fn in thunks for inst in fn.insts)
+    if branched:
+        for fn in thunks:
+            lines.append(
+                f"static uint32_t {fn.name}(uint32_t r6, uint32_t r7, uint32_t r8, uint32_t r9);"
+            )
+    for fn in thunks:
+        if any(inst.kind in {"b", "br"} for inst in fn.insts):
+            lines.extend(_emit_gap_cfg(fn, tails))
+            continue
+        boot = 1 if fn.entry < 0x20000 else 0
+        lines.append(
+            f"static uint32_t {fn.name}(uint32_t r6, uint32_t r7, uint32_t r8, uint32_t r9) {{"
+        )
+        lines.append(f"    camry_gap_enter(r6, r7, r8, r9, {boot});")
+        for inst in fn.insts:
+            if inst.stmt:
+                lines.append(f"    {inst.stmt}")
+        lines.append("    camry_sp = camry_R[3];")
+        lines.append("    camry_psw = pack_psw();")
+        lines.append("    return camry_R[10];")
+        lines.append("}")
+    return "\n".join(lines) + "\n"
+
+
+def fn_symbol(entry: int) -> str:
+    return f"camry_fn_{entry:08x}"
+
+
+def emit_c(functions: dict[int, LiftedFn], selected: set[int], path: Path) -> None:
+    ordered = [functions[entry] for entry in sorted(selected)]
+    lines = [
+        "/* Generated by tools/toyota decomp lift emit. Do not hand-edit. */",
+        '#include "host_cpu.h"',
+        "#include <stdio.h>",
+        "#include <stdlib.h>",
+        "static void camry_dispatch(uint32_t target, uint32_t return_to);",
+    ]
+    for fn in ordered:
+        lines.append(f"static void {fn_symbol(fn.entry)}(uint32_t pc, uint32_t entry_lp);")
+    for fn in ordered:
+        lines.extend(emit_function(fn))
+    spans = []
+    for fn in ordered:
+        for start, end in fn.ranges:
+            spans.append((start, end + 1, fn.entry))
+    spans.sort()
+    lines.append("static const struct { uint32_t start; uint32_t end; void (*fn)(uint32_t, uint32_t); } camry_ranges[] = {")
+    for start, end, entry in spans:
+        lines.append(f"    {{0x{start:x}u, 0x{end:x}u, {fn_symbol(entry)}}},")
+    lines.append("};")
+    lines.append("static const uint32_t camry_range_count = sizeof camry_ranges / sizeof camry_ranges[0];")
+    lines.append(DISPATCH)
+    lines.append(RUNNER)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def emit_function(fn: LiftedFn) -> list[str]:
+    checks = " || ".join(
+        f"(target >= 0x{start:x}u && target < 0x{end + 1:x}u)" for start, end in fn.ranges
+    ) or "0"
+    lines = [
+        f"__attribute__((unused)) static int camry_in_{fn.entry:08x}(uint32_t target) {{ return {checks}; }}",
+        f"static void {fn_symbol(fn.entry)}(uint32_t pc, uint32_t entry_lp) {{",
+        "    (void)entry_lp;",
+        "    for (;;) {",
+        "        camry_step();",
+        "        switch (pc) {",
+    ]
+    ordered = sorted(fn.insts, key=lambda inst: inst.addr)
+    for index, inst in enumerate(ordered):
+        fall = ordered[index + 1].addr if index + 1 < len(ordered) else None
+        lines.append(f"        case 0x{inst.addr:x}u: {{")
+        lines.extend("            " + line for line in emit_case(inst, fall, fn))
+        lines.append("        }")
+    lines.extend([
+        "        default:",
+        f'            fprintf(stderr, "lift bad pc %#x in {fn.name}\\n", pc);',
+        "            abort();",
+        "        }",
+        "    }",
+        "}",
+    ])
+    return lines
+
+
+def emit_case(inst: Inst, fall: int | None, fn: LiftedFn) -> list[str]:
+    fall_s = f"0x{fall:x}u" if fall is not None else None
+    if inst.kind == "alu" or inst.kind == "nop":
+        body = [inst.stmt] if inst.stmt else []
+        if fall_s is None:
+            body.append("return;")
+            return body
+        body.append(f"pc = {fall_s};")
+        body.append("break;")
+        return body
+    if inst.kind == "abort":
+        return [f'fprintf(stderr, "lift abort {inst.text} at {inst.addr:#x}\\n");', "abort();"]
+    if inst.kind in {"b", "br"}:
+        inside = inst.target in fn.sites
+        if inst.kind == "br" or inst.cc == 5:
+            return branch_lines(inst.target, inside, fall_s, None, fn)
+        return branch_lines(inst.target, inside, fall_s, inst.cc, fn)
+    if inst.kind in {"jarl", "jarl_ind"}:
+        link_next = inst.addr + inst.size
+        lines = []
+        if inst.kind == "jarl_ind":
+            lines.append(f"uint32_t target = rr({inst.reg});")
+        if inst.link:
+            lines.append(f"camry_R[{inst.link}] = 0x{link_next:x}u;")
+        target = "target" if inst.kind == "jarl_ind" else f"0x{inst.target:x}u"
+        lines.append(f"camry_dispatch({target}, 0x{link_next:x}u);")
+        if fall is not None:
+            lines.extend([f"pc = 0x{fall:x}u;", "break;"])
+        else:
+            lines.append("return;")
+        return lines
+    if inst.kind == "jr":
+        inside = inst.target in fn.sites
+        return branch_lines(inst.target, inside, None, None, fn)
+    if inst.kind == "jmp":
+        return transfer_lines(f"rr({inst.reg})", fn)
+    if inst.kind == "eiret":
+        mode = {"ctret": 0, "eiret": 1, "feret": 2}[inst.text]
+        return transfer_lines(f"camry_return_target({mode}u)", fn)
+    if inst.kind == "jmpdisp":
+        return transfer_lines(f"0x{inst.base:x}u + rr({inst.reg})", fn)
+    if inst.kind == "loop":
+        inside = inst.target in fn.sites
+        if inside:
+            taken = f"pc = 0x{inst.target:x}u; break;"
+        else:
+            taken = f"camry_dispatch(0x{inst.target:x}u, entry_lp); return;"
+        lines = [f"if (camry_loop({inst.reg})) {{ {taken} }}"]
+        if fall_s:
+            lines.extend([f"pc = {fall_s};", "break;"])
+        else:
+            lines.append("return;")
+        return lines
+    if inst.kind == "switch":
+        nxt = inst.addr + inst.size
+        return transfer_lines(f"camry_switch_target(0x{nxt:x}u, {inst.reg})", fn)
+    if inst.kind == "callt":
+        nxt = fall if fall is not None else inst.addr + inst.size
+        lines = [f"camry_dispatch(camry_callt_target(0x{nxt:x}u, {inst.imm}u), 0x{nxt:x}u);"]
+        if fall is not None:
+            lines.extend([f"pc = 0x{fall:x}u;", "break;"])
+        else:
+            lines.append("return;")
+        return lines
+    if inst.kind == "dispose":
+        lines = [f"camry_sp_add({inst.slots}u << 2);"]
+        for reg in (31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 21, 20):
+            if inst.mask & (1 << reg):
+                lines.append(f"camry_pop({reg});")
+        if inst.ret:
+            lines.extend(transfer_lines(f"rr({inst.ret})", fn))
+        elif fall_s:
+            lines.extend([f"pc = {fall_s};", "break;"])
+        else:
+            lines.append("return;")
+        return lines
+    raise SystemExit(f"unemitted {inst.kind} at {inst.addr:#x}")
+
+
+def transfer_lines(expr: str, fn: LiftedFn) -> list[str]:
+    return [
+        f"uint32_t target = {expr};",
+        "if (target == entry_lp) return;",
+        f"if (camry_in_{fn.entry:08x}(target)) {{ pc = target; break; }}",
+        "camry_dispatch(target, entry_lp);",
+        "return;",
+    ]
+
+
+def branch_lines(target: int, inside: bool, fall_s: str | None, cc: int | None, fn: LiftedFn) -> list[str]:
+    del fn
+    if inside:
+        taken = f"pc = 0x{target:x}u; break;"
+    else:
+        taken = f"camry_dispatch(0x{target:x}u, entry_lp); return;"
+    if cc is None:
+        return [taken]
+    lines = [f"if (camry_take({cc})) {{ {taken} }}"]
+    if fall_s:
+        lines.extend([f"pc = {fall_s};", "break;"])
+    else:
+        lines.append("return;")
+    return lines
+
+

@@ -7,97 +7,97 @@
   "function_evidence": {
     "0x04C97A": {
       "body_size": 1162,
-      "decompiled_c_sha256": "b20ba679d5723ecdeb235c3f646604780b9e461943ac82f937fbb8ce12e79d10",
+      "decompiled_c_sha256": "8875e740045466fcb96766228bcae3a0ef8b3ac7f07f3384276f33a312fa798f",
       "role": "generated-COM PDU0/0x030 application packer"
     },
     "0x07DF14": {
       "body_size": 306,
-      "decompiled_c_sha256": "37065bd2474b9b769b024a2796c8c6d0cb5d269b661027f79b8145e4f586b595",
+      "decompiled_c_sha256": "4b9576c6d121f02ba17112d0da18d9f9c5ac831b657573698f98c88f743624fe",
       "role": "generated-COM transmit dispatcher"
     },
     "0x081A7E": {
       "body_size": 26,
-      "decompiled_c_sha256": "01d68e17a84f0ac1fc78bc75b4a5165d2731a1fe3b0d1df5f37e743d92e58e24",
+      "decompiled_c_sha256": "15c512b00e3eb625b859487fc775d531d22732cb789a4af9b97ae2432da97136",
       "role": "PduR transmit shim"
     },
     "0x081AB2": {
       "body_size": 112,
-      "decompiled_c_sha256": "1e7494d94ead68f7bef494f652d51c4f9b302f9a343a1c34fdf01548b9a02eaa",
+      "decompiled_c_sha256": "ae3fcbfd436bb86cfbf1d3b17705bf43ea635463e6cecf99b9ec9ddcfb6587b6",
       "role": "PduR lower-route dispatcher"
     },
     "0x088B84": {
       "body_size": 178,
-      "decompiled_c_sha256": "d02bcaddd859ce6dd64f031a075a0d642c164a036a12218a5da977a01c05d5ec",
+      "decompiled_c_sha256": "f82c1c176b29aef3671503a19d4fddbcc9fcb7c0c30e4888bd7372119e1ec42e",
       "role": "ICU-S command-5 job preparation"
     },
     "0x088D60": {
       "body_size": 92,
-      "decompiled_c_sha256": "acddc51cd1de4b90cbb625f3d5af7ed526f4b9471a91cec6c7d12bbd3646e2b6",
+      "decompiled_c_sha256": "5dc81c6904d5815e394bb1fdd3481b9bd0dbf7b9195c40b8f35f9a831a5e0909",
       "role": "ICU-S command-5 start wrapper"
     },
     "0x089440": {
       "body_size": 150,
-      "decompiled_c_sha256": "259172dc7db0ba52b710828fc79cc0f7083217de9075795e39b8d06bfe7febff",
+      "decompiled_c_sha256": "d9ae1f2e3282c16eb5b66bd640e4a917a5c21f4fdb107a60c40d5d0da125d390",
       "role": "CryptoIf record dispatcher"
     },
     "0x089BC2": {
       "body_size": 138,
-      "decompiled_c_sha256": "019271326624c9c43b046dca5aa7953297d662b18f4629a7981dc8d4cf920951",
+      "decompiled_c_sha256": "7c23f4ccd0c3c4f5203087cceab1f5d5d4dacd9c5ac2db67ea17d95768abc87b",
       "role": "serialized MAC-generation wrapper"
     },
     "0x08A720": {
       "body_size": 274,
-      "decompiled_c_sha256": "398c85f38fe1323134eb3bb309d5caa556e088e4ff58e65600f9592c0c476f62",
+      "decompiled_c_sha256": "7ec8db9d799b251b2011e114cee15efdaff22ae28d0cd3f80a281354fd0107ea",
       "role": "ICU-S command-5 hardware submit"
     },
     "0x08ECB2": {
       "body_size": 98,
-      "decompiled_c_sha256": "114a7cf4b6ad8380b17f528d12b215486587f759357c71259f7b261b2b63ee71",
+      "decompiled_c_sha256": "79632589d452f266f83850eb76a1ac884ca22dc994d127f5d918cdc0659237b3",
       "role": "DataID/payload/freshness authentication-input builder"
     },
     "0x08ED8E": {
       "body_size": 88,
-      "decompiled_c_sha256": "18c75c67e26409b64a3b6705c8639b2fdfba114b03f3172e6bbbba123032cbba",
+      "decompiled_c_sha256": "92fc77cc654aee84cb19902dbc9d675e808f80aaaeed5f7d469100961690bc89",
       "role": "SecOC Tx ingress for generated-COM PDU0"
     },
     "0x08F19A": {
       "body_size": 54,
-      "decompiled_c_sha256": "21a551ef96105320b0d8f41c1354d047dbc211d7b11f2dc5cf2f694766b09871",
+      "decompiled_c_sha256": "8887815cbae4d14654f1f56edce3836ba823b2a8d28231bfc7dce61a7f6c37d5",
       "role": "Tx key-selector descriptor lookup"
     },
     "0x08FA5A": {
       "body_size": 44,
-      "decompiled_c_sha256": "56a99b215574d7df30676ae8db775177ac6bb6c04fdaa78d4ccd6062ebbfadcc",
+      "decompiled_c_sha256": "8b573b3bdd8bf9a9972ed7179b0fbdc4d0f1caa1808488629abc9ef4f16a680e",
       "role": "SecOC Tx source/lower-PDU profile mapper"
     },
     "0x08FABA": {
       "body_size": 152,
-      "decompiled_c_sha256": "4de42c4237abe4911dd800b2bd85feca410e7f47d131ccae5240faae2c872e8c",
+      "decompiled_c_sha256": "5b095652caf855ae0250e44985309766bdcbf3115756359434689e36168b1e67",
       "role": "SecOC Tx authentic-payload queue"
     },
     "0x08FCCA": {
       "body_size": 58,
-      "decompiled_c_sha256": "c313889d32f12b112e1691017308e905af0cc0c41336ffaff8bbdb05ae281bc8",
+      "decompiled_c_sha256": "8c111a0eda618ed0c0e339e24f99e6e1593198642f86cc20d6d08b2113f593ca",
       "role": "CryptoIf MAC-generation entry"
     },
     "0x08FD90": {
       "body_size": 320,
-      "decompiled_c_sha256": "95bcaf3ca67b0c07c230c73d2c5ed44b5305bae59b93bd1267b4bef4371338cc",
+      "decompiled_c_sha256": "c9f808b71d1c5d77ad871bdcb51ed03c347e2a99bde4a0f98b1c6cce6de40bf3",
       "role": "SecOC Tx authentication coordinator"
     },
     "0x08FED0": {
       "body_size": 266,
-      "decompiled_c_sha256": "1b09d1e49f2bc27f231c361b5807fff47c9996761dc0a0ddef1b756ea6f0e0f8",
+      "decompiled_c_sha256": "4a26b9b07da72d06b64eefb1fb57822b7841d3ed1f7abfd5d9d83815b9a501c7",
       "role": "FV/authenticator trailer bit packer"
     },
     "0x08FFDA": {
-      "body_size": 152,
-      "decompiled_c_sha256": "68883b21ba15347ec67d7a6523fc12f49c19b7cd20c02271e8dcc1185f1325a3",
+      "body_size": 272,
+      "decompiled_c_sha256": "1df5d311ca578c4265553f46a3f0809c1a0735aad12374f13d5c7d47f9ba575e",
       "role": "secured-PDU assembly and lower transmit"
     },
     "0x090736": {
       "body_size": 116,
-      "decompiled_c_sha256": "c54da5a984cd69b067c8879a219fff628adc84aab5324ff4a5e8045e154201cf",
+      "decompiled_c_sha256": "d680beb67f2ec774915daac3f9c57795f9109181ee3e53c737c0b8031a77fe6c",
       "role": "ordinary FV4/full-freshness decoder"
     }
   },

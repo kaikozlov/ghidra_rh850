@@ -94,7 +94,7 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 		// without it silently falls back to the generic no-CALLT-recovery
 		// path instead of the production join-consistent resolver.
 		AddressSet analyzed = new AddressSet(addr(program, 0x10000), addr(program, 0x13fff));
-		analyzed.add(addr(program, 0x20000), addr(program, 0x203ff));
+		analyzed.add(addr(program, 0x20000), addr(program, 0x207ff));
 		V850RegisterAnalyzer registerAnalyzer = new V850RegisterAnalyzer();
 		if (registerAnalyzer.canAnalyze(program)) {
 			registerAnalyzer.added(program, analyzed, monitor, new MessageLog());
@@ -297,6 +297,21 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 		put(program, at, j[0], j[1], s10[0], s10[1], s11[0], s11[1]);
 		return at + 12;
 	}
+	/** Two calls deliberately share r7; each call's unchanged r6/r7 escape. */
+	private void copyConsumer(ProgramDB program, long entry, long helper, int source,
+			int destination, int slot) throws Exception {
+		callerPrologue(program, entry);
+		long at = mat32(program, entry + 20, 7, source);
+		for (int i = 0; i < 2; i++) {
+			at = mat32(program, at, 6, destination + i * 0x80);
+			put(program, at, jarl(at, helper, 31));
+			put(program, at + 4, stw(6, slot + i * 8, 20));
+			put(program, at + 8, stw(7, slot + i * 8 + 4, 20));
+			at += 12;
+		}
+		callerEpilogue(program, at);
+	}
+
 
 	/** 64-bit constant materializers for r6..r9: `mov imm5, reg` (format VIII,
 	 * opcode bits 10:5 = 0x10). The imm5 is sign-extended, and reg1 r0
@@ -987,7 +1002,7 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 		// same &31 masking. a = 0x1122334455667788 throughout; one extra
 		// negative-input site proves ashrdi3's sign replication.
 		MemoryBlock flash2 = program.getMemory()
-			.createInitializedBlock("flash2", addr(program, 0x20000), 0x400, (byte) 0, monitor,
+			.createInitializedBlock("flash2", addr(program, 0x20000), 0x800, (byte) 0, monitor,
 				false);
 		flash2.setPermissions(true, false, true);
 		callerPrologue(program, 0x20000);
@@ -1005,6 +1020,23 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 		gs = gccShiftSite(program, gs, 0x55667788, 0x11223344, -1, 0x119a0, 0x4f8);
 		gs = gccShiftSite(program, gs, 0x12345678, 0x9abcdef0, 64, 0x119e0, 0x500);
 		callerEpilogue(program, gs);
+
+		// Exact fixed-copy bodies relocated independently of firmware addresses.
+		// Both loop forms leave their r6/r7 inputs unchanged.
+		put(program, 0x20400, 0x9a00, 0x0813, 0x0ac2, 0xf001, 0xf1c6, 0x09c7, 0x9a41,
+			0x0f21, 0x0001, 0x0613, 0xffe8, 0x0d01, 0xf5d9, 0x007f);
+		put(program, 0x20420, 0x9a00, 0x0813, 0x0ac2, 0xf001, 0xf1c6, 0x09c7, 0x9a41,
+			0x0f21, 0x0001, 0x9a68, 0x0d01, 0xf5e1, 0x007f);
+		// Near misses: write r6 instead of r1, invert the loop condition,
+		// and add a source-argument clobber just before the return.
+		put(program, 0x20440, 0x9a00, 0x0813, 0x0ac2, 0xf001, 0xf1c6, 0x31c7, 0x9a41,
+			0x0f21, 0x0001, 0x9a68, 0x0d01, 0xf5e1, 0x007f);
+		put(program, 0x20460, 0x9a00, 0x0813, 0x0ac2, 0xf001, 0xf1c6, 0x09c7, 0x9a41,
+			0x0f21, 0x0001, 0x9a68, 0x0d01, 0xf5e9, 0x007f);
+		put(program, 0x20480, 0x9a00, 0x0813, 0x0ac2, 0xf001, 0xf1c6, 0x09c7, 0x9a41,
+			0x0f21, 0x0001, 0x9a68, 0x0d01, 0xf5e1, 0x3a00, 0x007f);
+		copyConsumer(program, 0x20500, 0x20400, 0x14000, 0x14100, 0x560);
+		copyConsumer(program, 0x20600, 0x20420, 0x14080, 0x14200, 0x570);
 
 		// Ordinary in-function GHS/GCC epilogues are not standalone
 		// helpers, even when their bytes match an out-of-line return helper.
@@ -1051,7 +1083,8 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 			0x13dc0, 0x13e00,
 			// the constant-driven value-selection consumer and the GCC
 			// shift constant-edge consumer
-			0x13e40, 0x13f00, 0x13f40, 0x13f80, 0x13fc0, 0x13fe0, 0x13ff0, 0x20000 };
+			0x13e40, 0x13f00, 0x13f40, 0x13f80, 0x13fc0, 0x13fe0, 0x13ff0, 0x20000,
+			0x20400, 0x20420, 0x20440, 0x20460, 0x20480, 0x20500, 0x20600 };
 		for (long e : entries) {
 			new DisassembleCommand(addr(program, e), null, true).applyTo(program, monitor);
 		}
@@ -1059,7 +1092,7 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 		// Create the caller functions and name the arithmetic contracts.
 		long[] callers = { 0x10000, 0x10020, 0x10400, 0x10500, 0x10520, 0x10600, 0x11600,
 			0x11880, 0x11c60, 0x11d40, 0x11dc0, 0x12ec0, 0x13e40,
-			0x10230, 0x13f00, 0x13f40, 0x13f80, 0x20000 };
+			0x10230, 0x13f00, 0x13f40, 0x13f80, 0x20000, 0x20500, 0x20600 };
 		for (long c : callers) {
 			new CreateFunctionCmd(addr(program, c)).applyTo(program, monitor);
 		}
@@ -1096,7 +1129,7 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 			// back out of the existing 0x121c0 function.
 			0x11e80,
 			0x12f60, 0x12fa0, 0x12fc0, 0x12ff0, 0x13d00, 0x13d20, 0x13d40, 0x13d80, 0x13da0,
-			0x13dc0, 0x13e00 };
+			0x13dc0, 0x13e00, 0x20400, 0x20420, 0x20440, 0x20460, 0x20480 };
 		for (long s : stripped) {
 			new CreateFunctionCmd(addr(program, s)).applyTo(program, monitor);
 		}
@@ -1108,6 +1141,46 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 
 	private void runAssertions(ProgramDB program) throws Exception {
 		Listing listing = program.getListing();
+		boolean killsR6 = false;
+		boolean killsR7 = false;
+		for (Varnode killed : program.getCompilerSpec().getDefaultCallingConvention()
+				.getKilledByCallList()) {
+			killsR6 |= killed.getAddress().equals(program.getRegister("r6").getAddress());
+			killsR7 |= killed.getAddress().equals(program.getRegister("r7").getAddress());
+		}
+		check(killsR6 && killsR7, "ordinary ABI still clobbers r6/r7 outside proven copy bodies");
+		for (int i = 0; i < 2; i++) {
+			long helper = 0x20400 + i * 0x20;
+			Function copy = listing.getFunctionAt(addr(program, helper));
+			check(copy != null && !copy.isInline() && copy.getCallFixup() == null &&
+				copy.getCallingConventionName().equals("__v850_copy_words"),
+				"fixed-word copy has a body-proven local convention, not unsafe repeated inlining");
+			Function consumer = listing.getFunctionAt(addr(program, 0x20500 + i * 0x100));
+			int source = i == 0 ? 0x14000 : 0x14080;
+			int destination = i == 0 ? 0x14100 : 0x14200;
+			int slot = 0x14560 + i * 0x10;
+			for (int call = 0; call < 2; call++) {
+				check(storesConstAt(program, consumer, slot + call * 8,
+					destination + call * 0x80),
+					"copy caller retains live r6 after call " + call + " in variant " + i);
+				check(storesConstAt(program, consumer, slot + call * 8 + 4, source),
+					"copy caller retains/reuses source r7 across call " + call + " in variant " + i);
+			}
+			check(callsCopyWithPointers(program, consumer, helper, source, destination),
+				"both real copy calls retain their destination and shared source arguments");
+			check(countOps(program, copy, PcodeOp.LOAD, 0) >= 1 &&
+				countOps(program, copy, PcodeOp.STORE, 0) >= 1,
+				"real copy helper retains its loop memory effects");
+			check(execCopyConsumer(program, 0x20500 + i * 0x100, source, destination,
+				slot, i == 0 ? 24 : 8),
+				"machine copy executes both calls with preserved arguments, exact bounds and data");
+		}
+		for (long entry : new long[] { 0x20440, 0x20460, 0x20480 }) {
+			Function mutant = listing.getFunctionAt(addr(program, entry));
+			check(mutant != null && !mutant.isInline() && mutant.getCallFixup() == null &&
+				mutant.getName().startsWith("FUN_"),
+				"mutated copy is not granted an instruction-unproven preservation contract");
+		}
 		check(listing.getFunctionAt(addr(program, 0x13f0a)) == null &&
 			listing.getFunctionAt(addr(program, 0x13f00)).getBody().contains(addr(program, 0x13f0a)),
 			"GHS inline epilogue remains inside its caller, not a false helper entry");
@@ -1538,6 +1611,37 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 		finally { emu.dispose(); }
 	}
 
+	private boolean execCopyConsumer(ProgramDB program, long entry, int source,
+			int destination, int slot, int count) throws Exception {
+		EmulatorHelper emu = machine(program, entry);
+		try {
+			// Poison the copied range and its guard words independently of
+			// source data, so skipped stores and off-by-one writes are visible.
+			byte[] poison = new byte[count * 4 + 8];
+			java.util.Arrays.fill(poison, (byte) 0xa5);
+			for (int call = 0; call < 2; call++) {
+				emu.writeMemory(addr(program, destination + call * 0x80 - 4), poison);
+			}
+			runToReturn(emu);
+			for (int call = 0; call < 2; call++) {
+				long target = destination + call * 0x80;
+				if (readWord(program, emu, slot + call * 8) != target ||
+					readWord(program, emu, slot + call * 8 + 4) != source ||
+					readWord(program, emu, target - 4) != 0xa5a5a5a5L ||
+					readWord(program, emu, target + count * 4) != 0xa5a5a5a5L) {
+					return false;
+				}
+				for (int word = 0; word < count; word++) {
+					if (readWord(program, emu, target + word * 4) !=
+						readWord(program, emu, source + word * 4)) return false;
+				}
+			}
+			return emu.readRegister("sp").longValue() == ENTRY_SP &&
+				emu.readRegister("lp").longValue() == RETURN_PC;
+		}
+		finally { emu.dispose(); }
+	}
+
 	private boolean execUmodSi3(ProgramDB program) throws Exception {
 		long[][] inputs = {{37, 5}, {0, 7}, {0xffffffffL, 3},
 			{0x80000000L, 0x7fffffffL}, {0xffffffffL, 0x80000000L},
@@ -1677,13 +1781,9 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 	}
 
 	/**
-	 * True when the decompiled function makes the constant `expected`
-	 * observable at the absolute RAM slot `slotAddr`. The consumer folds
-	 * the call-fixup payload against the site constants, so the value must
-	 * arrive as either a raw STORE of the constant to the constant address,
-	 * or - because RuleStoreVarnode rewrites absolute-address stores (not
-	 * just stack-relative ones) into COPYs of addr-tied RAM varnodes - a
-	 * COPY of the constant into the 4-byte varnode at that address.
+	 * True when a constant reaches an escaping RAM slot. Pointer constants may
+	 * be expressed as PTRSUB(0,address), including as the RAM varnode's defining
+	 * operation, rather than a literal COPY. Inspect the actual expression.
 	 */
 	private boolean storesConstAt(ProgramDB program, Function f, long slotAddr, long expected) {
 		if (f == null) {
@@ -1698,22 +1798,63 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 			if (op.getOpcode() == PcodeOp.STORE) {
 				Varnode address = op.getInput(1);
 				Varnode value = op.getInput(2);
-				if (address != null && address.isConstant() && address.getOffset() == slotAddr &&
-					value != null && value.isConstant() && value.getOffset() == expected) {
+				Long addressValue = constantValue(address, 0);
+				Long storedValue = constantValue(value, 0);
+				if (addressValue != null && addressValue.longValue() == slotAddr &&
+					storedValue != null && storedValue.longValue() == expected) {
 					return true;
 				}
 			}
-			else if (op.getOpcode() == PcodeOp.COPY) {
+			else {
 				Varnode out = op.getOutput();
-				Varnode in = op.getInput(0);
+				Long value = constantValue(out, 0);
 				if (out != null && out.getSize() == 4 &&
-					out.getAddress().equals(slot.getAddress()) && in != null &&
-					in.isConstant() && in.getOffset() == expected) {
+					out.getAddress().equals(slot.getAddress()) && value != null &&
+					value.longValue() == expected) {
 					return true;
 				}
 			}
 		}
 		return false;
+	}
+
+	private Long constantValue(Varnode value, int depth) {
+		if (value == null || depth > 16) return null;
+		if (value.isConstant()) return value.getOffset();
+		PcodeOp def = value.getDef();
+		if (def == null) return null;
+		int opcode = def.getOpcode();
+		if (opcode == PcodeOp.COPY || opcode == PcodeOp.CAST) {
+			return constantValue(def.getInput(0), depth + 1);
+		}
+		if (opcode == PcodeOp.PTRSUB || opcode == PcodeOp.INT_ADD) {
+			Long base = constantValue(def.getInput(0), depth + 1);
+			Long offset = constantValue(def.getInput(1), depth + 1);
+			if (base != null && offset != null) return (base + offset) & 0xffffffffL;
+		}
+		return null;
+	}
+
+	private boolean callsCopyWithPointers(ProgramDB program, Function caller, long helper,
+			int source, int destination) {
+		PcodeOp[] ops = decompiledPcode(program, caller);
+		if (ops == null) return false;
+		int calls = 0;
+		int destinations = 0;
+		for (PcodeOp op : ops) {
+			if (op.getOpcode() != PcodeOp.CALL ||
+				!op.getInput(0).getAddress().equals(addr(program, helper))) continue;
+			if (op.getNumInputs() != 3) return false;
+			Long actualDestination = constantValue(op.getInput(1), 0);
+			Long actualSource = constantValue(op.getInput(2), 0);
+			if (actualSource == null || actualSource.longValue() != source ||
+				actualDestination == null) return false;
+			if (actualDestination.longValue() == destination) destinations |= 1;
+			else if (actualDestination.longValue() == destination + 0x80) destinations |= 2;
+			else return false;
+			calls++;
+		}
+		return calls == 2 && destinations == 3;
 	}
 
 	/** Defined instructions within the first 0x40 bytes at an entry. */

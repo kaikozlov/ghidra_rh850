@@ -25,8 +25,8 @@
         "to_space": "ram"
       }
     ],
-    "decompiled_c": "\nundefined4 did_1c05_1c0c_asic_state_information(int param_1)\n\n{\n  undefined *puVar1;\n  \n  puVar1 = &LAB_febeb800;\n  FUN_0006a55c(DAT_febe8298,param_1);\n  FUN_0006a55c(*(undefined4 *)(puVar1 + -0x3564),param_1 + 4);\n  return 0;\n}\n\n",
-    "decompiled_c_sha256": "a3dbe40fe1f3b33e659b83aa15441850df772f3f45ebb0d05b3925025e7c65d2",
+    "decompiled_c": "\nundefined4 did_1c05_1c0c_asic_state_information(int param_1)\n\n{\n  undefined *puVar1;\n  \n  puVar1 = &LAB_febeb800;\n  store_u32_big_endian_bytes_6a55c(DAT_febe8298,param_1);\n  store_u32_big_endian_bytes_6a55c(*(undefined4 *)(puVar1 + -0x3564),param_1 + 4);\n  return 0;\n}\n\n",
+    "decompiled_c_sha256": "400375477b1ffd017f61f48f30674298e0bd87cc3ec69b77d18b139520c01aed",
     "entry": "0x0004E848",
     "fixed_gp_offsets": [
       "-0x3568",
@@ -48,8 +48,8 @@
   "software_id": "8965F3307000",
   "source_corpus": {
     "boundary": "Tracked first-class exact-F33 Ghidra corpus; promoted function body and canonical data references remain independently image-bound.",
-    "function_count": 7178,
+    "function_count": 7336,
     "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
-    "sha256": "e17dcec4c17ae7e77d0143b4e098604a13740e0c1f845f4409b1a8cf5e98d37c"
+    "sha256": "e3ac4e094422d68757173a48b2a7a4d9ca85187ce324e7a9e1ac0ce2410e82b8"
   }
 }

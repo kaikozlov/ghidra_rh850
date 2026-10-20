@@ -18,15 +18,17 @@ import struct
 from pathlib import Path
 
 from tools import REPO_ROOT as REPO
+from tools.targets.camry.builders.build_camry_8965F3307000_command_cone_ingress import exact_pairs
 from tools.targets.camry.support.camry_f33_corpus import CORPUS, IMAGE, IMAGE_SHA256
+from tools.targets.camry.decomp.c_text import _c_contains
 
 OUT = REPO / "data/generated/camry_8965F3307000_internal_assist_oracles.json"
 GTS = REPO / "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json"
 GTS_REGISTRY = REPO / "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json"
 COMMAND_CONE = REPO / "data/generated/camry_8965F3307000_command_cone_ingress.json"
 LIVE_SELECTOR = REPO / "data/generated/camry_2026_baseline_selector_live.json"
-RDBI_OFFSET = 0x2928C
-RDBI_COUNT = 241
+RDBI_OFFSET = 0x2927C
+RDBI_COUNT = 242
 
 
 def need(cond: object, msg: str) -> None:
@@ -52,7 +54,7 @@ def text(funcs: dict[int, dict], ea: int) -> str:
 def tokens(funcs: dict[int, dict], ea: int, *needles: str) -> None:
     body = text(funcs, ea)
     for needle in needles:
-        need(needle in body, f"{ea:#x} missing token {needle!r}")
+        need(_c_contains(body, needle), f"{ea:#x} missing token {needle!r}")
 
 
 def data_refs(row: dict, addr: int, kind: str | None = None) -> list[dict]:
@@ -80,6 +82,8 @@ def main() -> int:
     image = IMAGE.read_bytes()
     need(len(image) == 0x100000, "unexpected CodeFlash length")
 
+    # All metadata from 0x50990, including both kinds; do not filter this
+    # observability denominator by the dynamic read-admission gate in 0x4D36E.
     rdbi = []
     for i in range(RDBI_COUNT):
         off = RDBI_OFFSET + i * 16
@@ -107,7 +111,7 @@ def main() -> int:
          f"selector RDBI direct-ref negative drift: {selector_direct}")
 
     unique_callbacks = {rr["callback"] for rr in rdbi if rr["callback"]}
-    need(len(unique_callbacks) == 195 and all(cb in funcs for cb in unique_callbacks),
+    need(len(unique_callbacks) == 196 and all(cb in funcs for cb in unique_callbacks),
          f"RDBI callback denominator drift: {len(unique_callbacks)}")
     did_read_cells = set()
     for cb in unique_callbacks:
@@ -149,9 +153,8 @@ def main() -> int:
            "DAT_febee8c2 = DAT_febeae6e;")
 
     # AE3C is itself an internal calibration-derived snapshot from FEBEB140.
-    tokens(funcs, 0xBCD62, "*(undefined2 *)(puVar38 + -0x9c4) = *(undefined2 *)(puVar38 + -0x6c0);")
-    need(0xFEBEB800 - 0x9C4 == 0xFEBEAE3C and 0xFEBEB800 - 0x6C0 == 0xFEBEB140,
-         "AE3C/B140 GP geometry drift")
+    need((0xFEBEB140, 0xFEBEAE3C) in exact_pairs(0xBCD62, funcs),
+         "AE3C calibration-derived snapshot edge drift")
 
     term_specs = {
         0x1C3E: {
@@ -179,7 +182,7 @@ def main() -> int:
         cbtxt = text(funcs, spec["callback"])
         cell = spec["diagnostic_cell"].lower()
         need(f"DAT_{cell}" in cbtxt, f"RDBI {did:#x} no longer reads {spec['diagnostic_cell']}")
-        need("* 100) / 0x80" in cbtxt and "FUN_00070110" in cbtxt and "FUN_0006a5ac" in cbtxt,
+        need("* 100) / 0x80" in cbtxt and f"{funcs[0x70110]['name']}(" in cbtxt and f"{funcs[0x6A5AC]['name']}(" in cbtxt,
              f"RDBI {did:#x} scaling/emission drift")
         oracle_rows.append({
             "data_id": f"0x{did:04X}", "payload_size": 2,
@@ -211,22 +214,17 @@ def main() -> int:
     # consumes C5EC and writes C5EE.  Thus DID 1C3E is a selector-modulated term proxy,
     # not an enum/state DID. C8678 independently proves C4C0 is selector-indexed too, but
     # no exact RDBI callback exposes C4C0 directly.
-    tokens(funcs, 0xC9812,
-           "uVar3 = (uint)DAT_febec156;",
-           "FUN_000d0768((&PTR_DAT_000d39dc)[uVar3 & 3],uVar5);",
-           "iVar6 = iVar6 * 0x400;",
-           "iVar6 = iVar6 / iVar7;",
-           "*(short *)(puVar4 + 0xdec) = (short)iVar6;")
-    need(0xFEBEB800 + 0xDEC == 0xFEBEC5EC, "C9812 C5EC GP geometry drift")
-    tokens(funcs, 0xC9A84,
-           "iVar2 = (int)*(short *)(puVar4 + 0xdec) + (int)*(short *)(puVar4 + -0xc06);",
-           "*(short *)(puVar4 + 0xdee) = (short)(((int)(short)iVar6 * (int)sVar1) / 0x400);")
-    need(0xFEBEB800 + 0xDEE == 0xFEBEC5EE, "C9A84 C5EE GP geometry drift")
-    tokens(funcs, 0xC8678,
-           "uVar2 = (uint)DAT_febec156;",
-           "FUN_000d0768((&PTR_LAB_000d3630)[uVar2 & 3],uVar5);",
-           "*(int *)(puVar3 + 0xcc0) = iVar7;")
-    need(0xFEBEB800 + 0xCC0 == 0xFEBEC4C0, "C8678 C4C0 GP geometry drift")
+    need(data_refs(funcs[0xC9812], 0xFEBEC156, "READ")
+         and data_refs(funcs[0xC9812], 0xD39DC)
+         and data_refs(funcs[0xC9812], 0xFEBEC5EC, "WRITE"),
+         "C9812 selector/table/intermediate references drift")
+    need(data_refs(funcs[0xC9A84], 0xFEBEC5EC, "READ")
+         and data_refs(funcs[0xC9A84], 0xFEBEC5EE, "WRITE"),
+         "C9A84 intermediate/term references drift")
+    need(data_refs(funcs[0xC8678], 0xFEBEC156, "READ")
+         and data_refs(funcs[0xC8678], 0xD3630)
+         and data_refs(funcs[0xC8678], 0xFEBEC4C0, "WRITE"),
+         "C8678 selector/table/term references drift")
 
     # Critically, the apparent selector dependency of both C5EE and C4C0 aliases away in
     # this exact calibration. All four C9812 selector table entries point to the same map;
@@ -303,11 +301,9 @@ def main() -> int:
            "DAT_febec158 = 0x44;", "DAT_febec158 = 0x88;")
     tokens(funcs, 0xC5554, "DAT_febec156 = 0;", "uVar1 = 1;", "uVar1 = 2", "uVar1 = 3")
     tokens(funcs, 0xC58B8,
-           "(DAT_febec156 & 3) * 0x12 + 0x9c4", "DAT_febeadf6", "FUN_000d097a")
-    tokens(funcs, 0xC2B64,
-           "iVar7 = (int)DAT_febec1a6;", "iVar8 = (int)DAT_febec128;",
-           "FUN_000c28fc(&local_1c,apuStack_18);", "FUN_000c29b2")
-    tokens(funcs, 0xC29B2, "uVar5 =", "*param_3 = sVar3;")
+           "(DAT_febec156 & 3) * 0x12 + 0x9c4", "DAT_febeadf6", f"{funcs[0xD097A]['name']}(")
+    tokens(funcs, 0xC2B64, "DAT_febec1a6", "DAT_febec128",
+           f"{funcs[0xC28FC]['name']}(", f"{funcs[0xC29B2]['name']}(")
     tokens(funcs, 0xC2C32, "DAT_febec1a6", "DAT_febebf40")
 
     # C58B8 uses SP1 in 0.01 km/h and linearly interpolates between eight C2B64 rows.
@@ -476,31 +472,36 @@ def main() -> int:
     # The four non-base-surface Sport differences are not dead calibration.  Three have
     # short, exact paths into D0162 terms C39C/C41E/C5A8; the fourth C6E7E family reaches
     # C39C through C362->C6F1E/C348->C6F58/C358->C6F68.
-    tokens(funcs, 0xC6E7E, "DAT_febec156", "puVar5 + 0xb62")
-    tokens(funcs, 0xC6F1E, "DAT_febec362", "puVar1 + 0xb48")
-    tokens(funcs, 0xC6F58, "DAT_febec358 = DAT_febec348")
-    tokens(funcs, 0xC6F68, "DAT_febec39c", "DAT_febec358")
-    tokens(funcs, 0xC7AB0, "DAT_febec156", "puVar2 + 0xc16")
+    for entry, source, destination in (
+        (0xC6E7E, 0xFEBEC156, 0xFEBEC362),
+        (0xC6F1E, 0xFEBEC362, 0xFEBEC348),
+        (0xC6F58, 0xFEBEC348, 0xFEBEC358),
+        (0xC6F68, 0xFEBEC358, 0xFEBEC39C),
+        (0xC7AB0, 0xFEBEC156, 0xFEBEC416),
+    ):
+        need(data_refs(funcs[entry], source, "READ")
+             and data_refs(funcs[entry], destination, "WRITE"),
+             f"{entry:#x} selector/assist data-reference edge drift")
     need(direct_users(funcs, 0xFEBEC418, "READ") == [0xC7C58], "C418 reader drift")
     need(direct_users(funcs, 0xFEBEC41E, "READ") == [0xD0162], "C41E D0162 reader drift")
     need(direct_users(funcs, 0xFEBEC5A8, "READ") == [0xD0162], "C5A8 D0162 reader drift")
     tokens(funcs, 0xD0162, "DAT_febec39c", "DAT_febec41e", "DAT_febec5a8")
 
-    # Close the exact-F33 command-value-model -> motor-current boundary.  The earlier
-    # direct-reader-only interpretation was incomplete because D042C writes FEBECC62 and
-    # immediately reuses the same value to form FEBECC66 inside one function.  The
-    # motor-driving branch is the post-slew CC64/AC54/EE40C path; AC56/EE40A/1C02 is a
-    # diagnostic/model mirror of the pre-slew CC62 value.
+    # D042C publishes signed16 CC62, then reuses that register value for an
+    # amplitude clamp and gate: it does not reload CC62 or apply a slew recurrence.
+    # D02DA is the earlier slew/filter; D039E can instead select delayed history.
+    # AC56/EE40A/1C02 mirrors the pre-final-clamp/gate value; CC64/AC54/EE40C
+    # carries the selected motor-driving value, including the internal override.
     cc62_readers = direct_users(funcs, 0xFEBECC62, "READ")
     ac56_readers = direct_users(funcs, 0xFEBEAC56, "READ")
     e40a_readers = direct_users(funcs, 0xFEBEE40A, "READ")
     v6772_readers = direct_users(funcs, 0xFEBE6772, "READ")
     need(cc62_readers == [0xC4F04, 0xD0AAE], f"FEBECC62 canonical direct-reader drift: {cc62_readers}")
     need(v6772_readers == [0x3B400, 0x3B4A8, 0x4E7D6], f"FEBE6772 reader set drift: {v6772_readers}")
-    tokens(funcs, 0x3B400, "FUN_0006a522((int)DAT_febe6772", "DAT_febe6f6e", "DAT_0002b5d8")
-    tokens(funcs, 0x3B4A8, "FUN_0006a522((int)DAT_febe6772", "DAT_febe6f74", "DAT_0002b5dc")
+    tokens(funcs, 0x3B400, f"{funcs[0x6A522]['name']}((int)DAT_febe6772", "DAT_febe6f6e", "DAT_0002b5d8")
+    tokens(funcs, 0x3B4A8, f"{funcs[0x6A522]['name']}((int)DAT_febe6772", "DAT_febe6f74", "DAT_0002b5dc")
 
-    # Pre-slew model value -> post-slew/override actuation command.
+    # Scaled diagnostic value -> amplitude clamp/gate -> final override selection.
     tokens(funcs, 0xD042C,
            "DAT_febecc62 = (short)((int)((int)DAT_febecc50 * (uint)DAT_febeac5a) / 0x400);",
            "iVar2 = (int)DAT_febecc62;",
@@ -519,10 +520,20 @@ def main() -> int:
            "sVar1 = DAT_febee40c;",
            "DAT_febe6af4 = -sVar1;")
     tokens(funcs, 0x387BA, "DAT_febe6e0a = DAT_febe6af4;")
-    tokens(funcs, 0x38502, "uVar1 = (uint)DAT_febe6e0a;", "DAT_febe6dec")
-    tokens(funcs, 0x3835E, "iVar2 = (int)DAT_febe6dec;", "DAT_febe6dc8 = DAT_febe6dec,")
-    tokens(funcs, 0x384D8, "sVar2 = DAT_febe6e0a;", "FUN_00038396((int)DAT_febe6dc8)")
-    tokens(funcs, 0x37F16, "DAT_febe6d84 = DAT_febe6dd6;", "DAT_febe6d86 = DAT_febe6dc8;")
+    tokens(funcs, 0x38502, "DAT_febe6e0a", "DAT_febe6dec")
+    # Signed loads and CMOVGE select separate actual and feedback-baseline
+    # minima. Bind their register/store dataflow, not decompiler-local spelling.
+    need(image[0x3835E:0x38392] == bytes.fromhex(
+        "3e06f01b03006088240fecb524978ab51106a6ffba05019ce505"
+        "249ffab5e199e19f3c9be19124f6c8b5809ce1973c0b810c7f00"
+    ), "3835E actual/baseline current selection instruction drift")
+    need(image[0x31BF0] != 0x5A, "3835E fixed-current calibration override became active")
+    tokens(funcs, 0x384D8, "DAT_febe6e0a", f"{funcs[0x38396]['name']}(")
+    # R18 carries 6DD6 to 6D84; R19 carries actual 6DC8, not baseline
+    # 6DCA, to 6D86. EP-relative destinations are 6D7C+8 and +A.
+    need(image[0x37F16:0x37F26] == bytes.fromhex(
+        "2497d6b524f67cb5249fc8b58494859c"
+    ), "37F16 actual current diagnostic publication instruction drift")
 
     funnel_cells = {
         "FEBECC64": 0xFEBECC64,
@@ -544,11 +555,11 @@ def main() -> int:
     need(funnel_writers["FEBE6DC8"] == [0x3835E, 0x59448], f"6DC8 writers drift: {funnel_writers['FEBE6DC8']}")
     need(funnel_writers["FEBE6DD6"] == [0x384D8, 0x59448], f"6DD6 writers drift: {funnel_writers['FEBE6DD6']}")
     need(0x38162 in direct_users(funcs, 0xFEBE6DC8, "READ") and 0x38162 in direct_users(funcs, 0xFEBE6DD6, "READ"),
-         "downstream motor transform no longer reads both 6DC8/6DD6")
+         "sixfold-angle current correction no longer reads both 6DC8/6DD6")
 
-    # Diagnostic/model mirror branch of the pre-slew CC62 value.
+    # Diagnostic/model mirror branch of the pre-final-clamp/gate CC62 value.
     tokens(funcs, 0x5D5E0, "DAT_febe6772 = DAT_febee40a;")
-    tokens(funcs, 0x4E7D6, "DAT_febe6772", "FUN_0006a5ac")
+    tokens(funcs, 0x4E7D6, "DAT_febe6772", f"{funcs[0x6A5AC]['name']}(")
     tokens(funcs, 0xC4F04, "iVar8 = (int)DAT_febecc62;", "puVar3[0x92a] = bVar11;")
     qcmd84_writers = direct_users(funcs, 0xFEBE6D84, "WRITE")
     qcmd86_writers = direct_users(funcs, 0xFEBE6D86, "WRITE")
@@ -566,14 +577,14 @@ def main() -> int:
     # magnitude; their primal values reduce to torque/speed/angle feedback, internal
     # phase/mode state, and ROM calibration.
     d0218_terms = [
-        {"cell": "FEBEC43C", "runtime_writer": "0x000C7E36", "classification": "measured steering-torque-shaped assist", "provenance": "C7E36 clamps C472+C45A+C44C against AC6C; the upstream family is the conditioned four-sensor steering-torque chain"},
-        {"cell": "FEBEC4C0", "runtime_writer": "0x000C8678", "classification": "torque+speed gain/map term", "provenance": "C8678 maps filtered torque-family C266 through ROM tables and crossfades with C1AA/BF40; exact ordinary selector maps alias"},
-        {"cell": "FEBEC3BA", "runtime_writer": "0x000C74AC", "classification": "measured steering-torque-family term", "provenance": "C74AC clamps ABB0+C3A4, both recovered in the torque-filter family"},
-        {"cell": "FEBECC2C", "runtime_writer": "0x000D0162", "classification": "internal assist aggregate with ROM slew bound", "provenance": "D0162 sums C3A0+C39C+C41E+C5A8+C53A with constant/ROM-bounded accumulator state"},
-        {"cell": "FEBEBF3C", "runtime_writer": "0x000C2B64", "classification": "nonnegative |measured torque| calibration-curve term", "provenance": "C2B64 interpolates C28FC-selected curves over |C128| and scales by ROM gain; retained Normal-mode value0 can reach only equivalent banks 0/2, while Sport value2 selects distinct bank1"},
-        {"cell": "FEBECB38", "runtime_writer": "0x000CF2B2", "classification": "angle-domain ramp/return/dither term", "provenance": "CF2B2 slew/median-limits CB08*CB20/0x100; CB08 is recovered from the 0x025 angle-processing family and CB20 is an internal ramp sequencer"},
-        {"cell": "FEBEC5EE", "runtime_writer": "0x000C9A84", "classification": "moving-mode monitor/assist term; zero in retained drives", "provenance": "C9A84 scales C5EC by C5B8; retained 0x0D5 s213 source is identically zero"},
-        {"cell": "FEBECBE8", "runtime_writer": "0x000CFCD4", "classification": "phase-window angle excitation/return term", "provenance": "CFCD4 clamps CC22+CB64; both are internally sequenced angle/phase waveform state, not an external lane target"},
+        {"cell": "FEBEC43C", "runtime_writer": "0x000C7E36", "classification": "bounded torque and angle-rate composition", "provenance": "C7E36 clamps C472+C45A+C44C against AC6C; these combine conditioned torque and angle-rate feedback rather than a single measured-torque source"},
+        {"cell": "FEBEC4C0", "runtime_writer": "0x000C8678", "classification": "torque-rate and assist-slope/speed compensation", "provenance": "C8678 combines differentiated filtered torque C266 with speed-dependent gains and the C1AA/BF40 assist-curve slope blend; exact ordinary selector maps alias"},
+        {"cell": "FEBEC3BA", "runtime_writer": "0x000C74AC", "classification": "bounded differentiated torque-model composition", "provenance": "C74AC clamps ABB0+C3A4 from two separately filtered and differentiated torque-model branches"},
+        {"cell": "FEBECC2C", "runtime_writer": "0x000D0162", "classification": "bounded nested assist sum", "provenance": "D0162 sums C3A0+C39C+C41E+C5A8+C53A and amplitude-clamps the result; this summation is not itself a slew limiter"},
+        {"cell": "FEBEBF3C", "runtime_writer": "0x000C2B64", "classification": "signed measured-torque calibration-curve term", "provenance": "C2B64 interpolates C28FC-selected curves over |C128|, clamps the magnitude, then restores torque sign using AF888=+1024 or AF88A=-1024 divided by1024; retained Normal-mode value0 can reach only equivalent banks 0/2, while Sport value2 selects distinct bank1"},
+        {"cell": "FEBECB38", "runtime_writer": "0x000CF2B2", "classification": "angle-controller output envelope and slew", "provenance": "CF2B2 bounds CB08*CB20/0x100 against the previous output; CB08 comes from the angle-controller composition and CB20 is its stateful envelope, including mode7 hold/fade behavior"},
+        {"cell": "FEBEC5EE", "runtime_writer": "0x000C9A84", "classification": "retained moving-state contribution with gain transition", "provenance": "C9812 holds C5EC when admission is inactive; C9A84 bounds C5EC+ABFA and scales by C5B8 while admission is active or retained gain exceeds its lower bound. A zero current 0x0D5 s213 source alone does not establish zero output"},
+        {"cell": "FEBECBE8", "runtime_writer": "0x000CFCD4", "classification": "gated window waveform and filtered bounded memory", "provenance": "CFCD4 clamps CC22+CB64: a gated phase/window waveform plus filtered bounded AC24 memory; no independent external lane-target magnitude is recovered"},
     ]
     runtime_writer_expect = {
         "FEBEC43C": 0xC7E36, "FEBEC4C0": 0xC8678, "FEBEC3BA": 0xC74AC,
@@ -588,7 +599,7 @@ def main() -> int:
              f"{row['cell']} runtime writer drift")
 
     out = {
-        "schema": "camry-8965f3307000-internal-assist-oracles-v1",
+        "schema": "camry-8965f3307000-internal-assist-oracles-v2",
         "target": {"software_id": "8965F3307000", "codeflash_sha256": IMAGE_SHA256,
                    "corpus_function_count": len(funcs)},
         "exact_rdbi_table": {"offset": f"0x{RDBI_OFFSET:05X}", "record_count": RDBI_COUNT},
@@ -620,7 +631,7 @@ def main() -> int:
             ),
         },
         "command_value_torque_observable_branch": {
-            "pre_slew_value": "FEBECC62",
+            "pre_final_clamp_gate_value": "FEBECC62",
             "observable_chain": "FEBECC62 -> D0AAE/FEBEAC56 -> BF33E/FEBEE40A -> 5D5E0/FEBE6772 -> DID 0x1C02 Command Value Torque",
             "FEBECC62_canonical_direct_readers": [f"0x{x:08X}" for x in cc62_readers],
             "FEBEAC56_direct_readers": [f"0x{x:08X}" for x in ac56_readers],
@@ -639,7 +650,7 @@ def main() -> int:
                 "FEBE6E24_direct_readers": [f"0x{x:08X}" for x in e24_readers],
             },
             "classification": (
-                "verified distinction: AC56/EE40A/FEBE6772 is the diagnostic/model mirror of the pre-slew CC62 value. "
+                "verified distinction: AC56/EE40A/FEBE6772 is the diagnostic/model mirror of the pre-final-clamp/gate CC62 value. "
                 "Two recovered callback predicates (3B400/3B4A8) also compare its saturated magnitude against "
                 "FEBE6F6E/FEBE6F74 plus fixed ROM thresholds; they return status into the generic 6AE7C state machine "
                 "and do not write the command funnel. The 6AF6->6E22/6E24 tail terminates in snapshot/report consumers. "
@@ -652,11 +663,11 @@ def main() -> int:
             "chain": (
                 "D039E/FEBECC50 -> D042C/FEBECC62 -> D042C/FEBECC66 -> D047C/FEBECC64 -> "
                 "D0AAE/FEBEAC54 -> BF33E/FEBEE40C -> 35C4C/FEBE6AF4 -> 387BA/FEBE6E0A -> "
-                "38502/FEBE6DEC -> 3835E/FEBE6DC8 + 384D8/FEBE6DD6 -> 38162 motor-control transform"
+                "38502/FEBE6DEC -> 3835E/FEBE6DC8 + 384D8/FEBE6DD6 -> 38162 sixfold-angle correction -> 37F16 current-pair publication"
             ),
             "normal_motor_mirror": "0x35C4C normally sets FEBE6AF4=-FEBEE40C; service/limit branches can substitute bounded internal FEBE6AF8 before the same 6AF4 funnel",
-            "pre_slew_intra_function_edge": "D042C computes FEBECC62=FEBECC50*FEBEAC5A/0x400, immediately loads it to iVar2, and writes/slew-limits FEBECC66 from the same value",
-            "post_slew_override": "D047C normally copies FEBECC66->FEBECC64; if FEBECC98 is nonzero it substitutes clamp(FEBECC94,+/-0x569A), an internally generated return/limit path",
+            "scale_clamp_gate_edge": "D042C computes signed16(trunc(FEBECC50*u16(FEBEAC5A)/1024)), publishes FEBECC62, reuses the signed16 register value for the symmetric FEBEAC4C amplitude clamp, publishes ungated FEBECC54, then publishes FEBECC66 only when AC29!=0 and AC2A==0 (zero otherwise). No history or slew recurrence occurs here.",
+            "final_command_override": "D047C normally copies FEBECC66->FEBECC64; if FEBECC98 is nonzero it substitutes clamp(FEBECC94,+/-0x569A), an internally generated return/limit path",
             "writer_sets": {name: [f"0x{x:08X}" for x in writers] for name, writers in funnel_writers.items()},
             "downstream_current_diagnostic_mirror": {
                 "cells": ["FEBE6D84", "FEBE6D86"],
@@ -668,8 +679,8 @@ def main() -> int:
             },
             "classification": (
                 "verified cell-level physical-current convergence through the exact F33 command/current chain. CC62 is a "
-                "real pre-slew stage in this funnel; AC56/EE40A/1C02 is its diagnostic mirror, while AC54/EE40C carries "
-                "the motor-driving post-slew/override value. No second additive lateral-command injection is recovered "
+                "real scaled pre-final-clamp/gate stage; AC56/EE40A/1C02 is its diagnostic mirror, while AC54/EE40C carries "
+                "the motor-driving selected value. No second additive lateral-command injection is recovered "
                 "downstream of CC50; special 35C4C and D047C branches are bounded internal limit/override selections. "
                 "Factory LTA with B6 absent is therefore not contradictory to the exact F33 actuation architecture. The "
                 "remaining stock-LTA question is which exact external/local state changes select or modulate the B6-independent "
@@ -729,7 +740,7 @@ def main() -> int:
             "speed_breakpoints_kph": speed_breakpoints_kph,
             "driver_torque_axis": "signed Q8.8 torque-domain axis; 0x100 counts corresponds to 1.000 Nm by the exact upstream DID 0x1035 Steering Wheel Torque scaling",
             "direct_bf3c_samples": drive_mode_samples,
-            "secondary_effect": "C29B2 also emits local curve slope; C2C32 speed-blends that slope into FEBEBF40, which C8678 consumes in the separate FEBEC4C0 torque+speed term. The mode bank therefore affects more than the direct BF3C magnitude.",
+            "secondary_effect": "C29B2 also emits local curve slope; C2C32 speed-blends that slope into FEBEBF40, which C8678 consumes in the separate FEBEC4C0 torque-rate and assist-slope/speed compensation. The mode bank therefore affects more than the direct BF3C magnitude.",
             "selector_reader_census": {
                 "FEBEC156_direct_readers": [f"0x{x:06X}" for x in c156_readers],
                 "direct_region_count": len(selector_group_census),
@@ -796,10 +807,10 @@ def main() -> int:
                 "rank": 1, "data_id": "0x1C38", "reason": "scaled/clamped FEBECB38 proxy; direct visibility into an unresolved nonzero-capable D0218 term"
             },
             {
-                "rank": 2, "data_id": "0x1C02", "reason": "Toyota-named Command Value Torque pre-slew model/observable; diagnostic mirror of a value that D042C also feeds into the verified CC66/CC64 physical actuation funnel"
+                "rank": 2, "data_id": "0x1C02", "reason": "Toyota-named Command Value Torque pre-final-clamp/gate observable; diagnostic mirror of a value that D042C also feeds into the verified CC66/CC64 physical actuation funnel"
             },
             {
-                "rank": 3, "data_id": "0x1C3E", "reason": "scaled/clamped FEBEC5EE proxy; useful control oracle, but exact selector maps alias and retained-drive evidence already bounds this moving-mode term to zero"
+                "rank": 3, "data_id": "0x1C3E", "reason": "scaled/clamped FEBEC5EE proxy; useful moving-state oracle, but exact selector maps alias. Zero captured source does not determine retained output without initial-state/history or a direct proxy observation"
             },
         ],
         "production_output_authorized": False,

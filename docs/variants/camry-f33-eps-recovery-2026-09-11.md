@@ -547,7 +547,7 @@ Canonical evidence:
 ## 9. External safety outputs and flash-bank selection do not add a network boot path
 
 The application configures the ECM physical `ERROROUT` masks explicitly during
-`f33_startup_coordinator -> 0x63338`. The final programmed values are:
+`startup_coordinator -> 0x63338`. The final programmed values are:
 
 - `ECMEMK0 = 0xFFFFFFE1`, leaving only ECM sources **1–4** unmasked to `ERROROUT`;
 - `ECMEMK1 = 0xFFFFFFFF`, masking sources 32–63;

@@ -198,6 +198,15 @@ public class ApplyP1MDeviceProfile extends GhidraScript {
         ensureUninitBlock("SFR_EIC", 0xFFFFB000L, 0x1000L, true, true, false, true);
         // RSCFD / RSCAN channel register window used by application CAN.
         ensureUninitBlock("SFR_RSCFD", 0xFFD20000L, 0x10000L, true, true, false, true);
+        // DCRA1 CIN/COUT/CTL: P1M-E Tables33.4 and33.7-33.9; no other unit inferred.
+        ensureUninitBlock("SFR_DCRA1", 0xFFD51000L, 0x21L, true, true, false, true);
+        // FLMD protected pull-control bank: P1M-E Tables35.8-35.11.
+        ensureUninitBlock("SFR_FLMD", 0xFFA00000L, 0xCL, true, true, false, true);
+        ensureUninitBlock("SFR_DATAFLASH_READ_CYCLE", 0xFFC59810L, 0x1L,
+                true, true, false, true);
+        // DataFlash ECC register bank: P1M-E Table31.17, FFC5B000..FFC5B01F.
+        ensureUninitBlock("SFR_DATAFLASH_ECC", 0xFFC5B000L, 0x20L,
+                true, true, false, true);
         // ICU-S crypto-driver command/status window (see architecture evidence).
         ensureUninitBlock("SFR_ICUS", 0xFFC5D000L, 0x1000L, true, true, false, true);
         // CodeFlash ECC/address-parity safety registers. The boot validity
@@ -214,6 +223,9 @@ public class ApplyP1MDeviceProfile extends GhidraScript {
         ensureUninitBlock("SFR_FACI", 0xFFA10000L, 0x200L, true, true, false, true);
         ensureUninitBlock("SFR_FACI_COMMAND", 0xFFA20000L, 0x4L, true, true, false, true);
         ensureUninitBlock("SFR_FACI_CONFIG", 0xFFC59000L, 0x100L, true, true, false, true);
+        // Flash software enables: P1M-E Table35.14, distinct four-byte registers.
+        ensureUninitBlock("SFR_FHVE3", 0xFFF82410L, 0x4L, true, true, false, true);
+        ensureUninitBlock("SFR_FHVE15", 0xFFF8A430L, 0x4L, true, true, false, true);
         // Error Control Module master, checker, common, and error-pulse windows.
         ensureUninitBlock("SFR_ECM_MASTER", 0xFFD60000L, 0x100L, true, true, false, true);
         ensureUninitBlock("SFR_ECM_CHECKER", 0xFFD61000L, 0x100L, true, true, false, true);

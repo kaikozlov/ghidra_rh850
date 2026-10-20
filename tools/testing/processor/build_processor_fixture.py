@@ -646,6 +646,9 @@ def build() -> tuple[bytes, list[dict]]:
     add("feret", u16(0x07E0) + u16(0x014A), {"mnemonic_prefix": "feret"})
     add("rie-imm", u16(0x07F0) + u16(0), {"mnemonic_prefix": "rie"})
     add("syscall-3", u16(0xD7E3) + u16(0x0160), {"mnemonic_prefix": "syscall"})
+    add("sbfc", enc_xi(0x382, 6, 10, 11), {
+        "mnemonic_prefix": "sbfc",
+    })
 
     return bytes(blob), cases
 

@@ -22,7 +22,9 @@
         "Section 3.3.3: Global RAM uses write-through access and maintains PE/DMA data coherency",
         "Section 3.4.1.2: publishing instructions written to RAM requires a dummy read from the written memory followed by SYNCP and SYNCI before branching",
         "Section 3.4.5: initialize 48 bytes beyond RAM-resident code for speculative fetch and do not cross an access-prohibited/IPG boundary",
-        "Section 24.3: TAUJ CDR/CNT/CMOR/TPS/BRS register semantics; PRS0=2 gives CK0=PCLK/4"
+        "Section 24.3: TAUJ CDR/CNT/CMOR/TPS/BRS register semantics; PRS0=2 gives CK0=PCLK/4",
+        "Section 33, pages 2844-2852: DCRA1 base FFD51000; CIN/COUT word accesses, CTL byte access; POL=00 LSB-first 32-bit Ethernet polynomial; COUT reads XOR raw state with FFFFFFFF",
+        "Section 35.7, pages 2869-2874: FLMDCNT/FLMDPCMD/FLMDPS at FFA00000/04/08, word-only accesses; A5/value/full-word inverse/value protected update controls the internal FLMD0 pull, not the external pin level"
       ]
     },
     "flash_hardware_manual": {

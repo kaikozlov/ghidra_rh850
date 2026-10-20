@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -196,6 +197,21 @@ def main() -> int:
     _target_name, target_row = analysis_target.target(args.target)
     corpus = args.corpus or (ROOT / target_row["decompiler_corpus"])
     metadata, functions = load_corpus(corpus)
+    if args.corpus is None and "decomp_root" in target_row:
+        symbols = ROOT / target_row["decomp_root"] / "symbols.jsonl"
+        names = {int(row["addr"], 16): row["name"]
+                 for row in map(json.loads, symbols.read_text(encoding="utf-8").splitlines())}
+        renames = {row["name"]: names[int(row["entry_addr"], 16)]
+                   for row in functions
+                   if row["name"] != names[int(row["entry_addr"], 16)]}
+        if renames:
+            tokens = re.compile(r"\b(?:" + "|".join(map(re.escape, renames)) + r")\b")
+            for row in functions:
+                for key in ("name", "signature", "decompiled_c"):
+                    row[key] = tokens.sub(lambda match: renames[match.group()], row[key])
+                row["decompiled_c_sha256"] = hashlib.sha256(row["decompiled_c"].encode()).hexdigest()
+                # This is an annotated view; recorded PC spans belong to the raw corpus.
+                row.pop("c_locations", None)
     if args.inventory is not None:
         inventory = args.inventory
     elif args.corpus is not None and isinstance(metadata.get("project_inventory_path"), str):

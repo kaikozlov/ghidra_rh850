@@ -26,10 +26,12 @@ Some top-level CSVs are generated through `make` targets rather than the
 artifact catalog: `make generate-dataflash` rewrites `dataflash_nvm_records.csv`
 and `checkpoint_payload_map.csv`, `make generate-application-receive` rewrites
 `application_rx_map.csv`, `make generate-application-diagnostics` rewrites
-`application_diagnostic_map.csv`, and `make generate-semantic-coverage`
-rewrites `semantic_coverage_ledger.csv`. Other top-level tables are curated:
-do not overwrite them as though every CSV were a generator output. Their
-placement alone does not determine their evidence role.
+`application_diagnostic_map.csv`. `make generate-semantic-coverage TARGET=...`
+and `make generate-function-discovery TARGET=...` regenerate the selected target's
+registered ledgers/summaries; `semantic_reviews` and `function_discovery_reviews`
+in `analysis_targets.json` point to their curated inputs. Other top-level tables
+are curated: do not overwrite them as though every CSV were a generator output.
+Placement alone does not determine a file's evidence role.
 
 `data/generated/` is the preferred destination for new derived artifacts unless
 an existing subsystem convention requires a stable top-level data path.

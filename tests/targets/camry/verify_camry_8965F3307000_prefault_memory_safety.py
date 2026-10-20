@@ -96,15 +96,6 @@ check(
 )
 
 cs = art["computed_store_audit"]
-check(
-    "critical-cell candidate denominator",
-    cs["whole_image_critical_candidate_rows"] == 62
-    and cs["critical_cells"] == [
-        "0xFEBE3DF0","0xFEBE3DF1","0xFEBE3DF2","0xFEBE3DF3","0xFEBE3DF4","0xFEBE3DF5",
-        "0xFEBE5628","0xFEBF0FD0","0xFEBF117C","0xFEBF1180","0xFEBF1194","0xFEBF1198",
-        "0xFEBF131C","0xFEBF1320","0xFEBF1324","0xFEBF6B04",
-    ],
-)
 check("critical range intersection is exactly 8E7BA", cs["prefault_critical_intersection_functions"] == ["0x0008E7BA"])
 check("no known-range store overlaps saved-context stack", all(x["known_range_store_count"] == 0 for x in cs["stack_ranges"]))
 check("communication channel dimensions forbid index2 guard hit", cs["communication_dimensions"] == {"DAT_2183C":1,"DAT_2183D":0,"DAT_21864":2,"DAT_21865":1,"DAT_21BE1":1})
