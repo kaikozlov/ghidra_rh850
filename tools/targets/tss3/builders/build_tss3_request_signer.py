@@ -268,10 +268,10 @@ request_signer_resident_handoff:
 
     .org 0x{resident_offset:X}
 resident_blob:
-    .incbin "/out/resident.bin"
+    .incbin "/out/resident_padded.bin"
     .org 0x{helper_offset:X}
 helper_blob:
-    .incbin "/out/helper.bin"
+    .incbin "/out/helper_padded.bin"
 
 {tables}
 '''
@@ -493,8 +493,11 @@ def build_request_signer(
         resident_offset = profile_data_offset(universal_profiles)
         helper_offset = align(resident_offset + len(resident_blob), 4)
         need(helper_offset + len(helper_blob) <= STAGING_LIMIT, "resident/helper exceed staging budget")
-        (work / "resident.bin").write_bytes(resident_blob)
-        (work / "helper.bin").write_bytes(helper_blob)
+        # Keep compiler outputs immutable. A host rewrite of a file just
+        # produced through a Docker bind mount can leave the next container
+        # reading its previous length, omitting the fetch guard from .incbin.
+        (work / "resident_padded.bin").write_bytes(resident_blob)
+        (work / "helper_padded.bin").write_bytes(helper_blob)
         generated_staging_source = staging_source(
             resident_offset=resident_offset,
             resident_size=len(resident_blob),

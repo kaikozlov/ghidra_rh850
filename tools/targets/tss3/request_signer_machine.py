@@ -708,15 +708,17 @@ def _lower_can_completion_scenario(contract: dict[str, Any]) -> dict[str, Any]:
 
 def _whole_helper_scenario(
     contract: dict[str, Any], *, helper_path: Path, trampoline: int,
-    command_completed: bool,
+    command_completed: bool, nvm_granted: bool = True,
 ) -> dict[str, Any]:
     """Execute the compiled universal helper across one complete request.
 
-    The timeout case leaves the native ICU-S command in flight. The success case
-    supplies only the recovered asynchronous completion state after submission;
-    exact submit/input/output callback scenarios remain separate, and neither
-    case pretends to model provisioned key material.
+    With NVM suspension already granted, the timeout case leaves the native
+    ICU-S command in flight. The success case supplies wrapper completion state
+    after submission; native interrupt completion and provisioned key material
+    are not modeled. The deferred-grant case must not submit an ICU-S command.
     """
+    if command_completed and not nvm_granted:
+        raise ValueError("cannot inject completion without an NVM suspension grant")
     request = contract["request"]
     signer_abi = contract["signer_abi"]
     state_base = contract["memory"]["state_base"]
@@ -758,7 +760,11 @@ def _whole_helper_scenario(
         name=(
             "tss3-dynamic-whole-request-signer-helper-success"
             if command_completed
-            else "tss3-dynamic-whole-request-signer-helper-timeout"
+            else (
+                "tss3-dynamic-whole-request-signer-helper-timeout"
+                if nvm_granted
+                else "tss3-dynamic-whole-request-signer-nvm-deferred"
+            )
         ),
         entry=_resolved("exact-codeflash-indirect-call-trampoline", trampoline),
         contract=contract,
@@ -817,8 +823,12 @@ def _whole_helper_scenario(
             },
             {
                 "address": _hx(command5_globals - 0x210),
-                "hex": "e1",
-                "evidence": "dump-relative cryptographic manager initialized-idle state",
+                "hex": "c3" if nvm_granted else "e1",
+                "evidence": (
+                    "native crypto manager: NVM suspension already granted"
+                    if nvm_granted else
+                    "native crypto manager idle; zeroed NVM service guards defer its grant"
+                ),
             },
             {
                 "address": _hx(command5_globals - 0x234),
@@ -842,6 +852,19 @@ def _whole_helper_scenario(
             },
         ],
         checks=[
+            {
+                "name": "NVM grant determines actual ICU-S submission",
+                "kind": "event-count",
+                "operation": "icus-command",
+                "equals": "1" if nvm_granted else "0",
+            },
+            {
+                "name": "native engine state distinguishes submitted from deferred work",
+                "kind": "memory",
+                "address": _hx(command5_globals - 0x34),
+                "size": 1,
+                "equals_hex": "d2" if nvm_granted else "e1",
+            },
             {
                 "name": "whole helper returns through exact indirect-call trampoline",
                 "kind": "register",
@@ -901,6 +924,23 @@ def _whole_helper_scenario(
             "equals_hex": expected_response,
         },
     ])
+    if nvm_granted:
+        scenario["checks"].extend([
+            {
+                "name": "native engine submits command five with selector four",
+                "kind": "memory",
+                "address": "0xFFC5D000",
+                "size": 4,
+                "equals_hex": "05000400",
+            },
+            {
+                "name": "native engine retains its own complete authentication input",
+                "kind": "memory",
+                "address": _hx(command5_globals - 0x17C),
+                "size": 36,
+                "equals_hex": (b"\x00\x8a" + SAFE_APPLICATION).hex() + "000100001014",
+            },
+        ])
     for register, expected in {
         "sp": STACK, "gp": contract["execution"]["gp"], "tp": contract["execution"]["tp"],
         **{f"r{reg}": 0x5A000000 | reg for reg in (2, *range(20, 30))},
@@ -924,7 +964,7 @@ def _whole_helper_scenario(
                 "kind": "memory-write",
                 "after_instructions": 2000,
                 "evidence": (
-                    "modeled asynchronous ICU-S output after exact command-five submission; "
+                    "supplied output at the wrapper boundary after command-five submission; "
                     "output bytes are scenario data, not a cryptographic claim"
                 ),
                 "address": _hx(scratch_base + 52),
@@ -934,7 +974,8 @@ def _whole_helper_scenario(
                 "kind": "memory-write",
                 "after_instructions": 2000,
                 "evidence": (
-                    "modeled asynchronous ICU-S completion after exact command-five submission"
+                    "injected wrapper completion after command-five submission; "
+                    "native interrupt completion and NVM release are not executed"
                 ),
                 "address": _hx(command5_globals + 0xC),
                 "data_hex": "10000000" + "00" * 12 + "0100",
@@ -949,6 +990,64 @@ def _whole_helper_scenario(
             "evidence": "current built universal request-signer helper",
         }
     ]
+    return scenario
+
+
+def _timeout_input_lifetime_scenario(
+    contract: dict[str, Any], *, helper_path: Path, trampoline: int,
+) -> dict[str, Any]:
+    """A later request must not alter an earlier command's native input copy."""
+    scenario = _whole_helper_scenario(
+        contract, helper_path=helper_path, trampoline=trampoline, command_completed=False,
+    )
+    scenario["name"] = "tss3-dynamic-whole-helper-timeout-input-lifetime"
+    request = contract["request"]
+    header = request["request_record_header"]
+    second_application = bytes(range(28))
+    records = b"".join(
+        header.to_bytes(4, "little")
+        + (header ^ 0xFFFFFFFF).to_bytes(4, "little")
+        + request["request_id"].to_bytes(4, "little")
+        + frame
+        for frame in build_request(second_application, 2)
+    )
+    scenario["memory"].extend([
+        {
+            "address": _hx(request["ring_base"] + 80),
+            "hex": records.hex(),
+            "evidence": "second complete request with a different authentication input",
+        },
+        {
+            "address": _hx(request["ring_producer"]),
+            "hex": _le(40, 2),
+            "evidence": "both transactions are pending before the helper starts",
+        },
+    ])
+    state = contract["memory"]["state_base"]
+    # Adapt the one-request postconditions; retain the command-count, native
+    # input-copy, ABI, and timeout checks from the underlying scenario.
+    for check in scenario["checks"]:
+        if check.get("address") == _hx(state + 8):
+            check["equals_hex"] = _le(2, 4)
+            check["name"] = check["name"].replace("one", "two")
+    # No transmit-completion ISR is scheduled: the first response remains in
+    # the mailbox, so only its transmit is counted by the inherited checks.
+    scenario["checks"].extend([
+        {
+            "name": "second request replaces helper scratch while native input stays intact",
+            "kind": "memory",
+            "address": _hx(contract["memory"]["scratch_base"] + 18),
+            "size": 28,
+            "equals_hex": second_application.hex(),
+        },
+        {
+            "name": "in-flight engine points to native storage, not helper scratch",
+            "kind": "memory",
+            "address": _hx(contract["signer_abi"]["command5_globals"] - 0x60),
+            "size": 4,
+            "equals_hex": _le(contract["signer_abi"]["command5_globals"] - 0x17C, 4),
+        },
+    ])
     return scenario
 
 
@@ -1224,6 +1323,13 @@ def request_signer_machine_scenarios(
         ),
         _whole_helper_scenario(
             contract, helper_path=helper_path, trampoline=trampoline, command_completed=True,
+        ),
+        _whole_helper_scenario(
+            contract, helper_path=helper_path, trampoline=trampoline,
+            command_completed=False, nvm_granted=False,
+        ),
+        _timeout_input_lifetime_scenario(
+            contract, helper_path=helper_path, trampoline=trampoline,
         ),
         _producer_reload_scenario(contract, helper_path=helper_path, trampoline=trampoline),
         *_icus_scenarios(contract),
