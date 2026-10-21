@@ -151,8 +151,8 @@ So `0x8C734` copies 16 bytes from `PDU_buffer[2:18]` into `FEBF497A`.
 ### No request-length validation
 
 The Dcm seed-path handler (`0x94BCC`) performs no request-data-length
-check. The config value `0x10` at `0x26360` validates *response buffer
-space* (enough room for the 16-byte seed response), not request length.
+check. The config value `0x10` at `0x26360` validates only *response buffer
+space* (enough room for the 16-byte seed response).
 
 ### Attack protocol
 
@@ -212,7 +212,7 @@ On failure, the worker returns `0x22` (conditionsNotCorrect).
 
 ## 6. Security-level consumers (what the unlock gates)
 
-**No configured SecurityAccess gating was found at the service, bounded RDBI-policy, or 19-RID RoutineControl policy layers in this Sienna calibration.** That statement is limited to Dcm policy tables, not arbitrary callback-local checks. The complete configured `0xAB` event-record graph contains no direct sensitive target, while SID `0xBA` operation F7/`BAENA` independently reads the live Dcm security mask and requires application SecurityAccess level 2. The policy tables are empty even though this callback-local protection is real.
+**No configured SecurityAccess gating was found at the service, bounded RDBI-policy, or 19-RID RoutineControl policy layers in this Sienna calibration.** This result covers Dcm policy tables only. Callback-local checks require separate analysis. The complete configured `0xAB` event-record graph contains no direct sensitive target, while SID `0xBA` operation F7/`BAENA` independently reads the live Dcm security mask and requires application SecurityAccess level 2. The policy tables are empty even though this callback-local protection is real.
 
 | Scope | Check | Result |
 |---|---|---|
@@ -252,10 +252,10 @@ DIDs `0105`, `010B`, and `F18C` pass literal checkpoint IDs `0x204`, `0x20A`, an
 apparent `FEBF0308` hit lies behind the mutually exclusive `0x000` branch
 through `0x668B2`. The actual `0x66172` closure has zero selected sensitive
 references. The only branch-feasible selected observation is DID `0110` reading
-`FEBE5050`, whose exact xrefs bound it to reset/saturating status bookkeeping,
-not key or generated-MAC material. This does **not** prove the full 242-DID
-corpus contains no privacy, diagnostic-history, or other sensitive information;
-it specifically closes the currently recovered key/MAC/SA-buffer disclosure
+`FEBE5050`, whose exact xrefs limit it to reset/saturating status bookkeeping.
+The full 242-DID corpus may still contain privacy, diagnostic-history, or other
+sensitive information. This result specifically closes the currently recovered
+key/MAC/SA-buffer disclosure
 candidates.
 That callback-local result does not close the Dcm transport-buffer lifetime.
 Forty-eight DIDs use configured producers that immediately return success without
@@ -369,7 +369,7 @@ authorization:
   `data/application_wdbi_surface.csv` and
   [../diagnostics/application.md](../diagnostics/application.md).
 - **ControlDTCSetting and proprietary `0xAB`** are also session-only. `0xAB` exposes event-record list/state/detail reads through subfunction workers; the recovered graph does not perform the formerly hypothesized motor-control, calibration, flash, or provisioning writes.
-- **Proprietary `0xBA`** is extended-session only and has ten fixed operation descriptors. Its outer service object has no configured SecurityAccess level, but F7/`BAENA` has a callback-local level-2 gate. F7 persists a BA authorization marker plus 30-invocation countdown; while active, the generic gateway admits the remaining tokenized operations without a fresh SA read. The recovered effects are lifecycle/maintenance/persistent-state operations and bounded operational overrides, not a direct steering-current primitive. See [the dedicated BA report](../diagnostics/application-proprietary-ba.md).
+- **Proprietary `0xBA`** is extended-session only and has ten fixed operation descriptors. Its outer service object has no configured SecurityAccess level, but F7/`BAENA` has a callback-local level-2 gate. F7 persists a BA authorization marker plus 30-invocation countdown; while active, the generic gateway admits the remaining tokenized operations without a fresh SA read. The recovered effects are limited to lifecycle/maintenance/persistent-state operations and bounded operational overrides. See [the dedicated BA report](../diagnostics/application-proprietary-ba.md).
 
 For a comma integration this policy weakness is not a clean control interface.
 It is primarily an availability/configuration surface, and the partially unnamed RoutineControl/OEM diagnostic semantics make it too fragile for steering control. A purpose-built,
@@ -426,8 +426,7 @@ The underlying findings support these conclusions:
 - Exactly **one stale-authorization window** exists (BA dispatcher `0x348B4`
   skipping the fresh SA read while `FEBE5F27 == 0x5A`), bounded by the
   30-invocation countdown and requiring a prior legitimate SA2 enable.
-- CommunicationControl composes communication **availability** only, not
-  privilege.
+- CommunicationControl composes communication **availability** only.
 
 ## 9. Variant limitations
 

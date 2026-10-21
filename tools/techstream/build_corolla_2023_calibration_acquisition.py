@@ -176,7 +176,7 @@ def build() -> dict[str, Any]:
             "boundary": (
                 "24TC01 independently publishes a concrete 2023 Corolla Brake/EPB CID family. No package "
                 "descriptor has DiagID 07B0 or any published Brake CID in the pinned 26-CUW local corpus. "
-                "The campaign family is therefore an acquisition key set, not proof of the exact target Brake F181."
+                "The campaign family is therefore an acquisition key set. The exact target Brake F181 remains unproved."
             ),
         },
         "acquisition_plan": {
@@ -207,7 +207,7 @@ def build() -> dict[str, Any]:
             "tms051_sender_attribution_retracted": False,
             "priority_refinement": (
                 "The next acquisition target is specifically the 07B0 Brake/EPB application or exact live Brake "
-                "identity, not an unspecified matched FRC package. The 2023 Corolla 0792 generation package family "
+                "identity. The 2023 Corolla 0792 generation package family "
                 "is already local but remains encoded."
             ),
         },

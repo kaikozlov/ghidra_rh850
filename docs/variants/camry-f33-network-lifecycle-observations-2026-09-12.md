@@ -9,11 +9,11 @@ parallel edits in the larger recovery reports.
 
 The Mac retains the original tool results in the project-scoped session
 `~/.codex/sessions/2026/09/10/rollout-2026-09-10T23-31-27-01a08ebc-1cb8-7881-9f68-4ea81dd22b95.jsonl`.
-The selected records are tool outputs, not assistant explanations. A filtered
-observation is retained at
+The selected records contain original tool outputs. A filtered observation is
+retained at
 `targets/camry-2026/raw-20260912/eps-recovery/installer-tool-observation.json`.
 It excludes security material, device-location data and model reasoning.
-It is a selected-field copy of stdout, not the complete original telemetry file.
+It copies selected stdout fields. Complete original telemetry remains unavailable.
 
 | Original tool-result timestamp (UTC, September 11) | Source line | Operation/result |
 |---|---:|---|
@@ -26,8 +26,7 @@ The hook-apply result itself was created at **04:51:01 UTC**. It records the
 initial application F181, then the boot identity before running the writer.
 Its configuration is explicitly a **four-byte** patch at `7A272`, original
 `80FFEE1C`, replacement `FF02925B`; its expected fixup is `4AED0259` and expected
-residue is `FFFFFFFF`. This is the original bad-package run, not a transcript
-from the corrected package.
+residue is `FFFFFFFF`. This transcript records the original bad-package run.
 
 Three retained local artifacts independently match the original run's reported
 identities:
@@ -50,12 +49,12 @@ fixup and residue in `apply` are calculated by `simulate_apply`. Therefore the
 original stdout supports a completed, acknowledged write sequence. It is not
 an independent whole-flash readback or proof of the subsequent CPU state.
 In particular, `health_after_reappearance` is nested inside the **pre-upload
-programming handoff**, not a post-write proof that the EPS rebooted normally.
+programming handoff**. Post-write EPS reboot remains unproved.
 
 The previously stated need to reconnect the comma before inspecting any original
-installer evidence was too broad. The remaining unavailable evidence is the
-complete raw telemetry and a synchronized post-install reset/execution capture,
-not this original completion record.
+installer evidence was too broad. The original completion record is available.
+Complete raw telemetry and a synchronized post-install reset/execution capture
+remain unavailable.
 
 ## 2. Normal Unified completion has a functional default-session phase
 
@@ -65,8 +64,8 @@ identities already retained in `gateway-preparation-observation.json`.
 This did not use an unrelated older generic flash writer as the Unified flow.
 
 `TCUWCanUnifiedFlashWriter.dll!10001000` constructs three ordinary functional
-return-to-default-session requests. The following details are static packet
-construction evidence, **not a proposed live sender or abort procedure**:
+return-to-default-session requests. The following details describe static packet
+construction only:
 
 | Native stores / send call | Constructed transport family |
 |---|---|
@@ -75,21 +74,20 @@ construction evidence, **not a proposed live sender or abort procedure**:
 | `100010F0..1000112E / 10001138` | Phase-6 exported address `18 DB EF E0`, service bytes `10 81`, extended-CAN-ID flag. |
 
 The second identifier follows from the actual little-endian store: it is
-**77F**, not 7FF. The Phase-6 address comes from the UnifiedUtils export at
-`100081A8`, not an assumption about this Camry's bus.
+**77F**, correcting the earlier 7FF reading. The Phase-6 address comes from the
+UnifiedUtils export at `100081A8`.
 
 The helper's only direct call in the executable sections is **10001893**.
 Its normal path first requires the target-reset exchange at **10001857**,
 stops synchronization messages at **10001864**, waits, and then invokes this
 functional cleanup. No executable literal-pointer alternative to this helper
 was found in that PE; the one literal-pattern occurrence is in the PE header.
-That is a bounded native callsite survey, not a proof against every computed
-call.
+That native callsite survey leaves computed calls outside its bounds.
 
-This timing matters: the cleanup exists, but it is found in **successful
-completion after target reset**, not a verified stand-alone abort path for an
-unresponsive target. It cannot automatically fill the P5 preparation-abort
-proof gap. Nor does the name “default session” imply any change to CodeFlash.
+The cleanup runs during **successful completion after target reset**. Its
+applicability as a stand-alone abort path for an unresponsive target remains
+unverified, leaving the P5 preparation-abort gap open. The “default session”
+name alone establishes no CodeFlash change.
 
 The separate SMC follow-up remains distinctly addressed. At
 `10001961..100019B8` the caller matches the package string `0751`, reads its
@@ -106,16 +104,16 @@ network send. It is not a deferred target-reset or recovery executor.
 ## 3. Correct the premise about the brake ECU's downstream CAN leg
 
 Exact **2025 Camry LE / 2.5L VIN A, 04/2024-onward** Toyota service pages were
-acquired and their images examined. They are model-family service evidence,
-not confirmation of every terminal on the owner's exact 2026 VIN.
+acquired and their images examined. Their model-family evidence leaves terminal
+assignments on the owner's exact 2026 VIN unconfirmed.
 
 The brake terminal table explicitly calls A30-34/35 `DC1H/DC1L` a **daisy-chain
 communication line** and A30-36/37 `CA1H/CA1L` CAN communication line 1. The CAN
 terminal table places both pairs under **Bus 4 main lines**. The overall
 network diagram shows EPS at the termination of the main line through BRK1;
 its legend marks gateway-equipped units with an asterisk, and BRK1 has no such
-mark on the drawing. The current GTS topology lists Central Gateway, not an
-additional brake gateway, in the EPS gateway path.
+mark on the drawing. The current GTS topology identifies Central Gateway as the
+gateway in the EPS path.
 
 Measuring approximately 120 ohms on each disconnected leg does **not** prove
 that the brake ECU implements two separately controlled buses. Splitting a

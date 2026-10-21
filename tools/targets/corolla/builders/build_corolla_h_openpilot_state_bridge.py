@@ -255,7 +255,7 @@ def build() -> dict:
       "schema":"corolla-8965H1202000-openpilot-state-bridge-v8",
       "evidence_boundary": (
         "Exact H bytes and target-native decompiler/Techstream joins define the newer EPS state carriers. "
-        "Sienna/openpilot structures are used only to identify which roles a port needs, not to transplant field scales or fault codes. "
+        "Sienna/openpilot structures identify only which roles a port needs. Field scales and fault codes require target-native evidence. "
         "The command side is additionally audited for GP-relative/computed writers: protected B6 signal255 is recovered through a hidden RTE snapshot as a signed16 target-steering-angle command, then compared against independently reconstructed 0x025 measured angle before entering the steering controller. "
         "Physical B6 scaling and OEM mode/request semantics are closed, as are the seven-tick receiver-loss cutoff and modulo-64 sequence handling; wall-clock cadence, exact secondary B6 field names, and the upstream producer/authentication route remain bounded; no second command-sized generated scalar or recovered literal block/group/full-PDU route is identified, while arbitrary computed aliases and DMA/peripheral mutation remain outside this proof."
       ),
@@ -354,7 +354,7 @@ def build() -> dict:
             "12":{"role":"class-0x40 internal fault branch"},
             "13":{"role":"class-0x08 internal fault branch when its additional classifier condition permits"},
             "14":{"role":"class-0x0F internal fault branch when its additional classifier condition permits"},
-            "15":{"role":"special operating state","boundary":"selected by a distinct operational predicate, not safely nameable as ready or fault from static evidence alone"},
+            "15":{"role":"special operating state","boundary":"selected by a distinct operational predicate; ready/fault naming remains unresolved from static evidence alone"},
             "16":{"role":"fallback/not-normal operational inhibit branch"},
           },
           "dem_class_aggregator":"0x4B692 accumulates event classes/counters consumed by 0x4B9AE; the complete 384-entry H event-table census now maps the populated classes to exact Toyota DTC families where a DTC index exists",

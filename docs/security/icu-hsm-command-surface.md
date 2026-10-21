@@ -85,10 +85,9 @@ that no discovered function owns. Each registers the shared
 `icus_command_finalize` (`0x89510`) callback exactly like the wired wrappers —
 seven `mov32 0x89510` sites exist (cmds 1/3, 5, 7, 8, abort `FUN_00089bb8`,
 plus these two) — but nothing in the 1 MiB image references the stub entries
-(`0x89A4C`, `0x89B70`) by any encoding. They are library artifacts of the
-generated driver's full SHE command set, not reachable operations: **no stock
-runtime initializes the ICU-S PRNG on any target, and nothing anywhere issues
-`CMD_RND` (`0xD`)**.
+(`0x89A4C`, `0x89B70`) by any encoding. They are unreachable library artifacts of
+the generated driver's full SHE command set: **no stock runtime initializes the
+ICU-S PRNG on any target, and nothing anywhere issues `CMD_RND` (`0xD`)**.
 
 No EPS application site issues any other command word; commands 9/10 remain
 reachable only through custom application-context code (the bounded
@@ -108,7 +107,7 @@ Four CryIf channel gateways `0x89440` (cmd5), `0x89646` (cmd7), `0x89838`
 | 5 | **Production SecOC TX signer**: `0x8F19A → 0x8FCCA → 0x89BC2 → 0x88B84 → 0x88D60 → 0x8A720`, authenticating the generated `0x030` status PDU (DataID `0x0030`, selector 4, profile at `0x2594x`). Also the crypto-test bank: RID `0x100F` action `0x8B872 → 0x6A0AE → 0x69C58 → 0x69BD8 → 0x89440`. |
 | 7 | SecOC RX verify crypto step `0x8F676` (six RX profiles); startup KAT `0x6921E` (from ECU-init sequencer `0x666BC`); crypto-test bank `0x6918E`/`0x6933C`. |
 | 1/3 | Crypto-test bank only (`0x69BD8 → 0x89838`; raw-AES control). No production AES user. |
-| 8 | Crypto-test bank key-update sequencer `0x692D2 → 0x89A26`. **RID `0x1010` is null/null in the F33 19-RID table** — unlike Sienna, F33's stock cmd8 carrier is the bank, not a dedicated RID. |
+| 8 | Crypto-test bank key-update sequencer `0x692D2 → 0x89A26`. **RID `0x1010` is null/null in the F33 19-RID table**. Sienna has a dedicated RID; F33 carries stock cmd8 through the bank. |
 | `0x7000/0x7100` | Startup crypto-driver init `0x666BC → 0x89D3C → 0x87EA0 → 0x8844E → 0x883E8 → 0x883CC → 0x8AE2E`. |
 | `0x3F` | Driver-internal only. |
 
@@ -130,7 +129,7 @@ corpus).
 
 | Command | Stock application owners |
 |---|---|
-| 5 | Channel exists (wrapper `0x82070 → 0x83A30`) and its sync API `0x820CC`/step `0x821D0` are registered in the ROM service registry (records at `0x27C9C/0x27CBC`); the SecOC engine block (`0x87000..0x8B000`) joins the service layer through runners (`0x881F8/0x88986/0x88FDA → 0x826xx..0x830xx`). A 0x44-stride TX descriptor table exists at `0x2581E+` with the same first-record shape as Crown (DataID field `0x0030`). **No diagnostic crypto-test RID bank exists** (no `0x100E/0x100F/0x1010` constants; all matches are bitmask tests) — the "never calls command 5" canary statement holds for text-level callers, not for the pointer-wired channel. |
+| 5 | Channel exists (wrapper `0x82070 → 0x83A30`) and its sync API `0x820CC`/step `0x821D0` are registered in the ROM service registry (records at `0x27C9C/0x27CBC`); the SecOC engine block (`0x87000..0x8B000`) joins the service layer through runners (`0x881F8/0x88986/0x88FDA → 0x826xx..0x830xx`). A 0x44-stride TX descriptor table exists at `0x2581E+` with the same first-record shape as Crown (DataID field `0x0030`). **No diagnostic crypto-test RID bank exists** (no `0x100E/0x100F/0x1010` constants; all matches are bitmask tests). The "never calls command 5" canary statement is limited to text-level callers. The pointer-wired channel remains present. |
 | 7 | SecOC RX engine: three 0x50-stride RX profiles at `0x25750` (`0x00F/0x0D7/0x0B6` per ARCH-015), queue helper `0x87B72`, verify join via the same service runners; sync API `0x824DC` registered at `0x27CE0/0x27D00`. |
 | 1/3, 8 | Channels registered with KAT functions (`0x27D24 → 0x81C98` AES, `0x27D48 → 0x814A8` cmd8) and a 16-byte KAT-vector table at `0x27C50..`; no application text caller recovered (ROM self-test module at `0x635xx` is the registered consumer). |
 | `0x3F`, `0x7000/0x7100` | Startup: `0x5CAAC → 0x5F9D4 → 0x8304C → 0x811B0 → 0x8175E → 0x837DE/0x816DC` (three diagnostic modes 0/1/2 → `0x00/0x70/0x71`) — the **only** ICU-S reach of the stock corolla application outside the SecOC/service-runner wiring. |
@@ -149,8 +148,8 @@ and literal 11/`0x22` are init/test-family sites. See
 production SecOC transmit signer for a `DataID 0x0030`-field TX profile, while
 the Sienna reference is receive-only.** This supersedes any blanket reading of
 SECOC-008 (a Sienna-scoped statement) as a family-wide property, and it means
-the practical signing surface on the current generation is stock hardware
-behavior, not only a diagnostic oracle.
+the practical signing surface on the current generation includes production
+stock hardware behavior.
 
 ## 5. Venza airbag: the ICUMC secure-service ABI
 
@@ -180,9 +179,9 @@ So the airbag application-facing secure-service opcode set is
 `{0x04, 0x10, 0x12, 0x31}` — five registered services, two more than the
 previously documented three (§5.5/§5.6 of the airbag report documented 0x12 and
 0x31 plus an unnamed 0x04 mode; this census adds the 0x10 service, both
-descriptor bases, and the registry). The opcodes stay numeric: they belong to
-the Renesas security-hardware protocol, not to the SHE command numbering used
-by the EPS ICU-S.
+descriptor bases, and the registry). The opcodes stay numeric because they use
+the Renesas security-hardware protocol. The EPS ICU-S uses separate SHE
+command numbering.
 
 ### Driver programming model (recovered from the Venza driver)
 
@@ -239,8 +238,8 @@ IRQ-disable critical sections (`0x89DC8/0x89DE8`); the `0x7CA68` application
 bring-up clears the FEFF ring under `di` and gates on status bits 31 then 28 of
 `0xFF1F0010` before enabling; the nine-runner table (`0x1C7C0`) is the
 scheduler-driven bracket set that moves the per-service `0xE1/0xD2` cells.
-`0x8A26A` is a two-instruction status-read helper (`return *0xFF1F0010`), not a
-submit; the common submit chain is `0xBD69E → 0x8A18A → 0x89F6E → 0x89E60`.
+`0x8A26A` is a two-instruction status-read helper (`return *0xFF1F0010`).
+Submission uses the common chain `0xBD69E → 0x8A18A → 0x89F6E → 0x89E60`.
 Result classification: nonzero result byte = error index, plus submit-layer
 codes `0x401` (ring full), `0x404` (HSM not ready), `1` (bad trigger mode).
 Vector-level EIINT analysis was not performed; the `0x114C` boot sequence
@@ -422,5 +421,5 @@ tools/pseudo --target <T> <issuer-addr>      # issuer constants per corpus
 The registered airbag target rebuilds and queries like any other:
 `make rebuild-project TARGET=venza-8917048E30`, `tools/gtarget
 venza-8917048E30 ...`, `tools/pseudo --target venza-8917048E30 ...`. The
-census sweep scripts under `ghidra/scripts/investigate/` remain one-shot
-workspace tooling, not evidence.
+census sweep scripts under `ghidra/scripts/investigate/` are one-shot workspace
+tooling. Their output requires independent evidence.

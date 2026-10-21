@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Measure exact-Camry parser source cadence/gaps from retained relay-correct rlogs.
 
-This is an integration-evidence reducer, not a CAN decoder. It pins the native
+This integration-evidence reducer measures timing only. It pins the native
 source side, median cadence, high-percentile jitter, and worst same-segment gap
 for every message checked by the current Camry TSS3 CarState parser. The
 ``parser_hz`` values are conservative frequency settings used to derive the
@@ -151,7 +151,7 @@ def main() -> int:
   payload = {
     'schema_version': 1,
     'scope': '2026 Camry exact-F33 relay-correct retained road routes; native Panda src only',
-    'boundary': 'same-segment dynamic timing; parser Hz is a conservative liveness setting, not an exact ECU scheduler claim',
+    'boundary': 'same-segment dynamic timing; parser Hz is only a conservative liveness setting; exact ECU scheduling remains unresolved',
     'routes': routes,
     'summary': summary,
   }

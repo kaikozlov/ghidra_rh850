@@ -455,7 +455,7 @@ def _section_openpilot_state_bridge():
     s394 = art["state_bridge"]["0x394"]
     check("394 has exact 17-row classifier table", len(s394["state_table_rows"]) == 17 and s394["state_table_rows"][0] == [0, 0, 0, 0, 0])
     check("394 homolog table is byte-identical in Sienna", s394["sienna_table_byte_identical"] is True)
-    check("394 state0 is deepest clear/normal path, not Ready", s394["classifier_states"]["0"]["role"] == "deepest clear/normal classifier path" and s394["openpilot_fault_mapping"]["classifier_deepest_clear_normal_state"] == 0 and "not sufficient to authorize actuation" in s394["openpilot_fault_mapping"]["conservative_clear_state_candidate"])
+    check("394 state0 is the deepest clear/normal path", s394["classifier_states"]["0"]["role"] == "deepest clear/normal classifier path" and s394["openpilot_fault_mapping"]["classifier_deepest_clear_normal_state"] == 0 and "not sufficient to authorize actuation" in s394["openpilot_fault_mapping"]["conservative_clear_state_candidate"])
     cfg = s394["state0_final_branch_window"]
     check("394 state0 final gating is raw-instruction pinned", cfg["start"] == "0x0004BB16" and cfg["end_exclusive"] == "0x0004BB50" and cfg["sha256"] == "d3838fae94f6a5bdcf953ccabda64142bddeffd2470e4935af3c4a7374ba50c6" and "0x4BB48" in cfg["control_flow"])
     check("394 temp/permanent fault mapping is deliberately unresolved", s394["openpilot_fault_mapping"]["steerFaultTemporary"] == s394["openpilot_fault_mapping"]["steerFaultPermanent"] == "unresolved")
@@ -483,7 +483,7 @@ def _section_openpilot_state_bridge():
     check("Ready Status exact input wire and DID", ready["can_id"] == "0x51E" and ready["wire"] == "B0[7]" and ready["firmware_signal_id"] == 154 and ready["did"] == "0x1033" and ready["name"] == "Ready Status")
     check("Ready Status exact source chain", ready["source_chain"] == ["0x51E B0[7]", "0xFEBE7D1B", "0xFEBEF052", "0xFEBEB5A8", "0xFEBEE811", "DID 0x1033"] and ready["firmware_chain_verified"] is True)
     check("Ready Status operational value1 observed on Span", ready["span_operational_frames"] == 60 and ready["span_values"] == [1])
-    check("Ready Status is explicitly an input, not invented as EPS Tx field", "can be parsed as the target-native Ready Status input" in ready["openpilot_consequence"] and "distinct from 0x030/0x351/0x394" in ready["openpilot_consequence"])
+    check("Ready Status is explicitly a target-native input", "can be parsed as the target-native Ready Status input" in ready["openpilot_consequence"] and "distinct from 0x030/0x351/0x394" in ready["openpilot_consequence"])
 
     print("\n== CarState/Panda closure ==")
     closure = art["carstate_and_panda_input_closure"]

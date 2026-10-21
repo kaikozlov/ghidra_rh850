@@ -19,8 +19,8 @@
 
 The `.ddb` corpus functions as an OEM semantic symbol server for the firmware.
 It lacks code addresses, but contains diagnostic vocabulary useful for naming
-services, DTCs, and freeze-data monitor values. Table identity comes from the
-runtime factory, not from numeric-pattern guesses.
+services, DTCs, and freeze-data monitor values. The runtime factory establishes
+table identity.
 
 Three new tools implement the extraction pipeline:
 
@@ -44,8 +44,8 @@ files, 25 structural payload variants, 129 unique DTC IDs, one actual
 `CDbDidTable` record, 146 `CDbSupPidTable` records with 16 unique raw keys, and
 1,257 freeze-data monitor records.
 
-Section 14 (24-byte records) is PID display-option configuration (value
-enums per PID group), not active test definitions. Dealer wizard/dialog text
+Section 14 (24-byte records) configures PID display options
+(value enums per PID group). Dealer wizard/dialog text
 lives in `U_English.ddb`, extracted separately with
 its parallel resource identifiers. Those identifiers group UI resources but do
 not by themselves bind a string to this ECU or to a firmware routine.
@@ -96,8 +96,8 @@ P5 monitor-list/signal-info consumers used by the interface-correlation pass.
 Category IDs join to type-19 DLL and type-26/27 function/detail rows across the
 regions where those databases exist. Exact source bytes and unresolved
 communication-DID/RID category edges remain in `toyota_master_routes.json`.
-Its exact bytes still contain no `8965B4512000` identifier, so the result is a
-family route, not a calibration identity match.
+Its exact bytes still contain no `8965B4512000` identifier, so the result
+establishes only a family route. Calibration identity remains unmatched.
 
 ### ECU databases
 
@@ -217,7 +217,7 @@ block. The section header at offset `0x28` specifies `compression=1`.
 
 **Critical:** ECU databases reference three separate string databases with the
 same index space but different content. DTC names and monitor names resolve
-through `M_English.ddb`, not `V_English.ddb`:
+through `M_English.ddb`:
 
 | String index | `V_English` | `M_English` |
 |---|---|---|
@@ -408,8 +408,8 @@ family-grade.
 Nine monitors bridge to firmware DIDs. Seven have independently decompiled,
 meaningful RAM sources and are structural/auto-named. DID `0x0101` lacks an
 independent source recovery and DID `0x0111` is a stub; both remain family
-comment-only. The CAN-family label is preferred over the KWP-family label as a
-vocabulary choice, not as proof of calibration-specific semantics:
+comment-only. The CAN-family label supplies the preferred vocabulary over the
+KWP-family label. Calibration-specific semantics still require independent proof:
 
 | DID | OEM name (CAN) | Callback | RAM source |
 |---|---|---|---|
@@ -465,8 +465,8 @@ Verification:
 
 The Java script (`ApplyDiagnosticVocabulary.java`) includes a self-contained
 JSON parser (Ghidra does not ship Gson or javax.json).  The parser correctly
-handles numeric fields (`identifier`, `sid`, `dtc_identifier` are JSON
-numbers, not strings) and applies OEM names/comments to service and monitor
+handles the JSON numeric fields `identifier`, `sid`, and `dtc_identifier`,
+and applies OEM names/comments to service and monitor
 callbacks. Missing exact/structural callback functions now fail the rebuild;
 actual rename/comment/already-applied effects are counted separately. The
 vocabulary path is passed as a script argument — no hardcoded paths or firmware
@@ -487,12 +487,12 @@ After: 157 functions, 6,848 instructions.
 
 `EPS_P4DK4.ddb` (JP region only) is the richest EPS database in the Techstream
 V18 corpus: 26 unique DTCs (45 records with dual naming), 89 monitors, 85
-raw `CDbPidTable` records. It is a JP-market diagnostic variant, not a later
-release — the Techstream V18.00.003 distribution is dated December 2022 and
+raw `CDbPidTable` records. It is a JP-market diagnostic variant.
+The Techstream V18.00.003 distribution is dated December 2022 and
 predates both the 2023 Sienna and the 2025 Corolla. P4DK4's larger freeze-data monitor
 count proves a vocabulary/configuration difference (e.g. torque sensor 3,
-backup power supply), not a temporal or hardware-generation gap. It is a useful
-supplementary
+backup power supply). A temporal or hardware-generation gap remains unproved.
+It is a useful supplementary
 vocabulary source because its 13 extra candidate bridges cover EPS state variables
 absent from the NA database, giving the correlation engine more matches to
 work with when Corolla firmware arrives.
@@ -512,8 +512,8 @@ seq < 100 (candidate bridge `DID = 0x0100 + seq`), compared to 64 in NA.
 ### New freeze-data monitor candidates not in the NA template
 
 P4DK4 adds 13 seq-derived candidate firmware-DID labels absent from the NA
-database. These are structural correlation candidates, not `CDbDidTable`
-records:
+database. These labels are structural correlation candidates derived outside
+`CDbDidTable`:
 
 | seq | DID | OEM name |
 |---|---|---|
@@ -576,12 +576,12 @@ the current control audit include:
   `CDbDDRCaseInfoDataIdTable` / `CDbDDRMonitorTable`, followed by the matching
   trigger/address/invalid-condition tables; the same DDR family repeats at
   127–132, 136–141 and 145–150;
-- 118 = `CDbFactorDataTable`, not an anonymous event table;
+- 118 = `CDbFactorDataTable`;
 - master 23 = `CDbSubSystemTable`, 44 = `CDbInstallingEcuListTable`, 55 =
   `CDbCanBusListTable`, and 60 = `CDbCustomListMTable`.
 
-The exact map is generated by `extract_gtsplus_factory_table_map.py`, not by the
-parser it audits. `parse_ddb.py` now carries the complete current class map and
+`extract_gtsplus_factory_table_map.py` generates the exact map independently of
+the parser it audits. `parse_ddb.py` now carries the complete current class map and
 `verify_gtsplus_ddb_factory_table_map.py` requires every parser name to agree
 with the independently recovered host factory.
 
@@ -593,9 +593,9 @@ than the earlier bounded guess. `GetRoBP5_DT.dll` imports
 `CDbFactorDataTable`. In `PSC_P5.ddb` the table has 396 20-byte records. Its
 string-bearing fields resolve factor/help text such as `History of no IG on in
 49 Days` and `Stop Start-up (Steering Lock)`, while the key/group fields vary
-across groups 301/401/501/601/701/801. It is therefore RoB factor/help metadata
-used by the P5 Record-of-Behavior path, **not** evidence for a generic PSC
-power-state-history protocol or a constant `0x12D` record class.
+across groups 301/401/501/601/701/801. This establishes RoB factor/help metadata
+for the P5 Record-of-Behavior path. A generic PSC power-state-history protocol
+or constant `0x12D` record class remains unsupported.
 
 ### Shared string indices are not typed references
 
@@ -634,17 +634,17 @@ current Camry path:
 - The Camry install set also contains `A_B_CAN_P5` (SRS Airbag). Its four exact
   `CDbDDRMonitorTable` groups contain repeated OEM monitor names
   **`Emergency Steering Assist Request Flag`** and
-  **`Collision Avoidance Assist 1/2/3`**. These are recorder/snapshot semantics,
-  not yet live-DID or wire-field assignments, but they establish that current
-  P5 diagnostic schemas explicitly model emergency-steering/collision-avoidance
-  request state.
+  **`Collision Avoidance Assist 1/2/3`**. These recorder/snapshot semantics
+  establish that current P5 diagnostic schemas explicitly model
+  emergency-steering/collision-avoidance request state.
+  Live-DID and wire-field assignments remain unresolved.
 - `PCS2_P5` is not one of this Camry's mounted candidates, so it is used only as
   a same-generation semantic oracle. It names **`PCS Steering Request`** at DID
   `0x1017/0x3017`, bit 8, plus `Emergency Steering Assist Invalid 1/2` at bits
   25/26 of `0x100B/0x300B`. `DRS_P5` similarly names `Active Steering Control
   Permission`; the P6 successor `ADCU_P6` names `Active Steering Status`. These
-  cross-generation/cross-ECU rows establish Toyota's vocabulary, not ownership
-  by the exact F33 FRC.
+  cross-generation/cross-ECU rows establish Toyota's vocabulary.
+  Ownership by the exact F33 FRC requires independent proof.
 
 This changes the next RE question. The diagnostic corpus is **not closed** by a
 negative Active Test name search. The high-value work is to determine what

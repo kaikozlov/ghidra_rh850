@@ -136,7 +136,7 @@ def main() -> int:
         CF[0x8E6C6:0x8E6CA].hex(),
     )
 
-    print("== recovered RAM callback cells are active subsystem state, not dormant hook slots ==")
+    print("== recovered RAM callback cells hold active subsystem state ==")
     cb_refs = [(fn, site, typ) for fn, _, site, typ in refs_to(0xFEBE5600)]
     check(
         "FEBE5600 callback cell has explicit clear/config writers and runtime readers",

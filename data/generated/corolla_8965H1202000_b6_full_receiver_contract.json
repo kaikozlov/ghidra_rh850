@@ -705,7 +705,7 @@
       264,
       265
     ],
-    "sender_boundary": "No recovered EPS application semantic consumer means these bytes impose no recovered receiver-application meaning, not that a sender may choose them freely: all B0..B27 are inside the CMAC input, and upstream producer-side formatting constraints remain unexamined."
+    "sender_boundary": "These bytes have no recovered EPS application semantic consumer. Sender formatting remains constrained: all B0..B27 are inside the CMAC input, and upstream producer-side formatting constraints remain unexamined."
   },
   "applies_to": [
     "8965H1202000",
@@ -728,7 +728,7 @@
   "sources": {
     "base_receiver_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
-      "sha256": "5019f19340320b1764af66fa348f9e8ffb5ec6e9c6bff1143ed03d76d8d37dc8"
+      "sha256": "799ff4b0beedad9a25723ac75b7b5911fc5fd88a07b52947b2d5991ff39042d3"
     },
     "codeflash": {
       "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
@@ -749,11 +749,11 @@
     },
     "lta_provenance": {
       "path": "data/generated/corolla_8965H1202000_lta_command_provenance.json",
-      "sha256": "7f9b6e9502e03d673d5eaa9319e2ca3d262f77e2c99c89a5869fdf07c6228f35"
+      "sha256": "2a542f366db967e151cf00ff8e047d13feb63f82698f149a43b3a99cb788299a"
     },
     "secoc_key_provenance": {
       "path": "data/generated/corolla_8965H1202000_secoc_key_provenance.json",
-      "sha256": "80a8f926d5db6172d3edb8ba3dc1d79708166af8c4c1d5379142188cf153f43e"
+      "sha256": "7c211823e25fb414f2824e89b24996f69a3ab9e6615a4478a08be90feff1ebe8"
     },
     "whole_corpus_census": {
       "path": "data/generated/corolla_8965H1202000_lta_command_provenance_census.json",
@@ -776,7 +776,7 @@
     "upstream_producer_closed": false
   },
   "verified_delivery": {
-    "length_boundary": "The recovered queue/delivery path preserves a PduInfo length and PDU42's COM descriptor is 32 bytes. Static evidence does not prove that B28..B31 are physically stripped before COM RAM; the application-consumer census, not a stripping assumption, is the basis for classifying them as SecOC-only.",
+    "length_boundary": "The recovered queue/delivery path preserves a PduInfo length and PDU42's COM descriptor is 32 bytes. Static evidence leaves physical stripping of B28..B31 before COM RAM unresolved; the application-consumer census establishes their SecOC-only classification.",
     "queue_getter": "0x00087E2C",
     "queue_ingress": "0x0008865A",
     "resolved_upper_callback": "0x00076A3C",

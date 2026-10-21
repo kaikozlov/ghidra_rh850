@@ -623,9 +623,8 @@ void update_application_receive_statuses(void)
 
 
 /* Low8 selector<30 reads290DA+8*selector: values1/2 select7F51/7F52; other rows or out-of-range
-   selectors return7F50. These are staged status bytes, not event IDs. Low8 selector<30
-   reads290DA+8*selector:1/2 route to7F51/52, otherwise7F50. Return is a staged status byte, not
-   event identity or physical freshness. */
+   selectors return7F50. These are staged status bytes. Low8 selector<30
+   reads290DA+8*selector:1/2 route to7F51/52, otherwise7F50. */
 
 uchar get_grouped_status_byte(uint selector)
 
@@ -700,7 +699,7 @@ void fill_constant_block_49eec(void)
    resets on any predicate other than22, including inapplicable44. Local22 recovers on11 immediately
    with configured recovery limit0; predicate44 resets counters only. Local44 recovers only after
    entry healthy-count>=200; other predicates reset that recovery count. Direct shared7F68 writes
-   are ordered, not a max/OR reduction. */
+   occur in sequence. */
 
 void advance_dual_source_admission_qualification(void)
 
@@ -812,8 +811,7 @@ void advance_dual_source_admission_qualification(void)
    entry count>=5 selects local22/shared2; entry persistence>=200 selects local44/shared3. Local11
    resets on any predicate other than22, including inapplicable44. Local22 recovers on11 immediately
    with configured recovery limit0; predicate44 resets counters only. Local44 has no ordinary
-   recovery branch; cause latch7F6A is set on entry. Direct shared7F68 writes are ordered, not a
-   max/OR reduction. */
+   recovery branch; cause latch7F6A is set on entry. Direct shared7F68 writes occur in sequence. */
 
 void advance_first_source_admission_qualification(void)
 
@@ -907,8 +905,7 @@ void advance_first_source_admission_qualification(void)
    entry count>=5 selects local22/shared2; entry persistence>=200 selects local44/shared3. Local11
    resets on any predicate other than22, including inapplicable44. Local22 recovers on11 immediately
    with configured recovery limit0; predicate44 resets counters only. Local44 has no ordinary
-   recovery branch; cause latch7F6B is set on entry. Direct shared7F68 writes are ordered, not a
-   max/OR reduction. */
+   recovery branch; cause latch7F6B is set on entry. Direct shared7F68 writes occur in sequence. */
 
 void advance_second_source_admission_qualification(void)
 
@@ -1256,7 +1253,7 @@ void latch_classifier2_on_6764_top_bit_510b6(void)
 
 
 /* Return/store actual R10 byte82B4. Zero latch asserts5A only for7F515A; nonzero latch clears only
-   when7F51 andE827 are both zero. Caller512E4 uses nonzero, not equality5A. Real R10 byte is both
+   when7F51 andE827 are both zero. Caller512E4 checks for nonzero. Real R10 byte is both
    stored82B4 and consumed by512E4. Zero latch asserts only for7F515A; nonzero latch clears only
    with7F51/E827 zero. */
 
@@ -1353,7 +1350,7 @@ void age_classifier_retained_flags(void)
 
 
 /* Snapshot flagsA4/A5, then age nonzero groups in A3,A5,A4 order. Exact thresholds 200/600/200 are
-   invocation counts, not elapsed time or event-bitmap aging. SnapshotA4/A5 flags and age nonzero
+   invocation counts. SnapshotA4/A5 flags and age nonzero
    groups inA3,A5,A4 order. Individual PMR sections are not one atomic classifier snapshot. */
 
 void age_classifier_groups(void)
@@ -1383,7 +1380,7 @@ void age_classifier_groups(void)
 
 
 /* Return5A for zero6AF0, E8533/4, E854FF, E85511, sentinel33333333 inE91C/E924/E92C or62E12
-   resultA55AA55A; otherwise0. Structural classifier priority, not a recovered OEM fault name.
+   resultA55AA55A; otherwise0. Structural classifier priority.
    Application zero/status/sentinel predicates select structural classifier priority3. No recovered
    OEM fault identity or permission semantics. */
 
@@ -1739,8 +1736,7 @@ int publish_redundant_u8(uchar value,uchar *raw,uchar *xor55,uchar *xorAA)
 
 
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
-   Referenced placeholder implementing no behavior; structural classification, not individually
-   executed. */
+   Referenced return-only stub; classified from the bytes. */
 
 void return_only_stub_73ca0(void)
 
@@ -1751,8 +1747,7 @@ void return_only_stub_73ca0(void)
 
 
 /* Two-byte return-only stub: single jmp [lp] (7f00); byte-verified against the exact image.
-   Referenced placeholder implementing no behavior; structural classification, not individually
-   executed. */
+   Referenced return-only stub; classified from the bytes. */
 
 void return_only_stub_73ca2(void)
 
@@ -1779,7 +1774,7 @@ undefined4 return_argument_word_7490e(undefined4 param_1)
 
 
 /* Low8 class0 sets6B76=0 and calls76ACE. Class83 sets4; other nonzero classes set1, report the
-   class and call76ADA. Their73CA0/73CA2 targets are JMPLP leaves, not logical publication. Extra
+   class and call76ADA. Their73CA0/73CA2 targets are JMPLP leaves. Extra
    r7/r8/r9 prepared by77D66 are not consumed in this implementation. Class0 sets result-state0;83
    sets4; other nonzero sets1 and reports class. Actual completion hooks terminate at
    JMPLP73CA0/73CA2; this is not logical/application publication. Extra prepared r7-r9 are unused.
@@ -2440,7 +2435,7 @@ void filter_established_estimator_difference
 
 
 /* WARNING: Removing unreachable block (ram,0x000c417e) */
-/* Start from C0B4, not oldBFEC. Below curve ceiling60000, increment if candidate changed or wrapped
+/* Start from C0B4. Below curve ceiling60000, increment if candidate changed or wrapped
    abs32(candidate-C080)<AE38/1024. Otherwise retain the input count, even above the ceiling.
    Publish BFEC and diagnostic ceilingC066. Count starts fromC0B4 rather thanBFEC. Below flat60000
    ceiling increment for changed candidate or strict center band; ceiling gates increment rather

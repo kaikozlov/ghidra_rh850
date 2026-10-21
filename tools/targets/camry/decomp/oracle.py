@@ -207,8 +207,8 @@ def run_oracles() -> int:
                 ]
             if address == 0x76B6:
                 params[1] = (False, 0xC4 if index else 0)
-            # Real caller tables (0x34ca2/0x34cac and 0x3207c), not
-            # unterminated scratch. Fill B walks to the ROM 0x7fff sentinel.
+            # Use real caller tables (0x34ca2/0x34cac and 0x3207c).
+            # Fill B walks to the ROM 0x7fff sentinel.
             if address == 0x70208:
                 params[:2] = [(False, 0x30F0C), (False, 1280 if index else 832)]
             elif address == 0x7025C:
@@ -234,8 +234,8 @@ def run_oracles() -> int:
                 params[:2] = [(False, 0xB0518), (False, 0x7FFF if index else 0)]
             elif address == 0xD1DE4:
                 params[:2] = [(False, 0xAEE7C), (False, 0x7FFF if index else 0)]
-            # DAT_21970 configures only controller 0; 21938 is adjacent code,
-            # not a second controller slot. Keep both RAM fills in-domain.
+            # DAT_21970 configures only controller 0; 21938 is adjacent code.
+            # Keep both RAM fills in-domain.
             elif address == 0x7CC60:
                 # 7ce24 passes a boolean fault-bit test as the second argument.
                 params[:2] = [(False, 0), (False, index)]

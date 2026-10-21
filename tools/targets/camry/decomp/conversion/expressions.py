@@ -254,7 +254,7 @@ def _expr_kind(
     if name in functions and name not in pointers and name not in integers:
         return "pointer" if not rest else "unknown"
     # A uint32 slot macro is the firmware pointer word, even when the
-    # decompiler also subscripts it. `(int)DAT` is that word, not a host pointer.
+    # decompiler also subscripts it. `(int)DAT` retains that firmware word.
     if not rest and name in _uint32_slot_names():
         return "integer"
     if name in pointers or name in arrays or name in integers or name.startswith(("DAT_", "UNK_", "PTR_")):

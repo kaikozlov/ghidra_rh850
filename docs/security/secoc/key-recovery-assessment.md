@@ -102,9 +102,9 @@ known answers. A successful result identifies the vendor ABI for volatile RAM-ke
 load/export; it still does not create a persistent-slot export operation. None of
 these hardware outcomes should be assumed from the stock call graph.
 
-Fault injection against serial read-range checks or ICU-S policy is a later
-fallback, not the first experiment. Public P1M-E work proves that RH850 serial
-programming checks can be glitched, but it does not prove that ICU-S protected
+Reserve fault injection against serial read-range checks or ICU-S policy for a
+later fallback. Public P1M-E work proves that RH850 serial programming checks
+can be glitched, but it does not prove that ICU-S protected
 key storage is exposed after the check. Command 8 can replace a key with a valid
 authenticated M1-M3 package; it cannot disclose the current key and risks
 irreversibly desynchronizing the EPS from its peers.
@@ -121,7 +121,7 @@ The exact `FFC5D000` store encoding occurs at nine CodeFlash sites:
 | `0x89628` | runtime selector plus command 1 or 3 | chosen-input AES oracle if slot policy permits |
 | `0x8973A` | runtime selector plus command 5 | lower variable-length CMAC primitive if slot policy permits; stock diagnostic caller is fixed to 16 bytes (SECOC-069) |
 | `0x8990C` | runtime selector plus command 7 | live SecOC verification and SCA stimulus |
-| `0x89A2C` | command 8 | authenticated M1-M3 key update, not export |
+| `0x89A2C` | command 8 | authenticated M1-M3 key update only |
 | `0x89A8A` | command 11 | unreferenced generated driver stub (dead code: no caller, pointer, or immediate reference in the image) — no stock PRNG initialization occurs |
 | `0x89BB0` | command `0x22` | unreferenced generated driver stub (dead code), `CMD_GET_ID` shape |
 | `0x89BF8` | abort/reset command `0x3F` | none |
@@ -150,8 +150,8 @@ Therefore the previously proposed standard-SHE chain
 persistent slot into `RAM_KEY` for exfiltration.
 
 The potentially confusing sentence in SHE §4.4.3.1 that `RAM_KEY` can be
-“written with the knowledge of the `KEY_<n>`” means **authenticated provisioning**,
-not a slot-to-slot copy. The specification itself distinguishes an actual key from
+“written with the knowledge of the `KEY_<n>`” means **authenticated provisioning**.
+The specification itself distinguishes an actual key from
 its identifier in §4.1.1 using subscript notation (`KEY_{KEY_NAME}` versus
 `ID_{KEY_NAME}`). Table 4.5 is
 introduced as the matrix of which keys can **serve as a secret to update another
@@ -173,13 +173,13 @@ RAM-key load.
 
 SHE tracks how `RAM_KEY` was populated with the dedicated `RAM_KEY_PLAIN` flag.
 `CMD_LOAD_PLAIN_KEY` sets it to 1. A protected `CMD_LOAD_KEY` into `RAM_KEY`
-clears it. **The origin flag is the export gate, not a gate on loading or using
-`RAM_KEY`.** Both paths legitimately populate the same volatile slot and that
+clears it. **The origin flag gates export only.**
+Both paths legitimately populate the same volatile slot and that
 slot remains usable for its permitted crypto operations; the difference is only
 that `CMD_EXPORT_RAM_KEY` is permitted when `RAM_KEY_PLAIN == 1`. Thus a key
 installed through the secure M1/M2/M3 path is intentionally usable but
-non-exportable. Even the plaintext-origin export returns M1..M5 wrapped under the
-device `SECRET_KEY`, not the raw 16-byte RAM key.
+non-exportable. Even the plaintext-origin export returns only M1..M5 wrapped
+under the device `SECRET_KEY`.
 
 The remaining uncertainty is vendor-specific. The public P1M-E hardware manual
 omits the ICU-S command-register specification and the restricted ICUSE manual has not
@@ -200,16 +200,16 @@ Command 9 receives known key `00..0f`; its success is accepted only if selector 
 then reproduces the independently calculated 128-bit CMAC. Command 10 is issued in the
 same HSM session only after that proof; it must return 112 bytes and satisfy `M1 ==
 M4[:16]`, the RAM-key/SECRET-key ID nibble, the known `K3`-derived `M4*` block, and the
-known `K4`-derived `M5` CMAC. Any undocumented persistent-slot copy/export effect would
-still have to be demonstrated separately and reported as a **Renesas deviation**, not
-as SHE behavior.
+known `K4`-derived `M5` CMAC. Any undocumented persistent-slot copy/export effect
+requires separate demonstration and must be reported as a **Renesas deviation**
+from standard SHE behavior.
 
 External semantic sources: Renesas Engineering Community,
 <https://community.renesas.com/mcu/rh850/f/rh850-rl78f/17819/rh850vp1m-x-icum-secure-documents>;
 AUTOSAR, *Specification of Secure Hardware Extensions*, §4.7.8-§4.7.10,
 <https://www.autosar.org/fileadmin/standards/R24-11/FO/AUTOSAR_FO_TR_SecureHardwareExtensions.pdf>.
 
-### 1.3 The available operations are oracles, not key reads
+### 1.3 The available operations expose cryptographic oracles
 
 Command 7 is sufficient for normal SecOC verification and provides a yes/no
 result. Command 5, if permitted, returns a 16-byte MAC. Command 1/3, if
@@ -233,8 +233,8 @@ permit MAC verification while generation is disabled" is **not supported by the
 SHE specification** and is retracted (CORR-017). The polarity is the reverse of
 the prior AES-oracle fallback: it is command 1/3 (raw encipher/decipher) that a
 MAC-usage slot would reject, while command 5 (MAC generation) is the
-spec-permitted primitive — which makes a command-5 signing oracle the
-SHE-aligned path, not a likely-denied one.
+spec-permitted primitive. A command-5 signing oracle therefore follows
+standard SHE policy.
 
 The reserved SHE IDs `0x0..0x3` are different from `KEY_<n>` and therefore do
 not inherit that arbitrary-use rule. The exact SHE function/memory matrix gives
@@ -273,11 +273,10 @@ is dynamic. See [command5-oracle-assessment.md](command5-oracle-assessment.md).
 The captured final `0x800` bytes of DataFlash contain 944 zero bytes and 1,104
 `FF` bytes and no other values. The application range validator rejects requests
 overlapping `0xFF207800..0xFF207FFF`. Renesas/third-party documentation identifies
-this end region as ICU-S-reserved, but the observed bytes are readback behavior,
-not a plaintext key dump.
+this end region as ICU-S-reserved. The observed bytes establish readback behavior only.
 
-**The concrete enforcement point is the flash-side access-control path, not the
-MainPE MPU and not merely the ICU-S cryptographic state machine.** P1M-E group
+**The flash-side access-control path enforces this boundary.** The MainPE MPU
+and ICU-S cryptographic state machine alone are insufficient. P1M-E group
 manual R01UH0585EJ0120 Rev.1.20 §31.4.1 places DataFlash behind the SoC
 interconnect as a bus slave. It states that memory resources have slave-side
 guards, explicitly including **flash guards**; ordinary bus accesses carry
@@ -315,8 +314,8 @@ diagram draws **two distinct hardware paths** into Flash Control: the ordinary
 "Data Flash access path from CPU" and a direct ICU-S/FSM path. The strongest
 publicly supported model is therefore that secure-flash authorization is
 implicit in the **request source / hardware port** (or a hardwired internal
-master attribute derived from that port), not a MainPE-writable "I am ICU-S"
-bit. The restricted ICUSE documentation would be required to name the exact
+master attribute derived from that port). The restricted ICUSE documentation
+would be required to name the exact
 internal signal. There is no public evidence that MainPE supervisor code can
 forge that source identity by changing `SPID`, `PEID`, or a normal flash
 register; `PEID` is bus-master identity generated by the interconnect and the
@@ -342,9 +341,8 @@ by RFP; [Lauterbach's RH850 debugger manual](https://www2.lauterbach.com/pdf/deb
 describes a device-dependent disable sequence only after flash erasure, which
 also erases the ICU-S region. Neither source proves whether exact P1M-E stores
 that enable state in a blown fuse, protected flash/configuration cell, or another
-lifecycle latch. What is established is that the resulting access decision is
-enforced in the on-chip flash/security path, not by Toyota application code or
-a board-level component.
+lifecycle latch. The established enforcement point is the on-chip
+flash/security path.
 
 **Observed CPU read behavior is narrower than an assumed hardware return
 code.** The exact 2026 Camry F33 RAM-resident reader traversed the entire
@@ -367,7 +365,7 @@ barrier. A debugger is still valuable for installing a deterministic trigger or
 calling the recovered wrappers, but success must not be reported as key access
 unless the candidate key validates stock SecOC frames.
 
-### 1.5 Command 8 is rekey, not recovery
+### 1.5 Command 8 replaces the key
 
 DID `0x1010` transports the standard SHE `CMD_LOAD_KEY` memory-update object,
 `M1[16] || M2[32] || M3[16]`, to command 8 and returns the standard
@@ -389,8 +387,8 @@ The repository pins two working SecOC-key-extraction-by-CAN implementations
 (`external-references.lock.json`: I-CAN-hack/secoc, Bk2ol/tsk_extraction_by_can_log).
 Their authenticated-RAM-exec bootstrap is exactly this image's SEC-BOOT-005/006/007
 gate on the identical `SEED_KEY_SECRET` (`f05f36b7…`, CodeFlash `0xBFE8`,
-`verify_findings.py`) — cross-validated, so the foothold is a solved, reusable
-toolchain across the `8965B4x` family, not something to rebuild (SECOC-024).
+`verify_findings.py`). Cross-validation establishes a solved, reusable foothold
+toolchain across the `8965B4x` family (SECOC-024).
 
 Neither tool issues any ICU-S command. Both read a CPU-visible key copy via the
 RAM-exec payload and transmit it over CAN:
@@ -415,8 +413,8 @@ The ICU-S driver is a selector-based hardware-accelerator interface — the key 
 engine only as a SELECTOR written to `0xFFC5D004`, never as a value; AES blocks move through
 `0xFFC5D008`/`0x090-BC`; driver state at `0xFEBF13**` is callback/command/status only. The
 ICU-S register footprint is exactly `0xFFC5D000-0xFFC5D0FF` with no key-RAM window, and the
-sibling mirror addresses `0xFEBE6E**` hold motor-signal data here (`FUN_000389C0`/`FUN_0003926E`),
-not keys. Combined with the SHE read-prohibition (SECOC-025), the slot-4 key is ICU-S-only on
+sibling mirror addresses `0xFEBE6E**` hold motor-signal data here (`FUN_000389C0`/`FUN_0003926E`).
+Combined with the SHE read-prohibition (SECOC-025), the slot-4 key is ICU-S-only on
 this calibration: extraction requires a bus-level/hardware read or SCA, or a weaker peer ECU.
 
 ### 1.7 Blurbdust fork lineage and persistent CodeFlash extension (SECOC-028)
@@ -433,9 +431,9 @@ blurbdust; those pieces are inherited lineage rather than CUW-provenance clues.
 The retained `community/.../main.c` is
 byte-identical to public `shellcode/main_flash_patch.c @ 47d2824`; the retained
 `flash_patcher.py` differs from the public file only in the two progress-frame
-`struct.unpack` endian format strings. Therefore the inherited SA/download/
-routine-control bootstrap is **same-lineage corroboration**, not independent
-evidence. Blurbdust's new evidence is the persistent FACI writer/patch host plus
+`struct.unpack` endian format strings. The inherited SA/download/
+routine-control bootstrap therefore supplies **same-lineage corroboration** only.
+Blurbdust's new evidence is the persistent FACI writer/patch host plus
 the separately shared CUW extractor.
 
 The CUW and writer chronology are tightly coupled. The optskug timeline preserves
@@ -459,8 +457,8 @@ command-lock at `0xFFA10010/0x10`, `FENTRYR=0xAA01`, the
 are shifted, and the old bit-21 pacing was wrong. The now-retained exact
 `T-0035-22.cuw` closes the manufacturer side directly: both CMAC-valid Toyota
 F340 erase routines write each halfword and then wait on **FSTATR bit10 /
-`0x400` (DBFULL)**, not bit11/SUSRDY. They also recover the `0x7040` FSTATR error
-family and B3 Forced Stop. Exact F33 boot code independently uses the same
+`0x400` (DBFULL)**. This corrects the bit11/SUSRDY attribution. They also recover
+the `0x7040` FSTATR error family and B3 Forced Stop. Exact F33 boot code independently uses the same
 post-write `0x400` condition and additionally provides stock Status Clear `0x50`.
 Thus CUW-informed provenance is no longer merely an acquisition lead, although
 the historical question of whether blurbdust's April writer was line-for-line
@@ -614,8 +612,7 @@ These negatives do **not** remove the signing-oracle route. The application
 already contains a serialized command-5 path and a viable foreground hook
 architecture; [sender-implementation.md](sender-implementation.md) §5 specifies
 the minimum design, including selector 4, command-7 contention, freshness, Tx,
-and teardown. What remains unknown is live hardware permission and runtime
-performance, not basic software plumbing.
+and teardown. Live hardware permission and runtime performance remain unknown.
 
 ## 2. Ranked recovery methods
 
@@ -653,7 +650,7 @@ object, or a provisioning cache.
    several frames for `0x2E4`, `0x131`, `0x132`, `0x090`, and `0x0D7`.
 2. Establish each message's physical producer by controlled bus isolation,
    connector isolation, gateway routing evidence, or transmitter-side capture.
-   Treat the forward camera as a lead, not a fact.
+   Treat the forward camera as an unproven producer candidate.
 3. Record exact peer part and software numbers before sourcing a donor. A
    different calibration or vehicle will normally have a different key.
 4. Dump all CPU-visible CodeFlash, DataFlash/EEPROM, external flash, and retained
@@ -773,10 +770,10 @@ number alone.
 
 Run this only on an isolated, recoverable bench unit. Start with a one-shot
 authenticated bootloader payload that polls ICU-S directly and reports raw output
-over its existing CAN transport. Treat bootloader lifecycle as a discriminator,
-not a definitive negative. If an operation rejects or initialization differs,
-repeat from a restorable hook after the stock application has initialized ICU-S;
-that context has different interrupts, global pointers, RAM, and driver state.
+over its existing CAN transport. Use bootloader lifecycle to distinguish possible
+initialization effects. If an operation rejects or initialization differs, repeat
+from a restorable hook after the stock application has initialized ICU-S.
+That context has different interrupts, global pointers, RAM, and driver state.
 
 ### 5.1 Required tests
 
@@ -869,11 +866,10 @@ stock SecOC frames.
 ### 6.2 Faulting command policy
 
 Potential targets include selector/usage checks, verify-only enforcement, and
-output gating. A fault that merely changes command-7 false to true is an
-authentication bypass, not key recovery. A fault that enables command 5 yields a
-MAC oracle, not plaintext. The most useful fault outcome would enable command 1
-or produce a correct/faulty full AES/MAC pair suitable for differential fault
-analysis.
+output gating. A fault that changes only command-7 false to true yields
+authentication bypass only. Enabling command 5 yields a MAC oracle only.
+The most useful fault outcome would enable command 1 or produce a correct/faulty
+full AES/MAC pair suitable for differential fault analysis.
 
 DFA is attractive only when an output-producing command is available and the
 fault reaches the AES datapath late enough to fit a known model. Blind voltage
@@ -956,8 +952,8 @@ A recovery is complete only when one 16-byte candidate:
 A successful command-5 or command-1 oracle is a useful fallback but is not
 plaintext-key recovery. A successful command-9/10 RAM-key characterization proves the
 vendor ABI for a **known volatile test key**; it is not slot-4 recovery. A successful
-serial/debug bypass is instrumentation access but is not key recovery. A changed
-slot-4 key is rekeying, not recovery of the original.
+serial/debug bypass provides instrumentation access only.
+Changing slot 4 installs a replacement key and leaves the original unrecovered.
 
 ## 10. Evidence summary
 
@@ -983,7 +979,7 @@ slot-4 key is rekeying, not recovery of the original.
 
 ## 11. Strategic framework: two independent layers and cross-ECU attack surface
 
-> **Document type:** strategic analysis, not a verified firmware finding.
+> **Document type:** strategic analysis. Firmware-finding status requires separate verification.
 > Synthesizes the recovery methods above with external evidence to frame the
 > broader research direction. This section is scoped as **hypothesis** unless a
 > specific claim references a FINDINGS-grade result. It does not modify or
@@ -1010,18 +1006,18 @@ the SecOC key from the ECU's memory.
 We observe layer-2 variation *within* the EPS family: the `8965B4514000`
 exposes a key candidate at CPU-visible DataFlash object 15 (`0xFF206E14`),
 while this `12000` calibration has **no valid key copy** in object 15. The
-three triplicate copies are uncommitted/invalid (raw field:
-`00000000040000808202000000000000`), not erased-blank, and the runtime
-verification path selects ICU-S slot 4 (SECOC-002/003). The exact production
+three triplicate copies contain nonblank uncommitted/invalid data (raw field:
+`00000000040000808202000000000000`). The runtime verification path selects
+ICU-S slot 4 (SECOC-002/003). The exact production
 relationship between object 15 and the live slot-4 key remains unknown.
 Whether similar variation exists across different ECU types on the same vehicle
 is **hypothesis** — no non-EPS ECU has been analyzed.
 
 ### 11.2 Cross-ECU payload portability: untested hypothesis
 
-If layer 1's `PAYLOAD_BUILD_SECRET` is shared across ECU types (not just EPS
-part variants), all Denso RH850/P1M-E ECUs on the vehicle bus are potential
-code-execution targets, not just the EPS.
+If layer 1's `PAYLOAD_BUILD_SECRET` is shared across ECU types beyond EPS
+part variants, all Denso RH850/P1M-E ECUs on the vehicle bus become potential
+code-execution targets.
 
 The optskug community timeline reports a TechInfo-derived list of ECU types
 covered by the "ECU Security Key" procedure for the RAV4 Prime (forward camera,
@@ -1038,13 +1034,13 @@ Acceptance by one ECU type would demonstrate portability **to that ECU only** �
 it would not establish compatible bootloaders across all ECU types, nor would
 it prove weak key storage on that ECU.
 
-### 11.3 Key-sharing topology: external evidence, not firmware proof
+### 11.3 Key-sharing topology: external-source evidence
 
 Pinned opendbc's sender uses a single `self.secoc_key` field for both steering
 (`0x2E4`, `0x131`) and acceleration (`0x183`) output streams. This is an
-implementation interface that **treats** those streams as sharing one key, but
-it is external-source evidence with a placeholder key (`b"00" * 16`), not a
-firmware-derived proof of production key topology. See
+implementation interface that **treats** those streams as sharing one key. This
+external-source evidence uses a placeholder key (`b"00" * 16`). Production key
+topology still requires firmware-derived proof. See
 [sender-implementation.md](sender-implementation.md) §1.2–1.3 for the bounded
 opendbc analysis.
 
@@ -1073,7 +1069,7 @@ It remains gated by hardware policy and application-context execution:
 
 1. **Does ICU-S slot 4 permit MAC generation?** Command 5's software plumbing
    accepts selector 4 and handles output (SECOC-006, **verified structure**).
-   Hardware slot-4 generation permission is **unobserved**. Under standard SHE semantics the same MAC-usage flag permits generation and verification (SECOC-023/CORR-017); a rejection would therefore indicate a Renesas-specific restriction or lifecycle condition, not a standard "verification-only" key policy.
+   Hardware slot-4 generation permission is **unobserved**. Standard SHE permits generation and verification under the same MAC-usage flag (SECOC-023/CORR-017). A rejection would therefore indicate a Renesas-specific restriction or lifecycle condition.
 2. **Is ICU-S operational in bootloader context?** The authenticated callback
    runs before application init. Whether ICU-S is initialized and slot 4 is
    loaded at that point is unknown. A restorable application-context hook is
@@ -1094,8 +1090,8 @@ The remaining supporting elements are independently verified:
 
 A signing oracle based on this EPS needs independent *sender* counters
 synchronized to the intended receiving ECU. The EPS tracks freshness only as a
-*receiver* — SECOC-012 describes receive-window initialization and sync
-acceptance for this EPS's inbound paths, not a transmit-side freshness manager.
+*receiver*. SECOC-012 covers receive-window initialization and synchronization
+acceptance for this EPS's inbound paths only.
 
 A sender must:
 
@@ -1127,8 +1123,7 @@ signing capability across the vehicle's SecOC ecosystem." The ranked methods
 in §2 can then be evaluated against the full vehicle surface rather than this
 one ECU.
 
-These are **hypotheses**, not established facts. The framework motivates
-specific experiments:
+These **hypotheses** motivate specific experiments:
 
 1. Test whether the EPS `PAYLOAD_BUILD_SECRET` is accepted by an inexpensive
    non-EPS donor ECU (§11.2).
@@ -1137,8 +1132,7 @@ specific experiments:
 3. If command 5 succeeds, prototype a sender that maintains independent
    per-PDU freshness and validates against a live receiver (§11.5).
 
-Variant-specific outcomes should be recorded in [docs/variants/](../../variants/),
-not here.
+Record variant-specific outcomes in [docs/variants/](../../variants/).
 
 ## References
 

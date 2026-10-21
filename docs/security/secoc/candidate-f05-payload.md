@@ -2,9 +2,9 @@
 
 Canonical analysis of
 `payload_candidate_f05_dataflash_ff200000_ff208000.bin` from Vance's pinned
-`20260531_othersienna_secoc_bundle_v3.zip`. This is an external deployment
-artifact for the `8965B4514000` investigation, not firmware from that variant
-and not evidence that the partner ECU executed it.
+`20260531_othersienna_secoc_bundle_v3.zip`. This externally supplied deployment
+payload supports the `8965B4514000` investigation. It provides evidence about the
+payload only. Execution by the partner ECU remains unproven.
 
 ## Conclusion
 
@@ -51,8 +51,8 @@ test. DID `0x201` and IV `0x202` are both 16 zero bytes in these fixtures.
 
 Candidate-f05 fails both CRC and CMAC when decrypted under the normal
 payload-build secret. Its valid plaintext contains neither the SecurityAccess
-secret, the derived key, nor ASCII `f05`; `f05` is tied to the filename and
-authentication choice, not an embedded runtime signature.
+secret, the derived key, nor ASCII `f05`. The `f05` association comes only from
+the filename and authentication choice.
 
 ## Recovered RH850 control flow
 
@@ -112,8 +112,7 @@ mirror, or a second input/search range.
 The standard code body is 394 bytes (`0x000..0x189`). Candidate-f05 is 434
 bytes (`0x000..0x1B1`) because saving `lp`, changed stack displacements, shifted
 branches, the indirect-call trampoline, and the return epilogue relocate most
-compiled bytes. The difference is compiler/control-flow layout, not a new
-memory-search algorithm.
+compiled bytes. These changes affect compiler/control-flow layout only.
 
 ## Answers to the handoff questions
 
@@ -125,7 +124,7 @@ memory-search algorithm.
 5. It reads `0xFF206E14` incidentally within the full dump; it does not touch
    object-15 RAM or special-case object 15.
 6. It performs no scan for key-slot structures.
-7. It is a deterministic sequential dump, not an oracle/probe.
+7. It performs a deterministic sequential dump.
 8. It preserves CAN ID `0x7A9` and the exact result-frame format.
 9. No `f05` byte/string/signature is embedded beyond the external
    authentication/filename association.
@@ -145,13 +144,13 @@ The loop is structurally the same as the pinned I-CAN-hack `shellcode/main.c`
 (present by commit `4ce19cc`, 2025-03-04) and the later Bk2ol
 `main_ff1ff000_ff209000.c` source (added at the pinned July 2026 revision),
 including RSCFD slot 16, CAN `0x7A9`, address/data packing, status handling,
-and reset target `0x157E`. This establishes the community source family, not
-authorship. The retained history does not prove who compiled candidate-f05,
+and reset target `0x157E`. This establishes the community source family.
+Authorship remains unproven. The retained history does not prove who compiled candidate-f05,
 which exact source revision/toolchain produced it, whether choosing
 `SEED_KEY_SECRET` as the build secret was intentional, or what failed/succeeded
 vehicle experiment motivated retaining it. The filename's `f05` prefix and
 exclusive authentication under that secret make deliberate selection
-plausible, but it remains **bounded**, not a provenance fact.
+plausible, but the provenance inference remains **bounded**.
 
 ## Reproduction
 

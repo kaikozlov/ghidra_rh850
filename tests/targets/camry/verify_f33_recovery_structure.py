@@ -144,14 +144,14 @@ def configured_modes(key: int, service: str) -> list[int]:
     return [s["subfunction"] for row in selected for s in row["mode_subfunctions"]]
 
 check(
-    "alternate 0x40 session belongs to the third list, not the primary programming list",
+    "alternate 0x40 session belongs only to the third list",
     configured_modes(2, "0x10") == [1, 2, 3]
     and configured_modes(3, "0x10") == [1, 3]
     and configured_modes(4, "0x10") == [1, 0x40],
 )
 sessions = {row["session"]: row for row in modes["session_definitions"]}
 check(
-    "0x40 uses immediate-session kind, not the programming handoff kind",
+    "0x40 uses immediate-session kind",
     sessions[0x40]["transition_kind"] == 0
     and sessions[2]["transition_kind"] == 2
     and sessions[0x40]["address"] == "0x00026140",

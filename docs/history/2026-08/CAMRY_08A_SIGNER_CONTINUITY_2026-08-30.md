@@ -29,8 +29,8 @@ regime-independent.
 
 ## Interpretation
 
-The `0x08A` signer is an **always-on chassis engine**, not an on-demand
-extension of the FRC request lifecycle. Signing at zero request is structurally
+The `0x08A` signer operates as an **always-on chassis engine**, independently of
+FRC request activation. Signing at zero request is structurally
 inconsistent with the front camera being the key holder. OQ-054 narrows to
 "which always-on Bus-4 node holds the slot-class key": brake family (ABS 435 /
 Brake Booster 466) or Central Gateway (VAR-096 install-set bound). FRC

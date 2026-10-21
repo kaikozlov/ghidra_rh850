@@ -965,7 +965,7 @@ def _whole_helper_scenario(
                 "after_instructions": 2000,
                 "evidence": (
                     "supplied output at the wrapper boundary after command-five submission; "
-                    "output bytes are scenario data, not a cryptographic claim"
+                    "output bytes supply scenario data only; cryptographic validity remains unproved"
                 ),
                 "address": _hx(scratch_base + 52),
                 "data_hex": "112233445566778899aabbccddeeff00",
@@ -1041,7 +1041,7 @@ def _timeout_input_lifetime_scenario(
             "equals_hex": second_application.hex(),
         },
         {
-            "name": "in-flight engine points to native storage, not helper scratch",
+            "name": "in-flight engine points to native storage",
             "kind": "memory",
             "address": _hx(contract["signer_abi"]["command5_globals"] - 0x60),
             "size": 4,

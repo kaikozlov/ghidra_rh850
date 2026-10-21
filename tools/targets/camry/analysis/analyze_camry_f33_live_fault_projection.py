@@ -49,7 +49,7 @@ def build() -> dict:
                               'steerFaultTemporary': 'current EPS_FAULT_INHIBIT contribution OR the separately recovered cooperative-command and angle inhibits',
                               'cooperative_evidence': 'data/generated/camry_f33_cooperative_fault_projection.json',
                               'steerFaultPermanent': 'not supplied by this one-bit current-state projection',
-                              'interpretation': 'Temporary means current steering unavailability in the ordinary openpilot interface, not a prediction that every underlying hardware fault will self-repair.',
+                              'interpretation': 'Temporary means only current steering unavailability in the ordinary openpilot interface; underlying hardware faults may still require repair.',
                               'missing_coverage': 'Only selected classes/statuses are represented. Other fault classes and restart-required causes cannot be reconstructed from this bit.',
                               'other_variants': 'No H/F or Crown policy transfer is made.'},
         'verification': {'script': 'ghidra/scripts/verify/VerifyCamryFaultProjection.java',

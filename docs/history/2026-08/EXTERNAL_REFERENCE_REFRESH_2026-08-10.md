@@ -1,5 +1,5 @@
-> **Historical snapshot.** This is a point-in-time investigation journal, not
-> current project state. Use [the current overview](../../OVERVIEW.md),
+> **Historical snapshot.** This journal records a point-in-time investigation.
+> For current project state, use [the current overview](../../OVERVIEW.md),
 > [priorities](../../status/PRIORITIES.md), and
 > [findings ledger](../../status/FINDINGS.md) for present conclusions.
 
@@ -112,7 +112,7 @@ A negative result means "not found in this bounded public/indexed search," not
 | `8965B4514000` CodeFlash | **not found** | exact identifier appears in docs/tooling only; no `.bin/.hex/.s19/.mot/.cuw` path hit, release asset, or fork artifact |
 | Completed `4514000` partner DataFlash/CAN outputs | **not found** | Vance public-safe and English trees contain reports/tools/logs, but not the completed partner dump/capture corpus needed for independent replay |
 | `8965F1208000` Corolla firmware | **not found** | exact public GitHub identifier search returns only this repository's analysis pages; firmware-static comparison remains blocked |
-| Sienna EPS `.cuw` calibration | **not found** | no `4512000`/`4514000` `.cuw` path hit; public `T-0035-22.cuw` references remain documentation about a Tundra update, not a retained file |
+| Sienna EPS `.cuw` calibration | **not found** | no `4512000`/`4514000` `.cuw` path hit; public `T-0035-22.cuw` references document a Tundra update. The file remains unretained |
 | Same-vehicle protected-traffic producer firmware | **not found** | no newly surfaced camera/radar/PCS/ADAS image can be tied to the partner Sienna security domain |
 | Physical producer of CAN `0x344` | **not identified** | no public artifact converts the inherited DBC logical node into physical-ECU proof; isolation/capture/producer firmware is still required |
 

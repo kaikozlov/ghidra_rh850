@@ -138,7 +138,7 @@ public class AssertMotorActuationBoundary extends GhidraScript {
         assertSfr(0xffe71188L, "SFR_TSG3", "TSG31CMPUE");
 
         // Stage-6 acquisition correction: FEEF81E0/FEEF8A20 are Global RAM A
-        // DMA rings, not peripheral SFRs. Their DMA sources are ADCG0/1 DIR00.
+        // DMA rings. Their DMA sources are ADCG0/1 DIR00.
         assertMappedLabel(0xfeef81e0L, "GlobalRAM_A", false, "ADCG0_DMA_SAMPLE_RING");
         assertMappedLabel(0xfeef8a20L, "GlobalRAM_A", false, "ADCG1_DMA_SAMPLE_RING");
         assertSfr(0xfff91200L, "SFR_ADCG0", "ADCG0DIR00");

@@ -185,7 +185,7 @@
       "wire": "32-byte CAN-FD; exact H firmware independently proves legacy STEER_ANGLE/STEER_FRACTION/STEER_RATE bit positions survive inside the new PDU"
     },
     "0x030": {
-      "boundary": "All route 0x030 frames matching the exact-H/F firmware-derived additive-byte rule is a strong format/producer-family continuity join, not an exact firmware/vehicle identity join.",
+      "boundary": "All route 0x030 frames match the exact-H/F firmware-derived additive-byte rule, strongly supporting format/producer-family continuity only. Exact firmware/vehicle identity remains unproved.",
       "exact_h_f_additive_rule": {
         "boundary": "recovered exact code behavior; OEM checksum naming/formula lineage is not inferred from the constant alone",
         "formula": "sum(payload_bytes_0_through_6) + 0x38, low byte",
@@ -307,7 +307,7 @@
       "wire": "classic 8-byte PCM_CRUISE with Toyota additive checksum"
     },
     "0x24D": {
-      "boundary": "All legacy cruise-switch bits are inactive in this segment; ID/DLC survival is evidence for a retained carrier, not proof that the old button semantics are unchanged on TSS3.",
+      "boundary": "All legacy cruise-switch bits are inactive in this segment; ID/DLC survival establishes only a retained carrier. Transfer of old button semantics to TSS3 remains unproved.",
       "frame_count": 59,
       "prior_art_button_values": {
         "cancel": [
@@ -924,7 +924,7 @@
   "source": {
     "can_source_filter": "Only CAN records with src<128 are treated as incoming vehicle traffic. Panda returned/Tx echoes (src=bus+128) and rejected echoes (src=bus+192) are excluded from every inventory and baseline in this artifact.",
     "duration_s": 61.099784091000004,
-    "identity_note": "Route carParams was forced TOYOTA_COROLLA_TSS2 and contains no carFw; this is a TSS3 Corolla whole-vehicle route oracle, not an exact H/F firmware-to-route join.",
+    "identity_note": "Route carParams was forced TOYOTA_COROLLA_TSS2 and contains no carFw; this supplies only a TSS3 Corolla whole-vehicle route oracle. Exact H/F firmware-to-route identity remains unproved.",
     "route": "a74eba85c97eaf67|00000004--555953f500",
     "segment": 0,
     "sha256": "d246a55988889253c8d155f04b132b1bb443fdd74f1e6bad68eef8879a5c477b",

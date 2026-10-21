@@ -13,8 +13,8 @@
 **Canonical Ghidra snapshot:** `../../projects/camry-8965F3307000/`
 **Canonical decompiler corpus:** `../../data/generated/camry-8965F3307000/decompilations.jsonl`
 
-This is a capture/provenance chronology, not an operator runbook. Harness,
-bus, firmware, and runtime statements belong to each dated evidence unit.
+This chronology records capture provenance. Harness, bus, firmware, and runtime
+statements belong to each dated evidence unit.
 Do not apply an August repinned-bus assignment to a later stock-harness setup.
 Use the [capability matrix](../../docs/variants/camry-2026-capability-matrix.md)
 for consolidated qualification boundaries and
@@ -72,8 +72,8 @@ The historical CONNECT-only probe sent standard `0x7F7` and observed no usable
 `0x7F8`; VAR-134/CORR-165 supersede its interpretation. Exact F33 rule46 is
 classic extended `0x1FDC0002` with response `0x1FE00002`. A 2026-09-06 parked
 non-command marker on that endpoint live-reached XCP staging `FEBE4C34`, but fixed
-CodeFlash `0x30D68=0x5A` blocks protocol dispatch before CONNECT. Stock exact-F33
-XCP command reachability is therefore closed negative, not a route/session unknown.
+CodeFlash `0x30D68=0x5A` blocks protocol dispatch before CONNECT. This closes stock
+exact-F33 XCP command reachability as negative on the verified route/session.
 The direct live marker evidence is tracked as
 `raw-20260906/xcp-extended-ingress-probe.json`; its payload is deliberately
 non-command and the record pins the before/after SID23 staging bytes and Panda
@@ -89,9 +89,9 @@ Canonical interpretation lives in
 
 ## Historical stationary B6 bring-up kit
 
-The August-30 repinned experiment and the later v7 car-kit notes described a
-development configuration, not a persistent statement of the current harness,
-installed firmware, or runtime. The original evidence remains in the dated
+The August-30 repinned experiment and the later v7 car-kit notes describe their
+dated development configurations only. Current harness, installed firmware, and
+runtime require current evidence. The original evidence remains in the dated
 capture units and [field report](../../docs/variants/camry-2026-live-baseline.md).
 
 The stationary-probe verifier now lives at
@@ -186,9 +186,9 @@ span is excluded from recovery conclusions.
 Against the retained healthy READY oracle, the generalized matcher exhaustively
 found zero candidate windows in all three stores: 32,753 DataFlash windows,
 126,946 eligible non-clobbered LocalRAM windows, and 65,521 GlobalRAM windows.
-This is a CPU-visible-store negative, not an ICU-S-slot negative: exact F33
-firmware and live protected `0x0D7` traffic independently establish an active
-slot-4 command-7 verification domain. Compact deterministic interpretation is
+This negative covers CPU-visible stores only. Exact F33 firmware and live
+protected `0x0D7` traffic independently establish an active slot-4 command-7
+verification domain. Compact deterministic interpretation is
 `data/generated/camry_8965F3307000_secoc_recovery.json`; canonical conclusions
 are in `docs/variants/camry-2026-live-baseline.md` §10.
 
@@ -257,9 +257,9 @@ effective MAIN presses, activation speed agrees with `0x0AA` wheel speed within 
 SET- decrements it and RES+ increments it. The two drives therefore contain 158.846096 s
 of machine-recovered cruise operation / 511,760 incoming frames, still with zero B6.
 A separate repeated state (`0x08A` byte21=`0x0B`, mirrored by `0x081` byte13 and a stable
-`0x412` display payload) adds 73.303384 s / 237,097 frames with zero B6. That state is
-kept as a **lateral/HUD candidate**, not an OEM-named LTA bit, until the current FRC state
-is joined directly. Reproduce with `tools/targets/camry/analysis/analyze_camry_2026_cruise_lta_edges.py`; the
+`0x412` display payload) adds 73.303384 s / 237,097 frames with zero B6. That state
+remains a **lateral/HUD candidate** pending a direct current FRC-state join for OEM LTA attribution.
+Reproduce with `tools/targets/camry/analysis/analyze_camry_2026_cruise_lta_edges.py`; the
 artifact is `data/generated/camry_2026_cruise_lta_edge_census.json` and canonical analysis
 is §20 of the live baseline.
 
@@ -276,10 +276,10 @@ so this capture cannot coexist with a configured vehicle-control safety model.
 
 The route is no longer guessed or auto-probed. The relay-correct 2026-08-27
 post-repin DTC sweep directly reaches FRC `0x792→0x79A` on **Panda logical bus 0**.
-Current-GTS+ “Central-Gateway Bus 1” is Toyota's vehicle-topology namespace, not a
-Panda bus number; the earlier pre-repin normal-harness diagnostic route was Panda
-bus1 and must not be projected through the physical repin unchanged. The poller
-can emit only these two literal 8-byte
+Current-GTS+ “Central-Gateway Bus 1” belongs to Toyota's vehicle-topology
+namespace. Panda uses a separate bus namespace. The earlier pre-repin
+normal-harness diagnostic route was Panda bus1 and must not be projected through
+the physical repin unchanged. The poller can emit only these two literal 8-byte
 SID-`0x22` requests, alternating at 10 Hz per DID:
 
 - `03 22 16 01 00 00 00 00` — FRC P5 DID `0x1601`;
@@ -291,8 +291,8 @@ Control `0=Enabled/1=Disabled`. `0x1914` independently resolves bit8 as
 `0=Cruise Control Not in Operation` / `1=Cruise Control in Operation`. The
 strong operating-context discriminator therefore requires stable
 **LTA Switch=1 + LTA Control=0 + ACC-in-operation=1**, plus independently
-observed vehicle motion and healthy Bus-4 `0x00F/0x0D7`. It remains an OEM-named
-diagnostic operating context, not direct proof of continuous steering torque.
+observed vehicle motion and healthy Bus-4 `0x00F/0x0D7`. This establishes only an
+OEM-named diagnostic operating context. Continuous steering torque requires direct evidence.
 
 Normal `pandad` and `loggerd` remain running. Loggerd records both the matching
 `sendcan` requests and incoming `can` responses; no competing direct-Panda reader
@@ -368,7 +368,7 @@ This configuration depends on all of the following identities and lifecycle deta
 - cumulative persistent stage-5 image SHA-256 `669cedf8c8465ebfd02318cb7708b897b817bc3b40925c89743b64ce49aa01af`;
 - RAM payload/resident/live padded-helper SHA-256 values `01ce9934...fc6c`,
   `31b1b2c3...3a3a`, and `b417e12d...159a`; the distinct `4719c4f2...965a`
-  helper is the later one-shot variant, not the final live steering handoff;
+  helper belongs to the later one-shot variant. The final live steering handoff uses the continuous helper;
 - exact continuous source, binaries, checksums, and replay selection retained in
   `raw-20260910/working-steering/runtime/`;
 - full EPS OFF, NRTD `./f33-secoc install`, direct transition to READY without OFF,

@@ -97,7 +97,7 @@ def main() -> int:
         for region in ("NA", "EU", "JP"):
             regional = index["regions"][region]
             categories = regional["categories"]
-            check(f"{region} P6 Engine is classified by Toyota plugin dispatch, not projected into P5",
+            check(f"{region} P6 Engine classification follows Toyota plugin dispatch",
                   categories["6000"]["database"] == "Engine_CM_P6.ddb"
                   and categories["6000"]["support_family"] == "p6"
                   and categories["6000"]["support_mode"] == "p6-standard"
@@ -129,7 +129,7 @@ def main() -> int:
                   and p6_route["functional_request_address"] == 0x18DB33F1)
 
             dispatch = regional["vehicle_resolver_dispatch"]
-            check(f"{region} VIN10 generation dispatch is exact and 5..19 are an unresolved alternate path, not unsupported",
+            check(f"{region} VIN10 generation dispatch is exact and 5..19 follow an unresolved alternate path",
                   dispatch["vin10_generation_low5"] == {
                       "3": "phase3", "4": "phase4", "20": "phase5", "21": "phase5", "22": "phase6",
                   }
@@ -284,7 +284,7 @@ def main() -> int:
 
         na = index["regions"]["NA"]
         camry = na["vehicles"]["12704"]
-        check("Camry HV remains one Toyota DB vehicle, not the bundle profile",
+        check("Camry HV remains one Toyota DB vehicle",
               camry["name"] == "Camry HV"
               and camry["install_set_ids"] == [8119, 8120, 8121, 27706])
         four_runner = na["vehicles"]["12757"]

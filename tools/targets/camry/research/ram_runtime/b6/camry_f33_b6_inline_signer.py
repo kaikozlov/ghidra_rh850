@@ -335,7 +335,7 @@ class InlineSignerSession:
             sent = 0
             for index in range(start_index, self.bundle.helper_words):
                 word = self.bundle.helper[index * 4:(index + 1) * 4]
-                # FEBE4C34 is a single latest-frame staging mailbox, not a queue.
+                # FEBE4C34 stages only the latest frame in a single mailbox.
                 # Hold each strictly-sequential word across several foreground
                 # ticks so losing one mailbox update cannot strand next_index.
                 for _ in range(WORD_REPEAT_COUNT):

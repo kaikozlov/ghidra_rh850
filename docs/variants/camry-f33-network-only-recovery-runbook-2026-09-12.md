@@ -33,17 +33,17 @@ ordinary EPS CID discovery requires `22 F1 81 -> 62 F1 81` before
 `StartPrepareWrite`, so a totally silent `0x7A1` normally never reaches gateway
 preparation. Only a missing exact package could select the recovered pre-CID
 local-bus flow or another package-specific admission exception; none of the 26
-retained CUWs does. GTS+ is therefore an exact-package/admission experiment,
-not an assumed network wake-up mechanism.
+retained CUWs does. GTS+ therefore tests exact-package admission. A network
+wake-up mechanism remains unproved.
 
 The strongest positive is conditional but real: authenticated RAM execution
 was already accepted by this exact F33 before the incident, and the retained
 incident package has a hash-bound inverse restore payload. If the primary
 application or boot diagnostic executor responds, a network-only restoration
 path exists. A secondary-listener response alone proves application execution
-but cannot request the programming handoff. The unresolved question is
-reachability of the primary executor after the malformed installed call, not
-whether the exact target ever supported the required network writer.
+but cannot request the programming handoff. The remaining unknown is whether the
+primary executor is reachable after the malformed installed call. The exact
+target's earlier network-writer support is established.
 
 No new live request, session transition, gateway preparation, reset, upload, or
 flash operation was performed while preparing this runbook.
@@ -141,8 +141,8 @@ warning/passive/bus-off, the safety route remained correct, and CAN-FD timing
 did not drift. Because a silent single-frame exchange needs no flow control, it
 also requires an aggregate `total_tx_cnt` increase of exactly one across the
 three physical controllers; this is invariant to harness-flip controller
-mapping and proves admission to one hardware TX FIFO. Otherwise the exchange is
-a transport error, not evidence that the ECU was silent.
+mapping and proves admission to one hardware TX FIFO. Otherwise classify the
+exchange as a transport error and leave ECU silence unresolved.
 
 ### 1. Qualify the route through Brake/EPB
 
@@ -180,7 +180,7 @@ target-side diagnostic execution. Interpret the identity pair together:
 | `62 F1 86 01` or `62 F1 86 03` | Exact application F186 implementation is running. |
 | `62 F1 81 02 ...8965F3307000...8A3113303100...` | Expected application identity. |
 | `62 F1 81 02` plus 32 bytes `0x21`, with `7F 22 31` to F186 | Compatible with exact boot. |
-| Placeholder F181 plus positive F186 | Application fallback identity, not boot. |
+| Placeholder F181 plus positive F186 | Application fallback identity. |
 | Any other identity or responder ID | Stop; do not transition sessions or upload. |
 | TesterPresent times out after a positive Brake control | Primary EPS listener remains silent in the tested state; do not add identity requests. |
 
@@ -200,8 +200,8 @@ remains silent. That result is sufficient; do not add identity reads. The
 secondary RDBI object is permitted only in manufacturer session `0x40`, so a
 default-state F181 would only be expected to return an NRC rather than useful
 identity data. Its intended OEM/manufacturing role is unknown, and it likely
-shares the same application DCM executor; it is a discriminator, not an assumed
-bypass.
+shares the same application DCM executor. Use it only to distinguish executor
+liveness.
 
 Do not poll it repeatedly. Its SID-10 object supports only subfunctions `0x01`
 and `0x40`; it does not expose the primary endpoint's `0x03`/`0x02`
@@ -219,8 +219,8 @@ native gateway reply. A receive prefilter discards the unrelated extensions
 `0x0F` and `0x6D` before ISO-TP sees the shared response ID.
 
 Extensions `0x0F` and `0x6D` on the same arbitration IDs are other logical
-nodes. A reply proves the node-`5F` gateway route, not EPS liveness. F186 is
-session state, not gateway firmware identity.
+nodes. A reply proves the node-`5F` gateway route only. EPS liveness still requires
+an EPS response. F186 reports session state. Gateway firmware identity remains unassigned.
 
 Every ordinary exit, transport error, and handled interrupt from the gateway
 block attempts ELM327 parameter `1` restoration three times, verifies safety
@@ -271,8 +271,8 @@ zero utilities. Main Body has 147 Active Tests and Entry & Start has 10, but a
 case-insensitive scan of every label finds no EPS/power-steering supply,
 ignition/IGP/IGR relay, ECU wake/sleep, or ECU reset control. Their superficially
 similar power entries are limited to power-window permission, lighting/wiper
-relays, tuners, and seat/door sensors. This is an installed-catalog absence, not
-proof against a VIN/server-delivered function.
+relays, tuners, and seat/door sensors. These functions are absent from the installed
+catalog. VIN/server-delivered functions remain outside this review's scope.
 
 Toyota's public replacement-ECU procedure explicitly lists 2025 Camry HV EMPS
 as requiring configuration software and says GTS+ adds a `Configure` column to
@@ -307,8 +307,8 @@ package selection at this stage. Enumeration alone does not satisfy the Stage 3
 reprogramming gate. Toyota's April 2026 Techstream Lite FAQ says other J2534
 devices will *likely* work, but Toyota validates and recommends only the
 Mongoose-Plus/MongoosePro family for diagnostic functions; other approved
-devices are described as reprogramming-only.^11 The Mini-VCI attempt is
-therefore a no-purchase discovery experiment, not a supported-interface claim.
+devices are described as reprogramming-only.^11 Treat the Mini-VCI attempt only
+as a no-purchase discovery experiment. Supported-interface status remains unproved.
 
 Perform:
 
@@ -321,9 +321,8 @@ Perform:
    and any live-identified central-gateway or power-supply participant.
 6. If their current Data Lists are supported, record Central Gateway DID `1001`
    (+B/IGP/IGR/ACC), Power Source Control DIDs `1003`, `1005`, and `2001`, and
-   Power Distribution Box DID `5011`. These are supply/routing observations,
-   not EPS wake or reset controls; leave them to GTS+ rather than extending the
-   raw Panda allowlist.
+   Power Distribution Box DID `5011`. These observe supply/routing state only.
+   Leave them to GTS+ and keep the raw Panda allowlist unchanged.
 7. Do not clear codes, run an Active Test, run Initial Setting, or write a key.
 
 ### Record the OEM attempt independently from the EPS-side network
@@ -363,10 +362,10 @@ The witness sets and verifies Panda safety `NOOUTPUT` immediately after the
 USB client opens and again at the capture boundary; that safety mode selects
 the normal harness CAN routing. It records physical Panda buses 0 through 2
 and makes **zero CAN data-frame submissions**—including no ISO-TP flow control.
-`NOOUTPUT` remains electrically ACK-capable; this is a data-frame-transmit-
-disabled witness, not a claim of listen-only electrical behavior. Panda client
-initialization still resets its host communications and reapplies local CAN-
-controller settings over USB. It explicitly pins all three controllers to the
+`NOOUTPUT` remains electrically ACK-capable. This witness disables CAN data-frame
+transmission while permitting electrical ACKs. Panda client initialization still
+resets its host communications and reapplies local CAN-controller settings over USB.
+It explicitly pins all three controllers to the
 exact installation's 500-kbit/s nominal, 2-Mbit/s ISO CAN-FD data timing so a
 prior direct client's persistent data-rate/non-ISO state cannot manufacture
 silence. The tool clears the complete board RX queue at
@@ -392,12 +391,12 @@ exchange within the conservative three-second evidence-correlation window. A
 lone, earlier, stale-bus, or later `50 02` remains only recorded traffic. It
 also invalidates absence claims on Panda RX loss, bus-off, controller reset,
 capture/index mismatch, or unsafe-state drift. Even a valid ordered positive
-proves executor liveness, not a completed repair or package compatibility.
+proves executor liveness only. Repair completion and package compatibility require separate evidence.
 
 The supported Software-as-a-Part UI does not expose a manual assembly/base-
-software tuple entry. Standard TIS **Diagnostics -> Calibrations** is a separate
-vehicle/current-CAL-ID and bulletin search, not a documented blank-ECU
-restoration lookup.^9 It can still be searched without transmitting to the car,
+software tuple entry. Standard TIS **Diagnostics -> Calibrations** searches by
+vehicle/current-CAL-ID and bulletin. Its use for blank-ECU restoration is
+undocumented.^9 It can still be searched without transmitting to the car,
 but an empty result there does not decide whether Software as a Part has a
 VIN-selected package. The exact saved preincident tuple to preserve for package
 review or dealer/Toyota technical escalation is:
@@ -408,9 +407,9 @@ review or dealer/Toyota technical escalation is:
 | Base software 1 | `8965F3307000` |
 | Base software 2 | `8A3113303100` |
 
-These are explicitly historical, identity-bound values from the saved image and
-preincident F181—not a fabricated current live response, a supported manual
-server request, or enough information to infer a CUW filename. Preserve any TIS
+These historical, identity-bound values come from the saved image and preincident
+F181. Current live responses, manual server-request support and a CUW filename remain
+unestablished. Preserve any TIS
 current-CID search result, including a no-result page. An anonymous URL redirect
 or a search hit for only one identifier is not package compatibility. The
 firmware source chain for this tuple is preserved in
@@ -483,7 +482,7 @@ Retain the raw package and SHA-256 before extraction. At minimum, reconcile:
 | Gateway list | If present, reconcile exact `07505F` rather than borrowing `0751`, `0786`, `0F`, or `6D`. |
 | Target/current CIDs | Reconcile `8965F3307000` and `8A3113303100`, or document the explicit blank/restoration rule that legitimately omits them. |
 | New CIDs and CPU/image count | Preserve exactly; do not infer a one-CPU image from a two-record F181. |
-| `IsBlankECU`, restore/update flags, timeout fields | Treat as host/package controls, not proof of an ECU-side recovery mode. |
+| `IsBlankECU`, restore/update flags, timeout fields | Treat as host/package controls. ECU-side recovery mode requires separate evidence. |
 | CID-getter exception fields | Preserve `FlagToSupportGetCID`, `RequestCANIDAllowingTimeout`, and any blank-target rule. The retained P5 rows leave the first two empty; do not assume the absent exact package does. |
 | `ChargeLocalBusEcuReprogrammingFlow` | Preserve its controller diagnostic ID, timing, and enable value. It is the only package-selected flow recovered before ordinary EPS CID discovery; its presence and EPS-power semantics are unproved here. |
 
@@ -532,9 +531,9 @@ local-bus flow; otherwise ordinary target F181 is first. State-changing gateway
 authorization, RoutineControl, communication masking, and periodic fanout are
 downstream of admission. Their exact branch cannot be named without the exact
 package. In the recovered current P5-shaped branch, gateway routines `1011`
-and `1012` require their result value, not merely a `71` start response. This
-incomplete package selection, abort, and cleanup knowledge is why those frames
-must not be recreated in the raw CLI.
+and `1012` require their completion result value. A `71` start response alone
+is insufficient. Package selection, abort and cleanup knowledge remains incomplete,
+so these frames must not be recreated in the raw CLI.
 
 Toyota's general GTS+ flash bulletin recommends IG ON/READY OFF for hybrids,
 accessories off, a connected battery support device, and battery voltage above
@@ -584,19 +583,19 @@ application F181/native EPS traffic are separate completion requirements.
 | ECUReset, ordinary cabin power cycle, or watchdog | Re-enters the still-valid malformed application image; no repaired byte source or reset-class boot selector was recovered. |
 | Peer ECU Active Test / power control | EMPS, Central Gateway, Power Source Control, and Power Distribution Box expose no such controls. Entry/Start and Main Body do have body/lighting/lock/load tests, but exhaustive candidate review found no EPS supply, IGP/IGR/ACC main-supply, network-routing, wake/sleep, or ECU-reset operation. No cataloged peer control power-cycles or programs EPS by proxy. |
 | EPS Initial Setting / Assist Map Clear | Scheduled application/DataFlash work; cannot repair the malformed CodeFlash path and may discard useful state. |
-| Telematics/OTA | Recovered operations target DCM/NAD or a different Phase-6 writer family, not the P5 F33 EPS executor. |
+| Telematics/OTA | Recovered operations target DCM/NAD or a separate Phase-6 writer family. A route to the P5 F33 EPS executor remains unproved. |
 | Hand-built gateway prep | Package/family selection, authorization, success checks, periodic traffic, and P5 abort normalization are incomplete; use exact OEM CUW only. |
 | Other local `07A1` CUW | Wrong calibration/vehicle identity; shared address and protocol family are insufficient. |
-| Security Key writing | Replacement-ECU commissioning, not CodeFlash recovery. |
+| Security Key writing | Commissions a replacement ECU. CodeFlash recovery remains a separate operation. |
 | Historical Panda Windows J2534 driver | Removed upstream in January 2024.^12 The last source forces `SAFETY_ALLOUTPUT`, hardcodes ISO-15765 to Panda CAN1/bus 0, and has no current ELM327 safety parameter or OBD-mux selection. Unmodified, it cannot reach this installation's node-`5F` OBD route and is not an acceptable GTS/CUW interface. Do not install or register it for this attempt. |
 
 The public NHTSA manufacturer-communications corpus was searched for 2025–2026
 Camry Hybrid EPS, software, recovery, OTA, and failed-reflash material. It
 returned the replacement configuration and Security Key bulletins cited here,
 but no public exact-ID failed-flash or silent-EPS recovery bulletin. NHTSA
-publishes manufacturer communications as a distinct dataset.^8 This is a
-bounded public-dataset absence as of September 12, 2026, not evidence that the
-authenticated current TIS service has no VIN-specific package or instruction.
+publishes manufacturer communications as a distinct dataset.^8 This search is
+limited to that public dataset as of September 12, 2026. VIN-specific packages
+or instructions in authenticated current TIS remain outside its scope.
 
 ## Evidence packet to retain
 

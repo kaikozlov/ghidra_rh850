@@ -38,8 +38,8 @@ while leaving the second in the OBD-mux state.
 Official harness schematics add a third dimension: the harness box is designed
 around a **CAN0/CAN2 intercept-relay pair**, while CAN1 is a separate unsplit
 network. The field report that the Toyota-B pinout puts the desired network on
-CAN1 instead of the expected CAN0/CAN2 pair is therefore literal hardware
-topology, not just Panda naming.
+CAN1 instead of the expected CAN0/CAN2 pair therefore describes literal hardware
+topology.
 
 For diagnostics, Panda can still attach directly to that stock CAN1 pair without
 repinning:
@@ -132,8 +132,8 @@ and `elm327_tx_hook` has no parameter-dependent branch. The `0x700..0x7FF`
 11-bit ISO-TP range remains permitted under either routing parameter, so EPS
 request `0x7A1` is allowed with both parameter 0 and parameter 1.
 
-Thus, in this context, ELM parameter 0/1 is a **physical-routing choice**, not a
-UDS-permission choice.
+Thus, in this context, ELM parameter 0/1 selects **physical routing** while
+UDS permissions remain unchanged.
 
 ### Intended openpilot usage is revealing
 
@@ -308,9 +308,8 @@ Harness orientation swaps logical 0 and 2 only.
 ELM diagnostics do **not** depend on the software forwarder. `SAFETY_ELM327`
 calls `set_intercept_relay(false, false)`, `nooutput_init` sets
 `disable_forwarding=true`, and harness initialization leaves the physical relay
-pass-through by default. Thus the dump/programming question is about which
-physical transceiver/network the diagnostic controller is attached to, not about
-Panda synthesizing 0↔2 forwarding while in ELM mode.
+pass-through by default. Thus the dump/programming question is which physical
+transceiver/network the diagnostic controller is attached to.
 
 This also means a successful ELM diagnostic test on bus 1 does not prove that the
 same wiring is suitable for normal openpilot interception. The latter needs the
@@ -515,7 +514,7 @@ change these speed/supply gates, or select a different lower handoff primitive.
 | `param=1,bus=1` is fully equivalent to repinning for normal openpilot interception | **Eliminated** | it leaves the vehicle network on unsplit CAN1 rather than the relay-backed CAN0/CAN2 pair |
 | OBD/gateway path stops forwarding during/reset after `10 02` | **Survives; unproved** | consistent with topology, but no gateway firmware or dual-segment transition capture is pinned |
 | indirect OBD path loses ACK / bus-off stability during transition | **Survives; unproved** | Panda explicitly handles FDCAN2 mux-related ACK errors; no field health trace binds this to the event |
-| old client timeout semantics misclassified a successful async reset | **Strongly plausible contributor, not sufficient alone** | foreign firmware permits reset before final positive response; old tooling treated timeout as failure |
+| old client timeout semantics misclassified a successful async reset | **Strongly plausible contributor; insufficient alone** | foreign firmware permits reset before final positive response; old tooling treated timeout as failure |
 
 ## 14. What static analysis still cannot choose
 

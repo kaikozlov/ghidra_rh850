@@ -42,8 +42,8 @@ def _bridge_process_worker(conn, serial: str) -> None:
     """Own a second SPI Panda handle and send only the stale 0x030 bridge.
 
     Panda's SPI transport already uses an OS flock around each complete transfer.
-    A separate process therefore competes at the kernel lock boundary instead of
-    starving behind the in-process threading.Lock used by UDS/bootstrap traffic.
+    A separate process therefore competes at the kernel lock boundary.
+    This avoids starvation behind the in-process threading.Lock used by UDS/bootstrap traffic.
     This worker never reads CAN and never changes Panda safety/configuration.
     """
     from panda import Panda
@@ -192,7 +192,7 @@ def run(bundle_dir: Path) -> dict[str,Any]:
         s.set_alloutput_mode(panda)
         panda.set_canfd_auto(s.CONTROL_BUS, False)
         # Pre-open the independent SPI writer before capturing the final native
-        # frame so starting replay costs only one Pipe message, not a Panda open.
+        # frame so starting replay costs only one Pipe message.
         bridge=_Process030Bridge(str(panda.get_usb_serial()))
         app=s._make_uds_client(panda,uds_mod,s.ROUTE,timeout=0.3,response_pending_timeout=1.0)
         f181_hex,f181_ascii=s._read_f181(app,uds_mod)
@@ -223,8 +223,7 @@ def run(bundle_dir: Path) -> dict[str,Any]:
         changed=_poll_first_changed_030(panda,replay,timeout=2.0)
         # Stop stale traffic immediately on the first genuinely different 0x030.
         # If none appears, still stop after the bounded observation window and
-        # preserve the remaining application/FRC/telemetry evidence instead of
-        # throwing it away.
+        # preserve the remaining application/FRC/telemetry evidence.
         changed_seen_ns=time.monotonic_ns()
         bridge_result=bridge.stop(); bridge=None
         if changed is not None:

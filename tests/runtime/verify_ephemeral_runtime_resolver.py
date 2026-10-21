@@ -103,7 +103,7 @@ corolla_expected = {
 check("foreign raw completion recovers target-specific queue/table geometry",
       all(cca[k] == v for k, v in corolla_expected.items()), repr({k: cca.get(k) for k in corolla_expected}))
 corolla_records = [mod.parse_record(COROLLA_CF, int(cca["secoc_record_table"], 0), i) for i in range(cca["secoc_record_count"])]
-check("foreign queue-1 record IDs are target-derived, not Sienna-assumed",
+check("foreign queue-1 record IDs derive from target bytes",
       [int(r["can_id"], 0) for r in corolla_records] == [0x00F, 0x0D7, 0x0B6] and
       all(mod.secoc_record_shape(COROLLA_CF, int(r["record_address"], 0)) for r in corolla_records))
 check("software-ID extraction rejects the longer ECU-serial prefix",

@@ -44,7 +44,7 @@ PYTHONPATH=. uv run --python 3.12 --extra test pytest -q
 
 ## 1. The current Lochuan patch now agrees with our Gate-2 patch
 
-The most important semantic change is a correction by upstream, not a new bypass.
+The most important semantic change corrects upstream's earlier bypass interpretation.
 
 The old public manifest at `e7c1f17...` targeted:
 
@@ -203,7 +203,7 @@ A bounded search of local files and Git object histories, GitHub code/forks/rele
 
 A deeper all-history audit recovers more provenance even though it does not recover the manufacturer bytes themselves.
 
-The strongest direct statement is not the README but commit `390ddb730ca24265c7935989e251f45545909d65` itself. Its commit message says the correction was cross-checked against the manufacturer's own CUW flash-programming shellcode, specifically an **`8965F3` series image imported into Ghidra**. The same message says the manufacturer's program loop uses `SUSRDY`/FSTATR bit 11 and that its instruction masks status with `andi 0x7040`. Therefore the `8965F3` + Ghidra provenance and the two most consequential corrected constants come from the correction commit itself, not only from the later rewritten README.
+Commit `390ddb730ca24265c7935989e251f45545909d65` supplies the strongest direct provenance statement. Its message says the correction was cross-checked against the manufacturer's own CUW flash-programming shellcode, specifically an **`8965F3` series image imported into Ghidra**. The same message says the manufacturer's program loop uses `SUSRDY`/FSTATR bit 11 and masks status with `andi 0x7040`. The correction commit itself therefore establishes the `8965F3` + Ghidra provenance and the two consequential corrected constants. The later rewritten README repeats that evidence.
 
 The public repository was also not the original development tree. Its root commit is `37d9dbda1e590b7fe57949950c71545f00d71fb8` (`2026-08-17 03:48:30 +0800`, `docs: define eps patch migration design`). Deleted-but-still-reachable migration reports repeatedly expose the predecessor path:
 
@@ -211,7 +211,7 @@ The public repository was also not the original development tree. Its root commi
 /Users/kevin/Desktop/disable-secoc/sienna-b4512000-rx-secoc
 ```
 
-The Task-4 report at ancestor `1118d031...` says its writer sources were added by **migrating the reviewed sources**, calls the retained writer binaries **previously reviewed** GCC/binutils artifacts, and says the patch-era shared headers were **mechanically migrated**. The public writer therefore descended from this private predecessor; the public repository was a migration/hardening project, not the place where the writer was originally authored or where all source evidence necessarily lived. The pre-public-release history contains no surviving `CUW`, `8965F3`, `*_erase.pt.bin`, or Ghidra disclosure; those details first appear only in the Aug-20 `390ddb7` correction and the following README rewrite. The public-release cleanup therefore did not delete a visible CUW reference from this repository's reachable history—the manufacturer comparison was disclosed afterward.
+The Task-4 report at ancestor `1118d031...` says its writer sources were added by **migrating the reviewed sources**, calls the retained writer binaries **previously reviewed** GCC/binutils artifacts, and says the patch-era shared headers were **mechanically migrated**. The public writer therefore descended from this private predecessor. The public repository records migration/hardening of an already-authored writer; its original source evidence may remain in the private workspace. The pre-public-release history contains no surviving `CUW`, `8965F3`, `*_erase.pt.bin`, or Ghidra disclosure; those details first appear only in the Aug-20 `390ddb7` correction and the following README rewrite. The public-release cleanup therefore did not delete a visible CUW reference from this repository's reachable history—the manufacturer comparison was disclosed afterward.
 
 The public Git history does not contain the CUW itself under another obvious name. An all-ref path/object scan found no `*.cuw`, `*_erase.pt.bin`, Ghidra project, or manufacturer flash-driver artifact. `git fsck --full --unreachable --no-reflogs` found no orphaned/unreachable objects in the fetched clone. The remote advertises only `refs/heads/main`, with no tags. GitHub's retained repository events show creation of `main` on 2026-08-17 followed by ordinary forward pushes and no retained branch-delete event. These negatives cannot prove that GitHub never held a now-garbage-collected object, but there is no surviving evidence of a public CUW commit or a rewritten public branch containing it.
 
@@ -222,7 +222,7 @@ That chronology separates two evidence contributions which the Aug-20 commit mes
 - **register naming/address correction:** already independently available from the RH850/P1M-E hardware manual by Aug 19;
 - **program pacing and error semantics:** the Aug-20 commit specifically attributes FSTATR bit 11 / `0x800` and error mask `0x7040` to the imported `8965F3` manufacturer CUW shellcode.
 
-The most likely location of the missing manufacturer input is therefore **outside the public Git tree**, in Kevin/Lochuan's private reverse-engineering workspace or another local artifact directory used alongside it. The archaeology does not recover an exact CUW filename, local path, SHA-256, Ghidra project name, or transfer source. `T-0035-22.cuw` remains the best independently documented `8965F3` acquisition lead, not a proven filename for Lochuan's personal copy.
+The most likely location of the missing manufacturer input is therefore **outside the public Git tree**, in Kevin/Lochuan's private reverse-engineering workspace or another local artifact directory used alongside it. The archaeology does not recover an exact CUW filename, local path, SHA-256, Ghidra project name, or transfer source. `T-0035-22.cuw` remains the best independently documented `8965F3` acquisition lead. The filename of Lochuan's personal copy remains unproved.
 
 No surviving Lochuan artifact records the **CUW extraction procedure itself**. Across the FW-PATCH history, deleted migration documents, and `eps-telescope` history there is no CUW parser/decryptor, extraction command, `SeedKey`/`Nonce` handling tied to CUW files, `EraseRoutineN` parser, intermediate filename, or output hash. His evidence stops at the two statements that an `8965F3` manufacturer image was imported into Ghidra and that he extracted/disassembled an `*_erase.pt.bin`. The retained `community/blurbdust_secoc_flash_patcher/decrypt.T-0035-22.py` supplies an independently documented community procedure for CUW→plaintext erase-routine extraction, but no surviving evidence proves Lochuan used that script or an equivalent implementation.
 

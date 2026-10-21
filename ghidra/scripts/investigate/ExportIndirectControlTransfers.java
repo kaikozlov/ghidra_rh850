@@ -22,9 +22,8 @@ public class ExportIndirectControlTransfers extends GhidraScript {
                 continue;
             }
             Function f = fm.getFunctionContaining(ins.getAddress());
-            // Ignore decoded bytes that are not owned by a recovered function and
-            // compiler switch-table dispatch. The latter is index control, not a
-            // function-pointer/control-target primitive.
+            // Ignore decoded bytes outside recovered functions and compiler
+            // switch-table dispatch, which performs index-based control.
             if (f == null || "switch".equals(ins.getMnemonicString())) {
                 continue;
             }

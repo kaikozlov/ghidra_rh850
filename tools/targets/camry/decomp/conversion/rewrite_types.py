@@ -185,7 +185,7 @@ def _integer_temporary_type(
             callee, index = found
             if callee == "camry_host_addr":
                 continue
-            # Ghidra's SUBxy reads register bits, not memory through a pointer.
+            # Ghidra's SUBxy reads bits directly from a register.
             if index == 0 and re.fullmatch(r"SUB[1-9][1-9]", callee):
                 continue
             # `(int)name` inside a call is the integer. The bare name is the pointer.
@@ -297,8 +297,8 @@ def _split_integer_pointer_lifetimes(code: str) -> str:
                 break
             if not any(op in {"*", "/", "%", "<<", ">>"} for _at, op in syntax._binary_ops(arithmetic)):
                 continue
-            # This is a split, not blanket pointer demotion: require actual
-            # dereferences before the overwrite, and no pointer use afterward.
+            # Split the pointer's lifetime only when actual dereferences precede
+            # the overwrite and no pointer use follows it.
             if not any(
                 _deref_wraps(code, use.start())
                 or code[c_text._skip_space(code, use.end()):].startswith(("[", "->"))
@@ -546,7 +546,7 @@ def _retype_struct_address_words(code: str) -> str:
 
 
 def _rewrite_packed_stack(code: str) -> str:
-    """Locals the bytes address as one record are one array, not separate slots.
+    """Combine locals into one array when the bytes address them as one record.
 
     Ghidra names each stack byte. -O2 then stores them apart, so a pointer to
     the first slot does not cover the rest.
@@ -711,8 +711,8 @@ def _rewrite_packed_stack(code: str) -> str:
             if is_array:
                 return f"(({cast} *)({slot}))"
             if match.group(0).startswith("&"):
-                # The byte record replaces storage, not the local's pointee
-                # type: (&uStack_24)[i] must still load and stride in halfwords.
+                # The byte record replaces storage while preserving the local's
+                # pointee type: (&uStack_24)[i] must still load and stride in halfwords.
                 return f"(({cast} *)({slot}))"
             if width == 1:
                 return f"{record}[{index}]"
@@ -824,7 +824,7 @@ def _host_index_span(code: str, match: re.Match[str]) -> tuple[int, int, str] | 
 
 
 def _rewrite_scalar_host_indexes(code: str) -> str:
-    """Index a firmware address, not the host pointer of its base.
+    """Apply the index in firmware address space before mapping the result.
 
     `((volatile uint16_t *)camry_host_ptr(base))[index]` adds `index` in the
     host mapping. A large or negative index leaves that mapping. The bytes add
@@ -1196,14 +1196,14 @@ def _rewrite_numeric_record_types(code: str) -> str:
                 + re.sub(r"\buStack_82\b", "record_counter", after)
             )
     if name == "nvm_route_application_result":
-        # 68eba is ld.hu from 2b010 + logical_handle*2, not a struct value.
+        # 68eba is a halfword ld.hu from 2b010 + logical_handle*2.
         code = code.replace("F33NvmApplicationRoute FVar1;", "ushort FVar1;")
         code = code.replace(
             "FVar1 = nvm_logical_application_routes[logical_handle];",
             f"FVar1 = {syntax._typed_load('0x2b010u + (uint32_t)logical_handle * 2u', 'uint16_t')};",
         )
     elif name == "prepare_tag_verification_request_and_bit_lengths_88fc0":
-        # 89002 forms gp+23224 = FEBF12B8, a memcpy destination, not code.
+        # 89002 forms gp+23224 = FEBF12B8 as a memcpy destination.
         code = code.replace(
             "memcpy_forward(boot_relocated_8628,",
             "memcpy_forward(&DAT_febf12b8,",
@@ -1220,7 +1220,7 @@ def _rewrite_numeric_record_types(code: str) -> str:
         )
         code = code.replace("*(byte *)(&pFVar4->handler + 3)", "*((byte *)pFVar4 + 12)")
     elif name == "compute_q15_sine_cosine_turn_angle_70e32":
-        # 70e58/70e74/70e8c are subtraction, not MonitorCurrentRecord loads.
+        # 70e58/70e74/70e8c perform register subtraction.
         for old, new in (
             ("pFVar6[-0x19a].bank1_bias", "(pFVar6 - 0x4000)"),
             ("pFVar6[-0x4cd].bank1_negative_gain + 2", "(pFVar6 - 0xc000)"),
@@ -1311,7 +1311,7 @@ def _rewrite_numeric_record_types(code: str) -> str:
             )
     elif name in {"filter_two_c6b0_transition_targets_ca72a", "filter_two_c7bf_transition_targets_cb82c"}:
         # ca832/cb934 leave the first clamped quotient in r7; the second
-        # quotient goes in r6, not in the overwritten C temporary's r7.
+        # quotient goes in r6. The overwritten C temporary incorrectly reused r7.
         first, first_scale, second, second_scale, callee = (
             ("DAT_febec68e", "DAT_febec6a2", "DAT_febec690", "DAT_febec6a3", "store_c68c_c6a8_with_ones_complements_ca312")
             if name == "filter_two_c6b0_transition_targets_ca72a" else
@@ -1398,7 +1398,7 @@ def _rewrite_numeric_record_types(code: str) -> str:
         code = code.replace("dcm_refresh_response_copy_cursor_from_head_92bd8()", "dcm_refresh_response_copy_cursor_from_head_92bd8(queue_01)")
     elif name == "dispatch_ecm_status_exception_71ae4":
         # This handler tail-transfers to 7162e or exits with EIRET. r10 is
-        # restored CPU context, not an ordinary C return value.
+        # restored CPU context and must retain exception-return semantics.
         code = code.replace("undefined4 dispatch_ecm_status_exception_71ae4(", "void dispatch_ecm_status_exception_71ae4(")
         code = code.replace("  undefined4 in_r10;\n", "")
         code = code.replace("  undefined4 uVar2;\n", "")
@@ -1409,7 +1409,7 @@ def _rewrite_numeric_record_types(code: str) -> str:
 
 
 def _rewrite_protected_registers(code: str) -> str:
-    """Protected register stores must reach the host memory model, not a raw lvalue."""
+    """Route protected register stores through the host memory model's write hooks."""
     registers = {
         name: row for name, row in tree._machine_registers().items()
         if row.get("behavior") == "flmd" and re.search(rf"\b{name}\b", code)
@@ -1437,14 +1437,14 @@ def _rewrite_inlined_mmio(code: str) -> str:
         # Inlined load_u16 / store_u16. FACI also accepts byte commands.
         accesses = {0xffa20000: "uint16_t"}
     elif name == "load_tp_configuration_into_ffc1_ffc2_ffc3_banks_c9a":
-        # DF0/DF8/E00/E2A/E30 store bytes, not the global label's word type.
+        # DF0/DF8/E00/E2A/E30 use byte-width stores despite the global label's word type.
         accesses = {address: "uint8_t" for address in (
             0xffc2400c, 0xffc24010, 0xffc2402c, 0xffc2001c, 0xffc20000,
         )}
     for address, ctype in accesses.items():
         code = re.sub(rf"\b(?:Ram|DAT_){address:08x}\b", syntax._volatile_at(f"0x{address:x}u", ctype), code)
     if name == "advance_snapshot_record_local_and_side_sources_8d15e":
-        # 8d280/8d28c/8d292 are byte loads at 0,1,2, not function values.
+        # 8d280/8d28c/8d292 load bytes from addresses 0,1,2.
         code = code.replace("uStack_37 = reset_vector;", f"uStack_37 = {syntax._typed_load('0u', 'uint8_t')};")
         for address in (1, 2):
             code = code.replace(f"uRam{address:08x}", syntax._typed_load(f"{address}u", "uint8_t"))

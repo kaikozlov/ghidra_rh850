@@ -84,7 +84,7 @@ installer and can be imported into Ghidra.
 Managed assemblies are not required to show native-style `.text` growth after
 recovery. For example, a CP loader can have a larger `.text` than the original
 CLR image. The proof is the same-path installer twin plus exact CP-to-installed
-identity, not a universal section-size heuristic.
+identity.
 
 ## How the extractor works
 

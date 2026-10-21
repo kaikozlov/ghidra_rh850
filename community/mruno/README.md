@@ -83,8 +83,8 @@ reproducible repository result.
 ## Read-only preflight artifacts received 2026-09-14
 
 Both files below are retained unchanged. The Python file is the contributor's
-troubleshooting variant, not the current shipped implementation; it was read and
-compared, not executed against a vehicle during this review.
+troubleshooting variant. The current shipped implementation is separate.
+This review read and compared the variant without executing it against a vehicle.
 
 | File | Size | SHA-256 | Interpretation |
 |---|---:|---|---|
@@ -157,7 +157,7 @@ The startup logs are not relay-side attribution evidence: startup uses ELM327
 with the intercept relay bypassed. In the 2026-10-11 captures, selected ordinary
 chassis frames `0x030`, `0x101`, and `0x51E` appear on logical bus 2 while the
 EPS diagnostic `0x7A9` response is observed on both buses 0 and 2. This asymmetry
-is a discriminator candidate, not proof of EPS-side ownership. The maintained
+is only a candidate discriminator of EPS-side ownership. The maintained
 read-only next test is `tools/toyota eps-probe --open-relay --execute`, which
 opens the relay with debug allOutput passthrough and polls F181 independently on
 logical buses 0 and 2 before restoring the bypassed ELM327 state.
@@ -178,8 +178,8 @@ C3X-specific four-frame transport defect:
   every packed CAN record in one endpoint write and calls `can_send()` for each;
   this is not a one-CAN-frame-per-SPI-transfer interface.
 - Endpoint 3 NACKs when its CAN-TX flow-control gate is not ready. Python's
-  `PandaSpiHandle.bulkWrite()` propagates/retries those NACKs; the retained Crown
-  failure is instead `no request-signer response`, not a SPI NACK/timeout from
+  `PandaSpiHandle.bulkWrite()` propagates/retries those NACKs. The retained Crown
+  failure is `no request-signer response`. It reports no SPI NACK/timeout from
   the send operation.
 - Panda HITL contains bulk `can_send_many()` stress/integrity coverage in
   addition to explicit SPI control/bulk transfer tests.
@@ -234,7 +234,7 @@ eight payload bytes through both routes: handle 50 uses global transmit buffer
 22 and handle 51 uses buffer 23. A separate resource-7 completion run consumes
 the helper's `00F0` software-confirmation value and reaches the same no-op
 handler. The old handle-51/resource-7 payload was consequently using a valid
-alternate mailbox, not a mailbox incapable of sending `0x7A9`.
+alternate mailbox capable of sending `0x7A9`.
 
 The observable difference is availability. `8153A` returns 2 without issuing a
 frame when the selected transmit-buffer status has any `TMSTS & 0x1E` bit set.
@@ -246,8 +246,8 @@ idle and does not prove its value on Mruno's EPS.
 
 The current profile retains handle 50/resource 6 because it matches the stock
 primary association and every successful application F181 response proves that
-mailbox operational on the field unit. This is a conservative stock-aligned
-selection, not a correction of an ID-invalid resource 7. None of the retained
+mailbox operational on the field unit. This conservative selection aligns with
+stock behavior. Resource 7 also accepts the ID. None of the retained
 failed runs captured resident counters, the lower return value, or either
 transmit-buffer status, so they cannot establish mailbox selection as the
 cause.
@@ -282,7 +282,7 @@ request signer:
 | ICU-S signer | Native-B6 equality and two moving runs completed through Crown `0x87662`, type 1 / selector 4; signed counts advanced `9 -> 19 -> 29` with matching command-five attempts and clean status | Same wrapper, globals, freshness encoder, and type 1 / selector 4 configuration; this rules out a generic Crown slot-4 or command-five incompatibility |
 | Helper memory | The 588-byte helper was loaded after startup into LocalRAM `FEBF0000` and read back through SID `0x23` before arming | The request signer instead executes from GlobalRAM `FEF07C00`; exact MPU, no-reference, startup-retention, cache-publication, and instruction-machine checks cover it, but the B6 run is not a live proof of that placement |
 | Host ingress | Valid ISO-TP `C6/C7` single frames reached the stock DCM buffer on pre-repin Panda bus 1 | Four deliberately non-ISO-TP `0x777` frames are tapped from the software RX ring on post-repin bus 0; the old run does not prove this path |
-| Signed domain | The helper signed Data ID `0x00B6` using freshness reconstructed from the native B6 | The helper signs Data ID `0x008A` with a private message counter in the authenticated current trip/reset epoch; the common command-five ABI transfers, not the complete domain behavior |
+| Signed domain | The helper signed Data ID `0x00B6` using freshness reconstructed from the native B6 | The helper signs Data ID `0x008A` with a private message counter in the authenticated current trip/reset epoch; only the common command-five ABI transfers across these domains |
 | Result publication | The helper mutated the already queued native B6 and needed no private CAN response | The request signer must transmit an eight-byte `0x7A9` response through the lower CAN writer; the B6 result cannot validate this new egress |
 | Panda route | Stock-harness `bus1,param1` | The maintained repin deliberately moves EPS diagnostics and signer traffic to `bus0,param1`; the retained startup catches and exact application F181 responses prove that diagnostic route |
 
@@ -315,7 +315,7 @@ this detects a wrong Python/openpilot environment before vehicle access. This
 host inspection gap did not cause the recorded October timeouts because those
 runs reached Panda, programming, and application F181.
 
-**2026-10-16 cross-vehicle audit: remaining live discriminators.** Current universal C signer firmware contracts resolve primary lower CAN response HTH 50/resource 6 on Crown, 53/resource 6 on Camry and 50/resource 6 on Corolla. All registered images independently resolve classic functional `0x777` acceptance, software ring producer, common TAUJ0 5-ms period, native 46-bit freshness encoder and type1/selector4 synchronous command-5 wrapper. This is exact-byte-derived portability evidence, not live Crown request-signer success. Crown's September B6 helper established live slot4 signing but did not exercise the current helper's GlobalRAM code, four raw-ring fragments, independent `0x008A` freshness epoch/message counter or separate `0x7A9` egress. The Oct 10–12 host records do not measure those stages. In particular, the older host's apparent release-Panda `allOutput` failure is not a complete explanation for ELM-labeled retries without the newer `signer_session` witness. The current stock-primary mailbox removes a potential resource-7 availability dependency but does not establish that the prior alternate resource was ID-invalid. Evaluate the current session telemetry and resident counts in order; no new speculative Crown payload/flash modification is justified by these logs.
+**2026-10-16 cross-vehicle audit: remaining live discriminators.** Current universal C signer firmware contracts resolve primary lower CAN response HTH 50/resource 6 on Crown, 53/resource 6 on Camry and 50/resource 6 on Corolla. All registered images independently resolve classic functional `0x777` acceptance, software ring producer, common TAUJ0 5-ms period, native 46-bit freshness encoder and type1/selector4 synchronous command-5 wrapper. This establishes exact-byte-derived portability only. Crown's September B6 helper established live slot4 signing but did not exercise the current helper's GlobalRAM code, four raw-ring fragments, independent `0x008A` freshness epoch/message counter or separate `0x7A9` egress. The Oct 10–12 host records do not measure those stages. In particular, the older host's apparent release-Panda `allOutput` failure is not a complete explanation for ELM-labeled retries without the newer `signer_session` witness. The current stock-primary mailbox removes a potential resource-7 availability dependency but does not establish that the prior alternate resource was ID-invalid. Evaluate the current session telemetry and resident counts in order; no new speculative Crown payload/flash modification is justified by these logs.
 
 The next result must retain the current `signer_session` and
 `resident_state_after_probe` objects. Their boundary is diagnostic:

@@ -47,9 +47,9 @@ The archived continuous helper replaces every distinct native B6 while the
 last C7 sequence is nonzero. Its branch-to-NOP change removes one-shot
 consumption without introducing command expiry. Native B6 arrivals can
 therefore keep a stale host target active after host updates cease. The
-historical steering witness does not establish host-loss behavior. This is an
-adapter lifecycle defect, not a reason to add another engagement policy to
-CarController or Panda.
+historical steering witness does not establish host-loss behavior. The defect
+belongs to the adapter lifecycle. CarController and Panda retain their existing
+engagement policies.
 
 ## Completed independent radar-unit review
 
@@ -73,8 +73,8 @@ validity/lifecycle is established.
 
 The corrected full August reconstruction consumes each time-bounded occurrence
 rather than overwriting repeated counter values: 30,532 / 35,994 complete
-four-record bank bursts. Its kinematic agreement is corroboration, not a
-substitute for the independent unit anchors above.
+four-record bank bursts. Its kinematic agreement corroborates the independent
+unit anchors above.
 
 ### TSS3 0x123/16 is a new Profile-5 radar-status PDU
 
@@ -136,8 +136,8 @@ CodeFlash patch or new memory region was introduced. The helper consumes a
 changed host generation as a seven-foreground-tick lease, polls it even when
 no native B6 is queued, never renews an unchanged generation, and leaves native
 B6 untouched on expiry or sequence zero. At the nominal 5-ms foreground period,
-this is 35 ms of host-command receive-loss supervision, not a new engagement
-policy in openpilot.
+this provides 35 ms of host-command receive-loss supervision. Openpilot's
+engagement policy remains unchanged.
 
 `VerifyCamrySignerHostLiveness.java` executes the actual linked instructions in
 Ghidra emulator-local memory. All 34 liveness assertions pass, including held-command
@@ -145,8 +145,8 @@ expiry, empty-queue aging, sequence wrap, zero release, normal 50-Hz updates,
 and no resurrection across 520 further scheduler invocations. The archived
 continuous helper fails the same expiry assertion. The emulator intercepts
 NOP's custom pcode operation with its architectural no-op behavior and stops
-before the first stock memory-copy/crypto call: this is a host-admission/liveness
-test, not silicon command-5, full ECU scheduling, or vehicle validation.
+before the first stock memory-copy/crypto call. The test covers host admission
+and liveness only. Silicon command-5, full ECU scheduling and vehicle validation remain outside its scope.
 
 The replacement method now rejects `replace-once` before sending a C7
 substitution when a continuous/supervised helper is selected. Those helpers can legitimately
@@ -220,9 +220,9 @@ against the archived continuous binary: all 16 received/committed low-counter
 combinations at three target angles, three command-5 failure modes, and an epoch
 mismatch. It compares the actual helper's domain, call-boundary inputs,
 freshness witness, and final queue image. Encoder/crypto callees are supplied
-identical deterministic stubs, not mistaken for a silicon CMAC oracle. All 86
-compiled-instruction assertions pass; the intended change is command expiry,
-not a changed signing construction or native-frame mutation tuple.
+identical deterministic stubs. Silicon CMAC behavior is outside this test's scope.
+All 86 compiled-instruction assertions pass. Command expiry changes while the
+signing construction and native-frame mutation tuple remain unchanged.
 
 ## Stock topology and ordinary controller/safety corrections
 
@@ -315,8 +315,8 @@ no unsupported confidence percentage or sensor-source enum is assigned.
 
 The decoder now consumes **every** source cycle in a host publication, so an
 intermediate deletion/new-track flag is not lost by reading only the last CAN
-parser value. Both cycle bytes increment independently modulo256, not as a
-16-bit counter. Missing cycles retire identity because they may hide a one-frame
+parser value. Each cycle byte increments independently modulo256. Missing cycles
+retire identity because they may hide a one-frame
 lifecycle event. Duplicates, mixed-cycle geometry/motion, bad CRC, truncation and
 wrong buses cannot manufacture an update; ordinary CAN timeout clears stale
 tracks and publishes a CAN error rather than waiting forever for a missing
@@ -324,8 +324,8 @@ trigger PDU. End-old/start-new ordering is explicit.
 
 The actual opendbc parser replays all 60,969 held-out bank pairs as **20,323
 complete updates**, **308,111 qualified point observations**, **17,868 observed
-identity replacements**, and **zero reported CAN errors**. This is a source
-replay result, not a new on-vehicle fusion/control qualification. Together with
+identity replacements**, and **zero reported CAN errors** in source replay.
+On-vehicle fusion/control qualification remains separate. Together with
 the already independent distance, speed and lateral-sign anchors, the supported
 Camry decoder is now selected by normal `CarParams` (`radarUnavailable=False`).
 Corolla has no radar DBC assignment and remains model-only; no cross-variant
@@ -358,9 +358,9 @@ non-underflow after final recovery. Only interrupt save/restore callees are
 substituted; there is no concurrent actor in this emulator-local test.
 
 Camry `CarState.steerFaultTemporary` now reports this current fault/inhibit
-aggregate through the ordinary upstream interface. "Temporary" is current
-steering-unavailability semantics, **not** a prediction that a physical defect
-will repair itself. `steerFaultPermanent` is not fabricated from the same
+aggregate through the ordinary upstream interface. "Temporary" describes current
+steering unavailability. Physical defect recovery remains unpredicted.
+`steerFaultPermanent` is not fabricated from the same
 one-bit aggregate: neither exact cause nor restart-required status can be
 reconstructed from it. Other unrepresented classes remain outside this selected
 fault projection. H/F and Crown are not assigned the F33 policy by analogy.
@@ -405,8 +405,8 @@ as-yet-unrecovered status or diagnostic source.
 
 The additional verifier executes stock OR, RTE, readiness and recovery code;
 only scalar packing/status submission is replaced by argument observation.
-It checks the actual stock packer arguments and both values, not merely a
-Python reconstruction of the RTE chain. **59 assertions pass**, adding to the
+It checks the actual stock packer arguments and both values. **59 assertions
+pass**, adding to the
 85 live hardware-fault assertions. Source, generated evidence and runnable
 verifier are `analyze_camry_f33_cooperative_fault_projection.py`,
 `data/generated/camry_f33_cooperative_fault_projection.json`, and
@@ -441,15 +441,15 @@ A separate shorter-window screen (−300..−25 ms, 0..250 ms) covers 80,532 sho
 field layouts over the 20 streams with complete coverage and also yields no
 fully reproduced candidate.
 
-These are method-bounded negatives, not proof that an automatic-cancel command
-is absent. They do not exclude noncontiguous or context-dependent encodings,
-sparse traffic outside the windows, or an automatic command not exercised by
-physical-switch cancellation. The search must not turn a post-cancel state
+These negatives are limited to the stated methods. An automatic-cancel command
+may still exist through noncontiguous or context-dependent encodings, sparse
+traffic outside the windows, or a command not exercised by physical-switch
+cancellation. The search must not turn a post-cancel state
 echo into an accepted command merely because its timing is correlated.
 
 The current FRC catalogue has 69 routine Active-Test candidates and no direct
 Active-Test table. Its only cancel-named test is **PDA Cancel Notification
-Display**, not a cruise cancel actuator. DID 1B01 is grouped with ISA switch
+Display**, which controls notification display. DID 1B01 is grouped with ISA switch
 recognition/output monitors; diagnostic bit positions do not establish CAN
 positions or writable DRCC commands. No maintenance/test routine, artificial
 fault, ECU communication suppression, or replay of a protected switch packet
@@ -459,11 +459,11 @@ Retained comparison-source review does not supply the missing contract:
 legacy Toyota implementations send their established `0x343`/PCM cancel
 commands, whereas the retained TSS3 Corolla branch returns from its TSS3
 controller before that legacy path. Neither constitutes target-native Camry
-receiver evidence. The local Camry CUW `T-0051-26` is node 0724 Engine/MG, not
-FRC or Brake/Skid; the repository's exact EPS firmware is not the missing
-cruise-command receiver image. The next unresolved software fact is an
-ordinary, accepted cancellation command and its receiver/transport ownership,
-not whether the deleted wrong-bus fake-brake implementation passes a road test.
+receiver evidence. The local Camry CUW `T-0051-26` is node 0724 Engine/MG;
+FRC and Brake/Skid receiver images remain missing. The repository's exact EPS
+firmware cannot fill that gap. The next unresolved software fact is an ordinary,
+accepted cancellation command and its receiver/transport ownership. The deleted
+wrong-bus fake-brake implementation remains withdrawn.
 No automatic-cancel sender is added in this checkpoint.
 
 Source/reducer: `tools/targets/camry/extract/extract_camry_2026_cancel_windows.py`,
@@ -489,8 +489,8 @@ the 17-source held-out reduction, it preserves original CAN publication
 boundaries on six raw-source segments. Two are stock-harness bus0 captures,
 and each produces 1,199 complete updates with zero reported CAN errors. Historical
 repin inputs are explicitly remapped by the test; stock-harness sources are not.
-This verifies source placement and parser behavior, not healthy EPS operation
-in the incident-era stock-harness captures or a road qualification of fusion.
+This verifies source placement and parser behavior only. Healthy EPS operation
+in incident-era stock-harness captures and road fusion qualification remain unproved.
 
 The six explicitly selected analysis suites all pass: radar anchors,
 radar lifecycle reduction, actual-opendbc radar replay, current hardware-fault
@@ -516,7 +516,7 @@ The existing ADAS CRC result remains 16,526 valid frames and zero failures.
 The expanded screen finds cancellation-related chassis outputs, including
 `0x1B2` and `0x5F6`, that the old ADAS-only negative did not cover. It does not
 recover a new ADAS-bus cancellation bit even with this earlier window. Timing
-is host-publication timing, not an arbitration-level causal ordering.
+records host publication. Arbitration-level causal ordering remains unresolved.
 
 Likewise, **an unsplit bus does not by itself make an event-only cancellation
 command impossible**. It prevents suppressing and replacing a native source
@@ -526,7 +526,7 @@ architectural distinction; their receiver behavior is not evidence that this
 Toyota accepts the same technique. The removed brake-copy implementation is
 still not qualified, and a bus-number change alone would not qualify it.
 
-### `0x1B2` is a switch-event mirror, not an established control API
+### `0x1B2` switch-event mirror
 
 The original stationary recording
 `targets/camry-2026/raw-20260826/camry_nrtd_cruise_can_sync_20260826.json.gz`
@@ -546,15 +546,13 @@ recognized switch events. The three mirror pulses outlast the physical switch
 assertions; this is not a direct unlatched copy of the switch level. A second
 stationary cancellation indication appears at `0x5F6 B4[7]`.
 
-The 184 stationary `0x1B2/32` frames have zeros after byte2. That is an observed
-payload property, **not** proof that every possible receiver accepts unauthenticated
-commands on this identifier. No signed/unsigned receiver policy follows from
-zeros in a recorded trailer.
+The 184 stationary `0x1B2/32` frames have zeros after byte2. This observed
+payload property leaves receiver authentication policy unresolved.
 
 On the historical repin, `0x1B2` is observed on the FRC-side chassis link, bus2.
 Four original stock-harness source windows place `0x1B2`, `0x5F6`, `0x198`,
-`0x19C`, and the physical `0x0FE/0x101` traffic on unsplit bus1. This closes the
-physical observation location, not logical receiver ownership behind the link.
+`0x19C`, and the physical `0x0FE/0x101` traffic on unsplit bus1. This establishes
+the physical observation location. Logical receiver ownership remains unresolved.
 
 The material missing fact is still **an ordinary receiver that acts on an
 externally supplied cancel event**. The OEM diagnostic name and the recovered
@@ -593,7 +591,7 @@ a release without a competing button/brake input. It separately rejects
 forwarded-only echoes, missing release, missing correct-bus input coverage,
 and competing driver input before release. A driver action after release does
 not retroactively confound the earlier observation. These synthetic cases
-validate the classifier, not a Toyota receiver.
+validate classifier behavior only. Toyota receiver acceptance remains unproved.
 
 The current cereal schema does not expose the former `fd` field. This
 extraction deliberately makes **no new FDF/BRS claim** from a defaulted
@@ -632,9 +630,8 @@ sender completion follows from the new passive mappings.
 
 ### Independent control-layer cancellation causality
 
-An additional reduction starts at the ordinary
-`carControl.cruiseControl.cancel` rising edge, rather than discovering episodes
-from a particular outgoing CAN identifier. Its 79 explicitly retained requests
+An additional reduction selects episodes from the ordinary
+`carControl.cruiseControl.cancel` rising edge. Its 79 explicitly retained requests
 come from 71 SHA-256-checked original rlogs across 16 routes. This is a different
 population from the 58 actual `sendcan 0x101` episodes described above; the two
 counts must not be added or described as interchangeable.
@@ -650,8 +647,8 @@ checksum and the recovered switch's complementary bit predicate; it does not
 claim cryptographic verification of the protected switch trailer.
 
 Native cruise is active before all 79 requests. Of those, 76 have an observed
-release within 500 ms. Three have no release in that interval and are retained
-as such, not converted into successful cancellation. In every release case,
+release within 500 ms. Three have no release in that interval and retain that
+classification. In every release case,
 the already preceding driver input prevents attributing release to an
 independently initiated host command. `sendcan` is recorded as an attempt,
 never as a receiving ECU acknowledgement. Missing event names in the old
@@ -660,9 +657,9 @@ never as a receiving ECU acknowledgement. Missing event names in the old
 The analysis also distinguishes a driver input between host request and cruise
 release, an input only after release, missing input coverage, already-inactive
 cruise, and an unwitnessed/held host flag. Even a release without a competing
-observed driver input is only a candidate for further analysis, not an automatic
-acceptance claim: unobserved causes and receiver ownership still matter.
-These are offline evidence classifications, not new controller timing policy.
+observed driver input is only a candidate for further analysis. Unobserved causes
+and receiver ownership still prevent an acceptance claim.
+These classifications apply to offline evidence only. Controller timing policy remains unchanged.
 
 Reproduction uses
 `tools/targets/camry/analysis/analyze_camry_2026_cancel_request_causality.py`,
@@ -695,9 +692,8 @@ fixing its project-root import bootstrap. Python lint and diff checks pass.
 
 The 2025 Camry service information, with procedures applicable from April
 2024, gives a more specific investigation target than the earlier generic
-"FRC/Brake receiver" wording. This is a same-generation 2025 circuit reference,
-**not** proof that the maintainer's 2026 ECU has identical software or a given
-CAN receive contract.
+"FRC/Brake receiver" wording. This same-generation 2025 circuit reference leaves
+the maintainer's 2026 ECU software and CAN receive contract unverified.
 
 The factory Steering Pad Switch Circuit description assigns primary cruise
 control to the **hybrid vehicle control ECU**. Its driving-assist, +RES,
@@ -720,8 +716,8 @@ camera-side switch-event mirror remains an observable output until its
 accepting receiver is established. Conversely, the direct circuit does **not**
 prove that the hybrid controller lacks an additional CAN cancellation input,
 and unsplit-bus placement alone does not exclude a cancel-only request.
-`0x1B2` therefore remains a candidate requiring receiver evidence, not a proved
-command or a disproved command.
+`0x1B2` therefore remains a candidate whose command status requires receiver
+evidence.
 
 The actual retained GTS registry keeps the following nodes distinct:
 
@@ -734,7 +730,7 @@ The actual retained GTS registry keeps the following nodes distinct:
 
 The source is `data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json`,
 `profile.ecus` and the corresponding category bindings. The retained
-`T-0051-26.cuw` is **node0724 Motor Generator**, not the hybrid-control node07D2.
+`T-0051-26.cuw` is **node0724 Motor Generator**. Hybrid Control is node07D2.
 The earlier convenient "Engine/MG" shorthand must not be interpreted as
 possession of the cruise controller's application.
 
@@ -742,16 +738,16 @@ All ten members of that package were inspected through the existing validated
 CUW parser and S-record decoder. Their records pass framing/checksum validation,
 but the resulting application and routine bodies remain opaque; executable
 receiver code was not recovered. The package names `8A2810602100`,
-`8A2A10602100` and `8A2910601100` describe the MG package's logical blocks, not
-a recovered exact-Camry hybrid-control application. Do not search these opaque
-bytes for a coincidental CAN ID and call it a receive descriptor.
+`8A2A10602100` and `8A2910601100` describe the MG package's logical blocks.
+An exact-Camry hybrid-control application remains unrecovered. Do not identify a
+receive descriptor from a coincidental CAN ID in these opaque bytes.
 
 The ordinary current GTS Active-Test catalogues were checked for the retained
 Engine, MG, Hybrid, Brake and FRC categories. No normal cruise-cancel actuator
 was recovered. The separate `CCS_P5` and `HV_CCS_P5` views have data/diagnostic
 and history tables but no direct or routine Active-Test tables in this corpus.
-That is a bounded host-tool result, not proof of firmware absence. FRC's
-"PDA Cancel Notification Display" remains a display test, not a DRCC command.
+These host-tool results leave firmware support unresolved. FRC's
+"PDA Cancel Notification Display" controls notification display.
 
 **Disposition:** prioritize the Hybrid Control receiver (`0x7D2`) and its
 camera/brake request interfaces when acquiring additional firmware or receiver
@@ -762,7 +758,7 @@ confounded historical host attempts currently establishes automatic-cancel
 acceptance. No sender, Panda permission, diagnostic control or vehicle command
 was added in this investigation. The production feature remains unimplemented.
 
-### Follow-up: select native releases, not host requests or physical CANCEL
+### Follow-up: select native releases
 
 The next pass changes the selection criterion. It scans every native chassis-side
 `0x08A` cruise-latch falling edge in the **463 hash-checked sources across the ten
@@ -777,7 +773,7 @@ as the separate 79 rising host requests across sixteen routes.
 The detector evaluates the whole CAN publication before attributing a release,
 keeps malformed or missing input unknown, and does not carry an engaged state
 across a cruise observation gap exceeding 100 ms. The 100-ms observation-gap and
-500-ms context limits are declared analysis screens, not runtime control policy.
+500-ms context limits apply only to offline analysis. Runtime control policy remains unchanged.
 It retains raw pre-edge context for every release, original source identities,
 and all native CAN, host sendcan, carControl and speed observations within three
 seconds of the three selected edges. The new fixture is 621 KiB compressed;
@@ -836,7 +832,7 @@ readable matching receiver implementation can close that fact; another search
 of button mirrors cannot substitute for it. No production openpilot/opendbc or
 Panda code, authentication path, EPS image, or vehicle state was changed.
 
-Validation for this follow-up: **15 new native-release tests pass**. The native-release, existing host-request-causality and existing cancellation-ownership suites all pass (**3 suites, no failures or skips**). Targeted Python lint and `git diff --check` pass. These are analysis results, not a cancellation-feature qualification.
+Validation for this follow-up: **15 new native-release tests pass**. The native-release, existing host-request-causality and existing cancellation-ownership suites all pass (**3 suites, no failures or skips**). Targeted Python lint and `git diff --check` pass. These results qualify the analysis only. Cancellation-feature qualification remains absent.
 
 
 ## September 16: 0x160 role and causality correction
@@ -847,8 +843,8 @@ matches native B4:B5 closely with cruise off (r=0.971345/0.988851 in the two
 complete August captures), and B4:B5 stays zero until 223–262 ms after wheel
 motion in three stock resumes. In all 1,249 counter-exact combined-trial pairs,
 intact native B12 predicts the chassis result better than replacement B12
-(r=0.930230 versus 0.700465 at nearest time). TX returns establish transport,
-not receiver acceptance. The former "proves influence" wording is withdrawn.
+(r=0.930230 versus 0.700465 at nearest time). TX returns establish transport only.
+Receiver acceptance remains unproved. The former "proves influence" wording is withdrawn.
 
 Full source populations, timing/selection limits, GTS vocabulary boundaries,
 and reproduction commands are in
@@ -863,8 +859,8 @@ The maintained [longitudinal evidence packet](camry-2026-longitudinal-evidence.m
 now includes an independent cross-check of camera B4:B5 against native chassis
 `0x13C`, packed ego speed against valid raw wheels, and B12 alignment against
 native `0x0CA`. Cruise-off fine-field correlations are 0.979857/0.988391 and
-moving speed correlations are 0.999758/0.999936. These are affirmative
-state-publication evidence, not just an absence of command acceptance.
+moving speed correlations are 0.999758/0.999936. These positively support
+state publication.
 
 The B12 lag advantage is shallow and sample-grid dependent; it is not a
 measured ECU latency. The original replacement trial still does not establish
@@ -937,4 +933,4 @@ The ID/allocation pair now has strong B6/B7 structural candidates, but its upper
 lower ordering plus shift/EPB/override/priority and 57D3 validity remain unresolved,
 while ordinary FRC state/display
 and ego-motion publications exist on separate PDUs. Treat `0x08A` as the central
-request envelope, not as an exhaustive inventory of FRC egress.
+request envelope within this broader FRC egress set.

@@ -60,7 +60,7 @@ def main() -> int:
     assert short["first_relative_s"] == short["last_relative_s"] == 2
     assert "fd" not in short  # Length alone does not establish the frame format.
 
-    # A sendcan-only file is valid input, not evidence of CAN receive coverage.
+    # A sendcan-only file is valid input with no CAN receive coverage.
     tx_only = scan([event("sendcan", 6, [frame(0x7A1, 1)]),
                     event("sendcan", 7, [frame(0x7A1, 1)])])
     assert tx_only["duration_s"] == 0 and tx_only["wall_start_utc"] is None

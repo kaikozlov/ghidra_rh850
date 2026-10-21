@@ -2,7 +2,7 @@
 """Shared structural constants for exact Corolla-H evidence/build pairs.
 
 Target identity and byte-table coordinates live here; acquisition files resolve
-through the analysis-target registry (capture roots), not ad-hoc repo joins.
+through the analysis-target registry (capture roots).
 Semantic proof logic remains in the individual extractors/builders.
 """
 from __future__ import annotations

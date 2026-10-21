@@ -32,7 +32,7 @@ write; it is not a new post-incident whole-flash readback.
 - Manufacturer: `REFERENCE/r01uh0585ej0120_manual.pdf`, **RH850/P1M-E Hardware
   Rev.1.20**, printed pages 215, 219–220, 244–250, 257, 261, 2530, 2860–2861,
   and 2867. The address-space, operating-mode, ECC and MPU tables were also
-  visually checked in rendered pages, not just text extraction.
+  visually checked in rendered pages alongside text extraction.
 - Manufacturer cross-check: **RH850/P1M-E Datasheet R01DS0505ED0100**, pp.1–2,
   master/checker lockstep and the R7F701381 product row.
 
@@ -51,8 +51,8 @@ not used for the conclusions below.
 
 ## 1. The hook's guard does not provide an external off switch
 
-The malformed instruction is inside `0x7A254`, not the first instruction of
-the main loop. The caller tests `uint16(FEBE3DF2) == FE01`. That initially looked
+The malformed instruction is inside `0x7A254`. The caller tests
+`uint16(FEBE3DF2) == FE01`. That initially looked
 like a possible way to retain diagnostics while avoiding the hook.
 
 Exact initialization `0x7A132` starts that state at `FD02`, runs the communication
@@ -75,9 +75,9 @@ reception with request execution. The order inside `0x7A254` is:
 ```
 
 `0x79EDE → 0x809FE → 0x808D6 → 0x80884` can drain received frames before the bad
-call, subject to its ordinary initialized-state/ring conditions. This is a
-static ordering result, not proof that a particular incident request arrived
-in time.
+call, subject to its ordinary initialized-state/ring conditions. This establishes
+static ordering only. The arrival time of any particular incident request remains
+unproved.
 
 The exact owner-0 table at `0x21A24` dispatches six callback classes. Class 2
 is the diagnostic path: records at `0x21FA0` contain `7A1`, `777`, and `7A0`;
@@ -99,8 +99,7 @@ family. `0x920BE` allocates/starts reception; `0x92152 → 0x93DE8` copies the
 request. On successful completion, `0x921D2 → 0x91F72 → 0x92B4A` initializes
 request state and writes `FEBE5964 = 10` through `0x92A86`. Timer arming through
 `0x98B3A` writes deadlines/state. `0x989EC` appends an event to a ring; it does
-not execute the event inline. These paths prepare a request, not an immediate
-programming handoff.
+not execute the event inline. These paths prepare a request for later processing.
 
 The ordinary foreground ordering is independently present in raw calls:
 
@@ -143,8 +142,8 @@ The `FEBF1194` installers select fixed driver callbacks (`880E0`, `888D0`,
 `88D04`, `89114`) with complement guards; initialization also clears the cell.
 They did not reveal an alternate diagnostic interpreter or boot handoff.
 The periodic communication path `667B6 → 7A232` is separate from the poisoned
-foreground aggregate, but its reviewed children are peripheral/ring maintenance,
-not the normal DCM worker.
+foreground aggregate. Its reviewed children perform peripheral/ring maintenance.
+The normal DCM worker remains on the foreground path.
 
 The canonical direct callers of `988C2`, `98946`, `58B5E`, and `667E6` remain
 the foreground chain above. A whole-image literal-pointer check found no ROM
@@ -153,7 +152,7 @@ specific dependency; it does not prove absence of arbitrary computed aliases
 or unmodeled execution. Adjacent non-vector data was not counted as interrupt
 handlers.
 
-## 4. The post-branch fault is architecture-predicted, not live-captured
+## 4. Architecture prediction of the post-branch fault
 
 The incident bytes remain distinct from the stock image.  The recorded four-byte
 write plus the untouched stock successor halfword decode as:
@@ -173,15 +172,15 @@ an unspecified reserved-address outcome.  P1M-E Table 3.80 assigns **FEIC 0x13**
 to `Instruction fetch from other than Code Flash`.  The matching RH850G3M
 software manual (R01US0123EJ0140 Rev.1.40) classifies an error input during
 instruction fetch as a **resumable FE-level SYSERR** and assigns SYSERR direct
-vector offset `+0x10`.  This remains an architecture prediction, not a dynamic
-observation: the incident did not capture `FEIC`, `FEPC`, or `FEPSW`.
+vector offset `+0x10`. This remains an architecture prediction. The incident
+did not capture `FEIC`, `FEPC`, or `FEPSW`.
 
 The vector-base selection can nevertheless be pinned from exact F33 bytes.  A
-whole-image raw `LDSR` census, rather than the canonical function graph, finds
-only two PSW writes.  The hidden reset/core-init stub loads `PSW=0x00018020` at
+whole-image raw `LDSR` census finds only two PSW writes. The hidden reset/core-init
+stub loads `PSW=0x00018020` at
 `0x1FE` and writes it at `0x204`; bit 15 (`EBV`) is therefore **1** before the
 valid application is entered.  The only other PSW write is `0x9F28`, inside the
-normal application-to-boot handoff `65F5E -> 9F00`, not cold valid-app startup.
+normal application-to-boot handoff `65F5E -> 9F00`.
 There are zero RBASE writes.  Application context initialization at `0x715C8`
 sets `EBASE=0x00020000`.  The two other EBASE stores at `0x8508/0x8514` belong to
 a low boot helper rooted at `0x84F8`; its only direct callers are
@@ -235,11 +234,11 @@ Canonical evidence:
 - `tools/targets/camry/builders/build_camry_8965F3307000_incident_fault_model.py`
 - `tests/targets/camry/verify_camry_8965F3307000_incident_fault_model.py`
 
-## 5. Boot selection is more than CRC, but not a crash counter
+## 5. Boot selection and validity checks
 
 Cold startup `1B0 → 1404 → 13B0` was checked in raw bytes. Earlier BIST/ECM
-failure branches lead to sentinel writes and halt loops, not a hidden CAN
-programming window. Cold C initialization clears the upper LocalRAM region
+failure branches lead to sentinel writes and halt loops. Cold C initialization
+clears the upper LocalRAM region
 before reaching `0x13B0`; an old volatile boot request cannot simply be assumed
 to survive this path.
 
@@ -268,22 +267,21 @@ calls `0xE54` before `0x119E`. That reader validates the complement-coded record
 snapshots ECM status into `FEBFFCxx`, clears ECM status, and returns. There is no
 branch on the retained signature into `0x1398`; the next boot-selection operation
 is still the ordinary `0x119E` validity call. The retained record is therefore
-boot telemetry/status preservation, not a recovery selector.
+boot telemetry/status preservation.
 
 ## 6. Independent ROM, core, and XCP alternatives
 
-The MCU's two G3M cores are a master/checker **lockstep pair**, not two independent
-application processors with separate diagnostic servers (manufacturer datasheet
-pp.1–2; hardware manual p.250). This does not rule out another processor
-elsewhere in the steering assembly; its existence, wiring, and ability to
-recover this target would require independent evidence.
+The MCU's two G3M cores form a master/checker **lockstep pair**
+(manufacturer datasheet pp.1–2; hardware manual p.250). This architecture provides
+one application processor with lockstep checking. Another processor
+elsewhere in the steering assembly remains possible. Its existence, wiring, and
+ability to recover this target would require independent evidence.
 
 The manufacturer documents serial programming selected by hardware mode pins
 at pin-reset release. Its documented transports are one-wire UART, two-wire
-UART, and CSI (hardware manual pp.261 and 2867), not a CAN-ROM listener available
-merely because the application stopped. No network-controlled entry to that
-mode was established. This is not a claim that every possible board-level
-programming arrangement is known.
+UART, and CSI (hardware manual pp.261 and 2867). No network-controlled entry to
+that mode was established. Other board-level programming arrangements remain
+outside this review's evidence.
 
 Stock XCP remains disabled by the fixed CodeFlash byte `30D68 = 5A` before
 protocol dispatch (`821D6 → 830C0 → 98E80`). Receiving bytes through `8312E →
@@ -362,8 +360,8 @@ Two additional write/pivot-looking cases also close under exact configuration:
 The remaining transport/route pointer stores likewise reduce to small fixed RAM
 islands.  `7A5C2/7A620` can return only exact configured 0x20-byte transport
 records whose `record[1]` state indices are `{0,2}` inside a three-slot state
-block; therefore the strided `7B18A/7BB0E` destinations are configuration-derived,
-not CAN-payload indexed.  Controller 0 has five exact route records at `21ACC`
+block; therefore configuration determines the strided `7B18A/7BB0E` destinations.
+Controller 0 has five exact route records at `21ACC`
 with state indices `{0,1,2,3,4}`, confining `803B0/8043C/806A4/807D8` mutable
 state to `FEBE48DA..48F5`, `FEBE4909..490D`, and `FEBE3E94..3E98`.
 
@@ -393,12 +391,12 @@ through the initial application stack), and zero through the broader
 `FEBE0000..FEBE2200` lower-LocalRAM interval.  Combined with the bounded 64-byte
 ISR locals, no recovered receive copy reaches the saved `EIPC/FEPC/lp` frames.
 
-The result is therefore narrower than "the parser is safe": **we found a real
-pre-fault memory-safety defect, but not the write primitive needed to recover the
-ECU.**  The remaining software route must be an unrecovered destination-write or
-control-flow side effect, not the obvious CAN-FD DLC/FIFO mismatch, standard
-ISO-TP length handling, normal COM copy, XCP staging, or the recovered software
-ring.
+The review identifies a **pre-fault memory-safety defect**. The write primitive
+needed to recover the ECU remains unrecovered. A software recovery route would
+require an unrecovered destination-write
+or control-flow side effect. The reviewed CAN-FD DLC/FIFO mismatch, standard
+ISO-TP length handling, normal COM copy, XCP staging and software ring provide
+no such primitive.
 
 Canonical evidence:
 
@@ -458,9 +456,9 @@ The controller settings independently agree.  CAN1 enters operation with
 `CCTR=0x00A00001`: `BOM=01`, so bus-off entry autonomously places the channel in
 halt mode, but `BEIE/EWIE/EPIE/BOEIE/BORIE/OLIE/BLIE/ALIE/TAIE` and the remaining
 channel-error interrupt enables are all zero.  Global `GCTR=0x00010001` likewise
-has `DEIE/MEIE/THLEIE/CMPOFIE=0`.  A hostile bus participant can therefore force
-bus-off/halt, but not the default non-returning CAN error ISR.  The software
-channel-recovery state machine is reached only later at `7A254 -> 79F16`, **after**
+has `DEIE/MEIE/THLEIE/CMPOFIE=0`. A hostile bus participant can therefore force
+bus-off/halt while the default non-returning CAN error ISR remains disabled.
+The software channel-recovery state machine is reached only later at `7A254 -> 79F16`, **after**
 the malformed transfer, while the independent `7A232` service path does not
 restart the halted channel.  Transmit-abort does not create a side door either: its
 interrupt is gated by `TAIE=0`.
@@ -555,13 +553,12 @@ The application configures the ECM physical `ERROROUT` masks explicitly during
 
 The P1M-E ECM table identifies sources 1–4 as lockstep/PFSS/bus-bridge/redundancy
 safety failures. Source 28, which the application separately enables in
-`MICFG0`, is **bus ECC DED**, not a generic illegal-address or SYSERR indication.
+`MICFG0`, specifically indicates **bus ECC DED**.
 The incident's predicted `FEIC 0x13` non-CodeFlash instruction-fetch SYSERR is a
 CPU exception and is not one of the ECM error sources routed to `ERROROUT` by
 this configuration. Therefore the malformed jump does not provide a recovered
 `SYSERR -> ERROROUT -> external reset` path. A real source-1..4 hardware failure
-would be a different event, not something produced by the CAN/UDS paths audited
-here.
+would require a separate event outside the audited CAN/UDS paths.
 
 `P0_10/RESETOUT` also points outward rather than back into the MCU. P1M-E starts
 that pin as active-low `RESETOUT`; F33 subsequently configures P0_10 as ordinary
@@ -576,10 +573,9 @@ Finally, the flash-area selector does not supply a software bank swap.
 and **1 when booted in serial programming mode**. Exact F33 has no recovered
 reference to `BFASELR`; the boot/application validity code uses fixed descriptor
 tables. The variable reset vector for the extended user area is a persistent
-flash configuration setting, not an automatic crash fallback. Therefore selecting
-an alternate flash area still requires entering an independent hardware/serial
-programming context or changing flash configuration with an already-running
-executor.
+flash configuration setting. Selecting an alternate flash area therefore requires
+an independent hardware/serial programming context or a flash-configuration change
+by an already-running executor.
 
 Together with §§4–8, the remaining boot-side escape is now narrow: make the
 normal CodeFlash validity check genuinely fail, or enter the documented hardware
@@ -592,7 +588,7 @@ Canonical structural evidence is included in
 `data/generated/camry_f33_recovery_structure.json` and verified by
 `tests/targets/camry/verify_f33_recovery_structure.py`.
 
-## 10. P4_5 is a free-running EXTCLK1O supervisor clock, not a software watchdog kick
+## 10. P4_5 free-running EXTCLK1O supervisor clock
 
 The exact reset-time collective PORT table begins at `0x87A0`.  Its Port-4
 record at `0x8860` configures bit 5 with `PMC=1`, `PM=0`, and
@@ -645,9 +641,9 @@ EXTCLK1O.
 The practical remaining boundary is correspondingly sharp: a network-only
 recovery needs an independent vehicle-side mechanism that can alter the external
 supervisor/FLMD/reset state, or a new executor before the malformed branch.
-Neither is present in the retained F33 CAN software.  Serial-programming UART/CSI
-uses dedicated JP0 pins, not the P2_0/P2_1 vehicle CAN pins, so merely forcing a
-serial boot mode would still not turn the five-wire CAN interface into a Renesas
+Neither is present in the retained F33 CAN software. Serial-programming UART/CSI
+uses dedicated JP0 pins. Vehicle CAN uses P2_0/P2_1, so merely forcing serial boot
+mode would still leave the five-wire CAN interface unable to act as a Renesas
 programmer.
 
 ## 11. The orphan INTECM reset trampoline is real, but it is not a CAN error path
@@ -708,9 +704,9 @@ new live observation of the reconstructed incident instruction or FE registers.
 Two diagnostic qualifications should not become speculative repair claims:
 
 - The retained 05:47 UTC identity check recorded Panda supply readings of
-  **11.473 V before / 11.561 V after**, not a present-day voltage measurement.
-  That is a power-quality qualification for future diagnostics/programming, not
-  evidence that charging repairs the malformed CodeFlash instruction. Toyota's
+  **11.473 V before / 11.561 V after** at that historical checkpoint.
+  Power quality still needs qualification for future diagnostics/programming.
+  These readings provide no evidence that charging repairs the malformed CodeFlash instruction. Toyota's
   user-provided **T-SB-0034-26**, p.5, specifies supported power-supply operation
   for its 2025–2026 Camry MG-ECU reflash procedure. That bulletin is **not an EPS
   calibration or EPS recovery procedure**.
@@ -723,11 +719,11 @@ Two diagnostic qualifications should not become speculative repair claims:
 
 The original Toyota **T-SB-0015-25**, January 29, 2025, was acquired from NHTSA:
 `https://static.nhtsa.gov/odi/tsbs/2025/MC-11014209-0001.pdf`.
-The working download is `build/work/f33-external-recovery/T-SB-0015-25.pdf`;
-the manufacturer document, not that disposable working path, is the source.
+The disposable working download is `build/work/f33-external-recovery/T-SB-0015-25.pdf`.
+The manufacturer document is the source.
 Page 2 was also rendered and visually checked. Its **2025 Camry HV** row
 explicitly includes **EMPS** among ECUs requiring replacement configuration.
-This is useful model-family evidence, not an exact 2026/F33 package match.
+This establishes model-family applicability only. An exact 2026/F33 package match remains unproved.
 
 Procedure A, pp.7–14, begins after ECU replacement, detects the replacement ECU
 through Health Check, identifies/downloads the required calibration, and then
@@ -735,8 +731,8 @@ refers to the ordinary signed ECU reprogramming procedure. It documents no
 independent entry for a silent, CRC-valid, crashing application. It therefore
 supports pursuing the actual Camry EMPS configuration package, but does not
 supersede the target-execution dependency or make the incident ECU equivalent
-to a factory blank ECU. The already-acquired `T-0051-26.cuw` remains an MG/inverter
-package, not this missing EPS package.
+to a factory blank ECU. The already-acquired `T-0051-26.cuw` covers MG/inverter.
+The EPS package remains missing.
 
 ### Remaining evidence that can change the recovery decision
 
@@ -756,17 +752,17 @@ package, not this missing EPS package.
    application worker. Reset/power control alone is insufficient. No such
    mechanism has yet been demonstrated within the owner's access constraints.
 
-No working non-invasive repair is established. The useful next work is to close
-these specific evidence gaps, not to repeat the failed catcher or assume that a
-replacement-configuration menu supplies a programmer in an unresponsive ECU.
+No working non-invasive repair is established. Close the specific evidence gaps
+above. The failed catcher remains withdrawn, and a replacement-configuration menu
+alone supplies no evidence of a programmer in an unresponsive ECU.
 
 ## What is established, and what would actually change the answer
 
 The direct, functional, and subaddressed diagnostic paths examined here do not
 supply a stock recovery entry independent of the blocked foreground work.
-The documented ROM programming mode is a different interface, not another
-CAN session. No vehicle experiment is justified by simply making the previous
-catcher faster or adding guessed messages.
+The documented ROM programming mode uses a separate physical interface. No vehicle
+experiment is justified by simply making the previous catcher faster or adding
+guessed messages.
 
 A useful new lead must establish an entry that **does not depend on returning
 from the corrupted foreground call**: an actual independently operating
@@ -792,7 +788,7 @@ reset, upload, or flash operation was performed. The fresh exact-target
 startup/scheduling account above, and the `camry_8965f3307000_incident_fault_model`
 verification suite passes. This still does not measure live exception registers.
 
-### Observed output, not inferred from openpilot's CarState
+### Observed CAN output
 
 The offline reducer read all 32 complete-named rlogs retained under
 `logs/camry-2026/2026-09-11` plus seven top-level `d9` rlogs: 39 files from
@@ -808,7 +804,7 @@ file completely still leaves **38 cleanly parsed segments / 3,858,144 native
 CAN frames**, with the same zero counts. The recovered per-file CAN time spans
 sum to about 38.7 minutes including the partial file, or 37.9 minutes excluding
 it; these are not continuous coverage of the whole afternoon. Span calculation
-uses CAN-event times, not repeated route `initData` timestamps in later segments.
+uses CAN-event times.
 
 The same reducer finds **6,000 native bus0 `030/32` frames** in the 59.99-second
 pre-incident control `2026-09-04/0000003d--0e812cecba/rlog-8.zst`, plus the
@@ -858,10 +854,10 @@ A focused read of `d9--0/rlog.zst` also confirms actual diagnostic transmission
 on that later bus-1 path: two `7A1` TesterPresent requests appear in `sendcan`
 and as source-129 TX echoes, with no `7A9` response. The neighboring `7A2`
 node produces two positive TesterPresent replies at source-1 `7AA`, plus a
-negative response to a normal identification read. Those are replies from the
-neighbor, not the EPS. The zero `7A9` count is not being inferred solely from a
-log containing no tester traffic; conversely, zero diagnostic replies in other
-segments without EPS-directed queries are only absence-of-traffic observations.
+negative response to a normal identification read. Those replies identify the
+neighbor. This log records EPS-directed tester traffic with zero `7A9` responses.
+Other segments without EPS-directed queries provide only absence-of-traffic
+observations.
 
 
 ## 14. Saved short-frame format is unknown; the bootloader is not Classical-only
@@ -879,18 +875,17 @@ The three post-incident producer builds are:
 
 Their exact `openpilot/cereal/log.capnp` definitions have `address`, `dat`, and
 `src` but **no per-frame FDF/BRS field**. They cannot establish the wire format
-of an eight-byte request or TX echo. Loading a newer schema that adds `fd`
-would supply its default value, not recover an unrecorded bit. Earlier
-format-preserving work on a different branch is not evidence that these
-producers recorded it. The reducer intentionally makes no short-frame-format
-claim.
+of an eight-byte request or TX echo. A newer schema would supply a default `fd`
+value and leave the original format unknown. Earlier format-preserving work on
+a different branch supplies no evidence about these producers. The reducer
+intentionally makes no short-frame-format claim.
 
 The exact `e00d4ede6` `openpilot/selfdrive/pandad/pandad.cc` also enables
-CAN-FD auto mode on all three buses during connection. That is configuration
-potential, not proof of the format of an individual transmitted request. The
-separate direct-Python Panda interface defaults auto mode off; without the
-frozen catcher source/configuration, do not transfer this later pandad behavior
-to the earlier 05:47 identity-only probe.
+CAN-FD auto mode on all three buses during connection. This establishes available
+configuration only. Each transmitted request's format remains unproved. The
+separate direct-Python Panda interface defaults auto mode off. Without the frozen
+catcher source/configuration, keep this later pandad behavior separate from the
+earlier 05:47 identity-only probe.
 
 A fresh target-native boot configuration check does **not** reveal a
 Classical-only listener that this could trivially repair:
@@ -908,8 +903,8 @@ bounded result is that the recorded negative probes have a framing-observation
 gap, but neither that gap nor switching frame format establishes an independent
 programming entry before the application fault.
 
-A further exact-target check follows the boot acceptance and receive path, not
-only the controller mode bits. `3B3C` installs rules through `39D6`, which writes
+A further exact-target check follows the boot acceptance and receive path.
+`3B3C` installs rules through `39D6`, which writes
 the ID/IDE selection, ID/IDE/RTR comparison mask, zero pointer-0/DLC criterion,
 and fixed FIFO destination. Manufacturer tables 17.115/17.116 (pp.966/968)
 contain no FDF/BRS comparison bit in those ID/mask words. The actual boot FIFO
@@ -926,8 +921,8 @@ The bounded consequence is that **once an eight-byte frame reaches this boot
 FIFO, the reviewed software path does not reject it merely for being FD rather
 than Classical**. This does not prove a particular prior transmission's wire
 format, physical/timing compatibility, or the existence of a running boot
-listener. It removes a software-format-filter hypothesis, not the blocked
-boot-entry dependency. No format-controlled live probe was performed. A
+listener. The software-format-filter hypothesis is removed. Boot entry remains
+blocked. No format-controlled live probe was performed. A
 read-only attempt to retrieve the frozen catcher configuration from the comma's
 filesystem could not connect, so that historical configuration remains unknown.
 
@@ -959,11 +954,10 @@ Original photographic sources:
 
 The retained vehicle F18C in `targets/camry-2026/raw-20260826/identity.json`
 begins with the matching **8965033K90** component prefix. The donor's software
-calibration and hardware revision have not been read; this is same-labeled-part
-photographic evidence, not a second verified `8965F3307000` firmware target.
-The images were acquired and visually checked in the disposable
-`build/work/f33-external-recovery/` workspace, not treated as OEM electrical
-schematics.
+calibration and hardware revision have not been read. The photographs establish
+matching part labels only. A second `8965F3307000` firmware target remains
+unverified. The images were acquired and visually checked in the disposable
+`build/work/f33-external-recovery/` workspace.
 
 **What changes:** the same-part photograph verifies the part labels and physical
 connector family, but supplies no positive evidence for another installed,
@@ -997,9 +991,9 @@ support for this part:
   `https://www.obdstar.com/Products_327.html` was read, including all five
   workbook files. In `BODY.xlsx`, the listed EPS entries are two GM/Bosch
   targets and a Volvo/XC164CS target; no Toyota/JTEKT/F33 EPS entry was found.
-  Toyota RH850 entries in the separate ECM workbook are engine controllers,
-  not this EPS. This bounds that published coverage only; it does not prove
-  every commercial tool lacks a method. Archive source:
+  Toyota RH850 entries in the separate ECM workbook cover engine controllers.
+  This bounds that published coverage only. Other commercial tools may still
+  provide a method. Archive source:
   `https://www.obdstar.com/Private/Files/6392393826584678411094158040.zip`.
 - **MSG Equipment MS561 PRO:** the manufacturer explicitly describes an
   OEM-number-indexed unit database with connector pinouts and unit-dependent
@@ -1011,7 +1005,7 @@ support for this part:
   `https://msg.equipment/en/equipment/electric-power-steering-eps/592991` and
   `https://msg.equipment/storage/files/260806-ms561-pro-user-manual-multi.pdf`,
   pp.4 and 12. These identify a possible source of the missing connector
-  documentation, not a recommendation to purchase a tester.
+  documentation. Tester purchase remains outside this recommendation.
 - **MSG MS-36055 (100R) cable:** the manufacturer's page explicitly lists
   Camry **2017–2026**, but describes power/data connection for diagnostics and
   does not list `44250-06490` or `89650-33K90` among its OEM references. The
@@ -1028,7 +1022,7 @@ support for this part:
   calibration download plus telecoding. Both pages were visually checked.
   The examples are other vehicle families; no F33-specific terminal assignment
   or entry for an unresponsive application is given. This supports ordinary
-  replacement configuration, not an independent recovery mechanism. Sources:
+  replacement configuration only. Independent recovery remains unproved. Sources:
   `https://www.jtekt.eu/eps-programming-settings/` and
   `https://www.jtekt.eu/app/uploads/2025/06/Steering-tuning-data-sheet-1.pdf`.
 - **ABRITES RR031:** the manufacturer's **2026-09-01** announcement does
@@ -1043,9 +1037,9 @@ support for this part:
   hardware/reference-file pass. Their working-CAN diagnostic tools require a
   responsive target; they are not independent recovery executors. A further
   read-only inspection of the installed GTS+ DataSync database found only
-  hash/process/logging tables, not a cached repair-manual/EWD corpus. Searching
-  the readable installed UI/configuration files did not supply an exact-rack
-  service document either; this is a bounded source-location negative.
+  hash/process/logging tables. The readable installed UI/configuration files
+  also supplied no exact-rack service document. This negative is limited to
+  those searched sources.
 
 An actionable documentation request is now part-specific: **for Toyota
 89650-33K90 / JTEKT JJ501-016640 / DENSO 210600-3912, identify every populated
@@ -1076,8 +1070,8 @@ f7 00 fd 00 7c 00 a9 00 00 00
 The current `ABS_P5` Data List maps **EPS/Steering Control Actuator ECU
 Communication Open** to MSB0 bit 74 of those ten bytes. For a zero-indexed byte
 array `value`, decode it as `(value[9] & 0x20) != 0`: zero is `Normal`; one is
-`Under intermittent`. The retained pre-incident value decodes to zero. It is a
-baseline, not the missing post-incident observation.
+`Under intermittent`. The retained pre-incident value decodes to zero and
+establishes a baseline. The post-incident value remains unobserved.
 
 The safest first action is therefore a stationary, IG-ON/not-READY Techstream or
 GTS read: select Brake/EPB identity `F152633K0000`, open Data List, retain the
@@ -1089,8 +1083,7 @@ configurations place this stable CAN-ID pair on different logical buses.
 
 Interpretation is intentionally narrow:
 
-- a positive `0x7B8` response proves the Brake/EPB ECU and route are alive, not
-  that EPS acknowledged anything;
+- a positive `0x7B8` response proves Brake/EPB ECU and route liveness only;
 - bit 74 set is the brake ECU's current peer-monitor report that EPS
   communication is open/intermittent;
 - bit 74 clear means the brake ECU currently considers that monitored EPS
@@ -1142,7 +1135,7 @@ cavities do not prove that every visible ECU-side contact is internally absent
 or unused; they do close an unsupported attempt to energize an extra C50 pin.
 
 The CAN system diagram puts EPS at the end of Bus 4, downstream of the brake
-booster/skid ECU at A30. A30 is a two-port node, not merely another branch:
+booster/skid ECU at A30. A30 is a two-port node:
 
 - A30-36 CA1H / A30-37 CA1L are the upstream Bus 4 leg;
 - A30-34 DC1H / A30-35 DC1L are the downstream EPS leg; and
@@ -1189,10 +1182,10 @@ backprobe a sealed connector, or rely on cavity numbering without visually
 matching the exact car.
 
 The model's brake-control tool list does name Toyota `09080-2C101`; Toyota's
-tool catalog describes only a general test-lead set with 2.0 mm and 0.5 mm
-pins, not compatibility with A30's terminal or seal. Likewise, networking SST
-`09991-00570` is a lance-cancelling terminal-removal tool, not a contact lead.
-Neither is an approved A30 breakout on the available evidence. Searches across
+tool catalog describes a general test-lead set with 2.0 mm and 0.5 mm pins.
+A30 terminal and seal compatibility remains unproved. Networking SST
+`09991-00570` removes terminals through its lance-cancelling mechanism.
+Neither tool is an approved A30 breakout on the available evidence. Searches across
 the retained GTS+/Techstream catalogs found no A30 housing, terminal family,
 `82998-*` repair wire or dedicated harness. The remaining low-cost sourcing
 step is a VIN-specific Toyota EWD **Connector List / Wire Harness Repair** query
@@ -1207,8 +1200,8 @@ and the model-specific networking SST page
 
 ### The safe experiment and what each result means
 
-If this A30 fallback is reached, its first live experiment should remain a
-mode/liveness probe, not a programming attempt. `tools/toyota
+If this A30 fallback is reached, limit the first live experiment to
+mode/liveness observation. `tools/toyota
 eps-isolated-probe` prints the plan without opening hardware by default; its
 live path remains fail-closed behind the following physical measurements and
 typed transition attestations:
@@ -1303,14 +1296,14 @@ The result partitions the remaining problem:
   DCM session byte, so `04 62 F1 86 <session>` identifies the application
   service implementation. The exact boot handler checks only four descriptors
   at `0x8F14`; F186 is absent, so `03 7F 22 31` is compatible with that boot
-  table. It is **boot-compatible, not standalone boot proof**: another NRC,
-  silence, or a malformed reply leaves mode unknown. The tool deliberately uses
+  table. This establishes **boot compatibility only**. Another NRC, silence
+  or a malformed reply leaves mode unknown. The tool deliberately uses
   F186 rather than F181 because the exact application F181 callback can itself
   emit the boot-like all-`21` placeholder after a metadata mismatch. No F186
   result authorizes programming. The tool retains a syntactic F186
   classification separately but does not promote it to a mode label when any
   surrounding evidence fails. An unmatched native frame on `0x7A9`
-  establishes physical peer activity, not a DCM executor or software identity.
+  establishes physical peer activity only. DCM execution and software identity remain unproved.
   `tools/test camry_f33_recovery_identity` pins the exact application DID row,
   default-session access, current-session producer, boot session/table bounds,
   and unknown-DID branch directly from the retained firmware bytes.
@@ -1343,10 +1336,10 @@ It does not branch on reset cause, IG/PIG state, CAN input, crash count or
 DataFlash. A still-valid poisoned image therefore returns to `0x20880` and the
 same malformed instruction after every genuine power cycle. IG-only removal is
 not a proven reset because PIG remains supplied; removing both external supplies
-guarantees power loss but does not alter that selection. The 80 A EPS path is a
-fastened multi-fuse/fusible-link block, not a convenient pullout fuse; Toyota's
-prescribed wait followed by auxiliary-battery-negative disconnection is the
-bounded accessible cold-isolation method.
+guarantees power loss but does not alter that selection. The 80 A EPS path uses
+a fastened multi-fuse/fusible-link block. Toyota's prescribed wait followed by
+auxiliary-battery-negative disconnection is the bounded accessible cold-isolation
+method.
 
 Toyota's `Power Steering ECU Initial Setting` utility is documented after rack
 replacement as assist-map writing. In this F33 image, routine `0x1109` reaches a
@@ -1357,12 +1350,10 @@ nor executes before the malformed instruction. The public utility page is:
 
 The same service manual's EPS communication-stop tree checks the downstream
 termination, PIG/IG and ground, then specifies rack replacement if those checks
-pass. Its C05D6 internal/calibration-failure tree likewise offers clear/recheck
-and replacement, not an independent reflashing entry. The readable GTS+ Brake
-Booster catalog contains 20 direct motor/relay/solenoid tests and four routine
-tests, but no CAN-bridge reset or downstream-EPS power control. These are
-important OEM-service negatives, not proof that an undocumented recovery mode
-cannot exist.
+pass. Its C05D6 internal/calibration-failure tree offers clear/recheck and replacement.
+The readable GTS+ Brake Booster catalog contains 20 direct motor/relay/solenoid
+tests and four routine tests, but no CAN-bridge reset or downstream-EPS power control.
+These OEM-service negatives leave undocumented recovery modes outside their scope.
 
 **Current boundary:** the fresh Brake/EPB `0x102F` read in §17 is first because
 it is network-only and requires no connector handling. If it cannot resolve the
@@ -1373,12 +1364,12 @@ NRC `0x31` is only boot-compatible, and neither result is restore authorization.
 This is not yet a repair, and A30 should not be attempted until a nondamaging
 exact connection method and the car's own connector orientation are verified.
 
-## 19. yc Venza airbag image: real retained RPRG handoff, but not a new F33 CAN recovery path
+## 19. yc Venza airbag image: retained RPRG handoff
 
 A 2026-09-14 community artifact from yc adds a useful related-RH850 comparison,
 but it does **not** change the no-working-CAN-only result of this incident audit.
-The specimen is a contributor-reported Venza airbag sensor, not an EPS, and its
-exact MCU part number is still unknown. The complete airbag analysis is in
+The specimen is a contributor-reported Venza airbag sensor whose exact MCU part
+number remains unknown. The complete airbag analysis is in
 [yc-venza-airbag-reprogramming-2026-09-14.md](yc-venza-airbag-reprogramming-2026-09-14.md).
 
 The received 32-KiB `boot.bin` initially looked promising as a possible stage
@@ -1386,8 +1377,7 @@ that ran before CodeFlash `0x0`. The airbag's own CodeFlash disproves that simpl
 interpretation. Its relocation tables source `0x01000000..0x01007588` and
 `0x01007588..0x01007BD0` into the common RAM runtime, with the trailer identifying
 `AUBIST_RPRG_201902`. A relocated direct-call seam enters the first copied byte.
-This is an extended-user RPRG component linked into the RAM-loaded runtime, not
-the RH850's immutable on-chip serial-programming firmware.
+This extended-user RPRG component is linked into the RAM-loaded runtime.
 
 The same image does prove a deliberate retained programming transition. One DCM
 SID-`0x10` group has subfunction `0x02` at `0x237E0`, callback `0xC190C`, and
@@ -1412,8 +1402,7 @@ This sharpens two boundaries for the F33 incident:
   mechanism gives no pre-fault packet interpreter to bypass that dependency.
 - **Do not transfer the airbag boot implementation to EPS.** Complete-body
   comparison found only generic/library overlap and no named semantic F33
-  transfer. The useful transfer is an implementation pattern to search for,
-  not addresses or code.
+  transfer. Use its implementation pattern to guide further searches.
 
 P1M-E's manufacturer-defined FLMD serial-programming mode remains a separate
 hardware route. It executes on-chip boot firmware selected at pin-reset release

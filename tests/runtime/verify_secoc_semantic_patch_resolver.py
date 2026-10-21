@@ -82,7 +82,7 @@ check("manifest verifies patch preimage", rebuilt["patch"]["preimage_verified"] 
 check("CRC descriptor scan finds exactly two self-describing records", rebuilt["discovery"]["crc_descriptor_count"] == 2)
 check("exactly one discovered CRC region covers the semantic patch", int(rebuilt["boot_crc"]["start"], 0) <= int(rebuilt["patch"]["address"], 0) < int(rebuilt["boot_crc"]["end"], 0))
 check("CRC fixup is derived as final word of discovered region", int(rebuilt["boot_crc"]["fixup_va"], 0) == int(rebuilt["boot_crc"]["end"], 0) - 4)
-check("public-dump anomaly is surfaced, not silently accepted", rebuilt["boot_crc"]["stock_region_valid"] is False)
+check("public-dump anomaly is surfaced", rebuilt["boot_crc"]["stock_region_valid"] is False)
 check("valid sibling descriptor proves terminal-fixup scheme", rebuilt["boot_crc"]["validated_sibling_descriptor_count"] >= 1)
 check("offline supplied-image resigning self-checks", rebuilt["boot_crc"]["patched_residue_for_supplied_image"] == "0xFFFFFFFF")
 

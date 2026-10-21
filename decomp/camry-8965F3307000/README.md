@@ -3,7 +3,7 @@
 This tree owns reconstructed C and retained original-byte scenarios. The target
 registry's `decomp_root` selects it; tooling lives under
 [`tools/targets/camry/decomp/`](../../tools/targets/camry/decomp/) and uses the
-Toyota dispatcher, not a separate command surface or target registry.
+Toyota dispatcher.
 
 ## Commands
 
@@ -20,13 +20,11 @@ tools/test camry_decomp
 ```
 
 `status` validates the registered image hash, size, and non-overlapping symbol
-ranges. It does **not** compile the C into a byte-identical RH850 image.
-`equivalent` means agreement with retained scenarios, not every possible input
-or physical vehicle behavior.
+ranges. `equivalent` means agreement with the retained scenarios.
 
 `source NAME_OR_ADDRESS` prints the canonical symbol, repository-relative path,
 and reconstructed body. It accepts an exact canonical name or hexadecimal entry
-address. A missing body is an error, not a fallback to Ghidra or a candidate cache.
+address. A missing body is an error.
 Use `tools/pseudo --target camry-8965F3307000 NAME_OR_ADDRESS` for Ghidra pseudocode.
 
 `corpus` generates and compiles disposable candidates. It copies checked retained
@@ -90,8 +88,8 @@ The local `camry_decomp` suite checks image identity, ROM bytes, retained
 return/memory/register/call-sequence contracts, missing oracle coverage, source
 selection, declaration compilation, and whole-bank/header rollback. It needs the
 locked Python environment and a native C compiler. Event-driven scenarios also
-need Ghidra machine timing replay when a local timing cache is absent; those
-caches are workspace state, not portable evidence.
+need Ghidra machine timing replay when a local timing cache is absent. Those
+caches are workspace state.
 
 Keep canonical sources and scenarios as inputs. Promote Ghidra snapshots only
 through the [project lifecycle](../../docs/WORKFLOW.md#rebuilding-the-complete-project-from-firmware).

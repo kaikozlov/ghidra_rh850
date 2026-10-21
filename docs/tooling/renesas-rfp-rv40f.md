@@ -84,9 +84,9 @@ make verify-rfp
 
 `Devices.xml` exposes generic `RH850`, `RH850/E2x`, and `RH850/U2x` entries but
 contains no P1M-E/R7F701381-specific device record. The library also retains a
-separate `BootRH850Gen2` implementation. Therefore `BootRV40F` is strong host
-protocol evidence for the generic/older RH850 route, **not** proof that the
-analyzed Toyota P1M-E selects it.
+separate `BootRH850Gen2` implementation. `BootRV40F` supplies strong host
+protocol evidence for the generic/older RH850 route. Selection by the analyzed
+Toyota P1M-E remains unproved.
 
 The package's executable-resource inventory does not supply a hidden P1M-E
 agent. All 68 `Firmwares/*.bin` images identify as SEGGER probe firmware;
@@ -346,8 +346,8 @@ to `0x1002` and `0x1109` and selects four layouts:
 - `!0x1002 && 0x1109`: send only `0x6E` with four ICU-S option bytes;
 - `!0x1002 && !0x1109`: use the legacy `SetICUM` path.
 
-Thus `SetICUM` is specifically a legacy fallback, not the universal ICU-S
-configuration method.
+Thus `SetICUM` is specifically a legacy fallback. The branches above select
+other ICU-S configuration methods.
 
 ### 5.2 Exact `SetICUM` structural record
 
@@ -410,7 +410,7 @@ payload, and no independently recovered persistent-state write in the host.
 security-option path when the cached state says validation is still required.
 The CLI documents that high-level option as `-fo flags icus` / “Enable ICU-S.”
 
-This proves the host precondition/sequence, not the target-side effect. Static
+This proves only the host precondition/sequence. Static
 RFP code alone cannot establish whether validation burns an irreversible
 lifecycle bit, what the mask ROM checks internally, or whether a specific
 P1M-E permits the command.
@@ -419,8 +419,8 @@ P1M-E permits the command.
 four-byte host primitives. The direct exported helpers have no recovered
 ordinary internal code callers; `SetOptionByteEx` independently constructs the
 same `0x6E` four-byte command in its extended-option branches. The documented
-high-level ICU-S enable transition concretely reaches `ValidateICU_S`, not a
-secret key-load operation.
+high-level ICU-S enable transition concretely reaches `ValidateICU_S`.
+No secret key-load operation was recovered on this path.
 
 ## 6. Complete key-provisioning negative
 
@@ -439,8 +439,8 @@ For the security/configuration commands (`0x20..0x30`, `0x48..0x4F`,
 - the retained `BootRV40F` symbol surface has no `SetKey`, `LoadKey`,
   `KeyUpdate`, or provisioning-image download method.
 
-This is a **complete negative for dedicated key provisioning in the retained
-standard RV40F host command surface**, not a universal negative for the silicon.
+The retained standard RV40F host command surface contains **no dedicated
+key provisioning command**. Silicon capabilities remain outside this negative.
 It does not exclude:
 
 - generic flash writes carrying arbitrary bytes to an address that a particular
@@ -471,8 +471,8 @@ remaining RFP/P1M-E questions require a target or a legitimate capture:
 
 The shipped RFP CLI documentation includes a generic all-`FF` ID-code example,
 and retained generic configuration strings use `UserID=0xFFFFFFFF`. Those facts
-support an all-`FF` `CheckIDAuth` value as a reasonable **probe hypothesis**,
-not as a recovered R7F701381/P1M-E blank-ID state. The analyzed distribution has
+support an all-`FF` `CheckIDAuth` value as a reasonable **probe hypothesis**.
+R7F701381/P1M-E blank-ID state remains unrecovered. The analyzed distribution has
 no specific P1M-E device record that closes that transfer. Acceptance or
 rejection must therefore be treated as target observation (CORR-092).
 

@@ -179,8 +179,8 @@ def build() -> dict:
     need(rules[46][0] == 0x9FDC0002, "packed XCP rule46 drift")
 
     # The receiver also tells us the source *module relationship* for B6. CAN frames
-    # have no source-node address, so this comes from F33's own communication-loss
-    # monitor rather than from the arbitration descriptor. The six-row monitor family
+    # have no source-node address. F33's own communication-loss monitor supplies
+    # this relationship. The six-row monitor family
     # is the exact F33 homolog of the H family: row5 watches status slot 0x1A; the
     # status-map table maps 0x1A -> PDU44 -> 0x0B6. Loss selects Dem event 0x0143,
     # whose DTC index 82 is the same exact F33 DTC record used by populated event 0x00AA.
@@ -226,7 +226,7 @@ def build() -> dict:
          and dtc82["techstream_failure"] == "Missing Message", "B6 source-module Techstream join drift")
 
     # Exact scalar generated-COM calls.  Relative byte geometry comes directly from
-    # signal-to-PDU + PDU-buffer-offset tables, not guessed DBC layouts.
+    # signal-to-PDU + PDU-buffer-offset tables.
     s2p = [struct.unpack_from("<H", image, SIGNAL_TO_PDU + 2 * i)[0] for i in range(SIGNAL_COUNT)]
     pdu_off = [struct.unpack_from("<H", image, PDU_OFFSETS + 2 * i)[0] for i in range(48)]
     call_re = re.compile(
@@ -312,7 +312,7 @@ def build() -> dict:
     need(len(cone_rows) == 19 and len(empty_cone_ids) == 97, "19/116 scalar command-cone census drift")
 
     # Same-image identity: F181's secondary record is software compatibility
-    # identity. Startup comparisons publish error state, not a local launch veto.
+    # identity. Startup comparisons publish error state while allowing local launch.
     # DID2032 is the separate 0x17D80 record and must not be conflated with F181.
     token(funcs, 0x4FA26, "*param_1 = 2;")
     need_ref(funcs, 0x4FA26, 0x20860, "READ")
@@ -479,7 +479,7 @@ def build() -> dict:
                 "description": dtc82["techstream_description"],
                 "failure": dtc82["techstream_failure"],
             },
-            "classification": "exact F33 receiver expects B6/PDU44 as Brake System Control Module traffic; CAN itself carries no source-node address, so this identifies the monitored immediate source-domain relationship rather than a unique transmitter implementation",
+            "classification": "exact F33 receiver expects B6/PDU44 as Brake System Control Module traffic; CAN itself carries no source-node address, so this identifies only the monitored immediate source-domain relationship; the unique transmitter implementation remains unresolved",
         },
         "special_paths": {
             "0x0D5": {
@@ -519,7 +519,7 @@ def build() -> dict:
             "The two drives do not machine-prove an exact factory-LTA-active interval.",
             "This census closes generated scalar COM plus the generic group-receive surface represented by exact F33 configuration; it does not prove the absence of DMA/peripheral mutation, diagnostics, computed aliases outside the recovered maps, or another internal controller path.",
             "Bus1 0x180..0x18C traffic is upstream candidate traffic only: those arbitration IDs are not in the exact F33 normal Rx descriptor table and cannot directly be the EPS normal-CAN command.",
-            "GTS+ supplies diagnostic names/DIDs, not a CAN-ID database; CAN-to-name joins are through exact F33 firmware dataflow.",
+            "GTS+ supplies diagnostic names/DIDs only; CAN-ID assignments and CAN-to-name joins require exact F33 firmware dataflow.",
         ],
     }
 

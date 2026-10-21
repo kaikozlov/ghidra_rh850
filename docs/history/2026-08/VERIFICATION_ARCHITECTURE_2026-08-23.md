@@ -40,9 +40,9 @@ such exception.  `make verify-changed` still selects owning suites regardless of
 tier, and `make verify-required-external` still selects all declared external
 suites and fails rather than skips when prerequisites are absent.
 
-`make verify-agent` is the compact-JSON form of the **core** gate, not an alias
-for the expensive local superset.  Agents that need the complete local corpus
-must request `make verify-local` explicitly.
+`make verify-agent` provides compact JSON for the **core** gate.
+Agents that need the complete local corpus must request
+the separate `make verify-local` superset explicitly.
 
 The runner sets `RH850_VERIFY_EXTERNAL=0` for core/full children and enables it
 only for local/required-external execution.  Three hybrid tests that contain both

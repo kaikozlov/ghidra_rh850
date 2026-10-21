@@ -626,7 +626,7 @@ def main() -> int:
                      f"family is {e['field']}, which tracks 0x025 angle at "
                      f"r={e['drive_a']['angle_r']}({e['drive_a']['lag_ms']} ms) and "
                      f"r={e['drive_b']['angle_r']}({e['drive_b']['lag_ms']} ms). CORR-138 "
-                     f"shows this is window-restricted rather than a standing field identity: "
+                     f"restricts this observation to the selected windows: "
                      f"full-drive 0x160[22]s16be correlation collapses to "
                      f"+0.086104/-0.091204. Preserve only the bounded observation that Bus 1 "
                      f"carries plant-shaped data; do not name a standing SAS echo or command."
@@ -675,21 +675,21 @@ def main() -> int:
                 f"observed/deterministic within the selected Class-L windows: {len(reproduced_lagging)} "
                 f"reproduced fields lag the motor proxy (peak lag <= -{LEAD_MIN_MS} ms in both drives). "
                 f"The drive-B speed-matched cruise control region shows the strongest correlations are "
-                f"also present outside Class-L. This supports generic plant-shaped traffic rather than "
-                f"a Class-L-gated command; CORR-138 forbids promoting window-local 0x160 correlations "
-                f"to a standing steering-angle-echo identity."
+                f"also present outside Class-L. This supports generic plant-shaped traffic; "
+                f"Class-L command gating remains unproved. CORR-138 forbids promoting window-local "
+                f"0x160 correlations to a standing steering-angle-echo identity."
             ),
             "control_region_boundary": (
                 "bounded: drive A has zero local speed-matched cruise control grid points (its cruise "
                 "interval 2 starts exactly at the Class-L rise and ends 0.56 s after the fall; interval 1 "
                 "lies outside the analysis window), so in-drive Class-L specificity is tested on drive B "
-                "only; drive A contributes the reproduction requirement, not the specificity control."
+                "only; drive A contributes only the reproduction requirement."
             ),
             "lag_range_boundary": (
                 f"bounded: the declared tested lead range is +/-{SCREEN_LAG_RANGE_MS} ms at {FINE_LAG_STEP_MS} ms "
                 f"resolution. Several weak reproduced correlates peak at the +/-{SCREEN_LAG_RANGE_MS} ms "
-                "boundary, i.e. slow window-scale trends rather than causal control-path leads; a Toyota "
-                "lateral command consumed by a 100 Hz EPS is not expected to lead by more than a few "
+                "boundary, indicating slow window-scale trends; causal control-path leads remain unproved. "
+                "A Toyota lateral command consumed by a 100 Hz EPS is expected to lead by at most a few "
                 "control frames, well inside the tested range."
             ),
             "production_output_authorized": False,

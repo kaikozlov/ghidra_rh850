@@ -490,7 +490,7 @@ def main() -> int:
 
         # This requirement is deliberately bounded inside the nominal 1.12-s
         # write-free instrumentation window. Startup itself consumes some of that
-        # budget, so fail closed rather than stretching the deadline to tick 224.
+        # budget, so fail closed within the original deadline before tick 224.
         pre = wait_for_f181(timeout=0.72, route=ROUTE, expected_f181_hex=EXPECTED_F181_HEX)
         result["pre_snapshot_f181"] = pre
         if not pre["ok"]:

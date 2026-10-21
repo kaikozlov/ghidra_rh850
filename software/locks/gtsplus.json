@@ -98,7 +98,7 @@
   "distribution": {
     "acquisition_date": "2026-06-18",
     "name": "Toyota GTS+ (Global TechStream Plus)",
-    "note": "Vendor archive/containers and reconstructed PE images remain local and untracked. The reconstructed PEs are deterministic analysis intermediates, not redistributed source artifacts.",
+    "note": "Vendor archive/containers and reconstructed PE images remain local and untracked. The reconstructed PEs are deterministic analysis intermediates.",
     "root": "software/Techstream/gtsplus",
     "source_archive": {
       "path": "gtsplus.7z",

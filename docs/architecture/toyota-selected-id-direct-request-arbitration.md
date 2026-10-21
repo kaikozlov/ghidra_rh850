@@ -97,7 +97,7 @@ Therefore:
 This is independent support for treating the GTS `5280/5281/5282` and
 `5284/5285` IDs as application identities rather than bus addresses.
 
-## 3. Figure 2 is a grant/stream-selection protocol, not packet forwarding
+## 3. Figure 2 specifies a grant/stream-selection protocol
 
 Figure 2 is the most important part of the patent.
 
@@ -119,9 +119,8 @@ executes**.
 
 That is much stronger than the shorthand "manager sends the winner ID." A useful
 RE interpretation is that the selected ID behaves like a source grant over
-subsequent request samples; **grant/lease is our shorthand, not Toyota patent
-terminology**. Once the manager chooses an application stream, the actuator
-follows a later sample from that stream.
+subsequent request samples. **Grant/lease is our shorthand**. Once the manager
+chooses an application stream, the actuator follows a later sample from that stream.
 
 The patent is explicit that if the actuator cannot obtain a request with the
 selected ID **after** receiving the control signal, steering need not be
@@ -201,9 +200,8 @@ new request from B  <---- first eligible B sample
 actuate from new B request
 ~~~
 
-This is a freshness/admission rule even though the patent does not discuss
-SecOC freshness counters. The freshness is **protocol ordering**, not
-cryptographic freshness.
+This freshness/admission rule concerns **protocol ordering**.
+Cryptographic freshness and SecOC freshness counters are outside the patent's discussion.
 
 Do not infer from this patent:
 
@@ -312,8 +310,8 @@ path using a direct-request bypass, while a remote high-bandwidth steering
 actuator is exactly where the selected-ID/direct-request pattern could be
 attractive.
 
-That is an architectural compatibility statement, not proof that exact F33
-uses this steering realization.
+That establishes architectural compatibility. Exact F33 use of this steering
+realization remains unproven.
 
 ## 10. Exact Camry F33: what matches and what does not
 
@@ -394,7 +392,7 @@ therefore implement either a direct-request + selector design or a
 manager-generated target design. The architecture has to be recovered per
 actuator and per platform.
 
-### B. Application ID can be authority, not merely telemetry
+### B. Application ID can confer authority
 
 A selected ID can operate as a persistent authority/grant over subsequent
 samples. That gives stronger meaning to Toyota's request/result ID surfaces:
@@ -475,8 +473,7 @@ than expecting the patent's generic names to appear verbatim in diagnostics.
 
 ## 13. Relationship to US20200070849A1
 
-These patents are better read as two contemporaneous architecture branches,
-not as one superseding the other.
+Read these patents as two contemporaneous architecture branches.
 
 US20200070849A1 centralizes the post-arbitration actuator target:
 

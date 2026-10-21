@@ -111,7 +111,7 @@ def main() -> int:
             "calibration": {"address": "0x000AEED8", **qcal},
             "exact_h_calibration_effect": (
                 "feature flag 0x5A makes the BB8F6 detector's enabled-only set branch unreachable and forces its raw detector output FEBEB64D to zero on each execution; debounce calibration is zero. "
-                "This closes the physical source family and detector-disable state, not an OEM display name for the final debounced bit."
+                "This closes the physical source family and detector-disable state only. The OEM display name for the final debounced bit remains unrecovered."
             ),
             "span_observation": {"values": span_bit1["values"], "boundary": "Span's moving rlog is not exact-F181-joined and therefore cannot override exact-H calibration identity; its 0/1 variation is useful cross-specimen evidence only."},
             "classification": "Q-axis actual-current-derived debounced status; exact H's threshold detector is calibration-disabled",
@@ -139,7 +139,7 @@ def main() -> int:
         "static_exhaustion": {
             "0x030_b6_bit1": "physical source and exact-H calibration behavior closed; only Toyota display/policy naming remains unavailable",
             "0x351_force7": "source topology and exact gating bits closed; current corpus has no unique Toyota/DTC semantic label for the two internal status inputs",
-            "boundary": "These are semantic-name boundaries, not invitations to infer names from packet position or neighboring DTCs.",
+            "boundary": "Semantic names remain unresolved and require independent evidence beyond packet position or neighboring DTCs.",
         },
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)

@@ -1085,8 +1085,8 @@ def _rewrite_system_inputs(code: str) -> str:
                 separator + "\n  camry_SR[0][0] = camry_saved_eipc;"
                 "\n  camry_SR[0][1] = in_EIPSW;"
             )
-        # The exception epilogue pops ISPR; FPIPR clamping and EBASE selection
-        # below it are decompiler temporaries, not writes to those registers.
+        # The exception epilogue pops ISPR. FPIPR clamping and EBASE selection
+        # below it affect only decompiler temporaries.
         code = code.replace(
             "in_ISPR = in_ISPR & in_ISPR - 1;",
             "in_ISPR = in_ISPR & in_ISPR - 1;\n    camry_SR[2][10] = in_ISPR;",
@@ -1115,7 +1115,7 @@ def _rewrite_system_inputs(code: str) -> str:
             "camry_psw = camry_SR[0][1];\n    return;",
             code,
         )
-        # 71ae4's early exit is a tail transfer, not a second EIRET.
+        # 71ae4's early exit tail-transfers and leaves EIRET to its destination.
         code = code.replace(
             "clear_ecm_error_latches_once_or_terminate_7162e();\n    camry_psw = camry_SR[0][1];\n    return;",
             "clear_ecm_error_latches_once_or_terminate_7162e();\n    return;",

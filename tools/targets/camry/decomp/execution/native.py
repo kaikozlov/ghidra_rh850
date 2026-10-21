@@ -102,7 +102,7 @@ def call_native_workflow(
     targets[entry] = name, signature
     probes = {}
     for pc, (owner, address) in stops.items():
-        if not owner:  # RAM stops are reached by the glue machine, not C probes.
+        if not owner:  # The glue machine handles RAM stops directly.
             continue
         if address in probes and probes[address] != owner:
             raise Harness("external-branch", f"conflicting native stop owners at {address:#x}")

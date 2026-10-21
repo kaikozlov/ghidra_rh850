@@ -124,7 +124,7 @@
       "callback_sha256": "77610d459be494531313efd2e34952d130e96ba3a89cf58c76b67287244f6d93",
       "capture_expectation": "normal path maps command magnitude monotonically and negates FEBEE40C before the Q-current reference path; compare sign against 0x1C02 rather than assuming equality",
       "confidence": "exact DID vocabulary + target-native callback/dataflow",
-      "control_role": "base Q-current command observer; compensated PI reference is FEBE6D24, not the DID-visible base cell",
+      "control_role": "base Q-current command observer; compensated PI reference is the separate FEBE6D24 cell",
       "did": "0x1152",
       "emitted_encoding": "signed16; raw observer * 100 / 0x80; clamp [-32768,32767]; 0.01 A/LSB",
       "monitor_key": 252,

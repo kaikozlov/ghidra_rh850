@@ -23,10 +23,9 @@ the census is complete:
 | **total** | **143** | **143** |
 
 The 16 CLR-labeled inputs comprise 12 ordinary managed images and four mixed
-native/CLR wrappers. All 143 rebuilt outputs parse as PE files; every managed
-output is additionally required to materialize every nonzero `MethodDef` RVA,
-not merely parse its CLR metadata. A zero/missing method body is now a hard
-recovery failure.
+native/CLR wrappers. All 143 rebuilt outputs parse as PE files.
+Every managed output must also materialize every nonzero `MethodDef` RVA.
+A zero/missing method body is a hard recovery failure.
 
 Run:
 
@@ -99,8 +98,8 @@ auxiliary product families.
 
 ## What is recovered versus regenerated
 
-The output files are **clean analysis PEs**, not a claim of byte-identical
-reproduction of Toyota's never-retained plaintext disk files.
+The output files are **clean analysis PEs**. Byte-identical reproduction of
+Toyota's never-retained plaintext disk files remains unproved.
 
 The recovered evidence is stronger than merely producing a parseable wrapper:
 
@@ -218,8 +217,7 @@ The import recovery is particularly useful for RE. The installed CP stub may
 contain only one placeholder import per dependency, while phase `0x5C0` reveals
 the full original decorated C++ symbol corpus. `CUW.dll`, for example, recovers
 293 imports across 27 DLLs, including the full Toyota `TCUW*` helper surface.
-The IAT slot is captured from the write itself, not inferred later by scanning
-for a duplicated resolved pointer.
+The IAT slot is captured directly from the write.
 
 ## Windows/anti-debug model
 

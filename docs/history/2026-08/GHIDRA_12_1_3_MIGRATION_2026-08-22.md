@@ -102,16 +102,16 @@ The processor gate then exposed one additional stale derived baseline at
 `application_ecu_reset_callback`, while both the pre-migration 12.1.2 canonical
 inventory/corpus and the annotation source already identify it as
 `application_clear_diagnostic_information_callback` (SID 0x14). The baseline
-was refreshed to the existing canonical function name/body hash. This was also
-pre-existing verification drift, not a 12.1.3 semantic change.
+was refreshed to the existing canonical function name/body hash. This corrects
+pre-existing verification drift while preserving 12.1.3 semantics.
 
 Finally, `verify-processor` regenerated `data/instruction_inventory.csv`. The
 tracked inventory had also lagged the current 6,376-function snapshot: its
 mnemonic counts summed to 180,262 instructions, while the canonical project has
 183,240. The refreshed inventory covers all 183,240 instructions while keeping
-the same 107 mnemonic classes and the same approved user-op set. This is a
-baseline refresh to the already-committed graph, not an instruction-decoder
-change caused by 12.1.3.
+the same 107 mnemonic classes and the same approved user-op set. This refreshes
+the baseline to the already-committed graph. The 12.1.3 migration preserves
+the instruction decoder.
 
 ## Repository consequences
 

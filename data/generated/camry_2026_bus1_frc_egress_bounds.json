@@ -92,7 +92,7 @@
     ],
     "periodic_threshold_frames": 50,
     "target": "native Panda bus-2 0x08A DLC 32 (protected side); forwarded bus-0 copies give identical ID11 intervals and reproduced edges",
-    "tx_ownership": "per-ID FRC-versus-radar transmitter ownership on Bus 1 is unresolved; this census is per-stream, not per-transmitter, so a capture-wide negative cannot be attributed specifically to FRC Tx"
+    "tx_ownership": "per-ID FRC-versus-radar transmitter ownership on Bus 1 is unresolved; this census distinguishes streams only, so a capture-wide negative cannot be attributed specifically to FRC Tx"
   },
   "tiers": {
     "exhaustive_1_16bit_lag_census": {
@@ -459,7 +459,7 @@
       },
       "candidate_fields": "every contiguous 1..24-bit and 32-bit window at every legal bit offset, serialized MSB-first and LSB-first, unsigned and signed (except 1-bit signed duplicate)",
       "candidate_specs": 898104,
-      "integrity_note": "B0:B1 CRC and B2 alive counter deliberately included; interpret their hits as E2E/time artifacts, not application fields",
+      "integrity_note": "B0:B1 CRC and B2 alive counter deliberately included; interpret their hits only as E2E/time artifacts",
       "join": "same-segment nearest 0x08A within 40 ms",
       "scope": "all 22 periodic native bus-1 (id,dlc) streams shared by both drives; no ID/byte prefilter",
       "screens": {
@@ -868,17 +868,17 @@
           "stream": "0x160/32"
         }
       ],
-      "note": "strong 0x160 candidates correlate with measured 0x025 steering angle at near-zero/negative lag while their best 0x08A target lags are more negative -- plant/feedback-shaped within the active windows, not demonstrated request commands; CORR-138 shows full-drive nonreproduction, so these are not promoted to standing field identities"
+      "note": "strong 0x160 candidates correlate with measured 0x025 steering angle at near-zero/negative lag while their best 0x08A target lags are more negative -- plant/feedback-shaped within the active windows; request commands remain undemonstrated. CORR-138 shows full-drive nonreproduction, so these are not promoted to standing field identities"
     },
     "stratified_wider_nonlinear_refinement": {
-      "boundary": "the +/-1 s / 25 ms wider-field nonlinear sweep is a stratified subset (strongest per screen metric), NOT an exhaustive lag search; only the tier-2 zero-lag state screen is exhaustive over all 898,104 specs",
+      "boundary": "the +/-1 s / 25 ms wider-field nonlinear sweep covers only a stratified subset (strongest per screen metric); only the tier-2 zero-lag state screen is exhaustive over all 898,104 specs",
       "lag_convention": "corr(field(t), target(t+lag)); positive means Bus-1 field leads downstream 0x08A",
       "lag_sweep_ms": [
         -1000,
         1000,
         25
       ],
-      "note": "strong selected 0x160/0x1A0 correlations peak at negative lag and/or fail sign reproduction; the strongest positive-lag candidate is weak perception-shaped association, not a demonstrated request carrier",
+      "note": "strong selected 0x160/0x1A0 correlations peak at negative lag and/or fail sign reproduction; the strongest positive-lag candidate is weak perception-shaped association; a request carrier remains undemonstrated",
       "selection": "stratified: per screen metric (cross/drive_a/drive_b over 9 state screens) top-15 with (id,order,start) support dedup and per-ID cap 3, then filled to the cap by best overall cross-drive screen score",
       "strongest_positive_lag_selected_candidate": {
         "A": {
@@ -938,7 +938,7 @@
     "transition_edge_screen": {
       "deterministic_request_mode_bit": false,
       "n_reproduced_active_edge_bits": 182,
-      "note": "no deterministic request/mode bit: the strongest reproduced four-edge margin is only 0.2105 and the top fields are noisy perception/object-family bits (0x181/0x189), not stable state flags; this bounds a single stable bit synchronized to 0x08A B21, it does not prove absence of egress",
+      "note": "no deterministic request/mode bit: the strongest reproduced four-edge margin is only 0.2105 and the top fields are noisy perception/object-family bits (0x181/0x189); stable state flags remain unproved. This bounds a single stable bit synchronized to 0x08A B21, it does not prove absence of egress",
       "strongest_four_edge_margin": 0.2105,
       "top_edge_bits": [
         {

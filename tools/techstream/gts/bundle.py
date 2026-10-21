@@ -632,7 +632,7 @@ def _bundle_customize_catalog(
 ) -> dict[str, Any]:
     """Recover current regional Toyota Customize catalog from master tables 20/21/22/34.
 
-    These are master tables, not ECU-DDB tables. GetCustomSupportList selects a
+    These are master tables. GetCustomSupportList selects a
     body type and then table-20 groups. GetCustomItemList resolves table-21 by
     group id and table-22 by choice-list id; each item names the live target ECU.
     """

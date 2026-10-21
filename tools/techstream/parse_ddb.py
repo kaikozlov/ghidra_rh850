@@ -642,7 +642,7 @@ class StringDataBase:
     )
 
     def __post_init__(self) -> None:
-        # UtilityDB!SetRecString consumes the row's +0xA0 u32, not its ordinal.
+        # UtilityDB!SetRecString consumes the row's explicit +0xA0 u32 link.
         # Preserve raw row order in metadata while indexing the explicit link.
         for entry in self.metadata or ():
             if not 1 <= entry.string_index <= self.entry_count:
@@ -776,8 +776,8 @@ class DDBParser:
 
         # Section directory: u32 offsets starting at file offset 0x24.
         # The slot index is the section type. The directory extends to the
-        # first section payload (0x280 in V18), not merely through type 16;
-        # newer schemas use types as high as 91.
+        # first section payload (0x280 in V18).
+        # Newer schemas use types as high as 91.
         directory_end = None
         for i in range(0x24, len(data) - 3, 4):
             offset = struct.unpack_from("<I", data, i)[0]

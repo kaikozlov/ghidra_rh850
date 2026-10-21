@@ -12,7 +12,7 @@
 >
 > **Evidence source:** external-source patent analysis joined to existing target-native SecOC RE
 >
-> **Scope warning:** this is a post-TSS3 filing. It is useful for Toyota terminology and future-architecture reasoning, not evidence that the 2026 Camry F33 implements the claimed scheme.
+> **Scope warning:** this post-TSS3 filing supplies Toyota terminology and supports future-architecture reasoning. Whether the 2026 Camry F33 implements the claimed scheme remains unproven.
 
 Public sources:
 
@@ -37,8 +37,8 @@ The patent describes ordinary AUTOSAR SecOC as **related art**:
 That related-art discussion is useful vocabulary, but it is not an admission
 that every Toyota production platform uses one vehicle-global static key.
 
-The proposed invention changes **the operational MAC key**, not the existence
-of persistent roots of trust.
+The proposed invention changes **the operational MAC key** while retaining
+persistent roots of trust.
 
 The illustrated pipeline is:
 
@@ -151,10 +151,9 @@ rounding to a tolerance, but gives much less detail about how geographical
 location is made identical across heterogeneous ECUs. It allows GPS, INS,
 cellular/Wi-Fi positioning, and external timestamp sources.
 
-Practical consequence: timestamp/location are best understood as **session
-diversification context**, not secret entropy. In a production vehicle they are
-likely observable or distributable state. Cryptographic secrecy still rests in
-the persistent master material.
+Timestamp/location supply **session diversification context**. In a production
+vehicle they are likely observable or distributable state. Cryptographic secrecy
+still rests in the persistent master material.
 
 The description also allows multiple master seeds and/or master keys. Therefore
 the patent does not require one vehicle-global root or one vehicle-global
@@ -223,7 +222,7 @@ Therefore the proposal only fixes the no-HSM problem if the implementation
 actually gives the **root material** stronger protection than the old static
 traffic key. Session rotation by itself does not do that.
 
-## 7. Freshness is generic, not the exact Toyota TSS3 mechanism
+## 7. The patent describes generic freshness
 
 The patent's freshness description is intentionally generic:
 
@@ -264,7 +263,7 @@ to rename or simplify the already recovered TSS3 freshness implementation.
 | Per-start KDF | Central feature | No recovered F33 application-side timestamp/location KDF feeding SecOC slot 4 | **Not supported** |
 | RAM-only traffic key | Natural implementation possibility | Exact F33 SecOC config selects slot 4; separate command-9/10 work treats RAM_KEY as a distinct volatile facility | **Patent-style RAM session key is not the current leading F33 model** |
 | Freshness | Optional monotonic counter, generic startup sync | `0x00F` + trip/reset/message counters + per-PDU receiver state | Conceptually related, physically different |
-| MAC | Generic keyed MAC | AES-CMAC-128 with truncated transmitted authenticator in recovered Toyota profiles | Compatible abstraction, not patent-specific |
+| MAC | Generic keyed MAC | AES-CMAC-128 with truncated transmitted authenticator in recovered Toyota profiles | Compatible at the abstraction level only |
 | Counter/MAC truncation | Explicit | Exact Toyota profiles transmit truncated freshness/authenticator | Strong conceptual match |
 | Key distribution | Derived independently; no session-key transport required | Current Toyota service flow provisions protected key material using standard SHE M1--M5 | Different lifecycle plane |
 | Receiver failure | Reject/discard on bad MAC or stale counter | Exact receivers fail closed before normal COM/freshness commit | Strong conceptual match |
@@ -303,8 +302,8 @@ Therefore:
 - the patent does not specify which SHE/HSM key slot would hold either root or
   derived key.
 
-A volatile `RAM_KEY` is an intuitive implementation for "does not exist at
-IG-OFF", but that is **our implementation inference**, not patent text.
+Using volatile `RAM_KEY` for "does not exist at IG-OFF" is **our implementation
+inference**. The patent leaves that implementation unspecified.
 
 ## 10. The literal HSM implementation problem
 
@@ -340,8 +339,8 @@ an ICU-S KDF opcode, or a RAM_KEY boot-load path.
 
 ## 11. Reliability / synchronization holes in the disclosure
 
-The patent is a broad architecture patent, not a production protocol
-specification. Several details are intentionally or accidentally loose.
+The patent describes broad architecture. A production protocol specification
+would require tighter definitions for several details below.
 
 ### 11.1 Same OTP without a key-confirmation protocol
 
@@ -379,7 +378,7 @@ Those are not the same construction. The granted claims retain the sensible
 sender formulation (MAC from derived key + counter, then truncated counter/MAC)
 and do not claim that receiver-side "truncate the derived key" sentence.
 
-Treat that receiver sentence as drafting noise, not an implementation rule.
+Treat that receiver sentence as drafting noise. Use the granted claims' sender formulation.
 
 ### 11.4 "Within a level of similarity" for MAC verification
 
@@ -428,8 +427,8 @@ material changing at ignition in dataflow proximity to time/location context**.
 
 ## 13. Bottom line
 
-This patent is useful, but mostly because it defines a plausible **post-TSS3
-key-lifecycle direction**, not because it explains the F33 implementation.
+This patent defines a plausible **post-TSS3 key-lifecycle direction**.
+The F33 implementation still requires target-native evidence.
 
 The security improvement is specific:
 

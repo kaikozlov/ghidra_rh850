@@ -13,7 +13,7 @@
     "what_is_already_owned": "Two raw 0792/P5-Unified CUWs exactly cover Toyota's published 23TC01 Corolla FRC source transitions to 8646F1204500; another generic 'find a 2023 Corolla FRC CUW' pass is unnecessary."
   },
   "brake_epb": {
-    "boundary": "24TC01 independently publishes a concrete 2023 Corolla Brake/EPB CID family. No package descriptor has DiagID 07B0 or any published Brake CID in the pinned 26-CUW local corpus. The campaign family is therefore an acquisition key set, not proof of the exact target Brake F181.",
+    "boundary": "24TC01 independently publishes a concrete 2023 Corolla Brake/EPB CID family. No package descriptor has DiagID 07B0 or any published Brake CID in the pinned 26-CUW local corpus. The campaign family is therefore an acquisition key set. The exact target Brake F181 remains unproved.",
     "campaign": {
       "applicability": [
         "Certain 2023 Model Corolla"
@@ -159,7 +159,7 @@
     "exact_albino_or_span_frc_cid_identified": false,
     "model_year_brake_calibration_family_publicly_identified": true,
     "model_year_frc_package_family_already_present": true,
-    "priority_refinement": "The next acquisition target is specifically the 07B0 Brake/EPB application or exact live Brake identity, not an unspecified matched FRC package. The 2023 Corolla 0792 generation package family is already local but remains encoded.",
+    "priority_refinement": "The next acquisition target is specifically the 07B0 Brake/EPB application or exact live Brake identity. The 2023 Corolla 0792 generation package family is already local but remains encoded.",
     "tms051_sender_attribution_retracted": false
   },
   "title": "2023 Corolla FRC/Brake calibration acquisition correlation"

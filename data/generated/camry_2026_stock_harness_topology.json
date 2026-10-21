@@ -1,5 +1,5 @@
 {
-  "boundary": "incident-era native traffic proves message placement, not healthy EPS operation or actuation; EPS 0x030 is absent",
+  "boundary": "incident-era native traffic proves message placement only; healthy EPS operation and actuation remain unproved because EPS 0x030 is absent",
   "candidate_direction": {
     "direct_frc_bus1_pdus": {
       "ids": [

@@ -482,7 +482,7 @@ def tiers_2_3(loaded, streams):
                     [f"angle_{s}" for s in STATES] + [f"{x}_{s}" for s in (11, 18)
                                                       for x in ("delta", "rate", "indicator")]},
         "integrity_note": "B0:B1 CRC and B2 alive counter deliberately included; interpret "
-                          "their hits as E2E/time artifacts, not application fields",
+                          "their hits only as E2E/time artifacts",
     }
     for key in sorted(tier2["screens"]):
         rows = sorted((r for r in pool.values() if f"cross_{key}" in r["screen"]),
@@ -627,9 +627,9 @@ def tiers_2_3(loaded, streams):
         "selection": "stratified: per screen metric (cross/drive_a/drive_b over 9 state "
                      "screens) top-15 with (id,order,start) support dedup and per-ID cap 3, "
                      "then filled to the cap by best overall cross-drive screen score",
-        "boundary": "the +/-1 s / 25 ms wider-field nonlinear sweep is a stratified subset "
-                    "(strongest per screen metric), NOT an exhaustive lag search; only the "
-                    "tier-2 zero-lag state screen is exhaustive over all 898,104 specs",
+        "boundary": "the +/-1 s / 25 ms wider-field nonlinear sweep covers only a stratified subset "
+                    "(strongest per screen metric); only the tier-2 zero-lag state screen "
+                    "is exhaustive over all 898,104 specs",
         "lag_sweep_ms": [T3_LAGS_MS[0], T3_LAGS_MS[-1], T3_LAGS_MS[1] - T3_LAGS_MS[0]],
         "lag_convention": "corr(field(t), target(t+lag)); positive means Bus-1 field leads downstream 0x08A",
         "strongest_positive_lag_selected_candidate": best_positive,
@@ -637,7 +637,7 @@ def tiers_2_3(loaded, streams):
         "strongest_reproduced_0x160_0x1A0_any_lag": reproduced_negative_peak,
         "note": "strong selected 0x160/0x1A0 correlations peak at negative lag and/or fail "
                 "sign reproduction; the strongest positive-lag candidate is weak "
-                "perception-shaped association, not a demonstrated request carrier",
+                "perception-shaped association; a request carrier remains undemonstrated",
     }
     return tier2, tier3
 
@@ -727,7 +727,7 @@ def tier4(loaded, streams):
         "deterministic_request_mode_bit": False,
         "note": "no deterministic request/mode bit: the strongest reproduced four-edge "
                 "margin is only 0.2105 and the top fields are noisy perception/object-family "
-                "bits (0x181/0x189), not stable state flags; this bounds a single stable bit "
+                "bits (0x181/0x189); stable state flags remain unproved. This bounds a single stable bit "
                 "synchronized to 0x08A B21, it does not prove absence of egress",
     }
 
@@ -799,8 +799,8 @@ def plant_feedback(loaded):
         "entries": entries,
         "note": "strong 0x160 candidates correlate with measured 0x025 steering angle at "
                 "near-zero/negative lag while their best 0x08A target lags are more "
-                "negative -- plant/feedback-shaped within the active windows, not "
-                "demonstrated request commands; CORR-138 shows full-drive nonreproduction, "
+                "negative -- plant/feedback-shaped within the active windows; request commands remain "
+                "undemonstrated. CORR-138 shows full-drive nonreproduction, "
                 "so these are not promoted to standing field identities",
     }
 
@@ -857,7 +857,7 @@ def main():
             "target": "native Panda bus-2 0x08A DLC 32 (protected side); forwarded bus-0 "
                       "copies give identical ID11 intervals and reproduced edges",
             "tx_ownership": "per-ID FRC-versus-radar transmitter ownership on Bus 1 is "
-                            "unresolved; this census is per-stream, not per-transmitter, so "
+                            "unresolved; this census distinguishes streams only, so "
                             "a capture-wide negative cannot be attributed specifically to FRC Tx",
         },
         "id11_intervals": {n: t4["id11_intervals"][n] for n in ("drive_a", "drive_b")},

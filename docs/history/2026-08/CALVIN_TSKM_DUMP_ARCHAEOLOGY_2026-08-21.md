@@ -32,7 +32,7 @@ internally credible.
 | six current range payload packages authenticate under the recovered BFD8 payload root | **VERIFIED** | all six 4-KiB ciphertexts independently pass decrypt/CRC/CMAC/callback/descriptor checks |
 | the six plaintexts differ at only six bytes | **CORRECTED** | the executable body below `0xFD0` differs at six encoded range bytes; the CRC fixup `0xFEC..0xFEF` also differs, for ten varying bytes through `0xFEF` |
 | Calvin's family introduced a newer reset-return dumper | **CORRECTED** | Calvin differs from Willem's 32-KiB DataFlash self-loop artifact, but Willem's older RAM payload already uses boot reset `0x157E` |
-| Bk2ol source/toolchain reproduces Calvin global-RAM package | **VERIFIED** | global-RAM source substitution with the pinned GCC13.2/binutils2.41 family reproduces the complete encrypted package; this proves family equivalence, not original authorship |
+| Bk2ol source/toolchain reproduces Calvin global-RAM package | **VERIFIED** | global-RAM source substitution with the pinned GCC13.2/binutils2.41 family reproduces the complete encrypted package; this proves family equivalence. Original authorship remains unresolved |
 | Bk2ol ladder establishes authorship | **BOUNDED** | Bk2ol contains an exact public precursor/common-lineage `.5/.7/1.0 s + repeated PROGRAMMING` sequence; sequence identity does not establish who first authored it |
 | `FF00` is being used as a callback/control-flow trigger | **VERIFIED** | CPU static path enters the legitimate erase state machine and dispatches through `FEBF0FD0 -> uploaded FEBF0000` |
 | `FF00` therefore never physically erases | **CORRECTED** | CPU-side static analysis does not prove zero FCU erase side effect; Calvin's “did not erase” statement is an external field observation without retained before/after sector evidence |
@@ -40,13 +40,13 @@ internally credible.
 | actual H DataFlash has poor byte repeatability | **VERIFIED** | restricting all five host reads to the real first 32 KiB gives 23.5077%-25.6470% pairwise divergence; cause is not assigned to real NVM writes |
 | H object-15 invalidity was a one-dump conclusion | **VERIFIED FALSE** | every one of the five reads independently decodes objects 0/2/5 as three-valid-copy and object 15 as zero-valid-copy |
 | `R7F701383` DataFlash size remained unsettled | **CORRECTED** | retained official Renesas datasheet + hardware manual settle it at 32 KiB for this 1-MiB part |
-| `FEDE`/`FEBE` aliasing should not transfer from `R7F701381` to `R7F701383` without another dump | **CORRECTED** | P1M-E hardware maps both 128-KiB PE1/self windows while the part has only 128 KiB total local RAM; the self window is an architectural self view, not a second bank. Calvin's live test is dynamic confirmation, not the sole basis |
+| `FEDE`/`FEBE` aliasing should not transfer from `R7F701381` to `R7F701383` without another dump | **CORRECTED** | P1M-E hardware maps both 128-KiB PE1/self windows while the part has only 128 KiB total local RAM; the self window maps the same PE-local memory. Calvin's live test adds dynamic confirmation of the manual-backed alias |
 | `FF206ED4` is object-14's raw second field | **CORRECTED** | `FF206E14` is object-15 `+0x14`; `FF206ED4` is three `0x40` strides later but maps to object 12 raw `FF206EC0 + 0x14`; object 14's corresponding field is `FF206E54` |
 | Calvin's ID/AuthID/master-key labels are locally established | **BOUNDED** | the `0x40` stride and `+0x14` placement align with local physical geometry; table-wide semantic labels remain Calvin field terminology |
 | dealer rekey left the prior factory key in plaintext | **BOUNDED** | retained only as Calvin's external field observation; no local before/after artifact proves it |
 | the corpus contains exactly 3,194,640 16-byte windows and two-oracle geometry of 6,389,280 | **VERIFIED** | file-size arithmetic reproduces the window count and two-oracle invocation count exactly |
 | 6,389,280 means exactly that many literal CMAC calculations and proves no key exists | **CORRECTED** | it is scan-position/oracle-invocation geometry; matcher internals may evaluate multiple samples. The zero-match run is external dynamic, both oracles are cross-session relative to the Aug-14 dumps, and the result excludes only stable raw-window matches under that epoch assumption |
-| successful SecurityAccess ~1 s after PROGRAMMING disproves a 10-s delay | **CORRECTED** | the bad-key backoff is independently **10 seconds** from TAUJ1 clocking. The ordinary retained PROGRAMMING replay explicitly clears the separate initializer delay before synthetic `10 02`; Calvin exercised that clear path, not the two-bad-key backoff |
+| successful SecurityAccess ~1 s after PROGRAMMING disproves a 10-s delay | **CORRECTED** | the bad-key backoff is independently **10 seconds** from TAUJ1 clocking. The ordinary retained PROGRAMMING replay explicitly clears the separate initializer delay before synthetic `10 02`; Calvin exercised that clear path. The two-bad-key backoff remains a separate condition |
 | final preflight fixes the Span route-selection bug | **VERIFIED code / BOUNDED field result** | final source probes answering routes through PROGRAMMING; in-car `param=1` PROGRAMMING remains unmeasured |
 | final preflight is mock-tested | **BOUNDED** | `CLAUDE.md` says it was mock-tested; no committed preflight test at the pinned tip independently demonstrates that claim |
 
@@ -89,7 +89,7 @@ rebased/cleaned TSKM line
 ```
 
 `823d`, `60d`, and `42d` share the same parent and are therefore replacement
-amendments, not one descendant sequence. The full-tree rebase also moves the
+amendments with a common base. The full-tree rebase also moves the
 upstream openpilot base; only Calvin's own `tsk/` delta is nearly
 content-preserving apart from `env.py`. This distinction matters whenever an
 orphan snapshot is compared with the visible branch.
@@ -190,11 +190,11 @@ FEBE0000..FEBFFFFF  Local RAM (PE1 area), 128 KiB
 FEDE0000..FEDFFFFF  Local RAM (self),     128 KiB
 ```
 
-while the product has only **128 KiB total local RAM**. The `FEDE` range is an
-architectural self view of PE-local RAM, not an additional 128-KiB physical
-bank. Calvin's live `R7F701381` FEDE/FEBE result is useful dynamic confirmation
-of the documented architecture; it is not the sole reason to apply that
-architecture to the explicitly listed `R7F701383` P1M-E part.
+while the product has only **128 KiB total local RAM**. The `FEDE` range maps
+the same PE-local RAM through an architectural self view. Calvin's live
+`R7F701381` FEDE/FEBE result adds dynamic confirmation of the documented
+architecture. The manual independently establishes that architecture for
+the explicitly listed `R7F701383` P1M-E part.
 
 The product/address facts, source hashes, and TAUJ1 timer facts are tracked in
 `data/p1me_product_memory.json` and asserted by
@@ -230,8 +230,7 @@ objects 0 / 2 / 5: three valid copies
 object 15:          zero valid copies
 ```
 
-Thus object-15 invalidity is a repeated record-integrity result, not a one-dump
-null-byte inference.
+Thus repeated record-integrity checks establish object-15 invalidity.
 
 ## 6. Broad no-key scan: exact geometry, bounded conclusion
 
@@ -240,8 +239,8 @@ The 15 retained Aug-14 range files total 3,162,112 bytes. Adding the earlier
 positions** when counted per file. Two synchronization oracles therefore give
 **6,389,280 window/oracle invocations**.
 
-That number is geometry, not a guarantee of exactly 6,389,280 low-level CMAC
-operations: the matcher may evaluate multiple oracle samples for a candidate.
+That number counts window/oracle invocations. The number of low-level CMAC
+operations can differ because the matcher may evaluate multiple oracle samples for a candidate.
 Calvin's journal reports zero matches and a planted-key positive control at
 `0x4000`; the historical run itself is external dynamic evidence.
 
@@ -277,15 +276,15 @@ object 13 raw record: FF206E80 -> second field FF206E94
 object 12 raw record: FF206EC0 -> second field FF206ED4
 ```
 
-So `FF206ED4` is **object 12's** corresponding field under exact `4512000`
-geometry, not object 14's. The alignment corroborates a `0x40` physical stride
+So exact `4512000` geometry places `FF206ED4` in **object 12's** corresponding
+field. Object 14's field is `FF206E54`. The alignment corroborates a `0x40` physical stride
 and a `+0x14` value position. It does not establish Calvin's table-wide ID,
 AuthID, or “ECU master key” semantics for `4512000`.
 
 Calvin also reports that a dealer rekey left the previous factory SecOC key
 readable in plaintext. No retained before/after artifact lets us reproduce that
-claim. Keep it as an external field observation and as a future acquisition
-requirement, not as a generalized Toyota storage rule.
+claim. Retain it only as an external field observation and a future acquisition
+requirement. A generalized Toyota storage rule remains unproved.
 
 ## 8. SecurityAccess: ten-second bad-key backoff and normal handoff are separate
 

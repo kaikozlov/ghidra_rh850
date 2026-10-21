@@ -169,7 +169,7 @@ def _section_keyless_application_diagnostic_transport():
     check('three diagnostic CanTp connections route PDU IDs 0x802/803/804', tp_ids == [2050, 2051, 2052], str([hex(x) for x in tp_ids]))
     callbacks = [u32(137356 + 4 * i) for i in range(6)]
     check('PduR callback vector is exact', callbacks == [590760, 590908, 592316, 591036, 592672, 592944], str([hex(x) for x in callbacks]))
-    check('generic 0x90916 copy belongs to CopyTxData, not receive reassembly', 'FUN_00090916' in by[592316]['decompiled_c'] and callbacks[2] == 592316)
+    check('generic 0x90916 copy belongs to CopyTxData', 'FUN_00090916' in by[592316]['decompiled_c'] and callbacks[2] == 592316)
     print('\n== DCM receive allocation ==')
     slots = [(u16(155748 + i * 8), u32(155748 + i * 8 + 4)) for i in range(3)]
     check('DCM has three fixed 256-byte request buffers', slots == [(256, 4273886761), (256, 4273887017), (256, 4273887273)], str([(hex(a), hex(b)) for a, b in slots]))
@@ -255,7 +255,7 @@ def _section_keyless_application_pc_surfaces():
     print('\n== architectural alias geometry ==')
     PE1_BASE, SELF_BASE, SIZE = (4273864704, 4275961856, 131072)
     check('self LocalRAM view is same-offset +0x200000 alias', SELF_BASE - PE1_BASE == 2097152)
-    check('XCP shadow aliases to FEDF7C00, not a lower FEBE control object', XCP_LO + (SELF_BASE - PE1_BASE) == 4276059136)
+    check('XCP shadow aliases to FEDF7C00', XCP_LO + (SELF_BASE - PE1_BASE) == 4276059136)
     for control in (4273866752, 4273868800, 4273870848, 4273872896, 4273960708):
         check(f'control object 0x{control:X} physical offset differs from XCP start', (control - PE1_BASE) % SIZE != (XCP_LO - PE1_BASE) % SIZE)
 _section_keyless_application_pc_surfaces()

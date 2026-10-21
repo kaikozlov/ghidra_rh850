@@ -47,9 +47,8 @@ class IntertickSession(_BaseSession):
 
 def classify_ingress(result: dict[str, Any]) -> dict[str, Any]:
     # A no-hit run legitimately has generation==0, which the generic decoder
-    # marks non-coherent. Fall back to the final stopped resident state so
-    # "no queue hit" remains a first-class experimental result rather than an
-    # artificial phase-inconclusive outcome.
+    # marks non-coherent. Use the final stopped resident state to classify
+    # "no queue hit" as a valid experimental result.
     last = result.get("capture", {}).get("last")
     if not isinstance(last, dict):
         post = result.get("post", {})

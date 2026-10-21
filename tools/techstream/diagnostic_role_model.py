@@ -1,7 +1,7 @@
 """Shared role/plugin operation model for Toyota Techstream/GTS diagnostics.
 
-The classification is intentionally about *recovered shared-runtime edges*, not
-about whether a command can ever touch a vehicle.  A plugin may invoke transport
+The classification covers *recovered shared-runtime edges*. Whether a command can
+ever touch a vehicle is a separate question. A plugin may invoke transport
 directly, delegate support discovery to CommandCommon, or use a path that has
 not yet been recovered.
 """
@@ -29,7 +29,7 @@ DIRECT_TRANSPORT_MARKERS = (
 # bodies are independently proven to reach GetCommFrmInfo + a send/receive
 # primitive (sometimes through CheckSupportBit).  Current GTS+ CommandCommon's
 # on-disk .text is sparse/virtual-only beyond the initial page, so this is an
-# API-continuity transfer, not a current-body byte-parity claim.
+# API-continuity transfer. Current-body byte parity remains unproved.
 V18_PROVEN_DELEGATED_TRANSPORT_MARKERS = (
     "?CheckSupportPid@CCommCachePlusP5@@",
     "?CheckSupportDid@CCommCachePlusP5@@",

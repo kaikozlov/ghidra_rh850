@@ -1,7 +1,7 @@
 {
   "conclusion": {
     "0x0CA": "Supersede the old upper/lower/result-triplet interpretation; 0x0CA remains other protected longitudinal/chassis state.",
-    "integration": "For Camry, do not revive 0x160 Alpha Long. The OEM-native integration target is the TSS application/request side feeding Toyota's Vehicle Movement Manager, not direct powertrain/brake actuator synthesis. 0x08A is the strongest observed request-side carrier, while the downstream Vehicle Motion Control target interface and source-suppression/security path remain to be recovered.",
+    "integration": "For Camry, do not revive 0x160 Alpha Long. The OEM-native integration target is specifically the TSS application/request side feeding Toyota's Vehicle Movement Manager. 0x08A is the strongest observed request-side carrier, while the downstream Vehicle Motion Control target interface and source-suppression/security path remain to be recovered.",
     "not_fully_mapped": "The entire 5280/5281 recorder model is NOT yet byte-named. B6/B7 are strongly recovered structurally as the two packed request-ID/allocation bytes (bits7:2 ID, bits1:0 allocation), including active/hold/override transitions; archive-wide unequal ordinary-DRCC frames strongly resolve A as upper and B as lower, while shift/EPB, override-prohibition and priority remain unmapped.",
     "request_plane": "0x08A is the unified observed continuous TSS request-side envelope: the lateral 5282 tuple is recovered there and the duplicated signed16 B8:B9/B11:B12 words occupy the 5280/5281 longitudinal lower/upper bound-package geometry. Exact placement before versus after internal TSS application selection remains unresolved.",
     "result_plane": "0x081 is the unified Brake-owned employed-result/reference/supervision envelope: its lateral selected ID/reference are recovered, B6[5:0] is the strongest 5284 longitudinal employed-source-ID candidate, and B20:B21 is observed as the closed-accelerator reference word with its former 57DB result-acceleration join retired by the 2026-09-30 cross-state corpus. In that corpus B4:B5 is the effective/result acceleration candidate and B18:B19 the drive result/reference, with no confirmed OEM diagnostic join for either. Current status and evidence: docs/variants/camry-2026-longitudinal-evidence.md#2026-09-30-vmc-status-corpus and data/generated/camry_20260930_vmc_status/."
@@ -207,7 +207,7 @@
         },
         "request_state": "FRC-origin 0x08A upper ID0 / lower ID4",
         "result_state": {
-          "interpretation": "Stable FRC 0/4 request state returns Brake/VMC employed-source ID63; any non-63 values should be treated as transition-lag candidates, not FRC-origin ID63 requests.",
+          "interpretation": "Stable FRC 0/4 request state returns Brake/VMC employed-source ID63; any non-63 values should be treated only as transition-lag candidates. FRC-origin ID63 requests remain unsupported.",
           "moving_over_1_mps_pair_count": 7713,
           "moving_over_1_mps_result_id_counts": {
             "63": 7713
@@ -386,7 +386,7 @@
             "status": "withdrawn"
           },
           "scale_mps2_per_count": 0.001,
-          "selection_discriminator": "Result ID 63 tracks the request nearly exactly while result ID 11 materially diverges in the retained drives; this is result-selection behavior, not a simple request echo.",
+          "selection_discriminator": "Result ID 63 tracks the request nearly exactly while result ID 11 materially diverges in the retained drives; this establishes result-selection behavior beyond a simple request echo.",
           "wire": "B20:B21 signed16 big-endian"
         },
         "longitudinal_result_id_candidate": {
@@ -412,7 +412,7 @@
         },
         "paired_to_preceding_0x08A": 17073,
         "rlog_publication_age_ms": {
-          "boundary": "rlog batch/publication timing, not physical wire latency",
+          "boundary": "rlog batch/publication timing only; physical wire latency unresolved",
           "median": 9.755318,
           "p90": 19.726309
         },
@@ -634,7 +634,7 @@
         },
         "request_state": "FRC-origin 0x08A upper ID0 / lower ID4",
         "result_state": {
-          "interpretation": "Stable FRC 0/4 request state returns Brake/VMC employed-source ID63; any non-63 values should be treated as transition-lag candidates, not FRC-origin ID63 requests.",
+          "interpretation": "Stable FRC 0/4 request state returns Brake/VMC employed-source ID63; any non-63 values should be treated only as transition-lag candidates. FRC-origin ID63 requests remain unsupported.",
           "moving_over_1_mps_pair_count": 10563,
           "moving_over_1_mps_result_id_counts": {
             "63": 10563
@@ -810,7 +810,7 @@
             "status": "withdrawn"
           },
           "scale_mps2_per_count": 0.001,
-          "selection_discriminator": "Result ID 63 tracks the request nearly exactly while result ID 11 materially diverges in the retained drives; this is result-selection behavior, not a simple request echo.",
+          "selection_discriminator": "Result ID 63 tracks the request nearly exactly while result ID 11 materially diverges in the retained drives; this establishes result-selection behavior beyond a simple request echo.",
           "wire": "B20:B21 signed16 big-endian"
         },
         "longitudinal_result_id_candidate": {
@@ -836,7 +836,7 @@
         },
         "paired_to_preceding_0x08A": 19999,
         "rlog_publication_age_ms": {
-          "boundary": "rlog batch/publication timing, not physical wire latency",
+          "boundary": "rlog batch/publication timing only; physical wire latency unresolved",
           "median": 9.756013,
           "p90": 19.784122
         },
@@ -1291,7 +1291,7 @@
       "44,102": 6,
       "45,103": 192
     },
-    "interpretation": "The former composite B7 0x47/0x67 state decomposes into request-B ID17/ID25 with allocation method3. Accelerator override changes A allocation 1->0 and B allocation 3->2 while preserving both request IDs. Delayed hold is specifically request-B ID25 with allocation2/3, not B7 bit5 alone; a moving raw B7=0x65 (ID25/allocation1) is the retained counterexample.",
+    "interpretation": "The former composite B7 0x47/0x67 state decomposes into request-B ID17/ID25 with allocation method3. Accelerator override changes A allocation 1->0 and B allocation 3->2 while preserving both request IDs. Delayed hold specifically requires request-B ID25 with allocation2/3; a moving raw B7=0x65 (ID25/allocation1) is the retained counterexample.",
     "route_3b_3c_pair_counts": {
       "44,102": 6,
       "44,70": 30550,
@@ -1399,7 +1399,7 @@
       "wire": "0x081 B13[5:0]"
     },
     "57D3_acceleration_valid": {
-      "note": "0x081 B11[4] is request-loss supervision, not OEM-joined to this flag",
+      "note": "0x081 B11[4] is request-loss supervision; its OEM join to this flag remains unresolved",
       "status": "unresolved",
       "wire": null
     },
@@ -1481,7 +1481,7 @@
       "id36_startup_frames": 33,
       "id4_semantic_assessment": {
         "brake_press_edges_reducing_lower_bound": 9,
-        "current_semantics": "Strong behavioral attribution: ID4 is the default closed-accelerator/manual baseline lower-bound application. Its lower-bound scalar is positive near zero speed in D, declines through zero into coast/regen/deceleration with speed, and is reduced by every matched low-speed brake press. This is the same physical behavior Toyota describes for the fully-closed powertrain acceleration / creep-to-engine-braking baseline, but no recovered Toyota enum names numeric ID4, so 'creep' is a low-speed behavior of the envelope rather than an OEM ID label.",
+        "current_semantics": "Strong behavioral attribution: ID4 is the default closed-accelerator/manual baseline lower-bound application. Its lower-bound scalar is positive near zero speed in D, declines through zero into coast/regen/deceleration with speed, and is reduced by every matched low-speed brake press. This is the same physical behavior Toyota describes for the fully-closed powertrain acceleration / creep-to-engine-braking baseline, but no recovered Toyota enum names numeric ID4, so 'creep' describes only a low-speed behavior of the envelope.",
         "matched_brake_press_edges_under_1_mps": 9,
         "median_brake_press_delta_mps2": -0.035,
         "moving_over_1_mps_pairs": 18276,
@@ -1523,9 +1523,9 @@
       "supports_shared_application_namespace": [
         "Toyota's architecture explicitly defines both longitudinal and lateral request IDs as application identifiers.",
         "0 is the no-request/manual anchor on both recovered interfaces.",
-        "63 is OEM-labeled Driver Operation on a P5 FRC diagnostic display surface and on the lateral Target ID dictionary, but longitudinal dynamic evidence places 63 on the downstream Brake/VMC result side rather than the FRC 0x08A request side.",
+        "63 is OEM-labeled Driver Operation on a P5 FRC diagnostic display surface and on the lateral Target ID dictionary, but longitudinal dynamic evidence places 63 specifically on the downstream Brake/VMC result side; FRC 0x08A ID63 requests remain unobserved.",
         "Camry longitudinal ID11 is the ordinary DRCC application source while lateral ID11 is OEM LTA/LCA, making 11 a strong shared TSS continuous-driving application-ID candidate.",
-        "P6 longitudinal IDs 41/45 are MaaS autonomous-driving Request 1/2 while the lateral table labels 41/45 AD(Lv.4)/DES(Lv.4); these may be axis-specific views of shared automated-driving application identities rather than contradictory namespaces."
+        "P6 longitudinal IDs 41/45 are MaaS autonomous-driving Request 1/2 while the lateral table labels 41/45 AD(Lv.4)/DES(Lv.4); these may be axis-specific views of shared automated-driving application identities."
       ],
       "unresolved_numeric_labels": [
         "The static corpus does not publish a complete longitudinal 0..63 value table.",
@@ -1572,7 +1572,7 @@
     ],
     "model": {
       "application_id_semantics": "Toyota's vehicle-movement architecture defines both longitudinal request IDs and the lateral request ID as identifiers of applications. This supports a coordinated/shared application-ID namespace model, while the static diagnostic corpus still does not expose a complete longitudinal value table.",
-      "axis_boundary": "Numeric reuse across axes is now treated as potentially intentional application identity, not an automatic coincidence. Axis-local diagnostic labels may still describe different roles/phases of the same application, so equal numbers do not by themselves prove identical display labels.",
+      "axis_boundary": "Numeric reuse across axes is now treated as potentially intentional application identity. Axis-local diagnostic labels may still describe different roles/phases of the same application, so equal numbers do not by themselves prove identical display labels.",
       "id_is_not_priority": "Request IDs identify FRC-submitted application sources and result IDs identify the source actually employed downstream; the numeric value is not an ordinal priority.",
       "upper_lower_boundary": "Candidate A/B are the two selected longitudinal bound-package ID/allocation slots. Archive-wide unequal ordinary-DRCC frames strongly resolve A as upper and B as lower. The bounds are independently arbitrated and can therefore carry different application IDs."
     },
@@ -1583,7 +1583,7 @@
       },
       "control_ownership": {
         "path": "data/generated/gtsplus_2026/tss3_control_ownership_surface.json",
-        "sha256": "66b40a5393539c519a69bd94f1d992b2986457244cc46a5811447e1f54d68ec5"
+        "sha256": "c03cb4fdaaaa2a1db02f261e103b434c660193a9a7c3fdb19fc59bed2e3ae65f"
       },
       "corolla_span": {
         "path": "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
@@ -1595,7 +1595,7 @@
       },
       "lateral_dictionary": {
         "path": "data/generated/camry_2026_upstream_request_field_census.json",
-        "sha256": "02677a4f85fcd82d9691ff8ffc1736015821195bf355b905207201bcac7e1188"
+        "sha256": "299d41f1178738c9f373feaad6ff7c6235922b17933058aa494cc6d796dcad7a"
       }
     },
     "working_table": {
@@ -1627,7 +1627,7 @@
       "25": {
         "grade": "observed longitudinal application ID; exact shared-application meaning unresolved",
         "lateral": "AP",
-        "longitudinal": "Observed Camry candidate B during delayed ACC hold; allocation method distinguishes held vs moving ID25 states. Under the application-ID architecture this is an unresolved semantic clue, not evidence that longitudinal/lateral namespaces are unrelated."
+        "longitudinal": "Observed Camry candidate B during delayed ACC hold; allocation method distinguishes held vs moving ID25 states. Under the application-ID architecture this remains an unresolved semantic clue; the longitudinal/lateral namespace relationship requires separate evidence."
       },
       "36": {
         "grade": "bounded startup state",
@@ -1666,7 +1666,7 @@
     "0x081": "native Brake/chassis Panda bus0 -> upstream bus2 on Toyota Bus 4",
     "0x08A": "native upstream Panda bus2 -> chassis bus0 on Toyota Bus 4",
     "capture_era": "temporary CAN0/CAN1 repin",
-    "stock_toyota_b": "Toyota Bus 4 returns to unsplit Panda bus1; compare Toyota network role, not raw Panda bus number"
+    "stock_toyota_b": "Toyota Bus 4 returns to unsplit Panda bus1; compare by Toyota network role across Panda bus-number changes"
   },
   "vehicle_access": false
 }

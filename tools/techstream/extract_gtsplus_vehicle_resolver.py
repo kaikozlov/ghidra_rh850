@@ -264,9 +264,9 @@ def master_region(parser: DDBParser, root: Path, region: str) -> dict[str, Any]:
     if any(len(row) != 32 for row in t59):
         raise ValueError(f"{region}: CDbVinVehicleDecisionTable record size drift")
 
-    # Camry-HV is a useful deterministic join witness, not an assumption in the
-    # generic resolver.  Vehicle type 12704 was independently pinned by the
-    # current master fleet map.
+    # Camry-HV is a deterministic join witness. The generic resolver derives
+    # its result independently. Vehicle type 12704 was independently pinned by
+    # the current master fleet map.
     camry_type = 12704
     camry_vin_rows = [raw for raw in t59 if u16(raw, 0x0E) == camry_type]
     camry_type41_rows = [raw for raw in t41 if u16(raw, 0x32) == camry_type]
@@ -458,8 +458,8 @@ def build() -> dict[str, Any]:
                 "stage": "feature-support-resolution",
                 "api": "GetSupportP5_DT",
                 "semantics": (
-                    "optionId 1/2/3 dispatches to CCommCachePlusP5::CheckSupportPid/Did/Rid; support is live/cached "
-                    "communication state, not DDB presence alone"
+                    "optionId 1/2/3 dispatches to CCommCachePlusP5::CheckSupportPid/Did/Rid; support requires live/cached "
+                    "communication state beyond DDB presence"
                 ),
             },
         ],
@@ -548,7 +548,7 @@ def build() -> dict[str, Any]:
                     "all current Camry-HV install rows use connection frame 0 / CommSet 9 and phase-type byte "
                     "0x12 or 0x22; every one of the 34 candidates independently resolves through Toyota's class-0x10D "
                     "(category, phase) route table. Frame 0 has empty send/mask/check variables, so mount resolution "
-                    "is category-scoped transport setup/connectivity, not an identity-DID probe"
+                    "is category-scoped transport setup/connectivity only"
                 ),
             },
             "output": "CCmdEcuInfo list",

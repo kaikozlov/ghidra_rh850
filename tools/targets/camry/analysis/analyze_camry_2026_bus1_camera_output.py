@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Decode retained Toyota Bus-1 camera/radar output with GTS+ vocabulary.
 
-GTS+ is DID/FFD keyed, not a CAN DBC. This joins the sniffed panda-bus-1
+GTS+ is keyed by diagnostic DID/FFD. This joins the sniffed panda-bus-1
 0x180 family to recovered FRC Data List / Operation-FFD scales, and tests
 whether FRC's TSS request object (5282 ID||pinion||assist) is on that native
 bus. It does not invent a 64-byte OEM field map where the corpus has none.
@@ -35,7 +35,7 @@ SLOT_LEN = 7
 HEADER_LEN = 4
 TRAILER_LEN = 4
 FAMILY = range(0x180, 0x18D)
-DIST_LSB_M = 0.005  # independent vision/range anchor, not the FFD encoding
+DIST_LSB_M = 0.005  # independent vision/range anchor; FFD uses a separate encoding
 LAT_LSB_M = 0.04  # independent calibrated-gyro and vision anchors, left-positive
 REL_SPEED_LSB_M_S = 0.025  # independent vision/ego-speed anchors; low14 word
 DIST_MAX_M = 500.0
@@ -382,9 +382,9 @@ def collect_drive(path: Path) -> dict:
             if 0x180 <= addr <= 0x18B and len(d) == 64:
                 bank = (addr - 0x180) % 3
                 record_group = (addr - 0x180) // 3
-                # P05 has an 8-bit B2 counter, not a monotonic B2:B3 u16.
-                # B3 also repeats after 256 cycles. An occurrence ordinal keeps
-                # every wrap in a segment instead of overwriting earlier data.
+                # P05 has an 8-bit B2 counter.
+                # B3 also repeats after 256 cycles. An occurrence ordinal retains
+                # every wrap in a segment.
                 cycle = (seg, d[2], d[3])
                 if cycle != object_cycle:
                     object_epoch += 1
@@ -521,11 +521,11 @@ def main() -> int:
                 "fff8000000ffff (0xFFF8/0xFFFF invalid-style sentinels). Occupied slot "
                 "bytes 0-1 unsigned big-endian * 0.005 m is the independently "
                 "vision-anchored longitudinal range; FRC DID/FFD distance encodings "
-                "are diagnostic vocabulary, not a wire-scale proof."
+                "supply diagnostic vocabulary only. The wire scale requires independent evidence."
             ),
             "not_08A": (
-                "The 28-byte 0x08A application blob is absent. This family is perception "
-                "output, not the truncated TSS request 5282."
+                "The 28-byte 0x08A application blob is absent. This family carries perception "
+                "output; the truncated TSS request 5282 is absent."
             ),
             "middle_hop": (
                 "FRC builds FFD 5282/5631 in camera RAM (ID + milliradian pinion + "
@@ -535,7 +535,7 @@ def main() -> int:
                 "layout ID||pinion||assist is absent from sniffed Bus-1 CAN. A Bus-4 "
                 "origin truncates damping, packs ID/pinion/assist as 0x08A B21/B18/B24, "
                 "and SecOC-wraps it. Measured angle on the camera bus is inbound plant "
-                "echo, not a command to EPS. Requested pinion is not an F33 COM input."
+                "echo only. Requested pinion is not an F33 COM input."
             ),
             "not_tss2_8byte_radar_dbc": (
                 "Old comma 8-byte 0x180..0x19F radar-track geometry does not transfer."

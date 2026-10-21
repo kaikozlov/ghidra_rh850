@@ -121,9 +121,9 @@ writes in the rendered functions. Cached instructions in an older working
 project are not post-fix evidence; use a fresh rebuild and regenerated corpus.
 
 `EIC136`/`EIC292`/`EIC293` remain memory-mapped peripheral registers at
-`0xFFFFB110` / `0xFFFFB248` / `0xFFFFB24A`, accessed via `ld.w`/`st.w`, not
-`ldsr`/`stsr`. They belong to the device profile and are not system-register
-table entries.
+`0xFFFFB110` / `0xFFFFB248` / `0xFFFFB24A`, accessed via `ld.w`/`st.w`.
+They belong to the device profile and are excluded from the `ldsr`/`stsr`
+system-register table.
 
 ## Instruction-decode coverage
 
@@ -132,8 +132,8 @@ Script: `ghidra/scripts/investigate/FindUndefinedInFunctions.java`
 
 The recorded legacy-Sienna checkpoint had **zero undefined bytes** inside its
 7,090 recovered functions. This establishes in-body decode only for that
-checkpoint, not discovery of every executable body or compiler idiom and not
-a reason to omit broader instruction or automatic-analysis support.
+checkpoint. Broader executable-body discovery, compiler-idiom recovery,
+instruction support, and automatic analysis remain separate requirements.
 
 That alone does **not** prove every decoded instruction has correct p-code.
 Semantic fixtures under `tests/fixtures/processor/` and the asserting scripts
@@ -220,7 +220,7 @@ cspec default_proto is correct; explicit assignment is what makes landmark
 decompiler signatures and project invariants report `__stdcall` instead of
 `unknown`. The script is idempotent and preserves `__interrupt`.
 
-## Compiler / ABI fingerprint: `ep` is volatile, not CC-RH callee-save
+## Compiler / ABI fingerprint: volatile `ep`
 
 The calling-convention model is now based on a direct machine-code discriminator
 rather than a generic RH850 compiler assumption. Exact Sienna `8965B4512000` and
@@ -254,7 +254,7 @@ supported modes are `callee` (preserved) or `fix` (globally fixed). The local
 package used for this comparison is
 `software/Renesas/cc-rh-compiler/cc-rh_v20800_for_linux_amd64-doc.zip`
 (SHA-256 `d72b7754cdfde84130ec585185300b447fdb73fdbf12221f070a6f7c64c2ab25`).
-It is research input, not a portable repository dependency.
+It is local research input. Portable repository builds do not depend on it.
 
 Reference compilation also explains why compiler identification from instruction
 shape alone was misleading. CC-RH V2.08 naturally emits the RH850 `switch`
@@ -265,7 +265,7 @@ prove CC-RH. Conversely, the repository's V850 GCC 13.2 toolchain exposes
 add `-mno-app-regs`; this is compatible with the firmware's fixed `gp`/`tp` and
 volatile `ep` model. Compatibility is not compiler provenance: no compiler ID
 string or byte-identical runtime-library match has been recovered, so the exact
-Toyota compiler vendor/version remains **bounded**, not identified.
+Toyota compiler vendor/version remains **bounded and unidentified**.
 
 A **known-working public GCC payload** independently validates our payload
 compiler family without changing that provenance boundary. Pinned
@@ -288,9 +288,9 @@ self-contained RSCFD MMIO. Its only stock call occurs after extraction, when it
 invokes boot reset `0x157E`; GCC materializes that constant in `r10` and emits a
 small indirect veneer before `jmp [r10]`. It therefore never creates the
 `r6=target_address` state that broke our later `call0(address)` startup replay,
-and the reset target is a terminal no-argument path. This is strong validation
-of GCC 13.2 for **standalone RH850 payloads**, not of C as an exact stock-call
-replay abstraction and not of Toyota's original compiler vendor.
+and the reset target is a terminal no-argument path. This strongly validates
+GCC 13.2 for **standalone RH850 payloads**. Exact stock-call replay in C
+and Toyota's original compiler vendor require independent evidence.
 
 Practical consequence: do not switch target-native payloads to CC-RH merely
 because its switch/prologue output looks Toyota-like. More importantly, this ABI
@@ -311,7 +311,7 @@ then:
    `DATA` references from each table halfword to its target; disassembles case
    entries when needed.
 
-### Why the prefix bound is the only trusted trigger (measured, not asserted)
+### Measured basis for the prefix-bound trigger
 
 `InventorySwitchTables.java` runs the recovery's bound+validation logic against
 **all 247** decoded `switch` opcodes in this image (not just the in-function
@@ -328,7 +328,7 @@ matched **only** data (4/4 false positives), so it was removed as a recovery
 trigger. Requiring the prefix bound recovers the same 20 tables with zero false
 positives.
 
-### `AssertSwitchTables` is a full-coverage verifier, not a count assert
+### `AssertSwitchTables` verifies full coverage
 
 `AssertSwitchTables.java` (run by `make verify-processor`) scans **every**
 decoded `switch`, independently recomputes which ones are prefix-bound with a
@@ -339,9 +339,9 @@ proves three things each run:
   complete `COMPUTED_JUMP` case coverage (real switches are never missed);
 - **soundness** — no switch without a prefix bound is recovered (no data
   mislabelled as a switch table);
-- **the boundary itself** — the 227 unrecovered `switch` opcodes are measured
-  collisions, not an assumption: none carries the range check a real compiler
-  switch requires.
+- **the boundary itself** — measurement identifies the 227 unrecovered `switch`
+  opcodes as collisions: none carries the range check a real compiler switch
+  requires.
 
 `make verify-processor` reruns this measurement read-only into `build/out/` and
 compares it with the committed `data/switch_table_inventory.csv` baseline.
@@ -446,10 +446,9 @@ Evidence grade is blank unless a curated review supports `bounded`,
 self-check, or successful decompilation does not create a semantic grade.
 Optional structural columns (`root_kind`, RAM/MMIO/`codeflash_data`/string reference
 counts, coarse `boot`/`application` subsystem) are filled only from reliable
-program facts; otherwise empty or zero. `codeflash_data_ref_count` is every
-DATA reference into CodeFlash that is not a function entry (scalars included),
-not a table-only classifier. The ledger deliberately does **not** claim that
-every function is behaviorally understood.
+program facts; otherwise empty or zero. `codeflash_data_ref_count` counts every
+DATA reference into CodeFlash outside function entries, including scalars and tables.
+Behavioral understanding still requires a curated semantic review.
 
 Review counts are generated in each target's registered summary. Curated
 conclusions are separate inputs; automatic decompilation-only entries are not
@@ -530,7 +529,7 @@ Exact counts, addresses, and the resulting bounded negative are owned by the
 [Camry report](../variants/camry-2026-live-baseline.md#135-control-transfer-audit-the-missing-primitive).
 
 The corrected G3M register map changes decompiler names and system-state
-interpretation, not firmware bytes. No current vehicle or exploit conclusion
+interpretation while preserving firmware bytes. No current vehicle or exploit conclusion
 depended on the former `SPID`/`IMSR`/`RDBCR` labels; persisted projects and
 corpora were nevertheless rebuilt so future register dataflow starts from
 `PID`/`PMR`/`CDBCR` rather than carrying the stale aliases forward.
@@ -581,7 +580,7 @@ Venza additionally required its exact capture boundary in the target profile:
 the `0x180000..0x2FFFFF` fill partition is non-executable and typed as data.
 That removes one direct-call-created function in erased space. Its larger
 pattern-recovery gain is deterministic discovery of previously disconnected
-entry-shaped code, not evidence for an exact device part or peripheral map.
+entry-shaped code. Exact device-part and peripheral-map attribution remain separate.
 
 The post-commit review found and corrected three gaps in the initial refresh:
 the load-link lifetime above was incomplete, the bit-search carry fixture
@@ -602,8 +601,8 @@ same pinned Ghidra, rizin, and radare2 trees recorded in
 `ghidra/ghidra_v850/PROVENANCE.json`, against a mnemonic-level enumeration of
 the G3M software manual. That comparison did not identify a missing G3M
 mnemonic; it does not establish complete operand-form coverage or semantic
-correctness. Architecture masks and primary manuals, not the union of decoded
-mnemonic strings, determine which language should accept an instruction.
+correctness. Architecture masks and primary manuals determine which language
+should accept an instruction.
 
 - `SATS`, `ROUNDF.*`, `DST`, `EST`, `DBRET`/`DBTRAP`/`DBPUSH`/`DBCP`/`DBTAG`,
   `HVCALL`/`HVTRAP`, TLB, DSP-accumulator, trace, and the `BINSL`/`DIVN`
@@ -623,8 +622,8 @@ The re-audit did surface two real defects, both fixed:
 1. **Architecture-specific floating support.** The V850E2M software manual,
    R01US0001EJ0100, explicitly documents `MADDF.S`, `MSUBF.S`, `NMADDF.S`, and
    `NMSUBF.S` on pp. 374, 380, 386, and 388. The reference radare2 opcode
-   table marks them `V850_CPU_E2V3`, not `V850_CPU_E3V5_UP`. They are not
-   G3K-only instructions. An initial deletion from the shared float file
+   table marks them `V850_CPU_E2V3`. This establishes their V850E2M support
+   outside the `V850_CPU_E3V5_UP` group. An initial deletion from the shared float file
    incorrectly removed them from the existing V850E2M language too; the four
    constructors and their split `reg4` operand are restored behind
    `V850E2M`. They remain excluded from the G3M language because its instruction
@@ -647,8 +646,8 @@ and RH850G3M to `0.6`. Restoring the E2M-only forms increments V850E2M to
 manifest. The existing fixture verifier additionally exercises all four E2M
 operations with even and odd destinations, and rejects the same encodings
 under G3M. At that decode-only checkpoint, these vectors established decode
-boundaries and finite arithmetic dataflow, not fused rounding or enabled FPU
-exception behavior.
+boundaries and finite arithmetic dataflow. Fused rounding and enabled FPU
+exception behavior remained unverified.
 The stale claim that the firmware inventory resolved `__cache`/`__prefetch`
 CALLOTHERs was corrected: the image uses only `__nop`, `__disable_irq`,
 `__enable_irq`, and `__synchronize`.
@@ -702,7 +701,7 @@ flush boundaries, infinities, signaling/quiet NaNs, destination aliases,
 interrupt returns. The existing 98-case processor fixture also passes.
 Both languages compile and the isolated G3M language resolves. Processor
 source and compiled identities are recorded in
-`data/processor_manifest.baseline.json`, not duplicated here.
+`data/processor_manifest.baseline.json`.
 
 The processor gate no longer compares whole-decompilation text hashes or
 literal C spellings. Those incidental checks changed with valid interrupt
@@ -720,8 +719,8 @@ promoted; the potentially-mutated live Camry session was left untouched.
 
 The NaN class is modeled, but the manuals do not define payload/sign selection:
 canonical quiet NaN `0x7fc00000` is a documented model convention.
-Imprecise delivery is modeled at instruction boundaries, not with physical
-pipeline latency. Neither is claimed as a silicon-observed result.
+Imprecise delivery is modeled at instruction boundaries. Physical pipeline
+latency remains outside the model. Neither is claimed as a silicon-observed result.
 
 ## Broader plugin implementation
 
@@ -731,8 +730,8 @@ The [module README](../../ghidra/ghidra_v850/README.md) lists the language IDs;
 rebuild commands. Exact G3M decoding remains available alongside the broader
 profile; a current firmware census does not exclude other family functionality.
 
-- **Register/ABI analysis:** fixed EP/CTBP/GP/TP values are explicit options,
-  not compulsory target assumptions. Callee-save policy for EP/GP/TP/r2 selects
+- **Register/ABI analysis:** fixed EP/CTBP/GP/TP values are optional settings.
+  Callee-save policy for EP/GP/TP/r2 selects
   native compiler-spec variants, so it affects unresolved indirect calls as
   well as direct calls. GHS MULTI is the default compiler; old-GCC and CC-RH
   retain their distinct scalar/aggregate alignment and hidden-return contracts.
@@ -750,9 +749,9 @@ profile; a current firmware census does not exclude other family functionality.
   and branch targets are checked before mutation. The existing target scripts
   remain annotation owners; they are not a substitute for generic recovery.
 - **Compiler helpers:** stripped GHS/GCC save/restore and arithmetic routines
-  are recognized from code structure or compiler-generated byte templates,
-  not from names alone. Call-fixups carry stack/register and numerical effects;
-  unknown caller-clobbered values remain independent opaque results, not zero.
+  are recognized from code structure or compiler-generated byte templates.
+  Call-fixups carry stack/register and numerical effects;
+  unknown caller-clobbered values remain independent opaque results.
   Epilogue bytes, including orphan decoded epilogues and conditional local exits,
   do not establish a new helper entry. Existing functions, calls and direct
   unconditional tail jumps from other functions do. This prevents false function
@@ -761,8 +760,8 @@ profile; a current firmware census does not exclude other family functionality.
   an indirect-pointer/aggregate signature oscillation on repeated analysis.
 - **Broader architecture:** DSP/SIMD operands and aliasing, FX status/control
   views, indexed MPU descriptors and Host/Guest register transfers have explicit
-  p-code dataflow. Fused SIMD and ROUNDF conversion models include status and
-  destination-suppression transitions, not merely mnemonic recognition.
+  p-code dataflow. Fused SIMD and ROUNDF conversion models implement status and
+  destination-suppression transitions.
   Scalar and paired `r0` reads supply zero; pair destinations discard the low word
   without changing `r1`'s high-word result. Native execution checks source,
   destination and aliased MAC/FP pairs, MODADD, and G3M PUSHSP/POPSP zero boundaries.
@@ -775,12 +774,12 @@ intrinsics with their known inputs and outputs. They are not aliased to unrelate
 G4MH Host/Guest registers or replaced with invented arithmetic. V850E1F has
 numeric dataflow and recovered EFG/ECT masks; exact vendor EFG retention,
 TRFF flag mapping and exceptional result rules require the unavailable
-`U16374EJ1V0UM00` instruction manual. Those boundaries are explicit operations,
-not silently discarded instructions. Static lifting and native offline execution
-do not establish silicon timing or vehicle behavior.
+`U16374EJ1V0UM00` instruction manual. Explicit operations preserve those
+boundaries. Static lifting and native offline execution do not establish
+silicon timing or vehicle behavior.
 
-Native offline validation compiles all four language profiles and executes these
-complete fixture scripts, not selected passing assertions:
+Native offline validation compiles all four language profiles and executes each
+fixture script completely:
 
 | Fixture | Exercised behavior |
 |---|---|
@@ -793,8 +792,8 @@ complete fixture scripts, not selected passing assertions:
 | `AssertV850SwitchAnalysis` | All four table idioms, recovered control flow and rejection boundaries |
 | `AssertV850CompilerHelpers` | Stripped recognition, numerical decompilation, independent clobbers, escaping stack effects and execution of real save/remainder bodies |
 
-The firmware-machine regression also passes. These checks establish the
-implemented offline behavior they exercise, not whole-ISA silicon qualification.
+The firmware-machine regression also passes. These checks establish only the
+implemented offline behavior they exercise. Whole-ISA silicon qualification remains outside their scope.
 
 Two fresh four-stage rebuilds of each registered target produced byte-identical
 normalized inventories. The canonical inventories and full decompiler corpora
@@ -809,9 +808,9 @@ were regenerated against the installed processor manifest:
 | Sienna `8965B4512000` | 7,090 |
 | Venza `8917048E30` | 10,390 |
 
-All 45,497 records exported without decompiler failures. This is export
-completeness, not proof that every recovered function is genuine or every
-indirect branch is resolved. Full Sienna working-project invariants,
+All 45,497 records exported without decompiler failures, establishing export
+completeness. Function authenticity and complete indirect-branch resolution
+remain separate questions. Full Sienna working-project invariants,
 instruction/userop coverage and exact live semantic-ledger comparison passed;
 its function entries, bodies and no-return flags were unchanged. The
 `rh850_compiler_abi` and `decompiler_corpus` verification selectors also passed.
@@ -834,7 +833,7 @@ Residual data-as-code is not hidden by the rebuild comparison. In Crown,
 halfword table is reached through a data load in `0xc9cea`, and its computed
 reference to `0x25212` does not establish a real call. Venza's `0xc974` still
 has bad-instruction pseudocode despite shedding decoded table bytes; its
-`callt 0x19` at `0xc99a` is unresolved, not a positive recovery example.
+`callt 0x19` at `0xc99a` remains unresolved and supplies no positive recovery evidence.
 These existing ambiguous regions are not evidence of complete firmware
 understanding or a zero-false-positive whole-program graph.
 
@@ -889,10 +888,9 @@ Concrete arm64 backend sites, using the binary identity above:
 | `0x4B5C`, table `0x3F5850` | Name recognition for 44 GHS/COM 64-bit arithmetic-helper entries | Existing `V850CompilerHelperAnalyzer` contracts and call-fixups cover the table |
 
 The prologue callback is at vtable slot `0x3F56D0`; the two preceding slots
-are destructors, not additional analysis callbacks. The saved-register transfer
-and serializer were decompiled, rather than inferred from the field-name
-strings. This establishes the metadata path, not complete parity with every
-private prologue heuristic.
+are destructors. Decompilation of the saved-register transfer and serializer
+establishes the metadata path. Complete parity with every private prologue
+heuristic remains unproved.
 
 Some backend differences favor retaining the existing Ghidra model: Hex-Rays
 uses opaque helpers for saturating arithmetic, clipping and several bit
@@ -922,8 +920,8 @@ recovery are not accepted as target evidence.
 The reference copies of both dylibs, the debugger XML, instruction comments,
 and function patterns were checked against the installed bundle by SHA-256;
 they match. No second copy or proprietary implementation import was needed.
-The public SDK exposes processor implementation, whereas `hexrays.hpp`
-exposes the decompiler API, not its implementation.
+The public SDK exposes processor implementation. `hexrays.hpp` exposes only
+the decompiler API.
 
 An isolated ELF wrapper around the existing 98-case synthetic processor
 fixture was decoded by installed IDA 9.5 with the RH850 processor selected.
@@ -941,8 +939,8 @@ substantive decode disagreements:
 The IDA instructions have no post-index operand flags for these four encodings.
 The readable SDK explains the result: `ana.cpp` cases `0x376` and `0x37A`
 do not discriminate the first halfword's `r2` field, unlike byte-store case
-`0x372`. This is a reason not to adopt IDA decoding blindly, not a hardware
-execution result. Exact G3M availability remains bounded: R01US0123EJ0140
+`0x372`. This decoder comparison warrants independent checking of IDA results.
+Hardware execution remains unobserved. Exact G3M availability remains bounded: R01US0123EJ0140
 describes post-index addressing on pp. 35–36, but its load/store instruction
 entries list only displacement forms. This comparison does not resolve that
 manual inconsistency or change the existing profile acceptance boundary.
@@ -974,12 +972,12 @@ zeroed memory.
 
 The changed languages are G3M `0.9` and broad RH850 `1.1`; V850E2M and E1F are
 unchanged. The processor identity baseline was regenerated from the installed
-extension. These are offline model checks, not silicon or vehicle observations.
+extension. These checks establish only offline model behavior. Silicon and vehicle behavior remain unobserved.
 
 ### SDK-derived switch recovery gaps
 
-The second comparison found real gaps within already-supported switch
-families, not a need for another analyzer. IDA's `regfinder.cpp` folds
+The second comparison found real gaps in the existing analyzer's supported
+switch families. IDA's `regfinder.cpp` folds
 `MOVHI`; `switch.cpp` accepts immediate/register base additions and both
 `MOVEA` and two-operand immediate `ADD` low-case normalization.
 
@@ -1020,9 +1018,9 @@ and no canonical inventory baseline changes were needed.
 
 ## What these audits do *not* claim
 
-- Zero undefined bytes inside the current functions proves in-body decode
-  coverage, not discovery of every executable body and not every
-  p-code edge case (FP rounding, hypervisor ops, unexercised arithmetic forms, …).
+- Zero undefined bytes inside the current functions proves only in-body decode
+  coverage. Discovery of every executable body and unexercised p-code edge cases
+  (FP rounding, hypervisor ops, arithmetic forms, …) remain outside that result.
 - Some scalar floating-point arithmetic/conversion forms still use Ghidra's
   ordinary primitives without a complete FPSR exception model. Fused and
   ROUNDF status semantics, and the broader SIMD models, do not make the entire
@@ -1039,14 +1037,14 @@ and no canonical inventory baseline changes were needed.
 
 The recorded legacy-Sienna rebuild (`tools/project/rebuild_project.sh`) ran
 Ghidra's default analyzers without disabling "Address Tables" or
-"Non-Returning Functions". These observations describe that image/checkpoint,
-not a restriction on generic switch or compiler-helper recognition:
+"Non-Returning Functions". These observations apply only to that image/checkpoint.
+Generic switch and compiler-helper recognition retain their broader scope:
 
 - **Address Tables:** the over-eager-disassembly symptom it warns about *is*
   present — 227 decoded `switch` opcodes are unreachable data misread as code
-  (see "Switch jump-table recovery" above). However most of those come from the
-  general disassembly pass following word-aligned operands into data, not from
-  this one analyzer, so disabling it alone would not remove them. The real
+  (see "Switch jump-table recovery" above). Most arise when the general
+  disassembly pass follows word-aligned operands into data.
+  Disabling this one analyzer alone would therefore leave them. The real
   defense here is seeding all known functions before the first analysis pass
   (`SeedEntries`, `SeedUdsServiceTable`, …, run as preScripts), which gives the
   code finder real anchors. The residual noise is then filtered soundly and

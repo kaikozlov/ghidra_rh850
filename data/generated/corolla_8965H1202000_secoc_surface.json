@@ -13,7 +13,7 @@
     "same_reported_size": true
   },
   "crypto_test_callbacks": {
-    "boundary": "forced callback Ghidra bodies are fragmented by prior disposable-project overlaps; decompiled semantics plus canonical-size raw windows are evidence, not reported contiguous body size",
+    "boundary": "forced callback Ghidra bodies are fragmented by prior disposable-project overlaps; evidence comes from decompiled semantics plus canonical-size raw windows. Reported contiguous body size is unreliable",
     "command1_3_completion": {
       "h": "0x00063564",
       "sienna": "0x0006922C"

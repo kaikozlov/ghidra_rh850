@@ -1,13 +1,13 @@
 # Sienna `8965B4512000` reference overview
 
-Legacy Sienna research summary, not the current multi-target project overview.
+This document summarizes legacy Sienna research.
 The technical sections and earlier investigation priorities below retain their
 Sienna scope. Start at [the project overview](../OVERVIEW.md) for repository
 orientation and [the variant index](README.md) for other targets.
 
 ## Target and evidence boundary
 
-Calibration covered here (legacy reference, not the default target):
+Calibration covered here (legacy reference):
 
 - **Toyota/Denso EPS:** `8965B4512000`
 - **MCU:** Renesas RH850/P1M-E `R7F701381`
@@ -17,8 +17,8 @@ Calibration covered here (legacy reference, not the default target):
 
 The committed Sienna CodeFlash and DataFlash files are the source inputs.
 The recorded inventory contains **7,090 structurally discovered functions /
-197,726 decoded instructions**; its semantic-review counts are historical,
-not a current whole-project progress measure. See the
+197,726 decoded instructions**. Its semantic-review counts describe a historical
+checkpoint. See the
 [Sienna coverage snapshot](../status/ANALYSIS_STATUS.md) and use
 `tools/gtarget show sienna-8965B4512000` for registered input/corpus paths.
 
@@ -30,8 +30,8 @@ Unless explicitly stated otherwise, firmware-static findings apply only to
 
 ### Boot / application trust
 
-The bootloader validates the application using CRC descriptors plus fixed
-validity markers, **not an OEM signature**. The reset-to-application chain,
+The bootloader validates the application with CRC descriptors and fixed validity
+markers only. An OEM signature check is absent. The reset-to-application chain,
 retry behavior, flash lifecycle, and application handoff are recovered.
 
 The bootloader also exposes the authenticated download/RAM-execution machinery
@@ -97,8 +97,8 @@ The application also has **two command-8 authenticated key-update clients**:
    eight 8-byte chunks and forms another 64-byte command-8 envelope.
 
 The shared command-8 completion callback has a verified attribution flaw:
-completion is routed according to the diagnostic-active byte at completion
-time, not remembered submitter identity. A bank-0 completion can therefore make
+completion follows the diagnostic-active byte at completion time. Submitter identity
+is discarded. A bank-0 completion can therefore make
 RID `0x1010` report a false terminal success with its own untouched zero result
 bank. **This does not bypass SHE authentication**; ICU-S still decides whether
 the supplied M1/M2/M3 package is valid.
@@ -163,9 +163,9 @@ See [the experimental research index](../../exploit/README.md).
 
 ## Earlier Sienna investigation priorities
 
-This list records the Sienna research checkpoint, not the current repository
-queue. In particular, later Crown, Camry, and Corolla acquisitions supersede
-the generic “another CodeFlash” acquisition gap below; applicability to a
+This list records the Sienna research checkpoint. Use the current repository
+queue for current priorities. Later Crown, Camry, and Corolla acquisitions supersede
+the generic “another CodeFlash” acquisition gap below. Applicability to a
 specific Sienna finding remains a separate question.
 
 1. **Live slot-4 command-5 permission and timing.** If generation is allowed,
@@ -187,8 +187,8 @@ boundaries. Neither this earlier list nor the ledger is a live coverage dashboar
 ## External / variant evidence
 
 Toyota Techstream, Renesas RFP, community tooling, and related-vehicle artifacts
-have been analyzed as **corroboration and acquisition context**, not silently
-promoted to Sienna firmware truth. The strongest external work includes:
+provide **corroboration and acquisition context**. Sienna firmware claims require
+target-native evidence. The strongest external work includes:
 
 - Techstream diagnostic/DDB vocabulary and MACKey registration analysis;
 - Renesas RV40F host protocol recovery;

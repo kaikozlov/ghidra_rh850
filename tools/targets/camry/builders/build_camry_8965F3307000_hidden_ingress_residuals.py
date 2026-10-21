@@ -276,8 +276,8 @@ def build() -> dict:
 
     # Direct recovered destination writers. +0x04 is initialized only by 6082C;
     # +0x14 is initialized by 6082C and refreshed by 60A6A. 6091E is read-only.
-    # Match the destination offsets and assignment form, not decompiler-local
-    # variable names, which can change when unrelated function recovery improves.
+    # Match the destination offsets and assignment form. Decompiler-local
+    # variable names can change when unrelated function recovery improves.
     plus04_store = re.compile(r"\*\(undefined4 \*\)\([^;\n]*\+ -0x7bfc\) =")
     plus14_store = re.compile(r"\*\(undefined4 \*\)\([^;\n]*\+ -0x7bec\) =")
     plus04_writers = sorted(entry for entry, row in rows.items() if plus04_store.search(str(row.get("decompiled_c", ""))))
@@ -345,7 +345,7 @@ def build() -> dict:
                 {"name": "cbxx_diagnostic_state", "functions": [hx(x) for x in (0xCA242,0xCB45E,0xCF4DA,0xCF4F8,0xCF51C)], "bound": "CA242/CB45E ring indices are <=0x13 and CF4xx helpers are <3; writes remain below the steering-command CCxx region"},
             ],
             "result": "zero recovered register-arithmetic STORE path can land on any audited steering command/current target once exact runtime/configuration index bounds are applied",
-            "boundary": "unknown/unbounded pointer stores and memory-safety bugs are not promoted to impossible; this closes VAR-084 E1 specifically, not arbitrary pointer corruption. Prior candidate 69EAC is absent from the refreshed census; its independently byte-bound copy remains confined to FEBE51C6..FEBE5205.",
+            "boundary": "unknown/unbounded pointer stores and memory-safety bugs remain possible; this closes VAR-084 E1 only. Arbitrary pointer corruption remains outside the proof. Prior candidate 69EAC is absent from the refreshed census; its independently byte-bound copy remains confined to FEBE51C6..FEBE5205.",
         },
         "e2_dmac_destination_reprogramming": {
             "status": "closed_within_recovered_application_dataflow",

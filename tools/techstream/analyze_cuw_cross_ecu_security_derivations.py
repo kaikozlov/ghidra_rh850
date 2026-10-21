@@ -117,7 +117,7 @@ def read_attach(path: Path) -> tuple[dict[str, dict[str, str]], int, int]:
         if len(payload) != payload_len:
             raise ValueError(f"{path.name}: truncated attach.att")
         if name != b"attach.att":
-            raise ValueError(f"{path.name}: first member is {name!r}, not attach.att")
+            raise ValueError(f"{path.name}: first member must be attach.att; found {name!r}")
         first_member_end = f.tell()
     return parse_attach_bytes(payload), format_type, first_member_end
 
@@ -269,7 +269,7 @@ def _frc_family_kdf_atoms(
 ) -> dict[str, bytes]:
     """Build the explicit stable-metadata atom set for the FRC CBC KDF search.
 
-    This is intentionally a bounded grammar, not a password cracker.  The raw
+    This uses an intentionally bounded grammar. The raw
     atoms are values genuinely available from the FRC CUW/host model or roots
     already recovered from Toyota EPS/Techstream. MD5 and SHA-256 halves cover
     the obvious 16-byte digest adapters, and a small set of semantically natural
@@ -867,7 +867,7 @@ def frc_extended_kdf_audit(packages: dict[str, dict]) -> dict:
             "rescored over the complete 64-KiB sample. No fully rescored result reaches the 1% threshold. This "
             "rejects only these explicit AES-CBC KDF grammars. A protected camera root, non-AES transform, "
             "different mode, unrelated routine key, or a KDF outside these bounded contexts remains possible. "
-            "A32 shape is a ranking heuristic, not a decryption oracle."
+            "A32 shape is only a ranking heuristic; decryption remains unverified."
         ),
     }
 
@@ -1112,7 +1112,7 @@ def build() -> dict:
     frc_extended_audit = frc_extended_kdf_audit(packages)
     for trial in pair_trials:
         # Random byte identity is 1/256 ~= 0.003906.  Keep a generous ceiling:
-        # these are merely dead-end guards, not a statistical cryptanalysis claim.
+        # these guards only reject dead ends and establish no statistical cryptanalysis result.
         if trial["best_candidate"]["byte_identity_after_32"] >= 0.01:
             raise ValueError(f"unexpectedly strong simple image-key candidate: {trial['best_candidate']}")
 
@@ -1147,7 +1147,7 @@ def build() -> dict:
         "simple_public_id_kdf_negative": {
             "tested": "AES-ENC/AES-DEC of six obvious 16-byte DiagID embeddings and CMAC of binary/ascii DiagID under the recovered EPS payload/boot/application roots",
             "matching_packages": [name for name, row in packages.items() if row["simple_diag_kdf_matches"]],
-            "interpretation": "No tested working key is an obvious one-step derivation of the public diagnostic identifier under the recovered EPS roots. This is a bounded negative, not an exhaustive KDF search.",
+            "interpretation": "No tested working key is an obvious one-step derivation of the public diagnostic identifier under the recovered EPS roots. This negative result is limited to the tested KDFs.",
         },
         "eps_payload_root_cuw_trials": {
             "grammar": "Kimage=AES-128-ECB-ENC(EPS_PAYLOAD_BUILD_ROOT, deobfuscate(SeedKey)); plaintext=AES-128-CBC-DEC(Kimage, deobfuscate(Nonce), ciphertext); CMAC is stored in the final 16 plaintext bytes",

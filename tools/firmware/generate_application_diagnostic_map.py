@@ -86,7 +86,7 @@ SEMANTICS = {
         "side_effects": "requires and packs the three-byte groupOfDTC, then executes the configured clear operation",
         "config_tables": "runtime service object 0x25E58",
         "evidence_status": "recovered",
-        "notes": "Request shape is ClearDiagnosticInformation, not ECUReset.",
+        "notes": "Request shape is ClearDiagnosticInformation.",
     },
     0x19: {
         "service_callback_role": "subfunction_table_only",
@@ -177,7 +177,7 @@ SEMANTICS = {
         "side_effects": "configured RID actions include crypto-test bank activation, key update, lifecycle reinitialization, and service-mode controls",
         "config_tables": f"RoutineControl RID table 0x{ROUTINE_CONTROL_TABLE:X} count {ROUTINE_CONTROL_COUNT}; callback table 0x25804",
         "evidence_status": "recovered",
-        "notes": "Request shape is controlType + 16-bit RID. The 0x25768 callback table belongs to SID 0x2E WDBI, not RoutineControl.",
+        "notes": "Request shape is controlType + 16-bit RID. The 0x25768 callback table belongs to SID 0x2E WDBI.",
     },
     0x34: {
         "service_callback_role": "null in service table; simple-response path (byte[9]==0)",

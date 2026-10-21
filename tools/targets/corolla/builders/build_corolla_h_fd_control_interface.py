@@ -319,8 +319,8 @@ def main() -> None:
     # The original direct textual-reference census missed GP-relative stores in
     # 0x47188/0x47430. Pin those functions from the independent compact steering
     # bridge evidence and explicitly recover all eleven affected PDU0 sources.
-    # These are positive writer proofs, not a broader claim that arbitrary
-    # computed-pointer writes cannot exist elsewhere.
+    # These proofs establish the identified writers only. Arbitrary
+    # computed-pointer writes elsewhere remain outside their scope.
     c47188 = state_funcs[0x47188]["decompiled_c"]
     c47430 = state_funcs[0x47430]["decompiled_c"]
     need(c47188,

@@ -192,8 +192,8 @@ check("SecurityAccess init arms 200000000-tick delay and clears attempts",
       CF[0x55AA:0x55FC] == bytes.fromhex(
           "80072100210600c2eb0b640f1d93bfff6cc7010a440f569364572193000a44075793"
           "249e249301f0d3f1410a80030106f0ffa003f6f5000a01f0d3f19003410a0106f0ffa6fd13f0010ab003b10b40063f00"))
-# The delay's wall-clock scale is independently recoverable from the actual
-# counter source and TAUJ1 configuration, not from the adjacent CanTp numbers.
+# The actual counter source and TAUJ1 configuration independently establish
+# the delay's wall-clock scale.
 check("free-running SecurityAccess timer reader is exact",
       CF[0x1D24:0x1D2C] == bytes.fromhex("8007095120ca7f00"))
 check("generic boot scheduler body pins exact x20000 counter scaling",

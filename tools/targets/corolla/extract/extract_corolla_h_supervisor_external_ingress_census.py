@@ -2,7 +2,7 @@ from tools.targets.sienna.sienna_target import CORPUS as SIENNA_CORPUS
 #!/usr/bin/env python3
 """Promote H generated-COM provenance into the CEDAE supervisor cone.
 
-This is a promotion extractor, not a portable verifier. The target whole-image
+This extractor promotes evidence. The target whole-image
 Ghidra corpus is disposable workspace state and must be supplied explicitly;
 the tracked compact JSON is what repository verification consumes. The extractor
 compares exact wire fields, follows raw->staging->fixed-map snapshot copies, and

@@ -165,7 +165,7 @@ def analyze() -> dict[str, Any]:
   }
 
   # B6 is secured record 2 (stride 0x50). Pin the exact fields consumed by the
-  # generic SecOC machinery rather than relying on a vehicle-side nickname.
+  # generic SecOC machinery directly.
   record = 2
   stride = 0x50
   off = record * stride

@@ -243,7 +243,7 @@ def _note_root_calls(text: str, addresses: dict[str, int]) -> str:
 
 
 def _seed_incoming_locals(text: str) -> str:
-    """Incoming GPRs and ep start as the scenario sentinel, not a zero local.
+    """Initialize incoming GPRs and ep with the scenario sentinel.
 
     r6-r9 are included. A parameter already carries the oracle argument; these
     locals are the registers Ghidra did not turn into parameters. An incoming
@@ -273,8 +273,8 @@ def _seed_incoming_locals(text: str) -> str:
 def _fill_local_arrays(text: str) -> str:
     """Give host stack objects the scenario fill before the body reads them.
 
-    A fresh host frame is zero or leftover stack, not the fill byte the byte
-    machine returns for an address it has not written.
+    A fresh host frame contains zero or leftover stack. Initialize it with the
+    fill byte the byte machine returns for an address it has not written.
     """
     from tools.targets.camry.decomp.layout import _STACK_WIDTH
 
@@ -882,7 +882,7 @@ _CODE_POINTER_LOAD = "*((code * *)camry_host_ptr("
 
 
 def _code_pointer_word_is_firmware_address(text: str) -> str:
-    """A code slot in the image is one firmware word, not a host pointer.
+    """Load a code slot in the image as one firmware address word.
 
     code * is eight bytes on the host, so the load concatenates the next word
     into the high half and the indirect call leaves the image. camry_host_addr
@@ -927,7 +927,7 @@ def _code_pointer_word_is_firmware_address(text: str) -> str:
 
 
 def _pointer_table_word_is_host_pointer(text: str) -> str:
-    """A PTR_ word is a firmware address, not a host pointer.
+    """Load a PTR_ word using its firmware-address representation.
 
     &PTR_DAT is the address of a uint32 in the image. The variable that holds
     it is typed as a pointer to a host pointer, so the load reads eight bytes
@@ -1092,7 +1092,7 @@ def _lazy_index_is_firmware_address(text: str) -> str:
 
 
 def _gp_host_pointer_offsets(text: str) -> str:
-    """Index camry_host_ptr(gp) by a firmware displacement, not a host pointer.
+    """Index camry_host_ptr(gp) using the integer firmware displacement.
 
     `puVar = camry_host_ptr(gp); puVar[-disp]` leaves the mapped window when
     the scenario image contains the field but not gp. The field is gp - disp.
@@ -1551,7 +1551,7 @@ def _native_stop_sites(addresses: set[int]) -> None:
                 )
             continue
         if pc == 0x3438c:
-            # The corpus maps this MOVEA to an argument token, not a statement.
+            # The corpus represents this MOVEA only as an argument token.
             # The producer spells the actual instruction before its stack stores.
             image = load_image()
             if (image[0x3438c:0x34390] == bytes.fromhex("230e1200")

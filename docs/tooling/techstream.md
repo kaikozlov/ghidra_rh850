@@ -3,8 +3,8 @@
 > **Scope:** Toyota Techstream V18.00.003 (DENSO) plus the 2026-06-18 GTS+
 > distribution used for current-generation P5/CUWPlus analysis. V18's internal
 > module version comes from `VerApp.ini`/`VerCmd.ini` (dated 2022-11-22 /
-> 2022-12-08); its installer filename says V18.00.008, but the "008" is the
-> Flexera IS wrapper build number, not the application version. V18 DDB files
+> 2022-12-08); its installer filename says V18.00.008. The "008" identifies the
+> Flexera IS wrapper build. The application version is V18.00.003. V18 DDB files
 > are dated 2022-12-07/08 and its VehicleData coverage extends through 2022.
 >
 > **Document type:** external-source reverse engineering
@@ -13,8 +13,8 @@
 >
 > **Evidence source:** external-source
 >
-> **Evidence profile:** recovered/bounded — each claim is scoped to its pinned
-> Techstream/GTS+ source corpus, not the Sienna firmware or a live vehicle session
+> **Evidence profile:** recovered/bounded — each claim applies only to its pinned
+> Techstream/GTS+ source corpus. Sienna firmware and live-vehicle conclusions require independent evidence.
 >
 > **Canonical tracked artifacts:** `software/locks/techstream-v18.json`,
 > `software/locks/gtsplus.json`, `software/locks/toyota-cuw-corpus.json`, and
@@ -124,8 +124,8 @@ profile (from `COMM_INFO_EFI_P4CAN_FUNC.ini`) is:
 | CAN DLC | 8 |
 | Flow control | `0x300004` (BS=0, STmin=4) |
 
-> These are gateway-facing OBD addresses, not the EPS bootloader's direct
-> physical `0x7A1` / functional `0x777`. The gateway routes diagnostic
+> These are gateway-facing OBD addresses. The EPS bootloader separately uses direct
+> physical `0x7A1` / functional `0x777` addressing. The gateway routes diagnostic
 > requests to the target ECU.
 
 ## 3. INI obfuscation
@@ -190,8 +190,8 @@ REFLASHING (CUW / Calibration Update Wizard):
 ```
 
 **Key implication for the Sienna EPS:** the `FUKUMORIYOSIYAMA` key in
-`CSecurityAccessAES128` (§4.1) is for runtime ADS/PCS FFD access, not for EPS
-reflashing. CUW prepare writers obtain service-auth material through
+`CSecurityAccessAES128` (§4.1) supplies runtime ADS/PCS FFD access.
+EPS reflashing uses separate material: CUW prepare writers obtain service-auth material through
 `CalibrationFile::GetServiceAuthKey()` (and unified prepare also supplies
 `GetECUAuthKey()` in the seed request). Unified flash separately obtains
 `GetSeedKey()`, `GetNonce()`, and `GetOffsetAddress()` for its predownload DID
@@ -371,9 +371,9 @@ Separately, the selected `0CAN70` row sets `PasswordAddress=001FFF00`,
 `ByteOrder=1`; the reconstructed **new** 2-MiB S-record image has `79 EF 38 FF`
 at `0x1FFF00`. `CalibArchivedFile::GetPassword @ 0x10002EF0` reads that value,
 and `CalibrationFile::GetNewPassword @ 0x10003090` falls back to it because
-this descriptor has no `NewPassword` override. Thus `0x79EF38FF` is the
-**new-image** software password for `302U1300`, not the first-attempt/source
-password and not the `27 02` SecurityAccess key.
+this descriptor has no `NewPassword` override. Thus `0x79EF38FF` is specifically
+the **new-image** software password for `302U1300`. The first-attempt/source
+password and the `27 02` SecurityAccess key have separate roles.
 
 `CFlashWriter::SelectRetryPassword @ 0x46CAB0` controls old/new selection at
 object `+0x8C`: explicit true selects new; false with status `+0x78 == 7`
@@ -451,8 +451,8 @@ For a matching ECU/CUW pair, the natural provisioning relation is therefore
 that both wrapped credentials decode to the same `Kwork`. Equivalently, a
 factory system that knows both roots can produce a pair as
 `ECUAuthKey = AES-ENC(SEED_KEY_SECRET, Kwork)` and
-`ServiceAuthKey = AES-ENC(Kwrap, Kwork)`. **That provisioning equation is an
-architecture inference, not yet a proved Sienna factory transcript**, because
+`ServiceAuthKey = AES-ENC(Kwrap, Kwork)`. **That provisioning equation remains an
+architecture inference. A Sienna factory transcript is unproved**, because
 the matching `8965B4512000` CUW is still absent. It does, however, rule out the
 need for Techstream to derive the ECU-family root from a family string at
 runtime: this exact path receives no family identifier and always selects
@@ -498,10 +498,10 @@ recovered Venza roots without requiring a restraint-ECU write.
 A bounded join against all 67 current AES-128 `SecretInfo` entries finds no
 one-step XOR/AES-ECB/AES-CMAC relationship to either EPS root or either Venza
 SRS root, and no ordered pair of table entries produces any of those four roots
-under XOR/AES-ECB/AES-CMAC. Consequently the current host table is evidence for
-frontend credential wrapping, not evidence that Techstream derives the
-firmware-resident roots. Any common root KDF remains upstream Toyota/Denso
-build/provisioning machinery unless another artifact exposes it.
+under XOR/AES-ECB/AES-CMAC. Consequently the current host table supports
+frontend credential wrapping. Firmware-resident root derivation remains
+unproved. Any common root KDF remains upstream Toyota/Denso build/provisioning
+machinery unless another artifact exposes it.
 
 Reproducer and committed result:
 `tools/techstream/analyze_reprogramming_root_pairs.py` and
@@ -553,9 +553,9 @@ The adjacent tail-handling code was previously mislabeled as a PKCS#7 gate.
 check. Optional post-decrypt trimming starts at `0x10024001`: it reads the last
 plaintext byte as a count, bounds that count against the plaintext length, and
 zeros that many trailing bytes. No loop compares every trailing byte to the
-count, so this is **not a strict PKCS#7 padding validator**. The live IT3 Neo
-cipher is nevertheless AES-256-ECB keyed by the full 32-character string, not
-AES-128 keyed by the 16-character prefix. See CORR-091.
+count, so this is **not a strict PKCS#7 padding validator**. CORR-091 corrects
+the live IT3 Neo cipher to AES-256-ECB keyed by the full 32-character string.
+The earlier AES-128 / 16-character-prefix interpretation was incorrect.
 
 That key also closes the formerly opaque `CONF/*.srp` UtilityNeo scripts. All
 18 pinned V18 SRPs decrypt under the recovered AES-256-ECB key; after the
@@ -567,8 +567,8 @@ literal diagnostic-frame census. The decoded scripts contain service bytes
 literal `27`, `34`, `36`, or `37`, and no `SecurityAccess`, `SeedKey`,
 `ServiceAuthKey`, or `ECUAuthKey` vocabulary. These SRPs are therefore not a
 hidden modern reflash/boot-credential implementation in the pinned corpus.
-This is a literal decoded-script closure, not a claim that arbitrary future
-UtilityNeo scripts could never synthesize a request byte dynamically.
+This closes the literal decoded scripts in the pinned corpus. Arbitrary future
+UtilityNeo scripts could still synthesize a request byte dynamically.
 
 All twelve IT3ACNK crypto exports are classified and extent-hashed in
 `data/generated/techstream_v18/crypto_inventory.json`. Besides `EncryptAds`,
@@ -579,9 +579,9 @@ their concrete helper paths; the report does not relabel their table material
 as AES keys without data-flow proof.
 
 **EMPS V850E PS2** uses a **static password** SA (key bytes `5A 5A 00 00`,
-no seed/key derivation). This is an older EPS generation on V850E, not RH850.
+no seed/key derivation). This is an older V850E EPS generation.
 
-**VFOREST is a writer-family label, not an RH850 proof.** The dynamic
+**VFOREST identifies a writer family. MCU architecture requires separate proof.** The dynamic
 VFOREST flash-writer classes have no `CollateSeedKey` or `CalcSeedKey` in their
 own methods; security is supplied by the selected prepare/orchestration route.
 A real legacy VFOREST package now proves that this qualifier matters:
@@ -643,7 +643,7 @@ final storage semantics remain bounded.
 
 This package also closes a route-dependent `PasswordAddress` subtlety. Its
 selected row is `PasswordAddress=0000100E`, `ByteOrder=0`; that address indexes
-the **hex-decoded ZV archive buffer**, not the LZF-expanded image. Bytes
+the **hex-decoded ZV archive buffer** before LZF expansion. Bytes
 `FF 0C EF 56` at stream offset `0x100E` become host uint32 password
 `0x56EF0CFF` under `GetPassword`, and shared CheckID emits them little-endian as
 `FF 0C EF 56`. The old/source `TargetData=3532323734463D4A` decodes to
@@ -752,10 +752,10 @@ is `[4-byte nonce prefix][1-byte block-seq][6-byte key chunk]` (a 4-byte chunk
 in the final frame of each key).
 
 **The `0x37`–`0x3c` bytes are a per-frame block sequence stored at
-`Data[4]`, not UDS service IDs** — they increment monotonically across the
-six frames, and `0x39`–`0x3c` are not UDS services at all. This routine
-therefore does **not** conflict with firmware SEC-BOOT-003 (UDS `27 01/02`):
-it is a different operation entirely. At the VFOREST call site, the two blobs
+`Data[4]`**. They increment monotonically across the six frames.
+`0x39`–`0x3c` are not UDS services at all. This key-material transfer operates
+separately from firmware SEC-BOOT-003 SecurityAccess (UDS `27 01/02`).
+At the VFOREST call site, the two blobs
 come from `CalibrationFile::GetNonce(int)` and `GetSeedKey(int)`, verbatim.
 Their semantic relationship to any Sienna payload-gate state is unproven
 because VFOREST is a different factory route. The SA itself is a separate
@@ -793,9 +793,9 @@ bytes; it does no cryptography.
 > UnifiedFlashWriter or UnifiedFlashWriterEachArea are byte-compatible. The
 > absent matching calibration payload still prevents choosing between those two
 > compatible rows or recovering their actual values. The CUW-side structural
-> finding (key-material transfer, not SA; `0x37`–`0x3c` are block-seq bytes, not
-> SIDs; `arg3=GetNonce`, `arg4=GetSeedKey`) stands, but its target ECU is not
-> `8965B4512000`.
+> finding stands: key-material transfer uses `0x37`–`0x3c` as block-sequence
+> bytes, with `arg3=GetNonce` and `arg4=GetSeedKey`. SecurityAccess is separate,
+> and the target ECU is not `8965B4512000`.
 
 ## 5. Calibration Update Wizard (CUW)
 
@@ -813,9 +813,9 @@ blocker are in `data/generated/techstream_v18/cuw_writer_inventory.json`.
 | `P5-Unified` | `TCUWCanUnifiedPrepareWriter.dll` | `TCUWCanUnifiedFlashWriter.dll` |
 | `0P5-CAN(SECURITY)302` | `TCUWP5CanSecurityPowerTrainPrepareWriter.dll` | `TCUWCanSecurityVFORESTFlashWriter.dll` |
 
-These examples prove that “P5,” “unified,” and “VFOREST” are factory choices,
-not sufficient identifiers for this EPS. Exact selection requires the missing
-matching Sienna `.cuw`/`.cal` payload.
+These examples identify “P5,” “unified,” and “VFOREST” as factory choices.
+Exact EPS route selection requires the missing matching Sienna
+`.cuw`/`.cal` payload.
 
 ### 5.1 Prepare-write phase
 
@@ -901,7 +901,7 @@ HV   0x7D2: 5693eea973333cf7a408bc86b1c98914
 MG   0x724: 192b8e45370251dff3b77f6bb069bf27
 ```
 
-These are **predictions, not recovered non-EPS secrets**. The non-EPS CUW
+These non-EPS secrets remain **predictions awaiting recovery**. The non-EPS CUW
 descriptors do not carry an `ECUAuthKey` field on this path, which is consistent
 with the frontend not needing a backend wrapper for the standard seed-only
 request. They are high-value firmware fingerprints: finding one
@@ -951,8 +951,8 @@ application `$27` root.
 
 #### Direct root-reuse tests for a foreign ECU or update package
 
-The practical cross-OEM test is candidate verification, not root recovery from
-a transcript. The three recovered EPS roots can be tested independently:
+The practical cross-OEM test verifies candidate roots. Transcript-only root
+recovery remains unproved. The three recovered EPS roots can be tested independently:
 
 1. **Firmware dump:** scan raw CodeFlash/application bytes for the three exact
    roots and common little-endian storage variants. A hit should then be joined
@@ -1066,13 +1066,13 @@ recovering the ECU's SecurityAccess root.
 `CalcSeedKeyForSecurityUp` construction. It is read by the unified **flash**
 writers and passed into their transfer/image-format orchestration; those DLLs
 have no `CryptEncrypt`/`CryptDecrypt`/`CryptImportKey` edge. For the public
-`8966312R1100` example, `SecurityProperty2=98` is therefore flash metadata, not
-a selector for the SecurityAccess wrapping key or the firmware payload-build
-root. Its exact transfer semantics are now pinned: `CBytes(const char*)`
+`8966312R1100` example, `SecurityProperty2=98` describes flash metadata.
+SecurityAccess wrapping-key and firmware payload-build root selection
+are separate. Its exact transfer semantics are now pinned: `CBytes(const char*)`
 hex-decodes the string, and bit 3 of the first decoded byte becomes the
 Unified RequestDownload `dataFormatIdentifier` (public example `98` → byte
-`0x98` → 1). The decoded byte is key-material semantics, not a character
-code; do not reinterpret the ASCII character value (CORR-083).
+`0x98` → 1). Interpret the decoded byte as key material.
+Do not reinterpret the ASCII character value (CORR-083).
 
 ECU-specific flash writers include:
 `TCUWCanReproStdFlashWriter` (standard CAN), `TCUWCanUnifiedFlashWriter`
@@ -1238,9 +1238,9 @@ route dispositions in `target_route_dispositions`.
 The one major shared implementation behind the specialized writers is now
 recovered directly rather than left as an import-name hint. **15 of the 25 flash
 writer modules import `TCUWCanCommonFlashWriter.dll`**, whose 19 exported
-protocol bodies are all byte-hash-pinned in the route-grammar artifact. This is
-a proprietary command protocol after the caller-supplied CAN-address prefix,
-not UDS service numbering:
+protocol bodies are all byte-hash-pinned in the route-grammar artifact. Its
+proprietary command namespace follows the caller-supplied CAN-address prefix.
+UDS service numbering is separate:
 
 | Common-flash operation | Recovered command grammar |
 |---|---|
@@ -1381,15 +1381,15 @@ Hatchback/Corolla Hybrid FRC transitions `8646F1204300→8646F1204500` and
 `ContactType=P5-Unified`, `RequiredSpecReproVer=04`, `ReproMethod=07`,
 `VehicleName=COROLLA Series`, NA model year `23`, and both converge on the same
 `8646F1204500` stored target image (`04b07fb4…c8dd3`). Thus a model/year-
-generation-matched 2023 Corolla FRC package family is already present locally;
-the missing FRC problem is **decoding/exact target identity**, not finding any
-2023 Corolla `0792` CUW. This still is not a VIN-level join to the albinoelephant
-or Span specimens.
+generation-matched 2023 Corolla FRC package family is already present locally.
+The remaining FRC work is **decoding/exact target identity** for these
+2023 Corolla `0792` CUWs. A VIN-level join to the albinoelephant
+or Span specimens remains unproved.
 
 **Payload boundary (verified/bounded).** The `01-….xx` members are
 Motorola S-record **framing** (5,341,273 records, zero invalid, two ranges:
 the `0x8F6C00` routine slot and flash `0x08E80000..0x0E000000` = 85,458,944
-B) around an **encrypted target representation**, not plaintext firmware.  The
+B) around an **encrypted target representation**. The
 recovered ReproStd writer sends these whole/routine bytes with UDS
 `dataFormatIdentifier=0x01`.  UDS defines the high DFI nibble as
 `compressionMethod` and the low nibble as `encryptingMethod`; zero means no
@@ -1423,9 +1423,9 @@ distinct targets share exactly two 16-byte stored blocks and first differ at byt
 32**.  Fixed-key/fixed-IV CBC with two common plaintext header blocks followed
 by a changed third block produces exactly that prefix-then-avalanche shape;
 a whole-image rekey would not naturally preserve the identical ciphertext
-prefix.  This remains a structural hypothesis, not a recovered FRC cipher: a
-custom chaining transform, partially clear/encrypted envelope, or another
-construction can reproduce the same observation.  Five further format-`0x67` camera packages
+prefix. The FRC cipher remains unrecovered. This structural hypothesis admits
+alternatives: a custom chaining transform, partially clear/encrypted envelope,
+or another construction can reproduce the observation. Five further format-`0x67` camera packages
 (Tundra/Crown/Camry/GH, DiagID `07D2/07506D/07500F/0724`) carry
 `ReproMethod=01`/`SecurityProperty2=98`/`IsControlledBySCC=0` and no delta
 sections — the pinned whole-repro contrast set.  That contrast set supplies an
@@ -1437,12 +1437,11 @@ range `FEEF7800..FEEF8000` with the exact same 16-byte CMAC
 representations are chance-correlated — only 5 equal byte positions and zero
 shared 16-byte blocks, with SHA-256 `4f45346f…0f32` vs `b280b85b…8164`.
 Therefore target range + integrity value + family `ServiceAuthKey` do **not**
-uniquely determine the serialized encrypted routine.  This is a useful oracle,
-not a proof that descriptor `Nonce` alone causes the change or that the
-underlying routine plaintexts are byte-identical.  Joined to the host negative
-below, any per-package decrypt context needed at programming time must be
-embedded/derived or otherwise ECU-local rather than sent as an explicit
-ReproStd Nonce/SeedKey field.
+uniquely determine the serialized encrypted routine. This differential supplies
+an oracle. It leaves descriptor `Nonce` causality and byte-identical routine
+plaintexts unproved. Joined to the host negative below, any per-package decrypt
+context needed at programming time must be embedded/derived or otherwise ECU-local.
+The selected ReproStd route sends no explicit Nonce/SeedKey field.
 
 **Modern host (recovered, from the statically unpacked GTS+ CUWPlus
 binaries in `software/Techstream/gtsplus/cuwplus`; provenance and SHA-256 pins are
@@ -1455,8 +1454,8 @@ pinned images (image base `0x10000000`):
   `enc = 0x23 + 4*nibble` obfuscation) selects
   `TCUWCanUnifiedCIDGetter.dll` + `TCUWCanReproStdPrepareWriter.dll` +
   `TCUWCanReproStdFlashWriter.dll`, `PrepareRetryFlag=0` — the ReproStd
-  pair serves `P5-Unified04`, so these FRC packages use the standard
-  ReproStd route, not the Unified flash writers of TMS-032.
+  pair serves `P5-Unified04`, so these FRC packages use standard ReproStd.
+  TMS-032's Unified flash writers belong to a separate route.
 - **Descriptor parser (modern `CUW.dll`)**: the `[LogicalBlock]` section
   names map to `CLogicalBlockInfo` area objects through `FUN_1000DD60`'s
   store sequence — `ReproDatanxx→+0x24`, `EraseAndReproRoutinenxx→+0xCC`,
@@ -1465,8 +1464,8 @@ pinned images (image base `0x10000000`):
   `ReproDataSegment0nxx..2nxx` loop — and the `CLogicalBlockInfo`
   constructor (`TCUWCalibrationFile.unpack.dll @0x10001400`, symbol
   present) builds area objects at exactly those offsets minus `0x1C`
-  (`+0x08/+0xB0/+0x158/+0x200/+0x2A8/+0x350`), so the `+0x158/+0x200`
-  area names are **recovered, not inferred**.  `IsControlledBySCC` is
+  (`+0x08/+0xB0/+0x158/+0x200/+0x2A8/+0x350`), directly recovering the
+  `+0x158/+0x200` area names. `IsControlledBySCC` is
   compared against `[KindOfCal]` and stored at calibration `+0x24`
   (`0x1000CF89`); when SCC is set and `IsBlankECU` clear, the parser calls
   `FUN_100115E0`, which consumes `VehicleForNA`/`VehicleForEUOT` sections.
@@ -1508,9 +1507,9 @@ pinned images (image base `0x10000000`):
   FRC matrix is routine-PackageDL tag0→`0x01`, whole-data tag1→`0x01`,
   delta-data tag2→`0x21`, compression-data tag3→`0x11`.  Exact P1M-E EPS
   firmware provides useful cross-family context: its accepted DFI-low-nibble-1
-  download path dispatches TransferData through AES-128-CBC decryption.  That
-  makes AES-CBC a concrete Toyota/Denso method-1 precedent, **not proof that the
-  TMPV770 FRC uses the same cipher/root/IV construction**.
+  download path dispatches TransferData through AES-128-CBC decryption.
+  This establishes a Toyota/Denso method-1 precedent. The TMPV770 FRC's
+  cipher/root/IV construction remains unproved.
 - **What the `0x21` bytes are**: Toyota's compact **delta method 2** input,
   additionally protected by the same DFI encryption-method-1 layer as whole
   data.  The patch grammar, plaintext delta bytes, exact decryptor, key, and IV
@@ -1618,10 +1617,10 @@ manufacturer-specific **encryption method 1**, corrects the FRC integrity object
 to a 256-byte signature, and closes the selected host route's lack of explicit
 Nonce/SeedKey provisioning.  It does **not** recover the encryption-method-1
 cipher/key/IV, plaintext image, delta patch grammar, `10F5`/`10F6` ECU-side
-implementation, or signature algorithm/signed object.  Those are now an
-**ECU-side decoder/boot-firmware acquisition problem**, not a CUW-container or
-Techstream-host parsing problem, and none of it is EPS-specific (Corolla front camera,
-not the tracked Sienna/Corolla-H EPS Unified routes of TMS-032/TMS-036).
+implementation, or signature algorithm/signed object. Those remaining questions
+require **ECU-side decoder/boot-firmware acquisition** for the Corolla front camera.
+CUW-container and Techstream-host parsing are closed here. The tracked Sienna/
+Corolla-H EPS Unified routes remain separately documented in TMS-032/TMS-036.
 
 #### 5.2.2 Retained Toyota F340 manufacturer erase/program payload
 
@@ -1658,8 +1657,8 @@ Exact Camry `8965F3307000` boot code independently corroborates the same
 post-write `0x400` program condition at `0x78E2A` and supplies stock Status
 Clear `0x50` / Forced Stop `0xB3` helpers. This is why the generic patcher now
 uses bounded post-write DBFULL polling while retaining `0x50` as exact-target
-recovery behavior. T-0035 remains a Tundra F340 package, not an exact F33 Camry
-CUW and not an OEM full-image restore package for `8965F3307000`. Canonical
+recovery behavior. T-0035 applies only to Tundra F340. It supplies neither an
+exact F33 Camry CUW nor an OEM full-image restore for `8965F3307000`. Canonical
 evidence: `data/generated/techstream_v18/t0035_faci_backend_evidence.json`;
 SECOC-074/CORR-121.
 
@@ -1710,8 +1709,8 @@ offsets into the managed fields:
 | `SeedValue` | `+78` | `+28D` | 16-byte callback argument, rendered as 32 uppercase hex chars |
 
 `CUWAccessRKSWrapper.SetDataForReproKey` sets `IsStored=true` immediately
-before copying those fields. This is a managed request-data-validity flag, not
-evidence that a previously issued server token is cached or reusable. The
+before copying those fields. This flag marks valid managed request data.
+Caching or reuse of a previously issued server token remains unproved. The
 config object is the `0x38`-byte structure returned by `FUN_0043DFBC`; its
 accessors at `43F034/3C/48/54/60/6C/78` expose the offsets above. The request
 builder `FUN_0049BCFE` obtains that object, reads VIN from the current vehicle,
@@ -1784,9 +1783,8 @@ browser/.NET prerequisite path is unavailable, to choose **No** to continue
 reprogramming if Signature Request is not necessary. No RKS-required field is
 present in the recovered `attach.att` calibration schema and no RKS token reaches
 a flash writer. Therefore V18 does **not** support treating RKS as universally
-mandatory for every ECU/EPS reflash. What remains external is the Toyota policy
-for a particular target/region/calibration, not another hidden client-side
-cryptographic predicate.
+mandatory for every ECU/EPS reflash. The remaining external question is Toyota's
+policy for a particular target/region/calibration.
 
 `SeedValue` is fully closed inside the native client. The reprogram flow
 registers `FUN_0049BCF8/FUN_0049BCFE` as a callback when host flow mode is `3`;
@@ -1826,8 +1824,8 @@ certificate, and no embedded public key. Client-side validation is format-only:
 the managed layer requires `^[0-9a-zA-Z]+$`, and native
 `CReproKeyServerAccessCtrlr::CheckReproKeyFormat` requires exactly 512
 characters. Signing is entirely server-side; the client trusts the `Signature`
-purely on receipt through the authenticated IE session. `KeypairID` is a
-selector for the portal's signing key, not a client key. The fixed width is
+purely on receipt through the authenticated IE session. `KeypairID` selects
+the portal's signing key. The fixed width is
 compatible with several possible server token/signature encodings and is not
 sufficient evidence to name one.
 
@@ -1838,7 +1836,7 @@ references (ASCII and UTF-16). Layer A is nevertheless vehicle-facing: CUW
 decodes the server token and returns its 256 bytes to the Central Gateway in
 `27 22`. That gateway authorization does not enter the EPS flash-writer crypto
 or any of the three firmware-secret paths. The firmware secrets remain
-calibration-file Layer-B material, not installer-resident RKS material.
+calibration-file Layer-B material, separate from installer-resident RKS.
 
 **`SeedValue` boundary (native path now recovered).**
 `CUWAccessRKSWrapper.SetDataForReproKey` maps native request-buffer offset
@@ -1930,8 +1928,8 @@ Recovered code semantics sharpen those tables:
   mode-change/status-poll machinery; that is comparative route evidence only
   because the tracked Sienna bootloader rejects VFOREST framing.
 - `TCUWCanCommonPrepareWriter::GetBusTypeFromCPUImage @ 0x10001630` proves
-  `CANCommunicationSpeedAddress` is a **CPU-image byte location used to choose a
-  bus/speed mode**, not a hardware baud-rate register address.
+  `CANCommunicationSpeedAddress` identifies a **CPU-image byte used to choose a
+  bus/speed mode**. Hardware baud-rate registers have separate addresses.
 
 All of those bodies are SHA-pinned in the generated artifact so the decompiled
 semantics cannot silently drift from the installed V18 binaries.
@@ -2150,18 +2148,18 @@ format (`DiagTool DataCtrl` magic). The EPS-relevant databases:
 The Stage-3 residual audit removes the older blanket statement that the DDB
 record structures are unknown. Every one of the **35 steering `EPS*`/`EMPS*`
 type-2 databases** is structurally parsed through its complete directory, with
-an explicit observed section-type union through type 91. The remaining issue is
-field semantics for selected section classes, not record discovery.
+an explicit observed section-type union through type 91. Record discovery is
+closed. Field semantics for selected section classes remain unresolved.
 
 A targeted pass over `Security_P4.ddb` also prevents its filename from being
 overread as cryptographic evidence. Section type 35 is one 28-byte record whose
 leading string resolves to **`Security Alarm Operation`**; section type 37 is
 50 20-byte records beginning with alarm-condition vocabulary such as
 `Battery Desorption`, `Hood Open`, `Luggage Open`, and `Door Open`, with alarm
-explanations in the companion string field. This high-signal residual is
-therefore vehicle-security/alarm diagnostic vocabulary, not a recovered
-Safekey/MCU-ID/MACKey provisioning table. Other section classes retain their
-factory-derived names. The factory map is now itself generated from executable
+explanations in the companion string field. This recovers vehicle-security/
+alarm diagnostic vocabulary. Safekey/MCU-ID/MACKey provisioning remains
+unsupported. Other section classes retain their factory-derived names.
+The factory map is now itself generated from executable
 evidence: both x86 switch tables are walked from case target to direct
 constructor export, yielding all 89 format-1 and 151 format-2 identities.
 Parser constants are checked against that independent map rather than against a
@@ -2291,9 +2289,9 @@ selector `0xD1` = **`10 01`** (default session) and selector `0xD2` = **`10 03`*
 wrapper: it is **`KGP_CommFrameCtrl::SendProc @ 0x10037F10`**. SendProc reads
 master class `0x110` / `CDbEcuCategoryTable` byte `+0x48`, masks the low five
 bits, and selects one shared automatic-session branch for values `0x14/0x15/0x16`.
-That three-value SendProc branch is a transport/session gate, **not** the P5-family
-classifier: `SelectCarTypeVin10` dispatches low5 `0x16` to Phase6, while the current
-master categories bound to `GetSupportP5_DT.dll` are only low5 `0x14/0x15`.
+That three-value SendProc branch gates transport/session behavior. P5-family
+classification is separate: `SelectCarTypeVin10` dispatches low5 `0x16` to Phase6,
+while current categories bound to `GetSupportP5_DT.dll` are only low5 `0x14/0x15`.
 Hybrid397 (`HV_P5.ddb`), Brake435 (`ABS_P5.ddb`), and FRC498 (`FRC_P5.ddb`) all
 have exact value **`0x14`**. The Phase5 request classifier at vtable `+0x100`
 (`0x100292F0`) returns class 2 for service bytes `>=0x10`. When class 2 is
@@ -2319,14 +2317,14 @@ only in `NoConfGenComRes_DT.dll`, around `SendIntForced`; ordinary P5 Data
 Monitor/Active-Test code does not import them. This exception must therefore not
 be generalized into the ordinary P5 monitor lifecycle.
 
-`DataMonitorPhase5_DT.dll` does still reference `0xD1`/`0xD2`, but those
-references are **DRS journaling, not transport**. The `+0x1DC` sink is the DRS writer path; the D1 callsite creates `CDrsChangDefaultSession` and the D2
-callsite creates `CDrsChangExtendedSession`, mirroring a session change already
-owned by KGP. The worker itself remains command-driven: command 9 starts Data
+`DataMonitorPhase5_DT.dll` references `0xD1`/`0xD2` for **DRS journaling**.
+The `+0x1DC` sink is the DRS writer path. The D1 callsite creates
+`CDrsChangDefaultSession`; D2 creates `CDrsChangExtendedSession`.
+Both mirror a session change already owned by KGP. The worker remains command-driven: command 9 starts Data
 Monitor, 10 stops it, `0x0B` launches the direct Active-Test path, and `0x0C`
 handles Active-Test initialization. Low-level `DataListIF` polling can use
-no-init/no-session send variants because the outer session judgment belongs to
-KGP `SendProc`, not because the session transition is absent.
+no-init/no-session send variants because KGP `SendProc` owns the outer session
+judgment and the actual session transition.
 
 Security is now narrower than the earlier generic caveat too. During current P5
 monitor setup, `DataMonitorPhase5_DT.dll @ 0x10013DB2` calls
@@ -2337,16 +2335,16 @@ hierarchy, and current master type27 `CDbEcuFuncDetailsTable` has **no function
 3 / detail `0x50` row for Hybrid397, Brake435, or FRC498**. The current ordinary
 P5 monitor plan therefore does not statically advertise that security-release
 capability for those three categories. Teardown still contains conditional
-`CancelSecurity` support for Toyota/Subaru/Suzuki mode families, so this is a
-category/operation-specific negative, not a blanket claim that every Toyota
-utility is authentication-free.
+`CancelSecurity` support for Toyota/Subaru/Suzuki mode families.
+This negative applies only to the named categories and operation.
+Other Toyota utilities may still require authentication.
 
 Finally, Toyota **check mode is a different state machine**. Hybrid397 alone
 binds roles `0x17` `ConfCheckModeP5_DT.dll` and `0x18`
 `ChangeCheckModeP5_DT.dll`; Brake435/FRC498 do not. Those Hybrid plugins use
 RoutineControl RID `0x1002`: selector3 `31 01 10 02`, selector4 `31 02 10 02`,
-and selector5 `31 03 10 02` with result check `71 03 10 02 01`. They are
-maintenance/check-mode operations, not aliases for UDS DiagnosticSessionControl.
+and selector5 `31 03 10 02` with result check `71 03 10 02 01`. These operate
+the maintenance/check-mode state machine independently of UDS DiagnosticSessionControl.
 
 This makes the selector numbers used throughout Toyota's command DLLs effectively
 **operands into a diagnostic database VM**. The DLL contributes sequencing,
@@ -2392,8 +2390,8 @@ stub and sidecar hash byte-for-byte to the installed pair, while the original
 has SHA-256 `98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3`
 and a materialized `0xD3600`-byte raw `.text`.
 
-This is complete across the installed current GTS+ tree, not a one-file special
-case: `Setup_PF.exe` supplies 45 protected-body twins and
+This covers the complete installed current GTS+ tree:
+`Setup_PF.exe` supplies 45 protected-body twins and
 `Setup_InfoCenter.exe` supplies the remaining 9, for **54/54 installed
 `.dll._`/`.exe._` pairs**. `tools/gts recover-bodies` now extracts the original
 same-release PEs under `build/out/gtsplus-unprotected/`, proves each installer
@@ -2423,7 +2421,7 @@ Current role `0x06` closes the analogous Active Test catalog layer. Current Hybr
 
 Current role `0x08` closes the next layer for a **selected direct Active Test**. Hybrid category397 binds `GetActTstInitP5_DT.dll` (37,392 B; SHA-256 `36baa624…9d55`). The current body looks up the selected type68 row by u16 `+0x20`, then interprets `+0x39` as its initial-read mode. Mode 0 resolves master selector `0xCA` (`22FFFF`, mask `FF`, positive check `62`, CommSet1), copies type68 `+0x34` into request bytes 1/2, sends through `CommCacheSndRcvExt`, and extracts the initial value from the row's `+0x28/+0x2A` bit range; mode 1 skips that transaction, while other values return `C0040102`. Byte `+0x3C` selects the panel-key path (`+0x30` for modes 1/3, `+0x32` for mode 2), and byte `+0x3D` controls linked-monitor recovery: mode 1 copies type68 `+0x36`; otherwise the plugin scans generation-selected type62/type157 monitor rows for flag `+0x30 & 0x40` and exact DID/bit-range equality (`+0x46`, `+0x3C`, `+0x3E`), then copies monitor key `+0x34`. Final initialization joins type12 Active-Test pattern, type13 physical conversion, type14 display pattern, and type15 unit records, with `CheckSupportPanel` governing applicable display entries. Exact current witness: Hybrid direct test `0x0001` **Activate the Inverter Water Pump** has DID `0x2801`, bits 15..15, read mode 0, and therefore materializes selector `0xCA` as **`22 28 01 -> 62`**; the monitor scan uniquely resolves key30 **Inverter Water Pump**, whose typed metadata is OFF/ON. `tools/gts command HV_P5 0x08 --item 0x1` reproduces that plan offline. Boundary: role `0x08` initialization does not prove role `0x06` runtime availability, and panel support may still depend on live/cache state; `tools/gts` does not execute the Active Test.
 
-The shared **P5 direct Active-Test runtime executor** below role `0x08` is now closed as well. It is not another category DLL role. Current `CommandDataLib.dll` `CStartActTstSnd::SetValue @ 0x10089E00` performs the exact inverse physical conversion into the command object's low raw byte: **`raw8 = trunc_toward_zero((engineering_integer - Offset) * Div / Mul) & 0xFF`**. Here `engineering_integer` is the displayed engineering value scaled by `10^decimal_point_count`; the role-`0x70` metadata supplies the same type13 `Mul/Div/Offset`, type15 unit, and type14 display choices. The generated direct-test rows therefore export that physical metadata and named choices explicitly. `DataMonitorPhase5_DT.dll` `CDataMonitorThreadP5::virtual_104 @ 0x1000D5E0` then combines the selected type68 row with type67 `CDbDataIdForActTable`. Type67 u16 `+0x02` is the DID lookup key and **the lookup is intentionally one-to-many**: current GTS keeps the complete result set. Every shared-DID set in the current NA/EU/JP corpus has one uniform encoding mode at u8 `+0x0A` (zero mixed-mode sets). The executor also consumes type67 u16 `+0x04` as a 1-based control-enable bit, `+0x06` as data-byte offset, `+0x08` as data-byte length, and the mode-5-only match fields at `+0x0C/+0x0E`. Rejecting a DID merely because it resolves multiple type67 rows was therefore an exporter bug, not an OEM ambiguity.
+The shared **P5 direct Active-Test runtime executor** below role `0x08` is now closed as well. It is not another category DLL role. Current `CommandDataLib.dll` `CStartActTstSnd::SetValue @ 0x10089E00` performs the exact inverse physical conversion into the command object's low raw byte: **`raw8 = trunc_toward_zero((engineering_integer - Offset) * Div / Mul) & 0xFF`**. Here `engineering_integer` is the displayed engineering value scaled by `10^decimal_point_count`; the role-`0x70` metadata supplies the same type13 `Mul/Div/Offset`, type15 unit, and type14 display choices. The generated direct-test rows therefore export that physical metadata and named choices explicitly. `DataMonitorPhase5_DT.dll` `CDataMonitorThreadP5::virtual_104 @ 0x1000D5E0` then combines the selected type68 row with type67 `CDbDataIdForActTable`. Type67 u16 `+0x02` is the DID lookup key and **the lookup is intentionally one-to-many**: current GTS keeps the complete result set. Every shared-DID set in the current NA/EU/JP corpus has one uniform encoding mode at u8 `+0x0A` (zero mixed-mode sets). The executor also consumes type67 u16 `+0x04` as a 1-based control-enable bit, `+0x06` as data-byte offset, `+0x08` as data-byte length, and the mode-5-only match fields at `+0x0C/+0x0E`. Rejecting a DID merely because it resolves multiple type67 rows was an exporter bug. The recovered OEM lookup supports those rows unambiguously.
 
 Selector `0x9D` is **`2F FF FF 03`** / mask `FF` / check `6F`, with the type68 DID substituted, and selector `0x64` is **`2F FF FF 00`** / check `6F`. The current builder's control-enable behavior is encoding-mode-specific. Mode 0/3 zero-fill the runtime DID-data length `N` and write the selected raw value big-endian into the whole-byte span covered by type68 `+0x28/+0x2A`; mode 0 then walks all matching type67 rows whose `data_byte_offset/data_byte_length` lies fully inside that selected span and sets MSB0 mask bit `control_enable_bit_1based-1`, while mode 3 appends no control-enable mask. Mode 1 places the raw value at the selected ending bit and uses the selected type68 bit-range mask for return-control. Mode 4 shifts the raw value into the selected bit range and likewise uses the selected-bit-range mask for return-control. Thus control-enable-mask length is **not generally `N`**: it is the produced mask geometry for the selected mode. The **source of N is instruction-closed rather than merely bounded**. `DiagCommCtrlMain` registers share-data slot `0x27` as its `CCmdList<CCmdDataIdLengthList>` at object `+0xE14`; `CCommCachePlusP5::GetSupportEcuDataIdLengthListCache` reads that slot, and each per-ECU entry stores parallel DID (`+0x0C`) and byte-length (`+0x20`) word lists. In `CCommCachePlusP5::CheckSupportDid`, the ordinary probe path resolves selector `0xCA` (`22 FF FF -> 62`), substitutes the selected type68 DID, sends it through `CommCacheSndRcvExt`, requires the received UDS payload length to exceed 3, then appends **`received_length - 3`** to the length list beside that DID; a cached hit reconstructs the internal received length as `N + 3`. Thus the three bytes removed are exactly positive SID `0x62` plus the echoed DID. This runtime-length probe is distinct from role-`0x08`'s initial-value mode: mode 1 may skip the UI initialization read while the support/runtime cache still has an exact `22 <DID>` length probe. Static DDB bit geometry still gives only a lower bound. The current Hybrid `0x0001` water-pump test joins type67 row `000001280000000000000100000000000000`, encoding mode1, DID `0x2801`, bit15, and raw OFF/ON `0/1`; therefore the exact formulas are `2F 28 01 03 || N-byte value` with byte1 bit0 carrying the value and `2F 28 01 00 || control-enable mask` with byte1 bit0 set; for this bit-15 witness the mask itself is two bytes even if runtime `N` is larger. Bit15 proves only `N >= 2`; for the **minimum** `N=2`, the corresponding examples are OFF `2F2801030000`, ON `2F2801030001`, and return-control `2F2801000001`. The handoff is also instruction-closed: `CDataMonitorThreadP5::virtual_20` passes `buffer+1,length-1` through `CDataMonitorPhase5Interface` vtable `+0x2C`; `DataListIF` `CCommEventPhase5AT::ActiveTestStart` re-prepends `0x2F` for direct `ActiveTestType=0`, queues start/return-control frames, `GetSndFrame` copies the queued bytes unchanged, `CheckRcvFrame` requires `0x6F` and at least three response bytes, and `p5diag_tf::J2534DiagInterface::ThreadMain` sends the frame through `KGP_CommFrameCtrl::CCommFrameCtrl::SendIntExt`. No Active Test was executed to establish this model. Current category485 `EPB_P5` is a fail-closed exception: its DDB contains type68/type67 direct-control geometry and selector `0xCA`, but the category has **no selector `0x9D` or `0x64` master frame**. Same-release `CommandCommon.dll` `CCommCachePlus::GetCommFrmInfo @ 0x1006F8C0` queries type `0x112` by the actual category+selector and returns `C0040101` when no row exists; there is no category/frame fallback. Those 14 EPB rows therefore remain non-executable rather than borrowing another category's `2F .. 03/00` template. `tools/gts command HV_P5 0x08 --item 0x1` and `tools/gts active-test HV_P5 0x1` now expose the exact `runtime-length-probe` alongside the executor formula and qualified static-minimum examples.
 
@@ -2431,17 +2429,17 @@ The generic **current P5 RoB transport** is now closed through raw record bodies
 
 The **current P5 RoB semantic schema** is now pinned from the current GTS+ consumers rather than the older V18 record layout. Current `KgpDataCtrl.dll` `CDbBehaviorDataRecordP5Table::GetRecordAddress` uses a **0x48-byte** type-88 row. `FindDbItem1` keys that row by u16 `+0x2C`; `SetRecString` resolves the OEM signal name from u32 `+0x20`; `SortInOrder` uses u16 `+0x36`; and the current `GetRoBP5_DT.dll` consumer pins support-condition key `+0x2E`, physical-data key `+0x30`, bit range `+0x32/+0x34`, pattern-display key `+0x38`, exception ID `+0x3A`, DID `+0x3C`, extraction mode `+0x3E`, presentation mode `+0x3F`, and exception flag `+0x42`. Current type-87 behavior-code rows retain signature at bytes `0x00..0x0B`, OEM name/comment string indices at `+0x0C/+0x10`, and the actual behavior-code key at u16 `+0x14`. Type-90 `CDbDataIdForRobTable` is keyed by DID at u16 `+0x02`; its mode byte `+0x06` is the local support rule. Mode 0/2 accepts the DID locally; mode 1 requires the same end-bit position to be set in the preceding payload byte (`byte=(bit_end>>3)-1`, mask=`0x80>>(bit_end&7)`). A nonzero type-88 support-condition key selects type-89: its variable points to another DID, its `+0x06/+0x08` bit range is extracted from that returned DID, condition type `+0x0B` must be 7, and the signal is included only when the extracted value is nonzero.
 
-RoB values then use the existing P5 physical/unit/pattern chain (type 13/15/14) and `CCmdCommSignalLSBP5::ChangeSignalLSB`. This path is recovered **directly from the same GTS+ 2026.03.002.02 release**, not transferred from V18: `build/out/gtsplus-unprotected/bin/CommandCommon.dll` is the installer-original plaintext twin of the installed CP stub (`SHA-256 98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3`; see `gtsplus-body-recovery.md`). Current `ChangeSignalLSB` applies only to category modes `0x14`, `0x15`, `0x34`, and `0x74`, looks up type 64 `CDbCommLsbDataIdData` by the RoB record key, and is a successful no-op when that row/table is absent. If a row exists, current `GetSignalLSB` uses its support key/bit geometry through `CheckSupportPid` plus selector `0xCA`, then replaces the effective LSB numerator/denominator from the runtime support value and the row's multiplier/divisor. In the current release this dynamic branch is absent for ordinary P5 RoB entirely: among role-`0xA0`/`GetRoBP5_DT.dll` categories with ECU DDBs, type 64 is absent for **80/80 NA, 86/86 EU, and 84/84 JP** catalogs. On the selected Camry-HV install set, all **26** RoB-capable logical categories therefore use the base physical coefficients directly; across their **4,445** current type-88 signal rows the cross-DID support-condition key is also zero. Thus the generated Camry RoB signal metadata has final GTS-equivalent scaling plus only the exact local type-90 mode gate. Concrete witness: `EMPS_P5` **Steering Angle** is DID `0x5037`, bits `0..15`, signed, `Mul=15`, `Div=1`, `Offset=0`, one decimal, unit `deg`; raw `0x0001` renders `1.5 deg` and raw `0xFFFF` renders `-1.5 deg`. The generated diagnostic catalogs now export `rob.behavior_codes` and DID-scoped `rob.signals` from this current schema so runtime consumers need no DDB offsets.
+RoB values then use the existing P5 physical/unit/pattern chain (type 13/15/14) and `CCmdCommSignalLSBP5::ChangeSignalLSB`. This path is recovered **directly from the same GTS+ 2026.03.002.02 release**: `build/out/gtsplus-unprotected/bin/CommandCommon.dll` is the installer-original plaintext twin of the installed CP stub (`SHA-256 98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3`; see `gtsplus-body-recovery.md`). Current `ChangeSignalLSB` applies only to category modes `0x14`, `0x15`, `0x34`, and `0x74`, looks up type 64 `CDbCommLsbDataIdData` by the RoB record key, and is a successful no-op when that row/table is absent. If a row exists, current `GetSignalLSB` uses its support key/bit geometry through `CheckSupportPid` plus selector `0xCA`, then replaces the effective LSB numerator/denominator from the runtime support value and the row's multiplier/divisor. In the current release this dynamic branch is absent for ordinary P5 RoB entirely: among role-`0xA0`/`GetRoBP5_DT.dll` categories with ECU DDBs, type 64 is absent for **80/80 NA, 86/86 EU, and 84/84 JP** catalogs. On the selected Camry-HV install set, all **26** RoB-capable logical categories therefore use the base physical coefficients directly; across their **4,445** current type-88 signal rows the cross-DID support-condition key is also zero. Thus the generated Camry RoB signal metadata has final GTS-equivalent scaling plus only the exact local type-90 mode gate. Concrete witness: `EMPS_P5` **Steering Angle** is DID `0x5037`, bits `0..15`, signed, `Mul=15`, `Div=1`, `Offset=0`, one decimal, unit `deg`; raw `0x0001` renders `1.5 deg` and raw `0xFFFF` renders `-1.5 deg`. The generated diagnostic catalogs now export `rob.behavior_codes` and DID-scoped `rob.signals` from this current schema so runtime consumers need no DDB offsets.
 
 The generic **current P5 per-DTC freeze-frame path** is closed through signal-level presentation. Master role `0xB5` uses category-0 `GetEachFrzFrmDatP5_DT.dll` as the current ordinary-P5 fallback; exact P6 categories override that role with `GetEachFrzFrmDatP6_DT.dll`. The ordinary P5 plugin resolves selector `0xCF` to **`19 04 00 00 00 FF`** with positive check **`59 04`**. `CGetFrzFrmDatP5Base::SetDTCToSndFrame` writes the selected 24-bit DTC into request bytes 2/3/4, leaving byte5 as snapshot-record selector `0xFF` (all records). The receive parser treats bytes after `59 04` as `DTC[3] | status | repeated(snapshot_record:u8 | identifier_count:u8 | repeated(DID:be16 | length:u8 | data[length]))`; unlike ordinary UDS generic DID parsing, each snapshot DID carries an explicit one-byte data length. This path is read-only and directly matches ISO 14229 subfunction `0x04 reportDTCSnapshotRecordByDTCNumber`.
 
-The same-release plaintext `CommandCommon.dll` closes the **generic P5 FFD signal join** rather than requiring an inferred Data List reuse. `CGetFrzFrmDatP5Base::GetPidIdFromSSRDataId @ 0x100934A0` scans the current type62/157 `CDbDatamonitorP5` rows and maps a returned snapshot/SSR DID against row u16 `+0x48`, yielding monitor key u16 `+0x34`. `AnalyzeSingleDataId @ 0x100928E0` resolves those rows and admits only rows with the FFD-membership flag **`+0x30 & 0x02`**. The row's current bit range `+0x3C/+0x3E` is extracted from the snapshot DID payload and `SetFrzFrmDat @ 0x10094160` / `SetSignalInfo` reuses that monitor row's exact OEM name plus type13/type15/type14 physical/unit/pattern metadata. This is therefore an OEM-defined reuse of the current Data Monitor record schema, not a heuristic cross-application of Data List metadata.
+The same-release plaintext `CommandCommon.dll` closes the **generic P5 FFD signal join**. `CGetFrzFrmDatP5Base::GetPidIdFromSSRDataId @ 0x100934A0` scans the current type62/157 `CDbDatamonitorP5` rows and maps a returned snapshot/SSR DID against row u16 `+0x48`, yielding monitor key u16 `+0x34`. `AnalyzeSingleDataId @ 0x100928E0` resolves those rows and admits only rows with the FFD-membership flag **`+0x30 & 0x02`**. The row's current bit range `+0x3C/+0x3E` is extracted from the snapshot DID payload and `SetFrzFrmDat @ 0x10094160` / `SetSignalInfo` reuses that monitor row's exact OEM name plus type13/type15/type14 physical/unit/pattern metadata. This directly establishes OEM-defined reuse of the current Data Monitor record schema.
 
 FFD support filtering is also exact. `CheckSupportPid @ 0x10092F40` resolves type61 `CDbDataIdForDm` by the snapshot DID (`monitor +0x48`); its mode byte `+0x06` has the same local rules used elsewhere: mode0/mode2 include, while mode1 requires the signal end-bit's corresponding mask in the preceding payload byte. A nonzero monitor u16 **`+0x38`** is the FFD-specific condition key into type80 `CDbDataIdBitForFfd`. Current type80 rows are 12 bytes: key `+0x00`, variable id `+0x02`, bit start/end `+0x06/+0x08`, and condition type `+0x0B`. `CheckSupportBit @ 0x10092CE0` resolves that variable through Toyota's master variable table; the variable's first two bytes are the referenced DID, which must exist in the same snapshot record, condition type must be 7, and the configured bit range must decode nonzero. Concrete current witness: `EMPS_P5` **Steering Angle** uses snapshot DID `0x3037`, source/Data-List DID `0x1037`, bits0..15, signed `Mul=15`, one decimal, unit `deg`; conditional odometer row key `9905` uses type80 key `10001`, variable `0x2C1A -> DID 0x0403`, bit7, type7. The generated diagnostic catalogs now export this under `generic_ffd`, including exact local/conditional support rules and physical metadata. On the selected Camry there are **11,448 raw FFD-member rows across 33 categories** before type62/157 alias collapse, including **326** rows with an explicit type80 condition; no selected Camry category has a type64 dynamic-LSB table, so the exported base physical coefficients are final for this vehicle.
 
-The shared **current P5 routine Active-Test executor** is now closed alongside the direct path. Its wrapper roles are deliberately generic rather than category-local: current master roles `0xB0` (`StartActTst.dll`), `0xAE` (`GetRoutineActTstInitP5_DT.dll`), `0xAF` (`GetRoutineActTstSignalInfoP5_DT.dll`), and `0xD4` (`SingleRoutineActTstP5_DT.dll`) have a category-0 P5 row. The selection mechanism is now instruction-pinned rather than inferred from that census. `DiagCommCtrlMain::CommandExecute` passes command `m_dwCmd` (`+0x08`) and the actual target `m_dwEcuId` (`+0x1C`) into the type19 `CDbDllTable` lookup. `CDbDllTable::GetQuery` first narrows by role (`+0x54`), then tries the exact ECU/category (`+0x50`); when the category stage returns no rows but the role stage is nonempty, it deliberately supplies the **first role match**. For current `0xAE/0xAF`, that first/default row is category 0/P5, followed by category-6000+ P6 rows, so category 0 is the generic P5 **fallback/default**, not the caller's target category. The selected P5 init plugin still reads the original command `m_dwEcuId` when it opens the target ECU database, preserving the real target category across dispatch. Current GTS+ type71 records are 72 bytes and must not be parsed with the older V18 offsets: `KgpDataCtrl::CDbRoutineActTestP5ResRecords::SetRecVariableData` pins RID `u16 +0x1C`, Active-Test key `+0x1E`, routine-command variable `+0x28`, routine-stop variable `+0x2A`, output-value mask `+0x2C`, output-button mask `+0x2E`; the one-shot status consumer pins `+0x30` as the type72 routine-status key, and `SortInOrder` uses `+0x40`.
+The shared **current P5 routine Active-Test executor** is now closed alongside the direct path. Its generic wrapper roles have category-0 P5 rows: current master roles `0xB0` (`StartActTst.dll`), `0xAE` (`GetRoutineActTstInitP5_DT.dll`), `0xAF` (`GetRoutineActTstSignalInfoP5_DT.dll`), and `0xD4` (`SingleRoutineActTstP5_DT.dll`). Instructions establish the selection mechanism. `DiagCommCtrlMain::CommandExecute` passes command `m_dwCmd` (`+0x08`) and the actual target `m_dwEcuId` (`+0x1C`) into the type19 `CDbDllTable` lookup. `CDbDllTable::GetQuery` first narrows by role (`+0x54`), then tries the exact ECU/category (`+0x50`); when the category stage returns no rows but the role stage is nonempty, it deliberately supplies the **first role match**. For current `0xAE/0xAF`, that first/default row is category 0/P5, followed by category-6000+ P6 rows. Category 0 supplies the generic P5 **fallback/default**. The selected P5 init plugin reads the original command `m_dwEcuId` when it opens the target ECU database, preserving the real target category across dispatch. Parse current GTS+ type71 records with their 72-byte layout: `KgpDataCtrl::CDbRoutineActTestP5ResRecords::SetRecVariableData` pins RID `u16 +0x1C`, Active-Test key `+0x1E`, routine-command variable `+0x28`, routine-stop variable `+0x2A`, output-value mask `+0x2C`, output-button mask `+0x2E`; the one-shot status consumer pins `+0x30` as the type72 routine-status key, and `SortInOrder` uses `+0x40`. The older V18 layout requires separate offsets.
 
-`DataMonitorPhase5_DT.dll` `CDataMonitorThreadBase::virtual_108 @ 0x1000E710` is the current routine materializer. Selector `0xD5` is **`31 01 FF FF`** / mask `FF FF` / check `71 01`; selector `0xD6` is **`31 02 FF FF`** / check `71 02`; selector `0xD7` is **`31 03 FF FF`** / check `71 03`. The builder replaces bytes 2/3 with the selected type71 RID. Start first copies `GetRoutineCommand` bytes directly at offset4: these bytes are **static request material**, not runtime parameterization. Runtime data exists only when `GetOutputMaskValue` or `GetOutputMaskButtonData` returns a nonempty mask; value/button bytes are OR-merged into the static command buffer only at mask-authorized positions. The final option-record width is the routine-command length when nonzero, otherwise the value-mask length, otherwise the button-mask length. For the current ordinary-P5 type71 corpus, every routine-stop variable is zero; the non-`0x60` branch emits the base D6 stop with RID only. This distinction corrects the earlier conservative grade that treated any command-variable reference as parameterized: **309 current type71 rows have nonzero static command bytes but no runtime masks and are therefore fixed requests**. `CDataMonitorThreadP5::virtual_28` calls that builder through vtable `+0x6C`, then uses the same phase5 interface `+0x2C` as direct tests with `ActiveTestType=1`. `DataListIF::CCommEventPhase5AT::ActiveTestStart` therefore re-prepends **`0x31`**, de-duplicates/replaces routine queue entries by RID, and `CheckRcvFrame` requires **`0x71`**. The queued bytes reach the same P5 J2534 `SendIntExt` sink as the direct executor. Independent role `0xD4` `SingleRoutineActTstP5_DT.dll` corroborates the sequence as D5 start -> 200 ms -> D7 result request -> 5000 ms on success -> D6 stop.
+`DataMonitorPhase5_DT.dll` `CDataMonitorThreadBase::virtual_108 @ 0x1000E710` is the current routine materializer. Selector `0xD5` is **`31 01 FF FF`** / mask `FF FF` / check `71 01`; selector `0xD6` is **`31 02 FF FF`** / check `71 02`; selector `0xD7` is **`31 03 FF FF`** / check `71 03`. The builder replaces bytes 2/3 with the selected type71 RID. Start first copies `GetRoutineCommand` bytes directly at offset4 as **static request material**. Runtime data exists only when `GetOutputMaskValue` or `GetOutputMaskButtonData` returns a nonempty mask; value/button bytes are OR-merged into the static command buffer only at mask-authorized positions. The final option-record width is the routine-command length when nonzero, otherwise the value-mask length, otherwise the button-mask length. For the current ordinary-P5 type71 corpus, every routine-stop variable is zero; the non-`0x60` branch emits the base D6 stop with RID only. This distinction corrects the earlier conservative grade that treated any command-variable reference as parameterized: **309 current type71 rows have nonzero static command bytes but no runtime masks and are therefore fixed requests**. `CDataMonitorThreadP5::virtual_28` calls that builder through vtable `+0x6C`, then uses the same phase5 interface `+0x2C` as direct tests with `ActiveTestType=1`. `DataListIF::CCommEventPhase5AT::ActiveTestStart` therefore re-prepends **`0x31`**, de-duplicates/replaces routine queue entries by RID, and `CheckRcvFrame` requires **`0x71`**. The queued bytes reach the same P5 J2534 `SendIntExt` sink as the direct executor. Independent role `0xD4` `SingleRoutineActTstP5_DT.dll` corroborates the sequence as D5 start -> 200 ms -> D7 result request -> 5000 ms on success -> D6 stop.
 
 The steering-relevant current witness stays deliberately narrow and strong. `FRC_P5` Active-Test key `0xA429` is **LTA Steering Vibration**, RID `0x1588`; its routine-command, stop-command, value-mask, and button-mask variable refs are all zero, while status key `+0x30` is `2`. There is therefore no hidden type71 parameter/setpoint source in the recovered current executor. Its exact current requests are **`31 01 15 88`** (start), **`31 02 15 88`** (stop), and **`31 03 15 88`** (request results). This does not mean the downstream FRC->vehicle-network effect is known. The shared current-P5 session/keepalive wrapper is closed above; live ECU state and operation success remain separate from the fixed routine payload. It also does not overwrite TMS-041: the pinned V18 `SingleRoutineActTstP5_DT.dll` family used proprietary `21 E2` / `61 E2` framing, so the two observations are retained as a versioned transport change. `tools/gts active-test FRC_P5 0xA429` exposes the current fixed request plan, and `tools/gts active-test HV_P5 0x1` provides the analogous direct-test plan; both commands are offline/read-only and send nothing to a vehicle.
 
@@ -2457,7 +2455,7 @@ The **multi-control value-write path is now instruction-closed** as well. `DataM
 
 In the current generic P5 corpus, only category372 `Engine_P5` among the generic bindings contains type33 rows: 10 memberships forming five two-member groups. Four groups satisfy the runtime composer: `0x004C` (`0x004D/0x004E`, DID `0x284A`), `0x004F` (`0x0050/0x0051`, DID `0x284C`), `0x005D` (`0x005E/0x005F`, DID `0x2856`), and `0x0060` (`0x0061/0x0062`, DID `0x2857`). Group `0x0066` is an important negative: member `0x0067` uses DID `0x2838` while `0x0068` uses `0x2859`, so the current composer rejects it at its DID-equality check. Hybrid category397 binds role `0x63` but has no type33 table. The generated registry exports four `materializable` groups and one blocked mixed-DID group rather than manufacturing a wire path.
 
-Current role `0xAD` closes the Data Monitor list used by the Active Test UI as a **category-wide membership filter**, not a selected-test mapping. Hybrid category397 binds `GetDatMonListP5ForActTest_DT.dll` (39,440 B; SHA-256 `a9f96403…3abff`). Its current body preserves role `0x05`'s category-generation selection (type157 only for mode `0x60`, otherwise type62), Subaru/normal enable-list builders, candidate key u16 `+0x34`, `CheckSupportPid`, MultiPID handling, and final physical/unit `ChangeSignalLSB` conversion. The semantic difference is monitor flag bit `0x40`: when flag bit4 is set, `0x40` directly determines include/exclude; when bit4 is clear, the plugin probes PID support first and then re-tests `0x40` before final emission. Current Hybrid generation20 uses type62 and normal `CreateEnableDataIdList`; among 1,464 monitor rows, **1,411 carry Active-Test membership bit `0x40` and 53 do not**. None set bit4, so all 1,411 members require `CheckSupportPid`, and the 53 nonmembers are also runtime-probed before the final `0x40` filter removes them. `tools/gts command HV_P5 0xAD` exposes these exact counts. Boundary: membership is offline-deterministic; final support remains cache/live-ECU dependent, and role `0xAD` does not identify which one selected Active Test caused a monitor to be displayed because the plugin accepts no selected-test ID.
+Current role `0xAD` supplies the Active Test UI's Data Monitor list through a **category-wide membership filter**. Hybrid category397 binds `GetDatMonListP5ForActTest_DT.dll` (39,440 B; SHA-256 `a9f96403…3abff`). Its current body preserves role `0x05`'s category-generation selection (type157 only for mode `0x60`, otherwise type62), Subaru/normal enable-list builders, candidate key u16 `+0x34`, `CheckSupportPid`, MultiPID handling, and final physical/unit `ChangeSignalLSB` conversion. The semantic difference is monitor flag bit `0x40`: when flag bit4 is set, `0x40` directly determines include/exclude; when bit4 is clear, the plugin probes PID support first and then re-tests `0x40` before final emission. Current Hybrid generation20 uses type62 and normal `CreateEnableDataIdList`; among 1,464 monitor rows, **1,411 carry Active-Test membership bit `0x40` and 53 do not**. None set bit4, so all 1,411 members require `CheckSupportPid`, and the 53 nonmembers are also runtime-probed before the final `0x40` filter removes them. `tools/gts command HV_P5 0xAD` exposes these exact counts. Boundary: membership is offline-deterministic; final support remains cache/live-ECU dependent, and role `0xAD` does not identify which one selected Active Test caused a monitor to be displayed because the plugin accepts no selected-test ID.
 
 Current role `0x70` closes the selected direct Active Test's **signal/presentation metadata** without adding another transport edge. Hybrid category397 binds `GetATSignalInfoP5_DT.dll` (27,664 B; SHA-256 `0544b446…41b7b`). The current body iterates requested `CCmdWordId` values, looks each up as type68 u16 `+0x20`, then maps type68 pattern key `+0x26` through type12 `CDbActTestPatternTable` and physical key `+0x24` through type13 `CDbPhyDataTable`. Current consumers pin type12 `+0x15` button size, `+0x13` key-operation pattern, `+0x12` key-invalid flag, `+0x04/+0x06/+0x0C` maintenance/auto-continue/lock values, and `+0x0A` as the type14 pattern-display key. Type13 `+0/+4/+8` become Mul/Div/Offset, `+0x14/+0x15` signedness/decimal count, and `+0x0E` selects type15 unit/default text; matching type14 rows contribute value/string display entries. The plugin imports no `CommandCommon` send/support primitive and emits one `CCmdActTstSignalInfoItem` per selected ID. Exact witness `HV_P5` test `0x0001` **Activate the Inverter Water Pump** resolves pattern key10, physical key6, `Mul=1, Div=1, Offset=0`, unsigned/0 decimals, and type14 display `1 -> ON`. `tools/gts command HV_P5 0x70 --item 0x1` reproduces that metadata. Boundary: this does not prove role `0x06` live availability or execute an Active Test.
 
@@ -2710,8 +2708,8 @@ The same exact H join closes protected `0x0D7` at field level. Its regenerated
 PDU40 unpacker reads only signal 240 (1 bit), signal 243 (16 bits), and signal
 246 (4 bits). Signal 243 is stored at `FEBE7D82`; DID `0x1185` reads that cell
 and `EMPS_P5` names it **`CAN Vehicle Speed (SP1)`**. D7's nonscalar configured
-rows have no recovered group/full-PDU consumer. Its only command-sized scalar is
-therefore OEM-identified vehicle speed, not a hidden steering magnitude.
+rows have no recovered group/full-PDU consumer. Its only command-sized scalar
+is OEM-identified vehicle speed. A hidden steering magnitude remains unsupported.
 
 The P5 DTC path supplies an OEM **immediate sender relationship** for B6. H's
 six-row communication-monitor scheduler maps receive-status slot `0x18` to the
@@ -2743,9 +2741,9 @@ implemented by H RDBI. Category-405 `EMPS_P5` is also observation-oriented rathe
 than an obvious command surface: its parsed section set is exactly
 `61/62/63/80/87/88/90/91`, with no classic type-11/type-12 Active Test table, and
 its eight master-routed DLLs contain no Active-Test- or Routine-named role. The
-nominal `Cooperation Control State` DID `0x106A` is a success stub in H. These are
-bounded negatives for this Techstream package/calibration, not proof that Toyota
-has no separate utility or server-mediated procedure.
+nominal `Cooperation Control State` DID `0x106A` is a success stub in H.
+These negatives apply only to this Techstream package/calibration.
+Separate Toyota utilities or server-mediated procedures remain possible.
 
 Machine-readable ownership is
 `data/generated/corolla_8965H1202000_techstream_correlations.json` with compact
@@ -2756,16 +2754,16 @@ The state-monitor candidates do not meet that bar. Key 60's binary cooperation
 encoding is real in the DDB and the same key/name also occurs once in P5
 behavior-data section 88, but exact H DID `106A` returns success without writing
 its declared byte. Key 403 is a generic 16-bit state word with no recovered route
-to a specific external steering aggregate. Those names therefore remain
-diagnostic vocabulary, not proof of a live autonomous-control interface.
+to a specific external steering aggregate. Those names supply only diagnostic
+vocabulary. A live autonomous-control interface remains unproved.
 Consumer-proven P5 tables 61/63/80/88/90/91 contain no key-402 or key-403 join.
-This is a bounded search, not a whole-diagnostic-system absence claim.
+The search is bounded to these surfaces.
 
 The repository parser now decodes section directories, DTC records,
 factory-identified supported-PID/PID/DID table classes, freeze-data monitor
-vocabulary, and all three OEM string databases. Section 3 is
-`CDbSupPidTable`, not a DID table; the two selected P4 EPS databases therefore
-provide no direct database-DID correlation. Run
+vocabulary, and all three OEM string databases. Section 3 is `CDbSupPidTable`.
+The two selected P4 EPS databases therefore provide no direct database-DID
+correlation. Run
 `make generate-diagnostic-vocabulary` to rebuild the calibration-focused
 annotations plus the complete regional steering corpus.
 
@@ -2791,7 +2789,7 @@ record contains two 40-wchar resource keys at `+0x00`/`+0x50` and an explicit
 (`10009D14`/`10009D84`) and passes it to `CDbStringTable::GetString @ 10005480`.
 `GetUtilityString_DT.dll` uses this table via class `0x601` for both resource-key
 lookup exports. The decoder preserves record order but `get_metadata(text_index)`
-now follows that explicit index, not a zipped/ordinal association.
+now follows the explicit index, correcting the earlier zipped/ordinal association.
 
 This corrects real misattributions: V18 text 6585, **Torque Sensor Writing**,
 belongs to `IDS_D_EPS_01_007_TITLE`, not the unrelated diesel-EFI resource at raw
@@ -2832,12 +2830,12 @@ are pinned per region (NA 49,806 bytes / SHA-256 `63307a9b…46fe42`, EU and JP
 `GetTSS3ImageFFDP5_DT.dll` and role 234 `GetTSS3OperationFFDP5_DT.dll`
 both to category 498; roles 224/225 (`GetADSOperationFFDP5_DT.dll` /
 `GetADSImageFFDP5_DT.dll`) are bound to `ADS_Eth_P5` category 476, and role
-229 (`GetADSDDRInfoP5_DT.dll`) is a **category-0/global** entry, not an
-ADS-category binding. This is the strongest role-association signal for the
-diagnostic domain: the true-TSS3 lateral-control diagnostic domain has its
+229 (`GetADSDDRInfoP5_DT.dll`) is a **category-0/global** entry.
+This role association distinguishes the diagnostic domains:
+the true-TSS3 lateral-control diagnostic domain has its
 own capture-plugin roles bound to category 498, separate from the Advanced
-Drive Ethernet stack's category-476 roles. It is a diagnostic-domain/role
-association, not a claim of physical or control-path ownership.
+Drive Ethernet stack's category-476 roles. Physical or control-path ownership
+requires evidence beyond this diagnostic-domain/role association.
 
 **Installation join (model-resolved, region-local).** The master type-44 table
 is `CDbInstallingEcuListTable` (format-1 factory `0x1001C9D0`); records are 24
@@ -2886,8 +2884,7 @@ Steering Angle Malfunction` (X2082), and `Communication Error by ECU Security
 Key Not Registered (Power Steering Control Module "A")` (X2166). A verified
 negative: `FRC_P5` has **no** named `Target Steering Angle` monitor in the
 type-62 `CDbDatamonitorP5Table` or the type-88 `CDbBehaviorDataRecordP5Table`
-in any region — the target-angle observer text lives on the steering side, not
-the camera side.
+in any region. The target-angle observer text appears only on the steering side.
 
 **Read-only proprietary Operation FFD protocol** (`GetTSS3OperationFFDP5_DT.dll`,
 SHA-256 `8d8461cf…38f86`, all claims anchored to exact machine-code bytes
@@ -2903,18 +2900,18 @@ count when nonzero and deduplicating by DID; `0x10001F90` special-cases DID
 `0x66` and runs through `CCommCachePlus::CommFrameSendReceiveExt`. A fixed
 special/excluded ID table at VA `0x100091D4` holds 15 LE u16s (`0x2270`,
 `0x2271`, `0x2272`, `0x2273`, `0x2274`, `0x2296`, `0x2297`, `0x2298`, `0x2299`,
-`0x227C`, `0x227D`, `0x229A`, `0x22B0`, `0x22B1`, `0x22B2`) — these are
-proprietary operation/behavior IDs, **not** UDS DIDs, unless independently
-resolved. This is observation/capture infrastructure only; the repository
-deliberately builds no live writer against it.
+`0x227C`, `0x227D`, `0x229A`, `0x22B0`, `0x22B1`, `0x22B2`).
+These identify proprietary operations/behaviors. Any UDS DID interpretation requires
+independent resolution. This is observation/capture infrastructure only;
+the repository deliberately builds no live writer against it.
 
 **Image FFD plugin** (`GetTSS3ImageFFDP5_DT.dll`, SHA-256 `787f88b5…63e4`):
 the support probe at `0x10004420` issues `GetDataNoEnableList` for DID `0x1402`
 selector 1 then selector 2, and DID `0x1401` selector 2 — both DIDs exist in
 `FRC_P5` as `AHB Control ON Information` and `AHB/AHS Information`. The main
 capture path is `CCmdImgOpeDdr::GetTSS3ImageFFDInfo`. The immediate `0x1CE4`
-seen elsewhere in this DLL is an allocation size passed to the `0x1000C62E`
-allocator, **not** a DID.
+seen elsewhere in this DLL specifies an allocation size for the `0x1000C62E`
+allocator.
 
 **ADS remains useful but secondary.** `ADS_Eth_P5` type-134 rows 406/407 name
 `Advanced Drive Control Target Steering Angle Speed Order Value` and
@@ -2923,10 +2920,10 @@ Status`). `GetADSDDRInfoP5_DT.dll` (SHA-256 `28a4474c…46df`) reads the row
 fields `+0x28` (PhysicalData key), `+0x2A`/`+0x2C` (bit start/end), and `+0x30`
 (PatternDisplay key); the unit chain row `+0x28` → CDbPhyData key `+0x0C` →
 PhyData `+0x0E` unit key → CDbUnit key `+0x04` → `GetDefaultUnitStr` resolves
-row 406 to bits 0–31 **rad/s** and row 407 to bits 0–31 **rad**. These are
-Operation-FFD/DDR recorded snapshot fields, **not** proven live wire command
-fields. The ADS Operation plugin probes its own plugin-specific DID `0x1C08`
-with selectors 1 and 6; that probe is not joined to rows 406/407 without
+row 406 to bits 0–31 **rad/s** and row 407 to bits 0–31 **rad**.
+These Operation-FFD/DDR snapshot fields have no proved live wire-command join.
+The ADS Operation plugin probes its own plugin-specific DID `0x1C08`
+with selectors 1 and 6. Joining that probe to rows 406/407 requires
 further proof.
 
 **Steering-side observer domain.** Both `EMPS_P5` and `EMPS2_P5` carry the
@@ -3004,9 +3001,9 @@ monitor key 314 / DID **`0x107E ADS Control EPS Pinion Angle2`**, bits 0..23. Th
 decimal places, unit `rad`: **0.00025 rad/count** over raw
 `-131072..131071`. `Brk_Bst_P5` (466) and `EPB_P5` (485) use database-local
 PhyData keys but independently resolve the same name, geometry, range, and
-engineering conversion. This is shared brake-family diagnostic vocabulary, not
-proof that category 435 computes the value or that `0x107E` is the B6 wire
-scalar.
+engineering conversion. This establishes shared brake-family diagnostic vocabulary.
+Category-435 computation and a B6 wire-scalar join for `0x107E`
+remain unproved.
 
 Joined to exact Corolla-H evidence—protected B6/PDU42 loss maps to U012987 `Lost
 Communication with Brake System Control Module / Missing Message`—these records
@@ -3023,10 +3020,10 @@ brake actuators: Motor/Solenoid/Stop-Lamp/ECB relays, EXO, Brake Booster Motor,
 linear solenoids, and ABS/VSC/ECB solenoids. The four routines are `EBS Relay`,
 `ABS Solenoid`, `VSC Solenoid`, and `ECB Solenoid`; all have zero routine-command,
 output-mask, and button-data variables. No category-435 Active-Test catalog row
-is named for steering, EPS, ADS, lateral control, or pinion angle. This is a
-catalog/host-schema negative, not proof that brake actuator tests have no indirect
-network effects, but it rules out a named Techstream Brake/EPB steering-setpoint
-writer in the pinned corpus.
+is named for steering, EPS, ADS, lateral control, or pinion angle.
+This catalog/host-schema negative rules out a named Techstream Brake/EPB
+steering-setpoint writer in the pinned corpus. Indirect network effects
+from brake actuator tests remain possible.
 
 The acquisition discriminator for that brake-side firmware is now exact enough
 to stop searching by vague ECU name. Raw `ECU_Setting_Table` rows in all three
@@ -3087,13 +3084,13 @@ and groups the copied bytes into fixed **16-byte** entries emitted as `CID1`,
 **not** use that byte to determine how many records to emit, instead terminating
 from response length. A separate non-SAS helper contains selectors `0xAC/0xAD`,
 but category 435 has no corresponding FuncCommFrame rows and `Execute` explicitly
-clears a nonzero result from that helper. It is supplemental, not the Brake CID
-transaction. This closes the live read protocol; the **actual CID value** still
+clears a nonzero result from that supplemental helper. The Brake CID transaction
+is separate. This closes the live read protocol; the **actual CID value** still
 requires a live target or a retained diagnostic capture.
 
-TMS-048 closes the apparent offline resolver lead: V18 `SearchCal.dll` is a
-**local CUW search/selection UI**, not a Toyota/TIS package catalog client. The
-pinned 49,152-byte PE (`a47d859f…1f72b`) exports only
+TMS-048 closes the apparent offline resolver lead: V18 `SearchCal.dll` provides
+only a **local CUW search/selection UI**. Its implementation supplies no Toyota/TIS catalog client.
+The pinned 49,152-byte PE (`a47d859f…1f72b`) exports only
 `ShowSearchCalDialog @ 0x100014F0`. Its import DLL set is exactly MFC42, MSVCRT,
 KERNEL32, USER32, and SHELL32; it imports `GetPrivateProfileStringA`,
 `GetPrivateProfileIntA`, string/memory helpers, UI calls, and `ShellExecuteA`, but
@@ -3160,8 +3157,8 @@ the **last entry in the leading contiguous `canWired == "1"` prefix** (with the
 single-entry case selecting that first record). A later, independent eligibility
 pass checks whether an improvement record has `updateFlg == "1"`. `canOTA` is
 parsed, but no direct `canOTA` test occurs in the two byte-pinned wired/update
-policy blocks; this is a bounded negative, not a claim that the field is unused
-everywhere in Techstream.
+policy blocks. This negative applies only to those blocks.
+Other Techstream uses of the field remain unexamined.
 
 Per-ECU `supplyInfo/selectSwInfo` candidates independently parse `swId`, `comment`,
 `fileName`, and `downloadFlg`. The selection page carries the software identity,
@@ -3252,8 +3249,8 @@ point count 3, giving unity displayed-unit conversion. Brake-family DID `0x107E
 ADS Control EPS Pinion Angle2` remains a separate signed-24 observer at
 `0.00025 rad/count`; H's B6 controller-equivalent target scale is
 `~0.001000121519 rad/count` (ratio `~4.000486075`). No producer dataflow joins
-those domains, so the near-four ratio is a correlation lead, **not** evidence of
-B6 packing. Likewise the seven-foreground-tick B6 loss cutoff is receiver policy;
+those domains, so the near-four ratio supplies only a correlation lead.
+B6 packing remains unproved. Likewise the seven-foreground-tick B6 loss cutoff is receiver policy;
 TAUJ0-CH3's wall-clock period remains unresolved, so no sender cadence is inferred
 from it or from unrelated CUW flashing timers.
 
@@ -3264,8 +3261,8 @@ Machine-readable sender-attribution evidence is
 boundary: the 23TC01 `8646F1204500` 2023-Corolla `0792` family is already local,
 but encoded and not exact-specimen-joined. The next code-level target is therefore
 the decoded category-435 `07B0` Brake application plus either a decoder/exact
-identity join for the already-owned FRC family or synchronized stock-LTA traffic,
-not another scan for an unspecified 2023 Corolla FRC CUW.
+identity join for the already-owned FRC family or synchronized stock-LTA traffic.
+An unspecified 2023 Corolla FRC CUW search would repeat completed acquisition work.
 
 The same P5 signal-info path also closes the **Target Lateral ID** value
 dictionary. `GetDatMonSignalInfoP5_DT.dll` consumes the type-62 monitor record's
@@ -3289,9 +3286,8 @@ independently checked by `tests/techstream/verify_techstream_p5_lateral_control.
 
 #### 6.2.3 Current GTS+ CAN Bus Check topology tables
 
-Current GTS+ carries Toyota's CAN Bus Check network model in the master `Toyota.ddb`,
-not in the per-ECU Data List tables. The current class-backed surface used by the Camry
-analysis is:
+Current GTS+ carries Toyota's CAN Bus Check network model in the master
+`Toyota.ddb`. The current class-backed surface used by the Camry analysis is:
 
 - type 55 `CDbCanBusListTable` — gateway/bus ownership metadata;
 - type 75 `CDbCanBusCarIdTable` — vehicle type -> CAN-topology key;
@@ -3383,14 +3379,14 @@ surface:
 - `0x5631`: LTA Lateral ID + LTA Control Request Pinion Angle;
 - `0x57DB/0x57DE`: arbitration-result acceleration / pinion angle.
 
-The longitudinal ID vocabulary is **sparse, not absent**, but request-side and
-result-side labels must not be conflated. A September-16 ID sweep across current GTS+
-and Techstream V18 NA/EU/JP (3,207 DDBs)
+The longitudinal ID vocabulary contains sparse labels. Request-side and
+result-side labels require separate interpretation. A September-16 ID sweep across
+current GTS+ and Techstream V18 NA/EU/JP (3,207 DDBs)
 finds no complete longitudinal 0..63 pattern table on `5280/5281/5284`, FRC
 `0x1284`, Brake `0x10A3/0x10A4`, or the successor longitudinal arbitration IDs.
 The available OEM labels are distributed across feature-specific requester fields:
 
-- P5 FRC `0x1B03` ISA Requesting Vertical ID diagnostic display: `0=No Request`, **`63=Driver Operation`**. This pattern table is a diagnostic vocabulary source, not proof that the FRC originates 63; Camry wire evidence places longitudinal 63 only on the downstream Brake/VMC `0x081` result side;
+- P5 FRC `0x1B03` ISA Requesting Vertical ID diagnostic display: `0=No Request`, **`63=Driver Operation`**. This pattern table supplies diagnostic vocabulary. FRC origination of 63 remains unproved; Camry wire evidence places longitudinal 63 only on the downstream Brake/VMC `0x081` result side;
 - P6 ADCU `0x1982` Speed Limiter Requesting Vertical ID: `0=No Request`, **`9=ISA`**;
 - P6 ADCU MaaS lower-limit longitudinal requester: `0=No Request`, **`41=Request 1`**,
   **`45=Request 2`** of MaaS Autonomous Driving System;
@@ -3409,8 +3405,8 @@ provides a counterexample: longitudinal request ID25 is exercised by delayed ACC
 whereas lateral ID25 is `AP`. P6 supplies another axis-specific example: longitudinal
 MaaS 41/45 are Request1/Request2, while the generation-20 lateral table uses 41/45 for
 AD(Lv.4)/DES(Lv.4). Numeric coincidences such as longitudinal DRCC ID11 versus lateral
-`11=LTA/LCA` are therefore useful **shared-application-ID hypotheses**, not automatic
-enum transfers. The tracked Camry request-plane artifact owns the current working table.
+`11=LTA/LCA` support **shared-application-ID hypotheses** that require independent
+enum validation. The tracked Camry request-plane artifact owns the current working table.
 
 The shipped PCS executable still has protector-zeroed managed bodies, but the generic
 CP decoder now recovers a clean analysis PE with **22,447/22,447 executable `MethodDef`
@@ -3463,8 +3459,8 @@ now directly current-body proven as selector `0x66` plus `AB11/EB11`,
 parsing starts at offset 6 and consumes `data_id_be16 + length_u8 + data`. Image FFD now
 has a current-body end-to-end setup chain: `22 11 03` spec -> `22 11 01` availability ->
 **`27 03` six-byte seed / `27 04` six-byte level-49 key** -> `22 20 81` encryption method.
-`GetTSS3ImageFFDInfo` directly calls the six-byte `SecurityUnlock` path, not the separate
-16-byte/level-2 implementation. Accepted image specs are 5 and 7; availability value 2
+`GetTSS3ImageFFDInfo` directly calls the six-byte `SecurityUnlock` path.
+The 16-byte/level-2 implementation is separate. Accepted image specs are 5 and 7; availability value 2
 marks slots 1..10 and 1..11 respectively. The same current Image plugin now closes the
 record transport too: `AB31 -> EB31` enumerates BE16 RoB codes;
 `AB33 || rob_code_be16 || frame_number_be32 -> EB33` fetches a record; EB33 is
@@ -3484,10 +3480,10 @@ category-498 fleet census. Current NA/EU/JP `CDbDllTable` records bind exactly t
 TSS3-named recorder plugins, and both bind **only category 498 `FRC_P5 = Front
 Recognition Camera 2`**: role `0xE9` `GetTSS3ImageFFDP5_DT.dll` and role `0xEA`
 `GetTSS3OperationFFDP5_DT.dll`. The category-498 diagnostic request address is `0x792`
-in every pinned region. Therefore the current TSS3 Operation/Image recorder is hosted
-and served by the FRC diagnostic endpoint. This is recorder-host evidence, not proof
-that the FRC executes the final arbitration or physically transmits every recorded
-request/result on the vehicle network.
+in every pinned region. Therefore the FRC diagnostic endpoint hosts and serves
+the current TSS3 Operation/Image recorder. Final arbitration execution and
+physical transmission of each recorded request/result on the vehicle network
+require independent evidence.
 
 Joined to the already-pinned exact-H B6 sender-attribution artifact, this also closes the
 **lateral static ownership boundary**. The EPS receives protected `0x0B6` and maps its
@@ -3530,10 +3526,10 @@ the recorder and brake receive surface.
 This brake observation sink is effectively fleet-wide for category-498 architectures.
 Among the same **256/460/213** NA/EU/JP FRC_P5 install rows from TMS-079, a DDB that
 exposes `0x10A1..0x10A4` is present in **255/256 NA, 460/460 EU, and 213/213 JP**
-rows; the sole NA exception is the explicit model-name `TEST` placeholder. This is an
-install/DDB observation-surface result, not a claim that every PID is runtime-supported
-on every vehicle; normal P5 PID support remains runtime-probed. The request DIDs are also
-not intrinsically TSS3-only because Toyota reuses the brake DDB family in older
+rows; the sole NA exception is the explicit model-name `TEST` placeholder.
+This establishes an install/DDB observation surface. Normal P5 PID support
+still requires runtime probes on each vehicle. The request DIDs also occur
+outside TSS3 because Toyota reuses the brake DDB family in older
 architectures.
 
 The remaining ordinary P5 **Record-on-Behavior** lead is negative as well. A direct
@@ -3642,11 +3638,11 @@ Techstream 11.30.137 files. Current `TSEConverter` also proves the version bound
 calling `GFCConvertOldTSEToLatestTSE` before feeding `_NEW.TSE` to `BinaryRead` with the
 configured template. What remains open at this host layer is primarily recorder-ID ->
 vehicle-network producer/frame correlation and exercising the latest layout against a
-**true-TSS3** Toyota TSE containing PCS Operation/Image FFD, not generic real-TSE framing or
-the existence/purpose/executable semantics of the three host layers.
+**true-TSS3** Toyota TSE containing PCS Operation/Image FFD.
+Generic real-TSE framing and the three host layers' executable semantics are closed.
 
-**P6 is a successor oracle, not TSS3 evidence, and its migration boundary is now
-explicit.** A dedicated cross-generation artifact joins `DSSystem_P5`, `Fr_RadSen_P5`,
+**P6 supplies successor semantics. TSS3 attribution requires independent evidence.**
+A dedicated cross-generation artifact joins `DSSystem_P5`, `Fr_RadSen_P5`,
 `LDA_P5`, `PCS1_P5`, `PCS2_P5`, and `RoadSign_P5` into generation-22
 `ADCU_P6 = ADAS Domain Controller`. The older P5 compute family is genuinely distributed:
 for example, the LS500/LS500h/MIRAI install architecture is exactly
@@ -3669,7 +3665,7 @@ migration oracle without making it evidence about category-498 TSS3 ownership. S
 
 Current GTS+ contains a first-class Toyota resolver above individual diagnostic commands. The clean runtime model must therefore keep **vehicle resolution, expected installation, transport routing, mounted connectivity, diagnostic support-family dispatch, live capability discovery, catalog decoding, and session execution as separate layers**. Treating failure to decode one layer as permission to reject the others is not Toyota behavior.
 
-`CDAExecSelectVehicle` / the VIN10 selector family dispatches by the category generation low five bits. The constructor jump table is exact: `3 -> CGetCarInfoPhase3`, `4 -> CGetCarInfoPhase4`, `20/21 -> Phase5`, and `22 -> Phase6`; values `5..19` return Toyota error `0xA0040403` from this **VIN10 command only**. The master DLL table separately binds role `0x45` to `SelectCarType.dll`, role `0x4A` to `SelectCarTypeVin.dll`, and role `0x7D` to the regional VIN10 selector. The two legacy-selector binaries are referenced by the current master but are absent from the current GTS+ and extracted V18 payloads, so generations routed through them are an **unrecovered resolver implementation**, not unsupported Toyota vehicles.
+`CDAExecSelectVehicle` / the VIN10 selector family dispatches by the category generation low five bits. The constructor jump table is exact: `3 -> CGetCarInfoPhase3`, `4 -> CGetCarInfoPhase4`, `20/21 -> Phase5`, and `22 -> Phase6`; values `5..19` return Toyota error `0xA0040403` from this **VIN10 command only**. The master DLL table separately binds role `0x45` to `SelectCarType.dll`, role `0x4A` to `SelectCarTypeVin.dll`, and role `0x7D` to the regional VIN10 selector. The two legacy-selector binaries are referenced by the current master but are absent from the current GTS+ and extracted V18 payloads. Their resolver implementations remain **unrecovered**. Vehicle support for those generations requires independent evidence.
 
 Phase3/Phase4 are not a VIN-table-only path. Their decision program is stored in `DB/Spe/Toyota.ddb` and cross-joins the ordinary `DB/Gen/Toyota.ddb`: Spe supplies variables, CommFrames, and FuncCommFrames while the corresponding CommSet IDs resolve in Gen. Shared-data slot 14 supplies K1. Phase4 selectors `0x28..0x39` resolve to an 18-step program; all current P4 K1 variants carry the same program. The program issues `21 C1`, uses each DB receive mask to select response bytes, and `CGetCarInfoPhase4` assembles those results into the key consumed by class `0x129` `CDbVehicleDecisionTable`. P3 uses the analogous `0x1B..0x27` program and retains a genuine alternate K1 variant. The type-41 matcher itself uses category/phase plus two text and eight scalar criteria, with record flag bits 0..9 bypassing criteria and scalar operator codes `1=equal`, `2=not equal`, `3=record<=key`, `4=record>=key`; EU variants additionally return specificity and Toyota retains highest-score matches. The runtime bundle exports the semantic criteria and the full Spe probe programs rather than opaque DDB records.
 
@@ -3681,9 +3677,9 @@ Diagnostic support is a separate Toyota plugin dispatch. `CDbDllTable::GetQuery`
 
 For P5, `GetSupportP5_DT.dll` exposes `(ecuId, optionId, id) -> support`: option 1/2/3 dispatches PID/DID/RID checks, but the shared plugin is **not one universal algorithm**. Current `CommandCommon.dll` first selects family-local behavior: ordinary Toyota P5, Subaru/FHI (`generation & 0xE0 == 0x20`), Suzuki (`0x60`), generation-21 Mazda/MMC-style handling, and Hino exceptions for categories 5033/5049/5050. The universal resolver therefore exports `support_mode` separately from `support_family`. Ordinary Toyota P5 DID support is exact and live: selector `0xC8` sends `22 01 01`; `AnalyzeFrameData` decodes the `62 01 01` payload MSB-first and **retains advertised `xx00` root IDs in the enabled-ID list**, then `CreateEnableDataIdList` queries ordinary advertised groups and expands their member bitmaps. It deliberately does not issue group queries for `0xF300` or `0xFD00`; those advertised roots remain supported IDs. Routine support remains rooted at selector `0xCC`, `31 01 10 01 -> 71...` for the ordinary P5 path.
 
-P6 is independently selected by `GetSupportMultiP6_DT.dll`, and its complete current support hierarchy is now byte-closed. DID enumeration starts with `22 A1 00`; the root MSB-first bitmap advertises selector IDs `A1nn`, which themselves remain supported. Ordinary selectors are queried as `22 A1 nn`, and the returned bitmap expands to `nn00..nnFF`. `A1FD` and `A1FE` remain advertised selector IDs but Toyota deliberately does not query/expand them. Routine enumeration is parallel: `31 01 D1 00` advertises `D1nn`, ordinary selectors are queried as `31 01 D1 nn`, and the returned bitmap expands to `nn00..nnFF`; `D1F0` and `D1FE` remain advertised but unexpanded. These are independent Toyota support executors, not generation/category permission gates.
+P6 is independently selected by `GetSupportMultiP6_DT.dll`, and its complete current support hierarchy is now byte-closed. DID enumeration starts with `22 A1 00`; the root MSB-first bitmap advertises selector IDs `A1nn`, which themselves remain supported. Ordinary selectors are queried as `22 A1 nn`, and the returned bitmap expands to `nn00..nnFF`. `A1FD` and `A1FE` remain advertised selector IDs but Toyota deliberately does not query/expand them. Routine enumeration is parallel: `31 01 D1 00` advertises `D1nn`, ordinary selectors are queried as `31 01 D1 nn`, and the returned bitmap expands to `nn00..nnFF`; `D1F0` and `D1FE` remain advertised but unexpanded. These Toyota support executors operate independently of generation/category permissions.
 
-Transport selection is likewise separate from support family. `CCommFrameCtrl::ChangeCommIF` selects `CCommCtrlISO15765_Phase5` for phase `0x12`, `CCommCtrlISO15765_29BitCan` for phase `0x18`/`0x38`, `CCommCtrl_FD_ISO15765_PS` for `0x78`/`0x88`, and ISO13400/NDIS on its own switch case. For the P6 29-bit normal-fixed path, class-`0x10D +0x08` is the **target-address byte**, not a literal CAN ID: Toyota materializes physical request `0x18DA<target>F1`, response `0x18DAF1<target>`, and functional request `0x18DB33F1`. Category 6000 therefore resolves raw target `0x00` to `0x18DA00F1 -> 0x18DAF100`. Comma's upstream `UdsClient` already implements this 29-bit source/target swap. The universal Toyota bundle records the Toyota transport controller/physical endpoint but intentionally carries **no Panda-bus default**; Panda logical bus selection is harness/installation state supplied by the caller, not Toyota resolver semantics.
+Transport selection is separate from support family. `CCommFrameCtrl::ChangeCommIF` selects `CCommCtrlISO15765_Phase5` for phase `0x12`, `CCommCtrlISO15765_29BitCan` for phase `0x18`/`0x38`, `CCommCtrl_FD_ISO15765_PS` for `0x78`/`0x88`, and ISO13400/NDIS on its own switch case. For the P6 29-bit normal-fixed path, class-`0x10D +0x08` supplies the **target-address byte**. Toyota materializes physical request `0x18DA<target>F1`, response `0x18DAF1<target>`, and functional request `0x18DB33F1`. Category 6000 therefore resolves raw target `0x00` to `0x18DA00F1 -> 0x18DAF100`. Comma's upstream `UdsClient` already implements this 29-bit source/target swap. The universal Toyota bundle records the Toyota transport controller/physical endpoint and carries **no Panda-bus default**. The caller supplies Panda logical-bus selection from harness/installation state.
 
 Session lifecycle is independent again. The universal bundle resolves D1/D2/DD for every Toyota category. When D1/D2 are literal two-byte `10 XX` requests, the generic runtime executes those exact bytes; it does **not** apply a supported-generation/category allowlist. DD remains category-local (`22 F1 86`, `22 D1 00`, `10 03` refresh, or another unrecovered shape). Unknown shapes mean only that the generic session executor is unavailable for that row. The historical Camry v6 JSON still contains its old `eligible_generation_low5` evidence field, but the universal runtime does not use it as a permission system.
 
@@ -3731,9 +3727,9 @@ Data ID before stripping the first three bytes. A capture script should therefor
 **stricter than GTS+** and require `62 || requested_DID_hi || requested_DID_lo`
 before decoding the payload with the DDB bit ranges.
 
-This closes the live service mapping, not the CAN-field mapping. It also does not
-prove a named outer UDS DiagnosticSessionControl or SecurityAccess prerequisite;
-the Phase-5 monitor-internal state machine is insufficient evidence to infer
+This closes the live service mapping. The CAN-field mapping remains open.
+Outer UDS DiagnosticSessionControl or SecurityAccess prerequisites remain unproved.
+The Phase-5 monitor-internal state machine is insufficient evidence to infer
 `10 01`, `10 03`, or a security level. The next vehicle capture can nevertheless
 poll these five RDBIs directly and synchronize their exact Toyota semantics with
 all-bus CAN without depending on the GTS+ GUI.
@@ -3878,8 +3874,8 @@ finds neither the Sienna bootloader SecurityAccess secret
 `f05f36b7d78c03e24ab4faef2a57d044` nor the application secret
 `893e08418c741ffa2a9c044bffa55813`.
 
-This is a representation-bounded negative, not proof of complete absence:
-there is no general constant propagation, symbolic execution, encrypted-blob
+This negative applies only to the examined representations:
+the search lacks general constant propagation, symbolic execution, encrypted-blob
 recovery, or arbitrary runtime decoding. The same artifact corrects the host
 maps above and records every hit with artifact SHA-256, file offset, RVA/VA,
 representation, direct references, containing export where recoverable, and
@@ -3892,7 +3888,7 @@ confidence.
 | Firmware finding | Techstream corroboration |
 |---|---|
 | SEC-BOOT-003: AES-128-ECB SA construction | `CSecurityAccessAES128::AES_128_ECB` implements the same cipher |
-| SEC-APP-001: Application SA level 2 with AES-128 | Shape only: `CSecurityAccessAES128` shares the AES-128 / level-03-04 / 16-byte *form*, but its key `FUKUMORIYOSIYAMA` and single-stage construction differ from the EPS two-stage + per-calibration secret (§4.0 resolves the routing: FUKU serves ADS/PCS runtime, not EPS) |
+| SEC-APP-001: Application SA level 2 with AES-128 | Shape only: `CSecurityAccessAES128` shares the AES-128 / level-03-04 / 16-byte *form*, but its key `FUKUMORIYOSIYAMA` and single-stage construction differ from the EPS two-stage + per-calibration secret (§4.0 establishes FUKU's ADS/PCS runtime role and the separate EPS route) |
 | DIAG-APP-003: Programming handoff gates | CUW prepare-write implements the same session/speed/phase sequence |
 | ARCH-007 / authenticated steering-command domain | `EMPS_P5` monitor 402 `Command Value Torque` is master-routed, 16-bit, and resolves to `Nm`; public Toyota DBC independently names CAN `0x2E4`'s signed 16-bit field `STEER_TORQUE_CMD` |
 | Bootloader diagnostic `0x7A1` / `0x777` | Gateway routing (`07E0`/`07DF` → ECU-specific physical address) |
@@ -3903,7 +3899,7 @@ confidence.
 |---|---|
 | SecOC runtime-key extraction | None — diagnostic MACKey tooling can provision secure network-key state, but it does not expose the plaintext runtime key or ordinary SecOC verify/generate traffic |
 | Motor actuation join (`0x2E4` → d/q current) | Techstream now corroborates the **steering-command domain** through monitor 402, but still provides no direct SecOC or d/q-current join |
-| Runtime RAM key-slot mirror | None — Techstream reads diagnostic values, not raw RAM |
+| Runtime RAM key-slot mirror | None — Techstream reads only diagnostic values |
 | ICU-S command 5/13 characterization | None — Techstream does not issue ICU-S commands |
 
 ### 8.3 New leads
@@ -3920,11 +3916,11 @@ confidence.
 ## 9. Limitations
 
 This analysis is static — extracted from the installer without executing
-Techstream on a vehicle or bench. The findings describe the *capability* and
-*design* of the toolchain, not observed runtime behavior. Specifically:
+Techstream on a vehicle or bench. The findings describe only the toolchain's
+*capability* and *design*. Runtime behavior remains unobserved. Specifically:
 
-- The SA key computation in `CSecurityAccessAES128` was identified by symbol
-  analysis, not by executing the cipher against a known seed/key pair.
+- Symbol analysis identified the SA key computation in `CSecurityAccessAES128`.
+  Execution against a known seed/key pair remains unperformed.
 - The `.ddb` pipeline decodes DTC, DID, and monitor records but not every
   section type. The complete steering corpus prevents source-file omission;
   unknown sections remain explicitly inventoried rather than interpreted.
@@ -3936,7 +3932,7 @@ Techstream on a vehicle or bench. The findings describe the *capability* and
 
 ### Current GTS+ Customize master catalog
 
-Current GTS+ keeps Toyota Customize metadata in the **regional master**, not in the target ECU's ordinary P5/P6 DDB. The current master factory identifies type 20 `CDbCustSignListTable`, type 21 `CDbCustItemTable`, type 22 `CDbPossibleToSetTable`, and type 34 `CDbBodyTypeRetrieveTable`. `GetCustomSupportList.dll` selects a body type through the type-34 connection-check program and then reads type-20 groups keyed by `(body_type:u8 @ +0x08, group_id:u16 @ +0x04)`. `GetCustomItemList.dll` reads type-21 by `(group_id:u16 @ +0x08, item_id:u16 @ +0x0A)` and type-22 choices by `(choice_list_key:u16 @ +0x04, value:u16 @ +0x06)`. OEM names are the first `u32` string indices in all three tables. The type-21 item target is `u16 +0x0C`; current-value/support geometry is carried in the same 52-byte row and is evaluated against that live target ECU through `CCommCurrentData`.
+Current GTS+ keeps Toyota Customize metadata in the **regional master**. The current master factory identifies type 20 `CDbCustSignListTable`, type 21 `CDbCustItemTable`, type 22 `CDbPossibleToSetTable`, and type 34 `CDbBodyTypeRetrieveTable`. `GetCustomSupportList.dll` selects a body type through the type-34 connection-check program and then reads type-20 groups keyed by `(body_type:u8 @ +0x08, group_id:u16 @ +0x04)`. `GetCustomItemList.dll` reads type-21 by `(group_id:u16 @ +0x08, item_id:u16 @ +0x0A)` and type-22 choices by `(choice_list_key:u16 @ +0x04, value:u16 @ +0x06)`. OEM names are the first `u32` string indices in all three tables. The type-21 item target is `u16 +0x0C`; current-value/support geometry is carried in the same 52-byte row and is evaluated against that live target ECU through `CCommCurrentData`.
 
 The current NA master contains 79 group rows, 3,431 item rows, 2,444 possible-value rows, and four body-type probe rows; EU has 77/3,440/2,444/4 and JP 81/3,121/2,444/10. Concrete NA witness: body-type-0 group 1 is **Wireless Door Lock**; item `(group 1, item 23)` is **Open Door Warn**, targets category 26 `Theft Deterrent`, uses data id 1009 with current bits 7..7, and has OEM choices `OFF=0` / `ON=1`. `SetCustomizeAllDefault` checks item `u16 +0x22` before one default path, but that field is zero in every current NA/EU/JP item row; no default value is therefore inferred from the first choice or any other heuristic.
 

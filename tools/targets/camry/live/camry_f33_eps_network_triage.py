@@ -13,8 +13,8 @@ OBD route (Panda bus 1, ELM327 parameter 0).  Every path out of that observation
 attempts a bounded restoration to ELM327 parameter 1, verifies the remembered
 safety mode/parameter through Panda health, and only then performs the final
 Brake positive control.  Host/process death, USB loss, or repeated board-control
-failure can defeat software cleanup; the result makes an unverified restoration
-an urgent stop rather than claiming a guarantee.
+failure can defeat software cleanup. An unverified restoration requires an
+urgent stop.
 
 There are no caller-selectable addresses, buses, payloads, retries, diagnostic
 sessions, resets, SecurityAccess requests, DTC clears, writes, or routines.
@@ -947,7 +947,7 @@ def run_on_panda(
     except (KeyboardInterrupt, TriageInterrupted) as error:
         interrupted = error
         gateway["state"] = "interrupted"
-    except BaseException as error:  # record, restore, then report rather than escaping cleanup
+    except BaseException as error:  # Record, restore, then report the error.
         gateway_error = error
         gateway["state"] = "error"
         gateway["error"] = f"{type(error).__name__}: {error}"

@@ -6,8 +6,8 @@ belongs in [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md); claim history lives in
 [FINDINGS.md](FINDINGS.md) / [CORRECTIONS.md](CORRECTIONS.md); procedures,
 evidence, and closure narratives live in the canonical reports linked below.
 
-This is a research queue, not deployment qualification or an installation
-procedure. The [Camry capability matrix](../variants/camry-2026-capability-matrix.md)
+This research queue leaves deployment qualification and installation procedures
+to their canonical reports. The [Camry capability matrix](../variants/camry-2026-capability-matrix.md)
 owns the distinction between retained demonstrations and remaining qualification.
 
 ## Active queue
@@ -57,9 +57,9 @@ owns the distinction between retained demonstrations and remaining qualification
    target-specific results. Canonical:
    [XCP report](../communications/xcp-command-dispatch.md).
 6. **Applicable comparison image — [OQ-006](OPEN_QUESTIONS.md).** Additional
-   acquisition should answer a specific transfer question, not the obsolete
-   “first foreign image” milestone. Existing Crown, Camry, and Corolla inputs
-   are discoverable through [the target index](../variants/README.md).
+   acquisition should answer a specific transfer question. Existing Crown, Camry,
+   and Corolla inputs already satisfy the former “first foreign image” milestone
+   and are discoverable through [the target index](../variants/README.md).
 7. **Capture-preservation add-ons during a real GTS+ session:** preserve raw
    true-TSS3 PCS Operation/Image FFD `.TSE` before GTSE conversion and, if
    exported, the `.vdas` ZIP (TMS-086/087). Canonical:
@@ -108,5 +108,5 @@ confirmation ([OQ-003](OPEN_QUESTIONS.md)) · CommunicationControl availability
 ## When this page changes
 
 Update only when the **execution order** changes. Keep completed conclusions in
-the owning subsystem report; update ledger navigation when useful, not as a
-mandatory transaction. Never append a completion diary here.
+the owning subsystem report. Update ledger navigation when useful.
+Never append a completion diary here.

@@ -135,7 +135,7 @@ for hit in expected_prefix_hits:
     line_end = raw.find(b"\n", offset)
     line = raw[line_start:line_end if line_end >= 0 else len(raw)].strip()
     check(
-        f"{hit['filename']} family-prefix hit is inside S-record hex text, not an identity string",
+        f"{hit['filename']} family-prefix hit is inside S-record hex text",
         line.startswith((b"S1", b"S2", b"S3"))
         and b"F152633" in line
         and b"F152633K0000" not in line

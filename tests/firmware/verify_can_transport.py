@@ -44,7 +44,7 @@ rx = u32(TP + 0x29C)
 rx_rows = [struct.unpack_from("<IIB3x", CF, rx + i * 12) for i in range(2)]
 check("Rx config 0 maps CAN 0x7A1 to upper PDU 0", rx_rows[0] == (0, 0x7A1, 0), repr(rx_rows[0]))
 check("Rx config 1 maps CAN 0x777 to upper PDU 1", rx_rows[1] == (1, 0x777, 0), repr(rx_rows[1]))
-check("both request IDs are standard, not extended", all(r[2] == 0 for r in rx_rows))
+check("both request IDs use standard format", all(r[2] == 0 for r in rx_rows))
 tx = u32(TP + 0x2A0)
 tx_pdu, tx_id = struct.unpack_from("<II", CF, tx)
 tx_ide = CF[tx + 8]

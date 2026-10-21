@@ -665,7 +665,7 @@ def call_corpus(
         if library.camry_host_firmware(result, ctypes.byref(firmware)):
             return int(firmware.value) & 0xFFFFFFFF
         # A status or firmware address returned through a pointer-typed
-        # signature is the integer in r10, not a host pointer.
+        # signature retains the integer-word representation from r10.
         if result <= 0xFFFFFFFF:
             return int(result) & 0xFFFFFFFF
         library.camry_host_addr.argtypes = [ctypes.c_void_p]

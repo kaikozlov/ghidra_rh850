@@ -27,7 +27,7 @@ OUTPUT = ROOT / 'data/generated/camry_2026_native_cruise_release.json'
 SCOPE = ROOT / 'tests/fixtures/camry_2026_cancel_host_attempts.jsonl.gz'
 CONTEXT_NS = 500_000_000
 WINDOW_NS = 3_000_000_000
-# These are analysis observation windows, not vehicle runtime thresholds.
+# These observation windows apply only to offline analysis.
 MAX_OBSERVATION_GAP_NS = 100_000_000
 
 
@@ -171,7 +171,7 @@ def discover(log_root: Path, openpilot_root: Path, output: Path) -> None:
     header = {'schema': 'camry-native-cruise-release-fixture-v1', 'sources': sources, 'routes': routes,
               'input_bus': 0, 'cruise_bus': 2, 'adas_bus': 1, 'topology': 'historical repin only',
               'context_ns': CONTEXT_NS, 'window_ns': WINDOW_NS, 'selected_release_indices': selected,
-              'boundary': 'No decoded input observed is a selection, not proof of autonomous cancellation or host acceptance.'}
+              'boundary': 'No decoded input observed is only a selection criterion; autonomous cancellation and host acceptance remain unproved.'}
     write_rows(output, header, [['release', r] for r in releases] + windows)
     print(output, flush=True)
 
@@ -243,7 +243,7 @@ def build(path: Path = FIXTURE) -> dict:
             'fixture_sha256': sha(path), 'source_count': len(header['sources']), 'routes': header['routes'],
             'dispositions': dict(counts), 'release_count': len(releases),
             'selected_windows': [reduce_native_window(releases[i], [r for r in windows if r[1] == i]) for i in selected],
-            'boundaries': ['This scan is selected by native 0x08A falling edges, not by physical buttons or host cancel requests.',
+            'boundaries': ['Native 0x08A falling edges alone select this scan; physical buttons and host cancel requests are separate observations.',
                            'A <=100ms continuous cruise edge is required; absent/malformed inputs are unknown, never deasserted.',
                            'Publication ordering is not physical bus arbitration ordering.',
                            'Neither a native release nor a switch mirror is proof that an injected command is accepted.',

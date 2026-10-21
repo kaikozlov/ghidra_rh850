@@ -174,7 +174,7 @@ def check_fault_check_error_boundary(output_root: Path) -> None:
     The retained byte-store primitive faults on an unmapped destination before
     any RAM write lands. Ordinary checks and the second operand of a memory-equal
     check inspect uninitialized RAM. The report must retain the execution fault
-    and publish each structured inspection error, not fabricate equal bytes.
+    and publish each structured inspection error without fabricating equal bytes.
     """
     scenario = {
         "schema": "rh850-p1me-machine-scenario-v2",

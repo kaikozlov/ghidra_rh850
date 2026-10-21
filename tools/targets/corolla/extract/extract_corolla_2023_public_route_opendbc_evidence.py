@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Extract opendbc-porting evidence from the pinned 2023 Corolla public rlog.
 
-This is an external-source regeneration helper, not a core verifier. The raw rlog is
+This helper regenerates external-source evidence. The raw rlog is
 intentionally untracked. Point --openpilot-root at a checkout that can import
 openpilot.tools.lib.logreader; all Toyota signal/checksum decoding used here is
 implemented locally so the result does not depend on that checkout's Toyota DBC.
@@ -299,7 +299,7 @@ def main() -> int:
             "segment": 0,
             **actual,
             "duration_s": ((last_t - first_t) * 1e-9) if first_t is not None and last_t is not None else None,
-            "identity_note": "Route carParams was forced TOYOTA_COROLLA_TSS2 and contains no carFw; this is a TSS3 Corolla whole-vehicle route oracle, not an exact H/F firmware-to-route join.",
+            "identity_note": "Route carParams was forced TOYOTA_COROLLA_TSS2 and contains no carFw; this supplies only a TSS3 Corolla whole-vehicle route oracle. Exact H/F firmware-to-route identity remains unproved.",
             "can_source_filter": "Only CAN records with src<128 are treated as incoming vehicle traffic. Panda returned/Tx echoes (src=bus+128) and rejected echoes (src=bus+192) are excluded from every inventory and baseline in this artifact.",
         },
         "axis_boundary": "TSS generation describes ADAS/control architecture. SecOC/TSK describes security/authentication. Presence of 0x00F or authenticated messages does not classify TSS generation.",
@@ -311,7 +311,7 @@ def main() -> int:
                 "exact_h_f_additive_rule": h030_rule,
                 "frame_count": len(fd30),
                 "rule_matches": fd30_rule_matches,
-                "boundary": "All route 0x030 frames matching the exact-H/F firmware-derived additive-byte rule is a strong format/producer-family continuity join, not an exact firmware/vehicle identity join.",
+                "boundary": "All route 0x030 frames match the exact-H/F firmware-derived additive-byte rule, strongly supporting format/producer-family continuity only. Exact firmware/vehicle identity remains unproved.",
             },
             "0x025": {
                 "wire": "32-byte CAN-FD; exact H firmware independently proves legacy STEER_ANGLE/STEER_FRACTION/STEER_RATE bit positions survive inside the new PDU",
@@ -362,7 +362,7 @@ def main() -> int:
                 "wire": "classic 8-byte PCM_CRUISE_4 / SecOC cruise-switch prior-art carrier",
                 "frame_count": len(cruise_switch),
                 "prior_art_button_values": {k: unique(v) for k, v in cruise_switch_prior_art.items()},
-                "boundary": "All legacy cruise-switch bits are inactive in this segment; ID/DLC survival is evidence for a retained carrier, not proof that the old button semantics are unchanged on TSS3.",
+                "boundary": "All legacy cruise-switch bits are inactive in this segment; ID/DLC survival establishes only a retained carrier. Transfer of old button semantics to TSS3 remains unproved.",
             },
             "0x51E": {
                 "wire": "classic 8-byte target-native H/F Ready Status input carrier",

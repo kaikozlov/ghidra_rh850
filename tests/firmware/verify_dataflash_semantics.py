@@ -304,7 +304,7 @@ check("the sole occurrence is object 27's descriptor RAM field at 0x2B078",
       repr([hex(h) for h in obj27_ram_hits]))
 check("object 27 writer_functions column is empty (dead configuration)",
       payload_rows[27]["writer_functions"] == "")
-check("object 27 is enabled (configured orphan, not a disabled slot)",
+check("object 27 is an enabled configured orphan",
       payload_rows[27]["enabled"] == "yes"
       and payload_rows[27]["evidence_name"] == "configured_orphan_slot")
 

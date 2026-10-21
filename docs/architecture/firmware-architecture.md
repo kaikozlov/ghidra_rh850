@@ -28,7 +28,7 @@ The 1 MiB CodeFlash is one dense image containing two execution domains:
 | Application execution | vector base `0x20000`; INTBP table `0x20200`; entry `0x20880` | Values installed into EBASE/INTBP and the entry selected by the boot pointer |
 | Cross-region metadata/calibration | for example `0x181DC` and entry pointer `0xFFDB8` | Application code reads calibration below `0x20000`; boot code reads application metadata near the end of flash |
 
-`0x20000` is therefore the verified **application vector/executable base**, not a strict ownership boundary for every constant. The low flash contains the boot execution image but also application-used calibration, while the final application-entry metadata is at `0xFFDB8`. These are logical domains inside the same split CodeFlash import, not separate firmware files. The application starts only after the boot checks at `0x13B0` succeed.
+`0x20000` is the verified **application vector/executable base**. Constant ownership crosses this boundary: low flash contains both boot code and application-used calibration. The final application-entry metadata is at `0xFFDB8`. These logical domains share the same split CodeFlash import. The application starts only after the boot checks at `0x13B0` succeed.
 
 The high-level path is:
 

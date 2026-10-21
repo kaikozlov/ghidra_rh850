@@ -4012,7 +4012,7 @@
     ],
     "referenced_rows_identical_to_h": true,
     "table": "0x00030850",
-    "vocabulary_join": "For every DTC index still referenced by F33, the exact 8-byte F33 DTC record equals the pinned H record. Toyota EMPS_P5 names are therefore joined by identical packed-DTC bytes, not transferred by variant assumption."
+    "vocabulary_join": "For every DTC index still referenced by F33, the exact 8-byte F33 DTC record equals the pinned H record. Toyota EMPS_P5 names are therefore joined directly by identical packed-DTC bytes."
   },
   "openpilot_policy": {
     "internal_state_exposure": "safe as a diagnostic/status candidate set when 0x394 is present",
@@ -4042,11 +4042,11 @@
     },
     "h_techstream_vocabulary": {
       "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
-      "sha256": "5e4eac747a29080dcb5a700070655dccb7814434cc810f204080512416aa8e3a"
+      "sha256": "ee4ffc57d325fc3b4d787d8d1ec03a35c5e9006845add87c73d7ea5bd86290fd"
     },
     "tx_contract": {
       "path": "data/generated/camry_8965F3307000_tss3_opendbc_port.json",
-      "sha256": "4bd4071f4d163d09f20b41d8483f03cc1abab4be8758c7e7aa20487936463d18"
+      "sha256": "18f8039b23385e572c4701182f7c6b0bf5f99d9d602cec1901be16624458dbe9"
     }
   },
   "target": {

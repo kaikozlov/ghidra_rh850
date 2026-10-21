@@ -69,7 +69,7 @@ ARCHITECTURE_LABEL_TOKENS = {
 }
 
 # Category-family clustering used by the census and the fleet-map report. The
-# grouping is by diagnostic role, not by install-set membership; membership
+# grouping uses diagnostic roles. Install-set membership
 # facts live in the per-region co-occurrence counts the generator emits.
 CATEGORY_FAMILIES = {
     "steering_actuation": (142, 405, 499),
@@ -671,7 +671,7 @@ def tse_converter(root: Path, versions: dict[str, str]) -> dict[str, Any]:
             "The shipped TSE/GTSE converter has dedicated P5 DTC/FFD, PredictiveFFD, RoB, health-check, "
             "ring-buffer signal and ECU-map readers, and its three format templates explicitly allocate "
             "CAN, RoB, VehicleControlHistory, PCS time-series FFD and PCS image-FFD sections. This is a "
-            "high-value offline capture-format decoder surface, not yet a proven direct parser for FRC AB/EB payloads."
+            "high-value offline capture-format decoder surface. Direct parsing of FRC AB/EB payloads remains unproved."
         ),
     }
 
@@ -728,8 +728,8 @@ def category_identity_section(parser: DDBParser, root: Path, addresses: dict[str
                 "diagnostic_request_address": address_row["address"] if address_row else None,
             }
         out["regions"][region] = identities
-    # The census treats cross-region identity equality as an observed fact to
-    # prove, not an assumption: collapse only after comparing the joined rows.
+    # Establish cross-region identity equality from observed rows:
+    # collapse only after comparing the joined rows.
     reference = json.dumps(out["regions"][REGIONS[0]], sort_keys=True)
     for region in REGIONS[1:]:
         if json.dumps(out["regions"][region], sort_keys=True) != reference:
@@ -780,8 +780,8 @@ def install_set_collision_proof(parser: DDBParser, root: Path) -> dict[str, Any]
     """Prove install-set ids are region-local by exhibiting cross-region collisions.
 
     The comparison uses the full CDbInstallingEcuListTable category set of each
-    498-carrying install set, not just the census selection, so an identical
-    selected sub-architecture cannot mask a different real install set.
+    498-carrying install set, including categories outside the census selection.
+    This prevents identical selected sub-architectures from masking different real install sets.
     """
     per_region_sets: dict[str, dict[int, frozenset[int]]] = {}
     for region in REGIONS:
@@ -855,13 +855,13 @@ def build() -> dict[str, Any]:
         "focus_component_t76_indexes": list(TOPOLOGY_FOCUS_T76_INDEXES),
         "identity_note": (
             "bus_index/bus_name/gateway_names are Toyota CDbCanBusNameTable/CDbCanBusListTable identities "
-            "(for example 'Bus 1' and 'Bus 4' behind 'Central Gateway'). They are network-model identities, "
-            "not comma panda bus numbers and not connector cavity numbers; see "
+            "(for example 'Bus 1' and 'Bus 4' behind 'Central Gateway'). They identify network-model domains. "
+            "Comma panda bus numbers and connector cavity numbers use separate namespaces; see "
             "docs/tooling/panda-toyota-routing.md for the separate panda naming layers."
         ),
         "component_name_join": (
-            "component_index+1 -> CDbSubBusConfirmationCGWTable name ('Power Steering (EPS)' etc.) is a naming "
-            "correspondence, not an ECUNo key join; only the Camry 0x6D/0x29/0x32 membership is independently "
+            "component_index+1 -> CDbSubBusConfirmationCGWTable name ('Power Steering (EPS)' etc.) establishes naming "
+            "correspondence only. An ECUNo key join remains unproved; only the Camry 0x6D/0x29/0x32 membership is independently "
             "pinned by repo evidence in docs/variants/camry-2026-live-baseline.md."
         ),
         "regions": {},
@@ -929,8 +929,8 @@ def build() -> dict[str, Any]:
             },
             "diagnostic_address_generation_boundary": (
                 "The ECUNo->diagnostic-request-address join is read from the v18 IT3Data_BDC ECU_Setting_Table "
-                "because current GTS+ ships no equivalent table. Addresses are physical UDS request IDs (0x7xx "
-                "range), not panda bus numbers, and cross-generation stability of each address is only observed "
+                "because current GTS+ ships no equivalent table. Addresses are physical UDS request IDs in the 0x7xx "
+                "range. Panda bus numbers use a separate namespace. Cross-generation address stability is observed only "
                 "where repo captures corroborate it (Camry 2026 FRC 0x792, EPS 0x7A1, skid 0x7B0)."
             ),
             "topology_is_gateway_identity_not_panda_bus": (

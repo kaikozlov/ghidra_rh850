@@ -86,8 +86,8 @@ The `0x00F0` software-PDU handle is deliberate. While our frame owns HTH0,
 `FEBE502A` contains `0x00F0`; stock Tx completion removes that ownership and
 then sends the special class through `FUN_0008043C` to `FUN_0008152E`, which is
 a literal no-op. Because stock `0x030` shares HTH0 at 100 Hz, the next observed
-handle may already be the successor stock transmission rather than intermediate
-idle `0xFFFF`. Departure from our unique `0x00F0` is therefore the physical-Tx
+handle may already belong to the successor stock transmission, skipping the
+intermediate idle `0xFFFF`. Departure from our unique `0x00F0` is therefore the physical-Tx
 completion witness. The probe does not masquerade as a completion of stock
 `0x030` or another configured PDU. It does not invoke command 5, modify
 the frame, touch B6, override SecOC, or write flash.
@@ -175,8 +175,7 @@ evidence gives a compelling reason to move those semantics into the EPS.
 
 ## Implementation handoff — 2026-09-18
 
-The A-positive/B-negative decision tree is now implemented in the openpilot fork rather than
-remaining only a runtime experiment.
+The openpilot fork now implements the A-positive/B-negative decision tree.
 
 - Panda/opendbc transparent boundary: `f4c20d0e`, `dfe606d0`, `9b5cc835`.
 - Host CAN-FD `sendcan` serialization: parent `a3c761b04` (Panda firmware mixed-format forwarding
@@ -205,7 +204,7 @@ The development Param was enabled once on the stock/unrepinned Toyota-B layout t
 behavior before any source suppression. READY/Park/stationary and Panda safety were healthy, but
 native `0x08A` remained on logical bus1. No private arm admin was emitted, so Panda never blocked a
 source frame and the transparent proxy never transmitted a replacement. This is a clean topology
-negative, not a handoff failure.
+negative. The handoff itself did not fail.
 
 The software is now prepared for the physical repin in parent `e31c85e84` / opendbc `ec401d56`:
 state parsing and safety motion/brake/gas/angle/cruise sampling move to downstream bus0 only in
@@ -232,8 +231,8 @@ bus1: TSS3 radar/object banks 0x180..0x185
 The initial post-repin host-mode parser incorrectly required the FRC-source PDUs on bus0 and
 therefore stayed fail-closed with `CarState.canValid=false`; no arm admin was emitted. Final parser
 split is opendbc `20b4e37b` / parent `03fbbab6d`: bus0 state + bus2 source + bus1 radar. This keeps
-the takeover guard meaningful and matches the measured wiring rather than forcing the old
-single-bus software model onto the repinned hardware.
+the takeover guard meaningful and matches the measured wiring. The old single-bus software
+model applied to the earlier wiring.
 
 ## Atomic ownership handshake replaces N+1/N+2 prediction
 

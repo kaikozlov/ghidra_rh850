@@ -203,7 +203,7 @@ public class RecoverVectorHandlers extends GhidraScript {
         // Direct vectors are 16-byte stubs beginning with JMP disp32[r0].
         // The common encoding is 1f 00 e0 06 <target:u32>; boot vector 0xd0
         // uses the verified alternate 1f 00 80 07 form. Other encodings (for
-        // example application 0x20100+) are executable stubs, not pointers.
+        // example application 0x20100+) are executable stubs.
         Set<Long> seen = new HashSet<>();
         int created = 0;
         for (int i = 0; i < count; i++) {

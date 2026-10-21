@@ -97,8 +97,8 @@ def lateral_reference_family(
     ret_words = [int.from_bytes(dat[16:18], "big", signed=True) for _, dat in return_rows]
 
     # Join request/reference word to the nearest 0x025 measured steering-angle
-    # publication.  The exact H/F/Camry controller-equivalent factor is kept as
-    # an explicit comparison, not promoted to an OEM unit name for 0x08A.
+    # publication. The exact H/F/Camry controller-equivalent factor remains
+    # an explicit comparison; the OEM unit name for 0x08A remains unrecovered.
     angle_times = [t for t, _ in angle_rows]
     fit_x: list[float] = []
     fit_y: list[float] = []
@@ -223,7 +223,7 @@ class GearReadyCensus:
         }
 
     def add_can(self, src: int, address: int, dat: bytes) -> None:
-        """Feed one `can` service record; src>=128 are panda echoes, not vehicle traffic."""
+        """Feed one `can` service record; src>=128 identifies panda echoes only."""
         channel = self.RECEIVED if src < 128 else (self.RETURNED if src < 192 else self.REJECTED)
         self._add(channel, src, address, dat)
 
@@ -280,5 +280,5 @@ class GearReadyCensus:
                 self.SENDCAN: "sendcan service records (openpilot queued/attempted Tx; raw src)",
             },
             "channels": channels,
-            "boundary": "Raw per-source/per-DLC counts over every recorded channel, source and DLC; sources are never normalized to a physical bus topology and no DLC is filtered. A zero count proves only that this pinned input contains no such record, not that the vehicle never sends the ID. Selected-field value counts are raw decodes gated on sufficient DLC and assert no gear/READY label semantics.",
+            "boundary": "Raw per-source/per-DLC counts over every recorded channel, source and DLC; sources are never normalized to a physical bus topology and no DLC is filtered. A zero count establishes absence only within this pinned input; vehicle behavior outside it remains unproved. Selected-field value counts are raw decodes gated on sufficient DLC and assert no gear/READY label semantics.",
         }

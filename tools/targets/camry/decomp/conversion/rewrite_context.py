@@ -98,7 +98,7 @@ def _rewrite_exception_context(code: str) -> str:
                 "",
             )
     if name == "application_entry":
-        # 20880 saves incoming LP on the old stack, not at a fixed RAM word.
+        # 20880 saves incoming LP on the old stack at a stack-relative address.
         code = re.sub(r"\s*undefined4 unaff_retaddr\s*;", "", code)
         code = re.sub(r"\s*DAT_febe1ffc = unaff_retaddr\s*;", "", code)
     if name == "boot_advance_crc_authentication_routine_5936" and "LAB_00005a00:" not in code:
@@ -567,7 +567,7 @@ def _rewrite_exception_context(code: str) -> str:
         def frame_return(match: re.Match[str]) -> str:
             value = match.group(1).strip()
             if value:
-                # A returned callee executes before DISPOSE, not after it.
+                # A returned callee executes before DISPOSE.
                 return ("{ uint32_t camry_return_value = (" + value + "); "
                         "if (camry_halted) return 0; " + restore + " return camry_return_value; }")
             return "{ if (!camry_halted) { " + restore + " } return; }"

@@ -233,8 +233,8 @@ art. Its production SecOC configuration uses logical key selector 4 in both
 directions. The four generated receive profiles are `0x00F`, `0x090`, `0x0D7`
 and `0x024`; the two generated transmit profiles are only SecOC DataIDs `0x326`
 and `0x024`. Thus that real Toyota airbag implementation explicitly treats
-`0x00F` as a synchronization **receive** profile, not a transmit profile. This
-does not prove the exact Camry SRS calibration is identical, but it materially
+`0x00F` solely as a synchronization **receive** profile.
+This does not prove the exact Camry SRS calibration is identical, but it materially
 weakens Airbag as the `0x00F` source hypothesis.
 
 Central Gateway remains the strongest unisolated physical-publication candidate.
@@ -338,7 +338,7 @@ eb13281801005c05010700f60087b1670105020402000339050706260809002229520102c0805203
 
 ### Immediate decode anchors already known from the recovered PCS schema
 
-Use the current PCS dictionary, not guesses:
+Use the current PCS dictionary:
 
 - `5282`: generic TSS lateral request — byte1 lateral ID, bytes2:3 signed pinion request at 0.001, bytes4/5 assist+damping gains at 0.01
 - `5631`: LTA request tuple — same 5-byte geometry as `5282`
@@ -392,7 +392,7 @@ Do not repeat broad discovery. Resume exactly here:
 4. Fetch a small number of **existing** recent LTA-relevant records (`2844` is especially valuable) and decode the same six Data IDs.
 5. If we need live causal ordering, synchronize Operation-FFD reads with passive CAN only; avoid unnecessary mutation.
 6. Investigate `0x081 B11[4]` OEM identity via Brake/GTS/firmware separately; its live behavior is already clear.
-7. Physical `0x08A` signer/proxy remains unresolved. The source dependency points to FRC; tested FRC/Brake/EPS/three unknown responders/powertrain nodes do not identify a separate Bus-4 publisher. Central Gateway/non-addressed proxy remains a hypothesis, not a finding.
+7. Physical `0x08A` signer/proxy remains unresolved. The source dependency points to FRC; tested FRC/Brake/EPS/three unknown responders/powertrain nodes do not identify a separate Bus-4 publisher. Central Gateway/non-addressed proxy remains an unproved hypothesis.
 
 
 ## 13. Post-restart continuation: corrected EB13 parser and first exact lateral decode
@@ -402,7 +402,7 @@ After the vehicle restart, passive health was normal and stationary:
 - Brake DID `0x1042` Vehicle Speed (Control Value): `0.0 km/h`
 - 2 s passive chassis-bus census: `0x030=330`, `0x081=111`, `0x08A=132`
 
-The saved `AB13 2818 0100` response was re-parsed offline. Important parser correction: after the six-byte `EB13 || behavior_be16 || record_be16` header, the next byte is the **block count**. In this response it is `0x5C = 92`; the DID stream begins at byte 7, not byte 6. Parsing exactly 92 `data_id_be16 || length_u8 || data[length]` blocks consumes the response with no trailing bytes.
+The saved `AB13 2818 0100` response was re-parsed offline. Parser correction: after the six-byte `EB13 || behavior_be16 || record_be16` header, the next byte is the **block count**. In this response it is `0x5C = 92`; the corrected DID-stream start is byte 7, replacing byte 6. Parsing exactly 92 `data_id_be16 || length_u8 || data[length]` blocks consumes the response with no trailing bytes.
 
 Critical lateral blocks in behavior `0x2818` record `0x0100`:
 
@@ -444,7 +444,7 @@ All four contain:
 | `0200` | `0b00556400` | 11 | +0.085 | 1.00 | 0.00 | +0.101 |
 | `0209` | `0b00496400` | 11 | +0.073 | 1.00 | 0.00 | +0.071 |
 
-Important distinction: this trigger name contains “under LTA”, but Toyota's own stored feature request is `5531` **LDA**, not `5631` LTA. ID11 is a lateral request identity used across feature/arbitration layers; it must not be casually equated with one feature-local recorder tuple.
+This trigger name contains “under LTA”, but Toyota stores feature request `5531` **LDA** here. The separate LTA tuple is `5631`. ID11 is a lateral request identity used across feature/arbitration layers; it must not be casually equated with one feature-local recorder tuple.
 
 ## 15. Sparse live Operation-FFD family census: generic request and arbitration result
 
@@ -470,7 +470,7 @@ Generic/arbitration-bearing families:
   - generic request ID **18 (SDG)**, pinion `+0.023`, assist `0.50`, damping `0.00`
   - arbitration-result lateral ID **18 (SDG)**
 
-The `2294/0001` snapshot is the first direct same-record live-car witness that the FRC-hosted Operation FFD contains both a generic lateral request and a matching arbitration-result lateral ID. It establishes the request/result distinction as active recorder data on this car, not merely a static PCS schema distinction.
+The `2294/0001` snapshot is the first direct same-record live-car witness that the FRC-hosted Operation FFD contains both a generic lateral request and a matching arbitration-result lateral ID. It establishes the request/result distinction in active recorder data on this car, extending the earlier static PCS schema evidence.
 
 Far-end samples of those same generic/arbitration families (`22B1/0195`, `2279/0159`, `2292/0245`, `2294/0122`) also contain `5285` and where applicable `5282`, but still no `57DE`. Across the one-per-family census, no currently stored behavior sample contains `57DE`. Working interpretation: the present stored trigger set logs arbitration-result ID but not the separate arbitration-result pinion-angle datum; do not brute-force all records unless another reason emerges.
 
@@ -510,7 +510,7 @@ Therefore §17's initial wording that the healthy post-restart FRC state was obs
 
 This also means the pre-restart fault cannot yet be attributed by comparing that healthy state against a supposedly still-running replacement sender.
 
-### 18.2 Sequential bus0/bus2 trailer differences were a time-pairing artifact, not re-signing
+### 18.2 Sequential bus0/bus2 trailer differences: time-pairing correction
 
 Sequential one-second captures of `0x08A` on bus0 then bus2 naturally contained the same recurring application states at different freshness/MAC publications. Comparing equal modulo-64 sequence values across those non-simultaneous windows produced different trailers and briefly suggested a re-authentication stage at the Panda split. That inference was wrong.
 
@@ -599,7 +599,7 @@ The most natural hardware interpretation is a **multi-interface FRC ECU/assembly
 
 This interpretation also resolves why `0x08A` disappears immediately under FRC CommunicationControl without requiring a separately diagnosed downstream proxy ECU to honor that command.
 
-Keep one distinction: UDS CommunicationControl proves the protected bus2 transmitter lies under the FRC diagnostic/ECU boundary; it does not yet identify the exact internal MCU/HSM within the camera assembly. For integration purposes, however, **stock protected `0x08A` is an FRC-owned output domain**, not an independently controlled Brake/gateway output.
+UDS CommunicationControl proves the protected bus2 transmitter lies under the FRC diagnostic/ECU boundary. The exact internal MCU/HSM within the camera assembly remains unresolved. For integration purposes, **stock protected `0x08A` is an FRC-owned output domain**. Independent Brake/gateway control is excluded by this test.
 
 ## 21. Symmetric Brake/EPB transmitter attribution: 15 native chassis/bus0 publications
 
@@ -640,7 +640,7 @@ EPS
 
 The previously observed `0x081 B11[4]` change when FRC Tx disappears is therefore a Brake-owned upstream return/supervision state reacting to loss of the FRC-owned downstream request domain. It is not an EPS echo.
 
-## 22. `0x081 B11[4]` is a dedicated FRC-request supervision state, not ordinary Brake comm-open status
+## 22. `0x081 B11[4]`: dedicated FRC-request supervision
 
 A before / FRC-normal-Tx-off / restored modal-byte comparison was run over the major Brake-owned return PDUs while parked. Among:
 
@@ -671,7 +671,7 @@ The experiment cannot distinguish the effect of losing `0x081`, because **before
 - `1703 = F0 20`: PCS Availability Disabled
 - `1705 = FF 3A`: PCS PB / ESA / AES / PAS-A Invalid flags asserted; PCS AES Invalid Flag = ON
 
-These values remained the same during and after the short Brake-Tx suppression, so the reciprocal test is **inconclusive**, not negative.
+These values remained the same during and after the short Brake-Tx suppression, leaving the reciprocal test **inconclusive**. A negative result remains unproved.
 
 Brake was returned to default session; an explicit `28 00 01` attempted after the diagnostic session had already dropped returned NRC `0x7F`, but returning to default succeeded and a subsequent passive check confirmed `0x081` is again flowing normally (5/5 requested frames observed immediately).
 
@@ -751,7 +751,7 @@ The combined source isolation, relay-open direction, and Operation-FFD data now 
 
 The prior standing model treated the FRC as only the request-compute side and required an externally diagnosed Brake/Skid/CGW proxy to turn that request into protected `0x08A`. The live CommunicationControl census no longer supports that separation as the primary model. Standard FRC normal-Tx suppression removes the entire native-upstream protected `0x08A` publication family as well as the four Bus-1 FRC PDUs. The protected publisher is therefore inside the **FRC ECU/assembly diagnostic boundary**.
 
-This does not require the main vision/control MCU itself to contain the Toyota TSK key/HSM. A multi-MCU FRC assembly with a separate network/security controller is entirely consistent with all observed facts and is now the leading hardware model. The old categorical statement “FRC cannot sign SecOC, therefore an external Brake/gateway proxy must sign `0x08A`” should be retired; at most, it applies to the previously considered main compute silicon, not the complete FRC assembly.
+This does not require the main vision/control MCU itself to contain the Toyota TSK key/HSM. A multi-MCU FRC assembly with a separate network/security controller is entirely consistent with all observed facts and is now the leading hardware model. Retire the old categorical statement “FRC cannot sign SecOC, therefore an external Brake/gateway proxy must sign `0x08A`”. At most, its exclusion applies only to the previously considered main compute silicon. The complete FRC assembly remains compatible with signing.
 
 ### `0x081` role
 
@@ -830,7 +830,7 @@ The category-435 Brake/EPB application does not expose SA level 1, but programmi
 27 01 || 16*00 -> 7F 27 13
 ```
 
-This is the recovered CUW **ReproStd** SecurityAccess grammar, not the exact-F33 EPS Unified grammar. Techstream's recovered host construction is:
+This is the recovered CUW **ReproStd** SecurityAccess grammar. Exact-F33 EPS uses the separate Unified grammar. Techstream's recovered host construction is:
 
 ```text
 Kwork = AES-128-ECB-DEC(B45B26D6344FD60E80BC01D63C7584A0, ServiceAuthKey[16])
@@ -858,7 +858,7 @@ The write/download side is substantially more informative. `34 RequestDownload` 
 - `FEBF1000..FEBFF000` individually return `0x31` when used as start addresses;
 - requests beginning exactly at `FEBF0000` remain security-gated for lengths from 1 byte through at least `0x20000` bytes.
 
-The working interpretation is an OEM-configured download/staging area whose accepted base is exactly `0xFEBF0000`, not a generic claim that arbitrary LocalRAM is writable. This is a high-value post-auth canary/payload candidate once SA is solved.
+The working interpretation is an OEM-configured download/staging area whose accepted base is exactly `0xFEBF0000`. Writability of arbitrary LocalRAM remains unproved. This is a high-value post-auth canary/payload candidate once SA is solved.
 
 ### Missing Brake credential / Toyota acquisition path
 
@@ -944,7 +944,7 @@ Caller `CEcuSupplyChange*` wrapper at **`0xB99863`** (delay-import slot `0xF533B
 5. **`ID` = the constant string `"000000"`** — the orchestrator
    `CEcuSupplyChangeFuncProc::GetXmlDataSwSearch` (`0x52C6A3`) resets member `+0x1A4` to the
    literal `"000000"` (`0x11EA3BC`) immediately before the send and passes that member as the
-   ID argument. The client job tag is therefore fixed, not a GUID/counter.
+   ID argument. The client job tag is therefore the fixed literal `"000000"`.
 
 Log literals byte-pinned: `-- Send -- strFileNamePath[%s] strSoftwareId[%s] strTimeStamp[%s]`,
 `-- Return -- bRet[%d]`, `-- Receive -- strId[%s] Result[%s]`,
@@ -1053,8 +1053,8 @@ re-running the descriptor census independently of the VAR-069 artifact:
 
 **Credential-family conclusion.** `cuw_security_up.py` was re-verified
 end-to-end (all ten corpus `ServiceAuthKey`s re-derive their recorded `Kwork`
-byte-for-byte). Across the corpus, credentials are scoped **per DiagID, not per
-vehicle or per calibration**: 0792 shares one key across six
+byte-for-byte). Across the corpus, credentials are scoped **per DiagID**, with
+sharing across vehicles and calibrations: 0792 shares one key across six
 packages/vehicles/years (Corolla, Corolla Cross, bZ4X, 2023–24), and 07D2
 shares one across Grand Highlander + Crown; but 07A1 rotates per generation
 (three distinct keys), and no key is shared across different DiagIDs. The live
@@ -1218,7 +1218,7 @@ Its recovered PCS dictionary directly names the steering pipeline objects:
 
 No other current P5/FRC recorder dictionary found below contains this request/arbitration-result vocabulary.
 
-### 2. TSS3 Image FFD — deep event context, not the shortest lateral path
+### 2. TSS3 Image FFD — deep event context
 
 Current category-498 role `0xE9` is `GetTSS3ImageFFDP5_DT.dll`. Its live SecurityAccess and `AB31/AB33` protocol are documented in the preceding section. It provides timestamped camera-event metadata plus split image payload (`6002..6017 -> 6001`), but it does not expose the lateral request/arbitration object graph directly.
 
@@ -1264,7 +1264,7 @@ However, the same dictionary contains **no lateral target/pinion request or arbi
 12271a2c0000060006000007
 ```
 
-Their lookup keys are `0x2711/0x2712` and both reference master variable `0x2C1A`, which normalizes through the current GTS+ `-0x2710` variable namespace to entry `0x50A = 04 03`. A corpus census shows this exact pair in **126 P5 databases**. It is generic P5 FFD plumbing, not a hidden FRC-specific recorder channel.
+Their lookup keys are `0x2711/0x2712` and both reference master variable `0x2C1A`, which normalizes through the current GTS+ `-0x2710` variable namespace to entry `0x50A = 04 03`. A corpus census shows this exact pair in **126 P5 databases**, establishing generic P5 FFD plumbing. An FRC-specific recorder channel remains unsupported.
 
 ### 5. Older generic Operation Freeze Frame — not bound to current FRC
 
@@ -1284,7 +1284,7 @@ GTS+ ships generic `GetDDRInfo*` plugins and its TSE saved-session format has fi
 168 CDbDDRInvalidConditionTable
 ```
 
-and current category 498 has no DDR-specific DLL binding. The richer DDR/event-recorder dictionary appears on other ECUs / the P6 ADAS-domain successor, not as a hidden P5 FRC surface. Vehicle Control History likewise remains a saved-session/report family here rather than a separately identified category-498 live request protocol.
+and current category 498 has no DDR-specific DLL binding. The richer DDR/event-recorder dictionary appears on other ECUs / the P6 ADAS-domain successor. A hidden P5 FRC surface remains unsupported. Vehicle Control History likewise remains a saved-session/report family here rather than a separately identified category-498 live request protocol.
 
 ### Practical priority
 
@@ -1308,7 +1308,7 @@ The ID11/current-angle phase sent **85 B6 frames and received 85 Panda TX echoes
 
 Exact Gate-2 disassembly sharpens the next experiment. One pre-callback path already executes `8F944 003A = mov 0,r7`; the other executes `8F948 1A38 = mov r26,r7` before callback `8F94C`, and only later reaches the stage-1-patched compare at `8F952`. The next bounded persistent stage therefore changes only `8F948 1A38->003A` while preserving `8F952=E001`. The builder reconstructs the source from stock plus stage 1 and resigns the **combined** image: source SHA `272843a2…9f65`, source fixup `D9AF33AF`; two-patch prefix `2ED524FA`, final fixup `D12ADB05`, final residue `FFFFFFFF`, final SHA `6a371a2a…d59c`. The inverse recovery payload reverses stage 2 only.
 
-This is a testable hypothesis, not a live success claim. The next car sequence is zero-write stage-2 preflight, APPLY only on exact preflight, full OFF->READY, zero-write persistence verification, then repeat the same admission-only ID0/ID11 ladder. A steering offset remains gated on `ADMITTED`.
+This hypothesis requires live testing. The next car sequence is zero-write stage-2 preflight, APPLY only on exact preflight, full OFF->READY, zero-write persistence verification, then repeat the same admission-only ID0/ID11 ladder. A steering offset remains gated on `ADMITTED`.
 
 
 ## Gate-2 stage-2 live result and root-result correction

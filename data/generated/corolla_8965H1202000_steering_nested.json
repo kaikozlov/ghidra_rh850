@@ -17,7 +17,7 @@
       "FEBEC271"
     ],
     "h_decoder_wrapper": "0x000CB68A",
-    "interpretation": "H does not preserve separate authenticated-0x131 LTA and authenticated-0x2E4 torque arbitration/latch functions. The paired root-stage wrapper collapses to one H supervisory-mode decoder that derives six local mode flags from H-specific state. The three canonical roles are therefore closed by a complete replacement-surface recensus, not fake one-to-one homologs.",
+    "interpretation": "H does not preserve separate authenticated-0x131 LTA and authenticated-0x2E4 torque arbitration/latch functions. The paired root-stage wrapper collapses to one H supervisory-mode decoder that derives six local mode flags from H-specific state. A complete replacement-surface recensus therefore closes the three canonical roles.",
     "sienna_roles": [
       "steering_request_source_arbitration",
       "steering_lta_mode_latch",

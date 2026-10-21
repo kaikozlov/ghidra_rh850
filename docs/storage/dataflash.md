@@ -84,8 +84,8 @@ In this captured image the outer committed-record markers are:
 68 of 122 configured physical records meet both conditions. The remaining 54
 read as erased, uncommitted, stale, masked, or otherwise invalid records.
 
-The second header word at `+2` is now recovered as a **short-block additive
-checksum**, not a CRC. `FUN_000762c6 @ 0x762C6` is an unsigned byte-sum loop.
+The second header word at `+2` is a recovered **short-block additive
+checksum**. `FUN_000762c6 @ 0x762C6` is an unsigned byte-sum loop.
 For NvM payload lengths below `0x21`, writer `FUN_000765D0 @ 0x765D0` writes the
 16-bit accumulated sum at `+2`, and reader `FUN_0007668A @ 0x7668A` recomputes
 and compares it, returning `0xFFFC` on mismatch. Across every committed short
@@ -184,8 +184,8 @@ MAC/key objects.
 ### 2.3 Checkpoint producer and payload classification
 
 Every enabled descriptor was traced through the object-indexed update API and
-restore accessor. The names below are **evidence names** for storage structure,
-not recovered Toyota/Denso identifiers:
+restore accessor. The names below are analyst-assigned **evidence names** for
+storage structure:
 
 | Object | Bytes | Direct writer(s) | Defensible evidence name |
 |---:|---:|---|---|
@@ -222,11 +222,10 @@ counters and three condition-history entries. Object 24 is a one-byte countdown;
 For whole-buffer writers, the CSV deliberately preserves `u8[length]` rather than
 inventing field boundaries. Enabled object 27 is especially bounded: it has a
 valid 72-byte descriptor and generic restore support, but exhaustive static call
-tracing found no object-specific writer. That is evidence of a configured orphan
-or externally unused slot in this calibration, not permission to assign an OEM
-name. Disabled objects are similarly not given semantics. This resolves storage
-ownership and recoverable structure while leaving unavailable physical meanings
-explicitly unknown.
+tracing found no object-specific writer. This supports classifying the slot as a
+configured orphan or externally unused in this calibration. Its OEM name remains
+unknown. Disabled objects similarly retain unknown semantics. This resolves storage
+ownership and recoverable structure while preserving the bounds on physical meanings.
 
 ### 2.4 Pages 0–255 are outside the object store
 
@@ -303,8 +302,8 @@ by `secoc_nvm_persist_triplicate @ 0x67608`.
 | 14 | 32 | 40 | `0xFEBF02A8` | 441 / 437 / 433 | no valid copy |
 | 15 | 32 | 41 (`0x29`) | `0xFEBF02E8` | 440 / 436 / 432 | no valid copy |
 
-This table explains all pages 432–479. Pages 468–479 are only objects 0–3;
-their first words (`1..12`) are physical storage indexes, not ICU key IDs.
+This table explains all pages 432–479. Pages 468–479 contain only objects 0–3.
+Their first words (`1..12`) identify physical storage indexes.
 
 ## 4. The field-verified SecOC-key record
 
@@ -379,16 +378,16 @@ session crypto parameters. It does not persist them in NvM.
 
 ## 6. Implications for the previous lifecycle analysis
 
-The prior correction remains valid that `0x65CD8 -> 0x66E48 -> 0x67590 ->
-0x72F58` is NvM, not a CSM/ICU command chain. The broader conclusion changes:
-this NvM subsystem is not exclusively non-key state. Object 15 is structurally a
-key-bearing object on field-verified related variants, and a valid value would be
-CPU-visible in its RAM mirror/work buffers.
+The prior correction remains valid: `0x65CD8 -> 0x66E48 -> 0x67590 ->
+0x72F58` is an NvM call chain. The broader conclusion changes: this subsystem
+also handles key-bearing state. Object 15 is structurally key-bearing on
+field-verified related variants, and a valid value would be CPU-visible in its
+RAM mirror/work buffers.
 
 Accordingly:
 
 - the report's FEBEF capture locations remain wrong for the SecOC key;
-- `0x72F58` remains generic `NvM_ReadBlock`, not key-set;
+- `0x72F58` remains generic `NvM_ReadBlock`;
 - the correct known related-variant locations are DataFlash `0xFF206E14` and RAM
   mirror field `0xFEBF02F8`;
 - neither is validated as containing a key in this exact snapshot;
@@ -411,12 +410,12 @@ Accordingly:
 | exact prior use before the present erased/unallocated state | **Indeterminable from this dump** |
 | active checkpoint writer ownership and evidence-bounded payload schemas | **Definitive where field assembly is direct; bounded otherwise** |
 | pages 432–479 are the 16-object raw/XOR55/XORAA bank | **Definitive** |
-| pages 468–479 are ordinary objects 0–3, not key IDs 1–12 | **Definitive** |
+| pages 468–479 store ordinary objects 0–3, indexed by physical values 1–12 | **Definitive** |
 | object 15 is len 32 / base block 41 / RAM `0xFEBF02E8` | **Definitive** |
 | field `0xFF206E14` maps to RAM `0xFEBF02F8` after restore | **Definitive** |
 | current snapshot's object 15 has no valid copy/key | **Definitive** |
 | related variants store the CMAC-verified SecOC key at `0xFF206E14` | **Strong external/field evidence** |
-| DIDs 201/202/203 are volatile, not DataFlash-backed | **Definitive** |
+| DIDs 201/202/203 use volatile storage only | **Definitive** |
 | `0x4EAD8` protects the final 2 KiB and optional-object pages 432–443 | **Definitive** |
 | pages 480–511 are the device's ICU-S reservation | **Strong hardware/firmware evidence** |
 | CPU-visible 00/FF tail bytes reveal protected ICU-S contents | **Unsupported** |

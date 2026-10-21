@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Compare canonical RH850 function bodies against a foreign CodeFlash image.
 
-This is a firmware-byte comparison, not a semantic matcher.  It uses the
+This compares firmware bytes. It uses the
 canonical Sienna Ghidra function inventory only to define reference function
 body ranges, then proves exact transfer from raw bytes wherever possible.
 

@@ -352,7 +352,7 @@ def _rewrite_pointer_to_int(code: str, pointers: set[str]) -> str:
 
 
 def _rewrite_explicit_fields(code: str) -> str:
-    """`&label.field_0xN` is the byte at that label plus N, not a C member."""
+    """`&label.field_0xN` addresses the byte at that label plus N."""
     def replace(match: re.Match[str]) -> str:
         address = _symbol_address(match.group(1))
         if address is None:
@@ -799,7 +799,7 @@ def _bitfield_assignment_rhs(code: str, end: int) -> tuple[str, int] | None:
 
 
 def _rewrite_bitfields(code: str) -> str:
-    """Ghidra `name._offset_size_` is a byte overlay, not a struct field."""
+    """Interpret Ghidra `name._offset_size_` as a byte overlay."""
     locals = _local_sizes(code)
     var_structs = layout._struct_var_types(code)
     pieces: list[str] = []
@@ -965,7 +965,7 @@ def _rewrite_base_address_sums(code: str, names: set[str]) -> str:
 
 
 def _top_level_address(expr: str, names: set[str]) -> bool:
-    """True when the expression is a firmware base or base+/-offset, not a compare."""
+    """True when the expression is a firmware base or base+/-offset with no comparison."""
     text = expr.strip()
     if "camry_host_ptr" in text or not text:
         return False
@@ -1186,7 +1186,7 @@ def _rewrite_pointer_compares(code: str, pointers: set[str]) -> str:
         if code.startswith(("<<", ">>"), index):
             index += 2
             continue
-        # `->` is a member access, not a greater-than compare.
+        # Skip the member-access operator `->` when scanning comparisons.
         if code[index] == ">" and index > 0 and code[index - 1] == "-":
             index += 1
             continue
@@ -1216,7 +1216,7 @@ def _rewrite_pointer_compares(code: str, pointers: set[str]) -> str:
             and _comparison_operand_is_pointer(raw_right, pointers, entries)
         )
         if left_pointer and right_pointer:
-            # A cast integer is already a firmware word, not a mapped pointer.
+            # A cast integer already uses the firmware-word representation.
             pieces.append(code[cursor:left_at])
             pieces.append(address(raw_left))
             pieces.append(op)
@@ -1225,7 +1225,7 @@ def _rewrite_pointer_compares(code: str, pointers: set[str]) -> str:
             index = right_end
             continue
         # A pointer slot holds a firmware address. Comparing that word with
-        # `(void *)0x0` is the `cmp r0` in the bytes, not a host-pointer test.
+        # `(void *)0x0` reproduces the integer `cmp r0` in the bytes.
         if left_pointer and not right_pointer and syntax._is_null_pointer_expr(raw_left):
             pieces.append(code[cursor:left_at])
             pieces.append("0")

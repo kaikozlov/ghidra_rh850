@@ -695,7 +695,7 @@ def _lateral_arbitration_schema(details: list[dict[str, Any]]) -> dict[str, Any]
             "LCA": {
                 "presence_field": lca_presence,
                 "dedicated_request_tuple_rows": [],
-                "boundary": "LCA is explicitly present as a feature in DID 5202, but this 1,130-row current recorder dictionary contains no LCA-named lateral-ID/pinion-angle/assist-gain/damping-gain request tuple. This is a recorder-schema negative, not proof that LCA has no internal request path.",
+                "boundary": "LCA is explicitly present as a feature in DID 5202, but this 1,130-row current recorder dictionary contains no LCA-named lateral-ID/pinion-angle/assist-gain/damping-gain request tuple. This negative result covers only the recorder schema. An internal LCA request path remains possible.",
             },
         },
         "arbitration_result": {

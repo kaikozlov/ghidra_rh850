@@ -30,8 +30,8 @@ must independently establish four classes of evidence:
 
 If the control/queue structure resolves but either steering capability or exact
 RAM geometry does not, the manifest remains useful for variant comparison but is
-explicitly **not runtime-build-ready**. Missing steering records are reported as
-`semantic-resolved-steering-unsupported`, not as a resolver failure.
+explicitly **not runtime-build-ready**. The manifest reports missing steering
+records with the capability status `semantic-resolved-steering-unsupported`.
 
 ## One-command fresh-image workflow
 

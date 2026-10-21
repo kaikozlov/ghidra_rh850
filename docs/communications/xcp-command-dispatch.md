@@ -108,14 +108,14 @@ logical channel before either standard or custom memory commands execute;
 CONNECT itself has no GET_SEED/UNLOCK prerequisite in this image.
 
 For example, an eight-byte `F4 01 00 00 28 6D BE FE` request selects one byte at
-`0xFEBE6D28`. Firmware-static evidence establishes the parser and read path, not
-external gateway reachability.
+`0xFEBE6D28`. Firmware-static evidence establishes the parser and read path.
+External gateway reachability remains unproven.
 
 The copied interval does not contain the bootloader secrets at `0xBFD8` and
 `0xBFE8` or the application SecurityAccess secret at `0x20840`; this finding
 does not claim direct key disclosure.
 
-### DAQ commands provide event-driven RAM telemetry, not a reverse write path
+### DAQ commands provide event-driven RAM telemetry
 
 The lower command map also implements a complete XCP-shaped DAQ subset:
 
@@ -159,8 +159,8 @@ read-only live-project assertion finds exactly four direct references to the
 DAQ pointer-table base: initialization, list clearing, `WRITE_DAQ`, and the
 sampler. No reverse store through the configured source pointer is recovered.
 Thus this DAQ surface is a **firmware-static unauthenticated event-driven
-LocalRAM disclosure primitive**, not a STIM-style memory-write primitive in this
-calibration.
+LocalRAM disclosure primitive**. This calibration has no recovered STIM-style
+memory-write path.
 
 This is directly useful to the remaining dynamic steering discriminator if the
 physical `0x7F7/0x7F8` route is reachable. The already-recovered d/q reference
@@ -207,8 +207,8 @@ foreground/flash-end entry (`0x31810=1`), and context 0 for CAN1 Tx/Rx ISR
 wrappers (`0x31811=0`). MPAT bit semantics are those in the Renesas P1M-E
 manual (`REFERENCE/r01uh0585ej0120_manual.pdf`, Table 3.49). The common P1M-E
 device profile now correctly marks the PE1 and self Local-RAM views executable;
-the former `execute=false` Ghidra block flag was stale analysis metadata, not a
-hardware security bound (CORR-060). Second, an exhaustive live-project
+the former `execute=false` Ghidra block flag was stale analysis metadata
+(CORR-060). Second, an exhaustive live-project
 census over all defined function instructions finds exactly three direct
 references into `0xFEBF7C00..0xFEBFFBFF`, all `WRITE` references to the base
 `FEBF7C00` (`0x142E`, `0x62652`, `0x976E4`). It finds zero function-owned direct
@@ -252,16 +252,16 @@ pins the source ZIP and extracted bytes and verifies the full composition; see
 
 The security conclusion is therefore corrected and still bounded:
 **write capability is verified, and the window is supervisor-executable by MPU
-configuration, but no control-transfer consumer is recovered** — so this
-remains a write primitive, not a claimed RCE.
+configuration, but no control-transfer consumer is recovered**.
+The established capability is limited to writing.
 `exploit/followups/xcp_shadow_write_plan.py` now represents the verified
 SET_MTA/DOWNLOAD wire primitive as an offline-only planner/simulator. It has no
 live transport path; that preserves the distinction between proving the write
 primitive and claiming an as-yet-unrecovered consumer or actuation effect.
 
-Firmware-static evidence proves CAN1 acceptance and response construction, not
-that an external vehicle gateway or diagnostic connector forwards CAN
-`0x7F7/0x7F8`. The transport also closes the obvious short-frame stale-tail
+Firmware-static evidence proves CAN1 acceptance and response construction.
+Forwarding of CAN `0x7F7/0x7F8` through an external vehicle gateway or diagnostic
+connector remains unproven. The transport also closes the obvious short-frame stale-tail
 avenue: `0x81FE4` accepts only nonzero payload lengths up to eight bytes, clears
 the eight-byte receive staging slot before copying the supplied bytes, and the
 custom handlers require an exact eight-byte request before consuming their

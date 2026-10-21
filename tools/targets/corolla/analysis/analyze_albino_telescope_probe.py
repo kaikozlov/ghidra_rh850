@@ -242,7 +242,7 @@ def build() -> dict:
             "fhve3": f"0x{probe['layer3']['registers']['FHVE3']:08X}",
             "selfid": [f"0x{probe['layer3']['registers'][f'SELFID{i}']:08X}" for i in range(4)],
             "selfidst": f"0x{probe['layer3']['registers']['SELFIDST']:08X}",
-            "boundary": "register values are retained as observations; SELFIDST is the self-programming ID-authentication status, not proof that the OCD debugger ID or ICU-S key store is unlocked",
+            "boundary": "register values are retained as observations; SELFIDST reports self-programming ID-authentication status only. The OCD debugger ID and ICU-S key-store unlock states remain unproved",
         },
         "boundaries": [
             "This probe independently replays the bootloader authenticated-RAM execution path already required by the earlier range-dump acquisition; it does not prove application-context resident-code retention.",

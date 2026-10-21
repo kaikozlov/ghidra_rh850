@@ -1,10 +1,10 @@
 # 2026 Camry longitudinal evidence packet and status (WP4)
 
 **Evidence scope:** the September-16 command-role correction, followed by
-later dated request/result and archive-wide analyses. This is a wire-evidence
-report, not a statement of the currently deployed sender. `0x160` is an
-FRC-origin longitudinal/ego-state publication, not the demonstrated Camry
-actuator ingress. The central request surface is `0x08A`: it carries the
+later dated request/result and archive-wide analyses. This report covers wire
+evidence. The currently deployed sender is outside its scope. `0x160` is an
+FRC-origin longitudinal/ego-state publication. The demonstrated central request
+surface is `0x08A`: it carries the
 FRC-submitted upper/lower longitudinal request packages plus the recovered lateral
 request tuple. Brake-owned `0x081` publishes the downstream selected/employed result state.
 The Camry `0x160` B4:B5+B12 encoder remains withdrawn.
@@ -21,9 +21,9 @@ request with the driver's accelerator request. The reported
 `arbitration result_longitudinal ID` is the selected application's ID when the
 application request is employed, or a distinct value that identifies a driver
 request when the driver wins. The patent also defines the analogous lateral ID
-as an application identifier. This is generic Toyota architecture, not by
-itself a byte-level proof for F33, but it matches the recovered `0x08A/0x081`
-behavior unusually closely.
+as an application identifier. This generic Toyota architecture closely matches
+the recovered `0x08A/0x081` behavior. F33 byte-level proof requires independent
+evidence.
 
 That distinction explains the ID63 observation cleanly. On the Camry, FRC-origin
 `0x08A` request slots carry IDs such as 0/4 and 11/17; **ID63 is not observed in
@@ -61,7 +61,7 @@ combined and drive-side quantities, respectively. Neither is OEM-joined to `57DB
 The [braking-ceiling comparison](#repeated-braking-ceiling-and-request-policy-candidate)
 narrows the weak-braking behavior; the subsequent
 [stock scene comparison](#stock-following-versus-free-cruise-association) makes a
-companion request-policy mismatch the leading hypothesis, not a proved cause.
+companion request-policy mismatch the leading hypothesis. Its cause remains unproved.
 `0x0CA` remains protected longitudinal/chassis state but is no longer the primary
 result interpretation. See `data/generated/camry_2026_longitudinal_request_plane.json`.
 
@@ -117,15 +117,15 @@ mean-wheel speed above 0.1 m/s near each previously identified resume:
 An unconstrained acceleration-demand interpretation for this field does not
 explain these stock starts: the vehicle is already accelerating while the fine
 field remains zero. A measured-acceleration/estimated-motion role is the
-stronger interpretation. This is a **bounded semantic classification**, not
-recovery of an OEM field name or proof that the entire PDU is read-only.
+stronger interpretation. This **bounded semantic classification** leaves the OEM
+field name and the writability of other PDU fields unresolved.
 
 ### Independent chassis-state and ego-speed cross-check
 
-A second reduction in the maintained motion-audit producer now checks the two
-complete August captures against raw chassis messages, rather than relying
-only on the wheel-speed derivative or the current port's signal names. Inputs
-are already tracked; regeneration needs neither `REFERENCE/` nor `build/`.
+A second reduction in the maintained motion-audit producer checks both complete
+August captures against raw chassis messages. This adds an independent check to
+the wheel-speed derivative and current port signal names. Inputs are tracked;
+regeneration needs neither `REFERENCE/` nor `build/`.
 
 | Cross-check | Drive A | Drive B |
 |---|---:|---:|
@@ -137,9 +137,9 @@ are already tracked; regeneration needs neither `REFERENCE/` nor `build/`.
 | Moving speed samples | 8,930 | 14,413 |
 
 The packed speed candidate spans B7:B9. Its observed numerical encoding is
-compatible with the existing Toyota wheel-speed representation; this is an
-ego-speed match, not a new OEM name or command definition. Invalid wheel flags
-are rejected. The acceleration comparison uses the preceding chassis sample
+compatible with the existing Toyota wheel-speed representation. This match
+establishes ego-speed correspondence only. Invalid wheel flags are rejected.
+The acceleration comparison uses the preceding chassis sample
 within 100 ms; speed uses the preceding wheel sample within 80 ms. Neither
 joins across original source files or consumes a future sample at the queried
 instant. The `0x13C` word remains described structurally; the independently
@@ -150,7 +150,7 @@ This substantially strengthens the **ego-state publication** interpretation
 of the PDU. It does not prove all its other fields are telemetry, that only a
 radar consumes it, or that changing reported state could have no indirect
 control effect. In particular, our DBC name `TSS3_LONGITUDINAL_REQUEST` is a
-project-assigned hypothesis, not Toyota evidence.
+project-assigned hypothesis.
 
 ### B12 timing favors a return-derived quantity, but does not measure a path delay
 
@@ -180,10 +180,10 @@ the new cross-checks above use the already tracked full August captures.
 
 All **1,249** host frames can be paired to a CRC-valid preceding camera frame
 with the **same B2 counter** in the same original source file. Source ages are
-1.619–2.733 ms (median 1.879 ms). This is a local time-bounded match, not a
-whole-route dictionary indexed by an 8-bit wrapping counter. All 1,249 have a
-byte-identical returned Panda TX within 3.892–21.305 ms. Thus this audit is not
-mistaking a host send request for proof that the frame was actually transmitted.
+1.619–2.733 ms (median 1.879 ms). Each match is local and time-bounded, so the
+8-bit wrapping counter is disambiguated. All 1,249 have a byte-identical returned
+Panda TX within 3.892–21.305 ms. This provides transmission evidence beyond
+the host send request.
 The returned TX still does **not** acknowledge receiver acceptance.
 
 B4:B5 differs from its native source in 1,243 frames; B12 differs in 970.
@@ -215,8 +215,8 @@ At 500 ms before the wheel-defined motion onsets, the three `0x0CA` result-like
 values are already **+0.453, +0.335, and +0.516 m/s²**, while B12 remains at its
 preceding baseline (+0.1, −0.1, and 0 under the historical comparison convention)
 and B4:B5 remains zero. B12 changes later but still before wheel motion.
-The complete neighborhoods, not only threshold-crossing timestamps, are in the
-result artifact. Different quantization/filtering and parallel calculations
+The result artifact contains the complete neighborhoods, including threshold-crossing
+timestamps. Different quantization/filtering and parallel calculations
 prevent treating this temporal order as a unique internal dataflow proof.
 Nevertheless, "B12 changes before the car moves" cannot identify it as the
 upstream command: an export of an already selected native acceleration can do
@@ -225,7 +225,7 @@ that too.
 The three stock segments also directly separate native traffic from Panda
 returns: `0x0CA` has **7,641 native bus0 frames and 7,641 returned bus2 TXs
 (src=130)**, with no native bus2 copy. It is a chassis-to-camera publication on
-the temporary repin, not a proven FRC-origin acceleration request. In these
+the temporary repin. An FRC-origin acceleration-request role remains unproved. In these
 same captures `0x160` is native on bus1. On the restored stock harness, the
 camera link is the split bus2→bus0 pair and `0x0CA` is on unsplit bus1.
 Toyota network numbers and Panda indices must not be mixed across harnesses.
@@ -236,8 +236,8 @@ The exact chassis ECU that publishes `0x0CA` remains unassigned here.
 Direct reads of the retained `FRC_P5.ddb` expose both estimated motion and
 request/output vocabulary. DID `0x1253` names **Estimate Vehicle Acceleration**.
 DID `0x1B08` contains **Driver Acceleration for Output**, **Acceleration Limit
-for Output**, and **Acceleration for Output**. Those names are diagnostic
-observables, not an assignment to a particular byte of `0x160`.
+for Output**, and **Acceleration for Output**. Those diagnostic observables
+remain unassigned to particular bytes of `0x160`.
 
 The previously proposed `0x1B03..0x1B07` join is specifically an **ISA**
 upper-limit/permission surface. It must not be described as a proved generic
@@ -279,9 +279,8 @@ The follow-up review reread the **28 original rlogs** selected by the expanded
 local role analysis: September-11 `d1` segments 3–6 and 9–12, `d4` segments 0–6,
 historical relay-direction route `2d` segments 0–5, September-4 `3b` segments
 83–85, and `3c` segments 25–28. The last two groups retain the declared
-four-second neighborhoods around the three stock-resume landmarks. This is a
-selection of source files/windows, not a claim to have reviewed every Camry
-route or every message in those files.
+four-second neighborhoods around the three stock-resume landmarks. The review
+is limited to these selected source files/windows.
 
 Re-extraction produced **306,073 original publication events** and was
 byte-identical to the existing expanded local fixture
@@ -297,8 +296,8 @@ The expanded comparison supplies useful independent corroboration: native
 B4:B5 agrees with the chassis `0x13C` signed-15 numerical channel in both August
 captures (r=0.979516/0.989355; median absolute difference 0.006/0.014 m/s²), and
 a separate packed speed candidate in `0x160` agrees with raw wheel speed
-(r=0.999789/0.999942). These are numerical/behavioral matches, **not** OEM
-signal-name assignments or proof of a byte-for-byte forwarding operation.
+(r=0.999789/0.999942). These matches establish numerical/behavioral correspondence
+only. OEM signal names and byte-for-byte forwarding remain unproved.
 The wheel-derivative audit and stock starts remain important because merely
 matching a second presumed command would not resolve the original question.
 
@@ -346,7 +345,7 @@ The expanded evidence lives in:
 **Working diagnosis:** the examined Camry fields fit an FRC publication of ego
 motion and selected longitudinal state better than a direct independent
 acceleration-demand interface. A perception/radar-side state report is the
-leading architectural interpretation, **not a recovered receiver contract**.
+leading architectural interpretation. Its receiver contract remains unrecovered.
 Neither "every field is telemetry" nor "the packet can never influence control"
 follows. It is also not established that this is an exact echo of some other
 FRC-origin command: the correlated `0x0CA` channel travels from the chassis
@@ -356,16 +355,16 @@ side toward the camera on the historical split.
 
 With no additional unit fit, the fine field agrees with the acceleration-like
 quantity in chassis `0x13C`: all-sample correlations **0.979516 / 0.989355**, with
-median absolute differences **0.006 / 0.014 m/s²** in August A/B. This names the
-observed chassis channel, **not its physical ECU owner or an OEM signal**. The
-independent wheel derivative and cruise-off moving results above avoid circularly
+median absolute differences **0.006 / 0.014 m/s²** in August A/B. This identifies
+the observed chassis channel only. Its physical ECU owner and OEM name remain unassigned.
+The independent wheel derivative and cruise-off moving results above avoid circularly
 validating one presumed command against another presumed command.
 
 A separate packed speed-like field in `0x160` follows mean wheel speed with
 correlations **0.999789 / 0.999942** and median absolute differences about
 **0.019 / 0.020 m/s**, above the declared low-speed cut. The selected packet
-therefore contains ego-state information, not merely an acceleration-shaped
-number. Its validity/sentinel semantics and every other field remain unmapped.
+therefore contains ego-state information. Its validity/sentinel semantics and
+every other field remain unmapped.
 Invalid wheel flags are excluded rather than interpreted as zero speed.
 
 In the restored-harness d1/d4 captures, with cruise disengaged and speed above
@@ -424,7 +423,7 @@ possible influence or identify a particular acceptance gate.
 
 The September-1 notebook §19 records `0x160` **40 → 0 → 40** under FRC normal-Tx
 suppression/restoration on the observed ADAS network. This supports the FRC
-publication source, not a propulsion/brake destination. The full six-segment
+publication source. A propulsion/brake destination remains unproved. The full six-segment
 historical relay capture has `0x0CA` **13,756 native bus-0 RXs** and **13,256
 returned bus-2 TXs**, versus only 503 startup/native bus-2 observations. FRC-side
 `0x08A` has the opposite dominant direction. On the restored stock harness,
@@ -433,14 +432,13 @@ network. Panda bus indices are not Toyota network numbers.
 
 Direct GTS DDB queries reproduce `FRC_P5` DID `0x1253` (estimated acceleration)
 and `0x1B08` (separate driver, limit and output accelerations). `0x1B03..0x1B07`
-are ISA-specific request/permission observables, not a generic decoded DRCC
-request. Brake `0x10A1..0x10A4` name TSS requests, but no retained synchronized
+are ISA-specific request/permission observables. A generic DRCC request decoding
+remains unproved. Brake `0x10A1..0x10A4` name TSS requests, but no retained synchronized
 CAN/DID sample assigns these names to B4:B5 or B12. The current checked-in
-firmware inventory contains EPS applications, not the relevant Camry
-longitudinal producer/receiver implementation. EPS receive behavior cannot fill
+firmware inventory contains EPS applications. The relevant Camry longitudinal
+producer/receiver implementation remains unavailable. EPS receive behavior cannot fill
 that provenance gap. The candidate re-rank below identifies a protected
-chassis-facing request carrier, but not yet the preferred upstream replacement
-carrier.
+chassis-facing request carrier. The preferred upstream replacement carrier remains unresolved.
 
 ### Longitudinal candidate re-rank after topology normalization
 
@@ -453,9 +451,9 @@ therefore normalized to Toyota network role before any candidate is compared:
 | Temporary CAN0/CAN1 repin (Aug-27 through lateral development) | **Toyota Bus 4**: upstream `0x08A/0x0C9` on bus2 -> chassis bus0; `0x0CA` returns bus0 -> bus2 | **Toyota Bus 1** camera/radar/FRC P05 family | Healthy Sep-4 DRCC routes `3b/3c` are in this era |
 | Stock Toyota-B restored in the Sep-11 integration cleanup | **Toyota Bus 1** camera/ADAS: FRC `0x020/0x160/0x230/0x440` source bus2 -> downstream bus0 | **Toyota Bus 4** request/result/chassis family `0x08A/0x0C9/0x0CA`, unsplit | Current production-shaped topology |
 
-`harnessStatus=flipped` means harness/cable orientation, **not** the physical
-CAN0/CAN1 repin. Likewise Panda sources 128/130 are returned host-TX echoes, not
-additional ECU transmitters. The regenerated stock-topology artifact checks all
+`harnessStatus=flipped` describes harness/cable orientation. Physical CAN0/CAN1
+repinning is a separate configuration. Panda sources 128/130 identify returned
+host-TX echoes. The regenerated stock-topology artifact checks all
 seven request/result candidate IDs explicitly rather than inferring this mapping
 from unrelated state messages.
 
@@ -517,8 +515,8 @@ The alternatives now rank as follows:
 
 1. **Protected `0x08A` B8:B9/B11:B12** — strongest direct downstream TSS
    acceleration-request candidate.
-2. **Protected `0x5AF` B26** — a coarse longitudinal companion, not a
-   replacement for the `0x08A` magnitude. Interpreting B26 as signed 6-bit gives
+2. **Protected `0x5AF` B26** — a coarse longitudinal companion. The `0x08A`
+   magnitude remains the request reference. Interpreting B26 as signed 6-bit gives
    a reproducible fit of **0.251/0.246 m/s² per count** against the `0x08A`
    request word (r=0.756/0.857), but its best alignment is **50/75 ms after**
    `0x08A`. Around the three stock resumes it steps through small signed values
@@ -553,8 +551,8 @@ acceleration carrier**. Thus there is no second same-scale request magnitude hid
 observed FRC-dependent protected domain. This does **not** mean a different semantic
 request must exist before `0x08A`: the retained CommunicationControl experiment
 already establishes `0x08A` as the upstream TSS request-side plane. A proxy or
-signer may physically publish the protected Bus-4 PDU, but that is a
-transport/cryptographic ownership question, not a second request layer.
+signer may physically publish the protected Bus-4 PDU. That possibility concerns
+transport/cryptographic ownership of the same request layer.
 
 This distinction matters for the port. On the temporary repin, `0x08A` sat on
 the intercept pair and its source side was observable separately. On final
@@ -575,14 +573,14 @@ longitudinal request IDs, braking/driving-force allocation, shift/EPB,
 override/priority and other request metadata whose exact wire locations are not
 all mapped. Ordinary FRC state/display/ego-motion publications (`0x020`,
 `0x160`, `0x230`, `0x440`, `0x371`, `0x412`, etc.) also exist outside `0x08A`.
-The bounded claim is **central control-request plane**, not exhaustive FRC output.
+The bounded claim is **central control-request plane**. Other FRC outputs remain separate.
 
 
 ### Request/result recorder layout: what is actually mapped
 
 Toyota's architecture changes the meaning of the longitudinal pair. The lower and
-upper packages are independently arbitrated **bounds** on allowed acceleration, not
-two redundant acceleration commands. The downstream powertrain compares driver demand
+upper packages are independently arbitrated **bounds** on allowed acceleration.
+The downstream powertrain compares driver demand
 with those bounds and clips it into the selected range; the longitudinal result ID then
 reports the request source whose acceleration was actually employed. This explains why
 result ID63 (`Driver Operation`) can appear while neither `0x08A` bound-package ID is
@@ -627,8 +625,8 @@ Every selected ID63 sample (**15,544 / 16,718**) has ID63 absent from both FRC
 request A/B fields. Toyota's P5 FRC diagnostic display vocabulary includes
 `63 = Driver Operation`, and Toyota's movement-control patent explicitly allows
 the **result** longitudinal ID to carry a driver discriminator when driver demand
-is employed. Thus 63 is evidence for Brake/VMC result feedback to the FRC, not an
-FRC requester. This also strongly supports B6/B7 as packed FRC-submitted
+is employed. Thus 63 supports Brake/VMC result feedback to the FRC.
+This also strongly supports B6/B7 as packed FRC-submitted
 application-ID/allocation bytes rather than generic ACC-state bytes.
 
 The retained delayed-stop corpus gives a second dynamic check and supersedes the
@@ -651,7 +649,7 @@ Do not flatten the FRC request IDs and Brake/VMC result IDs into one wire namesp
 `0x08A` carries **FRC-origin application request IDs** for the upper/lower bound
 packages. `0x081` carries the downstream **employed-source result ID**; that result
 can identify the driver even though no FRC request used that number. The numeric
-values are identities, not priorities or ECU addresses. The current Toyota corpus
+values identify applications or the employed source. The current Toyota corpus
 does not contain one complete longitudinal 0..63 request enum analogous to EMPS
 `Target Lateral ID`. A six-region sweep
 of current GTS+ and Techstream V18 (NA/EU/JP; 3,207 DDB files total) found the
@@ -667,7 +665,7 @@ The working namespace is:
 | **0** | P5 FRC ISA Vertical ID names `No Request`; Camry request A uses 0 while idle | `No Request (Manual Operation)` | common no-request anchor |
 | **4** | Camry/Corolla default lower-bound request slot in manual `0/4`; Camry scalar is positive creep-like at very low speed, declines through zero into coast/decel with speed, and falls on 9/9 matched low-speed brake presses | LDA | **strong closed-accelerator/manual baseline lower-bound attribution**; exact longitudinal OEM application name unknown, and lateral `LDA` label must not be copied |
 | **9** | P6 Speed Limiter Requesting Vertical ID explicitly names `ISA` | no generation-20 lateral label | named cross-generation longitudinal/vertical anchor; not observed on Camry `0x08A` |
-| **11** | Camry request A during ordinary DRCC; `0x081` result ID11 when that application request is employed | LTA/LCA | **strong shared-TSS-application-ID hypothesis**, not yet an OEM longitudinal enum name |
+| **11** | Camry request A during ordinary DRCC; `0x081` result ID11 when that application request is employed | LTA/LCA | **strong shared-TSS-application-ID hypothesis**; OEM longitudinal enum name unresolved |
 | **17** | Camry active request B; retained 2025 Corolla active request A | no lateral label | repeatable cross-platform active longitudinal requester; OEM name unknown |
 | **18** | not observed in Camry longitudinal A/B | SDG; P6 PDA-SA lateral request also uses 18 | lateral-only named anchor; no longitudinal transfer |
 | **23** | retained 2025 Corolla active request B | no lateral label | observed longitudinal requester; OEM name unknown |
@@ -723,13 +721,13 @@ attribution rather than an OEM enum recovery.
 Toyota's architecture materially strengthens the ID11 observation: it defines both
 the longitudinal request ID and the lateral request ID as the **identifier of an
 application**. The leading model is therefore a coordinated/shared application-ID
-namespace, not two unrelated numeric enums. Camry ID11 is the ordinary DRCC
+namespace. Camry ID11 is the ordinary DRCC
 longitudinal application source while generation-20 lateral ID11 is LTA/LCA, making
 ID11 a strong TSS continuous-driving application-identity candidate. This is still not
 an OEM label assignment for the longitudinal field: the static corpus does not publish
-the complete longitudinal value dictionary. ID25 and P6 41/45 are retained as semantic
-clues, not counterexamples—axis-local labels can describe different control roles of
-the same application.
+the complete longitudinal value dictionary. ID25 and P6 41/45 provide semantic
+clues: axis-local labels can describe different control roles of the same
+application.
 
 Toyota also exposes feature-specific longitudinal-ID recorder fields that can
 supply future direct joins: `5271` **IFU request vertical ID (lower limit)**,
@@ -845,8 +843,8 @@ The pipeline is extract → join → analyze → plot (commands in
 [WORKFLOW.md](../WORKFLOW.md#external-openpilot-rlog-reducers)). The join is
 **preceding-only** with request windows of 75 ms and
 carState/carControl/carOutput/wheel/pedal windows of 60 ms (plan/selfdriveState
-120 ms); every snapshot carries per-source ages. These are bounded-fresh
-samples, not atomic same-instant measurements or interpolation across gaps.
+120 ms); every snapshot carries per-source ages. Samples have bounded freshness.
+They retain distinct acquisition times and exclude interpolation across gaps.
 Covered time sums adjacent status intervals, capping each contribution at
 100 ms. It includes parked time and bounds each recording-gap contribution.
 `t_route` is seconds from the minimum recorded monotonic
@@ -856,20 +854,20 @@ physical wire timing or ECU execution/acceptance deadlines.
 
 Each delivered `0x08A` request is classified by exact 32-byte payload match
 against host sendcan versus native CAN traffic (plot legend `10=comma`,
-`20=native`). Vehicle-side Tx confirmations therefore establish **observed
-publication only** — not ECU execution, acceptance, or an acceptance deadline.
+`20=native`). Vehicle-side Tx confirmations establish **observed publication only**.
+ECU execution, acceptance and deadlines remain unresolved.
 `ID11` also appears on native stock traffic, so it is **not a comma-ownership
 marker**.
 
-### Six acceleration-like words: candidate roles, not OEM joins
+### Six acceleration-like words: candidate roles
 
 | Word | Candidate role | Dominant evidence and bounds |
 |---|---|---|
-| `B4:B5` | inferred combined longitudinal control/force-equivalent quantity; normally request-following | in every one of 126 excited no-pedal moving stock windows the direct `B4−request` RMS beats the direct `B4−wheel CarState` RMS (medians 0.00921 vs 0.09756 m/s²); `B4−B18` follows the separate driver-brake word during manual braking; not literal body motion (−2.458 at held-brake standstill), an unconditional echo, or an established `57DB` join |
-| `B18:B19` | inferred drive-side result/reference; empirically `max(B4,B24)` | exact in 1,232,419/1,232,664 frames; `B22 ≥ B18` in all frames; distinct from the combined quantity during braking, but not an established `57DB` join or recovered ECU formula |
-| `B20:B21` | **closed-accelerator reference** | equals `B24` in 1,005,245/1,010,206 fresh closed-pedal frames (~99.5%); mirrors inactive native request words (IDs 0/4); not whole-vehicle achieved acceleration |
-| `B22:B23` | upper/open-accelerator envelope | `B22 ≥ B18` with zero violations in 1,232,664 frames; `B24` itself exceeds `B22` in 11 frames, so it is not a proved hard cap on driver demand; exact quantity and speed/gear/grade dependence unresolved |
-| `B24:B25` | driver-accelerator demand/reference | rises from `B20` toward `B22` with physical accelerator fraction; not a universal selected-result or motion measurement |
+| `B4:B5` | inferred combined longitudinal control/force-equivalent quantity; normally request-following | in every one of 126 excited no-pedal moving stock windows the direct `B4−request` RMS beats the direct `B4−wheel CarState` RMS (medians 0.00921 vs 0.09756 m/s²); `B4−B18` follows the separate driver-brake word during manual braking; −2.458 at held-brake standstill; unconditional echo and `57DB` interpretations remain unproved |
+| `B18:B19` | inferred drive-side result/reference; empirically `max(B4,B24)` | exact in 1,232,419/1,232,664 frames; `B22 ≥ B18` in all frames; distinct from the combined quantity during braking; `57DB` join and ECU formula remain unresolved |
+| `B20:B21` | **closed-accelerator reference** | equals `B24` in 1,005,245/1,010,206 fresh closed-pedal frames (~99.5%); mirrors inactive native request words (IDs 0/4) |
+| `B22:B23` | upper/open-accelerator envelope | `B22 ≥ B18` with zero violations in 1,232,664 frames; `B24` itself exceeds `B22` in 11 frames; exact quantity and speed/gear/grade dependence unresolved |
+| `B24:B25` | driver-accelerator demand/reference | rises from `B20` toward `B22` with physical accelerator fraction |
 | `B26:B27` low 13 bits | driver-brake-linked signed quantity | nonzero on 121,174/121,175 brake-on frames and negative whenever nonzero (135,686/135,686); remains zero in the route-86 automatic-braking example; physical scale unresolved |
 
 Separately, `B6[7]` — the high bit above the six-bit result ID — is
@@ -893,8 +891,8 @@ cases are exactly the frames where `B24` exceeds `B22` (routes `3f` and
 `B18 = min(max(B4, B24), B22)` exactly in **1,232,430/1,232,664** frames,
 with **no below-envelope violations**. The remaining 234 above-envelope
 rows are concentrated around braking and stop/launch transitions.
-This is an empirical envelope relationship, not a recovered ECU formula;
-the additional dynamics behind those above-envelope rows remain unresolved.
+This empirical envelope relationship leaves the ECU formula and the additional
+dynamics behind the above-envelope rows unresolved.
 
 ### Independent stock direct-difference comparison
 
@@ -935,8 +933,8 @@ For the weak-braking case the full native-shaped status packet is
 `B22:B23`=`0x1078`=4216, `B26:B27`=0). The native FRC was already
 publishing an upper request of −4.0 **before** driver intervention, while
 the vehicle-side publication remained the host's −2.123. Native forwarding
-resumed only after the brake press; subsequent deep deceleration is
-confounded by driver braking, not unconfounded proof of native execution.
+resumed only after the brake press. Driver braking therefore confounds the
+subsequent deep deceleration and prevents attributing it to native execution alone.
 The [repeated braking-ceiling comparison](#repeated-braking-ceiling-and-request-policy-candidate)
 below explains the numerical shape of this gap; its exact policy cause remains open.
 
@@ -968,10 +966,10 @@ The current byte-level reconstruction is:
 | `0x081` | `B4:B5`, `B6[5:0]`, `B6[7]`, `B7` | inferred combined quantity, result-source ID, standstill-associated state, verified checksum |
 | `0x081` | `B11[4]`, `B13`, `B16:B17` | request-loss supervision; lateral result ID/status; pinion result/reference |
 | `0x081` | `B18:B19`, `B20:B21`, `B22:B23`, `B24:B25`, `B26:B27` | inferred drive-side, closed/open capability, accelerator demand, and driver-brake quantities as bounded above |
-| both | `B28:B31` | security trailer, not application acceleration words |
+| both | `B28:B31` | security trailer |
 
-The request census selects each route's native source using the saved
-`*.joined.json` metadata, rather than counting host requests or forwarded copies.
+The request census selects each route's native source from saved `*.joined.json`
+metadata. It excludes host requests and forwarded copies.
 `0x08A B15/B27` are also zero throughout. No variation identifies the constant
 `0x7FFF` words as jerk quantities rather than other unused slots.
 
@@ -980,8 +978,8 @@ On primary-drive rows with result ID63, no accelerator, and signed13 brake word
 below −50, the median raw-count ratio `(B4−B18)/brake_word` is **10.268**.
 Applying that coefficient without refitting to **84,434 historical rows** gives
 a median absolute residual of **3.53 counts** (nominal 0.00353 m/s²).
-This is an empirical relationship, not a calibration or an OEM force unit:
-a fixed **10.24-count step with truncation** explains much of the apparent
+This empirical relationship leaves calibration and OEM force units unresolved.
+A fixed **10.24-count step with truncation** explains much of the apparent
 gain difference, and transitions produce larger residuals. At held-brake
 standstill on route `87`, t=9.972897, `B4=−2.458`, `B18=+0.666`,
 brake word=−305, and wheel acceleration is zero. During route-86 automatic
@@ -995,9 +993,9 @@ The brake-pedal quantity explicitly excludes automatic braking.
 separately describes powertrain availability and the additional braking needed
 below that availability. These definitions support the decomposition, but do
 not prove that a particular Camry word is a particular patent variable.
-In particular, the empirical `B18=min(max(B4,B24),B22)` relation is not literally
-the first patent's request-bound clamp: `B22` is a capability candidate, not
-the application-request upper bound.
+The empirical `B18=min(max(B4,B24),B22)` relation uses the capability candidate
+`B22`. The first patent's clamp instead uses the application-request upper bound,
+so these formulas describe distinct bounds.
 
 GTS recorder records `5252/5253/5261/5262` name brake-pedal demand, body
 acceleration/status, fully closed ground acceleration, and accelerator demand.
@@ -1008,9 +1006,9 @@ result records needed to decide `57DB=B4` versus `57DB=B18`.
 
 ### Repeated braking ceiling and request-policy candidate
 
-The weak-braking shape repeats as a roughly **−1.0 m/s² additional contribution**,
-not as a total-acceleration clamp at the closed-pedal baseline. In the route-86
-packet above, `−0.466 + (−0.957) = −1.423`, close to wheel-derived −1.453.
+The weak-braking shape repeats as a roughly **−1.0 m/s² additional contribution**
+below the closed-pedal baseline. In the route-86 packet above,
+`−0.466 + (−0.957) = −1.423`, close to wheel-derived −1.453.
 The drive/brake interpretation remains an inference; the subtraction is observed.
 
 Selection uses the existing preceding-only joins and exact-payload host origin:
@@ -1041,8 +1039,8 @@ This yields **12 episodes / 8 routes / 708 status rows**. Every retained
 
 All times and software identities resolve through the existing
 `input_manifest.json`; full route IDs are zero-padded to eight hexadecimal
-digits before `--`. This is a follow-on calculation over the saved raw/joined
-caches, not an output already emitted by the original summary generator.
+digits before `--`. A follow-on calculation over the saved raw/joined caches
+produced these results separately from the original summary generator.
 An empirical model for these states is
 `B4 ≈ max(request, B18−1.0 m/s²)`; median absolute error is **0.008 m/s²**,
 maximum **0.044 m/s²**.
@@ -1052,7 +1050,7 @@ counterexample to a universal cap. Its `B4−B18` reaches **−1.352 m/s²** whi
 B4 follows the request. A directly redecoded packet at t=1313.999846 is
 `00000018f8c00b6400000004000b00000016fdddfddd1208fddd000094a9766d`:
 `B4=−1.856`, `B18=−0.547`, difference=−1.309, driver-brake word=0.
-Strong stock comparison coverage is one episode, not a matched causal experiment.
+Strong stock comparison coverage is limited to one observational episode.
 
 **Request-policy lead in the recorded stack:** before opendbc commit
 `3ec57f92`, `opendbc/car/toyota/toyotacan.py::create_tss3_control_request_values`
@@ -1060,14 +1058,14 @@ hardcoded `CRUISE_STATE_MIRROR=3` in its synthesized longitudinal request,
 making `0x08A B20[7:6]=0b11` (`0xC0`). The stock strong-braking example uses
 `0b01` (`0x40`). Stock-longitudinal pass-through retains the native longitudinal
 fields. The following comparisons do not isolate the field's causal effect.
-The [policy-one cutover](#policy-one-encoder-cutover) changes that constant,
-not the interpretation or evidentiary limits of the recorded drives.
+The [policy-one cutover](#policy-one-encoder-cutover) changes that constant.
+The interpretation and evidentiary limits of the recorded drives remain unchanged.
 
 ### Stock following versus free-cruise association
 
 **Observed:** the native `0x08A B20[7:6]` values have a strong association with
-following-like versus free-cruise-like scenes. Eight stock-ACC segments were
-selected for coverage of both field values, not for lead presence:
+following-like versus free-cruise-like scenes. Selection of eight stock-ACC segments
+used coverage of both field values, independently of lead presence:
 
 | Stock route | Segments |
 |---|---|
@@ -1091,17 +1089,17 @@ Time gap is `leadOne.dRel / vehicle_speed`. The lead-present rows under
 near their set speeds: median set-speed-minus-vehicle-speed is +0.101 m/s
 under `0x40` and +0.056 m/s under `0xC0`.
 
-These are **openpilot's radar/model lead estimates, not Toyota's internal ACC
-target selection**. Status rows are temporally correlated; multiple rows can
-reuse one radar sample. This selected two-route comparison is not a fleet-wide
-prevalence estimate or a count of independent trials. It is an exploratory
-follow-on calculation using the retained request/status caches and additional
-raw-rlog lead extraction, not an output of the existing VMC summary generator.
+These are **openpilot's radar/model lead estimates**. Status rows are temporally
+correlated, and multiple rows can reuse one radar sample. This exploratory
+two-route comparison uses retained request/status caches and additional raw-rlog
+lead extraction. Fleet-wide prevalence, Toyota's internal ACC target selection
+and independent trial counts remain outside its scope. It supplements the
+existing VMC summary generator.
 
 The native field changes while cruise remains active. Thus the observed
 `0x40/0xC0` distinction is not adequately described as another copy of the
-cruise latch. Following/free-cruise are scene associations, not recovered OEM
-enum names or a complete explanation: the button-driven transitions below
+cruise latch. Following/free-cruise describe scene associations. OEM enum names
+and a complete explanation remain unresolved: the button-driven transitions below
 also occur without a lead-presence change.
 
 ### Native policy transitions and cruise-speed buttons
@@ -1118,7 +1116,7 @@ same-timestamp batches and gaps are not assigned transition order.
 - **379 of 610 `1 → 3` transitions** change requested speed in the same
   packet; none of the 607 reverse transitions does. Of those 379 speed
   changes, 139 are on stock-ACC routes and 240 on openpilot-longitudinal
-  routes; the latter are still native camera requests, not host output.
+  routes; the latter are native camera requests.
 - Some scene-context transitions occur while openpilot continues detecting
   the same lead. Its lead selection is not Toyota's internal ACC target.
 
@@ -1141,8 +1139,8 @@ acceleration-sign flag nor solely a lead-present indicator.
 
 For ordinary `11/17`, allocation `1/3` requests on stock-ACC recordings,
 observed upper-acceleration ranges are −1.888…+0.925 m/s² under policy `1`
-and −0.993…+0.942 m/s² under policy `3`. These are observed ranges, not
-limits. Native traffic during an openpilot-longitudinal drive also switches
+and −0.993…+0.942 m/s² under policy `3`. Native traffic during an
+openpilot-longitudinal drive also switches
 to policy `3` at −1.444 m/s², then relaxes toward zero; stronger braking does
 not invariably imply policy `1`.
 
@@ -1162,8 +1160,8 @@ identities are in the existing
 In the documented September 21 event, route `00000043--29caa20fbc`, segment
 12, the native policy is already **`1` before ID34, stays `1` throughout
 ID34/ID33, and remains `1` afterward**. Its preceding transition was about
-79.5 s earlier under an ordinary request. The host's policy `3` was a
-pre-existing mismatch, not a change triggered by PCS.
+79.5 s earlier under an ordinary request. The host's policy `3` mismatch
+predates PCS.
 
 The ordinary native `11/17` request ramps from about +0.37 to −4.0 m/s²
 over 6.6 s and reaches −4.0 **20.226 ms before** the first ID34 packet.
@@ -1178,22 +1176,22 @@ persist across the event:
 | +486.045 | 33 | −3.800 | 0 | 1 | `0x40` |
 | +518.686 | 17 | −3.800 | 0 | 0 | `0x40` |
 
-The table's final row is the first request after the special-ID interval,
-not the last ID33 packet. B22 changes `0x10 → 0x30` on the third ID34 frame,
+The table's final row is the first request after the special-ID interval.
+B22 changes `0x10 → 0x30` on the third ID34 frame,
 after driver braking begins; its meaning is unassigned. Lateral ID and both
 lateral gains remain zero; both `0x7FFF` slots remain unchanged. The first
 two ID34 packets have identical application bytes and sequence but different
 trailers. B3[2] occurs only on the nine ID34 frames in this retained corpus;
-B4[6] occurs on exactly the 21 ID34/ID33 frames. Those are observed
-phase correspondences, not recovered Toyota feature/substage names.
+B4[6] occurs on exactly the 21 ID34/ID33 frames. These observations establish
+phase correspondences. Toyota feature/substage names remain unrecovered.
 
 The first two native special-ID packets have no vehicle-side Tx confirmation.
 Driver braking begins at +16.733 ms; forwarding resumes at +33.508 ms,
 after the pedal disable. The host was still publishing about −1.5 m/s² with
 policy `3` versus the native −4.0 with policy `1`. This records replacement
 of the stronger factory request through the beginning of the event; it does
-not isolate either policy's effect on braking. Logger timestamps establish
-these observations, not ECU execution timing.
+not isolate either policy's effect on braking. These timestamps record logger
+observations only. ECU execution timing remains unmeasured.
 
 All **2,401 native request packets** in the event segment were independently
 matched to the retained raw cache. The
@@ -1222,8 +1220,8 @@ Verification: 75 targeted Toyota safety/car/transport tests ran with four
 skipped. An offline encoder/packer/compiled-safety smoke accepted policy `1`
 at −3.5, −2.123, 0, +1, and +2 m/s², rejected host policy values `0/2/3`,
 and accepted native-preserving stock-long requests under policies `1` and
-`3`. No hardware signer or vehicle response was exercised. The cutover is
-an experimental candidate, **not a demonstrated fix for weak braking**.
+`3`. No hardware signer or vehicle response was exercised. The cutover remains
+an experimental candidate whose effect on weak braking is unproved.
 
 The existing raw steering-assist gain `100` is `LATERAL_ASSIST_GAIN=1.0`;
 it is not a longitudinal feedback-gain setting. The acceleration requests
@@ -1249,12 +1247,11 @@ Source: [recovered control-ownership vocabulary](../../data/generated/gtsplus_20
 The shipped PCS viewer's PDA(OAA) record `5A08_3` independently names
 `ブレーキ使用制限許可フラグ`, with English alias **Brake Use Restriction Flag**.
 The Japanese compound supports the reading **permission to restrict brake
-use**, not merely permission to brake. Record `5A07_3` separately names
-`応答性要求` / Response Priority Request.
+use**. Record `5A07_3` separately names `応答性要求` / Response Priority Request.
 Source: [EN/JA recorder dictionary](../../data/generated/gtsplus_2026/pcs_data_viewer_tss3_dictionary.json).
 
-These are diagnostic/recorder definitions, not a CAN layout or proof that the
-ISA/PDA fields map identically onto the DRCC request. In particular, the
+These diagnostic/recorder definitions leave the CAN layout and ISA/PDA-to-DRCC
+field correspondence unresolved. In particular, the
 [recorder decoder](../../data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json)
 defines a **three-bit** response-priority field for `5A07` and three separate
 one-bit flags for `5A08`; the DDB monitor uses a byte-wide responsiveness row
@@ -1270,8 +1267,8 @@ pre-jerk-limit request quantities. It also recovers the
 [ADS field table](../tooling/pcs-data-viewer-tss3-dictionary.md#62-ads-recorder-schema)
 and resolves the viewer's
 [PBA event discriminator](../tooling/pcs-data-viewer-tss3-dictionary.md#pba-event-discriminator).
-These are recorder definitions and consumer behavior, not new Camry wire
-assignments. The pass leaves the OEM meaning of `0x08A B20` and the
+These results establish recorder definitions and consumer behavior. The pass
+leaves Camry wire assignments, the OEM meaning of `0x08A B20` and the
 `0x081 B4/B18/B20` quantity mappings open; it adds no vehicle-response
 evidence for the policy-one cutover.
 
@@ -1308,8 +1305,8 @@ these recordings do not qualify its vehicle response.
 - The earlier `0x081 B20:B21 → 57DB` interpretation is withdrawn. `B20` is a
   closed-accelerator reference candidate; B4 and B18 have distinct combined
   and drive-side candidate roles. Neither is conclusively joined to `57DB`.
-  The earlier request correlations and ID63/ID11 deltas remain observations,
-  not evidence assigning one universal "result acceleration" name.
+  The earlier request correlations and ID63/ID11 deltas remain observations.
+  A universal "result acceleration" name remains unassigned.
 - `0x08A` B6/B7 request-ID/allocation geometry, the ID63/ID11 result-ID
   observations, and `B11[4]` request-loss supervision are unchanged by this
   corpus.
@@ -1318,8 +1315,8 @@ these recordings do not qualify its vehicle response.
   companion request-policy hypothesis without proving the field's identity or
   causal effect. All acceleration OEM joins, B26 physical scale, rare B18
   envelope departures, and B22 speed/gear/grade dependence remain unresolved.
-  Vehicle-side Tx confirmations bound publication, not ECU execution or
-  acceptance deadlines.
+  Vehicle-side Tx confirmations bound publication only. ECU execution and
+  acceptance deadlines remain unresolved.
 - No new gain or cap recommendation follows from this corpus, and none is
   implied.
 
@@ -1345,8 +1342,8 @@ documented the non-SecOC `0x160` request-plane candidate on 2026-08-31;
 and implemented the exact Profile-5 integrity contract. Commit `198d8da`
 documented the native openpilot integration path on 2026-09-05. The attributed
 albinoelephant Corolla field run was reported on 2026-09-10. Its contribution
-is independent live validation, not the original discovery or generator. The
-contributor's 2026-09-11 architecture/change reference is now retained under
+is independent live validation. The contributor's 2026-09-11 architecture/change
+reference is now retained under
 `community/albinoelephant/`;
 it documents the Corolla-specific B4:B5 request, Data ID `0x444A`, and the
 post-fault handoff design, but the exact source checkout and rlog are still
@@ -1388,7 +1385,7 @@ behavior. The September-16 audit does not attribute that co-movement to the host
 | Validity/counter rules | **transport observed, receiver processing unproved** | Profile-5 counter/CRC and one-for-one source-counter-paced TX are observed; absence of an observed integrity fault does not establish acceptance. Gap, replay, authority, and fault thresholds remain untested. |
 | Receiver acceptance | **processing/authority unproved with a genuine conventional latch; `0x251` substitution did not establish engagement** | FRC DRCC attempts were rejected and the successful cruise latch in route `000000d4--327b2c4bb8` was conventional (`0x251` B0=`0x90`). Panda suppressed the stock downstream copy and transmitted the combined replacements, but the requested stopping deceleration was not applied. In route `000000d9--a1a459c5b5`, accepted synthetic `0x251` `0xA0/0xC0` frames did not make authenticated `0x08A` active even once; stock `0x251=0xE0` also continued on the unsplit bus. |
 | Source ownership | **FRC transmit side observed; downstream receiver unresolved** | The 2026-09-01 selective normal-Tx suppression run isolates `0x160` as a 40-Hz FRC normal-Tx PDU. Which downstream participant accepts/transforms it, and its exact replacement/fallback contract, remain open. |
-| Physical response | **combined synthetic stopping response negative without DRCC** | Four captured short stock stops auto-resume without gas/brake/RES/SET; in three examples B12 ramps before motion and protected `0x0CA` exceeds +0.5 m/s² 413–503 ms before motion. In the combined trial, measured acceleration closely followed the limited protected result (`r=0.912` over strong-braking samples), not openpilot's substantially stronger requested deceleration; the driver directly observed that the car did not slow for the modeled stop sign. |
+| Physical response | **combined synthetic stopping response negative without DRCC** | Four captured short stock stops auto-resume without gas/brake/RES/SET; in three examples B12 ramps before motion and protected `0x0CA` exceeds +0.5 m/s² 413–503 ms before motion. In the combined trial, measured acceleration closely followed the limited protected result (`r=0.912` over strong-braking samples) despite openpilot's substantially stronger requested deceleration; the driver directly observed that the car did not slow for the modeled stop sign. |
 | Release/override | **partially closed** | Short-stop auto-resume works natively. After ~5.2–9.3 s stopped, Toyota enters a delayed hold state (`0x08A` B7 `0x67`, `0x66` on accelerator override); all three retained long-hold exits require accelerator input, and hold clears before motion. The command-side hold/release semantic is not yet mapped. |
 | Fault behavior | **no request-path fault observed; standstill remains open** | The moving combined-request trial completed without an observed request-integrity/system-malfunction fault. The Corolla port initially faulted at complete standstill; its 2026-09-11 contributor architecture note reports a successor frame-for-frame/camera-counter handoff plus <~1 mph stock relay that validates stop/go externally. That does not close the distinct Camry hold/release contract. |
 | Source suppression | **live transport validated** | Route `000000d1--ad906be282` retained all camera-side bus-2 templates while the active replacement windows had no competing native bus-0 copy. Across segments 3–6 and 9–12, openpilot emitted 10,259 bus-0 `0x160` frames paced by the camera counter; 10,228 carried modified B4:B5, and only 13 transient Panda rejects occurred at control transitions. Route `000000d4--327b2c4bb8` repeats the one-for-one handoff for 1,249 combined replacements. |
@@ -1442,7 +1439,7 @@ SecOC-shaped switch PDU (VAR-127) and cannot be forged without the key story.
 Route `000000d4--327b2c4bb8` was captured after the EPS stopped providing its
 normal `0x030` traffic. MAIN attempts first produced the already-observed
 DRCC-unavailable/rejection state; the later successful latch was conventional
-cruise (`0x251` B0=`0x90`), not stock DRCC. This limits the route to a conventional-cruise observation. It does not
+cruise (`0x251` B0=`0x90`). This limits the route to a conventional-cruise observation. It does not
 distinguish a DRCC-mode permission requirement from an ineffective field
 substitution or a parallel/feedback publication.
 
@@ -1570,9 +1567,9 @@ a real user-reported PCS alert with a native FRC emergency-request transition;
 see [the current request-plane analysis](camry-2026-tss3-opendbc-port.md#415-the-retained-pcs-alert-drive-proves-a-native-emergency-request-transition).
 That capture does not prove PCS wins downstream arbitration. Instead, it proves
 the then-active replacement path suppresses the first two native ID34 emergency
-requests; driver braking begins before native `0x08A` forwarding resumes. It is
-therefore a negative PCS/AEB coexistence result for that replacement architecture,
-not a clean stock-AEB actuation experiment.
+requests; driver braking begins before native `0x08A` forwarding resumes. This
+establishes a negative PCS/AEB coexistence result for that replacement architecture.
+Stock-AEB actuation remains confounded.
 
 The openpilot-facing carrier question is nevertheless closed: PCS braking is
 present on the same native FRC `0x08A CONTROL_REQUEST` that host longitudinal
@@ -1580,8 +1577,7 @@ replaces, while `0x5AE` carries a separate warning/UI path. `0x081` remains
 the downstream Brake/VMM result witness. The corrected integration target is
 therefore to **relinquish host `0x08A` ownership and pass the original
 authenticated native PCS request untouched** when the source-side emergency
-request is detected, rather than to merge or synthesize PCS into the host
-request. What remains open is the timing/implementation of that handoff and an
+request is detected. What remains open is the timing/implementation of that handoff and an
 unconfounded downstream result/physical-actuation validation.
 
 ## Branch implementation and validation boundary
@@ -1627,6 +1623,6 @@ virtual engagement path are disproved and removed; delayed-hold release and the
 missing request/permission semantics remain open. PCS/AEB coexistence is no longer
 merely untested: the September-21 event disproves preservation at emergency-request
 onset for the then-active replacement path **and closes the logical correction**:
-release host ownership and pass the stock authenticated `0x08A` PCS request,
-rather than synthesize/merge it. Corrected handoff timing plus an unconfounded
+release host ownership and pass the stock authenticated `0x08A` PCS request
+untouched. Corrected handoff timing plus an unconfounded
 downstream AEB result/actuation capture remain open.

@@ -364,7 +364,7 @@ check("SA crypto init 0x8C7BC references crypto temp at FEBF498C",
       struct.pack("<I", 0xFEBF498C) in CF[0x8C7BC:0x8C7F6])
 check("SA crypto transform 0x8C7F6 references crypto temp at FEBF498C",
       struct.pack("<I", 0xFEBF498C) in CF[0x8C7F6:0x8C82A])
-# Unlock helper 0x900FC is a prepare/call/return wrapper (10 bytes, not a stub)
+# Unlock helper 0x900FC is a 10-byte prepare/call/return wrapper.
 check("SA unlock helper 0x900FC starts with prepare {lp},0",
       CF[0x900FC:0x90100] == bytes.fromhex("80072100"))
 check("SA unlock helper 0x900FC ends with jmp lp (return)",
@@ -378,7 +378,7 @@ check("SA unlock helper 0x900FC is not a bare return (function body > 4 bytes)",
 # security_access_compute_expected_key at 0x704C:
 #   stage1 = AES-128-DEC(SECRET, data_record)
 #   expected_key = AES-128-ENC(stage1, seed)
-# All tables are standard NIST AES-128 (verified by content, not address).
+# All tables are standard NIST AES-128, verified by content.
 print("\n== application SecurityAccess AES-128 primitives ==")
 # Forward S-box at 0x8FF1 (standard NIST FIPS-197)
 check("SA forward S-box @0x8FF1 matches FIPS-197 standard",
@@ -412,7 +412,7 @@ check("SA Td table group @0x24628 has 4 contiguous 1 KiB tables",
       struct.unpack_from("<I", CF, 0x25228+4)[0] != 0)
 
 # -- Call-edge assertions (exact jarl bytes at exact call-site addresses) --
-# These prove the crypto dispatch chain, not just that functions exist nearby.
+# These prove the crypto dispatch chain through exact call edges.
 # Stage 1 (0x8C7BC): key_init -> 0x865D4, decrypt -> 0x853EE, clear -> 0x869D2
 check("SA stage1 jarl key_init at 0x8C7D6 -> 0x865D4",
       CF[0x8C7D6:0x8C7DA] == bytes.fromhex("bffffe9d"))
@@ -443,8 +443,8 @@ check("SA aes_encrypt jarl rounds at 0x8535C -> 0x8496C",
 # pointer into the Dcm RX PDU buffer (advanced past SID+subfn).
 # 0x8C734 then copies 16 bytes from that pointer to FEBF497A.
 # The send_key worker has the same load at 0x94A88.
-# The Dcm config check at 0x26360 (value 0x10) validates response space,
-# NOT request data length — so extra bytes in "27 03" are accepted.
+# The Dcm config check at 0x26360 (value 0x10) validates response space only,
+# so extra bytes in "27 03" are accepted.
 check("SA seed worker loads data ptr via ld.w at 0x94996",
       CF[0x94996:0x9499A] == bytes.fromhex("243fada5"))
 check("SA send-key worker loads data ptr via ld.w at 0x94A88",

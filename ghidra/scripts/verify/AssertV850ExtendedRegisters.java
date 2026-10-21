@@ -561,7 +561,7 @@ public class AssertV850ExtendedRegisters extends GhidraScript {
         }
     }
 
-    // User mode with CU1 clear is still UCPOP, not PIE (Table 3.3 order).
+    // With CU1 clear, UCPOP precedes the user-mode PIE check (Table 3.3).
     private void execFxPermissionUcpopBeforeUm(ProgramDB program, Address base)
             throws Exception {
         Address at = base.add(0x20 * (++fixtures));
@@ -636,8 +636,8 @@ public class AssertV850ExtendedRegisters extends GhidraScript {
             requireReg(emu, "pushpop pop", "tp", 0x55555555L);
             requireReg(emu, "pushpop pop", "r6", 0x66666666L);
             requireReg(emu, "pushpop pop", "sp", 0x8380L);
-            // independent order pin: three stacked words reload rt..rh, not
-            // rh..rt (an ascending POPSP expansion fails this mapping)
+            // Pin order independently: three stacked words reload rt..rh.
+            // An ascending POPSP expansion fails this mapping.
             emu.writeMemory(program.getAddressFactory().getDefaultAddressSpace().getAddress(0x8380L), bytes(words(0x00000aaaL, 0x00000bbbL, 0x00000cccL)));
             emu.writeRegister("sp", 0x8380L);
             emu.writeRegister("gp", 0);

@@ -408,7 +408,7 @@ def gtsplus_data_monitor_decoder(gts_root: Path) -> dict:
             "byte_order": "big-endian across all bytes touched by [bit_start, bit_end]",
             "bit_range": "inclusive",
             "algorithm": "assemble covered bytes big-endian; shift right by 7-(bit_end&7); mask bit_end-bit_start+1 bits",
-            "ordinary_p5_payload_origin": "monitor bit_start/bit_end are relative to the Data Monitor value payload; CPacketConvertor's +4 is its ring-packet framing, not a signal-bit offset",
+            "ordinary_p5_payload_origin": "monitor bit_start/bit_end are relative to the Data Monitor value payload; CPacketConvertor's +4 applies only to its ring-packet framing",
         },
         "physical_conversion": {
             "sign_modes": {
@@ -764,7 +764,7 @@ def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
                 "echoed_did_receive_indexes": [1, 2],
                 "payload_offset": 4,
                 "record_size": 16,
-                "record_count_source": "received_length_minus_4, chunked until exhausted; receive byte 3 is skipped, not used as count",
+                "record_count_source": "received_length_minus_4, chunked until exhausted; receive byte 3 is skipped",
                 "string_conversion": "Windows MultiByteToWideChar code page 0 (CP_ACP) from zero-terminated <=16-byte chunk",
                 "value_capacity_chars": 17,
                 "entry_name_prefix": "CID",
@@ -1139,7 +1139,7 @@ def gtsplus_p5_active_test_runtime(parser: DDBParser, master, gts_root: Path) ->
                 "result_request": "31031588",
                 "parameterization_negative": "all four command/stop/value-mask/button-mask variable references are zero; no parameter payload or steering setpoint is appended by the recovered current routine materializer",
             },
-            "version_boundary": "current GTS+ uses standard UDS 31/71 templates; the pinned V18 TMS-041 21 E2/61 E2 executor is retained as version-specific older behavior, not treated as an error",
+            "version_boundary": "current GTS+ uses standard UDS 31/71 templates; the pinned V18 TMS-041 21 E2/61 E2 executor is retained as valid version-specific older behavior",
             "safety_boundary": "static recovery only; no Active Test or RoutineControl request was sent to a vehicle; outer session/authentication and downstream FRC network effects remain separate questions",
         },
         "anchors": {
@@ -1418,8 +1418,8 @@ def gtsplus_execution_lifecycle(parser: DDBParser, master, gts_root: Path) -> di
                 "categories": category_modes,
                 "category_gate": (
                     "SendProc reads CDbEcuCategoryTable/class 0x110 record byte +0x48, masks low 5 bits, "
-                    "and enters this shared automatic-session path for 0x14/0x15/0x16. This is a transport/session "
-                    "gate, not a P5-family classifier: SelectCarTypeVin10 dispatches low5 0x16 to Phase6, while "
+                    "and enters this shared automatic-session path for 0x14/0x15/0x16. This gate controls transport/session "
+                    "setup: SelectCarTypeVin10 dispatches low5 0x16 to Phase6, while "
                     "current GetSupportP5_DT-bound categories are low5 0x14/0x15 only. Hybrid397, Brake435, and "
                     "FRC498 are all 0x14"
                 ),
@@ -1531,10 +1531,10 @@ def gtsplus_execution_lifecycle(parser: DDBParser, master, gts_root: Path) -> di
                 "vendor_protocol_gate": "the capability can only arm when the monitor security/vendor byte is Toyota low-5-bit 0x15, Subaru high bits 0x20, or Suzuki high bits 0x60",
                 "camry_p5_capability": security_capability,
                 "conclusion": "current master type-27 does not advertise function 3/detail 0x50 for Hybrid397, Brake435, or FRC498, so their ordinary current-P5 monitor plan does not statically request this security-release capability",
-                "boundary": "this is a static capability negative, not a proof that every possible utility/ECU operation is authentication-free",
+                "boundary": "this negative result covers static capability only; authentication requirements for other utility/ECU operations remain unresolved",
             },
             "check_mode": {
-                "meaning": "Hybrid P5 roles 0x17/0x18 are RoutineControl RID 0x1002 maintenance/check-mode operations, not DiagnosticSessionControl",
+                "meaning": "Hybrid P5 roles 0x17/0x18 are RoutineControl RID 0x1002 maintenance/check-mode operations",
                 "bindings": check_mode_bindings,
                 "hybrid_frames": hybrid_check_frames,
             },
@@ -1675,8 +1675,8 @@ def build(techstream_root: Path, gts_root: Path | None) -> dict:
         },
         "gtsplus_continuity": gts,
         "boundary": (
-            "This recovers the common diagnostic execution architecture, not a claim that every plugin "
-            "is declarative or that all Toyota diagnostics can be implemented without plugin semantics. "
+            "This recovers the common diagnostic execution architecture. Plugin-specific semantics remain necessary "
+            "for Toyota diagnostics. "
             "Specialized parsing, retries, session changes, security, and state machines remain executable behavior."
         ),
     }

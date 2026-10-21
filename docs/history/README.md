@@ -8,8 +8,8 @@ chronology and methodology, including analyses that were later corrected.
 canonical target reports under [../variants/](../variants/README.md) and the
 canonical subsystem reports. [../status/](../status/README.md) is a navigation
 index — current queue, claim IDs, unresolved questions, and one Sienna coverage
-snapshot — and is maintained opportunistically, not continuously; it is not
-current truth by itself. Superseded claims are tracked in
+snapshot — with opportunistic updates. Consult the canonical reports for
+current conclusions. Superseded claims are tracked in
 `status/CORRECTIONS.md`.
 
 ## 2026-08

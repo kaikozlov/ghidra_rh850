@@ -115,9 +115,8 @@ At the strong witness:
 - `0x251 CRUISE_MAIN_STATE` remains `1`, so cruise availability/main remains on;
 - `0x081 REQUEST_LOSS_STATUS` remains `0`.
 
-Therefore the forced cancellation is not the normal brake/button-cancel carrier,
-not a physical pedal event, not cruise-main being switched off, and not a missing
-request timeout.
+Cancellation occurs while the brake/button carrier remains unchanged, pedals remain
+inactive, cruise-main remains on and request communication remains healthy.
 
 ## 5. Integration implication
 
@@ -139,5 +138,5 @@ that withdrawal. The two plausible control boundaries are therefore:
 The second option is not a simple HUD-message replacement: `0x08A` is authenticated
 and jointly carries lateral and longitudinal requests. Its source/authentication
 ownership must be handled correctly. The route-45 evidence only establishes where
-the cancellation appears on the wire, not that replacing this PDU is yet the best
-production solution.
+the cancellation appears on the wire. The best production solution remains
+unresolved.

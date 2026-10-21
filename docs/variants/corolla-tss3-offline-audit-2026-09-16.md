@@ -4,9 +4,9 @@
 
 The retained Corolla CAN shapes decode successfully with the current port, and
 its selected Toyota/firmware-fingerprint/safety unit suites pass. This is not an
-all-clear for a completed or road-qualified port. There are identifiable software
-and evidence gaps, not only pending vehicle testing. Earlier statements that
-nothing remained except physical qualification were too strong.
+all-clear for a completed or road-qualified port. Software, evidence, and vehicle-testing
+gaps remain. Earlier statements that only physical qualification remained were
+too strong.
 
 This audit changes documentation only. It does not change controller, Panda,
 resident, or installer behavior; it performs no vehicle access or transmission.
@@ -15,8 +15,8 @@ resident, or installer behavior; it performs no vehicle access or transmission.
 
 Reviewed analysis `4d8006d8`, kai-openpilot `53b95d0dd` on `tss3`, and its opendbc
 revision `7dce3659`. Primary integration checks use current source in the latter
-checkout and the retained raw CAN inputs, rather than treating readiness prose
-or a passing fixture as proof of physical behavior.
+checkout and the retained raw CAN inputs. Physical behavior requires evidence
+beyond readiness prose and passing fixtures.
 
 The audit covers identification/subtype selection, passive CarState decoding,
 existing Toyota safety tests, the stock-cruise cancellation call path, and the
@@ -65,14 +65,14 @@ No required message was invalid after warmup. The public route decoded
 Park/Reverse/Drive; the Span segment decoded Drive. The public route had no
 reported ACC engagement during the counted interval. The Span replay had 92
 engaged decoder cycles (0.92 s); neither replay exercised ACC standstill hold.
-These are samples of the decoded state, not independent observations of the
-physical dashboard or proof of controller authority.
+These samples describe decoded state. Independent physical-dashboard observations
+and evidence of controller authority remain unavailable.
 
 This is a stronger nominal parser check than repeating representative frames at
 100 Hz, but it is **not** an automatic-fingerprinting replay or a physical car
 qualification. The public route contains no usable firmware identity join, and
-the Span log is MOCK-attributed vehicle evidence rather than an exact
-firmware-to-route join. See the identity boundaries in the existing
+the Span log supplies MOCK-attributed vehicle evidence. Its exact
+firmware-to-route join remains unavailable. See the identity boundaries in the existing
 `corolla_2023_public_route_opendbc_evidence.json` and
 `corolla_2025_span_discord_rlog_opendbc_evidence.json` artifacts.
 
@@ -134,8 +134,8 @@ fallback and implemented behavior, plus an untested configuration boundary.
 Supporting a new fallback would require an evidence-backed selection decision;
 this audit does not change that decision.
 
-Likewise, `values.py:560–572` resolves OEM VIN identities to a platform set, not
-to CarParams powertrain metadata. Separating the ten GTS vehicle IDs and fixing
+Likewise, `values.py:560–572` resolves OEM VIN identities only to a platform set.
+CarParams powertrain metadata requires separate propagation. Separating the ten GTS vehicle IDs and fixing
 the dynamic-enum membership bug did not add direct propagation of the GTS
 powertrain classification. Present runtime subtype detection still uses
 positive diagnostic/CAN evidence.
@@ -152,7 +152,7 @@ independent cruise-main oracle.
 
 At this checkpoint, GTS diagnostic enum labels corroborated shift meanings but
 were not a direct CAN wire mapping. The retained public route exercises `0x3BF`
-P/R/D, not Neutral. The [later gear investigation](corolla-h-f-openpilot-state-bridge.md)
+P/R/D. Neutral remains unexercised. The [later gear investigation](corolla-h-f-openpilot-state-bridge.md)
 adds the OEM meter dictionary and controlled Camry Neutral observations;
 it does not turn them into a Corolla Neutral capture or qualify the unexercised
 Corolla hybrid values. Vehicle mass, steering ratio, actuator delay, and dynamic
@@ -160,8 +160,8 @@ tuning are also not physically validated by these decoder tests.
 
 ## Tester-kit boundary
 
-The prior exact-target kit build and `doctor` result establish packaging/import
-checks, not the complete installed lifecycle on the recipient's ECU. This audit
+The prior exact-target kit build and `doctor` result establish only packaging/import
+checks. The complete installed lifecycle on the recipient's ECU remains unqualified. This audit
 adds no new vehicle evidence for runtime survival, native-message replacement,
 fault recovery, driver override, stock-system coexistence, or physical steering
 response. A successful stationary signing/replacement check would still not
@@ -198,11 +198,10 @@ bit asserted and a valid Toyota checksum; it adds no speed, cruise-state, timer,
 or separate permission policy. Both retained ICE/hybrid Corolla routes carry the
 same checksum-valid ordinary `0x101` family, while exact Camry evidence proves
 the homologous `0x101 B0[3]` assertion causes the protected cruise request to
-drop. Corolla receiver acceptance is still a live qualification item, not an
-offline-proven fact.
+drop. Corolla receiver acceptance still requires live qualification.
 
-The hybrid `0x3BF` item is retained as a coverage boundary rather than a known
-Span-car failure: Span's retained hybrid supplies 3,662 valid `0x127` frames.
+The hybrid `0x3BF` item remains a coverage boundary. Span's retained hybrid
+supplies 3,662 valid `0x127` frames and shows no corresponding failure.
 Likewise the cruise-main availability rule remains bounded pending an OFF/ON
 capture. The corrected status is therefore: nominal identification/CarState/C7
 software is strong and a bounded stationary signer qualification is warranted,

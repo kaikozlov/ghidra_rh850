@@ -243,10 +243,10 @@ for target, spec in SPECS.items():
         and spec["image"].read_bytes()[noop:noop + 2] == bytes.fromhex("7f00"),
     )
 
-# The primary 0x7A9 response is selected by CanIf class-2 HTH routing, not by
-# how many unrelated transmit resources happen to exist. Remove Camry's fifth
-# resource to reproduce Crown's four-row topology; the primary diagnostic
-# lower handle/resource must remain unchanged.
+# CanIf class-2 HTH routing selects the primary 0x7A9 response independently of
+# the count of unrelated transmit resources. Remove Camry's fifth resource to
+# reproduce Crown's four-row topology; the primary diagnostic lower
+# handle/resource must remain unchanged.
 camry_contract = SPECS[CAMRY_TARGET]["contract"]
 camry_abi = camry_contract["signer_abi"]
 four_resource_image = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())
@@ -501,7 +501,7 @@ with (mock.patch.object(host, "load_security_secret", return_value=(b"\x00" * 16
         OUT / meta["authenticated_payload"]["path"], meta_path,
         direct_boot=True, panda=fake_probe_panda,
     )
-check("post-activation install success is proved by the signer response, not a second F181 check",
+check("post-activation install success is proved by the signer response",
       direct["entry_condition"] == "exact_bootloader_f181" and
       direct["verdict"] == "request_signer_live_probe_pass" and
       fake_probe_panda.request_count == 1 and

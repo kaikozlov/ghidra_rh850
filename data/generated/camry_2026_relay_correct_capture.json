@@ -21,7 +21,7 @@
     "b6_any_bus_any_length_count": 0,
     "b6_examples": [],
     "cruise_main_availability_lifecycle": {
-      "boundary": "B1[4] is a persistent cruise-availability/latch state, not the physical MAIN switch: it rises after the first retained MAIN activation and remains high through later MAIN deactivation edges. No ignition-off/reset fall is retained, so exact reset semantics and the OEM field name remain unjoined.",
+      "boundary": "B1[4] is specifically a persistent cruise-availability/latch state: it rises after the first retained MAIN activation and remains high through later MAIN deactivation edges. No ignition-off/reset fall is retained, so exact reset semantics and the OEM field name remain unjoined.",
       "falling_edges": [],
       "main_operation_edges": [
         {
@@ -688,7 +688,7 @@
     "b6_any_bus_any_length_count": 0,
     "b6_examples": [],
     "cruise_main_availability_lifecycle": {
-      "boundary": "B1[4] is a persistent cruise-availability/latch state, not the physical MAIN switch: it rises after the first retained MAIN activation and remains high through later MAIN deactivation edges. No ignition-off/reset fall is retained, so exact reset semantics and the OEM field name remain unjoined.",
+      "boundary": "B1[4] is specifically a persistent cruise-availability/latch state: it rises after the first retained MAIN activation and remains high through later MAIN deactivation edges. No ignition-off/reset fall is retained, so exact reset semantics and the OEM field name remain unjoined.",
       "falling_edges": [],
       "main_operation_edges": [
         {

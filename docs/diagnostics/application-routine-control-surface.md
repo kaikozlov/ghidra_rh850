@@ -18,8 +18,8 @@ Eighteen records use policy index 0. That policy permits diagnostic sessions
 **default, programming, and extended sessions (`1,2,3`)**. RID `0x1010` is the
 sole policy-index-1 record and remains extended-session-only (`3`).
 
-This is a Dcm authentication result, not a claim that every routine succeeds
-unconditionally. Individual RIDs still contain runtime precondition logic.
+This result concerns Dcm authentication. Individual RIDs still enforce runtime
+preconditions.
 RID `0x1010` additionally transports the standard SHE `CMD_LOAD_KEY` M1--M5
 Memory Update Protocol and authenticates it inside ICU-S, independent of the
 empty Dcm SecurityAccess table.
@@ -121,8 +121,8 @@ operational `0x300/0x400/0x500` mode families. State `0x11` is an in-progress
 transition: the workers wait for subordinate states to converge to `0x22`, or
 resolve to error state `0x44` on failure/timeout.
 
-The requests are **one-shot per application boot**, not an unlimited diagnostic
-DoS loop. `0x1007` writes `FEBE8157=1` and `0x1008` writes `FEBE8158=1`; exact
+The requests are **one-shot per application boot**.
+`0x1007` writes `FEBE8157=1` and `0x1008` writes `FEBE8158=1`; exact
 xref censuses recover no other writer that clears either byte during runtime.
 Subsequent control-type-1 attempts therefore fail their busy check until reset.
 
@@ -152,7 +152,7 @@ scheduler region as the other lifecycle workers.
 The repeatability boundary differs from `0x1007/0x1008`. Control type 1 writes
 latch `FEBE8159=1`, but control type 3 can clear that latch if the feature becomes
 disabled or the aggregate-health snapshot becomes nonzero. Static evidence
-therefore supports a **state-dependent**, not strictly one-shot-per-boot,
+therefore supports **state-dependent repeatability** of this
 reinitialization primitive. It remains bounded by the aggregate-health-zero
 condition and, like the other lifecycle paths, has no recovered static join into
 the d/q/PWM producer cone.
@@ -205,22 +205,20 @@ per-object status bytes pending. Later `0x53DAC` polls those statuses and change
 Queue monitor `0x50A1C` recognizes active state `0x85`, reports selector `3` with
 result `0` or `0x20`, and advances the queue. Generic selector helper `0x4F864`
 turns those into terminal RoutineControl states `2/3`. Since the start
-precondition rejects only state `1`, **RID `1004` is repeatable after completion**,
-not one-shot.
+precondition rejects only state `1`, **RID `1004` is repeatable after completion**.
 
 The firmware proves a persistent event-log/history rewrite but does not retain an
 OEM service name that would justify calling this “ClearDTC.” Exact static/live
 graph audits across the recovered op5/event-history cone find no direct reference
 to conditioned steering-command or d/q-current/PWM state. The bounded consequence
 is repeatable persistent diagnostic/history integrity and maintenance-state
-perturbation, not arbitrary steering-current injection. A routine bench probe is
-intentionally omitted because the request deliberately rewrites persistent event
-history.
+perturbation. A routine bench probe is intentionally omitted because the
+request deliberately rewrites persistent event history.
 
 The formerly generic `1001/1002/1103/1106/1108/1109` rows are now closed through
 their application workers and completion states.
 
-- **`0x1001` is a query, not a state-changing routine.** Control type 1 passes a
+- **`0x1001` is a read-only query.** Control type 1 passes a
   fixed `0x20`-byte output to `0x4C5AE`, which clears the buffer and builds a
   support bitmap from the configured RoutineControl records, then marks its
   status complete.
@@ -332,8 +330,8 @@ runtime state and persists multiple checkpoint objects, without a recovered
 vehicle-speed gate. Exact raw/live graph audits still find **no direct reference
 to the conditioned steering-command state or the d/q-current/PWM producer cone**.
 The supported interpretation is therefore persistent maintenance/reset and
-availability-state perturbation, not arbitrary steering-current injection. A
-normal bench probe is intentionally omitted because the routine modifies
+availability-state perturbation. A normal bench probe is intentionally omitted
+because the routine modifies
 persistent state; dynamic characterization requires a disposable/matching ECU
 with NVM backup/restore and recovery planning.
 
@@ -386,10 +384,10 @@ initialization, and snapshot/telemetry functions. None joins the independently
 proved d/q current-reference state at `FEBE6D28/FEBE6D2A` or the known PWM
 producer cone.
 
-Therefore the current static evidence supports **diagnostic service-mode and
-control-state exposure with bounded availability implications**, not arbitrary
-steering torque/current actuation. Hardware-only effects and indirect physical
-behavior of the service routines remain dynamic questions.
+The current static evidence establishes **diagnostic service-mode and
+control-state exposure with bounded availability implications**. Arbitrary
+steering torque/current actuation remains unproven. Hardware-only effects and
+indirect physical behavior of the service routines remain dynamic questions.
 
 ## 8. Security interpretation
 
@@ -405,8 +403,8 @@ RoutineControl RIDs; `0x1009` exposes a state-gated variant that forces
 `FEBEB2D5=0x11` when aggregate health is zero; **`0x1108` is a repeatable,
 default-session, no-speed-gate trigger for persistent checkpoint reset operation
 2**; and `0x110A/0x110C/0x110D` can request special EPS service modes under their
-own runtime gates. These are authentication/safety-policy weaknesses, not
-evidence of a clean steering-control primitive.
+own runtime gates. These are authentication/safety-policy weaknesses.
+A clean steering-control primitive remains unproven.
 
 For comma/openpilot work these RoutineControl RIDs should not be treated as a production
 control interface. Their semantics are factory/service-oriented, their runtime

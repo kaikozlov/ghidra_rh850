@@ -288,11 +288,11 @@ def _section_keyless_reset_entry():
     for fixed in ('FUN_000628ee(0x11);', 'FUN_000628ee(0x22);', 'FUN_000628ee(0x33);', 'FUN_000628ee(0x44);'):
         check(f'coordinator uses fixed action {fixed}', fixed in coord)
     check('coordinator does not reference application XCP window', 'febf7c' not in coord.lower() and 'febffb' not in coord.lower())
-    print('\n== power-on validation remains data/status selection, not PC selection ==')
+    print('\n== power-on validation selects only data/status ==')
     restore = c(400152)
     check('reset-latch consumer copies all four words to FEBE status state', all((x in restore for x in ('DAT_febe39b4 = Ramffc0a000;', 'DAT_febe8d90 = Ramffc0a004;', 'DAT_febe8da4 = Ramffc0a008;', 'DAT_febe39b8 = Ramffc0a00c;'))))
     check('reset-latch consumer then overwrites hardware words with fixed sentinels', all((x in restore for x in ('Ramffc0a000 = 0xa5a5a5a5;', 'Ramffc0a004 = 0xf0f0f0f0;', 'Ramffc0a008 = 0xf0f0f0f;', 'Ramffc0a00c = 0;'))))
-    check('live 9F00 handoff remains direct CodeFlash call, not latch-derived target', CF[413420:413424] == bytes.fromhex('baff1450') and 'FUN_00009f00' in c(413384))
+    check('live 9F00 handoff remains a direct CodeFlash call', CF[413420:413424] == bytes.fromhex('baff1450') and 'FUN_00009f00' in c(413384))
 _section_keyless_reset_entry()
 print()
 

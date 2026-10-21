@@ -75,8 +75,8 @@ This is a whole-vehicle camera/ACC contract. It is not an EPS-local interface.
 ### 2.4 Driver UI: `0x412 LKAS_HUD`
 
 Both profiles send `0x412` at 5 Hz, plus immediate sends on relevant alert/cancel
-edges, while preserving selected camera-originated HUD state. This too is a
-whole-vehicle camera/cluster contract rather than an EPS-local one.
+edges, while preserving selected camera-originated HUD state. This contract
+spans the vehicle's camera and cluster.
 
 ## 3. The old Corolla state/safety messages that matter most
 
@@ -116,11 +116,10 @@ Rx/Tx conclusion below applies equally to Albino and Span.
 
 ### 5.1 `0x025`: same semantic role, new CAN-FD wire contract
 
-The H/F application still has an active receive descriptor for **`0x025`**, but
-it is now **32-byte CAN-FD**, not the old 8-byte classic frame.
+The H/F application retains an active receive descriptor for **`0x025`**.
+Its wire format changed from 8-byte classic CAN to **32-byte CAN-FD**.
 
-This is not an ID-only guess. H target-native recovery independently proves the
-same steering-sensor semantics:
+H target-native recovery independently proves the same steering-sensor semantics:
 
 - signal 184: signed 12-bit coarse steering angle;
 - signal 185: signed 4-bit fractional component;
@@ -244,9 +243,9 @@ new “find LTA angle command” requirement by itself.
 
 ### 5.6 `0x343` and `0x412`: EPS absence is intentionally non-diagnostic
 
-Neither appears in the H/F EPS application Rx/Tx tables. That does **not** mean
-the newer vehicle abandoned those semantic roles. Pre-TSS3 Corolla used them in
-the camera/ACC/cluster integration, not as EPS-local steering messages.
+Neither appears in the H/F EPS application Rx/Tx tables. Their vehicle-level
+semantic roles remain open: pre-TSS3 Corolla used them for camera/ACC/cluster
+integration outside EPS-local steering.
 
 Their TSS3 replacements must be recovered from whole-bus captures and the
 relevant FRC/radar/brake/gateway firmware. An EPS dump cannot settle them.
@@ -279,8 +278,8 @@ recovery is documented in
 This is more direct than treating all 37 `0x030` fields as equally likely old
 `0x260/0x262` replacements.
 
-**Second, characterize the recovered B6 command contract rather than searching for
-another message.** Protected `0x0B6` signal 255 is the H/F target-angle ingress at
+**Second, characterize the recovered B6 command contract.** Protected `0x0B6`
+signal 255 is the H/F target-angle ingress at
 `1024/17870 deg/count` controller-equivalent scale, and signal 254 selects the
 now-labeled `PCS/LDA/Hands Off LTA/LTA-LCA/PDA` profiles. The next dynamic work is
 to correlate those fields with stock LTA, `0x1C02`, `0x1152`, measured steering

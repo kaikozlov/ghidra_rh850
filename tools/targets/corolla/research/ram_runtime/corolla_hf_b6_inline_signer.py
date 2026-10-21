@@ -8,7 +8,7 @@ extended-CAN receive path. It first reproduces one untouched native B6 trailer
 with stock ICU-S command 5; failure leaves every native B6 unchanged.
 
 Installation is volatile and requires NRTD (READY=0). Resident status is read
-through the application's ordinary UDS SID 0x23 path, not XCP. A full EPS power
+through the application's ordinary UDS SID 0x23 path. A full EPS power
 cycle removes the resident and restores the unmodified application.
 """
 from __future__ import annotations

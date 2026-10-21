@@ -1,5 +1,5 @@
 {
-  "boundary": "Clean derived diagnostic metadata only: no Toyota binaries are embedded. Active Tests are static plans; execution=executable only means the fixed request geometry is complete, not that the registry authorizes execution: it intentionally contains no execution authorization, session escalation, SecurityAccess, flash, or write workflow.",
+  "boundary": "Clean derived diagnostic metadata only: no Toyota binaries are embedded. Active Tests are static plans; execution=executable means only that the fixed request geometry is complete. The registry intentionally contains no execution authorization, session escalation, SecurityAccess, flash, or write workflow.",
   "catalogs": {
     "372": {
       "active_test_groups": {
@@ -564533,7 +564533,7 @@
     "fault_status_mask": 175,
     "gts_can_topology": {
       "can_bus_car_id": "0x00A7D910",
-      "namespace_boundary": "Toyota GTS Bus N names are vehicle-network domains, not Panda logical bus numbers; current post-repin diagnostics use Panda bus0",
+      "namespace_boundary": "Toyota GTS Bus N names identify vehicle-network domains. Panda logical bus numbers use a separate namespace; current post-repin diagnostics use Panda bus0",
       "option_count": 18,
       "placement_variant_count": 1,
       "placement_variants": [
@@ -564914,7 +564914,7 @@
     "panda_bus": 0,
     "profile": "camry-2026-f33",
     "session_control": {
-      "boundary": "frames are resolved per category from the current master; SendProc itself gates a shared automatic-session path by CDbEcuCategoryTable/class-0x110 byte +0x48 low5 in 0x14/0x15/0x16. This raw SendProc gate is not a diagnostic-family classifier: SelectCarTypeVin10 dispatches low5 0x16 to Phase6 and the universal P5 runtime instead follows GetSupportP5_DT bindings. The former local wire_proven_categories subset is intentionally absent: it was an independent-tooling policy, not Toyota resolver semantics. session_judgment_exception is documentation, not a runtime default",
+      "boundary": "frames are resolved per category from the current master; SendProc itself gates a shared automatic-session path by CDbEcuCategoryTable/class-0x110 byte +0x48 low5 in 0x14/0x15/0x16. This raw SendProc gate is not a diagnostic-family classifier: SelectCarTypeVin10 dispatches low5 0x16 to Phase6 and the universal P5 runtime instead follows GetSupportP5_DT bindings. The former local wire_proven_categories subset is intentionally absent: it was an independent-tooling policy. session_judgment_exception provides documentation only",
       "category_gate": "SendProc reads CDbEcuCategoryTable/class 0x110 record byte +0x48, masks low 5 bits, and enters this shared automatic-session path for 0x14/0x15/0x16. This is a transport/session gate, not a P5-family classifier: SelectCarTypeVin10 dispatches low5 0x16 to Phase6, while current GetSupportP5_DT-bound categories are low5 0x14/0x15 only. Hybrid397, Brake435, and FRC498 are all 0x14",
       "class_1_default": "for classifier class 1, SendProc uses the DB-backed +0x50 selector 0xD1 path and records software session state 0",
       "class_2_normal_path": "when the P5 classifier returns 2 and current session CCommFrameCtrl +0x29 is not 3, the normal session-judgment path calls protocol vtable +0x50 with selector 0xD1 then 0xD2 and records software session state 3",
@@ -565966,8 +565966,8 @@
       "sha256": "3a344b6cb2de19edb163e040974955f2d27467dc0a864974b6a5af90659d308f"
     },
     "data/generated/gtsplus_2026/vehicle_resolver_semantics.json": {
-      "bytes": 36994,
-      "sha256": "5574b77a1a5ec18913f871175bf68b0a2c12bb1bfb7a57403e116e6a50cc8a5d"
+      "bytes": 36974,
+      "sha256": "dd10f5b8dfc4a54ab3febc24a6e2d3132d1ac6eea3efb0f5a9235a02a7e2273b"
     },
     "data/generated/techstream_v18/diagnostic_execution_model.json": {
       "bytes": 297427,

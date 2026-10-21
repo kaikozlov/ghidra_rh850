@@ -18,7 +18,7 @@ Sienna 8965B4512000 calibration:
 Every match is a TRIAGE CANDIDATE. Nothing here proves that a mechanism
 transfers to a new calibration, and the scanner deliberately contains no
 per-calibration software-ID offset fallback table: identify targets by their
-own structure, not by inherited offsets.
+own structure.
 
 Usage:
   analyze_rh850_codeflash_structure.py IMAGE.bin [-o report.json] [--max-vas 16]
@@ -45,8 +45,8 @@ from tools.security.build_secoc_patch_manifest import (
 SCHEMA = "rh850-codeflash-structure-triage-v1"
 CODEFLASH_SIZE = P1M_E_CODEFLASH_SIZE
 
-# Structural anchor constants. These are FAMILY/GATE anchors, not per-target
-# patch offsets: boot-validity marker word, RAM-exec download-window base and
+# Structural anchor constants. These FAMILY/GATE anchors identify the
+# boot-validity marker word, RAM-exec download-window base and
 # its post-link package length, XCP CAN route pair, page-copy window end and
 # shadow destination.
 RAM_EXEC_WINDOW_BASE = 0xFEBF0000

@@ -959,7 +959,7 @@ _BOOT_RELOCATED_COPIES = {
 
 
 def _walk_boot_relocated_abi(image: bytes, row: dict):
-    """Decode the six recovered boot-copy bodies for ABI facts, not execution."""
+    """Decode the six recovered boot-copy bodies solely to recover ABI facts."""
     from dataclasses import replace
     from .lifting.graph import LiftedFn, walk_symbol
 
@@ -1027,8 +1027,8 @@ def _call_facts() -> dict:
         saved = _saved_context_regs(fn)
         if saved:
             _CONTEXT_SAVED[fn.entry] = saved
-        # Resolve immutable callback words from native register origins, not
-        # from the stale pointer labels in the decompiler corpus.
+        # Resolve immutable callback words from native register origins.
+        # The decompiler corpus's pointer labels are stale.
         state = _function_origins(fn)
         for inst in fn.insts:
             if inst.kind not in {"jarl_ind", "jmp"}:

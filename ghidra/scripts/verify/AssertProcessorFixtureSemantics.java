@@ -1097,7 +1097,7 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
                             found |= op.getOpcode() == PcodeOp.RETURN;
                         } else {
                             // A surviving write is either a register output
-                            // or a volatile side effect, not pure arithmetic.
+                            // or a volatile side effect.
                             found |= (op.getOutput() != null
                                     && op.getOutput().getAddress().isRegisterAddress())
                                     || (op.getOpcode() == PcodeOp.CALLOTHER
@@ -1144,7 +1144,7 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
             emu.writeRegister("r6", mode);
             emu.writeRegister("CDBCR", 1);
             emu.writeRegister("ICCTRL", 0x30003);
-            // This is a fixture bound, not a hardware completion latency.
+            // This bound applies only to the fixture.
             int steps = 0;
             while (emu.readRegister("PC").longValue() != poll && steps++ < 40) {
                 step(emu, label + " enter instruction-cache poll");
@@ -1162,7 +1162,7 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
                 step(emu, label + " busy branch");
                 requireRegister(emu, label, "PC", poll);
             }
-            // The environment supplies completion, not the CPU instruction.
+            // The environment supplies completion.
             emu.writeRegister("ICCTRL", pending & ~0x100L);
             steps = 0;
             while (emu.readRegister("PC").longValue() != 0x3698 && steps++ < 20) {
@@ -1187,7 +1187,7 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
                 .getLanguage(new LanguageID("v850e3:LE:32:default"));
         // These are the exact 136 CodeFlash bytes at Camry 8965F3307000 0x3614,
         // SHA256 42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7.
-        // Keep this witness in a disposable processor fixture, not a target seed.
+        // Keep this witness only in a disposable processor fixture.
         byte[] code = java.util.HexFormat.of().parseHex(
                 "f80f4068d832fa1d1e9a5309e1c72068f80f40205309e1c72020"
                 + "f80f4068810e0200e1c72068f80f4068820ad1fdf80f4020810e0001"
@@ -1325,8 +1325,8 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
                     PcodeOp op = operations.next();
                     long at = op.getSeqnum().getTarget().getOffset();
                     // Native register volatility lowers to a CALLOTHER with an
-                    // address annotation and value. Identify PMR itself, not
-                    // a DI/EI/SYNCP or pending-FPI side effect at this LDSR.
+                    // address annotation and value. Identify the PMR annotation
+                    // specifically at this LDSR.
                     if ((at == firstWrite || at == secondWrite)
                             && op.getOpcode() == PcodeOp.CALLOTHER
                             && op.getNumInputs() == 3 && op.getOutput() == null
@@ -1549,7 +1549,7 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
 
     private void verifyMaddfLanguageBoundary() throws Exception {
         // R01US0001EJ0100 pp. 374, 380, 386, 388: E2M four-register forms.
-        // The low bit of reg4 is instruction bit 23, not bit 16.
+        // The low bit of reg4 is instruction bit 23.
         String[] mnemonics = {"maddf.s", "msubf.s", "nmaddf.s", "nmsubf.s"};
         float[] results = {10.0f, 2.0f, -10.0f, -2.0f};
         for (String id : new String[]{"v850:LE:32:default", "v850e3:LE:32:default"}) {

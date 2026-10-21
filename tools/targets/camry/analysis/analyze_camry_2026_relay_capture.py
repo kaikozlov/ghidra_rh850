@@ -146,7 +146,7 @@ def summarize_route(path: Path, segment_ids: tuple[int, ...], structural_segment
       rows = [(t, fn(d)) for t, d in fe_rows[seg]]
       ints = [x for x in contiguous_intervals(rows) if x["frames"] <= 30]
       if ints:
-        # Store offsets from the first 0x0FE sample, not opaque absolute monotonic time.
+        # Store relative offsets from the first 0x0FE sample.
         base = fe_rows[seg][0][0]
         switches[name][str(seg)] = [
           {
@@ -160,8 +160,8 @@ def summarize_route(path: Path, segment_ids: tuple[int, ...], structural_segment
   # Recover the persistent 0x251 B1[4] lifecycle without assigning an OEM
   # field name. The validated 0x0FE MAIN pulses plus 0x08A operation-latch
   # transitions let us distinguish actual cruise-main activation/deactivation
-  # events from a button pulse alone. This is intentionally a state-lifecycle
-  # join, not a claim that 0x251 B1[4] is the physical MAIN switch.
+  # events from a button pulse alone. This join identifies only a state lifecycle;
+  # the physical MAIN switch carrier remains unresolved.
   availability_segments = {}
   availability_rises = []
   availability_falls = []
@@ -218,7 +218,7 @@ def summarize_route(path: Path, segment_ids: tuple[int, ...], structural_segment
     "segments": availability_segments,
     "main_operation_edges": main_operation_edges,
     "boundary": (
-      "B1[4] is a persistent cruise-availability/latch state, not the physical MAIN switch: "
+      "B1[4] is specifically a persistent cruise-availability/latch state: "
       "it rises after the first retained MAIN activation and remains high through later MAIN deactivation edges. "
       "No ignition-off/reset fall is retained, so exact reset semantics and the OEM field name remain unjoined."
     ),

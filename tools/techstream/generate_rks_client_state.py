@@ -196,7 +196,7 @@ def main():
  'request_fields':NATIVE_FIELDS,
  'managed_mapping':{
    'SetDataForReproKey':'CUWAccessRKSWrapper.SetDataForReproKey',
-   'is_stored':'hardcoded true before all string fields are copied; this is a DataForReproKey-validity flag, not evidence of a cached server token',
+   'is_stored':'hardcoded true before all string fields are copied; this flag marks DataForReproKey validity only; a cached server token remains unproved',
    'xml_fields':['X-Version','SoftwareID','SoftwareVersion','LicenseKey','VehicleIdentificationNumber','RequesterKind','KeypairID','SeedValue'],
  },
  'ui_handlers':handlers,
@@ -249,7 +249,7 @@ def main():
  'call_anchors':calls,
  'string_anchors':strs,
  'function_identities':funcs,
- 'server_boundary':'no client private key, public-key verification, or signature-generation algorithm is present; the server-produced 512-character token is decoded and sent to the Central Gateway as the 27 22 payload, not to the EPS flash writers; do not infer server cryptography from the fixed token format',
+ 'server_boundary':'no client private key, public-key verification, or signature-generation algorithm is present; the server-produced 512-character token is decoded and sent exclusively to the Central Gateway as the 27 22 payload; do not infer server cryptography from the fixed token format',
  }
  a.output.parent.mkdir(parents=True,exist_ok=True); a.output.write_text(json.dumps(obj,indent=2,sort_keys=True)+'\n')
  return 0

@@ -53,8 +53,8 @@ Requests use stock physical 0x7A1 ISO-TP reassembly. The EPS invokes ICU-S
 command 5 / selector 4 and returns only CMAC[0:4] on stock response route 0x7A9.
 It does not transmit 0x08A or B6. known-answer must reproduce the Experiment-A
 MAC28 d64e2a5. transport-probe sends one identical known-answer request while
-using a caller-selected Consecutive-Frame gap instead of the ECU-advertised
-STmin; use only as the bounded transport discriminator. benchmark honors stock
+using a caller-selected Consecutive-Frame gap that overrides the ECU-advertised
+STmin. Use only as the bounded transport discriminator. benchmark honors stock
 STmin. benchmark-fast defaults to 20 requests at the native 25 ms period with
 0-ms CF gap. Full EPS power-off removes the runtime.
 USAGE

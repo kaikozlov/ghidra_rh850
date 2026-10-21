@@ -59,8 +59,8 @@ def check_results(
             expected = int(check["equals"], 16)
             if register == "PC":
                 continue
-            # C entry points expose their return, memory and modeled system
-            # state, not the firmware's incidental argument/scratch registers.
+            # C entry points expose only their return, memory, modeled system
+            # state, and preserved registers. Incidental argument/scratch registers are excluded.
             if (
                 value_return is not None
                 and re.fullmatch(r"r\d+", register)

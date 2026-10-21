@@ -30,9 +30,8 @@ was therefore retired; see CORR-108.
 | Corolla `8965H1202000` | TSS3 vehicle/P5 control context | SecOC/TSK | exact tracked image | exact newer-EPS receiver/state/control contract |
 | Corolla `8965F1208000` | TSS3 vehicle/P5 control context | SecOC/TSK | exact tracked image | application-identical H/F transfer + 2025 field acquisition |
 
-The old empty Camry/RAV4 placeholder rows were removed. Unacquired vehicles belong
-in `OPEN_QUESTIONS.md` / the acquisition queue, not in a data table that can be
-mistaken for observed evidence.
+The old empty Camry/RAV4 placeholder rows were removed. Keep unacquired vehicles
+in `OPEN_QUESTIONS.md` / the acquisition queue. Data tables require observed evidence.
 
 ## What actually transfers
 
@@ -48,8 +47,8 @@ Corolla wire contract.
 Conversely, security findings transfer only when proved from bytes. H/F retain
 the same static application/boot security roots as the tracked Sienna, but their
 SecOC generated profile/configuration and vehicle-control message set differ.
-Each matrix cell therefore records its own evidence source instead of using
-"same family" as a proof shortcut.
+Each matrix cell therefore records its own evidence source. Family membership
+alone cannot establish transfer.
 
 ## What "same software family" does and does not mean
 
@@ -73,7 +72,7 @@ The maintained `tss3-request-signer` uses one C resident/helper, with immutable 
 
 On the contributor Crown, September's native-B6 MAC equality and subsequent signed soaks establish that the stock ECU can execute a resident and use type1/slot4 command five. They do **not** prove the newer `0x008A` request-signer path's GlobalRAM helper execution, raw four-fragment receipt or `0x7A9` output. October 10–12 request-signer logs time out, but do not contain authenticated runtime counters or reliably verify the currently instrumented host; see `community/mruno/README.md`. A fresh current build and session readback are needed to discriminate stages before altering payload assumptions.
 
-For Corolla H/F, the two exact application images are byte-identical at `0x17E00..0xFFFFF`, with specimen-specific low calibration and F181 secondary identity. The 2023 and Span 2025 moving captures independently contain native `0x08A/32` and `0x081/32` but **no active lateral ID11**; read-only DBC decode/re-encode reproduces the entire 28-byte `0x08A` application in all 4,755 observed requests, and stock-longitudinal cloning retains all other fields. This establishes a shared inactive request-plane wire image, not MAC equivalence or an active FRC/Brake/VMM handoff. Physical repin and sole-source replacement, active request ID11/result/steering correlation, CAN state and fault transitions, and target-specific stock PCS/ACC coexistence remain live gates. The maintained fork's TSS3 Panda angle safety parameter and per-vehicle dynamics must also be verified independently; Camry calibration and vehicle model are not universal.
+For Corolla H/F, the two exact application images are byte-identical at `0x17E00..0xFFFFF`, with specimen-specific low calibration and F181 secondary identity. The 2023 and Span 2025 moving captures independently contain native `0x08A/32` and `0x081/32` but **no active lateral ID11**; read-only DBC decode/re-encode reproduces the entire 28-byte `0x08A` application in all 4,755 observed requests, and stock-longitudinal cloning retains all other fields. This establishes a shared inactive request-plane wire image only. MAC equivalence and an active FRC/Brake/VMM handoff remain unproved. Physical repin and sole-source replacement, active request ID11/result/steering correlation, CAN state and fault transitions, and target-specific stock PCS/ACC coexistence remain live gates. The maintained fork's TSS3 Panda angle safety parameter and per-vehicle dynamics must also be verified independently; Camry calibration and vehicle model are not universal.
 
 **Verification boundary on this local checkout:** `tools/test tss3_request_signer`, `tss3_resident_control_ingress`, `crown_8965f3012000` and `corolla_hf_command5` passed at least once; the GNU CodeFlash suite completed universal fallback/idle simulation for all four images before an intermittent `helper embedding drift` during its optional optimized build. Repeated direct `-O2` builds passed, so that failure's cause is not established. The P1M-E scenario runner could not open the working Camry Ghidra project (`ReadOnlyException`) and therefore did not produce a fresh four-target machine verdict. The historical Span-vs-Sienna function-transfer verifier also fails against the newer Sienna canonical inventory (7,089 rows versus 6,375 retained), while the direct H/F equivalence checks pass; do not reuse the old transfer counts as current-corpus counts.
 
@@ -81,12 +80,12 @@ For Corolla H/F, the two exact application images are byte-identical at `0x17E00
 
 1. Add a row to `data/toyota_eps_variant_matrix.csv` only after a concrete
    firmware/field artifact exists.
-2. Populate `adas_generation` and `security_architecture` independently; use
-   `unknown` / `not established` rather than deriving one from the other.
+2. Populate `adas_generation` and `security_architecture` independently. Use
+   `unknown` / `not established` when evidence for either field is missing.
 3. If firmware is in hand, create a `variants/<name>-<partnumber>.md` and add
    target-native verification.
-4. Keep unacquired family targets in `OPEN_QUESTIONS.md` instead of speculative
-   all-unknown matrix rows.
+4. Keep unacquired family targets in `OPEN_QUESTIONS.md`. Matrix rows require
+   observed evidence.
 
 For an unidentified newer-TSK target, first satisfy the identity/artifact contract
 in [newer-tsk-target-evidence.md](newer-tsk-target-evidence.md).

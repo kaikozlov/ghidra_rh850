@@ -91,7 +91,7 @@ def extract(fixture: Path, log_root: Path, openpilot: Path) -> None:
                 elif which == "can":
                     for frame in event.can:
                         # These specified routes used the historical repin. Bus 1
-                        # here is ADAS, not the final stock-Toyota-B parser bus.
+                        # here carries ADAS; final stock-Toyota-B parser routing differs.
                         if frame.src != 1 or not 0x180 <= frame.address <= 0x185 or len(frame.dat) != 64:
                             continue
                         payload = bytes(frame.dat)
@@ -225,7 +225,7 @@ def reduce(fixture: Path) -> dict:
         "gyro_inverted_sign_error": stats(abs(m[:, 0]+m[:, 1])),
         "narrow_velocity_wrap_disagreements": widths,
         "boundaries": ["range and range-rate agreement alone cannot determine their common scale",
-                       "stationary-object membership is inferred from continuity and velocity, not an OEM validity bit",
+                       "stationary-object membership is inferred only from continuity and velocity; the OEM validity bit remains unresolved",
                        "OEM object validity, confidence, and silent slot reassignment remain unresolved; no production radar-enable decision follows automatically",
                        "cached lagd outputs are not independent fresh identifications"],
     }

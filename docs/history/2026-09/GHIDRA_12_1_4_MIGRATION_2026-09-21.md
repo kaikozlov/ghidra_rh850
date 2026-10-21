@@ -56,8 +56,8 @@ byte-identical to its prior canonical record; only corpus metadata changed.
 The first Corolla-F rebuild assigned operand index 2 rather than 0 to one
 otherwise-identical `PARAM` reference at `0x4348e`. The second independent
 rebuild reproduced the prior canonical index 0 on two consecutive exports, so
-that parity-preserving rebuild was promoted. This is bounded rebuild-order
-variation, not a firmware or decompiler-semantic change.
+that parity-preserving rebuild was promoted. This bounded rebuild-order
+variation preserves firmware and decompiler semantics.
 
 ## Lifecycle correction
 

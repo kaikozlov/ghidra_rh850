@@ -78,9 +78,9 @@ def event_batching(
             else None
         ),
         "boundary": (
-            "Each rlog Event.logMonoTime timestamps a publication batch, not an "
-            "individual CAN frame. Inter-frame 20/30 ms classes therefore cannot "
-            "identify physical arbitration, a CAN TX queue, or a transmitter ECU"
+            "Each rlog Event.logMonoTime timestamps an entire publication batch. "
+            "Individual-frame timing remains unresolved. Inter-frame 20/30 ms classes "
+            "therefore cannot identify physical arbitration, a CAN TX queue, or a transmitter ECU"
         ),
     }
 
@@ -128,8 +128,8 @@ def summarize_bus1_auth(
         "classification": (
             "no ordinary-P5 SecOC trailer on panda bus 1: zero 0x00F, and every "
             "periodic stream has a near-constant last-4 (max unique fraction "
-            f"{max_frac}); last-8 variation on 64-byte vision PDUs is payload, "
-            "not a MAC (a MAC28 would uniquify last-4)"
+            f"{max_frac}); last-8 variation on 64-byte vision PDUs belongs to payload. "
+            "A MAC28 would uniquify last-4"
         ),
     }
 

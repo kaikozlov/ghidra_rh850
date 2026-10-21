@@ -135,14 +135,14 @@
     "measured_wire_physical_relation": "FD025 signal184 = 1.5 deg/count from H DID1037 + Techstream CDbPhyData key3; signed4 signal185 supplies 0.1-deg fraction, so 15*signal184+signal185 is tenths of a degree",
     "oem_wire_unit_name_closed": false,
     "physical_degree_scale_closed": true,
-    "quantization_boundary": "The measured path uses integer truncation and the target path saturates after x2, so controller equality is quantized; the fraction above is the exact linearized conversion implied by the two fixed-point gains, not a claim that every individual integer target code has a unique exact degree value."
+    "quantization_boundary": "The measured path uses integer truncation and the target path saturates after x2, so controller equality is quantized; the fraction above gives only the exact linearized conversion implied by the two fixed-point gains. Individual integer target codes remain subject to quantization."
   },
   "schema": "corolla-8965H1202000-b6-target-angle-ingress-v4",
   "software_id": "8965H1202000",
   "sources": {
     "b6_receiver_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
-      "sha256": "5019f19340320b1764af66fa348f9e8ffb5ec6e9c6bff1143ed03d76d8d37dc8"
+      "sha256": "799ff4b0beedad9a25723ac75b7b5911fc5fd88a07b52947b2d5991ff39042d3"
     },
     "codeflash": {
       "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
@@ -155,11 +155,11 @@
     },
     "p5_lateral_semantics": {
       "path": "data/generated/techstream_v18/p5_lateral_control_semantics.json",
-      "sha256": "d86dc9c016dd94cbbc3f4435d09eadc0796192bfd258c8ea264722a163e6b86b"
+      "sha256": "564fdc5604cd5cbb3e909c4aae60aed6a68b8c3eb1dad1d0c1145a632f5d05f2"
     },
     "techstream_correlations": {
       "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
-      "sha256": "5e4eac747a29080dcb5a700070655dccb7814434cc810f204080512416aa8e3a"
+      "sha256": "ee4ffc57d325fc3b4d787d8d1ec03a35c5e9006845add87c73d7ea5bd86290fd"
     }
   },
   "static_conclusion": {
@@ -226,7 +226,7 @@
   ],
   "techstream": {
     "corolla_p5_topology": {
-      "interpretation": "Corolla P5 install sets contain EMPS + Brake/EPB + FRC_P5; B6 is monitored by EPS as Brake System Control Module traffic. This proves the immediate module relationship, not the upstream FRC-to-Brake wire route.",
+      "interpretation": "Corolla P5 install sets contain EMPS + Brake/EPB + FRC_P5; B6 is monitored by EPS as Brake System Control Module traffic. This proves only the immediate module relationship. The upstream FRC-to-Brake wire route remains unproved.",
       "names": {
         "405": "EMPS",
         "435": "Brake/EPB",

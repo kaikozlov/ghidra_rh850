@@ -249,7 +249,7 @@ def main() -> int:
                 "public_2023": {"frames": pub51e["frame_count"], "values": pub51e["ready_status_values"], "payloads": pub51e["unique_payloads"]},
                 "span_2025": {"frames": span51e["frame_count"], "values": span51e["ready_status_values"], "payloads": span51e["unique_payloads"]},
             },
-            "boundary": "Both operational captures show only value 1; value 0 and a Ready transition remain uncaptured. This is an incoming Ready Status field, not proof that an EPS Tx PDU republishes the same boolean.",
+            "boundary": "Both operational captures show only value 1; value 0 and a Ready transition remain uncaptured. This identifies the incoming Ready Status field only. Republication of the same boolean in an EPS Tx PDU remains unproved.",
         },
         "gear": {
             "classification": "core CarState gear semantics closed from generation-native route transitions plus Toyota ordering",
@@ -337,7 +337,7 @@ def main() -> int:
                 "Use FRC_P5 0x1912 only if exposing following-distance state is desired.",
                 "Retain 0x1901 Current/Memory Vehicle Speed as a diagnostic cross-check for 0x251 set speed rather than a required runtime input.",
             ],
-            "diagnostic_transport_boundary": "Current GTS+ proves selected FRC_P5 0x1901/0x1905/0x1906/0x1912/0x1914 Data IDs are ordinary SID 0x22 ReadDataByIdentifier requests. They are now optional semantic oracles, not prerequisites for core CarState.",
+            "diagnostic_transport_boundary": "Current GTS+ proves selected FRC_P5 0x1901/0x1905/0x1906/0x1912/0x1914 Data IDs are ordinary SID 0x22 ReadDataByIdentifier requests. They are optional semantic oracles; core CarState works independently of them.",
             "retained_contributor_boundary": "The retained contributor architecture explicitly says longitudinal follow/speed/stop-and-go-to-0/hold/resume was VALIDATED on car while lateral remained IN PROGRESS. Only the longitudinal/state observations are used here.",
             "boundary": "Core openpilot cruise state is closed from retained generation-native CAN plus validated contributor live-drive evidence. Detailed ACC-not-available UI and follow-distance remain optional unmapped state.",
         },

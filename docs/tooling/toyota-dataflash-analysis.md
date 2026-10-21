@@ -28,8 +28,8 @@ Shannon entropy, and emits a configurable entropy-ranked list containing only:
 
 Raw candidate key bytes are not written to the report.
 
-For the committed 32 KiB `4512000` dump this means all **32,753** possible
-sliding windows are covered, not merely 16-byte-aligned fields.
+For the committed 32 KiB `4512000` dump this covers all **32,753** possible
+sliding windows, including unaligned windows.
 
 ## 2. Physical NvM validity model
 
@@ -123,8 +123,8 @@ keeping `runtime_key_equivalence = unproven`.
 
 For the committed `4512000` image it reproduces the expected negative:
 object 15 has zero physically valid copies, its three decoded payloads do not
-agree, and its raw second field is low entropy. This is structural evidence,
-not a runtime statement about protected ICU-S slot 4.
+agree, and its raw second field is low entropy. This establishes only structure.
+Protected ICU-S slot 4 runtime state remains unresolved.
 
 A future Corolla dump can therefore be compared immediately:
 

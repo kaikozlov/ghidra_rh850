@@ -55,8 +55,8 @@ check("RDBI policy table pointer at 0x26208 is valid",
 
 # The DID policy table at 0x261A4 has a complex AUTOSAR Dcm layout.
 # Some entries have session_block_ptr values that aren't valid pointers
-# (sentinels, callback addresses, flags). These are structural artifacts,
-# not security configs. We scan all 242 entries and assert that among
+# (sentinels, callback addresses, flags). These are structural artifacts.
+# We scan all 242 entries and assert that among
 # entries with valid structure (block_ptr in CodeFlash, sec_count 0-8,
 # list_ptr in CodeFlash, all levels 0-9), none requires level > 0.
 rdbi_secure_count = 0

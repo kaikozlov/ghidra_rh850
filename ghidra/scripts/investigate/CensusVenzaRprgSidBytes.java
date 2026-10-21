@@ -33,7 +33,7 @@ public class CensusVenzaRprgSidBytes extends GhidraScript {
             }
             if (m.equals("jarl") || m.equals("jmp")) {
                 String rep = ins.toString();
-                // indirect: destination operand is a register, not 0x address
+                // Indirect: the destination operand is a register.
                 String dst = rep.contains(",") ? rep.substring(rep.lastIndexOf(",") + 1).trim() : "";
                 boolean hasAddrTarget = false;
                 for (int i = 0; i < ins.getNumOperands(); i++) {

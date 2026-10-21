@@ -119,10 +119,10 @@ def exact_commands(name: str) -> list[dict[str, Any]]:
 def target_disposition(name: str, tags: list[str]) -> dict[str, str]:
     """Writer-level structural summary.
 
-    Exact target compatibility is a property of the prepare+flash route, not an
-    isolated DLL.  `target_route_dispositions` below is authoritative and is
+    Exact target compatibility requires the prepare+flash route.
+    `target_route_dispositions` below is authoritative and is
     computed with the same exact route classifier as the protocol-grammar
-    artifact.  Keep this field only for backward-compatible structural hints.
+    artifact. Keep this field only for backward-compatible structural hints.
     """
     if name in {"TCUWCanReproStdPrepareWriter.dll", "TCUWCanReproStdFlashWriter.dll"}:
         status = "structural-standard-family"
@@ -226,7 +226,7 @@ def generate(root: Path) -> dict[str, Any]:
             "protocol_tag_counts": dict(sorted(tag_counts.items())),
         },
         "evidence_boundary": {
-            "imports": "structural: imported helper/getter names prove dependencies, not exact on-wire requests",
+            "imports": "structural: imported helper/getter names prove dependencies only; exact on-wire requests require separate recovery",
             "exact_recovered_commands": "recovered subset: this inventory retains legacy COMMANDS pins; the second-stage route-grammar artifact owns the additional exact formerly-specialized builders",
             "target_disposition": "writer-level structural compatibility hint retained for backward compatibility; do not use for route decisions",
             "target_route_dispositions": "exact route-pair classifier shared with cuw_writer_protocol_grammar.json; all 196 rows are either byte-compatible or rejected",

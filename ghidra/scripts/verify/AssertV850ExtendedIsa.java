@@ -757,8 +757,8 @@ public class AssertV850ExtendedIsa extends GhidraScript {
         }
     }
 
-    // roundf.sw r2, r6: 2.5f ties to even = 2 (R01US0209 2.4.4.68 p.354;
-    // dest is r6, not r0: the R2731 field-0 form discards its write).
+    // roundf.sw r2, r6: 2.5f ties to even = 2 (R01US0209 2.4.4.68 p.354).
+    // Destination r6 preserves the write; the R2731 field-0 form discards it.
     private void execRoundfSw(ProgramDB program, Address base) throws Exception {
         Address at = base.add(0x70);
         EmulatorHelper emu = prepare(program, at, "e0174034", "roundf.sw");
@@ -775,9 +775,9 @@ public class AssertV850ExtendedIsa extends GhidraScript {
     }
 
     // modadd (pair r0,r1): r0 is architecturally fixed zero, so inc and
-    // value read as 0 and the rewritten inc/value word is discarded -- the
-    // poked raw r0 varnode is neither read (inc/val = 0, not 1/4) nor
-    // written, and the limit in r1 survives untouched.
+    // value read as 0 and the rewritten inc/value word is discarded. The raw r0
+    // varnode remains unread and unwritten, with inc/val = 0.
+    // The limit in r1 survives untouched.
     private void execModadd(ProgramDB program, Address base) throws Exception {
         Address at = base.add(0x80);
         EmulatorHelper emu = prepare(program, at, "e007d806", "modadd");
@@ -1144,7 +1144,7 @@ public class AssertV850ExtendedIsa extends GhidraScript {
         }
     }
 
-    // cvtf.sw4 w1, w3 with FXSR.RM = 0: 1.5 rounds to 2 (per-RM, not trunc).
+    // cvtf.sw4 w1, w3 with FXSR.RM = 0: 1.5 rounds to 2 according to RM.
     private void execCvtfRmNearest(ProgramDB program, Address base) throws Exception {
         Address at = base.add(0x120);
         EmulatorHelper emu = prepareFpu(program, at, "e80fa01d", "cvtf.sw4");

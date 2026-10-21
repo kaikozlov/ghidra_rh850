@@ -150,7 +150,7 @@ public class AssertDecompilerInvariants extends GhidraScript {
             println(String.format("ISR 0x%x convention=__interrupt params=%d", addr, params));
         }
 
-        // Normal ICU dispatch callees use the RH850/G3 ABI, not __interrupt.
+        // Normal ICU dispatch callees use the RH850/G3 ABI.
         Function dispatch292 = requireFunction(0x87610L, "icus_interrupt_channel292_dispatch");
         requireConvention(dispatch292, "__stdcall");
         if (dispatch292 != null) {

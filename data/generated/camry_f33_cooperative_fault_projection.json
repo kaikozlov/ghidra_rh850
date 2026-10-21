@@ -49,7 +49,7 @@
   },
   "openpilot_mapping": {
     "platform": "TOYOTA_CAMRY_TSS3 only",
-    "semantics": "current steering unavailability, not a guarantee of automatic repair; no host-side persistence timer or new engagement policy",
+    "semantics": "current steering unavailability only; automatic repair remains unguaranteed; no host-side persistence timer or new engagement policy",
     "steerFaultPermanent": "not inferred from these lossy projections",
     "steerFaultTemporary": "current selected hardware fault OR cooperative command inhibit OR cooperative angle inhibit"
   },

@@ -191,12 +191,12 @@ ev = [
 for rec in ev:
     red.feed(rec)
 res = red.finish()
-check("origin anchored at first live event, not metadata",
+check("origin anchored at first live event",
       res.first_live_ns == t0)
 check("repeated metadata never resets origin", res.last_live_ns == t0 + 100_000_000)
 check("grid spans live window only", res.grid_samples == 3, str(res.grid_samples))
 # grid rows at t0+100/150/200 ms sample CAN observations last made at t0, so
-# beyond the 75 ms freshness window they are stale, not zero.
+# beyond the 75 ms freshness window they are stale.
 red2 = SegmentReducer("r", 1, keep_qualified=True)
 for rec in ev[:7]:
     red2.feed(rec)
@@ -208,7 +208,7 @@ red2.feed(ref081(t0 + 200_000_000, 9))
 red2.feed(req08a(t0 + 200_000_000, 11, 9))
 red2.feed(b6(t0 + 200_000_000, 11, 18))
 res2 = red2.finish()
-check("stale signals excluded, not zero-filled",
+check("stale signals excluded",
       res2.exclusions.get("torque_stale", 0) > 0 and res2.exclusions.get("measured_stale", 0) > 0,
       str(res2.exclusions))
 check("fresh numeric zero stays a value",

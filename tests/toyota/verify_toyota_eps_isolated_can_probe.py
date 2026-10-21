@@ -221,7 +221,7 @@ response = assess_test(response_frames, base_health, dict(base_health, total_tx_
 check("validated native 0x7A9 diagnostic reply confirms request response and ACK", response["verdict"] == "matched-eps-diagnostic-response" and response["wire_ack"] == "confirmed-by-native-response")
 echo_only = probe.classify_frames(rows[:1], 1)
 clean = assess_test(echo_only, base_health, dict(base_health, total_tx_cnt=11))
-check("clean echo-only phase is labeled ACK-consistent, not confirmed", clean["verdict"] == "ack-consistent-no-eps-response" and clean["wire_ack"] == "inferred-from-clean-controller-health")
+check("clean echo-only phase is labeled as an ACK-consistent inference", clean["verdict"] == "ack-consistent-no-eps-response" and clean["wire_ack"] == "inferred-from-clean-controller-health")
 native_request_mirror = probe.classify_frames([
     (probe.TX_ADDR, probe.TESTER_PRESENT_FRAME, 129),
     (probe.TX_ADDR, probe.TESTER_PRESENT_FRAME, 1),
@@ -340,7 +340,7 @@ unmatched_native = assess_test(
     base_health,
     dict(base_health, total_tx_cnt=11),
 )
-check("arbitrary native 0x7A9 is peer traffic, not a diagnostic response or fallback without TX receipt", unmatched_native["verdict"] == "native-eps-frame-diagnostic-unmatched" and unmatched_native["matched_diagnostic_response_count"] == 0 and unmatched_native["wire_ack"] == "request-ack-indeterminate" and not unmatched_native["host_tx_receipt_confirmed"] and not unmatched_native["fd_fallback_eligible"])
+check("arbitrary native 0x7A9 remains unmatched peer traffic without TX receipt", unmatched_native["verdict"] == "native-eps-frame-diagnostic-unmatched" and unmatched_native["matched_diagnostic_response_count"] == 0 and unmatched_native["wire_ack"] == "request-ack-indeterminate" and not unmatched_native["host_tx_receipt_confirmed"] and not unmatched_native["fd_fallback_eligible"])
 f186_extended_sf = bytes.fromhex("000462f18603") + bytes(6)
 check("positive F186 labels application default session", probe.classify_f186_mode_response(bytes.fromhex("0462f18601000000")) == "application-default-session")
 check("positive F186 labels application programming session", probe.classify_f186_mode_response(bytes.fromhex("0462f18602000000")) == "application-programming-session")

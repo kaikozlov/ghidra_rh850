@@ -40,7 +40,7 @@ check("Camry protocol table/class", na["tables"]["protocol_info"] == {
 check("all Camry mount candidates have Toyota transport routes",
       len(camry["mount_candidates"]) == 34 and all(isinstance(row.get("transport_route"), dict) for row in camry["mount_candidates"]))
 routes = {row["category_id"]: row["transport_route"] for row in camry["mount_candidates"]}
-check("Toyota protocol +0x14 is legislated request, not response",
+check("Toyota protocol +0x14 holds the legislated request address",
       routes[372]["legislated_request_address"] == 0x7E0 and
       all(route["legislated_request_address"] == 0 or 0x7E0 <= route["legislated_request_address"] <= 0x7E7 for route in routes.values()))
 check("direct current-P5 Toyota route witnesses",

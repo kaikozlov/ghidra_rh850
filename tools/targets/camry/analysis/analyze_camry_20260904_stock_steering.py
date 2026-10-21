@@ -17,12 +17,11 @@ Design boundaries:
   at a time in stable monotonic-time order. Reducer state is counters,
   last-observed signal trackers, a 20-Hz sample grid, and qualified/review rows.
   A further iterator pass is used only when emitting a compact source-derived
-  fixture. This is segment-bounded rather than whole-route retention.
+  fixture. Retention is bounded to one segment.
 - Provenance: every readable source file is hashed over its compressed bytes
   and inventoried with parser/schema identity, event counts, first/last
   live-event timestamps, and input-quality flags. Missing, unreadable,
-  duplicate, and out-of-order inputs are reported explicitly rather than
-  silently disappearing from the corpus.
+  duplicate, and out-of-order inputs are reported explicitly.
 - Separation: native vehicle frames (Panda ``src`` 0..2), Panda TX-loopback
   echoes (``src`` 128..191), rejected TX (``src`` 192..255), and openpilot
   ``sendcan`` are counted independently. Forwarding echoes are never counted
@@ -96,8 +95,8 @@ ANALYSIS_ADDRESSES = (ADDR_STEER_ANGLE, ADDR_EPS_TELEM, ADDR_REFERENCE,
 ADDRS_ABSENT_NATIVE = (0x0B6, 0x131, 0x2E4)
 # Shortest frame the fixed-offset decoders index into, per analysis address
 # (0x025 needs d4; 0x030 needs d17/B22:B23; 0x081 needs B16:B17; 0x08A needs
-# B24; the 32-byte B6 shape reads d28..d31). Shorter frames are counted, not
-# decoded, so one malformed frame cannot abort a whole-route run.
+# B24; the 32-byte B6 shape reads d28..d31). Shorter frames are counted and
+# excluded from decoding, so one malformed frame cannot abort a whole-route run.
 DECODE_MIN_LEN = {
     ADDR_STEER_ANGLE: 5, ADDR_EPS_TELEM: 24, ADDR_REFERENCE: 18,
     ADDR_LATERAL_REQ: 25, ADDR_LATERAL_CTRL: 32,
@@ -404,7 +403,7 @@ class SegmentReducer:
         else:
             # Panda emits src 0..2 (native), 128..191 (returned TX), 192+
             # (rejected TX). Anything else is a misrouted/foreign frame:
-            # count it instead of silently dropping it from every census.
+            # include it in a separate census.
             self.unexpected_src[str(src)] += 1
 
     def _car_state(self, t: int, v_ego: float, left: bool, right: bool) -> None:
@@ -951,7 +950,7 @@ def load_logreader(openpilot_root: str):
     for cand in (root, root / "openpilot"):
         if (cand / "tools" / "lib" / "logreader.py").exists():
             # In a nested-submodule fork `cand` is itself the openpilot package,
-            # so `from openpilot...` needs cand's parent importable, not cand.
+            # so `from openpilot...` needs cand's parent on the import path.
             base = cand.parent if (cand / "__init__.py").exists() else cand
             if str(base) not in sys.path:
                 sys.path.insert(0, str(base))

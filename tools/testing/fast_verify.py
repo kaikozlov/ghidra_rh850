@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Small explicit verification runner.
 
-Verification in this repository is intentionally opt-in.  The manifest is a
-registry of named suites, not a changed-file ownership graph.  Documentation,
+Verification in this repository is intentionally opt-in. The manifest registers
+named suites. Documentation,
 status ledgers, provenance metadata, and unrelated source files never select
 verification automatically.
 

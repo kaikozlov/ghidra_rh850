@@ -417,7 +417,7 @@ def build_plan(
                 "Panda NOOUTPUT; interactively reconnect negative with IG OFF; then IG ON, never READY"
             ),
             "usb_power": (
-                "Panda host must be battery-powered, not vehicle-powered or mains-powered, to avoid a "
+                "Panda host must use battery power only to avoid a "
                 "second power/ground path while auxiliary negative is disconnected"
             ),
             "immobilization": "level ground, parking brake set, wheels chocked, foot off brake",
@@ -469,7 +469,7 @@ def build_plan(
             "application": "04 62 F1 86 <session>: exact application current-session producer",
             "boot_compatible": (
                 "03 7F 22 31: F186 is absent from the exact boot readable-DID table; this is "
-                "boot-compatible, not boot proof"
+                "boot-compatible, with software mode still unproved"
             ),
             "unknown": "another NRC, silence, or malformed response does not identify software mode",
             "restore_authorization": False,

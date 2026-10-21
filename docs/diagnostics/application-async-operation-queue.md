@@ -31,7 +31,7 @@ non-replay owner is therefore explicit for all five operations.
 SID `0x14` state worker `0x4C9C6` starts operation 1 and stores shared Dcm word
 `FEBE816A = 0x1410`. Low byte `0x10` is the pending marker. Queue monitor
 `0x50A1C` waits until the shared maintenance status bytes leave `0xAA/0xA5`, then
-reports success/failure through **selector `0x11`**, not compact selector `1`.
+reports success/failure through **selector `0x11`**.
 
 That distinction is important. `0x4C430` sends selectors below `0x10` to the
 compact RoutineControl-style selector bank, but selector `0x11` takes the shared
@@ -75,8 +75,7 @@ state `0x84`. Monitor `0x50A1C` has terminal branches for `0x81`, `0x82`,
 maintenance status bytes are no longer pending, execution simply reaches replay
 `0x50996`; replay clears `FEBE828C` before examining the pending ring and
 advancing the queue. Operation 4 is therefore a **finite, selector-less internal
-maintenance action**, not a latched queue defect and not a hidden diagnostic
-service.
+maintenance action**.
 
 ## Verification boundary
 

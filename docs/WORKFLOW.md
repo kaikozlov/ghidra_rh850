@@ -50,7 +50,7 @@ Processor evidence and implementation boundaries:
 `Fixed TP value` and `Fixed EP value` in its analysis options. Empty values
 preserve supplied context and permit instruction-flow recovery; a hexadecimal
 value explicitly seeds function entries. Clearing a seed restores only the
-analyzer-owned context, not unrelated target annotations.
+analyzer-owned context.
 
 `Callee-save policy registers` controls `{ep, gp, tp, r2}`. Empty keeps the
 selected compiler ABI; `none` makes all four volatile; a comma/space-separated
@@ -183,7 +183,7 @@ and [Corolla report](variants/corolla-h-f-openpilot-state-bridge.md).
 
 ## Build workspace contract
 
-`build/` is ignored **workspace state**, not a source of repository truth. A
+`build/` is ignored **workspace state**. A
 clean clone must be able to run `make verify` and `make verify-full` without any
 pre-existing build files. If a deterministic/core verifier needs bytes or compact
 facts, promote them to a tracked location (`community/`, `data/`, `exploit/.../audited/`, etc.)
@@ -282,9 +282,7 @@ priority and paths; the current default/primary target is the 2026 Camry F33.
 - `make work-project` — materialize the registry-default Camry working project;
   add `TARGET=<target>` to select another registered target.
 - `make rebuild-project` — fresh from-scratch rebuild using the selected target's
-  registered rebuild path. The legacy Sienna keeps its mature specialized rebuild
-  script, but it is selected because the target is Sienna, not because it is the
-  default.
+  registered rebuild path. Sienna selects its specialized rebuild script.
 - `make verify-project-parity` — export the selected live project and compare it
   byte-for-byte to that target's tracked normalized inventory baseline.
 - `make generate-decompiler-corpus` — regenerate the selected target's canonical
@@ -304,9 +302,7 @@ Mutation markers are project-affine records under
 `build/work/ghidra-session-dirty/`; each records the canonical working-project path.
 `GHIDRA_PROJECT=/path/to/build-copy tools/g ...` therefore cannot mark or clear
 another working project, and finalization propagates its `PROJECT_DIR` to the
-daemon stop and snapshot steps. Markers are warnings about mutation-capable
-commands, not the authority for deciding whether a rebuilt project needs
-promotion.
+daemon stop and snapshot steps. Markers warn about mutation-capable commands.
 
 ## Opening the working project
 
@@ -418,7 +414,7 @@ tools/pseudo rdbi_0103 --all             # emit all matching pseudocode
 tools/pseudo --data-ref 0xfebef02a       # canonical function-owned RAM refs despite text aliases
 tools/pseudo --data-ref 0xfebe8001 --list
 tools/pseudo --target sienna-8965B4512000 0x6fec   # explicit legacy-Sienna corpus lookup
-# IMPORTANT: --data-ref is a function-owned corpus query, not an exhaustive live-xref census.
+# IMPORTANT: --data-ref queries references owned by recovered functions.
 # References at addresses outside Ghidra's current Function.body can be absent even when the
 # decompiler follows that code (the legacy-Sienna boot send-key 0x54DC is a known example).
 # For exhaustive security-state writer closure, confirm with `tools/g x-ref to <address>` in a
@@ -450,8 +446,8 @@ the exporter lists its profile names. `tools/gts` instead exposes task-shaped
 subcommands such as `ecu`, `did`, `recorder`, `category` and `command`.
 Start with the [schema-first workflow](tooling/gts-query-cli.md#schema-first-workflow)
 to select the Data List or PCS recorder namespace before searching strings.
-It is a discovery surface, not a proof generator. Target tests are split into
-behavioral domains and selected through stable `tools/test` suite names.
+Use it to discover schema entries. Target tests are split into behavioral
+domains and selected through stable `tools/test` suite names.
 Implementation locations and capability boundaries are documented in
 [tooling/README.md](tooling/README.md#task-oriented-entry-points).
 
@@ -491,8 +487,8 @@ code, rejects writable globals and relocations, checks C layouts against the
 host config, and enforces both code-plus-fetch-guard budgets and Corolla's
 reclaimed entry prefix. It also rejects missing/unbounded compiler stack reports
 or summed own C frames above **0 bytes for the resident / 24 bytes for the helper**.
-Metadata `stack_frames` reports bytes per C function, **not** total stack usage
-including stock firmware or interrupts. Onboarding checks the resident's actual
+Metadata `stack_frames` reports bytes per C function.
+Onboarding checks the resident's actual
 SP at helper entry through both fallback and idle paths.
 See [compiler frame handling](tooling/rh850-build-and-sim.md#non-returning-c-functions)
 and [far calls](tooling/rh850-build-and-sim.md#per-callee-far-calls) for the
@@ -528,8 +524,8 @@ The command resolves and reports `geometry`, selector identity, boot transition,
 scheduler, RX ring and functional acceptance rule, native receive/foreground
 path, signer ABI, private-memory layout, and MPU transit permission directly
 from that dump. Components are reported independently as `resolved`,
-`missing-or-ambiguous`, or `blocked`; a required failure means “not proven
-compatible,” not proof that the firmware can never support the approach.
+`missing-or-ambiguous`, or `blocked`; a required failure leaves compatibility
+unproven.
 
 It then reports whether the registered universal profile table already contains
 the exact selector/config row; a missing row is inserted into that candidate
@@ -634,7 +630,7 @@ The evidence boundary is deliberate: **pseudocode for understanding ->
 canonical persisted xrefs/dataflow for tracing -> disassembly/firmware bytes for
 proof**. `--data-ref` is the preferred persisted-xref entry point for RAM state;
 it avoids treating decompiler alias spelling as an address census. Decompiled C
-and the exported reference graph are generated evidence, not the source of truth.
+and the exported reference graph are generated evidence.
 
 Expected memory map after the common P1M-E device profile is applied:
 
@@ -660,7 +656,7 @@ SFR_EIC0_31        fffeea00..fffeea3f  rw volatile
 SFR_EIC            ffffb000..ffffbfff  rw volatile
 ```
 
-The self Local-RAM range is a mapped alias, not a second physical allocation.
+The self Local-RAM range aliases the same physical Local RAM.
 Executable flags describe architectural fetch capability; recovered MPU
 permissions remain the authority for a particular runtime context. The full
 high peripheral range `0xFF600000..0xFFFFFFFF` remains volatile in
@@ -726,7 +722,7 @@ make verify-semantic-coverage-live TARGET=sienna-8965B4512000 PROJECT_DIR="$PWD/
 
 `verification.toml` lists suites and external prerequisites. It does not
 assign tests to changed files. Broad sweeps and Ghidra rebuilds are release or
-diagnostic tools, not a per-edit checklist.
+diagnostic tools.
 
 A permanent test needs a plausible failure: wrong decoding, lost data,
 incorrect state transitions, malformed-input handling, or a critical binary
@@ -858,19 +854,17 @@ baseline.
 
 Run fresh A/B rebuilds sequentially when sharing the default isolated Ghidra
 home: each rebuild reinstalls the shared `GhidraFindcrypt` extension directory.
-Independent reproduction means separate fresh project imports, not concurrent
-extension bootstrap.
+Independent reproduction requires separate fresh project imports.
 
 The whole-image corpus is Ghidra output for reading a function; use
 `tools/pseudo --target TARGET`. Camry understanding that is being recompiled
 lives in `decomp/camry-8965F3307000/src/`. The legacy `semantic_reviews` CSV
 still owns curated conclusions for Sienna, and `function_discovery_reviews`
 owns adjudicated outside-function clusters. Exporters regenerate the
-corresponding summaries. Structural coverage/ranking provides navigation, not
-additional proof.
+corresponding summaries. Structural coverage/ranking provides navigation.
 
-For Camry `camry-8965F3307000`, the E1/E2 computed-store censuses also depend on
-the canonical corpus, not only the firmware hash. After promoting a changed
+For Camry `camry-8965F3307000`, the E1/E2 computed-store censuses depend on both
+the canonical corpus and the firmware hash. After promoting a changed
 corpus, run `ghidra/scripts/investigate/AuditComputedStoreTargets.java` through
 `tools/gtarget camry-8965F3307000 script run` against the matching rebuilt working
 project. Supply each census artifact's `targets` list after `--`, separately for

@@ -3,7 +3,7 @@
 
 Uses the extraction/join cache and matplotlib (available in the openpilot/
 opendbc runtime). Plot thinning is deterministic and does not affect numerical
-summaries. Titles retain byte offsets rather than asserting OEM field names.
+summaries. Titles use byte offsets because OEM field names remain unresolved.
 """
 from __future__ import annotations
 

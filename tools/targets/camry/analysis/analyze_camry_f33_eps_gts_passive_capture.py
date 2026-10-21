@@ -18,8 +18,8 @@ CAPTURE_SCHEMA = "camry-f33-eps-gts-passive-capture-v1"
 CANBIN_MAGIC = b"CAMGTS1\0"
 CANBIN_HEADER = struct.Struct("<QIBB")
 NORMAL_EPS_BUS = 0
-# This is a conservative evidence-correlation ceiling shared with the active
-# exact-target triage, not a claim about every OEM package's protocol timeout.
+# This conservative evidence-correlation ceiling is shared with active exact-target
+# triage. Each OEM package's protocol timeout requires separate evidence.
 PROGRAMMING_PAIR_MAX_NS = 3_000_000_000
 KNOWN_ROUTES = {
     0x750: "central-gateway-request",
@@ -424,7 +424,7 @@ def analyze(capture_dir: Path) -> dict[str, object]:
     capture_status = summary.get("status", "summary-missing")
     coverage_issues = []
     if capture_status != "capture-complete":
-        coverage_issues.append(f"capture status is {capture_status!r}, not 'capture-complete'")
+        coverage_issues.append(f"capture status must be 'capture-complete'; found {capture_status!r}")
 
     if integrity_issues:
         outcome = "capture-integrity-failed"

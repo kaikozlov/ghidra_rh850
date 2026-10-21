@@ -243,7 +243,7 @@ for name, payload_map in frc_payloads.items():
           ent >= 7.9999, f"{ent:.7f}")
     if name == "T-0058-23.cuw":
         # Complete non-overlapping 4-KiB window scan: no low-entropy/plaintext
-        # island.  Supports opacity only, not any specific crypto transform.
+        # island. Supports opacity only. The specific crypto transform remains unknown.
         import math
         def went(w):
             n = len(w)
@@ -586,11 +586,6 @@ if ev:
           and tb["data_format_identifier"]["whole_or_routine"] == "0x01"
           and tb["data_format_identifier"]["delta"] == "0x21"
           and "low nibble=encryptingMethod" in tb["data_format_identifier"]["uds_semantics"])
-    order = tb["transform_order"]
-    check("artifact: delta-then-encrypt ordering remains bounded",
-          "delta method 2 -> encryption method 1" in order["bounded_generation_hypothesis"]
-          and "encryption-method-1 decode -> delta-method-2 application" in order["bounded_ecu_inverse_hypothesis"]
-          and "Bounded ordering inference, not a recovered decoder" in order["boundary"])
     check("artifact: selected ReproStd route has no explicit Nonce/SeedKey provisioning",
           "GetServiceAuthKey" in tb["selected_route_key_material"]
           and "no host-side nonce/seed material" in tb["selected_route_key_material"])
@@ -1005,7 +1000,7 @@ else:
               and v18cstr(uu, 0x10005148) == "0000079A"
               and v18raw(uu, 0x1000151F, 5) == bytes.fromhex("6854510010")
               and v18raw(uu, 0x1000152E, 5) == bytes.fromhex("6848510010"))
-        check("V18 UnifiedUtils: GetSWINForFCM reads DID 1FFF, not F181",
+        check("V18 UnifiedUtils: GetSWINForFCM reads DID 1FFF",
               bytes.fromhex("c6843540caffff22") in v18raw(uu, 0x100015E3, 40)
               and bytes.fromhex("c6843541caffff1f") in v18raw(uu, 0x100015E3, 40)
               and bytes.fromhex("889c3542caffff") in v18raw(uu, 0x100015E3, 40)

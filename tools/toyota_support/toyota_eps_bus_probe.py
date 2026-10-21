@@ -256,7 +256,7 @@ def main() -> int:
         "routing_note": (
             "elm327_param=0 selects the OBD physical path for logical bus 1/FDCAN2; "
             "nonzero selects the normal-harness physical path. Harness orientation "
-            "changes which GPIO/transceiver implements that semantic path, not the logical bus."
+            "changes which GPIO/transceiver implements that semantic path while preserving the logical bus."
         ),
         "toyota_b_repin_candidate": {
             "elm327_param": 1,

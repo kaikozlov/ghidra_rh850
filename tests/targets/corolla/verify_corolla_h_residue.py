@@ -83,7 +83,7 @@ def _section_final_named_residue():
     check('33 roles + one recensus close final 34',d['role_closure_count']==33 and d['surface_recensus_count']==1 and d['static_conclusion']['all_34_prior_unresolved_names_closed'])
     check('boot dispatcher transferred at -0x1C',d['claims']['boot_eiint']['dispatcher_target']=='0x0000072C' and d['claims']['boot_eiint']['dispatcher_shift']==-0x1c and s[0x730:0x770]==h[0x714:0x754])
     check('H boot EIINT table shrinks to 10BC/10C0/10C1/default',[x[0] for x in d['claims']['boot_eiint']['h_rows']]==['0x000010BC','0x000010C0','0x000010C1','0xFFFFFFFF'])
-    check('boot TAUJ0 CH2 is removed, not remapped',d['surface_recensus']==[{'reason':'H complete boot EIINT table removes code 0x1087; H 0x1E5E belongs to code 0x10BC and must not be misidentified as TAUJ0 CH2','reference_entry':'0x00001E44','reference_name':'boot_tauj0_ch2_isr'}])
+    check('boot TAUJ0 CH2 is removed',d['surface_recensus']==[{'reason':'H complete boot EIINT table removes code 0x1087; H 0x1E5E belongs to code 0x10BC and must not be misidentified as TAUJ0 CH2','reference_entry':'0x00001E44','reference_name':'boot_tauj0_ch2_isr'}])
     check('boot exception handlers exact at -0x1C',s[0x1e1e:0x1e26]==h[0x1e02:0x1e0a] and s[0x1e2a:0x1e36]==h[0x1e0e:0x1e1a])
     roles={x['reference_name']:x['target_entry'] for x in d['role_closure']}
     check('CRC trio exact',roles['memory_crc_verify_result']=='0x000047C2' and roles['memory_crc_verify_busy']=='0x000047C8' and roles['crc32_hardware_compute']=='0x000047CE')
@@ -133,7 +133,7 @@ def _section_static_coverage():
     check('all four removed async-operation callback roles are surface-recensused',sum(1 for r in rows if 'application-async-operation-complete-table-recensus' in r.get('surface_recensus',[]))==4)
     check('all 33 final named-residue successors are target-native recovered',sum(1 for r in rows if r.get('role_recovery') and r['role_recovery'].get('report')=='data/generated/corolla_8965H1202000_final_named_residue.json')==33)
     check('all three keyless event-formatter roles are target-native recovered',sum(1 for r in rows if r.get('role_recovery') and r['role_recovery'].get('report')=='data/generated/corolla_8965H1202000_keyless_event_formatter.json')==3)
-    check('removed boot TAUJ0 CH2 role is recensused, not falsely mapped',sum(1 for r in rows if 'boot-eiint-complete-table-recensus' in r.get('surface_recensus',[]))==1 and any(r['reference_name']=='boot_tauj0_ch2_isr' and r['coverage']=='target-surface-recensused' for r in rows))
+    check('removed boot TAUJ0 CH2 role is recensused',sum(1 for r in rows if 'boot-eiint-complete-table-recensus' in r.get('surface_recensus',[]))==1 and any(r['reference_name']=='boot_tauj0_ch2_isr' and r['coverage']=='target-surface-recensused' for r in rows))
     check('238 total roles are target-native recovered',s['coverage_counts'].get('target-native-role-recovered')==238)
     check('all 88 deadline callbacks are closed by complete target recensus',sum(1 for r in rows if r['reference_name'].startswith('deadline_') and r['coverage']=='target-surface-recensused')==88)
     check('global genuinely-unresolved denominator is zero',s['genuinely_unresolved_count']==0)

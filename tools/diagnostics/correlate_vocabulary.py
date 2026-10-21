@@ -225,9 +225,8 @@ def correlate_dtcs(
     DTC descriptions are resolved against M_English.  If the same DTC ID has
     different descriptions across the KWP (EPS_P4DK3) and CAN (EPS_CAN_P4DK)
     databases, the grade is "candidate" with a conflict note — but only when
-    both variants describe the same DID differently, not when the variants
-    simply use different generic names (which is expected for different
-    protocol generations).
+    both variants describe the same DID differently. Different generic names
+    are expected across protocol generations and do not trigger a conflict.
     """
     fw_dtcs = scan_firmware_dtc_table(cf)
     matches = []
@@ -370,9 +369,9 @@ def correlate_monitors(
         # Attach independent decompiled RAM evidence for candidate DIDs.
         ram_source = MONITOR_RAM_SOURCES.get(did)
 
-        # The seq bridge and firmware membership establish structure, not OEM
-        # semantics by themselves. Auto-name only when callback decompilation
-        # independently recovers a meaningful RAM source. DID 0x0111 is a stub
+        # The seq bridge and firmware membership establish structure. Auto-name
+        # only when callback decompilation independently recovers a meaningful
+        # RAM source. DID 0x0111 is a stub
         # and 0x0101 has no recovered source, so both remain family vocabulary.
         if len(can_names) > 1:
             grade = "candidate"

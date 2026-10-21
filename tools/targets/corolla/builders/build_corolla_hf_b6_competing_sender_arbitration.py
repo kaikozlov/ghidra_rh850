@@ -164,7 +164,7 @@ def main() -> int:
             "crypto_slot": 4,
             "separate_source_identifier_in_authenticated_input": False,
             "source_specific_acceptance_recovered": False,
-            "boundary": "The receiver authenticates one generated B6/DataID/freshness profile. No sender/source identity is concatenated into the recovered CMAC input or used after verification. This is a receiver-side negative, not proof that upstream network topology has only one producer."
+            "boundary": "The receiver authenticates one generated B6/DataID/freshness profile. No sender/source identity is concatenated into the recovered CMAC input or used after verification. This negative result covers the receiver only; upstream network producer count remains unresolved."
         },
         "single_profile_queue": {
             "ingress": "0x0008865A",
@@ -199,7 +199,7 @@ def main() -> int:
             "duplicate_sequence_rejected": False,
             "examples": {k: {"raw_delta": v[0], "effective_gap": v[1]} for k, v in seq_examples.items()},
             "plausibility_use": "0xCB4F4 consumes effective_gap; H/F target-jump allowance is 78 raw per effective gap",
-            "conclusion": "signal261 is a steering plausibility/time-gap input, not a duplicate-sender winner selector",
+            "conclusion": "signal261 supplies steering plausibility/time-gap input only; duplicate-sender winner selection remains unrecovered",
         },
         "request_id_arbitration": {
             "signal_id": 254,

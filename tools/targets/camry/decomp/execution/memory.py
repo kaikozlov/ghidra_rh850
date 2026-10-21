@@ -44,7 +44,7 @@ DCRA_CALLS = {
 def _overlay_regions(
     regions: list[tuple[int, bytearray]], address: int, payload: bytearray,
 ) -> None:
-    # Update owned storage rather than hiding a bank behind a second buffer.
+    # Update the bank's owned storage directly.
     # In particular, both local-RAM views share this same bytearray.
     for base, data in reversed(regions):
         if covers(base, len(data), address, len(payload)):
@@ -204,8 +204,8 @@ def dataflash_view():
     if _DATAFLASH_BYTES is None:
         metadata = resolve_target("camry-8965F3307000")[1]
         _DATAFLASH_BYTES = (REPO_ROOT / metadata["dataflash"]).read_bytes()
-    # FACI may modify this backing. Each scenario starts from the registered
-    # nonvolatile image, not a preceding native call's mutable view.
+    # FACI may modify this backing. Reset each scenario to the registered
+    # nonvolatile image independently of preceding native calls.
     _DATAFLASH_VIEW = view_of(bytearray(_DATAFLASH_BYTES))
     return _DATAFLASH_VIEW
 

@@ -38,8 +38,8 @@ kit because removed launchers are intentionally absent from the new manifest.
 The exact-F33 Camry kit additionally exposes the maintained `ui-*`
 startup-catcher commands through `tss3-request-signer`.
 
-The universal staging profile selector is executable verification, not an
-untested transfer assumption. It reads the 12-byte `8965F...` identity from
+The universal staging profile selector is verified by execution.
+It reads the 12-byte `8965F...` identity from
 CodeFlash `0x20860` in three 32-bit comparisons, then copies the selected runtime
 config into the retained high-RAM config block. The `rh850_codeflash` simulation
 runs that actual staging selector against every registered exact CodeFlash image
@@ -249,9 +249,8 @@ The implementation is statically constructible, but these are still dynamic:
   authenticated image on `8965B4512000` because the pinned public fixture is
   already gate-valid.
 
-The first hardware payload should be an inert canary/runtime-telemetry variant,
-not a steering command. A successful RAM transition is not itself proof of the
-SecOC bridge or steering behavior.
+The first hardware payload should be an inert canary/runtime-telemetry variant.
+A successful RAM transition leaves SecOC-bridge and steering behavior unproved.
 
 ## RAM-only command-5 proxy
 
@@ -300,7 +299,7 @@ transfer by address. Exact H/F static analysis instead bounds a 464-byte candida
 pocket at `FEBF0000..FEBF01CF`: the first recovered normalized direct/simple-GP
 reference is `FEBF01D0`, and H MPU region 5 (`FEBEF400..FEBF33FC`) gives that
 pocket supervisor R/W/X (`MPAT=0xB8`) in both recovered application contexts.
-This remains a bounded reference census, not live retention proof.
+This bounded reference census leaves live retention unproved.
 
 Two reviewed executables are tracked separately:
 
@@ -417,8 +416,8 @@ Canonical evidence:
 > intentional mutable startup prefix while pinning the immutable foreground;
 > NRTD/READY phase checks, wheel-fault/freshness checks, decoded Park, explicit
 > failure-path release, and attempt-local failure records are enforced. The kit
-> is therefore intended for **stationary signer qualification**, not automatic
-> road qualification. Corolla's native-shape stock-ACC cancel carrier is
+> is therefore intended for **stationary signer qualification** only.
+> Corolla's native-shape stock-ACC cancel carrier is
 > implemented; receiver acceptance plus physical steering/coexistence remain
 > separate vehicle-qualification items; see
 > [the Corolla handoff audit](../../../../../docs/variants/corolla-tss3-tester-handoff-audit-2026-09-16.md).
@@ -504,8 +503,8 @@ read path; neither installation nor runtime status depends on XCP. State
 commands to modify B6; `failed` means B6 remains stock. Status also decodes the
 last generated-COM B6 scalar destinations at `FEBE7D94..FEBE7DA2`, including
 the native signal261 sequence and whether the observed secondary fields match
-the firmware-derived minimal ID11 tuple. This is a persistent extraction view,
-not a live queue snapshot. The returned `qualification` is deliberately strict:
+the firmware-derived minimal ID11 tuple. This persistent extraction view retains
+observations beyond the live queue state. The returned `qualification` is deliberately strict:
 only `ready_for_stationary_c7=true` authorizes the next stationary experiment.
 `awaiting-native-b6` means the exact replacement mechanism has no carrier yet;
 it is not a signing failure and must not be worked around by transmitting a
@@ -709,8 +708,8 @@ uv run --locked python tools/targets/tss3/research/ram_runtime/live_installer.py
   --execute --bench-isolated
 ```
 
-The installer is an operational composition of already-verified primitives,
-not evidence that the target ICU-S slot permits command 5. The canary variant now
+The installer composes already-verified primitives. Target ICU-S slot permission
+for command 5 still requires live evidence. The canary variant now
 performs its own post-FF00 attestation in the same invocation: application F181
 must reappear as a manifest-pinned target and the manifest-selected heartbeat
 cell must advance through stock application SID `0x23`. For the command-5

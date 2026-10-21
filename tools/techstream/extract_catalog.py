@@ -141,8 +141,8 @@ def extract_monitors(
 
     String indices at offsets 48 and 52 are u32 (not u16 — indices above
     65535 are valid and appear in this data). KgpDataCtrl exposes these names
-    through ``CDbFreezeResRecords::GetDataMonitorName``; they are diagnostic
-    vocabulary, not records from ``CDbDidTable``.
+    through ``CDbFreezeResRecords::GetDataMonitorName``. They provide diagnostic
+    vocabulary separately from ``CDbDidTable`` records.
     """
     entries = []
     if 10 not in db.sections:
@@ -184,7 +184,7 @@ def extract_utility_strings(
     U_English (format 0x06) contains wizard/dialog text for dealer service
     procedures. Its parallel type-1 section supplies stable resource
     identifiers, but still does not establish ECU ownership or a firmware
-    routine binding. These are family-level candidates, not procedure records.
+    routine binding. These are family-level candidates only.
     """
     entries: list[dict] = []
     for idx in range(1, u_db.entry_count + 1):

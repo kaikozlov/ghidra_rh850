@@ -260,7 +260,7 @@ def plan() -> dict:
         "acc_operation_dictionary": ACC_OPERATION_LABELS,
         "operational_context_oracle": (
             "0x1601 switch=ON/control=LTA Enabled plus 0x1914 ACC Control in Operation=1; "
-            "this is a diagnostic operating-context oracle, not direct steering-torque proof"
+            "this oracle establishes diagnostic operating context only; steering torque requires separate direct evidence"
         ),
         "safety": {"model": "ELM327", "numeric": ELM327_SAFETY_MODEL, "param": ELM327_PARAM},
         "hard_guard": "refuse execution while pandad is running; one process must own Panda USB",

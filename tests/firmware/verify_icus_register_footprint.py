@@ -58,7 +58,7 @@ check("every ICU-S-band literal is in the documented set",
 check("no key-RAM window outside the 0xFFC5D000-0xFFC5D0FF command/data block",
       all(0xFFC5D000 <= w < 0xFFC5D100 or w in UNUSED_POOL for w in found),
       f"out-of-band: {sorted(hex(w) for w in found if not (0xFFC5D000 <= w < 0xFFC5D100 or w in UNUSED_POOL))}")
-check("key selector 0xFFC5D004 is referenced (selector-based, not key-value)",
+check("key selector 0xFFC5D004 is referenced",
       0xFFC5D004 in found)
 
 print(f"\nSummary: {passed} passed, {failed} failed")

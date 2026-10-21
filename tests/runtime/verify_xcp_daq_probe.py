@@ -54,7 +54,7 @@ def _section_xcp_daq_probe():
     check('routine-lifecycle profile fits exactly one ODT', len(PROFILES['routine-lifecycle-state'].addresses) == 7)
     check('async/BA profile maps DIAG-APP-023 and SEC-APP-007', PROFILES['async-ba-state'].finding_ids == ('DIAG-APP-023', 'SEC-APP-007'))
     check('BA operational profile maps DIAG-APP-024', PROFILES['ba-operational-state'].finding_ids == ('DIAG-APP-024',))
-    print('\n== SecOC verification-state profile is firmware-pinned, not guessed ==')
+    print('\n== firmware-pinned SecOC verification-state profile ==')
     secoc = PROFILES['secoc-verification-state']
     check('SecOC profile maps SECOC-011/012/029', secoc.finding_ids == ('SECOC-011', 'SECOC-012', 'SECOC-029'))
     check('SecOC profile observes exactly the pinned SecOC state bytes', secoc.addresses == (4273886556, 4273886568, 4273886572, 4273886560, 4273886562, 4273886564), repr([hex(a) for a in secoc.addresses]))

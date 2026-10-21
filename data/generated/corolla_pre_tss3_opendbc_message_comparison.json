@@ -6,7 +6,7 @@
     "secoc_boundary": "0x131 and 0x183 are not pre-TSS3 Corolla messages and must not be included in the Corolla migration baseline",
     "survives_as_configuration_lead": "0x0AA wheel speeds",
     "survives_with_semantic_proof": "0x025 steering angle/rate",
-    "tss2_lta_note": "0x191 was only a neutral coexistence/replacement frame on Corolla TSS2 torque control, not its active steering command"
+    "tss2_lta_note": "0x191 served only as a neutral coexistence/replacement frame on Corolla TSS2 torque control"
   },
   "evidence_boundary": "The 2023 H and 2025 F conclusions are exact application CodeFlash facts plus target-native fixed-map/dataflow proofs. Whole-vehicle openpilot messages may legitimately be absent from an EPS image; only EPS-local command/feedback migrations are treated as architectural evidence. B6 controller-equivalent physical scaling, signal254 feature/request selection, the 7-tick receiver loss cutoff, and modulo-64 sequence handling are closed; the exact OEM signal255 unit, wall-clock sender cadence, exact secondary-field names, and upstream producer/authentication remain open.",
   "explicit_non_corolla_prior_art": [
@@ -32,7 +32,7 @@
       "software_id": "8965H1202000",
       "source": {
         "normalization": "bare-codeflash",
-        "path": "/Users/kai/dev/inspect/repos/ghidra_rh850_analysis/community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+        "path": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
         "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
         "size": 1048576
       }
@@ -43,7 +43,7 @@
       "software_id": "8965F1208000",
       "source": {
         "normalization": "trim-all-ff-upper-1mib-from-2mib-range-dump",
-        "path": "/Users/kai/dev/inspect/repos/ghidra_rh850_analysis/community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
+        "path": "/Volumes/data/altdev/inspect/repos/ghidra_rh850_analysis/community/spanconstant/raw-20260821/span-corolla-2025.20260821-1511/dump_codeflash_00000000_00200000_20260821-152033.bin",
         "sha256": "b8fa3d951f59fb75c190ce1b2c73164adb952f871650cfcd3b7656f08a9c448d",
         "size": 2097152
       }
@@ -601,7 +601,7 @@
               "role": "class-0x0F internal fault branch when its additional classifier condition permits"
             },
             "15": {
-              "boundary": "selected by a distinct operational predicate, not safely nameable as ready or fault from static evidence alone",
+              "boundary": "selected by a distinct operational predicate; ready/fault naming remains unresolved from static evidence alone",
               "role": "special operating state"
             },
             "16": {
@@ -727,7 +727,7 @@
               "event_table": "0x0002B988",
               "state11_additional_source": "0x4B930 can set the shared 0x20 aggregate bit from three internal 0x22-valued conditions; state 11 is therefore not exclusively class-0x20/F0 DTC events"
             },
-            "evidence_boundary": "All class/state selection logic and aging constants are exact-H firmware-static and transfer byte-for-byte to F. Toyota DTC names come from the pinned EMPS_P5 Techstream table via the committed Corolla Techstream correlation catalog. Classes with DTC index 0 remain internal/no-named-DTC. State 16 is a general fallback, not a unique class-0x80 code.",
+            "evidence_boundary": "All class/state selection logic and aging constants are exact-H firmware-static and transfer byte-for-byte to F. Toyota DTC names come from the pinned EMPS_P5 Techstream table via the committed Corolla Techstream correlation catalog. Classes with DTC index 0 remain internal/no-named-DTC. State 16 is a general fallback shared beyond class-0x80.",
             "internal_only_classes": {
               "0x04": {
                 "dtc_indexed_count": 0,
@@ -1160,7 +1160,7 @@
               },
               "techstream_correlations": {
                 "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
-                "sha256": "5e4eac747a29080dcb5a700070655dccb7814434cc810f204080512416aa8e3a"
+                "sha256": "74c41adf16dd7e81255a30589bf6a0c06ca1e96a80613b7a20a703178a598cab"
               }
             },
             "wire": {

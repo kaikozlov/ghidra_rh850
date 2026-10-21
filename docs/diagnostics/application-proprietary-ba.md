@@ -92,8 +92,7 @@ a reset while its persisted countdown remains valid.
 `checkpoint_persistent_countdown_step @ 0x34FB6` decrements the count by one per
 worker invocation, persists object `0x18`, and clears redundant object `0x105`
 and the authorization marker when the count reaches zero. The static graph proves
-**30 worker invocations**, not a wall-clock duration; no seconds/minutes claim is
-made.
+**30 worker invocations**. The wall-clock duration remains unmeasured.
 
 This pair is distinct from the related-variant SecOC key object. Redundant object
 `15` / API ID `0x10F` is 32 bytes at `FEBF02E8` and is not written by F6/F7.
@@ -105,14 +104,14 @@ This pair is distinct from the related-variant SecOC key object. Redundant objec
 F1/F4/F5/F9 share the `FE024 -> B201A` request path and the `FE150 -> B209C`
 completion path. Their modes 3/5/6/7 map to lifecycle request state
 `FEBEB112=0x5A` and `FEBEB113=0x11/0x22/0x44/0x88` respectively. These states
-feed system-mode/telemetry workers, not a recovered numeric steering-command
-input.
+feed system-mode/telemetry workers. A numeric steering-command input remains
+unrecovered.
 
 ### `TMPCL`
 
 F3 completion reaches `3B252`, `38DCA`, and `47958`. The recovered lower paths
-reset runtime groups and persist ordinary objects 6 and 5. This is a
-maintenance/reset workflow, not a direct actuation primitive.
+reset runtime groups and persist ordinary objects 6 and 5. This establishes a
+maintenance/reset workflow.
 
 ### `TZCLR`
 
@@ -159,9 +158,8 @@ The supported security statement is narrow:
    conditioned-command, d/q-reference, current-PI, or TSG3-PWM state set.
 
 This is a **persistent proprietary diagnostic authorization/freshness downgrade**
-and a maintenance/lifecycle surface. It is not an initial SecurityAccess bypass,
-not a write to the SecOC key object, and not a recovered arbitrary
-steering-current primitive.
+and a maintenance/lifecycle surface. Initial SecurityAccess remains required.
+The recovered effects exclude SecOC-key writes and arbitrary steering-current commands.
 
 ## 6. Verification
 

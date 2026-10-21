@@ -111,7 +111,7 @@ check("committed fixture is exactly 1 MiB", len(firmware) == CODEFLASH_SIZE)
 indices = list(range(WORD_COUNT))
 random.Random(0x4512000).shuffle(indices)
 r_full = CodeFlashReassembler()
-# Controls can arrive around data; only their values, not sequential placement, matter.
+# Controls can arrive around data. Only their values matter.
 r_full.feed(startup_frames()[0])
 r_full.feed(startup_frames()[2])
 r_full.feed(startup_frames()[3])
@@ -136,7 +136,7 @@ sanity = report["boot_crc_sanity"]
 check("boot sanity dynamically rediscovers two descriptors", sanity["descriptor_count"] == 2)
 check("public Sienna artifact retains exactly one directly valid descriptor", sanity["valid_descriptor_count"] == 1)
 high = next(item for item in sanity["descriptors"] if item["start"] == "0x18000")
-check("high-region acquisition anomaly is observed, not repaired", high["terminal_fixup_valid"] is False and high["full_crc"] == "0x5AA2313A")
+check("high-region acquisition anomaly is preserved in the report", high["terminal_fixup_valid"] is False and high["full_crc"] == "0x5AA2313A")
 
 print("\n== partial persistence is explicit ==")
 with tempfile.TemporaryDirectory() as td:

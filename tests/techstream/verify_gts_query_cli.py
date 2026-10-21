@@ -72,7 +72,7 @@ with tempfile.TemporaryDirectory(prefix="gts-recorder-schema-") as td:
         bare = query.recorder_payload("tss3", "5A08")["fields"]
         check(
             [row["DataName"] for row in prefixed] == [row["DataName"] for row in bare] == ["Brake permission"],
-            "recorder IDs match exactly, not names containing the same hex token",
+            "recorder IDs match exactly",
         )
         check(
             [row["DataID"] for row in query.recorder_payload("tss3", "brAKE")["fields"]] == ["5A08"],

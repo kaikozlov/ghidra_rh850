@@ -339,7 +339,7 @@ def main() -> int:
                 "consumer": "0x000CC442",
                 "semantics": "percentage-like modifier of an internal steering contributor; ordinary values scale the contributor by signal262/100, while 0xC9/0xCA/0xCB select calibrated special cases",
                 "candidate_id11_value": 0,
-                "candidate_boundary": "For the ordinary path, zero removes this percentage-scaled contribution. This is an EPS-consumer result, not proof that every network receiver treats B8=0 as neutral.",
+                "candidate_boundary": "For the ordinary path, zero removes this percentage-scaled contribution in the EPS consumer. Whether every network receiver treats B8=0 as neutral remains unproved.",
                 "oem_name_identified": False,
             },
             "263": {
@@ -348,7 +348,7 @@ def main() -> int:
                 "consumer": "0x000CBFCE",
                 "semantics": "percentage-like modifier of the active profile's internal contribution; the computed term is multiplied by signal263/100",
                 "candidate_id11_value": 0,
-                "candidate_boundary": "Zero removes this recovered percentage-scaled term. This is an EPS-consumer result, not proof that every network receiver treats B9=0 as neutral.",
+                "candidate_boundary": "Zero removes this recovered percentage-scaled term in the EPS consumer. Whether every network receiver treats B9=0 as neutral remains unproved.",
                 "oem_name_identified": False,
             },
             "264": {

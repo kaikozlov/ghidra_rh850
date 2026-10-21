@@ -41,10 +41,10 @@ getting past the host's optional read does not prove a bootloader is listening.
 
 The retained 39 post-incident log segments do not establish that node-5F gateway
 preparation was completed: the selected shared-ID records are for other logical
-nodes. Their time coverage is partial. This is an untested-condition finding,
-not a claim that no such operation was attempted at any time.
+nodes. Their partial time coverage leaves attempts outside those records
+unresolved.
 
-## Exact Camry endpoint, rather than a shared CAN ID alone
+## Exact Camry endpoint
 
 Current Toyota master data and the runtime's unmodified offline mount resolver
 agree for **both** Camry HV vehicle types 12704 and 12984:
@@ -63,12 +63,11 @@ must not silently identify the separate logical brake-booster endpoint.
 
 Primary inputs are current `Toyota.ddb` type 13, the vehicle's install-set
 membership, and the recovered helper's `000007505F/000007585F` literals.
-The vehicle tables describe candidates, not proof of installed/live responders.
+The vehicle tables identify candidates. Installed/live responders require separate evidence.
 
 ## Two reproduced client defects that would invalidate the gateway experiment
 
-These were found in the separate `toyota-diagnostics` runtime and fixed there,
-not in the ECU or the openpilot driving path.
+These defects were found and fixed in the separate `toyota-diagnostics` runtime.
 
 ### 1. An explicit OBD-route request was silently discarded
 
@@ -96,7 +95,7 @@ Before `cd0aa90`, a valid `758` response from extension `0F` or `6D` caused the
 installed upstream ISO-TP client to raise `InvalidSubAddressError` while waiting
 for `5F`, even if the matching gateway reply immediately followed in the same
 batch. The failure was reproduced with actual `UdsClient`/`IsoTpMessage` code and
-FakePanda, rather than by mocking the ISO-TP result.
+FakePanda.
 
 The fix adds a small borrowed-transport address-extension demultiplexer before
 ISO-TP. It leaves bus/CAN-ID filtering and all ISO-TP validation with the upstream
@@ -106,8 +105,8 @@ There is no target-specific CAN-ID list, vehicle permission state or change to
 Panda safety in this demultiplexer.
 
 The new tests fail on the old implementation and pass after the fixes. The full
-runtime suite passes **182 tests**, including **14 transport tests**. These are
-hardware-independent software tests, not successful vehicle transactions.
+runtime suite passes **182 tests**, including **14 transport tests**. These
+hardware-independent software tests establish host behavior only.
 
 ## Checked baseline command: existing CLI, no new probing framework
 
@@ -128,14 +127,13 @@ bus 1, CAN 750: 5F 02 3E 00 00 00 00 00
 ```
 
 After simulated unrelated `0F/6D` replies, the real ISO-TP implementation
-accepted the simulated `5F` reply and returned payload `7E 00`. That proves the
-host routing request, address-extension framing and receive isolation, **not**
-the vehicle's response. Panda host submissions are not a count of wire retries.
+accepted the simulated `5F` reply and returned payload `7E 00`. This proves the
+host routing request, address-extension framing and receive isolation.
+Vehicle response remains unobserved. Panda host submissions do not count wire retries.
 
 This is only the baseline read. Manufacturer gateway-family qualification and
 reprogramming preparation are separate stages. The current native classifier
-uses request form and its validated response, not merely the model year or
-an assumed gateway generation. P4-shaped preparation has an explicit default-
+uses request form and its validated response. P4-shaped preparation has an explicit default-
 session cleanup in the host; the P5-specific cleanup must not be invented by
 borrowing the SMC or P6 flow. Preserve the actual response and use the matching
 supported OEM procedure, including normal authorization and exit handling.
@@ -148,11 +146,11 @@ than guess a mode-changing sequence.
 
 ## Separate SMC state/cleanup helper is not a Camry cancellation primitive
 
-An apparent missing cleanup was investigated in current `TCUWUnifiedUtils.dll`,
-not inferred from an export name. `ReadProgrammingModeControlState` at
+An apparent missing cleanup was investigated in current `TCUWUnifiedUtils.dll`.
+`ReadProgrammingModeControlState` at
 `100043D0` builds RDBI `22 10 05`, checks `62 10 05`, and extracts bit 0 of the
-first data byte. Its address literals at `100082BC/100082C8` are **751/761**,
-not the Camry `750/758` plus `5F` route.
+first data byte. Its address literals at `100082BC/100082C8` select **751/761**.
+Camry uses the separate `750/758` plus `5F` route.
 
 The actual UnifiedFlashWriter caller (`10001961..100019B8`) first matches the
 package gateway string **0751**, reads this state, and invokes SMC routine type
@@ -163,20 +161,18 @@ The SMC acronym is not expanded here without OEM provenance.
 
 Toyota master categories 5038/8502 carry 751 routes in the overall corpus;
 neither a 751 route nor those logical candidates is present in either inspected
-Camry install set. This bounds applicability, not the contents of every real
-vehicle. Sending the SMC stop operation to the Camry's normal gateway would be
-an unsupported substitution, not completion of the P5 exit proof.
+Camry install set. This bounds applicability to those inspected configurations.
+Sending the SMC stop operation to the Camry's normal gateway would be unsupported
+and would leave P5 exit behavior unproved.
 
 The protected stubs, sidecars and recovered copies of UnifiedUtils,
 UnifiedPrepareWriter, UnifiedFlashWriter and CommonPrepareWriter were freshly
 hash-matched against `build/out/cuwplus-unprotected/manifest.json`. Their current
 installed PE inputs are the reproducible source. Disposable disassemblies under
-`build/work/f33-gateway-control-state-20260912/` are convenient working outputs,
-not required authority for these conclusions.
+`build/work/f33-gateway-control-state-20260912/` are optional working outputs.
 
 ## Live boundary
 
 There has been no live gateway response, completed gateway preparation, new EPS
 identity or ECU repair in this pass. The concrete next experiment is the
-properly routed and demultiplexed **OEM gateway-preparation condition**, not a
-repeat of unchanged EPS polling and not any work under the car.
+properly routed and demultiplexed **OEM gateway-preparation condition**.

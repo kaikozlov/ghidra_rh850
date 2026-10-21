@@ -15,7 +15,7 @@ The byte reaches 2 via exactly one site: the success path of
 uds_security_access_send_key (a correct 27 02 key derived from SEED_KEY_SECRET,
 SEC-BOOT-002/003). Boot init and the diagnostic-session-change handler only
 ever write 1, so DiagnosticSessionControl (10 0x) alone cannot satisfy the
-gate -- SecurityAccess is mandatory, not redundant.
+gate -- SecurityAccess is mandatory.
 
 All assertions are exact instruction bytes at exact CodeFlash VAs (VA == file
 offset in the standalone CodeFlash image; no Ghidra needed at test time). The

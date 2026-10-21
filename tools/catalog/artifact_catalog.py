@@ -146,7 +146,7 @@ def _naming_producer(path: str) -> str | None:
 def _producer_candidates(path: str) -> tuple[str, ...]:
     """Return likely producers, preferring declared output ownership.
 
-    A source file merely mentioning an artifact is a consumer, not a producer. We
+    A source file that only mentions an artifact is a consumer. We
     therefore first recover conventional OUT/OUTPUT constants, then the established
     Corolla semantic-builder naming contract, and only then fall back to source
     mentions for older tools that have not adopted declarative output metadata yet.

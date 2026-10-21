@@ -396,7 +396,7 @@ def airbag_ddr_grip_surface(parser: DDBParser, root: Path) -> dict[str, Any]:
                 "Grip monitor keys 5500..5505 are reused in multiple CDbDDRAddressTable selector contexts. "
                 "The current host looks the table up by byte +0x0A, byte +0x0B, then local monitor key +0x04. "
                 "The same grip key therefore maps to different recorder-layout rows across selectors; this table "
-                "is DDR payload-address metadata, not a CAN arbitration-ID or vehicle-PDU routing table."
+                "provides DDR payload-address metadata only. CAN arbitration-ID and vehicle-PDU routing remain outside its scope."
             ),
         },
         "host_layout_proof": {
@@ -411,7 +411,7 @@ def airbag_ddr_grip_surface(parser: DDBParser, root: Path) -> dict[str, Any]:
             "conclusion": (
                 "CDbDDRMonitorTable uses the u16 at +0x18 as its local monitor key. CDbDDRAddressTable is "
                 "independently keyed by selector bytes +0x0A/+0x0B and local monitor key +0x04. Therefore "
-                "5500..5505 and their address rows describe the SRS DDR recorder schema, not CAN IDs."
+                "5500..5505 and their address rows describe only the SRS DDR recorder schema."
             ),
         },
     }

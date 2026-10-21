@@ -414,7 +414,7 @@ def analyze() -> dict[str, Any]:
   # into r29; BD00A..BD00C publishes r29 at the recovered ACBD reference.
   # CEFA8..CEFE0 calls grouped-status selectors 0x11/0x1A, inhibits when
   # their OR equals 0x5A, otherwise publishes each route-status == 0.
-  # These are instruction/dataflow guards, not decompiler-local spellings.
+  # These guards bind directly to recovered instruction/dataflow.
   checks = {
     "secoc_ingress_state_and_pointer_checks": all(x in c[0x8EE7C] for x in ("DAT_febe54f4 == -0x1ff", "param_2 != (int *)0x0", corpus[0x8F34A]["name"])),
     "queue_wrapper_calls_insert": re.search(rf"\b{re.escape(corpus[0x8E9C6]['name'])}\s*\(1", c[0x8F34A]) is not None,
@@ -526,7 +526,7 @@ def analyze() -> dict[str, Any]:
     {"n": 7, "name": "bank_health", "cells": ["FEBEACBD", "FEBECAFF", "FEBEADB0", "FEBECB00"], "proves": "ID11 reached cooperative bank2"},
     {"n": 8, "name": "application_supervision", "cells": ["FEBEADDD", "FEBEADBB", "FEBEADBC", "FEBEADBD", "FEBEADBE", "FEBECAB5", "FEBECAB6", "FEBECAB7", "FEBECAFC", "FEBECAFD"], "proves": "B6 companion/sequence/readiness state"},
     {"n": 9, "name": "cooperative_contribution", "cells": ["FEBECB20", "FEBECB08", "FEBECB38"], "proves": "supervised B6 contribution became nonzero"},
-    {"n": 10, "name": "d0218_branch", "cells": ["FEBEB112", "FEBEAC2B", "FEBECB38", "FEBECC48"], "proves": "normal D0218 branch actually included B6 rather than diagnostic/service reduction"},
+    {"n": 10, "name": "d0218_branch", "cells": ["FEBEB112", "FEBEAC2B", "FEBECB38", "FEBECC48"], "proves": "normal D0218 branch included B6 with diagnostic/service reduction inactive"},
     {"n": 11, "name": "ordinary_funnel", "cells": ["FEBECC48", "FEBECC4C", "FEBECC4E", "FEBEAC52", "FEBECC60", "FEBECC50"], "proves": "B6-containing ordinary command survived common scaling/limits to CC50"},
     {"n": 12, "name": "output_scale", "cells": ["FEBEB1F8", "FEBEAC5A", "FEBECC50", "FEBECC62"], "proves": "common AC5A output scaling retained command"},
     {"n": 13, "name": "hard_actuator_gate", "cells": ["FEBE8B28", "FEBEEF90", "FEBEAC29", "FEBEAC2A", "FEBECC62", "FEBECC66"], "proves": "common actuator gate did/did not force command to zero"},
@@ -695,7 +695,7 @@ def analyze() -> dict[str, Any]:
     "scheduler": {
       "communications_application_root": "66062 -> 667E6 -> 58B5E -> 5EC24/5F610 -> 4BD46 -> 58074 -> BCD62 -> D1130 -> D0EEC",
       "shared_command_root": "65FEA -> 6679E -> 5899E -> C1F7A/C2000 -> BCD02 -> BCAA6/BCBD8 -> D1100 -> D0AF6 -> BF33E",
-      "boundary": "The two cyclic roots share snapshot RAM; exact within-task ordering is recovered. Absolute inter-task phase is scheduler/runtime state, not one direct call chain.",
+      "boundary": "The two cyclic roots share snapshot RAM; exact within-task ordering is recovered. Absolute inter-task phase depends on scheduler/runtime state across the two call chains.",
     },
     "stage5_boundary": {
       "bypassed": ["freshness callback result", "ICU command return", "ICU root verification result", "post-crypto callback result", "final Gate-2 delivery predicate"],

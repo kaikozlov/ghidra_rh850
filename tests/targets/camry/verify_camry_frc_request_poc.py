@@ -56,7 +56,7 @@ check("retained 0x160 independently recovers implicit DataID 0x0160", e2e_p05_re
 # The contributor's Corolla implementation expresses this same fixed-length
 # transform as init=0 plus Data ID 0x444A.  Equality on one base and every
 # payload-bit basis vector proves the two affine CRC maps are identical for all
-# 30-byte 0x160 application payloads; this is nomenclature, not a wire split.
+# 30-byte 0x160 application payloads; the two names describe the same wire format.
 def contributor_0x160_crc(frame: bytes) -> int:
     return crc16_ccitt(frame[2:] + bytes.fromhex("4a44"), start=0)
 

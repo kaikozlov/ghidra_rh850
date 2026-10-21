@@ -369,7 +369,7 @@ def main() -> int:
         "interpretation": (
             "The master-routed EMPS_P5 surface is data-monitor/DTC/support/RoB oriented. It is routed in NA/EU/JP, while EMPS2_P5 has no recovered master route in this V18 corpus. "
             "EMPS_P5's parsed section set contains no classic type-11/type-12 active-test tables, and category 405 routes no DLL whose name identifies Active Test or RoutineControl. "
-            "This is a bounded Techstream-package negative, not proof that Toyota has no separate utility or server-mediated steering procedure."
+            "This negative result covers only the Techstream package. Separate Toyota utilities or server-mediated steering procedures remain possible."
         ),
     }
 
@@ -431,7 +431,7 @@ def main() -> int:
     # 0x394 17-state classifier. Join every populated class record to H's own
     # DTC table and the pinned EMPS_P5 Toyota DTC vocabulary when a DTC index
     # exists. Keep class semantics separate from openpilot temporary/permanent
-    # policy: this is an OEM fault-family/lifetime join, not an openpilot label.
+    # policy: this joins OEM fault families/lifetimes only.
     fault_event_classes: dict[str, list[dict]] = {}
     for dem_event in range(0x180):
         event_address = 0x2B988 + dem_event * 8
@@ -752,7 +752,7 @@ def main() -> int:
             "interpretation": (
                 "EMPS_P5 has the stronger static DID-vocabulary fit for this H image (124 versus 112 type61 IDs) "
                 "and uniquely maps H-supported DID 0x1C02 to Command Value Torque; this is evidence for using "
-                "EMPS_P5 vocabulary, not proof that a particular vehicle session selected category 405."
+                "EMPS_P5 vocabulary only. Selection of category 405 in any particular vehicle session remains unproved."
             ),
         },
         "techstream_surface": techstream_surface,

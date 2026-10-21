@@ -160,7 +160,7 @@ RECORD_ROLES = {
     4: {
         "classification": "identity",
         "role": "ecu_part_number_record",
-        "boundary": "Payload is marker A55A5AA5 followed by the 10-character Toyota part number '8965012N50' (i.e. 89650-12N50) and two NUL bytes, identical in both Corolla specimens. The Sienna calibration's same-shaped record 4 at 0xA0A0 carries '8965045170' (89650-45170), matching its F181 identity family. Techstream's English string database contains the exact OEM vocabulary 'ECU Part Number' (M_English entries 2665884 and 10040272) used by diagnostic part-number displays. No target-native firmware consumer of this record's staged RAM (FEBEF6A0) was recovered, so the classification rests on the cross-variant Toyota part-number shape plus OEM vocabulary, not on a decompiled reader.",
+        "boundary": "Payload is marker A55A5AA5 followed by the 10-character Toyota part number '8965012N50' (i.e. 89650-12N50) and two NUL bytes, identical in both Corolla specimens. The Sienna calibration's same-shaped record 4 at 0xA0A0 carries '8965045170' (89650-45170), matching its F181 identity family. Techstream's English string database contains the exact OEM vocabulary 'ECU Part Number' (M_English entries 2665884 and 10040272) used by diagnostic part-number displays. No target-native firmware consumer of this record's staged RAM (FEBEF6A0) was recovered, so the classification rests only on the cross-variant Toyota part-number shape plus OEM vocabulary.",
     },
     5: {
         "classification": "active-unit-calibration",
@@ -350,8 +350,8 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
             "derived_payload_key": ram[0x12D18:0x12D28].hex(),
         })
 
-    # High-block boundary: 0x18000..0x1FDEF is an invariant structurally homologous template,
-    # not a proven selectable page and not a proven default source.
+    # High-block boundary: 0x18000..0x1FDEF is an invariant structurally homologous template.
+    # Selectable-page and default-source roles remain unproved.
     high_homology = sum(1 for k in range(0x7DF0) if h[0x10000 + k] == h[0x18000 + k])
     changed_low = [i for i in range(0x10000, 0x17DF0) if h[i] != s[i]]
     high_matches_h = sum(1 for i in changed_low if h[0x18000 + (i - 0x10000)] == h[i])
@@ -537,7 +537,7 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
                     "0xC6E68": "selected low base 0x10100 + 0x203C/0x20CC + (mode&3)*0x24 -> Bank-B rows 2..9",
                     "0xC6ECE": "selected low base 0x10100 + 0x215C/0x21EC + (mode&3)*0x24 -> Bank-B rows 10..17",
                     "axis_source": "FEBEADE8 is a conditioned/scaled form of H DID 0x1185 / Techstream 'CAN Vehicle Speed (SP1)' (km/h); 0xBB22A clamps the source at 30000 and 0xBB362 conditions it before 0xB8EEC mirrors it to FEBEADE8",
-                    "classification": "active vehicle-speed-dependent interpolation maps; exact OEM names/physical units of each map output remain bounded because the shipped DDB describes live monitor signals, not these internal calibration-map labels",
+                    "classification": "active vehicle-speed-dependent interpolation maps; exact OEM names/physical units of each map output remain bounded because the shipped DDB describes live monitor signals only. Internal calibration-map labels remain unrecovered",
                 },
                 "records": bank_b_records,
             },
@@ -575,7 +575,7 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
                     "0x2DF98": "initializes its 0x28-byte staging buffer from CodeFlash 0x21010 (all zero), then calls 0x6009E(0x200); only a successful persistent-record read is copied onward to live record-0 state",
                     "0x2FB36": "initializes its 0x40-byte staging buffer from CodeFlash 0x21038 (all zero), then calls 0x6009E(0x202); only a successful persistent-record read is copied onward to live record-2 state",
                 },
-                "interpretation": "The three readers use byte-identical all-zero staging seeds in the shared application and then admit persistent A000 records only on successful validation/read. The differing record 0/2/3 values are therefore persistent calibration state, not differing compiled software constants; this does not require treating the zero seeds as fallback defaults. Factory adjustment and/or later service writing remain possible origins. Techstream's exact OEM vocabulary (Torque Sensor Adjustment; Torque Sensor 1..4 Zero Point Value; Motor Rotation Angle Sensor Calibration; EPS Motor Angle Zero Point Value, plus missing/incomplete-calibration failure text) corroborates the adjustment/calibration class but does not assign individual record channels without an offset-level join.",
+                "interpretation": "The three readers use byte-identical all-zero staging seeds in the shared application and then admit persistent A000 records only on successful validation/read. The differing record 0/2/3 values are therefore persistent calibration state; the compiled software constants are identical. This does not require treating the zero seeds as fallback defaults. Factory adjustment and/or later service writing remain possible origins. Techstream's exact OEM vocabulary (Torque Sensor Adjustment; Torque Sensor 1..4 Zero Point Value; Motor Rotation Angle Sensor Calibration; EPS Motor Angle Zero Point Value, plus missing/incomplete-calibration failure text) corroborates the adjustment/calibration class but does not assign individual record channels without an offset-level join.",
             },
             "xcp_page_state": {
                 "set_cal_page_handler": "0x9261E (custom selector 0xEB)", "get_cal_page_handler": "0x92698 (custom selector 0xEA)",
@@ -619,10 +619,10 @@ def build_report(h_path: Path = H_DEFAULT, span_path: Path = SPAN_DEFAULT) -> di
                 "zero_session_cmac_target": zero_cmac_s,
                 "zero_session_matches_stored_baseline": zero_cmac_h == cmac_tag_h.hex(),
                 "zero_session_matches_stored_target": zero_cmac_s == cmac_tag_s.hex(),
-                "retained_ram_session_values": "all retained H/Span LocalRAM captures have DID0201=0, DID0202=0 and derived key 80d221a05622b4f9d4f287922e6c78d1; these are later/default boot-session values, not the factory values that produced either stored tag",
+                "retained_ram_session_values": "all retained H/Span LocalRAM captures have DID0201=0, DID0202=0 and derived key 80d221a05622b4f9d4f287922e6c78d1; these are later/default boot-session values. The factory values that produced either stored tag remain unavailable",
                 "techstream_route": "Unified CUW writes 0203 OffsetAddress -> 0201 SeedKey -> 0202 Nonce before transfer/verification; matching CUW package values or a programming-session capture would supply the two missing 16-byte inputs",
             },
-            "region0_cmac_semantics": "For region 0, the CMAC algorithm and message are now fully recovered: K=AES-128-ECB-ENC(root@0xBFD8,DID0201), MAC=AES-CMAC(K,DID0202 || CodeFlash[0x10000:0x17DF0]). The stored 16-byte tag at 0x17DF0 protects the page body. What remains is not a firmware-analysis unknown: the historical 16-byte DID0201 SeedKey and 16-byte DID0202 Nonce used by the factory/package are volatile inputs and are absent from the retained package/session corpus. Zero values reproduce the retained derived key but not either stored tag. A matching Corolla CUW/calibration package or legitimate reflash transcript is the missing evidence source.",
+            "region0_cmac_semantics": "For region 0, the CMAC algorithm and message are now fully recovered: K=AES-128-ECB-ENC(root@0xBFD8,DID0201), MAC=AES-CMAC(K,DID0202 || CodeFlash[0x10000:0x17DF0]). The stored 16-byte tag at 0x17DF0 protects the page body. The missing evidence consists of volatile historical inputs: the 16-byte DID0201 SeedKey and 16-byte DID0202 Nonce used by the factory/package are absent from the retained package/session corpus. Zero values reproduce only the retained derived key; neither stored tag matches. A matching Corolla CUW/calibration package or legitimate reflash transcript is the missing evidence source.",
             "high_region_boundary": "Region 1 (0x18000..0xFFDFF) has its CMAC tag at 0xFFDF0 and validity marker at 0xFFE00; because H and Span are byte-identical over 0x18000..0xFFDF0, that tag is also identical and does not enter this delta. The 0x40004000-pattern filler at 0xFFDF0..0xFFDFF is retained as observed; whether the high-region tag slot is programmed on this generation is not asserted here.",
         },
         "identity_and_integrity_tail": {

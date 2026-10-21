@@ -21,7 +21,7 @@ CROWN_SHA = "5b89fdbc69edc2f66ef8a557f88b08c758e3146bd4e90067320d7966812b1273"
 CAMRY_SHA = f33.IMAGE_SHA256
 
 # Function bodies independently established in the first-class projects. These
-# checks intentionally compare raw CodeFlash bytes, not decompiler text.
+# checks compare only raw CodeFlash bytes.
 EXACT_BODY_MAPPINGS = {
     "startup_shadow_copy": (0x636D4, 0x62AD4, 36),
     "command5_sync_wrapper": (0x89BC2, 0x87662, 138),
@@ -114,7 +114,7 @@ def build() -> dict:
 
     # Independently recovered getters: Crown 0x4FE86 and Camry 0x50990 each
     # return 0xF2 records, starting with DID 0100. This compares metadata
-    # membership, not dynamic read admission or availability.
+    # membership only. Dynamic read admission and availability require separate evidence.
     crown_dids, crown_callbacks = did_table(crown, 0x28F98, 242)
     camry_dids, camry_callbacks = did_table(camry, 0x2927C, 242)
     if crown_dids != camry_dids or crown_dids[0] != 0x0100 or crown_dids[-1] != 0xF18C:

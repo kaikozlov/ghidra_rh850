@@ -65,13 +65,13 @@ The useful prior art is broader than the DBC.
 | Vehicle state | `CarState.update()` | Recover the feedback/state contract before declaring control support |
 | Lateral controller | `CarController.update()` + `create_steer_command()` / LTA builders | Command format, cadence, driver override, EPS feedback, fault states, and rate limits are one unit |
 | Longitudinal controller | `CarController.update()` + ACC builders | Command encoding is inseparable from which ECU owns stock ACC and how its output is suppressed |
-| Stock-source replacement | Panda safety `check_relay` substitution; optional radar CommunicationControl | Identify the producer and duplicate-suppression point, not just the receiver |
+| Stock-source replacement | Panda safety `check_relay` substitution; optional radar CommunicationControl | Identify the producer, duplicate-suppression point, and receiver |
 | Driver UI | `LKAS_HUD` builder and preservation of camera state | A complete port must preserve stock-visible state/alerts rather than only actuate |
 | SecOC | `opendbc/car/secoc.py` + three independent Toyota output counters | Authentication wraps selected semantic commands; it does not define the command architecture |
 | Safety/tuning | `CarControllerParams`, Toyota safety flags, EPS fault interpretation | Limits must be recovered/validated per platform instead of copied because an old message still exists |
 
-This is the central architectural lesson from openpilot: a Toyota port is a
-**control contract**, not a list of arbitration IDs.
+This is the central architectural lesson from openpilot: a Toyota port requires a
+**control contract**.
 
 A second upstream clue is especially useful for acquisition triage. In
 `values.py`, comma explicitly treats forward-camera, forward-radar, and EPS
@@ -79,7 +79,7 @@ firmware as platform-code ECUs, and notes that **EPS firmware describes lateral
 API changes**, including generations that use LTA for lane keeping and reject LKA
 messages. `radar_interface.py` likewise moves the stock track ranges from
 `0x210..0x22F` pre-TSS2 to `0x180..0x19F` on TSS2. Generation identification is
-therefore part of the control API itself, not bookkeeping after the DBC is known.
+therefore part of the control API itself.
 
 ## 2. Older Toyota contract, by semantic role
 
@@ -124,8 +124,8 @@ TSS2 back to torque control (`5e71fde2`, `e76c2cf5`) based on vehicle behavior.
 At the pinned revision, Panda's Toyota safety hook goes further: it accepts the
 `0x131` frame shape but explicitly blocks **all** `STEERING_LTA_2` actuation
 (request bits or a nonzero angle). For a TSS3 port, an authenticated angle-looking
-command is therefore a lead, not a finished or upstream-safety-approved lateral
-interface.
+command is therefore an investigation lead. A finished or upstream-safety-approved
+lateral interface requires further evidence.
 
 Our exact Sienna donor contains a real protected `0x131` LTA command path and
 converges it with the protected `0x2E4` torque mode. Exact Corolla H removes both
@@ -214,8 +214,8 @@ acceleration change while the stock producer is still active is not a viable
 production integration.
 
 The existing Corolla public-route evidence is already a hard warning: actual
-CAN `0x183` traffic there is **64-byte CAN-FD**, not the classic 8-byte
-`ACC_CONTROL_2` shape. The number `0x183` therefore has no portable semantic
+CAN `0x183` traffic there is **64-byte CAN-FD**. The older `ACC_CONTROL_2` uses
+classic 8-byte frames. The number `0x183` therefore has no portable semantic
 meaning by itself.
 
 ### 2.4 Engagement, faults, and driver state
@@ -279,7 +279,7 @@ work must recover the second and fourth boxes for each new generation as well.
 | Torque steering command | protected `0x2E4` request/torque path recovered | classic `0x2E4` absent; H/F instead receive protected B6 target-angle control | do not port torque limits/scales; derive H/F-native limits and finish SecOC sender/producer contract |
 | LTA/angle command | protected `0x131` path recovered and converges with torque mode | active queue lacks `0x131`; protected `0x0B6` signal255 is target angle, signal254 is the OEM request selector, receiver loss is nominal 35 ms (7 steady 5-ms ticks), and signal261 is modulo-64 sequence state | module topology is `FRC_P5` 498 + `ABS_P5`/Brake-EPB 435 + `EMPS_P5` 405; TMS-051 identifies Brake System Control/category-435 as the immediate authenticated B6 source family; TMS-052 proves the 23TC01 `8646F1204500` 2023-Corolla `0792` FRC family is already local but encoded and publishes the 24TC01 Brake candidate family `F152612A51/52/53→A54`, while no `07B0` Brake image is local. Code-level origin/forwarding and **stock** cadence/signing ownership still require decoded producer firmware or synchronized stock-LTA traffic, but TMS-053 closes replacement-sender message8 re-anchoring from authenticated `0x00F`; do not transplant old `0x131` wire scaling |
 | Steering feedback | `0x025`, `0x260`, `0x262` roles strongly mapped | H `0x025` is FD angle/rate; live `0x030` provides physical driver torque plus fault/validity gates; B6[1] is Q-axis-current-derived with its exact-H threshold detector calibration-disabled; `0x4A3` supplies alternate torque/Q-current; `0x351` force-7 source topology and `0x394`'s 242-event DEM-class/DTC families are statically closed | choose and dynamically validate a conservative Panda driver-override/Q-current-response policy; validate Ready=0 plus recoverable-vs-latched fault transitions before assigning openpilot temporary/permanent policy. Static H finds no physical driver-torque comparator in the recovered target-to-motor control cone |
-| Longitudinal command | older SecOC DBC provides a useful comparator, not an EPS-local proof | route `0x183` is 64-byte CAN-FD and disproves old wire-shape transfer | locate ACC producer, target command, feedback, stock suppression, AEB coexistence |
+| Longitudinal command | older SecOC DBC provides a useful comparator; EPS-local proof is still required | route `0x183` is 64-byte CAN-FD and disproves old wire-shape transfer | locate ACC producer, target command, feedback, stock suppression, AEB coexistence |
 | Stock producer ownership | old openpilot architecture gives camera/radar replacement model | physical Toyota-B/network differences already observed | map FRC/radar/gateway ownership and safe duplicate blocking for each command family |
 | UI / alerts | older `0x412` is historical reference | old-camera U023A87 path is disabled residue in H | identify FRC/cluster LTA/LDA/LCA status and warning outputs |
 | Authentication | Sienna SecOC receiver and bypass paths deeply recovered | command carrier is secured B6; receiver-side FV4/CMAC28 trailer, 46-bit freshness reconstruction, reset/message candidate window, retry scopes, trip-wrap handling, exact 36-byte CMAC input, command7 result/commit ordering, and config/job0→ICU-S slot4 selection are closed; authenticated `00F` is the wire-visible `trip16||reset20` epoch, and TMS-053 closes exclusive replacement-sender re-anchoring/progression without prior B6 message8 persistence; application signal261 remains a separate authenticated counter | recover **stock** sender cadence/secondary-field template and a production-safe way to use/provision slot4 before actuation; do not copy D7's message counter or confuse application signal261 with SecOC freshness. H/F command-5 software supports the 36-byte input, and a target-native 464-byte supervisor-R/W/X static carrier candidate now fits an audited 424-byte signer plus a separate 298-byte inert canary. Both tracked CodeFlash images pass modeled canary execution; live retention, slot4 permission, hardware behavior, and signing latency remain required |
@@ -293,7 +293,7 @@ This is deliberately **not** an H-firmware-to-route join. The public 2023 Coroll
 route has forced `TOYOTA_COROLLA_TSS2` `carParams` and no `carFw`; it is an
 externally attributed whole-vehicle TSS3 Corolla oracle, while H/F firmware facts
 remain exact to their own specimens. Span's separately supplied July-29 driving
-rlog is a second vehicle-level oracle, not an exact F-image join: its embedded
+rlog is a second vehicle-level oracle with an unproven exact F-image join: its embedded
 `carParams` is `MOCK`, its logging dongle (`67fd5b833889fedf`) differs from the
 later firmware-dump preflight dongle (`23257862c6bf2f83`), and it contains no usable
 F181 identity. Contributor attribution therefore does not collapse those two Span
@@ -308,14 +308,14 @@ and from the H/F Tx set it exposes only `0x030` (5,888 frames). That surviving
 H/F firmware-derived byte-7 rule `B7 = (sum(B0..B6) + 0x38) mod 256`**. Span's
 moving rlog independently repeats the same pattern: `0x00F` 600 frames,
 `0x0D7` 3,000, zero B6, and only `0x030` from the H/F Tx set; all **6,000/6,000**
-`0x030` frames satisfy the same exact-H/F rule. Treat these as format/producer-family
-continuity, not firmware-identity proof.
+`0x030` frames satisfy the same exact-H/F rule. These establish format/producer-family
+continuity only. Firmware identity remains unproven.
 
 The Span visibility result must also be read with the harness topology correctly.
 All **599** Panda-state samples are `ELM327 param=1`, `harnessStatus=flipped`,
 `controlsAllowed=false`. `harnessStatus=flipped` is the Panda/USB-C harness
-**orientation**, not the physical Toyota-B CAN0/CAN1 pin repin. ELM327 param 1
-keeps logical bus 1/FDCAN2 on the **normal harness CAN1 wires**, so the unmodified
+**orientation**. The physical Toyota-B CAN0/CAN1 pin repin is a separate change.
+ELM327 param 1 keeps logical bus 1/FDCAN2 on the **normal harness CAN1 wires**, so the unmodified
 harness can passively observe that unsplit stock network. The maintainer reports
 that Span had **not** physically swapped the Toyota-B CAN0/CAN1 pairs for this
 capture. That missing repin prevents putting the network on the CAN0/CAN2 relay
@@ -335,8 +335,8 @@ What the exact segment-0 rlog *does* close is the old-openpilot role migration:
   `0x101` brake bit toggles; the old `0x116 GAS_PEDAL_USER` field is dynamic; and
   **all 1,855 `0x176` frames pass the existing Toyota additive checksum**. Cruise
   is never engaged in this segment, so `0x176` active-state semantics still need
-  an exact-target transition capture. `0x00F` is reusable because the target is
-  SecOC-protected, not because it is TSS3.
+  an exact-target transition capture. `0x00F` reuse depends on the target's
+  SecOC protection.
 - **`0x025` is evolutionary at the signal level but not the PDU level.** The route
   carries `0x025/32` at ~96 Hz. Exact H firmware independently proves that the
   older signed-12 coarse angle, signed-4 fraction, and signed-12 rate positions
@@ -344,7 +344,7 @@ What the exact segment-0 rlog *does* close is the old-openpilot role migration:
   range of `-471..348 deg` and `-270..410 deg/s`. A TSS3 DBC can therefore reuse
   those proved fields while defining the correct 32-byte message rather than
   pretending the old 8-byte PDU survived.
-- **Gear-source selection needs capture evidence, not a universal TSS3 layout.**
+- **Gear-source selection needs capture evidence for each target.**
   The retained public 2023 Corolla minute has no `0x127` on any recorded source,
   including echoes and outgoing traffic; this does not prove the vehicle never
   sends it. Span's retained hybrid capture supplies **3,662/3,662** checksum-valid
@@ -352,7 +352,7 @@ What the exact segment-0 rlog *does* close is the old-openpilot role migration:
   and simultaneous `0x3BF`. Exact H's EPS unpacker does not consume that nibble.
   The OEM meter dictionary and controlled Camry captures independently establish
   `0x3BF` byte0 `P=0x80/R=0x40/N=0x20/D=0x10`; the Corolla recordings exercise
-  P/R/D and D respectively, not Neutral. Camry's B interval still reads D on
+  only P/R/D and D respectively. Neutral remains unobserved. Camry's B interval still reads D on
   `0x3BF`, so retain its existing `0x127` decoder. Stock-harness bus1 evidence
   must not be confused with the maintained physical repin's bus0/2 placement.
   See the [Corolla evidence owner](../variants/corolla-h-f-openpilot-state-bridge.md)
@@ -400,7 +400,7 @@ What the exact segment-0 rlog *does* close is the old-openpilot role migration:
   named/fixed-GP census finds **zero** physical driver-torque source/snapshot
   references in the recovered C8xxx–CExxx target-to-motor control cone. The
   remaining driver-override threshold is therefore a conservative Panda/openpilot
-  policy to choose and validate dynamically, not an OEM comparator to recover.
+  policy to choose and validate dynamically.
   Q-current response policy and the final openpilot temporary/permanent mapping
   still require vehicle-level evidence; the broad static fault-family mapping itself
   is no longer open.
@@ -412,8 +412,7 @@ What the exact segment-0 rlog *does* close is the old-openpilot role migration:
 - **The forced old Corolla profile demonstrably does not work as a parser.** Across
   5,639 logged `carState` samples, **`canValid=false`** and logged vehicle
   speed and steering state remain zero despite coherent raw TSS3 traffic. This
-  is direct evidence for a generation-specific bus/DBC/CarState path, not just a
-  theoretical DBC difference.
+  directly demonstrates the need for a generation-specific bus/DBC/CarState path.
 
 The ADAS/radar side shows an even harder generation break. The route extraction
 uses **incoming CAN only (`src<128`)**; Panda returned/Tx echoes (`src=bus+128`) and
@@ -441,15 +440,15 @@ speeds reach ~24 km/h, brake/gas/steering are dynamic, and buses 0 and 2 again
 carry exactly the same 22 ID/DLC shapes with **byte-identical payload sequences**.
 The exact same 22-ID/DLC baseline also appears on the public 2023 route. Thus the
 geometry persists across a real driving segment as well as the earlier static
-capture. This is still a TSS3 Corolla network-geometry invariant, **not** a
-field-semantics or producer-ownership proof.
+capture. This establishes a TSS3 Corolla network-geometry invariant only.
+Field semantics and producer ownership remain unproven.
 
 This also bounds the community `0x18A` lead more sharply. **Thirteen** TSS3 FD
 PDUs, `0x180..0x18C`, land inside comma's older TSS2 radar-track numeric namespace
 `0x180..0x19F`; their geometry has changed radically from the old 8-byte tracks
-(`0x180..0x18B` are now 64 bytes and `0x18C` is 48 bytes). This is a concrete
-radar/object-family search prior, not proof that any one of these frames is a radar
-track. In particular, `0x18A` is one 64-byte, ~20-Hz member of that family **and**
+(`0x180..0x18B` are now 64 bytes and `0x18C` is 48 bytes). This provides a concrete
+radar/object-family search prior. Individual radar-track assignments remain unproven.
+In particular, `0x18A` is one 64-byte, ~20-Hz member of that family **and**
 the community lateral-control heatmap lead. Those are competing hypotheses. Do not
 assign producer, fields, integrity, or command ownership until firmware or synchronized
 traffic joins one of them to a real source/consumer.
@@ -487,7 +486,7 @@ non-actuating Corolla scaffold landed in opendbc commit
 `263b339480eabf8be242b486bd76f1df835241b2`, with follow-up `0x51E B0[7]` Ready
 Status observation in opendbc `fa1847d7ee66a221f2960ec5cf7a840e737ca521`.
 That checkpoint experimented with choosing bus placement from the unrepinned Span
-capture. It is retained here only as history, not as current architecture.
+capture. It is retained here only as history.
 
 **Current implementation rule:** the maintained fork has removed Corolla platform
 registration and its separate control/safety branches. The shared TSS3 DBC and
@@ -507,11 +506,11 @@ all 60 observed `0x51E` samples decoded Ready=1, and physical driver torque span
 hundredth-N.m values. `steeringPressed` and both openpilot steering-fault flags remain false
 by design because their policy mapping is not yet proved.
 `tests/targets/corolla/verify_corolla_tss3_opendbc_readonly_external.py` reproduces this against the sibling
-maintained forks. What still cannot be made production-ready is the **deployment** side of the B6 sender contract (live proof of the audited H/F carrier canary, live slot4 MAC capability and acceptable command-5 latency or an equivalent signer, stock payload/cadence template, and relay-correct suppression topology), a deliberately chosen/validated Panda driver-override policy, Q-current response policy, Ready/fault transition mapping, radar parsing, or longitudinal control. Receiver freshness/message8 re-anchoring and the nominal 35-ms loss cutoff are already static closures, not remaining blockers. The readiness artifact continues to record those evidence blockers rather than implementation state.
+maintained forks. What still cannot be made production-ready is the **deployment** side of the B6 sender contract (live proof of the audited H/F carrier canary, live slot4 MAC capability and acceptable command-5 latency or an equivalent signer, stock payload/cadence template, and relay-correct suppression topology), a deliberately chosen/validated Panda driver-override policy, Q-current response policy, Ready/fault transition mapping, radar parsing, or longitudinal control. Receiver freshness/message8 re-anchoring and the nominal 35-ms loss cutoff are already statically closed. The readiness artifact continues to record the remaining evidence blockers rather than implementation state.
 
 ## 5. The concrete TSS3 investigation roadmap
 
-### Architecture rule: enter Toyota's request pipeline, not an arbitrary actuator layer
+### Architecture rule: enter Toyota's request pipeline
 
 Toyota patent US20200070849A1 plus the current GTS/F33 joins close a missing
 architecture distinction. TSS3 has separate **application request**, **arbitration
@@ -525,7 +524,7 @@ Manager placement in the brake domain. See
 For production integration, prefer replacing/becoming the application request source
 while retaining Toyota's arbitration, driver/stability mediation, request generation and
 actuator controllers. Direct final-instruction B6 injection remains a useful development
-fallback, not the preferred architecture, unless the request-side replacement/suppression
+fallback. Prefer it for production only if the request-side replacement/suppression
 point proves unavailable. Do not require B6 to become exclusive EPS authority: Toyota's
 architecture explicitly permits local/controller and priority Vehicle Movement Control
 intervention.
@@ -641,15 +640,15 @@ high/default copies are nonzero. No TSS2-style speed-dependent reduction of the 
 B6 ceiling is therefore recovered.
 
 Live `0x030` supplies physical driver torque, but the firmware's ~±8.238 N.m native
-acquisition clamp and ±10 N.m telemetry saturation are representation limits, not an
-OEM override threshold. Physical `0x4A3` Q-current is also closed as an observable,
+acquisition clamp and ±10 N.m telemetry saturation define representation limits only.
+Physical `0x4A3` Q-current is also closed as an observable,
 but the recovered cooperative supervisor does not directly compare measured
 `FEBE6592`; `CB394/CB59A` monitor `FEBEAE16` instead. Thus driver override remains an
 explicit policy input and any Panda actuator-response limit must be deliberately
 chosen/validated rather than copied from an invented EPS Q-current threshold.
 Relay-side ownership/suppression, active-LTA secondary-B6 template, sender cadence and
-SecOC MAC/freshness construction remain integration blockers, not reasons to copy
-pre-TSS3 safety constants.
+SecOC MAC/freshness construction remain integration blockers. Recover and validate
+target-native safety constants independently.
 
 Canonical artifacts:
 `data/generated/corolla_hf_steering_limits.json` and

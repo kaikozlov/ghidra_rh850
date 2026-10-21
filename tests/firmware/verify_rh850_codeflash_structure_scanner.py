@@ -2,7 +2,7 @@
 """Verify the offline RH850 CodeFlash structural triage scanner.
 
 The scanner is candidate-only: every anchor it reports on a future calibration
-must be treated as triage, not transfer proof. This suite pins
+supports triage only. This suite pins
   - the exact report shape and triage labeling,
   - deterministic anchor counts against the committed Sienna image,
   - negative behavior on truncated, concatenated, and content-free images,
@@ -126,7 +126,7 @@ check("content-free 1 MiB image has correct geometry but zero anchors",
       and zeros["xcp_command_surface"]["request_can_id_immediates"]["count"] == 0
       and zeros["xcp_command_surface"]["command_map_window_count"] == 0
       and zeros["semantic_resolver_prefilter"]["byte_load_then_cmov_site_count"] == 0,
-      "scanner output tracks content, not just size")
+      "scanner output tracks content")
 
 print("\n== determinism and CLI ==")
 check("analysis is deterministic", analyze(cf, max_vas=200) == report)

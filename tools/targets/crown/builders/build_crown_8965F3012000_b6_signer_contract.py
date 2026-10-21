@@ -504,7 +504,7 @@ def main() -> int:
             "auxiliary_term": "AE5E is copied from FEBEB49E by BB51A; B9066 computes FEBEB49E independently. Its physical meaning is not required for the scale/sign proof because it cancels algebraically.",
             "matched_controller": "C9D7E applies the same 0xB76/0x400 gain to target and measured domains before subtracting measured from target",
             "derivation": "2 B6-internal counts per B6 raw count versus (10 tenths/deg)*(1787/512) measured-internal counts/deg => 2*512/(10*1787) = 1024/17870 deg/count",
-            "quantization_boundary": "integer truncation/saturation remain; the fraction is the exact linearized controller-equivalent conversion, not a claim that every integer code has a unique exact degree value",
+            "quantization_boundary": "integer truncation/saturation remain; the fraction gives only the exact linearized controller-equivalent conversion. Individual integer codes remain subject to quantization",
             "functions": {
                 "b6_unpack": "0x0004B608", "b6_target_scale": "0x000C9B64", "fd025_unpack": "0x0004AEF8",
                 "fd025_stage": "0x0004749C", "did1037": "0x0004D550", "measured_reconstruct": "0x000CB640",

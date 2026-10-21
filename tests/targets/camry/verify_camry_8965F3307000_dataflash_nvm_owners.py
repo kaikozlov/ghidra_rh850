@@ -28,9 +28,9 @@ def check(name, cond, detail=""):
 
 
 # A short table with deliberately distinct page/length fields catches the old
-# one-descriptor shift and hard-coded 48-row traversal. The zero descriptor is
-# a sentinel, not a physical page. Nonzero option overhead makes record2 span
-# two pages even though its payload is shorter than one page.
+# one-descriptor shift and hard-coded 48-row traversal. The zero descriptor
+# marks the end of the physical-page list. Nonzero option overhead makes record2
+# span two pages even though its payload is shorter than one page.
 code = bytearray(owner.JOB_COUNT + 2)
 struct.pack_into("<H", code, owner.JOB_COUNT, 3)
 for index, fields in enumerate(((0xFFFF, 32, 0, 0), (7, 16, 0, 0), (2, 48, 1, 0))):
@@ -56,7 +56,7 @@ records = {record["handle"]: record for record in owner.decode_dataflash_records
 check("final-allocation trailer is recognized", records[2]["markers_match"])
 struct.pack_into("<H", dump, 2 * 64, 480 - 2)
 records = {record["handle"]: record for record in owner.decode_dataflash_records(bytes(dump), jobs)}
-check("header must match handle, not descending page ordinal",
+check("header must match the record handle",
       records[2]["commit_marker_present"] and not records[2]["header_matches_handle"]
       and not records[2]["markers_match"])
 
@@ -67,8 +67,8 @@ except ValueError:
 else:
     check("truncated allocation rejected", False)
 
-# The checksum-width transition is based on payload length, not allocation
-# size. These two records occupy one page each; the large record's unrelated
+# Payload length determines the checksum-width transition.
+# These two records occupy one page each; the large record's unrelated
 # header halfword deliberately differs from its checksum word.
 integrity_jobs = [
     {"handle": 1, "page": 0, "payload_len": 32, "allocation_pages": 1},

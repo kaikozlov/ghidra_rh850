@@ -46,7 +46,7 @@ def validate_build(audit: dict, binary: Path, source: Path, kind: str, expected_
     shell = audit["shellcode"]
     need(shell == {"headroom": expected_headroom, "sha256": expected_sha, "size": expected_size}, f"{kind} shellcode identity drift")
     need(sha_file(binary) == expected_sha and binary.stat().st_size == expected_size, f"{kind} audited binary drift")
-    # Audits bind reviewed bytes, not the current location/revision of their builder.
+    # Audits bind the reviewed builder bytes independently of its current location/revision.
     need(audit["source"]["sha256"] == sha_file(source), f"{kind} source bytes drift")
     cc = audit["compile_contract"]
     need(cc["candidate_base"] == "0xFEBF0000" and cc["candidate_end_exclusive"] == "0xFEBF01D0" and cc["candidate_limit"] == 464, f"{kind} carrier compile geometry drift")
@@ -70,7 +70,7 @@ def build() -> dict:
 
     need(ev["schema"] == "corolla-hf-command5-runtime-carrier-evidence-v1", "carrier evidence schema drift")
     need(ev["generator"]["path"] == "tools/targets/corolla/extract/extract_corolla_hf_command5_runtime_carrier_evidence.py", "carrier extractor path drift")
-    # Generator/corpus hashes describe the recovered checkpoint, not today's source.
+    # Generator/corpus hashes describe only the recovered checkpoint.
     need(port["schema"] == "corolla-hf-command5-portability-v1", "portability schema drift")
 
     candidate = ev["carrier_candidate"]
@@ -197,7 +197,7 @@ def build() -> dict:
                 "stage": 3,
                 "name": "independent MAC agreement",
                 "criterion": "7/12/36-byte generated results agree with independently known CMAC vectors for the same live key/domain where such vectors are available",
-                "purpose": "validate semantic output, not merely command completion",
+                "purpose": "validate semantic output beyond command completion",
             },
             {
                 "stage": 4,

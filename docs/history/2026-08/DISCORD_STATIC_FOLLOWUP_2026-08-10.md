@@ -1,5 +1,5 @@
-> **Historical snapshot.** This is a point-in-time investigation journal, not
-> current project state. Use [the current overview](../../OVERVIEW.md),
+> **Historical snapshot.** This journal records a point-in-time investigation.
+> For current project state, use [the current overview](../../OVERVIEW.md),
 > [priorities](../../status/PRIORITIES.md), and
 > [findings ledger](../../status/FINDINGS.md) for present conclusions.
 
@@ -7,12 +7,12 @@
 
 Focused static-analysis sprint prompted by recent comma `#toyota-security`
 discussion supplied as screenshots in the active research session. The
-screenshots are **external-source observations**, not primary firmware evidence;
-they are not archived as binary artifacts in this repository. This document
+screenshots provide **external-source observations** that require primary firmware corroboration.
+They are not archived as binary artifacts in this repository. This document
 tracks what can be established from already pinned/local artifacts before
 requesting new files from participants.
 
-## Input observations to test, not assume
+## Input observations to test
 
 The screenshots report or discuss:
 
@@ -114,8 +114,8 @@ coverage deliberately uses bus 1 and `0x116`/`0x24D`.
 
 The tool is now ready to process a future Corolla dump/capture, but no Corolla
 key/storage conclusion is possible without those artifacts. The eight-ID DBC
-profile is a known Toyota classic-SecOC vocabulary, not proof that every listed
-ID appears on the 2023 Corolla or shares one production key.
+profile supplies known Toyota classic-SecOC vocabulary. Presence of each listed
+ID and production-key sharing on the 2023 Corolla require independent proof.
 
 ### Commit
 
@@ -205,8 +205,8 @@ a destination transmit entry. Toyota has no custom forward hook that undoes
 that behavior. Therefore forcing this profile substitutes an old camera
 steering/HUD message family; it is not a single `0x2E4` MAC experiment.
 
-`0x183 ACC_CONTROL_2` belongs to the SecOC openpilot-longitudinal transmit set,
-not the reported stock-longitudinal experiment. The sender still derives
+`0x183 ACC_CONTROL_2` belongs only to the SecOC openpilot-longitudinal transmit
+set. The reported experiment used stock longitudinal control. The sender still derives
 TRIP/RESET state from the live `0x00F` synchronization frame even when the
 configured key is wrong; the dummy key invalidates the generated MACs but does
 not make trip/reset freshness arbitrary.
@@ -387,7 +387,7 @@ transmitted trailer reset-low2 bits align on:
 0x24D:   59 /   59 eligible frames
 ```
 
-This is structural freshness evidence, not cryptographic key proof.
+This establishes structural freshness. Cryptographic key proof remains open.
 
 ### Consequence for the reported `0 protected`
 
@@ -395,7 +395,7 @@ The public route plus Step 1 closes the interpretation: the current Bk2ol
 verifier ignores bus 1 and only recognizes `0x131/0x2E4/0x344` as protected,
 while this route's genuine classic protected-family traffic is bus-1
 `0x116/0x24D`. The reported `0 protected` is therefore a tool-profile false
-negative, not evidence of SecOC absence.
+negative despite the observed SecOC traffic.
 
 ### Durable work
 
@@ -554,7 +554,7 @@ Commit: `4aa492e7a9b5e38ebf7c7d3cade647849adc643b analysis: resolve Techstream U
 `tools/analyze_toyota_dataflash.py` now closes the remaining pre-artifact
 DataFlash work:
 
-- ranks every sliding 16-byte window, not only aligned candidates;
+- ranks every sliding 16-byte window, including unaligned candidates;
 - uses the generated physical NvM record map to evaluate the proved validity
   rule (storage-index header + `AAAAAAAA` trailer);
 - retains the second physical header word as opaque because its checksum/CRC
@@ -569,7 +569,7 @@ DataFlash work:
   and each protected CAN ID rather than requiring one universal key;
 - emits explicit classifications including `sync only`, `0x116 only`, `0x24D
   only`, shared `0x116+0x24D`, and shared `sync+protected`;
-- reports only candidate hashes/addresses, not raw key bytes.
+- reports only candidate hashes/addresses and keeps raw key bytes private.
 
 The committed `4512000` reference artifact reproduces six valid triplicate
 consensuses (`0/1/2/3/5/6`) and zero valid copies for `4/12/13/14/15`. A

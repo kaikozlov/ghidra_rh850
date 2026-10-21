@@ -24,8 +24,8 @@ the client it lost":
    system abnormality;
 6. a distinct cancellation request restores ordinary arbitration.
 
-That is an architecture for **selective arbitration policy**, not transport
-failure. It is therefore a much closer model for clean coexistence than cutting
+That is an architecture for **selective arbitration policy** with transport intact.
+It is therefore a much closer model for clean coexistence than cutting
 the complete FRC request publication.
 
 ## Evidence boundary
@@ -46,8 +46,8 @@ In particular:
 - the exact F33/P5 diagnostic corpus currently exposes priority and arbitration
   vocabulary, but no field has yet been recovered as this patent's
   manager-to-client rejection feedback;
-- later P6 diagnostic surfaces provide strong cross-generation vocabulary, not
-  proof of the P5/F33 wire realization.
+- later P6 diagnostic surfaces provide strong cross-generation vocabulary.
+  The P5/F33 wire realization still requires proof.
 
 ## 1. Physical/function architecture
 
@@ -89,8 +89,8 @@ Figures 1 and 2 place the disclosed functions as follows:
 ```
 
 The embodiment places motion manager 200 in Brake ECU 20. The patent also says
-the manager may be a separate ECU or located elsewhere; the functional graph is
-the important part, not universal Brake-ECU placement.
+the manager may be a separate ECU or located elsewhere. The functional graph
+applies across those placement options.
 
 The driver-assistance system includes AEB 102, LKA 104, ACC 106, ASL 108,
 PCS 110, ISA 112, and other applications. ADS 122, running in the removable ADK
@@ -221,7 +221,7 @@ A clean F33 takeover mechanism, if the platform exposes one, is therefore more
 likely to preserve the native request/result communication contract while
 changing **eligibility/priority**, rather than simulate absence of the source.
 
-## 4. Invalidation is stateful, not merely a per-cycle request bit
+## 4. Invalidation uses cooperating state machines
 
 Figures 4 and 5 expose two cooperating state machines.
 
@@ -239,8 +239,8 @@ When autonomous driving is no longer executing:
 2. if not, output invalidation cancellation;
 3. set the request flag OFF.
 
-The requester therefore treats invalidation/cancellation as **transition
-commands**, not as a requirement to resend an "invalidate PCS" bit forever.
+The requester therefore issues invalidation/cancellation as **transition
+commands** and records their state locally.
 
 ### Motion-manager state machine — Figure 5
 
@@ -273,9 +273,9 @@ cancel/release transition.
 
 It also provides a plausible architectural reason that takeover-related state
 can outlive restoration of the raw request stream: policy/fail-state machines
-can be latched independently from transport state. That is a hypothesis for
-F33, not proof that the current persistent DRCC/FRC latch is this patent's
-invalidation flag.
+can be latched independently from transport state. For F33 this remains a
+hypothesis. Identifying the current persistent DRCC/FRC latch as this patent's
+invalidation flag would require proof.
 
 ## 5. The claims are broader than literal "PCS invalidation"
 
@@ -324,7 +324,7 @@ Paragraph [0145] says the requesting first system need not be ADS; another
 driver-assistance application can issue the request.
 
 Thus the architecture is a general **client-vs-client arbitration policy
-mechanism**, not solely an autonomous-driving special case.
+mechanism** that also applies beyond autonomous driving.
 
 ## 6. Lateral/steering is explicitly in scope
 
@@ -380,8 +380,8 @@ Toyota's whole control stack. It is to replace/supersede the intended native
 continuous-driving client while retaining independent constraints and actuator
 protections.
 
-Again, this is an architecture lesson, not evidence of a user-accessible F33
-priority API.
+This architecture lesson leaves the existence of a user-accessible F33 priority
+API unproven.
 
 ## 8. Stronger GTS joins from this close read
 
@@ -430,9 +430,9 @@ consistent with a decision to request PCS suppression/priority policy (the
 patent's arrow A). It is **not** direct evidence for the manager-to-PCS
 "request rejection information" feedback (arrow B).
 
-Also, `0x20D4` is recovered here through a DDR freeze-frame descriptor, not
-as an ordinary ADCU P6 Data Monitor/RDBI item. The current `tools/gts did`
-surface does not expose it as a normal monitor.
+Also, `0x20D4` is recovered here through a DDR freeze-frame descriptor.
+The current `tools/gts did` surface does not expose it as an ordinary ADCU P6
+Data Monitor/RDBI item.
 
 ### 8.2 P6 Hybrid/EV PCM: request IDs and rejection factors are adjacent
 
@@ -560,8 +560,8 @@ FRC internal applications
 So there are **two different selection questions**. The FRC decides which of
 its resident features authors the request it submits. The downstream VMM then
 arbitrates the submitted request against the manager's other inputs/policies.
-The patent is direct evidence for the second stage, not proof that the FRC's
-local feature-owner state machine implements the same invalidation mechanism.
+The patent is direct evidence for the second stage. Whether the FRC's local
+feature-owner state machine implements the same invalidation mechanism remains unproven.
 
 ### Separate question: where would intentional-rejection feedback appear?
 
@@ -570,8 +570,8 @@ intentional so it does not diagnose an abnormality. If exact P5/F33 implements
 an analogous path, the source-derived placement is **manager -> requesting
 system/application**. Since the requesting TSS applications reside in the FRC,
 that feedback could return from Brake/VMM toward the FRC over a result/status
-interface or another unrecovered path. It could then become FRC-internal state,
-but that is downstream feedback, not proof of an FRC-local Arrow B.
+interface or another unrecovered path. It could then become FRC-internal state.
+This downstream feedback leaves an FRC-local Arrow B unproven.
 
 `5284/5285`, `57DB/57DE`, and Brake-owned `0x081` are therefore relevant
 places to look for the downstream arbitration/result side. No recovered field
@@ -624,7 +624,7 @@ The patent-specific downstream signature would instead require a submitted
 not select it (or explicitly reports rejection), with request-loss and fail
 class remaining healthy.
 
-### B. Search state-change semantics, not just value carriers
+### B. Search state-change semantics alongside value carriers
 
 Patent-guided terms:
 
@@ -711,7 +711,7 @@ This is consistent with the different publication cadences. Across routes 3b
 and 3c, 0x08A is roughly a 40-Hz-class publication (median observed interval
 about 22.8 ms with rlog batching/jitter) while 0x081 is tightly about 30 ms
 (about 33-Hz-class). The short old-ID/new-ID mismatch is therefore a normal
-request->result pipeline delay, not evidence that a request is being rejected.
+request->result pipeline delay. It does not establish request rejection.
 
 The angle values reinforce that interpretation. When request/result IDs match,
 0x081 B16:B17 tracks the newest 0x08A B18:B19 request extremely tightly. For
@@ -760,7 +760,7 @@ Healthy retained CAN never shows a generic 0x08A lateral request continuing for
 a meaningful interval while a different 0x081 application ID wins. The only
 disagreements are the one-result-cycle transition delays above.
 
-The healthy logs therefore show **two stages**, not one. LTA, LDA, LCA,
+The healthy logs therefore show **two stages**. LTA, LDA, LCA,
 PDA/SDG and PCS are FRC-resident functions, and their feature-owner transition is
 already visible when `5282`/`0x08A` changes ID. Brake then receives that
 feature-selected but not yet VMM-arbitrated request; the downstream Vehicle
@@ -804,10 +804,9 @@ feature-local `5531` request while `5631` is zero and EPS pinion follows the
 result ID18 in `5285`. What is still missing is one synchronized record that
 shows the **FRC-internal handoff itself**: multiple feature states enabled, one
 feature-local request becoming preferred/inhibited, and `5282` changing owner.
-That is an FRC application RE problem, not a search for simultaneous external
-lateral requests at Brake.
+Recovering that handoff requires FRC application RE.
 
-### 12.3 A still-unresolved request-side bit looks driver-steering-related, not like the policy latch
+### 12.3 A still-unresolved request-side bit looks driver-steering-related
 
 The transition review also gives one useful bound on unresolved 0x08A metadata.
 Across the existing 12-route lateral census, request byte B23 has only values

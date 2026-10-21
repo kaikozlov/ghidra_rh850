@@ -17,8 +17,8 @@ or trusting a used-parts listing. The exact retained lookup tuple is:
 | Second `baseSwNo` | `8A3113303100` | Normal F181 producer's second fixed-width record. |
 | VIN | Use the owner's actual VIN in the authorized lookup. | Not derived from the EPS part number and not published here. |
 
-These are original-image lookup inputs, **not fabricated current diagnostic
-responses**. They can identify a part-specific inquiry or supported calibration
+These lookup inputs come from the original image. They can identify a
+part-specific inquiry or supported calibration
 search without first making the silent EPS answer. This does not prove that
 Toyota offers a matching restore package, that the frontend supports importing
 these fields, or that a programmer is currently reachable.
@@ -31,7 +31,7 @@ Fresh exact-target Ghidra and raw instructions establish:
 
 1. RDBI record `292BC` selects DID `0105`, length 12 and callback `4D93C`.
    That callback calls `66DFC` with object `0204`; its failure reply is ten
-   question marks plus two NUL bytes, not a fallback part-number string.
+   question marks plus two NUL bytes.
 2. `66DFC` selects ROM-object family `0200`, index 4. `67208` checks it through
    `67090 -> 67060`, then copies from the descriptor's ROM source pointer via
    `66E2E`. It does not copy from the adjacent RAM-mirror pointer.
@@ -39,12 +39,11 @@ Fresh exact-target Ghidra and raw instructions establish:
    source `A0A0`. The stored marker is `A55A5AA5`; the ten data bytes are
    `8965033K90`. CRC over the object and its checkword is `FFFFFFFF`.
 4. `4D93C` requires the validated object's marker, copies precisely those ten
-   bytes and appends two NUL bytes. This establishes the actual DID-value
-   origin, rather than a string-search association.
+   bytes and appends two NUL bytes. This establishes the actual DID-value origin.
 5. The independent serial object `0207` is also checksum-valid and its saved
    serial agrees with the retained original F18C response. The whole
    manufacturing-data span `A000..FFFF` is unchanged in the complete saved
-   incident reconstruction. This is archive agreement, not a new flash dump.
+   incident reconstruction. This agreement is established from archives only.
 6. Normal F181 producer `4FA26` reads 16-byte fields at `20860` and `17DC0`.
    Its separate compatibility-failure placeholder branch remains distinct;
    the two actual identifiers above match the retained preincident F181.
@@ -56,13 +55,12 @@ must not be allowed to redefine which trusted baseline the audit uses.
 
 ## Same-release GTS+ uses those same two diagnostic inputs
 
-The current installed `GetPartNumber_DT.dll` was inspected directly, not
-inferred from its V18 counterpart. Its input SHA-256 is
+The current installed `GetPartNumber_DT.dll` was inspected directly. Its input SHA-256 is
 `ae05a7f705a2eebf78514b935b50cf1162fec0cb449198224b4f5ff133ca17b3`.
 
-The plugin initially obtains selector `66` at `10001403`. In current EMPS
-metadata this is a `3E00` initializer, **not the final part-number request**:
-the plugin replaces its send/mask/check lists with its own literals.
+The plugin initially obtains selector `66` at `10001403`. Current EMPS metadata
+defines this as a `3E00` initializer. The plugin then replaces its send/mask/check
+lists with its own part-number request literals.
 The optional assembly branch uses `220105 / FFFFFF / 620105` at
 `100051BC/100051C0/100051C4`, then sends at `100015A5` and parses one
 12-byte record after the three-byte response header.
@@ -104,11 +102,11 @@ replacement bytes and changes no authorization or programming behavior.
 ## Incident recovery is not the same goal as factory equality
 
 The known inverse restores the complete retained incident reconstruction to its
-previous stage-6 state, not to untouched factory firmware. That distinction
-must not become an invented requirement that every previous working change be
-removed merely to recover EPS operation. The missing exact OEM package is a
-dependency of the **manufacturer-package restoration branch**, not proof that
-all other authorized restoration routes are unavailable.
+previous stage-6 state. Untouched factory firmware is a separate restoration
+objective. Recovering EPS operation does not require removing every previous
+working change. The missing exact OEM package is a dependency of the
+**manufacturer-package restoration branch**. The availability of other authorized
+restoration routes remains unresolved.
 
 Either restoration objective still needs a reachable, executing programmer and
 a completion path back to the EPS application. The archived custom writer's
@@ -141,8 +139,8 @@ values but a different input clock? The common boot initializer is
 R01UH0585EJ0120 Table 12.2 (p.469) and Tables 17.6/17.7 (p.791), rendered and
 visually checked in this pass, identify `clkc=CLK_LSB` as **40 MHz fixed**.
 The reconstructed modes therefore do not establish an overlooked 250-kbit/s or
-1-Mbit/s cold recovery listener. This is configured behavior, not a live clock
-measurement or proof against an electrical clock fault.
+1-Mbit/s cold recovery listener. This result describes configured behavior only.
+Live clock measurements and electrical clock faults remain outside its scope.
 
 The cold handoff value `FF` is not simply a disabled-protocol flag:
 `69D2` enables the boot protocol for either `0` or `FF`, and `6A22` initializes

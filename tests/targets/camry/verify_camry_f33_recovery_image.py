@@ -52,7 +52,7 @@ class RecoveryImageTests(unittest.TestCase):
         )
         self.assertEqual(self.factory[0x4D95C:0x4D964].hex(), "2036040281ff9c94")
         self.assertEqual(self.factory[0x66E1A:0x66E24].hex(), "010600feca0580ffe803")
-        # The ROM-object reader consumes +8, not the descriptor's RAM mirror.
+        # The ROM-object reader consumes the descriptor's +8 field.
         self.assertEqual(
             self.factory[0x6725A:0x6726A].hex(), "21068caf0200c1f1043d7040bfffc8fb"
         )

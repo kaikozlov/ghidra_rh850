@@ -260,9 +260,9 @@ class FdOracleSession:
             raise FdOracleError(f"raw-FD oracle state unavailable: {state}")
         # Exact-F33 application SID23/RMBA exposes LocalRAM but rejects the
         # FEF0.... GlobalRAM transit span. The authenticated payload and audited
-        # staging image bind the helper bytes placed at FEF07C00; live execution
-        # is proven by the selector-4 known-answer transaction itself rather than
-        # by an impossible application-RMBA readback.
+        # staging image bind the helper bytes placed at FEF07C00. The selector-4
+        # known-answer transaction proves live execution. Application-RMBA cannot
+        # read back this span.
         return {
             "resident_sha256": resident_sha,
             "helper_expected_sha256": self.meta["helper"]["sha256"],

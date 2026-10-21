@@ -182,8 +182,8 @@ def join(route: str, corpus_dir: Path):
           "missing_cs_rows": int(np.isnan(cs[:, 0]).sum()), "missing_cc_rows": int(np.isnan(cc[:, 0]).sum()),
           "bounds": {"status_native_only": True, "join": "preceding only; status native source chosen by dominant count; CS/CC 60ms; request 75ms",
                      "origin": "exact 32-byte match to host send or native FRC receive <=100ms, simultaneous logger batch allowed; 1 host,2 native,3 both,0 unknown",
-                     "timing": "CAN log batch timestamps, not physical wire timestamps",
-                     "phase": "pedal states override standstill/control classes; native_or_stock_cruise is observed request latch, not proven ECU execution"}}
+                     "timing": "CAN log batch timestamps only; physical wire timestamps unresolved",
+                     "phase": "pedal states override standstill/control classes; native_or_stock_cruise records only the observed request latch; ECU execution remains unproved"}}
   (corpus_dir / (route + ".joined.json")).write_text(json.dumps(info, indent=2))
   print(json.dumps(info), flush=True)
   return joined

@@ -114,7 +114,7 @@
     "named_cancel_active_tests": [
       "PDA Cancel Notification Display"
     ],
-    "named_test_disposition": "PDA Cancel Notification Display is a display active test, not an adaptive-cruise cancellation command"
+    "named_test_disposition": "PDA Cancel Notification Display is a display-only active test; adaptive-cruise cancellation requires a separate command"
   },
   "integrity": {
     "valid": 16526

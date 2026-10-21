@@ -72,7 +72,8 @@ EPS08A_ORACLE_BIN = ROOT / "tools/targets/camry/research/ram_runtime/oracle/audi
 EPS08A_ORACLE_META = ROOT / "tools/targets/camry/research/ram_runtime/oracle/audited/audited_camry_f33_08a_oracle_stream_build.json"
 # Supervised continuous substitution preserves the road helper's steady-state
 # behavior, but stops after seven foreground ticks without a changed host
-# generation. Its new identity has instruction-level, not vehicle, validation.
+# generation. Its new identity has instruction-level validation only; vehicle
+# validation remains outstanding.
 INLINE_SIGNER_BIN = ROOT / "tools/targets/camry/research/ram_runtime/b6/audited/camry_f33_b6_inline_signer_supervised.bin"
 INLINE_SIGNER_HELPER = ROOT / "tools/targets/camry/research/ram_runtime/b6/audited/camry_f33_b6_inline_signer_supervised_helper_padded.bin"
 INLINE_SIGNER_META = ROOT / "tools/targets/camry/research/ram_runtime/b6/audited/audited_camry_f33_b6_inline_signer_supervised_build.json"
@@ -277,7 +278,7 @@ fixup `EC525C33`, CRC prefix `13ADA3CC`, and final residue `FFFFFFFF`.
 
 ## 3. Full OFF -> NRTD, then zero-write persistence verification
 
-Power the vehicle fully OFF. Return to **NRTD/Park/stationary**, not READY, then:
+Power the vehicle fully OFF. Return to **NRTD/Park/stationary**. Keep READY off, then:
 
 ```bash
 $PY runtime/exploit/patcher/post_apply_verify.py \\
@@ -386,7 +387,7 @@ def build(out: Path, openpilot: Path) -> dict:
     reused_resident = icus_ramkey_meta["reused_publication_correct_payload"]["resident"]
     # Continuous and one-shot signer bundles intentionally reuse the exact same
     # r6-correct staging/resident while carrying different post-startup helpers.
-    # Artifact filenames differ, so bind the executable identity, not the path.
+    # Artifact filenames differ, so bind the executable identity independently of the path.
     for key in ("base", "size", "sha256"):
         if reused_resident[key] != inline_meta["resident"][key]:
             raise RuntimeError(f"ICU-S RAM_KEY probe no longer reuses the r6-correct resident ({key})")
@@ -679,7 +680,7 @@ def build(out: Path, openpilot: Path) -> dict:
                     "route": "0000008d--a9f348691a",
                     "corroborating_route": "00000093--4066e7ae51",
                     "helper_padded_sha256": "b417e12dde0dc7d6478ea6f242fe9eaa246a00a9fbbcc711a5d2d3adcf159a28",
-                    "boundary": "historical continuous helper only, not the current supervised default; the route records C7 and vehicle response but not EPS LocalRAM bytes",
+                    "boundary": "qualification covers the historical continuous helper only; the current supervised default remains unqualified; the route records C7 and vehicle response but not EPS LocalRAM bytes",
                 },
                 "same_cycle_drcc_recovery": {
                     "command": "./f33-secoc recover-drcc",
@@ -990,7 +991,7 @@ def build(out: Path, openpilot: Path) -> dict:
                 "requires_before_arm": "first prove the exact injected ID63 frame reaches profile2 with b6_midaggregate_observer; bridge is a later controlled transformation experiment",
             },
             "order": [
-                "08a_mac_oracle is the live-qualified historical ISO-TP command-5 transport and remains useful as primitive evidence, not the selected driving carrier",
+                "08a_mac_oracle is the live-qualified historical ISO-TP command-5 transport retained as primitive evidence only; a separate carrier is selected for driving",
                 "b6_inline_signer is retained only as historical direct-B6 development evidence and must not be armed alongside the request-plane path",
                 "command5_probe is retained as the earlier bounded diagnostic oracle",
                 "valid_090_route40_experiment is the current routing discriminator for a host-origin 0x090 after both exact P5/MAC28 and local B7 conditions are satisfied",

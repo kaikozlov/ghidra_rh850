@@ -1,7 +1,7 @@
 {
   "combined_classification": "VAR-084 E1 and E2 are closed without finding a hidden computed-store or DMAC steering ingress. CORR-135 subsequently removes the premise that such an escape was needed to explain zero-B6 factory LTA: exact F33 has a B6-independent D0218->CC60->CC50 actuation path. These negatives therefore bound hidden mutation mechanisms; they do not imply an 0x08A-to-B6 transform.",
   "e1_register_arithmetic_store_targets": {
-    "boundary": "unknown/unbounded pointer stores and memory-safety bugs are not promoted to impossible; this closes VAR-084 E1 specifically, not arbitrary pointer corruption. Prior candidate 69EAC is absent from the refreshed census; its independently byte-bound copy remains confined to FEBE51C6..FEBE5205.",
+    "boundary": "unknown/unbounded pointer stores and memory-safety bugs remain possible; this closes VAR-084 E1 only. Arbitrary pointer corruption remains outside the proof. Prior candidate 69EAC is absent from the refreshed census; its independently byte-bound copy remains confined to FEBE51C6..FEBE5205.",
     "candidate_function_count": 49,
     "candidate_functions": [
       "0x0003B8E4",

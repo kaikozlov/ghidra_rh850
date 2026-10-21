@@ -113,7 +113,7 @@
       }
     ]
   },
-  "evidence_boundary": "Exact H bytes and target-native decompiler/Techstream joins define the newer EPS state carriers. Sienna/openpilot structures are used only to identify which roles a port needs, not to transplant field scales or fault codes. The command side is additionally audited for GP-relative/computed writers: protected B6 signal255 is recovered through a hidden RTE snapshot as a signed16 target-steering-angle command, then compared against independently reconstructed 0x025 measured angle before entering the steering controller. Physical B6 scaling and OEM mode/request semantics are closed, as are the seven-tick receiver-loss cutoff and modulo-64 sequence handling; wall-clock cadence, exact secondary B6 field names, and the upstream producer/authentication route remain bounded; no second command-sized generated scalar or recovered literal block/group/full-PDU route is identified, while arbitrary computed aliases and DMA/peripheral mutation remain outside this proof.",
+  "evidence_boundary": "Exact H bytes and target-native decompiler/Techstream joins define the newer EPS state carriers. Sienna/openpilot structures identify only which roles a port needs. Field scales and fault codes require target-native evidence. The command side is additionally audited for GP-relative/computed writers: protected B6 signal255 is recovered through a hidden RTE snapshot as a signed16 target-steering-angle command, then compared against independently reconstructed 0x025 measured angle before entering the steering controller. Physical B6 scaling and OEM mode/request semantics are closed, as are the seven-tick receiver-loss cutoff and modulo-64 sequence handling; wall-clock cadence, exact secondary B6 field names, and the upstream producer/authentication route remain bounded; no second command-sized generated scalar or recovered literal block/group/full-PDU route is identified, while arbitrary computed aliases and DMA/peripheral mutation remain outside this proof.",
   "evidence_sources": {
     "did_0x1035_callback": {
       "entry": "0x00048820",
@@ -122,11 +122,11 @@
     },
     "fault_state_contract": {
       "path": "data/generated/corolla_hf_fault_state_contract.json",
-      "sha256": "74020856ecae4167eaa7cb7c4b33729ddb243487033018805b5b4c8f04fc17a3"
+      "sha256": "d0358814b553c131c2273fb95394fb5ac8577bb312e8cffd51a4f2bbb23079a6"
     },
     "remaining_status_contract": {
       "path": "data/generated/corolla_hf_remaining_status_contract.json",
-      "sha256": "27181bebdf983e237096944383db64368240126fa70cfb3d2a2dbc8f60106938"
+      "sha256": "10385c7b4c848a9c4a0e419166a79d5a70ca6e2e4e7748b19eec5ba12ad30b9b"
     },
     "state_corpus": {
       "path": "data/generated/corolla_8965H1202000_openpilot_state_bridge_decompiler_evidence.json",
@@ -519,7 +519,7 @@
               "0x030 B6[1]"
             ],
             "classification": "Q-axis actual-current-derived debounced status; exact H's threshold detector is calibration-disabled",
-            "exact_h_calibration_effect": "feature flag 0x5A makes the BB8F6 detector's enabled-only set branch unreachable and forces its raw detector output FEBEB64D to zero on each execution; debounce calibration is zero. This closes the physical source family and detector-disable state, not an OEM display name for the final debounced bit.",
+            "exact_h_calibration_effect": "feature flag 0x5A makes the BB8F6 detector's enabled-only set branch unreachable and forces its raw detector output FEBEB64D to zero on each execution; debounce calibration is zero. This closes the physical source family and detector-disable state only. The OEM display name for the final debounced bit remains unrecovered.",
             "openpilot_consequence": "Do not treat B6[1] as a generic steering-ready/authority bit. Its source is motor Q-current monitoring and its exact-H detector is disabled by calibration.",
             "signal_id": 7,
             "span_observation": {
@@ -644,7 +644,7 @@
           "role": "class-0x0F internal fault branch when its additional classifier condition permits"
         },
         "15": {
-          "boundary": "selected by a distinct operational predicate, not safely nameable as ready or fault from static evidence alone",
+          "boundary": "selected by a distinct operational predicate; ready/fault naming remains unresolved from static evidence alone",
           "role": "special operating state"
         },
         "16": {
@@ -770,7 +770,7 @@
           "event_table": "0x0002B988",
           "state11_additional_source": "0x4B930 can set the shared 0x20 aggregate bit from three internal 0x22-valued conditions; state 11 is therefore not exclusively class-0x20/F0 DTC events"
         },
-        "evidence_boundary": "All class/state selection logic and aging constants are exact-H firmware-static and transfer byte-for-byte to F. Toyota DTC names come from the pinned EMPS_P5 Techstream table via the committed Corolla Techstream correlation catalog. Classes with DTC index 0 remain internal/no-named-DTC. State 16 is a general fallback, not a unique class-0x80 code.",
+        "evidence_boundary": "All class/state selection logic and aging constants are exact-H firmware-static and transfer byte-for-byte to F. Toyota DTC names come from the pinned EMPS_P5 Techstream table via the committed Corolla Techstream correlation catalog. Classes with DTC index 0 remain internal/no-named-DTC. State 16 is a general fallback shared beyond class-0x80.",
         "internal_only_classes": {
           "0x04": {
             "dtc_indexed_count": 0,
@@ -1203,7 +1203,7 @@
           },
           "techstream_correlations": {
             "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
-            "sha256": "5e4eac747a29080dcb5a700070655dccb7814434cc810f204080512416aa8e3a"
+            "sha256": "74c41adf16dd7e81255a30589bf6a0c06ca1e96a80613b7a20a703178a598cab"
           }
         },
         "wire": {

@@ -71,7 +71,7 @@ def fine(data):
 
 
 def coarse(data):
-    """Existing comparison convention, not a calibrated actuation demand."""
+    """Existing comparison convention with uncalibrated actuation-demand units."""
     return -.1 * signed(np.asarray(data)[:, 12] & 127, 7)
 
 
@@ -199,7 +199,7 @@ def physical_motion(s, wheels, cruise):
 
 
 def packed_speed(data):
-    """Observed ego-speed candidate, not a recovered OEM signal name."""
+    """Observed ego-speed candidate with an unresolved OEM signal name."""
     d = np.asarray(data, dtype=np.int64)
     raw = (((d[:, 7] << 16) | (d[:, 8] << 8) | d[:, 9]) >> 5) & 32767
     return (raw * .01 - 67.67) / 3.6
@@ -209,8 +209,8 @@ def feedback_crosscheck(s, brake, wheels, ca, cruise):
     """Compare camera fields with independent native chassis publications.
 
     All joins stay within a source file. For every queried instant, only the
-    most recent preceding native observation is used. Lag sweeps are descriptive
-    alignment tests, not an inference of physical causation or actuator delay.
+    most recent preceding native observation is used. Lag sweeps describe
+    alignment only; physical causation and actuator delay remain unresolved.
     """
     def metric(x, y):
         result = stats(x, y)
@@ -341,7 +341,7 @@ def trial_analysis(streams):
             'native_source_age_ms': [round(float(x), 6) for x in np.percentile(ages, [0, 50, 100])],
             'preceding_mode_byte_counts': {hex(k): n for k, n in sorted(modes.items())}, 'mode_coverage_frames': int(mok.sum()),
             'ca_time_shift_ms': result,
-            'boundary': 'Predictive comparison, not a causal effect estimate. Conventional mode and absent EPS do not qualify healthy DRCC.'}
+            'boundary': 'Predictive comparison only; causal effects remain unresolved. Conventional mode and absent EPS do not qualify healthy DRCC.'}
 
 
 def resume_analysis(streams):
@@ -390,16 +390,16 @@ def build(fixture=FIXTURE):
                 'negative_shift': 'Later field versus earlier measured motion; publication and filtering delays are not actuator latency.',
                 'trial': 'Preceding same-counter native frame <=75ms old in same file; CA nearest within40ms at stated shifts.',
                 'resume': 'First mean-wheel speed>0.1m/s within300ms of prior stock-resume landmark; no new proof about unrecorded driver inputs.',
-                'b12_units': '-0.1*signed7(B12) is the old comparison convention, not an independently calibrated demand.'},
+                'b12_units': '-0.1*signed7(B12) is the old comparison convention; independent demand calibration remains absent.'},
             'august_motion': august, 'combined_trial': trial_analysis(streams), 'stock_resumes': resume_analysis(streams),
             'fixture_can_census': [{'group': g, 'service': k, 'panda_src': b, 'address': hex(a), 'n': n} for (g, k, b, a), n in sorted(census.items())],
             'invalid_0x160': [{'group': g, 'service': k, 'panda_src': b, 'n': n} for (g, k, b), n in sorted(invalid.items())],
             'boundaries': [
                 'No 0x160 receiver implementation in this audit; EPS firmware does not establish a longitudinal contract.',
-                'B4 measured-motion tracking and zero-until-after-motion are feedback-like, not an OEM field-name recovery.',
+                'B4 measured-motion tracking and zero-until-after-motion are feedback-like; the OEM field name remains unresolved.',
                 'The intact native source defeats the earlier combined-trial correlation as independent proof of host influence.',
                 'State mirror, parallel output, mode-dependent request, or mixed-role PDU remain incompletely distinguished.',
-                'Panda TX returns prove transport only, not receiver acceptance; no alternative FRC command is identified.']}
+                'Panda TX returns prove transport only; receiver acceptance remains unresolved and no alternative FRC command is identified.']}
 
 
 def main():

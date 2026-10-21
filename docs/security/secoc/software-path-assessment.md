@@ -10,7 +10,7 @@
 > semantics, live slot permissions, and dynamic proxy behavior remain untested
 >
 > **Primary evidence:** firmware bytes and disposable working-project Ghidra
-> analysis in `build/work/project/`; existing reports are navigation aids, not proof
+> analysis in `build/work/project/`. Existing reports serve only as navigation aids.
 >
 > **Verification:** `tests/firmware/verify_icus_software_paths.py`,
 > `tests/runtime/verify_payload_gate.py`, `tools/test secoc`
@@ -60,8 +60,8 @@ signing proxy is recorded as a separate capability.
   `81d87b678784bb2a07b1fdcb3d43dd40767d4f5ca1b56867b6575cd652a9ecb8`
 - Existing raw-byte census: nine direct `ICUSCMD` stores; intended command
   families are 1/3, 5, 7, 8, 11, `0x22`, `0x3f`, and `0x7000/0x7100`; no
-  intended command-13 writer. This is a starting boundary, not a software
-  security conclusion.
+  intended command-13 writer. This census defines the starting boundary for
+  software security analysis.
 
 ## Candidate-path ledger
 
@@ -172,8 +172,8 @@ signing proxy is recorded as a separate capability.
   CodeFlash start/completion functions and their literal complements or clear
   the pair. No request-derived callback address was recovered.
 - Higher crypto dispatchers select lower adapter pointers from CodeFlash driver
-  records after bounds lookup; caller-controlled fields are selectors and data
-  buffers, not adapter function addresses.
+  records after bounds lookup. Caller-controlled fields select adapters and supply
+  data buffers. Adapter function addresses remain fixed in CodeFlash.
 - **Implication:** stock diagnostics already supply the missing activation
   primitive. Characterizing selector-4 command 5 no longer requires an
   activation hook; only an observation path for `FEBE51AA` remains necessary.
@@ -311,8 +311,8 @@ result capacity at 49 bytes. No diagnostic request-length overwrite was recovere
   load that word and call it indirectly.
 - Existing pinned accepted payloads place `FEBF0000` in the callback word, so
   execution begins in tester-supplied plaintext at the start of the download
-  window. This is arbitrary bootloader-context code execution after satisfying
-  the payload gate, not merely a data-download facility.
+  window. This establishes arbitrary bootloader-context code execution after
+  satisfying the payload gate.
 - Payload key derivation at `0x7068` is
   `AES-ECB(PAYLOAD_BUILD_SECRET, DID_0x201)`. In the pinned flow DID `0x201` and
   DID `0x202` are all-zero, and the fixed build secret is already recovered from
@@ -373,9 +373,8 @@ As an external-source reproducibility check, extracting the nonzero shellcode
 prefixes (`0x18A` and `0x1B5` bytes) from both committed fixtures and running
 that builder with the recovered secret and zero DID inputs reproduced both
 4 KiB ciphertexts byte-for-byte, including SHA-256
-`d4898836...a06e34` and `d972d4bf...356be2`. The next experiment can therefore
-be implemented by adapting C and the existing uploader, not by hand-encoding
-RH850 instructions.
+`d4898836...a06e34` and `d972d4bf...356be2`. Implement the next experiment by
+adapting C and the existing uploader.
 
 #### Recovered command-shape anchors and register-map hypothesis
 
@@ -469,9 +468,9 @@ The shared driver also closes the obvious cross-command race:
 
 **Stage-7 conclusion:** no request-controlled software path was recovered that
 returns stale ICU output across error, timeout, abort, or command replacement.
-This is a bounded static negative, not a proof about impossible **hardware sequencing** behavior. `icus_command_finalize @ 0x89510` checks the ICU error/status result
-but does not independently assert in software that every expected output block
-was observed before accepting a hardware-reported clean completion. A hardware
+This static negative covers software paths only. `icus_command_finalize @ 0x89510`
+checks the ICU error/status result but does not independently assert in software
+that every expected output block was observed before accepting a hardware-reported clean completion. A hardware
 fault or undocumented sequencing violation that reports success without the
 specified output-ready events is therefore outside this software-static proof.
 
@@ -520,8 +519,8 @@ The useful **static software** questions in this report are now mostly closed, b
 
 ## External references
 
-These establish only public SHE/CSE command numbering, not Renesas ICU-S
-semantics:
+These sources establish public SHE/CSE command numbering only. Renesas ICU-S
+semantics require separate evidence:
 
 - Bk2ol, `tsk_extraction_by_can_log`, payload source/toolchain at commit
   `db45375`: <https://github.com/Bk2ol/tsk_extraction_by_can_log>

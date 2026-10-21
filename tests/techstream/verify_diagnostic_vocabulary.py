@@ -10,7 +10,7 @@ Verifies that:
   6. Auto-applied mappings are exact or independently recovered structural matches.
   7. Monitor→DID bridges do not overstate vocabulary identity as exact.
   8. U_English steering strings are family-only (no guessed firmware binding).
-  9. Active tests are NOT extracted (section 14 is PID display config, not active tests).
+  9. Section 14 configures PID display. Active tests remain unextracted.
 
 Independently verifies DDB parsing against raw bytes — does not trust the
 correlation engine's own output for DDB field offsets.
@@ -396,8 +396,8 @@ mon_name_idx = struct.unpack_from("<I", raw_m0, 48)[0]
 check("monitor name index is u32 at offset 48",
       mon_name_idx > 0)
 
-# Factory identity is authoritative: section 3 is supported-PID metadata, not
-# a DID table.  The old pipeline reinterpreted bytes 4-5 as a little-endian DID.
+# Factory identity establishes section 3 as supported-PID metadata.
+# The old pipeline reinterpreted bytes 4-5 as a little-endian DID.
 sec3 = eps_can.sections[3]
 raw_d0 = sec3.raw_data[0:8]
 check("former 0x0100 DID bytes are retained as supported-PID raw evidence",
@@ -554,7 +554,7 @@ u_strings = parser.load_string_db(DB_PATH / "U_English.ddb")
 check("U_English type-1 metadata section has all 25,957 records",
       u_strings.metadata is not None and len(u_strings.metadata) == 25_957)
 torque_metadata = u_strings.get_metadata(6585)
-check("U_English resource follows explicit text index, not resource row ordinal",
+check("U_English resource follows explicit text index",
       torque_metadata is not None
       and torque_metadata.identifier == "IDS_D_EPS_01_007_TITLE"
       and torque_metadata.string_index == 6585

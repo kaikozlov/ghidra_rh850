@@ -111,7 +111,7 @@ with tempfile.TemporaryDirectory(prefix="verify-corolla-hf-inline-signer-") as t
         plan = installer.build_plan(bundle)
         check(f"{target} installer binds exact F181", plan["target"]["required_application_f181_hex"] == installer.APP_F181[target])
         check(f"{target} installer binds exact CodeFlash", plan["target"]["codeflash_sha256"] == installer.CODEFLASH_SHA256[target])
-        check(f"{target} status is SID23, not XCP", plan["runtime"]["status"] == {
+        check(f"{target} status uses SID23", plan["runtime"]["status"] == {
             "transport": "application UDS SID 0x23 RMBA", "alfid": "0x15", "memory_id": 1,
         })
         check(f"{target} plan exposes native carrier requirement",

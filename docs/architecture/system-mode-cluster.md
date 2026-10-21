@@ -169,7 +169,7 @@ the dispatcher flag bit `0x10`.
 
 - **`0xBEC4C`** and **`0xBF17E`** are the two scheduler dispatchers (full and
   fast-path) that run per-tick subsystem update sequences and then invoke the
-  coordinator. They are the wiring, not the decision logic.
+  coordinator. They provide the scheduling connections.
 - **`0xB0518`** (system_mode_coordinator) is the actual mode state machine
   containing all transition rules. Event 9 → 0x900 is checked from every mode.
 - **`0xBA43A`** (system_mode_state_worker) is a telemetry/snapshot copier with

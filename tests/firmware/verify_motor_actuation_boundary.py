@@ -110,7 +110,7 @@ def main() -> int:
           0x35960 in branch_targets(codeflash, 0x5CEA8, 0x5CEE4))
 
     print("\n== ADCG -> DMAC -> Global RAM sample acquisition ==")
-    # P1M-E memory map identifies FEEF8000..FEEFFFFF as Global RAM A, not SFR.
+    # P1M-E memory map identifies FEEF8000..FEEFFFFF as Global RAM A.
     # Firmware DMA descriptors pair ADCG0/1 DIR00 with the two 432-entry rings.
     dmac0 = struct.unpack_from("<III", codeflash, 0x312B0)
     dmac0_dup = struct.unpack_from("<III", codeflash, 0x312C0)
@@ -196,16 +196,16 @@ def main() -> int:
               "8404"       # sst.h 0x8,ep,r0       -> FEBE6D2C = 0
               "8504"       # sst.h 0xa,ep,r0       -> FEBE6D2E = 0
               "bdffd6c8"))  # jarl 0x3770e        -> dual_motor_dq_current_reference
-    check("the dispatch write site calls the constructor, not a command copy",
+    check("the dispatch write site calls the constructor",
           decode_branch(0x5ae38, codeflash)[1] == 0x3770e)
     # Constructor 0x37712 reads only motor-block inputs. The two GP-relative
     # halfword loads below resolve to FEBE6D7E and FEBE6D70; later ep-relative
     # loads read FEBE6D4E/6D50/6D52/6D54. No conditioned-command location
     # (FEBE7F94/EF184/AE20/BF80/BF84/BF9A/BFA2/AE16) is read anywhere in the
     # producer cone (0x37712 + 0x3795e + 0x37b5a + 0x37cd4).
-    check("constructor reads motor-block FEBE6D7E, not command state",
+    check("constructor reads motor-block FEBE6D7E",
           codeflash[0x37712:0x37716] == bytes.fromhex("24977eb5"))  # ld.h -0x4a82,gp,r18
-    check("constructor reads motor-block FEBE6D70, not command state",
+    check("constructor reads motor-block FEBE6D70",
           codeflash[0x3771a:0x3771e] == bytes.fromhex("249f70b5"))  # ld.h -0x4a90,gp,r19
 
     # Full negative: scan every gp-relative instruction in the producer cone

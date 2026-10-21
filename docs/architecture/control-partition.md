@@ -52,7 +52,7 @@ A seventh row covers the `0x7F7` special receive callback:
 The earlier “motor control state machine” label was wrong. Decompiling the
 descendants identifies the `0xFEBE5085..0xFEBE508F` cluster as the three dormant
 CAN-controlled crypto-test banks documented in
-`../security/secoc/application-chain.md`, not torque state.
+`../security/secoc/application-chain.md`.
 
 `0x68c0c` dispatches the bank state machines in fixed order. The last gated
 branch calls `crypto_test_bank1_state_step` at `0x68bc2`, whose command-5 path
@@ -171,8 +171,7 @@ steering-command conditioner described below.
 
 The E2E helpers (`0x6f71c`, `0x6f6a6`, `0x6f97a`), version reconciliation, and
 rolling state at `0xFEBE8BC9/0xFEBE8BCB` remain valid structural observations.
-They are gate/setup logic around the control dispatch, not the torque algorithm
-itself.
+They provide gate/setup logic around the control dispatch.
 
 ### Evidence grade: recovered
 
@@ -281,14 +280,12 @@ parallel visible-status branch from the same scaled command:
   companion status `0xFEBEBF7A` into `0xFEBEBF7B`; the command-export/snapshot
   chain carries it through `0xFEBEACF6 -> 0xFEBEE844 -> 0xFEBE80A3`, which is
   signal 25 / B3[5] of CAN `0x262` — bit4 of the public seven-bit `LKA_STATE`
-  field. This is a **command-contributes-to-status** edge, not a claim that the
-  Tx bit is a direct copy of command magnitude: `0xC8072` also evaluates other
-  steering-control state.
+  field. This is a **command-contributes-to-status** edge: `0xC8072` evaluates
+  both command magnitude and other steering-control state.
 
 The machine-readable rows for `0xC8072` and `0xC8280` in
 `data/control_partition.csv` preserve this newly recovered visible-status branch.
-The conditioning stages execute under the CH3-polled foreground domain, not in
-the TAUJ0 CH0/CH2 ISR bodies:
+The conditioning stages execute under the CH3-polled foreground domain:
 
 ```text
 foreground loop 0x64FCC polls TAUJ0 CH3 EIRF136
@@ -315,8 +312,8 @@ through category 405 / generation 20, is named **`Command Value Torque`**, uses
 a 16-bit monitor range (`0..15`), and resolves through its physical-data/unit
 records to **`Nm`**. The metadata is byte-identical across NA/EU/JP. This is
 strong corroborating vocabulary/dimensional evidence for the recovered command
-domain, not proof that Techstream monitor 402 reads the CAN COM destination
-itself. The RAM and call chain above remain firmware-static evidence.
+domain. Whether Techstream monitor 402 reads the CAN COM destination itself
+remains unproven. The RAM and call chain above remain firmware-static evidence.
 
 ### Boundary
 
@@ -339,8 +336,8 @@ a motor-current command:
 The processor audit locks those exact direct-reference sets. Whole-program
 decompiler-text, high-p-code, and GP-displacement/scalar scans were also used to
 look for indirect consumers. They found no recovered path into the proved d/q
-current references at `0xFEBE6D28/0xFEBE6D2A`. This is a bounded static negative,
-not proof that no table-driven, computed, or runtime-only handoff can exist.
+current references at `0xFEBE6D28/0xFEBE6D2A`. This static negative is limited to
+the recovered paths. Table-driven, computed, or runtime-only handoffs remain possible.
 
 ### Evidence grade: recovered
 
@@ -381,8 +378,8 @@ FEEF8000..FEEFFFFF  Global RAM (Bank A), 32 KiB
 FEF00000..FEF07FFF  Global RAM (Bank B), 32 KiB
 ```
 
-Both sample bases are therefore ordinary Global RAM A, not MMIO. Firmware DMA
-descriptors identify the hardware source:
+Both sample bases are therefore ordinary Global RAM A. Firmware DMA
+descriptors identify the MMIO hardware source:
 
 | Descriptor | Source | Manual name | Destination | Consumer |
 |---:|---:|---|---:|---:|
@@ -531,8 +528,7 @@ and signed 16-bit `STEER_ANGLE_CMD` in B2..B3. The recovered firmware ingress is
 `FEBEC13A = 1`, clears torque mode `FEBEC13D`, and derives submode state
 `FEBEC13B/13C` from `FEBEAD52/AD54`.
 
-The signed angle command then enters a real controller chain, not a telemetry
-copy:
+The signed angle command then enters the controller chain:
 
 ```text
 0x131 STEER_ANGLE_CMD
@@ -628,8 +624,8 @@ calibrated ramp/state calculation at `0xC7F58`. `AE2A` remains write-only.
 Configured signals 194/197 remain separately classified store-only in the Rx
 consumer audit.
 
-These are recovered steering-controller state/prerequisite consumers, not a
-third proven command-mode selector: none of the four functions writes the
+These are recovered steering-controller state/prerequisite consumers. A third
+command-mode selector remains unproven: none of the four functions writes the
 `FEBE6D28/6D2A` d/q references or selects `FEBEC13A/C13D`. The exact OEM field
 names and downstream authority of `0x132` remain unresolved.
 
@@ -643,15 +639,14 @@ The actuator-side producer cone is separately closed:
   motor-state domain;
 - the complete static xref/writer census over `FEBE6D00..FEBE6DFF` finds only
   motor-control writers plus explicit initialization/reinitialization writes;
-- RTE staging copies that touch the d/q block are **readers**, not writers;
+- RTE staging copies access the d/q block only as **readers**;
 - a bytewise CodeFlash scan finds **zero absolute 32-bit pointers** into
   `FEBE6D00..FEBE6DFF`;
 - generic `memcpy @ 0x153A` has exactly one direct caller, bootloader transfer
   code at `0x4F84`, and no application caller;
 - the apparent second d/q-reference writer in
   `autosar_os_task_signal_dispatch @ 0x58404` is a zero-clear/reinitialization
-  sequence over `FEBE6D24..6D2E` followed by the normal reference constructor,
-  not a command copy.
+  sequence over `FEBE6D24..6D2E` followed by the normal reference constructor.
 
 The bounded **command-to-current** static negative is consequently broader than
 the Stage-6 version: no direct, table-pointer, generic-memcpy, RTE-copy,
@@ -721,10 +716,10 @@ writes only `FEBEB5F4..B5FE`, and calls event/status helpers `0x53562`,
 
 No direct current-reference or PWM write is recovered from `0x43F28` or
 `0xB9D36`. The defensible classification is therefore **registered
-plausibility/deadline/fault monitoring with event-state output**, not a proved
-motor-inhibit/interlock path. An indirect safety policy elsewhere could still
-consume its event state; this trace does not claim the monitors are irrelevant
-to safety.
+plausibility/deadline/fault monitoring with event-state output**. A
+motor-inhibit/interlock path remains unproven. An indirect safety policy elsewhere
+could still consume its event state. This trace does not claim the monitors are
+irrelevant to safety.
 
 ### 9.6 Calibration/version-domain handlers
 
@@ -778,7 +773,7 @@ with availability implications, but the static graph does **not** establish an
 arbitrary steering-torque/current primitive. The complete RoutineControl access/control surface is documented in
 [`../diagnostics/application-routine-control-surface.md`](../diagnostics/application-routine-control-surface.md).
 
-### 9.8 RoutineControl `0x1007/0x1008` inject live lifecycle reinitialization, not d/q commands
+### 9.8 RoutineControl `0x1007/0x1008` inject live lifecycle reinitialization
 
 Two additional policy-0 RoutineControl RIDs operate on lifecycle groups that are serviced by
 normal operational scheduling rather than the `0x520`-only service island.
@@ -801,8 +796,8 @@ sets for `B7A36/B7AAE`, and the normal scheduler references to `B79E8`.
 This is a real live-state perturbation boundary, but it still does not create a
 recovered d/q command. None of these lifecycle states is a producer of
 `FEBE6D28/FEBE6D2A`, and the previously pinned d/q/PWM cone remains unchanged.
-The security consequence is therefore bounded operational availability/control
-state, not arbitrary steering-current injection.
+The recovered security consequence is therefore limited to operational
+availability/control state.
 
 ### Evidence grade: recovered/verified with bounded actuation join
 
@@ -858,7 +853,7 @@ respective packer decompilations:
 bytes untouched. No checksum or E2E computation exists inside any of the three
 packer functions — each ends with a common `FUN_0007bffe`/`FUN_0007d526`/
 `FUN_0007d37e`/`FUN_0007d5aa` COM-send-status sequence that operates on the PDU
-state, not the signal bytes. The runtime producers (if any) for signals 9, 37,
+state only. The runtime producers (if any) for signals 9, 37,
 and 57 must live outside the packer functions — either in a separate COM
 callback, a different cyclic, or not at all in this calibration. The signals
 remain **configured-unresolved** with packer evidence now recorded in

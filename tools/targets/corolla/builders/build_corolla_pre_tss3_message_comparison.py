@@ -255,7 +255,7 @@ def build(args: argparse.Namespace) -> dict:
             "survives_as_configuration_lead":"0x0AA wheel speeds",
             "feedback_generation_change":"0x260 + 0x262 disappear; roles split across classic 0x4A3/0x351/0x394 plus mixed 32-byte FD 0x030",
             "command_generation_change":"classic 5-byte torque 0x2E4 disappears; protected FD 0x0B6 signal255 is the H/F target-steering-angle command and signal254 selects cooperative modes",
-            "tss2_lta_note":"0x191 was only a neutral coexistence/replacement frame on Corolla TSS2 torque control, not its active steering command",
+            "tss2_lta_note":"0x191 served only as a neutral coexistence/replacement frame on Corolla TSS2 torque control",
             "longitudinal_ui_boundary":"0x343 and 0x412 are whole-vehicle camera/ACC/UI contracts; EPS-table absence does not answer their TSS3 replacements",
             "secoc_boundary":"0x131 and 0x183 are not pre-TSS3 Corolla messages and must not be included in the Corolla migration baseline",
         },

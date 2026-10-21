@@ -14,8 +14,8 @@
 //   rejected           → skip
 //
 // This script does NOT overwrite symbols created by AnnotateApplicationDiagnostics.
-// It adds OEM vocabulary as a separate layer. If a function already has a
-// USER_DEFINED name, the OEM name is appended as a comment, not a rename.
+// It adds OEM vocabulary as a separate layer. Preserve existing USER_DEFINED
+// function names and append the OEM name as a comment.
 //
 // Run after AnnotateApplicationDiagnostics in the Stage 4 post-analysis pass.
 // The vocabulary path is passed as the first script argument.
@@ -131,7 +131,7 @@ public class ApplyDiagnosticVocabulary extends GhidraScript {
                 }
 
                 // Build the suffix from the identifier or SID.
-                // These are numeric in the JSON (integers, not strings).
+                // The JSON encodes these as integers.
                 String suffix;
                 if (kind.equals("did") || kind.equals("monitor")) {
                     long id = entry.getLong("identifier", 0);

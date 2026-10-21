@@ -47,7 +47,7 @@ The five PDU descriptors at `0x226C0` are:
 0x4C8: cycle=196  length=8
 ```
 
-At the registered nominal80MHz timer domain, the foreground interval is5ms and these descriptor counts produce the nominal cycle times above. They are invocation-count scheduling, not a measured execution-time, backlog or jitter guarantee.
+At the registered nominal80MHz timer domain, the foreground interval is5ms and these descriptor counts produce the nominal cycle times above. They specify invocation-count scheduling. Execution time, backlog and jitter require separate measurement.
 
 All five belong to the same generated-COM Tx I-PDU group. The group starts at PDU0, contains five PDUs, and every member has communication mask `0x10`. The retained PE1 RAM snapshot proves that this is not merely dormant configuration:
 
@@ -66,7 +66,7 @@ There is also an important direct-pack distinction:
 - `0x351` and `0x394` use `0x7D1DC`, the change-aware signal pack helper. On an actual value change it calls `0x7E196(pdu, 0x80)`, so those messages can request event transmission in addition to the periodic schedule.
 - `0x030`, `0x4A3`, and `0x4C8` use the raw pack helper `0x7D31E`; their direct packers do not themselves create a change-triggered transmit request.
 
-The normal application packers are live, not dead configuration: the F33 application task reaches all five through the normal source-preparation/packing sequence.
+The F33 application task reaches all five normal application packers through the normal source-preparation/packing sequence.
 
 ### 2.1 Payload generation is not transmit admission
 
@@ -132,7 +132,7 @@ The retained HTH-state snapshot is `5A 69 69 69 69`: HTH0 happened to be active/
 The exact ABI carries `F33PduInfo {data*,length:u16,opaque:u16}` in `r7`
 through PduR/SecOC forwarding. Missing second arguments in the old decompilation
 were not missing firmware arguments. `7FEF8` also has a consequential `r10`
-return: default1 or the result of `7FD46`, not void.
+return: default1 or the result of `7FD46`.
 
 For ordinary classic traffic, `7FD46` first copies up to64 bytes into scratch
 `4FB2` and calls its configured callback, **before** checking controller state,
@@ -160,8 +160,8 @@ this result **consumes the COM pending request**; newer live COM remains for
 a later opportunity. This preservation is specific to the outer occupied claim:
 an internal malformed queue can fail after `8E9C6` has copied application data.
 
-Queue service `8025A→8015C` passes retained queue payload to `85112`, not live
-COM storage. Driver rejection marks hardware group3C without consuming the
+Queue service `8025A→8015C` passes the retained queue payload to `85112`.
+Driver rejection marks hardware group3C without consuming the
 record. Admission marks group and queue5A; later `8043C` advances the read
 cursor and subtracts occupancy. State3C does not consume that record.
 The eventual RSCAN boundary is `852FE`: ID/control/payload stores precede the
@@ -436,7 +436,7 @@ admission, driver progress or completion. The lifecycle above retains distinct
 software failure boundaries. Identity-bound witnesses are still needed across
 the classic queue/driver path and external routing; a fabricated EPS “disabled”
 flag is not an explanation either. The later lower-driver sender experiment
-establishes its own bounded transaction, not every stock classic-PDU lifecycle.
+establishes only its own bounded transaction. Stock classic-PDU lifecycles need separate witnesses.
 
 ## 11. Consequence for DBC work
 
@@ -444,11 +444,11 @@ For exact F33, message ownership and semantics should now be derived from this f
 
 In particular:
 
-- `0x030` is EPS-origin, not ECM-origin.
+- `0x030` originates from EPS.
 - its security trailer is genuinely Toyota SecOC `FV4 || MAC28`.
-- it is not merely “telemetry”: it combines physical feedback with EPS cooperative-control and inhibit state.
+- it combines physical feedback with EPS cooperative-control and inhibit state.
 - `0x4A3` is another EPS-origin steering-state/feedback PDU.
-- `0x351` and `0x394` are status/fault projections, not generic powertrain messages.
+- `0x351` and `0x394` project EPS status/fault state.
 - `0x4C8` should remain unnamed beyond its recovered structural role until Toyota semantics are closed.
 
 The machine-readable artifact should be treated as the canonical exact-F33 transmit inventory for subsequent DBC and openpilot work.
@@ -469,8 +469,8 @@ cannot forge an upper-layer `0x030` confirmation. It permits one successful
 Tx per boot and refuses nonzero Target Lateral ID; it does not sign, alter
 freshness, touch B6, or write flash.
 
-The second experiment is intentionally a routing test, not an actuation or
-receiver-acceptance test. If the otherwise-unique captured FV4+MAC frame becomes
+The second experiment tests routing only. Actuation and receiver acceptance remain
+outside its scope. If the otherwise-unique captured FV4+MAC frame becomes
 visible at Panda only after EPS lower-driver completion, the EPS-local Tx path
 reaches the observed Bus-4 domain. If the lower driver physically completes the
 replay but Panda never sees the exact frame, selective EBU/Brake-domain forwarding remains the leading
@@ -487,8 +487,8 @@ stock samples with `samples_matched=3/3`. For sample 3, the captured native MAC2
 `d64e2a5` was reproduced exactly by EPS ICU-S selector 4 over domain
 `008a || B0..B27 || freshness48`, with trip `620`, reset `1109`, and reconstructed
 message counter `8`. This dynamically verifies the exact F33 EPS slot-4 command-5
-path as a valid MAC oracle for stock `0x08A`; the remaining oracle problem is
-transport/latency, not key-domain compatibility or authenticated-input framing.
+path as a valid MAC oracle for stock `0x08A`. Key-domain compatibility and
+authenticated-input framing are established. Transport/latency remains unresolved.
 
 **Experiment B closed negative for outward routing.** The EPS helper replayed one
 byte-exact stock ID0 frame
@@ -806,8 +806,8 @@ from the host side in opendbc `2cf0322a` / parent `740031c93`:
   the chassis;
 - once Panda's atomic arm takes effect, it blocks the next native source frame and accepts that
   frame's exact host clone;
-- **the first returned host `0x08A` TX echo**, not the admin echo, is the host's proof that ownership
-  actually crossed;
+- **the first returned host `0x08A` TX echo** proves to the host that ownership
+  actually crossed. The admin echo alone leaves that handoff unproved;
 - malformed/mistimed replacements immediately clear Panda replacement ownership and fail open to
   stock forwarding.
 
@@ -821,7 +821,7 @@ The atomic safety regression is 293 passed / 120 skipped / 16 subtests, and the 
 transparent mode enabled and signed mode disabled. Offroad startup rebuilt/flashed Panda safety from
 old signature `0cc8a00dfc8ac6f6` to expected `8d776c4f8bd73381` and pandad reconnected normally.
 
-### 12.15 Freshness sync originates on bus0, not bus2
+### 12.15 Freshness sync originates on bus0
 
 The first atomic-handoff READY attempt still produced rejected canonical arm admins even though
 CarState, Park/standstill, and native ID0 continuity were valid. Live correlation around each

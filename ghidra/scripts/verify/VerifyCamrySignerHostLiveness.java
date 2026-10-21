@@ -93,9 +93,9 @@ public class VerifyCamrySignerHostLiveness extends GhidraScript {
                     calls.add("copy:" + r6 + ":" + r7 + ":" + r8);
                     e.writeMemory(toAddr(r6), e.readMemory(toAddr(r7), (int)r8));
                 } else if (pc == 0x90566L) {
-                    // Golden differential boundary, not a replacement encoder:
-                    // compare exact ABI and freshness witnesses, and supply the
-                    // same deterministic six bytes to both compiled helpers.
+                    // At the golden differential boundary, compare exact ABI
+                    // and freshness witnesses. Supply the same deterministic
+                    // six bytes to both compiled helpers.
                     byte[] witness = e.readMemory(toAddr(r6), 12);
                     calls.add("freshness:" + java.util.HexFormat.of().formatHex(witness));
                     e.writeMemory(toAddr(r7), java.util.Arrays.copyOf(witness, 6));

@@ -61,7 +61,7 @@ def main():
   else:
    ht=None; status='removed-slot'
    recens += [
-    {'reference_entry':f'0x{slot:08X}','reference_name':high_name,'reason':f'H slot {slot:#x} is fill, not a veneer'},
+    {'reference_entry':f'0x{slot:08X}','reference_name':high_name,'reason':f'H slot {slot:#x} contains fill only'},
     {'reference_entry':f'0x{slow:08X}','reference_name':name,'reason':f'canonical low target was named from removed veneer slot {slot:#x}; no one-to-one H role assigned'},
    ]
   pairs.append({'slot':f'0x{slot:08X}','sienna_target':f'0x{slow:08X}','h_target':None if ht is None else f'0x{ht:08X}','status':status,'h_raw8':h['raw8']})

@@ -133,7 +133,7 @@
     {
       "criterion": "7/12/36-byte generated results agree with independently known CMAC vectors for the same live key/domain where such vectors are available",
       "name": "independent MAC agreement",
-      "purpose": "validate semantic output, not merely command completion",
+      "purpose": "validate semantic output beyond command completion",
       "stage": 3
     },
     {

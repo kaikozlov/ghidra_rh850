@@ -119,8 +119,8 @@ def _rewrite_preserved_results(code: str) -> str:
                 assigned_earlier is not None
                 and syntax._is_int_type(_declared_scalar(body, assigned_earlier[0]) or "")
             )
-            # The saved register is a firmware address, not a truncated host
-            # pointer, when the original C also uses it as a numeric word.
+            # The saved register is a firmware address when the original C
+            # also uses it as a numeric word. Preserve that address representation.
             address_word = "*" in typ and numeric_target
             edits.append((name_start, name_start, ("camry_host_addr(" if address_word else "") + f"({source} = "))
             edits.append((earlier[2] + 1, earlier[2] + 1, "))" if address_word else ")"))
@@ -509,7 +509,7 @@ def _rewrite_recovered_arguments(code: str) -> str:
         )
     if syntax._signature_name(syntax._c_signature(code)) == "dcm_submit_transport_response":
         # Retained C discarded 929EE's result under the old one-argument
-        # veneer ABI. 929F2 compares that new r10, not 9185C's earlier result.
+        # veneer ABI. 929F2 compares the new r10 produced by 929EE.
         code = re.sub(
             r"\(\(void\)\(response\),\s*invoke_prefixed_id_callback_21ccc_92a52\(transmit_id\)\);",
             "iVar3 = invoke_prefixed_id_callback_21ccc_92a52(transmit_id,response);", code,
@@ -593,7 +593,7 @@ def _rewrite_recovered_arguments(code: str) -> str:
             after = min((opening for _target, opening, _end in events if opening > close), default=len(body))
             alias = re.search(r"\bextraout_r6(?:_[0-9]+)?\b", body[close + 1:after])
             if alias and not re.search(rf"\b{alias.group(0)}\s*=", existing[0]):
-                # Preserve the native incoming word, not the C compiler's caller-saved r6.
+                # Preserve the native incoming word across the C compiler's caller-saved r6.
                 start = c_text._skip_space(body, open_at + 1)
                 edits.append((start, f"({alias.group(0)} = "))
                 edits.append((start + len(existing[0]), ")"))
@@ -739,7 +739,7 @@ def _rewrite_recovered_arguments(code: str) -> str:
 
 
 def _rewrite_returned_call(code: str, saved_context: set[int] | None = None) -> str:
-    """Recover produced returns, not synthetic incoming saved-register pairs."""
+    """Recover produced returns while excluding synthetic incoming saved-register pairs."""
     signature = syntax._c_signature(code)
     name = syntax._signature_name(signature)
     facts = abi._call_facts() if saved_context is None else None

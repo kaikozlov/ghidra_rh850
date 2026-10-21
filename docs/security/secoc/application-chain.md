@@ -244,7 +244,7 @@ Successful authentication commits the reconstructed freshness through
 `0x8E942`, with normal and synchronization state handled by `0x8F084` and
 `0x8F112` respectively.
 
-## 4. The CMAC key is ICU-S slot 4, not an object-15 pointer
+## 4. The CMAC key comes from ICU-S slot 4
 
 The SecOC crypto configuration initialized at `0x25950` is:
 
@@ -301,11 +301,11 @@ slot 4 and cannot support an erased/default-key inference.
 
 All six live receive profiles pass CryptoIf handle `0` from record offset
 `+0x20`. `0x88508` resolves this to lower record 0, whose callback is `0x880DC`.
-Verify record 1 is referenced only by the disabled asynchronous KAT body. The
-values `8` and `32` at profile offset `+0x24` are buffer/PDU lengths, not job IDs.
+Verify record 1 is referenced only by the disabled asynchronous KAT body.
+The values `8` and `32` at profile offset `+0x24` specify buffer/PDU lengths.
 Thus the live generated receive path reaches the ICU-S command-7 verify adapter.
 
-### 4.1 ICU-S is a local peripheral interface, not a serialized request protocol
+### 4.1 ICU-S uses a local peripheral interface
 
 The application never sends a CAN-like packet to ICU-S. Startup reaches:
 
@@ -386,14 +386,13 @@ this substantially recovers command 5 as **MAC generation**.
 
 The engine checks that the runtime selector is at most `14`; selector 4
 therefore passes every recovered CPU-side validation before `ICUSCMD` is
-written. This proves software reachability of the slot number, not the ICU-S
-slot's operation policy. Only a live command-5 submission can show whether the
-provisioned hardware accepts generation with slot 4.
+written. This establishes software reachability of the slot number only.
+The ICU-S slot's operation policy requires a live command-5 submission to
+show whether the provisioned hardware accepts generation with slot 4.
 
 ### 5.1 Dormant CAN-controlled crypto-test bank
 
-The sole configured caller belongs to a generated test bank, not the SecOC
-receive stack:
+The sole configured caller belongs to a generated test bank:
 
 ```text
 periodic task 0x65750
@@ -423,9 +422,9 @@ FEBE51AA..1B9  generated 16-byte result
 ```
 
 **Length boundary (SECOC-069):** mode 1 at `0x68B42` passes literal input
-length `0x10` to command 5. That is a property of this generated test caller,
-not of the lower ICU-S API. None of the configured SecOC authenticated domains
-is 16 bytes: sync is 7 bytes, classic `0x2E4/0x131/0x132` is 12 bytes, and
+length `0x10` to command 5. This generated test caller imposes that length.
+The lower ICU-S API supports other lengths. The configured SecOC authenticated
+domains differ: sync is 7 bytes, classic `0x2E4/0x131/0x132` is 12 bytes, and
 CAN-FD `0x090/0x0D7` is 36 bytes. Because AES-CMAC padding/subkey selection is
 length-sensitive, a chosen 16-byte CMAC does not directly produce the 12- or
 36-byte production tag. The exact capability matrix, the lower 0..80-byte API,
@@ -454,7 +453,7 @@ with value `0x32`. Event `0xCC` maps to enabled DTC index 133, DTC `0x00D317`
 through the normal DTC status-mask machinery. The command-5 live harness now
 preserves read-only `19 02 FF` snapshots before and after a run.
 
-This is a **terminal negative-outcome side channel**, not a MAC-byte transport.
+This **terminal negative-outcome side channel** exposes status only.
 If successful command-5 execution is established independently, the side channel
 can distinguish a wrong full expected result from equality. Without that
 independent success fact, the same DTC also covers command-5 execution failure.
@@ -631,7 +630,7 @@ ordinary case. Consequences:
    primitive for any party that can produce a valid slot-4 tag.
 4. Practical reset replay still requires control of startup timing and suppression
    or racing of the legitimate sync sender. That bus-level feasibility is a
-   **hypothesis requiring a cold-boot bench capture**, not a completed exploit.
+   **hypothesis requiring a cold-boot bench capture**.
 
 The static reset, ordering predicate, and unbounded forward-jump behavior are
 firmware-static/recovered; the live attack window is unobserved.
@@ -661,14 +660,14 @@ by this counter.
 
 The second record limit, `+0x2E = 2` for the five ordinary profiles, bounds
 `0xFEBE550C` in `FUN_0008E426`. That helper is reached when
-`secoc_submit_cmac_verify()` returns result `2`; it is a CryptoIf submission /
-busy retry budget, **not** a second wrong-MAC attempt limit.
+`secoc_submit_cmac_verify()` returns result `2`. It bounds only CryptoIf
+submission/busy retries.
 
 Callback routing is likewise more specific than the raw three-pointer config
 block suggests. Global slot `0x25940 -> 0x6911C` is the status hook used by the
 ordinary mismatch path. Global slot `0x25944 -> 0x69116` is called separately
-through `FUN_0008E36C` for freshness-callback result `0x24`, not for an ordinary
-wrong MAC. The cap-exceeded generic failure path `FUN_0008E30A` invokes
+through `FUN_0008E36C` specifically for freshness-callback result `0x24`.
+The cap-exceeded generic failure path `FUN_0008E30A` invokes
 `0x6911C`, the per-profile callback at record `+0x4C` (all six records point to
 `0x69182`), and global slot `0x25948 -> 0x691EA`. These handlers remain RAM-only
 bookkeeping in the recovered application graph; no Com/PduR transmit or
@@ -815,9 +814,9 @@ bytes are committed to `FEBE50FA+8i`. When the mask reaches `0xFF`, the eight
 committed chunks are promoted to the envelope and state advances `0x11 ->
 0x22`. Consequences:
 
-- each frame must be observed **three times identically** (update-counter
-  changes, not timer ticks — an attacker retransmitting identical frames with
-  incrementing COM counters satisfies it);
+- each frame must be observed **three times identically**, counted by COM
+  update-counter changes. An attacker retransmitting identical frames with
+  incrementing COM counters satisfies it;
 - commits are per-PDU, so **the 64-byte package may mix chunks captured at
 different times** — M1 can come from one epoch and M2/M3 from another;
 - churn on one PDU never resets another PDU's stability counter.
@@ -827,7 +826,7 @@ For an attacker this is *replay-fragmentation*: any previously captured valid
 It does not forge authentication — ICU-S still validates the composite — but
 it defeats any assumption that envelope fields must originate from one
 sender/epoch. Replay of a previously *accepted* full package is bounded by the
-protected monotonic update counter inside M2 (enforced by ICU-S, not MainPE).
+protected monotonic update counter inside M2, enforced by ICU-S.
 
 ### State machine, timeouts, and scrubbing
 
@@ -884,9 +883,9 @@ bank0 times out (1200 ticks) -> 0x66 -> active 0xFF
 
 Impact classification:
 
-- **State-machine/completion misattribution, not a key bypass.** A successful
-  bank-0 command still requires an ICU-S-authenticated envelope; the race
-  cannot make ICU-S accept anything it would not otherwise accept.
+- **State-machine/completion misattribution.** A successful bank-0 command still
+  requires an ICU-S-authenticated envelope. The race cannot make ICU-S accept
+  anything it would not otherwise accept.
 - The diagnostic can report **status `0x02` "complete" for an envelope it never
   submitted**, with zero-filled M4/M5. Any tool treating RID `0x1010` status
   `0x02` as proof that *its own* package executed is wrong; the proof bytes
@@ -897,8 +896,7 @@ Impact classification:
 - The window where real M4/M5 exist at `FEBE526A` is **not remotely readable**:
   no stock diagnostic reads that bank, RMBA/XCP disclosure paths exclude the
   `0xFEBE5030..0xFEBE529B` region, and bank-0's own timeout (1200 ticks)
-  scrubs it. So the race yields a *false-success oracle*, not key-material
-  disclosure.
+  scrubs it. The race therefore yields only a *false-success oracle*.
 - The symmetric interleaving (diagnostic in flight, `0x100E` activates) is
   benign: the bank-0 collector runs while the diagnostic owns the driver, and
   each completion is routed correctly once only one machine is active.
@@ -937,8 +935,8 @@ masked/incomplete acquisition, and a different production policy remain
 distinguishable only by dynamic measurement.
 
 A separate address correction follows from the application GP value
-`0xFEBEB800`: the restore work-buffer root is `gp + 0x5308 = 0xFEBF0B08`, **not**
-`0xFEBFEB08`. Object 15 uses group `15 & 3 = 3`, hence:
+`0xFEBEB800`: the restore work-buffer root is `gp + 0x5308 = 0xFEBF0B08`.
+This corrects the former `0xFEBFEB08` address. Object 15 uses group `15 & 3 = 3`, hence:
 
 ```text
 raw destination:   0xFEBF0C28
@@ -1057,9 +1055,9 @@ exact-EPS branch selection and package target remain dynamic questions.
    - FD protected input:
      `be16(CAN_ID) || payload[0:28] || freshness48`;
    - compare the first 28 CMAC bits with the packed frame tag.
-6. Require repeated matches across sync and protected frames, not one accidental
-   28-bit match. Keep `0x344` as a separate oracle class until its transmitter and
-   direction are independently established.
+6. Require repeated matches across sync and protected frames. A single 28-bit
+   match can occur accidentally. Keep `0x344` as a separate oracle class until
+   its transmitter and direction are independently established.
 7. If generation works, separately measure whether a patched application can
    transport results or transmit complete protected frames while maintaining
    sender freshness and deadlines. The dormant stock harness proves neither.
@@ -1280,9 +1278,9 @@ The previous `0x91698386` adjustment belongs to the superseded wrong-direction
 
 The semantic resolver is annotation-independent on the Sienna fixture: both the
 fully annotated project and a fresh bare CodeFlash import resolve
-`0x8E6C6 e0d1→e001`. That proves annotation independence, not universal Toyota
-address equivalence. Future firmware must be resolved independently and fails
-closed on zero/multiple candidates or incompatible branch polarity.
+`0x8E6C6 e0d1→e001`. This establishes annotation independence for the fixture.
+Future firmware must be resolved independently and fails closed on zero/multiple
+candidates or incompatible branch polarity.
 
 A 2026-08-16 field report from yc provides strong external dynamic
 corroboration of the corrected direction: a 2024 RAV4 Prime reportedly ran
@@ -1291,8 +1289,8 @@ openpilot lateral for about 1.5 days after applying the same local transform
 forced, a dummy SecOC key, and stock Toyota longitudinal. yc also reported a
 2025 bZ4X patched without errors while retaining the stock camera; openpilot
 TSS3 message support remained missing there. Exact firmware/F181 artifacts for
-those vehicles are not present in this repository, so these are
-**external-source/observed** results, not firmware-static transfer proof.
+those vehicles are not present in this repository, so these results remain
+**external-source/observed**. Firmware-static transfer requires separate proof.
 
 The RAV4 Prime report also does not replace the controlled MAC28 experiment
 below: forcing the old profile substitutes a broader message set, while the
@@ -1321,9 +1319,9 @@ reports; it is simply **no longer the current Lochuan patch**.
 
 The refreshed README also says the corrected patch point, target-sector digests,
 and CRC adjustment were captured from an actual bench vehicle and validated with
-a complete `probe -> patch -> verify` run. The bench **image identity is bound**,
-not unknown: the current manifest is hard-locked to F181
-`01 8965B4512000 00000000`, and its original `0x88000`-sector SHA-256
+a complete `probe -> patch -> verify` run. The bench **image identity is bound**:
+the current manifest is hard-locked to F181 `01 8965B4512000 00000000`,
+and its original `0x88000`-sector SHA-256
 `281a0ef918a1bd8e709bb579a7f19163d3e908eedb5bdf79ad7348c701177b01`
 exactly equals both Lochuan's pinned Sienna-CN `RH850_P1M-E_Firmware.bin` and the
 canonical CodeFlash in this repository. Operator provenance identifies that donor
@@ -1354,8 +1352,7 @@ The relevant external sources are pinned beside the yc/community provenance in
 Those historical labels explain why `0x664E6` looked like a plausible SecOC
 patch, but the current firmware reconstruction disproves that ownership. The
 cited `0x66374`/`0x674A8` cone is ordinary checkpoint/NvM machinery; in
-particular, `0x674A8` builds redundant persistence records and reaches NvM write
-submission, not ICU-S MAC generation.
+particular, `0x674A8` builds redundant persistence records and submits NvM writes.
 
 The exact `0x664E6` instruction is the immediate byte inside
 `0x664E4: movea 0x31,r0,r28` in `FUN_00066446`. That function is an ordinary
@@ -1456,10 +1453,10 @@ record-read/verification sites when `FUN_000737BA` finds a mismatch between the
 storage representation and expected RAM data. `0xFFFB` is the common invalid
 state/range/setup return across the same storage-machine family. Other terminal
 keys remain numeric because no firmware-supported semantic name has been
-recovered. This means `0x31` is best described as a **terminal ordinary-write
-failure**, not narrowly as a physical DataFlash program-pulse failure: setup,
+recovered. Describe `0x31` as a **terminal ordinary-write failure**: setup,
 state, record verification, or lower media errors can all collapse to completed
-result 1. Conversely, normal success and the explicit special/nonterminal
+result 1. The code does not distinguish a physical DataFlash program-pulse failure.
+Conversely, normal success and the explicit special/nonterminal
 `0xFFFC/0x83` path do not execute the patched immediate.
 
 The second failure condition inside `FUN_00067BC8`—service result 0 but callback
@@ -1495,8 +1492,8 @@ That invariant also rules out the Dem record as the patch-specific LKAS cause.
 For the same failed write, stock and patched firmware both set `FEBF067C`, both
 report Dem `0x94`, and both expose the same DTC-table entry. Only
 `FEBF0308[obj]` differs (`0x31` stock versus forged `0x10`). Any behavioral
-difference must therefore be downstream of a consumer that trusts the public
-checkpoint status, not downstream of DTC `0x45D6` itself.
+difference must therefore originate downstream of a consumer that trusts the
+public checkpoint status. DTC `0x45D6` remains unchanged.
 
 #### Object 6 gives a concrete patch-sensitive steering-model path
 
@@ -1525,7 +1522,7 @@ foreground object-6 reload      reject mirror     trust mirror
 restored FEBEB592               0x7F80/invalid    new RAM value/valid
 ```
 
-The reload is lifecycle-relevant, not startup-only. In
+The reload also runs at foreground lifecycle transitions. In
 `system_mode_per_tick_dispatcher @ 0xBEC4C`, entry into the `>=0x200` mode band
 from `<0x200` runs `FUN_000B9036` and then, when dispatcher flag `0x10` is set,
 `FUN_000B9662`; the latter calls `FUN_000B9054` on its first pass and latches the
@@ -1571,8 +1568,7 @@ object-6 learned bank. Object 8 is another exact-`0x10` restore: its persisted
 u32/u16/validity tuple is published to `FEBEAF04/FEBEAE0E/FEBEACEC`, then seeds
 `FEBEB830/834/836` in the same steering-learning/plausibility partition. The
 patch can consequently create a **coupled same-boot trust split** across multiple
-learned-state records after a real persistence failure, not merely preserve one
-object-6 word.
+learned-state records after a real persistence failure.
 
 The source ECU's captured DataFlash argues that this is an exceptional recovery
 path rather than a continuously active condition. All six physical checkpoint
@@ -1687,9 +1683,9 @@ sector SHA-256 `f0e76a887c2b85609cee4cd44620db068d414edfb44bbafe551ec440b2a0e9d0
 directly from this repository's `0x60000..0x67FFF` CodeFlash bytes and reproduces
 candidate SHA-256 `c67d992a8413d020fb16464d58654ab3fbd84139809b6b544c6142d6dcfeeb7b`
 by changing only `0x664E6` to `0x10`; the original CRC fixup `0x0962887F` is
-likewise the literal source-image word at `0xFFDEC`. These pins prove image
-identity/candidate construction, not that the changed instruction has the
-claimed SecOC meaning.
+likewise the literal source-image word at `0xFFDEC`. These pins establish image
+identity/candidate construction only. The claimed SecOC meaning of the changed
+instruction remains unproven.
 
 The strongest supportable historical statement is therefore: **the one-byte
 target candidate was genuinely programmed and read back on an EPS, but the
@@ -1751,7 +1747,7 @@ routines recover the same FACI contract:
 - page program is `FSADDR`, `0xE8`, halfword count `0x80`, 128 halfword writes,
   then `0xD0`;
 - **after each halfword write**, the manufacturer routine tests/waits while
-  `FSTATR & 0x400` is nonzero. This is bit 10 / DBFULL, not bit 11 / `0x800`;
+  `FSTATR & 0x400` is nonzero. This tests bit 10 / DBFULL;
 - the extracted routine uses Forced Stop `0xB3`; it does not itself issue FCMD
   Status Clear `0x50` on that path.
 
@@ -1761,8 +1757,8 @@ tests `FSTATR & 0x400`; `0x78BFA` uses FRDY `0x8000`; `0x78C30` supplies stock
 Status Clear `0x50`; `0x78CE6` supplies Forced Stop `0xB3`; and `0x79026` tests
 its broader `0x24068` status mask. Thus the generic patcher now uses a bounded
 **post-write `FSTATR_DBFULL_MASK=0x400` wait**. It retains Status Clear `0x50`
-because exact F33/Sienna stock code supports that recovery operation, not because
-T-0035 is claimed byte-identical to the patcher.
+because exact F33/Sienna stock code supports that recovery operation.
+T-0035 and the patcher remain distinct implementations.
 
 This closes the manufacturer-input acquisition and the pacing ambiguity. It does
 **not** make T-0035 an exact Camry package: F3401200/2200 is a Tundra F3/P1M-E
@@ -1783,8 +1779,8 @@ added by **migrating the reviewed sources**, calls the shipped binaries
 `sienna-b4512000-rx-secoc` project. Deleted migration reports preserve that
 predecessor's local path as
 `/Users/kevin/Desktop/disable-secoc/sienna-b4512000-rx-secoc`. The public repo's
-root is an Aug-17 migration-design commit, not the original writer-development
-history. Exhaustive surviving-ref/object checks find no committed `.cuw`,
+root is an Aug-17 migration-design commit. The original writer-development
+history remains outside it. Exhaustive surviving-ref/object checks find no committed `.cuw`,
 `*_erase.pt.bin`, Ghidra project, hidden remote branch/tag, or unreachable Git
 object containing the manufacturer input. Exact line-by-line authorship and the
 private CUW file location therefore cannot be reconstructed from public Git,
@@ -1839,8 +1835,8 @@ record. What the chronology does establish is directionality: the public patch
 repository did not rediscover or re-prove the target; it imported a reviewed
 fixed target from an older private tool, and the only surviving earlier semantic
 model of the surrounding code was the July MAC-scheduler misclassification.
-That makes the misclassification a strong **candidate origin**, not documentary
-proof of the exact target-selection step.
+The misclassification is therefore a strong **candidate origin**.
+Documentary proof of the exact target-selection step remains unavailable.
 
 This is structurally capable of producing delayed or state-transition-dependent
 breakage after a genuine persistence failure, and a 2026-08-17 community report

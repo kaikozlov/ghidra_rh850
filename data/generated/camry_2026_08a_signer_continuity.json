@@ -25,11 +25,11 @@
     "0x081": "native Brake/chassis Panda bus0 -> upstream bus2 on Toyota Bus 4",
     "0x08A": "native upstream Panda bus2 -> chassis bus0 on Toyota Bus 4",
     "capture_era": "temporary CAN0/CAN1 repin",
-    "stock_toyota_b": "Toyota Bus 4 returns to unsplit Panda bus1; compare Toyota network role, not raw Panda bus number"
+    "stock_toyota_b": "Toyota Bus 4 returns to unsplit Panda bus1; compare by Toyota network role across Panda bus-number changes"
   },
   "schema": "camry-2026-08a-signer-continuity-v2",
   "signer_identity": {
-    "decisive_evidence": "Exact FRC firmware or a live FRC key-update/HSM-service trace is required to identify the internal SecOC key selector, freshness owner, CMAC call and Tx descriptor. Brake firmware remains decisive for 0x08A verification/arbitration and downstream B6 generation, not for locating the 0x08A publisher.",
+    "decisive_evidence": "Exact FRC firmware or a live FRC key-update/HSM-service trace is required to identify the internal SecOC key selector, freshness owner, CMAC call and Tx descriptor. Brake firmware remains decisive specifically for 0x08A verification/arbitration and downstream B6 generation; the 0x08A publisher is already located.",
     "frc_branch_disposition": "The old external Brake/Booster/CGW physical-publisher hypothesis is superseded by the repin direction result. Native public Bus-1 Profile-5 PDUs are simply a different FRC interface; they do not negate the protected Bus-4-side request emitted from the same FRC assembly.",
     "grade": "frc-assembly-boundary-observed/internal-engine-open",
     "grades": {

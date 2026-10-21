@@ -69,9 +69,9 @@ in addition to the newer `0x3002` transport already recovered from Techstream.
 Toyota's public ECU Security Key bulletin includes 2021 Venza HV in the key-write
 procedure, and Toyota's Techstream known-bugs page explicitly lists a 2021 Venza
 HV “ECU Security Key write process” failure mode. The firmware, host utility,
-and service procedure therefore agree on the architecture: **“rekey” means
-provisioning the HSM-backed network authentication credential, not satisfying
-RPRG SecurityAccess.** Sections 5.4–5.7 give the bounded static join.
+and service procedure therefore agree on the architecture: **“rekey” provisions
+the HSM-backed network authentication credential. RPRG SecurityAccess is a separate
+operation.** Sections 5.4–5.7 give the bounded static join.
 
 For the exact F33 EPS, this is useful architectural evidence but not a code
 transfer. Exact complete-function comparison found only generic/library overlap
@@ -136,8 +136,7 @@ Portable byte assertions for the critical findings are in
 
 ## 1. `boot.bin` is the `0x01000000` extended-user image
 
-The address is established by the airbag CodeFlash, not inferred from the
-filename.
+The airbag CodeFlash establishes the address directly.
 
 Startup integrity code covers the extended-user range
 `0x01000000..<0x01007FFC` and uses the final dword at `0x01007FFC` as the stored
@@ -176,7 +175,7 @@ The call at CodeFlash `0x83E0` is decoded by the RH850 processor as a direct cal
 to logical `0xA304`. After that caller's relocation, the same relative call lands
 at `FEBF0924`: the first instruction copied from `0x01000000`.
 
-This is a split linked image, not two independent programs. The `boot.bin` entry
+This is one split linked image. The `boot.bin` entry
 at `0x01000000` calls several helpers but does not establish GP/TP itself, and
 its apparently high `0x00FFxxxx` direct-call targets relocate back into adjacent
 RAM-loaded CodeFlash sections. That shape is consistent with an RPRG component
@@ -322,8 +321,7 @@ chains establish different roles for them.
 
 ### 5.1 Payload-build root: `8af2c4708cd9cdec494da7acdaa9a8f7`
 
-This first root is the payload-build root for the RPRG RequestDownload path, not
-merely an unused AES-looking constant.
+This first root serves the RPRG RequestDownload payload-build path.
 
 The WDBI dispatcher at CodeFlash `0x654A` explicitly recognizes DIDs `0x0201`,
 `0x0202`, and `0x0203`. Its `0x0201` handler at `0x64DE` stores exactly 16 bytes
@@ -354,8 +352,7 @@ Kpayload = AES-128-ECB-ENC(
 `DID_0202[16]` is installed as the 16-byte IV in the payload crypto context.
 This KDF is reached from the RPRG RequestDownload setup (`0x01004036 ->
 0x01003F14` on the normal branch) through the relocated `0x7A4C -> 0x635C`
-call. That closes the role strongly enough to call the first value the
-**payload-build root**, rather than only a generic crypto key.
+call. That establishes the first value's **payload-build root** role.
 
 This is notably the same *construction shape* as the P1M-E EPS payload gate —
 AES(root, DID0201), with DID0202 supplying the IV — but the root value is
@@ -415,9 +412,9 @@ inline transforms:
 The relevant workers are `0xCAA2C`, `0xCAA94`, `0xCAAFE`, `0xCAB66`, and
 `0xCABB4`. Thus no third 16-byte application-SA secret analogous to the EPS
 `0x20840` root is present in the configured application unlock algorithm. The
-application's seed-generation machinery does use AES internally, but the
-SecurityAccess acceptance secret is the inline arithmetic above, not another
-hidden 128-bit CodeFlash root.
+application's seed-generation machinery uses AES internally. SecurityAccess accepts
+through the inline arithmetic above. Its configured acceptance algorithm has no
+additional hidden 128-bit CodeFlash root.
 
 The important transfer boundary remains unchanged: these two recovered airbag
 roots are **airbag-specimen credentials**. Their values must not be projected
@@ -427,10 +424,9 @@ reprogramming architecture.
 ### 5.4 No plaintext operational SecOC key is present in the supplied dump — and the runtime explains why
 
 A raw/structured search still does **not** identify a plaintext operational
-SecOC key in either contributor artifact. That negative is now meaningful
-rather than merely inconclusive. The two CodeFlash roots recovered above have
-complete, independent callers in the reprogramming path; neither is passed to
-the application SecOC implementation. The known EPS roots are also absent.
+SecOC key in either contributor artifact. The two CodeFlash roots recovered above
+have complete, independent callers in the reprogramming path. Neither reaches the
+application SecOC implementation. The known EPS roots are also absent.
 
 The application SecOC callers instead carry a small key/configuration selector
 through generated crypto records. No 16-byte key crosses the application-side
@@ -450,9 +446,9 @@ Application startup sets `TP=0x24050`. SecOC initialization at `0xDD6F4` passes
 ```
 
 That is the same generated shape used in the tracked P1M-E EPS images:
-`type=1`, logical key selector **4**, with the remaining 15 bytes zero. This is
-an exact byte-level structural join, not a guessed semantic transfer. The
-important boundary is the next layer: on P1M-E EPS firmware selector 4 is
+`type=1`, logical key selector **4**, with the remaining 15 bytes zero. This
+establishes an exact byte-level structural join. The next layer differs:
+on P1M-E EPS firmware selector 4 is
 literally encoded into the ICU-S command-7 command word; on this airbag the same
 logical selector is copied into a request descriptor for a different local
 secure-service/HSM interface. Therefore **logical selector 4 is proven here;
@@ -466,9 +462,8 @@ standard four-bit key-ID namespace reserves `0x0` for `SECRET_KEY`, `0x1` for
 that both ICU-S and ICU-M secure-boot designs can be based on the AUTOSAR/HIS
 SHE model. Combined with this airbag's standard SHE M1/M2/M3 -> M4/M5
 `CMD_LOAD_KEY` protocol, the selector-4 match strongly supports the
-interpretation that Toyota is using the standard SHE logical namespace and
-placing its TSK/SecOC key in
-`KEY_1`, not choosing an unexplained fourth Toyota-specific slot.
+interpretation that Toyota uses the standard SHE logical namespace and places
+its TSK/SecOC key in `KEY_1`.
 
 That does **not** reveal the actual contents of IDs `1..3` on this specimen.
 Those values live behind the ICUM secure boundary and were not part of yc's
@@ -501,11 +496,10 @@ routes. The four receive profiles are `0x50` bytes each:
 
 The receive worker at `0xDE09E` uses a `0x50`-byte stride, resolves each row's
 config ID through the common config getter, and reaches the MAC-verification
-adapter. So this is a configured production receive-verification graph, not
-merely crypto library residue.
+adapter. This establishes a configured production receive-verification graph.
 
-Transmit uses a distinct `0x44`-byte generated descriptor type, not another
-`0x50`-byte receive record. There are exactly two profiles:
+Transmit uses a distinct `0x44`-byte generated descriptor type. Receive records
+are `0x50` bytes. There are exactly two transmit profiles:
 
 | Record | Authenticated SecOC DataID field | Crypto config |
 |---:|---:|---:|
@@ -539,8 +533,8 @@ security-hardware command semantics live in the separate Renesas Security
 Hardware Manual. Therefore the observed request opcodes below are intentionally
 left as numeric protocol values rather than assigned proprietary command names.
 
-**Update 2026-10-08 (exhaustive census):** the three paths below are the
-SecOC-relevant subset, not the whole boundary. A full census in
+**Update 2026-10-08 (exhaustive census):** the three paths below cover only the
+SecOC-relevant subset. A full census in
 [../security/icu-hsm-command-surface.md](../security/icu-hsm-command-surface.md)
 proves the application disposes of **exactly five** ROM-registered secure
 services — these two MAC paths (`0x12`), the RID-`0x1010` key update (`0x31`
@@ -672,8 +666,7 @@ from Techstream V18:
 31 03 30 02 -> state || M4 || M5
 ```
 
-So the correct host conclusion is **multi-generation protocol support**, not
-“Toyota tooling uses only `0x3002`.” Static GTS analysis alone does not tell us
+The host supports **multiple protocol generations**. Static GTS analysis alone does not tell us
 which branch a live 2021 Venza SRS session selects. The exact airbag firmware,
 however, implements `0x1010`, making that GTS branch the structurally matching
 candidate.
@@ -697,8 +690,8 @@ pair to compare with the P1M-E EPS family:
 | P1M-E EPS | `ba052435f8843f985fd1329d2b6117b0` | `f05f36b7d78c03e24ab4faef2a57d044` | `0xBFD8`, then `0xBFE8` |
 | Venza SRS | `8af2c4708cd9cdec494da7acdaa9a8f7` | `8f69e6dc2a4b80b45054b4827a5ab622` | `0xC3AC`, then `0xC3BC` |
 
-The common structure is significant, but it is a **configuration-layout**
-relationship rather than a recovered key derivation. In both firmware families
+The common structure establishes a **configuration-layout** relationship only.
+Key derivation remains unrecovered. In both firmware families
 the two 16-byte values are literal adjacent CodeFlash constants. The payload
 worker initializes AES directly from the first root, while the boot
 SecurityAccess worker initializes AES directly from the second. Neither image
@@ -728,8 +721,8 @@ values. Selector 0 is still the known SecurityUp wrapping key
 present in that table. Testing every 16-byte table entry against both firmware
 root pairs under one-step XOR/AES-ECB/AES-CMAC relationships yields no match;
 likewise, applying XOR/AES-ECB/AES-CMAC to every ordered pair of table entries
-produces none of the four firmware roots. The table therefore supplies frontend
-CUW wrapping credentials, not a recovered firmware-root derivation surface.
+produces none of the four firmware roots. The table supplies frontend CUW wrapping
+credentials. Firmware-root derivation from this table remains unrecovered.
 
 The current secure-airbag writers line up exactly with the firmware-side
 architecture. `TCUWP4CanSecurityAirbagPrepareWriter.dll` imports
@@ -786,9 +779,9 @@ runner `0x01007542` dispatches states `{5,6}` to `FUN_010074d4`, which copies
 `min(chunk_cap, remaining)` per pass (cap from `*(TP−0x6A50)`, memcpy via
 `0x00FF9C4C`) and advances to `7` on completion; `0x37` polls `FUN_010073a4`
 (`state==7` resets to `1`); `FUN_0100741e` posts a `{0x1005,…}` notification.
-**No cryptographic transform appears anywhere in this path** — the copy is
-plaintext, so a RAM-area download requires only RPRG SecurityAccess, not the
-payload-build KDF of §5.1. A second engine (`FEBFAF20/24/28`, states `{2,3}`
+The copy path is plaintext and contains **no cryptographic transform**. RAM-area
+downloads require only RPRG SecurityAccess. The §5.1 payload-build KDF applies
+elsewhere. A second engine (`FEBFAF20/24/28`, states `{2,3}`
 via `FUN_0100748a`, submitted from the `0x01006594` DID-area dispatcher feeding
 `0x010073b6`) implements the same copy shape for a synchronous feeder.
 
@@ -812,8 +805,8 @@ Figure 4.1), that span belongs to the part's **extra Code Flash bank**
 programming engine that would implement (or not) an EPS-style call into staging
 RAM therefore lives in an uncaptured flash bank, and the question cannot be
 answered from retained artifacts. `boot.bin` itself executes from the
-extended-user window at `0x0100_0000` (P1x-C extra flash), not from the
-`FEBF0924` RAM copy: near calls are PC-relative within the image and far calls
+extended-user window at `0x0100_0000` (P1x-C extra flash). Its link base is
+distinct from the `FEBF0924` RAM copy: near calls are PC-relative within the image and far calls
 reach backward into `0x00FFxxxx`, which is only non-negative from the
 `0x01000000` link base.
 
@@ -888,7 +881,7 @@ v18 table (their ids read 0x00, 0x04–0x13), so the newer table extends rather
 than replaces it. `GetSecretInfo` compares the requested id against
 `record+0x204` (five-record unrolled scan) only after `AuthorizeSecretInfo`
 sets the flag at `0x1000D088`; an unauthorized caller receives out-of-table
-record index `0x47` — a decoy, not a key. The cleaned `unpacked/gtsplus`
+record index `0x47` as a decoy. The cleaned `unpacked/gtsplus`
 copies of `SecretInfo.dll` and `TCUWCanCommonPrepareWriter.dll` are hollowed
 by deprotection (export entries decode mid-instruction); only the
 `gts-all-unprotected` dump disassembles. The selector-0 value and the
@@ -942,10 +935,10 @@ recovered, but the addresses themselves are captured facts. The
 (`..0xFEBFFBFF`), so unlike the EPS 4-KiB package it must be populated or
 owned by firmware rather than ordinary type-2 TransferData.
 
-**Calvin trigger semantics.** The retained community client says this
-explicitly: the `FF00` erase routine is the trigger that runs the
-already-uploaded payload, not the dump target. It first asks `10F0` to
-validate the 4-KiB image, then sends `31 01 FF00 45 00 <addr> <len>`
+**Calvin trigger semantics.** The retained community client identifies the
+`FF00` erase routine as the trigger for the already-uploaded payload. The dump
+target is separate. The client first asks `10F0` to validate the 4-KiB image,
+then sends `31 01 FF00 45 00 <addr> <len>`
 without waiting for the response that never arrives. In the captured EPS
 handler the authenticated callback runs before ordinary erase completion and
 does not return, preempting that erase path. Therefore adapting Calvin's
@@ -962,8 +955,8 @@ the raw type-2 image to exactly 2 KiB. The current pinned-toolchain build is
 `0x7A9`. P1x-C uses MCAN rather than the EPS RSCFD block, so the payload
 discovers the initialized MCAN0/MCAN1 instance, its configured Tx-element
 geometry, and the element retaining standard ID `0x7A9`; it then owns that
-element with interrupts disabled. This is an offline build/sizing result, not
-evidence that the airbag callback has executed on hardware.
+element with interrupts disabled. This establishes only offline build and sizing.
+Airbag-callback execution on hardware remains unobserved.
 
 **No captured consumer.** The block's flash addresses have no direct xrefs;
 the surrounding pointer values show it is copied to RAM
@@ -991,7 +984,7 @@ inside the bank handlers:
 3. whether the bank's `FF00` gates on the `10F0` authorization bit the way
    the EPS engine does.
 
-**The Renesas manuals close the CPU/RAM question, not Toyota's wrapper.**
+**The Renesas manuals close the CPU/RAM question. Toyota's wrapper remains unresolved.**
 The retained RH850/P1x-C hardware manual (R01UH0517EJ0130) maps
 `0xFEBE0000..0xFEBFFBFF` as PE1 Local RAM and
 `0xFEBFFC00..0xFEBFFFFF` as its 1-KiB backup section.  PE1 instruction fetch
@@ -1048,8 +1041,8 @@ A Toyota RH850 ECU can combine:
 3. startup mode selection based on that retained state; and
 4. an RPRG component stored in extended-user flash and relocated into RAM.
 
-That is a concrete pattern to search for in other Toyota RH850 families, but it
-must be searched from each target's bytes rather than transferred by analogy.
+That provides a concrete search pattern for other Toyota RH850 families.
+Each target requires its own byte-level evidence.
 
 ### It sharpens the hardware-boot distinction
 
@@ -1073,8 +1066,8 @@ transferred exactly into the airbag image. A structural fingerprint comparison
 likewise found no named exact-shape transfer.
 
 That is enough to reject “same boot code” as a working assumption. The airbag
-image is valuable as an implementation example, not as an address or patch map
-for F33.
+image provides an implementation example only. F33 addresses and patches require
+F33-native evidence.
 
 The contributor's RH850/glitch-acquisition statement remains relevant in a
 different way: a clean exact-F33 read of its extended-user region would be useful

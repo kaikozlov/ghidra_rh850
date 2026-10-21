@@ -332,7 +332,7 @@ def build() -> dict[str, Any]:
             "maps": map_rows,
             "selected_low_vehicle_effect": "all four promoted ADF4-indexed profile compensation maps are zero at every real interpolation point",
             "high_default_effect": "the four compiled fallback maps become nonzero beginning at axis 7680 and rise thereafter",
-            "safety_conclusion": "No speed-dependent reduction of the hard ±1745 B6 LTA/LCA target ceiling is recovered. These are compensation maps, not a max-angle curve. Do not transplant pre-TSS3/TSS2 speed-angle limits.",
+            "safety_conclusion": "No speed-dependent reduction of the hard ±1745 B6 LTA/LCA target ceiling is recovered. These maps provide compensation only. Do not transplant pre-TSS3/TSS2 speed-angle limits.",
             "boundary": "The map input is named only by its recovered RAM cell here. This artifact does not claim FEBEADF4 is SP1/vehicle speed without a separate provenance join.",
         },
         "internal_plausibility_and_fault_thresholds": {
@@ -371,7 +371,7 @@ def build() -> dict[str, Any]:
             },
             "controller_error_saturation": {
                 "raw_internal": gv["controller_error_saturation"],
-                "classification": "controller saturation, not Panda command-rejection limit",
+                "classification": "controller saturation only; Panda command-rejection policy remains separate",
             },
             "torque_sensor_fault_calibration": {
                 "raw_constants": torque_fault_constants,
@@ -392,8 +392,8 @@ def build() -> dict[str, Any]:
             "target_to_motor_physical_torque_comparator_recovered": False,
             "direct_source_snapshot_reference_entries": follow_driver["entries"],
             "direct_source_snapshot_refs_inside_c8xxx_cexxx_control_cone": follow_driver["entries_inside_control_cone"],
-            "policy_classification": "Panda/openpilot driver-override policy requiring dynamic validation; not an unrecovered Toyota EPS cooperative-control comparator",
-            "safety_boundary": "The ~8.238 N.m acquisition clamp and ±10.00 N.m telemetry saturation are representation limits, not driver-override thresholds. The expanded exact-H named/fixed-GP census finds the physical FEBE7B08->FEBE6554 chain only in acquisition/telemetry/copy code and zero direct references in the C8xxx-CExxx target-to-motor control cone. This does not prove every computed alias is absent, but it removes an OEM override comparator from the recovered static blocker list.",
+            "policy_classification": "Panda/openpilot driver-override policy requiring dynamic validation; Toyota EPS cooperative-control comparator remains unrecovered",
+            "safety_boundary": "The ~8.238 N.m acquisition clamp and ±10.00 N.m telemetry saturation bound representation only. The expanded exact-H named/fixed-GP census finds the physical FEBE7B08->FEBE6554 chain only in acquisition/telemetry/copy code and zero direct references in the C8xxx-CExxx target-to-motor control cone. This does not prove every computed alias is absent, but it removes an OEM override comparator from the recovered static blocker list.",
             "census_boundary": "Expanded TMS-053 named-symbol plus fixed-GP textual census over the exact-H corrected-context whole-image corpus; value-set/computed-pointer aliases and DMA remain outside the negative proof.",
         },
         "motor_q_current": {
@@ -403,7 +403,7 @@ def build() -> dict[str, Any]:
             "cooperative_supervisor_measured_q_comparator_recovered": False,
             "internal_monitors_are_q_current": False,
             "direct_reference_matches": [x["entry"] for x in q_refs["matches"]],
-            "safety_boundary": "No measured-Q-current comparator is recovered in the cooperative B6 supervisor under the promoted exact-symbol census plus known packet bridge. CB394/CB59A monitor FEBEAE16 internal command state instead. A future Panda response limit must be a separately validated sender/live safety policy, not a fabricated OEM current threshold.",
+            "safety_boundary": "No measured-Q-current comparator is recovered in the cooperative B6 supervisor under the promoted exact-symbol census plus known packet bridge. CB394/CB59A monitor FEBEAE16 internal command state instead. A future Panda response limit requires a separately validated sender/live safety policy; an OEM current threshold remains unrecovered.",
             "census_boundary": census["evidence_boundary"],
         },
         "remaining_policy": {

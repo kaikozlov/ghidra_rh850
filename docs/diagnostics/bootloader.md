@@ -17,7 +17,7 @@
 This note completes the implemented bootloader diagnostics that were not covered
 in `../diagnostics/bootloader-dids.md`, `../security/bootloader-payload-gate.md`, or the SecurityAccess analysis in
 the top-level README. Its scope is the bootloader UDS table at CodeFlash
-`0x8E54`, not the separate application Dcm configuration documented in
+`0x8E54`. The separate application Dcm configuration is documented in
 `../diagnostics/application.md`.
 
 All addresses are CodeFlash virtual addresses. The independent checks in
@@ -188,8 +188,8 @@ TAUJ1 channel-0 counter. Therefore:
 
 The generic scheduler at `0x1D2C` independently agrees with that clock domain:
 it schedules a 16-bit delay argument as `current + delay * 20000`, i.e. 20,000
-ticks per millisecond. The nearby CanTp values `1000/150/10` are corroboration,
-not the basis of the unit conversion.
+ticks per millisecond. The nearby CanTp values `1000/150/10` corroborate this
+scheduler-derived unit conversion.
 
 There are **two distinct ways** this delay state is armed. The second failed
 `27 02` arms the 10-second anti-bruteforce backoff described above. Separately,

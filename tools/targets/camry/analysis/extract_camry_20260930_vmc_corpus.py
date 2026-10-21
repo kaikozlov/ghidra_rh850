@@ -19,9 +19,8 @@ Environment prerequisites:
 - numpy (existing repository dependency).
 - ``--openpilot-root`` is a caller-supplied openpilot checkout containing
   ``tools/lib/logreader.py`` (nested-package forks accepted). Its importable
-  parent is added to ``sys.path`` lazily at runtime; this is caller input, not
-  repository-owned importing, so the default checkout path must be passed
-  explicitly.
+  parent is added to ``sys.path`` lazily at runtime. The caller must supply the
+  checkout path explicitly, including when using the default checkout.
 
 Provenance: each route's ``.json`` records the selected source files with
 their readable absolute ``path`` (matching the cached originals),
@@ -65,8 +64,8 @@ LONG_STATES = {"off": 0, "pid": 1, "stopping": 2, "starting": 3}
 PLAN_SOURCES = {"cruise": 0, "lead0": 1, "lead1": 2, "e2e": 3}
 TIMING_NOTE = (
   "origin_ns and per-segment start_ns/end_ns are sampled from decoded "
-  "logMonoTime events in each rlog; cached init/carParams timestamps are "
-  "capture metadata, not actual segment playback anchors."
+  "logMonoTime events in each rlog; cached init/carParams timestamps serve "
+  "only as capture metadata. Segment playback anchors require sampled events."
 )
 
 

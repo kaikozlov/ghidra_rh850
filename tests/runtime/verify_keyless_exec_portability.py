@@ -74,7 +74,7 @@ def _section_keyless_xcp_composition():
     check('WRITE_DAQ stores accepted address into DAQ pointer table', CF[529608:529612] == bytes.fromhex('7ee7f194'))
     check('SET_DAQ_LIST_MODE rejects mode bits 0x33 including STIM direction', CF[529728:529736] == bytes.fromhex('6108c10633009a2d'))
     check('DAQ sampler dereferences configured pointer for one-byte read', CF[529090:529104] == bytes.fromhex('00f5c49941d2410a9a0081006090'))
-    check('DAQ sampler writes only DTO staging, not through configured pointer', CF[529104:529108] == bytes.fromhex('5397c894'))
+    check('DAQ sampler writes only DTO staging', CF[529104:529108] == bytes.fromhex('5397c894'))
     for op in (223, 220, 219):
         check(f'STIM-like opcode 0x{op:02X} is unconfigured', command_map[255 - op] == 0)
     print('\n== custom page/checksum commands cannot redirect writes ==')

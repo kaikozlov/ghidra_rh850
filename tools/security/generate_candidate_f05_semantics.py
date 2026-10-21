@@ -200,7 +200,7 @@ def build_report() -> dict[str, object]:
                 "terminal infinite-loop replaced by boot reset call",
                 "CRC32 adjustment and CMAC",
             ],
-            "classification": "alternate full DataFlash dump, not an oracle or key-slot probe",
+            "classification": "alternate full DataFlash dump only",
         },
     }
 

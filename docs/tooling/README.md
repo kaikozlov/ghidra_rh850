@@ -79,7 +79,7 @@ tools/know fault_status --kind artifact --kind suite
 tools/know TMS-060 --json
 ```
 
-`tools/know` reads the authoritative findings/corrections/open-question ledgers, the derived artifact catalog, `verification.toml`, and tracked docs directly. It is navigation, not an evidence oracle: use the returned canonical report/test to continue, and return to firmware/Ghidra for primary proof.
+`tools/know` reads the authoritative findings/corrections/open-question ledgers, the derived artifact catalog, `verification.toml`, and tracked docs directly. Use it for navigation: continue with the returned canonical report/test, and return to firmware/Ghidra for primary proof.
 
 Configured firmware targets likewise have one registry-backed discovery surface:
 
@@ -116,8 +116,7 @@ output, input corpora, and function count. The profiles cover only the common
 operation of selecting known target-native functions from disposable JSONL
 corpora and binding their decompilation to CodeFlash bytes. Extractors that do
 dynamic discovery, whole-corpus censuses, call-graph construction, or semantic
-joins remain separate tools because those are different operations, not
-variants of the same one.
+joins remain separate tools because each performs a distinct operation.
 
 Likewise, the `build_corolla_h_*` programs remain separate semantic builders.
 Their envelopes look similar, but the proof logic they encode (routing tables,

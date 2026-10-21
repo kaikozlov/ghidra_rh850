@@ -54,7 +54,7 @@ CLASS_STATES = {
 }
 
 # Function starts containing references to each displayed S324 procedure code.
-# These are string-reference sites, NOT one-handler-per-state ownership. A
+# These sites establish string references only. A
 # function may reference more than one S324 label (0x10241650 references both
 # S324-08 and S324-19), and one code may be referenced from multiple functions.
 # Keep this evidence separate from class-wide ComProcess operation recovery.

@@ -166,7 +166,7 @@
     "tracked_codeflash_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
   },
   "live_registers": {
-    "boundary": "register values are retained as observations; SELFIDST is the self-programming ID-authentication status, not proof that the OCD debugger ID or ICU-S key store is unlocked",
+    "boundary": "register values are retained as observations; SELFIDST reports self-programming ID-authentication status only. The OCD debugger ID and ICU-S key-store unlock states remain unproved",
     "fastat": "0x00",
     "fentryr": "0x0000",
     "fhve15": "0x00000000",

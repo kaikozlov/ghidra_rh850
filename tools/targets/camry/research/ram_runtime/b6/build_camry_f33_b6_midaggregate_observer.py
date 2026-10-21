@@ -129,9 +129,9 @@ def verify_source_contract(source: str) -> None:
         if token in source:
             raise RuntimeError(f"forbidden observer source construct present: {token!r}")
     if ".L_clear_mailbox" in source:
-        raise RuntimeError("observer must preserve arbitrary counter baselines rather than clear the mailbox")
+        raise RuntimeError("observer must preserve arbitrary counter baselines; mailbox clearing is forbidden")
     if "jarl32 fg_aggregate, lp" in source:
-        raise RuntimeError("observer must split aggregate rather than sample outside it")
+        raise RuntimeError("observer must split aggregate and sample inside it")
     if "jarl32 rx_6a410" in source:
         raise RuntimeError("observer must tail-call the untouched 7A254 suffix containing 6A410")
 

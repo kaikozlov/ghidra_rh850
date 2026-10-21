@@ -24,10 +24,9 @@ that every paragraph is current**.
    Sienna reference findings do not silently transfer to the default Camry.
 2. Use the report's conclusion and stated supersessions. Long Camry/Corolla
    reports preserve dated investigations; “current” inside an old checkpoint
-   refers to that checkpoint, not today's installation.
-3. Follow the actual evidence. Generated artifacts are regenerated, not
-   hand-edited; `build/` and `REFERENCE/` material is local context, not portable
-   authority.
+   refers to that checkpoint.
+3. Follow the actual evidence. Regenerate generated artifacts from their
+   inputs. Use `build/` and `REFERENCE/` material as local context.
 4. Keep successful software checks, observed vehicle behavior, and outstanding
    qualification separate. Historical integration audits are not deployment
    instructions or a claim about current upstream support.
@@ -52,11 +51,11 @@ multi-target reports. Their indexes identify that distinction.
 
 | Document | Meaning |
 |---|---|
-| [PRIORITIES.md](status/PRIORITIES.md) | Short execution queue, not a completion diary |
-| [FINDINGS.md](status/FINDINGS.md) | Claim IDs, evidence grades, and links; not a complete or always-current status mirror |
+| [PRIORITIES.md](status/PRIORITIES.md) | Short execution queue |
+| [FINDINGS.md](status/FINDINGS.md) | Claim IDs, evidence grades, and links |
 | [OPEN_QUESTIONS.md](status/OPEN_QUESTIONS.md) | Reference questions and recorded closure boundaries; owning reports may be newer |
 | [CORRECTIONS.md](status/CORRECTIONS.md) | Prior interpretations retained so mistakes are not repeated |
-| [ANALYSIS_STATUS.md](status/ANALYSIS_STATUS.md) | Historical Sienna coverage snapshot, not whole-project progress |
+| [ANALYSIS_STATUS.md](status/ANALYSIS_STATUS.md) | Historical Sienna coverage snapshot |
 | [history/](history/README.md) | Dated investigation journals and migrations |
 
 Historical sections also remain inside variant and subsystem reports where

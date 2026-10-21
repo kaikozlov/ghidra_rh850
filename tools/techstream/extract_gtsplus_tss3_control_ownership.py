@@ -293,8 +293,8 @@ def longitudinal_request_surface(parser: DDBParser, root: Path) -> dict[str, Any
             "consumers": brake_consumers,
             "meaning": (
                 "Toyota labels 0x10A1..0x10A4 as upper/lower acceleration magnitudes and request IDs 'from Toyota "
-                "Safety Sense'. They are ordinary read-only Data Monitor observations in the brake domain, not "
-                "proof of the underlying vehicle-network frame or authentication owner."
+                "Safety Sense'. They are ordinary read-only Data Monitor observations in the brake domain. "
+                "The underlying vehicle-network frame and authentication owner remain unproved."
             ),
         },
         "pcs_recorder_vocabulary": recorder,
@@ -353,7 +353,7 @@ def fleet_brake_sink_census(parser: DDBParser, root: Path) -> dict[str, Any]:
         "interpretation": (
             "Every EU/JP FRC_P5 install row and every NA row except one explicit TEST placeholder includes at "
             "least one brake ECU whose current DDB exposes 0x10A1..0x10A4. This establishes a fleet-wide "
-            "diagnostic observation sink, not guaranteed runtime PID support on every physical vehicle."
+            "diagnostic observation sink. Runtime PID support on each physical vehicle requires independent confirmation."
         ),
     }
 
@@ -582,8 +582,8 @@ def current_utility_srp_census(root: Path) -> dict[str, Any]:
             "The current GTS+ UtilityNeo CONF scripts decode with the pinned V18 AES-256-ECB key and are "
             "ordinary maintenance/utilities (alarm, lamp, DCM, SAS zero point, RCM, TVD). Their literal frame "
             "corpus contains no SecurityAccess/reflash service and no TSS3 lateral/longitudinal/arbitration/SecOC "
-            "vocabulary, so current host utilities cannot distinguish arbitration execution or wire ownership "
-            "either. This is a literal decoded-script closure, not a claim about dynamically synthesized bytes."
+            "vocabulary, so current host utilities cannot distinguish arbitration execution or wire ownership. "
+            "This closure covers literal decoded scripts only; dynamically synthesized bytes remain outside its scope."
         ),
     }
 

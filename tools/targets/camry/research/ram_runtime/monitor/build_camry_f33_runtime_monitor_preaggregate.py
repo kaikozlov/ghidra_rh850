@@ -28,10 +28,9 @@ B6_QUEUE_LENGTH = 0xFEBE547A
 
 def verify_preaggregate_contract(image: bytes, source: str) -> None:
     verify_monitor_contract(image, source)
-    # This variant deliberately moves the existing snapshot machinery before
-    # the unchanged aggregate instead of adding a second sampler. RUN is sticky:
-    # only a nonzero profile-2 queue length latches a snapshot, so slow SID23
-    # polling cannot miss the short-lived queued frame.
+    # Move the existing snapshot machinery before the unchanged aggregate.
+    # Keep one sampler. RUN is sticky: only a nonzero profile-2 queue length
+    # latches a snapshot, so slow SID23 polling cannot miss the short-lived queued frame.
     ordered = (
         source.index("jarl32 fg_pre_3, lp"),
         source.index("ld.hu -0x6386[gp], r1"),

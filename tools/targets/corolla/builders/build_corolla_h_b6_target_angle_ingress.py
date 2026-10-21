@@ -172,11 +172,11 @@ def main()->int:
         'physical_degree_scale_closed':True,
         'oem_wire_unit_name_closed':False,
         'interpretation':'In the matched target-vs-measured controller domain, one B6 signal255 count is equivalent to 1024/17870 deg (~0.057302742 deg), or ~1.000121519 mrad. The 0.0122% offset from exactly 1 mrad is consistent with the firmware fixed-point 1787/512 degree-to-internal approximation, but static evidence does not directly name the B6 engineering unit as milliradians.',
-        'quantization_boundary':'The measured path uses integer truncation and the target path saturates after x2, so controller equality is quantized; the fraction above is the exact linearized conversion implied by the two fixed-point gains, not a claim that every individual integer target code has a unique exact degree value.'
+        'quantization_boundary':'The measured path uses integer truncation and the target path saturates after x2, so controller equality is quantized; the fraction above gives only the exact linearized conversion implied by the two fixed-point gains. Individual integer target codes remain subject to quantization.'
       },
       'techstream':{
         'immediate_sender_monitor':{'dtc':b6row['dtc']['techstream_code'],'description':b6row['dtc']['techstream_description'],'failure':b6row['dtc']['techstream_failure']},
-        'corolla_p5_topology':{'required_categories':[405,435,498],'names':{'405':'EMPS','435':'Brake/EPB','498':'Front Recognition Camera 2'},'interpretation':'Corolla P5 install sets contain EMPS + Brake/EPB + FRC_P5; B6 is monitored by EPS as Brake System Control Module traffic. This proves the immediate module relationship, not the upstream FRC-to-Brake wire route.'},
+        'corolla_p5_topology':{'required_categories':[405,435,498],'names':{'405':'EMPS','435':'Brake/EPB','498':'Front Recognition Camera 2'},'interpretation':'Corolla P5 install sets contain EMPS + Brake/EPB + FRC_P5; B6 is monitored by EPS as Brake System Control Module traffic. This proves only the immediate module relationship. The upstream FRC-to-Brake wire route remains unproved.'},
         'family_angle_vocabulary':[{'monitor_key':2071,'name':names[2071],'primary_data_id':'0x1CEE'},{'monitor_key':2072,'name':names[2072],'primary_data_id':'0x1CEE'}],
         'target_lateral_id_dictionary':{'name':target_id['oem_name'],'accepted_h_profile_labels':{str(k):v for k,v in profile_labels.items()},'special_h_ids':{'25':target_id_values[25],'27':target_id_values[27]},'pattern_display_key':39},
         'steering_angle_conversion':{'did':'0x1037','name':'Steering Angle','h_callback':'0x488A8','raw_scale':'1.5 deg/count','physical_data_key':3,'conversion_plugin':'GetDatMonSignalInfoP5_DT.dll'},

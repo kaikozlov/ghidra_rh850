@@ -87,16 +87,16 @@ The compiler accounts for the instruction length itself and enables the GAS
 explicit-width aliases through its driver; callers need no extra assembler
 flags. Older ISAs use the existing full-address indirect sequence.
 
-Use the attribute on the distant callee declaration, not `-mlong-calls` on the
-whole translation unit. The global option still has its documented meaning:
+Use the attribute on the distant callee declaration. Avoid applying `-mlong-calls`
+to the whole translation unit. The global option still has its documented meaning:
 prohibit PC-relative calls. No assembler displacement-size override or linker
 relaxation is needed. The signer marks only its fixed GlobalRAM helper.
 
 ### C frame unwinding
 
 [`gdb-v850-frame-unwind.patch`](../../tools/toolchains/v850-gcc/patches/gdb-v850-frame-unwind.patch)
-reads the cached caller SP as a value, not as a saved-register address. It
-also uses FP only after the prologue establishes it, skips MOV's embedded
+uses the cached caller SP directly as a value.
+It also uses FP only after the prologue establishes it, skips MOV's embedded
 32-bit immediate, and ends prologue scanning at native far and register calls.
 Call displacements and instructions after a call are not treated as stack setup.
 This repairs the assertion reached by instruction stepping, backtraces,
@@ -142,8 +142,8 @@ tools/rh850 test payload path/to/entry.S path/to/payload.c \
   --output-dir build/out/payload-experiment
 ```
 
-Here `payload_done` and the result address/value belong to the experiment, not
-to a stock firmware calibration. The CLI owns breakpoint installation, execution,
+Here the experiment defines `payload_done` and the result address/value.
+The CLI owns breakpoint installation, execution,
 and postcondition evaluation; no hand-written GDB run sequence is needed.
 Without `--linker-script`, supply one already-linked ELF:
 
@@ -224,8 +224,8 @@ The machine has one owner for each layer:
    R01US0123EJ0140.
 2. `data/devices/p1me.rdl` defines the P1M-E address spaces, register widths,
    access policy, reset rules, evidence class, and peripheral trigger
-   relationships. Generated JSON/CSV files are projections, not competing
-   sources. Java dispatches generated trigger/reset metadata; it does not select
+   relationships. Generated JSON/CSV files project this authoritative source.
+   Java dispatches generated trigger/reset metadata; it does not select
    TAUJ, RSCFD, FACI, DataFlash ECC, or ICU-S behavior by register-name tables.
 3. `data/analysis_targets.json` supplies exact MCU, processor language,
    CodeFlash identity, and optional DataFlash identity. It is not a capability
@@ -283,13 +283,13 @@ flowchart LR
 |Reset behavior|Initialize architectural reset registers and the SLEIGH-internal load-link monitor centrally; apply generated P1M-E reset-source rules before deciding which RAM regions to clear.|Implemented for `none`, `power-on`, `system-1-pin`, `system-1-cvm`, `system-2`, and `application-1`. A fresh machine has `ll_valid=0` and initialized `ll_addr`; scenarios need no monitor workaround.|
 |Peripheral scheduler|Complete instruction-triggered device events at retirement, then apply external inputs before the next instruction. Equal-boundary external inputs retain scenario order.|Implemented. `after_instructions` selects a deterministic boundary; `clock.p_bus_cycles` supplies independent peripheral-clock progression. There is no inferred CPU-cycle ratio or wall-clock polling.|
 |Interrupts|Arbitrate modeled EIC requests using EIMK, PSW.ID/NP, PMR, ISPR, priority, and channel-number tie-break; save EIPC/EIPSW/EIIC and select direct or INTBP vectors; invalidate the load-link reservation.|Implemented for modeled EIINT channels. Edge acceptance clears EIRF; level requests remain until their source clears. Native `EIRET` applies automatic ISPR release when pre-return EP=0 and INTCFG.ISPC=0; protected software ISPR writes are ignored. Reserved channels without a supported reset contract fault on injection.|
-|TAUJ|Progress software-triggered interval timers from explicit P-Bus cycles, applying CK0–CK2 prescalers, retaining fractional progress, reloading on underflow, and raising the channel request.|Implemented for the bounded TAUJ0 interval path, including MD0 immediate-start requests. CK3/BRS and other timer modes fault rather than invent behavior. Clock events are functional stimulus, not CPU/silicon timing.|
+|TAUJ|Progress software-triggered interval timers from explicit P-Bus cycles, applying CK0–CK2 prescalers, retaining fractional progress, reloading on underflow, and raising the channel request.|Implemented for the bounded TAUJ0 interval path, including MD0 immediate-start requests. CK3/BRS and other timer modes fault rather than invent behavior. Clock events supply functional stimulus. CPU/silicon timing remains outside the model.|
 |RSCFD|Retain the exact registered signer response resources plus the diagnostic transmit buffer; model common receive FIFOs 3 and 5 using generated control/status/window/pointer/interrupt relationships.|Transmit events identify the buffer derived from the modeled message-RAM address. Receive inputs explicitly start **post-filter**. Mode/enable gates, payload capacity, queue depth, overflow, interrupt threshold, sticky flags, oldest-message windows, and native pointer pops are modeled. CAN1's receive level is the OR of modeled FIFO sources. Acceptance-filter execution, global RFIFOs, arbitration, bus timing, and error-state evolution are not modeled.|
 |FACI / CodeFlash|Keep image bytes immutable. Model status clear in P/E mode, forced-stop `B3` acceptance, and incremental DataFlash blank-check submission `71,D0`, including both FHVE enables, keyed read/DataFlash mode transitions, address-register readback and busy-write suppression.|Bounded implementation. Stop/blank-check submission clears `FRDY`; completion requires explicit inputs. Stop accepts ready/busy/locked/reissued states in normal P/E mode, without requiring blank-check FHVE gates. No dump-derived blankness, automatic ready interrupt, erase/program, CodeFlash/FWE entry, OCD emulation, partial-prefix stop or sequencer timing. Unsupported commands/modes/ranges fault before the current write.|
 |DataFlash ECC/read controls|Use manual-backed `DFERSTR`/`DFERSTC` widths/reset and low-bit error clearing; keyed `DFECCCTL`/`DFTSTCTL` fields, masked `DFERRINT`, and `EEPRDCYCL` codes3..F.|Bounded implementation. Protection keys read zero; rejected keys preserve prior fields. Codes0..2 fault as prohibited. Non-normal ECC/test-mode payload reads fault rather than silently using ordinary dump bytes. Error flags remain explicit inputs; no ECC generation/correction, test-bit payload, error-address capture, overflow, ECM delivery or flash timing is synthesized.|
 |DCRA1|Use generated CIN/COUT/CTL relationships for the exact Camry `0x67060` register sequence: CTL=00, explicit seed, and whole-word input.|Bounded implementation from R01UH0585EJ0120 pp2844–2852. Only the 32-bit Ethernet polynomial with 32-bit input is modeled; other modes/reserved-bit writes and input before an explicit seed fault. No timing, other DCRA units, or external CRC-result injection.|
 |FLMD|Execute the protected `FLMDPCMD=A5`, desired/full-word inverse/desired sequence controlling `FLMDCNT.bit0`.|Bounded nominal protocol from R01UH0585EJ0120 pp2869–2874. Word-only accesses, protected commit and successful error-status clearing are modeled. Malformed sequences fault at the model boundary; hardware error timing, same-module interruption and the external FLMD0 pin level are not synthesized.|
-|ICU-S|Expose only recovered registers and exact command-five/callback transitions. Treat supplied output words and the opaque offset20 word as scenario state, not generated cryptography or readiness.|Implemented within that recovered boundary. Offset20 has no assumed reset and supports only observed word reads; physical write semantics and bit meaning remain unknown. No provisioned-key or AES-CMAC silicon claim.|
+|ICU-S|Expose only recovered registers and exact command-five/callback transitions. Supplied output words and the opaque offset20 word are explicit scenario state. Cryptography and readiness require external inputs.|Implemented within that recovered boundary. Offset20 has no assumed reset and supports only observed word reads; physical write semantics and bit meaning remain unknown. No provisioned-key or AES-CMAC silicon claim.|
 |Integration|Expose model generation through `tools/rh850 model update` and `tools/rh850 model check`, and batched execution through `tools/rh850 test firmware`; bind identity through the existing target registry; retain one JSON report per scenario under `build/out/`.|Implemented. No parallel capability manifest, target whitelist, project lifecycle, backend selector, or legacy CLI alias exists.|
 |Verification|Resolve every signer component from raw bytes and generate one functional scenario set for every registered signer target; retain target-specific fixtures only for device-model regression and negative cases.|`tools/test rh850_firmware` runs all generated signer scenarios on Camry, Crown, and both Corolla images, then the retained machine-boundary fixtures. `make verify-processor` requires this gate after the synthetic instruction fixture. GNU simulation remains an independent backend and raw-image build check.|
 
@@ -323,7 +323,7 @@ faults carrying PC, address, size, access kind, and evidence provenance.
 A known register without a behavior model remains ordinary typed storage; it
 does not acquire invented side effects.
 
-DCRA1 is a hardware CRC model, not a shortcut for a firmware CRC function.
+DCRA1 models the hardware CRC peripheral through its registers.
 R01UH0585EJ0120 Table33.4 (p2844) locates `CIN`, `COUT`, and `CTL` at
 `FFD51000`, `FFD51004`, and `FFD51020`; Tables33.7–33.9 (pp2849–2851)
 require word, word, and byte accesses respectively. The supported `CTL=00`
@@ -332,15 +332,15 @@ the p2845 Ethernet polynomial. A `COUT` write seeds the **raw** shift state;
 a read exposes that state XOR `FFFFFFFF` (Table33.8, p2850). The reset
 read value is zero, corresponding to raw state `FFFFFFFF` (Table33.10,
 p2852). Thus Camry `0x67060`'s final complement cancels the hardware read
-XOR: its return is raw state, not the usual final-XOR CRC32 value.
+XOR: its return is raw state before the usual final XOR.
 It consumes only `length >> 2` words and ignores trailing bytes.
 
 The `camry_f33_crc_*` scenarios retain actual `0x67060`, ROM-default
 integrity selector `0x67090`, and composed status-repair sweep `0x670C4`
 instructions. Registered descriptors at `0x2AF8C` have length at `+0`,
 RAM pointer at `+4`, and the **ROM** pointer used by `0x67090` at `+8`.
-Their independent expectations use the manual's serial feedback circuit
-and immutable registered CodeFlash bytes, not injected CRC results.
+Their independent expectations derive from the manual's serial feedback circuit
+and immutable registered CodeFlash bytes.
 Printed page numbers above equal one-based PDF page indices for this manual.
 
 FLMD support removes a real execution boundary in Camry's application-cycle
@@ -353,7 +353,7 @@ the firmware routine or inject register results. Native scenarios exercise
 idle and protected-update paths, a stopped pre-commit prefix, access policy
 and explicit model-boundary faults.
 
-`FLMDCNT` selects an **internal pull**, not the actual FLMD0 pin level.
+`FLMDCNT` selects an **internal pull**. The actual FLMD0 pin level remains external.
 Malformed-protocol faults are not emulated `FLMDPS` errors, and do not prove
 hardware retry timing. External `register-input` cannot bypass protection by
 injecting FLMD control/status. FACI erase/program execution remains a separate
@@ -366,7 +366,7 @@ but supplied ICU-S data words are scenario inputs. It does not claim to derive
 a provisioned key or emulate the hardware AES-CMAC implementation.
 The offset20 word (`ICUSREG20`) specifically requires an explicit preload or
 scheduled register input. Its two-read and one-read Camry consumers establish
-bit extraction, not a hardware busy/ready contract. The Ghidra profile maps the
+only bit extraction. The hardware busy/ready contract remains unresolved. The Ghidra profile maps the
 manual's 32-byte DataFlash ECC bank and exact one-byte `EEPRDCYCL` window as
 volatile; this does not grant the machine access to registers absent from its
 generated definition. P1M-E hardware manual Tables31.18/31.23/31.25 and35.13
@@ -453,7 +453,7 @@ The generated suite has no calibration-named JSON inputs:
 |Lower response wrapper|resolved lower CAN writer, online-state base, lower handle, route map, controller/resource, and response ID|helper-shaped `0x00F0`/length/ID/data-pointer PDU traverses the target wrapper and exact classic-Tx path to one modeled RSCFD transmit|
 |Lower response completion|resolved native Tx-completion entry and pending software-handle slot|private handle `0x00F0` is consumed through the target dispatcher and no-op confirmation callback|
 |Whole request-signer timeout|current compiled C helper artifact plus the dump-resolved runtime config, four exact software-ring records, freshness/command-five state, and lower response route|the helper consumes all four fragments, reaches the exact synchronous command-five path, packs status 2 after the bounded poll expires, and transmits the complete private `0x7A9` error response through the selected target wrapper|
-|Whole request-signer completion|the same execution plus scheduled writes of supplied ICU-S output/completion state after exact submission|the exact wrapper observes completion, the helper validates done/status/length, increments its success counter, packs status 0 plus the supplied CMAC prefix, and transmits the complete response; supplied output remains scenario data, not provisioned-key cryptography|
+|Whole request-signer completion|the same execution plus scheduled writes of supplied ICU-S output/completion state after exact submission|the exact wrapper observes completion, the helper validates done/status/length, increments its success counter, packs status 0 plus the supplied CMAC prefix, and transmits the complete response; supplied output remains scenario data with no provisioned-key cryptography claim|
 |Producer reload during signing|completion scenario plus an unrelated ring record published while command 5 is waiting|the helper reloads the producer after its response and consumes the arriving record before returning; whole-helper scenarios also check stack/application/callee-saved register preservation|
 |ICU-S submit|structural command-five role plus dump-relative engine globals|validated command submission and in-flight state|
 |ICU-S input callback|structural callback role plus dump-relative input state|four input words and acknowledgement|
@@ -480,8 +480,8 @@ External `events` require `kind`, nonnegative `after_instructions`, and
 - `can-rx`: `fifo`, `boundary: "post-filter"`, `can_id`, and `data_hex`;
   optional `fd`, `extended`, 12-bit `label`, and 16-bit `timestamp`.
   Classical lengths are 0–8; FD additionally permits 12/16/20/24/32/48/64
-  bytes. Label/timestamp are explicit accepted-message metadata, not recovered
-  by a simulated filter or timestamp clock.
+  bytes. The scenario supplies label/timestamp as accepted-message metadata.
+  Filter execution and timestamp-clock recovery remain outside the model.
 - `interrupt`: `channel`; requests a modeled EIC source. Unknown/reserved
   channels fail closed.
 - `memory-write`: 32-bit `address` and non-empty `data_hex`; supplies a
@@ -493,19 +493,19 @@ External `events` require `kind`, nonnegative `after_instructions`, and
   be mapped and software-readable. This supplies external device state without
   invoking CPU-store callbacks or command triggers. Existing model logic can
   subsequently consume that supplied state. CPU-register names, write-only
-  commands and oversized values are rejected. Report events
-  identify these as `external-register-input`, not firmware writes or inferred
-  peripheral completion. Ordinary `memory-write` remains RAM-only.
+  commands and oversized values are rejected. Report events identify these
+  supplied inputs as `external-register-input`. Firmware writes and inferred
+  peripheral completion are separate event sources. Ordinary `memory-write` remains RAM-only.
 
 Stop addresses are terminal: events scheduled after reaching a stop are not
 executed. Unsupported modes and missing state remain faults.
 
 The `memory-equal` check compares `size` positive bytes at `address` with bytes
 at `source_address` in the same final machine state. It reports `equal` or
-`different`, not the compared bytes. Use this to check a destination against
+`different` while keeping the compared bytes out of the report. Use this to check a destination against
 registered DataFlash without copying captured payload/key material into a
-golden fixture. Like ordinary memory checks, read failures are check errors,
-not successful comparisons.
+golden fixture. Like ordinary memory checks, read failures produce check errors
+and leave the comparison unsuccessful.
 
 The functional profile establishes instruction, register, memory, and
 modeled-device behavior only. It makes no cycle-timing, silicon, vehicle, or
@@ -644,9 +644,9 @@ Generic callers should use the wrapper rather than copying version strings
 into argument defaults. `--toolchain`, `--image`, and `build-compat-image` are
 not supported; `RH850_TOOLCHAIN_IMAGE` no longer changes image selection.
 
-Historical compiler outputs and audit records remain immutable evidence, not
-a reason to retain a second supported compiler. Current ECU payload builders
-all enter the pinned toolchain through `tools/rh850`; builder CLIs do not accept
+Historical compiler outputs and audit records remain immutable evidence.
+Current ECU payload builders all use the single supported pinned toolchain
+through `tools/rh850`; builder CLIs do not accept
 an image or compiler override. A compiler upgrade can change bytes without
 changing behavior, so field-qualified historical binaries remain separate from
 newly built artifacts until the new artifacts receive their own qualification.
@@ -670,14 +670,14 @@ Renesas also ships two useful but separate products:
 2. **[Cycle-Accurate Simulator for RH850](https://www.renesas.com/en/software-tool/cycle-accurate-simulator-rh850).**
    P1M-E is explicitly listed among the supported devices. It is an optional
    licensed CS+ component and is the official path when cycle timing matters.
-   Renesas currently advertises executable-file support for CC-RH and GHS, not
-   GNU `v850-elf`, so this is not a drop-in executor for our deployment ELF.
+   Renesas currently advertises executable-file support for CC-RH and GHS.
+   GNU `v850-elf` support is unadvertised, so this is not a drop-in executor for our deployment ELF.
 
 The current **CC-RH V2.08.00** compiler has a Linux x86-64 distribution in
 addition to Windows; Renesas publishes it through the
 [compiler installation guide](https://www.renesas.com/en/software-tool/compiler-installation-guide).
-CC-RH is an external reference tool, not an alternative compiler selected by
-`tools/rh850` or part of the supported GNU build path.
+CC-RH serves only as an external reference tool.
+`tools/rh850` selects the supported GNU build path.
 
 The official CS+ simulator remains valuable as an independent implementation,
 especially for ISA edge cases and CC-RH differential tests. Renesas documents

@@ -145,8 +145,8 @@ public class ExportDecompilerCorpus extends GhidraScript {
             rendered.append(indent);
             offset += indent.codePointCount(0, indent.length());
             for (ClangToken token : line.getAllTokens()) {
-                // Exactly PrettyPrinter.getText's symbol transformation, not a
-                // source-text search. Offsets count Unicode characters, as in Python.
+                // Apply exactly PrettyPrinter.getText's symbol transformation.
+                // Offsets count Unicode characters, as in Python.
                 String text = token.getText();
                 boolean clean = token instanceof ClangFuncNameToken
                     || token instanceof ClangVariableToken || token instanceof ClangTypeToken
@@ -163,7 +163,7 @@ public class ExportDecompilerCorpus extends GhidraScript {
                 if (pc != null) locations.add(new CLocation(
                     start, offset, pc, "token", token.getPcodeOp().getMnemonic()));
                 // A statement can wrap lines and contain nested token groups.
-                // Its extent is all rendered descendant tokens, not an address interval.
+                // Its extent includes all rendered descendant tokens.
                 for (ClangNode node = token.Parent(); node != null; node = node.Parent()) {
                     if (!(node instanceof ClangStatement)) continue;
                     ClangStatement statement = (ClangStatement) node;

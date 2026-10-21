@@ -1,5 +1,5 @@
-> **Historical snapshot.** This is a point-in-time investigation journal, not
-> current project state. Use [the current overview](../../OVERVIEW.md),
+> **Historical snapshot.** This journal records a point-in-time investigation.
+> For current project state, use [the current overview](../../OVERVIEW.md),
 > [priorities](../../status/PRIORITIES.md), and
 > [findings ledger](../../status/FINDINGS.md) for present conclusions.
 
@@ -49,8 +49,8 @@ negatives from that pairing require the explicit assumption that the protected
 key remained stable between sessions.
 
 The old TSKM collector's Sienna-shaped bus/ID filter explains the sync-only
-artifact; `0 protected` was a collection-profile false negative, not evidence
-that the vehicle lacked protected traffic.
+artifact. Its `0 protected` result was a collection-profile false negative.
+The vehicle's protected traffic requires a matching collection profile.
 
 ## 2. Cryptographic negatives
 
@@ -66,7 +66,7 @@ This is the strongest local key-storage comparison available from the supplied
 artifacts: the dump contains no raw 16-byte value equal to a key that
 authenticates the nearby TSKM synchronization capture. Because capture and dump
 are separate jobs with a programming transition between possible runtime
-epochs, this excludes a static raw key hypothesis, not a session-derived key.
+epochs, this excludes only the static raw-key hypothesis. Session-derived keys remain possible.
 
 ### Public-route protected domains
 

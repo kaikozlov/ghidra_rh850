@@ -188,8 +188,8 @@ SafekeyNumber = the unmodified 16-byte positive-response payload of DID 0x1010
 The pinned Techstream tree contains no `MCUID`, `MCU ID`, or transformation
 edge that names those bytes as a silicon identifier. Techstream validates only
 service/DID/length before forwarding and later uses the value as the response
-association key. Therefore equivalence to a physical MCU ID is **bounded**, not
-established.
+association key. Equivalence to a physical MCU ID therefore remains **bounded
+and unproven**.
 
 Stage 8 adds one independently pinned external observation without collapsing
 that boundary. `optskug/docs @ 2c7184122d3f1644dfc9f32e98daaa45df653098`
@@ -216,8 +216,8 @@ Class-wide `Ex2MAC_01_ComProcess` selector sets are retained as separately
 scoped recovered evidence; they are **not** assigned to individual S324 codes.
 
 The S324 strings are procedure/display labels distributed across variant
-methods, not one serialized state-variable table and not one-handler-per-state
-identifiers. The reference census contains 61 state-code/function associations
+methods. Their relation to native handlers is many-to-many. The reference
+census contains 61 state-code/function associations
 across 60 unique native functions. One function, `0x10241650`, references both
 `S324-08` and `S324-19` and selects which label to display on different
 branches. Conversely, some S324 codes are referenced by multiple functions.
@@ -226,8 +226,8 @@ That structure makes per-state diagnostic-operation ownership unsound.
 A review patch briefly tried to infer per-handler `ComProcess` counts/selectors
 from wider code regions; that attribution was invalid. For example,
 `S324-41`'s actual reference function at `0x1023F900` contains exactly **one**
-direct call to `mackey_com_process`, not 19. The generated CSV therefore no
-longer has `handler_comprocess_calls` or `handler_operations` columns. It
+direct call to `mackey_com_process`. This corrects the review patch's count of
+19. The generated CSV therefore no longer has `handler_comprocess_calls` or `handler_operations` columns. It
 carries `state_code_reference_rvas` (all native functions that reference that
 label) and a deliberately separate `class_operations` column. The latter is
 class-wide only and must not be read as state ownership (TMS-014).
@@ -318,8 +318,8 @@ RID-`0x1010` MACKey transport exists.
 
 ## Cross-OEM corroboration: GM Global B / Renesas SHE
 
-Snipesy's 2026-09-22 public Global B SecOC write-up is useful **external
-cross-OEM corroboration**, not Toyota evidence:
+Snipesy's 2026-09-22 public Global B SecOC write-up supplies **external
+cross-OEM corroboration** scoped to GM:
 <https://surrealdev.com/rooting-the-cadillac-part-2-secoc/>. Its preceding
 hardware note identifies a Cadillac/GM Global B radio controller as an
 **RH850/F1x**:
@@ -351,9 +351,9 @@ profile. GM's published example reports authentication over
 the standard input as the full 16-bit SecOC Data ID, secured Authentic I-PDU
 data, and complete Freshness Value. The GM vector may still be an exact
 empirical description of Global B -- the reported live key and captured frame
-are sufficient to test it -- but if so it is an OEM/supplier-specific secured-CAN
-profile or preprocessing layer around standard AES-CMAC, not evidence that GM
-invented a cryptographic primitive. The Toyota EPS recovered here follows the
+are sufficient to test it -- but if so it describes an OEM/supplier-specific
+secured-CAN profile or preprocessing layer around standard AES-CMAC.
+The Toyota EPS recovered here follows the
 canonical-looking `DataID_be16 || authentic_payload || full_freshness` shape,
 with a Toyota-specific six-byte reconstructed freshness value and bit-packed
 FV4/MAC28 trailer.
@@ -364,9 +364,9 @@ is not by itself evidence of shared implementation. The implementations behind
 that carrier are presently different:
 
 - the GM report gives a 31-byte `ECUID[16] || nonce[15]` seed, a 12-byte
-  response, and a two-stage AES-CMAC derivation; its worked
-  `2b7e1516...` root is explicitly an AES test key, not the recovered GM
-  vehicle root;
+  response, and a two-stage AES-CMAC derivation. Its worked
+  `2b7e1516...` root is explicitly an AES test key used only to illustrate
+  the derivation;
 - the tracked Toyota/Denso P1M-E EPS boot path uses a 16-byte seed/key and
   `AES-ENC(AES-DEC(root, tester_data_record), ecu_seed)`.
 
@@ -391,9 +391,9 @@ boundary. It could still have originated in supplier/reference software that a
 Tier-1 failed to customize, but that is a software-provenance hypothesis.
 
 Public exact-value searches currently provide no cross-OEM support for a
-Renesas-global secret: the three P1M-E root constants resolve to Toyota/Denso
-P1M-E research and derivative tooling, not to a retained non-Toyota P1M-E
-firmware. Conversely, Renesas publicly supplies the P1M-E AUTOSAR MCAL and
+Renesas-global secret: the three P1M-E root constants resolve only to Toyota/Denso
+P1M-E research and derivative tooling. No retained non-Toyota P1M-E firmware
+supports the claim. Conversely, Renesas publicly supplies the P1M-E AUTOSAR MCAL and
 documents ICU-S as a fixed SHE state machine, so a substantial common Renesas
 low-level/security-driver layer is expected. MCAL/ICU-S provenance does not
 imply that an OEM UDS SecurityAccess root or algorithm is Renesas-selected.
@@ -417,8 +417,8 @@ covering exactly the expected low-level modules:
 adc can dio fls gpt icu mcu port pwm spi wdg
 ```
 
-Here `icu` is AUTOSAR **Input Capture Unit**, not the RH850 Intelligent
-Cryptographic Unit / ICU-S. A bounded whole-package source/configuration search
+Here `icu` names the AUTOSAR **Input Capture Unit**. The RH850 Intelligent
+Cryptographic Unit / ICU-S is a separate peripheral. A bounded whole-package source/configuration search
 finds no Dcm, `SecurityAccess`, `requestSeed`, `sendKey`, SecOC, CSM,
 CryptoIf, SHE `CMD_LOAD_KEY`, ICU-S driver/API, `ICUSCMD`, or any of the
 three Toyota/Denso EPS roots. The generic GHS `R7F701381` device header also
@@ -590,9 +590,8 @@ Labforge independently reaches the same hardware conclusion in its public
 TMPV770 OpenOCD port: commit
 `d104b493381ef04724b763751b1439124eaf7f9b` creates a distinct `cortex_m`
 `...hsm` target on **DAP AP 2** with CoreSight base **`0xE000E000`**, separate
-from the two R4 targets on AP 1 and the A53 complex. This is independent direct
-confirmation that `HSM_CM3` is a real TMPV770 on-die debug/security domain, not
-just a name in one proprietary debugger UI.
+from the two R4 targets on AP 1 and the A53 complex. This independently confirms
+`HSM_CM3` as a real TMPV770 on-die debug/security domain.
 
 That closes the **hardware-backend** question at the platform level: TMPV770
 contains an on-die protected Cortex-M3 hardware-security-module domain capable
@@ -612,9 +611,8 @@ A53↔R4 storage-service boundary. Linux uses Toshiba GCOMM at `0x24040000` and
 shared FIFOs `0x4_80000000/0x4_80100000` to access
 `toshiba,mbox-flash-tmpv7700`; the R4 side aliases those FIFOs at
 `0x80000000/0x80100000`, dispatches service `1` operations
-`erase/write/read`, and reads serial NOR through `0x08000000 + offset`. This is
-a byte-level example of the platform's normal-world service partition, not an
-HSM API guess.
+`erase/write/read`, and reads serial NOR through `0x08000000 + offset`. This
+provides a byte-level example of the platform's normal-world service partition.
 
 The Toyota FRC package aligns with both sibling address domains: its downloaded
 programming routine targets `0x008F6C00` (the sibling's R4 execution domain),
@@ -644,17 +642,16 @@ the Toyota routine address plus the independent sibling firmware; it is still
 not proven that the ordinary live `0x792` MACKey UDS handler itself executes on
 R4 rather than handing off from another core. Likewise, the exact
 R4/application↔`HSM_CM3` mailbox/shared-memory/service ABI is not public in the
-recovered sibling sample. That negative is now structural, not string-based:
+recovered sibling sample. Structural evidence now supports that negative:
 the CR4 image's static GCOMM table contains only sixteen A53-node-`0..7` <->
 R4DL0-node-`8` shared-buffer entries, its running program registers only receive
 endpoint `0x0008` and replies on `0x0800`, and service class `1` implements only
 `erase/write/read`. The library has callback-only plumbing for special logical
 participants `9/10/11`, but this image registers none of them and provides no
-data-buffer route to those participants. Thus the public CR4 artifact is a
-flash proxy, not the missing 64-byte `M1||M2||M3` HSM client. The remaining
-decisive evidence is therefore decoded Toyota FRC fixed R4/application code, a
-raw camera NOR/boot-region dump, or direct HSM/debug evidence—not more inference
-from CPU vendor names.
+data-buffer route to those participants. The public CR4 artifact therefore
+implements a flash proxy. The 64-byte `M1||M2||M3` HSM client remains unrecovered.
+Decisive evidence requires decoded Toyota FRC fixed R4/application code, a
+raw camera NOR/boot-region dump, or direct HSM/debug evidence.
 
 We still need that evidence to prove the FRC's RID-`0x3002` handler-to-HSM call,
 identify the SHE slot/AuthID used for the ECU Security Key, and determine whether

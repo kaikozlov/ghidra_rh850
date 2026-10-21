@@ -123,8 +123,8 @@ uv run --locked python -m tools.techstream.parse_ptshim_log \
 
 Hash the normalized JSON and record both hashes in the private manifest. Check
 that the parser preserved direction, timing, channel/protocol, address bytes,
-payload bytes, lengths, flags, unparsed lines, and encoding. A parser warning or
-unparsed message is a capture-review item, not a reason to silently drop data.
+payload bytes, lengths, flags, unparsed lines, and encoding. Review parser warnings
+and unparsed messages while preserving all captured data.
 
 ## Redaction and committed derivatives
 

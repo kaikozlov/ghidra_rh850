@@ -2,10 +2,10 @@
 """Build an evidence-graded Sienna-vs-H steering-supervisor stage ledger.
 
 The direct-call sequences are globally order-aligned with structural similarity.
-This is a navigation/classification aid, not semantic identity proof. A matched
+This supports navigation/classification only. A matched
 pair is promoted only when the separately generated whole-image artifact proves a
-unique complete instruction-shape match. H-only/Sienna-only rows mean unpaired
-in this ordered supervisor alignment, not globally absent from the other image.
+unique complete instruction-shape match. H-only/Sienna-only rows identify unpaired
+entries within this ordered supervisor alignment only; global absence remains unproved.
 """
 from __future__ import annotations
 from tools.targets.sienna.sienna_target import CORPUS as SIENNA_CORPUS
@@ -154,7 +154,7 @@ def main():
   elif typ=='h_only':
    h=H[j]
    if h not in H_ROLE:raise ValueError(f'unclassified H insertion {h:#x}')
-   role,desc=H_ROLE[h];row={'classification':'h-order-unpaired','h_index':j,'h_entry':f'0x{h:X}','role_class':role,'bounded_description':desc,'evidence_boundary':'target-native decompilation reviewed; unpaired in ordered supervisor alignment, not proof of global absence in Sienna'}
+   role,desc=H_ROLE[h];row={'classification':'h-order-unpaired','h_index':j,'h_entry':f'0x{h:X}','role_class':role,'bounded_description':desc,'evidence_boundary':'target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved'}
    honly.append(row);stages.append(row)
   else:
    s=S[i]

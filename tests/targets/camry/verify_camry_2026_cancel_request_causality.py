@@ -25,7 +25,7 @@ def frame(address, active=False, bus=1):
         data[0] = 0x88 if active else 0x80
         data[7] = (sum(data[:7]) + 10) & 255
     elif address == 0xFE:
-        # Structural read-only predicate, not an authenticated vehicle packet.
+        # Synthetic structural read-only predicate.
         data[4] = 0x40 if active else 0
         data[7] = 0 if active else 0x20
     elif address == 0x08A:

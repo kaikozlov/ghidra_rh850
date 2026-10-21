@@ -204,7 +204,7 @@ public class SeedCamryF33Semantics extends GhidraScript {
         names++;
       }
       String signature = row.get("signature").getAsString();
-      // undefined f() is the absence of a recovered contract, not int f(void).
+      // undefined f() indicates that the contract remains unrecovered.
       if (signature.equals("undefined " + row.get("name").getAsString() + "()"))
         continue;
       FunctionDefinitionDataType definition = parser.parse(null, signature);
@@ -405,7 +405,7 @@ public class SeedCamryF33Semantics extends GhidraScript {
       }
     }
     repairCodeTail(0x802L, 0x83CL, 0x87FL);
-    // 0xD48 is inside MULHI at 0xD46, not an entry.
+    // 0xD48 is inside MULHI at 0xD46.
     repairCodeTail(0xC9AL, 0xD46L, 0xE53L);
     // Undefined data at 0x8374 covered the copied-code dispatcher.
     repairCodeTail(0x8370L, 0x8374L, 0x8399L);

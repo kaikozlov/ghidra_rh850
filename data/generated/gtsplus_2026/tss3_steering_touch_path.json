@@ -1,7 +1,7 @@
 {
   "airbag_ddr_grip_surface": {
     "address_table": {
-      "conclusion": "Grip monitor keys 5500..5505 are reused in multiple CDbDDRAddressTable selector contexts. The current host looks the table up by byte +0x0A, byte +0x0B, then local monitor key +0x04. The same grip key therefore maps to different recorder-layout rows across selectors; this table is DDR payload-address metadata, not a CAN arbitration-ID or vehicle-PDU routing table.",
+      "conclusion": "Grip monitor keys 5500..5505 are reused in multiple CDbDDRAddressTable selector contexts. The current host looks the table up by byte +0x0A, byte +0x0B, then local monitor key +0x04. The same grip key therefore maps to different recorder-layout rows across selectors; this table provides DDR payload-address metadata only. CAN arbitration-ID and vehicle-PDU routing remain outside its scope.",
       "invalid_condition_table": {
         "record_size": 16,
         "rows": [
@@ -166,7 +166,7 @@
         "selector_0_plus_0x0a": true,
         "selector_1_plus_0x0b": true
       },
-      "conclusion": "CDbDDRMonitorTable uses the u16 at +0x18 as its local monitor key. CDbDDRAddressTable is independently keyed by selector bytes +0x0A/+0x0B and local monitor key +0x04. Therefore 5500..5505 and their address rows describe the SRS DDR recorder schema, not CAN IDs.",
+      "conclusion": "CDbDDRMonitorTable uses the u16 at +0x18 as its local monitor key. CDbDDRAddressTable is independently keyed by selector bytes +0x0A/+0x0B and local monitor key +0x04. Therefore 5500..5505 and their address rows describe only the SRS DDR recorder schema.",
       "kgp_data_ctrl": {
         "path": "Bin/KgpDataCtrl.dll",
         "sha256": "19e709e12e53f485a84ccfbf6b226922b88502206c34b767db543c7f3df101f8"

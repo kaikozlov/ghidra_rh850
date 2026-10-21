@@ -51,7 +51,7 @@
         "bus1:0x116": 3
       }
     },
-    "interpretation": "the committed exhaustive raw-window scan found zero candidate matches; this supports absence of an obvious CPU-visible raw key in the supplied DataFlash snapshot, not absence of derivation or protected hardware storage",
+    "interpretation": "the committed exhaustive raw-window scan found zero candidate matches; this supports absence only of an obvious CPU-visible raw key in the supplied DataFlash snapshot. Derivation and protected hardware storage remain possible",
     "matches": [],
     "min_entropy": 0.0,
     "snapshot_sha256": "8ac2a6beecb4ca2e6caf695eebffe440478171b4e093a1b2a36ab4e4ff313299"

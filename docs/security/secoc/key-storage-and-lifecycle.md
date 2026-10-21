@@ -53,10 +53,10 @@ The prior labels were wrong:
 | `0x758A0` | ICU key derivation | synchronous/status-mapped NvM/DataFlash read |
 | `0x785D2` | ICU opcode validator | NvM service-ID validator/state setter |
 
-The report's proposed FEBEF object-0 monitor would capture ordinary persistent
-state, not the SecOC AES key. `0x72F58` is still generic `NvM_ReadBlock`, not a
-key-set operation; however, a block-aware monitor can observe object 15 reads on
-a provisioned variant. In this exact dump object 15 has no valid persistent copy.
+The report's proposed FEBEF object-0 monitor captures ordinary persistent state
+only. `0x72F58` performs generic `NvM_ReadBlock` operations. A block-aware monitor
+can observe object 15 reads on a provisioned variant. In this exact dump object 15
+has no valid persistent copy.
 
 A **separate real key-update path** has now been recovered elsewhere in the
 application. Enabled RoutineControl RID `0x1010` transports a 64-byte authenticated request
@@ -148,7 +148,7 @@ base + 4: each byte XOR 0x55
 base + 8: each byte XOR 0xAA
 ```
 
-This is software redundancy/TMR encoding, not three cryptographic key slots.
+The three copies encode software redundancy/TMR for one object.
 
 ## 3. Boot restore lifecycle
 
@@ -233,7 +233,7 @@ The report called pages 468–479 “key-slot metadata” and interpreted their 
 patterns as derivation parameters. The differences are instead exactly explained
 by the raw/XOR55/XORAA encoding implemented at `0x67608`.
 
-The complete table has 16 objects, not four. Objects 12–15 are 32-byte records in
+The complete table has 16 objects. Objects 12–15 are 32-byte records in
 pages 440–443 (raw), 436–439 (XOR55), and 432–435 (XORAA).
 Object 15 is base block 41 with RAM mirror `0xFEBF02E8`; its raw second field is
 `0xFF206E14`, the CMAC-verified SecOC-key location on related EPS variants. All
@@ -280,8 +280,8 @@ reportedly anchored a **0x40-byte repeating KEY-record geometry**: record index 
 `+0x00`, fields he labels ID/AuthID at `+0x04/+0x08`, and a 16-byte value at
 `+0x14`. The first address independently matches the object-15 raw-copy second
 field above. The second address is three `0x40` strides later; under the exact
-`8965B4512000` physical map it is **object 12** raw copy `FF206EC0 + 0x14`, not
-object 14 (whose corresponding field is `FF206E54`). Thus the stride/+0x14
+`8965B4512000` physical map it is **object 12** raw copy `FF206EC0 + 0x14`.
+Object 14's corresponding field is `FF206E54`. Thus the stride/+0x14
 geometry is corroborative, while Calvin's table-wide ID/AuthID and
 "ECU master key" labels remain external terminology and must not be imported as
 `4512000` object semantics.
@@ -338,8 +338,8 @@ RAM_KEY -> export` remains **disproved as a SHE mechanism**. The removed command
 key-export probe neither changed nor tested that conclusion.
 
 This leaves peer-ECU extraction, selector-4 command-5 signing, and physical leakage as
-the leading existing-key routes. Candidate commands 9/10 are useful for closing the
-vendor ABI, not for exporting slot 4. In particular, the CAN-FD
+the leading existing-key routes. Candidate commands 9/10 can close the
+vendor ABI, but cannot export slot 4 under the standard SHE policy. In particular, the CAN-FD
 command-7 path authenticates
 `DataID_be16 || payload[28] || freshness[6]`, placing 14 chosen payload bytes in
 CMAC's first AES block. The ranked methods and isolated-bench plan are canonical
@@ -375,9 +375,9 @@ M4: 32 bytes
 M5: 16 bytes
 ```
 
-This is the **standard AUTOSAR SHE Memory Update Protocol** used by
-`CMD_LOAD_KEY`, not merely a proprietary package with matching lengths. In the
-standard construction, `M1 = UID' || ID || AuthID`; the issuer derives `K1` and
+This implements the **standard AUTOSAR SHE Memory Update Protocol** used by
+`CMD_LOAD_KEY`. In the standard construction,
+`M1 = UID' || ID || AuthID`; the issuer derives `K1` and
 `K2` from `KEY_AuthID` using `KEY_UPDATE_ENC_C` / `KEY_UPDATE_MAC_C`; `M2`
 contains the encrypted new counter, flags, and replacement key; and
 `M3 = CMAC_K2(M1 || M2)`. Successful storage produces the `M4/M5` verification
@@ -401,8 +401,8 @@ operation and control type `0x03` reads its status/result.
 Current 2026 GTS+ closes the former host-side uncertainty: its `MAC_01`
 `UtilityExNK2.dll` contains an official branch that emits exactly
 `31 01 10 10 || M1 || M2 || M3` and polls `31 03 10 10` for M4/M5. RID
-`0x1010` is therefore an OEM-supported ECU Security Key transport, not merely a
-firmware-side candidate. What remains unobserved is whether a live
+`0x1010` is therefore an OEM-supported ECU Security Key transport.
+What remains unobserved is whether a live
 `8965B4512000` session selects that GTS branch, which target slot a particular
 M1 names, and the server-side package-generation inputs/AuthID/current counter.
 
@@ -447,8 +447,8 @@ and clears the diagnostic request/result banks after either terminal status
 (`requestSequenceError`); an external inhibit maps to NRC `0x22`
 (`conditionsNotCorrect`).
 
-This is application-level polling, not one long RoutineControl request that eventually
-returns M4/M5. A trace must retain both control types to distinguish acceptance
+Completion requires application-level polling through a separate RoutineControl
+request. A trace must retain both control types to distinguish acceptance
 from completion. **Composition caveat (CORR-062):** status `0x02` proves only
 that *some* command-8 job completed while `FEBE5085` was active — the
 RID-`0x100E` bank-0 test can submit its own envelope first and have its
@@ -527,14 +527,14 @@ proving that other H units cannot carry a valid object 15.
 
 Consequently:
 
-- monitoring `0xFEBEF468/478/488` still captures objects 0/1/3, not the key;
+- monitoring `0xFEBEF468/478/488` captures ordinary objects 0/1/3 only;
 - object 15's known related-variant locations are DataFlash `0xFF206E14` and RAM
   `0xFEBF02F8`;
 - generic work groups rooted at `0xFEBF0B08` can temporarily hold currently
   processed triplicate objects; object 15 specifically uses
   `0xFEBF0C28/0xFEBF0C48/0xFEBF0C68`, but these are not fixed key-set buffers;
-- hooking `0x72F58` identifies generic reads; a useful monitor must filter block
-  41/45/49 and observe completion, not treat the call as ICU key-set;
+- hooking `0x72F58` identifies generic NvM reads. A useful monitor must filter
+  block 41/45/49 and observe completion;
 - none of those locations contains a valid key in this exact committed snapshot;
 - the original dealer/FEBEF capture design remains unsupported.
 
@@ -562,8 +562,8 @@ ICU-S option configuration, validation, and mode selection, but no named
 key-load API. Its packaged `Firmwares/` images are SEGGER probe firmware, and
 its only explicit secure-provisioning payload is for RA6B1; no RH850
 target-side provisioning image is shipped. The documented high-level “Enable
-ICU-S” path reaches a payload-free validation command, not a key-bearing
-request. Its legacy `SetICUM` path serializes a structured extended-option
+ICU-S” path reaches a payload-free validation command. Its legacy `SetICUM` path
+serializes a structured extended-option
 record rather than `slot || AES key`. Those mask-ROM programming operations are
 separate from the application RoutineControl RID-`0x1010` M1–M5 route recovered here. RFP
 therefore constrains chip lifecycle setup but does not reveal the Toyota/Denso
@@ -599,14 +599,14 @@ that the RAM field held a valid key at capture time.
 | Finding | Grade |
 |---|---|
 | `0x72F58/0x72F84` are NvM ReadBlock/WriteBlock | **Definitive** |
-| pages 468–479 are redundant objects 0–3, not derivation metadata | **Definitive** |
+| pages 468–479 store redundant ordinary objects 0–3 | **Definitive** |
 | object 15 is len32/base41/RAM `0xFEBF02E8` | **Definitive** |
 | `0xFF206E14` maps to object 15's RAM field `0xFEBF02F8` | **Definitive** |
 | this dump's three object-15 copies are invalid and contain no verified key | **Definitive** |
 | related variants store a CMAC-verified SecOC key at `0xFF206E14` | **Strong field evidence** |
 | report's FEBEF/key-set/derivation path is invalid | **Definitive** |
 | final 2 KiB is an ICU-S protected storage tail | **Strong inference** |
-| application CMAC path selects ICU-S slot 4, not object-15 RAM | **Definitive** |
+| application CMAC path selects ICU-S slot 4 | **Definitive** |
 | all nine application `ICUSCMD` writers are accounted for | **Definitive** |
 | stock application invokes command 13 or a plaintext persistent-slot export | **Disproved for this image** |
 | commands 8/11/`0x22` match SHE LOAD_KEY/INIT_RNG/GET_ID shapes; 9/10 are the strongest contiguous LOAD_PLAIN_KEY/EXPORT_RAM_KEY candidates | **Recovered anchors / bounded mapping; dynamic KAT pending** |

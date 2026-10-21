@@ -496,8 +496,8 @@
   },
   "interpretation": {
     "boundary": "These are passive wire/lifecycle observations. The precise nonzero state labels and additional object-class/confidence fields are not recovered.",
-    "lifecycle": "Birth, deletion and occupied-to-occupied replacement are source flags, not motion thresholds.",
-    "loss": "An unobserved cycle may contain a one-frame end/start event; restart identities rather than silently bridge it.",
+    "lifecycle": "Birth, deletion and occupied-to-occupied replacement are source flags; motion thresholds require separate evidence.",
+    "loss": "An unobserved cycle may contain a one-frame end/start event; restart identities after the gap.",
     "processing_order": "End old identity, then start replacement; both flags may be set in one occupied record.",
     "qualifier": "Reject empty/sentinel range and raw state zero. Keep states1/2/3 unnamed; no confidence percentage or radar-versus-camera attribution is inferred."
   },

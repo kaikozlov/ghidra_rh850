@@ -12,8 +12,7 @@ analysis scripts**. They have different maintenance rules.
 | `ghidra-findcrypt/` | Vendored/forked findcrypt database/tooling |
 
 Each vendored tree carries provenance metadata. Treat changes there as vendor
-fork maintenance, not ordinary analysis-script edits. Build outputs remain
-untracked/ignored.
+fork maintenance. Build outputs remain untracked/ignored.
 
 ## Repository-owned scripts
 

@@ -46,8 +46,8 @@ Static extraction/classification closure (this calibration):
 | configured ID on no-COM-unpacker SecOC PDU (`0x00F`) | 3 |
 | configured ID on ordinary no-COM-unpacker PDU (`0x2E8`) | 1 |
 
-Thus all **242/242** configured Rx signal IDs are classified. The final 97 are
-negative COM-extraction results, not guessed bit layouts: the stock firmware has
+Thus all **242/242** configured Rx signal IDs are classified. The final 97 record
+negative COM-extraction results: the stock firmware has
 no signal-level extraction call for those IDs. This does **not** claim that every
 wire bit in the containing PDU is globally unused by direct-buffer or security
 logic.
@@ -154,8 +154,8 @@ Signals **0..57** are transmit (see `../communications/application-tx.md`). Sign
 
 `application_com_receive_signal @ 0x7C03E` extracts a big-endian bit field from
 the COM buffer. Wire fields use the same `B0[7]` notation as the transmit map.
-Its destination store width is determined by the extracted bit length, not by a
-nominal C destination type: **1 byte for 1..8 bits, 2 bytes for 9..16 bits, and
+Its destination store width follows the extracted bit length:
+**1 byte for 1..8 bits, 2 bytes for 9..16 bits, and
 4 bytes for 17..32 bits**. The raw helper branches at `0x7C0D8..0x7C0EA` are
 pinned by `verify_application_receive.py`; this matters for the 10/12/15-bit
 signals, whose evidence rows are halfword destinations rather than overlapping
@@ -204,9 +204,9 @@ The remaining **97 configured IDs therefore have no stock COM extraction**:
   a configured signal but no recovered COM unpacker.
 
 These rows are emitted as `classified-no-com-extraction` with `wire_field=n/a`
-and no invented destination. The claim is deliberately signal-API scoped: it
-excludes a configured COM extraction of that signal ID, not every possible
-direct read of the containing PDU buffer.
+and no invented destination. The claim is limited to the signal API: it
+excludes a configured COM extraction of that signal ID. Possible direct reads
+of the containing PDU buffer remain outside this result.
 
 ### 5.2 Processor audit coverage
 
@@ -250,9 +250,9 @@ generated unpacker cluster**; this excludes the Ghidra-visible pointer forms a
 generic memcpy/RTE-style whole-bank consumer would normally require. Sixteen of
 those 18 are selective omissions inside unpackers whose sibling fields do have
 downstream consumers; only CAN `0x020` signals **291/292** form an entire
-two-signal unpacker with no scalar consumer. This remains a bounded static
-result, not a proof against a representation that creates neither a direct
-READ nor a Ghidra `PARAM`/plain-`DATA` address reference.
+two-signal unpacker with no scalar consumer. This static result is limited to
+representations that produce a direct READ or a Ghidra `PARAM`/plain-`DATA`
+address reference.
 
 For SecOC specifically, the nine formerly direct-read-unresolved fields split
 as follows:
@@ -318,8 +318,8 @@ selects the `C13A/C13D` command modes or writes the d/q-reference state.
 One corpus representation caveat is now pinned explicitly: instruction
 `0x572B0` reads byte `FEBE8001` (signal 196) and `0x572B4` writes `FEBEF063`,
 but the decompiler currently prints that source as `DAT_febe8000._1_1_` because
-Ghidra typed the adjacent bytes as one object. Canonical instruction/data xrefs,
-not the textual composite spelling, are authoritative for this join.
+Ghidra typed the adjacent bytes as one object. Canonical instruction/data xrefs
+are authoritative for this join.
 
 ### 5.4 Complete six-profile SecOC downstream surface
 
@@ -378,7 +378,7 @@ steering-cycle snapshot:
 ```
 
 `FEBEAE02` is therefore the selected/conditioned rear-wheel-speed input used by
-the recovered LTA/steering subsystem, not telemetry-only state. The normal
+the recovered LTA/steering subsystem. The normal
 calibration publishes the second member of the RR/RL pair while retaining the
 first for cross-channel plausibility; an alternate configuration enables a
 combined two-channel calculation. `FEBEAF00` is the conditioned SSAV input.
@@ -533,8 +533,7 @@ SecOC primitive.
 
 The four monitor variants differ in signal class and timeout behavior. The
 older nine-channel plausibility/deadline family in the control-partition report
-is a separate `com_signal_deadline_monitor_c` registration cluster, not these
-newly recovered callback records.
+belongs to a separate `com_signal_deadline_monitor_c` registration cluster.
 
 ## 8. RTE input staging copies
 

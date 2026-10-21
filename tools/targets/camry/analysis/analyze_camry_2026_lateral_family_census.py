@@ -364,8 +364,8 @@ def exact_f33() -> dict:
   # Exact F33 signal261..273 application fields as unpacked by 0x4BD46.  The
   # standard generated-COM -> stage -> broad-snapshot propagation is explicit
   # for every entry below except signal266, whose staged F135 byte is never
-  # copied into the broad BCD62 snapshot.  This is a bounded direct-reference
-  # consumer census, not an OEM naming claim for the unnamed fields.
+  # copied into the broad BCD62 snapshot. This direct-reference consumer census
+  # is bounded; OEM names for the unnamed fields remain unresolved.
   secondary_specs = {
     261: ('B3[5:0]', 0xFEBEADB0, 'Target Lateral ID; sole ordinary profile selector value'),
     262: ('B4:B5', 0xFEBEAE90, 'signed target steering-angle command'),

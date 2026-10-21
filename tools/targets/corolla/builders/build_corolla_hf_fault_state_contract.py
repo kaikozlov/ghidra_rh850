@@ -178,7 +178,7 @@ def main() -> int:
         "evidence_boundary": (
             "All class/state selection logic and aging constants are exact-H firmware-static and transfer byte-for-byte to F. "
             "Toyota DTC names come from the pinned EMPS_P5 Techstream table via the committed Corolla Techstream correlation catalog. "
-            "Classes with DTC index 0 remain internal/no-named-DTC. State 16 is a general fallback, not a unique class-0x80 code."
+            "Classes with DTC index 0 remain internal/no-named-DTC. State 16 is a general fallback shared beyond class-0x80."
         ),
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)

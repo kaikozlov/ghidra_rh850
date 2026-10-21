@@ -150,7 +150,7 @@
       "service_table": "0x00025C54",
       "slots": 64,
       "subfunction_table": "0x00025AFC",
-      "verdict": "event-record read/format path, not an address/call primitive"
+      "verdict": "event-record read/format path only; address/call primitive absent from the recovered surface"
     },
     "sid_ba": {
       "all_callbacks_fixed_codeflash": true,
@@ -221,9 +221,9 @@
       "request_copy_cap_bytes": 64,
       "request_derived_indirect_pc_target_recovered": false,
       "service_callback": "0x0008E434",
-      "verdict": "fixed maintenance/test operation dispatch, not an arbitrary address/call primitive"
+      "verdict": "fixed maintenance/test operation dispatch only; arbitrary address/call primitive absent from the recovered surface"
     },
-    "summary": "All configured application diagnostic classes with plausible write/control semantics (WDBI, RoutineControl, SID AB, SID BA, ECUReset, and 0x34/0x36/0x37) are now target-natively bounded away from a tester-chosen PC transfer. This is a recovered-surface negative, not a memory-safety proof of undiscovered code.",
+    "summary": "All configured application diagnostic classes with plausible write/control semantics (WDBI, RoutineControl, SID AB, SID BA, ECUReset, and 0x34/0x36/0x37) are now target-natively bounded away from a tester-chosen PC transfer. This negative covers only the recovered surface; memory safety of undiscovered code remains unproved.",
     "wdbi": {
       "all_callbacks_fixed_codeflash": true,
       "class_count": 6,
@@ -511,7 +511,7 @@
       "configured_delay_ms": 15.0,
       "configured_source_mask": "0x10",
       "disabled_value": "0x69",
-      "dynamic_boundary": "Sep-6 live SID23 proved the transport/owner predicates active and FEBE4EE6=0x5A; that state is necessary but not sufficient because the independent fixed CodeFlash pre-command gate remains disabled",
+      "dynamic_boundary": "Sep-6 live SID23 proved the transport/owner predicates active and FEBE4EE6=0x5A; this necessary state still requires the independent fixed CodeFlash pre-command gate, which remains disabled",
       "enabled_value": "0x5A",
       "foreground_tick_ms": 5.0,
       "owner_active_predicate": "0x0007F23C",
@@ -597,7 +597,7 @@
       "name": "application UDS 0x34/0x36/0x37",
       "network_visibility": "PROGRAMMING handoff is disruptive and makes the EPS temporarily disappear; violates production requirement",
       "placement": "no application transfer state recovered; all three service objects have null direct callbacks",
-      "privilege_mpu_context": "bootloader/application handoff, not an already-running stock-application mechanism",
+      "privilege_mpu_context": "bootloader/application handoff only; an already-running stock-application mechanism remains unrecovered",
       "rank": 3,
       "remaining_unknowns": [],
       "verdict": "rejected for production"
@@ -615,7 +615,7 @@
       },
       "indirect_transfers": {
         "path": "ghidra/scripts/investigate/ExportIndirectControlTransfers.java",
-        "sha256": "27270dcf9d0a20abb4c22c9f7a9647e7a4dd44b85b0774fba4a414e6ad986670"
+        "sha256": "efd868f045201e8d8c45627f639b0b3b121fbbdbfd30482654c079f46697c2a6"
       },
       "range_references": {
         "path": "ghidra/scripts/investigate/InspectRangeReferences.java",
@@ -629,7 +629,7 @@
     "bounded_negative": "No recovered scheduler/task/diagnostic/CAN/CryptoIf/ICU-S/OS/interrupt/PDU callback pointer or saved-PC cell lies in the XCP-writable window. The current first-class census has 995 function-owned decoded indirect transfers / 986 application transfers. All 197 locally defined call-target loads with operand references resolve outside the XCP window; the nine RAM-source sites are below its floor. The remaining sites divide into 744 locally resolved definitions without operand references (including 99 fixed-immediate CodeFlash thunks), 50 parameter-vector calls in ten routines with no recovered incoming reference or raw CodeFlash entry pointer, and four guarded lower-RAM callback residuals. CTBP/CALLT and fixed EBASE/INTBP vector-base compositions are closed; recovered XCP DAQ is measurement-only; all configured write/proprietary/routine/reset diagnostics resolve to fixed-code/bounded-data semantics; and the recovered fixed F33 DMAC families have zero endpoints in the window. Arbitrary synthesized/computed aliases, a memory-safety bug not represented by recovered control/data-flow, a separate undiscovered DMA/hardware mutation path, an undiscovered caller of the ten parameter-vector routines, and undiscovered code remain outside this static negative.",
     "computed_call_classifier_provenance": {
       "all_direct_lower_ram_cells_below_xcp_write_window": true,
-      "bounded_note": "The classifier reports source-cell provenance, not complete target semantics. Fixed descriptor/table families, 99 fixed-immediate CodeFlash thunks, 50 parameter-vector calls in ten unreferenced library routines, and four guarded lower-RAM residuals are classified separately below.",
+      "bounded_note": "The classifier reports source-cell provenance only; complete target semantics require separate analysis. Fixed descriptor/table families, 99 fixed-immediate CodeFlash thunks, 50 parameter-vector calls in ten unreferenced library routines, and four guarded lower-RAM residuals are classified separately below.",
       "direct_lower_ram_cells": [
         {
           "cell": "0xFEBF0FD0",
@@ -1270,7 +1270,7 @@
       "recovered_function_owned_flow_edges_into_source_range": 0,
       "source_sha256": "675e9f5f360277c6eb27ef73bb021e40861a88d99dd283adb2d7062506d246b6",
       "translator_recovered_use": "BUILD_CHECKSUM memory-address translation",
-      "verdict": "closed as calibration-page data shadow, not a recovered execution overlay or PC pivot"
+      "verdict": "closed as calibration-page data shadow only; execution overlay and PC pivot remain unrecovered"
     },
     "e4_copy": {
       "copy_helper": "0x000993F0",
@@ -1552,7 +1552,7 @@
     "exact_after_stock_startup": true,
     "executed_live": true,
     "low_febf0000_carrier_rejected": true,
-    "poststartup_direct_canary_result": "negative/no application reappearance; retained as a failed architecture probe, not evidence against the proven high-tail carrier",
+    "poststartup_direct_canary_result": "negative/no application reappearance; retained only as a failed architecture probe; the high-tail carrier remains proven",
     "retained_sha256": "89ffed31c24e746a57171e6f3e22f99d1e78d57b63bccb8778c7fe715d18800c",
     "safety_tx_blocked_delta": 0,
     "size": 524,
@@ -1674,7 +1674,7 @@
     "precondition": "0x0008B858",
     "rid": "0x100F",
     "routine_table": "0x00026918",
-    "verdict": "real no-service-SA stock command-5 test path, but not a direct SecOC signer API: fixed 16-byte input and local/private result path",
+    "verdict": "real no-service-SA stock command-5 test path only: fixed 16-byte input and local/private result path; a direct SecOC signer API remains absent",
     "xcp_can_rewrite_input_or_output": false
   },
   "target": {

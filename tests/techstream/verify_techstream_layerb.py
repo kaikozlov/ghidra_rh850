@@ -3,7 +3,7 @@
 key-material transfer finding (TMS-010).
 
 The EPS/VFOREST reflash **key-material transfer** runs through the
-flash-writer side, not the PrepareWriter's CalcSeedKey. Specifically:
+flash-writer side. PrepareWriter's CalcSeedKey is separate. Specifically:
 
   * `TCUWCanSecurityVFORESTFlashWriter.dll` IMPORTS
     `CCanCommonFlashWriter::SendNonceAndSeedKey` (delegates; has no
@@ -115,7 +115,7 @@ for imp in [b"CryptEncrypt", b"CryptDecrypt", b"CryptImportKey",
     check(f"Cuw.exe imports {imp.decode()} (Windows CryptoAPI, §4.5 path)",
           has(cuw, imp))
 
-# --- VFOREST writer is native (so SendNonceAndSeedKey is real x86, not IL) ---
+# --- VFOREST writer and SendNonceAndSeedKey use native x86 ---
 def is_dotnet(data):
     pe = data.find(b"PE\x00\x00")
     if pe < 0: return False

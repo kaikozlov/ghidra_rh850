@@ -74,7 +74,7 @@ Every dominant architecture pairs 498 with steering 405 and brake 435; 466
 Brake Booster is the main fleet split; the NA `FRC` singleton shows 498 can
 appear with no selected steering/brake cluster row at all.
 
-### Region-local boundaries (facts, not projections)
+### Region-local measured boundaries
 
 - **Zero co-occurrence in all regions** for PCS1 427, DSSystem 428,
   Fr_RadSen 429, RoadSign 431, PCS2 432 — the pre-498 P5 longitudinal compute
@@ -99,8 +99,8 @@ appear with no selected steering/brake cluster row at all.
 | pre_498_pcs_compute | 427, 428, 431, 432 | never with 498 |
 | adas_supervision_ethernet | 476, 477 | only in the small ADS/ADeU cluster |
 
-Selected-category identities (id, generation, database, name) are **identical
-across NA/EU/JP** — asserted by the generator, not assumed.
+The generator asserts that selected-category identities (id, generation,
+database, name) are **identical across NA/EU/JP**.
 
 ## 3. Diagnostic request addresses (v18 ECU_Setting_Table join)
 
@@ -127,8 +127,8 @@ RC_P5).
 | 5005 | RC_P5 | 7A2 | NA/JP only |
 
 Boundary: **none of 466 Brake Booster, 476 ADS, 477 ADeU, 499 EMPS2, 418/427/
-428/429/430/431/432, 485 EPB carries an ECU_Setting row.** Absence means "no
-phase-5 ECU_Setting row in this table", not "no diagnostic address". ADS/ADeU
+428/429/430/431/432, 485 EPB carries an ECU_Setting row.** This establishes only
+the absence of a phase-5 ECU_Setting row in this table. Diagnostic addresses remain unresolved. ADS/ADeU
 are Ethernet-phase categories by database name (`ADS_Eth_P5`/`ADeU_Eth_P5`);
 how the remaining unaddressed categories are reached is an open question
 (hypothesis: via the shared 0x750 gateway address or simply not exposed in
@@ -150,7 +150,7 @@ NA 114/114 shapes, EU 328/328 shapes carrying both, JP 99/99 shapes carrying
 both. No shape anywhere in the fleet splits EPS from Skid Control. The Camry
 Bus-4-chassis / Bus-1-camera split documented in
 [variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md)
-is the generic TSS3 topology pattern, not a Camry quirk.
+follows the generic TSS3 topology pattern.
 
 Worked example (asserted by the verifier): the three NA Camry HV vehicle types
 12704/12862/12984 share car id `0x00A7D910`; its shape places FCM `0x6D` on
@@ -168,18 +168,18 @@ behind `Central Gateway`.
   naming layers), and
 - **not connector cavity numbers**.
 
-The component→domain name join (`component_index+1` → table-76 name) is a
-naming correspondence, not an ECUNo key join; only the Camry
+The component→domain name join (`component_index+1` → table-76 name) establishes
+only a naming correspondence. An ECUNo key join remains unproved. Only the Camry
 `0x6D/0x29/0x32` membership is independently pinned by repo evidence.
 
 ## 5. Boundaries
 
 - Install-set ids, architectures, and topology shapes are **facts of the
-  pinned 2026.03.002 GTS+ masters**; they describe Toyota's diagnostic data
-  model, not necessarily production wiring.
+  pinned 2026.03.002 GTS+ masters**. They describe Toyota's diagnostic data
+  model. Production wiring requires vehicle-specific evidence.
 - Per-vehicle conclusions still require the vehicle's own master row; model
   families span multiple vehicle types (e.g. three NA Camry HV types).
-- The address join is v18-derived; treat per-address stability across
-  generations as observed, not guaranteed.
+- The address join is v18-derived. Cross-generation stability is established
+  only for the observed addresses.
 - Placeholder vehicle types (TEST/MAC/ZZZ4_P5C) carry real install sets but no
   topology; keep them out of production-fleet denominators.

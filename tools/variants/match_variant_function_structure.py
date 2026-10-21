@@ -6,8 +6,8 @@ The strongest class emitted here, ``unique-exact-shape``, requires one and only
 one function on *both* sides to have the same complete mnemonic sequence and
 instruction-length sequence.  Operands, constants, data addresses, call targets,
 and semantics are intentionally excluded from the signature, so a structural
-match is a homolog *candidate*, not proof that configuration or behavior is
-identical.  Material roles still require target-native disassembly/decompilation.
+match identifies only a homolog *candidate*. Configuration and behavior require
+target-native disassembly/decompilation.
 """
 
 from __future__ import annotations

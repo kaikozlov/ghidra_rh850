@@ -316,8 +316,8 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 	/** 64-bit constant materializers for r6..r9: `mov imm5, reg` (format VIII,
 	 * opcode bits 10:5 = 0x10). The imm5 is sign-extended, and reg1 r0
 	 * supplies zero, so a=-1 loads both halves with mov -1 while b=0 loads
-	 * mov 0. (0x12 would be ADD imm5 - a runtime increment of unknown entry
-	 * registers, NOT a constant, so the payloads could never fold.) */
+	 * mov 0. (0x12 would be ADD imm5, incrementing unknown entry registers
+	 * at runtime, so the payloads could never fold to constants.) */
 	private static final int[] NEG64_A = { 0x321f, 0x3a1f, 0x4000, 0x4800 }; // a=-1, b=0
 	private static final int[] NEG64_B = { 0x3000, 0x3800, 0x421f, 0x4a1f }; // a=0, b=-1
 	private static final int[] SEVEN = { 0x3207, 0x3a07, 0x4207, 0x4a07 };   // a=b=7
@@ -477,9 +477,9 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 
 		// --- Stripped (default-named) 64-bit arithmetic recovery -----------
 		// Bodies relocated verbatim from the pinned GCC 16.2.0 v850-elf
-		// objects (libgcc and the freestanding -O2 helpers.o idioms), so
-		// recognition is exercised on real compiler code, not hand-built
-		// lookalikes. Function names stay FUN_* (created without labels).
+		// objects (libgcc and the freestanding -O2 helpers.o idioms) exercise
+		// recognition on compiler-produced code.
+		// Function names stay FUN_* (created without labels).
 		// 0x11900: adddi3 (helpers.o _t_add): mov r8,r10; add r6,r10;
 		//          cmp r6,r10; mov r7,r11; setf c,r6; add r9,r11;
 		//          add r6,r11; jmp [lp]
@@ -1478,11 +1478,10 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 			"stripped negvdi2 keeps its call and abort() control flow");
 		checkAbi(program, listing, 0x11e80, "mulvdi3", "longlong", "longlong", "longlong");
 
-		// Real dependency structure, not names: the dependency bodies are
-		// real code (each is many instructions, never a jmp [lp] stub), the
-		// GCC register-restore helpers are recognized from their bodies,
-		// umodsi3 keeps its REAL relocated prologue/epilogue and calls into
-		// udivsi3/mulsi3, and the si3 bodies decompile to real arithmetic.
+		// Verify dependency structure directly: each dependency body contains
+		// many instructions. Recognize GCC register-restore helpers from their
+		// bodies. umodsi3 retains its relocated prologue/epilogue and calls into
+		// udivsi3/mulsi3. The si3 bodies decompile to arithmetic.
 		check(instructionCount(program, 0x12100) > 10 && instructionCount(program, 0x12140) > 10 &&
 			instructionCount(program, 0x12180) > 10,
 			"udivsi3/umodsi3/mulsi3 dependency bodies are real code, not stubs");
@@ -1536,9 +1535,9 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 		check(clzOk, "___clz_tab holds GCC bit lengths 0,1,2,2,3,...,8 (t[128..255]=8)");
 
 		// Stripped near-misses and regressed mutants of real bodies must
-		// stay unrecovered (FUN_, no fixup, not inline): the branch-predicate
-		// and branch-constant mutants and the preserved-register side-effect
-		// mutant must all remain calls.
+		// retain FUN_ names and calls without fixups or inlining. This applies
+		// to branch-predicate and branch-constant mutants and the
+		// preserved-register side-effect mutant.
 		long[] nearMisses = { 0x13d00, 0x13d20, 0x13d40, 0x13d80, 0x13da0, 0x12f60, 0x12fa0,
 			0x12fc0, 0x12ff0, 0x13dc0, 0x13e00 };
 		for (long nm : nearMisses) {
@@ -1743,7 +1742,7 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 				value.getDef().getOpcode() == PcodeOp.COPY; depth++) {
 				value = value.getDef().getInput(0);
 			}
-			// Ignore artificial RAM self-copies, not executed call results.
+			// Ignore artificial RAM self-copies. Retain executed call results.
 			if (value.getDef() == null || value.getDef().getOpcode() != PcodeOp.CALLOTHER) continue;
 			if (slot == slotA) va = value;
 			else vb = value;
@@ -1755,7 +1754,7 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 		return va != null && vb != null && va != vb;
 	}
 
-	/** Resolve SSA arithmetic on the entry SP, not a register-address match. */
+	/** Resolve SP offsets through SSA arithmetic on the entry SP. */
 	private Long spOffset(ProgramDB program, Varnode value, int depth) {
 		if (depth > 32) return null;
 		PcodeOp def = value.getDef();
@@ -1916,8 +1915,7 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 
 	/**
 	 * True when a CALL to the given entry address survives decompilation:
-	 * direct CALL input zero is a destination-address varnode in the code
-	 * space, not a constant-space varnode.
+	 * direct CALL input zero is a destination-address varnode in code space.
 	 */
 	private boolean hasCallTo(ProgramDB program, Function f, long target) {
 		if (f == null) {

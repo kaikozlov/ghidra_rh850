@@ -310,8 +310,7 @@ The current test sender deliberately sets the MAC28 bits to zero. The FV4 nibble
 is populated from the sender's message-low2/reset-low2 state.
 
 No native accepted F33 B6 transcript has been captured. The current active
-companion bytes are derived from receiver/application semantics, not from a
-stock B6 payload capture.
+companion bytes derive solely from receiver/application semantics.
 
 ## Route 37 log used during this work
 
@@ -332,8 +331,8 @@ B6 census from those rlogs:
 0      native B6 on src=0/1/2
 ```
 
-Therefore route 37 contains the openpilot-generated B6 corpus and its Panda TX
-results, not a native stock B6 transcript.
+Therefore route 37 contains only the openpilot-generated B6 corpus and its
+Panda TX results.
 
 The sender audit over all 18,456 route-37 B6 sends found:
 
@@ -722,7 +721,7 @@ At the time of this handoff:
 
 ## Specific questions for independent review
 
-These are questions, not current answers:
+Independent review must answer these open questions:
 
 1. Is RSCFD rule39 -> CanIf descriptor39 -> PduR44 the complete live ingress for
    `0x0B6`, including interrupt and DMA interactions?

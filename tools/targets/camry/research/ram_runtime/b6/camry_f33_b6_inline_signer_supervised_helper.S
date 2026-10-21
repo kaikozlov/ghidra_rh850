@@ -50,7 +50,7 @@ _helper_entry:
          00 C7 seq 00 target_hi target_lo 00 00
        seq zero disables replacement immediately. Nonzero sequences hold
        across native B6 arrivals only while the host generation is live.
-       This is a new offline-qualified candidate, not the archived road image. */
+       This new offline-qualified candidate has a separate identity from the archived road image. */
     ld.hu -0x6bcc[gp], r6
     mov 0xc700, r7
     cmp r6, r7

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Pin exact F33 read-only identity distinctions used in recovery assessment.
 
-This checks the retained firmware, not live reachability or permission to flash.
+This checks retained firmware only. Live reachability and flash permission require separate evidence.
 No network, vehicle, Ghidra, proprietary host distribution or build/ input.
 """
 from __future__ import annotations
@@ -66,8 +66,8 @@ def main() -> int:
     assert len(boot_body) == 33
     assert normal_body != boot_body
 
-    # F186 is an ordinary application current-session producer, not a write
-    # or reset. Boot's four-entry readable table does not contain that DID.
+    # F186 only produces the ordinary application current-session value.
+    # Boot's four-entry readable table does not contain that DID.
     assert image[0x4FA7C:0x4FA8A] == bytes.fromhex("8007210084ff7420005240063f00")
     assert image[0x924FC:0x92518] == bytes.fromhex(
         "8007610006e880ffd867840f5da15d0f000080ffd867005240067f00"

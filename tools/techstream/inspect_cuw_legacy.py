@@ -166,8 +166,8 @@ def legacy_check_id_payloads(location_id: bytes, password: int) -> list[bytes]:
 
     Cuw.exe parses LocationID as eight hexadecimal bytes, packs the selected
     software-password integer as four big-endian CBytes bytes, then explicitly
-    reverses that four-byte value in the fifth frame.  This is the legacy raw
-    CCanCommonFlashWriter handshake, not UDS SecurityAccess.
+    reverses that four-byte value in the fifth frame. This uses the legacy raw
+    CCanCommonFlashWriter handshake.
     """
     if len(location_id) != 8:
         raise ValueError("legacy LocationID must be exactly eight bytes")

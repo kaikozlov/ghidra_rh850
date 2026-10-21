@@ -16,8 +16,7 @@ not duplicate the changing integration checkpoint.
   verification.
 - Openpilot integration research, including dated experiments and their
   limitations. The openpilot/opendbc implementation lives in separate
-  repositories; a revision quoted here is the revision used for that result,
-  not a claim about today's upstream or deployed software.
+  repositories; a revision quoted here is the revision used for that result.
 
 The primary/default registered target is **2026 Camry Hybrid EPS
 `8965F3307000`**. Crown and both Corolla specimens have independent registered
@@ -55,8 +54,7 @@ bytes, and dataflow are the proof. A capture establishes an observation only
 for its recorded vehicle, software, harness, and operating state.
 
 For openpilot design, start from current upstream openpilot/opendbc/Panda.
-Firmware establishes genuinely target-specific constraints, not a second
-engagement or permission architecture.
+Firmware establishes target-specific constraints.
 
 Keep evidence source separate from confidence. The
 [evidence model](status/FINDINGS.md#evidence-model) defines **verified**,
@@ -66,9 +64,8 @@ qualification are not interchangeable.
 
 Status ledgers are lookup aids and may lag the owning reports.
 [ANALYSIS_STATUS.md](status/ANALYSIS_STATUS.md) is a historical Sienna coverage
-snapshot, not a current multi-target dashboard. Dated sections inside a
-subsystem or variant report are historical checkpoints even when they are not
-stored under `history/`.
+snapshot. Dated sections inside a subsystem or variant report are historical
+checkpoints even when they are stored outside `history/`.
 
 ## Working state is not evidence
 

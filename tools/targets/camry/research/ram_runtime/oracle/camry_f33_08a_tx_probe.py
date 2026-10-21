@@ -176,7 +176,7 @@ class TxProbeSession:
             raise TxProbeError(f"native 0x08A length is {len(row[1])}, expected {TX_LEN}")
         target_id = row[1][21] & 0x3F
         if target_id != 0:
-            raise TxProbeError(f"native 0x08A Target Lateral ID is {target_id}, not required no-request ID0")
+            raise TxProbeError(f"native 0x08A Target Lateral ID is {target_id}; required no-request ID0")
         return {
             "monotonic_ns": row[0],
             "bus": TX_BUS,

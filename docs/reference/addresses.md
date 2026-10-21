@@ -2,7 +2,7 @@
 
 Consolidated address lookup across all subsystems of the **legacy Sienna EPS
 `8965B4512000`** image. Every entry links to its canonical report; this page is
-an index, not an explanation. All addresses are Sienna CodeFlash VAs unless
+an index. All addresses are Sienna CodeFlash VAs unless
 marked RAM or DataFlash. The same virtual address names different code in other
 registered targets (`data/analysis_targets.json`, `tools/gtarget show TARGET`);
 Camry/Crown/Corolla lookups stay in their target-scoped reports under

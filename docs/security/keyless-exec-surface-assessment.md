@@ -16,10 +16,10 @@
 > TransferData state, RequestDownload pre-SA side effects, CTBP retention,
 > alternate credential-read engines, the 18 Corolla boot residuals, the
 > effectively-keyless application-SA surface, live-handoff DMA state, and a
-> target-native H computed-control-flow census. These are **mechanism-specific**
-> closures, not a claim that all software-visible static avenues have been
-> enumerated. Static parser/dataflow, copy-sink, state-composition, and variant-
-> specific searches remain valid work; CORR-101 records the correction after a
+> target-native H computed-control-flow census. These **mechanism-specific**
+> closures cover the enumerated avenues only. Static parser/dataflow, copy-sink,
+> state-composition, and variant-specific searches remain valid work.
+> CORR-101 records the correction after a
 > fresh re-audit found additional unaudited application transport and formatter
 > surfaces. Deterministic regressions are
 > `tools/test keyless` and
@@ -83,9 +83,9 @@ The range checker nevertheless has the correct explicit wrap guard. At Sienna
 ```
 
 `start <= start + len - 1` as an unsigned comparison rejects a wrapped
-interval. This is a real memory-safety bound and is pinned across all three
-images, but it is **defense in depth behind SecurityAccess**, not the mechanism
-that prevents unauthenticated RequestDownload writes.
+interval. This memory-safety bound is pinned across all three images and provides
+**defense in depth behind SecurityAccess**. SecurityAccess itself prevents
+unauthenticated RequestDownload writes.
 
 ## 3. Attack 3 — Corolla-generation boot UDS policy divergence (closed)
 
@@ -117,7 +117,7 @@ window at negative GP displacements:
 - `FEBF2B24` / `FEBF2B34` — SecurityAccess seed/key work buffers;
 - `FEBF2B11` — authenticated-region authorization bitfield used by the
   RequestDownload/RoutineControl flow;
-- `FEBF2BDE` — payload-decrypt **queue/busy flag**, not an authentication latch.
+- `FEBF2BDE` — payload-decrypt **queue/busy flag**.
 
 The canonical Sienna non-flow reference graph has exactly one boot-context
 reference into the XCP window: `FUN_00001404 WRITE -> FEBF7C00`. It is the
@@ -159,7 +159,7 @@ signals:
    new live READ/WRITE consumer or security-state overlap deserves direct
    control-flow analysis.
 
-These checks are deliberately discriminators, not an exhaustive exploit search.
+These checks serve as discriminators within a broader exploit search.
 A future image that differs should be escalated into the full ingress,
 indirect-call, lifecycle, and hardware-route audit rather than declared
 vulnerable from one signature alone.
@@ -229,7 +229,7 @@ are not recovered from application-retained data. The complete TransferData and
 initialization cohort transfers to H/F with the established boot relocation.
 `KEYLESS-007` pins the chain and state reset.
 
-## 9. RequestDownload has a pre-SA near-miss, not a bypass
+## 9. RequestDownload's pre-SA near-miss remains gated
 
 `uds_request_download @ 0x5D68` is slightly more subtle than a simple
 "nothing happens until SA" description. On one request class it can perform
@@ -256,7 +256,7 @@ rather than assumed safe.
 A whole-image, two-byte-aligned decode of every RH850/E3 LDSR encoding targeting
 CTBP finds exactly one writer in each image: `ldsr r0,CTBP @ 0x25E`. There is
 no application CTBP writer, so the live application-to-boot handoff inherits
-`CTBP=0`, not tester-selected state.
+the fixed value `CTBP=0`.
 
 The former CALLT interpretation was wrong. Sienna bytes `22 02 @ 0x1D5C` are
 the second halfword of the four-byte `mulu r27,r1,r0 @ 0x1D5A`; H/F bytes
@@ -334,7 +334,7 @@ endpoint, retained vector base, credential reader, or alternate boot entry.
 `tools/test keyless` pins the raw-byte closure
 (`KEYLESS-011`).
 
-## 14. Recovering application SA mainly unlocks BA F7, not boot execution
+## 14. Recovering application SA mainly unlocks BA F7
 
 The application root disclosure changes how the application SecurityAccess
 surface should be described. A tester can recover the root, perform normal
@@ -362,7 +362,7 @@ facts; the complete Sienna BA semantics remain in
 
 ## 15. Live handoff retains peripheral state, but DMAC endpoints are fixed
 
-The normal application-to-boot transition is a live call, not a hardware reset.
+The normal application-to-boot transition preserves live peripheral state.
 `FUN_00064ec8` calls `0x9F00` first; `system_hard_reset()` is a fallback after a
 non-returning path. It would therefore be incorrect to dismiss DMA/peripheral
 state merely because reset values are safe.
@@ -408,10 +408,10 @@ computed-transfer result stands independently and does not rely on them.
 Configured H XCP/async callback tables are separately raw-byte pinned by
 `tools/test corolla_h`.
 
-The result is therefore a **bounded target-native negative**, not a claim that
-Ghidra has perfect function ownership for every H byte: no recovered H computed
-control-transfer target is sourced from tester-writable XCP RAM, and no target
-into that RAM is recovered. Span's executable code is byte-identical to H
+The result is therefore a **bounded target-native negative** within the recovered
+H function ownership: no recovered H computed control-transfer target is sourced
+from tester-writable XCP RAM, and no target into that RAM is recovered.
+Span's executable code is byte-identical to H
 outside its calibration-only `0xA004..0x17DFF` delta, so this control-flow result
 transfers to F. This is `KEYLESS-014`.
 
@@ -419,8 +419,8 @@ transfers to F. This is `KEYLESS-014`.
 
 The unauthenticated XCP write primitive is already unusually strong: a tester
 can place arbitrary bytes in executable LocalRAM `FEBF7C00..FEBFFBFF`. The
-remaining application-RCE problem is therefore control transfer, not code
-placement. A fresh pass widened the earlier computed-call census to include
+remaining application-RCE problem is therefore control transfer. A fresh pass
+widened the earlier computed-call census to include
 exception returns, saved PCs, stack geometry, near-window callbacks, MPU
 contexts, and the PE-local/self LocalRAM alias.
 
@@ -429,7 +429,7 @@ The common EIINT restore path at `0x70292` really does reload EIPC from a RAM
 frame before `eiret`, and the fast-exception path likewise spills/restores FEPC.
 However, the recovered live frames are on fixed application stacks in the
 `FEBE...` view (`FEBE0800`, `FEBE1000`, `FEBE1800`, with foreground stack
-`FEBE2000`), not inside the XCP shadow. The raw instruction census also finds
+`FEBE2000`), outside the XCP shadow. The raw instruction census also finds
 zero direct CodeFlash flow edges into `FEBF7C00..FEBFFBFF`.
 
 The closest recovered writable-control object is more interesting:
@@ -448,7 +448,7 @@ feeds the loader.
 Finally, the second LocalRAM mapping does not create a hidden overlap. The PE1
 view `FEBE0000..FEBFFFFF` and self view `FEDE0000..FEDFFFFF` are same-offset
 aliases separated by `0x200000`; XCP address `FEBF7C00` therefore aliases
-`FEDF7C00`, not a lower `FEBE...` stack or `FEBF7704`. Span's paired PE1/self
+`FEDF7C00`. The lower `FEBE...` stacks and `FEBF7704` remain separate. Span's paired PE1/self
 RAM captures are consistent with this same-offset mapping. These facts are
 pinned by `tools/test keyless` (`KEYLESS-015`).
 
@@ -463,8 +463,8 @@ compiled writable interval remains exactly `FEBF7C00..FEBFFBFF`.
 DAQ does not provide a write-around. `WRITE_DAQ` installs validated addresses
 that the runtime sampler dereferences as **sources** into DTO staging. The
 configured `SET_DAQ_LIST_MODE` rejects the XCP direction/STIM bit, and the
-STIM-like command slots are absent. Thus an attacker-selected DAQ pointer is a
-read/exfiltration primitive, not a receive destination.
+STIM-like command slots are absent. An attacker-selected DAQ pointer therefore
+selects only a read/exfiltration source.
 
 The custom command family is likewise fixed. Selectors
 `FB/FA/F5/F3/EB/EA/E4` map to immutable CodeFlash handlers. `EB/EA` only alter
@@ -475,9 +475,9 @@ cases were also checked: multi-byte XCP writes reject interval overflow, and
 the word-aligned `MODIFY_BITS` case cannot wrap `0xFFFFFFFC + 3` through zero.
 
 `tools/test keyless` pins this closure (`KEYLESS-016`).
-It materially narrows the remaining application-RCE search: a useful future
-primitive must come from a different writer/corruption path, not from reversing
-DAQ direction or composing the currently configured XCP commands.
+This narrows the remaining application-RCE search to a different
+writer/corruption path. Reversing DAQ direction or composing the currently
+configured XCP commands provides no such path.
 
 ## 19. Reset and alternate software-entry paths do not expose a keyless PC selector
 
@@ -487,8 +487,7 @@ triple-copy hardware area `FFC0A000/4/8` as raw, XOR-`0x55555555`, and
 XOR-`0xAAAAAAAA`; known producers supply fixed values such as
 `3E3E3E3E`, `6D6D6D6D`, and `D6D6D6D6`. The consumer at `0x61B18` moves these
 into ordinary application status state and replaces the hardware words with
-fixed sentinels. They are reset-cause/status bookkeeping, not a PC or ROM-loader
-address.
+fixed sentinels. These words record reset-cause/status bookkeeping.
 
 The reset-mode translator `0x60870` has only three canonical callers and maps
 fixed internal mode values to fixed reset codes. The startup coordinator at
@@ -513,7 +512,7 @@ all transfer to H/F at the dominant `-0x1C` relocation; H and F are byte-
 identical over the relevant boot domain. The three security roots remain
 byte-identical as documented in §0.
 
-There is also acquisition provenance, not only static similarity. Albino's
+Acquisition provenance also supports this path. Albino's
 raw manifest records owner-side OBD acquisition with TSK Manager using the
 public payload-build secret and explicitly rules out glitching, bench work, and
 module removal; the retained bootstrap profile separately grades the target-built
@@ -552,9 +551,8 @@ The CanTp CF path at `0x79FDA` separately clips the current transport chunk to
 the remaining TP total.
 
 Thus ordinary segmented application diagnostics do not provide a pre-SID
-buffer overflow on this image. The important methodological result is that this
-was a **new static avenue**, not something implied by KEYLESS-015/016. It is
-pinned as `KEYLESS-019` by
+buffer overflow on this image. This **new static avenue** required independent
+analysis beyond KEYLESS-015/016. It is pinned as `KEYLESS-019` by
 `tools/test keyless`.
 
 ## 20.2 The event snapshot formatter is structurally unchecked but configuration-safe on S/H/F
@@ -576,7 +574,7 @@ bound the reachable record subsets well below the `0x300` AB staging capacity:
 | Corolla H `8965H1202000` | `0x50038` / `0x50D10` | 78 | 202 | 404 | 364 |
 | Corolla F `8965F1208000` | H-byte-identical path | 78 | 202 | 404 | 364 |
 
-The Corolla conclusion is target-native, not inferred only from Sienna. A fresh
+The Corolla conclusion comes from target-native evidence. A fresh
 H Ghidra recovery shows `0x50038` retains the unchecked append loop,
 `0x50122` retains the two-bank/post-write total check, `0x501A6` retains the
 bounded sibling, `0x50D10` selects 78 descriptors at `0x29F1C`, and the AB
@@ -596,9 +594,9 @@ artifact
 
 CORR-101 corrects the earlier analysis mistake: closing a collection of known
 compositions is not equivalent to exhausting the firmware's software-visible
-attack surface. The exploit-interest ranking itself is explicitly a candidate
-generator, not an absence proof. Its reviewed-candidate ledger covers selected
-cohorts, not every one of the 1,055 pre-SA-reachable ranked functions.
+attack surface. The exploit-interest ranking generates candidates. Its
+reviewed-candidate ledger covers selected cohorts within the 1,055
+pre-SA-reachable ranked functions.
 
 The three rows that were still explicitly `open` when this re-audit began are
 now individually closed as bounded negatives: `0x539A8` is a parameterless
@@ -613,8 +611,8 @@ Static work therefore remains legitimate and potentially productive. New
 candidate discovery can come from previously unmodeled parser/reassembly
 layers, configuration-dependent copy/formatting paths, indirect dataflow,
 state-machine compositions, target-native variant deltas, or other software
-mechanisms. Hardware/ROM/fault evidence is an additional class of evidence, not
-a prerequisite for making further progress.
+mechanisms. These software investigations can proceed independently of additional
+hardware/ROM/fault evidence.
 
 ## 21. Techstream Unified recovery does not reveal a target-compatible no-SA retry
 
@@ -628,9 +626,9 @@ only `StartPrepareWrite`; the two matching flash writers export only
 That matters because the recovered `StartPrepareWrite` target grammar includes
 the same exact 18-byte SecurityAccess exchange required by firmware:
 `27 01 || testerData[16]`, followed by `27 02 || key[16]`. The generic CUW
-`UseNewSoftwarePassword`/RecoveryInfo state is therefore host persistence, not
-evidence that these target-compatible rows resume a fresh locked ECU without
-SecurityAccess. `TMS-036` and
+`UseNewSoftwarePassword`/RecoveryInfo state therefore records host persistence.
+These target-compatible rows still require SecurityAccess to resume a fresh
+locked ECU. `TMS-036` and
 `tests/techstream/verify_techstream_cuw_timing_recovery.py` pin this V18-specific closure.
 
 ## 22. Payload fixtures and key rotation
@@ -654,9 +652,8 @@ roots separate throughout the bootstrap documentation.
 
 ## 23. Evidence boundary
 
-This is a set of bounded negative static results over **enumerated mechanisms**
-in three images, not a universal impossibility proof and not proof that the
-software-only static search is exhausted. CORR-101 is the controlling
+These negative static results cover **enumerated mechanisms** in three images only.
+Other software-only static avenues remain open. CORR-101 sets the controlling
 methodological boundary: an unmodeled software parser, copy sink, state
 composition, indirect-control chain, or target-native variant difference can
 still change the result without requiring new hardware evidence. New boot

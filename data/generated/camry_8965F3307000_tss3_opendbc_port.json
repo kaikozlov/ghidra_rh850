@@ -36,7 +36,7 @@
     "private_runtime_gates": [],
     "production_output_authorized": false,
     "road_gate_reconciliation": "VAR-150: across current-shape active B6 joins ACCD==0, ADBF<2, CAFC==0 and CAD9==0 always pass when observable, cadence has zero sequential gaps above the exact 35-ms loss bound, and only ACCC among CE772/CE7A6's five normal readiness operands lacks a direct road witness.",
-    "secoc_result_boundary": "Cumulative exact-F33 stage 5 is persistence-verified. VAR-147/CORR-178 prove all-zero MAC28 and wrong-key dummy-CMAC MAC28 have identical recovered software acceptance behavior; the dummy CMAC is native-envelope hygiene, not an admission fix.",
+    "secoc_result_boundary": "Cumulative exact-F33 stage 5 is persistence-verified. VAR-147/CORR-178 prove all-zero MAC28 and wrong-key dummy-CMAC MAC28 have identical recovered software acceptance behavior; the dummy CMAC changes native-envelope hygiene only, leaving admission unchanged.",
     "sender": "One 0x0B6/DLC32 frame every other 100-Hz control frame (nominal 50 Hz) on Panda bus0. Live 0x00F supplies trip/reset freshness; reset changes reanchor message8 to zero; application sequence advances modulo64; ID11 is used while latActive and ID0 on release; standard Toyota angle shaping applies. build_b6_secoc_frame uses the fixed all-zero 16-byte dummy AES-128 key and emits the normal DataID/application/full-freshness/AES-CMAC/FV4 envelope. The tag is intentionally wrong under the unrecovered real slot-4 key.",
     "status": "ordinary-toyota-runtime-b6-admission-unproven",
     "target_binding": "TOYOTA_CAMRY_TSS3 + exact EPS F181 8965F3307000 on the relay-correct Panda bus0/CAN0-CAN2 Toyota Bus-4 Brake/EPS segment"
@@ -44,7 +44,7 @@
   "gate2_development_history": {
     "acceptance_options": {
       "persistent_codeflash": "historical exact-F33 Gate-2 compare neutralization plus deterministic CRC repair; cumulative stage 5 is now installed/persistence-verified but does not prove application admission",
-      "ram_bridge": "audited exact-F33 zero-MAC28 re-admission candidate in application-retained high RAM; reset restores stock; retained as research history, not current openpilot architecture"
+      "ram_bridge": "audited exact-F33 zero-MAC28 re-admission candidate in application-retained high RAM; reset restores stock; retained only as research history"
     },
     "application_candidate": "Historical explicit-zero non-stock candidate with additive-term suppression=1 and percentage contributions=0; superseded by the later ordinary sender with signal265=0 and 100/100 contributions.",
     "default_enabled": false,
@@ -294,7 +294,7 @@
         "alternate_staging_writer": "0x00058C9A also writes FEBE816C (and signal-0 source FEBE8132); it is not decompiled here and carries no semantic claim",
         "classification": "nonlinear mapped motor-feedback/current-family proxy sharing the pre-clamp Q-axis aggregate that feeds DID 0x1151",
         "pdu_slice_offset_table": "0x00022840",
-        "semantic_boundary": "The source family is now target-natively joined to DID1151's pre-clamp Q-axis aggregate, but B22:B23 is not DID1151 in wire units: a sibling-axis-conditioned lookup and a separate runtime scale intervene. Treat it as a signed motor-feedback/assist proxy, not amperes, commanded torque, or LTA authority. Motor feedback is never by itself proof of an external lateral command: driver EPS assist also creates current.",
+        "semantic_boundary": "The source family is now target-natively joined to DID1151's pre-clamp Q-axis aggregate, but B22:B23 is not DID1151 in wire units: a sibling-axis-conditioned lookup and a separate runtime scale intervene. Treat it only as a signed motor-feedback/assist proxy; amperes, commanded torque, and LTA authority remain unresolved. Motor feedback is never by itself proof of an external lateral command: driver EPS assist also creates current.",
         "signal_id": 33,
         "source_chain": [
           "0x00037E48: dual-channel feedback sums -> FEBE6D70 plus extended Q-axis sum FEBE6D78; saturated FEBE6D72 is the DID1151 upstream source",
@@ -339,7 +339,7 @@
       "projection": "0x0004C24A"
     },
     "0x4A3": {
-      "current_semantic_boundary": "F33 0x4A3 uses GP-0x50E8, while DID 0x1151 Motor Actual Current (Q Axis) reads GP-0x50F2. The upstream join is now closed: GP-0x50E8 is a nonlinear sibling-axis-conditioned map of the same extended Q-axis sum that is saturated into the DID1151 source. It is therefore a motor-current-family feedback proxy, but not DID1151 in wire units and not yet amperes or commanded torque.",
+      "current_semantic_boundary": "F33 0x4A3 uses GP-0x50E8, while DID 0x1151 Motor Actual Current (Q Axis) reads GP-0x50F2. The upstream join is now closed: GP-0x50E8 is a nonlinear sibling-axis-conditioned map of the same extended Q-axis sum that is saturated into the DID1151 source. It is therefore a motor-current-family feedback proxy with units distinct from DID1151; conversion to amperes or commanded torque remains unresolved.",
       "fields": [
         {
           "role": "marker bit from staged status byte OR 0x20",

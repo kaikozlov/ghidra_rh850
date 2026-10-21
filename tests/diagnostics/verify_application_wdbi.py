@@ -291,8 +291,8 @@ for i, row in enumerate(wdbi_rows):
           f"csv={sorted(map(hex, csv_targets))}; actual={sorted(map(hex, actual_targets))}")
 
 # The worker wrappers are the fourth callbacks in generic DID-class records for
-# 0x0201..0x02FF and 0x2001..0x20FF. They are reached by the active SID-0x2E
-# generic write-record dispatcher, not by CommunicationControl or SID 0x31.
+# 0x0201..0x02FF and 0x2001..0x20FF. The active SID-0x2E generic write-record
+# dispatcher reaches them.
 CONTROL_RECORD = struct.Struct("<IIIIIHHB3x")
 control_rows = [CONTROL_RECORD.unpack_from(CF, 0x26210 + i * CONTROL_RECORD.size)
                 for i in range(5)]

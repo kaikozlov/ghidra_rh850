@@ -660,13 +660,12 @@ def main() -> int:
                 "slot-4 secret value or approved slot-4 CMAC operation",
                 "stock B6 producer suppression / relay-side ownership",
                 "B6 sender cadence and complete application-payload policy",
-                "live B6 capture to validate the sender's own message8 initialization/cadence; D7 proves receiver arithmetic, not B6 sender policy",
+                "live B6 capture to validate the sender's own message8 initialization/cadence; D7 proves only receiver arithmetic. B6 sender policy remains unproved",
             ],
         },
         "prior_art_note": (
             "Current comma/opendbc Toyota SecOC code independently treats 0x00F RESET_CNT changes as the event that resets per-PDU sender message counters. "
-            "That is useful sender-side prior art, but the live H/F-family conclusion above is based on D7 wire evolution and exact H receiver code, not transferred "
-            "from the older Toyota implementation."
+            "That is useful sender-side prior art. The live H/F-family conclusion above follows independently from D7 wire evolution and exact H receiver code."
         ),
     }
 

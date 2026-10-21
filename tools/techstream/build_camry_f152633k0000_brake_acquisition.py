@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build the exact-Camry Brake/EPB producer acquisition assessment.
 
-This is an integration artifact, not a firmware decoder.  It joins the exact
+This integration artifact joins the exact
 read-only Camry identity to the raw local CUW descriptor census and the already
 verified Toyota/TIS host acquisition contract.  If a matching 07B0 package
 appears, generation stops so the package can be decoded and promoted as a real
@@ -260,12 +260,12 @@ def build() -> dict[str, Any]:
             "camry_packages": camry_packages,
             "camry_package_rejection": (
                 "T-0051-26 is a validated 2025-26 AXVH85 CAMRY P5-Unified package, but Node01/DiagID=0724 "
-                "and its 8A28/8A29/8A2A calibration family identify the Engine/MG package, not Brake/EPB 07B0."
+                "and its 8A28/8A29/8A2A calibration family identify the Engine/MG package. Brake/EPB uses 07B0."
             ),
             "boundary": (
                 "The pinned 26-CUW corpus is covered both at CRC-checked attach.att descriptor level and by a full "
-                "raw-container/recognized-decoded-image identity census. This proves local absence only, not absence "
-                "from Toyota/TIS or from an unretained package."
+                "raw-container/recognized-decoded-image identity census. This proves absence within the local corpus only. "
+                "Availability from Toyota/TIS or an unretained package remains unresolved."
             ),
         },
         "requested_producer_searches": {
@@ -297,7 +297,7 @@ def build() -> dict[str, Any]:
             "calibration_url": None,
             "url_policy": (
                 "Do not synthesize /t3Portal/calibration/F152633K0000 or any other URL. The exact F181 is a "
-                "search input/current software identity, not a proved downloadable target CID."
+                "search input/current software identity. A downloadable target CID remains unproved."
             ),
             "accepted_package_checks": [
                 "Toyota/TIS result is returned for the exact VIN + ecuAssyNo + baseSwNo query",
@@ -313,7 +313,7 @@ def build() -> dict[str, Any]:
                 "flash_writer": route["flash_writer"],
                 "can_id_source": route["get_can_id_flash"],
                 "boundary": (
-                    "P5-Unified is a current host route, not proof that an unavailable exact Brake package uses it; "
+                    "P5-Unified is a current host route. The unavailable exact Brake package's route remains unproved; "
                     "the acquired CUW descriptor must select the contact type."
                 ),
             },

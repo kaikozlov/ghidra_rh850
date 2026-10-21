@@ -22,8 +22,8 @@ generated artifacts. The catalog covers tracked files under `data/generated/`
 and derives producers/consumers from repository source; those files do not need
 a verification owner.
 
-Some top-level CSVs are generated through `make` targets rather than the
-artifact catalog: `make generate-dataflash` rewrites `dataflash_nvm_records.csv`
+Some top-level CSVs use `make` targets for generation:
+`make generate-dataflash` rewrites `dataflash_nvm_records.csv`
 and `checkpoint_payload_map.csv`, `make generate-application-receive` rewrites
 `application_rx_map.csv`, `make generate-application-diagnostics` rewrites
 `application_diagnostic_map.csv`. `make generate-semantic-coverage TARGET=...`

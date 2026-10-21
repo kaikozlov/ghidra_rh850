@@ -206,8 +206,8 @@ def extract(assembly: Path, *, gtsplus_root: Path | None = None) -> dict[str, An
                 ),
             ),
             "boundary": (
-                "These are recorder observables and event triggers, not a recovered ACC resume state machine or "
-                "authorization policy."
+                "These are recorder observables and event triggers only. The ACC resume state machine and "
+                "authorization policy remain unrecovered."
             ),
         },
         "request_id_legend_search": {

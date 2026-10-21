@@ -1,6 +1,6 @@
 {
   "comparison": {
-    "causality_boundary": "The post-fix warning onsets are observed before steeringPressed becomes true and while latActive and transmitted B6 ID11 remain active; this rules out the new steeringPressed event as the immediate trigger of the native warning onset, not every possible indirect vehicle-policy interaction.",
+    "causality_boundary": "The post-fix warning onsets are observed before steeringPressed becomes true and while latActive and transmitted B6 ID11 remain active; this rules out the new steeringPressed event as the immediate trigger of the native warning onset. Possible indirect vehicle-policy interactions remain unresolved.",
     "post_fix_outbound": "3e",
     "post_fix_return": "3f",
     "pre_fix_routes": [
@@ -17,7 +17,7 @@
     "hud_companion_candidate": "native bus2 0x412 B0=0x14 and B1[3:2]=3",
     "hud_escalation_candidate": "native bus2 0x412 B2 bit6 while warning active",
     "semantic_boundary": "dynamic timing/torque/state joins only; exact OEM CAN bit names and exact torque threshold remain unproved",
-    "stock_acc_standstill_candidate": "native bus2 0x08A B7 in {0x66,0x67} while cruise latch is set; delayed zero-speed hold state, not generic vehicle standstill",
+    "stock_acc_standstill_candidate": "native bus2 0x08A B7 in {0x66,0x67} while cruise latch is set; specifically a delayed zero-speed hold state",
     "touch_proxy": "abs(carState.steeringTorque) >= 0.9 N.m",
     "warning_candidate": "native bus2 0x371 B19 bit6"
   },
@@ -165,7 +165,7 @@
       },
       "native_state_machine_candidate": {
         "b17lsb_equals_not_b20bit4_violations": 0,
-        "boundary": "dynamic state/timing join; B20[4] is a strong low-sensitivity driver-steering detector candidate, not a statically joined OEM bit name or exact torque threshold",
+        "boundary": "dynamic state/timing join; B20[4] is a strong low-sensitivity driver-steering detector candidate; its static OEM bit name and exact torque threshold remain unresolved",
         "driver_detect_by_abs_eps_torque_nm": {
           "0-0.25": {
             "driver_detect_fraction": 0.04695623,
@@ -250,7 +250,7 @@
             "true_negative_rate": 0.885643257,
             "true_positive_rate": 0.795264222
           },
-          "boundary": "classification against Toyota's slower hysteretic driver-detect state; intended to choose a simple upstream-style steeringPressed threshold, not to claim Toyota itself uses one static torque comparator",
+          "boundary": "classification against Toyota's slower hysteretic driver-detect state; intended to choose a simple upstream-style steeringPressed threshold; Toyota's own torque-comparator implementation remains unresolved",
           "sample_count": 18189,
           "selected_policy_threshold_nm": 0.6,
           "selected_threshold_witnesses": {
@@ -572,7 +572,7 @@
       },
       "native_state_machine_candidate": {
         "b17lsb_equals_not_b20bit4_violations": 0,
-        "boundary": "dynamic state/timing join; B20[4] is a strong low-sensitivity driver-steering detector candidate, not a statically joined OEM bit name or exact torque threshold",
+        "boundary": "dynamic state/timing join; B20[4] is a strong low-sensitivity driver-steering detector candidate; its static OEM bit name and exact torque threshold remain unresolved",
         "driver_detect_by_abs_eps_torque_nm": {
           "0-0.25": {
             "driver_detect_fraction": 0.015545792,
@@ -657,7 +657,7 @@
             "true_negative_rate": 0.941648717,
             "true_positive_rate": 0.78056266
           },
-          "boundary": "classification against Toyota's slower hysteretic driver-detect state; intended to choose a simple upstream-style steeringPressed threshold, not to claim Toyota itself uses one static torque comparator",
+          "boundary": "classification against Toyota's slower hysteretic driver-detect state; intended to choose a simple upstream-style steeringPressed threshold; Toyota's own torque-comparator implementation remains unresolved",
           "sample_count": 7062,
           "selected_policy_threshold_nm": 0.6,
           "selected_threshold_witnesses": {
@@ -962,7 +962,7 @@
       },
       "native_state_machine_candidate": {
         "b17lsb_equals_not_b20bit4_violations": 0,
-        "boundary": "dynamic state/timing join; B20[4] is a strong low-sensitivity driver-steering detector candidate, not a statically joined OEM bit name or exact torque threshold",
+        "boundary": "dynamic state/timing join; B20[4] is a strong low-sensitivity driver-steering detector candidate; its static OEM bit name and exact torque threshold remain unresolved",
         "driver_detect_by_abs_eps_torque_nm": {
           "0-0.25": {
             "driver_detect_fraction": 0.025712577,
@@ -1055,7 +1055,7 @@
             "true_negative_rate": 0.927996319,
             "true_positive_rate": 0.756653992
           },
-          "boundary": "classification against Toyota's slower hysteretic driver-detect state; intended to choose a simple upstream-style steeringPressed threshold, not to claim Toyota itself uses one static torque comparator",
+          "boundary": "classification against Toyota's slower hysteretic driver-detect state; intended to choose a simple upstream-style steeringPressed threshold; Toyota's own torque-comparator implementation remains unresolved",
           "sample_count": 11850,
           "selected_policy_threshold_nm": 0.6,
           "selected_threshold_witnesses": {
@@ -1323,7 +1323,7 @@
       },
       "native_state_machine_candidate": {
         "b17lsb_equals_not_b20bit4_violations": 0,
-        "boundary": "dynamic state/timing join; B20[4] is a strong low-sensitivity driver-steering detector candidate, not a statically joined OEM bit name or exact torque threshold",
+        "boundary": "dynamic state/timing join; B20[4] is a strong low-sensitivity driver-steering detector candidate; its static OEM bit name and exact torque threshold remain unresolved",
         "driver_detect_by_abs_eps_torque_nm": {
           "0-0.25": {
             "driver_detect_fraction": 0.017899572,
@@ -1569,7 +1569,7 @@
             "true_negative_rate": 0.927368512,
             "true_positive_rate": 0.817266744
           },
-          "boundary": "classification against Toyota's slower hysteretic driver-detect state; intended to choose a simple upstream-style steeringPressed threshold, not to claim Toyota itself uses one static torque comparator",
+          "boundary": "classification against Toyota's slower hysteretic driver-detect state; intended to choose a simple upstream-style steeringPressed threshold; Toyota's own torque-comparator implementation remains unresolved",
           "sample_count": 16745,
           "selected_policy_threshold_nm": 0.6,
           "selected_threshold_witnesses": {
@@ -1831,7 +1831,7 @@
       },
       "native_state_machine_candidate": {
         "b17lsb_equals_not_b20bit4_violations": 0,
-        "boundary": "dynamic state/timing join; B20[4] is a strong low-sensitivity driver-steering detector candidate, not a statically joined OEM bit name or exact torque threshold",
+        "boundary": "dynamic state/timing join; B20[4] is a strong low-sensitivity driver-steering detector candidate; its static OEM bit name and exact torque threshold remain unresolved",
         "driver_detect_by_abs_eps_torque_nm": {
           "0-0.25": {
             "driver_detect_fraction": 0.020766551,
@@ -2131,7 +2131,7 @@
             "true_negative_rate": 0.935197655,
             "true_positive_rate": 0.794027745
           },
-          "boundary": "classification against Toyota's slower hysteretic driver-detect state; intended to choose a simple upstream-style steeringPressed threshold, not to claim Toyota itself uses one static torque comparator",
+          "boundary": "classification against Toyota's slower hysteretic driver-detect state; intended to choose a simple upstream-style steeringPressed threshold; Toyota's own torque-comparator implementation remains unresolved",
           "sample_count": 16876,
           "selected_policy_threshold_nm": 0.6,
           "selected_threshold_witnesses": {

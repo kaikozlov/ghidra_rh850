@@ -66,8 +66,8 @@ def analyze(image: bytes) -> dict[str, object]:
         return {**span(offset, 4),
                 "target": address(jarl22_target(image[offset:offset + 4], offset))}
 
-    # Incident record, not a generated replacement image. Include the following
-    # stock halfword: the defect cannot be decoded from its four stored bytes alone.
+    # Decode the incident record. Include the following stock halfword:
+    # the defect cannot be decoded from its four stored bytes alone.
     incident_stream = bytes.fromhex("ff02925b") + image[0x7A276:0x7A278]
     incident_displacement = struct.unpack_from("<I", incident_stream, 2)[0]
     incident_target = (0x7A272 + struct.unpack_from("<i", incident_stream, 2)[0]) & 0xFFFFFFFF
@@ -118,8 +118,7 @@ def analyze(image: bytes) -> dict[str, object]:
         direct_vectors.append({**span(pc, 8), "target": address(u32(pc + 4))})
 
     # INTECM is EIINT8 on P1M-E. Exact F33 uses an orphan/table-driven handler
-    # at INTBP[8], so preserve it explicitly rather than relying only on
-    # Ghidra's direct-call function closure.
+    # at INTBP[8]. Preserve it explicitly alongside Ghidra's direct-call closure.
     ecm_mask = 0x100B001E
     if image[0x6376A:0x6376E] != struct.pack("<I", ecm_mask):
         raise ValueError("exact F33 ECM mask immediate drift")

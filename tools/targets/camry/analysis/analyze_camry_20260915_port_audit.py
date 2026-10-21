@@ -142,9 +142,9 @@ def main() -> int:
                                        for filename in ("camry_relay_route_can_20260827.ndjson.gz", "camry_relay_lta_confirm_route_can_20260827.ndjson.gz")],
         "boundaries": [
             "Stock-harness samples have an absent EPS and cannot qualify healthy-stock-harness steering.",
-            "The working steering samples use conventional cruise, not a demonstrated adaptive-cruise lifecycle.",
+            "The working steering samples establish conventional-cruise operation only; an adaptive-cruise lifecycle remains undemonstrated.",
             "Repeated cached lag estimates are not fresh independent lag measurements.",
-            "GTS meanings for Control Mode/Permission/ACC Not Available remain diagnostic fields, not CAN overlays.",
+            "GTS meanings for Control Mode/Permission/ACC Not Available remain diagnostic-only fields with unresolved CAN overlays.",
         ],
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)

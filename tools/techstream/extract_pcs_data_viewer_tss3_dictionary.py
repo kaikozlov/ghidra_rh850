@@ -679,8 +679,8 @@ def build(gts_root: Path | None = None) -> dict[str, Any]:
         "identity_boundaries": {
             "recorder_ids_are_not_sid22_dids": (
                 "FFD_TSS3_ID_* numbers are recorder data IDs/keys consumed by the "
-                "proprietary Operation-FFD SID-$AB-$12/$13 path, not ordinary FRC_P5 "
-                "UDS SID-22 DIDs; no Data-Monitor DDB join is asserted"
+                "proprietary Operation-FFD SID-$AB-$12/$13 path. Ordinary FRC_P5 "
+                "UDS SID-22 DIDs use a separate namespace; no Data-Monitor DDB join is asserted"
             ),
             "neutral_culture_is_english": all(
                 v["values_equal_english"] for v in dictionaries["neutral_culture"].values()

@@ -37,7 +37,7 @@
     ],
     "calibration_url": null,
     "current_gtsplus_writer_route": {
-      "boundary": "P5-Unified is a current host route, not proof that an unavailable exact Brake package uses it; the acquired CUW descriptor must select the contact type.",
+      "boundary": "P5-Unified is a current host route. The unavailable exact Brake package's route remains unproved; the acquired CUW descriptor must select the contact type.",
       "can_id_source": "GetCanIDsFromCANIDTable",
       "cid_getter": "TCUWCanUnifiedCIDGetter.dll",
       "contact_type": "P5-Unified",
@@ -57,10 +57,10 @@
     },
     "selection": "category-435 Brake/EPB at physical 0x7B0 for the exact vehicle VIN",
     "server_package_availability_proven": false,
-    "url_policy": "Do not synthesize /t3Portal/calibration/F152633K0000 or any other URL. The exact F181 is a search input/current software identity, not a proved downloadable target CID."
+    "url_policy": "Do not synthesize /t3Portal/calibration/F152633K0000 or any other URL. The exact F181 is a search input/current software identity. A downloadable target CID remains unproved."
   },
   "local_corpus": {
-    "boundary": "The pinned 26-CUW corpus is covered both at CRC-checked attach.att descriptor level and by a full raw-container/recognized-decoded-image identity census. This proves local absence only, not absence from Toyota/TIS or from an unretained package.",
+    "boundary": "The pinned 26-CUW corpus is covered both at CRC-checked attach.att descriptor level and by a full raw-container/recognized-decoded-image identity census. This proves absence within the local corpus only. Availability from Toyota/TIS or an unretained package remains unresolved.",
     "byte_level_census": {
       "decoded_member_count": 46,
       "exact_identity_hits": [],
@@ -218,7 +218,7 @@
       "zv_decoded_bytes": 28573696,
       "zv_decoded_record_count": 6976
     },
-    "camry_package_rejection": "T-0051-26 is a validated 2025-26 AXVH85 CAMRY P5-Unified package, but Node01/DiagID=0724 and its 8A28/8A29/8A2A calibration family identify the Engine/MG package, not Brake/EPB 07B0.",
+    "camry_package_rejection": "T-0051-26 is a validated 2025-26 AXVH85 CAMRY P5-Unified package, but Node01/DiagID=0724 and its 8A28/8A29/8A2A calibration family identify the Engine/MG package. Brake/EPB uses 07B0.",
     "camry_packages": [
       {
         "contact_type": "P5-Unified",
@@ -374,7 +374,7 @@
       "sha256": "c38891ce3a96d5e20fc4fc7599076a8defd65bee76683ec974c33013cf887110"
     },
     "software/locks/gtsplus.json": {
-      "sha256": "f6f5a072d3ef890787b9e09f7b54fed6dc00d3e367a66f632a05a435bbe2e5ed"
+      "sha256": "0fc9545053dd6067cfc078a0df1acb031669f5ac7283222ca9bc9a130d83c6fa"
     }
   },
   "static_conclusion": {

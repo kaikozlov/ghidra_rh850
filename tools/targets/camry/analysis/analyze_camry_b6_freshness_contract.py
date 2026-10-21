@@ -80,9 +80,8 @@ class SimState:
     returns retry/failure upstream.
     """
     if not self.initialized:
-      # EPS SecOC init zeros the ordinary slots.  All observed road epochs are newer
-      # than (0,0), so keep the real initialized values rather than inventing a
-      # first-frame special case.
+      # EPS SecOC init zeros the ordinary slots. All observed road epochs are newer
+      # than (0,0), so retain the real initialized values for the first frame too.
       self.initialized = True
     if epoch_newer(epoch, self.epoch):
       self.epoch = epoch
@@ -274,7 +273,7 @@ def scan_route(LogReader, route: Path, segments: list[tuple[int, Path]]) -> dict
           mlow, rlow = decode_fv4(dat)
           # CarState's TSS3 parser and the B6 sender use the same logical bus as
           # the outgoing B6 in the current Camry port.  Historical routes are
-          # recorded per bus rather than silently projecting bus 0.
+          # recorded separately for each bus.
           sync = latest_sync.get(bus)
           if sync is None:
             send_b6_sim_unmapped[bus] += 1
@@ -409,8 +408,8 @@ def aggregate(routes: list[dict[str, Any]]) -> dict[str, Any]:
   for route in routes:
     total_bytes += int(route["total_rlog_bytes"])
     for x in route["native"].values():
-      # Count each physical/native plane.  The artifact also publishes per-plane
-      # data so relay duplicates are visible rather than silently deduplicated.
+      # Count each physical/native plane. Per-plane artifact data preserves
+      # visibility of relay duplicates.
       native_b6 += int(x["incoming_b6"])
       incoming_b6_send_match += int(x["incoming_b6_exact_payload_matches_route_sendcan"])
       incoming_b6_not_send += int(x["incoming_b6_payload_not_in_route_sendcan"])
@@ -525,7 +524,7 @@ def main() -> None:
       "new_epoch_start_low2_accepted": {str(low2): SimState().accept((1, 1), low2)[0] for low2 in range(4)},
       "reset_candidate_from_current_100": {str(low2): reconstruct_reset_candidate(100, low2) for low2 in range(4)},
       "same_epoch_next_from_message_0": {str(low2): reconstruct_same_epoch_message(0, low2) for low2 in range(4)},
-      "interpretation": "The observed native D7 preference for first low2=1 is sender policy/timing, not an F33 B6 receiver requirement.",
+      "interpretation": "The observed native D7 preference for first low2=1 is sender policy/timing only; F33 B6 receiver acceptance permits other first low2 values.",
     },
     "routes": routes,
   }

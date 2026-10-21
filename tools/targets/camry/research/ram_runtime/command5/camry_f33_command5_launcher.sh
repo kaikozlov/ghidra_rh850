@@ -45,7 +45,7 @@ The 36-byte input is DataID(00b6) || B6 application bytes B0..B27 ||
 full freshness(6 bytes). This probe returns the full 16-byte CMAC but does not
 transmit B6. Powering the EPS fully OFF removes the resident.
 Wrapper return 2 is retried automatically, up to three total attempts; any
-non-success leaves slot permission unresolved rather than proving denial.
+non-success leaves slot permission unresolved. Denial requires separate evidence.
 generate-fast uses the same resident and command-5 call but paces changed input
 words at 10 ms (two exact-F33 foreground ticks) without a SID23 read after each
 word, then verifies the exact assembled input once before EXECUTE. It never

@@ -632,7 +632,7 @@
           "primary_did": "0x108D"
         }
       ],
-      "interpretation": "Successor BSCM_A=Brake/EPB exposes the native wheel/G quantities while BSCM_B=Brake Booster exposes an EBU-node copy. This strongly favors EBU as the Brake/EPB/skid-control-side node rather than a third ECU, but it is successor contextual evidence, not an exact-P5 Camry wiring proof."
+      "interpretation": "Successor BSCM_A=Brake/EPB exposes the native wheel/G quantities while BSCM_B=Brake Booster exposes an EBU-node copy. This strongly favors EBU as the Brake/EPB/skid-control-side node. The successor evidence provides context only; exact-P5 Camry wiring remains unproved."
     },
     "p6_successor_category_control": {
       "6004": {
@@ -643,12 +643,12 @@
         "database": "BSCM_B_P6.ddb",
         "name": "Brake Booster"
       },
-      "boundary": "Successor naming is context for the brake-domain split, not an exact-P5 Camry ownership transfer."
+      "boundary": "Successor naming provides context only for the brake-domain split; exact-P5 Camry ownership requires separate evidence."
     }
   },
   "interpretation": {
     "discrete_ebu_filter_ecu_supported_by_exact_camry_topology": false,
-    "leading_physical_model": "The exact topology supports an EPS attachment through an EBU-labelled brake-domain node/branch, not a second installed EBU ECU. Combined with the one-controller F33 receiver and direct-B6 pre-admission loss, the leading model is an upstream Brake/Skid request-generation/routing boundary feeding the EPS over its single local CAN path. The P6 A/B split strongly favors the EBU node as the Brake/EPB/skid-control side, and ABS_P5's explicit Power-Steering ch2/missing-message vocabulary is consistent with that two-sided brake-domain topology.",
+    "leading_physical_model": "The exact topology supports an EPS attachment through an EBU-labelled brake-domain node/branch. A second installed EBU ECU remains unsupported. Combined with the one-controller F33 receiver and direct-B6 pre-admission loss, the leading model is an upstream Brake/Skid request-generation/routing boundary feeding the EPS over its single local CAN path. The P6 A/B split strongly favors the EBU node as the Brake/EPB/skid-control side, and ABS_P5's explicit Power-Steering ch2/missing-message vocabulary is consistent with that two-sided brake-domain topology.",
     "one_eps_controller_compatible_with_upstream_segmentation": true,
     "unresolved": "Current GTS does not identify the exact electrical bridge, whether the EBU-labelled attachment is internal to the brake actuator assembly, or the concrete B6 filter/forwarder/signing routine. Exact category-435 F152633K0000 firmware or physical wiring/trace evidence is required for that promotion."
   },

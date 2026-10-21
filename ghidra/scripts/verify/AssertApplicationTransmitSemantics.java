@@ -100,7 +100,7 @@ public class AssertApplicationTransmitSemantics extends GhidraScript {
     @Override
     public void run() throws Exception {
         // One foreground staging orchestrator owns all four CAN 0x260 producer
-        // helpers. This is structural scheduling evidence, not an OEM name.
+        // helpers. This establishes structural scheduling only.
         assertCall(0x4ba8cL, 0x4b66cL);
         assertCall(0x4ba8cL, 0x4b900L);
         assertCall(0x4ba8cL, 0x4b976L);
@@ -185,7 +185,7 @@ public class AssertApplicationTransmitSemantics extends GhidraScript {
 
         // Signal 7 / B3..B4: C0FC is a saturated signed steering-control
         // difference/estimate exported via AE5C/E8BC into E810E. Public DBC
-        // STEER_ANGLE is retained as corroboration, not as sole proof.
+        // STEER_ANGLE provides additional corroboration.
         assertExactRefs(0xfebec0fcL,
                 "000c9bbe:WRITE", "000c9d00:WRITE", "000cb84a:READ");
         assertExactRefs(0xfebeae5cL,

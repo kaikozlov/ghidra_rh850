@@ -82,7 +82,7 @@ if rec:
 
 print('\n== RoutineControl wire-byte correction ==')
 # x86 imm16 is stored little-endian to the request buffer. These are the encoded bytes,
-# so 0xF510 means wire bytes 10 F5, not F5 10.
+# so 0xF510 means wire bytes 10 F5.
 check('standard RID immediate encodes wire 10 F5',raw('TCUWCanReproStdFlashWriter.dll',0x2698,9)==bytes.fromhex('66c78510c9ffff10f5'))
 check('standard FF00 branch encodes ff 00',raw('TCUWCanReproStdFlashWriter.dll',0x2683,9)==bytes.fromhex('66c78510c9ffffff00'))
 check('unified F0 routine encodes 10 F0',bytes.fromhex('10f0') in raw('TCUWCanUnifiedFlashWriter.dll',0x20e0,40))

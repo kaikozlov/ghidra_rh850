@@ -128,8 +128,8 @@ static int camry_register_firmware(uintptr_t raw, uint32_t *out) {
 
 /* camry_host_ptr of an address the scenario never touched. The bytes still
  * hold that address in a register. A later load uses camry_read and faults;
- * forming the pointer does not. The page after the buffer is unmapped so a
- * walk off the end stops instead of leaving the allocation. */
+ * forming the pointer does not. An unmapped page after the buffer stops a
+ * walk at the allocation boundary. */
 #define CAMRY_LAZY_PAGE 0x1000u
 #define CAMRY_LAZY_SLOTS 128
 
@@ -372,8 +372,8 @@ static uint8_t *camry_host_find(uint32_t address, uint32_t width) {
     }
 }
 
-/* instructions is the absolute workflow clock, not an increment. Inputs are
- * external register changes: bypass firmware write hooks and their side effects. */
+/* instructions specifies the absolute workflow clock. Inputs are external
+ * register changes: bypass firmware write hooks and their side effects. */
 void camry_native_advance(uint32_t instructions) {
     if (instructions < camry_native_instructions) {
         fprintf(stderr, "camry native clock reversal from %u to %u\n",
@@ -513,8 +513,8 @@ static int camry_lazy_firmware(uintptr_t raw, uint32_t *out) {
     return 0;
 }
 
-/* The byte machine reads an address it has not been given as the scenario
- * fill. A host load of that address is the same word, not a fault. A store
+/* The byte machine returns the scenario fill for an address it has not been
+ * given. A host load returns the same fill word without faulting. A store
  * the scenario did not map is not a checked write. */
 extern uint8_t camry_fill;
 

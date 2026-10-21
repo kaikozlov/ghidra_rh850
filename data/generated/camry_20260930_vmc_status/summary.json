@@ -27,7 +27,7 @@
   "limits": [
     "Candidate roles are not confirmed OEM byte/name joins.",
     "ID11 also appears under native stock control and does not establish comma ownership.",
-    "Vehicle-side TX confirmations establish publication, not execution or acceptance latency.",
+    "Vehicle-side TX confirmations establish publication only; execution and acceptance latency remain unresolved.",
     "Driver-brake onset confounds the subsequent native -4m/s2 request; it is not native-only braking proof.",
     "B4 is neither unconditional request echo nor literal stationary body acceleration.",
     "B18 envelope exceptions prohibit treating the dominant identity as universal.",
@@ -36,12 +36,12 @@
   "methods": {
     "clamped_envelope": "B18=min(max(B4,B24),B22), raw counts; tests whether B22 explains below-max samples",
     "coverage": "sum adjacent status intervals capped100ms; includes parked time, limits larger-gap contributions to100ms",
-    "max_relation": "B18=max(B4,B24), rawcounts; informative excludes B4=B24; empirical, not proved ECU equation",
+    "max_relation": "B18=max(B4,B24), rawcounts; informative excludes B4=B24; empirical relation; ECU equation unproved",
     "moving": ">0.5m/s from fresh raw wheels with CarState fallback",
     "segment_times": "t_route from minimum recorded monotonic event; repeated init/carParams timestamps are not segment playback anchors",
     "semantics": "candidate roles only; exact synchronized OEM diagnostic/FFD joins absent",
     "stock_epochs": "native latch1,no pedals,moving,freshCS; >=2s; request range>=0.5 or centered-median wheel-gradient range>=0.4 using unique time knots; direct RMS on original2-decimal episode boundaries, no fitted gain/offset",
-    "timing": "preceding-only joins; CS/CC60ms,request75ms,exact-payload origin100ms; logger batch timestamps, not ECU deadlines",
+    "timing": "preceding-only joins; CS/CC60ms,request75ms,exact-payload origin100ms; logger batch timestamps; ECU deadlines unresolved",
     "words": "B4/B18/B20/B22/B24 signed16BE x0.001 nominalm/s2; B26 low13 signed, physical scale unresolved"
   },
   "primary_op_braking_events": 2,

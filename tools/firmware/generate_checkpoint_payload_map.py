@@ -2,8 +2,8 @@
 """Generate the evidence-bounded checkpoint payload ownership map.
 
 Descriptor geometry is read from the committed CodeFlash image. Semantic labels
-and layouts summarize direct producer/consumer tracing; they are descriptive
-analysis names, not recovered Toyota/Denso identifiers.
+and layouts summarize direct producer/consumer tracing. They use descriptive
+analysis names. Toyota/Denso identifiers remain unrecovered.
 """
 from __future__ import annotations
 

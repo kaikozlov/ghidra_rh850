@@ -91,7 +91,7 @@
     "event_table": "0x0002B988",
     "state11_additional_source": "0x4B930 can set the shared 0x20 aggregate bit from three internal 0x22-valued conditions; state 11 is therefore not exclusively class-0x20/F0 DTC events"
   },
-  "evidence_boundary": "All class/state selection logic and aging constants are exact-H firmware-static and transfer byte-for-byte to F. Toyota DTC names come from the pinned EMPS_P5 Techstream table via the committed Corolla Techstream correlation catalog. Classes with DTC index 0 remain internal/no-named-DTC. State 16 is a general fallback, not a unique class-0x80 code.",
+  "evidence_boundary": "All class/state selection logic and aging constants are exact-H firmware-static and transfer byte-for-byte to F. Toyota DTC names come from the pinned EMPS_P5 Techstream table via the committed Corolla Techstream correlation catalog. Classes with DTC index 0 remain internal/no-named-DTC. State 16 is a general fallback shared beyond class-0x80.",
   "internal_only_classes": {
     "0x04": {
       "dtc_indexed_count": 0,
@@ -524,7 +524,7 @@
     },
     "techstream_correlations": {
       "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
-      "sha256": "5e4eac747a29080dcb5a700070655dccb7814434cc810f204080512416aa8e3a"
+      "sha256": "ee4ffc57d325fc3b4d787d8d1ec03a35c5e9006845add87c73d7ea5bd86290fd"
     }
   },
   "wire": {

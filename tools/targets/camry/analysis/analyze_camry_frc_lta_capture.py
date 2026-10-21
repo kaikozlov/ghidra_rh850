@@ -252,7 +252,7 @@ def analyze(capture_dir: Path, *, max_oracle_gap_s: float = DEFAULT_MAX_ORACLE_G
                 "stable_other_overlap_duration_s": operation_duration["other"],
                 "interpretation": (
                     "0x1601 switch=1/control=0 is Toyota LTA Enabled; 0x1914 flag=1 is Toyota Cruise Control in Operation. "
-                    "Their stable overlap is a machine-timestamped factory operating-context oracle, not direct steering-torque proof."
+                    "Their stable overlap supplies only a machine-timestamped factory operating-context oracle; direct steering torque requires separate evidence."
                 ),
             },
         },
@@ -290,7 +290,7 @@ def analyze(capture_dir: Path, *, max_oracle_gap_s: float = DEFAULT_MAX_ORACLE_G
             "consequence": (
                 "If strong_zero_b6_operating_context is true, the capture has stable Toyota LTA-Enabled + ACC-in-Operation state, motion, "
                 "and healthy Bus-4 protected traffic with zero B6. The next RE boundary is then upstream FRC/Brake transformation or a "
-                "non-COM/internal EPS path, not another Panda bus or arbitrary EPS CAN ID. This still does not label continuous steering torque."
+                "non-COM/internal EPS path. Further arbitrary EPS CAN-ID or Panda-bus searches are unsupported by this evidence. This still does not label continuous steering torque."
             ),
         },
     }

@@ -80,8 +80,8 @@ def _pointer_names(signature: str, code: str) -> set[str]:
             continue
         first = re.match(r"[A-Za-z_][A-Za-z0-9_]*", text)
         first_word = first.group(0) if first else ""
-        # `DAT_x = a * b;` is a store, not `type *name`. A capital symbol is
-        # not a struct type, and the `*` is multiplication.
+        # `DAT_x = a * b;` stores a product. The capital symbol names storage,
+        # and `*` performs multiplication. Require a type for a pointer declaration.
         is_decl = first_word in _PRIMITIVE_TYPES | _INT_TYPES | {"code", "enum", "sbyte"} or (
             re.fullmatch(r"[A-Z][A-Za-z0-9_]*", first_word) is not None
             and not first_word.startswith(("DAT_", "UNK_", "PTR_", "LAB_", "Ram", "uRam"))
@@ -151,7 +151,7 @@ _NULL_POINTER = re.compile(
 
 
 def _is_null_pointer_expr(expr: str) -> bool:
-    """`(void *)0x0` is a null pointer constant, not a firmware address."""
+    """Recognize `(void *)0x0` as a C null pointer constant."""
     text = expr.strip()
     while text.startswith("(") and text.endswith(")"):
         try:
@@ -398,7 +398,7 @@ def _binary_ops(text: str) -> list[tuple[int, str]]:
             while previous >= 0 and text[previous] in " \t":
                 previous -= 1
             if previous >= 0 and text[previous] not in "+-*/%&|^<>=!({[,:":
-                # `(uint)*(expr)` is a cast of a dereference, not a product.
+                # `(uint)*(expr)` casts the result of a dereference.
                 if (
                     char in "*&"
                     and text[previous] == ")"

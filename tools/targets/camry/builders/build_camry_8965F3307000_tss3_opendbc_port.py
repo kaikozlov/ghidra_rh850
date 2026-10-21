@@ -134,9 +134,9 @@ def build() -> dict:
     need_tokens(funcs, 0x4C216, "param_1 = 7;", "DAT_febe8100", "DAT_febe8101")
     need_tokens(funcs, 0x4C24A, "uVar1 = DAT_febe82a0 - 1", "DAT_febe810a", "DAT_febe8102")
 
-    # The live 0x030 current-like field is target-native, not a transferred H
-    # interpretation.  The extended Q-axis sum is clamped into the DID1151
-    # upstream cell and independently enters a nonlinear two-axis map.  That
+    # The live 0x030 current-like field has a target-native interpretation.
+    # The extended Q-axis sum is clamped into the DID1151 upstream cell and
+    # independently enters a nonlinear two-axis map. That
     # mapped result is mirrored through GP-0x50E8, scaled, and packed at B22:B23.
     aggregate = need_tokens(funcs, 0x37E48,
                             "DAT_febe6e28", "DAT_febe6e2c", "DAT_febe6e30", "DAT_febe6e34",
@@ -227,7 +227,7 @@ def build() -> dict:
                     "staging_formula": "signed16(((((int)(-signed16(FEBE6718)) * unsigned16(FEBEE8D8)) / 0x100) * 100) / 0x2000)",
                     "alternate_staging_writer": "0x00058C9A also writes FEBE816C (and signal-0 source FEBE8132); it is not decompiled here and carries no semantic claim",
                     "classification": "nonlinear mapped motor-feedback/current-family proxy sharing the pre-clamp Q-axis aggregate that feeds DID 0x1151",
-                    "semantic_boundary": "The source family is now target-natively joined to DID1151's pre-clamp Q-axis aggregate, but B22:B23 is not DID1151 in wire units: a sibling-axis-conditioned lookup and a separate runtime scale intervene. Treat it as a signed motor-feedback/assist proxy, not amperes, commanded torque, or LTA authority. Motor feedback is never by itself proof of an external lateral command: driver EPS assist also creates current.",
+                    "semantic_boundary": "The source family is now target-natively joined to DID1151's pre-clamp Q-axis aggregate, but B22:B23 is not DID1151 in wire units: a sibling-axis-conditioned lookup and a separate runtime scale intervene. Treat it only as a signed motor-feedback/assist proxy; amperes, commanded torque, and LTA authority remain unresolved. Motor feedback is never by itself proof of an external lateral command: driver EPS assist also creates current.",
                 },
             },
             "0x351": {
@@ -264,7 +264,7 @@ def build() -> dict:
                 "current_semantic_boundary": (
                     "F33 0x4A3 uses GP-0x50E8, while DID 0x1151 Motor Actual Current (Q Axis) reads GP-0x50F2. "
                     "The upstream join is now closed: GP-0x50E8 is a nonlinear sibling-axis-conditioned map of the same extended Q-axis sum that is saturated into the DID1151 source. "
-                    "It is therefore a motor-current-family feedback proxy, but not DID1151 in wire units and not yet amperes or commanded torque."
+                    "It is therefore a motor-current-family feedback proxy with units distinct from DID1151; conversion to amperes or commanded torque remains unresolved."
                 ),
             },
         },
@@ -327,7 +327,7 @@ def build() -> dict:
             ),
             "acceptance_options": {
                 "persistent_codeflash": "historical exact-F33 Gate-2 compare neutralization plus deterministic CRC repair; cumulative stage 5 is now installed/persistence-verified but does not prove application admission",
-                "ram_bridge": "audited exact-F33 zero-MAC28 re-admission candidate in application-retained high RAM; reset restores stock; retained as research history, not current openpilot architecture",
+                "ram_bridge": "audited exact-F33 zero-MAC28 re-admission candidate in application-retained high RAM; reset restores stock; retained only as research history",
             },
             "production_output_authorized": False,
         },
@@ -350,7 +350,7 @@ def build() -> dict:
                 "Ordinary SafetyModel.toyota with TSS3 permits checked 0x0B6 bus0/DLC32 plus replacement 0x412 bus0 and stock-shaped 0x101 brake-cancel bus2. Active B6 permits ID11, release permits ID0, controls_allowed is derived from native 0x08A bit27 on bus2, and steering uses the standard steer_angle_cmd_checks against measured 0x025; no ALLOW_DEBUG or TSS3_DEV_LATERAL gate remains."
             ),
             "secoc_result_boundary": (
-                "Cumulative exact-F33 stage 5 is persistence-verified. VAR-147/CORR-178 prove all-zero MAC28 and wrong-key dummy-CMAC MAC28 have identical recovered software acceptance behavior; the dummy CMAC is native-envelope hygiene, not an admission fix."
+                "Cumulative exact-F33 stage 5 is persistence-verified. VAR-147/CORR-178 prove all-zero MAC28 and wrong-key dummy-CMAC MAC28 have identical recovered software acceptance behavior; the dummy CMAC changes native-envelope hygiene only, leaving admission unchanged."
             ),
             "road_gate_reconciliation": (
                 "VAR-150: across current-shape active B6 joins ACCD==0, ADBF<2, CAFC==0 and CAD9==0 always pass when observable, cadence has zero sequential gaps above the exact 35-ms loss bound, and only ACCC among CE772/CE7A6's five normal readiness operands lacks a direct road witness."

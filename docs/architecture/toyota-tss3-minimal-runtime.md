@@ -4,8 +4,8 @@ This report records successive runtime architecture checkpoints. The
 September-21 request-plane design supersedes the earlier C7/B6 design below;
 later host/reporting reviews are recorded in
 [the port report](../variants/camry-2026-tss3-opendbc-port.md#8-host-bring-up-result-reporting-audit-2026-09-26).
-Transport sizes, source pins, and deployment notes belong to their checkpoint,
-not an evergreen wire specification.
+Transport sizes, source pins, and deployment notes apply to their documented
+checkpoint only.
 
 The [capability matrix](../variants/camry-2026-capability-matrix.md) separates
 retained qualification evidence from later implementation changes. In
@@ -69,14 +69,13 @@ safety change that alters the Toyota TX whitelist or hooks requires rebuilding
 and deploying `panda_h7.bin.signed`; updating only openpilot/opendbc source is
 insufficient.
 
-The remainder of this note retains earlier C7/B6 architecture and field
-evidence where useful. It is historical, not the maintained RAM-runtime
-contract.
+The remainder of this note retains useful historical C7/B6 architecture and
+field evidence. The maintained RAM-runtime contract is defined above.
 
 At the earlier C7/B6 checkpoint, the initial integration goal was narrower
 than a complete TSS3 port: reproduce the demonstrated lateral result on exact
 F33 with an upstream-shaped runtime. The paragraphs below preserve that
-checkpoint, not a restriction on the later request-plane implementation.
+checkpoint. The later request-plane implementation has a broader scope.
 
 At that checkpoint, longitudinal was a separate layer and remained stock-owned.
 The September-16 request-plane audit supersedes the former `0x160` actuator
@@ -98,14 +97,14 @@ historical architecture; the supersession above replaces it:
 5. the exact-F33 EPS-resident signer consumes C7, edits the native B6
    application fields, and lets the stock EPS SecOC path produce the trailer.
 
-The exact-F33 signer is a target prerequisite, not a replacement openpilot
-controller or permission system. The production-shaped candidate is now the
+The exact-F33 signer is a target prerequisite. Openpilot retains controller and
+permission ownership. The production-shaped candidate is now the
 **volatile continuous RAM signer**: it generates a native-valid FV4+CMAC28
 trailer with the EPS's own ICU-S path and therefore does not require the
 historical stage-5 receiver bypass or any persistent CodeFlash change. Full EPS
 power loss removes it and requires the bounded NRTD -> READY install/load-arm
 lifecycle again. The old persistent signer remains historical development
-material, not the intended deployment architecture.
+material only.
 
 ## Minimum by repository
 
@@ -134,14 +133,14 @@ same PDU also carries the lateral request tuple. Brake-owned `0x081` is the
 corresponding chassis-side result/reference family.
 
 The earlier `camry_frc_request_poc.py` and contributor Corolla `0x160`
-modify-and-forward work remain historical RE/field evidence, not the current
-actuator contract. `0x160` is still useful as an FRC-origin Profile-5
+modify-and-forward work remain historical RE/field evidence only.
+`0x160` is still useful as an FRC-origin Profile-5
 state/evidence PDU, but opendbc no longer parses it as a live command template,
 constructs it, blocks it, or whitelists it for host replacement. Both Camry and
 Corolla therefore keep Toyota `STOCK_LONGITUDINAL` even when Alpha Long is
 requested.
 
-The remaining blocker is source ownership, not planner math. On stock Toyota-B
+The remaining blocker is source ownership. On stock Toyota-B
 the `0x08A` request family is visible on the unsplit chassis network, so the
 normal CAN0/CAN2 relay cannot simply make openpilot the sole emitter. A future
 native-long implementation needs a qualified suppression/sole-emitter boundary
@@ -174,8 +173,8 @@ transport exception was needed for longitudinal because openpilot emitted
 neither `0x08A` nor `0x160`.
 
 Adding `CanData.fd` remains useful for exact logging and arbitrary short FD
-host TX, but the demonstrated controller sends no short FD PDU. It is a
-transport enhancement, not a dependency of this lateral baseline.
+host TX. The demonstrated controller sends no short FD PDU and operates
+independently of that enhancement.
 
 ### Cross-variant resident control ingress
 
@@ -246,9 +245,8 @@ Corolla H/F resolve to the same application software ID and ABI:
 | Corolla `8965H1202000` | 1 | `FEBE3F4C` / `FEBE480C` | `FEBFF9F0` | 50 | `FEF07F98` | `FEBF1264` |
 | Corolla `8965F1208000` | 1 | `FEBE3F4C` / `FEBE480C` | `FEBFF9F0` | 50 | `FEF07F98` | `FEBF1264` |
 
-The response handle is derived from the exact generated CanIf diagnostic class,
-not from the total number of configured transmit resources. In all four images,
-class 2 contains primary/functional `0x7A9` on local HTH0 and secondary `0x7A8`
+The response handle is derived from the exact generated CanIf diagnostic class.
+In all four images, class 2 contains primary/functional `0x7A9` on local HTH0 and secondary `0x7A8`
 on local HTH1; the class-route base is 2, so `0x7A9` resolves to global HTH2.
 That is resource 6 / lower handle 53 on Camry and resource 6 / lower handle 50
 on Crown and Corolla. The former four-resource heuristic incorrectly selected
@@ -293,8 +291,8 @@ boundaries that CodeFlash alone cannot close.
 | primary `0x7A9` lower route | handle 53 / resource 6 | **handle 50 / resource 6** | handle 50 / resource 6 | exact CanIf diagnostic HTH + class-route + lower route map |
 | software confirmation | `85240 -> 8043C -> 8152E` | `813D0 -> 7DAA8 -> 7EB4A` | `7E550 -> 7974C -> 7A83E` | exact lower completion maps controller/resource back to pending `00F0`; dispatcher sends the `F0` class to a one-instruction `jmp [lp]` no-op |
 
-The lower completion entries above are the transmit-interrupt path, not the
-similarly shaped cancellation wrappers at `lower_can_write + 0xDC`. Exact
+The lower completion entries above are the transmit-interrupt path. The similarly
+shaped cancellation wrappers are at `lower_can_write + 0xDC`. Exact
 completion-table recovery binds the selected resource back to the pending
 software-handle cell (`FEBE5036`, `FEBE4AE6`, or `FEBE4F22` respectively), and
 the machine scenario consumes `00F0` from that cell through the target's
@@ -310,8 +308,8 @@ received the Crown alternate-mailbox selection. The shared runtime selector
 `8965F1208000` is bounded by byte-identical boot calls/runtime configuration;
 the host manifest still binds the complete target-specific application F181.
 
-The Crown response row records the stock primary association, not an ID
-restriction on the lower hardware object. The previous resolver inferred
+The Crown response row records only the stock primary association. The lower
+hardware object permits other IDs. The previous resolver inferred
 handle 51/resource 7 solely from the number of transmit-resource rows. Exact
 Crown CanIf data instead associates primary `0x7A9` with local HTH0 -> global
 HTH2 -> handle 50/resource 6, while secondary `0x7A8` uses handle 51/resource 7.
@@ -446,9 +444,9 @@ replacement rack, exact F33 boot calls, and high-tail retention still work. It
 does **not** by itself distinguish a fault in the newer resident from a fault in
 the subsequent boot-context helper staging, but it invalidates the field design's
 GlobalRAM justification: `FEF07C00` had only been proven under recovered
-**application** MPU contexts, not the active boot callback context. The
-self-dispatching/GlobalRAM payload remains an experimental artifact, not a field
-install path.
+**application** MPU contexts. The active boot callback context remained unproven.
+The self-dispatching/GlobalRAM payload remains experimental and is excluded
+from field installation.
 
 The selected resident is copied to the common retained high tail
 `FEBFF9F0..FEBFFBFB`. The selected helper is temporarily parked at
@@ -458,9 +456,9 @@ references into that transit span. Their byte-identical MPU table places the
 span in region 12 (`FEC00000..FFFFFFFC`) with MPAT `0xB8` in both recovered
 application contexts, so the high resident can read it after startup. For the
 exact supported boot path, firmware startup clears GlobalRAM before the
-authenticated payload writes this transit buffer. That ordering is an
-exact-image firmware fact, not a universal consequence of all P1M-E reset
-classes. The transit buffer is used only until the selected resident installs
+authenticated payload writes this transit buffer. That ordering is established
+for the exact supported images and boot path only. The transit buffer is used
+only until the selected resident installs
 its helper into the target-native low-RAM pocket.
 
 Corolla can install its 458-byte helper into `FEBF0000..FEBF01C9` before
@@ -651,7 +649,7 @@ the manual page remains reachable when the kit is missing so it can report the
 exact installation or compatibility failure.
 
 FRC `0x1905` **Cruise Control Permission Flag** and `0x1906` **Main Switch
-Recognition Flag** are operational cruise state, not persistent health latches. In a
+Recognition Flag** are operational cruise state. In a
 verified healthy startup run they were initially false (`1905=8000`,
 `1906=e000e0008000`) and later became true (`8080` / `e080e0008000`) after a normal
 drive with **no ECU reset**. Therefore startup success does not require those bits to
@@ -693,7 +691,7 @@ After the native catcher reached PROGRAMMING it published a cooperative handoff
 marker and the warm uploader acquired the direct-Panda lease. Its evidence
 recorded wake-relative and ignition-relative timing, including wake to first
 `10 03`, wake to ignition, `50 03`, and `10 02`. This remains exact-Camry
-historical evidence, not another maintained kit workflow.
+historical evidence only.
 
 The former direct-C7 mutation test required READY/stationary state, derived a
 target from measured angle, sent one C7 generation, observed a signed
@@ -711,7 +709,7 @@ per-frame value and uses sticky bus state; BRS is likewise bus-global.
 The minimum Panda candidate marks internally forwarded packets and preserves
 their received FDF/BRS. Because the marker reuses wire-header bits, USB host
 input must be validated first and those private bits cleared before the packet
-enters the TX queue. This is transport correctness, not Toyota policy.
+enters the TX queue. This requirement preserves transport correctness.
 
 The exact F33 uses a 70% 2-Mbit data sample point and receive-edge filtering,
 but retained routes already received its FD traffic at Panda's upstream 80%

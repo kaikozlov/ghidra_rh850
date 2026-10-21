@@ -86,7 +86,7 @@ def _rewrite_indirect_arguments(code: str) -> str:
 
 
 def _pointer_macro_names() -> set[str]:
-    """Object macros that expand to a host pointer, not a loaded word."""
+    """Object macros that expand directly to a host pointer."""
     cached = getattr(_pointer_macro_names, "cached", None)
     if cached is not None:
         return cached
@@ -117,7 +117,7 @@ def _scalar_names(code: str) -> set[str]:
 
 
 def _is_integer_address(expr: str, scalars: set[str], pointers: set[str], pointer_macros: set[str]) -> bool:
-    """True when `expr` is a firmware address, not a pointer into the host mapping."""
+    """True when `expr` is an integer address in the firmware address space."""
     text = expr.strip()
     while syntax._fully_wrapped(text):
         text = text[1:-1].strip()
@@ -425,7 +425,7 @@ def _rewrite_firmware_call_wrap(code: str) -> str:
     """
     def framed_resolver(expr: str) -> str | None:
         # Frame instrumentation wraps the resolver callee in a comma expression.
-        # Its result is already a host function pointer, not another address word.
+        # Its result is already a resolved host function pointer.
         if not expr.startswith("("):
             return None
         close = c_text._match_delimiter(expr, 0)
@@ -561,7 +561,7 @@ def _based_pointers(code: str) -> tuple[dict[str, int], dict[str, tuple[int, str
 
 
 def _expression_is_host_pointer(expr: str) -> bool:
-    """True when an additive term is a host pointer, not a firmware integer."""
+    """True when an additive term is a pointer into the host mapping."""
     depth = 0
     start = 0
     terms: list[str] = []
@@ -670,7 +670,7 @@ def _rewrite_double_indirect(code: str) -> str:
 
 
 def _rewrite_pointer_slot_stores(code: str, ints: dict[str, int]) -> str:
-    """Store ``camry_host_addr`` into a pointer word, not the host pointer."""
+    """Convert the host pointer with ``camry_host_addr`` before storing its firmware word."""
     if not ints:
         return code
     comments = c_text._comment_spans(code)
@@ -944,7 +944,7 @@ def _strip_term(text: str) -> str:
 
 
 def _term_is_host_pointer(term: str) -> bool:
-    """True when the term is a host pointer from a pointer macro, not a loaded scalar."""
+    """True when the term retains a pointer macro's host-pointer representation."""
     macros, fields = _pointer_macro_types()
     text = _strip_term(term)
     match = re.match(r"([A-Za-z_][A-Za-z0-9_]*)", text)
@@ -1095,7 +1095,7 @@ def _expr_is_byte(expr: str, destinations: dict[str, tuple[str, int]]) -> bool:
 def _used_as_byte(
     code: str, start: int, end: int, destinations: dict[str, tuple[str, int]],
 ) -> bool:
-    """The value at [start, end) is a byte load, not a word."""
+    """The value at [start, end) is a single-byte load."""
     if _leading_byte_cast(code, start) is not None:
         return True
     assigned = _assigned_byte(code, start, destinations)
@@ -1971,7 +1971,7 @@ def _rewrite_nested_pointer_fields(code: str) -> str:
 
 
 def _span_is_bare_compare(code: str, start: int, end: int) -> bool:
-    """True when [start, end) is an address compare, not a pointer use.
+    """True when [start, end) compares firmware addresses as integers.
 
     `param + (length - 1)` is still the address register: a byte pointer
     adds that many bytes. A dereference, call, or subscript is not.
@@ -2058,7 +2058,7 @@ def _rewrite_address_parameters(code: str) -> str:
 
 
 def _rewrite_dat_scalars(code: str) -> str:
-    """`_DAT_ff300050` is the word at that address, not an undeclared name."""
+    """Resolve `_DAT_ff300050` as the word stored at that address."""
     widths = layout._access_widths()
     # A word `_DAT_` is Ghidra's untyped scalar. Signed compares (`b6`/`lt`)
     # read it as int32; storing those bits into a uint32 register keeps them.
@@ -2129,7 +2129,7 @@ def _rewrite_string_word_copies(code: str) -> str:
 
     The end is sometimes the string in the compare. The source is sometimes
     `= ""` while the compare already uses `camry_host_ptr` of the end. Either
-    form walks a host literal instead of the firmware bytes.
+    form incorrectly walks a host literal. The copy must read the firmware bytes.
     """
     string_end = '(uintptr_t)("' in code
     empty_source = re.search(r'=\s*""\s*;', code) is not None
@@ -2164,8 +2164,8 @@ def _rewrite_string_word_copies(code: str) -> str:
 def _rewrite_pointer_result(code: str) -> str:
     """A pointer function returns the address word in r10 as a host pointer.
 
-    The signature is the declaration, not a block comment. `/*` before the
-    function is not a pointer return.
+    The function declaration supplies the signature. Ignore `/*` in a preceding
+    block comment when determining the return type.
     """
     signature = syntax._c_signature(code)
     if not signature or not syntax._returns_pointer(signature):
@@ -2188,7 +2188,7 @@ def _rewrite_ghidra_strings(code: str) -> str:
 
     The hex suffix is the address Ghidra gave the string.
     """
-    # These literals are truncated byte tables, not C strings. The exact
+    # These literals are truncated byte tables. Use byte-table loads. The exact
     # ld.bu bases are 622b0/6231a/6235e/62592, 62118/62158, 63700,
     # 7ba28, 3b988/3b99c, and b94e0 in this target.
     literal_bases = {

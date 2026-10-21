@@ -126,8 +126,8 @@ check("startup copy is pinned to application-entry initialization chain", shadow
 ident = tracked["identity_and_integrity_tail"]
 check("low shadow region terminal fixups and 0xFFFFFFFF CRC32 residues are exact", struct.unpack_from("<I", h, 0x17DEC)[0] == 0x722611BD and struct.unpack_from("<I", s, 0x17DEC)[0] == 0x01A011A0 and zlib.crc32(h[0x10000:0x17DF0]) & 0xFFFFFFFF == zlib.crc32(s[0x10000:0x17DF0]) & 0xFFFFFFFF == 0xFFFFFFFF and ident["low_region_crc32_residue_baseline"] == ident["low_region_crc32_residue_target"] == "0xFFFFFFFF")
 
-# The 16 bytes at 0x17DF0..0x17DFF are the region-0 AES-CMAC tag, verified by the
-# boot integrity chain, not an opaque/unresolved field.
+# The boot integrity chain verifies the 16 bytes at 0x17DF0..0x17DFF as the
+# region-0 AES-CMAC tag.
 regions = tracked["boot_integrity_regions"]
 check("boot integrity region table is pinned at 0x8DE0 with three identical rows", regions["region_table_va"] == "0x8DE0" and regions["row_count"] == 3 and regions["row_stride"] == 28 and h[0x8DE0:0x8DE0 + 3*28] == s[0x8DE0:0x8DE0 + 3*28] and regions["table_identical_between_variants"])
 expected_rows = [

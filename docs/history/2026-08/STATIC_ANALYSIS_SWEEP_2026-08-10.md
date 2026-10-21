@@ -1,5 +1,5 @@
-> **Historical snapshot.** This is a point-in-time investigation journal, not
-> current project state. Use [the current overview](../../OVERVIEW.md),
+> **Historical snapshot.** This journal records a point-in-time investigation.
+> For current project state, use [the current overview](../../OVERVIEW.md),
 > [priorities](../../status/PRIORITIES.md), and
 > [findings ledger](../../status/FINDINGS.md) for present conclusions.
 
@@ -44,7 +44,7 @@ routines are explicitly dispositioned: `0x35B86`/`0x35D1E` are a mirrored pair
 of saturated calibration-driven state calculators; `0x5BEA6` and `0xBE8E6`
 are bounded bulk RAM snapshot/copy routines; and `0x916E2` is a bounded
 multi-state protocol/event dispatcher whose exact service semantics remain
-unnamed. These are firmware-static review results, not OEM field names.
+unnamed. These names describe firmware-static review results. OEM field names remain unresolved.
 
 The corrected-graph follow-up now supersedes the earlier untracked sample as a
 review oracle. It reproducibly selects and decompiles 100 functions, including
@@ -85,7 +85,7 @@ was searched separately. No search traversed unrelated personal storage.
 | I-CAN-hack SecOC checkout | available | `/Users/kai/dev/inspect/repos/secoc` at locked `4ce19cc31ff560b697bcd59cc3db55711f50b7b3` |
 | Calvin Park openpilot checkout | available | `/Users/kai/dev/inspect/repos/calvinpark-openpilot` at locked `eeb87f4f9cbcba2ee9c358c8d93015a513c1f822` |
 | Pinned opendbc checkout | available | `/Users/kai/dev/inspect/repos/opendbc` at locked `c9b31d21bc396e8958891e271936bdbdf1a6ca93`; all pinned sender/DBC hashes pass |
-| Additional reference opendbc checkout | available, not the locked evidence checkout | `REFERENCE/opendbc` at `a0febba355168a5cb6168b535144c8c41a5ce323` |
+| Additional reference opendbc checkout | available as a separate reference | `REFERENCE/opendbc` at `a0febba355168a5cb6168b535144c8c41a5ce323` |
 | Unpacked Techstream V18 tree | available | ignored `software/Techstream/v18/unpacked/toyota/Toyota Diagnostics/`; `Techstream.exe`, `IT3UtilityNK.dll`, `IT3UtilityRevNK.dll`, `eVbBroker.dll`, `td3webapi.dll`, both `ptshim32` variants, and `Cuw.exe` present; pinned artifact tests pass |
 | Existing Techstream PE-analysis projects | available | `build/pe-project/techstream_exe.gpr`, `build/pe-project/pe_dlls.gpr`, and nested `pe_dlls/rh850_p1me_mapped.gpr` |
 | Renesas RFP V3.24.00 | available | ignored `software/Renesas/renesas_flash_programmer_macos-arm64/`; locked `libRFP.dylib`, `rfp-cli`, `Devices.xml`, docs, and RA6B1 provisioning image all pass `verify_renesas_rfp.py` |
@@ -158,9 +158,8 @@ was searched separately. No search traversed unrelated personal storage.
 ### Negative/bounded results
 
 - Filename/content-shaped local acquisition remains blocked for the three
-  named missing high-value binaries. This is a current local-availability
-  result, not a claim that no public artifact exists; Stage 8 will inspect
-  upstream deltas and public availability.
+  named missing high-value binaries. This establishes only current local
+  availability. Stage 8 will inspect upstream deltas and public availability.
 - The extra `REFERENCE/opendbc` checkout is newer/different than the locked
   evidence revision and is not used as primary evidence unless separately
   pinned later.
@@ -260,8 +259,8 @@ was searched separately. No search traversed unrelated personal storage.
   the member 2026-05-11 and Git attributes the three archive uploads to
   Vance425 on 2026-05-31, but neither establishes who built the inner payload.
 - Filename prefix `f05` plus exclusive authentication under
-  `f05f36b7...` makes deliberate key selection plausible, not provable. No
-  exact build source or invocation exists in the pinned history.
+  `f05f36b7...` makes deliberate key selection plausible. Proof remains absent:
+  no exact build source or invocation exists in the pinned history.
 
 ### Documentation/tests changed
 
@@ -365,9 +364,9 @@ was searched separately. No search traversed unrelated personal storage.
 
 ### Negative/bounded results
 
-- The 51 S324 strings are distributed procedure/UI codes, not a serialized
-  central state table. Class-local selectors and branches are recovered, while
-  final cross-class successors are chosen by the outer UI/controller callback;
+- The 51 S324 strings identify distributed procedure/UI codes. A serialized
+  central state table remains unsupported. Class-local selectors and branches
+  are recovered, while final cross-class successors are chosen by the outer UI/controller callback;
   the generated CSV localizes that bounded edge instead of imposing a false
   linear state order.
 - No MCU/MCUID label or transformation proves a silicon-identity meaning for
@@ -502,8 +501,8 @@ was searched separately. No search traversed unrelated personal storage.
   remain intentionally unnamed.
 - No matching Sienna EPS `.cuw`/`.cwe`, `4514000` CodeFlash, or named
   Sienna/`8965B4512*`/`8965B4514*` firmware-shaped artifact appeared in the
-  bounded local search. This is a local-availability result, not a global
-  public-availability claim.
+  bounded local search. This establishes only local availability.
+  Global public availability remains unresolved.
 
 ### Documentation/tests changed
 
@@ -612,8 +611,8 @@ was searched separately. No search traversed unrelated personal storage.
 - Internal key `0x1106` is true iff packed capability-word bits `48..50` are
   `1` or `4`; neighboring `0x110x` keys are explicit bit projections and
   `0x120x` keys are derived widths/sizes. `GetSignature (0x3A)` is a separate
-  58/72-byte device/memory descriptor consulted **alongside** that preloaded
-  capability vector, not its source — grade: **verified** (`RFP-007`).
+  58/72-byte device/memory descriptor consulted **alongside** the independently
+  preloaded capability vector — grade: **verified** (`RFP-007`).
 - Generic serial entry is now bounded precisely before RV40F family routing:
   a configuration-selected `uint16` pattern is passed to the driver's named
   `RunModeEntry`, then entry selector 1/2 selects 9600 baud + 1 ms +
@@ -694,9 +693,8 @@ was searched separately. No search traversed unrelated personal storage.
   subset.
 - The target-side effect and reversibility of `ValidateICU_S` cannot be learned
   from the host library alone.
-- Any manufacturing-only ICU key-provisioning agent outside this standard RFP
-  distribution remains a possible external artifact, not a static lead in the
-  current package.
+- A manufacturing-only ICU key-provisioning agent may exist outside this standard
+  RFP distribution. The current package supplies no static lead to such an agent.
 
 ### Commit
 
@@ -767,8 +765,8 @@ was searched separately. No search traversed unrelated personal storage.
   test collector. The group-byte helper has exactly 12 callers, all inside the
   two known opaque/test collectors. No third generic stock COM extraction path
   remains — grade: **verified structural negative**.
-- Tx signals **9** and **37** are final-byte checksums, not dead configured
-  fields. COM PDU route flags are `1,1,0,0,0,0`; PDU 0/1 pass through
+- Tx signals **9** and **37** implement final-byte checksums.
+  COM PDU route flags are `1,1,0,0,0,0`; PDU 0/1 pass through
   `0x800D2 -> 0x7FEAC` after packing and before queueing. `0x7FEAC` sums DLC,
   CAN-ID bytes, and payload bytes except the final byte, then writes the low
   byte of the sum to `payload[DLC-1]`. Pinned opendbc independently implements
@@ -812,8 +810,8 @@ was searched separately. No search traversed unrelated personal storage.
 - Updated canonical Rx/Tx reports, FINDINGS, OPEN_QUESTIONS, ROADMAP, generated
   artifact ownership, Makefile generation targets, verification ownership, and
   this journal.
-- No `CORRECTIONS.md` entry is required: the old Rx/Tx rows were explicitly
-  `configured-unresolved`/bounded, not promoted false findings.
+- No `CORRECTIONS.md` entry is required: the old Rx/Tx rows retained their
+  `configured-unresolved`/bounded status throughout.
 
 ### Verification
 
@@ -831,8 +829,8 @@ was searched separately. No search traversed unrelated personal storage.
 ### Remaining blockers
 
 - None for the Stage-5 COM extraction/production census.
-- Downstream behavioral semantics of anonymous recovered RAM-backed signals are
-  a separate semantic-coverage problem, not an unresolved COM mapping problem.
+- Downstream behavioral semantics of anonymous recovered RAM-backed signals
+  remain a separate semantic-coverage problem. COM mapping is closed.
 - The special `0x7F7/0x7F8` channel's OEM protocol/service name remains unknown
   and is not needed to close its routing relationship.
 
@@ -896,8 +894,8 @@ was searched separately. No search traversed unrelated personal storage.
 
 ### Findings
 
-- **Phase acquisition is ADCG→DMAC→Global RAM, not SFR-window polling.** The
-  P1M-E manual maps `0xFEEF8000..0xFEEFFFFF` as 32 KiB Global RAM A. Firmware
+- **Phase acquisition follows ADCG→DMAC→Global RAM.** SFR-window polling is excluded.
+  The P1M-E manual maps `0xFEEF8000..0xFEEFFFFF` as 32 KiB Global RAM A. Firmware
   descriptors `0x312B0/0x312C0` pair `ADCG0DIR00 @ 0xFFF91200` with ring
   `0xFEEF81E0`; `0x31378/0x31388` pair `ADCG1DIR00 @ 0xFFF92200` with ring
   `0xFEEF8A20`. `0x5F5E0/0x5F68A` consume 432-entry x32-bit rings and feed the
@@ -942,9 +940,9 @@ was searched separately. No search traversed unrelated personal storage.
   recovered even after exhausting the named hidden-transfer classes. This is
   deliberately not promoted to "CAN command cannot actuate"; a runtime-only
   coupling remains logically possible.
-- The nine-channel monitor family reaches fault/event bookkeeping in the
-  recovered downstream trace, not direct motor output. This does not prove its
-  state can never participate indirectly in a broader safety policy.
+- The recovered downstream trace links the nine-channel monitor family to
+  fault/event bookkeeping. Direct motor output remains unproved. Its state
+  could still participate indirectly in a broader safety policy.
 - ADCG `DIR00` source-register identity is exact; the external analog pins or
   physical current-sensor channel assignment are not claimed.
 - The calibration handlers now have precise execution/version domains, but OEM
@@ -1107,8 +1105,8 @@ was searched separately. No search traversed unrelated personal storage.
 - Resident stale bytes in internal ICU staging are not equated with disclosure.
 - Static activator unreachability is not a claim that debugger/fault/hardware
   state can never set the activation byte.
-- The proxy is an engineering architecture, not a live signing capability:
-  slot-4 command-5 permission and performance remain dynamic.
+- The proxy defines an engineering architecture. Live signing still requires
+  dynamic confirmation of slot-4 command-5 permission and performance.
 - `0x7F8` is explicitly not claimed as an unused production transport.
 - Candidate-f05 ZIP member timestamps are not treated as source-control
   provenance; original author/toolchain remain unestablished and further
@@ -1343,7 +1341,7 @@ was searched separately. No search traversed unrelated personal storage.
   `key-recovery-assessment.md`, `software-path-assessment.md`, FINDINGS, and
   OPEN_QUESTIONS: standard SHE disproves nonvolatile slot→RAM_KEY→export;
   command 13 now remains only as a possible Renesas-specific deviation to
-  characterize, not the default extraction path.
+  characterize. The default extraction path excludes it.
 - Removed resolved-only RAM-mirror and VFOREST bullets from OPEN_QUESTIONS;
   renamed the EPS reflash item around the actual remaining `.cuw` artifact need.
 - Updated stale project cardinalities in OVERVIEW, the `4512000` variant record,
@@ -1364,9 +1362,9 @@ was searched separately. No search traversed unrelated personal storage.
   still said 5,865; both now use the verified 5,921-function project.
 - **Processor documentation had two stale cardinalities.** The undefined-byte
   audit now covers all 5,921 recovered functions, and the complete decoded
-  `switch` census is 252 (20 real + 5 packed-case0 false positives + 227 other),
-  not 251. The 20 recovered real switches are unchanged.
-- **SECOC-026 was historical, not open.** The sibling CPU-visible key-table
+  `switch` census is corrected from 251 to 252 (20 real + 5 packed-case0 false positives + 227 other).
+  The 20 recovered real switches are unchanged.
+- **SECOC-026 records a historical technique.** The sibling CPU-visible key-table
   technique is retained as external evidence, but transfer to `4512000` is now
   explicitly described as superseded by the SECOC-027 negative.
 - **No variant leakage was found.** `4514000` observations remain explicitly

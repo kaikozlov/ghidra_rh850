@@ -119,8 +119,8 @@ ID search. Camry enables generated-COM family5 (`count=1`, route `4`) and has a
 47th acceptance rule for extended `0x1FDC0002`. Exact Crown has the same
 transport-table/RSCFD architecture, but family5 is configured as `count=0`,
 route `0xFF`; its 44-rule acceptance table stops after diagnostics. The matching
-`0x9FDC0002` request and `0x9FE00002` response words are absent as a coherent
-feature, not merely relocated literals.
+`0x9FDC0002` request and `0x9FE00002` response feature is absent across the
+recovered configuration and acceptance tables.
 
 The temporary classic-`0x1DA` fallback is also closed as the wrong *private
 mailbox* assumption for mruno's car. Crown really receives PDU45/`0x1DA`; the
@@ -230,8 +230,8 @@ The host sends the helper as sequential functional `C6` single frames on
 modified: the helper signs the native application/freshness locally and requires
 its generated `FV4 || MAC28` to equal Toyota's existing B28..B31 exactly.
 
-Do not proceed unless `native_verified=true`. A mismatch is a target-port
-failure, not a reason to bypass the check.
+Do not proceed unless `native_verified=true`. Treat a mismatch as a target-port
+failure. Keep the check enabled.
 
 ### 4. Stationary current-angle replacement only
 

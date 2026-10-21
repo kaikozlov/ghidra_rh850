@@ -167,8 +167,8 @@ def main() -> int:
         },
         "boundary": (
             "Exact-H disposable-project decompilations for the protected 0x0B6 freshness/verification state machine, raw-byte-bound "
-            "to 8965H1202000. This evidence is intended to complement, not replace, the separately verified byte-complete receiver "
-            "envelope and ICU-S key-selector provenance artifacts."
+            "to 8965H1202000. This evidence complements the separately verified byte-complete receiver "
+            "envelope and ICU-S key-selector provenance artifacts, which remain independently required."
         ),
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)

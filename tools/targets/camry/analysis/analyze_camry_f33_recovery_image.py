@@ -38,7 +38,7 @@ def _spans(offsets: list[int]) -> list[dict[str, int]]:
 
 
 def _factory_lookup_identity(factory: bytes) -> dict[str, Any]:
-    """Read the reviewed 0105 backing object, not a guessed serial-number prefix.
+    """Read the reviewed 0105 backing object directly.
 
     The caller has already verified the complete factory-reference hash. These
     are archived lookup inputs, never substituted for a live diagnostic reply.
@@ -79,7 +79,7 @@ def compare_image(candidate: bytes, factory: bytes) -> dict[str, Any]:
             "The reference is not the reviewed 8965F3307000 factory baseline"
         )
 
-    # Exact-target native descriptors, not fields supplied by the candidate image.
+    # Read exact-target native descriptors from the verified factory reference.
     descriptors = [
         struct.unpack_from("<7I", factory, 0x8E00 + i * 28) for i in range(2)
     ]

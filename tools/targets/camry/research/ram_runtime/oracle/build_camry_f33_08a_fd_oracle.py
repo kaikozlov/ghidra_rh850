@@ -100,7 +100,7 @@ def verify_firmware_contract(image: bytes) -> dict[str, object]:
          "software RX ring base/capacity drift")
     need(RX_RING_BASE + RX_RING_WORDS * 4 - 1 == RX_RING_END, "RX ring end geometry drift")
 
-    # A native FD rule proves FDF is represented after GAFL matching rather than in GAFLID.
+    # A native FD rule places FDF representation after GAFL matching; GAFLID excludes FDF.
     b6_raw, b6_len = struct.unpack_from("<II", image, 0x21FE8 + 39 * 8)
     need(rules[39] == (0x000000B6, 0x00300000, 0x00000002, 0), "B6 GAFL rule drift")
     need((b6_raw, b6_len) == (0x400000B6, 32), "B6 FD CanIf descriptor drift")

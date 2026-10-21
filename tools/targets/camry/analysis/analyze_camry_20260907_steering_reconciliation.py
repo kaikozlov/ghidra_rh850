@@ -301,9 +301,9 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
           l1x, l1y = list(m.laneLines[1].x), list(m.laneLines[1].y)
           l2x, l2y = list(m.laneLines[2].x), list(m.laneLines[2].y)
 
-          # The onroad renderer uses the raw model path, not merely 10/20/30-m
-          # probes. Check every raw path point through 100 m so a far-horizon
-          # visual crossing cannot hide between the fixed-distance summaries.
+          # The onroad renderer uses every raw model path point. Check each
+          # point through 100 m so a far-horizon visual crossing cannot hide
+          # between the fixed-distance 10/20/30-m summaries.
           xmax = min(px[-1], l1x[-1], l2x[-1], 100.0)
           full_margins: list[float] = []
           for path_x, path_y in zip(px, py, strict=True):
@@ -427,7 +427,7 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
       "reference_minus_b6_deg": qstats(ref_b6),
       "reference_closer_to_stock_count": stock_closer,
       "reference_closer_to_b6_count": b6_closer,
-      "reference_position_ratio_definition": "(0x081 - stock_0x08A) / (B6 - stock_0x08A); geometric reference-plane ratio only, not an EPS B6 blend fraction",
+      "reference_position_ratio_definition": "(0x081 - stock_0x08A) / (B6 - stock_0x08A); geometric reference-plane ratio only; EPS B6 blend fraction remains unresolved",
       "reference_position_ratio": qstats(weights),
     }
 
@@ -519,7 +519,7 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
     "stock_id0_while_openpilot_b6_id11": {
       "model_rows": stock0_b611_rows,
       "rows_with_abs_driver_torque_lt_0p5_nm": stock0_b611_low_torque_rows,
-      "interpretation": "useful non-coincident-request episodes, but not by themselves a causal B6 actuation proof",
+      "interpretation": "useful non-coincident-request episodes only; causal B6 actuation requires additional proof",
     },
     "conclusion": {
       "b6_wire_angle_matches_openpilot_request": True,

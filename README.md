@@ -22,8 +22,8 @@ recorded vehicle demonstration establish different things.
 | Choose the next investigation | [Priorities](docs/status/PRIORITIES.md) |
 | Look up a prior claim or correction | `tools/know QUERY` |
 
-Detailed integration state belongs in the target reports, not in a second
-summary here. Dated checkpoints and old experiments are retained evidence;
+Detailed integration state belongs in the target reports.
+Dated checkpoints and old experiments are retained evidence;
 their commands, bus assignments, and software revisions are not automatically
 current instructions.
 
@@ -60,7 +60,7 @@ The short commands under `tools/` are the public interface:
 
 Bare `tools/test` runs nothing. Select checks for the code or evidence being
 changed; documentation-only edits do not need tests. `full`, `local`, and
-processor/SLEIGH gates are deliberate milestone tools, not the edit loop.
+processor/SLEIGH gates are deliberate milestone tools.
 
 ## Registered analysis targets
 
@@ -94,7 +94,7 @@ or supported vehicles.
 | `tools/` | Public commands and capability/target-scoped implementations |
 | `tests/`, `verification.toml` | Subsystem/target checks and their public suite selectors |
 | `ghidra/` | Vendored processor/CLI and analysis scripts |
-| `tsk/`, `exploit/` | Diagnostic support and experimental research implementations, not port qualification |
+| `tsk/`, `exploit/` | Diagnostic support and experimental research implementations |
 | `docs/` | Guides, scoped reports, status references, and historical journals |
 | `software/` | Tracked corpus identities plus ignored local vendor inputs |
 | `REFERENCE/`, `build/` | Ignored reference material and mutable workspace; never evidence authority |

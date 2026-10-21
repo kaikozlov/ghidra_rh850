@@ -43,7 +43,7 @@ verification done at introduction time - the sources are not vendored, so the
 producer records the pins instead of re-reading them).  ``___clz_tab`` bytes
 are read from the committed ``_clz.o`` .rodata and verified against its
 mathematical definition: t[0] == 0 and t[i] == i.bit_length() (floor(log2 i) + 1
-for i >= 1), NOT floor(log2 i).
+for i >= 1).
 
 License: the committed objects and their embedded code are GPL-3.0-or-later
 with the GCC Runtime Library Exception 3.1 (see COPYING3 / COPYING.RUNTIME in

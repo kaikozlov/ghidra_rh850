@@ -98,7 +98,7 @@ check("Sport selector1 differs from selector0 in exactly five direct calibration
           "C91F2_map_A_to_C5A8",
           "C9258_map_B_to_C5A8",
       ])
-check("selector2 differs only in three small shaping regions, not the main torque surface",
+check("selector2 differs only in three small shaping regions",
       census["selector2_distinct_regions_vs_selector0"] == [
           "C7AB0_map_B_to_C41E", "C91F2_map_A_to_C5A8", "C9258_map_B_to_C5A8",
       ])
@@ -138,7 +138,7 @@ check("physical funnel writer sets remain exact for the command/current cells",
       and funnel["writer_sets"]["FEBE6DEC"] == ["0x00038502","0x00059448"]
       and funnel["writer_sets"]["FEBE6DC8"] == ["0x0003835E","0x00059448"]
       and funnel["writer_sets"]["FEBE6DD6"] == ["0x000384D8","0x00059448"])
-check("6D84/6D86 are downstream diagnostic mirrors of 6DD6/6DC8, not the upstream command source",
+check("6D84/6D86 are downstream diagnostic mirrors of 6DD6/6DC8",
       funnel["downstream_current_diagnostic_mirror"]["cells"] == ["FEBE6D84","FEBE6D86"]
       and funnel["downstream_current_diagnostic_mirror"]["direct_writers"]["FEBE6D84"] == ["0x00037F16","0x00059448"]
       and funnel["downstream_current_diagnostic_mirror"]["direct_writers"]["FEBE6D86"] == ["0x00037F16","0x00059448"])

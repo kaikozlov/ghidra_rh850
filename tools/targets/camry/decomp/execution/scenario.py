@@ -616,7 +616,7 @@ _R10_UPDATE = {"addi_imm5", "sxh", "zxh", "sxb", "zxb", "shr", "sar", "shl_imm"}
 _CONSUMED_RETURNS: set[int] = set()
 
 
-# The last operand is an immediate, not a register. A displacement of 10 is not r10.
+# Interpret the last operand as an immediate displacement: 10 means the value 10.
 _IMM_TAIL = {
     "ld8s", "ld8u", "ld16s", "ld16u", "ld32",
     "st8", "st16", "st32",
@@ -673,7 +673,7 @@ def _returns_read_by_callers(functions: dict[int, object]) -> set[int]:
 
 
 def _simulator_cause(report: dict) -> str:
-    """Group a machine failure by its fault or runner error, not by the address."""
+    """Group a machine failure by its fault kind or runner error type."""
     fault = (report.get("fault") or {}).get("kind")
     if fault:
         return str(fault)

@@ -117,7 +117,7 @@ def body_hash(img: bytes, rec: dict[str, Any]) -> str:
 
 
 def direct_calls(text: str, symbol_addresses: dict[str, int]) -> set[int]:
-    # Resolve canonical symbols, not just anonymous FUN names. Ignore comments,
+    # Resolve all canonical symbols, including named functions. Ignore comments,
     # string/character literals and the function declaration when collecting edges.
     code = re.sub(r'/\*.*?\*/|//[^\n]*|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'',
                   " ", text, flags=re.DOTALL)
@@ -279,8 +279,8 @@ def analyze() -> dict[str, Any]:
              "e0e9ca251cf0000d72981b381d300340630f0100e50f431b9309630f0400bfffa6ee"),
          "opposite queue-family instruction/dataflow drift")
 
-    # 5) The timing blind spot: software-ring drain/enqueue and SecOC consume are ordered
-    # inside one 7A254 invocation, not separated by a foreground wait.
+    # 5) The timing blind spot: software-ring drain/enqueue and SecOC consume run
+    # in order inside one 7A254 invocation without an intervening foreground wait.
     t = c[0x7A254]
     receive_call = t.find(f"{funcs[0x79EDE]['name']}();")
     consume_call = t.find(f"{funcs[0x6A410]['name']}();")
@@ -357,7 +357,7 @@ def analyze() -> dict[str, Any]:
          and ebu_topology["exact_camry"]["critical_brake_eps_junctions_invariant_across_all_options"] is True,
          "Camry EBU component/junction boundary drift")
 
-    # Function evidence pins the proof to canonical corpus bytes, not documentation labels.
+    # Function evidence pins the proof directly to canonical corpus bytes.
     evidence = {}
     for a, role in ROLE.items():
         r = funcs[a]
@@ -377,7 +377,7 @@ def analyze() -> dict[str, Any]:
     ]
     runtime_only = [
         "The exact physical/link-layer reason a Panda B6 fails to become an F33 controller1 receive object: an unobserved/routed physical segment is the leading model, while a link-decode failure before GAFL acceptance remains the narrow receiver-side residue.",
-        "The physical provenance of the profile2 deliveries that advanced route44 during the retained zero-host-B6-TX control. Static software proves their route, not which external node/link produced the received frame.",
+        "The physical provenance of the profile2 deliveries that advanced route44 during the retained zero-host-B6-TX control. Static software proves only their route; the external source node/link remains unresolved.",
         "ICU-S silicon-internal cryptographic behavior beyond the recovered software-visible command/result contract.",
         "Final motor/PWM/plant response after the already-recovered software command/current funnel.",
     ]
@@ -390,7 +390,7 @@ def analyze() -> dict[str, Any]:
         "canonical_graph_repair": {
             "added_real_entries": ["0x00071508","0x0007D72C","0x000810F2"],
             "function_count_before": 6062, "function_count_after": 6065,
-            "distinction": "These are three real omitted entries, not a reversal of CORR-181's three false +4 child splits at BCD66/CCFB6/CEE80.",
+            "distinction": "These are three omitted function entries.",
         },
         "physical_ingress": {
             "controller1_rule_count":47,"normal_rule_count":43,"b6_rule_index":39,
@@ -441,7 +441,7 @@ def analyze() -> dict[str, Any]:
                 "sha256": sha(TOPOLOGY.read_bytes()),
                 "eps": eps_place,
                 "skid": skid_place,
-                "boundary": "GTS Bus 4 is a logical network domain. EBU is the junction/attachment label on the EPS row, not an installed exact-Camry ECU component; do not model a separate EBU filter ECU from this table.",
+                "boundary": "GTS Bus 4 is a logical network domain. EBU labels only the junction/attachment on the EPS row; the table supplies no installed exact-Camry EBU ECU component. Do not model a separate EBU filter ECU from this table.",
                 "ebu_topology_path": str(EBU_TOPOLOGY.relative_to(ROOT)),
                 "ebu_topology_sha256": sha(EBU_TOPOLOGY.read_bytes()),
             },

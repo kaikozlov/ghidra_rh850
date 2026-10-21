@@ -95,7 +95,7 @@ def extract_buses(log_root: Path, reader, output: Path) -> None:
         'schema': 'camry-cancel-all-bus-windows-v1', 'windows': metadata,
         'layout': 'historical repin: chassis/car bus0, FRC chassis side bus2, ADAS bus1',
         'selection': 'switch_cancel: all native 0/1/2 frames within +/-1s, no address/length filter; stock_placement: selected native mirror IDs in the first second of four stock-harness rlogs',
-        'timestamps': 'host publication timestamps, not physical wire arbitration timing',
+        'timestamps': 'host publication timing only; physical wire arbitration timing is unmeasured',
     }, rows)
     print(output, flush=True)
 

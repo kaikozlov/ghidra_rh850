@@ -230,7 +230,7 @@ def main() -> int:
                     "ordinary_slot": 1,
                     "upper_pdu_id": h_b6["upper_pdu_id"],
                 },
-                "meaning": "B6 is Corolla-specific as a protected PDU identity/application route, not as a cryptographic profile shape: it is instantiated from the same FD ordinary SecOC class already present as Sienna 0x0D7/0x090.",
+                "meaning": "B6's protected PDU identity/application route is Corolla-specific. Its cryptographic profile instantiates the same FD ordinary SecOC class already present as Sienna 0x0D7/0x090.",
             },
         },
         "synchronization_manager_config": {

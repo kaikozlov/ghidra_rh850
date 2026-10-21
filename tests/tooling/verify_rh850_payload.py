@@ -341,8 +341,8 @@ unsigned check_bits(unsigned char *p4) {
         body = function_mnemonics(elf, name)
         assert load in body and "tst1" not in body, (name, body)
 
-    # Different optimization passes expose different RTL shapes. Execute the
-    # exhaustive signed/inverse-bit checks, not just assembler acceptance.
+    # Different optimization passes expose different RTL shapes. Require
+    # exhaustive signed/inverse-bit checks in addition to assembler acceptance.
     command = [str(CLI), "toolchain", "run", "--work-dir", str(work)]
     for optimization in ("Oz", "O2"):
         compiled = subprocess.run(

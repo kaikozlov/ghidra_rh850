@@ -205,7 +205,7 @@ PROFILES: dict[str, Profile] = {
         },
         selections=_selections([0xC9C16, 0xC9CD2, 0xCB68A, 0xCBE6E, 0xCB8BA, 0xCB9B6, 0xCBA40, 0xCD3CC, 0xCD440, 0xCE974, 0xCEFF8, 0xB8E84, 0xCEDAE, 0xCF028]),
         boundary_key="boundary",
-        boundary="remaining steering-role evidence only; target-native roles are bound by caller/callee topology and dataflow, not local byte alignment",
+        boundary="remaining steering-role evidence only; caller/callee topology and dataflow establish target-native roles. Local byte alignment alone is insufficient",
     ),
     "storage-nvm": Profile(
         summary="changed storage/NvM roles",

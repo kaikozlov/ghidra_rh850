@@ -242,7 +242,7 @@ def build() -> dict[str, Any]:
             },
             "application_sequence": {"signal": 261, "wire": "B7[5:0]", "modulus": 64},
             "secoc_boundary": (
-                "Signal261 is application sequence state, not SecOC message8. SecOC authentication/freshness is a sender/transport prerequisite; this Panda contract does not claim to verify ICU-S slot4 or reconstruct CMAC itself."
+                "Signal261 carries application sequence state. SecOC message8 is separate. SecOC authentication/freshness is a sender/transport prerequisite; this Panda contract does not claim to verify ICU-S slot4 or reconstruct CMAC itself."
             ),
         },
         "eps_hard_envelope": {
@@ -280,7 +280,7 @@ def build() -> dict[str, Any]:
                 "persistent_eps_debounce_cycles_low_bank": u16(h, low + 0x06),
                 "persistent_eps_debounce_cycles_high_bank": u16(h, high + 0x06),
                 "panda_candidate_action": "cut active command immediately when abs(raw signal186) > 100; do not wait for the EPS persistent debounce",
-                "physical_unit_boundary": "Firmware proves the signed12 rate field and raw threshold 100. The current Toyota DBC uses 1 deg/s/count, but the historical DBC comment called the factor TBD; treat 100 deg/s as a prior-art physical interpretation, not a firmware-native unit proof.",
+                "physical_unit_boundary": "Firmware proves the signed12 rate field and raw threshold 100. The current Toyota DBC uses 1 deg/s/count, but the historical DBC comment called the factor TBD; 100 deg/s remains only a prior-art physical interpretation. Firmware-native units remain unproved.",
             },
             "internal_target_conditioning": {
                 "runtime_low_bank_lta_slew_doubled_domain_per_steering_task": low_values["lta_internal_slew_doubled_domain"],
@@ -294,7 +294,7 @@ def build() -> dict[str, Any]:
             },
             "internal_inhibit_chain": {
                 "target_plausibility_output": "0xCB4F4 -> FEBEC269; target magnitude/delta violation or internal C268/C263 state can assert it",
-                "internal_response_output": "0xCB59A -> FEBEC26B; persistent FEBEAE16 internal-command magnitude monitor, not measured motor Q-current and not directly available as a CAN measurement",
+                "internal_response_output": "0xCB59A -> FEBEC26B; monitors persistent FEBEAE16 internal-command magnitude. Measured motor Q-current is separate; FEBEAE16 is unavailable as a direct CAN measurement",
                 "aggregate": "0xCB22E sets FEBEC26A = (FEBEC269 == 1) || (FEBEC26B == 1)",
                 "additional_gate": "FEBEC245 from 0xCB14E is independently required clear by 0xCADE4/0xCAE18",
                 "cooperative_enable_consumers": ["0x000CADE4", "0x000CAE18"],
@@ -302,7 +302,7 @@ def build() -> dict[str, Any]:
             },
             "controller_error_clamp": {
                 "internal_abs_limit": global_values["controller_error_clamp_internal"],
-                "classification": "controller error saturation, not promoted to a Panda rejection threshold",
+                "classification": "controller error saturation only; Panda rejection policy remains separate",
             },
         },
         "measured_inputs": {
@@ -335,7 +335,7 @@ def build() -> dict[str, Any]:
                 "override_abs_threshold_nm": None,
                 "parameter_name": "driver_override_abs_nm",
                 "override_policy_source": limits["driver_torque"]["policy_classification"],
-                "override_boundary": "The firmware's ~8.238 N.m acquisition clamp and ±10 N.m telemetry saturation are representation limits, not driver-override thresholds. The promoted exact-H census finds no physical-driver-torque comparator in the target-to-motor control cone, so this threshold is a Panda/openpilot policy to choose conservatively and validate dynamically.",
+                "override_boundary": "The firmware's ~8.238 N.m acquisition clamp and ±10 N.m telemetry saturation bound representation only. The promoted exact-H census finds no physical-driver-torque comparator in the target-to-motor control cone, so the driver-override threshold is a Panda/openpilot policy to choose conservatively and validate dynamically.",
             },
             "steering_fault_inhibit": {
                 "can_id": "0x030",
@@ -415,7 +415,7 @@ def build() -> dict[str, Any]:
             "driver_torque_acquisition_and_telemetry_clamps": {
                 "acquisition_clamp_abs_nm": limits["driver_torque"]["acquisition_clamp_abs_nm"],
                 "telemetry_saturation_abs_nm": limits["driver_torque"]["telemetry_saturation_abs_nm"],
-                "reason": "representation limits, not OEM driver-override thresholds",
+                "reason": "representation limits only; OEM driver-override thresholds remain unrecovered",
             },
             "measured_q_current": {
                 "reason": "physical Q-current is observable, but no cooperative-supervisor measured-Q comparator is recovered; internal FEBEAE16 thresholds are not Q-current",

@@ -8,7 +8,7 @@ These binaries are the exact executable bytes pinned by the adjacent
 The binaries and manifests are frozen checkpoint evidence. The manifests retain
 their original source paths, source hashes, and toolchain identities, including
 paths from the former `exploit/ephemeral_runtime/` layout. Those paths describe
-the audited build, not the current checkout. Moving a builder does not create a
+the audited build only. Moving a builder does not create a
 new audit or transfer its historical hardware result to a rebuilt payload.
 
 Builders write disposable output under `build/out/`. Verification binds the

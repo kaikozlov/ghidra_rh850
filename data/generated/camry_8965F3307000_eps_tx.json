@@ -38,7 +38,7 @@
       ]
     ],
     "hth_table_address": "0x21ACC",
-    "interpretation": "0x030 and the four classic PDUs use sibling hardware objects on the same lower CAN-driver node; retained HTH state 0x69 means idle/available, not disabled",
+    "interpretation": "0x030 and the four classic PDUs use sibling hardware objects on the same lower CAN-driver node; retained HTH state 0x69 means idle/available",
     "normal_pdu_routes": [
       {
         "can_id": "0x030",
@@ -88,7 +88,7 @@
     ]
   },
   "dynamic_observations": {
-    "boundary": "tracked retained-log evidence; absence is an observation for these captures, not proof that a configured PDU can never transmit",
+    "boundary": "tracked retained-log evidence; absence applies only to these captures; transmission by a configured PDU outside them remains possible",
     "parked_censuses": {
       "post_repin_nrtd": {
         "absent_carriers": {
@@ -1068,7 +1068,7 @@
         {
           "grade": "GTS+firmware",
           "producer": "0x4C490",
-          "role": "signed motor-feedback/current-family proxy; related to, but not identical units with, DID1151 Q-axis current",
+          "role": "signed motor-feedback/current-family proxy; related to DID1151 Q-axis current through different units",
           "signal": 33,
           "source": "0xFEBE816C",
           "wire": "B22:B23"

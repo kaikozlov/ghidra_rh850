@@ -51,8 +51,8 @@ to only **11 producer functions** (`0x4B66C`, `0x4B754`, `0x4B7BA`, `0x4B882`,
 Only eight additional direct READ references exist, across signals 1, 6, 8,
 10, and 38. The exporter derives the staging-address set from the six packer
 bodies rather than from documentation, while the verifier independently pins
-every owning-function body hash to raw CodeFlash. This is a producer-census
-claim, not yet a semantic naming claim for the anonymous status fields.
+every owning-function body hash to raw CodeFlash. This establishes a producer
+census. Semantic names for the anonymous status fields remain unresolved.
 
 The application transmit chain is:
 
@@ -218,9 +218,9 @@ The status-bit producer graph is compact and explicit. Signal 0 follows
 `FEBEAD33 -> FEBEE830 -> FEBE8094`; `eps_subsystem_init_orchestrator @ 0xBD10E`
 and normal `steering_command_export_scale @ 0xCB700` both write the upstream
 byte as zero, and the live-project reference census finds no other direct
-producer. This is why the legacy `STEER_OVERRIDE` name is retained only as a
-DBC wire-position label, not as a claim that this Sienna emits the historical
-driver-threshold behavior on that bit.
+producer. The legacy `STEER_OVERRIDE` name therefore serves only as a DBC
+wire-position label. Historical driver-threshold behavior on that bit remains
+unproven for this Sienna.
 
 Signal 1 is synthesized in `0x4B66C`: three local validity fields must be zero
 and three snapshotted status bytes are compared against marker `0x22`. That
@@ -408,8 +408,7 @@ signal 289 is a signed 12-bit field from classic CAN `0x64F` into
 `0xFEBE807C`. `FUN_0004703E` computes `s221 - s289`, saturates the intermediate,
 and stores it at `0xFEBE7CE6`; the `0x4B7BA` Tx producer clamps that value again
 to **-2048..2047** before packing B3/B4. B1/B2 re-encode signal 221 directly.
-This is therefore an explicit verified **Rx→Tx state join**, not merely a shared
-RAM-address coincidence.
+This establishes an explicit verified **Rx→Tx state join**.
 
 The same producer also reuses states recovered for `0x260`: B5 derives from the
 driver-torque staging word after division by 10 and signed-byte saturation,
@@ -475,9 +474,9 @@ AUTOSAR plumbing:
    `0xFEBEBF7B`, which is exported through `0xFEBEACF6 -> 0xFEBEE844 ->
    0xFEBE80A3` to CAN `0x262` B3[5], **bit4 of public `LKA_STATE`**.
 
-The third relation is deliberately phrased as *command contributes to visible
-status*, not `status = command`: `0xC8072` has additional state inputs. It does,
-however, establish a firmware-static authenticated-command→external-status edge.
+The third relation establishes that the *command contributes to visible status*:
+`0xC8072` combines the command with additional state inputs.
+This establishes a firmware-static authenticated-command→external-status edge.
 The raw path is pinned by `verify_application_interface_state_joins.py`; the
 exact live-project reference sets are pinned by
 `AssertApplicationInterfaceStateJoins.java`.

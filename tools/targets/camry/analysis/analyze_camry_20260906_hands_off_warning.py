@@ -10,8 +10,8 @@ while stock LTA is active, native bus-2 0x371 byte 19 switches into bit6 state
 (typically 0x20 -> 0x40) after a long no-driver-torque interval and clears
 immediately after renewed steering torque. In the same clean-LTA population,
 0x371 B20[4] is strongly associated with exact-F33 0x030 physical driver torque
-and B17[0] is its exact structural complement; this is retained as a dynamic
-driver-steering detector candidate, not assigned a static OEM CAN-bit name. A
+and B17[0] is its exact structural complement; this remains a dynamic
+driver-steering detector candidate with an unresolved static OEM CAN-bit name. A
 native 0x412 HUD-state transition (B0=0x14 with B1[3:2]=3) is paired to the
 warning edges, with B2[6] providing a later ~6-second escalation stage. Current
 Techstream Operation-FFD vocabulary independently contains Hands-Off Judgment,
@@ -518,7 +518,7 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
         "best_minimum_classification_error": best_min_error,
         "selected_policy_threshold_nm": 0.6,
         "selected_threshold_witnesses": threshold_witnesses,
-        "boundary": "classification against Toyota's slower hysteretic driver-detect state; intended to choose a simple upstream-style steeringPressed threshold, not to claim Toyota itself uses one static torque comparator",
+        "boundary": "classification against Toyota's slower hysteretic driver-detect state; intended to choose a simple upstream-style steeringPressed threshold; Toyota's own torque-comparator implementation remains unresolved",
       },
       "lane_change_starting_sign": {
         "count": len(lane_change_starts),
@@ -537,7 +537,7 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
       "escalation_episode_count": len(escalation_episodes),
       "first_escalation_lag_from_warning_s": quantiles(escalation_lags),
       "escalation_episode_target_lateral_ids": [sorted(e["target_lateral_ids"]) for e in escalation_episodes],
-      "boundary": "dynamic state/timing join; B20[4] is a strong low-sensitivity driver-steering detector candidate, not a statically joined OEM bit name or exact torque threshold",
+      "boundary": "dynamic state/timing join; B20[4] is a strong low-sensitivity driver-steering detector candidate; its static OEM bit name and exact torque threshold remain unresolved",
     },
     "warning_candidate": {
       "carrier": "native Panda bus2 0x371/32 B19 bit6",
@@ -612,7 +612,7 @@ def main() -> int:
       "exact_eps_torque": "native bus0 0x030 signed(B8)*0.1 + signed4(B17 low nibble)*0.01 N.m",
       "hud_companion_candidate": "native bus2 0x412 B0=0x14 and B1[3:2]=3",
       "hud_escalation_candidate": "native bus2 0x412 B2 bit6 while warning active",
-      "stock_acc_standstill_candidate": "native bus2 0x08A B7 in {0x66,0x67} while cruise latch is set; delayed zero-speed hold state, not generic vehicle standstill",
+      "stock_acc_standstill_candidate": "native bus2 0x08A B7 in {0x66,0x67} while cruise latch is set; specifically a delayed zero-speed hold state",
       "semantic_boundary": "dynamic timing/torque/state joins only; exact OEM CAN bit names and exact torque threshold remain unproved",
     },
     "routes": routes,
@@ -620,7 +620,7 @@ def main() -> int:
       "pre_fix_routes": ["3b", "3c", "3d"],
       "post_fix_outbound": "3e",
       "post_fix_return": "3f",
-      "causality_boundary": "The post-fix warning onsets are observed before steeringPressed becomes true and while latActive and transmitted B6 ID11 remain active; this rules out the new steeringPressed event as the immediate trigger of the native warning onset, not every possible indirect vehicle-policy interaction.",
+      "causality_boundary": "The post-fix warning onsets are observed before steeringPressed becomes true and while latActive and transmitted B6 ID11 remain active; this rules out the new steeringPressed event as the immediate trigger of the native warning onset. Possible indirect vehicle-policy interactions remain unresolved.",
     },
   }
   args.out.parent.mkdir(parents=True, exist_ok=True)

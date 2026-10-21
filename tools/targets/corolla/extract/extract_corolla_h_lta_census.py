@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Compact whole-corpus facts needed by Corolla-H LTA provenance verification.
 
-This is a promotion tool, not a core verifier.  The source corpus is a disposable
+This tool promotes evidence. The source corpus is a disposable
 Ghidra workspace export and must be supplied explicitly; the tracked compact
 result is what repository verification consumes.
 """

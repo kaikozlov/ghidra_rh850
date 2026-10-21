@@ -266,7 +266,7 @@ def trial_comparison(z: dict) -> dict:
             'n': int(strong.sum()), 'host_request_range': [float(v) for v in (a[strong, 5].min(), a[strong, 5].max())],
             'ca_resultlike_range': [float(v) for v in (a[strong, 4].min(), a[strong, 4].max())],
             'host_vs_ca': stats(a[strong, 5], a[strong, 4])}
-    out['boundary'] = ('The native value is an observed comparison, not a randomized counterfactual. Better native fit '
+    out['boundary'] = ('The native value provides an observational comparison only. Better native fit '
                        'invalidates the previous correlation-only proof of host authority, but cannot rule out indirect influence.')
     return out
 
@@ -362,7 +362,7 @@ def build(fixture: Path) -> dict:
         report['trials'][label] = {**sensor_summary(groups[label], 2, 1),
                                    'delivery': delivery_summary(groups[label]), 'comparison': trial_comparison(groups[label])}
     report['conclusions'] = {
-        'fine_field': 'Strongly supported as ego-acceleration/measurement-like on this Camry, not a demonstrated independent acceleration demand.',
+        'fine_field': 'Strongly supported as ego-acceleration/measurement-like on this Camry; independent acceleration demand remains undemonstrated.',
         'b12_field': 'Closely follows a chassis acceleration/result-like channel; native timing and the untouched-camera comparison do not establish host command authority.',
         'whole_pdu': 'FRC-origin ADAS publication containing ego-state information; a report to the perception/radar domain is the leading interpretation. The consumer and every field are not recovered.',
         'not_proven': ['All 0x160 fields are telemetry', 'Exact OEM signal names and validity contracts',

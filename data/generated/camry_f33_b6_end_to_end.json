@@ -1309,7 +1309,7 @@
       ],
       "n": 10,
       "name": "d0218_branch",
-      "proves": "normal D0218 branch actually included B6 rather than diagnostic/service reduction"
+      "proves": "normal D0218 branch included B6 with diagnostic/service reduction inactive"
     },
     {
       "cells": [
@@ -2531,7 +2531,7 @@
     }
   ],
   "scheduler": {
-    "boundary": "The two cyclic roots share snapshot RAM; exact within-task ordering is recovered. Absolute inter-task phase is scheduler/runtime state, not one direct call chain.",
+    "boundary": "The two cyclic roots share snapshot RAM; exact within-task ordering is recovered. Absolute inter-task phase depends on scheduler/runtime state across the two call chains.",
     "communications_application_root": "66062 -> 667E6 -> 58B5E -> 5EC24/5F610 -> 4BD46 -> 58074 -> BCD62 -> D1130 -> D0EEC",
     "shared_command_root": "65FEA -> 6679E -> 5899E -> C1F7A/C2000 -> BCD02 -> BCAA6/BCBD8 -> D1100 -> D0AF6 -> BF33E"
   },

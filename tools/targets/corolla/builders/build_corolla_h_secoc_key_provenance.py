@@ -246,7 +246,7 @@ def main() -> None:
             "min_entropy": scan["min_entropy"],
             "capture_summary": df["capture"]["summary"],
             "boundary": "The DataFlash dump and retained CAN oracle are contributor artifacts and are not proven same-runtime-epoch. The scan excludes an exact raw 16-byte candidate among the 23,277 tested windows; it does not exclude transformed/derived values or ICU-S-internal storage.",
-            "interpretation": "the committed exhaustive raw-window scan found zero candidate matches; this supports absence of an obvious CPU-visible raw key in the supplied DataFlash snapshot, not absence of derivation or protected hardware storage",
+            "interpretation": "the committed exhaustive raw-window scan found zero candidate matches; this supports absence only of an obvious CPU-visible raw key in the supplied DataFlash snapshot. Derivation and protected hardware storage remain possible",
         },
         "static_storage_derivation_conclusion": {
             "mapped_secoc_init_raw_key_load_found": False,

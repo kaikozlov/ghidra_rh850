@@ -47,7 +47,7 @@ def parse_eb13(pdu: bytes, *, expected: tuple[int, int] | None = None) -> Record
     count = pdu[6]
     blocks = []
     pos = 7
-    # GetTSS3OperationFFDP5_DT: zero means derive count, not an empty record.
+    # GetTSS3OperationFFDP5_DT: zero selects derived-count parsing.
     while pos < len(pdu) and (count == 0 or len(blocks) < count):
         if len(pdu) - pos < 3:
             raise ValueError(f"EB13 truncated block header at offset {pos}")
@@ -72,7 +72,7 @@ def load_semantics(path: Path = SEMANTICS_PATH) -> dict[int, list[dict[str, Any]
         raise ValueError(f"unexpected recorder semantics schema in {path}")
     grouped: dict[int, list[dict[str, Any]]] = {}
     for row in artifact["operation_ffd"]["detail_rows"]:
-        if row["DataID"] != "-":  # Viewer metadata, not a recorder data block.
+        if row["DataID"] != "-":  # Exclude viewer-only metadata.
             grouped.setdefault(int(row["DataID"], 16), []).append(row)
     return grouped
 
@@ -90,7 +90,7 @@ def _physical_value(raw: int, row: dict[str, Any]) -> tuple[bool, str | None]:
     width = int(row["BitLength"])
     invalid_values = [int(value, 16) for value in row.get("InvalidValueList", [])]
     if row["DataID"] == "0507":
-        # GetSeparatedDateTime reads decimal digit pairs (BCD), not binary u8.
+        # GetSeparatedDateTime reads decimal digit pairs (BCD).
         # Return stored components, without the viewer's PC-local timezone shift.
         index = int(row["BytePosition"]) - 1
         text = f"{raw:02X}"
@@ -102,7 +102,7 @@ def _physical_value(raw: int, row: dict[str, Any]) -> tuple[bool, str | None]:
         return invalid, None if invalid else text
     if kind in ("u", "s"):
         logical = raw - (1 << width) if kind == "s" and raw & (1 << (width - 1)) else raw
-        # The viewer parses signed invalid constants as Int64, not field-width integers.
+        # The viewer parses signed invalid constants as Int64 at every field width.
         if kind == "s":
             invalid_values = [value - (1 << 64) if value & (1 << 63) else value for value in invalid_values]
         if logical in invalid_values:

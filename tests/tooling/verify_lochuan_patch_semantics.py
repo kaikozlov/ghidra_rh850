@@ -422,8 +422,8 @@ check(
     CF[0x53B76:0x53B8E] == bytes.fromhex("ff00aa0554526332ba05205615006232ba05205617007f00"),
     CF[0x53B76:0x53B8E].hex(),
 )
-# Object 13's accepted state is snapshotted to FEBEE896/90C; their direct readers
-# are incident/DID/monitor helpers, not the steering-command C8xx/CAxx cone.
+# Object 13's accepted state is snapshotted to FEBEE896/90C. Their direct
+# readers are confined to incident/DID/monitor helpers.
 obj13_snapshot_readers = set()
 with CORPUS.open(encoding="utf-8") as stream:
     for line in stream:

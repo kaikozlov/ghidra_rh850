@@ -1101,15 +1101,15 @@
   },
   "boundaries": [
     "No 0x160 receiver implementation in this audit; EPS firmware does not establish a longitudinal contract.",
-    "B4 measured-motion tracking and zero-until-after-motion are feedback-like, not an OEM field-name recovery.",
+    "B4 measured-motion tracking and zero-until-after-motion are feedback-like; the OEM field name remains unresolved.",
     "The intact native source defeats the earlier combined-trial correlation as independent proof of host influence.",
     "State mirror, parallel output, mode-dependent request, or mixed-role PDU remain incompletely distinguished.",
-    "Panda TX returns prove transport only, not receiver acceptance; no alternative FRC command is identified."
+    "Panda TX returns prove transport only; receiver acceptance remains unresolved and no alternative FRC command is identified."
   ],
   "combined_trial": {
     "b12_changed_from_counter_matched_native": 970,
     "b4_changed_from_counter_matched_native": 1243,
-    "boundary": "Predictive comparison, not a causal effect estimate. Conventional mode and absent EPS do not qualify healthy DRCC.",
+    "boundary": "Predictive comparison only; causal effects remain unresolved. Conventional mode and absent EPS do not qualify healthy DRCC.",
     "byte_identical_nearby_returned_tx": 1249,
     "ca_time_shift_ms": {
       "-100": {
@@ -1650,7 +1650,7 @@
   ],
   "invalid_0x160": [],
   "methods": {
-    "b12_units": "-0.1*signed7(B12) is the old comparison convention, not an independently calibrated demand.",
+    "b12_units": "-0.1*signed7(B12) is the old comparison convention; independent demand calibration remains absent.",
     "motion": "Signed15 B4 x0.001 versus 400-ms centered derivative of independent mean wheel speed; speed>2m/s, fixed -100/0ms shifts. Invalid wheels, gaps, extrapolation and cross-file joins excluded.",
     "negative_shift": "Later field versus earlier measured motion; publication and filtering delays are not actuator latency.",
     "resume": "First mean-wheel speed>0.1m/s within300ms of prior stock-resume landmark; no new proof about unrecorded driver inputs.",

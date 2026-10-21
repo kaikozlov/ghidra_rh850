@@ -7,7 +7,7 @@ recipient to install and then drive.** Source review exposes a Corolla-specific
 post-startup attestation contradiction and incomplete tester safety checks.
 Passing packaging checks and the existing unit suites did not cover these paths.
 Earlier claims that the only remaining work was physical qualification were too
-strong. This document records findings, not fixes or a new deployment procedure.
+strong. This document records findings only. It supplies no fixes or deployment procedure.
 
 Reviewed revisions: analysis `4d8006d8`, kai-openpilot `53b95d0dd`, opendbc
 `7dce3659`. This review performed no vehicle access, CAN transmission, resident
@@ -29,14 +29,14 @@ Those are incompatible expectations: successful initialization changes bytes
 inside the very range the host requires to remain byte-identical to the pristine
 image. Installation calls Session after application return; status and
 qualification also call it. The observed source therefore predicts rejection of
-an initialized Corolla resident with `resident identity mismatch`. This is a
-static lifecycle defect, not evidence that the ECU's actual firmware rejected an
-installation. No live execution was attempted to reproduce it.
+an initialized Corolla resident with `resident identity mismatch`. This defect
+follows from static lifecycle analysis. Actual ECU installation rejection remains
+unobserved. No live execution was attempted to reproduce it.
 
 The current verifier tests builds, helper liveness, packaging, a mocked mailbox
 probe and a nominal passive sensor fixture. It does not exercise the real Session
 attestation against a post-startup Corolla memory image. A successful `doctor`
-only establishes imports and bundle checks, not installed-state compatibility.
+establishes only imports and bundle checks. Installed-state compatibility remains untested.
 
 ## 2. The parked-test check accepts sensor states it should not qualify
 
@@ -88,8 +88,8 @@ phase instructions are not equivalent to enforced prerequisites on every path.
 
 Explicit release is reached only after the successful replacement checks.
 Exceptions before that point skip it; there is no unconditional cleanup around
-the operation. The resident's documented command-expiry behavior is a separate
-mechanism, not proof that the promised explicit release always occurs.
+the operation. The resident's command-expiry mechanism operates separately.
+It cannot establish whether the promised explicit release occurs.
 
 Failures are printed to stderr, while structured output is written only after a
 successful result is constructed. Existing output directories are reused. An
@@ -123,17 +123,17 @@ The current primary-source choices work for the retained traces. However,
 `carstate.py:33-38,375-395` selects exactly one gear parser from the HYBRID flag;
 it does not implement a general hybrid fallback to the one-hot carrier. A
 synthetic known-hybrid diagnostic identity with the ordinal gear carrier absent
-selects the ordinal parser and does not parse the one-hot carrier. This is a
-claim/coverage mismatch, not an observed failure in Span's retained log.
+selects the ordinal parser and does not parse the one-hot carrier. The claim
+exceeds coverage. Span's retained log shows no such failure.
 
 The GTS vehicle-ID split and corrected enum comparison do not directly pass the
 OEM powertrain subtype into CarParams. `values.py:560-572` returns platform
 identities; runtime subtype still comes from diagnostic ECU/CAN evidence.
 
 A fresh `tools/gts did HV_P5 0x1061 --json` read again returned the diagnostic
-P/R/N/D/B domain `0/2/4/6/8`. That corroborates meanings, not a CAN-ID/bit-layout
-join. The actual ordinal CAN parser uses Motorola start bit 47, width 4 (the
-high nibble of byte 5); historical low-nibble prose is not the implemented DBC.
+P/R/N/D/B domain `0/2/4/6/8`. That corroborates meanings only. A CAN-ID/bit-layout
+join requires separate evidence. The ordinal CAN parser uses Motorola start bit 47,
+width 4 (the high nibble of byte 5). Historical low-nibble prose misstates the DBC.
 
 ## 5. Positive checks and their limits
 
@@ -169,8 +169,8 @@ ordinal gear samples all at raw 3 and 60 one-hot samples all at the Drive value.
 Sources are the existing `community/spanconstant/` rlog and ignored
 `REFERENCE/public_route_corolla_2023_segment0_rlog.zst`. The latter was not added
 to Git. The retained generated evidence already records the raw source hashes
-and the missing exact firmware-to-route joins. These were decoder replays, not
-successful automatic-fingerprinting replays or physical dashboard oracles.
+and the missing exact firmware-to-route joins. These replays establish only decoder
+behavior. Automatic fingerprinting and physical dashboard correspondence remain untested.
 
 Nominal decoding does not prove main-switch OFF/ON discrimination, hold/resume,
 fault classification, dynamic steering response, or the new resident's operation
@@ -201,15 +201,15 @@ firmware-fingerprinting and Toyota safety suites: **324 passed, 262 skipped,
 A receive-only CarInterface fixture explicitly asserted the decoded
 `EPS_FAULT_INHIBIT` field and preserved the additive-byte increment. The parser
 reported the field as 1 and `canValid=true`, while both `steerFaultTemporary`
-and `steerFaultPermanent` remained false. This confirms the missing fault
-reporting as executable behavior, not just a source-comment concern.
+and `steerFaultPermanent` remained false. This confirms missing fault reporting
+in executable behavior.
 
 AST-isolated passive tester functions independently reproduced acceptance of
 all four asserted wheel-fault flags, and acceptance of wheel/angle samples
 approximately 1.99 seconds older than READY. The healthy fixture was accepted
 and the missing-angle fixture was rejected. No signer module, payload, Panda
 connection or transmit path was used. The HYBRID-identity/absent-ordinal-carrier
-fixture again selected only the ordinal gear parser, not the one-hot fallback.
+fixture again selected only the ordinal gear parser. The one-hot fallback remained unselected.
 
 These checks leave the disposition unchanged. Existing green tests do not
 cover all required behavior; the kit and port are not ready for an

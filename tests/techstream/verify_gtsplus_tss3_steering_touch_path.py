@@ -97,7 +97,7 @@ def main() -> int:
         ],
     )
     check(
-        "host field access proves +0x18 is the DDR monitor key, not a CAN ID",
+        "host field access proves +0x18 is the DDR monitor key",
         all(ddr["host_layout_proof"]["monitor_field_witnesses"].values()),
     )
     address = ddr["address_table"]

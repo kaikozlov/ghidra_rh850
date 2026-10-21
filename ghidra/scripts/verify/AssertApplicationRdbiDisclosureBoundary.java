@@ -172,8 +172,8 @@ public class AssertApplicationRdbiDisclosureBoundary extends GhidraScript {
         requireBytes(0x907f8L, "80ffd867"); // critical-section exit 0x96FD0
 
         // The sole branch-resolved crypto-neighborhood hit is a status
-        // accumulator, not the generated command-5 output. Pin its complete
-        // xref topology.
+        // accumulator. The generated command-5 output is separate.
+        // Pin the accumulator's complete xref topology.
         assertExactRefs(0xfebe5050L,
             "00068190:WRITE", "00068d52:READ", "00068da4:WRITE",
             "0006909a:READ", "000690e4:WRITE");

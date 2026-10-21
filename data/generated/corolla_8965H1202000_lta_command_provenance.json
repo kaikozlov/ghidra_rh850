@@ -1,6 +1,6 @@
 {
   "b6_hidden_payload_census": {
-    "boundary": "B6 has 28 authenticated application bytes and scalar IDs 254..265 are consumed by its recovered unpacker. Signal255 is separately recovered through a GP-relative RTE snapshot copy as the signed16 target-angle command. The four configured nonscalar IDs 252/253/266/267 are absent from every literal block/group receive call; no full-PDU copy uses PDU42; and the B6 COM buffer base has no raw absolute pointer literal. This closes the remaining nonscalar/group/full-PDU/direct-literal escape surfaces, not arbitrary unrelated computed aliases or hardware access.",
+    "boundary": "B6 has 28 authenticated application bytes and scalar IDs 254..265 are consumed by its recovered unpacker. Signal255 is separately recovered through a GP-relative RTE snapshot copy as the signed16 target-angle command. The four configured nonscalar IDs 252/253/266/267 are absent from every literal block/group receive call; no full-PDU copy uses PDU42; and the B6 COM buffer base has no raw absolute pointer literal. This closes only the remaining nonscalar/group/full-PDU/direct-literal escape surfaces. Arbitrary unrelated computed aliases and hardware access remain outside the proof.",
     "can_id": "0x0B6",
     "classification": "no-recovered-hidden-b6-group-or-full-pdu-command-consumer",
     "com": {
@@ -205,7 +205,7 @@
       "measured_wire_physical_relation": "FD025 signal184 = 1.5 deg/count from H DID1037 + Techstream CDbPhyData key3; signed4 signal185 supplies 0.1-deg fraction, so 15*signal184+signal185 is tenths of a degree",
       "oem_wire_unit_name_closed": false,
       "physical_degree_scale_closed": true,
-      "quantization_boundary": "The measured path uses integer truncation and the target path saturates after x2, so controller equality is quantized; the fraction above is the exact linearized conversion implied by the two fixed-point gains, not a claim that every individual integer target code has a unique exact degree value."
+      "quantization_boundary": "The measured path uses integer truncation and the target path saturates after x2, so controller equality is quantized; the fraction above gives only the exact linearized conversion implied by the two fixed-point gains. Individual integer target codes remain subject to quantization."
     },
     "static_conclusion": {
       "command_domain": "target steering angle",
@@ -271,7 +271,7 @@
     ],
     "techstream": {
       "corolla_p5_topology": {
-        "interpretation": "Corolla P5 install sets contain EMPS + Brake/EPB + FRC_P5; B6 is monitored by EPS as Brake System Control Module traffic. This proves the immediate module relationship, not the upstream FRC-to-Brake wire route.",
+        "interpretation": "Corolla P5 install sets contain EMPS + Brake/EPB + FRC_P5; B6 is monitored by EPS as Brake System Control Module traffic. This proves only the immediate module relationship. The upstream FRC-to-Brake wire route remains unproved.",
         "names": {
           "405": "EMPS",
           "435": "Brake/EPB",
@@ -455,7 +455,7 @@
       }
     },
     "entry": "0x000CD3CC",
-    "interpretation": "1C02 Command Value Torque is a general EPS-internal torque-command observable, not an LTA-only value. The computed-writer audit corrects the earlier direct-zero inference: BE04/BD90/B678/BEC6/C39C and the retained C2A8 branch have live local/calibration producers. No one of those live internal terms is thereby identified as a direct external autonomous setpoint.",
+    "interpretation": "1C02 Command Value Torque is a general EPS-internal torque-command observable that also covers operation outside LTA. The computed-writer audit corrects the earlier direct-zero inference: BE04/BD90/B678/BEC6/C39C and the retained C2A8 branch have live local/calibration producers. No one of those live internal terms is thereby identified as a direct external autonomous setpoint.",
     "recovered_terms": [
       "FEBEBE04",
       "FEBEBD90",
@@ -592,7 +592,7 @@
       "mode_enable_0xFEBEC26D": {
         "health_aggregate": "0x00044C86",
         "health_aggregate_recovered": true,
-        "interpretation": "C26D is a communication-health/validity-derived enable, not an init-only zero cell.",
+        "interpretation": "C26D is a live communication-health/validity-derived enable.",
         "recovered": true,
         "relation": "(health(slot0x10) | health(slot0x18)) != 0x5A and B6-validity snapshot FEBEADB9==0 -> GP+0xA6D/FEBEC26D",
         "selector_recovered": true,
@@ -838,7 +838,7 @@
         "wire_byte": 4
       }
     },
-    "interpretation": "The only shared H supervisor-reaching fields >=12 bits are signal184 and signal186 on CAN0x025. Together with signal185 they exactly match the pinned Toyota STEER_ANGLE_SENSOR layout: signed12 coarse STEER_ANGLE, signed4 STEER_FRACTION, signed12 STEER_RATE. H independently recombines 184*15+185 as steering angle and treats 186 as a rate magnitude. They are sensor measurements, not a semantically repurposed autonomous command.",
+    "interpretation": "The only shared H supervisor-reaching fields >=12 bits are signal184 and signal186 on CAN0x025. Together with signal185 they exactly match the pinned Toyota STEER_ANGLE_SENSOR layout: signed12 coarse STEER_ANGLE, signed4 STEER_FRACTION, signed12 STEER_RATE. H independently recombines 184*15+185 as steering angle and treats 186 as a rate magnitude. These retain their sensor-measurement semantics.",
     "target_native_semantics": {
       "angle_plus_fraction": {
         "entry": "0x000C2176",
@@ -911,7 +911,7 @@
   "supporting_inputs": {
     "b6_target_angle_ingress": {
       "path": "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
-      "sha256": "270e2902022b539a5845d74c6ebfa988b96c3e8d164a4a35b434bf6293aebd8f"
+      "sha256": "aafd2cdcec032bc2c7b3789c642ee97cd70fa9f0029ace524581d4290e94d761"
     },
     "fd_control_interface": {
       "path": "data/generated/corolla_8965H1202000_fd_control_interface.json",

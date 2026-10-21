@@ -82,7 +82,7 @@ while (true) {
 
 `memory_crc_verify_descriptors` checks the per-region CRC embedded in flash
 against a live computation. `FUN_0000115a` (`0x115A`) is a CodeFlash
-ECC/address-parity status helper, not a FACI sequencer-status poll. It snapshots
+ECC/address-parity status helper. It snapshots
 `UCFDERSTR @ 0xFFC62030`, clears that DED/address-parity latch through
 `UCFDERSTCLR @ 0xFFC62008`, and uses the ECM protected-write sequence at
 `ECMPCMD1 @ 0xFFD62040` to clear the corresponding source through
@@ -213,9 +213,9 @@ re-derivation against raw bytes; split-CodeFlash file offset == VA):
    0x1F2` its sole caller. The apparent `0x1426` `FEBF7C00` clear remains the
    CORR-067 zero-trip loop (`FEBF7C00 > FEBE7000`). Consequently bytes written
    into the XCP window immediately before `10 02` remain resident across the
-   normal application-to-boot transition. This is a **retention primitive, not
-   code execution**: no boot control-transfer consumer into that window is
-   established here. `tools/test xcp` pins this
+   normal application-to-boot transition. This establishes **retention** only:
+   no boot control-transfer consumer into that window is established here.
+   `tools/test xcp` pins this
    composition directly from raw CodeFlash.
 
    A third calibration now independently verifies the same lifetime property.

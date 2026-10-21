@@ -9,7 +9,7 @@ from dated investigation journals, which live under
 | **What should we do next?** | [PRIORITIES.md](PRIORITIES.md) |
 | **Is this claim actually established?** | [FINDINGS.md](FINDINGS.md) |
 | **What remains unresolved?** | [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) |
-| **How complete was the Sienna analysis?** | [ANALYSIS_STATUS.md](ANALYSIS_STATUS.md) (2026-08-15 snapshot, not a live dashboard) |
+| **How complete was the Sienna analysis?** | [ANALYSIS_STATUS.md](ANALYSIS_STATUS.md) (2026-08-15 snapshot) |
 | **What did we previously get wrong?** | [CORRECTIONS.md](CORRECTIONS.md) |
 | **Where did we record a prior lead/finding?** | `tools/know QUERY` |
 
@@ -23,8 +23,8 @@ themselves (source-of-truth hierarchy in [../../AGENTS.md](../../AGENTS.md)).
 
 ## Maintenance
 
-These files are historical/navigation aids, **not** a transaction log and **not**
-a completeness requirement — see the documentation section of
+These files provide historical references and navigation. Ledger maintenance is
+optional — see the documentation section of
 [../../AGENTS.md](../../AGENTS.md). In particular:
 
 - Do **not** stop active work to add a FINDINGS row, CORRECTIONS row,
@@ -33,10 +33,10 @@ a completeness requirement — see the documentation section of
   milestones only if it adds value.
 - New work does not need an OQ entry before it can proceed, and resolving a
   question does not require a FINDINGS/CORRECTIONS bookkeeping transaction.
-- **No freshness or completeness guarantee.** These pages are updated when
-  someone maintains them, not continuously. Verify against the canonical
+- **No freshness or completeness guarantee.** These pages receive manual
+  updates. Verify against the canonical
   reports and `tools/know QUERY` before relying on a ledger statement as
   current.
-- Completed investigation narratives belong under `docs/history/YYYY-MM/`, not
-  here; [PRIORITIES.md](PRIORITIES.md) holds only the current queue and must
+- Completed investigation narratives belong under `docs/history/YYYY-MM/`.
+  [PRIORITIES.md](PRIORITIES.md) holds only the current queue and must
   not grow a completion diary.

@@ -30,7 +30,7 @@ def diagnostic_modes(frames, states):
                 mode = before[1]
         counts[mode, event, source, address, data] += 1
     return {
-        "boundary": "Offline mode association, not electrical frame-format proof. "
+        "boundary": "Offline mode association only; electrical frame format requires separate proof. "
         "Only agreeing adjacent single-Panda states <=250 ms apart are assigned; "
         "mode transitions, gaps, multiple Pandas, and missing states remain unassigned. "
         "Payload length does not establish per-frame FDF/BRS; audit each producer schema separately.",

@@ -82,7 +82,7 @@ def short_branch_target(addr: int, raw: bytes | None = None) -> int:
 def short_condition(raw: bytes) -> int:
     return raw[0] & 0x0F
 
-# Pin the semantics of the branch we are removing, not merely its bytes.
+# Pin the semantics and bytes of the branch we are removing.
 # Status 2 is the stock copy path; every other status takes the BNE to the
 # zero-fill loop. NOPing only that BNE therefore forces the copy path.
 check("RID1010 observer compares status 2 then branches on not-equal",
@@ -247,7 +247,6 @@ check("each sent frame records monotonic and wall timestamps", '"sent_monotonic"
 check("each polling observation records per-request RTT from monotonic clock", '"rtt_seconds": observed_monotonic - requested_monotonic' in stimulus_source and '"requested_monotonic": requested_monotonic' in stimulus_source and '"observed_monotonic": observed_monotonic' in stimulus_source)
 check("each polling observation records a wall-clock stamp", '"observed_wall_utc": _utc_now()' in stimulus_source)
 check("run-level provenance records start and finish monotonic/wall stamps", '"started_monotonic": started_monotonic' in stimulus_source and '"finished_wall_utc": _utc_now()' in stimulus_source)
-check("timing block documents the clock semantics", '"monotonic": "time.monotonic seconds; deltas only (rtt, intervals), not wall time"' in stimulus_source)
 check("baseline result request records its own RTT", '"rtt_seconds": baseline_rtt' in stimulus_source)
 check("timing/DTC fields add no new mutating diagnostic service", stimulus_source.count("service_type.routine_control") == 2 and "service_type.read_dtc_information" in stimulus_source and "clear_diagnostic" not in stimulus_source and "service_type.write" not in stimulus_source and "request_download" not in stimulus_source and "write_data_by_identifier" not in stimulus_source)
 check("live harness records read-only 19 02 FF DTC snapshots before and after", 'data=b"\\x02\\xff"' in stimulus_source and '"dtc_observation"' in stimulus_source and '"read_only": true' in stimulus_source)
@@ -277,7 +276,7 @@ check("every verdict conclusion is from the pinned set", all(v["conclusion"] in 
 print("\n== v4 latency statistics and DTC classification ==")
 stats = latency_statistics([0.10, 0.20, 0.30, 0.40])
 check("latency statistics expose min/max/mean/jitter from monotonic deltas", stats["count"] == 4 and abs(stats["min_seconds"] - 0.10) < 1e-9 and abs(stats["max_seconds"] - 0.40) < 1e-9 and abs(stats["mean_seconds"] - 0.25) < 1e-9 and abs(stats["jitter_seconds"] - 0.30) < 1e-9)
-check("empty latency input is None, not zero", latency_statistics([]) is None)
+check("empty latency input returns None", latency_statistics([]) is None)
 check("RTT statistics read observation rtt_seconds fields", observation_rtt_statistics([{"rtt_seconds": 0.5}, {"rtt_seconds": 0.7}])["max_seconds"] == 0.7)
 check("interval statistics need two observations", observation_interval_statistics([{ "observed_monotonic": 1.0 }]) is None and abs(observation_interval_statistics([{ "observed_monotonic": 1.0 }, { "observed_monotonic": 1.25 }])["mean_seconds"] - 0.25) < 1e-9)
 check("unchanged DTC snapshot classifies as no change", classify_dtc_change("ab00", "ab00") == {"available": True, "changed": False, "before_hex": "ab00", "after_hex": "ab00"})

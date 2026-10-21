@@ -263,7 +263,7 @@ def scan_route(LogReader, route_name: str, files: list[tuple[int, Path]]) -> dic
       'ACCC': {
         'direct_road_proxy': False,
         'static_source': 'FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar',
-        'road_bound': 'continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself',
+        'road_bound': 'continuous 0x0D7 proves only source-PDU wire liveness; the internal generated status byte requires separate observation',
       },
       'CAFC': {
         'static_source': 'CAFC -> AD42 -> E834 -> 80EC; exact F33 0x030 packer signal25 = B16[0]',
@@ -368,7 +368,7 @@ def static_proof() -> dict[str, Any]:
       'C7B4_only_runtime_consumer': '0x000CB73A',
       'CB73A_arm_id': '0x31',
       'normal_id11': '0x0B',
-      'conclusion': 'sig263=0 and CB664 speed qualification belong to the special 0x31 transient, not normal ID11 bank2 admission',
+      'conclusion': 'sig263=0 and CB664 speed qualification belong exclusively to the special 0x31 transient; normal ID11 bank2 admission is independent of them',
     },
   }
 
@@ -393,7 +393,7 @@ def main() -> int:
     '00000045--805b7ca6ab', '00000048--709f22277b',
   }
   recent = [r for r in routes if r['route_name'] in recent_names]
-  # Current-shape cohort is derived from the bytes rather than a date cut: every
+  # Derive the current-shape cohort directly from the bytes: every
   # active ID11 frame in the route must match the current application template.
   current_shape = [r for r in routes if r['b6']['active_id11'] > 0 and r['b6']['unexpected_active_pattern_count'] == 0]
   active_recent = sum(r['b6']['active_id11'] for r in recent)

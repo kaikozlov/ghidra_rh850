@@ -35,7 +35,7 @@ call into the bootloader handler `0x614A`.
 ## Security
 
 Diagnostic security (SecurityAccess, payload gate, SecOC) is covered under
-[../security/README.md](../security/README.md), not here.
+[../security/README.md](../security/README.md).
 
 ## Machine-readable canonical map
 

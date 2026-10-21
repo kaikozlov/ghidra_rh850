@@ -271,7 +271,7 @@ public class ResolveEphemeralRuntime extends GhidraScript {
         }
         if(hits.size()!=1) return null;
         Function f=hits.get(0); List<Address> refs=hitRefs.get(f);
-        // Preserve semantic order from the generated stores, not numeric order.
+        // Preserve the generated stores' semantic order.
         c.descBase=refs.get(0); c.queueHeadBase=refs.get(1); c.rawBase=refs.get(2);
         return f;
     }

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Verify the live app->boot handoff does not create a tester-programmable DMA shortcut.
 
-The normal programming transition is a live call into 0x9F00, not a hardware
-reset.  Peripheral state therefore has to be treated as retained.  This suite
+The normal programming transition calls 0x9F00 directly without a hardware
+reset. Peripheral state therefore has to be treated as retained. This suite
 pins the relevant Sienna firmware facts: the fallback hard reset is after the
 non-returning live entry, application DMAC channel descriptors come only from
 fixed CodeFlash tables, and no reachable descriptor endpoint touches either

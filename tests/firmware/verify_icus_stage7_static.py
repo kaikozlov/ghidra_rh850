@@ -99,7 +99,7 @@ check("no raw CodeFlash pointer directly targets activator entry/interior", not 
 # AssertIcusStage7Static.java.
 check("startup path clears activation byte", CF[0x68006:0x6800A] == bytes.fromhex("44078f98"))
 check("activator uniquely has explicit set-to-one store", CF[0x69024:0x6902A] == bytes.fromhex("010a440f8f98"))
-check("finalizer writes terminal -1 state, not activation 1", CF[0x68D2C:0x68D36] == bytes.fromhex("1f9a44979798449f8f98"))
+check("finalizer writes terminal -1 state", CF[0x68D2C:0x68D36] == bytes.fromhex("1f9a44979798449f8f98"))
 
 print("\n== statically justified signing-proxy landmarks ==")
 for address, size, digest, label in (

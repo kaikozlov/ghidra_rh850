@@ -121,7 +121,7 @@ with tempfile.TemporaryDirectory() as td:
     check("scan result records all sync matches", found["verification"]["sync"] == {"matches": 1, "total": 1})
     check("scan result records 0x116 match", found["verification"]["protected"]["0x116"]["matches"] == 1)
     check("scan result records 0x24D match", found["verification"]["protected"]["0x24D"]["matches"] == 1)
-    check("scan result exposes hash, not raw key", "sha256" in found and "key" not in found)
+    check("scan result exposes only a hash of the key", "sha256" in found and "key" not in found)
 
     print("\n== command-line profile ==")
     cli = subprocess.run(

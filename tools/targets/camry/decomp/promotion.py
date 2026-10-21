@@ -355,8 +355,7 @@ def _promote(
 
 
 def _restore(snapshots: dict[Path, str | None]) -> None:
-    # A promotion may create new windows; restore the whole bank, not just
-    # files that existed when the snapshot was captured.
+    # Restore the whole bank, including any windows created after the snapshot.
     for path in retained_paths():
         if path not in snapshots:
             path.unlink()
@@ -502,7 +501,7 @@ def _keep_verified(
     if error is None:
         return runnable
     # A missing indirect target or an undefined symbol changes the linked set.
-    # That is one more full run of the new binary, not a scenario bisect.
+    # Run the complete scenario set once more against the newly linked binary.
     unresolved = {int(item, 16) for item in _UNRESOLVED_INDIRECT.findall(error)} - seen_indirect
     wanted = [name for name in _names_at_addresses(unresolved) if name in bodies]
     closure = [

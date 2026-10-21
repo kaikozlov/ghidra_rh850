@@ -430,11 +430,11 @@ def build(gts_root: Path | None = None) -> dict[str, Any]:
         },
         "key_conclusions": [
             "TSE is a FAT/indexed hierarchical binary container with declared scalar/list widths in Toyota's template CSV.",
-            "PCS time-series Operation FFD and PCS Image FFD are first-class TSE sections, not PCS-Viewer-only concepts.",
+            "PCS time-series Operation FFD and PCS Image FFD are first-class TSE sections and are also PCS-Viewer concepts.",
             "The current TSE->GTSE converter configuration explicitly skips those two PCS FFD section names (and RecordOnBehavior common) while converting the binary file.",
             "Ring-buffer saved data retains enough metadata to reconstruct engineering signals: frame membership, bit range, signedness, MUL/DIV/OFFSET, decimal precision, unit and display patterns.",
             "Installed managed converter stubs are protector-zeroed, but generic CP recovery now materializes their executable IL; exact position/FAT/list traversal semantics are captured in the recovered managed-semantics artifact.",
-            "A representative Toyota-generated TSE is still required to exercise the recovered traversal against real section population, not to recover the host implementation.",
+            "The host implementation is recovered. A representative Toyota-generated TSE is still required to exercise the recovered traversal against real section population.",
         ],
     }
 

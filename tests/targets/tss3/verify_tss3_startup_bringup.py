@@ -133,7 +133,7 @@ with tempfile.TemporaryDirectory() as td:
             ui_bringup, "race_to_bootloader", return_value={"schema": "tss3-startup-programming-v1"},
         ) as race:
             ui_bringup.manual_startup_race(kit_meta, cancel_requested=lambda: False)
-        check(f"manual arm on {target} uses the shared repinned bus, not stock topology",
+        check(f"manual arm on {target} uses the shared repinned bus",
               "bus" not in race.call_args.kwargs and race.call_args.kwargs["target"] == target)
 
     record = {

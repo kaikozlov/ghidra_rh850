@@ -216,7 +216,7 @@ def main() -> int:
             "health_aggregate": "0x00044C86",
             "health_aggregate_recovered": require(c[0x44C86], "uRamfebe7c40 = 0", "uRamfebe7c40 = 0x5a", "uRamfebe7c42 = uRamfebe7c40"),
             "selector_slots": slot_records,
-            "interpretation": "C26D is a communication-health/validity-derived enable, not an init-only zero cell.",
+            "interpretation": "C26D is a live communication-health/validity-derived enable.",
         },
         "replicated_magnitude_0xFEBEC17C_17E_184": {
             "writer": "0x000CAD62",
@@ -310,7 +310,7 @@ def main() -> int:
             "c392_recovered_local_state": require(c[0xCD1E8], "sRamfebec392", "iRamfebeac24", "cRamfebec35c"),
         },
         "interpretation": (
-            "1C02 Command Value Torque is a general EPS-internal torque-command observable, not an LTA-only value. "
+            "1C02 Command Value Torque is a general EPS-internal torque-command observable that also covers operation outside LTA. "
             "The computed-writer audit corrects the earlier direct-zero inference: BE04/BD90/B678/BEC6/C39C and the retained C2A8 branch have live local/calibration producers. "
             "No one of those live internal terms is thereby identified as a direct external autonomous setpoint."
         ),
@@ -391,7 +391,7 @@ def main() -> int:
         "boundary": (
             "B6 has 28 authenticated application bytes and scalar IDs 254..265 are consumed by its recovered unpacker. Signal255 is separately recovered through a GP-relative RTE snapshot copy as the signed16 target-angle command. "
             "The four configured nonscalar IDs 252/253/266/267 are absent from every literal block/group receive call; no full-PDU copy uses PDU42; "
-            "and the B6 COM buffer base has no raw absolute pointer literal. This closes the remaining nonscalar/group/full-PDU/direct-literal escape surfaces, not arbitrary unrelated computed aliases or hardware access."
+            "and the B6 COM buffer base has no raw absolute pointer literal. This closes only the remaining nonscalar/group/full-PDU/direct-literal escape surfaces. Arbitrary unrelated computed aliases and hardware access remain outside the proof."
         ),
     }
 
@@ -470,7 +470,7 @@ def main() -> int:
         "interpretation": (
             "The only shared H supervisor-reaching fields >=12 bits are signal184 and signal186 on CAN0x025. "
             "Together with signal185 they exactly match the pinned Toyota STEER_ANGLE_SENSOR layout: signed12 coarse STEER_ANGLE, signed4 STEER_FRACTION, signed12 STEER_RATE. "
-            "H independently recombines 184*15+185 as steering angle and treats 186 as a rate magnitude. They are sensor measurements, not a semantically repurposed autonomous command."
+            "H independently recombines 184*15+185 as steering angle and treats 186 as a rate magnitude. These retain their sensor-measurement semantics."
         ),
         "boundary": (
             "The public DBC is corroboration rather than sole naming evidence: target-native H arithmetic independently distinguishes angle+fraction and rate semantics. "

@@ -229,7 +229,7 @@ def main() -> int:
             "byte_order_semantics": "ByteOrder=0 reverses the four archived bytes when formatting the uint32 password; CheckID later emits that uint32 little-endian, reproducing the archived byte order on wire",
             "wire_password_hex": frames[-1].hex().upper(),
             "check_id_payloads_after_can_id": [x.hex().upper() for x in frames],
-            "important_boundary": "PasswordAddress indexes Techstream's decoded ZV/LZF archive buffer, not the LZF-expanded 2-MiB logical image",
+            "important_boundary": "PasswordAddress indexes Techstream's decoded ZV/LZF archive buffer. The LZF-expanded 2-MiB logical image uses a separate coordinate space",
         }
 
     type_counts = {"0": 0, "1": 0}
@@ -315,7 +315,7 @@ def main() -> int:
         },
         "modern_unified_boundary": {
             "descriptor_fields_absent": [x for x in ("ECUAuthKey", "ServiceAuthKey", "SeedKey", "Nonce", "OffsetAddress", "SecurityProperty2") if x not in cpu],
-            "selected_route": "legacy integrated CCanFlashWriter / CCanVFORESTFlashWriter, not modern dynamic Unified prepare+flash",
+            "selected_route": "legacy integrated CCanFlashWriter / CCanVFORESTFlashWriter",
         },
     }
 

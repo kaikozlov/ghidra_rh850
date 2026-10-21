@@ -952,7 +952,7 @@
   },
   "surface_recensus": [
     {
-      "reason": "H slot 0xfe164 is fill, not a veneer",
+      "reason": "H slot 0xfe164 contains fill only",
       "reference_entry": "0x000FE164",
       "reference_name": "direct_call_target_000fe164"
     },
@@ -962,7 +962,7 @@
       "reference_name": "constant_veneer_target_000b7114"
     },
     {
-      "reason": "H slot 0xfe1f0 is fill, not a veneer",
+      "reason": "H slot 0xfe1f0 contains fill only",
       "reference_entry": "0x000FE1F0",
       "reference_name": "direct_call_target_000fe1f0"
     },
@@ -972,7 +972,7 @@
       "reference_name": "constant_veneer_target_000b720a"
     },
     {
-      "reason": "H slot 0xfe204 is fill, not a veneer",
+      "reason": "H slot 0xfe204 contains fill only",
       "reference_entry": "0x000FE204",
       "reference_name": "direct_call_target_000fe204"
     },
@@ -982,7 +982,7 @@
       "reference_name": "constant_veneer_target_000b7218"
     },
     {
-      "reason": "H slot 0xfe218 is fill, not a veneer",
+      "reason": "H slot 0xfe218 contains fill only",
       "reference_entry": "0x000FE218",
       "reference_name": "direct_call_target_000fe218"
     },
@@ -992,7 +992,7 @@
       "reference_name": "constant_veneer_target_000b7226"
     },
     {
-      "reason": "H slot 0xfe22c is fill, not a veneer",
+      "reason": "H slot 0xfe22c contains fill only",
       "reference_entry": "0x000FE22C",
       "reference_name": "direct_call_target_000fe22c"
     },

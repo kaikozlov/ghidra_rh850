@@ -252,7 +252,7 @@ class _Machine:
             addr = self.entry_sp + (index - 4) * 4
             self._write_ram(addr, 4, value, 3)
             self.run.stack_args.append((addr, value))
-        # Setup is the scenario's initial memory, not a store the function made.
+        # Exclude scenario-initialization writes from the function's recorded accesses.
         self.run.reads.clear()
         self.run.writes.clear()
         self.root = fn.entry
@@ -884,8 +884,8 @@ class _Machine:
         self._cover_field_base(base, disp, size)
         addr = _u32(self.regs[base] + disp)
         self._write_reg(dst, self._read_ram(addr, size, signed, base))
-        # An unwritten scenario word is the fill, not a callee. A later
-        # indirect call of that register is skipped so the other fill can run.
+        # An unwritten scenario word contains fill. Skip an indirect call of
+        # that fill register so the other fill can run.
         if dst != 0 and not signed and self._fill_word(addr, size):
             self.fill_regs.add(dst)
             self.fill_addr[dst] = addr
@@ -1363,12 +1363,12 @@ def run_native_harness(
 ) -> dict:
     """Run native firmware interleaved with explicitly owned literal RAM scripts.
 
-    ``script_regions`` is an explicit whitelist, not a collection of all mapped
-    RAM: callers MUST exclude copied firmware bytes. Only those literals are
-    decoded, at their actual RAM PCs; self-modifying scripts are not supported.
+    ``script_regions`` explicitly whitelists literal script RAM. Callers MUST
+    exclude copied firmware bytes. Only those literals are decoded at their
+    actual RAM PCs; self-modifying scripts are not supported.
     No image is loaded or consulted. ``read_memory(address, byte_width)`` and
     ``write_memory(address, byte_width, value)`` MUST access the native C's same
-    mapped memory, including the script stack, not reference/expected memory.
+    mapped memory, including the script stack. Reference/expected memory is excluded.
 
     Every non-script destination (including the root firmware entry) goes to
     ``call_native(address, registers)``. It MUST execute actual native C, and

@@ -3,7 +3,7 @@
 field census with lead/lag classification over the two relay-correct Camry drives.
 
 Adapted from tools/targets/camry/analysis/analyze_camry_2026_bus1_field_leadlag.py (VAR-074) with:
-  - every bus0 (addr,dlc) stream, not only exact-F33-accepted IDs;
+  - every bus0 (addr,dlc) stream, including IDs outside the exact-F33 acceptance set;
   - added 12-bit and 10-bit low-nibble windows (w12/s12/w10/s10);
   - bits screened against motor+angle only (cost control);
   - refinement adds command-plausibility metrics: lag-1 autocorr inside Class-L,
@@ -664,7 +664,7 @@ def main() -> int:
             "lag_range_ms": SCREEN_LAG_RANGE_MS,
             "reproduction": {"min_abs_r_both_drives": REPRO_MIN_ABS_R, "lead_min_ms": LEAD_MIN_MS},
             "minimum_stream_frames_in_window": MIN_STREAM_FRAMES,
-            "low_rate_boundary": "streams below 50 frames in the Class-L+/-8s window are excluded from correlation; this excludes <=~1.5Hz traffic, not a plausible continuous EPS steering carrier",
+            "low_rate_boundary": "streams below 50 frames in the Class-L+/-8s window are excluded from correlation; the excluded traffic is <=~1.5Hz, below a plausible continuous EPS steering-carrier rate",
         },
         "drives": drives,
         "combined": {

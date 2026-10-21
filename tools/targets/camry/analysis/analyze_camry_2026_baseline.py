@@ -249,7 +249,7 @@ def main() -> int:
       "Read the Camry Brake/EPB and FRC software identities through their target diagnostic routes before assuming Corolla producer ownership/addressing transfers.",
       "Use the later relay-correct LTA/LCA captures and exact F33 control graph to identify which external/local state selects or modulates the B6-independent D0218/CC60/CC50 assist path; independently identify 0x08A producer/SecOC ownership without assuming translation into B6.",
       "Capture stationary P/R/N/D transitions to validate 0x127 enums on this target; B remains optional if the vehicle/trim exposes it.",
-      "Synchronize cruise main/engage/cancel with target-native diagnostic oracles rather than promoting inactive 0x176 fields by prior art.",
+      "Synchronize cruise main/engage/cancel with target-native diagnostic oracles; inactive 0x176 fields require target-native evidence before promotion.",
       "Acquire exact 8965F3307000 CodeFlash before transferring H/F boot-RAM, SecOC receiver, steering-limit, command-5 carrier, or safety conclusions as firmware facts.",
     ],
   }

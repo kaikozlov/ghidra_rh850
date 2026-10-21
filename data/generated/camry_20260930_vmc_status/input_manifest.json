@@ -2,11 +2,11 @@
   "boundary": "External rlog identities plus derived extraction/join cache hashes; large raw logs and caches are not committed.",
   "excluded_paths": [
     {
-      "path": "00000168--126aca7c36/rlog.zst",
+      "path": "00000043--29caa20fbc/_ambiguous_glob_copy/rlog.zst",
       "reason": "not an unambiguous route/segment path"
     },
     {
-      "path": "00000043--29caa20fbc/_ambiguous_glob_copy/rlog.zst",
+      "path": "00000168--126aca7c36/rlog.zst",
       "reason": "not an unambiguous route/segment path"
     }
   ],
@@ -498,73 +498,73 @@
       },
       "files": [
         {
-          "path": "0000003a--7d62f5b41f/0/rlog.zst",
+          "path": "0000003a--7d62f5b41f/rlog-0.zst",
           "segment": 0,
           "sha256": "cd8e8f47d177af27ab4a5d75fe9ea648287b56afd339abf3e8efaef247b6a5af",
           "size_bytes": 8720096
         },
         {
-          "path": "0000003a--7d62f5b41f/1/rlog.zst",
+          "path": "0000003a--7d62f5b41f/rlog-1.zst",
           "segment": 1,
           "sha256": "6c7d53147c3c8919cd0ad86fe3c1bcc4fbd327b261b642c2918b6707b641cdeb",
           "size_bytes": 9401847
         },
         {
-          "path": "0000003a--7d62f5b41f/2/rlog.zst",
+          "path": "0000003a--7d62f5b41f/rlog-2.zst",
           "segment": 2,
           "sha256": "f0031d2fdec2ff2ccb7d89f2ee95d92d8473141b27af71f82182850dc90be6b1",
           "size_bytes": 9494412
         },
         {
-          "path": "0000003a--7d62f5b41f/3/rlog.zst",
+          "path": "0000003a--7d62f5b41f/rlog-3.zst",
           "segment": 3,
           "sha256": "58a0503d44e19d15e41143af138b2216832224b8d0e2b8649d8b326d40d799f8",
           "size_bytes": 10784223
         },
         {
-          "path": "0000003a--7d62f5b41f/4/rlog.zst",
+          "path": "0000003a--7d62f5b41f/rlog-4.zst",
           "segment": 4,
           "sha256": "3c61c54c4b17ea0b541e500e5980246b7233c838bb44fc6ac171638605d414e8",
           "size_bytes": 10688846
         },
         {
-          "path": "0000003a--7d62f5b41f/5/rlog.zst",
+          "path": "0000003a--7d62f5b41f/rlog-5.zst",
           "segment": 5,
           "sha256": "a96d4ff18477732a4732c803c55a0cf7a85c6f8ea7ce391d842964c95dfa35b0",
           "size_bytes": 10772314
         },
         {
-          "path": "0000003a--7d62f5b41f/6/rlog.zst",
+          "path": "0000003a--7d62f5b41f/rlog-6.zst",
           "segment": 6,
           "sha256": "7d70561ca2b41e9a280630628dedeb50e084b0eae842ffd69ff6015cbb340b0a",
           "size_bytes": 10561623
         },
         {
-          "path": "0000003a--7d62f5b41f/7/rlog.zst",
+          "path": "0000003a--7d62f5b41f/rlog-7.zst",
           "segment": 7,
           "sha256": "499a959a400916672b07c421c64cd28b408f118c0bbe0be9c9e62b3ad172fc2a",
           "size_bytes": 9280176
         },
         {
-          "path": "0000003a--7d62f5b41f/8/rlog.zst",
+          "path": "0000003a--7d62f5b41f/rlog-8.zst",
           "segment": 8,
           "sha256": "fcfee944e69d5b3f38d5052af7a8570b34e25de47bab06f90db5127e2afbef38",
           "size_bytes": 9259207
         },
         {
-          "path": "0000003a--7d62f5b41f/9/rlog.zst",
+          "path": "0000003a--7d62f5b41f/rlog-9.zst",
           "segment": 9,
           "sha256": "c241cc25ee9f013953444f441ccb407c27d4ed7ea8037143d401a92fae14aa71",
           "size_bytes": 9275321
         },
         {
-          "path": "0000003a--7d62f5b41f/10/rlog.zst",
+          "path": "0000003a--7d62f5b41f/rlog-10.zst",
           "segment": 10,
           "sha256": "9ff89f19991cc15babaa9d3eeb4977c61dc5fe99581730fbcc72551576ec86ea",
           "size_bytes": 9268797
         },
         {
-          "path": "0000003a--7d62f5b41f/11/rlog.zst",
+          "path": "0000003a--7d62f5b41f/rlog-11.zst",
           "segment": 11,
           "sha256": "477c584d1ef5b6505bf9904b5eade48211bdace42eb7e70b3553c0617b4d8679",
           "size_bytes": 9283027

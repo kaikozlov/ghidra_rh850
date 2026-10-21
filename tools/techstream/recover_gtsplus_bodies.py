@@ -310,8 +310,8 @@ def recover(
                 # Native CP images are typically obvious hollow PEs (tiny raw
                 # .text, huge virtual .text).  Managed assemblies can instead
                 # gain a larger protector-loader .text than their original CLR
-                # image, so section-size growth is evidence worth recording,
-                # not a format-independent validity requirement.
+                # image. Record section-size growth as evidence only;
+                # validity checks must accommodate both image formats.
                 native_text_expanded = bool(
                     protected_text is not None
                     and recovered_text["raw_size"] > protected_text["raw_size"]

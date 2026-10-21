@@ -358,7 +358,7 @@ def choose_geometry(db: dict, image_sha: str, variant_id: str | None) -> tuple[d
         pinned_sha = item.get("codeflash_sha256")
         if pinned_sha is not None and pinned_sha != image_sha:
             raise ManifestError(
-                f"variant {variant_id} geometry is bound to CodeFlash {pinned_sha}, not {image_sha}"
+                f"variant {variant_id} geometry requires CodeFlash {pinned_sha}; supplied image is {image_sha}"
             )
         if pinned_sha is None:
             return item, "variant-evidence-not-image-bound"

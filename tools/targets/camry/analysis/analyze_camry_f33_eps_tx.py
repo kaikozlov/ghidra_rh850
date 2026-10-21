@@ -5,7 +5,7 @@ Scope is Toyota EPS application firmware 8965F3307000.  The reducer closes the
 five generated-COM transmit I-PDUs, their direct signal writers and lower-stack
 routes, plus the non-cyclic diagnostic and XCP-shaped transmit endpoints.  OEM
 names are only attached where firmware/GTS evidence closes them; anonymous
-status fields remain structural rather than inheriting stale public-DBC names.
+status fields keep structural names until a target-native semantic join is available.
 """
 from __future__ import annotations
 
@@ -125,7 +125,7 @@ FIELDS: dict[int, list[dict[str, Any]]] = {
         {"signal": 30, "wire": "B17[3:0]", "source": "0xFEBE8142", "producer": "0x4C490", "role": "Steering Wheel Torque fine signed4 component, *0.01 N.m", "oem": "Steering Wheel Torque", "grade": "GTS+firmware"},
         {"signal": 31, "wire": "B19[0]", "source": "0xFEBE80E0", "producer": "0x4C2DC", "role": "cooperative-angle inhibit (CAD9 family)", "grade": "firmware"},
         {"signal": 32, "wire": "B20:B21", "source": "0xFEBE8156", "producer": "0x4C2DC", "role": "signed steering-control/angle-family feedback from FEBEE8BC", "grade": "firmware"},
-        {"signal": 33, "wire": "B22:B23", "source": "0xFEBE816C", "producer": "0x4C490", "role": "signed motor-feedback/current-family proxy; related to, but not identical units with, DID1151 Q-axis current", "grade": "GTS+firmware"},
+        {"signal": 33, "wire": "B22:B23", "source": "0xFEBE816C", "producer": "0x4C490", "role": "signed motor-feedback/current-family proxy; related to DID1151 Q-axis current through different units", "grade": "GTS+firmware"},
         {"signal": 34, "wire": "B27[1]", "source": "0xFEBE8150", "producer": "0x4C490", "role": "constant-clear in normal producer", "grade": "firmware"},
         {"signal": 35, "wire": "B27[0]", "source": "0xFEBE8151", "producer": "0x4C490", "role": "constant-clear in normal producer", "grade": "firmware"},
     ],
@@ -222,7 +222,7 @@ def find_techstream_dtc(code: str) -> dict[str, str] | None:
 
 def dynamic_observations() -> dict[str, Any]:
     result: dict[str, Any] = {
-        "boundary": "tracked retained-log evidence; absence is an observation for these captures, not proof that a configured PDU can never transmit",
+        "boundary": "tracked retained-log evidence; absence applies only to these captures; transmission by a configured PDU outside them remains possible",
     }
     if LIVENESS.is_file():
         obj = json.loads(LIVENESS.read_text(encoding="utf-8"))
@@ -353,8 +353,8 @@ def analyze() -> dict[str, Any]:
 
     # CanIf class-0 hardware handles.  0x030 has handle 0 / driver object 0;
     # the four classic-CAN PDUs share handle 1 / driver object 3.  Both map to
-    # the same lower driver node index 1, so the classic path is a real sibling
-    # hardware route rather than dead configuration.
+    # the same lower driver node index 1, confirming a real sibling classic
+    # hardware route.
     hth_base = u32(0x218E4)
     hth_desc = [struct.unpack_from("<HHHHH", image, hth_base + 10 * i) for i in range(5)]
     hth_map_base = u32(0x22E38)
@@ -527,7 +527,7 @@ def analyze() -> dict[str, Any]:
                 {"can_id": "0x4A3", "canif_handle": 1, "hth_index": 1, "driver_object_id": 50, "driver_node": driver_map[50][0], "driver_mailbox": driver_map[50][1], "lower_writer": "0x853AA classic CAN"},
                 {"can_id": "0x4C8", "canif_handle": 1, "hth_index": 1, "driver_object_id": 50, "driver_node": driver_map[50][0], "driver_mailbox": driver_map[50][1], "lower_writer": "0x853AA classic CAN"},
             ],
-            "interpretation": "0x030 and the four classic PDUs use sibling hardware objects on the same lower CAN-driver node; retained HTH state 0x69 means idle/available, not disabled",
+            "interpretation": "0x030 and the four classic PDUs use sibling hardware objects on the same lower CAN-driver node; retained HTH state 0x69 means idle/available",
         },
         "normal_messages": messages,
         "noncyclic_transmit": {

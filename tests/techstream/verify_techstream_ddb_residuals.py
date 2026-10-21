@@ -157,7 +157,7 @@ expected_types = {
     35, 36, 37, 43, 44, 45, 46, 57, 58, 59,
 }
 check("Security_P4 complete section-type set", set(sec.sections) == expected_types)
-check("Security_P4 section 3 is supported-PID metadata, not a DID table",
+check("Security_P4 section 3 contains supported-PID metadata",
       ECU_TABLE_CLASS_NAMES[sec.sections[3].header.table_type]
       == "CDbSupPidTable")
 check("Security_P4 type 35 is one 28-byte record",

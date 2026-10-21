@@ -27,7 +27,7 @@ DEFAULT_FIXTURES = (
 )
 
 # Keep this child self-contained so each subprocess imports the requested
-# opendbc worktree rather than whichever revision happens to be on sys.path.
+# opendbc worktree independently of the revision already on sys.path.
 CHILD = r'''
 import json, sys
 from pathlib import Path
@@ -64,8 +64,8 @@ for line in Path(sys.argv[2]).read_text().splitlines():
 print(json.dumps(rows, separators=(",", ":")))
 '''
 
-# Execute the *actual current openpilot* DesireHelper rather than duplicating
-# its transition rule in this repository. This proves the CarState semantic
+# Execute the actual current openpilot DesireHelper and its transition rule.
+# This proves the CarState semantic
 # delta has the downstream consequence described in the WP2 audit while still
 # keeping the replay's software-only scope separate from the later same-car
 # dynamic sign/threshold validation.

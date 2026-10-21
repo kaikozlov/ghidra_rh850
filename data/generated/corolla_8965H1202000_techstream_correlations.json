@@ -3524,7 +3524,7 @@
       "type61_data_id_count": 337
     },
     "h_readable_did_count": 226,
-    "interpretation": "EMPS_P5 has the stronger static DID-vocabulary fit for this H image (124 versus 112 type61 IDs) and uniquely maps H-supported DID 0x1C02 to Command Value Torque; this is evidence for using EMPS_P5 vocabulary, not proof that a particular vehicle session selected category 405."
+    "interpretation": "EMPS_P5 has the stronger static DID-vocabulary fit for this H image (124 versus 112 type61 IDs) and uniquely maps H-supported DID 0x1C02 to Command Value Torque; this is evidence for using EMPS_P5 vocabulary only. Selection of category 405 in any particular vehicle session remains unproved."
   },
   "fault_event_class_catalog": {
     "boundary": "The event class byte and H DTC index are exact CodeFlash table fields. Toyota DTC names are joined through the pinned NA EMPS_P5 failure table. Class 0x01 is populated in H but is not consumed by the recovered 0x4B692 accumulator; classes with DTC index 0 remain internal/no-named-DTC events. These class families do not by themselves define openpilot steerFaultTemporary/steerFaultPermanent.",
@@ -8937,7 +8937,7 @@
   "sources": {
     "corolla_application_rx": {
       "path": "data/generated/corolla_8965H1202000_application_rx_diff.json",
-      "sha256": "5f3010636ad1c865f0855e68fc07b57537a1db1b40ededd3dcb31fb878e3c5e3"
+      "sha256": "a500776409a03840522040e9071fa101f5728e3e12203d96f7b17b0f17704f82"
     },
     "corolla_codeflash": {
       "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin",
@@ -9116,7 +9116,7 @@
       "EU",
       "JP"
     ],
-    "interpretation": "The master-routed EMPS_P5 surface is data-monitor/DTC/support/RoB oriented. It is routed in NA/EU/JP, while EMPS2_P5 has no recovered master route in this V18 corpus. EMPS_P5's parsed section set contains no classic type-11/type-12 active-test tables, and category 405 routes no DLL whose name identifies Active Test or RoutineControl. This is a bounded Techstream-package negative, not proof that Toyota has no separate utility or server-mediated steering procedure.",
+    "interpretation": "The master-routed EMPS_P5 surface is data-monitor/DTC/support/RoB oriented. It is routed in NA/EU/JP, while EMPS2_P5 has no recovered master route in this V18 corpus. EMPS_P5's parsed section set contains no classic type-11/type-12 active-test tables, and category 405 routes no DLL whose name identifies Active Test or RoutineControl. This negative result covers only the Techstream package. Separate Toyota utilities or server-mediated steering procedures remain possible.",
     "master_route_dlls": [
       "GetDatMonListP5_DT.dll",
       "DelDiagCodeP4.dll",

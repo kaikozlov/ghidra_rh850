@@ -120,7 +120,7 @@
       "road_gate_observables": {
         "ACCC": {
           "direct_road_proxy": false,
-          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "road_bound": "continuous 0x0D7 proves only source-PDU wire liveness; the internal generated status byte requires separate observation",
           "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
@@ -279,7 +279,7 @@
       "road_gate_observables": {
         "ACCC": {
           "direct_road_proxy": false,
-          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "road_bound": "continuous 0x0D7 proves only source-PDU wire liveness; the internal generated status byte requires separate observation",
           "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
@@ -439,7 +439,7 @@
       "road_gate_observables": {
         "ACCC": {
           "direct_road_proxy": false,
-          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "road_bound": "continuous 0x0D7 proves only source-PDU wire liveness; the internal generated status byte requires separate observation",
           "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
@@ -598,7 +598,7 @@
       "road_gate_observables": {
         "ACCC": {
           "direct_road_proxy": false,
-          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "road_bound": "continuous 0x0D7 proves only source-PDU wire liveness; the internal generated status byte requires separate observation",
           "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
@@ -757,7 +757,7 @@
       "road_gate_observables": {
         "ACCC": {
           "direct_road_proxy": false,
-          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "road_bound": "continuous 0x0D7 proves only source-PDU wire liveness; the internal generated status byte requires separate observation",
           "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
@@ -916,7 +916,7 @@
       "road_gate_observables": {
         "ACCC": {
           "direct_road_proxy": false,
-          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "road_bound": "continuous 0x0D7 proves only source-PDU wire liveness; the internal generated status byte requires separate observation",
           "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
@@ -1075,7 +1075,7 @@
       "road_gate_observables": {
         "ACCC": {
           "direct_road_proxy": false,
-          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "road_bound": "continuous 0x0D7 proves only source-PDU wire liveness; the internal generated status byte requires separate observation",
           "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
@@ -1234,7 +1234,7 @@
       "road_gate_observables": {
         "ACCC": {
           "direct_road_proxy": false,
-          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "road_bound": "continuous 0x0D7 proves only source-PDU wire liveness; the internal generated status byte requires separate observation",
           "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
@@ -1397,7 +1397,7 @@
       "road_gate_observables": {
         "ACCC": {
           "direct_road_proxy": false,
-          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "road_bound": "continuous 0x0D7 proves only source-PDU wire liveness; the internal generated status byte requires separate observation",
           "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
@@ -1554,7 +1554,7 @@
       "road_gate_observables": {
         "ACCC": {
           "direct_road_proxy": false,
-          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "road_bound": "continuous 0x0D7 proves only source-PDU wire liveness; the internal generated status byte requires separate observation",
           "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
@@ -1715,7 +1715,7 @@
       "road_gate_observables": {
         "ACCC": {
           "direct_road_proxy": false,
-          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "road_bound": "continuous 0x0D7 proves only source-PDU wire liveness; the internal generated status byte requires separate observation",
           "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
@@ -1872,7 +1872,7 @@
       "road_gate_observables": {
         "ACCC": {
           "direct_road_proxy": false,
-          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "road_bound": "continuous 0x0D7 proves only source-PDU wire liveness; the internal generated status byte requires separate observation",
           "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
@@ -2031,7 +2031,7 @@
       "road_gate_observables": {
         "ACCC": {
           "direct_road_proxy": false,
-          "road_bound": "continuous 0x0D7 proves source-PDU wire liveness but not the internal generated status byte itself",
+          "road_bound": "continuous 0x0D7 proves only source-PDU wire liveness; the internal generated status byte requires separate observation",
           "static_source": "FEBE80A5 = receive-status selector0x17 through 0x498E0 -> FEBEF093 -> FEBEACCC; not a directly encoded CAN scalar"
         },
         "ACCD": {
@@ -2142,9 +2142,9 @@
     "exact_f33_corpus": "data/generated/camry-8965F3307000/decompilations.jsonl",
     "exact_f33_corpus_sha256": "e3ac4e094422d68757173a48b2a7a4d9ca85187ce324e7a9e1ac0ce2410e82b8",
     "external_ingress_artifact": "data/generated/camry_8965F3307000_external_lateral_ingress.json",
-    "external_ingress_artifact_sha256": "726c443b53cfa0ce2054ffe93b692143d94055ba5cdb699b2c5381914dddaef1",
+    "external_ingress_artifact_sha256": "36934a7ef43505403c98747dfa2afda394db7e33102bcc873954fdbe3bc56f2c",
     "f33_port_artifact": "data/generated/camry_8965F3307000_tss3_opendbc_port.json",
-    "f33_port_artifact_sha256": "4bd4071f4d163d09f20b41d8483f03cc1abab4be8758c7e7aa20487936463d18",
+    "f33_port_artifact_sha256": "18f8039b23385e572c4701182f7c6b0bf5f99d9d602cec1901be16624458dbe9",
     "freshness_artifact": "data/generated/camry_b6_freshness_contract.json",
     "freshness_artifact_sha256": "097ef2d7cea631f2736e410ccc540d2cd2b56cf2a35ff6aef02b158b0320e30c",
     "retained_rlog_bytes": 5328786933,
@@ -2215,7 +2215,7 @@
       "C7B4_only_runtime_consumer": "0x000CB73A",
       "CB664_output": "FEBEC7B4",
       "CB73A_arm_id": "0x31",
-      "conclusion": "sig263=0 and CB664 speed qualification belong to the special 0x31 transient, not normal ID11 bank2 admission",
+      "conclusion": "sig263=0 and CB664 speed qualification belong exclusively to the special 0x31 transient; normal ID11 bank2 admission is independent of them",
       "normal_id11": "0x0B",
       "signal": 263,
       "snapshot": "0xFEBEADDD",

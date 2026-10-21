@@ -390,9 +390,8 @@ public class AssertV850E1f extends GhidraScript {
                 STATUS_U, "sp", f32(2.0f));
     }
 
-    // trff stops at its unresolved mapping intrinsic; the emulator
-    // leaves PSW untouched (nothing invented). Asserts only that the
-    // boundary is opaque, not any mapping.
+    // trff stops at its unresolved mapping intrinsic. The emulator leaves PSW
+    // untouched. This asserts only the opaque boundary.
     private void execTrffBoundary(ProgramDB program, Address base) throws Exception {
         EmulatorHelper emu = prepare(program, base.add(0x84),
                 enc(TRFF, 0, 0, 0), "trff");

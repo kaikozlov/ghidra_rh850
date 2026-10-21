@@ -948,7 +948,7 @@ def check_request_signer(work: Path) -> None:
 
     # -O2 duplicates the poll loop. A named assembler label inside that loop
     # used to fail assembly; its replacement must also identify a usable poll
-    # boundary for the idle-fast path, not merely compile successfully.
+    # boundary for the idle-fast path in addition to compiling successfully.
     optimized_dir = work / "tss3-request-signer-o2"
 
     def compile_optimized_resident(work_dir: Path, jobs: tuple[CJob, ...]):

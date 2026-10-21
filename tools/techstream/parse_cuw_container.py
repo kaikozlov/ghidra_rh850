@@ -325,7 +325,7 @@ def first_member_payload(data: bytes, parsed: dict[str, Any]) -> bytes:
 def read_first_member(path: Path, *, max_payload: int = 8 * 1024 * 1024) -> tuple[dict[str, Any], bytes]:
     """Read only the CUW header + first member without streaming the package tail.
 
-    This is a discovery fast path, not a full container integrity check. It owns
+    This discovery fast path performs only partial container integrity checks. It owns
     the same member framing constants as ``parse`` so callers do not reimplement
     CUW header geometry.
     """

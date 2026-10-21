@@ -118,7 +118,7 @@ def staging_transfers(image: bytes, entry: int) -> list[tuple[int, int, int]]:
             if not encoded & 1:
                 raise ValueError(f"unsupported staging load at {pc:#x}")
             # LD.BU carries displacement bit0 in instruction bit5; the low
-            # bit of the second halfword is opcode, not an address bit.
+            # bit of the second halfword belongs exclusively to the opcode.
             displacement = (encoded & 0xFFFE) | (1 if opcode == 0x0FA4 else 0)
             if displacement & 0x8000:
                 displacement -= 0x10000
@@ -328,7 +328,7 @@ def build() -> dict:
             },
         },
         "group_input_api": {
-            "descriptor_block": "FFFF8400 + idx*0x40, 16 channels; R6-scaled displacement, not GP-relative",
+            "descriptor_block": "FFFF8400 + idx*0x40, 16 channels; displacement scaled from R6",
             "fill_count_getter": "0x00060940 (combines low/high halfwords at +0x18 and +0x08 with low16 arithmetic)",
             "ring_base_map": "0x000620dc (ring size 0x1b0)",
             "accessors": {
@@ -357,7 +357,7 @@ def build() -> dict:
                 "The channel initializer 0x6082C programs 0x40-stride channel descriptors and "
                 "DMAC primary/secondary trigger-select SFRs; ADCG0/ADCG1 scan, CSIH1 serial, "
                 "and CRC0/CRC1 unit config appear in the same driver family. Exact "
-                "per-channel trigger identity beyond this evidence is bounded, not asserted."
+                "per-channel trigger identity beyond this evidence remains unresolved."
             ),
             "sfr_evidence": sfr_refs,
             "sfr_name_source": MANUAL,
@@ -435,8 +435,7 @@ def build() -> dict:
         "structural_constants": {
             "invalid_marker_staging": (
                 "FEBE81F4..820A is only ever written 0x8000 (0x00050b00) after init zeroing "
-                "(0x00058c9a); its mirror outputs FEBE6468..647E carry the invalid marker, "
-                "not data"
+                "(0x00058c9a); its mirror outputs FEBE6468..647E carry only the invalid marker"
             ),
             "error_words": (
                 "FEBE8260..8263 zeroed by 0x00050c38 each pass; 0x00050c58 OR-aggregates "
@@ -461,7 +460,7 @@ def build() -> dict:
             "conclusion": (
                 "The only READ into these regions from any checked function is 0xBF33E "
                 "reading FEBEAC54..FEBEAC7E in the shared command-torque cone. "
-                "0x59448's FEBE7Fxx references are WRITEs, not COM-value reads. "
+                "0x59448's FEBE7Fxx references are exclusively WRITEs. "
                 "The checked D5 functions do not directly read generated COM staging."
             ),
         },
@@ -486,7 +485,7 @@ def build() -> dict:
         ),
         "boundary": [
             "Negative proofs are scoped to the canonical direct data-reference graph: computed aliases without a recovered reference, DMA/hardware mutation of LocalRAM outside the GlobalRAM rings, and unrecovered code remain outside the proof.",
-            "Ring/FIFO producer identity is classified as hardware/peripheral-fed shared memory; the exact per-channel DMAC trigger/peripheral assignment is bounded, not asserted.",
+            "Ring/FIFO producer identity is classified as hardware/peripheral-fed shared memory; the exact per-channel DMAC trigger/peripheral assignment remains unresolved.",
             "No live vehicle I/O; firmware-static closure only.",
         ],
         "sources": {

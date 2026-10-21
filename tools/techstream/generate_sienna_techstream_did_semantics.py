@@ -33,7 +33,7 @@ DIDS = {
         "semantic": "Command Value Current (Q Axis)", "unit": "A", "monitor_key": 252,
         "role": "command_q_current",
         "emitted_encoding": "signed16; raw observer * 100 / 0x80; clamp [-32768,32767]; 0.01 A/LSB",
-        "control_role": "base Q-current command observer; compensated PI reference is FEBE6D24, not the DID-visible base cell",
+        "control_role": "base Q-current command observer; compensated PI reference is the separate FEBE6D24 cell",
         "capture_expectation": "normal path maps command magnitude monotonically and negates FEBEE40C before the Q-current reference path; compare sign against 0x1C02 rather than assuming equality",
     },
     0x1153: {

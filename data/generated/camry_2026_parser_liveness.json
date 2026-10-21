@@ -1,5 +1,5 @@
 {
-  "boundary": "same-segment dynamic timing; parser Hz is a conservative liveness setting, not an exact ECU scheduler claim",
+  "boundary": "same-segment dynamic timing; parser Hz is only a conservative liveness setting; exact ECU scheduling remains unresolved",
   "routes": {
     "3d": {
       "messages": {

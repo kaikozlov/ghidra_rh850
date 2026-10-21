@@ -101,8 +101,8 @@ public class ApplyRamTypes extends GhidraScript {
     /**
      * Four work groups rooted at application GP+0x5308 = 0xFEBF0B08
      * (docs/security/secoc/key-storage-and-lifecycle.md §3: four groups of three 32-byte work
-     * buffers). The groups are generic transient restore slots, not fixed key-set
-     * buffers; object 15 specifically uses group 3 at 0xFEBF0C28 / 0xC48 / 0xC68 (§8).
+     * buffers). The groups are generic transient restore slots. Object 15
+     * specifically uses group 3 at 0xFEBF0C28 / 0xC48 / 0xC68 (§8).
      */
     private DataType buildSecocWorkbufRoot(DataType triplet) throws Exception {
         StructureDataType s = new StructureDataType(CAT, "SecocNvmWorkbufRoot", 0);
@@ -298,7 +298,7 @@ public class ApplyRamTypes extends GhidraScript {
 
         // Application handoff / phase landmarks (application GP 0xFEBEB800).
         // GP-relative roots use signed 16-bit displacements proved at 0x4C942/0x4C960/0x4C98C.
-        // FEBF3B14/18/19 are absolute mov immediates, not GP-relative.
+        // FEBF3B14/18/19 use absolute mov immediates.
         applyScalar(0xFEBEB1A4L, UnsignedCharDataType.dataType, "application_system_transition_phase_live",
                 "Live system-transition phase byte (GP-0x65C)");
         applyScalar(0xFEBEE81FL, UnsignedCharDataType.dataType, "application_system_transition_phase_snapshot",

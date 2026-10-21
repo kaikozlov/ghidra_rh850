@@ -94,7 +94,7 @@ First bounded replacement, READY / Park / stationary:
 
   ./crown-tss3-signer replace-current /tmp/crown-replace-current.json
 
-This requests the current measured steering angle, not an offset.
+This requests the current measured steering angle directly.
 
 Optional repeated qualification before any openpilot integration:
 

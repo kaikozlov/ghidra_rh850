@@ -4,7 +4,7 @@
 ``EPS_P4DK4.ddb`` (JP region only) is the richest EPS database in the
 Techstream V18 corpus: 26 unique DTCs (45 records with dual naming),
 89 monitors, and 85 raw ``CDbPidTable`` records. It is a JP-market diagnostic
-variant with 85 raw ``CDbPidTable`` rows, not a later release — the
+variant with 85 raw ``CDbPidTable`` rows. Its
 Techstream V18.00.003 distribution
 (December 2022) predates both the 2023 Sienna and the 2025 Corolla.
 

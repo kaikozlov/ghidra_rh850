@@ -5,8 +5,8 @@ The incident instruction is reconstructed from the retained four-byte write plus
 its untouched stock successor halfword.  CodeFlash.bin itself is the stock image;
 this builder never substitutes stock bytes for the incident write.
 
-Architecture-derived exception semantics are deliberately labeled as predicted,
-not dynamically observed: no live FEPC/FEPSW/FEIC capture exists for the incident.
+Architecture-derived exception semantics remain predictions only:
+no live FEPC/FEPSW/FEIC capture exists for the incident.
 """
 from __future__ import annotations
 
@@ -114,7 +114,7 @@ def build() -> dict:
     # P1M-E implements PC31..1, PC0=0; there is no 512-MB PC sign-extension here.
     need((bad_target & 1) == 0, "incident target unexpectedly odd")
 
-    # Whole-image raw system-register census, not a Ghidra-function census.
+    # Census raw system-register instructions across the whole image.
     psw_writes = scan_ldsr(image, "PSW")
     rbase_writes = scan_ldsr(image, "RBASE")
     ebase_writes = scan_ldsr(image, "EBASE")
@@ -212,7 +212,7 @@ def build() -> dict:
             "g3m_exception_class": "resumable FE-level SYSERR due error input during instruction fetch",
             "g3m_acknowledgement_effects": {"PSW.ID":1,"PSW.NP":1,"PSW.EP":1,"PSW.EBV":"retained"},
             "g3m_vector_rule": "PSW.EBV=1 selects EBASE; SYSERR offset is +0x10",
-            "boundary": "FEIC/FEPC/FEPSW were never captured after the live incident; exact silicon response is therefore predicted from the matching Renesas architecture, not observed",
+            "boundary": "FEIC/FEPC/FEPSW were never captured after the live incident; exact silicon response remains only an architectural prediction based on the matching Renesas specification",
         },
         "terminal_handler": {
             "entry": f"0x{handler:08X}",

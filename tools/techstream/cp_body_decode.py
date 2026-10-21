@@ -195,8 +195,8 @@ def _install_entry_hook() -> None:
 
 def _arm_synthetic_api_integrity_trust(api_address):
  # Coree-managed EXEs run one protector integrity probe over GetProcAddress.
- # Synthetic emulator APIs are semantic callbacks, not byte-identical Windows
- # exports, so the probe cannot validate their prologues. Treat only our own
+ # Synthetic emulator APIs are semantic callbacks with different prologues from Windows
+ # exports, so the probe cannot validate them. Treat only our own
  # registered GetProcAddress trampoline as a known-clean export. Derive the
  # enclosing checker's return address from the live stack/code shape instead
  # of baking in a protector RVA.

@@ -16,8 +16,8 @@ the next analysis stages depend on and emits one machine-readable artifact:
    patch-manifest SHA binding), plus the exact next command to run.
 
 The tool never mutates the image, never opens Ghidra, and never requires
-hardware. A foreign calibration that passes here is *ready for triage*, not
-validated: every Sienna-recovered mechanism remains a hypothesis until checked
+hardware. A foreign calibration that passes here is *ready for triage* only:
+every Sienna-recovered mechanism remains a hypothesis until checked
 against the target's own bytes (see docs/variants/README.md).
 """
 

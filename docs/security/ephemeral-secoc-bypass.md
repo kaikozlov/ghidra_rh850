@@ -24,7 +24,7 @@ need stock application code to rediscover a RAM function pointer after startup:
 it performs the stock transition/initialization sequence itself, then remains
 the top-level foreground scheduler and inserts one bounded bridge between stock
 SecOC processing and stock COM/control processing. The remaining boundary is
-**dynamic bench validation**, not a missing static control-transfer primitive.
+**dynamic bench validation**.
 
 Evidence labels below follow `AGENTS.md`: **verified**, **recovered**,
 **bounded**, **hypothesis**, and **disproved**.
@@ -186,14 +186,14 @@ No generic safe trampoline region is claimed there.
 `boot_application_handoff @ 0x13B0` performs peripheral/application handoff
 work, reads the application entry pointer at CodeFlash `0xFFDB8` (`0x20880` in
 this image), and computed-calls the application entry. The broad LocalRAM zero
-loops are in its normal caller path, not inside `0x13B0`.
+loops execute in its normal caller path before `0x13B0`.
 
 **Recovered implication:** arbitrary boot-context code can call `0x13B0`
 directly instead of requesting a hardware reset. That avoids re-entering reset
 startup and can preserve upper LocalRAM into application startup.
 
-This is a static control-flow result, not a bench-proven transition from a
-custom payload.
+This result establishes static control flow. A transition from a custom payload
+still requires bench proof.
 
 ### 3.4 Application startup overwrites the XCP shadow window
 
@@ -398,8 +398,7 @@ The bootloader intentionally executes a 4 KiB authenticated object in
 same page, and the `0xFF00` dispatcher loads the callback and uses an indirect
 call.
 
-This proves ordinary SRAM execution is a supported firmware design, not merely
-an MPU-theory possibility.
+This proves ordinary SRAM execution is a supported firmware design.
 
 ### 6.2 Application executable RAM: confirmed; stock consumer still absent
 
@@ -410,7 +409,7 @@ window.
 
 A lifecycle re-audit strengthens the storage primitive: the normal application
 `10 02` transition enters the boot programming runtime by a live
-`0x64EC8 -> 0x9F00 -> 0x148E -> 0x1398` jump, not a reset. `0x64EC8` loads the
+`0x64EC8 -> 0x9F00 -> 0x148E -> 0x1398` jump. `0x64EC8` loads the
 fixed retained-record source `0x31914`; `0x9F00` touches no XCP-window bytes and
 writes `MPM=0`; `0x1398 -> 0x1338` does not call reset-startup initializer
 `0x1404`. Thus bytes written to `FEBF7C00..FEBFFBFF` immediately before
@@ -599,7 +598,7 @@ relocations:  0
 sha256:       8f486d36ae38d233165563ad2cc4a71d006cf5c8cf9a876345a3b6ab72f10495
 ```
 
-This is **generated-artifact evidence**, not a bench observation. The builder
+This is **generated-artifact evidence** only. The builder
 pins the Docker image content ID and rejects oversized or relocatable output.
 
 ## 10. Data-only alternatives
@@ -850,8 +849,7 @@ and requires `--execute --bench-isolated` for live use. The pinned fixture means
 this operational path does not require the payload-build secret. For
 `command5-proxy`, the same process can wait for the XCP mailbox and issue one
 variable-length command-5 request; slot-4 command-5 permission remains a dynamic
-hardware result. The remaining proof class is physical execution, not missing
-host choreography.
+hardware result. The remaining proof class is physical execution.
 
 
 
@@ -1007,8 +1005,7 @@ retained application R/W/X FEBF0000..FEBF0307
 callback cell               FEBF0FD0
 ```
 
-The current field-facing TSK integration exposes only the 332-byte inert canary,
-not this steering bridge.
+The current field-facing TSK integration exposes only the 332-byte inert canary.
 
 ### 19.8 `FF00` hands execution through retained RAM into the stock application
 
@@ -1176,9 +1173,9 @@ semantics:
    clears the initializer delay, so deployment must not add an unconditional
    ten-second startup sleep. If NRC `0x37` is returned after failed keys or another
    delay-armed lifecycle, respect/retry through the verified 10-second backoff.
-2. **Per-boot runtime attestation.** Sender arming must depend on volatile proof
-   that the target-bound runtime is alive on the current EPS boot, not only on a
-   persistent request/F181 configuration.
+2. **Per-boot runtime attestation.** Sender arming must require volatile proof
+   that the target-bound runtime is alive on the current EPS boot.
+   Persistent request/F181 configuration alone is insufficient.
 
 The first item follows from SEC-BOOT-010. The second follows from the verified
 upper-LocalRAM clear on hardware reset plus the retained-runtime architecture.
@@ -1203,13 +1200,13 @@ proof that its authenticated payload window survives into application-RWX RAM.
 The former is emitted as `semantic-resolved-steering-unsupported`; the latter as
 `semantic-resolved-geometry-unresolved`. Runtime builders refuse both. Sienna RAM
 geometry is selected only by the exact CodeFlash SHA-256. Supplying the Sienna
-variant ID against a foreign image is an error, not an override.
+variant ID against a foreign image is rejected.
 
 The tracked 2023-Corolla `8965H1202000` image is now the first foreign proof of
 that distinction. The resolver transfers the boot/startup/foreground/Gate-2/COM
-architecture unchanged, but the actual queue has exactly `0x00F/0x0D7/0x0B6`,
-not `0x2E4/0x131`; its manifest therefore resolves successfully and stops at the
-steering-capability boundary. The image also carries the same payload-build,
+architecture unchanged, but the actual queue contains exactly `0x00F/0x0D7/0x0B6`.
+Its manifest therefore resolves successfully and stops at the steering-capability
+boundary. The image also carries the same payload-build,
 boot-SA, and application-SA roots as `8965B4512000`, while the owner-side range
 dumps provide direct observed bootstrap execution evidence.
 

@@ -424,7 +424,7 @@ def main() -> int:
                 "rlog_dongle_id": init["dongle_id"],
                 "firmware_dump_preflight_dongle_id": preflight_dongle,
                 "same_dongle": init["dongle_id"] == preflight_dongle,
-                "interpretation": "Discord attribution ties this dynamic rlog to Span's reported 2025 Corolla investigation, but embedded carParams is MOCK and the logging dongle differs from the later TSKM dump preflight. Treat this as Span-attributed vehicle-level evidence, not an exact 8965F1208000 firmware-to-route join.",
+                "interpretation": "Discord attribution ties this dynamic rlog to Span's reported 2025 Corolla investigation, but embedded carParams is MOCK and the logging dongle differs from the later TSKM dump preflight. This supplies only Span-attributed vehicle-level evidence. Exact 8965F1208000 firmware-to-route identity remains unproved.",
             },
         },
         "runtime_boundary": {
@@ -598,7 +598,7 @@ def main() -> int:
                 "wire": "classic 8-byte PCM_CRUISE_4 / SecOC cruise-switch prior-art carrier",
                 "frame_count": len(cruise_switch),
                 "prior_art_button_values": {k: unique(v) for k, v in cruise_switch_prior_art.items()},
-                "boundary": "All legacy cruise-switch bits are inactive in this segment; ID/DLC survival is evidence for a retained carrier, not proof that the old button semantics are unchanged on TSS3.",
+                "boundary": "All legacy cruise-switch bits are inactive in this segment; ID/DLC survival establishes only a retained carrier. Transfer of old button semantics to TSS3 remains unproved.",
             },
             "0x51E": {
                 "wire": "classic 8-byte target-native H/F Ready Status input carrier",
@@ -614,7 +614,7 @@ def main() -> int:
             "all_samples_harness_status_flipped": all(x["harness_status"] == "flipped" for x in panda_states),
             "all_samples_controls_disallowed": all(not x["controls_allowed"] for x in panda_states),
             "field_context": "The maintainer reports Span had not physically swapped the Toyota-B CAN0/CAN1 pairs for this log.",
-            "interpretation": "Panda harnessStatus=flipped is USB-C harness orientation, not the Toyota-B physical CAN0/CAN1 repin. ELM327 param=1 keeps logical bus 1/FDCAN2 on the normal harness CAN1 wires, so an unmodified harness can passively observe that unsplit network. The missing physical repin prevents CAN0/CAN2 relay interception and camera-side-vs-car-side producer attribution; it does not by itself make stock CAN1 traffic invisible to logical bus 1.",
+            "interpretation": "Panda harnessStatus=flipped identifies USB-C harness orientation only. The Toyota-B physical CAN0/CAN1 repin is a separate change. ELM327 param=1 keeps logical bus 1/FDCAN2 on the normal harness CAN1 wires, so an unmodified harness can passively observe that unsplit network. The missing physical repin prevents CAN0/CAN2 relay interception and camera-side-vs-car-side producer attribution; it does not by itself make stock CAN1 traffic invisible to logical bus 1.",
         },
         "exact_h_f_visibility": {
             "secoc_rx_expected": [f"0x{addr:03X}/{dlc}" for addr, dlc in exact_h_secoc_rx],

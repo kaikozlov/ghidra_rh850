@@ -526,7 +526,7 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser(
         "recorder", help="inspect recovered PCS recorder field schemas (TSS3 or ADU)",
         description="Read tracked PCS viewer field definitions; no external GTS installation is needed. "
-                    "Byte/bit positions belong to recorder records, not CAN frames. "
+                    "Byte/bit positions belong exclusively to recorder records. "
                     "This does not query an ECU or transfer Data List enum meanings.",
     )
     p.add_argument("query", nargs="?", help="record ID (four hex digits or 0x-prefixed) or field-name substring")

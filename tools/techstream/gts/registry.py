@@ -913,8 +913,8 @@ def _registry_session_control(
             "path by CDbEcuCategoryTable/class-0x110 byte +0x48 low5 in 0x14/0x15/0x16. This raw SendProc gate is "
             "not a diagnostic-family classifier: SelectCarTypeVin10 dispatches low5 0x16 to Phase6 and the universal "
             "P5 runtime instead follows GetSupportP5_DT bindings. The former local "
-            "wire_proven_categories subset is intentionally absent: it was an independent-tooling policy, not "
-            "Toyota resolver semantics. session_judgment_exception is documentation, not a runtime default"
+            "wire_proven_categories subset is intentionally absent: it was an independent-tooling policy. "
+            "session_judgment_exception provides documentation only"
         ),
     }
 
@@ -1136,7 +1136,7 @@ def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str =
         raise ValueError("Camry HV CAN topology option/variant drift")
     profile["gts_can_topology"] = {
         **topology,
-        "namespace_boundary": "Toyota GTS Bus N names are vehicle-network domains, not Panda logical bus numbers; current post-repin diagnostics use Panda bus0",
+        "namespace_boundary": "Toyota GTS Bus N names identify vehicle-network domains. Panda logical bus numbers use a separate namespace; current post-repin diagnostics use Panda bus0",
     }
 
     observed_identities = _registry_nrtd_observed_identities(nrtd_p5)
@@ -1184,8 +1184,8 @@ def build_toyota_diag_registry(gts_root: Path, region: str = "NA", family: str =
         },
         "boundary": (
             "Clean derived diagnostic metadata only: no Toyota binaries are embedded. Active Tests are static plans; "
-            "execution=executable only means the fixed request geometry is complete, not that the registry authorizes "
-            "execution: it intentionally contains no execution authorization, session escalation, SecurityAccess, "
+            "execution=executable means only that the fixed request geometry is complete. "
+            "The registry intentionally contains no execution authorization, session escalation, SecurityAccess, "
             "flash, or write workflow."
         ),
     }

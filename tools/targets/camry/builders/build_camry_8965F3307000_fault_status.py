@@ -152,7 +152,7 @@ def build() -> dict:
 
     # Exact DTC table relocation. Every DTC record still referenced by F33 is
     # byte-identical to H, allowing the pinned EMPS_P5 vocabulary to be joined
-    # by exact packed-DTC record rather than by vehicle-name assumption.
+    # directly by exact packed-DTC record.
     f33_dtc_indexes = sorted({rec[2] for rec in events if rec[2]})
     need(f33_dtc_indexes and max(f33_dtc_indexes) == 133, "F33 DTC index range drift")
     vocab = dtc_vocab_by_index(htech)
@@ -282,7 +282,7 @@ def build() -> dict:
             "index_120_disabled": {"h_raw": h_idx120.hex(), "f33_raw": f_idx120.hex()},
             "vocabulary_join": (
                 "For every DTC index still referenced by F33, the exact 8-byte F33 DTC record equals the pinned H record. "
-                "Toyota EMPS_P5 names are therefore joined by identical packed-DTC bytes, not transferred by variant assumption."
+                "Toyota EMPS_P5 names are therefore joined directly by identical packed-DTC bytes."
             ),
         },
         "passive_opendbc_integration": {

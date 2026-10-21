@@ -108,7 +108,7 @@ def build() -> dict:
     need(scale["fraction_deg_per_b6_count"] == {"numerator": 1024, "denominator": 17870}, "B6 controller-equivalent scale drift")
     deg_per_count = 1024 / 17870
 
-    # Secondary fields: retain consumer behavior, not guessed OEM names.
+    # Secondary fields: retain only recovered consumer behavior until OEM names are joined.
 
     # Steering-rate monitor / diagnostic joins.
     need(u16(image, 0x2939C) == 0x1036 and u32(image, 0x293A0) == 0x4DBBC, "DID1036 row drift")
@@ -264,7 +264,7 @@ def build() -> dict:
             "techstream_correlations": {"path": str(TECH.relative_to(REPO)), "sha256": sha_file(TECH)},
         },
         "steering_rate_monitor": {
-            "boundary": "The raw threshold and 79-cycle persistence are firmware facts. The diagnostic callback independently names this measurement Steering Angle Velocity; production Panda policy may trip immediately above the raw threshold instead of reproducing EPS persistence.",
+            "boundary": "The raw threshold and 79-cycle persistence are firmware facts. The diagnostic callback independently names this measurement Steering Angle Velocity; production Panda policy may use an immediate raw-threshold trip without EPS persistence.",
             "callback": "0x0004DBBC",
             "can_id": "0x025",
             "did": "0x1036",

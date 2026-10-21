@@ -68,7 +68,7 @@ Current opendbc defines the following support states:
 | **Under review** | Merged but not yet release-supported pending safety/quality validation |
 | **Custom** | Upstream software exists, but install/configuration is non-standard; not ordinary release support |
 | **Dashcam mode** | Recognition/software may exist, but openpilot does not engage on release |
-| **Community** | Supported in a community fork, not validated/maintained as upstream support |
+| **Community** | Supported in a community fork only; upstream validation and maintenance are outside this status |
 | **Not compatible** | Known fundamental blocker such as unsupported network/security architecture |
 
 At the snapshot there are 335 Upstream, 31 Dashcam, 17 Community, 16 Not
@@ -93,8 +93,8 @@ following favorites:
 | Sedan | Toyota Corolla 2020-22; Hyundai Sonata 2020-23 |
 | Truck | Ram 1500 2019-24; Chevrolet Silverado 1500 2020-21 |
 
-This is a consumer shortlist, not an engineering completeness ranking. The
-current generated support metadata makes that visible:
+This shortlist addresses consumer suitability. Engineering completeness requires
+the separate comparison visible in the current generated support metadata:
 
 | Vehicle | Release ACC path | ACC floor | ALC floor | steering authority star | auto-resume |
 |---|---|---:|---:|:---:|:---:|
@@ -117,8 +117,7 @@ They should not be used unmodified as the architecture benchmark for a new port.
 
 ## 4. Cross-family integration survey
 
-The useful comparison is by platform architecture, not merely by number of
-supported model names.
+Compare platform architectures as well as the number of supported model names.
 
 ### Toyota / Lexus: mature TSS2 is the strongest Toyota benchmark
 
@@ -184,7 +183,7 @@ a useful radar-parsing comparison because radar is unavailable to the port, but
 they are a strong example of a small modern platform whose supported surface is
 coherent rather than broad-but-partial.
 
-### Hyundai / Kia / Genesis: arguably the best consumer family, not the best release-longitudinal benchmark
+### Hyundai / Kia / Genesis: strong consumer support with release-longitudinal limits
 
 Hyundai-family support is enormous and the vehicles generally provide strong,
 all-speed steering and stop-and-go stock SCC. Current metadata contains 99
@@ -277,8 +276,7 @@ all of these layers together:
 12. **Validation:** routes, replay coverage, safety tests, tuning data, and enough
     real driving to support comma's final safety/quality validation.
 
-A port that satisfies only command delivery is at the beginning of this list,
-not the end.
+Command delivery satisfies only the beginning of this quality model.
 
 ## 6. What this means for Toyota TSS3
 

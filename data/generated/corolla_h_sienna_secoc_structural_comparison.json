@@ -557,7 +557,7 @@
         "input_buffer_length"
       ],
       "matches_sienna_0d7_format_crypto_retry_class": true,
-      "meaning": "B6 is Corolla-specific as a protected PDU identity/application route, not as a cryptographic profile shape: it is instantiated from the same FD ordinary SecOC class already present as Sienna 0x0D7/0x090."
+      "meaning": "B6's protected PDU identity/application route is Corolla-specific. Its cryptographic profile instantiates the same FD ordinary SecOC class already present as Sienna 0x0D7/0x090."
     },
     "corolla_h_f": {
       "base": "0x0002572C",

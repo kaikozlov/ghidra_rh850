@@ -92,8 +92,8 @@ def enum_screen(windows: list, sources: list) -> dict:
     """Test a new literal value, allowing different pre-cancel enum states.
 
     Unlike the single-bit screen, this does not require the previous state to
-    be constant or identical across events. A common post-only value remains
-    necessary evidence, not proof of a command rather than a result-state echo.
+    be constant or identical across events. A common post-only value is necessary.
+    Both a command and a result-state echo can produce it.
     """
     specifications = 0
     candidates = []
@@ -187,8 +187,8 @@ def build() -> dict:
             summary['adas_streams'].append({'address': f'0x{address:03X}', 'length': size,
                                              'pre_samples': len(before), 'post_samples': len(after)})
             # Test both polarities. A literal cancel edge must leave its prior
-            # stable state in every event; this is necessary, not sufficient,
-            # evidence for a command (a result-state echo can do the same).
+            # stable state in every event. A result-state echo can do the same,
+            # so command identity requires additional evidence.
             for byte in range(3, size):
                 for bit in range(8):
                     old = {bool(d[byte] & (1 << bit)) for d in before}
@@ -226,7 +226,7 @@ def build() -> dict:
         'gts_surface': {
             'database': 'FRC_P5', 'active_test_count': len(tests),
             'named_cancel_active_tests': [r['name'] for r in tests if 'cancel' in r['name'].lower()],
-            'named_test_disposition': 'PDA Cancel Notification Display is a display active test, not an adaptive-cruise cancellation command',
+            'named_test_disposition': 'PDA Cancel Notification Display is a display-only active test; adaptive-cruise cancellation requires a separate command',
             'monitor_oracle': 'DID 0x1B01 groups ISA main-switch recognition with output set-cancel/cancel/resume switch monitors. These read-only observations are not a DRCC CAN field map or an actuator API',
             'boundary': 'absence of a named GTS active test is not proof that ECU firmware has no cancellation command',
         },

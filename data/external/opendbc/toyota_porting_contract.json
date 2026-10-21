@@ -4,7 +4,7 @@
     "url": "https://github.com/commaai/opendbc.git",
     "commit": "c9b31d21bc396e8958891e271936bdbdf1a6ca93"
   },
-  "boundary": "This file records what the pinned commaai/opendbc Toyota implementation does. It is prior art for semantic roles and integration architecture, not evidence that a TSS3 vehicle reuses any CAN identifier, wire layout, producer ECU, timing, or safety limit. Target firmware and captures remain authoritative.",
+  "boundary": "This file records what the pinned commaai/opendbc Toyota implementation does. Its evidence scope is limited to prior art for semantic roles and integration architecture. Target firmware and captures remain authoritative for TSS3 CAN identifiers, wire layouts, producer ECUs, timing, and safety limits.",
   "sources": {
     "interface": {
       "path": "opendbc/car/toyota/interface.py",
@@ -75,7 +75,7 @@
       ],
       "default_pt_dbc": "toyota_secoc_pt_generated",
       "default_radar_dbc": "toyota_tss2_adas",
-      "architectural_fact": "SecOC is layered onto the TSS2 platform model rather than replacing the state, ownership, actuation-limit, or stock-suppression model."
+      "architectural_fact": "SecOC is layered onto the TSS2 platform model and preserves its state, ownership, actuation-limit, and stock-suppression models."
     },
     "orthogonal_flags": [
       "RADAR_ACC",
@@ -256,7 +256,7 @@
       "torque": 0.4,
       "angle": 0.8
     },
-    "note": "These are implementation limits in the pinned older-Toyota port, not values to transplant into an uncharacterized TSS3 EPS.",
+    "note": "These implementation limits apply only to the pinned older-Toyota port. Limits for an uncharacterized TSS3 EPS require independent characterization.",
     "secoc_lta2_actuation_policy": "The pinned Toyota Panda safety hook allows the 0x131 frame shape but rejects any STEERING_LTA_2 actuation request or nonzero angle; pinned SecOC control is therefore torque-only at the safety boundary."
   },
   "stock_source_ownership": {
@@ -327,7 +327,7 @@
       "eps"
     ],
     "eps_role": "The upstream source explicitly says EPS firmware describes lateral API changes, including use of LTA for lane keeping and rejection of LKA messages.",
-    "porting_implication": "Collect and bind camera, radar, and EPS firmware identities before choosing a TSS3 DBC/control profile; EPS software identity is evidence about lateral API generation, not merely a fingerprint string."
+    "porting_implication": "Collect and bind camera, radar, and EPS firmware identities before choosing a TSS3 DBC/control profile. EPS software identity provides evidence about lateral API generation."
   },
   "radar_generation": {
     "tss2_track_id_ranges": [
@@ -338,6 +338,6 @@
       "0x210..0x21F",
       "0x220..0x22F"
     ],
-    "implication": "Even observation inputs moved with Toyota generation changes; TSS3 radar/camera state should be re-censused rather than inherited from TSS-P/TSS2."
+    "implication": "Observation inputs changed across Toyota generations. TSS3 radar/camera state should be censused independently of TSS-P/TSS2."
   }
 }

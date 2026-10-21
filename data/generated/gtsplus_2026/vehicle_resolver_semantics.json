@@ -91,7 +91,7 @@
           "phase_type": 34
         }
       ],
-      "meaning": "all current Camry-HV install rows use connection frame 0 / CommSet 9 and phase-type byte 0x12 or 0x22; every one of the 34 candidates independently resolves through Toyota's class-0x10D (category, phase) route table. Frame 0 has empty send/mask/check variables, so mount resolution is category-scoped transport setup/connectivity, not an identity-DID probe"
+      "meaning": "all current Camry-HV install rows use connection frame 0 / CommSet 9 and phase-type byte 0x12 or 0x22; every one of the 34 candidates independently resolves through Toyota's class-0x10D (category, phase) route table. Frame 0 has empty send/mask/check variables, so mount resolution is category-scoped transport setup/connectivity only"
     },
     "inputs": [
       "CDbInstallingEcuListResRecords",
@@ -153,7 +153,7 @@
     },
     {
       "api": "GetSupportP5_DT",
-      "semantics": "optionId 1/2/3 dispatches to CCommCachePlusP5::CheckSupportPid/Did/Rid; support is live/cached communication state, not DDB presence alone",
+      "semantics": "optionId 1/2/3 dispatches to CCommCachePlusP5::CheckSupportPid/Did/Rid; support requires live/cached communication state beyond DDB presence",
       "stage": "feature-support-resolution"
     }
   ],

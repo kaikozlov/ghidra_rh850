@@ -9,16 +9,16 @@
 > **Status:** no static PC-redirection primitive recovered. The XCP bytes do
 > survive the handoff, but the audited boot ingress/dispatch/copy surfaces do
 > not provide the missing jump. The practical path therefore still uses the
-> separately recovered boot SecurityAccess secret. This is a bounded negative
-> result, not a proof that no undocumented hardware effect can ever exist.
+> separately recovered boot SecurityAccess secret. This negative result is limited
+> to the audited software surfaces. Undocumented hardware effects remain outside it.
 
 ## 1. What the attacker already has before boot entry
 
 COM-005 gives unauthenticated XCP `DOWNLOAD`/`MODIFY_BITS` access to
 `FEBF7C00..FEBFFBFF`. The application MPU marks the corresponding shadow region
 supervisor-executable. SEC-BOOT-012 then adds the cross-lifecycle fact: normal
-application `10 02` is a live handoff, not a reset, and those bytes remain
-resident after entering the boot programming runtime.
+application `10 02` performs a live handoff that preserves those bytes
+in the boot programming runtime.
 
 The exact handoff is:
 
@@ -35,8 +35,8 @@ application XCP DOWNLOAD -> FEBF7C00..FEBFFBFF
 
 The initially promising idea that `0x148E` might copy attacker-selected state is
 false. `0x64EE6` loads the literal CodeFlash address `0x31914` into `r6`
-immediately before the call to `0x9F00`. The nine-dword copy is therefore fixed
-source data, not an arbitrary write.
+immediately before the call to `0x9F00`. The nine-dword copy therefore transfers
+fixed source data to its fixed destination.
 
 So the composition begins with **retained executable bytes**, but still needs a
 boot-context control-flow transfer into them.
@@ -128,8 +128,7 @@ Instruction-level review closes the simple memory-corruption variants:
 - send-key `0x53F2` gates on SecurityAccess handshake state and requires total
   request length `0x12` before the fixed 16-byte key calculation/comparison;
 - expected-key, seed, and request loops are fixed-width 16-byte operations;
-- the request pointer originates from the bounded DCM buffer, not a
-  tester-supplied pointer.
+- the request pointer originates from the bounded DCM buffer.
 
 No request-controlled destination address, copy length, or saved-return-address
 overwrite was recovered in either handler.
@@ -177,8 +176,8 @@ a PC transfer:
   caller's value slots;
 - application DCM generic callback: target provenance is the selected immutable
   CodeFlash service/subfunction descriptor;
-- RSCFD receive local buffer: hardware reader copies the fixed classic-CAN data
-  words, not a DLC-sized CAN-FD payload;
+- RSCFD receive local buffer: hardware reader copies only the fixed classic-CAN
+  data words;
 - CanTp 4 KiB reassembly: independently range-checked;
 - indexed callback dispatchers audited from external ingress: bounds precede
   target loads.

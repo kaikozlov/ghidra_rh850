@@ -35,7 +35,7 @@ instruction sequences directly from the committed image.
 
 The image contains a Denso application diagnostic configuration structurally
 separate from the bootloader UDS table. Runtime instructions in `FUN_8F282`
-index the primary **24-byte service objects from `0x25E28`**, not `0x25E30`.
+index the primary **24-byte service objects from `0x25E28`**.
 The corrected object layout is:
 
 ```c
@@ -100,10 +100,10 @@ not be projected onto this stack.
 
 ## 1. Application identification DIDs
 
-Three 16-byte records begin at `0x2A30C`. The second halfword is a response
-length/size attribute, not read/write flags: its values `0x11`, `0x01`, and
-`0x14` equal the response widths produced by the three callbacks. The separate
-19-row table at `0x26AEC` is RoutineControl RID configuration, not WDBI membership.
+Three 16-byte records begin at `0x2A30C`. The second halfword specifies response
+length/size: its values `0x11`, `0x01`, and `0x14` equal the response widths produced
+by the three callbacks. The separate 19-row table at `0x26AEC` configures
+RoutineControl RIDs.
 
 ```c
 struct application_did_record {
@@ -245,7 +245,7 @@ session-policy internals including `0x88`.
 ### ClearDiagnosticInformation (`0x14`) / ECUReset (`0x11`)
 
 `application_clear_diagnostic_information_callback @ 0x8B1F0` belongs to SID
-`0x14`, not ECUReset. Phase 0 enters
+`0x14`. Phase 0 enters
 `application_clear_diagnostic_information_request_start @ 0x8B144`, which
 requires exactly three request bytes and packs them as a 24-bit `groupOfDTC`.
 The lower operation stages are `0x8AF28` and `0x8B014`; failures map through the
@@ -350,9 +350,9 @@ the helper masks `0xFF00` and routes every `0x2xx` ID to `0x66172`, while the
 seven functions and zero selected security-sensitive references. The sole
 branch-feasible selected hit is therefore DID `0110 -> FEBE5050`. Exact xrefs
 show `FEBE5050` is initialized/reset and maintained as a saturating
-crypto-test/status accumulator, not the command-5 generated output. This is a
-bounded negative for the currently recovered high-value RAM regions, not a
-claim that every RDBI value is non-sensitive.
+crypto-test/status accumulator. The command-5 generated output remains outside
+this path. This negative result is limited to the currently recovered high-value
+RAM regions. Other RDBI values may still be sensitive.
 
 #### Response-length preflight and producer-write closure (MEM-SAFE-006)
 
@@ -395,7 +395,7 @@ stale-RDBI DIDs and **no new under-written surface** — RoutineControl packer
 success stub with nonzero result size; all seven XCP handlers route through
 the full-frame builder `0x9724E`; bootloader `F181` synthesizes every declared
 byte. The type-3 dispatcher status helpers (e.g. `0x960DE` pre-initializing
-its out slot) are the type-3 producers, not the action callbacks.
+its out slot) produce the type-3 results.
 
 #### Transport-layer stale-response disclosure in 48 RDBI DIDs
 
@@ -441,9 +441,9 @@ DIDs, sizes the seed read to `declared_length + 2`, implements only those two
 read services, defaults to planning, and requires `--execute --bench-isolated`
 for live confirmation. The firmware-static disclosure chain is verified; the
 exact bench oracle has not yet been observed on hardware. This does not
-contradict the callback-local high-value-RAM negative above: the disclosed bytes
-come from Dcm response-buffer lifetime, not from a sensitive reference inside
-one of the 48 success-stub producer callbacks.
+contradict the callback-local high-value-RAM negative above: Dcm response-buffer
+lifetime supplies the disclosed bytes. The 48 success-stub producer callbacks
+contain no sensitive reference that supplies them.
 
 The same complete callback graph also closes the obvious RDBI side-effect class.
 None of the 196 callback roots has a fixed-global RAM write. Across their
@@ -481,11 +481,11 @@ has **zero SecurityAccess levels**. The 13 implemented DIDs divide as follows:
 | `2014` | vehicle speed + two state flags clear | writes mode flag `FEBEB3EE = 0/0x5A`; changes threshold/mode eligibility and participates in RoutineControl `110A/110C` start gating |
 
 For the eight parameter-persistence DIDs, the state consumers construct IDs `0x101/0x102/0x103`
-and call `0xFF09C -> secoc_nvm_object_update`; this is a direct persistence join,
-not merely a callback-local RAM write. DID `2012` is the exceptional reachability
-case: its start callback at `0x4EF4A` is unconditional, while session-transition
-policy `0x4C942` applies the vehicle-speed limit only to requested session `02`,
-not extended session `03`. Thus the static path `10 03` followed by
+and call `0xFF09C -> secoc_nvm_object_update`, establishing direct persistence.
+DID `2012` is the exceptional reachability case: its start callback at `0x4EF4A`
+is unconditional. Session-transition policy `0x4C942` applies the vehicle-speed
+limit only to requested session `02`. Extended session `03` remains unrestricted
+by that policy. Thus the static path `10 03` followed by
 `2E 20 12 01` requires neither SecurityAccess nor a recovered vehicle-speed
 gate. The complete matrix is `data/application_wdbi_surface.csv`.
 
@@ -507,7 +507,7 @@ checkpoint object **7** through `FF09C`; the checkpoint inventory classifies
 object 7 as the bounded evidence name `three_phase_mode_latch`. `B7F4C` polls
 object-7 NvM status and `B7F24` reports WDBI selector `0x12` completion only
 after the persistence operation leaves pending state. Thus this is a genuine
-application/NvM handshake, not only Dcm transaction bookkeeping.
+application/NvM handshake.
 
 The two modes diverge after that completion signal. Dcm state `0x12` is simply
 cleared. State `0x22` instead calls `0x50922` before being cleared. `0x50922` is
@@ -525,8 +525,8 @@ A complete direct-reference audit of the recovered `0204` chain, including all
 12 operation-6 initializer callees, finds no direct reference to the conditioned
 steering-command state or the independently proved d/q reference/feedback cells.
 This bounds `0204` as a **persistent maintenance/reset and availability-state
-control**, not a recovered arbitrary steering-current/PWM command primitive. It
-is intentionally not given an isolated-bench probe here: the `0x22` branch
+control**. An arbitrary steering-current/PWM command primitive remains unrecovered.
+An isolated-bench probe is intentionally omitted here: the `0x22` branch
 deliberately clears and persists checkpoint state, so dynamic characterization
 requires a disposable/matching bench plus NVM backup/restore planning.
 
@@ -549,7 +549,7 @@ would write shared diagnostic word `FEBE816A = 0x2E10` only when that mapped
 result equals `2`, so the `0x2E10` branch is unreachable for DID `2010` and the
 callback always writes zero to `FEBE816A`.
 
-`FEBE816A` itself is Dcm service bookkeeping, not a `2010` application command:
+`FEBE816A` itself records shared Dcm service bookkeeping:
 `0x4C3CA` masks its high byte and dispatches service tags `0x14`, `0x2E`, and
 `0xBA`; the ClearDiagnosticInformation state machine independently stores
 `0x1410`, while other WDBI operations can store `0x2E10`. Thus the supported
@@ -595,14 +595,13 @@ that alternate selector. The observer publishes its indexed result through
 `B8E0C` to `FEBEB54C`; the exact project xref topology for `FEBEB54C` contains
 only init/snapshot consumers.
 
-This is an unauthenticated **operational lifecycle/transition inhibit plus
-calibration-mode normalization**, not a recovered steering-current command.
+This establishes an unauthenticated **operational lifecycle/transition inhibit
+plus calibration-mode normalization**.
 Exact xref closure for `FEBEB18F`, `18E`, `192`, `1D1`, `54C`, and the shared
 signal vector is pinned, and the lifecycle/calibration functions have no direct
 reference or call edge into the independently proved d/q-reference → current-PI
-→ TSG3 PWM boundary. That is a bounded graph negative, not a statement that the
-vehicle has no observable effect. Hardware characterization of the inhibit
-remains open.
+→ TSG3 PWM boundary. This bounded graph negative leaves hardware-visible effects
+unresolved. Hardware characterization of the inhibit remains open.
 
 #### DIDs `2013` and `2014`: bounded control and mode-eligibility cones
 
@@ -620,8 +619,8 @@ That apparent motor-worker join is bounded by the complete xref topology.
 `FEBE66CE/66D0` and `FEBE63CE/63D0`; all four mirrors have **zero runtime
 readers** in the accepted project. The `2013` cone therefore reaches the motor
 worker's state block but does not join the independently proved d/q-reference,
-current-PI, or TSG3-PWM consumers. This is a static graph boundary, not a claim
-that changing the parameter has no hardware-visible effect.
+current-PI, or TSG3-PWM consumers. This static graph boundary leaves the
+hardware-visible effect of changing the parameter unresolved.
 
 DID `2014` maps payload `0/1` to `FEBEB3EE = 0/0x5A`. `B692C` and `B70D0` use
 that flag to choose between calibrated thresholds at `0x1A4BC` and `0x1A4BE`;
@@ -697,7 +696,7 @@ current SA level (RAM `0xFEBE5DA4`, zero-indexed):
 Level 1 SecurityAccess is non-functional: both seed and key handlers are
 `return 1` stubs. The shared workers at `0x9497C`/`0x94A72` interpret return 1
 as an error and emit a negative response. Programming-session access is
-therefore obtained via `DiagnosticSessionControl` (`10 02`), not via `SA 01/02`.
+therefore obtained via `DiagnosticSessionControl` (`10 02`).
 
 #### Level 2 seed generation (`0x8C734`)
 
@@ -756,7 +755,7 @@ buffer, already advanced past SID and subfunction by the Dcm DSP dispatcher
 
 **The tester controls these bytes.** The Dcm DSP seed path (`0x94BCC`)
 performs no request-data-length validation: the config check at offset
-`0x2464` (value `0x10`) validates *response* space, not request length.
+`0x2464` (value `0x10`) validates only *response* space.
 An attacker can send `27 03` followed by 16 bytes of chosen data; those
 bytes occupy `PDU_buffer[2:18]` and become the AES-DEC input. If a bare
 `27 03` is sent instead, the 16 bytes are whatever the PDU buffer contained
@@ -861,7 +860,7 @@ conditioned-command/d/q/current-PI/PWM state set. See
 about SID `0xAB`.
 
 The callback table rooted at `0x25768` is the **active lower SID-`0x2E` WDBI
-membership table**, not a third dormant RoutineControl subsystem. It contains 13
+membership table**. It contains 13
 12-byte records `(DID, reserved, start_cb, result_cb)` for DIDs `0204`, `2001`,
 `2002`, `2005`, `2006`, `2007`, `2008`, `2009`, `200D`, `2010`, `2012`, `2013`,
 and `2014`. The unique caller chain is
@@ -1023,15 +1022,14 @@ The supply value is converted elsewhere as `raw * 10 / 256`; `0x0A00` becomes
 The first byte is now bounded structurally. `application_input_snapshot_update @
 0xBCB3A` copies it from the live GP-relative byte at `0xFEBEB1A4` (`gp-0x65C`)
 to snapshot byte `GP+0x301F` (`0xFEBEE81F`). The live source is owned by the
-generated transition state machine at `0xB28AC/0xB2912`, not by Dcm. Initialization
+generated transition state machine at `0xB28AC/0xB2912`. Initialization
 sets phase `0`; the recovered transitions assign phase markers `0x11` and `0x22`
 while coordinating system modes `0x300/0x400/0x500` and event `0x23`. Adjacent
 state-machine flags use `0x5A`, but the copied phase byte itself is not that
 marker. The handoff gate rejects phase `0x11` specifically.
 
-Accordingly the defensible name is **system-transition phase snapshot**, not
-"programming status", ignition state, READY state, or communication status. Its
-exact Toyota/Denso phase labels and physical condition remain unavailable.
+Accordingly the defensible name is **system-transition phase snapshot**.
+Its exact Toyota/Denso phase labels and physical condition remain unavailable.
 `0xFEBE8152` (`GP-0x36AE`) is set from an application initialization callback (`0x8F1E8 ->
 0x8A00C -> 0x4C506`); normal diagnostic operation requires its clear branch.
 
@@ -1056,7 +1054,7 @@ hardware, programs reset/watchdog registers, invokes the low-level reset helper,
 and loops forever awaiting reset.
 
 After event 9 is queued, `0x8A244` latches absolute `FEBF3B19 = 0x5A` and deliberately
-returns internal value `10` (pending), not success. The UDS path therefore keeps
+returns internal value `10` (pending). The UDS path therefore keeps
 NRC `0x78`/pending semantics while shutdown and reset overtake it; an application
 `50 02` is not required before the CAN endpoint disappears. This behavior can
 look exactly like a client timeout when the client consumes response-pending
@@ -1108,8 +1106,8 @@ Standard OBD functional ID `0x7DF` is **not** configured in this bootloader.
 A related-variant probe that uses `0x7DF` has not exercised the firmware-derived
 functional path at `0x777`. The application configuration also contains physical `0x7A1 -> 0x7A9`,
 functional `0x777 -> 0x7A9`, and limited secondary physical `0x7A0 -> 0x7A8`
-contexts. These are firmware facts for this image, not proof that every related
-application retains all three endpoints.
+contexts. These firmware facts apply to this image only. Related applications
+require independent endpoint recovery.
 
 ## 6. Corolla comparison
 
@@ -1126,7 +1124,7 @@ architecture, but the Sienna prerequisites must be compared individually:
 | speed `<= 0x0180` raw (strongly 3.00 km/h) | **likely but not measured from EPS RAM** in stationary/Not-Ready tests | no observed motion suggests it was met, but this is not a firmware-level Corolla proof |
 | scaled supply `>= 0x0A00` (strongly 10.0 V) | **not measured** | a low-voltage condition remains an untested Sienna-equivalent NRC `0x22` cause |
 | system-transition phase snapshot not `0x11` | **not measured** | the producer is identified, but its Corolla value and OEM phase labels are unknown |
-| security unlock before `10 02` | **not required by Sienna** | Corolla security-first attempts test a variant difference, not a Sienna prerequisite |
+| security unlock before `10 02` | **not required by Sienna** | Corolla security-first attempts test a possible variant-specific prerequisite |
 | `0x85`/`0x28` preamble | **not required by Sienna** | those experiments may reveal Corolla-specific behavior but cannot satisfy a missing Sienna gate |
 | one-second settle/tester-present/double request | **not required by Sienna** | no such prerequisite exists in the session record or policy |
 | initial and continuing NRC `0x78` followed by shutdown/reset | client reports final timeout/silence | compatible with the Sienna path because the client waits for a final `50 02` that the reset can overtake |

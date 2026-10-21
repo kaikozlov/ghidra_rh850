@@ -106,7 +106,7 @@ are now:
 3. recover the Brake/VMM firmware and its request-validation, routing,
    source-suppression, and signing contract; or
 4. retain the already-demonstrated EPS-resident admitted-B6 rewrite strictly as
-   a development mechanism, not a native production architecture.
+   a development-only mechanism outside the native production architecture.
 
 The next lowest-cost localization is an exact-frame observer at F33's earliest
 RSCFD/CanIf boundary for route 40. Absence there would place the loss before

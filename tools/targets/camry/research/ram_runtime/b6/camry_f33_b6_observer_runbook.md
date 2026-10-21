@@ -107,8 +107,8 @@ This mode performs **no RAM execute and no writes**. It independently requires:
   the source-term publisher is still executing in READY.
 
 The positive verdict is `ready_parked_source_terms_live`. Preserve both JSON and
-NDJSON outputs. A failure or any vehicle-state guard violation means **full OFF
-recovery**, not another payload attempt.
+NDJSON outputs. A failure or any vehicle-state guard violation requires **full OFF
+recovery**. Do not attempt another payload.
 
 This parked READY capture is intentionally the end of the current field sequence.
 It establishes whether the corrected resident survives the NRTD->READY transition
@@ -122,7 +122,7 @@ After collecting the READY/Park result, power the vehicle fully OFF. The residen
 is volatile and disappears on reset. On the next normal startup, confirm ordinary
 vehicle/EPS behavior before designing any moving observation.
 
-## Legacy B6 observer and route44 bridge: retained artifacts, not live-qualified
+## Legacy B6 observer and route44 bridge: retained artifacts awaiting live qualification
 
 `camry_f33_b6_transaction_observer_payload.bin` and
 `camry_f33_b6_bridge_payload.bin` remain in the kit only for reproducibility of
@@ -139,15 +139,15 @@ must first preserve the corrected direct-call ABI semantics (or attach without
 reconstructing the foreground scheduler) and receive its own deterministic/live
 qualification before bridge or offset experiments are reconsidered.
 
-The old bridge and small-offset procedure are therefore **deferred**, not the next
-steps after a successful runtime discriminator. No current kit command authorizes
-B6 re-injection, route44 intervention, or steering offset.
+The old bridge and small-offset procedure remain **deferred** after a successful
+runtime discriminator. No current kit command authorizes B6 re-injection,
+route44 intervention, or steering offset.
 
 ## Passive-observable interpretation boundaries
 
 The probe preserves raw adjacent witnesses (`0x08A`, `0x081`, `0x030`) without
-decoding them into any acceptance rule. Canonical interpretation lives in the
-analysis repository, not here:
+decoding them into any acceptance rule. The analysis repository supplies the
+canonical interpretation:
 
 - `0x025` is measured steering; `0x030` B8/B17 is measured driver torque and
   B22:B23 is a mapped motor-feedback proxy that ordinary driver assist also
@@ -166,11 +166,11 @@ analysis repository, not here:
 
 The probe's `ADMITTED` verdict bounds **receiver/application-side admission
 evidence only**: a phase-local queue admission plus the exact raw-COM phase
-signature defined above. It is not a statement of physical steering control
-(no wheel-motion measurement is involved), not a validation of the B6 command
-semantics (sign/scale/delay), and not deployability: the zero-MAC28 path
-depends on the maintainer EPS's cumulative stage-5 Gate-2 development patch
-and is not a stock interface. The 2026-09-04 highway corpus (VAR-124/125/126)
+signature defined above. Physical steering control remains unmeasured because the
+probe measures no wheel motion. B6 command semantics (sign/scale/delay) and
+deployability remain unvalidated. The zero-MAC28 path depends on the maintainer
+EPS's cumulative stage-5 Gate-2 development patch and is not a stock interface.
+The 2026-09-04 highway corpus (VAR-124/125/126)
 stands as the caution: 751,664 wire-exact B6 frames produced no measurable
 wheel response and no observable receiver objection — silent non-admission.
 

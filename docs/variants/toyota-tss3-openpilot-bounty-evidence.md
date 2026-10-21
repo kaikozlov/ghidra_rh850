@@ -100,10 +100,9 @@ of segment 6:
 | Absolute driver torque | 0.15 N.m median; 0.42 N.m p95; 0.97 N.m max |
 | EPS temporary/permanent fault samples | 0 / 0 |
 
-This is not an inference from the operator's impression alone. The command lead,
-repeated target/measured response, low driver torque, clean EPS state, and inactive
-Toyota request plane make this **observed openpilot lateral control**, not merely a
-successful transmit test.
+The command lead, repeated target/measured response, low driver torque, clean EPS
+state, and inactive Toyota request plane establish **observed openpilot lateral
+control** beyond the operator's impression and successful transmission.
 
 ### Corroborating result
 
@@ -139,8 +138,8 @@ Both routes record openpilot parent
 `ddd1f6fac47e636c6b5ec470849350587ee04272`, branch `kai`, version `0.11.2`,
 and `dirty=true`. Their captured `GitDiff` is byte-identical, SHA-256
 `e1caaf8276900c7aa64bb44e7f7e1a272e6026d432d7e654e1e530d4a6b6a705`, so the
-later `93` route is a same-build corroboration rather than a different steering
-configuration. The dirty state is material: the working C7 opendbc delta was not
+later `93` route corroborates the same steering build and configuration.
+The dirty state is material: the working C7 opendbc delta was not
 part of base commit `baec01c15ac3fdf7361f862a483ad3a06e1f985a`.
 
 The corroborating route's segment-3 evidence remains byte-identical to its retained
@@ -151,8 +150,8 @@ does not affect the segment-3 corroboration.
 ## 2. Exact Camry development mechanism
 
 This section records the **September-10 configuration** and subsequent rebuild
-notes, not the later capability matrix's runtime checkpoint. Its source hashes
-and mechanism are preserved to explain that particular road witness.
+notes. The later runtime checkpoint belongs to the capability matrix. The source
+hashes and mechanism here explain that particular road witness.
 
 The successful Camry drive did not transmit a host-built B6. Its ordinary
 openpilot control path was:
@@ -195,8 +194,8 @@ handoff. The later packaged/audited one-shot helper
 `4719c4f27563180359445724eaefd594e3051ea545f75d69efb9bbede8f1965a`
 is a distinct artifact and must not be substituted when reproducing that handoff.
 Its source-level difference is one sequence-equality instruction: the continuous
-helper replaces `be .L_return` with `nop`. Because the branch encodes to four bytes
-and the NOP to two, the continuous helper is 588 rather than 590 bytes.
+helper replaces `be .L_return` with `nop`. The four-byte branch becomes a
+two-byte NOP, reducing the helper from 590 to 588 bytes.
 
 The identities above are the exact road-observed artifacts. The P1M-E manual
 requires a dummy read from the written code region followed by `SYNCP` and
@@ -219,8 +218,8 @@ are the reproduction sources.
 
 The rlog records C7 commands, Panda returns, vehicle state, and wheel response;
 it does not expose EPS LocalRAM. The exact `b417...` identity is joined from the
-contemporaneous live install/status handoff and parked native-oracle witnesses,
-not inferred from CAN. The original Comma `/tmp/f33-valid-helper.bin` was no
+contemporaneous live install/status handoff and parked native-oracle witnesses.
+CAN supplies no LocalRAM identity evidence. The original Comma `/tmp/f33-valid-helper.bin` was no
 longer reachable at preservation time, but rebuilding the recovered source emits
 the complete recorded SHA-256 exactly; the retained binary is therefore the same
 recorded identity under the ordinary SHA-256 collision assumption.
@@ -241,8 +240,8 @@ Brake reset alone clears the FRC PCS-availability / ESA-AES-invalid inputs but l
 DRCC permission denied. Resetting FRC after Brake is healthy changes `1905` from
 `8000` to `8080` (Cruise Control Allowed), clears the ACC-not-available request,
 enables LDA, and leaves PCS availability/invalid state healthy. The EPS RAM resident
-survives throughout. Route `0000010c--506d7277c7` is the subsequent road proof that
-this is a real recovery mechanism rather than only a parked diagnostic-state change.
+survives throughout. Route `0000010c--506d7277c7` subsequently demonstrates
+same-ignition recovery on the road, beyond the parked diagnostic-state change.
 The older `recover-drcc` DTC-clear command remains useful for preserving diagnostic
 evidence, but the dependency-ordered resets are the actual same-ignition recovery
 **for that faulted legacy programming path**. A later 2026-09-20 startup-catch flow
@@ -323,8 +322,8 @@ follow, speed, stop-and-go to zero/hold/resume as validated, with the deployed
 1-mph floor still awaiting a confirming drive at its 2026-09-10 status cutoff.
 
 The same note documents the contributor's signed-15 B4:B5 substitution at
-0.001 m/s²/count. That is retained as the exact field shape used by the experiment,
-not as a now-validated Corolla command semantic. Its CRC is expressed as init=`0`
+0.001 m/s²/count. This records the exact field shape used by the experiment.
+Its Corolla command semantics remain unvalidated. Its CRC is expressed as init=`0`
 with Data ID `0x444A`. Deterministic basis-vector comparison shows that this is
 wire-equivalent, for the fixed 32-byte `0x160`, to the repository's recovered
 init=`0xFFFF` with Data ID `0x0160`; the parameter labels differ, but the transmitted
@@ -336,8 +335,8 @@ Evidence boundary: this remains attributed external field evidence. The original
 road result arrived as a Discord screenshot, and the later architecture/change
 reference is now retained verbatim and hash-pinned. The raw rlog, exact route ID,
 and exact source checkout/patch are still not in this repository, so road counts
-and code-behavior claims remain **observed/external-source**, not
-repository-verified. When supplied, retain the
+and code-behavior claims remain **observed/external-source**. Repository verification
+requires those missing artifacts. When supplied, retain the
 route inventory and reduce `safetyModel`, `sendcan 0x160`, counter continuity,
 requested acceleration, lead distance, speed response, and the standstill fault
 transition without inventing a second longitudinal permission system.
@@ -348,9 +347,9 @@ message generator:
 constructs the observed Camry-family 32-byte `0x160` candidate by changing B2/B12
 and recomputing its exact Profile-5 CRC. Its verifier reconstructs fixed wire
 witnesses and more than 20,000 retained counter/request pairs byte-for-byte.
-That is repository-verified prior proof of message generation, not proof of the
-later Corolla road result or evidence that B12 is the actuation field selected
-by the working Corolla controller.
+That is repository-verified prior proof of message generation. The later Corolla
+road result and B12's role in the working Corolla controller require separate
+evidence.
 
 ## 4. What is universal and what is target-specific
 
@@ -363,7 +362,7 @@ capabilities explicit:
 | Vehicle description | `CarInterface`/`CarParams` select angle control, buses, limits, and longitudinal capability | Firmware identity and per-platform flags |
 | State | `CarState` decodes steering, torque, faults, cruise, gear, and readiness | Message layout and native bus |
 | Control | `CarController` encodes only target-qualified actuator requests whose source-ownership boundary is closed | Camry B6/C7 lateral path; TSS3 longitudinal remains stock-owned until `0x08A` ownership exists |
-| Safety | Panda uses ordinary Toyota limits plus an explicit target-specific TX whitelist | Current TSS3 host control surface permits C7 lateral sideband, not host `0x08A`/`0x160` longitudinal replacement |
+| Safety | Panda uses ordinary Toyota limits plus an explicit target-specific TX whitelist | Current TSS3 host control surface permits only C7 lateral sideband; host `0x08A`/`0x160` longitudinal replacement is excluded |
 | Authentication | Optional transport/signing provider for a platform that actually requires it | Camry F33 C7/RAM/ICU-S adapter; `0x08A` signing/source handoff remains separate |
 | Harness | Preserve stock Toyota-B topology unless a proved command path requires interception | Camry C7 lateral on unsplit Panda bus 1; current Corolla longitudinal remains Toyota-owned |
 

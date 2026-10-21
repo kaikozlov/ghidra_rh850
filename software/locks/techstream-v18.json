@@ -15,7 +15,7 @@
       "ddb_files_dated": "2022-12-07/08",
       "model_year_coverage": "up to 2022"
     },
-    "note": "Installer filename is V18.00.008 but internal module versions are 18.00.003. The '008' is the Flexera IS installer wrapper build number, not the Techstream application version. The previously-recorded '2015-09-14' build_date was the Flexera IS toolchain version, not the software build date.",
+    "note": "Installer filename is V18.00.008 but internal module versions are 18.00.003. The '008' is the Flexera IS installer wrapper build number. The previously-recorded '2015-09-14' build_date was the Flexera IS toolchain version.",
     "installer": {
       "filename": "software/Techstream/v18/Techstream_Setup_V18.00.008.exe",
       "size": 271533864,

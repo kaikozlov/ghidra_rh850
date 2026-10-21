@@ -118,9 +118,8 @@ public class ExportApplicationRxSignalEvidence extends GhidraScript {
 
         // Classify every configured Rx signal. A negative row means the signal ID is
         // present in generated COM configuration but absent from the complete stock
-        // receive-signal/group-byte extraction census. This is intentionally a COM
-        // extraction negative, not a claim that the corresponding wire bits are unused
-        // by every possible direct-buffer consumer.
+        // receive-signal/group-byte extraction census. This negative covers only
+        // COM extraction. Other direct-buffer consumers may use those wire bits.
         Map<Integer, Boolean> pduHasExtraction = new HashMap<>();
         for (Row r : bySid.values()) {
             int pdu = readU16(SIG2PDU + 2L * r.signalId);

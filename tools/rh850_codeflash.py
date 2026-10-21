@@ -12,7 +12,7 @@ Two modes share one pipeline:
 
 What this proves is modeled CPU execution along the exercised path. It cannot
 prove upload, retention, interrupts, peripherals, timing, or vehicle behavior —
-that boundary lives in docs/tooling/rh850-build-and-sim.md, not in this code.
+that boundary lives in docs/tooling/rh850-build-and-sim.md.
 """
 
 from __future__ import annotations

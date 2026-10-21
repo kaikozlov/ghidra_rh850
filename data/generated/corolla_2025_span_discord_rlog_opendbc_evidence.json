@@ -522,7 +522,7 @@
       "wire": "classic 8-byte PCM_CRUISE with Toyota additive checksum"
     },
     "0x24D": {
-      "boundary": "All legacy cruise-switch bits are inactive in this segment; ID/DLC survival is evidence for a retained carrier, not proof that the old button semantics are unchanged on TSS3.",
+      "boundary": "All legacy cruise-switch bits are inactive in this segment; ID/DLC survival establishes only a retained carrier. Transfer of old button semantics to TSS3 remains unproved.",
       "frame_count": 60,
       "prior_art_button_values": {
         "cancel": [
@@ -606,7 +606,7 @@
     "all_samples_elm327_param1": true,
     "all_samples_harness_status_flipped": true,
     "field_context": "The maintainer reports Span had not physically swapped the Toyota-B CAN0/CAN1 pairs for this log.",
-    "interpretation": "Panda harnessStatus=flipped is USB-C harness orientation, not the Toyota-B physical CAN0/CAN1 repin. ELM327 param=1 keeps logical bus 1/FDCAN2 on the normal harness CAN1 wires, so an unmodified harness can passively observe that unsplit network. The missing physical repin prevents CAN0/CAN2 relay interception and camera-side-vs-car-side producer attribution; it does not by itself make stock CAN1 traffic invisible to logical bus 1.",
+    "interpretation": "Panda harnessStatus=flipped identifies USB-C harness orientation only. The Toyota-B physical CAN0/CAN1 repin is a separate change. ELM327 param=1 keeps logical bus 1/FDCAN2 on the normal harness CAN1 wires, so an unmodified harness can passively observe that unsplit network. The missing physical repin prevents CAN0/CAN2 relay interception and camera-side-vs-car-side producer attribution; it does not by itself make stock CAN1 traffic invisible to logical bus 1.",
     "panda_state_samples": 599
   },
   "lateral_reference_family": {
@@ -1129,7 +1129,7 @@
     },
     "identity_boundary": {
       "firmware_dump_preflight_dongle_id": "23257862c6bf2f83",
-      "interpretation": "Discord attribution ties this dynamic rlog to Span's reported 2025 Corolla investigation, but embedded carParams is MOCK and the logging dongle differs from the later TSKM dump preflight. Treat this as Span-attributed vehicle-level evidence, not an exact 8965F1208000 firmware-to-route join.",
+      "interpretation": "Discord attribution ties this dynamic rlog to Span's reported 2025 Corolla investigation, but embedded carParams is MOCK and the logging dongle differs from the later TSKM dump preflight. This supplies only Span-attributed vehicle-level evidence. Exact 8965F1208000 firmware-to-route identity remains unproved.",
       "rlog_car_params_is_mock": true,
       "rlog_dongle_id": "67fd5b833889fedf",
       "rlog_has_no_usable_f181_join": true,

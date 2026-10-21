@@ -332,7 +332,7 @@ def main() -> int:
                 "B0:B1 is exactly AUTOSAR E2E Profile 5 on every retained periodic native-Bus-1 frame: non-reflected "
                 "CRC-16/CCITT polynomial 0x1021, start 0xFFFF, no xorout, CRC stored little-endian, B2 as the 8-bit counter, "
                 "and an implicit 16-bit Data ID equal to the CAN identifier appended low byte then high byte after B2..end. "
-                "This is deterministic non-cryptographic E2E integrity, not a cryptographic MAC."
+                "This is deterministic non-cryptographic E2E integrity."
             ),
             "freshness": (
                 "0x160 B2 is an 8-bit alive/rolling counter. It advances +1 on every retained drive-B same-segment pair; "
@@ -345,7 +345,7 @@ def main() -> int:
                 "replay can still be rejected by receiver-side counter state; post-wrap anti-replay beyond that state is not on wire."
             ),
             "security_boundary": (
-                "The retained native Bus-1 family therefore exposes E2E integrity/freshness rather than ordinary P5 SecOC. "
+                "The retained native Bus-1 family therefore exposes non-cryptographic E2E integrity/freshness. "
                 "This does not identify which node transmits 0x160 or prove receiver acceptance of synthetically modified frames."
             ),
         },

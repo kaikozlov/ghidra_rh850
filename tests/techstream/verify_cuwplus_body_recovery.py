@@ -127,7 +127,7 @@ def main() -> int:
 
         # Independent runtime-unpack oracle retained from the earlier Windows
         # experiment: the tracked decoder must reproduce the original native
-        # entry and .text, not merely a parseable PE wrapper.
+        # entry and .text in the PE wrapper.
         oracle = REPO / "software/Techstream/gtsplus/cuwplus/CUWPlus/unpack/TCUWCanCommonPrepareWriter.unpack.dll"
         recovered = output / "TCUWCanCommonPrepareWriter.dll"
         a = pefile.PE(str(recovered), fast_load=False)

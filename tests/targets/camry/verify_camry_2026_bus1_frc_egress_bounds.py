@@ -107,7 +107,7 @@ check("periodic stream set is the 22 shared frequent streams",
 
 print("== ID11 protected-request intervals ==")
 iv = art["id11_intervals"]
-check("one continuous ID11 interval per drive (global monotonic time, not segment-local)",
+check("one continuous ID11 interval per drive uses global monotonic time",
       iv["drive_a"] == [{"start_segment": 5, "end_segment": 5, "duration_s": 16.14985933}]
       and iv["drive_b"] == [{"start_segment": 20, "end_segment": 21, "duration_s": 57.203824788}])
 

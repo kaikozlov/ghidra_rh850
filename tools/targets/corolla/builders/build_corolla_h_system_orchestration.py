@@ -58,7 +58,7 @@ def load_sienna(wanted: set[int]) -> dict[int, dict]:
 
 
 def direct_calls(code: str) -> list[str]:
-    # Keep only explicit firmware function calls, not language constructs.
+    # Keep only explicit firmware function calls.
     return re.findall(r"\b(?:FUN_[0-9a-fA-F]{8}|[a-zA-Z_][a-zA-Z0-9_]*)\(", code)
 
 
@@ -304,7 +304,7 @@ def main() -> None:
             "mode_policy_preserved": s_query == h_query and s_clear == h_clear,
             "per_tick_wiring_regenerated": bool(guard_diff),
             "com_rte_surface_regenerated": True,
-            "remaining_boundary": "lower helper semantics inside changed wiring remain independently auditable; this report closes the named high-level scheduler/system roles, not every generated COM helper",
+            "remaining_boundary": "lower helper semantics inside changed wiring remain independently auditable; this report closes only the named high-level scheduler/system roles. Generated COM helpers require independent review",
         },
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)

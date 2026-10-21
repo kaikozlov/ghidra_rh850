@@ -20,8 +20,8 @@ no `carFw`, so the route alone still does not identify its physical EPS. The lat
 same-car telescope probe closes the diagnostic identity instead: application F181
 returns count `2` with `8965F1208000` from CodeFlash `0x20860` and
 `8A3111202000` from `0x17DC0`. `8965H1202000` at `0x17D80` belongs to the
-separate one-record DID `0x2032` path. The historic `8965H1202000` filenames are
-kept as stable corpus labels, not as a claim about the wire-visible F181 primary.
+separate one-record DID `0x2032` path. The historic `8965H1202000` filenames
+serve only as stable corpus labels.
 This remains a distinct physical specimen from Span's Corolla despite sharing the
 same F181 primary software record.
 
@@ -87,8 +87,8 @@ than the 2026-09-10 screenshot report:
   stop-and-go to zero/hold/resume as validated, while a 1-mph floor still awaited a
   confirming drive at the note's 2026-09-10 status cutoff;
 - the implementation uses contributor/fork-specific `TSS3LongMode`, forced-platform,
-  sunnypilot second-pass, and `ALLOW_DEBUG` Panda plumbing. Those are retained as a
-  reproduction reference, not promoted to the repository's upstream architecture.
+  sunnypilot second-pass, and `ALLOW_DEBUG` Panda plumbing. The repository retains
+  those only as a reproduction reference.
 
 The note does **not** include the contributor's source checkout, a complete patch,
 or the road rlog, so its exact code and road-status statements remain
@@ -139,9 +139,9 @@ the previously retained static corpus to a later live bootloader session:
 - all 384 streamed CodeFlash bytes at `0x8E6A0`, `0xFFDE0`, and `0x17D80`
   match the tracked normalized image exactly;
 - boot SecurityAccess succeeds, RoutineControl `0x10F0` accepts the authenticated
-  `FEBF0000` envelope, and the shellcode stream validates end-to-end. This is an
-  independent clean replay of the boot-RAM execution already required by the
-  contributor's earlier range-dump acquisition, not its first demonstration;
+  `FEBF0000` envelope, and the shellcode stream validates end-to-end. This
+  independently replays the boot-RAM execution already demonstrated by the
+  contributor's earlier range-dump acquisition;
 - the live flash-wide scan finds the SecOC Gate-2 egg at `0x88C62`. Telescope did
   not stream the relocated candidate's 64-byte context (`NO_DATA`), but the tracked
   image independently shows that `0x88C43..0x88C82` has the exact pinned Sienna
@@ -224,8 +224,8 @@ these frames carry `TRIP_CNT=0xD0D`. They come from the same TSKM investigation
 as the supplied dump, but **not a provably identical EPS runtime epoch**: CAN
 collection and DataFlash dumping are separate mutually-exclusive jobs, and the
 dump path subsequently drives the EPS through programming-session/SecurityAccess
-and RAM-exec. The oracle therefore provides a close local synchronization-key
-comparison, not a same-session proof.
+and RAM-exec. The oracle therefore supports only a close local synchronization-key
+comparison across those jobs.
 
 ## Derived public-route oracle
 
@@ -294,9 +294,9 @@ The local TSKM `0x00F` oracle was also scanned independently with no entropy
 cutoff: all 23,277 unique raw 16-byte dump windows were tested and **none
 matches the synchronization-key domain**. This does not rely on the older
 public route, but it still cannot prove runtime-key continuity across the
-separate capture and programming/dump jobs. It therefore excludes a static raw
-DataFlash value equal to the locally observed synchronization key, not a
-session-derived key.
+separate capture and programming/dump jobs. It therefore excludes only a static
+raw DataFlash value equal to the locally observed synchronization key. A
+session-derived key remains possible.
 
 The public-route oracle has `TRIP_CNT=0xCE9`, so it is a **different ignition
 freshness epoch** from the local TSKM oracle (`0xD0D`). Its exhaustive zero-match result for

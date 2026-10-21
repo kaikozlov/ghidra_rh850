@@ -2169,14 +2169,14 @@
       "details": [
         "request bytes: 0x34, then dataFormatIdentifier from SecurityProperty2 decoded-byte bit 3, then 0x46, then addressSpaceByte derived from the area/routine tag (tags 0/1/2 -> 1, tag 3 -> 0), then the 5-byte big-endian address, then the area Length field bytes",
         "address = big-endian 40-bit combination of GetOffsetAddress[5] with GetUnsignedLong(area StartAddress string)",
-        "areaLength is transmitted as the raw Length field bytes, not a parsed integer",
+        "areaLength is transmitted directly as the raw Length field bytes",
         "positive response 0x74 carries a big-endian maxBlockLength; the writer caps it at 0x0FFF and then subtracts two header bytes before use"
       ],
       "grammar": "34 || dataFormatIdentifier || 46 || addressSpaceByte || (OffsetAddress[5] + areaStart) || areaLength",
       "supersedes": "field provenance here is authoritative: route_families[].reason and the mirrored cuw_writer_family_matrix.json / cuw_calibration_schema.json dispositions carry the same corrected byte order (regenerated from this classifier) but only as one-line summaries; per-byte semantics, SecurityProperty2 decoding, and sequencing live in this closure"
     },
     "security_property2": {
-      "boundary": "the decoded byte is key material semantics, not a character code; do not reinterpret the ASCII character value",
+      "boundary": "the decoded byte represents key material; preserve its decoded value; ASCII character values use a separate representation",
       "decode": "CBytes(const char*) performs ordinary two-hex-digits-per-byte decoding (the same parser proven for the auth fields), so the public value \"98\" decodes to a first byte 0x98",
       "example": {
         "dataFormatIdentifier": 1,

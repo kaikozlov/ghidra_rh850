@@ -24,7 +24,7 @@ DOCKERFILE = ROOT / "tools" / "toolchains" / "v850-gcc" / "Dockerfile"
 SELFTEST_RESULT = "RH850_SELFTEST_RESULT=0x12cb5687"
 SELFTEST_CODEFLASH_RESULT = "RH850_CODEFLASH_RESULT=0xc0deface"
 SELFTEST_BSWAP_RESULT = "RH850_BSWAP_RESULT=0x78563412"
-# Check generated frame/save invariants, not incidental register allocation
+# Check generated frame/save invariants independently of register allocation
 # or exact frame sizes in functions that must retain their ABI saves.
 SELFTEST_NORETURN_RESULTS = (
     "RH850_NORETURN_MIN_FRAME=0",
@@ -403,7 +403,7 @@ def validate_execution(
     elif re.fullmatch(r"[A-Za-z_][A-Za-z0-9_.$]*", stop):
         expression = f"(unsigned long)&{stop}"
     else:
-        raise Rh850ToolError("stop must be a symbol or numeric address, not a GDB command")
+        raise Rh850ToolError("stop must be a symbol or numeric address; GDB commands are prohibited")
     if not assertions and not expected_output:
         raise Rh850ToolError("test requires a postcondition: --assert or --expect")
     if any(not value.strip() for value in (*assertions, *expected_output)):

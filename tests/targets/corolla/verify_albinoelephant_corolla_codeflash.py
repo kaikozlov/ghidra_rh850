@@ -111,7 +111,7 @@ check("foreign stock CRC fixup is exact", patch_manifest["boot_crc"]["stored_fix
 check("foreign Gate patch resigns to exact fixup", patch_manifest["boot_crc"]["patched_fixup_for_supplied_image"] == "0xDD5F1477" and patch_manifest["boot_crc"]["patched_residue_for_supplied_image"] == "0xFFFFFFFF")
 
 print("\n== Lochuan checkpoint-patch homolog ==")
-# SECOC-050/CORR-066: use surrounding bytes, not the one-byte immediate alone.
+# SECOC-050/CORR-066: require surrounding bytes as well as the one-byte immediate.
 sienna_lochuan_context = SIENNA[0x664E2:0x664EA]
 hits = occurrences(codeflash, sienna_lochuan_context)
 check("Sienna Lochuan-patch context has one foreign homolog", hits == [0x6081A], repr([hex(x) for x in hits]))

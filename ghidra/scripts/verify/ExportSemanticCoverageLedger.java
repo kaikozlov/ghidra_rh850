@@ -268,7 +268,7 @@ public class ExportSemanticCoverageLedger extends GhidraScript {
                 }
 
                 // Conservative: any DATA ref into CodeFlash that is not a
-                // function entry (includes scalars/literals, not only tables).
+                // function entry, including scalars, literals, and tables.
                 if (off < CODEFLASH_END && ref.getReferenceType().isData()) {
                     Function targetFn = fm.getFunctionAt(to);
                     if (targetFn == null) {

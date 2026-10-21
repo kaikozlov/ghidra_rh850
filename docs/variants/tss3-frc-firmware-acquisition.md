@@ -56,8 +56,8 @@ is therefore not an ECU-ownership tag for every recorded DID.
 ### Current implementation model
 
 Joined to Toyota's vehicle-movement-manager architecture, the cleanest current
-answer is that the **FRC implements the application side, not the final actuator
-arbiter**. Feature logic such as LTA/LDA constructs feature-local request objects;
+answer is that the **FRC implements the application side**. Final actuator
+arbitration belongs downstream. Feature logic such as LTA/LDA constructs feature-local request objects;
 the camera normalizes those into the generic TSS request object (`5282`, with
 longitudinal peers `5280/5281`) and hands that request toward the vehicle-movement
 manager. The Brake/VMM domain performs the downstream package arbitration/request
@@ -76,8 +76,7 @@ normalized request reaches the Brake/VMM request input.
 
 ## 2. Exact read-only camera oracle
 
-The current native Operation-FFD protocol is recovered from the exact GTS+
-binary, not transferred from an older Techstream release:
+The exact current GTS+ binary establishes the native Operation-FFD protocol:
 
 ```text
 AB 11                                      -> EB 11 + behavior IDs
@@ -205,7 +204,7 @@ F161). Both chains are descriptor-complete, but neither `6200` whole image is
 present. Complete old/new encrypted images exist only for the second edge of
 each chain.
 
-## 4. Cipher shape: useful constraint, not a solved key
+## 4. Cipher-shape constraints and unresolved key
 
 The five distinct stored FRC whole images share **exactly the first two 16-byte
 blocks** and diverge at byte 32. Beyond those two blocks there are zero shared
@@ -249,11 +248,11 @@ stored bytes directly as little-endian A32 gives a code-shape score of 0.0058.
 The TMPV7708 Bottlenose R4 payload scores 0.657 over the same 1,376-byte window,
 with recognizable prologues, literal loads, and returns. The strongest of
 67,157 shared-key routine decryptions reaches only 0.096 and has no prologue or
-return pattern. This is a useful negative discriminator, not proof of AES-CBC
-or of the routine's plaintext ISA. Bottlenose is used only as a sibling R4
+return pattern. This supplies a negative discriminator. AES-CBC and the routine's
+plaintext ISA remain unproved. Bottlenose is used only as a sibling R4
 instruction-shape baseline.
 
-The `.datx` census is likewise structural rather than an entropy-only claim.
+The `.datx` census also tests structure.
 All six members share exactly the first 16 bytes
 `0a4aba7f300a8745e2acb15b5b59a046`, share no suffix, and have no common
 16-byte window at any of the 16 possible alignments after that prefix. Searches
@@ -286,9 +285,9 @@ a concrete Toyota DFI-1 construction or ECU-side implementation evidence.
 ## 5. Physical-firmware acquisition boundary
 
 The retained TechInsights TSS3 camera teardown under
-`REFERENCE/tss3_camera_report/` is a useful hardware-family reference, not an
-exact-Camry identity join. It identifies a Toshiba `TMPV7706XBG` Visconti5
-processor and an Infineon/Cypress `S25HS01GT` **1-Gbit / 128-MiB serial NOR**,
+`REFERENCE/tss3_camera_report/` supplies hardware-family context. Its exact-Camry
+identity remains unjoined. It identifies a Toshiba `TMPV7706XBG` Visconti5 processor
+and an Infineon/Cypress `S25HS01GT` **1-Gbit / 128-MiB serial NOR**,
 plus LPDDR4 and CAN transceivers.
 
 That physical flash capacity matters independently of the exact address map:
@@ -317,9 +316,9 @@ firmware bundle.
 
 Despite the `tmpv7706-bn3` filename convention in that bundle, its root device
 tree explicitly identifies **`toshiba,tmpv7708-bn3`, `toshiba,tmpv7708`**. It
-is therefore **TMPV7708 sibling-platform evidence**, not an exact TMPV7706XBG
-camera image. This distinction is mandatory. The value of the image is the
-shared Visconti5 execution/interconnect model, not target identity.
+therefore supplies **TMPV7708 sibling-platform evidence** only. Its value lies
+in the shared Visconti5 execution/interconnect model. Exact TMPV7706XBG camera
+identity remains unestablished.
 
 The sibling firmware gives three unusually strong address-domain joins:
 
@@ -354,8 +353,8 @@ artifact: two independent TMPV770 debug implementations expose the same
 physically separate Cortex-M security/debug domain. What remains unavailable is
 its Toyota normal-world client ABI and protected firmware/key state.
 
-The same binary now gives a useful **negative HSM boundary** rather than merely
-failing to reveal a recognizable crypto string. Its GCOMM shared-buffer table is
+The same binary supplies a **negative HSM boundary** from its recovered
+communication structure. Its GCOMM shared-buffer table is
 exactly sixteen directional entries: logical nodes `0..7 -> 8` use
 `0x80000000`-side buffers and `8 -> 0..7` use `0x80100000`-side buffers. The
 running flash image registers exactly one receive callback, packed endpoint

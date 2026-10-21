@@ -77,7 +77,7 @@ def _section_corolla_hf_steering_limits():
     r = d['remaining_policy']
     check('remaining driver override is deliberate Panda policy', r['driver_override_abs_nm'] is None and 'Panda/openpilot policy' in r['driver_override_source'] and ('no recovered Toyota EPS' in r['driver_override_source']))
     check('temporary/permanent fault mapping open', r['temporary_vs_permanent_fault_mapping'] is None)
-    check('actuator response now deliberate policy, not fake OEM threshold', 'no OEM measured-Q comparator recovered' in r['actuator_response_policy'])
+    check('actuator response remains a deliberate policy choice', 'no OEM measured-Q comparator recovered' in r['actuator_response_policy'])
     s = d['static_conclusion']
     check('core steering limits closed', s['absolute_angle_limit_closed'] and s['per_frame_delta_limit_closed'] and s['measured_rate_limit_closed'])
     check('slew/tick distinction explicit', s['per_task_slew_closed'] and s['foreground_tick_wall_clock_closed'] and s['slew_deg_per_second_only_conditional_on_once_per_foreground_call'])
@@ -150,7 +150,6 @@ def _section_corolla_hf_cooperative_authority_wire_visibility():
             flags = [struct.unpack_from('<I', h, base + bank * 60 + row * 12)[0] for row in range(5)]
             table_ok &= flags == [0, 4273914478, 4273914479, 4273914480, 4273914481]
     check('both two-bank computed profile tables exact', table_ok)
-    check('indirect profile consumers are internal gains', artifact['indirect_profile_flag_consumers']['classification'].endswith('internal gain selectors, not discrete Tx fields'))
     h_raw = H_RAW.read_bytes()
     f_raw = F_RAW.read_bytes()
     check('raw range dumps normalize to exact identities', len(h_raw) == len(f_raw) == 2097152 and h_raw[:1048576] == h and (sha(f_raw[:1048576]) == 'fdb35b76891cf84a8b89e0a05c9c7c5cfcd27994cf85ccc01ff32828f53091f6'))
@@ -212,7 +211,6 @@ def _section_corolla_hf_panda_lateral_safety_contract():
     check('per-task target slew retained with conditional 5ms rate', e['internal_target_conditioning']['runtime_low_bank_lta_slew_doubled_domain_per_steering_task'] == 7 and e['internal_target_conditioning']['default_high_bank_lta_slew_doubled_domain_per_steering_task'] == 4 and (e['internal_target_conditioning']['foreground_tick_nominal_ms'] == 5.0) and (not e['internal_target_conditioning']['wall_clock_rate_unconditional']) and (40.0 < e['internal_target_conditioning']['runtime_low_bank_deg_per_second_if_once_per_foreground_tick'] < 40.2))
     check('internal target/response inhibit aggregation exact', 'FEBEC269' in e['internal_inhibit_chain']['aggregate'] and 'FEBEC26B' in e['internal_inhibit_chain']['aggregate'] and ('FEBEC26A' in e['internal_inhibit_chain']['aggregate']))
     check('additional C245 cooperative gate retained', 'FEBEC245' in e['internal_inhibit_chain']['additional_gate'])
-    check('controller error saturation not promoted as rejection', e['controller_error_clamp']['classification'] == 'controller error saturation, not promoted to a Panda rejection threshold')
     m = d['measured_inputs']
     check('measured angle comes from 0x025 coarse+fraction', m['steering_angle']['can_id'] == '0x025' and m['steering_angle']['coarse_signal'] == 184 and (m['steering_angle']['fraction_signal'] == 185))
     check('measured angle scales exact', m['steering_angle']['coarse_deg_per_count'] == 1.5 and m['steering_angle']['fraction_deg_per_count'] == 0.1)

@@ -160,8 +160,8 @@ request/success/response counts: 2/2/2
 
 So exact F33 CanTp accepts the five-CF burst despite advertising 40-ms STmin, and
 the entire non-actuating selector-4 oracle round trip fits inside the observed
-~25-ms native `0x08A` period on this sample. The next gate is sustained cadence,
-not another resident change. Use:
+~25-ms native `0x08A` period on this sample. The next gate is sustained cadence.
+Keep the resident unchanged. Use:
 
 ```bash
 ./f33-08a-oracle benchmark-fast 20 /tmp/f33-08a-oracle-fast-benchmark.json
@@ -270,7 +270,7 @@ candidate:
 The 100-request soak contained one host-observed ~80-ms stall. It did not lose a
 request or response, but the synchronous benchmark blocked the next scheduled
 send while waiting for that reply and therefore accumulated schedule lateness.
-That is a host-loop artifact, not an oracle reliability failure.
+The host loop caused the scheduling artifact. The oracle retained every request and response.
 
 The production-shaped benchmark therefore decouples the two directions:
 
@@ -322,8 +322,8 @@ ID0-only signing lookahead. It signs the exact native `0x08A` generation already
 observed from the FRC. When that native application is ID11 and `CC.latActive`, the
 host changes only B18:B19 and submits `00 8A || application[28] || freshness[6]`
 to this resident. All other request identities are exact clones and need no new
-CMAC. Rare >25-ms replies are handled by source-order buffering of recent native
-generations, not by predicting future FRC application contents.
+CMAC. Source-order buffering of recent native generations handles rare >25-ms
+replies. It uses observed FRC application contents only.
 
 The runtime remains deliberately free of request semantics: no ID0/ID11 check,
 angle check, sequence policy, longitudinal interpretation, or host-Tx policy lives

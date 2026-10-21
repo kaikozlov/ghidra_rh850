@@ -5,8 +5,8 @@
 published 2022-01-06.
 
 **Evidence grade:** external-source architecture/terminology. This patent is a
-semantic and design oracle, not proof that the exact 2026 Camry F33 implements
-the illustrated embodiment or physical ECU topology.
+semantic and design oracle. Whether the exact 2026 Camry F33 implements the
+illustrated embodiment or physical ECU topology remains unproven.
 
 ## Executive finding
 
@@ -32,9 +32,8 @@ LTA hands-off warning begins about 13 seconds after the FRC's low-sensitivity
 driver-steering detector releases. The exact Camry retained TSS3 recorder also
 has Hands-Off Exist=0 and LTA Driver Monitor Camera Collaboration Exist=0.
 
-The best use of this patent for F33 is therefore **architecture vocabulary and
-feature separation**, not copying its timer or assuming its touch sensor is the
-source of the ordinary LTA nag.
+Use this patent for F33 **architecture vocabulary and feature separation**.
+Its timer and touch sensor do not establish the source or timing of the ordinary LTA nag.
 
 ## 1. What the patent actually claims
 
@@ -84,12 +83,12 @@ driver monitor, and steering touch sensor. It separately says the travel device
 contains steering, driving, and braking devices, with EPS as an example of the
 steering device.
 
-This should be read as **logical ownership**, not a literal TSS3 wiring diagram.
+Read this as **logical ownership**. Exact TSS3 wiring requires separate evidence.
 The current TSS3 evidence places the steering-touch hardware behind a
 steering-wheel/CXPI subnetwork and Combination Meter before FRC/SRS consumers;
 the patent does not expose that transport.
 
-## 3. Steering touch is a first-class state, not inferred attention
+## 3. Steering touch is a first-class state
 
 The patent defines the touch sensor's output as **steering holding information**
 indicating whether the driver is hands-on or hands-off. That information is sent
@@ -152,7 +151,7 @@ That distinction is consistent with current Toyota diagnostic vocabulary:
 - current FRC/TSS3 separately exposes driver-monitor-camera capability and
   warning-reason fields.
 
-## 5. The timer is an attention budget, not a lateral-control timeout
+## 5. The timer measures the attention budget
 
 The first embodiment's state machine is:
 
@@ -177,9 +176,9 @@ hands-on/holding confirmed for dwell
 withdraw request + reset T
 ~~~
 
-The example values are approximately 10 minutes for Tth and approximately
-4 seconds for the hands-on confirmation dwell. They are explicitly examples,
-not invariant calibration values.
+The patent gives illustrative values of approximately 10 minutes for Tth and
+approximately 4 seconds for the hands-on confirmation dwell.
+Actual calibration values can differ.
 
 The second embodiment adds **voluntary hands-on**: a driver who touches/holds
 the wheel before a request is issued resets the attention interval, and the next
@@ -249,10 +248,9 @@ The exact maintainer Camry has retained TSS3 recorder evidence:
 - Hands-Off Exist=0;
 - LTA Driver Monitor Camera Collaboration Exist=0.
 
-Its ordinary LTA nag occurs in Target Lateral ID 11 (LTA/LCA), not ID 10
-(Hands Off LTA). The warning begins about 13 seconds after the FRC
-driver-steering-detected candidate releases, not after a multi-minute hands-off
-window.
+Its ordinary LTA nag occurs in Target Lateral ID 11 (LTA/LCA).
+ID 10 denotes Hands Off LTA. The warning begins about 13 seconds after the FRC
+driver-steering-detected candidate releases.
 
 Therefore this patent most likely describes a **hands-off-capable Toyota
 automated-steering feature family** rather than the exact ordinary-LTA nag

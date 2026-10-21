@@ -135,8 +135,8 @@ the ordinary FRC Data List surface. Examples include:
 - `5A14` — ACC control state
 
 This is useful as an OEM vocabulary oracle for the still-open TSS3
-longitudinal producer/ownership problem. It is recorder semantics, not yet a
-wire-format join.
+longitudinal producer/ownership problem. It establishes recorder semantics.
+The wire-format join remains open.
 
 ## 5. Trigger dictionary: the recorder is an ADAS incident flight recorder
 
@@ -167,8 +167,8 @@ overrides, request boundaries, and hands-off state around events.
 ## 6. How PCS Data Viewer models Operation FFD
 
 The shipped `PCS Data Viewer.exe` intentionally has protected/zero-filled managed
-method bodies, but that is now only an **input representation**, not an analysis
-boundary. The generic CP recovery materializes **22,447/22,447** nonzero-RVA
+method bodies. Generic CP recovery resolves that **input representation**
+and materializes **22,447/22,447** nonzero-RVA
 `MethodDef` bodies from the installed stub + sidecar and rebuilds a clean CLR PE
 (entry `0x66FB8E`). The recovered type/model surface includes:
 
@@ -268,7 +268,7 @@ Operation-FFD data or producer firmware/dataflow.
 
 The 2026-10-01 offline consumer inspection closes the meaning of
 `UniqueRoBCodeDID=610` on RoB `2098` (`PBA Request Flag`). It is a **field-table
-key**, not diagnostic ID `0x0262`:
+key**:
 
 ```text
 RoB 2098 → field-table key 610 → recorder 5792, byte 1 bits 1:0
@@ -291,8 +291,8 @@ The executable identity is recorded in the [ADS inspection](#62-ads-recorder-sch
 The existing shared decoder was exercised with synthetic bytes `A0..A3`:
 it returned raw/physical PBA states `0..3`. Additional synthetic checks
 decoded `57DB: F8C0` as `-1.856` and `5261: BF000000` as `-0.500`.
-These checks exercise the decoder, not the viewer's event-numbering execution
-or live vehicle support.
+These checks exercise only the decoder. The viewer's event-numbering execution
+and live vehicle support require separate checks.
 
 ### Shared Operation-FFD decoder
 
@@ -312,8 +312,8 @@ neither command maintains a separate parser or value decoder.
 - **Values:** `raw` is the unsigned wire bit pattern, including signed and
   IEEE fields. `physical` is a fixed-point string. Invalid sentinels and IEEE
   NaNs set `invalid=true` and `physical=null`; infinities use JSON-safe strings.
-  Negative values are floored, not rounded or truncated toward zero.
-- **Time:** `0507` contains BCD components, not binary integers. The decoder
+  Negative values use floor rounding toward negative infinity.
+- **Time:** `0507` contains BCD components. The decoder
   applies the recovered component bounds and returns the stored date/time,
   without the viewer's PC-local timezone conversion. Download time does not
   establish the original event time.
@@ -382,7 +382,7 @@ promoted to a global feature enum.
 The 2026-10-01 EN/JA satellite inspection distinguishes additional policies
 within the existing
 [ADU schema](../../data/generated/gtsplus_2026/pcs_data_viewer_adu_semantics.json).
-Positions below are 1-based recorder bytes, not CAN offsets:
+Positions below use 1-based recorder bytes. CAN offsets require a separate join:
 
 | Resource suffix (`ADU_ID_…`) | OEM quantity | Geometry |
 |---|---|---|
@@ -443,8 +443,8 @@ independent runtime or firmware join.
 
 On 2026-10-01, an offline probe interpreted the previously unprocessed
 `PCSDataViewer.ADSDetailInfo::.cctor` at RVA `0xCB20`, using the existing
-`_interpret_collection` helper. The actual record constructor is
-`PCSDataViewer.ADSDetailBitAssignInfo`, not `ADSDisplayDetailInfo`.
+`_interpret_collection` helper. The recovered record constructor is
+`PCSDataViewer.ADSDetailBitAssignInfo`.
 Its ten fields are `DataID, DataSize, SupportDID, BytePosition, BitPosition,
 BitLength, InvalidValueList, Type, Lsb, Offset`; it has no `Point` member.
 
@@ -453,8 +453,8 @@ The result is **1,419 rows**, including **four metadata rows** with
 is 613 only when the metadata placeholder is included. English/Japanese
 names resolve through `ADS_ID_<key>` satellite resources.
 
-This is the **Advanced Drive** recorder namespace, not the FRC TSS3 or ADU
-namespace. Selected exact definitions, all starting at byte 1:
+This is the separate **Advanced Drive** recorder namespace. FRC TSS3 and ADU
+have their own namespaces. Selected exact definitions, all starting at byte 1:
 
 | ADS recorder ID | OEM label | Encoding |
 |---|---|---|
@@ -474,8 +474,8 @@ Source: PCS Data Viewer 12.00.005 from GTS+ 2026.03.002.02; reconstructed
 assembly SHA-256
 `fc0841df01e11e546977cecc14f391f018d0a402fa1dd88d14ea7e75a6543c4d`.
 The reconstruction materialized all 22,447 nonzero-RVA method bodies.
-This remains an exploratory extraction, not a registered ADS artifact or
-an added `tools/gts recorder` schema. Given that reconstructed assembly,
+This remains an exploratory extraction. ADS artifact registration and a
+`tools/gts recorder` schema remain absent. Given that reconstructed assembly,
 the bounded extraction is reproducible with the existing helpers:
 
 ```python
@@ -699,8 +699,8 @@ help rows are retained as descriptions without guessed recorder IDs.
 The PBA help is especially useful because it documents value semantics across
 Toyota system families: for TSS P/LSS+A it enumerates `00 No assist / 01 PBA1 /
 10 PBA2 / 11 PBA3`, while the TSS C interpretation collapses the states to
-request/no-request behavior. This is host documentation, not a claim that every
-TSS3 generation uses the same raw field or network encoding.
+request/no-request behavior. This host documentation leaves each TSS3
+generation's raw field and network encoding to independent recovery.
 
 The 2026-10-01 inspection also extracted `VCH.htm`, `Welcome.htm` and
 `Table of Contents.hhc` from both shipped CHMs. The 378-byte English VCH
@@ -722,9 +722,9 @@ add no request-policy or result-field definitions beyond `FFD.htm`.
 3. **Runtime trigger occurrence.** The 47 RoB definitions recover configured
    sampling/pre/post policy; they do not prove a particular vehicle actually
    emitted a given RoB event in a retained drive.
-4. **Arbitration execution owner.** The existence of generic TSS request and
-   arbitration-result fields proves the software abstraction, not which ECU
-   executes the arbitration on every TSS3 architecture.
+4. **Arbitration execution owner.** The generic TSS request and
+   arbitration-result fields establish the software abstraction. The ECU that
+   executes arbitration on each TSS3 architecture remains unresolved.
 
 The immediate practical use is to treat PCS Data Viewer as a second Rosetta
 stone alongside GTS+ DDBs: search the full generated dictionary for a firmware
@@ -767,7 +767,7 @@ contains no lateral target/pinion-request or arbitration-result signal. The two 
 FRC-specific: the exact pair occurs in 126 current P5 databases.
 
 The older generic P5 Operation Freeze Frame plugin `GetOperationFrzFrmDatP5_DT.dll` role
-`0xBA` remains bound to category 432 `PCS2_P5`, not current category 498. `FRC_P5` also lacks
+`0xBA` remains bound only to category 432 `PCS2_P5`. `FRC_P5` also lacks
 DDR tables 165/167/168 and has no category-498 DDR plugin binding. GTS+'s generic DDR,
 PredictiveFFD, and VehicleControlHistory saved-session families therefore do not establish an
 additional hidden live FRC recorder. For TSS3 lateral-control RE, Operation FFD is the primary

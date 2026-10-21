@@ -70,8 +70,8 @@ def load_codeflash(image: Path, *, description: str = "CodeFlash") -> bytes:
 
 def iter_corpus(path: Path) -> Iterator[dict[str, Any]]:
     for line in path.read_text(encoding="utf-8").splitlines():
-        # Preserve the retired extractors' strict JSONL contract: a blank line
-        # is malformed input, not whitespace to silently ignore.
+        # Preserve the retired extractors' strict JSONL contract:
+        # treat every blank line as malformed input.
         yield json.loads(line)
 
 

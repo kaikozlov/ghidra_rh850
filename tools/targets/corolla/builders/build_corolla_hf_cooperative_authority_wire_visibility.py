@@ -307,7 +307,7 @@ def main() -> int:
                 "0xD0E18/0xD0E54 -> 0xC5156 -> 0xCAF84 -> FEBEBC52 -> 0xC51EA internal gain product",
                 "0xD1118/0xD1154 -> 0xC6D16 -> 0xCAF84 -> FEBEBE28 -> 0xC6DAA internal gain product",
             ],
-            "classification": "fixed CodeFlash pointer-table use of profile flags as internal gain selectors, not discrete Tx fields",
+            "classification": "fixed CodeFlash pointer-table use of profile flags exclusively as internal gain selectors",
         },
         "five_pdu_boundary": five_pdu,
         "static_conclusion": {

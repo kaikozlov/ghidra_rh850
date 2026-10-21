@@ -717,9 +717,9 @@ def frc_generation_continuity_section(
             "PCS2_P5, LDA_P5, Fr_RadSen_P5, RoadSign_P5 and PCS1_P5 while replacing the "
             "older peer install set. Its DDB distinguishes a main microcomputer from an "
             "image-processing microcomputer and replaces PCS2's generic Operation-FFD "
-            "plugin with TSS3-specific Operation/Image-FFD roles. This is role-continuity "
-            "evidence, not proof of ECU-side code identity, arbitration placement, CAN "
-            "payload ownership or SecOC ownership."
+            "plugin with TSS3-specific Operation/Image-FFD roles. This establishes role continuity only. "
+            "ECU-side code identity, arbitration placement, CAN "
+            "payload ownership and SecOC ownership remain unproved."
         ),
     }
 
@@ -849,16 +849,16 @@ def build() -> dict[str, Any]:
             "successor_oracle_only": (
                 "ADCU_P6/P6F vocabulary is a generation-22 successor oracle. It must not be "
                 "projected onto TSS3/P5 ECUs or onto the Sienna EPS firmware without an "
-                "independent join; matching monitor/DTC names are host vocabulary continuity, "
-                "not proof of wire-identical behavior."
+                "independent join; matching monitor/DTC names establish host vocabulary continuity only. "
+                "Wire-identical behavior remains unproved."
             ),
             "no_frc_join": (
                 "The six P5 targets still have zero install-set co-occurrence with FRC_P5 "
                 "category 498 in NA/EU/JP; nothing here changes that boundary."
             ),
             "host_metadata_limit": (
-                "DDB/plugin data proves which host-side vocabulary and command roles exist, "
-                "not CAN arbitration IDs, ECU-side producer transforms, or SecOC ownership."
+                "DDB/plugin data proves only which host-side vocabulary and command roles exist. "
+                "CAN arbitration IDs, ECU-side producer transforms and SecOC ownership remain unproved."
             ),
             "rob_ddr_fields_bounded": (
                 "RoB/DDR table rows are decoded through name/unit/string joins and the "

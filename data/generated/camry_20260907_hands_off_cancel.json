@@ -1548,7 +1548,7 @@
     "bounded_state": "0x371 B19=0x60 is a repeatable late/final-stage hands-off candidate after the earlier B19=0x40 warning and 0x412 B2[6] escalation. Its exact OEM bit name and whether it alone commits cancellation remain unproved.",
     "chassis_response": "0x081 follows the FRC withdrawal: lateral result ID becomes 0 first, then longitudinal result ID becomes 63 (Driver Operation); request-loss remains clear.",
     "negative_evidence": "Native 0x101 remains a non-brake frame and no sendcan 0x101 precedes the strong witness; 0x251 cruise-main availability remains asserted. This is therefore not the normal brake/button cancel path and not loss-of-request supervision.",
-    "verified_dynamic": "The strongest retained hands-off cancellation is a native FRC 0x08A request withdrawal, not an openpilot 0x101 cancel: the operating latch clears, Target Lateral ID 11 becomes 0, both longitudinal request packages change, and set speed clears before controls sees pcmDisable."
+    "verified_dynamic": "The strongest retained hands-off cancellation is a native FRC 0x08A request withdrawal: the operating latch clears, Target Lateral ID 11 becomes 0, both longitudinal request packages change, and set speed clears before controls sees pcmDisable."
   },
   "latch_fall_count": 9,
   "native_bus_assignment": {

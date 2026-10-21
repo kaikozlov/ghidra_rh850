@@ -526,6 +526,6 @@
     "current_template_header_match": "The public files begin with the same field sequence declared by current 171/173/180 templates: 8-byte file-extension/signature field; DWORD ID; WORD version; WORD reserved; legacy-save DWORD; store-counter DWORD; destination WORD; length-prefixed GTS version; length-prefixed user-type code.",
     "legacy_fat_geometry": "14 consecutive 12-byte ASCII search keys followed by little-endian DWORD absolute positions, beginning immediately after the 0x2E-byte header.",
     "fat_target_marker_shape": "Every recorded legacy top-level FAT position in all four specimens points in-bounds to FF FF FF FF <selector> FF FF FF, the exact shape used by current recovered BinaryRead.GetNextReadPosition.",
-    "current_converter_upgrade_boundary": "Current recovered TSEConverter calls GFCConvertOldTSEToLatestTSE before BinaryRead; these 0x102A files are therefore old-format inputs to the native upgrader, not proof that 180_Template.csv directly parses their original layout."
+    "current_converter_upgrade_boundary": "Current recovered TSEConverter calls GFCConvertOldTSEToLatestTSE before BinaryRead. These 0x102A files establish the native upgrader's old-format input scope only. Direct parsing of their original layout by 180_Template.csv remains unproved."
   }
 }

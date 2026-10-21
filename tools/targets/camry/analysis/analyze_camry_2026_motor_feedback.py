@@ -10,7 +10,7 @@ speed are joined by nearest frame time.
 
 Quantified per drive:
   * strata: Class-L (bus0 0x08A B21==0x0B, recomputed and asserted equal to the VAR-067
-    census) versus a speed-matched cruise-latch control (0x08A B3==0x08, not Class-L,
+    census) versus a speed-matched cruise-latch-only control (0x08A B3==0x08,
     wheel speed inside the Class-L speed range);
   * simple deterministic stats: sample counts, medians/percentiles of |B22:B23| and
     |torque|, Pearson r of B22:B23 against torque/rate/angle per stratum;
@@ -473,7 +473,7 @@ def main() -> int:
                 "observed/deterministic: the cruise-clean drive-B Class-L rise shows no immediate |B22:B23| step "
                 "(3 s pre/post medians 84 vs 102), and no sustained >=0.5 s hands-light steering-motion sweep occurs "
                 "inside Class-L in either drive; the speed-matched non-Class-L stratum contains one such sweep (drive A). "
-                "The floor grows with Class-L occupancy rather than stepping at its rise edge, and falls after Class-L ends."
+                "The floor grows with Class-L occupancy without a rise-edge step, and falls after Class-L ends."
             ),
             "production_output_authorized": False,
         },

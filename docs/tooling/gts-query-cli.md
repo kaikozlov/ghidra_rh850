@@ -24,11 +24,11 @@ does not select one:
 | ECU implementation route | `tools/gts category FRC_P5` | Category and plugin-role bindings; follow a role with `command` |
 
 An empty `did` result means **no matching Data List/alternate snapshot row in
-that ECU database**, not “Toyota has no definition.” Check the recorder
-namespace when investigating a recorder ID. Neither command silently borrows
-records or enum meanings from the other namespace.
+that ECU database**. Toyota definitions can exist in other namespaces. Check the
+recorder namespace when investigating a recorder ID. Neither command silently
+borrows records or enum meanings from the other namespace.
 
-### Follow references, not just names
+### Follow references
 
 - **DDB path:** `Toyota.ddb` category/plugin routing → ECU monitor tables
   `62/157` → physical-data table `13` → unit table `15`, plus pattern-display
@@ -51,8 +51,8 @@ not establish identical enum values. Recorder `5A08` also has a support bitmap:
 for its `SupportDID=1` fields, the preceding byte supplies the support bit.
 Keep “unsupported” separate from a numeric zero.
 
-Both paths describe **diagnostic/recorder payload positions, not CAN-frame
-positions**. A CAN assignment requires a producer/dataflow or synchronized
+Both paths describe **diagnostic/recorder payload positions**.
+A CAN-frame assignment requires a producer/dataflow or synchronized
 capture join. A display focus filter also does not establish that raw records
 were omitted from acquisition; inspect the reader before making that claim.
 
@@ -71,12 +71,12 @@ displayed fields; JSON includes `matched_fields` before truncation.
 
 The command needs no external GTS installation. It reads the pinned
 `pcs_data_viewer_tss3_managed_semantics.json` or
-`pcs_data_viewer_adu_semantics.json` under `data/generated/gtsplus_2026/`,
-not whichever release `--gtsplus-root` selects for DDB queries. Output identifies
+`pcs_data_viewer_adu_semantics.json` under `data/generated/gtsplus_2026/`.
+`--gtsplus-root` selects only the DDB-query release. Output identifies
 the artifact and JSON includes its source hashes. All recovered field attributes
 are retained, including `Point` where present; byte positions are 1-based and
-bit position 7 is MSB. This is schema inspection, not a new decoder or a
-live-support claim. Legacy DDR schemas remain in the
+bit position 7 is MSB. This command inspects the recovered schema.
+Decoder implementation and live support require separate evidence. Legacy DDR schemas remain in the
 [recorder guide](pcs-data-viewer-tss3-dictionary.md), outside these two selections.
 
 ## Command surface
@@ -116,7 +116,7 @@ tools/gts pe TCUWCanReproStdFlashWriter.unpack.dll StartFlashWrite
 ```
 
 `tools/gts role` also reports a binding-weighted `surfaces=` breakdown. Its
-labels describe the recovered shared-runtime edge, not blanket vehicle I/O:
+labels describe only the recovered shared-runtime edge:
 `direct_transport` means the plugin imports frame/send primitives itself;
 `delegated_transport_v18_proven` means a stable current support-helper import has
 an executable V18 path to frame/send; `support_cache_v18_proven` consumes cached
@@ -195,8 +195,8 @@ vehicle=12704 name=Camry HV can_bus_car_id=0x00A7D910 options=18 placement_varia
     0xF0 Spiral cable (Steering Angle Sensor) ...
 ```
 
-The displayed Toyota `Bus N` name is a Central-Gateway network identity, **not** a Panda
-bus number or connector pin. Physical harness mapping still requires vehicle evidence.
+The displayed Toyota `Bus N` name identifies a Central-Gateway network.
+Panda bus numbers and connector pins require separate physical harness mapping with vehicle evidence.
 For the exact 2026 Camry join, see the [Camry baseline §19](../variants/camry-2026-live-baseline.md#19-current-gts-closes-logical-bus-4-membership-corr-197-separates-physical-transparency).
 
 ### Master DB execution model
@@ -300,13 +300,13 @@ frame  category=397  selector=0x1  comm_set=1  frame=0x279E  rcv_timeout=1020  r
 
 `active-test` is the preferred selected-test planner when you do not already know Toyota's internal command role. It auto-detects a unique current type-68 direct versus 72-byte type-71 routine row (or accepts `--kind` for an ambiguous key), resolves the current master templates, and never opens a transport. For current routine rows, type71 `+0x28/+0x2A/+0x2C/+0x2E` are respectively routine-command, routine-stop, output-value-mask, and output-button-mask variable references; `+0x30` is the type72 routine-status key. A `fixed=1` result means all four payload sources are zero, as for FRC `0xA429`, so the displayed `31 01/02/03 + RID` requests have no hidden setpoint bytes. Current GTS+ uses standard UDS `31/71` here; the older pinned V18 `21 E2/61 E2` routine executor remains version-specific.
 
-Role `0x63` handles **multi-control Active Test initialization**. `--item` is the type-33 group ID, not a direct member ID. The current generic P5 plugin reads 12-byte `CDbMultiDidIdTable` rows keyed by u16 `+0x00`, takes member Active Test ID from `+0x02`, and sorts on u32 `+0x06`. The current DataMonitor runtime additionally consumes the low u16 at `+0x06` as input slot 1/2, materializes each member through the ordinary type68 direct executor, and OR-composes complete start/stop frames. All member DID bytes must match; mixed-DID groups fail closed. The generated catalog therefore exports input slots plus `materializable`/`blocked` composer status. Categories may bind role `0x63` without having type-33 groups; the planner reports an empty census instead of manufacturing groups.
+Role `0x63` handles **multi-control Active Test initialization**. `--item` selects the type-33 group ID. The current generic P5 plugin reads 12-byte `CDbMultiDidIdTable` rows keyed by u16 `+0x00`, takes member Active Test ID from `+0x02`, and sorts on u32 `+0x06`. The current DataMonitor runtime additionally consumes the low u16 at `+0x06` as input slot 1/2, materializes each member through the ordinary type68 direct executor, and OR-composes complete start/stop frames. All member DID bytes must match; mixed-DID groups fail closed. The generated catalog therefore exports input slots plus `materializable`/`blocked` composer status. Categories may bind role `0x63` without having type-33 groups; the planner reports an empty census instead of manufacturing groups.
 
 Role `0xAD` is category-wide rather than selected-test-specific. The current `GetDatMonListP5ForActTest_DT.dll` reuses the normal role-`0x05` P5 support/table/MultiPID/conversion pipeline, but uses monitor flag bit `0x40` as the Active-Test membership bit. If flag bit4 is set, bit `0x40` is the direct include/exclude decision; if bit4 is clear, the plugin still calls `CheckSupportPid` and applies the `0x40` membership test afterward. `tools/gts command ... 0xAD` therefore reports both static membership and which rows still require runtime support evaluation. It does **not** take `--item`: the plugin does not join this list to one selected Active Test ID.
 
-For role `0x70`, the same `--item` selects the direct type-68 Active Test but no wire transaction is attached. The exact current `GetATSignalInfoP5_DT.dll` consumes that selected ID and joins type-12 Active-Test pattern, type-13 physical conversion, type-14 display values, and type-15 unit metadata into `CCmdActTstSignalInfoItem`. This makes `0x70` the read-only presentation/conversion companion to role `0x08`, not another executor.
+For role `0x70`, the same `--item` selects the direct type-68 Active Test but no wire transaction is attached. The exact current `GetATSignalInfoP5_DT.dll` consumes that selected ID and joins type-12 Active-Test pattern, type-13 physical conversion, type-14 display values, and type-15 unit metadata into `CCmdActTstSignalInfoItem`. This makes `0x70` the read-only presentation/conversion companion to role `0x08`.
 
-For role `0x08`, `--item` is the direct Active Test ID from the selected category's type-68 `CDbActTestP5Table`. The planner joins that exact row to the current plugin's initialization state machine: when `initial_read_mode == 0`, selector `0xCA` supplies a base `22FFFF` request and the plugin substitutes the row's `+0x34` DID into request bytes 1/2 before send. It also reproduces the plugin's linked-Data-Monitor lookup by DID and bit range. The planner continues into the shared P5 runtime executor: type67 `CDbDataIdForActTable` supplies the DID encoding mode; selector `0x9D` supplies `2FFFFF03 -> 6F` for start/short-term adjustment and selector `0x64` supplies `2FFFFF00 -> 6F` for return-control. The displayed `+N` remains intentionally symbolic in the offline plan because bit geometry proves only a minimum, but the **live source of N is now closed**: `CCommCachePlusP5::CheckSupportDid` resolves selector `0xCA`, sends `22 <DID>`, requires a response longer than the three-byte `62 <DID>` echo, and appends `received_length - 3` to the per-ECU `CCmdDataIdLengthList`. The exporter therefore emits a separate `runtime_length_probe` even when role-`0x08` initial-read mode is 1; this probe is support/runtime state, not the selected-test initial-value display transaction. `active-test-wire-minimum` stays a static illustration, while `runtime-length-probe` describes the exact read-only transaction that can materialize N on a live ECU. The planner itself still sends nothing and does not assert that role `0x06` would expose the test on a particular vehicle. Unknown direct-test IDs fail closed.
+For role `0x08`, `--item` is the direct Active Test ID from the selected category's type-68 `CDbActTestP5Table`. The planner joins that exact row to the current plugin's initialization state machine: when `initial_read_mode == 0`, selector `0xCA` supplies a base `22FFFF` request and the plugin substitutes the row's `+0x34` DID into request bytes 1/2 before send. It also reproduces the plugin's linked-Data-Monitor lookup by DID and bit range. The planner continues into the shared P5 runtime executor: type67 `CDbDataIdForActTable` supplies the DID encoding mode; selector `0x9D` supplies `2FFFFF03 -> 6F` for start/short-term adjustment and selector `0x64` supplies `2FFFFF00 -> 6F` for return-control. The displayed `+N` remains intentionally symbolic in the offline plan because bit geometry proves only a minimum, but the **live source of N is now closed**: `CCommCachePlusP5::CheckSupportDid` resolves selector `0xCA`, sends `22 <DID>`, requires a response longer than the three-byte `62 <DID>` echo, and appends `received_length - 3` to the per-ECU `CCmdDataIdLengthList`. The exporter therefore emits a separate `runtime_length_probe` even when role-`0x08` initial-read mode is 1. This probe supplies support/runtime state independently of the selected-test initial-value display transaction. `active-test-wire-minimum` stays a static illustration, while `runtime-length-probe` describes the exact read-only transaction that can materialize N on a live ECU. The planner itself still sends nothing and does not assert that role `0x06` would expose the test on a particular vehicle. Unknown direct-test IDs fail closed.
 
 Current GTS+ namespaces base-variable references above `0x2710`; the CLI follows
 `CDbVariableTable::GetVariable` and subtracts `0x2710` before the unchanged
@@ -315,8 +315,8 @@ resolve to logical variables `0x33` and `0x1E7` rather than being mistaken for
 out-of-range table indices. CommSet dword `+0x00` is intentionally exposed as
 `send_parameter`: it reaches `SendInt` argument 4, but the common CAN `SendProc`
 does not consume that argument, so the CLI does not invent a timeout/unit label.
-The current type-19 DLL-role layout is likewise
-version-aware (`u16 +0x54`, not V18's `u8 +0x56`).
+The current type-19 DLL-role layout uses `u16 +0x54`.
+V18 uses `u8 +0x56`.
 
 OEM display names can legitimately be ambiguous across diagnostic generations
 (e.g. multiple P3/P4/P5 categories named `Hybrid Control`); the CLI refuses such
@@ -385,20 +385,20 @@ unsigned or two's-complement interpretation at the declared bit width followed b
 integer as `value / 10^decimal_point_count`, and pattern-display lookup compares the
 converted integer before decimal rendering. The role-`0x41` signal-info plugin joins
 exactly those type-13 physical fields into `CCmdConversionTbl`; that table calls the
-basic conversion overload, not the separate special-format overload used by unrelated
-time/chassis/illuminance-style display paths. Each exported DID signal explicitly names
+basic conversion overload. Unrelated time/chassis/illuminance-style display paths
+use a separate special-format overload. Each exported DID signal explicitly names
 its decoder kind so future non-P5 formats can fail closed instead of inheriting this
 contract implicitly.
 
-`tools/gts registry toyota-current --out FILE.zip` is the default Comma-side export rather than a vehicle-specific registry. Bundle schema **`toyota-diagnostics-bundle-v2`** keeps Toyota's resolver layers independent: all regional vehicle/type-41/type-59 tables, install sets, all 2,136 category identities, class-`0x10D` category+phase routes, per-category D1/D2/DD frames, literal support-plugin dispatch, family-local `support_mode`, Toyota transport-controller selection, and lazy decoded catalogs. Catalog availability no longer decides whether a category exists or is routable. Current support-family selection comes from Toyota's DLL table (`p3/p4/p5/p6`), not generation guesses. The ordinary Toyota P5 mode reproduces `22 01 01` plus MSB-first group/member expansion while retaining advertised `xx00` IDs and skipping Toyota's `F300`/`FD00` group queries; Subaru/Suzuki/Mazda/Hino modes remain distinct rather than inheriting that implementation. Standard P6 is fully exported: DID `22 A1 00 -> A1nn -> nn00..nnFF` with `A1FD/A1FE` retained but unexpanded, and RID `31 01 D1 00 -> D1nn -> nn00..nnFF` with `D1F0/D1FE` retained but unexpanded. Phase `0x18`/`0x38` routes are materialized through Toyota's `CCommCtrlISO15765_29BitCan` normal-fixed address construction (`0x18DA<target>F1` request / `0x18DAF1<target>` response), rather than treating the raw class-`0x10D +0x08` target byte as an 11-bit CAN ID. Other Toyota controllers remain explicitly typed so local transport-executor coverage cannot become a category-support decision. P3/P4 also carry their `Spe/Toyota.ddb` live probe programs and semantic type-41 criteria; a VIN hit requiring that second stage is explicitly non-final. VIN10 low5 `5..19` rejection is recorded together with Toyota's separate legacy `SelectCarType.dll` / `SelectCarTypeVin.dll` role bindings, whose binaries are absent from the current corpus and are therefore an unresolved implementation path rather than an unsupported-generation declaration. The bundle deliberately contains no Panda logical-bus default: that is caller/harness state, not Toyota DB semantics. `tests/techstream/verify_toyota_diag_bundle.py` regenerates the ZIP byte-for-byte and verifies these boundaries plus Camry and 4Runner install/route resolution. The older Camry JSON remains only a compatibility/evidence fixture.
+`tools/gts registry toyota-current --out FILE.zip` is the default Comma-side export rather than a vehicle-specific registry. Bundle schema **`toyota-diagnostics-bundle-v2`** keeps Toyota's resolver layers independent: all regional vehicle/type-41/type-59 tables, install sets, all 2,136 category identities, class-`0x10D` category+phase routes, per-category D1/D2/DD frames, literal support-plugin dispatch, family-local `support_mode`, Toyota transport-controller selection, and lazy decoded catalogs. Catalog availability no longer decides whether a category exists or is routable. Current support-family selection comes directly from Toyota's DLL table (`p3/p4/p5/p6`). The ordinary Toyota P5 mode reproduces `22 01 01` plus MSB-first group/member expansion while retaining advertised `xx00` IDs and skipping Toyota's `F300`/`FD00` group queries; Subaru/Suzuki/Mazda/Hino modes remain distinct rather than inheriting that implementation. Standard P6 is fully exported: DID `22 A1 00 -> A1nn -> nn00..nnFF` with `A1FD/A1FE` retained but unexpanded, and RID `31 01 D1 00 -> D1nn -> nn00..nnFF` with `D1F0/D1FE` retained but unexpanded. Phase `0x18`/`0x38` routes are materialized through Toyota's `CCommCtrlISO15765_29BitCan` normal-fixed address construction (`0x18DA<target>F1` request / `0x18DAF1<target>` response), rather than treating the raw class-`0x10D +0x08` target byte as an 11-bit CAN ID. Other Toyota controllers remain explicitly typed so local transport-executor coverage cannot become a category-support decision. P3/P4 also carry their `Spe/Toyota.ddb` live probe programs and semantic type-41 criteria; a VIN hit requiring that second stage is explicitly non-final. VIN10 low5 `5..19` rejection is recorded together with Toyota's separate legacy `SelectCarType.dll` / `SelectCarTypeVin.dll` role bindings, whose binaries are absent from the current corpus and are therefore an unresolved implementation path rather than an unsupported-generation declaration. The bundle deliberately contains no Panda logical-bus default: the caller supplies that harness state. `tests/techstream/verify_toyota_diag_bundle.py` regenerates the ZIP byte-for-byte and verifies these boundaries plus Camry and 4Runner install/route resolution. The older Camry JSON remains only a compatibility/evidence fixture.
 
 Registry schema v3 also carries the current Camry-HV GTS CAN Bus Check topology and
 tracked module identities needed by the legacy Camry fixture. Toyota master vehicle type
 `12704` (**Camry HV**) resolves `CANBusCarID=0x00A7D910`; all 18 option rows collapse to
 one placement variant. The exact placements put **Front Camera Module** on GTS **Bus 1**
 and **Power Steering (EPS)** plus **Skid Control (ABS/VSC/TRAC)** on GTS **Bus 4**, all
-behind **Central Gateway**. These are Toyota vehicle-network domain names, not Panda bus
-numbers: the active post-repin profile remains Panda bus0. The registry separately
+behind **Central Gateway**. These Toyota vehicle-network domain names use a
+separate namespace from Panda buses. The active post-repin profile remains Panda bus0. The registry separately
 retains the tracked 2026-08-26 **pre-repin** identity observations without rewriting that
 history: EPS F181 `8965F3307000` + `8A3113303100` / F18C
 `8965033K9011J2740743`; FRC F181 `8646F3315000`, part `8646C06091`, F18C
@@ -426,8 +426,8 @@ The legacy Camry registry schema **v6** predates the universal bundle and remain
   (`8119`, `8120`, `8121`, `27706`), and **34 Toyota logical ECU categories**. Each
   candidate preserves its install-set/category identity plus the exact mount-connect
   inputs: connection frame `0`, CommSet `9`, and phase type `0x12` or `0x22`.
-  Connection frame 0 has no send/mask/check payload, so Toyota's mount stage is a
-  transport/category connectivity check, not an F181 identity probe. Each candidate
+  Connection frame 0 has no send/mask/check payload, so Toyota's mount stage
+  checks transport/category connectivity without probing F181 identity. Each candidate
   also carries `transport_route` resolved **only** through Toyota class `0x10D`
   `CDbProtInfoTable`, using the same `(category, phase)` key consumed by
   `CCommFrameCtrl::GetEcuAddr`: u16 `+0x08` is the request address and byte `+0x0A`
@@ -478,11 +478,11 @@ The legacy Camry registry schema **v6** predates the universal bundle and remain
   get/confirm, set-default-session, move-session-CGWDK, and the four routine
   Active-Test wrappers), the RoutineControl `31 01/02/03 FF FF` and IOControl
   `2F FF FF 03/00` templates with their substitution grammar, and pointers to the
-  per-category function menus. Unrecovered generic roles are absent by design, not
-  classified.
+  per-category function menus. Unrecovered generic roles are omitted.
 
-The registry is deliberately metadata, not authorization. `execution: executable`
-only certifies complete fixed request geometry; the registry still contains no
+The registry provides metadata. Authorization remains a runtime requirement.
+`execution: executable` only certifies complete fixed request geometry;
+the registry still contains no
 runtime command to execute anything, no SecurityAccess secret, no session escalation
 policy beyond the recovered lifecycle description, and no flash/write workflow. Live
 support state and any outer session/authentication requirements remain runtime
@@ -515,8 +515,8 @@ DDBs and writer tables are not silently mixed across releases. Use
 
 ## Evidence boundary
 
-A `tools/gts` result is **external-source discovery**, not target-firmware
-proof. Toyota names and database membership can constrain interpretation, but
+A `tools/gts` result provides **external-source discovery**.
+Target-firmware proof requires an image-bound join. Toyota names and database membership can constrain interpretation, but
 they do not prove that the Camry/Sienna/Corolla firmware uses a field the same
 way, nor do they prove CAN producer ownership, SecOC key/freshness semantics,
 or runtime reachability. Promote useful correlations through the existing

@@ -11,8 +11,8 @@ The input artifacts intentionally have different evidence strengths:
 * absence from both classes is an unresolved/changed result, never proof that an
   analogous target function or behavior is absent.
 
-The resulting ledger is designed for navigation and review, not automatic
-semantic promotion.
+The resulting ledger supports navigation and review only.
+Semantic promotion requires independent evidence.
 """
 
 from __future__ import annotations

@@ -4,7 +4,7 @@
 Consume extract_camry_20260930_vmc_corpus and join_camry_20260930_vmc_corpus
 outputs. Raw rlogs and NumPy caches remain external/ignored; this producer saves
 compact evidence under data/generated/camry_20260930_vmc_status. It requires
-NumPy, not an openpilot checkout or live vehicle connection. Supply --logs-root
+NumPy. It runs offline without an openpilot checkout. Supply --logs-root
 to bind an older extraction cache to the original rlog identities.
 """
 from __future__ import annotations
@@ -184,7 +184,7 @@ def stock_epochs(route: str, j: dict) -> list[dict]:
   times, first, inverse = np.unique(t[idx], return_index=True, return_inverse=True)
   if len(times) > 10:
     speeds = v[idx[first]]
-    # Centered median is an excitation selector, not a physical latency oracle.
+    # Centered median selects excitation only; physical latency remains unresolved.
     smooth = np.array([np.median(speeds[max(0, i - 5):min(len(speeds), i + 6)]) for i in range(len(speeds))])
     wheel_accel[idx] = np.gradient(smooth, times)[inverse]
   base = (np.isfinite(j["age_native"]) & (native[:, 6] == 1) & np.isfinite(j["age_cs"])
@@ -381,11 +381,11 @@ def main() -> None:
             "median_wheel_CarState_RMS_mps2": float(np.median([row["wheel_carstate_rmse_mps2"] for row in epochs])) if epochs else None}
   methods = {
     "words": "B4/B18/B20/B22/B24 signed16BE x0.001 nominalm/s2; B26 low13 signed, physical scale unresolved",
-    "max_relation": "B18=max(B4,B24), rawcounts; informative excludes B4=B24; empirical, not proved ECU equation",
+    "max_relation": "B18=max(B4,B24), rawcounts; informative excludes B4=B24; empirical relation; ECU equation unproved",
     "clamped_envelope": "B18=min(max(B4,B24),B22), raw counts; tests whether B22 explains below-max samples",
     "moving": ">0.5m/s from fresh raw wheels with CarState fallback",
     "coverage": "sum adjacent status intervals capped100ms; includes parked time, limits larger-gap contributions to100ms",
-    "timing": "preceding-only joins; CS/CC60ms,request75ms,exact-payload origin100ms; logger batch timestamps, not ECU deadlines",
+    "timing": "preceding-only joins; CS/CC60ms,request75ms,exact-payload origin100ms; logger batch timestamps; ECU deadlines unresolved",
     "stock_epochs": "native latch1,no pedals,moving,freshCS; >=2s; request range>=0.5 or centered-median wheel-gradient range>=0.4 using unique time knots; direct RMS on original2-decimal episode boundaries, no fitted gain/offset",
     "semantics": "candidate roles only; exact synchronized OEM diagnostic/FFD joins absent",
     "segment_times": "t_route from minimum recorded monotonic event; repeated init/carParams timestamps are not segment playback anchors",
@@ -406,7 +406,7 @@ def main() -> None:
                         "B24": "driver-accelerator demand/reference", "B26": "brake-linked signed13 quantity; scale unresolved"},
     "limits": ["Candidate roles are not confirmed OEM byte/name joins.",
                "ID11 also appears under native stock control and does not establish comma ownership.",
-               "Vehicle-side TX confirmations establish publication, not execution or acceptance latency.",
+               "Vehicle-side TX confirmations establish publication only; execution and acceptance latency remain unresolved.",
                "Driver-brake onset confounds the subsequent native -4m/s2 request; it is not native-only braking proof.",
                "B4 is neither unconditional request echo nor literal stationary body acceleration.",
                "B18 envelope exceptions prohibit treating the dominant identity as universal.",

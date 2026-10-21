@@ -1,8 +1,8 @@
 # Variant and target reports
 
-Use this index to select evidence for a **specific specimen or calibration**,
-not to infer vehicle support from a similar name. Registry roles describe
-analysis ownership, not openpilot qualification.
+Use this index to select evidence for a **specific specimen or calibration**.
+Vehicle support requires evidence beyond a similar name. Registry roles describe
+analysis ownership. Openpilot qualification requires separate evidence.
 
 ## Registered analysis targets
 
@@ -51,17 +51,17 @@ likewise apply to their recorded rack, firmware, and date.
   calibration-specific state analysis.
 - [September-16 offline audit](corolla-tss3-offline-audit-2026-09-16.md) and
   [tester-handoff audit](corolla-tss3-tester-handoff-audit-2026-09-16.md) are
-  revision-bound reviews, not current upstream or road-qualification claims.
+  revision-bound reviews. Current upstream status and road qualification require separate evidence.
 
-## Other evidence — not registered full analysis targets
+## Other evidence outside the registered full analysis targets
 
 | Evidence | Scope / report |
 |---|---|
 | Sienna `8965B4514000` | [External field report](sienna-8965B4514000.md) |
-| Tundra `8965F3401200` | [Partial application-image provenance](../../firmware/tundra-8965F3401200/README.md), not a complete registered CodeFlash target |
+| Tundra `8965F3401200` | [Partial application-image provenance](../../firmware/tundra-8965F3401200/README.md); complete registered CodeFlash target unavailable |
 | TSS3 Front Recognition Camera | [Acquisition and evidence boundaries](tss3-frc-firmware-acquisition.md) |
 | RAV4 Prime | [Historical field experiments](rav4-prime-forced-secoc-profile.md), with their own identity limits |
-| Venza airbag sensor | [September-14 specimen report](yc-venza-airbag-reprogramming-2026-09-14.md); not an EPS comparison by default |
+| Venza airbag sensor | [September-14 specimen report](yc-venza-airbag-reprogramming-2026-09-14.md); an EPS comparison requires separate evidence |
 | Newer TSK target | [Evidence contract](newer-tsk-target-evidence.md); no automatic transfer |
 | Cross-vehicle comparison | [Evidence-graded comparison](toyota-eps-variant-comparison.md) and `data/toyota_eps_variant_matrix.csv` |
 

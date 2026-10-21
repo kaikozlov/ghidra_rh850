@@ -100,7 +100,7 @@ def stationary() -> dict:
         'cruise_enabled_frames': sum(bool(d[3] & 8) for _, d in streams[0x8A]),
         'mirror_tail_zero_frames': sum(d[3:] == bytes(29) for _, d in streams[0x1B2]),
         'bindings': observations,
-        'boundary': 'These isolated inputs identify a switch-event mirror, not a writable cruise-controller input. All retained cruise-state frames are inactive.',
+        'boundary': 'These isolated inputs identify only a switch-event mirror; a writable cruise-controller input remains unresolved. All retained cruise-state frames are inactive.',
     }
 
 
@@ -179,7 +179,7 @@ def all_buses() -> dict:
         'common_stream_count_by_bus': dict(sorted(Counter(str(k[0]) for k in shared).items())),
         'events': events, 'adas_p05': dict(p05), 'stock_placement': placements,
         'early_screen': screen(discovery), 'long_screen': screen(discovery, post_end=1_000_000_000),
-        'boundary': 'A cancellation-linked output is not automatically a cancel input. Native2 identifies the FRC-side link, not exclusive logical ECU ownership behind it.',
+        'boundary': 'A cancellation-linked output is not automatically a cancel input. Native2 identifies only the FRC-side link; logical ECU ownership behind it remains unresolved.',
     }
 
 
@@ -232,7 +232,7 @@ def assess_host_attempt(rows, first_send_ns: int) -> dict:
         'selfdrive_alerts': dict(sorted(alerts.items())),
         'unconfounded_observation': native_engaged and fresh_inputs and bool(sends) and tx_valid and matched_returns > 0 and dropped is not None and not inputs,
         # Even an unconfounded temporal association would need full review of
-        # other causes. It is a candidate witness, not an automatic causal proof.
+        # other causes. It is only a candidate witness; causality remains unresolved.
     }
 
 

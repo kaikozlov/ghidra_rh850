@@ -680,7 +680,7 @@
       "IV-independent A32 shape scoring of the identical 1392-byte R4-domain routine"
     ],
     "best_sparse_min_identity": 0.0107421875,
-    "boundary": "Every unique key hypothesis is screened over 64 image blocks; only the top 32 sparse results are rescored over the complete 64-KiB sample. No fully rescored result reaches the 1% threshold. This rejects only these explicit AES-CBC KDF grammars. A protected camera root, non-AES transform, different mode, unrelated routine key, or a KDF outside these bounded contexts remains possible. A32 shape is a ranking heuristic, not a decryption oracle.",
+    "boundary": "Every unique key hypothesis is screened over 64 image blocks; only the top 32 sparse results are rescored over the complete 64-KiB sample. No fully rescored result reaches the 1% threshold. This rejects only these explicit AES-CBC KDF grammars. A protected camera root, non-AES transform, different mode, unrelated routine key, or a KDF outside these bounded contexts remains possible. A32 shape is only a ranking heuristic; decryption remains unverified.",
     "candidates_at_or_above_threshold": [],
     "full_rescore_top_n": 32,
     "hypothesis": "Under the AES-CBC hypothesis, adjacent plaintext images should regain substantial byte identity when a candidate formula derives the correct shared or per-image key. Blocks >=2 are IV-independent.",
@@ -2366,7 +2366,7 @@
     "universal_root_test": "If a non-EPS backend uses the same EPS root/wrapper algebra, its ECUAuthKey-shaped stored/provisioned value must equal AES-128-ECB-ENC(EPS_BOOT_SA_ROOT, Kwork)."
   },
   "simple_public_id_kdf_negative": {
-    "interpretation": "No tested working key is an obvious one-step derivation of the public diagnostic identifier under the recovered EPS roots. This is a bounded negative, not an exhaustive KDF search.",
+    "interpretation": "No tested working key is an obvious one-step derivation of the public diagnostic identifier under the recovered EPS roots. This negative result is limited to the tested KDFs.",
     "matching_packages": [],
     "tested": "AES-ENC/AES-DEC of six obvious 16-byte DiagID embeddings and CMAC of binary/ascii DiagID under the recovered EPS payload/boot/application roots"
   }

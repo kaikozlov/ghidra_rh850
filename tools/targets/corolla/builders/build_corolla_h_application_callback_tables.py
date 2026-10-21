@@ -74,7 +74,7 @@ def main():
     recensus.append({'reference_entry':ref,'reference_name':name,'reason':f'H async-operation descriptor set has no {disc:#06x} row'})
  # special op9 row immediately follows FB in both generations
  s9=parse_op_rows(S,S_OP_BASE+9*0x10,1)[0];h9=parse_op_rows(H,H_OP_BASE+7*0x10,1)[0]
- # special discriminator is a callback/state helper pointer in both words, not 6Fxx.
+ # special discriminator is a callback/state helper pointer in both words.
  op_rows.append({'discriminator':'special-op9','status':'preserved','sienna':s9,'h':h9})
  for field,name in [('start',OP9[0]),('completion',OP9[1])]:
   roles.append({'reference_entry':s9[field],'reference_name':name,'target_entry':h9[field],'role':f'async operation special op9 {field}'})

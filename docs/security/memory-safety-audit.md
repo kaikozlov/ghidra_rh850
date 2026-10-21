@@ -120,8 +120,7 @@ transformation entirely.
 - ranges outside the three configured windows.
 
 TransferData also checks `chunk_len <= remaining`. The write stays within
-bounds. The vulnerability is **missing AES-block alignment**, not destination
-bounds.
+bounds. The vulnerability is **missing AES-block alignment**.
 
 ### Security consequence: stale authorization enables payload substitution
 
@@ -135,8 +134,8 @@ across subsequent downloads:
 - the `0xFF00` request path inside `uds_routine_control @ 0x567E` accepts both
   `0x01` and `0x81` at `0x58A2–0x58B0`, calls `flash_erase_start @ 0x41E0`,
   then stores authorization state `0x81` and operation state `0x02` at
-  `0x58C2–0x58C8`. `routine_erase_task @ 0x5B70` is the later asynchronous
-  completion worker, not the request/authorization gate.
+  `0x58C2–0x58C8`. `routine_erase_task @ 0x5B70` handles later asynchronous
+  completion.
 
 The downstream flash-engine callback invocation is direct and unvalidated:
 
@@ -465,7 +464,7 @@ M4/M5 proof (48 bytes).
 
 SHE provides no command for exporting a nonvolatile key slot such as slot 4
 (SECOC-025). Key extraction therefore requires a privileged memory read of a
-CPU-visible key copy, not an OOB read into ICU-S address space.
+CPU-visible key copy.
 
 ## Strategic assessment: the signing-oracle path
 
@@ -526,8 +525,8 @@ own the control path without ever reading the ICU-S key.
 
 The following enumerated externally reachable paths were audited and found to
 reject malformed input correctly. The grade is `bounded`: the assertion covers
-the named sinks, callers, tables, and branches, not every possible unknown
-indirect consumer in the image.
+only the named sinks, callers, tables, and branches. Unknown indirect consumers
+remain outside this result.
 
 ### ISO-TP reassembly
 
@@ -550,7 +549,7 @@ No CAN-reachable ISO-TP OOB read/write was found.
   minimum.
 - Classic secured routes require **exactly** DLC 8.
 - FD secured routes accept DLC 32, 48, 64 but clamp to 32 bytes before SecOC.
-  The suffix is ignored, producing an **ignored-suffix alias**, not an overflow.
+  Ignoring the suffix produces an **ignored-suffix alias** within the 32-byte bound.
 
 No stale-tail, short-frame, or pointer-rewind vulnerability was identified in
 the CAN receive path.
@@ -718,7 +717,7 @@ SecOC key configuration at `0x25950` selects slot 4.
 | Key update 8 | `0x86E62` | `0x8997A` | `0x86EE8` | Exactly 64-byte M1/M2/M3; success copies 32+16 |
 
 Command-5 word at `0x89734–0x8973A`: `(selector << 16) | 5`.
-Command-7 SecOC result pointer is fixed RAM target `FEBE555C`, not wire-controlled.
+Command-7 SecOC writes its result to the fixed RAM target `FEBE555C`.
 Pointer and callback fields checked against stored bitwise complements before use.
 
 ### MEM-SAFE-004: command-8 failure path

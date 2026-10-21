@@ -185,7 +185,7 @@ def _section_xcp_security():
     check('DAQ scheduler decrements counter on every eligible pass', CF[529300:529312] == bytes.fromhex('1cf0600841ea9d005f0a800b'))
     check('DAQ sampler queues each DTO through 0x81E58', CF[529122:529130] == bytes.fromhex('243ec89480ff720b'))
     check('DAQ sampler loads configured pointer then reads one byte through it', CF[529090:529104] == bytes.fromhex('00f5c49941d2410a9a0081006090'))
-    check('DAQ sampled byte is stored into DTO staging, not through configured pointer', CF[529104:529108] == bytes.fromhex('5397c894'))
+    check('DAQ sampled byte is stored only into DTO staging', CF[529104:529108] == bytes.fromhex('5397c894'))
     check('DAQ transmit callback is 0x8206C and selects special class 0xF800', u32(142224) == 532588 and CF[532600:532610] == bytes.fromhex('863600f80338bfff8ecd'))
     check('DAQ special transmit class resolves to CAN 0x7F8', tx_record[0] == 2040)
     print('\n== RAM upload geometry ==')

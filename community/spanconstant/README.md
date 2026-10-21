@@ -19,8 +19,8 @@ keeping the directly analyzed corpus compact.
 
 ## Separate July-29 driving rlog
 
-`span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst` is a **separate**
-Span-supplied comma Discord artifact, not a member of `spanconstant_tsk.zip`.
+`span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst` is a
+Span-supplied comma Discord artifact supplied separately from `spanconstant_tsk.zip`.
 It was recorded 2026-07-29 and added to this corpus on 2026-08-24. SHA-256:
 `f1ae7c40ad8e9ff8c462a3f5367d914873e93575d902ccb82f2c74984acd439f`.
 Embedded `initData` records `spanconstant5/openpilot`, branch `tskdash`, commit
@@ -35,10 +35,10 @@ shows real motion plus dynamic brake/gas/steering, and the opendbc extraction is
 persisted as `data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json`.
 All 599 Panda-state samples are `ELM327 param=1`, `harnessStatus=flipped`, controls
 disallowed. The maintainer reports Span had **not physically repinned** the
-Toyota-B CAN0/CAN1 pairs for this capture. `harnessStatus=flipped` is Panda harness
-orientation, not that physical repin: param1 + logical bus1 directly observes the
-normal unsplit harness CAN1 network, while the absent repin means the network is
-not on the CAN0/CAN2 relay pair for normal comma interception/suppression.
+Toyota-B CAN0/CAN1 pairs for this capture. `harnessStatus=flipped` records Panda
+harness orientation. With param1, logical bus1 directly observes the normal
+unsplit harness CAN1 network. Without the repin, that network is outside the
+CAN0/CAN2 relay pair used for normal comma interception/suppression.
 
 ## Memory corpus
 
@@ -70,8 +70,8 @@ in exactly 2,190 bytes, all below `0x17E00`; the high CRC/application image is
 byte-identical. A fresh clean Span Ghidra import independently produced the same
 5,425-function structural fingerprint corpus as H, and a direct Span→Sienna run
 reproduced H's full exact-body, structural, named-function, and normal-Rx results.
-The resolved Span SecOC queue is `00F/D7/B6`, not Sienna's `2E4/131` steering
-profiles.
+The resolved Span SecOC queue contains only `00F/D7/B6`. Sienna separately has
+`2E4/131` steering profiles.
 
 The 2,190-byte low delta is now exhausted rather than left as a generic
 calibration caveat. Exactly 863 changed bytes belong to a nine-record `0xA000`

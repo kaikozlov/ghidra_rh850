@@ -95,7 +95,7 @@ bm = {name: art["drives"][name]["reference_word_081"]["batch_median_comparison"]
       for name in ("drive_a", "drive_b")}
 check("drive-B batch-median equality stays above 0.92 inside ID11",
       bm["drive_b"]["id11_equality_le1_fraction"] == 0.920555)
-check("drive-A fast-slew disagreement is disclosed, not hidden",
+check("drive-A fast-slew disagreement is disclosed",
       bm["drive_a"]["id11_equality_le1_fraction"] == 0.506849)
 
 print("\n== 0x08A byte-complete census ==")
@@ -123,7 +123,7 @@ check("drive B has five SDG intervals; the 17.7 s interval publishes a dynamic s
       len(b_sdg) == 5
       and (b_sdg[4]["start_s"], b_sdg[4]["frames"], b_sdg[4]["word_min"], b_sdg[4]["word_max"],
            b_sdg[4]["word_vs_sas_pearson_r"]) == (1423.999209, 711, -209, 123, 0.754389))
-check("SDG blips carry small nonzero trims (12-20 counts), not zeros",
+check("SDG blips carry small nonzero trims (12-20 counts)",
       all(14.0 <= i["mean_abs_word"] <= 21.0 for i in b_sdg[:4]))
 
 print("\n== plant closure ==")
@@ -162,7 +162,7 @@ for name, fast_start, fast_end in (("drive_a", 263.945429, 503.945429),
                                    ("drive_b", 1104.701663, 1494.701663)):
     p = art["drives"][name]["p19c_phase_refutation"]
     fast = [q for q in p["phases"] if q["mode"] == "fast"]
-    check(f"{name} single fast phase containing ID11 (mode dilution, not LTA behavior)",
+    check(f"{name} single fast phase containing ID11 shows mode dilution",
           len(fast) == 1 and (fast[0]["start_s"], fast[0]["end_s"]) == (fast_start, fast_end)
           and p["id11_contained_in_fast_phase"] is True)
 

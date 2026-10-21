@@ -92,10 +92,9 @@ At the pinned commit, a synchronization mismatch is logged but does not gate
 subsequent sends. The code consumes the synchronization source; it does not
 originate `0x00F`.
 
-A production sender must treat synchronization acceptance and counter changes as
-state transitions, not just call a stateless CMAC helper. Separate protected
-PDUs need separate message-counter state, and a stale or unauthenticated sync
-must not silently replace the active sender epoch.
+A production sender must maintain synchronization acceptance and counter changes
+as state transitions. Separate protected PDUs need separate message-counter state.
+A stale or unauthenticated sync must not silently replace the active sender epoch.
 
 #### H/F Corolla live synchronization behavior
 
@@ -160,9 +159,8 @@ on eight ordinary IDs:
 
 `0x00F` is the companion synchronization message. Every ordinary block carries
 `AUTHENTICATOR`, `RESET_FLAG`, and `MSG_CNT_LOWER`; the common sender formula is
-DataID-generic. This establishes a useful **known Toyota classic-SecOC profile**,
-not a claim that every listed ID appears on every vehicle or belongs to the same
-receiving ECU/key domain.
+DataID-generic. This establishes a useful **known Toyota classic-SecOC profile**.
+Each vehicle's message set and receiving ECU/key domains require separate evidence.
 
 The machine-readable profile is `data/toyota_classic_secoc_profile.csv`, and the
 community-extractor implications are canonical in
@@ -232,7 +230,7 @@ tools/toyota secoc sync \
 # 00F#12345678957BC857
 ```
 
-These are synthetic deterministic vectors, not captured vehicle material.
+These deterministic vectors are synthetically generated.
 The tool prints candump-compatible text but does not send it.
 
 ## 3. Generic capture and DataFlash oracle
@@ -247,7 +245,7 @@ DataFlash verifier, it does not assume steering IDs or Panda buses 0/2. It:
 - derives the 64 possible full message counters consistent with the transmitted
   two counter bits rather than brute-forcing unrelated counter values;
 - scans every sliding 16-byte DataFlash window with a sync-CMAC prefilter; and
-- reports only candidate offset/address hashes and match counts, not raw keys.
+- limits its report to candidate offset/address hashes and match counts.
 
 `tests/toyota/verify_toyota_secoc_oracle.py` includes a synthetic bus-1 capture with
 `0x116` and `0x24D` specifically to prevent regression to the Sienna-only
@@ -299,8 +297,8 @@ RAM proxy
   -> command 5
 ```
 
-The stock mode-1 test at `0x68B42` remains useful as calling-convention proof,
-but the resident proxy deliberately uses **record 0**, not diagnostic record 1.
+The stock mode-1 test at `0x68B42` remains useful as calling-convention proof.
+The resident proxy uses **record 0**. Diagnostic record 1 is separate.
 Both records use adapter `0x87CCC` and asynchronous worker `0x87DD0`; record 0's
 completion callback `0x88B5C` merely stores status to `FEBF13BD` and sets done
 flag `FEBF13BC`, whereas record 1 callback `0x6926A` invokes the diagnostic
@@ -319,9 +317,8 @@ DataID_be16 || payload[0:4] || freshness48
 ```
 
 The proxy keeps the full 16-byte CMAC result internally and uses its first 28
-bits when constructing the four-byte Toyota SecOC trailer. This is an
-engineering composition of already recovered primitives, not evidence that
-slot 4 has been observed generating a MAC.
+bits when constructing the four-byte Toyota SecOC trailer. This composes already
+recovered primitives. Slot-4 MAC generation still requires an observed hardware result.
 
 ### 5.2 Arbitration and command-7 contention
 

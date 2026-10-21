@@ -106,7 +106,7 @@ The request used by all available tooling is:
 ```
 
 The handler requires the SA-unlock state byte `0xFEBF2B0F == 2` (detailed in
-[§ SecurityAccess is the gate](#securityaccess-is-the-gate-not-the-session)
+[§ SecurityAccess gates RequestDownload](#securityaccess-gates-requestdownload)
 below), validates the range against `0x8DA0`, records the current destination
 and remaining byte count, and initializes payload crypto when enabled:
 
@@ -115,10 +115,10 @@ payload_build_derive_key       0x7068
 payload_crypto_initialize      0x70D4
 ```
 
-### SecurityAccess is the gate (not the session)
+### SecurityAccess gates RequestDownload
 
-RequestDownload's security check is a single gp-relative byte load compared to
-`2`, not a session-type comparison:
+RequestDownload's security check compares one gp-relative SA-unlock byte to
+`2`:
 
 ```text
 0x5efc  ld.bu -0x6cf1[gp], r19   ; byte @ 0xFEBF2B0F   (gp = 0xFEBF9800)
@@ -134,8 +134,7 @@ mismatch takes the `0x35` (invalidKey) branch at `0x54d4` instead. Boot init
 (`0x5090`, `FUN_00005086`) and the diagnostic-session-change handler (`0x561e`,
 `FUN_000055fc` called from `bootloader_set_diagnostic_session`) only ever write
 `1`. Therefore DiagnosticSessionControl (`10 0x`) alone cannot satisfy the gate;
-the `SEED_KEY_SECRET`-based SecurityAccess (SEC-BOOT-002/003) is mandatory, not
-redundant.
+the `SEED_KEY_SECRET`-based SecurityAccess (SEC-BOOT-002/003) is mandatory.
 
 The same byte gates two sibling services identically — `WriteDataByIdentifier`
 (read `0x49c6`) and `ECUReset` (read `0x610c`), both `cmp 2 / be / NRC 0x33`.
@@ -364,8 +363,8 @@ No recovered stock boot-runtime operation returns to application execution
 without traversing that reset/startup clear. A future no-reset boot→application
 control transfer would immediately make `0xFEBF2D18` a high-value disclosure
 candidate and should be re-audited before attempting to recover the root itself.
-This is a software-path boundary, not a claim about physical fault injection,
-debug access, or other out-of-model hardware disclosure.
+This boundary covers software paths only. Physical fault injection, debug access,
+and other hardware disclosure remain outside the model.
 
 ### Persistent-trust consequence
 
@@ -381,9 +380,8 @@ the same CPU privilege domain as the boot flash sequencer, and the firmware
 contains program/erase/marker machinery for the application-covered region. A
 payload that obtains a durable CodeFlash write and recomputes the CRC fields and
 markers can in principle install an application-resident hook that survives
-reset. This repository has not built or bench-tested such a persistent patch;
-the conclusion is a recovered trust-chain property, not an operational flashing
-procedure.
+reset. This repository has not built or bench-tested such a persistent patch.
+The conclusion establishes a recovered trust-chain property only.
 
 This distinction is central to a comma design. A one-shot boot callback is in the
 wrong GP/TP/RAM/interrupt context for the initialized ICU and CAN application

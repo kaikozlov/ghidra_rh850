@@ -499,7 +499,7 @@ class InlineSignerSession:
             sent = 0
             for index in range(start_index, self.bundle.helper_words):
                 word = self.bundle.helper[index * 4:(index + 1) * 4]
-                # Crown functional DCM channel1 is a single latest-N-SDU image, not a queue.
+                # Crown functional DCM channel1 retains only the latest N-SDU image.
                 # Hold each strictly-sequential word across several foreground
                 # ticks so losing one mailbox update cannot strand next_index.
                 for _ in range(WORD_REPEAT_COUNT):

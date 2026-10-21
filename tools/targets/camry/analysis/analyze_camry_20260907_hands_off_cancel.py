@@ -377,7 +377,7 @@ def analyze(LogReader, files: list[Path]) -> dict[str, Any]:
         'all_latch_falls': latch_falls,
         'interpretation': {
             'verified_dynamic': (
-                'The strongest retained hands-off cancellation is a native FRC 0x08A request withdrawal, not an openpilot 0x101 cancel: '
+                'The strongest retained hands-off cancellation is a native FRC 0x08A request withdrawal: '
                 'the operating latch clears, Target Lateral ID 11 becomes 0, both longitudinal request packages change, and set speed clears before controls sees pcmDisable.'
             ),
             'chassis_response': (

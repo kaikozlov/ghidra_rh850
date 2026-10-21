@@ -17,7 +17,7 @@
     "0x08A_frames_in_multi_frame_events": 20607,
     "0x08A_frame_count": 20615,
     "0x08A_multi_frame_event_fraction": 0.999612,
-    "boundary": "Each rlog Event.logMonoTime timestamps a publication batch, not an individual CAN frame. Inter-frame 20/30 ms classes therefore cannot identify physical arbitration, a CAN TX queue, or a transmitter ECU"
+    "boundary": "Each rlog Event.logMonoTime timestamps an entire publication batch. Individual-frame timing remains unresolved. Inter-frame 20/30 ms classes therefore cannot identify physical arbitration, a CAN TX queue, or a transmitter ECU"
    },
    "cadence": {
     "0x08A": {
@@ -82,7 +82,7 @@
     "maclike_last4_stream_count": 0,
     "0x180_unique_last4": 1,
     "0x160_unique_last4": 1,
-    "classification": "no ordinary-P5 SecOC trailer on panda bus 1: zero 0x00F, and every periodic stream has a near-constant last-4 (max unique fraction 0.000978); last-8 variation on 64-byte vision PDUs is payload, not a MAC (a MAC28 would uniquify last-4)"
+    "classification": "no ordinary-P5 SecOC trailer on panda bus 1: zero 0x00F, and every periodic stream has a near-constant last-4 (max unique fraction 0.000978); last-8 variation on 64-byte vision PDUs belongs to payload. A MAC28 would uniquify last-4"
    },
    "bus0_08a_last4_unique_frac": 1.0
   },
@@ -102,7 +102,7 @@
     "0x08A_frames_in_multi_frame_events": 23999,
     "0x08A_frame_count": 23999,
     "0x08A_multi_frame_event_fraction": 1.0,
-    "boundary": "Each rlog Event.logMonoTime timestamps a publication batch, not an individual CAN frame. Inter-frame 20/30 ms classes therefore cannot identify physical arbitration, a CAN TX queue, or a transmitter ECU"
+    "boundary": "Each rlog Event.logMonoTime timestamps an entire publication batch. Individual-frame timing remains unresolved. Inter-frame 20/30 ms classes therefore cannot identify physical arbitration, a CAN TX queue, or a transmitter ECU"
    },
    "cadence": {
     "0x08A": {
@@ -167,7 +167,7 @@
     "maclike_last4_stream_count": 0,
     "0x180_unique_last4": 1,
     "0x160_unique_last4": 1,
-    "classification": "no ordinary-P5 SecOC trailer on panda bus 1: zero 0x00F, and every periodic stream has a near-constant last-4 (max unique fraction 0.000834); last-8 variation on 64-byte vision PDUs is payload, not a MAC (a MAC28 would uniquify last-4)"
+    "classification": "no ordinary-P5 SecOC trailer on panda bus 1: zero 0x00F, and every periodic stream has a near-constant last-4 (max unique fraction 0.000834); last-8 variation on 64-byte vision PDUs belongs to payload. A MAC28 would uniquify last-4"
    },
    "bus0_08a_last4_unique_frac": 1.0
   }
@@ -251,7 +251,7 @@
    "0x081": "native Brake/chassis Panda bus0 -> upstream bus2 on Toyota Bus 4",
    "0x08A": "native upstream Panda bus2 -> chassis bus0 on Toyota Bus 4",
    "capture_era": "temporary CAN0/CAN1 repin",
-   "stock_toyota_b": "Toyota Bus 4 returns to unsplit Panda bus1; compare Toyota network role, not raw Panda bus number"
+   "stock_toyota_b": "Toyota Bus 4 returns to unsplit Panda bus1; compare by Toyota network role across Panda bus-number changes"
   },
   "regression_rule": "Do not label 0x08A a Bus-1 camera frame. Do not send 0x08A to EPS. No 0x08A->B6 stock-LTA transform (CORR-135). No output authorized"
  }

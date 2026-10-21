@@ -41,7 +41,7 @@ ledger context is useful.
   actuation discriminator. The separate shadow write window remains RWX and
   direct-consumer-negative. The corrected Ghidra device profile and hardware
   MPU both grant supervisor execute on that region (CORR-060), so the open
-  question is a runtime-computed control-transfer consumer, not executability.
+  question is which runtime-computed control-transfer consumer reaches that executable region.
   What is still unobserved is whether a vehicle
   gateway or diagnostic connector forwards CAN `0x7F7/0x7F8`.
   `exploit/followups/xcp_read_probe.py` remains read-only for isolated-bench
@@ -123,8 +123,7 @@ ledger context is useful.
   TMS-053 closes the replacement-side state machine from that point: an exclusive
   replacement sender can own B6 message8 locally, advance normally inside the +1..+4
   receiver window, keep application signal261 separate, and after sender restart wait
-  for the next authenticated `0x00F` epoch instead of guessing or persisting Toyota's
-  prior B6 message8. The remaining Corolla work is therefore **stock** sender wall-clock
+  for the next authenticated `0x00F` epoch and initialize B6 message8 locally. The remaining Corolla work is therefore **stock** sender wall-clock
   cadence/secondary-field template, the slot-4 secret value or an available approved
   MAC operation, stock-source suppression, and the upstream payload/SecOC producer
   contract. Static broad searching
@@ -171,8 +170,7 @@ ledger context is useful.
   `F152612A5100/5200/5300→F152612A5400`; none of those Brake CIDs and no `07B0`
   package is present locally. The next static evidence is therefore specifically
   a decoded/exact-target `07B0` Brake application plus a decoder/exact identity
-  join for the already-owned `0792` family (or synchronized stock-LTA traffic),
-  not another broad FRC-package search.
+  join for the already-owned `0792` family (or synchronized stock-LTA traffic).
   TMS-044 also closes the category-435 Techstream Active-Test catalog as a
   normal steering-writer lead: 20 direct tests and four routines are brake-actuator-
   only, and every routine has zero variable command/mask/button payloads. Those tests
@@ -198,7 +196,7 @@ ledger context is useful.
   selected software to server `swId`/`fileName`, filters targets already present
   as local `*.cuw`, then emits the missing subset as get-cal
   `swNo`/`fileName`/`swType` before URL polling and managed download. In that
-  path `swNo` is the selected server `swId`, not `systemAssyNo`. The unresolved
+  path `swNo` is the selected server `swId`. The unresolved
   external facts are the **actual Brake F181/0105 values, the live `resData`, and
   whether Toyota's service returns the desired `07B0` package for that VIN**.
   The FRC-only `1FFF` SWIN path remains unrelated.
@@ -350,9 +348,9 @@ ledger context is useful.
 - **OQ-019 — Protected-tail serial read.** Determine whether a faulted serial read of
   `0x1007800..0x1007FFF` bypasses only a mask-ROM range check or also exposes
   nonblank ICU-S storage. The current CPU-visible dump contains only `00/FF`;
-  public P1M-E fault injection proves ordinary flash readout, not key-array
-  access.
-- **OQ-020 — Bank-0 command-8 production role and safe dynamic confirmation (SECOC-047/048).** Static firmware closes the CAN `0x13..0x1A` assembly and completion-misattribution mechanics. What remains useful is dynamic provenance, not random stimulation: determine whether RID `0x100E`/those CAN IDs occur during legitimate provisioning, whether any external monitor exposes bank-0 terminal state, and whether dealer tooling treats RID `0x1010` status `02` with zero proof as success. Reproduce the race only on a disposable/matching unit with a legitimately captured authenticated update package and complete recovery plan; preserve F181, route, M1–M5 hashes, timing, DTCs, and post-run key state. Do not synthesize command-8 packages on the only original ECU.
+  public P1M-E fault injection proves ordinary flash readout only. Key-array
+  access remains unproved.
+- **OQ-020 — Bank-0 command-8 production role and safe dynamic confirmation (SECOC-047/048).** Static firmware closes the CAN `0x13..0x1A` assembly and completion-misattribution mechanics. The remaining useful work is dynamic provenance: determine whether RID `0x100E`/those CAN IDs occur during legitimate provisioning, whether any external monitor exposes bank-0 terminal state, and whether dealer tooling treats RID `0x1010` status `02` with zero proof as success. Reproduce the race only on a disposable/matching unit with a legitimately captured authenticated update package and complete recovery plan; preserve F181, route, M1–M5 hashes, timing, DTCs, and post-run key state. Do not synthesize command-8 packages on the only original ECU.
 - **OQ-021 — Application command-5 signing capability — static H/F carrier candidate closed; live retention/permission/timing remain dynamic.**
   Stock RoutineControl `31 01 10 0F` still supplies a fixed-16 diagnostic test,
   and SECOC-070 closes the generic alternate-caller problem on Sienna with the
@@ -439,8 +437,7 @@ ledger context is useful.
 
 - **OQ-027 — Sienna `8965B4514000`.** Acquire CodeFlash and completed partner
   dump/capture outputs. Stage 8 re-ran exact public/local acquisition searches
-  and found neither, so this remains missing-artifact blocked rather than
-  quietly unblocked. The object-15 field and CMAC counts are pinned external
+  and found neither, so this remains blocked by missing artifacts. The object-15 field and CMAC counts are pinned external
   observations, but runtime crypto architecture, `0x344` EPS direction/owner,
   mismatch clustering, and key uniqueness remain open. See
   [../variants/sienna-8965B4514000.md](../variants/sienna-8965B4514000.md).
@@ -467,8 +464,7 @@ ledger context is useful.
   retained-RAM execution geometry if a runtime is built; and live ICU-S policy
   only where hardware evidence is needed. Records 0/2/3 are persistent
   calibration state admitted only after successful reads over byte-identical
-  all-zero staging seeds — not differing compiled model-year constants; factory
-  vs service origin is not distinguished. See
+  all-zero staging seeds; factory vs service origin remains undistinguished. See
   [../variants/corolla-8965F1208000.md](../variants/corolla-8965F1208000.md).
 - **OQ-029 — Separate 2023 US Corolla / historical-`8965H1202000` corpus.** The complete
   memory corpus and same-car telescope probe are now retained. Direct application
@@ -491,8 +487,7 @@ ledger context is useful.
   `0x00F` oracle, CAN capture and dumping are separate jobs, and the older
   public-route `0x116/0x24D` oracle is a different freshness epoch (`TRIP 0xCE9`
   versus local `0xD0D`). The major H-native static transfer questions exposed by
-  the first whole-image census are now substantially closed rather than left as
-  offset hypotheses. XCP target-native decomp proves the same unauthenticated
+  the first whole-image census are now substantially closed. XCP target-native decomp proves the same unauthenticated
   LocalRAM read / shadow-write / E4 CodeFlash-copy architecture with H-specific
   exclusion ranges. SecOC target-native decomp proves the same verification
   algorithm over a different `00F/D7/B6` profile set. Motor-control recovery
@@ -546,8 +541,7 @@ ledger context is useful.
   The former 96 `structural-candidate-only` rows now all have target-native H
   operand/dataflow inspection evidence, leaving **zero structural-only rows** as
   well. Further H-static work should therefore be driven by concrete semantic,
-  exploit, runtime-reachability, or target-architecture questions rather than
-  denominator completion;
+  exploit, runtime-reachability, or target-architecture questions;
   generic DAQ/XCP callbacks remain optional unless such a hypothesis needs them. The
   direct F181 is now closed by VAR-049; boot-RAM execution was already established by
   the earlier range-dump acquisition and is now independently replayed/payload-bound by VAR-049. If revisited
@@ -596,8 +590,7 @@ ledger context is useful.
   driver-override threshold is a conservative Panda/openpilot policy to choose and
   validate dynamically. Measured `0x4A3` Q-current is observable, but no
   cooperative-supervisor measured-Q comparator is recovered; any actuator-response
-  limit is likewise a future Panda/sender policy rather than an OEM threshold still
-  waiting to be copied. TMS-058 now closes the extended **static** `0x394`
+  limit likewise requires a future Panda/sender policy. TMS-058 now closes the extended **static** `0x394`
   mapping: 242 populated-class DEM events are exhaustively partitioned into the
   native class/state families, named Toyota DTC families are joined where present,
   and the class-2/class-4 paired states have exact 200/600-count aging structure.
@@ -609,7 +602,7 @@ ledger context is useful.
   sender identity or Target-Lateral-ID priority; one pending SecOC slot coalesces
   arrivals, in-flight arrivals are ignored, one shared freshness state rejects replay
   but can be advanced by any future-valid slot4-capable sender, and signal261 delta0 is
-  tolerated rather than used as a duplicate filter. CORR-111 further closes a bounded
+  accepted. CORR-111 further closes a bounded
   generated fail-open mode: B6 verification failures can still reach COM without
   freshness commit while `FEBE5408 < 204` or a separate global D2 override is active.
   Deterministic lateral authority therefore requires exclusive B6 control. TMS-053
@@ -618,8 +611,7 @@ ledger context is useful.
   Span `0x030` timing corroborates the same period. It also closes the replacement
   sender's freshness restart/progression recipe: re-anchor only on a newer
   authenticated `0x00F` epoch, own B6 message8 locally, keep signal261 independent,
-  and wait for the next epoch after restart instead of guessing/persisting Toyota's
-  message8. The remaining suppression question is physical/deployment-specific:
+  and wait for the next epoch after restart before initializing message8 locally. The remaining suppression question is physical/deployment-specific:
   identify the producer side and validate the relay-side isolation point; do not use
   freshness racing as coexistence. **Stock** sender template/cadence, slot4 MAC
   capability/key policy or an audited H/F signer route, and that physical suppression
@@ -657,7 +649,7 @@ ledger context is useful.
   application→PROGRAMMING retained replay explicitly clears the initializer
   delay before synthetic boot `10 02`, explaining Calvin's roughly one-second
   successful unlocks. Remaining dynamic value is lifecycle confirmation after
-  hard reset / actual bad-key lockout, not the nominal duration. Host tooling
+  hard reset / actual bad-key lockout. Host tooling
   should request SecurityAccess normally after PROGRAMMING and respect NRC
   `0x37` only when the backoff is actually active.
 
@@ -692,7 +684,7 @@ ledger context is useful.
   `CheckIDAuth 0x30` with an all-FF ID as the first authentication probe. The
   shipped RFP docs/configuration contain generic all-FF ID examples/conventions,
   but there is no R7F701381/P1M-E device record proving that blank-ID state for
-  this target. Treat acceptance/rejection as an observation, not a prior fact.
+  this target. Record acceptance/rejection when observed.
   Defer `ValidateICU_S 0x70` and `DisableSerialProgramming 0x29` until their
   silicon effect on P1M-E is observed. See CORR-092.
   See [../tooling/renesas-rfp-rv40f.md](../tooling/renesas-rfp-rv40f.md).
@@ -763,7 +755,7 @@ ledger context is useful.
   transitions. Preserve `Save/RecoveryInfo.ini`, its saved calibration payload,
   raw J2534 timestamps, selected factory/contact/CPU metadata, and Data IDs
   `0016..0019`, `0033/0034/0036`, `0421/0422`, `07D1/07D2`, and
-  `26AC/26AD/26C1/26C3`. This is now a capture task, not a static-RE blocker.
+  `26AC/26AD/26C1/26C3`. The remaining task is capture.
 - **OQ-039 — Matching modern calibration package and target-specific integrity values.**
   TMS-026/TMS-034/TMS-037/TMS-038/TMS-039 now close two real legacy package
   families plus an 11-package Tacoma comparative corpus. `T-0087-17.cuw`
@@ -773,7 +765,7 @@ ledger context is useful.
   all 16 `.xxz` members as ASCII-hex `ZV00/ZV01` + LZF, including dual-CPU
   member ordering, password chains, image geometry, and stable logical
   header/footer/fill structure. Those expanded images are demonstrably
-  structured rather than whole-image ciphertext, although exact native MCU
+  structured, although exact native MCU
   interpretation / any Denso storage transform remains bounded. None of these
   artifacts is a tracked modern EPS package. What remains still needs a
   **matching modern EPS CUW**: choose between the two byte-compatible Unified
@@ -784,7 +776,7 @@ ledger context is useful.
   absent a real dataflow edge. TMS-042 now closes the format-`0x67` tail
   grammar, the `ReproMethod=07` delta descriptor/route (ReproStd writers,
   DFI `0x21`), and the modern unpacked GTS+ host anchors on a real six-package
-  FRC corpus — but that is a Corolla **front camera**, not EPS: its
+  Corolla **front-camera** FRC corpus: its
   `ServiceAuthKey`/`Nonce`/ranges do not transfer, and the EPS Unified-row
   choice/credentials above remain open.
 - **OQ-040 — RKS exact target/region policy (Layer A).** TMS-028/TMS-033 close the static
@@ -797,18 +789,18 @@ ledger context is useful.
   explicitly supports continuing without Signature Request when the repair
   manual says it is unnecessary, and no calibration-schema or flash-writer edge
   makes RKS universal — modern-host selection is the runtime
-  `JudgeReproGWNodeForP4AndP5` probe result, **not** the
-  `IsControlledBySCC` descriptor bit (which parses `VehicleForNA`/
-  `VehicleForEUOT`). TMS-042 additionally closes the host side of the delta
+  `JudgeReproGWNodeForP4AndP5` probe result. The separate
+  `IsControlledBySCC` descriptor bit parses `VehicleForNA`/
+  `VehicleForEUOT`. TMS-042 additionally closes the host side of the delta
   transfer itself: `.datx` is read raw+CRC-gated and passed verbatim
   (`CDeltaReproArchiveCtrlr` is orchestration-only; no crypto/compression
   imports on the writer path), with the routine-area (`10 F5`, DFI `0x01`)
   then delta-data (`10 F6`, DFI `0x21`) RoutineControl framing — so any
   `.datx` grammar, the routine blob format, and `10F5/10F6` ECU semantics
   now require **FRC bootloader/programming-decoder firmware or an executable camera
-  dump** — the 23TC01 Corolla update package itself is already local per TMS-052 — not more host RE, and explicitly not the tracked Sienna/H EPS
-  (TMS-029 already proves standard ReproStd `10F5`/`10F6` are absent/rejected
-  there). Bind the acquisition with the camera-special direct
+  dump**. The 23TC01 Corolla update package itself is already local per TMS-052.
+  TMS-029 proves standard ReproStd `10F5`/`10F6` are absent/rejected in the tracked
+  Sienna/H EPS images. Bind the acquisition with the camera-special direct
   `0x792→0x79A` DID-`1FFF` SWIN response recovered from `GetSWINForFCM`, plus
   generic F181/F18C and the package/current CID; `GetSWINForFCM` is a distinct
   path from generic F181. What remains is external policy evidence: determine
@@ -892,8 +884,7 @@ ledger context is useful.
   configured SecurityAccess policy or recovered speed gate. The isolated-bench
   probe is now ready under `exploit/followups/`; run it to determine which
   baseline-active EPS application Tx IDs are suppressed by `28 01 01` and prove
-  all recover after `28 00 01`. This is an availability characterization, not a
-  candidate steering interface.
+  all recover after `28 00 01`. This characterizes availability only.
 - **OQ-050 — Exploit-interest cohort consumption (SWEEP-008).** The ranking pipeline
   produces anchored candidate cohorts (`pre_sa_write`, `computed_store`,
   `selector_dispatch`, ...). The first serious cohort and the 2026-08-15
@@ -906,8 +897,7 @@ ledger context is useful.
   are bounded negatives or duplicates. The 2026-08-22 static re-audit also
   closed the three formerly `open` rows (`0x00058404`, `0x000539a8`,
   `0x0007c7c2`) with direct firmware bounds, so the reviewed ledger currently
-  has zero `open` rows. **That is a ledger statement, not a global coverage
-  statement**: ranked functions and cross-function compositions outside the
+  has zero `open` rows. **That describes only the reviewed ledger**: ranked functions and cross-function compositions outside the
   manually consumed cohorts remain valid review input and are not absence
   claims (CORR-101).
 - **OQ-051 — Cross-calibration structural triage of future P1M-E images.** The offline
@@ -944,7 +934,7 @@ ledger context is useful.
   -4.0 m/s² episode while a separate FRC-origin `0x5AE` warning path asserts. The
   then-active host replacement suppresses the first two native ID34 requests, so it
   demonstrably does not preserve PCS onset; `0x081` remains ID11 and is therefore a
-  downstream result witness, not the source-side detector. For openpilot, the logical
+  downstream result witness only. For openpilot, the logical
   correction is now defined: detect source-side PCS emergency intent, relinquish host
   `0x08A` ownership, and pass the **original authenticated FRC request** untouched.
   Exact ID33/34 Toyota substage names, first-frame handoff timing, and unconfounded
@@ -986,7 +976,7 @@ ledger context is useful.
   The remaining ordinary P5 Brake/FRC RoB-table lead is also exhausted: tables 90/151
   joined through 88/153 contain no named TSS request/arbitration winner field in `FRC_P5`,
   `ABS_P5`, or `Brk_Bst_P5`. The sole pinion-named brake RoB datum is `0x507E` **ADS
-  Control EPS Pinion Angle2**, an observer rather than a named target/request/result.
+  Control EPS Pinion Angle2**, an observer only.
 
   A current corpus-wide ordinary Data Monitor census finds **zero generation-20 control
   arbitration-result signals**. Only successor `ADCU_P6/P6F` exposes the corresponding
@@ -1018,11 +1008,11 @@ ledger context is useful.
   affine model independently recovers the same transform and the CAN-ID contribution.
   `0x160 B2` advances +1 on all 23,988 drive-B same-segment pairs; constant `0x020` has
   only 256 complete wire images and repeats byte-for-byte after wrap at ~12.8 s. This is
-  **standard non-cryptographic E2E CRC integrity plus rolling freshness, not SecOC/TSK**.
+  **standard non-cryptographic E2E CRC integrity plus rolling freshness**.
   The checksum polynomial/implementation is no longer open. Receiver `MaxDeltaCounter`,
   timeout/restart behavior, `0x160` producer/direction, and B12 OEM identity remain open.
 
-  **What is still genuinely open is target-native request identity, receiver acceptance, and execution ownership, not GTS+ naming.**
+  **Target-native request identity, receiver acceptance, and execution ownership remain open.**
   For one exact TSS3 target, join the diagnostic values to the real vehicle-network frame
   and cadence, determine the FRC->brake copy/transform, final brake/powertrain arbitration
   executor, SecOC/integrity signer/freshness owner, lead/distance/standstill feedback, and
@@ -1067,12 +1057,11 @@ ledger context is useful.
   `data/generated/gtsplus_2026/tss3_control_ownership_surface.json`, and
   [../architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md) §4.1/§5D.
 
-- **OQ-053 — F33 non-disruptive application-mode RAM execution pivot.** **Production-only ordering note:** VAR-060 still closes an exact persistent F33 Gate-2 development patch and deterministic restore, so this question does not block development lateral. The production goal remains a non-persistent signer/control path. Exact `8965F3307000` still has the desired volatile carrier: live evidence proves `FEBFF9F0..FEBFFBFB` (524 bytes) survives stock application startup byte-for-byte and executes, while `FEBF0000` is disproved. **VAR-134/CORR-165 withdraw the former claim that stock XCP supplies the placement half.** Rule46 `GAFLID=0x9FDC0002` is extended CAN `0x1FDC0002` (response `0x1FE00002`), and a Sep-6 non-command marker live-proved ingress through `FEBE4C34` staging with transport state `FEBE4EE6=0x5A`. But `0x821D6` calls `0x830C0 -> 0x98E80` before parsing CONNECT; fixed CodeFlash `0x30D68=0x5A` makes that hook return nonzero, so stock protocol command dispatch is disabled. The XCP `SET_MTA`/`DOWNLOAD` callbacks and write window remain real conditional handler semantics, not a stock-reachable RAM writer. OQ-053 therefore again needs **both** a stock-reachable volatile placement primitive and a safe already-running-application control transfer, or a different stock surface that supplies both.
+- **OQ-053 — F33 non-disruptive application-mode RAM execution pivot.** **Production-only ordering note:** VAR-060 still closes an exact persistent F33 Gate-2 development patch and deterministic restore, so this question does not block development lateral. The production goal remains a non-persistent signer/control path. Exact `8965F3307000` still has the desired volatile carrier: live evidence proves `FEBFF9F0..FEBFFBFB` (524 bytes) survives stock application startup byte-for-byte and executes, while `FEBF0000` is disproved. **VAR-134/CORR-165 withdraw the former claim that stock XCP supplies the placement half.** Rule46 `GAFLID=0x9FDC0002` is extended CAN `0x1FDC0002` (response `0x1FE00002`), and a Sep-6 non-command marker live-proved ingress through `FEBE4C34` staging with transport state `FEBE4EE6=0x5A`. But `0x821D6` calls `0x830C0 -> 0x98E80` before parsing CONNECT; fixed CodeFlash `0x30D68=0x5A` makes that hook return nonzero, so stock protocol command dispatch is disabled. The XCP `SET_MTA`/`DOWNLOAD` callbacks and write window remain real conditional handler semantics only; stock RAM-write reachability remains disproved. OQ-053 therefore again needs **both** a stock-reachable volatile placement primitive and a safe already-running-application control transfer, or a different stock surface that supplies both.
 
-  Sep-6 resident failures are now corrected by VAR-136/CORR-167: both failed high-tail residents used a C `call0(address)` trampoline that passes the target in RH850 `r6`, unlike Toyota's direct startup `jarl` sequence, so they do not qualify ABI-preserving replay. The next bounded live action is the **generic ABI-preserving runtime monitor**, not another address-specific resident. Its 520-byte high-tail code uses direct `JARL disp32`, adds no application-memory writes through foreground count 223, then accepts only the non-XCP `00 F3 seq opcode arg32-le` control protocol from the already-live-proven extended `0x1FDC0002 -> FEBE4C34` path. Eight host-configurable aligned LocalRAM watch windows can be changed from the comma without rebuilding or another RAM execute; SID23 reads the coherent current snapshot. Only `runtime_monitor_live` closes the runtime/control-plane half, after which the first qualification remains READY/Park/stationary.
+  Sep-6 resident failures are now corrected by VAR-136/CORR-167: both failed high-tail residents used a C `call0(address)` trampoline that passes the target in RH850 `r6`, unlike Toyota's direct startup `jarl` sequence, so they do not qualify ABI-preserving replay. The next bounded live action is the **generic ABI-preserving runtime monitor**. Its 520-byte high-tail code uses direct `JARL disp32`, adds no application-memory writes through foreground count 223, then accepts only the non-XCP `00 F3 seq opcode arg32-le` control protocol from the already-live-proven extended `0x1FDC0002 -> FEBE4C34` path. Eight host-configurable aligned LocalRAM watch windows can be changed from the comma without rebuilding or another RAM execute; SID23 reads the coherent current snapshot. Only `runtime_monitor_live` closes the runtime/control-plane half, after which the first qualification remains READY/Park/stationary.
 
-  The **recovered stock pivot surface is now statically exhausted**, rather than
-  merely missing an obvious callback. CORR-123 refreshes that conclusion against
+  The **recovered stock pivot surface is now statically exhausted**. CORR-123 refreshes that conclusion against
   the current first-class 6,065-function graph: **496 decoded indirect transfers**
   exist in total (403 `jarl` / 93 `jmp`), **487 in application CodeFlash**
   (395 / 92). The function-owned classifier covers 495 total and **all 487
@@ -1089,7 +1078,7 @@ ledger context is useful.
   programmer; the whole-image CTBP census finds only reset's `ldsr r0,CTBP @ 0x25E`;
   application context setup writes fixed `INTBP=0x20200` and `EBASE=0x20000`;
   and full configured XCP DAQ is measurement/readback-only (`WRITE_DAQ 0x82510`
-  supplies a read source consumed by `0x82368`, not a write/call target).
+  supplies a read source consumed by `0x82368`).
 
   The diagnostic/factory-test classes are closed target-natively too. SID `0x11`
   ECUReset is session-2-only with null callback and no subfunctions. WDBI resolves
@@ -1112,7 +1101,7 @@ ledger context is useful.
   neither RID is among its 19 routines, and callback cell `FEBF0FD0` has only boot
   flash-engine consumers. Application SecurityAccess does not reveal a second service
   graph; its exact callback-local BA `F7/BAENA` use remains lifecycle/authorization
-  state, not a PC pivot. Exact
+  state only. Exact
   controller-1 rules 43/44/45 are ordinary `0x7A1` physical UDS, `0x777` functional
   UDS, and `0x7A0` secondary diagnostics; interrupt-time reception only completes
   transport/enqueues DCM state, while SID dispatch occurs later in DCM main. `0x7F7` is
@@ -1123,10 +1112,10 @@ ledger context is useful.
   Active Test, type-71 Routine Active Test, or type-77 Simple Utility table. OEM EPS
   service workflows such as Initial Setting/Assist Map still reduce to already-audited
   fixed application routines (for example `0x1109` DataFlash/NvM calibration-state
-  work), not a parameterized code-loader. Exact Corolla-H remains the useful
+  work). Exact Corolla-H remains the useful
   differential: its
   sibling application leaves the same unauthenticated XCP RAM-write architecture live,
-  proving this is an F33 configuration/build exclusion rather than a platform limit.
+  proving this is an F33 configuration/build exclusion.
 
   The known oversized-DLC stale-stack source over-read also remains bounded away from
   control: recovered consumers truncate/reject before an escaping write, and the
@@ -1141,8 +1130,7 @@ ledger context is useful.
   memory-corruption bug with useful write+PC influence, a synthesized/computed alias or
   mutable continuation object absent from recovered references, an undiscovered
   DMA/hardware mutation mechanism, or undiscovered code. Any future READY-only work
-  should begin by producing one of those concrete primitives rather than guessing a PC
-  cell. Canonical:
+  should begin by producing one of those concrete primitives. Canonical:
   [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §13.7.
 
 
@@ -1157,7 +1145,7 @@ ledger context is useful.
   **Historical OQ-054 evidence follows; its downstream-`0x08A`-publisher model is superseded by the later relay-open/FRC-CommunicationControl source result.** VAR-091/CORR-149 established the older placement boundary: `0x08A` was observed on captured Bus 4 with ordinary-P5 `FV4||MAC28`, absent from Bus 1, and excluded from exact F33 Tx/Rx. GTS+ puts logical FRC on Bus 1 and Skid/Brake Booster/EPS/SAS/Airbag on Bus 4 behind Central Gateway, but that topology is not a CAN-ID source map. Retained rlog timestamps are multi-frame publication timestamps, so the former 20/30 ms arbitration/`0x0D7`-queue attribution is invalid. VAR-107 closes the observed native Bus-1 family as exact AUTOSAR E2E Profile 5. CORR-194 then established camera-family key provisioning. Those facts originally motivated a downstream proxy hypothesis; **do not carry that hypothesis forward**. Later source isolation proves the secured publisher is inside the FRC assembly. VAR-094's useful surviving result is only that consecutive recorder layout `ID||pinion||assist` is absent from native Bus-1 CAN; the selected request is packaged internally before chassis-facing `0x08A` egress. Independently capture FRC Operation FFD feature-local state plus `5282`, then `5285/57DE/5265/560D` with `0x081` to separate the FRC owner transition from downstream Brake result/plant state. Do not send `0x08A` to EPS or infer a byte-preserving `0x08A -> B6` transform. Protected B6 remains a separate candidate openpilot interface.
   Request/grant grading is VAR-095/CORR-137.
   **Historical VAR-096 inference, superseded:** no separate arbitration/request ECU co-installs with FRC_P5 498; the old topology-only analysis therefore bounded the `0x08A` transmitter/signer candidate set to Brake/Booster/CGW. Later physical source evidence removes that candidate set and places the secured publisher inside FRC.
-  **Historical VAR-097 ambiguity, superseded for lateral feature ownership:** the FRC recorder separated feature requests (`5531/5631/5Axx`), generic request `5282`, result `5285/57DE`, and external control/plant observations `5265/560D`, but at that stage FRC-vs-Brake selection placement was unresolved. Current evidence closes the relevant split: FRC selects the LTA/LDA/LCA/PDA/PCS owner before `5282`/`0x08A`; Brake supplies downstream request arbitration/result/request generation. Synchronized Operation FFD is now for recovering the **FRC internal selector**, not deciding whether Brake chooses among those features. Canonical §45.
+  **Historical VAR-097 ambiguity, superseded for lateral feature ownership:** the FRC recorder separated feature requests (`5531/5631/5Axx`), generic request `5282`, result `5285/57DE`, and external control/plant observations `5265/560D`, but at that stage FRC-vs-Brake selection placement was unresolved. Current evidence closes the relevant split: FRC selects the LTA/LDA/LCA/PDA/PCS owner before `5282`/`0x08A`; Brake supplies downstream request arbitration/result/request generation. Synchronized Operation FFD is now for recovering the **FRC internal selector**. Canonical §45.
   VAR-101 refines the question only at the **publication-continuity** level: the
   secured `0x08A` family continues at zero request (stationary READY, `B21=0` in
   2,475/2,475 frames, live FV4 epoch tracking, `+1 mod 64` B26, frame-unique
@@ -1232,8 +1220,7 @@ ledger context is useful.
   2.640 s (>=96.98/s), while additional modulo-256 wraps remain possible. This proves
   route44 activity occurred without host B6 transmission during that interval; it does not
   identify a transmitter, prove a universal background publisher, or provide exact cadence.
-  The earlier short-window `0/~200 Hz` values were modulo-256 endpoint residues, not rate
-  estimates. Post-aggregate ID0 therefore remains a real observation but not a host-frame
+  The earlier short-window `0/~200 Hz` values were modulo-256 endpoint residues. Post-aggregate ID0 therefore remains a real observation but not a host-frame
   identity witness.
 
   Exact scheduler recovery also supersedes both old queue probes. `79EDE` is the unique
@@ -1264,7 +1251,7 @@ ledger context is useful.
   path still drains under interrupt context `71508 -> 66026 -> 667B6 -> 7A232 -> 79EBA ->
   83CE4 -> 83E0C`. The old C observer remains ABI-blocked. The assembly v3 route44 bridge is
   ABI-safe but its current between-aggregate queue snapshot is timing-blind to the now-proven
-  same-invocation lifetime; it is an ephemeral diagnostic intervention, not production design.
+  same-invocation lifetime; it is an ephemeral diagnostic intervention only.
   Counter phase, MAC value, B6 companion guesses, `0x08A` suppression, and another result
   patch remain unjustified.
 
@@ -1273,8 +1260,7 @@ ledger context is useful.
   copies the received 32 bytes unchanged and solely invokes `8E772(44)`. No local B6
   constructor, sanitizer, replacement path, or autonomous route44 ticker is recovered. The
   retained zero-host-TX route44 activity is therefore an independent successful protected
-  receive stream (or an unrecovered mechanism), not evidence that Panda ID11 was rewritten to
-  ID0. Toyota diagnostics associate the immediate missing-message peer with the Brake System
+  receive stream (or an unrecovered mechanism). Panda ID11-to-ID0 rewriting remains unproved. Toyota diagnostics associate the immediate missing-message peer with the Brake System
   Control Module/category-435 domain. OQ-054 must now recover the exact external B6 physical
   transmitter/link, stock request handoff, signing owner, and source-suppression mechanism,
   alongside the already-open `0x08A/0x081` proxy contract. The mid-aggregate observer is
@@ -1291,9 +1277,8 @@ ledger context is useful.
   handlers** (`0x7BFE4` key-update, `0x7C020`, `0x7C05A` opcode-`0x10`, `0x7C0B4`) that
   gate on a diagnostic session/state block at `0xFEF041C4` and stage through
   `0xFEFF0158` — i.e. the opcode-`0x10` service is **diagnostic-routine-driven**
-  (the airbag counterpart of the EPS RID `0x100F`/`0x1010` crypto banks), not a
-  production SecOC operation. Corrections from the same pass: `0x8A26A` is a
-  two-instruction status-read helper (`return *0xFF1F0010`), not a submit — the real
+  (the airbag counterpart of the EPS RID `0x100F`/`0x1010` crypto banks). Corrections from the same pass: `0x8A26A` is a
+  two-instruction status-read helper (`return *0xFF1F0010`); the
   common submit chain is `0xBD69E → 0x8A18A → 0x89F6E → 0x89E60`; and completion is
   task-polled (see SECOC-087). Still open: which exact RoutineControl mode number
   selects `0x7C05A`, and what the 4-byte result represents (KAT status vs identity vs

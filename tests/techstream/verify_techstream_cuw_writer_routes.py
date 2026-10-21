@@ -88,8 +88,8 @@ check("controller imports LoadLibraryA", ("KERNEL32.dll", "LoadLibraryA") in imp
 check("controller imports GetProcAddress", ("KERNEL32.dll", "GetProcAddress") in imports)
 
 # Pin the exact controller references that connect INI field names to the two
-# dynamic factory entry points.  RVAs below are operand or instruction starts
-# in the pinned PE, not inferred strings found elsewhere in the image.
+# dynamic factory entry points. RVAs below identify operand or instruction
+# starts directly in the pinned PE.
 prepare_key_va = (0x10000000 + 0x116D8).to_bytes(4, "little")
 flash_key_va = (0x10000000 + 0x116F8).to_bytes(4, "little")
 for rva in (0x7178, 0x98D9):

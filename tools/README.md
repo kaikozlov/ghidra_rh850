@@ -1,6 +1,6 @@
 # Tool layout
 
-`tools/` is a **command surface**, not a dumping ground for every analysis script.
+`tools/` is a **command surface** for the small set of maintained analysis commands.
 The files directly in this directory are the small set of commands worth remembering:
 
 - `g`, `gtarget`, `pe`, `pseudo` — Ghidra/project access.
@@ -13,7 +13,7 @@ The files directly in this directory are the small set of commands worth remembe
 - `rh850` — target toolchain and instruction-simulation commands.
 
 `uv sync --locked` installs the checkout as an editable Python package. Packaged
-commands use `tools.*` imports and `tools.REPO_ROOT`, not `sys.path` bootstraps.
+commands use `tools.*` imports and `tools.REPO_ROOT`.
 Ghidra's pre-environment bootstrap helpers remain stdlib-only.
 For direct invocation, use module syntax, for example
 `uv run --locked python -m tools.project.analysis_target --list`.

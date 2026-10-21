@@ -170,7 +170,7 @@
       "wall_clock_duration_known": true
     },
     "controller_error_clamp": {
-      "classification": "controller error saturation, not promoted to a Panda rejection threshold",
+      "classification": "controller error saturation only; Panda rejection policy remains separate",
       "internal_abs_limit": 18000
     },
     "inactive_label": "No Request (Manual Operation)",
@@ -182,7 +182,7 @@
         "0x000CADE4",
         "0x000CAE18"
       ],
-      "internal_response_output": "0xCB59A -> FEBEC26B; persistent FEBEAE16 internal-command magnitude monitor, not measured motor Q-current and not directly available as a CAN measurement",
+      "internal_response_output": "0xCB59A -> FEBEC26B; monitors persistent FEBEAE16 internal-command magnitude. Measured motor Q-current is separate; FEBEAE16 is unavailable as a direct CAN measurement",
       "panda_mapping": "Mirror the observable target/rate and 0x030 fault/validity gates now. Do not reinterpret FEBEAE16 thresholds as Q-current response limits; any Panda actuator-response policy must be validated separately from the OEM internal-command monitors.",
       "target_plausibility_output": "0xCB4F4 -> FEBEC269; target magnitude/delta violation or internal C268/C263 state can assert it"
     },
@@ -206,7 +206,7 @@
       "panda_candidate_action": "cut active command immediately when abs(raw signal186) > 100; do not wait for the EPS persistent debounce",
       "persistent_eps_debounce_cycles_high_bank": 63,
       "persistent_eps_debounce_cycles_low_bank": 79,
-      "physical_unit_boundary": "Firmware proves the signed12 rate field and raw threshold 100. The current Toyota DBC uses 1 deg/s/count, but the historical DBC comment called the factor TBD; treat 100 deg/s as a prior-art physical interpretation, not a firmware-native unit proof.",
+      "physical_unit_boundary": "Firmware proves the signed12 rate field and raw threshold 100. The current Toyota DBC uses 1 deg/s/count, but the historical DBC comment called the factor TBD; 100 deg/s remains only a prior-art physical interpretation. Firmware-native units remain unproved.",
       "source_can_id": "0x025",
       "source_signal": 186,
       "wire": "signed12 B4-area field (existing TSS3 DBC STEER_RATE)"
@@ -236,7 +236,7 @@
         "unique_count": 536
       },
       "override_abs_threshold_nm": null,
-      "override_boundary": "The firmware's ~8.238 N.m acquisition clamp and \u00b110 N.m telemetry saturation are representation limits, not driver-override thresholds. The promoted exact-H census finds no physical-driver-torque comparator in the target-to-motor control cone, so this threshold is a Panda/openpilot policy to choose conservatively and validate dynamically.",
+      "override_boundary": "The firmware's ~8.238 N.m acquisition clamp and \u00b110 N.m telemetry saturation bound representation only. The promoted exact-H census finds no physical-driver-torque comparator in the target-to-motor control cone, so the driver-override threshold is a Panda/openpilot policy to choose conservatively and validate dynamically.",
       "override_policy_source": "Panda/openpilot driver-override policy requiring dynamic validation; not an unrecovered Toyota EPS cooperative-control comparator",
       "parameter_name": "driver_override_abs_nm",
       "physical_relation": "torque_Nm = signed(signal10)*0.1 + signed4(signal31)*0.01",
@@ -271,7 +271,7 @@
     "controller_error_clamp_internal": 18000,
     "driver_torque_acquisition_and_telemetry_clamps": {
       "acquisition_clamp_abs_nm": 8.23828125,
-      "reason": "representation limits, not OEM driver-override thresholds",
+      "reason": "representation limits only; OEM driver-override thresholds remain unrecovered",
       "telemetry_saturation_abs_nm": 10.0
     },
     "legacy_toyota_lta_limits": "use only as prior art; do not transplant pre-TSS3 max angle/rate, speed-angle curves, torque, or current thresholds",
@@ -297,7 +297,7 @@
     },
     "full_receiver_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_full_receiver_contract.json",
-      "sha256": "9430cb577237ee1413700115b47793133dfdd91616c010b5c9f99db58df12af0"
+      "sha256": "b6ffd19d038fc68cd368b4f708d1d244cf577510b2a410f4cfc6e3e3dba1b3b6"
     },
     "h_codeflash": {
       "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
@@ -305,11 +305,11 @@
     },
     "receiver_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
-      "sha256": "5019f19340320b1764af66fa348f9e8ffb5ec6e9c6bff1143ed03d76d8d37dc8"
+      "sha256": "799ff4b0beedad9a25723ac75b7b5911fc5fd88a07b52947b2d5991ff39042d3"
     },
     "state_bridge": {
       "path": "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
-      "sha256": "0c6d6efef3f84881248de6f6844ed47b668e06df2af8ab9d3b2f9694cd72dfd6"
+      "sha256": "db457921a1de95088d45d3799426bc1d3a9f473dc459c23f12549902cdae5b87"
     },
     "steering_limits": {
       "path": "data/generated/corolla_hf_steering_limits.json",
@@ -317,7 +317,7 @@
     },
     "target_angle_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
-      "sha256": "270e2902022b539a5845d74c6ebfa988b96c3e8d164a4a35b434bf6293aebd8f"
+      "sha256": "aafd2cdcec032bc2c7b3789c642ee97cd70fa9f0029ace524581d4290e94d761"
     }
   },
   "static_conclusion": {
@@ -373,7 +373,7 @@
     },
     "can_id": "0x0B6",
     "dlc": 32,
-    "secoc_boundary": "Signal261 is application sequence state, not SecOC message8. SecOC authentication/freshness is a sender/transport prerequisite; this Panda contract does not claim to verify ICU-S slot4 or reconstruct CMAC itself.",
+    "secoc_boundary": "Signal261 carries application sequence state. SecOC message8 is separate. SecOC authentication/freshness is a sender/transport prerequisite; this Panda contract does not claim to verify ICU-S slot4 or reconstruct CMAC itself.",
     "secoc_trailer": "B28..B31",
     "secured": true,
     "target_angle": {

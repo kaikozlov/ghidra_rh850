@@ -2,7 +2,7 @@
 //@category Verification
 // Read-only evidence boundary for a pointer-shaped cluster whose 60 targets are
 // now exact functions but still have no executable walker or computed-call
-// consumer. Function-start patterns prove boundaries, not dispatch.
+// consumer. Function-start patterns establish boundaries only.
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.listing.Function;

@@ -385,7 +385,7 @@ def vds_setting_table_evidence(root: Path) -> dict:
         "boundary": (
             "VDS proves ECUNo/category 498 is configured for these VIN descriptor patterns "
             "in the Techstream Setting_Table; ECUNo 499 has zero Setting_Table rows in all "
-            "three regions, which is VDS Setting_Table absence, not vehicle absence. The 5YF "
+            "three regions. This establishes VDS Setting_Table absence only; vehicle presence remains unresolved. The 5YF "
             "entries are exact NA descriptor families; no repository-verified Toyota source "
             "joins them to a model name, so they are not labeled by model from VDS alone."
         ),
@@ -802,10 +802,10 @@ def abs_p5_active_test_surface(parser: DDBParser, root: Path) -> dict:
     """Bound the category-435 Techstream Active-Test surface.
 
     Type-68 direct Active-Test names/keys and type-71 routine rows are recovered
-    from consumer-proven KgpDataCtrl fields.  This is a catalog-level negative:
-    it proves the pinned ABS_P5 database exposes brake-actuator tests, not a
-    named steering/EPS/ADS/lateral Active Test.  It does not prove those tests
-    have no indirect network effects.
+    from consumer-proven KgpDataCtrl fields. This catalog-level negative
+    establishes that the pinned ABS_P5 database exposes brake-actuator tests
+    and lacks a named steering/EPS/ADS/lateral Active Test. Those tests'
+    indirect network effects remain unresolved.
     """
     expected_direct = [
         (11, "Motor Relay", 30),
@@ -957,9 +957,9 @@ def abs_p5_active_test_surface(parser: DDBParser, root: Path) -> dict:
             "command/mask/button payloads."
         ),
         "boundary": (
-            "This is a catalog/host-schema negative, not proof that brake actuator tests have no "
-            "indirect network effects. It rules out a named Techstream category-435 steering/ADS "
-            "Active-Test writer in the pinned corpus; it does not resolve the normal B6 producer path."
+            "This negative result covers the catalog/host schema only. Brake actuator tests' "
+            "indirect network effects remain unresolved. It rules out a named Techstream category-435 steering/ADS "
+            "Active-Test writer in the pinned corpus; the normal B6 producer path remains unresolved."
         ),
     }
 
@@ -1595,7 +1595,7 @@ def tss3_operation_protocol(root: Path) -> dict:
             "read-only proprietary Operation FFD observation; the AB/EB FFD protocol "
             "itself is read-only capture infrastructure. Category 498 separately exposes "
             "an Active-Test surface (roles 6/8/99/112/173); its steering-relevant branch is "
-            "recovered separately in this artifact as fixed routine control, not a live setpoint writer."
+            "recovered separately in this artifact as fixed routine control only. A live setpoint writer remains unrecovered."
         ),
         "transport": (
             "CCommCachePlus::CommFrameSendReceiveExt; comm-frame info selector 0x66 via "
@@ -1693,7 +1693,7 @@ def tss3_image_fixed_reads() -> list[dict]:
                 "expected_sid_0x62": (0x100012C8, "c6 84 24 80 00 00 00 62"),
                 "expected_low_0x04": (0x100012D0, "c6 84 24 98 00 00 00 04"),
             },
-            "note": "+0x50 write is the fixed request low byte (local_58=4), not a length field",
+            "note": "+0x50 write is the fixed request low byte (local_58=4)",
         },
         {
             "request": "22 11 07",
@@ -1741,7 +1741,7 @@ def tss3_image_protocol(root: Path) -> dict:
     #   0a 11 0d 11 10 11 13 11 16 11 19 11 1c 11 1f 11 22 11 25 11 28 11 00 00
     # <12H> unpacks to [0x110A, 0x110D, 0x1110, 0x1113, 0x1116, 0x1119,
     #                    0x111C, 0x111F, 0x1122, 0x1125, 0x1128, 0x0000];
-    # the 12th entry is the 0x0000 terminator, not 0x1100.
+    # the 12th entry is the 0x0000 terminator.
     if did_table != bytes.fromhex("0a110d1110111311161119111c111f112211251128110000"):
         raise ValueError(f"spec DID table mismatch: {did_table.hex()}")
     read_dids = list(struct.unpack("<12H", did_table))
@@ -1812,7 +1812,7 @@ def tss3_image_protocol(root: Path) -> dict:
             "selectors": [f"0x{s:02X}" for s in spec5_selectors],
             "spec7_extension": {
                 "did": "0x1128",
-                "note": "present in the 12-entry table; its 11th selector (0x03) is bounded, not independently resolved",
+                "note": "present in the 12-entry table; its 11th selector (0x03) remains bounded without independent resolution",
             },
         },
         "proprietary_enumeration": {
@@ -2491,8 +2491,8 @@ def frc_routine_active_test_surface(parser: DDBParser, root: Path) -> dict:
             "LCA Steering Vibration": "21 E2 15 C8",
             "note": (
                 "The same four request bytes are used by D5/D7/D6 for these vibration rows because "
-                "their routine-command variable is zero; the selectors differ in receive-mask semantics, "
-                "not in the resolved 21 E2 send prefix."
+                "their routine-command variable is zero; the selectors use different receive-mask semantics "
+                "with the same resolved 21 E2 send prefix."
             ),
         },
         "conclusion": (
@@ -2601,8 +2601,8 @@ def build(root: Path) -> dict:
             "ddr_behavior_data_rows": ads_ddr_rows(parser, root),
             "protocol": ads_ddr_protocol(root),
             "boundary": (
-                "ADS_Eth_P5 rows 406/407 are Operation-FFD/DDR recorded snapshot fields, "
-                "not proven live wire command fields"
+                "ADS_Eth_P5 rows 406/407 are Operation-FFD/DDR recorded snapshot fields only. "
+                "Live wire command fields remain unproved"
             ),
         },
         "lane_departure_alert": {
@@ -2653,7 +2653,7 @@ def build(root: Path) -> dict:
                 "that FRC_P5 equals the old Fr_Camera_P5 (430) or ADS_Eth_P5 (476) software domain",
                 "that the Corolla-family 498+405 install sets imply EMPS2_P5 (499) vehicles use the same lateral contract",
                 "the downstream in-vehicle FRC output caused by fixed routine-active-test IDs 0x1508/0x1588/0x15C8",
-                "a unique 5YF-descriptor-to-VehicleId mapping (the per-pattern join is bounded, not unique)",
+                "a unique 5YF-descriptor-to-VehicleId mapping (the per-pattern join remains bounded with unresolved uniqueness)",
             ],
             "next_static_target": (
                 "Decoded FRC_P5 plus category-435 ABS/Brake firmware acquisition (or a synchronized "

@@ -50,7 +50,7 @@
         "0700",
         "FF0CEF56"
       ],
-      "important_boundary": "PasswordAddress indexes Techstream's decoded ZV/LZF archive buffer, not the LZF-expanded 2-MiB logical image",
+      "important_boundary": "PasswordAddress indexes Techstream's decoded ZV/LZF archive buffer. The LZF-expanded 2-MiB logical image uses a separate coordinate space",
       "password_hex": "56EF0CFF",
       "raw_bytes_hex": "FF0CEF56",
       "role": "new-image software password via CalibrationFile::GetNewPassword fallback when no descriptor override is present",
@@ -236,7 +236,7 @@
       "OffsetAddress",
       "SecurityProperty2"
     ],
-    "selected_route": "legacy integrated CCanFlashWriter / CCanVFORESTFlashWriter, not modern dynamic Unified prepare+flash"
+    "selected_route": "legacy integrated CCanFlashWriter / CCanVFORESTFlashWriter"
   },
   "outer_container": {
     "computed_crc32": "2615F236",

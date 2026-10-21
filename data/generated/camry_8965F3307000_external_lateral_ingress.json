@@ -1,6 +1,6 @@
 {
   "b6_receiver_source_expectation": {
-    "classification": "exact F33 receiver expects B6/PDU44 as Brake System Control Module traffic; CAN itself carries no source-node address, so this identifies the monitored immediate source-domain relationship rather than a unique transmitter implementation",
+    "classification": "exact F33 receiver expects B6/PDU44 as Brake System Control Module traffic; CAN itself carries no source-node address, so this identifies only the monitored immediate source-domain relationship; the unique transmitter implementation remains unresolved",
     "communication_monitor": {
       "can_id": "0x0B6",
       "dem_event": "0x0143",
@@ -43,7 +43,7 @@
     "The two drives do not machine-prove an exact factory-LTA-active interval.",
     "This census closes generated scalar COM plus the generic group-receive surface represented by exact F33 configuration; it does not prove the absence of DMA/peripheral mutation, diagnostics, computed aliases outside the recovered maps, or another internal controller path.",
     "Bus1 0x180..0x18C traffic is upstream candidate traffic only: those arbitration IDs are not in the exact F33 normal Rx descriptor table and cannot directly be the EPS normal-CAN command.",
-    "GTS+ supplies diagnostic names/DIDs, not a CAN-ID database; CAN-to-name joins are through exact F33 firmware dataflow."
+    "GTS+ supplies diagnostic names/DIDs only; CAN-ID assignments and CAN-to-name joins require exact F33 firmware dataflow."
   ],
   "conclusion": {
     "b6": "Protected 0x0B6 remains the only positively recovered external target-steering-angle ingress. Exact F33 communication-monitor row5 independently maps PDU44/B6 loss to DTC index82, which GTS+ names U012987 Lost Communication with Brake System Control Module / Missing Message, so the EPS expects the final steering-target PDU from the brake-system source domain. Later Sep-8/Sep-10 internal captures supersede the old Panda-visible zero-B6 inference: native B6/profile2 deliveries exist at F33 even when older external rlogs saw no B6. Toyota's vehicle-movement architecture independently places post-arbitration steering request generation in the Brake-hosted vehicle-movement-manager domain, strongly explaining this source relationship without locating the exact Camry physical hop.",
@@ -1245,7 +1245,7 @@
   "sources": {
     "b6_static": {
       "path": "data/generated/camry_8965F3307000_codeflash.json",
-      "sha256": "881cd7d44c4b1d8067020eac2ce640df1477900783a7bd8a0721f023d7f0f337"
+      "sha256": "2825a8389228545a53f4eb712a1da524898f479baaf8002bbe615b13e6a88dbb"
     },
     "drive_artifacts": [
       {
@@ -1261,11 +1261,11 @@
     ],
     "fault_status": {
       "path": "data/generated/camry_8965F3307000_fault_status.json",
-      "sha256": "cede9a3f534c511692e1052d2e25f4e13a189715bca9e32e03ca5becc68f9bf7"
+      "sha256": "094528d229d68fbe11c66b113cc0ca5838c1cf1106cc84f05e4b6986dae754a4"
     },
     "gtsplus_semantics": {
       "path": "data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json",
-      "sha256": "ecaf10a9fda9ea7be54bb08bb11f9bb37fafbf6264a3ef653c8fdc62e79e73e1"
+      "sha256": "38fd6877c441b8699fabe64baf40af8112855fd479d4723f4b70fb8ab2c59891"
     }
   },
   "special_paths": {

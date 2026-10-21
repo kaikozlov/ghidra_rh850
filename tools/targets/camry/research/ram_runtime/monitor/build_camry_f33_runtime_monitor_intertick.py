@@ -29,7 +29,7 @@ def verify_contract(image: bytes, source: str) -> None:
     raise RuntimeError("exact-F33 aggregate call chain drift")
   # Generic queue insertion copies PduInfo bytes first (8EA12 -> 89F2E), then
   # publishes the record length at 8EA24. A visible profile-2 length 32 thus
-  # post-dates the secured-buffer copy rather than racing ahead of it.
+  # follows completion of the secured-buffer copy.
   if image[0x8EA12:0x8EA16] != bytes.fromhex("bfff1cb5") or image[0x8EA24:0x8EA26] != bytes.fromhex("800c"):
     raise RuntimeError("exact-F33 queue copy-before-length-publication order drift")
   for token in ("inter-tick B6 ingress monitor", "ld.hu -0x6386[gp]", "addi -0x20, r6, r8", "addi -0x20, r7, r8", "ld.bu -0x6329[gp]", "andi 0x3f, r6, r6", "addi -0x3f, r6, r8", "tst1 4, -0x4eef[r0]", "jarl32 fg_aggregate, lp"):

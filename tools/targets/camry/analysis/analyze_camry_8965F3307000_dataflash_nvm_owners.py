@@ -3,8 +3,8 @@
 
 The descriptor accessors at 74884/74892/748A2 and allocation helper 748B0
 establish the six-byte table at 27634. The bound read by 77982 is at 27928.
-Handle zero has page FFFF; the remaining descriptors include multi-page
-allocations, not just the first 48 single-page records.
+Handle zero has page FFFF; the remaining descriptors cover both multi-page
+allocations and the first 48 single-page records.
 
 The 77B12 read path checks the commit marker and handle before comparing an
 additive checksum through 77356/7771A/777CA. These byte-level checks do not

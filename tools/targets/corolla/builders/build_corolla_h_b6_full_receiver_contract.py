@@ -306,7 +306,7 @@ def main() -> int:
             "upper_callback_role": "COM RxIndication for PDU42",
             "length_boundary": (
                 "The recovered queue/delivery path preserves a PduInfo length and PDU42's COM descriptor is 32 bytes. "
-                "Static evidence does not prove that B28..B31 are physically stripped before COM RAM; the application-consumer census, not a stripping assumption, is the basis for classifying them as SecOC-only."
+                "Static evidence leaves physical stripping of B28..B31 before COM RAM unresolved; the application-consumer census establishes their SecOC-only classification."
             ),
         },
         "application_consumption": {
@@ -331,7 +331,7 @@ def main() -> int:
                 "Recovered EPS application semantics are confined to selected bits in B3..B10. B0..B2 and B11..B27 are authenticated but have no recovered application consumer under the bounded generic-access census."
             ),
             "sender_boundary": (
-                "No recovered EPS application semantic consumer means these bytes impose no recovered receiver-application meaning, not that a sender may choose them freely: all B0..B27 are inside the CMAC input, and upstream producer-side formatting constraints remain unexamined."
+                "These bytes have no recovered EPS application semantic consumer. Sender formatting remains constrained: all B0..B27 are inside the CMAC input, and upstream producer-side formatting constraints remain unexamined."
             ),
         },
         "cross_variant": {

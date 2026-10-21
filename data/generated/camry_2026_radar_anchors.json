@@ -1,7 +1,7 @@
 {
   "boundaries": [
     "range and range-rate agreement alone cannot determine their common scale",
-    "stationary-object membership is inferred from continuity and velocity, not an OEM validity bit",
+    "stationary-object membership is inferred only from continuity and velocity; the OEM validity bit remains unresolved",
     "OEM object validity, confidence, and silent slot reassignment remain unresolved; no production radar-enable decision follows automatically",
     "cached lagd outputs are not independent fresh identifications"
   ],

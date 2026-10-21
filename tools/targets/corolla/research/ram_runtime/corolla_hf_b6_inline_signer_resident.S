@@ -76,7 +76,7 @@ _foreground_entry:
     jarl32 fg_pre_1, lp
     jarl32 fg_pre_2, lp
     jarl32 fg_pre_3, lp
-    /* In-resident target: use four-byte JARL22, not forced six-byte JARL32. */
+    /* In-resident target: use four-byte JARL22. */
     jarl signed_aggregate, lp
     jarl32 fg_post_0, lp
     jarl32 fg_post_1, lp
@@ -94,7 +94,7 @@ _foreground_entry:
 signed_aggregate:
     prepare {lp}, 0
     jarl32 agg_62f44, lp
-    /* In-resident target: use four-byte JARL22, not forced six-byte JARL32. */
+    /* In-resident target: use four-byte JARL22. */
     jarl signed_73564, lp
     jarl32 agg_91bd2, lp
     jarl32 agg_6311e, lp

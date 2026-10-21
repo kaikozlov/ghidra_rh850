@@ -211,8 +211,8 @@ def main() -> int:
 
     # Selector influence is distinguishable from selector-state readout. C9812 indexes an
     # exact calibration table with FEBEC156 and integrates the result into FEBEC5EC; C9A84
-    # consumes C5EC and writes C5EE.  Thus DID 1C3E is a selector-modulated term proxy,
-    # not an enum/state DID. C8678 independently proves C4C0 is selector-indexed too, but
+    # consumes C5EC and writes C5EE. Thus DID 1C3E exposes only a selector-modulated
+    # term proxy. C8678 independently proves C4C0 is selector-indexed too, but
     # no exact RDBI callback exposes C4C0 directly.
     need(data_refs(funcs[0xC9812], 0xFEBEC156, "READ")
          and data_refs(funcs[0xC9812], 0xD39DC)
@@ -273,8 +273,8 @@ def main() -> int:
     # Drive Mode Select Status.  Its enum shape matches the exact F33 0x51E B0[3:0]
     # selector consumer: Normal=0 and Eco=6 select the default/equivalent banks, while
     # Sport=2 (and Sport S+=4) takes the only distinct healthy C28FC/C2B64 bank.
-    # Keep the CAN semantic join recovered rather than "verified" until a retained drive
-    # explicitly toggles 0x51E B0[3:0] alongside the Toyota diagnostic oracle.
+    # Keep the CAN semantic join graded "recovered" until a retained drive explicitly
+    # toggles 0x51E B0[3:0] alongside the Toyota diagnostic oracle to verify it.
     registry = json.loads(GTS_REGISTRY.read_text())
     need(397 in registry["profile"]["catalog_category_ids"], "Camry HV category 397 no longer installed")
     drive_mode_did = registry["catalogs"]["397"]["dids"]["0x1004"][0]
@@ -522,15 +522,15 @@ def main() -> int:
     tokens(funcs, 0x387BA, "DAT_febe6e0a = DAT_febe6af4;")
     tokens(funcs, 0x38502, "DAT_febe6e0a", "DAT_febe6dec")
     # Signed loads and CMOVGE select separate actual and feedback-baseline
-    # minima. Bind their register/store dataflow, not decompiler-local spelling.
+    # minima. Bind directly to their register/store dataflow.
     need(image[0x3835E:0x38392] == bytes.fromhex(
         "3e06f01b03006088240fecb524978ab51106a6ffba05019ce505"
         "249ffab5e199e19f3c9be19124f6c8b5809ce1973c0b810c7f00"
     ), "3835E actual/baseline current selection instruction drift")
     need(image[0x31BF0] != 0x5A, "3835E fixed-current calibration override became active")
     tokens(funcs, 0x384D8, "DAT_febe6e0a", f"{funcs[0x38396]['name']}(")
-    # R18 carries 6DD6 to 6D84; R19 carries actual 6DC8, not baseline
-    # 6DCA, to 6D86. EP-relative destinations are 6D7C+8 and +A.
+    # R18 carries 6DD6 to 6D84; R19 carries actual 6DC8 to 6D86.
+    # Baseline 6DCA stays separate. EP-relative destinations are 6D7C+8 and +A.
     need(image[0x37F16:0x37F26] == bytes.fromhex(
         "2497d6b524f67cb5249fc8b58494859c"
     ), "37F16 actual current diagnostic publication instruction drift")
@@ -572,12 +572,11 @@ def main() -> int:
     need(e22_readers == [0x59448, 0x5CA3A, 0x5D12C] and e24_readers == [0x59448, 0x5CA3A, 0x5D12C],
          f"6E22/24 mirror readers drift: {e22_readers}/{e24_readers}")
     # Term-level semantic closure inside the B6-inactive D0218 / 1C02 observable cone.
-    # These names are structural classes, not Toyota OEM labels.  The important preserved
-    # negative is that no term below is an independently recovered external lane-target
-    # magnitude; their primal values reduce to torque/speed/angle feedback, internal
-    # phase/mode state, and ROM calibration.
+    # These names identify structural classes only. No term below is an independently
+    # recovered external lane-target magnitude; their primal values reduce to
+    # torque/speed/angle feedback, internal phase/mode state, and ROM calibration.
     d0218_terms = [
-        {"cell": "FEBEC43C", "runtime_writer": "0x000C7E36", "classification": "bounded torque and angle-rate composition", "provenance": "C7E36 clamps C472+C45A+C44C against AC6C; these combine conditioned torque and angle-rate feedback rather than a single measured-torque source"},
+        {"cell": "FEBEC43C", "runtime_writer": "0x000C7E36", "classification": "bounded torque and angle-rate composition", "provenance": "C7E36 clamps C472+C45A+C44C against AC6C; these combine conditioned torque and angle-rate feedback from multiple sources"},
         {"cell": "FEBEC4C0", "runtime_writer": "0x000C8678", "classification": "torque-rate and assist-slope/speed compensation", "provenance": "C8678 combines differentiated filtered torque C266 with speed-dependent gains and the C1AA/BF40 assist-curve slope blend; exact ordinary selector maps alias"},
         {"cell": "FEBEC3BA", "runtime_writer": "0x000C74AC", "classification": "bounded differentiated torque-model composition", "provenance": "C74AC clamps ABB0+C3A4 from two separately filtered and differentiated torque-model branches"},
         {"cell": "FEBECC2C", "runtime_writer": "0x000D0162", "classification": "bounded nested assist sum", "provenance": "D0162 sums C3A0+C39C+C41E+C5A8+C53A and amplitude-clamps the result; this summation is not itself a slew limiter"},
@@ -626,8 +625,8 @@ def main() -> int:
                 "no term is an independently recovered external lane-target magnitude; term values reduce to measured steering "
                 "torque, vehicle speed, steering-angle feedback, internal phase/mode state, and ROM calibration. The shared "
                 "downstream physical funnel is separately verified below. This positively explains why factory steering can "
-                "occur with B6 absent; the unresolved question is which exact external/local state selects or modulates this "
-                "internal assist path during LTA/LCA, not how an upstream request is converted into B6."
+                "occur with B6 absent; the unresolved question is specifically which exact external/local state selects or modulates this "
+                "internal assist path during LTA/LCA."
             ),
         },
         "command_value_torque_observable_branch": {
@@ -762,7 +761,7 @@ def main() -> int:
                 "classification": "31 exact C156 readers are censused. Among 26 direct healthy selector-strided calibration regions, selector1/Sport differs from selector0 in five regions; the other direct regions alias. All separately pointer-indexed selector families enumerated here alias across 0..3. OEM names for the four smaller distinct shaping regions remain bounded, but their control paths are live and all four converge into D0162 through C39C, C41E, or C5A8.",
             },
             "normal_eco_boundary": "Eco value6 deterministically selects selector0. Mode value0 with the retained route-wide zero companion fields settles the ordinary Normal path to selector0; selector2 is a separate value0 companion/customization substate and differs from selector0 in three small shaping regions even though the main C28FC/C2B64 driver-torque surface is identical. Do not generalize Normal==Eco to every possible value0 companion/customization state.",
-            "boundary": "The percentages above compare only the exact C2B64/FEBEBF3C base-assist term, not total EPS motor torque. D0218 sums multiple torque/speed/return terms before the shared current-control funnel. They demonstrate why Sport is heavier without quantifying whole-rack assist reduction.",
+            "boundary": "The percentages above compare only the exact C2B64/FEBEBF3C base-assist term. Total EPS motor torque requires additional terms: D0218 sums multiple torque/speed/return terms before the shared current-control funnel. These percentages demonstrate why Sport is heavier without quantifying whole-rack assist reduction.",
         },
         "selector_influence_observability": {
             "FEBEC5EE_via_0x1C3E": (
@@ -784,8 +783,8 @@ def main() -> int:
             },
             "classification": (
                 "Direct selector state remains unexposed by the exact RDBI callback census. 1C3E observes C5EE, "
-                "but exact selector-indexed maps alias, so it is a moving-assist term oracle/control rather than a "
-                "selector-state discriminator. Selector influence that survives calibration aliasing must be sought in "
+                "but exact selector-indexed maps alias, so it supplies only a moving-assist term oracle/control. "
+                "Discriminating selector state requires influence that survives calibration aliasing in "
                 "other internal terms (notably C28FC/C2B64) or blended final command state."
             ),
         },
@@ -794,7 +793,7 @@ def main() -> int:
             "intermediate_clamp": "+/-0x569A",
             "rdbi_post_scale": "*100/0x80",
             "boundary": (
-                "The returned DID value is a scaled/clamped proxy, not the raw D0218 term and not an OEM-named engineering unit."
+                "The returned DID value is a scaled/clamped proxy only; its raw D0218 source term uses different units, and an OEM engineering-unit name remains unresolved."
             ),
         },
         "current_gtsplus_boundary": {

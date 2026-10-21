@@ -82,7 +82,7 @@ def section_application_ram_loader() -> int:
     check("MODIFY_BITS/SHORT_UPLOAD remain configured", x["modify_bits"] == "0x000820C4" and x["short_upload"] == "0x00082B1A" and callbacks[opmap[0xFF-0xEC]] == 0x820C4 and callbacks[opmap[0xFF-0xF4]] == 0x82B1A)
     expected_daq={"0xE3":"0x00082880","0xE2":"0x000824B8","0xE1":"0x00082510","0xE0":"0x00082616","0xDE":"0x000826D6","0xDD":"0x000827B4","0xDA":"0x0008295C","0xD9":"0x0008299A","0xD8":"0x00082910","0xD7":"0x000829CE"}
     check("full configured XCP DAQ bank is exact", x["configured_daq_commands"] == expected_daq and all(callbacks[opmap[0xFF-int(cmd,16)]] == int(target,16) for cmd,target in expected_daq.items()))
-    check("XCP DAQ is measurement-only, not a PC/write pivot", x["daq_boundary"]["write_daq"] == "0x00082510" and x["daq_boundary"]["odt_reader"] == "0x00082368" and x["daq_boundary"]["odt_state_inside_xcp_write_window"] is False)
+    check("XCP DAQ supports measurement only", x["daq_boundary"]["write_daq"] == "0x00082510" and x["daq_boundary"]["odt_reader"] == "0x00082368" and x["daq_boundary"]["odt_state_inside_xcp_write_window"] is False)
     for cmd in (0xF9,0xF5,0xF3,0xF2,0xF1,0xEF,0xEE,0xED,0xDC,0xDB):
         check(f"standard XCP command 0x{cmd:02X} remains unmapped", opmap[0xFF-cmd] == 0)
     check("software write window exactly covers high tail", x["software_write_window"] == ["0xFEBF7C00", "0xFEBFFBFF"] and struct.unpack_from("<II", img, 0x2B21C) == (0xFEBF7C00, 0xFEBFFBFF) and x["high_tail_fully_inside_write_window"])
@@ -131,7 +131,7 @@ def section_application_ram_loader() -> int:
     check("SID AB has three fixed selector callbacks", raw_ab == [(1,0x9874A,0x259A4),(2,0x9876C,0x259A6),(3,0x9878E,0x259A8)] and [(r["selector"],r["callback"],r["policy"]) for r in ab["selectors"]] == [("0x01","0x0009874A","0x000259A4"),("0x02","0x0009876C","0x000259A6"),("0x03","0x0009878E","0x000259A8")])
     ab_events=[(struct.unpack_from("<I",img,0x2AB70+i*8)[0],img[0x2AB70+i*8+4],img[0x2AB70+i*8+5]) for i in range(64)]
     pop=[(i,row) for i,row in enumerate(ab_events) if row[0]]
-    check("SID AB event catalogue is IDs/types, not an address table", len(pop) == 51 and [i for i,_ in pop] == list(range(1,52)) and {row[1] for _,row in pop} == {0x11,0x22,0x33,0x44,0x55})
+    check("SID AB event catalogue contains IDs and types", len(pop) == 51 and [i for i,_ in pop] == list(range(1,52)) and {row[1] for _,row in pop} == {0x11,0x22,0x33,0x44,0x55})
     ba=dp["sid_ba"]
     raw_ba=[]
     for i in range(struct.unpack_from("<I",img,0x27EC0)[0]):

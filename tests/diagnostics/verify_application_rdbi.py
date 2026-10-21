@@ -238,7 +238,7 @@ check("declared lengths are 1..45 (max 45)",
 check("artifact census agrees with the table",
       audit["did_table"]["unique_producers"] == 196 and audit["summary"]["classified"] == 196)
 
-print("== count convention: configuration-owned, not producer-returned ==")
+print("== configuration-owned count convention ==")
 conv = audit["convention"]["pinned_bodies"]
 for name, (addr, size) in {
     "0x0008a374": (0x8A374, 270), "0x0008a31e": (0x8A31E, 12),

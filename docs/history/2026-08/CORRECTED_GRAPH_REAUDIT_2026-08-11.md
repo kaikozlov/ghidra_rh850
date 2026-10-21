@@ -1,5 +1,5 @@
-> **Historical snapshot.** This is a point-in-time investigation journal, not
-> current project state. Use [the current overview](../../OVERVIEW.md),
+> **Historical snapshot.** This journal records a point-in-time investigation.
+> For current project state, use [the current overview](../../OVERVIEW.md),
 > [priorities](../../status/PRIORITIES.md), and
 > [findings ledger](../../status/FINDINGS.md) for present conclusions.
 
@@ -67,7 +67,7 @@ the following boundaries:
 | `0xBE8E6` | caller `0xFDC8C` | bounded RAM snapshot/copy interpretation retained |
 | `0x916E2`, `0x8FFCC` | `0x8FFCC` calls `0x916E2`; `0x916E2` has 34 callees; `0x8FFCC` is called by `0x8F4C4` and `0x8F656` | multi-state dispatcher boundary retained; service semantics unnamed |
 | `0x9729A..0x976F4` | zero direct callers; exact data references from dispatch table `0x2B3F0` | seven computed-call XCP-shaped handlers retained |
-| `0x74BC4..0x74E64` | pointer-shaped targets only; no evidenced executable consumer | remain `unresolved-reviewed`, not functions |
+| `0x74BC4..0x74E64` | pointer-shaped targets only; no evidenced executable consumer | remain `unresolved-reviewed`; function status is unproved |
 
 The XCP family's zero direct-caller count is expected: `0x97160` selects the
 seven handlers from `0x2B3F0` and invokes them through computed `jarl`. Direct
@@ -75,8 +75,8 @@ caller count therefore cannot be used as an activation oracle for this family.
 
 ## Claim-family regression matrix
 
-The affected whole-image conclusions were rerun with claim-specific tests, not
-mere function-presence checks:
+The affected whole-image conclusions were rerun with tests of each claim's
+specific behavior:
 
 | Review class | Deterministic gate(s) | Assertions |
 |---|---|---:|
@@ -123,9 +123,9 @@ Every selected function has a curated disposition:
 | `reviewed_unknown` | 88 | decompiled successfully; no independent semantic conclusion |
 
 The 88 `reviewed_unknown` rows deliberately carry no evidence grade. Their
-`generated_self_check` oracle proves reproducible selection and decompilation,
-not semantic understanding. Whole-ledger totals are 110 reviewed functions,
-22 with bounded or identified semantics, and 5,927 unreviewed functions.
+`generated_self_check` oracle proves only reproducible selection and decompilation.
+Semantic understanding requires independent review. Whole-ledger totals are
+110 reviewed functions, 22 with bounded or identified semantics, and 5,927 unreviewed functions.
 
 ## Result
 

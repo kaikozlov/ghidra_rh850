@@ -1144,8 +1144,8 @@ def verify_native_profile(session: ProbeSession, *, label: str, data_id: bytes,
                 data_id, frame[:28], trip_counter, reset_counter, message_counter,
             )
             # The resident parses controls only in its bounded tick-224..255
-            # gate. Wait for each real sequence acknowledgement rather than
-            # assuming a burst happens to overlap that periodic window.
+            # gate. Wait for each real sequence acknowledgement to confirm
+            # acceptance within that periodic window.
             generation = session.generate(domain, expected_data_id=data_id)
             attempt = {
                 "trip_counter": trip_counter,

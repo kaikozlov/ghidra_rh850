@@ -1,5 +1,5 @@
 //@category Verification
-// Real LDSR/STSR/HVTRAP/EIRET/FERET paths, not simulated helper callbacks.
+// Exercise instruction paths through LDSR/STSR/HVTRAP/EIRET/FERET.
 // Authorities: R01US0432EJ0110 pp.13-25; R01UH0865EJ0140 Tables
 // 2.2/2.3/3.12/3.21-3.25/3.50, Sections 3.9 and 4.3;
 // R01UH0864EJ0150 Tables 3.30/3.72 for SVLOCK and invalid MPBK writes.
@@ -46,7 +46,7 @@ public class AssertV850Virtualization extends GhidraScript {
     }
     private EmulatorHelper host(ProgramDB p, boolean capable) {
         EmulatorHelper emu = new EmulatorHelper(p);
-        // Hardware identity/configuration inputs, not software-writable defaults.
+        // Supply hardware-controlled identity/configuration inputs.
         emu.writeRegister("PID", capable ? 0x00800000L : 0);
         emu.writeRegister("SPIDLIST", 0xffffffffL);
         emu.writeRegister("RBASE", 0x1000);
@@ -66,7 +66,7 @@ public class AssertV850Virtualization extends GhidraScript {
         write(emu, 0x301c, 0x8000);     // GMEBASE
         write(emu, 0x3020, 3);          // GMSPID
         write(emu, 0x3058, 17);         // virtual PEID, host PEID is read-only
-        write(emu, 0x3060, 0x01234567); // host notification, not banked
+        write(emu, 0x3060, 0x01234567); // unbanked host notification
         write(emu, 0x3008, 0x80000300L);// EIPSWH.GM + GPID 3
     }
     @Override protected void run() throws Exception {

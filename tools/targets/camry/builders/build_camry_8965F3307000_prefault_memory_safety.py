@@ -188,7 +188,7 @@ def build() -> dict:
 
     # Exact transport configuration records selected by 0x7A5C2/0x7A620.
     # The strided 0x7B18A/0x7BB0E writers use record[1] as their state-slot
-    # index; it is therefore configuration-derived, not a payload byte.
+    # index; it therefore comes exclusively from configuration.
     transport_desc_base = u32(image, 0x22C70)
     transport_desc_count = image[0x22C7C]
     need(transport_desc_base == 0x22C4C and transport_desc_count == 3, "transport descriptor root drift")
@@ -214,8 +214,8 @@ def build() -> dict:
     route_state_indices = [u16(image, route_cfg_base + i * 10 + 8) for i in range(route_count)]
     need(route_state_indices == [0,1,2,3,4], f"route state-index domain drift: {route_state_indices}")
 
-    # Queue geometry. 0x80A4A treats this as a word count, not bytes.  The
-    # backing pointer is fixed per controller; exact F33 configures one.
+    # Queue geometry. 0x80A4A measures capacity in words.
+    # The backing pointer is fixed per controller; exact F33 configures one.
     queue_capacity_words = u16(image, 0x21966)
     queue_base = u32(image, 0x21904)
     need(image[0x21970] == 1, "configured controller count drift")
@@ -321,7 +321,7 @@ def build() -> dict:
             "reachable_records": [{"descriptor":r["descriptor"],"role":r["role"],"address":f"0x{int(r['address']):08X}","state_index":r["state_index"]} for r in transport_records],
             "state_indices": transport_state_indices,
             "state_slot_count": image[0x22C48],
-            "classification": "0x7B18A/0x7BB0E state-slot index comes from fixed transport record[1], not CAN payload",
+            "classification": "0x7B18A/0x7BB0E state-slot index comes exclusively from fixed transport record[1]",
         },
         "route_manager_provenance": {
             "route_count": route_count,
@@ -340,7 +340,7 @@ def build() -> dict:
             "critical_cells": [f"0x{x:08X}" for x in CRITICAL_CELLS],
             "whole_image_critical_candidate_rows":len(critical_rows),
             "prefault_critical_intersection_functions":["0x0008E7BA"],
-            "intersection_closure":"0x8E7BA enforces index < 0x60 and writes FEBE5398..FEBE53F7, not a recovery cell",
+            "intersection_closure":"0x8E7BA enforces index < 0x60 and writes only FEBE5398..FEBE53F7; recovery cells remain outside that range",
             "stack_ranges":stack_intersections,
             "rscfd_pointer_row":[f"0x{x:08X}" for x in rscfd_ptrs],
             "route_slot_writer_range":{"base":f"0x{route_slot_base:08X}","max_if_slot_is_full_u8":f"0x{route_slot_max:08X}"},

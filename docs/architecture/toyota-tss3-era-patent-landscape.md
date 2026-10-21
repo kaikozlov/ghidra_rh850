@@ -23,8 +23,8 @@ wire encoding, or uses the example numeric values shown in a figure.
 
 Accordingly:
 
-- a semantic match to exact GTS terminology is a strong search oracle, not an
-  automatic CAN-field rename;
+- a semantic match to exact GTS terminology is a strong search oracle.
+  A CAN-field rename requires an exact join;
 - a later patent can explain Toyota architecture vocabulary without proving
   that an earlier TSS3 calibration implements the later mechanism;
 - example priorities, bit widths, enum values, and state codes remain examples
@@ -39,11 +39,11 @@ Accordingly:
 | **US20230082947A1**, Motion manager, vehicle, vehicle control method... | 2021-09-15 | Toyota | Actuator systems report reliability to the motion manager; steering state includes reliability, driver grip, steering torque and steering-wheel angle. The manager generates named fail classes, including **lateral control system fail class**, with semantic states normal / protective-control / abnormal-but-not-confirmed-and-invalid / confirmed failure. Additional failure information can describe influenced vehicle-speed range, malfunctioning portion, and operation mode; a malfunctioning portion can be inter-actuator communication. | Exceptional semantic hit for GTS recorder **5283_1 Lateral control system fail class status** and the current X2400 investigation. Gives companion vocabulary to search in GTS and a state model to test dynamically without assuming numeric encodings. |
 | **US20220219711A1 / US12071145B2**, Control device for vehicle, manager... | 2021-01-14 | Toyota + ADVICS | ADAS applications send **application IDs** with kinematic requests; priority is stored by application ID and may change with vehicle, driver, or availability state. Explicit examples include PCS, ACC, LKA/LTA, AEB, LDA and steering guidance. EPS is an example actuator for a steered-angle request. | Strong follow-on support that Toyota TSS request/result IDs are IDs of software applications/clients rather than CAN identifiers. Useful for interpreting 5280/5281/5282 and 5284/5285. |
 | **US20200070873A1 / US11643089B2**, Vehicle control system | 2018-08-29; pub. 2020 | Toyota | Applications put request values plus payload-level application IDs directly on the network; the patent explicitly distinguishes those IDs from `CAN_ID`. The manager selects an application ID, while the actuator waits for the selection and then consumes the **newest matching request received after that selection event**. The arbitration sample and the actuated sample may therefore be different. Claim 4 explicitly covers EPS/lateral motion. | Critical alternative physical realization: arbitration can be a selected-source plane separate from the request-value data plane. Exact F33 does **not** instantiate the claimed direct-request EPS boundary on its recovered external CAN surface because it receives neither `0x08A` nor `0x081`; B6 remains its recovered target-bearing ingress. See the dedicated close read. |
-| **US20200070802A1 / US11161496B2 / US12005882B2**, Control device | 2018-08-30; pub. 2020 | Toyota | Brake control ECU contains request arbitration, command distribution, feedback control, and optionally vehicle-motion control. It feeds measured **control record values** and summarized actuator operation/soundness information back to requesting applications; direct wheel-speed inputs and preferential stability control are explicit. | Reinforces Brake/VMM ownership and gives a reason for the rich result/status plane: applications need realized motion plus actuator soundness, not only the selected request. |
+| **US20200070802A1 / US11161496B2 / US12005882B2**, Control device | 2018-08-30; pub. 2020 | Toyota | Brake control ECU contains request arbitration, command distribution, feedback control, and optionally vehicle-motion control. It feeds measured **control record values** and summarized actuator operation/soundness information back to requesting applications; direct wheel-speed inputs and preferential stability control are explicit. | Reinforces Brake/VMM ownership and gives a reason for the rich result/status plane: applications need the selected request, realized motion, and actuator soundness. |
 | **US20200094835A1 / US11285952B2 / JP7067386B2**, Braking and driving force control device | 2018-09-21; pub. 2020 | Toyota | Defines the driving device's lower limit of available braking/driving force as the fully-closed baseline. At speed that floor can represent engine-braking/deceleration; below roughly 8--10 km/h, **creep torque becomes dominant and raises the lower limit into positive driving force**. The controller changes filtering/feedback so this low-speed creep transition is reflected promptly. | Strong physical semantic corroboration for the Camry `0x08A` idle lower package: ID4's acceleration is positive near zero speed, declines through zero with speed, and is reduced by low-speed brake input. This does not expose numeric request ID4, but supports a **closed-accelerator baseline / creep-coast lower-bound** attribution rather than `ID4 = creep` as a literal enum name. |
 | **US20220315018A1 / US12280788B2**, Control apparatus, manager... | 2021-04-06 | Toyota + ADVICS | Applications supply information about whether a kinematic plan remains an **arbitration target**. A request that is about to terminate can be excluded or handled specially so a new request is not delayed. | Concrete vocabulary for handoff/disengagement and source-suppression RE: search for arbitration-target, termination, low-priority, degeneration and handoff state rather than modeling every request as simply present/absent. |
 | **US20230166772A1 / US12534110B2**, Motion manager, autonomous driving apparatus... | 2021-11-30 | Toyota | A manager can intentionally invalidate a PCS/other ADAS request and return **request rejection information** so the suppressed application does not diagnose an abnormal condition merely because its plan is not selected. The disclosed invalidation target can also be AEB, ACC, ASL, or another application. | High-value vocabulary for the **downstream VMM arbitration-policy boundary**: a still-present request can be intentionally excluded/de-prioritized after reception, with explicit feedback toward the requester. On exact Camry this is conceptually downstream of FRC `0x08A` egress; do not conflate it with the separate FRC-internal feature-owner state machine. |
-| **US20220274616A1 / US12060069B2**, Manager, control method... | 2021-03-01 | Toyota + ADVICS | Manager accepts application IDs plus kinematic plans and outputs the motion request to an actuator system **corresponding to the application ID**, preventing an inappropriate actuator from being used for an unexpected application request. | Supports treating application ID as policy/routing metadata, not merely a display label. |
+| **US20220274616A1 / US12060069B2**, Manager, control method... | 2021-03-01 | Toyota + ADVICS | Manager accepts application IDs plus kinematic plans and outputs the motion request to an actuator system **corresponding to the application ID**, preventing an inappropriate actuator from being used for an unexpected application request. | Supports treating application ID as policy/routing metadata. |
 | **US11780500B2**, Control device, manager, method... | 2020-02-05 | Toyota | Manager converts/arbitrates requests and sends **actual steering angle** back to the driver-assistance system. | Useful for the 0x081/result-plane interpretation and for distinguishing requested pinion angle, selected target, and realized steering state. |
 | **US11834037B2**, Control device, method... | 2020-03-18 | Toyota | Manager distributes converted motion requests and returns steering-actuator **middle-point / neutral-point** information to applications; updates are coordinated so clients do not disagree across handoffs. | Search oracle for steering center/middle-point synchronization, calibration, and discontinuity handling. |
 | **US20240101086A1 / US12344222B2**, Motion manager, control device of brake device... | 2022-09-27 | Toyota + ADVICS | Explicit later topology has ADAS applications, engine ECU, steering ECU and a **brake ECU containing the motion manager**. The manager converts normalized motion requests into actuator-type-specific instruction values using stored actuator type information. | Later-generation confirmation of the brake-hosted VMM/request-generation model and useful vocabulary for the transformation between application requests and actuator-specific targets. |
@@ -103,9 +103,8 @@ Powertrain/brake/steering send `ACL2`/`BRK2`/`STR2` state to the motion manager;
 `STR2` explicitly includes steering-system reliability, driver grip,
 steering-wheel operating torque, and steering-wheel angle. The motion manager's
 generation unit then synthesizes `PLN2` back to the driver-assistance
-applications, including the fail classes. In other words, the lateral fail
-class is manager-produced application status, not simply a raw EPS diagnostic
-bit.
+applications, including the fail classes. The lateral fail class is therefore
+manager-produced application status derived from the actuator inputs.
 
 For steering reliability the embodiment distinguishes four semantic states:
 normal, protective control, abnormality detected but failure not yet confirmed
@@ -141,8 +140,8 @@ interpretation consistent with both the patent and the independent DRS enum is
 therefore **`B13[7:6]` as a two-bit lateral fail-class candidate**, with `10`
 matching a temporary/not-executable state and `11` matching
 failure-decided/confirmed. `01` would remain an unresolved protective/degraded
-state if F33 uses it. This is a hypothesis, not a rename: it must be joined
-against `5283_1` or an exact decoder before being promoted to wire truth.
+state if F33 uses it. This hypothesis requires a join against `5283_1` or an exact
+decoder before it can justify a wire-field rename.
 
 ### 2.2 Request/result IDs really are first-class application identifiers
 
@@ -238,8 +237,8 @@ priority. Applied Example 2 shows longitudinal arbitration where the physical
 request value (minimum requested acceleration) is primary and application
 priority can stabilize selection when candidate accelerations are nearly equal.
 That is a useful model for the current `5280/5281` upper/lower-bound work:
-application identity is policy metadata layered on top of the kinematic
-request, not a replacement for request-value arbitration itself.
+application identity supplies policy metadata alongside the kinematic request
+and request-value arbitration.
 
 That strengthens the working semantic join:
 
@@ -254,8 +253,7 @@ That strengthens the working semantic join:
 | B6 / EMPS target surface | post-arbitration steering-controller target/instruction |
 
 The patent still does **not** disclose Toyota's numeric application-ID table.
-The numeric mapping above comes from current GTS+ and dynamic Camry evidence,
-not from US20220219711A1 itself.
+The numeric mapping above comes from current GTS+ and dynamic Camry evidence.
 
 #### Retained Camry logs show the FRC-internal application handoff on egress
 
@@ -352,7 +350,7 @@ These observations sharpen the physical model:
   `0x08A` the final VMM arbitration result;
 - `0x08A` then enters the downstream **Brake/VMM request-arbitration unit**.
   `0x081 B13[5:0]` behaves as its arbitration-result identity with a separate
-  update cadence, not as a bit-for-bit echo;
+  update cadence;
 - the current exact-Camry layering is therefore FRC feature-local state -> FRC
   feature-owner selection -> generic `5282`/`0x08A` request -> Brake/VMM request
   arbitration -> `0x081` result/status + post-arbitration request generation ->
@@ -401,7 +399,7 @@ this is especially useful for steering and separately describes actuator-side
 rate/gradient limiting to smooth a source handoff.
 
 That architecture is an important alternative realization of the same logical
-request/arbitration problem, not a direct map of exact F33. Exact F33 receives
+request/arbitration problem. Exact F33 receives
 neither `0x08A` nor `0x081`, while B6 is its recovered external target-bearing
 cooperative-steering ingress. Therefore `0x081` must not be reinterpreted as
 this patent's manager->EPS selected-ID signal and B6 must not be demoted to an
@@ -474,16 +472,16 @@ The GTS vocabulary is now more tightly bounded than the first survey suggested:
   `0x1B06 ISA Speed Change Priority Request (Upper Limit)`. No equivalent
   lateral invalidation/priority field or manager->suppressed-client rejection
   feedback has yet been recovered.
-- `240E LCA Reject` is an Operation-FFD feature-event trigger, not evidence
-  that it carries the patent's request-rejection feedback.
+- `240E LCA Reject` is an Operation-FFD feature-event trigger. Whether it carries
+  the patent's request-rejection feedback remains unproven.
 
 The two patent directions therefore remain separate recovery problems at the
 **downstream manager boundary**: requester/system -> VMM priority/invalidation
 policy, and VMM -> suppressed requester intentional-non-selection feedback. Do
 not infer one from finding the other, and do not assume either has already been
 identified in `0x08A` or `0x081`. Separately recover the FRC feature-owner state
-machine that decides which feature authors `0x08A`; that is an upstream problem,
-not the patent's manager-side arbitration mechanism.
+machine that decides which feature authors `0x08A`. That upstream problem remains
+separate from the patent's manager-side arbitration mechanism.
 
 Detailed close read and cross-generation GTS joins:
 [toyota-request-invalidation-us20230166772.md](toyota-request-invalidation-us20230166772.md).
@@ -589,7 +587,7 @@ already-recovered `0x08A` longitudinal request fields and Toyota's
 longitudinal arbitration/hold/release semantics.  Avoiding the FRC latch remains
 preferable if stock-longitudinal coexistence is the objective.
 
-### 2.6 PCS is a staged collision pipeline, not a single AEB boolean
+### 2.6 PCS is a staged collision pipeline
 
 The PCS-specific patent pass on 2026-09-29 materially sharpens the current
 Camry interpretation. Toyota's own patents repeatedly separate **collision
@@ -649,9 +647,9 @@ The strongest families are:
    Current GTS help independently describes PBA as **Pre-collision brake
    assist**. That makes the current GTS names ALM Request Flag, PBA Request
    Status, PBA Assist Level, PBA1/PBA3 operation enable/prohibition, and the
-   PBA1/PBA2/PBA3 start/cancel flags look like inherited Toyota PCS vocabulary,
-   not generic translator guesses. It also gives an important semantic
-   distinction: **PBA is driver-brake assist, not necessarily autonomous PB**.
+   PBA1/PBA2/PBA3 start/cancel flags look like inherited Toyota PCS vocabulary.
+   It also gives an important semantic distinction: **PBA assists driver braking**.
+   Whether a particular PBA state includes autonomous PB requires separate evidence.
    Do not project the old patent's exact TTC thresholds or level encoding onto
    F33.
 
@@ -770,8 +768,8 @@ box is used in every scene:
                                                         |
                                                         +--> PBH after stop
 
-The arrows are a **semantic working model**, not a claim that every named stage
-is serialized exactly this way on the 2026 Camry.
+The arrows are a **semantic working model**. The exact serialization of these
+stages on the 2026 Camry remains unproven.
 
 #### Join to the retained 2026 Camry PCS event
 
@@ -794,8 +792,8 @@ still crossed the relay.
 
 The patents now make the evidence boundary clearer:
 
-- 0x5AE can be treated as evidence for the **warning/ALM presentation path**,
-  not as evidence that brake pressure was commanded or applied;
+- 0x5AE provides evidence for the **warning/ALM presentation path** only.
+  Commanded or applied brake pressure requires separate evidence;
 - the co-batched negative-acceleration 0x08A request, ordered after the first
   warning frame in the captured FIFO, is evidence that a **longitudinal PCS
   application request** was active, but it still does not
@@ -920,13 +918,13 @@ door opened while the vehicle is after IG-OFF, the manager interprets the
 source+state as a vehicle event, and it starts only the device group needed for
 that event.
 
-This patent is **contemporary Toyota architecture evidence**, not proof that
-F33 implements this exact manager/database or its target mapping. Its 2023
-priority is fully compatible with a 2026-model Camry and could reflect design
-work that reached this vehicle generation. The evidentiary limitation is
-implementation proof, not chronology: until the exact F33 wiring, firmware, or
-live state transitions join to it, use the patent as a strong architectural
-oracle rather than as an exact block assignment. It is strong Toyota evidence
+This patent supplies **contemporary Toyota architecture evidence**. Exact F33
+implementation of its manager/database or target mapping remains unproven. Its
+2023 priority is fully compatible with a 2026-model Camry and could reflect design
+work that reached this vehicle generation. The remaining evidentiary requirement
+is an implementation join: until exact F33 wiring, firmware, or live state
+transitions supply it, use the patent as a strong architectural oracle. It is
+strong Toyota evidence
 that "OFF" is intentionally decomposed into event-driven selective device
 startup, and that Toyota distinguishes physical power-control wake from
 network/communication wake.
@@ -960,8 +958,7 @@ physical rather than merely cosmetic. Lexus bulletin **L-SB-0032-23** warns
 that, while the auxiliary battery is connected, the brake control system
 activates with the power switch OFF when either the brake pedal is depressed or
 **any door courtesy switch** is turned on. The same warning appears across
-older Toyota hybrid repair procedures, so this is a long-lived Toyota behavior,
-not a one-off UI convention.
+older Toyota hybrid repair procedures, establishing a long-lived Toyota behavior.
 
 Source:
 https://static.nhtsa.gov/odi/tsbs/2023/MC-10245447-9999.pdf
@@ -1012,8 +1009,7 @@ https://lemon.dogeware.me/Toyota/2023/Sienna%20XSE%2C%202.5L%20Eng%20VIN%20R/Rep
 
 ### 3.2 What this means for the exact F33 wake investigation
 
-The best current model is a **layered power-state machine**, not a binary
-OFF/ON model:
+The best current model is a **layered power-state machine**:
 
 1. **quiescent / always-powered observers** remain capable of detecting at
    least selected entry/start/network events;
@@ -1061,8 +1057,7 @@ For each later boundary, record per-bus first/last frame time and newly appearin
 IDs, and concurrently sample the read-only GTS observables above when practical.
 Particularly useful joins are PSC 0x1001/0x1003/0x1005,
 Central Gateway 0x1001, PDB 0x5011, and the SMART_P5 sleep/start fields.
-A true deep-sleep baseline must begin **before approaching with the normal key**,
-not merely before touching a door.
+A true deep-sleep baseline must begin **before approaching with the normal key**.
 
 ## 4. Security and reprogramming families
 
@@ -1071,10 +1066,9 @@ not merely before touching a door.
 Priority 2024-03-22, Toyota.
 
 This is later than the initial TSS3 launch, but its 2024 priority is still
-temporally compatible with a 2026-model F33 Camry. It must therefore be treated
-as **contemporary Toyota security vocabulary**, not dismissed as too new; the
-remaining limitation is that a patent does not prove this exact calibration
-uses its new dynamic-key scheme.
+temporally compatible with a 2026-model F33 Camry. Treat it as
+**contemporary Toyota security vocabulary**. The remaining limitation is that a
+patent does not prove this exact calibration uses its new dynamic-key scheme.
 
 Its description explicitly calls the related architecture **AUTOSAR SecOC**:
 sender and receiver ECUs share a secret key, the sender appends a MAC to the
@@ -1128,8 +1122,8 @@ A dedicated claim/threat-model/F33 comparison is in
 
 For the existing F33 work the useful part is Toyota-authored terminology around
 MAC verification, freshness, truncated security fields, receiver rejection,
-and startup synchronization. It is a conceptual cross-check for the recovered
-SecOC-shaped traffic, not a substitute for the exact EPS/FRC implementation.
+and startup synchronization. It provides a conceptual cross-check for the recovered
+SecOC-shaped traffic. The exact EPS/FRC implementation remains the authority.
 
 ### US20230143921A1 / US12504961B2 — electronic control system for vehicle firmware
 
@@ -1164,7 +1158,7 @@ context.
 
 The patent itself contains **no torque-sensor disclosure and no torque
 threshold**. The touch-vs-torque fusion conclusion comes from Toyota's diagnostic
-corpus, not from this document. Its illustrative ~10-minute hands-off interval
+corpus. This patent's illustrative ~10-minute hands-off interval
 and ~4-second confirmation dwell are also not a behavioral match for the exact
 F33 ordinary-LTA ~13-second torque-backed nag.
 
@@ -1258,8 +1252,7 @@ B6/final actuator instruction where observable.
 
 US20220219711A1 makes this useful because Toyota explicitly treats application
 identity and priority/eligibility as separate concepts. On the exact Camry, the
-lateral feature-owner decision should be recovered in the **FRC application**,
-not by looking for simultaneous LTA/LDA/PDA request PDUs at Brake.
+lateral feature-owner decision should be recovered in the **FRC application**.
 
 ### D. Separate healthy FRC feature preemption from downstream policy rejection
 

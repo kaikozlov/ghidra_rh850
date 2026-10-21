@@ -149,8 +149,8 @@ _resident_entry:
 .L_run_aggregate:
     jarl32 fg_aggregate, lp
 
-    /* Hand the saved bytes, not a reconstructed message, to the exact native
-       successful-delivery endpoint. If stock already published a frame with the
+    /* Hand the saved bytes unchanged to the exact native successful-delivery
+       endpoint. If stock already published a frame with the
        same B3, conservatively skip reinjection. Exact native success necessarily
        has the same B3; an unrelated same-B3 publication can only create a safe
        false negative for this bridge, never a duplicate publication. */

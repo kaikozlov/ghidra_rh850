@@ -455,7 +455,7 @@ def capture_many(
     """Run a batch and return every report, including failed checks.
 
     The differential harness reads the machine's actual registers and bytes.
-    A mismatched placeholder check is data, not a batch abort.
+    A mismatched placeholder check is recorded as data and the batch continues.
     """
     output_dir = _absolute_input(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)

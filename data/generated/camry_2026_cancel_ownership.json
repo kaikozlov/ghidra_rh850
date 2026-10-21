@@ -3,7 +3,7 @@
     "adas_p05": {
       "valid": 16526
     },
-    "boundary": "A cancellation-linked output is not automatically a cancel input. Native2 identifies the FRC-side link, not exclusive logical ECU ownership behind it.",
+    "boundary": "A cancellation-linked output is not automatically a cancel input. Native2 identifies only the FRC-side link; logical ECU ownership behind it remains unresolved.",
     "common_stream_count_by_bus": {
       "0": 92,
       "1": 22,
@@ -3086,7 +3086,7 @@
         "switch_last_ns": 15349544241
       }
     ],
-    "boundary": "These isolated inputs identify a switch-event mirror, not a writable cruise-controller input. All retained cruise-state frames are inactive.",
+    "boundary": "These isolated inputs identify only a switch-event mirror; a writable cruise-controller input remains unresolved. All retained cruise-state frames are inactive.",
     "cruise_enabled_frames": 0,
     "cruise_frames": 1475,
     "gts_oracle_metadata": {

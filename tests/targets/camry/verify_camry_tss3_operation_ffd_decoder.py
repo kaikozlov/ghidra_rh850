@@ -111,7 +111,7 @@ for payload in (bytes.fromhex("00A0"), b"\x00"):
 short = decoder.decode_eb13(header + b"\x02" + block(0x5282, b"\x0b") + block(0x9999, b"\xaa"), semantics)
 check("short field reports error while preserving other data", short["blocks"][0]["decoded"][0]["raw"] == 11 and "decode_error" in short["blocks"][0]["decoded"][1] and short["blocks"][1]["data"] == "aa")
 
-# These exercise numeric boundaries, not schema-row spelling or copied metadata.
+# These exercise numeric boundaries.
 row = dict(semantics[0x5282][1], BytePosition=1, BitPosition=7, BitLength=16, Lsb="0.001", Offset="0", Point=2)
 for raw, expected in ((1239, "1.23"), (-1231, "-1.24"), (-32768, "-32.77"), (32767, "32.76")):
     value = decoder.decode_signal(raw.to_bytes(2, "big", signed=True), row)

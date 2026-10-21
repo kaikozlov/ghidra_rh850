@@ -37,9 +37,9 @@ There is an older public precursor that matters for attribution. Willem's
 the tundra`) already contains the exact 72-byte `8965F3401200/8965F3402200`
 application-version record, CPU0 DID-`0x0203` value `01 00 00 00 00`, and the
 `45 01` new-UDS routine grammar. Blurbdust's host tool generalizes those ideas
-to two CPUs; it does **not** byte-copy the Tundra RequestDownload prefix. Thus
-the F340 identity/new-UDS plumbing are pre-existing I-CAN-hack lineage, not
-independent evidence that blurbdust learned them from CUW extraction.
+to two CPUs; it does **not** byte-copy the Tundra RequestDownload prefix. The
+pre-existing I-CAN-hack lineage of the F340 identity/new-UDS plumbing prevents
+using them as independent evidence of CUW extraction.
 
 The retained `main.c` is **byte-identical** to public
 `shellcode/main_flash_patch.c` at `47d2824` (SHA-256
@@ -86,8 +86,8 @@ values, and command sequence while several register *names* were shifted and
 two status semantics were wrong. This is consistent with behavior reconstructed
 from disassembly without a correct symbolic register map. Together with the
 April-21 extractor statement, it makes CUW-informed FACI reconstruction
-**plausible and worth investigating**; the inherited F340 target identity adds
-context, not independent provenance evidence. It does not prove that
+**plausible and worth investigating**. The inherited F340 target identity adds
+context only. It does not prove that
 `main_flash_patch.c` was translated from Toyota's erase payload line-for-line.
 That comparison is now locally reproducible from pinned `T-0035-22.cuw`; the
 plaintext `*_erase.pt.bin` files remain ignored workspace intermediates, while
@@ -109,8 +109,8 @@ to consume the raw package or an already exposed package layer. The capture-safe
 workflow is therefore: **preserve/hash raw CUW -> validate outer container ->
 preserve/extract `attach.att` + tail -> run the T-0035 extractor against the
 package layer it actually recognizes -> CMAC-check every plaintext output**.
-This is another reason acquiring the real file remains valuable: it validates
-both independently recovered parser layers, not just the FACI disassembly.
+Acquiring the real file also validates both independently recovered parser layers
+and the FACI disassembly.
 
 ### Cross-validation value
 
@@ -141,11 +141,11 @@ decryptor:
   `0x0962887F` fixup validate, and also repairs an anomalous `sst.b 0x22,ep,r1`
   into `sst.b 0x2,ep,r1`, completing a six-byte destination permutation
   `0..5`. This strongly indicates a one-bit acquisition error in the public
-  dump, not a CRC-algorithm mismatch. The 8-byte egg marker is independently a
-  **false positive as a SecOC signature** on this calibration: it matches the
-  shared 5-byte token comparator (`FUN_0003485A` at VA `0x3485A`) used by the
-  application SID `0xBA` proprietary operation table, not the SecOC Gate-2
-  control flow. Forcing that comparator true removes BA token comparisons, but
+  dump. The 8-byte egg marker is independently a **false positive as a SecOC
+  signature** on this calibration: it matches the shared 5-byte token comparator
+  (`FUN_0003485A` at VA `0x3485A`) used by the application SID `0xBA` proprietary
+  operation table. The SecOC Gate-2 control flow is separate. Forcing that
+  comparator true removes BA token comparisons, but
   F7/`BAENA` still has an independent application SecurityAccess-level-2 check
   at `0x34D96`; the patch therefore does not create the persistent BA
   authorization state without SA2. See SECOC-028/035/043/044, SEC-APP-007, and
@@ -212,8 +212,8 @@ is a byte-preserved external-source implementation reference for the contributor
 Corolla longitudinal port. It reports the exact Corolla `0x160` E2E/acceleration
 layout and a successor stock/openpilot handoff that reuses the camera frame/counter
 and falls back to Toyota's standstill behavior below roughly 1 mph. Its hard-coded
-mode, forced-fingerprint, sunnypilot, and `ALLOW_DEBUG` pieces are reproduction
-scaffolding, not repository-wide TSS3 policy.
+mode, forced-fingerprint, sunnypilot, and `ALLOW_DEBUG` pieces serve only to
+reproduce that port.
 
 The contributor's TSKM oracle contains synchronization `0x00F` only, explaining
 the original matcher failure. The derived public-route oracle adds the genuine
@@ -256,8 +256,8 @@ A separate Span-supplied Discord rlog,
 recorded 2026-07-29 and added 2026-08-24. It is **not** part of the Aug-21 TSKM
 bundle and is not an exact F181 join (`carParams=MOCK`, different logging dongle),
 but it supplies a real moving whole-vehicle CAN sample. The maintainer reports the
-Toyota-B CAN0/CAN1 pairs were not physically repinned during that capture;
-`harnessStatus=flipped` in the rlog is Panda cable orientation, not the repin.
+Toyota-B CAN0/CAN1 pairs were not physically repinned during that capture.
+`harnessStatus=flipped` in the rlog records Panda cable orientation.
 See `spanconstant/README.md` for the evidence boundary.
 
 The full comparative pass is tracked rather than left as preliminary triage.

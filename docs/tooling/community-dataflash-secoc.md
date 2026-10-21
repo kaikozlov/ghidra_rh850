@@ -159,10 +159,10 @@ tools/toyota secoc session fingerprint-plan session
 tools/toyota secoc session oracle-plan session --dump dump.bin
 ```
 
-The fingerprint step is deliberately a **plan**, not an automatic source patch:
-it records the observed EPS address/F181 against the selected target car so an
-analyst can review the appropriate openpilot fingerprint entry without silently
-injecting Sienna defaults into another vehicle.
+The fingerprint step produces a **plan** for analyst review. It records the
+observed EPS address/F181 against the selected target car. An analyst can review
+the appropriate openpilot fingerprint entry before changing source, without
+silently injecting Sienna defaults into another vehicle.
 
 `tests/toyota/verify_toyota_secoc_session.py` proves that the manager contains no
 programming-session, SecurityAccess, DID-write, RequestDownload, RoutineControl,
@@ -231,9 +231,9 @@ FF200000..FF210000  64-KiB host range (DataFlash only through FF207FFF on R7F701
 `R7F701383` is a 1-MiB DPS part with 32-KiB DataFlash, 128-KiB total local RAM,
 and 64-KiB global RAM. The hardware manual exposes both `FEBE0000..FEBFFFFF`
 (PE1 area) and `FEDE0000..FEDFFFFF` (self view) as 128-KiB local-RAM mappings;
-with only 128 KiB physical local RAM, the self window is an architectural view
-of the same PE-local memory, not an additional bank. Calvin's repeated Sienna
-experiment is useful dynamic confirmation, not the sole basis for the alias.
+with only 128 KiB physical local RAM, the self window maps the same PE-local
+memory. Calvin's repeated Sienna experiment adds dynamic confirmation of the
+manual-backed alias.
 
 All six payload packages independently decrypt/authenticate with the recovered
 payload-build secret at CodeFlash `0xBFD8`, have CRC residue `0xFFFFFFFF`, and
@@ -250,9 +250,9 @@ more tightly: rebuilding Bk2ol's later-public
 (SHA-256 `43d00fda...`). The other shipped ranges preserve one long-body binary
 layout and patch fixed immediates, so recompiling each source variant can select
 shorter instruction encodings and is not expected to byte-reproduce every
-package. This proves source/compiler-family equivalence, not original authorship:
-Vance's candidate-f05 artifact predates Bk2ol's public source, so the pre-public
-source provenance remains bounded by SECOC-031.
+package. This proves source/compiler-family equivalence. Original authorship
+remains unresolved: Vance's candidate-f05 artifact predates Bk2ol's public
+source, so the pre-public source provenance remains bounded by SECOC-031.
 
 The branch history is also rewritten. The original July `Range dumper` and
 `mo-dump` commits were first pushed on `tskm`; `wide` was created only during the

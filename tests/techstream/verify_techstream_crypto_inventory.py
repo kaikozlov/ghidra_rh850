@@ -47,7 +47,7 @@ if neo_path.is_file():
               "c1eb048bfb74488d5424248d442414525056e8de040000"))
     check("0x10023F26 is only the pre-decrypt 16-byte alignment test",
           neo[0x23F26:0x23F2B] == bytes.fromhex("f6c30f740e"))
-    check("post-decrypt tail trim uses only final-byte count, not strict PKCS7 validation",
+    check("post-decrypt tail trim uses only final-byte count",
           neo[0x24001:0x24035] == bytes.fromhex(
               "8a4437ff884424108b4c241081e1ff0000003bce77238bc62bc13bc67316"
               "8bce03f82bc833c08bf1c1e902f3ab8bce83e103f3aa"))

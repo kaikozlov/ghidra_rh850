@@ -6,9 +6,9 @@
  * added side effect is an incrementing 32-bit heartbeat at
  * TARGET_CANARY_HEARTBEAT.
  *
- * Local call0 must inline: linking this raw carrier at VMA zero otherwise
- * materializes call0 as an absolute low address instead of a resident-relative
- * call. The indirect stock target remains the only runtime call.
+ * Local call0 must inline to preserve the resident-relative call. Otherwise,
+ * linking this raw carrier at VMA zero materializes an absolute low address.
+ * The indirect stock target remains the only runtime call.
  */
 
 typedef void (*fn0_t)(void);

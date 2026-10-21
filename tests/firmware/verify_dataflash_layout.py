@@ -150,7 +150,7 @@ current_field = DF[0x6E14:0x6E24]
 check("current raw field matches captured bytes",
       current_field == bytes.fromhex("00000000040000808202000000000000"), current_field.hex())
 
-print("\n== bootloader DID table is volatile RAM, not DataFlash ==")
+print("\n== bootloader DID table resides in volatile RAM ==")
 dids = [
     struct.unpack_from("<IHH4s", CF, 0x8F14 + i * 12)
     for i in range(4)

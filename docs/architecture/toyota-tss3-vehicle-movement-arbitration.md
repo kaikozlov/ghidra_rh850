@@ -119,8 +119,8 @@ applications.
 - driver-steering flag;
 - responsiveness request.
 
-The upper/lower longitudinal requests are **bounds**, not redundant copies.  Toyota
-uses them to describe an allowed longitudinal range.  An ACC application is explicitly
+The upper/lower longitudinal requests are distinct **bounds**. Toyota
+uses them to describe an allowed longitudinal range. An ACC application is explicitly
 given as an example of a function that sets both lower and upper packages.
 
 ### Camry/GTS join
@@ -138,8 +138,8 @@ The FRC-hosted TSS3 Operation-FFD dictionary mirrors this request vocabulary:
 | requested pinion angle | `5282 TSS request - pinion angle`, s16 x0.001 | `0x08A B18:B19` (~0.00100012 rad/count) |
 | lateral responsiveness/gains | `5282 Steering assist gain` / `Damping control gain` | `0x08A B24/B25` |
 
-This is why `0x08A` should be described as the **TSS request-side package**, not the
-final EPS command.  Exact F33 does not receive `0x08A`.
+Describe `0x08A` as the **TSS request-side package**.
+Exact F33 does not receive `0x08A`.
 
 The idle Camry pair `upper ID0 / lower ID4` is especially informative. Across both
 complete retained drives, every stable `0/4` request pairs with Brake/VMC result
@@ -152,7 +152,7 @@ released it is positive near zero speed and declines through zero into a negativ
 coast/deceleration baseline as speed rises.
 
 The best current semantic attribution is therefore **ID4 = the FRC's default
-closed-accelerator/manual baseline lower-bound application**, not simply "creep".
+closed-accelerator/manual baseline lower-bound application**.
 `US20200070849A1` independently returns a *full-closed estimated ground acceleration*
 from the powertrain to the request-arbitration/application layer. Toyota's
 `US20200094835A1 / US11285952B2` describes the corresponding physical powertrain lower
@@ -165,17 +165,17 @@ remains unknown**.
 
 The exact Camry implementation is now clearer than the patent's conceptual
 per-application drawing.  **LTA, LDA, LCA, PDA/SDG, PCS and the other TSS functions are
-applications inside the FRC application software, not separate network clients arriving
-at Brake.**  Their enable/configuration states can coexist.  The FRC's own application
+applications inside the FRC application software.** Their enable/configuration states
+can coexist. The FRC's own application
 logic decides which feature currently supplies the generic lateral request, and `5282`
 records that feature-selected generic request inside the FRC-hosted Operation FFD.
 Protected `0x08A` is the first externally observable publication of that FRC-selected
 request on the intercepted chassis network (apart from feature settings/configuration
 inputs themselves).
 
-The retained direct ID18->ID11 and ID11<->ID4 transitions are therefore **FRC-internal
-application-owner changes expressed on egress**, not evidence that Brake is choosing
-between simultaneous LTA/LDA/PDA network requests.  The same point applies to the two
+The retained direct ID18->ID11 and ID11<->ID4 transitions therefore show
+**FRC-internal application-owner changes expressed on egress**. Simultaneous
+LTA/LDA/PDA network requests at Brake remain unproven. The same point applies to the two
 longitudinal bound slots: the FRC may synthesize each bound from different internal
 applications before publishing the generic TSS request package.  `0x08A` must not be
 over-described as an untouched output of one feature, but neither should it be described
@@ -246,11 +246,11 @@ Patent paragraphs 148–152 explicitly arbitrate three objects independently:
 - longitudinal upper-limit package;
 - lateral package.
 
-The selected lower package and selected upper package can therefore originate from
-different applications.  The numeric IDs identify the **applications/request sources**,
-not ECUs and not ordinal priorities.  Selection can be based on magnitude and other
-predefined rules; the patent gives minimum-value selection as one example rather than a
-mandatory Toyota calibration rule.
+The selected lower and upper packages can therefore originate from different
+applications. The numeric IDs identify the **applications/request sources**.
+Selection can use magnitude and other predefined rules. The patent gives
+minimum-value selection as one example. Actual Toyota calibration rules require
+separate evidence.
 
 Toyota/ADVICS follow-on US20220219711A1 makes the ID/priority distinction explicit.
 Each application emits a preset ID that uniquely identifies the requesting application;
@@ -269,7 +269,7 @@ AD/EM/DES`, `49 Self-Propelled Transport`, and `63 Driver Operation`.  The misma
 between numeric order and the patent's priority order is itself decisive: for example,
 the patent prioritizes Lv.4 EM above Lv.4 AD while GTS identifies them as 43 and 41.
 The six-bit `0x08A B21[5:0]` / `0x081 B13[5:0]` request/result fields therefore fit a
-preset application-identity namespace, not a rank or ECU address.
+preset application-identity namespace.
 
 The retained road logs now expose the **FRC's selected lateral application changing on
 egress**. Across the 12-route / 513-segment lateral census, `0x08A` changes
@@ -297,9 +297,9 @@ mismatches is transition-shaped: the FRC egress request has already changed whil
 Brake/chassis result still carries the immediately previous ID. No retained stable
 interval shows the downstream result persistently disagreeing with the current FRC
 request. This makes `0x081 B13` a useful **downstream VMM arbitration-result oracle for
-the feature-selected FRC request**, not evidence of where LTA/LDA/PDA feature ownership
-is chosen. Logger batching keeps the observed ~10-40 ms raw examples from being promoted
-to an exact ECU deadline.
+the feature-selected FRC request**. It leaves the location of LTA/LDA/PDA feature-owner
+selection unproven. Logger batching keeps the observed ~10-40 ms raw examples from
+being promoted to an exact ECU deadline.
 
 This materially changes how the Camry ID namespace should be interpreted.  Toyota uses
 the same concept—an application identifier—for longitudinal and lateral IDs.  It is now
@@ -317,9 +317,9 @@ In particular:
 - P6 longitudinal 41/45 “MaaS autonomous-driving request 1/2” need not contradict
   lateral 41/45 `AD (Lv.4)` / `DES (Lv.4)`; those labels may be two views of the same
   autonomous-driving application identities;
-- longitudinal ID25 during delayed hold is an unresolved semantic clue, not proof that
-  the namespaces are unrelated.  It may identify a low-speed/parking/hold application,
-  a selected bound from another application, or expose a remaining field/order mistake.
+- longitudinal ID25 during delayed hold is an unresolved semantic clue. The relationship
+  between the namespaces remains unproven. It may identify a low-speed/parking/hold
+  application, a selected bound from another application, or expose a remaining field/order mistake.
 
 ## 4. Interface B: arbitration result and vehicle-state feedback
 
@@ -345,8 +345,7 @@ The two result IDs have deliberately different semantics:
 This is a direct explanation for Camry `0x081` result ID63 while neither FRC-origin
 `0x08A` longitudinal bound slot contains 63. Toyota labels 63 `Driver Operation` on a
 P5 FRC diagnostic display surface, but the wire direction matters: the Brake/VMC owns
-`0x081`, so longitudinal 63 is downstream employed-source feedback to the FRC, not an
-FRC-origin requester.
+`0x081`, so longitudinal 63 is downstream employed-source feedback to the FRC.
 
 ### Result/state telemetry
 
@@ -373,12 +372,12 @@ pinion angle. These diagnostic quantities do not supply CAN byte locations.
 ### Camry wire join
 
 `0x081` is therefore best modeled as the **Brake/VMM-owned result/reference/status
-publication toward the TSS applications**, not as a dumb echo:
+publication toward the TSS applications**:
 
 - `B13[5:0]` = recovered lateral result ID;
 - `B16:B17` = recovered result/reference pinion quantity;
 - `B6[5:0]` = strongest `5284` longitudinal employed-source-ID candidate;
-- `B11[4]` = proven FRC-request-loss supervision state, not yet joined to `57D3`.
+- `B11[4]` = proven FRC-request-loss supervision state, with its join to `57D3` still unresolved.
 
 The acceleration-like words are bounded by the
 [2026-09-30 VMC status corpus](../variants/camry-2026-longitudinal-evidence.md#2026-09-30-vmc-status-corpus)
@@ -403,7 +402,7 @@ through the recorded ID34/ID33 PCS escalation; its mismatch with host value
 `3` preceded that event. The subsequent
 [policy-one cutover](../variants/camry-2026-longitudinal-evidence.md#policy-one-encoder-cutover)
 changes the host constant and Panda match, without vehicle-response evidence.
-The mismatch remains a hypothesis, not a proved cause. GTS defines both
+The mismatch's causal role remains a hypothesis. GTS defines both
 brake-use restriction permission and responsiveness selection; neither has a
 verified CAN join to this field. The additional contribution is not independently
 identified as hydraulic braking. The empirical
@@ -474,8 +473,8 @@ from `0x80` to the ordinary healthy result. That ordering is highly repeatable,
 but it does not prove B6[0] is the sole reliability input. The existing stale
 `0x030` bridge does not close that question because the exact frame it repeated
 has B6=`0x01`: it preserved the invalid gate as well as stale SecOC freshness.
-Its negative result therefore rules out message presence alone, not
-fresh/accepted/semantically healthy EPS-status continuity.
+Its negative result therefore rules out message presence alone. Whether
+fresh/accepted/semantically healthy EPS-status continuity suffices remains unresolved.
 
 The detailed retained chronology is
 `targets/camry-2026/raw-20260917/brake-frc-081-fault-status/startup-fail-class-analysis.json`.
@@ -542,8 +541,8 @@ latest matching request received **after** the selection event.  The request sam
 manager arbitrated and the request sample the actuator executes may therefore differ.
 The application ID is explicitly separate from `CAN_ID`.
 
-This is a latency optimization, not the physical realization recovered at exact F33's
-external EPS boundary.  F33 receives neither `0x08A` nor `0x081`; its recovered
+This latency optimization differs from the physical realization recovered at exact F33's
+external EPS boundary. F33 receives neither `0x08A` nor `0x081`; its recovered
 external target-bearing cooperative-control ingress is B6.  There is no recovered
 second direct application-request stream at F33 that would make B6 merely the selector
 from US20200070873A1.  Therefore the current `0x08A` request -> Brake/VMM -> B6 target
@@ -587,10 +586,10 @@ The VMC also reports its state and reduced actuator availability back into the r
 manager so applications can adapt.
 
 This is important for interpreting exact F33.  We already proved accepted ID11 B6 is
-**co-modulated inside the ordinary EPS assist/current composition**, not an exclusive
-replacement writer.  That is architecturally unsurprising: the final steering controller
+**co-modulated inside the ordinary EPS assist/current composition**. That composition
+retains other writers. This is architecturally unsurprising: the final steering controller
 must coexist with local assist, driver input, stability intervention and other controller
-constraints.  “B6 did not become sole authority” was never evidence that B6 was the wrong
+constraints. “B6 did not become sole authority” was never evidence that B6 was the wrong
 OEM interface.
 
 It also means openpilot should not invent a requirement that its final target replace all
@@ -621,8 +620,8 @@ Therefore a 32-byte standard CAN-FD B6 that is successfully decoded by F33 contr
 would reach the Sep-10 post-ring/pre-SecOC observer.  The 121 host markers did not, while
 native B6 advanced that same queue by 217 deliveries during the treatment and by 205
 during the positive-control block.  The direct-Panda frame is consequently lost **before
-successful F33 controller1 decode/CanIf admission**, not in EPS SecOC, PduR, generated
-COM, or B6 application logic.  The only receiver-side residue is a physical/link decode
+successful F33 controller1 decode/CanIf admission**. EPS SecOC, PduR, generated
+COM, and B6 application logic lie downstream. The only receiver-side residue is a physical/link decode
 failure before GAFL matching; otherwise the loss is outside F33, between the
 Panda-visible Bus-4 trunk and the EPS-local B6 delivery path.
 
@@ -697,8 +696,8 @@ same Toyota/Sumitomo assignee group) is even more discriminating: a relay detect
 added functional unit, restricts/discards frames from it while authentication/network-setting
 processing is incomplete, and relaxes relay restrictions only after setup completes; the
 disclosure again expressly permits CAN/CAN-FD networks. Its worked filtering example is
-Ethernet/IEEE 802.1Qci, so this is **external architectural support, not proof that exact Camry
-BRK1/EBU implements the patented mechanism or uses that exact classifier**.
+Ethernet/IEEE 802.1Qci, so this supplies **external architectural support** only.
+Exact Camry BRK1/EBU implementation of the patented mechanism or classifier remains unproven.
 
 That distinction fits the live boundary unusually well. A Panda TX return proves only that a
 frame was acknowledged on the sender's physical CAN segment; it does not prove that a
@@ -710,8 +709,8 @@ that shape while remaining invisible to the F33 GAFL/CanIf analysis. The patents
 materially strengthen **source/port/routing admission** as the leading class of explanations,
 but do not yet select it over an upstream SecOC/authentication check on the exact Camry.
 
-The clean discriminator is therefore a **known native standard-ID FD route**, not another
-extended private-ID experiment.  `0x090/32` is the preferred parked probe because exact
+The clean discriminator is therefore a **known native standard-ID FD route**.
+`0x090/32` is the preferred parked probe because exact
 F33 routes it through an ordinary additive-checksum gate rather than SecOC.
 
 The September-19 live discriminator now closes that branch. A current native `0x090/32`
@@ -776,8 +775,8 @@ ordinary-P5 MAC28 domain accessible from this EPS. This strongly supports a shar
 across the relevant Toyota arbitration domain, while not by itself identifying which upstream
 component enforces it.
 
-The intact trailer is best treated as a **producer/domain property of the 32-byte PDU, not
-evidence that every receiver verifies it locally**. Toyota can emit one authenticated PDU
+The intact trailer is best treated as a **producer/domain property of the 32-byte PDU**.
+Local verification by every receiver remains unproven. Toyota can emit one authenticated PDU
 shape for the safety domain, forward that shape unchanged through intermediate nodes, and let
 individual consumers either verify SecOC locally, rely on an upstream trust boundary, or ignore
 the trailer in their application route. That explains why exact F33 can consume `0x025/0x090`
@@ -796,8 +795,8 @@ The remaining gate has to depend on something outside those authenticated payloa
 **ingress/source-domain/path membership, direction/routing state, CAN-FD traffic-class policy,
 or another upstream semantic predicate** on the deliberately unique host field. The first
 three are the leading class because the failure is format-selective: classic traffic on the
-same private endpoint reaches F33 while Panda-created FD does not. The valid-MAC negative is
-therefore evidence for a network-admission seam, not for missing cryptographic correctness.
+same private endpoint reaches F33 while Panda-created FD does not. The valid-MAC negative
+therefore supports a network-admission seam while preserving cryptographic correctness.
 
 An important implementation variant is **positive publication rather than negative filtering**.
 The Brake/EBU domain need not accept an arbitrary trunk-side application PDU and decide whether
@@ -850,9 +849,9 @@ single CAN transceiver simply taps that continued line. The result is physically
 wiring but one logical CAN bus, explicitly including CAN FD. Current Prius service material
 uses the same brake-ECU pin vocabulary and numbering (`DC1H/DC1L` on 34/35 and
 `CA1H/CA1L` on 36/37) while treating those wires as opposite portions of a Bus-4 main line.
-This is strong same-generation precedent that the Camry A30 `DC1` pair may be a **passive
-main-line continuation for CAN-FD signal integrity**, not a second CAN controller or
-store-and-forward gateway. It also explains why unplugging an inline node can leave about
+This is strong same-generation precedent that the Camry A30 `DC1` pair may be a
+**passive main-line continuation for CAN-FD signal integrity**. It also explains
+why unplugging an inline node can leave about
 120 ohms visible on each separated harness half: each half can see one end termination even
 when the plugged ECU normally joins them into the usual ~60-ohm two-termination bus.
 
@@ -891,7 +890,7 @@ itself proves only the literal `EBU` attachment label. Brake-family GTS vocabula
 The successor split sharpens that: `BSCM_A_P6 = Brake/EPB` exposes native
 `FR Wheel Speed` / `Lateral G`, while `BSCM_B_P6 = Brake Booster` exposes the
 corresponding `...(EBU node)` copy. That strongly favors **the EBU node being the
-Brake/EPB / skid-control side itself**, not a third ECU. `ABS_P5` additionally
+Brake/EPB / skid-control side itself**. `ABS_P5` additionally
 distinguishes U013187 **Lost Communication with Power Steering Control Module** from
 U11B187 **Lost Communication with Power Steering Control Module "A" (ch2)** and exposes
 DID `0x102F` **EPS/Steering Control Actuator ECU Communication Open**. Together these are
@@ -918,8 +917,8 @@ Panda-visible / shared logical Bus-4 domain
                                           one CAN receive path
 ```
 
-The serial Skid->EPS arrow is the leading **logical/source-domain inference**, not a literal
-store-and-forward route encoded by the GTS rows. In particular, the Denso daisy-chain
+The serial Skid->EPS arrow represents the leading **logical/source-domain inference**.
+The GTS rows leave the literal route unresolved. In particular, the Denso daisy-chain
 precedent above means the A30 `CA1/DC1` path may simply be one continuous Bus-4 main line.
 The source-domain inference is favored by three independent facts: Toyota places VMM request
 generation in the Brake ECU; F33 diagnoses loss of B6 as loss of the Brake System
@@ -947,7 +946,7 @@ This does not make the EPS-resident patch the preferred production architecture.
 powerful development fallback and proof that the downstream B6 target interface is
 sufficient once an instruction is admitted.
 
-## 9. Longitudinal control: range arbitration, not a scalar command
+## 9. Longitudinal control: range arbitration
 
 The patent's longitudinal example is critical for openpilot integration.  The selected
 lower and upper application limits define a range.  The powertrain controller then clips
@@ -1051,9 +1050,8 @@ FRC / TSS3 applications
 - B6 secondary-field OEM names;
 - longitudinal remaining policy bits and the distinct `ID13/ID20` intervention tuple semantics; ordinary `ID11/ID17` A/B ordering is now strongly resolved as upper/lower.
 
-The patent is an architecture source, not proof that every block is placed in exactly the
-same ECU on F33.  Those exact-Camry conclusions continue to require firmware/dynamic
-joins.
+The patent supplies architecture evidence. Exact F33 placement of each block
+continues to require firmware/dynamic joins.
 
 ## 11. Openpilot design consequence
 
