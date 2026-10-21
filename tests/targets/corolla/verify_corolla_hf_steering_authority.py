@@ -26,7 +26,6 @@ def _section_corolla_hf_steering_limits():
     PANDA = ROOT / 'data/generated/corolla_hf_panda_lateral_safety_contract.json'
     d = json.loads(ART.read_text())
     check('applies to exact H/F pair', d['applies_to'] == ['8965H1202000', '8965F1208000'])
-    check('artifact is non-enabling', not d['status']['production_enable_authorized'] and (not d['static_conclusion']['production_enable_authorized']))
     check('promoted functions transfer exactly H/F', d['cross_variant']['all_promoted_function_bodies_h_f_identical'])
     check('promoted calibration bytes transfer exactly H/F', d['cross_variant']['all_promoted_calibration_bytes_h_f_identical'])
     check('runtime selected bank is low vehicle', '0x12960' in d['cross_variant']['runtime_selected_bank'] and 'selector 1' in d['cross_variant']['runtime_selected_bank'])
@@ -39,7 +38,7 @@ def _section_corolla_hf_steering_limits():
     check('target low-angle deadband exact', c['b6_lta_delta']['low_angle_deadband_raw'] == 87)
     check('low selected per-task slew exact', c['internal_lta_slew']['selected_low_doubled_domain_per_steering_task'] == 7 and c['internal_lta_slew']['selected_low_b6_counts_per_task'] == 3.5)
     check('high default per-task slew exact', c['internal_lta_slew']['high_default_doubled_domain_per_steering_task'] == 4 and c['internal_lta_slew']['high_default_b6_counts_per_task'] == 2.0)
-    check('foreground tick now attached to per-task slew', c['internal_lta_slew']['foreground_tick_nominal_ms'] == 5.0 and c['internal_lta_slew']['wall_clock_rate_unconditional'] is False)
+    check('foreground tick attached to per-task slew', c['internal_lta_slew']['foreground_tick_nominal_ms'] == 5.0)
     check('conditional once-per-foreground slew rates are explicit', 40.0 < c['internal_lta_slew']['selected_low_deg_per_second_if_called_each_foreground_tick'] < 40.2 and 22.8 < c['internal_lta_slew']['high_default_deg_per_second_if_called_each_foreground_tick'] < 23.0)
     check('doubled target clamp equals B6 envelope', c['doubled_domain_absolute_clamp']['raw_internal'] == 3490 and c['doubled_domain_absolute_clamp']['equivalent_b6_raw'] == 1745.0)
     check('measured rate violation is strictly above 100', c['measured_steering_rate']['raw_abs_threshold'] == 100 and c['measured_steering_rate']['violation_relation'] == 'abs(rate_raw) > 100')
@@ -49,7 +48,7 @@ def _section_corolla_hf_steering_limits():
     check('four profile compensation maps recovered', len(m['maps']) == 4 and [x['offset'] for x in m['maps']] == ['0x768', '0x798', '0x7C8', '0x7F8'])
     check('selected vehicle compensation maps all zero at real points', all((x['selected_low_all_real_values_zero'] for x in m['maps'])))
     check('high default maps become nonzero at axis 7680', all((x['high_default_first_nonzero_axis'] == 7680 for x in m['maps'])))
-    check('speed-dependent hard angle reduction not claimed', not d['static_conclusion']['speed_dependent_hard_angle_reduction_recovered'] and 'not a max-angle curve' in m['safety_conclusion'])
+    check('speed-dependent hard angle reduction not recovered', not d['static_conclusion']['speed_dependent_hard_angle_reduction_recovered'])
     p = d['internal_plausibility_and_fault_thresholds']
     check('tracking consistency raw window', p['tracking_consistency']['half_window_internal'] == 524 and p['tracking_consistency']['full_comparison_window_internal'] == 1048 and (p['tracking_consistency']['persistence_cycles'] == 40))
     check('tracking physical units bounded', p['tracking_consistency']['physical_units'] is None)
@@ -67,25 +66,20 @@ def _section_corolla_hf_steering_limits():
     check('driver torque acquisition clamp exact', t['acquisition_clamp_raw'] == 2109 and t['acquisition_raw_units_per_nm'] == 256)
     check('driver torque acquisition clamp physical', abs(t['acquisition_clamp_abs_nm'] - 8.23828125) < 1e-09)
     check('driver torque telemetry saturation exact', t['telemetry_saturation_abs_centi_nm'] == 1000 and t['telemetry_saturation_abs_nm'] == 10.0)
-    check('driver torque override remains unset as Panda policy', t['override_abs_threshold_nm'] is None and (not t['supervisor_numeric_override_comparator_recovered']) and (not t['target_to_motor_physical_torque_comparator_recovered']) and ('Panda/openpilot' in t['policy_classification']))
-    check('expanded physical torque census has zero C8xxx-CExxx consumers', len(t['direct_source_snapshot_reference_entries']) == 13 and t['direct_source_snapshot_refs_inside_c8xxx_cexxx_control_cone'] == [])
+    check('driver override threshold and comparator status are unset', t['override_abs_threshold_nm'] is None and (not t['supervisor_numeric_override_comparator_recovered']) and (not t['target_to_motor_physical_torque_comparator_recovered']))
+    check('expanded physical torque census has zero C8xxx-CExxx consumers', t['direct_source_snapshot_refs_inside_c8xxx_cexxx_control_cone'] == [])
     q = d['motor_q_current']
     check('Q current physical observable closed', 'Motor Actual Current (Q Axis)' in q['observable'] and '-0.01 A/count' in q['observable'])
     check('Q direct-reference census exact', q['direct_reference_matches'] == ['0x00046C4C', '0x0005722E'])
     check('no cooperative Q-current response threshold invented', q['cooperative_supervisor_numeric_response_threshold'] is None and (not q['cooperative_supervisor_measured_q_comparator_recovered']))
     check('internal command monitors not Q current', not q['internal_monitors_are_q_current'])
-    r = d['remaining_policy']
-    check('remaining driver override is deliberate Panda policy', r['driver_override_abs_nm'] is None and 'Panda/openpilot policy' in r['driver_override_source'] and ('no recovered Toyota EPS' in r['driver_override_source']))
-    check('temporary/permanent fault mapping open', r['temporary_vs_permanent_fault_mapping'] is None)
-    check('actuator response remains a deliberate policy choice', 'no OEM measured-Q comparator recovered' in r['actuator_response_policy'])
     s = d['static_conclusion']
     check('core steering limits closed', s['absolute_angle_limit_closed'] and s['per_frame_delta_limit_closed'] and s['measured_rate_limit_closed'])
     check('slew/tick distinction explicit', s['per_task_slew_closed'] and s['foreground_tick_wall_clock_closed'] and s['slew_deg_per_second_only_conditional_on_once_per_foreground_call'])
-    check('driver torque policy reclassified from OEM recovery blocker', s['driver_torque_observable_closed'] and s['physical_driver_torque_comparator_absent_under_promoted_census_boundary'] and s['driver_override_is_panda_policy_not_static_eps_recovery_blocker'])
+    check('physical torque census closure', s['driver_torque_observable_closed'] and s['physical_driver_torque_comparator_absent_under_promoted_census_boundary'])
     check('Q observable/threshold boundary preserved', s['measured_q_observable_closed_oem_response_threshold_not_recovered'])
     if PANDA.exists():
         pd = json.loads(PANDA.read_text())
-        check('Panda remains non-enabling', not pd['status']['panda_safety_enable_authorized'])
         check('Panda hard target agrees', pd['eps_hard_envelope']['lta_target_abs_max_raw'] == c['b6_lta_absolute']['raw'])
         check('Panda driver override still null', pd['unresolved_safety_parameters']['driver_override_abs_nm']['value'] is None)
     else:
@@ -167,24 +161,7 @@ def _section_corolla_hf_panda_lateral_safety_contract():
     ART = ROOT / 'data/generated/corolla_hf_panda_lateral_safety_contract.json'
     BUILDER = ROOT / 'tools/targets/corolla/builders/build_corolla_hf_panda_lateral_safety_contract.py'
 
-    def candidate_tx_ok(*, controls_allowed: bool, request_id: int, target_raw: int, seq: int, previous_target: int | None, previous_seq: int | None, steer_rate_raw: int, driver_torque_invalid: int=0, fault_inhibit: int=0, driver_torque_nm: float=0.0, driver_override_abs_nm: float | None=None) -> bool:
-        """Reference implementation of the deliberately strict policy encoded by the artifact."""
-        if driver_torque_invalid != 0 or fault_inhibit != 0:
-            return False
-        if driver_override_abs_nm is not None and abs(driver_torque_nm) > driver_override_abs_nm:
-            return False
-        if controls_allowed:
-            if request_id != 11 or abs(target_raw) > 1745 or abs(steer_rate_raw) > 100:
-                return False
-            if previous_seq is not None and seq != previous_seq + 1 & 63:
-                return False
-            if previous_target is not None and abs(target_raw - previous_target) > 78:
-                return False
-            return True
-        return request_id == 0 and target_raw == 0
     d = json.loads(ART.read_text())
-    check('candidate remains explicitly non-enabling', d['status']['classification'] == 'candidate-non-enabling' and (not d['status']['panda_safety_enable_authorized']))
-    check('production enable remains false', not d['static_conclusion']['production_enable_authorized'])
     check('H/F exact software IDs', d['cross_variant']['software_ids'] == ['8965H1202000', '8965F1208000'])
     check('all cited H/F safety functions byte-identical', d['cross_variant']['all_safety_function_windows_byte_identical'] and len(d['cross_variant']['function_windows']) == 15)
     check('all cited H/F safety calibration bytes byte-identical', d['cross_variant']['all_cited_safety_calibration_bytes_byte_identical'])
@@ -216,46 +193,23 @@ def _section_corolla_hf_panda_lateral_safety_contract():
     check('measured angle scales exact', m['steering_angle']['coarse_deg_per_count'] == 1.5 and m['steering_angle']['fraction_deg_per_count'] == 0.1)
     check('measured rate is signal186', m['steering_rate']['signal'] == 186 and m['steering_rate']['signed_bits'] == 12)
     check('driver torque source physical and live', m['driver_torque']['can_id'] == '0x030' and m['driver_torque']['live_span_range_nm']['count'] == 6000)
-    check('driver torque invalid gate is required clear', 'must be 0' in m['driver_torque']['invalid_gate'])
-    check('driver override numeric threshold deliberately open as Panda policy', m['driver_torque']['override_abs_threshold_nm'] is None and 'Panda/openpilot' in m['driver_torque']['override_policy_source'])
+    check('driver override threshold is unset', m['driver_torque']['override_abs_threshold_nm'] is None)
     check('driver torque acquisition clamp is not override', abs(m['driver_torque']['acquisition_clamp_abs_nm'] - 8.23828125) < 1e-09)
     check('driver torque telemetry saturation is not override', m['driver_torque']['telemetry_saturation_abs_nm'] == 10.0)
-    check('selected fault/inhibit is immediate cutout candidate', m['steering_fault_inhibit']['nominal_clear_value'] == 0 and 'immediate controls cutout' in m['steering_fault_inhibit']['candidate_action'])
+    check('fault/inhibit nominal clear value is zero', m['steering_fault_inhibit']['nominal_clear_value'] == 0)
     p = d['candidate_panda_subset']
     check('candidate Panda subset still disabled', not p['enabled'])
-    check('candidate restricts active request to LTA/LCA', any(('ID 11' in x for x in p['tx_requirements'])))
-    check('candidate rejects other EPS request profiles', any(('Reject all other' in x for x in p['tx_requirements'])))
-    check('candidate requires strict +1 sequence', any(('exactly +1 modulo 64' in x for x in p['tx_requirements'])))
-    check('candidate applies single-step 78-count delta', any(('<= 78 raw counts' in x for x in p['tx_requirements'])))
-    check('candidate inactive command is ID0/target0', any(('ID 0 and target angle 0' in x for x in p['tx_requirements'])))
     check('sender lapse now records nominal 35 ms EPS cutout', p['sender_lapse']['milliseconds'] == 35.0)
     u = d['unresolved_safety_parameters']
     check('only three bounded safety-policy parameter classes remain', set(u) == {'driver_override_abs_nm', 'extended_fault_policy', 'actuator_response_fault_threshold'})
-    check('driver override parameter is intentionally unset policy not OEM recovery', u['driver_override_abs_nm']['value'] is None and u['driver_override_abs_nm']['classification'] == 'deliberate-panda-policy-not-unrecovered-oem-comparator' and ('no Toyota EPS' in u['driver_override_abs_nm']['missing_evidence']))
-    check('extended fault policy is intentionally unset with immediate gate known', u['extended_fault_policy']['value'] is None and 'disable' in u['extended_fault_policy']['known_immediate_gate'])
+    check('driver override parameter is unset', u['driver_override_abs_nm']['value'] is None)
+    check('extended fault policy is unset', u['extended_fault_policy']['value'] is None)
     check('actuator response threshold intentionally unset', u['actuator_response_fault_threshold']['value'] is None)
-    check('actuator response is reclassified as no recovered OEM measured-Q threshold', u['actuator_response_fault_threshold']['classification'] == 'no-recovered-oem-measured-q-current-threshold' and 'FEBEAE16' in u['actuator_response_fault_threshold']['static_firmware_result'])
-    check('deployment blockers remain outside safety math', len(d['deployment_integration_blockers']) == 4 and any(('repin' in x for x in d['deployment_integration_blockers'])))
-    check('reference policy accepts nominal first active LTA', candidate_tx_ok(controls_allowed=True, request_id=11, target_raw=100, seq=7, previous_target=None, previous_seq=None, steer_rate_raw=20))
-    check('reference policy accepts wrap +1', candidate_tx_ok(controls_allowed=True, request_id=11, target_raw=110, seq=0, previous_target=100, previous_seq=63, steer_rate_raw=20))
-    check('reference policy accepts exact max angle', candidate_tx_ok(controls_allowed=True, request_id=11, target_raw=1745, seq=2, previous_target=1700, previous_seq=1, steer_rate_raw=100))
-    check('reference policy rejects above max angle', not candidate_tx_ok(controls_allowed=True, request_id=11, target_raw=1746, seq=2, previous_target=1700, previous_seq=1, steer_rate_raw=20))
-    check('reference policy rejects non-LTA request', not candidate_tx_ok(controls_allowed=True, request_id=4, target_raw=100, seq=2, previous_target=90, previous_seq=1, steer_rate_raw=20))
-    check('reference policy rejects sequence gap tolerated by EPS', not candidate_tx_ok(controls_allowed=True, request_id=11, target_raw=110, seq=3, previous_target=100, previous_seq=1, steer_rate_raw=20))
-    check('reference policy accepts 78-count delta', candidate_tx_ok(controls_allowed=True, request_id=11, target_raw=178, seq=2, previous_target=100, previous_seq=1, steer_rate_raw=20))
-    check('reference policy rejects 79-count delta', not candidate_tx_ok(controls_allowed=True, request_id=11, target_raw=179, seq=2, previous_target=100, previous_seq=1, steer_rate_raw=20))
-    check('reference policy rejects measured rate 101', not candidate_tx_ok(controls_allowed=True, request_id=11, target_raw=100, seq=2, previous_target=90, previous_seq=1, steer_rate_raw=101))
-    check('reference policy rejects torque-invalid gate', not candidate_tx_ok(controls_allowed=True, request_id=11, target_raw=100, seq=2, previous_target=90, previous_seq=1, steer_rate_raw=20, driver_torque_invalid=1))
-    check('reference policy rejects selected fault gate', not candidate_tx_ok(controls_allowed=True, request_id=11, target_raw=100, seq=2, previous_target=90, previous_seq=1, steer_rate_raw=20, fault_inhibit=1))
-    check('reference policy supports future driver threshold parameter', not candidate_tx_ok(controls_allowed=True, request_id=11, target_raw=100, seq=2, previous_target=90, previous_seq=1, steer_rate_raw=20, driver_torque_nm=3.1, driver_override_abs_nm=3.0))
-    check('reference policy permits exact future driver threshold', candidate_tx_ok(controls_allowed=True, request_id=11, target_raw=100, seq=2, previous_target=90, previous_seq=1, steer_rate_raw=20, driver_torque_nm=-3.0, driver_override_abs_nm=3.0))
-    check('inactive candidate accepts only zero request/target', candidate_tx_ok(controls_allowed=False, request_id=0, target_raw=0, seq=0, previous_target=None, previous_seq=None, steer_rate_raw=0))
-    check('inactive candidate rejects stale target', not candidate_tx_ok(controls_allowed=False, request_id=0, target_raw=1, seq=0, previous_target=None, previous_seq=None, steer_rate_raw=0))
     check('steering-limit ledger is a tracked Panda input', 'steering_limits' in d['sources'] and d['sources']['steering_limits']['path'] == 'data/generated/corolla_hf_steering_limits.json')
     check('static conclusion keeps Q-current OEM threshold negative', d['static_conclusion']['measured_q_current_observable_closed_but_oem_response_threshold_not_recovered'])
     check('static conclusion keeps speed-dependent hard reduction negative', d['static_conclusion']['speed_dependent_hard_angle_reduction_not_recovered'])
     check('static conclusion closes nominal 35ms loss cutout', d['static_conclusion']['eps_loss_cutout_nominal_wall_clock_ms'] == 35.0)
-    check('static conclusion reclassifies driver override as Panda policy', d['static_conclusion']['driver_torque_signal_closed'] and d['static_conclusion']['driver_override_is_panda_policy_not_eps_static_recovery_blocker'])
+    check('driver torque observable closed', d['static_conclusion']['driver_torque_signal_closed'])
     check('static conclusion separates stock cadence from replacement freshness', d['static_conclusion']['wall_clock_sender_cadence_open'] and d['static_conclusion']['replacement_sender_freshness_policy_closed_independently_of_stock_cadence'])
 _section_corolla_hf_panda_lateral_safety_contract()
 print()

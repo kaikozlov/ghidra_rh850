@@ -4,8 +4,7 @@
 Read-only/offline.  Static signal geometry is consumed from the exact-F33 command-cone
 artifact; this reducer scans only the two tracked relay-correct CAN-only captures and
 asks whether any ordinary generated-COM input to C54A2/C5554/C28FC changes during the
-repeated Class-L intervals.  It does not infer an OEM LTA name and does not authorize
-vehicle output.
+repeated Class-L intervals.
 """
 from __future__ import annotations
 
@@ -154,7 +153,6 @@ def build() -> dict:
                 "from surrounding driving in the retained captures. Internal/fault/diagnostic selector "
                 "alternatives remain separately bounded by the exact static model."
             ),
-            "production_output_authorized": False,
         },
     }
 

@@ -307,7 +307,7 @@ def main() -> int:
                 "0xD0E18/0xD0E54 -> 0xC5156 -> 0xCAF84 -> FEBEBC52 -> 0xC51EA internal gain product",
                 "0xD1118/0xD1154 -> 0xC6D16 -> 0xCAF84 -> FEBEBE28 -> 0xC6DAA internal gain product",
             ],
-            "classification": "fixed CodeFlash pointer-table use of profile flags exclusively as internal gain selectors",
+            "classification": "fixed CodeFlash pointer-table use of profile flags as internal gain selectors",
         },
         "five_pdu_boundary": five_pdu,
         "static_conclusion": {
@@ -318,7 +318,7 @@ def main() -> int:
             "transfer_to_8965F1208000": "exact: all cited code and tables lie in the byte-identical 0x20000..0x0FFFFF application range",
         },
         "evidence_boundary": (
-            "The five configured normal H/F Tx PDUs were checked at their packers for direct cooperative-root reads; the missed raw-mode route was followed through fixed-GP copies and computed aliases; and all raw absolute pointer materializations of the exact/profile roots were enumerated, with the profile pointers resolved through both fixed CodeFlash table families to internal gain consumers. This proves no exact discrete cooperative-authority bit under those direct, fixed-GP, simple computed-alias, and fixed-CodeFlash-pointer-table surfaces. It does not exclude arbitrary mutable runtime pointers, DMA/peripheral mutation, physical actuator-response inference, or another ECU assigning a different meaning to the coarse 0x030 bits. No live authority transition is claimed."
+            "The five configured normal H/F Tx PDUs were checked at their packers for direct cooperative-root reads; the missed raw-mode route was followed through fixed-GP copies and computed aliases; and all raw absolute pointer materializations of the exact/profile roots were enumerated, with the profile pointers resolved through both fixed CodeFlash table families to internal gain consumers. This proves no exact discrete cooperative-authority bit under those direct, fixed-GP, simple computed-alias, and fixed-CodeFlash-pointer-table surfaces."
         ),
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)

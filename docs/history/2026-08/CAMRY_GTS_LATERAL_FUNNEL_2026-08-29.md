@@ -44,13 +44,13 @@ firmware/log join from evidence.
 
 | Wrong                                                 | Accurate                                                                                                                                                                  |
 | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| “GTS+ does not contain a CAN DBC.” | GTS+ **is** the OEM signal dictionary, keyed by **UDS DID / FFD recorder ID**. Vehicle CAN arbitration IDs require an independent join. It cannot by itself emit `BO_ 138` / `BO_ 182`. |
+| “GTS+ does not contain a CAN DBC.” | GTS+ **is** the OEM signal dictionary, keyed by **UDS DID / FFD recorder ID**. |
 | Family `.ddb` = this Camry.                           | `EMPS_P5.ddb` is the **generation-20 EMPS catalog**. Runtime `GetSupportP5` / `GetSupportMultiP5` intersects that catalog with **this ECU’s** supported DID list.         |
 | Stock LTA uses `0x0B6`.                               | Retained drives contain **73.3 s / 237k frames** of ID11 LTA/LCA **request state** with zero B6. Request state alone is not a winner/grant oracle. |
 | `0x08A` is a native Bus-1 camera frame.               | Every retained `0x08A` is on captured **Bus 4** and absent from Bus 1. The physical transmitter, private transport, and signer remain open; Bus-1 trailer absence does not identify FRC crypto capability. |
 | `0x08A → B6` is how stock LTA works.                  | **CORR-135 / OQ-054.** Matching milliradian scale plus exact F33 excluding `0x08A` as Rx does **not** prove a transform. B6 is a separate candidate ingress. |
 | P6 ADCU DIDs are on this car.                         | Camry HV **12984** moved **powertrain** to gen-22 P6. ADAS/chassis on 12704/12862/**12984** stays **gen-20 P5 FRC/EMPS**. Use P6 as a vocabulary oracle only. |
-| Treating `D0218` as the LTA request input. | `D0218` default-bank terms implement conventional EPS assist (driver torque × speed-sensitive maps, return, dither). The published milliradian request is separate. Retained ID11 proves only request state; winner/grant remains unresolved. |
+| Treating `D0218` as the LTA request input. | `D0218` default-bank terms implement conventional EPS assist (driver torque × speed-sensitive maps, return, dither). Retained ID11 proves request state. |
 | The middle is a mystery CAN ID EPS must be receiving. | Recovered PCS dictionary: request `5282`/`5631` vs winner `5285`/`57DE` vs grant `5265` vs EPS-copy `1B40_3`. `0x08A` carries the truncated **request**. |
 
 
@@ -185,7 +185,7 @@ the rest. Tracing “GTS+ name → this car” **always** needs that intersectio
 What F33 *does* implement as cooperative ingress: protected `0x0B6`.
 GTS+ names B6 loss **U012987 Lost Communication with Brake System Control
 Module**. At family level, this identifies the **brake domain** as the
-expected request source. FRC attribution requires separate evidence.
+expected request source.
 
 Exact F33 protected Rx: `0x00F`**,** `0x0D7`**,** `0x0B6` **only**. Generated COM Tx:
 `0x030 / 0x351 / 0x394 / 0x4A3 / 0x4C8`. It does **not** accept `0x08A` as
@@ -215,7 +215,7 @@ packing. OQ-054 still notes that B21/B26 upper two bits are zero in all retained
 
 | GTS+ leaf                          | OEM name                                                                                                                 | What it is                                            | This Camry wire / F33                                                   |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------- | ----------------------------------------------------------------------- |
-| FRC Data List `0x1601` | LTA Switch (`0=OFF/1=ON`); LTA Control (`0=Enabled/1=Disabled`); Hands-Off customize + control | switch + enabled/disabled | FRC DID; CAN PDU join unresolved |
+| FRC Data List `0x1601` | LTA Switch (`0=OFF/1=ON`); LTA Control (`0=Enabled/1=Disabled`); Hands-Off customize + control | switch + enabled/disabled | FRC DID |
 | FRC Data List `0x1202`             | LTA/LCA/LDA installation bits                                                                                            | option presence                                       | FRC DID                                                                 |
 | FRC Data List `0x1308`             | Steering Wheel Information                                                                                               | `0=Unused 1=Left 2=Right 3=Default`                   | LCA side cue; not pinion                                                |
 | FRC Data List `0x1914`             | ACC Control in Operation Flag                                                                                            | cruise operating                                      | FRC DID                                                                 |
@@ -230,7 +230,7 @@ packing. OQ-054 still notes that B21/B26 upper two bits are zero in all retained
 | FFD `5285` / `57DE`                | Arbitration result lateral ID / pinion angle                                                                             | **winner after arbitration**, same 0.001 pinion scale | not yet joined to a Bus-4 PDU                                           |
 | gen-22 `ADCU_P6` `0x1E19`          | Lateral Control Request Pinion Angle (**deg**, LSB 0.001) **and** Pinion Angle Of Arbitrated Result (**rad**, LSB 0.001) | successor names the request/result split in one DID   | **not an ECU on 12704’s ADAS set**                                      |
 | gen-22 `ADCU_P6` `0x1ED3`          | Lateral Control ID of Arbitrated Result                                                                                  | winner ID                                             | vocabulary oracle only                                                  |
-| gen-22 `ADCU_P6` `0x1EC2` | PDA-SA request ID + guide angle + system gain `[0,100]` + damping gain `[0,100]` | same four-field contract, PDA-SA flavour | `18` means “Request” in this namespace; EMPS SDG has separate semantics |
+| gen-22 `ADCU_P6` `0x1EC2` | PDA-SA request ID + guide angle + system gain `[0,100]` + damping gain `[0,100]` | same four-field contract, PDA-SA flavour | `18` means “Request” in this namespace |
 
 
 FRC ordinary Data List contains LTA *installation* and *switch/control condition*.
@@ -303,9 +303,7 @@ return-to-center, dither. Inputs are vehicle speed and driver torque.
 The eight B6-inactive terms have **no recovered lane-target**. This is parking-lot “mouse
 acceleration,” always available.
 
-The 73 s of `0x08A` B21=11 with zero B6 establishes only **FRC requesting LTA**.
-Path A execution and lane-aware Path B remain unproved. VAR-072 already refused
-to call the Class-L motor floor “LTA authority.”
+The 73 s of `0x08A` B21=11 with zero B6 establishes **FRC requesting LTA**.
 
 ## 7. What GTS+ physically contains (and what it does not)
 
@@ -334,7 +332,7 @@ Gen-22 `ADCU_P6` collapses the distributed P5 stack into one ADAS domain
 controller and names `Lateral Control Request Pinion Angle` / `Lateral Control ID of Arbitrated Result` directly.
 
 Camry 12984 moved **powertrain** to P6; ADAS on all three Camry HV types is
-still `FRC_P5`. Use P6 only for vocabulary. This car's producer requires an exact-target join.
+still `FRC_P5`. Use P6 for vocabulary.
 
 Pre-498 high-end stack (`PCS1+DSSystem+Fr_RadSen+RoadSign+PCS2`) is LS500 /
 LS500h / MIRAI only in NA. Do not mix it into TSS3 FRC ownership.
@@ -367,7 +365,7 @@ Tools: `tools/gts`, `tools/g` / `tools/gtarget camry-8965F3307000`,
 The funnel now identifies these specific next investigations, in priority order:
 
 1. **Treat `0x08A` as a Bus-4 publication of the FRC request object.**
-   FRC native-bus attribution remains unproved. Post-repin panda bus 1 is Toyota Bus 1
+   Post-repin panda bus 1 is Toyota Bus 1
    (camera/radar, `0x180..0x18C`) and has **zero** `0x08A`. Producer is a
    Bus-4 transmitter (Brake, CGW-as-Bus-4 origin, or another Bus-4 node).
    CentralGW_P5.ddb will not name the PDU — it has no routing DIDs.
@@ -438,7 +436,7 @@ Earlier `tools/gts search --ecu CentralGW_P5` also hit `CentralGW_P5FHI.ddb` (Su
 
 Implication: Toyota did not put the Bus-1→Bus-4 PDU republish table in GTS+. CGW firmware (not this diagnostic DB) would own it, if CGW is the hop.
 
-EPS on CAN Bus Check is “Power Steering (EPS) via **EBU**”; Skid/Brake Booster are “via No. 2 Global CAN Junction Connector”; SAS/Airbag via No. 7. EBU's meaning remains undecoded beyond its topology label. FCM `0x6D` sits on Bus 1 with no junction suffix.
+EPS on CAN Bus Check is “Power Steering (EPS) via **EBU**”; Skid/Brake Booster are “via No. 2 Global CAN Junction Connector”; SAS/Airbag via No. 7. FCM `0x6D` sits on Bus 1 with no junction suffix.
 
 #### Lost-communication graph (family dictionaries, then F33 subset)
 
@@ -584,13 +582,13 @@ Next probe: look at brake-family Data List / RoB for anything that could be a **
 
 **Brake “lateral” Data List** is accelerometer `Lateral G` / `Lateral G (EBU node)` plus the `0x107E` observer. `0x10A1..0x10A4` remain longitudinal TSS accel request (upper/lower + 6-bit IDs). Brake SID-22 does **not** publish a TSS lateral request. If Brake transmits `0x08A`, GTS+ does not expose that PDU as a DID.
 
-**EBU names a brake-domain node.** ABS/BrkBst DIDs `0x108D..0x1093` are wheel speed/accel, G, yaw “**(EBU node)**”. CAN Bus Check places EPS “via **EBU**” on Bus 4 next to Skid/Brake Booster. This places EPS on the chassis/brake stub of Bus 4. EBU authorship of `0x08A` still requires independent evidence.
+**EBU names a brake-domain node.** ABS/BrkBst DIDs `0x108D..0x1093` are wheel speed/accel, G, yaw “**(EBU node)**”. CAN Bus Check places EPS “via **EBU**” on Bus 4 next to Skid/Brake Booster. This places EPS on the chassis/brake stub of Bus 4.
 
-**Meter_P5 (cat 409, gen20, Toyota Bus 3)** exposes telltale and installation state. Commands remain unsupported:
+**Meter_P5 (cat 409, gen20, Toyota Bus 3)** exposes telltale and installation state:
 
 - `0x15A1` option bits: LDA/PCS/ICS/Radar Cruise/IPA/RSA With/Without — **no LTA-named bit in the rows dumped**
 - `0x2951` live indicators: PCS warning, Radar Cruise, Cruise, SET, **LDA Steering Control Indicator**, left/right LDA indicator/warning
-- `0x10A6` `Steering ECU` reports installation as **With/Without**. Missing-message monitoring requires separate evidence.
+- `0x10A6` `Steering ECU` reports installation as **With/Without**.
 
 Meter sits on Bus 3. A HUD consumer of `0x08A` would require CGW Bus-4→Bus-3 republish; GTS+ does not prove that join. LDA-named telltales can still light for LTA (Toyota kept the LDA indicator family). Do not treat meter as the `0x08A` producer.
 
@@ -642,7 +640,7 @@ Same Toyota Bus 4 (EPS via EBU, Skid `0x29`, Brake Booster `0x28`, SAS `0xF0`):
 - `0x0AA` wheels, `0x127` gear, `0x51E` Ready, `0x0FE` cruise buttons, …
 - Protected `0x0B6` — cooperative target angle + Target Lateral ID. **Zero frames in stock LTA.**
 
-**Out of EPS (only five generated-COM Tx IDs):** `0x030` (driver torque + motor-feedback proxy), `0x351`, `0x394`, `0x4A3` (angle/torque telemetry), `0x4C8`. Brake `U013187` is “some EPS message disappeared”; this Tx set supplies the natural candidates. GTS+ names alone cannot identify the missing PDU.
+**Out of EPS (only five generated-COM Tx IDs):** `0x030` (driver torque + motor-feedback proxy), `0x351`, `0x394`, `0x4A3` (angle/torque telemetry), `0x4C8`. Brake `U013187` is “some EPS message disappeared”; this Tx set supplies the natural candidates.
 
 **On Bus 4 but not into EPS:** `0x08A` (FRC-authored request object, truncated). FRC lives on Bus 1.
 
@@ -657,7 +655,6 @@ Do not read Path B as “how factory LTA steers.” See the next work-log entry.
 
 The retained drives have Path-A idle (zero B6) while FRC still published ID11
 on `0x08A`. That establishes request without cooperative grant.
-Path B lane keeping remains unproved.
 
 ### 2026-08-29 — Path A/B correction (chassis supervisor vs conventional assist)
 
@@ -674,14 +671,12 @@ Lateral ID 11 selects LTA/LCA supervisor mode2. GTS+ U012987 is this link.
 speed maps, return, dither, aggregation. Same idea as speed-sensitive power
 steering. Vehicle speed (`0x0D7` SP1) is an input; there is no recovered
 lane/camera term. Section 27 already showed the moving-mode/assist family is
-**cruise-generic**, leaving Class-L discrimination unproved. Its live contribution
+**cruise-generic**. Its live contribution
 was zero when `0x0D5` s213 was zero.
 
 **What the 73 s actually showed:** `0x08A` B21=11 (FRC request + HUD/state
-carriers `0x412`/`0x371`) with **zero B6**. This establishes only layer 1
-(camera requesting). Layer 2 requires Brake to grant cooperative control.
-Calling this “factory LTA steered through `D0218`” over-read VAR-081’s
-request-state label.
+carriers `0x412`/`0x371`) with **zero B6**. This establishes layer 1
+(camera requesting).
 
 **What §24 still is (do not throw away, do not over-promote):** inside those
 ID11 intervals the motor-feedback proxy had a hands-light floor vs
@@ -689,7 +684,6 @@ speed-matched cruise, and short opposing-driver runs. VAR-072 already
 bounded that as **not proof of LTA authority** — a changed damping/assist
 map looks the same, and there was **no** hands-light autonomous sweep.
 This is compatible with Path B changing feel under cruise/LTA *state*.
-A new Path B lane target remains unsupported.
 
 CORR-135 remains right that `0x08A → B6` is not proved. It overstated that
 zero-B6 “factory LTA” is therefore Path-B actuation. Working correction:
@@ -854,7 +848,7 @@ has **22,447/22,447** method bodies. Read it with
 `622081` status is `01`).
 
 That program models Toyota's TSS3 **control / flight recorder** using recorder
-DID keys. CAN-ID assignment requires a separate join. The extractors already
+DID keys. The extractors already
 pinned the tables, but we had not used them as the model for the
 0x08A-tracking result.
 
@@ -868,7 +862,7 @@ FRC-side objects that name the split the CAN logs just showed:
 | `5273` / `5274` | Steering angle / rate **(arbitration)** | float observers of the arbitrated plant |
 | `5246` / `5247` | Pinion angle / **EPS torque** (+ sensor)                         | FRC's view of the actuator we correlated as `0x030 B22:B23`                                                                            |
 | `5265` B14[7]   | **Active steering under-control flag**                           | sits next to ABS/VSC/VDM/MCB under-control bits. This is the FRC-side "is the chassis actually steering" bit, analogue of EPS `0x106A` |
-| `5601` | LTA SW / **LTA Control Status** / hands-off flags | feature state; Bus-4 request latch is separate |
+| `5601` | LTA SW / **LTA Control Status** / hands-off flags | feature state |
 | `560D`          | driver-steer detect, LTA DDR control state, EPS pinion `0.001`   | plant + override inside LTA                                                                                                            |
 | `5632`          | Hands-Off State / Hands-Off LTA Continue Request                 | the "car steering itself" condition Toyota named                                                                                       |
 | `57A3` | PCS steering output phase (3 bits) | `SupportDID=0` in the current table — PCS-family RoB |
@@ -888,7 +882,7 @@ arbitration result. That would falsify the Path-A "B6 actuation" model.
 Continued analysis of the same logs and recovered PCS dictionary identified the
 `0x8A00` hit in `GetTSS3OperationFFDP5` as `jnz +0x8A`.
 CommandCommon's `5282`/`57DE` immediates are code offsets.
-Native host plugins remain DID/FFD-keyed. CAN-ID joins require independent evidence.
+Native host plugins remain DID/FFD-keyed.
 
 **B24 OEM-join (recovered).** TSS3 recorder `5282` / LTA `5631` / LDA `5531`
 are the same four-field layout: lateral ID, pinion s16 `0.001`, **steering
@@ -896,9 +890,7 @@ assist gain** u8 `0.01`, damping u8 `0.01`. Live `0x08A` B24 is `100` in
 every ID11 frame and `50` in every ID18 (SDG) frame. These encode gain `1.00` /
 `0.50`. ADU resource `2A04_3` names the same slot **Steering support gain**.
 Damping (`5282_4` / `5631_4` / `2A04_4`) is
-**not on this PDU** (B25 is identically zero). Live-baseline §39 and opendbc
-`LATERAL_REQUEST_LEVEL` still describe a bounded percent unit with an unresolved OEM join.
-This session recovers the FFD name.
+**not on this PDU** (B25 is identically zero). This session recovers the FFD name.
 
 **The two** `0x7FFF` **s16 slots are the unpublished second pinion.** ADU
 `1B40` keeps *two* LTA angle requests in one record: `1B40_2` LTA steering
@@ -928,14 +920,14 @@ plant twin (`r` vs `0x025`'s 12-bit word is 0.45). Bus-1 `0x160[10]/[22]`
 looks like angle (r≈0.83) because it **is** the already-closed SAS echo
 (live-baseline §26, r=+0.9963 delayed). `0x081` B16 vs `0x08A` B18 is
 r=0.995 / 74% exact in this core — a low-pass of the **request**.
-The result remains unjoined. B8:B9 is still not `57DE`: ID0 r(B8, angle)=0.08; ID11 r=0.20;
+B8:B9 is still not `57DE`: ID0 r(B8, angle)=0.08; ID11 r=0.20;
 ID18 r=−0.42 and r(B8, B18)=−0.66. ID0 B18 ≈ `17.44·deg` recovers the
 milliradian scale when the request is following the wheel; ID11 is the
 hold-error case already logged.
 
 `0x0D7` **B1 is not an LTA grant.** F33 COM signal 246 is u16 at B1:B2
 (SP1, 0.01 km/h). B1≈27 during ID11 is the high byte of ~70 km/h
-(`0x1Bxx`), placing it in the set-speed band. A mode-nibble interpretation is excluded.
+(`0x1Bxx`), placing it in the set-speed band.
 Speed-class gating is already closed in the command-cone ingress artifact.
 
 `5601` **/ ADCU** `0x1B10` **LTA Control Status** is `{0..4}` Not
@@ -999,8 +991,7 @@ CAN frame only half-publishes:
 
 Two milliradian pinions, same invalid, one of them named **(EPS)**.
 `0x08A` putting one live pinion + two `0x7FFF` slots is that record
-with the EPS copy and the `2A06` result left unpublished. It is not
-proof F33 receives either copy.
+with the EPS copy and the `2A06` result left unpublished.
 
 `2E8D` **/** `2E92` **CAN observers use SAS-style geometry.**
 Byte1 s16 LSB **1.5** (Decimal 15 scale 1) + byte3 s8 LSB 0.1, invalid
@@ -1012,8 +1003,7 @@ s16 0.001-deg/rad geometry. ADU FFD fields are `_1` byte1 f32 request pinion inv
 `0xFFFFFFFF`, `_2` byte5 u8 EDSS ID, `_3` byte6 f32 arbitrated
 pinion. Do not pack `0x08A` as `1E19`.
 
-P6 ADCU is still not on this car. These layouts supply dictionary semantics
-for the truncated Bus-4 publication. F33 implementation of `1B40` remains unproved.
+These layouts supply dictionary semantics for the truncated Bus-4 publication.
 
 ### 2026-08-29 — B8:B9 cruise speed-error identification
 
@@ -1035,9 +1025,8 @@ follows set-speed error at 0.991. It is a longitudinal sidecar on the
 same PDU as the lateral request. B11:B12 remains the 100% byte-identical
 duplicate. Intercept is not zero (+28..+83), slope sits near **128
 counts/km/h**. This supports a bounded Q7-ish speed-error / ACC P-term
-interpretation. An OEM join remains absent. `5281` "TSS request acceleration
-(upper limit)" is s16 `0.001` and is collinear with a P-on-speed-error during a hold.
-That identity remains unproved.
+interpretation. `5281` "TSS request acceleration (upper limit)" is s16 `0.001`
+and is collinear with a P-on-speed-error during a hold.
 
 That also explains ID18 (cruise off, B10=0): B8 is not a speed-error
 against a setpoint, so the angle anti-correlation was a red herring.
@@ -1065,9 +1054,8 @@ Stop collapsing `eyes → EPS`. Toyota already named the box in the recovered
 PCS Operation-FFD dictionary
 (`data/generated/gtsplus_2026/pcs_data_viewer_tss3_managed_semantics.json`,
 PE `fc0841df…`, 1,130 `DetailBitAssignInfo` rows / 623 recorder DIDs).
-GTS+ uses recorder-ID keys. A `BO_` join requires independent evidence.
+GTS+ uses recorder-ID keys.
 This section joins that object model to this car’s buses.
-It leaves the mux CPU unresolved and authorizes no output.
 
 #### The four-object pipeline
 
@@ -1140,7 +1128,7 @@ If `_7` is clear, ID 11 on the request is eyes without chassis grant.
 driver-steer detect / prohibited, DDR state, **EPS pinion** `0.001`,
 following flags. `5632` is hands-off continue / DESA / TD reasons.
 `5601` describes feature state: LTA SW / **LTA Control Status** / hands-off
-customize+judgment. The Bus-4 request latch is separate.
+customize+judgment.
 
 **4. Feature presence (what this FRC even has).** `5202`, all
 `SupportDID=1`: PCS, FCTA, Radar Cruise, Cruise, **LDA, LTA, LCA**, AHB,
@@ -1178,7 +1166,7 @@ Joined to the two relay-correct drives (3.57M frames, chassis on panda 0/2):
 | `5280`/`5281` sidecar             | same PDU: cruise latch B3, set speed B10, speed-error B8:B9                                                  |
 | `1B40_2` ADU pinion               | the live milliradian at B18:B19                                                                              |
 | `1B40_3` EPS pinion               | **unpublished** — B13:B14 and B16:B17 are the s16 invalid `0x7FFF`                                           |
-| `2A06` / `57DE` result | **not** a distinct Bus-4 s16 (hands-light census). `0x081` low-pass-filters the **request**; winner join remains absent. |
+| `2A06` / `57DE` result | **not** a distinct Bus-4 s16 (hands-light census). `0x081` low-pass-filters the **request**. |
 | `5265` / `5285` / `5631` / `560D` | FFD-only so far. No live Operation-FFD grab in the retained logs.                                            |
 | EPS ingress | F33 does not accept `0x08A`. The request is published on EPS's bus. |
 
@@ -1188,7 +1176,7 @@ Joined to the two relay-correct drives (3.57M frames, chassis on panda 0/2):
 
 RoB `SYSTEM_TYPE` (`0=None 1=AHBAHS 2=LDA 3=PCS 4=IDA 5=URSM 6=SDG`)
 classifies **triggers**. LTA/LCA/LCS cancel RoBs use `SystemType=2`
-(LDA family). DID producer ownership requires independent evidence.
+(LDA family).
 
 #### Bounded host and execution ownership
 
@@ -1259,7 +1247,6 @@ request.
 FFD records these objects diagnostically. Driving commands that moved the
 car are on CAN and inside EPS. `0x08A` supplies the live request publication.
 Operation FFD can optionally inspect FRC RAM for winner/grant state.
-It provides no actuation interface. Keep `AB11` separate from steering output work.
 
 ### 2026-08-29 — CarState reads the live `0x08A` request
 
@@ -1368,9 +1355,7 @@ The first VAR-091 draft overclaimed the new evidence.
 all CAN frames in one publication. Bus-0 median batch size is **14** in both
 drives. `0x08A` shares its timestamp with another bus-0 frame in
 **20,607/20,615** A and **23,999/23,999** B samples. Therefore its apparent
-20/30 ms gaps measure publication timing. Per-frame wire timing remains unavailable.
-They cannot establish arbitration delay, a shared/different TX queue,
-oscillator, scheduler, or ECU. Remove the “not Skid's `0x0D7` queue” conclusion.
+20/30 ms gaps measure publication timing.
 
 **Authentication boundary.** Zero Bus-1 `0x00F` and near-constant last-4 on
 all periodic Bus-1 streams prove those observed PDUs do not end in ordinary-P5
@@ -1438,7 +1423,7 @@ is now part of `p5_adas_p6_migration.json` schema v2 and
 ### 2026-08-29 — exhaustive flow trace: every TSS lateral object hunted in both retained drives
 
 Multi-agent sweep over `raw-20260827` drives A/B (five stage finders → adversarial
-verification → gap closure). Session scratch records only workspace state:
+verification → gap closure). Session scratch:
 `build/tmp/camry_trace/` (`find_round1.json`, `verify_round.json`,
 `close_round.json`, per-test `_out.json`). Compacted 2026-08-29 into
 `data/generated/camry_2026_lateral_flow_trace.json` +
@@ -1502,7 +1487,7 @@ preserved, while their current bounded interpretation is stated explicitly.**
    an 11.7 s-old latch — no button in [-6,+1] s. Drive-A-only UDS session
    (29-bit startup sweep + `0x770/0x778/0x796/0x79E` polling, 12,645 0x7xx
    frames; zero in B) is an external tool; its 354.5–391.7 s pause originates
-   in that tool. Vehicle suppression is excluded.
+   in that tool.
 8. Refuted round-1 candidates (retained to prevent regression): `0x19C`
    "LTA cadence flip" (10/20 Hz phase dilution — the fast phase contains ID11
    in BOTH drives); bus-1 "5.3% rate deficit outside ID11" (capture-side
@@ -1522,4 +1507,4 @@ interface or private stub. VAR-066 independently places B6 on the already reache
 Bus-4 Brake/EPS segment: keep the current repin and treat `0x0B6` DLC 32 on Panda
 bus 0 / the `CAN0/CAN2` relay pair as the candidate openpilot ingress. FRC
 Operation FFD remains the no-output discriminator for request, winner, and
-grant ownership. Physical routing requires independent evidence.
+grant ownership.

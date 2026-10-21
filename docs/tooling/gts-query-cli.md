@@ -24,7 +24,7 @@ does not select one:
 | ECU implementation route | `tools/gts category FRC_P5` | Category and plugin-role bindings; follow a role with `command` |
 
 An empty `did` result means **no matching Data List/alternate snapshot row in
-that ECU database**. Toyota definitions can exist in other namespaces. Check the
+that ECU database**. Check the
 recorder namespace when investigating a recorder ID. Neither command silently
 borrows records or enum meanings from the other namespace.
 
@@ -52,9 +52,7 @@ for its `SupportDID=1` fields, the preceding byte supplies the support bit.
 Keep “unsupported” separate from a numeric zero.
 
 Both paths describe **diagnostic/recorder payload positions**.
-A CAN-frame assignment requires a producer/dataflow or synchronized
-capture join. A display focus filter also does not establish that raw records
-were omitted from acquisition; inspect the reader before making that claim.
+Inspect the reader to determine which raw records acquisition includes.
 
 ### Recorder lookup contract
 
@@ -76,7 +74,7 @@ The command needs no external GTS installation. It reads the pinned
 the artifact and JSON includes its source hashes. All recovered field attributes
 are retained, including `Point` where present; byte positions are 1-based and
 bit position 7 is MSB. This command inspects the recovered schema.
-Decoder implementation and live support require separate evidence. Legacy DDR schemas remain in the
+Legacy DDR schemas remain in the
 [recorder guide](pcs-data-viewer-tss3-dictionary.md), outside these two selections.
 
 ## Command surface
@@ -481,13 +479,10 @@ The legacy Camry registry schema **v6** predates the universal bundle and remain
   per-category function menus. Unrecovered generic roles are omitted.
 
 The registry provides metadata. Authorization remains a runtime requirement.
-`execution: executable` only certifies complete fixed request geometry;
-the registry still contains no
-runtime command to execute anything, no SecurityAccess secret, no session escalation
-policy beyond the recovered lifecycle description, and no flash/write workflow. Live
-support state and any outer session/authentication requirements remain runtime
-questions. The generated artifact also records SHA-256 identities for every consumed
-GTS+/derived input so a changed corpus cannot silently reuse old plans. Source keys
+`execution: executable` certifies complete fixed request geometry. Live support
+state and outer session/authentication requirements remain runtime questions.
+The generated artifact records SHA-256 identities for every
+consumed GTS+/derived input so a changed corpus cannot silently reuse old plans. Source keys
 are logical and checkout-independent: GTS inputs use `gtsplus/<region>/DB/<family>/...`
 while tracked evidence remains repository-relative, so an isolated worktree cannot
 change registry bytes merely because the corpus is mounted at a different path.
@@ -516,8 +511,4 @@ DDBs and writer tables are not silently mixed across releases. Use
 ## Evidence boundary
 
 A `tools/gts` result provides **external-source discovery**.
-Target-firmware proof requires an image-bound join. Toyota names and database membership can constrain interpretation, but
-they do not prove that the Camry/Sienna/Corolla firmware uses a field the same
-way, nor do they prove CAN producer ownership, SecOC key/freshness semantics,
-or runtime reachability. Promote useful correlations through the existing
-image-bound extractors/tests before recording them as firmware findings.
+Toyota names and database membership can constrain interpretation.

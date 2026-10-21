@@ -11,9 +11,8 @@ Techstream V18.00.003 distribution
 This script produces a standalone vocabulary artifact for cross-variant
 use — its 13 extra seq-derived candidate firmware-DID bridges (relative to the
 NA database) cover EPS state variables that give the correlation engine more
-matches to test when new firmware arrives. They are not ``CDbDidTable`` rows.
+matches to test when new firmware arrives.
 
-The artifact is NOT Sienna-specific (no firmware DID-table correlation).
 It is a pure OEM vocabulary extraction, analogous to what
 ``extract_catalog.py`` produces before the firmware correlation step.
 

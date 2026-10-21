@@ -390,10 +390,6 @@ def build(root: Path | None = None) -> dict[str, Any]:
                 control_rows.values(),
                 key=lambda r: (r["name"].casefold(), r["source"], r["table"]),
             ),
-            "boundary": (
-                "name census only: absence of an angle/torque label is not proof that a routine "
-                "cannot affect steering; semantic effect must be established separately"
-            ),
         },
         "current_camry_relevant": {
             "frc_pcs_collision_avoidance_routine": frc_collision_routine(parser, root),

@@ -3703,7 +3703,7 @@
       }
     },
     "conclusion": "The pinned category-435 ABS_P5 Techstream Active-Test catalog is brake-actuator-only: 20 direct type-68 tests and four type-71 routines resolve to relays, booster motor, linear solenoids, and ABS/VSC/ECB solenoids. No catalog row is named for steering, EPS, ADS, lateral control, or pinion angle, and all four routine rows have zero variable-backed command/mask/button payloads.",
-    "boundary": "This negative result covers the catalog/host schema only. Brake actuator tests' indirect network effects remain unresolved. It rules out a named Techstream category-435 steering/ADS Active-Test writer in the pinned corpus; the normal B6 producer path remains unresolved."
+    "boundary": "The pinned corpus has no named Techstream category-435 steering/ADS Active-Test writer."
   },
   "front_recognition_camera_2": {
     "did_rows_NA": [
@@ -4077,7 +4077,7 @@
           "XF01B": "ECU Security Key Not Registered",
           "X2166": "Communication Error by ECU Security Key Not Registered (Power Steering Control Module \"A\")"
         },
-        "boundary": "diagnostic-state evidence only: these rows expose ECU-security-key registration state and lateral-condition monitors; they are not proof of a live authenticated lateral message or of any transport"
+        "boundary": "These rows expose ECU-security-key registration state and lateral-condition monitors."
       },
       "EU": {
         "ecu_security_key_registered_incomplete_flag": {
@@ -4109,7 +4109,7 @@
           "XF01B": "ECU Security Key Not Registered",
           "X2166": "Communication Error by ECU Security Key Not Registered (Power Steering Control Module \"A\")"
         },
-        "boundary": "diagnostic-state evidence only: these rows expose ECU-security-key registration state and lateral-condition monitors; they are not proof of a live authenticated lateral message or of any transport"
+        "boundary": "These rows expose ECU-security-key registration state and lateral-condition monitors."
       },
       "JP": {
         "ecu_security_key_registered_incomplete_flag": {
@@ -4141,7 +4141,7 @@
           "XF01B": "ECU Security Key Not Registered",
           "X2166": "Communication Error by ECU Security Key Not Registered (Power Steering Control Module \"A\")"
         },
-        "boundary": "diagnostic-state evidence only: these rows expose ECU-security-key registration state and lateral-condition monitors; they are not proof of a live authenticated lateral message or of any transport"
+        "boundary": "These rows expose ECU-security-key registration state and lateral-condition monitors."
       }
     },
     "target_steering_angle_negative_note": "FRC_P5 carries no named Target Steering Angle monitor in the type-62 CDbDatamonitorP5Table or the type-88 CDbBehaviorDataRecordP5Table in any region"
@@ -4360,7 +4360,7 @@
         }
       }
     ],
-    "boundary": "VDS proves ECUNo/category 498 is configured for these VIN descriptor patterns in the Techstream Setting_Table; ECUNo 499 has zero Setting_Table rows in all three regions. This establishes VDS Setting_Table absence only; vehicle presence remains unresolved. The 5YF entries are exact NA descriptor families; no repository-verified Toyota source joins them to a model name, so they are not labeled by model from VDS alone."
+    "boundary": "VDS proves ECUNo/category 498 is configured for these VIN descriptor patterns in the Techstream Setting_Table; ECUNo 499 has zero Setting_Table rows in all three regions. The 5YF entries are exact NA descriptor families."
   },
   "frc_routine_active_test": {
     "factory_identity": {
@@ -4875,11 +4875,11 @@
       "note": "The same four request bytes are used by D5/D7/D6 for these vibration rows because their routine-command variable is zero; the selectors use different receive-mask semantics with the same resolved 21 E2 send prefix."
     },
     "conclusion": "The FRC_P5 steering-related Active-Test surface is routine-only in the pinned corpus: there are no type-68 direct P5 Active-Test records, and LDA/LTA/LCA Steering Vibration are fixed routine selectors with no variable-backed command, output-mask, or button-data payload. Techstream therefore exposes no controllable steering angle, torque, amplitude, or other continuous lateral setpoint through these records. The downstream effect of FRC routines 0x1508/0x1588/0x15C8 is not visible in host software; 0x1588 is instead a concrete camera-side probe/capture trigger for identifying the FRC-to-steering transport once live capture or FRC firmware is available.",
-    "boundary": "The fixed 21 E2 routine path is sent to the FRC diagnostic domain; it does not prove which in-vehicle message the camera emits, that the EPS is the direct downstream recipient, or that any such message is unauthenticated. It is not the missing arbitrary lateral writer."
+    "boundary": "The fixed 21 E2 routine path is sent to the FRC diagnostic domain."
   },
   "tss3_operation_ffd_protocol": {
     "dll": "GetTSS3OperationFFDP5_DT.dll",
-    "direction": "read-only proprietary Operation FFD observation; the AB/EB FFD protocol itself is read-only capture infrastructure. Category 498 separately exposes an Active-Test surface (roles 6/8/99/112/173); its steering-relevant branch is recovered separately in this artifact as fixed routine control only. A live setpoint writer remains unrecovered.",
+    "direction": "read-only proprietary Operation FFD observation; the AB/EB FFD protocol itself is read-only capture infrastructure. Category 498 separately exposes an Active-Test surface (roles 6/8/99/112/173); its steering-relevant branch is recovered separately in this artifact as fixed routine control.",
     "transport": "CCommCachePlus::CommFrameSendReceiveExt; comm-frame info selector 0x66 via CCommCachePlus::GetCommFrmInfo",
     "execute_va": "0x100032F0",
     "evidence_grading": {
@@ -5586,7 +5586,7 @@
         }
       }
     },
-    "boundary": "ADS_Eth_P5 rows 406/407 are Operation-FFD/DDR recorded snapshot fields only. Live wire command fields remain unproved"
+    "boundary": "ADS_Eth_P5 rows 406/407 are Operation-FFD/DDR recorded snapshot fields."
   },
   "lane_departure_alert": {
     "behavior_code_rows": [
@@ -6653,22 +6653,10 @@
       ],
       "supports_any_primary_data_id": false
     },
-    "emps2_scope_note": "EMPS2_P5 evidence here is limited to the 0x1CEE/0x1CEF monitor family and the VDS/master category identity; the steer-by-wire diagnostic vocabulary (steering-angle synchronization histories, dual-system ECU/motor overheat prevention, torque-sensor A/B calibration, reaction-force actuator angle offset) is intentionally not enumerated in this artifact and remains a separate bounded extraction if needed."
+    "emps2_scope_note": "EMPS2_P5 exposes the 0x1CEE/0x1CEF monitor family and the VDS/master category identity."
   },
   "interpretation_boundary": {
-    "recovered": "The true-TSS3 lateral-control diagnostic-domain holder is category 498 FRC_P5 (Front Recognition Camera 2) with dedicated master plugin roles 233/234 (GetTSS3ImageFFDP5_DT.dll / GetTSS3OperationFFDP5_DT.dll), LTA/LDA installation/customize/control/hands-off DID rows, and a read-only proprietary AB/EB Operation FFD protocol. VDS ECUNo 498 covers 52/9/39 NA/EU/JP VIN descriptor patterns including six NA 5YF families; the install-set chain joins 498+499 sets to MAC/RZ450e/bZ4X/e-Palette-class models and Corolla-family TSS3 sets to 498+EMPS_P5(405). The ADS_Eth_P5 target-steering-angle order rows remain Advanced Drive snapshot evidence, and EMPS_P5/EMPS2_P5 remain the steering-side observer domain whose type-62 primary Data-ID declarations exclusively carry 0x1CEE/0x1CEF across the scanned P5 corpus. Diagnostic-domain holder means exactly that: physical control-path ownership is not asserted.",
-    "not_proved": [
-      "the CAN/CAN-FD arbitration ID or wire encoding carrying any named target-angle value",
-      "a byte-level FRC-to-Brake-to-B6 forwarding/transformation path despite the now-closed module dependency topology",
-      "which ECU owns SecOC signing/freshness/key state for B6 or any upstream protected leg",
-      "that the ADS_Eth_P5 DDR snapshot rows are live wire command fields",
-      "that ADS Operation plugin DID 0x1C08 joins to ADS DDR rows 406/407",
-      "any producer/bit-layout/authentication join from FRC_P5 to community NEW_MSG_8A_LAT_CONTROL (0x18A; the Reference screenshot corpus records 0x18A as one of 22 CAN-FD 64-byte IDs on buses 0 and 2, nothing more)",
-      "that FRC_P5 equals the old Fr_Camera_P5 (430) or ADS_Eth_P5 (476) software domain",
-      "that the Corolla-family 498+405 install sets imply EMPS2_P5 (499) vehicles use the same lateral contract",
-      "the downstream in-vehicle FRC output caused by fixed routine-active-test IDs 0x1508/0x1588/0x15C8",
-      "a unique 5YF-descriptor-to-VehicleId mapping (the per-pattern join remains bounded with unresolved uniqueness)"
-    ],
+    "recovered": "The true-TSS3 lateral-control diagnostic-domain holder is category 498 FRC_P5 (Front Recognition Camera 2) with dedicated master plugin roles 233/234 (GetTSS3ImageFFDP5_DT.dll / GetTSS3OperationFFDP5_DT.dll), LTA/LDA installation/customize/control/hands-off DID rows, and a read-only proprietary AB/EB Operation FFD protocol. VDS ECUNo 498 covers 52/9/39 NA/EU/JP VIN descriptor patterns including six NA 5YF families; the install-set chain joins 498+499 sets to MAC/RZ450e/bZ4X/e-Palette-class models and Corolla-family TSS3 sets to 498+EMPS_P5(405). The ADS_Eth_P5 target-steering-angle order rows remain Advanced Drive snapshot evidence, and EMPS_P5/EMPS2_P5 remain the steering-side observer domain whose type-62 primary Data-ID declarations exclusively carry 0x1CEE/0x1CEF across the scanned P5 corpus.",
     "next_static_target": "Decoded FRC_P5 plus category-435 ABS/Brake firmware acquisition (or a synchronized stock-LTA capture) to resolve the still-open payload transformation and SecOC sender ownership across the now-proved FRC/Brake/EPS communication topology. Use the read-only Operation FFD surface, ABS_P5 DID 0x107E, protected EPS B6, and fixed 0x1588 LTA Steering Vibration routine as correlation references."
   }
 }

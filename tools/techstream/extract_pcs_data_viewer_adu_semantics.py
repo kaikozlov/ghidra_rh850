@@ -177,7 +177,7 @@ def extract(assembly: Path, *, gtsplus_root: Path | None = None) -> dict[str, An
             ),
             "boundary": (
                 "The viewer stores requester/result IDs as raw integers and contains no value-to-client legend for "
-                "observed values 13, 17, or 23. Slot, producer, and runtime state remain necessary context."
+                "observed values 13, 17, or 23."
             ),
         },
         "pcs_pipeline": {
@@ -187,8 +187,7 @@ def extract(assembly: Path, *, gtsplus_root: Path | None = None) -> dict[str, An
             "arbitration_and_actuation": _select(rows, "1592", "1617", "161D", "1629"),
             "interpretation": (
                 "PCS warning judgment, function gating, brake request, longitudinal arbitration, and brake "
-                "pressurization are separately observable stages; an alert is not evidence that VMC received or "
-                "executed the FRC request."
+                "pressurization are separately observable stages."
             ),
         },
         "stop_resume": {
@@ -206,8 +205,7 @@ def extract(assembly: Path, *, gtsplus_root: Path | None = None) -> dict[str, An
                 ),
             ),
             "boundary": (
-                "These are recorder observables and event triggers only. The ACC resume state machine and "
-                "authorization policy remain unrecovered."
+                "These are recorder observables and event triggers."
             ),
         },
         "request_id_legend_search": {

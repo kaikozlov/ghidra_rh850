@@ -70,13 +70,13 @@ establish the semantics below.
 | H `0x4A3` field | H-native source | Meaning now closed |
 |---|---|---|
 | B0[5] | constant `1` from `FEBE7DAE | 0x20` | constant marker bit |
-| B0[0] | `FEBE7DAE` | selected steering fault/inhibit status aggregate; the same source is live on `0x030` B6[2] and is not an exhaustive EPS-fault state |
+| B0[0] | `FEBE7DAE` | selected steering fault/inhibit status aggregate; the same source is live on `0x030` B6[2] |
 | B1:B2 | `FEBE7D34` | mirror of FD `0x025` signal184, signed12 steering angle at 1.5 deg/count |
 | B3:B4 | `FEBE7A46` | DID `0x1037` **Steering Angle**, also 1.5 deg/count |
 | B5 | `FEBE6554 -> trunc(*100/0x100) -> trunc(/10) -> signed-byte saturation` | DID `0x1035` **Steering Wheel Torque**, 0.1 N·m/count |
 | B6:B7 | `FEBE6592 * -100 / 0x80`, big-endian signed16 | DID `0x1151` **Motor Actual Current (Q Axis)** with packet sign inverted, -0.01 A/count |
 
-The H DID computation establishes the torque scale independently of display precision.
+The H DID computation establishes the torque scale.
 `0x1035` computes `(FEBE6554 * 1000) / 0x100`; Techstream defines the DID as signed
 N·m with three decimal places. Therefore `FEBE6554 / 256` is N·m. The `0x4A3` B5
 producer first forms `trunc(FEBE6554 * 100 / 256)` and then divides by ten before
@@ -86,8 +86,7 @@ The Q-current scale is also closed. DID `0x1151` computes
 `(FEBE6592 * 100) / 0x80`, and Techstream displays the signed result in amperes with
 two decimal places. `0x4A3` applies the same magnitude conversion with the opposite
 sign. Thus B6:B7 is **-0.01 A/count** relative to Techstream's Q-axis-current sign
-convention. It represents actuator-current response. The old `STEER_TORQUE_EPS`
-signal has a different role.
+convention. It represents actuator-current response.
 
 ### 3.2 Port consequence
 
@@ -117,9 +116,8 @@ Dem event 4 selects enabled H DTC index 54, packed DTC `0x559B49`. Techstream
 Circuit / Internal Electronic Failure**.
 
 The exact wire fields are still B2[7:5] = `FEBE7DD0` and B2[4] = `FEBE7DD1`.
-C159B49 therefore names only one upstream **base-status path** within the mixed
-`0x351` carrier. The separate force-7 condition remains distinct. Neither a generic
-EPS-ready nor an old `LKA_STATE` replacement interpretation is supported. Current tracked routes contain
+C159B49 names one upstream **base-status path** within the mixed `0x351` carrier.
+The separate force-7 condition remains distinct. Current tracked routes contain
 no `0x351`, so the base path, force-7 override, and their asserted/clear transitions
 remain to be captured on-vehicle.
 
@@ -139,20 +137,15 @@ byte-identical. `0x46E96` projects the selected row into transmit staging, and
 The classifier recovers an important state boundary. State `0` is reached by
 the deepest clear/normal path only after the preceding aggregated fault-class branches
 are clear and additional operational predicates pass. Its transmitted tuple is all
-zero and is unique in the table, but this is **not** evidence that state 0 is the exact
-Techstream `Ready Status` boolean or is by itself sufficient to authorize steering. States `1/2` are startup/settling holds; state `3` is selected
+zero and is unique in the table. States `1/2` are startup/settling holds; state `3` is selected
 by the internal self-test/input-invalid branch; states `6..14` are active
 fault/inhibit branches; state `15` is a distinct special operating state; and state
 `16` is the fallback/not-normal branch. Table rows `4/5` remain present but are not
 directly selected by the recovered classifier body.
 
-Two limits matter. First, some nonzero internal states collide on the transmitted
-four-field tuple, so the wire message is a lossy status projection. Second,
-nothing in the recovered firmware maps these classes to openpilot's
-`steerFaultTemporary` versus `steerFaultPermanent` contract. Treating every nonzero
-state as one of those two categories would be an invention. State 0 is a useful future clear/normal discriminator candidate once routing and
-Ready/LTA correlation are observed; temporary/permanent classification still requires
-dynamic DTC/Ready/LTA evidence.
+Some nonzero internal states collide on the transmitted four-field tuple, so the
+wire message is a lossy status projection. State 0 is a future clear/normal
+discriminator candidate once routing and Ready/LTA correlation are observed.
 Current tracked routes contain no `0x394` frames.
 
 ## 6. `0x030`: live driver torque and fault/validity state
@@ -170,9 +163,7 @@ path applies here: `0x47188` and `0x47430` write them through
 `GP=0xFEBEB800 + constant offset`, so their absolute RAM names do not appear in the
 assignment text. Exact image-bound recovery now closes runtime writers for signal
 IDs **0, 1, 10, 14, 16, 17, 18, 27, 28, 31, and 34**. Among packed IDs `0..34`
-there are now zero fields left in the false `default-init-only` class. This
-correction covers those eleven addresses. Arbitrary computed-pointer mutation
-outside that scope remains possible.
+there are now zero fields left in the false `default-init-only` class.
 
 ### 6.2 Live Steering Wheel Torque
 
@@ -200,7 +191,7 @@ Two additional fields have target-native producer semantics and live nominal
 polarity:
 
 - signal 6, B6[2] from `FEBE7DAE`, aggregates **selected steering fault/inhibit
-  status**. Its scope covers only selected EPS faults. The same source is exported
+  status**. The same source is exported
   as `0x4A3` B0[0]. Span: `0` in 6,000/6,000 frames;
 - signal 8, B6[0] from `FEBE7DB2`, is the driver-torque invalid/inhibit gate. The
   same producer condition suppresses the `0x4A3` driver-torque staging value.
@@ -214,16 +205,14 @@ B6[1]`. Exact H calibration `0xAEED8..0xAEEDF` is `5A 00 00 14 00 0A 00 00`:
 feature flag `0x5A`, thresholds 5120/2560, debounce count 0. Under that calibration
 the detector's enabled-only set branch is unreachable and its raw detector output is
 forced clear each execution. Thus B6[1] is a **Q-axis-current-derived debounced status
-whose exact-H threshold detector is calibration-disabled**. A generic Ready or
-authority interpretation is unsupported. Span's 0/1 behavior remains cross-specimen
-evidence because its rlog is not exact-F181-joined. B6[3] is runtime-produced and remains zero in that segment.
+whose exact-H threshold detector is calibration-disabled**. Span's 0/1 behavior
+is cross-specimen evidence because its rlog is not exact-F181-joined.
+B6[3] is runtime-produced and remains zero in that segment.
 Signal 34 is separately a signed16 calibrated derivative of the same DID `0x1151`
 Q-current source; its packet scale remains calibration-dependent.
 
 The capture contains no induced EPS fault and no stock-LTA off→active→off
-transition. Therefore the asserted operational consequences of B6[2]/B6[0] remain
-firmware-static, and they do not justify guessing openpilot temporary/permanent
-fault classes.
+transition. The asserted operational consequences of B6[2]/B6[0] remain firmware-static.
 
 ### 6.4 Ready Status is wire-visible on incoming `0x51E B0[7]`
 
@@ -235,32 +224,24 @@ COM signal154 is unpacked at `0x46144` from **`B0[7]` directly into
 
 `0x51E B0[7] -> FEBE7D1B -> FEBEF052 -> FEBEB5A8 -> FEBEE811 -> DID 0x1033 Ready Status`.
 
-`FEBEF052 -> FEBEB5A8` is not an exclusive single-writer edge: exact-H
-`0xBAB58` and `0xBAC16` both perform the operational copy, and the RAM nodes also
-have initialization/reset writers. The Ready dataflow is therefore proved without
-claiming exclusive-writer provenance.
+H `0xBAB58` and `0xBAC16` perform the operational
+`FEBEF052 -> FEBEB5A8` copy. The RAM nodes also have initialization/reset writers.
 
 The same field is observable in both retained TSS3 Corolla driving routes. The
 public 2023 segment carries 59 `0x51E/8` frames and Span's 2025 moving segment
-carries 60; **B0[7]=1 in every one**. This is strong operational-state
-corroboration, but neither route exercises value `0`, so a Ready transition is
-still required before using the bit as an openpilot engagement/fault classifier.
-The join is an **incoming CAN Ready Status field**; it does not imply that
-`0x030/0x351/0x394/0x4A3` republishes the same boolean on an EPS Tx PDU.
+carries 60; **B0[7]=1 in every one**.
 
-For maintained integration, bus placement is no longer specimen-dependent. The
-canonical Toyota-B physical repin is the only supported TSS3 topology: chassis/state
-(including `0x51E`) on Panda bus 0, FRC/source traffic on bus 2, and the unsplit
-auxiliary/radar path on bus 1. The historical Corolla routes below observed the target
-network on stock-harness logical bus 1; that remains raw-capture provenance only and
-must not become a runtime parser fallback or a separate Corolla topology.
+The maintained Toyota-B physical repin places chassis/state traffic (including
+`0x51E`) on Panda bus 0, FRC/source traffic on bus 2, and the unsplit auxiliary/radar
+path on bus 1. The historical Corolla routes below record the target network on
+stock-harness logical bus 1.
 
-**2026-10-07 recheck:** no change to the path or limits above. Both retained captures
-still show `B0[7]=1` in every `0x51E/8` frame, and no retained capture — no ICE startup
-and no Crown capture — ever exercises `0`, so the bit remains unvalidated as a `0/1`
-engagement/fault classifier. The consolidated gear/READY audit of this date is
-[below](#gear-and-ready-audit--2026-10-07); the Crown-side static path is audited in
+The consolidated gear/READY audit is
+[below](#gear-and-ready-audit--2026-10-07); the Crown static path is in
 [crown-8965F3012000.md](crown-8965F3012000.md#gear-and-ready-audit--2026-10-07).
+
+The non-steering engagement report uses Span evidence from commit
+`5532e6dc2d417394ef39d40213c4faf4bbbe890c`.
 
 ### 6.5 The cooperative system gate is a graded power-supply receive-validity/freeze state
 
@@ -291,7 +272,7 @@ Machine-readable evidence:
 `data/generated/corolla_8965H1202000_power_supply_monitor_decompiler_evidence.json`;
 deterministic verifier: `tools/test corolla_h`.
 
-### 6.6 Normal H/F Tx exposes only a coarse system-mode derivative
+### 6.6 Normal H/F Tx exposes a coarse system-mode derivative
 
 A wider direct/fixed-GP/computed-alias search found one useful missed wire-visible
 path from the same raw state:
@@ -348,10 +329,7 @@ families.
 The paired class-2/class-4 states have exact internal aging structure:
 primary latches use calibration **200**, the shared secondary
 latch uses **600**, and primary clear is additionally gated on `FEBEE8B0 >= 17736`.
-Those are Toyota classifier/latch mechanics. They are **not** renamed
-`steerFaultTemporary`/`steerFaultPermanent`: openpilot's policy distinction still needs
-a recoverable-versus-latched live fault/recovery sequence or another independent policy
-join.
+Those are Toyota classifier/latch mechanics.
 
 Machine-readable contract: `data/generated/corolla_hf_fault_state_contract.json`;
 deterministic verifier: `tools/test corolla_hf`.
@@ -370,10 +348,7 @@ two 12-byte record banks, ORs each valid record's `+6` ushort (plus one gated ex
 source), and passes aggregate bit **15** through `0x3738C -> 0x472E0 -> FEBE7E13`.
 When both sides assert, `0x46E62` forces status code 7 and `FEBE7DD1=1`.
 
-This closes topology and gating. Toyota display names remain unresolved: the current
-corpus has no unique OEM/DTC label for status-bitmap bits0/1 or record `+6` bit15.
-The force-7 path is a distinct conservative severe/special status input, separate
-from C159B49. Its openpilot temporary/permanent classification remains unresolved.
+The force-7 path is a distinct conservative severe/special status input.
 
 Machine-readable contract: `data/generated/corolla_hf_remaining_status_contract.json`;
 raw-body evidence: `data/generated/corolla_8965H1202000_remaining_status_decompiler_evidence.json`;
@@ -382,14 +357,15 @@ deterministic verifier: `tools/test corolla_hf`.
 ## 7. Command ingress: what the complete generated-COM census says
 
 The H generated scalar extractor `FUN_0007643A` has **101 constant scalar binding
-calls** in the corrected-context H corpus. The existing supervisor-ingress audit
-walks those generated scalar destinations through raw/staging/snapshot references
-and the steering-supervisor cone.
+calls** in the registered H corpus,
+`data/generated/corolla-8965H1202000/decompilations.jsonl`.
+The supervisor-ingress audit follows those destinations through raw, staging, and
+snapshot references into the steering-supervisor cone.
 
 The result is unusually restrictive:
 
-- 22 distinct externally generated scalar signals reach the supervisor cone after
-  resolving the fixed GP map;
+- 27 distinct externally generated scalar signals reach the supervisor cone through
+  44 references after the audit resolves the fixed GP map and persisted references;
 - FD `0x025` signals 184 and 186 are the shared 12-bit steering angle/rate sensor
   fields; and
 - the sole H-only command-sized field is protected B6 **signal 255**, signed16 at
@@ -488,9 +464,7 @@ history, while `1/2` select the special branch family and `2` has an additional
 interpolation path. Signal264 (B10 bit7) is a special-control validity/inhibit
 input used around the AP/Remote-Parking state machine; signal265 (B10[2:0]) is
 republished only while B6 communication is healthy and downstream accepts modes
-1/2/3 while normalizing other values to 0. Their literal OEM names remain bounded;
-Techstream's `Cooperative Control in Progress Flag` supplies family vocabulary.
-A one-to-one assignment to signal258 remains unproved.
+1/2/3 while normalizing other values to 0.
 
 Signals 262 and 263 remain important companion modifiers: B8/B9 feed `0xCC442` and
 `0xCBFCE` as percentage-like scaling inputs to internal steering contributors.
@@ -515,7 +489,7 @@ Module "A"**, but the older active monitor family for:
 is absent from H's active monitor table. Their old Dem records point at the disabled
 DTC residue instead. Combined with the missing H `0x2E4/0x131` COM/SecOC profiles,
 this is strong target-native evidence that the classic direct camera/IPM-A steering
-interface was **disabled/removed**. A simple renumbering to `0x0B6` is excluded.
+interface was **disabled/removed**.
 
 ## 8. Computed/indirect ingress audit: the retained branch is live
 
@@ -742,16 +716,13 @@ that matter more than importing pre-TSS3 Toyota constants:
   `CBFCE` profile path does have four `FEBEADF4`-indexed compensation LUTs
   (`bank+0x768/+0x798/+0x7C8/+0x7F8`), but every real point in the runtime-selected
   low/vehicle bank has value **0**. The compiled high/default counterparts become
-  nonzero beginning at axis 7680. The physical identity of `FEBEADF4` is deliberately
-  not guessed here. These maps provide compensation. No maximum-angle curve or
-  speed-dependent reduction of the hard ±1745 B6 ceiling is recovered.
+  nonzero beginning at axis 7680. These maps provide compensation.
 - `CB14E` uses an internal tracking half-window of **524** (a 1048-unit full
   comparison window) with persistence 40. `CB394` monitors `FEBEAE16` at **512**
   with persistence 79 in the selected low bank / 59 high-default; `CB59A` has a
   second `FEBEAE16` threshold **1280** with persistence 96. `CBD7E` retains raw
   reconstruction-validity bounds **80/90/512**, and `CAE18` contains a separate
-  counter threshold 15. Their internal units are not promoted to fabricated
-  steering-angle/current engineering units.
+  counter threshold 15.
 - The physical driver-torque path has a native acquisition clamp of **±2109** in
   the N·m×256 domain (~**±8.2383 N·m**) and exported telemetry saturation at
   **±10.00 N·m**. These explain representation behavior—including Span's -8.23 N·m
@@ -785,9 +756,7 @@ transition before allowing active steering again.
 This leaves three bounded **policy** classes:
 physical `driver_override_abs_nm`, extended fault policy (`0x394`/Ready/DTC classes
 beyond the already-known immediate `0x030` gate), and a deliberately chosen
-actuator-response policy. The third is no longer framed as an undiscovered OEM
-Q-current threshold: static H/F evidence did not recover one in the cooperative
-supervisor. Secondary B6 fields 258/260/262/263/264/265 are **not free safety
+actuator-response policy. Secondary B6 fields 258/260/262/263/264/265 are **not free safety
 parameters**: the EPS-consumer-derived minimal ID11 candidate is
 `1/0/0/0/0/0`. The current inline helper does not synthesize that tuple: it
 changes only B3..B5 and retains the exact car's native secondary fields and
@@ -847,8 +816,7 @@ while `FEBE5408 < 204`; it also does so whenever a separate global state at
 PDU can therefore reach COM **despite failed verification** during those bounded
 modes. This is fail-open delivery: verification failed and freshness remains
 uncommitted. Once the counter is >=204 and the global D2 mode is inactive,
-the recovered failure handler stops routing B6 verification failures. The
-wall-clock length of the 204-count window remains unknown.
+the recovered failure handler stops routing B6 verification failures.
 
 Signal261 does not solve that race. `CB246` computes `(current-previous) mod 64`;
 delta 0 and delta 1 both become effective gap 1, while larger gaps are capped at 8.
@@ -990,11 +958,10 @@ The same-car bootstrap provenance is retained in
 `data/generated/corolla_2023_albino_telescope_analysis.json` and the specimen
 report [corolla-2023-us-public-route.md](corolla-2023-us-public-route.md) §7.39.
 
-This closes only the **static target-native carrier candidate**. The live runtime remains unqualified.
+This closes the **static target-native carrier candidate**.
 `data/variant_ram_exec_requirements.json` therefore still gains **no** H/F verified
 entry. Live retention/lifetime, provisioned slot-4 command-5 permission, signing
-latency, and production B6 timing remain dynamic blockers, and nothing here
-authorizes vehicle actuation. Machine-readable evidence:
+latency, and production B6 timing remain dynamic blockers. Machine-readable evidence:
 `data/generated/corolla_hf_command5_runtime_carrier_evidence.json`,
 `data/generated/corolla_hf_command5_runtime_carrier.json`, the exact same-car
 `data/generated/corolla_2023_albino_telescope_analysis.json`, and the earlier
@@ -1049,19 +1016,14 @@ Both retained Corolla captures use the historical normal **unsplit** Toyota harn
 observation, so `0x08A` and `0x081` appear together on logical bus 1 and cannot be
 direction-separated there. The repinned 2026 Camry later exposes their opposite sides
 of the relay: `0x08A` upstream-to-chassis and `0x081` chassis-to-upstream. That repinned
-direction is now the integration contract for Corolla as well. The earlier bus-1
-observations establish only wire format. The strongest cross-generation
+direction is now the integration contract for Corolla as well. The strongest cross-generation
 interpretation is a persistent Toyota TSS3 **control request/result plane**,
 already present by the 2023 Corolla.
 
-The retained Corolla segments never leave Target Lateral ID 0, so they do **not** prove
-stock LTA/LDA/PDA actuation, arbitration winner state, or the final EPS authority
-handoff. They nevertheless materially constrain the architecture: factory road traffic
+The retained Corolla segments never leave Target Lateral ID 0. Factory road traffic
 shows the same CAN reference family while the captured segments contain neither native
 B6 nor the classic `0x2E4/0x131` steering commands. This supports treating the unresolved
-Camry step as a general TSS3 reference-to-actuator handoff problem. It does not prove a
-serial/local handoff, but it gives no positive evidence for a Honda-style dedicated
-serial steering command either.
+Camry step as a general TSS3 reference-to-actuator handoff problem.
 
 Deterministic evidence is generated by
 `tools/targets/corolla/extract/extract_corolla_2023_public_route_opendbc_evidence.py` and
@@ -1128,7 +1090,7 @@ one-hot `1=P,2=R,4=N,8=D,16=B`. ICE `Engine_P5.ddb` exposes **Shift Position (Cu
 Position)** in DID `0x1424` and **Shift Position (Control Position)** in DID `0x1428`,
 with the latter preserving the same `0/2/4/6/8` P/R/N/D/B-family ordering. These
 OEM diagnostic semantics confirm separate powertrain owners with common shift
-meaning. Direct CAN-ID mappings still require separate evidence.
+meaning.
 
 Span's moving 2025 hybrid segment has 3,662 checksum-valid `0x127` frames in about
 60 s (~61 Hz), while its `0x3BF` appears 60 times (~1 Hz). The public 2023 Corolla
@@ -1158,9 +1120,7 @@ but **Neutral remains unobserved on either retained Corolla capture**.
 
 An all-source census finds no `0x127` in the public minute on any recorded
 `can`/`sendcan` source or DLC. Received-frame coverage is bus0=19,934,
-bus1=79,201, bus2=8,470. The absence result applies only to this recording.
-Other ICE Corolla operation remains unobserved. Span's recording has 3,662
-incoming `0x127` frames, all on bus1.
+bus1=79,201, bus2=8,470. Span's recording has 3,662 incoming `0x127` frames, all on bus1.
 
 The controlled Camry B interval supplies the decisive distinction: five
 `0x3BF` samples retain Drive while `0x127` distinguishes B. All six P/R/N/D
@@ -1184,10 +1144,7 @@ but the same recording also supplies the existing `0x127` raw3 Drive carrier.
 The compared refs contain vendored opendbc. Neither contributor implements READY
 decoding, so their software adds no READY-semantic evidence.
 
-**GTS boundaries.** `PCS_P5` DID `0x1007` describes only powertrain type. CAN
-decoder selection needs separate evidence. A shared EPS database does not imply identical powertrain
-diagnostics. The relevant monitor rows require runtime support checks; catalog
-presence does not establish that an ECU answers them. The meter dictionary
+`PCS_P5` DID `0x1007` describes powertrain type. The meter dictionary
 corrects the earlier investigation's claim that no matching enum was found:
 the enum was indexed under indicator operation.
 
@@ -1228,21 +1185,17 @@ remains decoded for both powertrains.
 segments above were replayed with their original CAN-batch timestamps and
 unchanged payloads. Stock-harness source 1 was explicitly
 projected onto logical relay buses 0/2; original source 0 was projected onto
-auxiliary bus 1 and original mirrored source 2 was omitted. This projection is
-only a decoder fixture: it neither observes nor verifies the physical repin or
-which emitter is present on each relay half. Runtime bus assignments were not
-changed. After five seconds of warmup, all **5,609** public-ICE decoder samples
+auxiliary bus 1 and original mirrored source 2 was omitted. Runtime bus assignments
+were not changed. After five seconds of warmup, all **5,609** public-ICE decoder samples
 were CAN-valid and exercised Park/Reverse/Drive; all **5,500** Span-hybrid samples
-were CAN-valid and decoded Drive. These results describe only decoder outputs.
-Independent dashboard observations and Corolla Neutral captures remain unavailable.
+were CAN-valid and decoded Drive. Corolla Neutral remains unobserved.
 
 Focused Toyota/Corolla/Camry and platform/interface verification passed **29
 tests**; changed Python files passed Ruff. Obsolete full-firmware-inventory
-assertions were removed. Camera versions remain unassigned pending evidence. Firmware
+assertions were removed. Firmware
 matching remains unchanged: the complete stored inventory uniquely matches each
 known EPS variant, while EPS-only input still does not match. Missing camera and
-Span non-EPS firmware captures remain data gaps. This checkpoint makes no
-signer, source-suppression, longitudinal-authority, or road-qualification claim.
+Span non-EPS firmware captures remain data gaps.
 
 ## 10. Production boundary
 
@@ -1267,7 +1220,7 @@ actuation. Before a real H/F openpilot port, recover and validate:
 - live confirmation that an EPS-local native B6 reaches the inline hook, plus
   its wall-clock cadence and persistent secondary-field tuple. The helper
   retains native signal261 and secondary fields. `awaiting-native-b6` marks a
-  hard carrier failure for this construction. A second B6 sender remains excluded;
+  hard carrier failure for this construction;
 - live proof that the 522-byte resident / 458-byte helper survives into
   healthy application scheduling, then confirmation that provisioned slot4
   permits command 5 with acceptable latency through the C7/SID23 workflow (or

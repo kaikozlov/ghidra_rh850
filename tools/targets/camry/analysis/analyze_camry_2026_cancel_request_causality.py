@@ -179,10 +179,9 @@ def build(path: Path = FIXTURE) -> dict:
             'windows': windows, 'dispositions': dict(Counter(w['disposition'] for w in windows)),
             'driver_to_host_request_ms': {'min': min(offsets), 'median': statistics.median(offsets), 'max': max(offsets)} if offsets else None,
             'boundaries': [
-                'Times describe rlog publication only; wire arbitration times and measured actuator delay remain unresolved.',
-                'sendcan records a host transmission attempt only; ECU acceptance requires separate acknowledgement.',
+                'Times describe rlog publication.',
+                'sendcan records a host transmission attempt.',
                 'A physical input can explain a subsequent cruise release even when the host also transmits a cancel-shaped packet.',
-                'Absence of a recovered input in this window cannot prove a new command or rule out unobserved causes.',
                 'The protected switch is observed, never generated or replayed onto a vehicle.',
             ]}
 

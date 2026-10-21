@@ -2,7 +2,10 @@
 //@category Verification
 // Export address-independent instruction-shape fingerprints for cross-variant matching.
 import ghidra.app.script.GhidraScript;
+import ghidra.framework.Application;
 import ghidra.program.model.address.Address;
+import ghidra.program.model.address.AddressRange;
+import ghidra.program.model.address.AddressRangeIterator;
 import ghidra.program.model.listing.Function;
 import ghidra.program.model.listing.FunctionIterator;
 import ghidra.program.model.listing.Instruction;
@@ -66,6 +69,26 @@ public class ExportFunctionStructuralFingerprints extends GhidraScript {
         return out.toString();
     }
 
+    private static String bodyRangesJson(Function function) {
+        StringBuilder out = new StringBuilder(96);
+        out.append('[');
+        boolean first = true;
+        AddressRangeIterator ranges = function.getBody().getAddressRanges(true);
+        while (ranges.hasNext()) {
+            AddressRange range = ranges.next();
+            if (!first) out.append(',');
+            first = false;
+            out.append("{\"space\":")
+                .append(jsonString(range.getMinAddress().getAddressSpace().getName()))
+                .append(",\"min\":").append(jsonString(String.format(
+                    Locale.ROOT, "0x%08x", range.getMinAddress().getOffset())))
+                .append(",\"max\":").append(jsonString(String.format(
+                    Locale.ROOT, "0x%08x", range.getMaxAddress().getOffset())))
+                .append('}');
+        }
+        return out.append(']').toString();
+    }
+
     @Override
     public void run() throws Exception {
         String[] args = getScriptArgs();
@@ -80,6 +103,14 @@ public class ExportFunctionStructuralFingerprints extends GhidraScript {
         int functionCount = 0;
         int instructionCount = 0;
         try (BufferedWriter writer = Files.newBufferedWriter(output, StandardCharsets.UTF_8)) {
+            writer.write("{\"record\":\"metadata\",\"schema_version\":2," +
+                "\"ghidra_version\":" + jsonString(Application.getApplicationVersion()) + "," +
+                "\"program_name\":" + jsonString(currentProgram.getName()) + "," +
+                "\"executable_sha256\":" + jsonString(currentProgram.getExecutableSHA256()) + "," +
+                "\"language_id\":" + jsonString(currentProgram.getLanguageID().getIdAsString()) + "," +
+                "\"compiler_spec_id\":" + jsonString(
+                    currentProgram.getCompilerSpec().getCompilerSpecID().getIdAsString()) + "}");
+            writer.newLine();
             FunctionIterator functions = currentProgram.getFunctionManager().getFunctions(true);
             while (functions.hasNext()) {
                 monitor.checkCancelled();
@@ -135,6 +166,7 @@ public class ExportFunctionStructuralFingerprints extends GhidraScript {
                     .append(jsonString(function.getEntryPoint().getAddressSpace().getName())).append(',');
                 record.append("\"name\":").append(jsonString(function.getName())).append(',');
                 record.append("\"body_size\":").append(function.getBody().getNumAddresses()).append(',');
+                record.append("\"body_ranges\":").append(bodyRangesJson(function)).append(',');
                 record.append("\"instruction_count\":").append(mnemonics.size()).append(',');
                 record.append("\"mnemonics\":").append(stringArrayJson(mnemonics)).append(',');
                 record.append("\"instruction_lengths\":").append(stringArrayJson(lengths)).append(',');

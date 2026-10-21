@@ -68,7 +68,7 @@
     "selection": "all retained normal-logger road routes whose qlogs showed vehicle motion before Sep-4, plus complete Sep-4/Sep-6 road routes; route 1c retains the marginal-motion case"
   },
   "exact_f33": {
-    "boundary": "This does not mean EPS is state-blind: the common controller has SecOC/freshness, PDU health, speed, angle/rate, fault and slew/limit supervision. It means the recovered B6 profile selector has no DRCC/LTA engagement authorization input and no per-profile ownership latch.",
+    "boundary": "The common controller has SecOC/freshness, PDU health, speed, angle/rate, fault and slew/limit supervision. The recovered B6 profile selector has no DRCC/LTA engagement authorization input and no per-profile ownership latch.",
     "communication_timeout": {
       "basis": "seven exact-F33 foreground ticks at 5 ms",
       "nominal_ms": 35,
@@ -1520,9 +1520,9 @@
       "first_08a_id": 0,
       "first_mono_s": 59.542857893,
       "id_transition_counts": {
-        "0->11": 3,
+        "0->11": 4,
         "0->18": 1,
-        "11->0": 3,
+        "11->0": 4,
         "18->0": 1
       },
       "last_08a_id": 0,

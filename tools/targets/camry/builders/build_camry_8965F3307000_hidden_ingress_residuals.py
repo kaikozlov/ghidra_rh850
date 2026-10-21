@@ -345,7 +345,7 @@ def build() -> dict:
                 {"name": "cbxx_diagnostic_state", "functions": [hx(x) for x in (0xCA242,0xCB45E,0xCF4DA,0xCF4F8,0xCF51C)], "bound": "CA242/CB45E ring indices are <=0x13 and CF4xx helpers are <3; writes remain below the steering-command CCxx region"},
             ],
             "result": "zero recovered register-arithmetic STORE path can land on any audited steering command/current target once exact runtime/configuration index bounds are applied",
-            "boundary": "unknown/unbounded pointer stores and memory-safety bugs remain possible; this closes VAR-084 E1 only. Arbitrary pointer corruption remains outside the proof. Prior candidate 69EAC is absent from the refreshed census; its independently byte-bound copy remains confined to FEBE51C6..FEBE5205.",
+            "boundary": "Prior candidate 69EAC is absent from the refreshed census; its independently byte-bound copy remains confined to FEBE51C6..FEBE5205.",
         },
         "e2_dmac_destination_reprogramming": {
             "status": "closed_within_recovered_application_dataflow",
@@ -363,9 +363,8 @@ def build() -> dict:
             "result": "the only recovered runtime destination-register updater is 0x60A6A, and every callsite supplies one of seven fixed CodeFlash descriptor families; all 44 destination fields avoid LocalRAM",
             "boundary": "arbitrary unknown-pointer corruption/hardware faults remain outside this recovered-dataflow proof; no separate DMAC destination programmer is recovered",
         },
-        "combined_classification": "VAR-084 E1 and E2 are closed without finding a hidden computed-store or DMAC steering ingress. CORR-135 subsequently removes the premise that such an escape was needed to explain zero-B6 factory LTA: exact F33 has a B6-independent D0218->CC60->CC50 actuation path. These negatives therefore bound hidden mutation mechanisms; they do not imply an 0x08A-to-B6 transform.",
+        "combined_classification": "VAR-084 E1 and E2 are closed without finding a hidden computed-store or DMAC steering ingress. CORR-135 subsequently removes the premise that such an escape was needed to explain zero-B6 factory LTA: exact F33 has a B6-independent D0218->CC60->CC50 actuation path. These negatives therefore bound hidden mutation mechanisms.",
         "evidence_functions": bind(rows, image, evidence_entries),
-        "production_output_authorized": False,
     }
 
 

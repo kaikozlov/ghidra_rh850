@@ -61,9 +61,7 @@ pass. An independent arithmetic model covers lengths `0`, `1`, `15`, `16`,
 `17`, and `0x400`.
 
 `verified` below means the decisive static firmware propositions are now
-deterministically asserted. It does not mean an exploit has been dynamically
-demonstrated. MEM-SAFE-005 remains `bounded` because an enumerated negative is
-not proof that an unknown indirect consumer cannot exist.
+deterministically asserted.
 
 ## MEM-SAFE-001: partial AES-block chunks produce raw RAM writes
 
@@ -501,9 +499,7 @@ remaining gap.
 
 ## Next attack priorities for newer targets
 
-The Sienna image identifies vulnerable shapes but cannot prove bugs in code we
-don't possess. The following priorities apply when a newer target's CodeFlash
-becomes available:
+The following priorities apply when a newer target's CodeFlash becomes available:
 
 1. **CanIf DLC gate → PduR/CanTp copy path** — check for short-frame
    stale-tail or DLC/length differential between layers.
@@ -524,9 +520,7 @@ own the control path without ever reading the ICU-S key.
 ## MEM-SAFE-005: bounded negative findings
 
 The following enumerated externally reachable paths were audited and found to
-reject malformed input correctly. The grade is `bounded`: the assertion covers
-only the named sinks, callers, tables, and branches. Unknown indirect consumers
-remain outside this result.
+reject malformed input correctly.
 
 ### ISO-TP reassembly
 

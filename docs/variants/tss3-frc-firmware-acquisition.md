@@ -42,22 +42,15 @@ The recorder also keeps feature-local inputs. In particular, LTA `0x5631`, LDA
 `0x5531`, and generic TSS request `0x5282` have **the same five-byte normalized
 shape**. That is exactly the shape expected from a software request-normalization
 stage: application-specific producers feed one common lateral request object,
-after which separate arbitration-result objects are recorded. This is a
-structural implementation result. It does **not** yet prove the runtime copy
-direction between those objects or that every arbitration instruction executes
-inside the FRC rather than being reflected into its recorder from another
-controller.
+after which separate arbitration-result objects are recorded.
 
-The current PCS viewer's `SYSTEM_TYPE` field must not be over-read here. Static
-recovery proves it classifies RoB trigger families; the parameter decoder scans
-the global DID table without consulting `SYSTEM_TYPE`. `LDA` on a trigger row
-is therefore not an ECU-ownership tag for every recorded DID.
+The current PCS viewer's `SYSTEM_TYPE` field classifies RoB trigger families;
+the parameter decoder scans the global DID table without consulting `SYSTEM_TYPE`.
 
 ### Current implementation model
 
 Joined to Toyota's vehicle-movement-manager architecture, the cleanest current
-answer is that the **FRC implements the application side**. Final actuator
-arbitration belongs downstream. Feature logic such as LTA/LDA constructs feature-local request objects;
+answer is that the **FRC implements the application side**. Feature logic such as LTA/LDA constructs feature-local request objects;
 the camera normalizes those into the generic TSS request object (`5282`, with
 longitudinal peers `5280/5281`) and hands that request toward the vehicle-movement
 manager. The Brake/VMM domain performs the downstream package arbitration/request
@@ -204,7 +197,7 @@ F161). Both chains are descriptor-complete, but neither `6200` whole image is
 present. Complete old/new encrypted images exist only for the second edge of
 each chain.
 
-## 4. Cipher-shape constraints and unresolved key
+## 4. Cipher-shape constraints
 
 The five distinct stored FRC whole images share **exactly the first two 16-byte
 blocks** and diverge at byte 32. Beyond those two blocks there are zero shared
@@ -218,8 +211,7 @@ fit: identical first two plaintext blocks produce identical first two
 ciphertext blocks, then the first changed block propagates divergence through
 the rest of the chain. P1M-E Toyota/Denso firmware independently uses AES-CBC
 for its DFI-low-nibble-1 payload path, so AES-CBC is the strongest concrete
-cross-family candidate. Neither fact proves that the TMPV770 FRC uses the same
-cipher, key derivation, or IV.
+cross-family candidate.
 
 The two closed FRC update chains let us test candidate image keys more directly
 than inspecting decrypted entropy. Under the CBC hypothesis, blocks from index 2
@@ -248,9 +240,7 @@ stored bytes directly as little-endian A32 gives a code-shape score of 0.0058.
 The TMPV7708 Bottlenose R4 payload scores 0.657 over the same 1,376-byte window,
 with recognizable prologues, literal loads, and returns. The strongest of
 67,157 shared-key routine decryptions reaches only 0.096 and has no prologue or
-return pattern. This supplies a negative discriminator. AES-CBC and the routine's
-plaintext ISA remain unproved. Bottlenose is used only as a sibling R4
-instruction-shape baseline.
+return pattern. Bottlenose supplies a sibling R4 instruction-shape baseline.
 
 The `.datx` census also tests structure.
 All six members share exactly the first 16 bytes
@@ -260,9 +250,7 @@ for source/new CID, target/routine address, target span, and serialized `.datx`
 length in plausible byte orders find no clear fields. The first block is also
 neither whole-image header block and does not occur in the stored routine.
 Together with DFI `0x21`, this supports delta construction followed by an outer
-encryption-method-1 representation; it does not distinguish a fixed IV or
-envelope value from the first ciphertext block of a common delta header, nor
-does it prove the internal decrypt/apply order.
+encryption-method-1 representation.
 
 A focused Techstream/GTS+ implementation search adds no hidden decryptor. The
 calibration library exposes `GetRequiredSpecReproVer` and named constants only
@@ -273,10 +261,6 @@ decompression imports. Thus the useful host-side clues remain the DFI values,
 the RequiredSpec04 integrity request shape, and the raw pass-through boundary;
 the encryption-method-1 implementation is ECU-side in the recovered route.
 
-That is a substantially stronger negative than trying `ServiceAuthKey`, its
-unwrapped working key, descriptor Nonce, or the known EPS roots one at a time.
-It still is not exhaustive cryptanalysis: a protected camera root, another
-cipher/mode, or a more complex KDF can trivially sit outside the tested grammar.
 The useful conclusion is narrower and operational: **the FRC image key is not
 an obvious one- or bounded two-stage derivation from the package-visible values
 and Toyota roots we already possess.** Further key guessing should be driven by
@@ -285,9 +269,9 @@ a concrete Toyota DFI-1 construction or ECU-side implementation evidence.
 ## 5. Physical-firmware acquisition boundary
 
 The retained TechInsights TSS3 camera teardown under
-`REFERENCE/tss3_camera_report/` supplies hardware-family context. Its exact-Camry
-identity remains unjoined. It identifies a Toshiba `TMPV7706XBG` Visconti5 processor
-and an Infineon/Cypress `S25HS01GT` **1-Gbit / 128-MiB serial NOR**,
+`REFERENCE/tss3_camera_report/` supplies hardware-family context. It identifies a
+Toshiba `TMPV7706XBG` Visconti5 processor and an Infineon/Cypress `S25HS01GT`
+**1-Gbit / 128-MiB serial NOR**,
 plus LPDDR4 and CAN transceivers.
 
 That physical flash capacity matters independently of the exact address map:
@@ -316,9 +300,7 @@ firmware bundle.
 
 Despite the `tmpv7706-bn3` filename convention in that bundle, its root device
 tree explicitly identifies **`toshiba,tmpv7708-bn3`, `toshiba,tmpv7708`**. It
-therefore supplies **TMPV7708 sibling-platform evidence** only. Its value lies
-in the shared Visconti5 execution/interconnect model. Exact TMPV7706XBG camera
-identity remains unestablished.
+therefore supplies **TMPV7708 sibling-platform evidence** for the Visconti5 execution/interconnect model.
 
 The sibling firmware gives three unusually strong address-domain joins:
 
@@ -362,16 +344,11 @@ running flash image registers exactly one receive callback, packed endpoint
 service class `1`; the second word is exclusively `0=erase`, `1=write`, or
 `2=read`. The generic library can install callback-only interrupt hooks for
 three additional logical participants `9/10/11`, but this image never registers
-one of those hooks and has no data-buffer entry for them. Their exact hardware
-identities are therefore deliberately left unnamed.
+one of those hooks and has no data-buffer entry for them.
 
-Consequently public `cr4dl0.img` is not an HSM command client hidden behind
-stripped names: it is a narrowly recovered **A53<->R4 flash RPC service**. In
-particular, this image contains no active path capable of transporting the
-64-byte `M1||M2||M3` SHE update object to `HSM_CM3` or returning the 48-byte
-`M4||M5` proof. This does not prove that Toyota uses a different inter-core
-mechanism; it proves only that the public sibling flash-service image is the
-wrong firmware artifact from which to recover that ABI.
+Public `cr4dl0.img` is an **A53<->R4 flash RPC service**. It contains no active
+path capable of transporting the 64-byte `M1||M2||M3` SHE update object to
+`HSM_CM3` or returning the 48-byte `M4||M5` proof.
 
 That makes the Toyota CUW address geometry substantially less mysterious. Its
 85,458,944-byte application target **`0x08E80000..0x0E000000`** sits naturally
@@ -394,9 +371,7 @@ TMPV770 Cortex-R4 execution domain       (routine target 0x008F6C00)
 
 The first two arrows are strongly supported by independent package and sibling
 platform address evidence; the final R4-to-HSM edge is the remaining software
-join. This still does **not** prove the exact Toyota TMPV7706 flash aperture,
-R4 firmware layout, UDS task placement, or HSM command ABI. It does make an
-A53/Linux-side payload decryptor a poor next target: the actual FRC package
+join. An A53/Linux-side payload decryptor is a poor next target: the actual FRC package
 loads a routine into the R4 address domain, and a closely related Visconti5
 platform already uses R4/GCOMM services to mediate the serial NOR.
 

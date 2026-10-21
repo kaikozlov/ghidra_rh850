@@ -18,7 +18,7 @@
       ]
     },
     "D02DA_filter": "FEBECC4C -> optional slew/filter state CC30/34/38/3C -> FEBECC4E",
-    "D0382_limit": "FEBECC60 = clamp(FEBECC4E, +/-FEBEAC52); AC52 supplies only the saturation limit",
+    "D0382_limit": "FEBECC60 = clamp(FEBECC4E, +/-FEBEAC52); AC52 supplies the saturation limit",
     "FEBEAC52_limit_provenance": "BCBD8 <- FEBEEF8E <- FCC00 <- FEBE71F2. Runtime 0x3BDC6 selects the minimum active entry from ROM table 0x317E0 (0x2B4D/0x3A75/0x569A; default 0x569A) from an internal protected status mask and stores FEBE71F2.",
     "classification": "B6-independent EPS-internal baseline-assist magnitude path. It explains how CC60/command torque can be nonzero with B6 absent; FEBE71F2 is only its saturation limit. This does not create a second generated-COM target ingress: the complete COM denominator remains separately closed.",
     "direct_D0218_value_cells": [
@@ -90,7 +90,7 @@
         "source": "FEBE80D8",
         "unpacker": "0x4BFB2"
       },
-      "classification": "resolved COM-receive status/gate state only: FEBEF0C2/FEBEF0A0/FEBEF157 are staged 498E0 PDU-validity results for 0x13B/0x490/0x1DA companion paths; FEBEF000<-FEBE7F68 is the shared extraction/debounce gate. They can suppress qualification but do not choose a parameter bank directly. Absent 0x490/0x1DA traffic cannot provide a fresh valid value."
+      "classification": "resolved COM-receive status/gate state: FEBEF0C2/FEBEF0A0/FEBEF157 are staged 498E0 PDU-validity results for 0x13B/0x490/0x1DA companion paths; FEBEF000<-FEBE7F68 is the shared extraction/debounce gate. They can suppress qualification. Absent 0x490/0x1DA traffic cannot provide a fresh valid value."
     },
     "generated_com_inputs": [
       {
@@ -164,12 +164,12 @@
         "stage_cell": "0xFEBEF156"
       }
     ],
-    "parameter_integrity_bank": "FEBEAC3C&1 <- FEBEB354 <- B7374(FF254()==0); FF254->62E12 returns TMR-protected FEBF0668 written by 62D5E after exact ROM 0x17DA0/0x17DC0.. comparison against working copy 0x20850/0x20870..; this controls parameter-copy integrity only.",
+    "parameter_integrity_bank": "FEBEAC3C&1 <- FEBEB354 <- B7374(FF254()==0); FF254->62E12 returns TMR-protected FEBF0668 written by 62D5E after exact ROM 0x17DA0/0x17DC0.. comparison against working copy 0x20850/0x20870..; this controls parameter-copy integrity.",
     "qualification_chain": "0x58074 stages the listed scalar inputs; B3430/B3686 debounce FEBEF050 into the FEBEB124 mode family while B34D4/B3538 qualify companion fields; B35DC/B372A map the result to FEBEB121; BCBD8 snapshots FEBEB121->FEBEAC2F; C54A2 selects FEBEC158; C5554 maps FEBEC158 to FEBEC156=0/1/2/3; C28FC chooses the parameter block consumed by baseline-assist terms."
   },
   "boundary": [
     "statement-level closure: 0xBF97A holds WRITE refs into FEBEE400..418 whose stores the decompiler elides; 0xBF33E is the statement-verified block writer and BF97A's block refs are treated as a second (runtime/reset) writer with unchanged sourcing",
-    "FEBEACC0 (0xC2F26 integrator-enable input) is computed locally inside 0xBCD62; its exact inputs remain bounded",
+    "FEBEACC0 (0xC2F26 integrator-enable input) is computed locally inside 0xBCD62",
     "FEBEB3FC/FEBEB3FE/FEBEB400/FEBEB354 (command block bytes 406/407/416/418) come from 0xB7xxx/0xB8xxx internal qualification not traced byte-exhaustively here",
     "no live vehicle I/O was performed; live context is re-read from retained artifacts"
   ],
@@ -181,7 +181,7 @@
   },
   "class_l_relevance": {
     "0x090": "the previously unresolved live 0x090 correlation now has a firmware path: 0x090-derived values are integrated observers (FEBEBFA0/FEBEBF80) whose plausibility flags (FEBEC02C/FEBEC043/FEBEC045) and validity gates (FEBEBFB0..FB2) qualify other paths; no 0x090 value is a command magnitude",
-    "mode_without_b6": "no non-B6 COM signal can raise assist-active FEBEC7BF (activation is B6-sig261-gated at 0xCB73A); Class-L mode change with B6=0 must therefore arise from the B6-independent internal baseline-assist path, other internal state machinery, or driver/feedback dynamics; all COM target alternatives are excluded"
+    "mode_without_b6": "no non-B6 COM signal can raise assist-active FEBEC7BF (activation is B6-sig261-gated at 0xCB73A); Class-L mode change with B6=0 must therefore arise from the B6-independent internal baseline-assist path, other internal state machinery, or driver/feedback dynamics"
   },
   "cluster": {
     "command_cone": [
@@ -451,7 +451,7 @@
       "FEBEEF8E": "FEBE71F2",
       "FEBEEF90": "FEBE8B28"
     },
-    "classification": "internal mirror/configuration class outside generated-COM; FEBE71F2 supplies only a ROM-selected limit",
+    "classification": "internal mirror/configuration class outside generated-COM; FEBE71F2 supplies a ROM-selected limit",
     "into_cone": "FEBE71F2 -> FCC00/FEBEEF8E -> BCBD8/FEBEAC52 -> D0382 saturation limit on dynamic FEBECC4E; FEBEAC04/FEBEAC06 gates (D04AC mode-latch) <- FEBEEE02/FEBEEE12"
   },
   "pipeline": {
@@ -664,7 +664,7 @@
         "sig244 -> stage FEBEF095 -> qualification 0xB7728/0xBECD0 -> FEBEB37C 'Z' flag -> 0xBB7FA handler-branch select -> FEBEAF40",
         "FEBEAF40 -> snapshot FEBEAC4C (0xBCBD8) -> D042C -> FEBECC66/FEBECC68 -> FEBEAC76/FEBEAC7E -> FEBEE410/FEBEE414"
       ],
-      "classification": "speed-class gating and handler selection: sig246 bounds/qualifies command paths; sig244 selects a handler pointer branch (FEBEAF40 stores only a pointer); no FEBECC50/FEBECC62 magnitude contribution",
+      "classification": "speed-class gating and handler selection: sig246 bounds/qualifies command paths; sig244 selects a handler pointer branch (FEBEAF40 stores a pointer)",
       "consumers": [
         "0xBECF4",
         "0xB7728",

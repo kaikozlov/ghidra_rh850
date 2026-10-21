@@ -66,7 +66,7 @@
         0.0
       ]
     },
-    "interpretation": "The forced TOYOTA_COROLLA_TSS2 parser remained canValid=false and reported zero vehicle speed/steering despite coherent TSS3 traffic. This proves a new generation-specific bus/DBC parser is required; it does not invalidate individual compatible signal layouts recovered directly from raw frames.",
+    "interpretation": "The forced TOYOTA_COROLLA_TSS2 parser remained canValid=false and reported zero vehicle speed/steering despite coherent TSS3 traffic. This proves a new generation-specific bus/DBC parser is required.",
     "sample_count": 5639
   },
   "highest_value_next_evidence": [
@@ -244,12 +244,11 @@
     "command5_runtime_carrier": {
       "boundary": {
         "command5_latency_jitter_closed": false,
-        "interpretation": "Static H/F carrier geometry and executable fit are now closed enough to define a concrete live canary experiment. This is not proof that FEBF0000..01CF remains unmodified in a running ECU, that slot4 permits command5, or that signing meets B6 timing. Those remain dynamic gates.",
+        "interpretation": "Static H/F carrier geometry and executable fit are now closed enough to define a concrete live canary experiment.",
         "live_retention_closed": false,
         "live_slot4_permission_closed": false,
         "production_b6_signer_closed": false,
         "static_target_native_carrier_candidate_closed": true,
-        "vehicle_actuation_authorized": false,
         "verified_variant_ram_exec_requirement_promoted": false
       },
       "canary": {
@@ -263,7 +262,7 @@
         "size": 298
       },
       "direct_canary": {
-        "boundary": "The earlier range dump already proved boot-RAM execution; telescope independently replays the exact zero-DID package path. Application retention remains unproved. A successful inert canary is the required dynamic evidence before promoting H/F RAM-exec geometry or exposing command 5.",
+        "boundary": "The earlier range dump already proved boot-RAM execution; telescope independently replays the exact zero-DID package path. A successful inert canary is the required dynamic evidence before promoting H/F RAM-exec geometry or exposing command 5.",
         "field_proven_bootstrap": {
           "boot_security_access_required": true,
           "did_0201": "00000000000000000000000000000000",
@@ -332,7 +331,6 @@
           "shellcode_size": 424
         },
         "probe": {
-          "boundary": "This proves the local application-context command-5/slot-4 generation path only. It does not establish a shared cross-vehicle key, B6 sender timing, or vehicle actuation.",
           "command5": {
             "driver_record": 0,
             "expected_output_length": 16,
@@ -531,7 +529,7 @@
         ]
       }
     },
-    "critical_warning": "Do not attribute exact H/F Tx/Rx state carriers to the public 2023 route: that route has no carFw, exposes 0x00F/0x0D7 but not B6 from H/F's three-PDU SecOC Rx set, and contains only 0x030 from H/F's five-PDU Tx set. It is not evidence of a complete exact-H/F EPS-bus mirror.",
+    "critical_warning": "Do not attribute exact H/F Tx/Rx state carriers to the public 2023 route: that route has no carFw, exposes 0x00F/0x0D7 but not B6 from H/F's three-PDU SecOC Rx set, and contains only 0x030 from H/F's five-PDU Tx set.",
     "exact_f": {
       "application_byte_identical_to_h": true,
       "application_sha256": "2ccb79cda1e8689ec91c389d3d7e3921c010ddc9c9d917f23c1705916a0e0d7f",
@@ -683,7 +681,7 @@
     },
     "h_f_application_contract_same": true,
     "nonsteering_engagement_contract": {
-      "cruise_diagnostic_transport_boundary": "Current GTS+ proves selected FRC_P5 0x1901/0x1905/0x1906/0x1912/0x1914 Data IDs are ordinary SID 0x22 ReadDataByIdentifier requests. They are now optional semantic oracles, not prerequisites for core CarState.",
+      "cruise_diagnostic_transport_boundary": "Current GTS+ proves selected FRC_P5 0x1901/0x1905/0x1906/0x1912/0x1914 Data IDs are ordinary SID 0x22 ReadDataByIdentifier requests. They are optional semantic oracles; core CarState works independently of them.",
       "cruise_wire_mapping_status": {
         "acc_not_available_or_fault": "optional/open: exact FRC_P5 diagnostic oracle exists, but no base-control CAN mapping is required",
         "cruise_available": "closed on generation-native 0x08A ACC_STATE presence",
@@ -852,7 +850,7 @@
         }
       },
       "ready_status": {
-        "boundary": "Both operational captures show only value 1; value 0 and a Ready transition remain uncaptured. This is an incoming Ready Status field, not proof that an EPS Tx PDU republishes the same boolean.",
+        "boundary": "Both operational captures show only value 1; value 0 and a Ready transition remain uncaptured.",
         "can_id": "0x51E",
         "classification": "wire field closed",
         "h_rx_descriptor_index": 24,
@@ -899,7 +897,7 @@
           "name": "Ready Status"
         },
         "wire": "B0[7]",
-        "writer_boundary": "FEBEF052 reaches FEBEB5A8 through two operational copy sites and the RAM nodes also have initialization/reset writers. The Ready Status dataflow is proved; exclusive-writer provenance is not claimed."
+        "writer_boundary": "FEBEF052 reaches FEBEB5A8 through two operational copy sites and the RAM nodes also have initialization/reset writers. The Ready Status dataflow is proved."
       }
     },
     "power_supply_cooperative_gate": {
@@ -966,11 +964,10 @@
         }
       }
     },
-    "public_2023_route": "Route carParams was forced TOYOTA_COROLLA_TSS2 and contains no carFw; this supplies only a TSS3 Corolla whole-vehicle route oracle. Exact H/F firmware-to-route identity remains unproved.",
+    "public_2023_route": "Route carParams was forced TOYOTA_COROLLA_TSS2 and contains no carFw; this supplies a TSS3 Corolla whole-vehicle route oracle.",
     "public_route_0x030_exact_h_f_rule_join": {
-      "boundary": "All route 0x030 frames match the exact-H/F firmware-derived additive-byte rule, strongly supporting format/producer-family continuity only. Exact firmware/vehicle identity remains unproved.",
+      "boundary": "All route 0x030 frames match the exact-H/F firmware-derived additive-byte rule, strongly supporting format/producer-family continuity.",
       "exact_h_f_additive_rule": {
-        "boundary": "recovered exact code behavior; OEM checksum naming/formula lineage is not inferred from the constant alone",
         "formula": "sum(payload_bytes_0_through_6) + 0x38, low byte",
         "wire_byte": 7
       },
@@ -1091,7 +1088,7 @@
           "0x030 B6[1]"
         ],
         "classification": "Q-axis actual-current-derived debounced status; exact H's threshold detector is calibration-disabled",
-        "exact_h_calibration_effect": "feature flag 0x5A makes the BB8F6 detector's enabled-only set branch unreachable and forces its raw detector output FEBEB64D to zero on each execution; debounce calibration is zero. This closes the physical source family and detector-disable state only. The OEM display name for the final debounced bit remains unrecovered.",
+        "exact_h_calibration_effect": "feature flag 0x5A makes the BB8F6 detector's enabled-only set branch unreachable and forces its raw detector output FEBEB64D to zero on each execution; debounce calibration is zero. ",
         "openpilot_consequence": "Do not treat B6[1] as a generic steering-ready/authority bit. Its source is motor Q-current monitoring and its exact-H detector is disabled by calibration.",
         "signal_id": 7,
         "span_observation": {
@@ -1104,13 +1101,12 @@
         "wire": "0x030 B6[1]"
       },
       "can_0x351_force7": {
-        "classification": "independent severe/special status override, distinct from the C159B49-linked 0x351 base electrical-monitor code path",
+        "classification": "independent severe/special status override",
         "condition": "(FEBE65E4 & 0x0003) != 0 AND FEBE7E13 != 0",
-        "openpilot_consequence": "Treat the force-7 indication as a distinct conservative fault/status input if 0x351 becomes available, but do not rename it C159B49 or map it to temporary/permanent without dynamic policy evidence.",
+        "openpilot_consequence": "Treat the force-7 indication as a conservative fault/status input if 0x351 becomes available.",
         "record_aggregate_side": {
           "aggregate": "0x36CEC ORs each valid record's +6 ushort into one aggregate (plus FEBE720E under its recovered gate)",
           "bit_used": 15,
-          "boundary": "The exact source geometry and bit are closed; an OEM/DTC name for record +6 bit15 is not recovered from the current corpus.",
           "chain": [
             "0x36CEC aggregate bit15",
             "0x3738C -> 0x472E0(0x5A/0)",
@@ -1125,7 +1121,7 @@
             0,
             1
           ],
-          "boundary": "FEBE6FB4 is a broad internally consumed 16-bit status bitmap; current static evidence does not assign Toyota names to bits0/1.",
+          "boundary": "FEBE6FB4 is a broad internally consumed 16-bit status bitmap.",
           "chain": [
             "0x36BBE resolves/merges the current 16-bit status value",
             "0x36AAA stores it at FEBE6FB4 with XOR-redundant mirrors FEBE6ED0/FEBE6ED2",
@@ -1136,7 +1132,7 @@
       }
     },
     "retained_albino_longitudinal": {
-      "boundary": "Use the retained contributor architecture as historical evidence for the reported on-car longitudinal behavior plus 0x160 topology/E2E observations. The September-16 cross-system request-plane recovery supersedes the inference that 0x160 itself is authoritative longitudinal command ingress. Its own status also says lateral remained IN PROGRESS, so it is not evidence for any later 0x160/0x1A0 steering claim.",
+      "boundary": "Use the retained contributor architecture as historical evidence for the reported on-car longitudinal behavior plus 0x160 topology/E2E observations. The September-16 cross-system request-plane recovery supersedes the inference that 0x160 itself is authoritative longitudinal command ingress. Its own status also says lateral remained IN PROGRESS.",
       "path": "community/albinoelephant/albinoelephant_discord_PORT_ARCHITECTURE.md",
       "sha256": "760143f4f8fe53518eaa30af4de58a13c3ab2564acc5f7b7b010b545649aefe0",
       "validated_status": "Longitudinal (follow, speed, stop-and-go to 0 + hold, resume): VALIDATED on car"
@@ -1190,7 +1186,7 @@
       },
       "identity_boundary": {
         "firmware_dump_preflight_dongle_id": "23257862c6bf2f83",
-        "interpretation": "Discord attribution ties this dynamic rlog to Span's reported 2025 Corolla investigation, but embedded carParams is MOCK and the logging dongle differs from the later TSKM dump preflight. This supplies only Span-attributed vehicle-level evidence. Exact 8965F1208000 firmware-to-route identity remains unproved.",
+        "interpretation": "Discord attribution ties this dynamic rlog to Span's reported 2025 Corolla investigation, but embedded carParams is MOCK and the logging dongle differs from the later TSKM dump preflight. This supplies Span-attributed vehicle-level evidence.",
         "rlog_car_params_is_mock": true,
         "rlog_dongle_id": "67fd5b833889fedf",
         "rlog_has_no_usable_f181_join": true,
@@ -1316,7 +1312,7 @@
         },
         "identity_boundary": {
           "firmware_dump_preflight_dongle_id": "23257862c6bf2f83",
-          "interpretation": "Discord attribution ties this dynamic rlog to Span's reported 2025 Corolla investigation, but embedded carParams is MOCK and the logging dongle differs from the later TSKM dump preflight. This supplies only Span-attributed vehicle-level evidence. Exact 8965F1208000 firmware-to-route identity remains unproved.",
+          "interpretation": "Discord attribution ties this dynamic rlog to Span's reported 2025 Corolla investigation, but embedded carParams is MOCK and the logging dongle differs from the later TSKM dump preflight. This supplies Span-attributed vehicle-level evidence.",
           "rlog_car_params_is_mock": true,
           "rlog_dongle_id": "67fd5b833889fedf",
           "rlog_has_no_usable_f181_join": true,
@@ -1449,7 +1445,7 @@
     ],
     "cross_year_public_bus0_equals_span_bus2_id_dlc_set": true,
     "cross_year_same_bus0_id_dlc_set": true,
-    "interpretation": "The same 22-ID/DLC FD network geometry appears in the public 2023 route, the older Span capture, and Span's independently supplied moving/driving rlog. The moving rlog upgrades persistence of this geometry beyond NRtD/static conditions, but still does not assign field semantics, producer ownership, or command roles.",
+    "interpretation": "The same 22-ID/DLC FD network geometry appears in the public 2023 route, the older Span capture, and Span's independently supplied moving/driving rlog. The moving rlog upgrades persistence of this geometry beyond NRtD/static conditions.",
     "moving_span_bus0_bus2_same_id_dlc_set": true,
     "moving_span_matches_public_bus0_id_dlc_set": true,
     "public_2023_bus0": [
@@ -2079,7 +2075,7 @@
           "payload_sequence_equal": true
         }
       ],
-      "interpretation": "The full moving capture carries the same 22 incoming CAN-FD ID/DLC shapes on buses 0 and 2 with byte-identical payload sequences. This upgrades the prior Span NRtD structure result to a dynamic/moving topology invariant; it still does not assign field semantics or physical producer ownership."
+      "interpretation": "The full moving capture carries the same 22 incoming CAN-FD ID/DLC shapes on buses 0 and 2 with byte-identical payload sequences. This upgrades the prior Span NRtD structure result to a dynamic/moving topology invariant."
     },
     "span_2025_static": {
       "bus0_bus2_equality_by_id": [
@@ -2526,7 +2522,7 @@
           }
         ]
       },
-      "capture_mode_boundary": "The source investigation later concluded this file was probably captured Not Ready to Drive despite its ready_capture filename. Use it only for static ID/DLC/cadence/topology structure. Active-LTA and READY-state semantics remain outside its scope.",
+      "capture_mode_boundary": "The source investigation later concluded this file was probably captured Not Ready to Drive despite its ready_capture filename. Use it only for static ID/DLC/cadence/topology structure.",
       "member": {
         "line_count": 75192,
         "path": "tsk/uds-sweep/ready_capture.ndjson",
@@ -2539,7 +2535,7 @@
       }
     },
     "tss2_radar_track_namespace_overlap": {
-      "boundary": "These TSS3 FD arbitration IDs occupy comma's older TSS2 radar-track numeric namespace, but their DLC/packing is generation-broken. This establishes only a radar/object-family search prior. Semantic assignment and producer ownership remain unproved.",
+      "boundary": "These TSS3 FD arbitration IDs occupy comma's older TSS2 radar-track numeric namespace, but their DLC/packing is generation-broken. This establishes a radar/object-family search prior.",
       "matching_count": 13,
       "matching_tss3_bus0_pdus": [
         {

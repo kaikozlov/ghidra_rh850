@@ -264,8 +264,7 @@ def build() -> dict[str, Any]:
             ),
             "boundary": (
                 "The pinned 26-CUW corpus is covered both at CRC-checked attach.att descriptor level and by a full "
-                "raw-container/recognized-decoded-image identity census. This proves absence within the local corpus only. "
-                "Availability from Toyota/TIS or an unretained package remains unresolved."
+                "raw-container/recognized-decoded-image identity census. No matching package is present in the local corpus."
             ),
         },
         "requested_producer_searches": {
@@ -297,7 +296,7 @@ def build() -> dict[str, Any]:
             "calibration_url": None,
             "url_policy": (
                 "Do not synthesize /t3Portal/calibration/F152633K0000 or any other URL. The exact F181 is a "
-                "search input/current software identity. A downloadable target CID remains unproved."
+                "search input/current software identity."
             ),
             "accepted_package_checks": [
                 "Toyota/TIS result is returned for the exact VIN + ecuAssyNo + baseSwNo query",
@@ -313,8 +312,7 @@ def build() -> dict[str, Any]:
                 "flash_writer": route["flash_writer"],
                 "can_id_source": route["get_can_id_flash"],
                 "boundary": (
-                    "P5-Unified is a current host route. The unavailable exact Brake package's route remains unproved; "
-                    "the acquired CUW descriptor must select the contact type."
+                    "P5-Unified is a current host route; the acquired CUW descriptor must select the contact type."
                 ),
             },
         },

@@ -1144,7 +1144,6 @@ public class AssertProcessorFixtureSemantics extends GhidraScript {
             emu.writeRegister("r6", mode);
             emu.writeRegister("CDBCR", 1);
             emu.writeRegister("ICCTRL", 0x30003);
-            // This bound applies only to the fixture.
             int steps = 0;
             while (emu.readRegister("PC").longValue() != poll && steps++ < 40) {
                 step(emu, label + " enter instruction-cache poll");

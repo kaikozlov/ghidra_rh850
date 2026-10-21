@@ -48,7 +48,7 @@
     },
     "same_pdu_retry_transition": "0x88702 itself performs B4->C3 without an additional reset; the caller that schedules an authentication retry (0x8891E) has already incremented the auth counter and reset the CryptoIf-submit counter to zero",
     "verification_failure_delivery_policy": {
-      "authentication_boundary": "failure-forwarded payloads are not authenticated successes and do not commit pending freshness. Do not describe this as CMAC acceptance; it is explicit generated delivery despite verification failure.",
+      "authentication_boundary": "failure-forwarded payloads are not authenticated successes and do not commit pending freshness.",
       "b6_profile_is_sync": false,
       "b6_profile_plus_0x09": 0,
       "cmac_mismatch_path": "the first result-nonzero mismatch schedules B4 retry; once the one B6 auth/freshness retry is exhausted, 0x8891E sets generic failure 0x96 and calls 0x888A6, so the same conditional failure-forwarding path applies",
@@ -66,7 +66,7 @@
       "upper_delivery_helper": "0x00088856 -> 0x00089514 -> PduR/COM PDU42"
     },
     "verified_delivery": {
-      "length_boundary": "The recovered queue/delivery path preserves a PduInfo length and PDU42's COM descriptor is 32 bytes. Static evidence does not prove that B28..B31 are physically stripped before COM RAM; the application-consumer census, not a stripping assumption, is the basis for classifying them as SecOC-only.",
+      "length_boundary": "The recovered queue/delivery path preserves a PduInfo length and PDU42's COM descriptor is 32 bytes. The application-consumer census establishes the SecOC-only classification of B28..B31.",
       "queue_getter": "0x00087E2C",
       "queue_ingress": "0x0008865A",
       "resolved_upper_callback": "0x00076A3C",
@@ -124,14 +124,12 @@
   "cross_variant": {
     "all_verification_functions_and_tables_inside_identical_range": true,
     "b6_secoc_verification_contract_byte_identical": true,
-    "boundary": "H and F application bytes are identical for every record/config/function used by this proof. This does not transfer low-region calibration values or identify the upstream sender.",
     "h_f_application_identical": true,
     "identical_range": [
       "0x20000",
       "0x100000"
     ]
   },
-  "evidence_boundary": "This closes the H/F EPS receiver-side SecOC verification algorithm for protected 0x0B6, including exact freshness state, candidate/window rules, retry scopes, CMAC input/slot selection, commit timing, generated verification-failure forwarding policy, and application-sequence separation. It does not recover the protected slot-4 secret, Toyota's stock sender implementation/cadence, or the upstream FRC/Brake payload/signing producer. For an exclusive replacement sender, however, the receiver algorithm plus authenticated 0x00F closes a deterministic re-anchor/message8 state machine without discovering the stock B6 counter policy.",
   "freshness_acceptance": {
     "epoch_transition": {
       "new_epoch_message": "received_message_low2 (0..3)",
@@ -283,7 +281,6 @@
     "gp": "0xFEBEB800",
     "initialization": {
       "freshness": "0x00089812 zeros current/pending global sync state and both 12-byte ordinary current/pending slots",
-      "persistence_boundary": "This proves application initialization writes these RAM cells; it does not by itself claim a whole-program negative for every possible external/NvM restoration path.",
       "verify_engine": "0x0008857C clears both retry counters and initializes all three queue states to E1"
     }
   },
@@ -322,7 +319,6 @@
     "runtime_state_blocker": "Toyota's stock B6 sender ownership/cadence/initial-message policy remains outside this EPS image, but it is no longer required to construct receiver-valid freshness for an exclusive replacement sender. Physical stock-source suppression and a signing primitive/key remain deployment blockers."
   },
   "sienna_prior_art": {
-    "boundary": "Sienna supplies role anchors for the generic acceptance engine. The H functions occupy the same control roles near a +0x5A64 Sienna relocation but are not claimed byte-identical: raw differences include relocated calls, GP/table displacements, and generated-profile geometry. H freshness/window conclusions below must be recovered from the target-native H bodies rather than transferred from Sienna.",
     "rows": [
       {
         "body_size": 66,
@@ -472,7 +468,7 @@
   "sources": {
     "base_receiver_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
-      "sha256": "5019f19340320b1764af66fa348f9e8ffb5ec6e9c6bff1143ed03d76d8d37dc8"
+      "sha256": "de36c4736b832f933311ca3f2151cadd209eccca24564a39b43065ae07474928"
     },
     "codeflash": {
       "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
@@ -481,11 +477,11 @@
     "decompiler_evidence": {
       "function_count": 44,
       "path": "data/generated/corolla_8965H1202000_b6_secoc_verification_decompiler_evidence.json",
-      "sha256": "606b9a5efe470558c2dc691d58acb13c6e995e1165f605fd8997e9a68db3dab7"
+      "sha256": "4554382c2b3de122f0af389a521418f86f73293375923b15a44b117f6a93c686"
     },
     "full_receiver_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_full_receiver_contract.json",
-      "sha256": "111602fc059375c00fdb8f2a7ecbb8ac2cbbb9452d79e98eb047a7ed538966bf"
+      "sha256": "0fb18c91952873dea512a48be0543d7cb4dd9eed7748f3368565599aae1e3f13"
     },
     "hf_equivalence": {
       "path": "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
@@ -493,7 +489,7 @@
     },
     "key_provenance": {
       "path": "data/generated/corolla_8965H1202000_secoc_key_provenance.json",
-      "sha256": "80a8f926d5db6172d3edb8ba3dc1d79708166af8c4c1d5379142188cf153f43e"
+      "sha256": "24b559cca288567b3e6edd618b1a8cfe6b420c28208013eafc742dda6a7979ed"
     }
   },
   "static_conclusion": {

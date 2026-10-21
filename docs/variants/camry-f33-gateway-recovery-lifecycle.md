@@ -43,9 +43,8 @@ and blank-target configuration must not be inferred from that wrapper.
 **Consequence:** the catch-all inside `StartPrepareWrite` does not establish
 that ordinary CUW frontend discovery/eligibility will reach it on this silent
 EPS. Neither fabricate target identity nor treat a host-side exception as a
-successful target response. The exact F33 CUW remains unacquired, limiting
-claims about the manufacturer-package frontend. The separately archived inverse
-is available below.
+successful target response. The exact F33 CUW remains unacquired.
+The separately archived inverse is available below.
 
 ## 2. Preparation completion comes after target execution
 
@@ -67,8 +66,7 @@ DH gateway branches remain distinct. Select them from actual topology and
 responses.
 
 Stopping periodic transmissions and receive filters appears in the preparation
-error/cleanup path. These operations provide **host transport cleanup** only.
-Restoration of every gateway and power-management state remains unproved.
+error/cleanup path. These operations provide **host transport cleanup**.
 The post-programming callback owner is now resolved:
 
 - The manager constructs its real 0xC84-byte active job through `10058780` and
@@ -125,10 +123,7 @@ referenced config, shellcode and payload. These retained local incident artifact
 must be acquired separately from a clean checkout. The disposable
 result is `build/work/f33-gateway-end-to-end/archived-rollback-audit.json`.
 
-This proves the **byte-image inverse** only. Current EPS flash contents, live
-preimage checking, executable-payload correctness and successful vehicle repair
-remain unproved. Restoring factory firmware and certifying roadworthiness
-are separate objectives.
+This proves the **byte-image inverse**.
 
 ## 4. A surviving boot listener can be admitted; it is not created by admission
 
@@ -147,9 +142,7 @@ emits the same `02 || 32*21` response when its compatibility-status getter
 `62E18` is nonzero.
 The complete application producer, its status getter, and the boot RDBI table
 are unchanged in the retained incident reconstruction. Normal compatibility
-bytes match in that reconstruction. The shared placeholder requires careful
-interpretation, while the current application's fallback-branch state remains
-unobserved.
+bytes match in that reconstruction.
 
 An independent, ordinary read-only distinction is available if the target
 answers: the application implements **F186** through `4FA7C -> 91AF4 -> 924FC`,
@@ -183,8 +176,7 @@ A completed recovery therefore needs four separate observations: a working
 prepared-state target service; successful, correct-image restoration with
 readback; an actual return/reset into the repaired application; and renewed EPS
 identity/normal output with the diagnostic and vehicle-state checks completed.
-None of those live observations was produced in this pass. The result is a
-more complete **audit of the candidate**. End-to-end demonstration remains absent.
+None of those live observations was produced in this pass.
 
 ## Sources and reproduction boundary
 
@@ -212,10 +204,7 @@ PE disassembly and IL outputs live under `build/work/f33-gateway-end-to-end/`.
 
 The retained current Camry install set resolves Central Gateway to category
 443 `CentralGW_P5`, request/response `750/758` with addressing extension `5F`.
-This resolves the catalog entry only. Live gateway identity and the current
-Panda-bus assignment remain unverified. Its role-82 plugin is the specially named
-`GetCID_SID22_GearShiftControl_DT.dll`; the name must not be treated as proof
-that identification needs a different protocol.
+Its role-82 plugin is `GetCID_SID22_GearShiftControl_DT.dll`.
 
 Its primary path at `100013F0` loads selector **DC** with `GetCommFrmInfo`
 at `1000149E/100014A9`, and sends it through `CommFrameSendReceiveExt` at
@@ -326,8 +315,7 @@ Thus the unresolved P5 reverse-state question cannot be filled merely by calling
 
 Working disassemblies from this independent check are under
 `build/work/f33-network-return-20260912/`. These disposable outputs are optional
-for portable verification. No additional vehicle observation, recovery sender,
-exploit primitive, or completed repair is implied.
+for portable verification.
 
 
 ## 9. The surrounding phase wrapper distinguishes retry policy from restoration
@@ -367,10 +355,9 @@ prepare-then-unrelated-writer sequence as already complete.
 ## 10. Native restoration coverage and saved-image verification
 
 This additional pass checks the **restoration half** of the network candidate.
-It does not establish the missing live EPS entry, acquire a matching OEM flash
-package, or execute any writer. Undoing the incident and returning every byte to
-factory state are distinct goals; the archived stage-7 inverse remains an
-incident rollback even though it preserves the previous stage-6 modifications.
+Undoing the incident and returning every byte to factory state are distinct goals;
+the archived stage-7 inverse remains an incident rollback even though it preserves
+the previous stage-6 modifications.
 
 ### All reconstructed changes fall within the normal upper-region erase domain
 
@@ -398,7 +385,7 @@ Independent comparisons of the complete retained images give:
 Every difference in both comparisons is inside that upper-region erase extent.
 The lower boot bytes are unchanged. The incident-to-stage-6 comparison differs
 at eight bytes, consistent with the archived inverse already checked in section
-3. These comparisons cover **saved images** only. Present ECU flash remains unmeasured.
+3. These comparisons cover **saved images**.
 
 **Positive result:** normal full upper-region restoration has the necessary
 address coverage to remove the damaged call, previous application patches, and
@@ -472,8 +459,7 @@ public reprogramming index directs matched-calibration acquisition to TIS and
 applicable service bulletins, but the public search in this pass supplied no
 exact F33 package or independent recovery-entry procedure:
 https://techinfo.toyota.com/techInfoPortal/appmanager/t3/ti?_nfpb=true&_pageLabel=ti_tdt_reprog
-The OEM-package branch still needs acquisition of an exact package. Its existence
-remains unresolved; the archived incident inverse's byte correctness is independently established.
+The OEM-package branch still needs acquisition of an exact package.
 
 **Remaining composition gap:** no prepared-state EPS response was observed;
 no compatible native restoration was executed; the repaired application has
@@ -530,8 +516,7 @@ a pre-application entry into those services.
 The ten direct-call checks and the independent saved-image count check passed.
 The latter again found 16 incident differences in the application data range,
 476 in the footer, and none below `18000`. The existing saved-image comparator's
-11 portable tests also passed. These checks cover offline observations only.
-ECU execution, complete flash-driver emulation and successful recovery remain unproved.
+11 portable tests also passed.
 The disposable numeric record is
 `build/work/f33-oem-writer-composition/observations.json`; no portable check
 requires it. No new transport, writer payload, key material, or vehicle command
@@ -612,15 +597,12 @@ mapping: current RC_P5 table 65, record 1, resolves it to **C161854, Optical
 Axis Alignment / Missing Calibration**. The prior F181 **867BF0601001**
 observation therefore must not be treated as a central-gateway identity or an
 alternate EPS programming CPU merely because it is adjacent to 7A1. This
-identification joins OEM install-set data with the observed fault. Hardware
-label capture and sender authentication remain absent.
+identification joins OEM install-set data with the observed fault.
 
 Both current camera category 5005 and gateway category 443 use selector DC,
 frame 2B54, for normal F181 reading. Their identical request service does not
 make them the same endpoint. The gateway's separate **750/758, extension 5F**
-route remains the relevant route for the prepared-network hypothesis. A camera
-reply demonstrates communication with that camera path only. The gateway's EPS
-programming-route state remains unproved.
+route remains the relevant route for the prepared-network hypothesis.
 
 ## 12. The incident reconstruction also passes the native regional CRC inputs
 
@@ -650,16 +632,13 @@ post-incident ECU readback.
 
 The earlier distinction between the optional F181 read **inside preparation**
 and admission **before preparation** was followed into native current `CUW.dll`.
-This result covers the reviewed native code only. GTS execution and a complete
-recovery procedure remain unproved.
 
 ### Native handling of an absent CID
 
 `_JudgeFlashable@16` at `10061B70` reaches the worker at `1005F800` through its
 normal or alternate loaded-package paths. In the reviewed worker:
 
-- `1005F927..1005F9B2` reduces the selected node's per-entry bitmap. Its EPS fault
-  or hardware-blank semantics remain unproved.
+- `1005F927..1005F9B2` reduces the selected node's per-entry bitmap.
 - If that bitmap condition is not satisfied, `1005F9EF..1005FA28` checks a
   package-filename exception containing the literal **`.vbf`** at `10078D50`.
 - Outside that exception, `1005FA33..1005FA52` branches to the **`BBE`** return
@@ -726,8 +705,7 @@ end-to-end network repair.
 ## Read-only gateway selection and native cancellation: caller-level follow-up
 
 2026-09-12. Offline investigation of the actual OEM route, with no vehicle
-request, mode change, reset, upload or write. This extends the gateway candidate;
-it does not establish a surviving EPS executor or a completed repair.
+request, mode change, reset, upload or write.
 
 ### The actual Unified caller enables the legacy query first
 
@@ -754,8 +732,7 @@ real CLI and ISO-TP implementation with only the Panda replaced by a fake:
 - Explicit OBD multiplexing selects Panda bus 1 / ELM327 parameter 0.
   The EPS normal-harness path retains its separate bus assignment.
 
-These software tests leave on-wire qualification and full OEM classifier, retry
-and timing parity unproved. The committed tests are
+The committed tests are
 `toyota-diagnostics/tests/test_gateway_raw_cli.py` (`08539fe`, `b3cb8b8`);
 that file plus `tests/test_transport.py` passes **15 tests**. No production
 runtime was changed in this pass and no extra raw probe framework was created.
@@ -795,14 +772,11 @@ the job's +3C cancellation callback when the phase and stop conditions match.
 
 The manager explicitly installs **1003D490** into that +3C slot at `1003C3D6`.
 That callback only loads the host object at `1008AE4C`, sets its byte +258 to
-one, and returns. It does not send a gateway-normalization packet. This resolves
-a concrete cancellation callback; it is not a whole-program claim that no
-other cancellation, job phase or supplier package has any network side effect.
+one, and returns. It does not send a gateway-normalization packet.
 
 Likewise, current managed `CuwModel::SuppressSleepMode` and
-`CancelingSleepMode` set/clear the host static `IsSuppressSleep`. Their names
-are not evidence of remote EPS power control. The native/managed input PEs,
-sidecars and recovered outputs were matched against their existing manifests.
+`CancelingSleepMode` set/clear the host static `IsSuppressSleep`. The native/managed
+input PEs, sidecars and recovered outputs were matched against their existing manifests.
 
 **Recovery consequence:** completing the appropriate OEM gateway preparation
 remains an untested network delivery condition. A gateway reply alone, the

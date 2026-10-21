@@ -118,7 +118,7 @@ def span_capture() -> dict[str, Any]:
             "size": len(raw),
             "line_count": len(raw.splitlines()),
         },
-        "capture_mode_boundary": "The source investigation later concluded this file was probably captured Not Ready to Drive despite its ready_capture filename. Use it only for static ID/DLC/cadence/topology structure. Active-LTA and READY-state semantics remain outside its scope.",
+        "capture_mode_boundary": "The source investigation later concluded this file was probably captured Not Ready to Drive despite its ready_capture filename. Use it only for static ID/DLC/cadence/topology structure.",
         "buses": buses,
         "bus0_bus2_same_id_dlc_set": set0 == set2,
         "bus0_bus2_payload_sequences_equal": sequence_equal,
@@ -394,12 +394,12 @@ def main() -> int:
             {"can_id": can_id, "dlc": dlc}
             for can_id, dlc in sorted(pub_set & span0_set)
         ],
-        "interpretation": "The same 22-ID/DLC FD network geometry appears in the public 2023 route, the older Span capture, and Span's independently supplied moving/driving rlog. The moving rlog upgrades persistence of this geometry beyond NRtD/static conditions, but still does not assign field semantics, producer ownership, or command roles.",
+        "interpretation": "The same 22-ID/DLC FD network geometry appears in the public 2023 route, the older Span capture, and Span's independently supplied moving/driving rlog. The moving rlog upgrades persistence of this geometry beyond NRtD/static conditions.",
         "tss2_radar_track_namespace_overlap": {
             "upstream_ranges": prior["radar_generation"]["tss2_track_id_ranges"],
             "matching_tss3_bus0_pdus": radar_namespace_overlap,
             "matching_count": len(radar_namespace_overlap),
-            "boundary": "These TSS3 FD arbitration IDs occupy comma's older TSS2 radar-track numeric namespace, but their DLC/packing is generation-broken. This establishes only a radar/object-family search prior. Semantic assignment and producer ownership remain unproved.",
+            "boundary": "These TSS3 FD arbitration IDs occupy comma's older TSS2 radar-track numeric namespace, but their DLC/packing is generation-broken. This establishes a radar/object-family search prior.",
         },
         "0x18A_disposition": "0x18A is one 64-byte ~20-Hz member of the broader 0x180..0x18B family and lies inside comma's older TSS2 radar-track namespace. That makes radar/object semantics a concrete competing prior to the community lateral-control label; neither interpretation is promoted until producer/field/authentication dataflow is independently joined.",
     }
@@ -447,7 +447,7 @@ def main() -> int:
                 "path": str(ALBINO_ARCH.relative_to(REPO)),
                 "sha256": sha256_file(ALBINO_ARCH),
                 "validated_status": "Longitudinal (follow, speed, stop-and-go to 0 + hold, resume): VALIDATED on car",
-                "boundary": "Use the retained contributor architecture as historical evidence for the reported on-car longitudinal behavior plus 0x160 topology/E2E observations. The September-16 cross-system request-plane recovery supersedes the inference that 0x160 itself is authoritative longitudinal command ingress. Its own status also says lateral remained IN PROGRESS, so it is not evidence for any later 0x160/0x1A0 steering claim.",
+                "boundary": "Use the retained contributor architecture as historical evidence for the reported on-car longitudinal behavior plus 0x160 topology/E2E observations. The September-16 cross-system request-plane recovery supersedes the inference that 0x160 itself is authoritative longitudinal command ingress. Its own status also says lateral remained IN PROGRESS.",
             },
             "command5_runtime_carrier": {
                 "static_candidate": carrier["carrier_geometry"],
@@ -495,7 +495,7 @@ def main() -> int:
                 "can_0x030_b6_bit1": remaining_status["can_0x030_b6_bit1"],
                 "can_0x351_force7": remaining_status["can_0x351_force7"],
             },
-            "critical_warning": "Do not attribute exact H/F Tx/Rx state carriers to the public 2023 route: that route has no carFw, exposes 0x00F/0x0D7 but not B6 from H/F's three-PDU SecOC Rx set, and contains only 0x030 from H/F's five-PDU Tx set. It is not evidence of a complete exact-H/F EPS-bus mirror.",
+            "critical_warning": "Do not attribute exact H/F Tx/Rx state carriers to the public 2023 route: that route has no carFw, exposes 0x00F/0x0D7 but not B6 from H/F's three-PDU SecOC Rx set, and contains only 0x030 from H/F's five-PDU Tx set.",
         },
         "role_readiness": readiness,
         "tss3_fd_network": tss3_fd,

@@ -52,7 +52,7 @@ Only eight additional direct READ references exist, across signals 1, 6, 8,
 10, and 38. The exporter derives the staging-address set from the six packer
 bodies rather than from documentation, while the verifier independently pins
 every owning-function body hash to raw CodeFlash. This establishes a producer
-census. Semantic names for the anonymous status fields remain unresolved.
+census.
 
 The application transmit chain is:
 
@@ -85,9 +85,8 @@ caller, a dormant receive-fed crypto-test harness, and its 16-byte result is
 compared locally rather than passed to the PDU router. Using the EPS as a
 signing proxy would therefore require new application-resident code, an output
 or in-EPS transmit route, and sender-side freshness handling; no production
-SecOC Tx stack in this firmware is available to repurpose. This stock-EPS
-boundary does not imply that no external sender exists: pinned opendbc code and
-the independent local stateless signer implement the accepted classic frame
+SecOC Tx stack in this firmware is available to repurpose. Pinned opendbc code
+and the independent local stateless signer implement the accepted classic frame
 format. See the [SecOC application chain](../security/secoc/application-chain.md)
 and [sender implementation](../security/secoc/sender-implementation.md).
 
@@ -218,9 +217,7 @@ The status-bit producer graph is compact and explicit. Signal 0 follows
 `FEBEAD33 -> FEBEE830 -> FEBE8094`; `eps_subsystem_init_orchestrator @ 0xBD10E`
 and normal `steering_command_export_scale @ 0xCB700` both write the upstream
 byte as zero, and the live-project reference census finds no other direct
-producer. The legacy `STEER_OVERRIDE` name therefore serves only as a DBC
-wire-position label. Historical driver-threshold behavior on that bit remains
-unproven for this Sienna.
+producer. The legacy `STEER_OVERRIDE` name serves as a DBC wire-position label.
 
 Signal 1 is synthesized in `0x4B66C`: three local validity fields must be zero
 and three snapshotted status bytes are compared against marker `0x22`. That

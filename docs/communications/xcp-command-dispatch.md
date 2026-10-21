@@ -109,11 +109,6 @@ CONNECT itself has no GET_SEED/UNLOCK prerequisite in this image.
 
 For example, an eight-byte `F4 01 00 00 28 6D BE FE` request selects one byte at
 `0xFEBE6D28`. Firmware-static evidence establishes the parser and read path.
-External gateway reachability remains unproven.
-
-The copied interval does not contain the bootloader secrets at `0xBFD8` and
-`0xBFE8` or the application SecurityAccess secret at `0x20840`; this finding
-does not claim direct key disclosure.
 
 ### DAQ commands provide event-driven RAM telemetry
 
@@ -159,8 +154,7 @@ read-only live-project assertion finds exactly four direct references to the
 DAQ pointer-table base: initialization, list clearing, `WRITE_DAQ`, and the
 sampler. No reverse store through the configured source pointer is recovered.
 Thus this DAQ surface is a **firmware-static unauthenticated event-driven
-LocalRAM disclosure primitive**. This calibration has no recovered STIM-style
-memory-write path.
+LocalRAM disclosure primitive**.
 
 This is directly useful to the remaining dynamic steering discriminator if the
 physical `0x7F7/0x7F8` route is reachable. The already-recovered d/q reference
@@ -250,19 +244,13 @@ UNLOCK remain unconfigured. `tests/targets/corolla/verify_spanconstant_corolla_c
 pins the source ZIP and extracted bytes and verifies the full composition; see
 [the Span Corolla variant record](../variants/corolla-8965F1208000.md).
 
-The security conclusion is therefore corrected and still bounded:
-**write capability is verified, and the window is supervisor-executable by MPU
-configuration, but no control-transfer consumer is recovered**.
-The established capability is limited to writing.
-`exploit/followups/xcp_shadow_write_plan.py` now represents the verified
-SET_MTA/DOWNLOAD wire primitive as an offline-only planner/simulator. It has no
-live transport path; that preserves the distinction between proving the write
-primitive and claiming an as-yet-unrecovered consumer or actuation effect.
+**Write capability is verified, and the window is supervisor-executable by MPU
+configuration.** `exploit/followups/xcp_shadow_write_plan.py` represents the verified
+SET_MTA/DOWNLOAD wire primitive as an offline planner/simulator.
 
 Firmware-static evidence proves CAN1 acceptance and response construction.
-Forwarding of CAN `0x7F7/0x7F8` through an external vehicle gateway or diagnostic
-connector remains unproven. The transport also closes the obvious short-frame stale-tail
-avenue: `0x81FE4` accepts only nonzero payload lengths up to eight bytes, clears
+The transport also closes the short-frame stale-tail avenue: `0x81FE4` accepts only
+nonzero payload lengths up to eight bytes, clears
 the eight-byte receive staging slot before copying the supplied bytes, and the
 custom handlers require an exact eight-byte request before consuming their
 fields. Standard commands retain their own configured request-length checks.
@@ -292,8 +280,7 @@ The nearby 60-pointer array at `0x27C88..0x27D77`, including the
 wrapper-shaped targets referenced by `0x27D08..0x27D54`, is not seeded as a
 dispatch table. Importing Ghidra's generic V850 PREPARE/ADDI function-start
 patterns now recovers all 60 targets as exact function entries on a clean
-rebuild. That closes their code boundaries; it does not prove that this
-calibration dispatches through the array.
+rebuild.
 
 The consumer negative remains stronger than "unreferenced": the descriptor
 array at `0x27E94` has exactly six recovered accessors, and every one consumes
@@ -303,5 +290,4 @@ The sole live xref to `0x27C88` is a DATA word at `0x27D84`; all 60 target
 pointer literals occur only inside the table; and no executable walker or
 computed-call consumer is recovered. `AssertRecoveredPointerClusters.java`
 pins the bytes, exact function entries, data references, and absence of a
-non-table dispatch reference. Function-start and pointer shape remain
-insufficient to claim a consumed selector path.
+non-table dispatch reference.

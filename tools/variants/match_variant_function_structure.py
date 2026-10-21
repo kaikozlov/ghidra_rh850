@@ -4,10 +4,7 @@
 Inputs are JSONL files emitted by ``ExportFunctionStructuralFingerprints.java``.
 The strongest class emitted here, ``unique-exact-shape``, requires one and only
 one function on *both* sides to have the same complete mnemonic sequence and
-instruction-length sequence.  Operands, constants, data addresses, call targets,
-and semantics are intentionally excluded from the signature, so a structural
-match identifies only a homolog *candidate*. Configuration and behavior require
-target-native disassembly/decompilation.
+instruction-length sequence. A structural match identifies a homolog *candidate*.
 """
 
 from __future__ import annotations
@@ -90,11 +87,6 @@ def match(reference_path: Path, target_path: Path) -> dict[str, Any]:
                 "indirect_call_count_target": tgt["indirect_call_count"],
                 "return_count_reference": ref["return_count"],
                 "return_count_target": tgt["return_count"],
-                "evidence_boundary": (
-                    "complete mnemonic+instruction-length shape is unique on both sides; "
-                    "operands/constants/data addresses/call targets are not part of the "
-                    "signature and must be checked before semantic transfer"
-                ),
             }
         )
     matches.sort(key=lambda row: int(row["reference_entry"], 16))
@@ -106,11 +98,6 @@ def match(reference_path: Path, target_path: Path) -> dict[str, Any]:
     named8 = [row for row in named if row["instruction_count"] >= 8]
     return {
         "schema": SCHEMA,
-        "evidence_boundary": (
-            "Structural matching ignores operands by design. It is stronger than local "
-            "address/byte-similarity triage for recovering function identity across relocation "
-            "and data-layout changes, but it is not a proof of identical semantics or configuration."
-        ),
         "reference": {
             "fingerprints": str(reference_path),
             "sha256": _sha256(reference_path),

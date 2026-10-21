@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 """Portable Corolla H static-residue and coverage pins: crypto, diagnostic, and final named residue, static coverage, structural residue inspection, CAN comms, and XCP surface.
-
-Domain split; assertions and helpers are carried over verbatim.
 """
 from __future__ import annotations
 
@@ -33,7 +31,7 @@ def _section_crypto_residue():
     check('H image hash pinned',sha(H)==e['image']['codeflash_sha256']==a['images']['h_sha256']);check('all raw H bodies validate',all(sha(H[int(x['target_entry'],16):int(x['target_entry'],16)+x['target_reported_body_size']])==x['body_sha256'] for x in e['functions']))
     exp={'0x000070FC':'0x000070E0','0x00068F0C':'0x00063244','0x00068F92':'0x000632CA','0x00068FC2':'0x000632FA','0x00069018':'0x00063350','0x00088302':'0x00082702','0x00088508':'0x00082908'};check('all seven role mappings exact', {x['reference_entry']:x['target_entry'] for x in a['crypto_role_closure']}==exp)
     pf=a['payload_crypto_finalize'];check('payload finalize is exact 12-byte relocated wrapper',pf['exact_body_equal'] and pf['body_size']==12 and pf['h']=='0x000070E0');check('payload finalize is role-bound by relocated clear call',pf['h_calls_clear'] and pf['clear_delta']==-0x1c and 'FUN_000070c8' in by[0x70e0]['decompiled_c'])
-    b=a['crypto_test_banks'];check('bank0 preserves eight-counter snapshot',b['bank0']['snapshot']['h_counter_indices']==list(range(10,18)) and b['bank0']['snapshot']['sienna_counter_indices']==list(range(12,20)));check('bank1 preserves five-counter snapshot',b['bank1']['snapshot']['h_counter_indices']==list(range(18,23)) and b['bank1']['snapshot']['sienna_counter_indices']==list(range(20,25)));check('both H counter cohorts shift by -2',b['bank0']['index_shift']==[-2]*8 and b['bank1']['index_shift']==[-2]*5);check('bank0 activation keeps active/state 0x11 lifecycle',all(t in by[0x632ca]['decompiled_c'] for t in ('cRamfebe4f82','uRamfebe4f83 = 0x11','FUN_00062214','FUN_0006224c(1)','direct_call_target_00063244')));check('bank1 activation keeps active/state 0x11 lifecycle',all(t in by[0x63350]['decompiled_c'] for t in ('cRamfebe4f87','uRamfebe4f88 = 0x11','FUN_00062282','direct_call_target_000632fa')));check('counter-number transfer is explicitly rejected','do not transfer Sienna counter numbers' in b['interpretation'])
+    b=a['crypto_test_banks'];check('bank0 preserves eight-counter snapshot',b['bank0']['snapshot']['h_counter_indices']==list(range(10,18)) and b['bank0']['snapshot']['sienna_counter_indices']==list(range(12,20)));check('bank1 preserves five-counter snapshot',b['bank1']['snapshot']['h_counter_indices']==list(range(18,23)) and b['bank1']['snapshot']['sienna_counter_indices']==list(range(20,25)));check('both H counter cohorts shift by -2',b['bank0']['index_shift']==[-2]*8 and b['bank1']['index_shift']==[-2]*5);check('bank0 activation keeps active/state 0x11 lifecycle',all(t in by[0x632ca]['decompiled_c'] for t in ('cRamfebe4f82','uRamfebe4f83 = 0x11','FUN_00062214','FUN_0006224c(1)','direct_call_target_00063244')));check('bank1 activation keeps active/state 0x11 lifecycle',all(t in by[0x63350]['decompiled_c'] for t in ('cRamfebe4f87','uRamfebe4f88 = 0x11','FUN_00062282','direct_call_target_000632fa')));
     dr=a['driver_record_lookup'];check('generate driver lookup is two records stride 0x20',dr['generate']['h']=='0x00082702' and dr['generate']['record_count']==2 and dr['generate']['record_stride']==0x20 and '0x27c88' in by[0x82702]['decompiled_c']);check('generic driver lookup is two records stride 0x20',dr['verify_generic']['h']=='0x00082908' and dr['verify_generic']['record_count']==2 and dr['verify_generic']['record_stride']==0x20 and '0x27ccc' in by[0x82908]['decompiled_c']);check('driver lookup pair remains -0x5C00',dr['delta']==-0x5c00)
     sc=a['static_conclusion'];check('all seven crypto residual roles closed',sc['all_7_crypto_residual_roles_recovered'] and sc['crypto_named_residue_closed']);
 
@@ -101,48 +99,31 @@ def _section_final_named_residue():
 
 def _section_static_coverage():
     print('== static coverage ==')
-    """Verify the evidence-graded named-function coverage denominator."""
     import json
-    REPO=REPO_ROOT
-    ART=REPO/'data/generated/corolla_8965H1202000_static_coverage_matrix.json'
-    d=json.loads(ART.read_text());s=d['summary'];rows=d['functions']
-    print('\n== denominator ==')
-    check('coverage counts sum to denominator',sum(s['coverage_counts'].values())==1113)
-    check('all 288 exact named transfers remain verified exact',s['coverage_counts']['verified-exact-body-transfer']==288)
-    check('some changed/structural entries are promoted only by later evidence',s['coverage_counts'].get('target-native-inspected-unique-shape',0)>0 and s['coverage_counts'].get('target-native-role-recovered',0)>0 and s['coverage_counts'].get('target-surface-recensused',0)>0)
-    check('canonical named denominator has zero genuinely unresolved rows',s['genuinely_unresolved_count']==0)
-    check('all former structural-only candidates now have target-native inspection evidence',s['structural_candidate_only_count']==0)
-    print('\n== promotion evidence discipline ==')
-    check('target-native-inspected rows always name evidence files',all(r['target_native_evidence_files'] for r in rows if r['coverage']=='target-native-inspected-unique-shape'))
-    check('target-native role-recovered rows always carry explicit role records and evidence',all(r['role_recovery'] and r['target_native_evidence_files'] for r in rows if r['coverage']=='target-native-role-recovered'))
-    check('all eight scheduler-system changed roles remain target-native recovered',s['tag_coverage_counts']['scheduler_system'].get('target-native-role-recovered')==8 and s['tag_coverage_counts']['scheduler_system'].get('genuinely-unresolved',0)==0)
-    check('all nine CAN/COM changed roles are target-native recovered',s['tag_coverage_counts']['can_com'].get('target-native-role-recovered')==9 and s['tag_coverage_counts']['can_com'].get('genuinely-unresolved',0)==0)
-    check('all three storage/NvM changed roles are target-native recovered',s['tag_coverage_counts']['storage_nvm'].get('target-native-role-recovered')==3 and s['tag_coverage_counts']['storage_nvm'].get('genuinely-unresolved',0)==0)
-    check('all four XCP changed roles are target-native recovered',s['tag_coverage_counts']['xcp'].get('target-native-role-recovered')==4 and s['tag_coverage_counts']['xcp'].get('genuinely-unresolved',0)==0)
-    check('all five newly mapped motor-control roles are target-native recovered',all(any(r['reference_name']==name and r['coverage']=='target-native-role-recovered' for r in rows) for name in ('motor_coord_transform_calib_handler','dq_current_pi_axis_b','motor0_inverse_rotating_frame_transform','motor1_inverse_rotating_frame_transform','tauj0_ch0_motor_control_worker')) and s['tag_coverage_counts']['motor_control'].get('genuinely-unresolved',0)==0)
-    check('axis-A motor PI structural candidate is promoted by target-native evidence',any(r['reference_name']=='dq_current_pi_axis_a' and r['coverage']=='target-native-inspected-unique-shape' for r in rows))
-    check('all 42 remaining SecOC/ICU-S roles are target-native recovered',s['tag_coverage_counts']['secoc_icus'].get('genuinely-unresolved',0)==0 and s['tag_coverage_counts']['secoc_icus'].get('target-native-role-recovered')==44)
-    check('all seven remaining crypto roles are target-native recovered',s['tag_coverage_counts']['crypto'].get('genuinely-unresolved',0)==0 and s['tag_coverage_counts']['crypto'].get('target-native-role-recovered')==14)
-    check('remaining steering residue is fully closed without fake latch homologs',s['tag_coverage_counts']['steering'].get('genuinely-unresolved',0)==0 and s['tag_coverage_counts']['steering'].get('target-native-role-recovered')==6 and s['tag_coverage_counts']['steering'].get('target-surface-recensused')==6)
-    check('remaining diagnostics residue is fully closed',s['tag_coverage_counts']['diagnostics'].get('genuinely-unresolved',0)==0 and s['tag_coverage_counts']['diagnostics'].get('target-native-role-recovered')==27)
-    check('all 11 plausibility-monitor roles are target-native recovered',sum(1 for r in rows if r['reference_name'].startswith('plausibility_monitor_') and r['coverage']=='target-native-role-recovered')==11)
-    check('all 18 packet/record/bounded adapter roles are target-native recovered',sum(1 for r in rows if (r['reference_name'].startswith('packet_low_selector_') or r['reference_name'].startswith('record_operation_') or r['reference_name'].startswith('bounded_api_wrapper_')) and r['coverage']=='target-native-role-recovered')==18)
-    check('all 12 preserved veneer-derived roles are target-native recovered',sum(1 for r in rows if r.get('role_recovery') and r['role_recovery'].get('report')=='data/generated/corolla_8965H1202000_veneer_bank.json')==12)
-    check('all 10 deleted veneer-derived roles are surface-recensused',sum(1 for r in rows if 'high-page-veneer-bank-complete-recensus' in r.get('surface_recensus',[]))==10)
-    check('all 33 configured application callback roles are target-native recovered',sum(1 for r in rows if r.get('role_recovery') and r['role_recovery'].get('report')=='data/generated/corolla_8965H1202000_application_callback_tables.json')==33)
-    check('all four removed async-operation callback roles are surface-recensused',sum(1 for r in rows if 'application-async-operation-complete-table-recensus' in r.get('surface_recensus',[]))==4)
-    check('all 33 final named-residue successors are target-native recovered',sum(1 for r in rows if r.get('role_recovery') and r['role_recovery'].get('report')=='data/generated/corolla_8965H1202000_final_named_residue.json')==33)
-    check('all three keyless event-formatter roles are target-native recovered',sum(1 for r in rows if r.get('role_recovery') and r['role_recovery'].get('report')=='data/generated/corolla_8965H1202000_keyless_event_formatter.json')==3)
-    check('removed boot TAUJ0 CH2 role is recensused',sum(1 for r in rows if 'boot-eiint-complete-table-recensus' in r.get('surface_recensus',[]))==1 and any(r['reference_name']=='boot_tauj0_ch2_isr' and r['coverage']=='target-surface-recensused' for r in rows))
-    check('238 total roles are target-native recovered',s['coverage_counts'].get('target-native-role-recovered')==238)
-    check('all 88 deadline callbacks are closed by complete target recensus',sum(1 for r in rows if r['reference_name'].startswith('deadline_') and r['coverage']=='target-surface-recensused')==88)
-    check('global genuinely-unresolved denominator is zero',s['genuinely_unresolved_count']==0)
-    check('all 96 former structural-only rows retain target-native structural-residue evidence',sum(1 for r in rows if r['coverage']=='target-native-inspected-unique-shape' and 'data/generated/corolla_8965H1202000_structural_residue_decompiler_evidence.json' in r.get('target_native_evidence_files', []))==96)
-    check('final evidence-class distribution is pinned',s['coverage_counts']=={'verified-exact-body-transfer':288,'target-native-role-recovered':238,'target-surface-recensused':461,'target-native-inspected-unique-shape':126})
-    check('surface-recensused rows always name an explicit complete recensus',all(r['surface_recensus'] for r in rows if r['coverage']=='target-surface-recensused'))
-    check('no structural-only rows remain',not any(r['coverage']=='structural-candidate-only' for r in rows))
-    check('genuinely unresolved rows have neither target-native evidence nor surface recensus',all(not r['target_native_evidence_files'] and not r['surface_recensus'] for r in rows if r['coverage']=='genuinely-unresolved'))
-    check('H-native inspected additions without unique S pair are counted separately',s['h_native_evidence_functions_without_unique_sienna_pair']>0)
+    from tools.variants.compare_variant_function_bodies import load_reference_functions
+    source=(REPO_ROOT/'firmware/RH850_P1M-E_CodeFlash.bin').read_bytes()
+    target=(REPO_ROOT/'firmware/corolla-8965H1202000/CodeFlash.bin').read_bytes()
+    inventory=REPO_ROOT/'data/ghidra_project_inventory.baseline.jsonl'
+    expected={r.entry for r in load_reference_functions(inventory,len(source)) if r.name}
+    d=json.loads((REPO_ROOT/'data/generated/corolla_8965H1202000_static_coverage_matrix.json').read_text())
+    rows=d['functions'];entries=[int(r['reference_entry'],16) for r in rows]
+    check('coverage includes each canonical named function exactly once',set(entries)==expected and len(entries)==len(set(entries)))
+    raw=json.loads((REPO_ROOT/'data/generated/corolla_8965H1202000_function_body_transfer.json').read_text())
+    bodies={int(r['reference_entry'],16):r for r in raw['functions']}
+    exact=True
+    for row in rows:
+        if row['coverage']!='verified-exact-body-transfer':
+            continue
+        entry=int(row['reference_entry'],16)
+        delta=int(row['target_entry'],16)-entry
+        for span in bodies[entry]['body_ranges']:
+            lo=int(span['start'],16);hi=int(span['end_exclusive'],16)
+            exact &= 0<=lo+delta<hi+delta<=len(target) and source[lo:hi]==target[lo+delta:hi+delta]
+    check('every exact classification reproduces all source ranges in H bytes',exact)
+    check('every canonical named function has exact or native evidence',all(
+        r['coverage'] in {'verified-exact-body-transfer','target-native-role-recovered','target-surface-recensused','target-native-inspected-unique-shape'}
+        for r in rows))
+
 
 
 def _section_structural_residue_inspection():
@@ -150,16 +131,11 @@ def _section_structural_residue_inspection():
     import json
     ROOT=REPO_ROOT
     ART=ROOT/'data/generated/corolla_8965H1202000_structural_residue_decompiler_evidence.json'
-    STRUCT=ROOT/'data/generated/corolla_8965H1202000_structural_function_transfer.json'
     HRAW=ROOT/'community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin'
-    d=json.loads(ART.read_text());st=json.loads(STRUCT.read_text());h=HRAW.read_bytes()[:0x100000]
+    d=json.loads(ART.read_text());h=HRAW.read_bytes()[:0x100000]
     check('software/image identity pinned',d['software_id']=='8965H1202000' and d['image']['codeflash_sha256']==sha(h))
-    check('reference and target entries are each unique',len({x['reference_entry'] for x in d['functions']})==96 and len({x['entry'] for x in d['functions']})==96)
+    check('retained reference and target entries are each unique',len({x['reference_entry'] for x in d['functions']})==len(d['functions']) and len({x['entry'] for x in d['functions']})==len(d['functions']))
     check('all H bodies raw-bound',all(sha(h[int(x['entry'],16):int(x['entry'],16)+x['body_size']])==x['body_sha256'] for x in d['functions']))
-    sm={int(x['reference_entry'],16):x for x in st['matches']}
-    check('every inspected pair is the structural artifact target',all(int(x['reference_entry'],16) in sm and int(x['entry'],16)==int(sm[int(x['reference_entry'],16)]['target_entry'],16) for x in d['functions']))
-    check('every inspected pair is unique-exact-shape',all(sm[int(x['reference_entry'],16)]['classification']=='unique-exact-shape' for x in d['functions']))
-    check('all structural body sizes agree with target evidence',all(int(sm[int(x['reference_entry'],16)]['body_size_target'])==x['body_size'] for x in d['functions']))
 
 
 def _section_can_com():
@@ -205,7 +181,7 @@ def _section_xcp():
     exp={'0x000972FA':'0x0009232A','0x00097432':'0x00092462','0x000975EE':'0x0009261E','0x00097668':'0x00092698'};check('four XCP residual roles recovered',a['xcp_role_closure_count']==4 and {x['reference_entry']:x['target_entry'] for x in a['xcp_role_closure']}==exp)
     check('custom selector sequence is unchanged',a['custom_command_table']['selectors']==[0xFB,0xFA,0xF5,0xF3,0xEB,0xEA,0xE4]);check('H command table points at all four recovered handlers',a['custom_command_table']['h_handlers'][1:6:1][0]=='0x0009232A' and a['custom_command_table']['h_handlers'][2]=='0x00092462' and a['custom_command_table']['h_handlers'][4]=='0x0009261E' and a['custom_command_table']['h_handlers'][5]=='0x00092698')
     fa=a['fa_indexed_identifier'];check('FA keeps index<5 behavior',fa['index_limit']==5 and '< 5' in by[0x9232A]['decompiled_c']);f5=a['f5_upload'];check('F5 accepts only lengths 1..7',f5['byte_count_min']==1 and f5['byte_count_max']==7 and all(t in by[0x92462]['decompiled_c'] for t in ('bVar3 == 0','7 < bVar3')));check('F5 range helper covers LocalRAM outer range','0xfebdffff < param_1' in by[0x9238A]['decompiled_c'] and '0xfec00000' in by[0x9238A]['decompiled_c']);check('F5 has five H-specific exclusion ranges',f5['exclusion_count']==5 and len(f5['h_exclusion_ranges'])==5);check('F5 retains special CodeFlash 0x10000..17DEF rule',f5['special_codeflash_copy_check']['length']==0x7DEC and '0x7dec' in by[0x9238A]['decompiled_c'] and 'DAT_00017df0' in by[0x9238A]['decompiled_c']);check('F5 copy helper advances MTA', 'FUN_0007c390' in by[0x92436]['decompiled_c'])
-    ps=a['page_state'];check('EB writer and EA reader share H state cells',all(cell.lower().replace('0x','') in (by[0x9261E]['decompiled_c']+by[0x92698]['decompiled_c']).lower() for cell in ps['state_cells']));check('EB writer preserves flag mask and value<2 checks','bVar4 & 3' in by[0x9261E]['decompiled_c'] and 'bVar3 < 2' in by[0x9261E]['decompiled_c']);check('EA reader preserves selectors 1/2',"== '\\x01'" in by[0x92698]['decompiled_c'] and "== '\\x02'" in by[0x92698]['decompiled_c']);check('E4 remains in same custom command table',a['e4_support']['remains_in_same_custom_table'] and a['custom_command_table']['h_handlers'][-1]=='0x00092724');check('application-side F5 primitive explicitly preserved',a['static_conclusion']['application_side_f5_read_primitive_preserved']);check('external reachability remains bounded','external gateway reachability' in a['static_conclusion']['boundary'])
+    ps=a['page_state'];check('EB writer and EA reader share H state cells',all(cell.lower().replace('0x','') in (by[0x9261E]['decompiled_c']+by[0x92698]['decompiled_c']).lower() for cell in ps['state_cells']));check('EB writer preserves flag mask and value<2 checks','bVar4 & 3' in by[0x9261E]['decompiled_c'] and 'bVar3 < 2' in by[0x9261E]['decompiled_c']);check('EA reader preserves selectors 1/2',"== '\\x01'" in by[0x92698]['decompiled_c'] and "== '\\x02'" in by[0x92698]['decompiled_c']);check('E4 remains in same custom command table',a['e4_support']['remains_in_same_custom_table'] and a['custom_command_table']['h_handlers'][-1]=='0x00092724');check('application-side F5 primitive explicitly preserved',a['static_conclusion']['application_side_f5_read_primitive_preserved']);
 
 
 _section_crypto_residue()

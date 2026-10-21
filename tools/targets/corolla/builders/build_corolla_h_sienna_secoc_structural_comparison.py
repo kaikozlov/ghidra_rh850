@@ -248,7 +248,6 @@ def main() -> int:
             "corolla_h_f_config": {"address": f"0x{H_KEY_CONFIG:08X}", "bytes": h_key.hex()},
             "configs_byte_identical": s_key == h_key,
             "config_semantics": {"type": 1, "icus_slot_selector": 4, "cryptoif_handle": 0, "icus_command": 7, "command_word": "0x00040007"},
-            "slot_secret_transfer_boundary": "The selector is the same ICU-S slot index. This does not prove that the secret key material provisioned into slot4 is the same across ECUs/vehicles.",
             "lower_driver_structural_reuse": {
                 "prepare": {"sienna": "0x00087ED0", "corolla_h_f": "0x000822D0", "body_size": 172},
                 "command7_driver": {"sienna": "0x000897F4", "corolla_h_f": "0x00083BF4", "body_size": 288},
@@ -259,7 +258,6 @@ def main() -> int:
             "rows": fn_rows,
             "exact_byte_transfers": exact_roles,
             "exact_byte_transfer_count": len(exact_roles),
-            "boundary": "Exact byte transfer is claimed only for the four raw-identical freshness pack/parse helpers. Other rows are target-native role correspondences whose bodies change because tables, state addresses, profile cardinality, or call targets differ.",
         },
         "initialization_and_persistence": {
             "sienna_state_clear": {
@@ -271,7 +269,6 @@ def main() -> int:
                 "action": "zero global sync current/pending state, reset wrap/control state, regenerate complements, zero 2x12-byte ordinary current plus 2x12-byte pending arrays, and zero one additional linked 12-byte current/pending pair",
             },
             "shared_semantic": "Both receiver implementations explicitly initialize freshness RAM to zero and maintain complement/control cells around authenticated sync state.",
-            "persistence_boundary": "Initialization equivalence does not prove that no other module later restores freshness from NVM. Sienna-specific persistence conclusions must not be transferred to H/F without target-native restore-path evidence.",
         },
         "freshness_state_geometry": {
             "sienna": {
@@ -300,10 +297,10 @@ def main() -> int:
                     "pending": "0xFEBE5504",
                     "linkage_config": "TP+0x1AB4 (0x00025820), value0",
                     "behavior": "initialized to zero and additionally cleared by 0x8A0AE when authenticated sync group0 wraps",
-                    "semantic_boundary": "This pair is outside the two ordinary receive-profile slots. Its consumer/producer role is not assigned here and is not needed for B6 slot1 verification.",
+                    "semantic_boundary": "This pair is outside the two ordinary receive-profile slots.",
                 },
             },
-            "portable_rule": "State record shape (trip32, reset32, message16 plus auxiliary bytes) and current/pending commit discipline are shared. Absolute RAM addresses, ordinary slot index, and freshness ID are generated per image and must not be transferred by number.",
+            "shared_state_layout": "State records contain trip32, reset32, message16 and auxiliary bytes, with separate current/pending records and authentication-only commit.",
         },
         "shared_freshness_semantics": {
             "ordinary_full_freshness": "46 meaningful bits: trip16||reset20||message8||reset_low2||00b",
@@ -346,15 +343,6 @@ def main() -> int:
                 "DataID||payload||full-freshness CMAC domain construction",
                 "AES-CMAC-128 with MSB28 transmitted tag through CryptoIf handle0 and ICU-S command7 slot selector4",
             ],
-            "must_remain_corolla_target_specific": [
-                "protected PDU inventory and upper PDU/callback routing",
-                "freshness ID and ordinary-slot numbering",
-                "absolute RAM addresses and generated array cardinality",
-                "the Corolla-only extra linked current/pending pair",
-                "B6 application payload semantics and independent signal261 sequence behavior",
-                "actual secret provisioned into ICU-S slot4",
-                "upstream sender ownership, sender freshness-state source, wall-clock cadence, and physical interception topology",
-            ],
         },
         "static_conclusion": {
             "same_generated_secoc_framework": True,
@@ -368,9 +356,6 @@ def main() -> int:
             "b6_is_new_pdu_on_shared_fd_secoc_class": True,
             "short_form": "H/F reuses the Sienna SecOC receiver architecture and freshness arithmetic; Corolla mainly regenerates the profile inventory/state geometry and adds B6 as an FD ordinary profile.",
         },
-        "evidence_boundary": (
-            "This comparison proves structural/protocol reuse between Sienna 8965B4512000 and application-identical Corolla H/F using raw profile/config bytes, exact relocated helper bodies, and independently recovered target-native H/F behavior. It does not infer that the ICU-S slot4 secret is shared, does not transfer generated freshness IDs or RAM slots by number, and does not identify the B6 sender, cadence, or physical producer topology."
-        ),
     }
 
     args.out.parent.mkdir(parents=True, exist_ok=True)

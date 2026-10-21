@@ -130,7 +130,7 @@
       "duration_s": 60.00031347,
       "gear_indication_comparison": {
         "B_intervals": [],
-        "boundary": "Pairing requires matching complete value sequences after projecting 0x127 B to the observed 0x3BF D indication. Times describe rounded receive-batch observations only; physical selector and wire latency remain unresolved. No one-second shift delay is inferred from the background rate.",
+        "boundary": "Pairing requires matching complete value sequences after projecting 0x127 B to the observed 0x3BF D indication. Times describe rounded receive-batch observations.",
         "max_abs_receive_delta_ms": 7.883,
         "projected_sequence_matches": true,
         "transition_pairs": [
@@ -264,7 +264,7 @@
             "start_seconds": 9.480908
           }
         ],
-        "boundary": "Pairing requires matching complete value sequences after projecting 0x127 B to the observed 0x3BF D indication. Times describe rounded receive-batch observations only; physical selector and wire latency remain unresolved. No one-second shift delay is inferred from the background rate.",
+        "boundary": "Pairing requires matching complete value sequences after projecting 0x127 B to the observed 0x3BF D indication. Times describe rounded receive-batch observations.",
         "max_abs_receive_delta_ms": 0.0,
         "projected_sequence_matches": true,
         "transition_pairs": [
@@ -406,7 +406,6 @@
       "64": "R"
     }
   },
-  "production_boundary": "This evidence validates read-only Ready/gear state decoding only. It does not establish Camry steering actuation, B6 producer/signing ownership, cruise engagement policy, or Panda actuation safety.",
   "ready_status": {
     "carrier": "0x51E/8 bus1",
     "field": "B0[7]",

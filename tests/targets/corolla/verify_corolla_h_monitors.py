@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 """Portable Corolla H monitor pins: COM deadline-monitor dispatch surface, plausibility monitor, and power-supply monitor gate.
-
-Domain split; assertions and helpers are carried over verbatim.
 """
 from __future__ import annotations
 
@@ -32,7 +30,9 @@ def _section_deadline_monitor_surface():
     check('H image hash pinned',sha(raw)==e['image']['codeflash_sha256'])
     check('all raw H bodies validate',all(sha(raw[int(r['entry'],16):int(r['entry'],16)+r['body_size']])==r['body_sha256'] for r in e['functions']))
     check('simple dispatcher maps 6962A->639CA at 138 bytes',d['dispatchers']['simple']=={'sienna':'0x0006962A','h':'0x000639CA','body_size':138,'unique_exact_instruction_shape':True})
-    check('variant-D dispatcher maps 6A28A->6462A at 1208 bytes',d['dispatchers']['variant_d']=={'sienna':'0x0006A28A','h':'0x0006462A','body_size':1208,'unique_exact_instruction_shape':True})
+    source=(ROOT/'firmware/RH850_P1M-E_CodeFlash.bin').read_bytes()
+    variant=d['dispatchers']['variant_d']
+    check('variant-D dispatcher has duplicate shapes and an exact native body',not variant['unique_exact_instruction_shape'] and raw[int(variant['h'],16):int(variant['h'],16)+variant['body_size']]==source[int(variant['sienna'],16):int(variant['sienna'],16)+variant['body_size']])
     check('simple setup maps to H 387E4 and table 280E8',d['dispatchers']['simple_setup']['h']=='0x000387E4' and d['dispatchers']['simple_setup']['h_table']=='0x000280E8')
     ht={x['name']:x for x in d['h_tables']};st={x['name']:x for x in d['sienna_tables']}
     check('H variant-D A table base 280B4',ht['variant_d_a']['base']=='0x000280B4')
@@ -45,7 +45,13 @@ def _section_deadline_monitor_surface():
     check('H variant B has 4 nonzero / 3 unique',ht['variant_d_b']['nonzero_slots']==4 and ht['variant_d_b']['unique_callbacks']==3)
     check('both images have 88-callback union',d['summary']['sienna_unique_callback_union']==88==d['summary']['h_unique_callback_union'])
     check('simple final row preserves duplicate-start/null-third shape',ht['simple']['rows'][-1][0]==ht['simple']['rows'][-1][1] and ht['simple']['rows'][-1][2] is None)
-    check('all 88 canonical deadline names are recensused',d['surface_recensus_count']==88 and d['summary']['all_88_named_deadline_residuals_closed'])
+    import struct
+    from tools.targets.corolla.support.corolla_h_constants import SIENNA_DEADLINE_TABLES
+    configured={struct.unpack_from('<I',source,base+i*stride+offset)[0]
+                for _,base,count,stride,offsets in SIENNA_DEADLINE_TABLES
+                for i in range(count) for offset in offsets}
+    configured.discard(0)
+    check('recensus covers every configured reference callback regardless of name',{int(r['reference_entry'],16) for r in d['surface_recensus']}==configured)
 
 
 

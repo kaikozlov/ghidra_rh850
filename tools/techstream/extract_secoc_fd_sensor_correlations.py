@@ -198,7 +198,7 @@ def build() -> dict:
         ],
         "bounded_unknowns": [
             "The static artifacts do not bind 0x090 signal 270 versus 273 individually to RR versus RL; only the unordered RR/RL pair is promoted.",
-            "EMPS2_P5 is a Toyota family diagnostic database. An exact 8965B4512000 calibration transcript remains unavailable; correlations require the independent firmware-shape joins recorded above.",
+            "EMPS2_P5 is a Toyota family diagnostic database; correlations require the independent firmware-shape joins recorded above.",
         ],
     }
 

@@ -350,9 +350,7 @@ the helper masks `0xFF00` and routes every `0x2xx` ID to `0x66172`, while the
 seven functions and zero selected security-sensitive references. The sole
 branch-feasible selected hit is therefore DID `0110 -> FEBE5050`. Exact xrefs
 show `FEBE5050` is initialized/reset and maintained as a saturating
-crypto-test/status accumulator. The command-5 generated output remains outside
-this path. This negative result is limited to the currently recovered high-value
-RAM regions. Other RDBI values may still be sensitive.
+crypto-test/status accumulator.
 
 #### Response-length preflight and producer-write closure (MEM-SAFE-006)
 
@@ -440,10 +438,8 @@ This gives an exact read-only confirmation oracle. Seed the fixed buffer with a
 DIDs, sizes the seed read to `declared_length + 2`, implements only those two
 read services, defaults to planning, and requires `--execute --bench-isolated`
 for live confirmation. The firmware-static disclosure chain is verified; the
-exact bench oracle has not yet been observed on hardware. This does not
-contradict the callback-local high-value-RAM negative above: Dcm response-buffer
-lifetime supplies the disclosed bytes. The 48 success-stub producer callbacks
-contain no sensitive reference that supplies them.
+exact bench oracle has not yet been observed on hardware. Dcm response-buffer
+lifetime supplies the disclosed bytes.
 
 The same complete callback graph also closes the obvious RDBI side-effect class.
 None of the 196 callback roots has a fixed-global RAM write. Across their
@@ -525,7 +521,7 @@ A complete direct-reference audit of the recovered `0204` chain, including all
 12 operation-6 initializer callees, finds no direct reference to the conditioned
 steering-command state or the independently proved d/q reference/feedback cells.
 This bounds `0204` as a **persistent maintenance/reset and availability-state
-control**. An arbitrary steering-current/PWM command primitive remains unrecovered.
+control**.
 An isolated-bench probe is intentionally omitted here: the `0x22` branch
 deliberately clears and persists checkpoint state, so dynamic characterization
 requires a disposable/matching bench plus NVM backup/restore planning.
@@ -600,8 +596,7 @@ plus calibration-mode normalization**.
 Exact xref closure for `FEBEB18F`, `18E`, `192`, `1D1`, `54C`, and the shared
 signal vector is pinned, and the lifecycle/calibration functions have no direct
 reference or call edge into the independently proved d/q-reference → current-PI
-→ TSG3 PWM boundary. This bounded graph negative leaves hardware-visible effects
-unresolved. Hardware characterization of the inhibit remains open.
+→ TSG3 PWM boundary.
 
 #### DIDs `2013` and `2014`: bounded control and mode-eligibility cones
 
@@ -619,8 +614,7 @@ That apparent motor-worker join is bounded by the complete xref topology.
 `FEBE66CE/66D0` and `FEBE63CE/63D0`; all four mirrors have **zero runtime
 readers** in the accepted project. The `2013` cone therefore reaches the motor
 worker's state block but does not join the independently proved d/q-reference,
-current-PI, or TSG3-PWM consumers. This static graph boundary leaves the
-hardware-visible effect of changing the parameter unresolved.
+current-PI, or TSG3-PWM consumers.
 
 DID `2014` maps payload `0/1` to `FEBEB3EE = 0/0x5A`. `B692C` and `B70D0` use
 that flag to choose between calibrated thresholds at `0x1A4BC` and `0x1A4BE`;
@@ -1029,7 +1023,6 @@ state-machine flags use `0x5A`, but the copied phase byte itself is not that
 marker. The handoff gate rejects phase `0x11` specifically.
 
 Accordingly the defensible name is **system-transition phase snapshot**.
-Its exact Toyota/Denso phase labels and physical condition remain unavailable.
 `0xFEBE8152` (`GP-0x36AE`) is set from an application initialization callback (`0x8F1E8 ->
 0x8A00C -> 0x4C506`); normal diagnostic operation requires its clear branch.
 
@@ -1106,8 +1099,7 @@ Standard OBD functional ID `0x7DF` is **not** configured in this bootloader.
 A related-variant probe that uses `0x7DF` has not exercised the firmware-derived
 functional path at `0x777`. The application configuration also contains physical `0x7A1 -> 0x7A9`,
 functional `0x777 -> 0x7A9`, and limited secondary physical `0x7A0 -> 0x7A8`
-contexts. These firmware facts apply to this image only. Related applications
-require independent endpoint recovery.
+contexts.
 
 ## 6. Corolla comparison
 

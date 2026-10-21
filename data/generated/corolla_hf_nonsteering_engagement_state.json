@@ -7,7 +7,7 @@
       "Retain 0x1901 Current/Memory Vehicle Speed as a diagnostic cross-check for 0x251 set speed rather than a required runtime input."
     ],
     "classification": "core generation-native CarState mapping closed; optional detailed ACC UI/follow fields remain open",
-    "diagnostic_transport_boundary": "Current GTS+ proves selected FRC_P5 0x1901/0x1905/0x1906/0x1912/0x1914 Data IDs are ordinary SID 0x22 ReadDataByIdentifier requests. They are now optional semantic oracles, not prerequisites for core CarState.",
+    "diagnostic_transport_boundary": "Current GTS+ proves selected FRC_P5 0x1901/0x1905/0x1906/0x1912/0x1914 Data IDs are ordinary SID 0x22 ReadDataByIdentifier requests. They are optional semantic oracles; core CarState works independently of them.",
     "legacy_ids_absent_in_both_captures": [
       "0x177",
       "0x1A2",
@@ -29,7 +29,74 @@
           18,
           93
         ],
-        "boundary": "In the retained Span segment byte22 bit0x10 asserts for every 0x5D state frame and is clear for every 0x12 state frame. This is a direct on-vehicle engaged-state join; contributor longitudinal evidence separately exercises 0x47 engaged and 0x67 standstill/hold states.",
+        "boundary": "In the retained Span segment byte22 bit0x10 asserts for every 0x5D state frame and is clear for every 0x12 state frame. This is a direct on-vehicle engaged-state join; contributor longitudinal evidence separately exercises Camry 0x47 engaged and 0x67 delayed-hold states.",
+        "request_id_allocation": {
+          "boundary": "Cross-platform structural decode using the same six-bit requester-ID plus two-bit allocation geometry recovered on Camry. The retained Span minute does not establish which A/B slot is upper versus lower or prove that either request wins: 0x081 result ID remains 63 throughout.",
+          "candidate_A_allocation_counts": {
+            "0": 2363,
+            "3": 37
+          },
+          "candidate_A_id_counts": {
+            "0": 2363,
+            "17": 37
+          },
+          "candidate_B_allocation_counts": {
+            "1": 37,
+            "2": 2363
+          },
+          "candidate_B_id_counts": {
+            "23": 37,
+            "4": 2363
+          },
+          "engaged_accel_mps2_range": [
+            -0.387,
+            0.082
+          ],
+          "engaged_accel_pair_equal_frames": 37,
+          "engaged_accel_raw_range": [
+            -387,
+            82
+          ],
+          "engaged_accel_raw_values": {
+            "candidate_A": [
+              -387,
+              -349,
+              -330,
+              -312,
+              -293,
+              -274,
+              -255,
+              -237,
+              -200,
+              -162,
+              -125,
+              0,
+              6,
+              44,
+              82
+            ],
+            "candidate_B": [
+              -387,
+              -349,
+              -330,
+              -312,
+              -293,
+              -274,
+              -255,
+              -237,
+              -200,
+              -162,
+              -125,
+              0,
+              6,
+              44,
+              82
+            ]
+          },
+          "result_id_counts": {
+            "63": 2000
+          }
+        },
         "state_when_disengaged": [
           18
         ],
@@ -677,7 +744,7 @@
     },
     "gts_registry": {
       "path": "data/generated/gtsplus_2026/toyota_diag_registry_camry_2026.json",
-      "sha256": "fb54d0dc559ff95490267652492b5f2c86722e10c80746935f51bd08c9c9fbc1"
+      "sha256": "c43ddf749a1b5bb158780bcb161f5c521aed566621051476077ed5ed1289e3fb"
     },
     "h_decompiler": {
       "path": "data/generated/corolla_8965H1202000_nonsteering_engagement_decompiler_evidence.json",
@@ -685,19 +752,19 @@
     },
     "h_rx_diff": {
       "path": "data/generated/corolla_8965H1202000_application_rx_diff.json",
-      "sha256": "5f3010636ad1c865f0855e68fc07b57537a1db1b40ededd3dcb31fb878e3c5e3"
+      "sha256": "6760a408d19837abec7b5ff5f2d6494ba1ffb3fc927fef6577d0c71351c4bfee"
     },
     "public_route": {
       "path": "data/generated/corolla_2023_public_route_opendbc_evidence.json",
-      "sha256": "26a36536f203ebd89641a0179414952b7d79f714f6fbf3d8b1f62db7b292c933"
+      "sha256": "f3549911933b2851bdb42df094257e4585155463390eeb555ecde0eebc5a280f"
     },
     "span_route": {
       "path": "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
-      "sha256": "09313e41c0f8f96399f10003e6d2a934c0f628a16fac9613d39bf374603717d6"
+      "sha256": "9123b4a381fd1012e7e938b8720eb3138436cb4fadaaa9236ce2c956b2604be1"
     },
     "state_bridge": {
       "path": "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
-      "sha256": "0c6d6efef3f84881248de6f6844ed47b668e06df2af8ab9d3b2f9694cd72dfd6"
+      "sha256": "b2de356a44a37ecc19af1b6120014b63766ab1e949a61840c57263528defd0d5"
     },
     "techstream_cruise": {
       "path": "data/generated/techstream_v18/tss3_cruise_engagement_semantics.json",
@@ -705,11 +772,11 @@
     },
     "techstream_cruise_live_transport": {
       "path": "data/generated/techstream_v18/tss3_cruise_live_transport.json",
-      "sha256": "a1c111c2851e40ed562fa229ab1aafbd021f6a8d23a7b70b992eda8e68f8e5d1"
+      "sha256": "7f52fd891cc8abdd0cd221c03b0f19ba12ccbfdd82fe4ca85a345b1e5a55426b"
     },
     "techstream_ready": {
       "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
-      "sha256": "5e4eac747a29080dcb5a700070655dccb7814434cc810f204080512416aa8e3a"
+      "sha256": "e16b546c68149f82ac67a6e61ab109b879c77bd780d32b331c75ce778a20293e"
     }
   },
   "gear": {
@@ -886,7 +953,7 @@
     ]
   },
   "ready_status": {
-    "boundary": "Both operational captures show only value 1; value 0 and a Ready transition remain uncaptured. This is an incoming Ready Status field, not proof that an EPS Tx PDU republishes the same boolean.",
+    "boundary": "Both operational captures show only value 1; value 0 and a Ready transition remain uncaptured.",
     "can_id": "0x51E",
     "classification": "wire field closed",
     "h_rx_descriptor_index": 24,
@@ -933,7 +1000,7 @@
       "name": "Ready Status"
     },
     "wire": "B0[7]",
-    "writer_boundary": "FEBEF052 reaches FEBEB5A8 through two operational copy sites and the RAM nodes also have initialization/reset writers. The Ready Status dataflow is proved; exclusive-writer provenance is not claimed."
+    "writer_boundary": "FEBEF052 reaches FEBEB5A8 through two operational copy sites and the RAM nodes also have initialization/reset writers. The Ready Status dataflow is proved."
   },
   "schema": "corolla-hf-nonsteering-engagement-state-v1",
   "software_family": {

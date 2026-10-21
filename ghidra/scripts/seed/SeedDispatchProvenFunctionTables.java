@@ -1,7 +1,6 @@
 //@author kaikozlov
 //@category Analysis
 // Persist function entries reached through firmware-proven indirect dispatches.
-// Structural names describe only the graph membership proved by the seed.
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.listing.Data;

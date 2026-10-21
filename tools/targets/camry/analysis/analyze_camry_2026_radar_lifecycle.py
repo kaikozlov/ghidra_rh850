@@ -3,7 +3,7 @@
 
 Discovery uses both complete August drives. Seventeen disjoint September log
 segments verify the resulting bit positions without fitting them again. GTS+
-provides object/fusion vocabulary only. CAN field maps and quality thresholds require separate evidence.
+provides object/fusion vocabulary.
 """
 from __future__ import annotations
 from tools.toyota_support.passive_capture import sha256_file as sha
@@ -173,7 +173,7 @@ def build() -> dict:
                  'raw_state': 'record B byte5 low2; zero is not a qualified measurement',
                  'geometry_empty_sentinel': EMPTY.hex(), 'cycle': 'both PDU bytes2 and3 increment independently modulo256'},
         'interpretation': {
-            'lifecycle': 'Birth, deletion and occupied-to-occupied replacement are source flags; motion thresholds require separate evidence.',
+            'lifecycle': 'Birth, deletion and occupied-to-occupied replacement are source flags.',
             'processing_order': 'End old identity, then start replacement; both flags may be set in one occupied record.',
             'qualifier': 'Reject empty/sentinel range and raw state zero. Keep states1/2/3 unnamed; no confidence percentage or radar-versus-camera attribution is inferred.',
             'loss': 'An unobserved cycle may contain a one-frame end/start event; restart identities after the gap.',

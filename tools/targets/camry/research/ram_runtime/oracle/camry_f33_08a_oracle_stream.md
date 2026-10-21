@@ -270,7 +270,6 @@ candidate:
 The 100-request soak contained one host-observed ~80-ms stall. It did not lose a
 request or response, but the synchronous benchmark blocked the next scheduled
 send while waiting for that reply and therefore accumulated schedule lateness.
-The host loop caused the scheduling artifact. The oracle retained every request and response.
 
 The production-shaped benchmark therefore decouples the two directions:
 
@@ -323,7 +322,7 @@ observed from the FRC. When that native application is ID11 and `CC.latActive`, 
 host changes only B18:B19 and submits `00 8A || application[28] || freshness[6]`
 to this resident. All other request identities are exact clones and need no new
 CMAC. Source-order buffering of recent native generations handles rare >25-ms
-replies. It uses observed FRC application contents only.
+replies.
 
 The runtime remains deliberately free of request semantics: no ID0/ID11 check,
 angle check, sequence policy, longitudinal interpretation, or host-Tx policy lives

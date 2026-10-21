@@ -135,16 +135,16 @@ def main() -> int:
     result = {
         "schema": "camry-port-evidence-audit-v1",
         "vehicle_access": False,
-        "scope": "seven source-pinned rlog segments plus both complete August-27 CAN captures; not a full-fleet qualification",
+        "scope": "seven source-pinned rlog segments plus both complete August-27 CAN captures",
         "route_groups": {name: [reduce_log(args.logs_root / route / f"rlog-{segment}.zst", args.logs_root, LogReader)
                                 for segment in segments] for name, route, segments in ROUTES},
         "native_longitudinal_handoff": [stock_longitudinal_bounds(f33.CAPTURE / "raw-20260827" / filename)
                                        for filename in ("camry_relay_route_can_20260827.ndjson.gz", "camry_relay_lta_confirm_route_can_20260827.ndjson.gz")],
         "boundaries": [
             "Stock-harness samples have an absent EPS and cannot qualify healthy-stock-harness steering.",
-            "The working steering samples establish conventional-cruise operation only; an adaptive-cruise lifecycle remains undemonstrated.",
+            "The working steering samples use conventional cruise.",
             "Repeated cached lag estimates are not fresh independent lag measurements.",
-            "GTS meanings for Control Mode/Permission/ACC Not Available remain diagnostic-only fields with unresolved CAN overlays.",
+            "GTS meanings for Control Mode/Permission/ACC Not Available are diagnostic fields.",
         ],
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)

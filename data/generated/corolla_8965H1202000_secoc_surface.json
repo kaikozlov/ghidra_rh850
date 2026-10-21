@@ -62,7 +62,6 @@
       246
     ],
     "h_secoc_record_pdu_id": 40,
-    "interpretation": "H keeps the D7 protected-PDU unpack role but regenerates the signal population: configured PDU 40 owns signals 240..247 and this scalar unpacker reads 240/243/246 rather than transferring Sienna signal IDs.",
     "sienna": "0x0004B3AA",
     "sienna_body_size": 194
   },
@@ -119,7 +118,6 @@
       "input_fifo": "0x00083848",
       "output_fifo": "0x000838BE"
     },
-    "boundary": "same function-boundary/control families; operand/configuration semantics remain target-native and are separately pinned by slot-4/key-provenance evidence",
     "delta": -23552,
     "role_count": 25,
     "roles": [
@@ -354,6 +352,732 @@
     "h_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
     "sienna_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
   },
+  "initialization_evidence": {
+    "evidence": {
+      "corolla-8965H1202000": {
+        "function_count": 7,
+        "functions": [
+          {
+            "body_ranges": [
+              {
+                "max": "0x0008306d",
+                "min": "0x0008304c",
+                "space": "ram"
+              }
+            ],
+            "body_sha256": "f062e3f789ce910ae85e57cef1c5769229a39284f159f48a751f6c7dd0ed8942",
+            "body_size": 34,
+            "data_references": [
+              {
+                "from_addr": "0x0008305c",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1284",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x00083062",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf128c",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x00083066",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf128e",
+                "to_space": "ram"
+              }
+            ],
+            "decompiled_c": "\nvoid FUN_0008304c(void)\n\n{\n  undefined4 *puVar1;\n  int iVar2;\n  \n  puVar1 = &LAB_febeb800;\n  iVar2 = FUN_000811b0();\n  if (iVar2 == 0) {\n    FUN_00083028();\n  }\n  puVar1[0x16a1] = 0;\n  *(undefined2 *)(puVar1 + 0x16a3) = 0;\n  *(undefined1 *)((int)puVar1 + 0x5a8e) = 1;\n  return;\n}\n\n",
+            "decompiled_c_sha256": "a96f5148356b3bee2b5c36f2c0b306727d26dda3ff651b88d531318492ba12df",
+            "entry": "0x0008304C"
+          },
+          {
+            "body_ranges": [
+              {
+                "max": "0x0008308f",
+                "min": "0x0008306e",
+                "space": "ram"
+              }
+            ],
+            "body_sha256": "357917acfa7c1bae96f077a26146938fdb99bee7ef231e8bdc1831954f231b4b",
+            "body_size": 34,
+            "data_references": [
+              {
+                "from_addr": "0x0008307e",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1284",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x00083084",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf128c",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x00083088",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf128e",
+                "to_space": "ram"
+              }
+            ],
+            "decompiled_c": "\nvoid FUN_0008306e(void)\n\n{\n  undefined4 *puVar1;\n  int iVar2;\n  \n  puVar1 = &LAB_febeb800;\n  iVar2 = FUN_000811bc();\n  if (iVar2 == 0) {\n    FUN_00083028();\n  }\n  puVar1[0x16a1] = 0;\n  *(undefined2 *)(puVar1 + 0x16a3) = 0;\n  *(undefined1 *)((int)puVar1 + 0x5a8e) = 1;\n  return;\n}\n\n",
+            "decompiled_c_sha256": "4bcd3b1f74df3df7ce6200e705c4ab0a3a4d1b422911e031bf70ca651e59426b",
+            "entry": "0x0008306E"
+          },
+          {
+            "body_ranges": [
+              {
+                "max": "0x000811bb",
+                "min": "0x000811b0",
+                "space": "ram"
+              }
+            ],
+            "body_sha256": "c28ae8f1c492f128d54173d66187f7a48965f8cdc595866ee9d03a7e5198769e",
+            "body_size": 12,
+            "data_references": [],
+            "decompiled_c": "\nvoid FUN_000811b0(void)\n\n{\n  FUN_0008175e();\n  return;\n}\n\n",
+            "decompiled_c_sha256": "56551fa0aa65ccad89a6ea48fa8d050b7312e9862bca375cf2290006596b0cf6",
+            "entry": "0x000811B0"
+          },
+          {
+            "body_ranges": [
+              {
+                "max": "0x000811c7",
+                "min": "0x000811bc",
+                "space": "ram"
+              }
+            ],
+            "body_sha256": "3842af25d5b74b69fadf1da443dcf629a903fa210d6d0bb76778c06578cf540f",
+            "body_size": 12,
+            "data_references": [],
+            "decompiled_c": "\nvoid FUN_000811bc(void)\n\n{\n  FUN_000817fa();\n  return;\n}\n\n",
+            "decompiled_c_sha256": "0f31f24685b75968761c2ba92f557f58fc127f2b5f1a5319f3a78698a9015b85",
+            "entry": "0x000811BC"
+          },
+          {
+            "body_ranges": [
+              {
+                "max": "0x0008304b",
+                "min": "0x00083028",
+                "space": "ram"
+              }
+            ],
+            "body_sha256": "7495a613fe3291df37cc5dbc8173445060b027cd132b01eb32fc0171f8624b62",
+            "body_size": 36,
+            "data_references": [
+              {
+                "from_addr": "0x00083036",
+                "operand_index": 2,
+                "ref_type": "DATA",
+                "to_addr": "0x00027d74",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x00083040",
+                "operand_index": 2,
+                "ref_type": "READ",
+                "to_addr": "0x00027d58",
+                "to_space": "ram"
+              }
+            ],
+            "decompiled_c": "\nvoid FUN_00083028(void)\n\n{\n  undefined8 uVar1;\n  int iVar2;\n  uint uVar3;\n  \n  uVar1 = 0x23d6c00000000;\n  for (uVar3 = 0; iVar2 = (int)((ulonglong)uVar1 >> 0x20), uVar3 < *(uint *)(iVar2 + 0x3fec);\n      uVar3 = uVar3 + 1) {\n    (**(code **)(uVar3 * 4 + iVar2 + 0x4008))();\n  }\n  return;\n}\n\n",
+            "decompiled_c_sha256": "6d447dfc6cb9b57141bfedca178c3f0f9d2c518baa97f7ae4e6299e8e7b87ed3",
+            "entry": "0x00083028"
+          },
+          {
+            "body_ranges": [
+              {
+                "max": "0x000817f9",
+                "min": "0x0008175e",
+                "space": "ram"
+              }
+            ],
+            "body_sha256": "40ab31bd1d786b2881d20bc17404c3012d54a7bf0d002c567cc8e9f246094ed1",
+            "body_size": 156,
+            "data_references": [
+              {
+                "from_addr": "0x0008176a",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf105c",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x0008176e",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf104c",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x00081772",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1050",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x00081776",
+                "operand_index": 2,
+                "ref_type": "READ",
+                "to_addr": "0xfebf1054",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x0008177a",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1058",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x0008177e",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1040",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x00081782",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1044",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x00081786",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1055",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x000817ac",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf103c",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x000817b0",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1038",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x000817b6",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1034",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x000817be",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1054",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x000817cc",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1054",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x000817e2",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1054",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x000817e8",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1054",
+                "to_space": "ram"
+              }
+            ],
+            "decompiled_c": "\nundefined4 FUN_0008175e(void)\n\n{\n  undefined4 *puVar1;\n  int iVar2;\n  undefined4 uVar3;\n  \n  puVar1 = &LAB_febeb800;\n  FUN_0008353c(0);\n  puVar1[0x1617] = 0xffffffff;\n  puVar1[0x1613] = 0xffffffff;\n  puVar1[0x1614] = 0xffffffff;\n  puVar1[0x1616] = 0;\n  puVar1[0x1610] = 0;\n  puVar1[0x1611] = 0;\n  *(undefined1 *)((int)puVar1 + 0x5855) = 0;\n  if (*(char *)(puVar1 + 0x1615) == '\\x0f') {\n    uVar3 = 1;\n  }\n  else {\n    FUN_00081672();\n    FUN_0008169a();\n    iVar2 = FUN_000837de();\n    if (iVar2 == 1) {\n      FUN_000816b2(0);\n      iVar2 = FUN_000816f8();\n      if (iVar2 == 0) {\n        puVar1[0x160f] = 0;\n        puVar1[0x160e] = 0;\n        puVar1[0x160d] = 0;\n        *(undefined1 *)(puVar1 + 0x1615) = 0xe1;\n        FUN_0008353c(1);\n        uVar3 = 0;\n      }\n      else {\n        *(undefined1 *)(puVar1 + 0x1615) = 0xf;\n        uVar3 = 1;\n      }\n    }\n    else {\n      uVar3 = 1;\n      if (iVar2 == 2) {\n        FUN_000816b2(1);\n        *(undefined1 *)(puVar1 + 0x1615) = 0xf;\n      }\n      else {\n        *(undefined1 *)(puVar1 + 0x1615) = 0;\n      }\n    }\n    FUN_00081746();\n  }\n  return uVar3;\n}\n\n",
+            "decompiled_c_sha256": "4f2767e7392ed48c96004362577d27fd6d45384eba1f1a783caeb598c1bc08ff",
+            "entry": "0x0008175E"
+          },
+          {
+            "body_ranges": [
+              {
+                "max": "0x00083823",
+                "min": "0x000837de",
+                "space": "ram"
+              }
+            ],
+            "body_sha256": "3b222153644635b83ca739fe67125e0cbcb4a059c4d2c073571e2b1da062533b",
+            "body_size": 70,
+            "data_references": [
+              {
+                "from_addr": "0x000837e2",
+                "operand_index": 0,
+                "ref_type": "READ",
+                "to_addr": "0xffc5d018",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x000837e8",
+                "operand_index": 2,
+                "ref_type": "READ",
+                "to_addr": "0xfebf1230",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x0008381a",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1230",
+                "to_space": "ram"
+              }
+            ],
+            "decompiled_c": "\nint FUN_000837de(void)\n\n{\n  uint uVar1;\n  undefined4 *puVar2;\n  char cVar3;\n  int iVar4;\n  \n  cVar3 = DAT_febf1230;\n  puVar2 = &LAB_febeb800;\n  uVar1 = ICUSIRQSTS;\n  if ((uVar1 & 1) == 0) {\n    puVar2 = &LAB_febeb800;\n    iVar4 = FUN_0008357a();\n    if ((iVar4 == 1) && ((cVar3 != '\\0' || (iVar4 = FUN_000836f2(), iVar4 == 1)))) {\n      FUN_00083760();\n      FUN_000837b8();\n      cVar3 = -0x1f;\n    }\n  }\n  else {\n    iVar4 = 0x30;\n  }\n  *(char *)(puVar2 + 0x168c) = cVar3;\n  return iVar4;\n}\n\n",
+            "decompiled_c_sha256": "1d5b2295270083f97c246724d1f91d36949512c75de21d1aa477bb88250405c6",
+            "entry": "0x000837DE"
+          }
+        ],
+        "image_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
+        "raw_dataflow": {
+          "callback_count": 4,
+          "callback_count_address": "0x00027D58",
+          "callback_dispatcher": "0x00083028",
+          "callback_entries": [
+            "0x000826AE",
+            "0x000828B4",
+            "0x00082AB8",
+            "0x00082CA6"
+          ],
+          "callback_gate": "CMP r0,r10; BNE skips only the callback call when lower initialization returns nonzero",
+          "callback_table_address": "0x00027D74",
+          "hardware_initialize": "0x000837DE",
+          "hardware_status_register": "0xFFC5D018",
+          "initializer_bytes": "80072100bfff60e1e051ba05bfffd0ff6407855a010a64078c5a440f8e5a40063f00",
+          "initializer_entry": "0x0008304C",
+          "lower_driver_wrapper": "0x000811B0",
+          "lower_initialize": "0x0008175E",
+          "same_shape_sibling": "0x0008306E",
+          "sibling_lower_wrapper": "0x000811BC",
+          "state_write_gate": "all three stores execute after either lower-driver return outcome",
+          "state_writes": [
+            {
+              "address": "0xfebf1284",
+              "value": 0,
+              "width": 4
+            },
+            {
+              "address": "0xfebf128c",
+              "value": 0,
+              "width": 2
+            },
+            {
+              "address": "0xfebf128e",
+              "value": 1,
+              "width": 1
+            }
+          ]
+        },
+        "source_corpus": {
+          "path": "data/generated/corolla-8965H1202000/decompilations.jsonl",
+          "sha256": "ede02931f236ba4c83243039df0ed920aa49108d90390cb478a01ae16d5610dc"
+        },
+        "source_fingerprints": {
+          "path": "data/targets/corolla-8965H1202000/function_structural_fingerprints.jsonl",
+          "sha256": "e7fc32a0ffa53ea4fc3a6678ff6deb5b595575c5cbd458994180dcb7ca5686a5"
+        }
+      },
+      "sienna-8965B4512000": {
+        "function_count": 7,
+        "functions": [
+          {
+            "body_ranges": [
+              {
+                "max": "0x00088c6d",
+                "min": "0x00088c4c",
+                "space": "ram"
+              }
+            ],
+            "body_sha256": "97d91f7e248f4eadc41fd58798f6ad92e77834bfcea674311b6a475697a8b788",
+            "body_size": 34,
+            "data_references": [
+              {
+                "from_addr": "0x00088c5c",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf13c0",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x00088c62",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf13c8",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x00088c66",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf13ca",
+                "to_space": "ram"
+              }
+            ],
+            "decompiled_c": "\n/* Application startup initializer for the generated crypto stack and ICU-S lower driver. */\n\nvoid crypto_icus_initialize(void)\n\n{\n  undefined4 *puVar1;\n  int iVar2;\n  \n  puVar1 = &LAB_febeb800;\n  iVar2 = FUN_00086db0();\n  if (iVar2 == 0) {\n    FUN_00088c28();\n  }\n  puVar1[0x16f0] = 0;\n  *(undefined2 *)(puVar1 + 0x16f2) = 0;\n  *(undefined1 *)((int)puVar1 + 0x5bca) = 1;\n  return;\n}\n\n",
+            "decompiled_c_sha256": "7c3ce9812702441753943c6482e0872b54d2a121a193a2b2a95724fccc1f4e66",
+            "entry": "0x00088C4C"
+          },
+          {
+            "body_ranges": [
+              {
+                "max": "0x00088c8f",
+                "min": "0x00088c6e",
+                "space": "ram"
+              }
+            ],
+            "body_sha256": "8ebca64809f30ec708a6bd0bc9c145836706393601ef8904e50f82650b4e4ea0",
+            "body_size": 34,
+            "data_references": [
+              {
+                "from_addr": "0x00088c7e",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf13c0",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x00088c84",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf13c8",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x00088c88",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf13ca",
+                "to_space": "ram"
+              }
+            ],
+            "decompiled_c": "\nvoid FUN_00088c6e(void)\n\n{\n  undefined4 *puVar1;\n  int iVar2;\n  \n  puVar1 = &LAB_febeb800;\n  iVar2 = FUN_00086dbc();\n  if (iVar2 == 0) {\n    FUN_00088c28();\n  }\n  puVar1[0x16f0] = 0;\n  *(undefined2 *)(puVar1 + 0x16f2) = 0;\n  *(undefined1 *)((int)puVar1 + 0x5bca) = 1;\n  return;\n}\n\n",
+            "decompiled_c_sha256": "a3b594b1ca031f756a65516c77ec9ef8190b2e9fae3fea39a4911c7f75c2859f",
+            "entry": "0x00088C6E"
+          },
+          {
+            "body_ranges": [
+              {
+                "max": "0x00086dbb",
+                "min": "0x00086db0",
+                "space": "ram"
+              }
+            ],
+            "body_sha256": "c28ae8f1c492f128d54173d66187f7a48965f8cdc595866ee9d03a7e5198769e",
+            "body_size": 12,
+            "data_references": [],
+            "decompiled_c": "\nvoid FUN_00086db0(void)\n\n{\n  FUN_0008735e();\n  return;\n}\n\n",
+            "decompiled_c_sha256": "d28a0b5de0e0044b96c3cd11a76e600332d632e44de289f9d762bdc7b3f27a27",
+            "entry": "0x00086DB0"
+          },
+          {
+            "body_ranges": [
+              {
+                "max": "0x00086dc7",
+                "min": "0x00086dbc",
+                "space": "ram"
+              }
+            ],
+            "body_sha256": "3842af25d5b74b69fadf1da443dcf629a903fa210d6d0bb76778c06578cf540f",
+            "body_size": 12,
+            "data_references": [],
+            "decompiled_c": "\nvoid FUN_00086dbc(void)\n\n{\n  FUN_000873fa();\n  return;\n}\n\n",
+            "decompiled_c_sha256": "debd731ad5081b2e3988d42f7fd149d5e0220a950e30b65eea4f07243ed167ef",
+            "entry": "0x00086DBC"
+          },
+          {
+            "body_ranges": [
+              {
+                "max": "0x00088c4b",
+                "min": "0x00088c28",
+                "space": "ram"
+              }
+            ],
+            "body_sha256": "2e192389abe9269c83d93c102a680bfa65122df1e8ac9415619f3727658b645a",
+            "body_size": 36,
+            "data_references": [
+              {
+                "from_addr": "0x00088c36",
+                "operand_index": 2,
+                "ref_type": "DATA",
+                "to_addr": "0x00028064",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x00088c40",
+                "operand_index": 2,
+                "ref_type": "READ",
+                "to_addr": "0x00028048",
+                "to_space": "ram"
+              }
+            ],
+            "decompiled_c": "\nvoid FUN_00088c28(void)\n\n{\n  undefined8 uVar1;\n  int iVar2;\n  uint uVar3;\n  \n  uVar1 = 0x23ee400000000;\n  for (uVar3 = 0; iVar2 = (int)((ulonglong)uVar1 >> 0x20), uVar3 < *(uint *)(iVar2 + 0x4164);\n      uVar3 = uVar3 + 1) {\n    (**(code **)(uVar3 * 4 + iVar2 + 0x4180))();\n  }\n  return;\n}\n\n",
+            "decompiled_c_sha256": "e7ee3911cd457508ad7d7e8266a5a236f38dfa1c30276edfaa7a927be9567dfe",
+            "entry": "0x00088C28"
+          },
+          {
+            "body_ranges": [
+              {
+                "max": "0x000873f9",
+                "min": "0x0008735e",
+                "space": "ram"
+              }
+            ],
+            "body_sha256": "d8ff13678e64e8d87307cc00953b4af05914f4e815f5bb69f157f3bc50d98fa4",
+            "body_size": 156,
+            "data_references": [
+              {
+                "from_addr": "0x0008736a",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1198",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x0008736e",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1188",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x00087372",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf118c",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x00087376",
+                "operand_index": 2,
+                "ref_type": "READ",
+                "to_addr": "0xfebf1190",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x0008737a",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1194",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x0008737e",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf117c",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x00087382",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1180",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x00087386",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1191",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x000873ac",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1178",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x000873b0",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1174",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x000873b6",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1170",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x000873be",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1190",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x000873cc",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1190",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x000873e2",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1190",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x000873e8",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf1190",
+                "to_space": "ram"
+              }
+            ],
+            "decompiled_c": "\nundefined4 FUN_0008735e(void)\n\n{\n  undefined4 *puVar1;\n  int iVar2;\n  undefined4 uVar3;\n  \n  puVar1 = &LAB_febeb800;\n  icus_interrupt_pair_set_enabled(0);\n  puVar1[0x1666] = 0xffffffff;\n  puVar1[0x1662] = 0xffffffff;\n  puVar1[0x1663] = 0xffffffff;\n  puVar1[0x1665] = 0;\n  puVar1[0x165f] = 0;\n  puVar1[0x1660] = 0;\n  *(undefined1 *)((int)puVar1 + 0x5991) = 0;\n  if (*(char *)(puVar1 + 0x1664) == '\\x0f') {\n    uVar3 = 1;\n  }\n  else {\n    FUN_00087272();\n    FUN_0008729a();\n    iVar2 = icus_driver_initialize();\n    if (iVar2 == 1) {\n      FUN_000872b2(0);\n      iVar2 = FUN_000872f8();\n      if (iVar2 == 0) {\n        puVar1[0x165e] = 0;\n        puVar1[0x165d] = 0;\n        puVar1[0x165c] = 0;\n        *(undefined1 *)(puVar1 + 0x1664) = 0xe1;\n        icus_interrupt_pair_set_enabled(1);\n        uVar3 = 0;\n      }\n      else {\n        *(undefined1 *)(puVar1 + 0x1664) = 0xf;\n        uVar3 = 1;\n      }\n    }\n    else {\n      uVar3 = 1;\n      if (iVar2 == 2) {\n        FUN_000872b2(1);\n        *(undefined1 *)(puVar1 + 0x1664) = 0xf;\n      }\n      else {\n        *(undefined1 *)(puVar1 + 0x1664) = 0;\n      }\n    }\n    FUN_00087346();\n  }\n  return uVar3;\n}\n\n",
+            "decompiled_c_sha256": "1cd3924b6fd05eb6c66b81eb59982d1420d56b54a5b3bf86cb0b977fa41d8bde",
+            "entry": "0x0008735E"
+          },
+          {
+            "body_ranges": [
+              {
+                "max": "0x00089423",
+                "min": "0x000893de",
+                "space": "ram"
+              }
+            ],
+            "body_sha256": "3026c0ed5bd72bb4465f61530d731564660f3e11b1db73ae812a1a389bd7c35a",
+            "body_size": 70,
+            "data_references": [
+              {
+                "from_addr": "0x000893e2",
+                "operand_index": 0,
+                "ref_type": "READ",
+                "to_addr": "0xffc5d018",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x000893e8",
+                "operand_index": 2,
+                "ref_type": "READ",
+                "to_addr": "0xfebf136c",
+                "to_space": "ram"
+              },
+              {
+                "from_addr": "0x0008941a",
+                "operand_index": 2,
+                "ref_type": "WRITE",
+                "to_addr": "0xfebf136c",
+                "to_space": "ram"
+              }
+            ],
+            "decompiled_c": "\n/* Application ICU-S initialization entry: recover/abort stale hardware state, run the register\n   self-test, clear driver RAM, initialize control registers, and publish ready state 0xE1. */\n\nint icus_driver_initialize(void)\n\n{\n  uint uVar1;\n  undefined4 *puVar2;\n  char cVar3;\n  int iVar4;\n  \n  cVar3 = DAT_febf136c;\n  puVar2 = &LAB_febeb800;\n  uVar1 = ICUSIRQSTS;\n  if ((uVar1 & 1) == 0) {\n    puVar2 = &LAB_febeb800;\n    iVar4 = icus_abort_and_recover();\n    if ((iVar4 == 1) && ((cVar3 != '\\0' || (iVar4 = icus_register_self_test(), iVar4 == 1)))) {\n      icus_driver_state_initialize();\n      icus_hardware_initialize();\n      cVar3 = -0x1f;\n    }\n  }\n  else {\n    iVar4 = 0x30;\n  }\n  *(char *)(puVar2 + 0x16db) = cVar3;\n  return iVar4;\n}\n\n",
+            "decompiled_c_sha256": "f062744e1c8af357137573f3da212875033971e6c72613decf43dc47398d935b",
+            "entry": "0x000893DE"
+          }
+        ],
+        "image_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde",
+        "raw_dataflow": {
+          "callback_count": 4,
+          "callback_count_address": "0x00028048",
+          "callback_dispatcher": "0x00088C28",
+          "callback_entries": [
+            "0x000882AE",
+            "0x000884B4",
+            "0x000886B8",
+            "0x000888A6"
+          ],
+          "callback_gate": "CMP r0,r10; BNE skips only the callback call when lower initialization returns nonzero",
+          "callback_table_address": "0x00028064",
+          "hardware_initialize": "0x000893DE",
+          "hardware_status_register": "0xFFC5D018",
+          "initializer_bytes": "80072100bfff60e1e051ba05bfffd0ff6407c15b010a6407c85b440fca5b40063f00",
+          "initializer_entry": "0x00088C4C",
+          "lower_driver_wrapper": "0x00086DB0",
+          "lower_initialize": "0x0008735E",
+          "same_shape_sibling": "0x00088C6E",
+          "sibling_lower_wrapper": "0x00086DBC",
+          "state_write_gate": "all three stores execute after either lower-driver return outcome",
+          "state_writes": [
+            {
+              "address": "0xfebf13c0",
+              "value": 0,
+              "width": 4
+            },
+            {
+              "address": "0xfebf13c8",
+              "value": 0,
+              "width": 2
+            },
+            {
+              "address": "0xfebf13ca",
+              "value": 1,
+              "width": 1
+            }
+          ]
+        },
+        "source_corpus": {
+          "path": "data/generated/decompilations.jsonl",
+          "sha256": "b8455006f5fc9cf20e66e1e7fa5897c5dd7b751d9e969e63f3656930aa81f275"
+        },
+        "source_fingerprints": {
+          "path": "data/function_structural_fingerprints.jsonl",
+          "sha256": "3ca3033ab6dd711ad1aa7dca50c31d17954c58abef3128a6f3e167428d45a6fc"
+        }
+      }
+    },
+    "structural_ambiguity": {
+      "inputs": {
+        "corolla-8965H1202000": {
+          "path": "data/targets/corolla-8965H1202000/function_structural_fingerprints.jsonl",
+          "same_shape_entries": [
+            "0x0008304c",
+            "0x0008306e"
+          ],
+          "sha256": "e7fc32a0ffa53ea4fc3a6678ff6deb5b595575c5cbd458994180dcb7ca5686a5"
+        },
+        "sienna-8965B4512000": {
+          "path": "data/function_structural_fingerprints.jsonl",
+          "same_shape_entries": [
+            "0x00088c4c",
+            "0x00088c6e"
+          ],
+          "sha256": "3ca3033ab6dd711ad1aa7dca50c31d17954c58abef3128a6f3e167428d45a6fc"
+        }
+      },
+      "reason": "The complete mnemonic/length signature occurs twice in each canonical inventory. The initializer and adjacent sibling call different lower-driver functions.",
+      "resolution": "The selected entry calls the native lower initializer, which reaches ICU-S hardware initialization; its zero return dispatches the generated four-callback vector before common state reset."
+    }
+  },
+  "role_closure": [
+    {
+      "classification": "target-native-role-recovered",
+      "evidence": "data/generated/corolla_8965H1202000_secoc_surface.json",
+      "reference_entry": "0x00088C4C",
+      "reference_name": "crypto_icus_initialize",
+      "target_entry": "0x0008304C"
+    }
+  ],
+  "role_closure_count": 1,
   "rx_frontend": {
     "indication": {
       "body_size": 62,
@@ -706,9 +1430,12 @@
   "software_id": "8965H1202000",
   "static_conclusion": {
     "all_42_secoc_icus_residual_roles_recovered": true,
-    "boundary": "role/control architecture is recovered target-natively; profile IDs, freshness state addresses, D7 signal population, and protected key contents remain H-specific",
+    "crypto_icus_initializer_recovered": true,
     "h_freshness_architecture_preserved": true,
     "h_profile_population_changed": true,
     "underlying_verify_engine_preserved": true
-  }
+  },
+  "target_evidence_entries": [
+    "0x0008304C"
+  ]
 }

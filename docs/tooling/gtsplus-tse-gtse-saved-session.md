@@ -184,9 +184,6 @@ first-class GTS/TSE saved sections
 PCS Data Viewer TSS3 decoder/resources
 ```
 
-It still does not prove that every `FFD_TSS3_ID_*` resource is present in every FRC
-record, nor does it identify the vehicle-network producer or SecOC signer.
-
 ## 5. Ring-buffer grammar
 
 The same template fully declares the metadata that accompanies stored high-rate monitor

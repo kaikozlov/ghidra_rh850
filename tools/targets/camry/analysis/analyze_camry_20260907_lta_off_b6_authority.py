@@ -309,8 +309,8 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
         "interpretation": (
           "Every route-48 B6 send is explicitly FDF=1 in sendcan. Every successful/rejected Panda return also has FDF=1. "
           "A preceding physical-controller-2 Panda state exists for every B6 send and reports CAN-FD+BRS enabled at 500/2000 kbit/s in ISO mode. "
-          "Given Panda 58a1b6a4 host-TX construction, those B6 frames are therefore emitted as 32-byte CAN-FD+BRS; BRS remains derived from bus state and absent from per-frame cereal data. "
-          "All B6 sends still carry the development zero-MAC28 marker, so transport framing is closed separately from SecOC authentication/admission."
+          "Given Panda 58a1b6a4 host-TX construction, those B6 frames are therefore emitted as 32-byte CAN-FD+BRS; BRS is derived from bus state. "
+          "All B6 sends carry the development zero-MAC28 marker."
         ),
       },
       "panda_health": panda_health,

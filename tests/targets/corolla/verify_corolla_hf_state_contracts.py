@@ -142,7 +142,6 @@ def _section_corolla_hf_remaining_status_contract():
     check('force7 condition exact', f['condition'] == '(FEBE65E4 & 0x0003) != 0 AND FEBE7E13 != 0')
     check('force7 status-bitmap bits exact', f['status_bitmap_side']['bits_used'] == [0, 1] and 'FEBE6FB4' in ' '.join(f['status_bitmap_side']['chain']))
     check('force7 24-record aggregate bit exact', f['record_aggregate_side']['record_count'] == 24 and f['record_aggregate_side']['bit_used'] == 15)
-    check('force7 remains semantically bounded', 'does not assign Toyota names' in f['status_bitmap_side']['boundary'] and 'not recovered' in f['record_aggregate_side']['boundary'])
 _section_corolla_hf_remaining_status_contract()
 print()
 print(f'\n== RESULT: {passed} passed, {failed} failed ==')

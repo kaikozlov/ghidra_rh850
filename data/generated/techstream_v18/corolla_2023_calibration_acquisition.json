@@ -13,7 +13,7 @@
     "what_is_already_owned": "Two raw 0792/P5-Unified CUWs exactly cover Toyota's published 23TC01 Corolla FRC source transitions to 8646F1204500; another generic 'find a 2023 Corolla FRC CUW' pass is unnecessary."
   },
   "brake_epb": {
-    "boundary": "24TC01 independently publishes a concrete 2023 Corolla Brake/EPB CID family. No package descriptor has DiagID 07B0 or any published Brake CID in the pinned 26-CUW local corpus. The campaign family is therefore an acquisition key set. The exact target Brake F181 remains unproved.",
+    "boundary": "24TC01 independently publishes a concrete 2023 Corolla Brake/EPB CID family. No package descriptor has DiagID 07B0 or any published Brake CID in the pinned 26-CUW local corpus. The campaign family is therefore an acquisition key set.",
     "campaign": {
       "applicability": [
         "Certain 2023 Model Corolla"
@@ -66,7 +66,7 @@
     "target_diag_id": "07B0"
   },
   "front_recognition_camera": {
-    "boundary": "T-0058-23 and T-0060-23 are raw-package matches to Toyota's published 23TC01 Corolla FRC transitions, so a 2023 Corolla P5 FRC update family is already present locally. This is not a VIN-level join to the albinoelephant or Span cars, and the 85,458,944-byte target representation remains high-entropy/opaque rather than decoded application code.",
+    "boundary": "T-0058-23 and T-0060-23 are raw-package matches to Toyota's published 23TC01 Corolla FRC transitions, so a 2023 Corolla P5 FRC update family is already present locally. The 85,458,944-byte target representation remains high-entropy/opaque rather than decoded application code.",
     "campaign": {
       "applicability": [
         "2023 Model Corolla",
@@ -150,7 +150,7 @@
       "sha256": "08abdf76eedb6bc551e17685b580aaca3580ebf365951dd264eee9c643c7308c"
     },
     "data/generated/techstream_v18/cuw_frc_corpus.json": {
-      "sha256": "eeca82ddf15bab993fd1942acf318f2c5308c73bd7d9f8c0c6983081d32cbd60"
+      "sha256": "4e524fe2b2ed164c583e8befb5e4b9d980458306d3082d47985f00c30e414b91"
     }
   },
   "static_conclusion": {

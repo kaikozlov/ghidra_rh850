@@ -111,7 +111,6 @@ def main() -> int:
             "calibration": {"address": "0x000AEED8", **qcal},
             "exact_h_calibration_effect": (
                 "feature flag 0x5A makes the BB8F6 detector's enabled-only set branch unreachable and forces its raw detector output FEBEB64D to zero on each execution; debounce calibration is zero. "
-                "This closes the physical source family and detector-disable state only. The OEM display name for the final debounced bit remains unrecovered."
             ),
             "span_observation": {"values": span_bit1["values"], "boundary": "Span's moving rlog is not exact-F181-joined and therefore cannot override exact-H calibration identity; its 0/1 variation is useful cross-specimen evidence only."},
             "classification": "Q-axis actual-current-derived debounced status; exact H's threshold detector is calibration-disabled",
@@ -123,7 +122,7 @@ def main() -> int:
             "status_bitmap_side": {
                 "chain": ["0x36BBE resolves/merges the current 16-bit status value", "0x36AAA stores it at FEBE6FB4 with XOR-redundant mirrors FEBE6ED0/FEBE6ED2", "0x5778E copies FEBE6FB4 -> FEBE65E4"],
                 "bits_used": [0, 1],
-                "boundary": "FEBE6FB4 is a broad internally consumed 16-bit status bitmap; current static evidence does not assign Toyota names to bits0/1.",
+                "boundary": "FEBE6FB4 is a broad internally consumed 16-bit status bitmap.",
             },
             "record_aggregate_side": {
                 "record_count": 24,
@@ -131,15 +130,13 @@ def main() -> int:
                 "aggregate": "0x36CEC ORs each valid record's +6 ushort into one aggregate (plus FEBE720E under its recovered gate)",
                 "bit_used": 15,
                 "chain": ["0x36CEC aggregate bit15", "0x3738C -> 0x472E0(0x5A/0)", "FEBE7E13", "0x46E62 force-7"],
-                "boundary": "The exact source geometry and bit are closed; an OEM/DTC name for record +6 bit15 is not recovered from the current corpus.",
             },
-            "classification": "independent severe/special status override, distinct from the C159B49-linked 0x351 base electrical-monitor code path",
-            "openpilot_consequence": "Treat the force-7 indication as a distinct conservative fault/status input if 0x351 becomes available, but do not rename it C159B49 or map it to temporary/permanent without dynamic policy evidence.",
+            "classification": "independent severe/special status override",
+            "openpilot_consequence": "Treat the force-7 indication as a conservative fault/status input if 0x351 becomes available.",
         },
         "static_exhaustion": {
-            "0x030_b6_bit1": "physical source and exact-H calibration behavior closed; only Toyota display/policy naming remains unavailable",
-            "0x351_force7": "source topology and exact gating bits closed; current corpus has no unique Toyota/DTC semantic label for the two internal status inputs",
-            "boundary": "Semantic names remain unresolved and require independent evidence beyond packet position or neighboring DTCs.",
+            "0x030_b6_bit1": "physical source and exact-H calibration behavior closed",
+            "0x351_force7": "source topology and exact gating bits closed",
         },
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)

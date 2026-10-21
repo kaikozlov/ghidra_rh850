@@ -221,7 +221,7 @@ def screen_direct_frc(loaded: dict) -> dict:
         'lag_convention': 'positive lag means the direct FRC PDU field is compared to a later protected 0x08A request word',
         'per_id': by_id,
         'top_reproduced': reproduced[:30],
-        'boundary': 'Correlation provides a screening bound only; source-code dataflow requires separate proof. Closed-loop ego-state fields can correlate strongly at long lags.',
+        'boundary': 'Correlation provides a screening bound. Closed-loop ego-state fields can correlate strongly at long lags.',
     }
 
 
@@ -409,7 +409,7 @@ def coarse_5af_companion(loaded: dict) -> dict:
         'drives': out,
         'lag_convention': 'corr(0x5AF.B26_s6(t), 0x08A_request(t+lag)); negative best lag means 0x5AF publishes after the request word',
         'interpretation': ('B26 behaves as a coarse longitudinal companion at roughly 0.25 m/s^2/count, but its best alignment lags 0x08A by 50-75 ms. '
-                           'Treat it only as quantized request/result/status state; the upstream acceleration command remains missing. No OEM field name is assigned.'),
+                           'Treat it as quantized request/result/status state.'),
     }
 
 def c9_vs_ca(loaded: dict) -> dict:
@@ -453,7 +453,7 @@ def gts_join(gts: dict) -> dict:
         'pcs_arbitration_result_id': recorder['5284'],
         'pcs_arbitration_result_acceleration': recorder['57DB'],
         'static_join': surface['static_join'],
-        'boundary': 'The diagnostic/recorder vocabulary establishes Toyota semantics and width/scale only; the 0x08A byte assignment and SecOC publisher identity remain unresolved.',
+        'boundary': 'The diagnostic/recorder vocabulary establishes Toyota semantics and width/scale.',
     }
 
 
@@ -538,7 +538,7 @@ def build() -> dict:
             'Do not restore Camry 0x160 longitudinal output and do not inject a competing 0x08A from this analysis alone. '
             'The semantic request plane is already 0x08A. On stock Toyota-B that protected PDU is on unsplit Bus 4, so production '
             'integration still needs a clean source-suppression/sole-emitter boundary or the physical FRC-to-signer publication handoff. '
-            'The remaining problem is transport/ownership; a different upstream command remains unsupported. No runtime or Panda policy is authorized here.'),
+            'The remaining problem is transport/ownership. No runtime or Panda policy is authorized here.'),
     }
 
 

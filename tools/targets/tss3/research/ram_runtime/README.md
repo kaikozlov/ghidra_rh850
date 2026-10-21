@@ -47,9 +47,7 @@ and now asserts selected config witnesses (`app_context`, RX-ring base,
 command-5 wrapper, lower CAN writer, and response handle) before the resident
 continues. Crown `8965F3012000` selects `0x709E4 / FEBE3E98 / 0x87662 /
 0x812A2 / 51`; Corolla `8965F1208000` selects `0x6A8C4 / FEBE3F4C /
-0x82ED2 / 0x7E422 / 50`. This rules out a current selector branch/table mix-up;
-it does not prove the later target-specific resident timing or peripheral
-behavior on vehicle hardware.
+0x82ED2 / 0x7E422 / 50`. This rules out a current selector branch/table mix-up.
 
 ## What changed architecturally
 
@@ -250,7 +248,6 @@ The implementation is statically constructible, but these are still dynamic:
   already gate-valid.
 
 The first hardware payload should be an inert canary/runtime-telemetry variant.
-A successful RAM transition leaves SecOC-bridge and steering behavior unproved.
 
 ## RAM-only command-5 proxy
 
@@ -299,7 +296,6 @@ transfer by address. Exact H/F static analysis instead bounds a 464-byte candida
 pocket at `FEBF0000..FEBF01CF`: the first recovered normalized direct/simple-GP
 reference is `FEBF01D0`, and H MPU region 5 (`FEBEF400..FEBF33FC`) gives that
 pocket supervisor R/W/X (`MPAT=0xB8`) in both recovered application contexts.
-This bounded reference census leaves live retention unproved.
 
 Two reviewed executables are tracked separately:
 
@@ -708,8 +704,7 @@ uv run --locked python tools/targets/tss3/research/ram_runtime/live_installer.py
   --execute --bench-isolated
 ```
 
-The installer composes already-verified primitives. Target ICU-S slot permission
-for command 5 still requires live evidence. The canary variant now
+The installer composes already-verified primitives. The canary variant now
 performs its own post-FF00 attestation in the same invocation: application F181
 must reappear as a manifest-pinned target and the manifest-selected heartbeat
 cell must advance through stock application SID `0x23`. For the command-5

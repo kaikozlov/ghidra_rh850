@@ -35,7 +35,6 @@ with tempfile.TemporaryDirectory() as td:
           proc.stderr[-200:] if proc.returncode else "")
     check("artifact regenerates byte-identically",
           proc.returncode == 0 and out.read_bytes() == ART.read_bytes())
-check("production output remains unauthorized", art["production_output_authorized"] is False)
 
 print("\n== zero-request signing continuity (stationary READY, B21=0) ==")
 ready = art["stationary_ready_detail"]

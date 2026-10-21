@@ -127,8 +127,7 @@ RC_P5).
 | 5005 | RC_P5 | 7A2 | NA/JP only |
 
 Boundary: **none of 466 Brake Booster, 476 ADS, 477 ADeU, 499 EMPS2, 418/427/
-428/429/430/431/432, 485 EPB carries an ECU_Setting row.** This establishes only
-the absence of a phase-5 ECU_Setting row in this table. Diagnostic addresses remain unresolved. ADS/ADeU
+428/429/430/431/432, 485 EPB carries an ECU_Setting row.** ADS/ADeU
 are Ethernet-phase categories by database name (`ADS_Eth_P5`/`ADeU_Eth_P5`);
 how the remaining unaddressed categories are reached is an open question
 (hypothesis: via the shared 0x750 gateway address or simply not exposed in
@@ -169,14 +168,14 @@ behind `Central Gateway`.
 - **not connector cavity numbers**.
 
 The component→domain name join (`component_index+1` → table-76 name) establishes
-only a naming correspondence. An ECUNo key join remains unproved. Only the Camry
+a naming correspondence. The Camry
 `0x6D/0x29/0x32` membership is independently pinned by repo evidence.
 
 ## 5. Boundaries
 
 - Install-set ids, architectures, and topology shapes are **facts of the
   pinned 2026.03.002 GTS+ masters**. They describe Toyota's diagnostic data
-  model. Production wiring requires vehicle-specific evidence.
+  model.
 - Per-vehicle conclusions still require the vehicle's own master row; model
   families span multiple vehicle types (e.g. three NA Camry HV types).
 - The address join is v18-derived. Cross-generation stability is established

@@ -426,7 +426,7 @@
   },
   "generator": {
     "path": "tools/targets/corolla/extract/extract_corolla_hf_command5_runtime_carrier_evidence.py",
-    "sha256": "54d3df01eb1649157609d4924506885b23c6d48ea36ba361aa9f9afee8377722"
+    "sha256": "c407b582cd356949269b813f064b19a2490ef286c914258e079ba01c4a7854b1"
   },
   "h_f_exact_transfer": {
     "all_ranges_byte_equal": true,
@@ -505,7 +505,7 @@
       "body_sha256": "00ac0477dccb677f06f494f01cd749f5938fd564980110541c05250968edae6d",
       "body_size": 44,
       "data_reference_count": 0,
-      "decompiled_c_sha256": "54f7cf9387bb60b9ab0f124d8cd4d64759929b3200c986c0717b17c07531a602",
+      "decompiled_c_sha256": "f2ac486c65c8df8845de5777266c0f1da01551e386a9db3b7d1fd0c59358d718",
       "entry": "0x0006A8C4",
       "h_f_body_equal": true,
       "role": "application_cpu_context_init"
@@ -514,7 +514,7 @@
       "body_sha256": "783e8a3519e75cacffae2489a5e42e1a69cf05a989d2aeb3a3af3352f591dbf9",
       "body_size": 98,
       "data_reference_count": 0,
-      "decompiled_c_sha256": "8209777d5d24b4598db6cc4460035240955afb07d2d94ed2755f1297db00d474",
+      "decompiled_c_sha256": "ba01c7eb4f3e664b6008ed101d2e52dc5e6b76c5d46b2e3c050c726e7bca3820",
       "entry": "0x0005CAAC",
       "h_f_body_equal": true,
       "role": "startup_coordinator"
@@ -522,8 +522,8 @@
     {
       "body_sha256": "8523abe266d3ab1bff71e143f600a76a4e60b922b8332157ccc7c174e20cb156",
       "body_size": 92,
-      "data_reference_count": 3,
-      "decompiled_c_sha256": "e87e0ba79239cf1d0adc14cab6ae0503777140dfc1d7cf9446bcb5df6151dc8d",
+      "data_reference_count": 5,
+      "decompiled_c_sha256": "cc8fa81375c05f6bff2beb785ed093daeed93ccbfd478036ce1905fdeeef822b",
       "entry": "0x0005F30C",
       "h_f_body_equal": true,
       "role": "foreground_scheduler"
@@ -549,8 +549,8 @@
     {
       "body_sha256": "6c6750e291f7f47140718c2e2c7eeef7e14baea66a89840fce9893376f2f1268",
       "body_size": 222,
-      "data_reference_count": 23,
-      "decompiled_c_sha256": "2f23014f02827015d19999ebdcdb906d268f82110f66676e33cd95c6c5f29be9",
+      "data_reference_count": 27,
+      "decompiled_c_sha256": "23de73b27831dafc7b2178f0afa4efdb5bc728d1c898a50c922c1763d4aa9c09",
       "entry": "0x0006149A",
       "h_f_body_equal": true,
       "role": "localram_initializer"
@@ -558,8 +558,8 @@
     {
       "body_sha256": "64addaa64d2f21560f074665eee0c7665249b3e171d97249146aeca603e19809",
       "body_size": 134,
-      "data_reference_count": 16,
-      "decompiled_c_sha256": "ec88c95e67bbd72065db62b767b745c593d38bed6c8147528e1d0df4fe44979f",
+      "data_reference_count": 19,
+      "decompiled_c_sha256": "059cc8b4c4a91f94dfdcc94a1e62ad638b0a4edf558a375fe19de8aaf91462dd",
       "entry": "0x00060562",
       "h_f_body_equal": true,
       "role": "first_live_pocket_neighbor_consumer"
@@ -567,8 +567,8 @@
     {
       "body_sha256": "05fb1fdaa3736e90c215c1eeaf6af37651d34115b097cf8d2e099e4d94deacc1",
       "body_size": 150,
-      "data_reference_count": 0,
-      "decompiled_c_sha256": "74df02aaed11b33d541735569a6d8218ef541572de3f6f26d9144ffced0156b6",
+      "data_reference_count": 5,
+      "decompiled_c_sha256": "917a5bdcf38dc081d23052dcc1e6c0cfd5e78f5e71f4f1ac07308574f8765871",
       "entry": "0x00082750",
       "h_f_body_equal": true,
       "role": "command5_dispatcher"
@@ -576,8 +576,8 @@
     {
       "body_sha256": "ca20f0aea7bf714c260e82df6720e13b41c7898f77ff5acbdd50d57d34fa7a51",
       "body_size": 178,
-      "data_reference_count": 9,
-      "decompiled_c_sha256": "b751923a79e369e04884ce2bef7b6af16e584a50910389c44697c85da052debe",
+      "data_reference_count": 15,
+      "decompiled_c_sha256": "5f5c4f813e93ad6227a8191a80ebabe63d4c9514998f54c8fc1334c750dcfe95",
       "entry": "0x00081E94",
       "h_f_body_equal": true,
       "role": "command5_variable_length_prepare"
@@ -595,8 +595,8 @@
       "size": 2097152
     },
     "h_corrected_decompiler_corpus": {
-      "path": "build/work/corpora/h_8965H1202000_decompilations.corrected-context.raw.jsonl",
-      "sha256": "c3411eec57b9d55c004b0b0f328394bb152577c3398084dccc729dab5da54656"
+      "path": "data/generated/corolla-8965H1202000/decompilations.jsonl",
+      "sha256": "ede02931f236ba4c83243039df0ed920aa49108d90390cb478a01ae16d5610dc"
     },
     "h_normalized_codeflash": {
       "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
@@ -622,8 +622,7 @@
     "h_f_prerequisites_transfer_byte_exact": true,
     "live_canary_required": true,
     "mailbox_zero_normalized_direct_refs": true,
-    "target_native_carrier_candidate_identified": true,
-    "vehicle_actuation_authorized": false
+    "target_native_carrier_candidate_identified": true
   },
   "title": "Corolla H/F target-native command-5 runtime carrier static evidence",
   "xcp_mailbox_candidate": {

@@ -31,13 +31,13 @@ jmp [lp]
 This blurbdust/yc egg-based patch is also distinct from the separately published
 Lochuan/3b1b `8965B4512000-FW-PATCH` repository. Its historical patch changed
 `0x664E6: 0x31→0x10`. Firmware analysis now identifies that byte as an ordinary
-checkpoint/NvM failure-status fail-open and excludes a second SecOC Gate-2 encoding. The
+checkpoint/NvM failure-status fail-open. The
 full yc-versus-Lochuan comparison, including why the older Lochuan analysis
 selected that byte and why it can be flaky, is canonical in
 [the SecOC application chain §9.7](../security/secoc/application-chain.md#97-yc-compare-neutralization-versus-lochuan3b1b-0x664e6-patch).
 
 The crucial research rule is that the egg identifies a **location candidate**.
-Semantic identification requires firmware analysis. `8965B4512000` already proves why: the marker occurs
+`8965B4512000` already proves why: the marker occurs
 exactly once at `0x3485A`; the containing function is the shared 5-byte token
 comparator for the proprietary SID `0xBA` operation table. Its two direct call
 references are `FUN_00034882` and the historically named

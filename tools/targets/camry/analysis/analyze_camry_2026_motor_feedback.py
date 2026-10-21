@@ -466,8 +466,7 @@ def main() -> int:
                 "observed/deterministic: episodes exist (longest 0.9 s, drive A) where the motor-feedback proxy drives in "
                 "the steering-motion direction while opposing measured driver torque, with B6 absent on all buses. This is "
                 "consistent with active EPS assist applying torque against the driver, but driver assist, damping, "
-                "friction/road-load compensation, and lane-keeping-class functions are not separable from these two drives; "
-                "it is not proof of LTA authority."
+                "friction/road-load compensation, and lane-keeping-class functions are not separable from these two drives."
             ),
             "bounded_edges_and_sweeps": (
                 "observed/deterministic: the cruise-clean drive-B Class-L rise shows no immediate |B22:B23| step "
@@ -475,7 +474,6 @@ def main() -> int:
                 "inside Class-L in either drive; the speed-matched non-Class-L stratum contains one such sweep (drive A). "
                 "The floor grows with Class-L occupancy without a rise-edge step, and falls after Class-L ends."
             ),
-            "production_output_authorized": False,
         },
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)

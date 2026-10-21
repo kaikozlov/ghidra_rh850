@@ -24,8 +24,7 @@ DOCKERFILE = ROOT / "tools" / "toolchains" / "v850-gcc" / "Dockerfile"
 SELFTEST_RESULT = "RH850_SELFTEST_RESULT=0x12cb5687"
 SELFTEST_CODEFLASH_RESULT = "RH850_CODEFLASH_RESULT=0xc0deface"
 SELFTEST_BSWAP_RESULT = "RH850_BSWAP_RESULT=0x78563412"
-# Check generated frame/save invariants independently of register allocation
-# or exact frame sizes in functions that must retain their ABI saves.
+# Check generated frame/save invariants in functions that must retain their ABI saves.
 SELFTEST_NORETURN_RESULTS = (
     "RH850_NORETURN_MIN_FRAME=0",
     "RH850_NORETURN_MIN_SAVES=0",

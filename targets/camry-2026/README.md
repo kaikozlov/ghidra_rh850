@@ -89,15 +89,12 @@ Canonical interpretation lives in
 
 ## Historical stationary B6 bring-up kit
 
-The August-30 repinned experiment and the later v7 car-kit notes describe their
-dated development configurations only. Current harness, installed firmware, and
-runtime require current evidence. The original evidence remains in the dated
-capture units and [field report](../../docs/variants/camry-2026-live-baseline.md).
+The August-30 repinned experiment and the later v7 car-kit notes describe dated
+development configurations. The original evidence remains in the dated capture
+units and [field report](../../docs/variants/camry-2026-live-baseline.md).
 
 The stationary-probe verifier now lives at
-`tests/targets/camry/verify_camry_f33_b6_stationary_probe.py`. Its existence is
-not evidence that the old kit is the maintained deployment. Obsolete build and
-live-install instructions are intentionally not repeated in this capture index.
+`tests/targets/camry/verify_camry_f33_b6_stationary_probe.py`.
 
 ## NRTD P5/cruise follow-up
 
@@ -186,9 +183,8 @@ span is excluded from recovery conclusions.
 Against the retained healthy READY oracle, the generalized matcher exhaustively
 found zero candidate windows in all three stores: 32,753 DataFlash windows,
 126,946 eligible non-clobbered LocalRAM windows, and 65,521 GlobalRAM windows.
-This negative covers CPU-visible stores only. Exact F33 firmware and live
-protected `0x0D7` traffic independently establish an active slot-4 command-7
-verification domain. Compact deterministic interpretation is
+Exact F33 firmware and live protected `0x0D7` traffic independently establish an
+active slot-4 command-7 verification domain. Compact deterministic interpretation is
 `data/generated/camry_8965F3307000_secoc_recovery.json`; canonical conclusions
 are in `docs/variants/camry-2026-live-baseline.md` §10.
 
@@ -258,7 +254,7 @@ SET- decrements it and RES+ increments it. The two drives therefore contain 158.
 of machine-recovered cruise operation / 511,760 incoming frames, still with zero B6.
 A separate repeated state (`0x08A` byte21=`0x0B`, mirrored by `0x081` byte13 and a stable
 `0x412` display payload) adds 73.303384 s / 237,097 frames with zero B6. That state
-remains a **lateral/HUD candidate** pending a direct current FRC-state join for OEM LTA attribution.
+is a **lateral/HUD candidate**.
 Reproduce with `tools/targets/camry/analysis/analyze_camry_2026_cruise_lta_edges.py`; the
 artifact is `data/generated/camry_2026_cruise_lta_edge_census.json` and canonical analysis
 is §20 of the live baseline.
@@ -291,8 +287,7 @@ Control `0=Enabled/1=Disabled`. `0x1914` independently resolves bit8 as
 `0=Cruise Control Not in Operation` / `1=Cruise Control in Operation`. The
 strong operating-context discriminator therefore requires stable
 **LTA Switch=1 + LTA Control=0 + ACC-in-operation=1**, plus independently
-observed vehicle motion and healthy Bus-4 `0x00F/0x0D7`. This establishes only an
-OEM-named diagnostic operating context. Continuous steering torque requires direct evidence.
+observed vehicle motion and healthy Bus-4 `0x00F/0x0D7`.
 
 Normal `pandad` and `loggerd` remain running. Loggerd records both the matching
 `sendcan` requests and incoming `can` responses; no competing direct-Panda reader

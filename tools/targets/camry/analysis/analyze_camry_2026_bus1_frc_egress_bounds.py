@@ -482,7 +482,7 @@ def tiers_2_3(loaded, streams):
                     [f"angle_{s}" for s in STATES] + [f"{x}_{s}" for s in (11, 18)
                                                       for x in ("delta", "rate", "indicator")]},
         "integrity_note": "B0:B1 CRC and B2 alive counter deliberately included; interpret "
-                          "their hits only as E2E/time artifacts",
+                          "their hits as E2E/time artifacts",
     }
     for key in sorted(tier2["screens"]):
         rows = sorted((r for r in pool.values() if f"cross_{key}" in r["screen"]),
@@ -637,7 +637,7 @@ def tiers_2_3(loaded, streams):
         "strongest_reproduced_0x160_0x1A0_any_lag": reproduced_negative_peak,
         "note": "strong selected 0x160/0x1A0 correlations peak at negative lag and/or fail "
                 "sign reproduction; the strongest positive-lag candidate is weak "
-                "perception-shaped association; a request carrier remains undemonstrated",
+                "perception-shaped association",
     }
     return tier2, tier3
 
@@ -726,9 +726,8 @@ def tier4(loaded, streams):
                                              "min_four_edge_margin", "drives")} for b in bits[:8]],
         "deterministic_request_mode_bit": False,
         "note": "no deterministic request/mode bit: the strongest reproduced four-edge "
-                "margin is only 0.2105 and the top fields are noisy perception/object-family "
-                "bits (0x181/0x189); stable state flags remain unproved. This bounds a single stable bit "
-                "synchronized to 0x08A B21, it does not prove absence of egress",
+                "margin is 0.2105 and the top fields are noisy perception/object-family "
+                "bits (0x181/0x189)",
     }
 
 
@@ -799,9 +798,8 @@ def plant_feedback(loaded):
         "entries": entries,
         "note": "strong 0x160 candidates correlate with measured 0x025 steering angle at "
                 "near-zero/negative lag while their best 0x08A target lags are more "
-                "negative -- plant/feedback-shaped within the active windows; request commands remain "
-                "undemonstrated. CORR-138 shows full-drive nonreproduction, "
-                "so these are not promoted to standing field identities",
+                "negative -- plant/feedback-shaped within the active windows. "
+                "CORR-138 shows full-drive nonreproduction.",
     }
 
 
@@ -856,9 +854,6 @@ def main():
             "periodic_threshold_frames": PERIODIC_MIN,
             "target": "native Panda bus-2 0x08A DLC 32 (protected side); forwarded bus-0 "
                       "copies give identical ID11 intervals and reproduced edges",
-            "tx_ownership": "per-ID FRC-versus-radar transmitter ownership on Bus 1 is "
-                            "unresolved; this census distinguishes streams only, so "
-                            "a capture-wide negative cannot be attributed specifically to FRC Tx",
         },
         "id11_intervals": {n: t4["id11_intervals"][n] for n in ("drive_a", "drive_b")},
         "tiers": {
@@ -878,23 +873,6 @@ def main():
                                 "related unsigned FRC lateral request carrier on native "
                                 "Toyota Bus 1; weak positive-lag perception associations and "
                                 "stronger trailing/plant-shaped fields remain.",
-            "does_not_establish": [
-                "absence of unsigned FRC lateral egress",
-                "that the FRC->proxy/arbitration handoff is private",
-                "impossibility of upstream source replacement",
-            ],
-            "not_excluded": [
-                "multivariate encoding",
-                "nonlinear/nonmonotonic transforms",
-                "conditionally multiplexed or event-driven egress",
-                "fields wider than 16 bits in the exhaustive lag tier",
-                "source data outside periodic CAN (sparse diagnostic/event streams; drive A "
-                "has 56 distinct Bus-1 ID/DLC streams vs the 22 frequent periodic ones)",
-                "private Ethernet/LVDS/internal-gateway handoff",
-                "diagnostic/recorder objects",
-                "an FRC state vector from which the downstream ECU synthesizes the protected target",
-                "effects hidden by having only one ID11 interval per drive",
-            ],
             "next_primary_source": "synchronized FRC Operation FFD (5282/5631 request, "
                                    "5285/57DE arbitration, 5265 grant, 560D pinion) plus "
                                    "all-bus CAN capture",

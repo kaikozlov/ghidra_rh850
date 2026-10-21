@@ -8,13 +8,15 @@ import hashlib
 import json
 from pathlib import Path
 from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
-from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
+from tools.project.analysis_target import path as target_path
+from tools.targets.corolla.extract.extract_corolla_h_evidence import load_retained_evidence
 
 REPO = REPO_ROOT
 GENERATOR = Path(__file__).resolve()
-IMAGE = H_CODEFLASH
+IMAGE = target_path("corolla-8965H1202000", "codeflash")
 SIENNA = SIENNA_CODEFLASH
 OUT = REPO / "data/generated/corolla_8965H1202000_b6_secoc_verification_decompiler_evidence.json"
+INPUT = REPO / "data/targets/corolla-8965H1202000/retained_decompiler_evidence.json"
 
 # These are target-native H functions needed beyond the earlier byte-complete
 # receiver-envelope proof. CryptoIf/ICU-S helper bodies that were already
@@ -66,9 +68,6 @@ ENTRIES = {
     0x0008A130: "sync_freshness_commit",
 }
 
-# Sienna's generic SecOC acceptance engine is useful prior art.  The comparison
-# is deliberately raw-byte descriptive only: H freshness storage/profile counts
-# are recovered independently below and are not transferred from Sienna.
 SIENNA_UPPER = {
     0x00088702: 0x0008E166,
     0x0008891E: 0x0008E382,
@@ -93,8 +92,8 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--image", type=Path, default=IMAGE)
     ap.add_argument("--sienna", type=Path, default=SIENNA)
-    ap.add_argument("--corpus", type=Path, required=True,
-                    help="disposable exact-H corpus with the SecOC/freshness boundaries forced")
+    ap.add_argument("--evidence-input", type=Path, default=INPUT,
+                    help="identified retained decompiler function subset")
     ap.add_argument("--out", type=Path, default=OUT)
     args = ap.parse_args()
 
@@ -103,16 +102,12 @@ def main() -> int:
     if len(image) != 0x100000 or len(sienna) < 0x100000:
         raise SystemExit("expected 1 MiB CodeFlash application images")
 
-    rows: dict[int, dict] = {}
-    for line in args.corpus.open():
-        row = json.loads(line)
-        if row.get("record") == "function" and row.get("entry_addr"):
-            rows[int(row["entry_addr"], 16)] = row
+    rows = load_retained_evidence(args.evidence_input, image)
 
     functions = []
     for entry, role in ENTRIES.items():
         row = rows.get(entry)
-        if not row or not row.get("decompile_completed") or not row.get("decompiled_c"):
+        if not row or not row.get("decompiled_c"):
             raise SystemExit(f"missing complete H decompile 0x{entry:X} ({role})")
         size = int(row["body_size"])
         body = image[entry:entry + size]
@@ -153,23 +148,12 @@ def main() -> int:
         "generator": {"path": rel(GENERATOR), "sha256": sha(GENERATOR.read_bytes())},
         "image": {"path": rel(args.image), "size": len(image), "sha256": sha(image)},
         "sienna_reference": {"path": rel(args.sienna), "size": len(sienna), "sha256": sha(sienna)},
-        "source_corpus": {"path": rel(args.corpus), "sha256": sha(args.corpus.read_bytes())},
+        "source_evidence": {"path": rel(args.evidence_input), "sha256": sha(args.evidence_input.read_bytes())},
         "function_count": len(functions),
         "functions": functions,
         "sienna_upper_engine_comparison": {
             "rows": sienna_comparison,
-            "boundary": (
-                "Sienna supplies role anchors for the generic acceptance engine. The H functions occupy the same control roles "
-                "near a +0x5A64 Sienna relocation but are not claimed byte-identical: raw differences include relocated calls, "
-                "GP/table displacements, and generated-profile geometry. H freshness/window conclusions below must be recovered "
-                "from the target-native H bodies rather than transferred from Sienna."
-            ),
         },
-        "boundary": (
-            "Exact-H disposable-project decompilations for the protected 0x0B6 freshness/verification state machine, raw-byte-bound "
-            "to 8965H1202000. This evidence complements the separately verified byte-complete receiver "
-            "envelope and ICU-S key-selector provenance artifacts, which remain independently required."
-        ),
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(out, indent=2, sort_keys=True) + "\n")

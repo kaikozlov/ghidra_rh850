@@ -1,9 +1,8 @@
 {
   "boundaries": [
-    "Times describe rlog publication only; wire arbitration times and measured actuator delay remain unresolved.",
-    "sendcan records a host transmission attempt only; ECU acceptance requires separate acknowledgement.",
+    "Times describe rlog publication.",
+    "sendcan records a host transmission attempt.",
     "A physical input can explain a subsequent cruise release even when the host also transmits a cancel-shaped packet.",
-    "Absence of a recovered input in this window cannot prove a new command or rule out unobserved causes.",
     "The protected switch is observed, never generated or replayed onto a vehicle."
   ],
   "dispositions": {

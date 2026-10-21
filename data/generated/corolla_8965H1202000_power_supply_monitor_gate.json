@@ -166,11 +166,7 @@
     },
     "techstream_correlations": {
       "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
-      "sha256": "5e4eac747a29080dcb5a700070655dccb7814434cc810f204080512416aa8e3a"
-    },
-    "tms053_followup_evidence": {
-      "path": "data/generated/corolla_8965H1202000_tms053_followup_decompiler_evidence.json",
-      "sha256": "4afbd5568b61016161b147d23239011f579a2511d3497e628b69c2bdde60b200"
+      "sha256": "e16b546c68149f82ac67a6e61ab109b879c77bd780d32b331c75ce778a20293e"
     }
   },
   "state_chain": {

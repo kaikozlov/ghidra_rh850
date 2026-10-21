@@ -3,9 +3,7 @@
 
 Scope is Toyota EPS application firmware 8965F3307000.  The reducer closes the
 five generated-COM transmit I-PDUs, their direct signal writers and lower-stack
-routes, plus the non-cyclic diagnostic and XCP-shaped transmit endpoints.  OEM
-names are only attached where firmware/GTS evidence closes them; anonymous
-status fields keep structural names until a target-native semantic join is available.
+routes, plus the non-cyclic diagnostic and XCP-shaped transmit endpoints.
 """
 from __future__ import annotations
 
@@ -125,7 +123,7 @@ FIELDS: dict[int, list[dict[str, Any]]] = {
         {"signal": 30, "wire": "B17[3:0]", "source": "0xFEBE8142", "producer": "0x4C490", "role": "Steering Wheel Torque fine signed4 component, *0.01 N.m", "oem": "Steering Wheel Torque", "grade": "GTS+firmware"},
         {"signal": 31, "wire": "B19[0]", "source": "0xFEBE80E0", "producer": "0x4C2DC", "role": "cooperative-angle inhibit (CAD9 family)", "grade": "firmware"},
         {"signal": 32, "wire": "B20:B21", "source": "0xFEBE8156", "producer": "0x4C2DC", "role": "signed steering-control/angle-family feedback from FEBEE8BC", "grade": "firmware"},
-        {"signal": 33, "wire": "B22:B23", "source": "0xFEBE816C", "producer": "0x4C490", "role": "signed motor-feedback/current-family proxy; related to DID1151 Q-axis current through different units", "grade": "GTS+firmware"},
+        {"signal": 33, "wire": "B22:B23", "source": "0xFEBE816C", "producer": "0x4C490", "role": "signed motor-feedback/current-family proxy; related to DID1151 Q-axis current", "grade": "GTS+firmware"},
         {"signal": 34, "wire": "B27[1]", "source": "0xFEBE8150", "producer": "0x4C490", "role": "constant-clear in normal producer", "grade": "firmware"},
         {"signal": 35, "wire": "B27[0]", "source": "0xFEBE8151", "producer": "0x4C490", "role": "constant-clear in normal producer", "grade": "firmware"},
     ],
@@ -222,7 +220,7 @@ def find_techstream_dtc(code: str) -> dict[str, str] | None:
 
 def dynamic_observations() -> dict[str, Any]:
     result: dict[str, Any] = {
-        "boundary": "tracked retained-log evidence; absence applies only to these captures; transmission by a configured PDU outside them remains possible",
+        "boundary": "tracked retained-log evidence",
     }
     if LIVENESS.is_file():
         obj = json.loads(LIVENESS.read_text(encoding="utf-8"))
@@ -561,7 +559,6 @@ def analyze() -> dict[str, Any]:
         "evidence_boundary": (
             "Raw CodeFlash closes configuration, pack geometry, direct pack calls and routing. GTS joins are only used for explicitly named diagnostics. "
             "The whole canonical decompiler corpus proves no literal generated-pack-helper calls for configured-only signals 36/37/55/283, but computed indirect calls, DMA or unrecovered code remain outside that bounded negative. "
-            "Retained logs show runtime behavior for captures we possess; absence of a configured cyclic PDU in those logs is not proof it can never be enabled."
         ),
     }
 

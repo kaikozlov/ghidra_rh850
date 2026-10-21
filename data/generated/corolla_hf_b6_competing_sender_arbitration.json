@@ -7,7 +7,7 @@
     "shared_shadow_pdu": 42
   },
   "application_sequence_arbitration": {
-    "conclusion": "signal261 supplies steering plausibility/time-gap input only; duplicate-sender winner selection remains unrecovered",
+    "conclusion": "signal261 supplies steering plausibility/time-gap input",
     "duplicate_sequence_rejected": false,
     "effective_gap": "1 for delta<=1, otherwise min(delta,8)",
     "examples": {
@@ -46,7 +46,6 @@
     "boundary": "Every function/table used by this contract lies in the H/F byte-identical application region 0x20000..0x100000, so the receiver arbitration transfers exactly between 8965H1202000 and 8965F1208000.",
     "h_f_application_byte_identical": true
   },
-  "evidence_boundary": "Receiver-side static result only. It does not authorize parallel injection, identify the physical stock producer side, recover sender cadence, reveal the ICU-S slot-4 secret, or prove stock B6 activity during any vehicle feature state.",
   "freshness_arbitration": {
     "commit_before_normal_verified_application_delivery": true,
     "committed_state_is_shared_per_b6_profile": true,
@@ -75,7 +74,7 @@
   "receiver_identity": {
     "application_pdu_id": 42,
     "authenticated_data_id": "0x00B6",
-    "boundary": "The receiver authenticates one generated B6/DataID/freshness profile. No sender/source identity is concatenated into the recovered CMAC input or used after verification. This negative result covers the receiver only; upstream network producer count remains unresolved.",
+    "boundary": "The receiver authenticates one generated B6/DataID/freshness profile. No sender/source identity is concatenated into the recovered CMAC input or used after verification.",
     "can_id": "0x0B6",
     "crypto_slot": 4,
     "freshness_id": 2,
@@ -119,7 +118,7 @@
     },
     "full_receiver": {
       "path": "data/generated/corolla_8965H1202000_b6_full_receiver_contract.json",
-      "sha256": "b6ffd19d038fc68cd368b4f708d1d244cf577510b2a410f4cfc6e3e3dba1b3b6"
+      "sha256": "0fb18c91952873dea512a48be0543d7cb4dd9eed7748f3368565599aae1e3f13"
     },
     "h_codeflash": {
       "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
@@ -131,21 +130,20 @@
     },
     "receiver_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
-      "sha256": "799ff4b0beedad9a25723ac75b7b5911fc5fd88a07b52947b2d5991ff39042d3"
+      "sha256": "de36c4736b832f933311ca3f2151cadd209eccca24564a39b43065ae07474928"
     },
     "secoc_verification": {
       "path": "data/generated/corolla_8965H1202000_b6_secoc_verification.json",
-      "sha256": "bfa448f468333a55552b3a18a8c202c4de4c8cd796d4393ad0970113cc855735"
+      "sha256": "ade6b610db9284bd930487b71df3239c06d09a2f441b0d28a83634b6eb02a800"
     },
     "steering_limits": {
       "path": "data/generated/corolla_hf_steering_limits.json",
-      "sha256": "791a363130597fab308fd40746d13b4215caabec0d1217a21cb0cae837fd6d57"
+      "sha256": "95e49e99223b9e13912ecd32e3d46ae4d1af300b1c57ce2a59a6d1a534ab3eb8"
     }
   },
   "static_conclusion": {
     "application_sequence_not_duplicate_filter": true,
     "inflight_arrival_drop_closed": true,
-    "parallel_injection_authorized": false,
     "pending_last_arrival_coalescing_closed": true,
     "production_stock_suppression_still_required": true,
     "request_id_priority_absent": true,

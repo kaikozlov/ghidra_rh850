@@ -965,7 +965,7 @@ def _whole_helper_scenario(
                 "after_instructions": 2000,
                 "evidence": (
                     "supplied output at the wrapper boundary after command-five submission; "
-                    "output bytes supply scenario data only; cryptographic validity remains unproved"
+                    "output bytes supply scenario data"
                 ),
                 "address": _hx(scratch_base + 52),
                 "data_hex": "112233445566778899aabbccddeeff00",

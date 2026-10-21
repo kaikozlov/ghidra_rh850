@@ -17,7 +17,7 @@
     "0x08A_frames_in_multi_frame_events": 20607,
     "0x08A_frame_count": 20615,
     "0x08A_multi_frame_event_fraction": 0.999612,
-    "boundary": "Each rlog Event.logMonoTime timestamps an entire publication batch. Individual-frame timing remains unresolved. Inter-frame 20/30 ms classes therefore cannot identify physical arbitration, a CAN TX queue, or a transmitter ECU"
+    "boundary": "Each rlog Event.logMonoTime timestamps an entire publication batch."
    },
    "cadence": {
     "0x08A": {
@@ -102,7 +102,7 @@
     "0x08A_frames_in_multi_frame_events": 23999,
     "0x08A_frame_count": 23999,
     "0x08A_multi_frame_event_fraction": 1.0,
-    "boundary": "Each rlog Event.logMonoTime timestamps an entire publication batch. Individual-frame timing remains unresolved. Inter-frame 20/30 ms classes therefore cannot identify physical arbitration, a CAN TX queue, or a transmitter ECU"
+    "boundary": "Each rlog Event.logMonoTime timestamps an entire publication batch."
    },
    "cadence": {
     "0x08A": {

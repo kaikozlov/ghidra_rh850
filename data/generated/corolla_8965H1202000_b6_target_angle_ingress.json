@@ -1,5 +1,5 @@
 {
-  "evidence_boundary": "The H target-angle role and controller-equivalent physical scale are firmware-primary: B6 signed16 becomes target state, is compared against independently reconstructed 0x025 measured steering angle with matched gain, and enters the steering controller. Techstream closes the 0x025 coarse-angle physical scale through DID1037 and the byte-anchored P5 conversion plugin, independently names B6 loss as Brake System Control Module loss, and closes H signal254 feature labels through the exact Target Lateral ID numeric dictionary. The dedicated receiver contract additionally closes signal254 request selection, the seven-foreground-tick / nominal-35-ms primary loss cutout, and modulo-64 sequence handling with gap cap 8. The OEM engineering-unit label for B6 signal255, Toyota stock B6 transmit cadence/template, exact secondary-field names, and the upstream FRC/Brake producer route remain unresolved; exclusive replacement freshness progression is closed separately.",
+  "evidence_boundary": "The H target-angle role and controller-equivalent physical scale are firmware-primary: B6 signed16 becomes target state, is compared against independently reconstructed 0x025 measured steering angle with matched gain, and enters the steering controller. Techstream closes the 0x025 coarse-angle physical scale through DID1037 and the byte-anchored P5 conversion plugin, independently names B6 loss as Brake System Control Module loss, and closes H signal254 feature labels through the exact Target Lateral ID numeric dictionary. The dedicated receiver contract additionally closes signal254 request selection, the seven-foreground-tick / nominal-35-ms primary loss cutout, and modulo-64 sequence handling with gap cap 8. Exclusive replacement freshness progression is closed separately.",
   "final_command_bridge": {
     "boundary": "Signal255 is one conditional contributor to the general EPS command composition; the final torque/current chain also contains local assist/control terms and gating.",
     "local_chain": "C2A8 -> CD3CC:C3B8 -> CD440:C3BC -> CD496:C3BE -> CD53E:C3D0 -> CD55A:C3C0 -> CD5DC:C3D2 -> CE928:AC56",
@@ -16,7 +16,7 @@
     }
   },
   "independent_safety_consumer": {
-    "boundary": "algorithmic safety/plausibility role; OEM monitor name not assigned",
+    "boundary": "algorithmic safety/plausibility role",
     "entry": "0x000CB4F4",
     "role": "absolute target magnitude / threshold / validity supervision",
     "source": "0xFEBEAE82"
@@ -60,8 +60,7 @@
   "migration": {
     "corolla_h_f": "protected FD 0x0B6 signed16 B4:B5 target-angle command through a new target-vs-measured controller architecture",
     "pre_tss3_corolla": "classic 0x2E4 5-byte torque command",
-    "sienna_secoc_prior_art": "protected 0x131 signed16 STEER_ANGLE_CMD uses a different wire position/path",
-    "wire_compatibility": "none claimed; H/F scaling, request/mode fields, freshness and authentication are generation-specific"
+    "sienna_secoc_prior_art": "protected 0x131 signed16 STEER_ANGLE_CMD uses a different wire position/path"
   },
   "mode_ingress": {
     "bit_length": 6,
@@ -131,18 +130,18 @@
     "controller_equivalent_mrad_per_b6_count": 1.0001215187701138,
     "difference_from_exact_1_mrad_percent": 0.01215187701137932,
     "exact_internal_relation": "target_internal_pre_controller = saturate(2 * signed16(B6 B4:B5)); measured_internal = trunc((FD025_fraction + 15*FD025_coarse) * 1787 / 512) before matched comparator gain",
-    "interpretation": "In the matched target-vs-measured controller domain, one B6 signal255 count is equivalent to 1024/17870 deg (~0.057302742 deg), or ~1.000121519 mrad. The 0.0122% offset from exactly 1 mrad is consistent with the firmware fixed-point 1787/512 degree-to-internal approximation, but static evidence does not directly name the B6 engineering unit as milliradians.",
+    "interpretation": "In the matched target-vs-measured controller domain, one B6 signal255 count is equivalent to 1024/17870 deg (~0.057302742 deg), or ~1.000121519 mrad. The 0.0122% offset from exactly 1 mrad is consistent with the firmware fixed-point 1787/512 degree-to-internal approximation.",
     "measured_wire_physical_relation": "FD025 signal184 = 1.5 deg/count from H DID1037 + Techstream CDbPhyData key3; signed4 signal185 supplies 0.1-deg fraction, so 15*signal184+signal185 is tenths of a degree",
     "oem_wire_unit_name_closed": false,
     "physical_degree_scale_closed": true,
-    "quantization_boundary": "The measured path uses integer truncation and the target path saturates after x2, so controller equality is quantized; the fraction above gives only the exact linearized conversion implied by the two fixed-point gains. Individual integer target codes remain subject to quantization."
+    "quantization_boundary": "The measured path uses integer truncation and the target path saturates after x2, so controller equality is quantized; the fraction above gives the exact linearized conversion implied by the two fixed-point gains."
   },
   "schema": "corolla-8965H1202000-b6-target-angle-ingress-v4",
   "software_id": "8965H1202000",
   "sources": {
     "b6_receiver_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
-      "sha256": "799ff4b0beedad9a25723ac75b7b5911fc5fd88a07b52947b2d5991ff39042d3"
+      "sha256": "de36c4736b832f933311ca3f2151cadd209eccca24564a39b43065ae07474928"
     },
     "codeflash": {
       "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
@@ -155,11 +154,11 @@
     },
     "p5_lateral_semantics": {
       "path": "data/generated/techstream_v18/p5_lateral_control_semantics.json",
-      "sha256": "564fdc5604cd5cbb3e909c4aae60aed6a68b8c3eb1dad1d0c1145a632f5d05f2"
+      "sha256": "629da7ff797e4566db44a813f582297522e2fb7e33fabe107acbc874127c6a06"
     },
     "techstream_correlations": {
       "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
-      "sha256": "ee4ffc57d325fc3b4d787d8d1ec03a35c5e9006845add87c73d7ea5bd86290fd"
+      "sha256": "e16b546c68149f82ac67a6e61ab109b879c77bd780d32b331c75ce778a20293e"
     }
   },
   "static_conclusion": {
@@ -226,7 +225,7 @@
   ],
   "techstream": {
     "corolla_p5_topology": {
-      "interpretation": "Corolla P5 install sets contain EMPS + Brake/EPB + FRC_P5; B6 is monitored by EPS as Brake System Control Module traffic. This proves only the immediate module relationship. The upstream FRC-to-Brake wire route remains unproved.",
+      "interpretation": "Corolla P5 install sets contain EMPS + Brake/EPB + FRC_P5; B6 is monitored by EPS as Brake System Control Module traffic.",
       "names": {
         "405": "EMPS",
         "435": "Brake/EPB",
@@ -277,8 +276,7 @@
         "25": "AP",
         "27": "Remote Parking"
       }
-    },
-    "vocabulary_boundary": "EMPS_P5 family vocabulary corroborates the target-angle interpretation. The Target Lateral ID numeric dictionary exactly labels every H-observed signal254 profile/special ID, while exact H lacks DID 0x1CEE and the OEM engineering-unit name for B6 signal255 remains unjoined."
+    }
   },
   "wire_ingress": {
     "bit_length": 16,

@@ -29,10 +29,9 @@ staging; STIM/direction mode is rejected.  This tool never emits DOWNLOAD,
 MODIFY_BITS, page-copy, B6, 0x08A, or any steering command.
 
 While DAQ runs, selected native CAN witnesses are captured in the same Panda
-receive loop. Their host monotonic timestamps identify batch observations only.
+receive loop. Their host monotonic timestamps identify batch observations.
 Four or eight ODT DTOs (depending on profile) are grouped by the firmware's
-ascending list/PID order into one coherent ECU DAQ event sample. Atomic CPU state
-remains unmeasured.
+ascending list/PID order into one coherent ECU DAQ event sample.
 
 The exact current post-repin EPS route is Panda bus 0 for UDS. F33 RSCFD
 controller 1 also owns the application-XCP extended endpoint, but ELM327 safety

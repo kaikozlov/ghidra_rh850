@@ -22,16 +22,14 @@ checkpoint. See the
 [Sienna coverage snapshot](../status/ANALYSIS_STATUS.md) and use
 `tools/gtarget show sienna-8965B4512000` for registered input/corpus paths.
 
-Unless explicitly stated otherwise, firmware-static findings apply only to
-`8965B4512000`. Related Corolla/Sienna/F3/F4/RAV4 observations are tracked under
-[variant reports](README.md) and do not automatically transfer.
+Related Corolla/Sienna/F3/F4/RAV4 observations are tracked under [variant reports](README.md).
 
 ## What the firmware does
 
 ### Boot / application trust
 
 The bootloader validates the application with CRC descriptors and fixed validity
-markers only. An OEM signature check is absent. The reset-to-application chain,
+markers. The reset-to-application chain,
 retry behavior, flash lifecycle, and application handoff are recovered.
 
 The bootloader also exposes the authenticated download/RAM-execution machinery
@@ -100,8 +98,7 @@ The shared command-8 completion callback has a verified attribution flaw:
 completion follows the diagnostic-active byte at completion time. Submitter identity
 is discarded. A bank-0 completion can therefore make
 RID `0x1010` report a false terminal success with its own untouched zero result
-bank. **This does not bypass SHE authentication**; ICU-S still decides whether
-the supplied M1/M2/M3 package is valid.
+bank. ICU-S validates the supplied M1/M2/M3 package.
 
 The live slot-4 key is still not known from this image. The embedded apparent
 `FF*16` KAT is compiled out, and object-15 state in this dump does not establish
@@ -165,8 +162,7 @@ See [the experimental research index](../../exploit/README.md).
 
 This list records the Sienna research checkpoint. Use the current repository
 queue for current priorities. Later Crown, Camry, and Corolla acquisitions supersede
-the generic “another CodeFlash” acquisition gap below. Applicability to a
-specific Sienna finding remains a separate question.
+the generic “another CodeFlash” acquisition gap below.
 
 1. **Live slot-4 command-5 permission and timing.** If generation is allowed,
    an application-resident signing proxy becomes practical without extracting
@@ -187,8 +183,7 @@ boundaries. Neither this earlier list nor the ledger is a live coverage dashboar
 ## External / variant evidence
 
 Toyota Techstream, Renesas RFP, community tooling, and related-vehicle artifacts
-provide **corroboration and acquisition context**. Sienna firmware claims require
-target-native evidence. The strongest external work includes:
+provide **corroboration and acquisition context**. The strongest external work includes:
 
 - Techstream diagnostic/DDB vocabulary and MACKey registration analysis;
 - Renesas RV40F host protocol recovery;

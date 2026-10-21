@@ -135,7 +135,7 @@ def main() -> None:
             "route44_minimum_publications_between_first_last_distinct_snapshot": min_events,
             "route44_distinct_span_s": distinct_span_s,
             "route44_minimum_publication_rate_hz": min_events / distinct_span_s,
-            "modulo_boundary": "the u8 generation only identifies event count modulo 256; minimum_publications assumes zero additional wraps and therefore gives only a lower bound; the exact rate remains unresolved",
+            "modulo_boundary": "the u8 generation identifies event count modulo 256; minimum_publications assumes zero additional wraps and gives a lower bound",
             "all_sampled_target_lateral_ids_zero": all(r["target_lateral_id"] == 0 for r in route_rows),
             "distinct_trailer_values": trailer_unique,
             "application_sequence_mod64_distinct_samples": seq,
@@ -149,7 +149,7 @@ def main() -> None:
         },
         "id63_postaggregate_reaudit": {
             "segments": marker,
-            "correction": "11-12 host reads per ~1.1-s block are sparse post-aggregate observations. Zero observed ID63 at route44/generated/ADB0 does not bound queue admission without a proven observation duty cycle.",
+            "correction": "11-12 host reads per ~1.1-s block are sparse post-aggregate observations.",
         },
         "design_requirements_before_next_vehicle_run": [
             "Do not poll SID23 during the treatment window; latch/count internally and read once after the block.",

@@ -96,7 +96,7 @@ def _gear_indication_comparison(gear_edges: list[dict], indication_edges: list[d
     "transition_pairs": pairs,
     "max_abs_receive_delta_ms": max((abs(p["receive_delta_ms"]) for p in pairs), default=None),
     "B_intervals": b_intervals,
-    "boundary": "Pairing requires matching complete value sequences after projecting 0x127 B to the observed 0x3BF D indication. Times describe rounded receive-batch observations only; physical selector and wire latency remain unresolved. No one-second shift delay is inferred from the background rate.",
+    "boundary": "Pairing requires matching complete value sequences after projecting 0x127 B to the observed 0x3BF D indication. Times describe rounded receive-batch observations.",
   }
 
 
@@ -182,7 +182,7 @@ def _check_gts_meter(artifact: dict, root: Path | None) -> dict:
     "monitor": {key: value for key, value in row.items() if key != "raw"},
     "monitor_raw_hex": row["raw"].hex(),
     "decode_checks": decoded,
-    "boundary": "This exercise uses synthetic diagnostic payloads only. DDB byte1 is not CAN byte0: the controlled captures independently establish use of these values in 0x3BF. Runtime support and physical producer identity are not established.",
+    "boundary": "This exercise uses synthetic diagnostic payloads. The controlled captures independently establish use of these values in 0x3BF.",
   }
 
 
@@ -258,7 +258,6 @@ def main() -> int:
       "cross_vehicle_boundary": "The retained public Corolla route exercises P/R/D and Span exercises D. Matching values corroborate Corolla Neutral but do not constitute a Corolla Neutral observation or prove that a vehicle never broadcasts 0x127.",
       "oem_cross_check": "Run --check-gts to decode synthetic Meter_P5 DID 0x2931 value payloads with the original DDB dictionary and independent lamp bits; external GTS+ files are not required to regenerate this capture artifact.",
     },
-    "production_boundary": "This evidence validates read-only Ready/gear state decoding only. It does not establish Camry steering actuation, B6 producer/signing ownership, cruise engagement policy, or Panda actuation safety.",
   }
 
   gts_check = _check_gts_meter(artifact, args.gtsplus_root) if args.check_gts else None

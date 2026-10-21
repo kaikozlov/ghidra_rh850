@@ -17116,7 +17116,7 @@
       },
       "feature_requests": {
         "LCA": {
-          "boundary": "LCA is explicitly present as a feature in DID 5202, but this 1,130-row current recorder dictionary contains no LCA-named lateral-ID/pinion-angle/assist-gain/damping-gain request tuple. This negative result covers only the recorder schema. An internal LCA request path remains possible.",
+          "boundary": "LCA is explicitly present as a feature in DID 5202, but this 1,130-row current recorder dictionary contains no LCA-named lateral-ID/pinion-angle/assist-gain/damping-gain request tuple.",
           "dedicated_request_tuple_rows": [],
           "presence_field": {
             "BitLength": 1,
@@ -17404,7 +17404,7 @@
       },
       "shape_equivalence": {
         "generic_5282_equals_lda_5531_equals_lta_5631": true,
-        "interpretation": "The current recorder exposes generic, LDA, and LTA request tuples with identical byte/bit/scaling geometry. This supports a normalized arbitration model but does not by itself prove runtime copy direction or ECU ownership.",
+        "interpretation": "The current recorder exposes generic, LDA, and LTA request tuples with identical byte/bit/scaling geometry. This supports a normalized arbitration model.",
         "layout": [
           {
             "BitLength": 8,

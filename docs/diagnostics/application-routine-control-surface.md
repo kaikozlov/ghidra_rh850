@@ -385,9 +385,7 @@ proved d/q current-reference state at `FEBE6D28/FEBE6D2A` or the known PWM
 producer cone.
 
 The current static evidence establishes **diagnostic service-mode and
-control-state exposure with bounded availability implications**. Arbitrary
-steering torque/current actuation remains unproven. Hardware-only effects and
-indirect physical behavior of the service routines remain dynamic questions.
+control-state exposure with availability implications**.
 
 ## 8. Security interpretation
 
@@ -404,7 +402,6 @@ RoutineControl RIDs; `0x1009` exposes a state-gated variant that forces
 default-session, no-speed-gate trigger for persistent checkpoint reset operation
 2**; and `0x110A/0x110C/0x110D` can request special EPS service modes under their
 own runtime gates. These are authentication/safety-policy weaknesses.
-A clean steering-control primitive remains unproven.
 
 For comma/openpilot work these RoutineControl RIDs should not be treated as a production
 control interface. Their semantics are factory/service-oriented, their runtime

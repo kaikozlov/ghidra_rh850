@@ -188,7 +188,7 @@ def build() -> dict:
 
     # Exact transport configuration records selected by 0x7A5C2/0x7A620.
     # The strided 0x7B18A/0x7BB0E writers use record[1] as their state-slot
-    # index; it therefore comes exclusively from configuration.
+    # index.
     transport_desc_base = u32(image, 0x22C70)
     transport_desc_count = image[0x22C7C]
     need(transport_desc_base == 0x22C4C and transport_desc_count == 3, "transport descriptor root drift")
@@ -321,7 +321,7 @@ def build() -> dict:
             "reachable_records": [{"descriptor":r["descriptor"],"role":r["role"],"address":f"0x{int(r['address']):08X}","state_index":r["state_index"]} for r in transport_records],
             "state_indices": transport_state_indices,
             "state_slot_count": image[0x22C48],
-            "classification": "0x7B18A/0x7BB0E state-slot index comes exclusively from fixed transport record[1]",
+            "classification": "0x7B18A/0x7BB0E state-slot index comes from fixed transport record[1]",
         },
         "route_manager_provenance": {
             "route_count": route_count,
@@ -340,7 +340,7 @@ def build() -> dict:
             "critical_cells": [f"0x{x:08X}" for x in CRITICAL_CELLS],
             "whole_image_critical_candidate_rows":len(critical_rows),
             "prefault_critical_intersection_functions":["0x0008E7BA"],
-            "intersection_closure":"0x8E7BA enforces index < 0x60 and writes only FEBE5398..FEBE53F7; recovery cells remain outside that range",
+            "intersection_closure":"0x8E7BA enforces index < 0x60 and writes FEBE5398..FEBE53F7",
             "stack_ranges":stack_intersections,
             "rscfd_pointer_row":[f"0x{x:08X}" for x in rscfd_ptrs],
             "route_slot_writer_range":{"base":f"0x{route_slot_base:08X}","max_if_slot_is_full_u8":f"0x{route_slot_max:08X}"},

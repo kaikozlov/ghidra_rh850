@@ -10,7 +10,7 @@
     "purpose": "synchronize exact Toyota cruise permission/main/operation/set-speed/follow-distance diagnostic truth with all-bus CAN during the next firmware-identified target capture",
     "validate": "accept only 0x62 followed by the same requested two-byte Data ID, then decode the existing FRC_P5 monitor bit ranges"
   },
-  "conclusion": "For these five FRC_P5 cruise Data IDs, current GTS+ uses ordinary UDS ReadDataByIdentifier wire requests. The Phase-5-specific machinery is the monitor selection/scheduling/buffering layer around SID 0x22. CAN-field mapping and any outer diagnostic-session prerequisite remain open/dynamic.",
+  "conclusion": "For these five FRC_P5 cruise Data IDs, current GTS+ uses ordinary UDS ReadDataByIdentifier wire requests. The Phase-5-specific machinery is the monitor selection/scheduling/buffering layer around SID 0x22.",
   "raw_function_evidence": {
     "check_rcv_frame": {
       "sha256": "932e5eee05d5605f13611e35bf9aad62fbb3dc3f86a8b444da5200f6a5d8a54e",
@@ -225,7 +225,7 @@
         "slot": 24
       },
       "path": "data/generated/techstream_v18/p5_lateral_control_semantics.json",
-      "sha256": "564fdc5604cd5cbb3e909c4aae60aed6a68b8c3eb1dad1d0c1145a632f5d05f2"
+      "sha256": "323ab3b0d29617aff3e289785a3b3c2200c5b9d74c6ec34f96c5dab6ed3f6a5b"
     }
   },
   "transport": {

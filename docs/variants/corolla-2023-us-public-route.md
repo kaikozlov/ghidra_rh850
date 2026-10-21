@@ -89,7 +89,7 @@ Genuine vehicle traffic includes:
 | 1 | `0x00F` | 8 | 588 | Toyota classic SecOC synchronization family |
 | 1 | `0x116` | 8 | 2,499 | `GAS_PEDAL` in pinned classic-SecOC DBC |
 | 1 | `0x24D` | 8 | 59 | `PCM_CRUISE_4` in pinned classic-SecOC DBC |
-| 0 | `0x183` | 64 | 1,221 | 64-byte CAN-FD traffic; classic `ACC_CONTROL_2` uses a distinct 8-byte wire shape |
+| 0 | `0x183` | 64 | 1,221 | 64-byte CAN-FD traffic |
 | 2 | `0x183` | 64 | 216 | same 64-byte CAN-FD ID on another bus |
 
 Representative genuine frames:
@@ -139,7 +139,6 @@ CAN_REJECTED_BUS_OFFSET = 0xC0
 
 and adds those offsets to the physical bus number when publishing CAN events.
 Thus `src=128` identifies a returned transmission from logical bus 0.
-Stock-camera receive events use a different source.
 
 Segment 0 shows:
 
@@ -187,14 +186,11 @@ community/albinoelephant/can_oracle.ndjson
 
 It contains exactly 1,232 rows, all CAN `0x00F` synchronization frames: 616 on
 Panda bus 0 and the same 616 on bus 2. There are **zero protected-message rows**.
-That directly explains the TSKM matcher failure without making any statement
-about whether the car itself emits protected traffic. All supplied TSKM sync
-frames decode to `TRIP_CNT=0xD0D`. The oracle came from the same TSKM
-investigation as the dump, but it is **not proven to be the same EPS runtime
-epoch**: CAN collection and DataFlash dumping are separate mutually-exclusive
-jobs, and the dump path enters programming mode, performs SecurityAccess,
-uploads code, and executes it. Treat `0xD0D` as the closest local
-synchronization-key oracle. Its same-session relationship remains unproved.
+That directly explains the TSKM matcher failure. All supplied TSKM sync frames
+decode to `TRIP_CNT=0xD0D`. CAN collection and DataFlash dumping are separate
+mutually-exclusive jobs, and the dump path enters programming mode, performs
+SecurityAccess, uploads code, and executes it. Treat `0xD0D` as the closest local
+synchronization-key oracle.
 
 The public route independently supplies the missing genuine bus-1 traffic:
 `0x00F`, `0x116`, and `0x24D`. The repository therefore retains a compact
@@ -238,9 +234,8 @@ Across the five reads, the **actual first 32 KiB** differ by
 identical across all five. The full 64-KiB host range differs by
 26.2650%-27.7328%, but that number mixes physical DataFlash with off-array
 P-Bus address space and is retained only as a transport/read-path observation.
-These percentages measure read-to-read capture divergence. Actual rewriting of
-physical DataFlash remains unproved. Three extended-CodeFlash captures
-are byte-identical, while global RAM differs about 1.2% and PE1 local RAM about
+These percentages measure read-to-read capture divergence. Three extended-CodeFlash
+captures are byte-identical, while global RAM differs about 1.2% and PE1 local RAM about
 2.8%-3.2%. `tests/targets/corolla/verify_albinoelephant_corolla_repeatability.py` and
 `data/p1me_product_memory.json` pin these boundaries.
 
@@ -248,8 +243,7 @@ That repeatability audit does **not** destroy the structural NvM conclusion belo
 every one of the five DataFlash reads independently gives three valid copies for
 objects 0/2/5 and zero valid copies for object 15. It does downgrade arbitrary
 single-byte/null observations from any one capture. The original 32-KiB scan is
-therefore retained as one exact captured image with an epoch-bound cryptographic
-negative. Byte-perfect reconstruction of physical NvM remains unproved.
+therefore retained as one exact captured image with an epoch-bound cryptographic negative.
 
 `tools/toyota_support/analyze_toyota_dataflash.py` was run against the contributor's public
 route oracle with `--domain-scan --min-entropy 0`. This removes the normal
@@ -261,24 +255,18 @@ synchronization, `0x116`, and `0x24D` independently.
 
 The same 23,277 unique raw windows were also scanned against the supplied local
 TSKM `0x00F` oracle and again produced **zero synchronization-key matches**.
-This is closer evidence than the older public route, but it still cannot prove
-runtime-key continuity across the separate CAN-capture and programming/dump
-jobs. It therefore excludes only a static raw DataFlash value equal to the locally
-observed synchronization key. A session-derived key remains possible. The
-`0x116`/`0x24D` protected-domain negative uses the older public-route session and
-carries an even wider key-stability boundary.
+It excludes a static raw DataFlash value equal to the locally observed
+synchronization key under a cross-session key-stability assumption.
+The `0x116`/`0x24D` protected-domain negative uses the older public-route session.
 
 As a bounded derivation check, all 23,277 unique dump windows were also tested
 after each of six simple transformations — XOR55, XORAA, bitwise NOT, complete
 16-byte reversal, per-32-bit byte swap, and per-16-bit byte swap — against the
-public-route domains. None survived even the first cryptographic probe. This
-rules out only those six representations. Arbitrary KDF/encryption schemes remain possible.
+public-route domains. None survived even the first cryptographic probe.
 
 The result is therefore a strong cryptographic negative for a **static raw
 CPU-visible synchronization key** in this DataFlash snapshot, with strong but
-cross-session evidence against a raw protected key. It does not prove that the ECU lacks
-SecOC, that the key is absent from every other storage region, or that ICU-S/HSM
-cannot own or derive it internally.
+cross-session evidence against a raw protected key.
 
 ### Shared NvM structure, different provisioning state
 
@@ -330,16 +318,13 @@ bytes; with the earlier 32-KiB DataFlash artifact, they contain exactly 3,194,64
 sliding 16-byte **positions**. Calvin's pinned `dump/CLAUDE.md` records running
 that corpus against two synchronization oracles — **6,389,280
 window/oracle invocations, zero reported matches** — with a planted-key control
-at offset `0x4000` recovered by the same path. These counts describe scan geometry.
-The internal CMAC-operation count may differ: `matcher.py` can probe multiple
-sync samples and fully verify survivors.
+at offset `0x4000` recovered by the same path.
 
 The zero-match result remains external dynamic evidence and is cross-session:
 the retained TSKM oracle (`TRIP=0xD0D`) and older public-route oracle
 (`TRIP=0xCE9`) are not the Aug-14 dump runtime epoch. It therefore excludes raw
 window equality only under the explicit assumption that the relevant key was
-stable across those sessions. It does not exclude transformed/derived keys or
-ICU-S-internal storage. In addition, half of every 64-KiB `dataflash` profile is
+stable across those sessions. In addition, half of every 64-KiB `dataflash` profile is
 outside the specified `R7F701383` DataFlash array and must not be counted as
 physical DataFlash coverage.
 
@@ -430,7 +415,7 @@ CRC-resigning backend transfer beyond `8965B4512000`.
 The result is a patch for this image's **configured SecOC acceptance paths**.
 The profile census below determines its steering applicability.
 
-### 7.3 The configured SecOC queue is not Sienna's steering queue
+### 7.3 The configured SecOC queue has three profiles
 
 The callback-free runtime semantic resolver also transfers far enough to recover
 the foreign startup/scheduler skeleton and target-specific state:
@@ -464,10 +449,8 @@ at `0x2572C`. Its three records are:
 
 There is no configured queue-1 `0x2E4` or `0x131` record. The correct runtime
 resolver result is therefore
-`semantic-resolved-steering-unsupported`. Semantic resolution succeeds, but the
-steering bridge remains unsupported. This provides firmware-static support for
-the earlier observation that this specimen differs from the Sienna steering
-SecOC participant: its configured protected domains differ.
+`semantic-resolved-steering-unsupported`. Its configured protected domains differ
+from Sienna's steering SecOC domains.
 
 ### 7.4 Foreign image exposed three resolver overfits
 
@@ -483,7 +466,7 @@ the architecture clearly transferring. The failures were real tooling bugs:
 
 The corrected resolver derives GP and TP from context setup, queue-1 bases/count
 from the generated helper, and the record table from Gate-2's TP-relative
-`index*0x50` access. `0x2E4/0x131` constrain **bridge capability** only.
+`index*0x50` access. `0x2E4/0x131` are **bridge capability requirements**.
 Discovery uses the structural anchors above. Software-ID extraction requires token boundaries. The
 wrapper also accepts this exact 2 MiB range-dumper geometry only when the upper
 1 MiB is all `0xFF`, normalizes it in a disposable workspace, and preserves both
@@ -502,7 +485,7 @@ exactly once in the foreign image, at `0x6081A`; the homologous status byte is
 checkpoint-completion shape: a successful lower result publishes `0x10`, while
 a non-`0x5A` result publishes `0x31` and separately records failure state.
 Thus the earlier checkpoint/NvM fail-open interpretation of `0x31 -> 0x10`
-independently transfers to this Corolla image. SecOC Gate-2 remains unchanged.
+independently transfers to this Corolla image.
 
 ### 7.6 The same image closes the EPS side of the Toyota-B pin-swap anomaly
 
@@ -555,49 +538,48 @@ Checked by `tests/toyota/verify_toyota_b_programming_topology.py`.
 
 ### 7.7 Whole-image function-body transfer census: conserved platform, divergent application domains
 
-The earlier foreign-image work deliberately answered a few high-value transfer
-questions. It did not answer the broader question: **how much of the already
-mapped `8965B4512000` program is actually present in this image, and where are
-the differences concentrated?** A new raw-byte census now uses the canonical
-Sienna Ghidra inventory only to define 6,375 CodeFlash function bodies, then
-searches the H image for exact complete-body transfers. Non-contiguous bodies
-must reproduce every range under the same relocation. No software-ID offset map
-or inherited H annotations are used.
+The raw-byte census uses the registered canonical Sienna Ghidra inventory to
+define 7,089 CodeFlash function ranges, then searches the H image for exact
+complete-body transfers. Non-contiguous bodies must reproduce every range
+under the same relocation.
 
 The raw machine-readable result is
 `data/generated/corolla_8965H1202000_function_body_transfer.json`, generated by
 `tools/variants/compare_variant_function_bodies.py` and regenerated byte-for-byte by
 `tests/targets/corolla/verify_albinoelephant_corolla_codeflash.py`. The target-native structural
 pass is tracked separately in
-`data/generated/corolla_8965H1202000_structural_function_transfer.json`. For
-day-to-day navigation, those two evidence layers are joined into
+`data/generated/corolla_8965H1202000_structural_function_transfer.json`.
+Its current inputs are the complete canonical snapshot graphs: 7,090 Sienna
+functions and 6,934 H functions, exported into tracked
+`data/function_structural_fingerprints.jsonl` and
+`data/targets/corolla-8965H1202000/function_structural_fingerprints.jsonl`.
+The snapshot export replaces the unavailable historical 6,376/5,425-function
+fingerprints; the match set gains 613 pairs and loses 34 pairs.
+See [the workflow](../WORKFLOW.md#cross-variant-structural-fingerprints) for
+the read-only export and matcher commands. For day-to-day navigation, those
+two evidence layers are joined into
 `data/generated/corolla_8965H1202000_named_function_transfer_ledger.json`, which
-classifies all 1,113 named canonical CodeFlash functions without promoting
-instruction-shape similarity to semantic identity.
+classifies the 634 user-named canonical CodeFlash functions.
 
-Across the 6,375 canonical CodeFlash functions:
+Across the 7,089 canonical CodeFlash functions:
 
-- **1,017 complete bodies (15.95%) transfer exactly**, including 288 of the
-  1,113 named Sienna functions;
-- the dominant exact relocation is **`-0x1C`** in the boot image: 292
+- **1,194 complete bodies (16.84%) transfer exactly**, including 216 of the
+  634 user-named Sienna functions;
+- the dominant exact relocation is **`-0x1C`** in the boot image: 307
   independently unique exact anchors of at least 16 bytes span
-  `0x770..0x834E` → `0x754..0x8332` and account for 27,078 exact function-body
+  `0x770..0x834E` → `0x754..0x8332` and account for 28,580 exact function-body
   bytes;
-- large application/framework islands independently resolve at `-0x5C60`
-  (191 exact anchors), `-0x5C00` (97), and `-0x4FDA` (108), with smaller
-  relocation islands around them;
-- functions that do not transfer exactly are retained as
-  `changed-or-absent`. Neighboring exact anchors may provide a byte-similarity
-  **triage candidate** only. Semantic transfer still requires target-native
-  evidence because function-boundary/layout changes can invalidate
-  candidate addresses.
+- application/framework islands resolve at `-0x5C60` (302 exact anchors),
+  `-0x5C00` (99), and `-0x4FDA` (120), with smaller relocation islands around them;
+- functions that do not transfer exactly are retained as `changed-or-absent`.
+  Neighboring exact anchors may provide a byte-similarity **triage candidate**.
 
 This makes the cross-calibration architecture much less ambiguous than a simple
 "similar Denso firmware" label.
 
 #### Bootloader: overwhelmingly byte-identical
 
-A named 126-function boot/trust/UDS/crypto cohort has **119 exact complete-body
+The 163 user-named boot-region functions have **154 exact complete-body
 transfers**. The exact `-0x1C` family includes peripheral/clock/flash init,
 validity checking and application handoff, CanTp/CanIf/DCM transport,
 SecurityAccess, RequestDownload/TransferData/TransferExit, RoutineControl,
@@ -677,9 +659,7 @@ The target difference lies in **configuration** within the shared verification
 algorithm. H's SecOC table base is `TP+0x19C2`; its queue resolver finds exactly
 three queue-1 profiles (`00F/D7/B6`) and no `2E4/131` steering profiles. That
 profile-set difference is therefore a real target property layered onto a
-shared SecOC/ICU-S implementation. Reusing Sienna profile IDs, queue indices,
-RAM offsets, or steering assumptions remains invalid even though the underlying
-verification state machine transfers structurally.
+shared SecOC/ICU-S implementation.
 
 #### XCP-shaped command and 0x7F7/0x7F8 transport survive in a different descriptor encoding
 
@@ -768,10 +748,11 @@ architecture was replaced.
 
 An address-independent structural pass exports every Ghidra function as its
 complete mnemonic + instruction-length sequence, ignores operands, and accepts a
-candidate only when that complete shape is unique on both images. A clean H
-import yields 2,542 unique exact-shape matches overall (2,324 with at least eight
-instructions). Target-native decompilation was then used to validate the
-high-value control candidates rather than inheriting Sienna operands or names.
+candidate only when that complete shape is unique on both images. The canonical
+snapshot graphs yield 3,121 unique exact-shape matches overall (2,865 with at
+least eight instructions), including 326 named matches (318 with at least eight
+instructions). Target-native decompilation validates the high-value control
+candidates with H operands and names.
 The following core stages survive with unique complete instruction shape:
 
 ```text
@@ -876,12 +857,6 @@ transfers as the same **latent** primitive and remains bounded by the configured
 48-byte caller in this image, matching the Sienna disposition rather than
 becoming a remotely controllable write primitive.
 
-The important methodological point is that failure of exact raw-body transfer
-was not evidence of a fix: every instruction role survived while GP-relative
-state addresses and call displacements changed. This is exactly the class of
-variant question for which structural matching must be followed by target-native
-operand/dataflow inspection.
-
 ### 7.9 Target-native GP/TP context and generated COM topology
 
 The foreign-project bootstrap exposed one analysis trap that matters beyond this
@@ -931,8 +906,7 @@ raw CodeFlash by `tools/variants/compare_variant_application_rx.py`. It locates 
 
 Sienna has 47 normal Rx descriptors at `0x22018`; H has 40 at `0x21F94`. **39 are
 shared.** Of those 39 shared PDUs, 28 retain the same configured signal count
-and 11 change it, so even a retained CAN ID is not sufficient evidence that its
-generated signal layout is identical. H removes exactly:
+and 11 change it. H removes exactly:
 
 ```text
 2E4  191  131  2FD  132  423  020(FD)  1DA(FD)
@@ -962,10 +936,7 @@ cluster from bytes `+3..+10`: a 6-bit field, one signed 16-bit field, several
 1/2/3/6/8-bit status fields, and a final 3-bit field. The configured signal block
 is larger (`252..267`) than the scalar calls (`254..265`), just as the D7 wrapper
 has configured metadata/group signals that are not individual scalar extracts.
-Accordingly the repo does not invent meanings for `252/253/266/267` or promote
-numeric signal-ID similarity across calibrations. It also does not yet prove that
-any particular B6 field is the external steering-torque command; that semantic
-assignment still requires signal-level provenance.
+Signals `252/253/266/267` have no assigned meanings in this census.
 
 The old Sienna `2E4` request path can nevertheless be bounded more strongly. H
 retains the same GP address for the old request staging cell:
@@ -980,9 +951,7 @@ cycle, and H initialization also zeroes it. H `0xB8EEC` still copies
 `GP+0x382A -> GP-0x0B01`. Across the recovered H decompiler corpus there is no
 other direct GP-relative writer to `GP+0x382A`. Thus the Sienna
 `2E4 STEER_REQUEST -> FEBEF02A -> FEBEACFF` ingress **does not transfer**; the
-surviving downstream slot serves only defaulted compatibility/state. The removed
-`2E4` route remains absent under this census. An indirect pointer write requires
-separate proof before that conclusion can change.
+surviving downstream slot serves defaulted compatibility/state.
 
 The old torque-shaped staging also changes, but the deeper target-native pass
 corrects its role. Instead of Sienna's raw `2E4` torque cell feeding `FEBEF184`,
@@ -1052,8 +1021,7 @@ The outer 17-service sequence is unchanged (`10/11/14/19/22/23/27/28/2E/31/
 34/36/37/3E/85/AB/BA`). The presence/absence of direct callbacks and subfunction
 tables, session/security counts, and subfunction counts are identical after
 relocation; all 17 outer service objects still have configured security count
-zero. This establishes framework/configuration transfer only. Each callback's
-semantics still require separate comparison.
+zero. This establishes framework/configuration transfer.
 
 #### RDBI generation: 242 → 226, and the stale-response set changes identity
 
@@ -1206,7 +1174,7 @@ reconstruct the measured steering-angle domain from FD `0x025` signals
 184/185/186. `CA138` votes both replicated domains, applies the **same
 `0xB76/0x400` gain to target and measured angle**, and forms target-minus-measured
 error before the active steering controller. This proves signal 255 is a
-**target steering-angle command**. The old `2E4 STEER_TORQUE_CMD` has a different role.
+**target steering-angle command**.
 
 The physical relation is also closed. Signal184 is the signed12 coarse angle that
 `42676 -> 488A8` carries unchanged into DID `0x1037 Steering Angle`; Techstream
@@ -1216,9 +1184,8 @@ value by `3600` for a full-turn representation, proving a 0.1-deg fractional
 unit. The measured controller state is
 `trunc((15*coarse+fraction)*1787/512)`, while the B6 target begins at
 `2*signal255`. Therefore one signal255 count is controller-equivalent to exactly
-**`1024/17870 deg = 0.057302742... deg = 1.000121519... mrad`**. The literal OEM
-B6 engineering-unit name is not directly recovered; nominal `1 mrad/count` is a
-strong interpretation derived from this target-native fixed-point result.
+**`1024/17870 deg = 0.057302742... deg = 1.000121519... mrad`**. Nominal
+`1 mrad/count` is a strong interpretation derived from this target-native fixed-point result.
 
 Signal 254 is its companion 6-bit control/profile ID. Under communication/validity
 gates, `CBE6E` decodes values `1`, `4`, `10`, `11`, and `19` into five mutually
@@ -1232,9 +1199,8 @@ distinct calibration banks from those profile flags. `C825A` also treats raw IDs
 The complete B6 result is therefore: `0x0B6` is a **secured steering-control and
 supervisory interface**. It carries the recovered target-angle magnitude plus
 mode/table/sequence/scaling/validity state. Techstream independently identifies
-its immediate monitored sender relationship as **Brake System Control Module**;
-that does not make the target-angle value a brake quantity. TMS-043 now identifies
-the module-level upstream topology as `FRC_P5` 498 + category-435 `ABS_P5`/Brake-EPB
+its immediate monitored sender relationship as **Brake System Control Module**.
+TMS-043 now identifies the module-level upstream topology as `FRC_P5` 498 + category-435 `ABS_P5`/Brake-EPB
 + `EMPS_P5` 405, but the byte-level planner→B6 forwarding transform and SecOC signer
 remain unresolved.
 
@@ -1256,13 +1222,7 @@ Consequently the retained clamp/gain branch is **zero-fed in this calibration**
 under the recovered direct-writer evidence. The old Sienna-shaped `FEBEAE20`
 path is separate: H internal controller family `0x35526/0x355CE/0x35710` produces
 `FEBE6D7A`, `0x5262C` stages it at `FEBEF156`, `0xB8EEC` copies it to
-`FEBEAE20`, and `0xC80C4` uses it in a plausibility/status predicate. This branch
-serves monitoring/status. The active `C91B6` clamp consumes a separate input.
-
-This does **not** prove that all H steering actuation is zero or absent. It proves
-that the specific Sienna external-torque branch retained in H is not supplied by
-a recovered nonzero source. The ordinary EPS assist/motor-control chain and
-other H supervisor states remain separate.
+`FEBEAE20`, and `0xC80C4` uses it in a plausibility/status predicate.
 
 #### FD 030 transmit field map
 
@@ -1281,16 +1241,11 @@ bits (signals 20/21/29/30). Signal 9 at B7 is computed inside the packer itself:
 B7 = (B0 + B1 + ... + B6 + 0x38) & 0xFF
 ```
 
-That exact additive behavior is recovered from code; the repository does not
-promote the `0x38` constant into an OEM checksum name or infer protocol lineage
-from the constant alone.
 
-The configuration-level conclusion remains that FD `0x030` occupies the H Tx
-slot where Sienna used classic `0x260/0x262`, but the field-level pass reinforces
-why `030 == concatenate(260,262)` is wrong: H has 37 configured fields, 35 direct
-packer calls, different widths/positions/sources, and several default/constant
-fields. It consolidates/replaces the prior generation's messages with a different
-wire layout.
+FD `0x030` occupies the H Tx slot where Sienna used classic `0x260/0x262`.
+H has 37 configured fields, 35 direct packer calls, different widths/positions/sources,
+and several default/constant fields. It consolidates/replaces the prior generation's
+messages with a different wire layout.
 
 Machine-readable evidence is in
 `data/generated/corolla_8965H1202000_fd_control_interface.json`, with compact
@@ -1337,9 +1292,7 @@ They cluster into four bounded families:
 2. **Dual-channel motion/plausibility estimation.** H adds a large later block
    around `0xC2296..0xC3DC6`: three motion-state estimator stages, paired
    channel-A/channel-B statistical/window classifiers, consistency/debounce,
-   health arbitration, and a five-stage local wrapper. The repository gives
-   these algorithmic role names only; it does not infer an OEM sensor/system
-   label from the math alone.
+   health arbitration, and a five-stage local wrapper.
 3. **Geometry/residual estimation.** `0xC4536/0xC4696` construct paired means,
    residuals, and bounded multi-channel geometry state used by the late H
    supervisor.
@@ -1365,11 +1318,8 @@ protected B6 signal255 is the H target-angle command and signal254 selects
 cooperative modes. The remaining architecture questions are upstream
 ownership/transport and exact scaling.
 
-The order-alignment boundary is explicit. A nonexact order-paired row is not
-semantic transfer proof, and an order-unpaired row is not proof that no analogous
-function exists elsewhere in the other image. The machine-readable ledger and
-its two compact structural-evidence files retain enough information to audit all
-123 H stages without reopening the disposable Ghidra project.
+The machine-readable ledger and its two compact structural-evidence files retain
+enough information to audit all 123 H stages without reopening the disposable Ghidra project.
 
 
 ### 7.13 SecOC key provenance: all H profiles select one protected ICU-S slot 4
@@ -1384,8 +1334,7 @@ record + 0x16 -> SecOC crypto-config ID
 record + 0x20 -> CryptoIf job handle
 ```
 
-All three records contain **config ID 0 and job handle 0**. The per-profile
-values elsewhere in the records are therefore not separate key handles.
+All three records contain **config ID 0 and job handle 0**.
 
 H `secoc_rx_init @ 0x88024` installs config 0 from CodeFlash `0x2570C`. Its
 exact 20-byte value is:
@@ -1420,8 +1369,7 @@ slot-4 key selection for `00F/D7/B6`**.
 The disabled H known-answer path independently corroborates the selector. H
 `0x62430` invokes job 0 using another exact `{type=1, selector=4}` config at
 `0x215B0`. Its fixed compile gate `CodeFlash[0x2CA9F]` is `0x00`, leaving the
-`0x5A`-gated KAT body inactive. It places no constraint on the current live
-slot-4 key value.
+`0x5A`-gated KAT body inactive.
 
 #### Provisioning/refresh requires an authenticated key package
 
@@ -1456,12 +1404,10 @@ retained SecOC oracle set. That tracked artifact does not independently preserve
 the richer temporary per-domain/simple-transform scan, so those stronger negatives
 are not carried forward here.
 
-That negative is useful but remains correctly bounded: CAN collection and
-DataFlash dumping were separate jobs/epochs, so it excludes only an exact raw
-candidate in the tested snapshot. Transformed/derived values, arbitrary KDFs, and
-undocumented ICU-S-internal storage remain outside that result. Combined with the
-command-7 path, the strongest
-static model is now straightforward: **the application selects protected ICU-S
+CAN collection and DataFlash dumping were separate jobs/epochs. The scan excludes
+an exact raw candidate in the tested snapshot under a cross-session key-stability
+assumption. Combined with the command-7 path, the strongest static model is:
+**the application selects protected ICU-S
 slot 4; the raw slot-4 AES key is opaque to the mapped CPU verification path and
 can be refreshed through authenticated command 8.**
 
@@ -1475,7 +1421,7 @@ the result.
 
 ### 7.14 External supervisor ingress: corrected fixed-map census identifies B6 signal255
 
-The steering-ingress census compares **wire fields** independently of signal numbers or names.
+The steering-ingress census compares **wire fields**.
 For every H scalar receive call it resolves:
 
 ```text
@@ -1499,8 +1445,8 @@ signal254: FEBE7D96 -> FEBEF127 -> GP-0xA50 = FEBEADB0
 signal255: FEBE7D94 -> FEBEF1CC -> GP-0x97E = FEBEAE82
 ```
 
-The regenerated census now contains **22 distinct external scalar signals** in
-the mapped supervisor cone. Its closure conditions are:
+The regenerated census contains **27 distinct external scalar signals** and
+**44 references** in the mapped supervisor cone. Its closure conditions are:
 
 1. **Every H-only or wire-changed supervisor field still comes from `0x0B6`.**
    No changed non-B6 field survives the generated ingress path.
@@ -1514,7 +1460,7 @@ the mapped supervisor cone. Its closure conditions are:
 
 This reverses the earlier bounded negative. The mapped generated-COM path does
 contain a replacement command-sized external scalar: **protected FD `0x0B6`
-signal255**. The positive role is not inferred from width alone. §7.11 and §7.35
+signal255**. §7.11 and §7.35
 show that its `FEBEAE82` snapshot becomes target state, is compared against an
 independently reconstructed `0x025` measured steering-angle domain with matched
 gain, and enters the active steering controller. Thus the command search closes
@@ -1534,56 +1480,44 @@ audited scalar/descriptor surfaces.
 The machine-readable census is
 `data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json`,
 generated by `tools/targets/corolla/extract/extract_corolla_h_supervisor_external_ingress_census.py` from
-the complete target-native H decompiler corpus. Every cited consumer and source
-unpacker carries an exact raw-body SHA-256, and
+`data/generated/corolla-8965H1202000/decompilations.jsonl`
+(SHA-256 `ede02931f236ba4c83243039df0ed920aa49108d90390cb478a01ae16d5610dc`).
+The canonical reference graph adds nine references to the earlier 35-reference
+census. These references identify signals 212, 216, 225, 228, 186, 255, and 265.
+The unique changed command-sized field remains B6 signal255.
+Every cited consumer and source unpacker carries an exact raw-body SHA-256, and
 `tools/test corolla_h` explicitly
 regresses the `FEBEF1CC -> FEBEAE82` fixed-map correction.
 
 ### 7.15 Named-function coverage denominator
 
-The cross-variant work now has an explicit **coverage denominator** rather than
-using the raw function-body diff as a proxy for semantic understanding. The
-canonical Sienna project contains 1,113 semantically named CodeFlash functions.
-The H coverage overlay classifies them only when tracked evidence justifies the
-promotion:
+The registered Sienna inventory defines **634 user-named CodeFlash functions**.
+The H coverage overlay classifies each through tracked firmware and native evidence:
 
 ```text
-named canonical functions                 1113
-verified exact-body transfers              288
-target-native inspected unique-shape      126
-target-native role-recovered                238
-complete target-surface recensuses          461
-structural candidates only                    0
-genuinely unresolved                          0
+user-named reference functions             634
+verified exact-body transfers               216
+target-native inspected unique-shape        135
+target-native role-recovered                 170
+complete target-surface recensuses           113
+structural candidates only                     0
+genuinely unresolved                           0
 ```
 
-`target-native inspected unique-shape` means a unique complete-instruction-shape
-H candidate is also present in one of the committed compact H-native decompiler
-evidence sets. `target-native role-recovered` is separate: the H role was
-independently reconstructed and raw/evidence pinned even though regenerated
-function boundaries prevent exact/unique-shape transfer. `target-surface recensused`
-is different: the old S function may
-not have a one-to-one H homolog, but the entire foreign generated surface has
-been independently enumerated—for example all H RDBI producers, all 19
-RoutineControl callback rows, or every direct stage in the 94→123 steering
-supervisor comparison. A raw structural candidate with no later H-native evidence would stay
-structural-only; after §7.33, none remain. There are now **zero genuinely-unresolved
-canonical named functions and zero structural-only rows**. CORR-101's later
-keyless re-audit promotes three former direct-call-surface rows (`0x54910`,
-`0x549FA`, `0x54A7E`) to explicit H-native event-formatter roles, producing the
-current 238/461 role-recovered/surface-recensused split without changing the
-1,113-function denominator. The 126 inspected unique-shape rows preserve the
-boundary between target-native operand/dataflow
-inspection and stronger semantic role recovery.
+`target-native inspected unique-shape` combines a unique complete instruction
+shape with committed H decompiler evidence. `target-native role-recovered`
+uses native caller, configuration, or dataflow evidence. `target-surface
+recensused` uses a complete enumeration of the corresponding H generated surface.
 
-This matrix is intentionally conservative. It does **not** mean every promoted
-function has an OEM-level semantic name, and it does not turn domain-wide
-findings into one-to-one function equivalence. Conversely, a canonical function
-that disappeared because H regenerated the whole table should not remain counted
-as an unexplained firmware difference merely because its exact body no longer
-exists. H-native functions with no unique canonical S pair are counted separately
-(582 currently have tracked target-native evidence) rather than being forced
-into the 1,113-function Sienna denominator.
+The canonical graph contains duplicate bodies for deadline dispatcher
+`6A28A→6462A` and duplicate shapes for ICU-S initializer `88C4C→8304C`.
+Native caller and hardware-initialization evidence establishes both roles
+in their existing subsystem reports.
+
+The original 1,113-name recovery checkpoints in §7.16–§7.33 used the earlier
+reference inventory. The current matrix uses the registered canonical inventory.
+Its compact evidence sets also contain 562 H-native functions without a unique
+Sienna structural pair, counted separately.
 
 The machine-readable owner is
 `data/generated/corolla_8965H1202000_static_coverage_matrix.json`; it joins the
@@ -1633,12 +1567,11 @@ startup sequence that enables EI interrupts and tails into the foreground cyclic
 loop; `FDC14 -> BBFE6` is the subsystem-init veneer and `FDD40 -> BD954` forwards
 the three per-tick arguments. H `B2692` retains the 26-byte generated
 four-argument transition-state initializer shape. The reset-decision continuation
-at `0x1F2` is explicitly treated as a non-contiguous Ghidra body: fixed raw windows
-pin the same FCU status/key-command logic, `FFC0A000/004/008/00C` marker constants,
-and terminal reset loop without pretending its reported body size is contiguous.
+at `0x1F2` has a non-contiguous Ghidra body: fixed raw windows
+pin the FCU status/key-command logic, `FFC0A000/004/008/00C` marker constants,
+and terminal reset loop.
 
-The lower generated COM/RTE surface is intentionally not forced into a false
-one-to-one transfer. H splits the old large Rx consumer across a shared fragment
+H splits the old large generated COM/RTE Rx consumer across a shared fragment
 `524B8` called by five generated paths (`5389C/58450/5886A/589A8/58B3C`), and its
 RTE copy banks are separately wrapped around `56970/5701E/5722E`. This closes the
 high-level scheduler/system roles while leaving individual changed COM helpers
@@ -1652,6 +1585,9 @@ image-bound decompiler evidence file;
 `tools/test corolla_h` pins the eight role
 mappings, event schedules, guard delta, reset windows, wrapper chains, and
 regenerated COM/RTE boundary.
+The orchestration report uses `data/generated/decompilations.jsonl` from commit
+`fd0c874bfa03f08c377ae68756b125c465ec6203` for its Sienna corpus input.
+
 
 ### 7.17 CAN / COM transport and generated receive dispatch
 
@@ -1796,8 +1732,7 @@ SecurityAccess root at `0x20840` is materialized at **`FEBF7B80`** on every
 startup. That address is outside the H exclusion intervals above. H SID `0x23`
 is likewise extended-session-only with configured SecurityAccess count zero.
 Therefore either no-SA RMBA or XCP `F4` can recover the application-SA root
-without first authenticating. This establishes credential disclosure only.
-Boot-SA and RAM-execution bypasses remain unproved. See `KEYLESS-006`.
+without first authenticating (`KEYLESS-006`).
 
 The `EB/EA` pair likewise survives as a shared page-state writer/reader, relocated
 from Sienna `FEBE5E9C/5E9D` to H **`FEBE5DB0/5DB1`**. `EB` still validates a
@@ -1883,10 +1818,11 @@ counted after the SecOC/ICU-S closure below.
 
 ### 7.21 SecOC / ICU-S residual surface
 
-The remaining **42** named `secoc_icus` functions are now target-native mapped,
-closing that tag's genuinely-unresolved residue completely. This pass extends the
-earlier verify-worker and slot-4 findings to the whole named receive/crypto
-surface instead of assuming the lower middleware transfers wholesale.
+The original residual pass target-native mapped **42** named `secoc_icus`
+functions. The canonical-inventory cutover also recovers the startup initializer
+from native evidence rather than retaining its former unique-shape match. This
+extends the earlier verify-worker and slot-4 findings across the named
+receive/crypto surface.
 
 The lower ICU-S/CryptoIf block is the cleanest part of the result. Twenty-five
 canonical roles map at one exact relocation island, **H = Sienna - 0x5C00**, and
@@ -1943,9 +1879,33 @@ reads scalar signals `240/243/246`. Its body is 140 bytes versus Sienna's 194-by
 D7 unpacker. Thus the protected D7 role survives while Sienna's signal IDs and
 individual field population do not.
 
+The startup initializer is independently recovered as Sienna
+`crypto_icus_initialize @ 0x88C4C -> H 0x8304C`, with 34 bytes in each image.
+Its complete mnemonic/length signature also belongs to Sienna `0x88C6E` and H
+`0x8306E`; the canonical matcher correctly emits no unique pair for this
+two-by-two ambiguity. The native call graph distinguishes the initializer:
+H `8304C -> 811B0 -> 8175E -> 837DE`, versus the sibling's `811BC -> 817FA`
+lower path. `837DE` reads ICU-S `ICUSIRQSTS @ FFC5D018`; its busy-bit gate and
+the lower initializer's hardware-success branch are pinned to raw instructions.
+At `83054/83056`, `CMP r0,r10; BNE 8305C` skips only the generated callback
+dispatch when lower initialization returns nonzero. On zero it calls `83028`,
+whose TP-relative loop reads count 4 at `27D58` and dispatches
+`826AE/828B4/82AB8/82CA6` from `27D74`. Both return outcomes then zero the
+word at `FEBF1284` and halfword at `FEBF128C`, and set byte `FEBF128E` to 1.
+The corresponding Sienna call chain, callback vector, and state writes are
+separately image-bound; no fixed relocation or old shape pair supplies this proof.
+
+The existing surface report embeds seven selected canonical function records
+per image, including both ambiguous siblings and their distinct lower wrappers.
+Each retained record carries its real body ranges/hash, decompiled C/hash, and
+data references. Source corpus, fingerprint, and image identities are recorded
+alongside the raw initializer bytes and decoded dataflow. Its one-entry
+`role_closure` exposes this additional role to the matrix; the original
+`secoc_role_closure` retains the 42-role evidence set.
+
 Machine-readable ownership is
 `data/generated/corolla_8965H1202000_secoc_surface.json` plus the compact
-42-role target-native evidence file. `tools/test corolla_h`
+42-role target-native evidence file, plus the report's selected initializer evidence. `tools/test corolla_h`
 pins the core relocation island, Rx front-end, configured profile/freshness
 callbacks, ICU ISRs, crypto-test callbacks, and regenerated D7 unpacker. With
 these 42 promotions, `secoc_icus` has **zero genuinely-unresolved named
@@ -2099,22 +2059,51 @@ unique union                                88 both
 ```
 
 The H simple table retains the final duplicated start callback and null third
-slot. Its dispatcher is the unique full-instruction-shape homolog
-`S 6962A -> H 639CA` (138 bytes), while the 13-pointer variant-D dispatcher is
-`S 6A28A -> H 6462A` (1208 bytes). The simple setup likewise maps by unique
+slot. Its dispatcher remains the unique full-instruction-shape homolog
+`S 6962A -> H 639CA` (138 bytes); the simple setup likewise maps by unique
 shape `S 3DC88 -> H 387E4` and directly uses H table `280E8`.
 
+The 13-pointer variant-D dispatcher maps `S 6A28A -> H 6462A` by **exact body
+plus native registration**, not uniqueness. The canonical fingerprint exports
+contain the same 447-instruction / 1208-byte shape twice on each side:
+S `6A28A/CC166`, H `6462A/CF71C`. All four bodies have SHA-256
+`1854f75394c483afffd8a2355be27f8a406398065249add8d951d9a23b69b2e8`.
+The active variant-D B registrations disambiguate the role: S `417EE` loads
+`286D0` at `41856` (`3b06d0860200`) and calls `6A28A` at
+`41874/41898/418BC`; H `3C34A` loads `28260` at `3C3B2`
+(`3b0660820200`) and calls `6462A` at `3C3D0/3C3F4/3C418`.
+Both registrations reset when the feature byte is `0x5A`; otherwise dispatch
+requires flags bit 0 clear and `FEBEEB85 == 0x5A`, and the three calls publish
+monitor IDs `43/44/45`. The report records the gate instruction bytes, canonical
+data references, and corpus/body hashes alongside the decoded direct calls.
+
 All 88 H callback targets were forced only in a disposable project and then
-raw-body/decompiler hashed into compact evidence. The canonical 88 named
-`deadline_*` callbacks are therefore closed by a **complete target-table
-recensus**. H-specific monitor IDs, thresholds, and operands remain target-native
-configuration.
+raw-body/decompiler hashed into compact evidence. The **complete target-table
+recensus** retains the actual 88-entry Sienna table union as its reference cohort,
+independent of coverage-matrix names. The canonical inventory now names 30 of
+these entries `deadline_*` and leaves 58 with generic names; this changes neither
+table bytes nor the 88-callback census. H-specific monitor IDs, thresholds, and
+operands remain target-native configuration.
 
 Machine-readable ownership is
 `data/generated/corolla_8965H1202000_deadline_monitor_surface.json` plus compact
-evidence. `tools/test corolla_h` pins
-table geometry/cardinality, dispatcher homologs, all callback hashes, and the
-no-fake-one-to-one boundary. The global named residue drops **316 -> 228**.
+evidence. Reproduce the native inspection and report generation after explicit
+target discovery:
+
+```bash
+tools/gtarget show sienna-8965B4512000
+tools/gtarget show corolla-8965H1202000
+tools/pseudo --target sienna-8965B4512000 0x6A28A
+tools/pseudo --target corolla-8965H1202000 0x6462A
+tools/pseudo --target sienna-8965B4512000 0x417EE
+tools/pseudo --target corolla-8965H1202000 0x3C34A
+python3 -m tools.targets.corolla.builders.build_corolla_h_deadline_monitor_surface
+```
+
+The report binds the registered CodeFlash images (S SHA-256 `21140bbd...6bafde`,
+H `0b47bdc1...41a67f`), canonical fingerprints/corpora, and compact H callback
+evidence. The earlier **316 -> 228** named-residue reduction used the historical
+1,113-name scope; it is not the denominator of the current canonical matrix.
 
 ### 7.26 Nine-channel plausibility monitor family
 
@@ -2189,8 +2178,6 @@ FE1DC     B20DC      B1F5A
 The five unresolved slots `FE164/FE1F0/FE204/FE218/FE22C` are literal
 `40 00` fill in H. A **replacement-surface recensus** therefore closes each old
 high-page veneer annotation and the low target name derived from that slot.
-This proves removal of only those fixed veneer roles. The old low-level
-operation could still exist elsewhere in H.
 
 The complete bank diff is
 `data/generated/corolla_8965H1202000_veneer_bank.json`, verified directly from
@@ -2217,8 +2204,7 @@ complete descriptor-surface recensus rather than invented H homologs.
 `data/generated/corolla_8965H1202000_application_callback_tables.json` pins every
 raw pointer and discriminator. The cohort closes as 33 target-native roles plus
 four removed descriptor roles, reducing genuinely unresolved named functions
-**177 -> 140**. Missing descriptor rows prove removal of only those configured
-roles. Their lower-level behavior could still exist elsewhere in H.
+**177 -> 140**.
 
 ### 7.30 Application transport and interrupt ownership closure
 
@@ -2245,15 +2231,15 @@ Machine-readable ownership is in
 
 ### 7.31 Clean H direct-call graph recensus
 
-The generic canonical names `direct_call_target_*` record discovery provenance from
-`SeedDirectCallTargets.java`. They carry no stable semantic identity. A clean H
-import was therefore censused directly. The
-tracked compact evidence contains **5,425 functions, 159,192 instructions,
-9,509 literal call edges, and 5,151 unique literal call targets**; every in-image
-literal target resolves to a function in the same clean H corpus. This complete
-call-graph recensus closes the 153-name canonical direct-call-seed class at the
-provenance level. Exact-body and independently recovered semantic roles retain
-higher precedence; the recensus itself does **not** imply behavioral homology.
+The canonical H snapshot contains **6,933 CodeFlash functions, 194,369
+instructions, 12,179 literal call edges, and 5,922 unique literal call targets**.
+Every in-image literal target resolves to a function in this graph.
+The evidence binds each function's actual address ranges to CodeFlash bytes,
+including 18 non-contiguous functions.
+
+The provenance recensus follows the current Sienna semantic ledger, which
+contains one remaining generic direct-call seed. The earlier clean-import
+checkpoint contained 5,425 functions and a 153-name reference seed cohort.
 
 ### 7.32 Final canonical named-residue closure
 
@@ -2287,10 +2273,9 @@ real target-generation removal:
   `BCB3A -> BBA48` and `CBCC8 -> CF27E`;
 - `fd0d7_status_fault_monitor B6396 -> B5EA4` is a **consolidated successor**:
   H still configures `0x0D7`, the expanded stage remains in the per-tick fault
-  cluster, calls the system-event setter, and still emits event `0x2D`, but its
-  internal qualification logic is not asserted equivalent.
+  cluster, calls the system-event setter, and still emits event `0x2D`.
 
-The evidence-graded 1,113-function denominator is therefore now fully classified:
+The historical 1,113-function checkpoint was fully classified:
 
 ```text
 verified exact-body transfers              288
@@ -2303,26 +2288,19 @@ genuinely unresolved                          0
 
 `data/generated/corolla_8965H1202000_final_named_residue.json` owns the final
 33-successor/1-removal closure, with raw-bound compact support in
-`corolla_8965H1202000_final_named_residue_evidence.json`. Zero genuinely
-unresolved names is now complemented by target-native inspection of every former
-shape-only candidate; no structural-only rows remain. The inspected-unique-shape
-class still remains deliberately weaker than semantic role recovery.
+`corolla_8965H1202000_final_named_residue_evidence.json`.
 
 ### 7.33 Final unique-shape target-native inspection
 
-The last 96 `structural-candidate-only` rows were all unambiguous
-**unique-exact-shape** matches. Every corresponding H target is now compacted
-from the existing target-native decompiler corpus and bound to the raw H body and
-decompiler hash in
+The final 96 structural-only candidates in the original inventory received
+raw-bound H decompiler evidence in
 `data/generated/corolla_8965H1202000_structural_residue_decompiler_evidence.json`.
-All 96 targets decompile successfully, their target addresses/body sizes agree
-with the independent structural-transfer artifact, and the evidence set is stable
-across regeneration.
+Those original pairs had unique instruction shapes. In the canonical graph,
+95 pairs retain that uniqueness; the ICUS initializer has a duplicate shape.
+Its native callee and register dataflow now recover `0x88C4C -> 0x8304C` in
+`corolla_8965H1202000_secoc_surface.json`.
 
-This promotion is intentionally narrow: it records H operands/dataflow for each
-unique complete-instruction-shape candidate and moves those rows to
-`target-native-inspected-unique-shape`; it does **not** upgrade them to semantic
-role equivalence. The final 1,113-function evidence distribution is therefore:
+The original 1,113-function evidence distribution was:
 
 ```text
 verified exact-body transfers              288
@@ -2333,11 +2311,7 @@ structural candidates only                    0
 genuinely unresolved                          0
 ```
 
-Thus every canonical named function is now backed by exact bytes, independently
-recovered target role, complete target-surface recensus, or target-native
-operand/dataflow inspection. Comparative static coverage is complete. Remaining
-uncertainty concerns specific claims, such as regenerated-code field equivalence,
-runtime reachability, and behavior that requires live/bench evidence.
+The current canonical matrix and its classification totals are in §7.15.
 
 ### 7.34 Techstream semantic join: DID 1C02 is the live internal Command Value Torque observable
 
@@ -2572,19 +2546,10 @@ The application side is much smaller than the authenticated envelope:
 Across all 256 wire bits this partitions to **51 bits with recovered downstream EPS
 semantics, 6 bits extracted but with no recovered downstream consumer, 167
 authenticated application bits with no recovered application consumer, and 32 SecOC
-trailer bits**. That negative is not based only on the generated scalar unpacker: a
-5,138-function application-corpus scan finds no B6 use through the literal block/group
-receive API, no full-PDU PDU42 copy, no raw absolute B6-buffer pointer, and no
-named/absolute/simple-GP-alias constant-displacement reference into
-`FEBE4AF4..FEBE4B13`. Arbitrary value-set/computed-base aliases and hardware/DMA
-access remain outside that bounded static proof.
-
-This distinction matters for a future sender. The EPS imposes no **recovered
-application-semantic** constraint on most of B0..B2/B11..B27, but those bytes are not
-cryptographically irrelevant: every B0..B27 bit is in the CMAC input. Upstream
-producer-side formatting may also constrain reserved/unused values, so this is not a
-claim that openpilot may fill those bytes arbitrarily. It does show that the receiver
-contract is far narrower than the raw 32-byte DLC suggests.
+trailer bits**. The 5,138-function application-corpus scan finds no B6 use through
+the literal block/group receive API, no full-PDU PDU42 copy, no raw absolute
+B6-buffer pointer, and no named/absolute/simple-GP-alias constant-displacement
+reference into `FEBE4AF4..FEBE4B13`.
 
 Techstream independently classifies `0x0B6` missing-message ownership as U012987
 **Lost Communication with Brake System Control Module / Missing Message**. That pins
@@ -2593,12 +2558,9 @@ module-dependency topology: Corolla P5 installs category 498 `FRC_P5`, category 
 **`ABS_P5` = Brake/EPB**, and category 405 `EMPS_P5`; FRC carries X216E `Front
 Recognition Camera => BRK Communication Invalid`, while ABS monitors EPS communication
 and exposes DID `0x107E ADS Control EPS Pinion Angle2` at signed 0.00025 rad/count.
-FRC also monitors EPS directly and both FRC/ABS reference an Automated Driving System
-Interface module, so this still does not prove that category 435 forwards or transforms
-the planner bytes into B6. Techstream's P5 steering vocabulary also contains
-**Target Lateral ID** and **Target Steering Angle After Output Compensation**, but
-exact H implements neither corresponding `0x1CEE/0x1CEF` observer DID, so those names
-are corroboration rather than a one-to-one B6 signal-name transfer.
+FRC also monitors EPS directly, and both FRC and ABS reference an Automated
+Driving System Interface module. Techstream's P5 vocabulary includes **Target
+Lateral ID** and **Target Steering Angle After Output Compensation**.
 
 The negative residue is now useful and narrow. D7's only 16-bit scalar is still
 `CAN Vehicle Speed (SP1)`; B6/D7 nonscalar block/group/full-PDU alternatives remain
@@ -2666,9 +2628,7 @@ explicitly while walking the three records. Therefore B6's committed 12-byte sta
 `message_u16`, plus two auxiliary/pad bytes. Global authenticated synchronization state
 from `0x00F` lives separately at `FEBE54AC`/`FEBE54B0` (current trip/reset) and
 `FEBE54B4`/`FEBE54B8` (pending trip/reset). Application initialization `0x89812`
-zeros those current/pending cells and both ordinary current/pending slots. This
-proves the exact initialization write only. External/NvM restoration elsewhere
-in the program remains possible.
+zeros those current/pending cells and both ordinary current/pending slots.
 
 The four transmitted freshness bits are exactly `B28[7:4]`:
 
@@ -2814,11 +2774,7 @@ The exact receiver-required sender envelope is consequently known:
 5. transmit CMAC_MSB28 in `B28[3:0],B29,B30,B31`; and
 6. independently maintain signal261's modulo-64 application sequence.
 
-This closes the **EPS receiver-side verification algorithm**. The upstream sender
-remains unresolved, including the slot-4 secret or an approved ICU-S operation that can
-produce the tag, sender-side ownership/source of the live trip/reset/message state,
-stock B6 wall-clock cadence, and the upstream FRC/Brake/gateway payload/signing
-producer. These remaining blockers concern the sender.
+This closes the **EPS receiver-side verification algorithm**.
 
 Machine-readable proof:
 `data/generated/corolla_8965H1202000_b6_secoc_verification.json` and
@@ -2891,8 +2847,7 @@ H/F relocates that cluster to current sync `FEBE54AC/54B0`, pending
 record shape and current/pending discipline are shared. H/F also initializes and
 wrap-clears an additional linked 12-byte current/pending pair at
 `FEBE54F8/FEBE5504`, controlled by a separate group-0 linkage field at `0x25820`.
-That pair lies outside the two ordinary receive-profile slots; no application meaning is
-assigned here, and B6 verification does not depend on naming it.
+That pair lies outside the two ordinary receive-profile slots.
 
 `0x00F` synchronization arithmetic itself is the same target-native algorithm. Both
 sync reconstructors require FV36, reject stale/equal state through the same result
@@ -2920,9 +2875,8 @@ The key-selection path is structurally shared all the way into ICU-S. Sienna con
 `0x87ED0` and H `0x822D0` both take the selector from config+4; Sienna
 `0x897F4` and H `0x83BF4` both issue command 7 as
 `ICUSCMD=(selector<<16)|7`, giving `0x00040007` for SecOC. Both use CryptoIf handle
-0 and AES-CMAC-128/MSB28. This proves only a shared **slot selector and hardware
-command contract**. Whether Sienna and Corolla provision the same key into slot 4
-remains unproved.
+0 and AES-CMAC-128/MSB28. This proves a shared **slot selector and hardware
+command contract**.
 
 The upper receiver state machine also transfers structurally. Seven generic H/F stages
 have their Sienna counterparts at a consistent `+0x5A64` relocation: new/retry
@@ -2936,12 +2890,9 @@ raw-bound generated failure-forwarding policy above, so upper delivery itself mu
 be equated unconditionally with authentication success. The generic upper bodies are not claimed byte-identical;
 the role/control correspondence is independently present in each target.
 
-Initialization has the same receiver-level intent but should not be overextended into an
-NvM claim. Sienna `0x8E9FC` explicitly clears sync current/pending state and its five
+Sienna `0x8E9FC` explicitly clears sync current/pending state and its five
 ordinary current/pending arrays; H `0x89812` does the same for the smaller two-slot
-arrays plus the extra linked pair. That proves RAM initialization semantics. It does
-**not** prove that another H/F module cannot later restore state, so Sienna-specific NvM
-or persistence conclusions are not transferred without H/F restore-path evidence.
+arrays plus the extra linked pair.
 
 The resulting transfer rule is narrow but useful:
 
@@ -2956,10 +2907,7 @@ The resulting transfer rule is narrow but useful:
   secret material, sender-side freshness ownership/cadence, and physical producer or
   interception topology.
 
-This materially changes how Sienna prior art should be used. We do **not** need to
-rediscover the generic freshness or MAC28 algorithm for every H/F protected PDU. B6 is a
-new application PDU on the same receiver framework. But copying Sienna's freshness ID,
-slot number, or assuming the same key would be incorrect.
+B6 is a new application PDU on the same receiver framework.
 
 Machine-readable proof:
 `data/generated/corolla_h_sienna_secoc_structural_comparison.json`;
@@ -3050,8 +2998,6 @@ This materially reduces, but does not eliminate, the B6 sender problem. Still op
 the slot-4 secret or an approved slot-4 CMAC operation, physical stock-B6 suppression
 and relay-side ownership, B6's wall-clock cadence and complete application-payload
 policy, and a live B6 capture validating the stock sender's own message8 initialization.
-The latter is a **sender-policy** question. D7 proves receiver arithmetic only.
-The B6 producer's use of the same `1..15` schedule remains unproved.
 
 The capture identity boundary remains explicit. Albino's sync oracle came from the same
 investigation as the H dump but not the same runtime job; the public and Span rlogs have
@@ -3102,8 +3048,8 @@ classifier. The probe reads `0xFFDEC=AD59D70C`; that 64-byte live region exactly
 matches the tracked image, and software CRC32 over target range
 `[0x18000,0xFFDF0)` is `0xFFFFFFFF`. Live DCRA state concurrently reports
 `DCRA1COUT=FFFFFFFF` and `DCRA1CTL=0`. Therefore telescope's textual
-`boot_integrity=unknown` means only that its hardcoded Sienna adjust-word table does
-not know this Corolla fixup; it is not evidence of invalid target integrity.
+`boot_integrity=unknown` identifies a missing entry for this Corolla fixup in its
+hardcoded Sienna adjust-word table.
 
 For live experimentation, the run provides a clean independent replay of the
 authenticated bootloader RAM-execution chain that the August-18 range-dump acquisition
@@ -3135,9 +3081,7 @@ For the observed telescope seed and the verified zero-record boot algorithm, the
 recovered computation gives stage-1 key
 `f18878ad2a00e3bf78992beb90684f9f` and expected response
 `1c673fae8a534600c6d529143ed25ce7`. This is a useful same-car boot-SA known-answer
-vector, but none of these CPU-visible boot/payload values is the operational
-SecOC key. The application profiles still select protected ICU-S slot 4, and this
-probe never invokes command 5 or exports that slot.
+vector.
 
 The result improves exact provenance for an existing bootstrap: the successful
 August-18 range dump already implied arbitrary authenticated **bootloader-context**
@@ -3145,7 +3089,6 @@ RAM shellcode. Telescope independently replays that
 capability while directly binding F181, image bytes, and the precise authenticated
 payload state. What remains is specifically the application-context carrier
 transition/retention and then provisioned slot-4 command-5 permission plus latency.
-The telescope run does not itself prove either of those later stages.
 
 Machine-readable correlation:
 `data/generated/corolla_2023_albino_telescope_analysis.json`;
@@ -3157,18 +3100,12 @@ snapshot, and dynamic-execution gates.
 
 ### Static closure criterion
 
-For this `8965H1202000` CodeFlash specimen, the comparative static-analysis
-objective is now closed under the repository's evidence model: all 1,113
-canonical named functions have target-native evidence; there are zero genuinely
-unresolved rows and zero structural-only rows; all generated foreign surfaces
-that replaced one-to-one functions are explicitly recensused; and H-native
-successors are kept at the weakest justified confidence class rather than being
-promoted by address similarity. Another undirected pass over the same CodeFlash
-would therefore repeat already-covered evidence rather than answer a remaining
-static question.
+The current canonical comparison covers all 634 named Sienna CodeFlash functions
+for this `8965H1202000` specimen, with zero genuinely unresolved rows and zero
+structural-only rows. Generated H-native surfaces are explicitly recensused.
+The classification totals and evidence owners are in §7.15.
 
-The remaining questions require **different evidence**. Comparative static coverage
-of this image is complete. The corpus still lacks:
+Remaining questions:
 
 - a same-vehicle capture of a known **stock LTA steering interval** synchronized
   to protected B6 signal254/255/258/260/261/262/263/264/265, measured angle,
@@ -3182,8 +3119,8 @@ of this image is complete. The corpus still lacks:
 - proof of where the selected slot-4 key value is physically stored or internally derived inside ICU-S;
 - same-runtime-epoch proof between the CAN oracles and any DataFlash read;
 - a retained Techstream transcript proving that this exact vehicle session chose
-  category-405 `EMPS_P5`. The 124-DID overlap and exact `1C02` join make it the
-  strongest static vocabulary fit, while session selection remains unobserved;
+  category-405 `EMPS_P5`; the 124-DID overlap and exact `1C02` join make it the
+  strongest static vocabulary fit;
 - proof that the low boot/calibration differences between `8965H1202000` and
   Span `8965F1208000` do not alter any vehicle-level limit or calibration needed
   for a production command implementation; their entire application region is

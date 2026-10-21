@@ -348,8 +348,7 @@ ledger context is useful.
 - **OQ-019 — Protected-tail serial read.** Determine whether a faulted serial read of
   `0x1007800..0x1007FFF` bypasses only a mask-ROM range check or also exposes
   nonblank ICU-S storage. The current CPU-visible dump contains only `00/FF`;
-  public P1M-E fault injection proves ordinary flash readout only. Key-array
-  access remains unproved.
+  public P1M-E fault injection proves ordinary flash readout.
 - **OQ-020 — Bank-0 command-8 production role and safe dynamic confirmation (SECOC-047/048).** Static firmware closes the CAN `0x13..0x1A` assembly and completion-misattribution mechanics. The remaining useful work is dynamic provenance: determine whether RID `0x100E`/those CAN IDs occur during legitimate provisioning, whether any external monitor exposes bank-0 terminal state, and whether dealer tooling treats RID `0x1010` status `02` with zero proof as success. Reproduce the race only on a disposable/matching unit with a legitimately captured authenticated update package and complete recovery plan; preserve F181, route, M1–M5 hashes, timing, DTCs, and post-run key state. Do not synthesize command-8 packages on the only original ECU.
 - **OQ-021 — Application command-5 signing capability — static H/F carrier candidate closed; live retention/permission/timing remain dynamic.**
   Stock RoutineControl `31 01 10 0F` still supplies a fixed-16 diagnostic test,
@@ -884,7 +883,7 @@ ledger context is useful.
   configured SecurityAccess policy or recovered speed gate. The isolated-bench
   probe is now ready under `exploit/followups/`; run it to determine which
   baseline-active EPS application Tx IDs are suppressed by `28 01 01` and prove
-  all recover after `28 00 01`. This characterizes availability only.
+  all recover after `28 00 01`.
 - **OQ-050 — Exploit-interest cohort consumption (SWEEP-008).** The ranking pipeline
   produces anchored candidate cohorts (`pre_sa_write`, `computed_store`,
   `selector_dispatch`, ...). The first serious cohort and the 2026-08-15
@@ -897,9 +896,8 @@ ledger context is useful.
   are bounded negatives or duplicates. The 2026-08-22 static re-audit also
   closed the three formerly `open` rows (`0x00058404`, `0x000539a8`,
   `0x0007c7c2`) with direct firmware bounds, so the reviewed ledger currently
-  has zero `open` rows. **That describes only the reviewed ledger**: ranked functions and cross-function compositions outside the
-  manually consumed cohorts remain valid review input and are not absence
-  claims (CORR-101).
+  has zero `open` rows. Ranked functions and cross-function compositions outside
+  the manually consumed cohorts remain review input (CORR-101).
 - **OQ-051 — Cross-calibration structural triage of future P1M-E images.** The offline
   structural fingerprint scanner (`tools/firmware/analyze_rh850_codeflash_structure.py`)
   now flags boot-CRC geometry, RAM-exec/MEM-SAFE-001 package anchors, and XCP
@@ -934,7 +932,7 @@ ledger context is useful.
   -4.0 m/s² episode while a separate FRC-origin `0x5AE` warning path asserts. The
   then-active host replacement suppresses the first two native ID34 requests, so it
   demonstrably does not preserve PCS onset; `0x081` remains ID11 and is therefore a
-  downstream result witness only. For openpilot, the logical
+  downstream result witness. For openpilot, the logical
   correction is now defined: detect source-side PCS emergency intent, relinquish host
   `0x08A` ownership, and pass the **original authenticated FRC request** untouched.
   Exact ID33/34 Toyota substage names, first-frame handoff timing, and unconfounded
@@ -976,7 +974,7 @@ ledger context is useful.
   The remaining ordinary P5 Brake/FRC RoB-table lead is also exhausted: tables 90/151
   joined through 88/153 contain no named TSS request/arbitration winner field in `FRC_P5`,
   `ABS_P5`, or `Brk_Bst_P5`. The sole pinion-named brake RoB datum is `0x507E` **ADS
-  Control EPS Pinion Angle2**, an observer only.
+  Control EPS Pinion Angle2**, an observer.
 
   A current corpus-wide ordinary Data Monitor census finds **zero generation-20 control
   arbitration-result signals**. Only successor `ADCU_P6/P6F` exposes the corresponding
@@ -1057,7 +1055,7 @@ ledger context is useful.
   `data/generated/gtsplus_2026/tss3_control_ownership_surface.json`, and
   [../architecture/toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md) §4.1/§5D.
 
-- **OQ-053 — F33 non-disruptive application-mode RAM execution pivot.** **Production-only ordering note:** VAR-060 still closes an exact persistent F33 Gate-2 development patch and deterministic restore, so this question does not block development lateral. The production goal remains a non-persistent signer/control path. Exact `8965F3307000` still has the desired volatile carrier: live evidence proves `FEBFF9F0..FEBFFBFB` (524 bytes) survives stock application startup byte-for-byte and executes, while `FEBF0000` is disproved. **VAR-134/CORR-165 withdraw the former claim that stock XCP supplies the placement half.** Rule46 `GAFLID=0x9FDC0002` is extended CAN `0x1FDC0002` (response `0x1FE00002`), and a Sep-6 non-command marker live-proved ingress through `FEBE4C34` staging with transport state `FEBE4EE6=0x5A`. But `0x821D6` calls `0x830C0 -> 0x98E80` before parsing CONNECT; fixed CodeFlash `0x30D68=0x5A` makes that hook return nonzero, so stock protocol command dispatch is disabled. The XCP `SET_MTA`/`DOWNLOAD` callbacks and write window remain real conditional handler semantics only; stock RAM-write reachability remains disproved. OQ-053 therefore again needs **both** a stock-reachable volatile placement primitive and a safe already-running-application control transfer, or a different stock surface that supplies both.
+- **OQ-053 — F33 non-disruptive application-mode RAM execution pivot.** **Production-only ordering note:** VAR-060 still closes an exact persistent F33 Gate-2 development patch and deterministic restore, so this question does not block development lateral. The production goal remains a non-persistent signer/control path. Exact `8965F3307000` still has the desired volatile carrier: live evidence proves `FEBFF9F0..FEBFFBFB` (524 bytes) survives stock application startup byte-for-byte and executes, while `FEBF0000` is disproved. **VAR-134/CORR-165 withdraw the former claim that stock XCP supplies the placement half.** Rule46 `GAFLID=0x9FDC0002` is extended CAN `0x1FDC0002` (response `0x1FE00002`), and a Sep-6 non-command marker live-proved ingress through `FEBE4C34` staging with transport state `FEBE4EE6=0x5A`. But `0x821D6` calls `0x830C0 -> 0x98E80` before parsing CONNECT; fixed CodeFlash `0x30D68=0x5A` makes that hook return nonzero, so stock protocol command dispatch is disabled. The XCP `SET_MTA`/`DOWNLOAD` callbacks and write window are conditional handlers. OQ-053 therefore again needs **both** a stock-reachable volatile placement primitive and a safe already-running-application control transfer, or a different stock surface that supplies both.
 
   Sep-6 resident failures are now corrected by VAR-136/CORR-167: both failed high-tail residents used a C `call0(address)` trampoline that passes the target in RH850 `r6`, unlike Toyota's direct startup `jarl` sequence, so they do not qualify ABI-preserving replay. The next bounded live action is the **generic ABI-preserving runtime monitor**. Its 520-byte high-tail code uses direct `JARL disp32`, adds no application-memory writes through foreground count 223, then accepts only the non-XCP `00 F3 seq opcode arg32-le` control protocol from the already-live-proven extended `0x1FDC0002 -> FEBE4C34` path. Eight host-configurable aligned LocalRAM watch windows can be changed from the comma without rebuilding or another RAM execute; SID23 reads the coherent current snapshot. Only `runtime_monitor_live` closes the runtime/control-plane half, after which the first qualification remains READY/Park/stationary.
 
@@ -1101,7 +1099,7 @@ ledger context is useful.
   neither RID is among its 19 routines, and callback cell `FEBF0FD0` has only boot
   flash-engine consumers. Application SecurityAccess does not reveal a second service
   graph; its exact callback-local BA `F7/BAENA` use remains lifecycle/authorization
-  state only. Exact
+  state. Exact
   controller-1 rules 43/44/45 are ordinary `0x7A1` physical UDS, `0x777` functional
   UDS, and `0x7A0` secondary diagnostics; interrupt-time reception only completes
   transport/enqueues DCM state, while SID dispatch occurs later in DCM main. `0x7F7` is
@@ -1251,7 +1249,7 @@ ledger context is useful.
   path still drains under interrupt context `71508 -> 66026 -> 667B6 -> 7A232 -> 79EBA ->
   83CE4 -> 83E0C`. The old C observer remains ABI-blocked. The assembly v3 route44 bridge is
   ABI-safe but its current between-aggregate queue snapshot is timing-blind to the now-proven
-  same-invocation lifetime; it is an ephemeral diagnostic intervention only.
+  same-invocation lifetime; it is an ephemeral diagnostic intervention.
   Counter phase, MAC value, B6 companion guesses, `0x08A` suppression, and another result
   patch remain unjustified.
 
@@ -1260,7 +1258,7 @@ ledger context is useful.
   copies the received 32 bytes unchanged and solely invokes `8E772(44)`. No local B6
   constructor, sanitizer, replacement path, or autonomous route44 ticker is recovered. The
   retained zero-host-TX route44 activity is therefore an independent successful protected
-  receive stream (or an unrecovered mechanism). Panda ID11-to-ID0 rewriting remains unproved. Toyota diagnostics associate the immediate missing-message peer with the Brake System
+  receive stream (or an unrecovered mechanism). Toyota diagnostics associate the immediate missing-message peer with the Brake System
   Control Module/category-435 domain. OQ-054 must now recover the exact external B6 physical
   transmitter/link, stock request handoff, signing owner, and source-suppression mechanism,
   alongside the already-open `0x08A/0x081` proxy contract. The mid-aggregate observer is

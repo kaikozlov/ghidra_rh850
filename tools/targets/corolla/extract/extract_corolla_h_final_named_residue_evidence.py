@@ -8,8 +8,8 @@ from tools.targets.corolla.support.corolla_h_constants import RAW_DUMP as H_RAW_
 ROOT=REPO_ROOT
 SRAW=SIENNA_CODEFLASH
 HRAW=H_RAW_DUMP
-SFP=ROOT/'build/work/corpora/sienna_function_structural_fingerprints.jsonl'
-HFP=ROOT/'build/work/corpora/h_clean_function_structural_fingerprints.jsonl'
+SFP=ROOT/'data/function_structural_fingerprints.jsonl'
+HFP=ROOT/'data/targets/corolla-8965H1202000/function_structural_fingerprints.jsonl'
 HDC=ROOT/'data/generated/corolla-8965H1202000/decompilations.jsonl'
 OUT=ROOT/'data/generated/corolla_8965H1202000_final_named_residue_evidence.json'
 S_ENTRIES={
@@ -32,7 +32,9 @@ def load_jsonl(p,key='entry_addr'):
  return out
 def compact_fp(r,raw):
  a=int(r['entry_addr'],16);n=int(r['body_size'])
- if sum(map(int,r['instruction_lengths']))!=n:raise ValueError(f'noncontiguous fp {a:#x}')
+ ranges=r['body_ranges']
+ if len(ranges)!=1 or ranges[0]['space']!=r['address_space'] or int(ranges[0]['min'],16)!=a or int(ranges[0]['max'],16)!=a+n-1:raise ValueError(f'noncontiguous fp {a:#x}')
+ if sum(map(int,r['instruction_lengths']))!=n:raise ValueError(f'partial instruction coverage {a:#x}')
  return {'entry':f'0x{a:08X}','body_size':n,'body_sha256':sha(raw[a:a+n]),'instruction_count':int(r['instruction_count']),
          'direct_call_targets':r.get('direct_call_targets',[]),'direct_call_target_count':int(r['direct_call_target_count']),
          'indirect_call_count':int(r['indirect_call_count']),'conditional_branch_count':int(r['conditional_branch_count']),
@@ -48,7 +50,7 @@ def main():
   dec.append({'entry':f'0x{a:08X}','body_size':n,'body_sha256':sha(hraw[a:a+n]),'decompiled_c_sha256':sha(c.encode()),'decompiled_c':c})
  p={'schema':'corolla-h-final-named-residue-evidence-v1','software_id':'8965H1202000',
     'images':{'sienna_sha256':sha(sraw),'h_sha256':sha(hraw)},
-    'sources':{'sienna_fingerprints':{'path':str(SFP.relative_to(ROOT)),'sha256':sha(SFP.read_bytes())},'h_clean_fingerprints':{'path':str(HFP.relative_to(ROOT)),'sha256':sha(HFP.read_bytes())},'h_decompiler':{'path':str(HDC.relative_to(ROOT)),'sha256':sha(HDC.read_bytes())}},
+    'sources':{'sienna_fingerprints':{'path':str(SFP.relative_to(ROOT)),'sha256':sha(SFP.read_bytes())},'h_fingerprints':{'path':str(HFP.relative_to(ROOT)),'sha256':sha(HFP.read_bytes())},'h_decompiler':{'path':str(HDC.relative_to(ROOT)),'sha256':sha(HDC.read_bytes())}},
     'sienna_fingerprints':[compact_fp(sf[a],sraw) for a in sorted(S_ENTRIES)],
     'h_fingerprints':[compact_fp(hf[a],hraw) for a in sorted(H_ENTRIES)],
     'h_decompiler':dec}

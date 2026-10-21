@@ -63,7 +63,7 @@ def event_batching(
     bus0_event_counts: dict[int, int],
     target_times: list[int],
 ) -> dict:
-    """Describe rlog publication batching; logMonoTime is not a wire timestamp."""
+    """Describe rlog publication batching."""
     sizes = sorted(bus0_event_counts.values())
     target_sizes = [bus0_event_counts[t] for t in target_times]
     return {
@@ -78,9 +78,7 @@ def event_batching(
             else None
         ),
         "boundary": (
-            "Each rlog Event.logMonoTime timestamps an entire publication batch. "
-            "Individual-frame timing remains unresolved. Inter-frame 20/30 ms classes "
-            "therefore cannot identify physical arbitration, a CAN TX queue, or a transmitter ECU"
+            "Each rlog Event.logMonoTime timestamps an entire publication batch."
         ),
     }
 

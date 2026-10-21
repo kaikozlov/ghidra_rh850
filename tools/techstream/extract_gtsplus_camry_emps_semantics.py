@@ -447,7 +447,7 @@ def main() -> int:
                 str(row["selector"] & 0xFF) for row in rdbi
             ).items())),
             "rdbi_membership_boundary": (
-                "Complete DID metadata; current readable-DID admission is evaluated separately. "
+                "Complete DID metadata. "
                 "0x4D36E selects kind byte +0x0C == 0 and requires an absent "
                 "availability callback or a callback result of 0x5A."
             ),
@@ -529,7 +529,7 @@ def main() -> int:
                 "interpretation": "Exact F33 normal application CAN handling is channel/controller-1-only in the recovered interrupt wrappers, and B6 is accepted inside that same controller-1 rule span. A second private F33 application CAN controller is not supported by this target-native configuration.",
             },
             "interpretation": "Toyota's current Camry CAN Bus Check model places Front Camera Module on Central Gateway Bus 1 while Skid Control (ABS/VSC/TRAC) and Power Steering (EPS) are co-resident on Central Gateway Bus 4, invariant across all 18 current Camry option variants. Combined with exact F33's controller-1-only application CAN path, this supports B6 as a Brake/Skid-to-EPS Bus-4 message rather than traffic on a hidden second EPS CAN controller.",
-            "boundary": "The GTS+ Bus 1/Bus 4 labels identify Toyota Central-Gateway topology. Comma/Panda bus numbers and connector pin numbers use separate namespaces. This static table alone does not prove which Toyota-B harness pair exposes Bus 4; that physical join is supplied separately by the retained pre/post-repin Camry captures and diagnostics. Front Camera Module is the GTS+ component-domain label and is not by itself a category-498 FRC identity proof.",
+            "boundary": "The GTS+ Bus 1/Bus 4 labels identify Toyota Central-Gateway topology. Comma/Panda bus numbers and connector pin numbers use separate namespaces. The physical join is supplied separately by the retained pre/post-repin Camry captures and diagnostics. Front Camera Module is the GTS+ component-domain label.",
         },
         "emps_p5_schema_delta": {
             "v18_file_size": source_paths["v18_emps"].stat().st_size,
@@ -585,11 +585,11 @@ def main() -> int:
                 "raw_hex": snapshot.hex(),
                 "low_u32_le": f"0x{int.from_bytes(snapshot[:4], 'little'):08X}",
                 "high_u32_le": f"0x{int.from_bytes(snapshot[4:], 'little'):08X}",
-                "state_boundary": "Captured after application-to-boot handoff; this names an observed RAM snapshot but does not establish READY-mode bit semantics.",
+                "state_boundary": "Captured after application-to-boot handoff.",
             },
             "remaining_unknown": "Toyota's bit-level meanings inside the two 32-bit ASIC state words are not resolved by the current EMPS_P5 monitor database.",
         },
-        "evidence_boundary": "OEM names/database membership come from pinned external Toyota GTS+/Techstream artifacts; RDBI dispatch and RAM sources are exact-target firmware-static evidence; RAM value is a tracked live snapshot. No static GTS+ row is treated as proof of CAN/CAN-FD producer ownership or SecOC signer/key/freshness semantics.",
+        "evidence_boundary": "OEM names/database membership come from pinned external Toyota GTS+/Techstream artifacts; RDBI dispatch and RAM sources are exact-target firmware-static evidence; RAM value is a tracked live snapshot.",
     }
 
     if artifact["f33_rdbi_join"]["gtsplus_named_f33_data_ids"] != 121:

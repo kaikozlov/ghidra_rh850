@@ -134,7 +134,7 @@
       "terminal infinite-loop replaced by boot reset call",
       "CRC32 adjustment and CMAC"
     ],
-    "classification": "alternate full DataFlash dump only",
+    "classification": "alternate full DataFlash dump",
     "crc_cmac_bytes_changed": 20,
     "plaintext_bytes_changed": 380,
     "pre_callback_bytes_changed": 360,

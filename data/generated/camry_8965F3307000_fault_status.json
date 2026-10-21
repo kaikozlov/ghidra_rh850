@@ -4016,7 +4016,6 @@
   },
   "openpilot_policy": {
     "internal_state_exposure": "safe as a diagnostic/status candidate set when 0x394 is present",
-    "production_output_authorized": false,
     "reason": "Toyota's internal DEM class/latch distinction does not define openpilot temporary/permanent policy. Relay-correct asserted/recovery capture or an independent policy proof is still required.",
     "state0": "unique deepest clear/normal internal classifier state; not independently a Ready authorization bit",
     "steerFaultPermanent": "unresolved policy mapping",
@@ -4027,7 +4026,6 @@
     "full_gate": "4077 passed / 719 skipped plus ruff, ty, codespell, cpplint, MISRA",
     "nested_opendbc_commit": "0d5773bd393bbf3d4109728171d2390b60fcde16",
     "parent_kai_openpilot_commit": "191aeb43df3fb72f3264209be1aad57b9ca42e2d",
-    "production_output_authorized": false,
     "public_fault_flags_changed": false
   },
   "schema": "camry-8965f3307000-fault-status-v1",
@@ -4042,11 +4040,11 @@
     },
     "h_techstream_vocabulary": {
       "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
-      "sha256": "ee4ffc57d325fc3b4d787d8d1ec03a35c5e9006845add87c73d7ea5bd86290fd"
+      "sha256": "96c86a91ac85d209bcbc1072582f38b523fd25e899af800b55b84d48ce951ba1"
     },
     "tx_contract": {
       "path": "data/generated/camry_8965F3307000_tss3_opendbc_port.json",
-      "sha256": "18f8039b23385e572c4701182f7c6b0bf5f99d9d602cec1901be16624458dbe9"
+      "sha256": "dbc4e9474f53dd558d72ac1950a2fb8636bc703db1ca8b27d2fa64357cbb6cd8"
     }
   },
   "target": {

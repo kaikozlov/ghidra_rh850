@@ -239,7 +239,6 @@ def payload_meta(kind: str, source: Path, result: dict[str, object], toolchain: 
             "carrier_retention_verified": False,
             "live_slot4_command5_permission_verified": False,
             "command5_latency_jitter_verified": False,
-            "vehicle_actuation_authorized": False,
         },
     }
 

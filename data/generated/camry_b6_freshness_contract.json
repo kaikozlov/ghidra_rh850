@@ -87,7 +87,7 @@
     "same_epoch_rule": "0x90A48 reconstructs the next strictly-forward message8 congruent with message_low2; ordinary accepted gap is 1..4"
   },
   "phase_exhaustive_check": {
-    "interpretation": "The observed native D7 preference for first low2=1 is sender policy/timing, not an F33 B6 receiver requirement.",
+    "interpretation": "The observed native D7 preference for first low2=1 is sender policy/timing; F33 B6 receiver acceptance permits other first low2 values.",
     "new_epoch_start_low2_accepted": {
       "0": true,
       "1": true,
@@ -290,7 +290,7 @@
           "successful_echoes": 18447
         }
       },
-      "route": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-01/00000037--dec6fe39cb",
+      "route": "build/work/capture-cohorts/camry-b6-freshness-original13/2026-09-01/00000037--dec6fe39cb",
       "route_name": "00000037--dec6fe39cb",
       "total_rlog_bytes": 64420457
     },
@@ -977,7 +977,7 @@
           "successful_echoes": 326975
         }
       },
-      "route": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003b--62262eb7a1",
+      "route": "build/work/capture-cohorts/camry-b6-freshness-original13/2026-09-04/0000003b--62262eb7a1",
       "route_name": "0000003b--62262eb7a1",
       "total_rlog_bytes": 1133870051
     },
@@ -1515,7 +1515,7 @@
           "successful_echoes": 240223
         }
       },
-      "route": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003c--97b9e7a69a",
+      "route": "build/work/capture-cohorts/camry-b6-freshness-original13/2026-09-04/0000003c--97b9e7a69a",
       "route_name": "0000003c--97b9e7a69a",
       "total_rlog_bytes": 816003607
     },
@@ -1958,7 +1958,7 @@
           "successful_echoes": 184430
         }
       },
-      "route": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-04/0000003d--0e812cecba",
+      "route": "build/work/capture-cohorts/camry-b6-freshness-original13/2026-09-04/0000003d--0e812cecba",
       "route_name": "0000003d--0e812cecba",
       "total_rlog_bytes": 635642183
     },
@@ -2484,7 +2484,7 @@
           "successful_echoes": 232548
         }
       },
-      "route": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-06/0000003e--1a2f20417d",
+      "route": "build/work/capture-cohorts/camry-b6-freshness-original13/2026-09-06/0000003e--1a2f20417d",
       "route_name": "0000003e--1a2f20417d",
       "total_rlog_bytes": 800982071
     },
@@ -3039,7 +3039,7 @@
           "successful_echoes": 249059
         }
       },
-      "route": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-06/0000003f--36e72f5fdc",
+      "route": "build/work/capture-cohorts/camry-b6-freshness-original13/2026-09-06/0000003f--36e72f5fdc",
       "route_name": "0000003f--36e72f5fdc",
       "total_rlog_bytes": 855088502
     },
@@ -3247,7 +3247,7 @@
           "successful_echoes": 43083
         }
       },
-      "route": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-07/00000045--805b7ca6ab",
+      "route": "build/work/capture-cohorts/camry-b6-freshness-original13/2026-09-07/00000045--805b7ca6ab",
       "route_name": "00000045--805b7ca6ab",
       "total_rlog_bytes": 149376764
     },
@@ -3422,7 +3422,7 @@
           "successful_echoes": 21339
         }
       },
-      "route": "/Users/kai/dev/inspect/logs/camry-2026/2026-09-07/00000048--709f22277b",
+      "route": "build/work/capture-cohorts/camry-b6-freshness-original13/2026-09-07/00000048--709f22277b",
       "route_name": "00000048--709f22277b",
       "total_rlog_bytes": 74680855
     },
@@ -3579,7 +3579,7 @@
           "successful_echoes": 16145
         }
       },
-      "route": "/Users/kai/dev/inspect/logs/camry-2026/archive/0000001c--574c06b528",
+      "route": "build/work/capture-cohorts/camry-b6-freshness-original13/archive/0000001c--574c06b528",
       "route_name": "0000001c--574c06b528",
       "total_rlog_bytes": 43100896
     },
@@ -3876,7 +3876,7 @@
           "successful_echoes": 106800
         }
       },
-      "route": "/Users/kai/dev/inspect/logs/camry-2026/archive/00000027--885099a1d4",
+      "route": "build/work/capture-cohorts/camry-b6-freshness-original13/archive/00000027--885099a1d4",
       "route_name": "00000027--885099a1d4",
       "total_rlog_bytes": 316117775
     },
@@ -4069,7 +4069,7 @@
           "successful_echoes": 39853
         }
       },
-      "route": "/Users/kai/dev/inspect/logs/camry-2026/archive/00000029--bae47e927f",
+      "route": "build/work/capture-cohorts/camry-b6-freshness-original13/archive/00000029--bae47e927f",
       "route_name": "00000029--bae47e927f",
       "total_rlog_bytes": 111859809
     },
@@ -4256,7 +4256,7 @@
           "successful_echoes": 32316
         }
       },
-      "route": "/Users/kai/dev/inspect/logs/camry-2026/archive/0000002a--c5647fd694",
+      "route": "build/work/capture-cohorts/camry-b6-freshness-original13/archive/0000002a--c5647fd694",
       "route_name": "0000002a--c5647fd694",
       "total_rlog_bytes": 92950010
     },
@@ -4524,7 +4524,7 @@
           "successful_echoes": 42995
         }
       },
-      "route": "/Users/kai/dev/inspect/logs/camry-2026/archive/0000002c--c784367b7e",
+      "route": "build/work/capture-cohorts/camry-b6-freshness-original13/archive/0000002c--c784367b7e",
       "route_name": "0000002c--c784367b7e",
       "total_rlog_bytes": 234693953
     }
@@ -4532,7 +4532,7 @@
   "schema": "camry-b6-freshness-contract-v1",
   "scope": {
     "eps": "8965F3307000",
-    "log_root": "/Users/kai/dev/inspect/logs/camry-2026",
+    "log_root": "build/work/capture-cohorts/camry-b6-freshness-original13",
     "openpilot_root": "/Users/kai/dev/inspect/repos/kai-openpilot",
     "vehicle": "2026 Toyota Camry Hybrid"
   }

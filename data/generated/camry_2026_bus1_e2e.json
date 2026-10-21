@@ -9558,10 +9558,10 @@
     "wire_formula": "crc = CRC16_CCITT(init=0xFFFF, bytes B2..end || CAN_ID_low || CAN_ID_high); store crc little-endian in B0:B1"
   },
   "interpretation": {
-    "freshness": "0x160 B2 is an 8-bit alive/rolling counter. It advances +1 on every retained drive-B same-segment pair; drive-A non-+1 observations coincide with capture gaps/missed cycles. Sender traces do not prove the receiver's accepted counter window or timeout policy.",
+    "freshness": "0x160 B2 is an 8-bit alive/rolling counter. It advances +1 on every retained drive-B same-segment pair; drive-A non-+1 observations coincide with capture gaps/missed cycles.",
     "integrity": "B0:B1 is exactly AUTOSAR E2E Profile 5 on every retained periodic native-Bus-1 frame: non-reflected CRC-16/CCITT polynomial 0x1021, start 0xFFFF, no xorout, CRC stored little-endian, B2 as the 8-bit counter, and an implicit 16-bit Data ID equal to the CAN identifier appended low byte then high byte after B2..end. This is deterministic non-cryptographic E2E integrity.",
     "replay_boundary": "There is no observed long-lived epoch/nonce on this Bus-1 framing. Constant 0x020 has only 256 complete wire images and repeats byte-for-byte after the 8-bit counter wraps (about 12.8 s at its ~20 Hz cadence). Immediate replay can still be rejected by receiver-side counter state; post-wrap anti-replay beyond that state is not on wire.",
-    "security_boundary": "The retained native Bus-1 family therefore exposes non-cryptographic E2E integrity/freshness. This does not identify which node transmits 0x160 or prove receiver acceptance of synthetically modified frames."
+    "security_boundary": "The retained native Bus-1 family exposes non-cryptographic E2E integrity/freshness."
   },
   "schema": "camry-2026-bus1-e2e-v2"
 }

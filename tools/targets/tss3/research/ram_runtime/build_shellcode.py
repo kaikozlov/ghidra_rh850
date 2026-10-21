@@ -117,7 +117,7 @@ def build(output: Path, *, manifest_path: Path = DEFAULT_MANIFEST) -> dict:
     if "There are no relocations in this file." not in reloc_text:
         raise RuntimeBuildError("runtime ELF contains relocations; payload is not self-contained")
 
-    # These compiler-output sentinels supplement the required firmware tests.
+    # Compiler-output sentinels.
     required_disasm = (
         f"mov\t0x{values['BOOT_INIT_0']:x}, r12",
         f"mov\t0x{values['APP_CPU_CONTEXT_INIT']:x}, r12",

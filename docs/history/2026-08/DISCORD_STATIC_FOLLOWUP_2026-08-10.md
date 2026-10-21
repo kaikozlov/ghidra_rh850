@@ -7,7 +7,7 @@
 
 Focused static-analysis sprint prompted by recent comma `#toyota-security`
 discussion supplied as screenshots in the active research session. The
-screenshots provide **external-source observations** that require primary firmware corroboration.
+screenshots provide **external-source observations**.
 They are not archived as binary artifacts in this repository. This document
 tracks what can be established from already pinned/local artifacts before
 requesting new files from participants.
@@ -87,8 +87,7 @@ with `0x00F` synchronization.
 
 Therefore a literal `0 protected` result from the unmodified Bk2ol verifier
 means only that no samples from **its three protected IDs on its two accepted
-buses** reached verification. It cannot establish that another variant has no
-SecOC traffic.
+buses** reached verification.
 
 ### Durable work
 
@@ -112,10 +111,8 @@ coverage deliberately uses bus 1 and `0x116`/`0x24D`.
 
 ### Boundary
 
-The tool is now ready to process a future Corolla dump/capture, but no Corolla
-key/storage conclusion is possible without those artifacts. The eight-ID DBC
-profile supplies known Toyota classic-SecOC vocabulary. Presence of each listed
-ID and production-key sharing on the 2023 Corolla require independent proof.
+The tool is now ready to process a future Corolla dump/capture. The eight-ID DBC
+profile supplies known Toyota classic-SecOC vocabulary.
 
 ### Commit
 
@@ -387,7 +384,7 @@ transmitted trailer reset-low2 bits align on:
 0x24D:   59 /   59 eligible frames
 ```
 
-This establishes structural freshness. Cryptographic key proof remains open.
+This establishes structural freshness.
 
 ### Consequence for the reported `0 protected`
 
@@ -395,7 +392,7 @@ The public route plus Step 1 closes the interpretation: the current Bk2ol
 verifier ignores bus 1 and only recognizes `0x131/0x2E4/0x344` as protected,
 while this route's genuine classic protected-family traffic is bus-1
 `0x116/0x24D`. The reported `0 protected` is therefore a tool-profile false
-negative despite the observed SecOC traffic.
+negative.
 
 ### Durable work
 

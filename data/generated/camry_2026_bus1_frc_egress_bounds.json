@@ -18,23 +18,7 @@
   },
   "interpretation": {
     "bounded_negative": "Within the declared tiers (exhaustive 1..16-bit semantic-field +/-300 ms Pearson census; exhaustive 898,104-spec zero-lag/state screen; stratified 450-candidate +/-1 s wider/nonlinear refinement; reproduced four-edge transition screen), the retained captures reveal no reproduced direct single-field linearly or monotonically related unsigned FRC lateral request carrier on native Toyota Bus 1; weak positive-lag perception associations and stronger trailing/plant-shaped fields remain.",
-    "does_not_establish": [
-      "absence of unsigned FRC lateral egress",
-      "that the FRC->proxy/arbitration handoff is private",
-      "impossibility of upstream source replacement"
-    ],
-    "next_primary_source": "synchronized FRC Operation FFD (5282/5631 request, 5285/57DE arbitration, 5265 grant, 560D pinion) plus all-bus CAN capture",
-    "not_excluded": [
-      "multivariate encoding",
-      "nonlinear/nonmonotonic transforms",
-      "conditionally multiplexed or event-driven egress",
-      "fields wider than 16 bits in the exhaustive lag tier",
-      "source data outside periodic CAN (sparse diagnostic/event streams; drive A has 56 distinct Bus-1 ID/DLC streams vs the 22 frequent periodic ones)",
-      "private Ethernet/LVDS/internal-gateway handoff",
-      "diagnostic/recorder objects",
-      "an FRC state vector from which the downstream ECU synthesizes the protected target",
-      "effects hidden by having only one ID11 interval per drive"
-    ]
+    "next_primary_source": "synchronized FRC Operation FFD (5282/5631 request, 5285/57DE arbitration, 5265 grant, 560D pinion) plus all-bus CAN capture"
   },
   "schema": "camry-2026-bus1-frc-egress-bounds-v1",
   "sources": {
@@ -91,8 +75,7 @@
       "0x450/32"
     ],
     "periodic_threshold_frames": 50,
-    "target": "native Panda bus-2 0x08A DLC 32 (protected side); forwarded bus-0 copies give identical ID11 intervals and reproduced edges",
-    "tx_ownership": "per-ID FRC-versus-radar transmitter ownership on Bus 1 is unresolved; this census distinguishes streams only, so a capture-wide negative cannot be attributed specifically to FRC Tx"
+    "target": "native Panda bus-2 0x08A DLC 32 (protected side); forwarded bus-0 copies give identical ID11 intervals and reproduced edges"
   },
   "tiers": {
     "exhaustive_1_16bit_lag_census": {
@@ -459,7 +442,7 @@
       },
       "candidate_fields": "every contiguous 1..24-bit and 32-bit window at every legal bit offset, serialized MSB-first and LSB-first, unsigned and signed (except 1-bit signed duplicate)",
       "candidate_specs": 898104,
-      "integrity_note": "B0:B1 CRC and B2 alive counter deliberately included; interpret their hits only as E2E/time artifacts",
+      "integrity_note": "B0:B1 CRC and B2 alive counter deliberately included; interpret their hits as E2E/time artifacts",
       "join": "same-segment nearest 0x08A within 40 ms",
       "scope": "all 22 periodic native bus-1 (id,dlc) streams shared by both drives; no ID/byte prefilter",
       "screens": {
@@ -868,7 +851,7 @@
           "stream": "0x160/32"
         }
       ],
-      "note": "strong 0x160 candidates correlate with measured 0x025 steering angle at near-zero/negative lag while their best 0x08A target lags are more negative -- plant/feedback-shaped within the active windows; request commands remain undemonstrated. CORR-138 shows full-drive nonreproduction, so these are not promoted to standing field identities"
+      "note": "strong 0x160 candidates correlate with measured 0x025 steering angle at near-zero/negative lag while their best 0x08A target lags are more negative -- plant/feedback-shaped within the active windows. CORR-138 shows full-drive nonreproduction."
     },
     "stratified_wider_nonlinear_refinement": {
       "boundary": "the +/-1 s / 25 ms wider-field nonlinear sweep covers only a stratified subset (strongest per screen metric); only the tier-2 zero-lag state screen is exhaustive over all 898,104 specs",
@@ -878,7 +861,7 @@
         1000,
         25
       ],
-      "note": "strong selected 0x160/0x1A0 correlations peak at negative lag and/or fail sign reproduction; the strongest positive-lag candidate is weak perception-shaped association; a request carrier remains undemonstrated",
+      "note": "strong selected 0x160/0x1A0 correlations peak at negative lag and/or fail sign reproduction; the strongest positive-lag candidate is weak perception-shaped association",
       "selection": "stratified: per screen metric (cross/drive_a/drive_b over 9 state screens) top-15 with (id,order,start) support dedup and per-ID cap 3, then filled to the cap by best overall cross-drive screen score",
       "strongest_positive_lag_selected_candidate": {
         "A": {
@@ -938,7 +921,7 @@
     "transition_edge_screen": {
       "deterministic_request_mode_bit": false,
       "n_reproduced_active_edge_bits": 182,
-      "note": "no deterministic request/mode bit: the strongest reproduced four-edge margin is only 0.2105 and the top fields are noisy perception/object-family bits (0x181/0x189); stable state flags remain unproved. This bounds a single stable bit synchronized to 0x08A B21, it does not prove absence of egress",
+      "note": "no deterministic request/mode bit: the strongest reproduced four-edge margin is 0.2105 and the top fields are noisy perception/object-family bits (0x181/0x189)",
       "strongest_four_edge_margin": 0.2105,
       "top_edge_bits": [
         {

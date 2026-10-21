@@ -102,7 +102,7 @@ of segment 6:
 
 The command lead, repeated target/measured response, low driver torque, clean EPS
 state, and inactive Toyota request plane establish **observed openpilot lateral
-control** beyond the operator's impression and successful transmission.
+control**.
 
 ### Corroborating result
 
@@ -150,8 +150,7 @@ does not affect the segment-3 corroboration.
 ## 2. Exact Camry development mechanism
 
 This section records the **September-10 configuration** and subsequent rebuild
-notes. The later runtime checkpoint belongs to the capability matrix. The source
-hashes and mechanism here explain that particular road witness.
+notes. The source hashes and mechanism here explain that particular road witness.
 
 The successful Camry drive did not transmit a host-built B6. Its ordinary
 openpilot control path was:
@@ -216,10 +215,9 @@ The retained [session summary](../../targets/camry-2026/raw-20260910/working-ste
 and [field runbook](../../tools/targets/camry/research/ram_runtime/monitor/camry_f33_runtime_monitor_runbook.md#known-working-openpilot-steering-fallback)
 are the reproduction sources.
 
-The rlog records C7 commands, Panda returns, vehicle state, and wheel response;
-it does not expose EPS LocalRAM. The exact `b417...` identity is joined from the
-contemporaneous live install/status handoff and parked native-oracle witnesses.
-CAN supplies no LocalRAM identity evidence. The original Comma `/tmp/f33-valid-helper.bin` was no
+The rlog records C7 commands, Panda returns, vehicle state, and wheel response.
+The exact `b417...` identity is joined from the contemporaneous live install/status
+handoff and parked native-oracle witnesses. The original Comma `/tmp/f33-valid-helper.bin` was no
 longer reachable at preservation time, but rebuilding the recovered source emits
 the complete recorded SHA-256 exactly; the retained binary is therefore the same
 recorded identity under the ordinary SHA-256 collision assumption.
@@ -241,7 +239,7 @@ DRCC permission denied. Resetting FRC after Brake is healthy changes `1905` from
 `8000` to `8080` (Cruise Control Allowed), clears the ACC-not-available request,
 enables LDA, and leaves PCS availability/invalid state healthy. The EPS RAM resident
 survives throughout. Route `0000010c--506d7277c7` subsequently demonstrates
-same-ignition recovery on the road, beyond the parked diagnostic-state change.
+same-ignition recovery on the road.
 The older `recover-drcc` DTC-clear command remains useful for preserving diagnostic
 evidence, but the dependency-ordered resets are the actual same-ignition recovery
 **for that faulted legacy programming path**. A later 2026-09-20 startup-catch flow
@@ -323,7 +321,7 @@ follow, speed, stop-and-go to zero/hold/resume as validated, with the deployed
 
 The same note documents the contributor's signed-15 B4:B5 substitution at
 0.001 m/s²/count. This records the exact field shape used by the experiment.
-Its Corolla command semantics remain unvalidated. Its CRC is expressed as init=`0`
+Its CRC is expressed as init=`0`
 with Data ID `0x444A`. Deterministic basis-vector comparison shows that this is
 wire-equivalent, for the fixed 32-byte `0x160`, to the repository's recovered
 init=`0xFFFF` with Data ID `0x0160`; the parameter labels differ, but the transmitted
@@ -335,8 +333,7 @@ Evidence boundary: this remains attributed external field evidence. The original
 road result arrived as a Discord screenshot, and the later architecture/change
 reference is now retained verbatim and hash-pinned. The raw rlog, exact route ID,
 and exact source checkout/patch are still not in this repository, so road counts
-and code-behavior claims remain **observed/external-source**. Repository verification
-requires those missing artifacts. When supplied, retain the
+and code-behavior claims remain **observed/external-source**. When supplied, retain the
 route inventory and reduce `safetyModel`, `sendcan 0x160`, counter continuity,
 requested acceleration, lead distance, speed response, and the standstill fault
 transition without inventing a second longitudinal permission system.
@@ -347,9 +344,7 @@ message generator:
 constructs the observed Camry-family 32-byte `0x160` candidate by changing B2/B12
 and recomputing its exact Profile-5 CRC. Its verifier reconstructs fixed wire
 witnesses and more than 20,000 retained counter/request pairs byte-for-byte.
-That is repository-verified prior proof of message generation. The later Corolla
-road result and B12's role in the working Corolla controller require separate
-evidence.
+That is repository-verified prior proof of message generation.
 
 ## 4. What is universal and what is target-specific
 

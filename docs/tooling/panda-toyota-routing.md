@@ -514,7 +514,7 @@ change these speed/supply gates, or select a different lower handoff primitive.
 | `param=1,bus=1` is fully equivalent to repinning for normal openpilot interception | **Eliminated** | it leaves the vehicle network on unsplit CAN1 rather than the relay-backed CAN0/CAN2 pair |
 | OBD/gateway path stops forwarding during/reset after `10 02` | **Survives; unproved** | consistent with topology, but no gateway firmware or dual-segment transition capture is pinned |
 | indirect OBD path loses ACK / bus-off stability during transition | **Survives; unproved** | Panda explicitly handles FDCAN2 mux-related ACK errors; no field health trace binds this to the event |
-| old client timeout semantics misclassified a successful async reset | **Strongly plausible contributor; insufficient alone** | foreign firmware permits reset before final positive response; old tooling treated timeout as failure |
+| old client timeout semantics misclassified a successful async reset | **Strongly plausible contributor** | foreign firmware permits reset before final positive response; old tooling treated timeout as failure |
 
 ## 14. What static analysis still cannot choose
 

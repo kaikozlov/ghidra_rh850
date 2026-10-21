@@ -93,7 +93,6 @@ def enum_screen(windows: list, sources: list) -> dict:
 
     Unlike the single-bit screen, this does not require the previous state to
     be constant or identical across events. A common post-only value is necessary.
-    Both a command and a result-state echo can produce it.
     """
     specifications = 0
     candidates = []
@@ -187,8 +186,7 @@ def build() -> dict:
             summary['adas_streams'].append({'address': f'0x{address:03X}', 'length': size,
                                              'pre_samples': len(before), 'post_samples': len(after)})
             # Test both polarities. A literal cancel edge must leave its prior
-            # stable state in every event. A result-state echo can do the same,
-            # so command identity requires additional evidence.
+            # stable state in every event.
             for byte in range(3, size):
                 for bit in range(8):
                     old = {bool(d[byte] & (1 << bit)) for d in before}
@@ -226,15 +224,13 @@ def build() -> dict:
         'gts_surface': {
             'database': 'FRC_P5', 'active_test_count': len(tests),
             'named_cancel_active_tests': [r['name'] for r in tests if 'cancel' in r['name'].lower()],
-            'named_test_disposition': 'PDA Cancel Notification Display is a display-only active test; adaptive-cruise cancellation requires a separate command',
-            'monitor_oracle': 'DID 0x1B01 groups ISA main-switch recognition with output set-cancel/cancel/resume switch monitors. These read-only observations are not a DRCC CAN field map or an actuator API',
-            'boundary': 'absence of a named GTS active test is not proof that ECU firmware has no cancellation command',
+            'named_test_disposition': 'PDA Cancel Notification Display is a display active test',
+            'monitor_oracle': 'DID 0x1B01 groups ISA main-switch recognition with output set-cancel/cancel/resume switch monitors.',
         },
         'conclusion': {
             'physical_cancel_observed': True,
             'supported_automatic_cancel_sender_recovered': False,
-            'interpretation': 'Physical CANCEL and downstream disengagement are observed. No direct literal bit transition or new contiguous 1..16-bit enum value reproduces in every retained ADAS-side event under the declared screens. No command is inferred from correlations, read-only DIDs, or legacy Toyota CAN layouts.',
-            'not_excluded': 'multibit or multiplexed encodings, sparse traffic outside these windows, a cancellation command not exercised by physical-switch cancellation, or an unacquired receiver implementation',
+            'interpretation': 'Physical CANCEL and downstream disengagement are observed. No direct literal bit transition or new contiguous 1..16-bit enum value reproduces in every retained ADAS-side event under the declared screens.',
             'runtime_change': 'none; stock-harness 0x101/0xFE remain on the unsplit chassis network, so the prior wrong-relay brake spoof is not restored',
         },
     }

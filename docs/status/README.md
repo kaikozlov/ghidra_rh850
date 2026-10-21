@@ -33,8 +33,7 @@ optional — see the documentation section of
   milestones only if it adds value.
 - New work does not need an OQ entry before it can proceed, and resolving a
   question does not require a FINDINGS/CORRECTIONS bookkeeping transaction.
-- **No freshness or completeness guarantee.** These pages receive manual
-  updates. Verify against the canonical
+- Verify against the canonical
   reports and `tools/know QUERY` before relying on a ledger statement as
   current.
 - Completed investigation narratives belong under `docs/history/YYYY-MM/`.

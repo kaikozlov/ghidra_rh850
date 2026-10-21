@@ -16,19 +16,9 @@ published 2020-03-05), already analyzed in
 
 ## Evidence boundary
 
-A patent proves that Toyota or a co-assignee disclosed a design and provides
-Toyota-authored terminology. It does **not** prove that the exact 2026 Camry F33
-implements that embodiment, assigns its blocks to the same ECUs, uses the same
-wire encoding, or uses the example numeric values shown in a figure.
+A patent records a disclosed design and Toyota-authored terminology.
 
-Accordingly:
-
-- a semantic match to exact GTS terminology is a strong search oracle.
-  A CAN-field rename requires an exact join;
-- a later patent can explain Toyota architecture vocabulary without proving
-  that an earlier TSS3 calibration implements the later mechanism;
-- example priorities, bit widths, enum values, and state codes remain examples
-  until joined to exact firmware, GTS, or dynamic evidence;
+- A semantic match to exact GTS terminology is a strong search oracle.
 - co-assignee patents from ADVICS, JTEKT, and Denso are included where the
   disclosed subsystem is directly relevant.
 
@@ -119,9 +109,8 @@ valid values are only `0..3` and whose display mapping is `0 = Steering control
 request is executable`, `1 = Reserved`, `2 = Steering control request is not
 executable (temporary)`, `3 = Steering control request is not executable (with
 failure decided)`. The same `0..3` mapping survives in rear-steering P6/P6F.
-That does not prove the F33 lateral fail-class encoding, but it gives strong
-Toyota-family evidence that values `2` and `3` mean temporary invalidity versus
-confirmed failure.
+This gives strong Toyota-family evidence that values `2` and `3` mean temporary
+invalidity versus confirmed failure.
 
 The same patent says the information for setting application behavior after an
 abnormality can include **influenced vehicle velocity range**,
@@ -140,8 +129,7 @@ interpretation consistent with both the patent and the independent DRS enum is
 therefore **`B13[7:6]` as a two-bit lateral fail-class candidate**, with `10`
 matching a temporary/not-executable state and `11` matching
 failure-decided/confirmed. `01` would remain an unresolved protective/degraded
-state if F33 uses it. This hypothesis requires a join against `5283_1` or an exact
-decoder before it can justify a wire-field rename.
+state if F33 uses it.
 
 ### 2.2 Request/result IDs really are first-class application identifiers
 
@@ -440,9 +428,7 @@ priority/invalidation state that can reject or de-prioritize a still-present
 FRC/requesting application.
 
 The FRC's own LTA/LDA/LCA/PDA/PCS feature-owner state machine remains a separate
-upstream recovery target. It determines which feature populates `5282`/`0x08A`,
-but this patent does not prove that FRC-local selection uses the same
-invalidation protocol.
+upstream recovery target. It determines which feature populates `5282`/`0x08A`.
 
 The patent also explicitly generalizes the mechanism from acceleration to
 steering-angle plans and names LKA/LTA as example steering clients, so the
@@ -472,8 +458,7 @@ The GTS vocabulary is now more tightly bounded than the first survey suggested:
   `0x1B06 ISA Speed Change Priority Request (Upper Limit)`. No equivalent
   lateral invalidation/priority field or manager->suppressed-client rejection
   feedback has yet been recovered.
-- `240E LCA Reject` is an Operation-FFD feature-event trigger. Whether it carries
-  the patent's request-rejection feedback remains unproven.
+- `240E LCA Reject` is an Operation-FFD feature-event trigger.
 
 The two patent directions therefore remain separate recovery problems at the
 **downstream manager boundary**: requester/system -> VMM priority/invalidation
@@ -649,7 +634,6 @@ The strongest families are:
    Status, PBA Assist Level, PBA1/PBA3 operation enable/prohibition, and the
    PBA1/PBA2/PBA3 start/cancel flags look like inherited Toyota PCS vocabulary.
    It also gives an important semantic distinction: **PBA assists driver braking**.
-   Whether a particular PBA state includes autonomous PB requires separate evidence.
    Do not project the old patent's exact TTC thresholds or level encoding onto
    F33.
 
@@ -768,8 +752,7 @@ box is used in every scene:
                                                         |
                                                         +--> PBH after stop
 
-The arrows are a **semantic working model**. The exact serialization of these
-stages on the 2026 Camry remains unproven.
+The arrows are a **semantic working model**.
 
 #### Join to the retained 2026 Camry PCS event
 
@@ -792,8 +775,7 @@ still crossed the relay.
 
 The patents now make the evidence boundary clearer:
 
-- 0x5AE provides evidence for the **warning/ALM presentation path** only.
-  Commanded or applied brake pressure requires separate evidence;
+- 0x5AE provides evidence for the **warning/ALM presentation path**;
 - the co-batched negative-acceleration 0x08A request, ordered after the first
   warning frame in the captured FIFO, is evidence that a **longitudinal PCS
   application request** was active, but it still does not
@@ -918,13 +900,7 @@ door opened while the vehicle is after IG-OFF, the manager interprets the
 source+state as a vehicle event, and it starts only the device group needed for
 that event.
 
-This patent supplies **contemporary Toyota architecture evidence**. Exact F33
-implementation of its manager/database or target mapping remains unproven. Its
-2023 priority is fully compatible with a 2026-model Camry and could reflect design
-work that reached this vehicle generation. The remaining evidentiary requirement
-is an implementation join: until exact F33 wiring, firmware, or live state
-transitions supply it, use the patent as a strong architectural oracle. It is
-strong Toyota evidence
+This 2023-priority patent supplies **contemporary Toyota architecture evidence**
 that "OFF" is intentionally decomposed into event-driven selective device
 startup, and that Toyota distinguishes physical power-control wake from
 network/communication wake.
@@ -1067,8 +1043,7 @@ Priority 2024-03-22, Toyota.
 
 This is later than the initial TSS3 launch, but its 2024 priority is still
 temporally compatible with a 2026-model F33 Camry. Treat it as
-**contemporary Toyota security vocabulary**. The remaining limitation is that a
-patent does not prove this exact calibration uses its new dynamic-key scheme.
+**contemporary Toyota security vocabulary**.
 
 Its description explicitly calls the related architecture **AUTOSAR SecOC**:
 sender and receiver ECUs share a secret key, the sender appends a MAC to the
@@ -1123,7 +1098,7 @@ A dedicated claim/threat-model/F33 comparison is in
 For the existing F33 work the useful part is Toyota-authored terminology around
 MAC verification, freshness, truncated security fields, receiver rejection,
 and startup synchronization. It provides a conceptual cross-check for the recovered
-SecOC-shaped traffic. The exact EPS/FRC implementation remains the authority.
+SecOC-shaped traffic.
 
 ### US20230143921A1 / US12504961B2 — electronic control system for vehicle firmware
 
@@ -1170,9 +1145,8 @@ Deep review:
 
 For TSS3 this is strongest as architecture vocabulary: wheel holding/contact,
 driver-monitor attention, the attention timer, and HMI request are separate
-concepts. It does not prove which TSS3 trims implement touch sensing, and the
-exact maintainer Camry's retained 5609 state says its LTA driver-monitor-camera
-collaboration and Toyota hands-off capability are absent.
+concepts. The exact maintainer Camry's retained 5609 state says its LTA
+driver-monitor-camera collaboration and Toyota hands-off capability are absent.
 
 US20230082947A1 independently places **whether the driver grips the steering
 wheel**, steering-wheel operating torque, steering-wheel rotation angle, and

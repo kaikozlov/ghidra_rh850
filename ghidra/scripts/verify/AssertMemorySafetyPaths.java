@@ -238,8 +238,8 @@ public class AssertMemorySafetyPaths extends GhidraScript {
         assertExactRefs(0x86ee8L, "00086fb4:UNCONDITIONAL_CALL", "000871b2:UNCONDITIONAL_CALL");
         assertExactRefs(0x88936L, "0006828a:UNCONDITIONAL_CALL");
 
-        // MEM-SAFE-005 is a negative bounded by:
-        // application copy gate, SecOC underflow gate, DLC map, and exact sink caller.
+        // MEM-SAFE-005: application copy gate, SecOC underflow gate, DLC map,
+        // and exact sink caller.
         assertFlow(0x90472L, 0x92398L);
         assertInsn(0x90476L, "ld.hu", "r27", "r1");
         assertInsn(0x9047aL, "cmp", "r10", "r1");

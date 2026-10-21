@@ -377,7 +377,7 @@ def analyze() -> dict[str, Any]:
     ]
     runtime_only = [
         "The exact physical/link-layer reason a Panda B6 fails to become an F33 controller1 receive object: an unobserved/routed physical segment is the leading model, while a link-decode failure before GAFL acceptance remains the narrow receiver-side residue.",
-        "The physical provenance of the profile2 deliveries that advanced route44 during the retained zero-host-B6-TX control. Static software proves only their route; the external source node/link remains unresolved.",
+        "The physical provenance of the profile2 deliveries that advanced route44 during the retained zero-host-B6-TX control remains unresolved.",
         "ICU-S silicon-internal cryptographic behavior beyond the recovered software-visible command/result contract.",
         "Final motor/PWM/plant response after the already-recovered software command/current funnel.",
     ]
@@ -441,7 +441,7 @@ def analyze() -> dict[str, Any]:
                 "sha256": sha(TOPOLOGY.read_bytes()),
                 "eps": eps_place,
                 "skid": skid_place,
-                "boundary": "GTS Bus 4 is a logical network domain. EBU labels only the junction/attachment on the EPS row; the table supplies no installed exact-Camry EBU ECU component. Do not model a separate EBU filter ECU from this table.",
+                "boundary": "GTS Bus 4 is a logical network domain. EBU labels the junction/attachment on the EPS row.",
                 "ebu_topology_path": str(EBU_TOPOLOGY.relative_to(ROOT)),
                 "ebu_topology_sha256": sha(EBU_TOPOLOGY.read_bytes()),
             },

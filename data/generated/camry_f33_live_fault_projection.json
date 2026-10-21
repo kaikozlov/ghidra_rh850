@@ -244,9 +244,7 @@
   },
   "openpilot_mapping": {
     "cooperative_evidence": "data/generated/camry_f33_cooperative_fault_projection.json",
-    "interpretation": "Temporary means only current steering unavailability in the ordinary openpilot interface; underlying hardware faults may still require repair.",
-    "missing_coverage": "Only selected classes/statuses are represented. Other fault classes and restart-required causes cannot be reconstructed from this bit.",
-    "other_variants": "No H/F or Crown policy transfer is made.",
+    "interpretation": "Temporary means current steering unavailability in the ordinary openpilot interface.",
     "platform": "TOYOTA_CAMRY_TSS3",
     "steerFaultPermanent": "not supplied by this one-bit current-state projection",
     "steerFaultTemporary": "current EPS_FAULT_INHIBIT contribution OR the separately recovered cooperative-command and angle inhibits"

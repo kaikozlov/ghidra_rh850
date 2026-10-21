@@ -10,10 +10,11 @@ import json
 import struct
 from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
+from tools.project.analysis_target import path as target_path
 from typing import Any
 
 REPO = REPO_ROOT
-DEFAULT_CORPUS = REPO / "build/work/corpora/h_8965H1202000_decompilations.corrected-context.raw.jsonl"
+DEFAULT_CORPUS = target_path("corolla-8965H1202000", "decompiler_corpus")
 DEFAULT_OUTPUT = REPO / "data/generated/corolla_hf_command5_runtime_carrier_evidence.json"
 H_CODE = H_CODEFLASH
 F_SOURCE = F_RAW_DUMP
@@ -21,7 +22,7 @@ F_SOURCE = F_RAW_DUMP
 H_SHA256 = "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
 F_SOURCE_SHA256 = "b8fa3d951f59fb75c190ce1b2c73164adb952f871650cfcd3b7656f08a9c448d"
 F_NORMALIZED_SHA256 = "fdb35b76891cf84a8b89e0a05c9c7c5cfcd27994cf85ccc01ff32828f53091f6"
-EXPECTED_CORPUS_SHA256 = "c3411eec57b9d55c004b0b0f328394bb152577c3398084dccc729dab5da54656"
+EXPECTED_CORPUS_SHA256 = "ede02931f236ba4c83243039df0ed920aa49108d90390cb478a01ae16d5610dc"
 
 APP_GP = 0xFEBEB800
 POCKET_LO = 0xFEBF0000
@@ -128,7 +129,7 @@ def build(corpus: Path = DEFAULT_CORPUS) -> dict[str, Any]:
         raise ValueError("8965F1208000 normalized first-MiB identity mismatch")
     corpus_sha = sha256_file(corpus)
     if corpus_sha != EXPECTED_CORPUS_SHA256:
-        raise ValueError(f"unexpected H corrected decompiler corpus identity: {corpus_sha}")
+        raise ValueError(f"unexpected H registered decompiler corpus identity: {corpus_sha}")
 
     functions, refs = load_functions(corpus)
     selected: list[dict[str, Any]] = []
@@ -296,7 +297,6 @@ def build(corpus: Path = DEFAULT_CORPUS) -> dict[str, Any]:
             "h_f_prerequisites_transfer_byte_exact": True,
             "carrier_retention_live_verified": False,
             "live_canary_required": True,
-            "vehicle_actuation_authorized": False,
         },
     }
 

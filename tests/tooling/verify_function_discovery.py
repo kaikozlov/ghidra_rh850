@@ -2,8 +2,7 @@
 """Verify the generated outside-function census and callback discovery floor.
 
 The callback-table anchors in this test are decoded directly from the pinned
-CodeFlash image. The generated candidate ledger requires independent validation:
-any dispatch-proven target that remains outside every function is a failure
+CodeFlash image. Any dispatch-proven target that remains outside every function is a failure
 until the reproducible seed stage creates it.
 """
 from __future__ import annotations

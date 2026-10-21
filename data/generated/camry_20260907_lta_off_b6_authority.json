@@ -221,7 +221,7 @@
     },
     "transport": {
       "b6_frame_format": {
-        "interpretation": "Every route-48 B6 send is explicitly FDF=1 in sendcan. Every successful/rejected Panda return also has FDF=1. A preceding physical-controller-2 Panda state exists for every B6 send and reports CAN-FD+BRS enabled at 500/2000 kbit/s in ISO mode. Given Panda 58a1b6a4 host-TX construction, those B6 frames are therefore emitted as 32-byte CAN-FD+BRS; BRS remains bus-state-derived rather than carried per frame through cereal. All B6 sends still carry the development zero-MAC28 marker, so transport framing is closed separately from SecOC authentication/admission.",
+        "interpretation": "Every route-48 B6 send is explicitly FDF=1 in sendcan. Every successful/rejected Panda return also has FDF=1. A preceding physical-controller-2 Panda state exists for every B6 send and reports CAN-FD+BRS enabled at 500/2000 kbit/s in ISO mode. Given Panda 58a1b6a4 host-TX construction, those B6 frames are therefore emitted as 32-byte CAN-FD+BRS; BRS is derived from bus state. All B6 sends carry the development zero-MAC28 marker.",
         "preceding_physical2_brs_enabled": 21347,
         "preceding_physical2_canfd_enabled": 21347,
         "preceding_physical2_speed_mode_counts": [
@@ -349,6 +349,6 @@
       }
     }
   },
-  "openpilot_parser_commit": "abe6b230231a7a548a3ecddd3bd460003ceeafb1",
+  "openpilot_parser_commit": "82b6e07d58693c46ad4edd23a32f6e3ee93d9e23",
   "schema": "camry-20260907-lta-off-b6-authority-v2"
 }

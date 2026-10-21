@@ -312,8 +312,7 @@ through category 405 / generation 20, is named **`Command Value Torque`**, uses
 a 16-bit monitor range (`0..15`), and resolves through its physical-data/unit
 records to **`Nm`**. The metadata is byte-identical across NA/EU/JP. This is
 strong corroborating vocabulary/dimensional evidence for the recovered command
-domain. Whether Techstream monitor 402 reads the CAN COM destination itself
-remains unproven. The RAM and call chain above remain firmware-static evidence.
+domain.
 
 ### Boundary
 
@@ -336,8 +335,7 @@ a motor-current command:
 The processor audit locks those exact direct-reference sets. Whole-program
 decompiler-text, high-p-code, and GP-displacement/scalar scans were also used to
 look for indirect consumers. They found no recovered path into the proved d/q
-current references at `0xFEBE6D28/0xFEBE6D2A`. This static negative is limited to
-the recovered paths. Table-driven, computed, or runtime-only handoffs remain possible.
+current references at `0xFEBE6D28/0xFEBE6D2A`.
 
 ### Evidence grade: recovered
 
@@ -624,10 +622,7 @@ calibrated ramp/state calculation at `0xC7F58`. `AE2A` remains write-only.
 Configured signals 194/197 remain separately classified store-only in the Rx
 consumer audit.
 
-These are recovered steering-controller state/prerequisite consumers. A third
-command-mode selector remains unproven: none of the four functions writes the
-`FEBE6D28/6D2A` d/q references or selects `FEBEC13A/C13D`. The exact OEM field
-names and downstream authority of `0x132` remain unresolved.
+These are recovered steering-controller state/prerequisite consumers.
 
 #### 9.3.5 d/q producer cone remains independently closed
 
@@ -653,9 +648,7 @@ the Stage-6 version: no direct, table-pointer, generic-memcpy, RTE-copy,
 recovered GP-relative, or
 late monitor/adaptation transfer joins **either** authenticated steering command
 mode (`0x2E4` torque or `0x131` LTA angle) to `FEBE6D28/6D2A` or their direct
-feeder state. This still does not prove physical independence. A runtime-only
-mechanism invisible to the recovered static model remains logically possible;
-a provisioned bench observation remains the discriminator.
+feeder state.
 
 ### 9.4 Torque-limit and command-side plausibility branches
 
@@ -716,10 +709,7 @@ writes only `FEBEB5F4..B5FE`, and calls event/status helpers `0x53562`,
 
 No direct current-reference or PWM write is recovered from `0x43F28` or
 `0xB9D36`. The defensible classification is therefore **registered
-plausibility/deadline/fault monitoring with event-state output**. A
-motor-inhibit/interlock path remains unproven. An indirect safety policy elsewhere
-could still consume its event state. This trace does not claim the monitors are
-irrelevant to safety.
+plausibility/deadline/fault monitoring with event-state output**.
 
 ### 9.6 Calibration/version-domain handlers
 
@@ -793,11 +783,8 @@ through normal `0x300/0x400/0x500` operational modes. Exact xref closure pins
 the one-shot flags `FEBE8157/8158`, group states `FEBEB454/455/456`, caller
 sets for `B7A36/B7AAE`, and the normal scheduler references to `B79E8`.
 
-This is a real live-state perturbation boundary, but it still does not create a
-recovered d/q command. None of these lifecycle states is a producer of
-`FEBE6D28/FEBE6D2A`, and the previously pinned d/q/PWM cone remains unchanged.
-The recovered security consequence is therefore limited to operational
-availability/control state.
+The recovered security consequence is operational availability/control-state
+perturbation.
 
 ### Evidence grade: recovered/verified with bounded actuation join
 

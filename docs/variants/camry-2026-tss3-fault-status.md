@@ -179,9 +179,6 @@ policy.
 
 ## 6. `0x351` force-status boundary
 
-The expanded reconstruction of the F33 `0x351` path leaves some source OEM display
-names unassigned.
-
 Target-native F33 `0x3C008` walks 24 records and ORs several verified ushort
 fields. Its fourth aggregate flows to `0x3C6A8`; **aggregate bit15** causes
 `0x3C6A8 -> 0x4C5E8` to write `0x5A` into `GP-0x36BD`. F33 `0x4C216` then forces
@@ -197,7 +194,6 @@ does not recover unique Toyota names for bits0/1. It is also **not** F33 DID
 diagnostic name is transplanted onto `GP-0x509C`.
 
 If observed, `0x351` code7/flag identifies a distinct forced/special status input.
-Its mapping to openpilot's permanent/temporary split remains unresolved.
 
 ## 7. Openpilot consequence
 

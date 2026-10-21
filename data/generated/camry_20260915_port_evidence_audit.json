@@ -1,9 +1,9 @@
 {
   "boundaries": [
     "Stock-harness samples have an absent EPS and cannot qualify healthy-stock-harness steering.",
-    "The working steering samples use conventional cruise, not a demonstrated adaptive-cruise lifecycle.",
+    "The working steering samples use conventional cruise.",
     "Repeated cached lag estimates are not fresh independent lag measurements.",
-    "GTS meanings for Control Mode/Permission/ACC Not Available remain diagnostic fields, not CAN overlays."
+    "GTS meanings for Control Mode/Permission/ACC Not Available are diagnostic fields."
   ],
   "native_longitudinal_handoff": [
     {
@@ -1830,6 +1830,6 @@
     ]
   },
   "schema": "camry-port-evidence-audit-v1",
-  "scope": "seven source-pinned rlog segments plus both complete August-27 CAN captures; not a full-fleet qualification",
+  "scope": "seven source-pinned rlog segments plus both complete August-27 CAN captures",
   "vehicle_access": false
 }

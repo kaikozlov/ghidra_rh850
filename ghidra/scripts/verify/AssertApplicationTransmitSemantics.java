@@ -100,7 +100,7 @@ public class AssertApplicationTransmitSemantics extends GhidraScript {
     @Override
     public void run() throws Exception {
         // One foreground staging orchestrator owns all four CAN 0x260 producer
-        // helpers. This establishes structural scheduling only.
+        // helpers.
         assertCall(0x4ba8cL, 0x4b66cL);
         assertCall(0x4ba8cL, 0x4b900L);
         assertCall(0x4ba8cL, 0x4b976L);

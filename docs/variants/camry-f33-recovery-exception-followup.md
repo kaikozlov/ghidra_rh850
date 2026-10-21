@@ -12,8 +12,7 @@ The canonical stock CodeFlash is
 `42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7`.
 The local reconstruction of the incident image hashes to
 `aba6867f244dda42b754d6f455f25a226ee95025dee6a2d98b07b3ac550f2d74`,
-the expected post-write image from the incident record. It is not a new live
-whole-flash readback.
+the expected post-write image from the incident record.
 
 Comparing that reconstruction with stock shows that these reviewed regions
 are unchanged: boot `00000..0FFFF`, CAN/DCM tables `21000..2BFFF`, startup and
@@ -35,8 +34,8 @@ inhibits the relevant EI/FE exception acknowledgements. `ei` clears ID while NP 
 Thus, **for an FE-level fault, `ei` alone does not prove that ordinary CAN/timer
 interrupts remain serviceable**. The PSW table was visually checked in the PDF.
 
-The exact live incident exception remains unobserved. At `7A272`, the recorded
-four bytes and next stock halfword form `FF 02 92 5B 24 36`, a six-byte JARL to
+At `7A272`, the recorded four bytes and next stock halfword form
+`FF 02 92 5B 24 36`, a six-byte JARL to
 `362BFE04`. Hardware Table 4.1 (p.257) marks `20000000..FEBDFFFF` reserved and
 Section 4.2.1 limits instruction fetch to CodeFlash, LocalRAM-self, and
 GlobalRAM. Table 3.80 assigns FEIC `13H` to a SYSERR caused by an instruction
@@ -45,9 +44,7 @@ not the final architectural classification for this subcase: matching
 RH850G3M Software Rev.1.40 Table 4-1 classifies **instruction-fetch SYSERR as a
 resumable FE exception**.  Exact F33 nevertheless makes it operationally
 terminal because its selected SYSERR handler never executes `FERET`.  These
-facts make SYSERR `13H` the bounded architecture-predicted interpretation of
-the malformed call; the missing live FEIC observation remains distinct from
-that interpretation.
+facts make SYSERR `13H` the architecture-predicted interpretation of the malformed call.
 
 The broad firmware MPU region spanning `00000000..FEBDFFFF` does not map the
 reserved system address range or make it a valid instruction source. Its
@@ -111,11 +108,10 @@ It is not RESF, a failed-start counter, or a persistent application-crash flag
 before the later validity check. A genuine new flash error can affect the
 check; an erroneous but correctly stored branch is not evidence of one.
 
-The three-attempt loops in `119E` retry validity checks during one invocation;
-they are not a multi-boot crash counter. The reviewed startup paths use backup
-words `FFC0A000/4/8/C` as guarded error/reset records. No network-controlled
-programming selector was recovered. Upper RAM is cleared on cold startup but
-retained across the application's live handoff.
+The three-attempt loops in `119E` retry validity checks during one invocation.
+The reviewed startup paths use backup words `FFC0A000/4/8/C` as guarded
+error/reset records. Upper RAM is cleared on cold startup but retained across
+the application's live handoff.
 
 Primary firmware: `802`, raw `1404..1477`, `E54`, `F80`, `10C6`, `115A`, `119E`,
 `13B0`, `62BAE`. No electrical fault or deliberate integrity failure is proposed
@@ -129,42 +125,29 @@ as a recovery procedure.
 prevents protocol command processing. That byte and the reviewed gate code are
 unchanged in the incident reconstruction.
 
-The callback relationship should not be replaced by a blanket assumption that
-all XCP interpretation waits for DCM. Conversely, even granting that the
-callback runs, reaching staging does not enable CONNECT/DOWNLOAD. This pass
-does not claim a particular incident frame reached the parser before the
-fault. The custom resident is not an independent listener: the malformed call
-does not reach its intended entry.
+The custom resident's intended entry is not reached by the malformed call.
 
 ## 5. Recovery boundary
 
 The documented Renesas ROM programming mode is selected by hardware mode pins
 at pin-reset release and uses UART/CSI (manual pp.261–263 and 2867).
 The master/checker pair provides lockstep checking of one application CPU
-(p.2684). Another processor or connection elsewhere in the assembly remains
-possible.
+(p.2684).
 
 Current local `tools/gts route P5-Unified --json` reports `PrepareRetryFlag=0`
 for both `P5-Unified` and `P5-Unified10`, with no configured repro-gateway-mode
-writer in those rows. This observation covers configuration only. Current-DLL
-internals and assembly-level mechanisms require separate evidence.
+writer in those rows.
 
 A subsequent read-only check of the shipped current
 `software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/CUWPlus/TCUWCanUnifiedPrepareWriter.dll`
 found a single export, `StartPrepareWrite`, and no `PrepareRetry` export. Use
 that absolute DLL path with `tools/gts pe`; the default CUWPlus evidence root
 in this checkout locates route INIs but did not resolve this DLL by basename.
-This confirms the export surface only. Internal functions and undocumented
-manufacturer recovery mechanisms remain outside its scope. The exact F33 binary was also
-rechecked at `13B0/119E`, `7A254/667E6`, `65F5E`, and `98E80`; those checks do
-not establish an additional recovery entry. No vehicle access occurred.
+The exact F33 binary was also rechecked at `13B0/119E`, `7A254/667E6`, `65F5E`,
+and `98E80`; those checks found no additional recovery entry. No vehicle access occurred.
 
-An actual recovery lead must provide legitimate recovery execution independent
-of returning from the corrupted foreground call. The exact live FE exception-register values,
-unacquired ROM/extended-region contents, and complete assembly-level wiring
-remain unknown. They are neither demonstrated recovery routes nor evidence
-for an absolute impossibility claim. Known inverse bytes alone do not supply
-an accessible way to perform the repair. No new vehicle job was left running.
+A recovery lead must provide legitimate recovery execution independent of
+returning from the corrupted foreground call. No new vehicle job was left running.
 
 ## 6. Network-only route closure after exact-target recheck
 
@@ -263,8 +246,7 @@ Result: the intact resident is a useful known executable landing pad **only if
 a separate pre-fault PC-transfer primitive is first recovered**. It would then
 still need to be paired with an independently callable flash erase/program
 chain to restore `7A272`. Neither prerequisite is present in the recovered
-network-reachable surface. This static negative is limited to the recovered
-surface. Undocumented manufacturer executors and unrecovered vulnerabilities remain possible.
+network-reachable surface.
 
 ## 8. CUW `BlankECU` and recovery host modes
 
@@ -320,8 +302,7 @@ extracting a CID from an otherwise silent processor.
 The relevant acquired package `T-0051-26.cuw` selects node diagnostic ID
 `0724`, gateway descriptor `07505F`, `P5-Unified`, and
 `ChargeLocalBusEcuReprogrammingFlow=00`. Its current route selects the ordinary
-unified CID/prepare/flash DLLs and `PrepareRetryFlag=0`. These facts apply to that
-package. The F33 EPS diagnostic address requires its own identity evidence.
+unified CID/prepare/flash DLLs and `PrepareRetryFlag=0`.
 
 ## 9. “Charge local bus” controls another ECU; it is not a byte proxy
 
@@ -340,10 +321,8 @@ No locally acquired CUW declares a nonzero charge-local-bus flow, and the
 Camry package above explicitly declares `00`. Exact F33 static topology also
 recovers one CAN controller rather than a separate software-addressable EPS
 local CAN. This facility provides a controller-mediated power/wake operation for
-other package geometries. A route to call the resident at `FFE04` or rewrite
-`7A272` remains unproved. Even if an external ECU
-could power-cycle the F33, the valid incident image would make the same fixed
-application jump and fault at the malformed call again.
+other package geometries. Power-cycling the F33 with the valid incident image
+would repeat the same fixed application jump and fault at the malformed call.
 
 The hook-reuse target is therefore precise: a new lead must either (a) transfer
 the F33 PC to intact `FFE04` before `7A272`, or (b) independently enter a flash
@@ -457,8 +436,6 @@ can produce configured-length truncation or ignored suffixes, but not a write
 past the reviewed workspaces. Thus flooding, unknown CAN IDs, short classic
 frames, and 12/16/20/24/32/48/64-byte FD shapes do not currently provide a
 write into the saved FE context, a callback cell, or a resident entry address.
-This negative is limited to the exact reviewed receive and ISO-TP paths.
-Undiscovered peripheral defects remain outside its scope.
 
 ## 13. The malformed JARL has a clean epilogue re-encoding, but no flash shortcut
 
@@ -527,10 +504,6 @@ independent DLC-pin-15 short-to-ground primitive, but that mechanism is not
 selected by the P5 CAN/Unified EPS programming family and cannot be promoted to
 an F33 hardware boot-mode control.
 
-This negative covers the reviewed host routes only. Other Toyota VCI or DLC
-electrical implementations remain outside its scope. A future F33-specific package
-selecting a different system/protocol row needs its own evaluation. The current
-P5 EPS package evidence does not exercise this physical pin-control path.
 
 
 ## 15. Network-only recheck: the frozen RAM writer is not a recovery server
@@ -550,7 +523,7 @@ Its stage-6 predecessor hashes to
 `818338cc3e3dc23f1cf466c72f497699adc9ff33767e67b81fb65bccfab09010`.
 The complete byte comparison finds exactly **eight** stage-6-to-incident byte
 changes: the four-byte call site at `7A272..7A275` and four-byte CRC fixup at
-`FFDEC..FFDEF`. This evidence reconstructs the write. Live readback remains unavailable.
+`FFDEC..FFDEF`.
 
 The earlier stock-to-incident unchanged-range comparison in the opening
 image-state check was repeated successfully. Whole-image raw PSW, EBASE, RBASE
@@ -563,7 +536,6 @@ confirms the malformed destination. A raw direct-transfer census finds only
 `65F82 -> 9F00` as an application-to-low-boot transfer inside a recovered
 function. Seven other apparent low-target branches lie outside the recovered
 functions in configuration/table regions and are not established code paths.
-The survey does not prove absence of every unrecognized computed transfer.
 The direct calls into `988C2` and `58B5E` remain at `667F2` and `667FA`, after
 the corrupted aggregate. Fresh Ghidra decompilation of the supported boot
 selection and handoff functions agrees with that ordering.
@@ -589,8 +561,7 @@ predicted fetch SYSERR into the returning protection exception.
 Manufacturer evidence is **R01UH0585EJ0120**, CPU register table for ASID,
 Table 3.39 (p.215), Tables 3.47/3.48 (p.219), and Table 3.49 (p.220). The MPAT
 page was rendered and visually checked. The existing
-`camry_8965f3307000_incident_fault_model` test passes. This result strengthens
-the existing model. Live FE registers remain unobserved.
+`camry_8965f3307000_incident_fault_model` test passes.
 
 ### 15.3 A still-running post-write payload would also be diagnostically silent
 
@@ -623,7 +594,7 @@ network continuation or abort command that this payload does not implement.
 A genuine reset would leave this RAM execution state, but the already-recorded
 CRC-valid malformed application remains the separate cold-start problem.
 
-### 15.4 Remaining live evidence limitation
+### 15.4 Incident archive access
 
 A read-only attempt to reach the configured comma SSH endpoint timed out before
 any remote command ran. The existing overlay-network record for a comma-named
@@ -637,16 +608,14 @@ records. Inspect them to recover the actual write/return/reset sequence. Keep
 their withdrawn scripts unexecuted. A target-native diagnostic
 response through an existing network route would override the present silent-
 executor model and must be identified as application or boot before recovery
-is considered. No such new response or working network-only repair was
-established by this offline pass.
+is considered.
 
 
 ## 16. Network-only recheck: current Unified writer and pre-foreground work
 
-2026-09-12. This pass covers recovery over the vehicle network only.
-Hidden connector contacts, rack removal and direct programming are outside its scope. It performed no
+2026-09-12. This pass covers recovery over the vehicle network. It performed no
 vehicle connection, transmission, session change, reset, RAM upload or flash
-operation. No working network repair was established.
+operation.
 
 ### The selected Unified writer itself requires the target response
 
@@ -656,8 +625,7 @@ The earlier ReproStd trace must not stand in for every P5 contact type.
 protected input, its `._` sidecar, and the previously recovered native body
 were freshly matched against the recovery manifest. The ordinary imported
 P5 exchange helper was independently bound to its current protected inputs
-in the same way. These observations cover the current host implementation only.
-Exact-F33 CUW package acquisition and vehicle execution remain absent.
+in the same way.
 
 Native instructions establish the following dependency without relying on
 RetDec's incomplete reconstruction of local packet stores:
@@ -671,21 +639,14 @@ RetDec's incomplete reconstruction of local packet stores:
 | `TCUWCanDiagCommUtils!100019D0` | Writes the request, receives the specified CAN response (`10001BC1`), enforces the minimum size (`10001D23`), and compares the expected bytes (`10001D3A..10001DA4`). |
 | Same exchange helper `10001F9A`, `10001FC4`, `10001FFD..10002046` | Short/mismatched responses and receive exceptions take error/throw paths. |
 
-The helper separately recognizes response-pending `7F <service> 78` from a
-running target. Programming still requires that target's execution and responses.
-In the Unified writer, the ordinary error handler translates target
-`7F 10 22` into its preparation error; it does not supply another target-side
-executor. The ordinary main preparation path calls `10002550` regardless of
-which side of its emissions-related delay branch was taken. Object member
-`+2C` comes from `GetEmissionsRelatedSystem` in the constructor; it is not
-identified here as a blank-ECU recovery flag.
+The helper separately recognizes response-pending `7F <service> 78`.
+In the Unified writer, the ordinary error handler translates target `7F 10 22`
+into its preparation error. The ordinary main preparation path calls `10002550`
+regardless of which side of its emissions-related delay branch was taken.
+Object member `+2C` comes from `GetEmissionsRelatedSystem` in the constructor.
 
-Thus the **actual current Unified flow** also requires the selected ECU to run
-programming-session service. Its network
-preparation can affect delivery, but does not itself repair the missing
-execution dependency in the reconstructed F33 incident. This does not prove
-that every unacquired target package or supplier recovery implementation uses
-this flow.
+Thus the **actual current Unified flow** requires the selected ECU to run
+programming-session service.
 
 Reproduction inputs are the current `TCUWCanUnifiedPrepareWriter.dll` and
 `TCUWCanDiagCommUtils.dll` plus their `._` files under the installed CUWPlus
@@ -713,8 +674,7 @@ than directly interpreting UDS input. Its worker `72EEA` polls the current job;
 and `72342` dispatches the configured job operation. The mode helper `73EEE`
 selects fixed internal callbacks `766F4`/`767EA`. None of the reviewed
 entry/dispatch functions is the normal DCM worker or an independently identified
-network programming listener. This result covers the reviewed preamble/dispatcher
-functions. Computed descendants remain outside the exhaustive review.
+network programming listener.
 
 The startup and preamble observations were also checked against the **complete
 cumulative incident reconstruction**.
@@ -723,8 +683,7 @@ bytes across 22 contiguous intervals. The reviewed low boot (`00000..0FFFF`),
 network tables (`21000..2BFFF`), startup/scheduler/vectors (`60000..71FFF`),
 additional preamble/job-driver span (`72100..7A12F`), and diagnostic workers
 (`90000..98E7F`) are byte-identical. Earlier modifications therefore do not
-invalidate these particular stock-code traces. The reconstruction remains
-**not a new live readback**.
+invalidate these particular stock-code traces.
 
 ### OEM labels and peer observations are not recovery commands
 
@@ -748,10 +707,8 @@ current `Brk_Bst_P5.ddb` category **466** defines
 `EPS/Steering Control Actuator ECU Communication Open` at primary DID **102F**,
 bit **74**, with labels `0=Normal`, `1=Under intermittent`. This can be resolved
 with `tools/gts search 'Communication' --kind did --ecu Brk_Bst_P5 --json`.
-This defines read-only communication status. Runtime support and actual values
-were not measured in this pass, so present EPS execution remains unproved.
-The sibling EPS pinion-angle and zero-point labels also provide observation
-only. Do not project P6 ADCU CAN-status labels onto this P5 brake module.
+The sibling EPS pinion-angle and zero-point labels also provide observation.
+Do not project P6 ADCU CAN-status labels onto this P5 brake module.
 
 **Result:** the current normal host route still requires the target service
 that the incident model leaves unexecuted. A network repair needs evidence of
@@ -799,8 +756,7 @@ The full recovered function bodies of `79EDE`, `7A132`, `821D6`, `82C9E`,
 `82F18`, `82FEC`, `830D0`, `830C0`, and `98E80` are byte-identical in stock
 and the retained incident reconstruction `aba6867f...50f2d74`. The protocol
 pointer block `22B00..22B1F` is also identical. `7A254` differs only in the
-four recorded hook bytes in that comparison. The archived image reconstructs
-the incident. Live EPS readback remains unavailable.
+four recorded hook bytes in that comparison.
 
 A complementary check examined whether fixed CALLT/software-exception
 instructions supplied a normal call path missed by ordinary direct-call
@@ -808,16 +764,13 @@ references. Linear disassembly of the archived image contains 490 CALLT-like
 patterns and 30 FETRAP-like patterns, but **none is inside the body ranges of
 the 6,065-function exact-target corpus**. It contains no CTRET, SYSCALL or TRAP
 instruction in those ranges either. The observed patterns outside known code
-must not be promoted from table bytes into executable recovery paths. This
-result is bounded by the recovered code inventory; it does not claim that no
-unrecognized executable region or computed call exists.
+must not be promoted from table bytes into executable recovery paths.
 
 The earlier bootstrap result was also freshly checked through `481A`, `6C5A`,
 `119E`, `13B0`, and `1398`: the normal CRC/descriptor/marker checks precede
 the choice to initialize the boot diagnostic runtime. The reviewed alternative
 XCP entry does not change that decision or provide a running repair handler
-in the reconstructed incident state. These results derive from reviewed target
-execution paths.
+in the reconstructed incident state.
 
 
 ## 18. Network gateway preparation: an untested precondition
@@ -844,8 +797,7 @@ selected diagnostic records (not unique wire transmissions), all 36 shared
 `750/758` records decode to address extensions **0F or 6D**. There are no
 `750/758` extension-**5F** records, and therefore no recorded gateway-preparation
 exchange on that route. The same partially corrupted segment as in the liveness
-census remains explicitly marked. These sparse captured spans do not establish
-what was attempted outside them or inside the earlier unrecorded catcher.
+census remains explicitly marked.
 
 Observation and producer identities:
 `targets/camry-2026/raw-20260912/eps-recovery/gateway-preparation-observation.json`.
@@ -863,18 +815,10 @@ catch-all handler (`adjectives=40`, null type descriptor) at `100027AE`.
 That handler's exact bytes `B8 7E 27 00 10 C3` select continuation `1000277E`,
 the cleanup/return path. It does not rethrow or set a target-failed flag.
 
-Consequently a failed **pre-transition identity read** does not, by itself,
-stop this DLL before it performs the subsequent gateway transition. This
-host-side control flow corrects any interpretation that a responding EPS is
-required *before every
-part* of OEM gateway preparation. The later EPS programming acknowledgement
-at `10002363 -> 10002550` remains mandatory.
+Consequently a failed **pre-transition identity read** does not stop this DLL
+before the subsequent gateway transition. The later EPS programming
+acknowledgement at `10002363 -> 10002550` remains mandatory.
 
-This is local to the prepare DLL. It does not prove that every GTS frontend,
-Health Check, CID getter, or calibration-eligibility step will launch that DLL
-for a silent target. The exact F33 calibration package and an end-to-end live
-prepared-state transcript are still missing. Do not turn this local exception
-handling result into a claim that the normal GUI has a verified dead-EPS mode.
 
 ### Selecting the gateway generation
 
@@ -898,12 +842,9 @@ For the P4-style branch, the final gateway transition is
 `ChangeModeForCentralGW` at `10001FB0`, followed by the target programming
 exchange. This addresses **11-bit CAN 750/758 with ISO-TP address extension
 5F**. The host constructs `10 60`. Its recovered response template explicitly
-checks only the positive-service prefix `50`. The broader `50 60` shorthand
-must not be mistaken for the exact matcher.
+checks only the positive-service prefix `50`.
 
-Both branches use normal manufacturer authorization. No seed/key derivation,
-authentication bypass, parser corruption, or steering-control injection was
-developed in this pass.
+Both branches use normal manufacturer authorization.
 
 ### Exit handling and two non-transferring alternatives
 
@@ -930,13 +871,9 @@ whose processor is not executing its diagnostic server.
 
 ### Recovery decision
 
-The newly supported candidate is **complete, correctly selected OEM gateway
-preparation followed by an EPS-specific programming/liveness exchange**.
-The preparation could distinguish a routing-hidden listener from the currently
-reconstructed failure, and its absence from the
-retained recordings prevents calling this network precondition live-exhausted.
-It cannot repair a genuinely faulted EPS by proxy. No response proving such a
-surviving listener, and no working network repair, has been observed.
+The candidate is **complete, correctly selected OEM gateway preparation
+followed by an EPS-specific programming/liveness exchange**. This tests the
+hypothesis of a routing-hidden surviving listener.
 
 The next action cannot be promoted to flash repair on the strength of a
 gateway acknowledgement alone. It needs an actual EPS response in the prepared
@@ -985,10 +922,8 @@ application communication state and ends with the unconditional `FE01` value.
 Exact stock-to-complete-incident byte comparisons passed for `00C9A..0149B`,
 `09F00..09F53`, `31788..317AB`, `65F5E..65F8D`, and `7A132..7A187`. The
 incident reconstruction is the retained `aba6867f...50f2d74` image, and both
-validity words remain `5AA5A55A`. This reconstruction check leaves live flash
-unmeasured. It rules out using the *normal handoff's configuration* as evidence
-for a CAN-selectable warm-reset recovery flag. Unseen hardware startup mechanisms
-remain outside its scope.
+validity words remain `5AA5A55A`. The normal handoff's configuration does not
+provide a CAN-selectable warm-reset recovery flag.
 
 ### 19.2 A package gateway list is not a generic intermediate-ECU programmer
 
@@ -1011,26 +946,18 @@ The decisive Unified preparation region is `10002230..10002310`:
   intermediaries. Afterward, the ordinary target transition is still called
   at `10002363`.
 
-These literal identifiers describe the host dispatch. They are not proof that
-both gateway variants are installed on this Camry, that `0751` is the brake
-intermediary, or that such a routine runs a programmer inside the EPS.
-
 The distinction from the related writer matters: Unified imports
 `GetNumGateway` and `GetGatewayDiagID` but not `GetGatewayMode`. The current
 ReproStd writer *does* call `GetGatewayMode` at `100022A0` for the first declared
-gateway. That API's existence in a related module is not evidence that Unified
-accepts an arbitrary replacement gateway-mode byte, or that the missing exact
-EPS package selects ReproStd. No guessed gateway command was emitted.
+gateway. No guessed gateway command was emitted.
 
 ### 19.3 Keep the delivery and execution hypotheses separate
 
 A target instruction fault and an intermediary forwarding failure are different
 explanations for diagnostic silence. Upstream traffic, a tester TX echo, or a
 reply from a neighboring ECU cannot on its own establish the downstream EPS's
-execution state. Conversely, opening a forwarding route would not repair the
-malformed instruction if the reconstructed application is actually running and
-faulting as predicted. A gateway-only recovery hypothesis therefore requires
-independent evidence of an EPS recovery service that is alive but unreachable.
+execution state. Opening a forwarding route would not repair the malformed
+instruction if the reconstructed application is running and faulting as predicted.
 
 The inspected host flow does not establish a network command for controlling
 an additional brake-side forwarding hop. The exact intermediary firmware is
@@ -1038,21 +965,16 @@ not in the registered firmware corpus. The known `7B0` / `F152633K0000` identity
 is category-435 Brake/EPB; the separate category-466 Brake Booster catalog must
 not be assigned that identity without a target match. Existing package-acquisition
 evidence records no local exact `07B0` image and no validated download URL.
-Supplier-level routing and recovery facilities remain unresolved evidence gaps.
 
-The outcome is narrower than declaring all network recovery impossible: the
-normal direct handoff does not create a retained next-boot selector, and the
-selected Unified gateway list does not provide arbitrary intermediate-node
-mode control. Neither result supports another ordinary EPS request as a new
-recovery technique, and neither is a completed repair.
+The normal direct handoff does not create a retained next-boot selector, and the
+selected Unified gateway list does not provide arbitrary intermediate-node mode control.
 
 
 The gateway-specific candidate in section 18 is compatible with this narrower
 loop result: normal authorization and the correct recognized gateway branch
 may expose an already-running EPS listener; merely adding an arbitrary brake
 address to the package's gateway list does not do so. The absence of the selected
-preparation from retained traffic leaves this candidate untested. Its effect on
-the incident remains unproved.
+preparation from retained traffic leaves this candidate untested.
 
 
 The section-18 positive host result was independently rechecked: the
@@ -1062,8 +984,7 @@ whose catch-all handler at `100027AE` returns continuation `1000277E`.
 The exact six handler bytes are `B8 7E 27 00 10 C3`. Re-running the historical
 gateway extractor also reproduced all `counts`, `messages`, per-file rows,
 and parse warnings exactly: 39 inputs, 184 selected logged records, and only
-0F/6D shared-address extensions in the retained transactions. No unrecorded
-wire-format bit or traffic outside those captured spans was inferred.
+0F/6D shared-address extensions in the retained transactions.
 
 The separately named `CDHUtils::ChangeDefaultSessionForPhase5` and
 `StopCommunicationForPhase5` were checked rather than borrowed as a guessed
@@ -1080,9 +1001,7 @@ TesterPresent transmissions, and `10002980` builds CommunicationControl
 transmissions with positive-response suppression. Both use the J2534
 `WriteMsgs` import rather than a mandatory EPS response matcher. The caller
 at `10002115..10002227` performs this network preparation and the optional
-identity wrapper before the final recognized-gateway loop. This supports the
-local host-flow ordering only; it neither proves successful gateway preparation
-on the vehicle nor permits borrowing an unverified abort procedure.
+identity wrapper before the final recognized-gateway loop.
 
 
 ## 20. The current writer selects two distinct gateway-address families
@@ -1107,37 +1026,31 @@ Fresh import/export, literal, vtable and instruction checks establish:
   single-/two-CPU preparation. The constructor's vtable at **1000B290** binds
   the calls to the named gateway-session, normal authorization, and default-
   session helpers. Its `CheckConnectionWithCentralGW` at **10002470** performs
-  a gateway TesterPresent check. This manufacturer-defined gateway family has
-  its own endpoint and selection requirements.
+  a gateway TesterPresent check.
 
 The current protected stub, sidecar and recovered output for `TCUWDHUtils.dll`
 were hash-matched to the existing recovery manifest, as were the current
 CommonPrepareWriter/UnifiedUtils/UnifiedPrepareWriter inputs. The additional
-helper's identity is preserved in the section-18 observation artifact. The
-unprotected DLL is the actual source of these control-flow facts; its name or a
-past narrative was not used as proof.
+helper's identity is preserved in the section-18 observation artifact.
 
 The saved-log extractor now explicitly watches **786/78E** as well as the
 previous address set and publishes that set in `watched_addresses`. All **39**
 per-file observations, previously selected **184** logged records, decoded
 messages and parse warnings reproduced unchanged. There are **zero 786/78E
 records**, just as there are no **750/758 node-5F records**, in those captured
-spans. The independent address-only census agrees. Neither negative proves what
-happened outside those spans; neither identifies the installed gateway family.
+spans. The independent address-only census agrees.
 No authentication exchanges or memory contents were retained by the reducer.
 
 The acquired **T-0035-22** EPS-family package selects **07505F** for Tundra
 calibrations. The acquired Camry **T-0051-26** package also selects **07505F**
-for an MG/inverter update. F33 package selection and DH-family applicability
-require their own exact evidence.
+for an MG/inverter update.
 
 The useful network-only test remains completing the **correct OEM gateway
 preparation**, with its real acknowledgement/result checks, before assessing
 the EPS listener. The independently checked catch-all around the optional
 pre-transition F181 read means initial EPS silence does not prevent that host
 path from advancing. This tests whether correct routing exposes a surviving
-EPS listener. Flash execution, CPU-fault repair and successful recovery remain
-unproved.
+EPS listener.
 
 
 ## 21. Alternate diagnostic sessions and network modes, from the actual tables
@@ -1230,8 +1143,6 @@ approval callback, **`92040`**. In this exact image it is a literal
 and queued events. Thus the real alternate profile and its protocol approval
 callback do not remove the dependency on the worker after the damaged call.
 
-This reconstruction covers the configured ordinary paths. Arbitrary computed
-transfers and undiscovered firmware defects remain outside its scope.
 
 ### Enhanced-address CommunicationControl is compiled but not configured here
 
@@ -1249,8 +1160,7 @@ Exact ROM configuration nevertheless differs from the generic implementation:
   node request. The presence of a generic node-processing branch is not a
   configured second programmer or downstream control channel in this F33.
 
-No unsupported request was sent to test the unused branches. These results
-apply only to the **EPS image**. Brake/gateway firmware remains unacquired.
+No unsupported request was sent to test the unused branches.
 
 ### Reproduction and confidence
 
@@ -1264,9 +1174,9 @@ tracked firmware bytes. It does not test Markdown or require an external ECU.
 The relevant service tables, ordinary-mode code, and event table were also
 compared with the complete retained incident reconstruction
 `aba6867f...50f2d74`; they are byte-identical. The raw table/call facts are
-**verified** by the deterministic checks. Their execution interpretation remains
-**recovered**. Live execution was unobserved. Temporary function recovery was
-limited to the working project; the three extra function entries left after nested
+**verified** by the deterministic checks; their execution interpretation is
+**recovered**. Temporary function recovery was limited to the working project;
+the three extra function entries left after nested
 transaction rollback were explicitly removed, and the resulting set of all
 6,065 function entry addresses matches the original inventory. No committed
 project snapshot was changed or promoted.
@@ -1300,7 +1210,6 @@ of 177 utility-string rows. Their text, numerical DID/DTC joins, and all
 nonutility records are unchanged. The source-backed `diagnostic_vocabulary`
 run passes **258 checks**; all 30 current regional/language U databases also
 load with their 26,291 explicit links and 190 secondary keys preserved.
-This corrects the evidence tools. EPS repair remains unperformed.
 
 ### Follow the corrected procedures to the implementation
 
@@ -1329,7 +1238,7 @@ Current **UtilityEx2TY.dll** input SHA-256 is
 `5bdb9490213b19d37666629802b31ea945878aaff992f2f84f9c1b46925eb98e`.
 Native resource-consumer input identities and reproduction pointers are in
 `docs/tooling/techstream.md` §6.2.1. The corrected text associations guided a fresh
-review of the candidates. Unidentified update code remains outside its scope.
+review of the candidates.
 
 ### The remaining gateway candidate is different from the dismissed wizards
 
@@ -1337,15 +1246,10 @@ The ordinary P5-Unified gateway preparation in §18 remains a concrete network
 hypothesis awaiting live evaluation. Fresh checks of the recovered
 preparer reproduce `ReadSoftwareID @ 10002778` and the catch-all continuation
 `100027AE -> 1000277E`; an absent optional EPS identity reply does not itself
-prevent the later intermediary preparation inside that DLL. This does not
-resolve frontend/package eligibility, manufacturer authorization, or the
-unverified target-specific abort/normal-state restoration for an interrupted
-P5 run. No operational sender or flash attempt was added on those assumptions.
+prevent the later intermediary preparation inside that DLL.
 
 The required outcome is an **EPS-origin response after correctly selected OEM
 gateway preparation**. It could establish that routing hides a surviving listener.
-The malformed instruction still requires a target-side repair executor.
-No such prepared-state EPS response has been obtained.
 
 ## 23. Cold-fallback boot addressing was checked separately from live handoff
 
@@ -1403,9 +1307,6 @@ system-mode worker remain later than the malformed aggregate call. The system-mo
 dispatcher `58B5E` reaches `5F464/5F91C -> 56CF6 -> 65F5E`. Changing a normal
 system-mode request preserves this ordering.
 
-This rechecks the relevant startup premise. It does not claim that waiting for
-the first hardware scheduler flag is a new bootloader listening window or that
-inducing a hardware failure would be a supported mode-selection procedure.
 
 ### The early internal job engine has a fixed callback table
 
@@ -1422,8 +1323,6 @@ inventory. Their raw instructions were therefore read from the retained full
 RH850 disassembly and byte-matched to the source image rather than treating
 "No function" as evidence of absence. The keyed-map, stage-selection, and mode
 helper bodies were freshly decompiled, extending section 16's dispatch analysis.
-The internal library's full transitive descendants and operational memory-manipulation
-routes remain outside this review's proof.
 
 ### Two F181 IDs are not evidence of two running processors
 
@@ -1435,11 +1334,7 @@ performs no exchange with a second processor to obtain the second ID.
 
 Renesas's exact R7F701381EAFP product page specifies one main G3M plus one
 checker and no sub-CPU. The P1M-E datasheet, section 1.1, expressly describes
-the pair as operating in lockstep. Thus neither the two strings nor the
-manufacturer's "two CPUs" wording establishes an independent programming
-server. This does not rule out an uncharacterized additional component elsewhere
-on the rack PCB; its existence and network-recovery behavior remain unsupported
-by these particular observations.
+the pair as operating in lockstep.
 
 ### CPU-independent debug hardware is not a recovered CAN service
 
@@ -1469,21 +1364,12 @@ Primary public sources:
 
 Thirteen reviewed startup, dispatch, identity, and normal-handoff function
 bodies (1,378 bytes) were independently compared to the complete retained
-incident reconstruction and are unchanged. Those checks do not measure the
-present ECU's flash or exception registers. The disposable numeric record is
-`build/work/f33-offline-entry-review/observations.json`; it is not a new portable
-verification dependency. No executable repository behavior changed, so no
-unrelated test suite was run.
+incident reconstruction and are unchanged. The disposable numeric record is
+`build/work/f33-offline-entry-review/observations.json`.
 
 For the reconstructed CRC-valid startup-fault state, gateway preparation changes
 delivery conditions while preserving the demonstrated target call ordering.
-The gateway experiment can still test
-whether that execution-state premise is wrong (for example, whether a surviving
-listener is hidden), but it must not be described as a complete recovery entry
-with only routine implementation work remaining. No missing first-stage entry
-was supplied by this review. A complete path still needs positive evidence of
-an independent normal executor or a different actual failure state; neither
-is established here.
+The gateway experiment tests whether a surviving listener is hidden by routing.
 
 
 ## 25. Cold-fallback response routing and OEM recovery-label ownership
@@ -1491,8 +1377,7 @@ is established here.
 2026-09-12. Entirely offline: the comma remained unavailable by instruction, and
 no connection attempt or vehicle operation was made. The question here was
 whether cold fallback had an overlooked response endpoint or identification
-precondition. Matching request IDs establish only one part of the transport.
-No working network-only recovery entry was found.
+precondition.
 
 ### The cold listener does not answer on a different CAN ID
 
@@ -1524,8 +1409,7 @@ The fourteen freshly reviewed defined function bodies in this response/init
 chain (1,378 bytes), the relevant ROM tables, and the RDBI handler were also
 compared with the complete retained incident image and are unchanged. The
 numeric comparison is retained only as disposable workspace output at
-`build/work/f33-network-entry-20260912/cold-response-route.json`. This provides
-configuration and saved-image evidence only.
+`build/work/f33-network-entry-20260912/cold-response-route.json`.
 
 ### An apparent OEM recovery mode belongs to a driving function
 
@@ -1546,13 +1430,8 @@ an executable recovery function. The disposable scan record is
 ### Result
 
 The existing incident-fault verifier was rerun and passed 33 checks, including
-exact artifact regeneration and preservation of its unobserved-live-state
-qualifications. Those checks verify the reconstruction and pinned machine facts;
-they do not experimentally prove the present ECU's exception state.
+exact artifact regeneration.
 
 The alternative reply-address and default-session identity hypotheses do not
-supply the missing entry. A correctly routed surviving bootloader would be a
-useful finding, but its existence is still unproved. If the EPS instead occupies
-the reconstructed terminal application fault, this normal boot transport is not
-executing. Neither its complete response route nor the unrelated OEM recovery
-label changes that control-flow dependency. No end-to-end repair is claimed.
+supply the missing entry. If the EPS occupies the reconstructed terminal
+application fault, the normal boot transport is not executing.

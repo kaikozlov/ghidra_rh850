@@ -338,10 +338,10 @@ def iq_comparative() -> dict[str, Any]:
         "binary": path.name,
         "sha256": digest(data),
         "strings": strings,
-        "boundary": "legacy/V850-M16C-era naming is comparative evidence only; it does not establish RH850 target behavior",
+        "boundary": "legacy/V850-M16C-era naming is comparative evidence",
         "inferences": [
             "SelectRetryPassword is historical vocabulary consistent with the modern UseNewSoftwarePassword recovery field",
-            "FiveBaudInit/SetBaudRateOfECU/TweakBaudRate establish legacy transport ancestry only; their use by the modern CAN target remains unproved",
+            "FiveBaudInit/SetBaudRateOfECU/TweakBaudRate establish legacy transport ancestry",
             "PrepareWrite1/2/3 iQ-EMPS pages expose operator-driven IG-OFF -> start -> IG-ON sequencing ancestry",
             "three retry captions and terminal three-attempt error show a longstanding CUW retry model; exact modern counter implementation remains independently bounded",
             "Verify Calibration ID and prior-reprogramming recovery strings show EPS-specific recovery/CID verification ancestry",

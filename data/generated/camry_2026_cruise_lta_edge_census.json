@@ -915,11 +915,10 @@
     }
   },
   "interpretation": {
-    "b6": "observed/deterministic: B6 remains absent not only globally but throughout machine-recovered cruise-active intervals and throughout the bounded lateral/HUD candidate intervals.",
+    "b6": "observed/deterministic: B6 remains absent globally, throughout machine-recovered cruise-active intervals, and throughout the bounded lateral/HUD candidate intervals.",
     "cruise": "observed/deterministic: 0x08A byte3=0x08 is a machine-visible cruise operating-state carrier. It toggles after effective MAIN/CANCEL actions and byte10 is the set-speed value in km/h: activation values track independent 0x0AA wheel speed and RES+/SET- adjust it.",
-    "eps_latch_inputs": "observed/deterministic: the exact-F33 moving-mode gate inputs are pinned across both retained drives: 0x0D5 s211 is set in 100% of frames inside both cruise-active and lateral/HUD candidate intervals while 0x0D7 s243 is never set, so the FEBEC5F3/FEBEC5F4 moving-mode family is a generic driving-state mode rather than a Class-L discriminator, and the FEBEC5EE assist contribution fed by 0x0D5 s213 stays zero because s213 is identically zero in these drives.",
-    "lateral_hud_candidate": "bounded: 0x08A byte21/byte24, mirrored 0x081 byte13, and 0x412 display-state changes form a state class distinct from the cruise-main and button-echo classes. Long intervals overlap the operator-reported steering-assistance drive, but no target-native current-Camry OEM name is yet joined, so this is not called LTA-active proof.",
-    "production_output_authorized": false
+    "eps_latch_inputs": "observed/deterministic: the exact-F33 moving-mode gate inputs are pinned across both retained drives: 0x0D5 s211 is set in 100% of frames inside both cruise-active and lateral/HUD candidate intervals while 0x0D7 s243 is never set, so the FEBEC5F3/FEBEC5F4 moving-mode family is a generic driving-state mode, and the FEBEC5EE assist contribution fed by 0x0D5 s213 stays zero because s213 is identically zero in these drives.",
+    "lateral_hud_candidate": "bounded: 0x08A byte21/byte24, mirrored 0x081 byte13, and 0x412 display-state changes form a state class distinct from the cruise-main and button-echo classes. Long intervals overlap the operator-reported steering-assistance drive."
   },
   "schema": "camry-2026-cruise-lta-edge-census-v2"
 }

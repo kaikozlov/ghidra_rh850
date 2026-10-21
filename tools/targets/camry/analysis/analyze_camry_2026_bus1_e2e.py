@@ -336,8 +336,7 @@ def main() -> int:
             ),
             "freshness": (
                 "0x160 B2 is an 8-bit alive/rolling counter. It advances +1 on every retained drive-B same-segment pair; "
-                "drive-A non-+1 observations coincide with capture gaps/missed cycles. Sender traces do not prove the receiver's "
-                "accepted counter window or timeout policy."
+                "drive-A non-+1 observations coincide with capture gaps/missed cycles."
             ),
             "replay_boundary": (
                 "There is no observed long-lived epoch/nonce on this Bus-1 framing. Constant 0x020 has only 256 complete wire "
@@ -345,8 +344,7 @@ def main() -> int:
                 "replay can still be rejected by receiver-side counter state; post-wrap anti-replay beyond that state is not on wire."
             ),
             "security_boundary": (
-                "The retained native Bus-1 family therefore exposes non-cryptographic E2E integrity/freshness. "
-                "This does not identify which node transmits 0x160 or prove receiver acceptance of synthetically modified frames."
+                "The retained native Bus-1 family exposes non-cryptographic E2E integrity/freshness."
             ),
         },
     }

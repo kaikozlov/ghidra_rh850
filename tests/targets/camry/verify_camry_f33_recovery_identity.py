@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Pin exact F33 read-only identity distinctions used in recovery assessment.
 
-This checks retained firmware only. Live reachability and flash permission require separate evidence.
+This checks retained firmware.
 No network, vehicle, Ghidra, proprietary host distribution or build/ input.
 """
 from __future__ import annotations

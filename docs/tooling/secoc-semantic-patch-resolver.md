@@ -198,16 +198,14 @@ faster developer path and retains the same SHA/image join.
 ## 5. Transfer boundary
 
 The resolver is now annotation-independent on Sienna and independently proven on
-one exact foreign Corolla image. That is still not evidence that every Toyota
-calibration uses the same address or even the same Level-1 machine shape. No
+one exact foreign Corolla image. No
 exact 2024 RAV4 Prime or 2025 bZ4X firmware/F181 artifact is present in the
 repository.
 
 A 2026-08-16 external field report from yc uses the same local transform
 `e0d19a0d... -> e0019a0d...` on newer Toyota vehicles and strongly corroborates
-the corrected **direction**, but cannot establish that an arbitrary image can be
-patched by offset. Each acquired CodeFlash must run through the semantic resolver
-independently.
+the corrected **direction**. Each acquired CodeFlash must run through the
+semantic resolver independently.
 
 If a future image yields zero candidates, promote the resolver to p-code/CFG
 data-flow rather than adding an offset table. If it yields multiple candidates,

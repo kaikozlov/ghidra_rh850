@@ -1,43 +1,70 @@
-from tools.targets.sienna.sienna_target import CORPUS as SIENNA_CORPUS
 #!/usr/bin/env python3
 """Promote H generated-COM provenance into the CEDAE supervisor cone.
 
-This extractor promotes evidence. The target whole-image
-Ghidra corpus is disposable workspace state and must be supplied explicitly;
-the tracked compact JSON is what repository verification consumes. The extractor
-compares exact wire fields, follows raw->staging->fixed-map snapshot copies, and
-fails closed unless the only changed command-sized field is B6 signal255.
+This extractor compares exact wire fields, follows raw->staging->fixed-map
+snapshot copies, and fails closed unless the only changed command-sized field
+is B6 signal255. Its default input is the registered exact-image H corpus.
 """
 from tools import REPO_ROOT
 import argparse,json,re,struct,hashlib
 from pathlib import Path
 from tools.targets.sienna.sienna_target import CODEFLASH as SIENNA_CODEFLASH
-from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
+from tools.project.analysis_target import path as target_path
+from tools.targets.sienna.sienna_target import CORPUS as SIENNA_CORPUS
 REPO=REPO_ROOT
 GP=0xFEBEB800
 ap=argparse.ArgumentParser(description=__doc__)
-ap.add_argument('--h-corpus',type=Path,required=True,help='disposable corrected-context H decompiler corpus JSONL')
+ap.add_argument('--h-corpus',type=Path,default=target_path("corolla-8965H1202000","decompiler_corpus"),help='registered exact-image H decompiler corpus JSONL')
 ap.add_argument('--out',type=Path,default=REPO/'data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json')
 ARGS=ap.parse_args()
 SIMG=(SIENNA_CODEFLASH).read_bytes()
-HIMG=(H_CODEFLASH).read_bytes()
+HIMG=target_path("corolla-8965H1202000","codeflash").read_bytes()
 
-def load_corpus(path):
- d={}
+def load_corpus(path, image):
+ d={};metadata=None
  for l in open(path):
   r=json.loads(l)
   if 'entry_addr' in r:d[int(r['entry_addr'],16)]=r
+  elif r.get('record')=='metadata':metadata=r
+ if metadata is None or metadata.get('executable_sha256') != hashlib.sha256(image).hexdigest():
+  raise ValueError(f'corpus/image identity drift: {path}')
  return d
 SCORPUS = SIENNA_CORPUS
 HCORPUS=ARGS.h_corpus.resolve()
-S=load_corpus(SCORPUS); H=load_corpus(HCORPUS)
+S=load_corpus(SCORPUS,SIMG); H=load_corpus(HCORPUS,HIMG)
 
-def addr_from(expr,varnames=('iVar1','iVar2','iVar3','iVar4','iVar15','puVar1','puVar2')):
+def gp_bindings(code):
+ bindings={}
+ for name in re.findall(r'(\w+)\s*=\s*&(?:LAB_|DAT_)febeb800\s*;',code,re.I):
+  declaration=re.search(r'\b(char|byte|short|ushort|int|uint|undefined[1248])\s+\*\s*'+re.escape(name)+r'\s*;',code)
+  if declaration:
+   size={'char':1,'byte':1,'short':2,'ushort':2,'int':4,'uint':4}.get(declaration[1])
+   bindings[name]=size if size is not None else int(declaration[1][-1])
+  else:bindings[name]=1
+ return bindings
+
+def addr_from(expr,varnames=('iVar1','iVar2','iVar3','iVar4','iVar15','puVar1','puVar2'),bindings=None):
  e=expr.strip()
  m=re.search(r'(?:[A-Za-z_]*Ram|DAT_)(febe[0-9a-f]{4})',e,re.I)
  if m:return int(m.group(1),16)
  m=re.search(r'0x(febe[0-9a-f]{4})',e,re.I)
  if m:return int(m.group(1),16)
+ for var,scale in (bindings or {}).items():
+  # Cast-to-int arithmetic is byte-scaled; native pointer arithmetic uses the
+  # declared element size. Resolve before the legacy scalar GP forms.
+  cast=re.search(r'\(int\)\s*'+re.escape(var),e)
+  unit=1 if cast else scale
+  variable=r'(?:\(int\)\s*)?'+re.escape(var)
+  m=re.search(r'(?:DAT_|FUN_)([0-9a-f]+)\s*\+\s*'+variable+r'(?:\s*\+\s*(0x[0-9a-f]+|\d+))?',e,re.I)
+  if m:return (GP+int(m[1],16)+(int(m[2],0) if m[2] else 0))&0xffffffff
+  m=re.search(r'(?:DAT_|FUN_)([0-9a-f]+)\s*\[\s*'+variable+r'\s*\+\s*(0x[0-9a-f]+|\d+)\s*\]',e,re.I)
+  if m:return (GP+int(m[1],16)+int(m[2],0))&0xffffffff
+  m=re.search(variable+r'\s*([+-])\s*(-?0x[0-9a-f]+|-?\d+)',e,re.I)
+  if m:
+   offset=int(m[2],0)*(1 if m[1]=='+' else -1)
+   return (GP+unit*offset)&0xffffffff
+  m=re.search(re.escape(var)+r'\s*\[\s*(-?0x[0-9a-f]+|-?\d+)\s*\]',e,re.I)
+  if m:return (GP+scale*int(m[1],0))&0xffffffff
  # Corrected-context Ghidra sometimes renders GP-relative fixed-map sources as
  # &DAT_000039cc + iVar15 or FUN_00003926[iVar15 + 1] rather than a RAM symbol.
  for var in varnames:
@@ -53,11 +80,12 @@ def addr_from(expr,varnames=('iVar1','iVar2','iVar3','iVar4','iVar15','puVar1','
 
 def assignment_map(rec,varnames):
  out=[]
+ bindings=gp_bindings(rec['decompiled_c'])
  for raw in rec['decompiled_c'].splitlines():
   line=raw.strip()
   # single plain assignment only
   if '=' not in line or any(op in line for op in ['==','!=','>=','<=']):continue
-  lhs,rhs=line.split('=',1);da=addr_from(lhs,varnames);sa=addr_from(rhs,varnames)
+  lhs,rhs=line.split('=',1);da=addr_from(lhs,varnames,bindings);sa=addr_from(rhs,varnames,bindings)
   if da is not None:out.append((da,sa,line))
  return out
 stage_assign=assignment_map(H[0x5262c],('iVar3',))
@@ -70,8 +98,9 @@ def scalar_calls(corpus,call_names):
  names='|'.join(re.escape(n) for n in call_names)
  pat=re.compile(r'(?:'+names+r')\((0x[0-9a-f]+|\d+),(0x[0-9a-f]+|\d+),(0x[0-9a-f]+|\d+),(0x[0-9a-f]+|\d+),(0x[0-9a-f]+|\d+),([^;]+)\);',re.I)
  for e,r in corpus.items():
+  bindings=gp_bindings(r['decompiled_c'])
   for m in pat.finditer(r['decompiled_c']):
-   vals=[int(m.group(i),0) for i in range(1,6)];dest=addr_from(m.group(6))
+   vals=[int(m.group(i),0) for i in range(1,6)];dest=addr_from(m.group(6),bindings=bindings)
    rows.append({'signal':vals[0],'offset':vals[1],'bits':vals[2],'bitoff':vals[3],'signed':vals[4], 'dest':dest,'unpacker':e,'ptr':m.group(6).strip()})
  return rows
 Scalls=scalar_calls(S,['application_com_receive_signal','FUN_0007c03e'])
@@ -201,15 +230,11 @@ for x in uniq:
         ({'entry':r['unpacker'],'body_size':H[r['unpacker']]['body_size'],'body_sha256':fhash(H,r['unpacker'],HIMG)} for r in rows),
         key=lambda q:q['entry'])
 out={'schema':'corolla-8965H1202000-supervisor-external-ingress-census-v2',
-     'evidence_boundary':'Complete scalar generated-COM -> raw/staging/fixed-map-snapshot census over the corrected-context H decompiler corpus and CEDAE call cone to depth 5. The fixed-map parser resolves ordinary GP offsets plus Ghidra DAT/FUN array forms. Companion provenance artifacts close the recovered literal block/group and full-PDU receive alternatives; arbitrary computed aliases, DMA/peripheral mutation, and diagnostic/debugger writes remain outside this model.',
      'images':{'sienna_sha256':hashlib.sha256(SIMG).hexdigest(),'corolla_h_sha256':hashlib.sha256(HIMG).hexdigest()},
-     'source_corpora':{'sienna':'data/generated/decompilations.jsonl','corolla_h':str(HCORPUS.relative_to(REPO)) if HCORPUS.is_relative_to(REPO) else str(HCORPUS),
+     'source_corpora':{'sienna':str(SCORPUS.relative_to(REPO)),'corolla_h':str(HCORPUS.relative_to(REPO)) if HCORPUS.is_relative_to(REPO) else str(HCORPUS),
                       'sienna_sha256':hashlib.sha256(SCORPUS.read_bytes()).hexdigest(),
                       'corolla_h_sha256':hashlib.sha256(HCORPUS.read_bytes()).hexdigest()},
      'summary':summary,'potential_changed_large_fields':cands,'external_refs':uniq}
-# Encode result into a small text artifact for easy inspection.
-lines=[json.dumps(summary,sort_keys=True),'CANDIDATES:']
-for x in cands:lines.append(json.dumps(x,sort_keys=True))
 changed=[x for x in uniq if x['wire_class']!='shared_wire_field']
 other=[x for x in changed if x['can']!=0xB6]
 # The corrected fixed-map RTE audit must recover exactly one changed command-sized

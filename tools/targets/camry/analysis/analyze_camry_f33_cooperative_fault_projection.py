@@ -60,7 +60,7 @@ def build() -> dict:
             'platform': 'TOYOTA_CAMRY_TSS3 only',
             'steerFaultTemporary': 'current selected hardware fault OR cooperative command inhibit OR cooperative angle inhibit',
             'steerFaultPermanent': 'not inferred from these lossy projections',
-            'semantics': 'current steering unavailability only; automatic repair remains unguaranteed; no host-side persistence timer or new engagement policy',
+            'semantics': 'current steering unavailability',
         },
         'verification': {
             'script': 'ghidra/scripts/verify/VerifyCamryCooperativeFaultProjection.java',

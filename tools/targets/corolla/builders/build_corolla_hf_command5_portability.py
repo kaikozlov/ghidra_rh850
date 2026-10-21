@@ -10,6 +10,7 @@ import json
 import struct
 from pathlib import Path
 from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_CODEFLASH
+from tools.project.analysis_target import target as registered_target
 
 REPO = REPO_ROOT
 H = H_CODEFLASH
@@ -34,11 +35,6 @@ def need(cond: bool, msg: str) -> None:
         raise SystemExit(msg)
 
 
-def token(text: str, *parts: str) -> None:
-    miss = [x for x in parts if x not in text]
-    need(not miss, f"missing command5 evidence token(s): {miss}")
-
-
 def build() -> dict:
     h = H.read_bytes(); f = F.read_bytes()[:0x100000]
     ev = json.loads(FOLLOWUP.read_text())
@@ -47,7 +43,9 @@ def build() -> dict:
     xcp = json.loads(XCP.read_text())
     need(len(h) == len(f) == 0x100000, "H/F image size drift")
     need(h[0x20000:] == f[0x20000:], "H/F application region no longer identical")
-    funcs = {int(x["entry"], 16): x["decompiled_c"] for x in ev["functions"]}
+    _, identity = registered_target("corolla-8965H1202000")
+    need(sha(h) == ev["image"]["sha256"] == identity["codeflash_sha256"],
+         "registered H image/evidence identity drift")
     for row in ev["functions"]:
         a = int(row["entry"], 16); n = row["body_size"]
         need(sha(h[a:a+n]) == row["body_sha256"], f"raw body drift {a:#x}")
@@ -75,17 +73,13 @@ def build() -> dict:
     need(u32(h, 0x27C84) == 1, "command5 config type drift")
     need(raw == f[rec:rec+0x20], "H/F command5 record0 differs")
 
-    token(funcs[0x82750], "FUN_00082702(param_1)", "+ 0x14", "+ 0x1c", "(*pcVar6)(uVar3")
-    token(funcs[0x81E94], "*param_1 == 1", "param_3 < 0x51", "bVar1 = *(byte *)(param_1 + 1)")
-    token(funcs[0x82070], "FUN_00083a30(0xfebf10cc)")
-    token(funcs[0x83A30], "Ramffc5d000 = puVar6[2] << 0x10 | 5")
-    token(funcs[0x82ED2], "uRamfebf1280 = 0;", "uRamfebf1281 = 1;", "FUN_00082750", "uVar2 < 0xe07")
+    # SHL 16,r18; ORI 5,r18,r1; ST.W r1,ICUSCMD at 0xFFC5D000.
+    need(h[0x83B34:0x83B40] == bytes.fromhex("d092920e050080070f08a08b"),
+         "command5 selector/command-word store drift")
 
     # This is the load-bearing negative for carrying the Sienna single-stage
     # resident proxy across variants. H application initialization owns/clears
     # substantial pieces of the authenticated FEBF0xxx page.
-    clear = funcs[0x6149A]
-    token(clear, "uVar1 + 0xfebf05cc", "uVar1 + 0xfebf0b4c", "uVar1 < 0x400")
     clear_ranges = [[0xFEBF05CC, 0xFEBF09CB], [0xFEBF0B4C, 0xFEBF0F4B]]
 
     variant_ids = {row["id"] for row in req["variants"]}

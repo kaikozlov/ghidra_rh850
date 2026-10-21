@@ -2,13 +2,13 @@
   "conclusion": {
     "command_generation_change": "classic 5-byte torque 0x2E4 disappears; protected FD 0x0B6 signal255 is the H/F target-steering-angle command and signal254 selects cooperative modes",
     "feedback_generation_change": "0x260 + 0x262 disappear; roles split across classic 0x4A3/0x351/0x394 plus mixed 32-byte FD 0x030",
-    "longitudinal_ui_boundary": "0x343 and 0x412 are whole-vehicle camera/ACC/UI contracts; EPS-table absence does not answer their TSS3 replacements",
+    "longitudinal_ui_boundary": "0x343 and 0x412 are whole-vehicle camera/ACC/UI contracts",
     "secoc_boundary": "0x131 and 0x183 are not pre-TSS3 Corolla messages and must not be included in the Corolla migration baseline",
     "survives_as_configuration_lead": "0x0AA wheel speeds",
     "survives_with_semantic_proof": "0x025 steering angle/rate",
     "tss2_lta_note": "0x191 served only as a neutral coexistence/replacement frame on Corolla TSS2 torque control"
   },
-  "evidence_boundary": "The 2023 H and 2025 F conclusions are exact application CodeFlash facts plus target-native fixed-map/dataflow proofs. Whole-vehicle openpilot messages may legitimately be absent from an EPS image; only EPS-local command/feedback migrations are treated as architectural evidence. B6 controller-equivalent physical scaling, signal254 feature/request selection, the 7-tick receiver loss cutoff, and modulo-64 sequence handling are closed; the exact OEM signal255 unit, wall-clock sender cadence, exact secondary-field names, and upstream producer/authentication remain open.",
+  "evidence_boundary": "The 2023 H and 2025 F conclusions are exact application CodeFlash facts plus target-native fixed-map/dataflow proofs. B6 controller-equivalent physical scaling, signal254 feature/request selection, the 7-tick receiver loss cutoff, and modulo-64 sequence handling are closed; the exact OEM signal255 unit, wall-clock sender cadence, exact secondary-field names, and upstream producer/authentication remain open.",
   "explicit_non_corolla_prior_art": [
     {
       "id": "0x131",
@@ -522,13 +522,12 @@
           },
           "dynamic_boundary": "Span and the public TSS3 route contain zero 0x351 frames, so packet availability and asserted-state transitions remain uncaptured.",
           "force7_static_contract": {
-            "classification": "independent severe/special status override, distinct from the C159B49-linked 0x351 base electrical-monitor code path",
+            "classification": "independent severe/special status override",
             "condition": "(FEBE65E4 & 0x0003) != 0 AND FEBE7E13 != 0",
-            "openpilot_consequence": "Treat the force-7 indication as a distinct conservative fault/status input if 0x351 becomes available, but do not rename it C159B49 or map it to temporary/permanent without dynamic policy evidence.",
+            "openpilot_consequence": "Treat the force-7 indication as a conservative fault/status input if 0x351 becomes available.",
             "record_aggregate_side": {
               "aggregate": "0x36CEC ORs each valid record's +6 ushort into one aggregate (plus FEBE720E under its recovered gate)",
               "bit_used": 15,
-              "boundary": "The exact source geometry and bit are closed; an OEM/DTC name for record +6 bit15 is not recovered from the current corpus.",
               "chain": [
                 "0x36CEC aggregate bit15",
                 "0x3738C -> 0x472E0(0x5A/0)",
@@ -543,7 +542,7 @@
                 0,
                 1
               ],
-              "boundary": "FEBE6FB4 is a broad internally consumed 16-bit status bitmap; current static evidence does not assign Toyota names to bits0/1.",
+              "boundary": "FEBE6FB4 is a broad internally consumed 16-bit status bitmap.",
               "chain": [
                 "0x36BBE resolves/merges the current 16-bit status value",
                 "0x36AAA stores it at FEBE6FB4 with XOR-redundant mirrors FEBE6ED0/FEBE6ED2",
@@ -601,7 +600,7 @@
               "role": "class-0x0F internal fault branch when its additional classifier condition permits"
             },
             "15": {
-              "boundary": "selected by a distinct operational predicate; ready/fault naming remains unresolved from static evidence alone",
+              "boundary": "selected by a distinct operational predicate",
               "role": "special operating state"
             },
             "16": {
@@ -1160,7 +1159,7 @@
               },
               "techstream_correlations": {
                 "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
-                "sha256": "74c41adf16dd7e81255a30589bf6a0c06ca1e96a80613b7a20a703178a598cab"
+                "sha256": "e16b546c68149f82ac67a6e61ab109b879c77bd780d32b331c75ce778a20293e"
               }
             },
             "wire": {
@@ -1302,8 +1301,8 @@
           "openpilot_consequence": "The native state now carries a statically closed DEM-class/DTC-family partition for states 6-14, including exact latch-aging structure for 6/7 and 8/9. It still does not provide a Ready authorization bit or a justified openpilot temporary/permanent policy split; a future relay-correct fault/recovery capture should validate that policy mapping.",
           "openpilot_fault_mapping": {
             "classifier_deepest_clear_normal_state": 0,
-            "conservative_clear_state_candidate": "state 0 only, pending packet routing plus Ready/LTA dynamic correlation; state 0 alone is not sufficient to authorize actuation",
-            "reason": "Firmware now closes exact DEM class-to-state families and 200/600-count latch-aging structure, but Toyota's internal class/latch distinctions still do not define openpilot's temporary/permanent fault contract. Guessing would be unsafe.",
+            "conservative_clear_state_candidate": "state 0 only, pending packet routing plus Ready/LTA dynamic correlation",
+            "reason": "Firmware now closes exact DEM class-to-state families and 200/600-count latch-aging structure, but Toyota's internal class/latch distinctions still do not define openpilot's temporary/permanent fault contract.",
             "steerFaultPermanent": "unresolved",
             "steerFaultTemporary": "unresolved"
           },
@@ -1564,7 +1563,7 @@
       "corolla_h_f": {
         "old_id_active_rx": null
       },
-      "porting_consequence": "0x191 was not Corolla TSS2's active steering actuator path in openpilot; its disappearance is not evidence for a missing angle-command replacement.",
+      "porting_consequence": "0x191 was not Corolla TSS2's active steering actuator path in openpilot.",
       "pre_tss3": {
         "cadence_hz": 50,
         "id": "0x191",

@@ -65,7 +65,7 @@ PLAN_SOURCES = {"cruise": 0, "lead0": 1, "lead1": 2, "e2e": 3}
 TIMING_NOTE = (
   "origin_ns and per-segment start_ns/end_ns are sampled from decoded "
   "logMonoTime events in each rlog; cached init/carParams timestamps serve "
-  "only as capture metadata. Segment playback anchors require sampled events."
+  "as capture metadata."
 )
 
 

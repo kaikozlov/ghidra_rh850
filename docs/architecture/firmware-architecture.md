@@ -285,8 +285,6 @@ The boot environment uses the common direct EIINT prologue at `0x100`. It passes
 | `0x10C1` | 193 | RSCAN CAN2 transmit | `0x1E96` |
 | `0xFFFFFFFF` | default | no match | `0x1EA4` fatal trap |
 
-The table describes supported wrappers. It does not prove that every CAN channel is enabled in every boot mode.
-
 ### 4.2 Application direct vectors
 
 The application installs `EBASE = 0x20000`. Most direct exception slots jump to the default handler at `0x61D88`. Direct-vector offset `0x90` instead jumps to `0x64B3E`, which saves fault context, records a fault, and enters recovery/reset handling. The region `0x20100..0x201FF` consists of `syncp; eiret` stubs.

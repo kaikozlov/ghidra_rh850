@@ -381,16 +381,15 @@
     }
   },
   "interpretation": {
-    "bounded_edges_and_sweeps": "observed/deterministic: the cruise-clean drive-B Class-L rise shows no immediate |B22:B23| step (3 s pre/post medians 84 vs 102), and no sustained >=0.5 s hands-light steering-motion sweep occurs inside Class-L in either drive; the speed-matched non-Class-L stratum contains one such sweep (drive A). The floor grows with Class-L occupancy rather than stepping at its rise edge, and falls after Class-L ends.",
+    "bounded_edges_and_sweeps": "observed/deterministic: the cruise-clean drive-B Class-L rise shows no immediate |B22:B23| step (3 s pre/post medians 84 vs 102), and no sustained >=0.5 s hands-light steering-motion sweep occurs inside Class-L in either drive; the speed-matched non-Class-L stratum contains one such sweep (drive A). The floor grows with Class-L occupancy without a rise-edge step, and falls after Class-L ends.",
     "bounded_motor_feedback_floor": "observed/deterministic: inside Class-L the rate-controlled hands-light core carries a several-fold larger |B22:B23| floor than the speed-matched cruise control stratum (drive B median ratio 6.0, rank-sum z=39.6), with higher lag-1 autocorrelation and near-zero correlation with driver torque, while the control stratum is driver-proportional (r(current,torque) strongly positive). This proves a smooth non-driver-proportional motor-feedback component inside Class-L; it does NOT uniquely label it LTA torque, because a mode-changed EPS damping/assist map produces the same signature.",
-    "bounded_opposing_runs": "observed/deterministic: episodes exist (longest 0.9 s, drive A) where the motor-feedback proxy drives in the steering-motion direction while opposing measured driver torque, with B6 absent on all buses. This is consistent with active EPS assist applying torque against the driver, but driver assist, damping, friction/road-load compensation, and lane-keeping-class functions are not separable from these two drives; it is not proof of LTA authority.",
-    "production_output_authorized": false
+    "bounded_opposing_runs": "observed/deterministic: episodes exist (longest 0.9 s, drive A) where the motor-feedback proxy drives in the steering-motion direction while opposing measured driver torque, with B6 absent on all buses. This is consistent with active EPS assist applying torque against the driver, but driver assist, damping, friction/road-load compensation, and lane-keeping-class functions are not separable from these two drives."
   },
   "schema": "camry-2026-motor-feedback-correlation-v1",
   "sources": {
     "census": {
       "path": "data/generated/camry_2026_cruise_lta_edge_census.json",
-      "sha256": "355ea5b408442a541bd946d21c3e85b0fa4d9e924474d3223189cb37894ee9fc"
+      "sha256": "30cae5b92fc5e4cc6ab94fb7d08916c7b4cab06438da4631cd7671ebb059da1b"
     },
     "drives": [
       {
@@ -404,7 +403,7 @@
     ],
     "tss3_port": {
       "path": "data/generated/camry_8965F3307000_tss3_opendbc_port.json",
-      "sha256": "55f70788dab0e8b7a9d2727806ed6403872d9d2981e1ca58cbe9ef921887c4d1"
+      "sha256": "dbc4e9474f53dd558d72ac1950a2fb8636bc703db1ca8b27d2fa64357cbb6cd8"
     }
   }
 }

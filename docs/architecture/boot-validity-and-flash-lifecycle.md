@@ -213,9 +213,7 @@ re-derivation against raw bytes; split-CodeFlash file offset == VA):
    0x1F2` its sole caller. The apparent `0x1426` `FEBF7C00` clear remains the
    CORR-067 zero-trip loop (`FEBF7C00 > FEBE7000`). Consequently bytes written
    into the XCP window immediately before `10 02` remain resident across the
-   normal application-to-boot transition. This establishes **retention** only:
-   no boot control-transfer consumer into that window is established here.
-   `tools/test xcp` pins this
+   normal application-to-boot transition. `tools/test xcp` pins this
    composition directly from raw CodeFlash.
 
    A third calibration now independently verifies the same lifetime property.

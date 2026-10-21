@@ -1,5 +1,4 @@
 {
-  "boundary": "remaining steering-role evidence only; target-native roles are bound by caller/callee topology and dataflow, not local byte alignment",
   "function_count": 14,
   "functions": [
     {
@@ -104,12 +103,12 @@
   "image": {
     "codeflash_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
     "codeflash_size": 1048576,
-    "path": "community/albinoelephant/raw-20260818/albinoelephant-corolla-2023.20260814-0023/dump_codeflash_00000000_00200000_20260814-025814.bin"
+    "path": "firmware/corolla-8965H1202000/CodeFlash.bin"
   },
   "schema": "corolla-h-steering-nested-evidence-v1",
   "software_id": "8965H1202000",
-  "source_corpus": {
-    "path": "build/work/corpora/h_8965H1202000_decompilations.corrected-context.raw.jsonl",
-    "sha256": "98fbd903f71165a433cb01dbb2e17bf3471824881760e6420d65ecef9f4f8dfa"
+  "source_evidence": {
+    "path": "data/targets/corolla-8965H1202000/retained_decompiler_evidence.json",
+    "sha256": "97cc28339620a012814a2f20164ed240f14d1efc3a31bf306726f613ec1fd50b"
   }
 }

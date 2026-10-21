@@ -494,7 +494,7 @@ def gtsplus_plugin_semantics(parser: DDBParser, master, gts_root: Path) -> dict:
                 "pattern_display_table": {"table": 14, "class": ECU_TABLE_CLASS_NAMES[14]},
                 "unit_table": {"table": 15, "class": ECU_TABLE_CLASS_NAMES[15]},
                 "output": "one CCmdActTstSignalInfoItem per requested selected Active Test ID, including name/unit/control-pattern/display/physical-conversion metadata",
-                "runtime_boundary": "metadata construction only; this plugin has no recovered vehicle transport edge and does not prove role-0x06 live availability",
+                "runtime_boundary": "metadata construction only; this plugin has no recovered vehicle transport edge",
             },
             "anchors": {
                 "selected_ids_and_type68_lookup": anchor(active_test_signal_info, 0x10001120, "8b8d04ffffff53c645fc01ff150c3000100fb758088b46048b48108bc350898500ffffff81c1cc0000008b8508ffffffff701c8d8514ffffff506844020000ff15803000108b"),
@@ -1140,7 +1140,7 @@ def gtsplus_p5_active_test_runtime(parser: DDBParser, master, gts_root: Path) ->
                 "parameterization_negative": "all four command/stop/value-mask/button-mask variable references are zero; no parameter payload or steering setpoint is appended by the recovered current routine materializer",
             },
             "version_boundary": "current GTS+ uses standard UDS 31/71 templates; the pinned V18 TMS-041 21 E2/61 E2 executor is retained as valid version-specific older behavior",
-            "safety_boundary": "static recovery only; no Active Test or RoutineControl request was sent to a vehicle; outer session/authentication and downstream FRC network effects remain separate questions",
+            "safety_boundary": "static recovery; no Active Test or RoutineControl request was sent to a vehicle",
         },
         "anchors": {
             "set_value_scaling": anchor(command_data, 0x10089E00, "558bec8b5508568bf185d274078b4a7085c9750ab8010008c05e5dc208008b450c2b42780faf427499f7f90fb6c833c0894e24"),
@@ -1531,7 +1531,6 @@ def gtsplus_execution_lifecycle(parser: DDBParser, master, gts_root: Path) -> di
                 "vendor_protocol_gate": "the capability can only arm when the monitor security/vendor byte is Toyota low-5-bit 0x15, Subaru high bits 0x20, or Suzuki high bits 0x60",
                 "camry_p5_capability": security_capability,
                 "conclusion": "current master type-27 does not advertise function 3/detail 0x50 for Hybrid397, Brake435, or FRC498, so their ordinary current-P5 monitor plan does not statically request this security-release capability",
-                "boundary": "this negative result covers static capability only; authentication requirements for other utility/ECU operations remain unresolved",
             },
             "check_mode": {
                 "meaning": "Hybrid P5 roles 0x17/0x18 are RoutineControl RID 0x1002 maintenance/check-mode operations",

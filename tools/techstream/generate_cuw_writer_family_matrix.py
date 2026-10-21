@@ -226,7 +226,7 @@ def generate(root: Path) -> dict[str, Any]:
             "protocol_tag_counts": dict(sorted(tag_counts.items())),
         },
         "evidence_boundary": {
-            "imports": "structural: imported helper/getter names prove dependencies only; exact on-wire requests require separate recovery",
+            "imports": "structural: imported helper/getter names prove dependencies",
             "exact_recovered_commands": "recovered subset: this inventory retains legacy COMMANDS pins; the second-stage route-grammar artifact owns the additional exact formerly-specialized builders",
             "target_disposition": "writer-level structural compatibility hint retained for backward compatibility; do not use for route decisions",
             "target_route_dispositions": "exact route-pair classifier shared with cuw_writer_protocol_grammar.json; all 196 rows are either byte-compatible or rejected",

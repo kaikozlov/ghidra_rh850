@@ -20,6 +20,7 @@ from typing import Any
 
 ROOT = REPO_ROOT
 from tools.targets.corolla.support.corolla_h_constants import RAW_DUMP, XCP_ROLE_MAP
+from tools.project.analysis_target import path as target_path
 
 RAW = RAW_DUMP
 
@@ -30,6 +31,7 @@ class Source:
     boundary: str | None = None
     tolerate_invalid_json: bool = False
     function_records_only: bool = False
+    retained_evidence: bool = False
 
 
 @dataclass(frozen=True)
@@ -198,14 +200,11 @@ PROFILES: dict[str, Profile] = {
         output="data/generated/corolla_8965H1202000_steering_nested_decompiler_evidence.json",
         sources={
             "default": Source(
-                "build/work/corpora/h_8965H1202000_decompilations.corrected-context.raw.jsonl",
-                tolerate_invalid_json=True,
-                function_records_only=True,
+                "data/targets/corolla-8965H1202000/retained_decompiler_evidence.json",
+                retained_evidence=True,
             )
         },
         selections=_selections([0xC9C16, 0xC9CD2, 0xCB68A, 0xCBE6E, 0xCB8BA, 0xCB9B6, 0xCBA40, 0xCD3CC, 0xCD440, 0xCE974, 0xCEFF8, 0xB8E84, 0xCEDAE, 0xCF028]),
-        boundary_key="boundary",
-        boundary="remaining steering-role evidence only; caller/callee topology and dataflow establish target-native roles. Local byte alignment alone is insufficient",
     ),
     "storage-nvm": Profile(
         summary="changed storage/NvM roles",
@@ -243,6 +242,30 @@ PROFILES: dict[str, Profile] = {
 
 def sha256(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
+
+
+def load_retained_evidence(path: Path, image: bytes) -> dict[int, dict[str, Any]]:
+    evidence = json.loads(path.read_text())
+    if evidence["schema"] != "corolla-h-retained-decompiler-evidence-v1":
+        raise ValueError(f"unexpected retained evidence schema: {path}")
+    if evidence["image"]["sha256"] != sha256(image) or evidence["image"]["size"] != len(image):
+        raise ValueError(f"retained evidence image identity drift: {path}")
+    rows = {}
+    for row in evidence["functions"]:
+        entry = int(row["entry"], 16)
+        size = row["body_size"]
+        if size <= 0 or len(image[entry:entry + size]) != size:
+            raise ValueError(f"retained function outside image: {entry:#x}")
+        if sha256(image[entry:entry + size]) != row["body_sha256"]:
+            raise ValueError(f"retained function byte identity drift: {entry:#x}")
+        if not row["decompiled_c"] or sha256(row["decompiled_c"].encode()) != row["decompiled_c_sha256"]:
+            raise ValueError(f"retained decompiler text identity drift: {entry:#x}")
+        if not 0 <= row["source_index"] < len(evidence["sources"]):
+            raise ValueError(f"missing retained function provenance: {entry:#x}")
+        if entry in rows:
+            raise ValueError(f"duplicate retained function: {entry:#x}")
+        rows[entry] = row
+    return rows
 
 
 def load_corpus(
@@ -291,7 +314,7 @@ def _source_metadata(profile: Profile, source_paths: dict[str, Path]) -> Any:
 def build_artifact(
     profile: Profile,
     *,
-    raw_path: Path = RAW,
+    raw_path: Path | None = None,
     source_paths: dict[str, Path] | None = None,
 ) -> dict[str, Any]:
     resolved_sources = (
@@ -302,9 +325,18 @@ def build_artifact(
     if set(resolved_sources) != set(profile.sources):
         raise ValueError("source override names must exactly match the profile")
 
+    if raw_path is None:
+        raw_path = (
+            target_path("corolla-8965H1202000", "codeflash")
+            if all(source.retained_evidence for source in profile.sources.values())
+            else RAW
+        )
+
     image = raw_path.read_bytes()[:0x100000]
     corpora = {
-        name: load_corpus(
+        name: load_retained_evidence(resolved_sources[name], image)
+        if source.retained_evidence
+        else load_corpus(
             resolved_sources[name],
             tolerate_invalid_json=source.tolerate_invalid_json,
             function_records_only=source.function_records_only,
@@ -331,7 +363,8 @@ def build_artifact(
             if merged_rows is not None
             else corpora[selection.source].get(selection.target)
         )
-        if not row or not row.get("decompile_completed") or not row.get("decompiled_c"):
+        completed = profile.sources[selection.source].retained_evidence or (row and row.get("decompile_completed"))
+        if not row or not completed or not row.get("decompiled_c"):
             source_description = (
                 " merged sources " + " -> ".join(profile.row_source_precedence)
                 if profile.row_source_precedence is not None
@@ -383,7 +416,10 @@ def build_artifact(
         "functions": functions,
         "function_count": len(functions),
     }
-    source_key = "source_corpus" if profile.source_format == "single" else "source_corpora"
+    source_key = (
+        "source_evidence" if all(source.retained_evidence for source in profile.sources.values())
+        else "source_corpus" if profile.source_format == "single" else "source_corpora"
+    )
     payload[source_key] = _source_metadata(profile, resolved_sources)
     if profile.boundary_key and profile.boundary:
         payload[profile.boundary_key] = profile.boundary

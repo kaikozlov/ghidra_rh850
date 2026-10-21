@@ -146,8 +146,7 @@ for short in ("3d", "3e", "3f"):
         13.0 <= last_detect_timer["p10"] <= last_detect_timer["p50"] <= last_detect_timer["p90"] <= 13.30)
 
 # Same-car stored FRC Operation-FFD witness from the retained 2818/0100 EB13
-# response in the 2026-09-01 live communication notebook. This distinguishes
-# feature capability only. The CAN-bit mapping remains separate.
+# response in the 2026-09-01 live communication notebook.
 same_car_5609 = bytes.fromhex("f8c0")
 check("same-car FFD says ordinary LTA exists", bool(same_car_5609[1] & 0x80))
 check("same-car FFD says Toyota Hands-Off feature does not exist", not bool(same_car_5609[1] & 0x10))

@@ -389,11 +389,10 @@ def analyze() -> dict[str, Any]:
       "conclusion": (
         "Accepted B6 Target Lateral ID11 co-modulates the ordinary EPS command composition alongside other assist inputs. "
         "ID11 selects bank2, its target-angle controller reaches CB38, and D0218 adds CB38 inside the ordinary assist sum before the single shared CC48->CC64/current funnel. "
-        "The only special transient that can alter that sum requires ADB0==0x31; ID11 0x0B remains outside that transient. No CB00/ADB0-selected writer exists later in the final command funnel."
+        "The special transient that can alter that sum requires ADB0==0x31. No CB00/ADB0-selected writer exists later in the final command funnel."
       ),
       "stock_request_plane_boundary": (
-        "This proves EPS-side composition. It does not mean F33 literally adds the upstream 0x08A angle: exact F33 receives neither 0x08A nor 0x081. "
-        "The Toyota/FRC request-to-chassis authority handoff is a separate upstream/local provenance question."
+        "This proves EPS-side composition. Exact F33 receives neither 0x08A nor 0x081."
       ),
     },
   }

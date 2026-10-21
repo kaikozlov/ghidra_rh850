@@ -180,8 +180,8 @@ def build() -> dict:
             "decisive_evidence": (
                 "Exact FRC firmware or a live FRC key-update/HSM-service trace is required "
                 "to identify the internal SecOC key selector, freshness owner, CMAC call and "
-                "Tx descriptor. Brake firmware remains decisive specifically for 0x08A verification/"
-                "arbitration and downstream B6 generation; the 0x08A publisher is already located."
+                "Tx descriptor. Brake firmware is decisive for 0x08A verification/"
+                "arbitration and downstream B6 generation."
             ),
             "frc_branch_disposition": (
                 "The old external Brake/Booster/CGW physical-publisher hypothesis is superseded "
@@ -197,7 +197,6 @@ def build() -> dict:
         },
         "repin_direction": repin,
         "stationary_ready_detail": ready,
-        "production_output_authorized": False,
     }
 
 

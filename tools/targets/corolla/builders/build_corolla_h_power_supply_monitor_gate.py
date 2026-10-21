@@ -13,7 +13,6 @@ from tools.targets.corolla.support.corolla_h_constants import CODEFLASH as H_COD
 REPO = REPO_ROOT
 IMAGE = H_CODEFLASH
 EVIDENCE = REPO / "data/generated/corolla_8965H1202000_power_supply_monitor_decompiler_evidence.json"
-FOLLOWUP = REPO / "data/generated/corolla_8965H1202000_tms053_followup_decompiler_evidence.json"
 TECH = REPO / "data/generated/corolla_8965H1202000_techstream_correlations.json"
 EQUIV = REPO / "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json"
 OUT = REPO / "data/generated/corolla_8965H1202000_power_supply_monitor_gate.json"
@@ -38,7 +37,6 @@ def main() -> int:
     args = ap.parse_args()
     image = args.image.read_bytes()
     ev = json.loads(args.evidence.read_text())
-    follow = json.loads(FOLLOWUP.read_text())
     tech = json.loads(TECH.read_text())
     equiv = json.loads(EQUIV.read_text())
     if len(image) != 0x100000 or sha(image) != ev["image"]["sha256"]:
@@ -46,7 +44,6 @@ def main() -> int:
     if ev["function_count"] != 14:
         raise ValueError("monitor evidence count drift")
     funcs = {int(x["entry"], 16): x["decompiled_c"] for x in ev["functions"]}
-    follow_funcs = {int(x["entry"], 16): x["decompiled_c"] for x in follow["functions"]}
 
     # Dispatcher, three classifiers, and the shared output-state setters.
     need(funcs[0x450FC], "DAT_0002b864 == 'Z'", "FUN_00044d84();",
@@ -68,9 +65,10 @@ def main() -> int:
     need(funcs[0x4528A], "uRamfebe7c58 = 3;", "uRamfebe7c5a = 0x5a;")
     need(funcs[0x4529A], "uRamfebe7c58 = 3;", "uRamfebe7c5b = 0x5a;")
 
-    # Exact stage copy and normalization.  The tracked corpus represents B8EE4
-    # as an 8-byte overlapping prologue and B8EEC as its 2646-byte continuation.
-    need(follow_funcs[0x5262C], "uRamfebef000 = uRamfebe7c58;")
+    # MOVEA -0x3BA8,gp,ep; SLD.BU 0[ep],r1; ST.B r1,0x3800[gp].
+    if (image[0x52630:0x52634] != bytes.fromhex("24f658c4")
+            or image[0x5263C:0x52642] != bytes.fromhex("6008440f0038")):
+        raise ValueError("native monitor snapshot-copy drift")
     need(funcs[0xB8EEC], "cVar1 = *(char *)(iVar15 + 0x3800);", "cVar1 != '\\0'",
          "cVar1 != '\\x02'", "cVar1 == '\\x03'", "cVar21 = '\\x04';",
          "cVar21 = '\\x01';", "*(char *)(iVar15 + -0xb43) = cVar21;")
@@ -122,7 +120,6 @@ def main() -> int:
         "sources": {
             "codeflash": {"path": str(args.image.relative_to(REPO)), "sha256": sha(image)},
             "decompiler_evidence": {"path": str(args.evidence.relative_to(REPO)), "sha256": sha(args.evidence.read_bytes()), "function_count": ev["function_count"]},
-            "tms053_followup_evidence": {"path": str(FOLLOWUP.relative_to(REPO)), "sha256": sha(FOLLOWUP.read_bytes())},
             "techstream_correlations": {"path": str(TECH.relative_to(REPO)), "sha256": sha(TECH.read_bytes())},
             "hf_application_equivalence": {"path": str(EQUIV.relative_to(REPO)), "sha256": sha(EQUIV.read_bytes()), "region": application_equivalence},
         },

@@ -25,10 +25,8 @@ It was recorded 2026-07-29 and added to this corpus on 2026-08-24. SHA-256:
 `f1ae7c40ad8e9ff8c462a3f5367d914873e93575d902ccb82f2c74984acd439f`.
 Embedded `initData` records `spanconstant5/openpilot`, branch `tskdash`, commit
 `7e78a9d89728c4bd106838d40b5891ce3931de43`, dongle `67fd5b833889fedf` and
-mici hardware. Embedded `carParams` is `MOCK`, so the rlog has no usable F181
-identity join; its dongle also differs from the later dump-preflight Panda
-`23257862c6bf2f83`. Contributor attribution therefore does not make it an exact
-`8965F1208000` firmware-to-route join.
+mici hardware. Embedded `carParams` is `MOCK`; its dongle differs from the later
+dump-preflight Panda `23257862c6bf2f83`.
 
 The rlog is nevertheless high-value whole-vehicle evidence. Raw incoming CAN
 shows real motion plus dynamic brake/gas/steering, and the opendbc extraction is
@@ -70,18 +68,14 @@ in exactly 2,190 bytes, all below `0x17E00`; the high CRC/application image is
 byte-identical. A fresh clean Span Ghidra import independently produced the same
 5,425-function structural fingerprint corpus as H, and a direct Span→Sienna run
 reproduced H's full exact-body, structural, named-function, and normal-Rx results.
-The resolved Span SecOC queue contains only `00F/D7/B6`. Sienna separately has
-`2E4/131` steering profiles.
+The resolved Span SecOC queue contains `00F/D7/B6`.
 
-The 2,190-byte low delta is now exhausted rather than left as a generic
-calibration caveat. Exactly 863 changed bytes belong to a nine-record `0xA000`
+The 2,190-byte low delta is location-exhausted. Exactly 863 changed bytes belong to a nine-record `0xA000`
 unit-calibration/identity family, whose active consumers include three
 mode-selected motor-rotation-angle correction LUTs and selected angle-offset
 coefficients; 1,311 changed bytes lie in the structured `0x10000..0x17DEF`
 shadow-copy source; the remaining 16 bytes are the opaque post-CRC field
-`0x17DF0..0x17DFF`. The active calibration differences are specimen-specific
-evidence, **not** proof of a 2023→2025 tuning revision, and the semantic CPU
-consumer of the `0x10000+` shadow bank remains bounded.
+`0x17DF0..0x17DFF`.
 
 The non-CodeFlash corpus is also compared directly. Span's 48-KiB extended
 CodeFlash is byte-identical to all three albino reads. All three physical

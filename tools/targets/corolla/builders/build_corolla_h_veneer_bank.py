@@ -78,7 +78,7 @@ def main():
   'static_conclusion':{
    'preserved_unresolved_pairs':sum(p['status']=='preserved-slot' for p in pairs),
    'removed_unresolved_pairs':sum(p['status']=='removed-slot' for p in pairs),
-   'boundary':'A preserved fixed veneer slot proves the H call-slot role and its H low target. A removed slot proves only removal of that canonical veneer-derived role; it does not prove the old low-level operation is absent elsewhere in H.'
+   'boundary':'A preserved fixed veneer slot proves the H call-slot role and its H low target. A removed slot proves removal of that canonical veneer-derived role.'
   }
  }
  a.out.write_text(json.dumps(payload,indent=2,sort_keys=True)+'\n'); print('wrote',a.out)

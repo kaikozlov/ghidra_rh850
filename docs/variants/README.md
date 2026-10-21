@@ -1,8 +1,7 @@
 # Variant and target reports
 
 Use this index to select evidence for a **specific specimen or calibration**.
-Vehicle support requires evidence beyond a similar name. Registry roles describe
-analysis ownership. Openpilot qualification requires separate evidence.
+Registry roles describe analysis ownership.
 
 ## Registered analysis targets
 
@@ -51,23 +50,17 @@ likewise apply to their recorded rack, firmware, and date.
   calibration-specific state analysis.
 - [September-16 offline audit](corolla-tss3-offline-audit-2026-09-16.md) and
   [tester-handoff audit](corolla-tss3-tester-handoff-audit-2026-09-16.md) are
-  revision-bound reviews. Current upstream status and road qualification require separate evidence.
+  revision-bound reviews.
 
 ## Other evidence outside the registered full analysis targets
 
 | Evidence | Scope / report |
 |---|---|
 | Sienna `8965B4514000` | [External field report](sienna-8965B4514000.md) |
-| Tundra `8965F3401200` | [Partial application-image provenance](../../firmware/tundra-8965F3401200/README.md); complete registered CodeFlash target unavailable |
+| Tundra `8965F3401200` | [Partial application-image provenance](../../firmware/tundra-8965F3401200/README.md) |
 | TSS3 Front Recognition Camera | [Acquisition and evidence boundaries](tss3-frc-firmware-acquisition.md) |
-| RAV4 Prime | [Historical field experiments](rav4-prime-forced-secoc-profile.md), with their own identity limits |
-| Venza airbag sensor | [September-14 specimen report](yc-venza-airbag-reprogramming-2026-09-14.md); an EPS comparison requires separate evidence |
-| Newer TSK target | [Evidence contract](newer-tsk-target-evidence.md); no automatic transfer |
+| RAV4 Prime | [Historical field experiments](rav4-prime-forced-secoc-profile.md) |
+| Venza airbag sensor | [September-14 specimen report](yc-venza-airbag-reprogramming-2026-09-14.md) |
+| Newer TSK target | [Evidence contract](newer-tsk-target-evidence.md) |
 | Cross-vehicle comparison | [Evidence-graded comparison](toyota-eps-variant-comparison.md) and `data/toyota_eps_variant_matrix.csv` |
 
-## The transfer rule
-
-Matching services, names, or application-family structure do not prove identical
-hardware, boot code, calibration, or vehicle behavior. A transfer starts as a
-**hypothesis** until checked against the target's own evidence. Dated raw logs
-and public routes retain their original software and vehicle-attribution limits.

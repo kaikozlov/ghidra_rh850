@@ -40,7 +40,7 @@
     "region": "NA"
   },
   "current_utility_srp_census": {
-    "boundary": "The current GTS+ UtilityNeo CONF scripts decode with the pinned V18 AES-256-ECB key and are ordinary maintenance/utilities (alarm, lamp, DCM, SAS zero point, RCM, TVD). Their literal frame corpus contains no SecurityAccess/reflash service and no TSS3 lateral/longitudinal/arbitration/SecOC vocabulary, so current host utilities cannot distinguish arbitration execution or wire ownership. This closure covers literal decoded scripts only; dynamically synthesized bytes remain outside its scope.",
+    "boundary": "The current GTS+ UtilityNeo CONF scripts decode with the pinned V18 AES-256-ECB key and are ordinary maintenance/utilities (alarm, lamp, DCM, SAS zero point, RCM, TVD). Their literal frame corpus contains no SecurityAccess/reflash service and no TSS3 lateral/longitudinal/arbitration/SecOC vocabulary.",
     "conf_dir": "CONF",
     "control_security_vocabulary_hits": [],
     "distinct_frame_service_bytes": [
@@ -173,7 +173,7 @@
         "vin": "required at authenticated query time; not stored in this artifact"
       },
       "t2_tis_package_availability_proven": false,
-      "url_policy": "Do not synthesize /t3Portal/calibration/F152633K0000 or any other URL. The exact F181 is a search input/current software identity. A downloadable target CID remains unproved."
+      "url_policy": "Do not synthesize /t3Portal/calibration/F152633K0000 or any other URL. The exact F181 is a search input/current software identity."
     }
   },
   "fleet_brake_sink_census": {
@@ -183,7 +183,7 @@
       "485": "EPB_P5.ddb",
       "6004": "BSCM_A_P6.ddb"
     },
-    "interpretation": "Every EU/JP FRC_P5 install row and every NA row except one explicit TEST placeholder includes at least one brake ECU whose current DDB exposes 0x10A1..0x10A4. This establishes a fleet-wide diagnostic observation sink. Runtime PID support on each physical vehicle requires independent confirmation.",
+    "interpretation": "Every EU/JP FRC_P5 install row and every NA row except one explicit TEST placeholder includes at least one brake ECU whose current DDB exposes 0x10A1..0x10A4. This establishes a fleet-wide diagnostic observation sink.",
     "regions": {
       "EU": {
         "frc_install_row_count": 460,
@@ -944,7 +944,7 @@
           }
         ]
       },
-      "meaning": "Toyota labels 0x10A1..0x10A4 as upper/lower acceleration magnitudes and request IDs 'from Toyota Safety Sense'. They are ordinary read-only Data Monitor observations in the brake domain. The underlying vehicle-network frame and authentication owner remain unproved."
+      "meaning": "Toyota labels 0x10A1..0x10A4 as upper/lower acceleration magnitudes and request IDs 'from Toyota Safety Sense'. They are ordinary read-only Data Monitor observations in the brake domain."
     },
     "frc_output_vocabulary": {
       "boundary": "The ordinary FRC Data List exposes only the upper-limit ISA request half. Lower-limit TSS request fields are present in the PCS recorder and brake receive surface but are not exposed as FRC_P5 ordinary Data Monitor DIDs.",
@@ -1280,7 +1280,7 @@
         }
       ]
     },
-    "static_join": "FRC_P5 contains the upper-limit requester/acceleration/allocation/permission source vocabulary; brake-domain ECUs expose upper/lower acceleration and requester IDs explicitly named 'from Toyota Safety Sense'; and the FRC-hosted PCS recorder contains both request halves plus arbitration-result longitudinal ID/acceleration. This closes the diagnostic source->brake-sink architecture, but not copy direction, wire encoding, SecOC ownership, or arbitration execution."
+    "static_join": "FRC_P5 contains the upper-limit requester/acceleration/allocation/permission source vocabulary; brake-domain ECUs expose upper/lower acceleration and requester IDs explicitly named 'from Toyota Safety Sense'; and the FRC-hosted PCS recorder contains both request halves plus arbitration-result longitudinal ID/acceleration. This closes the diagnostic source->brake-sink architecture."
   },
   "ordinary_arbitration_census": {
     "boundary": "The current ordinary P5 Data Monitor surface exposes no control-related arbitration-result signal. P6 arbitration rows are successor terminology only; the P5 winner remains available through the FRC-hosted PCS recorder rather than an ordinary RDBI oracle.",

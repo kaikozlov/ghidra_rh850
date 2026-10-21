@@ -206,8 +206,8 @@ def main() -> int:
                            "(ABS_P5, Brk_Bst_P5, EPB_P5, BSCM) carry no lateral-request DID "
                            "vocabulary, so GTS+ cannot name the producer from DID semantics.",
       "field_boundary": "Structural names (CRUISE_*, REQUEST_WORD_B8, LATERAL_REQUEST_LEVEL, "
-                        "COOPERATIVE_SUBSTATE_FLAG, RESERVED_16BIT_*) are census-bounded only; "
-                        "OEM joins remain unresolved. B21/B26 six-bit boundaries remain encoding assumptions. "
+                        "COOPERATIVE_SUBSTATE_FLAG, RESERVED_16BIT_*) describe the census. "
+                        "B21/B26 six-bit boundaries remain encoding assumptions. "
                         "The percent unit on B24 is bounded from the observed 0/50/100 value set.",
       "regression_rule": "No 0x08A-to-B6 stock-LTA transform is implied by scale or topology "
                          "(CORR-135). Passive analysis only; no output authorized.",

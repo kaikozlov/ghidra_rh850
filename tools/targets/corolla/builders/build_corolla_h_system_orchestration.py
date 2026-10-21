@@ -296,7 +296,7 @@ def main() -> None:
             ],
             "ram_default_init": {"target": "0x0005316C", "caller": "0x00052CFA"},
             "task_wrapper": {"target": "0x0005389C", "caller": "0x00052CE6"},
-            "boundary": "H split/restructured these generated copy/dispatch surfaces; do not infer canonical one-to-one function identity from the representative fragments",
+            "boundary": "H split/restructured these generated copy/dispatch surfaces.",
         },
         "supporting_analogues": support,
         "static_conclusion": {
@@ -304,7 +304,6 @@ def main() -> None:
             "mode_policy_preserved": s_query == h_query and s_clear == h_clear,
             "per_tick_wiring_regenerated": bool(guard_diff),
             "com_rte_surface_regenerated": True,
-            "remaining_boundary": "lower helper semantics inside changed wiring remain independently auditable; this report closes only the named high-level scheduler/system roles. Generated COM helpers require independent review",
         },
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)

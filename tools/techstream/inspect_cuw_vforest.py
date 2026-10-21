@@ -311,7 +311,7 @@ def main() -> int:
         },
         "host_transfer_boundary": {
             "conclusion": "Techstream decodes ASCII hex into ZV/LZF records but sends each record's stored raw/compressed body through CCanVFORESTFlashWriter; it does not LZF-expand the image before J2534 transmission",
-            "ecu_side": "LZF expansion / final image interpretation occurs downstream of this host writer; exact ECU-side implementation is not claimed from this package alone",
+            "ecu_side": "LZF expansion / final image interpretation occurs downstream of this host writer",
         },
         "modern_unified_boundary": {
             "descriptor_fields_absent": [x for x in ("ECUAuthKey", "ServiceAuthKey", "SeedKey", "Nonce", "OffsetAddress", "SecurityProperty2") if x not in cpu],

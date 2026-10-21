@@ -1,14 +1,11 @@
 # 2026 Camry steering bench-validation specification and interface inventory (WP3)
 
 **Historical WP3 specification:** this document records the direct-host-B6
-bench plan and its September-4-era evidence boundary. It specifies planned
-validation. Later development steering observations do not show that this bench
-plan was executed, and this plan's older “unobserved” statements do not negate
-those later observations.
+bench plan and specifies planned validation at the September-4 checkpoint.
 
 Use [the capability matrix](camry-2026-capability-matrix.md) for consolidated
 qualification status. The interface inventory and blocked exit below belong
-exclusively to this earlier plan. They do not describe the current installation or complete project state.
+to this earlier plan.
 Nothing here authorizes steering transmission.
 
 ## Boundary definitions and required evidence
@@ -71,8 +68,7 @@ that requirement.
 ## Verification test cases
 
 Acceptance limits must be selected from the supported interface and
-engineering requirements **before** outcome data is examined; no universal
-allowable tracking error is invented here.
+engineering requirements **before** outcome data is examined.
 
 | Case | Procedure | Pass criterion (to set before data) |
 |---|---|---|

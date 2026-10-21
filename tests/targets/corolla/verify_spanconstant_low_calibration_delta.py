@@ -90,8 +90,8 @@ bank_b = tracked["low_shadow_bank"]["structured_bank_b"]
 check("structured bank-B has 18 correctly aligned 0x24-byte rows with exact per-row delta census", bank_b["start"] == "0x120F4" and bank_b["end_exclusive"] == "0x1237C" and bank_b["record_stride"] == 0x24 and bank_b["record_count"] == 18 and [r["changed_bytes"] for r in bank_b["records"]] == [0,0,8,8,8,8,12,12,12,12,12,12,12,12,8,8,8,8])
 check("every structured-bank-B row terminates in 0x7FFFFFFF in both images", all(struct.unpack_from("<I", h, int(r["start"], 16) + 0x20)[0] == 0x7FFFFFFF and struct.unpack_from("<I", s, int(r["start"], 16) + 0x20)[0] == 0x7FFFFFFF for r in bank_b["records"]))
 
-# Pin exact bodies for the role-critical target-native H functions.  Span carries
-# the same bytes; semantic names remain bounded to the reviewed decompilation.
+# Pin exact bodies for the role-critical target-native H functions.
+# Span carries the same bytes.
 critical_bodies = {
     0x20880: (12, "b9a074cdc45397ba3280936e41004cc89349741987c0dc30b0ff1096c4cdcea8"),
     0x2DA0A: (30, "3abb7917543506aa512f3305aa43db8352e72b0b9344998085bf4a83b308312f"),
@@ -142,7 +142,7 @@ check("region-0 and region-1 validity markers are 0x5AA5A55A and row-2 null mark
 cmac_chain_entries = {c["entry"].split("/")[0] for c in regions["cmac_verify_chain"]}
 check("CMAC verify chain pins all named boot functions", cmac_chain_entries == {"0x00005BEA", "0x0000591A", "0x00006E9E", "0x00007106", "0x00003376", "0x00006EC4", "0x00007DF0", "0x00007336", "0x00007D34"})
 check("region-0 AES-CMAC tag is fully changed (16/16) and recorded", regions["region0_cmac_tag_baseline"] == h[0x17DF0:0x17E00].hex() and regions["region0_cmac_tag_target"] == s[0x17DF0:0x17E00].hex() and sum(a != b for a, b in zip(h[0x17DF0:0x17E00], s[0x17DF0:0x17E00])) == 16)
-check("high-region tag slot at 0xFFDF0 is identical between specimens and not asserted programmed", h[0xFFDF0:0xFFE00] == s[0xFFDF0:0xFFE00])
+check("high-region tag slot at 0xFFDF0 is identical between specimens", h[0xFFDF0:0xFFE00] == s[0xFFDF0:0xFFE00])
 # Role-critical CMAC chain bodies are byte-identical between H and Span.
 cmac_bodies = {
     0x3376: (58, "273d630364ce881bf6f650f608ac8fb827976f8295e008d8688d1201070558eb", "boot_memory_region_get_cmac_tag"),

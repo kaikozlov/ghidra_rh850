@@ -62,7 +62,7 @@ def main()->None:
    'tracked_images_overflow':False,
    'configuration_dependent_safety':True,
    'structural_in_loop_capacity_check':False,
-   'boundary':'Current S/H/F event masks bound reachable output inside the 0x300 staging area. The inner formatter itself has no capacity check, so this portability-sensitive bound applies only to the current configuration. Structural memory safety and global static-attack absence remain unproved.'
+   'boundary':'Current S/H/F event masks bound reachable output inside the 0x300 staging area. The inner formatter itself has no capacity check, so this portability-sensitive bound applies to the current configuration.'
   }
  }
  args.out.parent.mkdir(parents=True,exist_ok=True); args.out.write_text(json.dumps(payload,indent=2,sort_keys=True)+'\n'); print(json.dumps({'role_closure_count':len(roles),'sienna':sb,'corolla_h':hb,'corolla_f':fb},indent=2))

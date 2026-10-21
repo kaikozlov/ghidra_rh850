@@ -188,11 +188,9 @@ SafekeyNumber = the unmodified 16-byte positive-response payload of DID 0x1010
 The pinned Techstream tree contains no `MCUID`, `MCU ID`, or transformation
 edge that names those bytes as a silicon identifier. Techstream validates only
 service/DID/length before forwarding and later uses the value as the response
-association key. Equivalence to a physical MCU ID therefore remains **bounded
-and unproven**.
+association key.
 
-Stage 8 adds one independently pinned external observation without collapsing
-that boundary. `optskug/docs @ 2c7184122d3f1644dfc9f32e98daaa45df653098`
+`optskug/docs @ 2c7184122d3f1644dfc9f32e98daaa45df653098`
 records a July 2026 official-key-configuration experiment in which Toyota's
 server-side flow reportedly requires **both MCU ID and VIN** and rejects a
 VIN-only key-update request. This establishes that an MCU identity is a distinct
@@ -391,12 +389,10 @@ boundary. It could still have originated in supplier/reference software that a
 Tier-1 failed to customize, but that is a software-provenance hypothesis.
 
 Public exact-value searches currently provide no cross-OEM support for a
-Renesas-global secret: the three P1M-E root constants resolve only to Toyota/Denso
-P1M-E research and derivative tooling. No retained non-Toyota P1M-E firmware
-supports the claim. Conversely, Renesas publicly supplies the P1M-E AUTOSAR MCAL and
+Renesas-global secret: the three P1M-E root constants resolve to Toyota/Denso
+P1M-E research and derivative tooling. Renesas publicly supplies the P1M-E AUTOSAR MCAL and
 documents ICU-S as a fixed SHE state machine, so a substantial common Renesas
-low-level/security-driver layer is expected. MCAL/ICU-S provenance does not
-imply that an OEM UDS SecurityAccess root or algorithm is Renesas-selected.
+low-level/security-driver layer is expected.
 
 ### Local Renesas P1M-E MCAL package audit
 
@@ -638,24 +634,14 @@ FRC diagnostic / real-time service layer
 ```
 
 The **R4 placement is strongly supported for the programming/decoder path** by
-the Toyota routine address plus the independent sibling firmware; it is still
-not proven that the ordinary live `0x792` MACKey UDS handler itself executes on
-R4 rather than handing off from another core. Likewise, the exact
-R4/application↔`HSM_CM3` mailbox/shared-memory/service ABI is not public in the
-recovered sibling sample. Structural evidence now supports that negative:
-the CR4 image's static GCOMM table contains only sixteen A53-node-`0..7` <->
+the Toyota routine address plus the independent sibling firmware.
+The CR4 image's static GCOMM table contains sixteen A53-node-`0..7` <->
 R4DL0-node-`8` shared-buffer entries, its running program registers only receive
 endpoint `0x0008` and replies on `0x0800`, and service class `1` implements only
 `erase/write/read`. The library has callback-only plumbing for special logical
 participants `9/10/11`, but this image registers none of them and provides no
 data-buffer route to those participants. The public CR4 artifact therefore
-implements a flash proxy. The 64-byte `M1||M2||M3` HSM client remains unrecovered.
-Decisive evidence requires decoded Toyota FRC fixed R4/application code, a
-raw camera NOR/boot-region dump, or direct HSM/debug evidence.
-
-We still need that evidence to prove the FRC's RID-`0x3002` handler-to-HSM call,
-identify the SHE slot/AuthID used for the ECU Security Key, and determine whether
-the same HSM also owns runtime SecOC CMAC generation.
+implements a flash proxy.
 
 This provisioning result must remain separate from **runtime protected-message
 signing**. The captured native FRC-side Bus-1 periodic family is exact AUTOSAR

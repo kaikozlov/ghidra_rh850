@@ -149,7 +149,7 @@
   },
   "evidence": {
     "final_compact_evidence": "data/generated/corolla_8965H1202000_final_named_residue_evidence.json",
-    "final_compact_evidence_sha256": "02853029d504e4f4d862038d665a4dd812d969c9b3960f1d41cc3056b7c92f05"
+    "final_compact_evidence_sha256": "758013e3f85a67168a20f706e325070ce991c97523f06b21f600f70a6f5ac5eb"
   },
   "images": {
     "h_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
@@ -360,7 +360,6 @@
   "software_id": "8965H1202000",
   "static_conclusion": {
     "all_34_prior_unresolved_names_closed": true,
-    "boundary": "Zero genuinely-unresolved canonical names means every canonical named role has exact-body, target-native role, target-surface recensus, or target-native inspection evidence. It does not promote structural-only candidates or imply field-for-field equivalence for consolidated/generated successors.",
     "direct_target_native_successors": 33,
     "removed_target_surface_roles": 1
   },

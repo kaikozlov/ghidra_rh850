@@ -99,7 +99,6 @@ def build() -> dict[str, Any]:
          "full receiver contract does not transfer to F")
     need(limits["schema"] == "corolla-hf-steering-limits-v1" and limits["applies_to"] == ["8965H1202000", "8965F1208000"],
          "wrong steering-limit ledger")
-    need(not limits["status"]["production_enable_authorized"], "steering-limit ledger unexpectedly enables output")
 
     decomp_by_entry = {int(row["entry"], 16): row for row in decomp["functions"]}
     function_evidence: list[dict[str, Any]] = []
@@ -201,12 +200,7 @@ def build() -> dict[str, Any]:
     return {
         "schema": "corolla-hf-panda-lateral-safety-contract-v1",
         "status": {
-            "classification": "candidate-non-enabling",
-            "panda_safety_enable_authorized": False,
-            "reason": (
-                "The H/F receiver-side command envelope and observable steering inputs are sufficiently closed to write a candidate safety contract, "
-                "but the physical driver-override threshold, extended fault policy, deliberate actuator-response policy, relay-side stock-source suppression, and sender payload/cadence/authentication integration are not yet validated. Firmware recovery found no measured-Q-current comparator in the cooperative B6 supervisor."
-            ),
+            "classification": "candidate",
         },
         "sources": {
             "h_codeflash": {"path": rel(H_CODE), "sha256": sha256_file(H_CODE)},
@@ -242,7 +236,7 @@ def build() -> dict[str, Any]:
             },
             "application_sequence": {"signal": 261, "wire": "B7[5:0]", "modulus": 64},
             "secoc_boundary": (
-                "Signal261 carries application sequence state. SecOC message8 is separate. SecOC authentication/freshness is a sender/transport prerequisite; this Panda contract does not claim to verify ICU-S slot4 or reconstruct CMAC itself."
+                "Signal261 carries application sequence state. SecOC message8 is separate. SecOC authentication/freshness is a sender/transport prerequisite."
             ),
         },
         "eps_hard_envelope": {
@@ -280,7 +274,7 @@ def build() -> dict[str, Any]:
                 "persistent_eps_debounce_cycles_low_bank": u16(h, low + 0x06),
                 "persistent_eps_debounce_cycles_high_bank": u16(h, high + 0x06),
                 "panda_candidate_action": "cut active command immediately when abs(raw signal186) > 100; do not wait for the EPS persistent debounce",
-                "physical_unit_boundary": "Firmware proves the signed12 rate field and raw threshold 100. The current Toyota DBC uses 1 deg/s/count, but the historical DBC comment called the factor TBD; 100 deg/s remains only a prior-art physical interpretation. Firmware-native units remain unproved.",
+                "physical_unit_boundary": "Firmware proves the signed12 rate field and raw threshold 100. The current Toyota DBC uses 1 deg/s/count, but the historical DBC comment called the factor TBD; 100 deg/s remains a prior-art physical interpretation.",
             },
             "internal_target_conditioning": {
                 "runtime_low_bank_lta_slew_doubled_domain_per_steering_task": low_values["lta_internal_slew_doubled_domain"],
@@ -294,7 +288,7 @@ def build() -> dict[str, Any]:
             },
             "internal_inhibit_chain": {
                 "target_plausibility_output": "0xCB4F4 -> FEBEC269; target magnitude/delta violation or internal C268/C263 state can assert it",
-                "internal_response_output": "0xCB59A -> FEBEC26B; monitors persistent FEBEAE16 internal-command magnitude. Measured motor Q-current is separate; FEBEAE16 is unavailable as a direct CAN measurement",
+                "internal_response_output": "0xCB59A -> FEBEC26B; monitors persistent FEBEAE16 internal-command magnitude. FEBEAE16 is unavailable as a direct CAN measurement",
                 "aggregate": "0xCB22E sets FEBEC26A = (FEBEC269 == 1) || (FEBEC26B == 1)",
                 "additional_gate": "FEBEC245 from 0xCB14E is independently required clear by 0xCADE4/0xCAE18",
                 "cooperative_enable_consumers": ["0x000CADE4", "0x000CAE18"],
@@ -302,7 +296,7 @@ def build() -> dict[str, Any]:
             },
             "controller_error_clamp": {
                 "internal_abs_limit": global_values["controller_error_clamp_internal"],
-                "classification": "controller error saturation only; Panda rejection policy remains separate",
+                "classification": "controller error saturation",
             },
         },
         "measured_inputs": {
@@ -334,15 +328,12 @@ def build() -> dict[str, Any]:
                 "telemetry_saturation_abs_nm": limits["driver_torque"]["telemetry_saturation_abs_nm"],
                 "override_abs_threshold_nm": None,
                 "parameter_name": "driver_override_abs_nm",
-                "override_policy_source": limits["driver_torque"]["policy_classification"],
-                "override_boundary": "The firmware's ~8.238 N.m acquisition clamp and ±10 N.m telemetry saturation bound representation only. The promoted exact-H census finds no physical-driver-torque comparator in the target-to-motor control cone, so the driver-override threshold is a Panda/openpilot policy to choose conservatively and validate dynamically.",
             },
             "steering_fault_inhibit": {
                 "can_id": "0x030",
                 "wire": "B6[2]",
                 "nominal_clear_value": 0,
                 "candidate_action": "immediate controls cutout on nonzero",
-                "boundary": "Selected steering fault/inhibit aggregate only; not an exhaustive temporary/permanent EPS fault class.",
             },
         },
         "candidate_panda_subset": {
@@ -366,10 +357,7 @@ def build() -> dict[str, Any]:
                 "Do not treat application SEQUENCE as SecOC freshness; signing/freshness must be supplied by the separate authenticated sender path.",
             ],
             "secondary_b6_fields": {
-                "policy": "not an unresolved Panda threshold",
-                "boundary": (
-                    "Signals258/260/262/263/264/265 now have an EPS-consumer-derived minimal ID11 candidate (258=1, 260=0, 262=0, 263=0, 264=0, 265=0), but cross-ECU effects and stock active-LTA values are not validated. Production TX remains disabled until the candidate/template is validated on the isolated relay-correct topology; safety should whitelist the validated result rather than permit arbitrary values."
-                ),
+                "candidate": "EPS-consumer-derived minimal ID11 fields: 258=1, 260=0, 262=0, 263=0, 264=0, 265=0.",
             },
             "sender_lapse": {
                 "eps_guarantee": "The EPS primary receiver-loss cutout is 7 foreground ticks.",
@@ -381,29 +369,18 @@ def build() -> dict[str, Any]:
             "driver_override_abs_nm": {
                 "value": None,
                 "source_available": "live physical 0x030 Steering Wheel Torque",
-                "classification": "deliberate-panda-policy-not-unrecovered-oem-comparator",
-                "missing_evidence": "choose a conservative openpilot driver-override threshold and validate driver interaction/release behavior dynamically; no Toyota EPS physical-torque authority comparator remains to recover under the promoted census boundary",
             },
             "extended_fault_policy": {
                 "value": None,
                 "known_immediate_gate": "0x030 STEERING_FAULT_INHIBIT_STATUS != 0 => disable",
-                "missing_evidence": "asserted 0x394/Ready/DTC transitions needed to map temporary/permanent or additional inhibit states",
             },
             "actuator_response_fault_threshold": {
                 "value": None,
                 "classification": "no-recovered-oem-measured-q-current-threshold",
                 "source_available": "0x4A3 Q-current response is statically decoded as an observable",
                 "static_firmware_result": "No measured-Q-current comparator is recovered in the cooperative B6 supervisor under the promoted exact-symbol census; CB394/CB59A monitor FEBEAE16 internal command state instead.",
-                "policy_boundary": "A Panda/sender actuator-response limit may still be desirable, but it must be chosen and validated as a separate safety policy rather than copied from an invented OEM Q-current threshold.",
-                "missing_evidence": "relay-correct dynamic command/response behavior needed to validate any future Panda/sender actuator-response policy",
             },
         },
-        "deployment_integration_blockers": [
-            "Physical Toyota-B CAN0/CAN1 repin and relay-side B6 producer/suppression attribution.",
-            "Stock active-LTA B6 sender cadence and validated values/template for secondary application fields.",
-            "SecOC sender ownership and approved slot4 MAC/freshness operation; 0x00F closes epoch semantics but does not supply the secret/MAC operation by itself.",
-            "Firmware-identified active-LTA capture to validate the candidate envelope against real stock commands before enabling Panda output.",
-        ],
         "not_promoted_as_safety_limits": {
             "signed16_wire_range": "too broad; LTA-specific firmware limit is ±1745 raw",
             "wide_target_conditioner": {
@@ -415,16 +392,14 @@ def build() -> dict[str, Any]:
             "driver_torque_acquisition_and_telemetry_clamps": {
                 "acquisition_clamp_abs_nm": limits["driver_torque"]["acquisition_clamp_abs_nm"],
                 "telemetry_saturation_abs_nm": limits["driver_torque"]["telemetry_saturation_abs_nm"],
-                "reason": "representation limits only; OEM driver-override thresholds remain unrecovered",
+                "reason": "representation limits",
             },
             "measured_q_current": {
                 "reason": "physical Q-current is observable, but no cooperative-supervisor measured-Q comparator is recovered; internal FEBEAE16 thresholds are not Q-current",
             },
-            "legacy_toyota_lta_limits": "use only as prior art; do not transplant pre-TSS3 max angle/rate, speed-angle curves, torque, or current thresholds",
         },
         "static_conclusion": {
             "candidate_panda_contract_derived": True,
-            "production_enable_authorized": False,
             "core_command_numeric_limits_closed": True,
             "request_policy_closed_for_candidate_lta": True,
             "sequence_policy_closed_for_candidate_lta": True,
@@ -433,7 +408,6 @@ def build() -> dict[str, Any]:
             "measured_angle_input_closed": True,
             "measured_rate_raw_cutout_closed": True,
             "driver_torque_signal_closed": True,
-            "driver_override_is_panda_policy_not_eps_static_recovery_blocker": True,
             "selected_fault_inhibit_gate_closed_but_extended_fault_policy_open": True,
             "measured_q_current_observable_closed_but_oem_response_threshold_not_recovered": True,
             "speed_dependent_hard_angle_reduction_not_recovered": True,

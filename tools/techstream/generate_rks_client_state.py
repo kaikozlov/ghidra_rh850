@@ -196,7 +196,7 @@ def main():
  'request_fields':NATIVE_FIELDS,
  'managed_mapping':{
    'SetDataForReproKey':'CUWAccessRKSWrapper.SetDataForReproKey',
-   'is_stored':'hardcoded true before all string fields are copied; this flag marks DataForReproKey validity only; a cached server token remains unproved',
+   'is_stored':'hardcoded true before all string fields are copied; this flag marks DataForReproKey validity',
    'xml_fields':['X-Version','SoftwareID','SoftwareVersion','LicenseKey','VehicleIdentificationNumber','RequesterKind','KeypairID','SeedValue'],
  },
  'ui_handlers':handlers,
@@ -243,13 +243,13 @@ def main():
  'static_boundary':{
    'producer':'fully recovered inside Cuw.exe; there is no missing or unnamed producer code path',
    'external_residues':['the live Central Gateway seed VALUE returned by the vehicle for 27 21','the TIS-portal server-side signing algorithm and private key behind the 512-character token'],
-   'priority':'reflash-security infrastructure: Layer A reaches the Central Gateway through 27 21/27 22 but remains separate from EPS flash-writer Layer B; this does not expose an unauthenticated primitive',
+   'priority':'reflash-security infrastructure: Layer A reaches the Central Gateway through 27 21/27 22 but remains separate from EPS flash-writer Layer B',
  },
  'raw_anchors':anchors,
  'call_anchors':calls,
  'string_anchors':strs,
  'function_identities':funcs,
- 'server_boundary':'no client private key, public-key verification, or signature-generation algorithm is present; the server-produced 512-character token is decoded and sent exclusively to the Central Gateway as the 27 22 payload; do not infer server cryptography from the fixed token format',
+ 'server_boundary':'no client private key, public-key verification, or signature-generation algorithm is present; the server-produced 512-character token is decoded and sent to the Central Gateway as the 27 22 payload',
  }
  a.output.parent.mkdir(parents=True,exist_ok=True); a.output.write_text(json.dumps(obj,indent=2,sort_keys=True)+'\n')
  return 0

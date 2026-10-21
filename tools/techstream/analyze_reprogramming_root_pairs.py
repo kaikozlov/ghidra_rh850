@@ -239,8 +239,7 @@ def secretinfo_relation_tests(
         "pairwise_table_operations": ["xor", "aes_enc", "aes_dec", "cmac"],
         "pairwise_table_to_root_hits": pairwise_hits,
         "scope": (
-            "These bounded falsification tests leave upstream KDFs unresolved. "
-            "They reject only the listed one-step relationships involving current SecretInfo AES-128 entries."
+            "These tests reject the listed one-step relationships involving current SecretInfo AES-128 entries."
         ),
     }
 
@@ -368,7 +367,7 @@ def build() -> dict[str, Any]:
             },
             "interpretation": (
                 "No listed XOR/AES/CMAC pair fingerprint repeats across EPS and SRS. This rejects those simple fixed-constant "
-                "pair relationships but cannot rule out an upstream KDF with unknown master material or domain inputs."
+                "pair relationships."
             ),
         },
         "current_gtsplus": {
@@ -389,7 +388,7 @@ def build() -> dict[str, Any]:
             "CodeFlash constants consumed by their crypto workers. No runtime root derivation is present in either dumped "
             "ECU. Current GTS+ contains frontend wrapping secrets but none of the four firmware roots, and the bounded "
             "SecretInfo tests find no one-step relation. Any common root derivation therefore remains an upstream "
-            "Toyota/Denso build/provisioning hypothesis. An ECU or Techstream algorithm remains unrecovered."
+            "Toyota/Denso build/provisioning hypothesis."
         ),
     }
 

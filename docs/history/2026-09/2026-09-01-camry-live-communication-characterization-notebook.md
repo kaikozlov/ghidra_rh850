@@ -234,8 +234,7 @@ directions. The four generated receive profiles are `0x00F`, `0x090`, `0x0D7`
 and `0x024`; the two generated transmit profiles are only SecOC DataIDs `0x326`
 and `0x024`. Thus that real Toyota airbag implementation explicitly treats
 `0x00F` solely as a synchronization **receive** profile.
-This does not prove the exact Camry SRS calibration is identical, but it materially
-weakens Airbag as the `0x00F` source hypothesis.
+This weakens Airbag as the `0x00F` source hypothesis.
 
 Central Gateway remains the strongest unisolated physical-publication candidate.
 Current `CentralGW_P5` does contain behavior `XF01B ECU Security Key Not
@@ -392,7 +391,7 @@ Do not repeat broad discovery. Resume exactly here:
 4. Fetch a small number of **existing** recent LTA-relevant records (`2844` is especially valuable) and decode the same six Data IDs.
 5. If we need live causal ordering, synchronize Operation-FFD reads with passive CAN only; avoid unnecessary mutation.
 6. Investigate `0x081 B11[4]` OEM identity via Brake/GTS/firmware separately; its live behavior is already clear.
-7. Physical `0x08A` signer/proxy remains unresolved. The source dependency points to FRC; tested FRC/Brake/EPS/three unknown responders/powertrain nodes do not identify a separate Bus-4 publisher. Central Gateway/non-addressed proxy remains an unproved hypothesis.
+7. The source dependency points to FRC; tested FRC/Brake/EPS/three unknown responders/powertrain nodes do not identify a separate Bus-4 publisher. Central Gateway/non-addressed proxy remains a hypothesis.
 
 
 ## 13. Post-restart continuation: corrected EB13 parser and first exact lateral decode
@@ -421,7 +420,7 @@ Critical lateral blocks in behavior `0x2818` record `0x0100`:
   - LTA Damping Control Gain = `0`
 - `0x5282`, `0x5285`, `0x57DE`: not present in this particular stored record.
 
-Interpretation for this snapshot only: the stored steering-angle-speed event records a nonzero EPS pinion angle, but no active LTA feature request and no active-steering grant at the sampled instant. This is internally coherent and is not evidence against active LTA in other records.
+Interpretation for this snapshot only: the stored steering-angle-speed event records a nonzero EPS pinion angle, but no active LTA feature request and no active-steering grant at the sampled instant.
 
 Next read-only target: existing `0x2844` (**Lane Departure Warning Operation under LTA**) records, especially the `0x0100..0x0109` series, searching for `5282/5285/57DE/5265/560D/5631` together.
 
@@ -599,7 +598,7 @@ The most natural hardware interpretation is a **multi-interface FRC ECU/assembly
 
 This interpretation also resolves why `0x08A` disappears immediately under FRC CommunicationControl without requiring a separately diagnosed downstream proxy ECU to honor that command.
 
-UDS CommunicationControl proves the protected bus2 transmitter lies under the FRC diagnostic/ECU boundary. The exact internal MCU/HSM within the camera assembly remains unresolved. For integration purposes, **stock protected `0x08A` is an FRC-owned output domain**. Independent Brake/gateway control is excluded by this test.
+UDS CommunicationControl proves the protected bus2 transmitter lies under the FRC diagnostic/ECU boundary. For integration purposes, **stock protected `0x08A` is an FRC-owned output domain**.
 
 ## 21. Symmetric Brake/EPB transmitter attribution: 15 native chassis/bus0 publications
 
@@ -671,7 +670,7 @@ The experiment cannot distinguish the effect of losing `0x081`, because **before
 - `1703 = F0 20`: PCS Availability Disabled
 - `1705 = FF 3A`: PCS PB / ESA / AES / PAS-A Invalid flags asserted; PCS AES Invalid Flag = ON
 
-These values remained the same during and after the short Brake-Tx suppression, leaving the reciprocal test **inconclusive**. A negative result remains unproved.
+These values remained the same during and after the short Brake-Tx suppression, leaving the reciprocal test **inconclusive**.
 
 Brake was returned to default session; an explicit `28 00 01` attempted after the diagnostic session had already dropped returned NRC `0x7F`, but returning to default succeeded and a subsequent passive check confirmed `0x081` is again flowing normally (5/5 requested frames observed immediately).
 
@@ -751,7 +750,7 @@ The combined source isolation, relay-open direction, and Operation-FFD data now 
 
 The prior standing model treated the FRC as only the request-compute side and required an externally diagnosed Brake/Skid/CGW proxy to turn that request into protected `0x08A`. The live CommunicationControl census no longer supports that separation as the primary model. Standard FRC normal-Tx suppression removes the entire native-upstream protected `0x08A` publication family as well as the four Bus-1 FRC PDUs. The protected publisher is therefore inside the **FRC ECU/assembly diagnostic boundary**.
 
-This does not require the main vision/control MCU itself to contain the Toyota TSK key/HSM. A multi-MCU FRC assembly with a separate network/security controller is entirely consistent with all observed facts and is now the leading hardware model. Retire the old categorical statement “FRC cannot sign SecOC, therefore an external Brake/gateway proxy must sign `0x08A`”. At most, its exclusion applies only to the previously considered main compute silicon. The complete FRC assembly remains compatible with signing.
+A multi-MCU FRC assembly with a separate network/security controller is now the leading hardware model. Retire the old categorical statement “FRC cannot sign SecOC, therefore an external Brake/gateway proxy must sign `0x08A`”.
 
 ### `0x081` role
 
@@ -858,7 +857,7 @@ The write/download side is substantially more informative. `34 RequestDownload` 
 - `FEBF1000..FEBFF000` individually return `0x31` when used as start addresses;
 - requests beginning exactly at `FEBF0000` remain security-gated for lengths from 1 byte through at least `0x20000` bytes.
 
-The working interpretation is an OEM-configured download/staging area whose accepted base is exactly `0xFEBF0000`. Writability of arbitrary LocalRAM remains unproved. This is a high-value post-auth canary/payload candidate once SA is solved.
+The working interpretation is an OEM-configured download/staging area whose accepted base is exactly `0xFEBF0000`. This is a high-value post-auth canary/payload candidate once SA is solved.
 
 ### Missing Brake credential / Toyota acquisition path
 
@@ -1264,7 +1263,7 @@ However, the same dictionary contains **no lateral target/pinion request or arbi
 12271a2c0000060006000007
 ```
 
-Their lookup keys are `0x2711/0x2712` and both reference master variable `0x2C1A`, which normalizes through the current GTS+ `-0x2710` variable namespace to entry `0x50A = 04 03`. A corpus census shows this exact pair in **126 P5 databases**, establishing generic P5 FFD plumbing. An FRC-specific recorder channel remains unsupported.
+Their lookup keys are `0x2711/0x2712` and both reference master variable `0x2C1A`, which normalizes through the current GTS+ `-0x2710` variable namespace to entry `0x50A = 04 03`. A corpus census shows this exact pair in **126 P5 databases**, establishing generic P5 FFD plumbing.
 
 ### 5. Older generic Operation Freeze Frame — not bound to current FRC
 
@@ -1284,7 +1283,7 @@ GTS+ ships generic `GetDDRInfo*` plugins and its TSE saved-session format has fi
 168 CDbDDRInvalidConditionTable
 ```
 
-and current category 498 has no DDR-specific DLL binding. The richer DDR/event-recorder dictionary appears on other ECUs / the P6 ADAS-domain successor. A hidden P5 FRC surface remains unsupported. Vehicle Control History likewise remains a saved-session/report family here rather than a separately identified category-498 live request protocol.
+and current category 498 has no DDR-specific DLL binding. The richer DDR/event-recorder dictionary appears on other ECUs / the P6 ADAS-domain successor. Vehicle Control History remains a saved-session/report family here.
 
 ### Practical priority
 
@@ -1308,7 +1307,7 @@ The ID11/current-angle phase sent **85 B6 frames and received 85 Panda TX echoes
 
 Exact Gate-2 disassembly sharpens the next experiment. One pre-callback path already executes `8F944 003A = mov 0,r7`; the other executes `8F948 1A38 = mov r26,r7` before callback `8F94C`, and only later reaches the stage-1-patched compare at `8F952`. The next bounded persistent stage therefore changes only `8F948 1A38->003A` while preserving `8F952=E001`. The builder reconstructs the source from stock plus stage 1 and resigns the **combined** image: source SHA `272843a2…9f65`, source fixup `D9AF33AF`; two-patch prefix `2ED524FA`, final fixup `D12ADB05`, final residue `FFFFFFFF`, final SHA `6a371a2a…d59c`. The inverse recovery payload reverses stage 2 only.
 
-This hypothesis requires live testing. The next car sequence is zero-write stage-2 preflight, APPLY only on exact preflight, full OFF->READY, zero-write persistence verification, then repeat the same admission-only ID0/ID11 ladder. A steering offset remains gated on `ADMITTED`.
+The next car sequence for this hypothesis is zero-write stage-2 preflight, APPLY only on exact preflight, full OFF->READY, zero-write persistence verification, then repeat the same admission-only ID0/ID11 ladder. A steering offset remains gated on `ADMITTED`.
 
 
 ## Gate-2 stage-2 live result and root-result correction
@@ -1385,7 +1384,7 @@ unpacker staged cell:   FEBE80C8
 
 `8E772(44)` increments `FEBE5364`. `4BD46` then sees `FEBE5364 != FEBE80C8`, unpacks B3/B4:B5 into `FEBE80BC/FEBE80B8`, and finally acknowledges by copying the generation value into `FEBE80C8`.
 
-There is no separate downstream route44 producer: `8E772` has exactly one caller (`7D72C`), and the callers of `81CA6` are the SecOC delivery/failure-forwarding family. Thus a queued B6 that reaches the patched native-success delivery path must update PDU44 COM. The stage-5 live observation that COM remained ID0 therefore leaves one live edge unproved: **whether the Panda-transmitted B6 actually reached the F33 CanIf/SecOC queue at all**. A Panda TX echo alone does not establish that fact.
+There is no separate downstream route44 producer: `8E772` has exactly one caller (`7D72C`), and the callers of `81CA6` are the SecOC delivery/failure-forwarding family. Thus a queued B6 that reaches the patched native-success delivery path must update PDU44 COM. The stage-5 live observation that COM remained ID0 therefore leaves one live edge unproved: **whether the Panda-transmitted B6 actually reached the F33 CanIf/SecOC queue at all**.
 
 ### Route-37 log boundary
 

@@ -15065,7 +15065,7 @@
             "output_list_offset": "command output object +0x20",
             "payload_offset": 4,
             "positive_prefix": "62f181",
-            "record_count_source": "received_length_minus_4, chunked until exhausted; receive byte 3 is skipped, not used as count",
+            "record_count_source": "received_length_minus_4, chunked until exhausted; receive byte 3 is skipped",
             "record_size": 16,
             "string_conversion": "Windows MultiByteToWideChar code page 0 (CP_ACP) from zero-terminated <=16-byte chunk",
             "value_capacity_chars": 17
@@ -200350,7 +200350,7 @@
             "output_list_offset": "command output object +0x20",
             "payload_offset": 4,
             "positive_prefix": "62f181",
-            "record_count_source": "received_length_minus_4, chunked until exhausted; receive byte 3 is skipped, not used as count",
+            "record_count_source": "received_length_minus_4, chunked until exhausted; receive byte 3 is skipped",
             "record_size": 16,
             "string_conversion": "Windows MultiByteToWideChar code page 0 (CP_ACP) from zero-terminated <=16-byte chunk",
             "value_capacity_chars": 17
@@ -360666,7 +360666,7 @@
             "output_list_offset": "command output object +0x20",
             "payload_offset": 4,
             "positive_prefix": "62f181",
-            "record_count_source": "received_length_minus_4, chunked until exhausted; receive byte 3 is skipped, not used as count",
+            "record_count_source": "received_length_minus_4, chunked until exhausted; receive byte 3 is skipped",
             "record_size": 16,
             "string_conversion": "Windows MultiByteToWideChar code page 0 (CP_ACP) from zero-terminated <=16-byte chunk",
             "value_capacity_chars": 17
@@ -442604,7 +442604,7 @@
             "output_list_offset": "command output object +0x20",
             "payload_offset": 4,
             "positive_prefix": "62f181",
-            "record_count_source": "received_length_minus_4, chunked until exhausted; receive byte 3 is skipped, not used as count",
+            "record_count_source": "received_length_minus_4, chunked until exhausted; receive byte 3 is skipped",
             "record_size": 16,
             "string_conversion": "Windows MultiByteToWideChar code page 0 (CP_ACP) from zero-terminated <=16-byte chunk",
             "value_capacity_chars": 17
@@ -521329,7 +521329,7 @@
             "output_list_offset": "command output object +0x20",
             "payload_offset": 4,
             "positive_prefix": "62f181",
-            "record_count_source": "received_length_minus_4, chunked until exhausted; receive byte 3 is skipped, not used as count",
+            "record_count_source": "received_length_minus_4, chunked until exhausted; receive byte 3 is skipped",
             "record_size": 16,
             "string_conversion": "Windows MultiByteToWideChar code page 0 (CP_ACP) from zero-terminated <=16-byte chunk",
             "value_capacity_chars": 17
@@ -541773,7 +541773,7 @@
             "output_list_offset": "command output object +0x20",
             "payload_offset": 4,
             "positive_prefix": "62f181",
-            "record_count_source": "received_length_minus_4, chunked until exhausted; receive byte 3 is skipped, not used as count",
+            "record_count_source": "received_length_minus_4, chunked until exhausted; receive byte 3 is skipped",
             "record_size": 16,
             "string_conversion": "Windows MultiByteToWideChar code page 0 (CP_ACP) from zero-terminated <=16-byte chunk",
             "value_capacity_chars": 17
@@ -564914,8 +564914,8 @@
     "panda_bus": 0,
     "profile": "camry-2026-f33",
     "session_control": {
-      "boundary": "frames are resolved per category from the current master; SendProc itself gates a shared automatic-session path by CDbEcuCategoryTable/class-0x110 byte +0x48 low5 in 0x14/0x15/0x16. This raw SendProc gate is not a diagnostic-family classifier: SelectCarTypeVin10 dispatches low5 0x16 to Phase6 and the universal P5 runtime instead follows GetSupportP5_DT bindings. The former local wire_proven_categories subset is intentionally absent: it was an independent-tooling policy. session_judgment_exception provides documentation only",
-      "category_gate": "SendProc reads CDbEcuCategoryTable/class 0x110 record byte +0x48, masks low 5 bits, and enters this shared automatic-session path for 0x14/0x15/0x16. This is a transport/session gate, not a P5-family classifier: SelectCarTypeVin10 dispatches low5 0x16 to Phase6, while current GetSupportP5_DT-bound categories are low5 0x14/0x15 only. Hybrid397, Brake435, and FRC498 are all 0x14",
+      "boundary": "frames are resolved per category from the current master; SendProc itself gates a shared automatic-session path by CDbEcuCategoryTable/class-0x110 byte +0x48 low5 in 0x14/0x15/0x16. SelectCarTypeVin10 dispatches low5 0x16 to Phase6 and the universal P5 runtime follows GetSupportP5_DT bindings. session_judgment_exception provides documentation",
+      "category_gate": "SendProc reads CDbEcuCategoryTable/class 0x110 record byte +0x48, masks low 5 bits, and enters this shared automatic-session path for 0x14/0x15/0x16. This gate controls transport/session setup: SelectCarTypeVin10 dispatches low5 0x16 to Phase6, while current GetSupportP5_DT-bound categories are low5 0x14/0x15 only. Hybrid397, Brake435, and FRC498 are all 0x14",
       "class_1_default": "for classifier class 1, SendProc uses the DB-backed +0x50 selector 0xD1 path and records software session state 0",
       "class_2_normal_path": "when the P5 classifier returns 2 and current session CCommFrameCtrl +0x29 is not 3, the normal session-judgment path calls protocol vtable +0x50 with selector 0xD1 then 0xD2 and records software session state 3",
       "default_session": 1,
@@ -565966,12 +565966,12 @@
       "sha256": "3a344b6cb2de19edb163e040974955f2d27467dc0a864974b6a5af90659d308f"
     },
     "data/generated/gtsplus_2026/vehicle_resolver_semantics.json": {
-      "bytes": 36974,
-      "sha256": "dd10f5b8dfc4a54ab3febc24a6e2d3132d1ac6eea3efb0f5a9235a02a7e2273b"
+      "bytes": 36969,
+      "sha256": "bf94b12b3f6b4e6f22880a96c4dc5840578759849368bb8f044efd381101b421"
     },
     "data/generated/techstream_v18/diagnostic_execution_model.json": {
-      "bytes": 297427,
-      "sha256": "158b3125bdb3c620ef7dd39e095301ea0177ef7b7f88b4bfe428d15e0fd33a7c"
+      "bytes": 297037,
+      "sha256": "c877c04a39d6b834d4c564a647a1415821b48b5a89cc592f3e02dfcdfd3145a9"
     },
     "gtsplus/NA/DB/Gen/ABS_P5.ddb": {
       "bytes": 200474,

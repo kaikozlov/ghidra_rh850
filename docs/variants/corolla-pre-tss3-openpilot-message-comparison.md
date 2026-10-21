@@ -70,7 +70,7 @@ The two Corolla profiles differ materially here:
   permission, standstill/release, cancel, ACC type, lead/distance, and related
   state.
 
-This is a whole-vehicle camera/ACC contract. It is not an EPS-local interface.
+This is a whole-vehicle camera/ACC contract.
 
 ### 2.4 Driver UI: `0x412 LKAS_HUD`
 
@@ -241,14 +241,11 @@ H/F has no `0x191` normal-Rx descriptor. Since pre-TSS3 Corolla openpilot only
 sent neutral `0x191` while actually steering with `0x2E4`, this does not create a
 new “find LTA angle command” requirement by itself.
 
-### 5.6 `0x343` and `0x412`: EPS absence is intentionally non-diagnostic
+### 5.6 `0x343` and `0x412`: camera/ACC/cluster integration
 
-Neither appears in the H/F EPS application Rx/Tx tables. Their vehicle-level
-semantic roles remain open: pre-TSS3 Corolla used them for camera/ACC/cluster
-integration outside EPS-local steering.
-
-Their TSS3 replacements must be recovered from whole-bus captures and the
-relevant FRC/radar/brake/gateway firmware. An EPS dump cannot settle them.
+Neither appears in the H/F EPS application Rx/Tx tables. Pre-TSS3 Corolla used them
+for camera/ACC/cluster integration. Recover their TSS3 replacements from whole-bus
+captures and the relevant FRC/radar/brake/gateway firmware.
 
 ## 6. Compact migration matrix
 

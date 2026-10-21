@@ -424,7 +424,7 @@ def main() -> int:
                 "rlog_dongle_id": init["dongle_id"],
                 "firmware_dump_preflight_dongle_id": preflight_dongle,
                 "same_dongle": init["dongle_id"] == preflight_dongle,
-                "interpretation": "Discord attribution ties this dynamic rlog to Span's reported 2025 Corolla investigation, but embedded carParams is MOCK and the logging dongle differs from the later TSKM dump preflight. This supplies only Span-attributed vehicle-level evidence. Exact 8965F1208000 firmware-to-route identity remains unproved.",
+                "interpretation": "Discord attribution ties this dynamic rlog to Span's reported 2025 Corolla investigation, but embedded carParams is MOCK and the logging dongle differs from the later TSKM dump preflight. This supplies Span-attributed vehicle-level evidence.",
             },
         },
         "runtime_boundary": {
@@ -442,7 +442,7 @@ def main() -> int:
             "gas_pedal_user": stats(gas_user),
             "steering_angle_deg": stats(angle),
             "steering_rate_deg_s": stats(steer_rate),
-            "interpretation": "Raw vehicle signals are dynamic and wheel speed exceeds zero, so this is a moving/driving CAN capture even though the embedded MOCK CarState remains zeroed. Motion does not by itself prove that stock LTA was active or exercise every READY-state subsystem contract.",
+            "interpretation": "Raw vehicle signals are dynamic and wheel speed exceeds zero, so this is a moving/driving CAN capture even though the embedded MOCK CarState remains zeroed.",
         },
         "role_inventory": role_inventory,
         "lateral_reference_family": lateral_family,
@@ -598,7 +598,7 @@ def main() -> int:
                 "wire": "classic 8-byte PCM_CRUISE_4 / SecOC cruise-switch prior-art carrier",
                 "frame_count": len(cruise_switch),
                 "prior_art_button_values": {k: unique(v) for k, v in cruise_switch_prior_art.items()},
-                "boundary": "All legacy cruise-switch bits are inactive in this segment; ID/DLC survival establishes only a retained carrier. Transfer of old button semantics to TSS3 remains unproved.",
+                "boundary": "All legacy cruise-switch bits are inactive in this segment; ID/DLC survival establishes a retained carrier.",
             },
             "0x51E": {
                 "wire": "classic 8-byte target-native H/F Ready Status input carrier",
@@ -629,7 +629,7 @@ def main() -> int:
             "bus0_bus2_same_id_dlc_set": bus0_set == bus2_set,
             "bus0_bus2_payload_sequences_equal": all(x["payload_sequence_equal"] for x in equality),
             "equality_by_id": equality,
-            "interpretation": "The full moving capture carries the same 22 incoming CAN-FD ID/DLC shapes on buses 0 and 2 with byte-identical payload sequences. This upgrades the prior Span NRtD structure result to a dynamic/moving topology invariant; it still does not assign field semantics or physical producer ownership.",
+            "interpretation": "The full moving capture carries the same 22 incoming CAN-FD ID/DLC shapes on buses 0 and 2 with byte-identical payload sequences. This upgrades the prior Span NRtD structure result to a dynamic/moving topology invariant.",
         },
         "radar_parser_boundary": {
             "radar_tracks_samples": radar_tracks_samples,

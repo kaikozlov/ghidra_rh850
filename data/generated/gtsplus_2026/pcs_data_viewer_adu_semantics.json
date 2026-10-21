@@ -126175,7 +126175,7 @@
         "Type": "s"
       }
     ],
-    "boundary": "The viewer stores requester/result IDs as raw integers and contains no value-to-client legend for observed values 13, 17, or 23. Slot, producer, and runtime state remain necessary context.",
+    "boundary": "The viewer stores requester/result IDs as raw integers and contains no value-to-client legend for observed values 13, 17, or 23.",
     "interpretation": "Toyota records PDA(OAA) as an upper-limit longitudinal client and PDA(DA) as a lower-limit client. A simultaneous upper/lower ID pair can therefore represent two cooperating PDA subfunctions.",
     "pda_da_lower_request_resources": [
       {
@@ -127382,7 +127382,7 @@
         "Type": "u"
       }
     ],
-    "interpretation": "PCS warning judgment, function gating, brake request, longitudinal arbitration, and brake pressurization are separately observable stages; an alert is not evidence that VMC received or executed the FRC request.",
+    "interpretation": "PCS warning judgment, function gating, brake request, longitudinal arbitration, and brake pressurization are separately observable stages.",
     "request_and_output": [
       {
         "BitLength": 8,
@@ -128470,7 +128470,7 @@
         "Type": "f"
       }
     ],
-    "boundary": "These are recorder observables and event triggers, not a recovered ACC resume state machine or authorization policy.",
+    "boundary": "These are recorder observables and event triggers.",
     "hold_and_standstill": [
       {
         "BitLength": 8,

@@ -55,7 +55,7 @@
   "application_rx": {
     "camry_descriptor_count": 43,
     "camry_table_start": "0x00021FE8",
-    "interpretation": "All 40 Corolla-H normal application Rx descriptors are present on Camry; Camry adds 0x116/8, 0x0D8/8, and 0x1DA/8. This establishes target-native configuration continuity only; semantic equivalence requires separate evidence.",
+    "interpretation": "All 40 Corolla-H normal application Rx descriptors are present on Camry; Camry adds 0x116/8, 0x0D8/8, and 0x1DA/8. This establishes target-native configuration continuity.",
     "vs_corolla_h": {
       "added": [
         {

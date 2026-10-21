@@ -13,7 +13,6 @@
   "conclusion": {
     "b6": "repeated bounded negative: zero 0x0B6 at any DLC on any incoming bus across 19 retained route segments / 3574703 incoming CAN frames from two separate drives, while protected 0x00F/0x0D7 remain healthy",
     "next_observation": "identify the observed Bus-4 0x08A producer and exact SecOC/security ownership, and independently trace which exact external/local state selects or drives F33's B6-independent D0218/CC60/CC50 assist path during LTA/LCA; do not assume an 0x08A-to-B6 transform",
-    "production_output_authorized": false,
     "relay_topology": "observed: the former bus-1 steering/state family appears on the CAN0/CAN2 pair after the physical CAN0/CAN1 repin, while the separate 22-ID FD family remains on bus1",
     "semantic_upgrade": "VAR-081/CORR-134 subsequently identify complete retained LTA/LCA-active intervals and Bus-4 0x08A as the lateral-request representation; CORR-135 closes the false inference that zero B6 requires an 0x08A-to-B6 transform because exact F33 has a B6-independent internal assist path"
   },
@@ -21,7 +20,7 @@
     "b6_any_bus_any_length_count": 0,
     "b6_examples": [],
     "cruise_main_availability_lifecycle": {
-      "boundary": "B1[4] is specifically a persistent cruise-availability/latch state: it rises after the first retained MAIN activation and remains high through later MAIN deactivation edges. No ignition-off/reset fall is retained, so exact reset semantics and the OEM field name remain unjoined.",
+      "boundary": "B1[4] is a persistent cruise-availability/latch state: it rises after the first retained MAIN activation and remains high through later MAIN deactivation edges.",
       "falling_edges": [],
       "main_operation_edges": [
         {
@@ -688,7 +687,7 @@
     "b6_any_bus_any_length_count": 0,
     "b6_examples": [],
     "cruise_main_availability_lifecycle": {
-      "boundary": "B1[4] is specifically a persistent cruise-availability/latch state: it rises after the first retained MAIN activation and remains high through later MAIN deactivation edges. No ignition-off/reset fall is retained, so exact reset semantics and the OEM field name remain unjoined.",
+      "boundary": "B1[4] is a persistent cruise-availability/latch state: it rises after the first retained MAIN activation and remains high through later MAIN deactivation edges.",
       "falling_edges": [],
       "main_operation_edges": [
         {

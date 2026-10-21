@@ -67,8 +67,8 @@
     ]
   },
   "boundaries": [
-    "This probe independently replays the bootloader authenticated-RAM execution path already required by the earlier range-dump acquisition; it does not prove application-context resident-code retention.",
-    "The FEBF2CF8 window contains boot SecurityAccess and payload-build crypto state; it is not evidence that the operational SecOC/ICU-S slot-4 key is CPU-readable.",
+    "This probe independently replays the bootloader authenticated-RAM execution path already required by the earlier range-dump acquisition.",
+    "The FEBF2CF8 window contains boot SecurityAccess and payload-build crypto state.",
     "The probe never invokes ICU-S command 5, so provisioned slot-4 generate permission and latency remain live tests.",
     "The live egg scan proves the 8-byte signature at 0x88C62; the exact 64-byte surrounding-window equality comes from the separately retained CodeFlash image."
   ],
@@ -166,7 +166,7 @@
     "tracked_codeflash_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
   },
   "live_registers": {
-    "boundary": "register values are retained as observations; SELFIDST reports self-programming ID-authentication status only. The OCD debugger ID and ICU-S key-store unlock states remain unproved",
+    "boundary": "register values are retained as observations; SELFIDST reports self-programming ID-authentication status",
     "fastat": "0x00",
     "fentryr": "0x0000",
     "fhve15": "0x00000000",

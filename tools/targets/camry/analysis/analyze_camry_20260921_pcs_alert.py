@@ -308,12 +308,11 @@ def build(logs: Path = DEFAULT_LOGS, openpilot_root: Path = DEFAULT_OPENPILOT) -
                 "next host replacement is rejected and stock forwarding resumes 33.508 ms after native entry. The "
                 "separate 0x5AE alert bit is forwarded from the first transition, explaining why an alert can remain "
                 "visible while the shared 0x08A request is blocked. The Brake/VMM result never asserts request-loss "
-                "supervision and remains result ID11 throughout; ID33/34 selection is absent. A replacement path must "
+                "supervision and remains result ID11 throughout. A replacement path must "
                 "preserve stock emergency requests through normal upstream safety/controller ownership."
             ),
             "boundary": (
-                "The user report plus temporal join identifies this as the PCS-alert witness, but does not assign a "
-                "global semantic name to requester IDs 33/34 or prove which braking substage each ID represents."
+                "The user report plus temporal join identifies this as the PCS-alert witness."
             ),
         },
     }

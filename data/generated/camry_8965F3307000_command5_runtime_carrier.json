@@ -25,7 +25,6 @@
     "production_b6_signer_closed": false,
     "static_low_carrier_candidate_closed": true,
     "steering_can_transmit_used": false,
-    "vehicle_actuation_authorized": false,
     "verified_high_tail_live_retention_closed": true,
     "verified_variant_ram_exec_requirement_promoted": true
   },
@@ -159,7 +158,7 @@
     },
     "codeflash_analysis": {
       "path": "data/generated/camry_8965F3307000_codeflash.json",
-      "sha256": "881cd7d44c4b1d8067020eac2ce640df1477900783a7bd8a0721f023d7f0f337"
+      "sha256": "8d094f2d7e4cf20caa8e0fb8bdde906d8eea3a2580f027b4bfa2a6ddbc653722"
     },
     "high_tail_live_evidence": {
       "path": "targets/camry-2026/raw-20260826/high-tail-20260826.json",
@@ -261,7 +260,7 @@
     },
     "runtime_builder": {
       "path": "tools/targets/camry/research/ram_runtime/bootstrap/build_camry_f33_command5_carrier.py",
-      "sha256": "5760c409d5de812c161270f0eb362d5307ed2aefe25e120eef2f2ed7d428a3a4"
+      "sha256": "58ecfa7008455ab7c55fb8cdf86bbcf5cdd8ec1617d5aa5f51aa2df785cee9c8"
     }
   },
   "static_low_carrier_geometry": {

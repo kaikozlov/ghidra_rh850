@@ -469,7 +469,7 @@ def build_plan(
             "application": "04 62 F1 86 <session>: exact application current-session producer",
             "boot_compatible": (
                 "03 7F 22 31: F186 is absent from the exact boot readable-DID table; this is "
-                "boot-compatible, with software mode still unproved"
+                "boot-compatible"
             ),
             "unknown": "another NRC, silence, or malformed response does not identify software mode",
             "restore_authorization": False,

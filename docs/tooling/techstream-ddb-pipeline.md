@@ -97,7 +97,7 @@ Category IDs join to type-19 DLL and type-26/27 function/detail rows across the
 regions where those databases exist. Exact source bytes and unresolved
 communication-DID/RID category edges remain in `toyota_master_routes.json`.
 Its exact bytes still contain no `8965B4512000` identifier, so the result
-establishes only a family route. Calibration identity remains unmatched.
+establishes a family route.
 
 ### ECU databases
 
@@ -409,7 +409,7 @@ Nine monitors bridge to firmware DIDs. Seven have independently decompiled,
 meaningful RAM sources and are structural/auto-named. DID `0x0101` lacks an
 independent source recovery and DID `0x0111` is a stub; both remain family
 comment-only. The CAN-family label supplies the preferred vocabulary over the
-KWP-family label. Calibration-specific semantics still require independent proof:
+KWP-family label:
 
 | DID | OEM name (CAN) | Callback | RAM source |
 |---|---|---|---|
@@ -491,7 +491,7 @@ raw `CDbPidTable` records. It is a JP-market diagnostic variant.
 The Techstream V18.00.003 distribution is dated December 2022 and
 predates both the 2023 Sienna and the 2025 Corolla. P4DK4's larger freeze-data monitor
 count proves a vocabulary/configuration difference (e.g. torque sensor 3,
-backup power supply). A temporal or hardware-generation gap remains unproved.
+backup power supply).
 It is a useful supplementary
 vocabulary source because its 13 extra candidate bridges cover EPS state variables
 absent from the NA database, giving the correlation engine more matches to
@@ -532,8 +532,7 @@ database. These labels are structural correlation candidates derived outside
 | 74 | 0x014A | (unnamed) |
 
 The torque-sensor-3 and backup-power-supply labels are vocabulary present in
-the JP diagnostic variant and absent from the NA one. That does not prove a
-market-specific hardware feature in any firmware calibration.
+the JP diagnostic variant and absent from the NA one.
 
 ### Extraction tool
 
@@ -594,8 +593,7 @@ than the earlier bounded guess. `GetRoBP5_DT.dll` imports
 string-bearing fields resolve factor/help text such as `History of no IG on in
 49 Days` and `Stop Start-up (Steering Lock)`, while the key/group fields vary
 across groups 301/401/501/601/701/801. This establishes RoB factor/help metadata
-for the P5 Record-of-Behavior path. A generic PSC power-state-history protocol
-or constant `0x12D` record class remains unsupported.
+for the P5 Record-of-Behavior path.
 
 ### Shared string indices are not typed references
 
@@ -637,14 +635,12 @@ current Camry path:
   **`Collision Avoidance Assist 1/2/3`**. These recorder/snapshot semantics
   establish that current P5 diagnostic schemas explicitly model
   emergency-steering/collision-avoidance request state.
-  Live-DID and wire-field assignments remain unresolved.
 - `PCS2_P5` is not one of this Camry's mounted candidates, so it is used only as
   a same-generation semantic oracle. It names **`PCS Steering Request`** at DID
   `0x1017/0x3017`, bit 8, plus `Emergency Steering Assist Invalid 1/2` at bits
   25/26 of `0x100B/0x300B`. `DRS_P5` similarly names `Active Steering Control
   Permission`; the P6 successor `ADCU_P6` names `Active Steering Status`. These
   cross-generation/cross-ECU rows establish Toyota's vocabulary.
-  Ownership by the exact F33 FRC requires independent proof.
 
 This changes the next RE question. The diagnostic corpus is **not closed** by a
 negative Active Test name search. The high-value work is to determine what
@@ -659,8 +655,7 @@ The complete 34-ECU Camry-HV install set itself remains owned by the vehicle
 resolver artifact (TMS-089). `IPA_P5` is one useful negative-at-name-level
 check: it has only `Front Buzzer`/`Rear Buzzer` direct Active Tests, while its
 368 monitors expose Advanced Park, Remote Park, Steer-By-Wire and power-steering
-equipment/status vocabulary. That absence does not prove IPA lacks an indirect
-steering-control role.
+equipment/status vocabulary.
 
 ## RE provenance
 

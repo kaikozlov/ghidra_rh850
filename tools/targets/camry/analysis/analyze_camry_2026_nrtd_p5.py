@@ -285,7 +285,6 @@ def main() -> int:
         "interpretation": "DID 0x1912 is directly validated as a persistent following-distance state by isolated operator input. 0x251 and 0x5AF change within ~12 ms in the synchronized capture and remain candidate ordinary-CAN state carriers pending an independent repeat/enum sweep.",
       },
     },
-    "production_boundary": "This NRTD pass closes identities and observation carriers only. It does not establish Camry B6 producer/signing ownership, authenticated steering control, cruise engagement while driving, or production safety policy.",
   }
 
   args.out.parent.mkdir(parents=True, exist_ok=True)

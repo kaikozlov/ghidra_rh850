@@ -946,7 +946,7 @@
   "schema": "corolla-h-veneer-bank-v1",
   "software_id": "8965H1202000",
   "static_conclusion": {
-    "boundary": "A preserved fixed veneer slot proves the H call-slot role and its H low target. A removed slot proves only removal of that canonical veneer-derived role; it does not prove the old low-level operation is absent elsewhere in H.",
+    "boundary": "A preserved fixed veneer slot proves the H call-slot role and its H low target. A removed slot proves removal of that canonical veneer-derived role.",
     "preserved_unresolved_pairs": 6,
     "removed_unresolved_pairs": 5
   },

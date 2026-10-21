@@ -250,9 +250,8 @@ more tightly: rebuilding Bk2ol's later-public
 (SHA-256 `43d00fda...`). The other shipped ranges preserve one long-body binary
 layout and patch fixed immediates, so recompiling each source variant can select
 shorter instruction encodings and is not expected to byte-reproduce every
-package. This proves source/compiler-family equivalence. Original authorship
-remains unresolved: Vance's candidate-f05 artifact predates Bk2ol's public
-source, so the pre-public source provenance remains bounded by SECOC-031.
+package. This proves source/compiler-family equivalence. Vance's candidate-f05
+artifact predates Bk2ol's public source.
 
 The branch history is also rewritten. The original July `Range dumper` and
 `mo-dump` commits were first pushed on `tskm`; `wide` was created only during the

@@ -50,7 +50,6 @@ key remained stable between sessions.
 
 The old TSKM collector's Sienna-shaped bus/ID filter explains the sync-only
 artifact. Its `0 protected` result was a collection-profile false negative.
-The vehicle's protected traffic requires a matching collection profile.
 
 ## 2. Cryptographic negatives
 
@@ -66,7 +65,7 @@ This is the strongest local key-storage comparison available from the supplied
 artifacts: the dump contains no raw 16-byte value equal to a key that
 authenticates the nearby TSKM synchronization capture. Because capture and dump
 are separate jobs with a programming transition between possible runtime
-epochs, this excludes only the static raw-key hypothesis. Session-derived keys remain possible.
+epochs, this excludes the static raw-key hypothesis.
 
 ### Public-route protected domains
 

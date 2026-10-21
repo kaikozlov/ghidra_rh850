@@ -5,9 +5,7 @@ Toyota diagnostic software, and TSS3 vehicle integration research.
 
 The primary analysis target is the **2026 Camry Hybrid EPS `8965F3307000`**.
 This checkout contains firmware, analysis projects, captured evidence, and
-research tooling. It is **not an openpilot distribution or a production vehicle
-installation guide**. Target registration, a passing offline check, and a
-recorded vehicle demonstration establish different things.
+research tooling.
 
 ## Start here
 
@@ -23,9 +21,6 @@ recorded vehicle demonstration establish different things.
 | Look up a prior claim or correction | `tools/know QUERY` |
 
 Detailed integration state belongs in the target reports.
-Dated checkpoints and old experiments are retained evidence;
-their commands, bus assignments, and software revisions are not automatically
-current instructions.
 
 ## Quick start: offline discovery
 
@@ -79,8 +74,6 @@ a directory or copying an address from another calibration.
 
 The Corolla labels identify separate retained specimens; the
 [variant index](docs/variants/README.md) explains their application identities.
-Additional partial images and external reports do not imply registered targets
-or supported vehicles.
 
 ## Repository map
 

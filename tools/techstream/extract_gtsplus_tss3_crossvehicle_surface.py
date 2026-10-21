@@ -5,8 +5,7 @@ forget: category-498 install-set architecture breadth, per-model/install-set
 architecture classification, the v18 ECU_Setting_Table diagnostic-address join,
 the Toyota CAN Bus Check topology join, category-family clustering boundaries,
 the PCS Data Viewer TSS3 FFD resource surface, the TSE/GTSE parser/layout
-surface, and the P6 successor boundary.  It does not infer ECU-side producer
-ownership from host metadata.
+surface, and the P6 successor boundary.
 """
 from __future__ import annotations
 
@@ -671,7 +670,7 @@ def tse_converter(root: Path, versions: dict[str, str]) -> dict[str, Any]:
             "The shipped TSE/GTSE converter has dedicated P5 DTC/FFD, PredictiveFFD, RoB, health-check, "
             "ring-buffer signal and ECU-map readers, and its three format templates explicitly allocate "
             "CAN, RoB, VehicleControlHistory, PCS time-series FFD and PCS image-FFD sections. This is a "
-            "high-value offline capture-format decoder surface. Direct parsing of FRC AB/EB payloads remains unproved."
+            "high-value offline capture-format decoder surface."
         ),
     }
 
@@ -861,7 +860,7 @@ def build() -> dict[str, Any]:
         ),
         "component_name_join": (
             "component_index+1 -> CDbSubBusConfirmationCGWTable name ('Power Steering (EPS)' etc.) establishes naming "
-            "correspondence only. An ECUNo key join remains unproved; only the Camry 0x6D/0x29/0x32 membership is independently "
+            "correspondence. The Camry 0x6D/0x29/0x32 membership is independently "
             "pinned by repo evidence in docs/variants/camry-2026-live-baseline.md."
         ),
         "regions": {},
@@ -923,8 +922,7 @@ def build() -> dict[str, Any]:
                 "meaning": (
                     "Current master install rows containing FRC_P5 category 498 have zero selected-category "
                     "co-occurrence with PCS1_P5(427), DSSystem_P5(428), Fr_RadSen_P5(429), RoadSign_P5(431), or "
-                    "PCS2_P5(432) in NA/EU/JP. Those databases may still be useful Toyota vocabulary, but their P5 "
-                    "generation alone is not evidence that they are members of the category-498 TSS3 architecture."
+                    "PCS2_P5(432) in NA/EU/JP."
                 ),
             },
             "diagnostic_address_generation_boundary": (
@@ -939,9 +937,7 @@ def build() -> dict[str, Any]:
                 "separately in docs/tooling/panda-toyota-routing.md."
             ),
             "host_decoder_not_wire_owner": (
-                "PCS Data Viewer/TSE parser structure proves Toyota knows how to decode saved recorder data. It does "
-                "not by itself identify CAN arbitration IDs, ECU-side producer transforms, SecOC signing ownership, "
-                "or a one-to-one mapping from resource keys to FRC proprietary AB/EB records."
+                "PCS Data Viewer/TSE parser structure proves Toyota knows how to decode saved recorder data."
             ),
         },
     }

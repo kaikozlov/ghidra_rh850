@@ -53,8 +53,8 @@ The prior labels were wrong:
 | `0x758A0` | ICU key derivation | synchronous/status-mapped NvM/DataFlash read |
 | `0x785D2` | ICU opcode validator | NvM service-ID validator/state setter |
 
-The report's proposed FEBEF object-0 monitor captures ordinary persistent state
-only. `0x72F58` performs generic `NvM_ReadBlock` operations. A block-aware monitor
+The report's proposed FEBEF object-0 monitor captures ordinary persistent state.
+`0x72F58` performs generic `NvM_ReadBlock` operations. A block-aware monitor
 can observe object 15 reads on a provisioned variant. In this exact dump object 15
 has no valid persistent copy.
 
@@ -246,8 +246,7 @@ a 64-byte DataFlash page and checks whether the record can be read successfully.
 `0x758A0` reads into a local stack buffer and converts flash/NvM status codes.
 
 The buffer is discarded because this particular call is a validity probe. No
-buffer, metadata, or key is passed to a cryptographic engine. Therefore this call
-chain is not evidence of key derivation, a fused master key, or ICU-S binding.
+buffer, metadata, or key is passed to a cryptographic engine.
 
 ## 7. Where the SecOC key is represented
 
@@ -290,8 +289,7 @@ The same journal reports that a dealer rekey did **not** erase the preceding
 factory SecOC key: the old value remained readable in plaintext DataFlash. The
 before/after artifact is not retained here, so this remains an external field
 observation. It makes stale historical key material a plausible lifecycle concern
-on that observed Sienna; it does not establish a valid object-15 record on this
-exact `4512000` or H snapshot.
+on that observed Sienna.
 
 The H repeatability audit also changes how strongly a *single* DataFlash image
 may be read. Official P1M-E product data identifies `R7F701383` as a 1-MiB DPS
@@ -339,8 +337,7 @@ key-export probe neither changed nor tested that conclusion.
 
 This leaves peer-ECU extraction, selector-4 command-5 signing, and physical leakage as
 the leading existing-key routes. Candidate commands 9/10 can close the
-vendor ABI, but cannot export slot 4 under the standard SHE policy. In particular, the CAN-FD
-command-7 path authenticates
+vendor ABI. The CAN-FD command-7 path authenticates
 `DataID_be16 || payload[28] || freshness[6]`, placing 14 chosen payload bytes in
 CMAC's first AES block. The ranked methods and isolated-bench plan are canonical
 in [the key-recovery assessment](key-recovery-assessment.md).
@@ -402,9 +399,6 @@ Current 2026 GTS+ closes the former host-side uncertainty: its `MAC_01`
 `UtilityExNK2.dll` contains an official branch that emits exactly
 `31 01 10 10 || M1 || M2 || M3` and polls `31 03 10 10` for M4/M5. RID
 `0x1010` is therefore an OEM-supported ECU Security Key transport.
-What remains unobserved is whether a live
-`8965B4512000` session selects that GTS branch, which target slot a particular
-M1 names, and the server-side package-generation inputs/AuthID/current counter.
 
 ### 8.1 Exact diagnostic transport contract
 
@@ -521,13 +515,11 @@ The generic NvM restore/persistence path remains separately relevant because
 object 15 is key-bearing on field-verified related variants. The H-variant pass
 now independently confirms that `8965H1202000` retains the same 16-object restore
 namespace and exact `FF206C00..FF206EFF` protected geometry, but the supplied H
-DataFlash has **zero valid object-15 copies**. That strengthens the separation
-between generic persistence and the live ICU-S slot-4 verifier on this unit without
-proving that other H units cannot carry a valid object 15.
+DataFlash has **zero valid object-15 copies**.
 
 Consequently:
 
-- monitoring `0xFEBEF468/478/488` captures ordinary objects 0/1/3 only;
+- monitoring `0xFEBEF468/478/488` captures ordinary objects 0/1/3;
 - object 15's known related-variant locations are DataFlash `0xFF206E14` and RAM
   `0xFEBF02F8`;
 - generic work groups rooted at `0xFEBF0B08` can temporarily hold currently

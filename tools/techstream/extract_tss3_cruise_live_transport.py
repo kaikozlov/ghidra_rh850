@@ -162,7 +162,7 @@ def main() -> int:
             "validate": "accept only 0x62 followed by the same requested two-byte Data ID, then decode the existing FRC_P5 monitor bit ranges",
             "purpose": "synchronize exact Toyota cruise permission/main/operation/set-speed/follow-distance diagnostic truth with all-bus CAN during the next firmware-identified target capture",
         },
-        "conclusion": "For these five FRC_P5 cruise Data IDs, current GTS+ uses ordinary UDS ReadDataByIdentifier wire requests. The Phase-5-specific machinery is the monitor selection/scheduling/buffering layer around SID 0x22. CAN-field mapping and any outer diagnostic-session prerequisite remain open/dynamic.",
+        "conclusion": "For these five FRC_P5 cruise Data IDs, current GTS+ uses ordinary UDS ReadDataByIdentifier wire requests. The Phase-5-specific machinery is the monitor selection/scheduling/buffering layer around SID 0x22.",
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(out, indent=2, sort_keys=True) + "\n")

@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Retain original source windows around observed driver CANCEL transitions.
 
-This extractor operates solely on offline rlogs.
 The event selection is frozen; raw bytes, timestamps, and original hashes
 are acquired again from the corresponding rlog files on regeneration.
 """

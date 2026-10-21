@@ -158,8 +158,7 @@ def build() -> dict[str, Any]:
             "boundary": (
                 "T-0058-23 and T-0060-23 are raw-package matches to Toyota's published 23TC01 Corolla "
                 "FRC transitions, so a 2023 Corolla P5 FRC update family is already present locally. "
-                "This is not a VIN-level join to the albinoelephant or Span cars, and the 85,458,944-byte "
-                "target representation remains high-entropy/opaque rather than decoded application code."
+                "The 85,458,944-byte target representation remains high-entropy/opaque rather than decoded application code."
             ),
         },
         "brake_epb": {
@@ -176,7 +175,7 @@ def build() -> dict[str, Any]:
             "boundary": (
                 "24TC01 independently publishes a concrete 2023 Corolla Brake/EPB CID family. No package "
                 "descriptor has DiagID 07B0 or any published Brake CID in the pinned 26-CUW local corpus. "
-                "The campaign family is therefore an acquisition key set. The exact target Brake F181 remains unproved."
+                "The campaign family is therefore an acquisition key set."
             ),
         },
         "acquisition_plan": {

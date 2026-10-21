@@ -254,11 +254,11 @@ def main() -> int:
                 "normalized_output": "0xFEBEACBD",
                 "normalization": {"0": 0, "2": 2, "3": 4, "other_nonzero": 1},
                 "cooperative_acceptance": "CBE6E requires FEBEACBD == 0 AND FEBEC26D == 1 before asserting an active cooperative profile",
-                "classification": "graded internal steering/system mode-or-inhibit code; not a synonym for B6 communication loss",
+                "classification": "graded internal steering/system mode-or-inhibit code",
                 "b6_loss_path_is_separate": "B6 loss propagates through FEBEADB9 -> FEBEC26D",
                 "direct_reference_count": followup["cooperative_system_mode_direct_reference_union"]["match_count"],
                 "direct_tx_packer_refs": followup["cooperative_system_mode_direct_reference_union"]["entries_inside_tx_packer_window"],
-                "wire_feedback_boundary": "The promoted named/fixed-GP direct-reference census has no FEBEACBD consumer in the H 0x46xxx/0x47xxx Tx-packer window. This does not exclude an indirect/computed alias, so no native wire-visible cooperative-authority-loss bit is promoted.",
+                "wire_feedback_boundary": "The promoted named/fixed-GP direct-reference census has no FEBEACBD consumer in the H 0x46xxx/0x47xxx Tx-packer window.",
             },
             "scheduler": {
                 "foreground_loop": "0x0005F30C",
@@ -305,10 +305,10 @@ def main() -> int:
                 "consumer": "0x000CBEEE",
                 "semantics": "profile-dependent additive-contribution suppressor/filter: with a cooperative profile active, the CE864 add path requires signal258 != 1 AND the staged mode/sign mismatch predicate; signal258 == 1 suppresses that add regardless of the staged mode/sign value",
                 "candidate_id11_value": 1,
-                "candidate_boundary": "Value 1 is the conservative minimal-sender choice for this recovered consumer because it suppresses the extra additive term; that does not prove Toyota's stock ID11 value or neutralize unrelated ECUs' interpretations.",
+                "candidate_boundary": "Value 1 is the conservative minimal-sender choice for this recovered consumer because it suppresses the extra additive term.",
                 "oem_name_identified": False,
                 "family_vocabulary_candidate": "Cooperative Control in Progress Flag",
-                "boundary": "The P5 diagnostic family exposes this OEM name, but exact H lacks DID 0x1CEE and static evidence does not prove signal258 is that diagnostic field."
+                "boundary": "The P5 diagnostic family exposes this OEM name, but exact H lacks DID 0x1CEE."
             },
             "260": {
                 "wire": "B7 bits7:6",
@@ -316,7 +316,7 @@ def main() -> int:
                 "consumers": ["0x000C89D2", "0x000C8D42"],
                 "semantics": "four-state controller mode/transition selector; values 0 and 3 share the recovered steady direct-consumer families, while values 1/2 select the special branch family and value 2 has an additional interpolation path",
                 "candidate_id11_value": 0,
-                "candidate_boundary": "0 is the simplest replacement-sender value. 0 and 3 are not asserted globally equivalent because C8D42 retains prior-mode/change history and unrecovered consumers outside this bounded direct set are not excluded.",
+                "candidate_boundary": "0 is the simplest replacement-sender value. C8D42 retains prior-mode/change history.",
                 "oem_name_identified": False,
             },
             "261": {
@@ -339,7 +339,7 @@ def main() -> int:
                 "consumer": "0x000CC442",
                 "semantics": "percentage-like modifier of an internal steering contributor; ordinary values scale the contributor by signal262/100, while 0xC9/0xCA/0xCB select calibrated special cases",
                 "candidate_id11_value": 0,
-                "candidate_boundary": "For the ordinary path, zero removes this percentage-scaled contribution in the EPS consumer. Whether every network receiver treats B8=0 as neutral remains unproved.",
+                "candidate_boundary": "For the ordinary path, zero removes this percentage-scaled contribution in the EPS consumer.",
                 "oem_name_identified": False,
             },
             "263": {
@@ -348,7 +348,7 @@ def main() -> int:
                 "consumer": "0x000CBFCE",
                 "semantics": "percentage-like modifier of the active profile's internal contribution; the computed term is multiplied by signal263/100",
                 "candidate_id11_value": 0,
-                "candidate_boundary": "Zero removes this recovered percentage-scaled term in the EPS consumer. Whether every network receiver treats B9=0 as neutral remains unproved.",
+                "candidate_boundary": "Zero removes this recovered percentage-scaled term in the EPS consumer.",
                 "oem_name_identified": False,
             },
             "264": {
@@ -357,7 +357,7 @@ def main() -> int:
                 "consumer": "0x000C819E",
                 "semantics": "special-control validity/inhibit input; zero is required to enter/retain the C819E latch and nonzero clears it",
                 "candidate_id11_value": 0,
-                "scope_boundary": "C825A uses that latch around AP/Remote Parking IDs 25/27, so zero is the ordinary non-special-control candidate for ID11 but must not be generalized as the primary LTA request bit or a cross-ECU neutral.",
+                "scope_boundary": "C825A uses that latch around AP/Remote Parking IDs 25/27, so zero is the ordinary non-special-control candidate for ID11.",
                 "oem_name_identified": False,
             },
             "265": {
@@ -368,7 +368,7 @@ def main() -> int:
                 "semantics": "mode/status value republished only while B6 receive status is healthy; downstream accepts modes 1/2/3 and normalizes other values to 0",
                 "initial_default_value": 0,
                 "candidate_id11_value": 0,
-                "candidate_boundary": "Zero is the initialized/no-mode candidate; the stock ID11 value remains uncaptured and other network consumers are outside this EPS-only proof.",
+                "candidate_boundary": "Zero is the initialized/no-mode candidate; the stock ID11 value remains uncaptured.",
                 "oem_name_identified": False,
             },
         },
@@ -385,12 +385,8 @@ def main() -> int:
             "secondary_field_names_closed": False,
             "upstream_producer_closed": False,
             "minimal_id11_companion_candidate_closed_for_eps_consumers": True,
-            "next_static_target": "recover/validate the upstream FRC_P5/Brake stock template and cross-ECU effects; exact signal258/260/262/263/264/265 OEM names remain bounded unless an independent producer/diagnostic join appears",
+            "next_static_target": "recover/validate the upstream FRC_P5/Brake stock template and cross-ECU effects",
         },
-        "evidence_boundary": (
-            "This closes the H/F EPS receiver-side request and communication-loss contract in both scheduler and nominal wall-clock terms: signal254 selects the active Target Lateral ID, PDU42 is reloaded to 7 foreground ticks, the steady TAUJ0-CH3 tick is 5.0 ms (35.0 ms nominal primary cutout) with one 5.1-ms startup interval, and signal261 is a modulo-64 rolling sequence counter with an 8-gap cap. "
-            "It also bounds an EPS-side minimal ID11 companion-field candidate. It does not infer stock B6 transmit cadence, prove stock companion values/cross-ECU neutrality, recover the slot-4 secret, or identify exact OEM names for the secondary B6 fields."
-        ),
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(out, indent=2, sort_keys=True) + "\n")

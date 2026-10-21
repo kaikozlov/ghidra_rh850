@@ -16,7 +16,7 @@ the next analysis stages depend on and emits one machine-readable artifact:
    patch-manifest SHA binding), plus the exact next command to run.
 
 The tool never mutates the image, never opens Ghidra, and never requires
-hardware. A foreign calibration that passes here is *ready for triage* only:
+hardware. A foreign calibration that passes here is *ready for triage*:
 every Sienna-recovered mechanism remains a hypothesis until checked
 against the target's own bytes (see docs/variants/README.md).
 """
@@ -201,12 +201,6 @@ def build_report(
         "structure_triage": structure,
         "resolver_readiness": resolver,
         "ready": acquisition["geometry_valid"] and not acquisition["problems"],
-        "readiness_boundary": (
-            "ready-for-triage means the artifact is bound (geometry, SHA, optional run/manifest "
-            "provenance) and structurally scanned; it does not validate any Sienna-recovered "
-            "mechanism on this target — all transfer claims stay hypothesis until verified "
-            "against the target's own firmware"
-        ),
     }
 
 

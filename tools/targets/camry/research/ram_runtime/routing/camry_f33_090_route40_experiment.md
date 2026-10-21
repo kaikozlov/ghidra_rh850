@@ -91,13 +91,7 @@ FRC -- protected 0x08A request --> comma bus2/bus0 split
 
 The logical `0x08A -> Brake/VMM -> B6` separation is supported independently by
 Toyota's movement-manager architecture, GTS vocabulary, Brake-owned `0x081`,
-and exact-F33 B6 source attribution. The exact physical bridge, local segment,
-and ownership of `0x025`/`0x090` forwarding remain bounded.
-
-This is therefore not evidence that Panda cannot transmit CAN-FD. It is
-evidence that arbitrary EPS-targeted FD from the current FRC tap is not
-equivalent to an admitted native producer path. The viable integration seams
-are now:
+and exact-F33 B6 source attribution. The viable integration seams are now:
 
 1. remain at the camera tap, replace an authenticated FRC request such as
    `0x08A`, and let Brake/VMM produce the final B6 instruction;
@@ -105,8 +99,8 @@ are now:
    correctly authenticated B6 on the EPS-local segment;
 3. recover the Brake/VMM firmware and its request-validation, routing,
    source-suppression, and signing contract; or
-4. retain the already-demonstrated EPS-resident admitted-B6 rewrite strictly as
-   a development-only mechanism outside the native production architecture.
+4. retain the already-demonstrated EPS-resident admitted-B6 rewrite as
+   a development mechanism.
 
 The next lowest-cost localization is an exact-frame observer at F33's earliest
 RSCFD/CanIf boundary for route 40. Absence there would place the loss before

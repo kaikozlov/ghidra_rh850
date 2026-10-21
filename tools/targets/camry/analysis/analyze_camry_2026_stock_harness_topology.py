@@ -40,7 +40,7 @@ def analyze(log_root: Path, openpilot: Path) -> dict:
                                     for (a, b, n), count in sorted(counts.items())],
             })
     return {'schema': 'camry-stock-harness-topology-v2', 'sources': sources,
-            'boundary': 'incident-era native traffic proves message placement only; healthy EPS operation and actuation remain unproved because EPS 0x030 is absent',
+            'boundary': 'incident-era native traffic proves message placement; EPS 0x030 is absent',
             'parser_bus': {'radar_objects': 0, 'camera_frc_0x020_0x160_0x230_0x440': 2,
                            'bus4_0x08a_0x0c9_0x0ca_and_chassis_0x025_0x101_0x412': 1},
             'physical_network_roles': {

@@ -44,7 +44,7 @@ routines are explicitly dispositioned: `0x35B86`/`0x35D1E` are a mirrored pair
 of saturated calibration-driven state calculators; `0x5BEA6` and `0xBE8E6`
 are bounded bulk RAM snapshot/copy routines; and `0x916E2` is a bounded
 multi-state protocol/event dispatcher whose exact service semantics remain
-unnamed. These names describe firmware-static review results. OEM field names remain unresolved.
+unnamed.
 
 The corrected-graph follow-up now supersedes the earlier untracked sample as a
 review oracle. It reproducibly selects and decompiles 100 functions, including
@@ -158,8 +158,8 @@ was searched separately. No search traversed unrelated personal storage.
 ### Negative/bounded results
 
 - Filename/content-shaped local acquisition remains blocked for the three
-  named missing high-value binaries. This establishes only current local
-  availability. Stage 8 will inspect upstream deltas and public availability.
+  named missing high-value binaries. Stage 8 will inspect upstream deltas and
+  public availability.
 - The extra `REFERENCE/opendbc` checkout is newer/different than the locked
   evidence revision and is not used as primary evidence unless separately
   pinned later.
@@ -259,8 +259,7 @@ was searched separately. No search traversed unrelated personal storage.
   the member 2026-05-11 and Git attributes the three archive uploads to
   Vance425 on 2026-05-31, but neither establishes who built the inner payload.
 - Filename prefix `f05` plus exclusive authentication under
-  `f05f36b7...` makes deliberate key selection plausible. Proof remains absent:
-  no exact build source or invocation exists in the pinned history.
+  `f05f36b7...` makes deliberate key selection plausible.
 
 ### Documentation/tests changed
 
@@ -364,9 +363,9 @@ was searched separately. No search traversed unrelated personal storage.
 
 ### Negative/bounded results
 
-- The 51 S324 strings identify distributed procedure/UI codes. A serialized
-  central state table remains unsupported. Class-local selectors and branches
-  are recovered, while final cross-class successors are chosen by the outer UI/controller callback;
+- The 51 S324 strings identify distributed procedure/UI codes. Class-local
+  selectors and branches are recovered, while final cross-class successors are
+  chosen by the outer UI/controller callback;
   the generated CSV localizes that bounded edge instead of imposing a false
   linear state order.
 - No MCU/MCUID label or transformation proves a silicon-identity meaning for
@@ -501,8 +500,7 @@ was searched separately. No search traversed unrelated personal storage.
   remain intentionally unnamed.
 - No matching Sienna EPS `.cuw`/`.cwe`, `4514000` CodeFlash, or named
   Sienna/`8965B4512*`/`8965B4514*` firmware-shaped artifact appeared in the
-  bounded local search. This establishes only local availability.
-  Global public availability remains unresolved.
+  bounded local search.
 
 ### Documentation/tests changed
 
@@ -693,8 +691,6 @@ was searched separately. No search traversed unrelated personal storage.
   subset.
 - The target-side effect and reversibility of `ValidateICU_S` cannot be learned
   from the host library alone.
-- A manufacturing-only ICU key-provisioning agent may exist outside this standard
-  RFP distribution. The current package supplies no static lead to such an agent.
 
 ### Commit
 
@@ -894,7 +890,7 @@ was searched separately. No search traversed unrelated personal storage.
 
 ### Findings
 
-- **Phase acquisition follows ADCG→DMAC→Global RAM.** SFR-window polling is excluded.
+- **Phase acquisition follows ADCG→DMAC→Global RAM.**
   The P1M-E manual maps `0xFEEF8000..0xFEEFFFFF` as 32 KiB Global RAM A. Firmware
   descriptors `0x312B0/0x312C0` pair `ADCG0DIR00 @ 0xFFF91200` with ring
   `0xFEEF81E0`; `0x31378/0x31388` pair `ADCG1DIR00 @ 0xFFF92200` with ring
@@ -913,8 +909,7 @@ was searched separately. No search traversed unrelated personal storage.
   CodeFlash contains zero absolute 32-bit pointers into the block; generic
   `memcpy @ 0x153A` has only bootloader caller `0x4F84`; and no recovered
   computed-GP access in the producer cone reaches conditioned command state.
-  This does not prove physical independence; dynamic bench observation remains
-  the discriminator — grade: **bounded static negative** (`ARCH-008`).
+  Grade: **bounded static negative** (`ARCH-008`).
 - SWEEP-006 is corrected: `0x43A78`, `0x43716`, and `0x438C6` are not isolated
   interlocks. They are helpers inside a **nine-channel registered
   plausibility/deadline monitor family** using `com_signal_deadline_monitor_c @
@@ -941,8 +936,7 @@ was searched separately. No search traversed unrelated personal storage.
   deliberately not promoted to "CAN command cannot actuate"; a runtime-only
   coupling remains logically possible.
 - The recovered downstream trace links the nine-channel monitor family to
-  fault/event bookkeeping. Direct motor output remains unproved. Its state
-  could still participate indirectly in a broader safety policy.
+  fault/event bookkeeping.
 - ADCG `DIR00` source-register identity is exact; the external analog pins or
   physical current-sensor channel assignment are not claimed.
 - The calibration handlers now have precise execution/version domains, but OEM
@@ -1105,8 +1099,7 @@ was searched separately. No search traversed unrelated personal storage.
 - Resident stale bytes in internal ICU staging are not equated with disclosure.
 - Static activator unreachability is not a claim that debugger/fault/hardware
   state can never set the activation byte.
-- The proxy defines an engineering architecture. Live signing still requires
-  dynamic confirmation of slot-4 command-5 permission and performance.
+- The proxy defines an engineering architecture.
 - `0x7F8` is explicitly not claimed as an unused production transport.
 - Candidate-f05 ZIP member timestamps are not treated as source-control
   provenance; original author/toolchain remain unestablished and further

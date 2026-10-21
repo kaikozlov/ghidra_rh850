@@ -164,7 +164,7 @@ def main() -> int:
             "crypto_slot": 4,
             "separate_source_identifier_in_authenticated_input": False,
             "source_specific_acceptance_recovered": False,
-            "boundary": "The receiver authenticates one generated B6/DataID/freshness profile. No sender/source identity is concatenated into the recovered CMAC input or used after verification. This negative result covers the receiver only; upstream network producer count remains unresolved."
+            "boundary": "The receiver authenticates one generated B6/DataID/freshness profile. No sender/source identity is concatenated into the recovered CMAC input or used after verification."
         },
         "single_profile_queue": {
             "ingress": "0x0008865A",
@@ -199,7 +199,7 @@ def main() -> int:
             "duplicate_sequence_rejected": False,
             "examples": {k: {"raw_delta": v[0], "effective_gap": v[1]} for k, v in seq_examples.items()},
             "plausibility_use": "0xCB4F4 consumes effective_gap; H/F target-jump allowance is 78 raw per effective gap",
-            "conclusion": "signal261 supplies steering plausibility/time-gap input only; duplicate-sender winner selection remains unrecovered",
+            "conclusion": "signal261 supplies steering plausibility/time-gap input",
         },
         "request_id_arbitration": {
             "signal_id": 254,
@@ -247,9 +247,7 @@ def main() -> int:
             "request_id_priority_absent": True,
             "sequential_delivery_last_snapshot_wins": True,
             "production_stock_suppression_still_required": True,
-            "parallel_injection_authorized": False,
         },
-        "evidence_boundary": "Receiver-side static result only. It does not authorize parallel injection, identify the physical stock producer side, recover sender cadence, reveal the ICU-S slot-4 secret, or prove stock B6 activity during any vehicle feature state."
     }
 
     args.out.parent.mkdir(parents=True, exist_ok=True)

@@ -21,15 +21,13 @@ that every paragraph is current**.
 ## Reading reports without mixing checkpoints
 
 1. Check the **target, software revision, capture date, and evidence source**.
-   Sienna reference findings do not silently transfer to the default Camry.
 2. Use the report's conclusion and stated supersessions. Long Camry/Corolla
    reports preserve dated investigations; “current” inside an old checkpoint
    refers to that checkpoint.
 3. Follow the actual evidence. Regenerate generated artifacts from their
    inputs. Use `build/` and `REFERENCE/` material as local context.
 4. Keep successful software checks, observed vehicle behavior, and outstanding
-   qualification separate. Historical integration audits are not deployment
-   instructions or a claim about current upstream support.
+   qualification separate.
 
 ## Subsystem reports
 

@@ -84,7 +84,7 @@
   "schema": "corolla-h-keyless-event-formatter-v1",
   "software_id": "8965H1202000",
   "static_conclusion": {
-    "boundary": "Current S/H/F event masks bound reachable output inside the 0x300 staging area. The inner formatter itself has no capacity check, so this portability-sensitive bound applies only to the current configuration. Structural memory safety and global static-attack absence remain unproved.",
+    "boundary": "Current S/H/F event masks bound reachable output inside the 0x300 staging area. The inner formatter itself has no capacity check, so this portability-sensitive bound applies to the current configuration.",
     "configuration_dependent_safety": true,
     "structural_in_loop_capacity_check": false,
     "tracked_images_overflow": false

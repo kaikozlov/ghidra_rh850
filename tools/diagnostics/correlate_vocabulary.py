@@ -362,8 +362,7 @@ def correlate_monitors(
         can_names = sorted(set(names_by_db.get("EPS_CAN_P4DK.ddb", [])))
         kwp_names = sorted(set(names_by_db.get("EPS_P4DK3.ddb", [])))
 
-        # Prefer the CAN-family label over the KWP-family label. This chooses
-        # vocabulary; it does not prove calibration-specific semantics.
+        # Prefer the CAN-family label over the KWP-family label.
         oem_name = can_names[0] if can_names else (kwp_names[0] if kwp_names else "unnamed")
 
         # Attach independent decompiled RAM evidence for candidate DIDs.

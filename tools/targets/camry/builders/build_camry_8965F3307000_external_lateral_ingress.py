@@ -178,15 +178,13 @@ def build() -> dict:
     need([r[0] for r in rules[43:46]] == [0x7A1, 0x777, 0x7A0], "diagnostic acceptance tail drift")
     need(rules[46][0] == 0x9FDC0002, "packed XCP rule46 drift")
 
-    # The receiver also tells us the source *module relationship* for B6. CAN frames
-    # have no source-node address. F33's own communication-loss monitor supplies
-    # this relationship. The six-row monitor family
+    # F33's communication-loss monitor supplies the B6 source-module relationship.
+    # The six-row monitor family
     # is the exact F33 homolog of the H family: row5 watches status slot 0x1A; the
     # status-map table maps 0x1A -> PDU44 -> 0x0B6. Loss selects Dem event 0x0143,
     # whose DTC index 82 is the same exact F33 DTC record used by populated event 0x00AA.
     # Current GTS+ names that record U012987 Lost Communication with Brake System
-    # Control Module / Missing Message. Thus F33 itself expects B6 from the brake-system
-    # source domain even though it cannot encode a transmitter ECU address on the wire.
+    # Control Module / Missing Message. Thus F33 expects B6 from the brake-system source domain.
     token(funcs, 0x3CBE8, "param_1 < 6", "DAT_000280a4", "DAT_000280a6")
     # Selector/bank loads, real status call, R10->R7 forwarding, bank->R6 and
     # publication call, followed by the six-row loop bound. Names/types in the
@@ -479,7 +477,7 @@ def build() -> dict:
                 "description": dtc82["techstream_description"],
                 "failure": dtc82["techstream_failure"],
             },
-            "classification": "exact F33 receiver expects B6/PDU44 as Brake System Control Module traffic; CAN itself carries no source-node address, so this identifies only the monitored immediate source-domain relationship; the unique transmitter implementation remains unresolved",
+            "classification": "exact F33 receiver expects B6/PDU44 as Brake System Control Module traffic",
         },
         "special_paths": {
             "0x0D5": {
@@ -513,13 +511,12 @@ def build() -> dict:
             "normal_com": "Exact controller-1 rules 0..42 equal the 43 normal generated-COM descriptors one-for-one; rules 43..46 are diagnostics/XCP only. The corrected pinned scalar copy-edge census has exactly 19 nonempty signals out of 116 and 97 empty: B6 signal261 is the sole mode selector and B6 signal262 the sole command magnitude; all non-B6 members are feedback, monitors, plausibility inputs, or gates. Signal243 uses the explicit 0x4BB62 stack-RMW path to FEBE80A0 -> FEBEF094 -> FEBEACCD. No observed ordinary EPS-CAN field besides B6 is identified as an external steering target/command, and there is no hidden controller-1 acceptance ID outside the normal COM table.",
             "b6": "Protected 0x0B6 remains the only positively recovered external target-steering-angle ingress. Exact F33 communication-monitor row5 independently maps PDU44/B6 loss to DTC index82, which GTS+ names U012987 Lost Communication with Brake System Control Module / Missing Message, so the EPS expects the final steering-target PDU from the brake-system source domain. Later Sep-8/Sep-10 internal captures supersede the old Panda-visible zero-B6 inference: native B6/profile2 deliveries exist at F33 even when older external rlogs saw no B6. Toyota's vehicle-movement architecture independently places post-arbitration steering request generation in the Brake-hosted vehicle-movement-manager domain, strongly explaining this source relationship without locating the exact Camry physical hop.",
             "next": "Do not search another arbitrary accepted EPS CAN ID. Treat 0x08A as the upstream TSS application/request-side package, 0x081 as result/status feedback, and B6 as the downstream steering-controller target/instruction interface. Recover the exact Brake/VMM request-generation, physical transport/source-admission, suppression, and SecOC ownership between those layers; the logical request->result->target architecture is no longer the open question.",
-            "production_output_authorized": False,
         },
         "boundary": [
             "The two drives do not machine-prove an exact factory-LTA-active interval.",
             "This census closes generated scalar COM plus the generic group-receive surface represented by exact F33 configuration; it does not prove the absence of DMA/peripheral mutation, diagnostics, computed aliases outside the recovered maps, or another internal controller path.",
             "Bus1 0x180..0x18C traffic is upstream candidate traffic only: those arbitration IDs are not in the exact F33 normal Rx descriptor table and cannot directly be the EPS normal-CAN command.",
-            "GTS+ supplies diagnostic names/DIDs only; CAN-ID assignments and CAN-to-name joins require exact F33 firmware dataflow.",
+            "GTS+ supplies diagnostic names/DIDs; CAN-to-name joins use exact F33 firmware dataflow.",
         ],
     }
 

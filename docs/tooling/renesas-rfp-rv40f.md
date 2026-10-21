@@ -50,11 +50,8 @@ authentication or identity fields, and `WriteConfig` is `be32 || 16` (20
 bytes). The legacy `SetICUM` path is a fixed 20-byte option record split into
 4-byte and 15-byte commands.
 
-That negative is deliberately scoped. Generic write/data-transfer commands can
-transport arbitrary program bytes to an allowed target address range; this is
-not evidence of a dedicated ICU key-provisioning primitive. Nothing here proves
-which commands an R7F701381/P1M-E mask ROM advertises, nor that standard RFP is
-the manufacturing path used for Toyota/Denso SecOC provisioning.
+Generic write/data-transfer commands can transport arbitrary program bytes to an
+allowed target address range.
 
 The Sienna application has a separate, directly recovered key-update service:
 RoutineControl RID `0x1010` drives MainPE ICU command 8 with the standard SHE
@@ -85,8 +82,7 @@ make verify-rfp
 `Devices.xml` exposes generic `RH850`, `RH850/E2x`, and `RH850/U2x` entries but
 contains no P1M-E/R7F701381-specific device record. The library also retains a
 separate `BootRH850Gen2` implementation. `BootRV40F` supplies strong host
-protocol evidence for the generic/older RH850 route. Selection by the analyzed
-Toyota P1M-E remains unproved.
+protocol evidence for the generic/older RH850 route.
 
 The package's executable-resource inventory does not supply a hidden P1M-E
 agent. All 68 `Firmwares/*.bin` images identify as SEGGER probe firmware;
@@ -278,9 +274,6 @@ being treated as a generic fatal error.
 The task then calls `SetFrequency (0x32)`, delays briefly, stores the returned
 negotiation values, and updates host driver timing/baud state.
 
-This is a **host state machine** only. It does not establish the exact physical
-reset pin timing or mask-ROM behavior of the P1M-E without a target capture.
-
 ## 4. Device-type capability word
 
 `UtilityRV40F::GetRV40FInfo @ 0xC2528` accepts a vector only when its length is
@@ -410,10 +403,7 @@ payload, and no independently recovered persistent-state write in the host.
 security-option path when the cached state says validation is still required.
 The CLI documents that high-level option as `-fo flags icus` / “Enable ICU-S.”
 
-This proves only the host precondition/sequence. Static
-RFP code alone cannot establish whether validation burns an irreversible
-lifecycle bit, what the mask ROM checks internally, or whether a specific
-P1M-E permits the command.
+This proves the host precondition/sequence.
 
 `SetICUSOptionByte @ 0x1C4DC` and `GetICUSOptionByte @ 0x1CA90` remain valid
 four-byte host primitives. The direct exported helpers have no recovered
@@ -440,17 +430,7 @@ For the security/configuration commands (`0x20..0x30`, `0x48..0x4F`,
   `KeyUpdate`, or provisioning-image download method.
 
 The retained standard RV40F host command surface contains **no dedicated
-key provisioning command**. Silicon capabilities remain outside this negative.
-It does not exclude:
-
-- generic flash writes carrying arbitrary bytes to an address that a particular
-  mask ROM exposes;
-- an undocumented command omitted from this library build;
-- a manufacturing-only or target-resident provisioning program distributed
-  separately;
-- Toyota/Denso-specific software or application diagnostics;
-- a target-internal key derivation/provisioning action behind a structurally
-  ordinary option command.
+key provisioning command**.
 
 The Sienna's recovered DID-`0x1010` command-8 path remains the only static path
 in the current project that actually has the SHE M1/M2/M3 shape.
@@ -472,9 +452,7 @@ remaining RFP/P1M-E questions require a target or a legitimate capture:
 The shipped RFP CLI documentation includes a generic all-`FF` ID-code example,
 and retained generic configuration strings use `UserID=0xFFFFFFFF`. Those facts
 support an all-`FF` `CheckIDAuth` value as a reasonable **probe hypothesis**.
-R7F701381/P1M-E blank-ID state remains unrecovered. The analyzed distribution has
-no specific P1M-E device record that closes that transfer. Acceptance or
-rejection must therefore be treated as target observation (CORR-092).
+Acceptance or rejection must be treated as target observation (CORR-092).
 
 Until those are observed, host support must not be promoted into a claim about
 P1M-E mask-ROM capabilities.

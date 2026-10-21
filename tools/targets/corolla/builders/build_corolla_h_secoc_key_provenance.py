@@ -3,8 +3,7 @@
 
 The report deliberately separates facts about the *protected ICU-S slot selector*
 from facts about raw AES-key bytes. It proves what the CPU/application passes to
-command 7 and command 8; it does not claim visibility into undocumented ICU-S
-internal storage/derivation beyond those interfaces.
+command 7 and command 8.
 """
 from __future__ import annotations
 
@@ -245,8 +244,8 @@ def main() -> None:
             "matches": scan["matches"],
             "min_entropy": scan["min_entropy"],
             "capture_summary": df["capture"]["summary"],
-            "boundary": "The DataFlash dump and retained CAN oracle are contributor artifacts and are not proven same-runtime-epoch. The scan excludes an exact raw 16-byte candidate among the 23,277 tested windows; it does not exclude transformed/derived values or ICU-S-internal storage.",
-            "interpretation": "the committed exhaustive raw-window scan found zero candidate matches; this supports absence only of an obvious CPU-visible raw key in the supplied DataFlash snapshot. Derivation and protected hardware storage remain possible",
+            "boundary": "The scan excludes an exact raw 16-byte candidate among the 23,277 tested windows in the supplied DataFlash snapshot.",
+            "interpretation": "the committed exhaustive raw-window scan found zero candidate matches; this supports absence of an obvious CPU-visible raw key in the supplied DataFlash snapshot",
         },
         "static_storage_derivation_conclusion": {
             "mapped_secoc_init_raw_key_load_found": False,

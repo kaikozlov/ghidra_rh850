@@ -322,7 +322,6 @@ def build() -> dict:
             "live_slot4_command5_permission_closed": False,
             "command5_latency_jitter_closed": False,
             "production_b6_signer_closed": False,
-            "vehicle_actuation_authorized": False,
             "flash_write_used": False,
             "steering_can_transmit_used": False,
             "verified_variant_ram_exec_requirement_promoted": True,

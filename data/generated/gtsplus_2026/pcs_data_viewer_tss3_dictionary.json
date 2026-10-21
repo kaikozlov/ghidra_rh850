@@ -8853,7 +8853,7 @@
   "gtsplus_version": "2026.03.002.02",
   "identity_boundaries": {
     "neutral_culture_is_english": true,
-    "recorder_ids_are_not_sid22_dids": "FFD_TSS3_ID_* numbers are recorder data IDs/keys consumed by the proprietary Operation-FFD SID-$AB-$12/$13 path. Ordinary FRC_P5 UDS SID-22 DIDs use a separate namespace; no Data-Monitor DDB join is asserted"
+    "recorder_ids_are_not_sid22_dids": "FFD_TSS3_ID_* numbers are recorder data IDs/keys consumed by the proprietary Operation-FFD SID-$AB-$12/$13 path. Ordinary FRC_P5 UDS SID-22 DIDs use a separate namespace"
   },
   "image_ffd_family_did_join": {
     "conclusion": "the FCM (front-camera) TSS3 image-FFD extractor reads exactly the DIDs its DataTable DataID enum lists; every non-image DID has an IMGFFD_TSS3 display name while the image payload DID 6001 stays unnamed",

@@ -109,20 +109,14 @@ reset, while exactly one final old-epoch D7 per Span reset transition maps to
 message-low2 1. Every
 complete D7 epoch reconstructs full message8 `1..15`.
 
-For H/F B6 this closes the global freshness portion but **not** its local sender
-counter. `0x00F` reveals trip16/reset20 directly, so 36 of B6's 46 meaningful
-freshness bits are observable. D7 and B6 nevertheless have independent ordinary
-freshness slots. A replacement sender must not copy D7's message8. Exact H's
-new-epoch rule does provide a clean re-anchor: after stock B6 is suppressed and
-a strictly newer authenticated `0x00F` epoch is committed, the first B6 message8
-is seeded from its transmitted low2 and does not depend on the previous B6
-message8. Within the same epoch, the full B6 message counter is still needed for
-the CMAC.
+`0x00F` reveals trip16/reset20 directly: 36 of B6's 46 meaningful freshness
+bits. D7 and B6 have independent ordinary freshness slots. After stock B6 is
+suppressed and a strictly newer authenticated `0x00F` epoch is committed, the
+receiver seeds the first B6 message8 from its transmitted low2. Within the same
+epoch, the full B6 message counter is needed for the CMAC.
 
 The tracked proof is
-`data/generated/corolla_hf_secoc_00f_freshness_bridge.json`. This does not
-recover the H/F slot-4 secret, prove the stock B6 producer's message-counter
-start schedule, or replace the need for safe stock-source suppression.
+`data/generated/corolla_hf_secoc_00f_freshness_bridge.json`.
 
 ### 1.2 Direction and CAN-ID scope
 
@@ -160,7 +154,6 @@ on eight ordinary IDs:
 `0x00F` is the companion synchronization message. Every ordinary block carries
 `AUTHENTICATOR`, `RESET_FLAG`, and `MSG_CNT_LOWER`; the common sender formula is
 DataID-generic. This establishes a useful **known Toyota classic-SecOC profile**.
-Each vehicle's message set and receiving ECU/key domains require separate evidence.
 
 The machine-readable profile is `data/toyota_classic_secoc_profile.csv`, and the
 community-extractor implications are canonical in
@@ -298,8 +291,8 @@ RAM proxy
 ```
 
 The stock mode-1 test at `0x68B42` remains useful as calling-convention proof.
-The resident proxy uses **record 0**. Diagnostic record 1 is separate.
-Both records use adapter `0x87CCC` and asynchronous worker `0x87DD0`; record 0's
+The resident proxy uses **record 0**.
+Both configured records use adapter `0x87CCC` and asynchronous worker `0x87DD0`; record 0's
 completion callback `0x88B5C` merely stores status to `FEBF13BD` and sets done
 flag `FEBF13BC`, whereas record 1 callback `0x6926A` invokes the diagnostic
 16-byte expected-result comparer. The lower prepare `0x87A94` accepts lengths
@@ -317,8 +310,7 @@ DataID_be16 || payload[0:4] || freshness48
 ```
 
 The proxy keeps the full 16-byte CMAC result internally and uses its first 28
-bits when constructing the four-byte Toyota SecOC trailer. This composes already
-recovered primitives. Slot-4 MAC generation still requires an observed hardware result.
+bits when constructing the four-byte Toyota SecOC trailer.
 
 ### 5.2 Arbitration and command-7 contention
 

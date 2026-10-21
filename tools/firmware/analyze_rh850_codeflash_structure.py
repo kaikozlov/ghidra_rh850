@@ -15,10 +15,7 @@ Sienna 8965B4512000 calibration:
 - a byte-level prefilter for the SecOC semantic gate resolver shape
   (32-bit-displacement byte loads feeding a cmov-family materialization).
 
-Every match is a TRIAGE CANDIDATE. Nothing here proves that a mechanism
-transfers to a new calibration, and the scanner deliberately contains no
-per-calibration software-ID offset fallback table: identify targets by their
-own structure.
+Every match is a TRIAGE CANDIDATE. Identify targets by their own structure.
 
 Usage:
   analyze_rh850_codeflash_structure.py IMAGE.bin [-o report.json] [--max-vas 16]

@@ -19,7 +19,6 @@
       "cryptoif_submit_busy": 0
     },
     "upper_engine_correspondence": {
-      "boundary": "Sienna supplies role anchors for the generic acceptance engine. The H functions occupy the same control roles near a +0x5A64 Sienna relocation but are not claimed byte-identical: raw differences include relocated calls, GP/table displacements, and generated-profile geometry. H freshness/window conclusions below must be recovered from the target-native H bodies rather than transferred from Sienna.",
       "rows": [
         {
           "body_size": 66,
@@ -174,7 +173,6 @@
     "corolla_h_f_application_identical": true,
     "sienna": "8965B4512000"
   },
-  "evidence_boundary": "This comparison proves structural/protocol reuse between Sienna 8965B4512000 and application-identical Corolla H/F using raw profile/config bytes, exact relocated helper bodies, and independently recovered target-native H/F behavior. It does not infer that the ICU-S slot4 secret is shared, does not transfer generated freshness IDs or RAM slots by number, and does not identify the B6 sender, cadence, or physical producer topology.",
   "freshness_state_geometry": {
     "corolla_h_f": {
       "b6_current": "0xFEBE54D4",
@@ -184,7 +182,7 @@
         "current": "0xFEBE54F8",
         "linkage_config": "TP+0x1AB4 (0x00025820), value0",
         "pending": "0xFEBE5504",
-        "semantic_boundary": "This pair is outside the two ordinary receive-profile slots. Its consumer/producer role is not assigned here and is not needed for B6 slot1 verification."
+        "semantic_boundary": "This pair is outside the two ordinary receive-profile slots."
       },
       "global_sync_current": {
         "reset": "0xFEBE54B0",
@@ -204,7 +202,7 @@
       ],
       "wrap_flag": "0xFEBE54C6"
     },
-    "portable_rule": "State record shape (trip32, reset32, message16 plus auxiliary bytes) and current/pending commit discipline are shared. Absolute RAM addresses, ordinary slot index, and freshness ID are generated per image and must not be transferred by number.",
+    "shared_state_layout": "State records contain trip32, reset32, message16 and auxiliary bytes, with separate current/pending records and authentication-only commit.",
     "sienna": {
       "global_sync_current": {
         "reset": "0xFEBE556C",
@@ -229,7 +227,6 @@
     }
   },
   "function_correspondence": {
-    "boundary": "Exact byte transfer is claimed only for the four raw-identical freshness pack/parse helpers. Other rows are target-native role correspondences whose bodies change because tables, state addresses, profile cardinality, or call targets differ.",
     "exact_byte_transfer_count": 4,
     "exact_byte_transfers": [
       "full_freshness_pack",
@@ -290,8 +287,8 @@
         "role": "freshness_profile_lookup",
         "sienna_body_sha256": "8cb03307b1228e0fc9baf3c57dde6eeff031ef88d7d0289f28bd0e66f80b9267",
         "sienna_entry": "0x0008E80A",
-        "transfer_ledger_status": "changed-or-unresolved",
-        "transfer_ledger_target": null
+        "transfer_ledger_status": "unique-instruction-shape-candidate",
+        "transfer_ledger_target": "0x00089558"
       },
       {
         "body_size": 86,
@@ -301,8 +298,8 @@
         "role": "freshness_get_dispatch",
         "sienna_body_sha256": "9323be2e446a8ad8b22f328f1f47f11492aefbdb4637a0152cfae1fc45ee9015",
         "sienna_entry": "0x0008E8E6",
-        "transfer_ledger_status": "changed-or-unresolved",
-        "transfer_ledger_target": null
+        "transfer_ledger_status": "unique-instruction-shape-candidate",
+        "transfer_ledger_target": "0x000896b0"
       },
       {
         "body_size": 58,
@@ -312,8 +309,8 @@
         "role": "freshness_commit_dispatch",
         "sienna_body_sha256": "c31c46fdd12728fb003a578dcddeb0e0e40bf13df4b59cec1fe3152707a3e8a3",
         "sienna_entry": "0x0008E942",
-        "transfer_ledger_status": "changed-or-unresolved",
-        "transfer_ledger_target": null
+        "transfer_ledger_status": "unique-instruction-shape-candidate",
+        "transfer_ledger_target": "0x00089758"
       },
       {
         "body_size": 120,
@@ -400,8 +397,8 @@
         "role": "normal_freshness_reconstruct",
         "sienna_body_sha256": "333a700f5008a0e02a8a54a5f1d22e4dc2ee2b4a848b980715288064f3ad408b",
         "sienna_entry": "0x0008EECA",
-        "transfer_ledger_status": "changed-or-unresolved",
-        "transfer_ledger_target": null
+        "transfer_ledger_status": "unique-instruction-shape-candidate",
+        "transfer_ledger_target": "0x00089e9a"
       },
       {
         "body_size": 228,
@@ -411,8 +408,8 @@
         "role": "sync_freshness_reconstruct",
         "sienna_body_sha256": "0b0c4ce23e156ae4b1d621c86c0f4a5356d738ef6fdd2ed34187ff895bc5c596",
         "sienna_entry": "0x0008EF9E",
-        "transfer_ledger_status": "changed-or-unresolved",
-        "transfer_ledger_target": null
+        "transfer_ledger_status": "unique-instruction-shape-candidate",
+        "transfer_ledger_target": "0x00089f6e"
       },
       {
         "body_size": 52,
@@ -422,8 +419,8 @@
         "role": "normal_freshness_commit",
         "sienna_body_sha256": "33875674fcd01ee33ab0e408ff56e707f31c095f890bf01fbbd39663415a3d1d",
         "sienna_entry": "0x0008F084",
-        "transfer_ledger_status": "changed-or-unresolved",
-        "transfer_ledger_target": null
+        "transfer_ledger_status": "unique-instruction-shape-candidate",
+        "transfer_ledger_target": "0x0008a07a"
       },
       {
         "body_size": 130,
@@ -444,8 +441,8 @@
         "role": "sync_freshness_commit",
         "sienna_body_sha256": "20a8b423835a4fb3c6730a1c4250ab190abc3ea78211068db453e7defe0b7776",
         "sienna_entry": "0x0008F112",
-        "transfer_ledger_status": "changed-or-unresolved",
-        "transfer_ledger_target": null
+        "transfer_ledger_status": "unique-instruction-shape-candidate",
+        "transfer_ledger_target": "0x0008a130"
       },
       {
         "body_size": 172,
@@ -476,7 +473,6 @@
       "action": "zero global sync current/pending state, reset wrap/control state, regenerate complements, zero 2x12-byte ordinary current plus 2x12-byte pending arrays, and zero one additional linked 12-byte current/pending pair",
       "function": "0x00089812"
     },
-    "persistence_boundary": "Initialization equivalence does not prove that no other module later restores freshness from NVM. Sienna-specific persistence conclusions must not be transferred to H/F without target-native restore-path evidence.",
     "shared_semantic": "Both receiver implementations explicitly initialize freshness RAM to zero and maintain complement/control cells around authenticated sync state.",
     "sienna_state_clear": {
       "action": "zero global sync current/pending state, reset wrap/control state, regenerate complements, and zero 5x12-byte ordinary current plus 5x12-byte pending arrays",
@@ -512,8 +508,7 @@
     "sienna_config": {
       "address": "0x00025950",
       "bytes": "0100000004000000000000000000000000000000"
-    },
-    "slot_secret_transfer_boundary": "The selector is the same ICU-S slot index. This does not prove that the secret key material provisioned into slot4 is the same across ECUs/vehicles."
+    }
   },
   "mac28_and_authenticated_input": {
     "algorithm": "AES-CMAC-128",
@@ -921,15 +916,15 @@
     },
     "h_b6_secoc_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_secoc_verification.json",
-      "sha256": "bfa448f468333a55552b3a18a8c202c4de4c8cd796d4393ad0970113cc855735"
+      "sha256": "ade6b610db9284bd930487b71df3239c06d09a2f441b0d28a83634b6eb02a800"
     },
     "h_target_native_decompiler_evidence": {
       "path": "data/generated/corolla_8965H1202000_b6_secoc_verification_decompiler_evidence.json",
-      "sha256": "606b9a5efe470558c2dc691d58acb13c6e995e1165f605fd8997e9a68db3dab7"
+      "sha256": "4554382c2b3de122f0af389a521418f86f73293375923b15a44b117f6a93c686"
     },
     "raw_function_transfer_ledger": {
       "path": "data/generated/corolla_8965H1202000_named_function_transfer_ledger.json",
-      "sha256": "c4c3340ff8a4acdbe0a848492c4332a596bb1d69233b72b560dedda300e89858"
+      "sha256": "70e9528e6ab7e857f74e9c6bd7580df8a2a16305bd47d208af0d84637582bbf3"
     },
     "sienna_codeflash": {
       "path": "firmware/RH850_P1M-E_CodeFlash.bin",
@@ -959,15 +954,6 @@
     "wrap_threshold": 15
   },
   "transferable_sienna_semantics": {
-    "must_remain_corolla_target_specific": [
-      "protected PDU inventory and upper PDU/callback routing",
-      "freshness ID and ordinary-slot numbering",
-      "absolute RAM addresses and generated array cardinality",
-      "the Corolla-only extra linked current/pending pair",
-      "B6 application payload semantics and independent signal261 sequence behavior",
-      "actual secret provisioned into ICU-S slot4",
-      "upstream sender ownership, sender freshness-state source, wall-clock cadence, and physical interception topology"
-    ],
     "safe_to_transfer_to_h_f_b6": [
       "SecOC profile-record field meanings and generic queue/verification stages",
       "FV4/FV46 packing and parsing, including the exact four byte-identical helper bodies",

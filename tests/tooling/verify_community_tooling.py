@@ -110,8 +110,6 @@ if egg_matches:
     #   +0: 0152   mov 1, r10    (return = 1)
     #   +2: 7f00   jmp [lp]      (return immediately)
     # This makes the function always return "match" for BA token comparisons.
-    # SecOC and F7's independent SA2 gate remain elsewhere. The effect is
-    # documented only as an analysis of the hypothetical patch.
 
     # The actual SecOC MAC verification function is secoc_rx_verify_worker at 0x8E4BA.
     # Its prologue bytes are completely different.

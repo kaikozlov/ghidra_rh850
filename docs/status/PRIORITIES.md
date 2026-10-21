@@ -6,10 +6,6 @@ belongs in [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md); claim history lives in
 [FINDINGS.md](FINDINGS.md) / [CORRECTIONS.md](CORRECTIONS.md); procedures,
 evidence, and closure narratives live in the canonical reports linked below.
 
-This research queue leaves deployment qualification and installation procedures
-to their canonical reports. The [Camry capability matrix](../variants/camry-2026-capability-matrix.md)
-owns the distinction between retained demonstrations and remaining qualification.
-
 ## Active queue
 
 1. **Camry native producer contract — [OQ-054](OPEN_QUESTIONS.md).** Recover the

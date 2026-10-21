@@ -1,5 +1,4 @@
 {
-  "boundary": "Exact-H disposable-project decompilations for the protected 0x0B6 freshness/verification state machine, raw-byte-bound to 8965H1202000. This evidence is intended to complement, not replace, the separately verified byte-complete receiver envelope and ICU-S key-selector provenance artifacts.",
   "function_count": 44,
   "functions": [
     {
@@ -357,10 +356,10 @@
   ],
   "generator": {
     "path": "tools/targets/corolla/extract/extract_corolla_h_b6_secoc_verification_evidence.py",
-    "sha256": "6ab42e55763e2f06058f832dad614964dd60126da0c2b032d2182fad0a59950e"
+    "sha256": "f718f41778deb64765c2f0d1f0c68fdc33f2eaf38d584023c0b89bf7aea930cb"
   },
   "image": {
-    "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
+    "path": "firmware/corolla-8965H1202000/CodeFlash.bin",
     "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
     "size": 1048576
   },
@@ -371,7 +370,6 @@
     "size": 1048576
   },
   "sienna_upper_engine_comparison": {
-    "boundary": "Sienna supplies role anchors for the generic acceptance engine. The H functions occupy the same control roles near a +0x5A64 Sienna relocation but are not claimed byte-identical: raw differences include relocated calls, GP/table displacements, and generated-profile geometry. H freshness/window conclusions below must be recovered from the target-native H bodies rather than transferred from Sienna.",
     "rows": [
       {
         "body_size": 66,
@@ -518,8 +516,8 @@
     ]
   },
   "software_id": "8965H1202000",
-  "source_corpus": {
-    "path": "build/work/corpora/h_8965H1202000_b6_full_forced.raw.jsonl",
-    "sha256": "5cc79174e8ea917356b9d4758d086df1209c85c9665f122782cff7d88261c387"
+  "source_evidence": {
+    "path": "data/targets/corolla-8965H1202000/retained_decompiler_evidence.json",
+    "sha256": "97cc28339620a012814a2f20164ed240f14d1efc3a31bf306726f613ec1fd50b"
   }
 }

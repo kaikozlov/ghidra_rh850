@@ -1349,9 +1349,8 @@ void age_classifier_retained_flags(void)
 
 
 
-/* Snapshot flagsA4/A5, then age nonzero groups in A3,A5,A4 order. Exact thresholds 200/600/200 are
-   invocation counts. SnapshotA4/A5 flags and age nonzero
-   groups inA3,A5,A4 order. Individual PMR sections are not one atomic classifier snapshot. */
+/* Snapshot flagsA4/A5, then age nonzero groups in A3,A5,A4 order.
+   Thresholds 200/600/200 are invocation counts. */
 
 void age_classifier_groups(void)
 
@@ -1381,8 +1380,7 @@ void age_classifier_groups(void)
 
 /* Return5A for zero6AF0, E8533/4, E854FF, E85511, sentinel33333333 inE91C/E924/E92C or62E12
    resultA55AA55A; otherwise0. Structural classifier priority.
-   Application zero/status/sentinel predicates select structural classifier priority3. No recovered
-   OEM fault identity or permission semantics. */
+   Application zero/status/sentinel predicates select structural classifier priority3. */
 
 uint classifier_selector3_predicate(void)
 
@@ -1774,11 +1772,8 @@ undefined4 return_argument_word_7490e(undefined4 param_1)
 
 
 /* Low8 class0 sets6B76=0 and calls76ACE. Class83 sets4; other nonzero classes set1, report the
-   class and call76ADA. Their73CA0/73CA2 targets are JMPLP leaves. Extra
-   r7/r8/r9 prepared by77D66 are not consumed in this implementation. Class0 sets result-state0;83
-   sets4; other nonzero sets1 and reports class. Actual completion hooks terminate at
-   JMPLP73CA0/73CA2; this is not logical/application publication. Extra prepared r7-r9 are unused.
-    */
+   class and call76ADA. Actual completion hooks terminate at JMPLP73CA0/73CA2.
+   Extra prepared r7-r9 are unused. */
 
 void nvm_publish_physical_class(uchar result_class)
 

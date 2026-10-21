@@ -122,7 +122,7 @@ After collecting the READY/Park result, power the vehicle fully OFF. The residen
 is volatile and disappears on reset. On the next normal startup, confirm ordinary
 vehicle/EPS behavior before designing any moving observation.
 
-## Legacy B6 observer and route44 bridge: retained artifacts awaiting live qualification
+## Legacy B6 observer and route44 bridge: retained artifacts
 
 `camry_f33_b6_transaction_observer_payload.bin` and
 `camry_f33_b6_bridge_payload.bin` remain in the kit only for reproducibility of
@@ -143,7 +143,7 @@ The old bridge and small-offset procedure remain **deferred** after a successful
 runtime discriminator. No current kit command authorizes B6 re-injection,
 route44 intervention, or steering offset.
 
-## Passive-observable interpretation boundaries
+## Passive witnesses
 
 The probe preserves raw adjacent witnesses (`0x08A`, `0x081`, `0x030`) without
 decoding them into any acceptance rule. The analysis repository supplies the
@@ -151,28 +151,22 @@ canonical interpretation:
 
 - `0x025` is measured steering; `0x030` B8/B17 is measured driver torque and
   B22:B23 is a mapped motor-feedback proxy that ordinary driver assist also
-  produces — none of these is commanded torque or lateral authority.
+  produces.
 - `0x08A` B18:B19 / B21 / B24 and the `0x081` B16:B17 mirror are
-  request/reference state. They are passive observables: no request ID, level,
-  or reference value is promoted to engagement, readiness, or permission
-  semantics (VAR-129; port report §4.6).
-- Decoded stock-signal review belongs to the separate offline reducer report
-  in the analysis repository
-  (`data/generated/camry_20260904_stock_steering_report.json`), which serves
-  evidence review only and never affects this kit's acceptance logic,
-  controller permission, or transmitted traffic.
+  request/reference state (VAR-129; port report §4.6).
+- Decoded stock-signal review is in the analysis repository's offline reducer report
+  (`data/generated/camry_20260904_stock_steering_report.json`).
 
-## What `ADMITTED` does and does not mean
+## What `ADMITTED` means
 
-The probe's `ADMITTED` verdict bounds **receiver/application-side admission
-evidence only**: a phase-local queue admission plus the exact raw-COM phase
-signature defined above. Physical steering control remains unmeasured because the
-probe measures no wheel motion. B6 command semantics (sign/scale/delay) and
-deployability remain unvalidated. The zero-MAC28 path depends on the maintainer
-EPS's cumulative stage-5 Gate-2 development patch and is not a stock interface.
-The 2026-09-04 highway corpus (VAR-124/125/126)
-stands as the caution: 751,664 wire-exact B6 frames produced no measurable
-wheel response and no observable receiver objection — silent non-admission.
+The probe's `ADMITTED` verdict records receiver/application-side admission:
+a phase-local queue admission plus the exact raw-COM phase signature defined
+above. The zero-MAC28 path depends on the maintainer EPS's cumulative stage-5
+Gate-2 development patch.
+
+The 2026-09-04 highway corpus (VAR-124/125/126) contained 751,664 wire-exact B6
+frames with no measurable wheel response and no observable receiver objection —
+silent non-admission.
 
 ## Distribution scope
 
@@ -180,6 +174,4 @@ This kit mixes a passive observation capability with historical firmware
 patch and RAM-bridge material. Distribute and review them separately: the
 observer path is a passive-analysis handoff, while `FIRMWARE_PATCH.md`,
 `firmware_patch/`, and the bridge payload are historical development/bypass
-artifacts retained for reproducibility and recovery. No bypass runtime
-improvement is part of this package. A passing kit unit suite establishes
-internal software consistency only and is never physical vehicle validation.
+artifacts retained for reproducibility and recovery.

@@ -221,8 +221,7 @@ def main() -> int:
     if not {(0xFEBEF1A0, 0xFEBEADFE), (0xFEBEF06F, 0xFEBEACC5)} <= snapshot_pairs:
         raise ValueError('Camry measured-angle snapshot edge drift')
     need(measured_combine, 'DAT_febeb16c = DAT_febef1a0 * 0xf + (short)DAT_febef06f;')
-    # Pin the input scaling and measured*2 - scaled result directly to instructions,
-    # independently of inferred temporary names and expression folding.
+    # Pin the input scaling and measured*2 - scaled result directly to instructions.
     for address, encoded in (
         (0xCEA26, "240ffef520e6fb060437c5f424d75ef684bf4df5e10e0f00"
                     "a4cf4df524b722f6c1d224af24f6c131e6e72002200e0002e1e7fc02"),
@@ -296,7 +295,7 @@ def main() -> int:
             'camry_descriptor_count': vs_h['target']['descriptor_count'],
             'vs_corolla_h': vs_h['summary'],
             'vs_sienna_b4512000': vs_s['summary'],
-            'interpretation': 'All 40 Corolla-H normal application Rx descriptors are present on Camry; Camry adds 0x116/8, 0x0D8/8, and 0x1DA/8. This establishes target-native configuration continuity only; semantic equivalence requires separate evidence.',
+            'interpretation': 'All 40 Corolla-H normal application Rx descriptors are present on Camry; Camry adds 0x116/8, 0x0D8/8, and 0x1DA/8. This establishes target-native configuration continuity.',
         },
         'secoc_receive': {
             'key_config_address': f'0x{KEY_CONFIG:08X}',

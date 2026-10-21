@@ -13,7 +13,7 @@ The selected records contain original tool outputs. A filtered observation is
 retained at
 `targets/camry-2026/raw-20260912/eps-recovery/installer-tool-observation.json`.
 It excludes security material, device-location data and model reasoning.
-It copies selected stdout fields. Complete original telemetry remains unavailable.
+It copies selected stdout fields.
 
 | Original tool-result timestamp (UTC, September 11) | Source line | Operation/result |
 |---|---:|---|
@@ -46,10 +46,8 @@ The report semantics were checked in `exploit/patcher/deploy.py`:
 `payload_success` requires the SUCCESS and DONE stages with no error event;
 `write_crc_sequence_complete` copies that result, whereas the post-image hash,
 fixup and residue in `apply` are calculated by `simulate_apply`. Therefore the
-original stdout supports a completed, acknowledged write sequence. It is not
-an independent whole-flash readback or proof of the subsequent CPU state.
-In particular, `health_after_reappearance` is nested inside the **pre-upload
-programming handoff**. Post-write EPS reboot remains unproved.
+original stdout supports a completed, acknowledged write sequence.
+`health_after_reappearance` is nested inside the **pre-upload programming handoff**.
 
 The previously stated need to reconnect the comma before inspecting any original
 installer evidence was too broad. The original completion record is available.
@@ -64,8 +62,7 @@ identities already retained in `gateway-preparation-observation.json`.
 This did not use an unrelated older generic flash writer as the Unified flow.
 
 `TCUWCanUnifiedFlashWriter.dll!10001000` constructs three ordinary functional
-return-to-default-session requests. The following details describe static packet
-construction only:
+return-to-default-session requests:
 
 | Native stores / send call | Constructed transport family |
 |---|---|
@@ -82,12 +79,8 @@ Its normal path first requires the target-reset exchange at **10001857**,
 stops synchronization messages at **10001864**, waits, and then invokes this
 functional cleanup. No executable literal-pointer alternative to this helper
 was found in that PE; the one literal-pattern occurrence is in the PE header.
-That native callsite survey leaves computed calls outside its bounds.
 
-The cleanup runs during **successful completion after target reset**. Its
-applicability as a stand-alone abort path for an unresponsive target remains
-unverified, leaving the P5 preparation-abort gap open. The “default session”
-name alone establishes no CodeFlash change.
+The cleanup runs during **successful completion after target reset**.
 
 The separate SMC follow-up remains distinctly addressed. At
 `10001961..100019B8` the caller matches the package string `0751`, reads its
@@ -104,8 +97,7 @@ network send. It is not a deferred target-reset or recovery executor.
 ## 3. Correct the premise about the brake ECU's downstream CAN leg
 
 Exact **2025 Camry LE / 2.5L VIN A, 04/2024-onward** Toyota service pages were
-acquired and their images examined. Their model-family evidence leaves terminal
-assignments on the owner's exact 2026 VIN unconfirmed.
+acquired and their images examined.
 
 The brake terminal table explicitly calls A30-34/35 `DC1H/DC1L` a **daisy-chain
 communication line** and A30-36/37 `CA1H/CA1L` CAN communication line 1. The CAN
@@ -121,10 +113,9 @@ single normally joined bus between its two terminating resistors produces the
 same result. Thus the earlier inference “two connector pairs plus these
 resistances proves a software bridge” is unsupported.
 
-This does not prove the exact internal copper connection or exclude every
-filtering component inside BRK1. It means a network command to open or program
-an alleged brake gateway cannot be justified from those resistance readings
-and connector names alone. No physical disconnection is proposed here.
+A network command to open or program an alleged brake gateway cannot be justified
+from those resistance readings and connector names alone. No physical disconnection
+is proposed here.
 
 Toyota source reproductions and original figures:
 

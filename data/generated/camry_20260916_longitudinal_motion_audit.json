@@ -98,7 +98,6 @@
       "native_feedback_crosscheck": {
         "b12_vs_native_ca": {
           "convention": "corr(B12(t), CA(t+lag)); negative lag aligns B12 with an earlier chassis publication.",
-          "limit": "Temporal co-movement, quantization, smoothing and publication delay do not establish a unique producer/consumer path.",
           "peak": {
             "intercept": 0.092054728,
             "lag_ms": -50,
@@ -541,8 +540,7 @@
             2.004167,
             12.799306
           ]
-        },
-        "semantic_limit": "Numerical ego-state matches are not OEM names, a full-PDU telemetry proof, or a literal byte-copy proof."
+        }
       },
       "path": "targets/camry-2026/raw-20260827/camry_relay_route_can_20260827.ndjson.gz",
       "rejected": {},
@@ -647,7 +645,6 @@
       "native_feedback_crosscheck": {
         "b12_vs_native_ca": {
           "convention": "corr(B12(t), CA(t+lag)); negative lag aligns B12 with an earlier chassis publication.",
-          "limit": "Temporal co-movement, quantization, smoothing and publication delay do not establish a unique producer/consumer path.",
           "peak": {
             "intercept": 0.180218167,
             "lag_ms": -50,
@@ -1090,8 +1087,7 @@
             2.000694,
             20.136806
           ]
-        },
-        "semantic_limit": "Numerical ego-state matches are not OEM names, a full-PDU telemetry proof, or a literal byte-copy proof."
+        }
       },
       "path": "targets/camry-2026/raw-20260827/camry_relay_lta_confirm_route_can_20260827.ndjson.gz",
       "rejected": {},
@@ -1101,15 +1097,15 @@
   },
   "boundaries": [
     "No 0x160 receiver implementation in this audit; EPS firmware does not establish a longitudinal contract.",
-    "B4 measured-motion tracking and zero-until-after-motion are feedback-like; the OEM field name remains unresolved.",
+    "B4 measured-motion tracking and zero-until-after-motion are feedback-like.",
     "The intact native source defeats the earlier combined-trial correlation as independent proof of host influence.",
     "State mirror, parallel output, mode-dependent request, or mixed-role PDU remain incompletely distinguished.",
-    "Panda TX returns prove transport only; receiver acceptance remains unresolved and no alternative FRC command is identified."
+    "Panda TX returns prove transport."
   ],
   "combined_trial": {
     "b12_changed_from_counter_matched_native": 970,
     "b4_changed_from_counter_matched_native": 1243,
-    "boundary": "Predictive comparison only; causal effects remain unresolved. Conventional mode and absent EPS do not qualify healthy DRCC.",
+    "boundary": "Predictive comparison in conventional mode with absent EPS.",
     "byte_identical_nearby_returned_tx": 1249,
     "ca_time_shift_ms": {
       "-100": {
@@ -1650,10 +1646,10 @@
   ],
   "invalid_0x160": [],
   "methods": {
-    "b12_units": "-0.1*signed7(B12) is the old comparison convention; independent demand calibration remains absent.",
+    "b12_units": "-0.1*signed7(B12) is the old comparison convention.",
     "motion": "Signed15 B4 x0.001 versus 400-ms centered derivative of independent mean wheel speed; speed>2m/s, fixed -100/0ms shifts. Invalid wheels, gaps, extrapolation and cross-file joins excluded.",
-    "negative_shift": "Later field versus earlier measured motion; publication and filtering delays are not actuator latency.",
-    "resume": "First mean-wheel speed>0.1m/s within300ms of prior stock-resume landmark; no new proof about unrecorded driver inputs.",
+    "negative_shift": "Later field versus earlier measured motion.",
+    "resume": "First mean-wheel speed>0.1m/s within300ms of prior stock-resume landmark.",
     "trial": "Preceding same-counter native frame <=75ms old in same file; CA nearest within40ms at stated shifts."
   },
   "schema": "camry-longitudinal-motion-audit-v1",

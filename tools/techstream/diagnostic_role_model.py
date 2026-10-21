@@ -1,9 +1,8 @@
 """Shared role/plugin operation model for Toyota Techstream/GTS diagnostics.
 
-The classification covers *recovered shared-runtime edges*. Whether a command can
-ever touch a vehicle is a separate question. A plugin may invoke transport
-directly, delegate support discovery to CommandCommon, or use a path that has
-not yet been recovered.
+The classification covers *recovered shared-runtime edges*. A plugin may invoke
+transport directly, delegate support discovery to CommandCommon, or use a path
+that has not yet been recovered.
 """
 from __future__ import annotations
 
@@ -29,7 +28,7 @@ DIRECT_TRANSPORT_MARKERS = (
 # bodies are independently proven to reach GetCommFrmInfo + a send/receive
 # primitive (sometimes through CheckSupportBit).  Current GTS+ CommandCommon's
 # on-disk .text is sparse/virtual-only beyond the initial page, so this is an
-# API-continuity transfer. Current-body byte parity remains unproved.
+# API-continuity transfer.
 V18_PROVEN_DELEGATED_TRANSPORT_MARKERS = (
     "?CheckSupportPid@CCommCachePlusP5@@",
     "?CheckSupportDid@CCommCachePlusP5@@",
@@ -167,7 +166,7 @@ def role_operation_catalog(parser: Any, master: Any, bin_root: Path) -> dict[str
 
     roles.sort(key=lambda row: (-row["binding_count"], row["role"]))
     return {
-        "scope": "shared-runtime edges recovered from plugin imports; absence is not proof of no vehicle I/O",
+        "scope": "shared-runtime edges recovered from plugin imports",
         "binding_count": sum(row["binding_count"] for row in roles),
         "role_count": len(roles),
         "unique_plugin_count": len(signature_cache),

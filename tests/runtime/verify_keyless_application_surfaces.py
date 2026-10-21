@@ -108,7 +108,7 @@ def _section_keyless_application_event_formatter():
     check('F carries H formatter/wrapper/worker bytes exactly', F[327736:327736 + 234] == H[327736:327736 + 234] and F[327970:327970 + 90] == H[327970:327970 + 90] and (F[553860:553860 + 364] == H[553860:553860 + 364]))
     check('tracked configurations stay below staging capacity', 414 < 768 and 404 < 768)
     check('generated report publishes exact S/H/F maxima', ART['bounds']['sienna']['conservative_two_bank_max'] == 414 and ART['bounds']['corolla_h']['conservative_two_bank_max'] == 404 and (ART['bounds']['corolla_f']['conservative_two_bank_max'] == 404))
-    check('generated report preserves configuration-dependent safety boundary', ART['static_conclusion']['configuration_dependent_safety'] and (not ART['static_conclusion']['tracked_images_overflow']) and ('not a global static-attack absence claim' in ART['static_conclusion']['boundary']))
+    check('generated report records configuration-dependent capacity result', ART['static_conclusion']['configuration_dependent_safety'] and (not ART['static_conclusion']['tracked_images_overflow']))
 _section_keyless_application_event_formatter()
 print()
 

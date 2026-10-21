@@ -213,7 +213,6 @@
     },
     "elm327_param": 1
   },
-  "production_boundary": "This NRTD pass closes identities and observation carriers only. It does not establish Camry B6 producer/signing ownership, authenticated steering control, cruise engagement while driving, or production safety policy.",
   "schema": "camry-2026-nrtd-p5-v1",
   "sources": {
     "NRTD_MANIFEST.txt": {

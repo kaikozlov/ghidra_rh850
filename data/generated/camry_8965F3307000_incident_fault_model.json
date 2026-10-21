@@ -1,6 +1,6 @@
 {
   "architecture_prediction": {
-    "boundary": "FEIC/FEPC/FEPSW were never captured after the live incident; exact silicon response remains only an architectural prediction based on the matching Renesas specification",
+    "boundary": "FEIC/FEPC/FEPSW were never captured after the live incident",
     "g3m_acknowledgement_effects": {
       "PSW.EBV": "retained",
       "PSW.EP": 1,

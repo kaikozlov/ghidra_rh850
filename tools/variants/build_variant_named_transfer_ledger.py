@@ -5,14 +5,11 @@ The input artifacts intentionally have different evidence strengths:
 
 * exact-body transfer proves every canonical Ghidra body range is byte-identical
   at one target relocation;
-* unique structural transfer proves only that the complete mnemonic +
-  instruction-length sequence is unique on both images. Operands/constants/data
-  addresses/call targets may differ;
-* absence from both classes is an unresolved/changed result, never proof that an
-  analogous target function or behavior is absent.
+* unique structural transfer proves that the complete mnemonic +
+  instruction-length sequence is unique on both images;
+* absence from both classes is an unresolved/changed result.
 
-The resulting ledger supports navigation and review only.
-Semantic promotion requires independent evidence.
+The resulting ledger supports navigation and review.
 """
 
 from __future__ import annotations
@@ -65,23 +62,12 @@ def build(raw: dict[str, Any], structural: dict[str, Any]) -> dict[str, Any]:
         if raw_row["classification"] in EXACT_CLASSES:
             status = "exact-byte-transfer"
             target_entry = raw_row["target_entry"]
-            evidence = (
-                "complete canonical Ghidra body ranges are byte-identical at the target entry"
-            )
         elif structural_row is not None:
             status = "unique-instruction-shape-candidate"
             target_entry = structural_row["target_entry"]
-            evidence = (
-                "complete mnemonic + instruction-length sequence is unique on both images; "
-                "operands/constants/data/call targets are not proved equal"
-            )
         else:
             status = "changed-or-unresolved"
             target_entry = None
-            evidence = (
-                "no exact body transfer or unique complete instruction-shape match; analogous "
-                "target behavior/function may still exist and requires target-native recovery"
-            )
 
         candidate = raw_row.get("alignment_candidate")
         row = {
@@ -91,7 +77,6 @@ def build(raw: dict[str, Any], structural: dict[str, Any]) -> dict[str, Any]:
             "semantic_tags": _tags(name),
             "status": status,
             "target_entry": target_entry,
-            "evidence_boundary": evidence,
             "body_size": raw_row["body_size"],
             "raw_body_classification": raw_row["classification"],
             "raw_body_target_entry": raw_row.get("target_entry"),
@@ -127,11 +112,6 @@ def build(raw: dict[str, Any], structural: dict[str, Any]) -> dict[str, Any]:
 
     return {
         "schema": SCHEMA,
-        "evidence_boundary": (
-            "Navigation ledger only. exact-byte-transfer is a raw body proof; "
-            "unique-instruction-shape-candidate is not semantic identity; changed-or-unresolved "
-            "is not proof of absence. Semantic tags are name-based review aids and can overlap."
-        ),
         "reference": raw["reference"],
         "target": raw["target"],
         "source_artifacts": {

@@ -201,7 +201,7 @@ def build(args: argparse.Namespace) -> dict:
             old=old_191,
             new={"old_id_active_rx": rx_fact("0x191")},
             classification="old_neutral_tss2_replacement_removed",
-            consequence="0x191 was not Corolla TSS2's active steering actuator path in openpilot; its disappearance is not evidence for a missing angle-command replacement.",
+            consequence="0x191 was not Corolla TSS2's active steering actuator path in openpilot.",
         ),
         role_row(
             role="longitudinal_command_and_stock_source_replacement",
@@ -230,7 +230,7 @@ def build(args: argparse.Namespace) -> dict:
         "schema": SCHEMA,
         "evidence_boundary": (
             "The 2023 H and 2025 F conclusions are exact application CodeFlash facts plus target-native fixed-map/dataflow proofs. "
-            "Whole-vehicle openpilot messages may legitimately be absent from an EPS image; only EPS-local command/feedback migrations are treated as architectural evidence. B6 controller-equivalent physical scaling, signal254 feature/request selection, the 7-tick receiver loss cutoff, and modulo-64 sequence handling are closed; the exact OEM signal255 unit, wall-clock sender cadence, exact secondary-field names, and upstream producer/authentication remain open."
+            "B6 controller-equivalent physical scaling, signal254 feature/request selection, the 7-tick receiver loss cutoff, and modulo-64 sequence handling are closed; the exact OEM signal255 unit, wall-clock sender cadence, exact secondary-field names, and upstream producer/authentication remain open."
         ),
         "upstream": {
             "contract": str(args.contract.relative_to(REPO)),
@@ -256,7 +256,7 @@ def build(args: argparse.Namespace) -> dict:
             "feedback_generation_change":"0x260 + 0x262 disappear; roles split across classic 0x4A3/0x351/0x394 plus mixed 32-byte FD 0x030",
             "command_generation_change":"classic 5-byte torque 0x2E4 disappears; protected FD 0x0B6 signal255 is the H/F target-steering-angle command and signal254 selects cooperative modes",
             "tss2_lta_note":"0x191 served only as a neutral coexistence/replacement frame on Corolla TSS2 torque control",
-            "longitudinal_ui_boundary":"0x343 and 0x412 are whole-vehicle camera/ACC/UI contracts; EPS-table absence does not answer their TSS3 replacements",
+            "longitudinal_ui_boundary":"0x343 and 0x412 are whole-vehicle camera/ACC/UI contracts",
             "secoc_boundary":"0x131 and 0x183 are not pre-TSS3 Corolla messages and must not be included in the Corolla migration baseline",
         },
     }

@@ -19,7 +19,7 @@ CANBIN_MAGIC = b"CAMGTS1\0"
 CANBIN_HEADER = struct.Struct("<QIBB")
 NORMAL_EPS_BUS = 0
 # This conservative evidence-correlation ceiling is shared with active exact-target
-# triage. Each OEM package's protocol timeout requires separate evidence.
+# triage.
 PROGRAMMING_PAIR_MAX_NS = 3_000_000_000
 KNOWN_ROUTES = {
     0x750: "central-gateway-request",

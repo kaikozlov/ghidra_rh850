@@ -1,5 +1,5 @@
 {
-  "evidence_boundary": "The five configured normal H/F Tx PDUs were checked at their packers for direct cooperative-root reads; the missed raw-mode route was followed through fixed-GP copies and computed aliases; and all raw absolute pointer materializations of the exact/profile roots were enumerated, with the profile pointers resolved through both fixed CodeFlash table families to internal gain consumers. This proves no exact discrete cooperative-authority bit under those direct, fixed-GP, simple computed-alias, and fixed-CodeFlash-pointer-table surfaces. It does not exclude arbitrary mutable runtime pointers, DMA/peripheral mutation, physical actuator-response inference, or another ECU assigning a different meaning to the coarse 0x030 bits. No live authority transition is claimed.",
+  "evidence_boundary": "The five configured normal H/F Tx PDUs were checked at their packers for direct cooperative-root reads; the missed raw-mode route was followed through fixed-GP copies and computed aliases; and all raw absolute pointer materializations of the exact/profile roots were enumerated, with the profile pointers resolved through both fixed CodeFlash table families to internal gain consumers. This proves no exact discrete cooperative-authority bit under those direct, fixed-GP, simple computed-alias, and fixed-CodeFlash-pointer-table surfaces.",
   "exact_authority_negative": {
     "distinguishing_pair": {
       "raw_mode_0": "FEBEF000<2 is true and B8EEC emits FEBEACBD=0, permitting CBE6E when the health gate is 1",
@@ -151,7 +151,7 @@
       "wire_source_signal_15": [],
       "wire_source_signal_5": []
     },
-    "classification": "fixed CodeFlash pointer-table use of profile flags exclusively as internal gain selectors",
+    "classification": "fixed CodeFlash pointer-table use of profile flags as internal gain selectors",
     "consumer_chain": [
       "0xD0E18/0xD0E54 -> 0xC5156 -> 0xCAF84 -> FEBEBC52 -> 0xC51EA internal gain product",
       "0xD1118/0xD1154 -> 0xC6D16 -> 0xCAF84 -> FEBEBE28 -> 0xC6DAA internal gain product"
@@ -382,7 +382,7 @@
     },
     "fd_control_interface": {
       "path": "data/generated/corolla_8965H1202000_fd_control_interface.json",
-      "sha256": "8d693f50871ccb3987c79c2e2cfd7c34ead2901c5d3e3d58665947aca952ffc2"
+      "sha256": "8d9385f509f95b8a12ebf0a8be6855faf931ef97d80004679bba7b279b8dcd07"
     },
     "h_codeflash": {
       "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
@@ -395,7 +395,7 @@
     },
     "openpilot_state_bridge": {
       "path": "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
-      "sha256": "db457921a1de95088d45d3799426bc1d3a9f473dc459c23f12549902cdae5b87"
+      "sha256": "b2de356a44a37ecc19af1b6120014b63766ab1e949a61840c57263528defd0d5"
     }
   },
   "static_conclusion": {

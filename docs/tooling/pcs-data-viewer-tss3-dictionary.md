@@ -136,7 +136,6 @@ the ordinary FRC Data List surface. Examples include:
 
 This is useful as an OEM vocabulary oracle for the still-open TSS3
 longitudinal producer/ownership problem. It establishes recorder semantics.
-The wire-format join remains open.
 
 ## 5. Trigger dictionary: the recorder is an ADAS incident flight recorder
 
@@ -291,8 +290,7 @@ The executable identity is recorded in the [ADS inspection](#62-ads-recorder-sch
 The existing shared decoder was exercised with synthetic bytes `A0..A3`:
 it returned raw/physical PBA states `0..3`. Additional synthetic checks
 decoded `57DB: F8C0` as `-1.856` and `5261: BF000000` as `-0.500`.
-These checks exercise only the decoder. The viewer's event-numbering execution
-and live vehicle support require separate checks.
+These checks exercise the decoder.
 
 ### Shared Operation-FFD decoder
 
@@ -343,16 +341,16 @@ The recovered viewer's `MeasuredValue.GetValue`, `CheckSupportDataID`,
 provide the conversion rules. Regression coverage exercises framing/counts,
 echoes, support, signed/packed integers, floats/doubles, invalid values,
 timestamp bounds, raw retention and CLI filtering. Offline command and
-synthetic ISO-TP acquisition smoke checks agree on decoded blocks. These
-checks do not establish live field availability or a recorder-to-CAN join.
+synthetic ISO-TP acquisition smoke checks agree on decoded blocks.
 
 ### 6.1 ADU longitudinal arbitration, PDA split, PCS, and resume observables
 
 The same recovered executable now exposes the complete
 `ADUDetailInfo::.cctor`: **7,851 `P6DetailBitAssignInfo` rows across 1,369
 recorder DIDs**. The generated ADU artifact preserves every row and selects the
-control surfaces relevant to `0x08A` analysis. The aggregate request/result
-schema is exact:
+control surfaces relevant to `0x08A` analysis. The interpreter resolves generic
+`Dictionary` and `List` collections from TypeSpec metadata, including lists stored
+in IL locals. The aggregate request/result schema is exact:
 
 | ADU DID | Recovered layout |
 |---|---|
@@ -382,7 +380,7 @@ promoted to a global feature enum.
 The 2026-10-01 EN/JA satellite inspection distinguishes additional policies
 within the existing
 [ADU schema](../../data/generated/gtsplus_2026/pcs_data_viewer_adu_semantics.json).
-Positions below use 1-based recorder bytes. CAN offsets require a separate join:
+Positions below use 1-based recorder bytes:
 
 | Resource suffix (`ADU_ID_…`) | OEM quantity | Geometry |
 |---|---|---|
@@ -474,9 +472,8 @@ Source: PCS Data Viewer 12.00.005 from GTS+ 2026.03.002.02; reconstructed
 assembly SHA-256
 `fc0841df01e11e546977cecc14f391f018d0a402fa1dd88d14ea7e75a6543c4d`.
 The reconstruction materialized all 22,447 nonzero-RVA method bodies.
-This remains an exploratory extraction. ADS artifact registration and a
-`tools/gts recorder` schema remain absent. Given that reconstructed assembly,
-the bounded extraction is reproducible with the existing helpers:
+This exploratory extraction is reproducible from that reconstructed assembly
+with the existing helpers:
 
 ```python
 import dnfile
@@ -699,8 +696,7 @@ help rows are retained as descriptions without guessed recorder IDs.
 The PBA help is especially useful because it documents value semantics across
 Toyota system families: for TSS P/LSS+A it enumerates `00 No assist / 01 PBA1 /
 10 PBA2 / 11 PBA3`, while the TSS C interpretation collapses the states to
-request/no-request behavior. This host documentation leaves each TSS3
-generation's raw field and network encoding to independent recovery.
+request/no-request behavior.
 
 The 2026-10-01 inspection also extracted `VCH.htm`, `Welcome.htm` and
 `Table of Contents.hhc` from both shipped CHMs. The 378-byte English VCH
@@ -722,9 +718,8 @@ add no request-policy or result-field definitions beyond `FFD.htm`.
 3. **Runtime trigger occurrence.** The 47 RoB definitions recover configured
    sampling/pre/post policy; they do not prove a particular vehicle actually
    emitted a given RoB event in a retained drive.
-4. **Arbitration execution owner.** The generic TSS request and
-   arbitration-result fields establish the software abstraction. The ECU that
-   executes arbitration on each TSS3 architecture remains unresolved.
+4. The generic TSS request and arbitration-result fields establish the software
+   abstraction.
 
 The immediate practical use is to treat PCS Data Viewer as a second Rosetta
 stone alongside GTS+ DDBs: search the full generated dictionary for a firmware

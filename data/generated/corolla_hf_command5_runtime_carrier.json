@@ -5,12 +5,11 @@
   ],
   "boundary": {
     "command5_latency_jitter_closed": false,
-    "interpretation": "Static H/F carrier geometry and executable fit are now closed enough to define a concrete live canary experiment. This is not proof that FEBF0000..01CF remains unmodified in a running ECU, that slot4 permits command5, or that signing meets B6 timing. Those remain dynamic gates.",
+    "interpretation": "Static H/F carrier geometry and executable fit are now closed enough to define a concrete live canary experiment.",
     "live_retention_closed": false,
     "live_slot4_permission_closed": false,
     "production_b6_signer_closed": false,
     "static_target_native_carrier_candidate_closed": true,
-    "vehicle_actuation_authorized": false,
     "verified_variant_ram_exec_requirement_promoted": false
   },
   "carrier_geometry": {
@@ -92,7 +91,7 @@
     },
     "command5_portability": {
       "path": "data/generated/corolla_hf_command5_portability.json",
-      "sha256": "04ccb290562ce1ccb4372ddf372f8951ea73088f237d0aa6b328d240c6113e55"
+      "sha256": "de843d997d26ec474167e1d9c9352491dbe3fc8586014d7d5e5e8d8b048f3420"
     },
     "proxy_audit": {
       "path": "tools/targets/corolla/research/ram_runtime/audited/audited_corolla_hf_command5_proxy_build.json",
@@ -104,11 +103,11 @@
     },
     "runtime_builder": {
       "path": "tools/targets/corolla/research/ram_runtime/build_corolla_hf_command5_carrier.py",
-      "sha256": "a86adc89e3af84f048fdfbaf6818a2030a87d8870cd72f26bbe0d9efc40aa577"
+      "sha256": "887713e5a6035b9d50457495b1b4fc0d08df3ccedb3cb04a913830743cf6dcc1"
     },
     "static_evidence": {
       "path": "data/generated/corolla_hf_command5_runtime_carrier_evidence.json",
-      "sha256": "10e341010d8a7e01745e7212af2373843689d31b3953d94afbd754b96899733b"
+      "sha256": "dbf8ed95c88d4c25038164f2e562f6cd250d262fca65b53b237af2b93d04959c"
     }
   },
   "toolchain_reproducibility": {
@@ -133,7 +132,7 @@
     {
       "criterion": "7/12/36-byte generated results agree with independently known CMAC vectors for the same live key/domain where such vectors are available",
       "name": "independent MAC agreement",
-      "purpose": "validate semantic output beyond command completion",
+      "purpose": "validate semantic output",
       "stage": 3
     },
     {

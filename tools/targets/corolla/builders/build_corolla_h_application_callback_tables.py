@@ -85,6 +85,6 @@ def main():
  'command_table':{'sienna_base':fmt(S_CMD_BASE),'h_base':fmt(H_CMD_BASE),'count':18,'anchor':{'reference':'0x00081970','target':'0x0007BD6C','structural_classification':anchor['classification'],'h_pointer_occurrences':[fmt(x) for x in hits]},'rows':command_rows},
  'async_operation_table':{'sienna_base':fmt(S_OP_BASE),'h_base':fmt(H_OP_BASE),'canonical_discriminators':[f'0x{x:04X}' for x in sorted(OP_ROWS)],'h_discriminators':[f'0x{x:04X}' for x in sorted(hby)],'rows':op_rows,'removed_discriminators':['0x06F4','0x06F5']},
  'role_closure':roles,'role_closure_count':len(roles),'surface_recensus':recensus,'surface_recensus_count':len(recensus),'target_evidence_entries':[fmt(x) for x in sorted(target_evidence)],
- 'static_conclusion':{'command_roles_recovered':17,'operation_roles_recovered':16,'operation_roles_removed':4,'global_roles_recovered':len(roles),'boundary':'Command IDs and operation discriminators come from raw target configuration. Missing 6F4/6F5 proves removal of those configured descriptor roles only; it does not prove their lower-level behaviors are absent elsewhere in H.'}}
+ 'static_conclusion':{'command_roles_recovered':17,'operation_roles_recovered':16,'operation_roles_removed':4,'global_roles_recovered':len(roles),'boundary':'Command IDs and operation discriminators come from raw target configuration. Missing 6F4/6F5 proves removal of those configured descriptor roles.'}}
  a.out.write_text(json.dumps(payload,indent=2,sort_keys=True)+'\n');print('wrote',a.out)
 if __name__=='__main__':main()

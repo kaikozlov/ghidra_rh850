@@ -49,8 +49,7 @@ _helper_entry:
     /* Continuous replacement control on the proven latest-frame mailbox:
          00 C7 seq 00 target_hi target_lo 00 00
        seq zero disables replacement immediately. Nonzero sequences hold
-       across native B6 arrivals only while the host generation is live.
-       This new offline-qualified candidate has a separate identity from the archived road image. */
+       across native B6 arrivals only while the host generation is live. */
     ld.hu -0x6bcc[gp], r6
     mov 0xc700, r7
     cmp r6, r7

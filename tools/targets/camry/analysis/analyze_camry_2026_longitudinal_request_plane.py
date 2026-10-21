@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 """Recover the Camry TSS3 0x08A request / 0x081 result layout.
 
-Offline analysis only. This intentionally distinguishes a recovered wire field
-from an OEM recorder-name join: fields require a synchronized diagnostic/FFD
-witness for an OEM name. Otherwise, their semantics remain bounded or unresolved.
+Offline analysis.
 """
 from __future__ import annotations
 from tools.toyota_support.toyota_route_opendbc_common import be_raw
@@ -245,7 +243,7 @@ def idle_0_4_context(streams: dict[int, list[tuple[int, bytes]]]) -> dict:
       "result_id_counts": {str(k): v for k, v in sorted(stable_result_ids.items())},
       "moving_over_1_mps_pair_count": stable_moving_pairs,
       "moving_over_1_mps_result_id_counts": {str(k): v for k, v in sorted(stable_moving_result_ids.items())},
-      "interpretation": "Stable FRC 0/4 request state returns Brake/VMC employed-source ID63; any non-63 values should be treated only as transition-lag candidates. FRC-origin ID63 requests remain unsupported.",
+      "interpretation": "Stable FRC 0/4 request state returns Brake/VMC employed-source ID63; any non-63 values should be treated as transition-lag candidates.",
       "non63_examples": stable_transition_mismatches,
     },
     "lower_id4_brake_context": {
@@ -360,7 +358,7 @@ def result_summary(request_rows: list[tuple[int, bytes]], result_rows: list[tupl
     "rlog_publication_age_ms": {
       "median": round(statistics.median(ages), 6),
       "p90": round(quantile(ages, 0.9), 6),
-      "boundary": "rlog batch/publication timing only; physical wire latency unresolved",
+      "boundary": "rlog batch/publication timing",
     },
     "longitudinal_result_id_candidate": {
       "wire": "B6[5:0]",
@@ -385,7 +383,7 @@ def result_summary(request_rows: list[tuple[int, bytes]], result_rows: list[tupl
       "request_vs_reference": regression(req_acc, res_acc),
       "conditional_by_result_id": conditional,
       "selection_discriminator": ("Result ID 63 tracks the request nearly exactly while result ID 11 materially diverges in the retained drives; "
-                                  "this establishes result-selection behavior beyond a simple request echo."),
+                                  "this establishes result-selection behavior."),
       "retired_oem_join": {
         "former_mapping": "PCS 57DB Arbitration result Acceleration (formerly graded a strong candidate here)",
         "status": "withdrawn",
@@ -486,13 +484,12 @@ def recorder_rows() -> dict:
 
 
 def requester_id_namespace(drive_reports: dict[str, dict], hold: dict) -> dict:
-  """Bound Toyota's longitudinal requester-ID namespace without inventing names.
+  """Bound Toyota's longitudinal requester-ID namespace.
 
   The observed 0x08A fields are post-application-selection candidates: Toyota's
   generic movement-control architecture names longitudinal IDs as application
   identifiers, but the static P5/P6 diagnostic corpus exposes only sparse enum
-  labels. Cross-axis numeric coincidences remain hypotheses. Assigning lateral
-  Target Lateral ID labels requires separate longitudinal evidence.
+  labels. Cross-axis numeric coincidences remain hypotheses.
   """
   lateral = json.loads(LATERAL_CENSUS.read_text())
   lateral_ids = lateral["gtsplus_join"]["emps_p5_did_0x1cee"]["target_lateral_id_dictionary"]
@@ -568,8 +565,7 @@ def requester_id_namespace(drive_reports: dict[str, dict], hold: dict) -> dict:
       "id_is_not_priority": "Request IDs identify FRC-submitted application sources and result IDs identify the source actually employed downstream; the numeric value is not an ordinal priority.",
       "application_id_semantics": ("Toyota's vehicle-movement architecture defines both longitudinal request IDs and the lateral request ID as identifiers of applications. "
                                    "This supports a coordinated/shared application-ID namespace model, while the static diagnostic corpus still does not expose a complete longitudinal value table."),
-      "axis_boundary": ("Numeric reuse across axes is now treated as potentially intentional application identity. "
-                        "Axis-local diagnostic labels may still describe different roles/phases of the same application, so equal numbers do not by themselves prove identical display labels."),
+      "axis_boundary": "Numeric reuse across axes is treated as potentially intentional application identity.",
       "upper_lower_boundary": ("Candidate A/B are the two selected longitudinal bound-package ID/allocation slots. Archive-wide unequal ordinary-DRCC frames strongly resolve A as upper and B as lower. "
                                "The bounds are independently arbitrated and can therefore carry different application IDs."),
     },
@@ -591,7 +587,7 @@ def requester_id_namespace(drive_reports: dict[str, dict], hold: dict) -> dict:
         "brake_press_edges_reducing_lower_bound": sum(delta < 0 for delta in id4_brake_deltas),
         "median_brake_press_delta_mps2": round(statistics.median(id4_brake_deltas), 6) if id4_brake_deltas else None,
         "current_semantics": ("Strong behavioral attribution: ID4 is the default closed-accelerator/manual baseline lower-bound application. Its lower-bound scalar is positive near zero speed in D, declines through zero into coast/regen/deceleration with speed, and is reduced by every matched low-speed brake press. "
-                              "This is the same physical behavior Toyota describes for the fully-closed powertrain acceleration / creep-to-engine-braking baseline, but no recovered Toyota enum names numeric ID4, so 'creep' describes only a low-speed behavior of the envelope."),
+                              "This is the same physical behavior Toyota describes for the fully-closed powertrain acceleration / creep-to-engine-braking baseline."),
       },
     },
     "corolla_cross_platform": {
@@ -640,8 +636,7 @@ def requester_id_namespace(drive_reports: dict[str, dict], hold: dict) -> dict:
         "lateral": lateral_ids.get("23"), "grade": "cross-platform observation only",
       },
       "25": {
-        "longitudinal": ("Observed Camry candidate B during delayed ACC hold; allocation method distinguishes held vs moving ID25 states. "
-                         "Under the application-ID architecture this remains an unresolved semantic clue; the longitudinal/lateral namespace relationship requires separate evidence."),
+        "longitudinal": "Observed Camry candidate B during delayed ACC hold; allocation method distinguishes held vs moving ID25 states.",
         "lateral": lateral_ids.get("25"),
         "grade": "observed longitudinal application ID; exact shared-application meaning unresolved",
       },
@@ -667,7 +662,7 @@ def requester_id_namespace(drive_reports: dict[str, dict], hold: dict) -> dict:
       "supports_shared_application_namespace": [
         "Toyota's architecture explicitly defines both longitudinal and lateral request IDs as application identifiers.",
         "0 is the no-request/manual anchor on both recovered interfaces.",
-        "63 is OEM-labeled Driver Operation on a P5 FRC diagnostic display surface and on the lateral Target ID dictionary, but longitudinal dynamic evidence places 63 specifically on the downstream Brake/VMC result side; FRC 0x08A ID63 requests remain unobserved.",
+        "63 is OEM-labeled Driver Operation on a P5 FRC diagnostic display surface and on the lateral Target ID dictionary; longitudinal dynamic evidence places 63 on the downstream Brake/VMC result side.",
         "Camry longitudinal ID11 is the ordinary DRCC application source while lateral ID11 is OEM LTA/LCA, making 11 a strong shared TSS continuous-driving application-ID candidate.",
         "P6 longitudinal IDs 41/45 are MaaS autonomous-driving Request 1/2 while the lateral table labels 41/45 AD(Lv.4)/DES(Lv.4); these may be axis-specific views of shared automated-driving application identities.",
       ],
@@ -732,11 +727,11 @@ def layout_disposition() -> dict:
     },
     "5284_longitudinal_result_id": {"status": "strong candidate", "wire": "0x081 B6[5:0]"},
     "5285_lateral_result_id": {"status": "recovered", "wire": "0x081 B13[5:0]"},
-    "57D3_acceleration_valid": {"status": "unresolved", "wire": None, "note": "0x081 B11[4] is request-loss supervision; its OEM join to this flag remains unresolved"},
+    "57D3_acceleration_valid": {"status": "unresolved", "wire": None, "note": "0x081 B11[4] is request-loss supervision"},
     "57DB_result_acceleration": {"status": "unmapped", "wire": None,
                                  "note": ("the former 0x081 B20:B21 join is disproved by the 2026-09-30 cross-state corpus: B20:B21 is the "
                                           "closed-accelerator reference word, B4:B5 the effective/result candidate and B18:B19 the drive "
-                                          "result/reference; no OEM diagnostic join is confirmed")},
+                                          "result/reference")},
     "57DE_result_pinion_angle": {"status": "recovered", "wire": "0x081 B16:B17 signed16", "scale_rad_per_count": round(ANGLE_RAD_PER_COUNT, 12)},
   }
 
@@ -788,7 +783,7 @@ def build() -> dict:
                            "request-ID/allocation bytes (bits7:2 ID, bits1:0 allocation), including active/hold/override transitions; archive-wide unequal ordinary-DRCC frames strongly resolve A as upper and B as lower, "
                            "while shift/EPB, override-prohibition and priority remain unmapped."),
       "0x0CA": "Supersede the old upper/lower/result-triplet interpretation; 0x0CA remains other protected longitudinal/chassis state.",
-      "integration": ("For Camry, do not revive 0x160 Alpha Long. The OEM-native integration target is specifically the TSS application/request side feeding Toyota's Vehicle Movement Manager. "
+      "integration": ("For Camry, do not revive 0x160 Alpha Long. The OEM-native integration target is the TSS application/request side feeding Toyota's Vehicle Movement Manager. "
                       "0x08A is the strongest observed request-side carrier, while the downstream Vehicle Motion Control target interface and source-suppression/security path remain to be recovered."),
     },
   }

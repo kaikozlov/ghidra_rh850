@@ -5,8 +5,7 @@ The incident instruction is reconstructed from the retained four-byte write plus
 its untouched stock successor halfword.  CodeFlash.bin itself is the stock image;
 this builder never substitutes stock bytes for the incident write.
 
-Architecture-derived exception semantics remain predictions only:
-no live FEPC/FEPSW/FEIC capture exists for the incident.
+Exception semantics are architectural predictions.
 """
 from __future__ import annotations
 
@@ -212,7 +211,7 @@ def build() -> dict:
             "g3m_exception_class": "resumable FE-level SYSERR due error input during instruction fetch",
             "g3m_acknowledgement_effects": {"PSW.ID":1,"PSW.NP":1,"PSW.EP":1,"PSW.EBV":"retained"},
             "g3m_vector_rule": "PSW.EBV=1 selects EBASE; SYSERR offset is +0x10",
-            "boundary": "FEIC/FEPC/FEPSW were never captured after the live incident; exact silicon response remains only an architectural prediction based on the matching Renesas specification",
+            "boundary": "FEIC/FEPC/FEPSW were never captured after the live incident",
         },
         "terminal_handler": {
             "entry": f"0x{handler:08X}",

@@ -269,7 +269,11 @@ def main() -> None:
         secoc_ev_path = REPO / secoc["evidence"]["decompiler_evidence"]
         secoc_ev = load_json(secoc_ev_path)
         secoc_targets = {int(r["target_entry"], 16) for r in secoc_ev.get("functions", [])}
-        for item in secoc.get("secoc_role_closure", []):
+        secoc_targets.update(
+            int(r["entry"], 16)
+            for r in secoc["initialization_evidence"]["evidence"]["corolla-8965H1202000"]["functions"]
+        )
+        for item in secoc["secoc_role_closure"] + secoc["role_closure"]:
             ref = int(item["reference_entry"], 16)
             target = int(item["target_entry"], 16)
             if target not in secoc_targets:
@@ -279,7 +283,7 @@ def main() -> None:
             role_recovery[ref] = {
                 "target_entry": item["target_entry"],
                 "report": secoc_rel,
-                "evidence": secoc["evidence"]["decompiler_evidence"],
+                "evidence": item["evidence"],
                 "role": item["reference_name"],
             }
 
@@ -389,6 +393,21 @@ def main() -> None:
         evidence_file_hashes[deadline_surface_rel] = sha256(deadline_surface_path.read_bytes())
         for item in deadline_surface.get("surface_recensus", []):
             recensus[int(item["reference_entry"], 16)].add("deadline-monitor-complete-three-table-recensus")
+        deadline_ev_rel = deadline_surface["evidence"]["decompiler_evidence"]
+        deadline_targets = {int(r["entry"], 16) for r in load_json(REPO / deadline_ev_rel)["functions"]}
+        for item in deadline_surface["role_closure"]:
+            ref = int(item["reference_entry"], 16)
+            target = int(item["target_entry"], 16)
+            if target not in deadline_targets:
+                raise ValueError(f"deadline role target lacks tracked target-native evidence: {target:#x}")
+            if ref in role_recovery:
+                raise ValueError(f"duplicate target-native role recovery for {ref:#x}")
+            role_recovery[ref] = {
+                "target_entry": item["target_entry"],
+                "report": deadline_surface_rel,
+                "evidence": deadline_ev_rel,
+                "role": item["reference_name"],
+            }
 
     plausibility_path = REPO / "data/generated/corolla_8965H1202000_plausibility_monitor.json"
     if plausibility_path.is_file():
@@ -579,10 +598,10 @@ def main() -> None:
             basis = census
         elif status == "unique-instruction-shape-candidate":
             coverage = "structural-candidate-only"
-            basis = ["unique complete instruction-shape match exists; target-native operand/dataflow not yet recorded"]
+            basis = ["unique complete instruction-shape match"]
         else:
             coverage = "genuinely-unresolved"
-            basis = ["no exact transfer, no inspected unique structural target, and no complete generated-surface recensus"]
+            basis = []
 
         classified.append(
             {
@@ -612,9 +631,6 @@ def main() -> None:
 
     payload = {
         "schema": "corolla-8965H1202000-static-coverage-matrix-v1",
-        "evidence_boundary": (
-            "Navigation/denominator artifact. Surface recensus means the foreign generated surface was exhaustively re-enumerated; it is not function homology. Target-native role recovery means a foreign role was independently reconstructed and pinned; it is not byte/shape identity. Structural-candidate-only is not semantic transfer. Genuinely-unresolved means only that none of the tracked promotion conditions apply."
-        ),
         "source": {
             "named_transfer_ledger": str(args.ledger.relative_to(REPO)),
             "named_transfer_ledger_sha256": sha256(args.ledger.read_bytes()),

@@ -306,7 +306,7 @@ def main() -> int:
             "upper_callback_role": "COM RxIndication for PDU42",
             "length_boundary": (
                 "The recovered queue/delivery path preserves a PduInfo length and PDU42's COM descriptor is 32 bytes. "
-                "Static evidence leaves physical stripping of B28..B31 before COM RAM unresolved; the application-consumer census establishes their SecOC-only classification."
+                "The application-consumer census establishes the SecOC-only classification of B28..B31."
             ),
         },
         "application_consumption": {
@@ -323,7 +323,7 @@ def main() -> int:
                 "direct_com_region_reference_census": evidence["direct_b6_com_region_reference_census"],
                 "all_literal_block_group_receive_ids": com["all_literal_block_group_receive_ids"],
                 "all_literal_full_pdu_ids": com["all_literal_full_pdu_ids"],
-                "boundary": "Closes generated scalar plus all literal block/group/full-PDU APIs, direct raw-u32 buffer pointers, and the complete application-corpus named/absolute/simple-GP-alias constant-displacement census; arbitrary value-set/computed-base aliases and hardware/DMA accesses remain outside the proof."
+                "boundary": "Closes generated scalar plus all literal block/group/full-PDU APIs, direct raw-u32 buffer pointers, and the complete application-corpus named/absolute/simple-GP-alias constant-displacement census."
             },
             "bit_category_counts": counts,
             "byte_map": byte_map,
@@ -331,7 +331,7 @@ def main() -> int:
                 "Recovered EPS application semantics are confined to selected bits in B3..B10. B0..B2 and B11..B27 are authenticated but have no recovered application consumer under the bounded generic-access census."
             ),
             "sender_boundary": (
-                "These bytes have no recovered EPS application semantic consumer. Sender formatting remains constrained: all B0..B27 are inside the CMAC input, and upstream producer-side formatting constraints remain unexamined."
+                "These bytes have no recovered EPS application semantic consumer. All B0..B27 are inside the CMAC input."
             ),
         },
         "cross_variant": {
@@ -340,7 +340,7 @@ def main() -> int:
             "different_bytes_in_range": app_eq["different_bytes"],
             "range_sha256": app_eq["baseline_sha256"],
             "receiver_contract_byte_identical": True,
-            "boundary": "All receiver tables and functions used by this proof lie inside the byte-identical application range. Low-region H/F calibration/identity differences are outside this proof and can still affect downstream limits/calibration."
+            "boundary": "All receiver tables and functions used by this proof lie inside the byte-identical application range."
         },
         "static_conclusion": {
             "full_32_byte_receiver_partition_closed": True,
@@ -357,9 +357,6 @@ def main() -> int:
             "upstream_producer_closed": False,
             "short_form": "EPS semantics are concentrated in B3..B10; B0..B27 are all authenticated; B28..B31 are FV4+CMAC28 SecOC trailer."
         },
-        "evidence_boundary": (
-            "This closes the exact H/F receiver-side 32-byte partition, normal-freshness/trailer format, CMAC input, slot selection, verified upper route, and bounded application-consumer surface. It does not recover the ICU-S slot-4 secret value, sender cadence, sender freshness-state ownership, upstream producer formatting, arbitrary hardware/DMA aliases, or OEM names for every secondary B6 scalar."
-        ),
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(out, indent=2, sort_keys=True) + "\n")

@@ -13,7 +13,7 @@
   },
   "boundary": [
     "Negative proofs are scoped to the canonical direct data-reference graph: computed aliases without a recovered reference, DMA/hardware mutation of LocalRAM outside the GlobalRAM rings, and unrecovered code remain outside the proof.",
-    "Ring/FIFO producer identity is classified as hardware/peripheral-fed shared memory; the exact per-channel DMAC trigger/peripheral assignment remains unresolved.",
+    "Ring/FIFO producer identity is classified as hardware/peripheral-fed shared memory.",
     "No live vehicle I/O; firmware-static closure only."
   ],
   "can_join_guard": {
@@ -40,7 +40,7 @@
       "0x00037e48",
       "0x000bf33e"
     ],
-    "conclusion": "The only READ into these regions from any checked function is 0xBF33E reading FEBEAC54..FEBEAC7E in the shared command-torque cone. 0x59448's FEBE7Fxx references are exclusively WRITEs. The checked D5 functions do not directly read generated COM staging.",
+    "conclusion": "The only READ into these regions from any checked function is 0xBF33E reading FEBEAC54..FEBEAC7E in the shared command-torque cone. 0x59448's FEBE7Fxx references are WRITEs. The checked D5 functions do not directly read generated COM staging.",
     "hits": {
       "0x00059448": [
         {
@@ -2910,7 +2910,7 @@
     ]
   },
   "command_torque_chain": {
-    "classification": "internal command composition with protected-B6 and B6-independent assist contributions; this terminal is not proof of exclusive B6 provenance",
+    "classification": "internal command composition with protected-B6 and B6-independent assist contributions",
     "steps": [
       "DID 0x1C02 (0x0004e7d6): signed16(((FEBE6772 * FEBEE8A6)/0x2000)*100/0x100)",
       "0x0005d5e0 mirror: FEBE6772 = FEBEE40A",
@@ -2996,7 +2996,7 @@
       "0x0005fa84",
       "0x00060aa8"
     ],
-    "classification": "No application-code writer posts fresh ring/FIFO payloads: every direct writer in the zone is init zeroing/marker seeding or the consume-side ack clear. Producers are hardware/peripheral (DMAC) feeds into shared GlobalRAM. The channel initializer 0x6082C programs 0x40-stride channel descriptors and DMAC primary/secondary trigger-select SFRs; ADCG0/ADCG1 scan, CSIH1 serial, and CRC0/CRC1 unit config appear in the same driver family. Exact per-channel trigger identity beyond this evidence remains unresolved.",
+    "classification": "No application-code writer posts fresh ring/FIFO payloads: every direct writer in the zone is init zeroing/marker seeding or the consume-side ack clear. Producers are hardware/peripheral (DMAC) feeds into shared GlobalRAM. The channel initializer 0x6082C programs 0x40-stride channel descriptors and DMAC primary/secondary trigger-select SFRs; ADCG0/ADCG1 scan, CSIH1 serial, and CRC0/CRC1 unit config appear in the same driver family.",
     "consume_ack_only": [
       "0x00060c60"
     ],
@@ -3314,7 +3314,7 @@
   },
   "structural_constants": {
     "error_words": "FEBE8260..8263 zeroed by 0x00050c38 each pass; 0x00050c58 OR-aggregates them into FEBE8274",
-    "invalid_marker_staging": "FEBE81F4..820A is only ever written 0x8000 (0x00050b00) after init zeroing (0x00058c9a); its mirror outputs FEBE6468..647E carry only the invalid marker"
+    "invalid_marker_staging": "FEBE81F4..820A is only ever written 0x8000 (0x00050b00) after init zeroing (0x00058c9a); its mirror outputs FEBE6468..647E carry the invalid marker"
   },
   "target": {
     "analysis_target": "camry-8965F3307000",

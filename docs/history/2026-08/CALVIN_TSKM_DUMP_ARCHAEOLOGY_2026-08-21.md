@@ -32,7 +32,7 @@ internally credible.
 | six current range payload packages authenticate under the recovered BFD8 payload root | **VERIFIED** | all six 4-KiB ciphertexts independently pass decrypt/CRC/CMAC/callback/descriptor checks |
 | the six plaintexts differ at only six bytes | **CORRECTED** | the executable body below `0xFD0` differs at six encoded range bytes; the CRC fixup `0xFEC..0xFEF` also differs, for ten varying bytes through `0xFEF` |
 | Calvin's family introduced a newer reset-return dumper | **CORRECTED** | Calvin differs from Willem's 32-KiB DataFlash self-loop artifact, but Willem's older RAM payload already uses boot reset `0x157E` |
-| Bk2ol source/toolchain reproduces Calvin global-RAM package | **VERIFIED** | global-RAM source substitution with the pinned GCC13.2/binutils2.41 family reproduces the complete encrypted package; this proves family equivalence. Original authorship remains unresolved |
+| Bk2ol source/toolchain reproduces Calvin global-RAM package | **VERIFIED** | global-RAM source substitution with the pinned GCC13.2/binutils2.41 family reproduces the complete encrypted package; this proves family equivalence |
 | Bk2ol ladder establishes authorship | **BOUNDED** | Bk2ol contains an exact public precursor/common-lineage `.5/.7/1.0 s + repeated PROGRAMMING` sequence; sequence identity does not establish who first authored it |
 | `FF00` is being used as a callback/control-flow trigger | **VERIFIED** | CPU static path enters the legitimate erase state machine and dispatches through `FEBF0FD0 -> uploaded FEBF0000` |
 | `FF00` therefore never physically erases | **CORRECTED** | CPU-side static analysis does not prove zero FCU erase side effect; Calvin's “did not erase” statement is an external field observation without retained before/after sector evidence |
@@ -278,13 +278,10 @@ object 12 raw record: FF206EC0 -> second field FF206ED4
 
 So exact `4512000` geometry places `FF206ED4` in **object 12's** corresponding
 field. Object 14's field is `FF206E54`. The alignment corroborates a `0x40` physical stride
-and a `+0x14` value position. It does not establish Calvin's table-wide ID,
-AuthID, or “ECU master key” semantics for `4512000`.
+and a `+0x14` value position.
 
-Calvin also reports that a dealer rekey left the previous factory SecOC key
-readable in plaintext. No retained before/after artifact lets us reproduce that
-claim. Retain it only as an external field observation and a future acquisition
-requirement. A generalized Toyota storage rule remains unproved.
+Calvin also reports, as an external field observation, that a dealer rekey left
+the previous factory SecOC key readable in plaintext.
 
 ## 8. SecurityAccess: ten-second bad-key backoff and normal handoff are separate
 

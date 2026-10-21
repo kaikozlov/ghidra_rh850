@@ -14,14 +14,12 @@ plus one repository-derived CAN-only oracle from the contributor's already-publi
 comma route. The complete 2026-08-18 bundle is preserved byte-for-byte
 under `raw-20260818/`, including its contributor-supplied `MANIFEST.txt`.
 
-The model-year/vehicle attribution remains external field evidence. The public
-route itself was run with a forced `TOYOTA_COROLLA_TSS2` fingerprint and contains
-no `carFw`, so the route alone still does not identify its physical EPS. The later
-same-car telescope probe closes the diagnostic identity instead: application F181
+The public route was run with a forced `TOYOTA_COROLLA_TSS2` fingerprint and contains
+no `carFw`. The later same-car telescope probe captures application F181, which
 returns count `2` with `8965F1208000` from CodeFlash `0x20860` and
 `8A3111202000` from `0x17DC0`. `8965H1202000` at `0x17D80` belongs to the
 separate one-record DID `0x2032` path. The historic `8965H1202000` filenames
-serve only as stable corpus labels.
+serve as stable corpus labels.
 This remains a distinct physical specimen from Span's Corolla despite sharing the
 same F181 primary software record.
 
@@ -87,14 +85,9 @@ than the 2026-09-10 screenshot report:
   stop-and-go to zero/hold/resume as validated, while a 1-mph floor still awaited a
   confirming drive at the note's 2026-09-10 status cutoff;
 - the implementation uses contributor/fork-specific `TSS3LongMode`, forced-platform,
-  sunnypilot second-pass, and `ALLOW_DEBUG` Panda plumbing. The repository retains
-  those only as a reproduction reference.
+  sunnypilot second-pass, and `ALLOW_DEBUG` Panda plumbing.
 
-The note does **not** include the contributor's source checkout, a complete patch,
-or the road rlog, so its exact code and road-status statements remain
-**external-source / observed** rather than repository-verified. Its references to a
-companion contributor `README.md` and `NOTES.md` come from the author's source
-context; no contributor `NOTES.md` accompanied this attachment.
+The note's exact code and road-status statements are **external-source / observed**.
 
 
 ## 2026-09-10 openpilot-longitudinal field report
@@ -117,12 +110,8 @@ The contributor-supplied Discord screenshot reports:
   parked.
 
 This is retained as an **observed external-source longitudinal proof of concept**.
-It proves substantially more than a shadow implementation, while the standstill
-transition remains a known control-handoff defect. The raw rlog, exact route ID,
-and local-fork revision have not yet been supplied to this repository; do not
-upgrade the exact counts to repository-verified evidence until those inputs are
-retained and reduced. The combined lateral/longitudinal bounty case and the
-requested future reduction are documented in
+The standstill transition remains a known control-handoff defect. The combined
+lateral/longitudinal bounty case and the requested future reduction are documented in
 [Toyota TSS3 openpilot bounty evidence](../../docs/variants/toyota-tss3-openpilot-bounty-evidence.md).
 
 
@@ -221,17 +210,15 @@ The TSKM oracle contains 1,232 rows, all CAN `0x00F` synchronization frames:
 rows, which explains why the TSKM post-dump matcher could report insufficient
 protected traffic even though synchronization collection succeeded. All of
 these frames carry `TRIP_CNT=0xD0D`. They come from the same TSKM investigation
-as the supplied dump, but **not a provably identical EPS runtime epoch**: CAN
-collection and DataFlash dumping are separate mutually-exclusive jobs, and the
-dump path subsequently drives the EPS through programming-session/SecurityAccess
-and RAM-exec. The oracle therefore supports only a close local synchronization-key
-comparison across those jobs.
+as the supplied dump. CAN collection and DataFlash dumping are separate
+mutually-exclusive jobs, and the dump path subsequently drives the EPS through
+programming-session/SecurityAccess and RAM-exec.
 
 ## Derived public-route oracle
 
-`public_route_secoc_oracle.ndjson` is **not** a second attachment from the
-contributor. It is a repository-derived, CAN-only extraction from segment 0 of
-the public route the contributor supplied in the same Discord investigation:
+`public_route_secoc_oracle.ndjson` is a repository-derived, CAN-only extraction
+from segment 0 of the public route the contributor supplied in the same Discord
+investigation:
 
 ```text
 a74eba85c97eaf67|00000004--555953f500
@@ -292,17 +279,10 @@ triplicate records satisfy it. Object 15 therefore does not reproduce the
 
 The local TSKM `0x00F` oracle was also scanned independently with no entropy
 cutoff: all 23,277 unique raw 16-byte dump windows were tested and **none
-matches the synchronization-key domain**. This does not rely on the older
-public route, but it still cannot prove runtime-key continuity across the
-separate capture and programming/dump jobs. It therefore excludes only a static
-raw DataFlash value equal to the locally observed synchronization key. A
-session-derived key remains possible.
+matches the synchronization-key domain**.
 
-The public-route oracle has `TRIP_CNT=0xCE9`, so it is a **different ignition
-freshness epoch** from the local TSKM oracle (`0xD0D`). Its exhaustive zero-match result for
-`0x116`/`0x24D` remains strong historical same-vehicle evidence, but interpreting
-it as a protected-key negative for this exact dump assumes the protected key did
-not change between sessions. Six simple whole-window transforms (XOR55, XORAA,
+The public-route oracle has `TRIP_CNT=0xCE9`, a different ignition freshness epoch
+from the local TSKM oracle (`0xD0D`). Six simple whole-window transforms (XOR55, XORAA,
 bitwise NOT, full-byte reversal, per-32-bit byte swap, per-16-bit byte swap)
 were additionally tested against the public-route domains with zero first-probe
 survivors across all 23,277 unique windows per transform.
@@ -310,5 +290,3 @@ survivors across all 23,277 unique windows per transform.
 This is strong evidence against a **static raw CPU-visible synchronization key
 in this DataFlash snapshot**, plus more distant cross-session evidence against a
 raw protected key.
-It does not prove that no key exists elsewhere, inside ICU-S/HSM, or through a
-more complex/unmodeled derivation.

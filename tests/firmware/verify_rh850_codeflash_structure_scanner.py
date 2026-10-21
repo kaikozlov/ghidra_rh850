@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """Verify the offline RH850 CodeFlash structural triage scanner.
 
-The scanner is candidate-only: every anchor it reports on a future calibration
-supports triage only. This suite pins
+This suite pins
   - the exact report shape and triage labeling,
   - deterministic anchor counts against the committed Sienna image,
   - negative behavior on truncated, concatenated, and content-free images,

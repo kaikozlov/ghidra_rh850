@@ -2,10 +2,9 @@
 """Build an evidence-graded Sienna-vs-H steering-supervisor stage ledger.
 
 The direct-call sequences are globally order-aligned with structural similarity.
-This supports navigation/classification only. A matched
-pair is promoted only when the separately generated whole-image artifact proves a
-unique complete instruction-shape match. H-only/Sienna-only rows identify unpaired
-entries within this ordered supervisor alignment only; global absence remains unproved.
+A matched pair is promoted only when the separately generated whole-image artifact
+proves a unique complete instruction-shape match. H-only/Sienna-only rows identify
+unpaired entries within this ordered supervisor alignment.
 """
 from __future__ import annotations
 from tools.targets.sienna.sienna_target import CORPUS as SIENNA_CORPUS
@@ -154,12 +153,12 @@ def main():
   elif typ=='h_only':
    h=H[j]
    if h not in H_ROLE:raise ValueError(f'unclassified H insertion {h:#x}')
-   role,desc=H_ROLE[h];row={'classification':'h-order-unpaired','h_index':j,'h_entry':f'0x{h:X}','role_class':role,'bounded_description':desc,'evidence_boundary':'target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved'}
+   role,desc=H_ROLE[h];row={'classification':'h-order-unpaired','h_index':j,'h_entry':f'0x{h:X}','role_class':role,'bounded_description':desc}
    honly.append(row);stages.append(row)
   else:
    s=S[i]
    if s not in S_REMOVED_ROLE:raise ValueError(f'unclassified Sienna removal {s:#x}')
-   role,desc=S_REMOVED_ROLE[s];row={'classification':'sienna-order-unpaired','sienna_index':i,'sienna_entry':f'0x{s:X}','role_class':role,'bounded_description':desc,'evidence_boundary':'unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence'}
+   role,desc=S_REMOVED_ROLE[s];row={'classification':'sienna-order-unpaired','sienna_index':i,'sienna_entry':f'0x{s:X}','role_class':role,'bounded_description':desc}
    sonly.append(row);stages.append(row)
  # key semantic pins for expansion/deletion claims
  Hdec={int(r['entry'],16):r['decompiled_c'] for r in hdoc['functions']}
@@ -174,11 +173,10 @@ def main():
  lta=next(r for r in decs if int(r['entry_addr'],16)==0xC8DE0)['decompiled_c']
  if 'authenticated 0x131 STEERING_LTA_2' not in lta or 'DAT_febeae60' not in lta:raise ValueError('Sienna LTA command stage semantic pin missing')
  payload={'schema':'corolla-8965H1202000-steering-supervisor-stage-ledger-v2',
-  'evidence_boundary':'Global order alignment is a navigation aid. Only unique complete instruction-shape pairs are semantic-transfer candidates; other pairs require target-native operand/dataflow review. H/S order-unpaired rows are not global absence proofs.',
   'roots':{'sienna':'0xCB86E','corolla_h':'0xCEDAE','sienna_body_size':sroot['body_size'],'corolla_h_body_size':hroot['body_size'],'sienna_direct_stage_count':len(S),'corolla_h_direct_stage_count':len(H)},
   'summary':{'paired':len(matched),'paired_unique_exact_shape':sum(r['pair_evidence']=='unique-exact-instruction-shape' for r in matched),'paired_high_similarity_nonexact':sum(r['pair_evidence']=='order-aligned-high-similarity' for r in matched),'paired_order_candidate':sum(r['pair_evidence']=='order-aligned-candidate' for r in matched),'h_order_unpaired':len(honly),'sienna_order_unpaired':len(sonly),'h_unpaired_role_counts':{}},
   'stages':stages,'h_order_unpaired':honly,'sienna_order_unpaired':sonly,
-  'explicit_command_mode_boundary':{'classic_2e4':'normal Rx descriptor absent on H and retained torque-clamp input remains independently proven zero-fed','classic_131':'normal Rx/SecOC descriptor absent on H and Sienna lta_angle_command_smoothing 0xC8DE0 is order-unpaired','replacement_command':'protected FD 0x0B6 signal255 signed16 B4:B5 is the target-steering-angle command; signal254 B3 is the Target Lateral ID request/profile selector. Controller-equivalent scale is 1024/17870 deg/count (~1.000121519 mrad/count); accepted profiles are PCS/LDA/Hands Off LTA/LTA-LCA/PDA; signal254 request selection, the 7-foreground-tick / nominal-35-ms primary receiver cutoff, and signal261 modulo-64 sequence handling are closed. The literal OEM signal255 unit, stock wall-clock sender cadence/template, exact secondary B6 names, and upstream producer/SecOC signing contract remain bounded; exclusive replacement freshness progression is closed separately.','canonical_proof':str(a.b6_target.relative_to(REPO))}}
+  'explicit_command_mode_boundary':{'classic_2e4':'normal Rx descriptor absent on H and retained torque-clamp input remains independently proven zero-fed','classic_131':'normal Rx/SecOC descriptor absent on H and Sienna lta_angle_command_smoothing 0xC8DE0 is order-unpaired','replacement_command':'protected FD 0x0B6 signal255 signed16 B4:B5 is the target-steering-angle command; signal254 B3 is the Target Lateral ID request/profile selector. Controller-equivalent scale is 1024/17870 deg/count (~1.000121519 mrad/count); accepted profiles are PCS/LDA/Hands Off LTA/LTA-LCA/PDA; signal254 request selection, the 7-foreground-tick / nominal-35-ms primary receiver cutoff, and signal261 modulo-64 sequence handling are closed.','canonical_proof':str(a.b6_target.relative_to(REPO))}}
  from collections import Counter
  payload['summary']['h_unpaired_role_counts']=dict(sorted(Counter(r['role_class'] for r in honly).items()))
  a.out.parent.mkdir(parents=True,exist_ok=True);a.out.write_text(json.dumps(payload,indent=2,sort_keys=True)+'\n')

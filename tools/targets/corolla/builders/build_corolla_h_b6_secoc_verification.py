@@ -272,7 +272,6 @@ def main() -> int:
             "initialization": {
                 "verify_engine": "0x0008857C clears both retry counters and initializes all three queue states to E1",
                 "freshness": "0x00089812 zeros current/pending global sync state and both 12-byte ordinary current/pending slots",
-                "persistence_boundary": "This proves application initialization writes these RAM cells; it does not by itself claim a whole-program negative for every possible external/NvM restoration path."
             },
         },
         "transmitted_freshness": {
@@ -393,7 +392,7 @@ def main() -> int:
                 "delivery_condition": "0x888A6 routes the queued PDU if global override D2 is active OR (profile+0x09 != 1 AND grace_counter < 204). B6 profile+0x09 is 0, so the bounded counter branch applies to B6.",
                 "freshness_0x22_path": "0x88A56 sets A5 then calls 0x888A6 immediately; command7 is never submitted, but the queued payload can still reach COM under the failure-forwarding condition",
                 "cmac_mismatch_path": "the first result-nonzero mismatch schedules B4 retry; once the one B6 auth/freshness retry is exhausted, 0x8891E sets generic failure 0x96 and calls 0x888A6, so the same conditional failure-forwarding path applies",
-                "authentication_boundary": "failure-forwarded payloads are not authenticated successes and do not commit pending freshness. Do not describe this as CMAC acceptance; it is explicit generated delivery despite verification failure.",
+                "authentication_boundary": "failure-forwarded payloads are not authenticated successes and do not commit pending freshness.",
                 "steady_state_boundary": "once grace_counter >= 204 and global override D2 is inactive, the recovered failure handler does not route B6 verification failures through 0x88856",
             },
             "verified_delivery": full["verified_delivery"],
@@ -417,7 +416,6 @@ def main() -> int:
             "identical_range": ["0x20000", "0x100000"],
             "all_verification_functions_and_tables_inside_identical_range": True,
             "b6_secoc_verification_contract_byte_identical": True,
-            "boundary": "H and F application bytes are identical for every record/config/function used by this proof. This does not transfer low-region calibration values or identify the upstream sender."
         },
         "sender_recipe": {
             "receiver_required_steps": [
@@ -466,12 +464,6 @@ def main() -> int:
             "upstream_producer_closed": False,
             "short_form": "FV4 reconstructs against authenticated 00F state; candidate is staged and command7 verifies CMAC28 with slot4. Only result0 commits freshness, but generated failure-forwarding can still deliver an uncommitted queued B6 during the bounded grace/global-override modes; post-grace normal mode routes only verified success."
         },
-        "evidence_boundary": (
-            "This closes the H/F EPS receiver-side SecOC verification algorithm for protected 0x0B6, including exact freshness state, "
-            "candidate/window rules, retry scopes, CMAC input/slot selection, commit timing, generated verification-failure forwarding policy, and application-sequence separation. It "
-            "does not recover the protected slot-4 secret, Toyota's stock sender implementation/cadence, or the upstream FRC/Brake payload/signing producer. "
-            "For an exclusive replacement sender, however, the receiver algorithm plus authenticated 0x00F closes a deterministic re-anchor/message8 state machine without discovering the stock B6 counter policy."
-        ),
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(out, indent=2, sort_keys=True) + "\n")

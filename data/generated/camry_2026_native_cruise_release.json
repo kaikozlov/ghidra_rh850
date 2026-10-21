@@ -1,9 +1,8 @@
 {
   "boundaries": [
-    "Native 0x08A falling edges alone select this scan; physical buttons and host cancel requests are separate observations.",
+    "Native 0x08A falling edges select this scan.",
     "A <=100ms continuous cruise edge is required; absent/malformed inputs are unknown, never deasserted.",
     "Publication ordering is not physical bus arbitration ordering.",
-    "Neither a native release nor a switch mirror is proof that an injected command is accepted.",
     "No cancel sender, diagnostic operation, ECU fault, or vehicle write is performed."
   ],
   "dispositions": {

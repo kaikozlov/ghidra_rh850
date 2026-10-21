@@ -92,7 +92,7 @@ a reset while its persisted countdown remains valid.
 `checkpoint_persistent_countdown_step @ 0x34FB6` decrements the count by one per
 worker invocation, persists object `0x18`, and clears redundant object `0x105`
 and the authorization marker when the count reaches zero. The static graph proves
-**30 worker invocations**. The wall-clock duration remains unmeasured.
+**30 worker invocations**.
 
 This pair is distinct from the related-variant SecOC key object. Redundant object
 `15` / API ID `0x10F` is 32 bytes at `FEBF02E8` and is not written by F6/F7.
@@ -104,8 +104,7 @@ This pair is distinct from the related-variant SecOC key object. Redundant objec
 F1/F4/F5/F9 share the `FE024 -> B201A` request path and the `FE150 -> B209C`
 completion path. Their modes 3/5/6/7 map to lifecycle request state
 `FEBEB112=0x5A` and `FEBEB113=0x11/0x22/0x44/0x88` respectively. These states
-feed system-mode/telemetry workers. A numeric steering-command input remains
-unrecovered.
+feed system-mode/telemetry workers.
 
 ### `TMPCL`
 
@@ -158,8 +157,7 @@ The supported security statement is narrow:
    conditioned-command, d/q-reference, current-PI, or TSG3-PWM state set.
 
 This is a **persistent proprietary diagnostic authorization/freshness downgrade**
-and a maintenance/lifecycle surface. Initial SecurityAccess remains required.
-The recovered effects exclude SecOC-key writes and arbitrary steering-current commands.
+and a maintenance/lifecycle surface.
 
 ## 6. Verification
 

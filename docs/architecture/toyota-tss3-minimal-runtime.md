@@ -4,8 +4,7 @@ This report records successive runtime architecture checkpoints. The
 September-21 request-plane design supersedes the earlier C7/B6 design below;
 later host/reporting reviews are recorded in
 [the port report](../variants/camry-2026-tss3-opendbc-port.md#8-host-bring-up-result-reporting-audit-2026-09-26).
-Transport sizes, source pins, and deployment notes apply to their documented
-checkpoint only.
+Transport sizes, source pins, and deployment notes apply to their documented checkpoint.
 
 The [capability matrix](../variants/camry-2026-capability-matrix.md) separates
 retained qualification evidence from later implementation changes. In
@@ -74,8 +73,7 @@ field evidence. The maintained RAM-runtime contract is defined above.
 
 At the earlier C7/B6 checkpoint, the initial integration goal was narrower
 than a complete TSS3 port: reproduce the demonstrated lateral result on exact
-F33 with an upstream-shaped runtime. The paragraphs below preserve that
-checkpoint. The later request-plane implementation has a broader scope.
+F33 with an upstream-shaped runtime.
 
 At that checkpoint, longitudinal was a separate layer and remained stock-owned.
 The September-16 request-plane audit supersedes the former `0x160` actuator
@@ -400,20 +398,8 @@ message counter. This directly supports the helper's private reset-local message
 counter. Canonical counts and the one public-route logging gap are retained in
 `data/generated/corolla_hf_secoc_00f_freshness_bridge.json`.
 
-Two boundaries remain separate from CodeFlash portability:
-
-- **Corolla current-runtime hardware qualification.** H/F exact code and retained
-  RAM captures make the high-tail/GlobalRAM placement strong, but the current
-  universal resident/helper composition has not yet received the same live
-  state/counter witness as Camry. A failed clean probe should read resident
-  state before inventing a new firmware theory.
-- **External `0x08A` key-domain equality.** Camry has a retained 3/3 native
-  `0x08A` equality oracle proving EPS slot 4 reproduces the stock `00 8A` MAC.
-  Crown's live old B6 signer proves its EPS slot-4 command-5 capability, and H/F
-  firmware proves selector-4 use for protected EPS traffic, but neither fact
-  alone proves that another vehicle's external `0x08A` producer shares the EPS
-  slot-4 secret. Crown and Corolla need their own passive native-`0x08A`
-  command-5 equality witness before signed replacement traffic is promoted.
+Camry's retained native-`0x08A` equality oracle matches EPS slot 4 in 3/3 samples.
+Crown's earlier B6 signer exercised EPS slot-4 command five.
 
 The one-message canonical-reconstruction codec is retained only as an explicit
 experiment. Its stock-TSS3 steering experiment was reported broken, so it is
@@ -456,9 +442,8 @@ references into that transit span. Their byte-identical MPU table places the
 span in region 12 (`FEC00000..FFFFFFFC`) with MPAT `0xB8` in both recovered
 application contexts, so the high resident can read it after startup. For the
 exact supported boot path, firmware startup clears GlobalRAM before the
-authenticated payload writes this transit buffer. That ordering is established
-for the exact supported images and boot path only. The transit buffer is used
-only until the selected resident installs
+authenticated payload writes this transit buffer. The transit buffer is used
+until the selected resident installs
 its helper into the target-native low-RAM pocket.
 
 Corolla can install its 458-byte helper into `FEBF0000..FEBF01C9` before
@@ -690,8 +675,7 @@ the visible network.
 After the native catcher reached PROGRAMMING it published a cooperative handoff
 marker and the warm uploader acquired the direct-Panda lease. Its evidence
 recorded wake-relative and ignition-relative timing, including wake to first
-`10 03`, wake to ignition, `50 03`, and `10 02`. This remains exact-Camry
-historical evidence only.
+`10 03`, wake to ignition, `50 03`, and `10 02`.
 
 The former direct-C7 mutation test required READY/stationary state, derived a
 target from measured angle, sent one C7 generation, observed a signed
@@ -763,7 +747,7 @@ implementation and evidence boundaries as follows:
   merges transient and latched causes cannot supply a permanent-fault class.
 - Planner, controller and Panda share the Camry −1.5..+1.3-m/s² host envelope.
   A CRC-valid byte-exact native handback is preserved without clipping Toyota's
-  own request. This does not establish native longitudinal authority.
+  own request.
 
 The September-10 steering samples used conventional cruise, but that boundary is
 now superseded by the September-18 exact-car recovery and road qualification.

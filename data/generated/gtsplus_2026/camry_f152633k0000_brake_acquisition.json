@@ -37,7 +37,7 @@
     ],
     "calibration_url": null,
     "current_gtsplus_writer_route": {
-      "boundary": "P5-Unified is a current host route. The unavailable exact Brake package's route remains unproved; the acquired CUW descriptor must select the contact type.",
+      "boundary": "P5-Unified is a current host route; the acquired CUW descriptor must select the contact type.",
       "can_id_source": "GetCanIDsFromCANIDTable",
       "cid_getter": "TCUWCanUnifiedCIDGetter.dll",
       "contact_type": "P5-Unified",
@@ -57,10 +57,10 @@
     },
     "selection": "category-435 Brake/EPB at physical 0x7B0 for the exact vehicle VIN",
     "server_package_availability_proven": false,
-    "url_policy": "Do not synthesize /t3Portal/calibration/F152633K0000 or any other URL. The exact F181 is a search input/current software identity. A downloadable target CID remains unproved."
+    "url_policy": "Do not synthesize /t3Portal/calibration/F152633K0000 or any other URL. The exact F181 is a search input/current software identity."
   },
   "local_corpus": {
-    "boundary": "The pinned 26-CUW corpus is covered both at CRC-checked attach.att descriptor level and by a full raw-container/recognized-decoded-image identity census. This proves absence within the local corpus only. Availability from Toyota/TIS or an unretained package remains unresolved.",
+    "boundary": "The pinned 26-CUW corpus is covered both at CRC-checked attach.att descriptor level and by a full raw-container/recognized-decoded-image identity census. No matching package is present in the local corpus.",
     "byte_level_census": {
       "decoded_member_count": 46,
       "exact_identity_hits": [],
@@ -368,7 +368,7 @@
       "sha256": "3a344b6cb2de19edb163e040974955f2d27467dc0a864974b6a5af90659d308f"
     },
     "data/generated/techstream_v18/cuw_frc_corpus.json": {
-      "sha256": "eeca82ddf15bab993fd1942acf318f2c5308c73bd7d9f8c0c6983081d32cbd60"
+      "sha256": "4e524fe2b2ed164c583e8befb5e4b9d980458306d3082d47985f00c30e414b91"
     },
     "data/generated/techstream_v18/tss3_b6_sender_attribution.json": {
       "sha256": "c38891ce3a96d5e20fc4fc7599076a8defd65bee76683ec974c33013cf887110"

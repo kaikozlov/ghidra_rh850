@@ -133,8 +133,7 @@ def build_plan(duration_seconds: int, output_dir: str | None) -> dict[str, objec
             "secondary_route": "0x7A0 -> 0x7A8",
             "brake_route": "0x7B0 -> 0x7B8",
             "central_gateway_route": (
-                "0x750/0x758 address-extension 0x5F is on the separate OBD-mux segment; "
-                "normal-route sightings are incidental; direct GTS/gateway evidence requires observation on that segment"
+                "0x750/0x758 address-extension 0x5F is on the separate OBD-mux segment"
             ),
         },
         "duration_seconds": duration_seconds,

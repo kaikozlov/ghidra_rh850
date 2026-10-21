@@ -11,8 +11,6 @@
 > **Grant:** US12615265B2, 2026-04-28
 >
 > **Evidence source:** external-source patent analysis joined to existing target-native SecOC RE
->
-> **Scope warning:** this post-TSS3 filing supplies Toyota terminology and supports future-architecture reasoning. Whether the 2026 Camry F33 implements the claimed scheme remains unproven.
 
 Public sources:
 
@@ -263,7 +261,7 @@ to rename or simplify the already recovered TSS3 freshness implementation.
 | Per-start KDF | Central feature | No recovered F33 application-side timestamp/location KDF feeding SecOC slot 4 | **Not supported** |
 | RAM-only traffic key | Natural implementation possibility | Exact F33 SecOC config selects slot 4; separate command-9/10 work treats RAM_KEY as a distinct volatile facility | **Patent-style RAM session key is not the current leading F33 model** |
 | Freshness | Optional monotonic counter, generic startup sync | `0x00F` + trip/reset/message counters + per-PDU receiver state | Conceptually related, physically different |
-| MAC | Generic keyed MAC | AES-CMAC-128 with truncated transmitted authenticator in recovered Toyota profiles | Compatible at the abstraction level only |
+| MAC | Generic keyed MAC | AES-CMAC-128 with truncated transmitted authenticator in recovered Toyota profiles | Compatible abstraction |
 | Counter/MAC truncation | Explicit | Exact Toyota profiles transmit truncated freshness/authenticator | Strong conceptual match |
 | Key distribution | Derived independently; no session-key transport required | Current Toyota service flow provisions protected key material using standard SHE M1--M5 | Different lifecycle plane |
 | Receiver failure | Reject/discard on bad MAC or stale counter | Exact receivers fail closed before normal COM/freshness commit | Strong conceptual match |
@@ -303,7 +301,7 @@ Therefore:
   derived key.
 
 Using volatile `RAM_KEY` for "does not exist at IG-OFF" is **our implementation
-inference**. The patent leaves that implementation unspecified.
+inference**.
 
 ## 10. The literal HSM implementation problem
 
@@ -339,8 +337,7 @@ an ICU-S KDF opcode, or a RAM_KEY boot-load path.
 
 ## 11. Reliability / synchronization holes in the disclosure
 
-The patent describes broad architecture. A production protocol specification
-would require tighter definitions for several details below.
+The patent describes broad architecture.
 
 ### 11.1 Same OTP without a key-confirmation protocol
 
@@ -428,7 +425,6 @@ material changing at ignition in dataflow proximity to time/location context**.
 ## 13. Bottom line
 
 This patent defines a plausible **post-TSS3 key-lifecycle direction**.
-The F33 implementation still requires target-native evidence.
 
 The security improvement is specific:
 

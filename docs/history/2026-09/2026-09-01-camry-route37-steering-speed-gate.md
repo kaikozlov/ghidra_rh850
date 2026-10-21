@@ -59,7 +59,7 @@ Those events are consistent with openpilot asking for angle without obtaining th
 
 The sustained high-speed intervals in which steering was perceptible all coincide with Toyota's existing request-plane state ID11. The long neighborhood intervals in which steering was not perceptible coincide with Toyota request-plane ID0 even though openpilot keeps transmitting active B6 ID11.
 
-The first active interval is especially important because it contains ID11 at only about 25–26 mph: openpilot is already active before the request-plane transition, B6 is already being transmitted, and `0x08A` changes ID0→ID11 at 25.83 mph while speed stays in the same narrow neighborhood-speed band. This is incompatible with a simple explanation of “the steering path is hard-disabled until roughly 45 mph.” It does **not** prove the final actuator grant follows `0x08A`. Current project evidence establishes only that `0x08A` witnesses the request plane. EPS-input, arbitration-result, and active-grant interpretations remain unsupported.
+The first active interval is especially important because it contains ID11 at only about 25–26 mph: openpilot is already active before the request-plane transition, B6 is already being transmitted, and `0x08A` changes ID0→ID11 at 25.83 mph while speed stays in the same narrow neighborhood-speed band. This is incompatible with a simple explanation of “the steering path is hard-disabled until roughly 45 mph.” `0x08A` witnesses the request plane.
 
 Exact F33 static recovery is consistent with that bounded conclusion. `CEFA4` handles B6 communication/status health and `CEFFC` maps an already-delivered B6 Target Lateral ID to `FEBECB00`; neither recovered function contains a vehicle-speed predicate. Other downstream speed-dependent conditioning is not globally excluded by this observation.
 
@@ -80,7 +80,7 @@ A narrower alternative remains open: some moving-only condition could change B6 
 
 ## Conclusion
 
-For route `00000037--dec6fe39cb`, there is **no evidence of an openpilot/Panda ~25 mph steering gate**. Openpilot remains lateral-active and transmits B6 below 30 mph. The apparent speed dependence tracks Toyota's own lateral request-state changes almost perfectly, and the same route contains an ID11 interval near 25 mph. B6 admission/authority remains unresolved. A configured minimum steering speed is unsupported.
+For route `00000037--dec6fe39cb`, there is **no evidence of an openpilot/Panda ~25 mph steering gate**. Openpilot remains lateral-active and transmits B6 below 30 mph. The apparent speed dependence tracks Toyota's own lateral request-state changes almost perfectly, and the same route contains an ID11 interval near 25 mph. B6 admission/authority remains unresolved.
 
 ## Follow-up: B6 construction audit versus the exact-F33 receiver
 

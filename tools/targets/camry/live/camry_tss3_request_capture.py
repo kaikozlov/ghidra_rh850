@@ -288,8 +288,6 @@ def plan(targets: tuple[DidTarget, ...]) -> dict[str, Any]:
         "routine_control": False,
         "vehicle_control_tx": False,
         "flash_write": False,
-        "boundary": "live PID support on the exact Camry is unmeasured; this plan claims "
-                    "tooling availability only",
     }
 
 

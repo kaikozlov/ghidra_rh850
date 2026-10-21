@@ -524,7 +524,7 @@ def main() -> None:
       "new_epoch_start_low2_accepted": {str(low2): SimState().accept((1, 1), low2)[0] for low2 in range(4)},
       "reset_candidate_from_current_100": {str(low2): reconstruct_reset_candidate(100, low2) for low2 in range(4)},
       "same_epoch_next_from_message_0": {str(low2): reconstruct_same_epoch_message(0, low2) for low2 in range(4)},
-      "interpretation": "The observed native D7 preference for first low2=1 is sender policy/timing only; F33 B6 receiver acceptance permits other first low2 values.",
+      "interpretation": "The observed native D7 preference for first low2=1 is sender policy/timing; F33 B6 receiver acceptance permits other first low2 values.",
     },
     "routes": routes,
   }

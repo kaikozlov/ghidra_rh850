@@ -3,7 +3,7 @@
 key-material transfer finding (TMS-010).
 
 The EPS/VFOREST reflash **key-material transfer** runs through the
-flash-writer side. PrepareWriter's CalcSeedKey is separate. Specifically:
+flash-writer side. Specifically:
 
   * `TCUWCanSecurityVFORESTFlashWriter.dll` IMPORTS
     `CCanCommonFlashWriter::SendNonceAndSeedKey` (delegates; has no
@@ -12,8 +12,7 @@ flash-writer side. PrepareWriter's CalcSeedKey is separate. Specifically:
     buffers and ship two 16-byte keys + a nonce prefix in sequenced frames
     (block-seq bytes 0x37..0x3c at Data[4] — NOT UDS SIDs) via CJ2534IF::WriteMsgs.
     Key bytes come verbatim from `CalibrationFile::GetSeedKey(int)`.
-    This is NOT SecurityAccess; it feeds the firmware payload gate
-    (SEC-BOOT-005/006/007), so there is no 0x27-vs-0x37 conflict.
+    This feeds the firmware payload gate (SEC-BOOT-005/006/007).
   * No AES S-box in ANY CUW DLL/EXE (full-tree scan). AES exists only in the
     diagnostic-app DLLs (CommandCommon/UtilityEx2TY/IT3*/DS2Com*, the six of
     TMS-008) and via `Cuw.exe`'s Windows CryptoAPI (the §4.5 CalcSeedKey path).

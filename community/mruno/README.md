@@ -83,7 +83,7 @@ reproducible repository result.
 ## Read-only preflight artifacts received 2026-09-14
 
 Both files below are retained unchanged. The Python file is the contributor's
-troubleshooting variant. The current shipped implementation is separate.
+troubleshooting variant.
 This review read and compared the variant without executing it against a vehicle.
 
 | File | Size | SHA-256 | Interpretation |
@@ -157,7 +157,7 @@ The startup logs are not relay-side attribution evidence: startup uses ELM327
 with the intercept relay bypassed. In the 2026-10-11 captures, selected ordinary
 chassis frames `0x030`, `0x101`, and `0x51E` appear on logical bus 2 while the
 EPS diagnostic `0x7A9` response is observed on both buses 0 and 2. This asymmetry
-is only a candidate discriminator of EPS-side ownership. The maintained
+is a candidate discriminator of EPS-side ownership. The maintained
 read-only next test is `tools/toyota eps-probe --open-relay --execute`, which
 opens the relay with debug allOutput passthrough and polls F181 independently on
 logical buses 0 and 2 before restoring the bypassed ELM327 state.
@@ -242,15 +242,11 @@ Those bits cover a pending request, a completed/aborted result awaiting clear,
 and an abort request; the P1M-E manual defines them in sections 17.3.10.1–2.
 The focused idle-resource-7 run succeeds, while a focused busy-resource-7 run
 returns 2 and emits no frame. Functional-model success initializes that status
-idle and does not prove its value on Mruno's EPS.
+idle.
 
 The current profile retains handle 50/resource 6 because it matches the stock
 primary association and every successful application F181 response proves that
-mailbox operational on the field unit. This conservative selection aligns with
-stock behavior. Resource 7 also accepts the ID. None of the retained
-failed runs captured resident counters, the lower return value, or either
-transmit-buffer status, so they cannot establish mailbox selection as the
-cause.
+mailbox operational on the field unit.
 
 Separate exact Crown scenarios execute native post-filter `0x777` reception
 through IRQ187 into the software ring, the recovered freshness and ICU-S
@@ -273,17 +269,16 @@ run used the two local fixes later committed as `50f6f3fd`: inline
 `u32_delta`, and a 350-ms minimum / 2.5-s witness deadline. Those host-only
 fixes did not change the resident, helper, or authenticated payload.
 
-That live result is a strong but bounded positive control for the current
-request signer:
+That live result provides a positive control for the current request signer:
 
 | Boundary | September B6 observation | Current `0x08A` relationship |
 |---|---|---|
 | Boot transition and resident | Exact Crown application returned and the resident at `FEBFF9F0` remained live | Same resident base and same exact 21-call Crown startup span; the recovered startup shadow copy ends exactly at `FEBFF9F0` |
 | ICU-S signer | Native-B6 equality and two moving runs completed through Crown `0x87662`, type 1 / selector 4; signed counts advanced `9 -> 19 -> 29` with matching command-five attempts and clean status | Same wrapper, globals, freshness encoder, and type 1 / selector 4 configuration; this rules out a generic Crown slot-4 or command-five incompatibility |
-| Helper memory | The 588-byte helper was loaded after startup into LocalRAM `FEBF0000` and read back through SID `0x23` before arming | The request signer instead executes from GlobalRAM `FEF07C00`; exact MPU, no-reference, startup-retention, cache-publication, and instruction-machine checks cover it, but the B6 run is not a live proof of that placement |
-| Host ingress | Valid ISO-TP `C6/C7` single frames reached the stock DCM buffer on pre-repin Panda bus 1 | Four deliberately non-ISO-TP `0x777` frames are tapped from the software RX ring on post-repin bus 0; the old run does not prove this path |
-| Signed domain | The helper signed Data ID `0x00B6` using freshness reconstructed from the native B6 | The helper signs Data ID `0x008A` with a private message counter in the authenticated current trip/reset epoch; only the common command-five ABI transfers across these domains |
-| Result publication | The helper mutated the already queued native B6 and needed no private CAN response | The request signer must transmit an eight-byte `0x7A9` response through the lower CAN writer; the B6 result cannot validate this new egress |
+| Helper memory | The 588-byte helper was loaded after startup into LocalRAM `FEBF0000` and read back through SID `0x23` before arming | The request signer executes from GlobalRAM `FEF07C00`; exact MPU, no-reference, startup-retention, cache-publication, and instruction-machine checks cover it |
+| Host ingress | Valid ISO-TP `C6/C7` single frames reached the stock DCM buffer on pre-repin Panda bus 1 | Four deliberately non-ISO-TP `0x777` frames are tapped from the software RX ring on post-repin bus 0 |
+| Signed domain | The helper signed Data ID `0x00B6` using freshness reconstructed from the native B6 | The helper signs Data ID `0x008A` with a private message counter in the authenticated current trip/reset epoch; the command-five ABI is common to both domains |
+| Result publication | The helper mutated the already queued native B6 and needed no private CAN response | The request signer must transmit an eight-byte `0x7A9` response through the lower CAN writer |
 | Panda route | Stock-harness `bus1,param1` | The maintained repin deliberately moves EPS diagnostics and signer traffic to `bus0,param1`; the retained startup catches and exact application F181 responses prove that diagnostic route |
 
 The six failed October runs all used payload
@@ -315,7 +310,7 @@ this detects a wrong Python/openpilot environment before vehicle access. This
 host inspection gap did not cause the recorded October timeouts because those
 runs reached Panda, programming, and application F181.
 
-**2026-10-16 cross-vehicle audit: remaining live discriminators.** Current universal C signer firmware contracts resolve primary lower CAN response HTH 50/resource 6 on Crown, 53/resource 6 on Camry and 50/resource 6 on Corolla. All registered images independently resolve classic functional `0x777` acceptance, software ring producer, common TAUJ0 5-ms period, native 46-bit freshness encoder and type1/selector4 synchronous command-5 wrapper. This establishes exact-byte-derived portability only. Crown's September B6 helper established live slot4 signing but did not exercise the current helper's GlobalRAM code, four raw-ring fragments, independent `0x008A` freshness epoch/message counter or separate `0x7A9` egress. The Oct 10–12 host records do not measure those stages. In particular, the older host's apparent release-Panda `allOutput` failure is not a complete explanation for ELM-labeled retries without the newer `signer_session` witness. The current stock-primary mailbox removes a potential resource-7 availability dependency but does not establish that the prior alternate resource was ID-invalid. Evaluate the current session telemetry and resident counts in order; no new speculative Crown payload/flash modification is justified by these logs.
+**2026-10-16 cross-vehicle audit: remaining live discriminators.** Current universal C signer firmware contracts resolve primary lower CAN response HTH 50/resource 6 on Crown, 53/resource 6 on Camry and 50/resource 6 on Corolla. All registered images independently resolve classic functional `0x777` acceptance, software ring producer, common TAUJ0 5-ms period, native 46-bit freshness encoder and type1/selector4 synchronous command-5 wrapper. Crown's September B6 helper established live slot4 signing. The current stock-primary mailbox removes a potential resource-7 availability dependency. Evaluate the current session telemetry and resident counts in order.
 
 The next result must retain the current `signer_session` and
 `resident_state_after_probe` objects. Their boundary is diagnostic:
@@ -326,7 +321,5 @@ The next result must retain the current `signer_session` and
 - `success_count>0`, `response_count=0`: lower-writer rejection/busy state;
 - `response_count>0` with no host `0x7A9`: physical routing or host receive.
 
-The old B6 result therefore removes generic Crown boot, high-tail retention,
-and slot-4 command-five failure from the leading explanations. It does not
-remove the three mechanisms introduced specifically for `0x08A`: GlobalRAM
-execution, raw-ring request ingress, and private response egress.
+The old B6 result removes generic Crown boot, high-tail retention, and slot-4
+command-five failure from the leading explanations.

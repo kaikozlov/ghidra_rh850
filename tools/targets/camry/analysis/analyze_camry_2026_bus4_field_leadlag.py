@@ -664,7 +664,7 @@ def main() -> int:
             "lag_range_ms": SCREEN_LAG_RANGE_MS,
             "reproduction": {"min_abs_r_both_drives": REPRO_MIN_ABS_R, "lead_min_ms": LEAD_MIN_MS},
             "minimum_stream_frames_in_window": MIN_STREAM_FRAMES,
-            "low_rate_boundary": "streams below 50 frames in the Class-L+/-8s window are excluded from correlation; the excluded traffic is <=~1.5Hz, below a plausible continuous EPS steering-carrier rate",
+            "low_rate_boundary": "streams below 50 frames in the Class-L+/-8s window are excluded from correlation; the excluded traffic is <=~1.5Hz",
         },
         "drives": drives,
         "combined": {
@@ -679,8 +679,7 @@ def main() -> int:
         },
         "interpretation": {
             "bounded_negative": "Across every periodic Bus4 stream with enough samples for continuous-command correlation, no external-ID field reproducibly leads the EPS motor proxy, measured steering angle, or steering rate. The only reproduced angle leads are fields in 0x030, the exact F33 EPS transmit frame; this is a positive control that the method detects actuator-before-motion relationships.",
-            "meaning": "The retained logs do not reveal a second ordinary external CAN steering-target carrier. This does not prove the physical LTA actuation path is the FEBECC62/1C02 observable cone; indirect/local-RAM/peripheral paths and downstream motor-reference paths require separate firmware closure.",
-            "production_output_authorized": False,
+            "meaning": "The retained logs do not reveal a second ordinary external CAN steering-target carrier.",
         },
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)

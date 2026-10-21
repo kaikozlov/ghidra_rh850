@@ -290,7 +290,6 @@ def build() -> dict:
             "parent_kai_openpilot_commit": PARENT_OPENPILOT_COMMIT,
             "behavior": "decode exact-F33 0x394 wire tuples into candidate internal states; unique tuple yields a unique internal-state observer only",
             "public_fault_flags_changed": False,
-            "production_output_authorized": False,
             "full_gate": "4077 passed / 719 skipped plus ruff, ty, codespell, cpplint, MISRA",
         },
         "openpilot_policy": {
@@ -302,7 +301,6 @@ def build() -> dict:
                 "Toyota's internal DEM class/latch distinction does not define openpilot temporary/permanent policy. "
                 "Relay-correct asserted/recovery capture or an independent policy proof is still required."
             ),
-            "production_output_authorized": False,
         },
         "sources": {
             "codeflash": {"path": str(IMAGE.relative_to(REPO)), "sha256": IMAGE_SHA256},

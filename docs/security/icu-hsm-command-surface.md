@@ -129,7 +129,7 @@ corpus).
 
 | Command | Stock application owners |
 |---|---|
-| 5 | Channel exists (wrapper `0x82070 → 0x83A30`) and its sync API `0x820CC`/step `0x821D0` are registered in the ROM service registry (records at `0x27C9C/0x27CBC`); the SecOC engine block (`0x87000..0x8B000`) joins the service layer through runners (`0x881F8/0x88986/0x88FDA → 0x826xx..0x830xx`). A 0x44-stride TX descriptor table exists at `0x2581E+` with the same first-record shape as Crown (DataID field `0x0030`). **No diagnostic crypto-test RID bank exists** (no `0x100E/0x100F/0x1010` constants; all matches are bitmask tests). The "never calls command 5" canary statement is limited to text-level callers. The pointer-wired channel remains present. |
+| 5 | Channel exists (wrapper `0x82070 → 0x83A30`) and its sync API `0x820CC`/step `0x821D0` are registered in the ROM service registry (records at `0x27C9C/0x27CBC`); the SecOC engine block (`0x87000..0x8B000`) joins the service layer through runners (`0x881F8/0x88986/0x88FDA → 0x826xx..0x830xx`). A 0x44-stride TX descriptor table exists at `0x2581E+` with the same first-record shape as Crown (DataID field `0x0030`). **No diagnostic crypto-test RID bank exists** (no `0x100E/0x100F/0x1010` constants; all matches are bitmask tests). |
 | 7 | SecOC RX engine: three 0x50-stride RX profiles at `0x25750` (`0x00F/0x0D7/0x0B6` per ARCH-015), queue helper `0x87B72`, verify join via the same service runners; sync API `0x824DC` registered at `0x27CE0/0x27D00`. |
 | 1/3, 8 | Channels registered with KAT functions (`0x27D24 → 0x81C98` AES, `0x27D48 → 0x814A8` cmd8) and a 16-byte KAT-vector table at `0x27C50..`; no application text caller recovered (ROM self-test module at `0x635xx` is the registered consumer). |
 | `0x3F`, `0x7000/0x7100` | Startup: `0x5CAAC → 0x5F9D4 → 0x8304C → 0x811B0 → 0x8175E → 0x837DE/0x816DC` (three diagnostic modes 0/1/2 → `0x00/0x70/0x71`) — the **only** ICU-S reach of the stock corolla application outside the SecOC/service-runner wiring. |
@@ -422,4 +422,4 @@ The registered airbag target rebuilds and queries like any other:
 `make rebuild-project TARGET=venza-8917048E30`, `tools/gtarget
 venza-8917048E30 ...`, `tools/pseudo --target venza-8917048E30 ...`. The
 census sweep scripts under `ghidra/scripts/investigate/` are one-shot workspace
-tooling. Their output requires independent evidence.
+tooling.

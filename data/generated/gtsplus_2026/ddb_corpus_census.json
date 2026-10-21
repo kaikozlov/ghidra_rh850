@@ -3668,8 +3668,7 @@
         "legacy_primary_key": 1,
         "legacy_secondary_key": 7
       }
-    ],
-    "boundary": "name census only: absence of an angle/torque label is not proof that a routine cannot affect steering; semantic effect must be established separately"
+    ]
   },
   "current_camry_relevant": {
     "frc_pcs_collision_avoidance_routine": {
@@ -3697,7 +3696,9 @@
           ],
           "record": 49,
           "name": "Steering Wheel Information",
+          "flags": 67,
           "monitor_key": 50,
+          "ffd_support_condition_key": 0,
           "physical_data_key": 1,
           "bit_start": 0,
           "bit_end": 7,
@@ -3715,6 +3716,12 @@
             "signed": false,
             "decimal_point_count": 0,
             "bit_width": 8,
+            "pattern_display": {
+              "0": "Unused",
+              "1": "Left",
+              "2": "Right",
+              "3": "Default Value"
+            },
             "data_range": [
               0,
               3
@@ -3722,13 +3729,7 @@
             "graph_range": [
               0,
               3
-            ],
-            "pattern_display": {
-              "0": "Unused",
-              "1": "Left",
-              "2": "Right",
-              "3": "Default Value"
-            }
+            ]
           }
         },
         {
@@ -3741,7 +3742,9 @@
           ],
           "record": 152,
           "name": "PCS Collision Avoidance Assist Function",
+          "flags": 65,
           "monitor_key": 153,
+          "ffd_support_condition_key": 0,
           "physical_data_key": 1,
           "bit_start": 8,
           "bit_end": 8,
@@ -3759,6 +3762,10 @@
             "signed": false,
             "decimal_point_count": 0,
             "bit_width": 1,
+            "pattern_display": {
+              "0": "OFF",
+              "1": "ON"
+            },
             "data_range": [
               0,
               1
@@ -3766,11 +3773,7 @@
             "graph_range": [
               0,
               1
-            ],
-            "pattern_display": {
-              "0": "OFF",
-              "1": "ON"
-            }
+            ]
           }
         }
       ],
@@ -3785,7 +3788,9 @@
           ],
           "record": 24,
           "name": "PCS Steering Request",
+          "flags": 67,
           "monitor_key": 25,
+          "ffd_support_condition_key": 0,
           "physical_data_key": 3,
           "bit_start": 8,
           "bit_end": 8,
@@ -3803,6 +3808,10 @@
             "signed": false,
             "decimal_point_count": 0,
             "bit_width": 1,
+            "pattern_display": {
+              "0": "OFF",
+              "1": "ON"
+            },
             "data_range": [
               0,
               1
@@ -3810,11 +3819,7 @@
             "graph_range": [
               0,
               1
-            ],
-            "pattern_display": {
-              "0": "OFF",
-              "1": "ON"
-            }
+            ]
           }
         },
         {
@@ -3827,7 +3832,9 @@
           ],
           "record": 30,
           "name": "PCS Collision Avoidance Assist Function",
+          "flags": 67,
           "monitor_key": 31,
+          "ffd_support_condition_key": 0,
           "physical_data_key": 3,
           "bit_start": 8,
           "bit_end": 8,
@@ -3845,6 +3852,10 @@
             "signed": false,
             "decimal_point_count": 0,
             "bit_width": 1,
+            "pattern_display": {
+              "0": "OFF",
+              "1": "ON"
+            },
             "data_range": [
               0,
               1
@@ -3852,11 +3863,7 @@
             "graph_range": [
               0,
               1
-            ],
-            "pattern_display": {
-              "0": "OFF",
-              "1": "ON"
-            }
+            ]
           }
         },
         {
@@ -3869,7 +3876,9 @@
           ],
           "record": 32,
           "name": "Emergency Steering Assist Invalid 1",
+          "flags": 67,
           "monitor_key": 33,
+          "ffd_support_condition_key": 0,
           "physical_data_key": 3,
           "bit_start": 25,
           "bit_end": 25,
@@ -3887,6 +3896,10 @@
             "signed": false,
             "decimal_point_count": 0,
             "bit_width": 1,
+            "pattern_display": {
+              "0": "OFF",
+              "1": "ON"
+            },
             "data_range": [
               0,
               1
@@ -3894,11 +3907,7 @@
             "graph_range": [
               0,
               1
-            ],
-            "pattern_display": {
-              "0": "OFF",
-              "1": "ON"
-            }
+            ]
           }
         },
         {
@@ -3911,7 +3920,9 @@
           ],
           "record": 33,
           "name": "Emergency Steering Assist Invalid 2",
+          "flags": 67,
           "monitor_key": 34,
+          "ffd_support_condition_key": 0,
           "physical_data_key": 3,
           "bit_start": 26,
           "bit_end": 26,
@@ -3929,6 +3940,10 @@
             "signed": false,
             "decimal_point_count": 0,
             "bit_width": 1,
+            "pattern_display": {
+              "0": "OFF",
+              "1": "ON"
+            },
             "data_range": [
               0,
               1
@@ -3936,11 +3951,7 @@
             "graph_range": [
               0,
               1
-            ],
-            "pattern_display": {
-              "0": "OFF",
-              "1": "ON"
-            }
+            ]
           }
         }
       ],
@@ -3955,7 +3966,9 @@
           ],
           "record": 36,
           "name": "Active Steering Control Permission",
+          "flags": 3,
           "monitor_key": 182,
+          "ffd_support_condition_key": 0,
           "physical_data_key": 1,
           "bit_start": 128,
           "bit_end": 135,
@@ -3973,6 +3986,10 @@
             "signed": false,
             "decimal_point_count": 0,
             "bit_width": 8,
+            "pattern_display": {
+              "0": "OFF",
+              "1": "ON"
+            },
             "data_range": [
               0,
               1
@@ -3980,11 +3997,7 @@
             "graph_range": [
               0,
               1
-            ],
-            "pattern_display": {
-              "0": "OFF",
-              "1": "ON"
-            }
+            ]
           }
         }
       ],
@@ -3999,7 +4012,9 @@
           ],
           "record": 823,
           "name": "Active Steering Status",
+          "flags": 65,
           "monitor_key": 885,
+          "ffd_support_condition_key": 0,
           "physical_data_key": 3,
           "bit_start": 16,
           "bit_end": 23,
@@ -4017,6 +4032,10 @@
             "signed": false,
             "decimal_point_count": 0,
             "bit_width": 8,
+            "pattern_display": {
+              "0": "Inactive",
+              "1": "Active"
+            },
             "data_range": [
               0,
               1
@@ -4024,11 +4043,7 @@
             "graph_range": [
               0,
               1
-            ],
-            "pattern_display": {
-              "0": "Inactive",
-              "1": "Active"
-            }
+            ]
           }
         }
       ],
@@ -4043,7 +4058,9 @@
           ],
           "record": 179,
           "name": "Power Steering Control Module Malfunction",
+          "flags": 65,
           "monitor_key": 180,
+          "ffd_support_condition_key": 0,
           "physical_data_key": 1,
           "bit_start": 8,
           "bit_end": 8,
@@ -4061,6 +4078,10 @@
             "signed": false,
             "decimal_point_count": 0,
             "bit_width": 1,
+            "pattern_display": {
+              "0": "No",
+              "1": "Yes"
+            },
             "data_range": [
               0,
               1
@@ -4068,11 +4089,7 @@
             "graph_range": [
               0,
               1
-            ],
-            "pattern_display": {
-              "0": "No",
-              "1": "Yes"
-            }
+            ]
           }
         },
         {
@@ -4085,7 +4102,9 @@
           ],
           "record": 187,
           "name": "Communication Error from Clearance Warning Control Module to Power Steering Control Module",
+          "flags": 65,
           "monitor_key": 188,
+          "ffd_support_condition_key": 0,
           "physical_data_key": 1,
           "bit_start": 8,
           "bit_end": 8,
@@ -4103,6 +4122,10 @@
             "signed": false,
             "decimal_point_count": 0,
             "bit_width": 1,
+            "pattern_display": {
+              "0": "No",
+              "1": "Yes"
+            },
             "data_range": [
               0,
               1
@@ -4110,11 +4133,7 @@
             "graph_range": [
               0,
               1
-            ],
-            "pattern_display": {
-              "0": "No",
-              "1": "Yes"
-            }
+            ]
           }
         },
         {
@@ -4127,7 +4146,9 @@
           ],
           "record": 192,
           "name": "Advanced Park Perpendicular Parking Control Area",
+          "flags": 65,
           "monitor_key": 193,
+          "ffd_support_condition_key": 0,
           "physical_data_key": 1,
           "bit_start": 6,
           "bit_end": 7,
@@ -4145,6 +4166,12 @@
             "signed": false,
             "decimal_point_count": 0,
             "bit_width": 2,
+            "pattern_display": {
+              "0": "Narrow",
+              "1": "Normal",
+              "2": "Wide1",
+              "3": "Wide2"
+            },
             "data_range": [
               0,
               3
@@ -4152,13 +4179,7 @@
             "graph_range": [
               0,
               3
-            ],
-            "pattern_display": {
-              "0": "Narrow",
-              "1": "Normal",
-              "2": "Wide1",
-              "3": "Wide2"
-            }
+            ]
           }
         },
         {
@@ -4171,7 +4192,9 @@
           ],
           "record": 193,
           "name": "Advanced Park Parallel Parking Control Area",
+          "flags": 65,
           "monitor_key": 194,
+          "ffd_support_condition_key": 0,
           "physical_data_key": 1,
           "bit_start": 14,
           "bit_end": 15,
@@ -4189,6 +4212,12 @@
             "signed": false,
             "decimal_point_count": 0,
             "bit_width": 2,
+            "pattern_display": {
+              "0": "Narrow",
+              "1": "Normal",
+              "2": "Wide1",
+              "3": "Wide2"
+            },
             "data_range": [
               0,
               3
@@ -4196,13 +4225,7 @@
             "graph_range": [
               0,
               3
-            ],
-            "pattern_display": {
-              "0": "Narrow",
-              "1": "Normal",
-              "2": "Wide1",
-              "3": "Wide2"
-            }
+            ]
           }
         },
         {
@@ -4215,7 +4238,9 @@
           ],
           "record": 194,
           "name": "Advanced Park Equipped Information",
+          "flags": 65,
           "monitor_key": 195,
+          "ffd_support_condition_key": 0,
           "physical_data_key": 1,
           "bit_start": 5,
           "bit_end": 7,
@@ -4233,6 +4258,12 @@
             "signed": false,
             "decimal_point_count": 0,
             "bit_width": 3,
+            "pattern_display": {
+              "0": "Without",
+              "1": "With (Semi-Automatic)",
+              "2": "With (Full-Automatic)",
+              "7": "Unknown"
+            },
             "data_range": [
               0,
               7
@@ -4240,13 +4271,7 @@
             "graph_range": [
               0,
               7
-            ],
-            "pattern_display": {
-              "0": "Without",
-              "1": "With (Semi-Automatic)",
-              "2": "With (Full-Automatic)",
-              "7": "Unknown"
-            }
+            ]
           }
         },
         {
@@ -4259,7 +4284,9 @@
           ],
           "record": 195,
           "name": "Advanced Park Main Switch Press Status",
+          "flags": 65,
           "monitor_key": 196,
+          "ffd_support_condition_key": 0,
           "physical_data_key": 1,
           "bit_start": 8,
           "bit_end": 8,
@@ -4277,6 +4304,10 @@
             "signed": false,
             "decimal_point_count": 0,
             "bit_width": 1,
+            "pattern_display": {
+              "0": "OFF",
+              "1": "ON"
+            },
             "data_range": [
               0,
               1
@@ -4284,11 +4315,7 @@
             "graph_range": [
               0,
               1
-            ],
-            "pattern_display": {
-              "0": "OFF",
-              "1": "ON"
-            }
+            ]
           }
         },
         {
@@ -4301,7 +4328,9 @@
           ],
           "record": 197,
           "name": "Accumulated Time of System Control Maintain Brake (During Advanced Park Control)",
+          "flags": 65,
           "monitor_key": 198,
+          "ffd_support_condition_key": 0,
           "physical_data_key": 21,
           "bit_start": 0,
           "bit_end": 7,
@@ -4319,6 +4348,7 @@
             "signed": false,
             "decimal_point_count": 0,
             "bit_width": 8,
+            "pattern_display": {},
             "data_range": [
               0,
               255
@@ -4326,8 +4356,7 @@
             "graph_range": [
               0,
               765
-            ],
-            "pattern_display": {}
+            ]
           }
         },
         {
@@ -4340,7 +4369,9 @@
           ],
           "record": 198,
           "name": "Detection Count of Get Out the Vehicle (During Advanced Park Control)",
+          "flags": 65,
           "monitor_key": 199,
+          "ffd_support_condition_key": 0,
           "physical_data_key": 3,
           "bit_start": 8,
           "bit_end": 15,
@@ -4358,6 +4389,7 @@
             "signed": false,
             "decimal_point_count": 0,
             "bit_width": 8,
+            "pattern_display": {},
             "data_range": [
               0,
               255
@@ -4365,8 +4397,7 @@
             "graph_range": [
               0,
               255
-            ],
-            "pattern_display": {}
+            ]
           }
         },
         {
@@ -4379,7 +4410,9 @@
           ],
           "record": 210,
           "name": "Remote Park Equipped",
+          "flags": 65,
           "monitor_key": 211,
+          "ffd_support_condition_key": 0,
           "physical_data_key": 1,
           "bit_start": 6,
           "bit_end": 7,
@@ -4397,6 +4430,11 @@
             "signed": false,
             "decimal_point_count": 0,
             "bit_width": 2,
+            "pattern_display": {
+              "0": "Without",
+              "1": "With",
+              "3": "Unknown"
+            },
             "data_range": [
               0,
               3
@@ -4404,12 +4442,7 @@
             "graph_range": [
               0,
               3
-            ],
-            "pattern_display": {
-              "0": "Without",
-              "1": "With",
-              "3": "Unknown"
-            }
+            ]
           }
         },
         {
@@ -4422,7 +4455,9 @@
           ],
           "record": 224,
           "name": "Compatible with AVN (Advanced Park)",
+          "flags": 65,
           "monitor_key": 225,
+          "ffd_support_condition_key": 0,
           "physical_data_key": 1,
           "bit_start": 8,
           "bit_end": 8,
@@ -4440,6 +4475,10 @@
             "signed": false,
             "decimal_point_count": 0,
             "bit_width": 1,
+            "pattern_display": {
+              "0": "No",
+              "1": "Yes"
+            },
             "data_range": [
               0,
               1
@@ -4447,11 +4486,7 @@
             "graph_range": [
               0,
               1
-            ],
-            "pattern_display": {
-              "0": "No",
-              "1": "Yes"
-            }
+            ]
           }
         },
         {
@@ -4464,7 +4499,9 @@
           ],
           "record": 257,
           "name": "Steer-By-Wire Equipped Information",
+          "flags": 65,
           "monitor_key": 258,
+          "ffd_support_condition_key": 0,
           "physical_data_key": 1,
           "bit_start": 6,
           "bit_end": 7,
@@ -4482,6 +4519,11 @@
             "signed": false,
             "decimal_point_count": 0,
             "bit_width": 2,
+            "pattern_display": {
+              "0": "Without",
+              "1": "With",
+              "2": "Unknown"
+            },
             "data_range": [
               0,
               2
@@ -4489,12 +4531,7 @@
             "graph_range": [
               0,
               2
-            ],
-            "pattern_display": {
-              "0": "Without",
-              "1": "With",
-              "2": "Unknown"
-            }
+            ]
           }
         },
         {
@@ -4507,7 +4544,9 @@
           ],
           "record": 258,
           "name": "Steer-By-Wire Signal Inconsistency",
+          "flags": 65,
           "monitor_key": 259,
+          "ffd_support_condition_key": 0,
           "physical_data_key": 1,
           "bit_start": 9,
           "bit_end": 9,
@@ -4525,6 +4564,10 @@
             "signed": false,
             "decimal_point_count": 0,
             "bit_width": 1,
+            "pattern_display": {
+              "0": "No",
+              "1": "Yes"
+            },
             "data_range": [
               0,
               1
@@ -4532,11 +4575,7 @@
             "graph_range": [
               0,
               1
-            ],
-            "pattern_display": {
-              "0": "No",
-              "1": "Yes"
-            }
+            ]
           }
         },
         {
@@ -4549,7 +4588,9 @@
           ],
           "record": 263,
           "name": "Power Steering Control Module Equipped",
+          "flags": 65,
           "monitor_key": 264,
+          "ffd_support_condition_key": 0,
           "physical_data_key": 1,
           "bit_start": 7,
           "bit_end": 7,
@@ -4567,6 +4608,10 @@
             "signed": false,
             "decimal_point_count": 0,
             "bit_width": 1,
+            "pattern_display": {
+              "0": "Without",
+              "1": "With"
+            },
             "data_range": [
               0,
               1
@@ -4574,11 +4619,7 @@
             "graph_range": [
               0,
               1
-            ],
-            "pattern_display": {
-              "0": "Without",
-              "1": "With"
-            }
+            ]
           }
         },
         {
@@ -4591,7 +4632,9 @@
           ],
           "record": 264,
           "name": "Software Inconsistency with Power Steering Control Module",
+          "flags": 65,
           "monitor_key": 265,
+          "ffd_support_condition_key": 0,
           "physical_data_key": 1,
           "bit_start": 11,
           "bit_end": 11,
@@ -4609,6 +4652,10 @@
             "signed": false,
             "decimal_point_count": 0,
             "bit_width": 1,
+            "pattern_display": {
+              "0": "No",
+              "1": "Yes"
+            },
             "data_range": [
               0,
               1
@@ -4616,11 +4663,7 @@
             "graph_range": [
               0,
               1
-            ],
-            "pattern_display": {
-              "0": "No",
-              "1": "Yes"
-            }
+            ]
           }
         }
       ]
@@ -4952,7 +4995,9 @@
             ],
             "record": 47,
             "name": "Motor 2 V Phase Duty",
+            "flags": 3,
             "monitor_key": 155,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 15,
             "bit_start": 0,
             "bit_end": 15,
@@ -4970,7 +5015,9 @@
             ],
             "record": 47,
             "name": "Motor 2 V Phase Duty",
+            "flags": 3,
             "monitor_key": 155,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 15,
             "bit_start": 0,
             "bit_end": 15,
@@ -5001,7 +5048,9 @@
             ],
             "record": 545,
             "name": "Pressure Control Solenoid \"D\" Actuator Stuck Off",
+            "flags": 67,
             "monitor_key": 546,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 8,
             "bit_end": 8,
@@ -5019,7 +5068,9 @@
             ],
             "record": 546,
             "name": "Pressure Control Solenoid \"G\" Actuator Stuck Off",
+            "flags": 67,
             "monitor_key": 547,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 9,
             "bit_end": 9,
@@ -5037,7 +5088,9 @@
             ],
             "record": 547,
             "name": "Pressure Control Solenoid \"G\" Actuator Stuck On",
+            "flags": 67,
             "monitor_key": 548,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 10,
             "bit_end": 10,
@@ -5055,7 +5108,9 @@
             ],
             "record": 548,
             "name": "Pressure Control Solenoid \"C\" Actuator Stuck Off",
+            "flags": 67,
             "monitor_key": 549,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 11,
             "bit_end": 11,
@@ -5073,7 +5128,9 @@
             ],
             "record": 549,
             "name": "Pressure Control Solenoid \"B\" Actuator Stuck Off",
+            "flags": 67,
             "monitor_key": 550,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 12,
             "bit_end": 12,
@@ -5091,7 +5148,9 @@
             ],
             "record": 550,
             "name": "Pressure Control Solenoid \"B\" Actuator Stuck On",
+            "flags": 67,
             "monitor_key": 551,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 13,
             "bit_end": 13,
@@ -5109,7 +5168,9 @@
             ],
             "record": 551,
             "name": "Pressure Control Solenoid \"A\" Actuator Stuck Off",
+            "flags": 67,
             "monitor_key": 552,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 14,
             "bit_end": 14,
@@ -5127,7 +5188,9 @@
             ],
             "record": 552,
             "name": "Pressure Control Solenoid \"A\" Actuator Stuck On",
+            "flags": 67,
             "monitor_key": 553,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 15,
             "bit_end": 15,
@@ -5145,7 +5208,9 @@
             ],
             "record": 553,
             "name": "Transmission Fluid Temperature Sensor Stuck on Actual Operation Range",
+            "flags": 67,
             "monitor_key": 554,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 25,
             "bit_end": 25,
@@ -5163,7 +5228,9 @@
             ],
             "record": 554,
             "name": "Transmission Fluid Temperature Sensor Stuck High",
+            "flags": 67,
             "monitor_key": 555,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 26,
             "bit_end": 26,
@@ -5181,7 +5248,9 @@
             ],
             "record": 555,
             "name": "Transmission Fluid Temperature Sensor Stuck Low",
+            "flags": 67,
             "monitor_key": 556,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 27,
             "bit_end": 27,
@@ -5199,7 +5268,9 @@
             ],
             "record": 556,
             "name": "Abnormal Input Shaft Revolution Increasing Detection (Transmission)",
+            "flags": 67,
             "monitor_key": 557,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 28,
             "bit_end": 28,
@@ -5217,7 +5288,9 @@
             ],
             "record": 557,
             "name": "Transmission Fluid Pump Revolution Deviation Abnormal",
+            "flags": 67,
             "monitor_key": 558,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 29,
             "bit_end": 29,
@@ -5235,7 +5308,9 @@
             ],
             "record": 558,
             "name": "Shift Solenoid \"J\" Control Actuator Stuck On",
+            "flags": 67,
             "monitor_key": 559,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 30,
             "bit_end": 30,
@@ -5253,7 +5328,9 @@
             ],
             "record": 559,
             "name": "Shift Solenoid \"H\" Control Actuator Stuck Off",
+            "flags": 67,
             "monitor_key": 560,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 31,
             "bit_end": 31,
@@ -5271,7 +5348,9 @@
             ],
             "record": 545,
             "name": "Pressure Control Solenoid \"D\" Actuator Stuck Off",
+            "flags": 67,
             "monitor_key": 546,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 8,
             "bit_end": 8,
@@ -5289,7 +5368,9 @@
             ],
             "record": 546,
             "name": "Pressure Control Solenoid \"G\" Actuator Stuck Off",
+            "flags": 67,
             "monitor_key": 547,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 9,
             "bit_end": 9,
@@ -5307,7 +5388,9 @@
             ],
             "record": 547,
             "name": "Pressure Control Solenoid \"G\" Actuator Stuck On",
+            "flags": 67,
             "monitor_key": 548,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 10,
             "bit_end": 10,
@@ -5325,7 +5408,9 @@
             ],
             "record": 548,
             "name": "Pressure Control Solenoid \"C\" Actuator Stuck Off",
+            "flags": 67,
             "monitor_key": 549,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 11,
             "bit_end": 11,
@@ -5343,7 +5428,9 @@
             ],
             "record": 549,
             "name": "Pressure Control Solenoid \"B\" Actuator Stuck Off",
+            "flags": 67,
             "monitor_key": 550,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 12,
             "bit_end": 12,
@@ -5361,7 +5448,9 @@
             ],
             "record": 550,
             "name": "Pressure Control Solenoid \"B\" Actuator Stuck On",
+            "flags": 67,
             "monitor_key": 551,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 13,
             "bit_end": 13,
@@ -5379,7 +5468,9 @@
             ],
             "record": 551,
             "name": "Pressure Control Solenoid \"A\" Actuator Stuck Off",
+            "flags": 67,
             "monitor_key": 552,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 14,
             "bit_end": 14,
@@ -5397,7 +5488,9 @@
             ],
             "record": 552,
             "name": "Pressure Control Solenoid \"A\" Actuator Stuck On",
+            "flags": 67,
             "monitor_key": 553,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 15,
             "bit_end": 15,
@@ -5415,7 +5508,9 @@
             ],
             "record": 553,
             "name": "Transmission Fluid Temperature Sensor Stuck on Actual Operation Range",
+            "flags": 67,
             "monitor_key": 554,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 25,
             "bit_end": 25,
@@ -5433,7 +5528,9 @@
             ],
             "record": 554,
             "name": "Transmission Fluid Temperature Sensor Stuck High",
+            "flags": 67,
             "monitor_key": 555,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 26,
             "bit_end": 26,
@@ -5451,7 +5548,9 @@
             ],
             "record": 555,
             "name": "Transmission Fluid Temperature Sensor Stuck Low",
+            "flags": 67,
             "monitor_key": 556,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 27,
             "bit_end": 27,
@@ -5469,7 +5568,9 @@
             ],
             "record": 556,
             "name": "Abnormal Input Shaft Revolution Increasing Detection (Transmission)",
+            "flags": 67,
             "monitor_key": 557,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 28,
             "bit_end": 28,
@@ -5487,7 +5588,9 @@
             ],
             "record": 557,
             "name": "Transmission Fluid Pump Revolution Deviation Abnormal",
+            "flags": 67,
             "monitor_key": 558,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 29,
             "bit_end": 29,
@@ -5505,7 +5608,9 @@
             ],
             "record": 558,
             "name": "Shift Solenoid \"J\" Control Actuator Stuck On",
+            "flags": 67,
             "monitor_key": 559,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 30,
             "bit_end": 30,
@@ -5523,7 +5628,9 @@
             ],
             "record": 559,
             "name": "Shift Solenoid \"H\" Control Actuator Stuck Off",
+            "flags": 67,
             "monitor_key": 560,
+            "ffd_support_condition_key": 0,
             "physical_data_key": 6,
             "bit_start": 31,
             "bit_end": 31,

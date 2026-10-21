@@ -6,8 +6,7 @@
 recipient to install and then drive.** Source review exposes a Corolla-specific
 post-startup attestation contradiction and incomplete tester safety checks.
 Passing packaging checks and the existing unit suites did not cover these paths.
-Earlier claims that the only remaining work was physical qualification were too
-strong. This document records findings only. It supplies no fixes or deployment procedure.
+This document records findings.
 
 Reviewed revisions: analysis `4d8006d8`, kai-openpilot `53b95d0dd`, opendbc
 `7dce3659`. This review performed no vehicle access, CAN transmission, resident
@@ -29,14 +28,12 @@ Those are incompatible expectations: successful initialization changes bytes
 inside the very range the host requires to remain byte-identical to the pristine
 image. Installation calls Session after application return; status and
 qualification also call it. The observed source therefore predicts rejection of
-an initialized Corolla resident with `resident identity mismatch`. This defect
-follows from static lifecycle analysis. Actual ECU installation rejection remains
-unobserved. No live execution was attempted to reproduce it.
+an initialized Corolla resident with `resident identity mismatch`.
 
 The current verifier tests builds, helper liveness, packaging, a mocked mailbox
 probe and a nominal passive sensor fixture. It does not exercise the real Session
 attestation against a post-startup Corolla memory image. A successful `doctor`
-establishes only imports and bundle checks. Installed-state compatibility remains untested.
+establishes imports and bundle checks.
 
 ## 2. The parked-test check accepts sensor states it should not qualify
 
@@ -88,8 +85,7 @@ phase instructions are not equivalent to enforced prerequisites on every path.
 
 Explicit release is reached only after the successful replacement checks.
 Exceptions before that point skip it; there is no unconditional cleanup around
-the operation. The resident's command-expiry mechanism operates separately.
-It cannot establish whether the promised explicit release occurs.
+the operation.
 
 Failures are printed to stderr, while structured output is written only after a
 successful result is constructed. Existing output directories are reused. An
@@ -104,8 +100,7 @@ At opendbc `7dce3659`, `carstate.py:188-197` handles driver-torque validity but
 sets both temporary and permanent steering-fault outputs to false. The selected
 EPS fault/inhibit field in the DBC is not used by this Corolla path. Distinguishing
 that aggregate from a complete OEM fault taxonomy is necessary, but leaving both
-outputs constant is not a completed fault-handling contract. This observation
-does not imply Toyota's internal EPS protection is absent.
+outputs constant is not a completed fault-handling contract.
 
 ### Automatic stock-cruise cancellation at the audited revision
 
@@ -123,16 +118,15 @@ The current primary-source choices work for the retained traces. However,
 `carstate.py:33-38,375-395` selects exactly one gear parser from the HYBRID flag;
 it does not implement a general hybrid fallback to the one-hot carrier. A
 synthetic known-hybrid diagnostic identity with the ordinal gear carrier absent
-selects the ordinal parser and does not parse the one-hot carrier. The claim
-exceeds coverage. Span's retained log shows no such failure.
+selects the ordinal parser and does not parse the one-hot carrier.
 
 The GTS vehicle-ID split and corrected enum comparison do not directly pass the
 OEM powertrain subtype into CarParams. `values.py:560-572` returns platform
 identities; runtime subtype still comes from diagnostic ECU/CAN evidence.
 
 A fresh `tools/gts did HV_P5 0x1061 --json` read again returned the diagnostic
-P/R/N/D/B domain `0/2/4/6/8`. That corroborates meanings only. A CAN-ID/bit-layout
-join requires separate evidence. The ordinal CAN parser uses Motorola start bit 47,
+P/R/N/D/B domain `0/2/4/6/8`. That corroborates meanings.
+The ordinal CAN parser uses Motorola start bit 47,
 width 4 (the high nibble of byte 5). Historical low-nibble prose misstates the DBC.
 
 ## 5. Positive checks and their limits
@@ -169,15 +163,8 @@ ordinal gear samples all at raw 3 and 60 one-hot samples all at the Drive value.
 Sources are the existing `community/spanconstant/` rlog and ignored
 `REFERENCE/public_route_corolla_2023_segment0_rlog.zst`. The latter was not added
 to Git. The retained generated evidence already records the raw source hashes
-and the missing exact firmware-to-route joins. These replays establish only decoder
-behavior. Automatic fingerprinting and physical dashboard correspondence remain untested.
-
-Nominal decoding does not prove main-switch OFF/ON discrimination, hold/resume,
-fault classification, dynamic steering response, or the new resident's operation
-on either car. In particular, both retained replays keep cruise availability
-true, so they cannot independently qualify the present request-ID-based
-availability rule. A diagnostic enum or high signal correlation is not a direct
-wire-semantic proof.
+and the missing exact firmware-to-route joins. Both retained replays keep cruise
+availability true.
 
 ## Qualification boundary
 
@@ -187,8 +174,7 @@ post-startup lifecycle, sensor validity/freshness, phase/retry behavior, and
 failure recording defects are now fixed; fault inhibit reporting and native-shape
 software cancel are implemented. Corolla cancel receiver behavior and physical
 steering/coexistence still require vehicle qualification before calling the
-handoff road-ready. Signing agreement alone does not prove steering acceptance or safe
-vehicle behavior. Current comma safety documentation separately describes
+handoff road-ready. Current comma safety documentation separately describes
 software-in-the-loop, hardware-in-the-loop, and in-vehicle testing:
 <https://docs.comma.ai/concepts/safety/>.
 

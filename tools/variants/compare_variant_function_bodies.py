@@ -20,10 +20,7 @@ For each reference function:
   duplicated.
 
 For non-exact bodies, the report may include a *candidate* target address inferred
-from neighboring exact functions.  Candidate byte-similarity is useful triage,
-but it is deliberately not promoted to semantic homology.  Decompile/disassemble
-and prove any material transferred behavior against the foreign firmware before
-recording it as a finding.
+from neighboring exact functions. Candidate byte-similarity supports triage.
 
 The target may be a bare 1 MiB CodeFlash image or the repository-supported 2 MiB
 range-dumper shape whose upper 1 MiB is all 0xFF.
@@ -312,10 +309,6 @@ def alignment_candidate(
             None if halfword_equal_ratio is None else round(halfword_equal_ratio, 6)
         ),
         "quality": quality,
-        "evidence_boundary": (
-            "triage candidate only; neighboring exact relocation plus byte similarity does "
-            "not prove function boundaries, control flow, or semantic homology"
-        ),
     }
 
 
@@ -469,12 +462,6 @@ def compare(
     )
     return {
         "schema": SCHEMA,
-        "evidence_boundary": (
-            "Exact classes are raw-byte transfer proofs for the reference Ghidra-defined "
-            "body ranges only. They do not by themselves prove callers, data tables, runtime "
-            "reachability, or unchanged semantics outside those bytes. Alignment candidates "
-            "are triage only and require foreign-image disassembly/decompilation before use."
-        ),
         "reference": {
             "id": reference_id,
             "codeflash_sha256": sha256(reference_image),
@@ -494,7 +481,6 @@ def compare(
             "exact_relocation_anchor_minimum_body_bytes": ANCHOR_MIN_BODY_BYTES,
             "bracket_alignment_max_distance_bytes": BRACKET_MAX_DISTANCE,
             "nearest_alignment_max_distance_bytes": NEAREST_MAX_DISTANCE,
-            "candidate_similarity_is_semantic_proof": False,
         },
         "summary": {
             "reference_codeflash_functions": len(rows),

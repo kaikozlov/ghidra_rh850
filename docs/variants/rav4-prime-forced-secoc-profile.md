@@ -80,10 +80,7 @@ least:
 are statically selected for **replacement**.
 
 The experiment substituted the older profile's camera steering/HUD message family
-across the harness boundary. That change extends beyond sending a bad-MAC
-`0x2E4` to a patched EPS. A 2024 TSS3 network may differ in message presence,
-cadence, payload semantics, or dependencies independently of the EPS SecOC
-acceptance predicate.
+across the harness boundary.
 
 ### 2.1 Exhaustive relevant-message matrix
 
@@ -180,9 +177,7 @@ where byte 2 `0x5D` is DTC-table index 93. `FUN_00050f56` and
 `FUN_00051268` independently establish that event-record byte 2 is the DTC
 index used to aggregate/report diagnostic state.
 
-This does **not** prove that the RAV4 Prime uses identical Dem event IDs or
-identical PDU monitors. It establishes `U023A87` as a concrete configured
-failure subtype in the analyzed Denso EPS family.
+`U023A87` is a concrete configured failure subtype in the analyzed Denso EPS family.
 
 Four of the five Sienna event IDs can now be taken one step further through the
 11-entry communication-monitor table at `0x28278`. Each table row carries a Dem
@@ -200,10 +195,8 @@ IDs:
 
 This is a useful comparative Sienna result: U023A87 can be raised by missing
 traffic in a group that includes both protected steering streams (`0x2E4`,
-`0x131`), ordinary `0x191`, and `0x2FD`. It does **not** mean the 2024 RAV4 uses
-identical event-to-PDU assignments. Event `0xB3` is configured for the same DTC
-but is absent from this recovered monitor table. Its specific reporter remains
-unresolved.
+`0x131`), ordinary `0x191`, and `0x2FD`. Event `0xB3` is configured for the same DTC
+but is absent from this recovered monitor table.
 
 Machine-readable evidence:
 `data/generated/u023a87_monitor_map.json`.
@@ -262,8 +255,7 @@ The patch is the corrected Gate-2 compare neutralization independently recovered
 from the Sienna firmware: `cmp r0,r26 -> cmp r0,r0`, preserving the following
 BNE and forcing its result-zero/PduR-delivery fallthrough. The Sienna command-7
 KAT pins result zero as verification OK. The field result strongly corroborates
-the corrected predicate direction through external dynamic evidence. The
-branch-to-`0x8E6DA` patch remains superseded.
+the corrected predicate direction through external dynamic evidence.
 
 The experiment is still not the controlled MAC28-only causal proof. The forced
 old profile continues to block/replace stock `0x191/0x412/0x2E4/0x131`, so

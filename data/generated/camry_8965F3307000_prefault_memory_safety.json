@@ -146,7 +146,7 @@
       "0xFEBF1324",
       "0xFEBF6B04"
     ],
-    "intersection_closure": "0x8E7BA enforces index < 0x60 and writes only FEBE5398..FEBE53F7; recovery cells remain outside that range",
+    "intersection_closure": "0x8E7BA enforces index < 0x60 and writes FEBE5398..FEBE53F7",
     "pointer_parameter_dependent": {
       "functions": 52,
       "interpretation": "over-approximation; caller/configuration provenance resolves the relevant route/controller/state pointers to fixed objects or RSCFD MMIO",
@@ -471,7 +471,7 @@
     "software_id": "8965F3307000"
   },
   "transport_state_provenance": {
-    "classification": "0x7B18A/0x7BB0E state-slot index comes exclusively from fixed transport record[1]",
+    "classification": "0x7B18A/0x7BB0E state-slot index comes from fixed transport record[1]",
     "descriptor_base": "0x00022C4C",
     "descriptor_count": 3,
     "descriptor_root": "0x00022C70",

@@ -427,7 +427,7 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
       "reference_minus_b6_deg": qstats(ref_b6),
       "reference_closer_to_stock_count": stock_closer,
       "reference_closer_to_b6_count": b6_closer,
-      "reference_position_ratio_definition": "(0x081 - stock_0x08A) / (B6 - stock_0x08A); geometric reference-plane ratio only; EPS B6 blend fraction remains unresolved",
+      "reference_position_ratio_definition": "(0x081 - stock_0x08A) / (B6 - stock_0x08A); geometric reference-plane ratio",
       "reference_position_ratio": qstats(weights),
     }
 
@@ -519,7 +519,7 @@ def scan(LogReader, route: Path) -> dict[str, Any]:
     "stock_id0_while_openpilot_b6_id11": {
       "model_rows": stock0_b611_rows,
       "rows_with_abs_driver_torque_lt_0p5_nm": stock0_b611_low_torque_rows,
-      "interpretation": "useful non-coincident-request episodes only; causal B6 actuation requires additional proof",
+      "interpretation": "useful non-coincident-request episodes",
     },
     "conclusion": {
       "b6_wire_angle_matches_openpilot_request": True,

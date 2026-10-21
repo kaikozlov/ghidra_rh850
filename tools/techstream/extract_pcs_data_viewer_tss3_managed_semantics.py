@@ -23,6 +23,8 @@ from typing import Any
 
 
 import dnfile  # type: ignore
+from dnfile.codedindex import TypeDefOrRef
+from dnfile.utils import read_compressed_int
 from dncil.cil.body import CilMethodBody  # type: ignore
 from tools.techstream.extract_pcs_data_viewer_tss3_dictionary import load_culture
 from tools.techstream.inspect_dotnet_il import MethodBodyReader, resolve_token, type_name
@@ -395,6 +397,21 @@ def _decimal_from_ctor(stack: list[Any], row: dnfile.mdtable.MemberRefRow) -> De
     return -value if negative else value
 
 
+def _collection_kind(pe: dnfile.dnPE, row: dnfile.mdtable.TypeSpecRow) -> str:
+    signature = bytes(row.Signature.value)
+    # GENERICINST CLASS is followed by a compressed TypeDefOrRef token.
+    encoded_type = read_compressed_int(signature[2:]) if signature[:2] == b"\x15\x12" else None
+    if encoded_type is None:
+        raise ValueError(f"unsupported collection type signature: {signature.hex()}")
+    type_token, _ = encoded_type
+    owner = type_name(TypeDefOrRef(type_token, pe.net.mdtables.tables_list).row)
+    if owner == "System.Collections.Generic.Dictionary`2":
+        return "outer"
+    if owner == "System.Collections.Generic.List`1":
+        return "list"
+    raise ValueError(f"unsupported collection type: {owner}")
+
+
 def _interpret_collection(
     pe: dnfile.dnPE,
     english: dict[str, str | bytes],
@@ -412,7 +429,6 @@ def _interpret_collection(
     owners = _method_owner_map(pe)
     stack: list[Any] = []
     locals_: dict[int, Any] = {}
-    typespec_ctor_count = 0
     records: list[tuple[Any, dict[str, Any]]] = []
 
     for index, ins in enumerate(body.instructions):
@@ -484,13 +500,12 @@ def _interpret_collection(
             owner, name = _owner_and_name(called, owners)
             if name != ".ctor":
                 raise ValueError(f"{define_type}: unsupported newobj {owner}::{name}")
-            if owner.startswith("<dnfile.mdtable.TypeSpecRow") or owner == "?":
-                next_op = str(body.instructions[index + 1].opcode) if index + 1 < len(body.instructions) else ""
-                is_outer = typespec_ctor_count == 0 or next_op.startswith("stloc")
-                typespec_ctor_count += 1
-                if is_outer:
+            class_row = getattr(getattr(called, "Class", None), "row", None)
+            if isinstance(class_row, dnfile.mdtable.TypeSpecRow):
+                kind = _collection_kind(pe, class_row)
+                if kind == "outer":
                     records = []
-                stack.append(Collection("outer" if is_outer else "list", []))
+                stack.append(Collection(kind, []))
                 continue
             if owner == "System.Decimal" and isinstance(called, dnfile.mdtable.MemberRefRow):
                 stack.append(_decimal_from_ctor(stack, called))
@@ -695,7 +710,7 @@ def _lateral_arbitration_schema(details: list[dict[str, Any]]) -> dict[str, Any]
             "LCA": {
                 "presence_field": lca_presence,
                 "dedicated_request_tuple_rows": [],
-                "boundary": "LCA is explicitly present as a feature in DID 5202, but this 1,130-row current recorder dictionary contains no LCA-named lateral-ID/pinion-angle/assist-gain/damping-gain request tuple. This negative result covers only the recorder schema. An internal LCA request path remains possible.",
+                "boundary": "LCA is explicitly present as a feature in DID 5202, but this 1,130-row current recorder dictionary contains no LCA-named lateral-ID/pinion-angle/assist-gain/damping-gain request tuple.",
             },
         },
         "arbitration_result": {
@@ -705,7 +720,7 @@ def _lateral_arbitration_schema(details: list[dict[str, Any]]) -> dict[str, Any]
         "shape_equivalence": {
             "generic_5282_equals_lda_5531_equals_lta_5631": True,
             "layout": generic_shape,
-            "interpretation": "The current recorder exposes generic, LDA, and LTA request tuples with identical byte/bit/scaling geometry. This supports a normalized arbitration model but does not by itself prove runtime copy direction or ECU ownership.",
+            "interpretation": "The current recorder exposes generic, LDA, and LTA request tuples with identical byte/bit/scaling geometry. This supports a normalized arbitration model.",
         },
     }
 

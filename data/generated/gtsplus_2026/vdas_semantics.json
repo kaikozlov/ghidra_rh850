@@ -24,7 +24,6 @@
     "vdas_call_argument": 6,
     "vdas_effective_compression_level": "System.IO.Compression.CompressionLevel.Optimal (enum 0)"
   },
-  "boundary": "This proves the host persistence/export format and exact source-log bindings. It does not prove that a given vehicle/session populated those logs, nor does it identify ECU-side CAN/SecOC producer ownership.",
   "capture_implication": "A real .vdas file can be inspected with an ordinary ZIP reader and its UTF-8 json.log retained directly. For TSS3 RE this may be simpler than GTSE because the current VDAS creation path explicitly includes TSS3OperationFFD.log and ImageFFD.log rather than applying TSEConverter's PCS skip list.",
   "create_and_export": {
     "csv_export": {

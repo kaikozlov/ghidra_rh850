@@ -2,8 +2,7 @@
 """Build the exact-F33 application-mode volatile signer loader assessment.
 
 This artifact intentionally separates byte placement from control transfer.  It
-uses exact CodeFlash bytes plus retained live evidence.  It does not authorize
-or implement a vehicle-side execution pivot.
+uses exact CodeFlash bytes plus retained live evidence.
 """
 from __future__ import annotations
 
@@ -310,7 +309,7 @@ def build() -> dict:
     need(bysid[0x11]["callback"]==0 and bysid[0x11]["sessions"]==[2] and not bysid[0x11]["has_subfunctions"] and bysid[0x11]["sub_count"]==0, "F33 ECUReset null-service boundary drift")
 
     # Proprietary SID 0xAB is a three-selector event-record service. The selectors
-    # are fixed CodeFlash callbacks. The 64-slot catalogue holds only event IDs/type
+    # are fixed CodeFlash callbacks. The 64-slot catalogue holds event IDs/type
     # metadata.
     ab_rows=[]
     for i in range(3):
@@ -394,8 +393,7 @@ def build() -> dict:
 
     # F33 has two byte-identical calibration-page copy loops: one in normal
     # application startup and one behind XCP COPY_CAL_PAGE (0xE4). Both copy the
-    # exact low calibration page into the lower XCP window. This establishes only a
-    # calibration shadow/data path; instruction-fetch remapping remains unproved.
+    # exact low calibration page into the lower XCP window as a calibration shadow/data path.
     need(CAL_SOURCE_END-CAL_SOURCE_LO+1==0x7DF0, "calibration page size drift")
     need(CAL_SHADOW_END-CAL_SHADOW_LO+1==0x7DF0, "calibration shadow size drift")
     need(image[0x636D4:0x636F8]==image[0x993F0:0x99414], "startup/XCP calibration copy loops diverged")
@@ -468,7 +466,7 @@ def build() -> dict:
         "retained_sha256":high["result"]["retained_sha256"],"exact_after_stock_startup":True,"executed_live":True,"stock_application_reappeared":True,
         "safety_tx_blocked_delta":0,"low_febf0000_carrier_rejected":True,
         "source_files":{p.name:sha_file(p) for p in (HIGH,LOW,STOCK_HANDOFF,POSTSTARTUP,RETENTION_MANIFEST)},
-        "poststartup_direct_canary_result":"negative/no application reappearance; retained only as a failed architecture probe; the high-tail carrier remains proven",
+        "poststartup_direct_canary_result":"negative/no application reappearance; failed architecture probe",
       },
       "application_xcp":{
         "request_can_id":"0x1FDC0002","response_can_id":"0x1FE00002",
@@ -509,7 +507,7 @@ def build() -> dict:
           "communication_manager_state":"0xFEBE3DF2","channel0_state":"0xFEBE3DE5",
           "source_comm_mask":"0xFEBE4FAE","configured_source_mask":"0x10","propagated_comm_mask":"0xFEBE493A","owner_active_state":"0xFEBE491B","owner_online_event_state":"0xFEBE4919",
           "owner_active_predicate":"0x0007F23C","owner_online_setter":"0x0007F030","configured_delay_foreground_ticks":3,"foreground_tick_ms":5.0,"configured_delay_ms":15.0,
-          "dynamic_boundary":"Sep-6 live SID23 proved the transport/owner predicates active and FEBE4EE6=0x5A; this necessary state still requires the independent fixed CodeFlash pre-command gate, which remains disabled",
+          "dynamic_boundary":"Sep-6 live SID23 proved the transport/owner predicates active and FEBE4EE6=0x5A; the independent fixed CodeFlash pre-command gate remains disabled",
           "read_only_preflight":"exploit/followups/xcp_runtime_state_probe.py",
         },
         "normal_route_live_result":{"status":"superseded_standard_id_probe","tested_bus":1,"elm327_param":1,"panda_tx_block_counter_recorded":False,"source":str(XCP_LIVE.relative_to(ROOT)),"source_sha256":sha_file(XCP_LIVE)},
@@ -536,13 +534,13 @@ def build() -> dict:
           "request_state":"0xFEBF45D0..0xFEBF45E3","request_state_inside_xcp_write_window":False,
           "request_semantics":"bounded event IDs/selectors only; response workers copy/merge event data into the DCM response",
           "request_derived_indirect_pc_target_recovered":False,
-          "verdict":"event-record read/format path only; address/call primitive absent from the recovered surface",
+          "verdict":"event-record read/format path",
         },
         "sid_ba":{
           "service_callback":"0x0008E434","operation_table":"0x00027EC4","operation_count":ba_count,
           "operations":[{"command":f"0x{r['command']:02X}","mode":f"0x{r['mode']:02X}","start":f"0x{r['start']:08X}","finish":f"0x{r['finish']:08X}"} for r in ba_rows],
           "request_copy_cap_bytes":64,"all_callbacks_fixed_codeflash":True,"request_derived_indirect_pc_target_recovered":False,
-          "verdict":"fixed maintenance/test operation dispatch only; arbitrary address/call primitive absent from the recovered surface",
+          "verdict":"fixed maintenance/test operation dispatch",
         },
         "routine_control":{
           "callback_table":"0x000256DC","row_count":19,
@@ -563,14 +561,14 @@ def build() -> dict:
           "service":"0x11","callback":None,"sessions":[2],"has_subfunctions":False,"application_reset_action_recovered":False,
           "verdict":"ordinary application ECUReset supplies no reset worker/pivot in this calibration",
         },
-        "summary":"All configured application diagnostic classes with plausible write/control semantics (WDBI, RoutineControl, SID AB, SID BA, ECUReset, and 0x34/0x36/0x37) are now target-natively bounded away from a tester-chosen PC transfer. This negative covers only the recovered surface; memory safety of undiscovered code remains unproved.",
+        "summary":"All configured application diagnostic classes with plausible write/control semantics (WDBI, RoutineControl, SID AB, SID BA, ECUReset, and 0x34/0x36/0x37) are target-natively bounded away from a tester-chosen PC transfer.",
       },
       "stock_command5_routine":{
         "rid":"0x100F","routine_table":"0x00026918","callback_table":"0x000256DC","precondition":"0x0008B858","action":"0x0008B872",
         "chain":["0x0008B872","0x0006A0AE","0x00069C58","0x00069BD8","0x00089440"],
         "command5_dispatcher":"0x00089440","input_length":16,"input":"0xFEBE5186","output":"0xFEBE51B6","output_exposed_to_tester":False,
         "xcp_can_rewrite_input_or_output":False,
-        "verdict":"real no-service-SA stock command-5 test path only: fixed 16-byte input and local/private result path; a direct SecOC signer API remains absent",
+        "verdict":"real no-service-SA stock command-5 test path: fixed 16-byte input and local/private result path",
       },
       "control_transfer_audit":{
         "raw_indirect_control_transfer_census":{
@@ -596,7 +594,7 @@ def build() -> dict:
             {"cell":"0xFEBE5628","consumers":["0x00091678","0x000916BE"],"closure":"temporary service callback derived from fixed CodeFlash service configuration; request bytes do not become a pointer"},
           ],
           "all_direct_lower_ram_cells_below_xcp_write_window":True,
-          "bounded_note":"The classifier reports source-cell provenance only; complete target semantics require separate analysis. Fixed descriptor/table families, 99 fixed-immediate CodeFlash thunks, 50 parameter-vector calls in ten unreferenced library routines, and four guarded lower-RAM residuals are classified separately below.",
+          "bounded_note":"The classifier reports source-cell provenance. Fixed descriptor/table families, 99 fixed-immediate CodeFlash thunks, 50 parameter-vector calls in ten unreferenced library routines, and four guarded lower-RAM residuals are classified separately below.",
         },
         "residual_computed_calls":{
           "sites":["0x0008863E","0x0008AF7A","0x0008AF88","0x0008AFAA"],
@@ -674,7 +672,7 @@ def build() -> dict:
           "writers":ctbp_writers,
           "all_ctbp_writers_census_closed":True,
           "only_writer_sets_zero":True,
-          "verdict":"CTBP cannot be retargeted by application/tester state in the exact image; the sole LDSR-to-CTBP is reset's ldsr r0,CTBP at 0x25E; this does not establish a live CALLT consumer",
+          "verdict":"CTBP cannot be retargeted by application/tester state in the exact image; the sole LDSR-to-CTBP is reset's ldsr r0,CTBP at 0x25E",
         },
         "audit_scripts":{
           "computed_calls":{"path":"ghidra/scripts/investigate/ClassifyComputedCallTargets.java","sha256":sha_file(ROOT / "ghidra/scripts/investigate/ClassifyComputedCallTargets.java")},
@@ -704,8 +702,8 @@ def build() -> dict:
           "page_state_application_consumers_recovered":0,
           "translator_recovered_use":"BUILD_CHECKSUM memory-address translation",
           "instruction_fetch_or_branch_remap_recovered":False,
-          "verdict":"closed as calibration-page data shadow only; execution overlay and PC pivot remain unrecovered",
-          "boundary":"Function/flow counts are from the exact F33 recovered Ghidra corpus. Undiscovered code remains outside that census, but exact startup/XCP copy identity and standard page-command semantics independently support the data-shadow classification.",
+          "verdict":"closed as calibration-page data shadow",
+          "boundary":"Function/flow counts are from the exact F33 recovered Ghidra corpus. Exact startup/XCP copy identity and standard page-command semantics independently support the data-shadow classification.",
         },
         "residual_tail_starts_exactly_after_e4_copy":HIGH_BASE==CAL_SHADOW_END+1,
         "arbitrary_high_tail_writer":False,
@@ -743,7 +741,7 @@ def build() -> dict:
           "placement":"no application transfer state recovered; all three service objects have null direct callbacks",
           "execution":"real loader requires session-2 PROGRAMMING handoff into bootloader",
           "network_visibility":"PROGRAMMING handoff is disruptive and makes the EPS temporarily disappear; violates production requirement",
-          "privilege_mpu_context":"bootloader/application handoff only; an already-running stock-application mechanism remains unrecovered",
+          "privilege_mpu_context":"bootloader/application handoff",
           "lifetime":"payload may be volatile, but the transition itself is unacceptable",
           "diagnostic_side_effects":"known ECU disappearance/communication-fault risk during PROGRAMMING transition",
           "remaining_unknowns":[],

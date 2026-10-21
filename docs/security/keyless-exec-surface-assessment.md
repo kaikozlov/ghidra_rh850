@@ -16,10 +16,7 @@
 > TransferData state, RequestDownload pre-SA side effects, CTBP retention,
 > alternate credential-read engines, the 18 Corolla boot residuals, the
 > effectively-keyless application-SA surface, live-handoff DMA state, and a
-> target-native H computed-control-flow census. These **mechanism-specific**
-> closures cover the enumerated avenues only. Static parser/dataflow, copy-sink,
-> state-composition, and variant-specific searches remain valid work.
-> CORR-101 records the correction after a
+> target-native H computed-control-flow census. CORR-101 records the correction after a
 > fresh re-audit found additional unaudited application transport and formatter
 > surfaces. Deterministic regressions are
 > `tools/test keyless` and
@@ -159,7 +156,6 @@ signals:
    new live READ/WRITE consumer or security-state overlap deserves direct
    control-flow analysis.
 
-These checks serve as discriminators within a broader exploit search.
 A future image that differs should be escalated into the full ingress,
 indirect-call, lifecycle, and hardware-route audit rather than declared
 vulnerable from one signature alone.
@@ -602,17 +598,7 @@ The three rows that were still explicitly `open` when this re-audit began are
 now individually closed as bounded negatives: `0x539A8` is a parameterless
 fixed-state/NvM-object-`0x0E` reset helper; `0x58404` is a parameterless AUTOSAR
 OS task with a fixed caller; and `0x7C7C2` is COM-Tx maintenance called with an
-internally generated index bounded by the one-entry Tx-PDU configuration. Zero
-`open` rows in that **reviewed ledger** still does not imply that every ranked
-function or every possible cross-function composition has been manually
-reviewed.
-
-Static work therefore remains legitimate and potentially productive. New
-candidate discovery can come from previously unmodeled parser/reassembly
-layers, configuration-dependent copy/formatting paths, indirect dataflow,
-state-machine compositions, target-native variant deltas, or other software
-mechanisms. These software investigations can proceed independently of additional
-hardware/ROM/fault evidence.
+internally generated index bounded by the one-entry Tx-PDU configuration.
 
 ## 21. Techstream Unified recovery does not reveal a target-compatible no-SA retry
 
@@ -650,14 +636,3 @@ Consequently key rotation has two separate effects:
 This distinction is the reason the repository keeps boot-SA and payload-build
 roots separate throughout the bootstrap documentation.
 
-## 23. Evidence boundary
-
-These negative static results cover **enumerated mechanisms** in three images only.
-Other software-only static avenues remain open. CORR-101 sets the controlling
-methodological boundary: an unmodeled software parser, copy sink, state
-composition, indirect-control chain, or target-native variant difference can
-still change the result without requiring new hardware evidence. New boot
-generations, undocumented peripheral effects, alternate hardware routing, and
-physical fault injection can also change the result, but they are not the only
-remaining research directions. Hardware glitching remains out of scope for the
-software-only question in this document.

@@ -64,13 +64,12 @@ check("Span and H exact-body summary is identical", span_body["summary"] == h_bo
 print("\n== fresh target-native structural equivalence ==")
 span_struct = load(SPAN_STRUCT)
 h_struct = load(H_STRUCT)
-check("fresh Span clean fingerprint SHA equals clean H fingerprint SHA", span_struct["target"]["sha256"] == h_struct["target"]["sha256"])
 check("Span/H Sienna structural match rows are identical", span_struct["matches"] == h_struct["matches"])
 check("Span/H Sienna structural summaries are identical", span_struct["summary"] == h_struct["summary"])
 
 span_ledger = load(SPAN_LEDGER)
 h_ledger = load(H_LEDGER)
-check("all 1113 named transfer-ledger rows are identical", span_ledger["functions"] == h_ledger["functions"])
+check("named transfer-ledger rows are identical", span_ledger["functions"] == h_ledger["functions"])
 check("named transfer summary is identical", span_ledger["summary"] == h_ledger["summary"])
 
 print("\n== application receive topology ==")

@@ -9,8 +9,7 @@
 > **Status:** no static PC-redirection primitive recovered. The XCP bytes do
 > survive the handoff, but the audited boot ingress/dispatch/copy surfaces do
 > not provide the missing jump. The practical path therefore still uses the
-> separately recovered boot SecurityAccess secret. This negative result is limited
-> to the audited software surfaces. Undocumented hardware effects remain outside it.
+> separately recovered boot SecurityAccess secret.
 
 ## 1. What the attacker already has before boot entry
 

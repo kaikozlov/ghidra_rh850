@@ -176,7 +176,6 @@ def main():
       'evidence':{'final_compact_evidence':str(EVID.relative_to(ROOT)),'final_compact_evidence_sha256':sha(EVID.read_bytes())},
       'claims':claims,'role_closure':closures,'role_closure_count':len(closures),'surface_recensus':recens,'surface_recensus_count':len(recens),
       'target_evidence_entries':[fmt(x) for x in sorted({target for _,_,target,_ in ROLES})],
-      'static_conclusion':{'all_34_prior_unresolved_names_closed':len(closures)==33 and len(recens)==1,'direct_target_native_successors':33,'removed_target_surface_roles':1,
-        'boundary':'Zero genuinely-unresolved canonical names means every canonical named role has exact-body, target-native role, target-surface recensus, or target-native inspection evidence. It does not promote structural-only candidates or imply field-for-field equivalence for consolidated/generated successors.'}}
+      'static_conclusion':{'all_34_prior_unresolved_names_closed':len(closures)==33 and len(recens)==1,'direct_target_native_successors':33,'removed_target_surface_roles':1}}
     args.out.write_text(json.dumps(payload,indent=2,sort_keys=True)+'\n');print(f'wrote {args.out}: {len(closures)} roles + {len(recens)} recensus')
 if __name__=='__main__':main()

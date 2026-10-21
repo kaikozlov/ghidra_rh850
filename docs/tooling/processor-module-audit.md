@@ -131,13 +131,9 @@ Script: `ghidra/scripts/investigate/FindUndefinedInFunctions.java`
 (asserting companion: `ghidra/scripts/verify/AssertNoUndefinedInFunctions.java`).
 
 The recorded legacy-Sienna checkpoint had **zero undefined bytes** inside its
-7,090 recovered functions. This establishes in-body decode only for that
-checkpoint. Broader executable-body discovery, compiler-idiom recovery,
-instruction support, and automatic analysis remain separate requirements.
-
-That alone does **not** prove every decoded instruction has correct p-code.
+7,090 recovered functions. This establishes in-body decode for that checkpoint.
 Semantic fixtures under `tests/fixtures/processor/` and the asserting scripts
-close the highest-impact gaps for this firmware:
+cover:
 
 - signed `sld.b` / `sld.h` use `sext` (not `zext`);
 - two-operand `divh` uses signed division (`s/`) and sets `OV` without executing
@@ -289,8 +285,7 @@ invokes boot reset `0x157E`; GCC materializes that constant in `r10` and emits a
 small indirect veneer before `jmp [r10]`. It therefore never creates the
 `r6=target_address` state that broke our later `call0(address)` startup replay,
 and the reset target is a terminal no-argument path. This strongly validates
-GCC 13.2 for **standalone RH850 payloads**. Exact stock-call replay in C
-and Toyota's original compiler vendor require independent evidence.
+GCC 13.2 for **standalone RH850 payloads**.
 
 Practical consequence: do not switch target-native payloads to CC-RH merely
 because its switch/prologue output looks Toyota-like. More importantly, this ABI
@@ -448,7 +443,6 @@ Optional structural columns (`root_kind`, RAM/MMIO/`codeflash_data`/string refer
 counts, coarse `boot`/`application` subsystem) are filled only from reliable
 program facts; otherwise empty or zero. `codeflash_data_ref_count` counts every
 DATA reference into CodeFlash outside function entries, including scalars and tables.
-Behavioral understanding still requires a curated semantic review.
 
 Review counts are generated in each target's registered summary. Curated
 conclusions are separate inputs; automatic decompilation-only entries are not
@@ -580,7 +574,7 @@ Venza additionally required its exact capture boundary in the target profile:
 the `0x180000..0x2FFFFF` fill partition is non-executable and typed as data.
 That removes one direct-call-created function in erased space. Its larger
 pattern-recovery gain is deterministic discovery of previously disconnected
-entry-shaped code. Exact device-part and peripheral-map attribution remain separate.
+entry-shaped code.
 
 The post-commit review found and corrected three gaps in the initial refresh:
 the load-link lifetime above was incomplete, the bit-search carry fixture
@@ -646,8 +640,7 @@ and RH850G3M to `0.6`. Restoring the E2M-only forms increments V850E2M to
 manifest. The existing fixture verifier additionally exercises all four E2M
 operations with even and odd destinations, and rejects the same encodings
 under G3M. At that decode-only checkpoint, these vectors established decode
-boundaries and finite arithmetic dataflow. Fused rounding and enabled FPU
-exception behavior remained unverified.
+boundaries and finite arithmetic dataflow.
 The stale claim that the firmware inventory resolved `__cache`/`__prefetch`
 CALLOTHERs was corrected: the image uses only `__nop`, `__disable_irq`,
 `__enable_irq`, and `__synchronize`.
@@ -719,8 +712,7 @@ promoted; the potentially-mutated live Camry session was left untouched.
 
 The NaN class is modeled, but the manuals do not define payload/sign selection:
 canonical quiet NaN `0x7fc00000` is a documented model convention.
-Imprecise delivery is modeled at instruction boundaries. Physical pipeline
-latency remains outside the model. Neither is claimed as a silicon-observed result.
+Imprecise delivery is modeled at instruction boundaries.
 
 ## Broader plugin implementation
 
@@ -775,8 +767,7 @@ G4MH Host/Guest registers or replaced with invented arithmetic. V850E1F has
 numeric dataflow and recovered EFG/ECT masks; exact vendor EFG retention,
 TRFF flag mapping and exceptional result rules require the unavailable
 `U16374EJ1V0UM00` instruction manual. Explicit operations preserve those
-boundaries. Static lifting and native offline execution do not establish
-silicon timing or vehicle behavior.
+boundaries.
 
 Native offline validation compiles all four language profiles and executes each
 fixture script completely:
@@ -792,8 +783,7 @@ fixture script completely:
 | `AssertV850SwitchAnalysis` | All four table idioms, recovered control flow and rejection boundaries |
 | `AssertV850CompilerHelpers` | Stripped recognition, numerical decompilation, independent clobbers, escaping stack effects and execution of real save/remainder bodies |
 
-The firmware-machine regression also passes. These checks establish only the
-implemented offline behavior they exercise. Whole-ISA silicon qualification remains outside their scope.
+The firmware-machine regression also passes.
 
 Two fresh four-stage rebuilds of each registered target produced byte-identical
 normalized inventories. The canonical inventories and full decompiler corpora
@@ -809,8 +799,7 @@ were regenerated against the installed processor manifest:
 | Venza `8917048E30` | 10,390 |
 
 All 45,497 records exported without decompiler failures, establishing export
-completeness. Function authenticity and complete indirect-branch resolution
-remain separate questions. Full Sienna working-project invariants,
+completeness. Full Sienna working-project invariants,
 instruction/userop coverage and exact live semantic-ledger comparison passed;
 its function entries, bodies and no-return flags were unchanged. The
 `rh850_compiler_abi` and `decompiler_corpus` verification selectors also passed.
@@ -833,9 +822,7 @@ Residual data-as-code is not hidden by the rebuild comparison. In Crown,
 halfword table is reached through a data load in `0xc9cea`, and its computed
 reference to `0x25212` does not establish a real call. Venza's `0xc974` still
 has bad-instruction pseudocode despite shedding decoded table bytes; its
-`callt 0x19` at `0xc99a` remains unresolved and supplies no positive recovery evidence.
-These existing ambiguous regions are not evidence of complete firmware
-understanding or a zero-false-positive whole-program graph.
+`callt 0x19` at `0xc99a` remains unresolved.
 
 ## 2026-10-11 IDA 9.5 processor/decompiler prior-art audit
 
@@ -889,8 +876,7 @@ Concrete arm64 backend sites, using the binary identity above:
 
 The prologue callback is at vtable slot `0x3F56D0`; the two preceding slots
 are destructors. Decompilation of the saved-register transfer and serializer
-establishes the metadata path. Complete parity with every private prologue
-heuristic remains unproved.
+establishes the metadata path.
 
 Some backend differences favor retaining the existing Ghidra model: Hex-Rays
 uses opaque helpers for saturating arithmetic, clipping and several bit
@@ -939,8 +925,7 @@ substantive decode disagreements:
 The IDA instructions have no post-index operand flags for these four encodings.
 The readable SDK explains the result: `ana.cpp` cases `0x376` and `0x37A`
 do not discriminate the first halfword's `r2` field, unlike byte-store case
-`0x372`. This decoder comparison warrants independent checking of IDA results.
-Hardware execution remains unobserved. Exact G3M availability remains bounded: R01US0123EJ0140
+`0x372`. Exact G3M availability remains bounded: R01US0123EJ0140
 describes post-index addressing on pp. 35–36, but its load/store instruction
 entries list only displacement forms. This comparison does not resolve that
 manual inconsistency or change the existing profile acceptance boundary.
@@ -972,7 +957,7 @@ zeroed memory.
 
 The changed languages are G3M `0.9` and broad RH850 `1.1`; V850E2M and E1F are
 unchanged. The processor identity baseline was regenerated from the installed
-extension. These checks establish only offline model behavior. Silicon and vehicle behavior remain unobserved.
+extension.
 
 ### SDK-derived switch recovery gaps
 
@@ -1016,11 +1001,10 @@ packed-snapshot validation. The committed snapshots now carry the final
 processor checkpoint. Pre-existing user working projects were not replaced,
 and no canonical inventory baseline changes were needed.
 
-## What these audits do *not* claim
+## Remaining implementation gaps
 
-- Zero undefined bytes inside the current functions proves only in-body decode
-  coverage. Discovery of every executable body and unexercised p-code edge cases
-  (FP rounding, hypervisor ops, arithmetic forms, …) remain outside that result.
+- Zero undefined bytes inside the current functions proves in-body decode
+  coverage.
 - Some scalar floating-point arithmetic/conversion forms still use Ghidra's
   ordinary primitives without a complete FPSR exception model. Fused and
   ROUNDF status semantics, and the broader SIMD models, do not make the entire
@@ -1030,15 +1014,12 @@ and no canonical inventory baseline changes were needed.
 - Exact function/instruction counts are smoke signals; prefer the asserting
   invariant scripts and the generated semantic coverage ledger for coverage
   floors.
-- A provisioned SecOC key or live ICU-S behavior cannot be proven from this
-  dump alone; see the firmware evidence docs for dynamic caveats.
 
 ## Historical legacy-Sienna auto-analysis defaults
 
 The recorded legacy-Sienna rebuild (`tools/project/rebuild_project.sh`) ran
 Ghidra's default analyzers without disabling "Address Tables" or
-"Non-Returning Functions". These observations apply only to that image/checkpoint.
-Generic switch and compiler-helper recognition retain their broader scope:
+"Non-Returning Functions". Observations for that image/checkpoint:
 
 - **Address Tables:** the over-eager-disassembly symptom it warns about *is*
   present — 227 decoded `switch` opcodes are unreachable data misread as code

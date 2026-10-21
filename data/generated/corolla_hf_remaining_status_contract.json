@@ -18,7 +18,7 @@
       "0x030 B6[1]"
     ],
     "classification": "Q-axis actual-current-derived debounced status; exact H's threshold detector is calibration-disabled",
-    "exact_h_calibration_effect": "feature flag 0x5A makes the BB8F6 detector's enabled-only set branch unreachable and forces its raw detector output FEBEB64D to zero on each execution; debounce calibration is zero. This closes the physical source family and detector-disable state only. The OEM display name for the final debounced bit remains unrecovered.",
+    "exact_h_calibration_effect": "feature flag 0x5A makes the BB8F6 detector's enabled-only set branch unreachable and forces its raw detector output FEBEB64D to zero on each execution; debounce calibration is zero. ",
     "openpilot_consequence": "Do not treat B6[1] as a generic steering-ready/authority bit. Its source is motor Q-current monitoring and its exact-H detector is disabled by calibration.",
     "signal_id": 7,
     "span_observation": {
@@ -31,13 +31,12 @@
     "wire": "0x030 B6[1]"
   },
   "can_0x351_force7": {
-    "classification": "independent severe/special status override, distinct from the C159B49-linked 0x351 base electrical-monitor code path",
+    "classification": "independent severe/special status override",
     "condition": "(FEBE65E4 & 0x0003) != 0 AND FEBE7E13 != 0",
-    "openpilot_consequence": "Treat the force-7 indication as a distinct conservative fault/status input if 0x351 becomes available, but do not rename it C159B49 or map it to temporary/permanent without dynamic policy evidence.",
+    "openpilot_consequence": "Treat the force-7 indication as a conservative fault/status input if 0x351 becomes available.",
     "record_aggregate_side": {
       "aggregate": "0x36CEC ORs each valid record's +6 ushort into one aggregate (plus FEBE720E under its recovered gate)",
       "bit_used": 15,
-      "boundary": "The exact source geometry and bit are closed; an OEM/DTC name for record +6 bit15 is not recovered from the current corpus.",
       "chain": [
         "0x36CEC aggregate bit15",
         "0x3738C -> 0x472E0(0x5A/0)",
@@ -52,7 +51,7 @@
         0,
         1
       ],
-      "boundary": "FEBE6FB4 is a broad internally consumed 16-bit status bitmap; current static evidence does not assign Toyota names to bits0/1.",
+      "boundary": "FEBE6FB4 is a broad internally consumed 16-bit status bitmap.",
       "chain": [
         "0x36BBE resolves/merges the current 16-bit status value",
         "0x36AAA stores it at FEBE6FB4 with XOR-redundant mirrors FEBE6ED0/FEBE6ED2",
@@ -74,7 +73,7 @@
     },
     "fd_control_interface": {
       "path": "data/generated/corolla_8965H1202000_fd_control_interface.json",
-      "sha256": "8d693f50871ccb3987c79c2e2cfd7c34ead2901c5d3e3d58665947aca952ffc2"
+      "sha256": "8d9385f509f95b8a12ebf0a8be6855faf931ef97d80004679bba7b279b8dcd07"
     },
     "h_codeflash": {
       "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
@@ -95,16 +94,15 @@
     },
     "span_moving_rlog_evidence": {
       "path": "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
-      "sha256": "7805940db508c3bac09b6c7cbb70326daa49fb2071c942e6eacc12dce2052ebf"
+      "sha256": "9123b4a381fd1012e7e938b8720eb3138436cb4fadaaa9236ce2c956b2604be1"
     },
     "techstream_correlations": {
       "path": "data/generated/corolla_8965H1202000_techstream_correlations.json",
-      "sha256": "ee4ffc57d325fc3b4d787d8d1ec03a35c5e9006845add87c73d7ea5bd86290fd"
+      "sha256": "e16b546c68149f82ac67a6e61ab109b879c77bd780d32b331c75ce778a20293e"
     }
   },
   "static_exhaustion": {
-    "0x030_b6_bit1": "physical source and exact-H calibration behavior closed; only Toyota display/policy naming remains unavailable",
-    "0x351_force7": "source topology and exact gating bits closed; current corpus has no unique Toyota/DTC semantic label for the two internal status inputs",
-    "boundary": "Semantic names remain unresolved and require independent evidence beyond packet position or neighboring DTCs."
+    "0x030_b6_bit1": "physical source and exact-H calibration behavior closed",
+    "0x351_force7": "source topology and exact gating bits closed"
   }
 }

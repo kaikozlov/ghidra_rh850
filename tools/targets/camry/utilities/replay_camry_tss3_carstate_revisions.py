@@ -65,10 +65,8 @@ print(json.dumps(rows, separators=(",", ":")))
 '''
 
 # Execute the actual current openpilot DesireHelper and its transition rule.
-# This proves the CarState semantic
-# delta has the downstream consequence described in the WP2 audit while still
-# keeping the replay's software-only scope separate from the later same-car
-# dynamic sign/threshold validation.
+# This proves the CarState semantic delta has the downstream consequence
+# described in the WP2 audit.
 DESIRE_CHILD = r'''
 import json, sys
 from types import SimpleNamespace

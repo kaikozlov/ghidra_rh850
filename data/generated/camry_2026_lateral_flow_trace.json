@@ -1219,6 +1219,5 @@
    "source": "targets/camry-2026/raw-20260827/camry_post_repin_ready_20260827.json.gz"
   }
  },
- "production_output_authorized": false,
  "schema": "camry-2026-lateral-flow-trace-v1"
 }

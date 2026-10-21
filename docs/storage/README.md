@@ -22,4 +22,4 @@ layouts; do not transfer page or record numbers across images.
 - Pages 432–479 are the full 16-object SecOC triplicate bank.
 - `application_dataflash_range_allowed` (`0x4EAD8`) rejects accesses
   overlapping pages 480–511 and optional-object pages 432–443.
-- DIDs `0x201/0x202/0x203` are volatile bootloader inputs only.
+- DIDs `0x201/0x202/0x203` are volatile bootloader inputs.

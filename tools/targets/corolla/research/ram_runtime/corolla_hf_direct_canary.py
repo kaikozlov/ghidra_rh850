@@ -168,7 +168,7 @@ def build_plan() -> dict[str, Any]:
         },
         "boundary": (
             "The earlier range dump already proved boot-RAM execution; telescope independently "
-            "replays the exact zero-DID package path. Application retention remains unproved. A successful "
+            "replays the exact zero-DID package path. A successful "
             "inert canary is the required dynamic evidence "
             "before promoting H/F RAM-exec geometry or exposing command 5."
         ),

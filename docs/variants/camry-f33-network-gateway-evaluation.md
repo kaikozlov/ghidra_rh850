@@ -41,8 +41,7 @@ getting past the host's optional read does not prove a bootloader is listening.
 
 The retained 39 post-incident log segments do not establish that node-5F gateway
 preparation was completed: the selected shared-ID records are for other logical
-nodes. Their partial time coverage leaves attempts outside those records
-unresolved.
+nodes in those partial captures.
 
 ## Exact Camry endpoint
 
@@ -63,7 +62,7 @@ must not silently identify the separate logical brake-booster endpoint.
 
 Primary inputs are current `Toyota.ddb` type 13, the vehicle's install-set
 membership, and the recovered helper's `000007505F/000007585F` literals.
-The vehicle tables identify candidates. Installed/live responders require separate evidence.
+The vehicle tables identify candidates.
 
 ## Two reproduced client defects that would invalidate the gateway experiment
 
@@ -85,9 +84,6 @@ These settings are independently supported by Panda `board/main.c` and the
 
 A logical bus-1 label is not proof of the physical mux state. `safetyParam` alone
 is not a mux readback either, because Panda also has a separate `set_obd()` path.
-This fix is not evidence that the withdrawn incident catcher used the new CLI
-or suffered this particular defect; it prevents a future test from silently
-using the wrong requested route.
 
 ### 2. Another node's shared-ID reply aborted the selected transaction
 
@@ -105,8 +101,7 @@ There is no target-specific CAN-ID list, vehicle permission state or change to
 Panda safety in this demultiplexer.
 
 The new tests fail on the old implementation and pass after the fixes. The full
-runtime suite passes **182 tests**, including **14 transport tests**. These
-hardware-independent software tests establish host behavior only.
+runtime suite passes **182 tests**, including **14 transport tests**.
 
 ## Checked baseline command: existing CLI, no new probing framework
 
@@ -129,7 +124,6 @@ bus 1, CAN 750: 5F 02 3E 00 00 00 00 00
 After simulated unrelated `0F/6D` replies, the real ISO-TP implementation
 accepted the simulated `5F` reply and returned payload `7E 00`. This proves the
 host routing request, address-extension framing and receive isolation.
-Vehicle response remains unobserved. Panda host submissions do not count wire retries.
 
 This is only the baseline read. Manufacturer gateway-family qualification and
 reprogramming preparation are separate stages. The current native classifier
@@ -161,9 +155,8 @@ The SMC acronym is not expanded here without OEM provenance.
 
 Toyota master categories 5038/8502 carry 751 routes in the overall corpus;
 neither a 751 route nor those logical candidates is present in either inspected
-Camry install set. This bounds applicability to those inspected configurations.
-Sending the SMC stop operation to the Camry's normal gateway would be unsupported
-and would leave P5 exit behavior unproved.
+Camry install set. Sending the SMC stop operation to the Camry's normal gateway
+would be unsupported.
 
 The protected stubs, sidecars and recovered copies of UnifiedUtils,
 UnifiedPrepareWriter, UnifiedFlashWriter and CommonPrepareWriter were freshly

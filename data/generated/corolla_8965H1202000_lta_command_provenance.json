@@ -1,6 +1,6 @@
 {
   "b6_hidden_payload_census": {
-    "boundary": "B6 has 28 authenticated application bytes and scalar IDs 254..265 are consumed by its recovered unpacker. Signal255 is separately recovered through a GP-relative RTE snapshot copy as the signed16 target-angle command. The four configured nonscalar IDs 252/253/266/267 are absent from every literal block/group receive call; no full-PDU copy uses PDU42; and the B6 COM buffer base has no raw absolute pointer literal. This closes only the remaining nonscalar/group/full-PDU/direct-literal escape surfaces. Arbitrary unrelated computed aliases and hardware access remain outside the proof.",
+    "boundary": "B6 has 28 authenticated application bytes and scalar IDs 254..265 are consumed by its recovered unpacker. Signal255 is separately recovered through a GP-relative RTE snapshot copy as the signed16 target-angle command. The four configured nonscalar IDs 252/253/266/267 are absent from every literal block/group receive call; no full-PDU copy uses PDU42; and the B6 COM buffer base has no raw absolute pointer literal. This closes the remaining nonscalar/group/full-PDU/direct-literal escape surfaces.",
     "can_id": "0x0B6",
     "classification": "no-recovered-hidden-b6-group-or-full-pdu-command-consumer",
     "com": {
@@ -143,7 +143,7 @@
         64,
         65
       ],
-      "interpretation": "Sienna 2E4 itself has configured IDs beyond its scalar application fields; configured-table membership alone is not evidence for a hidden command payload.",
+      "interpretation": "Sienna 2E4 itself has configured IDs beyond its scalar application fields.",
       "pdu_id": 6,
       "scalar_receive_ids": [
         58,
@@ -201,11 +201,11 @@
       "controller_equivalent_mrad_per_b6_count": 1.0001215187701138,
       "difference_from_exact_1_mrad_percent": 0.01215187701137932,
       "exact_internal_relation": "target_internal_pre_controller = saturate(2 * signed16(B6 B4:B5)); measured_internal = trunc((FD025_fraction + 15*FD025_coarse) * 1787 / 512) before matched comparator gain",
-      "interpretation": "In the matched target-vs-measured controller domain, one B6 signal255 count is equivalent to 1024/17870 deg (~0.057302742 deg), or ~1.000121519 mrad. The 0.0122% offset from exactly 1 mrad is consistent with the firmware fixed-point 1787/512 degree-to-internal approximation, but static evidence does not directly name the B6 engineering unit as milliradians.",
+      "interpretation": "In the matched target-vs-measured controller domain, one B6 signal255 count is equivalent to 1024/17870 deg (~0.057302742 deg), or ~1.000121519 mrad. The 0.0122% offset from exactly 1 mrad is consistent with the firmware fixed-point 1787/512 degree-to-internal approximation.",
       "measured_wire_physical_relation": "FD025 signal184 = 1.5 deg/count from H DID1037 + Techstream CDbPhyData key3; signed4 signal185 supplies 0.1-deg fraction, so 15*signal184+signal185 is tenths of a degree",
       "oem_wire_unit_name_closed": false,
       "physical_degree_scale_closed": true,
-      "quantization_boundary": "The measured path uses integer truncation and the target path saturates after x2, so controller equality is quantized; the fraction above gives only the exact linearized conversion implied by the two fixed-point gains. Individual integer target codes remain subject to quantization."
+      "quantization_boundary": "The measured path uses integer truncation and the target path saturates after x2, so controller equality is quantized; the fraction above gives the exact linearized conversion implied by the two fixed-point gains."
     },
     "static_conclusion": {
       "command_domain": "target steering angle",
@@ -271,7 +271,7 @@
     ],
     "techstream": {
       "corolla_p5_topology": {
-        "interpretation": "Corolla P5 install sets contain EMPS + Brake/EPB + FRC_P5; B6 is monitored by EPS as Brake System Control Module traffic. This proves only the immediate module relationship. The upstream FRC-to-Brake wire route remains unproved.",
+        "interpretation": "Corolla P5 install sets contain EMPS + Brake/EPB + FRC_P5; B6 is monitored by EPS as Brake System Control Module traffic.",
         "names": {
           "405": "EMPS",
           "435": "Brake/EPB",
@@ -322,8 +322,7 @@
           "25": "AP",
           "27": "Remote Parking"
         }
-      },
-      "vocabulary_boundary": "EMPS_P5 family vocabulary corroborates the target-angle interpretation. The Target Lateral ID numeric dictionary exactly labels every H-observed signal254 profile/special ID, while exact H lacks DID 0x1CEE and the OEM engineering-unit name for B6 signal255 remains unjoined."
+      }
     },
     "wire_ingress": {
       "bit_length": 16,
@@ -412,7 +411,7 @@
     "path": "data/generated/corolla_8965H1202000_lta_command_provenance_decompiler_evidence.json",
     "sha256": "5414fead091374eaa6ba0f65b404e5cce2cc296efb117a624b2ba2aff5b353fb"
   },
-  "evidence_boundary": "Static closure is exact for the B6 signal255 generated extraction, GP-relative stage-to-snapshot copy, target-vs-measured angle controller, promoted direct/GP-relative retained-branch writers, raw absolute pointers, literal block/group receives, and literal full-PDU copies in the tracked H corpus. The EPS ingress, angle-command domain, FD025 physical angle representation, B6 controller-equivalent physical scale, signal254 feature/request selection, seven-foreground-tick primary receiver-loss cutoff, and modulo-64 sequence handling are identified. The exact OEM B6 signal255 unit label, wall-clock sender cadence, exact secondary-field names, and the upstream FRC/Brake producer/authentication route remain bounded. No second command-sized generated scalar or recovered literal block/group/full-PDU ingress is identified; arbitrary computed aliases and DMA/peripheral mutation remain outside the static proof.",
+  "evidence_boundary": "Static closure is exact for the B6 signal255 generated extraction, GP-relative stage-to-snapshot copy, target-vs-measured angle controller, promoted direct/GP-relative retained-branch writers, raw absolute pointers, literal block/group receives, and literal full-PDU copies in the tracked H corpus. The EPS ingress, angle-command domain, FD025 physical angle representation, B6 controller-equivalent physical scale, signal254 feature/request selection, seven-foreground-tick primary receiver-loss cutoff, and modulo-64 sequence handling are identified. No second command-sized generated scalar or recovered literal block/group/full-PDU ingress is identified.",
   "final_command_composition": {
     "all_promoted_computed_writers_recovered": true,
     "bd0e_local_chain": {
@@ -455,7 +454,7 @@
       }
     },
     "entry": "0x000CD3CC",
-    "interpretation": "1C02 Command Value Torque is a general EPS-internal torque-command observable that also covers operation outside LTA. The computed-writer audit corrects the earlier direct-zero inference: BE04/BD90/B678/BEC6/C39C and the retained C2A8 branch have live local/calibration producers. No one of those live internal terms is thereby identified as a direct external autonomous setpoint.",
+    "interpretation": "1C02 Command Value Torque is a general EPS-internal torque-command observable that also covers operation outside LTA. The computed-writer audit corrects the earlier direct-zero inference: BE04/BD90/B678/BEC6/C39C and the retained C2A8 branch have live local/calibration producers. ",
     "recovered_terms": [
       "FEBEBE04",
       "FEBEBD90",
@@ -480,7 +479,7 @@
     }
   },
   "retained_lta_branch": {
-    "boundary": "The earlier direct-symbol-only conclusion was incomplete. GP-relative writers CC7F8, CC2EC and CAD62 make the mode enable and replicated magnitude branch live. B6 signals262/263 modulate internal magnitude contributors as 8-bit percentage-like values. A deeper GP-relative copy audit additionally recovers signed16 B6 signal255 at AE82 as the target-steering-angle command feeding the upstream target-vs-measured controller. This closes the named retained-branch computed aliases; arbitrary unrelated computed aliases and undocumented hardware/DMA writers remain outside this proof.",
+    "boundary": "The earlier direct-symbol-only conclusion was incomplete. GP-relative writers CC7F8, CC2EC and CAD62 make the mode enable and replicated magnitude branch live. B6 signals262/263 modulate internal magnitude contributors as 8-bit percentage-like values. A deeper GP-relative copy audit additionally recovers signed16 B6 signal255 at AE82 as the target-steering-angle command feeding the upstream target-vs-measured controller. This closes the named retained-branch computed aliases.",
     "classification": "retained-sienna-homolog-conditioner-live-b6-target-angle-driven-and-b6-modulated",
     "command_conditioning": [
       {
@@ -612,7 +611,7 @@
         "writer": "0x000CC7F8"
       },
       "replicated_magnitude_0xFEBEC17C_17E_184": {
-        "interpretation": "The three retained magnitude words are live locally synthesized state; they are not copied from a command-sized COM scalar.",
+        "interpretation": "The three retained magnitude words are live locally synthesized state.",
         "recovered": true,
         "relation": "CC2EC produces replicated C1F8/C1FC/C206; CAD62 selects/scales that state and writes the same value through GP+0x97C/+0x97E/+0x984 to C17C/C17E/C184",
         "upstream_conditioner": "0x000CC2EC",
@@ -751,7 +750,7 @@
   },
   "schema": "corolla-8965H1202000-lta-command-provenance-v8",
   "shared_can025_sensor_ingress": {
-    "boundary": "The public DBC is corroboration rather than sole naming evidence: target-native H arithmetic independently distinguishes angle+fraction and rate semantics. This closes the adversarial possibility that an unchanged-shape large scalar was silently repurposed as the missing LTA command.",
+    "boundary": "Target-native H arithmetic independently distinguishes angle+fraction and rate semantics, corroborating the public DBC.",
     "can_id": "0x025",
     "classification": "shared-command-sized-ingress-is-steering-angle-sensor-state",
     "dbc": {
@@ -823,6 +822,7 @@
         "bit_offset_in_byte": 0,
         "can_id": "0x025",
         "consumer_entries": [
+          "0x000C8E70",
           "0x000CB2E0",
           "0x000CBD7E"
         ],
@@ -911,15 +911,15 @@
   "supporting_inputs": {
     "b6_target_angle_ingress": {
       "path": "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
-      "sha256": "aafd2cdcec032bc2c7b3789c642ee97cd70fa9f0029ace524581d4290e94d761"
+      "sha256": "9d6d466092dc22252eee435c8a75abce19b9f11e69640439c9c3f0387f4341d1"
     },
     "fd_control_interface": {
       "path": "data/generated/corolla_8965H1202000_fd_control_interface.json",
-      "sha256": "8d693f50871ccb3987c79c2e2cfd7c34ead2901c5d3e3d58665947aca952ffc2"
+      "sha256": "8d9385f509f95b8a12ebf0a8be6855faf931ef97d80004679bba7b279b8dcd07"
     },
     "supervisor_external_ingress_census": {
       "path": "data/generated/corolla_8965H1202000_supervisor_external_ingress_census.json",
-      "sha256": "a977a50083d35d24fdcfbc6cabef16a6a433cddf99d4e98adde4a28976e18937"
+      "sha256": "8aa350ae14443bda036b743d4474fd8b56a6a8093518bdb1dcf9c56bf8899608"
     },
     "toyota_dbc": {
       "path": "data/external/opendbc/toyota_dbc_facts.json",

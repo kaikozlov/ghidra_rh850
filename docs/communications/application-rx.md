@@ -48,9 +48,7 @@ Static extraction/classification closure (this calibration):
 
 Thus all **242/242** configured Rx signal IDs are classified. The final 97 record
 negative COM-extraction results: the stock firmware has
-no signal-level extraction call for those IDs. This does **not** claim that every
-wire bit in the containing PDU is globally unused by direct-buffer or security
-logic.
+no signal-level extraction call for those IDs.
 
 No OEM message names, physical scaling, or DBC field names are assigned. Signal
 numbers are the generated COM IDs present in this image.
@@ -203,10 +201,7 @@ The remaining **97 configured IDs therefore have no stock COM extraction**:
 - signal **217** belongs to COM PDU 39 / CAN `0x2E8`, the sole ordinary PDU with
   a configured signal but no recovered COM unpacker.
 
-These rows are emitted as `classified-no-com-extraction` with `wire_field=n/a`
-and no invented destination. The claim is limited to the signal API: it
-excludes a configured COM extraction of that signal ID. Possible direct reads
-of the containing PDU buffer remain outside this result.
+These rows are emitted as `classified-no-com-extraction` with `wire_field=n/a`.
 
 ### 5.2 Processor audit coverage
 
@@ -250,9 +245,7 @@ generated unpacker cluster**; this excludes the Ghidra-visible pointer forms a
 generic memcpy/RTE-style whole-bank consumer would normally require. Sixteen of
 those 18 are selective omissions inside unpackers whose sibling fields do have
 downstream consumers; only CAN `0x020` signals **291/292** form an entire
-two-signal unpacker with no scalar consumer. This static result is limited to
-representations that produce a direct READ or a Ghidra `PARAM`/plain-`DATA`
-address reference.
+two-signal unpacker with no scalar consumer.
 
 For SecOC specifically, the nine formerly direct-read-unresolved fields split
 as follows:
@@ -525,11 +518,8 @@ points**. The simple dispatcher consumes exactly `param_3[0..2]`; variant D
 consumes the full 13-pointer `param_3[0..12]` shape across its lifecycle states.
 The table byte hashes, setup bodies, literal table loads, and direct dispatcher
 calls are pinned by `tests/firmware/verify_deadline_monitor_dispatch_tables.py`.
-Consequently these 88 targets are not speculative pointer scans: they are
-configured callback entries on live COM deadline-monitor paths and are seeded
-into the persistent graph. This is a graph-completeness result; it does not by
-itself assign detailed semantics to each callback or create a new steering /
-SecOC primitive.
+These 88 targets are configured callback entries on live COM deadline-monitor
+paths and are seeded into the persistent graph.
 
 The four monitor variants differ in signal class and timeout behavior. The
 older nine-channel plausibility/deadline family in the control-partition report

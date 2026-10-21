@@ -393,7 +393,7 @@ def build() -> dict:
     token(0xD0284, funcs, "DAT_febecc44", "DAT_febecc4c = DAT_000b1334;")
     token(0xD02DA, funcs, "DAT_febecc4e = DAT_febecc4c;", "DAT_febecc38 + DAT_febecc3c")
 
-    # D0284's multiplier also comes exclusively from internal calibration state.
+    # D0284's multiplier comes from internal calibration state.
     # BCBD8 snapshots FEBEB140 -> FEBEAC64. The three normal
     # writers derive B140 from the exact u16 calibration at 0xAEF4C; BF97A's
     # reset/default writer uses the adjacent rounded constant 0x7637.
@@ -433,8 +433,7 @@ def build() -> dict:
 
     # ---- baseline-assist parameter-bank selector -------------------------
     # C28FC selects the calibration block consumed by several default-assist terms.
-    # Close its ordinary-COM inputs separately from command magnitudes: these inputs
-    # only choose/debounce parameter families.
+    # Its ordinary-COM inputs choose/debounce parameter families.
     selector_expect = {
         160: (0x51E, 0, 4, 0, 0xFEBE8030, 0xFEBEF050),
         163: (0x51E, 1, 4, 0, 0xFEBE8033, 0xFEBEF14A),
@@ -503,7 +502,7 @@ def build() -> dict:
          {int(r["to_addr"], 0) for r in funcs[0xC28FC]["data_references"]},
          "selector calibration-bank references drift")
 
-    # AC3C selects the healthy-parameter integrity bank only. B7374 stores
+    # AC3C selects the healthy-parameter integrity bank. B7374 stores
     # the boolean result of FF254/62E12, whose exact comparison is ROM 0x17DA0.. against
     # working copy 0x20850.. before the TMR-protected FEBF0668 verdict.
     token(0xB7374, funcs, f"iVar2 = {funcs[0xFF254]['name']}();", "puVar1[-0x4ac] = iVar2 == 0;")
@@ -515,7 +514,7 @@ def build() -> dict:
     token(0x62D5E, funcs, "&DAT_febf0668", "&DAT_febf10a4", "&DAT_febf10c8")
     token(0x62E12, funcs, "return DAT_febf0668;")
 
-    # AC50's validity mask also comes exclusively from an internal mirror.
+    # AC50's validity mask comes from an internal mirror.
     token(0xBCAA6, funcs, "uVar3 = *(ushort *)(puVar8 + 0x3788);",
           "*(ushort *)(puVar8 + -0xbb0) = uVar3;")
     need(GP + 0x3788 == 0xFEBEEF88 and GP - 0xBB0 == 0xFEBEAC50,
@@ -531,10 +530,10 @@ def build() -> dict:
         "com_receive_validity_companions": {
             **selector_validity,
             "classification": (
-                "resolved COM-receive status/gate state only: FEBEF0C2/FEBEF0A0/FEBEF157 "
+                "resolved COM-receive status/gate state: FEBEF0C2/FEBEF0A0/FEBEF157 "
                 "are staged 498E0 PDU-validity results for 0x13B/0x490/0x1DA companion paths; "
-                "FEBEF000<-FEBE7F68 is the shared extraction/debounce gate. They can suppress qualification "
-                "but do not choose a parameter bank directly. Absent 0x490/0x1DA traffic cannot provide a fresh valid value."
+                "FEBEF000<-FEBE7F68 is the shared extraction/debounce gate. They can suppress qualification. "
+                "Absent 0x490/0x1DA traffic cannot provide a fresh valid value."
             ),
         },
         "qualification_chain": (
@@ -552,7 +551,7 @@ def build() -> dict:
         "parameter_integrity_bank": (
             "FEBEAC3C&1 <- FEBEB354 <- B7374(FF254()==0); FF254->62E12 returns TMR-protected "
             "FEBF0668 written by 62D5E after exact ROM 0x17DA0/0x17DC0.. comparison against "
-            "working copy 0x20850/0x20870..; this controls parameter-copy integrity only."
+            "working copy 0x20850/0x20870..; this controls parameter-copy integrity."
         ),
         "ac50_validity_mask": "BCAA6 writes FEBEAC50 from internal mirror state including FEBEEF88<-FCC00<-FEBE71EC; no generated-COM value source recovered",
         "boundary": (
@@ -580,7 +579,7 @@ def build() -> dict:
             "classification": "internal ROM/calibration-derived scale; no generated-COM/CAN value source",
         },
         "D02DA_filter": "FEBECC4C -> optional slew/filter state CC30/34/38/3C -> FEBECC4E",
-        "D0382_limit": "FEBECC60 = clamp(FEBECC4E, +/-FEBEAC52); AC52 supplies only the saturation limit",
+        "D0382_limit": "FEBECC60 = clamp(FEBECC4E, +/-FEBEAC52); AC52 supplies the saturation limit",
         "FEBEAC52_limit_provenance": (
             "BCBD8 <- FEBEEF8E <- FCC00 <- FEBE71F2. Runtime 0x3BDC6 selects the minimum "
             "active entry from ROM table 0x317E0 (0x2B4D/0x3A75/0x569A; default 0x569A) "
@@ -685,8 +684,7 @@ def build() -> dict:
             "consumers": ["0xBECF4", "0xB7728", "0xBECD0", "0xBB7FA", "0xCB664", "0xCB73A",
                           "0xCDFF8", "0xD042C"],
             "classification": "speed-class gating and handler selection: sig246 bounds/qualifies command paths; "
-                              "sig244 selects a handler pointer branch (FEBEAF40 stores only a pointer); "
-                              "no FEBECC50/FEBECC62 magnitude contribution",
+                              "sig244 selects a handler pointer branch (FEBEAF40 stores a pointer)",
         },
         {
             "can_id": "0x675", "pdu": 33, "length": rx[33]["length"],
@@ -840,7 +838,7 @@ def build() -> dict:
                             "FEBEEE1C": "FEBE7DB0", "FEBEEE26": "FEBE71F2"},
             "into_cone": "FEBE71F2 -> FCC00/FEBEEF8E -> BCBD8/FEBEAC52 -> D0382 saturation limit on dynamic FEBECC4E; "
                          "FEBEAC04/FEBEAC06 gates (D04AC mode-latch) <- FEBEEE02/FEBEEE12",
-            "classification": "internal mirror/configuration class outside generated-COM; FEBE71F2 supplies only a ROM-selected limit",
+            "classification": "internal mirror/configuration class outside generated-COM; FEBE71F2 supplies a ROM-selected limit",
         },
         "class_l_relevance": {
             "0x090": "the previously unresolved live 0x090 correlation now has a firmware path: "
@@ -850,7 +848,7 @@ def build() -> dict:
             "mode_without_b6": "no non-B6 COM signal can raise assist-active FEBEC7BF "
                                "(activation is B6-sig261-gated at 0xCB73A); Class-L mode change with B6=0 "
                                "must therefore arise from the B6-independent internal baseline-assist path, "
-                               "other internal state machinery, or driver/feedback dynamics; all COM target alternatives are excluded",
+                               "other internal state machinery, or driver/feedback dynamics",
         },
         "live_context": {
             "b6_frames_in_retained_drives": sum(b6_absent.values()),
@@ -871,8 +869,7 @@ def build() -> dict:
             "statement-level closure: 0xBF97A holds WRITE refs into FEBEE400..418 whose stores the "
             "decompiler elides; 0xBF33E is the statement-verified block writer and BF97A's block refs "
             "are treated as a second (runtime/reset) writer with unchanged sourcing",
-            "FEBEACC0 (0xC2F26 integrator-enable input) is computed locally inside 0xBCD62; "
-            "its exact inputs remain bounded",
+            "FEBEACC0 (0xC2F26 integrator-enable input) is computed locally inside 0xBCD62",
             "FEBEB3FC/FEBEB3FE/FEBEB400/FEBEB354 (command block bytes 406/407/416/418) come from "
             "0xB7xxx/0xB8xxx internal qualification not traced byte-exhaustively here",
             "no live vehicle I/O was performed; live context is re-read from retained artifacts",

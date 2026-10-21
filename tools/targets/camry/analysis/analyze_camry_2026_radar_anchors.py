@@ -225,8 +225,8 @@ def reduce(fixture: Path) -> dict:
         "gyro_inverted_sign_error": stats(abs(m[:, 0]+m[:, 1])),
         "narrow_velocity_wrap_disagreements": widths,
         "boundaries": ["range and range-rate agreement alone cannot determine their common scale",
-                       "stationary-object membership is inferred only from continuity and velocity; the OEM validity bit remains unresolved",
-                       "OEM object validity, confidence, and silent slot reassignment remain unresolved; no production radar-enable decision follows automatically",
+                       "stationary-object membership is inferred from continuity and velocity",
+                       "OEM object validity, confidence, and silent slot reassignment remain unresolved",
                        "cached lagd outputs are not independent fresh identifications"],
     }
 

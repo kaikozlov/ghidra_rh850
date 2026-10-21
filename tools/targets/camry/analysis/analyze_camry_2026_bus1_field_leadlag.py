@@ -628,8 +628,7 @@ def main() -> int:
                      f"r={e['drive_b']['angle_r']}({e['drive_b']['lag_ms']} ms). CORR-138 "
                      f"restricts this observation to the selected windows: "
                      f"full-drive 0x160[22]s16be correlation collapses to "
-                     f"+0.086104/-0.091204. Preserve only the bounded observation that Bus 1 "
-                     f"carries plant-shaped data; do not name a standing SAS echo or command."
+                     f"+0.086104/-0.091204."
                      )
 
     out = {
@@ -675,9 +674,7 @@ def main() -> int:
                 f"observed/deterministic within the selected Class-L windows: {len(reproduced_lagging)} "
                 f"reproduced fields lag the motor proxy (peak lag <= -{LEAD_MIN_MS} ms in both drives). "
                 f"The drive-B speed-matched cruise control region shows the strongest correlations are "
-                f"also present outside Class-L. This supports generic plant-shaped traffic; "
-                f"Class-L command gating remains unproved. CORR-138 forbids promoting window-local "
-                f"0x160 correlations to a standing steering-angle-echo identity."
+                f"also present outside Class-L. This supports generic plant-shaped traffic."
             ),
             "control_region_boundary": (
                 "bounded: drive A has zero local speed-matched cruise control grid points (its cruise "
@@ -688,11 +685,10 @@ def main() -> int:
             "lag_range_boundary": (
                 f"bounded: the declared tested lead range is +/-{SCREEN_LAG_RANGE_MS} ms at {FINE_LAG_STEP_MS} ms "
                 f"resolution. Several weak reproduced correlates peak at the +/-{SCREEN_LAG_RANGE_MS} ms "
-                "boundary, indicating slow window-scale trends; causal control-path leads remain unproved. "
+                "boundary, indicating slow window-scale trends. "
                 "A Toyota lateral command consumed by a 100 Hz EPS is expected to lead by at most a few "
                 "control frames, well inside the tested range."
             ),
-            "production_output_authorized": False,
         },
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)

@@ -2,8 +2,7 @@
   "combined": {
     "all_observed_selector_inputs_constant_zero": true,
     "class_l_edge_value_changes": 0,
-    "classification": "observed/deterministic: every ordinary selector input that appears in either retained drive is zero for the entire route and through the Class-L edge windows; 0x490/0x1DA selector inputs are absent. These ordinary COM selector inputs therefore do not distinguish Class-L from surrounding driving in the retained captures. Internal/fault/diagnostic selector alternatives remain separately bounded by the exact static model.",
-    "production_output_authorized": false
+    "classification": "observed/deterministic: every ordinary selector input that appears in either retained drive is zero for the entire route and through the Class-L edge windows; 0x490/0x1DA selector inputs are absent. These ordinary COM selector inputs therefore do not distinguish Class-L from surrounding driving in the retained captures. Internal/fault/diagnostic selector alternatives remain separately bounded by the exact static model."
   },
   "drives": {
     "drive_a": {
@@ -657,11 +656,11 @@
   "sources": {
     "class_l_census": {
       "path": "data/generated/camry_2026_cruise_lta_edge_census.json",
-      "sha256": "355ea5b408442a541bd946d21c3e85b0fa4d9e924474d3223189cb37894ee9fc"
+      "sha256": "30cae5b92fc5e4cc6ab94fb7d08916c7b4cab06438da4631cd7671ebb059da1b"
     },
     "static_selector": {
       "path": "data/generated/camry_8965F3307000_command_cone_ingress.json",
-      "sha256": "3c6132199c12707f6f32a85d9c09b80a5b71ca2e7def35e3adbae751e68c9eec"
+      "sha256": "f1cdceab1c34b09ddddf5023f5dc009cb6838b531180abf8f9c9ed9870d59d18"
     }
   }
 }

@@ -2,12 +2,11 @@
   "methods": {
     "clamped_envelope": "B18=min(max(B4,B24),B22), raw counts; tests whether B22 explains below-max samples",
     "coverage": "sum adjacent status intervals capped100ms; includes parked time, limits larger-gap contributions to100ms",
-    "max_relation": "B18=max(B4,B24), rawcounts; informative excludes B4=B24; empirical relation; ECU equation unproved",
+    "max_relation": "B18=max(B4,B24), rawcounts; informative excludes B4=B24; empirical relation",
     "moving": ">0.5m/s from fresh raw wheels with CarState fallback",
     "segment_times": "t_route from minimum recorded monotonic event; repeated init/carParams timestamps are not segment playback anchors",
-    "semantics": "candidate roles only; exact synchronized OEM diagnostic/FFD joins absent",
     "stock_epochs": "native latch1,no pedals,moving,freshCS; >=2s; request range>=0.5 or centered-median wheel-gradient range>=0.4 using unique time knots; direct RMS on original2-decimal episode boundaries, no fitted gain/offset",
-    "timing": "preceding-only joins; CS/CC60ms,request75ms,exact-payload origin100ms; logger batch timestamps; ECU deadlines unresolved",
+    "timing": "preceding-only joins; CS/CC60ms,request75ms,exact-payload origin100ms; logger batch timestamps",
     "words": "B4/B18/B20/B22/B24 signed16BE x0.001 nominalm/s2; B26 low13 signed, physical scale unresolved"
   },
   "phases": [

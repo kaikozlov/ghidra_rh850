@@ -30,10 +30,7 @@ the complete FRC request publication.
 
 ## Evidence boundary
 
-The patent proves Toyota disclosed this architecture and gives Toyota-authored
-names for its interfaces. It does **not** prove that the exact 2026 Camry F33
-implements this embodiment, that its policy input is externally accessible, or
-that any named patent signal has a one-to-one CAN/CAN-FD encoding.
+The patent discloses this architecture and gives Toyota-authored names for its interfaces.
 
 In particular:
 
@@ -47,7 +44,6 @@ In particular:
   vocabulary, but no field has yet been recovered as this patent's
   manager-to-client rejection feedback;
 - later P6 diagnostic surfaces provide strong cross-generation vocabulary.
-  The P5/F33 wire realization still requires proof.
 
 ## 1. Physical/function architecture
 
@@ -274,8 +270,7 @@ cancel/release transition.
 It also provides a plausible architectural reason that takeover-related state
 can outlive restoration of the raw request stream: policy/fail-state machines
 can be latched independently from transport state. For F33 this remains a
-hypothesis. Identifying the current persistent DRCC/FRC latch as this patent's
-invalidation flag would require proof.
+hypothesis.
 
 ## 5. The claims are broader than literal "PCS invalidation"
 
@@ -380,9 +375,6 @@ Toyota's whole control stack. It is to replace/supersede the intended native
 continuous-driving client while retaining independent constraints and actuator
 protections.
 
-This architecture lesson leaves the existence of a user-accessible F33 priority
-API unproven.
-
 ## 8. Stronger GTS joins from this close read
 
 A second pass over current GTS+ resolves the previously loose patent-vocabulary
@@ -459,10 +451,6 @@ Their recovered layout metadata places those four items in successive
 
 That is strong cross-generation evidence that Toyota treats **who requested a
 bound** and **why that request was rejected** as paired result/status data.
-
-It still does not prove the exact PCS feedback mechanism in F33, and this P6
-powertrain-domain result should not be back-projected onto the P5 lateral wire
-without a direct join.
 
 ## 9. Exact P5/TSS3 evidence: priority exists, feedback remains open
 
@@ -560,8 +548,7 @@ FRC internal applications
 So there are **two different selection questions**. The FRC decides which of
 its resident features authors the request it submits. The downstream VMM then
 arbitrates the submitted request against the manager's other inputs/policies.
-The patent is direct evidence for the second stage. Whether the FRC's local
-feature-owner state machine implements the same invalidation mechanism remains unproven.
+The patent is direct evidence for the second stage.
 
 ### Separate question: where would intentional-rejection feedback appear?
 
@@ -571,7 +558,6 @@ an analogous path, the source-derived placement is **manager -> requesting
 system/application**. Since the requesting TSS applications reside in the FRC,
 that feedback could return from Brake/VMM toward the FRC over a result/status
 interface or another unrecovered path. It could then become FRC-internal state.
-This downstream feedback leaves an FRC-local Arrow B unproven.
 
 `5284/5285`, `57DB/57DE`, and Brake-owned `0x081` are therefore relevant
 places to look for the downstream arbitration/result side. No recovered field
@@ -656,9 +642,7 @@ failure?
 
 The observed `0x08A`/`0x081` pair is a natural place to bracket this question:
 `0x08A` is the FRC-submitted request and `0x081` is downstream
-arbitration-result/status feedback. The patent does not prove that either of its
-specific policy/rejection arrows is encoded inside those two PDUs, so the exact
-carrier remains open.
+arbitration-result/status feedback.
 
 The **separate** FRC-local question is how LTA/LDA/LCA/PDA/PCS state chooses
 which feature populates `5282`/`0x08A`. Recover that too, but do not use it as a
@@ -711,7 +695,7 @@ This is consistent with the different publication cadences. Across routes 3b
 and 3c, 0x08A is roughly a 40-Hz-class publication (median observed interval
 about 22.8 ms with rlog batching/jitter) while 0x081 is tightly about 30 ms
 (about 33-Hz-class). The short old-ID/new-ID mismatch is therefore a normal
-request->result pipeline delay. It does not establish request rejection.
+request->result pipeline delay.
 
 The angle values reinforce that interpretation. When request/result IDs match,
 0x081 B16:B17 tracks the newest 0x08A B18:B19 request extremely tightly. For

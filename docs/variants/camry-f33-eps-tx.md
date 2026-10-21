@@ -47,7 +47,7 @@ The five PDU descriptors at `0x226C0` are:
 0x4C8: cycle=196  length=8
 ```
 
-At the registered nominal80MHz timer domain, the foreground interval is5ms and these descriptor counts produce the nominal cycle times above. They specify invocation-count scheduling. Execution time, backlog and jitter require separate measurement.
+At the registered nominal80MHz timer domain, the foreground interval is5ms and these descriptor counts produce the nominal cycle times above. They specify invocation-count scheduling.
 
 All five belong to the same generated-COM Tx I-PDU group. The group starts at PDU0, contains five PDUs, and every member has communication mask `0x10`. The retained PE1 RAM snapshot proves that this is not merely dormant configuration:
 
@@ -168,7 +168,6 @@ The eventual RSCAN boundary is `852FE`: ID/control/payload stores precede the
 byte1 request at `8539E..853A4` to `CFDTMC[channel][mailbox]`.
 The channel1 request base isFFD20224. Classic admission checks
 `CFDTMSTS & 1E`; FD additionally checks retained nibble consistency.
-Request storage and software admission are not proof of physical delivery.
 
 Native compositions execute the real scheduler for classic admission
 (`camry_f33_tx_publication_classic_due_enqueues_snapshot`), classic queue-full
@@ -431,12 +430,7 @@ under that model, the EPS sends the classic PDUs locally but the junction only
 forwards0x030 to the Panda-visible segment. The retained evidence does not
 establish that per-PDU local transmission premise.
 
-Armed timers, valid routes and an idle HTH do not independently prove queue
-admission, driver progress or completion. The lifecycle above retains distinct
-software failure boundaries. Identity-bound witnesses are still needed across
-the classic queue/driver path and external routing; a fabricated EPS “disabled”
-flag is not an explanation either. The later lower-driver sender experiment
-establishes only its own bounded transaction. Stock classic-PDU lifecycles need separate witnesses.
+The lifecycle above retains distinct software failure boundaries.
 
 ## 11. Consequence for DBC work
 
@@ -469,8 +463,7 @@ cannot forge an upper-layer `0x030` confirmation. It permits one successful
 Tx per boot and refuses nonzero Target Lateral ID; it does not sign, alter
 freshness, touch B6, or write flash.
 
-The second experiment tests routing only. Actuation and receiver acceptance remain
-outside its scope. If the otherwise-unique captured FV4+MAC frame becomes
+The second experiment tests routing. If the otherwise-unique captured FV4+MAC frame becomes
 visible at Panda only after EPS lower-driver completion, the EPS-local Tx path
 reaches the observed Bus-4 domain. If the lower driver physically completes the
 replay but Panda never sees the exact frame, selective EBU/Brake-domain forwarding remains the leading
@@ -488,7 +481,7 @@ stock samples with `samples_matched=3/3`. For sample 3, the captured native MAC2
 `008a || B0..B27 || freshness48`, with trip `620`, reset `1109`, and reconstructed
 message counter `8`. This dynamically verifies the exact F33 EPS slot-4 command-5
 path as a valid MAC oracle for stock `0x08A`. Key-domain compatibility and
-authenticated-input framing are established. Transport/latency remains unresolved.
+authenticated-input framing are established.
 
 **Experiment B closed negative for outward routing.** The EPS helper replayed one
 byte-exact stock ID0 frame
@@ -807,7 +800,7 @@ from the host side in opendbc `2cf0322a` / parent `740031c93`:
 - once Panda's atomic arm takes effect, it blocks the next native source frame and accepts that
   frame's exact host clone;
 - **the first returned host `0x08A` TX echo** proves to the host that ownership
-  actually crossed. The admin echo alone leaves that handoff unproved;
+  actually crossed;
 - malformed/mistimed replacements immediately clear Panda replacement ownership and fail open to
   stock forwarding.
 

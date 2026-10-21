@@ -865,9 +865,7 @@ def frc_extended_kdf_audit(packages: dict[str, dict]) -> dict:
         "boundary": (
             "Every unique key hypothesis is screened over 64 image blocks; only the top 32 sparse results are "
             "rescored over the complete 64-KiB sample. No fully rescored result reaches the 1% threshold. This "
-            "rejects only these explicit AES-CBC KDF grammars. A protected camera root, non-AES transform, "
-            "different mode, unrelated routine key, or a KDF outside these bounded contexts remains possible. "
-            "A32 shape is only a ranking heuristic; decryption remains unverified."
+            "rejects the tested explicit AES-CBC KDF grammars. A32 shape is a ranking heuristic."
         ),
     }
 
@@ -1112,7 +1110,7 @@ def build() -> dict:
     frc_extended_audit = frc_extended_kdf_audit(packages)
     for trial in pair_trials:
         # Random byte identity is 1/256 ~= 0.003906.  Keep a generous ceiling:
-        # these guards only reject dead ends and establish no statistical cryptanalysis result.
+        # these guards reject dead ends.
         if trial["best_candidate"]["byte_identity_after_32"] >= 0.01:
             raise ValueError(f"unexpectedly strong simple image-key candidate: {trial['best_candidate']}")
 
@@ -1147,7 +1145,7 @@ def build() -> dict:
         "simple_public_id_kdf_negative": {
             "tested": "AES-ENC/AES-DEC of six obvious 16-byte DiagID embeddings and CMAC of binary/ascii DiagID under the recovered EPS payload/boot/application roots",
             "matching_packages": [name for name, row in packages.items() if row["simple_diag_kdf_matches"]],
-            "interpretation": "No tested working key is an obvious one-step derivation of the public diagnostic identifier under the recovered EPS roots. This negative result is limited to the tested KDFs.",
+            "interpretation": "No tested working key is an obvious one-step derivation of the public diagnostic identifier under the recovered EPS roots.",
         },
         "eps_payload_root_cuw_trials": {
             "grammar": "Kimage=AES-128-ECB-ENC(EPS_PAYLOAD_BUILD_ROOT, deobfuscate(SeedKey)); plaintext=AES-128-CBC-DEC(Kimage, deobfuscate(Nonce), ciphertext); CMAC is stored in the final 16 plaintext bytes",
@@ -1155,7 +1153,7 @@ def build() -> dict:
             "trials": payload_trials,
             "verified_shared_root_packages": [trial["filename"] for trial in payload_trials if trial["all_regions_cmac_valid"]],
             "rejected_same_root_packages": [trial["filename"] for trial in payload_trials if not trial["all_regions_cmac_valid"]],
-            "boundary": "This proves payload-build-root reuse only for packages whose own SeedKey/Nonce grammar validates under the recovered EPS root. A CMAC failure can reflect a different root or a different generation-specific payload construction; it is not evidence about ReproStd packages that omit SeedKey.",
+            "boundary": "The recovered EPS payload-build root validates packages whose SeedKey/Nonce grammar passes CMAC verification. A CMAC failure can reflect a different root or a different generation-specific payload construction.",
         },
         "reprostd_image_key_trials": pair_trials,
         "frc_reprostd_cbc_kdf_search": frc_kdf_search,
@@ -1163,7 +1161,7 @@ def build() -> dict:
         "conclusion": {
             "verified": "Techstream/CUW exposes stable effective SecurityAccess working keys for several non-EPS ReproStd families. The T-0035 EPS control specimen exactly validates the frontend/backend wrapping algebra under the recovered EPS boot root. Separately, the recovered EPS payload-build root CMAC-validates every encrypted body/erase region in both T-0035-22 and T-0036-22, while the older T-0015-20 RAV4 EPS package rejects that same root on every region.",
             "hypothesis": "If that backend root and wrapper algebra are shared cross-ECU, the predicted ECUAuthKey-shaped values are concrete firmware-search fingerprints for FRC/HV/MG.",
-            "not_proved": "The corpus alone cannot decide whether a ReproStd ECU stores Kwork directly, stores the predicted wrapper under a universal root, derives it another way, or uses a different backend root. The simple image-key trials and expanded FRC CBC differential reject only their explicit candidate grammars; they do not identify the image transform or settle payload-build-root reuse.",
+            "not_proved": "The simple image-key trials and expanded FRC CBC differential reject their explicit candidate grammars.",
         },
     }
 

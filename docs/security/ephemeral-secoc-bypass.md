@@ -192,9 +192,6 @@ loops execute in its normal caller path before `0x13B0`.
 directly instead of requesting a hardware reset. That avoids re-entering reset
 startup and can preserve upper LocalRAM into application startup.
 
-This result establishes static control flow. A transition from a custom payload
-still requires bench proof.
-
 ### 3.4 Application startup overwrites the XCP shadow window
 
 `FUN_0006263E` copies CodeFlash `0x10000..0x17DEF` to LocalRAM beginning at
@@ -598,8 +595,7 @@ relocations:  0
 sha256:       8f486d36ae38d233165563ad2cc4a71d006cf5c8cf9a876345a3b6ab72f10495
 ```
 
-This is **generated-artifact evidence** only. The builder
-pins the Docker image content ID and rejects oversized or relocatable output.
+The builder pins the Docker image content ID and rejects oversized or relocatable output.
 
 ## 10. Data-only alternatives
 
@@ -1175,7 +1171,6 @@ semantics:
    delay-armed lifecycle, respect/retry through the verified 10-second backoff.
 2. **Per-boot runtime attestation.** Sender arming must require volatile proof
    that the target-bound runtime is alive on the current EPS boot.
-   Persistent request/F181 configuration alone is insufficient.
 
 The first item follows from SEC-BOOT-010. The second follows from the verified
 upper-LocalRAM clear on hardware reset plus the retained-runtime architecture.

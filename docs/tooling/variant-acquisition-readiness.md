@@ -52,11 +52,7 @@ One JSON artifact (`variant-acquisition-readiness-v1`):
   cross-checks, `problems[]`;
 - `structure_triage` — the scanner summary described above;
 - `resolver_readiness` — geometry/manifest gates and the literal next command;
-- `ready` — top-level conjunction;
-- `readiness_boundary` — standing text: ready-for-triage binds the artifact, it
-  does **not** validate any Sienna-recovered mechanism on the target. Every
-  transfer claim stays **hypothesis** until verified against the target's own
-  bytes.
+- `ready` — top-level conjunction.
 
 The artifact is designed to slot into the newer-TSK evidence bundle as the
 CodeFlash half of the target manifest
@@ -71,6 +67,3 @@ and what safely runs next against it.
   ([secoc-semantic-patch-resolver.md](secoc-semantic-patch-resolver.md)).
 - It performs no per-calibration software-ID lookup; identity is hash + structure
   only, matching the scanner's provenance rule.
-- A `ready: true` report on a foreign image authorizes nothing beyond triage;
-  it is not evidence that the XCP surface, RAM-exec gate, or SecOC gate function
-  on that calibration.

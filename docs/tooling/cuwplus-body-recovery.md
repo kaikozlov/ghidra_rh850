@@ -98,8 +98,7 @@ auxiliary product families.
 
 ## What is recovered versus regenerated
 
-The output files are **clean analysis PEs**. Byte-identical reproduction of
-Toyota's never-retained plaintext disk files remains unproved.
+The output files are **clean analysis PEs**.
 
 The recovered evidence is stronger than merely producing a parseable wrapper:
 

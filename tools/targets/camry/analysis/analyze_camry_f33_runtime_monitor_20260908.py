@@ -251,7 +251,7 @@ def build() -> dict:
             "next": "deterministic mid-aggregate observer: internally count D7/B6 after 0x79EDE/0x809FE and before the untouched 0x7A272 tail reaches 0x6A410; issue no SID23 reads during the treatment block; require native D7 as same-scheduler positive control and exact ID63 B0..B11||B28..B31 signature match for success",
             "rejected_probe": {
                 "candidate": "foreground active-RSCFD polling at controller1 FFD200DC/FFD23080/FFD2308C",
-                "reason": "exact receive drain runs in interrupt context through 0x71508 -> 0x66026 -> 0x667B6 -> 0x7A232 -> 0x79EBA -> 0x83CE4 -> 0x83E0C; scheduling a 0x66062 foreground poll before that hardware-head drain remains unproved",
+                "reason": "exact receive drain runs in interrupt context through 0x71508 -> 0x66026 -> 0x667B6 -> 0x7A232 -> 0x79EBA -> 0x83CE4 -> 0x83E0C",
             },
         },
     }

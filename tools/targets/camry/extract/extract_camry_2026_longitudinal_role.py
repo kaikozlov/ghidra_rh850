@@ -87,7 +87,7 @@ def extract(source_root: Path, openpilot_root: Path, output: Path) -> None:
         'carControl_columns': ['longActive', 'enabled', 'actuatorAccel'],
         'topology': {'d1_d4': '0=ADAS downstream, 2=camera source, 1=unsplit chassis',
                      '2d_3b_3c': '0/2=historical chassis relay, 1=ADAS'},
-        'timestamp_boundary': 'logMonoTime records host publication for a shared CAN batch; per-frame wire time is unmeasured',
+        'timestamp_boundary': 'logMonoTime records host publication for a shared CAN batch',
     }
     output.parent.mkdir(parents=True, exist_ok=True)
     with (

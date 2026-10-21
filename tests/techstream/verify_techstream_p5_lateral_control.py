@@ -1270,9 +1270,8 @@ check(
     and anchor(cid_data, cid_pe, 0x100016D8, "3b6c24180f8c80feffff"),
 )
 
-# Legacy SUW routing provides independent corroboration only. P5 security/writer
-# transfer remains unproven. FileVersion 17.0.13 maps VSC/ABS/ECB to CANID1=7B0
-# and EMPS to 7A1. SK1 is recorded only as a legacy config token.
+# FileVersion 17.0.13 maps VSC/ABS/ECB to CANID1=7B0 and EMPS to 7A1.
+# SK1 is a legacy config token.
 rp_app = ROOT / "SUW/InternalCF/Db/RpAppOsT.ini"
 rp_raw = rp_app.read_bytes()
 rp_text = rp_raw.decode("utf-16")

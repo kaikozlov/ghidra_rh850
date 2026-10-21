@@ -7,9 +7,7 @@ Handle zero has page FFFF; the remaining descriptors cover both multi-page
 allocations and the first 48 single-page records.
 
 The 77B12 read path checks the commit marker and handle before comparing an
-additive checksum through 77356/7771A/777CA. These byte-level checks do not
-establish application copy consensus or successful hardware reads. Likewise,
-a direct-reference census cannot exclude transitive learned-state influence.
+additive checksum through 77356/7771A/777CA.
 
 All inputs are tracked. No payload or key bytes are printed.
 """

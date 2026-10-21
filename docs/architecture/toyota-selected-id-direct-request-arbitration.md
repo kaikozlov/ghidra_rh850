@@ -15,9 +15,7 @@ latency-optimized physical realization in which the actuator can receive the
 application request stream directly and the manager can arbitrate primarily by
 selecting **which application stream the actuator should currently follow**.
 
-That distinction is important. The patent is not evidence that the exact Camry
-F33 EPS receives `0x08A`, and it is not a reason to reinterpret Brake/VMM
-`0x081` as an EPS selector. Exact F33 receives neither `0x08A` nor
+Exact F33 receives neither `0x08A` nor
 `0x081`; its recovered external target-bearing steering ingress remains B6.
 The value of this patent is that it exposes Toyota's alternate **data-plane +
 selection-plane** architecture and several timing/freshness rules that can be
@@ -201,17 +199,6 @@ actuate from new B request
 ~~~
 
 This freshness/admission rule concerns **protocol ordering**.
-Cryptographic freshness and SecOC freshness counters are outside the patent's discussion.
-
-Do not infer from this patent:
-
-- a particular timeout;
-- a modulo counter;
-- a SecOC freshness value;
-- a MAC;
-- a failure code when a selected request is missing.
-
-Those mechanisms are outside this disclosure.
 
 ## 6. The latency claim is narrower than "the manager is bypassed"
 
@@ -310,8 +297,7 @@ path using a direct-request bypass, while a remote high-bandwidth steering
 actuator is exactly where the selected-ID/direct-request pattern could be
 attractive.
 
-That establishes architectural compatibility. Exact F33 use of this steering
-realization remains unproven.
+That establishes architectural compatibility.
 
 ## 10. Exact Camry F33: what matches and what does not
 

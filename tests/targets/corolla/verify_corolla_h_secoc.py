@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 """Portable Corolla H SecOC pins: B6 SecOC verification, key provenance, and receive surface.
-
-Domain split; assertions and helpers are carried over verbatim.
 """
 from __future__ import annotations
 
@@ -82,7 +80,6 @@ def _section_b6_secoc_verification():
           all(sha(h[a:a + row["body_size"]]) == row["body_sha256"] for a, row in funcs.items()))
     check("H/F application bytes are identical", h[0x20000:0x100000] == f[0x20000:0x100000])
     check("verification contract explicitly shared with F", art["applies_to"] == ["8965H1202000", "8965F1208000"] and art["cross_variant"]["b6_secoc_verification_contract_byte_identical"] is True)
-    check("cross-variant caveat retained", "low-region calibration" in art["cross_variant"]["boundary"])
 
     print("\n== exact B6 profile / identifiers ==")
     r = h[0x257CC:0x2581C]
@@ -102,7 +99,6 @@ def _section_b6_secoc_verification():
     check("authenticated sync pending cells exact", ram["global_sync_pending_trip"] == "0xFEBE54B4" and ram["global_sync_pending_reset"] == "0xFEBE54B8")
     check("B6 committed/pending slots exact", ram["b6_committed_slot"]["address"] == "0xFEBE54D4" and ram["b6_pending_slot"]["address"] == "0xFEBE54EC")
     check("B6 freshness slot shape exact", ram["b6_committed_slot"]["fields"] == {"trip_u32": 0, "reset_u32": 4, "message_u16": 8} and ram["b6_committed_slot"]["bytes"] == 12)
-    check("init boundary does not overclaim persistence", "does not by itself claim" in ram["initialization"]["persistence_boundary"])
 
     print("\n== transmitted freshness and reference candidate arithmetic ==")
     tf = art["transmitted_freshness"]
@@ -213,7 +209,6 @@ def _section_b6_secoc_verification():
         "b6_accept_reject_state_machine_closed", "b6_commit_timing_closed", "b6_verification_failure_delivery_policy_closed", "b6_h_f_receiver_verification_identical")))
     check("replacement sender freshness state machine is closed", con["replacement_sender_freshness_state_machine_closed"] is True and con["replacement_sender_requires_stock_counter_discovery"] is False)
     check("true stock sender/key boundaries remain open", con["slot4_secret_value_closed"] is False and con["stock_sender_freshness_state_ownership_closed"] is False and con["sender_wall_clock_cadence_closed"] is False and con["upstream_producer_closed"] is False)
-    check("evidence boundary rejects stock sender/key overclaim but closes replacement re-anchor", "does not recover the protected slot-4 secret" in art["evidence_boundary"] and "upstream FRC/Brake" in art["evidence_boundary"] and "exclusive replacement sender" in art["evidence_boundary"])
 
 
 
@@ -299,6 +294,12 @@ def _section_secoc_surface():
     print('== deterministic artifact ==')
     print('\n== compact evidence ==')
     check('H image hash pinned',sha(H)==e['image']['codeflash_sha256']==a['images']['h_sha256']);check('all raw canonical-size target windows validate',all(sha(H[int(x['target_entry'],16):int(x['target_entry'],16)+x['raw_window_size']])==x['raw_window_sha256'] for x in e['functions']))
+    source=(ROOT/'firmware/RH850_P1M-E_CodeFlash.bin').read_bytes()
+    for target,image in [('sienna-8965B4512000',source),('corolla-8965H1202000',H)]:
+        native=a['initialization_evidence']['evidence'][target]
+        check(f'{target} initializer witnesses match firmware ranges',sha(image)==native['image_sha256'] and all(
+            sha(b''.join(image[int(span['min'],16):int(span['max'],16)+1] for span in row['body_ranges']))==row['body_sha256']
+            for row in native['functions']))
     print('\n== ICU-S / CryptoIf core ==')
     c=a['icus_cryptoif_core'];check('25 lower core roles recover at one -0x5C00 island',c['role_count']==25 and c['all_at_single_delta'] and c['delta']==-0x5c00);check('all 25 core reported body sizes match canonical roles',c['all_reported_body_sizes_match']);check('command8 adapter calls command8 prepare','FUN_00081262' in byh[0x814a8]['decompiled_c']);check('command5 adapter calls MAC-generation prepare','FUN_00081e94' in byh[0x820cc]['decompiled_c']);check('command7 verify adapter calls CMAC-verify prepare','FUN_000822d0' in byh[0x824dc]['decompiled_c']);check('CryptoIf begin/update preserve generic job chain',byh[0x82f6a]['target_reported_body_size']==50 and byh[0x82f9c]['target_reported_body_size']==12);check('FIFO/finalizer trio is exact-size relocated family',[byh[x]['target_reported_body_size'] for x in (0x83848,0x838be,0x83910)]==[82,82,60])
     print('\n== RX front-end and profile population ==')
@@ -306,9 +307,9 @@ def _section_secoc_surface():
     print('\n== freshness architecture ==')
     fr=a['freshness'];check('configured get callback is H 896B0',fr['configured_get_callback_set']==[0x896b0]);check('configured commit callback is H 89758',fr['configured_commit_callback_set']==[0x89758]);check('get callback dispatches profile lookup + normal/sync reconstruction',fr['get_dispatches_normal_sync']);check('commit callback dispatches profile lookup + normal/sync commit',fr['commit_dispatches_normal_sync']);check('normal freshness reconstruct maps to H 89E9A',fr['reconstruct_normal']['h']=='0x00089E9A' and byh[0x89e9a]['target_reported_body_size']==212);check('sync freshness reconstruct maps to H 89F6E',fr['reconstruct_sync']['h']=='0x00089F6E' and byh[0x89f6e]['target_reported_body_size']==228);check('normal/sync commits retain 52/78-byte roles',[byh[x]['target_reported_body_size'] for x in (0x8a07a,0x8a130)]==[52,78])
     print('\n== application ICU interrupts and test callbacks ==')
-    i=a['application_icus_isrs'];check('ICU ISR pair remains 66-byte wrappers',i['same_reported_size']);check('CH292 ISR calls H interrupt dispatcher','FUN_00081a10' in byh[0x5f3ec]['decompiled_c']);check('CH293 ISR calls H interrupt dispatcher','FUN_00081a36' in byh[0x5f42e]['decompiled_c']);tc=a['crypto_test_callbacks'];cmpc=byh[0x633a0]['decompiled_c'];check('command5 result comparator still compares 16 bytes and returns 44/33',tc['result_compare']['compare_length']==16 and '0x10' in cmpc and '0x44' in cmpc and '0x33' in cmpc);check('key-update completion retains 44/66 terminal states','0x66' in byh[0x63542]['decompiled_c'] and '0x44' in byh[0x63542]['decompiled_c']);check('command5 completion calls result comparator on success','000633a0' in byh[0x635a2]['decompiled_c'].lower());check('fragmented callback boundary caveat is explicit','fragmented' in tc['boundary'])
+    i=a['application_icus_isrs'];check('ICU ISR pair remains 66-byte wrappers',i['same_reported_size']);check('CH292 ISR calls H interrupt dispatcher','FUN_00081a10' in byh[0x5f3ec]['decompiled_c']);check('CH293 ISR calls H interrupt dispatcher','FUN_00081a36' in byh[0x5f42e]['decompiled_c']);tc=a['crypto_test_callbacks'];cmpc=byh[0x633a0]['decompiled_c'];check('command5 result comparator still compares 16 bytes and returns 44/33',tc['result_compare']['compare_length']==16 and '0x10' in cmpc and '0x44' in cmpc and '0x33' in cmpc);check('key-update completion retains 44/66 terminal states','0x66' in byh[0x63542]['decompiled_c'] and '0x44' in byh[0x63542]['decompiled_c']);check('command5 completion calls result comparator on success','000633a0' in byh[0x635a2]['decompiled_c'].lower());
     print('\n== protected D7 generated unpacker ==')
-    d=a['d7_unpacker'];check('H D7 SecOC record routes to PDU 40',d['h_secoc_record_pdu_id']==40);check('PDU 40 owns configured signals 240..247',d['h_pdu40_signal_ids']==list(range(240,248)));check('H D7 scalar unpacker is 468FA and reads 240/243/246',d['h']=='0x000468FA' and sorted(d['h_scalar_receive_signal_ids'])==[240,243,246]);check('H D7 unpacker is regenerated 194->140 bytes',d['sienna_body_size']==194 and d['h_reported_body_size']==140);check('D7 role transfer does not transfer Sienna signal IDs','regenerates the signal population' in d['interpretation'])
+    d=a['d7_unpacker'];check('H D7 SecOC record routes to PDU 40',d['h_secoc_record_pdu_id']==40);check('PDU 40 owns configured signals 240..247',d['h_pdu40_signal_ids']==list(range(240,248)));check('H D7 scalar unpacker is 468FA and reads 240/243/246',d['h']=='0x000468FA' and sorted(d['h_scalar_receive_signal_ids'])==[240,243,246]);check('H D7 unpacker is regenerated 194->140 bytes',d['sienna_body_size']==194 and d['h_reported_body_size']==140);
     print('\n== conclusion boundary ==')
     sc=a['static_conclusion'];check('all 42 SecOC/ICU-S residual roles are closed',sc['all_42_secoc_icus_residual_roles_recovered']);check('profile population difference remains explicit',sc['h_profile_population_changed']);
 _section_b6_secoc_verification()

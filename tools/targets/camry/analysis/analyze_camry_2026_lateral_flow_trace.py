@@ -581,7 +581,6 @@ def main() -> int:
         "schema": "camry-2026-lateral-flow-trace-v1",
         "generated_from": ("retained relay-correct 2026-08-27 Camry drives; nearest-neighbour "
                            "and batch-granular pairings per CORR-136"),
-        "production_output_authorized": False,
         "drives": drives,
         "parked_censuses": parked,
         "interpretation": {

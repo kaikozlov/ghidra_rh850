@@ -123,8 +123,7 @@ keeping `runtime_key_equivalence = unproven`.
 
 For the committed `4512000` image it reproduces the expected negative:
 object 15 has zero physically valid copies, its three decoded payloads do not
-agree, and its raw second field is low entropy. This establishes only structure.
-Protected ICU-S slot 4 runtime state remains unresolved.
+agree, and its raw second field is low entropy.
 
 A future Corolla dump can therefore be compared immediately:
 

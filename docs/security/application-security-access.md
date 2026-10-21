@@ -212,7 +212,7 @@ On failure, the worker returns `0x22` (conditionsNotCorrect).
 
 ## 6. Security-level consumers (what the unlock gates)
 
-**No configured SecurityAccess gating was found at the service, bounded RDBI-policy, or 19-RID RoutineControl policy layers in this Sienna calibration.** This result covers Dcm policy tables only. Callback-local checks require separate analysis. The complete configured `0xAB` event-record graph contains no direct sensitive target, while SID `0xBA` operation F7/`BAENA` independently reads the live Dcm security mask and requires application SecurityAccess level 2. The policy tables are empty even though this callback-local protection is real.
+**No configured SecurityAccess gating was found at the service, bounded RDBI-policy, or 19-RID RoutineControl policy layers in this Sienna calibration.** The complete configured `0xAB` event-record graph contains no direct sensitive target, while SID `0xBA` operation F7/`BAENA` independently reads the live Dcm security mask and requires application SecurityAccess level 2.
 
 | Scope | Check | Result |
 |---|---|---|
@@ -253,10 +253,7 @@ apparent `FEBF0308` hit lies behind the mutually exclusive `0x000` branch
 through `0x668B2`. The actual `0x66172` closure has zero selected sensitive
 references. The only branch-feasible selected observation is DID `0110` reading
 `FEBE5050`, whose exact xrefs limit it to reset/saturating status bookkeeping.
-The full 242-DID corpus may still contain privacy, diagnostic-history, or other
-sensitive information. This result specifically closes the currently recovered
-key/MAC/SA-buffer disclosure
-candidates.
+This result closes the currently recovered key/MAC/SA-buffer disclosure candidates.
 That callback-local result does not close the Dcm transport-buffer lifetime.
 Forty-eight DIDs use configured producers that immediately return success without
 writing. Their declared widths are 1..45 bytes; the exact set is pinned by the
@@ -426,7 +423,7 @@ The underlying findings support these conclusions:
 - Exactly **one stale-authorization window** exists (BA dispatcher `0x348B4`
   skipping the fresh SA read while `FEBE5F27 == 0x5A`), bounded by the
   30-invocation countdown and requiring a prior legitimate SA2 enable.
-- CommunicationControl composes communication **availability** only.
+- CommunicationControl composes communication **availability**.
 
 ## 9. Variant limitations
 

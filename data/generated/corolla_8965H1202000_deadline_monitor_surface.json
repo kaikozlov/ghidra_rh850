@@ -14,14 +14,48 @@
       "unique_exact_instruction_shape": true
     },
     "variant_d": {
+      "body_sha256": "1854f75394c483afffd8a2355be27f8a406398065249add8d951d9a23b69b2e8",
       "body_size": 1208,
       "h": "0x0006462A",
+      "h_exact_body_occurrences": [
+        "0x0006462A",
+        "0x000CF71C"
+      ],
+      "h_shape_candidates": [
+        "0x0006462A",
+        "0x000CF71C"
+      ],
+      "method": "exact-body-and-native-callback-dispatch",
       "sienna": "0x0006A28A",
-      "unique_exact_instruction_shape": true
+      "sienna_exact_body_occurrences": [
+        "0x0006A28A",
+        "0x000CC166"
+      ],
+      "sienna_shape_candidates": [
+        "0x0006A28A",
+        "0x000CC166"
+      ],
+      "unique_exact_instruction_shape": false
     }
   },
   "evidence": {
-    "decompiler_evidence": "data/generated/corolla_8965H1202000_deadline_monitor_surface_decompiler_evidence.json"
+    "decompiler_evidence": "data/generated/corolla_8965H1202000_deadline_monitor_surface_decompiler_evidence.json",
+    "h_codeflash": {
+      "path": "firmware/corolla-8965H1202000/CodeFlash.bin",
+      "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
+    },
+    "h_fingerprints": {
+      "path": "data/targets/corolla-8965H1202000/function_structural_fingerprints.jsonl",
+      "sha256": "e7fc32a0ffa53ea4fc3a6678ff6deb5b595575c5cbd458994180dcb7ca5686a5"
+    },
+    "sienna_codeflash": {
+      "path": "firmware/RH850_P1M-E_CodeFlash.bin",
+      "sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
+    },
+    "sienna_fingerprints": {
+      "path": "data/function_structural_fingerprints.jsonl",
+      "sha256": "3ca3033ab6dd711ad1aa7dca50c31d17954c58abef3128a6f3e167428d45a6fc"
+    }
   },
   "h_tables": [
     {
@@ -358,6 +392,403 @@
     "h_sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f",
     "sienna_sha256": "21140bbd65e530a9e518a3e84e20e5d85679675bc09cc724cb177bb7c76bafde"
   },
+  "native_variant_d_registration": [
+    {
+      "body_sha256": "2646214f0412b1a1b8d636506a4acc16f61895e35f94618b02d96fa245205495",
+      "body_size": 302,
+      "corpus": {
+        "path": "data/generated/decompilations.jsonl",
+        "sha256": "b8455006f5fc9cf20e66e1e7fa5897c5dd7b751d9e969e63f3656930aa81f275"
+      },
+      "data_references": [
+        {
+          "from_addr": "0x00041828",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002bd74",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00041832",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe744d",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00041834",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe7194",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00041838",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebeeb85",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004184e",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe7710",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004185c",
+          "operand_index": 1,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe7754",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004185e",
+          "operand_index": 0,
+          "ref_type": "PARAM",
+          "to_addr": "0x0002b980",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00041860",
+          "operand_index": 0,
+          "ref_type": "PARAM",
+          "to_addr": "0x000286d0",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00041862",
+          "operand_index": 2,
+          "ref_type": "PARAM",
+          "to_addr": "0xfebe7724",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00041866",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe775c",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x00041868",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe6368",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0004186c",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe7758",
+          "to_space": "ram"
+        }
+      ],
+      "decompiled_c_sha256": "1429e32486a6e1958700a051fef21ad05355a345483e85bd6e3a688a6323fad8",
+      "direct_calls": [
+        {
+          "bytes": "82ff168a",
+          "site": "0x00041874",
+          "target": "0x0006A28A"
+        },
+        {
+          "bytes": "82fff289",
+          "site": "0x00041898",
+          "target": "0x0006A28A"
+        },
+        {
+          "bytes": "82ffce89",
+          "site": "0x000418BC",
+          "target": "0x0006A28A"
+        }
+      ],
+      "entry": "0x000417EE",
+      "gate": "feature byte == 0x5A resets; otherwise flags bit0 must be clear and FEBEEB85 == 0x5A to dispatch; other cases call the non-dispatch fallback",
+      "gate_instructions": [
+        {
+          "address": "0x00041828",
+          "bytes": "810f75bd",
+          "mnemonic": "ld.bu"
+        },
+        {
+          "address": "0x0004182C",
+          "bytes": "0106a6ff",
+          "mnemonic": "addi"
+        },
+        {
+          "address": "0x00041830",
+          "bytes": "925d",
+          "mnemonic": "be"
+        },
+        {
+          "address": "0x00041832",
+          "bytes": "65e0",
+          "mnemonic": "sld.bu"
+        },
+        {
+          "address": "0x00041834",
+          "bytes": "e48f95b9",
+          "mnemonic": "ld.hu"
+        },
+        {
+          "address": "0x00041838",
+          "bytes": "a4978533",
+          "mnemonic": "ld.bu"
+        },
+        {
+          "address": "0x0004183C",
+          "bytes": "3d0680b90200",
+          "mnemonic": "mov"
+        },
+        {
+          "address": "0x00041842",
+          "bytes": "13e1",
+          "mnemonic": "or"
+        },
+        {
+          "address": "0x00041844",
+          "bytes": "818a",
+          "mnemonic": "shr"
+        },
+        {
+          "address": "0x00041846",
+          "bytes": "e13d",
+          "mnemonic": "bc"
+        },
+        {
+          "address": "0x00041848",
+          "bytes": "1206a6ff",
+          "mnemonic": "addi"
+        },
+        {
+          "address": "0x0004184C",
+          "bytes": "ba3d",
+          "mnemonic": "bne"
+        },
+        {
+          "address": "0x0004184E",
+          "bytes": "240f10bf",
+          "mnemonic": "ld.h"
+        }
+      ],
+      "monitor_ids": [
+        "0x43",
+        "0x44",
+        "0x45"
+      ],
+      "table_load": {
+        "bytes": "3b06d0860200",
+        "register": "r27",
+        "site": "0x00041856",
+        "table": "0x000286D0"
+      },
+      "target": "sienna-8965B4512000"
+    },
+    {
+      "body_sha256": "72bd8ef31f866f62bea7c9b61514542603f68c4a75be6bf44721beb5fc4b3159",
+      "body_size": 302,
+      "corpus": {
+        "path": "data/generated/corolla-8965H1202000/decompilations.jsonl",
+        "sha256": "ede02931f236ba4c83243039df0ed920aa49108d90390cb478a01ae16d5610dc"
+      },
+      "data_references": [
+        {
+          "from_addr": "0x0003c384",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0x0002b768",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0003c38e",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe7275",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0003c390",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe6fb4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0003c394",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebeeb85",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0003c3aa",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe7480",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0003c3b8",
+          "operand_index": 1,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe74c4",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0003c3ba",
+          "operand_index": 0,
+          "ref_type": "PARAM",
+          "to_addr": "0x0002b388",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0003c3bc",
+          "operand_index": 0,
+          "ref_type": "PARAM",
+          "to_addr": "0x00028260",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0003c3be",
+          "operand_index": 2,
+          "ref_type": "PARAM",
+          "to_addr": "0xfebe7494",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0003c3c2",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe74cc",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0003c3c4",
+          "operand_index": 2,
+          "ref_type": "READ",
+          "to_addr": "0xfebe622c",
+          "to_space": "ram"
+        },
+        {
+          "from_addr": "0x0003c3c8",
+          "operand_index": 2,
+          "ref_type": "WRITE",
+          "to_addr": "0xfebe74c8",
+          "to_space": "ram"
+        }
+      ],
+      "decompiled_c_sha256": "5623baa328f30c31fd17d3f627d60ca5c8a4921893052c50266ed2de5bb6aa35",
+      "direct_calls": [
+        {
+          "bytes": "82ff5a82",
+          "site": "0x0003C3D0",
+          "target": "0x0006462A"
+        },
+        {
+          "bytes": "82ff3682",
+          "site": "0x0003C3F4",
+          "target": "0x0006462A"
+        },
+        {
+          "bytes": "82ff1282",
+          "site": "0x0003C418",
+          "target": "0x0006462A"
+        }
+      ],
+      "entry": "0x0003C34A",
+      "gate": "feature byte == 0x5A resets; otherwise flags bit0 must be clear and FEBEEB85 == 0x5A to dispatch; other cases call the non-dispatch fallback",
+      "gate_instructions": [
+        {
+          "address": "0x0003C384",
+          "bytes": "810f69b7",
+          "mnemonic": "ld.bu"
+        },
+        {
+          "address": "0x0003C388",
+          "bytes": "0106a6ff",
+          "mnemonic": "addi"
+        },
+        {
+          "address": "0x0003C38C",
+          "bytes": "925d",
+          "mnemonic": "be"
+        },
+        {
+          "address": "0x0003C38E",
+          "bytes": "65e0",
+          "mnemonic": "sld.bu"
+        },
+        {
+          "address": "0x0003C390",
+          "bytes": "e48fb5b7",
+          "mnemonic": "ld.hu"
+        },
+        {
+          "address": "0x0003C394",
+          "bytes": "a4978533",
+          "mnemonic": "ld.bu"
+        },
+        {
+          "address": "0x0003C398",
+          "bytes": "3d0688b30200",
+          "mnemonic": "mov"
+        },
+        {
+          "address": "0x0003C39E",
+          "bytes": "13e1",
+          "mnemonic": "or"
+        },
+        {
+          "address": "0x0003C3A0",
+          "bytes": "818a",
+          "mnemonic": "shr"
+        },
+        {
+          "address": "0x0003C3A2",
+          "bytes": "e13d",
+          "mnemonic": "bc"
+        },
+        {
+          "address": "0x0003C3A4",
+          "bytes": "1206a6ff",
+          "mnemonic": "addi"
+        },
+        {
+          "address": "0x0003C3A8",
+          "bytes": "ba3d",
+          "mnemonic": "bne"
+        },
+        {
+          "address": "0x0003C3AA",
+          "bytes": "240f80bc",
+          "mnemonic": "ld.h"
+        }
+      ],
+      "monitor_ids": [
+        "0x43",
+        "0x44",
+        "0x45"
+      ],
+      "table_load": {
+        "bytes": "3b0660820200",
+        "register": "r27",
+        "site": "0x0003C3B2",
+        "table": "0x00028260"
+      },
+      "target": "corolla-8965H1202000"
+    }
+  ],
+  "role_closure": [
+    {
+      "method": "exact-body-and-native-callback-dispatch",
+      "proof": "1208-byte exact body; active variant-D B registrations S417EE/H3C34A load tables 286D0/28260 and call 6A28A/6462A three times under equivalent gates",
+      "reference_entry": "0x0006A28A",
+      "reference_name": "com_signal_deadline_monitor_d",
+      "target_entry": "0x0006462A"
+    }
+  ],
   "schema": "corolla-h-deadline-monitor-surface-v1",
   "sienna_tables": [
     {
@@ -692,9 +1123,9 @@
   ],
   "software_id": "8965H1202000",
   "summary": {
-    "all_88_named_deadline_residuals_closed": true,
-    "boundary": "callback cardinality/dispatcher architecture is recovered exactly at the generated-surface level; individual H callback operands and monitor IDs remain target-specific and are not assigned Sienna callback names one-to-one.",
+    "all_reference_table_callbacks_recensused": true,
     "h_unique_callback_union": 88,
+    "reference_callback_named_count": 30,
     "same_per_table_unique_counts": true,
     "same_table_shapes": true,
     "sienna_unique_callback_union": 88
@@ -710,13 +1141,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003DBC0",
-      "reference_name": "deadline_monitor_d_a_00_callback_04"
+      "reference_name": "FUN_0003dbc0"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003DBD0",
-      "reference_name": "deadline_monitor_d_a_00_callback_08"
+      "reference_name": "FUN_0003dbd0"
     },
     {
       "classification": "target-surface-recensused",
@@ -728,13 +1159,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003DE38",
-      "reference_name": "deadline_monitor_simple_00_callback_01"
+      "reference_name": "FUN_0003de38"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003DE48",
-      "reference_name": "deadline_monitor_simple_00_callback_02"
+      "reference_name": "FUN_0003de48"
     },
     {
       "classification": "target-surface-recensused",
@@ -746,13 +1177,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003E0D6",
-      "reference_name": "deadline_monitor_simple_01_callback_01"
+      "reference_name": "FUN_0003e0d6"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003E0E6",
-      "reference_name": "deadline_monitor_simple_01_callback_02"
+      "reference_name": "FUN_0003e0e6"
     },
     {
       "classification": "target-surface-recensused",
@@ -764,13 +1195,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003E306",
-      "reference_name": "deadline_monitor_simple_02_callback_01"
+      "reference_name": "FUN_0003e306"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003E316",
-      "reference_name": "deadline_monitor_simple_02_callback_02"
+      "reference_name": "FUN_0003e316"
     },
     {
       "classification": "target-surface-recensused",
@@ -782,13 +1213,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003E53A",
-      "reference_name": "deadline_monitor_simple_03_callback_01"
+      "reference_name": "FUN_0003e53a"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003E54A",
-      "reference_name": "deadline_monitor_simple_03_callback_02"
+      "reference_name": "FUN_0003e54a"
     },
     {
       "classification": "target-surface-recensused",
@@ -800,13 +1231,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003E8E0",
-      "reference_name": "deadline_monitor_simple_04_callback_01"
+      "reference_name": "FUN_0003e8e0"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003E8F8",
-      "reference_name": "deadline_monitor_simple_04_callback_02"
+      "reference_name": "FUN_0003e8f8"
     },
     {
       "classification": "target-surface-recensused",
@@ -818,13 +1249,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003EB0A",
-      "reference_name": "deadline_monitor_simple_05_callback_01"
+      "reference_name": "FUN_0003eb0a"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003EB1A",
-      "reference_name": "deadline_monitor_simple_05_callback_02"
+      "reference_name": "FUN_0003eb1a"
     },
     {
       "classification": "target-surface-recensused",
@@ -836,13 +1267,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003ED20",
-      "reference_name": "deadline_monitor_simple_06_callback_01"
+      "reference_name": "FUN_0003ed20"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003ED30",
-      "reference_name": "deadline_monitor_simple_06_callback_02"
+      "reference_name": "FUN_0003ed30"
     },
     {
       "classification": "target-surface-recensused",
@@ -854,13 +1285,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003EEAC",
-      "reference_name": "deadline_monitor_simple_07_callback_01"
+      "reference_name": "FUN_0003eeac"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003EEBC",
-      "reference_name": "deadline_monitor_simple_07_callback_02"
+      "reference_name": "FUN_0003eebc"
     },
     {
       "classification": "target-surface-recensused",
@@ -872,13 +1303,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003F038",
-      "reference_name": "deadline_monitor_simple_08_callback_01"
+      "reference_name": "FUN_0003f038"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003F048",
-      "reference_name": "deadline_monitor_simple_08_callback_02"
+      "reference_name": "FUN_0003f048"
     },
     {
       "classification": "target-surface-recensused",
@@ -890,13 +1321,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003F212",
-      "reference_name": "deadline_monitor_simple_09_callback_01"
+      "reference_name": "FUN_0003f212"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003F222",
-      "reference_name": "deadline_monitor_simple_09_callback_02"
+      "reference_name": "FUN_0003f222"
     },
     {
       "classification": "target-surface-recensused",
@@ -908,13 +1339,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003F3EC",
-      "reference_name": "deadline_monitor_simple_10_callback_01"
+      "reference_name": "FUN_0003f3ec"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003F3FC",
-      "reference_name": "deadline_monitor_simple_10_callback_02"
+      "reference_name": "FUN_0003f3fc"
     },
     {
       "classification": "target-surface-recensused",
@@ -926,13 +1357,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003F526",
-      "reference_name": "deadline_monitor_simple_11_callback_01"
+      "reference_name": "FUN_0003f526"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003F536",
-      "reference_name": "deadline_monitor_simple_11_callback_02"
+      "reference_name": "FUN_0003f536"
     },
     {
       "classification": "target-surface-recensused",
@@ -944,13 +1375,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003F660",
-      "reference_name": "deadline_monitor_simple_12_callback_01"
+      "reference_name": "FUN_0003f660"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003F670",
-      "reference_name": "deadline_monitor_simple_12_callback_02"
+      "reference_name": "FUN_0003f670"
     },
     {
       "classification": "target-surface-recensused",
@@ -962,13 +1393,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003F840",
-      "reference_name": "deadline_monitor_simple_13_callback_01"
+      "reference_name": "FUN_0003f840"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003F850",
-      "reference_name": "deadline_monitor_simple_13_callback_02"
+      "reference_name": "FUN_0003f850"
     },
     {
       "classification": "target-surface-recensused",
@@ -980,13 +1411,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003FA20",
-      "reference_name": "deadline_monitor_simple_14_callback_01"
+      "reference_name": "FUN_0003fa20"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003FA30",
-      "reference_name": "deadline_monitor_simple_14_callback_02"
+      "reference_name": "FUN_0003fa30"
     },
     {
       "classification": "target-surface-recensused",
@@ -998,13 +1429,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003FC5C",
-      "reference_name": "deadline_monitor_simple_15_callback_01"
+      "reference_name": "FUN_0003fc5c"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003FC6C",
-      "reference_name": "deadline_monitor_simple_15_callback_02"
+      "reference_name": "FUN_0003fc6c"
     },
     {
       "classification": "target-surface-recensused",
@@ -1016,13 +1447,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003FE9C",
-      "reference_name": "deadline_monitor_simple_16_callback_01"
+      "reference_name": "FUN_0003fe9c"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0003FEAC",
-      "reference_name": "deadline_monitor_simple_16_callback_02"
+      "reference_name": "FUN_0003feac"
     },
     {
       "classification": "target-surface-recensused",
@@ -1034,13 +1465,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x00040014",
-      "reference_name": "deadline_monitor_simple_17_callback_01"
+      "reference_name": "FUN_00040014"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x00040024",
-      "reference_name": "deadline_monitor_simple_17_callback_02"
+      "reference_name": "FUN_00040024"
     },
     {
       "classification": "target-surface-recensused",
@@ -1052,13 +1483,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0004018C",
-      "reference_name": "deadline_monitor_simple_18_callback_01"
+      "reference_name": "FUN_0004018c"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x0004019C",
-      "reference_name": "deadline_monitor_simple_18_callback_02"
+      "reference_name": "FUN_0004019c"
     },
     {
       "classification": "target-surface-recensused",
@@ -1070,13 +1501,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x00040426",
-      "reference_name": "deadline_monitor_simple_19_callback_01"
+      "reference_name": "FUN_00040426"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x00040436",
-      "reference_name": "deadline_monitor_simple_19_callback_02"
+      "reference_name": "FUN_00040436"
     },
     {
       "classification": "target-surface-recensused",
@@ -1088,13 +1519,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x000406C4",
-      "reference_name": "deadline_monitor_simple_20_callback_01"
+      "reference_name": "FUN_000406c4"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x000406D4",
-      "reference_name": "deadline_monitor_simple_20_callback_02"
+      "reference_name": "FUN_000406d4"
     },
     {
       "classification": "target-surface-recensused",
@@ -1106,13 +1537,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x00040918",
-      "reference_name": "deadline_monitor_simple_21_callback_01"
+      "reference_name": "FUN_00040918"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x00040932",
-      "reference_name": "deadline_monitor_simple_21_callback_02"
+      "reference_name": "FUN_00040932"
     },
     {
       "classification": "target-surface-recensused",
@@ -1124,13 +1555,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x00040B86",
-      "reference_name": "deadline_monitor_simple_22_callback_01"
+      "reference_name": "FUN_00040b86"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x00040BA0",
-      "reference_name": "deadline_monitor_simple_22_callback_02"
+      "reference_name": "FUN_00040ba0"
     },
     {
       "classification": "target-surface-recensused",
@@ -1142,13 +1573,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x00040DC8",
-      "reference_name": "deadline_monitor_simple_23_callback_01"
+      "reference_name": "FUN_00040dc8"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x00040DD8",
-      "reference_name": "deadline_monitor_simple_23_callback_02"
+      "reference_name": "FUN_00040dd8"
     },
     {
       "classification": "target-surface-recensused",
@@ -1160,13 +1591,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x00041000",
-      "reference_name": "deadline_monitor_simple_24_callback_01"
+      "reference_name": "FUN_00041000"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x00041010",
-      "reference_name": "deadline_monitor_simple_24_callback_02"
+      "reference_name": "FUN_00041010"
     },
     {
       "classification": "target-surface-recensused",
@@ -1178,13 +1609,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x00041230",
-      "reference_name": "deadline_monitor_simple_25_callback_01"
+      "reference_name": "FUN_00041230"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x00041240",
-      "reference_name": "deadline_monitor_simple_25_callback_02"
+      "reference_name": "FUN_00041240"
     },
     {
       "classification": "target-surface-recensused",
@@ -1196,13 +1627,13 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x00041464",
-      "reference_name": "deadline_monitor_simple_26_callback_01"
+      "reference_name": "FUN_00041464"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x00041474",
-      "reference_name": "deadline_monitor_simple_26_callback_02"
+      "reference_name": "FUN_00041474"
     },
     {
       "classification": "target-surface-recensused",
@@ -1220,14 +1651,15 @@
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x000419F2",
-      "reference_name": "deadline_monitor_d_b_00_callback_04"
+      "reference_name": "FUN_000419f2"
     },
     {
       "classification": "target-surface-recensused",
       "recensus": "complete H three-table deadline-monitor callback surface",
       "reference_entry": "0x00041A02",
-      "reference_name": "deadline_monitor_d_b_00_callback_08"
+      "reference_name": "FUN_00041a02"
     }
   ],
+  "surface_recensus_basis": "raw Sienna three-table callback union",
   "surface_recensus_count": 88
 }

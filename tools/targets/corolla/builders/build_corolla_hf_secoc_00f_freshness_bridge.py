@@ -204,10 +204,6 @@ def analyze_albino_sync_oracle(path: Path) -> dict[str, Any]:
         "source": {
             "path": str(path.resolve().relative_to(REPO)),
             "sha256": actual_sha,
-            "identity_boundary": (
-                "Contributor-supplied TSKM 0x00F oracle from the same 2023 Corolla investigation as the exact-H dump corpus, but CAN collection and "
-                "memory dumping were separate jobs; this is not a same-runtime-epoch CodeFlash-to-CAN proof."
-            ),
         },
         "rows": len(sync) + len(by_bus[2]),
         "rows_per_bus": {"0": len(sync), "2": len(by_bus[2])},
@@ -560,11 +556,9 @@ def main() -> int:
     artifact = {
         "schema": 1,
         "title": "Corolla H/F 0x00F SecOC synchronization -> ordinary freshness bridge",
-        "evidence_boundary": (
-            "Exact H/F firmware proves receiver-side 0x00F and D7/B6 freshness semantics. The two captures prove wire evolution but are not exact "
-            "H/F firmware-identity joins and the slot-4 key is unavailable, so their MAC28 values are not independently cryptographically verified here. "
-            "D7 is used as the live ordinary-PDU oracle because exact H/F puts D7 and B6 under the same authenticated 0x00F trip/reset state while retaining "
-            "independent per-PDU message8 slots. No D7 message counter is transferred to B6."
+        "method": (
+            "Replay D7 wire evolution against the exact H/F reset-search model. D7 and B6 share authenticated "
+            "0x00F trip/reset state and retain independent per-PDU message8 slots."
         ),
         "static_h_f_receiver": static_model(),
         "captures": captures,
@@ -621,7 +615,7 @@ def main() -> int:
             "interpretation": (
                 "The live D7 sequence exercises the exact H reset search/window model under logged receive order: in Span, every new 0x00F is stored before "
                 "one same-logMonoTime old-reset D7, which therefore maps to current-1; the next new-reset D7 seeds a new ordinary epoch, and within an epoch "
-                "message8 advances by one. Physical sub-event timing inside one batched CAN publication is not independently reconstructed."
+                "message8 advances by one."
             ),
         },
         "request_08a_signer_implication": {
@@ -631,20 +625,15 @@ def main() -> int:
                 "start a private 0x08A message counter at 1 whenever that epoch changes, and increment it by one for each subsequent 0x08A request in the epoch."
             ),
             "application_sequence_boundary": (
-                "0x08A B26 advances independently. Its message-low2 phase differs between the 2023 public and 2025 Span captures, so the signer must not derive "
-                "SecOC message8 from B26."
-            ),
-            "cryptographic_boundary": (
-                "These captures validate 0x08A FV4/freshness evolution only. They do not prove that Corolla EPS ICU-S slot 4 contains the same key as the external "
-                "0x08A producer; a live native-0x08A command-5 equality oracle is still required for that key-domain join."
+                "0x08A B26 advances independently. Its message-low2 phase differs between the 2023 public and 2025 Span captures."
             ),
         },
         "b6_sender_implication": {
             "what_00f_reveals": "36/46 meaningful B6 freshness bits directly: trip16 and reset20.",
-            "what_remains_per_b6": "message8 is B6-local state; FV4 additionally repeats reset_low2. D7's message8 must not be copied into B6.",
+            "what_remains_per_b6": "message8 is B6-local state; FV4 additionally repeats reset_low2.",
             "new_epoch_reanchor": (
-                "If the stock B6 producer is suppressed before the EPS commits a strictly newer authenticated 0x00F trip/reset, the first B6 under that new epoch "
-                "does not require knowledge of the previous B6 message8: H 0x89D58 seeds full message8 from transmitted message_low2 (0..3). Thereafter the "
+                "If the stock B6 producer is suppressed before the EPS commits a strictly newer authenticated 0x00F trip/reset, "
+                "H 0x89D58 seeds full message8 for the first B6 from transmitted message_low2 (0..3). Thereafter the "
                 "replacement sender can maintain the B6-local message8 and FV4 itself."
             ),
             "same_epoch_boundary": (
@@ -652,16 +641,8 @@ def main() -> int:
                 "sender still needs the reconstructed full message8 to compute a correct CMAC."
             ),
             "transition_race": (
-                "H's current-1 reset candidate and the live D7 transition show that one old-reset ordinary frame can remain valid immediately after 0x00F advances. "
-                "A replacement sender should therefore treat a visible new 0x00F plus subsequent ordinary new-reset traffic as the clean epoch boundary rather than "
-                "assuming simultaneous bus timestamps imply atomic sender rollover."
+                "H's current-1 reset candidate and the live D7 transition show that one old-reset ordinary frame can remain valid immediately after 0x00F advances."
             ),
-            "still_blocking": [
-                "slot-4 secret value or approved slot-4 CMAC operation",
-                "stock B6 producer suppression / relay-side ownership",
-                "B6 sender cadence and complete application-payload policy",
-                "live B6 capture to validate the sender's own message8 initialization/cadence; D7 proves only receiver arithmetic. B6 sender policy remains unproved",
-            ],
         },
         "prior_art_note": (
             "Current comma/opendbc Toyota SecOC code independently treats 0x00F RESET_CNT changes as the event that resets per-PDU sender message counters. "

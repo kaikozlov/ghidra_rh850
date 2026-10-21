@@ -509,7 +509,7 @@
     },
     "oem_wire_unit_name_closed": false,
     "physical_scale_closed": true,
-    "quantization_boundary": "integer truncation/saturation remain; the fraction gives only the exact linearized controller-equivalent conversion. Individual integer codes remain subject to quantization",
+    "quantization_boundary": "integer truncation/saturation remain; the fraction gives the exact linearized controller-equivalent conversion",
     "target_internal_relation": "C9B64: target_internal_pre_controller = saturate(2 * signed16(B6 B4:B5))"
   },
   "vehicle_state_guard": {

@@ -37,9 +37,7 @@ There is an older public precursor that matters for attribution. Willem's
 the tundra`) already contains the exact 72-byte `8965F3401200/8965F3402200`
 application-version record, CPU0 DID-`0x0203` value `01 00 00 00 00`, and the
 `45 01` new-UDS routine grammar. Blurbdust's host tool generalizes those ideas
-to two CPUs; it does **not** byte-copy the Tundra RequestDownload prefix. The
-pre-existing I-CAN-hack lineage of the F340 identity/new-UDS plumbing prevents
-using them as independent evidence of CUW extraction.
+to two CPUs.
 
 The retained `main.c` is **byte-identical** to public
 `shellcode/main_flash_patch.c` at `47d2824` (SHA-256
@@ -86,10 +84,8 @@ values, and command sequence while several register *names* were shifted and
 two status semantics were wrong. This is consistent with behavior reconstructed
 from disassembly without a correct symbolic register map. Together with the
 April-21 extractor statement, it makes CUW-informed FACI reconstruction
-**plausible and worth investigating**. The inherited F340 target identity adds
-context only. It does not prove that
-`main_flash_patch.c` was translated from Toyota's erase payload line-for-line.
-That comparison is now locally reproducible from pinned `T-0035-22.cuw`; the
+**plausible and worth investigating**.
+A comparison with Toyota's erase payload is now locally reproducible from pinned `T-0035-22.cuw`; the
 plaintext `*_erase.pt.bin` files remain ignored workspace intermediates, while
 secret-free hashes/function identities are tracked in
 `data/generated/techstream_v18/t0035_faci_backend_evidence.json`. CORR-121 records
@@ -144,11 +140,9 @@ decryptor:
   dump. The 8-byte egg marker is independently a **false positive as a SecOC
   signature** on this calibration: it matches the shared 5-byte token comparator
   (`FUN_0003485A` at VA `0x3485A`) used by the application SID `0xBA` proprietary
-  operation table. The SecOC Gate-2 control flow is separate. Forcing that
-  comparator true removes BA token comparisons, but
+  operation table. Forcing that comparator true removes BA token comparisons, but
   F7/`BAENA` still has an independent application SecurityAccess-level-2 check
-  at `0x34D96`; the patch therefore does not create the persistent BA
-  authorization state without SA2. See SECOC-028/035/043/044, SEC-APP-007, and
+  at `0x34D96`. See SECOC-028/035/043/044, SEC-APP-007, and
   `verify_community_tooling.py` §6–7.
 - **Extended version family** — targets 8965F3401200 (dual-CPU),
   8965F4207000, 8965F4201000, 8965B4209000, 8965B4233100, 8965B4509100.
@@ -211,9 +205,7 @@ The later [`albinoelephant_discord_PORT_ARCHITECTURE.md`](albinoelephant/albinoe
 is a byte-preserved external-source implementation reference for the contributor's
 Corolla longitudinal port. It reports the exact Corolla `0x160` E2E/acceleration
 layout and a successor stock/openpilot handoff that reuses the camera frame/counter
-and falls back to Toyota's standstill behavior below roughly 1 mph. Its hard-coded
-mode, forced-fingerprint, sunnypilot, and `ALLOW_DEBUG` pieces serve only to
-reproduce that port.
+and falls back to Toyota's standstill behavior below roughly 1 mph.
 
 The contributor's TSKM oracle contains synchronization `0x00F` only, explaining
 the original matcher failure. The derived public-route oracle adds the genuine
@@ -253,12 +245,11 @@ reads `8965F1208000 @ 0x20860` and `8A3111213000 @ 0x17DC0`, while
 
 A separate Span-supplied Discord rlog,
 `spanconstant/span_67fd5b833889fedf_00000010--17084916da--3--rlog.zst`, was
-recorded 2026-07-29 and added 2026-08-24. It is **not** part of the Aug-21 TSKM
-bundle and is not an exact F181 join (`carParams=MOCK`, different logging dongle),
-but it supplies a real moving whole-vehicle CAN sample. The maintainer reports the
+recorded 2026-07-29 and added 2026-08-24. It supplies a real moving whole-vehicle
+CAN sample. The maintainer reports the
 Toyota-B CAN0/CAN1 pairs were not physically repinned during that capture.
 `harnessStatus=flipped` in the rlog records Panda cable orientation.
-See `spanconstant/README.md` for the evidence boundary.
+See `spanconstant/README.md` for the capture details.
 
 The full comparative pass is tracked rather than left as preliminary triage.
 Span differs from albino's normalized 1-MiB CodeFlash in only 2,190 low-region

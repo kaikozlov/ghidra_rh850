@@ -223,9 +223,7 @@ For whole-buffer writers, the CSV deliberately preserves `u8[length]` rather tha
 inventing field boundaries. Enabled object 27 is especially bounded: it has a
 valid 72-byte descriptor and generic restore support, but exhaustive static call
 tracing found no object-specific writer. This supports classifying the slot as a
-configured orphan or externally unused in this calibration. Its OEM name remains
-unknown. Disabled objects similarly retain unknown semantics. This resolves storage
-ownership and recoverable structure while preserving the bounds on physical meanings.
+configured orphan or externally unused in this calibration.
 
 ### 2.4 Pages 0–255 are outside the object store
 
@@ -351,10 +349,6 @@ It has low entropy and the original report measured zero CMAC matches. Therefore
   compiled out, so the donor's protected slot state remains unknown and requires
   a dynamic experiment.
 
-The absence of a matching key in this dump is not evidence that pages 468–479 are
-KDF metadata, nor does it prove per-boot ICU derivation. It only proves absence
-from the captured readable bytes.
-
 ## 5. Bootloader DIDs are not DataFlash-backed
 
 The complete access, response, and ordering analysis is in `docs/diagnostics/bootloader-dids.md` and is
@@ -415,7 +409,7 @@ Accordingly:
 | field `0xFF206E14` maps to RAM `0xFEBF02F8` after restore | **Definitive** |
 | current snapshot's object 15 has no valid copy/key | **Definitive** |
 | related variants store the CMAC-verified SecOC key at `0xFF206E14` | **Strong external/field evidence** |
-| DIDs 201/202/203 use volatile storage only | **Definitive** |
+| DIDs 201/202/203 use volatile storage | **Definitive** |
 | `0x4EAD8` protects the final 2 KiB and optional-object pages 432–443 | **Definitive** |
 | pages 480–511 are the device's ICU-S reservation | **Strong hardware/firmware evidence** |
 | CPU-visible 00/FF tail bytes reveal protected ICU-S contents | **Unsupported** |

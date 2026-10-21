@@ -183,8 +183,7 @@ def extract_utility_strings(
 
     U_English (format 0x06) contains wizard/dialog text for dealer service
     procedures. Its parallel type-1 section supplies stable resource
-    identifiers, but still does not establish ECU ownership or a firmware
-    routine binding. These are family-level candidates only.
+    identifiers. These are family-level candidates.
     """
     entries: list[dict] = []
     for idx in range(1, u_db.entry_count + 1):

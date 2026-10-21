@@ -239,6 +239,10 @@ or reconstructed near-copy of one simply to make a verifier portable. Portable
 verification consumes the tracked derived evidence; `local` / `required-external`
 verification rechecks it against the ignored source corpus.
 
+For the diagnostic execution model's GTS+ continuity census, use a case-insensitive
+view of the locked vendor files: the database uses `.Dll` spellings for vendor
+`.dll` filenames.
+
 ## The durability trap (read this first)
 
 The `ghidra` CLI runs a long-lived bridge (TCP server inside Ghidra) that keeps
@@ -401,7 +405,44 @@ interior field (`DAT_base._n_m_`) or a base-relative expression (`LAB_base +
 offset`). Its metadata pins the exact canonical project-inventory hash,
 Ghidra/program identity, and the exporter/generator source hashes.
 
-Use it as the first cognitive/search surface for broad static analysis. Address
+The Corolla-H compact SecOC and nested-steering producers use
+`data/targets/corolla-8965H1202000/retained_decompiler_evidence.json`.
+This input retains 44 SecOC functions and 14 nested-steering functions from the
+earlier compact artifacts. Each source record identifies the original artifact
+and disposable corpus by path and SHA-256. Each function retains its original C,
+C hash, body size, and body hash. The producer checks those hashes against
+`firmware/corolla-8965H1202000/CodeFlash.bin`
+(`0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f`).
+These 58 retained functions are a subset, not either original whole-image corpus.
+
+The supervisor external-ingress census uses the registered H corpus at
+`data/generated/corolla-8965H1202000/decompilations.jsonl`.
+Its parser resolves GP-relative typed pointers with their declared element sizes.
+The census also consumes persisted data references independently of C rendering.
+Regenerate the three compact reports and two derived SecOC reports with:
+
+```bash
+python3 -m tools.targets.corolla.extract.extract_corolla_h_b6_secoc_verification_evidence
+python3 -m tools.targets.corolla.extract.extract_corolla_h_evidence extract steering-nested
+python3 -m tools.targets.corolla.extract.extract_corolla_h_supervisor_external_ingress_census
+python3 -m tools.targets.corolla.builders.build_corolla_h_b6_secoc_verification
+python3 -m tools.targets.corolla.builders.build_corolla_h_sienna_secoc_structural_comparison
+```
+
+The current census preserves all 35 earlier references and adds nine references
+from the canonical reference graph. It reports 44 references, 27 distinct signals,
+and four consumers of the sole changed command-sized field, B6 signal255.
+Its 101 scalar calls, 90 staging cells, 34 snapshot cells, and 303 cone functions
+remain unchanged.
+
+The H/F command-5 carrier evidence uses the same registered H corpus. Regenerate
+it with:
+
+```bash
+uv run --locked python -m tools.targets.corolla.extract.extract_corolla_hf_command5_runtime_carrier_evidence
+```
+
+Use the registered corpus for broad static-analysis searches. Address
 lookup accepts either a function entry or any address inside an exact body range
 from the provenance-matched project inventory:
 
@@ -423,6 +464,86 @@ make pseudocode                          # rebuild the ignored build/out/pseudoc
 rg 'ICUSCMD' build/out/pseudocode
 rg 'rdbi' build/out/pseudocode
 ```
+
+### Cross-variant structural fingerprints
+
+The Sienna/H/F structural matcher consumes tracked complete fingerprint exports:
+`data/function_structural_fingerprints.jsonl` for Sienna and
+`data/targets/<target>/function_structural_fingerprints.jsonl` for each Corolla.
+Each JSONL starts with the actual Ghidra version, program name, executable
+SHA-256, language and compiler identity (`schema_version: 2`), followed by every
+recovered function. Function records include exact `body_ranges` as ordered
+`{space, min, max}` objects, with inclusive hexadecimal bounds.
+The decompiler corpora contain references and rendered C, but lack the complete
+instruction mnemonic/length records needed by this matcher.
+
+The 2026-10-21 exports use clean materializations of the registered snapshots,
+leaving working projects and live daemons untouched. First inspect the registry:
+
+```bash
+tools/gtarget show sienna-8965B4512000
+tools/gtarget show corolla-8965H1202000
+tools/gtarget show corolla-8965F1208000
+```
+
+Run from the repository root. The disposable directory must be new; materializing
+into an occupied project is rejected. Export sequentially so the wrapper's shared
+processor-environment bootstrap has one owner.
+
+```bash
+set -e
+mkdir -p build/work
+export_root=$(mktemp -d "$PWD/build/work/structural-evidence.XXXXXX")
+for spec in \
+  'sienna-8965B4512000 rh850_p1me_mapped RH850_P1M-E_CodeFlash.bin data/function_structural_fingerprints.jsonl data/ghidra_project_inventory.baseline.jsonl' \
+  'corolla-8965H1202000 corolla_8965H1202000 CodeFlash.bin data/targets/corolla-8965H1202000/function_structural_fingerprints.jsonl data/targets/corolla-8965H1202000/ghidra_project_inventory.baseline.jsonl' \
+  'corolla-8965F1208000 corolla_8965F1208000 CodeFlash.bin data/targets/corolla-8965F1208000/function_structural_fingerprints.jsonl data/targets/corolla-8965F1208000/ghidra_project_inventory.baseline.jsonl'
+do
+  read -r target project program output baseline <<< "$spec"
+  uv run --locked python -m tools.project.project_layout materialize \
+    --snapshot-dir "projects/$target" --project-dir "$export_root/$target" \
+    --project-name "$project"
+  tools/project/run_headless --project-dir "$export_root/$target" \
+    --project "$project" --label "structural-$target" -- \
+    -process "$program" -noanalysis -readOnly \
+    -postScript ExportProjectInventory.java "$export_root/$target-inventory.jsonl" \
+    -postScript ExportFunctionStructuralFingerprints.java "$PWD/$output"
+  uv run --locked python - "$export_root/$target-inventory.jsonl" "$baseline" <<'PY'
+import json
+import sys
+from pathlib import Path
+def graph(path):
+    return [row for line in Path(path).read_text().splitlines()
+            if (row := json.loads(line))["record"] not in ("bookmark", "totals")]
+if graph(sys.argv[1]) != graph(sys.argv[2]):
+    raise SystemExit("snapshot graph differs from registered baseline")
+PY
+done
+for software in 8965H1202000 8965F1208000
+do
+  uv run --locked python -m tools.variants.match_variant_function_structure \
+    --reference data/function_structural_fingerprints.jsonl \
+    --target "data/targets/corolla-$software/function_structural_fingerprints.jsonl" \
+    --output "data/generated/corolla_${software}_structural_function_transfer.json"
+done
+```
+
+All exported non-bookmark/non-total inventory records exactly matched the
+registered baselines. The snapshot exports contain 4/4/5 fewer Error bookmarks
+for Sienna/H/F respectively; function identities, body ranges, memory blocks,
+symbols and comments match. No analysis or project save was performed.
+
+The Sienna export has 7,090 functions / 194,093 instructions and SHA-256
+`3ca3033ab6dd711ad1aa7dca50c31d17954c58abef3128a6f3e167428d45a6fc`.
+H and F each have 6,934 functions / 194,369 instructions. Their function records
+are identical, but complete-file SHA-256 values differ because their executable
+identities differ: H
+`e7fc32a0ffa53ea4fc3a6678ff6deb5b595575c5cbd458994180dcb7ca5686a5`,
+F `720339bea51973f946d82f5d32302976e3bbfa294d887caedd9b14de01a583cc`.
+Both matcher outputs contain 3,121 unique-shape pairs, 2,865 with at least eight
+instructions, 326 named pairs and 318 named pairs with at least eight instructions.
+These canonical snapshots replace unavailable historical 6,376/5,425-function
+exports: 613 match pairs are added and 34 removed relative to those reports.
 
 ## Task-oriented tooling discovery
 
@@ -524,8 +645,7 @@ The command resolves and reports `geometry`, selector identity, boot transition,
 scheduler, RX ring and functional acceptance rule, native receive/foreground
 path, signer ABI, private-memory layout, and MPU transit permission directly
 from that dump. Components are reported independently as `resolved`,
-`missing-or-ambiguous`, or `blocked`; a required failure leaves compatibility
-unproven.
+`missing-or-ambiguous`, or `blocked`.
 
 It then reports whether the registered universal profile table already contains
 the exact selector/config row; a missing row is inserted into that candidate
@@ -684,6 +804,14 @@ make verify                       # alias for core
 make verify-sleigh                # SLEIGH compile + isolated install
 make verify-processor             # processor fixtures + firmware-machine gate + working-project audits
 make verify-project-parity        # exact working-project inventory vs baseline
+```
+
+Exercise the PCS ADU constructor interpreter and decoded field geometry with the
+recovered viewer assembly:
+
+```bash
+uv run --locked python tests/techstream/verify_gtsplus_pcs_data_viewer_adu_semantics.py \
+  --assembly "software/Techstream/gtsplus/gts-aux-unprotected/PCS Data Viewer/PCS Data Viewer.exe"
 ```
 
 The processor fixtures cover all four language profiles. Their optional

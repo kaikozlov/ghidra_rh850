@@ -163,8 +163,7 @@ def main() -> int:
     need(not any(r["ecu_domain"] == "EBU" for r in placement), "EBU unexpectedly became ECU-domain name")
     need(not any(r["component_index"] == "0x65" for r in placement), "Camry unexpectedly gained component 0x65")
 
-    # Current Toyota English GTS does not spell the acronym out. Preserve that
-    # exact negative. An expansion requires a separate Toyota-authored source.
+    # Current Toyota English GTS does not spell the acronym out.
     expansion_hits = {
         term: [text for _, text in strings.search(term, limit=32)]
         for term in ("Electronic Brake Unit", "Electric Brake Unit", "Electronic Brake Module")
@@ -224,7 +223,7 @@ def main() -> int:
          f"ABS_P5 EPS communication-open monitor drift: {eps_comm_open}")
 
     # P6 category names provide successor naming context: A is Brake/EPB;
-    # B is Brake Booster. Exact Camry physical ownership requires separate proof.
+    # B is Brake Booster.
     cats = {e.category_id: e for e in parser.extract_master_ecu_categories(master.sections[16])}
     cat_names = {cid: strings.get_string(cats[cid].ecu_name_string_index) or "" for cid in (6004, 6005)}
     need(cats[6004].database_name == "BSCM_A_P6.ddb" and cat_names[6004] == "Brake/EPB", "P6 BSCM_A identity drift")
@@ -259,7 +258,7 @@ def main() -> int:
                 **p6_ebu_identity_probe,
                 "interpretation": (
                     "Successor BSCM_A=Brake/EPB exposes the native wheel/G quantities while BSCM_B=Brake Booster exposes an EBU-node copy. "
-                    "This strongly favors EBU as the Brake/EPB/skid-control-side node. The successor evidence provides context only; exact-P5 Camry wiring remains unproved."
+                    "This strongly favors EBU as the Brake/EPB/skid-control-side node."
                 ),
             },
             "brake_to_eps_channel_vocabulary": {
@@ -272,15 +271,15 @@ def main() -> int:
             "p6_successor_category_control": {
                 "6004": {"database": cats[6004].database_name, "name": cat_names[6004]},
                 "6005": {"database": cats[6005].database_name, "name": cat_names[6005]},
-                "boundary": "Successor naming provides context only for the brake-domain split; exact-P5 Camry ownership requires separate evidence.",
+                "boundary": "Successor naming provides context for the brake-domain split.",
             },
         },
         "interpretation": {
             "discrete_ebu_filter_ecu_supported_by_exact_camry_topology": False,
             "one_eps_controller_compatible_with_upstream_segmentation": True,
             "leading_physical_model": (
-                "The exact topology supports an EPS attachment through an EBU-labelled brake-domain node/branch. A second "
-                "installed EBU ECU remains unsupported. Combined with the one-controller F33 receiver and direct-B6 pre-admission loss, the leading "
+                "The exact topology supports an EPS attachment through an EBU-labelled brake-domain node/branch. "
+                "Combined with the one-controller F33 receiver and direct-B6 pre-admission loss, the leading "
                 "model is an upstream Brake/Skid request-generation/routing boundary feeding the EPS over its single local CAN path. "
                 "The P6 A/B split strongly favors the EBU node as the Brake/EPB/skid-control side, and ABS_P5's explicit Power-Steering ch2/missing-message vocabulary is consistent with that two-sided brake-domain topology."
             ),

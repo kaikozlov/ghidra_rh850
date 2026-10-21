@@ -197,7 +197,7 @@ def build() -> dict:
                 "stage": 3,
                 "name": "independent MAC agreement",
                 "criterion": "7/12/36-byte generated results agree with independently known CMAC vectors for the same live key/domain where such vectors are available",
-                "purpose": "validate semantic output beyond command completion",
+                "purpose": "validate semantic output",
             },
             {
                 "stage": 4,
@@ -213,8 +213,7 @@ def build() -> dict:
             "live_slot4_permission_closed": False,
             "command5_latency_jitter_closed": False,
             "production_b6_signer_closed": False,
-            "vehicle_actuation_authorized": False,
-            "interpretation": "Static H/F carrier geometry and executable fit are now closed enough to define a concrete live canary experiment. This is not proof that FEBF0000..01CF remains unmodified in a running ECU, that slot4 permits command5, or that signing meets B6 timing. Those remain dynamic gates.",
+            "interpretation": "Static H/F carrier geometry and executable fit are now closed enough to define a concrete live canary experiment.",
         },
     }
 

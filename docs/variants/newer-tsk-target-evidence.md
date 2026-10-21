@@ -71,8 +71,7 @@ No exact newer-TSK part number, target CodeFlash/DataFlash, matching `.cuw`, or
 labeled official Techstream capture is present. Therefore:
 
 - V18's zero `SecOC`/`VehSec` vocabulary supports only “no named/static path
-  recovered in pinned V18”; it does not prove generic J2534 traffic never
-  carries secured runtime frames;
+  recovered in pinned V18”;
 - Sienna firmware findings remain Sienna-specific;
 - target-generation transfer remains **hypothesis**, with zero verified exact
   transfers in [../status/ANALYSIS_STATUS.md](../status/ANALYSIS_STATUS.md).

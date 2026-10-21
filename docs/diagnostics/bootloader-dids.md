@@ -203,7 +203,7 @@ variant. It does mean those meanings must not be projected onto handlers
 | access bits, lengths, destination pointers, session/security checks | **Definitive** |
 | `0203 -> 0201 -> 0202` state transitions and ignored `0203` data | **Definitive** |
 | `0201` key derivation and `0202` CBC-IV/CMAC consumers | **Definitive** |
-| all three proprietary DIDs use volatile storage only | **Definitive** |
+| all three proprietary DIDs use volatile storage | **Definitive** |
 | `F181` exact response is `02 || 32*0x21` | **Definitive** |
 | interpreting `0x02` as a two-record count | **Standard-based inference** |
 

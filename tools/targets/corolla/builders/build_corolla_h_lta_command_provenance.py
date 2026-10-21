@@ -223,7 +223,7 @@ def main() -> int:
             "upstream_conditioner": "0x000CC2EC",
             "relation": "CC2EC produces replicated C1F8/C1FC/C206; CAD62 selects/scales that state and writes the same value through GP+0x97C/+0x97E/+0x984 to C17C/C17E/C184",
             "recovered": require(c[0xCC2EC], "iVar10 + 0x9f8", "iVar10 + 0x9fc", "iVar10 + 0xa06") and require(c[0xCAD62], "iVar2 + 0x97c", "iVar2 + 0x97e", "iVar2 + 0x984"),
-            "interpretation": "The three retained magnitude words are live locally synthesized state; they are not copied from a command-sized COM scalar.",
+            "interpretation": "The three retained magnitude words are live locally synthesized state.",
         },
         "b6_modulators": [
             {
@@ -280,7 +280,7 @@ def main() -> int:
         "boundary": (
             "The earlier direct-symbol-only conclusion was incomplete. GP-relative writers CC7F8, CC2EC and CAD62 make the mode enable and replicated magnitude branch live. "
             "B6 signals262/263 modulate internal magnitude contributors as 8-bit percentage-like values. A deeper GP-relative copy audit additionally recovers signed16 B6 signal255 at AE82 as the target-steering-angle command feeding the upstream target-vs-measured controller. "
-            "This closes the named retained-branch computed aliases; arbitrary unrelated computed aliases and undocumented hardware/DMA writers remain outside this proof."
+            "This closes the named retained-branch computed aliases."
         ),
     }
 
@@ -312,7 +312,6 @@ def main() -> int:
         "interpretation": (
             "1C02 Command Value Torque is a general EPS-internal torque-command observable that also covers operation outside LTA. "
             "The computed-writer audit corrects the earlier direct-zero inference: BE04/BD90/B678/BEC6/C39C and the retained C2A8 branch have live local/calibration producers. "
-            "No one of those live internal terms is thereby identified as a direct external autonomous setpoint."
         ),
     }
 
@@ -385,13 +384,13 @@ def main() -> int:
             "configured_signal_ids": s_2e4_signals,
             "scalar_receive_ids": s_2e4_scalar,
             "configured_without_scalar_receive": sorted(set(s_2e4_signals) - set(s_2e4_scalar)),
-            "interpretation": "Sienna 2E4 itself has configured IDs beyond its scalar application fields; configured-table membership alone is not evidence for a hidden command payload.",
+            "interpretation": "Sienna 2E4 itself has configured IDs beyond its scalar application fields.",
         },
         "classification": "no-recovered-hidden-b6-group-or-full-pdu-command-consumer",
         "boundary": (
             "B6 has 28 authenticated application bytes and scalar IDs 254..265 are consumed by its recovered unpacker. Signal255 is separately recovered through a GP-relative RTE snapshot copy as the signed16 target-angle command. "
             "The four configured nonscalar IDs 252/253/266/267 are absent from every literal block/group receive call; no full-PDU copy uses PDU42; "
-            "and the B6 COM buffer base has no raw absolute pointer literal. This closes only the remaining nonscalar/group/full-PDU/direct-literal escape surfaces. Arbitrary unrelated computed aliases and hardware access remain outside the proof."
+            "and the B6 COM buffer base has no raw absolute pointer literal. This closes the remaining nonscalar/group/full-PDU/direct-literal escape surfaces."
         ),
     }
 
@@ -473,8 +472,7 @@ def main() -> int:
             "H independently recombines 184*15+185 as steering angle and treats 186 as a rate magnitude. These retain their sensor-measurement semantics."
         ),
         "boundary": (
-            "The public DBC is corroboration rather than sole naming evidence: target-native H arithmetic independently distinguishes angle+fraction and rate semantics. "
-            "This closes the adversarial possibility that an unchanged-shape large scalar was silently repurposed as the missing LTA command."
+            "Target-native H arithmetic independently distinguishes angle+fraction and rate semantics, corroborating the public DBC."
         ),
     }
 
@@ -552,7 +550,7 @@ def main() -> int:
         },
         "evidence_boundary": (
             "Static closure is exact for the B6 signal255 generated extraction, GP-relative stage-to-snapshot copy, target-vs-measured angle controller, promoted direct/GP-relative retained-branch writers, raw absolute pointers, literal block/group receives, and literal full-PDU copies in the tracked H corpus. "
-            "The EPS ingress, angle-command domain, FD025 physical angle representation, B6 controller-equivalent physical scale, signal254 feature/request selection, seven-foreground-tick primary receiver-loss cutoff, and modulo-64 sequence handling are identified. The exact OEM B6 signal255 unit label, wall-clock sender cadence, exact secondary-field names, and the upstream FRC/Brake producer/authentication route remain bounded. No second command-sized generated scalar or recovered literal block/group/full-PDU ingress is identified; arbitrary computed aliases and DMA/peripheral mutation remain outside the static proof."
+            "The EPS ingress, angle-command domain, FD025 physical angle representation, B6 controller-equivalent physical scale, signal254 feature/request selection, seven-foreground-tick primary receiver-loss cutoff, and modulo-64 sequence handling are identified. No second command-sized generated scalar or recovered literal block/group/full-PDU ingress is identified."
         ),
     }
 

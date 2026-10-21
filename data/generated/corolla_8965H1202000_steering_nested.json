@@ -131,7 +131,7 @@
   "software_id": "8965H1202000",
   "static_conclusion": {
     "all_9_named_steering_residuals_closed": true,
-    "boundary": "high-level steering role/control topology is closed. H-specific supervisory mode meanings, calibration constants, and internal estimator state remain target-specific; absent classic 2E4/131 command ingress is not reintroduced.",
+    "boundary": "high-level steering role/control topology is closed. H-specific supervisory mode meanings, calibration constants, and internal estimator state remain target-specific.",
     "one_to_one_roles_recovered": 6,
     "removed_or_replaced_roles_recensused": 3
   },

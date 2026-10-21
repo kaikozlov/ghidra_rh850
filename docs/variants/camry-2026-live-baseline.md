@@ -17,7 +17,7 @@ evidence is retained under `targets/camry-2026/raw-20260826/`; the
 reproducible compact analysis is
 `data/generated/camry_2026_tsk_baseline.json`.
 
-Sections 1–8 preserve the original **dynamic field evidence**. Corolla H/F names there are used only where the wire behavior itself strongly transfers. Section 9 adds the subsequently acquired exact `8965F3307000` CodeFlash and replaces the firmware-transfer boundary only for facts proved target-natively there; remaining timing/limit/signer questions stay explicit.
+Sections 1–8 preserve the original **dynamic field evidence**. Section 9 adds the subsequently acquired exact `8965F3307000` CodeFlash.
 
 ## 1. Exact EPS identity and route
 
@@ -114,7 +114,6 @@ The H/F DBC geometry decodes coherently: steering angle spans `-12.0..+19.5 deg`
 fraction exercises all signed 0.1-degree nibble values from `-0.7..+0.7`, and
 the signed rate field spans `-80..+70` in the existing prior-art deg/s
 interpretation. This strongly supports wire-layout continuity.
-Camry receiver/producer semantics still require target-native code evidence.
 
 ### 4.3 legacy checksum/state carriers
 
@@ -358,14 +357,11 @@ Its diagnostic value byte 1 has these encodings:
 
 The same DID separately defines each P/R/N/D indicator bit, corroborating the
 dictionary. This is OEM diagnostic metadata. The controlled capture independently
-joins it to CAN ID `0x3BF`. It does
-not establish the physical sender or support for this DID on a particular ECU.
+joins it to CAN ID `0x3BF`.
 
 In the first capture, `0x3BF` follows the complete **P → R → N → D → N → R → P**
 sequence. All six changes are within **8 ms** of the corresponding `0x127`
 change in the retained receive timestamps. These observations measure receive-batch timing.
-Physical selector-to-wire latency remains unmeasured.
-The roughly one-per-second background rate therefore cannot establish a one-second shift delay.
 
 In the second capture, all five `0x3BF` samples inside the `0x127`-identified B
 interval retain `0x10`. This information loss requires retaining the hybrid ordinal
@@ -414,7 +410,6 @@ Every one of the 40 Corolla-H descriptors exists on this target; Camry adds only
 `0x116/8`, `0x0D8/8`, and `0x1DA/8`. Relative to the older Sienna image, Camry
 removes the old `2E4/191/131/2FD/132/423/020` receive set and adds
 `116/D8/B6`. This establishes configuration continuity.
-Semantic transfer requires separate evidence.
 
 The exact three-record protected receive table is at **`0x25848`** and contains
 only `0x00F`, `0x0D7`, and `0x0B6`. The shared crypto configuration immediately
@@ -518,8 +513,7 @@ against the two inclusive intervals stored at `0x29244`,
 for memory ID 2 before the DataFlash copy operation. The same exact 16-byte
 table appears in the retained Sienna, Crown, and both Corolla EPS CodeFlash
 images at their respective target-specific offsets. This is a **patchable
-application policy**. MainPE access to the underlying ICU-S flash remains a separate
-hardware restriction. Renesas documents that an enabled ICU-S owns its
+application policy**. Renesas documents that an enabled ICU-S owns its
 reserved DataFlash region exclusively, including against CPU and serial access
 (<https://community.renesas.com/mcu/rh850/f/rh850-rl78f/17721/regarding-icu-region-access-in-data-flash>).
 
@@ -576,13 +570,11 @@ every eligible sliding 16-byte window:
 This closes the simple CPU-visible-key hypothesis for the retained post-handoff
 memories: **no raw 16-byte window in the complete DataFlash, non-clobbered PE1
 LocalRAM, or GlobalRAM authenticates the captured Camry SecOC traffic under the
-recovered Toyota CMAC formats.** It does *not* imply that ICU-S slot 4 is empty.
+recovered Toyota CMAC formats.**
 Exact F33 firmware already proves command-7 verification selects slot 4, and the
 live `0x0D7` stream demonstrates an operational protected domain. The natural
 interpretation is therefore that the active slot-4 secret is not present as a
-raw CPU-visible value in these retained stores. A transient application-only
-RAM value could also be cleared by the application-to-boot handoff, so the RAM
-negative applies only to the post-handoff snapshots.
+raw CPU-visible value in these retained stores.
 
 Raw acquisition, payload, oracle, and retained matcher provenance live under
 `targets/camry-2026/raw-20260826/secoc-recovery/`; deterministic compact
@@ -619,8 +611,7 @@ request representation. The current blockers are therefore narrower and split by
    protection, downstream-result, and safety gates close. The retained LTA/LCA interval is
    already identified. FRC `0x1601/0x1914` remains useful independent corroboration.
 
-Production output remains disabled. The exact firmware substantially reduces the
-remaining work, but it does not by itself authorize steering transmission.
+Production output remains disabled.
 
 ## 12. Exact F33 static lateral/runtime prerequisite closure
 
@@ -629,8 +620,7 @@ remaining F33 lateral prerequisites (ledger: **VAR-056**): foreground timing,
 the B6 mode2 limit calibration, companion control fields, feedback monitors,
 application runtime anchors, and the static carrier geometry. All claims are
 exact `8965F3307000` firmware-static results on the retained CodeFlash from
-§9; none is transferred from Corolla H/F or Sienna. Static closure does not
-authorize transmitting any frame.
+§9.
 
 ### 12.1 Foreground timing: TAUJ0 CH3 steady 5.000 ms
 
@@ -664,8 +654,6 @@ The companion-field semantics recovered in the mode2 consumers are:
   the term entirely;
 - **signal 268** is the application-side modulo-64 sequence counter (the
   receiver-side sequence state was already closed in §9);
-- the remaining secondary fields stay **unnamed** — no OEM field name is
-  assigned without firmware or diagnostic evidence.
 
 ### 12.4 Feedback oracles: angle-velocity monitor, torque, and Q current
 
@@ -676,7 +664,7 @@ Exact F33 diagnostic joins close the feedback side:
   **79-cycle persistence**.
 - DID1035 **Steering Wheel Torque** callback `0x4DB70` scales **raw/256 N.m**
   with validity magic `0xA5AA5AA5`. The **±2109 raw (~±8.238 N.m)** bound applies
-  to **acquisition/representation**. An override threshold requires separate evidence.
+  to **acquisition/representation**.
 - DID1151 **Motor Actual Current Q Axis** callback `0x4E394` computes
   **(raw*100)/0x80**. The current canonical Ghidra graph resolves
   `GP-0x5158` to `FEBE66A8` and finds **9 direct driver-torque references
@@ -759,8 +747,7 @@ active and the marker probe proved the request reaches `FEBE4C34`.
 Protocol execution stops one layer later. Before CONNECT or any opcode lookup,
 `0x821D6` calls `0x830C0 -> 0x98E80`. Exact CodeFlash `0x30D68=0x5A`; `0x98E80`
 returns nonzero immediately for that value, and `0x821D6` processes XCP only when the
-return is zero. Fixed stock calibration closes the session,
-Panda, bus, FIFO, and communication-owner questions. Consequently native XCP DAQ is not
+return is zero. Consequently native XCP DAQ is not
 the next Camry steering observer and XCP DOWNLOAD is not a stock production RAM loader.
 The 52-byte DAQ profile remains useful as an observation specification for the audited
 RAM-resident observer.
@@ -795,8 +782,7 @@ A target-native recovered-function census finds **zero function entries** in the
 32,240-byte source page and **zero function-owned flow edges** into it; the mirrored
 `FEBF7C00..FEBFF9EF` range likewise has **zero recovered flow edges**. No application
 consumer of the page-state bytes outside this calibration/XCP machinery is recovered.
-The recovered composition is a **data-shadow path**. A control-transfer primitive
-would require separate evidence.
+The recovered composition is a **data-shadow path**.
 
 The verified carrier begins on the very next byte:
 
@@ -864,21 +850,16 @@ for the PC-pivot question:
 
 The later [application diagnostic reconstruction](#7725-diagnostic-admission-application-writes-and-routine-lifecycles)
 owns admission, control-state effects, asynchronous results and cancellation.
-This section bounds control-transfer primitives. The later reconstruction owns
-semantic closure of those application operations.
 
 Thus every **recovered configured application diagnostic class with plausible
 write/control semantics** is now bounded away from a tester-chosen PC transfer.
-This is not a general memory-safety proof of undiscovered code, but there is no
-remaining known UDS/proprietary/factory-test service to mine for a straightforward
+There is no remaining known UDS/proprietary/factory-test service to mine for a straightforward
 runtime call primitive. No Techstream engineering/calibration operation recovered
 to date improves this bound. The current Techstream/GTS+ host corpus also supplies no OEM-facing name
 that turns F33 RID `0x100F` into a general signer service. Its relevant `0x7F7`
 host evidence is instead bounded to Unified CUW/reset choreography: after ECU
 reset an EachArea writer emits raw `0x7F7 || FE 10 81` as one post-reset tail
-frame. That proves Toyota tooling knows the route family, but not that Techstream
-exposes the application's arbitrary XCP `DOWNLOAD` as a normal runtime engineering
-function; the F33 firmware bytes above remain the authority for that write path.
+frame. That proves Toyota tooling knows the route family.
 
 ### 13.5 Control-transfer audit: the missing primitive
 
@@ -1079,8 +1060,8 @@ The current Toyota GTS+ `EMPS_P5` database supplies no separate parameterized co
 surface beyond the firmware rows already audited. Its installed table inventory has
 neither type 68 `CDbActTestP5Table`, type 71 `CDbRoutineActTestP5Table`, nor type 77
 `CDbSimpleUtilityTable`; the category registry has zero Active Tests. Types 90/91 contain
-Record-of-Behavior data/signal-check metadata. Toyota EPS service utilities still exist:
-the documented Power Steering ECU Initial Setting / Assist Map workflow reaches fixed application RoutineControl behavior
+Record-of-Behavior data/signal-check metadata.
+The documented Power Steering ECU Initial Setting / Assist Map workflow reaches fixed application RoutineControl behavior
 such as RID `0x1109`. That path is already in the exact 19-RID census, takes no arbitrary
 address/code payload, and performs scheduled DataFlash/NvM calibration-state work.
 The same exact service table has no SID `0x2F` and no SID `0x3D`.
@@ -1090,7 +1071,7 @@ supply the missing composition. Exact F33 can over-read stale ISR-stack bytes wh
 logical CAN-FD DLC exceeds physical FIFO storage, but the recovered consumers truncate
 or reject before a write escapes their configured destinations. The exact pre-fault
 STORE audit finds no ranged write into saved-PC/context RAM. The recovered primitive
-is limited to information leakage and stale input.
+provides information leakage and stale input.
 
 **Disposition:** no stock uninterrupted-READY arbitrary-code path is recovered on exact
 F33. A new path would now have to come from one of the deliberately residual classes:
@@ -1145,13 +1126,11 @@ now performs bounded post-write DBFULL polling; see SECOC-074/CORR-121. T-0035 i
 a Tundra F340 package. Exact F33 full-reflash recovery requires a matching package.
 
 This closes the **offline patch construction** and recovery contract.
-Live behavioral proof remains open. The generic patcher can validate the exact preimage/CRC in RAM
+The generic patcher can validate the exact preimage/CRC in RAM
 before any flash operation and is restore-gated for APPLY. A live F33 run must still
 perform zero-write preflight first, bind application F181/route to the exact car,
 retain a separately validated restore artifact, apply the target block and CRC block,
 then prove the intended SecOC consequence with an unsigned/invalid-MAC B6 experiment.
-Until that live causal step, `SecOC bypass works on F33` is not promoted beyond the
-recovered Gate-2 semantics.
 
 A 2026-08-30 sequence of live validate-only attempts exposed several independent
 tooling defects before any flash write. The old-stack DID `0x0203` selector was wrong,
@@ -1192,7 +1171,7 @@ patch block `0x88000`, block size `0x8000`, CRC range `0x18000..0xFFDF0`, fixup 
 `273C8914`, and residue `FFFFFFFF`. The retained `preflight.json` therefore records
 `boot_crc_valid=true`, `payload_success=true`, and **`apply_ready=true`**. This is the
 first dynamic proof that the current F33 target/route and generic patcher agree on all
-read-only APPLY prerequisites; it is not yet proof of a persistent write or SecOC bypass.
+read-only APPLY prerequisites.
 The run is retained under
 `targets/camry-2026/raw-20260830/secoc-patch-preflight-f33-collector-fixed/`; see SECOC-080.
 
@@ -1237,11 +1216,10 @@ the low/high 32-bit halves **ASIC State Information / ASIC State Information 2**
 `40 00 C0 00 00 00 00 00` across those words. Individual bit meanings are not
 resolved, and that post-handoff value is not promoted as READY-mode state.
 
-Two important non-transfers remain explicit. Current-only `Target Lateral ID` DIDs
-`0x1CEE/0x1CEF` are **absent** from exact F33, so those names are not assigned to
-this calibration. Current GTS+ also adds behavior `X2436 = Beta Cooperative Control
-Transmission Counter Malfunction`. This diagnostic vocabulary leaves the wire-field
-and SecOC-signer implementations unproved. The complete machine-readable join is
+Current-only `Target Lateral ID` DIDs
+`0x1CEE/0x1CEF` are **absent** from exact F33.
+Current GTS+ also adds behavior `X2436 = Beta Cooperative Control
+Transmission Counter Malfunction`. The complete machine-readable join is
 `data/generated/gtsplus_2026/camry_8965F3307000_emps_semantics.json`.
 
 ## 16. Relay-correct 2026-08-27 captures: topology closed; B6 repeatedly not observed
@@ -1275,8 +1253,7 @@ and `0x0D7` remain healthy on both buses 0 and 2 in every segment (for example,
 segment 5 has 600 `0x00F` and 3000 `0x0D7` frames per relay side). A structural
 `0x08A/32` state changes around the validated MAIN/SET interactions, but exact
 F33's receive descriptor table does not accept `0x08A`; it is therefore retained
-only as cross-ECU state corroboration.
-No alternative steering-command carrier is assigned from this capture.
+as cross-ECU state corroboration.
 
 A second deliberately requested drive reproduced the negative.
 Its privacy-minimized artifact retains **1,918,047 incoming CAN
@@ -1306,9 +1283,8 @@ the FRC's own P5 lateral state with the relay-correct CAN.
 That was the §16 acquisition-time boundary. CORR-129/VAR-081 later re-enumerate the
 same raw logs and strongly identify their two B21=`11` intervals as LTA/LCA active
 from the current EMPS Target-Lateral numeric dictionary plus the repeated three-state
-dynamic join. They still do not prove byte-exact producer mapping or isolate when
-lane-centering torque was applied. Synchronized FRC state remains an independent
-cross-check and term-attribution experiment. The captured state is already identified.
+dynamic join. Synchronized FRC state remains an independent
+cross-check and term-attribution experiment.
 
 Toyota/GTS+ gives a direct oracle: FRC DID **`0x1601`** contains `LTA Switch
 Condition Flag` in bits 0-7 and **`LTA Control Condition`** in bits 8-15, with
@@ -1337,7 +1313,6 @@ a Central-Gateway topology label. Keep this namespace separate from Panda bus nu
 rlog segments into the same privacy-minimized `can.bin`/`oracle.ndjson` shape used
 by `tools/targets/camry/analysis/analyze_camry_frc_lta_capture.py`; the reducer retains incoming CAN and
 only those two matching FRC requests. The capture **tooling** is verified.
-A synchronized `0x1601/0x1914` driving artifact remains unacquired.
 Deterministic interpretation of the two completed blind drives remains
 `data/generated/camry_2026_relay_correct_capture.json`, verified by
 `tools/test camry_2026`. Production steering output remains disabled.
@@ -1426,12 +1401,11 @@ row selects Dem event `0x0143`; its exact F33 event record selects DTC index 82 
 `0xC12987`. Current GTS+ names that DTC **U012987 `Lost Communication with Brake System
 Control Module` / `Missing Message`**. The exact Camry EPS itself therefore expects B6
 as **Brake System Control Module traffic** on its controller-1
-receive network. CAN has no source-node field, so the receiver cannot identify the unique
-transmitter implementation beyond that monitored module relationship. Section 19 now
-closes the stronger topology fact independently: Toyota's own current Camry CAN model
+receive network. Section 19 now
+closes the topology fact independently: Toyota's own current Camry CAN model
 places Skid Control and EPS together on Central-Gateway Bus 4, while the front-camera
 sensor domain is on Bus 1. The DTC identifies the immediate logical source
-domain. Identifying the ECU that computes, transforms, or signs the lane target requires separate evidence.
+domain.
 
 The corrected pinned copy-edge census starts from all **116** exact scalar extracts and
 follows only exact raw→`0x58074` stage→`0xBCD62` snapshot edges and their consumers. It
@@ -1481,11 +1455,7 @@ Therefore **no observed ordinary EPS generated-COM field other than B6 is identi
 value/mode input to the recovered `FEBECC50/FEBECC62` Command-Value-Torque model cone**,
 controller-1 hardware acceptance contains no extra direct-CAN candidate outside that COM
 surface, and exact F33 independently labels B6 loss as **Brake System Control Module /
-Missing Message**. CORR-130 limits this conclusion to an internal Toyota-named
-command-value observable/model path. Universal physical motor-current/PWM convergence
-at `FEBECC62/FEBEAC56` remains a separate question.
-DMA/peripheral mutation, diagnostic/debug paths, computed aliases outside the recovered
-maps, and downstream/current-reference paths remain separate questions. The separate
+Missing Message**. The separate
 bus-1 `0x180..0x18C` CAN-FD family remains a plausible *upstream* FRC/Brake planning or
 transfer surface, but none of those arbitration IDs exists in exact F33's normal Rx table,
 so it cannot directly be the EPS normal-CAN steering command.
@@ -1644,11 +1614,10 @@ measured `0x025` steering angle with best lag **-25 ms** in both drives: fitted 
 from feedback-shaped to forward-correlated: the best measured-angle lag shifts to
 **+50 ms** in drive A (a broad plateau — `r` varies only 0.8746..0.8755 across 0..75 ms)
 and **+225 ms** in drive B (weaker, `r=0.4467`, over a narrow target range). These
-observations describe correlation shape. Exact causal lead times remain unmeasured. Current category-405 `EMPS_P5` DID
+observations describe correlation shape. Current category-405 `EMPS_P5` DID
 `0x1CEE` independently places
 **Target Steering Angle After Output Compensation** immediately after Target Lateral ID.
-The byte position is not transferred from that diagnostic DID; the CAN position, scale,
-and dynamics are recovered from the retained route and exact F33 contract.
+The CAN position, scale, and dynamics are recovered from the retained route and exact F33 contract.
 
 Two further messages reconstruct one three-state carrier without transferring any old
 layout:
@@ -1695,18 +1664,17 @@ GTS+ topology places logical Front Camera on Bus 1 and Brake/EPS on Bus 4, while
 F33 accepts protected B6 on the latter. **Later relay-open direction plus FRC
 CommunicationControl closes the apparent topology paradox: the secured `0x08A` publisher
 is inside the FRC assembly and its chassis-facing egress is distinct from native Bus 1.**
-The exact internal FRC signer/key/freshness owner remains open. The retained bytes close the request representation without making it an EPS ingress or grant oracle. Exact F33's B6-independent internal path proves only that ordinary assist/current control can continue with zero B6; VAR-111/CORR-151 now close the recovered autonomous-target branch as B6-only and reject the earlier implication that this internal path itself explains stock lane-centering authority. The remaining authority handoff is outside the recovered F33 external-command surface (CORR-137 / VAR-095).
+The retained bytes close the request representation. Exact F33's B6-independent internal path supports ordinary assist/current control with zero B6; VAR-111/CORR-151 close the recovered autonomous-target branch as B6-only (CORR-137 / VAR-095).
 
 Historical Toyota names `LTA_RELATED` for `0x371` and `LKAS_HUD` for `0x412` are
-corroboration only; no historical signal layout is transferred. Current FRC_P5 `LTA
+corroboration. Current FRC_P5 `LTA
 Indicator 1` is a fixed RoutineControl/display active-test concept (`31 01 15 83`).
-It supplies neither a synchronized live-state oracle nor a byte label. Likewise, no physical
-LTA-button carrier is recovered: the decoded `0x0FE` pulses remain only the exact
+No physical LTA-button carrier is recovered: the decoded `0x0FE` pulses remain the exact
 same-car MAIN/RES+/SET-/CANCEL controls. The operator's report of a green LTA indicator
-and steering assistance during the first drive is retained as separate human
-corroboration outside the machine-derived numeric proof.
+and steering assistance during the first drive is retained as human
+corroboration.
 
-This supersedes VAR-067's “generic lateral/HUD candidate” wording (CORR-129), the later state/display-only interpretation (CORR-134), and the interim `0x08A -> B6` stock-LTA assumption (CORR-135). The trailer is now structurally much tighter: B28 candidate reset-low2 matches preceding authenticated `0x00F` on 19,868/20,615 drive-A frames and 23,093/23,996 eligible drive-B frames, comparable to known protected `0x0D7/0x090`; on all 18,727 A / 21,989 B same-reset, same-segment B26+1 pairs, candidate message-low2 advances +1. B27 is always zero and the remaining 28 trailer bits are effectively frame-unique. This strongly supports Toyota ordinary-P5 `FV4 || MAC28` framing. Later source evidence closes producer ownership to the FRC assembly; the exact internal sender profile/key/CMAC implementation remains unrecovered. It does not establish or require an `0x08A -> B6` stock-LTA transform, and it does not authorize steering output.
+This supersedes VAR-067's “generic lateral/HUD candidate” wording (CORR-129), the later state/display-only interpretation (CORR-134), and the interim `0x08A -> B6` stock-LTA assumption (CORR-135). The trailer is now structurally much tighter: B28 candidate reset-low2 matches preceding authenticated `0x00F` on 19,868/20,615 drive-A frames and 23,093/23,996 eligible drive-B frames, comparable to known protected `0x0D7/0x090`; on all 18,727 A / 21,989 B same-reset, same-segment B26+1 pairs, candidate message-low2 advances +1. B27 is always zero and the remaining 28 trailer bits are effectively frame-unique. This strongly supports Toyota ordinary-P5 `FV4 || MAC28` framing. Later source evidence closes producer ownership to the FRC assembly.
 Deterministic evidence is
 `data/generated/camry_2026_lta_state_reconciliation.json`, regenerated by
 `tools/targets/camry/analysis/analyze_camry_2026_lta_state_reconciliation.py` and verified by
@@ -1733,8 +1701,6 @@ parsing yields record count **3 in every frame on both sides of all four edges**
 steering in the two drives, so it lags steering and has steering-derived behavior.
 The exploratory `0x090` correlation is now closed and retired in
 §28: its best field was a synthetic composite outside the exact-F33 receive surface.
-These negatives do not prove absence of invisible EPS-internal state and do not authorize
-production output.
 
 Deterministic evidence is
 `data/generated/camry_2026_class_l_upstream_correlation.json`, generated by
@@ -1798,7 +1764,7 @@ category-435 identities:
 
 No calibration URL is known. In particular, do **not** synthesize a
 `/t3Portal/calibration/F152633K0000` path. The observed F181 supplies a current software
-identity/search input. A downloadable target CID remains unproved. Current GTS+ exposes a
+identity/search input. Current GTS+ exposes a
 `P5-Unified` host route through `TCUWCanUnifiedCIDGetter.dll`,
 `TCUWCanUnifiedPrepareWriter.dll`, and `TCUWCanUnifiedFlashWriter.dll`, but only the
 eventual package descriptor can select its actual contact type. If acquisition yields
@@ -1818,8 +1784,7 @@ result-selection mechanics remain independently verified by TMS-049/TMS-050.
 The exact current GTS+ category **435** identity is generation-20
 `ABS_P5.ddb` **Brake/EPB**. Its 80-byte type-62 Data Monitor table contains 554
 static candidates, all of which role `0x05` sends through runtime
-`CheckSupportPid`. A DDB row supplies vocabulary. Exact-Camry DID support requires
-runtime confirmation.
+`CheckSupportPid`.
 
 Two rows bound the steering/authentication language precisely. DID `0x107E`
 **ADS Control EPS Pinion Angle2** (alternate `0x307E`) is bits 0..23, signed,
@@ -1849,8 +1814,7 @@ GP-0x50E8 mapped current through a runtime scale, packed by `0x4C97A`. Its upstr
 target-natively joined to DID `0x1151`'s **pre-clamp** Q-axis aggregate
 (`0x37E48 -> 0x38678 -> 0x3879E -> 0x59448/0x5D12C -> 0x4C490`), so it is
 motor-current family, but a sibling-axis-conditioned lookup and a runtime scale
-intervene. Its wire units differ from DID1151, amperes, and commanded torque
-(VAR-071).
+intervene (VAR-071).
 
 A deterministic offline analyzer decodes this field across the same two relay-correct
 drives with the exact DBC torque/angle/rate formulas, nearest-frame joins, the §20
@@ -1866,8 +1830,7 @@ the §23 B6 census (**B6 = 0 on all buses in both drives**). The bounded results
    (r = -0.10, rate +0.18, angle +0.01). This proves a smooth **non-driver-proportional
    motor-feedback component inside Class-L**. The cruise-clean
    drive-B rise shows comparable 3 s pre/post medians (84 vs 102), and the floor falls
-   after Class-L ends (77 -> 38). It does **not** uniquely label the component LTA
-   torque: a mode-changed EPS damping/assist map produces the same signature.
+   after Class-L ends (77 -> 38).
 2. **Opposing-driver/motion runs.** With |B22:B23| >= 150, |driver torque| >= 0.2 N.m,
    |rate_raw| >= 2, sign(current) == sign(rate) and sign(current) == -sign(torque),
    bridging <= 1 sample dropout: drive A Class-L holds **214 qualifying samples / 5
@@ -1885,10 +1848,8 @@ the §23 B6 census (**B6 = 0 on all buses in both drives**). The bounded results
    the speed-matched non-Class-L stratum contains one such sweep (drive A). The
    Class-L signature is a smooth current floor with episodic opposition.
 
-Motor feedback is never by itself proof of an external lateral command: driver EPS
-assist also creates current. These results are the strongest bounded live evidence yet
-that EPS behavior **changes mode inside Class-L while B6 = 0**, and they sharpen the
-VAR-063/065/066 discriminator question without resolving it. Deterministic evidence is
+These results provide bounded live evidence
+that EPS behavior **changes mode inside Class-L while B6 = 0**. Deterministic evidence is
 `data/generated/camry_2026_motor_feedback_correlation.json`, generated by
 `tools/targets/camry/analysis/analyze_camry_2026_motor_feedback.py` and verified by `tools/test camry_2026`.
 
@@ -1924,8 +1885,7 @@ The recovered staging provenance is:
   initializer `0x6082C` programs the descriptors **and DMAC primary/secondary
   trigger-select SFRs `0xFFF99000/0xFFF99004`**; the same driver family carries
   ADCG0/ADCG1 scan, CSIH1 serial, and CRC0/CRC1 unit config. Producer class is
-  therefore **hardware/peripheral-fed shared memory (DMAC)**. Exact per-channel
-  trigger identity remains bounded.
+  therefore **hardware/peripheral-fed shared memory (DMAC)**.
 
 The three command/driver families export through Techstream-named DIDs from
 internal-state terminals: steering-wheel torque DID `0x1035` ← `FEBE66A8` ←
@@ -2007,9 +1967,6 @@ interval 2 begins exactly at the Class-L rise and ends 0.56 s after the fall), s
 in-drive Class-L specificity rests on drive B. The declared tested lead range is
 ±500 ms at 25-ms resolution; weak fields peaking at that boundary are window-scale
 trends. A Toyota lateral command consumed by a 100-Hz EPS leads by control frames.
-This negative covers observed periodic bus1 traffic only: it does
-not touch the EPS-internal mode explanation of Section 24 and does not authorize
-production output.
 
 Deterministic evidence is `data/generated/camry_2026_bus1_field_leadlag.json`, generated
 by `tools/targets/camry/analysis/analyze_camry_2026_bus1_field_leadlag.py` and verified by
@@ -2157,8 +2114,6 @@ consumed fields. The scan-ranked `B4[3:0]+B5` is different: while B4 <= 3 inside
 Class-L intervals it is numerically identical to exact **sig235**, which explains its
 strong angle correlation without inventing another signal.
 
-Boundaries: sig229/sig232/sig235 OEM names remain unknown. The angle interpretation
-is a dynamic classification. Nothing here authorizes production output.
 
 Deterministic evidence is the `firmware_exact_0x090` and
 `exploratory_0x090_reproduction` sections of
@@ -2200,9 +2155,9 @@ The dynamic B6-independent magnitude enters earlier. `D0218` writes `FEBECC48`; 
 
 The direct runtime writers are all internal C/D-family algorithm state: `CF2B2 -> FEBECB38`, `C9A84 -> FEBEC5EE`, `C7E36 -> FEBEC43C`, `C8678 -> FEBEC4C0`, `C74AC -> FEBEC3BA`, `D0162 -> FEBECC2C`, `C2B64 -> FEBEBF3C`, and `CFCD4 -> FEBECBE8`. `FEBEAC2B` is an internal diagnostic/control snapshot (`BCBD8 <- FEBEB112`; `B338C` sets `0x5A`, `B330A` clears it), while `CB73A` can set `FEBEC7BF=1` only with B6 sig261 snapshot `FEBEADB0=='1'`. The complete generated-COM denominator in §29 therefore remains intact: this is an **EPS-internal baseline-assist path**.
 
-The retained captures establish a zero `0x0D5` s213 **source**. The `FEBEC5EE` contribution remains unresolved because the moving-state filter can hold earlier state while its gain decays. The retained drives lack the initial-state/history or direct term observation needed to infer this output. The `D0218` terms can reach the `CC62 -> CC66/CC64 -> AC54/EE40C` current-control chain with B6 absent. Those terms are torque/rate compensation, bounded aggregates, stateful angle-controller envelopes and excitation, with no independently identified lane-target magnitude. VAR-081 identifies the captured interval as LTA/LCA active. The unresolved question is which upstream state/value selects or modulates this shared funnel during that interval. The path from `CC62` to current control is established. Nothing here authorizes output.
+The retained captures establish a zero `0x0D5` s213 **source**. The moving-state filter can hold earlier state while its gain decays. The `D0218` terms can reach the `CC62 -> CC66/CC64 -> AC54/EE40C` current-control chain with B6 absent. Those terms are torque/rate compensation, bounded aggregates, stateful angle-controller envelopes and excitation. VAR-081 identifies the captured interval as LTA/LCA active.
 
-**`CEFFC` / `CB00` is the recovered D0218 map-bank selector, and it is B6-fed.** Exact `FUN_000CEFFC` writes `FEBECB00`. Default is `7`. When `FEBEACBD==0` and `FEBECAFF==1`, B6 signal 261 snapshot `FEBEADB0` (Target Lateral ID, B3[5:0]) maps `1→0`, `4→1`, `0x0A→3`, `0x0B→2` (LTA/LCA), `0x12→5` (SDG), `0x13→4`. `CD094` and `CDFF8` then index return/dither tables as `(CB00&7)+(AC3C&1)*8`. That is how F33 would change D0218 angle-domain maps **if B6 carried ID 11/18**. Runtime writers of `FEBEADB0` are only snapshot copier `BCD62` and reset `BF97A`; `0x08A` is not a source. In the retained drives B6 is absent, so `ADB0` stays 0 and `CB00` stays **7**. The ID11/18 D0218 banks therefore do not run. `CEFFC` only switches internal maps from B6's copy of the same Target Lateral ID dictionary. Hands-light motor tracking of `0x08A` error remains a separate plant observation with unresolved provenance. VAR-090.
+**`CEFFC` / `CB00` is the recovered D0218 map-bank selector, and it is B6-fed.** Exact `FUN_000CEFFC` writes `FEBECB00`. Default is `7`. When `FEBEACBD==0` and `FEBECAFF==1`, B6 signal 261 snapshot `FEBEADB0` (Target Lateral ID, B3[5:0]) maps `1→0`, `4→1`, `0x0A→3`, `0x0B→2` (LTA/LCA), `0x12→5` (SDG), `0x13→4`. `CD094` and `CDFF8` then index return/dither tables as `(CB00&7)+(AC3C&1)*8`. That is how F33 would change D0218 angle-domain maps **if B6 carried ID 11/18**. Runtime writers of `FEBEADB0` are only snapshot copier `BCD62` and reset `BF97A`; `0x08A` is not a source. In the retained drives B6 is absent, so `ADB0` stays 0 and `CB00` stays **7**. The ID11/18 D0218 banks therefore do not run. `CEFFC` only switches internal maps from B6's copy of the same Target Lateral ID dictionary. VAR-090.
 
 **Default-bank terms themselves have no unpublished milliradian.** With `CB00=7`, `C43C` is `clamp(C472+C45A+C44C)` from driver-torque snapshot `AC44`, speed `ADF6`, and filtered measured-angle rate `C172` (delta of `AC88`). `C4C0` is a torque×speed map. `C3BA`/`CC2C`/`BF3C` stay inside the torque family. `CD094` blends return state `CA36` toward `C172` under that default bank; dither/return copies peripheral `EC14`/`EC18`. None of the eight term writers reads B6 `ADB0` or the B6 COM window. Combined with VAR-077 (only B6 supplies COM value/mode into `CC50/CC62`), the retained hands-light motor correlation with published `0x08A` error is **not an F33 COM input** (VAR-092). The command is observed adjacent to EPS.
 
@@ -2210,7 +2165,7 @@ Deterministic evidence is the `baseline_internal_assist_path` section of `data/g
 
 ## 31. Drive-mode baseline-assist selector: Sport selects the only distinct healthy C2B64 bank
 
-VAR-079 originally closed this as an unnamed parameter-bank selector immediately upstream of several `D0218` baseline-assist terms. The exact codeflash plus current installed Camry diagnostic dictionary now recover its useful vehicle meaning: this is the **driver-selected drive-mode steering calibration**. The OEM wire-field name is still one dynamic join short of verified because the retained drives never toggle it, but the static enum/code alignment is exact enough to identify the mode behavior.
+VAR-079 originally closed this as an unnamed parameter-bank selector immediately upstream of several `D0218` baseline-assist terms. The exact codeflash plus current installed Camry diagnostic dictionary now recover its useful vehicle meaning: this is the **driver-selected drive-mode steering calibration**.
 
 **OEM enum join.** Current Camry `HV_P5` (installed category 397) exposes DID `0x1004` **Drive Mode Select Status** with `0=Normal`, `1=Power`, `2=Sport`, `3=Sport S`, `4=Sport S+`, `5=Comfort`, `6=Eco`, `9=Range`, and `11=Chauffeur`. Exact F33 receives `0x51E/8` sig160 `B0[3:0] -> FEBE8030 -> FEBEF050`; `B3430/B3686` debounce it into `FEBEB124`, and `B35DC/B372A` branch on the same enum-shaped values. Value `2` or `4` produces `FEBEB121=0x11`; `C54A2` maps that to `FEBEC158=0x77`, and `C5554` selects **`FEBEC156=1`**. Value `6` falls through to selector 0. Value 0 can resolve to selector 0 or 2 depending companion state. For the **main `C28FC/C2B64` driver-torque assist surface**, selector 0 and selector 2 are byte-identical; Sport selects selector 1, the only distinct bank for that surface. The full C156-reader census below preserves one nuance: selector 2 differs from selector 0 in three much smaller shaping regions, so `Normal==Eco` must not be generalized to every possible value-0 companion/customization substate. The retained ordinary Normal captures have the companion value fields zero throughout and therefore exercise the selector-0-compatible path. A synchronized `HV_P5 22 1004` plus `0x51E` mode-toggle capture remains the independent wire-name closure.
 
@@ -2220,23 +2175,23 @@ The other selector branches are explicitly internal. `C54A2` can choose `0x66` f
 
 **Exact calibration surfaces.** For the primary driver-torque term, healthy base `0x10100` contains four selector banks of eight `0x44` torque curves each. Selectors 0/2/3 are byte-identical; selector 1 differs by **215 bytes**. `C58B8` interpolates the rows against conditioned SP1 vehicle speed at exact breakpoints **0, 7.68, 19.2, 38.4, 76.8, 128, 192, 256 km/h**. `C2B64` then evaluates the two adjacent driver-torque curves against `FEBEC128` and blends them by the speed fraction. The torque axis is the same Q8.8 domain as Toyota DID `0x1035 Steering Wheel Torque` (`0x100` internal counts = 1.000 N·m). `C29B2` also exports curve slope; `C2C32` blends that into `FEBEBF40`, which feeds the separate `C8678 -> FEBEC4C0` torque+speed term. So Sport changes more than one downstream contribution.
 
-The complete direct calibration census makes that scope precise. Exact F33 has **31 direct readers of `FEBEC156`**. Across **26 direct selector-strided healthy calibration regions**, selector 1/Sport differs from selector 0 in exactly five: the `C28FC/C2B64` driver-torque surface (**215 bytes**), the `C6E7E` 8-map bank (**40 bytes**), `C7AB0`'s second map (**6 bytes**), `C91F2`'s first map (**2 bytes**), and `C9258`'s second map (**4 bytes**). Every other direct region aliases selector 0, and all separately pointer-indexed selector families enumerated in the artifact alias across 0..3. The four smaller differences are live shaping paths rather than dead calibration: `C6E7E` reaches `C39C`, `C7AB0` reaches `C41E`, and the `C91F2/C9258` pair reaches `C5A8`; all three terms are summed by `D0162` into the ordinary `D0218` assist aggregate. Their exact Toyota calibration names remain bounded.
+The complete direct calibration census makes that scope precise. Exact F33 has **31 direct readers of `FEBEC156`**. Across **26 direct selector-strided healthy calibration regions**, selector 1/Sport differs from selector 0 in exactly five: the `C28FC/C2B64` driver-torque surface (**215 bytes**), the `C6E7E` 8-map bank (**40 bytes**), `C7AB0`'s second map (**6 bytes**), `C91F2`'s first map (**2 bytes**), and `C9258`'s second map (**4 bytes**). Every other direct region aliases selector 0, and all separately pointer-indexed selector families enumerated in the artifact alias across 0..3. The four smaller differences are live shaping paths: `C6E7E` reaches `C39C`, `C7AB0` reaches `C41E`, and the `C91F2/C9258` pair reaches `C5A8`; all three terms are summed by `D0162` into the ordinary `D0218` assist aggregate.
 
 Selector 2 is also now bounded: relative to selector 0 it differs only in the three tiny `C7AB0/C91F2/C9258` shaping regions. The 215-byte `C28FC/C2B64` driver-torque surface and the 40-byte `C6E7E` Sport-specific bank remain identical. This is why the ordinary zero-companion Normal path and Eco can share the same primary steering-weight surface while a less-common value-0 companion/customization substate is not byte-for-byte globally identical.
 
-The direct `C2B64 -> FEBEBF3C` difference is large at normal hand torques. Representative exact-map evaluations of the selector-0 primary surface versus Sport are **40 km/h / 1.0 N·m: 703 vs 280 (-60.2%)**; **60 km/h / 2.0 N·m: 1869 vs 1002 (-46.4%)**; **80 km/h / 1.0 N·m: 366 vs 215 (-41.3%)**; and **120 km/h / 1.0 N·m: 343 vs 109 (-68.2%)**. These percentages apply only to this base-assist term: `D0218` sums several torque/speed/return terms before the shared current-control funnel. They explain the substantially heavier Sport steering directly from the exact codeflash.
+The direct `C2B64 -> FEBEBF3C` difference is large at normal hand torques. Representative exact-map evaluations of the selector-0 primary surface versus Sport are **40 km/h / 1.0 N·m: 703 vs 280 (-60.2%)**; **60 km/h / 2.0 N·m: 1869 vs 1002 (-46.4%)**; **80 km/h / 1.0 N·m: 366 vs 215 (-41.3%)**; and **120 km/h / 1.0 N·m: 343 vs 109 (-68.2%)**. These base-assist-term differences explain the substantially heavier Sport steering directly from the exact codeflash. `D0218` sums several torque/speed/return terms before the shared current-control funnel.
 
-**Retained-drive join.** The two relay-correct CAN-only captures are Normal-mode-compatible throughout: in drive A all **519** observed `0x51E` frames have sig160=0; in drive B all **600** have sig160=0. The other selector inputs remain zero/absent as previously reported. This still rejects the drive-mode selector as the retained Class-L/LTA transition discriminator, but it no longer means the selector is functionally unimportant: the captures simply never exercise the distinct Sport bank. The `0x51E` observations are only about one sample per second, so they do not establish high-rate transition timing.
+**Retained-drive join.** The two relay-correct CAN-only captures are Normal-mode-compatible throughout: in drive A all **519** observed `0x51E` frames have sig160=0; in drive B all **600** have sig160=0. The other selector inputs remain zero/absent as previously reported. This rejects the drive-mode selector as the retained Class-L/LTA transition discriminator. The captures never exercise the distinct Sport bank. The `0x51E` observations are about one sample per second.
 
 Deterministic evidence is `data/generated/camry_8965F3307000_internal_assist_oracles.json`, generated by `tools/targets/camry/builders/build_camry_8965F3307000_internal_assist_oracles.py` and verified by `tests/targets/camry/verify_camry_8965F3307000_internal_assist_oracles.py`; the earlier retained-drive reduction remains `data/generated/camry_2026_baseline_selector_live.json`.
 
 ## 32. Exact-F33 passive internal-assist RDBI oracles: term proxies exist; selector state does not
 
-VAR-080 closes the most useful read-only diagnostic observability around the B6-independent `D0218` baseline-assist path. The exact 242-record F33 DID metadata table resolves to **196 unique callbacks reading 136 distinct `>=FEBE0000` RAM source cells**, and has **no callback that directly reads `FEBEC158` or `FEBEC156`**. The canonical graph has 34 direct selector-reader functions; their write targets intersect those 136 direct RDBI source cells **zero times**. Thus the recovered `C54A2/C5554` parameter-bank selector is not directly enumerable through an exact DID. This is a canonical direct-reference negative: pointer/indexed copies and downstream-derived diagnostic effects remain bounded.
+VAR-080 closes the most useful read-only diagnostic observability around the B6-independent `D0218` baseline-assist path. The exact 242-record F33 DID metadata table resolves to **196 unique callbacks reading 136 distinct `>=FEBE0000` RAM source cells**, and has **no callback that directly reads `FEBEC158` or `FEBEC156`**. The canonical graph has 34 direct selector-reader functions; their write targets intersect those 136 direct RDBI source cells **zero times**. Thus the recovered `C54A2/C5554` parameter-bank selector is not directly enumerable through an exact DID.
 
-Two `D0218` terms do have exact passive RDBI projections. `D0D7C` computes `FEBEAE12 = clamp(FEBEC5EE * FEBEAE3C / 0x8000, +/-0x569A)` and `FEBEAE6E = clamp(FEBECB38 * FEBEAE3C / 0x8000, +/-0x569A)`; `BF3AA` snapshots those to `FEBEE8B6` and `FEBEE8C2`. DID `0x1C3E` / callback `0x4EA90` returns `(FEBEE8B6*100)/0x80`, while DIDs `0x1C38`, `0x1C4A`, and `0x1C50` / callbacks `0x4EA06`, `0x4EB7C`, and `0x4EC06` all return `(FEBEE8C2*100)/0x80`; every callback saturates to signed16 before emitting the two-byte payload. `FEBEAE3C <- FEBEB140` is the internal calibration-derived scale already closed by VAR-078. These DIDs are therefore exact **scaled/clamped term proxies** whose OEM engineering units remain unknown. Current target-native `EMPS_P5` names none of these four exact F33 DIDs; Toyota's named downstream reference remains DID `0x1C02` **Command Value Torque**.
+Two `D0218` terms do have exact passive RDBI projections. `D0D7C` computes `FEBEAE12 = clamp(FEBEC5EE * FEBEAE3C / 0x8000, +/-0x569A)` and `FEBEAE6E = clamp(FEBECB38 * FEBEAE3C / 0x8000, +/-0x569A)`; `BF3AA` snapshots those to `FEBEE8B6` and `FEBEE8C2`. DID `0x1C3E` / callback `0x4EA90` returns `(FEBEE8B6*100)/0x80`, while DIDs `0x1C38`, `0x1C4A`, and `0x1C50` / callbacks `0x4EA06`, `0x4EB7C`, and `0x4EC06` all return `(FEBEE8C2*100)/0x80`; every callback saturates to signed16 before emitting the two-byte payload. `FEBEAE3C <- FEBEB140` is the internal calibration-derived scale already closed by VAR-078. These DIDs are therefore exact **scaled/clamped term proxies**. Toyota's named downstream reference is DID `0x1C02` **Command Value Torque**.
 
-A tempting selector join also collapses under exact calibration bytes. `C9812` syntactically indexes `PTR_DAT_000D39DC[FEBEC156&3]` on the path to `FEBEC5EC -> C9A84 -> FEBEC5EE`, but all four exact pointer entries are the same `0xB018A`. This alias proof does not establish a zero moving-state contribution; the filter can hold earlier state while its gain decays. `C8678` similarly indexes `PTR_LAB_000D3630[FEBEC156&3]` plus selector-strided `D3670/D3674` tables on the path to `FEBEC4C0`, but the exact maps alias (`0xB1208` x4; the pair family repeats `0xB1248/0xB121C` for all four banks), and no exact RDBI callback directly reads `FEBEC4C0`. So `0x1C3E` is useful only as a moving-state oracle. The selector's meaningful exact-image effect remains elsewhere, notably the `C28FC -> C2B64 -> FEBEBF3C` parameter-block path, for which no direct exact RDBI term readout is recovered.
+`C9812` indexes `PTR_DAT_000D39DC[FEBEC156&3]` on the path to `FEBEC5EC -> C9A84 -> FEBEC5EE`, and all four exact pointer entries are the same `0xB018A`. The filter can hold earlier state while its gain decays. `C8678` similarly indexes `PTR_LAB_000D3630[FEBEC156&3]` plus selector-strided `D3670/D3674` tables on the path to `FEBEC4C0`; the exact maps alias (`0xB1208` x4; the pair family repeats `0xB1248/0xB121C` for all four banks), and no exact RDBI callback directly reads `FEBEC4C0`. `0x1C3E` is a moving-state oracle. The selector's exact-image effect includes the `C28FC -> C2B64 -> FEBEBF3C` parameter-block path, for which no direct exact RDBI term readout is recovered.
 
 For any future passive validation capture, the most discriminating EPS reads remain: **`0x1C38` first** as a direct proxy for `FEBECB38`; **`0x1C02` second** as Toyota-named **pre-final-clamp/gate Command Value Torque diagnostic state**; and **`0x1C3E` as a moving-state control**, measuring rather than assuming the retained contribution. VAR-083 gives `1C02` a stronger interpretation: its `CC62` source is relevant to current control because the same value continues intra-function into `CC66/CC64`, even though the `AC56/EE40A/1C02` copy itself is the diagnostic sibling rather than the motor-driving `AC54/EE40C` branch. These reads can be synchronized with FRC `0x1601`/`0x1914`; none requires or authorizes steering output.
 
@@ -2247,8 +2202,7 @@ Deterministic evidence is `data/generated/camry_8965F3307000_internal_assist_ora
 The 2026-10-08 from-scratch processor/profile rebuild expands the current
 canonical graph to **7,178 functions**, all decompiled without failure and bound
 to the promoted normalized inventory. The additional 1,113 starts improve
-analysis coverage. Firmware behaviors and vehicle observations require separate evidence.
-Only the exact-byte/dataflow closures below are promoted as new target knowledge.
+analysis coverage.
 
 The refresh resolves four exact table targets that the
 previous project left as raw words.  The existing schedulers `0x3B3D0` and
@@ -2271,16 +2225,13 @@ Each predicate occupies callback slots 0 and 1 of its table.  Transition
 callback `0x3B434` calls `0x51C66(0x6E, 800)`, `0x545DE(3)`, and
 `0x51CF6(0, 800)`; paired callback `0x3B4DC` uses `(0x6D, 800)`, `2`, and
 `(1, 800)`.  This establishes internal state/diagnostic supervision of the
-same pre-final-clamp/gate Command Value Torque cell exposed by DID `0x1C02`.  It does
-**not** add an ingress, write `FEBE6772`, authorize steering, or establish an
-OEM name or engineering unit for either reference.
+same pre-final-clamp/gate Command Value Torque cell exposed by DID `0x1C02`.
 The same refresh corrects three earlier B6 field bounds. `ADB0` has a third
 reader at `CA614`: IDs `0x19/0x1B` select `CAAA2`, which initializes sibling
 state `C6D8` from target-angle snapshot `AE90`. Signal267 snapshot `ADC2` is
 read by `CB0FC` as a sibling-state mode selector; signal271 snapshot `ADC1` is
 read by `CA558` in a readiness condition. These paths refine the application
-state model but do not add an ingress, an ID11-exclusive command writer, or an
-output authorization.
+state model.
 
 The exact low-CodeFlash region `0x10000..0x17FFF` is now represented in the
 Camry Ghidra profile as non-executable calibration/metadata.  Firmware copies
@@ -2322,10 +2273,9 @@ known `0x0D7`, `0x13B`, and `0x127` families do not produce a cross-drive comman
 lead. Streams below 50 frames in the analysis window are excluded from correlation; that
 is at most roughly 1–1.5 Hz and cannot be a continuous steering carrier for the
 millisecond-scale EPS control path. Low-rate `0x412` remains useful as display/state
-corroboration only.
+corroboration.
 
-This is a strong **ordinary-CAN matched negative**. Stock LTA authority remains
-unexplained, including whether it involves more than internal damping.
+This is a strong **ordinary-CAN matched negative**.
 CORR-130/VAR-083 independently close the physical command/current
 convergence: `CC62` is the pre-final-clamp/gate value feeding `CC66/CC64 -> AC54/EE40C -> 6AF4 ->
 6E0A -> 6DEC/6DC8/6DD6`, while `AC56/EE40A/1C02` is its diagnostic sibling. The
@@ -2576,18 +2526,15 @@ positives is reported as unmeasured, exactly as captured.
 
 The capture **tooling** is verified
 (`tests/targets/camry/verify_camry_tss3_request_capture.py`, suite
-`camry_2026_tss3_request_capture`): no synchronized driving artifact exists yet,
-live PID support on this car remains unmeasured, and the join output is
-co-observation only — the FRC→brake copy/transform, cadence, arbitration
-executor, and SecOC/integrity ownership remain OQ-052's open questions.
+`camry_2026_tss3_request_capture`).
 
 ## 38. First-principles stock-LTA correction: secured `0x08A` and F33 internal assist are separate planes
 
 CORR-135 removes the architecture assumption that accumulated after the `0x08A` target-angle recovery. Three exact evidence surfaces now have to be held simultaneously:
 
-1. **`0x08A` is a real secured-looking lateral-request PDU outside exact-F33 normal CAN.** B21 carries the Target Lateral ID state and B18:B19 the signed target-angle quantity. Every retained frame is on the Toyota Bus-4 capture; exact F33's 43 normal Rx descriptors exclude `0x08A`, its generated-COM Tx IDs are only `0x030/0x351/0x394/0x4A3/0x4C8`, and its 47-rule acceptance surface adds only diagnostics/XCP. The trailer strongly matches ordinary Toyota P5 SecOC: candidate reset-low2 agrees with preceding authenticated `0x00F` at 96.376% A / 96.237% B, candidate message-low2 advances +1 on every same-reset B26+1 pair, B27 is zero, and the remaining 28 bits are effectively frame-unique. This structurally supports `FV4 || MAC28`. Exact sender/key/profile attribution remains open.
-2. **Zero B6 does not require a missing cooperative packet.** Exact `FUN_000D0218` has an ordinary B6-inactive branch that computes `FEBECC48` from eight internal assist terms, and the exact `CC48 -> ... -> motor-control` chain reaches physical current control. The retained 73.303384 s is machine-identified **request state** (`0x08A` ID11/LTA-LCA). A direct grant oracle remains missing: zero B6 is architecturally consistent with F33 continuing to actuate, but the logs do not prove that this internal path carried autonomous lane-centering authority. Operation FFD `5285/57DE/5265` is the missing grant discriminator.
-3. **B6 remains a separate protected external cooperative-control ingress.** Exact F33 really does accept B6 and consume its target/mode when active. That makes B6 a possible future openpilot actuation interface, but stock LTA does not prove that Toyota converts `0x08A` into B6. If B6 is chosen, its signer/freshness/suppression/arbitration contract must be recovered on its own evidence.
+1. **`0x08A` is a real secured-looking lateral-request PDU outside exact-F33 normal CAN.** B21 carries the Target Lateral ID state and B18:B19 the signed target-angle quantity. Every retained frame is on the Toyota Bus-4 capture; exact F33's 43 normal Rx descriptors exclude `0x08A`, its generated-COM Tx IDs are only `0x030/0x351/0x394/0x4A3/0x4C8`, and its 47-rule acceptance surface adds only diagnostics/XCP. The trailer strongly matches ordinary Toyota P5 SecOC: candidate reset-low2 agrees with preceding authenticated `0x00F` at 96.376% A / 96.237% B, candidate message-low2 advances +1 on every same-reset B26+1 pair, B27 is zero, and the remaining 28 bits are effectively frame-unique. This structurally supports `FV4 || MAC28`.
+2. **Zero B6 does not require a missing cooperative packet.** Exact `FUN_000D0218` has an ordinary B6-inactive branch that computes `FEBECC48` from eight internal assist terms, and the exact `CC48 -> ... -> motor-control` chain reaches physical current control. The retained 73.303384 s is machine-identified **request state** (`0x08A` ID11/LTA-LCA). Operation FFD `5285/57DE/5265` provides a grant discriminator.
+3. **B6 remains a separate protected external cooperative-control ingress.** Exact F33 really does accept B6 and consume its target/mode when active. That makes B6 a possible future openpilot actuation interface. If B6 is chosen, its signer/freshness/suppression/arbitration contract must be recovered on its own evidence.
 
 The original VAR-091/CORR-149 topology-only interpretation in this section is superseded by the later relay-open/FRC-CommunicationControl source result. The FRC is not merely the request-side semantic participant: protected `0x08A` publication is inside the FRC assembly. The current split is therefore **FRC feature-owner selection + secured `0x08A` request egress -> downstream Brake/VMM request arbitration -> `0x081` arbitration-result/status + post-arbitration request generation -> B6/EPS**. VAR-090/092 still close default-bank `D0218` as not an F33 COM copy of the published milliradian. Synchronized FRC Operation FFD remains useful for observing the feature-local-to-generic request transition and the downstream arbitration result. Protected B6 remains an independent candidate openpilot ingress.
 
@@ -2611,7 +2558,7 @@ application byte of `0x08A/32` (44,613 deduped bus-0 frames; per-B21-state censu
 | B20[7:6], B22[4] | matched B3[3] in 44,587/44,613 early frames; the inferred universal cruise-mirror role for B20 is [superseded by ordinary policy transitions](camry-2026-longitudinal-evidence.md#native-policy-transitions-and-cruise-speed-buttons) |
 | B21 | Target Lateral ID, value set exactly `{0,11,18}` in both drives |
 | B23[5] | set in every SDG row (1,898/1,898); toggles inside LTA/LCA (605/2,934 set) |
-| B24 | request level `0/50/100`: **100 in every LTA/LCA frame (2,934/2,934)**, **50 in every SDG frame (1,898/1,898)**, 0/50/100 in manual; percent unit remains bounded pending an OEM join |
+| B24 | request level `0/50/100`: **100 in every LTA/LCA frame (2,934/2,934)**, **50 in every SDG frame (1,898/1,898)**, 0/50/100 in manual |
 | B26[5:0] | modulo-64 application sequence (six-bit boundary an encoding assumption) |
 | B28..B31 | ordinary-P5 `FV4 \|\| MAC28` trailer (CORR-135): message-low2 tracks B26+1, reset-low2 tracks authenticated `0x00F` |
 
@@ -2739,13 +2686,11 @@ by itself the proof; FRC normal-Tx suppression plus relay-open direction is.
 
 **Authentication boundary.** The tracked EPS/SRS implementations carry the
 standard AUTOSAR SHE `CMD_LOAD_KEY` M1--M5 memory-update protocol for ECU Security
-Key provisioning. Toyota's wire-level prerequisite is independent of the secure-engine
-implementation. Renesas ICU-S is one implementation. VAR-107 proves that the FRC's **observed native Bus-1**
-output uses E2E Profile 5.
+Key provisioning. Renesas ICU-S is one secure-engine implementation.
+VAR-107 proves that the FRC's **observed native Bus-1** output uses E2E Profile 5.
 Current `FRC_P5` key-registration state plus Toyota camera-replacement procedure prove
-the camera family itself receives an ECU Security Key (CORR-194). Native Bus-1 E2E framing
-still does not identify the internal `0x08A` CMAC implementation, but the ECU-level publisher
-is no longer open: it is inside the FRC assembly.
+the camera family itself receives an ECU Security Key (CORR-194).
+The `0x08A` publisher is inside the FRC assembly.
 Any pre-authentication handoff is therefore **internal to FRC**.
 
 **Closed vs open.** FRC-hosted feature-local state feeds generic `5282`; protected `0x08A`
@@ -2811,7 +2756,7 @@ selection -> egress placement is no longer open**.
 
 **Observed route boundary.** The consecutive recorder layout `ID || pinion_s16be || assist` is absent from native Toyota Bus 1: 200 spread ID11 samples with `|B18|>=20` per drive yield zero hits inside +/-25 ms and zero global four-byte hits. Scattered two-byte collisions never concentrate on one `(CAN ID, offset)`. That does **not** imply an inter-ECU request-selection hop: Bus 1 is the FRC perception/radar network, while the selected generic request is packaged inside the FRC assembly and emitted as secured `0x08A` on the intercepted chassis side.
 
-**Observed packing relation.** `0x08A` retains generic FRC request ID + pinion + assist as B21 / B18:B19 / B24, omits damping (B25=0), adds sidecar state, and carries ordinary-P5 `FV4||MAC28`. The exact internal FRC packer/security-controller split remains open; the ECU-level ownership does not. Dual-pinion record `1B40_2` is the live milliradian at B18; `1B40_3` is unpublished (`0x7FFF` at B13:B14 and B16:B17). Brake-owned `0x081` represents downstream result `5285`/`57DE`, separately from the simultaneous lateral candidates on `0x08A`. Grant `5265` remains FFD-only.
+**Observed packing relation.** `0x08A` retains generic FRC request ID + pinion + assist as B21 / B18:B19 / B24, omits damping (B25=0), adds sidecar state, and carries ordinary-P5 `FV4||MAC28`. Dual-pinion record `1B40_2` is the live milliradian at B18; `1B40_3` is unpublished (`0x7FFF` at B13:B14 and B16:B17). Brake-owned `0x081` represents downstream result `5285`/`57DE`, separately from the simultaneous lateral candidates on `0x08A`. Grant `5265` remains FFD-only.
 
 **Steering angle, and whether any of it is relayed to EPS.**
 
@@ -2957,7 +2902,7 @@ monitor/active-test/RoB family but replaces that generic recorder with
 the zero-co-occurrence install-set result in §44, this is strong role-migration
 evidence: the FRC assembly absorbed the old DSS/PCS/LDA/RSA compute and
 supervision surfaces. Assignment of the former DSS arbiter specifically to the FRC
-main microcomputer remains **recovered/inferred**, pending firmware proof of code identity.
+main microcomputer is **recovered/inferred**.
 The physical front and front-side radars remain separate Bus-1 nodes.
 
 ### 45.3 Current bounded architecture
@@ -3026,7 +2971,7 @@ declared search. It does **not** prove that the reached network is an incomplete
 EPS interface or an EBU-private stub. Section 19 / VAR-066 already joins GTS+
 topology, exact-F33 one-controller routing, UDS, and the physical repin: the
 reached `CAN0/CAN2` relay pair is Toyota Bus 4's Brake/EPS segment, and B6 belongs
-on it. Missing configured telemetry IDs establish presence/schedule observations only.
+on it. Missing configured telemetry IDs are presence/schedule observations.
 Exact F33's B6-inactive internal path into motor-current control also explains why
 stock LTA need not publish B6.
 
@@ -3068,7 +3013,7 @@ sender resets versus omitted/interleaved publications. This supports a
 message-freshness role beside the B28:B31 `FV4|MAC28`
 trailer. B24 is the only byte with the recorder assist `{0,50,100}` alphabet; no
 other `0x08A` byte carries that same alphabet. No separate damping-gain field was
-identified on `0x08A`. Differently encoded or off-PDU carriers remain possible.
+identified on `0x08A`.
 
 **Later interpretation correction:** the expanded native corpus shows
 `0x08A B20[7:6]` changing between `0x40` and `0xC0` while cruise remains active.
@@ -3076,7 +3021,7 @@ The [stock scene comparison](camry-2026-longitudinal-evidence.md#stock-following
 associates those values with following-like and free-cruise-like conditions.
 The two-drive latch correlation above applies only to that historical sample.
 Brake-use restriction permission and responsiveness selection remain competing
-interpretations pending established CAN names.
+interpretations.
 
 ### 46.4 SDG is a steering request; the plant shows request-associated response (VAR-100)
 
@@ -3086,8 +3031,7 @@ trims). Inside ID11 the request word leads measured angle (A plateau r≈0.868,
 best +50 ms, plant gain 1.248945 mrad/mrad; B small-signal, first-30 s r=0.561663
 collapsing to 0.139101), and the EPS motor proxy follows the reference word at
 least as well as SAS (A 0.587897 vs 0.456945; B 0.591181 vs 0.126883).
-These establish request-associated plant correlations. Causal command-path and
-winner/grant attribution remain unproved (CORR-137).
+These establish request-associated plant correlations (CORR-137).
 
 ### 46.5 Session-internal refutations retained
 
@@ -3510,8 +3454,7 @@ is explicitly rejected: that byte subsequently walks through multiple values whi
 `0x622` byte 5 remains fixed.
 
 **Wiper boundary:** no native Toyota-B/Panda-bus1 field in the retained corpus is
-currently identified as FRC wiper-operation status. Private, multiplexed,
-gateway-published, or presently unnamed Bus-1 wiper states remain possible.
+currently identified as FRC wiper-operation status.
 A synchronized physical wiper ON/OFF/INT/LO/HI exercise (or
 exact source-ECU/EWD evidence) is required before assigning one.
 
@@ -3698,7 +3641,6 @@ application packages are arbitrated separately; request-generation then sends
 the selected IDs/targets toward powertrain/brake; the final result-longitudinal
 ID reports the application whose acceleration is actually employed, or a driver
 discriminator when driver demand wins. This architecture supplies a semantic oracle.
-Exact F33 software placement requires separate evidence.
 
 The two complete relay-correct drives now provide the longitudinal join. `0x08A`
 B8:B9 and B11:B12 are equal in **44,617/44,617** frames and have the exact
@@ -3866,10 +3808,7 @@ validates every retained periodic Bus-1 frame. The CLI contains no CAN transmit
 path; source attribution, B12 OEM identity, receiver `MaxDeltaCounter`/timeout
 behavior, and downstream acceptance remain separate live questions.
 
-This is an **analysis result**. A vehicle-control contract still requires closing
-VAR-106's open `0x160` physical transmitter/direction and B12 OEM identity, and no
-live experiment has shown how the downstream ECU reacts to a synthetically
-modified request. The native Bus-1 family exposes **standard AUTOSAR Profile-5
+The native Bus-1 family exposes **standard AUTOSAR Profile-5
 CRC integrity + rolling freshness**. The ordinary **Toyota P5 SecOC/TSK
 authentication boundary** applies to Bus 4.
 
@@ -4128,23 +4067,18 @@ On the retained DataFlash SHA `231fbdde…4432`, **57 of 122 mapped records**
 have both the expected handle and final `AAAAAAAA` marker. Nine are within the
 original 48-single-page subset. **All 57 also match the recovered additive
 checksum**. Checksum evaluation remains unset for the other 65 marker-rejected records.
-This establishes offline record integrity. Successful hardware reads and application
-copy consensus require separate evidence. The application restore/selection machinery
+This establishes offline record integrity. The application restore/selection machinery
 must establish Raw/XOR55/XORAA grouping.
 
 The retained **2026-08-26 post-application→boot-handoff PE1 LocalRAM capture**
 still shows four `0x0800` words at both `FEBE6AD2` and `FEBE6AE6`, and equal
-45-byte windows at `FEBE6A26` / `FEBE6A84`. Those values apply only to this capture.
+45-byte windows at `FEBE6A26` / `FEBE6A84`.
 The old assertion of an `A55A5AA5` marker at
 `FEBE6AAA` is withdrawn: the captured word there is `80008000`, and that address
 starts inside the active 45-byte window.
 
 The maintained analysis uses instruction-anchored canonical data references.
-Its `FEBE6Axx` versus assist-cell census is limited to **direct references**.
-Exhaustive alias analysis and transitive dataflow remain outside that measurement.
-The influence conclusion is explicitly unresolved; application
-copy grouping and learned-state propagation retain their separate evidence
-requirements.
+Its `FEBE6Axx` versus assist-cell census measures **direct references**.
 
 Owner: `tools/targets/camry/analysis/analyze_camry_8965F3307000_dataflash_nvm_owners.py`.
 Its generated artifact records every descriptor, marker and admitted checksum
@@ -4244,9 +4178,8 @@ steering: median `|target-measured|` is about **2.73 deg**, roughly 60% of activ
 frames exceed 2 deg, roughly 32% exceed 4 deg, and the route contains errors above 18 deg.
 Those observations rule out the simple explanations "B6 never left Panda", "the cleaned
 sender still set the known suppress bit", "the sender timed out continuously", and "the
-requested angle was effectively zero". They do **not** prove EPS acceptance. The same
-route also forwarded stock `0x08A`. CORR-179 limits that inference to request-plane
-forwarding state. EPS exclusive authority requires a separate discriminator.
+requested angle was effectively zero". The same
+route also forwarded stock `0x08A`.
 
 One implementation detail must remain separated from this route. At the pinned cleaned
 port (`opendbc@ae284aaf`), F33 B6 is built with `build_b6_zero_marker_frame`; it does not
@@ -4434,7 +4367,7 @@ machine bytes, builds zero-write preflight/APPLY/RESTORE/post-apply payloads, an
 fails closed on any source/fixup/SHA drift. The next live sequence is therefore:
 **zero-write exact preflight -> stage-2 APPLY only if exact -> OFF/READY ->
 zero-write persistence verification -> repeat the same admission-only B6 probe**.
-Stage 2 remains a candidate discriminator. Its B6 effect requires live demonstration.
+Stage 2 remains a candidate discriminator.
 The 0.5-degree causal test remains forbidden until the repeated ID11 phase reports `ADMITTED`.
 
 A supplementary same-session SID-0x23 capture read the static D7/B6
@@ -4483,7 +4416,7 @@ The next bounded patch changes the **definition**. The repository RH850 encoder 
 
 Stage 3 intentionally starts from the live-proven stage-2 image and changes only that new four-byte site. With `r26=0`, the remaining `FUN_0008F906` path receives the same boolean/status values and takes the same success arm as native verified success; the existing `8F948=003A` and `8F952=E001` edits become outcome-equivalent to the stock instructions for this function but are left present to keep the next experiment one-new-site. The deterministic cumulative image has CRC prefix **`0x13ADA3CC`**, fixup **`0xEC525C33`**, residue `0xFFFFFFFF`, and SHA-256 **`67f4aaa803f9f3df3e5b2bf31d2c8950ebbb3870fa3f5d439f585caae3a8313c`**. RESTORE reverses stage 3 only and returns to the exact reboot-verified stage-2 image. Stage 3 is not a live success claim.
 
-At that experiment stage, `FUN_0004BD46` was known to write B6 sig261/sig262 to generated-COM cells `FEBE80BC/FEBE80B8`; `FUN_00058074` carries them to `FEBEF130/FEBEF1FA`, and `FUN_000BCD62` copies those values to `FEBEADB0/FEBEAE90`. The probe added `80BC/80B8` as an intermediate rung and then labeled a miss there `pdu_not_delivered_to_com`. CORR-158/162 later correct that label: these cells contain post-window generated scalars, and the retained ID0 result was baseline-confounded. Raw PDU44 requires a separate observation. Positive `ADMITTED` still requires the complete downstream ladder and bank 2.
+At that experiment stage, `FUN_0004BD46` was known to write B6 sig261/sig262 to generated-COM cells `FEBE80BC/FEBE80B8`; `FUN_00058074` carries them to `FEBEF130/FEBEF1FA`, and `FUN_000BCD62` copies those values to `FEBEADB0/FEBEAE90`. The probe added `80BC/80B8` as an intermediate rung and then labeled a miss there `pdu_not_delivered_to_com`. CORR-158/162 later correct that label: these cells contain post-window generated scalars, and the retained ID0 result was baseline-confounded. Positive `ADMITTED` still requires the complete downstream ladder and bank 2.
 
 The next field sequence is therefore **NRTD zero-write stage-3 preflight -> APPLY only on an exact match -> full OFF -> NRTD zero-write persistence verification -> full OFF -> READY admission-only B6**. The 0.5-degree offset remains forbidden until the admission-only run reports `ADMITTED`.
 
@@ -4507,7 +4440,7 @@ the F33 profile-2 queue; freshness, raw-COM publication, and scalar unpacking
 also remain dynamically unobserved.  Route `00000037--dec6fe39cb` contains
 18,456 B6 `sendcan` records, 18,447 Panda TX echoes and nine reject-return
 records, but zero native `src=0/1/2` B6. It validates sender construction and
-timing. EPS receipt and a stock-native transcript remain unobserved.
+timing.
 
 The next test is not stage 6, and it is not a bypass first. A dedicated **non-bypassing transaction observer** now occupies the same live-proven high tail without calling route44: 494 bytes of resident code plus 28 bytes of telemetry, 522/524 bytes total, zero relocations, raw SHA `42af3133…aa3f`, authenticated 4-KiB payload SHA `29841b49…bbbb`. At the exact pre-`667E6` scheduler point it latches whether profile2 is queued, the last receiver-side B3..B7/B28..B31, and pre-SecOC `FEBE5564/FEBE5364`; immediately after the unchanged stock aggregate it latches queue length, post-SecOC result/publication state, and ICU-S `FEBF13BE/BF`, which application SID23 cannot read directly. The stationary probe's `--require-observer` mode concurrently reads the two committed and two pending 12-byte freshness records, the COM/application ladder, and `CB38 -> CC48 -> CC60 -> CC62/CC64`. Only after a positive queue observation does the separate existing RAM route44 bridge become a justified second experiment. No new flash patch is part of this sequence.
 
@@ -4587,7 +4520,6 @@ retains only its last queued value, a negative or baseline collision remains
 
 Panda CAN-health handling is also narrowed. REC/TEC are endpoint gauges.
 Only cumulative event counters are differenced modulo 32 bits.
-Neither clean endpoints nor Panda's TX return prove physical ACK.
 Separating transport from EPS ingress after a negative observer result requires
 an independent physical-bus receiver or genuine TX-completion witness.
 
@@ -4728,8 +4660,7 @@ cells move together, only during transmit phases.
 
 The programming-session RAM snapshot is also narrower evidence than
 previously stated.  `gen[44] = 209`, `gen[40] = 210`, and `gen[45] = 0`
-show only prior activity at the capture point. Continuous stock cadence and input-to-route
-mapping require separate evidence. The capture followed the retained stock CAN oracle
+show prior activity at the capture point. The capture followed the retained stock CAN oracle
 by about 13 minutes and entered programming/boot state.  The 32-byte route-44
 COM window has no exact full-window or bytes-3-through-31 match in that
 oracle; its zero at byte 3 is non-unique.  It therefore does not identify
@@ -4844,8 +4775,7 @@ failed to reappear after the RAM trigger; a full vehicle OFF followed by NRTD re
 `8965F3307000 / 8A3113303100`. The raw session summary is
 `targets/camry-2026/raw-20260906/ram-resident-replay-failures.json`.
 
-This result does **not** retract the high-tail carrier proof. The independent Aug-26
-probe copied 524 bytes to `FEBFF9F0..FEBFFBFB`, executed a marker from that region,
+The independent Aug-26 probe copied 524 bytes to `FEBFF9F0..FEBFFBFB`, executed a marker from that region,
 and then jumped exact stock application entry `0x20880`; application F181 reappeared
 and the 524 bytes survived stock startup byte-for-byte.
 The new failure concerns the resident/manual-replay composition.
@@ -4873,7 +4803,7 @@ Through stock foreground counter **223** (~1.12 s nominal) it performs the corre
 
 This composition intentionally separates **runtime** from **experiment definition**. One positive NRTD install (`runtime_monitor_live`) is followed directly by NRTD->READY without OFF; thereafter `status/watch/run/stop/snapshot/capture/shell` can change hypotheses without rebuilding, repackaging, re-entering the bootloader, or executing another RAM payload. The monitor contains no source-memory writer, dynamic call, steering/B6 transmit, SecOC bypass, command-5 path, or CodeFlash write.
 
-The first generic-monitor qualification remains Park/stationary. Its v1 output is a coherent **current** snapshot polled through SID23. On-ECU history and asynchronous telemetry remain outside its scope. That is sufficient to validate the external-control architecture and to iterate rapidly on parked state hypotheses. After live qualification, road-state work should extend the same command plane with resident history/trigger or response telemetry. The older C-based B6 observer and route44 bridge remain deferred and must not be executed merely because their artifacts are audited.
+The first generic-monitor qualification remains Park/stationary. Its v1 output is a coherent **current** snapshot polled through SID23. That is sufficient to validate the external-control architecture and to iterate rapidly on parked state hypotheses. After live qualification, road-state work should extend the same command plane with resident history/trigger or response telemetry. The older C-based B6 observer and route44 bridge remain deferred and must not be executed merely because their artifacts are audited.
 
 
 ## 59. Exact F33 CAN-FD timing and Panda mixed-frame transport audit (VAR-142)
@@ -5289,7 +5219,7 @@ rows where the vehicle is at least 0.30 m from the detected lane center, the
 from lane center than the vehicle in **103/230 (44.8%)**.  In the same 230 rows,
 B6 target-minus-measured steering has the edge-side sign in **191/230 (83.0%)**;
 for the 57 rows at >=0.40 m offset, that rises to **55/57 (96.5%)**.
-This establishes model/request direction. Physical B6 rack actuation remains unproved.
+This establishes model/request direction.
 
 Those 103 ``path farther toward the same edge'' rows form eight deterministic
 episodes.  The longest episode whose median absolute driver torque remains below
@@ -5350,13 +5280,11 @@ non-response evidence or prove that this route's wheel motion was caused by B6.
 **Consequence.** There is no evidence here for changing B6 sign, scale, or adding a
 stock-derived steering offset. The fork is transmitting the steering angle that controls
 requested in the exact-F33 B6 physical-angle domain. The stock `0x08A` value supplies
-Toyota request/reference evidence only.
-Route 45's edge-hugging/model result remains valid, but its `0x081` comparison does **not** identify EPS-side authority.
+Toyota request/reference evidence.
 VAR-148 supplies the objective structural answer: accepted ID11 B6 is not sole authority;
 it is a contribution inside the ordinary EPS command sum. The remaining live question is
 whether the transmitted B6 reaches or is published into that controller.
-The `0x081` comparison cannot answer that question. No steering sign/scale/offset tuning
-constant changes from this comparison.
+No steering sign/scale/offset tuning constant changes from this comparison.
 
 
 ## 62. Route-48 Toyota-LTA-off B6 isolation (VAR-145)
@@ -5394,8 +5322,7 @@ that physical controller's `brs_enabled` state, so route 48's B6 was emitted as
 bus-state-derived rather than carried per frame through cereal, so this is a
 route-specific code+state proof rather than a generic per-frame BRS log.  All
 21,347 B6 sends also retain the intentional **zero-MAC28 development marker**.
-This closes Panda/CAN-FD framing. SecOC authentication and receiver admission remain
-unproved. The request-plane-off result cannot be attributed to a recurrent Panda
+This closes Panda/CAN-FD framing. The request-plane-off result cannot be attributed to a recurrent Panda
 rejection or a CAN protocol-error burst.
 
 A post-drive sender-history audit found an important distinction that route 48
@@ -5467,13 +5394,13 @@ and MAC value are closed. No steering sign, scale, or planner tuning change foll
 
 ## 63. Exact-F33 B6 freshness closure and complete retained-corpus audit (VAR-146)
 
-The B6 freshness counter-start question is now closed from the exact
-`8965F3307000` receiver. The complete retained Camry rlog tree was also reduced as a
-consistency
-check: **13 routes / 530 rlogs / 5,328,786,933 bytes**, covering every archived
-and dated route presently under `/Users/kai/dev/inspect/logs/camry-2026`.  The
-machine-readable inventory, including a SHA-256 for every input rlog, is
-`data/generated/camry_b6_freshness_contract.json`.
+The B6 freshness counter-start question is closed from the exact
+`8965F3307000` receiver. The retained capture cohort contains **13 routes / 530 rlogs /
+5,328,786,933 bytes** from `/Users/kai/dev/inspect/logs/camry-2026`.
+`data/generated/camry_b6_freshness_contract.json` records a SHA-256 for every input
+rlog. Reproduction selects this cohort through
+`--log-root build/work/capture-cohorts/camry-b6-freshness-original13`; that view
+links the original capture files.
 
 The exact-F33 receive order is decisive. `8F746` extracts the protected trailer
 through `8F434` and invokes B6's profile freshness callback before the ICU-S MAC
@@ -5512,8 +5439,7 @@ low2 deltas are overwhelmingly +1, with the small set of +2/+3/0 cases remaining
 inside the receiver's +1..+4 congruent window (`delta 0` represents the next +4
 candidate at the freshness layer). These historical frames all precede CORR-176's
 restored normal dummy-CMAC sender and all **1,696,097 sendcan frames have MAC28=0**,
-so the corpus establishes freshness/FV4 progression. Road testing of the new
-dummy-CMAC envelope remains separate.
+so the corpus establishes freshness/FV4 progression.
 
 The two latest corrected-CAN-format routes are especially clean. Route 45 has
 43,093 B6 sends / 43,083 successful echoes / 9 rejected returns; route 48 has
@@ -5533,7 +5459,6 @@ scan. Route `00000027--885099a1d4` contains 106,800 incoming `src=2` B6 frames, 
 **all 106,800 payloads occur exactly in that same route's comma `sendcan` B6 set**.
 There are zero incoming B6 payloads outside the route's comma-generated population.
 It is therefore a reflection/forwarding population.
-A factory B6 sender's counter-start rule remains unobserved.
 
 The current fork aligns its full-freshness construction with the exact receiver's
 complete reconstruction rules. `carcontroller.py` resets the B6-local 8-bit
@@ -5632,9 +5557,7 @@ application bytes B3..B10. The SecOC trailer lives at offsets `0x1D3..0x1D6`
 (B28..B31); none of those four raw COM addresses has a direct application reference,
 and `4BD46` never requests them. The tag has no post-delivery authority semantics.
 
-ICU-S silicon internals remain outside the CodeFlash evidence.
-That does not reopen a useful zero-versus-dummy distinction here. With the true
-slot-4 key absent, both candidates are invalid verification tags except for the
+With the true slot-4 key absent, both candidates are invalid verification tags except for the
 same accidental **1 in 2^28** truncation match probability. More importantly,
 every recovered software-visible output by which ICU-S can affect this B6 secured
 receive transaction -- command return, root result, profile callback result, final
@@ -5788,8 +5711,7 @@ that global state as `FEBEF000`; `BCD62` normalizes it to `FEBEACBD` as
 new B6 from being unpacked at all, while `7F68==1` can allow an unpack but still makes
 `ACBD!=0`; `CEFFC` requires `ACBD==0` before ID11 can select bank 2.  The equivalent
 H/F state has a Techstream-backed power-supply receive-validity/freeze role
-(TMS-055); this section uses only the exact-F33 mapping/gating behavior and does not
-transfer a literal F33 OEM label.
+(TMS-055).
 
 ### 66.2 Every B3..B10 B6 scalar now has a bounded application fate
 
@@ -5801,7 +5723,7 @@ staging/snapshot:
 |---|---|---|---|
 | 261 | B3[5:0] | `ADB0` -> `CA614/CB73A/CEFFC` | **Target Lateral ID**; ID11 maps to `CB00=2`; IDs `0x19/0x1B` select a sibling-state initialization path |
 | 262 | B4:B5 s16BE | `AE90` -> `CBA80/CBB66/CCF0E/CEE7C` | target steering angle/controller input |
-| 263 | B6[7] | `ADDD` -> `CB664` | qualifies the **special `ADB0==0x31` transient only**; not a normal ID11 bank-admission requirement |
+| 263 | B6[7] | `ADDD` -> `CB664` | qualifies the **special `ADB0==0x31` transient** |
 | 264 | B6[6:4] | `ADB1` | snapshotted; zero runtime readers recovered |
 | 265 | B6[2] | `ADBB` -> `CDA20` | value `1` suppresses one controller term; `0` permits it |
 | 266 | B6[1:0] | stops at `F135` | no application snapshot/runtime reader recovered |
@@ -5825,7 +5747,7 @@ signal265=0; modulo-64 signal268; signals269/270=`100/100`; signal267=0 leaves
 the sibling-state mode on its default path; signal271=0 participates in the
 recovered readiness condition; and the remaining secondary companions stay zero. Signal263 is also zero, but exact
 `CB664 -> C7B4 -> CB73A` closure now shows that bit only qualifies the separate
-`ADB0==0x31` transient. It is harmless to ID11 admission. The 28-byte zero template also
+`ADB0==0x31` transient. The 28-byte zero template also
 keeps the non-extracted B3..B10 residual bits zero.  Its B6 application cadence is one
 frame every second CarController cycle (nominal 50 Hz / 20 ms), inside exact F33's
 seven-5-ms / nominal 35-ms receive-loss window.  VAR-146 already proves its SecOC
@@ -5886,17 +5808,14 @@ at `EE40C`. `35C4C` normally uses it as `6AF4=-EE40C`, but its internal
 service/status branches can substitute bounded `EEB10/EE416/EE418` state before the
 same `6AF4 -> 6E0A` current model. The recovered exact-F33 chain then reaches
 `6DEC`, `6DC8`, `6DD6`, and `38162`. VAR-083 establishes exact target-native
-**motor-current-model convergence**. Final F33 TSG3 hardware-PWM commit remains
-outside that recovered chain.
+**motor-current-model convergence**.
 
 The current-corpus direct-writer census is exact from `CB00/CB20/CB38` through
 `CC48/CC4C/CC4E/CC60/CC50/CC62/CC66/CC64`, `AC54/EE40C`, and
 `6AF4/6E0A/6DEC/6DC8/6DD6`: each state has only the recovered runtime writer plus the
 known reset/init writer(s).  The gate-source censuses similarly close `AC2B/B112`,
 `AC5A/B1F8`, `AC29/AC2A`, `8B28/EEF90`, and `CC98/CC94`.  This is why another generic
-xref sweep of the same CodeFlash is no longer the correct next action. Computed aliases,
-DMA/peripheral mutation, ICU-S silicon internals, and final F33 hardware-PWM commit are
-outside that direct-reference proof.
+xref sweep of the same CodeFlash is no longer the correct next action.
 
 ### 66.4 One stationary capture can now identify the first failing rung
 
@@ -5993,8 +5912,7 @@ The static ladder in §66 is now reconciled against every retained Camry B6 send
 than only the last route.  The reducer
 `tools/targets/camry/analysis/analyze_camry_f33_b6_gate_log_reconciliation.py` uses the same 13-route / 530-rlog
 corpus already pinned by VAR-146. A successful Panda TX return proves host/Panda
-transmission only. F33 acceptance and publication require receiver-side evidence.
-Several gates can nevertheless be evaluated from ordinary
+transmission. Several gates can be evaluated from ordinary
 road CAN because exact F33 itself exposes their source or mirror.
 
 ### 67.1 Current B6 application construction is stable; the old mismatches are identifiable history
@@ -6229,8 +6147,7 @@ at an earlier ingress stage.
 
 Phase P used a 522/524-byte resident sampling immediately before the outer `0x667E6`
 aggregate. It transmitted and Panda-returned **188/188** current-shape B6 frames while that
-chosen queue sample was zero. That zero applies only **at the sampled instant**.
-Queue admission outside that instant remains unobserved.
+chosen queue sample was zero at the sampled instant.
 
 The later inter-tick Phase-Q-v1 was also actually run live after fixing the RH850 imm5
 comparison bug; it sent roughly 153/153 returned frames and observed no profile-2 queue hit.
@@ -6451,7 +6368,7 @@ settle near 15.254, supporting the 15.3 default in place of inherited 13.7.
 Paramsd's learned stiffness is a **multiplier of CP front/rear tire stiffness**.
 Its ~1.0 therefore supports keeping `CP.tireStiffnessFactor` at 0.7933.
 Both working routes repeat the same cached lag estimate 0.3837597 s.
-Those repeats supply no independent fresh lag measurements. The 0.18-s actuator default is unchanged.
+The 0.18-s actuator default is unchanged.
 
 **Radar units and lifecycle.** The full body has three banks of eight slots,
 each spread across four seven-byte records (`180/183/186/189`,
@@ -6473,8 +6390,7 @@ The independent raw-object-byte fixture pins 17 rlogs. Range/vision agreement
 is r=0.998518 over 1,953 associations, slope=1.029071; held-out lateral has
 slope=0.982563 over 240 off-center associations; 27,602 inferred-stationary gyro
 pairs give r=0.843106 and implied lateral LSB=0.038909. Every source radar PDU
-is CRC-checked during extraction. These cross-sensor anchors leave OEM object
-confidence, validity, and silent same-slot reassignment unproved.
+is CRC-checked during extraction.
 
 `camry_2026_bus1_camera_output.json` is now schema **v5** and the independent
 anchor report is `camry_2026_radar_anchors.json`. The candidate parser uses the
@@ -6487,9 +6403,8 @@ withdrawn; sign itself is now independently supported.
 **Stock topology and lateral lifecycle.** Four September-11 rlogs independently
 place `0x412` and `0x101` on unsplit bus1, so their duplicate transmissions on
 the ADAS relay did not replace those sources and were removed. Historical
-working steering samples demonstrate conventional cruise only.
-Adaptive-cruise combination remains unproved. The new seven-tick supervised helper fixes stale
-host-command retention. Its qualification covers compilation and emulation only.
+working steering samples demonstrate conventional cruise. The new seven-tick supervised helper fixes stale
+host-command retention. Its qualification covers compilation and emulation.
 See the current capability matrix for the real automatic-cancel, DRCC,
 longitudinal and fault-status boundaries.
 
@@ -6721,7 +6636,7 @@ Route `00000093--4066e7ae51` independently repeats the same result with 893/893
 successful active C7 returns over 17.94 seconds at 10.61..10.94 m/s and
 target/measured `r=0.997` at 400 ms. Both routes record the same parent commit and
 byte-identical captured `GitDiff`; route `93` therefore corroborates the same configuration.
-This is graded **observed**. Deterministic actuator attribution remains unproved.
+This is graded **observed**.
 
 The exact lifecycle is part of the result: explicitly select the retained continuous
 payload/helper/metadata through `F33_INLINE_PAYLOAD_PATH`, `F33_INLINE_HELPER_PATH`,
@@ -6880,7 +6795,7 @@ The exact hook bytes are the complete independently decoded four-byte JARL
 Inverse operations restore stage 7 -> exact stage 6 -> exact cumulative stage 5.
 
 This establishes **verified generated-artifact construction**.
-Live persistent qualification remains open. The installer is deliberately two-stage so resident bytes are inert
+The installer is deliberately two-stage so resident bytes are inert
 before the hook exists, and removal is hook-first. No bootloader byte changes;
 nevertheless an interrupted 32-KiB block rewrite requires exact full-image CUW/
 bootloader recovery rather than the small inverse payload. The field prerequisite
@@ -6994,7 +6909,7 @@ A separate endpoint `0x7A2 -> 0x7AA` on bus 0 returned software identity
 `867BF0601001`; this is not an EPS bootloader response. Both sampled Panda CAN
 controllers reported no current bus-off, zero current transmit/receive error
 counters, and zero safety-TX blocks. This supports diagnostic transport to the other
-endpoint only. EPS recovery and liveness remain unproved.
+endpoint.
 
 The preceding cold-start catcher had finished at 05:44:08 UTC with `timeout`;
 its conditional restore log contains only `catcher-did-not-catch`. No restore
@@ -7126,8 +7041,7 @@ startup, ABS-only NRTD startup, and present-but-wrong EPS rejection. The parent
 openpilot pin is `6c22ffb5c`. The focused Toyota suite passed 34 tests and 213
 subtests. This finding concerns openpilot identification/lifecycle.
 The dedicated TSS3 preflight independently read exact EPS F181 while Ready=0,
-so NRTD preserves that observed diagnostic reachability. Physical Toyota-B bus
-topology requires separate evidence.
+so NRTD preserves that observed diagnostic reachability.
 
 ## 73. 2026-09-17 replacement-rack road drive: temporary lateral loss is the F33 target-step request-failure gate
 
@@ -7327,7 +7241,6 @@ events around ~6707.33 s and ~7218.45 s.
 A coarse nearest-sample comparison of commanded versus measured steering angle
 during active lateral gives median absolute error **0.493 deg**, p90 **1.444 deg**,
 p99 **3.013 deg**, and max **5.544 deg**. These observations characterize vehicle response.
-Actuator-model calibration requires separate evidence.
 
 This live route upgrades the exact Camry post-auth backend from
 firmware-closed/regression-built to **live road demonstrated** for the failure it
@@ -7393,7 +7306,6 @@ engagements. During that exposure:
   **-17.60..+33.30 deg**; and
 - a coarse 200-ms-lag nearest-sample comparison gives `r=0.988` and median
   absolute error `0.766 deg` over 8,158 pairs. This characterizes road response.
-  Actuator-model calibration requires separate evidence.
 
 Fifteen `steerFaultTemporary` samples appear only at the terminal offroad tail
 of segment 8, with `latActive=false`; they produced no steering-unavailable

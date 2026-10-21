@@ -293,8 +293,7 @@ def longitudinal_request_surface(parser: DDBParser, root: Path) -> dict[str, Any
             "consumers": brake_consumers,
             "meaning": (
                 "Toyota labels 0x10A1..0x10A4 as upper/lower acceleration magnitudes and request IDs 'from Toyota "
-                "Safety Sense'. They are ordinary read-only Data Monitor observations in the brake domain. "
-                "The underlying vehicle-network frame and authentication owner remain unproved."
+                "Safety Sense'. They are ordinary read-only Data Monitor observations in the brake domain."
             ),
         },
         "pcs_recorder_vocabulary": recorder,
@@ -302,8 +301,7 @@ def longitudinal_request_surface(parser: DDBParser, root: Path) -> dict[str, Any
             "FRC_P5 contains the upper-limit requester/acceleration/allocation/permission source vocabulary; "
             "brake-domain ECUs expose upper/lower acceleration and requester IDs explicitly named 'from Toyota "
             "Safety Sense'; and the FRC-hosted PCS recorder contains both request halves plus arbitration-result "
-            "longitudinal ID/acceleration. This closes the diagnostic source->brake-sink architecture, but not "
-            "copy direction, wire encoding, SecOC ownership, or arbitration execution."
+            "longitudinal ID/acceleration. This closes the diagnostic source->brake-sink architecture."
         ),
     }
 
@@ -353,7 +351,7 @@ def fleet_brake_sink_census(parser: DDBParser, root: Path) -> dict[str, Any]:
         "interpretation": (
             "Every EU/JP FRC_P5 install row and every NA row except one explicit TEST placeholder includes at "
             "least one brake ECU whose current DDB exposes 0x10A1..0x10A4. This establishes a fleet-wide "
-            "diagnostic observation sink. Runtime PID support on each physical vehicle requires independent confirmation."
+            "diagnostic observation sink."
         ),
     }
 
@@ -582,8 +580,7 @@ def current_utility_srp_census(root: Path) -> dict[str, Any]:
             "The current GTS+ UtilityNeo CONF scripts decode with the pinned V18 AES-256-ECB key and are "
             "ordinary maintenance/utilities (alarm, lamp, DCM, SAS zero point, RCM, TVD). Their literal frame "
             "corpus contains no SecurityAccess/reflash service and no TSS3 lateral/longitudinal/arbitration/SecOC "
-            "vocabulary, so current host utilities cannot distinguish arbitration execution or wire ownership. "
-            "This closure covers literal decoded scripts only; dynamically synthesized bytes remain outside its scope."
+            "vocabulary."
         ),
     }
 

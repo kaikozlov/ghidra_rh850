@@ -108,6 +108,23 @@
     "boundary": "guard-level wiring comparison; removed helper calls are not assigned OEM semantics solely from location",
     "guard_diff": [
       {
+        "h_guards": [
+          "if ((param_1 & 2) != 0) {"
+        ],
+        "h_range": [
+          40,
+          41
+        ],
+        "opcode": "replace",
+        "sienna_guards": [
+          "if ((param_1 >> 1 & 1) != 0) {"
+        ],
+        "sienna_range": [
+          40,
+          41
+        ]
+      },
+      {
         "h_guards": [],
         "h_range": [
           60,
@@ -209,7 +226,7 @@
     }
   },
   "regenerated_com_rte_surface": {
-    "boundary": "H split/restructured these generated copy/dispatch surfaces; do not infer canonical one-to-one function identity from the representative fragments",
+    "boundary": "H split/restructured these generated copy/dispatch surfaces.",
     "consumer_fragment_callers_within_evidence": [
       "0x0005389C",
       "0x00058450",
@@ -314,7 +331,7 @@
       "reference_metrics": {
         "body_size": 110,
         "direct_call_count": 25,
-        "if_count": 0,
+        "if_count": 5,
         "loop_count": 0,
         "switch_count": 0,
         "unique_direct_call_count": 25
@@ -484,7 +501,6 @@
     "com_rte_surface_regenerated": true,
     "mode_policy_preserved": true,
     "per_tick_wiring_regenerated": true,
-    "remaining_boundary": "lower helper semantics inside changed wiring remain independently auditable; this report closes the named high-level scheduler/system roles, not every generated COM helper",
     "scheduler_system_residue_closed": true
   },
   "supporting_analogues": [

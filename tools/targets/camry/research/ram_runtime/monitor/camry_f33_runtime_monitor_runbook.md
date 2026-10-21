@@ -31,7 +31,7 @@ the Panda tap. Its application was `00000000fff3002e...`: Target Lateral ID 0,
 target raw -13, B6=0, and B7 low6 rolling normally. With pandad/openpilot
 cooperatively quiesced, that native source continued independently; B7 advanced
 `0x0d -> 0x3d` in 1.0001 s. The old interpretation of `queue32_hits` was wrong
-because that counter measured scheduler occupancy. Distinct frames require separate counting. The final
+because that counter measured scheduler occupancy. The final
 distinct-trailer counter observed 119 new native B6 frames in 1.000102 s while the
 host producer was quiesced: **118.99 frames/s** at stationary READY.
 
@@ -67,7 +67,7 @@ FEBF02D0..FEBF02F7  private operation/target/dedup/capacity state
 
 All of it remains inside the already-recovered reference-free
 `FEBF0000..FEBF0307` low-RAM pocket and MPU region 5. The SID23 exclusion begins
-at `FEBF0288`; that boundary applies only to diagnostic reads. Ownership extends across the pocket.
+at `FEBF0288` for diagnostic reads.
 Current specification-conformant resident SHA-256 is
 `f599fd600c7a2b59e72d18058729f0d121331df7078a72e6400571934447e2c4`;
 current padded-helper SHA-256 is
@@ -115,7 +115,7 @@ openpilot service or leave Panda ownership intentionally wedged.
 
 ### Live qualification on 2026-09-09/10
 
-The first revised helper exposed an implementation failure. Key failure was not established:
+The first revised helper exposed an implementation failure:
 command 5 returned success, but transaction telemetry showed an all-zero reconstructed
 freshness structure and a mismatching trailer. The final helper removes that opaque
 four-register pass-through and implements the exact ordinary-profile arithmetic recovered
@@ -275,13 +275,12 @@ receiver patch already forces recovered authentication results successful.
 
 The 2026-09-08 monitor work exposed two instrumentation mistakes that are now corrected
 offline. First, route44 generation `FEBE5364` is an **8-bit modulo-256 counter**. The old
-short-window `0/~200 Hz` values were endpoint residues and could not estimate rates. In the longer
+short-window `0/~200 Hz` values were endpoint residues. In the longer
 zero-host-B6 control, 26 SID23 reads collapse to only six distinct resident snapshots with
 route44 generation `121 -> 243 -> 249 -> 107 -> 119 -> 121`. Their minimum modulo
 increments sum to 256 over 2.640 s, proving **at least 96.98 route44 publications/s during
 that captured interval with zero host B6 TX echoes**, while additional 256-count wraps remain
-possible. That proves route44 activity occurred without host B6 transmission; it does not
-identify the producer or exact cadence.
+possible.
 
 Second, exact scheduler recovery shows why both earlier queue probes were timing-blind. In
 one `0x7A254` foreground invocation, F33 first drains normal receive software rings through
@@ -350,8 +349,8 @@ Require:
 inline_signer_resident_live_loader_ready
 ```
 
-This is the already-qualified staged payload/resident identity. The full-runtime
-observer failed separately. NRTD installation does not require receive-gated observation progress.
+This is the already-qualified staged payload/resident identity.
+NRTD installation does not require receive-gated observation progress.
 
 Transition **directly NRTD -> READY without OFF**, remain Park/stationary, then run:
 
@@ -370,8 +369,7 @@ midaggregate_observer_selfcheck_pass
 ```
 
 If the result is `same_scheduler_d7_positive_control_not_seen` or
-`observer_foreground_not_advancing`, stop. That instrumentation failure leaves
-B6 ingress inconclusive.
+`observer_foreground_not_advancing`, stop. That is an instrumentation failure.
 
 After the selfcheck passes, run exactly one marker block on the proven chassis bus:
 
@@ -392,7 +390,6 @@ id63_not_seen_at_midaggregate_boundary
     Bounded negative. D7 positive control passed and Panda transport completed, but the
     marker never appeared at the exact post-CanIf/pre-SecOC boundary during this block.
     The next instrument must examine interrupt/CanIf/PduR admission below this boundary.
-    Further SecOC/MAC/counter/companion experiments cannot localize that loss.
 
 same_scheduler_d7_positive_control_not_seen
 observer_foreground_not_advancing

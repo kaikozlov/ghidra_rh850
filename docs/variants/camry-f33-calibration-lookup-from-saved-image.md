@@ -19,9 +19,7 @@ or trusting a used-parts listing. The exact retained lookup tuple is:
 
 These lookup inputs come from the original image. They can identify a
 part-specific inquiry or supported calibration
-search without first making the silent EPS answer. This does not prove that
-Toyota offers a matching restore package, that the frontend supports importing
-these fields, or that a programmer is currently reachable.
+search without first making the silent EPS answer.
 
 ## Exact firmware source chain
 
@@ -43,7 +41,7 @@ Fresh exact-target Ghidra and raw instructions establish:
 5. The independent serial object `0207` is also checksum-valid and its saved
    serial agrees with the retained original F18C response. The whole
    manufacturing-data span `A000..FFFF` is unchanged in the complete saved
-   incident reconstruction. This agreement is established from archives only.
+   incident reconstruction.
 6. Normal F181 producer `4FA26` reads 16-byte fields at `20860` and `17DC0`.
    Its separate compatibility-failure placeholder branch remains distinct;
    the two actual identifiers above match the retained preincident F181.
@@ -102,13 +100,10 @@ replacement bytes and changes no authorization or programming behavior.
 ## Incident recovery is not the same goal as factory equality
 
 The known inverse restores the complete retained incident reconstruction to its
-previous stage-6 state. Untouched factory firmware is a separate restoration
-objective. Recovering EPS operation does not require removing every previous
-working change. The missing exact OEM package is a dependency of the
-**manufacturer-package restoration branch**. The availability of other authorized
-restoration routes remains unresolved.
+previous stage-6 state. The missing exact OEM package is a dependency of the
+**manufacturer-package restoration branch**.
 
-Either restoration objective still needs a reachable, executing programmer and
+Restoration still needs a reachable, executing programmer and
 a completion path back to the EPS application. The archived custom writer's
 DONE/halt does not supply that completion path. The normal bootloader's own
 programming/verification/reset lifecycle is a separate implementation and has
@@ -139,8 +134,7 @@ values but a different input clock? The common boot initializer is
 R01UH0585EJ0120 Table 12.2 (p.469) and Tables 17.6/17.7 (p.791), rendered and
 visually checked in this pass, identify `clkc=CLK_LSB` as **40 MHz fixed**.
 The reconstructed modes therefore do not establish an overlooked 250-kbit/s or
-1-Mbit/s cold recovery listener. This result describes configured behavior only.
-Live clock measurements and electrical clock faults remain outside its scope.
+1-Mbit/s cold recovery listener.
 
 The cold handoff value `FF` is not simply a disabled-protocol flag:
 `69D2` enables the boot protocol for either `0` or `FF`, and `6A22` initializes

@@ -10,9 +10,7 @@ Two modes share one pipeline:
   Overlay preimages bind the model to the exact image; any byte drift at a
   modeled site aborts before execution.
 
-What this proves is modeled CPU execution along the exercised path. It cannot
-prove upload, retention, interrupts, peripherals, timing, or vehicle behavior —
-that boundary lives in docs/tooling/rh850-build-and-sim.md.
+This models CPU execution along the exercised path.
 """
 
 from __future__ import annotations

@@ -92,7 +92,7 @@
     ],
     "frc_runtime_code_searchable": false,
     "why_brake_not_searchable": "No current software/Techstream/cuw package has Node01/DiagID=07B0. This is a local-corpus absence only.",
-    "why_frc_not_searchable": "Motorola S-record framing carrying an encrypted target representation. ReproStd downloads whole/routine data with UDS RequestDownload DFI 0x01; by the UDS dataFormatIdentifier definition that is compression method 0 plus manufacturer-specific encryption method 1. The exact FRC cipher/key/IV remain unknown."
+    "why_frc_not_searchable": "Motorola S-record framing carrying an encrypted target representation. ReproStd downloads whole/routine data with UDS RequestDownload DFI 0x01; by the UDS dataFormatIdentifier definition that is compression method 0 plus manufacturer-specific encryption method 1."
   },
   "immediate_b6_sender_domain": {
     "boundary": "This identifies the immediate monitored source domain at the EPS endpoint. It does not distinguish originator from forwarder or prove which ECU executes CMAC/freshness generation.",
@@ -249,22 +249,22 @@
       "sha256": "0b47bdc1217835c839e3543e52eab40eb793650a9c159e46f6a9b365ea41a67f"
     },
     "data/generated/corolla_8965H1202000_b6_secoc_verification.json": {
-      "sha256": "bfa448f468333a55552b3a18a8c202c4de4c8cd796d4393ad0970113cc855735"
+      "sha256": "7e105e9f3c7ce61bc604949d15beb186312688a8c02443fcf67f21d953ffe2e3"
     },
     "data/generated/corolla_8965H1202000_lta_command_provenance.json": {
-      "sha256": "016ac3c03dcb0aa87556a4d1c061ad44076a91776fa8432ec03db93428470251"
+      "sha256": "3a76c9d49b2522d28ce4076ec77f786122094d24817dcc8ac9c540a5339ec481"
     },
     "data/generated/corolla_8965H1202000_secoc_key_provenance.json": {
-      "sha256": "80a8f926d5db6172d3edb8ba3dc1d79708166af8c4c1d5379142188cf153f43e"
+      "sha256": "24b559cca288567b3e6edd618b1a8cfe6b420c28208013eafc742dda6a7979ed"
     },
     "data/generated/corolla_8965H1202000_techstream_correlations.json": {
-      "sha256": "5e4eac747a29080dcb5a700070655dccb7814434cc810f204080512416aa8e3a"
+      "sha256": "96c86a91ac85d209bcbc1072582f38b523fd25e899af800b55b84d48ce951ba1"
     },
     "data/generated/techstream_v18/cuw_frc_corpus.json": {
-      "sha256": "eeca82ddf15bab993fd1942acf318f2c5308c73bd7d9f8c0c6983081d32cbd60"
+      "sha256": "7ed99e89ce79d3bbc35e7100fae9a3a24655b9acf368a458dcdc77b9ed1e20c8"
     },
     "data/generated/techstream_v18/p5_lateral_control_semantics.json": {
-      "sha256": "d86dc9c016dd94cbbc3f4435d09eadc0796192bfd258c8ea264722a163e6b86b"
+      "sha256": "323ab3b0d29617aff3e289785a3b3c2200c5b9d74c6ec34f96c5dab6ed3f6a5b"
     }
   },
   "static_conclusion": {

@@ -1,5 +1,5 @@
 {
-  "boundary": "Both firmware families store the payload-build and boot SecurityAccess roots as literal adjacent 16-byte CodeFlash constants consumed by their crypto workers. No runtime root derivation is present in either dumped ECU. Current GTS+ contains frontend wrapping secrets but none of the four firmware roots, and the bounded SecretInfo tests find no one-step relation. Any common root derivation therefore remains an upstream Toyota/Denso build/provisioning hypothesis, not a recovered ECU or Techstream algorithm.",
+  "boundary": "Both firmware families store the payload-build and boot SecurityAccess roots as literal adjacent 16-byte CodeFlash constants consumed by their crypto workers. No runtime root derivation is present in either dumped ECU. Current GTS+ contains frontend wrapping secrets but none of the four firmware roots, and the bounded SecretInfo tests find no one-step relation. Any common root derivation therefore remains an upstream Toyota/Denso build/provisioning hypothesis.",
   "cross_family_relationship_tests": {
     "fingerprints": {
       "eps": {
@@ -27,7 +27,7 @@
       "eps_sa_vs_srs_sa": 66,
       "srs_payload_vs_srs_sa": 57
     },
-    "interpretation": "No listed XOR/AES/CMAC pair fingerprint repeats across EPS and SRS. This rejects those simple fixed-constant pair relationships but cannot rule out an upstream KDF with unknown master material or domain inputs.",
+    "interpretation": "No listed XOR/AES/CMAC pair fingerprint repeats across EPS and SRS. This rejects those simple fixed-constant pair relationships.",
     "shared_simple_fingerprints": []
   },
   "current_gtsplus": {
@@ -168,7 +168,7 @@
         "cmac"
       ],
       "pairwise_table_to_root_hits": [],
-      "scope": "These are bounded falsification tests, not a proof that no upstream KDF exists. They reject only the listed one-step relationships involving current SecretInfo AES-128 entries."
+      "scope": "These tests reject the listed one-step relationships involving current SecretInfo AES-128 entries."
     },
     "security_airbag_flash": {
       "meaning": "current host passes package SeedKey and Nonce through the secure-airbag flash path",

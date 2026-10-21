@@ -323,7 +323,7 @@ def build() -> tuple[bytes, list[dict]]:
         "forbid_pcode_ops": ["INT_DIV"],
     })
 
-    # Saturating add — SAT should track signed overflow independently of carry.
+    # Saturating add — SAT should track signed overflow.
     add("satadd", enc_satadd_rr(6, 10), {
         "mnemonic_prefix": "satadd",
         "must_pcode_ops": ["INT_ADD", "INT_SLESS"],

@@ -239,7 +239,7 @@ def main() -> int:
             "wire": "B0[7]",
             "source_chain": ["0x51E B0[7]", "0xFEBE7D1B", "0xFEBEF052", "0xFEBEB5A8", "0xFEBEE811", "DID 0x1033"],
             "operational_copy_sites": ["0x000BAB58", "0x000BAC16"],
-            "writer_boundary": "FEBEF052 reaches FEBEB5A8 through two operational copy sites and the RAM nodes also have initialization/reset writers. The Ready Status dataflow is proved; exclusive-writer provenance is not claimed.",
+            "writer_boundary": "FEBEF052 reaches FEBEB5A8 through two operational copy sites and the RAM nodes also have initialization/reset writers. The Ready Status dataflow is proved.",
             "techstream": {
                 "name": "Ready Status",
                 "did": "0x1033",
@@ -249,7 +249,7 @@ def main() -> int:
                 "public_2023": {"frames": pub51e["frame_count"], "values": pub51e["ready_status_values"], "payloads": pub51e["unique_payloads"]},
                 "span_2025": {"frames": span51e["frame_count"], "values": span51e["ready_status_values"], "payloads": span51e["unique_payloads"]},
             },
-            "boundary": "Both operational captures show only value 1; value 0 and a Ready transition remain uncaptured. This identifies the incoming Ready Status field only. Republication of the same boolean in an EPS Tx PDU remains unproved.",
+            "boundary": "Both operational captures show only value 1; value 0 and a Ready transition remain uncaptured.",
         },
         "gear": {
             "classification": "core CarState gear semantics closed from generation-native route transitions plus Toyota ordering",

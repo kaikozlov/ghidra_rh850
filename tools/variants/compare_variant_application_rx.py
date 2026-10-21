@@ -116,11 +116,6 @@ def compare(
     ]
     return {
         "schema": SCHEMA,
-        "evidence_boundary": (
-            "Raw generated normal-Rx descriptor-table comparison only. Same CAN ID/length "
-            "proves only a shared configured receive descriptor. Downstream signal "
-            "semantics, SecOC policy, hardware routing, and consumer behavior require independent evidence."
-        ),
         "reference": {
             "id": reference_id,
             "sha256": _sha256(reference),

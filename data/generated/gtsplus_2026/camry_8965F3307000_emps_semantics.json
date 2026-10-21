@@ -71,12 +71,12 @@
       "low_u32_le": "0x00C00040",
       "path": "targets/camry-2026/raw-20260826/secoc-recovery/ram/local_ram_pe1.bin",
       "raw_hex": "4000c00000000000",
-      "state_boundary": "Captured after application-to-boot handoff; this names an observed RAM snapshot but does not establish READY-mode bit semantics."
+      "state_boundary": "Captured after application-to-boot handoff."
     },
     "remaining_unknown": "Toyota's bit-level meanings inside the two 32-bit ASIC state words are not resolved by the current EMPS_P5 monitor database."
   },
   "current_camry_can_topology": {
-    "boundary": "The GTS+ Bus 1/Bus 4 labels identify Toyota Central-Gateway topology. Comma/Panda bus numbers and connector pin numbers use separate namespaces. This static table alone does not prove which Toyota-B harness pair exposes Bus 4; that physical join is supplied separately by the retained pre/post-repin Camry captures and diagnostics. Front Camera Module is the GTS+ component-domain label and is not by itself a category-498 FRC identity proof.",
+    "boundary": "The GTS+ Bus 1/Bus 4 labels identify Toyota Central-Gateway topology. Comma/Panda bus numbers and connector pin numbers use separate namespaces. The physical join is supplied separately by the retained pre/post-repin Camry captures and diagnostics. Front Camera Module is the GTS+ component-domain label.",
     "can_bus_car_id": "0x00A7D910",
     "canonical_component_placements": [
       {
@@ -1273,7 +1273,7 @@
       "record_size": 64
     }
   },
-  "evidence_boundary": "OEM names/database membership come from pinned external Toyota GTS+/Techstream artifacts; RDBI dispatch and RAM sources are exact-target firmware-static evidence; RAM value is a tracked live snapshot. No static GTS+ row is treated as proof of CAN/CAN-FD producer ownership or SecOC signer/key/freshness semantics.",
+  "evidence_boundary": "OEM names/database membership come from pinned external Toyota GTS+/Techstream artifacts; RDBI dispatch and RAM sources are exact-target firmware-static evidence; RAM value is a tracked live snapshot.",
   "f33_rdbi_join": {
     "direct_current_improvements_on_f33_supported_dids": [
       {
@@ -4131,7 +4131,7 @@
   "target": {
     "codeflash_path": "firmware/camry-8965F3307000/CodeFlash.bin",
     "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
-    "rdbi_membership_boundary": "Complete DID metadata; current readable-DID admission is evaluated separately. 0x4D36E selects kind byte +0x0C == 0 and requires an absent availability callback or a callback result of 0x5A.",
+    "rdbi_membership_boundary": "Complete DID metadata. 0x4D36E selects kind byte +0x0C == 0 and requires an absent availability callback or a callback result of 0x5A.",
     "rdbi_record_count": 242,
     "rdbi_record_kind_counts": {
       "0": 196,

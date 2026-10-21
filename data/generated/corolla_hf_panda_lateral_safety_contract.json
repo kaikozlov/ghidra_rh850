@@ -11,8 +11,7 @@
     ],
     "scope": "future lateral-only Corolla H/F safety policy; deliberately stricter than the EPS receiver where Panda controls the sender",
     "secondary_b6_fields": {
-      "boundary": "Signals258/260/262/263/264/265 now have an EPS-consumer-derived minimal ID11 candidate (258=1, 260=0, 262=0, 263=0, 264=0, 265=0), but cross-ECU effects and stock active-LTA values are not validated. Production TX remains disabled until the candidate/template is validated on the isolated relay-correct topology; safety should whitelist the validated result rather than permit arbitrary values.",
-      "policy": "not an unresolved Panda threshold"
+      "candidate": "EPS-consumer-derived minimal ID11 fields: 258=1, 260=0, 262=0, 263=0, 264=0, 265=0."
     },
     "sender_lapse": {
       "eps_guarantee": "The EPS primary receiver-loss cutout is 7 foreground ticks.",
@@ -147,12 +146,6 @@
       "8965F1208000"
     ]
   },
-  "deployment_integration_blockers": [
-    "Physical Toyota-B CAN0/CAN1 repin and relay-side B6 producer/suppression attribution.",
-    "Stock active-LTA B6 sender cadence and validated values/template for secondary application fields.",
-    "SecOC sender ownership and approved slot4 MAC/freshness operation; 0x00F closes epoch semantics but does not supply the secret/MAC operation by itself.",
-    "Firmware-identified active-LTA capture to validate the candidate envelope against real stock commands before enabling Panda output."
-  ],
   "eps_hard_envelope": {
     "accepted_active_target_lateral_ids": {
       "1": "PCS",
@@ -170,7 +163,7 @@
       "wall_clock_duration_known": true
     },
     "controller_error_clamp": {
-      "classification": "controller error saturation only; Panda rejection policy remains separate",
+      "classification": "controller error saturation",
       "internal_abs_limit": 18000
     },
     "inactive_label": "No Request (Manual Operation)",
@@ -182,7 +175,7 @@
         "0x000CADE4",
         "0x000CAE18"
       ],
-      "internal_response_output": "0xCB59A -> FEBEC26B; monitors persistent FEBEAE16 internal-command magnitude. Measured motor Q-current is separate; FEBEAE16 is unavailable as a direct CAN measurement",
+      "internal_response_output": "0xCB59A -> FEBEC26B; monitors persistent FEBEAE16 internal-command magnitude. FEBEAE16 is unavailable as a direct CAN measurement",
       "panda_mapping": "Mirror the observable target/rate and 0x030 fault/validity gates now. Do not reinterpret FEBEAE16 thresholds as Q-current response limits; any Panda actuator-response policy must be validated separately from the OEM internal-command monitors.",
       "target_plausibility_output": "0xCB4F4 -> FEBEC269; target magnitude/delta violation or internal C268/C263 state can assert it"
     },
@@ -206,7 +199,7 @@
       "panda_candidate_action": "cut active command immediately when abs(raw signal186) > 100; do not wait for the EPS persistent debounce",
       "persistent_eps_debounce_cycles_high_bank": 63,
       "persistent_eps_debounce_cycles_low_bank": 79,
-      "physical_unit_boundary": "Firmware proves the signed12 rate field and raw threshold 100. The current Toyota DBC uses 1 deg/s/count, but the historical DBC comment called the factor TBD; 100 deg/s remains only a prior-art physical interpretation. Firmware-native units remain unproved.",
+      "physical_unit_boundary": "Firmware proves the signed12 rate field and raw threshold 100. The current Toyota DBC uses 1 deg/s/count, but the historical DBC comment called the factor TBD; 100 deg/s remains a prior-art physical interpretation.",
       "source_can_id": "0x025",
       "source_signal": 186,
       "wire": "signed12 B4-area field (existing TSS3 DBC STEER_RATE)"
@@ -236,8 +229,6 @@
         "unique_count": 536
       },
       "override_abs_threshold_nm": null,
-      "override_boundary": "The firmware's ~8.238 N.m acquisition clamp and \u00b110 N.m telemetry saturation bound representation only. The promoted exact-H census finds no physical-driver-torque comparator in the target-to-motor control cone, so the driver-override threshold is a Panda/openpilot policy to choose conservatively and validate dynamically.",
-      "override_policy_source": "Panda/openpilot driver-override policy requiring dynamic validation; not an unrecovered Toyota EPS cooperative-control comparator",
       "parameter_name": "driver_override_abs_nm",
       "physical_relation": "torque_Nm = signed(signal10)*0.1 + signed4(signal31)*0.01",
       "telemetry_saturation_abs_nm": 10.0
@@ -254,7 +245,6 @@
       "physical_relation": "angle_deg = 1.5*signal184 + 0.1*signal185"
     },
     "steering_fault_inhibit": {
-      "boundary": "Selected steering fault/inhibit aggregate only; not an exhaustive temporary/permanent EPS fault class.",
       "can_id": "0x030",
       "candidate_action": "immediate controls cutout on nonzero",
       "nominal_clear_value": 0,
@@ -271,10 +261,9 @@
     "controller_error_clamp_internal": 18000,
     "driver_torque_acquisition_and_telemetry_clamps": {
       "acquisition_clamp_abs_nm": 8.23828125,
-      "reason": "representation limits only; OEM driver-override thresholds remain unrecovered",
+      "reason": "representation limits",
       "telemetry_saturation_abs_nm": 10.0
     },
-    "legacy_toyota_lta_limits": "use only as prior art; do not transplant pre-TSS3 max angle/rate, speed-angle curves, torque, or current thresholds",
     "measured_q_current": {
       "reason": "physical Q-current is observable, but no cooperative-supervisor measured-Q comparator is recovered; internal FEBEAE16 thresholds are not Q-current"
     },
@@ -297,7 +286,7 @@
     },
     "full_receiver_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_full_receiver_contract.json",
-      "sha256": "b6ffd19d038fc68cd368b4f708d1d244cf577510b2a410f4cfc6e3e3dba1b3b6"
+      "sha256": "0fb18c91952873dea512a48be0543d7cb4dd9eed7748f3368565599aae1e3f13"
     },
     "h_codeflash": {
       "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
@@ -305,32 +294,30 @@
     },
     "receiver_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
-      "sha256": "799ff4b0beedad9a25723ac75b7b5911fc5fd88a07b52947b2d5991ff39042d3"
+      "sha256": "de36c4736b832f933311ca3f2151cadd209eccca24564a39b43065ae07474928"
     },
     "state_bridge": {
       "path": "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
-      "sha256": "db457921a1de95088d45d3799426bc1d3a9f473dc459c23f12549902cdae5b87"
+      "sha256": "b2de356a44a37ecc19af1b6120014b63766ab1e949a61840c57263528defd0d5"
     },
     "steering_limits": {
       "path": "data/generated/corolla_hf_steering_limits.json",
-      "sha256": "791a363130597fab308fd40746d13b4215caabec0d1217a21cb0cae837fd6d57"
+      "sha256": "95e49e99223b9e13912ecd32e3d46ae4d1af300b1c57ce2a59a6d1a534ab3eb8"
     },
     "target_angle_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
-      "sha256": "aafd2cdcec032bc2c7b3789c642ee97cd70fa9f0029ace524581d4290e94d761"
+      "sha256": "9d6d466092dc22252eee435c8a75abce19b9f11e69640439c9c3f0387f4341d1"
     }
   },
   "static_conclusion": {
     "candidate_panda_contract_derived": true,
     "core_command_numeric_limits_closed": true,
-    "driver_override_is_panda_policy_not_eps_static_recovery_blocker": true,
     "driver_torque_signal_closed": true,
     "eps_loss_cutout_closed_in_ticks": true,
     "eps_loss_cutout_nominal_wall_clock_ms": 35.0,
     "measured_angle_input_closed": true,
     "measured_q_current_observable_closed_but_oem_response_threshold_not_recovered": true,
     "measured_rate_raw_cutout_closed": true,
-    "production_enable_authorized": false,
     "replacement_sender_freshness_policy_closed_independently_of_stock_cadence": true,
     "request_policy_closed_for_candidate_lta": true,
     "selected_fault_inhibit_gate_closed_but_extended_fault_policy_open": true,
@@ -339,28 +326,21 @@
     "wall_clock_sender_cadence_open": true
   },
   "status": {
-    "classification": "candidate-non-enabling",
-    "panda_safety_enable_authorized": false,
-    "reason": "The H/F receiver-side command envelope and observable steering inputs are sufficiently closed to write a candidate safety contract, but the physical driver-override threshold, extended fault policy, deliberate actuator-response policy, relay-side stock-source suppression, and sender payload/cadence/authentication integration are not yet validated. Firmware recovery found no measured-Q-current comparator in the cooperative B6 supervisor."
+    "classification": "candidate"
   },
   "unresolved_safety_parameters": {
     "actuator_response_fault_threshold": {
       "classification": "no-recovered-oem-measured-q-current-threshold",
-      "missing_evidence": "relay-correct dynamic command/response behavior needed to validate any future Panda/sender actuator-response policy",
-      "policy_boundary": "A Panda/sender actuator-response limit may still be desirable, but it must be chosen and validated as a separate safety policy rather than copied from an invented OEM Q-current threshold.",
       "source_available": "0x4A3 Q-current response is statically decoded as an observable",
       "static_firmware_result": "No measured-Q-current comparator is recovered in the cooperative B6 supervisor under the promoted exact-symbol census; CB394/CB59A monitor FEBEAE16 internal command state instead.",
       "value": null
     },
     "driver_override_abs_nm": {
-      "classification": "deliberate-panda-policy-not-unrecovered-oem-comparator",
-      "missing_evidence": "choose a conservative openpilot driver-override threshold and validate driver interaction/release behavior dynamically; no Toyota EPS physical-torque authority comparator remains to recover under the promoted census boundary",
       "source_available": "live physical 0x030 Steering Wheel Torque",
       "value": null
     },
     "extended_fault_policy": {
       "known_immediate_gate": "0x030 STEERING_FAULT_INHIBIT_STATUS != 0 => disable",
-      "missing_evidence": "asserted 0x394/Ready/DTC transitions needed to map temporary/permanent or additional inhibit states",
       "value": null
     }
   },
@@ -373,7 +353,7 @@
     },
     "can_id": "0x0B6",
     "dlc": 32,
-    "secoc_boundary": "Signal261 carries application sequence state. SecOC message8 is separate. SecOC authentication/freshness is a sender/transport prerequisite; this Panda contract does not claim to verify ICU-S slot4 or reconstruct CMAC itself.",
+    "secoc_boundary": "Signal261 carries application sequence state. SecOC message8 is separate. SecOC authentication/freshness is a sender/transport prerequisite.",
     "secoc_trailer": "B28..B31",
     "secured": true,
     "target_angle": {

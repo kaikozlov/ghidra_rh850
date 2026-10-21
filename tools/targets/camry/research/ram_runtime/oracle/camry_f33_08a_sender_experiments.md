@@ -204,7 +204,7 @@ The development Param was enabled once on the stock/unrepinned Toyota-B layout t
 behavior before any source suppression. READY/Park/stationary and Panda safety were healthy, but
 native `0x08A` remained on logical bus1. No private arm admin was emitted, so Panda never blocked a
 source frame and the transparent proxy never transmitted a replacement. This is a clean topology
-negative. The handoff itself did not fail.
+negative.
 
 The software is now prepared for the physical repin in parent `e31c85e84` / opendbc `ec401d56`:
 state parsing and safety motion/brake/gas/angle/cruise sampling move to downstream bus0 only in
@@ -231,8 +231,7 @@ bus1: TSS3 radar/object banks 0x180..0x185
 The initial post-repin host-mode parser incorrectly required the FRC-source PDUs on bus0 and
 therefore stayed fail-closed with `CarState.canValid=false`; no arm admin was emitted. Final parser
 split is opendbc `20b4e37b` / parent `03fbbab6d`: bus0 state + bus2 source + bus1 radar. This keeps
-the takeover guard meaningful and matches the measured wiring. The old single-bus software
-model applied to the earlier wiring.
+the takeover guard meaningful and matches the measured wiring.
 
 ## Atomic ownership handshake replaces N+1/N+2 prediction
 

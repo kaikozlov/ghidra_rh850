@@ -959,7 +959,7 @@ _BOOT_RELOCATED_COPIES = {
 
 
 def _walk_boot_relocated_abi(image: bytes, row: dict):
-    """Decode the six recovered boot-copy bodies solely to recover ABI facts."""
+    """Decode the six recovered boot-copy bodies to recover ABI facts."""
     from dataclasses import replace
     from .lifting.graph import LiftedFn, walk_symbol
 

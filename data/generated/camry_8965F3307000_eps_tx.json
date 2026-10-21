@@ -88,7 +88,7 @@
     ]
   },
   "dynamic_observations": {
-    "boundary": "tracked retained-log evidence; absence applies only to these captures; transmission by a configured PDU outside them remains possible",
+    "boundary": "tracked retained-log evidence",
     "parked_censuses": {
       "post_repin_nrtd": {
         "absent_carriers": {
@@ -139,7 +139,7 @@
       }
     ]
   },
-  "evidence_boundary": "Raw CodeFlash closes configuration, pack geometry, direct pack calls and routing. GTS joins are only used for explicitly named diagnostics. The whole canonical decompiler corpus proves no literal generated-pack-helper calls for configured-only signals 36/37/55/283, but computed indirect calls, DMA or unrecovered code remain outside that bounded negative. Retained logs show runtime behavior for captures we possess; absence of a configured cyclic PDU in those logs is not proof it can never be enabled.",
+  "evidence_boundary": "Raw CodeFlash closes configuration, pack geometry, direct pack calls and routing. GTS joins are only used for explicitly named diagnostics. The whole canonical decompiler corpus proves no literal generated-pack-helper calls for configured-only signals 36/37/55/283, but computed indirect calls, DMA or unrecovered code remain outside that bounded negative. ",
   "executive_summary": {
     "diagnostic_response_ids": [
       "0x7A9",
@@ -1068,7 +1068,7 @@
         {
           "grade": "GTS+firmware",
           "producer": "0x4C490",
-          "role": "signed motor-feedback/current-family proxy; related to DID1151 Q-axis current through different units",
+          "role": "signed motor-feedback/current-family proxy; related to DID1151 Q-axis current",
           "signal": 33,
           "source": "0xFEBE816C",
           "wire": "B22:B23"

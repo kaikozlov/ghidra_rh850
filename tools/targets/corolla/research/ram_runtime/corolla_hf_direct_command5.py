@@ -207,10 +207,6 @@ def build_request_plan(message: bytes) -> dict[str, Any]:
             "request_state returns 0, result_status changes from FE to 00, output_length is 16, "
             "and output differs from the host sentinel; state 2 may be observed while queued"
         ),
-        "boundary": (
-            "This proves the local application-context command-5/slot-4 generation path only. "
-            "It does not establish a shared cross-vehicle key, B6 sender timing, or vehicle actuation."
-        ),
     }
 
 

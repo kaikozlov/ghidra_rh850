@@ -910,11 +910,10 @@ def _registry_session_control(
         "per_category": per_category,
         "boundary": (
             "frames are resolved per category from the current master; SendProc itself gates a shared automatic-session "
-            "path by CDbEcuCategoryTable/class-0x110 byte +0x48 low5 in 0x14/0x15/0x16. This raw SendProc gate is "
-            "not a diagnostic-family classifier: SelectCarTypeVin10 dispatches low5 0x16 to Phase6 and the universal "
-            "P5 runtime instead follows GetSupportP5_DT bindings. The former local "
-            "wire_proven_categories subset is intentionally absent: it was an independent-tooling policy. "
-            "session_judgment_exception provides documentation only"
+            "path by CDbEcuCategoryTable/class-0x110 byte +0x48 low5 in 0x14/0x15/0x16. "
+            "SelectCarTypeVin10 dispatches low5 0x16 to Phase6 and the universal "
+            "P5 runtime follows GetSupportP5_DT bindings. "
+            "session_judgment_exception provides documentation"
         ),
     }
 

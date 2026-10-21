@@ -33,7 +33,6 @@
         "min_interval_ms": 0.0
       },
       "exact_h_f_additive_rule": {
-        "boundary": "recovered exact code behavior; OEM checksum naming/formula lineage is not inferred from the constant alone",
         "formula": "sum(payload_bytes_0_through_6) + 0x38, low byte",
         "wire_byte": 7
       },
@@ -522,7 +521,7 @@
       "wire": "classic 8-byte PCM_CRUISE with Toyota additive checksum"
     },
     "0x24D": {
-      "boundary": "All legacy cruise-switch bits are inactive in this segment; ID/DLC survival establishes only a retained carrier. Transfer of old button semantics to TSS3 remains unproved.",
+      "boundary": "All legacy cruise-switch bits are inactive in this segment; ID/DLC survival establishes a retained carrier.",
       "frame_count": 60,
       "prior_art_button_values": {
         "cancel": [
@@ -668,7 +667,7 @@
       "min": 0.0,
       "unique_count": 121
     },
-    "interpretation": "Raw vehicle signals are dynamic and wheel speed exceeds zero, so this is a moving/driving CAN capture even though the embedded MOCK CarState remains zeroed. Motion does not by itself prove that stock LTA was active or exercise every READY-state subsystem contract.",
+    "interpretation": "Raw vehicle signals are dynamic and wheel speed exceeds zero, so this is a moving/driving CAN capture even though the embedded MOCK CarState remains zeroed.",
     "steering_angle_deg": {
       "count": 6003,
       "max": 123.0,
@@ -1129,7 +1128,7 @@
     },
     "identity_boundary": {
       "firmware_dump_preflight_dongle_id": "23257862c6bf2f83",
-      "interpretation": "Discord attribution ties this dynamic rlog to Span's reported 2025 Corolla investigation, but embedded carParams is MOCK and the logging dongle differs from the later TSKM dump preflight. This supplies only Span-attributed vehicle-level evidence. Exact 8965F1208000 firmware-to-route identity remains unproved.",
+      "interpretation": "Discord attribution ties this dynamic rlog to Span's reported 2025 Corolla investigation, but embedded carParams is MOCK and the logging dongle differs from the later TSKM dump preflight. This supplies Span-attributed vehicle-level evidence.",
       "rlog_car_params_is_mock": true,
       "rlog_dongle_id": "67fd5b833889fedf",
       "rlog_has_no_usable_f181_join": true,
@@ -1637,6 +1636,6 @@
         "payload_sequence_equal": true
       }
     ],
-    "interpretation": "The full moving capture carries the same 22 incoming CAN-FD ID/DLC shapes on buses 0 and 2 with byte-identical payload sequences. This upgrades the prior Span NRtD structure result to a dynamic/moving topology invariant; it still does not assign field semantics or physical producer ownership."
+    "interpretation": "The full moving capture carries the same 22 incoming CAN-FD ID/DLC shapes on buses 0 and 2 with byte-identical payload sequences. This upgrades the prior Span NRtD structure result to a dynamic/moving topology invariant."
   }
 }

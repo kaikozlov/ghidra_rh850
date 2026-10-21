@@ -1,6 +1,6 @@
 {
   "direct_frc_bus1_duplicate_request_screen": {
-    "boundary": "Correlation provides a screening bound only; source-code dataflow requires separate proof. Closed-loop ego-state fields can correlate strongly at long lags.",
+    "boundary": "Correlation provides a screening bound. Closed-loop ego-state fields can correlate strongly at long lags.",
     "lag_convention": "positive lag means the direct FRC PDU field is compared to a later protected 0x08A request word",
     "method": "Every byte-aligned 8/16/24/32-bit BE/LE signed+unsigned field; nearest protected 0x08A B8:B9 request-word candidate at source time + lag; lags -300..+300 ms/25 ms; <=30 ms join; cruise latch B3[3] asserted; segment-local only.",
     "per_id": {
@@ -1153,7 +1153,7 @@
     ]
   },
   "gts_semantic_template": {
-    "boundary": "The diagnostic/recorder vocabulary establishes Toyota semantics and width/scale only; the 0x08A byte assignment and SecOC publisher identity remain unresolved.",
+    "boundary": "The diagnostic/recorder vocabulary establishes Toyota semantics and width/scale.",
     "brake_tss_receive": {
       "0x10A1": {
         "bit_width": 16,
@@ -1312,9 +1312,9 @@
         "type": "u"
       }
     ],
-    "static_join": "FRC_P5 contains the upper-limit requester/acceleration/allocation/permission source vocabulary; brake-domain ECUs expose upper/lower acceleration and requester IDs explicitly named 'from Toyota Safety Sense'; and the FRC-hosted PCS recorder contains both request halves plus arbitration-result longitudinal ID/acceleration. This closes the diagnostic source->brake-sink architecture, but not copy direction, wire encoding, SecOC ownership, or arbitration execution."
+    "static_join": "FRC_P5 contains the upper-limit requester/acceleration/allocation/permission source vocabulary; brake-domain ECUs expose upper/lower acceleration and requester IDs explicitly named 'from Toyota Safety Sense'; and the FRC-hosted PCS recorder contains both request halves plus arbitration-result longitudinal ID/acceleration. This closes the diagnostic source->brake-sink architecture."
   },
-  "implementation_boundary": "Do not restore Camry 0x160 longitudinal output and do not inject a competing 0x08A from this analysis alone. The semantic request plane is already 0x08A. On stock Toyota-B that protected PDU is on unsplit Bus 4, so production integration still needs a clean source-suppression/sole-emitter boundary or the physical FRC-to-signer publication handoff. The remaining problem is transport/ownership; a different upstream command remains unsupported. No runtime or Panda policy is authorized here.",
+  "implementation_boundary": "Do not restore Camry 0x160 longitudinal output and do not inject a competing 0x08A from this analysis alone. The semantic request plane is already 0x08A. On stock Toyota-B that protected PDU is on unsplit Bus 4, so production integration still needs a clean source-suppression/sole-emitter boundary or the physical FRC-to-signer publication handoff. The remaining problem is transport/ownership. No runtime or Panda policy is authorized here.",
   "other_candidates": {
     "0x0C9": {
       "b12_b13_vs_0x0ca": {
@@ -1385,7 +1385,7 @@
       }
     },
     "interpretation": "B8:B9 and B11:B12 are the strongest retained chassis-facing longitudinal request candidates: duplicated signed16 words with a natural 0.001 m/s^2 scale, upstream-to-chassis direction, pre-motion behavior, and an exact width/scale semantic match to Toyota TSS upper/lower request vocabulary. Upper-versus-lower byte identity and request-ID fields are not recovered.",
-    "prior_census_boundary": "Structural names (CRUISE_*, REQUEST_WORD_B8, LATERAL_REQUEST_LEVEL, COOPERATIVE_SUBSTATE_FLAG, RESERVED_16BIT_*) are census-bounded only; OEM joins remain unresolved. B21/B26 six-bit boundaries remain encoding assumptions. The percent unit on B24 is bounded from the observed 0/50/100 value set.",
+    "prior_census_boundary": "Structural names (CRUISE_*, REQUEST_WORD_B8, LATERAL_REQUEST_LEVEL, COOPERATIVE_SUBSTATE_FLAG, RESERVED_16BIT_*) describe the census. B21/B26 six-bit boundaries remain encoding assumptions. The percent unit on B24 is bounded from the observed 0/50/100 value set.",
     "prior_independence_checks": {
       "drive_a": {
         "driver_torque_030": -0.0342,
@@ -1845,7 +1845,7 @@
         ]
       }
     },
-    "interpretation": "B26 behaves as a coarse longitudinal companion at roughly 0.25 m/s^2/count, but its best alignment lags 0x08A by 50-75 ms. Treat it only as quantized request/result/status state; the upstream acceleration command remains missing. No OEM field name is assigned.",
+    "interpretation": "B26 behaves as a coarse longitudinal companion at roughly 0.25 m/s^2/count, but its best alignment lags 0x08A by 50-75 ms. Treat it as quantized request/result/status state.",
     "lag_convention": "corr(0x5AF.B26_s6(t), 0x08A_request(t+lag)); negative best lag means 0x5AF publishes after the request word"
   },
   "protected_bus4_companion_screen": {
@@ -2470,7 +2470,7 @@
     },
     "gts_surface": {
       "path": "data/generated/gtsplus_2026/tss3_control_ownership_surface.json",
-      "sha256": "c03cb4fdaaaa2a1db02f261e103b434c660193a9a7c3fdb19fc59bed2e3ae65f"
+      "sha256": "64e4010d81ce72a107790438b2a39e9b7e1a97b2de07ecd2741dba2bcd523b77"
     },
     "role_fixture": {
       "path": "tests/fixtures/camry_2026_longitudinal_role.jsonl.gz",
@@ -2479,15 +2479,15 @@
     },
     "role_report": {
       "path": "data/generated/camry_2026_longitudinal_role.json",
-      "sha256": "8e5c8cdfc8a7e85a19c2f6ac831f7ffe1b2980af415cf07f4ce13d3aeb1560ea"
+      "sha256": "4395a2158ae56fb8bf9a43b8861878975d89fd0db446b8eb6ab5d84b73ca0db0"
     },
     "stock_topology": {
       "path": "data/generated/camry_2026_stock_harness_topology.json",
-      "sha256": "05f07875bbc003847ec20add9fa002dd8056cb8598ad04fd457f8b3b983eace7"
+      "sha256": "932e0e060b3da4660d6e9bc686d1d7d4daf2627e93fee7bdff14a3480661217c"
     },
     "upstream_request_census": {
       "path": "data/generated/camry_2026_upstream_request_field_census.json",
-      "sha256": "299d41f1178738c9f373feaad6ff7c6235922b17933058aa494cc6d796dcad7a"
+      "sha256": "e65ec22ad6c3eeec3f34704ae20186d5da9f73fd49203269422c31cd79d1a208"
     }
   },
   "topology_normalization": {

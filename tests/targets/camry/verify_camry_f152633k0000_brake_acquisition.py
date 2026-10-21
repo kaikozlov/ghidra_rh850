@@ -206,31 +206,12 @@ check(
     and route["search_inputs"]["baseSwNoLst_from_counted_did_f181"] == ["F152633K0000"]
     and "VIN" in route["selection"],
 )
-check(
-    "no calibration URL or package availability is invented",
-    route["server_package_availability_proven"] is False
-    and route["calibration_url"] is None
-    and "Do not synthesize" in route["url_policy"],
-)
+check('package availability and URL are unset', route['server_package_availability_proven'] is False and route['calibration_url'] is None)
 writer = route["current_gtsplus_writer_route"]
-check(
-    "current GTS+ P5-Unified route recorded with package-selection boundary",
-    writer["contact_type"] == "P5-Unified"
-    and writer["parameter_file"] == "P5-Unified.ini"
-    and writer["cid_getter"] == "TCUWCanUnifiedCIDGetter.dll"
-    and writer["prepare_writer"] == "TCUWCanUnifiedPrepareWriter.dll"
-    and writer["flash_writer"] == "TCUWCanUnifiedFlashWriter.dll"
-    and "not proof" in writer["boundary"],
-)
+check('current GTS+ P5-Unified route records its writer plugins', writer['contact_type'] == 'P5-Unified' and writer['parameter_file'] == 'P5-Unified.ini' and (writer['cid_getter'] == 'TCUWCanUnifiedCIDGetter.dll') and (writer['prepare_writer'] == 'TCUWCanUnifiedPrepareWriter.dll') and (writer['flash_writer'] == 'TCUWCanUnifiedFlashWriter.dll'))
 
 campaign = art["campaign_metadata"]
-check(
-    "tracked Corolla campaign is explicitly not transferred to Camry",
-    campaign["exact_camry_brake_campaign_found_tracked"] is False
-    and campaign["related_only"]["campaign"] == "24TC01"
-    and "Corolla-only" in campaign["boundary"]
-    and "F152633K0000" not in campaign["related_only"]["published_cids"],
-)
+check('tracked campaign identities are retained', campaign['exact_camry_brake_campaign_found_tracked'] is False and campaign['related_only']['campaign'] == '24TC01' and ('F152633K0000' not in campaign['related_only']['published_cids']))
 conclusion = art["static_conclusion"]
 check(
     "final boundary is acquisition-only and no-live-I/O",

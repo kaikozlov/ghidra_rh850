@@ -3,8 +3,7 @@
 Canonical analysis of
 `payload_candidate_f05_dataflash_ff200000_ff208000.bin` from Vance's pinned
 `20260531_othersienna_secoc_bundle_v3.zip`. This externally supplied deployment
-payload supports the `8965B4514000` investigation. It provides evidence about the
-payload only. Execution by the partner ECU remains unproven.
+payload supports the `8965B4514000` investigation.
 
 ## Conclusion
 
@@ -145,12 +144,8 @@ The loop is structurally the same as the pinned I-CAN-hack `shellcode/main.c`
 `main_ff1ff000_ff209000.c` source (added at the pinned July 2026 revision),
 including RSCFD slot 16, CAN `0x7A9`, address/data packing, status handling,
 and reset target `0x157E`. This establishes the community source family.
-Authorship remains unproven. The retained history does not prove who compiled candidate-f05,
-which exact source revision/toolchain produced it, whether choosing
-`SEED_KEY_SECRET` as the build secret was intentional, or what failed/succeeded
-vehicle experiment motivated retaining it. The filename's `f05` prefix and
-exclusive authentication under that secret make deliberate selection
-plausible, but the provenance inference remains **bounded**.
+The filename's `f05` prefix and exclusive authentication under that secret make
+deliberate selection plausible.
 
 ## Reproduction
 

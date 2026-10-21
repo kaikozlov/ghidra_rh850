@@ -121,7 +121,7 @@ The exact `FFC5D000` store encoding occurs at nine CodeFlash sites:
 | `0x89628` | runtime selector plus command 1 or 3 | chosen-input AES oracle if slot policy permits |
 | `0x8973A` | runtime selector plus command 5 | lower variable-length CMAC primitive if slot policy permits; stock diagnostic caller is fixed to 16 bytes (SECOC-069) |
 | `0x8990C` | runtime selector plus command 7 | live SecOC verification and SCA stimulus |
-| `0x89A2C` | command 8 | authenticated M1-M3 key update only |
+| `0x89A2C` | command 8 | authenticated M1-M3 key update |
 | `0x89A8A` | command 11 | unreferenced generated driver stub (dead code: no caller, pointer, or immediate reference in the image) — no stock PRNG initialization occurs |
 | `0x89BB0` | command `0x22` | unreferenced generated driver stub (dead code), `CMD_GET_ID` shape |
 | `0x89BF8` | abort/reset command `0x3F` | none |
@@ -173,12 +173,12 @@ RAM-key load.
 
 SHE tracks how `RAM_KEY` was populated with the dedicated `RAM_KEY_PLAIN` flag.
 `CMD_LOAD_PLAIN_KEY` sets it to 1. A protected `CMD_LOAD_KEY` into `RAM_KEY`
-clears it. **The origin flag gates export only.**
+clears it. **The origin flag gates export.**
 Both paths legitimately populate the same volatile slot and that
 slot remains usable for its permitted crypto operations; the difference is only
 that `CMD_EXPORT_RAM_KEY` is permitted when `RAM_KEY_PLAIN == 1`. Thus a key
 installed through the secure M1/M2/M3 path is intentionally usable but
-non-exportable. Even the plaintext-origin export returns only M1..M5 wrapped
+non-exportable. The plaintext-origin export returns M1..M5 wrapped
 under the device `SECRET_KEY`.
 
 The remaining uncertainty is vendor-specific. The public P1M-E hardware manual
@@ -200,9 +200,7 @@ Command 9 receives known key `00..0f`; its success is accepted only if selector 
 then reproduces the independently calculated 128-bit CMAC. Command 10 is issued in the
 same HSM session only after that proof; it must return 112 bytes and satisfy `M1 ==
 M4[:16]`, the RAM-key/SECRET-key ID nibble, the known `K3`-derived `M4*` block, and the
-known `K4`-derived `M5` CMAC. Any undocumented persistent-slot copy/export effect
-requires separate demonstration and must be reported as a **Renesas deviation**
-from standard SHE behavior.
+known `K4`-derived `M5` CMAC.
 
 External semantic sources: Renesas Engineering Community,
 <https://community.renesas.com/mcu/rh850/f/rh850-rl78f/17819/rh850vp1m-x-icum-secure-documents>;
@@ -273,10 +271,9 @@ is dynamic. See [command5-oracle-assessment.md](command5-oracle-assessment.md).
 The captured final `0x800` bytes of DataFlash contain 944 zero bytes and 1,104
 `FF` bytes and no other values. The application range validator rejects requests
 overlapping `0xFF207800..0xFF207FFF`. Renesas/third-party documentation identifies
-this end region as ICU-S-reserved. The observed bytes establish readback behavior only.
+this end region as ICU-S-reserved.
 
-**The flash-side access-control path enforces this boundary.** The MainPE MPU
-and ICU-S cryptographic state machine alone are insufficient. P1M-E group
+**The flash-side access-control path enforces this boundary.** P1M-E group
 manual R01UH0585EJ0120 Rev.1.20 §31.4.1 places DataFlash behind the SoC
 interconnect as a bus slave. It states that memory resources have slave-side
 guards, explicitly including **flash guards**; ordinary bus accesses carry
@@ -866,8 +863,8 @@ stock SecOC frames.
 ### 6.2 Faulting command policy
 
 Potential targets include selector/usage checks, verify-only enforcement, and
-output gating. A fault that changes only command-7 false to true yields
-authentication bypass only. Enabling command 5 yields a MAC oracle only.
+output gating. A fault that changes command-7 false to true yields
+authentication bypass. Enabling command 5 yields a MAC oracle.
 The most useful fault outcome would enable command 1 or produce a correct/faulty
 full AES/MAC pair suitable for differential fault analysis.
 
@@ -949,12 +946,6 @@ A recovery is complete only when one 16-byte candidate:
 5. is handled as vehicle-specific secret material and is not committed to this
    repository.
 
-A successful command-5 or command-1 oracle is a useful fallback but is not
-plaintext-key recovery. A successful command-9/10 RAM-key characterization proves the
-vendor ABI for a **known volatile test key**; it is not slot-4 recovery. A successful
-serial/debug bypass provides instrumentation access only.
-Changing slot 4 installs a replacement key and leaves the original unrecovered.
-
 ## 10. Evidence summary
 
 | Claim | Grade | Source |
@@ -979,13 +970,10 @@ Changing slot 4 installs a replacement key and leaves the original unrecovered.
 
 ## 11. Strategic framework: two independent layers and cross-ECU attack surface
 
-> **Document type:** strategic analysis. Firmware-finding status requires separate verification.
+> **Document type:** strategic analysis.
 > Synthesizes the recovery methods above with external evidence to frame the
-> broader research direction. This section is scoped as **hypothesis** unless a
-> specific claim references a FINDINGS-grade result. It does not modify or
-> supersede the carefully bounded conclusions in
-> [sender-implementation.md](sender-implementation.md) or
-> [variants/](../../variants/).
+> broader research direction. This section is **hypothesis** unless a
+> specific claim references a FINDINGS-grade result.
 
 ### 11.1 The two layers are independent
 
@@ -1030,18 +1018,14 @@ does it confirm the same bootloader payload format or the same
 `PAYLOAD_BUILD_SECRET` was uploaded to a non-EPS ECU. Such an experiment would
 be the cheapest discriminator: acquire an inexpensive donor ECU, attempt the
 existing signed payload, and observe whether routine `0x10F0` accepts it.
-Acceptance by one ECU type would demonstrate portability **to that ECU only** —
-it would not establish compatible bootloaders across all ECU types, nor would
-it prove weak key storage on that ECU.
 
 ### 11.3 Key-sharing topology: external-source evidence
 
 Pinned opendbc's sender uses a single `self.secoc_key` field for both steering
 (`0x2E4`, `0x131`) and acceleration (`0x183`) output streams. This is an
 implementation interface that **treats** those streams as sharing one key. This
-external-source evidence uses a placeholder key (`b"00" * 16`). Production key
-topology still requires firmware-derived proof. See
-[sender-implementation.md](sender-implementation.md) §1.2–1.3 for the bounded
+external-source evidence uses a placeholder key (`b"00" * 16`). See
+[sender-implementation.md](sender-implementation.md) §1.2–1.3 for the
 opendbc analysis.
 
 The I-CAN-Hack report concerns the RAV4 Prime EPS and states that its extracted

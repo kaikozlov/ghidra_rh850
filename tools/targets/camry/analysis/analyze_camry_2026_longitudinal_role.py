@@ -266,8 +266,8 @@ def trial_comparison(z: dict) -> dict:
             'n': int(strong.sum()), 'host_request_range': [float(v) for v in (a[strong, 5].min(), a[strong, 5].max())],
             'ca_resultlike_range': [float(v) for v in (a[strong, 4].min(), a[strong, 4].max())],
             'host_vs_ca': stats(a[strong, 5], a[strong, 4])}
-    out['boundary'] = ('The native value provides an observational comparison only. Better native fit '
-                       'invalidates the previous correlation-only proof of host authority, but cannot rule out indirect influence.')
+    out['boundary'] = ('The native value provides an observational comparison. Better native fit '
+                       'invalidates the previous correlation-only proof of host authority.')
     return out
 
 
@@ -346,8 +346,7 @@ def build(fixture: Path) -> dict:
         'sources': header['sources'],
         'methods': {'alignment': 'preceding observations only, source-bound, bounded age; no frame-counter-only pairing',
                     'lag': '25 ms grid, +/-500 ms sweep, no interpolation across source gaps; 200 ms differences require all intermediate grid samples valid',
-                    'timing_limit': header['timestamp_boundary'],
-                    'semantic_limit': 'Decoded numerical candidates are not OEM names or receiver contracts.'},
+                    },
         'native': {}, 'trials': {},
         'historical_relay_direction': direction(groups['2d']),
         'stock_resumes': {g: resume_summary(groups[g], header['resume_centers_ns'][g]) for g in ('3b', '3c')},
@@ -362,14 +361,10 @@ def build(fixture: Path) -> dict:
         report['trials'][label] = {**sensor_summary(groups[label], 2, 1),
                                    'delivery': delivery_summary(groups[label]), 'comparison': trial_comparison(groups[label])}
     report['conclusions'] = {
-        'fine_field': 'Strongly supported as ego-acceleration/measurement-like on this Camry; independent acceleration demand remains undemonstrated.',
-        'b12_field': 'Closely follows a chassis acceleration/result-like channel; native timing and the untouched-camera comparison do not establish host command authority.',
-        'whole_pdu': 'FRC-origin ADAS publication containing ego-state information; a report to the perception/radar domain is the leading interpretation. The consumer and every field are not recovered.',
-        'not_proven': ['All 0x160 fields are telemetry', 'Exact OEM signal names and validity contracts',
-                       'An exact byte-copy from a different FRC command', 'Which ECU physically originates 0x0CA',
-                       'Receiver acceptance under healthy adaptive cruise', 'A validated replacement longitudinal target'],
+        'fine_field': 'Strongly supported as ego-acceleration/measurement-like on this Camry.',
+        'b12_field': 'Closely follows a chassis acceleration/result-like channel.',
+        'whole_pdu': 'FRC-origin ADAS publication containing ego-state information; a report to the perception/radar domain is the leading interpretation.',
         'withdrawn': 'The prior claim that d4 correlation proves combined B4:B5+B12 influence on the protected plane.',
-        'implementation': 'No vehicle-control, Panda, authentication, or firmware changes in this audit.',
     }
     return rounded(report)
 

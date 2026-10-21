@@ -4,7 +4,7 @@
 GTS+ is keyed by diagnostic DID/FFD. This joins the sniffed panda-bus-1
 0x180 family to recovered FRC Data List / Operation-FFD scales, and tests
 whether FRC's TSS request object (5282 ID||pinion||assist) is on that native
-bus. It does not invent a 64-byte OEM field map where the corpus has none.
+bus.
 """
 from __future__ import annotations
 
@@ -35,7 +35,7 @@ SLOT_LEN = 7
 HEADER_LEN = 4
 TRAILER_LEN = 4
 FAMILY = range(0x180, 0x18D)
-DIST_LSB_M = 0.005  # independent vision/range anchor; FFD uses a separate encoding
+DIST_LSB_M = 0.005  # independent vision/range anchor
 LAT_LSB_M = 0.04  # independent calibrated-gyro and vision anchors, left-positive
 REL_SPEED_LSB_M_S = 0.025  # independent vision/ego-speed anchors; low14 word
 DIST_MAX_M = 500.0
@@ -520,12 +520,10 @@ def main() -> int:
                 "Eight 7-byte slots after the 4-byte header. Empty slot is exactly "
                 "fff8000000ffff (0xFFF8/0xFFFF invalid-style sentinels). Occupied slot "
                 "bytes 0-1 unsigned big-endian * 0.005 m is the independently "
-                "vision-anchored longitudinal range; FRC DID/FFD distance encodings "
-                "supply diagnostic vocabulary only. The wire scale requires independent evidence."
+                "vision-anchored longitudinal range."
             ),
             "not_08A": (
-                "The 28-byte 0x08A application blob is absent. This family carries perception "
-                "output; the truncated TSS request 5282 is absent."
+                "The 28-byte 0x08A application blob is absent. This family carries perception output."
             ),
             "middle_hop": (
                 "FRC builds FFD 5282/5631 in camera RAM (ID + milliradian pinion + "
@@ -535,7 +533,7 @@ def main() -> int:
                 "layout ID||pinion||assist is absent from sniffed Bus-1 CAN. A Bus-4 "
                 "origin truncates damping, packs ID/pinion/assist as 0x08A B21/B18/B24, "
                 "and SecOC-wraps it. Measured angle on the camera bus is inbound plant "
-                "echo only. Requested pinion is not an F33 COM input."
+                "echo."
             ),
             "not_tss2_8byte_radar_dbc": (
                 "Old comma 8-byte 0x180..0x19F radar-track geometry does not transfer."

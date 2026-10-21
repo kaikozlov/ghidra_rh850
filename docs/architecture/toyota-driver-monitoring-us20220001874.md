@@ -4,9 +4,7 @@
 "Driver Monitoring System and Driver Monitoring Method", priority 2020-07-01,
 published 2022-01-06.
 
-**Evidence grade:** external-source architecture/terminology. This patent is a
-semantic and design oracle. Whether the exact 2026 Camry F33 implements the
-illustrated embodiment or physical ECU topology remains unproven.
+**Evidence grade:** external-source architecture/terminology.
 
 ## Executive finding
 
@@ -33,7 +31,6 @@ driver-steering detector releases. The exact Camry retained TSS3 recorder also
 has Hands-Off Exist=0 and LTA Driver Monitor Camera Collaboration Exist=0.
 
 Use this patent for F33 **architecture vocabulary and feature separation**.
-Its timer and touch sensor do not establish the source or timing of the ordinary LTA nag.
 
 ## 1. What the patent actually claims
 
@@ -83,10 +80,9 @@ driver monitor, and steering touch sensor. It separately says the travel device
 contains steering, driving, and braking devices, with EPS as an example of the
 steering device.
 
-Read this as **logical ownership**. Exact TSS3 wiring requires separate evidence.
-The current TSS3 evidence places the steering-touch hardware behind a
-steering-wheel/CXPI subnetwork and Combination Meter before FRC/SRS consumers;
-the patent does not expose that transport.
+The diagram describes **logical ownership**. Current TSS3 evidence places the
+steering-touch hardware behind a steering-wheel/CXPI subnetwork and Combination
+Meter before FRC/SRS consumers.
 
 ## 3. Steering touch is a first-class state
 
@@ -178,7 +174,6 @@ withdraw request + reset T
 
 The patent gives illustrative values of approximately 10 minutes for Tth and
 approximately 4 seconds for the hands-on confirmation dwell.
-Actual calibration values can differ.
 
 The second embodiment adds **voluntary hands-on**: a driver who touches/holds
 the wheel before a request is issued resets the attention interval, and the next

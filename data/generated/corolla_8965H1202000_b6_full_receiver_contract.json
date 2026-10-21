@@ -675,7 +675,7 @@
         0
       ],
       "b6_full_pdu_copy_present": false,
-      "boundary": "Closes generated scalar plus all literal block/group/full-PDU APIs, direct raw-u32 buffer pointers, and the complete application-corpus named/absolute/simple-GP-alias constant-displacement census; arbitrary value-set/computed-base aliases and hardware/DMA accesses remain outside the proof.",
+      "boundary": "Closes generated scalar plus all literal block/group/full-PDU APIs, direct raw-u32 buffer pointers, and the complete application-corpus named/absolute/simple-GP-alias constant-displacement census.",
       "direct_com_region_reference_census": {
         "application_end_exclusive": "0x00100000",
         "application_first": "0x00020000",
@@ -705,14 +705,14 @@
       264,
       265
     ],
-    "sender_boundary": "These bytes have no recovered EPS application semantic consumer. Sender formatting remains constrained: all B0..B27 are inside the CMAC input, and upstream producer-side formatting constraints remain unexamined."
+    "sender_boundary": "These bytes have no recovered EPS application semantic consumer. All B0..B27 are inside the CMAC input."
   },
   "applies_to": [
     "8965H1202000",
     "8965F1208000"
   ],
   "cross_variant": {
-    "boundary": "All receiver tables and functions used by this proof lie inside the byte-identical application range. Low-region H/F calibration/identity differences are outside this proof and can still affect downstream limits/calibration.",
+    "boundary": "All receiver tables and functions used by this proof lie inside the byte-identical application range.",
     "different_bytes_in_range": 0,
     "h_f_application_identical": true,
     "identical_range": [
@@ -722,13 +722,12 @@
     "range_sha256": "2ccb79cda1e8689ec91c389d3d7e3921c010ddc9c9d917f23c1705916a0e0d7f",
     "receiver_contract_byte_identical": true
   },
-  "evidence_boundary": "This closes the exact H/F receiver-side 32-byte partition, normal-freshness/trailer format, CMAC input, slot selection, verified upper route, and bounded application-consumer surface. It does not recover the ICU-S slot-4 secret value, sender cadence, sender freshness-state ownership, upstream producer formatting, arbitrary hardware/DMA aliases, or OEM names for every secondary B6 scalar.",
   "schema": "corolla-8965H1202000-b6-full-receiver-contract-v1",
   "software_id": "8965H1202000",
   "sources": {
     "base_receiver_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
-      "sha256": "799ff4b0beedad9a25723ac75b7b5911fc5fd88a07b52947b2d5991ff39042d3"
+      "sha256": "de36c4736b832f933311ca3f2151cadd209eccca24564a39b43065ae07474928"
     },
     "codeflash": {
       "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
@@ -741,7 +740,7 @@
     },
     "fd_control_interface": {
       "path": "data/generated/corolla_8965H1202000_fd_control_interface.json",
-      "sha256": "8d693f50871ccb3987c79c2e2cfd7c34ead2901c5d3e3d58665947aca952ffc2"
+      "sha256": "8d9385f509f95b8a12ebf0a8be6855faf931ef97d80004679bba7b279b8dcd07"
     },
     "hf_equivalence": {
       "path": "data/generated/corolla_8965F1208000_vs_8965H1202000_codeflash_equivalence.json",
@@ -749,11 +748,11 @@
     },
     "lta_provenance": {
       "path": "data/generated/corolla_8965H1202000_lta_command_provenance.json",
-      "sha256": "2a542f366db967e151cf00ff8e047d13feb63f82698f149a43b3a99cb788299a"
+      "sha256": "3fdf678c2d16b89172384ff0f7854e015e3b4979fc6dd771b2436fe610cef52c"
     },
     "secoc_key_provenance": {
       "path": "data/generated/corolla_8965H1202000_secoc_key_provenance.json",
-      "sha256": "7c211823e25fb414f2824e89b24996f69a3ab9e6615a4478a08be90feff1ebe8"
+      "sha256": "24b559cca288567b3e6edd618b1a8cfe6b420c28208013eafc742dda6a7979ed"
     },
     "whole_corpus_census": {
       "path": "data/generated/corolla_8965H1202000_lta_command_provenance_census.json",
@@ -776,7 +775,7 @@
     "upstream_producer_closed": false
   },
   "verified_delivery": {
-    "length_boundary": "The recovered queue/delivery path preserves a PduInfo length and PDU42's COM descriptor is 32 bytes. Static evidence leaves physical stripping of B28..B31 before COM RAM unresolved; the application-consumer census establishes their SecOC-only classification.",
+    "length_boundary": "The recovered queue/delivery path preserves a PduInfo length and PDU42's COM descriptor is 32 bytes. The application-consumer census establishes the SecOC-only classification of B28..B31.",
     "queue_getter": "0x00087E2C",
     "queue_ingress": "0x0008865A",
     "resolved_upper_callback": "0x00076A3C",

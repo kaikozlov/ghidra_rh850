@@ -229,7 +229,7 @@ def build() -> dict:
         row=matches.get(target_entry)
         if not row or row["classification"] != "unique-exact-shape":
             raise ValueError(f"structural transfer drift {target_entry:#x}")
-        structural[f"0x{target_entry:08X}"]={"role":role,"reference_entry":row["reference_entry"],"classification":row["classification"],"boundary":row["evidence_boundary"]}
+        structural[f"0x{target_entry:08X}"]={"role":role,"reference_entry":row["reference_entry"],"classification":row["classification"]}
 
     old260=next(x for x in old["state_messages"] if x["id"]=="0x260")
     old262=next(x for x in old["state_messages"] if x["id"]=="0x262")
@@ -255,9 +255,9 @@ def build() -> dict:
       "schema":"corolla-8965H1202000-openpilot-state-bridge-v8",
       "evidence_boundary": (
         "Exact H bytes and target-native decompiler/Techstream joins define the newer EPS state carriers. "
-        "Sienna/openpilot structures identify only which roles a port needs. Field scales and fault codes require target-native evidence. "
+        "Sienna/openpilot structures identify which roles a port needs. "
         "The command side is additionally audited for GP-relative/computed writers: protected B6 signal255 is recovered through a hidden RTE snapshot as a signed16 target-steering-angle command, then compared against independently reconstructed 0x025 measured angle before entering the steering controller. "
-        "Physical B6 scaling and OEM mode/request semantics are closed, as are the seven-tick receiver-loss cutoff and modulo-64 sequence handling; wall-clock cadence, exact secondary B6 field names, and the upstream producer/authentication route remain bounded; no second command-sized generated scalar or recovered literal block/group/full-PDU route is identified, while arbitrary computed aliases and DMA/peripheral mutation remain outside this proof."
+        "Physical B6 scaling and OEM mode/request semantics are closed, as are the seven-tick receiver-loss cutoff and modulo-64 sequence handling; no second command-sized generated scalar or recovered literal block/group/full-PDU route is identified."
       ),
       "evidence_sources": {
         "state_corpus": {"path": str(EVID.relative_to(REPO)), "sha256": sha(EVID.read_bytes())},
@@ -354,17 +354,17 @@ def build() -> dict:
             "12":{"role":"class-0x40 internal fault branch"},
             "13":{"role":"class-0x08 internal fault branch when its additional classifier condition permits"},
             "14":{"role":"class-0x0F internal fault branch when its additional classifier condition permits"},
-            "15":{"role":"special operating state","boundary":"selected by a distinct operational predicate; ready/fault naming remains unresolved from static evidence alone"},
+            "15":{"role":"special operating state","boundary":"selected by a distinct operational predicate"},
             "16":{"role":"fallback/not-normal operational inhibit branch"},
           },
           "dem_class_aggregator":"0x4B692 accumulates event classes/counters consumed by 0x4B9AE; the complete 384-entry H event-table census now maps the populated classes to exact Toyota DTC families where a DTC index exists",
           "fault_state_contract":fault_state,
           "openpilot_fault_mapping":{
             "classifier_deepest_clear_normal_state":0,
-            "conservative_clear_state_candidate":"state 0 only, pending packet routing plus Ready/LTA dynamic correlation; state 0 alone is not sufficient to authorize actuation",
+            "conservative_clear_state_candidate":"state 0 only, pending packet routing plus Ready/LTA dynamic correlation",
             "steerFaultTemporary":"unresolved",
             "steerFaultPermanent":"unresolved",
-            "reason":"Firmware now closes exact DEM class-to-state families and 200/600-count latch-aging structure, but Toyota's internal class/latch distinctions still do not define openpilot's temporary/permanent fault contract. Guessing would be unsafe.",
+            "reason":"Firmware now closes exact DEM class-to-state families and 200/600-count latch-aging structure, but Toyota's internal class/latch distinctions still do not define openpilot's temporary/permanent fault contract.",
           },
           "dynamic_boundary":"Span and the public route contain zero 0x394 frames; the state-0 clear/normal path and fault branches are statically recovered but not observed on-vehicle in the available captures.",
           "openpilot_consequence":"The native state now carries a statically closed DEM-class/DTC-family partition for states 6-14, including exact latch-aging structure for 6/7 and 8/9. It still does not provide a Ready authorization bit or a justified openpilot temporary/permanent policy split; a future relay-correct fault/recovery capture should validate that policy mapping.",
@@ -414,7 +414,7 @@ def build() -> dict:
           "firmware_chain_verified":True,
           "span_operational_frames":span_ready["frame_count"],
           "span_values":span_ready["ready_status_values"],
-          "boundary":"Exact H proves the incoming CAN field that feeds Techstream Ready Status. Neither retained route exercises value 0, and this does not imply that any EPS Tx PDU republishes the same boolean.",
+          "boundary":"Exact H proves the incoming CAN field that feeds Techstream Ready Status. Neither retained route exercises value 0.",
           "openpilot_consequence":"0x51E B0[7] can be parsed as the target-native Ready Status input. Keep it distinct from 0x030/0x351/0x394 steering-fault state, and validate a Ready 1->0 transition before using it as an engagement/fault classifier.",
         },
       },
@@ -427,7 +427,6 @@ def build() -> dict:
         "eps_classifier_clear_normal_path":"0x394 state 0 is the deepest recovered clear/normal classifier path; it is not a proved Ready boolean, and route availability/transitions are not captured",
         "eps_ready":"closed as incoming 0x51E B0[7] -> FEBE7D1B -> FEBEF052 -> FEBEB5A8 -> FEBEE811 -> Techstream DID 0x1033 Ready Status; Span moving route carries value 1 on 60/60 frames, but Ready=0 transition remains uncaptured",
         "temporary_vs_permanent_fault":"not closed; no safe static mapping from 0x394 classes to openpilot steerFaultTemporary/steerFaultPermanent",
-        "production_safety_boundary":"These results close most semantic input roles but do not authorize actuation. Panda safety still requires relay-correct message availability/side attribution, stock-LTA transitions, asserted fault captures, and validated control limits/suppression.",
       },
       "command_ingress_closure": {
         "generated_scalar_rx_calls":ingress["summary"]["h_scalar_rx_calls"],

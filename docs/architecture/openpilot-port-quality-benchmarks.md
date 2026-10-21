@@ -68,7 +68,7 @@ Current opendbc defines the following support states:
 | **Under review** | Merged but not yet release-supported pending safety/quality validation |
 | **Custom** | Upstream software exists, but install/configuration is non-standard; not ordinary release support |
 | **Dashcam mode** | Recognition/software may exist, but openpilot does not engage on release |
-| **Community** | Supported in a community fork only; upstream validation and maintenance are outside this status |
+| **Community** | Supported in a community fork |
 | **Not compatible** | Known fundamental blocker such as unsupported network/security architecture |
 
 At the snapshot there are 335 Upstream, 31 Dashcam, 17 Community, 16 Not
@@ -275,8 +275,6 @@ all of these layers together:
     no speculative permission state machine layered over `controlsd`.
 12. **Validation:** routes, replay coverage, safety tests, tuning data, and enough
     real driving to support comma's final safety/quality validation.
-
-Command delivery satisfies only the beginning of this quality model.
 
 ## 6. What this means for Toyota TSS3
 

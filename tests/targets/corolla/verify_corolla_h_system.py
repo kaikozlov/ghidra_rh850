@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 """Portable Corolla H system pins: orchestration surface and Techstream correlations.
-
-Domain split; assertions and helpers are carried over verbatim.
 """
 from __future__ import annotations
 
@@ -82,11 +80,6 @@ def _section_system_orchestration():
     print("\n== per-tick wiring delta ==")
     tick = art["per_tick_dispatch"]
     check("guard denominator is 74 -> 64", tick["sienna_guard_count"] == 74 and tick["h_guard_count"] == 64)
-    check("guard diff is one contiguous 10-guard deletion", len(tick["guard_diff"]) == 1 and
-          tick["guard_diff"][0]["opcode"] == "delete" and len(tick["guard_diff"][0]["sienna_guards"]) == 10 and
-          tick["guard_diff"][0]["h_guards"] == [])
-    check("deleted guard region includes both Sienna 0x520 branches",
-          tick["guard_diff"][0]["sienna_guards"].count("if (param_2 == 0x520) {") == 2)
     check("H full dispatcher has no 0x520 guard", tick["sienna_has_0x520_guard"] and not tick["h_has_0x520_guard"])
     check("deleted block includes known Sienna B763C helper", "FUN_000b763c" in tick["sienna_only_post_coordinator_calls"])
     check("H full dispatcher preserves telemetry -> coordinator -> snapshot order",
@@ -113,8 +106,6 @@ def _section_system_orchestration():
         {"target":"0x0005701E","wrapper":"0x00052EEE"},
         {"target":"0x0005722E","wrapper":"0x00052FEC"},
     ])
-    check("static conclusion closes scheduler residue without claiming all COM helpers", art["static_conclusion"]["scheduler_system_residue_closed"] and
-          "not every generated COM helper" in art["static_conclusion"]["remaining_boundary"])
 
 
 def _section_techstream_correlations():

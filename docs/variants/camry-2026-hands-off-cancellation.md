@@ -135,8 +135,5 @@ that withdrawal. The two plausible control boundaries are therefore:
 2. take ownership of the protected `0x08A` request plane and preserve the desired
    longitudinal request when the FRC would withdraw it.
 
-The second option is not a simple HUD-message replacement: `0x08A` is authenticated
-and jointly carries lateral and longitudinal requests. Its source/authentication
-ownership must be handled correctly. The route-45 evidence only establishes where
-the cancellation appears on the wire. The best production solution remains
-unresolved.
+`0x08A` is authenticated and jointly carries lateral and longitudinal requests.
+Its source/authentication ownership must be handled correctly.

@@ -561,15 +561,14 @@ def build() -> dict:
       "descriptor_count": ingress["normal_rx"]["descriptor_count"],
       "accepted_can_ids": accepted,
       "state_carriers_absent": {can_id: can_id not in accepted for can_id in ("0x08A", "0x371", "0x412")},
-      "interpretation": "0x08A carries a lateral-request representation and 0x371/0x412 carry state/display evidence; none is exact-F33 normal-CAN ingress. This does not imply that stock LTA must be transformed into B6 before F33 can steer.",
+      "interpretation": "0x08A carries a lateral-request representation and 0x371/0x412 carry state/display evidence; none is exact-F33 normal-CAN ingress.",
     },
     "interpretation": {
-      "identification": "Bus-0 0x08A B21 is Target Lateral ID and B18:B19 is the request target-steering-angle quantity. In manual ID0, B18:B19 tracks measured 0x025 angle in both drives at the exact F33 B6 controller-equivalent scale; under ID11 LTA/LCA its correlation shifts forward toward future measured angle. This establishes a shape change only; an exact causal lead remains unproved.",
-      "route_boundary": "Every retained 0x08A frame is on the captured Toyota Bus-4 Brake/EPS segment (Panda bus 0 and its relay mirror bus 2; zero on Panda bus 1). Exact F33 does not receive 0x08A. The physical transmitter and SecOC computation owner are unknown, so the frame must not be labeled a native Bus-1 camera message. Protected B6 is a separate exact-F33 external cooperative-control ingress. The zero-B6 ID11 intervals prove request state only; a granted autonomous lane-centering mode and a 0x08A-to-B6 transformation remain unestablished.",
+      "identification": "Bus-0 0x08A B21 is Target Lateral ID and B18:B19 is the request target-steering-angle quantity. In manual ID0, B18:B19 tracks measured 0x025 angle in both drives at the exact F33 B6 controller-equivalent scale; under ID11 LTA/LCA its correlation shifts forward toward future measured angle.",
+      "route_boundary": "Every retained 0x08A frame is on the captured Toyota Bus-4 Brake/EPS segment (Panda bus 0 and its relay mirror bus 2; zero on Panda bus 1). Exact F33 does not receive 0x08A. Protected B6 is a separate exact-F33 external cooperative-control ingress. The zero-B6 ID11 intervals prove request state.",
       "proof_boundary": "The field identity is a recovered cross-domain join: current GTS+ EMPS_P5 supplies Target Lateral ID and Target Steering Angle After Output Compensation vocabulary, the captures supply state-dependent correlation shape and scale, and exact F33 supplies a numerically matching B6 controller-equivalent scale without proving a conversion path. B21/B26 upper bits are never observed nonzero, while the GTS+ Target Lateral ID diagnostic field is 8-bit, so the DBC's 6-bit field boundaries remain encoding assumptions. B28..B31 structurally match Toyota P5 ordinary FV4+MAC28 framing: candidate reset_low2 tracks preceding authenticated 0x00F at ~96% in both drives, comparable to known protected 0x0D7/0x090 under the same log-order method; candidate message_low2 advances +1 on every same-reset, same-segment B26+1 pair. This strongly supports a secured 0x08A PDU but does not recover its physical transmitter, private transport, signer profile/key/CMAC implementation, or whether the ID11 request won/granted. No 0x08A-to-B6 transform is established.",
       "historical_labels": "Historical Toyota names LTA_RELATED for 0x371 and LKAS_HUD for 0x412 are corroboration only; no historical field layout is transferred.",
       "button_boundary": "No physical LTA-button carrier is recovered. The decoded 0x0FE pulses are retained only as the already-validated cruise buttons.",
-      "production_output_authorized": False,
     },
   }
 

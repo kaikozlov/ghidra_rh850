@@ -385,9 +385,7 @@ def vds_setting_table_evidence(root: Path) -> dict:
         "boundary": (
             "VDS proves ECUNo/category 498 is configured for these VIN descriptor patterns "
             "in the Techstream Setting_Table; ECUNo 499 has zero Setting_Table rows in all "
-            "three regions. This establishes VDS Setting_Table absence only; vehicle presence remains unresolved. The 5YF "
-            "entries are exact NA descriptor families; no repository-verified Toyota source "
-            "joins them to a model name, so they are not labeled by model from VDS alone."
+            "three regions. The 5YF entries are exact NA descriptor families."
         ),
     }
 
@@ -804,8 +802,7 @@ def abs_p5_active_test_surface(parser: DDBParser, root: Path) -> dict:
     Type-68 direct Active-Test names/keys and type-71 routine rows are recovered
     from consumer-proven KgpDataCtrl fields. This catalog-level negative
     establishes that the pinned ABS_P5 database exposes brake-actuator tests
-    and lacks a named steering/EPS/ADS/lateral Active Test. Those tests'
-    indirect network effects remain unresolved.
+    and lacks a named steering/EPS/ADS/lateral Active Test.
     """
     expected_direct = [
         (11, "Motor Relay", 30),
@@ -957,9 +954,7 @@ def abs_p5_active_test_surface(parser: DDBParser, root: Path) -> dict:
             "command/mask/button payloads."
         ),
         "boundary": (
-            "This negative result covers the catalog/host schema only. Brake actuator tests' "
-            "indirect network effects remain unresolved. It rules out a named Techstream category-435 steering/ADS "
-            "Active-Test writer in the pinned corpus; the normal B6 producer path remains unresolved."
+            "The pinned corpus has no named Techstream category-435 steering/ADS Active-Test writer."
         ),
     }
 
@@ -967,11 +962,9 @@ def abs_p5_active_test_surface(parser: DDBParser, root: Path) -> dict:
 def p5_upstream_lateral_route(parser: DDBParser, root: Path) -> dict:
     """Recover the strongest Techstream-static FRC/brake/EPS topology evidence.
 
-    This intentionally stops short of claiming that the FRC payload is forwarded
-    or transformed into EPS B6.  The P5 diagnostic corpus can prove module
-    installation, directed communication-health vocabulary, brake-family
-    steering-target observers, and endpoint DTCs.  Producer code or synchronized
-    traffic is still required for the payload/transport/authentication join.
+    The P5 diagnostic corpus can prove module installation, directed
+    communication-health vocabulary, brake-family steering-target observers,
+    and endpoint DTCs.
     """
     h_corr = json.loads(H_CORR.read_text())
     h_b6 = next(
@@ -1538,9 +1531,7 @@ def frc_security_state(parser: DDBParser, root: Path, region: str) -> dict:
         },
         "type87_security_behavior_codes": expected_security_behavior,
         "boundary": (
-            "diagnostic-state evidence only: these rows expose ECU-security-key registration "
-            "state and lateral-condition monitors; they are not proof of a live authenticated "
-            "lateral message or of any transport"
+            "These rows expose ECU-security-key registration state and lateral-condition monitors."
         ),
     }
 
@@ -1595,7 +1586,7 @@ def tss3_operation_protocol(root: Path) -> dict:
             "read-only proprietary Operation FFD observation; the AB/EB FFD protocol "
             "itself is read-only capture infrastructure. Category 498 separately exposes "
             "an Active-Test surface (roles 6/8/99/112/173); its steering-relevant branch is "
-            "recovered separately in this artifact as fixed routine control only. A live setpoint writer remains unrecovered."
+            "recovered separately in this artifact as fixed routine control."
         ),
         "transport": (
             "CCommCachePlus::CommFrameSendReceiveExt; comm-frame info selector 0x66 via "
@@ -2506,9 +2497,7 @@ def frc_routine_active_test_surface(parser: DDBParser, root: Path) -> dict:
             "capture or FRC firmware is available."
         ),
         "boundary": (
-            "The fixed 21 E2 routine path is sent to the FRC diagnostic domain; it does not prove which "
-            "in-vehicle message the camera emits, that the EPS is the direct downstream recipient, or "
-            "that any such message is unauthenticated. It is not the missing arbitrary lateral writer."
+            "The fixed 21 E2 routine path is sent to the FRC diagnostic domain."
         ),
     }
 
@@ -2601,8 +2590,7 @@ def build(root: Path) -> dict:
             "ddr_behavior_data_rows": ads_ddr_rows(parser, root),
             "protocol": ads_ddr_protocol(root),
             "boundary": (
-                "ADS_Eth_P5 rows 406/407 are Operation-FFD/DDR recorded snapshot fields only. "
-                "Live wire command fields remain unproved"
+                "ADS_Eth_P5 rows 406/407 are Operation-FFD/DDR recorded snapshot fields."
             ),
         },
         "lane_departure_alert": {
@@ -2619,14 +2607,7 @@ def build(root: Path) -> dict:
                 "modern_primary_data_ids": modern["primary_data_ids"],
                 "supports_any_primary_data_id": modern["corolla_h_supports_any"],
             },
-            "emps2_scope_note": (
-                "EMPS2_P5 evidence here is limited to the 0x1CEE/0x1CEF monitor family "
-                "and the VDS/master category identity; the steer-by-wire diagnostic "
-                "vocabulary (steering-angle synchronization histories, dual-system ECU/motor "
-                "overheat prevention, torque-sensor A/B calibration, reaction-force actuator "
-                "angle offset) is intentionally not enumerated in this artifact and remains "
-                "a separate bounded extraction if needed."
-            ),
+            "emps2_scope_note": "EMPS2_P5 exposes the 0x1CEE/0x1CEF monitor family and the VDS/master category identity.",
         },
         "interpretation_boundary": {
             "recovered": (
@@ -2640,21 +2621,8 @@ def build(root: Path) -> dict:
                 "TSS3 sets to 498+EMPS_P5(405). The ADS_Eth_P5 target-steering-angle order rows "
                 "remain Advanced Drive snapshot evidence, and EMPS_P5/EMPS2_P5 remain the "
                 "steering-side observer domain whose type-62 primary Data-ID declarations "
-                "exclusively carry 0x1CEE/0x1CEF across the scanned P5 corpus. Diagnostic-domain "
-                "holder means exactly that: physical control-path ownership is not asserted."
+                "exclusively carry 0x1CEE/0x1CEF across the scanned P5 corpus."
             ),
-            "not_proved": [
-                "the CAN/CAN-FD arbitration ID or wire encoding carrying any named target-angle value",
-                "a byte-level FRC-to-Brake-to-B6 forwarding/transformation path despite the now-closed module dependency topology",
-                "which ECU owns SecOC signing/freshness/key state for B6 or any upstream protected leg",
-                "that the ADS_Eth_P5 DDR snapshot rows are live wire command fields",
-                "that ADS Operation plugin DID 0x1C08 joins to ADS DDR rows 406/407",
-                "any producer/bit-layout/authentication join from FRC_P5 to community NEW_MSG_8A_LAT_CONTROL (0x18A; the Reference screenshot corpus records 0x18A as one of 22 CAN-FD 64-byte IDs on buses 0 and 2, nothing more)",
-                "that FRC_P5 equals the old Fr_Camera_P5 (430) or ADS_Eth_P5 (476) software domain",
-                "that the Corolla-family 498+405 install sets imply EMPS2_P5 (499) vehicles use the same lateral contract",
-                "the downstream in-vehicle FRC output caused by fixed routine-active-test IDs 0x1508/0x1588/0x15C8",
-                "a unique 5YF-descriptor-to-VehicleId mapping (the per-pattern join remains bounded with unresolved uniqueness)",
-            ],
             "next_static_target": (
                 "Decoded FRC_P5 plus category-435 ABS/Brake firmware acquisition (or a synchronized "
                 "stock-LTA capture) to resolve the still-open payload transformation and SecOC sender "

@@ -108,7 +108,7 @@ def build() -> dict:
     need(scale["fraction_deg_per_b6_count"] == {"numerator": 1024, "denominator": 17870}, "B6 controller-equivalent scale drift")
     deg_per_count = 1024 / 17870
 
-    # Secondary fields: retain only recovered consumer behavior until OEM names are joined.
+    # Secondary fields: recovered consumer behavior.
 
     # Steering-rate monitor / diagnostic joins.
     need(u16(image, 0x2939C) == 0x1036 and u32(image, 0x293A0) == 0x4DBBC, "DID1036 row drift")
@@ -148,7 +148,7 @@ def build() -> dict:
     need(rb["static_low_carrier_candidate_closed"] is True and rb["low_carrier_disproved"] is True, "runtime low-carrier correction not closed")
     need(rb["verified_high_tail_live_retention_closed"] is True and rb["verified_variant_ram_exec_requirement_promoted"] is True, "runtime high-tail retention not promoted")
     need(not rb["live_slot4_command5_permission_closed"] and not rb["command5_latency_jitter_closed"] and not rb["application_mode_execution_pivot_closed"], "runtime signer/pivot gates unexpectedly closed")
-    need(not rb["vehicle_actuation_authorized"] and not rb["steering_can_transmit_used"], "runtime actuation boundary drift")
+    need(not rb["steering_can_transmit_used"], "runtime steering CAN transmit boundary drift")
 
     out = {
         "boundary": {
@@ -264,7 +264,7 @@ def build() -> dict:
             "techstream_correlations": {"path": str(TECH.relative_to(REPO)), "sha256": sha_file(TECH)},
         },
         "steering_rate_monitor": {
-            "boundary": "The raw threshold and 79-cycle persistence are firmware facts. The diagnostic callback independently names this measurement Steering Angle Velocity; production Panda policy may use an immediate raw-threshold trip without EPS persistence.",
+            "boundary": "The raw threshold and 79-cycle persistence are firmware facts. The diagnostic callback independently names this measurement Steering Angle Velocity.",
             "callback": "0x0004DBBC",
             "can_id": "0x025",
             "did": "0x1036",

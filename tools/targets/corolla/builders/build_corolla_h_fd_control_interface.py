@@ -319,8 +319,6 @@ def main() -> None:
     # The original direct textual-reference census missed GP-relative stores in
     # 0x47188/0x47430. Pin those functions from the independent compact steering
     # bridge evidence and explicitly recover all eleven affected PDU0 sources.
-    # These proofs establish the identified writers only. Arbitrary
-    # computed-pointer writes elsewhere remain outside their scope.
     c47188 = state_funcs[0x47188]["decompiled_c"]
     c47430 = state_funcs[0x47430]["decompiled_c"]
     need(c47188,
@@ -411,7 +409,7 @@ def main() -> None:
             "corolla_h_fd_rx": [{"can_id": f"0x{x:03X}", "length": n} for x, n in h_fd],
             "h_only_fd_rx": ["0x0B6"],
             "shared_0x025_boundary": {
-                "classification": "shared-preexisting-fd-interface-not-h-replacement",
+                "classification": "shared-preexisting-fd-interface",
                 "unique_instruction_shape_pairs": [
                     {"sienna": "0x4AD82", "corolla_h": "0x4636A", "role": "FD025 generated unpacker"},
                     {"sienna": "0x4B7BA", "corolla_h": "0x46D9A", "role": "FD025-to-4A3 producer"},
@@ -440,7 +438,7 @@ def main() -> None:
             "signed16_target_angle_command": {
                 "signal_id": 255,
                 "snapshot_destination": "0xFEBEAE82",
-                "classification": "authenticated target-steering-angle command; not torque",
+                "classification": "authenticated target-steering-angle command",
                 "canonical_proof": str(TARGET_ANGLE.relative_to(REPO)),
                 "physical_scale_closed": target_angle["scaling"]["physical_degree_scale_closed"],
                 "controller_equivalent_deg_per_count": target_angle["scaling"]["controller_equivalent_deg_per_b6_count"],
@@ -463,7 +461,7 @@ def main() -> None:
             },
         },
         "fd_0x030_transmit": {
-            "classification": "H-generation replacement/consolidation for Sienna 0x260/0x262 transmit slots; field-for-field equivalence not claimed",
+            "classification": "H-generation replacement/consolidation for Sienna 0x260/0x262 transmit slots",
             "sienna_tx_ids": [f"0x{x:03X}" for x in s_tx],
             "corolla_h_tx_ids": [f"0x{x & 0x7FF:03X}" for x in h_tx],
             "pdu0_descriptor": {"cycle_or_timeout": h_pdu0[0], "length": h_pdu0[3], "flags": h_pdu0[5]},
@@ -473,7 +471,6 @@ def main() -> None:
             "checksum_like_signal_9": {
                 "wire_byte": 7,
                 "formula": "sum(payload_bytes_0_through_6) + 0x38, low byte",
-                "boundary": "recovered exact code behavior; OEM checksum naming/formula lineage is not inferred from the constant alone",
             },
             "fields": tx030_rows,
             "gp_relative_writer_correction": {

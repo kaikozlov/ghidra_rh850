@@ -327,10 +327,6 @@ def _build_from_recovered(root: Path, manifest: dict[str, Any] | None = None) ->
             "For TSS3 RE this may be simpler than GTSE because the current VDAS creation path explicitly includes "
             "TSS3OperationFFD.log and ImageFFD.log rather than applying TSEConverter's PCS skip list."
         ),
-        "boundary": (
-            "This proves the host persistence/export format and exact source-log bindings. It does not prove that a "
-            "given vehicle/session populated those logs, nor does it identify ECU-side CAN/SecOC producer ownership."
-        ),
     }
 
 

@@ -225,9 +225,9 @@ def build() -> dict:
                         "0x0004C97A: signal33 -> 0x030 B22:B23",
                     ],
                     "staging_formula": "signed16(((((int)(-signed16(FEBE6718)) * unsigned16(FEBEE8D8)) / 0x100) * 100) / 0x2000)",
-                    "alternate_staging_writer": "0x00058C9A also writes FEBE816C (and signal-0 source FEBE8132); it is not decompiled here and carries no semantic claim",
+                    "alternate_staging_writer": "0x00058C9A also writes FEBE816C (and signal-0 source FEBE8132)",
                     "classification": "nonlinear mapped motor-feedback/current-family proxy sharing the pre-clamp Q-axis aggregate that feeds DID 0x1151",
-                    "semantic_boundary": "The source family is now target-natively joined to DID1151's pre-clamp Q-axis aggregate, but B22:B23 is not DID1151 in wire units: a sibling-axis-conditioned lookup and a separate runtime scale intervene. Treat it only as a signed motor-feedback/assist proxy; amperes, commanded torque, and LTA authority remain unresolved. Motor feedback is never by itself proof of an external lateral command: driver EPS assist also creates current.",
+                    "semantic_boundary": "The source family is target-natively joined to DID1151's pre-clamp Q-axis aggregate through a sibling-axis-conditioned lookup and a separate runtime scale. It is a signed motor-feedback/assist proxy.",
                 },
             },
             "0x351": {
@@ -264,7 +264,7 @@ def build() -> dict:
                 "current_semantic_boundary": (
                     "F33 0x4A3 uses GP-0x50E8, while DID 0x1151 Motor Actual Current (Q Axis) reads GP-0x50F2. "
                     "The upstream join is now closed: GP-0x50E8 is a nonlinear sibling-axis-conditioned map of the same extended Q-axis sum that is saturated into the DID1151 source. "
-                    "It is therefore a motor-current-family feedback proxy with units distinct from DID1151; conversion to amperes or commanded torque remains unresolved."
+                    "It is a motor-current-family feedback proxy."
                 ),
             },
         },
@@ -327,9 +327,8 @@ def build() -> dict:
             ),
             "acceptance_options": {
                 "persistent_codeflash": "historical exact-F33 Gate-2 compare neutralization plus deterministic CRC repair; cumulative stage 5 is now installed/persistence-verified but does not prove application admission",
-                "ram_bridge": "audited exact-F33 zero-MAC28 re-admission candidate in application-retained high RAM; reset restores stock; retained only as research history",
+                "ram_bridge": "audited exact-F33 zero-MAC28 re-admission candidate in application-retained high RAM; reset restores stock; retained as research history",
             },
-            "production_output_authorized": False,
         },
         "current_native_integration": {
             "status": "ordinary-toyota-runtime-b6-admission-unproven",
@@ -350,14 +349,13 @@ def build() -> dict:
                 "Ordinary SafetyModel.toyota with TSS3 permits checked 0x0B6 bus0/DLC32 plus replacement 0x412 bus0 and stock-shaped 0x101 brake-cancel bus2. Active B6 permits ID11, release permits ID0, controls_allowed is derived from native 0x08A bit27 on bus2, and steering uses the standard steer_angle_cmd_checks against measured 0x025; no ALLOW_DEBUG or TSS3_DEV_LATERAL gate remains."
             ),
             "secoc_result_boundary": (
-                "Cumulative exact-F33 stage 5 is persistence-verified. VAR-147/CORR-178 prove all-zero MAC28 and wrong-key dummy-CMAC MAC28 have identical recovered software acceptance behavior; the dummy CMAC changes native-envelope hygiene only, leaving admission unchanged."
+                "Cumulative exact-F33 stage 5 is persistence-verified. VAR-147/CORR-178 prove all-zero MAC28 and wrong-key dummy-CMAC MAC28 have identical recovered software acceptance behavior; the dummy CMAC changes native-envelope hygiene, leaving admission unchanged."
             ),
             "road_gate_reconciliation": (
                 "VAR-150: across current-shape active B6 joins ACCD==0, ADBF<2, CAFC==0 and CAD9==0 always pass when observable, cadence has zero sequential gaps above the exact 35-ms loss bound, and only ACCC among CE772/CE7A6's five normal readiness operands lacks a direct road witness."
             ),
             "application_admission_verified": False,
             "causal_steering_verified": False,
-            "production_output_authorized": False,
             "current_blocker": (
                 "Run the stationary internal first-divergence capture in order: F33 SecOC queue -> raw route44 -> generated COM -> ADB0/CAFF/CB00. Only if that handoff passes, inspect the remaining ACCC readiness operand, CB20/CB38, then AC2B/AC5A/AC29/AC2A/CC98/CC94 and the motor-side/current-model gates. Do not spend another run on MAC value, counter phase, 0x08A suppression, or a private arming layer."
             ),
@@ -370,7 +368,7 @@ def build() -> dict:
             "decompiler_evidence": {"path": str(EVID.relative_to(REPO)), "sha256": sha(EVID.read_bytes())},
         },
         "boundary": (
-            "The F33 Tx/status geometry and the current fork's ordinary Toyota B6 sender/safety construction are closed at the stated evidence grades. The current path is not private-gated: kai-openpilot 7aece7f63 / opendbc f207c273 / panda bbc93b17 use CC.latActive and ordinary Toyota TSS3 safety, with a normal SecOC envelope signed by an intentionally wrong dummy key. This artifact does not authorize steering transmission because F33 application admission and causal steering remain unproved. The immediate discriminator is the stationary internal queue/route44/generated-COM/application ladder. Factory 0x08A/0x081 winner/grant provenance and B6 producer/delivery are independently unresolved; missing native B6 does not establish an EBU-private EPS bus."
+            "The F33 Tx/status geometry and the current fork's ordinary Toyota B6 sender/safety construction are closed at the stated evidence grades. The current path is not private-gated: kai-openpilot 7aece7f63 / opendbc f207c273 / panda bbc93b17 use CC.latActive and ordinary Toyota TSS3 safety, with a normal SecOC envelope signed by an intentionally wrong dummy key. The immediate discriminator is the stationary internal queue/route44/generated-COM/application ladder. Factory 0x08A/0x081 winner/grant provenance and B6 producer/delivery are independently unresolved; missing native B6 does not establish an EBU-private EPS bus."
         ),
     }
 

@@ -1,16 +1,14 @@
 {
-  "evidence_boundary": "Global order alignment is a navigation aid. Only unique complete instruction-shape pairs are semantic-transfer candidates; other pairs require target-native operand/dataflow review. H/S order-unpaired rows are not global absence proofs.",
   "explicit_command_mode_boundary": {
     "canonical_proof": "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
     "classic_131": "normal Rx/SecOC descriptor absent on H and Sienna lta_angle_command_smoothing 0xC8DE0 is order-unpaired",
     "classic_2e4": "normal Rx descriptor absent on H and retained torque-clamp input remains independently proven zero-fed",
-    "replacement_command": "protected FD 0x0B6 signal255 signed16 B4:B5 is the target-steering-angle command; signal254 B3 is the Target Lateral ID request/profile selector. Controller-equivalent scale is 1024/17870 deg/count (~1.000121519 mrad/count); accepted profiles are PCS/LDA/Hands Off LTA/LTA-LCA/PDA; signal254 request selection, the 7-foreground-tick / nominal-35-ms primary receiver cutoff, and signal261 modulo-64 sequence handling are closed. The literal OEM signal255 unit, stock wall-clock sender cadence/template, exact secondary B6 names, and upstream producer/SecOC signing contract remain bounded; exclusive replacement freshness progression is closed separately."
+    "replacement_command": "protected FD 0x0B6 signal255 signed16 B4:B5 is the target-steering-angle command; signal254 B3 is the Target Lateral ID request/profile selector. Controller-equivalent scale is 1024/17870 deg/count (~1.000121519 mrad/count); accepted profiles are PCS/LDA/Hands Off LTA/LTA-LCA/PDA; signal254 request selection, the 7-foreground-tick / nominal-35-ms primary receiver cutoff, and signal261 modulo-64 sequence handling are closed."
   },
   "h_order_unpaired": [
     {
       "bounded_description": "two mode-selected interpolation lookups from ADE8-derived operating state",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC9466",
       "h_index": 13,
       "role_class": "calibration_interpolation"
@@ -18,7 +16,6 @@
     {
       "bounded_description": "mode-indexed interpolation from ADE8-derived operating state",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC5DEC",
       "h_index": 14,
       "role_class": "calibration_interpolation"
@@ -26,7 +23,6 @@
     {
       "bounded_description": "absolute/threshold debounce over steering snapshot state",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC803C",
       "h_index": 52,
       "role_class": "supervisor_plausibility"
@@ -34,7 +30,6 @@
     {
       "bounded_description": "AE20/AE22 multi-window plausibility predicate; AE20 is not clamp input",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC80C4",
       "h_index": 53,
       "role_class": "supervisor_plausibility"
@@ -42,7 +37,6 @@
     {
       "bounded_description": "sentinel/validity aggregation over AE0A..AE10 and supervisor flags",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC813A",
       "h_index": 54,
       "role_class": "supervisor_validity"
@@ -50,7 +44,6 @@
     {
       "bounded_description": "history/delta comparison with mode-dependent limits",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC7E88",
       "h_index": 55,
       "role_class": "supervisor_history_delta"
@@ -58,7 +51,6 @@
     {
       "bounded_description": "mode fallback/latch update",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC7F40",
       "h_index": 56,
       "role_class": "supervisor_mode_latch"
@@ -66,7 +58,6 @@
     {
       "bounded_description": "paired scaled-state consistency/rate check",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC8526",
       "h_index": 58,
       "role_class": "supervisor_consistency"
@@ -74,7 +65,6 @@
     {
       "bounded_description": "mode-dependent scale initialization and state update",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC8370",
       "h_index": 59,
       "role_class": "supervisor_mode_scaling"
@@ -82,7 +72,6 @@
     {
       "bounded_description": "feedback delta/history/rate estimator",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC87FC",
       "h_index": 60,
       "role_class": "supervisor_rate_estimation"
@@ -90,7 +79,6 @@
     {
       "bounded_description": "snapshot delta with signed saturation",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC88EE",
       "h_index": 61,
       "role_class": "supervisor_delta_saturation"
@@ -98,7 +86,6 @@
     {
       "bounded_description": "speed-normalized rate and bounded state update",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC8926",
       "h_index": 62,
       "role_class": "supervisor_rate_estimation"
@@ -106,7 +93,6 @@
     {
       "bounded_description": "B6-derived two-bit mode/table selection with debounce/ramp state",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC89D2",
       "h_index": 63,
       "role_class": "b6_mode_table"
@@ -114,7 +100,6 @@
     {
       "bounded_description": "bounded error/offset correction from supervisor state",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC8B02",
       "h_index": 64,
       "role_class": "supervisor_correction"
@@ -122,7 +107,6 @@
     {
       "bounded_description": "activation debounce with event/fault path",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC7BE8",
       "h_index": 65,
       "role_class": "supervisor_activation_fault"
@@ -130,7 +114,6 @@
     {
       "bounded_description": "B6 validity plus local validity gate",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC7C70",
       "h_index": 66,
       "role_class": "b6_validity_gate"
@@ -138,7 +121,6 @@
     {
       "bounded_description": "sign/plausibility monitor with event/fault path",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC7C94",
       "h_index": 67,
       "role_class": "supervisor_fault_monitor"
@@ -146,7 +128,6 @@
     {
       "bounded_description": "stability/debounce monitor with event/fault path",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC7D6A",
       "h_index": 68,
       "role_class": "supervisor_fault_monitor"
@@ -154,7 +135,6 @@
     {
       "bounded_description": "delta monitor with event/fault path",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC7DEE",
       "h_index": 69,
       "role_class": "supervisor_fault_monitor"
@@ -162,7 +142,6 @@
     {
       "bounded_description": "mode-change/status latch update",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC8652",
       "h_index": 70,
       "role_class": "supervisor_mode_latch"
@@ -170,7 +149,6 @@
     {
       "bounded_description": "three-stage local postprocessing wrapper",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC9ED0",
       "h_index": 77,
       "role_class": "composite_wrapper"
@@ -178,7 +156,6 @@
     {
       "bounded_description": "multi-input H-only motion/state arbitration block",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC2296",
       "h_index": 89,
       "role_class": "h_motion_state_estimator"
@@ -186,7 +163,6 @@
     {
       "bounded_description": "kinematic/feedback compensation and bounded interpolation block",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC265C",
       "h_index": 90,
       "role_class": "h_motion_state_estimator"
@@ -194,7 +170,6 @@
     {
       "bounded_description": "paired state-update wrapper",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC432E",
       "h_index": 91,
       "role_class": "h_motion_state_estimator"
@@ -202,7 +177,6 @@
     {
       "bounded_description": "channel-A statistical/window plausibility estimator",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC35BC",
       "h_index": 92,
       "role_class": "h_dual_channel_plausibility"
@@ -210,7 +184,6 @@
     {
       "bounded_description": "channel-B mirror statistical/window plausibility estimator",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC37AC",
       "h_index": 93,
       "role_class": "h_dual_channel_plausibility"
@@ -218,7 +191,6 @@
     {
       "bounded_description": "channel-A window/status classifier",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC399C",
       "h_index": 94,
       "role_class": "h_dual_channel_plausibility"
@@ -226,7 +198,6 @@
     {
       "bounded_description": "channel-B window/status classifier",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC3A2E",
       "h_index": 95,
       "role_class": "h_dual_channel_plausibility"
@@ -234,7 +205,6 @@
     {
       "bounded_description": "dual-channel consistency/debounce state",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC3AC8",
       "h_index": 96,
       "role_class": "h_dual_channel_plausibility"
@@ -242,7 +212,6 @@
     {
       "bounded_description": "speed/state threshold fault latch",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC3BD4",
       "h_index": 97,
       "role_class": "h_dual_channel_plausibility"
@@ -250,7 +219,6 @@
     {
       "bounded_description": "five-stage H-only estimation subpipeline wrapper",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC3526",
       "h_index": 98,
       "role_class": "composite_wrapper"
@@ -258,7 +226,6 @@
     {
       "bounded_description": "combined channel-health/status arbitration",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC3C3C",
       "h_index": 99,
       "role_class": "h_dual_channel_plausibility"
@@ -266,7 +233,6 @@
     {
       "bounded_description": "combined channel-health finalizer",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC3DC6",
       "h_index": 100,
       "role_class": "h_dual_channel_plausibility"
@@ -274,7 +240,6 @@
     {
       "bounded_description": "two-channel mean plus residual/offset construction",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC4536",
       "h_index": 103,
       "role_class": "h_geometry_estimation"
@@ -282,7 +247,6 @@
     {
       "bounded_description": "bounded multi-channel residual/geometry computation",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC4696",
       "h_index": 104,
       "role_class": "h_geometry_estimation"
@@ -290,7 +254,6 @@
     {
       "bounded_description": "two-stage late postprocessing wrapper",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xCDCFC",
       "h_index": 105,
       "role_class": "composite_wrapper"
@@ -298,7 +261,6 @@
     {
       "bounded_description": "B6-validity-gated mode/status propagation",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xCCF58",
       "h_index": 106,
       "role_class": "b6_status_export"
@@ -306,7 +268,6 @@
     {
       "bounded_description": "multi-source status/calibration postprocessing wrapper",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xCD01C",
       "h_index": 107,
       "role_class": "status_postprocess"
@@ -314,7 +275,6 @@
     {
       "bounded_description": "ADE8-dependent calibrated postprocessing wrapper",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC5FCC",
       "h_index": 108,
       "role_class": "calibration_postprocess"
@@ -322,7 +282,6 @@
     {
       "bounded_description": "two mode-selected interpolation lookups from ADE8-derived operating state",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xCD15A",
       "h_index": 109,
       "role_class": "calibration_interpolation"
@@ -341,7 +300,6 @@
     {
       "bounded_description": "ADF6-indexed calibration lookup",
       "classification": "sienna-order-unpaired",
-      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
       "role_class": "sienna_command_shaping",
       "sienna_entry": "0xC4CE0",
       "sienna_index": 17
@@ -349,7 +307,6 @@
     {
       "bounded_description": "ADF6-indexed calibration lookup",
       "classification": "sienna-order-unpaired",
-      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
       "role_class": "sienna_command_shaping",
       "sienna_entry": "0xC4E12",
       "sienna_index": 18
@@ -357,7 +314,6 @@
     {
       "bounded_description": "ADF6-indexed calibration lookup",
       "classification": "sienna-order-unpaired",
-      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
       "role_class": "sienna_command_shaping",
       "sienna_entry": "0xC4F62",
       "sienna_index": 19
@@ -365,7 +321,6 @@
     {
       "bounded_description": "ADF6-indexed calibration lookup",
       "classification": "sienna-order-unpaired",
-      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
       "role_class": "sienna_command_shaping",
       "sienna_entry": "0xC5100",
       "sienna_index": 20
@@ -373,7 +328,6 @@
     {
       "bounded_description": "AE4A-indexed paired calibration lookup",
       "classification": "sienna-order-unpaired",
-      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
       "role_class": "sienna_command_shaping",
       "sienna_entry": "0xC5050",
       "sienna_index": 26
@@ -381,7 +335,6 @@
     {
       "bounded_description": "AE4A/BC9C gain and bounded scaling stage",
       "classification": "sienna-order-unpaired",
-      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
       "role_class": "sienna_command_shaping",
       "sienna_entry": "0xC4E2C",
       "sienna_index": 31
@@ -389,7 +342,6 @@
     {
       "bounded_description": "ADF6/BE28 mode-gain/debounce stage",
       "classification": "sienna-order-unpaired",
-      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
       "role_class": "sienna_command_shaping",
       "sienna_entry": "0xC53A2",
       "sienna_index": 42
@@ -397,7 +349,6 @@
     {
       "bounded_description": "authenticated 0x131 angle smoothing into BFF0",
       "classification": "sienna-order-unpaired",
-      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
       "role_class": "sienna_lta_angle_command",
       "sienna_entry": "0xC8DE0",
       "sienna_index": 64
@@ -405,7 +356,6 @@
     {
       "bounded_description": "state snapshot/bounded helper wrapper",
       "classification": "sienna-order-unpaired",
-      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
       "role_class": "sienna_state_postprocess",
       "sienna_entry": "0xC5350",
       "sienna_index": 86
@@ -413,7 +363,6 @@
     {
       "bounded_description": "command/state sign debounce/status stage",
       "classification": "sienna-order-unpaired",
-      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
       "role_class": "sienna_command_shaping",
       "sienna_entry": "0xC4EC8",
       "sienna_index": 89
@@ -421,7 +370,6 @@
     {
       "bounded_description": "AE4A-driven gain/integrator/output shaping stage",
       "classification": "sienna-order-unpaired",
-      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
       "role_class": "sienna_command_shaping",
       "sienna_entry": "0xC4F7C",
       "sienna_index": 90
@@ -548,7 +496,6 @@
     {
       "bounded_description": "two mode-selected interpolation lookups from ADE8-derived operating state",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC9466",
       "h_index": 13,
       "role_class": "calibration_interpolation"
@@ -556,7 +503,6 @@
     {
       "bounded_description": "mode-indexed interpolation from ADE8-derived operating state",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC5DEC",
       "h_index": 14,
       "role_class": "calibration_interpolation"
@@ -600,7 +546,6 @@
     {
       "bounded_description": "ADF6-indexed calibration lookup",
       "classification": "sienna-order-unpaired",
-      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
       "role_class": "sienna_command_shaping",
       "sienna_entry": "0xC4CE0",
       "sienna_index": 17
@@ -608,7 +553,6 @@
     {
       "bounded_description": "ADF6-indexed calibration lookup",
       "classification": "sienna-order-unpaired",
-      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
       "role_class": "sienna_command_shaping",
       "sienna_entry": "0xC4E12",
       "sienna_index": 18
@@ -616,7 +560,6 @@
     {
       "bounded_description": "ADF6-indexed calibration lookup",
       "classification": "sienna-order-unpaired",
-      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
       "role_class": "sienna_command_shaping",
       "sienna_entry": "0xC4F62",
       "sienna_index": 19
@@ -624,7 +567,6 @@
     {
       "bounded_description": "ADF6-indexed calibration lookup",
       "classification": "sienna-order-unpaired",
-      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
       "role_class": "sienna_command_shaping",
       "sienna_entry": "0xC5100",
       "sienna_index": 20
@@ -677,7 +619,6 @@
     {
       "bounded_description": "AE4A-indexed paired calibration lookup",
       "classification": "sienna-order-unpaired",
-      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
       "role_class": "sienna_command_shaping",
       "sienna_entry": "0xC5050",
       "sienna_index": 26
@@ -721,7 +662,6 @@
     {
       "bounded_description": "AE4A/BC9C gain and bounded scaling stage",
       "classification": "sienna-order-unpaired",
-      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
       "role_class": "sienna_command_shaping",
       "sienna_entry": "0xC4E2C",
       "sienna_index": 31
@@ -819,7 +759,6 @@
     {
       "bounded_description": "ADF6/BE28 mode-gain/debounce stage",
       "classification": "sienna-order-unpaired",
-      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
       "role_class": "sienna_command_shaping",
       "sienna_entry": "0xC53A2",
       "sienna_index": 42
@@ -953,7 +892,6 @@
     {
       "bounded_description": "absolute/threshold debounce over steering snapshot state",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC803C",
       "h_index": 52,
       "role_class": "supervisor_plausibility"
@@ -961,7 +899,6 @@
     {
       "bounded_description": "AE20/AE22 multi-window plausibility predicate; AE20 is not clamp input",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC80C4",
       "h_index": 53,
       "role_class": "supervisor_plausibility"
@@ -969,7 +906,6 @@
     {
       "bounded_description": "sentinel/validity aggregation over AE0A..AE10 and supervisor flags",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC813A",
       "h_index": 54,
       "role_class": "supervisor_validity"
@@ -977,7 +913,6 @@
     {
       "bounded_description": "history/delta comparison with mode-dependent limits",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC7E88",
       "h_index": 55,
       "role_class": "supervisor_history_delta"
@@ -985,7 +920,6 @@
     {
       "bounded_description": "mode fallback/latch update",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC7F40",
       "h_index": 56,
       "role_class": "supervisor_mode_latch"
@@ -1002,7 +936,6 @@
     {
       "bounded_description": "paired scaled-state consistency/rate check",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC8526",
       "h_index": 58,
       "role_class": "supervisor_consistency"
@@ -1010,7 +943,6 @@
     {
       "bounded_description": "mode-dependent scale initialization and state update",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC8370",
       "h_index": 59,
       "role_class": "supervisor_mode_scaling"
@@ -1018,7 +950,6 @@
     {
       "bounded_description": "feedback delta/history/rate estimator",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC87FC",
       "h_index": 60,
       "role_class": "supervisor_rate_estimation"
@@ -1026,7 +957,6 @@
     {
       "bounded_description": "snapshot delta with signed saturation",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC88EE",
       "h_index": 61,
       "role_class": "supervisor_delta_saturation"
@@ -1034,7 +964,6 @@
     {
       "bounded_description": "speed-normalized rate and bounded state update",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC8926",
       "h_index": 62,
       "role_class": "supervisor_rate_estimation"
@@ -1042,7 +971,6 @@
     {
       "bounded_description": "B6-derived two-bit mode/table selection with debounce/ramp state",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC89D2",
       "h_index": 63,
       "role_class": "b6_mode_table"
@@ -1050,7 +978,6 @@
     {
       "bounded_description": "bounded error/offset correction from supervisor state",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC8B02",
       "h_index": 64,
       "role_class": "supervisor_correction"
@@ -1058,7 +985,6 @@
     {
       "bounded_description": "activation debounce with event/fault path",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC7BE8",
       "h_index": 65,
       "role_class": "supervisor_activation_fault"
@@ -1066,7 +992,6 @@
     {
       "bounded_description": "B6 validity plus local validity gate",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC7C70",
       "h_index": 66,
       "role_class": "b6_validity_gate"
@@ -1074,7 +999,6 @@
     {
       "bounded_description": "sign/plausibility monitor with event/fault path",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC7C94",
       "h_index": 67,
       "role_class": "supervisor_fault_monitor"
@@ -1082,7 +1006,6 @@
     {
       "bounded_description": "stability/debounce monitor with event/fault path",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC7D6A",
       "h_index": 68,
       "role_class": "supervisor_fault_monitor"
@@ -1090,7 +1013,6 @@
     {
       "bounded_description": "delta monitor with event/fault path",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC7DEE",
       "h_index": 69,
       "role_class": "supervisor_fault_monitor"
@@ -1098,7 +1020,6 @@
     {
       "bounded_description": "mode-change/status latch update",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC8652",
       "h_index": 70,
       "role_class": "supervisor_mode_latch"
@@ -1160,7 +1081,6 @@
     {
       "bounded_description": "three-stage local postprocessing wrapper",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC9ED0",
       "h_index": 77,
       "role_class": "composite_wrapper"
@@ -1168,7 +1088,6 @@
     {
       "bounded_description": "authenticated 0x131 angle smoothing into BFF0",
       "classification": "sienna-order-unpaired",
-      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
       "role_class": "sienna_lta_angle_command",
       "sienna_entry": "0xC8DE0",
       "sienna_index": 64
@@ -1275,7 +1194,6 @@
     {
       "bounded_description": "multi-input H-only motion/state arbitration block",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC2296",
       "h_index": 89,
       "role_class": "h_motion_state_estimator"
@@ -1283,7 +1201,6 @@
     {
       "bounded_description": "kinematic/feedback compensation and bounded interpolation block",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC265C",
       "h_index": 90,
       "role_class": "h_motion_state_estimator"
@@ -1291,7 +1208,6 @@
     {
       "bounded_description": "paired state-update wrapper",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC432E",
       "h_index": 91,
       "role_class": "h_motion_state_estimator"
@@ -1299,7 +1215,6 @@
     {
       "bounded_description": "channel-A statistical/window plausibility estimator",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC35BC",
       "h_index": 92,
       "role_class": "h_dual_channel_plausibility"
@@ -1307,7 +1222,6 @@
     {
       "bounded_description": "channel-B mirror statistical/window plausibility estimator",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC37AC",
       "h_index": 93,
       "role_class": "h_dual_channel_plausibility"
@@ -1315,7 +1229,6 @@
     {
       "bounded_description": "channel-A window/status classifier",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC399C",
       "h_index": 94,
       "role_class": "h_dual_channel_plausibility"
@@ -1323,7 +1236,6 @@
     {
       "bounded_description": "channel-B window/status classifier",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC3A2E",
       "h_index": 95,
       "role_class": "h_dual_channel_plausibility"
@@ -1331,7 +1243,6 @@
     {
       "bounded_description": "dual-channel consistency/debounce state",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC3AC8",
       "h_index": 96,
       "role_class": "h_dual_channel_plausibility"
@@ -1339,7 +1250,6 @@
     {
       "bounded_description": "speed/state threshold fault latch",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC3BD4",
       "h_index": 97,
       "role_class": "h_dual_channel_plausibility"
@@ -1347,7 +1257,6 @@
     {
       "bounded_description": "five-stage H-only estimation subpipeline wrapper",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC3526",
       "h_index": 98,
       "role_class": "composite_wrapper"
@@ -1355,7 +1264,6 @@
     {
       "bounded_description": "combined channel-health/status arbitration",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC3C3C",
       "h_index": 99,
       "role_class": "h_dual_channel_plausibility"
@@ -1363,7 +1271,6 @@
     {
       "bounded_description": "combined channel-health finalizer",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC3DC6",
       "h_index": 100,
       "role_class": "h_dual_channel_plausibility"
@@ -1389,7 +1296,6 @@
     {
       "bounded_description": "two-channel mean plus residual/offset construction",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC4536",
       "h_index": 103,
       "role_class": "h_geometry_estimation"
@@ -1397,7 +1303,6 @@
     {
       "bounded_description": "bounded multi-channel residual/geometry computation",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC4696",
       "h_index": 104,
       "role_class": "h_geometry_estimation"
@@ -1405,7 +1310,6 @@
     {
       "bounded_description": "two-stage late postprocessing wrapper",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xCDCFC",
       "h_index": 105,
       "role_class": "composite_wrapper"
@@ -1413,7 +1317,6 @@
     {
       "bounded_description": "B6-validity-gated mode/status propagation",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xCCF58",
       "h_index": 106,
       "role_class": "b6_status_export"
@@ -1421,7 +1324,6 @@
     {
       "bounded_description": "multi-source status/calibration postprocessing wrapper",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xCD01C",
       "h_index": 107,
       "role_class": "status_postprocess"
@@ -1429,7 +1331,6 @@
     {
       "bounded_description": "ADE8-dependent calibrated postprocessing wrapper",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xC5FCC",
       "h_index": 108,
       "role_class": "calibration_postprocess"
@@ -1437,7 +1338,6 @@
     {
       "bounded_description": "two mode-selected interpolation lookups from ADE8-derived operating state",
       "classification": "h-order-unpaired",
-      "evidence_boundary": "target-native decompilation reviewed; unpaired only within ordered supervisor alignment. Global absence in Sienna remains unproved",
       "h_entry": "0xCD15A",
       "h_index": 109,
       "role_class": "calibration_interpolation"
@@ -1517,7 +1417,6 @@
     {
       "bounded_description": "state snapshot/bounded helper wrapper",
       "classification": "sienna-order-unpaired",
-      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
       "role_class": "sienna_state_postprocess",
       "sienna_entry": "0xC5350",
       "sienna_index": 86
@@ -1543,7 +1442,6 @@
     {
       "bounded_description": "command/state sign debounce/status stage",
       "classification": "sienna-order-unpaired",
-      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
       "role_class": "sienna_command_shaping",
       "sienna_entry": "0xC4EC8",
       "sienna_index": 89
@@ -1551,7 +1449,6 @@
     {
       "bounded_description": "AE4A-driven gain/integrator/output shaping stage",
       "classification": "sienna-order-unpaired",
-      "evidence_boundary": "unpaired in ordered supervisor alignment; only explicit command-stage removals are promoted using independent CAN/config evidence",
       "role_class": "sienna_command_shaping",
       "sienna_entry": "0xC4F7C",
       "sienna_index": 90

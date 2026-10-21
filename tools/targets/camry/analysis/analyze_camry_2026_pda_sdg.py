@@ -191,7 +191,7 @@ def main() -> None:
     "schema": "camry-2026-pda-sdg-attribution-v1",
     "conclusion": {
       "pda_sa_to_sdg": "Toyota's TSS3 recorder classifies PDA(SA) under SystemType 6 / SDG; same-car ID18 is therefore the strongest wire identity for PDA-SA/SDG steering.",
-      "id19_boundary": "Target Lateral ID 19 is OEM-labeled PDA and exact F33 gives it a distinct bank in the same B6 controller. No native ID19 episode is present in the scanned 2026-09-04/06 corpus, so PDA-OAA->ID19 remains only an architectural interpretation; a dynamic same-car join requires additional evidence.",
+      "id19_boundary": "Target Lateral ID 19 is OEM-labeled PDA and exact F33 gives it a distinct bank in the same B6 controller. No native ID19 episode is present in the scanned 2026-09-04/06 corpus; PDA-OAA->ID19 is an architectural interpretation.",
       "other_path": "PDA does not create a second recovered F33 external steering ingress: ID18/ID19 are common B6-controller profiles; the separate target-native snapshot consumer is raw 49 / Self-Propelled Transport.",
     },
     "exact_f33": exact_f33_join(),

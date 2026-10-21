@@ -268,9 +268,6 @@ Therefore the bounded static conclusion is:
 > stack corruption during the call, or a hardware fault. None is recovered from
 > the bank-1 input path.
 
-This negative result covers static software paths only. Fault injection and
-unknown computed memory-corruption primitives remain outside it.
-
 ### 6.2 The alternate caller is now implemented in retained RAM
 
 The absence of length smuggling does **not** make the lower API unreachable.

@@ -363,8 +363,6 @@ No recovered stock boot-runtime operation returns to application execution
 without traversing that reset/startup clear. A future no-reset boot→application
 control transfer would immediately make `0xFEBF2D18` a high-value disclosure
 candidate and should be re-audited before attempting to recover the root itself.
-This boundary covers software paths only. Physical fault injection, debug access,
-and other hardware disclosure remain outside the model.
 
 ### Persistent-trust consequence
 
@@ -381,7 +379,6 @@ contains program/erase/marker machinery for the application-covered region. A
 payload that obtains a durable CodeFlash write and recomputes the CRC fields and
 markers can in principle install an application-resident hook that survives
 reset. This repository has not built or bench-tested such a persistent patch.
-The conclusion establishes a recovered trust-chain property only.
 
 This distinction is central to a comma design. A one-shot boot callback is in the
 wrong GP/TP/RAM/interrupt context for the initialized ICU and CAN application

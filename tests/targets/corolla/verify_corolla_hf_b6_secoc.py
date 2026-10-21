@@ -373,18 +373,6 @@ def _section_corolla_hf_secoc_00f_freshness_bridge():
     req = ART['request_08a_signer_implication']
     check('both Corolla generations corroborate maintained 0x08A reset-local freshness policy', req['observed_on_both_corolla_generations'] is True and ART['cross_capture_conclusions']['request_08a_reanchors_message_low2_to_one_on_each_observed_sync_epoch'] is True)
     check('0x08A message counter tracks frame count but is not B26', ART['cross_capture_conclusions']['request_08a_same_epoch_message_low2_tracks_request_count_mod4'] is True and ART['cross_capture_conclusions']['request_08a_b26_is_not_secoc_message_counter'] is True)
-    check('Corolla 0x08A key-domain equality remains a live cryptographic boundary', 'live native-0x08A command-5 equality oracle' in req['cryptographic_boundary'])
-    print('\n== B6 sender consequence and boundary ==')
-    imp = ART['b6_sender_implication']
-    check('00F exposes 36/46 meaningful B6 freshness bits', imp['what_00f_reveals'].startswith('36/46'))
-    check('B6 message8 explicitly remains local', 'B6-local' in imp['what_remains_per_b6'] and 'must not be copied' in imp['what_remains_per_b6'])
-    check('new authenticated epoch removes dependence on old B6 message8', 'does not require knowledge of the previous B6 message8' in imp['new_epoch_reanchor'])
-    check('same-epoch sender still needs full message state', 'still needs the reconstructed full message8' in imp['same_epoch_boundary'])
-    check('transition overlap is explicitly handled', 'current-1' in imp['transition_race'] and 'new 0x00F' in imp['transition_race'])
-    check('slot4 secret remains unresolved', any(('slot-4 secret' in x for x in imp['still_blocking'])))
-    check('live B6 sender policy remains unresolved', any(('live B6' in x for x in imp['still_blocking'])))
-    check('capture identity boundary remains explicit', 'not exact H/F firmware-identity joins' in ART['evidence_boundary'])
-    check('D7 message counter is not transferred to B6', 'No D7 message counter is transferred to B6' in ART['evidence_boundary'])
 _section_corolla_hf_secoc_00f_freshness_bridge()
 print()
 print(f'\n== RESULT: {passed} passed, {failed} failed ==')

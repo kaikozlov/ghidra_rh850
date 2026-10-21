@@ -364,8 +364,7 @@ def exact_f33() -> dict:
   # Exact F33 signal261..273 application fields as unpacked by 0x4BD46.  The
   # standard generated-COM -> stage -> broad-snapshot propagation is explicit
   # for every entry below except signal266, whose staged F135 byte is never
-  # copied into the broad BCD62 snapshot. This direct-reference consumer census
-  # is bounded; OEM names for the unnamed fields remain unresolved.
+  # copied into the broad BCD62 snapshot.
   secondary_specs = {
     261: ('B3[5:0]', 0xFEBEADB0, 'Target Lateral ID; sole ordinary profile selector value'),
     262: ('B4:B5', 0xFEBEAE90, 'signed target steering-angle command'),
@@ -442,7 +441,7 @@ def exact_f33() -> dict:
     },
     'known_frc_state_carriers_absent_from_exact_rx': [f'0x{x:03X}' for x in sorted(state_carriers)],
     'exact_normal_rx_descriptor_count': len(accepted_rx),
-    'boundary': 'This does not mean EPS is state-blind: the common controller has SecOC/freshness, PDU health, speed, angle/rate, fault and slew/limit supervision. It means the recovered B6 profile selector has no DRCC/LTA engagement authorization input and no per-profile ownership latch.',
+    'boundary': 'The common controller has SecOC/freshness, PDU health, speed, angle/rate, fault and slew/limit supervision. The recovered B6 profile selector has no DRCC/LTA engagement authorization input and no per-profile ownership latch.',
   }
 
 

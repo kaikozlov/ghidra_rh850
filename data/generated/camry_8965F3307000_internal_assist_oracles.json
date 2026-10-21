@@ -117,7 +117,7 @@
     }
   ],
   "d0218_term_semantic_closure": {
-    "classification": "recovered/bounded inside the B6-inactive D0218 contribution to the shared CC50/CC62 actuation funnel: no term is an independently recovered external lane-target magnitude; term values reduce to measured steering torque, vehicle speed, steering-angle feedback, internal phase/mode state, and ROM calibration. The shared downstream physical funnel is separately verified below. This positively explains why factory steering can occur with B6 absent; the unresolved question is specifically which exact external/local state selects or modulates this internal assist path during LTA/LCA.",
+    "classification": "recovered/bounded inside the B6-inactive D0218 contribution to the shared CC50/CC62 actuation funnel: term values reduce to measured steering torque, vehicle speed, steering-angle feedback, internal phase/mode state, and ROM calibration. The shared downstream physical funnel is separately verified below. This explains why factory steering can occur with B6 absent.",
     "terms": [
       {
         "cell": "FEBEC43C",
@@ -140,7 +140,7 @@
       {
         "cell": "FEBECC2C",
         "classification": "bounded nested assist sum",
-        "provenance": "D0162 sums C3A0+C39C+C41E+C5A8+C53A and amplitude-clamps the result; this summation is not itself a slew limiter",
+        "provenance": "D0162 sums C3A0+C39C+C41E+C5A8+C53A and amplitude-clamps the result",
         "runtime_writer": "0x000D0162"
       },
       {
@@ -170,7 +170,7 @@
     ]
   },
   "drive_mode_assist_map": {
-    "boundary": "The percentages above compare only the exact C2B64/FEBEBF3C base-assist term. Total EPS motor torque requires additional terms: D0218 sums multiple torque/speed/return terms before the shared current-control funnel. These percentages demonstrate why Sport is heavier without quantifying whole-rack assist reduction.",
+    "boundary": "The percentages above compare the exact C2B64/FEBEBF3C base-assist term. D0218 sums multiple torque/speed/return terms before the shared current-control funnel. These percentages demonstrate why Sport is heavier.",
     "direct_bf3c_samples": [
       {
         "normal_eco_direct_bf3c": 703,
@@ -331,7 +331,7 @@
         "0x0C9BCE",
         "0x0CC3BE"
       ],
-      "classification": "31 exact C156 readers are censused. Among 26 direct healthy selector-strided calibration regions, selector1/Sport differs from selector0 in five regions; the other direct regions alias. All separately pointer-indexed selector families enumerated here alias across 0..3. OEM names for the four smaller distinct shaping regions remain bounded, but their control paths are live and all four converge into D0162 through C39C, C41E, or C5A8.",
+      "classification": "31 exact C156 readers are censused. Among 26 direct healthy selector-strided calibration regions, selector1/Sport differs from selector0 in five regions; the other direct regions alias. All separately pointer-indexed selector families enumerated here alias across 0..3. The four smaller distinct shaping regions have live control paths and converge into D0162 through C39C, C41E, or C5A8.",
       "direct_region_count": 26,
       "direct_regions": [
         {
@@ -1001,7 +1001,6 @@
       ]
     }
   },
-  "production_output_authorized": false,
   "recommended_passive_oracles": [
     {
       "data_id": "0x1C38",
@@ -1023,7 +1022,7 @@
   "selector_influence_observability": {
     "FEBEC4C0_no_direct_term_did": "C8678 syntactically indexes PTR_LAB_000D3630[FEBEC156&3] and selector-strided D3670/D3674 tables before writing FEBEC4C0, but exact pointer entries alias across all four selector banks (D3630=0xB1208 x4; D3670 family repeats 0xB1248/0xB121C). No exact F33 RDBI callback directly reads FEBEC4C0.",
     "FEBEC5EE_via_0x1C3E": "C9812 syntactically indexes PTR_DAT_000D39DC[FEBEC156&3], filters/integrates into FEBEC5EC; C9A84 consumes FEBEC5EC and writes FEBEC5EE; D0D7C/BF3AA then expose its scaled/clamped proxy at DID 0x1C3E. In exact 8965F3307000 all four selector entries alias 0xB018A, so this path cannot distinguish FEBEC156 choices in this calibration.",
-    "classification": "Direct selector state remains unexposed by the exact RDBI callback census. 1C3E observes C5EE, but exact selector-indexed maps alias, so it supplies only a moving-assist term oracle/control. Discriminating selector state requires influence that survives calibration aliasing in other internal terms (notably C28FC/C2B64) or blended final command state.",
+    "classification": "Direct selector state remains unexposed by the exact RDBI callback census. 1C3E observes C5EE, but exact selector-indexed maps alias, so it supplies a moving-assist term oracle/control.",
     "exact_alias_tables": {
       "C4C0_D3630": [
         "0xB1208",
@@ -1064,7 +1063,7 @@
     }
   },
   "shared_proxy_scale": {
-    "boundary": "The returned DID value is a scaled/clamped proxy only; its raw D0218 source term uses different units, and an OEM engineering-unit name remains unresolved.",
+    "boundary": "The returned DID value is a scaled/clamped proxy.",
     "intermediate_clamp": "+/-0x569A",
     "intermediate_scale_cell": "FEBEAE3C <- FEBEB140 via BCD62",
     "rdbi_post_scale": "*100/0x80"

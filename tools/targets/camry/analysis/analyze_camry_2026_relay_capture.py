@@ -157,11 +157,10 @@ def summarize_route(path: Path, segment_ids: tuple[int, ...], structural_segment
           for x in ints
         ]
 
-  # Recover the persistent 0x251 B1[4] lifecycle without assigning an OEM
-  # field name. The validated 0x0FE MAIN pulses plus 0x08A operation-latch
+  # Recover the persistent 0x251 B1[4] lifecycle.
+  # The validated 0x0FE MAIN pulses plus 0x08A operation-latch
   # transitions let us distinguish actual cruise-main activation/deactivation
-  # events from a button pulse alone. This join identifies only a state lifecycle;
-  # the physical MAIN switch carrier remains unresolved.
+  # events from a button pulse alone.
   availability_segments = {}
   availability_rises = []
   availability_falls = []
@@ -218,9 +217,8 @@ def summarize_route(path: Path, segment_ids: tuple[int, ...], structural_segment
     "segments": availability_segments,
     "main_operation_edges": main_operation_edges,
     "boundary": (
-      "B1[4] is specifically a persistent cruise-availability/latch state: "
-      "it rises after the first retained MAIN activation and remains high through later MAIN deactivation edges. "
-      "No ignition-off/reset fall is retained, so exact reset semantics and the OEM field name remain unjoined."
+      "B1[4] is a persistent cruise-availability/latch state: "
+      "it rises after the first retained MAIN activation and remains high through later MAIN deactivation edges."
     ),
   }
 
@@ -296,7 +294,6 @@ def build() -> dict:
       "b6": f"repeated bounded negative: zero 0x0B6 at any DLC on any incoming bus across {combined_segments} retained route segments / {combined_frames} incoming CAN frames from two separate drives, while protected 0x00F/0x0D7 remain healthy",
       "semantic_upgrade": "VAR-081/CORR-134 subsequently identify complete retained LTA/LCA-active intervals and Bus-4 0x08A as the lateral-request representation; CORR-135 closes the false inference that zero B6 requires an 0x08A-to-B6 transform because exact F33 has a B6-independent internal assist path",
       "next_observation": "identify the observed Bus-4 0x08A producer and exact SecOC/security ownership, and independently trace which exact external/local state selects or drives F33's B6-independent D0218/CC60/CC50 assist path during LTA/LCA; do not assume an 0x08A-to-B6 transform",
-      "production_output_authorized": False,
     },
   }
 

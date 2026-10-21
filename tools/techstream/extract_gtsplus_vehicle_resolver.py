@@ -548,7 +548,7 @@ def build() -> dict[str, Any]:
                     "all current Camry-HV install rows use connection frame 0 / CommSet 9 and phase-type byte "
                     "0x12 or 0x22; every one of the 34 candidates independently resolves through Toyota's class-0x10D "
                     "(category, phase) route table. Frame 0 has empty send/mask/check variables, so mount resolution "
-                    "is category-scoped transport setup/connectivity only"
+                    "is category-scoped transport setup/connectivity"
                 ),
             },
             "output": "CCmdEcuInfo list",

@@ -103,7 +103,7 @@
     }
   },
   "can_bus_check_topology": {
-    "component_name_join": "component_index+1 -> CDbSubBusConfirmationCGWTable name ('Power Steering (EPS)' etc.) establishes naming correspondence only. An ECUNo key join remains unproved; only the Camry 0x6D/0x29/0x32 membership is independently pinned by repo evidence in docs/variants/camry-2026-live-baseline.md.",
+    "component_name_join": "component_index+1 -> CDbSubBusConfirmationCGWTable name ('Power Steering (EPS)' etc.) establishes naming correspondence. The Camry 0x6D/0x29/0x32 membership is independently pinned by repo evidence in docs/variants/camry-2026-live-baseline.md.",
     "focus_component_t76_indexes": [
       2,
       16,
@@ -37169,7 +37169,7 @@
   },
   "generalization_boundaries": {
     "diagnostic_address_generation_boundary": "The ECUNo->diagnostic-request-address join is read from the v18 IT3Data_BDC ECU_Setting_Table because current GTS+ ships no equivalent table. Addresses are physical UDS request IDs in the 0x7xx range. Panda bus numbers use a separate namespace. Cross-generation address stability is observed only where repo captures corroborate it (Camry 2026 FRC 0x792, EPS 0x7A1, skid 0x7B0).",
-    "host_decoder_not_wire_owner": "PCS Data Viewer/TSE parser structure proves Toyota knows how to decode saved recorder data. It does not by itself identify CAN arbitration IDs, ECU-side producer transforms, SecOC signing ownership, or a one-to-one mapping from resource keys to FRC proprietary AB/EB records.",
+    "host_decoder_not_wire_owner": "PCS Data Viewer/TSE parser structure proves Toyota knows how to decode saved recorder data.",
     "region_local_install_sets": "Architecture is joined through vehicle/install-set/category membership per regional master. Numeric install-set IDs are region-local and must not be transferred between NA/EU/JP by number alone; region_local_boundaries.install_set_id_namespaces exhibits concrete collisions.",
     "topology_is_gateway_identity_not_panda_bus": "CAN Bus Check bus_index/bus_name/gateway_names describe Toyota's Central-Gateway network model. They must not be relabeled as panda bus numbers; the panda harness dimension is tracked separately in docs/tooling/panda-toyota-routing.md.",
     "tss3_is_not_one_steering_topology": "Category 498 FRC_P5 spans multiple selected install-set architectures. EMPS2_P5/Steering Actuator category 499 is present only in a minority of category-498 rows, so Steering Actuator is not an intrinsic requirement of the TSS3 diagnostic generation.",
@@ -37201,7 +37201,7 @@
           "NA": 0
         }
       },
-      "meaning": "Current master install rows containing FRC_P5 category 498 have zero selected-category co-occurrence with PCS1_P5(427), DSSystem_P5(428), Fr_RadSen_P5(429), RoadSign_P5(431), or PCS2_P5(432) in NA/EU/JP. Those databases may still be useful Toyota vocabulary, but their P5 generation alone is not evidence that they are members of the category-498 TSS3 architecture."
+      "meaning": "Current master install rows containing FRC_P5 category 498 have zero selected-category co-occurrence with PCS1_P5(427), DSSystem_P5(428), Fr_RadSen_P5(429), RoadSign_P5(431), or PCS2_P5(432) in NA/EU/JP."
     }
   },
   "gtsplus_db_version": "01.01.037",
@@ -37324,7 +37324,7 @@
       "GetHealthCheck_EcuInfo",
       "GetSystemEcuInfoList"
     ],
-    "interpretation": "The shipped TSE/GTSE converter has dedicated P5 DTC/FFD, PredictiveFFD, RoB, health-check, ring-buffer signal and ECU-map readers, and its three format templates explicitly allocate CAN, RoB, VehicleControlHistory, PCS time-series FFD and PCS image-FFD sections. This is a high-value offline capture-format decoder surface. Direct parsing of FRC AB/EB payloads remains unproved.",
+    "interpretation": "The shipped TSE/GTSE converter has dedicated P5 DTC/FFD, PredictiveFFD, RoB, health-check, ring-buffer signal and ECU-map readers, and its three format templates explicitly allocate CAN, RoB, VehicleControlHistory, PCS time-series FFD and PCS image-FFD sections. This is a high-value offline capture-format decoder surface.",
     "ring_buffer_symbols": [
       "ParseBufferFrame",
       "ParseFrameTable",

@@ -2,6 +2,7 @@
 """Verify recovered PCS Data Viewer ADU recorder semantics."""
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 from pathlib import Path
@@ -27,7 +28,15 @@ def geometry(row: dict[str, object]) -> tuple[object, ...]:
 
 
 def main() -> int:
-    data = json.loads(ART.read_text())
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--assembly", type=Path, help="exercise extraction from a CP-recovered PCS viewer")
+    args = parser.parse_args()
+    if args.assembly is not None:
+        from tools.techstream.extract_pcs_data_viewer_adu_semantics import extract
+
+        data = extract(args.assembly, gtsplus_root=DIAG / "GTSPlus")
+    else:
+        data = json.loads(ART.read_text())
     adu = data["adu"]
     check("ADU row census", adu["row_count"] == 7851)
     check("ADU DID census", adu["did_count"] == 1369)
@@ -35,6 +44,8 @@ def main() -> int:
     rows = {row["Key"]: row for row in adu["rows"]}
 
     expected = {
+        "Trigger": ("Trigger", (0, 0, 0, "u", "1", [])),
+        "1523": ("Relative velocity of the controlled object", (1, 7, 32, "s", "0.01", ["0x7FFFFFFF"])),
         "2A02_1": ("ADAS required longitudinal ID (lower limit)", (1, 7, 8, "u", "1", [])),
         "2A02_2": ("ADAS required acceleration (lower limit)", (2, 7, 16, "s", "0.001", ["0x7FFF"])),
         "2A02_3": ("ADAS braking/driving force distribution method instruction (lower limit)", (4, 7, 8, "u", "1", [])),
