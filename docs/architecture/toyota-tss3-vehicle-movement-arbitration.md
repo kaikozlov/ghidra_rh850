@@ -812,7 +812,7 @@ component** in the exact-Camry component set; component `0x65`, which appears in
 other Toyota topology sets, is absent here. The current GTS English database also does
 not spell the acronym out.
 
-The exact 04/2024-onward 2025-Camry service material puts real hardware behind those GTS
+The exact 04/2024-onward Camry service material puts real hardware behind those GTS
 names. Connector **A30** is the **No. 1 skid control ECU (brake booster with master
 cylinder assembly)**. Its terminal table names A30-34/35 `DC1H/DC1L` **Daisy chain
 communication line (H/L)** and A30-36/37 `CA1H/CA1L` **CAN communication line 1
@@ -823,15 +823,17 @@ catalog makes both computers serviceable only as larger electrohydraulic assembl
 **47050-06040** is the 2025--2026 brake booster/master-cylinder assembly and explicitly
 includes an ABS control module; **44050-06691** is the 2025 ABS hydraulic/brake-actuator
 assembly and includes the ABS control module, modulator, pump and motor (superseding
-44050-06690). Thus there is no separate catalogued "EBU box" to buy on this Camry. The
-most direct physical candidate for the EPS attachment boundary is the A30/47050 assembly,
-because both the ordinary CAN1 pair and the explicitly named daisy-chain pair terminate at
-that ECU connector. **That does not yet prove an active bridge/filter inside 47050-06040**:
-the service manual calls both pairs Bus-4 main-line circuitry, and the prior disconnected
-~120-ohm measurements are also consistent with a normally continuous daisy chain split
-between its termination resistors. The separate A31/44050 Brake/EPB ECU remains the leading
-VMM/request-generation candidate and can still be the producer/controller of traffic that
-A30 forwards onto the EPS attachment.
+44050-06690). Thus there is no separate catalogued "EBU box" to buy on this Camry.
+
+The 2026 Camry Chilton/Toyota `Multiplex Communication System (CAN)` schematic closes the
+physical branch more tightly. Page 20 draws A30-36/37 `CA1H/CA1L` onto the shared Bus-4
+side through **A48 No. 2 Global CAN Junction Connector**, while A30-34/35 `DC1H/DC1L`
+runs directly through the passive **CA4** inline connector to C50 EPS pins 10/11
+`CANH/CANL`. No ECU, gateway or additional junction is drawn between A30 `DC1` and C50.
+A31 remains a separate brake actuator/skid-control participant on the shared side and the
+leading VMM/B6 request-generation source-domain candidate. The physical admission boundary
+and the logical B6 source therefore need not be the same ECU function: A31 can generate or
+own the post-arbitration request while A30 controls which traffic reaches the EPS leg.
 
 A Denso physical-layer disclosure materially narrows what `DC1` itself means. Denso
 US10829062 describes a high-speed CAN/CAN-FD **physical daisy chain** in which two twisted
@@ -861,16 +863,20 @@ segmentation/admission/regeneration boundary exists between the Panda-visible ch
 and F33**, unless the remaining narrow alternative is a receiver-specific analog/link-decode
 failure affecting Panda-created FD.
 
-This does not yet prove that A30 itself implements that active boundary. A30 could use the
-Denso-style passive `CA1<->DC1` continuation while another integrated EBU sub-node or later
-attachment performs the selective routing. But if physical tracing shows that A30's DC1 pair
-is the only path from the shared Bus-4 side to C50/EPS, then direct CA1<->DC1 continuity would
-conflict with the hidden-native-B6 observation and force a search for another inline element
-on that downstream leg. Conversely, two independently routed transceivers/switches inside the
-47050/47210 assembly would fit the dynamic evidence immediately. The cheapest discriminator
-remains unpowered `CA1H -> DC1H` / `CA1L -> DC1L` continuity plus PCB inspection, but the
-prior probability is no longer neutral: **the vehicle data already requires an active boundary
-somewhere on this physical route.**
+The page-20 branch drawing resolves the assembly-level location that was previously conditional.
+A30 `DC1` is the only active-module endpoint drawn between the shared Bus-4 side and C50/EPS;
+CA4 is an inline connector, not an ECU. Combined with the exact-car dynamic evidence above,
+the leading conclusion is now that the required admission/segmentation/regeneration boundary
+is **inside the A30 brake-booster/master-cylinder assembly**. An integrated EBU/network-security
+sub-node inside A30 is an internal implementation candidate, not a separate downstream physical
+location. The remaining narrow alternative is an EPS-specific analog/link-decode failure that
+selectively affects Panda-created FD traffic; absent that, the harness-level search is closed.
+What remains unresolved is which circuitry inside A30 implements the boundary: main
+skid-control MCU, a second CAN controller/transceiver domain, an integrated EBU/security node,
+or another internal switching/regeneration block. Unpowered `CA1H -> DC1H` /
+`CA1L -> DC1L` continuity and PCB inspection are still useful for classifying that internal
+implementation, but are no longer needed to identify the serviceable assembly containing the
+boundary.
 
 Toyota-authored terminology supplies the expansion independently: Toyota Motor
 Engineering & Manufacturing North America patent US20210323519A1 calls an EBU an
@@ -894,38 +900,43 @@ The resulting leading physical model is therefore **not**
 ```text
 Panda-visible / shared logical Bus-4 domain
              |
-             +-- No.2 Global CAN Junction -- Brake Booster
-             |                           \-- Skid Control / Brake actuator
+             +-- No.2 Global CAN Junction -- A31 Skid Control / Brake actuator
              |                                (category 435)
              |                                VMM/request generation
-             |                                B6 generation/auth/routing  [leading]
-             |                                      |
-             |                                      v
-             +--------------------------- EBU-labelled EPS attachment
-                                                    |
-                                                    v
-                                                F33 EPS
-                                          one CAN receive path
+             |                                B6 generation/auth  [leading]
+             |
+             +--------------------------- A30 CA1
+                                              |
+                                      A30 internal admission /
+                                      routing / regeneration
+                                      [implementation unresolved]
+                                              |
+                                           A30 DC1
+                                              |
+                                      CA4 inline connector
+                                              |
+                                              v
+                                           C50/F33 EPS
 ```
 
-The serial Skid->EPS arrow represents the leading **logical/source-domain inference**.
-The Denso daisy-chain
-precedent above means the A30 `CA1/DC1` path may simply be one continuous Bus-4 main line.
-The source-domain inference is favored by three independent facts: Toyota places VMM request
-generation in the Brake ECU; F33 diagnoses loss of B6 as loss of the Brake System
-Control Module; and contemporary Toyota repair procedures require ECU-Security-Key
-update when the skid-control ECU/brake-actuator assembly is replaced. A distinct,
-serviceable EBU filter ECU is neither present in the exact Camry GTS component set nor
-needed to explain the evidence. An integrated internal EBU sub-node inside the brake
-assembly remains possible and would not require a separately serviceable ECU identity.
+The A31->B6 part remains the leading **logical/source-domain inference**. The A30 placement
+is now a separate **physical-path conclusion**: the exact wiring puts A30 between the shared
+Bus-4 junction and the EPS-only downstream leg, with no other ECU on that leg. The Denso
+daisy-chain precedent remains useful as a warning that `DC1` naming alone never proved an
+active bridge, but it no longer supplies an external alternative location once combined with
+the exact-car hidden-native-B6 / host-FD rejection evidence. A distinct, serviceable EBU
+filter ECU is neither present in the exact Camry GTS component set nor present in the page-20
+wiring path. An integrated EBU sub-node inside A30 remains plausible and is part of the A30
+assembly-level conclusion.
 
 This model is completely compatible with exact F33 having only **one** application CAN
-controller. The segmentation/selection happens upstream; EPS sees only its one local
-CAN input. Ordinary diagnostics and selected Bus-4 traffic can be routed onto that leg
-while externally injected B6 is withheld and locally generated Brake/VMM B6 is admitted.
-**The exact bridge/filter routine is still unproved** until Camry category-435 Brake
-application `F152633K0000` is acquired or equivalent physical tracing identifies the hop.
-Machine-readable GTS-only evidence is `data/generated/camry_2026_ebu_topology.json`.
+controller. The segmentation/selection happens upstream in the A30 assembly; EPS sees only
+its one local CAN input. Ordinary diagnostics and selected Bus-4 traffic can be routed onto
+that leg while externally injected B6 is withheld and locally generated Brake/VMM B6 is
+admitted. **The exact A30 bridge/filter implementation is still unproved** until the relevant
+brake-side application firmware is acquired or physical/PCB tracing identifies the internal
+hop. Machine-readable GTS-only evidence remains `data/generated/camry_2026_ebu_topology.json`;
+the page-20 wiring closure is independent service-manual evidence layered on top of it.
 
 The successful development fallback proves the complementary point.  The EPS-resident
 helper waits for an **already-admitted native B6**, replaces its target/application bytes,

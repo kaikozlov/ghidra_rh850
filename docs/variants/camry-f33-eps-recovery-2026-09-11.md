@@ -1060,22 +1060,29 @@ The system diagram is `https://lemon-manuals.la/images25/GTY1267625/`; the
 A30 terminal face is `https://lemon-manuals.la/images25/GTY1267223/`; and the
 power-steering branch is shown in `https://lemon-manuals.la/images25/GTY1267483/`.
 The specified resistance on both disconnected harness halves establishes that each
-separated half sees a termination, but it **does not establish an active A30 bridge**.
+separated half sees a termination; by itself it **does not establish an active A30 bridge**.
 Denso US10829062 documents a CAN-FD physical daisy-chain construction in which an
 intermediate ECU joins incoming/outgoing CANH directly by PCB conductor pattern and does
 the same for CANL while a single transceiver taps the continued line. Current Prius brake
 service material uses the same `DC1H/DC1L` 34/35 and `CA1H/CA1L` 36/37 vocabulary for
-opposite portions of a CAN main line. The Camry A30 pair can therefore be consistent with a
-normally continuous Bus-4 daisy chain that becomes two ~120-ohm halves when unplugged.
-A direct tester on A30-34/35 can still access the EPS-side harness in isolation, but that
-physical isolation must not be described as bypassing a proved A30 gateway/filter. Unpowered
-A30 `CA1H->DC1H` / `CA1L->DC1L` continuity or PCB inspection is required to classify the
-node as passive pass-through versus an active bridge. Importantly, later exact-car dynamics
-show that the **overall Panda-visible Bus-4 -> F33 path cannot be one transparent passive
-segment**: native B6 reaches F33 while remaining absent from 253 segments of Panda-visible
-native traffic, and Panda-created FD disappears before F33 admission while classic traffic on
-the same private endpoint reaches it. Thus a passive A30 result would not eliminate an active
-EBU/attachment boundary; it would move that boundary farther down the EPS-side leg.
+opposite portions of a CAN main line, so the connector names and resistance measurements
+alone originally allowed a passive-continuation interpretation.
+
+Later exact-car evidence closes the **assembly-level** location more tightly. The 2026 Camry
+Chilton/Toyota `Multiplex Communication System (CAN)` page 20 draws A30-36/37
+`CA1H/CA1L` to A48 No. 2 Global CAN Junction Connector and A30-34/35 `DC1H/DC1L`
+directly through passive inline connector CA4 to C50 EPS pins 10/11 `CANH/CANL`; no ECU,
+gateway or additional junction is present on the downstream leg. Independently, native B6
+reaches F33 while remaining absent from 253 segments of Panda-visible native traffic, and
+Panda-created FD disappears before F33 admission while classic traffic on the same endpoint
+reaches it. A completely transparent CA1<->DC1 vehicle path cannot explain both observations.
+The leading conclusion is therefore that the required admission/segmentation/regeneration
+boundary is **inside the A30 brake-booster/master-cylinder assembly**, including any integrated
+EBU/security sub-node. The remaining uncertainty is internal implementation, not a separate
+ECU farther down the harness; the narrow residual alternative is EPS-specific analog/link
+decode behavior. Unpowered A30 `CA1H->DC1H` / `CA1L->DC1L` continuity or PCB inspection
+remains useful for classifying A30's internal implementation. Current interpretation is owned
+by [the TSS3 vehicle-movement arbitration report](../architecture/toyota-tss3-vehicle-movement-arbitration.md).
 
 A30 is a sealed underhood connector on the upper/rear brake-booster electronics
 in the left-rear engine compartment; full booster removal is not a prerequisite
