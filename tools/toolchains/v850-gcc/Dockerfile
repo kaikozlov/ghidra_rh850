@@ -20,6 +20,7 @@ RUN /src/binutils/configure --target="${TARGET_ARCH}" --prefix="${TOOLCHAIN_PATH
 WORKDIR /src
 COPY patches/binutils-v850-sim-imm32.patch /tmp/binutils-v850-sim-imm32.patch
 COPY patches/binutils-v850-sim-codeflash-map.patch /tmp/binutils-v850-sim-codeflash-map.patch
+COPY patches/binutils-v850-sim-loop.patch /tmp/binutils-v850-sim-loop.patch
 COPY patches/gdb-v850-frame-unwind.patch /tmp/gdb-v850-frame-unwind.patch
 RUN git clone --depth=1 --branch=gdb-18.1-release https://sourceware.org/git/binutils-gdb.git gdb \
  && test "$(git -C gdb rev-parse HEAD)" = "${GDB_COMMIT}" \
@@ -27,6 +28,8 @@ RUN git clone --depth=1 --branch=gdb-18.1-release https://sourceware.org/git/bin
  && git -C gdb apply /tmp/binutils-v850-sim-imm32.patch \
  && git -C gdb apply --check /tmp/binutils-v850-sim-codeflash-map.patch \
  && git -C gdb apply /tmp/binutils-v850-sim-codeflash-map.patch \
+ && git -C gdb apply --check /tmp/binutils-v850-sim-loop.patch \
+ && git -C gdb apply /tmp/binutils-v850-sim-loop.patch \
  && git -C gdb apply --check /tmp/gdb-v850-frame-unwind.patch \
  && git -C gdb apply /tmp/gdb-v850-frame-unwind.patch
 WORKDIR /build/gdb

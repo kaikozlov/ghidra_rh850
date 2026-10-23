@@ -1292,12 +1292,25 @@ simulated opcode/payload because `CodeFlash[0x30D68]=0x5A`.
 The next simulator-extension target is the complete diagnostic/session envelope
 (including real state from `0x95A3E/0x95B88` and caller transitions), with
 measured instruction timing and receive scheduling rather than synthetic RAM
-changes. A separate attempt to execute `boot_service_request_download @ 0x5D68`
-under the GNU simulator reaches the real `loop r1,0x52B0` instruction at
-`0x52B8`, whose simulated next PC is anomalously `0x7F000C` and faults. That is
-a **simulator instruction-support boundary**, not a firmware memory-corruption
-result or a completed bootloader fuzz. Fix that emulator behavior or use the
-pinned Ghidra P1M-E runner before interpreting a boot `0x34` fuzz outcome.
+changes. A separate original-CodeFlash boot `0x34` attempt exposed a
+**confirmed GNU simulator defect**, now fixed by
+[`binutils-v850-sim-loop.patch`](../../tools/toolchains/v850-gcc/patches/binutils-v850-sim-loop.patch):
+`loop r1,0x52B0` at `0x52B8` is four bytes (`e1 06 09 00`), but the old
+`sim/v850/v850.igen` matched it as a six-byte `jmp32`, consumed the following
+instruction and attempted a bogus fetch from `0x7F000C`. The updated pinned
+simulator recognizes the bit-16 instruction distinction and correctly executes
+both loop and fallthrough cases. The unmodified boot parser at `0x52A6` now
+runs to return: input `12 34 56 78` produces `r10=0x12345678`, with counter
+`r1=0`. Direct checks also verify the carry/zero/overflow corner cases.
+Under the same fixed simulator, the exact boot `RequestDownload @ 0x5D68`
+passes its parser, computes `start=FEBF0000`/`length=0x1000`, and reaches
+SecurityAccess gate `0x5EFC`; with SA state 1 it takes the denied arm at
+`0x5F04` (`NRC 0x33`). A separate synthetic SA-state-2 attempt proceeds
+further and encounters another unmodeled target environment/fault near
+`0x6798`, which is not evidence for a bootloader exploit. Thus the **LOOP
+blocker is fixed**, but the entire authenticated download workflow is not yet
+end-to-end verified by this test. Run `tools/rh850 toolchain self-test` and
+`tools/test rh850_codeflash` for the regression contract.
 
 ## 14. Exact F33 persistent Gate-2 development patch
 

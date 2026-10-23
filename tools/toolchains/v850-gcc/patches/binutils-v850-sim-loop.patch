@@ -1,0 +1,73 @@
+From: ghidra_rh850 project
+Subject: [PATCH] sim: v850e3v5: disambiguate and implement LOOP
+
+GNU sim/v850 lacks RH850E3 LOOP, which shares its first halfword with
+JMP disp32[reg1]. The old six-byte JMP pattern matches the four-byte LOOP
+and consumes the next instruction as the last immediate halfword.
+
+Require the encoded bit 16 to be zero for the six-byte JMP and one for the
+four-byte LOOP. Decode LOOP's unsigned backward displacement, decrement and
+condition flags, while preserving the normal JMP32 immediate.
+
+---
+--- a/sim/v850/v850.igen
++++ b/sim/v850/v850.igen
+@@ -52,6 +52,7 @@
+ :cache:::unsigned:disp9:ddddd,ddd:SEXT32 ((ddddd << 4) + (ddd << 1), 9 - 1)
+ :cache:::unsigned:disp16:dddddddddddddddd:EXTEND16 (dddddddddddddddd)
+ :cache:::unsigned:disp16:ddddddddddddddd: EXTEND16 (ddddddddddddddd << 1)
++:cache:::unsigned:loopdisp:ddddddddddddddd:(ddddddddddddddd << 1)
+ :cache:::unsigned:disp17:d,ddddddddddddddd:SEXT32 (((d <<16) + (ddddddddddddddd << 1)), 17 - 1)
+ :cache:::unsigned:disp22:dddddd,ddddddddddddddd: SEXT32 ((dddddd << 16) + (ddddddddddddddd << 1), 22 - 1)
+ :cache:::unsigned:disp23:ddddddd,dddddddddddddddd: SEXT32 ((ddddddd) + (dddddddddddddddd << 7), 23 - 1)
+@@ -64,6 +65,7 @@
+ :cache:::unsigned:simm16:iiiiiiiiiiiiiiii:EXTEND16 (iiiiiiiiiiiiiiii)
+ :cache:::unsigned:uimm16:iiiiiiiiiiiiiiii:iiiiiiiiiiiiiiii
+ :cache:::unsigned:imm32:iiiiiiiiiiiiiiii,IIIIIIIIIIIIIIII:((IIIIIIIIIIIIIIII << 16) + iiiiiiiiiiiiiiii)
++:cache:::unsigned:jmpdisp32:iiiiiiiiiiiiiii,IIIIIIIIIIIIIIII:((IIIIIIIIIIIIIIII << 16) + (iiiiiiiiiiiiiii << 1))
+ :cache:::unsigned:uimm32:iiiiiiiiiiiiiiii,dddddddddddddddd:((iiiiiiiiiiiiiiii << 16) + dddddddddddddddd)
+ 
+ :cache:::unsigned:vector:iiiii:iiiii
+@@ -798,13 +800,35 @@
+   TRACE_BRANCH0 ();
+ }
+ 
+-00000110111,RRRRR + iiiiiiiiiiiiiiii + IIIIIIIIIIIIIIII:VI:::jmp32
+-*v850e2
+-*v850e2v3
+-*v850e3v5
+-"jmp <imm32>[r<reg1>]"
+-{
+-  nia = (GR[reg1] + imm32) & ~1;
++// LOOP (RH850E3/V850E3V5)
++// The low bit of the second halfword distinguishes this 4-byte instruction
++// from the 6-byte JMP disp32[reg1].  Its displacement is unsigned.
++00000110111,RRRRR + ddddddddddddddd,1:VI:::loop
++*v850e3v5
++"loop r<reg1>, <loopdisp>"
++{
++  uint32_t old = GR[reg1];
++  uint32_t next = old - 1;
++
++  GR[reg1] = next;
++  /* LOOP decrements by adding -1, including CY from that addition. */
++  PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
++  if (next == 0) PSW |= PSW_Z;
++  if (next & 0x80000000) PSW |= PSW_S;
++  if (old != 0) PSW |= PSW_CY;
++  if (old == 0x80000000) PSW |= PSW_OV;
++  if (next != 0) nia = cia - loopdisp;
++
++  TRACE_BRANCH_RESULT (nia);
++}
++
++00000110111,RRRRR + iiiiiiiiiiiiiii,0 + IIIIIIIIIIIIIIII:VI:::jmp32
++*v850e2
++*v850e2v3
++*v850e3v5
++"jmp <jmpdisp32>[r<reg1>]"
++{
++  nia = (GR[reg1] + jmpdisp32) & ~1;
+ 
+   TRACE_BRANCH_RESULT (nia);
+ }

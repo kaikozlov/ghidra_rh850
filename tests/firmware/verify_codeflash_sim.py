@@ -860,6 +860,69 @@ def check_contract(work: Path, image: Path, resident_end: int) -> None:
         raise AssertionError("simulation must reject byte-pinned overlay drift")
 
 
+
+def check_camry_original_loop(work: Path) -> None:
+    """Execute the unmodified boot parsing LOOP at 0x52B8.
+
+    Before the RH850E3 LOOP decoder fix GNU sim/v850 treated the four-byte
+    LOOP as a six-byte JMP32, consumed the next instruction, and faulted at
+    0x7F000C.  This checks the real CodeFlash loop and its return value,
+    not an isolated C reimplementation of the parser.
+    """
+    codeflash = ROOT / "firmware/camry-8965F3307000/CodeFlash.bin"
+    if sha256(codeflash.read_bytes()) != "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7":
+        raise AssertionError("unexpected Camry CodeFlash image")
+    output, _elf = run_codeflash(
+        root=ROOT, image_path=codeflash, entry=0x52A6,
+        memory_regions=("0xFEBE0000,0x20000",), stop="0x798",
+        gdb_commands=(
+            "set $r6 = 0xFEBE4000",
+            "set $r7 = 4",
+            "set $r31 = 0x798",
+            "set {unsigned int}0xFEBE4000 = 0x78563412",
+            "break *0x798",
+            "continue",
+        ),
+        assertions=("$r10 == 0x12345678", "$r1 == 0"),
+        output_dir=work / "camry-boot-loop", timeout=45.0,
+    )
+    if "RH850_EXECUTION_VERIFIED" not in output:
+        raise AssertionError("original CodeFlash LOOP did not complete")
+    print("PASS Camry boot 0x52A6 LOOP: four input bytes -> 0x12345678, counter zero")
+
+    # Reach the existing SA=1 rejection via an actual 13-byte boot SID 0x34
+    # request. Stop before responding/performing a flash operation; this test
+    # verifies the parser and authorization-boundary control flow only.
+    request = bytes.fromhex("34 01 46 01 00 FE BF 00 00 00 00 10 00")
+    script = [
+        "set $r4 = 0xFEBF9800",  # boot GP
+        "set $r5 = 0x869C",      # boot TP
+        "set $r3 = 0xFEBE8000",  # boot SP
+        "set $r31 = 0x798",
+        "set $r6 = 13",
+        "set {unsigned char}0xFEBF2B0E = 2",  # programming session
+        "set {unsigned char}0xFEBF2B0F = 1",  # SA locked
+        "set {unsigned char}0xFEBF2B13 = 0",  # no active transfer
+        "set {unsigned char}0xFEBF2B16 = 0",  # no payload ready
+        "set {unsigned char}0xFEBF2B15 = 1",
+        "set {unsigned char}0xFEBF2B12 = 1",
+    ]
+    script.extend(
+        f"set {{unsigned char}}0x{0xFEBF30C0 + i:X} = {value}"
+        for i, value in enumerate(request)
+    )
+    script.extend(("break *0x5F04", "continue"))
+    run_codeflash(
+        root=ROOT, image_path=codeflash, entry=0x5D68,
+        memory_regions=("0xFEBE0000,0x20000",), stop="0x5F04",
+        gdb_commands=tuple(script),
+        assertions=("$r29 == 0xFEBF0000", "$r28 == 0x1000",
+                    "*(unsigned char *)0xFEBF2B0F == 1"),
+        output_dir=work / "camry-boot-request-download-locked", timeout=45.0,
+    )
+    print("PASS Camry boot SID 0x34: parsed address/length, SA-locked branch at 0x5F04")
+
+
 def check_gate2(work: Path) -> None:
     """Stock, root-only, stage-2, and stage-3 Gate-2 images differ behaviorally."""
     stock = gate2_builder.STOCK_IMAGE.read_bytes()
@@ -986,6 +1049,7 @@ def main() -> int:
         image_path, resident_end = build_generic(work)
         check_generic(image_path, resident_end)
         check_contract(work, image_path, resident_end)
+        check_camry_original_loop(work)
         check_unwind(work)
         check_gate2(work)
         check_built_resident(

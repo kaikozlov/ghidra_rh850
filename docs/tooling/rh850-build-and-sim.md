@@ -612,15 +612,29 @@ required per target.
 Upstream GNU `sim/v850` has a long-standing format-VI 32-bit-immediate decoder
 bug affecting `jarl32`/`jr32`/`jmp32` (the `imm32` cache in `v850.igen` used a
 relational `<` where a shift was intended, and assembled the encoded halfwords
-in the wrong order; still present on upstream master). The repository toolchain
-applies two patches:
+in the wrong order; still present on upstream master). The pinned simulator
+also lacked the four-byte RH850E3 `loop reg1, disp16` instruction: it shares
+its first halfword with six-byte `jmp32`, but has **bit 16 set** rather than
+clear. On exact Camry `8965F3307000`, the original `e1 06 09 00` at `0x52B8`
+therefore incorrectly consumed the following instruction and jumped to
+`0x007F000C`, rather than decrementing `r1` and branching to `0x52B0`.
+The repository toolchain applies three simulator patches:
 
 - `binutils-v850-sim-imm32.patch` fixes format-VI immediate word assembly;
 - `binutils-v850-sim-codeflash-map.patch` replaces the legacy 32 KiB mirrored
   backing store for `0x00000000..0x000FFFFF` with a complete 1 MiB store —
-  without it every `0x8000`-byte block overwrites the previous alias.
+  without it every `0x8000`-byte block overwrites the previous alias;
+- `binutils-v850-sim-loop.patch` disambiguates the six-byte `jmp32` (bit 16
+  zero) from four-byte RH850E3 `loop` (bit 16 one), and implements LOOP's
+  unsigned backward displacement, decrement, and `ADD(-1)` condition flags.
 
-`tools/rh850 toolchain self-test` covers both fixes before accepting the simulator.
+`tools/rh850 toolchain self-test` exercises the prior long branch/CodeFlash
+cases, the corrected taken/fallthrough LOOP cases (including Z/CY flags), and
+the non-LOOP six-byte JMP32 decoder. The existing `tools/test rh850_codeflash`
+suite additionally executes the **original, unmodified** Camry boot parser
+`0x52A6` through LOOP at `0x52B8`, checks its big-endian result, then follows
+boot SID `0x34` from `0x5D68` to the locked SecurityAccess reject arm at
+`0x5F04`, with the requested RAM address and size verified.
 
 ## Rebuilding the GNU setup
 

@@ -19,11 +19,12 @@ from pathlib import Path
 from tools import REPO_ROOT
 
 ROOT = REPO_ROOT
-IMAGE = "ghidra-rh850-v850-gcc:16.2.0-binutils2.46.1-gdb18.1-simfix2-bswap1-noreturn1-codegen1-unwind1"
+IMAGE = "ghidra-rh850-v850-gcc:16.2.0-binutils2.46.1-gdb18.1-simfix3-bswap1-noreturn1-codegen1-unwind1"
 DOCKERFILE = ROOT / "tools" / "toolchains" / "v850-gcc" / "Dockerfile"
 SELFTEST_RESULT = "RH850_SELFTEST_RESULT=0x12cb5687"
 SELFTEST_CODEFLASH_RESULT = "RH850_CODEFLASH_RESULT=0xc0deface"
 SELFTEST_BSWAP_RESULT = "RH850_BSWAP_RESULT=0x78563412"
+SELFTEST_LOOP_RESULT = "RH850_LOOP_RESULT=4"
 # Check generated frame/save invariants in functions that must retain their ABI saves.
 SELFTEST_NORETURN_RESULTS = (
     "RH850_NORETURN_MIN_FRAME=0",
@@ -95,6 +96,40 @@ low_jump:
     jarl32 _selftest_bswap, lp
     mov 0xfebf1008, r11
     st.w r10, 0[r11]
+
+    /* RH850E3 LOOP is four bytes, sharing its first halfword with JMP32.
+       Exercise both taken and terminal fallthrough paths with the real ISA. */
+    mov 4, r16
+    mov 0, r17
+rh850_loop_body:
+    add 1, r17
+    loop r16, rh850_loop_body
+    /* Last decrement 1 + (-1) sets Z and CY (not a borrow). */
+    bne selftest_fail
+    bnc selftest_fail
+    cmp 4, r17
+    bne selftest_fail
+    cmp 0, r16
+    bne selftest_fail
+    mov 1, r16
+    loop r16, rh850_loop_body
+    bne selftest_fail
+    bnc selftest_fail
+    cmp 0, r16
+    bne selftest_fail
+    mov 0xfebf100c, r11
+    st.w r17, 0[r11]
+
+    /* JMP32 shares LOOP's first halfword but has bit 16 clear and six
+       encoded bytes. Exercise the other side of the decode partition. */
+    jarl32 rh850_jmp32_anchor, lp
+rh850_jmp32_anchor:
+    mov lp, r19
+    jmp 12[r19]
+    br selftest_fail
+    nop
+rh850_jmp32_target:
+
     .global rh850_sim_stop
 rh850_sim_stop:
     br rh850_sim_stop
@@ -139,7 +174,7 @@ v850-elf-gdb -q -batch \
   -ex "break rh850_sim_stop" \
   -ex "break rh850_sim_fail_stop" \
   -ex run \
-  -ex 'printf "RH850_SELFTEST_RESULT=0x%x\nRH850_CODEFLASH_RESULT=0x%x\nRH850_BSWAP_RESULT=0x%x\n", *(unsigned int *)0xFEBF1000, *(unsigned int *)0xFEBF1004, *(unsigned int *)0xFEBF1008'
+  -ex 'printf "RH850_SELFTEST_RESULT=0x%x\nRH850_CODEFLASH_RESULT=0x%x\nRH850_BSWAP_RESULT=0x%x\nRH850_LOOP_RESULT=%u\n", *(unsigned int *)0xFEBF1000, *(unsigned int *)0xFEBF1004, *(unsigned int *)0xFEBF1008, *(unsigned int *)0xFEBF100C'
 
 # The no-local loop must lose its entire frame. Genuine locals/outgoing
 # arguments and saves needed by returning, interrupt, or unwind paths remain.
@@ -584,6 +619,7 @@ def cmd_selftest(_args: argparse.Namespace) -> int:
         SELFTEST_RESULT,
         SELFTEST_CODEFLASH_RESULT,
         SELFTEST_BSWAP_RESULT,
+        SELFTEST_LOOP_RESULT,
         *SELFTEST_NORETURN_RESULTS,
     ):
         if expected not in proc.stdout:
