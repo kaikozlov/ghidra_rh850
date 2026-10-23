@@ -4,13 +4,15 @@
     "asserted_files": [
       "00000043--29caa20fbc/00000043--29caa20fbc--12/rlog.zst"
     ],
+    "byte4_bit6_asserted_files": [
+      "00000043--29caa20fbc/00000043--29caa20fbc--12/rlog.zst"
+    ],
+    "native_08a_byte4_bit6_asserted": 21,
+    "native_08a_frames": 100804,
+    "native_08a_valid_prefix_checksums": 100804,
     "native_5ae_byte2_bit2_asserted": 4,
     "native_5ae_frames": 12981,
-    "rlog_count": 44,
-    "special_08a_request_b_counts": {
-      "id_33_allocation_3": 12,
-      "id_34_allocation_3": 9
-    }
+    "rlog_count": 44
   },
   "event": {
     "acceleration_range_mps2": [
@@ -19,7 +21,12 @@
     ],
     "after": {
       "byte3": 8,
+      "byte3_bit2": false,
       "byte4": 128,
+      "byte4_bit6": false,
+      "byte7_checksum": 71,
+      "byte7_checksum_expected": 71,
+      "byte7_checksum_valid": true,
       "lateral_id": 0,
       "log_mono_time_ns": 3183879464054,
       "raw": "0000000880002d47f1285ef1287fff007fff00174000300000001f00117281d9",
@@ -29,16 +36,19 @@
         "id": 11
       },
       "request_b": {
-        "accel_mps2": -3.8,
-        "allocation": 3,
-        "id": 17
+        "accel_mps2": -3.8
       },
       "request_sequence": 31,
       "set_speed_kph": 94
     },
     "before": {
       "byte3": 8,
+      "byte3_bit2": false,
       "byte4": 128,
+      "byte4_bit6": false,
+      "byte7_checksum": 71,
+      "byte7_checksum_expected": 71,
+      "byte7_checksum_valid": true,
       "lateral_id": 0,
       "log_mono_time_ns": 3183340552706,
       "raw": "0000000880002d47f0605ef0607fff007fff000c4000100000000a00fc472d50",
@@ -48,45 +58,52 @@
         "id": 11
       },
       "request_b": {
-        "accel_mps2": -4.0,
-        "allocation": 3,
-        "id": 17
+        "accel_mps2": -4.0
       },
       "request_sequence": 10,
       "set_speed_kph": 94
     },
     "brake_vmm_result": {
+      "byte20_21_range_mps2": [
+        -0.427,
+        -0.401
+      ],
       "first": {
+        "byte20_21_mps2": -0.427,
         "lateral_result_id": 11,
         "log_mono_time_ns": 3183375241976,
         "longitudinal_result_id": 11,
         "raw": "00000018faad0b5300000004000b0000fffffe55fe550c69fe551ff9f74010dd",
-        "request_loss_supervision": false,
-        "result_accel_mps2": -0.427
+        "request_loss_supervision": false
       },
       "frame_count": 17,
       "last": {
+        "byte20_21_mps2": -0.401,
         "lateral_result_id": 0,
         "log_mono_time_ns": 3183846822926,
         "longitudinal_result_id": 11,
         "raw": "00000018f31d0bbc00000004000000000017fe6ffe6f0c6bfe6f1f4fd10a00a3",
-        "request_loss_supervision": false,
-        "result_accel_mps2": -0.401
+        "request_loss_supervision": false
       },
       "longitudinal_result_ids": [
         11
       ],
-      "request_loss_supervision_asserted_frames": 0,
-      "result_accel_range_mps2": [
-        -0.427,
-        -0.401
-      ]
+      "request_loss_supervision_asserted_frames": 0
+    },
+    "byte3_bit2_phase_counts": {
+      "0": 12,
+      "1": 9
     },
     "duration_s": 0.486045,
     "end_route_offset_s": 752.922597,
     "first": {
       "byte3": 12,
+      "byte3_bit2": true,
       "byte4": 192,
+      "byte4_bit6": true,
+      "byte7_checksum": 139,
+      "byte7_checksum_expected": 139,
+      "byte7_checksum_valid": true,
       "lateral_id": 0,
       "log_mono_time_ns": 3183360778366,
       "raw": "0000000cc0002d8bf0605ef0607fff007fff000b4000100000000b003a194b8d",
@@ -96,9 +113,7 @@
         "id": 11
       },
       "request_b": {
-        "accel_mps2": -4.0,
-        "allocation": 3,
-        "id": 34
+        "accel_mps2": -4.0
       },
       "request_sequence": 11,
       "set_speed_kph": 94
@@ -158,7 +173,12 @@
     },
     "last": {
       "byte3": 8,
+      "byte3_bit2": false,
       "byte4": 192,
+      "byte4_bit6": true,
+      "byte7_checksum": 135,
+      "byte7_checksum_expected": 135,
+      "byte7_checksum_valid": true,
       "lateral_id": 0,
       "log_mono_time_ns": 3183846822926,
       "raw": "00000008c0002d87f1285ef1287fff007fff00154000300000001e00d1994198",
@@ -168,16 +188,19 @@
         "id": 11
       },
       "request_b": {
-        "accel_mps2": -3.8,
-        "allocation": 3,
-        "id": 33
+        "accel_mps2": -3.8
       },
       "request_sequence": 30,
       "set_speed_kph": 94
     },
     "phase_transition": {
       "byte3": 8,
+      "byte3_bit2": false,
       "byte4": 192,
+      "byte4_bit6": true,
+      "byte7_checksum": 135,
+      "byte7_checksum_expected": 135,
+      "byte7_checksum_valid": true,
       "lateral_id": 0,
       "log_mono_time_ns": 3183576656788,
       "raw": "00000008c0002d87f0605ef0607fff007fff000d400030000000130006f38fbe",
@@ -187,9 +210,7 @@
         "id": 11
       },
       "request_b": {
-        "accel_mps2": -4.0,
-        "allocation": 3,
-        "id": 33
+        "accel_mps2": -4.0
       },
       "request_sequence": 19,
       "set_speed_kph": 94
@@ -197,7 +218,12 @@
     "relay_timeline": {
       "first_host_send_after_start": {
         "byte3": 8,
+        "byte3_bit2": false,
         "byte4": 128,
+        "byte4_bit6": false,
+        "byte7_checksum": 71,
+        "byte7_checksum_expected": 71,
+        "byte7_checksum_valid": true,
         "lateral_id": 11,
         "log_mono_time_ns": 3183376463383,
         "offset_from_request_start_ms": 15.685,
@@ -208,16 +234,19 @@
           "id": 11
         },
         "request_b": {
-          "accel_mps2": -1.5,
-          "allocation": 3,
-          "id": 17
+          "accel_mps2": -1.5
         },
         "request_sequence": 42,
         "set_speed_kph": 94
       },
       "first_native_forwarded": {
         "byte3": 12,
+        "byte3_bit2": true,
         "byte4": 192,
+        "byte4_bit6": true,
+        "byte7_checksum": 139,
+        "byte7_checksum_expected": 139,
+        "byte7_checksum_valid": true,
         "lateral_id": 0,
         "log_mono_time_ns": 3183394286123,
         "offset_from_request_start_ms": 33.508,
@@ -228,16 +257,19 @@
           "id": 11
         },
         "request_b": {
-          "accel_mps2": -4.0,
-          "allocation": 3,
-          "id": 34
+          "accel_mps2": -4.0
         },
         "request_sequence": 12,
         "set_speed_kph": 94
       },
       "last_accepted_host_replacement_before_start": {
         "byte3": 8,
+        "byte3_bit2": false,
         "byte4": 128,
+        "byte4_bit6": false,
+        "byte7_checksum": 71,
+        "byte7_checksum_expected": 71,
+        "byte7_checksum_valid": true,
         "lateral_id": 11,
         "log_mono_time_ns": 3183352837554,
         "offset_from_request_start_ms": -7.941,
@@ -248,9 +280,7 @@
           "id": 11
         },
         "request_b": {
-          "accel_mps2": -1.5,
-          "allocation": 3,
-          "id": 17
+          "accel_mps2": -1.5
         },
         "request_sequence": 41,
         "set_speed_kph": 94
@@ -260,7 +290,12 @@
       "not_forwarded": [
         {
           "byte3": 12,
+          "byte3_bit2": true,
           "byte4": 192,
+          "byte4_bit6": true,
+          "byte7_checksum": 139,
+          "byte7_checksum_expected": 139,
+          "byte7_checksum_valid": true,
           "lateral_id": 0,
           "log_mono_time_ns": 3183360778366,
           "raw": "0000000cc0002d8bf0605ef0607fff007fff000b4000100000000b003a194b8d",
@@ -270,16 +305,19 @@
             "id": 11
           },
           "request_b": {
-            "accel_mps2": -4.0,
-            "allocation": 3,
-            "id": 34
+            "accel_mps2": -4.0
           },
           "request_sequence": 11,
           "set_speed_kph": 94
         },
         {
           "byte3": 12,
+          "byte3_bit2": true,
           "byte4": 192,
+          "byte4_bit6": true,
+          "byte7_checksum": 139,
+          "byte7_checksum_expected": 139,
+          "byte7_checksum_valid": true,
           "lateral_id": 0,
           "log_mono_time_ns": 3183375241976,
           "raw": "0000000cc0002d8bf0605ef0607fff007fff000b4000100000000b00726d435a",
@@ -289,9 +327,7 @@
             "id": 11
           },
           "request_b": {
-            "accel_mps2": -4.0,
-            "allocation": 3,
-            "id": 34
+            "accel_mps2": -4.0
           },
           "request_sequence": 11,
           "set_speed_kph": 94
@@ -304,7 +340,12 @@
       },
       "rejected_host_replacement": {
         "byte3": 8,
+        "byte3_bit2": false,
         "byte4": 128,
+        "byte4_bit6": false,
+        "byte7_checksum": 71,
+        "byte7_checksum_expected": 71,
+        "byte7_checksum_valid": true,
         "lateral_id": 11,
         "log_mono_time_ns": 3183382952902,
         "offset_from_request_start_ms": 22.175,
@@ -315,17 +356,11 @@
           "id": 11
         },
         "request_b": {
-          "accel_mps2": -1.5,
-          "allocation": 3,
-          "id": 17
+          "accel_mps2": -1.5
         },
         "request_sequence": 42,
         "set_speed_kph": 94
       }
-    },
-    "request_b_phase_counts": {
-      "id_33_allocation_3": 12,
-      "id_34_allocation_3": 9
     },
     "request_frame_count": 21,
     "route": "00000043--29caa20fbc",
@@ -355,13 +390,16 @@
     }
   },
   "interpretation": {
-    "boundary": "The user report plus temporal join identifies this as the PCS-alert witness.",
-    "bounded_result": "The native FRC request plane enters a two-phase ID34->ID33 state while request A remains ID11. Both acceleration slots are -4.000 m/s^2 at entry. FRC-side 0x5AE byte2 bit2 asserts on the exact entry timestamp and is unique in the retained 44-rlog corpus.",
-    "relay_consequence": "The active replacement path blocks the first two native ID34 frames. After openpilot disables, the next host replacement is rejected and stock forwarding resumes 33.508 ms after native entry. The separate 0x5AE alert bit is forwarded from the first transition, explaining why an alert can remain visible while the shared 0x08A request is blocked. The Brake/VMM result never asserts request-loss supervision and remains result ID11 throughout. A replacement path must preserve stock emergency requests through normal upstream safety/controller ownership."
+    "boundary": "The user report and coincident warning identify a PCS-associated state. Its exact OEM stage (preparation, brake assist, or automatic braking) remains unmapped. The 0x081 B20:B21 scalar is a closed-accelerator reference candidate, not an identified arbitration-result acceleration.",
+    "bounded_result": "Native FRC 0x08A byte4 bit6 is set for 21 consecutive frames; byte3 bit2 is set for the first nine. Byte7 validates as the Toyota checksum of the eight-byte prefix, not a lower request ID or allocation. Both acceleration slots are already -4.000 m/s^2 before the flags assert. FRC-side 0x5AE byte2 bit2 asserts on the exact entry timestamp and is unique in the retained 44-rlog corpus.",
+    "relay_consequence": "The active replacement path blocks the first two native frames with byte4 bit6 set. After openpilot disables, the next host replacement is rejected and stock forwarding resumes 33.508 ms after native entry. The separate 0x5AE alert bit is forwarded from the first transition, explaining why an alert can remain visible while the shared 0x08A request is blocked. The Brake/VMM result never asserts request-loss supervision and remains result ID11 throughout. A replacement path must preserve stock emergency requests through normal upstream safety/controller ownership."
   },
-  "schema": "camry-20260921-pcs-alert-v2",
+  "schema": "camry-20260921-pcs-alert-v3",
   "sources": [
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2450,
+      "native_08a_valid_prefix_checksums": 2450,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 307,
       "path": "0000003a--7d62f5b41f/rlog-0.zst",
@@ -369,6 +407,9 @@
       "size": 8720096
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2400,
+      "native_08a_valid_prefix_checksums": 2400,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 300,
       "path": "0000003a--7d62f5b41f/rlog-1.zst",
@@ -376,6 +417,9 @@
       "size": 9401847
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2400,
+      "native_08a_valid_prefix_checksums": 2400,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 300,
       "path": "0000003a--7d62f5b41f/rlog-10.zst",
@@ -383,6 +427,9 @@
       "size": 9268797
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2400,
+      "native_08a_valid_prefix_checksums": 2400,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 300,
       "path": "0000003a--7d62f5b41f/rlog-11.zst",
@@ -390,6 +437,9 @@
       "size": 9283027
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2400,
+      "native_08a_valid_prefix_checksums": 2400,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 301,
       "path": "0000003a--7d62f5b41f/rlog-2.zst",
@@ -397,6 +447,9 @@
       "size": 9494412
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2400,
+      "native_08a_valid_prefix_checksums": 2400,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 325,
       "path": "0000003a--7d62f5b41f/rlog-3.zst",
@@ -404,6 +457,9 @@
       "size": 10784223
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2400,
+      "native_08a_valid_prefix_checksums": 2400,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 314,
       "path": "0000003a--7d62f5b41f/rlog-4.zst",
@@ -411,6 +467,9 @@
       "size": 10688846
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2399,
+      "native_08a_valid_prefix_checksums": 2399,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 317,
       "path": "0000003a--7d62f5b41f/rlog-5.zst",
@@ -418,6 +477,9 @@
       "size": 10772314
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2400,
+      "native_08a_valid_prefix_checksums": 2400,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 313,
       "path": "0000003a--7d62f5b41f/rlog-6.zst",
@@ -425,6 +487,9 @@
       "size": 10561623
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2400,
+      "native_08a_valid_prefix_checksums": 2400,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 300,
       "path": "0000003a--7d62f5b41f/rlog-7.zst",
@@ -432,6 +497,9 @@
       "size": 9280176
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2400,
+      "native_08a_valid_prefix_checksums": 2400,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 300,
       "path": "0000003a--7d62f5b41f/rlog-8.zst",
@@ -439,6 +507,9 @@
       "size": 9259207
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2400,
+      "native_08a_valid_prefix_checksums": 2400,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 300,
       "path": "0000003a--7d62f5b41f/rlog-9.zst",
@@ -446,6 +517,9 @@
       "size": 9275321
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2443,
+      "native_08a_valid_prefix_checksums": 2443,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 318,
       "path": "00000041--a8c2152e46/00000041--a8c2152e46--0/rlog.zst",
@@ -453,6 +527,9 @@
       "size": 10303104
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2399,
+      "native_08a_valid_prefix_checksums": 2399,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 321,
       "path": "00000041--a8c2152e46/00000041--a8c2152e46--1/rlog.zst",
@@ -460,6 +537,9 @@
       "size": 10907168
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2400,
+      "native_08a_valid_prefix_checksums": 2400,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 308,
       "path": "00000041--a8c2152e46/00000041--a8c2152e46--2/rlog.zst",
@@ -467,6 +547,9 @@
       "size": 10849261
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2401,
+      "native_08a_valid_prefix_checksums": 2401,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 303,
       "path": "00000041--a8c2152e46/00000041--a8c2152e46--3/rlog.zst",
@@ -474,6 +557,9 @@
       "size": 10836320
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2400,
+      "native_08a_valid_prefix_checksums": 2400,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 314,
       "path": "00000041--a8c2152e46/00000041--a8c2152e46--4/rlog.zst",
@@ -481,6 +567,9 @@
       "size": 10713903
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 455,
+      "native_08a_valid_prefix_checksums": 455,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 60,
       "path": "00000041--a8c2152e46/00000041--a8c2152e46--5/rlog.zst",
@@ -488,6 +577,9 @@
       "size": 2050487
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 92,
+      "native_08a_valid_prefix_checksums": 92,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 12,
       "path": "00000042--169d4d611d/00000042--169d4d611d--0/rlog.zst",
@@ -495,6 +587,9 @@
       "size": 125642
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2443,
+      "native_08a_valid_prefix_checksums": 2443,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 316,
       "path": "00000043--29caa20fbc/00000043--29caa20fbc--0/rlog.zst",
@@ -502,6 +597,9 @@
       "size": 10256935
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2400,
+      "native_08a_valid_prefix_checksums": 2400,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 306,
       "path": "00000043--29caa20fbc/00000043--29caa20fbc--1/rlog.zst",
@@ -509,6 +607,9 @@
       "size": 10571123
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2400,
+      "native_08a_valid_prefix_checksums": 2400,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 312,
       "path": "00000043--29caa20fbc/00000043--29caa20fbc--10/rlog.zst",
@@ -516,6 +617,9 @@
       "size": 10292994
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2400,
+      "native_08a_valid_prefix_checksums": 2400,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 306,
       "path": "00000043--29caa20fbc/00000043--29caa20fbc--11/rlog.zst",
@@ -523,6 +627,9 @@
       "size": 10501057
     },
     {
+      "native_08a_byte4_bit6_asserted": 21,
+      "native_08a_frames": 2401,
+      "native_08a_valid_prefix_checksums": 2401,
       "native_5ae_byte2_bit2_asserted": 4,
       "native_5ae_frames": 310,
       "path": "00000043--29caa20fbc/00000043--29caa20fbc--12/rlog.zst",
@@ -530,6 +637,9 @@
       "size": 10318903
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2400,
+      "native_08a_valid_prefix_checksums": 2400,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 309,
       "path": "00000043--29caa20fbc/00000043--29caa20fbc--13/rlog.zst",
@@ -537,6 +647,9 @@
       "size": 10545290
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2400,
+      "native_08a_valid_prefix_checksums": 2400,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 310,
       "path": "00000043--29caa20fbc/00000043--29caa20fbc--14/rlog.zst",
@@ -544,6 +657,9 @@
       "size": 10713317
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2399,
+      "native_08a_valid_prefix_checksums": 2399,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 314,
       "path": "00000043--29caa20fbc/00000043--29caa20fbc--15/rlog.zst",
@@ -551,6 +667,9 @@
       "size": 10757517
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 1977,
+      "native_08a_valid_prefix_checksums": 1977,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 260,
       "path": "00000043--29caa20fbc/00000043--29caa20fbc--16/rlog.zst",
@@ -558,6 +677,9 @@
       "size": 8390432
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2399,
+      "native_08a_valid_prefix_checksums": 2399,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 311,
       "path": "00000043--29caa20fbc/00000043--29caa20fbc--2/rlog.zst",
@@ -565,6 +687,9 @@
       "size": 10534698
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2400,
+      "native_08a_valid_prefix_checksums": 2400,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 316,
       "path": "00000043--29caa20fbc/00000043--29caa20fbc--3/rlog.zst",
@@ -572,6 +697,9 @@
       "size": 10929361
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2400,
+      "native_08a_valid_prefix_checksums": 2400,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 302,
       "path": "00000043--29caa20fbc/00000043--29caa20fbc--4/rlog.zst",
@@ -579,6 +707,9 @@
       "size": 10089795
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2400,
+      "native_08a_valid_prefix_checksums": 2400,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 312,
       "path": "00000043--29caa20fbc/00000043--29caa20fbc--5/rlog.zst",
@@ -586,6 +717,9 @@
       "size": 10741517
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2399,
+      "native_08a_valid_prefix_checksums": 2399,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 308,
       "path": "00000043--29caa20fbc/00000043--29caa20fbc--6/rlog.zst",
@@ -593,6 +727,9 @@
       "size": 10198599
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2401,
+      "native_08a_valid_prefix_checksums": 2401,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 300,
       "path": "00000043--29caa20fbc/00000043--29caa20fbc--7/rlog.zst",
@@ -600,6 +737,9 @@
       "size": 9611937
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2400,
+      "native_08a_valid_prefix_checksums": 2400,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 307,
       "path": "00000043--29caa20fbc/00000043--29caa20fbc--8/rlog.zst",
@@ -607,6 +747,9 @@
       "size": 10320806
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2399,
+      "native_08a_valid_prefix_checksums": 2399,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 308,
       "path": "00000043--29caa20fbc/00000043--29caa20fbc--9/rlog.zst",
@@ -614,6 +757,9 @@
       "size": 10238743
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2437,
+      "native_08a_valid_prefix_checksums": 2437,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 316,
       "path": "00000051--894db634a8/00000051--894db634a8--0/rlog.zst",
@@ -621,6 +767,9 @@
       "size": 10046257
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2401,
+      "native_08a_valid_prefix_checksums": 2401,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 315,
       "path": "00000051--894db634a8/00000051--894db634a8--1/rlog.zst",
@@ -628,6 +777,9 @@
       "size": 10709498
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2400,
+      "native_08a_valid_prefix_checksums": 2400,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 306,
       "path": "00000051--894db634a8/00000051--894db634a8--2/rlog.zst",
@@ -635,6 +787,9 @@
       "size": 10547025
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2399,
+      "native_08a_valid_prefix_checksums": 2399,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 319,
       "path": "00000051--894db634a8/00000051--894db634a8--3/rlog.zst",
@@ -642,6 +797,9 @@
       "size": 10634925
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2400,
+      "native_08a_valid_prefix_checksums": 2400,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 320,
       "path": "00000051--894db634a8/00000051--894db634a8--4/rlog.zst",
@@ -649,6 +807,9 @@
       "size": 10583273
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2400,
+      "native_08a_valid_prefix_checksums": 2400,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 313,
       "path": "00000051--894db634a8/00000051--894db634a8--5/rlog.zst",
@@ -656,6 +817,9 @@
       "size": 10789396
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2400,
+      "native_08a_valid_prefix_checksums": 2400,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 308,
       "path": "00000051--894db634a8/00000051--894db634a8--6/rlog.zst",
@@ -663,6 +827,9 @@
       "size": 9815522
     },
     {
+      "native_08a_byte4_bit6_asserted": 0,
+      "native_08a_frames": 2110,
+      "native_08a_valid_prefix_checksums": 2110,
       "native_5ae_byte2_bit2_asserted": 0,
       "native_5ae_frames": 264,
       "path": "00000051--894db634a8/00000051--894db634a8--7/rlog.zst",

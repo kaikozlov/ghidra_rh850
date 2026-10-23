@@ -1,36 +1,39 @@
 #!/usr/bin/env python3
-"""Verify the recovered Camry TSS3 0x08A request / 0x081 result layout."""
+"""Verify Camry request-plane decoding against retained raw CAN observations."""
 from __future__ import annotations
 
+import bisect
+import gzip
+import hashlib
 import json
 import subprocess
 import sys
 import tempfile
+from collections import Counter
 from pathlib import Path
 
 from tools import REPO_ROOT
+from tools.targets.camry.analysis.analyze_camry_2026_longitudinal_request_plane import request_summary
+
 REPO = REPO_ROOT
 ART = REPO / "data/generated/camry_2026_longitudinal_request_plane.json"
 BUILD = REPO / "tools/targets/camry/analysis/analyze_camry_2026_longitudinal_request_plane.py"
-
 passed = failed = 0
 
 
-def check(name: str, cond, detail: str = "") -> None:
+def check(name: str, condition, detail: str = "") -> None:
   global passed, failed
-  ok = bool(cond)
+  ok = bool(condition)
   passed += int(ok)
   failed += int(not ok)
   print(f"[{'PASS' if ok else 'FAIL'}] {name}" + (f" ({detail})" if detail else ""))
 
 
-def approx(a: float, b: float, eps: float = 1e-9) -> bool:
-  return abs(a - b) <= eps
+def decimal_counts(values) -> dict[str, int]:
+  return {str(k): v for k, v in sorted(Counter(values).items())}
 
 
 art = json.loads(ART.read_text())
-
-print("== deterministic regeneration ==")
 with tempfile.TemporaryDirectory() as td:
   out = Path(td) / ART.name
   proc = subprocess.run([sys.executable, str(BUILD), "--output", str(out)], cwd=REPO,
@@ -38,108 +41,105 @@ with tempfile.TemporaryDirectory() as td:
   check("analyzer succeeds", proc.returncode == 0, proc.stderr[-300:])
   check("artifact regenerates byte-exact", proc.returncode == 0 and out.read_bytes() == ART.read_bytes())
 
-expected = {
-  "drive_a": {
-    "sha": "be0c02946818fafc48b7d3e2be5d2fde31d796e057ab29d8bf59a879c7553db5",
-    "request_frames": 20618, "raw_range": [-1146, 995], "pair_n": 17073,
-    "result_ids": {"11": 1529, "63": 15544}, "r": 0.941674118,
-    "id63_delta": 0.0, "id11_delta": -0.181, "lat_match": 0.999941428,
-    "idle04_stable": 18608, "idle04_moving": 7713, "low_speed_brake_edges": 4, "low_speed_brake_median_delta": -0.0295,
-  },
-  "drive_b": {
-    "sha": "641eee57eaffc579002708185178ea08c189155527354712dd43a1f0e309bb3a",
-    "request_frames": 23999, "raw_range": [-1102, 1070], "pair_n": 19999,
-    "result_ids": {"11": 3281, "63": 16718}, "r": 0.836883952,
-    "id63_delta": 0.0, "id11_delta": -0.435, "lat_match": 0.99979999,
-    "idle04_stable": 19441, "idle04_moving": 10563, "low_speed_brake_edges": 5, "low_speed_brake_median_delta": -0.036,
-  },
-}
-
-for label, e in expected.items():
-  d = art["drives"][label]
-  request = d["request_0x08A"]
-  result = d["result_0x081"]
+for label, drive in art["drives"].items():
+  source = REPO / drive["source"]["path"]
+  check(f"{label}: source identity", hashlib.sha256(source.read_bytes()).hexdigest() == drive["source"]["sha256"])
+  request_rows, result_rows = [], []
+  with gzip.open(source, "rt") as stream:
+    for line in stream:
+      _, timestamp, bus, address, payload = json.loads(line)
+      data = bytes.fromhex(payload)
+      if address == 0x08A and bus == 2 and len(data) == 32:
+        request_rows.append((timestamp, data))
+      elif address == 0x081 and bus == 0 and len(data) == 32:
+        result_rows.append((timestamp, data))
+  payloads = [data for _, data in request_rows]
+  request = drive["request_0x08A"]
+  checksum = request["byte7_checksum"]
+  # Sum individual address bytes and the original eight-byte length, not DLC32.
+  expected = [(0x8A + 0x00 + 8 + sum(data[0:7])) % 256 for data in payloads]
+  mismatches = sum(data[7] != value for data, value in zip(payloads, expected))
+  check(f"{label}: every native B7 satisfies Toyota checksum",
+        bool(payloads) and mismatches == 0
+        and checksum["checked_frames"] == len(payloads)
+        and checksum["matching_frames"] == len(payloads)
+        and checksum["mismatch_frames"] == mismatches)
+  raw_counts = {f"0x{k:02X}": v for k, v in sorted(Counter(data[7] for data in payloads).items())}
+  check(f"{label}: checksum census preserves raw bytes",
+        checksum["observed_counts"] == raw_counts == checksum["expected_counts"])
+  b6 = request["b6_request_state"]
+  check(f"{label}: B6-only request state census",
+        b6["request_id_counts"] == decimal_counts(data[6] >> 2 for data in payloads)
+        and b6["allocation_method_counts"] == decimal_counts(data[6] & 3 for data in payloads))
   words = request["longitudinal_acceleration_words"]
-  result_id = result["longitudinal_result_id_candidate"]
-  result_acc = result["longitudinal_reference_word_B20"]
-  print(f"== {label} ==")
-  check(f"{label}: raw capture identity", d["source"]["sha256"] == e["sha"])
-  check(f"{label}: duplicated 0x08A acceleration words are exact",
-        request["frame_count"] == e["request_frames"] and words["equal_frames"] == e["request_frames"]
-        and words["equal_fraction"] == 1.0 and words["B8_B9"]["signed16_raw_range"] == e["raw_range"]
-        and words["B11_B12"]["signed16_raw_range"] == e["raw_range"])
-  check(f"{label}: 0x081 selected longitudinal-ID alphabet",
-        result["paired_to_preceding_0x08A"] == e["pair_n"] and result_id["value_counts"] == e["result_ids"])
-  packed = request["longitudinal_id_allocation_packing"]
-  check(f"{label}: 0x08A B6/B7 use Toyota's 6-bit ID + 2-bit allocation geometry",
-        set(packed["candidate_A"]["allocation_method_counts"]).issubset({"0", "1", "2", "3"})
-        and set(packed["candidate_B"]["allocation_method_counts"]).issubset({"0", "1", "2", "3"})
-        and "11" in packed["candidate_A"]["request_id_counts"]
-        and "17" in packed["candidate_B"]["request_id_counts"])
-  relation = result_id["relation_to_request_ids"]
-  check(f"{label}: selected ID11 names request candidate A and ID63 is outside the TSS application slots",
-        relation["selected_ID11_equals_candidate_A_frames"] >= relation["selected_ID11_frames"] - 5
-        and relation["selected_equals_candidate_B_frames"] == 0
-        and relation["selected_63_absent_from_A_B_frames"] == e["result_ids"]["63"])
-  check(f"{label}: historical B20 reference-word request correlation",
-        approx(result_acc["request_vs_reference"]["pearson_r"], e["r"]))
-  check(f"{label}: ID63 pass-through and ID11 divergence in the B20 reference word",
-        approx(result_acc["conditional_by_result_id"]["63"]["result_minus_request"]["median_mps2"], e["id63_delta"])
-        and approx(result_acc["conditional_by_result_id"]["11"]["result_minus_request"]["median_mps2"], e["id11_delta"])
-        and abs(result_acc["conditional_by_result_id"]["11"]["result_minus_request"]["median_mps2"]) > .15)
-  check(f"{label}: lateral selected ID remains the 0x081 positive control",
-        approx(result["lateral_result"]["latest_request_id_match_fraction"], e["lat_match"]))
-  idle = d["idle_0_4_context"]
-  idle_result = idle["result_state"]
-  brake_ctx = idle["lower_id4_brake_context"]
-  check(f"{label}: stable FRC 0/4 returns Brake/VMC Driver Operation ID63",
-        idle_result["stable_pair_count"] == e["idle04_stable"]
-        and idle_result["result_id_counts"] == {"63": e["idle04_stable"]}
-        and idle_result["moving_over_1_mps_pair_count"] == e["idle04_moving"]
-        and idle_result["moving_over_1_mps_result_id_counts"] == {"63": e["idle04_moving"]})
-  check(f"{label}: low-speed brake press reduces the ID4 lower-bound value in every matched event",
-        brake_ctx["matched_brake_press_edges_under_1_mps"] == e["low_speed_brake_edges"]
-        and brake_ctx["negative_delta_edges"] == e["low_speed_brake_edges"]
-        and brake_ctx["positive_delta_edges"] == 0
-        and approx(brake_ctx["median_delta_mps2"], e["low_speed_brake_median_delta"])
-        and all(row["delta_mps2"] < 0 for row in brake_ctx["edges"]))
-  old = d["0x0CA_supersession_check"]["0x081_B20_reference_vs_0x0CA_words"]
-  check(f"{label}: old 0x0CA result triplet does not reproduce the 0x081 B20 reference word",
-        all(abs(row["pearson_r"]) < .6 for row in old.values()))
+  for offset in (8, 11):
+    values = [int.from_bytes(data[offset:offset + 2], "big", signed=True) for data in payloads]
+    check(f"{label}: signed acceleration slot B{offset}:B{offset + 1}",
+          words[f"B{offset}_B{offset + 1}"]["signed16_raw_range"] == [min(values), max(values)]
+          and words[f"B{offset}_B{offset + 1}"]["scale_mps2_per_count"] == 0.001)
+  check(f"{label}: acceleration equality measured directly",
+        words["equal_frames"] == sum(data[8:10] == data[11:13] for data in payloads))
+
+  result_times = [timestamp for timestamp, _ in result_rows]
+  stable_ids = []
+  for index, (timestamp, data) in enumerate(request_rows):
+    low, high = max(0, index - 4), min(len(request_rows), index + 5)
+    if data[6] != 0 or high - low < 5 or any(row[1][6] != 0 for row in request_rows[low:high]):
+      continue
+    pos = bisect.bisect_left(result_times, timestamp)
+    candidates = [j for j in (pos - 1, pos) if 0 <= j < len(result_rows)]
+    if candidates:
+      nearest = min(candidates, key=lambda j: abs(result_times[j] - timestamp))
+      if abs(result_times[nearest] - timestamp) <= 60_000_000:
+        stable_ids.append(result_rows[nearest][1][6] & 63)
+  context = drive["b6_zero_context"]["result_state"]
+  check(f"{label}: stable context selection depends on B6, not checksum",
+        context["stable_pair_count"] == len(stable_ids)
+        and context["result_id_counts"] == decimal_counts(stable_ids))
+
+  relation = drive["result_0x081"]["longitudinal_result_id_candidate"]["relation_to_b6_request_id"]
+  times = [timestamp for timestamp, _ in request_rows]
+  paired = []
+  for timestamp, result in result_rows:
+    pos = bisect.bisect_right(times, timestamp) - 1
+    if pos >= 0 and timestamp - times[pos] <= 60_000_000:
+      paired.append((request_rows[pos][1], result))
+  check(f"{label}: result comparison uses B6 only",
+        relation["selected_equals_B6_frames"] == sum((result[6] & 63) == (data[6] >> 2) for data, result in paired)
+        and relation["selected_63_absent_from_B6_frames"] == sum((result[6] & 63) == 63 and (data[6] >> 2) != 63 for data, result in paired))
+
+# Alter real retained frames to exercise checksum boundaries, not canned output.
+original = payloads[0]
+for offset in range(7):
+  altered = bytearray(original)
+  altered[offset] ^= 1
+  decoded = request_summary([(0, bytes(altered))])
+  check(f"checksum detects header B{offset} change", decoded["byte7_checksum"]["mismatch_frames"] == 1)
+  altered[7] = (0x8A + 8 + sum(altered[:7])) & 255
+  repaired = request_summary([(0, bytes(altered))])
+  check(f"checksum recomputation covers B{offset}", repaired["byte7_checksum"]["matching_frames"] == 1)
+for offset in (8, 11, 21, 28, 31):
+  altered = bytearray(original)
+  altered[offset] ^= 1
+  decoded = request_summary([(0, bytes(altered))])
+  check(f"legacy checksum excludes payload B{offset}", decoded["byte7_checksum"]["matching_frames"] == 1)
 
 hold = art["hold_request_semantics"]
-check("raw ACC hold states decompose into request IDs and allocation methods",
-      hold["hold_episode_frames"] == 198
-      and hold["decoded_states"]["ordinary_active"]["request_id_B"] == 17
-      and hold["decoded_states"]["ordinary_active"]["allocation_B"] == 3
-      and hold["decoded_states"]["delayed_hold"]["request_id_B"] == 25
-      and hold["decoded_states"]["delayed_hold"]["allocation_B"] == 3
-      and hold["decoded_states"]["delayed_hold_accelerator_override"]["allocation_A"] == 0
-      and hold["decoded_states"]["delayed_hold_accelerator_override"]["allocation_B"] == 2)
-check("B4[5] is the exact Camry delayed-hold structural state",
-      hold["structural_hold_state"]["wire"] == "0x08A B4[5]"
-      and hold["structural_hold_state"]["set_frames_with_cruise_latch"] == 198
-      and hold["structural_hold_state"]["xor_violations_vs_retained_delayed_hold"] == 0)
-check("moving ID25 counterexample proves hold needs allocation state too",
-      hold["decoded_states"]["moving_ID25_counterexample"]["request_id_B"] == 25
-      and hold["decoded_states"]["moving_ID25_counterexample"]["allocation_B"] == 1)
-
-namespace = art["requester_id_namespace"]
-check("Camry startup ID36 frame count",
-      namespace["camry_observed"]["id36_startup_frames"] == 33)
-id4 = namespace["camry_observed"]["id4_semantic_assessment"]
-check("ID4 stable and moving pair counts with brake-press deltas",
-      id4["stable_0_4_pairs"] == 38049
-      and id4["stable_0_4_result_63_pairs"] == 38049
-      and id4["moving_over_1_mps_pairs"] == 18276
-      and id4["moving_over_1_mps_result_63_pairs"] == 18276
-      and id4["matched_brake_press_edges_under_1_mps"] == 9
-      and id4["brake_press_edges_reducing_lower_bound"] == 9
-      and approx(id4["median_brake_press_delta_mps2"], -0.035))
-check("retained Corolla independently exercises active requester IDs 17 and 23 with downstream result63",
-      namespace["corolla_cross_platform"]["request_candidate_A_counts"] == {"0": 2363, "17": 37}
-      and namespace["corolla_cross_platform"]["request_candidate_B_counts"] == {"4": 2363, "23": 37}
-      and namespace["corolla_cross_platform"]["result_id_counts"] == {"63": 2000})
+upstream = json.loads((REPO / hold["source"]["path"]).read_text())
+raw_pairs, hold_pairs = Counter(), Counter()
+hold_frames = bit5_frames = 0
+for route in ("3b", "3c"):
+  state = upstream["routes"][route]["stock_acc_standstill_candidate"]
+  raw_pairs.update(state["raw_b6_b7_pair_counts"])
+  hold_frames += state["frames"]
+  bit5_frames += state["b4_bit5_set_frames_with_cruise_latch"]
+  for episode in state["episodes"]:
+    hold_pairs.update(episode["raw_b6_b7_pair_counts"])
+check("hold source observations preserved without checksum ID decoding",
+      hold["route_3b_3c_pair_counts"] == dict(raw_pairs)
+      and hold["hold_episode_pair_counts"] == dict(hold_pairs)
+      and hold["hold_episode_frames"] == hold_frames
+      and hold["structural_hold_state"]["set_frames_with_cruise_latch"] == bit5_frames)
 
 print(f"Summary: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

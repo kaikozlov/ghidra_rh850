@@ -28,6 +28,7 @@ from collections import Counter
 from itertools import pairwise
 from pathlib import Path
 from typing import Any
+from tools.toyota_support.toyota_route_opendbc_common import toyota_checksum
 
 REPO = REPO_ROOT
 DEFAULT_OPENPILOT = Path('/Users/kai/dev/inspect/repos/kai-openpilot')
@@ -66,13 +67,15 @@ def s16be(data: bytes) -> int:
 
 
 def decode_08a(data: bytes) -> dict[str, Any]:
+    checksum_expected = toyota_checksum(0x08A, data[:8])
     return {
         'cruise_operating_latch': (data[3] >> 3) & 1,
         'delayed_hold_state': (data[4] >> 5) & 1,
         'longitudinal_request_id_a': (data[6] >> 2) & 0x3F,
         'longitudinal_allocation_a': data[6] & 0x03,
-        'longitudinal_request_id_b': (data[7] >> 2) & 0x3F,
-        'longitudinal_allocation_b': data[7] & 0x03,
+        'byte7_checksum': data[7],
+        'byte7_checksum_expected': checksum_expected,
+        'byte7_checksum_valid': data[7] == checksum_expected,
         'longitudinal_accel_a_m_s2': round(s16be(data[8:10]) * 0.001, 6),
         'set_speed_kph': data[10],
         'longitudinal_accel_b_m_s2': round(s16be(data[11:13]) * 0.001, 6),
@@ -356,7 +359,7 @@ def analyze(LogReader, files: list[Path]) -> dict[str, Any]:
     stock_active_lta = [row for row in latch_falls if row['classification'] != 'openpilot_button_cancel' and row['request_before']['lateral_request_id'] == 11]
 
     return {
-        'schema': 'camry-20260907-hands-off-cancel-v1',
+        'schema': 'camry-20260907-hands-off-cancel-v2',
         'source': {
             'route': files[0].parent.parent.name if files and files[0].name == 'rlog.zst' else files[0].parent.name,
             'segments': len(files),
@@ -378,7 +381,7 @@ def analyze(LogReader, files: list[Path]) -> dict[str, Any]:
         'interpretation': {
             'verified_dynamic': (
                 'The strongest retained hands-off cancellation is a native FRC 0x08A request withdrawal: '
-                'the operating latch clears, Target Lateral ID 11 becomes 0, both longitudinal request packages change, and set speed clears before controls sees pcmDisable.'
+                'the operating latch clears, Target Lateral ID 11 becomes 0, the B6 longitudinal requester/allocation and both signed16 acceleration slots change, and set speed clears before controls sees pcmDisable. B7 is the Toyota checksum over the first eight-byte block, not a second requester/allocation.'
             ),
             'chassis_response': (
                 '0x081 follows the FRC withdrawal: lateral result ID becomes 0 first, then longitudinal result ID becomes 63 (Driver Operation); request-loss remains clear.'

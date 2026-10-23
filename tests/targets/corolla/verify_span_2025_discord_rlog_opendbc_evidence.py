@@ -93,13 +93,19 @@ check("0x127 carrier/checksum/raw3 D is independently corroborated", gear["frame
 gear3bf = reuse["0x3BF"]
 check("Span 0x3BF independently corroborates D", gear3bf["frame_count"] == 60 and gear3bf["raw_values"] == [16] and gear3bf["direct_decoded_values"] == ["D"])
 acc = reuse["0x08A_acc"]
-check("Span 0x08A directly closes the native ACC engaged gate", acc["acc_state_values"] == [18, 93] and acc["acc_engaged_bit_values"] == [0, 1] and acc["acc_engaged_frames"] == 37 and acc["acc_disengaged_frames"] == 2363 and acc["state_when_engaged"] == [93] and acc["state_when_disengaged"] == [18])
+check("Span 0x08A retains the B22 bit4 transitions",
+      acc["acc_engaged_bit_values"] == [0, 1] and acc["acc_engaged_frames"] == 37
+      and acc["acc_disengaged_frames"] == 2363)
+checksum = acc["byte7_checksum"]
+check("Span B7 is the Toyota checksum on every 0x08A first block",
+      checksum["valid_frames"] == acc["frame_count"] == 2400
+      and checksum["values"] == [18, 93]
+      and checksum["values_when_byte22_bit4_set"] == [93]
+      and checksum["values_when_byte22_bit4_clear"] == [18])
 packed_long = acc["request_id_allocation"]
-check("Span shares the Camry six-bit requester/two-bit allocation shape",
+check("Span B6 retains the Camry six-bit requester/two-bit allocation shape",
       packed_long["candidate_A_id_counts"] == {"0": 2363, "17": 37} and
-      packed_long["candidate_A_allocation_counts"] == {"0": 2363, "3": 37} and
-      packed_long["candidate_B_id_counts"] == {"4": 2363, "23": 37} and
-      packed_long["candidate_B_allocation_counts"] == {"1": 37, "2": 2363})
+      packed_long["candidate_A_allocation_counts"] == {"0": 2363, "3": 37})
 check("Span active ACC carries the shared signed16 acceleration-request pair",
       packed_long["engaged_accel_raw_range"] == [-387, 82] and
       packed_long["engaged_accel_mps2_range"] == [-0.387, 0.082] and

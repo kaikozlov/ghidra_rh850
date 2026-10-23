@@ -58,9 +58,12 @@ cycle removes the volatile resident.
 
 The matching `tss3` openpilot path gates both `CarState` and Panda from
 `0x08A byte22 bit4`, matching the contributor's live implementation. The
-tracked Span drive independently contains 37 asserted and 2,363 clear samples
-of that field, while legacy `0x176 B0[5]` remains clear in all 1,890 frames.
-The legacy field must therefore not be used as the Corolla control gate.
+tracked Span drive contains 37 asserted and 2,363 clear samples of that bit,
+but no independent engagement oracle qualifies its meaning. Legacy
+`0x176 B0[5]` remains clear in all 1,890 frames and supplies no positive
+control-gate evidence. B7 is the prefix checksum, not an independent
+engagement, availability or standstill state; those limits are retained in
+the [Corolla request-plane summary](../../docs/variants/corolla-h-f-openpilot-state-bridge.md#92-september-16-integration-consequence-longitudinal-stays-stock-owned-var-163).
 
 
 ## 2026-09-11 TSS3 port architecture/change reference

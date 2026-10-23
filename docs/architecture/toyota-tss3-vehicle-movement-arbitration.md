@@ -129,10 +129,10 @@ The FRC-hosted TSS3 Operation-FFD dictionary mirrors this request vocabulary:
 
 | Patent request concept | Toyota GTS/FFD | Current Camry wire join |
 |---|---|---|
-| lower longitudinal application ID | `5280 TSS required longitudinal ID (lower limit)` | strongly resolved as `0x08A B7[7:2]` for ordinary Camry DRCC; idle/manual uses ID4, active DRCC ID17 |
+| lower longitudinal application ID | `5280 TSS required longitudinal ID (lower limit)` | unmapped; `B7` is the embedded checksum, not an ID |
 | lower acceleration | `5280 ... acceleration (lower limit)`, s16 x0.001 | strongly resolved as `B11:B12` for ordinary Camry DRCC |
-| lower distribution/policy | `5280` distribution, shift, EPB, override, priority | only ID/allocation core mapped so far |
-| upper longitudinal application ID | `5281 TSS request longitudinal ID (upper limit)` | strongly resolved as `0x08A B6[7:2]` for ordinary Camry DRCC; idle/manual uses ID0, active DRCC ID11 |
+| lower distribution/policy | `5280` distribution, shift, EPB, override, priority | wire locations unresolved |
+| upper longitudinal application ID | `5281 TSS request longitudinal ID (upper limit)` | candidate `0x08A B6[7:2]`; idle/manual value 0, ordinary active DRCC value 11 |
 | upper acceleration | `5281 ... acceleration (upper limit)`, s16 x0.001 | strongly resolved as `B8:B9` for ordinary Camry DRCC |
 | request lateral ID | `5282 TSS request - lateral ID` | `0x08A B21[5:0]` |
 | requested pinion angle | `5282 TSS request - pinion angle`, s16 x0.001 | `0x08A B18:B19` (~0.00100012 rad/count) |
@@ -141,27 +141,26 @@ The FRC-hosted TSS3 Operation-FFD dictionary mirrors this request vocabulary:
 Describe `0x08A` as the **TSS request-side package**.
 Exact F33 does not receive `0x08A`.
 
-The idle Camry pair `upper ID0 / lower ID4` is especially informative. Across both
-complete retained drives, every stable `0/4` request pairs with Brake/VMC result
-`63=Driver Operation` (18,608/18,608 and 19,441/19,441), including every stable
-pair above 1 m/s. ID63 therefore describes downstream driver employment; it is not an
-FRC request hiding behind the `0/4` state. Meanwhile the ID4 lower-bound magnitude is
-dynamic. At nine matched brake-press edges below 1 m/s in D with zero accelerator,
-B11:B12 falls on 9/9 edges (combined median about -0.035 m/s²). With the brake
-released it is positive near zero speed and declines through zero into a negative
-coast/deceleration baseline as speed rises.
+The [longitudinal wire audit](../variants/camry-2026-longitudinal-evidence.md#requestresult-recorder-layout-what-is-actually-mapped)
+supersedes the former `upper ID0 / lower ID4` and active `11/17` interpretation:
+`B7 = (0x8A + 8 + sum(B0..B6)) & 255`. Its high six and low two bits
+are not independent lower-request ID/allocation fields. `B6[7:2]` and
+`B6[1:0]` remain candidate application-ID/allocation metadata; the actual lower
+ID and allocation locations remain unmapped. GTS `0x10A3/0x10A4` and recorder
+`5280/5281` define diagnostic/recorder fields, not a wire join to B7.
 
-The best current semantic attribution is therefore **ID4 = the FRC's default
-closed-accelerator/manual baseline lower-bound application**.
+The retained idle/manual acceleration observations remain useful without a lower
+application identity. At nine matched brake-press edges below 1 m/s in D with zero
+accelerator, B11:B12 falls on 9/9 edges (combined median about -0.035 m/s²).
+With the brake released it is positive near zero speed and declines through zero
+into a negative coast/deceleration baseline as speed rises.
 `US20200070849A1` independently returns a *full-closed estimated ground acceleration*
 from the powertrain to the request-arbitration/application layer. Toyota's
-`US20200094835A1 / US11285952B2` describes the corresponding physical powertrain lower
-limit as a fully-closed baseline that is braking/negative at speed but rises due to
-creep torque below roughly 8--10 km/h; older `JP5195257B2` describes accelerator-off
-creep and brake-demand creep cut. That patent behavior matches the observed ID4 curve
-and brake response extremely closely. No recovered Toyota enum assigns numeric 4 this
-name, so the application **role/quantity is strongly bounded while its exact OEM name
-remains unknown**.
+`US20200094835A1 / US11285952B2` describes a fully-closed powertrain baseline
+that is braking/negative at speed but rises due to creep torque below roughly
+8--10 km/h; older `JP5195257B2` describes accelerator-off creep and brake-demand
+creep cut. That behavior supports a **closed-accelerator/creep-coast quantity
+hypothesis** for the observed curve, not an OEM application name or numeric ID4.
 
 The exact Camry implementation is now clearer than the patent's conceptual
 per-application drawing.  **LTA, LDA, LCA, PDA/SDG, PCS and the other TSS functions are
@@ -295,25 +294,22 @@ request. This makes `0x081 B13` a useful **downstream VMM arbitration-result ora
 the feature-selected FRC request**. Logger batching limits the timing precision of
 the observed ~10-40 ms raw examples.
 
-This materially changes how the Camry ID namespace should be interpreted.  Toyota uses
-the same concept—an application identifier—for longitudinal and lateral IDs.  It is now
-reasonable to treat numeric reuse as intentional until contradicted, while still avoiding
-an unsupported claim that every generation/axis has one identical display-label table.
-In particular:
+Toyota's patents use the same concept—an application identifier—for longitudinal
+and lateral requests, but that does not establish a shared numeric label table
+across axes or generations:
 
-- `0` is a common no-request/manual anchor;
 - `63` is independently named **Driver Operation** on a P5 FRC diagnostic display
-  surface and in the lateral dictionary, but Camry longitudinal dynamics place 63 on the
-  downstream Brake/VMC **result** side: it is absent from both FRC-origin `0x08A`
-  request slots and appears when driver demand is the employed longitudinal source;
-- Camry longitudinal ID11 during ordinary DRCC and lateral ID11 `LTA/LCA` are a strong
-  candidate for a shared TSS continuous-driving application identity;
+  surface and in the lateral dictionary. Camry longitudinal dynamics place 63 on
+  the downstream Brake/VMC **result** side when driver demand is employed;
+  the unmapped lower-request ID prevents a comparison against both request IDs.
+- Candidate longitudinal B6 ID11 during ordinary DRCC and lateral ID11 `LTA/LCA`
+  are consistent with a shared continuous-driving identity, not proof of one.
 - P6 longitudinal 41/45 “MaaS autonomous-driving request 1/2” need not contradict
   lateral 41/45 `AD (Lv.4)` / `DES (Lv.4)`; those labels may be two views of the same
-  autonomous-driving application identities;
-- longitudinal ID25 during delayed hold is an unresolved semantic clue. It may
-  identify a low-speed/parking/hold application, a selected bound from another
-  application, or expose a remaining field/order mistake.
+  autonomous-driving application identities.
+- Delayed hold is associated with `0x08A B4[5]`. The accompanying B7 change is a
+  checksum consequence, not longitudinal ID25; it supplies no cross-axis join to
+  lateral `25 AP` and no separate hold-application identity.
 
 ## 4. Interface B: arbitration result and vehicle-state feedback
 
@@ -336,10 +332,10 @@ The two result IDs have deliberately different semantics:
   the powertrain controller after it compares the arbitrated application request with
   driver demand**.  If the driver wins, a driver-discriminator value is returned.
 
-This is a direct explanation for Camry `0x081` result ID63 while neither FRC-origin
-`0x08A` longitudinal bound slot contains 63. Toyota labels 63 `Driver Operation` on a
-P5 FRC diagnostic display surface, but the wire direction matters: the Brake/VMC owns
-`0x081`, so longitudinal 63 is downstream employed-source feedback to the FRC.
+This explains the downstream role of Camry `0x081` result ID63. Toyota labels
+63 `Driver Operation` on a P5 FRC diagnostic display surface, but the wire
+direction matters: the Brake/VMC owns `0x081`, so longitudinal 63 is downstream
+employed-source feedback to the FRC. The lower request ID is not yet wire-mapped.
 
 ### Result/state telemetry
 
@@ -392,7 +388,7 @@ associates the request's `0x08A B20[7:6]` values with following-like versus
 free-cruise-like conditions, while
 [original cruise-button packets](../variants/camry-2026-longitudinal-evidence.md#native-policy-transitions-and-cruise-speed-buttons)
 also establish ordinary driver-input-associated changes. The field stays `1`
-through the recorded ID34/ID33 PCS escalation; its mismatch with host value
+through the recorded PCS-associated `B4[6]` interval; its mismatch with host value
 `3` preceded that event. The subsequent
 [policy-one cutover](../variants/camry-2026-longitudinal-evidence.md#policy-one-encoder-cutover)
 changes the host constant and Panda match, without vehicle-response evidence.
@@ -967,12 +963,13 @@ reports whichever source was actually employed.
 Consequences for the Camry work:
 
 - `0x08A` B8:B9/B11:B12 are not conceptually “two copies of one acceleration
-  command”; they occupy two **bound-package slots**.  The original selected DRCC corpus
+  command”; they occupy two **bound-package slots**. The original selected DRCC corpus
   happened to have equal values, but a Sep-22 archive-wide census finds six independent
-  ordinary `ID11/ID17` divergence episodes (12 frames) with B8:B9 > B11:B12 in every
-  case.  That strongly resolves the ordinary-DRCC ordering as B8:B9=upper and
-  B11:B12=lower. A separate `ID13/ID20` intervention family has different unequal
-  geometry and remains semantically unresolved.
+  ordinary-DRCC divergence episodes (12 frames) with B8:B9 > B11:B12 in every
+  case. That strongly resolves the ordinary-DRCC ordering as B8:B9=upper and
+  B11:B12=lower, independently of the disproved B7 ID interpretation. A separate
+  intervention family with candidate B6 ID13 has different unequal geometry and
+  remains semantically unresolved.
 - A result ID of 63 while application bounds are present is expected when driver demand
   is the employed value inside the allowed range.
 - Remaining policy/permission fields still need recovery before native longitudinal is
@@ -1050,7 +1047,7 @@ FRC / TSS3 applications
 - which internal node owns each SecOC freshness/signing operation and the clean external
   replacement/suppression boundary;
 - B6 secondary-field OEM names;
-- longitudinal remaining policy bits and the distinct `ID13/ID20` intervention tuple semantics; ordinary `ID11/ID17` A/B ordering is now strongly resolved as upper/lower.
+- longitudinal remaining policy bits, lower-request ID/allocation locations, and the distinct candidate-B6-ID13 intervention semantics; ordinary-DRCC acceleration-slot ordering is strongly resolved as upper/lower.
 
 ## 11. Openpilot design consequence
 

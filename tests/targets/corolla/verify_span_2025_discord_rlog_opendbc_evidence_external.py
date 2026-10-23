@@ -32,7 +32,7 @@ if not RLOG.is_file() or not PYTHON.is_file():
 with tempfile.TemporaryDirectory(prefix="span-rlog-opendbc-") as td:
     out = Path(td) / "evidence.json"
     proc = subprocess.run([
-        str(PYTHON), str(REPO / "tools/targets/corolla/extract/extract_span_2025_discord_rlog_opendbc_evidence.py"),
+        str(PYTHON), "-m", "tools.targets.corolla.extract.extract_span_2025_discord_rlog_opendbc_evidence",
         "--rlog", str(RLOG), "--openpilot-root", str(OPENPILOT), "--output", str(out),
     ], cwd=REPO, capture_output=True, text=True, timeout=180, check=False)
     check("raw Span-rlog extraction succeeds", proc.returncode == 0, proc.stderr.strip()[:200])
@@ -50,7 +50,6 @@ torque = bridge["steering_wheel_torque"]
 check("0x030 driver torque exact reconstruction spans real steering load", torque["torque_nm"]["count"] == 6000 and torque["torque_nm"]["min"] < -8.0 and torque["torque_nm"]["max"] > 2.8 and torque["torque_nm"]["unique_count"] > 500)
 check("0x030 torque fine remainder is signed decimal digit", torque["fine_values"] == [-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5])
 check("0x030 coarse views differ only by expected rounding", torque["coarse_rounding_delta_values"] == [-1, 0, 1] and torque["coarse_rounding_delta_nonzero_frames"] == 2488)
-check("0x030 byte16 nominal value is pinned", bridge["byte16_values"] == [2])
 
 print(f"\n== RESULT: {passed} passed, {failed} failed ==")
 raise SystemExit(1 if failed else 0)

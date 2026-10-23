@@ -28,6 +28,7 @@ import json
 import sys
 from collections import Counter
 from pathlib import Path
+from tools.toyota_support.toyota_route_opendbc_common import toyota_checksum
 
 ROOT = REPO_ROOT
 DEFAULT_LOG_ROOT = Path("/Users/kai/dev/inspect/logs/camry-2026")
@@ -177,9 +178,10 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
   pending_warning_fall_t = None
   warning_episode = None
   warning_episodes: list[dict] = []
-  cruise_substate_pairs: Counter[tuple[int, int]] = Counter()
+  raw_b6_b7_pairs: Counter[tuple[int, int]] = Counter()
   cruise_hold_b4_bit5_set = 0
-  cruise_hold_b4_bit5_xor_violations = 0
+  request_checksum_frames = 0
+  request_checksum_valid_frames = 0
   cruise_hold_episode = None
   cruise_hold_episodes: list[dict] = []
 
@@ -254,22 +256,20 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
             continue
           if frame.address == 0x08A and len(dat) > 21:
             latest_stock_id = dat[21] & 0x3F
+            request_checksum_frames += 1
+            request_checksum_valid_frames += int(dat[7] == toyota_checksum(0x08A, dat[:8]))
             if warning_episode is not None:
               warning_episode["target_lateral_ids"].add(latest_stock_id)
 
-            # Same-car stock-ACC stop/hold state. B7 0x66/0x67 is distinct
-            # from generic zero vehicle speed: it appears only after several
-            # seconds stopped and clears with accelerator input before motion.
-            # Keep B6/B7 pair counts as a falsification surface: B7 bit5 alone
-            # is insufficient because the moving transition 0x47/0x65 exists.
+            # Segment the retained delayed zero-speed hold candidate on B4[5].
+            # B7 is the Toyota first-block checksum, not a hold/requester field.
+            # Preserve raw B6/B7 pairs to retain the original wire observations.
             if dat[3] & 0x08 and last_cs_t is not None and 0 <= t - last_cs_t <= MAX_STATE_AGE_S:
               pair = (dat[6], dat[7])
-              cruise_substate_pairs[pair] += 1
-              hold = dat[7] in (0x66, 0x67)
+              raw_b6_b7_pairs[pair] += 1
               b4_hold = bool(dat[4] & 0x20)
               cruise_hold_b4_bit5_set += int(b4_hold)
-              cruise_hold_b4_bit5_xor_violations += int(b4_hold != hold)
-              if hold:
+              if b4_hold:
                 if cruise_hold_episode is None:
                   cruise_hold_episode = {
                     "start_s": t,
@@ -277,7 +277,7 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
                     "frames": 0,
                     "gas_pressed_frames": 0,
                     "max_abs_speed_m_s": 0.0,
-                    "state_pair_counts": Counter(),
+                    "raw_b6_b7_pair_counts": Counter(),
                     "target_lateral_ids": set(),
                     "time_since_last_moving_at_start_s": None if last_moving_cs_t is None else t - last_moving_cs_t,
                   }
@@ -285,7 +285,7 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
                 cruise_hold_episode["frames"] += 1
                 cruise_hold_episode["gas_pressed_frames"] += int(gas_pressed)
                 cruise_hold_episode["max_abs_speed_m_s"] = max(cruise_hold_episode["max_abs_speed_m_s"], abs(v_ego))
-                cruise_hold_episode["state_pair_counts"][pair] += 1
+                cruise_hold_episode["raw_b6_b7_pair_counts"][pair] += 1
                 cruise_hold_episode["target_lateral_ids"].add(latest_stock_id)
               elif cruise_hold_episode is not None:
                 cruise_hold_episode["duration_s"] = cruise_hold_episode["end_s"] - cruise_hold_episode["start_s"]
@@ -420,7 +420,7 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
       row["time_since_last_moving_at_start_s"] = round(row["time_since_last_moving_at_start_s"], 6)
     if row["clear_abs_speed_m_s"] is not None:
       row["clear_abs_speed_m_s"] = round(row["clear_abs_speed_m_s"], 9)
-    row["state_pair_counts"] = {f"{a},{b}": n for (a, b), n in sorted(row["state_pair_counts"].items())}
+    row["raw_b6_b7_pair_counts"] = {f"{a},{b}": n for (a, b), n in sorted(row["raw_b6_b7_pair_counts"].items())}
     row["target_lateral_ids"] = sorted(row["target_lateral_ids"])
     cruise_hold_episodes_out.append(row)
 
@@ -488,16 +488,20 @@ def analyze_route(LogReader, route_dir: Path, label: str) -> dict:
     "clean_stock_lta_371_frames": eligible_371_frames,
     "b19_values_in_clean_stock_lta": {f"0x{k:02X}": v for k, v in sorted(b19_values.items())},
     "native_source_counts": {f"0x{addr:03X}/src{src}": count for (addr, src), count in sorted(source_counts.items())},
+    "request_0x08a_checksum": {
+      "frame_count": request_checksum_frames,
+      "valid_frames": request_checksum_valid_frames,
+      "formula": "(0x8A + 8 + sum(B0..B6)) & 0xFF",
+    },
     "stock_acc_standstill_candidate": {
-      "wire_state": "native bus2 0x08A delayed hold: B4[5]=1 with packed request-B ID25/allocation2-or-3",
-      "cruise_substate_pair_counts": {f"{a},{b}": n for (a, b), n in sorted(cruise_substate_pairs.items())},
+      "wire_state": "native bus2 0x08A structural delayed-hold candidate: B4[5]=1 with B3[3] cruise latch set",
+      "raw_b6_b7_pair_counts": {f"{a},{b}": n for (a, b), n in sorted(raw_b6_b7_pairs.items())},
       "b4_bit5_set_frames_with_cruise_latch": cruise_hold_b4_bit5_set,
-      "b4_bit5_vs_legacy_b7_66_67_xor_violations": cruise_hold_b4_bit5_xor_violations,
       "frames": sum(episode["frames"] for episode in cruise_hold_episodes_out),
       "episodes": cruise_hold_episodes_out,
       "all_frames_exactly_stopped": all(episode["max_abs_speed_m_s"] < 1e-6 for episode in cruise_hold_episodes_out),
       "all_episode_target_lateral_ids": sorted({lid for episode in cruise_hold_episodes_out for lid in episode["target_lateral_ids"]}),
-      "boundary": "dynamic stock-ACC resume-required/hold interpretation: B4[5] is an exact structural hold-state discriminator in the retained routes; the packed request-B state is ID25/allocation2-or-3. The state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. OEM recorder name for B4[5] remains unknown.",
+      "boundary": "Dynamic stock-ACC resume-required/hold interpretation is bounded to B4[5] with the B3[3] latch in the retained routes. The state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. B7 is a checksum and the raw B6/B7 pairs are not two requester identities. OEM name for B4[5] remains unknown.",
     },
     "native_state_machine_candidate": {
       "driver_steering_candidate": "native bus2 0x371 B20 bit4",
@@ -600,7 +604,7 @@ def main() -> int:
     routes[short] = analyze_route(LogReader, args.log_root / day / route, label)
 
   payload = {
-    "schema_version": 7,
+    "schema_version": 8,
     "method": {
       "touch_proxy": f"abs(carState.steeringTorque) >= {TOUCH_TORQUE_NM} N.m",
       "clean_stock_lta": f"carState cruise enabled, vEgo > {MIN_SPEED_MS} m/s, no blinker, latest native bus2 0x08A B21 low6 == 11",
@@ -610,7 +614,7 @@ def main() -> int:
       "exact_eps_torque": "native bus0 0x030 signed(B8)*0.1 + signed4(B17 low nibble)*0.01 N.m",
       "hud_companion_candidate": "native bus2 0x412 B0=0x14 and B1[3:2]=3",
       "hud_escalation_candidate": "native bus2 0x412 B2 bit6 while warning active",
-      "stock_acc_standstill_candidate": "native bus2 0x08A B7 in {0x66,0x67} while cruise latch is set; delayed zero-speed hold state",
+      "stock_acc_standstill_candidate": "native bus2 0x08A B4[5] while B3[3] cruise latch is set; retained delayed zero-speed hold candidate; B7 is Toyota checksum",
       "semantic_boundary": "dynamic timing/torque/state joins",
     },
     "routes": routes,

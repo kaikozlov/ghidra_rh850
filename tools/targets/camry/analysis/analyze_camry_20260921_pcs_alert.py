@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from tools import REPO_ROOT
+from tools.toyota_support.toyota_route_opendbc_common import toyota_checksum
 import argparse
 import glob
 import hashlib
@@ -59,13 +60,19 @@ def signed16(data: bytes) -> float:
 
 
 def request_row(t: int, data: bytes) -> dict[str, Any]:
+    checksum = toyota_checksum(0x08A, data[:8])
     return {
         "log_mono_time_ns": t,
         "raw": data.hex(),
         "byte3": data[3],
         "byte4": data[4],
+        "byte3_bit2": bool(data[3] & 0x04),
+        "byte4_bit6": bool(data[4] & 0x40),
+        "byte7_checksum": data[7],
+        "byte7_checksum_expected": checksum,
+        "byte7_checksum_valid": data[7] == checksum,
         "request_a": {"id": data[6] >> 2, "allocation": data[6] & 3, "accel_mps2": signed16(data[8:10])},
-        "request_b": {"id": data[7] >> 2, "allocation": data[7] & 3, "accel_mps2": signed16(data[11:13])},
+        "request_b": {"accel_mps2": signed16(data[11:13])},
         "set_speed_kph": data[10],
         "lateral_id": data[21] & 0x3F,
         "request_sequence": data[26] & 0x3F,
@@ -79,7 +86,7 @@ def result_row(t: int, data: bytes) -> dict[str, Any]:
         "longitudinal_result_id": data[6] & 0x3F,
         "request_loss_supervision": bool(data[11] & 0x10),
         "lateral_result_id": data[13] & 0x3F,
-        "result_accel_mps2": signed16(data[20:22]),
+        "byte20_21_mps2": signed16(data[20:22]),
     }
 
 
@@ -100,10 +107,11 @@ def build(logs: Path = DEFAULT_LOGS, openpilot_root: Path = DEFAULT_OPENPILOT) -
 
     sources = []
     asserted_5ae: list[dict[str, Any]] = []
-    special_08a_census: Counter[tuple[int, int]] = Counter()
+    asserted_08a_files: set[str] = set()
+    total_08a = asserted_08a = valid_08a_checksums = 0
     total_5ae = 0
     for path in files:
-        file_5ae = file_asserted = 0
+        file_5ae = file_asserted = file_08a = file_08a_asserted = file_08a_valid = 0
         for event in LogReader(str(path), sort_by_time=False, only_union_types=True):
             if event.which() != "can":
                 continue
@@ -121,14 +129,25 @@ def build(logs: Path = DEFAULT_LOGS, openpilot_root: Path = DEFAULT_OPENPILOT) -
                             "log_mono_time_ns": int(event.logMonoTime),
                             "raw": data.hex(),
                         })
-                elif frame.address == 0x08A and (data[7] >> 2) in (33, 34):
-                    special_08a_census[(data[7] >> 2, data[7] & 3)] += 1
+                elif frame.address == 0x08A:
+                    total_08a += 1
+                    file_08a += 1
+                    valid = data[7] == toyota_checksum(0x08A, data[:8])
+                    valid_08a_checksums += valid
+                    file_08a_valid += valid
+                    if data[4] & 0x40:
+                        asserted_08a += 1
+                        file_08a_asserted += 1
+                        asserted_08a_files.add(relative(path, logs))
         sources.append({
             "path": relative(path, logs),
             "size": path.stat().st_size,
             "sha256": sha256(path),
             "native_5ae_frames": file_5ae,
             "native_5ae_byte2_bit2_asserted": file_asserted,
+            "native_08a_frames": file_08a,
+            "native_08a_byte4_bit6_asserted": file_08a_asserted,
+            "native_08a_valid_prefix_checksums": file_08a_valid,
         })
 
     request_frames: list[dict[str, Any]] = []
@@ -196,14 +215,14 @@ def build(logs: Path = DEFAULT_LOGS, openpilot_root: Path = DEFAULT_OPENPILOT) -
                 "alert_type": str(state.alertType),
             })
 
-    special_indices = [index for index, row in enumerate(request_frames) if row["request_b"]["id"] in (33, 34)]
+    special_indices = [index for index, row in enumerate(request_frames) if row["byte4_bit6"]]
     if len(special_indices) != 21 or special_indices != list(range(special_indices[0], special_indices[-1] + 1)):
-        raise ValueError("PCS-alert request-ID run is absent or no longer contiguous")
+        raise ValueError("PCS-alert byte4 bit6 run is absent or no longer contiguous")
     first_index, last_index = special_indices[0], special_indices[-1]
     special = request_frames[first_index : last_index + 1]
     before, after = request_frames[first_index - 1], request_frames[last_index + 1]
     start_ns, end_ns = special[0]["log_mono_time_ns"], special[-1]["log_mono_time_ns"]
-    phase_counts = Counter((row["request_b"]["id"], row["request_b"]["allocation"]) for row in special)
+    phase_counts = Counter(int(row["byte3_bit2"]) for row in special)
     first_brake = next(row for row in car_states if row["log_mono_time_ns"] >= start_ns and row["brake_pressed"])
     first_disabled = next(row for row in selfdrive_states if row["log_mono_time_ns"] >= start_ns and not row["enabled"])
     asserted_in_segment = [row for row in f5ae if row["byte2"] & 0x04]
@@ -220,7 +239,7 @@ def build(logs: Path = DEFAULT_LOGS, openpilot_root: Path = DEFAULT_OPENPILOT) -
     event_results = [row for row in result_frames if start_ns <= row["log_mono_time_ns"] <= end_ns]
 
     return {
-        "schema": "camry-20260921-pcs-alert-v2",
+        "schema": "camry-20260921-pcs-alert-v3",
         "title": "Retained Camry user-reported PCS-alert request-plane timeline",
         "annotation": "The driver reported visible/audible PCS alerting in this window; that attribution is external to the logged openpilot fields.",
         "sources": sources,
@@ -229,7 +248,10 @@ def build(logs: Path = DEFAULT_LOGS, openpilot_root: Path = DEFAULT_OPENPILOT) -
             "native_5ae_frames": total_5ae,
             "native_5ae_byte2_bit2_asserted": len(asserted_5ae),
             "asserted_files": sorted({row["source"] for row in asserted_5ae}),
-            "special_08a_request_b_counts": {f"id_{key[0]}_allocation_{key[1]}": count for key, count in sorted(special_08a_census.items())},
+            "native_08a_frames": total_08a,
+            "native_08a_valid_prefix_checksums": valid_08a_checksums,
+            "native_08a_byte4_bit6_asserted": asserted_08a,
+            "byte4_bit6_asserted_files": sorted(asserted_08a_files),
         },
         "event": {
             "route": EVENT_ROUTE,
@@ -238,10 +260,10 @@ def build(logs: Path = DEFAULT_LOGS, openpilot_root: Path = DEFAULT_OPENPILOT) -
             "end_route_offset_s": round((end_ns - route_start_ns) / 1e9, 6),
             "duration_s": round((end_ns - start_ns) / 1e9, 6),
             "request_frame_count": len(special),
-            "request_b_phase_counts": {f"id_{key[0]}_allocation_{key[1]}": count for key, count in sorted(phase_counts.items())},
+            "byte3_bit2_phase_counts": {str(key): count for key, count in sorted(phase_counts.items())},
             "before": before,
             "first": special[0],
-            "phase_transition": next(row for row in special if row["request_b"]["id"] == 33),
+            "phase_transition": next(row for row in special if not row["byte3_bit2"]),
             "last": special[-1],
             "after": after,
             "acceleration_range_mps2": [min(row["request_b"]["accel_mps2"] for row in special), max(row["request_b"]["accel_mps2"] for row in special)],
@@ -289,9 +311,9 @@ def build(logs: Path = DEFAULT_LOGS, openpilot_root: Path = DEFAULT_OPENPILOT) -
                 "frame_count": len(event_results),
                 "longitudinal_result_ids": sorted({row["longitudinal_result_id"] for row in event_results}),
                 "request_loss_supervision_asserted_frames": sum(row["request_loss_supervision"] for row in event_results),
-                "result_accel_range_mps2": [
-                    min(row["result_accel_mps2"] for row in event_results),
-                    max(row["result_accel_mps2"] for row in event_results),
+                "byte20_21_range_mps2": [
+                    min(row["byte20_21_mps2"] for row in event_results),
+                    max(row["byte20_21_mps2"] for row in event_results),
                 ],
                 "first": event_results[0],
                 "last": event_results[-1],
@@ -299,12 +321,13 @@ def build(logs: Path = DEFAULT_LOGS, openpilot_root: Path = DEFAULT_OPENPILOT) -
         },
         "interpretation": {
             "bounded_result": (
-                "The native FRC request plane enters a two-phase ID34->ID33 state while request A remains ID11. "
-                "Both acceleration slots are -4.000 m/s^2 at entry. FRC-side 0x5AE byte2 bit2 asserts on the exact "
-                "entry timestamp and is unique in the retained 44-rlog corpus."
+                "Native FRC 0x08A byte4 bit6 is set for 21 consecutive frames; byte3 bit2 is set for the first nine. "
+                "Byte7 validates as the Toyota checksum of the eight-byte prefix, not a lower request ID or allocation. "
+                "Both acceleration slots are already -4.000 m/s^2 before the flags assert. FRC-side 0x5AE byte2 bit2 "
+                "asserts on the exact entry timestamp and is unique in the retained 44-rlog corpus."
             ),
             "relay_consequence": (
-                "The active replacement path blocks the first two native ID34 frames. After openpilot disables, the "
+                "The active replacement path blocks the first two native frames with byte4 bit6 set. After openpilot disables, the "
                 "next host replacement is rejected and stock forwarding resumes 33.508 ms after native entry. The "
                 "separate 0x5AE alert bit is forwarded from the first transition, explaining why an alert can remain "
                 "visible while the shared 0x08A request is blocked. The Brake/VMM result never asserts request-loss "
@@ -312,7 +335,9 @@ def build(logs: Path = DEFAULT_LOGS, openpilot_root: Path = DEFAULT_OPENPILOT) -
                 "preserve stock emergency requests through normal upstream safety/controller ownership."
             ),
             "boundary": (
-                "The user report plus temporal join identifies this as the PCS-alert witness."
+                "The user report and coincident warning identify a PCS-associated state. Its exact OEM stage "
+                "(preparation, brake assist, or automatic braking) remains unmapped. The 0x081 B20:B21 scalar "
+                "is a closed-accelerator reference candidate, not an identified arbitration-result acceleration."
             ),
         },
     }

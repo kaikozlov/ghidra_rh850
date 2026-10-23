@@ -1416,7 +1416,7 @@
           {
             "5af_b24": 4,
             "5af_b26_signed6": 0,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 0.076,
             "offset_from_wheel_onset_ms": -700,
@@ -1427,7 +1427,7 @@
           {
             "5af_b24": 4,
             "5af_b26_signed6": 1,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 0.41,
             "offset_from_wheel_onset_ms": -500,
@@ -1438,7 +1438,7 @@
           {
             "5af_b24": 4,
             "5af_b26_signed6": 2,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 0.854,
             "offset_from_wheel_onset_ms": -300,
@@ -1449,7 +1449,7 @@
           {
             "5af_b24": 4,
             "5af_b26_signed6": 3,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 1.055,
             "offset_from_wheel_onset_ms": -200,
@@ -1460,7 +1460,7 @@
           {
             "5af_b24": 4,
             "5af_b26_signed6": 3,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 1.129,
             "offset_from_wheel_onset_ms": -100,
@@ -1471,7 +1471,7 @@
           {
             "5af_b24": 4,
             "5af_b26_signed6": 3,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 1.228,
             "offset_from_wheel_onset_ms": 0,
@@ -1482,7 +1482,7 @@
           {
             "5af_b24": 4,
             "5af_b26_signed6": 3,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 1.281,
             "offset_from_wheel_onset_ms": 100,
@@ -1493,7 +1493,7 @@
           {
             "5af_b24": 4,
             "5af_b26_signed6": 4,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 1.337,
             "offset_from_wheel_onset_ms": 200,
@@ -1504,7 +1504,7 @@
           {
             "5af_b24": 4,
             "5af_b26_signed6": 4,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 1.359,
             "offset_from_wheel_onset_ms": 300,
@@ -1515,7 +1515,7 @@
           {
             "5af_b24": 4,
             "5af_b26_signed6": 3,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 64542,
             "ca_resultlike_mps2": 1.224,
             "offset_from_wheel_onset_ms": 500,
@@ -1526,7 +1526,7 @@
           {
             "5af_b24": 4,
             "5af_b26_signed6": 3,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 64542,
             "ca_resultlike_mps2": 1.185,
             "offset_from_wheel_onset_ms": 700,
@@ -1552,7 +1552,7 @@
           {
             "5af_b24": 228,
             "5af_b26_signed6": 0,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 0.0,
             "offset_from_wheel_onset_ms": -700,
@@ -1563,7 +1563,7 @@
           {
             "5af_b24": 228,
             "5af_b26_signed6": 0,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 0.245,
             "offset_from_wheel_onset_ms": -500,
@@ -1574,7 +1574,7 @@
           {
             "5af_b24": 228,
             "5af_b26_signed6": 1,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 0.627,
             "offset_from_wheel_onset_ms": -300,
@@ -1585,7 +1585,7 @@
           {
             "5af_b24": 228,
             "5af_b26_signed6": 2,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 0.793,
             "offset_from_wheel_onset_ms": -200,
@@ -1596,7 +1596,7 @@
           {
             "5af_b24": 228,
             "5af_b26_signed6": 2,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 0.835,
             "offset_from_wheel_onset_ms": -100,
@@ -1607,7 +1607,7 @@
           {
             "5af_b24": 228,
             "5af_b26_signed6": 3,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 0.866,
             "offset_from_wheel_onset_ms": 0,
@@ -1618,7 +1618,7 @@
           {
             "5af_b24": 228,
             "5af_b26_signed6": 3,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 0.881,
             "offset_from_wheel_onset_ms": 100,
@@ -1629,7 +1629,7 @@
           {
             "5af_b24": 228,
             "5af_b26_signed6": 3,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 0.896,
             "offset_from_wheel_onset_ms": 200,
@@ -1640,7 +1640,7 @@
           {
             "5af_b24": 228,
             "5af_b26_signed6": 3,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 0.892,
             "offset_from_wheel_onset_ms": 300,
@@ -1651,7 +1651,7 @@
           {
             "5af_b24": 228,
             "5af_b26_signed6": 2,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 0.762,
             "offset_from_wheel_onset_ms": 500,
@@ -1662,7 +1662,7 @@
           {
             "5af_b24": 228,
             "5af_b26_signed6": 2,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 0.69,
             "offset_from_wheel_onset_ms": 700,
@@ -1688,7 +1688,7 @@
           {
             "5af_b24": 231,
             "5af_b26_signed6": 0,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 0.096,
             "offset_from_wheel_onset_ms": -700,
@@ -1699,7 +1699,7 @@
           {
             "5af_b24": 231,
             "5af_b26_signed6": 1,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 0.476,
             "offset_from_wheel_onset_ms": -500,
@@ -1710,7 +1710,7 @@
           {
             "5af_b24": 231,
             "5af_b26_signed6": 1,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 0.853,
             "offset_from_wheel_onset_ms": -300,
@@ -1721,7 +1721,7 @@
           {
             "5af_b24": 231,
             "5af_b26_signed6": 2,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 0.945,
             "offset_from_wheel_onset_ms": -200,
@@ -1732,7 +1732,7 @@
           {
             "5af_b24": 231,
             "5af_b26_signed6": 2,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 0.968,
             "offset_from_wheel_onset_ms": -100,
@@ -1743,7 +1743,7 @@
           {
             "5af_b24": 231,
             "5af_b26_signed6": 2,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 0.987,
             "offset_from_wheel_onset_ms": 0,
@@ -1754,7 +1754,7 @@
           {
             "5af_b24": 231,
             "5af_b26_signed6": 2,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 0.995,
             "offset_from_wheel_onset_ms": 100,
@@ -1765,7 +1765,7 @@
           {
             "5af_b24": 231,
             "5af_b26_signed6": 3,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 1.008,
             "offset_from_wheel_onset_ms": 200,
@@ -1776,7 +1776,7 @@
           {
             "5af_b24": 231,
             "5af_b26_signed6": 3,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 6200,
             "ca_resultlike_mps2": 0.987,
             "offset_from_wheel_onset_ms": 300,
@@ -1787,7 +1787,7 @@
           {
             "5af_b24": 231,
             "5af_b26_signed6": 2,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 59136,
             "ca_resultlike_mps2": 0.85,
             "offset_from_wheel_onset_ms": 500,
@@ -1798,7 +1798,7 @@
           {
             "5af_b24": 231,
             "5af_b26_signed6": 2,
-            "acc_state": 71,
+            "byte7_checksum": 71,
             "c9_b12_b13_raw": 59136,
             "ca_resultlike_mps2": 0.805,
             "offset_from_wheel_onset_ms": 700,
@@ -2456,7 +2456,7 @@
     "logical_request": "0x08A is already the recovered upstream TSS request-side plane and is FRC-normal-Tx-dependent. FRC normal-Tx suppression removes 0x08A, while the Brake-owned 0x081 result/reference publication survives FRC loss and asserts its request-loss response. The repin/source experiment places protected 0x08A publication inside the FRC assembly; that does not create a second semantic request layer.",
     "selected_result": "0x081 is the established Brake/chassis-side selected/result/reference publication for lateral. The corresponding longitudinal result may be distributed across 0x0CA/0x5AF/0x5F7 or other fields; this audit does not assign one PDU as the complete longitudinal analogue."
   },
-  "schema": "camry-longitudinal-request-candidates-v3",
+  "schema": "camry-longitudinal-request-candidates-v4",
   "sources": {
     "august_drives": {
       "drive_a": {

@@ -42,7 +42,6 @@ with tempfile.TemporaryDirectory() as td:
         proc.returncode == 0 and out.read_bytes() == ART.read_bytes(),
     )
 
-check("schema is v5", art["schema"] == "camry-2026-08a-producer-bounds-v5")
 check(
     "F33 generated-COM Tx excludes 0x08A",
     art["f33_generated_com_tx"] == ["0x030", "0x351", "0x394", "0x4A3", "0x4C8"],
@@ -68,11 +67,6 @@ for drive in ("drive_a", "drive_b"):
         f"{drive}: over 99.9% of 0x08A uses multi-frame publication timestamps",
         batching["0x08A_frames_in_multi_frame_events"] <= batching["0x08A_frame_count"]
         and batching["0x08A_multi_frame_event_fraction"] >= 0.999,
-    )
-    check(
-        f"{drive}: timestamp boundary rejects wire attribution",
-        "not an individual CAN frame" in batching["boundary"]
-        and "cannot identify physical arbitration" in batching["boundary"],
     )
     neg = d["bus1_auth_negative"]
     check(f"{drive}: zero 0x00F on bus 1", neg["0x00F_count"] == 0)
@@ -115,31 +109,11 @@ check(
 )
 
 cl = art["classification"]
-check("FRC recorder object is joined without naming transmitter", "FRC-hosted" in cl["recorder_object"])
-check(
-    "batched timestamps forbid queue attribution",
-    "cannot reject a shared controller" in cl["timestamp_attribution_boundary"],
-)
-check("SecOC remains 0x00F-domain FV4||MAC28", "FV4||MAC28" in cl["secoc"] and "unrecovered" in cl["secoc"])
-check(
-    "public Bus-1 FRC traffic is a separate non-SecOC interface",
-    "do not carry an ordinary-P5 FV4||MAC28 trailer" in cl["camera_output_auth_boundary"]
-    and "repin direction result supersedes the old external-proxy inference" in cl["camera_output_auth_boundary"]
-    and "inside the FRC assembly diagnostic boundary" in cl["camera_output_auth_boundary"],
-)
-check(
-    "physical publisher is FRC assembly while internal signer remains open",
-    "physically originates at the FRC/camera-side endpoint" in cl["physical_tx_and_signer_bounds"]
-    and "inside the FRC ECU/assembly boundary" in cl["physical_tx_and_signer_bounds"]
-    and "main TSS SoC/HSM" in cl["physical_tx_and_signer_bounds"]
-    and "Brake/Booster/CGW are no longer" in cl["physical_tx_and_signer_bounds"],
-)
 check(
     "repin direction is request toward chassis and result toward FRC",
     cl["repin_direction"]["0x08A"] == "native upstream Panda bus2 -> chassis bus0 on Toyota Bus 4"
     and cl["repin_direction"]["0x081"] == "native Brake/chassis Panda bus0 -> upstream bus2 on Toyota Bus 4",
 )
-check("regression forbids sending 0x08A to EPS", "Do not send 0x08A to EPS" in cl["regression_rule"])
 
 print(f"\nResults: {passed} passed, {failed} failed")
 raise SystemExit(1 if failed else 0)

@@ -1,13 +1,13 @@
 {
   "cruise": {
-    "boundary": "Core openpilot cruise state is closed from retained generation-native CAN plus validated contributor live-drive evidence. Detailed ACC-not-available UI and follow-distance remain optional unmapped state.",
+    "boundary": "Retained generation-native CAN exposes B22 bit4 transitions and 0x251 set-speed prior art. Availability and standstill require an independent wire join; detailed ACC-not-available UI and follow-distance remain optional unmapped state.",
     "capture_recipe": [
-      "Use FRC_P5 0x1905/0x1906/0x1914 only to extend optional permission/fault UI semantics; core available/enabled no longer requires a diagnostic discovery pass.",
+      "Use FRC_P5 0x1905/0x1906/0x1914 as diagnostic oracles when joining cruise permission/fault states to native CAN; diagnostic semantics alone do not map a CAN field.",
       "Use FRC_P5 0x1912 only if exposing following-distance state is desired.",
       "Retain 0x1901 Current/Memory Vehicle Speed as a diagnostic cross-check for 0x251 set speed rather than a required runtime input."
     ],
-    "classification": "core generation-native CarState mapping closed; optional detailed ACC UI/follow fields remain open",
-    "diagnostic_transport_boundary": "Current GTS+ proves selected FRC_P5 0x1901/0x1905/0x1906/0x1912/0x1914 Data IDs are ordinary SID 0x22 ReadDataByIdentifier requests. They are optional semantic oracles; core CarState works independently of them.",
+    "classification": "B22 bit4 and set-speed observations retained; availability and standstill CAN semantics unresolved",
+    "diagnostic_transport_boundary": "Current GTS+ proves selected FRC_P5 0x1901/0x1905/0x1906/0x1912/0x1914 Data IDs are ordinary SID 0x22 ReadDataByIdentifier requests. Diagnostic DIDs are not a CAN mapping.",
     "legacy_ids_absent_in_both_captures": [
       "0x177",
       "0x1A2",
@@ -15,8 +15,8 @@
       "0x399"
     ],
     "native_wire_mapping": {
-      "available": "0x08A ACC_STATE (B7) != 0; retained states 0x12 idle and 0x5D engaged, and the validated contributor Panda path uses B7!=0 as acc_main_on",
-      "enabled": "0x08A B22 bit0x10; Span directly observes 2,363 clear / 37 asserted frames with exact 0x12/0x5D state separation",
+      "available": "Unresolved: B7 is the first-block Toyota checksum; nonzero checksum is not a cruise-availability field.",
+      "enabled": "0x08A B22 bit0x10 is the retained contributor engaged-gate interpretation; Span observes 2,363 clear / 37 asserted frames without an independent engagement oracle.",
       "set_speed": "0x251 B2, mph factor 1.0; contributor live-drive evidence records one-mph +/- changes and a 19-mph floor",
       "span_0x08a": {
         "acc_disengaged_frames": 2363,
@@ -25,13 +25,24 @@
           1
         ],
         "acc_engaged_frames": 37,
-        "acc_state_values": [
-          18,
-          93
-        ],
-        "boundary": "In the retained Span segment byte22 bit0x10 asserts for every 0x5D state frame and is clear for every 0x12 state frame. This is a direct on-vehicle engaged-state join; contributor longitudinal evidence separately exercises Camry 0x47 engaged and 0x67 delayed-hold states.",
+        "boundary": "The retained Span segment has 37 frames with byte22 bit0x10 set and 2,363 clear. Their B7 checksum values are respectively 0x5D and 0x12; these arithmetic results do not independently establish cruise availability, engagement, or standstill semantics.",
+        "byte7_checksum": {
+          "formula": "(0x8A + 8 + sum(B0..B6)) & 0xFF",
+          "valid_frames": 2400,
+          "values": [
+            18,
+            93
+          ],
+          "values_when_byte22_bit4_clear": [
+            18
+          ],
+          "values_when_byte22_bit4_set": [
+            93
+          ]
+        },
+        "frame_count": 2400,
         "request_id_allocation": {
-          "boundary": "Cross-platform structural decode using the same six-bit requester-ID plus two-bit allocation geometry recovered on Camry. The retained Span minute does not establish which A/B slot is upper versus lower or prove that either request wins: 0x081 result ID remains 63 throughout.",
+          "boundary": "B6 retains the current six-bit requester-ID plus two-bit allocation interpretation recovered on Camry. B7 is the Toyota checksum, not another requester/allocation. The two signed16 acceleration slots remain observed; their upper/lower arbitration meaning is not established here, and 0x081 result ID remains 63 throughout.",
           "candidate_A_allocation_counts": {
             "0": 2363,
             "3": 37
@@ -39,14 +50,6 @@
           "candidate_A_id_counts": {
             "0": 2363,
             "17": 37
-          },
-          "candidate_B_allocation_counts": {
-            "1": 37,
-            "2": 2363
-          },
-          "candidate_B_id_counts": {
-            "23": 37,
-            "4": 2363
           },
           "engaged_accel_mps2_range": [
             -0.387,
@@ -97,13 +100,7 @@
             "63": 2000
           }
         },
-        "state_when_disengaged": [
-          18
-        ],
-        "state_when_engaged": [
-          93
-        ],
-        "wire": "0x08A/32 generation-native Corolla ACC state"
+        "wire": "0x08A/32 generation-native Corolla control request"
       },
       "span_0x251": {
         "boundary": "Span's retained segment does not exercise set-speed changes (byte2 stays zero). Contributor live-drive evidence independently identifies byte2 as the retained dash set speed in mph; this segment only confirms carrier presence/shape.",
@@ -113,7 +110,7 @@
         "frame_count": 60,
         "wire": "classic 8-byte TSS3 cruise-display carrier"
       },
-      "standstill": "0x08A ACC_STATE B7 bit0x20; contributor live-drive evidence records 0x67 engaged+standstill hold and validates stop-and-go hold/resume"
+      "standstill": "Unresolved: B7 bit0x20 and checksum value0x67 do not establish a standstill field; contributor stop/hold/resume observations remain valid without this CAN mapping."
     },
     "openpilot_oracle_mapping": {
       "brake_control_activity": [
@@ -148,7 +145,7 @@
         "Memory Vehicle Speed"
       ]
     },
-    "retained_contributor_boundary": "The retained contributor architecture explicitly says longitudinal follow/speed/stop-and-go-to-0/hold/resume was VALIDATED on car while lateral remained IN PROGRESS. Only the longitudinal/state observations are used here.",
+    "retained_contributor_boundary": "The retained contributor architecture reports longitudinal follow/speed/stop-and-go-to-0/hold/resume as VALIDATED on car while lateral remained IN PROGRESS. Preserve those operating observations, but its B7-based availability/standstill decode is invalid because B7 is a checksum.",
     "retained_wire_prior_art": {
       "0x176": {
         "b0_bit3_interpretation": "Rejected as the TSS3 active/main source: B0[3] tracks accelerator-release/brake context while the old CRUISE_ACTIVE/STATE fields stay inactive.",
@@ -725,9 +722,9 @@
     ],
     "wire_mapping_status": {
       "acc_not_available_or_fault": "optional/open: exact FRC_P5 diagnostic oracle exists, but no base-control CAN mapping is required",
-      "cruise_available": "closed on generation-native 0x08A ACC_STATE presence",
-      "cruise_enabled": "closed on generation-native 0x08A B22 bit0x10",
-      "cruise_standstill": "closed from contributor live-drive 0x08A B7 bit0x20 / state0x67",
+      "cruise_available": "open: former B7!=0 mapping used the Toyota checksum",
+      "cruise_enabled": "observed B22 bit0x10; contributor interpretation retained, independent transition oracle absent",
+      "cruise_standstill": "open: former B7 bit0x20 mapping used the Toyota checksum",
       "follow_distance": "optional/open: exact FRC_P5 Set Vehicle Interval Time oracle exists",
       "set_speed": "closed from contributor live-drive 0x251 B2 mph"
     }
@@ -760,11 +757,11 @@
     },
     "span_route": {
       "path": "data/generated/corolla_2025_span_discord_rlog_opendbc_evidence.json",
-      "sha256": "9123b4a381fd1012e7e938b8720eb3138436cb4fadaaa9236ce2c956b2604be1"
+      "sha256": "3f69a6a1510117ba639b12bb1d9e2ca6fed108786253845b390cd8b85c38aff4"
     },
     "state_bridge": {
       "path": "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
-      "sha256": "b2de356a44a37ecc19af1b6120014b63766ab1e949a61840c57263528defd0d5"
+      "sha256": "892c8297ecf9e1f560918bd59ad803fdf86677e4614cf3ce3e009718b2557fef"
     },
     "techstream_cruise": {
       "path": "data/generated/techstream_v18/tss3_cruise_engagement_semantics.json",
@@ -942,12 +939,13 @@
     "not_safe_yet": [
       "Treat 0x176 B0[3] as cruise main/active state.",
       "Assume surviving 0x24D button bit semantics without a button transition.",
+      "Use 0x08A B7!=0 as cruise availability or B7 bit0x20 as standstill.",
       "Map Ready=0 or native steering fault states to temporary/permanent openpilot faults without an exercised recovery/latched transition."
     ],
     "safe_now": [
       "Use 0x51E B0[7] as target-native Ready Status input; keep Ready=0 fault policy dynamic until exercised.",
       "Use 0x127 GEAR_PACKET_HYBRID on the retained hybrid shape and generation-native 0x3BF one-hot gear otherwise.",
-      "Use 0x08A ACC_STATE/B22 for cruise available/enabled and the contributor-validated B7 bit0x20 standstill state.",
+      "Retain 0x08A B22 bit0x10 as the contributor engaged-gate interpretation; do not derive availability or standstill from B7.",
       "Use retained 0x251 B2 as set speed in mph; preserve the native 19-mph set-speed floor and manual resume from hold.",
       "Keep optional follow-distance and detailed ACC-unavailable UI unmapped until needed; their FRC_P5 diagnostic oracles are already known."
     ]
@@ -1002,7 +1000,7 @@
     "wire": "B0[7]",
     "writer_boundary": "FEBEF052 reaches FEBEB5A8 through two operational copy sites and the RAM nodes also have initialization/reset writers. The Ready Status dataflow is proved."
   },
-  "schema": "corolla-hf-nonsteering-engagement-state-v1",
+  "schema": "corolla-hf-nonsteering-engagement-state-v2",
   "software_family": {
     "application_byte_identical": true,
     "f": "8965F1208000",

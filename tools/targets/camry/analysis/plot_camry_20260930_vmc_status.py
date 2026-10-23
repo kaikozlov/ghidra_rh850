@@ -31,6 +31,8 @@ def main() -> None:
   plt.rcParams.update({"font.size": 10, "axes.grid": True, "grid.alpha": .2})
   args.output_dir.mkdir(parents=True, exist_ok=True)
   info = json.loads((args.corpus_dir / (ROUTES[0] + ".joined.json")).read_text())
+  if info.get("schema") != "camry-20260930-vmc-join-v2":
+    raise ValueError("regenerate the VMC join with the checksum-aware producer")
   with np.load(args.corpus_dir / (ROUTES[0] + ".joined.npz")) as j, np.load(args.corpus_dir / (ROUTES[0] + ".npz")) as raw:
     pedal = raw["pedal"]
     onset = float(pedal[(pedal[:, 2] == info["brake_source"]) & (pedal[:, 4] == 1)
@@ -72,17 +74,17 @@ def main() -> None:
       valid = np.isfinite(j["v"]) & (j["v"] > .5) & np.isfinite(j["cs"][:, 4]) & (j["request_loss"] == 0)
       words, native = j["words"][valid] * .001, j["native"][valid]
       all_rows.append(np.column_stack((words[:, 2], words[:, 9], words[:, 10], words[:, 11], words[:, 12],
-                                      j["cs"][valid, 4], j["gas"][valid, 3], native[:, 0], native[:, 2], native[:, 3])))
+                                      j["cs"][valid, 4], j["gas"][valid, 3], native[:, 0], native[:, 2], native[:, 4])))
   a = np.concatenate(all_rows)
   fig, axes = plt.subplots(2, 2, figsize=(13, 11))
   s = a[::max(1, len(a) // 18000)]
   axes[0, 0].scatter(np.maximum(s[:, 0], s[:, 4]), s[:, 1], s=2, alpha=.2)
   axes[0, 0].plot([-5, 4], [-5, 4], "k--", lw=1)
   axes[0, 0].set(xlabel="max(B4, B24)", ylabel="B18", title="Dominant numerical relation, moving vehicle")
-  idle = (a[:, 8] == 0) & (a[:, 9] == 4) & np.isfinite(a[:, 7])
-  axes[0, 1].scatter(a[idle, 7], a[idle, 2], s=2, alpha=.15)
+  b6_zero = (a[:, 8] == 0) & (a[:, 9] == 0) & np.isfinite(a[:, 7])
+  axes[0, 1].scatter(a[b6_zero, 7], a[b6_zero, 2], s=2, alpha=.15)
   axes[0, 1].plot([-2, 2], [-2, 2], "k--", lw=1)
-  axes[0, 1].set(xlabel="inactive native FRC upper word (IDs0/4)", ylabel="B20", title="Inactive request words versus B20")
+  axes[0, 1].set(xlabel="fresh native FRC upper (B6=0, checksum-independent)", ylabel="B20", title="Native B6=0 request words versus B20")
   axes[1, 0].scatter(s[:, 5], s[:, 0], s=2, alpha=.2)
   axes[1, 0].plot([-5, 4], [-5, 4], "k--", lw=1)
   axes[1, 0].set(xlabel="wheel-derived aEgo (m/s²)", ylabel="B4", title="B4 comparison (not a proved sensor reading)")

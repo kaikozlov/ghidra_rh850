@@ -395,7 +395,7 @@
     },
     "openpilot_state_bridge": {
       "path": "data/generated/corolla_8965H1202000_openpilot_state_bridge.json",
-      "sha256": "b2de356a44a37ecc19af1b6120014b63766ab1e949a61840c57263528defd0d5"
+      "sha256": "892c8297ecf9e1f560918bd59ad803fdf86677e4614cf3ce3e009718b2557fef"
     }
   },
   "static_conclusion": {

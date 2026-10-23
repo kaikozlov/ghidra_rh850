@@ -259,12 +259,11 @@ def main() -> int:
     gear_3bf = rows(0x3BF, 8)
     gear_3bf_values = [dat[0] for _, dat in gear_3bf]
     acc = rows(0x08A, 32)
-    acc_state = [dat[7] for _, dat in acc]
+    acc_checksum = [dat[7] for _, dat in acc]
+    acc_checksum_valid = sum(toyota_checksum(0x08A, dat[:8]) == dat[7] for _, dat in acc)
     acc_engaged = [1 if (dat[22] & 0x10) else 0 for _, dat in acc]
     acc_request_id_a = [dat[6] >> 2 for _, dat in acc]
-    acc_request_id_b = [dat[7] >> 2 for _, dat in acc]
     acc_allocation_a = [dat[6] & 0x03 for _, dat in acc]
-    acc_allocation_b = [dat[7] & 0x03 for _, dat in acc]
     acc_request_accel_a = [int.from_bytes(dat[8:10], "big", signed=True) for _, dat in acc]
     acc_request_accel_b = [int.from_bytes(dat[11:13], "big", signed=True) for _, dat in acc]
     control_result = rows(0x081, 32)
@@ -404,7 +403,7 @@ def main() -> int:
     preflight_dongle = preflight["panda"]["dongle"]
 
     out = {
-        "schema": "corolla-2025-span-discord-rlog-opendbc-evidence-v1",
+        "schema": "corolla-2025-span-discord-rlog-opendbc-evidence-v2",
         "source": {
             "path": RLOG_REL,
             **actual,
@@ -548,18 +547,21 @@ def main() -> int:
                 "boundary": "Span's moving 2025 segment carries 0x10 throughout while the car is driving forward; the retained public Corolla route independently observes 0x80=P, 0x40=R, 0x10=D transitions on this same carrier.",
             },
             "0x08A_acc": {
-                "wire": "0x08A/32 generation-native Corolla ACC state",
-                "acc_state_values": unique(acc_state),
+                "wire": "0x08A/32 generation-native Corolla control request",
+                "frame_count": len(acc),
+                "byte7_checksum": {
+                    "formula": "(0x8A + 8 + sum(B0..B6)) & 0xFF",
+                    "values": unique(acc_checksum),
+                    "valid_frames": acc_checksum_valid,
+                    "values_when_byte22_bit4_set": unique([value for value, engaged in zip(acc_checksum, acc_engaged) if engaged]),
+                    "values_when_byte22_bit4_clear": unique([value for value, engaged in zip(acc_checksum, acc_engaged) if not engaged]),
+                },
                 "acc_engaged_bit_values": unique(acc_engaged),
                 "acc_engaged_frames": sum(acc_engaged),
                 "acc_disengaged_frames": sum(1 - x for x in acc_engaged),
-                "state_when_engaged": unique([state for state, engaged in zip(acc_state, acc_engaged) if engaged]),
-                "state_when_disengaged": unique([state for state, engaged in zip(acc_state, acc_engaged) if not engaged]),
                 "request_id_allocation": {
                     "candidate_A_id_counts": {str(k): v for k, v in sorted(collections.Counter(acc_request_id_a).items())},
                     "candidate_A_allocation_counts": {str(k): v for k, v in sorted(collections.Counter(acc_allocation_a).items())},
-                    "candidate_B_id_counts": {str(k): v for k, v in sorted(collections.Counter(acc_request_id_b).items())},
-                    "candidate_B_allocation_counts": {str(k): v for k, v in sorted(collections.Counter(acc_allocation_b).items())},
                     "engaged_accel_raw_values": {
                         "candidate_A": unique([raw for raw, engaged in zip(acc_request_accel_a, acc_engaged) if engaged]),
                         "candidate_B": unique([raw for raw, engaged in zip(acc_request_accel_b, acc_engaged) if engaged]),
@@ -574,9 +576,9 @@ def main() -> int:
                         if engaged and a == b
                     ),
                     "result_id_counts": {str(k): v for k, v in sorted(collections.Counter(longitudinal_result_ids).items())},
-                    "boundary": "Cross-platform structural decode using the same six-bit requester-ID plus two-bit allocation geometry recovered on Camry. The retained Span minute does not establish which A/B slot is upper versus lower or prove that either request wins: 0x081 result ID remains 63 throughout.",
+                    "boundary": "B6 retains the current six-bit requester-ID plus two-bit allocation interpretation recovered on Camry. B7 is the Toyota checksum, not another requester/allocation. The two signed16 acceleration slots remain observed; their upper/lower arbitration meaning is not established here, and 0x081 result ID remains 63 throughout.",
                 },
-                "boundary": "In the retained Span segment byte22 bit0x10 asserts for every 0x5D state frame and is clear for every 0x12 state frame. This is a direct on-vehicle engaged-state join; contributor longitudinal evidence separately exercises Camry 0x47 engaged and 0x67 delayed-hold states.",
+                "boundary": "The retained Span segment has 37 frames with byte22 bit0x10 set and 2,363 clear. Their B7 checksum values are respectively 0x5D and 0x12; these arithmetic results do not independently establish cruise availability, engagement, or standstill semantics.",
             },
             "0x251": {
                 "wire": "classic 8-byte TSS3 cruise-display carrier",

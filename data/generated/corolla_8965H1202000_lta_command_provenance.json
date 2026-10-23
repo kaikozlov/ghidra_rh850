@@ -911,7 +911,7 @@
   "supporting_inputs": {
     "b6_target_angle_ingress": {
       "path": "data/generated/corolla_8965H1202000_b6_target_angle_ingress.json",
-      "sha256": "9d6d466092dc22252eee435c8a75abce19b9f11e69640439c9c3f0387f4341d1"
+      "sha256": "4f1c63fe43b6c7768857fea48aa355e1752154eb92a5c0234d4cd847c96b7c4e"
     },
     "fd_control_interface": {
       "path": "data/generated/corolla_8965H1202000_fd_control_interface.json",

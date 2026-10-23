@@ -307,13 +307,24 @@
         1
       ],
       "acc_engaged_frames": 37,
-      "acc_state_values": [
-        18,
-        93
-      ],
-      "boundary": "In the retained Span segment byte22 bit0x10 asserts for every 0x5D state frame and is clear for every 0x12 state frame. This is a direct on-vehicle engaged-state join; contributor longitudinal evidence separately exercises Camry 0x47 engaged and 0x67 delayed-hold states.",
+      "boundary": "The retained Span segment has 37 frames with byte22 bit0x10 set and 2,363 clear. Their B7 checksum values are respectively 0x5D and 0x12; these arithmetic results do not independently establish cruise availability, engagement, or standstill semantics.",
+      "byte7_checksum": {
+        "formula": "(0x8A + 8 + sum(B0..B6)) & 0xFF",
+        "valid_frames": 2400,
+        "values": [
+          18,
+          93
+        ],
+        "values_when_byte22_bit4_clear": [
+          18
+        ],
+        "values_when_byte22_bit4_set": [
+          93
+        ]
+      },
+      "frame_count": 2400,
       "request_id_allocation": {
-        "boundary": "Cross-platform structural decode using the same six-bit requester-ID plus two-bit allocation geometry recovered on Camry. The retained Span minute does not establish which A/B slot is upper versus lower or prove that either request wins: 0x081 result ID remains 63 throughout.",
+        "boundary": "B6 retains the current six-bit requester-ID plus two-bit allocation interpretation recovered on Camry. B7 is the Toyota checksum, not another requester/allocation. The two signed16 acceleration slots remain observed; their upper/lower arbitration meaning is not established here, and 0x081 result ID remains 63 throughout.",
         "candidate_A_allocation_counts": {
           "0": 2363,
           "3": 37
@@ -321,14 +332,6 @@
         "candidate_A_id_counts": {
           "0": 2363,
           "17": 37
-        },
-        "candidate_B_allocation_counts": {
-          "1": 37,
-          "2": 2363
-        },
-        "candidate_B_id_counts": {
-          "23": 37,
-          "4": 2363
         },
         "engaged_accel_mps2_range": [
           -0.387,
@@ -379,13 +382,7 @@
           "63": 2000
         }
       },
-      "state_when_disengaged": [
-        18
-      ],
-      "state_when_engaged": [
-        93
-      ],
-      "wire": "0x08A/32 generation-native Corolla ACC state"
+      "wire": "0x08A/32 generation-native Corolla control request"
     },
     "0x0AA": {
       "fault_values": {
@@ -1094,7 +1091,7 @@
       "disabled"
     ]
   },
-  "schema": "corolla-2025-span-discord-rlog-opendbc-evidence-v1",
+  "schema": "corolla-2025-span-discord-rlog-opendbc-evidence-v2",
   "source": {
     "attribution": "Span / spanconstant, comma Discord; rlog recorded 2026-07-29 and imported 2026-08-24",
     "can_source_filter": "Only src<128 records are treated as incoming vehicle traffic; Panda returned/Tx and rejected echoes are excluded from every inventory and baseline.",

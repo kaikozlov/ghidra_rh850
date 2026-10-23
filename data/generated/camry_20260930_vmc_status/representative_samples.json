@@ -15,18 +15,13 @@
       "age_gas": 0.0,
       "age_native": 10.01864599993496
     },
-    "allocation": [
-      1.0,
-      3.0
-    ],
+    "allocation": 1,
     "b6_high_bits": 0,
     "brake_on": false,
+    "byte7_checksum": 71,
     "confirmed_origin": 2,
-    "delivered_ids": [
-      11.0,
-      17.0
-    ],
     "delivered_lower": -0.436,
+    "delivered_request_id": 11,
     "delivered_upper": -0.436,
     "gas_fraction": 0.0,
     "label": "stock braking ramp start",
@@ -58,18 +53,13 @@
       "age_gas": 12.733050999997886,
       "age_native": 20.496901000001344
     },
-    "allocation": [
-      1.0,
-      3.0
-    ],
+    "allocation": 1,
     "b6_high_bits": 0,
     "brake_on": false,
+    "byte7_checksum": 71,
     "confirmed_origin": 1,
-    "delivered_ids": [
-      11.0,
-      17.0
-    ],
     "delivered_lower": -2.123,
+    "delivered_request_id": 11,
     "delivered_upper": -2.123,
     "gas_fraction": 0.0,
     "label": "OP weak braking before pedal",
@@ -101,18 +91,13 @@
       "age_gas": 0.0,
       "age_native": 0.0
     },
-    "allocation": [
-      1.0,
-      3.0
-    ],
+    "allocation": 1,
     "b6_high_bits": 0,
     "brake_on": true,
+    "byte7_checksum": 71,
     "confirmed_origin": 2,
-    "delivered_ids": [
-      11.0,
-      17.0
-    ],
     "delivered_lower": -4.0,
+    "delivered_request_id": 11,
     "delivered_upper": -4.0,
     "gas_fraction": 0.0,
     "label": "driver brake after disengagement",
@@ -144,18 +129,13 @@
       "age_gas": 21.88964199996235,
       "age_native": 10.214596999958303
     },
-    "allocation": [
-      0.0,
-      2.0
-    ],
+    "allocation": 0,
     "b6_high_bits": 0,
     "brake_on": false,
+    "byte7_checksum": 18,
     "confirmed_origin": 2,
-    "delivered_ids": [
-      0.0,
-      4.0
-    ],
     "delivered_lower": -0.049,
+    "delivered_request_id": 0,
     "delivered_upper": -0.049,
     "gas_fraction": 0.25,
     "label": "driver accelerator",
@@ -187,18 +167,13 @@
       "age_gas": 22.01979799997389,
       "age_native": 10.327512999992905
     },
-    "allocation": [
-      1.0,
-      3.0
-    ],
+    "allocation": 1,
     "b6_high_bits": 0,
     "brake_on": false,
+    "byte7_checksum": 71,
     "confirmed_origin": 1,
-    "delivered_ids": [
-      11.0,
-      17.0
-    ],
     "delivered_lower": 0.642,
+    "delivered_request_id": 11,
     "delivered_upper": 0.642,
     "gas_fraction": 0.0,
     "label": "normal OP acceleration",
@@ -230,18 +205,13 @@
       "age_gas": 19.431836999999064,
       "age_native": 19.431836999999064
     },
-    "allocation": [
-      0.0,
-      2.0
-    ],
+    "allocation": 0,
     "b6_high_bits": 2,
     "brake_on": true,
+    "byte7_checksum": 18,
     "confirmed_origin": 2,
-    "delivered_ids": [
-      0.0,
-      4.0
-    ],
     "delivered_lower": 0.666,
+    "delivered_request_id": 0,
     "delivered_upper": 0.666,
     "gas_fraction": 0.0,
     "label": "stationary with brake held",

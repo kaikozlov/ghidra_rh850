@@ -73,6 +73,9 @@
         ]
       },
       "request_after": {
+        "byte7_checksum": 18,
+        "byte7_checksum_expected": 18,
+        "byte7_checksum_valid": true,
         "cruise_operating_latch": 0,
         "delayed_hold_state": 0,
         "lateral_assist_gain": 0.0,
@@ -82,14 +85,15 @@
         "longitudinal_accel_a_m_s2": -0.249,
         "longitudinal_accel_b_m_s2": -0.249,
         "longitudinal_allocation_a": 0,
-        "longitudinal_allocation_b": 2,
         "longitudinal_request_id_a": 0,
-        "longitudinal_request_id_b": 4,
         "raw": "0000000080000012ff0700ff077fff007ffffe610000000000002700c75d46fd",
         "request_sequence": 39,
         "set_speed_kph": 0
       },
       "request_before": {
+        "byte7_checksum": 71,
+        "byte7_checksum_expected": 71,
+        "byte7_checksum_valid": true,
         "cruise_operating_latch": 1,
         "delayed_hold_state": 0,
         "lateral_assist_gain": 0.0,
@@ -99,9 +103,7 @@
         "longitudinal_accel_a_m_s2": -0.109,
         "longitudinal_accel_b_m_s2": -0.109,
         "longitudinal_allocation_a": 1,
-        "longitudinal_allocation_b": 3,
         "longitudinal_request_id_a": 11,
-        "longitudinal_request_id_b": 17,
         "raw": "0000000880002d47ff9322ff937fff007ffffe61c000100000002600899e3e9a",
         "request_sequence": 38,
         "set_speed_kph": 34
@@ -239,6 +241,9 @@
         ]
       },
       "request_after": {
+        "byte7_checksum": 18,
+        "byte7_checksum_expected": 18,
+        "byte7_checksum_valid": true,
         "cruise_operating_latch": 0,
         "delayed_hold_state": 0,
         "lateral_assist_gain": 1.0,
@@ -248,14 +253,15 @@
         "longitudinal_accel_a_m_s2": -0.855,
         "longitudinal_accel_b_m_s2": -0.855,
         "longitudinal_allocation_a": 0,
-        "longitudinal_allocation_b": 2,
         "longitudinal_request_id_a": 0,
-        "longitudinal_request_id_b": 4,
         "raw": "0000000080000012fca900fca97fff007fff000700000000640003001088c70c",
         "request_sequence": 3,
         "set_speed_kph": 0
       },
       "request_before": {
+        "byte7_checksum": 71,
+        "byte7_checksum_expected": 71,
+        "byte7_checksum_valid": true,
         "cruise_operating_latch": 1,
         "delayed_hold_state": 0,
         "lateral_assist_gain": 1.0,
@@ -265,9 +271,7 @@
         "longitudinal_accel_a_m_s2": 0.11,
         "longitudinal_accel_b_m_s2": 0.11,
         "longitudinal_allocation_a": 1,
-        "longitudinal_allocation_b": 3,
         "longitudinal_request_id_a": 11,
-        "longitudinal_request_id_b": 17,
         "raw": "0000000880002d47006e48006e7fff007fff0008c00b100064000200dae62fd5",
         "request_sequence": 2,
         "set_speed_kph": 72
@@ -395,6 +399,9 @@
         ]
       },
       "request_after": {
+        "byte7_checksum": 18,
+        "byte7_checksum_expected": 18,
+        "byte7_checksum_valid": true,
         "cruise_operating_latch": 0,
         "delayed_hold_state": 0,
         "lateral_assist_gain": 1.0,
@@ -404,14 +411,15 @@
         "longitudinal_accel_a_m_s2": -0.45,
         "longitudinal_accel_b_m_s2": -0.45,
         "longitudinal_allocation_a": 0,
-        "longitudinal_allocation_b": 2,
         "longitudinal_request_id_a": 0,
-        "longitudinal_request_id_b": 4,
         "raw": "0000000080000012fe3e00fe3e7fff007fffffe70000000064001f003b6c57d9",
         "request_sequence": 31,
         "set_speed_kph": 0
       },
       "request_before": {
+        "byte7_checksum": 83,
+        "byte7_checksum_expected": 83,
+        "byte7_checksum_valid": true,
         "cruise_operating_latch": 1,
         "delayed_hold_state": 0,
         "lateral_assist_gain": 1.0,
@@ -421,9 +429,7 @@
         "longitudinal_accel_a_m_s2": -0.439,
         "longitudinal_accel_b_m_s2": 0.0,
         "longitudinal_allocation_a": 1,
-        "longitudinal_allocation_b": 3,
         "longitudinal_request_id_a": 13,
-        "longitudinal_request_id_b": 20,
         "raw": "0000000880043553fe490000007fff007fffffd60000100064001e00f7a9d952",
         "request_sequence": 30,
         "set_speed_kph": 0
@@ -574,6 +580,9 @@
         ]
       },
       "request_after": {
+        "byte7_checksum": 18,
+        "byte7_checksum_expected": 18,
+        "byte7_checksum_valid": true,
         "cruise_operating_latch": 0,
         "delayed_hold_state": 0,
         "lateral_assist_gain": 1.0,
@@ -583,14 +592,15 @@
         "longitudinal_accel_a_m_s2": -0.48,
         "longitudinal_accel_b_m_s2": -0.48,
         "longitudinal_allocation_a": 0,
-        "longitudinal_allocation_b": 2,
         "longitudinal_request_id_a": 0,
-        "longitudinal_request_id_b": 4,
         "raw": "0000000080000012fe2000fe207fff007fff002700000000640017000293c62e",
         "request_sequence": 23,
         "set_speed_kph": 0
       },
       "request_before": {
+        "byte7_checksum": 71,
+        "byte7_checksum_expected": 71,
+        "byte7_checksum_valid": true,
         "cruise_operating_latch": 1,
         "delayed_hold_state": 0,
         "lateral_assist_gain": 1.0,
@@ -600,9 +610,7 @@
         "longitudinal_accel_a_m_s2": -0.014,
         "longitudinal_accel_b_m_s2": -0.014,
         "longitudinal_allocation_a": 1,
-        "longitudinal_allocation_b": 3,
         "longitudinal_request_id_a": 11,
-        "longitudinal_request_id_b": 17,
         "raw": "0000000880002d47fff247fff27fff007fff002fc00b100064001600c111d5c0",
         "request_sequence": 22,
         "set_speed_kph": 71
@@ -783,6 +791,9 @@
         ]
       },
       "request_after": {
+        "byte7_checksum": 18,
+        "byte7_checksum_expected": 18,
+        "byte7_checksum_valid": true,
         "cruise_operating_latch": 0,
         "delayed_hold_state": 0,
         "lateral_assist_gain": 1.0,
@@ -792,14 +803,15 @@
         "longitudinal_accel_a_m_s2": -0.596,
         "longitudinal_accel_b_m_s2": -0.596,
         "longitudinal_allocation_a": 0,
-        "longitudinal_allocation_b": 2,
         "longitudinal_request_id_a": 0,
-        "longitudinal_request_id_b": 4,
         "raw": "0000000080000012fdac00fdac7fff007fff000e00000000640019008d27f3e3",
         "request_sequence": 25,
         "set_speed_kph": 0
       },
       "request_before": {
+        "byte7_checksum": 70,
+        "byte7_checksum_expected": 70,
+        "byte7_checksum_valid": true,
         "cruise_operating_latch": 1,
         "delayed_hold_state": 0,
         "lateral_assist_gain": 1.0,
@@ -809,9 +821,7 @@
         "longitudinal_accel_a_m_s2": -0.593,
         "longitudinal_accel_b_m_s2": -0.593,
         "longitudinal_allocation_a": 0,
-        "longitudinal_allocation_b": 2,
         "longitudinal_request_id_a": 11,
-        "longitudinal_request_id_b": 17,
         "raw": "0000000880002c46fdaf3cfdaf7fff007ffffffec00b1020640018004f86d267",
         "request_sequence": 24,
         "set_speed_kph": 60
@@ -948,6 +958,9 @@
         ]
       },
       "request_after": {
+        "byte7_checksum": 18,
+        "byte7_checksum_expected": 18,
+        "byte7_checksum_valid": true,
         "cruise_operating_latch": 0,
         "delayed_hold_state": 0,
         "lateral_assist_gain": 1.0,
@@ -957,14 +970,15 @@
         "longitudinal_accel_a_m_s2": -0.438,
         "longitudinal_accel_b_m_s2": -0.438,
         "longitudinal_allocation_a": 0,
-        "longitudinal_allocation_b": 2,
         "longitudinal_request_id_a": 0,
-        "longitudinal_request_id_b": 4,
         "raw": "0000000080000012fe4a00fe4a7fff007fff00080000000064003100edff5578",
         "request_sequence": 49,
         "set_speed_kph": 0
       },
       "request_before": {
+        "byte7_checksum": 71,
+        "byte7_checksum_expected": 71,
+        "byte7_checksum_valid": true,
         "cruise_operating_latch": 1,
         "delayed_hold_state": 0,
         "lateral_assist_gain": 1.0,
@@ -974,9 +988,7 @@
         "longitudinal_accel_a_m_s2": 0.097,
         "longitudinal_accel_b_m_s2": 0.097,
         "longitudinal_allocation_a": 1,
-        "longitudinal_allocation_b": 3,
         "longitudinal_request_id_a": 11,
-        "longitudinal_request_id_b": 17,
         "raw": "0000000880002d4700614600617fff007fff000ec00b100064003000a3e08561",
         "request_sequence": 48,
         "set_speed_kph": 70
@@ -1115,6 +1127,9 @@
         ]
       },
       "request_after": {
+        "byte7_checksum": 18,
+        "byte7_checksum_expected": 18,
+        "byte7_checksum_valid": true,
         "cruise_operating_latch": 0,
         "delayed_hold_state": 0,
         "lateral_assist_gain": 1.0,
@@ -1124,14 +1139,15 @@
         "longitudinal_accel_a_m_s2": -0.484,
         "longitudinal_accel_b_m_s2": -0.484,
         "longitudinal_allocation_a": 0,
-        "longitudinal_allocation_b": 2,
         "longitudinal_request_id_a": 0,
-        "longitudinal_request_id_b": 4,
         "raw": "0000000080000012fe1c00fe1c7fff007ffffffd00000000640007004249cffa",
         "request_sequence": 7,
         "set_speed_kph": 0
       },
       "request_before": {
+        "byte7_checksum": 71,
+        "byte7_checksum_expected": 71,
+        "byte7_checksum_valid": true,
         "cruise_operating_latch": 1,
         "delayed_hold_state": 0,
         "lateral_assist_gain": 1.0,
@@ -1141,9 +1157,7 @@
         "longitudinal_accel_a_m_s2": 0.016,
         "longitudinal_accel_b_m_s2": 0.016,
         "longitudinal_allocation_a": 1,
-        "longitudinal_allocation_b": 3,
         "longitudinal_request_id_a": 11,
-        "longitudinal_request_id_b": 17,
         "raw": "0000000880002d4700104600107fff007ffffffec00b10006400060006cfe7e3",
         "request_sequence": 6,
         "set_speed_kph": 70
@@ -1282,6 +1296,9 @@
         ]
       },
       "request_after": {
+        "byte7_checksum": 18,
+        "byte7_checksum_expected": 18,
+        "byte7_checksum_valid": true,
         "cruise_operating_latch": 0,
         "delayed_hold_state": 0,
         "lateral_assist_gain": 1.0,
@@ -1291,14 +1308,15 @@
         "longitudinal_accel_a_m_s2": -0.578,
         "longitudinal_accel_b_m_s2": -0.578,
         "longitudinal_allocation_a": 0,
-        "longitudinal_allocation_b": 2,
         "longitudinal_request_id_a": 0,
-        "longitudinal_request_id_b": 4,
         "raw": "0000000080000012fdbe00fdbe7fff007fff0016000000006400330051e15a76",
         "request_sequence": 51,
         "set_speed_kph": 0
       },
       "request_before": {
+        "byte7_checksum": 71,
+        "byte7_checksum_expected": 71,
+        "byte7_checksum_valid": true,
         "cruise_operating_latch": 1,
         "delayed_hold_state": 0,
         "lateral_assist_gain": 1.0,
@@ -1308,9 +1326,7 @@
         "longitudinal_accel_a_m_s2": 0.011,
         "longitudinal_accel_b_m_s2": 0.011,
         "longitudinal_allocation_a": 1,
-        "longitudinal_allocation_b": 3,
         "longitudinal_request_id_a": 11,
-        "longitudinal_request_id_b": 17,
         "raw": "0000000880002d47000b48000b7fff007fff0013c00b10006400320015b8b069",
         "request_sequence": 50,
         "set_speed_kph": 72
@@ -1463,6 +1479,9 @@
         ]
       },
       "request_after": {
+        "byte7_checksum": 18,
+        "byte7_checksum_expected": 18,
+        "byte7_checksum_valid": true,
         "cruise_operating_latch": 0,
         "delayed_hold_state": 0,
         "lateral_assist_gain": 1.0,
@@ -1472,14 +1491,15 @@
         "longitudinal_accel_a_m_s2": -0.499,
         "longitudinal_accel_b_m_s2": -0.499,
         "longitudinal_allocation_a": 0,
-        "longitudinal_allocation_b": 2,
         "longitudinal_request_id_a": 0,
-        "longitudinal_request_id_b": 4,
         "raw": "0000000080000012fe0d00fe0d7fff007fff000b0000000064001900f13cc89a",
         "request_sequence": 25,
         "set_speed_kph": 0
       },
       "request_before": {
+        "byte7_checksum": 71,
+        "byte7_checksum_expected": 71,
+        "byte7_checksum_valid": true,
         "cruise_operating_latch": 1,
         "delayed_hold_state": 0,
         "lateral_assist_gain": 1.0,
@@ -1489,9 +1509,7 @@
         "longitudinal_accel_a_m_s2": 0.011,
         "longitudinal_accel_b_m_s2": 0.011,
         "longitudinal_allocation_a": 1,
-        "longitudinal_allocation_b": 3,
         "longitudinal_request_id_a": 11,
-        "longitudinal_request_id_b": 17,
         "raw": "0000000880002d47000b46000b7fff007fff0007c00b100064001800be0a32c0",
         "request_sequence": 24,
         "set_speed_kph": 70
@@ -1548,7 +1566,7 @@
     "bounded_state": "0x371 B19=0x60 is a repeatable late/final-stage hands-off candidate after the earlier B19=0x40 warning and 0x412 B2[6] escalation. Its exact OEM bit name and whether it alone commits cancellation remain unproved.",
     "chassis_response": "0x081 follows the FRC withdrawal: lateral result ID becomes 0 first, then longitudinal result ID becomes 63 (Driver Operation); request-loss remains clear.",
     "negative_evidence": "Native 0x101 remains a non-brake frame and no sendcan 0x101 precedes the strong witness; 0x251 cruise-main availability remains asserted. This is therefore not the normal brake/button cancel path and not loss-of-request supervision.",
-    "verified_dynamic": "The strongest retained hands-off cancellation is a native FRC 0x08A request withdrawal: the operating latch clears, Target Lateral ID 11 becomes 0, both longitudinal request packages change, and set speed clears before controls sees pcmDisable."
+    "verified_dynamic": "The strongest retained hands-off cancellation is a native FRC 0x08A request withdrawal: the operating latch clears, Target Lateral ID 11 becomes 0, the B6 longitudinal requester/allocation and both signed16 acceleration slots change, and set speed clears before controls sees pcmDisable. B7 is the Toyota checksum over the first eight-byte block, not a second requester/allocation."
   },
   "latch_fall_count": 9,
   "native_bus_assignment": {
@@ -1587,7 +1605,7 @@
     "0x412/src0": 14,
     "0x412/src2": 939
   },
-  "schema": "camry-20260907-hands-off-cancel-v1",
+  "schema": "camry-20260907-hands-off-cancel-v2",
   "source": {
     "openpilot_commit": "f8bd956a4b23eb4992c6abbe899e72b27cd91d80",
     "route": "00000045--805b7ca6ab",
@@ -1688,6 +1706,9 @@
         ]
       },
       "request_after": {
+        "byte7_checksum": 18,
+        "byte7_checksum_expected": 18,
+        "byte7_checksum_valid": true,
         "cruise_operating_latch": 0,
         "delayed_hold_state": 0,
         "lateral_assist_gain": 1.0,
@@ -1697,14 +1718,15 @@
         "longitudinal_accel_a_m_s2": -0.578,
         "longitudinal_accel_b_m_s2": -0.578,
         "longitudinal_allocation_a": 0,
-        "longitudinal_allocation_b": 2,
         "longitudinal_request_id_a": 0,
-        "longitudinal_request_id_b": 4,
         "raw": "0000000080000012fdbe00fdbe7fff007fff0016000000006400330051e15a76",
         "request_sequence": 51,
         "set_speed_kph": 0
       },
       "request_before": {
+        "byte7_checksum": 71,
+        "byte7_checksum_expected": 71,
+        "byte7_checksum_valid": true,
         "cruise_operating_latch": 1,
         "delayed_hold_state": 0,
         "lateral_assist_gain": 1.0,
@@ -1714,9 +1736,7 @@
         "longitudinal_accel_a_m_s2": 0.011,
         "longitudinal_accel_b_m_s2": 0.011,
         "longitudinal_allocation_a": 1,
-        "longitudinal_allocation_b": 3,
         "longitudinal_request_id_a": 11,
-        "longitudinal_request_id_b": 17,
         "raw": "0000000880002d47000b48000b7fff007fff0013c00b10006400320015b8b069",
         "request_sequence": 50,
         "set_speed_kph": 72

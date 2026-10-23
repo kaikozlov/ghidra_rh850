@@ -71,8 +71,10 @@ def _section_corolla_hf_nonsteering_engagement_state():
     check('0x24D survives but old switch fields remain inactive', c24d['public_2023_frames'] == 59 and c24d['span_2025_frames'] == 60 and all(v == [0] for v in c24d['legacy_button_fields'].values()))
     check('old cruise replacement IDs absent in both captures', cruise['legacy_ids_absent_in_both_captures'] == ['0x177', '0x1A2', '0x1D3', '0x399'])
     native = cruise['native_wire_mapping']
-    check('0x08A native available/enabled mapping is closed', 'ACC_STATE' in native['available'] and 'B22 bit0x10' in native['enabled'] and native['span_0x08a']['acc_engaged_frames'] == 37 and native['span_0x08a']['acc_disengaged_frames'] == 2363)
-    check('core cruise fields are closed while optional fields remain open', cruise['wire_mapping_status']['cruise_available'].startswith('closed') and cruise['wire_mapping_status']['cruise_enabled'].startswith('closed') and cruise['wire_mapping_status']['cruise_standstill'].startswith('closed') and cruise['wire_mapping_status']['set_speed'].startswith('closed') and cruise['wire_mapping_status']['follow_distance'].startswith('optional/open'))
+    acc = native['span_0x08a']
+    check('0x08A B22 bit4 transitions are retained without a second requester',
+          acc['acc_engaged_frames'] == 37 and acc['acc_disengaged_frames'] == 2363
+          and acc['byte7_checksum']['valid_frames'] == acc['frame_count'] == 2400)
 
     print('\n== Toyota P5 engagement diagnostic oracles ==')
     rows = {x['name']: x for x in cruise['techstream_p5_frc_oracles']}
@@ -88,7 +90,6 @@ def _section_corolla_hf_nonsteering_engagement_state():
     unsafe = art['implementation_consequence']['not_safe_yet']
     check('Ready input is safe for inspection', any('0x51E B0[7]' in x for x in safe))
     check('gear carriers are safe for production CarState', any('0x127 GEAR_PACKET_HYBRID' in x and '0x3BF' in x for x in safe))
-    check('native cruise available/enabled/standstill is safe', any('0x08A ACC_STATE/B22' in x and 'standstill' in x for x in safe))
     check('retained set speed is safe with native floor', any('0x251 B2' in x and '19-mph' in x for x in safe))
     check('fault-policy overreach remains prohibited', any('temporary/permanent' in x and 'fault' in x for x in unsafe))
 

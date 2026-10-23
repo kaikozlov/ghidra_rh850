@@ -141,7 +141,7 @@
   "sources": {
     "b6_receiver_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
-      "sha256": "de36c4736b832f933311ca3f2151cadd209eccca24564a39b43065ae07474928"
+      "sha256": "2f2276650e22153af08f0d3a02eb4abec10a75839f2740d0978c8f59bed512bd"
     },
     "codeflash": {
       "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",

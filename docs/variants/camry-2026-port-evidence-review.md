@@ -866,14 +866,15 @@ motion. Toyota's P5 Brake/Booster/EPB DDBs independently name upper/lower
 the FRC-hosted PCS recorder contains matching lower/upper TSS acceleration
 request records plus IDs/allocation/arbitration results.
 
-This is a strong **structural/semantic mapping**, but upper versus lower A/B
-ordering remains unresolved because the two acceleration words are equal in the
-retained complete drives. The request-ID geometry is now tighter: `0x08A B6`
-and `B7` each split exactly into a six-bit request-ID candidate in bits7:2 plus
-a two-bit allocation-method candidate in bits1:0, matching Brake 0x10A3/0x10A4
-and Toyota's 0..3 allocation enum. During active cruise candidate A is ID11 and
-candidate B ID17; Brake's selected result ID11 overwhelmingly selects candidate A. The
-direct FRC P05 streams `0x020/0x230/0x440` have no simple byte-aligned field that
+This is a strong **structural/semantic mapping**, but the equal acceleration words
+in these retained complete drives do not resolve upper versus lower A/B ordering.
+The former two-byte request-ID interpretation is superseded:
+`B7 = (0x8A + 8 + sum(B0..B6)) & 0xFF` is the prefix checksum, not a lower
+request-ID/allocation field. B6[7:2]/B6[1:0] remain one six-bit request-ID/two-bit
+allocation candidate (ID11/allocation1 during ordinary active cruise); the lower
+request ID/allocation wire locations remain unmapped. Brake `0x10A3/0x10A4` and
+recorder `5280` describe diagnostic/recorder fields, not a proven join onto B7.
+The direct FRC P05 streams `0x020/0x230/0x440` have no simple byte-aligned field that
 reproduces the protected request word across both complete drives; `0x160` has
 only state-related long-lag correlations and remains disqualified as the
 implemented Camry demand interface. The exhaustive FRC-dependent protected-domain
@@ -899,7 +900,7 @@ request plane: lateral request identity/angle is already closed there and its
 duplicated signed16 words are now the strongest longitudinal acceleration-request
 candidates. Toyota's recorder schema additionally exposes longitudinal request
 IDs, force-allocation, shift/EPB, override/priority and other request metadata.
-The ID/allocation pair now has strong B6/B7 structural candidates, but its upper/
-lower ordering plus shift/EPB/override/priority and 57D3 validity remain unresolved,
-while ordinary FRC state/display
+Only B6 retains a request-ID/allocation structural candidate; B7 is the prefix
+checksum. The lower-request identity/allocation, shift/EPB/override/priority and
+57D3 validity wire fields remain unresolved, while ordinary FRC state/display
 and ego-motion publications exist on separate PDUs.

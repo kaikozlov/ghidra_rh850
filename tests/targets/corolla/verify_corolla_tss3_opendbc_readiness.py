@@ -45,7 +45,9 @@ span_spec = spec["span_moving_rlog"]
 check("Span moving rlog has no usable F181 join", span_spec["identity_boundary"]["rlog_has_no_usable_f181_join"] is True and span_spec["identity_boundary"]["same_dongle"] is False)
 check("Span moving rlog is unswapped ELM327 observation", span_spec["harness_observation_boundary"]["all_samples_elm327_param1"] is True)
 native_acc = span_spec["native_acc_gate"]
-check("Span retained rlog closes native 0x08A ACC gate", native_acc["acc_engaged_frames"] == 37 and native_acc["acc_disengaged_frames"] == 2363 and native_acc["state_when_engaged"] == [93] and native_acc["state_when_disengaged"] == [18])
+check("Span retained rlog preserves native B22 bit4 transitions and B7 checksum",
+      native_acc["acc_engaged_frames"] == 37 and native_acc["acc_disengaged_frames"] == 2363
+      and native_acc["byte7_checksum"]["valid_frames"] == native_acc["frame_count"] == 2400)
 public_gear = spec["public_route_gear"]
 check("public route closes 0x3BF P/R/D transitions", public_gear["0x3BF"]["direct_observed_labels"] == {"0x10": "D", "0x40": "R", "0x80": "P"} and [x["raw"] for x in public_gear["0x3BF"]["transitions"]] == [128, 64, 16])
 check("public 0x2A1 independently corroborates P/R/D", public_gear["0x2A1"]["direct_observed_labels"] == {"0x01": "P", "0x02": "R", "0x04": "D"} and [x["raw"] for x in public_gear["0x2A1"]["transitions"]] == [1, 2, 4])

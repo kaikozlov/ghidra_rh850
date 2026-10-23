@@ -124,10 +124,12 @@ This section records the longitudinal boundary as it stood before the
 remains open in [../status/OPEN_QUESTIONS.md](../status/OPEN_QUESTIONS.md)
 (OQ-052). At this baseline, native longitudinal was deliberately **not
 advertised** on the TSS3 platforms. The recovered request/result split places
-the TSS application
-request in `0x08A`: B6/B7 carry the two request-ID/allocation tuples and
-B8:B9/B11:B12 carry the two signed16 ×0.001 m/s² acceleration requests. The
-same PDU also carries the lateral request tuple. Brake-owned `0x081` is the
+the TSS application request in `0x08A`: B6 high-six/low-two bits remain
+candidate request-ID/allocation metadata, and B8:B9/B11:B12 carry the two
+signed16 ×0.001 m/s² acceleration requests. The former second ID/allocation
+tuple at B7 was a checksum misdecode:
+`B7 = (0x8A + 8 + sum(B0..B6)) & 255`; the lower ID/allocation remain unmapped.
+The same PDU also carries the lateral request tuple. Brake-owned `0x081` is the
 corresponding chassis-side result/reference family.
 
 The earlier `camry_frc_request_poc.py` and contributor Corolla `0x160`

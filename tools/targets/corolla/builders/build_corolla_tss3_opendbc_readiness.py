@@ -212,7 +212,7 @@ def main() -> int:
         raise ValueError("H/F direct-command5 package drift")
     if not direct_command5["live_guards"]["successful_canary_result_required"] or not direct_command5["live_guards"]["reset_to_stock_confirmation_required"]:
         raise ValueError("H/F direct-command5 must remain gated behind canary/reset proof")
-    if engagement["schema"] != "corolla-hf-nonsteering-engagement-state-v1":
+    if engagement["schema"] != "corolla-hf-nonsteering-engagement-state-v2":
         raise ValueError("non-steering engagement contract schema drift")
     if fault_state["schema"] != "corolla-hf-0x394-fault-state-contract-v1" or remaining_status["schema"] != "corolla-hf-remaining-status-contract-v1":
         raise ValueError("remaining H/F static-state contract drift")
@@ -278,11 +278,11 @@ def main() -> int:
         ),
         row(
             "cruise engaged",
-            "generation_native_can_closed",
+            "generation_native_bit_observed",
             "Older Toyota uses 0x176 PCM_CRUISE.CRUISE_ACTIVE/CRUISE_STATE",
-            "0x176 is explicitly rejected as the TSS3 engagement source: its old active/state fields stay inactive and B0[3] tracks accelerator-release/brake context. Span's retained 2025 rlog directly closes 0x08A B22 bit 0x10 instead: 2,363 clear frames are all ACC_STATE=0x12 and 37 asserted frames are all ACC_STATE=0x5D. Albino's validated longitudinal implementation independently uses the same 0x08A engaged bit for host and Panda gating.",
-            "Span moving rlog + retained Albino on-car longitudinal implementation",
-            "No core CarState engagement-field blocker remains; exact-target replay remains the normal final validation step.",
+            "0x176 is rejected as the TSS3 engagement source: its old active/state fields stay inactive and B0[3] tracks accelerator-release/brake context. Span's retained 2025 rlog observes 0x08A B22 bit0x10 clear on 2,363 frames and set on 37. The retained contributor implementation uses that bit as its engaged gate, but the checksum values0x12/0x5D are not an independent engagement oracle.",
+            "Span moving rlog + retained contributor longitudinal implementation",
+            "Retain the observed B22 bit4 behavior and contributor interpretation; an independent cruise transition oracle remains absent from this Span minute.",
         ),
         row(
             "steering angle / rate",
@@ -318,11 +318,11 @@ def main() -> int:
         ),
         row(
             "cruise availability / set speed / ACC faults / follow distance",
-            "core_carstate_closed_optional_acc_ui_open",
+            "availability_standstill_wire_join_open",
             "0x1D3 PCM_CRUISE_2 and 0x399 PCM_CRUISE_SM supply main availability, set speed, fault, lockout, distance and cluster set speed",
-            "The old 0x1D3/0x399 family is absent. Core TSS3 CarState is instead generation-native: 0x08A ACC_STATE is nonzero in retained idle/engaged states, B22 bit0x10 is the direct engaged gate, and contributor live drives identify ACC_STATE bit0x20/0x67 as standstill hold. Retained contributor evidence identifies 0x251 byte2 as the dash set speed in mph and the validated on-car port reports a 19-mph set-speed floor. GTS+ FRC_P5 independently provides the diagnostic semantic oracles 0x1901/0x1905/0x1906/0x1912/0x1914. Follow-distance and detailed ACC-unavailable UI state remain optional unmapped fields. Base control works independently of them.",
-            "Span moving rlog + retained Albino live-drive evidence + GTS+ FRC_P5 semantics",
-            "Optional follow-distance and detailed ACC-unavailable UI mapping remain open; they are not required for base engagement, set speed, standstill, or actuation.",
+            "The old 0x1D3/0x399 family is absent. 0x08A B7 is the Toyota first-block checksum, so B7!=0 and B7 bit0x20 do not map availability or standstill. B22 bit0x10 remains the contributor engaged-gate interpretation with observed Span transitions. Retained contributor evidence identifies 0x251 byte2 as dash set speed in mph and reports a 19-mph set-speed floor and stop/hold/resume operation; those observations do not prove a B7 state field. GTS+ FRC_P5 diagnostic oracles 0x1901/0x1905/0x1906/0x1912/0x1914 do not independently provide a CAN mapping.",
+            "Span moving rlog + retained contributor observations + GTS+ FRC_P5 diagnostic semantics",
+            "Availability and standstill require an independent native-CAN join. Preserve set-speed and operating observations; leave optional follow-distance and detailed ACC-unavailable UI unmapped.",
         ),
         row(
             "brake hold / stability state",
@@ -405,7 +405,7 @@ def main() -> int:
     }
 
     out = {
-        "schema": "corolla-tss3-opendbc-readiness-v1",
+        "schema": "corolla-tss3-opendbc-readiness-v2",
         "axes": {
             "adas_control_generation": "TSS/TSS2/TSS3 describes ADAS/control ownership, messages and semantics.",
             "security_architecture": "SecOC/TSK describes the security/authentication architecture: message authentication, freshness, keying, and diagnostic/reprogramming security.",

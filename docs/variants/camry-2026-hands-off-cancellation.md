@@ -65,8 +65,8 @@ Recovered fields:
 
 ```text
 CRUISE_OPERATING_LATCH       1
-long request A               ID 11 / allocation 1
-long request B               ID 17 / allocation 3
+B6 candidate                ID 11 / allocation 1
+B7 prefix checksum          0x47
 accel A/B                    +0.011 / +0.011 m/s^2
 set speed                    72 km/h
 Target Lateral ID            11
@@ -84,14 +84,18 @@ with:
 
 ```text
 CRUISE_OPERATING_LATCH       0
-long request A               ID 0 / allocation 0
-long request B               ID 4 / allocation 2
+B6 candidate                ID 0 / allocation 0
+B7 prefix checksum          0x12
 accel A/B                    -0.578 / -0.578 m/s^2
 set speed                    0
 Target Lateral ID            0
 lateral assist gain          1.00
 sequence                     51
 ```
+
+Both B7 values satisfy `(0x8A + 8 + sum(B0..B6)) & 0xFF`. The former
+request-B ID17/allocation3 and ID4/allocation2 labels were checksum-derived and
+are retracted; the lower request ID/allocation wire locations remain unmapped.
 
 The sequence remains continuous, so this is not sender disappearance or a stale
 frame. The FRC deliberately publishes a new authenticated request state which

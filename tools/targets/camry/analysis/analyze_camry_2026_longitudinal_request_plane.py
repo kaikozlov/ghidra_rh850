@@ -4,7 +4,7 @@
 Offline analysis.
 """
 from __future__ import annotations
-from tools.toyota_support.toyota_route_opendbc_common import be_raw
+from tools.toyota_support.toyota_route_opendbc_common import be_raw, toyota_checksum
 
 from tools.targets.camry.support import camry_f33_corpus as f33
 from tools import REPO_ROOT
@@ -136,7 +136,7 @@ def preceding_value(rows: list[tuple[int, bytes]], t: int, decoder, max_age_ns: 
   return decoder(rows[i][1])
 
 
-def idle_0_4_context(streams: dict[int, list[tuple[int, bytes]]]) -> dict:
+def b6_zero_context(streams: dict[int, list[tuple[int, bytes]]]) -> dict:
   request = streams[0x08A]
   result = streams[0x081]
   result_ts = [t for t, _ in result]
@@ -150,8 +150,8 @@ def idle_0_4_context(streams: dict[int, list[tuple[int, bytes]]]) -> dict:
       return None
     return decoder(rows[i][1])
 
-  def request_pair(data: bytes) -> tuple[int, int]:
-    return data[6] >> 2, data[7] >> 2
+  def b6_state(data: bytes) -> int:
+    return data[6]
 
   stable_result_ids = Counter()
   stable_moving_result_ids = Counter()
@@ -161,10 +161,10 @@ def idle_0_4_context(streams: dict[int, list[tuple[int, bytes]]]) -> dict:
 
   contextual = []
   for i, (t, data) in enumerate(request):
-    if request_pair(data) != (0, 4):
+    if b6_state(data) != 0:
       continue
     lo, hi = max(0, i - 4), min(len(request), i + 5)
-    stable = hi - lo >= 5 and all(request_pair(d) == (0, 4) for _, d in request[lo:hi])
+    stable = hi - lo >= 5 and all(b6_state(d) == 0 for _, d in request[lo:hi])
     if not stable:
       continue
 
@@ -193,7 +193,7 @@ def idle_0_4_context(streams: dict[int, list[tuple[int, bytes]]]) -> dict:
         "lower": s16be(data, 11) * 0.001,
       })
 
-  # Match brake-on edges against the same 0/4 request state before and after the edge.
+  # Match brake-on edges against the same raw B6=0 state before and after.
   # Raw gear 3 is D on the retained Camry road captures. Limit the primary test to
   # <1 m/s, where Toyota's creep-related behavior should be most discriminating.
   brake_edges = []
@@ -219,7 +219,7 @@ def idle_0_4_context(streams: dict[int, list[tuple[int, bytes]]]) -> dict:
           })
     last_brake = brake
 
-  # Speed-stratified descriptive check for the no-accelerator, D, 0/4 state.
+  # Speed-stratified descriptive check for the no-accelerator, D, B6=0 state.
   bins = [(0.0, 0.15), (0.15, 0.5), (0.5, 1.0), (1.0, 2.0), (2.0, 5.0), (5.0, 10.0), (10.0, 20.0)]
   speed_bins = []
   for low, high in bins:
@@ -237,16 +237,16 @@ def idle_0_4_context(streams: dict[int, list[tuple[int, bytes]]]) -> dict:
 
   deltas = [row["delta_mps2"] for row in brake_edges]
   return {
-    "request_state": "FRC-origin 0x08A upper ID0 / lower ID4",
+    "request_state": "FRC-origin 0x08A raw B6=0 (request ID0 / allocation0); B7 is not a selector",
     "result_state": {
       "stable_pair_count": stable_pairs,
       "result_id_counts": {str(k): v for k, v in sorted(stable_result_ids.items())},
       "moving_over_1_mps_pair_count": stable_moving_pairs,
       "moving_over_1_mps_result_id_counts": {str(k): v for k, v in sorted(stable_moving_result_ids.items())},
-      "interpretation": "Stable FRC 0/4 request state returns Brake/VMC employed-source ID63; any non-63 values should be treated as transition-lag candidates.",
+      "interpretation": "Observed result B6[5:0] distribution during stable request B6=0. This is not a diagnostic identity join.",
       "non63_examples": stable_transition_mismatches,
     },
-    "lower_id4_brake_context": {
+    "slot_B11_B12_brake_context": {
       "matched_brake_press_edges_under_1_mps": len(brake_edges),
       "negative_delta_edges": sum(row["delta_mps2"] < 0 for row in brake_edges),
       "positive_delta_edges": sum(row["delta_mps2"] > 0 for row in brake_edges),
@@ -254,7 +254,7 @@ def idle_0_4_context(streams: dict[int, list[tuple[int, bytes]]]) -> dict:
       "mean_delta_mps2": round(statistics.fmean(deltas), 6) if deltas else None,
       "edges": brake_edges,
       "speed_bins_gas_off_drive": speed_bins,
-      "boundary": "Observed 0/4 lower-slot behavior; ID4 OEM application name remains unknown. Brake correlation is strongest below 1 m/s and does not by itself prove a creep application identity.",
+      "boundary": "Observed acceleration-slot behavior during raw B6=0. Brake correlation does not identify a lower-slot requester or an OEM creep application.",
     },
   }
 
@@ -269,32 +269,31 @@ def request_summary(rows: list[tuple[int, bytes]]) -> dict:
   b = [s16be(d, 11) for d in data]
   id_a = [d[6] >> 2 for d in data]
   alloc_a = [d[6] & 0x03 for d in data]
-  id_b = [d[7] >> 2 for d in data]
-  alloc_b = [d[7] & 0x03 for d in data]
+  checksum_expected = [toyota_checksum(0x8A, d[:8]) for d in data]
   return {
     "frame_count": len(data),
-    "longitudinal_id_allocation_packing": {
-      "candidate_A": {
-        "wire": "B6[7:2] request ID + B6[1:0] allocation method",
-        "request_id_counts": {str(k): v for k, v in sorted(Counter(id_a).items())},
-        "allocation_method_counts": {str(k): v for k, v in sorted(Counter(alloc_a).items())},
-      },
-      "candidate_B": {
-        "wire": "B7[7:2] request ID + B7[1:0] allocation method",
-        "request_id_counts": {str(k): v for k, v in sorted(Counter(id_b).items())},
-        "allocation_method_counts": {str(k): v for k, v in sorted(Counter(alloc_b).items())},
-      },
-      "gts_geometry": ("Brake 0x10A3/0x10A4 define each TSS request ID as bits 7:2 (six bits), leaving exactly two low bits. "
-                       "FRC allocation-method vocabulary is 0..3. The wire split is therefore a strong structural candidate; "
-                       "archive-wide unequal ordinary-DRCC frames strongly resolve A/B as upper/lower even though a synchronized DID/FFD join is still absent."),
-      "allocation_enum": {"0": "Engine Only", "1": "Engine and Brake 1", "2": "Engine and Brake 2", "3": "Brake Only"},
+    "b6_request_state": {
+      "wire": "B6[7:2] request ID + B6[1:0] allocation method (current interpretation)",
+      "request_id_counts": {str(k): v for k, v in sorted(Counter(id_a).items())},
+      "allocation_method_counts": {str(k): v for k, v in sorted(Counter(alloc_a).items())},
+      "boundary": "B6 interpretation is retained; diagnostic/recorder geometry alone is not a CAN mapping.",
+    },
+    "byte7_checksum": {
+      "wire": "B7",
+      "formula": "(0x8A + 8 + sum(B0..B6)) & 0xFF",
+      "checked_frames": len(data),
+      "matching_frames": sum(d[7] == expected for d, expected in zip(data, checksum_expected)),
+      "mismatch_frames": sum(d[7] != expected for d, expected in zip(data, checksum_expected)),
+      "observed_counts": hist(data, 7),
+      "expected_counts": {f"0x{k:02X}": v for k, v in sorted(Counter(checksum_expected).items())},
+      "boundary": "Checksum over the first seven payload bytes and legacy eight-byte length; not a lower request ID or allocation field.",
     },
     "longitudinal_acceleration_words": {
       "B8_B9": {"signed16_raw_range": [min(a), max(a)], "scale_mps2_per_count": 0.001},
       "B11_B12": {"signed16_raw_range": [min(b), max(b)], "scale_mps2_per_count": 0.001},
       "equal_frames": sum(x == y for x, y in zip(a, b)),
       "equal_fraction": round(sum(x == y for x, y in zip(a, b)) / len(a), 9),
-      "upper_lower_assignment": "these two selected complete drives are equal-only; archive-wide unequal ordinary-DRCC frames independently resolve B8:B9 as upper and B11:B12 as lower",
+      "upper_lower_assignment": "The retained complete drives are equal-only and cannot independently order the slots. Unequal ordinary-DRCC observations elsewhere retain the current upper B8:B9 / lower B11:B12 interpretation; no lower requester ID is identified.",
     },
     "lateral_request": {
       "target_lateral_id_low6_values": sorted({d[21] & 0x3F for d in data}),
@@ -316,7 +315,7 @@ def request_summary(rows: list[tuple[int, bytes]]) -> dict:
       "B23": hist(data, 23),
       "B24": hist(data, 24),
       "B25": hist(data, 25),
-      "boundary": ("B6/B7 are structurally split into two six-bit request IDs plus two-bit allocation methods. The selected complete drives alone are equal-bound, but the archive-wide unequal ordinary-DRCC census strongly resolves B6/B8:B9 as upper and B7/B11:B12 as lower. "
+      "boundary": ("B6 retains the current six-bit request ID / two-bit allocation interpretation; B7 is the Toyota checksum. "
                    "Shift, EPB, override-prohibition and priority fields remain unassigned. B20/B22 mirror cruise state. Do not OEM-name unresolved bytes from resemblance."),
     },
   }
@@ -348,8 +347,7 @@ def result_summary(request_rows: list[tuple[int, bytes]], result_rows: list[tupl
   lat_id_matches = sum((q[21] & 0x3F) == (r[13] & 0x3F) for q, r, _ in pairs)
   angle_deltas = [s16be(r, 16) - s16be(q, 18) for q, r, _ in pairs]
   selected_equals_a = sum((r[6] & 0x3F) == (q[6] >> 2) for q, r, _ in pairs)
-  selected_equals_b = sum((r[6] & 0x3F) == (q[7] >> 2) for q, r, _ in pairs)
-  selected_63_not_request = sum((r[6] & 0x3F) == 63 and 63 not in (q[6] >> 2, q[7] >> 2) for q, r, _ in pairs)
+  selected_63_not_b6 = sum((r[6] & 0x3F) == 63 and (q[6] >> 2) != 63 for q, r, _ in pairs)
   selected_11 = [(q, r) for q, r, _ in pairs if (r[6] & 0x3F) == 11]
   selected_11_equals_a = sum((q[6] >> 2) == 11 for q, _ in selected_11)
   return {
@@ -366,14 +364,13 @@ def result_summary(request_rows: list[tuple[int, bytes]], result_rows: list[tupl
       "high_bit_separate": {str(k): v for k, v in sorted(Counter((r[6] >> 7) & 1 for _, r, _ in pairs).items())},
       "candidate_for": "PCS 5284 Arbitration result_longitudinal ID",
       "grade": "strong candidate; no synchronized DID/FFD value capture",
-      "relation_to_request_ids": {
-        "selected_equals_candidate_A_frames": selected_equals_a,
-        "selected_equals_candidate_B_frames": selected_equals_b,
-        "selected_63_absent_from_A_B_frames": selected_63_not_request,
+      "relation_to_b6_request_id": {
+        "selected_equals_B6_frames": selected_equals_a,
+        "selected_63_absent_from_B6_frames": selected_63_not_b6,
         "selected_ID11_frames": len(selected_11),
-        "selected_ID11_equals_candidate_A_frames": selected_11_equals_a,
-        "interpretation": ("Selected ID11 overwhelmingly names request candidate A (0x08A B6[7:2]); selected ID63 is absent from both TSS request slots and "
-                           "consistent with Toyota's independently named Driver Operation ID63. This supports the packed request-ID interpretation."),
+        "selected_ID11_equals_B6_frames": selected_11_equals_a,
+        "interpretation": ("Result ID11 overwhelmingly equals request B6[7:2]; result ID63 is absent from the B6 request-ID field. "
+                           "No comparison with B7 is meaningful because B7 is a checksum. Numeric agreement does not establish an OEM diagnostic identity."),
       },
     },
     "longitudinal_reference_word_B20": {
@@ -434,18 +431,16 @@ def hold_semantics() -> dict:
   episode_frames = 0
   for route in ("3b", "3c"):
     state = report["routes"][route]["stock_acc_standstill_candidate"]
-    for key, count in state["cruise_substate_pair_counts"].items():
+    for key, count in state["raw_b6_b7_pair_counts"].items():
       totals[key] += count
     episode_frames += int(state["frames"])
     for episode in state["episodes"]:
-      for key, count in episode["state_pair_counts"].items():
+      for key, count in episode["raw_b6_b7_pair_counts"].items():
         episode_pairs[key] += count
-  def decode_pair(key: str) -> dict:
-    a_raw, b_raw = (int(v) for v in key.split(","))
-    return {
-      "raw_B6": f"0x{a_raw:02X}", "request_id_A": a_raw >> 2, "allocation_A": a_raw & 3,
-      "raw_B7": f"0x{b_raw:02X}", "request_id_B": b_raw >> 2, "allocation_B": b_raw & 3,
-    }
+  def raw_pair(key: str) -> dict:
+    b6, b7 = (int(v) for v in key.split(","))
+    return {"raw_B6": f"0x{b6:02X}", "raw_B7_checksum": f"0x{b7:02X}",
+            "B6_request_id": b6 >> 2, "B6_allocation": b6 & 3}
   return {
     "source": {"path": str(HOLD.relative_to(REPO)), "sha256": sha256(HOLD)},
     "route_3b_3c_pair_counts": {key: totals[key] for key in sorted(totals)},
@@ -454,20 +449,13 @@ def hold_semantics() -> dict:
     "structural_hold_state": {
       "wire": "0x08A B4[5]",
       "set_frames_with_cruise_latch": sum(report["routes"][route]["stock_acc_standstill_candidate"]["b4_bit5_set_frames_with_cruise_latch"] for route in ("3b", "3c")),
-      "xor_violations_vs_retained_delayed_hold": sum(report["routes"][route]["stock_acc_standstill_candidate"]["b4_bit5_vs_legacy_b7_66_67_xor_violations"] for route in ("3b", "3c")),
       "grade": "exact structural delayed-hold state on complete 3b/3c routes; OEM recorder name unresolved",
     },
-    "decoded_states": {
-      "ordinary_active": decode_pair("45,71"),
-      "ordinary_active_accelerator_override": decode_pair("44,70"),
-      "delayed_hold": decode_pair("45,103"),
-      "delayed_hold_accelerator_override": decode_pair("44,102"),
-      "moving_ID25_counterexample": decode_pair("71,101"),
-    },
-    "interpretation": ("The former composite B7 0x47/0x67 state decomposes into request-B ID17/ID25 with allocation method3. "
-                       "Accelerator override changes A allocation 1->0 and B allocation 3->2 while preserving both request IDs. "
-                       "Delayed hold specifically requires request-B ID25 with allocation2/3; a moving raw B7=0x65 "
-                       "(ID25/allocation1) is the retained counterexample."),
+    "raw_header_pairs": {key: raw_pair(key) for key in sorted(totals)},
+    "interpretation": ("Delayed hold is measured by B4[5] with the cruise latch set. Raw B6/B7 pairs are retained observations, "
+                       "not two request-ID/allocation slots: B7 is the checksum. B6 allocation changes with accelerator override; "
+                       "B7 changes also reflect header flags, so its former ID17/ID25 distinction has no application-ID meaning. "
+                       "The exact OEM recorder identity of B4[5] remains unknown."),
   }
 
 
@@ -483,20 +471,12 @@ def recorder_rows() -> dict:
   return out
 
 
-def requester_id_namespace(drive_reports: dict[str, dict], hold: dict) -> dict:
-  """Bound Toyota's longitudinal requester-ID namespace.
-
-  The observed 0x08A fields are post-application-selection candidates: Toyota's
-  generic movement-control architecture names longitudinal IDs as application
-  identifiers, but the static P5/P6 diagnostic corpus exposes only sparse enum
-  labels. Cross-axis numeric coincidences remain hypotheses.
-  """
+def requester_id_namespace(drive_reports: dict[str, dict]) -> dict:
+  """Keep diagnostic dictionaries distinct from observed CAN B6 state."""
   lateral = json.loads(LATERAL_CENSUS.read_text())
   lateral_ids = lateral["gtsplus_join"]["emps_p5_did_0x1cee"]["target_lateral_id_dictionary"]
-
   ownership = json.loads(OWNERSHIP.read_text())
   isa_rows = ownership["longitudinal_request_surface"]["frc_output_vocabulary"]["dids"]["0x1B03"]
-  isa_patterns = isa_rows[0]["patterns"]
 
   from tools.techstream.ddb_semantics import monitor_rows
   from tools.techstream.ddb_strings import load_string_db
@@ -510,169 +490,62 @@ def requester_id_namespace(drive_reports: dict[str, dict], hold: dict) -> dict:
     "PDA-SA Lateral Control Request ID",
   }
   sparse_cross_generation = {}
-  for database in ("ADCU_P6.ddb",):
-    db = parser.parse_ecu_db(DDB_ROOT / database)
-    for row in monitor_rows(db, strings, database, deduplicate=True, include_signal_info=True):
-      if row["name"] not in requested_names:
-        continue
-      patterns = (row.get("signal_info") or {}).get("pattern_display") or {}
-      sparse_cross_generation[row["name"]] = {
-        "patterns": {str(k): v for k, v in sorted(patterns.items())},
-        "primary_did": f"0x{row['primary_did']:04X}",
-        "alternate_did": f"0x{row['alternate_did']:04X}",
-        "database": database,
-      }
+  database = "ADCU_P6.ddb"
+  db = parser.parse_ecu_db(DDB_ROOT / database)
+  for row in monitor_rows(db, strings, database, deduplicate=True, include_signal_info=True):
+    if row["name"] not in requested_names:
+      continue
+    patterns = (row.get("signal_info") or {}).get("pattern_display") or {}
+    sparse_cross_generation[row["name"]] = {
+      "patterns": {str(k): v for k, v in sorted(patterns.items())},
+      "primary_did": f"0x{row['primary_did']:04X}",
+      "alternate_did": f"0x{row['alternate_did']:04X}",
+      "database": database,
+    }
 
-  observed_a = Counter()
-  observed_b = Counter()
+  observed_b6 = Counter()
   observed_result = Counter()
   for drive in drive_reports.values():
-    req = drive["request_0x08A"]["longitudinal_id_allocation_packing"]
-    observed_a.update({int(k): v for k, v in req["candidate_A"]["request_id_counts"].items()})
-    observed_b.update({int(k): v for k, v in req["candidate_B"]["request_id_counts"].items()})
+    req = drive["request_0x08A"]["b6_request_state"]
+    observed_b6.update({int(k): v for k, v in req["request_id_counts"].items()})
     observed_result.update({int(k): v for k, v in drive["result_0x081"]["longitudinal_result_id_candidate"]["value_counts"].items()})
-
-  id25_hold_frames = hold["hold_episode_frames"]
-  id36_frames = observed_b[36]
-  id4_stable = sum(d["idle_0_4_context"]["result_state"]["stable_pair_count"] for d in drive_reports.values())
-  id4_stable_63 = sum(d["idle_0_4_context"]["result_state"]["result_id_counts"].get("63", 0) for d in drive_reports.values())
-  id4_moving = sum(d["idle_0_4_context"]["result_state"]["moving_over_1_mps_pair_count"] for d in drive_reports.values())
-  id4_moving_63 = sum(d["idle_0_4_context"]["result_state"]["moving_over_1_mps_result_id_counts"].get("63", 0) for d in drive_reports.values())
-  id4_brake_edges = [edge for d in drive_reports.values() for edge in d["idle_0_4_context"]["lower_id4_brake_context"]["edges"]]
-  id4_brake_deltas = [edge["delta_mps2"] for edge in id4_brake_edges]
-
-  pcs = json.loads(GTS.read_text())
-  feature_id_fields = []
-  for row in pcs["operation_ffd"]["detail_rows"]:
-    if row.get("DataID") in {"5271", "5280", "5281", "5284", "5A04", "5B07"} and "ID" in row.get("DataName", ""):
-      feature_id_fields.append({
-        "data_id": row["DataID"], "name": row["DataName"],
-        "bit_length": row["BitLength"], "byte_position": row["BytePosition"],
-      })
-
   corolla = json.loads(COROLLA_SPAN.read_text())
-  corolla_long = corolla["direct_reuse_evidence"]["0x08A_acc"]["request_id_allocation"]
+  corolla_request = corolla["direct_reuse_evidence"]["0x08A_acc"]["request_id_allocation"]
+  pcs = json.loads(GTS.read_text())
+  feature_id_fields = [{
+    "data_id": row["DataID"], "name": row["DataName"],
+    "bit_length": row["BitLength"], "byte_position": row["BytePosition"],
+  } for row in pcs["operation_ffd"]["detail_rows"]
+     if row.get("DataID") in {"5271", "5280", "5281", "5284", "5A04", "5B07"}
+     and "ID" in row.get("DataName", "")]
 
   return {
     "source_files": {
       "lateral_dictionary": {"path": str(LATERAL_CENSUS.relative_to(REPO)), "sha256": sha256(LATERAL_CENSUS)},
-      "adcu_p6_ddb": {"path": str((DDB_ROOT / "ADCU_P6.ddb").relative_to(REPO)), "sha256": sha256(DDB_ROOT / "ADCU_P6.ddb")},
+      "adcu_p6_ddb": {"path": str((DDB_ROOT / database).relative_to(REPO)), "sha256": sha256(DDB_ROOT / database)},
       "english_strings_ddb": {"path": str((DDB_ROOT / "M_English.ddb").relative_to(REPO)), "sha256": sha256(DDB_ROOT / "M_English.ddb")},
       "control_ownership": {"path": str(OWNERSHIP.relative_to(REPO)), "sha256": sha256(OWNERSHIP)},
       "corolla_span": {"path": str(COROLLA_SPAN.relative_to(REPO)), "sha256": sha256(COROLLA_SPAN)},
     },
-    "model": {
-      "id_is_not_priority": "Request IDs identify FRC-submitted application sources and result IDs identify the source actually employed downstream; the numeric value is not an ordinal priority.",
-      "application_id_semantics": ("Toyota's vehicle-movement architecture defines both longitudinal request IDs and the lateral request ID as identifiers of applications. "
-                                   "This supports a coordinated/shared application-ID namespace model, while the static diagnostic corpus still does not expose a complete longitudinal value table."),
-      "axis_boundary": "Numeric reuse across axes is treated as potentially intentional application identity.",
-      "upper_lower_boundary": ("Candidate A/B are the two selected longitudinal bound-package ID/allocation slots. Archive-wide unequal ordinary-DRCC frames strongly resolve A as upper and B as lower. "
-                               "The bounds are independently arbitrated and can therefore carry different application IDs."),
-    },
     "camry_observed": {
-      "request_candidate_A_counts": {str(k): v for k, v in sorted(observed_a.items())},
-      "request_candidate_B_counts": {str(k): v for k, v in sorted(observed_b.items())},
+      "B6_request_id_counts": {str(k): v for k, v in sorted(observed_b6.items())},
       "result_id_counts": {str(k): v for k, v in sorted(observed_result.items())},
-      "id25_delayed_hold_frames": id25_hold_frames,
-      "id36_startup_frames": id36_frames,
-      "id36_boundary": ("ID36 appears only in drive A request candidate B for 33 frames (~0.79 s at startup), with candidate A ID0, "
-                        "zero request acceleration, and result ID63; it is not observed as active cruise authority."),
-      "id4_semantic_assessment": {
-        "wire_role": "FRC-origin lower-bound requester in the stable manual/driver 0/4 state",
-        "stable_0_4_pairs": id4_stable,
-        "stable_0_4_result_63_pairs": id4_stable_63,
-        "moving_over_1_mps_pairs": id4_moving,
-        "moving_over_1_mps_result_63_pairs": id4_moving_63,
-        "matched_brake_press_edges_under_1_mps": len(id4_brake_edges),
-        "brake_press_edges_reducing_lower_bound": sum(delta < 0 for delta in id4_brake_deltas),
-        "median_brake_press_delta_mps2": round(statistics.median(id4_brake_deltas), 6) if id4_brake_deltas else None,
-        "current_semantics": ("Strong behavioral attribution: ID4 is the default closed-accelerator/manual baseline lower-bound application. Its lower-bound scalar is positive near zero speed in D, declines through zero into coast/regen/deceleration with speed, and is reduced by every matched low-speed brake press. "
-                              "This is the same physical behavior Toyota describes for the fully-closed powertrain acceleration / creep-to-engine-braking baseline."),
-      },
     },
     "corolla_cross_platform": {
-      "request_candidate_A_counts": corolla_long["candidate_A_id_counts"],
-      "request_candidate_B_counts": corolla_long["candidate_B_id_counts"],
-      "result_id_counts": corolla_long["result_id_counts"],
-      "boundary": corolla_long["boundary"],
+      "B6_request_id_counts": corolla_request["candidate_A_id_counts"],
+      "B6_allocation_counts": corolla_request["candidate_A_allocation_counts"],
+      "result_id_counts": corolla_request["result_id_counts"],
+      "boundary": "Independent raw-state observation; numeric reuse does not identify a shared OEM application.",
     },
-    "authoritative_sparse_names": {
-      "p5_frc_isa_vertical_id": {"patterns": isa_patterns, "meaning": ("P5 FRC ordinary Data Monitor display surface. Its pattern table includes 63=Driver Operation, but that does not establish FRC request origination. "
-                                                                                  "On the Camry wire, 63 is absent from both FRC-origin 0x08A request slots and appears on the Brake/VMC-owned 0x081 employed-result field.")},
+    "diagnostic_dictionaries": {
+      "p5_frc_isa_vertical_id_patterns": isa_rows[0]["patterns"],
       "cross_generation_examples": sparse_cross_generation,
       "lateral_target_id_dictionary": lateral_ids,
     },
     "feature_specific_recorder_id_fields_without_enum": feature_id_fields,
-    "working_table": {
-      "0": {
-        "longitudinal": "No Request is OEM-named on P5 ISA vertical ID; observed as Camry candidate A idle.",
-        "lateral": lateral_ids.get("0"), "grade": "named anchor / observed",
-      },
-      "4": {
-        "longitudinal": ("Observed as the Camry/Corolla default lower-bound requester in the manual 0/4 state. On the Camry its scalar behaves like the closed-accelerator baseline acceleration envelope: positive creep-like floor near zero speed, falling with speed into coast/regen/deceleration, and reduced on every matched low-speed brake press. No OEM numeric longitudinal label for 4 is recovered."),
-        "lateral": lateral_ids.get("4"), "grade": "strong behavioral closed-accelerator/baseline lower-bound attribution; exact OEM application name unknown",
-      },
-      "9": {
-        "longitudinal": "P6 Speed Limiter Requesting Vertical ID explicitly names 9 = ISA; not observed in Camry 0x08A corpus.",
-        "lateral": lateral_ids.get("9"), "grade": "OEM cross-generation longitudinal/vertical anchor",
-      },
-      "11": {
-        "longitudinal": ("Observed Camry candidate A during ordinary DRCC and selected result ID11 when the application request is employed. "
-                         "No static longitudinal enum row names 11."),
-        "lateral": lateral_ids.get("11"),
-        "grade": "strong cross-axis shared-application-ID hypothesis; not OEM-named longitudinally",
-      },
-      "17": {
-        "longitudinal": "Observed Camry active candidate B and retained Corolla active candidate A; no OEM longitudinal label recovered.",
-        "lateral": lateral_ids.get("17"), "grade": "cross-platform active-request observation",
-      },
-      "18": {
-        "longitudinal": "No Camry longitudinal observation in the complete-drive request slots.",
-        "lateral": lateral_ids.get("18"),
-        "grade": "OEM lateral/PDA-SA anchor only; do not transfer to longitudinal",
-      },
-      "23": {
-        "longitudinal": "Observed retained Corolla active candidate B; no OEM longitudinal label recovered.",
-        "lateral": lateral_ids.get("23"), "grade": "cross-platform observation only",
-      },
-      "25": {
-        "longitudinal": "Observed Camry candidate B during delayed ACC hold; allocation method distinguishes held vs moving ID25 states.",
-        "lateral": lateral_ids.get("25"),
-        "grade": "observed longitudinal application ID; exact shared-application meaning unresolved",
-      },
-      "36": {
-        "longitudinal": "Observed Camry startup-only candidate B; no active authority and no OEM label recovered.",
-        "lateral": lateral_ids.get("36"), "grade": "bounded startup state",
-      },
-      "41": {
-        "longitudinal": "P6 MaaS lower-limit longitudinal requester explicitly names 41 = Request 1 of MaaS Autonomous Driving System.",
-        "lateral": lateral_ids.get("41"), "grade": "OEM cross-generation shared-application candidate",
-      },
-      "45": {
-        "longitudinal": "P6 MaaS lower-limit longitudinal requester explicitly names 45 = Request 2 of MaaS Autonomous Driving System.",
-        "lateral": lateral_ids.get("45"), "grade": "OEM cross-generation shared-application candidate",
-      },
-      "63": {
-        "longitudinal": ("Driver Operation is OEM-named on a P5 FRC diagnostic display surface, but dynamic Camry/Corolla evidence places longitudinal ID63 on the downstream Brake/VMC result side only: "
-                         "it is absent from both FRC-origin 0x08A request slots and appears in 0x081 when driver demand is the employed source."),
-        "lateral": lateral_ids.get("63"), "grade": "OEM-named driver/result identity; not an observed FRC longitudinal requester",
-      },
-    },
-    "cross_axis_assessment": {
-      "supports_shared_application_namespace": [
-        "Toyota's architecture explicitly defines both longitudinal and lateral request IDs as application identifiers.",
-        "0 is the no-request/manual anchor on both recovered interfaces.",
-        "63 is OEM-labeled Driver Operation on a P5 FRC diagnostic display surface and on the lateral Target ID dictionary; longitudinal dynamic evidence places 63 on the downstream Brake/VMC result side.",
-        "Camry longitudinal ID11 is the ordinary DRCC application source while lateral ID11 is OEM LTA/LCA, making 11 a strong shared TSS continuous-driving application-ID candidate.",
-        "P6 longitudinal IDs 41/45 are MaaS autonomous-driving Request 1/2 while the lateral table labels 41/45 AD(Lv.4)/DES(Lv.4); these may be axis-specific views of shared automated-driving application identities.",
-      ],
-      "unresolved_numeric_labels": [
-        "The static corpus does not publish a complete longitudinal 0..63 value table.",
-        "Camry longitudinal ID25 is used during delayed ACC hold while lateral ID25 is AP; this needs a feature-local recorder or firmware join before naming, and does not by itself disprove shared application identity.",
-      ],
-      "current_hypothesis": ("A coordinated/shared application-ID namespace is now the leading model. Longitudinal and lateral labels can describe different control roles of the same application, "
-                             "so numeric identity is meaningful but exact longitudinal labels remain evidence-graded. Camry longitudinal ID11 is therefore a strong DRCC/TSS3 application-ID candidate aligned with lateral ID11 LTA/LCA."),
-    },
+    "boundary": ("Diagnostic/recorder and CAN namespaces are distinct. Numeric coincidences across axes or platforms do not establish application identity. "
+                 "B6 is the only currently interpreted request-ID/allocation byte here; the lower-slot requester ID and allocation remain unknown. "
+                 "Former B7-derived ID4/17/25/36 observations and associated baseline/hold/startup application attributions are withdrawn."),
   }
 
 
@@ -706,18 +579,18 @@ def vehicle_motion_control_did_surface() -> dict:
 def layout_disposition() -> dict:
   return {
     "5280_lower_longitudinal_request": {
-      "request_id": {"status": "strongly resolved for ordinary Camry DRCC", "wire": "0x08A B7[7:2]"},
+      "request_id": {"status": "unresolved; B7 is checksum", "wire": None},
       "acceleration": {"status": "strongly resolved for ordinary Camry DRCC", "wire": "0x08A B11:B12", "scale_mps2_per_count": 0.001},
-      "force_distribution": {"status": "strong structural join", "wire": "0x08A B7[1:0]", "enum": {"0": "Engine Only", "1": "Engine and Brake 1", "2": "Engine and Brake 2", "3": "Brake Only"}},
+      "force_distribution": {"status": "unresolved; B7 is checksum", "wire": None},
       "shift_range": {"status": "unresolved", "wire": None},
       "epb_request": {"status": "unresolved", "wire": None},
       "accelerator_override_prohibition": {"status": "unresolved", "wire": None},
       "low_priority": {"status": "unresolved", "wire": None},
     },
     "5281_upper_longitudinal_request": {
-      "request_id": {"status": "strongly resolved for ordinary Camry DRCC", "wire": "0x08A B6[7:2]"},
+      "request_id": {"status": "current B6 interpretation; exact recorder join unresolved", "wire": "0x08A B6[7:2]"},
       "acceleration": {"status": "strongly resolved for ordinary Camry DRCC", "wire": "0x08A B8:B9", "scale_mps2_per_count": 0.001},
-      "force_distribution": {"status": "strong structural join", "wire": "0x08A B6[1:0]", "enum": {"0": "Engine Only", "1": "Engine and Brake 1", "2": "Engine and Brake 2", "3": "Brake Only"}},
+      "force_distribution": {"status": "current B6 interpretation; exact recorder join unresolved", "wire": "0x08A B6[1:0]"},
     },
     "5282_lateral_request": {
       "lateral_id": {"status": "recovered", "wire": "0x08A B21[5:0]"},
@@ -744,13 +617,13 @@ def build() -> dict:
       "source": {"path": str(path.relative_to(REPO)), "sha256": sha256(path)},
       "request_0x08A": request_summary(streams[0x08A]),
       "result_0x081": result_summary(streams[0x08A], streams[0x081]),
-      "idle_0_4_context": idle_0_4_context(streams),
+      "b6_zero_context": b6_zero_context(streams),
       "0x0CA_supersession_check": old_0ca_boundary(streams[0x081], streams[0x0CA]),
     }
   hold = hold_semantics()
-  namespace = requester_id_namespace(drive_reports, hold)
+  namespace = requester_id_namespace(drive_reports)
   return {
-    "schema": "camry-2026-longitudinal-request-plane-v5",
+    "schema": "camry-2026-longitudinal-request-plane-v6",
     "vehicle_access": False,
     "topology": {
       "capture_era": "temporary CAN0/CAN1 repin",
@@ -771,17 +644,16 @@ def build() -> dict:
     "layout": layout_disposition(),
     "drives": drive_reports,
     "conclusion": {
-      "request_plane": ("0x08A is the unified observed continuous TSS request-side envelope: the lateral 5282 tuple is recovered there and the duplicated "
-                        "signed16 B8:B9/B11:B12 words occupy the 5280/5281 longitudinal lower/upper bound-package geometry. Exact placement before versus after internal TSS application selection remains unresolved."),
+      "request_plane": ("0x08A is the observed continuous TSS request-side envelope. Signed16 B8:B9/B11:B12 acceleration slots and B6 request-ID/allocation interpretation are retained. "
+                        "B7 is the Toyota checksum, not a second request-ID/allocation byte. Recorder geometry does not prove a CAN mapping; exact internal application-selection placement remains unresolved."),
       "result_plane": ("0x081 is the unified Brake-owned employed-result/reference/supervision envelope: its lateral selected ID/reference are recovered, "
                        "B6[5:0] is the strongest 5284 longitudinal employed-source-ID candidate, and B20:B21 is observed as the closed-accelerator "
                        "reference word with its former 57DB result-acceleration join retired by the 2026-09-30 cross-state corpus. In that corpus "
                        "B4:B5 is the effective/result acceleration candidate and B18:B19 the drive result/reference, with no confirmed OEM diagnostic "
                        "join for either. Current status and evidence: docs/variants/camry-2026-longitudinal-evidence.md#2026-09-30-vmc-status-corpus "
                        "and data/generated/camry_20260930_vmc_status/."),
-      "not_fully_mapped": ("The entire 5280/5281 recorder model is NOT yet byte-named. B6/B7 are strongly recovered structurally as the two packed "
-                           "request-ID/allocation bytes (bits7:2 ID, bits1:0 allocation), including active/hold/override transitions; archive-wide unequal ordinary-DRCC frames strongly resolve A as upper and B as lower, "
-                           "while shift/EPB, override-prohibition and priority remain unmapped."),
+      "not_fully_mapped": ("The 5280/5281 recorder model is not fully byte-mapped. B6 retains the current ID/allocation interpretation, while the lower requester ID/allocation, "
+                           "shift/EPB, override-prohibition and priority remain unknown. B7-derived active/hold/override application-ID conclusions are withdrawn."),
       "0x0CA": "Supersede the old upper/lower/result-triplet interpretation; 0x0CA remains other protected longitudinal/chassis state.",
       "integration": ("For Camry, do not revive 0x160 Alpha Long. The OEM-native integration target is the TSS application/request side feeding Toyota's Vehicle Movement Manager. "
                       "0x08A is the strongest observed request-side carrier, while the downstream Vehicle Motion Control target interface and source-suppression/security path remain to be recovered."),

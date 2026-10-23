@@ -91,14 +91,11 @@ def main() -> int:
         raise ValueError("GTS+ P5 hybrid shift-position semantics drift")
     for marker in (
         "Longitudinal (follow, speed, stop-and-go to 0 + hold, resume): VALIDATED on car",
-        "acc_main_on = msg->data[7] != 0U",
         "Lateral: IN PROGRESS",
     ):
         if marker not in albino_arch:
             raise ValueError(f"Albino retained architecture drift: {marker}")
     for marker in (
-        'CM_ SG_ 138 ACC_STATE "byte 7. DECODED FROM REAL DRIVES',
-        'CM_ SG_ 138 ACC_STANDSTILL "byte 7 mask 0x20.',
         'CM_ SG_ 593 SET_SPEED "byte 2, mph, factor 1.0',
     ):
         if marker not in albino_dbc:
@@ -220,11 +217,11 @@ def main() -> int:
             [x["raw"] for x in public_2a1["transitions"]] == [1, 2, 4]):
         raise ValueError("generation-native Corolla gear transition evidence drift")
     if not (span_acc["acc_engaged_frames"] == 37 and span_acc["acc_disengaged_frames"] == 2363 and
-            span_acc["state_when_engaged"] == [0x5D] and span_acc["state_when_disengaged"] == [0x12]):
-        raise ValueError("Span native 0x08A ACC-state evidence drift")
+            span_acc["byte7_checksum"]["valid_frames"] == span_acc["frame_count"] == 2400):
+        raise ValueError("Span native 0x08A B22 bit4/checksum evidence drift")
 
     out = {
-        "schema": "corolla-hf-nonsteering-engagement-state-v1",
+        "schema": "corolla-hf-nonsteering-engagement-state-v2",
         "software_family": {
             "h": "8965H1202000",
             "f": "8965F1208000",
@@ -292,7 +289,7 @@ def main() -> int:
             "production_boundary": "The base port no longer needs a gear-discovery experiment. Use 0x127 where the retained hybrid carrier is present and 0x3BF otherwise; preserve the stated N/0x127-unexercised-value evidence boundaries rather than inventing new enums.",
         },
         "cruise": {
-            "classification": "core generation-native CarState mapping closed; optional detailed ACC UI/follow fields remain open",
+            "classification": "B22 bit4 and set-speed observations retained; availability and standstill CAN semantics unresolved",
             "retained_wire_prior_art": {
                 "0x176": {
                     "public_2023_frames": pub176["frame_count"],
@@ -313,9 +310,9 @@ def main() -> int:
                 },
             },
             "native_wire_mapping": {
-                "available": "0x08A ACC_STATE (B7) != 0; retained states 0x12 idle and 0x5D engaged, and the validated contributor Panda path uses B7!=0 as acc_main_on",
-                "enabled": "0x08A B22 bit0x10; Span directly observes 2,363 clear / 37 asserted frames with exact 0x12/0x5D state separation",
-                "standstill": "0x08A ACC_STATE B7 bit0x20; contributor live-drive evidence records 0x67 engaged+standstill hold and validates stop-and-go hold/resume",
+                "available": "Unresolved: B7 is the first-block Toyota checksum; nonzero checksum is not a cruise-availability field.",
+                "enabled": "0x08A B22 bit0x10 is the retained contributor engaged-gate interpretation; Span observes 2,363 clear / 37 asserted frames without an independent engagement oracle.",
+                "standstill": "Unresolved: B7 bit0x20 and checksum value0x67 do not establish a standstill field; contributor stop/hold/resume observations remain valid without this CAN mapping.",
                 "set_speed": "0x251 B2, mph factor 1.0; contributor live-drive evidence records one-mph +/- changes and a 19-mph floor",
                 "span_0x08a": span_acc,
                 "span_0x251": span_set_speed,
@@ -325,33 +322,34 @@ def main() -> int:
             "openpilot_oracle_mapping": tech_cruise["frc_p5"]["openpilot_oracle_mapping"],
             "supporting_p5_oracles": tech_cruise["supporting_p5"],
             "wire_mapping_status": {
-                "cruise_available": "closed on generation-native 0x08A ACC_STATE presence",
-                "cruise_enabled": "closed on generation-native 0x08A B22 bit0x10",
-                "cruise_standstill": "closed from contributor live-drive 0x08A B7 bit0x20 / state0x67",
+                "cruise_available": "open: former B7!=0 mapping used the Toyota checksum",
+                "cruise_enabled": "observed B22 bit0x10; contributor interpretation retained, independent transition oracle absent",
+                "cruise_standstill": "open: former B7 bit0x20 mapping used the Toyota checksum",
                 "set_speed": "closed from contributor live-drive 0x251 B2 mph",
                 "acc_not_available_or_fault": "optional/open: exact FRC_P5 diagnostic oracle exists, but no base-control CAN mapping is required",
                 "follow_distance": "optional/open: exact FRC_P5 Set Vehicle Interval Time oracle exists",
             },
             "capture_recipe": [
-                "Use FRC_P5 0x1905/0x1906/0x1914 only to extend optional permission/fault UI semantics; core available/enabled no longer requires a diagnostic discovery pass.",
+                "Use FRC_P5 0x1905/0x1906/0x1914 as diagnostic oracles when joining cruise permission/fault states to native CAN; diagnostic semantics alone do not map a CAN field.",
                 "Use FRC_P5 0x1912 only if exposing following-distance state is desired.",
                 "Retain 0x1901 Current/Memory Vehicle Speed as a diagnostic cross-check for 0x251 set speed rather than a required runtime input.",
             ],
-            "diagnostic_transport_boundary": "Current GTS+ proves selected FRC_P5 0x1901/0x1905/0x1906/0x1912/0x1914 Data IDs are ordinary SID 0x22 ReadDataByIdentifier requests. They are optional semantic oracles; core CarState works independently of them.",
-            "retained_contributor_boundary": "The retained contributor architecture explicitly says longitudinal follow/speed/stop-and-go-to-0/hold/resume was VALIDATED on car while lateral remained IN PROGRESS. Only the longitudinal/state observations are used here.",
-            "boundary": "Core openpilot cruise state is closed from retained generation-native CAN plus validated contributor live-drive evidence. Detailed ACC-not-available UI and follow-distance remain optional unmapped state.",
+            "diagnostic_transport_boundary": "Current GTS+ proves selected FRC_P5 0x1901/0x1905/0x1906/0x1912/0x1914 Data IDs are ordinary SID 0x22 ReadDataByIdentifier requests. Diagnostic DIDs are not a CAN mapping.",
+            "retained_contributor_boundary": "The retained contributor architecture reports longitudinal follow/speed/stop-and-go-to-0/hold/resume as VALIDATED on car while lateral remained IN PROGRESS. Preserve those operating observations, but its B7-based availability/standstill decode is invalid because B7 is a checksum.",
+            "boundary": "Retained generation-native CAN exposes B22 bit4 transitions and 0x251 set-speed prior art. Availability and standstill require an independent wire join; detailed ACC-not-available UI and follow-distance remain optional unmapped state.",
         },
         "implementation_consequence": {
             "safe_now": [
                 "Use 0x51E B0[7] as target-native Ready Status input; keep Ready=0 fault policy dynamic until exercised.",
                 "Use 0x127 GEAR_PACKET_HYBRID on the retained hybrid shape and generation-native 0x3BF one-hot gear otherwise.",
-                "Use 0x08A ACC_STATE/B22 for cruise available/enabled and the contributor-validated B7 bit0x20 standstill state.",
+                "Retain 0x08A B22 bit0x10 as the contributor engaged-gate interpretation; do not derive availability or standstill from B7.",
                 "Use retained 0x251 B2 as set speed in mph; preserve the native 19-mph set-speed floor and manual resume from hold.",
                 "Keep optional follow-distance and detailed ACC-unavailable UI unmapped until needed; their FRC_P5 diagnostic oracles are already known.",
             ],
             "not_safe_yet": [
                 "Treat 0x176 B0[3] as cruise main/active state.",
                 "Assume surviving 0x24D button bit semantics without a button transition.",
+                "Use 0x08A B7!=0 as cruise availability or B7 bit0x20 as standstill.",
                 "Map Ready=0 or native steering fault states to temporary/permanent openpilot faults without an exercised recovery/latched transition.",
             ],
         },

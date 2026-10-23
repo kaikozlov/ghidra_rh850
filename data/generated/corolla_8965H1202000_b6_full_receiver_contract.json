@@ -727,7 +727,7 @@
   "sources": {
     "base_receiver_contract": {
       "path": "data/generated/corolla_8965H1202000_b6_receiver_contract.json",
-      "sha256": "de36c4736b832f933311ca3f2151cadd209eccca24564a39b43065ae07474928"
+      "sha256": "2f2276650e22153af08f0d3a02eb4abec10a75839f2740d0978c8f59bed512bd"
     },
     "codeflash": {
       "path": "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin",
@@ -748,7 +748,7 @@
     },
     "lta_provenance": {
       "path": "data/generated/corolla_8965H1202000_lta_command_provenance.json",
-      "sha256": "3fdf678c2d16b89172384ff0f7854e015e3b4979fc6dd771b2436fe610cef52c"
+      "sha256": "bef4ea4ef430402b5fecd082bc1567b611118c29f3712955d22ec0cabc3ee23b"
     },
     "secoc_key_provenance": {
       "path": "data/generated/corolla_8965H1202000_secoc_key_provenance.json",

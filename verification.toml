@@ -1326,3 +1326,7 @@ tests = ["tests/runtime/verify_xcp_daq_probe.py"]
 [suite.xcp_reachability]
 tests = ["tests/runtime/verify_xcp_reachability.py"]
 # XCP reachability and shadow-write plan.
+
+[suite.camry_20260930_vmc_status]
+tests = ["tests/targets/camry/verify_camry_20260930_vmc_status.py"]
+# Offline checksum-aware request decoding and joined origin/phase behavior.

@@ -271,7 +271,7 @@ def resume_evidence(role_report: dict, groups: dict) -> list[dict]:
                                 'ca_resultlike_mps2': round(s16be(cd, 7) * .001, 6),
                                 'c9_b12_b13_raw': int((int(nd[12]) << 8) | int(nd[13])),
                                 '5af_b26_signed6': s6(int(md[26])), '5af_b24': int(md[24]),
-                                'acc_state': int(ad[7]), 'target_lateral_id_low6': int(ad[21] & 0x3F)})
+                                'byte7_checksum': int(ad[7]), 'target_lateral_id_low6': int(ad[21] & 0x3F)})
             out.append({'group': group, 'wheel_onset_ns': onset,
                         'driver_inputs_minus1_to_plus0p5_seconds': event['driver_inputs_minus1_to_plus0p5_seconds'],
                         'samples': samples})
@@ -468,7 +468,7 @@ def build() -> dict:
     a8 = summarize_08a(loaded, census)
     resumes = resume_evidence(role_report, groups)
     return {
-        'schema': 'camry-longitudinal-request-candidates-v3',
+        'schema': 'camry-longitudinal-request-candidates-v4',
         'vehicle_access': False,
         'sources': {
             'august_drives': {name: {'path': str(path.relative_to(ROOT)), 'sha256': sha(path)} for name, path in DRIVES.items()},

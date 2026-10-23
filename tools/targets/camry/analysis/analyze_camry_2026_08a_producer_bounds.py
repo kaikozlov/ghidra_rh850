@@ -256,14 +256,15 @@ def main() -> int:
         raise RuntimeError("0x081 repin direction drift")
 
     artifact = {
-        "schema": "camry-2026-08a-producer-bounds-v5",
+        "schema": "camry-2026-08a-producer-bounds-v6",
         "drives": drives,
         "f33_generated_com_tx": tx,
         "gtsplus_canbus_12984": canbus,
         "classification": {
-            "recorder_object": (
-                "FRC-hosted TSS recorder objects 5282/5631; Bus-4 0x08A carries "
-                "the same ID/pinion/assist subset"
+            "recorder_boundary": (
+                "FRC-hosted TSS recorder objects 5282/5631 provide diagnostic vocabulary, "
+                "not a wire or publisher join. Retained 0x08A request-plane observations "
+                "include raw header state, acceleration slots and a validated B7 Toyota checksum."
             ),
             "not_exact_f33": (
                 "exact F33 generated-COM Tx is only 0x030/0x351/0x394/0x4A3/0x4C8; "

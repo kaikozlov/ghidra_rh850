@@ -926,17 +926,18 @@ ledger context is useful.
   integration point is the application/request side of Toyota's Vehicle Movement
   Manager. Canonical architecture: [../architecture/toyota-tss3-vehicle-movement-arbitration.md](../architecture/toyota-tss3-vehicle-movement-arbitration.md).
 
-  **September-29 PCS/AEB closure of the openpilot-facing carrier question:** the
-  retained user-reported PCS event proves that stock PCS braking itself rides native
-  FRC `0x08A`. Request B enters the unique ID34->ID33 Brake-Only, approximately
-  -4.0 m/s² episode while a separate FRC-origin `0x5AE` warning path asserts. The
-  then-active host replacement suppresses the first two native ID34 requests, so it
-  demonstrably does not preserve PCS onset; `0x081` remains ID11 and is therefore a
-  downstream result witness. For openpilot, the logical
-  correction is now defined: detect source-side PCS emergency intent, relinquish host
-  `0x08A` ownership, and pass the **original authenticated FRC request** untouched.
-  Exact ID33/34 Toyota substage names, first-frame handoff timing, and unconfounded
-  downstream Brake/VMM selection/physical actuation remain open.
+  **PCS-associated request-state correction:** in the retained user-reported
+  PCS event, native FRC `0x08A` B4[6] asserts for 21 frames while the separate
+  `0x5AE` warning path asserts. B3[2] is set for the first nine frames.
+  B7 is the Toyota prefix checksum: the former ID34/ID33 and lower-slot
+  Brake-Only interpretation is withdrawn. Native acceleration is already
+  −4.0 m/s² before these flags assert. The active replacement suppresses the
+  first two flagged frames; forwarding resumes after driver-brake disable.
+  The preservation target is to yield host ownership and pass the original
+  authenticated native frame. The exact Toyota meaning of B4[6], lower-slot
+  requester/allocation, first-frame handoff timing and downstream actuation
+  remain open; [the corrected event analysis](../variants/camry-2026-tss3-opendbc-port.md#415-the-retained-pcs-alert-drive-records-a-pcs-associated-request-transition)
+  owns the chronology and source evidence.
 
   The historical evidence below remains provenance for how this was reached, but any
   section that promotes `0x160` or `0x0CA` as the current command candidate is superseded.

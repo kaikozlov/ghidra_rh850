@@ -49,9 +49,15 @@ check('0x08A set speed clears', before['set_speed_kph'] == 72 and after['set_spe
 check('0x08A longitudinal package A changes 11/1 -> 0/0',
       (before['longitudinal_request_id_a'], before['longitudinal_allocation_a']) == (11, 1)
       and (after['longitudinal_request_id_a'], after['longitudinal_allocation_a']) == (0, 0))
-check('0x08A longitudinal package B changes 17/3 -> 4/2',
-      (before['longitudinal_request_id_b'], before['longitudinal_allocation_b']) == (17, 3)
-      and (after['longitudinal_request_id_b'], after['longitudinal_allocation_b']) == (4, 2))
+check('0x08A B7 checksums match the first eight-byte Toyota block',
+      all(
+          row['byte7_checksum'] == bytes.fromhex(row['raw'])[7]
+          == row['byte7_checksum_expected']
+          == ((0x8A + 8 + sum(bytes.fromhex(row['raw'])[:7])) & 0xFF)
+          and row['byte7_checksum_valid']
+          for edge in obj['all_latch_falls']
+          for row in (edge['request_before'], edge['request_after'])
+      ))
 check('0x08A accel packages change +0.011 -> -0.578 m/s2',
       before['longitudinal_accel_a_m_s2'] == 0.011 and before['longitudinal_accel_b_m_s2'] == 0.011
       and after['longitudinal_accel_a_m_s2'] == -0.578 and after['longitudinal_accel_b_m_s2'] == -0.578)

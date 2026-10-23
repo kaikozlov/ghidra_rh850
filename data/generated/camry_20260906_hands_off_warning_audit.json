@@ -17,7 +17,7 @@
     "hud_companion_candidate": "native bus2 0x412 B0=0x14 and B1[3:2]=3",
     "hud_escalation_candidate": "native bus2 0x412 B2 bit6 while warning active",
     "semantic_boundary": "dynamic timing/torque/state joins",
-    "stock_acc_standstill_candidate": "native bus2 0x08A B7 in {0x66,0x67} while cruise latch is set; delayed zero-speed hold state",
+    "stock_acc_standstill_candidate": "native bus2 0x08A B4[5] while B3[3] cruise latch is set; retained delayed zero-speed hold candidate; B7 is Toyota checksum",
     "touch_proxy": "abs(carState.steeringTorque) >= 0.9 N.m",
     "warning_candidate": "native bus2 0x371 B19 bit6"
   },
@@ -344,6 +344,11 @@
         }
       },
       "openpilot_commit": "d1914bbe7f88b03fd7f59afd97607e873c4bba47",
+      "request_0x08a_checksum": {
+        "formula": "(0x8A + 8 + sum(B0..B6)) & 0xFF",
+        "frame_count": 263265,
+        "valid_frames": 263265
+      },
       "route": "0000003b--62262eb7a1",
       "route_duration_s": 6582.551449,
       "segments": 110,
@@ -353,15 +358,7 @@
         ],
         "all_frames_exactly_stopped": true,
         "b4_bit5_set_frames_with_cruise_latch": 152,
-        "b4_bit5_vs_legacy_b7_66_67_xor_violations": 0,
-        "boundary": "dynamic stock-ACC resume-required/hold interpretation: B4[5] is an exact structural hold-state discriminator in the retained routes; the packed request-B state is ID25/allocation2-or-3. The state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. OEM recorder name for B4[5] remains unknown.",
-        "cruise_substate_pair_counts": {
-          "44,102": 4,
-          "44,70": 26120,
-          "45,103": 148,
-          "45,71": 163516,
-          "71,101": 6
-        },
+        "boundary": "Dynamic stock-ACC resume-required/hold interpretation is bounded to B4[5] with the B3[3] latch in the retained routes. The state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. B7 is a checksum and the raw B6/B7 pairs are not two requester identities. OEM name for B4[5] remains unknown.",
         "episodes": [
           {
             "clear_abs_speed_m_s": 0.0,
@@ -371,11 +368,11 @@
             "frames": 120,
             "gas_pressed_frames": 7,
             "max_abs_speed_m_s": 0.0,
-            "start_s": 5003.856619,
-            "state_pair_counts": {
+            "raw_b6_b7_pair_counts": {
               "44,102": 2,
               "45,103": 118
             },
+            "start_s": 5003.856619,
             "target_lateral_ids": [
               11
             ],
@@ -389,11 +386,11 @@
             "frames": 32,
             "gas_pressed_frames": 7,
             "max_abs_speed_m_s": 0.0,
-            "start_s": 5298.942095,
-            "state_pair_counts": {
+            "raw_b6_b7_pair_counts": {
               "44,102": 2,
               "45,103": 30
             },
+            "start_s": 5298.942095,
             "target_lateral_ids": [
               11
             ],
@@ -401,7 +398,14 @@
           }
         ],
         "frames": 152,
-        "wire_state": "native bus2 0x08A delayed hold: B4[5]=1 with packed request-B ID25/allocation2-or-3"
+        "raw_b6_b7_pair_counts": {
+          "44,102": 4,
+          "44,70": 26120,
+          "45,103": 148,
+          "45,71": 163516,
+          "71,101": 6
+        },
+        "wire_state": "native bus2 0x08A structural delayed-hold candidate: B4[5]=1 with B3[3] cruise latch set"
       },
       "warning_candidate": {
         "carrier": "native Panda bus2 0x371/32 B19 bit6",
@@ -751,6 +755,11 @@
         }
       },
       "openpilot_commit": "d1914bbe7f88b03fd7f59afd97607e873c4bba47",
+      "request_0x08a_checksum": {
+        "formula": "(0x8A + 8 + sum(B0..B6)) & 0xFF",
+        "frame_count": 193390,
+        "valid_frames": 193390
+      },
       "route": "0000003c--97b9e7a69a",
       "route_duration_s": 4835.677784,
       "segments": 81,
@@ -760,14 +769,7 @@
         ],
         "all_frames_exactly_stopped": true,
         "b4_bit5_set_frames_with_cruise_latch": 46,
-        "b4_bit5_vs_legacy_b7_66_67_xor_violations": 0,
-        "boundary": "dynamic stock-ACC resume-required/hold interpretation: B4[5] is an exact structural hold-state discriminator in the retained routes; the packed request-B state is ID25/allocation2-or-3. The state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. OEM recorder name for B4[5] remains unknown.",
-        "cruise_substate_pair_counts": {
-          "44,102": 2,
-          "44,70": 4430,
-          "45,103": 44,
-          "45,71": 82136
-        },
+        "boundary": "Dynamic stock-ACC resume-required/hold interpretation is bounded to B4[5] with the B3[3] latch in the retained routes. The state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. B7 is a checksum and the raw B6/B7 pairs are not two requester identities. OEM name for B4[5] remains unknown.",
         "episodes": [
           {
             "clear_abs_speed_m_s": 0.0,
@@ -777,11 +779,11 @@
             "frames": 46,
             "gas_pressed_frames": 5,
             "max_abs_speed_m_s": 0.0,
-            "start_s": 9204.279471,
-            "state_pair_counts": {
+            "raw_b6_b7_pair_counts": {
               "44,102": 2,
               "45,103": 44
             },
+            "start_s": 9204.279471,
             "target_lateral_ids": [
               11
             ],
@@ -789,7 +791,13 @@
           }
         ],
         "frames": 46,
-        "wire_state": "native bus2 0x08A delayed hold: B4[5]=1 with packed request-B ID25/allocation2-or-3"
+        "raw_b6_b7_pair_counts": {
+          "44,102": 2,
+          "44,70": 4430,
+          "45,103": 44,
+          "45,71": 82136
+        },
+        "wire_state": "native bus2 0x08A structural delayed-hold candidate: B4[5]=1 with B3[3] cruise latch set"
       },
       "warning_candidate": {
         "carrier": "native Panda bus2 0x371/32 B19 bit6",
@@ -1149,6 +1157,11 @@
         }
       },
       "openpilot_commit": "d1914bbe7f88b03fd7f59afd97607e873c4bba47",
+      "request_0x08a_checksum": {
+        "formula": "(0x8A + 8 + sum(B0..B6)) & 0xFF",
+        "frame_count": 148567,
+        "valid_frames": 148567
+      },
       "route": "0000003d--0e812cecba",
       "route_duration_s": 3715.004303,
       "segments": 62,
@@ -1156,15 +1169,14 @@
         "all_episode_target_lateral_ids": [],
         "all_frames_exactly_stopped": true,
         "b4_bit5_set_frames_with_cruise_latch": 0,
-        "b4_bit5_vs_legacy_b7_66_67_xor_violations": 0,
-        "boundary": "dynamic stock-ACC resume-required/hold interpretation: B4[5] is an exact structural hold-state discriminator in the retained routes; the packed request-B state is ID25/allocation2-or-3. The state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. OEM recorder name for B4[5] remains unknown.",
-        "cruise_substate_pair_counts": {
+        "boundary": "Dynamic stock-ACC resume-required/hold interpretation is bounded to B4[5] with the B3[3] latch in the retained routes. The state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. B7 is a checksum and the raw B6/B7 pairs are not two requester identities. OEM name for B4[5] remains unknown.",
+        "episodes": [],
+        "frames": 0,
+        "raw_b6_b7_pair_counts": {
           "44,70": 8688,
           "45,71": 85170
         },
-        "episodes": [],
-        "frames": 0,
-        "wire_state": "native bus2 0x08A delayed hold: B4[5]=1 with packed request-B ID25/allocation2-or-3"
+        "wire_state": "native bus2 0x08A structural delayed-hold candidate: B4[5]=1 with B3[3] cruise latch set"
       },
       "warning_candidate": {
         "carrier": "native Panda bus2 0x371/32 B19 bit6",
@@ -1663,6 +1675,11 @@
         }
       },
       "openpilot_commit": "be56d6f688b557c4a2226e402da30ef3597eb5d7",
+      "request_0x08a_checksum": {
+        "formula": "(0x8A + 8 + sum(B0..B6)) & 0xFF",
+        "frame_count": 187216,
+        "valid_frames": 187216
+      },
       "route": "0000003e--1a2f20417d",
       "route_duration_s": 4681.099054,
       "segments": 78,
@@ -1670,15 +1687,14 @@
         "all_episode_target_lateral_ids": [],
         "all_frames_exactly_stopped": true,
         "b4_bit5_set_frames_with_cruise_latch": 0,
-        "b4_bit5_vs_legacy_b7_66_67_xor_violations": 0,
-        "boundary": "dynamic stock-ACC resume-required/hold interpretation: B4[5] is an exact structural hold-state discriminator in the retained routes; the packed request-B state is ID25/allocation2-or-3. The state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. OEM recorder name for B4[5] remains unknown.",
-        "cruise_substate_pair_counts": {
+        "boundary": "Dynamic stock-ACC resume-required/hold interpretation is bounded to B4[5] with the B3[3] latch in the retained routes. The state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. B7 is a checksum and the raw B6/B7 pairs are not two requester identities. OEM name for B4[5] remains unknown.",
+        "episodes": [],
+        "frames": 0,
+        "raw_b6_b7_pair_counts": {
           "44,70": 5798,
           "45,71": 123394
         },
-        "episodes": [],
-        "frames": 0,
-        "wire_state": "native bus2 0x08A delayed hold: B4[5]=1 with packed request-B ID25/allocation2-or-3"
+        "wire_state": "native bus2 0x08A structural delayed-hold candidate: B4[5]=1 with B3[3] cruise latch set"
       },
       "warning_candidate": {
         "carrier": "native Panda bus2 0x371/32 B19 bit6",
@@ -2224,6 +2240,11 @@
         }
       },
       "openpilot_commit": "be56d6f688b557c4a2226e402da30ef3597eb5d7",
+      "request_0x08a_checksum": {
+        "formula": "(0x8A + 8 + sum(B0..B6)) & 0xFF",
+        "frame_count": 200559,
+        "valid_frames": 200559
+      },
       "route": "0000003f--36e72f5fdc",
       "route_duration_s": 5014.842854,
       "segments": 84,
@@ -2231,15 +2252,14 @@
         "all_episode_target_lateral_ids": [],
         "all_frames_exactly_stopped": true,
         "b4_bit5_set_frames_with_cruise_latch": 0,
-        "b4_bit5_vs_legacy_b7_66_67_xor_violations": 0,
-        "boundary": "dynamic stock-ACC resume-required/hold interpretation: B4[5] is an exact structural hold-state discriminator in the retained routes; the packed request-B state is ID25/allocation2-or-3. The state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. OEM recorder name for B4[5] remains unknown.",
-        "cruise_substate_pair_counts": {
+        "boundary": "Dynamic stock-ACC resume-required/hold interpretation is bounded to B4[5] with the B3[3] latch in the retained routes. The state enters only after several seconds already stopped and all three retained episodes clear with accelerator input before motion; no RES-button clear join is established. B7 is a checksum and the raw B6/B7 pairs are not two requester identities. OEM name for B4[5] remains unknown.",
+        "episodes": [],
+        "frames": 0,
+        "raw_b6_b7_pair_counts": {
           "44,70": 9760,
           "45,71": 122866
         },
-        "episodes": [],
-        "frames": 0,
-        "wire_state": "native bus2 0x08A delayed hold: B4[5]=1 with packed request-B ID25/allocation2-or-3"
+        "wire_state": "native bus2 0x08A structural delayed-hold candidate: B4[5]=1 with B3[3] cruise latch set"
       },
       "warning_candidate": {
         "carrier": "native Panda bus2 0x371/32 B19 bit6",
@@ -2272,5 +2292,5 @@
       }
     }
   },
-  "schema_version": 7
+  "schema_version": 8
 }

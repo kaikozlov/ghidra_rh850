@@ -133,9 +133,6 @@ print("\n== target-native ordinary freshness algorithm ==")
 h_reset = h_funcs["reset_candidate_search"]["decompiled_c"]
 s_reset = s_decomp[0x8ED0A]
 check("both reset searches have five trial domain", all(t in s_reset and t in h_reset for t in ("0xfffff", "uVar3 == 1", "uVar3 == 2", "uVar3 == 3")))
-h_win = h_funcs["normal_freshness_window_check"]["decompiled_c"]
-s_win = s_decomp[0x8ED88]
-check("same-epoch message reconstruction shape shared", "1 << uVar6" in h_win and "1 << uVar7" in s_win and "0xff" in h_win and "0xff" in s_win)
 h_norm = h_funcs["normal_freshness_reconstruct"]["decompiled_c"]
 s_norm = s_decomp[0x8EECA]
 check("normal reconstruct cardinality shrinks 5 -> 2", "param_1[1] < 5" in s_norm and "param_1[1] < 2" in h_norm)

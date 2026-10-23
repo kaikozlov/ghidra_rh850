@@ -30,7 +30,7 @@ A patent records a disclosed design and Toyota-authored terminology.
 | **US20220219711A1 / US12071145B2**, Control device for vehicle, manager... | 2021-01-14 | Toyota + ADVICS | ADAS applications send **application IDs** with kinematic requests; priority is stored by application ID and may change with vehicle, driver, or availability state. Explicit examples include PCS, ACC, LKA/LTA, AEB, LDA and steering guidance. EPS is an example actuator for a steered-angle request. | Strong follow-on support that Toyota TSS request/result IDs are IDs of software applications/clients rather than CAN identifiers. Useful for interpreting 5280/5281/5282 and 5284/5285. |
 | **US20200070873A1 / US11643089B2**, Vehicle control system | 2018-08-29; pub. 2020 | Toyota | Applications put request values plus payload-level application IDs directly on the network; the patent explicitly distinguishes those IDs from `CAN_ID`. The manager selects an application ID, while the actuator waits for the selection and then consumes the **newest matching request received after that selection event**. The arbitration sample and the actuated sample may therefore be different. Claim 4 explicitly covers EPS/lateral motion. | Critical alternative physical realization: arbitration can be a selected-source plane separate from the request-value data plane. Exact F33 does **not** instantiate the claimed direct-request EPS boundary on its recovered external CAN surface because it receives neither `0x08A` nor `0x081`; B6 remains its recovered target-bearing ingress. See the dedicated close read. |
 | **US20200070802A1 / US11161496B2 / US12005882B2**, Control device | 2018-08-30; pub. 2020 | Toyota | Brake control ECU contains request arbitration, command distribution, feedback control, and optionally vehicle-motion control. It feeds measured **control record values** and summarized actuator operation/soundness information back to requesting applications; direct wheel-speed inputs and preferential stability control are explicit. | Reinforces Brake/VMM ownership and gives a reason for the rich result/status plane: applications need the selected request, realized motion, and actuator soundness. |
-| **US20200094835A1 / US11285952B2 / JP7067386B2**, Braking and driving force control device | 2018-09-21; pub. 2020 | Toyota | Defines the driving device's lower limit of available braking/driving force as the fully-closed baseline. At speed that floor can represent engine-braking/deceleration; below roughly 8--10 km/h, **creep torque becomes dominant and raises the lower limit into positive driving force**. The controller changes filtering/feedback so this low-speed creep transition is reflected promptly. | Strong physical semantic corroboration for the Camry `0x08A` idle lower package: ID4's acceleration is positive near zero speed, declines through zero with speed, and is reduced by low-speed brake input. This does not expose numeric request ID4, but supports a **closed-accelerator baseline / creep-coast lower-bound** attribution rather than `ID4 = creep` as a literal enum name. |
+| **US20200094835A1 / US11285952B2 / JP7067386B2**, Braking and driving force control device | 2018-09-21; pub. 2020 | Toyota | Defines the driving device's lower limit of available braking/driving force as the fully-closed baseline. At speed that floor can represent engine-braking/deceleration; below roughly 8--10 km/h, **creep torque becomes dominant and raises the lower limit into positive driving force**. The controller changes filtering/feedback so this low-speed creep transition is reflected promptly. | Physical semantic corroboration for the Camry `0x08A B11:B12` idle/manual curve: positive near zero speed, declining through zero with speed, and reduced by low-speed brake input. Supports a **closed-accelerator baseline / creep-coast quantity** hypothesis, not an application identity; the former lower ID4 interpretation was a checksum misdecode. |
 | **US20220315018A1 / US12280788B2**, Control apparatus, manager... | 2021-04-06 | Toyota + ADVICS | Applications supply information about whether a kinematic plan remains an **arbitration target**. A request that is about to terminate can be excluded or handled specially so a new request is not delayed. | Concrete vocabulary for handoff/disengagement and source-suppression RE: search for arbitration-target, termination, low-priority, degeneration and handoff state rather than modeling every request as simply present/absent. |
 | **US20230166772A1 / US12534110B2**, Motion manager, autonomous driving apparatus... | 2021-11-30 | Toyota | A manager can intentionally invalidate a PCS/other ADAS request and return **request rejection information** so the suppressed application does not diagnose an abnormal condition merely because its plan is not selected. The disclosed invalidation target can also be AEB, ACC, ASL, or another application. | High-value vocabulary for the **downstream VMM arbitration-policy boundary**: a still-present request can be intentionally excluded/de-prioritized after reception, with explicit feedback toward the requester. On exact Camry this is conceptually downstream of FRC `0x08A` egress; do not conflate it with the separate FRC-internal feature-owner state machine. |
 | **US20220274616A1 / US12060069B2**, Manager, control method... | 2021-03-01 | Toyota + ADVICS | Manager accepts application IDs plus kinematic plans and outputs the motion request to an actuator system **corresponding to the application ID**, preventing an inappropriate actuator from being used for an unexpected application request. | Supports treating application ID as policy/routing metadata. |
@@ -319,8 +319,8 @@ ignition, cruise-cancel, or fault transition.
 
 The September-7 hands-off-cancel route supplies a different but complementary
 handoff. Immediately before the native withdrawal, `0x08A` carries lateral
-ID11 plus longitudinal request IDs 11/17. The FRC then changes lateral ID
-`11 -> 0`, the longitudinal request slots to `0/4`, clears the cruise operating
+ID11 and candidate B6 longitudinal ID11. The FRC then changes lateral ID
+`11 -> 0`, B6 candidate ID `11 -> 0`, clears the cruise operating
 latch/set speed, and does so without a physical brake/gas input or an
 openpilot/native brake-cancel frame. About **20.84 ms** later `0x081` has
 already moved its lateral result to 0 while the longitudinal result is still
@@ -756,40 +756,40 @@ The arrows are a **semantic working model**.
 
 #### Join to the retained 2026 Camry PCS event
 
-This patent/GTS join strengthens one part of the existing log interpretation
-without solving the still-unknown request IDs.
+The [longitudinal evidence report](../variants/camry-2026-longitudinal-evidence.md)
+owns the wire interpretation. B7 is the embedded checksum, so the former
+`ID17 -> ID34 -> ID33` phases do not identify requesters or PCS stages.
 
-During the retained route
-00000043--29caa20fbc, segment 12, the first asserted FRC-side 0x5AE warning
-frame and the first native 0x08A request-B transition from ID17 to ID34 share
-one cereal CAN-event timestamp. They are nevertheless ordered inside that
-receive batch: 0x5AE is CAN-array index 16 and the ID34 0x08A is index 28.
-Current pandad preserves Panda receive-buffer order when publishing that array,
-so the captured FIFO order is **warning frame first, ID34 request second**.
-The rlog carries no per-frame hardware timestamp, so the sub-batch delay is
-unknown. The ID34 request carries approximately -4.0 m/s^2 requested
-acceleration. The user brake arrives about 16.7 ms after the batch timestamp;
-the native 0x08A request later changes from ID34 to ID33. The relay blocked the
-first two special native 0x08A frames, while the separate 0x5AE warning path
-still crossed the relay.
+During route `00000043--29caa20fbc`, segment 12, the first asserted FRC-side
+`0x5AE` warning frame and the first native `0x08A B4[6]` assertion share one
+cereal CAN-event timestamp. They are ordered inside that receive batch:
+`0x5AE` is CAN-array index 16 and the flagged `0x08A` is index 28. Pandad
+preserves Panda receive-buffer order when publishing that array, so the captured
+FIFO order is **warning frame first, flagged request second**. The rlog has no
+per-frame hardware timestamp; the sub-batch delay is unknown.
 
-The patents now make the evidence boundary clearer:
+`B4[6]` is set for 21 native frames. `B3[2]` is set for the first nine and
+clear for the next twelve; B7's `0x8B -> 0x87` change exactly tracks that bit
+clearing, not a requester change. ACC already requested -4.0 m/s²
+**20.226 ms before** the flag, still requested -4.0 at entry, and ended the
+flagged interval at -3.8. B20 policy remains 1 throughout. Driver brake begins
+**16.733 ms** after flag onset, openpilot disables at **19.717 ms**, and native
+forwarding resumes at **33.508 ms**. The relay blocked the first two flagged
+native `0x08A` frames while the separate `0x5AE` warning path still crossed it.
 
-- 0x5AE provides evidence for the **warning/ALM presentation path**;
-- the co-batched negative-acceleration 0x08A request, ordered after the first
-  warning frame in the captured FIFO, is evidence that a **longitudinal PCS
-  application request** was active, but it still does not
-  prove that Brake/VMM selected it or that the actuator executed it;
-- Prefill is itself a first-class PCS state and explicitly need not mean
-  braking, so a future capture must not collapse Prefill and PB merely because
-  both involve the brake system;
-- PBA is driver-brake-assist vocabulary. Since the user's brake starts during
-  the event, a transition involving PBA is now a plausible hypothesis for one
-  of the request-ID phases, but **ID34 and ID33 remain unassigned** until the
-  same event is joined to TSS3 Operation FFD/VDAS state;
-- the unchanged Brake/VMM longitudinal result ID11 in this interrupted event
-  remains meaningful negative evidence against claiming that the observed
-  ID33/34 request demonstrably won arbitration.
+The patents make the evidence boundary clearer:
+
+- `0x5AE` supports the **warning/ALM presentation path**. The coincident
+  `B4[6]` assertion is PCS-associated, but neither it nor `B3[2]` has an exact
+  brake-request, preparation, assist, or stage meaning established by this event.
+- The negative acceleration predates the flags under ACC; it is not evidence
+  of a newly issued PCS deceleration request or a PCS arbitration winner.
+- Prefill is a first-class PCS state and need not mean braking. PBA assists
+  driver braking. Neither can be assigned to these bits from correlation or
+  the driver's later brake input.
+- The unchanged Brake/VMM longitudinal result ID11 does not identify a selected
+  PCS result. Establishing PCS request, downstream selection, and physical
+  execution requires synchronized request/state and actuator evidence.
 
 The highest-value next capture is therefore no longer just "PCS warning on/off."
 At minimum synchronize these current GTS fields with 0x08A, 0x081, 0x5AE,

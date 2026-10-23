@@ -38,7 +38,7 @@ from tools import REPO_ROOT
 
 ROOT = REPO_ROOT
 DEFAULT_CORPUS_DIR = ROOT / "build/cache/camry_20260930_vmc_corpus"
-REQUEST_COLUMNS = ["upper", "lower", "id_upper", "id_lower", "allocation_upper", "allocation_lower", "latch", "hold", "sequence", "lateral_id"]
+REQUEST_COLUMNS = ["upper", "lower", "request_id", "byte7_checksum", "allocation", "latch", "hold", "sequence", "lateral_id"]
 PHASES = {0: "unknown", 1: "driver_brake", 2: "driver_gas", 3: "standstill", 4: "op_braking", 5: "op_accelerating", 6: "op_near_zero", 7: "native_or_stock_cruise", 8: "manual_moving"}
 
 
@@ -49,9 +49,10 @@ def word(b, offset):
 
 def requests(b):
   if not len(b):
-    return np.empty((0, 10))
-  return np.column_stack((word(b, 8) * .001, word(b, 11) * .001, b[:, 6] >> 2, b[:, 7] >> 2,
-                          b[:, 6] & 3, b[:, 7] & 3, (b[:, 3] >> 3) & 1, (b[:, 4] >> 5) & 1,
+    return np.empty((0, len(REQUEST_COLUMNS)))
+  # B7 is the Toyota header checksum: (0x8A + 8 + sum(B0..B6)) & 255.
+  return np.column_stack((word(b, 8) * .001, word(b, 11) * .001, b[:, 6] >> 2, b[:, 7],
+                          b[:, 6] & 3, (b[:, 3] >> 3) & 1, (b[:, 4] >> 5) & 1,
                           b[:, 26] & 63, b[:, 21] & 63))
 
 
@@ -117,7 +118,7 @@ def join(route: str, corpus_dir: Path):
     origins.append(3 if h and n else 1 if h else 2 if n else 0)
     host_match_ages.append(ages[0])
     native_match_ages.append(ages[1])
-  delivered_all = np.column_stack((delivered_q[:, 0], requests(delivered_b), np.asarray(origins))) if len(delivered_q) else np.empty((0, 12))
+  delivered_all = np.column_stack((delivered_q[:, 0], requests(delivered_b), np.asarray(origins))) if len(delivered_q) else np.empty((0, 11))
   native_all = np.column_stack((q[native_mask, 0], requests(qb[native_mask])))
   host_all = np.column_stack((q[host_mask, 0], requests(qb[host_mask])))
   applied, a_age = preceding(delivered_all, t, .075)
@@ -145,7 +146,7 @@ def join(route: str, corpus_dir: Path):
   standing = np.isfinite(v) & (abs(v) < .03)
   mode_long = meta["cp"].get("openpilotLongitudinalControl") if meta["cp"] else None
   op = np.isfinite(cc[:, 0]) & (cc[:, 3] == 1) & (mode_long is True)
-  native_active = ((applied[:, 7] == 1) | (native[:, 7] == 1))
+  native_active = ((applied[:, 6] == 1) | (native[:, 6] == 1))
   phase = np.zeros(len(t), np.int8)
   phase[np.isfinite(v) & ~standing] = 8
   phase[native_active & ~standing] = 7
@@ -162,7 +163,7 @@ def join(route: str, corpus_dir: Path):
     "request_loss": ((sb[:, 11] >> 4) & 1), "lateral_id": sb[:, 13] & 63,
     "cs": cs, "cc": cc, "out": out, "plan": plan, "sd": sd,
     "wheel": wh, "gas": gas, "brake": brake, "v": v, "gas_on": gas_on, "brake_on": brake_on,
-    "applied": applied[:, 1:11], "origin": applied[:, 11], "native": native[:, 1:], "host": host[:, 1:],
+    "applied": applied[:, 1:10], "origin": applied[:, 10], "native": native[:, 1:], "host": host[:, 1:],
     "phase": phase,
     "age_applied": a_age, "age_native": n_age, "age_host": h_age, "age_cs": cs_age, "age_cc": cc_age,
     "age_out": out_age, "age_plan": plan_age, "age_sd": sd_age, "age_wheel": wh_age,
@@ -171,7 +172,7 @@ def join(route: str, corpus_dir: Path):
   np.savez(corpus_dir / (route + ".joined.npz"), **joined)
   ages = np.asarray(host_match_ages)
   finite = ages[np.isfinite(ages)]
-  info = {"route": route, "status_source": source, "native_request_source": native_source,
+  info = {"schema": "camry-20260930-vmc-join-v2", "route": route, "status_source": source, "native_request_source": native_source,
           "wheel_source": wheel_source, "gas_source": gas_source, "brake_source": brake_source,
           "rows": len(t), "phase_counts": {PHASES[int(k)]: int(v) for k, v in Counter(phase).items()},
           "request_columns": REQUEST_COLUMNS, "word_offsets": list(range(0, 28, 2)),
@@ -182,6 +183,7 @@ def join(route: str, corpus_dir: Path):
           "missing_cs_rows": int(np.isnan(cs[:, 0]).sum()), "missing_cc_rows": int(np.isnan(cc[:, 0]).sum()),
           "bounds": {"status_native_only": True, "join": "preceding only; status native source chosen by dominant count; CS/CC 60ms; request 75ms",
                      "origin": "exact 32-byte match to host send or native FRC receive <=100ms, simultaneous logger batch allowed; 1 host,2 native,3 both,0 unknown",
+                     "request": "B6 high6 request ID / low2 allocation; B7 Toyota header checksum, not lower request metadata; B8:B9 and B11:B12 signed16BE x0.001",
                      "timing": "CAN log batch timestamps",
                      "phase": "pedal states override standstill/control classes; native_or_stock_cruise records the observed request latch"}}
   (corpus_dir / (route + ".joined.json")).write_text(json.dumps(info, indent=2))

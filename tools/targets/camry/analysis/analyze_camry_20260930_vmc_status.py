@@ -97,7 +97,8 @@ def route_report(route: dict, meta: dict, info: dict, j: dict) -> tuple[dict, li
   closed = np.isfinite(j["age_gas"]) & (j["gas"][:, 3] == 0)
   opened = np.isfinite(j["age_gas"]) & (j["gas"][:, 3] > 0)
   brake_on = np.isfinite(j["age_brake"]) & (j["brake"][:, 4] == 1)
-  native_idle = np.isfinite(j["age_native"]) & (j["native"][:, 2] == 0) & (j["native"][:, 3] == 4)
+  native_b6_zero = (np.isfinite(j["age_native"]) & (j["native"][:, 2] == 0)
+                    & (j["native"][:, 4] == 0))
   clamped_residual = b18 - np.minimum(np.maximum(b4, b24), b22)
   bit7 = (j["result_high_bits"] & 2) != 0
   cs_standstill, cs_nonstandstill = j["cs"][:, 7] == 1, j["cs"][:, 7] == 0
@@ -124,8 +125,8 @@ def route_report(route: dict, meta: dict, info: dict, j: dict) -> tuple[dict, li
     "brake_on_b26_nonzero": fractions(brake_on, b26 != 0),
     "b26_nonzero_s13_negative": fractions(b26 != 0, signed13(b26) < 0),
     "b26_high3bit_counts": dict(Counter((b26 >> 13).tolist())),
-    "idle_native_upper_vs_b20": fit(j["native"][native_idle, 0], b20[native_idle] * .001),
-    "idle_native_upper_minus_b20_q": quants(j["native"][native_idle, 0] - b20[native_idle] * .001),
+    "b6_zero_native_upper_vs_b20": fit(j["native"][native_b6_zero, 0], b20[native_b6_zero] * .001),
+    "b6_zero_native_upper_minus_b20_q": quants(j["native"][native_b6_zero, 0] - b20[native_b6_zero] * .001),
     "result_id_counts": dict(Counter(j["result_id"].tolist())),
     "request_loss_rows": int(j["request_loss"].sum()),
     "b18_above_max_rows": int((residual > 0).sum()), "b18_below_max_rows": int((residual < 0).sum()),
@@ -187,7 +188,7 @@ def stock_epochs(route: str, j: dict) -> list[dict]:
     # Centered median selects excitation.
     smooth = np.array([np.median(speeds[max(0, i - 5):min(len(speeds), i + 6)]) for i in range(len(speeds))])
     wheel_accel[idx] = np.gradient(smooth, times)[inverse]
-  base = (np.isfinite(j["age_native"]) & (native[:, 6] == 1) & np.isfinite(j["age_cs"])
+  base = (np.isfinite(j["age_native"]) & (native[:, 5] == 1) & np.isfinite(j["age_cs"])
           & ~j["gas_on"] & ~j["brake_on"] & np.isfinite(v) & (v > .5))
   result = []
   for start, end in runs(base):
@@ -221,7 +222,7 @@ def stock_epochs(route: str, j: dict) -> list[dict]:
 def braking_events(route: str, j: dict, stock: bool) -> list[dict]:
   request = j["native"][:, 0] if stock else j["applied"][:, 0]
   if stock:
-    active = np.isfinite(j["age_native"]) & (j["native"][:, 6] == 1)
+    active = np.isfinite(j["age_native"]) & (j["native"][:, 5] == 1)
   else:
     active = np.isfinite(j["age_applied"]) & (j["cc"][:, 3] == 1)
   mask = active & np.isfinite(j["age_cs"]) & ~j["gas_on"] & ~j["brake_on"] & (request <= -.5) & np.isfinite(j["v"])
@@ -256,7 +257,8 @@ def snapshots(route: str, j: dict, raw: dict, info: dict) -> list[dict]:
       "label": label, "route": route, "t_route": float(j["t"][i]), "segment": int(j["segment"][i]),
       "status_hex": j["bytes"][i].tobytes().hex(),
       "delivered_upper": float(j["applied"][i, 0]), "delivered_lower": float(j["applied"][i, 1]),
-      "delivered_ids": j["applied"][i, 2:4].tolist(), "allocation": j["applied"][i, 4:6].tolist(),
+      "delivered_request_id": int(j["applied"][i, 2]), "allocation": int(j["applied"][i, 4]),
+      "byte7_checksum": int(j["applied"][i, 3]),
       "native_upper": float(j["native"][i, 0]), "confirmed_origin": int(j["origin"][i]),
       "aEgo": float(j["cs"][i, 4]), "speed_mps": float(j["v"][i]),
       "gas_fraction": float(j["gas"][i, 3]), "brake_on": bool(j["brake_on"][i]),
@@ -336,6 +338,8 @@ def main() -> None:
     name = route["route"]
     meta = json.loads((args.corpus_dir / (name + ".json")).read_text())
     info = json.loads((args.corpus_dir / (name + ".joined.json")).read_text())
+    if info.get("schema") != "camry-20260930-vmc-join-v2":
+      raise ValueError(f"{name}: regenerate the VMC join with the checksum-aware producer")
     with np.load(args.corpus_dir / (name + ".joined.npz")) as joined_archive, np.load(args.corpus_dir / (name + ".npz")) as raw_archive:
       j = {key: joined_archive[key] for key in joined_archive.files}
       raw = {key: raw_archive[key] for key in raw_archive.files}
@@ -386,12 +390,14 @@ def main() -> None:
     "moving": ">0.5m/s from fresh raw wheels with CarState fallback",
     "coverage": "sum adjacent status intervals capped100ms; includes parked time, limits larger-gap contributions to100ms",
     "timing": "preceding-only joins; CS/CC60ms,request75ms,exact-payload origin100ms; logger batch timestamps",
+    "request_metadata": "B6 high6 request ID / low2 allocation; B7=(0x8A+8+sum(B0..B6))&255, not a lower requester/allocation",
+    "b6_zero_native_population": "fresh preceding native request (<=75ms), raw B6=0 (request ID0/allocation0), independent of B7 checksum; replaces the invalid ID0/lower-ID4 classification",
     "stock_epochs": "native latch1,no pedals,moving,freshCS; >=2s; request range>=0.5 or centered-median wheel-gradient range>=0.4 using unique time knots; direct RMS on original2-decimal episode boundaries, no fitted gain/offset",
     "segment_times": "t_route from minimum recorded monotonic event; repeated init/carParams timestamps are not segment playback anchors",
   }
   validation = {"methods": methods, "summary": groups, "routes": reports, "phases": phases}
   summary = {
-    "schema": "camry-20260930-vmc-status-v1", "vehicle_access": False, "scope": groups, "methods": methods,
+    "schema": "camry-20260930-vmc-status-v2", "vehicle_access": False, "scope": groups, "methods": methods,
     "direct_stock_comparison": direct, "simple_driver_brake_correction_scale10": dict(brake_model),
     "b18_exceptions": {"above": sum(row["residual_counts"] > 0 for row in exceptions),
                        "below": sum(row["residual_counts"] < 0 for row in exceptions)},

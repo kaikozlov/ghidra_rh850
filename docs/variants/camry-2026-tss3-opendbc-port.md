@@ -182,8 +182,8 @@ The coexistence classification is independently visible on Toyota traffic. Durin
 openpilot `latActive`, all 36,779 native `0x08A` lateral request IDs and all 30,652
 `0x081` lateral result IDs are **0**, so factory LTA is not the steering source.
 At the same time stock longitudinal is active: during the adaptive-cruise overlap,
-`0x08A` upper request ID is 11 on 36,777/36,779 frames, the lower request is primarily
-ID17 (36,709 frames), and `0x081` returns longitudinal result ID11 on 26,339 samples.
+`0x08A` B6 request-ID candidate is 11 on 36,777/36,779 frames, and
+`0x081` returns longitudinal result ID11 on 26,339 samples. B7 is a checksum.
 The route also contains a 15.871-s <0.5-m/s stop while the adaptive+lateral overlap
 remains selected. Source hashes and the complete derived reduction are retained in
 `targets/camry-2026/raw-20260918/recovered-road-drive/summary.json`; the 30 rlogs and
@@ -2059,14 +2059,14 @@ CAN-alive checking and are not yet mapped to public openpilot fault policy.
 
 VAR-088 established the byte-complete `0x08A` census; the September-16 follow-up
 renames the DBC entry `TSS3_CONTROL_REQUEST` and maps the unified request/result
-structure. B6/B7 split into two six-bit longitudinal request-ID candidates plus
-two-bit allocation-method candidates, B8:B9/B11:B12 are the indistinguishable
-signed16 x0.001 longitudinal acceleration-request pair, and B18:B19/B21/B24/B25
-carry the lateral request tuple. Brake-owned `0x081` is now `TSS3_CONTROL_RESULT`,
-with selected longitudinal ID B6[5:0], selected lateral ID B13[5:0], lateral
-result pinion B16:B17, and longitudinal result acceleration B20:B21. Upper-vs-
-lower A/B ordering and the remaining shift/EPB/override/priority/validity metadata
-stay bounded rather than guessed.
+structure. B6 retains six-bit longitudinal request-ID and two-bit allocation
+candidates. B7 is the Toyota checksum of the eight-byte prefix, withdrawing
+its former lower-ID/allocation interpretation. B8:B9/B11:B12 are signed16
+x0.001 acceleration slots; B18:B19/B21/B24/B25 carry the lateral request tuple.
+Brake-owned `0x081` carries selected longitudinal ID B6[5:0], selected lateral
+ID B13[5:0], and lateral result pinion B16:B17. B20:B21 is a closed-accelerator
+reference candidate. Lower requester/allocation and the remaining policy
+metadata are unmapped.
 
 ### 3.3 B6 candidate construction and freshness/signing interfaces
 
@@ -3126,45 +3126,35 @@ retain the already-audited RAM-only semantics.
 Verification: `tests/targets/camry/verify_camry_f33_steering_state_capture.py`;
 historical in-car packaging is `tools/targets/camry/research/package_camry_f33_research_kit.py`.
 
-### 4.11 Stock ACC delayed hold is request-ID/allocation state (VAR-140 supersession)
+### 4.11 Stock ACC delayed hold uses the observed hold bit
 
-The September road corpus originally exposed the delayed stop/hold condition as
-raw `0x08A B7={0x66,0x67}`. The unified request-layout recovery now explains that
-byte rather than treating it as an opaque ACC state. `B6` and `B7` each pack a
-six-bit longitudinal request ID in bits7:2 plus a two-bit braking/driving-force
-allocation method in bits1:0. A full-frame re-read adds a cleaner structural
-state bit: `0x08A B4[5]` is asserted on **198/198** retained delayed-hold frames
-and clear on every other native `0x08A` frame in complete routes `3b/3c`.
+The September road corpus originally exposed delayed hold through raw
+`0x08A B7={0x66,0x67}`. **B7 is a checksum.** The actual structural
+observation is B4[5], asserted on **198/198** retained delayed-hold
+frames while the B3[3] cruise latch is set.
 
-The retained states decompose as follows:
+| Raw B6 | B4[5] | B7 checksum | Dynamic state |
+|---|---:|---|---|
+| `0x2D` | 0 | `0x47` | ordinary active cruise |
+| `0x2C` | 0 | `0x46` | active accelerator override |
+| `0x2D` | 1 | `0x67` | delayed zero-speed hold |
+| `0x2C` | 1 | `0x66` | delayed hold with accelerator override |
+| `0x47` | 0 | `0x65` | moving counterexample to checksum-based hold detection |
 
-| Raw B6/B7 | Request A | Request B | Dynamic state |
-|---|---|---|---|
-| `0x2D / 0x47` | ID11 / Engine+Brake1 | ID17 / Brake Only | ordinary active cruise |
-| `0x2C / 0x46` | ID11 / Engine Only | ID17 / Engine+Brake2 | active accelerator override |
-| `0x2D / 0x67` | ID11 / Engine+Brake1 | ID25 / Brake Only | delayed zero-speed hold |
-| `0x2C / 0x66` | ID11 / Engine Only | ID25 / Engine+Brake2 | delayed hold with accelerator override |
-| `0x47 / 0x65` | ID17 / Brake Only | ID25 / Engine+Brake1 | moving counterexample |
+Routes `3b` and `3c` contain three delayed-hold episodes totaling
+**198** native frames: 192 raw `0x2D/0x67` pairs and six `0x2C/0x66`.
+Each episode enters after more than five seconds stopped and clears with
+accelerator input before motion. No RES-button clear join is established.
+The producer now segments these episodes on B4[5] with B3[3], preserving
+the original raw pairs as observations rather than request identities.
 
-Routes `3b` and `3c` contain three independent delayed-hold episodes totaling
-**198** native request frames: 192 `0x2D/0x67` plus six `0x2C/0x66`. Every hold
-frame is effectively 0 m/s, enters only after the vehicle has already remained
-stopped for more than five seconds, and all three episodes clear with accelerator
-input before vehicle motion. No RES-button clear join is established. The moving
-`B7=0x65` witness rejects both the old B7-bit5 rule and request-B ID25 alone as a
-standstill predicate.
-
-Fork opendbc therefore reports Camry stock-ACC standstill from the cruise latch
-plus source-real structural `B4[5]`. Request-B ID25/allocation2-or-3 remains the
-independent decoded-state corroboration, and the moving ID25/allocation1 witness
-keeps that ID from being promoted to a standstill flag by itself. Corolla, where
-B4[5] hold behavior is not independently retained, uses the decoded ID25 plus
-allocation2/3 contract. No resume command is synthesized.
+B4[5]'s OEM name remains unmapped. The Corolla capture lacks an independent
+hold witness, so its former checksum-derived standstill mapping is withdrawn.
+No resume command follows from this analysis.
 
 Evidence: `data/generated/camry_20260906_hands_off_warning_audit.json`,
-`data/generated/camry_2026_longitudinal_request_plane.json`,
-`tests/targets/camry/verify_camry_2026_longitudinal_request_plane.py`, and fork
-`opendbc/car/toyota/tests/test_tss3_{camry,corolla}.py`.
+`data/generated/camry_2026_longitudinal_request_plane.json`, and
+`tests/targets/camry/verify_camry_2026_longitudinal_request_plane.py`.
 
 ### 4.12 Source-real parser liveness across the long routes (VAR-141)
 
@@ -3415,10 +3405,11 @@ upper requester ID, acceleration, and distribution. `1592` separately records
 the overall, brake, and powertrain arbitration-result IDs, while `161D` records
 the resulting acceleration.
 
-The table gives a concrete explanation for the observed upper-ID-17/lower-ID-23
-combination: Toyota explicitly records PDA(OAA) as an **upper-limit** request
-family (`1F03..1F07`) and PDA(DA) as a **lower-limit** request family
-(`5B07..5B11`). Two different IDs can therefore be cooperating halves of PDA.
+The recorder separately names PDA(OAA) upper-limit requests (`1F03..1F07`)
+and PDA(DA) lower-limit requests (`5B07..5B11`). These describe Toyota's
+request model; their recorder offsets do not identify CAN fields. In particular,
+`0x08A` byte 7 is a checksum, so the former upper-ID-17/lower-ID-23
+interpretation of the Corolla capture is withdrawn.
 
 PCS evidence must be interpreted at the same boundary. The recorder separates
 warning/target judgment, enable/prohibit state, deceleration request, generic
@@ -3441,176 +3432,95 @@ Evidence:
 `tools/techstream/extract_pcs_data_viewer_adu_semantics.py`, and
 `tests/techstream/verify_gtsplus_pcs_data_viewer_adu_semantics.py`.
 
-### 4.15 The retained PCS-alert drive proves a native emergency request transition
+### 4.15 The retained PCS-alert drive records a PCS-associated request transition
 
 The user-reported PCS alert is localized to route `00000043--29caa20fbc`,
-segment 12, route offset **752.436552--752.922597 s**. The native FRC-side
-`0x08A` request-B slot makes one contiguous 21-frame transition:
+segment 12, route offset **752.436552–752.922597 s**. Native FRC-side
+`0x08A` **byte 4 bit 6** is asserted for 21 consecutive frames.
 
-| Phase | Frames | Request A | Request B | requested acceleration |
-|---|---:|---|---|---:|
-| immediately before | 1 witness | ID11 / allocation 1 | ID17 / allocation 3 | -4.000 m/s² |
-| first special-request phase | 9 | ID11 / allocation 1 | **ID34 / allocation 3** | -4.000 m/s² |
-| second special-request phase | 12 | ID11 / allocation 1 | **ID33 / allocation 3** | -4.000 to -3.800 m/s² |
-| immediately after | 1 witness | ID11 / allocation 1 | ID17 / allocation 3 | -3.800 m/s² |
+**Byte 7 is the Toyota checksum of the eight-byte prefix:**
+`(0x8A + 8 + sum(B0..B6)) & 0xFF`. The former ID34→ID33 interpretation was
+the checksum changing `0x8B→0x87` when byte 3 bit 2 cleared. Neither those
+requester IDs nor the former lower-slot “Brake Only” allocation are fields.
 
-Two other application bits track the phase: byte 4 bit 6 is set throughout the
-ID34/33 interval, while byte 3 bit 2 is set only during ID34. FRC-side
-`0x5AE` byte 2 bit 2 first asserts in the **same cereal CAN-event batch** as
-the first ID34 frame, but the raw batch is not unordered: `0x5AE` is CAN-array
-index 16 and `0x08A` ID34 is index 28. `pandad` copies the Panda receive
-buffer into cereal in order, so the captured FIFO order is **0x5AE warning
-first, ID34 request second**. The last observed clear `0x5AE` was 188.123 ms
-earlier, whereas the last ID17 `0x08A` was 20.226 ms earlier.
+| Phase | Frames | B3[2] | B4[6] | B7 checksum | Both acceleration slots |
+|---|---:|---:|---:|---|---|
+| immediately before | 1 witness | 0 | 0 | `0x47` | −4.000 m/s² |
+| first flagged phase | 9 | 1 | 1 | `0x8B` | −4.000 m/s² |
+| second flagged phase | 12 | 0 | 1 | `0x87` | −4.000 to −3.800 m/s² |
+| immediately after | 1 witness | 0 | 0 | `0x47` | −3.800 m/s² |
 
-The observed onset/exit chronology, relative to the first asserted `0x5AE` /
-first ID34 receive batch, is:
+B6 remains ID11/allocation 1. The native acceleration slots already contain
+−4.000 m/s² **20.226 ms before** B4[6] asserts. B20 remains `0x40` throughout.
+
+#### Recorded chronology
+
+Offsets below use the first B4[6]-asserted receive batch:
 
 | Offset | Observation |
 |---:|---|
-| -188.123 ms | prior native `0x5AE` sample has warning bit clear |
-| -20.226 ms | prior native `0x08A`: request B ID17, -4.000 m/s² |
-| +0.000 ms | native `0x5AE` warning bit asserted, receive-array index 16 |
-| +0.000 ms | native `0x08A` request B first observed as ID34, -4.000 m/s², receive-array index 28 |
-| +0.000 ms | forwarded `0x5AE` TX return appears later in the same batch, index 36 |
-| +14.464 ms | second native ID34 `0x08A` |
+| −188.123 ms | prior native `0x5AE` has byte 2 bit 2 clear |
+| −20.226 ms | prior native `0x08A` has B4[6] clear and both slots at −4.000 m/s² |
+| 0.000 ms | `0x5AE` warning bit asserts at CAN-array index 16; flagged `0x08A` follows at index 28; forwarded `0x5AE` TX return is index 36 |
+| +14.464 ms | second flagged native `0x08A`; neither of the first two has a bus-0 TX confirmation |
 | +16.733 ms | first logged driver-brake press |
-| +33.508 ms | next native ID34 frame is the first special request observed forwarded to bus 0 |
-| +215.878 ms | native request B first changes ID34 -> ID33 |
-| +486.045 ms | last native ID33 frame; `0x5AE` warning remains asserted |
-| +518.686 ms | native `0x08A` returns to ID17 |
-| +646.872 ms | native `0x5AE` warning bit first observed clear again |
+| +19.717 ms | openpilot disables on `pedalPressed/userDisable` |
+| +33.508 ms | native forwarding resumes; the remaining 19 flagged frames are forwarded |
+| +215.878 ms | B3[2] clears while B4[6] remains set |
+| +486.045 ms | last B4[6]-asserted frame |
+| +518.686 ms | first `0x08A` with B4[6] clear again |
+| +646.872 ms | first `0x5AE` with its warning bit clear again |
 
-Across the retained September 21 corpus—44 rlogs and **12,981 native `0x5AE`
-frames**—that bit is asserted only four times, all in this one event. The
-`0x08A` ID33 and ID34 states likewise occur only here, 12 and 9 frames
-respectively.
+`pandad` preserves Panda receive-buffer order within the CAN array. The
+warning frame therefore precedes the flagged request in this batch; there
+is no per-frame hardware timestamp for the sub-batch delay.
 
-The event is not caused by openpilot asking for the same braking. Immediately
-before native entry, `carControl.longActive` is true but requests only
-**-1.5 m/s²**; vehicle speed is 7.691 m/s and neither pedal is pressed. The
-native request is already -4.000 m/s². The logged driver brake follows entry by
-**16.733 ms**, and openpilot disables on `pedalPressed/userDisable` at
-**19.717 ms**. This ordering rejects “driver braking created the entire
-transition” and makes the user-reported PCS attribution a tightly joined
-dynamic witness.
+Across the retained September-21 corpus of **44 rlogs**, the warning bit is
+set on four of **12,981 native `0x5AE` frames**, all in this segment. The
+21 B4[6]-asserted `0x08A` frames are likewise confined to this event.
 
-The relay trace also resolves what the receiving side actually saw. Panda source
-2 contains the native FRC request; source 128 is an accepted bus-0 transmit
-confirmation, and source 192 is a rejected bus-0 transmit confirmation. The last
-accepted openpilot replacement precedes native entry by 7.941 ms and still
-carries request B ID17 with -1.5 m/s². The **first two native ID34 frames have no
-bus-0 transmit confirmation**. A final host replacement is submitted at +15.685
-ms but rejected at +22.175 ms, after the pedal disable. Native forwarding resumes
-at +33.508 ms and forwards the remaining 19 ID34/33 frames. Thus this drive
-dynamically proves the user's topology point: while replacement ownership is
-active, the VMC side does not receive the native PCS request merely because the
-FRC produced it. This particular event becomes fail-open quickly enough to pass
-most of the request after disengagement; that is not preservation while active.
+Immediately before entry, openpilot longitudinal is active and requests
+−1.5 m/s²; vehicle speed is 7.691 m/s and neither pedal is pressed. The
+last accepted replacement is at −7.941 ms. A final host replacement is
+submitted at +15.685 ms and rejected at +22.175 ms. Forwarding resumes
+after the pedal disable, rather than demonstrating a PCS-triggered handoff
+while longitudinal remains active.
 
-The visible alert has a separate path. All four asserted `0x5AE` alert-bit frames
-have accepted bus-0 transmit confirmations, beginning exactly at native request
-entry, even while the first two `0x08A` ID34 frames are blocked. Current GTS+
-provides the corresponding UI endpoint vocabulary: predecessor `PCS2_P5` exposes
-DID `0x100E` **PCS Warning Display Request** (Not Request / Display 1 / Display 2 /
-Display 3) and DID `0x1014` **PCS Warning Buzzer Request**, while `Meter_P5`
-exposes DID `0x2951` bit 9 as **PCS Warning**. The exact Camry-HV type-12984 CAN
-Bus Check topology places the FRC on Toyota Bus 1 and the **Combination Meter**
-on Toyota Bus 3, both behind the Central Gateway. Joined to the independently
-observed FRC-origin `0x5AE` direction and the recovered FRC absorption of older
-`PCS2_P5` roles, this strongly supports `0x5AE` as an FRC-origin PCS alert/UI
-carrier routed toward display consumers including the Combination Meter. It does
-**not** prove that `0x5AE` is meter-exclusive, nor does the GTS+ diagnostic DDB
-map `0x5AE` byte 2 bit 2 directly to Meter DID `0x2951`; normal-driving CAN
-arbitration-ID/bit routing remains a separate wire-level join. An audible/visual
-PCS alert therefore does **not** prove that the shared `0x08A` braking request
-reached the VMC.
+All four asserted `0x5AE` frames are forwarded from warning onset. The
+separate warning path explains how the driver can receive a PCS alert while
+replacement ownership suppresses the beginning of the native request-plane
+transition.
 
-Brake/VMM-owned `0x081` supplies the complementary result-side bound. Across 17
-result frames during the ID34/33 interval, longitudinal result ID remains **11**,
-request-loss supervision never asserts, and the result-acceleration candidate
-moves only -0.427 to -0.401 m/s². It never reports ID33 or ID34. **This is not
-negative evidence that an uninterrupted stock PCS/AEB event would have declined
-to brake.** The relay withheld the first two native ID34 requests from Brake/VMM;
-the driver brake arrives at +16.733 ms, openpilot disables at +19.717 ms, and
-native PCS forwarding does not resume until +33.508 ms. The receiving side
-therefore never observes the event's native onset before driver intervention.
-Once the remaining 19 ID34/33 frames are forwarded, the vehicle is already in a
-different driver/control state. This capture can prove that the FRC generated an
-emergency request and that the active replacement path initially suppressed it;
-it cannot answer the counterfactual downstream arbitration/automatic-braking
-response had the native request arrived uninterrupted. In particular, **result
-ID alone is not a PCS detector**: the alert carrier, submitted request, delivered
-request, and employed result are distinct observations.
+Brake/VMM `0x081` remains longitudinal result ID11 across all 17 result
+frames in the flagged interval, with request-loss supervision clear.
+Its B20:B21 scalar spans −0.427 to −0.401 m/s²; the
+[VMC status analysis](camry-2026-longitudinal-evidence.md#2026-09-30-vmc-status-corpus)
+identifies that as a closed-accelerator reference candidate. No lower
+requester ID is available to compare with the result.
 
-ID33 and ID34 participate in this alert event, in request-B, with the coincident FRC flags.
+#### Meaning and ownership boundary
 
-#### Upstream policy consequence
+The user report, coincident warning, and native B4[6] transition establish
+a **PCS-associated state**. Its exact OEM stage remains unmapped.
+Toyota's shipped PCS Data Viewer distinguishes `15E5_9` Prefill Request
+Flag, `15E6` PCS brake request status, `15E7` PBA Request Status, and
+`1607_9` PCS Emergency Brake Activation Flag. These are recorder fields,
+not a CAN mapping for B4[6]. Likewise `PCS2_P5` DID `0x100E` names warning
+display requests without mapping `0x5AE` byte 2 bit 2.
 
-The comparison baseline is opendbc `origin/master` commit
-`4ad6045b2cd19c0c9adc0c2cd79bf96c8bda6e5d` (2026-09-21). Its idiom is
-consistent:
-
-- expose proven stock warning/braking state through `CarState.stockFcw` and
-  `CarState.stockAeb`; generic `CarEvents` turns these into UI/events;
-- when stock AEB has a distinct carrier, preserve it by normal Panda forwarding
-  while blocking/replacing only the ACC carrier—Hyundai `CAMERA_SCC` states
-  this explicitly, and Ford/GM likewise observe AEB on carriers separate from
-  their replaced ACC/UI traffic;
-- when disabling or replacing the relevant ECU/carrier loses AEB, say so
-  explicitly. Honda Bosch warns that longitudinal disables AEB, and Subaru
-  sets its PCB-off indication because AEB is not preserved.
-
-The September-21 event plus the PCS-specific patent/GTS join now close the
-**openpilot-facing architecture** more tightly than that earlier either/or
-framing.
-
-First, observe stock PCS on the FRC/source side:
-
-- the FRC-origin `0x5AE` warning bit is the current **`stockFcw` candidate**:
-  it is rare in the retained corpus, asserts at the observed PCS warning event,
-  follows a separate forwarding path, and remains asserted after the special
-  longitudinal-request phase has ended;
-- the native source-side `0x08A` ID34->ID33 request-B episode is the current
-  **`stockAeb` candidate**. Both phases use allocation 3 (Brake Only) and a
-  large negative request (-4.0 to -3.8 m/s²), and occur only in this retained
-  PCS event. Byte 4 bit 6 tracks the whole ID34/33 interval and byte 3 bit 2
-  additionally distinguishes ID34;
-- Brake-owned `0x081 CONTROL_RESULT` supplies **downstream selection/result evidence**.
-  In this capture it remains ID11 while the native PCS request onset is suppressed.
-
-Second, the carrier question is no longer open: **PCS braking rides the same
-native FRC `0x08A CONTROL_REQUEST` that host longitudinal replaces.** The
-September-21 relay trace directly demonstrates that active replacement blocks
-the native emergency-request onset while the separate `0x5AE` warning path
-continues. Thus the then-active alpha-long shape did not preserve stock PCS
-braking.
-
-The idiomatic preservation target is therefore not to synthesize or merge a
-Toyota PCS command. When a native source-side PCS emergency request is detected,
-host `0x08A` ownership should be relinquished so the FRC's **original
-authenticated request**—including its OEM request identity, acceleration,
-allocation/policy fields, freshness and MAC—can reach Brake/VMM untouched.
-This is analogous in purpose to ports that preserve a stock AEB command while
-openpilot owns ordinary longitudinal control, but TSS3 requires an ownership
-handoff because ACC and PCS share one carrier.
-
-The current Panda forwarding hook is address-based, so an implementation must prove
-that ownership can be released early enough to preserve the first native
-emergency frame. The observed `0x5AE` warning frame precedes the first ID34
-frame in the Panda receive FIFO and may provide an early latch, but its lower
-cadence means that ordering must not be assumed universal from one event.
-Completion therefore requires a corrected handoff demonstrated while host
-longitudinal remains active, followed by an unconfounded capture showing the
-native PCS request reaching Brake/VMM and the downstream `0x081`/physical
-braking response.
+The ownership consequence is unchanged: when yielding to this native
+PCS-associated state, pass the **original authenticated `0x08A` frame**
+untouched rather than synthesizing its payload. The recording proves the
+then-active replacement blocked the first two flagged frames. Corrected
+handoff timing and the exact PCS stage require their own evidence; the
+unchanged result ID11 does not identify that stage.
 
 Evidence:
-`data/generated/camry_20260921_pcs_alert.json`,
+`data/generated/camry_20260921_pcs_alert.json` (v3),
 `tools/targets/camry/analysis/analyze_camry_20260921_pcs_alert.py`,
 `tests/targets/camry/verify_camry_20260921_pcs_alert.py`,
-`data/generated/gtsplus_2026/pcs_data_viewer_ddr_semantics.json`, and
-`tests/techstream/verify_gtsplus_pcs_data_viewer_ddr_semantics.py`.
+`data/generated/gtsplus_2026/pcs_data_viewer_adu_semantics.json`, and
+`software/Techstream/gtsplus/unpacked/gtsplus/Toyota Diagnostics/PCS Data Viewer/en-US/PCS Data Viewer.resources.dll`.
 
 ## 5. Demonstrated B6 steering authority and remaining qualification
 
@@ -3693,12 +3603,12 @@ generation and B6 routing.
 > direct chassis-facing candidate is now protected Bus-4 `0x08A` B8:B9/B11:B12,
 > whose signed16 ×0.001 shape matches Toyota's upper/lower TSS acceleration
 > request vocabulary. Brake-owned `0x081` now supplies the matching result plane:
-> B6[5:0] is the strongest selected-longitudinal-ID candidate and B20:B21 the
-> strongest selected-acceleration candidate, superseding the older `0x0CA` result
-> interpretation. Exact upper/lower request-word order and additional request
-> metadata are partly closed: B6/B7 strongly fit the two packed request-ID/allocation
-> bytes, but their upper/lower A/B ordering and shift/EPB/override/priority fields
-> remain unresolved. The semantic request plane itself is `0x08A`;
+> B6[5:0] is the selected-longitudinal-ID candidate. B20:B21 is now a
+> closed-accelerator reference candidate, superseding its older result-
+> acceleration label. B6 retains candidate request-ID/allocation metadata;
+> B7 is the prefix checksum, not a second metadata byte. Lower requester/
+> allocation and shift/EPB/override/priority fields remain unmapped.
+> The semantic request plane itself is `0x08A`;
 > what remains unresolved is the clean physical source/suppression boundary. Camry therefore keeps
 > stock longitudinal ownership and does **not** advertise Alpha Long. See
 > `camry-2026-longitudinal-evidence.md` for the current evidence and topology
@@ -3740,9 +3650,9 @@ longitudinal request and `0x160` remains non-actuating evidence/state traffic. T
 field hypothesis and its exact Profile-5 transform.
 
 Thus clean `0x08A` source ownership is no longer the native-long blocker on the repinned
-F33 path. The September-21 PCS-alert capture also makes the emergency-preservation boundary
-concrete: the then-active replacement path suppressed the first two native ID34 PCS requests,
-and native forwarding resumed only after driver braking and openpilot disengagement. The
+F33 path. The September-21 PCS-alert capture records initial suppression of
+the first two native B4[6]-asserted frames; native forwarding resumes only
+after driver braking and openpilot disengagement. The
 remaining longitudinal semantic/safety qualification is exact Brake/VMC selection and
 feedback, corrected PCS/AEB preservation while host longitudinal is active, driver override,
 standstill/hold behavior, and the `0x081` result/actuation plane. The same capture does **not**

@@ -25,10 +25,12 @@
     "n_epochs": 126
   },
   "methods": {
+    "b6_zero_native_population": "fresh preceding native request (<=75ms), raw B6=0 (request ID0/allocation0), independent of B7 checksum; replaces the invalid ID0/lower-ID4 classification",
     "clamped_envelope": "B18=min(max(B4,B24),B22), raw counts; tests whether B22 explains below-max samples",
     "coverage": "sum adjacent status intervals capped100ms; includes parked time, limits larger-gap contributions to100ms",
     "max_relation": "B18=max(B4,B24), rawcounts; informative excludes B4=B24; empirical relation",
     "moving": ">0.5m/s from fresh raw wheels with CarState fallback",
+    "request_metadata": "B6 high6 request ID / low2 allocation; B7=(0x8A+8+sum(B0..B6))&255, not a lower requester/allocation",
     "segment_times": "t_route from minimum recorded monotonic event; repeated init/carParams timestamps are not segment playback anchors",
     "stock_epochs": "native latch1,no pedals,moving,freshCS; >=2s; request range>=0.5 or centered-median wheel-gradient range>=0.4 using unique time knots; direct RMS on original2-decimal episode boundaries, no fitted gain/offset",
     "timing": "preceding-only joins; CS/CC60ms,request75ms,exact-payload origin100ms; logger batch timestamps",
@@ -41,7 +43,7 @@
   ],
   "primary_op_braking_events": 2,
   "report": "docs/variants/camry-2026-longitudinal-evidence.md#2026-09-30-vmc-status-corpus",
-  "schema": "camry-20260930-vmc-status-v1",
+  "schema": "camry-20260930-vmc-status-v2",
   "scope": {
     "all_status": {
       "b22_ceiling": {

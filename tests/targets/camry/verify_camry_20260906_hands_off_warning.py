@@ -49,17 +49,19 @@ hold3b = routes["3b"]["stock_acc_standstill_candidate"]
 hold3c = routes["3c"]["stock_acc_standstill_candidate"]
 check("3b stock-ACC standstill state has 152 source-real frames", hold3b["frames"] == 152)
 check("3c stock-ACC standstill state has 46 source-real frames", hold3c["frames"] == 46)
-check("3b stock-ACC standstill states are exactly 45/103 and 44/102",
-      hold3b["cruise_substate_pair_counts"].get("45,103") == 148 and
-      hold3b["cruise_substate_pair_counts"].get("44,102") == 4)
-check("3c stock-ACC standstill states are exactly 45/103 and 44/102",
-      hold3c["cruise_substate_pair_counts"].get("45,103") == 44 and
-      hold3c["cruise_substate_pair_counts"].get("44,102") == 2)
-check("B4[5] is exact delayed-hold state across 3b/3c",
-      hold3b["b4_bit5_set_frames_with_cruise_latch"] == 152 and
-      hold3c["b4_bit5_set_frames_with_cruise_latch"] == 46 and
-      hold3b["b4_bit5_vs_legacy_b7_66_67_xor_violations"] == 0 and
-      hold3c["b4_bit5_vs_legacy_b7_66_67_xor_violations"] == 0)
+check("3b retains raw B6/B7 pairs 45/103 and 44/102",
+      hold3b["raw_b6_b7_pair_counts"].get("45,103") == 148 and
+      hold3b["raw_b6_b7_pair_counts"].get("44,102") == 4)
+check("3c retains raw B6/B7 pairs 45/103 and 44/102",
+      hold3c["raw_b6_b7_pair_counts"].get("45,103") == 44 and
+      hold3c["raw_b6_b7_pair_counts"].get("44,102") == 2)
+check("B4[5] segments the retained delayed-hold candidate across 3b/3c",
+      hold3b["b4_bit5_set_frames_with_cruise_latch"] == hold3b["frames"] == 152 and
+      hold3c["b4_bit5_set_frames_with_cruise_latch"] == hold3c["frames"] == 46)
+check("native 0x08A B7 checksums validate across retained routes",
+      all(route["request_0x08a_checksum"]["valid_frames"]
+          == route["request_0x08a_checksum"]["frame_count"] > 0
+          for route in routes.values()))
 check("all retained stock-ACC hold frames are exactly stopped",
       hold3b["all_frames_exactly_stopped"] and hold3c["all_frames_exactly_stopped"])
 check("stock-ACC hold remains native LTA/LCA ID11", hold3b["all_episode_target_lateral_ids"] == [11] and

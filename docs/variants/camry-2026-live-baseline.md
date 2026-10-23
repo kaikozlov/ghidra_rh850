@@ -2551,7 +2551,7 @@ application byte of `0x08A/32` (44,613 deduped bus-0 frames; per-B21-state censu
 |---|---|
 | B0,B1,B2,B5,B15,B25,B27 | identically zero in every retained frame |
 | B3[3] | cruise operating-state latch (value `8`); VAR-067's MAIN/CANCEL joins |
-| B6,B7 | cruise sub-state pair `(0,18)` off, `(45,71)` LTA/LCA-active, `(44,70)` second sub-mode, `(0,146)` 33 transitional frames |
+| B6,B7 | raw pairs `(0,18)` off, `(45,71)` LTA/LCA-active, `(44,70)` second observed mode, `(0,146)` in 33 transitional frames; the old joint cruise-sub-state interpretation is superseded: B7 is the prefix checksum, while B6[7:2]/B6[1:0] remain request-ID/allocation candidates |
 | B8:B9 and B11:B12 | **byte-identical duplicated signed16 in 100% of frames**; raw range −1146..995; four negative joins bound semantics (`\|r\|<=0.07` vs speed-derived acceleration, `0x025` angle, `0x030` driver torque, and B18:B19 target-angle rate) |
 | B10 | latched cruise set speed, 1 km/count (RES+ 66→67→68→70; FRC `0x1901` Memory Vehicle Speed concept corroboration) |
 | B13:B14, B16:B17 | constant `0x7FFF` sentinel slots in every frame |
@@ -2588,11 +2588,13 @@ to the Brake System Control Module domain remains the immediate downstream sourc
 anchor.
 
 The fork's opendbc `toyota_tss3_pt` `0x08A` entry (`TSS3_CONTROL_REQUEST`) now
-carries the complete census-bounded field set — cruise latch/sub-states,
+carries the census-bounded raw fields — cruise latch/header bytes,
 duplicated request word, set speed, sentinel slots, cruise mirrors, cooperative
 substate flag, request level, sequence, and the `FV4+MAC28` trailer geometry —
 with the full 19-value Target Lateral ID `VAL_` dictionary on both `0x08A` and
 protected B6. Passive observables only; no output authorized.
+The historical B6/B7 sub-state labels do not establish independent state fields:
+`B7 = (0x8A + 8 + sum(B0..B6)) & 0xFF`.
 
 Deterministic evidence: `tools/targets/camry/analysis/analyze_camry_2026_upstream_request_census.py`,
 `data/generated/camry_2026_upstream_request_field_census.json`, and
@@ -3005,7 +3007,8 @@ command. Producer identity stays open (OQ-054); F33's Rx set excludes `0x081`
 
 In this two-drive census, constants B0/B1/B2/B5/B15/B25/B27=0x00,
 B13/B16=0x7F, B14/B17=0xFF; B6[0]/B7[0]/B20[7] matched the B3[3] cruise
-latch; B22[4]/B4[7] asserted in every ID11 frame.
+latch; B22[4]/B4[7] asserted in every ID11 frame. B7[0] is a checksum
+consequence in this corpus, not an independent cruise-state bit.
 B23[5] differs by drive (0.582/0.100 of ID11 frames). B26[5:0] is overwhelmingly
 `+1 mod 64` across chronological frames; drive A contains 175 non-`+1` breaks and
 drive B contains 0. Batched capture ordering does not classify those breaks as
@@ -3665,45 +3668,45 @@ request ID/pinion angle, while `0x081 B13[5:0]` / B16:B17 maps to selected resul
 ID/pinion angle. The recovered steering scale `1024/17870 deg/count` is
 0.00100012 rad/count, matching recorder `5282/57DE`'s 0.001-rad geometry.
 
-The full recorder record is **not** byte-complete yet. `0x08A B6/B7` now
-strongly fit the two packed request-ID/allocation bytes: each upper six bits match
-Brake `0x10A3/0x10A4` request-ID geometry and each low two bits stay inside the
-0..3 FRC allocation-method enum. Upper-vs-lower A/B ordering, shift/EPB,
+The full recorder record is **not** byte-complete yet. The former B6/B7
+two-request-ID interpretation is superseded by the exact prefix checksum:
+`B7 = (0x8A + 8 + sum(B0..B6)) & 0xFF`. Only B6[7:2]/B6[1:0] remain a
+request-ID/allocation candidate. Brake `0x10A3/0x10A4` and recorder `5280`
+describe real diagnostic/recorder fields, but do not map a lower request ID or
+allocation onto B7. Those lower-request wire locations, shift/EPB,
 override/priority fields and `57D3` acceleration validity remain unresolved.
-The result plane independently validates the packed-ID interpretation: selected
-`0x081 B6[5:0]` ID11 equals request candidate A (`0x08A B6[7:2]`) in
-**1,525/1,529** and **3,276/3,281** ID11 samples across the two drives, while
-every selected ID63 result is absent from both FRC request-ID candidates. Candidate B
-is ID17 during active cruise. P5 FRC diagnostics include the display label
-`63=Driver Operation`, but `0x081` is Brake/VMC-owned.
-Longitudinal 63 is downstream employed-source feedback to the FRC when driver demand wins.
-The archive-wide unequal-bound census now strongly resolves ordinary DRCC A as upper
-and B as lower.
+Selected `0x081 B6[5:0]` ID11 equals the B6 request-ID candidate in
+**1,525/1,529** and **3,276/3,281** ID11 samples across the two drives.
+Selected ID63 differs from that B6 candidate; with the lower ID unmapped, it
+cannot be declared absent from both submitted request IDs. P5 FRC diagnostics
+include `63=Driver Operation`; `0x081` is Brake/VMC-owned result feedback.
+The archive-wide unequal-bound observations support ordinary DRCC A as upper
+and B as lower independently of the retracted B7 identity labels.
 
-The delayed-hold corpus independently decomposes the old composite raw-B7 states:
-ordinary `0x2D/0x47` is A `(ID11,method1)` / B `(ID17,method3)`, delayed hold
-`0x2D/0x67` changes B to ID25, and accelerator override changes the allocation
-methods to A0/B2 (`0x2C/0x66`) while preserving the request IDs. The full-frame
-re-read additionally finds `0x08A B4[5]` asserted on all **198** delayed-hold
-frames and nowhere else in complete routes `3b/3c`. A moving `B7=0x65` =
-ID25/method1 has B4[5] clear. Camry runtime uses this exact structural hold bit;
-its OEM recorder name remains unassigned.
+The delayed-hold corpus retains raw B6/B7 pairs `0x2D/0x47` during ordinary
+cruise, `0x2C/0x46` during ordinary accelerator override, `0x2D/0x67` during
+delayed hold, and `0x2C/0x66` during accelerator override in that hold state.
+These observations do not establish lower request
+IDs17/25 or lower allocation changes: B7 is checksum. The full-frame re-read
+finds `0x08A B4[5]` asserted on all **198** delayed-hold frames and nowhere else
+in complete routes `3b/3c`. A moving `B7=0x65` frame has B4[5] clear, further
+showing why a checksum value is not a hold discriminator. Camry runtime uses
+the observed B4[5] hold bit; its exact OEM recorder name remains unassigned.
 
-The request/result ID roles are now separately bounded. Camry observes FRC request IDs
-A `{0,11}`, request IDs B `{4,17,25,36}`, and Brake/VMC result IDs `{11,63}`;
-ID25 is the delayed-ACC-hold requester and ID36 is a 33-frame startup-only state.
-The retained 2025 Corolla independently uses FRC idle A/B `0/4`, active A/B `17/23`,
-while the downstream result stays 63. Toyota statically names only sparse
-longitudinal/vertical anchors in the available corpus: the P5 FRC diagnostic display
-includes `0=No Request,63=Driver Operation`, but only 0 is observed as an FRC request
-anchor here; 63 is dynamically result-side. P6 speed-limiter
-`9=ISA`; P6 MaaS longitudinal `41/45=Request 1/2`. The full generation-20 lateral
-ID dictionary uses `11=LTA/LCA`, making Camry longitudinal ID11 during DRCC a
-strong **shared TSS application-ID hypothesis**, but not an OEM longitudinal name.
-A universal lateral->longitudinal label table is disproved by longitudinal ID25
-(delayed ACC hold) versus lateral ID25 (AP), and by axis-specific P6 41/45 names.
-The retained FRC ReproStd CUWs remain manufacturer-encrypted, so their application
-plaintext cannot yet be searched for the missing table.
+In these complete Camry drives, B6 request-ID candidates are `{0,11}`, while
+Brake/VMC result IDs are `{11,63}`. The former lower-ID set `{4,17,25,36}`,
+including delayed-hold ID25 and startup ID36, was checksum-derived and is
+retracted. The retained Corolla's active B6 candidate is ID17; its former
+lower ID23 and idle lower ID4 were likewise checksum-derived, while its
+downstream result remains 63. Toyota statically names only sparse
+longitudinal/vertical anchors in the available corpus: P5 FRC diagnostics
+include `0=No Request,63=Driver Operation`, P6 speed-limiter `9=ISA`, and P6
+MaaS longitudinal `41/45=Request 1/2`. The generation-20 lateral dictionary's
+`11=LTA/LCA` does not independently name Camry longitudinal ID11 during DRCC;
+shared application identity remains a hypothesis, not a universal
+lateral-to-longitudinal enum transfer. The retained FRC ReproStd CUWs remain
+manufacturer-encrypted, so their application plaintext cannot yet be searched
+for the missing longitudinal table.
 
 The correct current claim is therefore: `0x08A` is the FRC's unified observed
 continuous **selected generic TSS request** envelope, and `0x081` is the Brake-owned
