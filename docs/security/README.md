@@ -15,6 +15,7 @@ calibrations are compared under [../variants/README.md](../variants/README.md).
 | Bootloader SecurityAccess + payload gate | Unlock programming services; authenticated download | [bootloader-payload-gate.md](bootloader-payload-gate.md) |
 | Bootloader no-auth PC-pivot assessment | XCP-retained code placement versus boot ingress/control-flow sinks | [bootloader-noauth-pc-pivot-assessment.md](bootloader-noauth-pc-pivot-assessment.md) |
 | Keyless execution surface | Cross-image audit of key-free execution paths; reusable triage screen for future dumps | [keyless-exec-surface-assessment.md](keyless-exec-surface-assessment.md) |
+| Camry hot-entry gates (full 7,336-function F33 corpus) | Keyless code-execution blockers, runtime programming admission, and read-only late-handoff discriminators | [Camry live baseline §13.8](../variants/camry-2026-live-baseline.md#138-2026-10-22-full-decomp-re-audit-keyless-installation-after-startup) |
 | Application SecurityAccess | Extended-session level 2 unlock | [application-security-access.md](application-security-access.md) |
 | SecOC | Runtime CAN message authentication and ICU-S software-path assessment | [secoc/README.md](secoc/README.md) |
 | App↔HSM command surface | Exhaustive cross-target census of every ICU-S/ICUMC command the application can issue (all EPS dumps + Venza airbag) | [icu-hsm-command-surface.md](icu-hsm-command-surface.md) |

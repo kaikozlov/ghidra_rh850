@@ -551,6 +551,9 @@ tests = ["tests/targets/camry/verify_camry_8965F3307000_command5_runtime_carrier
 [suite.camry_8965f3307000_application_ram_loader]
 tests = ["tests/targets/camry/verify_camry_8965F3307000_application_ram_loader.py"]
 
+[suite.camry_8965f3307000_hot_entry_gates]
+tests = ["tests/targets/camry/verify_camry_8965F3307000_hot_entry_gates.py"]
+
 [suite.span_2025_discord_rlog_opendbc_evidence]
 tests = ["tests/targets/corolla/verify_span_2025_discord_rlog_opendbc_evidence.py"]
 

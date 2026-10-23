@@ -1084,6 +1084,141 @@ residual classes produces a concrete primitive, the practical non-persistent boo
 remains the startup PROGRAMMING race plus high-tail resident followed by application
 return.
 
+### 13.8 2026-10-22 full-decomp re-audit: keyless installation after startup
+
+**Question:** can stock `8965F3307000` accept a *new* volatile executable and
+enter it while the application is already running (especially stationary READY),
+without catching the initial wake/boot window, application-to-boot handoff,
+boot SecurityAccess, or a persistent flash modification? **Not yet demonstrated.**
+This section revisits §§13.3–13.7 against the current completed Camry corpus;
+it is not a claim that every undiscovered defect has been excluded. Evidence is
+bound to CodeFlash SHA-256
+`42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7`
+with **7,336/7,336** completed retained decompilations. The current computed
+STORE census likewise binds to that corpus (14,134 STOREs, 5,432 with known
+target ranges); its 103 steering/current-cone coarse candidates in 49 functions
+and five DMAC-register coarse candidates in three functions remain bounded by
+[VAR-085](../status/FINDINGS.md). The current application-loader, hidden-ingress,
+prefault-control-flow, and prefault-memory-safety test suites all pass.
+
+**Runtime handoff gates, exact F33 rather than transferred Sienna offsets.**
+The handoff is a deferred operation, not an unconditional `10 02` branch:
+
+```text
+DCM programming-session handler 0x95D1C -> 0x95C52 -> 0x95A3E
+    -> session precondition 0x4D5BA
+    -> deferred join 0x95B88 / 0x95CF2
+    -> application pending join 0x8B334 -> admission/staging 0x8B1B2
+    -> latch helper 0x8B17E -> second precondition 0x4D5D8
+    -> local-word submission 0x8B262 / event 9
+    -> application-to-boot context 0x65F5E -> 0x9F00
+```
+
+Original bytes independently disassembled with the pinned `v850-elf-objdump`
+confirm the two critical preconditions:
+
+| Function / gate | Exact bound | Consequence |
+|---|---|---|
+| `app_session_transition_precondition @ 0x4D5BA` | For target session 2, `uint16(FEBEE892) > uint16(CodeFlash[0x318B0])`; threshold bytes `80 01`, value `0x0180` | internal `0x0B` -> vehicle-speed NRC `0x88`; other target sessions do not use this check |
+| `test_mode_or_low_66ba_or_latched_condition_4d5d8 @ 0x4D5D8` | `FEBEE81F == 0x11` **or** `uint16(FEBE66BA) < 0x0A00` (`CodeFlash[0x318B2]`) **or** `FEBE819A != 0` | rejects the late programming admission; deferred DCM worker reports NRC `0x22` |
+| `app_request_programming_transition @ 0x4D604` | Addressing must permit the request; programming request latch must permit event posting | submits the system mode request/event, **not** an arbitrary jump |
+
+The speed and supply threshold values are firmware-verified raw representations;
+this does not infer that the car can safely enter programming at any particular
+road speed. The lifecycle byte `FEBEE81F` is a foreground snapshot of
+`FEBEB1A4` (published at `0xBF3AA`), maintained as an XOR-redundant mode/health
+state by `advance_health_record_lifecycle @ 0xB4214`. Its `0x11` transition
+state is *one* explicit admission blocker; it is **not** proven to be the
+actual source of every READY-mode NRC `0x22`. The observed READY `0x22` versus
+NRTD success in §57 therefore needs a gate-state snapshot, not an assumed
+phase explanation. There are also state/latch results surrounding `0x8B1B2`
+and `0x8B334`; satisfying the two isolated predicates is necessary but not
+sufficient proof of a successful handoff.
+
+**Existing read-only discriminator (no execution experiment).** The stock
+application's SID `0x23` is configured for *extended diagnostic session 3* and
+memory ID 1. Its exact allow-set is `FEBE0000..FEBFFFFF` minus five protected
+intervals from CodeFlash `0x29254`: `FEBE0000..FEBE37FF`,
+`FEBE503C..FEBE52A7`, `FEBF0288..FEBF13CB`, `FEBF4958..FEBF4B33`, and
+`FEBF6000..FEBF6CDF`. All four gate-input ranges are outside those exclusions:
+
+| Read address | Width | Purpose |
+|---|---:|---|
+| `FEBEE892` | 2 bytes | Speed snapshot fed to the first precondition |
+| `FEBEE81F` | 1 byte | Snapshot of lifecycle transition state |
+| `FEBE66BA` | 2 bytes | Supply snapshot fed to the second precondition |
+| `FEBE819A` | 1 byte | Physical/functional diagnostic addressing flag |
+
+A **parked, read-only, bench/controlled-vehicle** comparison across NRTD,
+stationary READY, and natural READY-to-NRTD transitions would discriminate the
+known predicates; interpret the recorded traces offline. An ordinary *physical* SID-23 request may itself refresh the
+addressing flag, so capture its request/address context and do not interpret
+`FEBE819A=0` in that read as a persistent permission independent of request
+addressing. The four reads are not atomic: include timestamps and repeated
+snapshots. This step does **not** request `10 02`, reset an ECU, change a mode
+flag, or write to RAM/flash. Current ROM bounds say these addresses are eligible
+for memory-ID-1 reads; the complete read sequence for these specific cells has
+not yet been observed on this vehicle.
+
+**Other candidate execution entrypoints, revisited on exact F33:**
+
+- **Application XCP/DAQ:** classic extended-CAN ingress and all XCP callbacks
+  exist, and the executable tail is within their hypothetical writer range.
+  But the original-byte instruction sequence at `0x98E84..0x98E8F` reads
+  `CodeFlash[0x30D68]`; the stock value `0x5A` rejects dispatch unless it is
+  zero. This is an *application protocol gate*, not a network discovery issue.
+  Changing the byte would be a persistent patch, not keyless stock behavior.
+- **Ordinary application UDS:** `SID 0x23` is a **reader**; the `0x2E` DID table,
+  19 `0x31` RIDs, `0xAB/0xBA` operations, and `0x100F` fixed-input command-5
+  crypto test have fixed actions without a recovered arbitrary write/PC sink.
+  SIDs `0x2F` and `0x3D` are absent. The application `0x11` ECUReset record
+  has no worker; `0x34/0x36/0x37` have no application-side transfer callbacks.
+- **Boot diagnostics:** `boot_service_request_download @ 0x5D68` and
+  `boot_service_routine_control @ 0x567E` require boot SA state 2. A retained
+  prebuilt authenticated payload can avoid rebuilding its payload MAC, but
+  cannot dispense with that independent boot SA gate. Application `10 02`
+  still must pass the above lifecycle boundary before these services exist.
+- **Indirect control flow, exceptions, CALLT, MPU, DMA and communication:**
+  the exact-F33 995 computed-transfer-site review, 99 fixed thunks, ISR
+  saved-PC geometry, zero nonzero CTBP writers, fixed INTBP/EBASE,
+  and retained DMAC descriptors do not identify a stock externally writable
+  continuation into the high-tail executable RAM. The known oversized-FD
+  receive condition yields stale/over-read data, but its recovered write
+  destinations do not make it an execution primitive (prefault audits).
+- **Already-installed resident:** sending requests to a previously loaded
+  `0x777` signer can happen later during READY. That is a live service of an
+  *existing* executable, not a way to install a fresh one after missing boot.
+  A previously explored CodeFlash hook would remove the startup dependency,
+  but changes flash and is not a stock-keyless or volatile solution.
+
+**Operational distinction:** the maintained `tss3-request-signer install`
+procedure supports **NRTD / READY=0 / Park**, followed by a direct transition to
+READY without EPS power loss. It is not inherently confined to the first
+seconds of wake, but it does **not** satisfy uninterrupted already-READY
+installation. `ui-bringup` uses the early startup catch to obtain the same
+PROGRAMMING entry. Neither path is the missing post-start *stock execution*
+primitive. Do not conflate current signer request/response liveness with the
+ability to install its code in the first place.
+
+**Next research, in order:** (1) establish the precise stationary READY
+lifecycle/status distinction through read-only gate snapshots and the complete
+`0x95B88 -> 0x8B334` pending-state mapping; (2) if a stationary READY gate
+seems admissible, verify the *entire* transition semantics offline and in
+controlled non-road testing, preserving peer health; (3) seek a demonstrable
+stock-exposed byte-placement primitive plus a separate mutable continuation,
+or a single service furnishing both, rather than retrying closed XCP commands;
+(4) focus memory-safety work on a specific ingress-to-write-to-PC chain before
+claiming arbitrary code execution. No new on-road execution or peer reset test
+is authorized by this static audit.
+
+The reproducible evidence pin for the thresholds, instructions, service policy,
+phase producer, and four readable cells is
+`tools/test camry_8965f3307000_hot_entry_gates`. An additional 11-case
+original-byte machine-scenario matrix was prepared under `build/out/` but **not
+executed**, because this checkout requires Ghidra 12.1.4 and the installed
+Ghidra is 12.2. The byte-pinned static assertions pass; they do not replace
+machine execution or READY/NRTD observations.
+
 ## 14. Exact F33 persistent Gate-2 development patch
 
 The non-persistent signer architecture in §13 remains the preferred production
