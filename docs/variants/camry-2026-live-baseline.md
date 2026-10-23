@@ -1211,13 +1211,93 @@ or a single service furnishing both, rather than retrying closed XCP commands;
 claiming arbitrary code execution. No new on-road execution or peer reset test
 is authorized by this static audit.
 
-The reproducible evidence pin for the thresholds, instructions, service policy,
-phase producer, and four readable cells is
-`tools/test camry_8965f3307000_hot_entry_gates`. An additional 11-case
-original-byte machine-scenario matrix was prepared under `build/out/` but **not
-executed**, because this checkout requires Ghidra 12.1.4 and the installed
-Ghidra is 12.2. The byte-pinned static assertions pass; they do not replace
-machine execution or READY/NRTD observations.
+The reproducible static evidence pin for the thresholds, instructions,
+service policy, phase producer, and four readable cells is
+`tools/test camry_8965f3307000_hot_entry_gates`. The eleven original-byte
+**Ghidra P1M-E** scenarios first proposed in this section could not run through
+`tools/rh850 test firmware` because the local installed Ghidra is 12.2 rather
+than pinned 12.1.4. That was a limitation of *that runner*, not of the available
+simulation stack: the separate pinned GNU V850E3v5 simulator now executes the
+original CodeFlash directly, as detailed below.
+
+### 13.9 2026-10-22 executed RH850 CodeFlash fuzz: late admission and lifecycle
+
+The actual `CodeFlash.bin` runs at VA zero in the pinned GNU V850E3v5 GDB
+simulator via `tools/rh850 test codeflash` / `tools.rh850_codeflash.run_elf`,
+**without Ghidra, code patches, or native-C reinterpretation**. The harness
+sets the recovered application GP `FEBEB800`, TP `23DFC`, SP `FEBE2000`, and
+isolated input RAM, and reuses one linked exact-image ELF for thousands of
+independently reset function-entry trials. The target-local executable fuzzer is
+`tools/targets/camry/research/fuzz_camry_f33_hot_entry.py`:
+
+```bash
+uv run --locked python -m tools.targets.camry.research.fuzz_camry_f33_hot_entry \
+  --seed 20261022 --random-each 2048 --sequence-random 2048 \
+  --window-random 1024 --cancel-random 1024 --batch-size 350 \
+  --timeout 150 \
+  --out build/out/targets/camry-8965F3307000/hot-entry-fuzz-final
+```
+
+Six independently executed original-instruction root families are included:
+`0x4D5BA` programming session/speed, `0x4D5D8` phase/supply/addressing,
+`0x8B17E` authorization latch, `0x8B1B2` asynchronous admission, `0x8B334`
+subsequent pending join, and `0x98E80` XCP dispatch. Inputs cover exact raw
+threshold boundaries, every possible target-session value (at speed above the
+bound), every lifecycle-phase byte, every addressing byte, all 256 XCP opcodes
+with mutated request payloads, and seeded random combinations. The simulator
+returns the actual instruction-derived values and RAM state, not a Python
+implementation of firmware. The independent expected-value model and actual
+exit-PC checks flag divergence, including unexpected branches or aborts.
+
+At seed `20261022` with the above options, the campaign executed **14,523**
+independent original-CodeFlash function-entry cases: speed (2,395), second
+precondition (2,592), authorization latch (2,592), admission staging (2,304),
+pending join (2,336), and stock XCP gateway (2,304). In addition it executed
+**2,560** deferred-error sequences, **1,536** mid-admission temporal mutations,
+and **2,560** cancel-state cases: **21,179** simulations total, with **zero
+mismatches** against the checks applicable to each cohort. The full evidence
+is in the disposable/reproducible `build/out/.../hot-entry-fuzz-final/summary.json`
+and accompanying per-batch actual GDB transcripts. This result is about the
+covered assertions, not proof that all fuzzed inputs were reachable from CAN.
+
+Separate original-byte **stateful** experiments carry state between instructions:
+
+- **Successful first admission then deferred DCM failure:** `0x8B1B2` installs
+  `FEBF3B18=0x5A` using the real code. Changed phase/supply/addressing inputs
+  precede `0x95CB0`, which takes the genuine error path through `0x8B134` and
+  clears the authorization, pending, and stage bytes. This refutes a durable
+  stale-latch shortcut through the **tested** DCM cleanup route.
+- **Mid-admission temporal mutation:** break at `0x8B1A4` *after* the first
+  `0x4D5D8` check but before storing the latch. A synthetic RAM change to phase
+  `0x11`, undervoltage, or nonphysical addressing does not prevent the same
+  pending operation from reaching `0x4D604`; no second precondition read
+  intervenes in that bounded instruction path. This is a time-of-check/time-of-
+  use fact, **not** a demonstrated network-triggerable race or READY-mode entry.
+- **DCM session cancellation (`0x95B48`):** for the actual programming-session
+  timing row (index 1, transition kind 2), deferred state 1 or 2 resets the
+  latch via `0x95D4E -> 0x8B134`; states 0/3 or another session row do not.
+  This matches the configured active-operation condition. Synthetic mismatched
+  row/state/latch combinations do not establish that a stale authorization can
+  arise through a valid tester request.
+
+All pending-join/temporal experiments **stop before** `app_request_programming_transition
+@ 0x4D604` executes event 9 or affects the EPS mode. No payload execution,
+application-to-boot shutdown, or physical readiness is inferred. Successful
+unlocked boot programming and keyless application execution are separate
+unproven capabilities. These targeted campaigns exercise the named paths and
+synthetic microstates, **not** the whole 7,336-function attack surface or live
+CAN/UDS scheduling. The stock XCP command gate remains closed under every
+simulated opcode/payload because `CodeFlash[0x30D68]=0x5A`.
+
+The next simulator-extension target is the complete diagnostic/session envelope
+(including real state from `0x95A3E/0x95B88` and caller transitions), with
+measured instruction timing and receive scheduling rather than synthetic RAM
+changes. A separate attempt to execute `boot_service_request_download @ 0x5D68`
+under the GNU simulator reaches the real `loop r1,0x52B0` instruction at
+`0x52B8`, whose simulated next PC is anomalously `0x7F000C` and faults. That is
+a **simulator instruction-support boundary**, not a firmware memory-corruption
+result or a completed bootloader fuzz. Fix that emulator behavior or use the
+pinned Ghidra P1M-E runner before interpreting a boot `0x34` fuzz outcome.
 
 ## 14. Exact F33 persistent Gate-2 development patch
 
