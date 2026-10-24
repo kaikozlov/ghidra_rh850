@@ -16,6 +16,22 @@ This work is iterative by nature. With every change, we build on top of existing
 
 We are cultivating an ecosystem.
 
+## Tools
+
+Everything you need lives under `tools/`, and each command has `--help`. Reach for these before writing a script.
+
+- `tools/gtarget list` / `show TARGET` -- what targets exist, and where their images, projects, and corpora live. Targets are named like `camry-8965F3307000`; the bare part number is rejected. `tools/gtarget TARGET ...` runs Ghidra commands against that target, and bare `tools/g` runs against the registry default (currently the Camry).
+- `tools/g decompile ADDR`, `tools/g inspect ADDR --decompile --callers --disasm 40` -- live Ghidra. It bootstraps its own environment and working project; don't source env files by hand. `tools/g session-status` shows the daemon, `tools/g stop` shuts it down cleanly.
+- `tools/pseudo --target TARGET QUERY` -- search the tracked decompilation corpus. `--data-ref ADDR` finds functions that reference an address, which beats grepping decompiler spelling. Pseudocode is not proof; confirm in disassembly.
+- `tools/know QUERY` -- find what we've already written down about a topic. It's navigation, not an oracle.
+- `tools/gts` -- Toyota GTS+/Techstream data: ECU tables, DIDs, recorder schemas. Start with `--help` and the schema-first workflow in `docs/tooling/gts-query-cli.md` instead of grepping strings.
+- `tools/toyota` -- Toyota capabilities and per-target workflows. `tools/toyota decomp source` shows the Camry's reconstructed C.
+- `tools/rh850` -- `toolchain` builds RH850 code; `test` and `csplus` run payloads or firmware scenarios in simulation.
+- `tools/artifact list` / `regen NAME` -- generated artifacts and what produces them.
+- `tools/test list` / `plan SELECTOR` / `SELECTOR` -- verification.
+
+Python is an editable install (`uv sync --locked`). Import `tools.*` and use `tools.REPO_ROOT`; don't add `sys.path` or `PYTHONPATH` tricks to packaged tooling or tests.
+
 ## Evidence
 
 Bytes are the ground truth; docs and our own earlier notes are leads. When you write something down, say how we know it: read from firmware, observed in a capture, or inferred. Code that exists or a test that passes doesn't tell us how the car behaves. Name things for what they do, and don't invent OEM field names.
@@ -26,6 +42,8 @@ Bytes are the ground truth; docs and our own earlier notes are leads. When you w
 - Opening a committed `projects/` database in Ghidra compacts it. Work in the target's `build/work/` copy.
 - In-memory Ghidra edits only persist on a clean daemon stop, so stop it before copying or promoting a project. [WORKFLOW.md](docs/WORKFLOW.md) has the lifecycle, including the order of the rebuild stages.
 - The decompilation corpus is derived. After graph, naming, or type changes, regenerate it from a fresh rebuild.
+- `build/` and `REFERENCE/` are local workspace and aren't in a fresh checkout. Don't make a check depend on them, and don't treat what's in them as evidence. If something is needed, promote it deliberately.
+- Some public dumps are DataFlash+CodeFlash concatenated, and the 0x8000-byte prefix shifts every CodeFlash address by -0x8000. Our registered CodeFlash images are bare and start at VA zero; `tools/gtarget show` gives each target's base.
 
 ## Building things
 
@@ -39,7 +57,7 @@ Each conclusion lives in one place, the target or subsystem report. Rewrite in p
 
 ## Across targets
 
-These ECUs share a software family, so most of what we learn on one carries to the others. Treat a finding from another target as a strong lead: addresses and calibrations differ, but structure and logic usually line up, so go find the counterpart in the target you're on and see. `tools/gtarget list` shows what's registered, and the default isn't always the one you want.
+These ECUs share a software family, so most of what we learn on one carries to the others. Treat a finding from another target as a strong lead: addresses and calibrations differ, but structure and logic usually line up, so go find the counterpart in the target you're on and see. `tools/gtarget list` shows what's registered.
 
 ## Openpilot
 
