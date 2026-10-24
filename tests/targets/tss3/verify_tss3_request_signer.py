@@ -3,6 +3,10 @@
 from __future__ import annotations
 
 import copy
+import io
+import json
+import subprocess
+import sys
 import tempfile
 from collections.abc import Sequence
 from dataclasses import replace
@@ -614,6 +618,76 @@ check("session telemetry proves the running firmware matches the flash-candidate
       identity_session.telemetry["fw_file_signature_hex_prefix"] == "a5" * 8 and
       identity_session.telemetry["panda_signature_hex_prefix"] == "a5" * 8)
 identity_session.close()
+
+for app_live, signer_replies, expected_exit in ((True, True, 0), (True, False, 2), (False, False, 2)):
+    cli_output = BUILD_ROOT / "install-cli.json"
+    cli_panda = _FakeProbePanda(respond=signer_replies)
+    with (
+        mock.patch("sys.argv", [
+            "signer", "install", "--execute",
+            "--payload", str(OUT / meta["authenticated_payload"]["path"]),
+            "--meta", str(meta_path), "--output", str(cli_output),
+        ]),
+        mock.patch("sys.stdout", io.StringIO()) as stdout,
+        mock.patch.dict(sys.modules, {"panda": SimpleNamespace(Panda=lambda: cli_panda)}),
+        mock.patch.object(host, "execute_ram_payload", return_value={}),
+        mock.patch.object(host, "wait_for_f181", return_value={"ok": app_live}),
+        mock.patch.object(host, "SIGNER_PROBE_TIMEOUT_SECONDS", 0.01),
+    ):
+        exit_status = host.main()
+    report = json.loads(cli_output.read_text())
+    check(
+        f"install CLI exit reflects application={app_live}, signer={signer_replies}",
+        exit_status == expected_exit
+        and (report["verdict"] == "request_signer_live_probe_pass") == (expected_exit == 0)
+        and json.loads(stdout.getvalue()) == report,
+    )
+
+
+def _source_git(repo: Path, *args: str) -> str:
+    return subprocess.check_output(
+        ["git", "-C", str(repo), *args], text=True, stderr=subprocess.STDOUT, timeout=10,
+    ).strip()
+
+
+source_root = BUILD_ROOT / "source-checkouts"
+source_origin = BUILD_ROOT / "source-origin"
+for repo, branch in ((source_root, "host-branch"), (source_origin, "dbc-branch")):
+    repo.mkdir()
+    _source_git(repo, "init", "--quiet", f"--initial-branch={branch}")
+    _source_git(
+        repo, "-c", "user.name=Signer test", "-c", "user.email=signer@example.invalid",
+        "-c", "commit.gpgsign=false", "commit", "--quiet", "--allow-empty", "-m", branch,
+    )
+source_commit = _source_git(source_origin, "rev-parse", "HEAD")
+host_commit = _source_git(source_root, "rev-parse", "HEAD")
+_source_git(
+    source_root, "-c", "protocol.file.allow=always", "submodule", "add", "--quiet",
+    str(source_origin), "opendbc_repo",
+)
+source_submodule = source_root / "opendbc_repo"
+_source_git(source_submodule, "checkout", "--quiet", "--detach")
+host_identity = host._checkout_identity(source_root)
+submodule_identity = host._checkout_identity(source_submodule)
+check(
+    "source provenance identifies an attached branch and a detached submodule independently",
+    host_identity["branch"] == "host-branch"
+    and host_identity["commit"] == host_commit
+    and submodule_identity["branch"] is None
+    and submodule_identity["commit"] == source_commit
+    and source_commit != host_commit,
+)
+uninitialized_submodule = source_root / "panda"
+uninitialized_submodule.mkdir()
+uninitialized_identity = host._checkout_identity(uninitialized_submodule)
+missing_identity = host._checkout_identity(source_root / "missing")
+check(
+    "missing or uninitialized checkouts report errors without inheriting the parent commit",
+    all(
+        identity["branch"] is None and identity["commit"] is None and identity.get("error")
+        for identity in (uninitialized_identity, missing_identity)
+    ),
+)
 
 BUILD_TEMP.cleanup()
 print("PASS TSS3 request signer behavior")

@@ -695,9 +695,18 @@ per-vehicle identity, and the registry's stock bus observations stay
 provenance. The manual-arm race requires the exact `06 50 03 00 32 01 F4 00` frame constructed by every registered target's bootloader.
 
 `install` records the application F181 once before helper activation, then
-waits for a successful signer request/response. `status`, `self-test`, and the
-benchmarks use that request/response path directly; post-activation EPS F181 or
-SID23 availability is not required.
+waits for a successful signer request/response. It emits its result JSON and
+exits with status 0 on a successful probe or 2 on a reported installation failure.
+`status`, `self-test`, and the benchmarks use that request/response path directly;
+post-activation EPS F181 or SID23 availability is not required.
+
+The install JSON's `signer_session` records Panda firmware identity, safety-mode
+readback, TX receipts, and `source_checkouts`. The latter records `path`, checked-out
+`branch`, and full `commit` for `/data/openpilot` and its `opendbc_repo` and `panda`
+submodules; `TSS3_OPENPILOT_ROOT` overrides that root. Detached HEADs have
+`branch: null` and retain their commit. Missing/uninitialized checkouts or Git
+failures record an `error` with null branch/commit without failing the signer
+probe. An uninitialized submodule never inherits the parent repository's identity.
 
 The optional `--codec compact` build is experimental and explicit. Omission
 always selects the four-frame carrier that transports all 28 application
