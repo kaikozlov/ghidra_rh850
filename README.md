@@ -3,10 +3,6 @@
 Reverse engineering and evidence tooling for Toyota/Denso RH850/P1M-E ECUs,
 Toyota diagnostic software, and TSS3 vehicle integration research.
 
-The primary analysis target is the **2026 Camry Hybrid EPS `8965F3307000`**.
-This checkout contains firmware, analysis projects, captured evidence, and
-research tooling.
-
 ## Start here
 
 | Goal | Entry point |
