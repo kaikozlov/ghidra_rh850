@@ -1,0 +1,10 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "port-jppr0-high-fails",
+  "entry": {"role": "original-reset-pin-check", "scope": "resolved-address", "address": "0x2c4"},
+  "max_instructions": 12,
+  "stop_addresses": ["0x2e4", "0x744"],
+  "gpr_fill": "0",
+  "memory": [{"address": "0xffc2000c", "hex": "1000", "evidence": "Explicit JP0 pin4-high fixture; native JPPR0 byte semantics from R01UH0585EJ0120 Table2.42, functional halfword read window recovered from original F33 instruction at0x2CA"}],
+  "checks": [{"name": "original-repeated-pin-check-enters-failure-loop", "kind": "register", "register": "pc", "equals": "0x744"}]
+}

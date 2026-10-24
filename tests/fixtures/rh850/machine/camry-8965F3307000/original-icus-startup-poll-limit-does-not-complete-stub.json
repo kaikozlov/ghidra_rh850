@@ -1,0 +1,83 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "original-icus-startup-poll-limit-does-not-complete-stub",
+  "entry": {
+    "role": "original-original-icus-startup-scripted-diagnostics",
+    "scope": "resolved-address",
+    "address": "0x883e8"
+  },
+  "max_instructions": 500000,
+  "stop_addresses": [
+    "0x10000"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "lp": "0x10000",
+    "tp": "0x23dfc"
+  },
+  "memory": [
+    {
+      "address": "0xfebf136c",
+      "hex": "e1",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffffb248",
+      "hex": "8000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffffb24a",
+      "hex": "8000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    }
+  ],
+  "checks": [
+    {
+      "name": "original-poll-limit-returns-failure",
+      "kind": "register",
+      "register": "r10",
+      "equals": "1"
+    },
+    {
+      "name": "unexpired-command-remains-busy",
+      "kind": "memory",
+      "address": "0xffc5d00c",
+      "size": 4,
+      "equals_hex": "01000000"
+    },
+    {
+      "name": "no-invented-completion",
+      "kind": "memory",
+      "address": "0xffc5d014",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "second-check-not-issued",
+      "kind": "memory",
+      "address": "0xffc5d000",
+      "size": 4,
+      "equals_hex": "00700000"
+    }
+  ],
+  "hsb_cycles_per_instruction": 1,
+  "icus_startup_stub": {
+    "evidence": "Explicit bench assumption from the reconstructed diagnostic caller contract, not a hardware capture; delays are chosen test latencies.",
+    "responses": [
+      {
+        "command": "0x7000",
+        "error_bits": "0x0",
+        "completion_hsb_cycles": 2000000
+      },
+      {
+        "command": "0x7100",
+        "error_bits": "0x800",
+        "completion_hsb_cycles": 1024
+      }
+    ]
+  },
+  "expected_termination": "stop-address"
+}

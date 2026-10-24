@@ -1,0 +1,17 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "ecm-startup-mask-rejected-inverse",
+  "entry": {"role": "original-ECM-initialization-mask-stores-with-invalid-complement-operand", "scope": "resolved-address", "address": "0x6335E"},
+  "reset": "none",
+  "max_instructions": 16,
+  "stop_addresses": ["0x63374"],
+  "gpr_fill": "0",
+  "registers": {"ep": "0xFFD62028", "r1": "0xA5", "r19": "0x1F"},
+  "memory": [{"address": "0xFFD62028", "hex": "78563412", "evidence": "Synthetic preexisting effective mask. Wrong inverse operand must leave it unchanged through all original stores."}],
+  "checks": [
+    {"name": "bad-inverse-retains-preexisting-effective-mask", "kind": "memory", "address": "0xFFD62028", "size": 4, "equals_hex": "78563412"},
+    {"name": "original-byte-load-reports-protocol-failure", "kind": "register", "register": "r1", "equals": "1"},
+    {"name": "bad-inverse-never-commits", "kind": "event-count", "operation": "ecm-protection-accepted", "equals": "0"},
+    {"name": "bad-inverse-and-unarmed-final-write-rejected", "kind": "event-count", "operation": "ecm-protection-rejected", "equals": "2"}
+  ]
+}

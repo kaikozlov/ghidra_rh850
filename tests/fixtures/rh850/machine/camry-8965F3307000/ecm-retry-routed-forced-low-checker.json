@@ -1,0 +1,29 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "ecm-retry-routed-forced-low-checker",
+  "entry": {"role": "original-retry-helper-routed-checker-held-low", "scope": "resolved-address", "address": "0x63F94"},
+  "reset": "none",
+  "max_instructions": 512,
+  "stop_addresses": ["0x6405A"],
+  "gpr_fill": "0",
+  "registers": {"sp": "0xFEBE2000"},
+  "memory": [
+    {"address": "0xFFD60010", "hex": "00000000", "evidence": "Initially low master sample with no errors."},
+    {"address": "0xFFD61010", "hex": "00000000", "evidence": "Initially low checker sample with no errors."},
+    {"address": "0xFFD6207C", "hex": "03000000", "evidence": "Documented compare masks before isolated clear helper."},
+    {"address": "0xFFC100D0", "hex": "FFF7", "evidence": "Explicit PM3_11 output; other group bits retain reset direction."},
+    {"address": "0xFFC100D4", "hex": "0008", "evidence": "Explicit PMC3_11 alternative mode."},
+    {"address": "0xFFC100E8", "hex": "0008", "evidence": "Explicit PFCAE3_11 fifth alternative; PFC and PFCE remain reset zero."},
+    {"address": "0xFFC140C4", "hex": "0008", "evidence": "Explicit PBDC3_11 loopback; PIBC remains reset zero."}
+  ],
+  "events": [
+    {"kind": "ecm-pin-drive", "after_instructions": 0, "pin": "ERROROUT", "drive": "released", "evidence": "Master external driver released."},
+    {"kind": "ecm-pin-drive", "after_instructions": 0, "pin": "ERROROUT_C", "drive": "low", "evidence": "Checker external active-low driver held despite its valid clear and appropriate routing."}
+  ],
+  "checks": [
+    {"name": "routed-checker-clear-cannot-overwrite-external-low", "kind": "memory", "address": "0xFFD61010", "size": 4, "equals_hex": "00000000"},
+    {"name": "canonical-controls-compose-PCR-alias", "kind": "memory", "address": "0xFFC120EC", "size": 4, "equals_hex": "44000200"},
+    {"name": "actual-helper-accepts-master-high-checker-low", "kind": "register", "register": "r10", "equals": "0"},
+    {"name": "both-clears-and-status-clear-accepted", "kind": "event-count", "operation": "ecm-protection-accepted", "equals": "3"}
+  ]
+}

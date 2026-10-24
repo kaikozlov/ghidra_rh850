@@ -1,0 +1,33 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "guard-peg-rejects-reserved-bits",
+  "entry": {
+    "role": "original-instruction-guard-register-and-permission-regression",
+    "scope": "resolved-address",
+    "address": "0x7a2"
+  },
+  "max_instructions": 2,
+  "stop_addresses": [
+    "0x7a4"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "ep": "0xfffee694",
+    "r1": "0x8"
+  },
+  "checks": [
+    {
+      "name": "invalid-base-not-committed",
+      "kind": "memory",
+      "address": "0xfffee694",
+      "size": 4,
+      "equals_hex": "00000000"
+    }
+  ],
+  "memory": [],
+  "expected_fault": {
+    "kind": "prohibited-register-reserved-bits",
+    "address": "0xfffee694",
+    "access": "write"
+  }
+}

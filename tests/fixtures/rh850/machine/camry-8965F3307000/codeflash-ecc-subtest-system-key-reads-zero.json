@@ -1,0 +1,35 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "codeflash-ecc-subtest-system-key-reads-zero",
+  "entry": {
+    "role": "original-instruction-retargeted-to-ecc-register",
+    "scope": "resolved-address",
+    "address": "0x7a2"
+  },
+  "reset": "none",
+  "max_instructions": 64,
+  "stop_addresses": [
+    "0x7a4"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "ep": "0xffc622f0",
+    "r1": "0x4001"
+  },
+  "memory": [],
+  "checks": [
+    {
+      "name": "effect-0xffc622f0",
+      "kind": "memory",
+      "address": "0xffc622f0",
+      "size": 4,
+      "equals_hex": "01000000"
+    },
+    {
+      "name": "original-path-reaches-stop",
+      "kind": "register",
+      "register": "pc",
+      "equals": "0x7a4"
+    }
+  ]
+}

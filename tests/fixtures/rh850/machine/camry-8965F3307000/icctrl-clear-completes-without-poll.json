@@ -1,0 +1,15 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "icctrl-clear-completes-without-poll",
+  "entry": {"role": "original-cache-clear-request-ldsr-only", "scope": "resolved-address", "address": "0x364a"},
+  "max_instructions": 1,
+  "stop_addresses": ["0x364e"],
+  "registers": {"r1": "0x00030107", "r6": "0x12345678", "PSW": "0x2f"},
+  "checks": [
+    {"name": "request-completes-at-retirement-with-no-stsr", "kind": "register", "register": "ICCTRL", "equals": "0x00030007"},
+    {"name": "ldsr-source-retains-request-bit", "kind": "register", "register": "r1", "equals": "0x00030107"},
+    {"name": "cache-completion-does-not-change-unrelated-gpr", "kind": "register", "register": "r6", "equals": "0x12345678"},
+    {"name": "cache-completion-does-not-change-flags", "kind": "register", "register": "PSW", "equals": "0x2f"},
+    {"name": "ldsr-retires-to-sequential-original-instruction", "kind": "register", "register": "pc", "equals": "0x364e"}
+  ]
+}

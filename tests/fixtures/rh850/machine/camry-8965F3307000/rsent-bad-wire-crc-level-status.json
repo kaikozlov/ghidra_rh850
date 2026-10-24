@@ -1,0 +1,125 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "rsent-bad-wire-crc-level-status",
+  "entry": {
+    "role": "original-rsent-native-spc-pulse-frame",
+    "scope": "resolved-address",
+    "address": "0x78af2"
+  },
+  "max_instructions": 512,
+  "stop_addresses": [
+    "0x10000"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "lp": "0x10000",
+    "r6": "0xFFE05020",
+    "r7": "0xF"
+  },
+  "memory": [
+    {
+      "address": "0xffe05000",
+      "hex": "4f000000",
+      "evidence": "Explicit active receiver configuration and masked IRQ inputs; no receive data, request, timestamp, or completion seeded"
+    },
+    {
+      "address": "0xffe05010",
+      "hex": "0b040000",
+      "evidence": "Explicit active receiver configuration and masked IRQ inputs; no receive data, request, timestamp, or completion seeded"
+    },
+    {
+      "address": "0xffe05014",
+      "hex": "00040005",
+      "evidence": "Explicit active receiver configuration and masked IRQ inputs; no receive data, request, timestamp, or completion seeded"
+    },
+    {
+      "address": "0xffe05018",
+      "hex": "03000000",
+      "evidence": "Explicit active receiver configuration and masked IRQ inputs; no receive data, request, timestamp, or completion seeded"
+    },
+    {
+      "address": "0xffe0501c",
+      "hex": "05000000",
+      "evidence": "Explicit active receiver configuration and masked IRQ inputs; no receive data, request, timestamp, or completion seeded"
+    },
+    {
+      "address": "0xffe05024",
+      "hex": "05000000",
+      "evidence": "Explicit active receiver configuration and masked IRQ inputs; no receive data, request, timestamp, or completion seeded"
+    },
+    {
+      "address": "0xffffb1d0",
+      "hex": "8280",
+      "evidence": "Explicit active receiver configuration and masked IRQ inputs; no receive data, request, timestamp, or completion seeded"
+    },
+    {
+      "address": "0xffffb1d2",
+      "hex": "8200",
+      "evidence": "Explicit active receiver configuration and masked IRQ inputs; no receive data, request, timestamp, or completion seeded"
+    }
+  ],
+  "checks": [
+    {
+      "name": "crc-error-latched",
+      "kind": "memory",
+      "address": "0xffe05028",
+      "size": 4,
+      "equals_hex": "02000000"
+    },
+    {
+      "name": "invalid-frame-never-published",
+      "kind": "memory",
+      "address": "0xffe05044",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "status-irq-high-despite-mask",
+      "kind": "memory",
+      "address": "0xffffb1d0",
+      "size": 2,
+      "equals_hex": "8290"
+    },
+    {
+      "name": "no-receive-edge",
+      "kind": "memory",
+      "address": "0xffffb1d2",
+      "size": 2,
+      "equals_hex": "8200"
+    },
+    {
+      "name": "no-frame-committed",
+      "kind": "event-count",
+      "operation": "rsent-frame-complete",
+      "equals": "0"
+    }
+  ],
+  "events": [
+    {
+      "kind": "rsent-frame",
+      "unit": 0,
+      "after_spc_triggers": 1,
+      "delay_hsb_cycles": 2000,
+      "pulse_samples": [
+        1344,
+        288,
+        312,
+        336,
+        360,
+        384,
+        408,
+        432,
+        360
+      ],
+      "evidence": "Explicit synthetic invalid frame: only CRC interval changed from2 to3"
+    },
+    {
+      "kind": "clock",
+      "after_instructions": 2,
+      "p_bus_cycles": 23120,
+      "evidence": "Explicit CLK_HSB stimulus, not inferred CPU timing"
+    }
+  ]
+}

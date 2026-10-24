@@ -1,0 +1,12 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "noise-clock-nontimer-source-prohibited",
+  "entry": {"role": "original-word-store-at-DNFCKS100C", "scope": "resolved-address", "address": "0x1672"},
+  "reset": "none",
+  "max_instructions": 1,
+  "stop_addresses": ["0x1674"],
+  "gpr_fill": "0",
+  "registers": {"ep": "0xfff89120", "r1": "6"},
+  "checks": [{"name": "prohibited-source-does-not-assert-activity", "kind": "memory", "address": "0xfff89124", "size": 4, "equals_hex": "03000000"}],
+  "expected_fault": {"kind": "prohibited-clock-source", "address": "0xfff89120", "access": "write"}
+}

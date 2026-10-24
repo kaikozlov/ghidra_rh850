@@ -1,0 +1,23 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "intc-csih-edge-acceptance-and-real-eiret",
+  "entry": {"role": "original-instruction-interrupted-by-table-vectored-csih-source", "scope": "resolved-address", "address": "0x62e4c"},
+  "max_instructions": 2,
+  "stop_addresses": ["0x62e4e"],
+  "gpr_fill": "0",
+  "registers": {"PSW": "0", "RBASE": "0", "INTBP": "0xfebf0000", "ep": "0xfffeea12", "r7": "0xcf"},
+  "memory": [
+    {"address": "0xffffb0c6", "hex": "4400", "evidence": "Explicit EIC99 priority4, table vector, unmasked."},
+    {"address": "0xfebf018c", "hex": "72130700", "evidence": "Explicit vector to the original EIRET instruction at71372; no firmware bytes modified."}
+  ],
+  "events": [{"kind": "interrupt", "channel": 99, "after_instructions": 0, "evidence": "Explicit CSIH2 receive edge pulse through the shared INTC request interface."}],
+  "checks": [
+    {"name": "edge-request-clears-on-acceptance", "kind": "memory", "address": "0xffffb0c6", "size": 2, "equals_hex": "4400"},
+    {"name": "correct-source-code", "kind": "register", "register": "EIIC", "equals": "0x1063"},
+    {"name": "actual-eiret-resumes-and-retires-foreground-store", "kind": "register", "register": "pc", "equals": "0x62e4e"},
+    {"name": "interrupt-return-address", "kind": "register", "register": "EIPC", "equals": "0x62e4c"},
+    {"name": "automatic-priority-return-clears-ispr", "kind": "register", "register": "ISPR", "equals": "0"},
+    {"name": "entry-once", "kind": "event-count", "operation": "interrupt-enter", "equals": "1"},
+    {"name": "real-return-once", "kind": "event-count", "operation": "interrupt-return", "equals": "1"}
+  ]
+}

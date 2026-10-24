@@ -1,0 +1,54 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "guard-gram-original-configuration",
+  "entry": {
+    "role": "original-instruction-guard-register-and-permission-regression",
+    "scope": "resolved-address",
+    "address": "0x657fa"
+  },
+  "max_instructions": 128,
+  "stop_addresses": [
+    "0x10000"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "lp": "0x10000"
+  },
+  "checks": [
+    {
+      "name": "first-region-enabled-locked",
+      "kind": "memory",
+      "address": "0xffc49000",
+      "size": 4,
+      "equals_hex": "10feffc7"
+    },
+    {
+      "name": "first-region-spid2-and3",
+      "kind": "memory",
+      "address": "0xffc49004",
+      "size": 4,
+      "equals_hex": "0c000000"
+    },
+    {
+      "name": "compare-address-bit20",
+      "kind": "memory",
+      "address": "0xffc4900c",
+      "size": 4,
+      "equals_hex": "00001000"
+    },
+    {
+      "name": "last-region-disabled-locked",
+      "kind": "memory",
+      "address": "0xffc49070",
+      "size": 4,
+      "equals_hex": "10feff87"
+    },
+    {
+      "name": "last-region-no-spids",
+      "kind": "memory",
+      "address": "0xffc49074",
+      "size": 4,
+      "equals_hex": "00000000"
+    }
+  ]
+}

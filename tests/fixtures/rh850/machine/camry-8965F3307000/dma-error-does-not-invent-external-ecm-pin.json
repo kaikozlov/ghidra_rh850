@@ -1,0 +1,211 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "dma-error-does-not-invent-external-ecm-pin",
+  "entry": {
+    "role": "original-load-u32-after-native-dma-guard-error",
+    "scope": "resolved-address",
+    "address": "0x78ae0"
+  },
+  "max_instructions": 2000,
+  "stop_addresses": [
+    "0x10000"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "lp": "0x10000",
+    "r6": "0xffd60010"
+  },
+  "memory": [
+    {
+      "address": "0xffe05000",
+      "hex": "4f000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffe05010",
+      "hex": "0b040000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffe05014",
+      "hex": "00040005",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffe05018",
+      "hex": "01000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffe0501c",
+      "hex": "05000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffe05024",
+      "hex": "05000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffffb1d0",
+      "hex": "8280",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffffb1d2",
+      "hex": "8200",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff8520",
+      "hex": "01000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff8500",
+      "hex": "3050e0ff",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff8504",
+      "hex": "f890effe",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff8508",
+      "hex": "0c000600",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff850c",
+      "hex": "0a2e0004",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff8510",
+      "hex": "3050e0ff",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff8514",
+      "hex": "f890effe",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff8518",
+      "hex": "0c000600",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff851c",
+      "hex": "00000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff8530",
+      "hex": "ef000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff84e0",
+      "hex": "01000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff84c0",
+      "hex": "50120300",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff84c4",
+      "hex": "2050e0ff",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff84c8",
+      "hex": "01000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff84cc",
+      "hex": "48260004",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff84d0",
+      "hex": "50120300",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff84d4",
+      "hex": "2050e0ff",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff84d8",
+      "hex": "01000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff84dc",
+      "hex": "00000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff84f0",
+      "hex": "03000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffe50090",
+      "hex": "0000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffe50000",
+      "hex": "ffffffff",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffe50010",
+      "hex": "00000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffe50050",
+      "hex": "01",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    }
+  ],
+  "checks": [
+    {
+      "name": "dma-write-error-completes-its-cycle",
+      "kind": "memory",
+      "address": "0xffff84e4",
+      "size": 4,
+      "equals_hex": "90080000"
+    },
+    {
+      "name": "dma-error-channel-captured",
+      "kind": "memory",
+      "address": "0xffff8020",
+      "size": 4,
+      "equals_hex": "08000000"
+    }
+  ],
+  "events": [
+    {
+      "kind": "clock",
+      "after_instructions": 0,
+      "p_bus_cycles": 10,
+      "evidence": "Explicit CLK_HSB stimulus, not inferred CPU timing"
+    }
+  ],
+  "expected_fault": {
+    "kind": "missing-reset-input",
+    "address": "0xffd60010",
+    "access": "read"
+  }
+}

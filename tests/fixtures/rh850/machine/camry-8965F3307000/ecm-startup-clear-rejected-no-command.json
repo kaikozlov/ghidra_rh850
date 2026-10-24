@@ -1,0 +1,22 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "ecm-startup-clear-rejected-no-command",
+  "entry": {"role": "original-startup-three-ECM-status-clear-stores-without-command", "scope": "resolved-address", "address": "0x3F8"},
+  "reset": "none",
+  "max_instructions": 8,
+  "stop_addresses": ["0x402"],
+  "gpr_fill": "0",
+  "registers": {"r10": "0xFFD62040", "ep": "0xFFD6203C", "r11": "0x08000000", "r12": "0xF7FFFFFF"},
+  "memory": [
+    {"address": "0xFFD60010", "hex": "04000088", "evidence": "Synthetic preexisting master latches and explicit high ERROROUT input."},
+    {"address": "0xFFD61010", "hex": "20000008", "evidence": "Synthetic preexisting checker latches and explicit low ERROROUT_C input."},
+    {"address": "0xFFD62040", "hex": "a5000000", "evidence": "A preloaded command-register byte pattern is not an executed unlock command and must not authorize the stores."}
+  ],
+  "checks": [
+    {"name": "original-ldw-observes-protection-failure-not-fixed-zero", "kind": "register", "register": "r11", "equals": "1"},
+    {"name": "failed-protection-retains-master-status-and-pin", "kind": "memory", "address": "0xFFD60010", "size": 4, "equals_hex": "04000088"},
+    {"name": "failed-protection-retains-checker-status-and-pin", "kind": "memory", "address": "0xFFD61010", "size": 4, "equals_hex": "20000008"},
+    {"name": "no-failed-store-commits", "kind": "event-count", "operation": "ecm-protection-accepted", "equals": "0"},
+    {"name": "all-three-unarmed-stores-rejected", "kind": "event-count", "operation": "ecm-protection-rejected", "equals": "3"}
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "clock3-divisor-1023",
+  "entry": {"role": "original-ecc-word-store-and-readback", "scope": "resolved-address", "address": "0x7e0"},
+  "max_instructions": 4,
+  "stop_addresses": ["0x7e4"],
+  "gpr_fill": "0",
+  "registers": {"ep": "0xfff88818", "r1": "0x3ff"},
+  "checks": [
+    {"name": "all-ten-divisor-bits-read-back", "kind": "register", "register": "r1", "equals": "0x3ff"},
+    {"name": "maximum-divisor-starts-synchronized-output", "kind": "memory", "address": "0xfff8881c", "size": 4, "equals_hex": "03000000"}
+  ]
+}

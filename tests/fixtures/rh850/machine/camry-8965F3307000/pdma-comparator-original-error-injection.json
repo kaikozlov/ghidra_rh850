@@ -1,0 +1,65 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "pdma-comparator-original-error-injection",
+  "entry": {
+    "role": "original-PDMA-comparator-error-injection",
+    "scope": "resolved-address",
+    "address": "0x63F5E"
+  },
+  "reset": "power-on",
+  "max_instructions": 16,
+  "stop_addresses": [
+    "0x10000"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "lp": "0x10000"
+  },
+  "memory": [
+    {
+      "address": "0xFFFEEA10",
+      "hex": "C000",
+      "evidence": "Explicit EIC8 masked/table-vector state set by the original caller at 0x6413C before comparator injection."
+    },
+    {
+      "address": "0xFFD62004",
+      "hex": "04000000",
+      "evidence": "Explicit initial ECM source2 maskable-interrupt enable; R01UH0585EJ0120 Table32.23."
+    },
+    {
+      "address": "0xFFD62028",
+      "hex": "FFFFFFFF",
+      "evidence": "Explicit initial error-output mask; status and interrupt reporting remain independent."
+    }
+  ],
+  "checks": [
+    {
+      "name": "write-key-does-not-read-back",
+      "kind": "memory",
+      "address": "0xFFC4CA00",
+      "size": 4,
+      "equals_hex": "7F7FFF3F"
+    },
+    {
+      "name": "PFSS-error-latched-in-master",
+      "kind": "memory",
+      "address": "0xFFD60008",
+      "size": 4,
+      "equals_hex": "04000000"
+    },
+    {
+      "name": "PFSS-error-latched-in-checker",
+      "kind": "memory",
+      "address": "0xFFD61008",
+      "size": 4,
+      "equals_hex": "04000000"
+    },
+    {
+      "name": "ECM-source2-requests-masked-EIC8",
+      "kind": "memory",
+      "address": "0xFFFEEA10",
+      "size": 2,
+      "equals_hex": "C010"
+    }
+  ]
+}

@@ -141,6 +141,11 @@ def _model() -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
             }
             for property_name in (
                 "trigger",
+                "writable_mask",
+                "read_value",
+                "read_input",
+                "sync_mask",
+                "active_mask",
                 "status_register",
                 "secondary_status_register",
                 "access_register",
@@ -151,17 +156,11 @@ def _model() -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
                 "emulation_register",
                 "enable_register",
                 "secondary_enable_register",
-                "reload_prefix",
-                "counter_prefix",
                 "payload_address",
                 "completion_value",
-                "channel_count",
                 "interrupt_channel",
                 "interrupt_register",
-                "interrupt_register_prefix",
                 "interrupt_channel_base",
-                "mode_prefix",
-                "prescaler_register",
                 "control_register",
                 "pointer_register",
                 "window_register",
@@ -169,10 +168,28 @@ def _model() -> tuple[dict[str, Any], list[dict[str, Any]], dict[str, Any]]:
                 "global_control_register",
                 "fifo_index",
                 "fifo_channel",
+                "skipped_value",
+                "reset_mask",
+                "protection_mask",
+                "protection_value",
             ):
                 value = node.get_property(property_name)
                 if value is not None:
                     row[property_name] = value
+            for property_name in ("allowed_values", "status_masks", "secondary_status_masks"):
+                value = node.get_property(property_name)
+                if value is not None:
+                    row[property_name] = [int(item.strip(), 0) for item in str(value).split(",")]
+            for property_name in ("reset_classes", "capture_registers"):
+                value = node.get_property(property_name)
+                if value is not None:
+                    row[property_name] = [item.strip() for item in str(value).split(",")]
+            if row.get("read_input") and (
+                row["access"] != "w" or "read_value" in row
+            ):
+                raise RuntimeError(
+                    f"{node.inst_name}: read_input requires write-only access and no constant read_value"
+                )
             registers.append(row)
     regions.sort(key=lambda row: row["start"])
     registers.sort(key=lambda row: row["address"])

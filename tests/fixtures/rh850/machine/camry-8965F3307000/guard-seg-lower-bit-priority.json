@@ -1,0 +1,34 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "guard-seg-lower-bit-priority",
+  "entry": {
+    "role": "original-instruction-guard-register-and-permission-regression",
+    "scope": "resolved-address",
+    "address": "0x71600"
+  },
+  "max_instructions": 2,
+  "stop_addresses": [
+    "0x10"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "r12": "0xfffee980",
+    "r11": "0x210",
+    "RBASE": "0"
+  },
+  "checks": [
+    {
+      "name": "lower-factor-number-wins",
+      "kind": "register",
+      "register": "FEIC",
+      "equals": "0x14"
+    }
+  ],
+  "memory": [
+    {
+      "address": "0xfffee982",
+      "hex": "1002",
+      "evidence": "Explicit guard state exercising P1M-E documented configuration/permission behavior, not a firmware patch"
+    }
+  ]
+}

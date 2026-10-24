@@ -1,0 +1,44 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "guard-seg-address-locked-by-enabled-error",
+  "entry": {
+    "role": "original-instruction-guard-register-and-permission-regression",
+    "scope": "resolved-address",
+    "address": "0x7a2"
+  },
+  "max_instructions": 1,
+  "stop_addresses": [
+    "0x7a4"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "ep": "0xfffee988",
+    "r1": "0"
+  },
+  "checks": [
+    {
+      "name": "first-enabled-error-address-retained",
+      "kind": "memory",
+      "address": "0xfffee988",
+      "size": 4,
+      "equals_hex": "bebafeca"
+    }
+  ],
+  "memory": [
+    {
+      "address": "0xfffee982",
+      "hex": "0002",
+      "evidence": "Explicit guard state exercising P1M-E documented configuration/permission behavior, not a firmware patch"
+    },
+    {
+      "address": "0xfffee980",
+      "hex": "0002",
+      "evidence": "Explicit guard state exercising P1M-E documented configuration/permission behavior, not a firmware patch"
+    },
+    {
+      "address": "0xfffee988",
+      "hex": "bebafeca",
+      "evidence": "Explicit guard state exercising P1M-E documented configuration/permission behavior, not a firmware patch"
+    }
+  ]
+}

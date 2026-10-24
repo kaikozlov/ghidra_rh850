@@ -1,0 +1,15 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "localram-ecc-key-readback",
+  "entry": {
+    "role": "original-localram-ecc-enable-loop",
+    "scope": "resolved-address",
+    "address": "0x7d6"
+  },
+  "max_instructions": 32,
+  "stop_addresses": ["0x7ec"],
+  "gpr_fill": "0",
+  "checks": [
+    {"name": "protection-key-reads-zero-and-ecc-stays-enabled", "kind": "register", "register": "r1", "equals": "0"}
+  ]
+}

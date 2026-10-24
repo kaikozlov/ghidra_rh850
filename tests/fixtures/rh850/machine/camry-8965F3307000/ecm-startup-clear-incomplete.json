@@ -1,0 +1,20 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "ecm-startup-clear-incomplete",
+  "entry": {"role": "original-startup-ECM-command-and-first-two-protected-writes", "scope": "resolved-address", "address": "0x3D8"},
+  "reset": "none",
+  "max_instructions": 16,
+  "stop_addresses": ["0x3FC"],
+  "gpr_fill": "0",
+  "memory": [
+    {"address": "0xFFD60010", "hex": "04000088", "evidence": "Synthetic preexisting error latches and explicit high ERROROUT input; not a hardware capture or BIST result."},
+    {"address": "0xFFD61010", "hex": "20000008", "evidence": "Synthetic preexisting error latches and explicit low ERROROUT_C input."},
+    {"address": "0xFFD62044", "hex": "01", "evidence": "Synthetic previous protection failure must remain until a complete valid transaction."}
+  ],
+  "checks": [
+    {"name": "first-two-stores-cannot-clear-master-latches", "kind": "memory", "address": "0xFFD60010", "size": 4, "equals_hex": "04000088"},
+    {"name": "first-two-stores-cannot-clear-checker-latches", "kind": "memory", "address": "0xFFD61010", "size": 4, "equals_hex": "20000008"},
+    {"name": "command-and-inverse-do-not-report-new-success", "kind": "memory", "address": "0xFFD62044", "size": 1, "equals_hex": "01"},
+    {"name": "no-premature-commit", "kind": "event-count", "operation": "ecm-protection-accepted", "equals": "0"}
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "dataflash-read-response-rejects-misaligned-load",
+  "entry": {"role": "original-word-load-with-misaligned-explicit-response-address", "scope": "resolved-address", "address": "0x7e2"},
+  "reset": "none",
+  "max_instructions": 1,
+  "stop_addresses": ["0x7e4"],
+  "gpr_fill": "0",
+  "registers": {"ep": "0xffc5b009", "MCTL": "0"},
+  "events": [{"kind": "register-input", "after_instructions": 0, "register": "DFERSTC", "value": "0xa5c39e72", "evidence": "Explicit bus response does not waive CPU alignment or declared register access rules."}],
+  "expected_fault": {"kind": "misaligned-read", "address": "0xffc5b009", "access": "read"},
+  "checks": [{"name": "fault-stays-at-real-word-load", "kind": "register", "register": "pc", "equals": "0x7e2"}]
+}

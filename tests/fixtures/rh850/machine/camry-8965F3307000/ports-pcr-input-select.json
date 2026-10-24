@@ -1,0 +1,19 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "ports-pcr-input-select",
+  "entry": {"role": "original-sst-word-to-PCR4_0", "scope": "resolved-address", "address": "0x1672"},
+  "reset": "none",
+  "max_instructions": 1,
+  "stop_addresses": ["0x1674"],
+  "gpr_fill": "0",
+  "registers": {"ep": "0xffc12100", "r1": "0x004f1177"},
+  "memory": [
+    {"address": "0xffc1010c", "hex": "0100", "evidence": "Explicit PPR4 input bit0; the PCR PPR mirror is read-only."}
+  ],
+  "checks": [
+    {"name": "input-characteristic-selection-reaches-PISA4", "kind": "memory", "address": "0xffc1412c", "size": 2, "equals_hex": "0100"},
+    {"name": "per-pin-mux-reaches-correct-port-group", "kind": "memory", "address": "0xffc10114", "size": 2, "equals_hex": "0100"},
+    {"name": "PCR-retains-input-mirror-with-writable-fields", "kind": "memory", "address": "0xffc12100", "size": 4, "equals_hex": "77114f00"},
+    {"name": "neighbor-pin-configuration-is-unchanged", "kind": "memory", "address": "0xffc12104", "size": 4, "equals_hex": "10000000"}
+  ]
+}

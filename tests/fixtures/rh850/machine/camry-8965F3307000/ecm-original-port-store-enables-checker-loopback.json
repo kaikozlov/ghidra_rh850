@@ -1,0 +1,27 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "ecm-original-port-store-enables-checker-loopback",
+  "entry": {"role": "original-SST-W-helper-then-original-ECM-clear-helper", "scope": "resolved-address", "address": "0x1672"},
+  "reset": "none",
+  "max_instructions": 512,
+  "stop_addresses": ["0x6405A"],
+  "gpr_fill": "0",
+  "registers": {"sp": "0xFEBE2000", "ep": "0xFFC120EC", "r1": "0x20044", "lp": "0x63F94"},
+  "memory": [
+    {"address": "0xFFD60010", "hex": "00000000", "evidence": "Explicit initial master low sample; no active errors."},
+    {"address": "0xFFD61010", "hex": "00000000", "evidence": "Explicit initial checker low sample; route is NOT preconfigured in memory."},
+    {"address": "0xFFD6207C", "hex": "03000000", "evidence": "Documented compare masks before isolated protected-clear helper."}
+  ],
+  "events": [
+    {"kind": "ecm-pin-drive", "after_instructions": 0, "pin": "ERROROUT", "drive": "released", "evidence": "Master external driver released."},
+    {"kind": "ecm-pin-drive", "after_instructions": 0, "pin": "ERROROUT_C", "drive": "released", "evidence": "Checker external driver released; original SST.W must configure output and loopback before ECLR can be observed."}
+  ],
+  "checks": [
+    {"name": "real-original-port-write-updates-PCR-alias", "kind": "memory", "address": "0xFFC120EC", "size": 4, "equals_hex": "44000200"},
+    {"name": "real-original-port-write-updates-direction", "kind": "memory", "address": "0xFFC100D0", "size": 2, "equals_hex": "FFF7"},
+    {"name": "real-original-port-write-updates-loopback", "kind": "memory", "address": "0xFFC140C4", "size": 2, "equals_hex": "0008"},
+    {"name": "checker-rises-only-after-original-clear", "kind": "memory", "address": "0xFFD61010", "size": 4, "equals_hex": "00000080"},
+    {"name": "original-helper-reports-its-real-checker-high-failure", "kind": "register", "register": "r10", "equals": "0x11"},
+    {"name": "real-clear-sequences-committed", "kind": "event-count", "operation": "ecm-protection-accepted", "equals": "3"}
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "ecm-startup-clear-source0-accepted",
+  "entry": {"role": "original-ECM-source0-bit2-clear-command-stores-and-byte-status-read", "scope": "resolved-address", "address": "0x63F46"},
+  "reset": "none",
+  "max_instructions": 8,
+  "stop_addresses": ["0x63F56"],
+  "gpr_fill": "0",
+  "registers": {"ep": "0xFFD62034", "r1": "0xA5", "r19": "0xFFFFFFFB"},
+  "memory": [
+    {"address": "0xFFD60008", "hex": "25000000", "evidence": "Synthetic master error latches bits0,2,5 for a software-clear transaction, not a hardware event claim."},
+    {"address": "0xFFD61008", "hex": "44000000", "evidence": "Synthetic checker error latches bits2,6; common clear must affect both channels independently."}
+  ],
+  "checks": [
+    {"name": "source0-master-clears-only-bit2", "kind": "memory", "address": "0xFFD60008", "size": 4, "equals_hex": "21000000"},
+    {"name": "source0-checker-clears-only-bit2", "kind": "memory", "address": "0xFFD61008", "size": 4, "equals_hex": "40000000"},
+    {"name": "original-byte-read-confirms-clear-sequence-success", "kind": "register", "register": "r1", "equals": "0"},
+    {"name": "one-source0-clear-committed", "kind": "event-count", "operation": "ecm-protection-accepted", "equals": "1"}
+  ]
+}

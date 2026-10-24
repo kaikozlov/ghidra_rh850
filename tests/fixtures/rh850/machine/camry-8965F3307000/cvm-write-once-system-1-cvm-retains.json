@@ -1,0 +1,94 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "cvm-write-once-system-1-cvm-retains",
+  "entry": {
+    "role": "original-harmless-repeated-byte-stores-from-ECM-sequence-retargeted-to-CVMDEW",
+    "scope": "resolved-address",
+    "address": "0x63592"
+  },
+  "reset": "none",
+  "max_instructions": 4,
+  "stop_addresses": [
+    "0x6359a"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "ep": "0xfff82c18",
+    "r1": "0xb4",
+    "r19": "0x08"
+  },
+  "memory": [
+    {
+      "address": "0xfff82c00",
+      "hex": "83",
+      "evidence": "Synthetic explicit CVM state for isolated digital reset semantics; not a voltage or diagnostic success capture. R01UH0585EJ0120 Tables10.3-10.10."
+    },
+    {
+      "address": "0xfff82c0c",
+      "hex": "01",
+      "evidence": "Synthetic explicit CVM state for isolated digital reset semantics; not a voltage or diagnostic success capture. R01UH0585EJ0120 Tables10.3-10.10."
+    },
+    {
+      "address": "0xfff82c10",
+      "hex": "0c",
+      "evidence": "Synthetic explicit CVM state for isolated digital reset semantics; not a voltage or diagnostic success capture. R01UH0585EJ0120 Tables10.3-10.10."
+    },
+    {
+      "address": "0xfff82c14",
+      "hex": "01",
+      "evidence": "Synthetic explicit CVM state for isolated digital reset semantics; not a voltage or diagnostic success capture. R01UH0585EJ0120 Tables10.3-10.10."
+    }
+  ],
+  "events": [
+    {
+      "kind": "peripheral-reset",
+      "after_instructions": 1,
+      "reset_class": "system-1-cvm",
+      "evidence": "Explicit isolated device reset boundary after the first original byte store; CPU execution is intentionally unchanged. Synthetic explicit CVM state for isolated digital reset semantics; not a voltage or diagnostic success capture. R01UH0585EJ0120 Tables10.3-10.10."
+    }
+  ],
+  "checks": [
+    {
+      "name": "enable-latch-ignores-both-later-writes",
+      "kind": "memory",
+      "address": "0xfff82c04",
+      "size": 1,
+      "equals_hex": "b7"
+    },
+    {
+      "name": "write-command-never-stores-value",
+      "kind": "memory",
+      "address": "0xfff82c1c",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "factors-reset-only-on-POR",
+      "kind": "memory",
+      "address": "0xfff82c00",
+      "size": 1,
+      "equals_hex": "83"
+    },
+    {
+      "name": "output-mask-reset-category",
+      "kind": "memory",
+      "address": "0xfff82c0c",
+      "size": 1,
+      "equals_hex": "01"
+    },
+    {
+      "name": "diagnostic-reset-category",
+      "kind": "memory",
+      "address": "0xfff82c10",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "external-pin-level-not-reset",
+      "kind": "memory",
+      "address": "0xfff82c14",
+      "size": 1,
+      "equals_hex": "01"
+    }
+  ]
+}

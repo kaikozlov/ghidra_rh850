@@ -1,0 +1,13 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "intc-edge-halfword-reserved-fields-read-reset",
+  "entry": {"role": "original-halfword-store-retargeted-to-eic", "scope": "resolved-address", "address": "0x62e4c"},
+  "max_instructions": 1,
+  "stop_addresses": ["0x62e4e"],
+  "gpr_fill": "0",
+  "registers": {"ep": "0xffffb0c6", "r7": "0xffff"},
+  "checks": [
+    {"name": "edge-type-and-reserved-bits-fixed-but-eirf-writable", "kind": "memory", "address": "0xffffb0c6", "size": 2, "equals_hex": "cf10"},
+    {"name": "store-retires-without-reserved-bit-exception", "kind": "register", "register": "pc", "equals": "0x62e4e"}
+  ]
+}

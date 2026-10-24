@@ -1,0 +1,107 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "dma-PEG-overlap-permissions-are-union",
+  "entry": {
+    "role": "original-dma-PEG-overlap-permissions-are-union",
+    "scope": "resolved-address",
+    "address": "0x607f8"
+  },
+  "max_instructions": 16,
+  "stop_addresses": [],
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "lp": "0x619be"
+  },
+  "memory": [
+    {
+      "address": "0xffff8000",
+      "hex": "01000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff8400",
+      "hex": "0010befe",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff8404",
+      "hex": "0081effe",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff8408",
+      "hex": "01000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff840c",
+      "hex": "08000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff8420",
+      "hex": "01000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff8424",
+      "hex": "01000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xfebe1000",
+      "hex": "b6a53412",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xfffee680",
+      "hex": "00100000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xfffee684",
+      "hex": "0300befe",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xfffee688",
+      "hex": "08000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xfffee690",
+      "hex": "00100000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xfffee694",
+      "hex": "0300befe",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xfffee698",
+      "hex": "04000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    }
+  ],
+  "checks": [
+    {
+      "name": "one-overlapping-region-grants-read",
+      "kind": "memory",
+      "address": "0xfeef8100",
+      "size": 4,
+      "equals_hex": "b6a53412"
+    },
+    {
+      "name": "no-PEG-violation",
+      "kind": "memory",
+      "address": "0xffc4a204",
+      "size": 4,
+      "equals_hex": "00000000"
+    }
+  ],
+  "expected_termination": "instruction-budget",
+  "hsb_cycles_per_instruction": 1
+}

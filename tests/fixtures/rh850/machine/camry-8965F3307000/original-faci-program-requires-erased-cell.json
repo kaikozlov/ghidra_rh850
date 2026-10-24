@@ -1,0 +1,91 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "original-faci-program-requires-erased-cell",
+  "entry": {
+    "role": "original-faci-program-halfwords",
+    "scope": "resolved-address",
+    "address": "0x78e2a"
+  },
+  "max_instructions": 512,
+  "stop_addresses": [],
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "lp": "0x619be",
+    "r6": "0xfebe2200",
+    "r7": "0x5000",
+    "r8": "4"
+  },
+  "memory": [
+    {
+      "address": "0xffa10084",
+      "hex": "8000",
+      "evidence": "Explicit permitted DataFlash operation precondition and retained previous blank-check result"
+    },
+    {
+      "address": "0xfff8a430",
+      "hex": "01000000",
+      "evidence": "Explicit permitted DataFlash operation precondition and retained previous blank-check result"
+    },
+    {
+      "address": "0xfff82410",
+      "hex": "01000000",
+      "evidence": "Explicit permitted DataFlash operation precondition and retained previous blank-check result"
+    },
+    {
+      "address": "0xffa100d4",
+      "hex": "01",
+      "evidence": "Explicit permitted DataFlash operation precondition and retained previous blank-check result"
+    },
+    {
+      "address": "0xffa100d8",
+      "hex": "34120000",
+      "evidence": "Explicit permitted DataFlash operation precondition and retained previous blank-check result"
+    },
+    {
+      "address": "0xffa100e4",
+      "hex": "2800",
+      "evidence": "Explicit40MHzFCU notification as configured by the original driver; timing uses primary manual Table37.14"
+    },
+    {
+      "address": "0xffa10104",
+      "hex": "3000",
+      "evidence": "Explicit normal ECC encoding/verification, matching native A630 setup"
+    },
+    {
+      "address": "0xfebe2200",
+      "hex": "d0e8b350",
+      "evidence": "Synthetic program payload deliberately contains command-like bytes; it is data, not FACI opcodes"
+    }
+  ],
+  "checks": [
+    {
+      "name": "native-FRDY-transition",
+      "kind": "memory",
+      "address": "0xffa10080",
+      "size": 4,
+      "equals_hex": "00800000"
+    },
+    {
+      "name": "faci-completion-count",
+      "kind": "event-count",
+      "operation": "faci-completion",
+      "equals": "0"
+    }
+  ],
+  "dataflash_cells": [
+    {
+      "address": "0xff205000",
+      "size": 4,
+      "state": "programmed",
+      "evidence": "Explicit physical-cell precondition independent of the registered captured payload"
+    }
+  ],
+  "events": [],
+  "expected_fault": {
+    "kind": "prohibited-dataflash-overwrite",
+    "address": "0xff205000",
+    "access": "device"
+  }
+}

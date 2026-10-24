@@ -1,0 +1,25 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "ecm-original-clear-return-then-master-set",
+  "entry": {"role": "original-clear-helper-return-chained-to-original-master-ESET", "scope": "resolved-address", "address": "0x63F94"},
+  "reset": "none",
+  "max_instructions": 512,
+  "stop_addresses": ["0x64238"],
+  "gpr_fill": "0",
+  "registers": {"sp": "0xFEBE2000", "lp": "0x6420E"},
+  "memory": [
+    {"address": "0xFFD60010", "hex": "00000000", "evidence": "Explicit initially-low master feedback with no active errors."},
+    {"address": "0xFFD61010", "hex": "00000000", "evidence": "Explicit unrouted checker low sample."},
+    {"address": "0xFFD6207C", "hex": "03000000", "evidence": "Documented compare masks before isolated protected operations."}
+  ],
+  "events": [
+    {"kind": "ecm-pin-drive", "after_instructions": 0, "pin": "ERROROUT", "drive": "released", "evidence": "External master line remains released through both original ECLR and ESET sequences."}
+  ],
+  "checks": [
+    {"name": "original-helper-first-observed-master-high", "kind": "register", "register": "r10", "equals": "0"},
+    {"name": "original-return-reaches-completed-ESET-boundary", "kind": "register", "register": "pc", "equals": "0x64238"},
+    {"name": "later-protected-ESET-reasserts-low-and-latches-source30", "kind": "memory", "address": "0xFFD60010", "size": 4, "equals_hex": "00000040"},
+    {"name": "three-helper-effects-then-one-protected-set", "kind": "event-count", "operation": "ecm-protection-accepted", "equals": "4"},
+    {"name": "two-clears-and-one-set-request", "kind": "event-count", "operation": "ecm-output-request", "equals": "3"}
+  ]
+}

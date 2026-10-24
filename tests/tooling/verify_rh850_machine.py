@@ -11,6 +11,7 @@ from pathlib import Path
 import tools.targets.tss3.builders.build_tss3_request_signer as signer_builder
 from exploit.ram_runtime.target_profiles import supported_targets, target_spec
 from tools import REPO_ROOT
+from tools.emulation.p1me_machine import load_scenario
 from tools.targets.tss3.request_signer_machine import verify_request_signer_target
 
 FIXTURE_ROOT = REPO_ROOT / "tests/fixtures/rh850/machine"
@@ -67,6 +68,9 @@ def check_exact_scenarios(output_root: Path) -> None:
             expected_status = (
                 "verified-expected-fault"
                 if scenario.get("expected_fault") is not None
+                else "verified-stubbed-execution"
+                if scenario.get("icus_startup_stub") is not None
+                or scenario.get("dma_master_rewrite_assumption") is not None
                 else "verified-local-execution"
             )
             if report["status"] != expected_status or not report["passed"]:
@@ -305,6 +309,93 @@ def check_memory_equality_failure(output_root: Path) -> None:
     print("PASS memory-equal detects different initialized bytes")
 
 
+def check_expected_termination_boundaries(output_root: Path) -> None:
+    """A declared budget end must not hide a fault, early stop, or failed check."""
+    output_dir = output_root / "termination-boundaries"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    fixtures = FIXTURE_ROOT / "camry-8965F3307000"
+    cases = [
+        ("undeclared-budget", "csih-reset-cancels-relative-completion", "instruction-budget"),
+        ("failed-check", "csih-reset-cancels-relative-completion", "instruction-budget"),
+        ("early-stop", "csih-transmit-relative-frame-complete-and-poll", "stop-address"),
+        ("unexpected-fault", "csih-loopback-mode-is-explicit-boundary", "unexpected-fault"),
+    ]
+    paths = []
+    for name, fixture, _ in cases:
+        scenario = json.loads((fixtures / f"{fixture}.json").read_text(encoding="utf-8"))
+        scenario["name"] = f"termination-{name}"
+        scenario.pop("expected_fault", None)
+        if name == "undeclared-budget":
+            scenario.pop("expected_termination")
+        else:
+            scenario["expected_termination"] = "instruction-budget"
+        if name == "failed-check":
+            scenario["checks"][0]["equals"] = "0"
+        path = output_dir / f"{name}.json"
+        path.write_text(json.dumps(scenario, indent=2) + "\n", encoding="utf-8")
+        paths.append(path)
+    run([
+        str(REPO_ROOT / "tools/rh850"), "test", "firmware", "camry-8965F3307000",
+        *(str(path) for path in paths), "--output-dir", str(output_dir),
+    ], expect_success=False)
+    for name, _, termination in cases:
+        report = json.loads((output_dir / f"{name}.report.json").read_text(encoding="utf-8"))
+        if report.get("passed") is not False or report.get("termination_reason") != termination:
+            raise AssertionError(f"{name}: unexpected termination acceptance: {report!r}")
+        if name == "failed-check":
+            if report["checks"][0].get("passed") is not False:
+                raise AssertionError("the deliberately wrong PC expectation must fail")
+        elif not all(check.get("passed") is True for check in report["checks"]):
+            raise AssertionError(f"{name}: unrelated checks failed: {report!r}")
+        if name == "unexpected-fault" and report.get("fault", {}).get("kind") != "unsupported-csih-operation":
+            raise AssertionError(f"wrong machine fault: {report!r}")
+        print(f"PASS termination boundary {name}: {termination}")
+
+
+def check_serial_repetition_normalization(output_root: Path) -> None:
+    """Finite repetitions retain source order and lifetime transmit ordinals."""
+    relative_serial = {
+        "kind": "csih-word", "unit": 1, "value": "0x1234",
+        "after_transmit_words": 3, "delay_instructions": 128,
+        "evidence": "scenario: finite transmit-relative input normalization",
+    }
+    reset = {
+        "kind": "peripheral-reset", "reset_class": "power-on", "after_instructions": 0,
+        "evidence": "scenario: reset does not restart the lifetime transmitted-word ordinal",
+    }
+    scenario = {
+        "schema": "rh850-p1me-machine-scenario-v2",
+        "name": "serial-repetition-normalization",
+        "entry": PORTABLE_STORE_SELECTOR,
+        "max_instructions": 1,
+        "stop_addresses": ["0x00010000"],
+        "checks": [],
+        "events": [
+            {**relative_serial, "repeat": 3, "stride_words": 4},
+            reset,
+            {**relative_serial, "after_transmit_words": 4, "repeat": 2, "stride_words": 4},
+            {**relative_serial, "unit": 2, "repeat": 2},
+            {**relative_serial, "unit": 3},
+            {
+                **relative_serial, "after_transmit_words": (1 << 63) - 1,
+                "stride_words": (1 << 63) - 1,
+            },
+        ],
+    }
+    path = output_root / "serial-repetition-normalization.json"
+    path.write_text(json.dumps(scenario, indent=2) + "\n", encoding="utf-8")
+    events = load_scenario(path)["events"]
+    boundaries = [(event["unit"], event["after_transmit_words"]) if event["kind"] == "csih-word"
+                  else event["kind"] for event in events]
+    expected = [
+        (1, 3), (1, 7), (1, 11), "peripheral-reset", (1, 4), (1, 8),
+        (2, 3), (2, 4), (3, 3), (1, (1 << 63) - 1),
+    ]
+    if boundaries != expected or any("repeat" in event or "stride_words" in event for event in events):
+        raise AssertionError(f"finite CSIH repetition normalization drift: {boundaries!r}")
+    print("PASS finite CSIH repetitions normalize without changing order or reset ordinals")
+
+
 def check_event_schema_rejections(output_root: Path) -> None:
     """Reject invalid external inputs before producing execution reports."""
     output_dir = output_root / "event-schema-rejections"
@@ -317,6 +408,22 @@ def check_event_schema_rejections(output_root: Path) -> None:
         "can_id": "0x7A1",
         "data_hex": "085a",
         "boundary": "post-filter",
+    }
+    relative_serial = {
+        "kind": "csih-word", "unit": 1, "value": "0x1234",
+        "after_transmit_words": 1, "delay_instructions": 128,
+        "evidence": "scenario: explicit launch-relative serial input",
+    }
+    adc_sample = {
+        "kind": "adc-sample", "unit": 0, "channel": 0, "value": "0x800",
+        "boundary": "normal", "after_instructions": 0,
+        "evidence": "scenario: explicit synthetic ADC input",
+    }
+    rsent_frame = {
+        "kind": "rsent-frame", "unit": 0,
+        "after_spc_triggers": 1, "delay_hsb_cycles": 2000,
+        "pulse_samples": [1344, 288, 312, 336, 360, 384, 408, 432, 336],
+        "evidence": "scenario: explicit synthetic SPC pulse intervals",
     }
     cases = [
         (
@@ -418,11 +525,177 @@ def check_event_schema_rejections(output_root: Path) -> None:
             },
         ),
         (
+            "register-read-response-overflow",
+            {
+                "kind": "register-input", "after_instructions": 0,
+                "register": "DFERSTC", "value": "0x100000000",
+                "evidence": "scenario: explicit bus response must fit declared 32-bit width",
+            },
+        ),
+        (
             "unknown-event-kind",
             {**receive, "kind": "can-tx"},
         ),
+        ("serial-zero-delay", {**relative_serial, "delay_instructions": 0}),
+        ("serial-zero-ordinal", {**relative_serial, "after_transmit_words": 0}),
+        ("serial-bool-ordinal", {**relative_serial, "after_transmit_words": True}),
+        ("serial-mixed-boundaries", {**relative_serial, "after_instructions": 0}),
+        ("serial-duplicate-word", [relative_serial, relative_serial]),
+        ("serial-repeat-mixed-boundaries", {**relative_serial, "repeat": 2, "after_instructions": 0}),
+        (
+            "serial-repeat-on-absolute-input",
+            {
+                "kind": "csih-word", "unit": 1, "value": "0x1234",
+                "after_instructions": 0, "repeat": 2,
+                "evidence": "scenario: repetition is only transmit-relative",
+            },
+        ),
+        (
+            "serial-stride-on-absolute-input",
+            {
+                "kind": "csih-word", "unit": 1, "value": "0x1234",
+                "after_instructions": 0, "stride_words": 2,
+                "evidence": "scenario: stride is only transmit-relative",
+            },
+        ),
+        ("serial-repeat-on-can-input", {**receive, "repeat": 2}),
+        ("serial-stride-on-adc-input", {**adc_sample, "stride_words": 2}),
+        ("serial-repeat-on-spc-input", {**rsent_frame, "repeat": 2}),
+        ("serial-stride-on-spc-input", {**rsent_frame, "stride_words": 2}),
+        (
+            "serial-repeat-ordinal-overflow",
+            {**relative_serial, "after_transmit_words": (1 << 63) - 1, "repeat": 2},
+        ),
+        (
+            "serial-repeat-stride-overflow",
+            {**relative_serial, "repeat": 3, "stride_words": (1 << 62)},
+        ),
+        (
+            "serial-repeat-collides-with-explicit",
+            [{**relative_serial, "repeat": 3}, {**relative_serial, "after_transmit_words": 3}],
+        ),
+        (
+            "serial-explicit-collides-with-repeat",
+            [{**relative_serial, "after_transmit_words": 3}, {**relative_serial, "repeat": 3}],
+        ),
+        (
+            "serial-strided-repeat-collision",
+            [
+                {**relative_serial, "repeat": 3, "stride_words": 4},
+                {**relative_serial, "after_transmit_words": 3, "repeat": 2, "stride_words": 2},
+            ],
+        ),
+        (
+            "serial-repeat-collision-across-reset",
+            [
+                {**relative_serial, "repeat": 3},
+                {
+                    "kind": "peripheral-reset", "reset_class": "power-on", "after_instructions": 0,
+                    "evidence": "scenario: reset does not restart the lifetime transmitted-word ordinal",
+                },
+                {**relative_serial, "after_transmit_words": 3},
+            ],
+        ),
+        ("adc-unit-not-present", {**adc_sample, "unit": 2}),
+        ("adc-temperature-on-wrong-unit", {**adc_sample, "channel": 12}),
+        ("adc-pin-channel-bool", {**adc_sample, "channel": True}),
+        ("adc-code-underflow", {**adc_sample, "value": "-1"}),
+        ("adc-code-overflow", {**adc_sample, "value": "0x1000"}),
+        ("adc-numeric-code-not-string", {**adc_sample, "value": 2048}),
+        ("adc-unknown-boundary", {**adc_sample, "boundary": "injected-result"}),
+        ("adc-temperature-pull", {**adc_sample, "unit": 1, "channel": 12, "boundary": "pull-down"}),
+        ("rsent-unit-not-present", {**rsent_frame, "unit": 2}),
+        ("rsent-zero-ordinal", {**rsent_frame, "after_spc_triggers": 0}),
+        ("rsent-negative-delay", {**rsent_frame, "delay_hsb_cycles": -1}),
+        ("rsent-mixed-boundaries", {**rsent_frame, "after_instructions": 0}),
+        ("rsent-zero-pulse", {**rsent_frame, "pulse_samples": [1344, 0, 312, 336]}),
+        ("rsent-pulse-overflow", {**rsent_frame, "pulse_samples": [131072, 288, 312, 336]}),
+        ("rsent-pulse-bool", {**rsent_frame, "pulse_samples": [True, 288, 312, 336]}),
+        ("rsent-frame-too-long", {**rsent_frame, "pulse_samples": [288] * 10}),
+        ("rsent-empty-evidence", {**rsent_frame, "evidence": ""}),
+        ("rsent-injected-crc-verdict", {**rsent_frame, "crc_valid": True}),
+        ("rsent-duplicate-response", [rsent_frame, rsent_frame]),
     ]
-    for name, event in cases:
+    cases.extend(
+        (f"serial-{field}-{name}", {**relative_serial, field: value})
+        for field in ("repeat", "stride_words")
+        for name, value in (
+            ("zero", 0), ("negative", -1), ("bool", True), ("float", 1.5),
+            ("string", "2"), ("null", None), ("overflow", 1 << 63),
+        )
+    )
+    invalid_scenarios: list[tuple[str, dict[str, object]]] = [
+        (name, {"events": event if isinstance(event, list) else [event]})
+        for name, event in cases
+    ]
+    invalid_scenarios.extend(
+        (f"hsb-quantum-{name}", {"events": [], "hsb_cycles_per_instruction": value})
+        for name, value in (("zero", 0), ("negative", -1), ("bool", True), ("overflow", 1 << 63))
+    )
+    cell = {
+        "address": "0xff205000", "size": 4, "state": "erased",
+        "evidence": "Explicit synthetic flash-cell state, not inferred payload blankness",
+    }
+    invalid_scenarios.extend(
+        (f"dataflash-cells-{name}", {"dataflash_cells": rows})
+        for name, rows in (
+            ("not-a-list", cell),
+            ("unaligned-address", [{**cell, "address": "0xff205001"}]),
+            ("unaligned-size", [{**cell, "size": 3}]),
+            ("zero-size", [{**cell, "size": 0}]),
+            ("bool-size", [{**cell, "size": True}]),
+            ("negative-address", [{**cell, "address": "-4"}]),
+            ("address-wrap", [{**cell, "address": "0xfffffffc", "size": 8}]),
+            ("numeric-address", [{**cell, "address": 0xff205000}]),
+            ("unknown-state", [{**cell, "state": "assume-from-bytes"}]),
+            ("missing-evidence", [{**cell, "evidence": ""}]),
+            ("overlapping-states", [cell, {**cell, "state": "programmed"}]),
+        )
+    )
+    startup_response = {
+        "command": "0x7000", "error_bits": "0x0", "completion_hsb_cycles": 32,
+    }
+    startup_stub = {
+        "evidence": "Explicit diagnostic startup assumption, not captured hardware",
+        "responses": [startup_response],
+    }
+    invalid_scenarios.extend(
+        (f"icus-startup-{name}", {"icus_startup_stub": value})
+        for name, value in (
+            ("not-object", []),
+            ("missing-evidence", {"responses": [startup_response]}),
+            ("empty-evidence", {**startup_stub, "evidence": ""}),
+            ("empty-responses", {**startup_stub, "responses": []}),
+            ("non-list-responses", {**startup_stub, "responses": startup_response}),
+            ("non-object-response", {**startup_stub, "responses": [0]}),
+            ("missing-command", {
+                **startup_stub, "responses": [{"error_bits": "0", "completion_hsb_cycles": 32}],
+            }),
+        )
+    )
+    invalid_scenarios.extend(
+        (f"icus-startup-{name}", {
+            "icus_startup_stub": {**startup_stub, "responses": [{**startup_response, **changes}]},
+        })
+        for name, changes in (
+            ("crypto-command", {"command": "0x5"}),
+            ("selector", {"command": "0x17000"}),
+            ("numeric-command", {"command": 0x7000}),
+            ("negative-errors", {"error_bits": "-1"}),
+            ("error-overflow", {"error_bits": "0x1000"}),
+            ("numeric-errors", {"error_bits": 0}),
+            ("zero-delay", {"completion_hsb_cycles": 0}),
+            ("negative-delay", {"completion_hsb_cycles": -1}),
+            ("bool-delay", {"completion_hsb_cycles": True}),
+            ("delay-overflow", {"completion_hsb_cycles": 1 << 63}),
+            ("output-payload", {"output_words": [0, 0, 0, 0]}),
+        )
+    )
+    invalid_scenarios.extend(
+        (f"dma-master-rewrite-{name}", {"dma_master_rewrite_assumption": value})
+        for name, value in (("boolean", True), ("object", {}), ("empty", ""), ("blank", "  "))
+    )
+    for name, overrides in invalid_scenarios:
         scenario = {
             "schema": "rh850-p1me-machine-scenario-v2",
             "name": f"reject-event-{name}",
@@ -434,7 +707,7 @@ def check_event_schema_rejections(output_root: Path) -> None:
             "memory": [],
             "artifacts": [],
             "checks": [],
-            "events": [event],
+            **overrides,
         }
         scenario_path = output_dir / f"{name}.json"
         scenario_path.write_text(json.dumps(scenario, indent=2) + "\n", encoding="utf-8")
@@ -447,19 +720,14 @@ def check_event_schema_rejections(output_root: Path) -> None:
             raise AssertionError(f"{name}: expected CLI input rejection, got {proc.returncode}")
         if (output_dir / f"{name}.report.json").exists():
             raise AssertionError(f"{name}: rejected scenario must not produce a report")
-        print(f"PASS event {name} rejected before emulation")
+        print(f"PASS scenario {name} rejected before emulation")
 
 
 def check_execution_event_boundaries(output_root: Path) -> None:
-    """External clock and interrupt requests must land only on modeled device state.
+    """Reserved interrupt requests must fault before executing the entry.
 
-    Both scenarios retain the exact byte-store primitive entry so the failure is
-    the external-event dispatch boundary itself: no entry instruction executes.
-    The clock scenario selects valid but unimplemented CK3, so the event must
-    yield an unsupported-timer-mode fault rather than invent clock progression.
-    Interrupt channel 292 has no reset row in the device model (manual Table
-    6.11 reserves it), so the request must fault instead of synthesizing a
-    reset value, handler vector, or delivery event.
+    Manual Table6.11 reserves channel292. An external request must not
+    synthesize a reset value, handler vector, or delivery event.
     """
     output_dir = output_root / "execution-event-boundaries"
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -472,53 +740,6 @@ def check_execution_event_boundaries(output_root: Path) -> None:
         "PMR": "0",
     }
     scenarios = {
-        "clock-unsupported-timer-mode.json": {
-            "schema": "rh850-p1me-machine-scenario-v2",
-            "name": "clock-on-unsupported-timer-mode-faults",
-            "entry": PORTABLE_STORE_SELECTOR,
-            "max_instructions": 4,
-            "stop_addresses": ["0x00010000"],
-            "gpr_fill": "0",
-            "registers": registers,
-            "memory": [
-                {
-                    "address": "0xFFE50050",
-                    "hex": "01",
-                    "evidence": "scenario: TAUJ0 channel 0 counting enabled",
-                },
-                {
-                    "address": "0xFFE50080",
-                    "hex": "00c0",
-                    "evidence": "scenario: TAUJ0 CMOR0 selects valid but unimplemented CK3",
-                },
-            ],
-            "artifacts": [],
-            "checks": [
-                {
-                    "name": "unsupported timer mode emits no tauj-clock event",
-                    "kind": "event-count",
-                    "operation": "tauj-clock",
-                    "equals": "0",
-                },
-                {
-                    "name": "unsupported timer mode invents no interrupt request",
-                    "kind": "event-count",
-                    "operation": "interrupt-request",
-                    "equals": "0",
-                },
-            ],
-            "events": [{
-                "kind": "clock",
-                "after_instructions": 0,
-                "evidence": "scenario: one p-bus clock burst onto the enabled channel",
-                "p_bus_cycles": 8,
-            }],
-            "expected_fault": {
-                "kind": "unsupported-timer-mode",
-                "address": "0xFFE50080",
-                "access": "clock",
-            },
-        },
         "interrupt-292-reserved.json": {
             "schema": "rh850-p1me-machine-scenario-v2",
             "name": "reserved-interrupt-channel-292-faults",
@@ -563,7 +784,6 @@ def check_execution_event_boundaries(output_root: Path) -> None:
         },
     }
     expectations = {
-        "clock-unsupported-timer-mode.json": ("unsupported-timer-mode", "0xFFE50080", "clock"),
         "interrupt-292-reserved.json": ("unsupported-interrupt", "0x00000124", "request"),
     }
     paths = []
@@ -666,7 +886,7 @@ def check_register_input_boundaries(output_root: Path) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
     for name, register, value in (
         ("cpu-register", "PC", "0x100"),
-        ("write-only-command", "DFERSTC", "1"),
+        ("undeclared-write-only-command", "UCFSERSTCLR", "1"),
         ("byte-register-overflow", "FPMON", "0x100"),
         ("dcra-internal-state", "DCRA1COUT", "0"),
         ("flmd-internal-state", "FLMDCNT", "1"),
@@ -707,9 +927,11 @@ def main() -> int:
         check_exact_scenarios(output_root)
         check_dynamic_request_signer_targets(output_root)
         check_schema_rejection(output_root)
+        check_expected_termination_boundaries(output_root)
         check_executable_overlay_rejection(output_root)
         check_fault_check_error_boundary(output_root)
         check_memory_equality_failure(output_root)
+        check_serial_repetition_normalization(output_root)
         check_event_schema_rejections(output_root)
         check_execution_event_boundaries(output_root)
         check_register_input_boundaries(output_root)

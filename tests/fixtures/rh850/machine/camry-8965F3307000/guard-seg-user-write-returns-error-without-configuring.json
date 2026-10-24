@@ -1,0 +1,49 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "guard-seg-user-write-returns-error-without-configuring",
+  "entry": {
+    "role": "original-instruction-guard-register-and-permission-regression",
+    "scope": "resolved-address",
+    "address": "0x71600"
+  },
+  "max_instructions": 2,
+  "stop_addresses": [
+    "0x71604"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "r12": "0xfffee980",
+    "r11": "0x200",
+    "RBASE": "0",
+    "PSW": "0x40000020"
+  },
+  "checks": [
+    {
+      "name": "user-cannot-enable-notification",
+      "kind": "memory",
+      "address": "0xfffee980",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "privilege-violation-recorded",
+      "kind": "memory",
+      "address": "0xfffee982",
+      "size": 2,
+      "equals_hex": "1000"
+    },
+    {
+      "name": "masked-error-keeps-user-mode",
+      "kind": "register",
+      "register": "PSW",
+      "equals": "0x40000020"
+    }
+  ],
+  "memory": [
+    {
+      "address": "0xfffee982",
+      "hex": "0000",
+      "evidence": "Explicit guard state exercising P1M-E documented configuration/permission behavior, not a firmware patch"
+    }
+  ]
+}

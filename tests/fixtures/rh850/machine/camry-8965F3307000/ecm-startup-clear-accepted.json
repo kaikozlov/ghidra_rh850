@@ -1,0 +1,21 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "ecm-startup-clear-accepted",
+  "entry": {"role": "original-startup-ECM-A5-value-inverse-value-and-word-status-read", "scope": "resolved-address", "address": "0x3D8"},
+  "reset": "none",
+  "max_instructions": 16,
+  "stop_addresses": ["0x402"],
+  "gpr_fill": "0",
+  "memory": [
+    {"address": "0xFFD60010", "hex": "04000088", "evidence": "Synthetic preexisting master error latches: field-BIST bit27 plus bit2; explicit ERROROUT high feedback bit31. Not a BIST result or full-boot success input."},
+    {"address": "0xFFD61010", "hex": "20000008", "evidence": "Synthetic preexisting checker error latches: field-BIST bit27 plus bit5; explicit ERROROUT_C low feedback bit31. No pin level is inferred."},
+    {"address": "0xFFD62044", "hex": "01", "evidence": "Synthetic previous protection failure; command alone must not erase it, but completed valid sequence must."}
+  ],
+  "checks": [
+    {"name": "original-ldw-observes-real-completed-protection-success", "kind": "register", "register": "r11", "equals": "0"},
+    {"name": "master-clears-only-requested-BIST-latch-and-retains-high-pin", "kind": "memory", "address": "0xFFD60010", "size": 4, "equals_hex": "04000080"},
+    {"name": "checker-clears-only-requested-BIST-latch-and-retains-low-pin", "kind": "memory", "address": "0xFFD61010", "size": 4, "equals_hex": "20000000"},
+    {"name": "exactly-one-protected-effect-committed", "kind": "event-count", "operation": "ecm-protection-accepted", "equals": "1"},
+    {"name": "no-rejected-writes", "kind": "event-count", "operation": "ecm-protection-rejected", "equals": "0"}
+  ]
+}

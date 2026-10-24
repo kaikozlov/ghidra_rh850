@@ -1,0 +1,18 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "strict-prepare-preserves-written-local",
+  "entry": {"role": "original-word-store-return-then-one-prepare-only", "scope": "resolved-address", "address": "0x1672"},
+  "max_instructions": 3,
+  "stop_addresses": ["0x528a"],
+  "registers": {"sp": "0xfebe2000", "ep": "0xfebe1ff8", "r1": "0x12345678", "lp": "0x5286"},
+  "memory": [
+    {"address": "0xfebe1ff0", "size": 16, "fill": 165, "evidence": "Regression stack fill, changed by original SST.W at 0x1672 before original PREPARE at 0x5286; no executable overlays"}
+  ],
+  "checks": [
+    {"name": "original-store-survives-prepare-local-allocation", "kind": "memory", "address": "0xfebe1ff8", "size": 4, "equals_hex": "78563412"},
+    {"name": "prepare-still-saves-original-link-register", "kind": "memory", "address": "0xfebe1ffc", "size": 4, "equals_hex": "86520000"},
+    {"name": "prepare-allocates-one-local-and-one-saved-register", "kind": "register", "register": "sp", "equals": "0xfebe1ff8"},
+    {"name": "original-return-and-prepare-retire-without-shortcut", "kind": "register", "register": "pc", "equals": "0x528a"},
+    {"name": "prepare-does-not-clear-below-the-frame", "kind": "memory", "address": "0xfebe1ff4", "size": 4, "equals_hex": "a5a5a5a5"}
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "ports-jpcr-input-only-fields",
+  "entry": {"role": "original-sst-word-to-JPCR0_2", "scope": "resolved-address", "address": "0x1672"},
+  "reset": "none",
+  "max_instructions": 1,
+  "stop_addresses": ["0x1674"],
+  "gpr_fill": "0",
+  "registers": {"ep": "0xffc22008", "r1": "0xffffffff"},
+  "memory": [
+    {"address": "0xffc2000c", "hex": "04", "evidence": "Explicit JPPR0 input bit2; JP0_2 has no output latch or bidirectional field."}
+  ],
+  "checks": [
+    {"name": "only-JP0_2-effective-fields-change", "kind": "memory", "address": "0xffc22008", "size": 4, "equals_hex": "52014d00"},
+    {"name": "missing-output-function-is-not-created", "kind": "memory", "address": "0xffc20000", "size": 1, "equals_hex": "00"},
+    {"name": "missing-bidirectional-function-is-not-created", "kind": "memory", "address": "0xffc24004", "size": 1, "equals_hex": "00"},
+    {"name": "valid-alternate-function-mux-is-written", "kind": "memory", "address": "0xffc20014", "size": 1, "equals_hex": "04"}
+  ]
+}

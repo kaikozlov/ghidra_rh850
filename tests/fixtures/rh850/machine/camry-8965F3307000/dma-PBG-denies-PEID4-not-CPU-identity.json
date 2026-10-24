@@ -1,0 +1,102 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "dma-PBG-denies-PEID4-not-CPU-identity",
+  "entry": {
+    "role": "original-dma-PBG-denies-PEID4-not-CPU-identity",
+    "scope": "resolved-address",
+    "address": "0x607f8"
+  },
+  "max_instructions": 16,
+  "stop_addresses": [],
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "lp": "0x619be"
+  },
+  "memory": [
+    {
+      "address": "0xffff8000",
+      "hex": "01000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff8400",
+      "hex": "04140300",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff8404",
+      "hex": "0450d8ff",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff8408",
+      "hex": "01000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff840c",
+      "hex": "08000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff8420",
+      "hex": "01000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff8424",
+      "hex": "01000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffd60010",
+      "hex": "00000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffd61010",
+      "hex": "00000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    }
+  ],
+  "checks": [
+    {
+      "name": "write-error-direction-latched",
+      "kind": "memory",
+      "address": "0xffff8424",
+      "size": 4,
+      "equals_hex": "90080000"
+    },
+    {
+      "name": "PBG-error-latched",
+      "kind": "memory",
+      "address": "0xfff94404",
+      "size": 4,
+      "equals_hex": "01000000"
+    },
+    {
+      "name": "captured-DMA-PEID4-SPID2-write",
+      "kind": "memory",
+      "address": "0xfff9440c",
+      "size": 4,
+      "equals_hex": "01800200"
+    },
+    {
+      "name": "both-guard-and-DMA-ECM-sources",
+      "kind": "memory",
+      "address": "0xffd60010",
+      "size": 4,
+      "equals_hex": "08000100"
+    },
+    {
+      "name": "blocked-before-CSIH-launch",
+      "kind": "event-count",
+      "operation": "csih-tx",
+      "equals": "0"
+    }
+  ],
+  "expected_termination": "instruction-budget",
+  "hsb_cycles_per_instruction": 1
+}

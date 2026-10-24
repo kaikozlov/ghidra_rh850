@@ -1,0 +1,58 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "entry": {
+    "role": "original-word-store-to-PDMA-comparator",
+    "scope": "resolved-address",
+    "address": "0x7A2"
+  },
+  "max_instructions": 1,
+  "stop_addresses": [
+    "0x7A4"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "ep": "0xFFC4CA00",
+    "r1": "0x80000000"
+  },
+  "checks": [
+    {
+      "name": "injection-disabled",
+      "kind": "memory",
+      "address": "0xFFC4CA00",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "latched-error-retained-0",
+      "kind": "memory",
+      "address": "0xFFD60008",
+      "size": 4,
+      "equals_hex": "04000000"
+    },
+    {
+      "name": "latched-error-retained-1",
+      "kind": "memory",
+      "address": "0xFFD61008",
+      "size": 4,
+      "equals_hex": "04000000"
+    }
+  ],
+  "name": "pdma-comparator-clearing-injection-preserves-latched-error",
+  "memory": [
+    {
+      "address": "0xFFC4CA00",
+      "hex": "7f7fff3f",
+      "evidence": "Explicit initial documented injection selection."
+    },
+    {
+      "address": "0xFFD60008",
+      "hex": "04000000",
+      "evidence": "Previously latched PFSS comparison error; only ECM status-clear or power-on clears this flag."
+    },
+    {
+      "address": "0xFFD61008",
+      "hex": "04000000",
+      "evidence": "Previously latched checker PFSS comparison error."
+    }
+  ]
+}

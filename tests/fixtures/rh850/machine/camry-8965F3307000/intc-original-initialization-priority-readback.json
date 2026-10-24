@@ -1,0 +1,24 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "intc-original-initialization-priority-readback",
+  "entry": {"role": "original-intc-initialization-and-priority-verification", "scope": "resolved-address", "address": "0x62e6a"},
+  "max_instructions": 4096,
+  "stop_addresses": ["0x10000"],
+  "gpr_fill": "0",
+  "registers": {"sp": "0xfebe2000", "lp": "0x10000"},
+  "checks": [
+    {"name": "original-function-returns-after-real-readback-loops", "kind": "register", "register": "pc", "equals": "0x10000"},
+    {"name": "stack-restored", "kind": "register", "register": "sp", "equals": "0xfebe2000"},
+    {"name": "ecm-priority-zero", "kind": "memory", "address": "0xfffeea10", "size": 2, "equals_hex": "4000"},
+    {"name": "watchdog-masked-table-vector", "kind": "memory", "address": "0xfffeea12", "size": 2, "equals_hex": "cf00"},
+    {"name": "intc1-last-dma-channel", "kind": "memory", "address": "0xfffeea3e", "size": 2, "equals_hex": "cf00"},
+    {"name": "intc2-first-external-channel", "kind": "memory", "address": "0xffffb040", "size": 2, "equals_hex": "cf00"},
+    {"name": "csih2-edge-configuration", "kind": "memory", "address": "0xffffb0c4", "size": 8, "equals_hex": "cf00cf00cf00cf00"},
+    {"name": "sci-level-edge-boundary", "kind": "memory", "address": "0xffffb0d4", "size": 6, "equals_hex": "cf80cf00cf00"},
+    {"name": "timer-priorities-actually-verified", "kind": "memory", "address": "0xffffb10a", "size": 6, "equals_hex": "460047004900"},
+    {"name": "can-level-priorities-actually-verified", "kind": "memory", "address": "0xffffb176", "size": 4, "equals_hex": "48804880"},
+    {"name": "flash-edge-priority-actually-verified", "kind": "memory", "address": "0xffffb2f6", "size": 2, "equals_hex": "4800"},
+    {"name": "last-level-channel-configured", "kind": "memory", "address": "0xffffb2fe", "size": 2, "equals_hex": "cf80"},
+    {"name": "configuration-does-not-deliver-interrupts", "kind": "event-count", "operation": "interrupt-enter", "equals": "0"}
+  ]
+}

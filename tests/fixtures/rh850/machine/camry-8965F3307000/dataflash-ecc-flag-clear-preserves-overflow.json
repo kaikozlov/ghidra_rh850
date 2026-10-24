@@ -1,0 +1,60 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "dataflash-ecc-flag-clear-preserves-overflow",
+  "entry": {
+    "role": "original-instruction-retargeted-to-ecc-register",
+    "scope": "resolved-address",
+    "address": "0x7a2"
+  },
+  "reset": "none",
+  "max_instructions": 64,
+  "stop_addresses": [
+    "0x7a4"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "ep": "0xffc5b008",
+    "r1": "0x1"
+  },
+  "memory": [
+    {
+      "address": "0xffc5b004",
+      "hex": "03000000",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc5b00c",
+      "hex": "01000000",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    }
+  ],
+  "checks": [
+    {
+      "name": "effect-0xffc5b004",
+      "kind": "memory",
+      "address": "0xffc5b004",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc5b00c",
+      "kind": "memory",
+      "address": "0xffc5b00c",
+      "size": 4,
+      "equals_hex": "01000000"
+    },
+    {
+      "name": "effect-0xffc5b008",
+      "kind": "memory",
+      "address": "0xffc5b008",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "original-path-reaches-stop",
+      "kind": "register",
+      "register": "pc",
+      "equals": "0x7a4"
+    }
+  ]
+}

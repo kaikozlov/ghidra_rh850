@@ -1,0 +1,177 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "cache-ecc-tag-ded-reserved-bank",
+  "entry": {
+    "role": "original-instruction-retargeted-to-cache-ecc-register",
+    "scope": "resolved-address",
+    "address": "0x158a"
+  },
+  "reset": "none",
+  "max_instructions": 32,
+  "stop_addresses": [],
+  "gpr_fill": "0",
+  "registers": {
+    "ep": "0xffc6140c",
+    "r1": "2"
+  },
+  "memory": [
+    {
+      "address": "0xffc60410",
+      "hex": "03000000",
+      "evidence": "Synthetic explicit cache ECC error latches/captured addresses for digital clear semantics, not injected successful status. R01UH0585EJ0120 Tables31.57,31.60-31.75."
+    },
+    {
+      "address": "0xffc60420",
+      "hex": "01010000",
+      "evidence": "Synthetic explicit cache ECC error latches/captured addresses for digital clear semantics, not injected successful status. R01UH0585EJ0120 Tables31.57,31.60-31.75."
+    },
+    {
+      "address": "0xffc60450",
+      "hex": "02020000",
+      "evidence": "Synthetic explicit cache ECC error latches/captured addresses for digital clear semantics, not injected successful status. R01UH0585EJ0120 Tables31.57,31.60-31.75."
+    },
+    {
+      "address": "0xffc60460",
+      "hex": "23010000",
+      "evidence": "Synthetic explicit cache ECC error latches/captured addresses for digital clear semantics, not injected successful status. R01UH0585EJ0120 Tables31.57,31.60-31.75."
+    },
+    {
+      "address": "0xffc60464",
+      "hex": "45010000",
+      "evidence": "Synthetic explicit cache ECC error latches/captured addresses for digital clear semantics, not injected successful status. R01UH0585EJ0120 Tables31.57,31.60-31.75."
+    },
+    {
+      "address": "0xffc604e0",
+      "hex": "67010000",
+      "evidence": "Synthetic explicit cache ECC error latches/captured addresses for digital clear semantics, not injected successful status. R01UH0585EJ0120 Tables31.57,31.60-31.75."
+    },
+    {
+      "address": "0xffc604e4",
+      "hex": "89010000",
+      "evidence": "Synthetic explicit cache ECC error latches/captured addresses for digital clear semantics, not injected successful status. R01UH0585EJ0120 Tables31.57,31.60-31.75."
+    },
+    {
+      "address": "0xffc61410",
+      "hex": "11000000",
+      "evidence": "Synthetic explicit cache ECC error latches/captured addresses for digital clear semantics, not injected successful status. R01UH0585EJ0120 Tables31.57,31.60-31.75."
+    },
+    {
+      "address": "0xffc61420",
+      "hex": "01000000",
+      "evidence": "Synthetic explicit cache ECC error latches/captured addresses for digital clear semantics, not injected successful status. R01UH0585EJ0120 Tables31.57,31.60-31.75."
+    },
+    {
+      "address": "0xffc61450",
+      "hex": "02000000",
+      "evidence": "Synthetic explicit cache ECC error latches/captured addresses for digital clear semantics, not injected successful status. R01UH0585EJ0120 Tables31.57,31.60-31.75."
+    },
+    {
+      "address": "0xffc61460",
+      "hex": "ab010000",
+      "evidence": "Synthetic explicit cache ECC error latches/captured addresses for digital clear semantics, not injected successful status. R01UH0585EJ0120 Tables31.57,31.60-31.75."
+    },
+    {
+      "address": "0xffc614e0",
+      "hex": "cd010000",
+      "evidence": "Synthetic explicit cache ECC error latches/captured addresses for digital clear semantics, not injected successful status. R01UH0585EJ0120 Tables31.57,31.60-31.75."
+    }
+  ],
+  "checks": [
+    {
+      "name": "rejected-write-retains-0xffc60410",
+      "kind": "memory",
+      "address": "0xffc60410",
+      "size": 4,
+      "equals_hex": "03000000"
+    },
+    {
+      "name": "rejected-write-retains-0xffc60420",
+      "kind": "memory",
+      "address": "0xffc60420",
+      "size": 4,
+      "equals_hex": "01010000"
+    },
+    {
+      "name": "rejected-write-retains-0xffc60450",
+      "kind": "memory",
+      "address": "0xffc60450",
+      "size": 4,
+      "equals_hex": "02020000"
+    },
+    {
+      "name": "rejected-write-retains-0xffc60460",
+      "kind": "memory",
+      "address": "0xffc60460",
+      "size": 4,
+      "equals_hex": "23010000"
+    },
+    {
+      "name": "rejected-write-retains-0xffc60464",
+      "kind": "memory",
+      "address": "0xffc60464",
+      "size": 4,
+      "equals_hex": "45010000"
+    },
+    {
+      "name": "rejected-write-retains-0xffc604e0",
+      "kind": "memory",
+      "address": "0xffc604e0",
+      "size": 4,
+      "equals_hex": "67010000"
+    },
+    {
+      "name": "rejected-write-retains-0xffc604e4",
+      "kind": "memory",
+      "address": "0xffc604e4",
+      "size": 4,
+      "equals_hex": "89010000"
+    },
+    {
+      "name": "rejected-write-retains-0xffc61410",
+      "kind": "memory",
+      "address": "0xffc61410",
+      "size": 4,
+      "equals_hex": "11000000"
+    },
+    {
+      "name": "rejected-write-retains-0xffc61420",
+      "kind": "memory",
+      "address": "0xffc61420",
+      "size": 4,
+      "equals_hex": "01000000"
+    },
+    {
+      "name": "rejected-write-retains-0xffc61450",
+      "kind": "memory",
+      "address": "0xffc61450",
+      "size": 4,
+      "equals_hex": "02000000"
+    },
+    {
+      "name": "rejected-write-retains-0xffc61460",
+      "kind": "memory",
+      "address": "0xffc61460",
+      "size": 4,
+      "equals_hex": "ab010000"
+    },
+    {
+      "name": "rejected-write-retains-0xffc614e0",
+      "kind": "memory",
+      "address": "0xffc614e0",
+      "size": 4,
+      "equals_hex": "cd010000"
+    },
+    {
+      "name": "rejected-command-does-not-latch",
+      "kind": "memory",
+      "address": "0xffc6140c",
+      "size": 4,
+      "equals_hex": "00000000"
+    }
+  ],
+  "expected_fault": {
+    "kind": "prohibited-register-reserved-bits",
+    "address": "0xffc6140c",
+    "access": "write"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "bist-system2-invalidates-old-signature",
+  "entry": {
+    "role": "original-ldw-requires-explicit-post-reset-BIST-input",
+    "scope": "resolved-address",
+    "address": "0x6594a"
+  },
+  "reset": "system-2",
+  "max_instructions": 2,
+  "stop_addresses": [
+    "0x6594e"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "r10": "0xffcd8994"
+  },
+  "pre_reset_memory": [
+    {
+      "address": "0xffcda010",
+      "hex": "45230100",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    }
+  ],
+  "checks": [],
+  "expected_fault": {
+    "kind": "missing-reset-input",
+    "address": "0xffcda010",
+    "access": "read"
+  }
+}

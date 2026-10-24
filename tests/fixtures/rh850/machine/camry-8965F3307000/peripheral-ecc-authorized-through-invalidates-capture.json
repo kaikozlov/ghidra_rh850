@@ -1,0 +1,35 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "peripheral-ecc-authorized-through-invalidates-capture",
+  "entry": {
+    "role": "original-peripheral-ecc-instructions",
+    "scope": "resolved-address",
+    "address": "0xc60"
+  },
+  "reset": "none",
+  "max_instructions": 64,
+  "stop_addresses": [
+    "0xc62"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "ep": "0xffc71100",
+    "r1": "0x4090"
+  },
+  "memory": [
+    {
+      "address": "0xffc71100",
+      "hex": "16080100",
+      "evidence": "Explicit peripheral ECC prior state for original instructions; R01UH0585EJ0120 Tables31.79-31.80. Not a physical error-injection result."
+    }
+  ],
+  "checks": [
+    {
+      "name": "through-mode-clears-capture-not-accumulated-flags",
+      "kind": "memory",
+      "address": "0xffc71100",
+      "size": 4,
+      "equals_hex": "96000000"
+    }
+  ]
+}

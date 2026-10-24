@@ -1,0 +1,73 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "guard-original-initialization-chain",
+  "entry": {
+    "role": "original-instruction-guard-register-and-permission-regression",
+    "scope": "resolved-address",
+    "address": "0x632c8"
+  },
+  "max_instructions": 3000,
+  "stop_addresses": [
+    "0x10000"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "lp": "0x10000",
+    "sp": "0xfebffb00",
+    "gp": "0xfebeb800"
+  },
+  "checks": [
+    {
+      "name": "original-mpu-window-clears-real-byte",
+      "kind": "memory",
+      "address": "0xfebf3400",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "protection-enabled-by-original-chain",
+      "kind": "register",
+      "register": "MPM",
+      "equals": "0x3"
+    },
+    {
+      "name": "temporary-write-window-closed",
+      "kind": "register",
+      "register": "MPAT6",
+      "equals": "0xa8"
+    },
+    {
+      "name": "original-peg-lock",
+      "kind": "memory",
+      "address": "0xfffee684",
+      "size": 4,
+      "equals_hex": "170000fe"
+    },
+    {
+      "name": "original-gram-lock-and-enable",
+      "kind": "memory",
+      "address": "0xffc49000",
+      "size": 4,
+      "equals_hex": "10feffc7"
+    },
+    {
+      "name": "masked-reserved-stores-remain-visible-as-errors",
+      "kind": "memory",
+      "address": "0xfffee982",
+      "size": 2,
+      "equals_hex": "0002"
+    }
+  ],
+  "memory": [
+    {
+      "address": "0xfffee982",
+      "hex": "0000",
+      "evidence": "Explicit guard state exercising P1M-E documented configuration/permission behavior, not a firmware patch"
+    },
+    {
+      "address": "0xfebf3400",
+      "hex": "7f",
+      "evidence": "Explicit guard state exercising P1M-E documented configuration/permission behavior, not a firmware patch"
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "guard-pbg-spid3-permitted",
+  "entry": {
+    "role": "original-instruction-guard-register-and-permission-regression",
+    "scope": "resolved-address",
+    "address": "0x7a2"
+  },
+  "max_instructions": 2,
+  "stop_addresses": [
+    "0x7a4"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "ep": "0xffddd114",
+    "r1": "0x8",
+    "MCFG0": "0x30004"
+  },
+  "checks": [
+    {
+      "name": "authorized-spid-can-configure-unlocked-register",
+      "kind": "memory",
+      "address": "0xffddd114",
+      "size": 4,
+      "equals_hex": "08000000"
+    }
+  ],
+  "memory": [
+    {
+      "address": "0xffddd00c",
+      "hex": "08000000",
+      "evidence": "Explicit guard state exercising P1M-E documented configuration/permission behavior, not a firmware patch"
+    }
+  ]
+}

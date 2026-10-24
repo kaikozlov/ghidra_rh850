@@ -1,0 +1,12 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "ecm-timer-undeclared-word-fault",
+  "entry": {"role": "original-startup-word-load-against-unextended-native-byte-ECM-control", "scope": "resolved-address", "address": "0x3FE"},
+  "reset": "none",
+  "max_instructions": 2,
+  "stop_addresses": [],
+  "gpr_fill": "0",
+  "registers": {"r10": "0xFFD62050"},
+  "checks": [],
+  "expected_fault": {"kind": "unmapped-read", "address": "0xFFD62054", "access": "read"}
+}

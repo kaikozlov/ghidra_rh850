@@ -1,0 +1,25 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "csih-original-four-halfword-configuration",
+  "entry": {"role": "canonical61260-configures-CSIH1-and-real-port-aliases", "scope": "resolved-address", "address": "0x61260"},
+  "max_instructions": 128,
+  "stop_addresses": ["0x10000"],
+  "gpr_fill": "0",
+  "registers": {"lp": "0x10000"},
+  "memory": [
+    {"address": "0xffc120f8", "hex": "00000000", "evidence": "Explicit initial software-visible port3 pin14 PCR state; no external serial reply."},
+    {"address": "0xffc12100", "hex": "00000000", "evidence": "Explicit initial port4 pin0 PCR state."},
+    {"address": "0xffc12104", "hex": "00000000", "evidence": "Explicit initial port4 pin1 PCR state."}
+  ],
+  "checks": [
+    {"name": "original-CSIH1-and-port-init-returns", "kind": "register", "register": "pc", "equals": "0x10000"},
+    {"name": "powered-transmit-receive-mode", "kind": "memory", "address": "0xffd82000", "size": 1, "equals_hex": "e0"},
+    {"name": "EDL-and-CS-inactive-setting", "kind": "memory", "address": "0xffd82010", "size": 4, "equals_hex": "90000000"},
+    {"name": "master-clock-setting", "kind": "memory", "address": "0xffd82014", "size": 2, "equals_hex": "0000"},
+    {"name": "dual-buffer-mode", "kind": "memory", "address": "0xffd83040", "size": 2, "equals_hex": "0001"},
+    {"name": "status-clear-command-not-storage", "kind": "memory", "address": "0xffd82008", "size": 2, "equals_hex": "0000"},
+    {"name": "buffer-pointers-cleared", "kind": "memory", "address": "0xffd83018", "size": 4, "equals_hex": "00000000"},
+    {"name": "actual-CS0-configuration", "kind": "memory", "address": "0xffd83044", "size": 4, "equals_hex": "00e00000"},
+    {"name": "actual-baud-generator", "kind": "memory", "address": "0xffd83068", "size": 2, "equals_hex": "1400"}
+  ]
+}

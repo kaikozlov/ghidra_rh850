@@ -1,0 +1,42 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "guard-gram-read-not-filtered",
+  "entry": {
+    "role": "original-instruction-guard-register-and-permission-regression",
+    "scope": "resolved-address",
+    "address": "0x7e2"
+  },
+  "max_instructions": 1,
+  "stop_addresses": [
+    "0x7e4"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "ep": "0xfeef8000"
+  },
+  "checks": [
+    {
+      "name": "gram-guard-only-filters-writes",
+      "kind": "register",
+      "register": "r1",
+      "equals": "0x12345678"
+    }
+  ],
+  "memory": [
+    {
+      "address": "0xffc49000",
+      "hex": "10feff47",
+      "evidence": "Explicit guard state exercising P1M-E documented configuration/permission behavior, not a firmware patch"
+    },
+    {
+      "address": "0xffc49004",
+      "hex": "00000000",
+      "evidence": "Explicit guard state exercising P1M-E documented configuration/permission behavior, not a firmware patch"
+    },
+    {
+      "address": "0xfeef8000",
+      "hex": "78563412",
+      "evidence": "Explicit guard state exercising P1M-E documented configuration/permission behavior, not a firmware patch"
+    }
+  ]
+}

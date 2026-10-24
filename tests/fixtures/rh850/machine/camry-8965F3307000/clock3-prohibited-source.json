@@ -1,0 +1,14 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "clock3-prohibited-source",
+  "entry": {"role": "original-ecc-word-store-and-readback", "scope": "resolved-address", "address": "0x7e0"},
+  "max_instructions": 4,
+  "stop_addresses": ["0x7e4"],
+  "gpr_fill": "0",
+  "registers": {"ep": "0xfff890c0", "r1": "7"},
+  "expected_fault": {"kind": "prohibited-clock-source", "address": "0xfff890c0", "access": "write"},
+  "checks": [
+    {"name": "prohibited-source-preserves-control", "kind": "memory", "address": "0xfff890c0", "size": 4, "equals_hex": "04000000"},
+    {"name": "prohibited-source-preserves-status", "kind": "memory", "address": "0xfff890c8", "size": 4, "equals_hex": "04000000"}
+  ]
+}

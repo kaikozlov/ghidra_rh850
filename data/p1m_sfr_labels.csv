@@ -31,26 +31,582 @@ address,name,size,access,comment
 0xFFA10100,FECCEMON,2,r,Flash ECC encoder monitor
 0xFFA10104,FECCTMD,2,rw,Flash ECC test-mode control
 0xFFA10108,FDMYECC,2,rw,Flash dummy ECC value
-0xFFA20000,FACI_COMMAND_AREA,1,w,FACI command-issuing area
+0xFFA20000,FACI_COMMAND_AREA,4,w,"FACI command-issuing area: byte commands/count, halfword program data"
+0xFFC0A000,BRAMDAT0,4,rw,Backup data retained across every reset and BIST; initial contents unspecified
+0xFFC0A004,BRAMDAT1,4,rw,Backup data retained across every reset and BIST; initial contents unspecified
+0xFFC0A008,BRAMDAT2,4,rw,Backup data retained across every reset and BIST; initial contents unspecified
+0xFFC0A00C,BRAMDAT3,4,rw,Backup data retained across every reset and BIST; initial contents unspecified
+0xFFC10000,P0,2,rw,
+0xFFC10004,PSR0,4,rw,
+0xFFC1000C,PPR0,2,r,
+0xFFC10010,PM0,2,rw,
+0xFFC10014,PMC0,2,rw,
+0xFFC10018,PFC0,2,rw,
+0xFFC1001C,PFCE0,2,rw,
+0xFFC10020,PMSR0,4,rw,
+0xFFC10024,PMCSR0,4,rw,
+0xFFC10028,PFCAE0,2,rw,
+0xFFC10030,PINV0,4,rw,
+0xFFC10040,P1,2,rw,
+0xFFC10044,PSR1,4,rw,
+0xFFC1004C,PPR1,2,r,
+0xFFC10050,PM1,2,rw,
+0xFFC10054,PMC1,2,rw,
+0xFFC10058,PFC1,2,rw,
+0xFFC1005C,PFCE1,2,rw,
+0xFFC10060,PMSR1,4,rw,
+0xFFC10064,PMCSR1,4,rw,
+0xFFC10068,PFCAE1,2,rw,
+0xFFC10070,PINV1,4,rw,
+0xFFC10080,P2,2,rw,
+0xFFC10084,PSR2,4,rw,
+0xFFC1008C,PPR2,2,r,
+0xFFC10090,PM2,2,rw,
+0xFFC10094,PMC2,2,rw,
+0xFFC10098,PFC2,2,rw,
+0xFFC1009C,PFCE2,2,rw,
+0xFFC100A0,PMSR2,4,rw,
+0xFFC100A4,PMCSR2,4,rw,
+0xFFC100A8,PFCAE2,2,rw,
+0xFFC100B0,PINV2,4,rw,
+0xFFC100C0,P3,2,rw,
+0xFFC100C4,PSR3,4,rw,
+0xFFC100CC,PPR3,2,r,
+0xFFC100D0,PM3,2,rw,
+0xFFC100D4,PMC3,2,rw,
+0xFFC100D8,PFC3,2,rw,
+0xFFC100DC,PFCE3,2,rw,
+0xFFC100E0,PMSR3,4,rw,
+0xFFC100E4,PMCSR3,4,rw,
+0xFFC100E8,PFCAE3,2,rw,
+0xFFC100F0,PINV3,4,rw,
+0xFFC10100,P4,2,rw,
+0xFFC10104,PSR4,4,rw,
+0xFFC1010C,PPR4,2,r,
+0xFFC10110,PM4,2,rw,
+0xFFC10114,PMC4,2,rw,
+0xFFC10118,PFC4,2,rw,
+0xFFC1011C,PFCE4,2,rw,
+0xFFC10120,PMSR4,4,rw,
+0xFFC10124,PMCSR4,4,rw,
+0xFFC10128,PFCAE4,2,rw,
+0xFFC10130,PINV4,4,rw,
+0xFFC10140,P5,2,rw,
+0xFFC10144,PSR5,4,rw,
+0xFFC1014C,PPR5,2,r,
+0xFFC10150,PM5,2,rw,
+0xFFC10154,PMC5,2,rw,
+0xFFC10158,PFC5,2,rw,
+0xFFC1015C,PFCE5,2,rw,
+0xFFC10160,PMSR5,4,rw,
+0xFFC10164,PMCSR5,4,rw,
+0xFFC10168,PFCAE5,2,rw,
+0xFFC10170,PINV5,4,rw,
+0xFFC12000,PCR0_0,4,rw,
+0xFFC12004,PCR0_1,4,rw,
+0xFFC12008,PCR0_2,4,rw,
+0xFFC1200C,PCR0_3,4,rw,
+0xFFC12010,PCR0_4,4,rw,
+0xFFC12014,PCR0_5,4,rw,
+0xFFC12018,PCR0_6,4,rw,
+0xFFC1201C,PCR0_7,4,rw,
+0xFFC12020,PCR0_8,4,rw,
+0xFFC12024,PCR0_9,4,rw,
+0xFFC12028,PCR0_10,4,rw,
+0xFFC1202C,PCR0_11,4,rw,
+0xFFC12030,PCR0_12,4,rw,
+0xFFC12034,PCR0_13,4,rw,
+0xFFC12038,PCR0_14,4,rw,
+0xFFC12040,PCR1_0,4,rw,
+0xFFC12044,PCR1_1,4,rw,
+0xFFC12048,PCR1_2,4,rw,
+0xFFC1204C,PCR1_3,4,rw,
+0xFFC12050,PCR1_4,4,rw,
+0xFFC12080,PCR2_0,4,rw,
+0xFFC12084,PCR2_1,4,rw,
+0xFFC12088,PCR2_2,4,rw,
+0xFFC1208C,PCR2_3,4,rw,
+0xFFC12090,PCR2_4,4,rw,
+0xFFC12094,PCR2_5,4,rw,
+0xFFC12098,PCR2_6,4,rw,
+0xFFC1209C,PCR2_7,4,rw,
+0xFFC120A0,PCR2_8,4,rw,
+0xFFC120A4,PCR2_9,4,rw,
+0xFFC120A8,PCR2_10,4,rw,
+0xFFC120AC,PCR2_11,4,rw,
+0xFFC120B0,PCR2_12,4,rw,
+0xFFC120B4,PCR2_13,4,rw,
+0xFFC120B8,PCR2_14,4,rw,
+0xFFC120BC,PCR2_15,4,rw,
+0xFFC120C0,PCR3_0,4,rw,
+0xFFC120C4,PCR3_1,4,rw,
+0xFFC120C8,PCR3_2,4,rw,
+0xFFC120CC,PCR3_3,4,rw,
+0xFFC120D0,PCR3_4,4,rw,
+0xFFC120D4,PCR3_5,4,rw,
+0xFFC120D8,PCR3_6,4,rw,
+0xFFC120DC,PCR3_7,4,rw,
+0xFFC120E0,PCR3_8,4,rw,
+0xFFC120E4,PCR3_9,4,rw,
+0xFFC120E8,PCR3_10,4,rw,
+0xFFC120EC,PCR3_11,4,rw,
+0xFFC120F0,PCR3_12,4,rw,
+0xFFC120F4,PCR3_13,4,rw,
+0xFFC120F8,PCR3_14,4,rw,
+0xFFC12100,PCR4_0,4,rw,
+0xFFC12104,PCR4_1,4,rw,
+0xFFC12108,PCR4_2,4,rw,
+0xFFC1210C,PCR4_3,4,rw,
+0xFFC12110,PCR4_4,4,rw,
+0xFFC12114,PCR4_5,4,rw,
+0xFFC12118,PCR4_6,4,rw,
+0xFFC1211C,PCR4_7,4,rw,
+0xFFC12120,PCR4_8,4,rw,
+0xFFC12124,PCR4_9,4,rw,
+0xFFC12128,PCR4_10,4,rw,
+0xFFC1212C,PCR4_11,4,rw,
+0xFFC12130,PCR4_12,4,rw,
+0xFFC12134,PCR4_13,4,rw,
+0xFFC12138,PCR4_14,4,rw,
+0xFFC12140,PCR5_0,4,rw,
+0xFFC12144,PCR5_1,4,rw,
+0xFFC12148,PCR5_2,4,rw,
+0xFFC1214C,PCR5_3,4,rw,
+0xFFC12150,PCR5_4,4,rw,
+0xFFC12154,PCR5_5,4,rw,
+0xFFC12158,PCR5_6,4,rw,
+0xFFC1215C,PCR5_7,4,rw,
+0xFFC12160,PCR5_8,4,rw,
+0xFFC12164,PCR5_9,4,rw,
+0xFFC12168,PCR5_10,4,rw,
+0xFFC1216C,PCR5_11,4,rw,
+0xFFC12170,PCR5_12,4,rw,
+0xFFC12174,PCR5_13,4,rw,
+0xFFC12178,PCR5_14,4,rw,
+0xFFC1217C,PCR5_15,4,rw,
+0xFFC14000,PIBC0,2,rw,
+0xFFC14004,PBDC0,2,rw,
+0xFFC14008,PIPC0,2,rw,
+0xFFC1400C,PU0,2,rw,
+0xFFC14010,PD0,2,rw,
+0xFFC14014,PODC0,4,rw,
+0xFFC14018,PDSC0,4,rw,
+0xFFC14028,PUCC0,4,rw,
+0xFFC1402C,PISA0,2,rw,
+0xFFC1403C,PODCE0,4,rw,
+0xFFC14040,PIBC1,2,rw,
+0xFFC14044,PBDC1,2,rw,
+0xFFC14048,PIPC1,2,rw,
+0xFFC1404C,PU1,2,rw,
+0xFFC14050,PD1,2,rw,
+0xFFC14054,PODC1,4,rw,
+0xFFC14058,PDSC1,4,rw,
+0xFFC14068,PUCC1,4,rw,
+0xFFC1406C,PISA1,2,rw,
+0xFFC1407C,PODCE1,4,rw,
+0xFFC14080,PIBC2,2,rw,
+0xFFC14084,PBDC2,2,rw,
+0xFFC14088,PIPC2,2,rw,
+0xFFC1408C,PU2,2,rw,
+0xFFC14090,PD2,2,rw,
+0xFFC14094,PODC2,4,rw,
+0xFFC14098,PDSC2,4,rw,
+0xFFC140A8,PUCC2,4,rw,
+0xFFC140AC,PISA2,2,rw,
+0xFFC140BC,PODCE2,4,rw,
+0xFFC140C0,PIBC3,2,rw,
+0xFFC140C4,PBDC3,2,rw,
+0xFFC140C8,PIPC3,2,rw,
+0xFFC140CC,PU3,2,rw,
+0xFFC140D0,PD3,2,rw,
+0xFFC140D4,PODC3,4,rw,
+0xFFC140D8,PDSC3,4,rw,
+0xFFC140E8,PUCC3,4,rw,
+0xFFC140EC,PISA3,2,rw,
+0xFFC140FC,PODCE3,4,rw,
+0xFFC14100,PIBC4,2,rw,
+0xFFC14104,PBDC4,2,rw,
+0xFFC14108,PIPC4,2,rw,
+0xFFC1410C,PU4,2,rw,
+0xFFC14110,PD4,2,rw,
+0xFFC14114,PODC4,4,rw,
+0xFFC14118,PDSC4,4,rw,
+0xFFC14128,PUCC4,4,rw,
+0xFFC1412C,PISA4,2,rw,
+0xFFC1413C,PODCE4,4,rw,
+0xFFC14140,PIBC5,2,rw,
+0xFFC14144,PBDC5,2,rw,
+0xFFC14148,PIPC5,2,rw,
+0xFFC1414C,PU5,2,rw,
+0xFFC14150,PD5,2,rw,
+0xFFC14154,PODC5,4,rw,
+0xFFC14158,PDSC5,4,rw,
+0xFFC14168,PUCC5,4,rw,
+0xFFC1417C,PODCE5,4,rw,
+0xFFC20000,JP0,1,rw,
+0xFFC20004,JPSR0,4,rw,
+0xFFC2000C,JPPR0,1,r,JPPR0 six pin-input bits; explicitly declared halfword read zero-extends native value
+0xFFC20010,JPM0,1,rw,
+0xFFC20014,JPMC0,1,rw,
+0xFFC2001C,JPFCE0,1,rw,
+0xFFC20020,JPMSR0,4,rw,
+0xFFC20024,JPMCSR0,4,rw,
+0xFFC22000,JPCR0_0,4,rw,
+0xFFC22004,JPCR0_1,4,rw,
+0xFFC22008,JPCR0_2,4,rw,
+0xFFC2200C,JPCR0_3,4,rw,
+0xFFC22010,JPCR0_4,4,rw,
+0xFFC22014,JPCR0_5,4,rw,
+0xFFC24000,JPIBC0,1,rw,
+0xFFC24004,JPBDC0,1,rw,
+0xFFC2400C,JPU0,1,rw,
+0xFFC24010,JPD0,1,rw,
+0xFFC24014,JPODC0,4,rw,
+0xFFC24018,JPDSC0,4,rw,
+0xFFC24028,JPUCC0,4,rw,
+0xFFC2402C,JPISA0,1,rw,
+0xFFC30000,DNFA0CTL,1,rw,
+0xFFC30004,DNFA0EN,2,rw,
+0xFFC30100,DNFA1CTL,1,rw,
+0xFFC30104,DNFA1EN,2,rw,
+0xFFC30200,DNFA2CTL,1,rw,
+0xFFC30204,DNFA2EN,2,rw,
+0xFFC30300,DNFA3CTL,1,rw,
+0xFFC30304,DNFA3EN,2,rw,
+0xFFC30400,DNFA4CTL,1,rw,
+0xFFC30404,DNFA4EN,2,rw,
+0xFFC30500,DNFA5CTL,1,rw,
+0xFFC30504,DNFA5EN,2,rw,
+0xFFC30600,DNFA6CTL,1,rw,
+0xFFC30604,DNFA6EN,2,rw,
+0xFFC30700,DNFA7CTL,1,rw,
+0xFFC30704,DNFA7EN,2,rw,
+0xFFC30800,DNFA8CTL,1,rw,
+0xFFC30804,DNFA8EN,2,rw,
+0xFFC30900,DNFA9CTL,1,rw,
+0xFFC30904,DNFA9EN,2,rw,
+0xFFC30A00,DNFA10CTL,1,rw,
+0xFFC30A04,DNFA10EN,2,rw,
+0xFFC30B00,DNFA11CTL,1,rw,
+0xFFC30B04,DNFA11EN,2,rw,
+0xFFC30C00,DNFA12CTL,1,rw,
+0xFFC30C04,DNFA12EN,2,rw,
+0xFFC30D00,DNFA13CTL,1,rw,
+0xFFC30D04,DNFA13EN,2,rw,
+0xFFC30E00,DNFA14CTL,1,rw,
+0xFFC30E04,DNFA14EN,2,rw,
+0xFFC30F00,DNFA15CTL,1,rw,
+0xFFC30F04,DNFA15EN,2,rw,
+0xFFC31000,DNFA16CTL,1,rw,
+0xFFC31004,DNFA16EN,2,rw,
+0xFFC31100,DNFA17CTL,1,rw,
+0xFFC31104,DNFA17EN,2,rw,
+0xFFC31200,DNFA18CTL,1,rw,
+0xFFC31204,DNFA18EN,2,rw,
+0xFFC31300,DNFA19CTL,1,rw,
+0xFFC31304,DNFA19EN,2,rw,
+0xFFC31400,DNFA20CTL,1,rw,
+0xFFC31404,DNFA20EN,2,rw,
+0xFFC31500,DNFA21CTL,1,rw,
+0xFFC31504,DNFA21EN,2,rw,
+0xFFC31600,DNFA22CTL,1,rw,
+0xFFC31604,DNFA22EN,2,rw,
+0xFFC31700,DNFA23CTL,1,rw,
+0xFFC31704,DNFA23EN,2,rw,
+0xFFC31800,DNFA24CTL,1,rw,
+0xFFC31804,DNFA24EN,2,rw,
+0xFFC31900,DNFA25CTL,1,rw,
+0xFFC31904,DNFA25EN,2,rw,
+0xFFC31A00,DNFA26CTL,1,rw,
+0xFFC31A04,DNFA26EN,2,rw,
+0xFFC31B00,DNFA27CTL,1,rw,
+0xFFC31B04,DNFA27EN,2,rw,
+0xFFC31C00,DNFA28CTL,1,rw,
+0xFFC31C04,DNFA28EN,2,rw,
+0xFFC31D00,DNFA29CTL,1,rw,
+0xFFC31D04,DNFA29EN,2,rw,
+0xFFC31E00,DNFA30CTL,1,rw,
+0xFFC31E04,DNFA30EN,2,rw,
+0xFFC31F00,DNFA31CTL,1,rw,
+0xFFC31F04,DNFA31EN,2,rw,
+0xFFC32000,DNFA32CTL,1,rw,
+0xFFC32004,DNFA32EN,2,rw,
+0xFFC32100,DNFA33CTL,1,rw,
+0xFFC32104,DNFA33EN,2,rw,
+0xFFC32200,DNFA34CTL,1,rw,
+0xFFC32204,DNFA34EN,2,rw,
+0xFFC32300,DNFA35CTL,1,rw,
+0xFFC32304,DNFA35EN,2,rw,
+0xFFC32400,DNFA36CTL,1,rw,
+0xFFC32404,DNFA36EN,2,rw,
+0xFFC32500,DNFA37CTL,1,rw,
+0xFFC32504,DNFA37EN,2,rw,
+0xFFC32600,DNFA38CTL,1,rw,
+0xFFC32604,DNFA38EN,2,rw,
+0xFFC32700,DNFA39CTL,1,rw,
+0xFFC32704,DNFA39EN,2,rw,
+0xFFC32800,DNFA40CTL,1,rw,
+0xFFC32804,DNFA40EN,2,rw,
+0xFFC32900,DNFA41CTL,1,rw,
+0xFFC32904,DNFA41EN,2,rw,
+0xFFC32A00,DNFA42CTL,1,rw,
+0xFFC32A04,DNFA42EN,2,rw,
+0xFFC32B00,DNFA43CTL,1,rw,
+0xFFC32B04,DNFA43EN,2,rw,
+0xFFC34000,FCLA0CTL0,1,rw,
+0xFFC34020,FCLA1CTL0,1,rw,
+0xFFC34024,FCLA1CTL1,1,rw,
+0xFFC34028,FCLA1CTL2,1,rw,
+0xFFC3402C,FCLA1CTL3,1,rw,
+0xFFC34030,FCLA1CTL4,1,rw,
+0xFFC34034,FCLA1CTL5,1,rw,
+0xFFC34038,FCLA1CTL6,1,rw,
+0xFFC3403C,FCLA1CTL7,1,rw,
+0xFFC34040,FCLA2CTL0,1,rw,
+0xFFC34044,FCLA2CTL1,1,rw,
+0xFFC34048,FCLA2CTL2,1,rw,
+0xFFC3404C,FCLA2CTL3,1,rw,
+0xFFC34050,FCLA2CTL4,1,rw,
+0xFFC34060,FCLA3CTL0,1,rw,
+0xFFC34064,FCLA3CTL1,1,rw,
+0xFFC34068,FCLA3CTL2,1,rw,
+0xFFC3406C,FCLA3CTL3,1,rw,
+0xFFC34070,FCLA3CTL4,1,rw,
+0xFFC34074,FCLA3CTL5,1,rw,
+0xFFC34080,FCLA4CTL0,1,rw,
+0xFFC34084,FCLA4CTL1,1,rw,
+0xFFC40000,FSGD5APROT00,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC40004,FSGD5ASPID00,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40008,FSGD5APROT01,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC4000C,FSGD5ASPID01,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40010,FSGD5APROT02,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC40014,FSGD5ASPID02,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40018,FSGD5APROT03,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC4001C,FSGD5ASPID03,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40020,FSGD5APROT04,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC40024,FSGD5ASPID04,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40028,FSGD5APROT05,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC4002C,FSGD5ASPID05,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40030,FSGD5APROT06,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC40034,FSGD5ASPID06,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40038,FSGD5APROT07,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC4003C,FSGD5ASPID07,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40040,FSGD5APROT08,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC40044,FSGD5ASPID08,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40048,FSGD5APROT09,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC4004C,FSGD5ASPID09,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40050,FSGD5APROT10,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC40054,FSGD5ASPID10,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40058,FSGD5APROT11,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC4005C,FSGD5ASPID11,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40060,FSGD5APROT12,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC40064,FSGD5ASPID12,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40068,FSGD5APROT13,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC4006C,FSGD5ASPID13,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40070,FSGD5APROT14,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC40074,FSGD5ASPID14,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40078,FSGD5APROT15,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC4007C,FSGD5ASPID15,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40080,FSGD5BPROT00,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC40084,FSGD5BSPID00,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40088,FSGD5BPROT01,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC4008C,FSGD5BSPID01,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40090,FSGD5BPROT02,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC40094,FSGD5BSPID02,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40098,FSGD5BPROT03,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC4009C,FSGD5BSPID03,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC400B0,FSGD5BPROT06,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC400B4,FSGD5BSPID06,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC400B8,FSGD5BPROT07,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC400BC,FSGD5BSPID07,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC400C0,FSGD5BPROT08,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC400C4,FSGD5BSPID08,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC400C8,FSGD5BPROT09,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC400CC,FSGD5BSPID09,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC400D0,FSGD5BPROT10,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC400D4,FSGD5BSPID10,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC400D8,FSGD5BPROT11,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC400DC,FSGD5BSPID11,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC400E0,FSGD5BPROT12,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC400E4,FSGD5BSPID12,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC400E8,FSGD5BPROT13,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC400EC,FSGD5BSPID13,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC400F0,FSGD5BPROT14,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC400F4,FSGD5BSPID14,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC400F8,FSGD5BPROT15,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC400FC,FSGD5BSPID15,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40100,FSGD5CPROT00,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC40104,FSGD5CSPID00,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40108,FSGD5CPROT01,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC4010C,FSGD5CSPID01,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40110,FSGD5CPROT02,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC40114,FSGD5CSPID02,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40118,FSGD5CPROT03,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC4011C,FSGD5CSPID03,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40120,FSGD5CPROT04,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC40124,FSGD5CSPID04,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40128,FSGD5CPROT05,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC4012C,FSGD5CSPID05,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC40400,ERRSLV5CTL,1,w,
+0xFFC40404,ERRSLV5STAT,4,r,
+0xFFC4040C,ERRSLV5TYPE,4,r,
+0xFFC40800,APEC2ECCCTL,4,rw,Peripheral IP group5 address/data ECC control; protected low4 fields
+0xFFC40804,APEC2ERRINT,4,rw,ECC error-report enable latches; reserved bits read reset; ECM delivery not synthesized
+0xFFC40808,APEC2STCLR,4,w,Write-one selected error flag/capture clear; zero is a no-op; reads zero
+0xFFC4080C,APEC2OVFSTR,4,r,ECC error capture overflow latch; bit0 ERROVF
+0xFFC40810,APEC21STERSTR,4,r,ECC error status latches; only documented flag bits are cleared
+0xFFC40850,APEC21STEADR0,4,r,ECC error captured address
+0xFFC49000,MGDGRPROT0,4,rw,Global-RAM write guard LOCK and EN; reserved bits must retain reset
+0xFFC49004,MGDGRSPID0,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC49008,MGDGRBAD0,4,rw,Global-RAM guard address/compare-valid bits20:9; 512-byte granularity
+0xFFC4900C,MGDGRADV0,4,rw,Global-RAM guard address/compare-valid bits20:9; 512-byte granularity
+0xFFC49010,MGDGRPROT1,4,rw,Global-RAM write guard LOCK and EN; reserved bits must retain reset
+0xFFC49014,MGDGRSPID1,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC49018,MGDGRBAD1,4,rw,Global-RAM guard address/compare-valid bits20:9; 512-byte granularity
+0xFFC4901C,MGDGRADV1,4,rw,Global-RAM guard address/compare-valid bits20:9; 512-byte granularity
+0xFFC49020,MGDGRPROT2,4,rw,Global-RAM write guard LOCK and EN; reserved bits must retain reset
+0xFFC49024,MGDGRSPID2,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC49028,MGDGRBAD2,4,rw,Global-RAM guard address/compare-valid bits20:9; 512-byte granularity
+0xFFC4902C,MGDGRADV2,4,rw,Global-RAM guard address/compare-valid bits20:9; 512-byte granularity
+0xFFC49030,MGDGRPROT3,4,rw,Global-RAM write guard LOCK and EN; reserved bits must retain reset
+0xFFC49034,MGDGRSPID3,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC49038,MGDGRBAD3,4,rw,Global-RAM guard address/compare-valid bits20:9; 512-byte granularity
+0xFFC4903C,MGDGRADV3,4,rw,Global-RAM guard address/compare-valid bits20:9; 512-byte granularity
+0xFFC49040,MGDGRPROT4,4,rw,Global-RAM write guard LOCK and EN; reserved bits must retain reset
+0xFFC49044,MGDGRSPID4,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC49048,MGDGRBAD4,4,rw,Global-RAM guard address/compare-valid bits20:9; 512-byte granularity
+0xFFC4904C,MGDGRADV4,4,rw,Global-RAM guard address/compare-valid bits20:9; 512-byte granularity
+0xFFC49050,MGDGRPROT5,4,rw,Global-RAM write guard LOCK and EN; reserved bits must retain reset
+0xFFC49054,MGDGRSPID5,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC49058,MGDGRBAD5,4,rw,Global-RAM guard address/compare-valid bits20:9; 512-byte granularity
+0xFFC4905C,MGDGRADV5,4,rw,Global-RAM guard address/compare-valid bits20:9; 512-byte granularity
+0xFFC49060,MGDGRPROT6,4,rw,Global-RAM write guard LOCK and EN; reserved bits must retain reset
+0xFFC49064,MGDGRSPID6,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC49068,MGDGRBAD6,4,rw,Global-RAM guard address/compare-valid bits20:9; 512-byte granularity
+0xFFC4906C,MGDGRADV6,4,rw,Global-RAM guard address/compare-valid bits20:9; 512-byte granularity
+0xFFC49070,MGDGRPROT7,4,rw,Global-RAM write guard LOCK and EN; reserved bits must retain reset
+0xFFC49074,MGDGRSPID7,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC49078,MGDGRBAD7,4,rw,Global-RAM guard address/compare-valid bits20:9; 512-byte granularity
+0xFFC4907C,MGDGRADV7,4,rw,Global-RAM guard address/compare-valid bits20:9; 512-byte granularity
+0xFFC49100,MGDGRSCTL_VCI2GRAM,4,rw,
+0xFFC49104,MGDGRSSTAT_VCI2GRAM,4,r,
+0xFFC4910C,MGDGRSTYPE_VCI2GRAM,4,r,
+0xFFC49200,MGDGRSCTL_PE1,4,rw,
+0xFFC49204,MGDGRSSTAT_PE1,4,r,
+0xFFC4920C,MGDGRSTYPE_PE1,4,r,
+0xFFC49700,MGDGRSCTL_AXI2GRAM,4,rw,
+0xFFC49704,MGDGRSSTAT_AXI2GRAM,4,r,
+0xFFC4970C,MGDGRSTYPE_AXI2GRAM,4,r,
+0xFFC4A200,PGERRSTATCTL_PE1,4,rw,
+0xFFC4A204,PGERRSTAT_PE1,4,r,
+0xFFC4A208,PGERRINFO_PE1,4,r,
+0xFFC4C000,APBFSGDPROT_PDMACM_A,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC4C004,APBFSGDSPID_PDMACM_A,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC4C008,APBFSGDPROT_PDMACM_B,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC4C00C,APBFSGDSPID_PDMACM_B,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC4C010,APBFSGDPROT_PDMACH_A,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC4C014,APBFSGDSPID_PDMACH_A,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC4C018,APBFSGDPROT_PDMACH_B,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC4C01C,APBFSGDSPID_PDMACH_B,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC4C020,APBFSGDPROT_INTC2_A,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC4C024,APBFSGDSPID_INTC2_A,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC4C028,APBFSGDPROT_INTC2_B,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC4C02C,APBFSGDSPID_INTC2_B,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC4C040,APBFSGDPROT_PBG_A,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC4C044,APBFSGDSPID_PBG_A,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC4C048,APBFSGDPROT_PBG_B,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC4C04C,APBFSGDSPID_PBG_B,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC4C050,APBFSGDPROT_SP1_A,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC4C054,APBFSGDSPID_SP1_A,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC4C058,APBFSGDPROT_SP1_B,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC4C05C,APBFSGDSPID_SP1_B,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC4C070,APBFSGDPROT_SP4_A,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC4C074,APBFSGDSPID_SP4_A,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC4C078,APBFSGDPROT_SP4_B,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC4C07C,APBFSGDSPID_SP4_B,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC4C800,ERRSLVCTL_PFSS0,4,w,
+0xFFC4C804,ERRSLVSTAT_PFSS0,4,r,
+0xFFC4C80C,ERRSLVTYPE_PFSS0,4,r,
+0xFFC4C810,ERRSLVCTL_PFSS1,4,w,
+0xFFC4C814,ERRSLVSTAT_PFSS1,4,r,
+0xFFC4C81C,ERRSLVTYPE_PFSS1,4,r,
+0xFFC4CA00,PDMA_COMP_CNTRL,4,rw,PDMA checker-output error injection; PROT=10 authorizes writes and reads as zero
 0xFFC59008,BFASELR,2,rw,Boot-flash area selector
 0xFFC59810,EEPRDCYCL,1,rw,"DataFlash read-cycle code; low4 bits, codes0..2 prohibited; model does not synthesize timing"
+0xFFC5A000,FSGD0PROT00,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC5A004,FSGD0SPID00,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC5A008,FSGD0PROT01,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC5A00C,FSGD0SPID01,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC5A020,FSGD0PROT04,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC5A024,FSGD0SPID04,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC5A028,FSGD0PROT05,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC5A02C,FSGD0SPID05,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC5A030,FSGD0PROT06,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC5A034,FSGD0SPID06,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC5A038,FSGD0PROT07,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC5A03C,FSGD0SPID07,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC5A050,FSGD0PROT10,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC5A054,FSGD0SPID10,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC5A058,FSGD0PROT11,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFC5A05C,FSGD0SPID11,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFC5A100,ERRSLV0CTL,1,w,
+0xFFC5A104,ERRSLV0STAT,4,r,
+0xFFC5A10C,ERRSLV0TYPE,4,r,
 0xFFC5B000,DFECCCTL,4,rw,"DataFlash ECC control; PROT[15:14]=01 permits low2-bit update, protection bits read0"
 0xFFC5B004,DFERSTR,4,r,DataFlash ECC status: bit0 SEDF and bit1 DEDF; error generation is an explicit external input
 0xFFC5B008,DFERSTC,4,w,DataFlash ECC status clear: writing low-bit ERRCLR=1 clears SEDF/DEDF; zero has no effect
+0xFFC5B00C,DFOVFSTR,4,r,DataFlash error capture overflow latch; bit0 ERROVF
+0xFFC5B010,DFOVFSTC,4,w,Write-one selected error flag/capture clear; zero is a no-op; readback is not specified
 0xFFC5B014,DFERRINT,4,rw,DataFlash ECC notification enables EOVFIE/DEDIE/SEDIE in low3 bits; ECM delivery not synthesized
 0xFFC5B01C,DFTSTCTL,4,rw,"DataFlash ECC test control; PROT[15:14]=01 permits ECCTST bit0 update, protection bits read0"
 0xFFC5D000,ICUSCMD,4,rw,ICU-S command register; recovered MAC generate writes (selector<<16)|5 and CMAC verify writes (selector<<16)|7
 0xFFC5D004,ICUSDAT,4,rw,ICU-S data/parameter word written beside ICUSCMD (firmware role)
 0xFFC5D008,ICUSOUT,4,rw,ICU-S output word consumed by recovered completion callbacks
 0xFFC5D00C,ICUSSTS,4,rw,ICU-S status; driver polls bit 0 as busy/ready
+0xFFC5D010,ICUSREG10,4,r,ICU-S offset10 word; the recovered diagnostic callback encodes set bits in its low twelve bits as errors
 0xFFC5D014,ICUSSTS2,4,rw,ICU-S companion status; driver polls low bits with ICUSSTS
 0xFFC5D018,ICUSIRQSTS,4,rw,ICU-S interrupt/status word read by the recovered service dispatcher
 0xFFC5D01C,ICUSPARAM,4,rw,ICU-S operation parameter written by recovered command setup
 0xFFC5D020,ICUSREG20,4,r,"ICU-S offset20 word: exact Camry readers consume bit0; model permits observed word reads only, without a hardware reset value or bit meaning"
 0xFFC5D024,ICUSCTL,4,rw,ICU-S control/acknowledgement word written by recovered callbacks and reset paths
-0xFFC62000,UCFERRINT,4,rw,CodeFlash error-information control
-0xFFC62004,UCFSERSTCLR,4,w,CodeFlash ECC single-error status clear
-0xFFC62008,UCFDERSTCLR,4,w,CodeFlash ECC double-error and address-parity status clear
+0xFFC5D090,ICUSREG90,4,rw,ICU-S word exercised by the original startup register-pattern self-check
+0xFFC5D094,ICUSREG94,4,rw,ICU-S word exercised by the original startup register-pattern self-check
+0xFFC5D098,ICUSREG98,4,rw,ICU-S word exercised by the original startup register-pattern self-check
+0xFFC5D09C,ICUSREG9C,4,rw,ICU-S word exercised by the original startup register-pattern self-check
+0xFFC5D0A0,ICUSREGA0,4,rw,ICU-S word exercised by the original startup register-pattern self-check
+0xFFC5D0A4,ICUSREGA4,4,rw,ICU-S word exercised by the original startup register-pattern self-check
+0xFFC5D0A8,ICUSREGA8,4,rw,ICU-S word exercised by the original startup register-pattern self-check
+0xFFC5D0AC,ICUSREGAC,4,rw,ICU-S word exercised by the original startup register-pattern self-check
+0xFFC5D0B0,ICUSREGB0,4,rw,ICU-S word exercised by the original startup register-pattern self-check
+0xFFC5D0B4,ICUSREGB4,4,rw,ICU-S word exercised by the original startup register-pattern self-check
+0xFFC5D0B8,ICUSREGB8,4,rw,ICU-S word exercised by the original startup register-pattern self-check
+0xFFC5D0BC,ICUSREGBC,4,rw,ICU-S word exercised by the original startup register-pattern self-check
+0xFFC5D0C0,ICUSREGC0,4,w,Opaque ICU-S word written during original startup initialization; no additional command or read semantics assigned
+0xFFC5D0E0,ICUSREGE0,4,rw,ICU-S word exercised by the original startup register-pattern self-check
+0xFFC5D0E4,ICUSREGE4,4,w,Opaque ICU-S word written during original startup initialization; no additional command or read semantics assigned
+0xFFC5D0F0,ICUSREGF0,4,rw,ICU-S word exercised by the original startup register-pattern self-check
+0xFFC5D0F4,ICUSREGF4,4,rw,ICU-S word exercised by the original startup register-pattern self-check
+0xFFC5D0F8,ICUSREGF8,4,rw,ICU-S word exercised by the original startup register-pattern self-check
+0xFFC5D0FC,ICUSREGFC,4,rw,ICU-S word exercised by the original startup register-pattern self-check
+0xFFC60408,IDSERSTCLR_PE1,4,w,"Instruction cache data SED clear; bank-select bits 0/1 clear status bits 0/8, overflow bits 0/1 and corresponding captured addresses; reads zero"
+0xFFC6040C,IDDERSTCLR_PE1,4,w,Instruction cache data DED clear; bank-select bits 0/1 clear status bits 1/9 and corresponding captured addresses; reads zero
+0xFFC60410,IDOVFSTR_PE1,4,r,"Instruction cache data SED overflow flags, bank 0/1 in bits 0/1"
+0xFFC60420,IDSERSTR_PE1,4,r,"Instruction cache data SED flags, bank 0/1 in bits 0/8"
+0xFFC60450,IDDERSTR_PE1,4,r,"Instruction cache data DED flags, bank 0/1 in bits 1/9"
+0xFFC60460,IDSEDADR0_PE1,4,r,"Instruction cache data bank 0 SED captured internal address, bits 8:0"
+0xFFC60464,IDSEDADR1_PE1,4,r,"Instruction cache data bank 1 SED captured internal address, bits 8:0"
+0xFFC604E0,IDDEDADR0_PE1,4,r,"Instruction cache data bank 0 DED captured internal address, bits 8:0"
+0xFFC604E4,IDDEDADR1_PE1,4,r,"Instruction cache data bank 1 DED captured internal address, bits 8:0"
+0xFFC61408,ITSERSTCLR_PE1,4,w,"Instruction cache tag SED clear; bit 0 clears SED status, overflow and captured address; reads zero"
+0xFFC6140C,ITDERSTCLR_PE1,4,w,Instruction cache tag DED clear; bit 0 clears DED status bit 1 and captured address; reads zero
+0xFFC61410,ITOVFSTR_PE1,4,r,Instruction cache tag SED overflow flag bit 0; reserved bit 4 is undefined after reset
+0xFFC61420,ITSERSTR_PE1,4,r,Instruction cache tag SED status flag bit 0
+0xFFC61450,ITDERSTR_PE1,4,r,Instruction cache tag DED status flag bit 1
+0xFFC61460,ITSEDADR_PE1,4,r,"Instruction cache tag SED captured address, entry bits 7:0 and way group bit 8"
+0xFFC614E0,ITDEDADR_PE1,4,r,"Instruction cache tag DED captured address, entry bits 7:0 and way group bit 8"
+0xFFC62000,UCFERRINT,4,rw,"CodeFlash error-report enables: SEDIE0, DEDIE1, APEIE2, SEOVFIE6; ECM delivery not synthesized"
+0xFFC62004,UCFSERSTCLR,4,w,CodeFlash ECC single-error status clear; reads always return zero
+0xFFC62008,UCFDERSTCLR,4,w,CodeFlash ECC double-error and address-parity status clear; reads always return zero
 0xFFC6200C,UCFOVFSTR,4,r,CodeFlash single-error count overflow status
 0xFFC62020,UCFSERSTR,4,r,CodeFlash ECC single-error status
 0xFFC62030,UCFDERSTR,4,r,CodeFlash ECC double-error and address-parity status
@@ -59,11 +615,177 @@ address,name,size,access,comment
 0xFFC62048,UCF3SEDADR,4,r,CodeFlash third single-error address
 0xFFC6204C,UCF4SEDADR,4,r,CodeFlash fourth single-error address
 0xFFC620C0,UCFDEDADR,4,r,CodeFlash double-error or address-parity error address
-0xFFC62100,CFAPCTL,4,rw,CodeFlash address-parity control
-0xFFC62200,CFECCCTL_VCI2CFBA,4,rw,CodeFlash ECC control for system-interconnect access
-0xFFC622F0,CFSTSTCTL_VCI2CFBA,4,rw,CodeFlash ECC sub-test control for system-interconnect access
-0xFFC62400,CFECCCTL_PE1,4,rw,CodeFlash ECC control for PE1 access
-0xFFC624F0,CFSTSTCTL_PE1,4,rw,CodeFlash ECC sub-test control for PE1 access
+0xFFC62100,CFAPCTL,4,rw,"CodeFlash address-parity control; PROT[15:14]=01 permits APTESTA/APARIDIS low2-bit update, protection bits read0; no error injection synthesized"
+0xFFC62200,CFECCCTL_VCI2CFBA,4,rw,"CodeFlash ECC control for system-interconnect access; PROT[15:14]=01 permits SECDIS/ECCDIS low2-bit update, protection bits read0"
+0xFFC622F0,CFSTSTCTL_VCI2CFBA,4,rw,"CodeFlash ECC sub-test control for system-interconnect access; keyed ECCTST bit0, key reads zero"
+0xFFC62400,CFECCCTL_PE1,4,rw,"CodeFlash ECC control for PE1 access; PROT[15:14]=01 permits SECDIS/ECCDIS low2-bit update, protection bits read0"
+0xFFC624F0,CFSTSTCTL_PE1,4,rw,"CodeFlash ECC sub-test control for PE1 access; keyed ECCTST bit0, key reads zero"
+0xFFC62C00,CFECCCTL_VCI2CFBB,4,rw,"CodeFlash address-ECC control; protected ASECDIS/AECCDIS at bits3:2, bits1:0 reserved"
+0xFFC62C04,CFERRINT_VCI2CFBB,4,rw,ECC error-report enable latches; reserved bits read reset; ECM delivery not synthesized
+0xFFC62C08,CFERSTCLR_VCI2CFBB,4,w,Write-one selected error flag/capture clear; zero is a no-op; reads zero
+0xFFC62C0C,CFOVFSTR_VCI2CFBB,4,r,ECC error capture overflow latch; bit0 ERROVF
+0xFFC62C10,CFERSTR_VCI2CFBB,4,r,ECC error status latches; only documented flag bits are cleared
+0xFFC62C50,CFEADR0_VCI2CFBB,4,r,ECC error captured address
+0xFFC63400,IFECCCTL_PE1,4,rw,Instruction-fetch ECC control; protected SECDIS/ECCDIS fields
+0xFFC63404,IFERRINT_PE1,4,rw,ECC error-report enable latches; reserved bits read reset; ECM delivery not synthesized
+0xFFC63408,IFERSTCLR_PE1,4,w,Write-one selected error flag/capture clear; zero is a no-op; reads zero
+0xFFC6340C,IFOVFSTR_PE1,4,r,ECC error capture overflow latch; bit0 ERROVF
+0xFFC63410,IFERSTR_PE1,4,r,ECC error status latches; only documented flag bits are cleared
+0xFFC63450,IFERADR_PE1,4,r,ECC error captured address
+0xFFC64000,UGRERRINT,4,rw,ECC error-report enable latches; reserved bits read reset; ECM delivery not synthesized
+0xFFC64004,UGRSERSTCLR,4,w,Write-one selected error flag/capture clear; zero is a no-op; reads zero
+0xFFC64008,UGRDERSTCLR,4,w,Write-one selected error flag/capture clear; zero is a no-op; reads zero
+0xFFC6400C,UGROVFSTR,4,r,Global-RAM ECC error status latch
+0xFFC64020,UGRSERSTR,4,r,Global-RAM ECC error status latch
+0xFFC64030,UGRDERSTR,4,r,Global-RAM ECC error status latch
+0xFFC64040,UGR1SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC64044,UGR2SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC64048,UGR3SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC6404C,UGR4SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC64050,UGR5SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC64054,UGR6SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC64058,UGR7SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC6405C,UGR8SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC64060,UGR9SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC64064,UGR10SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC64068,UGR11SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC6406C,UGR12SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC64070,UGR13SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC64074,UGR14SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC64078,UGR15SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC6407C,UGR16SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC64080,UGR17SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC64084,UGR18SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC64088,UGR19SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC6408C,UGR20SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC64090,UGR21SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC64094,UGR22SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC64098,UGR23SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC6409C,UGR24SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC640A0,UGR25SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC640A4,UGR26SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC640A8,UGR27SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC640AC,UGR28SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC640B0,UGR29SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC640B4,UGR30SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC640B8,UGR31SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC640BC,UGR32SEDADR,4,r,Global-RAM single-bit error captured address
+0xFFC640C0,UGR00DEDADR,4,r,Global-RAM data DED/address ECC error captured address
+0xFFC64100,GRECCCTL_GRAMC,4,rw,"Global-RAM address/data ECC control; writable ASECDIS, AECCDIS, SECDIS and ECCDIS, bit2 reserved"
+0xFFC64104,GRTSTCTL,4,rw,"Global-RAM test control; protected ECCTST, DECINEN and DATSEL fields, no error injection synthesized"
+0xFFC64200,GRECCCTL_VCI2GRAM,4,rw,Global-RAM system-interconnect ECC control; protected SECDIS/ECCDIS fields
+0xFFC64E00,GRECCCTL_AXI2GRAM,4,rw,Global-RAM AXI ECC control; protected SECDIS/ECCDIS fields
+0xFFC65400,LRECCCTL_PE1,4,rw,"Local-RAM ECC control for PE1; PROT[15:14]=01 permits SECDIS/ECCDIS low2-bit update, protection bits read0"
+0xFFC65404,LRERRINT_PE1,4,rw,ECC error-report enable latches; reserved bits read reset; ECM delivery not synthesized
+0xFFC65408,LRSERSTCLR_PE1,4,w,Write-one selected error flag/capture clear; zero is a no-op; reads zero
+0xFFC6540C,LRDERSTCLR_PE1,4,w,Write-one selected error flag/capture clear; zero is a no-op; reads zero
+0xFFC65410,LROVFSTR_PE1,4,r,Local-RAM ECC error status latch
+0xFFC65440,LRSERSTR_PE1,4,r,Local-RAM ECC error status latch
+0xFFC65450,LRDERSTR_PE1,4,r,Local-RAM ECC error status latch
+0xFFC65460,LR1SEDADR0_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC65464,LR1SEDADR1_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC65468,LR1SEDADR2_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC6546C,LR1SEDADR3_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC65470,LR2SEDADR0_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC65474,LR2SEDADR1_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC65478,LR2SEDADR2_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC6547C,LR2SEDADR3_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC65480,LR3SEDADR0_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC65484,LR3SEDADR1_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC65488,LR3SEDADR2_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC6548C,LR3SEDADR3_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC65490,LR4SEDADR0_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC65494,LR4SEDADR1_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC65498,LR4SEDADR2_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC6549C,LR4SEDADR3_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC654A0,LR5SEDADR0_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC654A4,LR5SEDADR1_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC654A8,LR5SEDADR2_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC654AC,LR5SEDADR3_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC654B0,LR6SEDADR0_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC654B4,LR6SEDADR1_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC654B8,LR6SEDADR2_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC654BC,LR6SEDADR3_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC654C0,LR7SEDADR0_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC654C4,LR7SEDADR1_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC654C8,LR7SEDADR2_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC654CC,LR7SEDADR3_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC654D0,LR8SEDADR0_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC654D4,LR8SEDADR1_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC654D8,LR8SEDADR2_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC654DC,LR8SEDADR3_PE1,4,r,Local-RAM single-bit error captured address
+0xFFC654E0,LRDEDADR0_PE1,4,r,Local-RAM double-bit error captured address
+0xFFC654E4,LRDEDADR1_PE1,4,r,Local-RAM double-bit error captured address
+0xFFC654E8,LRDEDADR2_PE1,4,r,Local-RAM double-bit error captured address
+0xFFC654EC,LRDEDADR3_PE1,4,r,Local-RAM double-bit error captured address
+0xFFC65604,LRTSTCTL_PE1,4,rw,"Local-RAM test control; protected ECCTST and DATSEL fields, no error injection synthesized"
+0xFFC66000,LSSECCCTL_PE1,4,rw,Load/store slave ECC control; protected SECDIS/ECCDIS fields
+0xFFC66004,LSSERRINT_PE1,4,rw,ECC error-report enable latches; reserved bits read reset; ECM delivery not synthesized
+0xFFC66008,LSSERSTCLR_PE1,4,w,Write-one selected error flag/capture clear; zero is a no-op; reads zero
+0xFFC6600C,LSSOVFSTR_PE1,4,r,ECC error capture overflow latch; bit0 ERROVF
+0xFFC66010,LSSERSTR_PE1,4,r,ECC error status latches; only documented flag bits are cleared
+0xFFC66050,LSSEADR_PE1,4,r,ECC error captured address
+0xFFC66400,LSMECCCTL_PE1,4,rw,Load/store master ECC control; protected SECDIS/ECCDIS fields
+0xFFC66404,LSMERRINT_PE1,4,rw,ECC error-report enable latches; reserved bits read reset; ECM delivery not synthesized
+0xFFC66408,LSMERSTCLR_PE1,4,w,Write-one selected error flag/capture clear; zero is a no-op; reads zero
+0xFFC6640C,LSMOVFSTR_PE1,4,r,ECC error capture overflow latch; bit0 ERROVF
+0xFFC66410,LSMERSTR_PE1,4,r,ECC error status latches; only documented flag bits are cleared
+0xFFC66450,LSMEADR_PE1,4,r,ECC error captured address
+0xFFC67004,VPERRINT_SG0,4,rw,ECC error-report enable latches; reserved bits read reset; ECM delivery not synthesized
+0xFFC67008,VPERSTCLR_SG0,4,w,Write-one selected error flag/capture clear; zero is a no-op; reads zero
+0xFFC6700C,VPOVFSTR_SG0,4,r,ECC error capture overflow latch; bit0 ERROVF
+0xFFC67010,VPERSTR_SG0,4,r,ECC error status latches; only documented flag bits are cleared
+0xFFC67050,VPEADR_SG0,4,r,ECC error captured address
+0xFFC67404,VPERRINT_SG1,4,rw,ECC error-report enable latches; reserved bits read reset; ECM delivery not synthesized
+0xFFC67408,VPERSTCLR_SG1,4,w,Write-one selected error flag/capture clear; zero is a no-op; reads zero
+0xFFC6740C,VPOVFSTR_SG1,4,r,ECC error capture overflow latch; bit0 ERROVF
+0xFFC67410,VPERSTR_SG1,4,r,ECC error status latches; only documented flag bits are cleared
+0xFFC67450,VPEADR_SG1,4,r,ECC error captured address
+0xFFC67804,VPERRINT_SG2,4,rw,ECC error-report enable latches; reserved bits read reset; ECM delivery not synthesized
+0xFFC67808,VPERSTCLR_SG2,4,w,Write-one selected error flag/capture clear; zero is a no-op; reads zero
+0xFFC6780C,VPOVFSTR_SG2,4,r,ECC error capture overflow latch; bit0 ERROVF
+0xFFC67810,VPERSTR_SG2,4,r,ECC error status latches; only documented flag bits are cleared
+0xFFC67850,VPEADR_SG2,4,r,ECC error captured address
+0xFFC68404,VPERRINT_SG5,4,rw,ECC error-report enable latches; reserved bits read reset; ECM delivery not synthesized
+0xFFC68408,VPERSTCLR_SG5,4,w,Write-one selected error flag/capture clear; zero is a no-op; reads zero
+0xFFC6840C,VPOVFSTR_SG5,4,r,ECC error capture overflow latch; bit0 ERROVF
+0xFFC68410,VPERSTR_SG5,4,r,ECC error status latches; only documented flag bits are cleared
+0xFFC68450,VPEADR_SG5,4,r,ECC error captured address
+0xFFC6A000,VCECCCTL_PDMA,4,rw,Peripheral-DMA ECC control; protected SECDIS/ECCDIS fields
+0xFFC6A004,VCERRINT_PDMA,4,rw,ECC error-report enable latches; reserved bits read reset; ECM delivery not synthesized
+0xFFC6A008,VCERSTCLR_PDMA,4,w,Write-one selected error flag/capture clear; zero is a no-op; reads zero
+0xFFC6A00C,VCOVFSTR_PDMA,4,r,ECC error capture overflow latch; bit0 ERROVF
+0xFFC6A010,VCERSTR_PDMA,4,r,ECC error status latches; only documented flag bits are cleared
+0xFFC6A050,VCEADR_PDMA,4,r,ECC error captured address
+0xFFC6C000,APECCCTL_PFSS,4,rw,Peripheral-subsystem address/data ECC control; protected low4 fields
+0xFFC6C004,APERRINT_PFSS,4,rw,ECC error-report enable latches; reserved bits read reset; ECM delivery not synthesized
+0xFFC6C008,APERSTCLR_PFSS,4,w,Write-one selected error flag/capture clear; zero is a no-op; reads zero
+0xFFC6C00C,APOVFSTR_PFSS,4,r,ECC error capture overflow latch; bit0 ERROVF
+0xFFC6C010,APERSTR_PFSS,4,r,ECC error status latches; only documented flag bits are cleared
+0xFFC6C050,APEADR_PFSS,4,r,ECC error captured address
+0xFFC70000,ECCCSIH0CTL,4,rw,"Peripheral RAM ECC control, latched error flags and live ECEMF input"
+0xFFC70004,ECCCSIH0TMC,4,rw,Peripheral RAM ECC test control; ETMA=10 authorizes the mode bit
+0xFFC70040,ECCCSIH1CTL,4,rw,"Peripheral RAM ECC control, latched error flags and live ECEMF input"
+0xFFC70044,ECCCSIH1TMC,4,rw,Peripheral RAM ECC test control; ETMA=10 authorizes the mode bit
+0xFFC70080,ECCCSIH2CTL,4,rw,"Peripheral RAM ECC control, latched error flags and live ECEMF input"
+0xFFC70084,ECCCSIH2TMC,4,rw,Peripheral RAM ECC test control; ETMA=10 authorizes the mode bit
+0xFFC700C0,ECCCSIH3CTL,4,rw,"Peripheral RAM ECC control, latched error flags and live ECEMF input"
+0xFFC700C4,ECCCSIH3TMC,4,rw,Peripheral RAM ECC test control; ETMA=10 authorizes the mode bit
+0xFFC71100,ECCCAN0CTL,4,rw,"Peripheral RAM ECC control, latched error flags and live ECEMF input"
+0xFFC71104,ECCCAN0TMC,4,rw,Peripheral RAM ECC test control; ETMA=10 authorizes the mode bit
+0xFFC71200,ECCCAN1CTL,4,rw,"Peripheral RAM ECC control, latched error flags and live ECEMF input"
+0xFFC71204,ECCCAN1TMC,4,rw,Peripheral RAM ECC test control; ETMA=10 authorizes the mode bit
+0xFFCDA000,LBISTREF1,4,r,Logic BIST reference 1; opaque 20-bit reset-time input
+0xFFCDA004,LBISTREF2,4,r,Logic BIST reference 2; opaque 20-bit reset-time input
+0xFFCDA008,MBISTREF,4,r,Memory BIST reference; opaque 20-bit reset-time input
+0xFFCDA010,LBISTSIG1,4,r,Logic BIST signature 1; opaque 20-bit reset-time result
+0xFFCDA014,LBISTSIG2,4,r,Logic BIST signature 2; opaque 20-bit reset-time result
+0xFFCDA018,MBISTSIG,4,r,Memory BIST signature; opaque 20-bit reset-time result
+0xFFCDA020,MBISTFTAGL,4,r,Memory BIST RAM-group results low; explicit reset-time input
+0xFFCDA024,MBISTFTAGH,4,r,Memory BIST RAM-group results high; explicit reset-time input
+0xFFCDA030,BSEQ0ST,4,r,"BIST sequencer result; 2 means normally completed, not a diagnostic reset-cause flag"
+0xFFCDA034,BSEQ0STB,4,r,Inverted low two bits of BIST sequencer result
+0xFFCDA038,BISTST,4,r,"Field BIST failure bits: LBIST1 bit0, LBIST2 bit1, MBIST bit2; skipped=7"
 0xFFD20014,C1CTR,4,rw,"RSCFD0CFDC1CTR (CmCTR = base+0x04+0x10*m, m=1): CAN1 channel control; CHMDC[1:0] bits 1-0 (00 channel communication, 01 channel reset, 10 channel halt), CSLPR bit 2 channel stop; reset 0x5 (channel reset and stop)"
 0xFFD20018,C1STS,4,rw,"RSCFD0CFDC1STS (CmSTS = base+0x08+0x10*m, m=1): CAN1 channel status; TEC[31:24] and REC[23:16] error counters, ESIF bit 8, COMSTS bit 7, RECSTS bit 6, TRMSTS bit 5, BOSTS bit 4, EPSTS bit 3, CSLPSTS bit 2, CHLTSTS bit 1, CRSTSTS bit 0; reset 0x5 (channel stop + channel reset state); native diagnostic receive gate 0x83EF2 polls (C1STS & 7) == 0 before entering the CFIFO receive path"
 0xFFD20084,GCFG,4,rw,"RSCFD0CFDGCFG: global configuration; CMPOC bit 5 payload-overflow mode (0 = frame whose payload exceeds storage size is not stored; 1 = stored with excess payload discarded), DRE bit 2 DLC replacement, ITRCP[31:16] interval-timer prescaler, TSBTCS[15:13]/TSSS bit 12/TSP[11:8] timestamp clock; reset 0x0"
@@ -147,107 +869,1737 @@ address,name,size,access,comment
 0xFFD24408,CFDTMFDSTS_CH1_16,4,rw,Application CAN1 Tx buffer n=16 FD pointer/status word
 0xFFD2440C,CFDTMDF0_CH1_16,4,rw,Application CAN1 Tx buffer n=16 data bytes 0..3
 0xFFD24410,CFDTMDF1_CH1_16,4,rw,Application CAN1 Tx buffer n=16 data bytes 4..7
+0xFFD50000,DCRA0CIN,4,rw,DCRA0 CRC input; original serial frame CRC8 uses low8 per word write
+0xFFD50004,DCRA0COUT,4,rw,"DCRA0 CRC result; in SAEJ1850 mode low8 read raw XOR FF, high24 undefined"
+0xFFD50020,DCRA0CTL,1,rw,DCRA0 control; original serial mode22 and reset Ethernet mode00 only
 0xFFD51000,DCRA1CIN,4,rw,DCRA1 CRC input; 32-bit register accesses only
 0xFFD51004,DCRA1COUT,4,rw,DCRA1 CRC data; reads XOR the internal Ethernet CRC state with FFFFFFFF
 0xFFD51020,DCRA1CTL,1,rw,"DCRA1 control; model supports only POL=00 ISZ=00, other modes fault"
-0xFFD60000,ECMMESET,1,w,ECM master error-source set trigger
-0xFFD60004,ECMMECLR,1,w,ECM master error-source clear trigger
+0xFFD60000,ECMMESET,1,w,ECM master protected error-set trigger; asserts internal ERROROUT drive
+0xFFD60004,ECMMECLR,1,w,ECM master protected error-clear trigger; releases internal drive only without unmasked errors
 0xFFD60008,ECMMESSTR0,4,r,ECM master error-source status 0
 0xFFD6000C,ECMMESSTR1,4,r,ECM master error-source status 1
-0xFFD60010,ECMMESSTR2,4,r,ECM master error-source status 2
-0xFFD60014,ECMMPCMD0,4,w,ECM master protection command; write 0xA5 before protected writes
-0xFFD61000,ECMCESET,1,w,ECM checker error-source set trigger
-0xFFD61004,ECMCECLR,1,w,ECM checker error-source clear trigger
+0xFFD60010,ECMMESSTR2,4,r,"ECM master error-source status 2; bit31=0 ERROROUT low,1 high"
+0xFFD60014,ECMMPCMD0,4,w,ECM master protection command; full A5/value/inverse/value protocol
+0xFFD61000,ECMCESET,1,w,ECM checker protected error-set trigger; GPIO routing and loopback govern ERROROUT_C feedback
+0xFFD61004,ECMCECLR,1,w,ECM checker protected error-clear trigger; does not configure P3_11 alternative output or loopback
 0xFFD61008,ECMCESSTR0,4,r,ECM checker error-source status 0
 0xFFD6100C,ECMCESSTR1,4,r,ECM checker error-source status 1
-0xFFD61010,ECMCESSTR2,4,r,ECM checker error-source status 2
-0xFFD61014,ECMCPCMD0,4,w,ECM checker protection command; write 0xA5 before protected writes
-0xFFD62000,ECMEPCFG,1,rw,ECM error-pulse configuration
-0xFFD62004,ECMMICFG0,4,rw,ECM maskable-interrupt configuration 0
-0xFFD62008,ECMMICFG1,4,rw,ECM maskable-interrupt configuration 1
-0xFFD6200C,ECMMICFG2,4,rw,ECM maskable-interrupt configuration 2
-0xFFD62010,ECMNMICFG0,4,rw,ECM non-maskable-interrupt configuration 0
-0xFFD62014,ECMNMICFG1,4,rw,ECM non-maskable-interrupt configuration 1
-0xFFD62018,ECMNMICFG2,4,rw,ECM non-maskable-interrupt configuration 2
-0xFFD6201C,ECMIRCFG0,4,rw,ECM internal-reset configuration 0
-0xFFD62020,ECMIRCFG1,4,rw,ECM internal-reset configuration 1
-0xFFD62024,ECMIRCFG2,4,rw,ECM internal-reset configuration 2
-0xFFD62028,ECMEMK0,4,rw,ECM error mask 0
-0xFFD6202C,ECMEMK1,4,rw,ECM error mask 1
-0xFFD62030,ECMEMK2,4,rw,ECM error mask 2
-0xFFD62034,ECMESSTC0,4,w,ECM error-source status-clear trigger 0
-0xFFD62038,ECMESSTC1,4,w,ECM error-source status-clear trigger 1
-0xFFD6203C,ECMESSTC2,4,w,ECM error-source status-clear trigger 2
-0xFFD62040,ECMPCMD1,4,w,ECM common protection command; write 0xA5 before protected writes
-0xFFD62044,ECMPS,1,r,ECM common protection status
-0xFFD62048,ECMPE0,4,w,ECM pseudo-error trigger 0
-0xFFD6204C,ECMPE1,4,w,ECM pseudo-error trigger 1
-0xFFD62050,ECMPE2,4,w,ECM pseudo-error trigger 2
-0xFFD62054,ECMDTMCTL,1,rw,ECM delay-timer control
+0xFFD61010,ECMCESSTR2,4,r,"ECM checker error-source status 2; bit31=0 ERROROUT_C low,1 high"
+0xFFD61014,ECMCPCMD0,4,w,ECM checker protection command; full A5/value/inverse/value protocol
+0xFFD62000,ECMEPCFG,1,rw,ECM protected error-pulse configuration; dynamic timing not modeled
+0xFFD62004,ECMMICFG0,4,rw,ECM protected maskable-interrupt configuration 0
+0xFFD62008,ECMMICFG1,4,rw,ECM protected maskable-interrupt configuration 1
+0xFFD6200C,ECMMICFG2,4,rw,ECM protected maskable-interrupt configuration 2
+0xFFD62010,ECMNMICFG0,4,rw,ECM protected non-maskable-interrupt configuration 0
+0xFFD62014,ECMNMICFG1,4,rw,ECM protected non-maskable-interrupt configuration 1
+0xFFD62018,ECMNMICFG2,4,rw,ECM protected non-maskable-interrupt configuration 2
+0xFFD6201C,ECMIRCFG0,4,rw,ECM protected internal-reset configuration 0
+0xFFD62020,ECMIRCFG1,4,rw,ECM protected internal-reset configuration 1
+0xFFD62024,ECMIRCFG2,4,rw,ECM protected internal-reset configuration 2
+0xFFD62028,ECMEMK0,4,rw,ECM protected error mask 0
+0xFFD6202C,ECMEMK1,4,rw,ECM protected error mask 1
+0xFFD62030,ECMEMK2,4,rw,ECM protected error mask 2
+0xFFD62034,ECMESSTC0,4,w,ECM protected write-one status-clear 0; affects master and checker
+0xFFD62038,ECMESSTC1,4,w,ECM protected write-one status-clear 1; affects master and checker
+0xFFD6203C,ECMESSTC2,4,w,ECM protected write-one status-clear 2; preserves external pin bit31
+0xFFD62040,ECMPCMD1,4,w,ECM common protection command; full A5/value/inverse/value protocol
+0xFFD62044,ECMPS,1,r,ECM protection status; real failure bit0; declared word read zero-extends native byte
+0xFFD62048,ECMPE0,4,w,ECM protected pseudo-error trigger 0; nonzero error generation is unmodeled
+0xFFD6204C,ECMPE1,4,w,ECM protected pseudo-error trigger 1; nonzero error generation is unmodeled
+0xFFD62050,ECMPE2,4,w,ECM protected pseudo-error trigger 2; nonzero error generation is unmodeled
+0xFFD62054,ECMDTMCTL,1,rw,ECM protected delay-timer control; active timer operation is unmodeled
 0xFFD62058,ECMDTMR,2,r,ECM delay-timer count
-0xFFD6205C,ECMDTMCMP,4,rw,ECM delay-timer compare
-0xFFD62060,ECMDTMCFG0,4,rw,ECM delay-timer configuration 0
-0xFFD62064,ECMDTMCFG1,4,rw,ECM delay-timer configuration 1
-0xFFD62068,ECMDTMCFG2,4,rw,ECM delay-timer configuration 2
-0xFFD6206C,ECMDTMCFG3,4,rw,ECM delay-timer configuration 3
-0xFFD62070,ECMDTMCFG4,4,rw,ECM delay-timer configuration 4
-0xFFD62074,ECMDTMCFG5,4,rw,ECM delay-timer configuration 5
-0xFFD62078,ECMEOCCFG,4,rw,ECM error-output clear-invalidation configuration
-0xFFD6207C,ECMPEM,4,rw,ECM pseudo-error mask
-0xFFD63000,ECMEPCTL,1,rw,ECM error-pulse control
-0xFFE50000,TAUJ0CDR0,4,rw,TAUJ0 channel 0 data reload
-0xFFE50004,TAUJ0CDR1,4,rw,TAUJ0 channel 1 data reload
-0xFFE50008,TAUJ0CDR2,4,rw,TAUJ0 channel 2 data reload
-0xFFE5000C,TAUJ0CDR3,4,rw,TAUJ0 channel 3 data reload
-0xFFE50010,TAUJ0CNT0,4,r,TAUJ0 channel 0 counter
-0xFFE50014,TAUJ0CNT1,4,r,TAUJ0 channel 1 counter
-0xFFE50018,TAUJ0CNT2,4,r,TAUJ0 channel 2 counter
-0xFFE5001C,TAUJ0CNT3,4,r,TAUJ0 channel 3 counter
-0xFFE50020,TAUJ0CMUR0,1,rw,TAUJ0 channel 0 user mode
-0xFFE50024,TAUJ0CMUR1,1,rw,TAUJ0 channel 1 user mode
-0xFFE50028,TAUJ0CMUR2,1,rw,TAUJ0 channel 2 user mode
-0xFFE5002C,TAUJ0CMUR3,1,rw,TAUJ0 channel 3 user mode
-0xFFE50050,TAUJ0TE,1,r,TAUJ0 channel enable status
-0xFFE50054,TAUJ0TS,1,w,TAUJ0 channel start trigger
-0xFFE50058,TAUJ0TT,1,w,TAUJ0 channel stop trigger
-0xFFE5005C,TAUJ0TO,1,rw,TAUJ0 channel output
-0xFFE50060,TAUJ0TOE,1,rw,TAUJ0 channel output enable
-0xFFE50064,TAUJ0TOL,1,rw,TAUJ0 channel output active level
-0xFFE50068,TAUJ0RDT,1,w,TAUJ0 channel reload data trigger
-0xFFE5006C,TAUJ0RSF,1,r,TAUJ0 channel reload status
-0xFFE50080,TAUJ0CMOR0,2,rw,TAUJ0 channel 0 mode
-0xFFE50084,TAUJ0CMOR1,2,rw,TAUJ0 channel 1 mode
-0xFFE50088,TAUJ0CMOR2,2,rw,TAUJ0 channel 2 mode
-0xFFE5008C,TAUJ0CMOR3,2,rw,TAUJ0 channel 3 mode
-0xFFE50090,TAUJ0TPS,2,rw,TAUJ0 prescaler
-0xFFE50094,TAUJ0BRS,2,rw,TAUJ0 base-clock reload selector
-0xFFE500A0,TAUJ0RDE,1,rw,TAUJ0 channel reload data enable
-0xFFE500A4,TAUJ0RDM,1,rw,TAUJ0 channel reload data mode
-0xFFE70180,TSG30CMPWE,4,rw,TSG30 bit-extended HT-PWM W-phase compare register
-0xFFE70184,TSG30CMPVE,4,rw,TSG30 bit-extended HT-PWM V-phase compare register
-0xFFE70188,TSG30CMPUE,4,rw,TSG30 bit-extended HT-PWM U-phase compare register
-0xFFE71180,TSG31CMPWE,4,rw,TSG31 bit-extended HT-PWM W-phase compare register
-0xFFE71184,TSG31CMPVE,4,rw,TSG31 bit-extended HT-PWM V-phase compare register
-0xFFE71188,TSG31CMPUE,4,rw,TSG31 bit-extended HT-PWM U-phase compare register
+0xFFD6205C,ECMDTMCMP,4,rw,ECM protected delay-timer compare
+0xFFD62060,ECMDTMCFG0,4,rw,ECM protected delay-timer configuration 0
+0xFFD62064,ECMDTMCFG1,4,rw,ECM protected delay-timer configuration 1
+0xFFD62068,ECMDTMCFG2,4,rw,ECM protected delay-timer configuration 2
+0xFFD6206C,ECMDTMCFG3,4,rw,ECM protected delay-timer configuration 3
+0xFFD62070,ECMDTMCFG4,4,rw,ECM protected delay-timer configuration 4
+0xFFD62074,ECMDTMCFG5,4,rw,ECM protected delay-timer configuration 5
+0xFFD62078,ECMEOCCFG,4,rw,ECM protected error-output clear-invalidation configuration
+0xFFD6207C,ECMPEM,4,rw,ECM pseudo-error mask; unprotected
+0xFFD63000,ECMEPCTL,1,rw,ECM error-pulse control; unprotected
+0xFFD80000,CSIH0CTL0,1,rw,
+0xFFD80004,CSIH0STR0,4,r,
+0xFFD80008,CSIH0STCR0,2,rw,
+0xFFD80010,CSIH0CTL1,4,rw,
+0xFFD80014,CSIH0CTL2,2,rw,
+0xFFD81000,CSIH0MCTL1,4,rw,
+0xFFD81004,CSIH0MCTL2,4,rw,
+0xFFD81008,CSIH0TX0W,4,rw,
+0xFFD8100C,CSIH0TX0H,2,rw,
+0xFFD81010,CSIH0RX0W,4,r,
+0xFFD81014,CSIH0RX0H,2,r,
+0xFFD81018,CSIH0MRWP0,4,rw,
+0xFFD81040,CSIH0MCTL0,2,rw,
+0xFFD81044,CSIH0CFG0,4,rw,
+0xFFD81048,CSIH0CFG1,4,rw,
+0xFFD8104C,CSIH0CFG2,4,rw,
+0xFFD81050,CSIH0CFG3,4,rw,
+0xFFD81054,CSIH0CFG4,4,rw,
+0xFFD81058,CSIH0CFG5,4,rw,
+0xFFD8105C,CSIH0CFG6,4,rw,
+0xFFD81060,CSIH0CFG7,4,rw,
+0xFFD81068,CSIH0BRS0,2,rw,
+0xFFD8106C,CSIH0BRS1,2,rw,
+0xFFD81070,CSIH0BRS2,2,rw,
+0xFFD81074,CSIH0BRS3,2,rw,
+0xFFD82000,CSIH1CTL0,1,rw,
+0xFFD82004,CSIH1STR0,4,r,
+0xFFD82008,CSIH1STCR0,2,rw,
+0xFFD82010,CSIH1CTL1,4,rw,
+0xFFD82014,CSIH1CTL2,2,rw,
+0xFFD83000,CSIH1MCTL1,4,rw,
+0xFFD83004,CSIH1MCTL2,4,rw,
+0xFFD83008,CSIH1TX0W,4,rw,
+0xFFD8300C,CSIH1TX0H,2,rw,
+0xFFD83010,CSIH1RX0W,4,r,
+0xFFD83014,CSIH1RX0H,2,r,
+0xFFD83018,CSIH1MRWP0,4,rw,
+0xFFD83040,CSIH1MCTL0,2,rw,
+0xFFD83044,CSIH1CFG0,4,rw,
+0xFFD83048,CSIH1CFG1,4,rw,
+0xFFD8304C,CSIH1CFG2,4,rw,
+0xFFD83050,CSIH1CFG3,4,rw,
+0xFFD83054,CSIH1CFG4,4,rw,
+0xFFD83058,CSIH1CFG5,4,rw,
+0xFFD8305C,CSIH1CFG6,4,rw,
+0xFFD83060,CSIH1CFG7,4,rw,
+0xFFD83068,CSIH1BRS0,2,rw,
+0xFFD8306C,CSIH1BRS1,2,rw,
+0xFFD83070,CSIH1BRS2,2,rw,
+0xFFD83074,CSIH1BRS3,2,rw,
+0xFFD84000,CSIH2CTL0,1,rw,
+0xFFD84004,CSIH2STR0,4,r,
+0xFFD84008,CSIH2STCR0,2,rw,
+0xFFD84010,CSIH2CTL1,4,rw,
+0xFFD84014,CSIH2CTL2,2,rw,
+0xFFD85000,CSIH2MCTL1,4,rw,
+0xFFD85004,CSIH2MCTL2,4,rw,
+0xFFD85008,CSIH2TX0W,4,rw,
+0xFFD8500C,CSIH2TX0H,2,rw,
+0xFFD85010,CSIH2RX0W,4,r,
+0xFFD85014,CSIH2RX0H,2,r,
+0xFFD85018,CSIH2MRWP0,4,rw,
+0xFFD85040,CSIH2MCTL0,2,rw,
+0xFFD85044,CSIH2CFG0,4,rw,
+0xFFD85048,CSIH2CFG1,4,rw,
+0xFFD8504C,CSIH2CFG2,4,rw,
+0xFFD85050,CSIH2CFG3,4,rw,
+0xFFD85054,CSIH2CFG4,4,rw,
+0xFFD85058,CSIH2CFG5,4,rw,
+0xFFD8505C,CSIH2CFG6,4,rw,
+0xFFD85060,CSIH2CFG7,4,rw,
+0xFFD85068,CSIH2BRS0,2,rw,
+0xFFD8506C,CSIH2BRS1,2,rw,
+0xFFD85070,CSIH2BRS2,2,rw,
+0xFFD85074,CSIH2BRS3,2,rw,
+0xFFD86000,CSIH3CTL0,1,rw,
+0xFFD86004,CSIH3STR0,4,r,
+0xFFD86008,CSIH3STCR0,2,rw,
+0xFFD86010,CSIH3CTL1,4,rw,
+0xFFD86014,CSIH3CTL2,2,rw,
+0xFFD87000,CSIH3MCTL1,4,rw,
+0xFFD87004,CSIH3MCTL2,4,rw,
+0xFFD87008,CSIH3TX0W,4,rw,
+0xFFD8700C,CSIH3TX0H,2,rw,
+0xFFD87010,CSIH3RX0W,4,r,
+0xFFD87014,CSIH3RX0H,2,r,
+0xFFD87018,CSIH3MRWP0,4,rw,
+0xFFD87040,CSIH3MCTL0,2,rw,
+0xFFD87044,CSIH3CFG0,4,rw,
+0xFFD87048,CSIH3CFG1,4,rw,
+0xFFD8704C,CSIH3CFG2,4,rw,
+0xFFD87050,CSIH3CFG3,4,rw,
+0xFFD87054,CSIH3CFG4,4,rw,
+0xFFD87058,CSIH3CFG5,4,rw,
+0xFFD8705C,CSIH3CFG6,4,rw,
+0xFFD87060,CSIH3CFG7,4,rw,
+0xFFD87068,CSIH3BRS0,2,rw,
+0xFFD8706C,CSIH3BRS1,2,rw,
+0xFFD87070,CSIH3BRS2,2,rw,
+0xFFD87074,CSIH3BRS3,2,rw,
+0xFFD8E000,SELCSIHDMA,1,rw,CSIH0/1 CS0 interrupt and DMA trigger gating
+0xFFDD0004,PIC1ASST,1,rw,"PIC1 simultaneous start command; bit0 generates one selected start pulse, reads zero"
+0xFFDD0010,PIC1ASSER0,2,rw,PIC1 per-channel simultaneous-start enable selector
+0xFFDD0014,PIC1ASSER1,2,rw,PIC1 per-channel simultaneous-start enable selector
+0xFFDD0018,PIC1ASSER2,2,rw,PIC1 per-channel simultaneous-start enable selector
+0xFFDD001C,PIC1ASSER3,2,rw,PIC1 per-channel simultaneous-start enable selector
+0xFFDD1000,PIC2BADCG0TSEL0,4,rw,PIC2BADCG0TSEL0
+0xFFDD1004,PIC2BADCG0TSEL1,4,rw,PIC2BADCG0TSEL1
+0xFFDD1008,PIC2BADCG0TSEL2,4,rw,PIC2BADCG0TSEL2
+0xFFDD100C,PIC2BADCG0TSEL3,4,rw,PIC2BADCG0TSEL3
+0xFFDD1010,PIC2BADCG0TSEL4,4,rw,PIC2BADCG0TSEL4
+0xFFDD101C,PIC2BADCG0EDGSEL,2,rw,PIC2BADCG0EDGSEL
+0xFFDD1020,PIC2BADCG1TSEL0,4,rw,PIC2BADCG1TSEL0
+0xFFDD1024,PIC2BADCG1TSEL1,4,rw,PIC2BADCG1TSEL1
+0xFFDD1028,PIC2BADCG1TSEL2,4,rw,PIC2BADCG1TSEL2
+0xFFDD102C,PIC2BADCG1TSEL3,4,rw,PIC2BADCG1TSEL3
+0xFFDD1030,PIC2BADCG1TSEL4,4,rw,PIC2BADCG1TSEL4
+0xFFDD103C,PIC2BADCG1EDGSEL,2,rw,PIC2BADCG1EDGSEL
+0xFFDD1040,PIC2BADTEN400,2,rw,
+0xFFDD1044,PIC2BADTEN401,2,rw,
+0xFFDD1048,PIC2BADTEN402,2,rw,
+0xFFDD104C,PIC2BADTEN403,2,rw,
+0xFFDD1050,PIC2BADTEN404,2,rw,
+0xFFDD1060,PIC2BADTEN410,2,rw,
+0xFFDD1064,PIC2BADTEN411,2,rw,
+0xFFDD1068,PIC2BADTEN412,2,rw,
+0xFFDD106C,PIC2BADTEN413,2,rw,
+0xFFDD1070,PIC2BADTEN414,2,rw,
+0xFFDDD000,FSGD1APROT00,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD004,FSGD1ASPID00,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD008,FSGD1APROT01,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD00C,FSGD1ASPID01,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD010,FSGD1APROT02,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD014,FSGD1ASPID02,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD018,FSGD1APROT03,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD01C,FSGD1ASPID03,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD020,FSGD1APROT04,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD024,FSGD1ASPID04,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD028,FSGD1APROT05,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD02C,FSGD1ASPID05,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD030,FSGD1APROT06,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD034,FSGD1ASPID06,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD038,FSGD1APROT07,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD03C,FSGD1ASPID07,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD040,FSGD1APROT08,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD044,FSGD1ASPID08,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD048,FSGD1APROT09,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD04C,FSGD1ASPID09,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD050,FSGD1APROT10,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD054,FSGD1ASPID10,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD058,FSGD1APROT11,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD05C,FSGD1ASPID11,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD060,FSGD1APROT12,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD064,FSGD1ASPID12,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD068,FSGD1APROT13,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD06C,FSGD1ASPID13,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD070,FSGD1APROT14,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD074,FSGD1ASPID14,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD078,FSGD1APROT15,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD07C,FSGD1ASPID15,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD080,FSGD1BPROT00,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD084,FSGD1BSPID00,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD088,FSGD1BPROT01,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD08C,FSGD1BSPID01,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD090,FSGD1BPROT02,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD094,FSGD1BSPID02,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD098,FSGD1BPROT03,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD09C,FSGD1BSPID03,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD0A0,FSGD1BPROT04,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD0A4,FSGD1BSPID04,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD0A8,FSGD1BPROT05,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD0AC,FSGD1BSPID05,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD0B0,FSGD1BPROT06,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD0B4,FSGD1BSPID06,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD0B8,FSGD1BPROT07,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD0BC,FSGD1BSPID07,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD0C0,FSGD1BPROT08,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD0C4,FSGD1BSPID08,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD0C8,FSGD1BPROT09,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD0CC,FSGD1BSPID09,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD0D0,FSGD1BPROT10,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD0D4,FSGD1BSPID10,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD0D8,FSGD1BPROT11,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD0DC,FSGD1BSPID11,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD0E0,FSGD1BPROT12,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD0E4,FSGD1BSPID12,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD0E8,FSGD1BPROT13,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD0EC,FSGD1BSPID13,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD0F0,FSGD1BPROT14,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD0F4,FSGD1BSPID14,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD0F8,FSGD1BPROT15,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD0FC,FSGD1BSPID15,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD100,FSGD1CPROT00,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD104,FSGD1CSPID00,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD108,FSGD1CPROT01,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD10C,FSGD1CSPID01,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD110,FSGD1CPROT02,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD114,FSGD1CSPID02,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD118,FSGD1CPROT03,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD11C,FSGD1CSPID03,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD120,FSGD1CPROT04,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD124,FSGD1CSPID04,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD128,FSGD1CPROT05,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD12C,FSGD1CSPID05,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD130,FSGD1CPROT06,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD134,FSGD1CSPID06,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD138,FSGD1CPROT07,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD13C,FSGD1CSPID07,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD140,FSGD1CPROT08,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD144,FSGD1CSPID08,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD148,FSGD1CPROT09,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD14C,FSGD1CSPID09,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD150,FSGD1CPROT10,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD154,FSGD1CSPID10,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD158,FSGD1CPROT11,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD15C,FSGD1CSPID11,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD160,FSGD1CPROT12,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD164,FSGD1CSPID12,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD168,FSGD1CPROT13,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD16C,FSGD1CSPID13,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD170,FSGD1CPROT14,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD174,FSGD1CSPID14,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD178,FSGD1CPROT15,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD17C,FSGD1CSPID15,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD180,FSGD1DPROT00,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD184,FSGD1DSPID00,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD188,FSGD1DPROT01,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD18C,FSGD1DSPID01,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD190,FSGD1DPROT02,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD194,FSGD1DSPID02,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD198,FSGD1DPROT03,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD19C,FSGD1DSPID03,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD1A0,FSGD1DPROT04,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD1A4,FSGD1DSPID04,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD1A8,FSGD1DPROT05,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD1AC,FSGD1DSPID05,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD1B0,FSGD1DPROT06,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD1B4,FSGD1DSPID06,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD1B8,FSGD1DPROT07,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD1BC,FSGD1DSPID07,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD1C0,FSGD1DPROT08,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD1C4,FSGD1DSPID08,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD1C8,FSGD1DPROT09,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD1CC,FSGD1DSPID09,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD1D0,FSGD1DPROT10,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD1D4,FSGD1DSPID10,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD1D8,FSGD1DPROT11,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD1DC,FSGD1DSPID11,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD1E0,FSGD1DPROT12,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD1E4,FSGD1DSPID12,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD1E8,FSGD1DPROT13,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD1EC,FSGD1DSPID13,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD1F0,FSGD1DPROT14,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD1F4,FSGD1DSPID14,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD1F8,FSGD1DPROT15,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD1FC,FSGD1DSPID15,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD200,FSGD1EPROT00,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD204,FSGD1ESPID00,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD208,FSGD1EPROT01,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD20C,FSGD1ESPID01,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD210,FSGD1EPROT02,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD214,FSGD1ESPID02,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD218,FSGD1EPROT03,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD21C,FSGD1ESPID03,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD220,FSGD1EPROT04,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD224,FSGD1ESPID04,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD228,FSGD1EPROT05,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD22C,FSGD1ESPID05,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD230,FSGD1EPROT06,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD234,FSGD1ESPID06,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD238,FSGD1EPROT07,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD23C,FSGD1ESPID07,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD240,FSGD1EPROT08,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD244,FSGD1ESPID08,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD248,FSGD1EPROT09,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD24C,FSGD1ESPID09,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD250,FSGD1EPROT10,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD254,FSGD1ESPID10,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD258,FSGD1EPROT11,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD25C,FSGD1ESPID11,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD260,FSGD1EPROT12,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD264,FSGD1ESPID12,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD268,FSGD1EPROT13,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD26C,FSGD1ESPID13,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD270,FSGD1EPROT14,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD274,FSGD1ESPID14,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD278,FSGD1EPROT15,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFDDD27C,FSGD1ESPID15,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFDDD400,ERRSLV1CTL,1,w,
+0xFFDDD404,ERRSLV1STAT,4,r,
+0xFFDDD40C,ERRSLV1TYPE,4,r,
+0xFFDDD800,APEC0ECCCTL,4,rw,Peripheral IP group1 address/data ECC control; protected low4 fields
+0xFFDDD804,APEC0ERRINT,4,rw,ECC error-report enable latches; reserved bits read reset; ECM delivery not synthesized
+0xFFDDD808,APEC0STCLR,4,w,Write-one selected error flag/capture clear; zero is a no-op; reads zero
+0xFFDDD80C,APEC0OVFSTR,4,r,ECC error capture overflow latch; bit0 ERROVF
+0xFFDDD810,APEC01STERSTR,4,r,ECC error status latches; only documented flag bits are cleared
+0xFFDDD850,APEC01STEADR0,4,r,ECC error captured address
+0xFFE05000,RSENT0TSPC,4,rw,
+0xFFE05004,RSENT0TSC,4,rw,
+0xFFE05010,RSENT0CC,4,rw,
+0xFFE05014,RSENT0BRP,4,rw,
+0xFFE05018,RSENT0IDE,4,rw,
+0xFFE0501C,RSENT0MDC,4,rw,
+0xFFE05020,RSENT0SPCT,4,rw,
+0xFFE05024,RSENT0MST,4,r,
+0xFFE05028,RSENT0CS,4,r,
+0xFFE0502C,RSENT0CSC,4,rw,
+0xFFE05030,RSENT0SRTS,4,r,
+0xFFE05034,RSENT0SRXD,4,r,
+0xFFE05038,RSENT0CPL,4,r,
+0xFFE0503C,RSENT0ML,4,r,
+0xFFE05040,RSENT0FRTS,4,r,
+0xFFE05044,RSENT0FRXD,4,r,
+0xFFE06000,RSENT1TSPC,4,rw,
+0xFFE06004,RSENT1TSC,4,rw,
+0xFFE06010,RSENT1CC,4,rw,
+0xFFE06014,RSENT1BRP,4,rw,
+0xFFE06018,RSENT1IDE,4,rw,
+0xFFE0601C,RSENT1MDC,4,rw,
+0xFFE06020,RSENT1SPCT,4,rw,
+0xFFE06024,RSENT1MST,4,r,
+0xFFE06028,RSENT1CS,4,r,
+0xFFE0602C,RSENT1CSC,4,rw,
+0xFFE06030,RSENT1SRTS,4,r,
+0xFFE06034,RSENT1SRXD,4,r,
+0xFFE06038,RSENT1CPL,4,r,
+0xFFE0603C,RSENT1ML,4,r,
+0xFFE06040,RSENT1FRTS,4,r,
+0xFFE06044,RSENT1FRXD,4,r,
+0xFFE0F000,RSENTTSSEL,4,rw,
+0xFFE20000,TAUD0CDR0,2,rw,
+0xFFE20004,TAUD0CDR1,2,rw,
+0xFFE20008,TAUD0CDR2,2,rw,
+0xFFE2000C,TAUD0CDR3,2,rw,
+0xFFE20010,TAUD0CDR4,2,rw,
+0xFFE20014,TAUD0CDR5,2,rw,
+0xFFE20018,TAUD0CDR6,2,rw,
+0xFFE2001C,TAUD0CDR7,2,rw,
+0xFFE20020,TAUD0CDR8,2,rw,
+0xFFE20024,TAUD0CDR9,2,rw,
+0xFFE20028,TAUD0CDR10,2,rw,
+0xFFE2002C,TAUD0CDR11,2,rw,
+0xFFE20030,TAUD0CDR12,2,rw,
+0xFFE20034,TAUD0CDR13,2,rw,
+0xFFE20038,TAUD0CDR14,2,rw,
+0xFFE2003C,TAUD0CDR15,2,rw,
+0xFFE20040,TAUD0TOL,2,rw,
+0xFFE20044,TAUD0RDT,2,w,
+0xFFE20048,TAUD0RSF,2,r,
+0xFFE2004C,TAUD0TRO,2,rw,
+0xFFE20050,TAUD0TME,2,rw,
+0xFFE20054,TAUD0TDL,2,rw,
+0xFFE20058,TAUD0TO,2,rw,
+0xFFE2005C,TAUD0TOE,2,rw,
+0xFFE20080,TAUD0CNT0,2,r,
+0xFFE20084,TAUD0CNT1,2,r,
+0xFFE20088,TAUD0CNT2,2,r,
+0xFFE2008C,TAUD0CNT3,2,r,
+0xFFE20090,TAUD0CNT4,2,r,
+0xFFE20094,TAUD0CNT5,2,r,
+0xFFE20098,TAUD0CNT6,2,r,
+0xFFE2009C,TAUD0CNT7,2,r,
+0xFFE200A0,TAUD0CNT8,2,r,
+0xFFE200A4,TAUD0CNT9,2,r,
+0xFFE200A8,TAUD0CNT10,2,r,
+0xFFE200AC,TAUD0CNT11,2,r,
+0xFFE200B0,TAUD0CNT12,2,r,
+0xFFE200B4,TAUD0CNT13,2,r,
+0xFFE200B8,TAUD0CNT14,2,r,
+0xFFE200BC,TAUD0CNT15,2,r,
+0xFFE200C0,TAUD0CMUR0,1,rw,
+0xFFE200C4,TAUD0CMUR1,1,rw,
+0xFFE200C8,TAUD0CMUR2,1,rw,
+0xFFE200CC,TAUD0CMUR3,1,rw,
+0xFFE200D0,TAUD0CMUR4,1,rw,
+0xFFE200D4,TAUD0CMUR5,1,rw,
+0xFFE200D8,TAUD0CMUR6,1,rw,
+0xFFE200DC,TAUD0CMUR7,1,rw,
+0xFFE200E0,TAUD0CMUR8,1,rw,
+0xFFE200E4,TAUD0CMUR9,1,rw,
+0xFFE200E8,TAUD0CMUR10,1,rw,
+0xFFE200EC,TAUD0CMUR11,1,rw,
+0xFFE200F0,TAUD0CMUR12,1,rw,
+0xFFE200F4,TAUD0CMUR13,1,rw,
+0xFFE200F8,TAUD0CMUR14,1,rw,
+0xFFE200FC,TAUD0CMUR15,1,rw,
+0xFFE20140,TAUD0CSR0,1,r,
+0xFFE20144,TAUD0CSR1,1,r,
+0xFFE20148,TAUD0CSR2,1,r,
+0xFFE2014C,TAUD0CSR3,1,r,
+0xFFE20150,TAUD0CSR4,1,r,
+0xFFE20154,TAUD0CSR5,1,r,
+0xFFE20158,TAUD0CSR6,1,r,
+0xFFE2015C,TAUD0CSR7,1,r,
+0xFFE20160,TAUD0CSR8,1,r,
+0xFFE20164,TAUD0CSR9,1,r,
+0xFFE20168,TAUD0CSR10,1,r,
+0xFFE2016C,TAUD0CSR11,1,r,
+0xFFE20170,TAUD0CSR12,1,r,
+0xFFE20174,TAUD0CSR13,1,r,
+0xFFE20178,TAUD0CSR14,1,r,
+0xFFE2017C,TAUD0CSR15,1,r,
+0xFFE20180,TAUD0CSC0,1,w,
+0xFFE20184,TAUD0CSC1,1,w,
+0xFFE20188,TAUD0CSC2,1,w,
+0xFFE2018C,TAUD0CSC3,1,w,
+0xFFE20190,TAUD0CSC4,1,w,
+0xFFE20194,TAUD0CSC5,1,w,
+0xFFE20198,TAUD0CSC6,1,w,
+0xFFE2019C,TAUD0CSC7,1,w,
+0xFFE201A0,TAUD0CSC8,1,w,
+0xFFE201A4,TAUD0CSC9,1,w,
+0xFFE201A8,TAUD0CSC10,1,w,
+0xFFE201AC,TAUD0CSC11,1,w,
+0xFFE201B0,TAUD0CSC12,1,w,
+0xFFE201B4,TAUD0CSC13,1,w,
+0xFFE201B8,TAUD0CSC14,1,w,
+0xFFE201BC,TAUD0CSC15,1,w,
+0xFFE201C0,TAUD0TE,2,r,
+0xFFE201C4,TAUD0TS,2,w,
+0xFFE201C8,TAUD0TT,2,w,
+0xFFE20200,TAUD0CMOR0,2,rw,
+0xFFE20204,TAUD0CMOR1,2,rw,
+0xFFE20208,TAUD0CMOR2,2,rw,
+0xFFE2020C,TAUD0CMOR3,2,rw,
+0xFFE20210,TAUD0CMOR4,2,rw,
+0xFFE20214,TAUD0CMOR5,2,rw,
+0xFFE20218,TAUD0CMOR6,2,rw,
+0xFFE2021C,TAUD0CMOR7,2,rw,
+0xFFE20220,TAUD0CMOR8,2,rw,
+0xFFE20224,TAUD0CMOR9,2,rw,
+0xFFE20228,TAUD0CMOR10,2,rw,
+0xFFE2022C,TAUD0CMOR11,2,rw,
+0xFFE20230,TAUD0CMOR12,2,rw,
+0xFFE20234,TAUD0CMOR13,2,rw,
+0xFFE20238,TAUD0CMOR14,2,rw,
+0xFFE2023C,TAUD0CMOR15,2,rw,
+0xFFE20240,TAUD0TPS,2,rw,
+0xFFE20244,TAUD0BRS,1,rw,
+0xFFE20248,TAUD0TOM,2,rw,
+0xFFE2024C,TAUD0TOC,2,rw,
+0xFFE20250,TAUD0TDE,2,rw,
+0xFFE20254,TAUD0TDM,2,rw,
+0xFFE20258,TAUD0TRE,2,rw,
+0xFFE2025C,TAUD0TRC,2,rw,
+0xFFE20260,TAUD0RDE,2,rw,
+0xFFE20264,TAUD0RDM,2,rw,
+0xFFE20268,TAUD0RDS,2,rw,
+0xFFE2026C,TAUD0RDC,2,rw,
+0xFFE21000,TAUD1CDR0,2,rw,
+0xFFE21004,TAUD1CDR1,2,rw,
+0xFFE21008,TAUD1CDR2,2,rw,
+0xFFE2100C,TAUD1CDR3,2,rw,
+0xFFE21010,TAUD1CDR4,2,rw,
+0xFFE21014,TAUD1CDR5,2,rw,
+0xFFE21018,TAUD1CDR6,2,rw,
+0xFFE2101C,TAUD1CDR7,2,rw,
+0xFFE21020,TAUD1CDR8,2,rw,
+0xFFE21024,TAUD1CDR9,2,rw,
+0xFFE21028,TAUD1CDR10,2,rw,
+0xFFE2102C,TAUD1CDR11,2,rw,
+0xFFE21030,TAUD1CDR12,2,rw,
+0xFFE21034,TAUD1CDR13,2,rw,
+0xFFE21038,TAUD1CDR14,2,rw,
+0xFFE2103C,TAUD1CDR15,2,rw,
+0xFFE21040,TAUD1TOL,2,rw,
+0xFFE21044,TAUD1RDT,2,w,
+0xFFE21048,TAUD1RSF,2,r,
+0xFFE2104C,TAUD1TRO,2,rw,
+0xFFE21050,TAUD1TME,2,rw,
+0xFFE21054,TAUD1TDL,2,rw,
+0xFFE21058,TAUD1TO,2,rw,
+0xFFE2105C,TAUD1TOE,2,rw,
+0xFFE21080,TAUD1CNT0,2,r,
+0xFFE21084,TAUD1CNT1,2,r,
+0xFFE21088,TAUD1CNT2,2,r,
+0xFFE2108C,TAUD1CNT3,2,r,
+0xFFE21090,TAUD1CNT4,2,r,
+0xFFE21094,TAUD1CNT5,2,r,
+0xFFE21098,TAUD1CNT6,2,r,
+0xFFE2109C,TAUD1CNT7,2,r,
+0xFFE210A0,TAUD1CNT8,2,r,
+0xFFE210A4,TAUD1CNT9,2,r,
+0xFFE210A8,TAUD1CNT10,2,r,
+0xFFE210AC,TAUD1CNT11,2,r,
+0xFFE210B0,TAUD1CNT12,2,r,
+0xFFE210B4,TAUD1CNT13,2,r,
+0xFFE210B8,TAUD1CNT14,2,r,
+0xFFE210BC,TAUD1CNT15,2,r,
+0xFFE210C0,TAUD1CMUR0,1,rw,
+0xFFE210C4,TAUD1CMUR1,1,rw,
+0xFFE210C8,TAUD1CMUR2,1,rw,
+0xFFE210CC,TAUD1CMUR3,1,rw,
+0xFFE210D0,TAUD1CMUR4,1,rw,
+0xFFE210D4,TAUD1CMUR5,1,rw,
+0xFFE210D8,TAUD1CMUR6,1,rw,
+0xFFE210DC,TAUD1CMUR7,1,rw,
+0xFFE210E0,TAUD1CMUR8,1,rw,
+0xFFE210E4,TAUD1CMUR9,1,rw,
+0xFFE210E8,TAUD1CMUR10,1,rw,
+0xFFE210EC,TAUD1CMUR11,1,rw,
+0xFFE210F0,TAUD1CMUR12,1,rw,
+0xFFE210F4,TAUD1CMUR13,1,rw,
+0xFFE210F8,TAUD1CMUR14,1,rw,
+0xFFE210FC,TAUD1CMUR15,1,rw,
+0xFFE21140,TAUD1CSR0,1,r,
+0xFFE21144,TAUD1CSR1,1,r,
+0xFFE21148,TAUD1CSR2,1,r,
+0xFFE2114C,TAUD1CSR3,1,r,
+0xFFE21150,TAUD1CSR4,1,r,
+0xFFE21154,TAUD1CSR5,1,r,
+0xFFE21158,TAUD1CSR6,1,r,
+0xFFE2115C,TAUD1CSR7,1,r,
+0xFFE21160,TAUD1CSR8,1,r,
+0xFFE21164,TAUD1CSR9,1,r,
+0xFFE21168,TAUD1CSR10,1,r,
+0xFFE2116C,TAUD1CSR11,1,r,
+0xFFE21170,TAUD1CSR12,1,r,
+0xFFE21174,TAUD1CSR13,1,r,
+0xFFE21178,TAUD1CSR14,1,r,
+0xFFE2117C,TAUD1CSR15,1,r,
+0xFFE21180,TAUD1CSC0,1,w,
+0xFFE21184,TAUD1CSC1,1,w,
+0xFFE21188,TAUD1CSC2,1,w,
+0xFFE2118C,TAUD1CSC3,1,w,
+0xFFE21190,TAUD1CSC4,1,w,
+0xFFE21194,TAUD1CSC5,1,w,
+0xFFE21198,TAUD1CSC6,1,w,
+0xFFE2119C,TAUD1CSC7,1,w,
+0xFFE211A0,TAUD1CSC8,1,w,
+0xFFE211A4,TAUD1CSC9,1,w,
+0xFFE211A8,TAUD1CSC10,1,w,
+0xFFE211AC,TAUD1CSC11,1,w,
+0xFFE211B0,TAUD1CSC12,1,w,
+0xFFE211B4,TAUD1CSC13,1,w,
+0xFFE211B8,TAUD1CSC14,1,w,
+0xFFE211BC,TAUD1CSC15,1,w,
+0xFFE211C0,TAUD1TE,2,r,
+0xFFE211C4,TAUD1TS,2,w,
+0xFFE211C8,TAUD1TT,2,w,
+0xFFE21200,TAUD1CMOR0,2,rw,
+0xFFE21204,TAUD1CMOR1,2,rw,
+0xFFE21208,TAUD1CMOR2,2,rw,
+0xFFE2120C,TAUD1CMOR3,2,rw,
+0xFFE21210,TAUD1CMOR4,2,rw,
+0xFFE21214,TAUD1CMOR5,2,rw,
+0xFFE21218,TAUD1CMOR6,2,rw,
+0xFFE2121C,TAUD1CMOR7,2,rw,
+0xFFE21220,TAUD1CMOR8,2,rw,
+0xFFE21224,TAUD1CMOR9,2,rw,
+0xFFE21228,TAUD1CMOR10,2,rw,
+0xFFE2122C,TAUD1CMOR11,2,rw,
+0xFFE21230,TAUD1CMOR12,2,rw,
+0xFFE21234,TAUD1CMOR13,2,rw,
+0xFFE21238,TAUD1CMOR14,2,rw,
+0xFFE2123C,TAUD1CMOR15,2,rw,
+0xFFE21240,TAUD1TPS,2,rw,
+0xFFE21244,TAUD1BRS,1,rw,
+0xFFE21248,TAUD1TOM,2,rw,
+0xFFE2124C,TAUD1TOC,2,rw,
+0xFFE21250,TAUD1TDE,2,rw,
+0xFFE21254,TAUD1TDM,2,rw,
+0xFFE21258,TAUD1TRE,2,rw,
+0xFFE2125C,TAUD1TRC,2,rw,
+0xFFE21260,TAUD1RDE,2,rw,
+0xFFE21264,TAUD1RDM,2,rw,
+0xFFE21268,TAUD1RDS,2,rw,
+0xFFE2126C,TAUD1RDC,2,rw,
+0xFFE50000,TAUJ0CDR0,4,rw,TAUJ interval reload data; writes do not replace the active counter
+0xFFE50004,TAUJ0CDR1,4,rw,TAUJ interval reload data; writes do not replace the active counter
+0xFFE50008,TAUJ0CDR2,4,rw,TAUJ interval reload data; writes do not replace the active counter
+0xFFE5000C,TAUJ0CDR3,4,rw,TAUJ interval reload data; writes do not replace the active counter
+0xFFE50010,TAUJ0CNT0,4,r,TAUJ current interval counter; stop retains value
+0xFFE50014,TAUJ0CNT1,4,r,TAUJ current interval counter; stop retains value
+0xFFE50018,TAUJ0CNT2,4,r,TAUJ current interval counter; stop retains value
+0xFFE5001C,TAUJ0CNT3,4,r,TAUJ current interval counter; stop retains value
+0xFFE50020,TAUJ0CMUR0,1,rw,TAUJ channel input-edge selection; independent interval operation uses zero
+0xFFE50024,TAUJ0CMUR1,1,rw,TAUJ channel input-edge selection; independent interval operation uses zero
+0xFFE50028,TAUJ0CMUR2,1,rw,TAUJ channel input-edge selection; independent interval operation uses zero
+0xFFE5002C,TAUJ0CMUR3,1,rw,TAUJ channel input-edge selection; independent interval operation uses zero
+0xFFE50050,TAUJ0TE,1,r,"TAUJ channel status mask, low four bits"
+0xFFE50054,TAUJ0TS,1,w,TAUJ per-channel write-one trigger; always reads zero
+0xFFE50058,TAUJ0TT,1,w,TAUJ per-channel write-one trigger; always reads zero
+0xFFE5005C,TAUJ0TO,1,rw,"TAUJ per-channel output/reload configuration, low four bits"
+0xFFE50060,TAUJ0TOE,1,rw,"TAUJ per-channel output/reload configuration, low four bits"
+0xFFE50064,TAUJ0TOL,1,rw,"TAUJ per-channel output/reload configuration, low four bits"
+0xFFE50068,TAUJ0RDT,1,w,TAUJ per-channel write-one trigger; always reads zero
+0xFFE5006C,TAUJ0RSF,1,r,"TAUJ channel status mask, low four bits"
+0xFFE50080,TAUJ0CMOR0,2,rw,TAUJ channel mode; interval controller supports CKS and MD0
+0xFFE50084,TAUJ0CMOR1,2,rw,TAUJ channel mode; interval controller supports CKS and MD0
+0xFFE50088,TAUJ0CMOR2,2,rw,TAUJ channel mode; interval controller supports CKS and MD0
+0xFFE5008C,TAUJ0CMOR3,2,rw,TAUJ channel mode; interval controller supports CKS and MD0
+0xFFE50090,TAUJ0TPS,2,rw,TAUJ shared prescaler CK0..CK3_PRE power-of-two selectors
+0xFFE50094,TAUJ0BRS,1,rw,TAUJ native BYTE baud-rate divider; CK3=CK3_PRE/(BRS+1)
+0xFFE50098,TAUJ0TOM,1,rw,"TAUJ per-channel output/reload configuration, low four bits"
+0xFFE5009C,TAUJ0TOC,1,rw,"TAUJ per-channel output/reload configuration, low four bits"
+0xFFE500A0,TAUJ0RDE,1,rw,"TAUJ per-channel output/reload configuration, low four bits"
+0xFFE500A4,TAUJ0RDM,1,rw,"TAUJ per-channel output/reload configuration, low four bits"
+0xFFE51000,TAUJ1CDR0,4,rw,TAUJ interval reload data; writes do not replace the active counter
+0xFFE51004,TAUJ1CDR1,4,rw,TAUJ interval reload data; writes do not replace the active counter
+0xFFE51008,TAUJ1CDR2,4,rw,TAUJ interval reload data; writes do not replace the active counter
+0xFFE5100C,TAUJ1CDR3,4,rw,TAUJ interval reload data; writes do not replace the active counter
+0xFFE51010,TAUJ1CNT0,4,r,TAUJ current interval counter; stop retains value
+0xFFE51014,TAUJ1CNT1,4,r,TAUJ current interval counter; stop retains value
+0xFFE51018,TAUJ1CNT2,4,r,TAUJ current interval counter; stop retains value
+0xFFE5101C,TAUJ1CNT3,4,r,TAUJ current interval counter; stop retains value
+0xFFE51020,TAUJ1CMUR0,1,rw,TAUJ channel input-edge selection; independent interval operation uses zero
+0xFFE51024,TAUJ1CMUR1,1,rw,TAUJ channel input-edge selection; independent interval operation uses zero
+0xFFE51028,TAUJ1CMUR2,1,rw,TAUJ channel input-edge selection; independent interval operation uses zero
+0xFFE5102C,TAUJ1CMUR3,1,rw,TAUJ channel input-edge selection; independent interval operation uses zero
+0xFFE51050,TAUJ1TE,1,r,"TAUJ channel status mask, low four bits"
+0xFFE51054,TAUJ1TS,1,w,TAUJ per-channel write-one trigger; always reads zero
+0xFFE51058,TAUJ1TT,1,w,TAUJ per-channel write-one trigger; always reads zero
+0xFFE5105C,TAUJ1TO,1,rw,"TAUJ per-channel output/reload configuration, low four bits"
+0xFFE51060,TAUJ1TOE,1,rw,"TAUJ per-channel output/reload configuration, low four bits"
+0xFFE51064,TAUJ1TOL,1,rw,"TAUJ per-channel output/reload configuration, low four bits"
+0xFFE51068,TAUJ1RDT,1,w,TAUJ per-channel write-one trigger; always reads zero
+0xFFE5106C,TAUJ1RSF,1,r,"TAUJ channel status mask, low four bits"
+0xFFE51080,TAUJ1CMOR0,2,rw,TAUJ channel mode; interval controller supports CKS and MD0
+0xFFE51084,TAUJ1CMOR1,2,rw,TAUJ channel mode; interval controller supports CKS and MD0
+0xFFE51088,TAUJ1CMOR2,2,rw,TAUJ channel mode; interval controller supports CKS and MD0
+0xFFE5108C,TAUJ1CMOR3,2,rw,TAUJ channel mode; interval controller supports CKS and MD0
+0xFFE51090,TAUJ1TPS,2,rw,TAUJ shared prescaler CK0..CK3_PRE power-of-two selectors
+0xFFE51094,TAUJ1BRS,1,rw,TAUJ native BYTE baud-rate divider; CK3=CK3_PRE/(BRS+1)
+0xFFE51098,TAUJ1TOM,1,rw,"TAUJ per-channel output/reload configuration, low four bits"
+0xFFE5109C,TAUJ1TOC,1,rw,"TAUJ per-channel output/reload configuration, low four bits"
+0xFFE510A0,TAUJ1RDE,1,rw,"TAUJ per-channel output/reload configuration, low four bits"
+0xFFE510A4,TAUJ1RDM,1,rw,"TAUJ per-channel output/reload configuration, low four bits"
+0xFFE70000,TSG30IOC2,2,rw,TSG30IOC2
+0xFFE70004,TSG30CTL3,1,rw,TSG30CTL3
+0xFFE70008,TSG30CTL5,2,rw,TSG30CTL5
+0xFFE7000C,TSG30CTL6,2,rw,TSG30CTL6
+0xFFE70010,TSG30STR0,1,r,TSG30STR0
+0xFFE70014,TSG30STR1,1,r,TSG30STR1
+0xFFE70018,TSG30STR2,2,r,TSG30STR2
+0xFFE7001C,TSG30STC,2,w,TSG30STC
+0xFFE70020,TSG30OPT0,1,rw,TSG30OPT0
+0xFFE70024,TSG30OPT1,1,rw,TSG30OPT1
+0xFFE70028,TSG30CNT,2,r,TSG30CNT
+0xFFE7002C,TSG30SBC,2,r,TSG30SBC
+0xFFE70030,TSG30TRG0,1,w,TSG30TRG0
+0xFFE70034,TSG30TRG1,1,w,TSG30TRG1
+0xFFE70038,TSG30TRG2,1,w,TSG30TRG2
+0xFFE7006C,TSG30DTC0W,4,rw,TSG30DTC0W
+0xFFE70070,TSG30DTC1W,4,rw,TSG30DTC1W
+0xFFE70074,TSG30IOC3,4,rw,TSG30IOC3
+0xFFE70078,TSG30CTL2,4,rw,TSG30CTL2
+0xFFE7007C,TSG30CTL4,4,rw,TSG30CTL4
+0xFFE70140,TSG30DCMP2E,4,rw,TSG30DCMP2E
+0xFFE70144,TSG30DCMP1E,4,rw,TSG30DCMP1E
+0xFFE70148,TSG30DCMP0E,4,rw,TSG30DCMP0E
+0xFFE7014C,TSG30CMP0E,4,rw,TSG30CMP0E
+0xFFE70150,TSG30CMP12E,4,rw,TSG30CMP12E
+0xFFE70154,TSG30CMP11E,4,rw,TSG30CMP11E
+0xFFE70158,TSG30CMP8E,4,rw,TSG30CMP8E
+0xFFE7015C,TSG30CMP7E,4,rw,TSG30CMP7E
+0xFFE70160,TSG30CMP4E,4,rw,TSG30CMP4E
+0xFFE70164,TSG30CMP3E,4,rw,TSG30CMP3E
+0xFFE70168,TSG30CMP10E,4,rw,TSG30CMP10E
+0xFFE7016C,TSG30CMP9E,4,rw,TSG30CMP9E
+0xFFE70170,TSG30CMP6E,4,rw,TSG30CMP6E
+0xFFE70174,TSG30CMP5E,4,rw,TSG30CMP5E
+0xFFE70178,TSG30CMP2E,4,rw,TSG30CMP2E
+0xFFE7017C,TSG30CMP1E,4,rw,TSG30CMP1E
+0xFFE70180,TSG30CMPWE,4,rw,TSG30CMPWE
+0xFFE70184,TSG30CMPVE,4,rw,TSG30CMPVE
+0xFFE70188,TSG30CMPUE,4,rw,TSG30CMPUE
+0xFFE701A0,TSG30CNTE,4,r,TSG30CNTE
+0xFFE701A4,TSG30SBCE,4,r,TSG30SBCE
+0xFFE70200,TSG30IOC0,1,rw,TSG30IOC0
+0xFFE70204,TSG30IOC1,1,rw,TSG30IOC1
+0xFFE70208,TSG30CTL0,1,rw,TSG30CTL0
+0xFFE7020C,TSG30CTL1,2,rw,TSG30CTL1
+0xFFE70210,TSG30DTPR,2,rw,TSG30DTPR
+0xFFE71000,TSG31IOC2,2,rw,TSG31IOC2
+0xFFE71004,TSG31CTL3,1,rw,TSG31CTL3
+0xFFE71008,TSG31CTL5,2,rw,TSG31CTL5
+0xFFE7100C,TSG31CTL6,2,rw,TSG31CTL6
+0xFFE71010,TSG31STR0,1,r,TSG31STR0
+0xFFE71014,TSG31STR1,1,r,TSG31STR1
+0xFFE71018,TSG31STR2,2,r,TSG31STR2
+0xFFE7101C,TSG31STC,2,w,TSG31STC
+0xFFE71020,TSG31OPT0,1,rw,TSG31OPT0
+0xFFE71024,TSG31OPT1,1,rw,TSG31OPT1
+0xFFE71028,TSG31CNT,2,r,TSG31CNT
+0xFFE7102C,TSG31SBC,2,r,TSG31SBC
+0xFFE71030,TSG31TRG0,1,w,TSG31TRG0
+0xFFE71034,TSG31TRG1,1,w,TSG31TRG1
+0xFFE71038,TSG31TRG2,1,w,TSG31TRG2
+0xFFE7106C,TSG31DTC0W,4,rw,TSG31DTC0W
+0xFFE71070,TSG31DTC1W,4,rw,TSG31DTC1W
+0xFFE71074,TSG31IOC3,4,rw,TSG31IOC3
+0xFFE71078,TSG31CTL2,4,rw,TSG31CTL2
+0xFFE7107C,TSG31CTL4,4,rw,TSG31CTL4
+0xFFE71140,TSG31DCMP2E,4,rw,TSG31DCMP2E
+0xFFE71144,TSG31DCMP1E,4,rw,TSG31DCMP1E
+0xFFE71148,TSG31DCMP0E,4,rw,TSG31DCMP0E
+0xFFE7114C,TSG31CMP0E,4,rw,TSG31CMP0E
+0xFFE71150,TSG31CMP12E,4,rw,TSG31CMP12E
+0xFFE71154,TSG31CMP11E,4,rw,TSG31CMP11E
+0xFFE71158,TSG31CMP8E,4,rw,TSG31CMP8E
+0xFFE7115C,TSG31CMP7E,4,rw,TSG31CMP7E
+0xFFE71160,TSG31CMP4E,4,rw,TSG31CMP4E
+0xFFE71164,TSG31CMP3E,4,rw,TSG31CMP3E
+0xFFE71168,TSG31CMP10E,4,rw,TSG31CMP10E
+0xFFE7116C,TSG31CMP9E,4,rw,TSG31CMP9E
+0xFFE71170,TSG31CMP6E,4,rw,TSG31CMP6E
+0xFFE71174,TSG31CMP5E,4,rw,TSG31CMP5E
+0xFFE71178,TSG31CMP2E,4,rw,TSG31CMP2E
+0xFFE7117C,TSG31CMP1E,4,rw,TSG31CMP1E
+0xFFE71180,TSG31CMPWE,4,rw,TSG31CMPWE
+0xFFE71184,TSG31CMPVE,4,rw,TSG31CMPVE
+0xFFE71188,TSG31CMPUE,4,rw,TSG31CMPUE
+0xFFE711A0,TSG31CNTE,4,r,TSG31CNTE
+0xFFE711A4,TSG31SBCE,4,r,TSG31SBCE
+0xFFE71200,TSG31IOC0,1,rw,TSG31IOC0
+0xFFE71204,TSG31IOC1,1,rw,TSG31IOC1
+0xFFE71208,TSG31CTL0,1,rw,TSG31CTL0
+0xFFE7120C,TSG31CTL1,2,rw,TSG31CTL1
+0xFFE71210,TSG31DTPR,2,rw,TSG31DTPR
+0xFFF80104,MODE,4,r,"Operating-mode pin latch; FLMD0/1 sampled at pin-reset release, FLMD1 reads zero in normal mode"
+0xFFF80200,BSEQ0CTL,4,rw,Field BIST enable for pin System Reset 1 and System Reset 2; retained otherwise except POR/CVM
+0xFFF81000,RESF,4,r,Reset factors: cause-dependent sticky flags; bit6 has undefined read data
+0xFFF81008,RESFC,4,w,Write-one reset-factor clear; only implemented flag bits are effective
 0xFFF81420,STAC_GRAM,4,rw,RAM initialization mode control for Global RAM; reset value 0x00000003
 0xFFF81520,STAC_LM0,4,rw,RAM initialization mode control for Local RAM; reset value 0x00000003
 0xFFF82410,FHVE3,4,rw,"Flash program/erase/blank-check software enable, bit0; reset excludes application reset 1"
-0xFFF88818,CLKD3DIV,4,rw,EXTCLK1O divider; boot writes 0x50 for divide by 80
-0xFFF8881C,CLKD3STAT,4,r,EXTCLK1O divider status; boot polls synchronization and active state
-0xFFF890C0,CKSC3C,4,rw,EXTCLK1O source selector; source 4 is CLK_LSB
-0xFFF890C8,CKSC3S,4,r,EXTCLK1O selected-source status; boot polls until source 4 is active
+0xFFF82C00,CVMF,1,r,"Latched CVM voltage/CVMOUT factors; POR-only reset, CVMFC clears selected flags"
+0xFFF82C04,CVMDE,1,r,CVM enable configuration reflected from first CVMDEW write after POR; reserved bits1:0 read3
+0xFFF82C0C,CVMDMASK,1,rw,CVMOUT mask control; does not itself supply external pin feedback
+0xFFF82C10,CVMDIAG,1,rw,CVM comparator diagnostic reference selection; no fixed comparator result
+0xFFF82C14,CVMMON,1,r,"CVMOUT pin monitor; level requires explicit external input, not reset-initialized"
+0xFFF82C18,CVMFC,1,w,CVM factor write-one clear; always reads zero
+0xFFF82C1C,CVMDEW,1,w,"CVM enable one-write latch; only POR rearms, subsequent writes ignored; always reads zero"
+0xFFF88818,CLKD3DIV,4,rw,"EXTCLK1O divisor; zero stops output, 1..1023 divide the selected source; functional completion without waveform timing"
+0xFFF8881C,CLKD3STAT,4,r,"EXTCLK1O divider status; SYNC bit1, CLKACT bit0; reserved bits read zero"
+0xFFF890C0,CKSC3C,4,rw,EXTCLK1O source selection; IDs3..6 permitted only with divider stopped and synchronized
+0xFFF890C8,CKSC3S,4,r,EXTCLK1O selected-source ID; reserved bits read zero
+0xFFF89110,CKSC8C,4,rw,
+0xFFF89114,CKSC8S,4,r,
+0xFFF89120,DNFCKS100C,4,rw,
+0xFFF89124,DNFCSC100STAT,4,r,
+0xFFF89128,DNFCKS101C,4,rw,
+0xFFF8912C,DNFCSC101STAT,4,r,
+0xFFF89130,DNFCKS106C,4,rw,
+0xFFF89134,DNFCSC106STAT,4,r,
+0xFFF89138,DNFCKS107C,4,rw,
+0xFFF8913C,DNFCSC107STAT,4,r,
+0xFFF89140,DNFCKS108C,4,rw,
+0xFFF89144,DNFCSC108STAT,4,r,
+0xFFF89148,DNFCKS109C,4,rw,
+0xFFF8914C,DNFCSC109STAT,4,r,
+0xFFF89150,DNFCKS110C,4,rw,
+0xFFF89154,DNFCSC110STAT,4,r,
+0xFFF89158,DNFCKS112C,4,rw,
+0xFFF8915C,DNFCSC112STAT,4,r,
+0xFFF89160,DNFCKS113C,4,rw,
+0xFFF89164,DNFCSC113STAT,4,r,
+0xFFF89168,DNFCKS114C,4,rw,
+0xFFF8916C,DNFCSC114STAT,4,r,
+0xFFF89170,DNFCKS104C,4,rw,
+0xFFF89174,DNFCSC104STAT,4,r,
+0xFFF89178,DNFCKS105C,4,rw,
+0xFFF8917C,DNFCSC105STAT,4,r,
+0xFFF89180,DNFCKS102C,4,rw,
+0xFFF89184,DNFCSC102STAT,4,r,
 0xFFF8A430,FHVE15,4,rw,"Flash program/erase/blank-check software enable, bit0; both FHVE controls must be one"
-0xFFF91200,ADCG0DIR00,4,r,ADCG0 data supplementary information register 00; DMA source for sample ring
-0xFFF92200,ADCG1DIR00,4,r,ADCG1 data supplementary information register 00; DMA source for sample ring
+0xFFF91000,ADCG0VCR00,4,rw,
+0xFFF91004,ADCG0VCR01,4,rw,
+0xFFF91008,ADCG0VCR02,4,rw,
+0xFFF9100C,ADCG0VCR03,4,rw,
+0xFFF91010,ADCG0VCR04,4,rw,
+0xFFF91014,ADCG0VCR05,4,rw,
+0xFFF91018,ADCG0VCR06,4,rw,
+0xFFF9101C,ADCG0VCR07,4,rw,
+0xFFF91020,ADCG0VCR08,4,rw,
+0xFFF91024,ADCG0VCR09,4,rw,
+0xFFF91028,ADCG0VCR10,4,rw,
+0xFFF9102C,ADCG0VCR11,4,rw,
+0xFFF91030,ADCG0VCR12,4,rw,
+0xFFF91034,ADCG0VCR13,4,rw,
+0xFFF91038,ADCG0VCR14,4,rw,
+0xFFF9103C,ADCG0VCR15,4,rw,
+0xFFF91040,ADCG0VCR16,4,rw,
+0xFFF91044,ADCG0VCR17,4,rw,
+0xFFF91048,ADCG0VCR18,4,rw,
+0xFFF9104C,ADCG0VCR19,4,rw,
+0xFFF91050,ADCG0VCR20,4,rw,
+0xFFF91054,ADCG0VCR21,4,rw,
+0xFFF91058,ADCG0VCR22,4,rw,
+0xFFF9105C,ADCG0VCR23,4,rw,
+0xFFF91100,ADCG0DR00,4,r,
+0xFFF91104,ADCG0DR02,4,r,
+0xFFF91108,ADCG0DR04,4,r,
+0xFFF9110C,ADCG0DR06,4,r,
+0xFFF91110,ADCG0DR08,4,r,
+0xFFF91114,ADCG0DR10,4,r,
+0xFFF91118,ADCG0DR12,4,r,
+0xFFF9111C,ADCG0DR14,4,r,
+0xFFF91120,ADCG0DR16,4,r,
+0xFFF91124,ADCG0DR18,4,r,
+0xFFF91128,ADCG0DR20,4,r,
+0xFFF9112C,ADCG0DR22,4,r,
+0xFFF91200,ADCG0DIR00,4,r,
+0xFFF91204,ADCG0DIR01,4,r,
+0xFFF91208,ADCG0DIR02,4,r,
+0xFFF9120C,ADCG0DIR03,4,r,
+0xFFF91210,ADCG0DIR04,4,r,
+0xFFF91214,ADCG0DIR05,4,r,
+0xFFF91218,ADCG0DIR06,4,r,
+0xFFF9121C,ADCG0DIR07,4,r,
+0xFFF91220,ADCG0DIR08,4,r,
+0xFFF91224,ADCG0DIR09,4,r,
+0xFFF91228,ADCG0DIR10,4,r,
+0xFFF9122C,ADCG0DIR11,4,r,
+0xFFF91230,ADCG0DIR12,4,r,
+0xFFF91234,ADCG0DIR13,4,r,
+0xFFF91238,ADCG0DIR14,4,r,
+0xFFF9123C,ADCG0DIR15,4,r,
+0xFFF91240,ADCG0DIR16,4,r,
+0xFFF91244,ADCG0DIR17,4,r,
+0xFFF91248,ADCG0DIR18,4,r,
+0xFFF9124C,ADCG0DIR19,4,r,
+0xFFF91250,ADCG0DIR20,4,r,
+0xFFF91254,ADCG0DIR21,4,r,
+0xFFF91258,ADCG0DIR22,4,r,
+0xFFF9125C,ADCG0DIR23,4,r,
+0xFFF91300,ADCG0ADSYNSTCR,1,w,
+0xFFF91304,ADCG0ADTSYNSTCR,1,w,
+0xFFF91340,ADCG0SMPCR,2,rw,
+0xFFF91380,ADCG0ADHALTR,1,w,
+0xFFF91384,ADCG0ADCR1,1,rw,
+0xFFF91398,ADCG0ADCR2,1,rw,
+0xFFF913C0,ADCG0SFTCR,1,rw,
+0xFFF913C4,ADCG0TDCR,1,rw,
+0xFFF913C8,ADCG0ODCR,4,rw,
+0xFFF913CC,ADCG0ULLMTBR0,4,rw,
+0xFFF913D0,ADCG0ULLMTBR1,4,rw,
+0xFFF913D4,ADCG0ULLMTBR2,4,rw,
+0xFFF913D8,ADCG0ECR,1,w,
+0xFFF913DC,ADCG0ULER,1,r,
+0xFFF913E0,ADCG0OWER,1,r,
+0xFFF913E4,ADCG0PER,1,r,
+0xFFF913E8,ADCG0IDER,1,r,
+0xFFF91400,ADCG0THSMPSTCR,1,w,
+0xFFF91404,ADCG0THSTPCR,1,w,
+0xFFF91408,ADCG0THCR,1,rw,
+0xFFF91410,ADCG0THAHLDSTCR,1,w,
+0xFFF91414,ADCG0THBHLDSTCR,1,w,
+0xFFF91420,ADCG0THACR,1,rw,
+0xFFF91424,ADCG0THBCR,1,rw,
+0xFFF91430,ADCG0THER,1,rw,
+0xFFF91434,ADCG0THGSR,2,rw,
+0xFFF91480,ADCG0SGSTCR0,1,w,
+0xFFF91490,ADCG0SGCR0,1,rw,
+0xFFF91494,ADCG0SGVCSP0,1,rw,
+0xFFF91498,ADCG0SGVCEP0,1,rw,
+0xFFF9149C,ADCG0SGMCYCR0,1,rw,
+0xFFF914A4,ADCG0SGSR0,1,r,
+0xFFF914B0,ADCG0ULLMSR0,1,rw,
+0xFFF91500,ADCG0SGSTCR1,1,w,
+0xFFF91510,ADCG0SGCR1,1,rw,
+0xFFF91514,ADCG0SGVCSP1,1,rw,
+0xFFF91518,ADCG0SGVCEP1,1,rw,
+0xFFF9151C,ADCG0SGMCYCR1,1,rw,
+0xFFF91524,ADCG0SGSR1,1,r,
+0xFFF91530,ADCG0ULLMSR1,1,rw,
+0xFFF91580,ADCG0SGSTCR2,1,w,
+0xFFF91590,ADCG0SGCR2,1,rw,
+0xFFF91594,ADCG0SGVCSP2,1,rw,
+0xFFF91598,ADCG0SGVCEP2,1,rw,
+0xFFF9159C,ADCG0SGMCYCR2,1,rw,
+0xFFF915A4,ADCG0SGSR2,1,r,
+0xFFF915B0,ADCG0ULLMSR2,1,rw,
+0xFFF91600,ADCG0SGSTCR3,1,w,
+0xFFF91608,ADCG0ADTSTCR3,1,w,
+0xFFF9160C,ADCG0ADTENDCR3,1,w,
+0xFFF91610,ADCG0SGCR3,1,rw,
+0xFFF91614,ADCG0SGVCSP3,1,rw,
+0xFFF91618,ADCG0SGVCEP3,1,rw,
+0xFFF9161C,ADCG0SGMCYCR3,1,rw,
+0xFFF91624,ADCG0SGSR3,1,r,
+0xFFF91628,ADCG0ADTIPR3,4,rw,
+0xFFF9162C,ADCG0ADTPRR3,4,rw,
+0xFFF91630,ADCG0ULLMSR3,1,rw,
+0xFFF91680,ADCG0SGSTCR4,1,w,
+0xFFF91688,ADCG0ADTSTCR4,1,w,
+0xFFF9168C,ADCG0ADTENDCR4,1,w,
+0xFFF91690,ADCG0SGCR4,1,rw,
+0xFFF91694,ADCG0SGVCSP4,1,rw,
+0xFFF91698,ADCG0SGVCEP4,1,rw,
+0xFFF9169C,ADCG0SGMCYCR4,1,rw,
+0xFFF916A4,ADCG0SGSR4,1,r,
+0xFFF916A8,ADCG0ADTIPR4,4,rw,
+0xFFF916AC,ADCG0ADTPRR4,4,rw,
+0xFFF916B0,ADCG0ULLMSR4,1,rw,
+0xFFF91800,ADOPDIG0,4,rw,
+0xFFF92000,ADCG1VCR00,4,rw,
+0xFFF92004,ADCG1VCR01,4,rw,
+0xFFF92008,ADCG1VCR02,4,rw,
+0xFFF9200C,ADCG1VCR03,4,rw,
+0xFFF92010,ADCG1VCR04,4,rw,
+0xFFF92014,ADCG1VCR05,4,rw,
+0xFFF92018,ADCG1VCR06,4,rw,
+0xFFF9201C,ADCG1VCR07,4,rw,
+0xFFF92020,ADCG1VCR08,4,rw,
+0xFFF92024,ADCG1VCR09,4,rw,
+0xFFF92028,ADCG1VCR10,4,rw,
+0xFFF9202C,ADCG1VCR11,4,rw,
+0xFFF92030,ADCG1VCR12,4,rw,
+0xFFF92034,ADCG1VCR13,4,rw,
+0xFFF92038,ADCG1VCR14,4,rw,
+0xFFF9203C,ADCG1VCR15,4,rw,
+0xFFF92040,ADCG1VCR16,4,rw,
+0xFFF92044,ADCG1VCR17,4,rw,
+0xFFF92048,ADCG1VCR18,4,rw,
+0xFFF9204C,ADCG1VCR19,4,rw,
+0xFFF92050,ADCG1VCR20,4,rw,
+0xFFF92054,ADCG1VCR21,4,rw,
+0xFFF92058,ADCG1VCR22,4,rw,
+0xFFF9205C,ADCG1VCR23,4,rw,
+0xFFF92100,ADCG1DR00,4,r,
+0xFFF92104,ADCG1DR02,4,r,
+0xFFF92108,ADCG1DR04,4,r,
+0xFFF9210C,ADCG1DR06,4,r,
+0xFFF92110,ADCG1DR08,4,r,
+0xFFF92114,ADCG1DR10,4,r,
+0xFFF92118,ADCG1DR12,4,r,
+0xFFF9211C,ADCG1DR14,4,r,
+0xFFF92120,ADCG1DR16,4,r,
+0xFFF92124,ADCG1DR18,4,r,
+0xFFF92128,ADCG1DR20,4,r,
+0xFFF9212C,ADCG1DR22,4,r,
+0xFFF92200,ADCG1DIR00,4,r,
+0xFFF92204,ADCG1DIR01,4,r,
+0xFFF92208,ADCG1DIR02,4,r,
+0xFFF9220C,ADCG1DIR03,4,r,
+0xFFF92210,ADCG1DIR04,4,r,
+0xFFF92214,ADCG1DIR05,4,r,
+0xFFF92218,ADCG1DIR06,4,r,
+0xFFF9221C,ADCG1DIR07,4,r,
+0xFFF92220,ADCG1DIR08,4,r,
+0xFFF92224,ADCG1DIR09,4,r,
+0xFFF92228,ADCG1DIR10,4,r,
+0xFFF9222C,ADCG1DIR11,4,r,
+0xFFF92230,ADCG1DIR12,4,r,
+0xFFF92234,ADCG1DIR13,4,r,
+0xFFF92238,ADCG1DIR14,4,r,
+0xFFF9223C,ADCG1DIR15,4,r,
+0xFFF92240,ADCG1DIR16,4,r,
+0xFFF92244,ADCG1DIR17,4,r,
+0xFFF92248,ADCG1DIR18,4,r,
+0xFFF9224C,ADCG1DIR19,4,r,
+0xFFF92250,ADCG1DIR20,4,r,
+0xFFF92254,ADCG1DIR21,4,r,
+0xFFF92258,ADCG1DIR22,4,r,
+0xFFF9225C,ADCG1DIR23,4,r,
+0xFFF92340,ADCG1SMPCR,2,rw,
+0xFFF92380,ADCG1ADHALTR,1,w,
+0xFFF92384,ADCG1ADCR1,1,rw,
+0xFFF92398,ADCG1ADCR2,1,rw,
+0xFFF923C0,ADCG1SFTCR,1,rw,
+0xFFF923C4,ADCG1TDCR,1,rw,
+0xFFF923C8,ADCG1ODCR,4,rw,
+0xFFF923CC,ADCG1ULLMTBR0,4,rw,
+0xFFF923D0,ADCG1ULLMTBR1,4,rw,
+0xFFF923D4,ADCG1ULLMTBR2,4,rw,
+0xFFF923D8,ADCG1ECR,1,w,
+0xFFF923DC,ADCG1ULER,1,r,
+0xFFF923E0,ADCG1OWER,1,r,
+0xFFF923E4,ADCG1PER,1,r,
+0xFFF923E8,ADCG1IDER,1,r,
+0xFFF92400,ADCG1THSMPSTCR,1,w,
+0xFFF92404,ADCG1THSTPCR,1,w,
+0xFFF92408,ADCG1THCR,1,rw,
+0xFFF92410,ADCG1THAHLDSTCR,1,w,
+0xFFF92414,ADCG1THBHLDSTCR,1,w,
+0xFFF92420,ADCG1THACR,1,rw,
+0xFFF92424,ADCG1THBCR,1,rw,
+0xFFF92430,ADCG1THER,1,rw,
+0xFFF92434,ADCG1THGSR,2,rw,
+0xFFF92480,ADCG1SGSTCR0,1,w,
+0xFFF92490,ADCG1SGCR0,1,rw,
+0xFFF92494,ADCG1SGVCSP0,1,rw,
+0xFFF92498,ADCG1SGVCEP0,1,rw,
+0xFFF9249C,ADCG1SGMCYCR0,1,rw,
+0xFFF924A4,ADCG1SGSR0,1,r,
+0xFFF924B0,ADCG1ULLMSR0,1,rw,
+0xFFF92500,ADCG1SGSTCR1,1,w,
+0xFFF92510,ADCG1SGCR1,1,rw,
+0xFFF92514,ADCG1SGVCSP1,1,rw,
+0xFFF92518,ADCG1SGVCEP1,1,rw,
+0xFFF9251C,ADCG1SGMCYCR1,1,rw,
+0xFFF92524,ADCG1SGSR1,1,r,
+0xFFF92530,ADCG1ULLMSR1,1,rw,
+0xFFF92580,ADCG1SGSTCR2,1,w,
+0xFFF92590,ADCG1SGCR2,1,rw,
+0xFFF92594,ADCG1SGVCSP2,1,rw,
+0xFFF92598,ADCG1SGVCEP2,1,rw,
+0xFFF9259C,ADCG1SGMCYCR2,1,rw,
+0xFFF925A4,ADCG1SGSR2,1,r,
+0xFFF925B0,ADCG1ULLMSR2,1,rw,
+0xFFF92600,ADCG1SGSTCR3,1,w,
+0xFFF92608,ADCG1ADTSTCR3,1,w,
+0xFFF9260C,ADCG1ADTENDCR3,1,w,
+0xFFF92610,ADCG1SGCR3,1,rw,
+0xFFF92614,ADCG1SGVCSP3,1,rw,
+0xFFF92618,ADCG1SGVCEP3,1,rw,
+0xFFF9261C,ADCG1SGMCYCR3,1,rw,
+0xFFF92624,ADCG1SGSR3,1,r,
+0xFFF92628,ADCG1ADTIPR3,4,rw,
+0xFFF9262C,ADCG1ADTPRR3,4,rw,
+0xFFF92630,ADCG1ULLMSR3,1,rw,
+0xFFF92680,ADCG1SGSTCR4,1,w,
+0xFFF92688,ADCG1ADTSTCR4,1,w,
+0xFFF9268C,ADCG1ADTENDCR4,1,w,
+0xFFF92690,ADCG1SGCR4,1,rw,
+0xFFF92694,ADCG1SGVCSP4,1,rw,
+0xFFF92698,ADCG1SGVCEP4,1,rw,
+0xFFF9269C,ADCG1SGMCYCR4,1,rw,
+0xFFF926A4,ADCG1SGSR4,1,r,
+0xFFF926A8,ADCG1ADTIPR4,4,rw,
+0xFFF926AC,ADCG1ADTPRR4,4,rw,
+0xFFF926B0,ADCG1ULLMSR4,1,rw,
+0xFFF92800,ADOPDIG1,4,rw,
+0xFFF94000,FSGD2APROT00,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF94004,FSGD2ASPID00,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94008,FSGD2APROT01,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF9400C,FSGD2ASPID01,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94010,FSGD2APROT02,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF94014,FSGD2ASPID02,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94018,FSGD2APROT03,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF9401C,FSGD2ASPID03,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94020,FSGD2APROT04,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF94024,FSGD2ASPID04,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94028,FSGD2APROT05,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF9402C,FSGD2ASPID05,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94030,FSGD2APROT06,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF94034,FSGD2ASPID06,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94038,FSGD2APROT07,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF9403C,FSGD2ASPID07,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94040,FSGD2APROT08,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF94044,FSGD2ASPID08,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94048,FSGD2APROT09,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF9404C,FSGD2ASPID09,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94050,FSGD2APROT10,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF94054,FSGD2ASPID10,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94058,FSGD2APROT11,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF9405C,FSGD2ASPID11,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94060,FSGD2APROT12,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF94064,FSGD2ASPID12,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94068,FSGD2APROT13,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF9406C,FSGD2ASPID13,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94070,FSGD2APROT14,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF94074,FSGD2ASPID14,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94078,FSGD2APROT15,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF9407C,FSGD2ASPID15,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94080,FSGD2BPROT00,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF94084,FSGD2BSPID00,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94088,FSGD2BPROT01,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF9408C,FSGD2BSPID01,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94090,FSGD2BPROT02,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF94094,FSGD2BSPID02,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94098,FSGD2BPROT03,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF9409C,FSGD2BSPID03,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF940A0,FSGD2BPROT04,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF940A4,FSGD2BSPID04,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF940A8,FSGD2BPROT05,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF940AC,FSGD2BSPID05,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF940B0,FSGD2BPROT06,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF940B4,FSGD2BSPID06,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF940B8,FSGD2BPROT07,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF940BC,FSGD2BSPID07,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF940C0,FSGD2BPROT08,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF940C4,FSGD2BSPID08,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF940C8,FSGD2BPROT09,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF940CC,FSGD2BSPID09,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF940D0,FSGD2BPROT10,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF940D4,FSGD2BSPID10,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF940D8,FSGD2BPROT11,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF940DC,FSGD2BSPID11,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF940E0,FSGD2BPROT12,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF940E4,FSGD2BSPID12,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF940E8,FSGD2BPROT13,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF940EC,FSGD2BSPID13,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94100,FSGD2CPROT00,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF94104,FSGD2CSPID00,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94108,FSGD2CPROT01,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF9410C,FSGD2CSPID01,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94110,FSGD2CPROT02,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF94114,FSGD2CSPID02,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94118,FSGD2CPROT03,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF9411C,FSGD2CSPID03,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94120,FSGD2CPROT04,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF94124,FSGD2CSPID04,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94128,FSGD2CPROT05,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF9412C,FSGD2CSPID05,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94130,FSGD2CPROT06,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF94134,FSGD2CSPID06,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94138,FSGD2CPROT07,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF9413C,FSGD2CSPID07,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94140,FSGD2CPROT08,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF94144,FSGD2CSPID08,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94148,FSGD2CPROT09,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF9414C,FSGD2CSPID09,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94150,FSGD2CPROT10,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF94154,FSGD2CSPID10,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94158,FSGD2CPROT11,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFF9415C,FSGD2CSPID11,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFF94400,ERRSLV2CTL,1,w,
+0xFFF94404,ERRSLV2STAT,4,r,
+0xFFF9440C,ERRSLV2TYPE,4,r,
+0xFFF94800,APEC1ECCCTL,4,rw,Peripheral IP group2 address/data ECC control; protected low4 fields
+0xFFF94804,APEC1ERRINT,4,rw,ECC error-report enable latches; reserved bits read reset; ECM delivery not synthesized
+0xFFF94808,APEC1STCLR,4,w,Write-one selected error flag/capture clear; zero is a no-op; reads zero
+0xFFF9480C,APEC1OVFSTR,4,r,ECC error capture overflow latch; bit0 ERROVF
+0xFFF94810,APEC11STERSTR,4,r,ECC error status latches; only documented flag bits are cleared
+0xFFF94850,APEC11STEADR0,4,r,ECC error captured address
+0xFFF99000,DMACTRGSEL0,4,rw,
+0xFFF99004,DMACTRGSEL1,4,rw,
+0xFFFA0000,FSGDF0PROT00,4,rw,P/H-bus read guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFFA0004,FSGDF0SPID00,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFFA0008,FSGDF0PROT01,4,rw,P/H-bus write guard LOCK and PEID1/PEID4 permissions; all other bits retain reset
+0xFFFA000C,FSGDF0SPID01,4,rw,"Allowed bus-master SPID bitmap, protected by corresponding LOCK"
+0xFFFEE00D,IPGENUM,1,rw,IPG user-mode protection enable and instruction-error recording control
+0xFFFEE020,IPGPMTUM0,1,rw,IPG peripheral-group user permissions
+0xFFFEE021,IPGPMTUM1,1,rw,IPG global-RAM-bank user execution permissions
+0xFFFEE022,IPGPMTUM2,1,rw,IPG INTC1 and COMPTEST user permissions
+0xFFFEE023,IPGPMTUM3,1,rw,IPG SYSERRGen user permissions
+0xFFFEE024,IPGPMTUM4,1,rw,IPG PEG and H-Bus user permissions
+0xFFFEE680,PEGG0MK,4,rw,PE guard address mask; a write clears the corresponding BA.EN
+0xFFFEE684,PEGG0BA,4,rw,"PE guard base, LOCK, write/read permission and enable"
+0xFFFEE688,PEGG0SP,4,rw,PE guard allowed external-master SPID bitmap; own PE is not checked
+0xFFFEE690,PEGG1MK,4,rw,PE guard address mask; a write clears the corresponding BA.EN
+0xFFFEE694,PEGG1BA,4,rw,"PE guard base, LOCK, write/read permission and enable"
+0xFFFEE698,PEGG1SP,4,rw,PE guard allowed external-master SPID bitmap; own PE is not checked
+0xFFFEE6A0,PEGG2MK,4,rw,PE guard address mask; a write clears the corresponding BA.EN
+0xFFFEE6A4,PEGG2BA,4,rw,"PE guard base, LOCK, write/read permission and enable"
+0xFFFEE6A8,PEGG2SP,4,rw,PE guard allowed external-master SPID bitmap; own PE is not checked
+0xFFFEE6B0,PEGG3MK,4,rw,PE guard address mask; a write clears the corresponding BA.EN
+0xFFFEE6B4,PEGG3BA,4,rw,"PE guard base, LOCK, write/read permission and enable"
+0xFFFEE6B8,PEGG3SP,4,rw,PE guard allowed external-master SPID bitmap; own PE is not checked
+0xFFFEE6C0,PEGG4MK,4,rw,PE guard address mask; a write clears the corresponding BA.EN
+0xFFFEE6C4,PEGG4BA,4,rw,"PE guard base, LOCK, write/read permission and enable"
+0xFFFEE6C8,PEGG4SP,4,rw,PE guard allowed external-master SPID bitmap; own PE is not checked
+0xFFFEE6D0,PEGG5MK,4,rw,PE guard address mask; a write clears the corresponding BA.EN
+0xFFFEE6D4,PEGG5BA,4,rw,"PE guard base, LOCK, write/read permission and enable"
+0xFFFEE6D8,PEGG5SP,4,rw,PE guard allowed external-master SPID bitmap; own PE is not checked
+0xFFFEE6E0,PEGG6MK,4,rw,PE guard address mask; a write clears the corresponding BA.EN
+0xFFFEE6E4,PEGG6BA,4,rw,"PE guard base, LOCK, write/read permission and enable"
+0xFFFEE6E8,PEGG6SP,4,rw,PE guard allowed external-master SPID bitmap; own PE is not checked
+0xFFFEE6F0,PEGG7MK,4,rw,PE guard address mask; a write clears the corresponding BA.EN
+0xFFFEE6F4,PEGG7BA,4,rw,"PE guard base, LOCK, write/read permission and enable"
+0xFFFEE6F8,PEGG7SP,4,rw,PE guard allowed external-master SPID bitmap; own PE is not checked
+0xFFFEE980,SEGCONT,2,rw,SYSERR notification enable by error factor; no flag clears on acknowledgement
+0xFFFEE982,SEGFLAG,2,rw,SYSERR error-response history; software can set and clear flags; setting alone does not notify; reserved bit5 reads undefined
+0xFFFEE988,SEGADDR,4,rw,"First notification-enabled SYSERR error address; undefined/retained across reset, locked while enabled error flag is set"
 0xFFFEEA10,EIC8,2,rw,"ECM maskable-error interrupt control (EIINT 8); EIRF bit 12, EIMK bit 7, EITB bit 6, EIP[3:0], EICT bit 15; synchronous edge detection"
-0xFFFF8100,DM00CM,4,rw,DMAC0 channel 0 channel master setting register
-0xFFFF8120,DM10CM,4,rw,DMAC1 channel 0 channel master setting register
+0xFFFEEA12,EIC9,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFEEA20,EIC16,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFEEA22,EIC17,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFEEA24,EIC18,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFEEA26,EIC19,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFEEA28,EIC20,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFEEA2A,EIC21,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFEEA2C,EIC22,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFEEA2E,EIC23,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFEEA30,EIC24,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFEEA32,EIC25,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFEEA34,EIC26,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFEEA36,EIC27,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFEEA38,EIC28,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFEEA3A,EIC29,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFEEA3C,EIC30,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFEEA3E,EIC31,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFF7A04,GRAMCWTBCONFIG0,4,rw,Global-RAM write-through buffer enable
+0xFFFF7A08,GRAMCWTBCONFIG1,4,rw,Global-RAM write-through buffer invalidation timer configuration
+0xFFFF7A0C,GRAMCWTBCONFIG2,4,r,Global-RAM write-through buffer invalidate-on-read; no cached entries in the functional model
+0xFFFF8000,DMACTL,4,rw,DMA global suspension; bit0=1 suspends without changing channel enables
+0xFFFF8020,DMACER,4,r,
+0xFFFF8030,DM0CMV,4,r,
+0xFFFF8034,DM1CMV,4,r,
+0xFFFF8038,DTSCMV,4,r,
+0xFFFF803C,CMVC,4,rw,
+0xFFFF804C,TFRSTS,4,r,
+0xFFFF80A0,ADECCTCL,4,rw,DMA bus address ECC test control; simultaneous PROT31:30=01 permits ECCTST1/RWSEL0; key reads zero; no fault injection synthesized
+0xFFFF8100,DM00CM,4,rw,
+0xFFFF8104,DM01CM,4,rw,
+0xFFFF8108,DM02CM,4,rw,
+0xFFFF810C,DM03CM,4,rw,
+0xFFFF8110,DM04CM,4,rw,
+0xFFFF8114,DM05CM,4,rw,
+0xFFFF8118,DM06CM,4,rw,
+0xFFFF811C,DM07CM,4,rw,
+0xFFFF8120,DM10CM,4,rw,
+0xFFFF8124,DM11CM,4,rw,
+0xFFFF8128,DM12CM,4,rw,
+0xFFFF812C,DM13CM,4,rw,
+0xFFFF8130,DM14CM,4,rw,
+0xFFFF8134,DM15CM,4,rw,
+0xFFFF8138,DM16CM,4,rw,
+0xFFFF813C,DM17CM,4,rw,
+0xFFFF8400,DSA0,4,rw,
+0xFFFF8404,DDA0,4,rw,
+0xFFFF8408,DTC0,4,rw,
+0xFFFF840C,DTCT0,4,rw,
+0xFFFF8410,DRSA0,4,rw,
+0xFFFF8414,DRDA0,4,rw,
+0xFFFF8418,DRTC0,4,rw,
+0xFFFF841C,DTCC0,4,rw,
+0xFFFF8420,DCEN0,4,rw,
+0xFFFF8424,DCST0,4,r,
+0xFFFF8428,DCSTS0,4,rw,
+0xFFFF842C,DCSTC0,4,rw,
+0xFFFF8430,DTFR0,4,rw,
+0xFFFF8434,DTFRRQ0,4,r,
+0xFFFF8438,DTFRRQC0,4,rw,
+0xFFFF8440,DSA1,4,rw,
+0xFFFF8444,DDA1,4,rw,
+0xFFFF8448,DTC1,4,rw,
+0xFFFF844C,DTCT1,4,rw,
+0xFFFF8450,DRSA1,4,rw,
+0xFFFF8454,DRDA1,4,rw,
+0xFFFF8458,DRTC1,4,rw,
+0xFFFF845C,DTCC1,4,rw,
+0xFFFF8460,DCEN1,4,rw,
+0xFFFF8464,DCST1,4,r,
+0xFFFF8468,DCSTS1,4,rw,
+0xFFFF846C,DCSTC1,4,rw,
+0xFFFF8470,DTFR1,4,rw,
+0xFFFF8474,DTFRRQ1,4,r,
+0xFFFF8478,DTFRRQC1,4,rw,
+0xFFFF8480,DSA2,4,rw,
+0xFFFF8484,DDA2,4,rw,
+0xFFFF8488,DTC2,4,rw,
+0xFFFF848C,DTCT2,4,rw,
+0xFFFF8490,DRSA2,4,rw,
+0xFFFF8494,DRDA2,4,rw,
+0xFFFF8498,DRTC2,4,rw,
+0xFFFF849C,DTCC2,4,rw,
+0xFFFF84A0,DCEN2,4,rw,
+0xFFFF84A4,DCST2,4,r,
+0xFFFF84A8,DCSTS2,4,rw,
+0xFFFF84AC,DCSTC2,4,rw,
+0xFFFF84B0,DTFR2,4,rw,
+0xFFFF84B4,DTFRRQ2,4,r,
+0xFFFF84B8,DTFRRQC2,4,rw,
+0xFFFF84C0,DSA3,4,rw,
+0xFFFF84C4,DDA3,4,rw,
+0xFFFF84C8,DTC3,4,rw,
+0xFFFF84CC,DTCT3,4,rw,
+0xFFFF84D0,DRSA3,4,rw,
+0xFFFF84D4,DRDA3,4,rw,
+0xFFFF84D8,DRTC3,4,rw,
+0xFFFF84DC,DTCC3,4,rw,
+0xFFFF84E0,DCEN3,4,rw,
+0xFFFF84E4,DCST3,4,r,
+0xFFFF84E8,DCSTS3,4,rw,
+0xFFFF84EC,DCSTC3,4,rw,
+0xFFFF84F0,DTFR3,4,rw,
+0xFFFF84F4,DTFRRQ3,4,r,
+0xFFFF84F8,DTFRRQC3,4,rw,
+0xFFFF8500,DSA4,4,rw,
+0xFFFF8504,DDA4,4,rw,
+0xFFFF8508,DTC4,4,rw,
+0xFFFF850C,DTCT4,4,rw,
+0xFFFF8510,DRSA4,4,rw,
+0xFFFF8514,DRDA4,4,rw,
+0xFFFF8518,DRTC4,4,rw,
+0xFFFF851C,DTCC4,4,rw,
+0xFFFF8520,DCEN4,4,rw,
+0xFFFF8524,DCST4,4,r,
+0xFFFF8528,DCSTS4,4,rw,
+0xFFFF852C,DCSTC4,4,rw,
+0xFFFF8530,DTFR4,4,rw,
+0xFFFF8534,DTFRRQ4,4,r,
+0xFFFF8538,DTFRRQC4,4,rw,
+0xFFFF8540,DSA5,4,rw,
+0xFFFF8544,DDA5,4,rw,
+0xFFFF8548,DTC5,4,rw,
+0xFFFF854C,DTCT5,4,rw,
+0xFFFF8550,DRSA5,4,rw,
+0xFFFF8554,DRDA5,4,rw,
+0xFFFF8558,DRTC5,4,rw,
+0xFFFF855C,DTCC5,4,rw,
+0xFFFF8560,DCEN5,4,rw,
+0xFFFF8564,DCST5,4,r,
+0xFFFF8568,DCSTS5,4,rw,
+0xFFFF856C,DCSTC5,4,rw,
+0xFFFF8570,DTFR5,4,rw,
+0xFFFF8574,DTFRRQ5,4,r,
+0xFFFF8578,DTFRRQC5,4,rw,
+0xFFFF8580,DSA6,4,rw,
+0xFFFF8584,DDA6,4,rw,
+0xFFFF8588,DTC6,4,rw,
+0xFFFF858C,DTCT6,4,rw,
+0xFFFF8590,DRSA6,4,rw,
+0xFFFF8594,DRDA6,4,rw,
+0xFFFF8598,DRTC6,4,rw,
+0xFFFF859C,DTCC6,4,rw,
+0xFFFF85A0,DCEN6,4,rw,
+0xFFFF85A4,DCST6,4,r,
+0xFFFF85A8,DCSTS6,4,rw,
+0xFFFF85AC,DCSTC6,4,rw,
+0xFFFF85B0,DTFR6,4,rw,
+0xFFFF85B4,DTFRRQ6,4,r,
+0xFFFF85B8,DTFRRQC6,4,rw,
+0xFFFF85C0,DSA7,4,rw,
+0xFFFF85C4,DDA7,4,rw,
+0xFFFF85C8,DTC7,4,rw,
+0xFFFF85CC,DTCT7,4,rw,
+0xFFFF85D0,DRSA7,4,rw,
+0xFFFF85D4,DRDA7,4,rw,
+0xFFFF85D8,DRTC7,4,rw,
+0xFFFF85DC,DTCC7,4,rw,
+0xFFFF85E0,DCEN7,4,rw,
+0xFFFF85E4,DCST7,4,r,
+0xFFFF85E8,DCSTS7,4,rw,
+0xFFFF85EC,DCSTC7,4,rw,
+0xFFFF85F0,DTFR7,4,rw,
+0xFFFF85F4,DTFRRQ7,4,r,
+0xFFFF85F8,DTFRRQC7,4,rw,
+0xFFFF8600,DSA8,4,rw,
+0xFFFF8604,DDA8,4,rw,
+0xFFFF8608,DTC8,4,rw,
+0xFFFF860C,DTCT8,4,rw,
+0xFFFF8610,DRSA8,4,rw,
+0xFFFF8614,DRDA8,4,rw,
+0xFFFF8618,DRTC8,4,rw,
+0xFFFF861C,DTCC8,4,rw,
+0xFFFF8620,DCEN8,4,rw,
+0xFFFF8624,DCST8,4,r,
+0xFFFF8628,DCSTS8,4,rw,
+0xFFFF862C,DCSTC8,4,rw,
+0xFFFF8630,DTFR8,4,rw,
+0xFFFF8634,DTFRRQ8,4,r,
+0xFFFF8638,DTFRRQC8,4,rw,
+0xFFFF8640,DSA9,4,rw,
+0xFFFF8644,DDA9,4,rw,
+0xFFFF8648,DTC9,4,rw,
+0xFFFF864C,DTCT9,4,rw,
+0xFFFF8650,DRSA9,4,rw,
+0xFFFF8654,DRDA9,4,rw,
+0xFFFF8658,DRTC9,4,rw,
+0xFFFF865C,DTCC9,4,rw,
+0xFFFF8660,DCEN9,4,rw,
+0xFFFF8664,DCST9,4,r,
+0xFFFF8668,DCSTS9,4,rw,
+0xFFFF866C,DCSTC9,4,rw,
+0xFFFF8670,DTFR9,4,rw,
+0xFFFF8674,DTFRRQ9,4,r,
+0xFFFF8678,DTFRRQC9,4,rw,
+0xFFFF8680,DSA10,4,rw,
+0xFFFF8684,DDA10,4,rw,
+0xFFFF8688,DTC10,4,rw,
+0xFFFF868C,DTCT10,4,rw,
+0xFFFF8690,DRSA10,4,rw,
+0xFFFF8694,DRDA10,4,rw,
+0xFFFF8698,DRTC10,4,rw,
+0xFFFF869C,DTCC10,4,rw,
+0xFFFF86A0,DCEN10,4,rw,
+0xFFFF86A4,DCST10,4,r,
+0xFFFF86A8,DCSTS10,4,rw,
+0xFFFF86AC,DCSTC10,4,rw,
+0xFFFF86B0,DTFR10,4,rw,
+0xFFFF86B4,DTFRRQ10,4,r,
+0xFFFF86B8,DTFRRQC10,4,rw,
+0xFFFF86C0,DSA11,4,rw,
+0xFFFF86C4,DDA11,4,rw,
+0xFFFF86C8,DTC11,4,rw,
+0xFFFF86CC,DTCT11,4,rw,
+0xFFFF86D0,DRSA11,4,rw,
+0xFFFF86D4,DRDA11,4,rw,
+0xFFFF86D8,DRTC11,4,rw,
+0xFFFF86DC,DTCC11,4,rw,
+0xFFFF86E0,DCEN11,4,rw,
+0xFFFF86E4,DCST11,4,r,
+0xFFFF86E8,DCSTS11,4,rw,
+0xFFFF86EC,DCSTC11,4,rw,
+0xFFFF86F0,DTFR11,4,rw,
+0xFFFF86F4,DTFRRQ11,4,r,
+0xFFFF86F8,DTFRRQC11,4,rw,
+0xFFFF8700,DSA12,4,rw,
+0xFFFF8704,DDA12,4,rw,
+0xFFFF8708,DTC12,4,rw,
+0xFFFF870C,DTCT12,4,rw,
+0xFFFF8710,DRSA12,4,rw,
+0xFFFF8714,DRDA12,4,rw,
+0xFFFF8718,DRTC12,4,rw,
+0xFFFF871C,DTCC12,4,rw,
+0xFFFF8720,DCEN12,4,rw,
+0xFFFF8724,DCST12,4,r,
+0xFFFF8728,DCSTS12,4,rw,
+0xFFFF872C,DCSTC12,4,rw,
+0xFFFF8730,DTFR12,4,rw,
+0xFFFF8734,DTFRRQ12,4,r,
+0xFFFF8738,DTFRRQC12,4,rw,
+0xFFFF8740,DSA13,4,rw,
+0xFFFF8744,DDA13,4,rw,
+0xFFFF8748,DTC13,4,rw,
+0xFFFF874C,DTCT13,4,rw,
+0xFFFF8750,DRSA13,4,rw,
+0xFFFF8754,DRDA13,4,rw,
+0xFFFF8758,DRTC13,4,rw,
+0xFFFF875C,DTCC13,4,rw,
+0xFFFF8760,DCEN13,4,rw,
+0xFFFF8764,DCST13,4,r,
+0xFFFF8768,DCSTS13,4,rw,
+0xFFFF876C,DCSTC13,4,rw,
+0xFFFF8770,DTFR13,4,rw,
+0xFFFF8774,DTFRRQ13,4,r,
+0xFFFF8778,DTFRRQC13,4,rw,
+0xFFFF8780,DSA14,4,rw,
+0xFFFF8784,DDA14,4,rw,
+0xFFFF8788,DTC14,4,rw,
+0xFFFF878C,DTCT14,4,rw,
+0xFFFF8790,DRSA14,4,rw,
+0xFFFF8794,DRDA14,4,rw,
+0xFFFF8798,DRTC14,4,rw,
+0xFFFF879C,DTCC14,4,rw,
+0xFFFF87A0,DCEN14,4,rw,
+0xFFFF87A4,DCST14,4,r,
+0xFFFF87A8,DCSTS14,4,rw,
+0xFFFF87AC,DCSTC14,4,rw,
+0xFFFF87B0,DTFR14,4,rw,
+0xFFFF87B4,DTFRRQ14,4,r,
+0xFFFF87B8,DTFRRQC14,4,rw,
+0xFFFF87C0,DSA15,4,rw,
+0xFFFF87C4,DDA15,4,rw,
+0xFFFF87C8,DTC15,4,rw,
+0xFFFF87CC,DTCT15,4,rw,
+0xFFFF87D0,DRSA15,4,rw,
+0xFFFF87D4,DRDA15,4,rw,
+0xFFFF87D8,DRTC15,4,rw,
+0xFFFF87DC,DTCC15,4,rw,
+0xFFFF87E0,DCEN15,4,rw,
+0xFFFF87E4,DCST15,4,r,
+0xFFFF87E8,DCSTS15,4,rw,
+0xFFFF87EC,DCSTC15,4,rw,
+0xFFFF87F0,DTFR15,4,rw,
+0xFFFF87F4,DTFRRQ15,4,r,
+0xFFFF87F8,DTFRRQC15,4,rw,
+0xFFFFB040,EIC32,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB042,EIC33,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB044,EIC34,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB046,EIC35,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB048,EIC36,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB050,EIC40,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB052,EIC41,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB054,EIC42,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB056,EIC43,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB058,EIC44,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB05A,EIC45,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB05C,EIC46,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB05E,EIC47,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB060,EIC48,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB062,EIC49,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB064,EIC50,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB066,EIC51,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB068,EIC52,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB06A,EIC53,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB06C,EIC54,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB06E,EIC55,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB070,EIC56,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB072,EIC57,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB074,EIC58,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB076,EIC59,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB078,EIC60,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB07A,EIC61,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB07C,EIC62,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB07E,EIC63,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB080,EIC64,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB082,EIC65,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB084,EIC66,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB086,EIC67,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB088,EIC68,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB08A,EIC69,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB08C,EIC70,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB08E,EIC71,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB090,EIC72,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB092,EIC73,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB094,EIC74,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB096,EIC75,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB098,EIC76,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB09A,EIC77,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB09C,EIC78,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB09E,EIC79,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0A0,EIC80,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0A2,EIC81,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0A4,EIC82,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0A6,EIC83,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0A8,EIC84,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0AA,EIC85,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0AC,EIC86,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0AE,EIC87,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0B0,EIC88,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0B2,EIC89,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0B4,EIC90,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0B6,EIC91,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0B8,EIC92,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0BA,EIC93,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0BC,EIC94,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0BE,EIC95,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0C0,EIC96,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0C2,EIC97,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0C4,EIC98,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0C6,EIC99,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0C8,EIC100,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0CA,EIC101,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0CC,EIC102,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0CE,EIC103,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0D0,EIC104,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0D2,EIC105,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0D4,EIC106,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB0D6,EIC107,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0D8,EIC108,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0DA,EIC109,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB0DC,EIC110,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB0DE,EIC111,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0E0,EIC112,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0E2,EIC113,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB0E4,EIC114,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0E6,EIC115,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0E8,EIC116,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0EA,EIC117,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0EC,EIC118,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0EE,EIC119,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB0F0,EIC120,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB0F2,EIC121,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB100,EIC128,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB102,EIC129,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB104,EIC130,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB106,EIC131,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB108,EIC132,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
 0xFFFFB10A,EIC133,2,rw,"TAUJ0 CH0 interrupt control (EIINT 133, INTTAUJ0I0); synchronous edge detection: EIRF bit 12 auto-cleared on CPU acceptance; source code 0x1085, INTBP offset +214H"
 0xFFFFB10C,EIC134,2,rw,"TAUJ0 CH1 interrupt control (EIINT 134, INTTAUJ0I1); synchronous edge detection; source code 0x1086, INTBP offset +218H"
 0xFFFFB10E,EIC135,2,rw,"TAUJ0 CH2 interrupt control (EIINT 135, INTTAUJ0I2); synchronous edge detection; source code 0x1087, INTBP offset +21CH"
 0xFFFFB110,EIC136,2,rw,"TAUJ0 CH3 interrupt control (EIINT 136, INTTAUJ0I3; foreground tick; EIRF bit 12 polled); synchronous edge detection; source code 0x1088, INTBP offset +220H"
+0xFFFFB112,EIC137,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB114,EIC138,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB116,EIC139,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB118,EIC140,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB11A,EIC141,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB11C,EIC142,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB11E,EIC143,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB120,EIC144,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB122,EIC145,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB124,EIC146,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB126,EIC147,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB128,EIC148,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB12A,EIC149,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB12C,EIC150,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB12E,EIC151,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB130,EIC152,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB132,EIC153,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB134,EIC154,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB136,EIC155,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB138,EIC156,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB13C,EIC158,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB13E,EIC159,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB140,EIC160,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB142,EIC161,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB144,EIC162,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB146,EIC163,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB148,EIC164,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB14A,EIC165,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB14C,EIC166,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB14E,EIC167,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB150,EIC168,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB152,EIC169,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB154,EIC170,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB156,EIC171,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB158,EIC172,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB15A,EIC173,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB15C,EIC174,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB15E,EIC175,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB160,EIC176,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB162,EIC177,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB164,EIC178,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB166,EIC179,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB168,EIC180,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB16A,EIC181,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB16C,EIC182,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB16E,EIC183,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB170,EIC184,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB172,EIC185,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB174,EIC186,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
 0xFFFFB176,EIC187,2,rw,"RSCFD CAN1 transmit/receive-FIFO receive-completion interrupt control (EIINT 187, INTRCAN1REC; CFIFO receive path); high-level detection: EIRF bit 12 read-only, follows CFRXIF gated by CFRXIE, not cleared by acceptance; source code 0x10BB, INTBP offset +2ECH"
 0xFFFFB178,EIC188,2,rw,"RSCFD CAN1 transmit interrupt control (EIINT 188, INTRCAN1TRX); high-level detection: EIRF bit 12 read-only; source code 0x10BC, INTBP offset +2F0H"
-0xFFFFB248,EIC292,2,rw,EIINT 292 interrupt control; channel reserved in Table 6.11 (no peripheral source documented); bound to the exact-firmware crypto driver; no manual reset row exists
-0xFFFFB24A,EIC293,2,rw,EIINT 293 interrupt control; channel reserved in Table 6.11 (no peripheral source documented); bound to the exact-firmware crypto driver; no manual reset row exists
+0xFFFFB17A,EIC189,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB17C,EIC190,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB17E,EIC191,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB180,EIC192,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB182,EIC193,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB184,EIC194,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB186,EIC195,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB188,EIC196,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB18A,EIC197,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB18C,EIC198,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB18E,EIC199,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB190,EIC200,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB192,EIC201,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB194,EIC202,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB196,EIC203,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB198,EIC204,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB1B4,EIC218,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB1B6,EIC219,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB1B8,EIC220,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB1BA,EIC221,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB1C4,EIC226,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB1C6,EIC227,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB1C8,EIC228,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB1CA,EIC229,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB1CC,EIC230,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB1CE,EIC231,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB1D0,EIC232,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB1D2,EIC233,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB1D4,EIC234,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB1D6,EIC235,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB1D8,EIC236,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB1DA,EIC237,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB1DC,EIC238,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB1DE,EIC239,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB1E0,EIC240,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB1E2,EIC241,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB1E4,EIC242,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB1E6,EIC243,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB1E8,EIC244,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB1EA,EIC245,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB1EC,EIC246,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB1EE,EIC247,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB1F0,EIC248,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB1F2,EIC249,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB1F4,EIC250,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB1F6,EIC251,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB1F8,EIC252,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB1FA,EIC253,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB1FC,EIC254,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset
+0xFFFFB200,EIC256,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB202,EIC257,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB204,EIC258,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB206,EIC259,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB208,EIC260,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB20A,EIC261,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB20C,EIC262,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB20E,EIC263,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB210,EIC264,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB212,EIC265,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB214,EIC266,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB216,EIC267,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB218,EIC268,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB21A,EIC269,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB21C,EIC270,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB21E,EIC271,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB220,EIC272,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB222,EIC273,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB224,EIC274,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB226,EIC275,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB228,EIC276,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB22A,EIC277,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB22C,EIC278,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB22E,EIC279,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB230,EIC280,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB232,EIC281,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB234,EIC282,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB236,EIC283,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB238,EIC284,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB23A,EIC285,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB23C,EIC286,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB23E,EIC287,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB240,EIC288,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB242,EIC289,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB244,EIC290,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB246,EIC291,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB248,EIC292,2,rw,Recovered exact-firmware EIINT292 priority storage; reserved in public Table6.11; no documented peripheral request source or reset value
+0xFFFFB24A,EIC293,2,rw,Recovered exact-firmware EIINT293 priority storage; reserved in public Table6.11; no documented peripheral request source or reset value
+0xFFFFB24C,EIC294,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB24E,EIC295,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB250,EIC296,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB252,EIC297,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
+0xFFFFB254,EIC298,2,rw,EI interrupt control; synchronous edge EIRF is software writable and clears on acceptance; EICT/reserved bits read reset
 0xFFFFB2F6,EIC379,2,rw,"Flash sequencer-end interrupt control (EIINT 379, INTFLENDNM); synchronous edge detection; source code 0x117B, INTBP offset +5ECH"
+0xFFFFB2FE,EIC383,2,rw,EI interrupt control; high-level EIRF is read-only and follows its source; EICT/reserved bits read reset

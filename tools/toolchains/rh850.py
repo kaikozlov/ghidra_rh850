@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build and test RH850 payloads and firmware with the pinned toolchain."""
+"""Build RH850 code and exercise firmware with GNU, Ghidra, or Renesas tooling."""
 
 from __future__ import annotations
 
@@ -710,6 +710,29 @@ def cmd_machine_run(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_csplus_run(args: argparse.Namespace) -> int:
+    from tools.emulation.csplus import DEFAULT_BOTTLE, CSPlusError, run
+
+    try:
+        report = run(
+            args.target, seconds=args.seconds,
+            bottle=args.bottle or DEFAULT_BOTTLE, output_dir=args.output_dir,
+            ior_inputs=args.ior, p1me_peripherals=args.p1me_peripherals,
+        )
+    except CSPlusError as exc:
+        raise Rh850ToolError(str(exc)) from exc
+    print(json.dumps({
+        "target": report["target"], "status": report["status"],
+        "pc": f"0x{report['registers']['pc']:08x}",
+        "peripheral_writes": report["peripheral_writes"],
+        "host_elapsed_seconds": report["host_elapsed_seconds"],
+        "readback_verified_before_execution": report["readback_verified_before_execution"],
+        "report_path": report["report_path"], "console_log": report["console_log"],
+        "coverage": report["coverage"],
+    }, indent=2, sort_keys=True))
+    return 0
+
+
 def cmd_machine_model(args: argparse.Namespace) -> int:
     from tools.emulation.generate_p1me_model import generate
 
@@ -897,6 +920,24 @@ def build_parser() -> argparse.ArgumentParser:
         help="write one execution report per scenario",
     )
     p.set_defaults(func=cmd_machine_run)
+
+    p = sub.add_parser(
+        "csplus",
+        help="observe registered firmware execution in the official RH850 simulator",
+    )
+    p.add_argument("target", help="registered analysis target with an exact MCU identity")
+    p.add_argument("--seconds", type=float, default=30.0, help="host observation duration before pausing a still-running CPU")
+    p.add_argument("--bottle", type=Path, help="installed CrossOver CS+ bottle")
+    p.add_argument("--output-dir", type=Path, help="retain project, image readbacks, console log, and execution report")
+    p.add_argument(
+        "--ior", action="append", default=[], metavar="NAME=VALUE",
+        help="explicit named I/O-register input after reset; recorded in the report; repeat as needed",
+    )
+    p.add_argument(
+        "--p1me-peripherals", action="store_true",
+        help="model supported P1M-E peripheral transactions using the shared device definitions",
+    )
+    p.set_defaults(func=cmd_csplus_run)
 
     return parser
 

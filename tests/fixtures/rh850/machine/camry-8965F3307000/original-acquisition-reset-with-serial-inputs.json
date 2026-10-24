@@ -1,0 +1,244 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "original-acquisition-reset-with-serial-inputs",
+  "entry": {
+    "role": "original-original-acquisition-reset-with-serial-inputs",
+    "scope": "resolved-address",
+    "address": "0x623c0"
+  },
+  "max_instructions": 1000000,
+  "stop_addresses": [
+    "0x10000"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "lp": "0x10000"
+  },
+  "memory": [
+    {
+      "address": "0xffd84000",
+      "hex": "e0",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x31420; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd84010",
+      "hex": "90000200",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x31424; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd84014",
+      "hex": "0000",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x31428; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd85040",
+      "hex": "0001",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x3142c; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd85044",
+      "hex": "00000100",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x31434; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd85048",
+      "hex": "00000900",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x31438; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd8504c",
+      "hex": "00000900",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x3143c; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd85050",
+      "hex": "00000900",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x31440; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd85054",
+      "hex": "00000900",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x31444; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd85058",
+      "hex": "00000900",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x31448; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd8505c",
+      "hex": "00000900",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x3144c; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd85060",
+      "hex": "00000900",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x31450; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd85068",
+      "hex": "0a00",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x31454; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd8506c",
+      "hex": "0a00",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x31456; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd85070",
+      "hex": "0a00",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x31458; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd85074",
+      "hex": "0a00",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x3145a; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd86000",
+      "hex": "e0",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x31470; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd86010",
+      "hex": "90000200",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x31474; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd86014",
+      "hex": "0000",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x31478; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd87040",
+      "hex": "0001",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x3147c; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd87044",
+      "hex": "00000100",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x31484; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd87048",
+      "hex": "00000900",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x31488; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd8704c",
+      "hex": "00000900",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x3148c; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd87050",
+      "hex": "00000900",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x31490; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd87054",
+      "hex": "00000900",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x31494; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd87058",
+      "hex": "00000900",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x31498; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd8705c",
+      "hex": "00000900",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x3149c; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd87060",
+      "hex": "00000900",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x314a0; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd87068",
+      "hex": "0a00",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x314a4; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd8706c",
+      "hex": "0a00",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x314a6; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd87070",
+      "hex": "0a00",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x314a8; no busy/completion state supplied."
+    },
+    {
+      "address": "0xffd87074",
+      "hex": "0a00",
+      "evidence": "Explicit prior native60D8C controller configuration from original ROM record at 0x314aa; no busy/completion state supplied."
+    }
+  ],
+  "checks": [
+    {
+      "name": "original-initializer-returns",
+      "kind": "register",
+      "register": "pc",
+      "equals": "0x10000"
+    },
+    {
+      "name": "both-controllers-complete-all-six-reset-frames",
+      "kind": "event-count",
+      "operation": "csih-frame",
+      "equals": "6"
+    },
+    {
+      "name": "CSIH2-idle-after-reset-sequence",
+      "kind": "memory",
+      "address": "0xffd84004",
+      "size": 4,
+      "equals_hex": "10000000"
+    },
+    {
+      "name": "CSIH2-prime-frame-is-staged-not-started",
+      "kind": "memory",
+      "address": "0xffd85018",
+      "size": 4,
+      "equals_hex": "0a000000"
+    },
+    {
+      "name": "CSIH3-idle-after-reset-sequence",
+      "kind": "memory",
+      "address": "0xffd86004",
+      "size": 4,
+      "equals_hex": "10000000"
+    },
+    {
+      "name": "CSIH3-prime-frame-is-staged-not-started",
+      "kind": "memory",
+      "address": "0xffd87018",
+      "size": 4,
+      "equals_hex": "0a000000"
+    }
+  ],
+  "expected_termination": "stop-address",
+  "events": [
+    {
+      "kind": "csih-word",
+      "unit": 2,
+      "after_transmit_words": 1,
+      "delay_instructions": 128,
+      "value": "0x0",
+      "evidence": "Explicit synthetic MISO-low response; initialization checks controller completion, not sensor sample health.",
+      "repeat": 15
+    },
+    {
+      "kind": "csih-word",
+      "unit": 3,
+      "after_transmit_words": 1,
+      "delay_instructions": 128,
+      "value": "0x0",
+      "evidence": "Explicit synthetic MISO-low response; initialization checks controller completion, not sensor sample health.",
+      "repeat": 15
+    }
+  ]
+}

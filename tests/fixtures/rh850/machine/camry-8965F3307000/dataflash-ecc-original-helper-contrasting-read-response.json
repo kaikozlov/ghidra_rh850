@@ -1,0 +1,31 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "dataflash-ecc-original-helper-contrasting-read-response",
+  "entry": {"role": "original-ecc-helper-with-contrasting-explicit-bus-responses", "scope": "resolved-address", "address": "0x880"},
+  "reset": "none",
+  "max_instructions": 64,
+  "stop_addresses": ["0x798"],
+  "gpr_fill": "0",
+  "registers": {"lp": "0x798"},
+  "memory": [
+    {"address": "0xffc5b000", "hex": "03000000", "evidence": "Synthetic initial effective ECC control; the original protected store must enable normal ECC."},
+    {"address": "0xffc5b004", "hex": "03000000", "evidence": "Synthetic single/double error flags before the original clear command."},
+    {"address": "0xffc5b00c", "hex": "01000000", "evidence": "Synthetic overflow flag before the original overflow clear command."},
+    {"address": "0xffc5b014", "hex": "07000000", "evidence": "Synthetic notification enables before the original disable loop."},
+    {"address": "0xffc5b01c", "hex": "01000000", "evidence": "Synthetic effective test mode before the original protected test-control write."}
+  ],
+  "events": [
+    {"kind": "register-input", "after_instructions": 0, "register": "DFERSTC", "value": "0xa5c39e72", "evidence": "Explicit contrasting arbitrary 32-bit bus response, not a hardware claim; original 0x88A load is overwritten without use."},
+    {"kind": "register-input", "after_instructions": 0, "register": "DFOVFSTC", "value": "0xa5c39e72", "evidence": "Explicit contrasting arbitrary 32-bit bus response, not a hardware claim; original 0x890 load is overwritten without use."}
+  ],
+  "checks": [
+    {"name": "helper-executes-real-return", "kind": "register", "register": "pc", "equals": "0x798"},
+    {"name": "real-command-clears-error-flags", "kind": "memory", "address": "0xffc5b004", "size": 4, "equals_hex": "00000000"},
+    {"name": "real-command-clears-overflow", "kind": "memory", "address": "0xffc5b00c", "size": 4, "equals_hex": "00000000"},
+    {"name": "normal-ecc-effective-control", "kind": "memory", "address": "0xffc5b000", "size": 4, "equals_hex": "00000000"},
+    {"name": "notification-disabled-by-real-loop", "kind": "memory", "address": "0xffc5b014", "size": 4, "equals_hex": "00000000"},
+    {"name": "test-mode-disabled-protection-key-not-stored", "kind": "memory", "address": "0xffc5b01c", "size": 4, "equals_hex": "00000000"},
+    {"name": "error-command-storage-is-not-bus-response", "kind": "memory", "address": "0xffc5b008", "size": 4, "equals_hex": "00000000"},
+    {"name": "overflow-command-storage-is-not-bus-response", "kind": "memory", "address": "0xffc5b010", "size": 4, "equals_hex": "00000000"}
+  ]
+}

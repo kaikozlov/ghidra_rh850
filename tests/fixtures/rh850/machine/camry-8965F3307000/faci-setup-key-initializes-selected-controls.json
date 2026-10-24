@@ -1,0 +1,116 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "faci-setup-key-initializes-selected-controls",
+  "entry": {
+    "role": "original-faci-setup-key-initializes-selected-controls",
+    "scope": "resolved-address",
+    "address": "0x78aec"
+  },
+  "max_instructions": 512,
+  "stop_addresses": [
+    "0x10000"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "lp": "0x10000",
+    "r6": "0xffa1008c",
+    "r7": "0x2d01"
+  },
+  "memory": [
+    {
+      "address": "0xffa10030",
+      "hex": "40000000",
+      "evidence": "Explicit pre-existing sequencer setup; original halfword store exercises native key and busy gates"
+    },
+    {
+      "address": "0xffa10034",
+      "hex": "80000000",
+      "evidence": "Explicit pre-existing sequencer setup; original halfword store exercises native key and busy gates"
+    },
+    {
+      "address": "0xffa10088",
+      "hex": "0100",
+      "evidence": "Explicit pre-existing sequencer setup; original halfword store exercises native key and busy gates"
+    },
+    {
+      "address": "0xffa100e0",
+      "hex": "0100",
+      "evidence": "Explicit pre-existing sequencer setup; original halfword store exercises native key and busy gates"
+    },
+    {
+      "address": "0xffa10084",
+      "hex": "8000",
+      "evidence": "Explicit pre-existing sequencer setup; original halfword store exercises native key and busy gates"
+    },
+    {
+      "address": "0xffa100d0",
+      "hex": "01",
+      "evidence": "Explicit pre-existing sequencer setup; original halfword store exercises native key and busy gates"
+    },
+    {
+      "address": "0xffa10020",
+      "hex": "0200",
+      "evidence": "Explicit pre-existing sequencer setup; original halfword store exercises native key and busy gates"
+    }
+  ],
+  "checks": [
+    {
+      "name": "setup-bit-excludes-key-readback",
+      "kind": "memory",
+      "address": "0xffa1008c",
+      "size": 2,
+      "equals_hex": "0100"
+    },
+    {
+      "name": "setup-transition-FSADDR",
+      "kind": "memory",
+      "address": "0xffa10030",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "setup-transition-FEADDR",
+      "kind": "memory",
+      "address": "0xffa10034",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "setup-transition-FPROTR",
+      "kind": "memory",
+      "address": "0xffa10088",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "setup-transition-FCPSR",
+      "kind": "memory",
+      "address": "0xffa100e0",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "setup-transition-FENTRYR",
+      "kind": "memory",
+      "address": "0xffa10084",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "setup-transition-FBCCNT",
+      "kind": "memory",
+      "address": "0xffa100d0",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "setup-transition-FAREASELC",
+      "kind": "memory",
+      "address": "0xffa10020",
+      "size": 2,
+      "equals_hex": "0000"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "cache-ecc-tag-overflow-undefined-reset-input",
+  "entry": {
+    "role": "original-instruction-retargeted-to-cache-ecc-register",
+    "scope": "resolved-address",
+    "address": "0x7b0"
+  },
+  "reset": "none",
+  "max_instructions": 32,
+  "stop_addresses": [],
+  "gpr_fill": "0",
+  "registers": {
+    "ep": "0xffc613c8"
+  },
+  "memory": [],
+  "checks": [],
+  "expected_fault": {
+    "kind": "missing-reset-input",
+    "address": "0xffc61410",
+    "access": "read"
+  }
+}

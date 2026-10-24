@@ -1,0 +1,20 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "entry": {
+    "role": "original-RESF-word-load",
+    "scope": "resolved-address",
+    "address": "0x63E00"
+  },
+  "max_instructions": 1,
+  "stop_addresses": [],
+  "gpr_fill": "0",
+  "registers": {},
+  "checks": [],
+  "name": "reset-factors-undefined-read-bit-needs-input",
+  "reset": "power-on",
+  "expected_fault": {
+    "kind": "missing-reset-input",
+    "address": "0xFFF81000",
+    "access": "read"
+  }
+}

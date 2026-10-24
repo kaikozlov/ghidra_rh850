@@ -1,0 +1,72 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "tauj-start-load-next-clock",
+  "entry": {
+    "role": "p1me-byte-store-primitive",
+    "scope": "function",
+    "shape_sha256": "8e49a0bf8bf3a1a29e104d2a16a92e063499f8ea357df01e11a0bca0db68aa41",
+    "instruction_count": 14,
+    "body_size": 36,
+    "offset": -18,
+    "requirements": []
+  },
+  "max_instructions": 512,
+  "stop_addresses": [
+    "0x10000"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "lp": "0x10000",
+    "r6": "0xffe50054",
+    "r7": "1"
+  },
+  "memory": [
+    {
+      "address": "0xffe50090",
+      "hex": "0000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffe50000",
+      "hex": "02000000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffffb10a",
+      "hex": "8200",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    }
+  ],
+  "checks": [
+    {
+      "name": "one-load-then-count-and-reload",
+      "kind": "memory",
+      "address": "0xffe50010",
+      "size": 4,
+      "equals_hex": "01000000"
+    },
+    {
+      "name": "masked-interrupt-latches-request",
+      "kind": "memory",
+      "address": "0xffffb10a",
+      "size": 2,
+      "equals_hex": "8210"
+    },
+    {
+      "name": "one-underflow-request",
+      "kind": "event-count",
+      "operation": "interrupt-request",
+      "equals": "1"
+    }
+  ],
+  "events": [
+    {
+      "kind": "clock",
+      "after_instructions": 2,
+      "p_bus_cycles": 5,
+      "evidence": "Explicit CLK_HSB stimulus, not inferred CPU timing"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "clock3-original-stop-repeats-current-source",
+  "entry": {"role": "select_clock3_source_and_set_divider_61874", "scope": "resolved-address", "address": "0x61874"},
+  "max_instructions": 128,
+  "stop_addresses": ["0x798"],
+  "gpr_fill": "0",
+  "registers": {"sp": "0xfebefff0", "lp": "0x798", "r6": "0"},
+  "memory": [
+    {"address": "0xfff88818", "hex": "50000000", "evidence": "Explicit existing divide-by80, as configured by the original boot clock helper."},
+    {"address": "0xfff8881c", "hex": "03000000", "evidence": "Explicit synchronized active clock; selector remains its reset CLK_LSB value4."}
+  ],
+  "checks": [
+    {"name": "original-function-reports-success", "kind": "register", "register": "r10", "equals": "0"},
+    {"name": "original-divider-store-stops-output", "kind": "memory", "address": "0xfff88818", "size": 4, "equals_hex": "00000000"},
+    {"name": "stopped-output-is-synchronized", "kind": "memory", "address": "0xfff8881c", "size": 4, "equals_hex": "02000000"},
+    {"name": "source-is-not-changed-by-idempotent-write", "kind": "memory", "address": "0xfff890c8", "size": 4, "equals_hex": "04000000"}
+  ]
+}

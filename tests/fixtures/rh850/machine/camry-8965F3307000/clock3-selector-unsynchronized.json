@@ -1,0 +1,15 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "clock3-selector-unsynchronized",
+  "entry": {"role": "original-ecc-word-store-and-readback", "scope": "resolved-address", "address": "0x7e0"},
+  "max_instructions": 4,
+  "stop_addresses": ["0x7e4"],
+  "gpr_fill": "0",
+  "registers": {"ep": "0xfff890c0", "r1": "6"},
+  "memory": [{"address": "0xfff8881c", "hex": "00000000", "evidence": "scenario: stop request is not synchronized; zero divisor alone must not authorize source selection"}],
+  "expected_fault": {"kind": "prohibited-clock-selector-running", "address": "0xfff890c0", "access": "write"},
+  "checks": [
+    {"name": "incomplete-stop-keeps-selected-source", "kind": "memory", "address": "0xfff890c8", "size": 4, "equals_hex": "04000000"},
+    {"name": "rejected-selection-does-not-complete-stop", "kind": "memory", "address": "0xfff8881c", "size": 4, "equals_hex": "00000000"}
+  ]
+}

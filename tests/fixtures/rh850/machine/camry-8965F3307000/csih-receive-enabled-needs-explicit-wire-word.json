@@ -1,0 +1,22 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "csih-receive-enabled-needs-explicit-wire-word",
+  "entry": {"role": "canonical61372-requires-real-wire-data-when-RXE-set", "scope": "resolved-address", "address": "0x61372"},
+  "max_instructions": 64,
+  "stop_addresses": ["0x10000"],
+  "gpr_fill": "0",
+  "registers": {"lp": "0x10000", "r6": "0xfebe1000"},
+  "memory": [
+    {"address": "0xffd82000", "hex": "e0", "evidence": "Explicit powered TX/RX state."},
+    {"address": "0xffd82010", "hex": "90000000", "evidence": "Original EDLE/CSRI configuration."},
+    {"address": "0xffd83040", "hex": "0001", "evidence": "Explicit dual-buffer mode."},
+    {"address": "0xfebe1000", "hex": "34127856bc9af0de", "evidence": "Explicit software transmit words."}
+  ],
+  "events": [
+    {"kind": "csih-word", "unit": 1, "after_instructions": 23, "evidence": "Deliberately incomplete external stimulus: completion without required receive data must fail, never synthesize echo or zero."}
+  ],
+  "checks": [
+    {"name": "incomplete-input-cannot-complete-frame", "kind": "event-count", "operation": "csih-frame", "equals": "0"}
+  ],
+  "expected_fault": {"kind": "unsupported-csih-operation", "address": "0xffd82000", "access": "device"}
+}

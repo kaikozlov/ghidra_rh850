@@ -1,0 +1,11 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "ipg-user-register-write-denied",
+  "entry": {"role": "original-IPG-byte-store", "scope": "resolved-address", "address": "0x632ea"},
+  "max_instructions": 2,
+  "stop_addresses": [],
+  "gpr_fill": "0",
+  "registers": {"PSW": "0x40000020", "r1": "2"},
+  "expected_fault": {"kind": "privileged-register-access", "address": "0xfffee00d", "access": "write"},
+  "checks": [{"name": "user-write-cannot-modify-supervisor-control", "kind": "memory", "address": "0xfffee00d", "size": 1, "equals_hex": "00"}]
+}

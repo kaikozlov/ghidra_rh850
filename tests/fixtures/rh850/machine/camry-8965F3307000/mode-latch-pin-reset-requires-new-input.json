@@ -1,0 +1,16 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "mode-latch-pin-reset-requires-new-input",
+  "entry": {"role": "poll_fff80104_bit0_clear_or_terminate_63718", "scope": "resolved-address", "address": "0x63718"},
+  "reset": "system-1-pin",
+  "max_instructions": 32,
+  "stop_addresses": [],
+  "gpr_fill": "0",
+  "registers": {"sp": "0xfebefff0", "lp": "0x798"},
+  "pre_reset_memory": [
+    {"address": "0xfff80104", "hex": "00000000", "evidence": "A previous normal-mode latch cannot stand in for newly sampled pins after pin reset; Table5.4."}
+  ],
+  "memory": [],
+  "checks": [],
+  "expected_fault": {"kind": "missing-reset-input", "address": "0xfff80104", "access": "read"}
+}

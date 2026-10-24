@@ -1,0 +1,112 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "dma-single-original-resume-with-cpu-mpu",
+  "entry": {
+    "role": "original-dma-single-original-resume-with-cpu-mpu",
+    "scope": "resolved-address",
+    "address": "0x607f8"
+  },
+  "max_instructions": 16,
+  "stop_addresses": [],
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "lp": "0x619be",
+    "MPM": "3",
+    "MPLA0": "0",
+    "MPUA0": "0x000ffffc",
+    "MPAT0": "0xa8",
+    "MPLA12": "0xffff8000",
+    "MPUA12": "0xffff8000",
+    "MPAT12": "0xb8"
+  },
+  "memory": [
+    {
+      "address": "0xffff8000",
+      "hex": "01000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff8400",
+      "hex": "04140300",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff8404",
+      "hex": "0081effe",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff8408",
+      "hex": "01000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff840c",
+      "hex": "08400000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff8420",
+      "hex": "01000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff8424",
+      "hex": "01000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    }
+  ],
+  "checks": [
+    {
+      "name": "ROM-word-reaches-independent-DMA-destination",
+      "kind": "memory",
+      "address": "0xfeef8100",
+      "size": 4,
+      "equals_hex": "05000580"
+    },
+    {
+      "name": "last-transfer-count-zero",
+      "kind": "memory",
+      "address": "0xffff8408",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "noncontinuous-channel-stops",
+      "kind": "memory",
+      "address": "0xffff8420",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "TC-without-disabled-compare",
+      "kind": "memory",
+      "address": "0xffff8424",
+      "size": 4,
+      "equals_hex": "10000000"
+    },
+    {
+      "name": "completion-IRQ-pending-while-masked",
+      "kind": "memory",
+      "address": "0xfffeea20",
+      "size": 2,
+      "equals_hex": "8f10"
+    },
+    {
+      "name": "CPU-supervisor-MPU-remains-enabled",
+      "kind": "register",
+      "register": "MPM",
+      "equals": "3"
+    },
+    {
+      "name": "one-transfer",
+      "kind": "event-count",
+      "operation": "dma-transfer",
+      "equals": "1"
+    }
+  ],
+  "expected_termination": "instruction-budget",
+  "hsb_cycles_per_instruction": 1
+}

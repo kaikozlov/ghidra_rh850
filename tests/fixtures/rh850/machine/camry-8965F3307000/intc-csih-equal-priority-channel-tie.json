@@ -1,0 +1,23 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "intc-csih-equal-priority-channel-tie",
+  "entry": {"role": "original-instruction-interrupted-by-two-equal-priority-sources", "scope": "resolved-address", "address": "0x62e4c"},
+  "max_instructions": 1,
+  "stop_addresses": ["0x71372"],
+  "gpr_fill": "0",
+  "registers": {"PSW": "0", "RBASE": "0", "INTBP": "0xfebf0000", "sp": "0xfebe2000"},
+  "memory": [
+    {"address": "0xffffb0c6", "hex": "4400", "evidence": "Explicit priority4 unmasked table-vector control for CSIH2 receive99."},
+    {"address": "0xffffb0c8", "hex": "4400", "evidence": "Equal priority4 unmasked table-vector control for CSIH2 communication100."},
+    {"address": "0xfebf018c", "hex": "7013070070130700", "evidence": "Both vectors reference the unchanged original stack-adjust instruction preceding EIRET; stop after the selected handler enters."}
+  ],
+  "events": [
+    {"kind": "interrupt", "channel": 100, "after_instructions": 0, "evidence": "Communication pulse arrives first in scenario order, not interrupt priority order."},
+    {"kind": "interrupt", "channel": 99, "after_instructions": 0, "evidence": "Receive pulse shares the arbitration boundary and has lower channel number."}
+  ],
+  "checks": [
+    {"name": "lower-channel-selected-regardless-of-event-order", "kind": "register", "register": "EIIC", "equals": "0x1063"},
+    {"name": "only-selected-edge-cleared", "kind": "memory", "address": "0xffffb0c6", "size": 4, "equals_hex": "44004410"},
+    {"name": "one-acceptance", "kind": "event-count", "operation": "interrupt-enter", "equals": "1"}
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "dataflash-ecc-overflow-rejects-halfword-read",
+  "entry": {
+    "role": "original-instruction-retargeted-to-ecc-register",
+    "scope": "resolved-address",
+    "address": "0x158c"
+  },
+  "reset": "none",
+  "max_instructions": 64,
+  "stop_addresses": [],
+  "gpr_fill": "0",
+  "registers": {
+    "ep": "0xffc5aff8"
+  },
+  "memory": [],
+  "checks": [],
+  "expected_fault": {
+    "kind": "mmio-width",
+    "address": "0xffc5b00c",
+    "access": "read"
+  }
+}

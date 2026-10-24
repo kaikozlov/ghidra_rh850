@@ -1,0 +1,38 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "cache-ecc-original-clear-retains-undefined-overflow-input",
+  "entry": {
+    "role": "original-cache-helper-returning-to-original-plus8-word-load",
+    "scope": "resolved-address",
+    "address": "0x79a"
+  },
+  "reset": "none",
+  "max_instructions": 32,
+  "stop_addresses": [],
+  "gpr_fill": "0",
+  "registers": {
+    "lp": "0x890"
+  },
+  "memory": [],
+  "checks": [
+    {
+      "name": "sed-status-really-cleared-before-undefined-overflow-read",
+      "kind": "memory",
+      "address": "0xffc61420",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "ded-status-really-cleared-before-undefined-overflow-read",
+      "kind": "memory",
+      "address": "0xffc61450",
+      "size": 4,
+      "equals_hex": "00000000"
+    }
+  ],
+  "expected_fault": {
+    "kind": "missing-reset-input",
+    "address": "0xffc61410",
+    "access": "read"
+  }
+}

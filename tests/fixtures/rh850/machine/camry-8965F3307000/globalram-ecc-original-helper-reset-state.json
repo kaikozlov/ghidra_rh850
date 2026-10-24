@@ -1,0 +1,328 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "globalram-ecc-original-helper-reset-state",
+  "entry": {
+    "role": "original-ecc-helper",
+    "scope": "resolved-address",
+    "address": "0x8c8"
+  },
+  "reset": "none",
+  "max_instructions": 96,
+  "stop_addresses": [
+    "0x798"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "lp": "0x798"
+  },
+  "memory": [],
+  "checks": [
+    {
+      "name": "effect-0xffc6400c",
+      "kind": "memory",
+      "address": "0xffc6400c",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64020",
+      "kind": "memory",
+      "address": "0xffc64020",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64030",
+      "kind": "memory",
+      "address": "0xffc64030",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64040",
+      "kind": "memory",
+      "address": "0xffc64040",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64044",
+      "kind": "memory",
+      "address": "0xffc64044",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64048",
+      "kind": "memory",
+      "address": "0xffc64048",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc6404c",
+      "kind": "memory",
+      "address": "0xffc6404c",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64050",
+      "kind": "memory",
+      "address": "0xffc64050",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64054",
+      "kind": "memory",
+      "address": "0xffc64054",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64058",
+      "kind": "memory",
+      "address": "0xffc64058",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc6405c",
+      "kind": "memory",
+      "address": "0xffc6405c",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64060",
+      "kind": "memory",
+      "address": "0xffc64060",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64064",
+      "kind": "memory",
+      "address": "0xffc64064",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64068",
+      "kind": "memory",
+      "address": "0xffc64068",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc6406c",
+      "kind": "memory",
+      "address": "0xffc6406c",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64070",
+      "kind": "memory",
+      "address": "0xffc64070",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64074",
+      "kind": "memory",
+      "address": "0xffc64074",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64078",
+      "kind": "memory",
+      "address": "0xffc64078",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc6407c",
+      "kind": "memory",
+      "address": "0xffc6407c",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64080",
+      "kind": "memory",
+      "address": "0xffc64080",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64084",
+      "kind": "memory",
+      "address": "0xffc64084",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64088",
+      "kind": "memory",
+      "address": "0xffc64088",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc6408c",
+      "kind": "memory",
+      "address": "0xffc6408c",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64090",
+      "kind": "memory",
+      "address": "0xffc64090",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64094",
+      "kind": "memory",
+      "address": "0xffc64094",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64098",
+      "kind": "memory",
+      "address": "0xffc64098",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc6409c",
+      "kind": "memory",
+      "address": "0xffc6409c",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc640a0",
+      "kind": "memory",
+      "address": "0xffc640a0",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc640a4",
+      "kind": "memory",
+      "address": "0xffc640a4",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc640a8",
+      "kind": "memory",
+      "address": "0xffc640a8",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc640ac",
+      "kind": "memory",
+      "address": "0xffc640ac",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc640b0",
+      "kind": "memory",
+      "address": "0xffc640b0",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc640b4",
+      "kind": "memory",
+      "address": "0xffc640b4",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc640b8",
+      "kind": "memory",
+      "address": "0xffc640b8",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc640bc",
+      "kind": "memory",
+      "address": "0xffc640bc",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc640c0",
+      "kind": "memory",
+      "address": "0xffc640c0",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64000",
+      "kind": "memory",
+      "address": "0xffc64000",
+      "size": 4,
+      "equals_hex": "22000000"
+    },
+    {
+      "name": "effect-0xffc64004",
+      "kind": "memory",
+      "address": "0xffc64004",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64008",
+      "kind": "memory",
+      "address": "0xffc64008",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64100",
+      "kind": "memory",
+      "address": "0xffc64100",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64104",
+      "kind": "memory",
+      "address": "0xffc64104",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64200",
+      "kind": "memory",
+      "address": "0xffc64200",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64e00",
+      "kind": "memory",
+      "address": "0xffc64e00",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "original-path-reaches-stop",
+      "kind": "register",
+      "register": "pc",
+      "equals": "0x798"
+    }
+  ]
+}

@@ -1,0 +1,170 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "tsg-ht-pwm-full-period",
+  "entry": {
+    "role": "p1me-byte-store-primitive",
+    "scope": "function",
+    "shape_sha256": "8e49a0bf8bf3a1a29e104d2a16a92e063499f8ea357df01e11a0bca0db68aa41",
+    "instruction_count": 14,
+    "body_size": 36,
+    "offset": -18,
+    "requirements": []
+  },
+  "max_instructions": 512,
+  "stop_addresses": [
+    "0x10000"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "lp": "0x10000",
+    "r6": "0xffe70030",
+    "r7": "1"
+  },
+  "memory": [
+    {
+      "address": "0xffe70208",
+      "hex": "01",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffe7020c",
+      "hex": "0000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffe70078",
+      "hex": "00000000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffe70004",
+      "hex": "00",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffe7007c",
+      "hex": "80000000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffe70008",
+      "hex": "0808",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffe7000c",
+      "hex": "1008",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffe70200",
+      "hex": "7e",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffe70000",
+      "hex": "0000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffe70204",
+      "hex": "00",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffe70074",
+      "hex": "00000000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffe70020",
+      "hex": "00",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffe70210",
+      "hex": "5ada",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffe7006c",
+      "hex": "50000000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffe70070",
+      "hex": "50000000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffe7014c",
+      "hex": "a00f0000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffe70184",
+      "hex": "20080000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffe70180",
+      "hex": "20080000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffe70148",
+      "hex": "080f0000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffe70144",
+      "hex": "40100000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffe70188",
+      "hex": "20080000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    }
+  ],
+  "checks": [
+    {
+      "name": "main-counter-leaves-first-valley",
+      "kind": "memory",
+      "address": "0xffe701a0",
+      "size": 4,
+      "equals_hex": "52000000"
+    },
+    {
+      "name": "counter-turn-loads-subcounter",
+      "kind": "memory",
+      "address": "0xffe701a4",
+      "size": 4,
+      "equals_hex": "50000000"
+    },
+    {
+      "name": "phase-directions-remain-visible",
+      "kind": "memory",
+      "address": "0xffe70010",
+      "size": 1,
+      "equals_hex": "05"
+    },
+    {
+      "name": "unselected-phase-timer-remains-stopped",
+      "kind": "memory",
+      "address": "0xffe71010",
+      "size": 1,
+      "equals_hex": "00"
+    }
+  ],
+  "events": [
+    {
+      "kind": "clock",
+      "after_instructions": 2,
+      "p_bus_cycles": 4001,
+      "evidence": "Explicit CLK_HSB stimulus, not inferred CPU timing"
+    }
+  ]
+}

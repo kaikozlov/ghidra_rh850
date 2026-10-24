@@ -1,0 +1,468 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "globalram-ecc-ded-clears-data-and-address-errors-only",
+  "entry": {
+    "role": "original-instruction-retargeted-to-ecc-register",
+    "scope": "resolved-address",
+    "address": "0x7a2"
+  },
+  "reset": "none",
+  "max_instructions": 64,
+  "stop_addresses": [
+    "0x7a4"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "ep": "0xffc64008",
+    "r1": "0x1"
+  },
+  "memory": [
+    {
+      "address": "0xffc6400c",
+      "hex": "01000000",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc64020",
+      "hex": "ffffffff",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc64030",
+      "hex": "31000000",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc64040",
+      "hex": "0000f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc64044",
+      "hex": "0400f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc64048",
+      "hex": "0800f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc6404c",
+      "hex": "0c00f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc64050",
+      "hex": "1000f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc64054",
+      "hex": "1400f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc64058",
+      "hex": "1800f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc6405c",
+      "hex": "1c00f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc64060",
+      "hex": "2000f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc64064",
+      "hex": "2400f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc64068",
+      "hex": "2800f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc6406c",
+      "hex": "2c00f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc64070",
+      "hex": "3000f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc64074",
+      "hex": "3400f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc64078",
+      "hex": "3800f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc6407c",
+      "hex": "3c00f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc64080",
+      "hex": "4000f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc64084",
+      "hex": "4400f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc64088",
+      "hex": "4800f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc6408c",
+      "hex": "4c00f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc64090",
+      "hex": "5000f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc64094",
+      "hex": "5400f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc64098",
+      "hex": "5800f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc6409c",
+      "hex": "5c00f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc640a0",
+      "hex": "6000f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc640a4",
+      "hex": "6400f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc640a8",
+      "hex": "6800f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc640ac",
+      "hex": "6c00f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc640b0",
+      "hex": "7000f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc640b4",
+      "hex": "7400f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc640b8",
+      "hex": "7800f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc640bc",
+      "hex": "7c00f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc640c0",
+      "hex": "0001f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    }
+  ],
+  "checks": [
+    {
+      "name": "effect-0xffc6400c",
+      "kind": "memory",
+      "address": "0xffc6400c",
+      "size": 4,
+      "equals_hex": "01000000"
+    },
+    {
+      "name": "effect-0xffc64020",
+      "kind": "memory",
+      "address": "0xffc64020",
+      "size": 4,
+      "equals_hex": "ffffffff"
+    },
+    {
+      "name": "effect-0xffc64030",
+      "kind": "memory",
+      "address": "0xffc64030",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64040",
+      "kind": "memory",
+      "address": "0xffc64040",
+      "size": 4,
+      "equals_hex": "0000f0fe"
+    },
+    {
+      "name": "effect-0xffc64044",
+      "kind": "memory",
+      "address": "0xffc64044",
+      "size": 4,
+      "equals_hex": "0400f0fe"
+    },
+    {
+      "name": "effect-0xffc64048",
+      "kind": "memory",
+      "address": "0xffc64048",
+      "size": 4,
+      "equals_hex": "0800f0fe"
+    },
+    {
+      "name": "effect-0xffc6404c",
+      "kind": "memory",
+      "address": "0xffc6404c",
+      "size": 4,
+      "equals_hex": "0c00f0fe"
+    },
+    {
+      "name": "effect-0xffc64050",
+      "kind": "memory",
+      "address": "0xffc64050",
+      "size": 4,
+      "equals_hex": "1000f0fe"
+    },
+    {
+      "name": "effect-0xffc64054",
+      "kind": "memory",
+      "address": "0xffc64054",
+      "size": 4,
+      "equals_hex": "1400f0fe"
+    },
+    {
+      "name": "effect-0xffc64058",
+      "kind": "memory",
+      "address": "0xffc64058",
+      "size": 4,
+      "equals_hex": "1800f0fe"
+    },
+    {
+      "name": "effect-0xffc6405c",
+      "kind": "memory",
+      "address": "0xffc6405c",
+      "size": 4,
+      "equals_hex": "1c00f0fe"
+    },
+    {
+      "name": "effect-0xffc64060",
+      "kind": "memory",
+      "address": "0xffc64060",
+      "size": 4,
+      "equals_hex": "2000f0fe"
+    },
+    {
+      "name": "effect-0xffc64064",
+      "kind": "memory",
+      "address": "0xffc64064",
+      "size": 4,
+      "equals_hex": "2400f0fe"
+    },
+    {
+      "name": "effect-0xffc64068",
+      "kind": "memory",
+      "address": "0xffc64068",
+      "size": 4,
+      "equals_hex": "2800f0fe"
+    },
+    {
+      "name": "effect-0xffc6406c",
+      "kind": "memory",
+      "address": "0xffc6406c",
+      "size": 4,
+      "equals_hex": "2c00f0fe"
+    },
+    {
+      "name": "effect-0xffc64070",
+      "kind": "memory",
+      "address": "0xffc64070",
+      "size": 4,
+      "equals_hex": "3000f0fe"
+    },
+    {
+      "name": "effect-0xffc64074",
+      "kind": "memory",
+      "address": "0xffc64074",
+      "size": 4,
+      "equals_hex": "3400f0fe"
+    },
+    {
+      "name": "effect-0xffc64078",
+      "kind": "memory",
+      "address": "0xffc64078",
+      "size": 4,
+      "equals_hex": "3800f0fe"
+    },
+    {
+      "name": "effect-0xffc6407c",
+      "kind": "memory",
+      "address": "0xffc6407c",
+      "size": 4,
+      "equals_hex": "3c00f0fe"
+    },
+    {
+      "name": "effect-0xffc64080",
+      "kind": "memory",
+      "address": "0xffc64080",
+      "size": 4,
+      "equals_hex": "4000f0fe"
+    },
+    {
+      "name": "effect-0xffc64084",
+      "kind": "memory",
+      "address": "0xffc64084",
+      "size": 4,
+      "equals_hex": "4400f0fe"
+    },
+    {
+      "name": "effect-0xffc64088",
+      "kind": "memory",
+      "address": "0xffc64088",
+      "size": 4,
+      "equals_hex": "4800f0fe"
+    },
+    {
+      "name": "effect-0xffc6408c",
+      "kind": "memory",
+      "address": "0xffc6408c",
+      "size": 4,
+      "equals_hex": "4c00f0fe"
+    },
+    {
+      "name": "effect-0xffc64090",
+      "kind": "memory",
+      "address": "0xffc64090",
+      "size": 4,
+      "equals_hex": "5000f0fe"
+    },
+    {
+      "name": "effect-0xffc64094",
+      "kind": "memory",
+      "address": "0xffc64094",
+      "size": 4,
+      "equals_hex": "5400f0fe"
+    },
+    {
+      "name": "effect-0xffc64098",
+      "kind": "memory",
+      "address": "0xffc64098",
+      "size": 4,
+      "equals_hex": "5800f0fe"
+    },
+    {
+      "name": "effect-0xffc6409c",
+      "kind": "memory",
+      "address": "0xffc6409c",
+      "size": 4,
+      "equals_hex": "5c00f0fe"
+    },
+    {
+      "name": "effect-0xffc640a0",
+      "kind": "memory",
+      "address": "0xffc640a0",
+      "size": 4,
+      "equals_hex": "6000f0fe"
+    },
+    {
+      "name": "effect-0xffc640a4",
+      "kind": "memory",
+      "address": "0xffc640a4",
+      "size": 4,
+      "equals_hex": "6400f0fe"
+    },
+    {
+      "name": "effect-0xffc640a8",
+      "kind": "memory",
+      "address": "0xffc640a8",
+      "size": 4,
+      "equals_hex": "6800f0fe"
+    },
+    {
+      "name": "effect-0xffc640ac",
+      "kind": "memory",
+      "address": "0xffc640ac",
+      "size": 4,
+      "equals_hex": "6c00f0fe"
+    },
+    {
+      "name": "effect-0xffc640b0",
+      "kind": "memory",
+      "address": "0xffc640b0",
+      "size": 4,
+      "equals_hex": "7000f0fe"
+    },
+    {
+      "name": "effect-0xffc640b4",
+      "kind": "memory",
+      "address": "0xffc640b4",
+      "size": 4,
+      "equals_hex": "7400f0fe"
+    },
+    {
+      "name": "effect-0xffc640b8",
+      "kind": "memory",
+      "address": "0xffc640b8",
+      "size": 4,
+      "equals_hex": "7800f0fe"
+    },
+    {
+      "name": "effect-0xffc640bc",
+      "kind": "memory",
+      "address": "0xffc640bc",
+      "size": 4,
+      "equals_hex": "7c00f0fe"
+    },
+    {
+      "name": "effect-0xffc640c0",
+      "kind": "memory",
+      "address": "0xffc640c0",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "effect-0xffc64008",
+      "kind": "memory",
+      "address": "0xffc64008",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "original-path-reaches-stop",
+      "kind": "register",
+      "register": "pc",
+      "equals": "0x7a4"
+    }
+  ]
+}

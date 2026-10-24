@@ -1,0 +1,33 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "cache-ecc-original-helper-reset-state",
+  "entry": {
+    "role": "original-cache-ecc-helper",
+    "scope": "resolved-address",
+    "address": "0x79a"
+  },
+  "reset": "none",
+  "max_instructions": 32,
+  "stop_addresses": [
+    "0x798"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "lp": "0x798"
+  },
+  "memory": [],
+  "checks": [
+    {
+      "name": "original-helper-returns-without-overflow-input",
+      "kind": "register",
+      "register": "pc",
+      "equals": "0x798"
+    },
+    {
+      "name": "original-tag-ded-read-is-reset-zero",
+      "kind": "register",
+      "register": "r1",
+      "equals": "0"
+    }
+  ]
+}

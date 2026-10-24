@@ -1,0 +1,26 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "ecm-retry-released-master-unrouted-checker",
+  "entry": {"role": "original-ECM-retry-helper-master-high-checker-low-success", "scope": "resolved-address", "address": "0x63F94"},
+  "reset": "none",
+  "max_instructions": 512,
+  "stop_addresses": ["0x6405A"],
+  "gpr_fill": "0",
+  "registers": {"sp": "0xFEBE2000"},
+  "memory": [
+    {"address": "0xFFD60010", "hex": "00000000", "evidence": "Initial low dedicated ERROROUT sample; no active errors."},
+    {"address": "0xFFD61010", "hex": "00000000", "evidence": "Explicit low checker sample with P3_11 reset GPIO/Hi-Z. Original helper tests master high AND checker low, not both high."},
+    {"address": "0xFFD6207C", "hex": "03000000", "evidence": "Documented compare masks before isolated output-clear helper."}
+  ],
+  "events": [
+    {"kind": "ecm-pin-drive", "after_instructions": 0, "pin": "ERROROUT", "drive": "released", "evidence": "Nominal external master driver released."},
+    {"kind": "ecm-pin-drive", "after_instructions": 0, "pin": "ERROROUT_C", "drive": "released", "evidence": "External checker line released, but no fifth-alternative output or loopback has been configured."}
+  ],
+  "checks": [
+    {"name": "original-helper-returns-success", "kind": "register", "register": "r10", "equals": "0"},
+    {"name": "original-helper-wait-finishes-after-one-read-pair", "kind": "register", "register": "r1", "equals": "1"},
+    {"name": "master-pin-high", "kind": "memory", "address": "0xFFD60010", "size": 4, "equals_hex": "00000080"},
+    {"name": "unrouted-checker-does-not-follow-its-ECLR", "kind": "memory", "address": "0xFFD61010", "size": 4, "equals_hex": "00000000"},
+    {"name": "both-clears-and-status-clear-really-accepted", "kind": "event-count", "operation": "ecm-protection-accepted", "equals": "3"}
+  ]
+}

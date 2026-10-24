@@ -1,0 +1,52 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "faci-status-clear-removes-correction-summary",
+  "entry": {
+    "role": "original-faci-status-clear-removes-correction-summary",
+    "scope": "resolved-address",
+    "address": "0x78c30"
+  },
+  "max_instructions": 512,
+  "stop_addresses": [
+    "0x10000"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "lp": "0x10000"
+  },
+  "memory": [
+    {
+      "address": "0xffa10084",
+      "hex": "8000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffa10080",
+      "hex": "14800100",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffa10010",
+      "hex": "01",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    }
+  ],
+  "checks": [
+    {
+      "name": "individual-correction-flags-clear",
+      "kind": "memory",
+      "address": "0xffa10080",
+      "size": 4,
+      "equals_hex": "00800000"
+    },
+    {
+      "name": "correction-summary-clears-too",
+      "kind": "memory",
+      "address": "0xffa10010",
+      "size": 1,
+      "equals_hex": "00"
+    }
+  ]
+}

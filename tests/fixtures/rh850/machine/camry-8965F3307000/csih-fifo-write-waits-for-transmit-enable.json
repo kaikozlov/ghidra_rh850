@@ -1,0 +1,17 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "csih-fifo-write-waits-for-transmit-enable",
+  "entry": {"role": "original61390-TX0W-store-with-TXE-prohibited", "scope": "resolved-address", "address": "0x61390"},
+  "max_instructions": 1,
+  "stop_addresses": ["0x61396"],
+  "gpr_fill": "0",
+  "registers": {"r19": "0xfe1234"},
+  "memory": [
+    {"address": "0xffd82000", "hex": "80", "evidence": "Explicit PWR=1, TXE=0, RXE=0 gate state; no physical wire stimulus."}
+  ],
+  "checks": [
+    {"name": "FIFO-retains-untransmitted-word", "kind": "memory", "address": "0xffd82004", "size": 4, "equals_hex": "80000100"},
+    {"name": "transmit-write-pointer-increments", "kind": "memory", "address": "0xffd83018", "size": 4, "equals_hex": "01000000"},
+    {"name": "TXE-gate-prevents-wire-launch", "kind": "event-count", "operation": "csih-tx", "equals": "0"}
+  ]
+}

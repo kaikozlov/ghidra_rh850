@@ -1,0 +1,47 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "guard-hbg-original-configuration",
+  "entry": {
+    "role": "original-instruction-guard-register-and-permission-regression",
+    "scope": "resolved-address",
+    "address": "0x65852"
+  },
+  "max_instructions": 128,
+  "stop_addresses": [
+    "0x10000"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "lp": "0x10000"
+  },
+  "checks": [
+    {
+      "name": "read-guard-locked-no-peid",
+      "kind": "memory",
+      "address": "0xfffa0000",
+      "size": 4,
+      "equals_hex": "1bfe0186"
+    },
+    {
+      "name": "write-guard-locked-no-peid",
+      "kind": "memory",
+      "address": "0xfffa0008",
+      "size": 4,
+      "equals_hex": "17fe0186"
+    },
+    {
+      "name": "read-no-spids",
+      "kind": "memory",
+      "address": "0xfffa0004",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "write-no-spids",
+      "kind": "memory",
+      "address": "0xfffa000c",
+      "size": 4,
+      "equals_hex": "00000000"
+    }
+  ]
+}

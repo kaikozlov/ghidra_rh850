@@ -1,0 +1,38 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "cache-ecc-data-status-rejects-software-write",
+  "entry": {
+    "role": "original-instruction-retargeted-to-cache-ecc-register",
+    "scope": "resolved-address",
+    "address": "0x7a2"
+  },
+  "reset": "none",
+  "max_instructions": 32,
+  "stop_addresses": [],
+  "gpr_fill": "0",
+  "registers": {
+    "ep": "0xffc60420",
+    "r1": "0"
+  },
+  "memory": [
+    {
+      "address": "0xffc60420",
+      "hex": "01010000",
+      "evidence": "Synthetic explicit cache ECC error latches/captured addresses for digital clear semantics, not injected successful status. R01UH0585EJ0120 Tables31.57,31.60-31.75."
+    }
+  ],
+  "checks": [
+    {
+      "name": "readonly-status-retains-both-bank-flags",
+      "kind": "memory",
+      "address": "0xffc60420",
+      "size": 4,
+      "equals_hex": "01010000"
+    }
+  ],
+  "expected_fault": {
+    "kind": "write-prohibited",
+    "address": "0xffc60420",
+    "access": "write"
+  }
+}

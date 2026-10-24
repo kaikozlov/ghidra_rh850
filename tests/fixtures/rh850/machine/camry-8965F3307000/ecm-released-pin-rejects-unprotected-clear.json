@@ -1,0 +1,23 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "ecm-released-pin-rejects-unprotected-clear",
+  "entry": {"role": "original-master-ECLR-stores-without-required-command", "scope": "resolved-address", "address": "0x63592"},
+  "reset": "none",
+  "max_instructions": 8,
+  "stop_addresses": ["0x6359A"],
+  "gpr_fill": "0",
+  "registers": {"ep": "0xFFD60000", "r1": "1", "r19": "0xFE"},
+  "memory": [
+    {"address": "0xFFD60010", "hex": "00000000", "evidence": "Explicit initially-low master feedback and no active errors."},
+    {"address": "0xFFD61010", "hex": "00000000", "evidence": "Explicit low checker feedback."}
+  ],
+  "events": [
+    {"kind": "ecm-pin-drive", "after_instructions": 0, "pin": "ERROROUT", "drive": "released", "evidence": "External released line must not clear the reset-asserted internal output by itself."}
+  ],
+  "checks": [
+    {"name": "missing-command-cannot-release-internal-output", "kind": "memory", "address": "0xFFD60010", "size": 4, "equals_hex": "00000000"},
+    {"name": "all-three-unprotected-stores-rejected", "kind": "event-count", "operation": "ecm-protection-rejected", "equals": "3"},
+    {"name": "no-release-request", "kind": "event-count", "operation": "ecm-output-request", "equals": "0"},
+    {"name": "no-protected-effect", "kind": "event-count", "operation": "ecm-protection-accepted", "equals": "0"}
+  ]
+}

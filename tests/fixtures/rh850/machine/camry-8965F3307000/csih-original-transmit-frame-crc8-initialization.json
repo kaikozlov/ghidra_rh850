@@ -1,0 +1,19 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "csih-original-transmit-frame-crc8-initialization",
+  "entry": {"role": "canonical616FC-bitmap-clear-and-DCRA0-frame-check-byte", "scope": "resolved-address", "address": "0x616fc"},
+  "max_instructions": 1024,
+  "stop_addresses": ["0x10000"],
+  "gpr_fill": "0",
+  "registers": {"sp": "0xfebe2000", "gp": "0xfebeb800", "lp": "0x10000"},
+  "memory": [
+    {"address": "0xfebe3854", "size": 64, "fill": 165, "evidence": "Explicit old bitmap data; canonical616FC must clear all64 bytes."}
+  ],
+  "checks": [
+    {"name": "original-initializer-returns", "kind": "register", "register": "pc", "equals": "0x10000"},
+    {"name": "actual-default-transmit-frame-and-raw-CRC8", "kind": "memory", "address": "0xfebe384a", "size": 8, "equals_hex": "008000009850601e"},
+    {"name": "bitmap-first-half-cleared", "kind": "memory", "address": "0xfebe3854", "size": 32, "equals_hex": "0000000000000000000000000000000000000000000000000000000000000000"},
+    {"name": "bitmap-second-half-cleared", "kind": "memory", "address": "0xfebe3874", "size": 32, "equals_hex": "0000000000000000000000000000000000000000000000000000000000000000"},
+    {"name": "no-transfer-before-actual-transmit-helper", "kind": "event-count", "operation": "csih-tx", "equals": "0"}
+  ]
+}

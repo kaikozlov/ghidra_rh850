@@ -1,0 +1,170 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "startup-original-reset-without-serial-completions",
+  "entry": {
+    "role": "original-reset-vector",
+    "scope": "resolved-address",
+    "address": "0x0"
+  },
+  "reset": "power-on",
+  "max_instructions": 4000000,
+  "stop_addresses": [
+    "0x619be"
+  ],
+  "gpr_fill": "0",
+  "registers": {},
+  "checks": [
+    {
+      "name": "terminal-sequence-stops-supervisor-clock",
+      "kind": "memory",
+      "address": "0xfff88818",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "clock-stops-with-synchronized-status",
+      "kind": "memory",
+      "address": "0xfff8881c",
+      "size": 4,
+      "equals_hex": "02000000"
+    },
+    {
+      "name": "startup-never-publishes-serial-ready",
+      "kind": "memory",
+      "address": "0xfebe3800",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "original-CSIH-word-is-launched",
+      "kind": "event-count",
+      "operation": "csih-tx",
+      "equals": "1"
+    },
+    {
+      "name": "no-external-serial-completion-is-invented",
+      "kind": "event-count",
+      "operation": "csih-frame",
+      "equals": "0"
+    }
+  ],
+  "pre_reset_memory": [
+    {
+      "address": "0xffc0a000",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic cold-start BRAM contents; section36.3.2 defines no reset value. This initial triplet is not an ECM snapshot-validity token."
+    },
+    {
+      "address": "0xffc0a004",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic cold-start BRAM contents; section36.3.2 defines no reset value. This initial triplet is not an ECM snapshot-validity token."
+    },
+    {
+      "address": "0xffc0a008",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic cold-start BRAM contents; section36.3.2 defines no reset value. This initial triplet is not an ECM snapshot-validity token."
+    },
+    {
+      "address": "0xffc0a00c",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic cold-start BRAM contents; section36.3.2 defines no reset value. This initial triplet is not an ECM snapshot-validity token."
+    }
+  ],
+  "memory": [
+    {
+      "address": "0xffcda000",
+      "hex": "45230100",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    },
+    {
+      "address": "0xffcda004",
+      "hex": "9a780600",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    },
+    {
+      "address": "0xffcda008",
+      "hex": "efcd0b00",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    },
+    {
+      "address": "0xffcda010",
+      "hex": "45230100",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    },
+    {
+      "address": "0xffcda014",
+      "hex": "9a780600",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    },
+    {
+      "address": "0xffcda018",
+      "hex": "efcd0b00",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    },
+    {
+      "address": "0xffcda020",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    },
+    {
+      "address": "0xffcda024",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    },
+    {
+      "address": "0xffcda030",
+      "hex": "02000000",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    },
+    {
+      "address": "0xffcda034",
+      "hex": "01000000",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    },
+    {
+      "address": "0xffcda038",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    },
+    {
+      "address": "0xffd60010",
+      "hex": "00000008",
+      "evidence": "Explicit nominal fixture: field-BIST completion with ERROROUT input low; P1M-E hardware manual p2808, not a vehicle capture"
+    },
+    {
+      "address": "0xffd61010",
+      "hex": "00000008",
+      "evidence": "Explicit nominal fixture: field-BIST completion with ERROROUT input low; P1M-E hardware manual p2808, not a vehicle capture"
+    }
+  ],
+  "events": [
+    {
+      "kind": "ecm-pin-drive",
+      "after_instructions": 0,
+      "pin": "ERROROUT",
+      "drive": "released",
+      "evidence": "Explicit nominal digital board input: external ERROROUT driver released; the ECM's actual internal output state determines feedback"
+    },
+    {
+      "kind": "register-input",
+      "after_instructions": 0,
+      "register": "DFERSTC",
+      "value": "0x1",
+      "evidence": "Explicit bus response observed in the native CS+ original store/load probe; Tables31.20/31.22 do not specify silicon command-read data"
+    },
+    {
+      "kind": "register-input",
+      "after_instructions": 0,
+      "register": "DFOVFSTC",
+      "value": "0x1",
+      "evidence": "Explicit bus response observed in the native CS+ original store/load probe; Tables31.20/31.22 do not specify silicon command-read data"
+    },
+    {
+      "kind": "register-input",
+      "after_instructions": 0,
+      "register": "MODE",
+      "value": "0x0",
+      "evidence": "Explicit normal operating-mode pin latch at reset release; R01UH0585EJ0120 section5.3, not a forced firmware branch"
+    }
+  ]
+}

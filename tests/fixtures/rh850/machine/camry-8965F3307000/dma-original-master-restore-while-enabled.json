@@ -1,0 +1,211 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "dma-original-master-restore-while-enabled",
+  "entry": {
+    "role": "original-dma-original-master-restore-while-enabled",
+    "scope": "resolved-address",
+    "address": "0x60a10"
+  },
+  "max_instructions": 512,
+  "stop_addresses": [
+    "0x10000"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "lp": "0x10000"
+  },
+  "memory": [
+    {
+      "address": "0xffff8100",
+      "hex": "0c200000",
+      "evidence": "Explicit prior native6076A master configuration; native60A10 writes the same value."
+    },
+    {
+      "address": "0xffff8420",
+      "hex": "01000000",
+      "evidence": "Explicit enabled channel, without a queued transfer."
+    },
+    {
+      "address": "0xffff8104",
+      "hex": "18200000",
+      "evidence": "Explicit prior native6076A master configuration; native60A10 writes the same value."
+    },
+    {
+      "address": "0xffff8460",
+      "hex": "01000000",
+      "evidence": "Explicit enabled channel, without a queued transfer."
+    },
+    {
+      "address": "0xffff8108",
+      "hex": "0c200000",
+      "evidence": "Explicit prior native6076A master configuration; native60A10 writes the same value."
+    },
+    {
+      "address": "0xffff84a0",
+      "hex": "01000000",
+      "evidence": "Explicit enabled channel, without a queued transfer."
+    },
+    {
+      "address": "0xffff810c",
+      "hex": "10200000",
+      "evidence": "Explicit prior native6076A master configuration; native60A10 writes the same value."
+    },
+    {
+      "address": "0xffff84e0",
+      "hex": "01000000",
+      "evidence": "Explicit enabled channel, without a queued transfer."
+    },
+    {
+      "address": "0xffff8110",
+      "hex": "0c200000",
+      "evidence": "Explicit prior native6076A master configuration; native60A10 writes the same value."
+    },
+    {
+      "address": "0xffff8520",
+      "hex": "01000000",
+      "evidence": "Explicit enabled channel, without a queued transfer."
+    },
+    {
+      "address": "0xffff8114",
+      "hex": "14200000",
+      "evidence": "Explicit prior native6076A master configuration; native60A10 writes the same value."
+    },
+    {
+      "address": "0xffff8560",
+      "hex": "01000000",
+      "evidence": "Explicit enabled channel, without a queued transfer."
+    },
+    {
+      "address": "0xffff8118",
+      "hex": "0c200000",
+      "evidence": "Explicit prior native6076A master configuration; native60A10 writes the same value."
+    },
+    {
+      "address": "0xffff85a0",
+      "hex": "01000000",
+      "evidence": "Explicit enabled channel, without a queued transfer."
+    },
+    {
+      "address": "0xffff811c",
+      "hex": "7c200000",
+      "evidence": "Explicit prior native6076A master configuration; native60A10 writes the same value."
+    },
+    {
+      "address": "0xffff85e0",
+      "hex": "01000000",
+      "evidence": "Explicit enabled channel, without a queued transfer."
+    },
+    {
+      "address": "0xffff8120",
+      "hex": "0c200000",
+      "evidence": "Explicit prior native6076A master configuration; native60A10 writes the same value."
+    },
+    {
+      "address": "0xffff8620",
+      "hex": "01000000",
+      "evidence": "Explicit enabled channel, without a queued transfer."
+    },
+    {
+      "address": "0xffff8124",
+      "hex": "18200000",
+      "evidence": "Explicit prior native6076A master configuration; native60A10 writes the same value."
+    },
+    {
+      "address": "0xffff8660",
+      "hex": "01000000",
+      "evidence": "Explicit enabled channel, without a queued transfer."
+    },
+    {
+      "address": "0xffff8128",
+      "hex": "0c200000",
+      "evidence": "Explicit prior native6076A master configuration; native60A10 writes the same value."
+    },
+    {
+      "address": "0xffff86a0",
+      "hex": "01000000",
+      "evidence": "Explicit enabled channel, without a queued transfer."
+    },
+    {
+      "address": "0xffff812c",
+      "hex": "10200000",
+      "evidence": "Explicit prior native6076A master configuration; native60A10 writes the same value."
+    },
+    {
+      "address": "0xffff86e0",
+      "hex": "01000000",
+      "evidence": "Explicit enabled channel, without a queued transfer."
+    },
+    {
+      "address": "0xffff8130",
+      "hex": "0c200000",
+      "evidence": "Explicit prior native6076A master configuration; native60A10 writes the same value."
+    },
+    {
+      "address": "0xffff8720",
+      "hex": "01000000",
+      "evidence": "Explicit enabled channel, without a queued transfer."
+    },
+    {
+      "address": "0xffff8134",
+      "hex": "14200000",
+      "evidence": "Explicit prior native6076A master configuration; native60A10 writes the same value."
+    },
+    {
+      "address": "0xffff8760",
+      "hex": "01000000",
+      "evidence": "Explicit enabled channel, without a queued transfer."
+    },
+    {
+      "address": "0xffff8138",
+      "hex": "0c200000",
+      "evidence": "Explicit prior native6076A master configuration; native60A10 writes the same value."
+    },
+    {
+      "address": "0xffff87a0",
+      "hex": "01000000",
+      "evidence": "Explicit enabled channel, without a queued transfer."
+    },
+    {
+      "address": "0xffff813c",
+      "hex": "7c200000",
+      "evidence": "Explicit prior native6076A master configuration; native60A10 writes the same value."
+    },
+    {
+      "address": "0xffff87e0",
+      "hex": "01000000",
+      "evidence": "Explicit enabled channel, without a queued transfer."
+    }
+  ],
+  "checks": [
+    {
+      "name": "native-master-restore-returns-without-changing-enabled-channel",
+      "kind": "register",
+      "register": "pc",
+      "equals": "0x10000"
+    },
+    {
+      "name": "channel-enable-retained",
+      "kind": "memory",
+      "address": "0xffff8420",
+      "size": 4,
+      "equals_hex": "01000000"
+    },
+    {
+      "name": "master-identity-retained",
+      "kind": "memory",
+      "address": "0xffff8100",
+      "size": 4,
+      "equals_hex": "0c200000"
+    },
+    {
+      "name": "all-enabled-identical-rewrites-recorded-as-assumptions",
+      "kind": "event-count",
+      "operation": "dma-master-rewrite-assumption",
+      "equals": "16"
+    }
+  ],
+  "expected_termination": "stop-address",
+  "dma_master_rewrite_assumption": "Explicit bench assumption: original Camry60A10 periodically rewrites identical DMA master values while enabled. Treat only these unchanged writes as state-preserving; manual section7.8 warns operation is not guaranteed, and no hardware capture validates this assumption."
+}

@@ -1,0 +1,30 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "csih-transmit-only-completions-do-not-invent-rx",
+  "entry": {"role": "canonical61836-and61372-transmit-only-explicit-wire-completions", "scope": "resolved-address", "address": "0x61836"},
+  "max_instructions": 128,
+  "stop_addresses": ["0x10000"],
+  "gpr_fill": "0",
+  "registers": {"sp": "0xfebe2000", "gp": "0xfebeb800", "lp": "0x10000", "r6": "0xfebe1000"},
+  "memory": [
+    {"address": "0xffd82000", "hex": "c0", "evidence": "Explicit powered transmit-only gate state; no receive data exists."},
+    {"address": "0xffd82010", "hex": "90000000", "evidence": "Original61260 EDLE/CSRI."},
+    {"address": "0xffd82014", "hex": "0000", "evidence": "Original61260 master setting."},
+    {"address": "0xffd83040", "hex": "0001", "evidence": "Original61260 dual-buffer setting."},
+    {"address": "0xffd83068", "hex": "1400", "evidence": "Original61260 baud setting."},
+    {"address": "0xfebe1000", "hex": "008200001850001f", "evidence": "Explicit software transmit frame."}
+  ],
+  "events": [
+    {"kind": "csih-word", "unit": 1, "after_instructions": 64, "evidence": "Explicit word1 transmitted on wire; no receive data supplied or expected."},
+    {"kind": "csih-word", "unit": 1, "after_instructions": 65, "evidence": "Explicit word2 wire completion."},
+    {"kind": "csih-word", "unit": 1, "after_instructions": 66, "evidence": "Explicit word3 wire completion."},
+    {"kind": "csih-word", "unit": 1, "after_instructions": 67, "evidence": "Explicit word4 wire completion."}
+  ],
+  "checks": [
+    {"name": "all-explicit-completions-clear-busy", "kind": "memory", "address": "0xffd82004", "size": 4, "equals_hex": "10000000"},
+    {"name": "receive-pointer-never-advances", "kind": "memory", "address": "0xffd83018", "size": 4, "equals_hex": "04000000"},
+    {"name": "all-four-words-transmitted", "kind": "event-count", "operation": "csih-tx", "equals": "4"},
+    {"name": "one-completed-EDL-frame", "kind": "event-count", "operation": "csih-frame", "equals": "1"},
+    {"name": "only-transmit-completion-IRQ-no-receive-IRQ", "kind": "event-count", "operation": "interrupt-request", "equals": "1"}
+  ]
+}

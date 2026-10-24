@@ -1,0 +1,18 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "mpu-region12-write-permitted",
+  "entry": {"role": "original-ecc-word-store-and-readback", "scope": "resolved-address", "address": "0x7e0"},
+  "max_instructions": 4,
+  "stop_addresses": ["0x7e4"],
+  "gpr_fill": "0",
+  "registers": {
+    "ep": "0xffc65400", "r1": "0x4001", "MPM": "3",
+    "MPLA0": "0", "MPUA0": "0x000ffffc", "MPAT0": "0xa8",
+    "MPLA12": "0xfec00000", "MPUA12": "0xfffffffc", "MPAT12": "0xb8"
+  },
+  "checks": [
+    {"name": "region12-authorizes-the-original-peripheral-write", "kind": "memory", "address": "0xffc65400", "size": 4, "equals_hex": "01000000"},
+    {"name": "original-load-observes-device-readback", "kind": "register", "register": "r1", "equals": "1"},
+    {"name": "supervisor-protection-remains-enabled", "kind": "register", "register": "MPM", "equals": "3"}
+  ]
+}

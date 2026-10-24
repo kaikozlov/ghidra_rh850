@@ -1,0 +1,84 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "bus-ecc-vperstclr_sg5-zero-noop",
+  "entry": {
+    "role": "original-instruction-retargeted-to-ecc-register",
+    "scope": "resolved-address",
+    "address": "0x7a2"
+  },
+  "reset": "none",
+  "max_instructions": 64,
+  "stop_addresses": [
+    "0x7a4"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "ep": "0xffc68408",
+    "r1": "0x0"
+  },
+  "memory": [
+    {
+      "address": "0xffc6840c",
+      "hex": "01000000",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc68410",
+      "hex": "03000000",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc68450",
+      "hex": "0001f0fe",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc65410",
+      "hex": "0f000000",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    }
+  ],
+  "checks": [
+    {
+      "name": "effect-0xffc6840c",
+      "kind": "memory",
+      "address": "0xffc6840c",
+      "size": 4,
+      "equals_hex": "01000000"
+    },
+    {
+      "name": "effect-0xffc68410",
+      "kind": "memory",
+      "address": "0xffc68410",
+      "size": 4,
+      "equals_hex": "03000000"
+    },
+    {
+      "name": "effect-0xffc68450",
+      "kind": "memory",
+      "address": "0xffc68450",
+      "size": 4,
+      "equals_hex": "0001f0fe"
+    },
+    {
+      "name": "effect-0xffc65410",
+      "kind": "memory",
+      "address": "0xffc65410",
+      "size": 4,
+      "equals_hex": "0f000000"
+    },
+    {
+      "name": "effect-0xffc68408",
+      "kind": "memory",
+      "address": "0xffc68408",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "original-path-reaches-stop",
+      "kind": "register",
+      "register": "pc",
+      "equals": "0x7a4"
+    }
+  ]
+}

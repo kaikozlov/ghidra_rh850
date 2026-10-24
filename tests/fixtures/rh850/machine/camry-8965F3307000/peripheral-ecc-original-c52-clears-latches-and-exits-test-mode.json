@@ -1,0 +1,172 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "peripheral-ecc-original-c52-clears-latches-and-exits-test-mode",
+  "entry": {
+    "role": "original-peripheral-ecc-instructions",
+    "scope": "resolved-address",
+    "address": "0xc52"
+  },
+  "reset": "none",
+  "max_instructions": 64,
+  "stop_addresses": [
+    "0x798"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "lp": "0x798"
+  },
+  "memory": [
+    {
+      "address": "0xffc71100",
+      "hex": "16080100",
+      "evidence": "Explicit peripheral ECC prior state for original instructions; R01UH0585EJ0120 Tables31.79-31.80. Not a physical error-injection result."
+    },
+    {
+      "address": "0xffc71104",
+      "hex": "80000000",
+      "evidence": "Explicit peripheral ECC prior state for original instructions; R01UH0585EJ0120 Tables31.79-31.80. Not a physical error-injection result."
+    },
+    {
+      "address": "0xffc71200",
+      "hex": "16080100",
+      "evidence": "Explicit peripheral ECC prior state for original instructions; R01UH0585EJ0120 Tables31.79-31.80. Not a physical error-injection result."
+    },
+    {
+      "address": "0xffc71204",
+      "hex": "80000000",
+      "evidence": "Explicit peripheral ECC prior state for original instructions; R01UH0585EJ0120 Tables31.79-31.80. Not a physical error-injection result."
+    },
+    {
+      "address": "0xffc70000",
+      "hex": "16080100",
+      "evidence": "Explicit peripheral ECC prior state for original instructions; R01UH0585EJ0120 Tables31.79-31.80. Not a physical error-injection result."
+    },
+    {
+      "address": "0xffc70004",
+      "hex": "80000000",
+      "evidence": "Explicit peripheral ECC prior state for original instructions; R01UH0585EJ0120 Tables31.79-31.80. Not a physical error-injection result."
+    },
+    {
+      "address": "0xffc70040",
+      "hex": "16080100",
+      "evidence": "Explicit peripheral ECC prior state for original instructions; R01UH0585EJ0120 Tables31.79-31.80. Not a physical error-injection result."
+    },
+    {
+      "address": "0xffc70044",
+      "hex": "80000000",
+      "evidence": "Explicit peripheral ECC prior state for original instructions; R01UH0585EJ0120 Tables31.79-31.80. Not a physical error-injection result."
+    },
+    {
+      "address": "0xffc70080",
+      "hex": "16080100",
+      "evidence": "Explicit peripheral ECC prior state for original instructions; R01UH0585EJ0120 Tables31.79-31.80. Not a physical error-injection result."
+    },
+    {
+      "address": "0xffc70084",
+      "hex": "80000000",
+      "evidence": "Explicit peripheral ECC prior state for original instructions; R01UH0585EJ0120 Tables31.79-31.80. Not a physical error-injection result."
+    },
+    {
+      "address": "0xffc700c0",
+      "hex": "16080100",
+      "evidence": "Explicit peripheral ECC prior state for original instructions; R01UH0585EJ0120 Tables31.79-31.80. Not a physical error-injection result."
+    },
+    {
+      "address": "0xffc700c4",
+      "hex": "80000000",
+      "evidence": "Explicit peripheral ECC prior state for original instructions; R01UH0585EJ0120 Tables31.79-31.80. Not a physical error-injection result."
+    }
+  ],
+  "checks": [
+    {
+      "name": "latched-errors-cleared-0xffc71100",
+      "kind": "memory",
+      "address": "0xffc71100",
+      "size": 4,
+      "equals_hex": "10000000"
+    },
+    {
+      "name": "authorized-normal-mode-0xffc71100",
+      "kind": "memory",
+      "address": "0xffc71104",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "latched-errors-cleared-0xffc71200",
+      "kind": "memory",
+      "address": "0xffc71200",
+      "size": 4,
+      "equals_hex": "10000000"
+    },
+    {
+      "name": "authorized-normal-mode-0xffc71200",
+      "kind": "memory",
+      "address": "0xffc71204",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "latched-errors-cleared-0xffc70000",
+      "kind": "memory",
+      "address": "0xffc70000",
+      "size": 4,
+      "equals_hex": "10000000"
+    },
+    {
+      "name": "authorized-normal-mode-0xffc70000",
+      "kind": "memory",
+      "address": "0xffc70004",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "latched-errors-cleared-0xffc70040",
+      "kind": "memory",
+      "address": "0xffc70040",
+      "size": 4,
+      "equals_hex": "10000000"
+    },
+    {
+      "name": "authorized-normal-mode-0xffc70040",
+      "kind": "memory",
+      "address": "0xffc70044",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "latched-errors-cleared-0xffc70080",
+      "kind": "memory",
+      "address": "0xffc70080",
+      "size": 4,
+      "equals_hex": "10000000"
+    },
+    {
+      "name": "authorized-normal-mode-0xffc70080",
+      "kind": "memory",
+      "address": "0xffc70084",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "latched-errors-cleared-0xffc700c0",
+      "kind": "memory",
+      "address": "0xffc700c0",
+      "size": 4,
+      "equals_hex": "10000000"
+    },
+    {
+      "name": "authorized-normal-mode-0xffc700c0",
+      "kind": "memory",
+      "address": "0xffc700c4",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "actual-load-has-no-key-bits",
+      "kind": "register",
+      "register": "r18",
+      "equals": "0"
+    }
+  ]
+}

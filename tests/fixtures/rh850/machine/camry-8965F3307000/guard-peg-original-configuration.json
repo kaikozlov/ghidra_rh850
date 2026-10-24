@@ -1,0 +1,61 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "guard-peg-original-configuration",
+  "entry": {
+    "role": "original-instruction-guard-register-and-permission-regression",
+    "scope": "resolved-address",
+    "address": "0x65458"
+  },
+  "max_instructions": 128,
+  "stop_addresses": [
+    "0x10000"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "lp": "0x10000"
+  },
+  "checks": [
+    {
+      "name": "region0-mask",
+      "kind": "memory",
+      "address": "0xfffee680",
+      "size": 4,
+      "equals_hex": "00f0ff00"
+    },
+    {
+      "name": "region0-base-permission-lock",
+      "kind": "memory",
+      "address": "0xfffee684",
+      "size": 4,
+      "equals_hex": "170000fe"
+    },
+    {
+      "name": "region0-spid",
+      "kind": "memory",
+      "address": "0xfffee688",
+      "size": 4,
+      "equals_hex": "04000000"
+    },
+    {
+      "name": "region1-base-readonly-lock",
+      "kind": "memory",
+      "address": "0xfffee694",
+      "size": 4,
+      "equals_hex": "130000fe"
+    },
+    {
+      "name": "region1-spid",
+      "kind": "memory",
+      "address": "0xfffee698",
+      "size": 4,
+      "equals_hex": "38000000"
+    },
+    {
+      "name": "last-region-disabled-locked",
+      "kind": "memory",
+      "address": "0xfffee6f4",
+      "size": 4,
+      "equals_hex": "16000000"
+    }
+  ]
+}

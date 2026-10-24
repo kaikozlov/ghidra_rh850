@@ -1,0 +1,17 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "dataflash-read-response-halfword-lane",
+  "entry": {"role": "original-halfword-load-retargeted-to-explicit-bus-response-lane", "scope": "resolved-address", "address": "0x158c"},
+  "reset": "none",
+  "max_instructions": 1,
+  "stop_addresses": ["0x158e"],
+  "gpr_fill": "0",
+  "registers": {"ep": "0xffc5affe"},
+  "memory": [{"address": "0xffc5b00c", "hex": "01000000", "evidence": "Synthetic overflow flag; bus response input and halfword read must not issue a clear command."}],
+  "events": [{"kind": "register-input", "after_instructions": 0, "register": "DFOVFSTC", "value": "0x65c39e72", "evidence": "Explicit arbitrary 32-bit bus response used to check little-endian halfword lanes, not a hardware readback claim."}],
+  "checks": [
+    {"name": "cpu-halfword-load-selects-upper-lanes", "kind": "register", "register": "r1", "equals": "0x65c3"},
+    {"name": "read-response-does-not-issue-clear", "kind": "memory", "address": "0xffc5b00c", "size": 4, "equals_hex": "01000000"},
+    {"name": "halfword-response-does-not-pollute-command-storage", "kind": "memory", "address": "0xffc5b010", "size": 4, "equals_hex": "00000000"}
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "ports-original-c9a-rom-table",
+  "entry": {"role": "load_tp_configuration_into_ffc1_ffc2_ffc3_banks_c9a", "scope": "resolved-address", "address": "0xc9a"},
+  "max_instructions": 4096,
+  "stop_addresses": ["0x10000"],
+  "gpr_fill": "0",
+  "registers": {"tp": "0x869c", "sp": "0xfebe2000", "lp": "0x10000"},
+  "checks": [
+    {"name": "original-routine-returns-with-real-startup-tp", "kind": "register", "register": "tp", "equals": "0x869c"},
+    {"name": "rom-pin-inversion-and-mux-compose-checker-alias", "kind": "memory", "address": "0xffc120ec", "size": 4, "equals_hex": "44000240"},
+    {"name": "port-one-reserved-direction-bits-remain-reset-ones", "kind": "memory", "address": "0xffc10050", "size": 2, "equals_hex": "e4ff"},
+    {"name": "jtag-input-only-reserved-direction-bits-are-preserved", "kind": "memory", "address": "0xffc20010", "size": 1, "equals_hex": "ff"}
+  ]
+}

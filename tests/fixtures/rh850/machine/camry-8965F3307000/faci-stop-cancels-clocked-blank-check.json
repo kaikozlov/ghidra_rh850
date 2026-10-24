@@ -1,0 +1,154 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "faci-stop-cancels-clocked-blank-check",
+  "entry": {
+    "role": "original-original-faci-blank-check-blank",
+    "scope": "resolved-address",
+    "address": "0x78ec6"
+  },
+  "max_instructions": 10000,
+  "stop_addresses": [],
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "lp": "0x619be",
+    "r6": "0x5000",
+    "r7": "0x503f",
+    "r8": "0x71"
+  },
+  "memory": [
+    {
+      "address": "0xffa10084",
+      "hex": "8000",
+      "evidence": "Explicit permitted DataFlash operation precondition and retained previous blank-check result"
+    },
+    {
+      "address": "0xfff8a430",
+      "hex": "01000000",
+      "evidence": "Explicit permitted DataFlash operation precondition and retained previous blank-check result"
+    },
+    {
+      "address": "0xfff82410",
+      "hex": "01000000",
+      "evidence": "Explicit permitted DataFlash operation precondition and retained previous blank-check result"
+    },
+    {
+      "address": "0xffa100d4",
+      "hex": "01",
+      "evidence": "Explicit permitted DataFlash operation precondition and retained previous blank-check result"
+    },
+    {
+      "address": "0xffa100d8",
+      "hex": "34120000",
+      "evidence": "Explicit permitted DataFlash operation precondition and retained previous blank-check result"
+    },
+    {
+      "address": "0xfeef8600",
+      "hex": "b3",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff8400",
+      "hex": "0086effe",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffff8404",
+      "hex": "0000a2ff",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffff8408",
+      "hex": "01000000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffff840c",
+      "hex": "40010004",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffff8430",
+      "hex": "03000000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffff8420",
+      "hex": "01000000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffe50050",
+      "hex": "01",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffe50010",
+      "hex": "f3010000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffe50000",
+      "hex": "ffffffff",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffe50090",
+      "hex": "0000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    }
+  ],
+  "checks": [
+    {
+      "name": "stop-not-blank-check-completes",
+      "kind": "memory",
+      "address": "0xffa10080",
+      "size": 4,
+      "equals_hex": "00800000"
+    },
+    {
+      "name": "canceled-operation-does-not-publish-blankness",
+      "kind": "memory",
+      "address": "0xffa100d4",
+      "size": 1,
+      "equals_hex": "01"
+    },
+    {
+      "name": "previous-offset-survives-cancellation",
+      "kind": "memory",
+      "address": "0xffa100d8",
+      "size": 4,
+      "equals_hex": "34120000"
+    },
+    {
+      "name": "stop-replaces-blank-command-history",
+      "kind": "memory",
+      "address": "0xffa100a0",
+      "size": 2,
+      "equals_hex": "d0b3"
+    },
+    {
+      "name": "no-stale-blank-completion",
+      "kind": "event-count",
+      "operation": "faci-completion",
+      "equals": "1"
+    },
+    {
+      "name": "one-native-stop-command-write",
+      "kind": "event-count",
+      "operation": "dma-transfer",
+      "equals": "1"
+    }
+  ],
+  "hsb_cycles_per_instruction": 1,
+  "expected_termination": "instruction-budget",
+  "dataflash_cells": [
+    {
+      "address": "0xff205000",
+      "size": 64,
+      "state": "erased",
+      "evidence": "Explicit synthetic erased physical cells independent of dump payload"
+    }
+  ]
+}

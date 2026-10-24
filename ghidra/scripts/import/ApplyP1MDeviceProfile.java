@@ -149,6 +149,12 @@ public class ApplyP1MDeviceProfile extends GhidraScript {
                 Address start = toAddr(addr);
                 Address end = start.add(size - 1L);
                 MemoryBlock block = currentProgram.getMemory().getBlock(start);
+                if (block == null) {
+                    // The generated register list owns isolated SFR addresses;
+                    // do not maintain a second address manifest for singleton blocks.
+                    block = ensureUninitBlock("SFR_" + name, addr, size,
+                            true, true, false, true);
+                }
                 if (block == null || !block.isVolatile() || !block.contains(end)) {
                     throw new IllegalStateException(String.format(
                             "SFR %s 0x%x..0x%x is outside a mapped volatile window",

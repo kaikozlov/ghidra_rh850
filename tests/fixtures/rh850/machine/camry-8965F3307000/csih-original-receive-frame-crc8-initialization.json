@@ -1,0 +1,17 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "csih-original-receive-frame-crc8-initialization",
+  "entry": {"role": "canonical613C8-software-frame-initialization-through-DCRA0", "scope": "resolved-address", "address": "0x613c8"},
+  "max_instructions": 128,
+  "stop_addresses": ["0x10000"],
+  "gpr_fill": "0",
+  "registers": {"sp": "0xfebe2000", "gp": "0xfebeb800", "lp": "0x10000"},
+  "checks": [
+    {"name": "original-initializer-returns", "kind": "register", "register": "pc", "equals": "0x10000"},
+    {"name": "original-initial-receive-packet-and-raw-CRC8", "kind": "memory", "address": "0xfebe3838", "size": 8, "equals_hex": "0064000000f0a500"},
+    {"name": "mode-selects-SAEJ1850-eight-bit-input", "kind": "memory", "address": "0xffd50020", "size": 1, "equals_hex": "22"},
+    {"name": "hardware-COUT-low-byte-has-final-XOR", "kind": "memory", "address": "0xffd50004", "size": 1, "equals_hex": "5a"},
+    {"name": "return-value-undoes-hardware-XOR", "kind": "register", "register": "r10", "equals": "0xa5"},
+    {"name": "no-invented-physical-serial-response", "kind": "event-count", "operation": "csih-word", "equals": "0"}
+  ]
+}

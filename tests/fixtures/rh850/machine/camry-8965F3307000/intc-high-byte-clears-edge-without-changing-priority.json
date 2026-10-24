@@ -1,0 +1,12 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "intc-high-byte-clears-edge-without-changing-priority",
+  "entry": {"role": "original-sst-b-offset-four-retargeted-to-eic", "scope": "resolved-address", "address": "0x63592"},
+  "max_instructions": 1,
+  "stop_addresses": ["0x63594"],
+  "gpr_fill": "0",
+  "registers": {"ep": "0xffffb0c3", "r1": "0"},
+  "memory": [{"address": "0xffffb0c6", "hex": "c600", "evidence": "Explicit masked edge priority6/table configuration before source pulse."}],
+  "events": [{"kind": "interrupt", "channel": 99, "after_instructions": 0, "evidence": "Explicit CSIH2 receive pulse before high-byte clear."}],
+  "checks": [{"name": "high-byte-clear-leaves-low-byte-exact", "kind": "memory", "address": "0xffffb0c6", "size": 2, "equals_hex": "c600"}]
+}

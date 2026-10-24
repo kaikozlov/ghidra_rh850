@@ -1,0 +1,17 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "csih-loopback-mode-is-explicit-boundary",
+  "entry": {"role": "canonical61372-no-silent-loopback-or-fake-wire-response", "scope": "resolved-address", "address": "0x61372"},
+  "max_instructions": 64,
+  "stop_addresses": ["0x10000"],
+  "gpr_fill": "0",
+  "registers": {"lp": "0x10000", "r6": "0xfebe1000"},
+  "memory": [
+    {"address": "0xffd82000", "hex": "e0", "evidence": "Explicit powered TX/RX state."},
+    {"address": "0xffd82010", "hex": "98000000", "evidence": "Explicit EDLE/CSRI plus unimplemented loopback control; runtime must not silently substitute echo."},
+    {"address": "0xffd83040", "hex": "0001", "evidence": "Explicit dual-buffer mode."},
+    {"address": "0xfebe1000", "hex": "34127856bc9af0de", "evidence": "Explicit software transmit words."}
+  ],
+  "checks": [{"name": "no-fabricated-loopback-wire-output", "kind": "event-count", "operation": "csih-tx", "equals": "0"}],
+  "expected_fault": {"kind": "unsupported-csih-operation", "address": "0xffd82010", "access": "device"}
+}

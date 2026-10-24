@@ -1,0 +1,33 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "guard-pbg-reserved-reset-ones-required",
+  "entry": {
+    "role": "original-instruction-guard-register-and-permission-regression",
+    "scope": "resolved-address",
+    "address": "0x7a2"
+  },
+  "max_instructions": 2,
+  "stop_addresses": [
+    "0x7a4"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "ep": "0xffddd110",
+    "r1": "0x80240000"
+  },
+  "checks": [
+    {
+      "name": "reserved-reset-state-unchanged",
+      "kind": "memory",
+      "address": "0xffddd110",
+      "size": 4,
+      "equals_hex": "1bfe0506"
+    }
+  ],
+  "memory": [],
+  "expected_fault": {
+    "kind": "prohibited-register-reserved-bits",
+    "address": "0xffddd110",
+    "access": "write"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "cvm-cvmfc-always-reads-zero",
+  "entry": {
+    "role": "original-startup-byte-load-retargeted-to-CVMFC",
+    "scope": "resolved-address",
+    "address": "0x418"
+  },
+  "reset": "none",
+  "max_instructions": 1,
+  "stop_addresses": [
+    "0x41c"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "r10": "0xfff82c18"
+  },
+  "memory": [
+    {
+      "address": "0xfff82c18",
+      "hex": "ff",
+      "evidence": "Synthetic stale backing byte proves the documented zero-read value is applied at the original byte load; not software writing reserved bits."
+    }
+  ],
+  "checks": [
+    {
+      "name": "write-command-byte-reads-zero",
+      "kind": "register",
+      "register": "r11",
+      "equals": "0"
+    },
+    {
+      "name": "zero-read-normalizes-backing-byte",
+      "kind": "memory",
+      "address": "0xfff82c18",
+      "size": 1,
+      "equals_hex": "00"
+    }
+  ]
+}

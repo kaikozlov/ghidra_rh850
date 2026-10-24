@@ -1,0 +1,168 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "dma-CSIH-wire-input-to-memory",
+  "entry": {
+    "role": "original61836-transmits-then-masked-CSIH1-receive-edge-drives-DMA",
+    "scope": "resolved-address",
+    "address": "0x61836"
+  },
+  "max_instructions": 512,
+  "stop_addresses": [],
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "lp": "0x619be",
+    "r6": "0xfebe1000"
+  },
+  "memory": [
+    {
+      "address": "0xffd82000",
+      "hex": "e0",
+      "evidence": "Explicit prior61260 CSIH1 state."
+    },
+    {
+      "address": "0xffd82010",
+      "hex": "90000000",
+      "evidence": "61260 EDLE/CSRI configuration."
+    },
+    {
+      "address": "0xffd82014",
+      "hex": "0000",
+      "evidence": "61260 master mode."
+    },
+    {
+      "address": "0xffd83040",
+      "hex": "0001",
+      "evidence": "61260 dual buffer mode."
+    },
+    {
+      "address": "0xffd83044",
+      "hex": "00e00000",
+      "evidence": "61260 CS0 configuration."
+    },
+    {
+      "address": "0xffd83068",
+      "hex": "1400",
+      "evidence": "61260 baud generator."
+    },
+    {
+      "address": "0xfebe1000",
+      "hex": "008200001850001f",
+      "evidence": "Explicit outgoing software frame; original wrapper must append CRC8."
+    },
+    {
+      "address": "0xffff8400",
+      "hex": "1430d8ff",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff8404",
+      "hex": "0081effe",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff8408",
+      "hex": "04000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff840c",
+      "hex": "45000004",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff8420",
+      "hex": "01000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff8430",
+      "hex": "91000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xfff940a0",
+      "hex": "1bfe2506",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    }
+  ],
+  "events": [
+    {
+      "kind": "csih-word",
+      "unit": 1,
+      "value": "0x0038",
+      "after_transmit_words": 4,
+      "delay_instructions": 1,
+      "evidence": "Synthetic regression wire word4 with explicit CRC8; canonical614D4 must validate it using the real DCRA0 instructions."
+    },
+    {
+      "kind": "csih-word",
+      "unit": 1,
+      "value": "0xf000",
+      "after_transmit_words": 3,
+      "delay_instructions": 1,
+      "evidence": "Synthetic regression wire word3, independent of outgoing5018."
+    },
+    {
+      "kind": "csih-word",
+      "unit": 1,
+      "value": "0x0001",
+      "after_transmit_words": 2,
+      "delay_instructions": 1,
+      "evidence": "Synthetic regression wire word2; must not echo outgoing zero."
+    },
+    {
+      "kind": "csih-word",
+      "unit": 1,
+      "value": "0x6400",
+      "after_transmit_words": 1,
+      "delay_instructions": 1,
+      "evidence": "Synthetic regression wire word1, supplied explicitly one functional instruction boundary after its actual launch; not an ASIC-derived response."
+    }
+  ],
+  "checks": [
+    {
+      "name": "wire-data-consumed-through-real-CSIH-read-callback",
+      "kind": "memory",
+      "address": "0xfeef8100",
+      "size": 8,
+      "equals_hex": "0064010000f03800"
+    },
+    {
+      "name": "RX-pointer-advanced-by-DMA-not-CPU",
+      "kind": "memory",
+      "address": "0xffd83018",
+      "size": 4,
+      "equals_hex": "04000400"
+    },
+    {
+      "name": "DMA-complete",
+      "kind": "memory",
+      "address": "0xffff8424",
+      "size": 4,
+      "equals_hex": "10000000"
+    },
+    {
+      "name": "all-four-word-requests-consumed",
+      "kind": "memory",
+      "address": "0xffff8408",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "four-DMA-read-side-effects",
+      "kind": "event-count",
+      "operation": "dma-transfer",
+      "equals": "4"
+    },
+    {
+      "name": "one-complete-physical-word-input-frame",
+      "kind": "event-count",
+      "operation": "csih-frame",
+      "equals": "1"
+    }
+  ],
+  "expected_termination": "instruction-budget",
+  "hsb_cycles_per_instruction": 1
+}

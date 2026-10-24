@@ -1,0 +1,24 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "cvm-monitor-requires-external-pin-input",
+  "entry": {
+    "role": "original-startup-byte-load-retargeted-to-CVMMON",
+    "scope": "resolved-address",
+    "address": "0x418"
+  },
+  "reset": "power-on",
+  "max_instructions": 1,
+  "stop_addresses": [
+    "0x41c"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "r10": "0xfff82c14"
+  },
+  "checks": [],
+  "expected_fault": {
+    "kind": "missing-reset-input",
+    "address": "0xfff82c14",
+    "access": "read"
+  }
+}

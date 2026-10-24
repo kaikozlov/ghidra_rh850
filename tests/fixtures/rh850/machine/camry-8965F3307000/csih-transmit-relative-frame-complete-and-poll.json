@@ -1,0 +1,152 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "csih-transmit-relative-frame-complete-and-poll",
+  "entry": {
+    "role": "canonical61836-transmit-then614D4-polls-and-accepts-explicit-CRC8-frame",
+    "scope": "resolved-address",
+    "address": "0x61836"
+  },
+  "max_instructions": 512,
+  "stop_addresses": [
+    "0x61522"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "lp": "0x614d4",
+    "r6": "0xfebe1000"
+  },
+  "memory": [
+    {
+      "address": "0xffd82000",
+      "hex": "e0",
+      "evidence": "Explicit prior61260 CSIH1 state."
+    },
+    {
+      "address": "0xffd82010",
+      "hex": "90000000",
+      "evidence": "61260 EDLE/CSRI configuration."
+    },
+    {
+      "address": "0xffd82014",
+      "hex": "0000",
+      "evidence": "61260 master mode."
+    },
+    {
+      "address": "0xffd83040",
+      "hex": "0001",
+      "evidence": "61260 dual buffer mode."
+    },
+    {
+      "address": "0xffd83044",
+      "hex": "00e00000",
+      "evidence": "61260 CS0 configuration."
+    },
+    {
+      "address": "0xffd83068",
+      "hex": "1400",
+      "evidence": "61260 baud generator."
+    },
+    {
+      "address": "0xfebe1000",
+      "hex": "008200001850001f",
+      "evidence": "Explicit outgoing software frame; original wrapper must append CRC8."
+    }
+  ],
+  "events": [
+    {
+      "kind": "csih-word",
+      "unit": 1,
+      "value": "0x0038",
+      "after_transmit_words": 4,
+      "delay_instructions": 1,
+      "evidence": "Synthetic regression wire word4 with explicit CRC8; canonical614D4 must validate it using the real DCRA0 instructions."
+    },
+    {
+      "kind": "csih-word",
+      "unit": 1,
+      "value": "0xf000",
+      "after_transmit_words": 3,
+      "delay_instructions": 1,
+      "evidence": "Synthetic regression wire word3, independent of outgoing5018."
+    },
+    {
+      "kind": "csih-word",
+      "unit": 1,
+      "value": "0x0001",
+      "after_transmit_words": 2,
+      "delay_instructions": 1,
+      "evidence": "Synthetic regression wire word2; must not echo outgoing zero."
+    },
+    {
+      "kind": "csih-word",
+      "unit": 1,
+      "value": "0x6400",
+      "after_transmit_words": 1,
+      "delay_instructions": 1,
+      "evidence": "Synthetic regression wire word1, supplied explicitly one functional instruction boundary after its actual launch; not an ASIC-derived response."
+    }
+  ],
+  "checks": [
+    {
+      "name": "original-poll-reaches-natural-epilogue",
+      "kind": "register",
+      "register": "pc",
+      "equals": "0x61522"
+    },
+    {
+      "name": "actual-serial-input-is-accepted-not-echoed",
+      "kind": "memory",
+      "address": "0xfebe3838",
+      "size": 8,
+      "equals_hex": "0064010000f03800"
+    },
+    {
+      "name": "outgoing-snapshot-remains-distinct",
+      "kind": "memory",
+      "address": "0xfebe3894",
+      "size": 8,
+      "equals_hex": "0082000018500e1f"
+    },
+    {
+      "name": "completed-wire-clears-busy",
+      "kind": "memory",
+      "address": "0xffd82004",
+      "size": 4,
+      "equals_hex": "10000000"
+    },
+    {
+      "name": "BTST-self-clears-ND-decrements-SOP-advances",
+      "kind": "memory",
+      "address": "0xffd83004",
+      "size": 4,
+      "equals_hex": "04000000"
+    },
+    {
+      "name": "RX-halfword-alias-advances-RRA",
+      "kind": "memory",
+      "address": "0xffd83018",
+      "size": 4,
+      "equals_hex": "04000400"
+    },
+    {
+      "name": "four-actual-word-launches",
+      "kind": "event-count",
+      "operation": "csih-tx",
+      "equals": "4"
+    },
+    {
+      "name": "one-EDL-frame-completed",
+      "kind": "event-count",
+      "operation": "csih-frame",
+      "equals": "1"
+    },
+    {
+      "name": "one-RX-and-one-TX-edge-request",
+      "kind": "event-count",
+      "operation": "interrupt-request",
+      "equals": "2"
+    }
+  ]
+}

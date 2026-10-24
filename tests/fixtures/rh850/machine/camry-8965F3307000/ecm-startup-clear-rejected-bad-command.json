@@ -1,0 +1,21 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "ecm-startup-clear-rejected-bad-command",
+  "entry": {"role": "original-startup-command-store-with-invalid-key-and-real-following-clear-sequence", "scope": "resolved-address", "address": "0x3E2"},
+  "reset": "none",
+  "max_instructions": 16,
+  "stop_addresses": ["0x402"],
+  "gpr_fill": "0",
+  "registers": {"r10": "0xFFD62040", "r11": "0xA4"},
+  "memory": [
+    {"address": "0xFFD60010", "hex": "04000088", "evidence": "Synthetic preexisting master latches and explicit ERROROUT high input; no BIST completion is assumed."},
+    {"address": "0xFFD61010", "hex": "20000008", "evidence": "Synthetic preexisting checker latches and explicit ERROROUT_C low input."}
+  ],
+  "checks": [
+    {"name": "real-status-load-reports-invalid-key-failure", "kind": "register", "register": "r11", "equals": "1"},
+    {"name": "invalid-key-retains-master-latches", "kind": "memory", "address": "0xFFD60010", "size": 4, "equals_hex": "04000088"},
+    {"name": "invalid-key-retains-checker-latches", "kind": "memory", "address": "0xFFD61010", "size": 4, "equals_hex": "20000008"},
+    {"name": "invalid-key-and-three-stores-are-rejected", "kind": "event-count", "operation": "ecm-protection-rejected", "equals": "4"},
+    {"name": "invalid-key-never-commits", "kind": "event-count", "operation": "ecm-protection-accepted", "equals": "0"}
+  ]
+}

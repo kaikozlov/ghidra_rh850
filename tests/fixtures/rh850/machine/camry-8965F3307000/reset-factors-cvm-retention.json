@@ -1,0 +1,40 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "entry": {
+    "role": "original-RESF-word-load",
+    "scope": "resolved-address",
+    "address": "0x63E00"
+  },
+  "max_instructions": 1,
+  "stop_addresses": [
+    "0x63E06"
+  ],
+  "gpr_fill": "0",
+  "registers": {},
+  "checks": [
+    {
+      "name": "original-word-load-observes-reset-cause-and-retention",
+      "kind": "register",
+      "register": "r16",
+      "equals": "0x406"
+    }
+  ],
+  "name": "reset-factors-cvm-retention",
+  "reset": "system-1-cvm",
+  "pre_reset_memory": [
+    {
+      "address": "0xFFF81000",
+      "hex": "ef060000",
+      "evidence": "Explicit pre-reset sticky flags and undefined bit6 sample; R01UH0585EJ0120 Table8.6."
+    }
+  ],
+  "events": [
+    {
+      "kind": "register-input",
+      "after_instructions": 0,
+      "register": "RESF",
+      "value": "0x406",
+      "evidence": "Explicit undefined read-bit6 and, where the reset class is ambiguous, software/ECM source input. Derived and retained flags must agree with Table8.6."
+    }
+  ]
+}

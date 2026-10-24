@@ -1,0 +1,191 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "original-faci-stop-erase-leaves-indeterminate-cell",
+  "entry": {
+    "role": "original-faci-range-submission",
+    "scope": "resolved-address",
+    "address": "0x78ec6"
+  },
+  "max_instructions": 512,
+  "stop_addresses": [],
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "lp": "0x619be",
+    "r6": "0x5000",
+    "r7": "0x503f",
+    "r8": "0x20"
+  },
+  "memory": [
+    {
+      "address": "0xffa10084",
+      "hex": "8000",
+      "evidence": "Explicit permitted DataFlash operation precondition and retained previous blank-check result"
+    },
+    {
+      "address": "0xfff8a430",
+      "hex": "01000000",
+      "evidence": "Explicit permitted DataFlash operation precondition and retained previous blank-check result"
+    },
+    {
+      "address": "0xfff82410",
+      "hex": "01000000",
+      "evidence": "Explicit permitted DataFlash operation precondition and retained previous blank-check result"
+    },
+    {
+      "address": "0xffa100d4",
+      "hex": "01",
+      "evidence": "Explicit permitted DataFlash operation precondition and retained previous blank-check result"
+    },
+    {
+      "address": "0xffa100d8",
+      "hex": "34120000",
+      "evidence": "Explicit permitted DataFlash operation precondition and retained previous blank-check result"
+    },
+    {
+      "address": "0xffa100e4",
+      "hex": "2800",
+      "evidence": "Explicit40MHzFCU notification as configured by the original driver; timing uses primary manual Table37.14"
+    },
+    {
+      "address": "0xffa10104",
+      "hex": "3000",
+      "evidence": "Explicit normal ECC encoding/verification, matching native A630 setup"
+    },
+    {
+      "address": "0xffe50090",
+      "hex": "0000",
+      "evidence": "Explicit timer/DMA testbench phase; timer edge launches bus writes, never injected FACI state"
+    },
+    {
+      "address": "0xffe50000",
+      "hex": "ffffffff",
+      "evidence": "Explicit timer/DMA testbench phase; timer edge launches bus writes, never injected FACI state"
+    },
+    {
+      "address": "0xffe50010",
+      "hex": "63000000",
+      "evidence": "Explicit timer/DMA testbench phase; timer edge launches bus writes, never injected FACI state"
+    },
+    {
+      "address": "0xffff8400",
+      "hex": "8086effe",
+      "evidence": "Explicit timer/DMA testbench phase; timer edge launches bus writes, never injected FACI state"
+    },
+    {
+      "address": "0xffff8404",
+      "hex": "0000a2ff",
+      "evidence": "Explicit timer/DMA testbench phase; timer edge launches bus writes, never injected FACI state"
+    },
+    {
+      "address": "0xffff8408",
+      "hex": "01000000",
+      "evidence": "Explicit timer/DMA testbench phase; timer edge launches bus writes, never injected FACI state"
+    },
+    {
+      "address": "0xffff840c",
+      "hex": "01010004",
+      "evidence": "Explicit timer/DMA testbench phase; timer edge launches bus writes, never injected FACI state"
+    },
+    {
+      "address": "0xffff8420",
+      "hex": "01000000",
+      "evidence": "Explicit timer/DMA testbench phase; timer edge launches bus writes, never injected FACI state"
+    },
+    {
+      "address": "0xffff8430",
+      "hex": "03000000",
+      "evidence": "Explicit timer/DMA testbench phase; timer edge launches bus writes, never injected FACI state"
+    },
+    {
+      "address": "0xfeef8680",
+      "hex": "b3",
+      "evidence": "Native command/address bytes transferred by the modeled DMA bus master"
+    },
+    {
+      "address": "0xffe50050",
+      "hex": "03",
+      "evidence": "Explicit timer/DMA testbench phase; timer edge launches bus writes, never injected FACI state"
+    },
+    {
+      "address": "0xffe50084",
+      "hex": "0000",
+      "evidence": "Explicit timer/DMA testbench phase; timer edge launches bus writes, never injected FACI state"
+    },
+    {
+      "address": "0xffe50004",
+      "hex": "ffffffff",
+      "evidence": "Explicit timer/DMA testbench phase; timer edge launches bus writes, never injected FACI state"
+    },
+    {
+      "address": "0xffe50014",
+      "hex": "cf070000",
+      "evidence": "Explicit timer/DMA testbench phase; timer edge launches bus writes, never injected FACI state"
+    },
+    {
+      "address": "0xffff8440",
+      "hex": "a086effe",
+      "evidence": "Explicit timer/DMA testbench phase; timer edge launches bus writes, never injected FACI state"
+    },
+    {
+      "address": "0xffff8444",
+      "hex": "0000a2ff",
+      "evidence": "Explicit timer/DMA testbench phase; timer edge launches bus writes, never injected FACI state"
+    },
+    {
+      "address": "0xffff8448",
+      "hex": "02000000",
+      "evidence": "Explicit timer/DMA testbench phase; timer edge launches bus writes, never injected FACI state"
+    },
+    {
+      "address": "0xffff844c",
+      "hex": "01010004",
+      "evidence": "Explicit timer/DMA testbench phase; timer edge launches bus writes, never injected FACI state"
+    },
+    {
+      "address": "0xffff8460",
+      "hex": "01000000",
+      "evidence": "Explicit timer/DMA testbench phase; timer edge launches bus writes, never injected FACI state"
+    },
+    {
+      "address": "0xffff8470",
+      "hex": "05000000",
+      "evidence": "Explicit timer/DMA testbench phase; timer edge launches bus writes, never injected FACI state"
+    },
+    {
+      "address": "0xfeef86a0",
+      "hex": "71d0",
+      "evidence": "Native command/address bytes transferred by the modeled DMA bus master"
+    }
+  ],
+  "checks": [
+    {
+      "name": "faci-completion-count",
+      "kind": "event-count",
+      "operation": "faci-completion",
+      "equals": "1"
+    }
+  ],
+  "dataflash_cells": [
+    {
+      "address": "0xff205000",
+      "size": 68,
+      "state": "programmed",
+      "evidence": "Explicit physical-cell precondition independent of the registered captured payload"
+    }
+  ],
+  "events": [
+    {
+      "kind": "clock",
+      "after_instructions": 200,
+      "p_bus_cycles": 10000,
+      "evidence": "Explicit HSB stimulus across the documented operation deadline; no completion flags injected"
+    }
+  ],
+  "expected_fault": {
+    "kind": "missing-dataflash-cell-state",
+    "address": "0xff205000",
+    "access": "device"
+  }
+}

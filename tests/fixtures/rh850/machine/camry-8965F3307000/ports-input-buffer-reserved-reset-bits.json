@@ -1,0 +1,11 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "ports-input-buffer-reserved-reset-bits",
+  "entry": {"role": "original-c9a-halfword-store-at-PISA0", "scope": "resolved-address", "address": "0xd58"},
+  "reset": "none",
+  "max_instructions": 1,
+  "stop_addresses": ["0xd5e"],
+  "gpr_fill": "0",
+  "registers": {"r1": "0x20", "r18": "0xffff"},
+  "checks": [{"name": "unsupported-buffer-select-bits-retain-reset-including-bit10-one", "kind": "memory", "address": "0xffc1402c", "size": 2, "equals_hex": "f827"}]
+}

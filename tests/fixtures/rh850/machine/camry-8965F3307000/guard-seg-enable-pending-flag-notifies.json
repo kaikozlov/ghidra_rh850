@@ -1,0 +1,52 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "guard-seg-enable-pending-flag-notifies",
+  "entry": {
+    "role": "original-instruction-guard-register-and-permission-regression",
+    "scope": "resolved-address",
+    "address": "0x71600"
+  },
+  "max_instructions": 2,
+  "stop_addresses": [
+    "0x10"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "r12": "0xfffee980",
+    "r11": "0x200",
+    "RBASE": "0"
+  },
+  "checks": [
+    {
+      "name": "enabling-pending-error-vectors",
+      "kind": "register",
+      "register": "pc",
+      "equals": "0x10"
+    },
+    {
+      "name": "pending-pbus-write-cause",
+      "kind": "register",
+      "register": "FEIC",
+      "equals": "0x19"
+    },
+    {
+      "name": "software-enable-does-not-capture-address",
+      "kind": "memory",
+      "address": "0xfffee988",
+      "size": 4,
+      "equals_hex": "bebafeca"
+    }
+  ],
+  "memory": [
+    {
+      "address": "0xfffee982",
+      "hex": "0002",
+      "evidence": "Explicit guard state exercising P1M-E documented configuration/permission behavior, not a firmware patch"
+    },
+    {
+      "address": "0xfffee988",
+      "hex": "bebafeca",
+      "evidence": "Explicit guard state exercising P1M-E documented configuration/permission behavior, not a firmware patch"
+    }
+  ]
+}

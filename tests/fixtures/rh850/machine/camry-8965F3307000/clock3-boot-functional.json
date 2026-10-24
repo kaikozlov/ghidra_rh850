@@ -1,0 +1,16 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "clock3-boot-functional",
+  "entry": {"role": "select_clock3_and_set_divider_80_10c6", "scope": "resolved-address", "address": "0x10c6"},
+  "max_instructions": 128,
+  "stop_addresses": ["0x10000"],
+  "gpr_fill": "0",
+  "registers": {"sp": "0xfebe2000", "lp": "0x10000"},
+  "checks": [
+    {"name": "original-routine-returns-with-stack-restored", "kind": "register", "register": "sp", "equals": "0xfebe2000"},
+    {"name": "original-divider-write-reads-back-80", "kind": "memory", "address": "0xfff88818", "size": 4, "equals_hex": "50000000"},
+    {"name": "nonzero-divider-is-synchronized-and-active", "kind": "memory", "address": "0xfff8881c", "size": 4, "equals_hex": "03000000"},
+    {"name": "original-source-write-reads-back-lsb", "kind": "memory", "address": "0xfff890c0", "size": 4, "equals_hex": "04000000"},
+    {"name": "selected-source-status-is-lsb", "kind": "memory", "address": "0xfff890c8", "size": 4, "equals_hex": "04000000"}
+  ]
+}

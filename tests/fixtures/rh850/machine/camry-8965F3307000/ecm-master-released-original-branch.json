@@ -1,0 +1,24 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "ecm-master-released-original-branch",
+  "entry": {"role": "original-master-ECLR-and-high-feedback-branch", "scope": "resolved-address", "address": "0x63584"},
+  "reset": "none",
+  "max_instructions": 256,
+  "stop_addresses": ["0x635C0"],
+  "gpr_fill": "0",
+  "memory": [
+    {"address": "0xFFD60010", "hex": "00000000", "evidence": "Explicit initially-low ERROROUT sample; no active error latches."},
+    {"address": "0xFFD61010", "hex": "00000000", "evidence": "Explicit checker sample; unrelated to dedicated master pin."},
+    {"address": "0xFFD6207C", "hex": "03000000", "evidence": "Documented compare masks before isolated ECLR."}
+  ],
+  "events": [
+    {"kind": "ecm-pin-drive", "after_instructions": 0, "pin": "ERROROUT", "drive": "released", "evidence": "Declared external line released; digital nominal input, not a forced status register."}
+  ],
+  "checks": [
+    {"name": "original-master-high-branch-reached", "kind": "register", "register": "pc", "equals": "0x635C0"},
+    {"name": "first-feedback-read-is-high", "kind": "register", "register": "r19", "equals": "1"},
+    {"name": "only-one-feedback-read-needed", "kind": "register", "register": "r1", "equals": "1"},
+    {"name": "released-pin-rose-after-real-protected-clear", "kind": "memory", "address": "0xFFD60010", "size": 4, "equals_hex": "00000080"},
+    {"name": "real-protected-clear-accepted-once", "kind": "event-count", "operation": "ecm-protection-accepted", "equals": "1"}
+  ]
+}

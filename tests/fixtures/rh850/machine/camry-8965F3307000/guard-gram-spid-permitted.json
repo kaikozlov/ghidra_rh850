@@ -1,0 +1,39 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "guard-gram-spid-permitted",
+  "entry": {
+    "role": "original-instruction-guard-register-and-permission-regression",
+    "scope": "resolved-address",
+    "address": "0x7a2"
+  },
+  "max_instructions": 2,
+  "stop_addresses": [
+    "0x7a4"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "ep": "0xfeef8000",
+    "r1": "0x12345678"
+  },
+  "checks": [
+    {
+      "name": "permitted-write-reaches-ram",
+      "kind": "memory",
+      "address": "0xfeef8000",
+      "size": 4,
+      "equals_hex": "78563412"
+    }
+  ],
+  "memory": [
+    {
+      "address": "0xffc49000",
+      "hex": "10feff47",
+      "evidence": "Explicit guard state exercising P1M-E documented configuration/permission behavior, not a firmware patch"
+    },
+    {
+      "address": "0xffc49004",
+      "hex": "04000000",
+      "evidence": "Explicit guard state exercising P1M-E documented configuration/permission behavior, not a firmware patch"
+    }
+  ]
+}

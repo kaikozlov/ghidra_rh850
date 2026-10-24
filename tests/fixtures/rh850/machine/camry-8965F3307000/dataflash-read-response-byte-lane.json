@@ -1,0 +1,17 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "dataflash-read-response-byte-lane",
+  "entry": {"role": "original-byte-load-retargeted-to-explicit-bus-response-lane", "scope": "resolved-address", "address": "0x418"},
+  "reset": "none",
+  "max_instructions": 1,
+  "stop_addresses": ["0x41c"],
+  "gpr_fill": "0",
+  "registers": {"r10": "0xffc5b00b"},
+  "memory": [{"address": "0xffc5b004", "hex": "03000000", "evidence": "Synthetic error flags; a bus response input and byte read must not issue a clear command."}],
+  "events": [{"kind": "register-input", "after_instructions": 0, "register": "DFERSTC", "value": "0x65c39e72", "evidence": "Explicit arbitrary 32-bit bus response used to check little-endian byte lanes, not a hardware readback claim."}],
+  "checks": [
+    {"name": "cpu-byte-load-selects-lane-three", "kind": "register", "register": "r11", "equals": "0x65"},
+    {"name": "read-response-does-not-issue-clear", "kind": "memory", "address": "0xffc5b004", "size": 4, "equals_hex": "03000000"},
+    {"name": "byte-response-does-not-pollute-command-storage", "kind": "memory", "address": "0xffc5b008", "size": 4, "equals_hex": "00000000"}
+  ]
+}

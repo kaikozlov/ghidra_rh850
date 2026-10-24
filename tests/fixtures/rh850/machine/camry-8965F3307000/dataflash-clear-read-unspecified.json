@@ -1,0 +1,17 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "dataflash-clear-read-unspecified",
+  "entry": {"role": "original-ecc-word-store-and-readback", "scope": "resolved-address", "address": "0x7e0"},
+  "max_instructions": 4,
+  "stop_addresses": ["0x7e4"],
+  "gpr_fill": "0",
+  "registers": {"ep": "0xffc5b008", "r1": "1"},
+  "memory": [
+    {"address": "0xffc5b004", "hex": "03000000", "evidence": "Synthetic error flags before the real clear store; no read response supplied."}
+  ],
+  "expected_fault": {"kind": "missing-read-input", "address": "0xffc5b008", "access": "read"},
+  "checks": [
+    {"name": "real-store-clears-flags-before-missing-response-fault", "kind": "memory", "address": "0xffc5b004", "size": 4, "equals_hex": "00000000"},
+    {"name": "fault-is-at-real-load", "kind": "register", "register": "pc", "equals": "0x7e2"}
+  ]
+}

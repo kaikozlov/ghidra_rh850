@@ -1,0 +1,15 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "clock3-divisor-unsynchronized",
+  "entry": {"role": "original-ecc-word-store-and-readback", "scope": "resolved-address", "address": "0x7e0"},
+  "max_instructions": 4,
+  "stop_addresses": ["0x7e4"],
+  "gpr_fill": "0",
+  "registers": {"ep": "0xfff88818", "r1": "0x50"},
+  "memory": [{"address": "0xfff8881c", "hex": "00000000", "evidence": "scenario: unsynchronized divider precondition for prohibited-write test; not reset state or modeled timing"}],
+  "expected_fault": {"kind": "prohibited-clock-divider-unsynchronized", "address": "0xfff88818", "access": "write"},
+  "checks": [
+    {"name": "unsynchronized-write-does-not-change-divisor", "kind": "memory", "address": "0xfff88818", "size": 4, "equals_hex": "00000000"},
+    {"name": "fault-does-not-synthesize-synchronization", "kind": "memory", "address": "0xfff8881c", "size": 4, "equals_hex": "00000000"}
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "ecm-startup-mask-accepted",
+  "entry": {"role": "original-ECM-initialization-command-and-mask0-protected-stores", "scope": "resolved-address", "address": "0x6335E"},
+  "reset": "none",
+  "max_instructions": 16,
+  "stop_addresses": ["0x63374"],
+  "gpr_fill": "0",
+  "registers": {"ep": "0xFFD62028", "r1": "0xA5", "r19": "0x1E"},
+  "memory": [{"address": "0xFFD62044", "hex": "01", "evidence": "Synthetic previous protection failure; the original complete mask-write sequence must clear it."}],
+  "checks": [
+    {"name": "original-three-stores-commit-desired-mask-not-inverse", "kind": "memory", "address": "0xFFD62028", "size": 4, "equals_hex": "e1ffffff"},
+    {"name": "original-native-byte-read-observes-success", "kind": "register", "register": "r1", "equals": "0"},
+    {"name": "one-mask-write-committed", "kind": "event-count", "operation": "ecm-protection-accepted", "equals": "1"},
+    {"name": "no-mask-write-rejected", "kind": "event-count", "operation": "ecm-protection-rejected", "equals": "0"}
+  ]
+}

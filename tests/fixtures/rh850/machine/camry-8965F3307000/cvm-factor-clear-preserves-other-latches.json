@@ -1,0 +1,54 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "cvm-factor-clear-preserves-other-latches",
+  "entry": {
+    "role": "original-startup-byte-store-load-with-store-retargeted-to-CVMFC",
+    "scope": "resolved-address",
+    "address": "0x40e"
+  },
+  "reset": "none",
+  "max_instructions": 3,
+  "stop_addresses": [
+    "0x41c"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "r10": "0xfff82c18",
+    "r11": "0x81"
+  },
+  "memory": [
+    {
+      "address": "0xfff82c00",
+      "hex": "83",
+      "evidence": "Synthetic explicit CVM state for isolated digital reset semantics; not a voltage or diagnostic success capture. R01UH0585EJ0120 Tables10.3-10.10."
+    },
+    {
+      "address": "0xfff82c14",
+      "hex": "00",
+      "evidence": "Synthetic explicit CVM state for isolated digital reset semantics; not a voltage or diagnostic success capture. R01UH0585EJ0120 Tables10.3-10.10."
+    }
+  ],
+  "checks": [
+    {
+      "name": "only-requested-factors-clear",
+      "kind": "memory",
+      "address": "0xfff82c00",
+      "size": 1,
+      "equals_hex": "02"
+    },
+    {
+      "name": "clear-register-stays-zero",
+      "kind": "memory",
+      "address": "0xfff82c18",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "clear-does-not-force-pin-high",
+      "kind": "memory",
+      "address": "0xfff82c14",
+      "size": 1,
+      "equals_hex": "00"
+    }
+  ]
+}

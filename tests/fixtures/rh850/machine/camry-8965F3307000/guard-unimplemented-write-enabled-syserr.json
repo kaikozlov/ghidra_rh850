@@ -1,0 +1,83 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "guard-unimplemented-write-enabled-syserr",
+  "entry": {
+    "role": "original-instruction-guard-register-and-permission-regression",
+    "scope": "resolved-address",
+    "address": "0x7a2"
+  },
+  "max_instructions": 2,
+  "stop_addresses": [
+    "0x10"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "ep": "0xffc5a044",
+    "r1": "0xffffffff",
+    "RBASE": "0",
+    "PSW": "0xa0"
+  },
+  "checks": [
+    {
+      "name": "real-syserr-vector",
+      "kind": "register",
+      "register": "pc",
+      "equals": "0x10"
+    },
+    {
+      "name": "pbus-write-cause",
+      "kind": "register",
+      "register": "FEIC",
+      "equals": "0x19"
+    },
+    {
+      "name": "instruction-retires-before-async-error",
+      "kind": "register",
+      "register": "FEPC",
+      "equals": "0x7a4"
+    },
+    {
+      "name": "saved-status",
+      "kind": "register",
+      "register": "FEPSW",
+      "equals": "0xa0"
+    },
+    {
+      "name": "syserr-ignores-ID-and-NP-and-sets-EP",
+      "kind": "register",
+      "register": "PSW",
+      "equals": "0xe0"
+    },
+    {
+      "name": "non-address-error-records-zero",
+      "kind": "memory",
+      "address": "0xfffee988",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "notification-does-not-clear-sticky-flag",
+      "kind": "memory",
+      "address": "0xfffee982",
+      "size": 2,
+      "equals_hex": "0002"
+    }
+  ],
+  "memory": [
+    {
+      "address": "0xfffee982",
+      "hex": "0000",
+      "evidence": "Explicit guard state exercising P1M-E documented configuration/permission behavior, not a firmware patch"
+    },
+    {
+      "address": "0xfffee980",
+      "hex": "0002",
+      "evidence": "Explicit guard state exercising P1M-E documented configuration/permission behavior, not a firmware patch"
+    },
+    {
+      "address": "0xfffee988",
+      "hex": "bebafeca",
+      "evidence": "Explicit guard state exercising P1M-E documented configuration/permission behavior, not a firmware patch"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "ports-jtag-rejects-halfword-store",
+  "entry": {"role": "original-c9a-halfword-store-at-byte-JPMC0", "scope": "resolved-address", "address": "0xd2c"},
+  "reset": "none",
+  "max_instructions": 1,
+  "stop_addresses": ["0xd2e"],
+  "gpr_fill": "0",
+  "registers": {"ep": "0xffc20010"},
+  "checks": [{"name": "wide-transaction-does-not-overlap-jtag-mode", "kind": "memory", "address": "0xffc20014", "size": 1, "equals_hex": "00"}],
+  "expected_fault": {"kind": "unmapped-write", "address": "0xffc20014", "access": "write"}
+}

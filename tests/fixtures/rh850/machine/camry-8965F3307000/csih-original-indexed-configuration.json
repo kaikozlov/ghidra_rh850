@@ -1,0 +1,22 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "csih-original-indexed-configuration",
+  "entry": {"role": "canonical60E3E-clears-buffers-and-applies-both-real-ROM-records", "scope": "resolved-address", "address": "0x60e3e"},
+  "max_instructions": 4096,
+  "stop_addresses": ["0x10000"],
+  "gpr_fill": "0",
+  "registers": {"sp": "0xfebe2000", "gp": "0xfebeb800", "lp": "0x10000"},
+  "memory": [
+    {"address": "0xfeef8050", "size": 80, "fill": 165, "evidence": "Explicit old software serial buffers at the two actual ROM pointers313FC/31400; canonical60D52 must clear each20-halfword buffer."}
+  ],
+  "checks": [
+    {"name": "original-both-controller-configuration-returns", "kind": "register", "register": "pc", "equals": "0x10000"},
+    {"name": "real-ROM-CSIH2-enable", "kind": "memory", "address": "0xffd84000", "size": 1, "equals_hex": "e0"},
+    {"name": "real-ROM-CSIH3-enable", "kind": "memory", "address": "0xffd86000", "size": 1, "equals_hex": "e0"},
+    {"name": "real-ROM-clock-inversion-and-EDL", "kind": "memory", "address": "0xffd84010", "size": 4, "equals_hex": "90000200"},
+    {"name": "real-ROM-dual-buffer-mode", "kind": "memory", "address": "0xffd85040", "size": 2, "equals_hex": "0001"},
+    {"name": "real-ROM-CSIH3-baud-setting", "kind": "memory", "address": "0xffd87068", "size": 2, "equals_hex": "0a00"},
+    {"name": "first-software-buffer-cleared", "kind": "memory", "address": "0xfeef8050", "size": 40, "equals_hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000"},
+    {"name": "second-software-buffer-cleared", "kind": "memory", "address": "0xfeef8078", "size": 40, "equals_hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000"}
+  ]
+}

@@ -1,0 +1,132 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "codeflash-ecc-sed-zero-noop-preserves-overflow",
+  "entry": {
+    "role": "original-instruction-retargeted-to-ecc-register",
+    "scope": "resolved-address",
+    "address": "0x7a2"
+  },
+  "reset": "none",
+  "max_instructions": 64,
+  "stop_addresses": [
+    "0x7a4"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "ep": "0xffc62004",
+    "r1": "0x0"
+  },
+  "memory": [
+    {
+      "address": "0xffc6200c",
+      "hex": "01000000",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc62020",
+      "hex": "0f000000",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc62030",
+      "hex": "06000000",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc62040",
+      "hex": "00010000",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc62044",
+      "hex": "04010000",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc62048",
+      "hex": "08010000",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc6204c",
+      "hex": "0c010000",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    },
+    {
+      "address": "0xffc620c0",
+      "hex": "00020000",
+      "evidence": "Explicit synthetic ECC flag/capture state for documented digital clear relationships, not a simulated error detector or a successful-result override. R01UH0585EJ0120 section31.2."
+    }
+  ],
+  "checks": [
+    {
+      "name": "effect-0xffc6200c",
+      "kind": "memory",
+      "address": "0xffc6200c",
+      "size": 4,
+      "equals_hex": "01000000"
+    },
+    {
+      "name": "effect-0xffc62020",
+      "kind": "memory",
+      "address": "0xffc62020",
+      "size": 4,
+      "equals_hex": "0f000000"
+    },
+    {
+      "name": "effect-0xffc62030",
+      "kind": "memory",
+      "address": "0xffc62030",
+      "size": 4,
+      "equals_hex": "06000000"
+    },
+    {
+      "name": "effect-0xffc62040",
+      "kind": "memory",
+      "address": "0xffc62040",
+      "size": 4,
+      "equals_hex": "00010000"
+    },
+    {
+      "name": "effect-0xffc62044",
+      "kind": "memory",
+      "address": "0xffc62044",
+      "size": 4,
+      "equals_hex": "04010000"
+    },
+    {
+      "name": "effect-0xffc62048",
+      "kind": "memory",
+      "address": "0xffc62048",
+      "size": 4,
+      "equals_hex": "08010000"
+    },
+    {
+      "name": "effect-0xffc6204c",
+      "kind": "memory",
+      "address": "0xffc6204c",
+      "size": 4,
+      "equals_hex": "0c010000"
+    },
+    {
+      "name": "effect-0xffc620c0",
+      "kind": "memory",
+      "address": "0xffc620c0",
+      "size": 4,
+      "equals_hex": "00020000"
+    },
+    {
+      "name": "effect-0xffc62004",
+      "kind": "memory",
+      "address": "0xffc62004",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "original-path-reaches-stop",
+      "kind": "register",
+      "register": "pc",
+      "equals": "0x7a4"
+    }
+  ]
+}

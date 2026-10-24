@@ -1,0 +1,12 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "codeflash-clear-readback",
+  "entry": {"role": "original-ecc-word-store-and-readback", "scope": "resolved-address", "address": "0x7e0"},
+  "max_instructions": 4,
+  "stop_addresses": ["0x7e4"],
+  "gpr_fill": "0",
+  "registers": {"ep": "0xffc62008", "r1": "1"},
+  "checks": [
+    {"name": "clear-register-reads-zero-after-nonzero-write", "kind": "register", "register": "r1", "equals": "0"}
+  ]
+}

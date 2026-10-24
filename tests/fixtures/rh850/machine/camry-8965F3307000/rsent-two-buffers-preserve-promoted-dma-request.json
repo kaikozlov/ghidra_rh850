@@ -1,0 +1,286 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "rsent-two-buffers-preserve-promoted-dma-request",
+  "entry": {
+    "role": "original-store-u32-enables-receive-dma-after-two-frames",
+    "scope": "resolved-address",
+    "address": "0x78af2"
+  },
+  "max_instructions": 2000,
+  "stop_addresses": [
+    "0x10000"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "lp": "0x10000",
+    "r6": "0xffff8520",
+    "r7": "1"
+  },
+  "memory": [
+    {
+      "address": "0xffe05000",
+      "hex": "4f000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffe05010",
+      "hex": "0b040000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffe05014",
+      "hex": "00040005",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffe05018",
+      "hex": "01000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffe0501c",
+      "hex": "05000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffe05024",
+      "hex": "05000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffffb1d0",
+      "hex": "8280",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffffb1d2",
+      "hex": "8200",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff8520",
+      "hex": "00000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff8500",
+      "hex": "3050e0ff",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff8504",
+      "hex": "f890effe",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff8508",
+      "hex": "0c000600",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff850c",
+      "hex": "0a2e0004",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff8510",
+      "hex": "3050e0ff",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff8514",
+      "hex": "f890effe",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff8518",
+      "hex": "0c000600",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff851c",
+      "hex": "00000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff8530",
+      "hex": "ef000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff84e0",
+      "hex": "01000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff84c0",
+      "hex": "50120300",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff84c4",
+      "hex": "2050e0ff",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff84c8",
+      "hex": "01000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff84cc",
+      "hex": "48260004",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff84d0",
+      "hex": "50120300",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff84d4",
+      "hex": "2050e0ff",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff84d8",
+      "hex": "01000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff84dc",
+      "hex": "00000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffff84f0",
+      "hex": "03000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffe50090",
+      "hex": "0000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffe50000",
+      "hex": "409c0000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffe50010",
+      "hex": "00000000",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffe50050",
+      "hex": "01",
+      "evidence": "Explicit testbench receiver/DMA configuration and one armed TAUJ edge; no received record or completion injected"
+    },
+    {
+      "address": "0xffddd200",
+      "hex": "1bfe2586",
+      "evidence": "Original startup PBG configuration permitting PEID4 RSENT DMA; preserve the native lock and CPU permissions"
+    },
+    {
+      "address": "0xffddd208",
+      "hex": "17fe2586",
+      "evidence": "Original startup PBG configuration permitting PEID4 RSENT DMA; preserve the native lock and CPU permissions"
+    }
+  ],
+  "checks": [
+    {
+      "name": "older-frame-remains-first",
+      "kind": "memory",
+      "address": "0xfeef910c",
+      "size": 4,
+      "equals_hex": "56341242"
+    },
+    {
+      "name": "promoted-frame-is-read-second",
+      "kind": "memory",
+      "address": "0xfeef9124",
+      "size": 4,
+      "equals_hex": "efcdab47"
+    },
+    {
+      "name": "both-frames-drained-without-overflow",
+      "kind": "memory",
+      "address": "0xffe05028",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "native-double-record-dma-reloads",
+      "kind": "memory",
+      "address": "0xffff8508",
+      "size": 4,
+      "equals_hex": "0c000600"
+    },
+    {
+      "name": "native-destination-reloads-after-two-records",
+      "kind": "memory",
+      "address": "0xffff8504",
+      "size": 4,
+      "equals_hex": "f890effe"
+    },
+    {
+      "name": "two-triggers-and-two-six-word-records",
+      "kind": "event-count",
+      "operation": "dma-transfer",
+      "equals": "14"
+    }
+  ],
+  "events": [
+    {
+      "kind": "rsent-frame",
+      "unit": 0,
+      "after_spc_triggers": 1,
+      "delay_hsb_cycles": 2000,
+      "pulse_samples": [
+        1344,
+        288,
+        312,
+        336,
+        360,
+        384,
+        408,
+        432,
+        336
+      ],
+      "evidence": "Explicit synthetic J2716/SPC intervals at 16MHz: status0,data123456,CRC2; no measured sensor or vehicle meaning"
+    },
+    {
+      "kind": "rsent-frame",
+      "unit": 0,
+      "after_spc_triggers": 2,
+      "delay_hsb_cycles": 2000,
+      "pulse_samples": [
+        1344,
+        288,
+        528,
+        552,
+        576,
+        600,
+        624,
+        648,
+        456
+      ],
+      "evidence": "Distinct synthetic second frame: status0,dataABCDEF,CRC7; no receive status injected"
+    },
+    {
+      "kind": "clock",
+      "after_instructions": 1,
+      "p_bus_cycles": 75000,
+      "evidence": "Explicit CLK_HSB stimulus, not inferred CPU timing"
+    },
+    {
+      "kind": "clock",
+      "after_instructions": 2,
+      "p_bus_cycles": 32,
+      "evidence": "Explicit CLK_HSB stimulus, not inferred CPU timing"
+    }
+  ]
+}

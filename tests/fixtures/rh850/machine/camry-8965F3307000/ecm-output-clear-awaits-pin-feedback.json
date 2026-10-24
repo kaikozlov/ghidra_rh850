@@ -1,0 +1,21 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "ecm-output-clear-awaits-pin-feedback",
+  "entry": {"role": "original-ECM-initialization-master-ECLR-protected-byte-sequence", "scope": "resolved-address", "address": "0x63584"},
+  "reset": "none",
+  "max_instructions": 16,
+  "stop_addresses": ["0x635A2"],
+  "gpr_fill": "0",
+  "memory": [
+    {"address": "0xFFD60010", "hex": "00000000", "evidence": "Explicit sampled ERROROUT low input with no source latches. This does not assert that an external fault holds the pin low; a drive/release-to-feedback board transition is outside this fixture."},
+    {"address": "0xFFD61010", "hex": "00000000", "evidence": "Explicit sampled ERROROUT_C low feedback, not inferred pin mux or loopback."},
+    {"address": "0xFFD6207C", "hex": "03000000", "evidence": "Synthetic preconfigured ECM compare pseudo-error masks, as required before the documented ECLR procedure."}
+  ],
+  "checks": [
+    {"name": "original-byte-status-read-confirms-valid-ECLR-protocol", "kind": "register", "register": "r1", "equals": "0"},
+    {"name": "ECLR-emits-one-output-request", "kind": "event-count", "operation": "ecm-output-request", "equals": "1"},
+    {"name": "valid-ECLR-protection-commits-once", "kind": "event-count", "operation": "ecm-protection-accepted", "equals": "1"},
+    {"name": "request-alone-does-not-fabricate-master-pin-feedback", "kind": "memory", "address": "0xFFD60010", "size": 4, "equals_hex": "00000000"},
+    {"name": "master-request-does-not-change-checker-feedback", "kind": "memory", "address": "0xFFD61010", "size": 4, "equals_hex": "00000000"}
+  ]
+}

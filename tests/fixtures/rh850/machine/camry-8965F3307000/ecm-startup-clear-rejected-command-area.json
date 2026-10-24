@@ -1,0 +1,21 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "ecm-startup-clear-rejected-command-area",
+  "entry": {"role": "original-startup-stores-with-master-command-for-common-protected-target", "scope": "resolved-address", "address": "0x3E2"},
+  "reset": "none",
+  "max_instructions": 16,
+  "stop_addresses": ["0x3FE"],
+  "gpr_fill": "0",
+  "registers": {"r10": "0xFFD60014", "r11": "0xA5"},
+  "memory": [
+    {"address": "0xFFD60010", "hex": "04000088", "evidence": "Synthetic master latches and explicit high ERROROUT feedback; common clear must not accept master command."},
+    {"address": "0xFFD61010", "hex": "20000008", "evidence": "Synthetic checker latches and explicit low ERROROUT_C feedback."}
+  ],
+  "checks": [
+    {"name": "wrong-command-area-reports-failure", "kind": "memory", "address": "0xFFD62044", "size": 1, "equals_hex": "01"},
+    {"name": "wrong-command-area-retains-master", "kind": "memory", "address": "0xFFD60010", "size": 4, "equals_hex": "04000088"},
+    {"name": "wrong-command-area-retains-checker", "kind": "memory", "address": "0xFFD61010", "size": 4, "equals_hex": "20000008"},
+    {"name": "common-writes-reject-mismatched-command", "kind": "event-count", "operation": "ecm-protection-rejected", "equals": "3"},
+    {"name": "wrong-command-never-commits", "kind": "event-count", "operation": "ecm-protection-accepted", "equals": "0"}
+  ]
+}

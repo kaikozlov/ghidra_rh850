@@ -1,0 +1,114 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "dma-self-view-read-error-with-ESE",
+  "entry": {
+    "role": "original-dma-self-view-read-error-with-ESE",
+    "scope": "resolved-address",
+    "address": "0x607f8"
+  },
+  "max_instructions": 16,
+  "stop_addresses": [],
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "lp": "0x619be"
+  },
+  "memory": [
+    {
+      "address": "0xffff8000",
+      "hex": "01000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff8400",
+      "hex": "0010defe",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff8404",
+      "hex": "0081effe",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff8408",
+      "hex": "02000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff840c",
+      "hex": "09000008",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff8420",
+      "hex": "01000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffff8424",
+      "hex": "01000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xfeef8100",
+      "hex": "efbeadde",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffd60010",
+      "hex": "00000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    },
+    {
+      "address": "0xffd61010",
+      "hex": "00000000",
+      "evidence": "Explicit isolated DMA helper precondition; not an observed vehicle state."
+    }
+  ],
+  "checks": [
+    {
+      "name": "read-error-skips-destination",
+      "kind": "memory",
+      "address": "0xfeef8100",
+      "size": 4,
+      "equals_hex": "efbeadde"
+    },
+    {
+      "name": "count-updates-even-on-read-error",
+      "kind": "memory",
+      "address": "0xffff8408",
+      "size": 4,
+      "equals_hex": "01000000"
+    },
+    {
+      "name": "ESE-blocks-second-cycle-and-retains-request",
+      "kind": "memory",
+      "address": "0xffff8424",
+      "size": 4,
+      "equals_hex": "81000000"
+    },
+    {
+      "name": "global-error-summary",
+      "kind": "memory",
+      "address": "0xffff8020",
+      "size": 4,
+      "equals_hex": "01000000"
+    },
+    {
+      "name": "ECM-source80",
+      "kind": "memory",
+      "address": "0xffd60010",
+      "size": 4,
+      "equals_hex": "00000100"
+    },
+    {
+      "name": "only-failed-cycle-retires",
+      "kind": "event-count",
+      "operation": "dma-transfer",
+      "equals": "1"
+    }
+  ],
+  "expected_termination": "instruction-budget",
+  "hsb_cycles_per_instruction": 1
+}

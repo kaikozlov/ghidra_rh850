@@ -1,0 +1,146 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "rsent-native-spc-pulse-frame",
+  "entry": {
+    "role": "original-rsent-native-spc-pulse-frame",
+    "scope": "resolved-address",
+    "address": "0x78af2"
+  },
+  "max_instructions": 512,
+  "stop_addresses": [
+    "0x10000"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "lp": "0x10000",
+    "r6": "0xFFE05020",
+    "r7": "0xF"
+  },
+  "memory": [
+    {
+      "address": "0xffe05000",
+      "hex": "4f000000",
+      "evidence": "Explicit active receiver configuration and masked IRQ inputs; no receive data, request, timestamp, or completion seeded"
+    },
+    {
+      "address": "0xffe05010",
+      "hex": "0b040000",
+      "evidence": "Explicit active receiver configuration and masked IRQ inputs; no receive data, request, timestamp, or completion seeded"
+    },
+    {
+      "address": "0xffe05014",
+      "hex": "00040005",
+      "evidence": "Explicit active receiver configuration and masked IRQ inputs; no receive data, request, timestamp, or completion seeded"
+    },
+    {
+      "address": "0xffe05018",
+      "hex": "01000000",
+      "evidence": "Explicit active receiver configuration and masked IRQ inputs; no receive data, request, timestamp, or completion seeded"
+    },
+    {
+      "address": "0xffe0501c",
+      "hex": "05000000",
+      "evidence": "Explicit active receiver configuration and masked IRQ inputs; no receive data, request, timestamp, or completion seeded"
+    },
+    {
+      "address": "0xffe05024",
+      "hex": "05000000",
+      "evidence": "Explicit active receiver configuration and masked IRQ inputs; no receive data, request, timestamp, or completion seeded"
+    },
+    {
+      "address": "0xffffb1d0",
+      "hex": "8280",
+      "evidence": "Explicit active receiver configuration and masked IRQ inputs; no receive data, request, timestamp, or completion seeded"
+    },
+    {
+      "address": "0xffffb1d2",
+      "hex": "8200",
+      "evidence": "Explicit active receiver configuration and masked IRQ inputs; no receive data, request, timestamp, or completion seeded"
+    }
+  ],
+  "checks": [
+    {
+      "name": "native-data-and-new-data-flag",
+      "kind": "memory",
+      "address": "0xffe05044",
+      "size": 4,
+      "equals_hex": "56341242"
+    },
+    {
+      "name": "native-status-nibble",
+      "kind": "memory",
+      "address": "0xffe05034",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "measured-calibration-interval",
+      "kind": "memory",
+      "address": "0xffe05038",
+      "size": 4,
+      "equals_hex": "40050000"
+    },
+    {
+      "name": "measured-message-intervals",
+      "kind": "memory",
+      "address": "0xffe0503c",
+      "size": 4,
+      "equals_hex": "68100000"
+    },
+    {
+      "name": "timestamp-at-calibration-detection",
+      "kind": "memory",
+      "address": "0xffe05040",
+      "size": 4,
+      "equals_hex": "6d000000"
+    },
+    {
+      "name": "receive-request-pending",
+      "kind": "memory",
+      "address": "0xffe05028",
+      "size": 4,
+      "equals_hex": "01000000"
+    },
+    {
+      "name": "masked-receive-irq-still-latches",
+      "kind": "memory",
+      "address": "0xffffb1d2",
+      "size": 2,
+      "equals_hex": "8210"
+    },
+    {
+      "name": "one-frame-committed",
+      "kind": "event-count",
+      "operation": "rsent-frame-complete",
+      "equals": "1"
+    }
+  ],
+  "events": [
+    {
+      "kind": "rsent-frame",
+      "unit": 0,
+      "after_spc_triggers": 1,
+      "delay_hsb_cycles": 2000,
+      "pulse_samples": [
+        1344,
+        288,
+        312,
+        336,
+        360,
+        384,
+        408,
+        432,
+        336
+      ],
+      "evidence": "Explicit synthetic J2716/SPC intervals at 16MHz: status0,data123456,CRC2; no measured sensor or vehicle meaning"
+    },
+    {
+      "kind": "clock",
+      "after_instructions": 2,
+      "p_bus_cycles": 23000,
+      "evidence": "Explicit CLK_HSB stimulus, not inferred CPU timing"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "strict-counted-loop",
+  "entry": {"role": "spin_wait", "scope": "resolved-address", "address": "0x71c68"},
+  "max_instructions": 8,
+  "stop_addresses": ["0x71c74", "0x10000"],
+  "gpr_fill": "0",
+  "registers": {"r6": "2", "lp": "0x10000"},
+  "checks": [
+    {"name": "original-loop-body-is-entered", "kind": "register", "register": "pc", "equals": "0x71c74"},
+    {"name": "outer-counter-is-not-shortcut-to-zero", "kind": "register", "register": "r12", "equals": "2"},
+    {"name": "inner-counter-is-initialized-by-original-instruction", "kind": "register", "register": "r13", "equals": "0x9b"}
+  ]
+}

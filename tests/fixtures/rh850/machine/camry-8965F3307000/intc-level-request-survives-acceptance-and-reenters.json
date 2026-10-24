@@ -1,0 +1,25 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "intc-level-request-survives-acceptance-and-reenters",
+  "entry": {"role": "original-instruction-interrupted-by-asserted-level-source", "scope": "resolved-address", "address": "0x62e4c"},
+  "max_instructions": 3,
+  "stop_addresses": ["0x62e4e"],
+  "gpr_fill": "0",
+  "registers": {"PSW": "0", "RBASE": "0", "INTBP": "0xfebf0000", "ep": "0xfffeea12", "r7": "0xcf"},
+  "memory": [
+    {"address": "0xffffb0d4", "hex": "4480", "evidence": "Explicit EIC106 priority4, table vector, unmasked."},
+    {"address": "0xfebf01a8", "hex": "72130700", "evidence": "Explicit vector to the unchanged original EIRET instruction at71372."}
+  ],
+  "events": [
+    {"kind": "interrupt", "channel": 106, "after_instructions": 0, "evidence": "Explicit SCI30 level assertion held through two acceptances."},
+    {"kind": "register-input", "register": "EIC106", "value": "0x8044", "after_instructions": 2, "evidence": "Explicit deasserted source input after two EIRETs, retaining every configuration bit; not a CPU write or physical bus-master transaction."}
+  ],
+  "checks": [
+    {"name": "only-external-deassertion-clears-level-eirf", "kind": "memory", "address": "0xffffb0d4", "size": 2, "equals_hex": "4480"},
+    {"name": "foreground-resumes-after-source-deassertion", "kind": "register", "register": "pc", "equals": "0x62e4e"},
+    {"name": "source-remains-selected", "kind": "register", "register": "EIIC", "equals": "0x106a"},
+    {"name": "real-eiret-allows-source-to-reenter", "kind": "event-count", "operation": "interrupt-enter", "equals": "2"},
+    {"name": "both-handlers-really-return", "kind": "event-count", "operation": "interrupt-return", "equals": "2"},
+    {"name": "priority-state-restored", "kind": "register", "register": "ISPR", "equals": "0"}
+  ]
+}

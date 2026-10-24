@@ -1,0 +1,131 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "bist-CVM-forces-execution-preserves-failure-and-ECM",
+  "entry": {
+    "role": "original-word-load-with-explicit-failed-BIST-reset-state-not-full-boot",
+    "scope": "resolved-address",
+    "address": "0x6594a"
+  },
+  "reset": "system-1-cvm",
+  "max_instructions": 2,
+  "stop_addresses": [
+    "0x6594e"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "r10": "0xffcd89bc"
+  },
+  "checks": [
+    {
+      "name": "original-ldw-observes-explicit-BIST-failure-after-CVM-reset",
+      "kind": "register",
+      "register": "r10",
+      "equals": "1"
+    },
+    {
+      "name": "CVM-forces-enable",
+      "kind": "memory",
+      "address": "0xfff80200",
+      "size": 4,
+      "equals_hex": "01000000"
+    },
+    {
+      "name": "CVM-retains-master-errors-and-pin-and-latches-field-BIST",
+      "kind": "memory",
+      "address": "0xffd60010",
+      "size": 4,
+      "equals_hex": "40000088"
+    },
+    {
+      "name": "CVM-retains-checker-errors-and-latches-field-BIST",
+      "kind": "memory",
+      "address": "0xffd61010",
+      "size": 4,
+      "equals_hex": "20000008"
+    }
+  ],
+  "pre_reset_memory": [
+    {
+      "address": "0xfff80200",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    },
+    {
+      "address": "0xffcda030",
+      "hex": "01000000",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    },
+    {
+      "address": "0xffcda038",
+      "hex": "07000000",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    },
+    {
+      "address": "0xffd60010",
+      "hex": "40000080",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    },
+    {
+      "address": "0xffd61010",
+      "hex": "20000000",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    }
+  ],
+  "memory": [
+    {
+      "address": "0xffcda000",
+      "hex": "45230100",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    },
+    {
+      "address": "0xffcda004",
+      "hex": "9a780600",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    },
+    {
+      "address": "0xffcda008",
+      "hex": "efcd0b00",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    },
+    {
+      "address": "0xffcda010",
+      "hex": "44230100",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    },
+    {
+      "address": "0xffcda014",
+      "hex": "9a780600",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    },
+    {
+      "address": "0xffcda018",
+      "hex": "efcd0b00",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    },
+    {
+      "address": "0xffcda020",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    },
+    {
+      "address": "0xffcda024",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    },
+    {
+      "address": "0xffcda030",
+      "hex": "00000000",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    },
+    {
+      "address": "0xffcda034",
+      "hex": "03000000",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    },
+    {
+      "address": "0xffcda038",
+      "hex": "01000000",
+      "evidence": "Explicit synthetic BIST transition fixture, not manufacturer signatures or a hardware capture; R01UH0585EJ0120 pages2767-2784,2808 Table8.2"
+    }
+  ]
+}

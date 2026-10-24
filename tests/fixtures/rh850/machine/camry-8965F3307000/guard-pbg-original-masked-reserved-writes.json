@@ -1,0 +1,55 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "guard-pbg-original-masked-reserved-writes",
+  "entry": {
+    "role": "original-instruction-guard-register-and-permission-regression",
+    "scope": "resolved-address",
+    "address": "0x654aa"
+  },
+  "max_instructions": 512,
+  "stop_addresses": ["0x10000"],
+  "gpr_fill": "0",
+  "registers": {
+    "lp": "0x10000"
+  },
+  "memory": [{"address": "0xfffee982", "hex": "0000", "evidence": "Explicit undefined SEGFLAG reserved-bit5 bus response; functional flags initially clear"}],
+  "checks": [
+    {"name": "unimplemented-writes-record-real-bus-errors", "kind": "memory", "address": "0xfffee982", "size": 2, "equals_hex": "0002"},
+    {"name": "documented-tail-guard-setup-still-executes", "kind": "memory", "address": "0xffc40128", "size": 4, "equals_hex": "17fe0586"},
+    {
+      "name": "tsg-read-guard-configured",
+      "kind": "memory",
+      "address": "0xffddd110",
+      "size": 4,
+      "equals_hex": "1bfe2586"
+    },
+    {
+      "name": "tsg-write-spid-restricted",
+      "kind": "memory",
+      "address": "0xffddd11c",
+      "size": 4,
+      "equals_hex": "24000000"
+    },
+    {
+      "name": "pfss-write-guard-lock",
+      "kind": "memory",
+      "address": "0xffc4c048",
+      "size": 4,
+      "equals_hex": "17fe4d86"
+    },
+    {
+      "name": "dataflash-read-guard-lock",
+      "kind": "memory",
+      "address": "0xffc5a020",
+      "size": 4,
+      "equals_hex": "1bfe2586"
+    },
+    {
+      "name": "last-documented-write-before-reserved-slot",
+      "kind": "memory",
+      "address": "0xffc5a038",
+      "size": 4,
+      "equals_hex": "17fe0586"
+    }
+  ]
+}

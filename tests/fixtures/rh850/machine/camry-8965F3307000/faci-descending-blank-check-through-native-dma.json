@@ -1,0 +1,139 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "faci-descending-blank-check-through-native-dma",
+  "entry": {
+    "role": "original-faci-descending-blank-check-through-native-dma",
+    "scope": "resolved-address",
+    "address": "0x78ae6"
+  },
+  "max_instructions": 512,
+  "stop_addresses": [
+    "0x10000"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "lp": "0x10000",
+    "r6": "0xfeef8604",
+    "r7": "0xaa"
+  },
+  "memory": [
+    {
+      "address": "0xffa10084",
+      "hex": "8000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xfff8a430",
+      "hex": "01000000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xfff82410",
+      "hex": "01000000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffa100d0",
+      "hex": "01",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffa10030",
+      "hex": "1c500000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffa10034",
+      "hex": "00500000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xfeef8680",
+      "hex": "71d0",
+      "evidence": "Native FACI command bytes supplied to the DMA bus master, not status registers"
+    },
+    {
+      "address": "0xffff8400",
+      "hex": "8086effe",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffff8404",
+      "hex": "0000a2ff",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffff8408",
+      "hex": "02000000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffff840c",
+      "hex": "01010000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffff8420",
+      "hex": "01000000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    },
+    {
+      "address": "0xffff8424",
+      "hex": "01000000",
+      "evidence": "Explicit stopped timer configuration for nominal clock-boundary execution"
+    }
+  ],
+  "checks": [
+    {
+      "name": "descending-command-completes",
+      "kind": "memory",
+      "address": "0xffa10080",
+      "size": 4,
+      "equals_hex": "00800000"
+    },
+    {
+      "name": "programmed-word-found",
+      "kind": "memory",
+      "address": "0xffa100d4",
+      "size": 1,
+      "equals_hex": "01"
+    },
+    {
+      "name": "first-programmed-in-descending-order",
+      "kind": "memory",
+      "address": "0xffa100d8",
+      "size": 4,
+      "equals_hex": "18500000"
+    },
+    {
+      "name": "both-command-bytes-written-by-native-dma",
+      "kind": "event-count",
+      "operation": "dma-transfer",
+      "equals": "2"
+    }
+  ],
+  "dataflash_cells": [
+    {
+      "address": "0xff20501c",
+      "size": 4,
+      "state": "erased",
+      "evidence": "Explicit first visited cell in a descending check"
+    },
+    {
+      "address": "0xff205018",
+      "size": 4,
+      "state": "programmed",
+      "evidence": "Explicit next cell; unvisited lower addresses deliberately remain unknown"
+    }
+  ],
+  "events": [
+    {
+      "kind": "clock",
+      "after_instructions": 0,
+      "p_bus_cycles": 8100,
+      "evidence": "Explicit CLK_HSB stimulus, not inferred CPU timing"
+    }
+  ]
+}

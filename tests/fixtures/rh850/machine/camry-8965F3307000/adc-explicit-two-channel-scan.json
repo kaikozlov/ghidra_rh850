@@ -1,0 +1,120 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "adc-explicit-two-channel-scan",
+  "entry": {
+    "role": "p1me-byte-store-primitive",
+    "scope": "function",
+    "shape_sha256": "8e49a0bf8bf3a1a29e104d2a16a92e063499f8ea357df01e11a0bca0db68aa41",
+    "instruction_count": 14,
+    "body_size": 36,
+    "offset": -18,
+    "requirements": []
+  },
+  "max_instructions": 512,
+  "stop_addresses": [
+    "0x10000"
+  ],
+  "gpr_fill": "0",
+  "registers": {
+    "sp": "0xfebe2000",
+    "gp": "0xfebeb800",
+    "lp": "0x10000",
+    "r6": "0xfff91480",
+    "r7": "1"
+  },
+  "memory": [
+    {
+      "address": "0xfff91000",
+      "hex": "00000000",
+      "evidence": "Explicit two-channel, right-justified, software-triggered ADC scan configuration; IRQ masked"
+    },
+    {
+      "address": "0xfff91004",
+      "hex": "01000000",
+      "evidence": "Explicit two-channel, right-justified, software-triggered ADC scan configuration; IRQ masked"
+    },
+    {
+      "address": "0xfff91398",
+      "hex": "10",
+      "evidence": "Explicit two-channel, right-justified, software-triggered ADC scan configuration; IRQ masked"
+    },
+    {
+      "address": "0xfff91490",
+      "hex": "10",
+      "evidence": "Explicit two-channel, right-justified, software-triggered ADC scan configuration; IRQ masked"
+    },
+    {
+      "address": "0xfff91498",
+      "hex": "01",
+      "evidence": "Explicit two-channel, right-justified, software-triggered ADC scan configuration; IRQ masked"
+    },
+    {
+      "address": "0xffffb09a",
+      "hex": "8200",
+      "evidence": "Explicit two-channel, right-justified, software-triggered ADC scan configuration; IRQ masked"
+    }
+  ],
+  "checks": [
+    {
+      "name": "packed-independent-conversions",
+      "kind": "memory",
+      "address": "0xfff91100",
+      "size": 4,
+      "equals_hex": "23015604"
+    },
+    {
+      "name": "channel0-write-flag-and-even-parity",
+      "kind": "memory",
+      "address": "0xfff91200",
+      "size": 4,
+      "equals_hex": "23010002"
+    },
+    {
+      "name": "channel1-identity-write-flag-and-even-parity",
+      "kind": "memory",
+      "address": "0xfff91204",
+      "size": 4,
+      "equals_hex": "56040102"
+    },
+    {
+      "name": "masked-scan-completion-irq",
+      "kind": "memory",
+      "address": "0xffffb09a",
+      "size": 2,
+      "equals_hex": "8210"
+    },
+    {
+      "name": "finite-scan-completes",
+      "kind": "memory",
+      "address": "0xfff914a4",
+      "size": 1,
+      "equals_hex": "00"
+    }
+  ],
+  "events": [
+    {
+      "kind": "adc-sample",
+      "unit": 0,
+      "channel": 0,
+      "value": "0x123",
+      "boundary": "normal",
+      "after_instructions": 0,
+      "evidence": "Explicit synthetic 12-bit ADC pin input, not a measured voltage"
+    },
+    {
+      "kind": "adc-sample",
+      "unit": 0,
+      "channel": 1,
+      "value": "0x456",
+      "boundary": "normal",
+      "after_instructions": 0,
+      "evidence": "Independent explicit synthetic second ADC pin input"
+    },
+    {
+      "kind": "clock",
+      "after_instructions": 2,
+      "p_bus_cycles": 200,
+      "evidence": "Explicit CLK_HSB stimulus, not inferred CPU timing"
+    }
+  ]
+}

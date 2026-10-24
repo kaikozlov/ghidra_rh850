@@ -1,0 +1,23 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "ecm-master-forced-low-original-branch",
+  "entry": {"role": "original-master-ECLR-and-low-feedback-wait-exhaustion", "scope": "resolved-address", "address": "0x63584"},
+  "reset": "none",
+  "max_instructions": 256,
+  "stop_addresses": ["0x635C0"],
+  "gpr_fill": "0",
+  "memory": [
+    {"address": "0xFFD60010", "hex": "00000000", "evidence": "Explicit initial master low sample; no active error latches."},
+    {"address": "0xFFD61010", "hex": "00000000", "evidence": "Explicit checker sample."},
+    {"address": "0xFFD6207C", "hex": "03000000", "evidence": "Documented compare masks before isolated ECLR."}
+  ],
+  "events": [
+    {"kind": "ecm-pin-drive", "after_instructions": 0, "pin": "ERROROUT", "drive": "low", "evidence": "Declared external low driver remains active through valid protected ECLR."}
+  ],
+  "checks": [
+    {"name": "original-low-wait-exhausted", "kind": "register", "register": "r1", "equals": "31"},
+    {"name": "original-low-test-remains-zero", "kind": "register", "register": "r19", "equals": "0"},
+    {"name": "valid-clear-never-overrides-external-low", "kind": "memory", "address": "0xFFD60010", "size": 4, "equals_hex": "00000000"},
+    {"name": "clear-was-actually-accepted-not-a-protocol-failure", "kind": "event-count", "operation": "ecm-protection-accepted", "equals": "1"}
+  ]
+}

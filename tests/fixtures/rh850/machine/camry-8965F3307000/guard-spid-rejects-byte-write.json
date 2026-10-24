@@ -1,0 +1,29 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "guard-spid-rejects-byte-write",
+  "entry": {
+    "role": "original-instruction-guard-register-and-permission-regression",
+    "scope": "resolved-address",
+    "address": "0xd26"
+  },
+  "max_instructions": 1,
+  "stop_addresses": [],
+  "gpr_fill": "0",
+  "registers": {
+    "ep": "0xffc49004"
+  },
+  "checks": [
+    {
+      "name": "bitmap-remains-word-only",
+      "kind": "memory",
+      "address": "0xffc49004",
+      "size": 4,
+      "equals_hex": "ffffffff"
+    }
+  ],
+  "expected_fault": {
+    "kind": "mmio-width",
+    "address": "0xffc49004",
+    "access": "write"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "dataflash-clear-store-load-explicit-response",
+  "entry": {"role": "original-store-load-preserves-explicit-bus-response", "scope": "resolved-address", "address": "0x7e0"},
+  "reset": "none",
+  "max_instructions": 4,
+  "stop_addresses": ["0x7e4"],
+  "gpr_fill": "0",
+  "registers": {"ep": "0xffc5b008", "r1": "1"},
+  "memory": [
+    {"address": "0xffc5b004", "hex": "03000000", "evidence": "Synthetic error flags before the original clear store."},
+    {"address": "0xffc5b00c", "hex": "01000000", "evidence": "Synthetic independent overflow flag; error clear must preserve it."}
+  ],
+  "events": [{"kind": "register-input", "after_instructions": 0, "register": "DFERSTC", "value": "0xa5c39e72", "evidence": "Explicit contrasting bus response, not a hardware value or command injection; CPU store of 1 must not replace it."}],
+  "checks": [
+    {"name": "real-cpu-load-receives-response-not-command-write", "kind": "register", "register": "r1", "equals": "0xa5c39e72"},
+    {"name": "original-store-load-reaches-stop", "kind": "register", "register": "pc", "equals": "0x7e4"},
+    {"name": "real-clear-effect", "kind": "memory", "address": "0xffc5b004", "size": 4, "equals_hex": "00000000"},
+    {"name": "unrelated-overflow-preserved", "kind": "memory", "address": "0xffc5b00c", "size": 4, "equals_hex": "01000000"},
+    {"name": "bus-response-is-not-command-storage", "kind": "memory", "address": "0xffc5b008", "size": 4, "equals_hex": "00000000"}
+  ]
+}
