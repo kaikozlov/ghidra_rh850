@@ -124,12 +124,8 @@ inactive, cruise-main remains on and request communication remains healthy.
 
 ## 5. Integration implication
 
-The capture distinguishes HUD presentation from the FRC's functional request
-withdrawal: changing `0x412` alone does not establish that the deeper hands-off
-state has reset. The native FRC withdraws the joint `0x08A` request, and
-Brake/chassis result state follows it.
+The native FRC withdraws the joint `0x08A` request after the visible HUD warning
+clears, and Brake/chassis result state follows it.
 
 The maintained port's request ownership is specified in the
 [runtime contract](../architecture/toyota-tss3-minimal-runtime.md).
-This capture does not describe the current controller or establish its
-behavior when openpilot owns both control axes.

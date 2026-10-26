@@ -52,8 +52,7 @@ the [capability matrix](../variants/camry-2026-capability-matrix.md).
 ## Target-specific evidence
 
 The following retained audit records the firmware and machine-model basis for
-cross-target runtime compatibility. Its target identities and modeled/hardware
-boundaries do not establish whole-vehicle support on another car.
+cross-target runtime compatibility.
 
 ## Cross-variant resident control ingress
 
@@ -111,15 +110,16 @@ the hash in its onboarding report. Panda logical-bus routing remains external
 registry metadata because it is not encoded by these CodeFlash structures.
 
 The audited binary contains three runtime configs for four targets;
-Corolla H/F resolve to the same application software ID and ABI. The registry's
-bus metadata below is separate from the maintained host topology above:
+Corolla H/F resolve to the same application software ID and ABI.
+Bus routing belongs to the maintained topology above and
+`data/analysis_targets.json`.
 
-| exact target | Registry bus metadata | RX ring / producer | resident state | response lower handle | signer scratch | command-5 globals |
-|---|---:|---|---|---:|---|---|
-| Camry `8965F3307000` | 0 | `FEBE4038` / `FEBE48F8` | `FEBF025C` | 53 | `FEBF0280` | `FEBF13A0` |
-| Crown `8965F3012000` | 1 | `FEBE3E98` / `FEBE475A` | `FEBF025C` | 50 | `FEBF0280` | `FEBF13A0` |
-| Corolla `8965H1202000` | 1 | `FEBE3F4C` / `FEBE480C` | `FEBFF9F0` | 50 | `FEF07F98` | `FEBF1264` |
-| Corolla `8965F1208000` | 1 | `FEBE3F4C` / `FEBE480C` | `FEBFF9F0` | 50 | `FEF07F98` | `FEBF1264` |
+| exact target | RX ring / producer | resident state | response lower handle | signer scratch | command-5 globals |
+|---|---|---|---:|---|---|
+| Camry `8965F3307000` | `FEBE4038` / `FEBE48F8` | `FEBF025C` | 53 | `FEBF0280` | `FEBF13A0` |
+| Crown `8965F3012000` | `FEBE3E98` / `FEBE475A` | `FEBF025C` | 50 | `FEBF0280` | `FEBF13A0` |
+| Corolla `8965H1202000` | `FEBE3F4C` / `FEBE480C` | `FEBFF9F0` | 50 | `FEF07F98` | `FEBF1264` |
+| Corolla `8965F1208000` | `FEBE3F4C` / `FEBE480C` | `FEBFF9F0` | 50 | `FEF07F98` | `FEBF1264` |
 
 The response handle is derived from the exact generated CanIf diagnostic class.
 In all four images, class 2 contains primary/functional `0x7A9` on local HTH0 and secondary `0x7A8`
@@ -188,10 +188,8 @@ request (P1M-E manual sections 17.3.10.1–2). A focused resource-7-busy scenari
 exercises that exact rejection. The machine's successful resource-7 case starts
 idle and therefore cannot establish the field value of `TMSTS7`.
 
-The stock primary association is handle 50/resource 6. Successful modeled
-transmission through resource 7 does not establish that mailbox's state in a
-field run. The retained no-response logs contain neither resident counters nor
-mailbox status and cannot distinguish those causes.
+The stock primary association is handle 50/resource 6. The retained no-response
+logs contain neither resident counters nor mailbox status.
 
 The complete-helper status-0 scenario schedules recovered ICU-S
 done/status/length and supplied output bytes only after exact command-five
@@ -232,8 +230,7 @@ benefit from resident-state readback when a field probe fails.
 
 The builder and lifecycle checks cover publication/coherency, guarded bounds,
 zero relocations, compare-immediate encoding, exact startup-copy survival and
-unchanged stock foreground execution. These are implementation invariants,
-not proof of silicon behavior.
+unchanged stock foreground execution.
 
 The shared `0x08A` freshness policy is no longer a Camry-only assumption.
 Re-reading the retained 2025 Span and 2023 public Corolla road logs against the

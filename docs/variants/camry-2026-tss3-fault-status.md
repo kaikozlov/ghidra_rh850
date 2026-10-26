@@ -1,10 +1,9 @@
 # 2026 Camry TSS3 exact-F33 fault/status contract
 
-This report closes the **static, target-native** meaning of the 2026 Camry
-`8965F3307000` EPS `0x394` status carrier far enough to expose its OEM internal
-classifier state safely in a passive openpilot port. It does **not** define
-openpilot `steerFaultTemporary` / `steerFaultPermanent`, and it does not enable
-CAN output.
+This report owns the exact `8965F3307000` EPS fault classifier, `0x394`
+projection and DTC-table analysis. The
+[vehicle-state review](camry-2026-port-evidence-review.md#fault-projections)
+owns the CarState fault mapping.
 
 Canonical machine-readable evidence:
 
@@ -88,13 +87,9 @@ That is useful telemetry, but it is not independently the same thing as DID
 must remain candidate sets; inventing a single state would discard information
 that the wire format genuinely does not carry.
 
-The passive opendbc implementation therefore exposes an internal state candidate
-set and a unique state only when the tuple is unambiguous. Public
-`steerFaultTemporary` and `steerFaultPermanent` remain unchanged/false. This is
-implemented in nested opendbc commit
-`0d5773bd393bbf3d4109728171d2390b60fcde16` and parent `kai-openpilot` commit
-`191aeb43df3fb72f3264209be1aad57b9ca42e2d`. The complete nested gate passes
-**4,077 tests / 719 skipped**, plus Ruff, ty, codespell, cpplint, and MISRA.
+Decode ambiguous tuples as candidate sets. The
+[CarState fault mapping](camry-2026-port-evidence-review.md#fault-projections)
+uses a separate current fault/inhibit projection.
 
 ## 3. F33 DEM class accumulator
 
@@ -155,6 +150,26 @@ identical packed-DTC bytes already pinned in the Techstream corpus. The only H/F
 record difference in the referenced union is the disabled index 120 described
 above, and F33 no longer references it.
 
+### Family diagnostic vocabulary
+
+The GTS+ family dictionaries contain the following communication labels.
+Query them with `tools/gts dtc DATABASE CODE`; exact-F33 support is determined
+by the event/table join above.
+
+| Database | Code | Reported peer |
+|---|---|---|
+| `EMPS_P5` | `U012987`, `U012687`, `U023A87` | Brake, steering-angle sensor, image-processing module A |
+| `EMPS_P5` | `U110487`, `U118487` | Driving Support ECU, Advanced Drive controller |
+| `FRC_P5` | `U013187`, `U012987`, `U012687`, `U023587` | EPS, Brake, steering-angle sensor, front radar |
+| `ABS_P5`, `Brk_Bst_P5` | `U013187`, `U11B187` | EPS and EPS channel 2 |
+
+`U013187` belongs to `EMPS2_P5`, not `EMPS_P5`. The latter contains
+`U013087` (Steering Effort Control Module) and `U118F87` (Steering Actuator
+Control Module). Both steering dictionaries expose `0x1CEF` **Target
+Lateral ID (System 2)**; Camry install set `0x1FB8` contains no category
+499 EMPS2. Brake/booster DID `0x102F` bit 74 is **EPS/Steering Control
+Actuator ECU Communication Open**, with 0=Normal and 1=Under intermittent.
+
 ## 5. F33 latch/aging constants are not H constants
 
 The classifier calibration words at exact F33 **`0x30E40`** are:
@@ -195,21 +210,8 @@ diagnostic name is transplanted onto `GP-0x509C`.
 
 If observed, `0x351` code7/flag identifies a distinct forced/special status input.
 
-## 7. Openpilot consequence
+## 7. Openpilot mapping
 
-The static work now supports three conservative statements:
-
-1. `0x394` can expose exact F33 internal classifier state candidates, including a
-   unique state0 all-clear projection.
-2. `0x394` DEM class families, target-specific aging constants, and exact Toyota
-   DTC joins are known without Corolla transfer.
-3. None of that alone defines `steerFaultTemporary` or `steerFaultPermanent`.
-
-A relay-correct live capture that exercises asserted and recovery transitions is
-still the correct policy discriminator. Driver-override and motor-current
-response limits remain separate policy work; acquisition/representation clamps
-must not be repurposed as safety thresholds.
-
-**Production output remains disabled.** `SafetyModel.noOutput`, zero controller
-CAN output, the absent production `0x0B6` whitelist, and the shadow-only safety
-path are unchanged.
+The [vehicle-state review](camry-2026-port-evidence-review.md#fault-projections)
+owns the CarState fault mapping and its evidence.
+The [capability matrix](camry-2026-capability-matrix.md) owns port status.

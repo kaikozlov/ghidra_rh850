@@ -50,11 +50,11 @@ as the upstream TSS request/instruction plane; Brake owns `0x081` and continues
 publishing it with request-loss supervision if the FRC request disappears. The
 byte-level audit maps `0x08A B8:B9` to the ordinary-DRCC upper bound and
 `B11:B12` to the lower bound at signed16 x0.001, and maps `0x081 B6[5:0]` as
-the strongest `5284` employed-source-ID candidate. An early draft also read
-`B20:B21` as the `57DB` result-acceleration candidate; the
-[2026-09-30 VMC status corpus](#2026-09-30-vmc-status-corpus) corrects that:
-`B20` is a closed-accelerator reference; `B4:B5` and `B18:B19` are candidate
-combined and drive-side quantities, respectively. Neither is OEM-joined to `57DB`.
+the strongest `5284` employed-source-ID candidate. In the
+[2026-09-30 VMC status corpus](#2026-09-30-vmc-status-corpus),
+`B20:B21` is a closed-accelerator reference; `B4:B5` and `B18:B19` are candidate
+combined and drive-side quantities, respectively. Their exact OEM labels remain
+unresolved.
 The [braking-ceiling comparison](#repeated-braking-ceiling-and-request-policy-candidate)
 narrows the weak-braking behavior; the subsequent
 [stock scene comparison](#stock-following-versus-free-cruise-association) makes a
@@ -392,7 +392,10 @@ therefore normalized to Toyota network role before any candidate is compared:
 |---|---|---|---|
 | Stock Toyota-B before the temporary repin | Toyota Bus 1 camera/ADAS: source side bus2 -> downstream bus0 | Toyota Bus 4 Brake/EPS/chassis, unsplit | Same physical wiring as the restored configuration below; direct-Panda ELM327 mux state is a separate axis |
 | Temporary CAN0/CAN1 repin (Aug-27 through lateral development) | **Toyota Bus 4**: upstream `0x08A/0x0C9` on bus2 -> chassis bus0; `0x0CA` returns bus0 -> bus2 | **Toyota Bus 1** camera/radar/FRC P05 family | Healthy Sep-4 DRCC routes `3b/3c` are in this era |
-| Stock Toyota-B restored in the Sep-11 integration cleanup | **Toyota Bus 1** camera/ADAS: FRC `0x020/0x160/0x230/0x440` source bus2 -> downstream bus0 | **Toyota Bus 4** request/result/chassis family `0x08A/0x0C9/0x0CA`, unsplit | Current production-shaped topology |
+| Stock Toyota-B restored in the Sep-11 integration cleanup | **Toyota Bus 1** camera/ADAS: FRC `0x020/0x160/0x230/0x440` source bus2 -> downstream bus0 | **Toyota Bus 4** request/result/chassis family `0x08A/0x0C9/0x0CA`, unsplit | September restored-harness captures |
+
+The [runtime contract](../architecture/toyota-tss3-minimal-runtime.md) owns
+maintained topology. The table above identifies the capture configurations.
 
 `harnessStatus=flipped` describes harness/cable orientation. Physical CAN0/CAN1
 repinning is a separate configuration. Panda sources 128/130 identify returned
@@ -494,8 +497,6 @@ acceleration carrier**. The retained CommunicationControl experiment establishes
 
 The maintained port intercepts the request source on the repinned relay
 topology; see the [runtime contract](../architecture/toyota-tss3-minimal-runtime.md).
-Stock-harness captures remain wire-format evidence but do not define runtime
-bus placement.
 
 `0x08A` is the central observed continuous request PDU and already carries the full
 recovered lateral request family plus the strongest longitudinal acceleration

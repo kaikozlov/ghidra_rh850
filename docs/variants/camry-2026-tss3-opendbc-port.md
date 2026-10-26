@@ -22,9 +22,7 @@ steering adapter or a `0x160` acceleration encoder.
   fields. In openpilot-longitudinal mode the controller authors those fields.
 - Toyota safety checks the application independently and manages replacement
   of the FRC request, including native PCS handoff.
-- Cancel and HUD outputs are implemented in `update_tss3()`. The existence
-  of these paths and their safety permissions is not a causal interpretation
-  of an older, physically confounded cancel capture.
+- Cancel and HUD outputs are implemented in `update_tss3()`.
 
 The [runtime contract](../architecture/toyota-tss3-minimal-runtime.md) owns
 transport/topology responsibilities. The
@@ -36,14 +34,12 @@ Exact EPS transmit tables and field maps belong in the
 [EPS transmit report](camry-f33-eps-tx.md); the native request/arbitration/controller
 distinction belongs in the
 [vehicle-movement report](../architecture/toyota-tss3-vehicle-movement-arbitration.md).
-These are not additional prerequisites for acknowledging the implemented port.
 
 ## Brake/FRC feedback observations
 
 Retained September-17/18 comparisons distinguish request loss, feature handoff
 and lateral-failure state. `0x081 B13[5:0]` is the lateral result ID;
-`B13[7:6]` is a **candidate** two-bit lateral fail class, not an OEM-joined
-CAN field name.
+`B13[7:6]` is a **candidate** two-bit lateral fail class.
 
 - Across healthy routes `37/3b/3c/3d/3e/3f/45`, 871,888 logged `0x081`
   observations contain class `00` on 871,642 and class `10` on 246,
@@ -160,8 +156,8 @@ Compressed source SHA-256 identities:
 
 The route `carParams` records identify the Camry platform and Brake firmware.
 Separate same-car evidence establishes exact EPS identity. The original September reducer source was
-recovered under the disposable `build/tmp/` tree during WP1, which removed the
-previous grid-phase ambiguity. The tracked deterministic implementation
+recovered from local workspace and used to resolve the grid phase.
+The tracked deterministic implementation
 `tools/targets/camry/analysis/analyze_camry_20260904_stock_steering.py` now reproduces its exact
 absolute-monotonic 50 ms grid and stock/dual-active predicates from the original
 rlogs. The tracked report/manifest and independent verifier reproduce the census
@@ -175,7 +171,7 @@ health adapter additionally retains all **150,642** `pandaStates` samples and
 reproduces the corpus `safetyTxBlocked` delta of **+19**; it preserves
 `controlsAllowed`, RX-check/heartbeat/fault state, and per-bus REC/TEC,
 `busOffCnt`, CAN-core-reset count, and CAN-FD-enable state. In particular the
-route-3d bus-0 maxima reproduce §4.5's REC=127, TEC=0, bus-off count=56 and one
+route-3d bus-0 maxima are REC=127, TEC=0, bus-off count=56 and one
 CAN-core reset. These health observations remain ancillary to the steering
 sample time base and predicates. ID4 table times remain quoted
 to the original published millisecond precision; frame counts, raw request-ID
@@ -230,7 +226,7 @@ The same route measures the native HUD publication cadence. On route `3f`, 5,305
 changes have median **432.440 ms** and minimum **79.514 ms**. Route `3e`
 independently gives a **995.572-ms** median heartbeat and **82.526-ms** minimum.
 The source is a roughly **1-Hz periodic heartbeat with event-driven
-publications**. This is a native-traffic measurement, not the current host schedule.
+publications**.
 
 The Toyota `Hands-Off` vocabulary is **overloaded and must not be treated as one
 state machine**. The same PCS recorder dictionary separately exposes capability
@@ -547,6 +543,20 @@ Evidence and reproduction:
 - fork opendbc Toyota safety/controller tests in
   `opendbc/car/toyota/tests/test_toyota.py`
 
+### Meter dictionary
+
+GTS+ `Meter_P5` (category 409) provides a separate diagnostic view of
+installation and HUD state:
+
+| DID | OEM fields |
+|---|---|
+| `0x15A1` | LDA, PCS, ICS, Radar Cruise, Intuitive P/A and Road Sign Assist installation bits 8–13 |
+| `0x2951` | PCS OFF/warning, Radar Cruise, Cruise, SET, LDA steering-control, drift/lane and left/right LDA indicators or warnings |
+| `0x10A6` | **Steering ECU** installation at bit 9, Without/With |
+
+Source: `tools/gts did Meter_P5 DID --json`. Positions in this table refer
+to diagnostic records.
+
 ## PDA and SDG lateral profiles
 
 Toyota's customer-facing **Proactive Driving Assist (PDA)** name resolves an otherwise
@@ -772,9 +782,7 @@ The retained 18-message census uses native-source observations from routes
 | `0x610` | worst same-segment gap 1006.457 ms |
 | `0x412` | worst same-segment gap 1758.564 ms; roughly 1-Hz heartbeat with event-driven updates |
 
-These are capture measurements, not an inventory of every message checked by
-the current parser. Current parser selection belongs to
-`CarState.get_can_parsers_tss3()`.
+Current parser selection belongs to `CarState.get_can_parsers_tss3()`.
 
 Evidence: `tools/targets/camry/analysis/analyze_camry_2026_parser_liveness.py`,
 `data/generated/camry_2026_parser_liveness.json`, and
@@ -835,10 +843,7 @@ Evidence:
 
 The inspected port detects the native PCS request flag and returns `0x08A`
 ownership to the FRC in both CarController and Toyota safety. The source names
-the flag `PCS_BRAKE_REQUEST`; that implementation label does not supply an
-OEM-stage mapping. The following capture records an earlier implementation,
-not the present handoff behavior.
-
+the flag `PCS_BRAKE_REQUEST`.
 
 The user-reported PCS alert is localized to route `00000043--29caa20fbc`,
 segment 12, route offset **752.436552–752.922597 s**. Native FRC-side

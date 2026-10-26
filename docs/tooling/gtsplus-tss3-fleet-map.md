@@ -88,6 +88,26 @@ appear with no selected steering/brake cluster row at all.
   sets but have **no CAN Bus Check topology row** (NA 5, EU 6, JP 6 vehicle
   types without topology).
 
+### Camry HV powertrain and ADAS generations
+
+NA vehicle types 12704, 12862 and 12984 retain the generation-20 ADAS
+categories 405/435/466/498 while their powertrain generations differ:
+
+| Vehicle type | Powertrain install set | ADAS/chassis install set |
+|---|---|---|
+| 12704 | 8119 (`0x1FB7`), generation 20 | 8120 (`0x1FB8`) |
+| 12862 | 8593 (`0x2191`), generation 20 | 8594 (`0x2192`) |
+| 12984 | 8959 (`0x22FF`), generation 22 | 8960 (`0x2300`) |
+
+The generation-22 powertrain set contains 6000 `Engine_CM_P6`,
+6026 `HE_PCM_A_P6`, 6027 `DMCM_A_P6` and 6031 `BECM_P6`.
+Vehicle 12704 also lists empty install set 27706 (`0x6C3A`).
+
+Source: NA vehicle/install-set/category records in
+`data/generated/gtsplus_2026/toyota_diag_bundle_current.zip`;
+the 498-carrying rows are also in
+`data/generated/gtsplus_2026/tss3_crossvehicle_fleet_install_sets.csv`.
+
 ### Category families
 
 | Family | Categories | 498 co-occurrence |

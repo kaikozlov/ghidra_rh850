@@ -171,6 +171,18 @@ example current `EMPS_P5` DID `0x1037 Steering Angle` reports `15/1`, offset 0,
 one decimal, signed 16-bit, `deg`; `0x106A Cooperation Control State` reports
 its exact `0=Cooperation Control`, `1=Other than Cooperation Control` dictionary.
 
+#### Database-name matching
+
+Check the returned database name when using `search --ecu`: the filter can
+match a longer name. For example, `--ecu CentralGW_P5` also matches the
+distinct `CentralGW_P5FHI.ddb` Subaru dictionary. Its lost-communication
+codes are not Toyota `CentralGW_P5.ddb` records.
+
+The Toyota dictionary has one DTC, `B102004`, and a Data List covering
+power, odometer, type information, Ethernet-1, DTC count and clock.
+It contains no steering/lateral/CAN-ID monitor. Inspect the selected database
+with `tools/gts ecu CentralGW_P5` and check each query's source identity.
+
 ### CAN Bus Check topology
 
 `canbus` exposes Toyota's current master CAN Bus Check model directly. It resolves a

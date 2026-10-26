@@ -375,6 +375,29 @@ longitudinal/vertical-ID fields but no integer-to-client legend** for values 13,
 the request slot, producer, and runtime state, so an observed number must not be
 promoted to a global feature enum.
 
+#### ADU lateral request, result and observer layouts
+
+The same `pcs_data_viewer_adu_semantics.json` schema defines the lateral
+records below. Positions are 1-based recorder bytes. Reproduce each row with
+`tools/gts recorder ID --schema adu --json`.
+
+| Record | Layout |
+|---|---|
+| `2A04` | Five-byte request: u8 ID at byte 1; s16 pinion at byte 2 ×0.001; u8 steering-support gain at byte 4 ×0.01; u8 damping gain at byte 5 ×0.01 |
+| `2A06` | Three-byte result: u8 ID at byte 1; s16 pinion at byte 2 ×0.001 |
+| `1620` | Standalone s16 result pinion ×0.001 |
+| `1B40` | Twelve-byte LTA client: u8 ID at byte 1; s16 requested angles labelled **(ADU)** and **(EPS)** at bytes 2 and 4 ×0.001; u8 assist/damping gains at bytes 6 and 7 ×0.01; five u8 indicator/coordination fields at bytes 8–12 |
+| `2E8D`, `2E92` | CAN angle observers: s16 at byte 1 ×1.5 plus s8 expanded angle at byte 3 ×0.1; invalid values `0x7FFF` and `0x7F` |
+| `2E94` | EPS torque (CAN), s16 ×0.01 |
+| `1E19` | Float32 requested pinion at byte 1; u8 EDSS ID at byte 5; float32 arbitrated pinion at byte 6; float invalid pattern `0xFFFFFFFF` |
+
+The `2A04`, `2A06`, `1620` and `1B40` pinion fields use invalid
+`0x7FFF`. The gain fields and `1B40` bytes 8 and 10–12 use invalid `0xFF`.
+Byte 9 (VLO operation status) has no recorded invalid sentinel.
+`2A04` has the same field geometry as TSS3 `5282`, but only the ADU
+schema records those invalid sentinels. The ADU recorder's float32 `1E19`
+layout and the ADCU_P6 SID-22 view are separate definitions.
+
 #### Separate OAA request-policy fields
 
 The 2026-10-01 EN/JA satellite inspection distinguishes additional policies

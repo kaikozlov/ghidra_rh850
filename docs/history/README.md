@@ -1,16 +1,9 @@
 # Research history
 
-Dated investigation journals and handoff-style reports live here. They preserve
-chronology and methodology, including analyses that were later corrected.
-
-**Do not use this tree to determine current project state.** Start with
-[../OVERVIEW.md](../OVERVIEW.md). Current per-target conclusions live in the
-canonical target reports under [../variants/](../variants/README.md) and the
-canonical subsystem reports. [../status/](../status/README.md) is a navigation
-index — current queue, claim IDs, unresolved questions, and one Sienna coverage
-snapshot — with opportunistic updates. Consult the canonical reports for
-current conclusions. Superseded claims are tracked in
-`status/CORRECTIONS.md`.
+Dated investigations and migration records. Target and subsystem reports own
+conclusions; use the [documentation map](../README.md) to find them.
+Keep source identities and useful observations when consolidating a journal.
+Delete obsolete claims and duplicate implementation narratives.
 
 ## 2026-08
 
@@ -30,8 +23,6 @@ Month index with current-state links: [2026-08/README.md](2026-08/README.md).
 - [2026-08/TACOMA_VFOREST_CUW_CORPUS_ANALYSIS_2026-08-23.md](2026-08/TACOMA_VFOREST_CUW_CORPUS_ANALYSIS_2026-08-23.md)
 - [2026-08/T0011_21_04C21_CUW_ANALYSIS_2026-08-23.md](2026-08/T0011_21_04C21_CUW_ANALYSIS_2026-08-23.md)
 - [2026-08/VERIFICATION_ARCHITECTURE_2026-08-23.md](2026-08/VERIFICATION_ARCHITECTURE_2026-08-23.md)
-- [2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md](2026-08/CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md)
-- [2026-08/CAMRY_08A_SIGNER_CONTINUITY_2026-08-30.md](2026-08/CAMRY_08A_SIGNER_CONTINUITY_2026-08-30.md)
 
 ## 2026-09
 

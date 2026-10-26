@@ -52,12 +52,7 @@ Use the application-request side while retaining Toyota's arbitration and
 actuator controllers. The detailed evidence belongs in the
 [vehicle-movement report](toyota-tss3-vehicle-movement-arbitration.md) and
 [longitudinal report](../variants/camry-2026-longitudinal-evidence.md).
-A downstream state correlation does not establish a writable command.
-
-Authentication makes a protected request deliverable. It does not identify
-its control meaning, prove receiver acceptance, or define stock-source
-replacement. Conversely, unresolved internal OEM field names do not erase
-an implemented and observed request path.
+Authentication makes a protected request deliverable.
 
 ## Source replacement and timing
 
@@ -93,28 +88,19 @@ The same rule applies to radar validity, track identity, UI state and
 longitudinal policy fields. Retain unknown fields as unknown rather than
 inventing OEM names, confidence percentages or behavioral rules.
 
-## Evidence for a support claim
+## Evidence provenance
 
-State the scope of each claim and how it is known:
+Record how each finding is known:
 
 - **Source inspection:** what the identified software implements.
 - **Firmware analysis:** what the exact target bytes and dataflow establish.
 - **Capture analysis:** what happened in the named vehicle/configuration.
-- **Maintainer or contributor report:** attributed behavior, separate from a
-  reproduced capture measurement.
+- **Maintainer or contributor report:** attributed behavior.
 - **Software/model tests:** the behavior or invariant actually exercised.
 
-For a production-support claim, assess identity, request semantics, receiver
-behavior, feedback, limits, driver interaction, source replacement,
-command-loss behavior, stock-feature coexistence and visible UI state.
-Record concrete gaps in the owning report. Do not convert an old missing
-experiment into a permanent blocker, or infer absence of evidence from not
-having searched for it.
-
-A software check is not a vehicle test. A vehicle test belongs to its recorded
-software, harness and runtime identities. Preserve useful observations and
-source provenance; delete obsolete implementation descriptions rather than
-requiring readers to reconstruct the current port from a chronology.
+Record vehicle observations with their software, harness and runtime identities.
+Preserve useful observations and source provenance; delete obsolete implementation
+descriptions.
 
 ## Upstream prior art
 
@@ -122,7 +108,7 @@ The reproducible upstream Toyota comparison is
 [`toyota_porting_contract.json`](../../data/external/opendbc/toyota_porting_contract.json),
 pinned to commaai/opendbc `c9b31d21bc396e8958891e271936bdbdf1a6ca93`.
 It records older Toyota command builders, platform flags, CarState, radar,
-SecOC and safety ownership. It is prior art, not the current Camry status.
+SecOC and safety ownership.
 
 Useful transferable patterns are standard CarControl/CarState integration,
 source replacement in safety, generation-specific DBCs, independent command

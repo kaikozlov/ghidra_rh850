@@ -3,8 +3,7 @@
 **Issue:** [commaai/opendbc#3695 — Toyota TSS3 car port](https://github.com/commaai/opendbc/issues/3695)
 
 This report owns the measured results and provenance of the named captures.
-It is not a current-status summary or an installation guide. Use the
-[capability matrix](camry-2026-capability-matrix.md) for the maintained port.
+The [capability matrix](camry-2026-capability-matrix.md) owns current port status.
 
 ## Camry lateral: direct route evidence
 
@@ -130,8 +129,5 @@ following. A later pass faulted at standstill. The contributor's description is
 retained under `community/albinoelephant/`; the
 [Corolla report](corolla-8965F1208000.md) owns the target-specific assessment.
 
-This is an attributed observation of host modification and coincident vehicle
-behavior. It does not establish `0x160` as causal longitudinal ingress.
-The [longitudinal evidence](camry-2026-longitudinal-evidence.md) owns that
-distinction. No transmitter design or present-day platform-support claim is
-derived from this report.
+The [longitudinal report](camry-2026-longitudinal-evidence.md) owns the
+request/result interpretation.

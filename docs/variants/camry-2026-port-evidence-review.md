@@ -14,9 +14,11 @@ initializes its model globals from those same CP stiffnesses. A learned value
 near 1.0 therefore supports preserving the configured baseline; it does not
 justify replacing `CP.tireStiffnessFactor=0.7933` with 1.0.
 
-The 15.3 steering-ratio default is a separate absolute learned quantity.
-The actuator-delay default is 0.18 s; identical cached lagd values on
-consecutive routes are not independent fresh estimates.
+Learned steering ratio is an absolute quantity. The September-4 routes span
+approximately 15.1–15.8; the September-10 working routes settle near 15.254,
+supporting the 15.3 default. Both working routes repeat the cached lag estimate
+0.3837597 s. The actuator-delay default is 0.18 s; those repeated cached values
+are not independent estimates.
 
 ## Radar units and lifecycle
 
@@ -34,6 +36,10 @@ Joint range/range-rate correlation cannot determine a common scale factor.
 Signed13 and signed14 velocity interpretations agree on the retained data;
 the wider field boundary is not independently resolved. Track lifecycle is
 established below; optional confidence/class labels remain unassigned.
+
+The radar has three banks of eight slots. Each bank uses four message families:
+`180/183/186/189`, `181/184/187/18A` and `182/185/188/18B`.
+The empty geometry sentinel is `fff8000000ffff`.
 
 The corrected full August reconstruction consumes each time-bounded occurrence
 rather than overwriting repeated counter values: 30,532 / 35,994 complete
@@ -100,7 +106,6 @@ trigger PDU. End-old/start-new ordering is explicit.
 The retained opendbc replay of 60,969 held-out bank pairs produced **20,323
 complete updates**, **308,111 qualified point observations**, **17,868 observed
 identity replacements**, and **zero reported CAN errors** in source replay.
-These Camry fixtures do not establish another vehicle's radar contract.
 
 Reproducible source reduction:
 `tools/targets/camry/analysis/analyze_camry_2026_radar_lifecycle.py`,
@@ -119,8 +124,7 @@ and 33 rejected returns. In 181 fresh, low-driver-torque samples where the
 stock and host targets diverge by at least 2.5 degrees, median measured-angle
 error is 0.79 degrees against stock versus 2.02 against host; stock is closer
 in 134 samples versus 47. Driving windows have no Panda bus-off or transmit-
-error accumulation. This is negative evidence for that sender/configuration,
-not the status of the maintained `0x08A` port.
+error accumulation. This is negative evidence for that sender/configuration.
 
 Those routes also expose a separate driver-state defect: the recorded parser
 held `steeringPressed=False`, preventing ordinary torque-nudge lane changes.
@@ -134,7 +138,7 @@ Independent September-6 routes `3e/3f` supply the sign and threshold evidence:
 all 45 observed lane-change starts have positive torque for left and negative
 for right. Toyota's `0x371 B20[4]` detector has a sampled assertion median of
 0.67 N·m and release medians of 0.37/0.34 N·m. The port's 0.6 N·m threshold
-is an openpilot policy, not an OEM single-comparator claim. Detailed source
+is an openpilot policy. Detailed source
 reduction: `data/generated/camry_20260906_hands_off_warning_audit.json` and
 [the hands-on evidence](camry-2026-tss3-opendbc-port.md#hands-on-detection-and-hud-evidence).
 
@@ -177,8 +181,6 @@ stock-code tracing closes their RTE staging through `D0D7C -> BF3AA -> 4C2DC ->
 `CE772` requires both clear before entering ready, and `CE7A6` leaves ready
 when either asserts. The inspected CarState maps B6[2] (`EPS_FAULT_INHIBIT`) to
 `steerFaultTemporary`; the two cooperative inhibits remain decoded DBC fields.
-Their firmware meaning does not imply that the current host aggregates them.
-
 
 The permanent/transient distinction is provably lossy at this projection:
 `CEC72` ORs `CAFB==1` and `CAFD==1`. `CEE7C` clears the request-failure source
@@ -201,8 +203,7 @@ verifier are `analyze_camry_f33_cooperative_fault_projection.py`,
 
 The maintained port implements cancel output; see the
 [port report](camry-2026-tss3-opendbc-port.md#maintained-integration).
-This section owns the bounded conclusions of the retained September captures,
-not a declaration that the current feature is absent.
+This section owns the retained September capture analysis.
 
 Three selections answer different questions and must not be added together:
 
@@ -210,7 +211,7 @@ Three selections answer different questions and must not be added together:
 |---|---|---|
 | 58 actual host-send episodes, 375 `sendcan 0x101` frames across 463 segments | Every episode has physical CANCEL or brake input at or before the first host send; none isolates host-command acceptance | `camry_2026_cancel_ownership.json` |
 | 79 rising CarControl cancel requests from 71 hashed rlogs / 16 routes | All follow physical driver input (53 switch, 26 brake); 76 have a release within 500 ms, three do not | `camry_2026_cancel_request_causality.json` |
-| 77 native cruise releases from 1,103,695 frames in the ten-route ownership corpus | 74 have preceding decoded driver assertions; the other three have no host cancel request and therefore are not host-acceptance witnesses | `camry_2026_native_cruise_release.json` |
+| 77 native cruise releases from 1,103,695 frames in the ten-route ownership corpus | 74 have preceding decoded driver assertions; the other three have no host cancel request | `camry_2026_native_cruise_release.json` |
 
 Artifact paths below are under `data/generated/`. Each reducer retains its
 source hashes and selection rules. A TX return establishes transmission, not
@@ -224,10 +225,9 @@ overlapping brake assertion, and release delays of 29.756–172.179 ms (median
 `tests/fixtures/camry_2026_cancel_windows.jsonl.gz`.
 
 The ADAS-only screen tested 17,824 bit/polarity hypotheses and 279,904
-contiguous field layouts without a common cancel edge. That negative applies
-only to its 22 ADAS streams. The all-native-bus extraction covers 168 streams
-and recovers the following switch mirrors; the ADAS CRC population remains
-16,526 valid frames.
+contiguous field layouts across 22 ADAS streams without a common cancel edge.
+The all-native-bus extraction covers 168 streams and recovers the following
+switch mirrors; the ADAS CRC population remains 16,526 valid frames.
 
 ### `0x1B2` switch-event mirror
 
@@ -409,7 +409,3 @@ release witnesses, and Profile-5 integrity of the retained ADAS request frames.
   `tests/fixtures/camry_2026_cancel_{all_buses,host_attempts,request_causality}.jsonl.gz`.
   Classifier tests include independent positive and negative controls for
   driver-input timing, missing observations and forwarded-only echoes.
-
-The retained switch mirrors and confounded host attempts do not identify a
-receiving ECU's cancel-command parser. That is a limit of these captures, not
-evidence that the maintained controller lacks an output path.

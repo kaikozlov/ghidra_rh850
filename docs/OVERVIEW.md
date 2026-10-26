@@ -41,9 +41,8 @@ and explains the historical Corolla naming.
 | What is the next investigation? | [Priorities](status/PRIORITIES.md) |
 | What was established for Sienna? | [Sienna reference overview](variants/sienna-8965B4512000-overview.md) and scoped subsystem reports |
 
-The capability matrix distinguishes demonstrations, software validation, and
-remaining qualification. Neither an older successful experiment nor an older
-failure should be read as the status of every later configuration.
+The capability matrix records the maintained implementation and its source
+identities.
 
 ## Evidence boundaries
 

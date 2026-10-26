@@ -36,8 +36,7 @@ rename their source evidence based on the shared primary string.
 | How are fault observations bounded? | [Fault/status report](camry-2026-tss3-fault-status.md) |
 | What is the normal software ownership contract? | [Native openpilot contract](../architecture/toyota-openpilot-porting-contract.md) |
 
-Capture and recovery observations apply to their recorded rack, software,
-harness and date. They do not override the maintained implementation summary.
+Capture and recovery reports retain their rack, software, harness and date.
 
 ## Corolla comparison and qualification
 

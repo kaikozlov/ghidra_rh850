@@ -1,41 +1,17 @@
-# Status ledgers
+# Status reference
 
-This directory answers five different questions. It is intentionally separate
-from dated investigation journals, which live under
-[../history/](../history/README.md).
+Target and subsystem reports own conclusions. These files provide navigation
+and earlier claim identifiers.
 
-| Question | Document |
+| Task | Document |
 |---|---|
-| **What should we do next?** | [PRIORITIES.md](PRIORITIES.md) |
-| **Is this claim actually established?** | [FINDINGS.md](FINDINGS.md) |
-| **What remains unresolved?** | [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) |
-| **How complete was the Sienna analysis?** | [ANALYSIS_STATUS.md](ANALYSIS_STATUS.md) (2026-08-15 snapshot) |
-| **What did we previously get wrong?** | [CORRECTIONS.md](CORRECTIONS.md) |
-| **Where did we record a prior lead/finding?** | `tools/know QUERY` |
+| Find the execution queue | [PRIORITIES.md](PRIORITIES.md) |
+| Look up a claim ID or evidence grade | [FINDINGS.md](FINDINGS.md) |
+| Look up an earlier question | [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) |
+| Find a recorded correction | [CORRECTIONS.md](CORRECTIONS.md) |
+| Inspect the Sienna coverage snapshot and later addenda | [ANALYSIS_STATUS.md](ANALYSIS_STATUS.md) |
+| Search reports and prior leads | `tools/know QUERY` |
 
-## Reading order
-
-Read [PRIORITIES.md](PRIORITIES.md) first for current work; follow its links
-into subsystem reports or [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md) when working a
-specific item. These ledgers are navigation aids. Canonical truth for any claim
-is its subsystem/variant report — and for firmware questions, the bytes
-themselves (source-of-truth hierarchy in [../../AGENTS.md](../../AGENTS.md)).
-
-## Maintenance
-
-These files provide historical references and navigation. Ledger maintenance is
-optional — see the documentation section of
-[../../AGENTS.md](../../AGENTS.md). In particular:
-
-- Do **not** stop active work to add a FINDINGS row, CORRECTIONS row,
-  verification owner, or cross-reference footer. Write conclusions in the
-  canonical subsystem/variant report; batch ledger cleanup at meaningful
-  milestones only if it adds value.
-- New work does not need an OQ entry before it can proceed, and resolving a
-  question does not require a FINDINGS/CORRECTIONS bookkeeping transaction.
-- Verify against the canonical
-  reports and `tools/know QUERY` before relying on a ledger statement as
-  current.
-- Completed investigation narratives belong under `docs/history/YYYY-MM/`.
-  [PRIORITIES.md](PRIORITIES.md) holds only the current queue and must
-  not grow a completion diary.
+Follow each entry to its owning report before relying on its conclusion.
+Use the [variant index](../variants/README.md) to select the target.
+Documentation maintenance follows [AGENTS.md](../../AGENTS.md#writing-it-down).

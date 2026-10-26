@@ -12,8 +12,7 @@ and OPEN_QUESTIONS are archives, not an implementation-status authority.
    downstream Brake request-arbitration/result → B6 handoff.
    Missing evidence includes synchronized FRC recorder/CAN observations and
    matched Brake/FRC firmware (item 2). Do not replace those with another
-   summary of already-retained EPS experiments. This is native-producer analysis,
-   not a claim that the maintained request-plane port is blocked. Current status:
+   summary of already-retained EPS experiments. Current port status:
    [capability matrix](../variants/camry-2026-capability-matrix.md).
    Canonical architecture:
    [../architecture/toyota-tss3-vehicle-movement-arbitration.md](../architecture/toyota-tss3-vehicle-movement-arbitration.md).
@@ -97,9 +96,3 @@ confirmation ([OQ-003](OPEN_QUESTIONS.md)) · CommunicationControl availability
 - Historical negative guidance — generic whole-image sweeps, `FF*16` KAT as a
   live key, object-15 as live-key proof, command-13 as key export, software-ID
   offset tables — is retained in [CORRECTIONS.md](CORRECTIONS.md).
-
-## When this page changes
-
-Update only when the **execution order** changes. Keep completed conclusions in
-the owning subsystem report. Update ledger navigation when useful.
-Never append a completion diary here.

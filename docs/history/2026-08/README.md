@@ -1,15 +1,5 @@
-# August 2026 investigation journals
+# August 2026 investigations
 
-These files are point-in-time research records. Their value is chronology and
-methodology; later findings and corrections may supersede individual claims.
-
-Current state: [../../OVERVIEW.md](../../OVERVIEW.md) ·
-[../../status/PRIORITIES.md](../../status/PRIORITIES.md) ·
-[../../status/FINDINGS.md](../../status/FINDINGS.md) ·
-[../../status/CORRECTIONS.md](../../status/CORRECTIONS.md).
-
-Living Camry TSS3 GTS+→wire working notes:
-[CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md](CAMRY_GTS_LATERAL_FUNNEL_2026-08-29.md).
-
-2026-08-30 signer-continuity closure (VAR-101):
-[CAMRY_08A_SIGNER_CONTINUITY_2026-08-30.md](CAMRY_08A_SIGNER_CONTINUITY_2026-08-30.md).
+The [history index](../README.md#2026-08) lists the retained August reports.
+Use the [variant index](../../variants/README.md) for target conclusions and
+[tooling index](../../tooling/README.md) for analysis workflows.
