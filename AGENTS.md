@@ -4,7 +4,7 @@ The primary analysis target is the **2026 Camry Hybrid EPS `8965F3307000`**.
 
 Read preexisting documentation to guide your work. @./docs/
 
-For firmware claims, inspect the exact target through `tools/gtarget` / `tools/pseudo`; For the camry, we also have the significantly more mature decompilation corpus under `./decomp/`, with tooling at `tools/toyota decomp`.
+For firmware claims, inspect the exact target through `tools/gtarget` / `tools/pseudo`; For the camry, we also have the significantly more mature decompilation corpus under `./decomp/`, with tooling at `tools/toyota decomp` (try this before pseudo for the camry target).
 Decompile a function before naming its role; verify important gates from disassembly, bytes, and dataflow.
 
 As this repo matures, we must do our absolute best to keep it tidy.

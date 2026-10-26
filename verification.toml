@@ -338,6 +338,15 @@ tests = [
   "tests/tooling/verify_memory_safety_mutations.py",
 ]
 
+[suite.camry_f33_stateful_memory_safety]
+tests = ["tests/targets/camry/verify_camry_f33_stateful_memory_safety.py"]
+timeout = 180
+
+
+[suite.camry_f33_boot_memory_safety]
+tests = ["tests/targets/camry/verify_camry_f33_boot_memory_safety.py"]
+timeout = 120
+
 [suite.ephemeral_secoc_bypass]
 tests = ["tests/runtime/verify_ephemeral_secoc_bypass.py"]
 

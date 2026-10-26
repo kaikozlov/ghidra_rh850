@@ -1,0 +1,4814 @@
+{
+  "comparison_target": {
+    "codeflash_sha256": "5b89fdbc69edc2f66ef8a557f88b08c758e3146bd4e90067320d7966812b1273",
+    "name": "crown-8965F3012000",
+    "role": "same-MCU Toyota/Denso family homolog comparator; differences are triage leads, not proof"
+  },
+  "homolog_changed_guard_operand_candidates": [
+    {
+      "camry_entry": "0x000937b0",
+      "camry_name": "dcm_classify_receive_slot_and_collect_displacements_937b0",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x20ec",
+            "r29",
+            "r29"
+          ],
+          "crown_operands": [
+            "0x1f8c",
+            "r29",
+            "r29"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0009392e",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x00091250",
+      "instruction_count": 165,
+      "memory_relevance_score": 20
+    },
+    {
+      "camry_entry": "0x0008fd90",
+      "camry_name": "prepare_secoc_transmit_authentication_8fd90",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x1b3c",
+            "r29",
+            "r29"
+          ],
+          "crown_operands": [
+            "0x19dc",
+            "r29",
+            "r29"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0008fda2",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0008d830",
+      "instruction_count": 105,
+      "memory_relevance_score": 16
+    },
+    {
+      "camry_entry": "0x0008f746",
+      "camry_name": "prepare_and_verify_secoc_receive_authentication_8f746",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x1a4c",
+            "r29",
+            "r29"
+          ],
+          "crown_operands": [
+            "0x18ec",
+            "r29",
+            "r29"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0008f758",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0008d1e6",
+      "instruction_count": 132,
+      "memory_relevance_score": 11
+    },
+    {
+      "camry_entry": "0x000b3538",
+      "camry_name": "debounce_f14a_f14b_snapshot_b3538",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0xc",
+            "r6"
+          ],
+          "crown_operands": [
+            "0xb",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x000b353c",
+          "mnemonic": "mov"
+        },
+        {
+          "camry_operands": [
+            "0x15",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0x14",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x000b3542",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x000b3438",
+      "instruction_count": 68,
+      "memory_relevance_score": 9
+    },
+    {
+      "camry_entry": "0x0008e506",
+      "camry_name": "dispatch_or_poll_write_did_action",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0xd",
+            "r28"
+          ],
+          "crown_operands": [
+            "0xc",
+            "r28"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0008e51e",
+          "mnemonic": "cmp"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0008bfa6",
+      "instruction_count": 35,
+      "memory_relevance_score": 9
+    },
+    {
+      "camry_entry": "0x0008f434",
+      "camry_name": "extract_receive_freshness_and_shift_authenticator_bits_8f434",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x1a4c",
+            "r28",
+            "r28"
+          ],
+          "crown_operands": [
+            "0x18ec",
+            "r28",
+            "r28"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0008f448",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0008ced4",
+      "instruction_count": 56,
+      "memory_relevance_score": 9
+    },
+    {
+      "camry_entry": "0x000cfda0",
+      "camry_name": "capture_request_when_group26_status_allows_cfda0",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x1a",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0x18",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x000cfda4",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x000cc9f6",
+      "instruction_count": 15,
+      "memory_relevance_score": 9
+    },
+    {
+      "camry_entry": "0x00090248",
+      "camry_name": "resolve_receive_freshness_selector_and_slot_90248",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x1a4c",
+            "r28",
+            "r28"
+          ],
+          "crown_operands": [
+            "0x18ec",
+            "r28",
+            "r28"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0009026a",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0008dce8",
+      "instruction_count": 39,
+      "memory_relevance_score": 8
+    },
+    {
+      "camry_entry": "0x0004b242",
+      "camry_name": "decode_receive_slot_11_ten_packed_fields_4b242",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x90",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0x8e",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b26a",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0xf7",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0xef",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b26e",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0xf7",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0xef",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b286",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x92",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0x90",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b29e",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0xf8",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0xf0",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b2a2",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0xf8",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0xf0",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b2ba",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x99",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0x97",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b2d2",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0xfb",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0xf3",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b2d6",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x96",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0x94",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b2ec",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0xf9",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0xf1",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b2f0",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0xf9",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0xf1",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b308",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0xf8",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0xf0",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b322",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0xfa",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0xf2",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b33c",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0xfb",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0xf3",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b356",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0xb",
+            "r6"
+          ],
+          "crown_operands": [
+            "0xa",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b366",
+          "mnemonic": "mov"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0004ab9c",
+      "instruction_count": 103,
+      "memory_relevance_score": 7
+    },
+    {
+      "camry_entry": "0x0004b68a",
+      "camry_name": "decode_receive_slot_18_four_biased_u15_values_and_flags_4b68a",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x147",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x13f",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b6b4",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x149",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x141",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b6e0",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x14b",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x143",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b70c",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x14d",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x145",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b738",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x147",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x13f",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b764",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x149",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x141",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b77e",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x14b",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x143",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b798",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x14d",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x145",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b7b2",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x12",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0x11",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b7c2",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0004afe4",
+      "instruction_count": 105,
+      "memory_relevance_score": 7
+    },
+    {
+      "camry_entry": "0x0004b4d4",
+      "camry_name": "decode_receive_slot_15_six_byte_fields_4b4d4",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x119",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x111",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b4fa",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x11a",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x112",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b514",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x11b",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x113",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b52e",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x11c",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x114",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b548",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x11d",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x115",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b562",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x11e",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x116",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b57c",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0xf",
+            "r6"
+          ],
+          "crown_operands": [
+            "0xe",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b58c",
+          "mnemonic": "mov"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0004ae2e",
+      "instruction_count": 67,
+      "memory_relevance_score": 7
+    },
+    {
+      "camry_entry": "0x0004b59e",
+      "camry_name": "decode_receive_slot_17_three_signed_fields_and_four_flags_4b59e",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x12b",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x123",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b5e4",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x127",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x11f",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b618",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x127",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x11f",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b632",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x127",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x11f",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b64c",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x12d",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x125",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b666",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x11",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0x10",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b676",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0004aef8",
+      "instruction_count": 79,
+      "memory_relevance_score": 7
+    },
+    {
+      "camry_entry": "0x0004b40e",
+      "camry_name": "decode_receive_slot_13_twobit_and_u32_fields_4b40e",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x10a",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x102",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b434",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x10b",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x103",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b44e",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0xd",
+            "r6"
+          ],
+          "crown_operands": [
+            "0xc",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b460",
+          "mnemonic": "mov"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0004ad68",
+      "instruction_count": 31,
+      "memory_relevance_score": 7
+    },
+    {
+      "camry_entry": "0x0004aa5c",
+      "camry_name": "dispatch_eight_codeword_timeout_monitors_4aa5c",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0xb",
+            "r6"
+          ],
+          "crown_operands": [
+            "0xa",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004aa64",
+          "mnemonic": "mov"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0004a418",
+      "instruction_count": 33,
+      "memory_relevance_score": 7
+    },
+    {
+      "camry_entry": "0x0004b1f6",
+      "camry_name": "decode_receive_slot_10_signed16_field_4b1f6",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0xa",
+            "r6"
+          ],
+          "crown_operands": [
+            "0x9",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b230",
+          "mnemonic": "mov"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0004ab50",
+      "instruction_count": 23,
+      "memory_relevance_score": 7
+    },
+    {
+      "camry_entry": "0x000bb736",
+      "camry_name": "set_current_limit_request",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0xa",
+            "r6"
+          ],
+          "crown_operands": [
+            "0x9",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x000bb73c",
+          "mnemonic": "cmp"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x000b9eec",
+      "instruction_count": 9,
+      "memory_relevance_score": 7
+    },
+    {
+      "camry_entry": "0x0004a702",
+      "camry_name": "dispatch_route30_codeword_timeout_monitors_4a702",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0xc",
+            "r6"
+          ],
+          "crown_operands": [
+            "0xb",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004a70a",
+          "mnemonic": "mov"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0004a0be",
+      "instruction_count": 53,
+      "memory_relevance_score": 6
+    },
+    {
+      "camry_entry": "0x000b34d4",
+      "camry_name": "debounce_and_latch_single_status_code_b34d4",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0xc",
+            "r6"
+          ],
+          "crown_operands": [
+            "0xb",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x000b34d8",
+          "mnemonic": "mov"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x000b33d4",
+      "instruction_count": 40,
+      "memory_relevance_score": 6
+    },
+    {
+      "camry_entry": "0x000bb74a",
+      "camry_name": "reduce_thermal_current_requests",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0xa",
+            "r1"
+          ],
+          "crown_operands": [
+            "0x9",
+            "r1"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x000bb780",
+          "mnemonic": "cmp"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x000b9f00",
+      "instruction_count": 23,
+      "memory_relevance_score": 6
+    },
+    {
+      "camry_entry": "0x000bb786",
+      "camry_name": "reduce_other_current_requests",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0xa",
+            "r1"
+          ],
+          "crown_operands": [
+            "0x9",
+            "r1"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x000bb7bc",
+          "mnemonic": "cmp"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x000b9f3c",
+      "instruction_count": 23,
+      "memory_relevance_score": 6
+    },
+    {
+      "camry_entry": "0x000bb7c2",
+      "camry_name": "reduce_service_current_requests",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0xa",
+            "r1"
+          ],
+          "crown_operands": [
+            "0x9",
+            "r1"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x000bb7f0",
+          "mnemonic": "cmp"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x000b9f78",
+      "instruction_count": 19,
+      "memory_relevance_score": 6
+    },
+    {
+      "camry_entry": "0x0008e4bc",
+      "camry_name": "find_write_did_and_check_precondition",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0xd",
+            "r29"
+          ],
+          "crown_operands": [
+            "0xc",
+            "r29"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0008e4fa",
+          "mnemonic": "cmp"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0008bf5c",
+      "instruction_count": 29,
+      "memory_relevance_score": 5
+    },
+    {
+      "camry_entry": "0x000b8742",
+      "camry_name": "minimum_ten_halfwords_except_index_five_when_ready_b8742",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0xa",
+            "r1"
+          ],
+          "crown_operands": [
+            "0x9",
+            "r1"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x000b876a",
+          "mnemonic": "cmp"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x000b847e",
+      "instruction_count": 21,
+      "memory_relevance_score": 5
+    },
+    {
+      "camry_entry": "0x000c7ea2",
+      "camry_name": "update_nonlinear_torque_compensation",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x130c",
+            "r0",
+            "r1"
+          ],
+          "crown_operands": [
+            "0x277a",
+            "r0",
+            "r1"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x000c7efc",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x000c5948",
+      "instruction_count": 54,
+      "memory_relevance_score": 5
+    },
+    {
+      "camry_entry": "0x0004b378",
+      "camry_name": "refresh_route30_health_inputs",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0xff",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0xf7",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b39e",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0xff",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0xf7",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b3b8",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x104",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0xfc",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b3d2",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x100",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0xf8",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b3ec",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0xc",
+            "r6"
+          ],
+          "crown_operands": [
+            "0xb",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b3fc",
+          "mnemonic": "mov"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0004acd2",
+      "instruction_count": 49,
+      "memory_relevance_score": 4
+    },
+    {
+      "camry_entry": "0x000cefa4",
+      "camry_name": "derive_caff_cafe_group_status_gates_cefa4",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x11",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0x10",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x000cefa8",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x1a",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0x18",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x000cefb2",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x000cbbfa",
+      "instruction_count": 21,
+      "memory_relevance_score": 4
+    },
+    {
+      "camry_entry": "0x00065324",
+      "camry_name": "check_dma_progress_windows",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0xdcc",
+            "r27",
+            "r27"
+          ],
+          "crown_operands": [
+            "0xa74",
+            "r27",
+            "r27"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x00065338",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x00064724",
+      "instruction_count": 49,
+      "memory_relevance_score": 4
+    },
+    {
+      "camry_entry": "0x000cf51c",
+      "camry_name": "mark_channel_event_and_count_unlatched_occurrence_cf51c",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x1354",
+            "r6",
+            "r6"
+          ],
+          "crown_operands": [
+            "0xa54",
+            "r6",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x000cf546",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x000cc172",
+      "instruction_count": 31,
+      "memory_relevance_score": 4
+    },
+    {
+      "camry_entry": "0x0004bb62",
+      "camry_name": "decode_changed_rx17_two_words_and_flags_4bb62",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x188",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x180",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bb90",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x18a",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x182",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bbac",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x187",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x17f",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bbc8",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x187",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x17f",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bbe2",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0xf9",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0xf7",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bbfa",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x1a3",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x19b",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bbfe",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x17",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0x16",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bc0c",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0004b4bc",
+      "instruction_count": 62,
+      "memory_relevance_score": 3
+    },
+    {
+      "camry_entry": "0x00060e5a",
+      "camry_name": "configure_enabled_serial_dma_descriptors_60e5a",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x14ac",
+            "r27",
+            "r27"
+          ],
+          "crown_operands": [
+            "0x1154",
+            "r27",
+            "r27"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x00060e82",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x14fc",
+            "r27",
+            "r27"
+          ],
+          "crown_operands": [
+            "0x11a4",
+            "r27",
+            "r27"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x00060eae",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x154c",
+            "r28",
+            "r28"
+          ],
+          "crown_operands": [
+            "0x11f4",
+            "r28",
+            "r28"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x00060eda",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0006025a",
+      "instruction_count": 51,
+      "memory_relevance_score": 3
+    },
+    {
+      "camry_entry": "0x000920be",
+      "camry_name": "dcm_start_of_reception",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x2094",
+            "r28",
+            "r28"
+          ],
+          "crown_operands": [
+            "0x1f34",
+            "r28",
+            "r28"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x00092122",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0008fb5e",
+      "instruction_count": 59,
+      "memory_relevance_score": 3
+    },
+    {
+      "camry_entry": "0x000c7f44",
+      "camry_name": "update_nonlinear_torque_slope",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0xa99",
+            "r0",
+            "r1"
+          ],
+          "crown_operands": [
+            "0xc04",
+            "r0",
+            "r1"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x000c7f62",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x000c59ea",
+      "instruction_count": 28,
+      "memory_relevance_score": 3
+    },
+    {
+      "camry_entry": "0x0004bd46",
+      "camry_name": "decode_changed_rx1a_word_bytes_and_flags_4bd46",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x1ba",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x1aa",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bd70",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x1bd",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x1ad",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bda8",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x1bd",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x1ad",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bdc2",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x1bd",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x1ad",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bddc",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x1bd",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x1ad",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bdf6",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x1be",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x1ae",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004be10",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x1be",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x1ae",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004be2a",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x1bf",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x1af",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004be44",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x1c0",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x1b0",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004be5e",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x1c1",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x1b1",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004be78",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x1c1",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x1b1",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004be92",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x1c1",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x1b1",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004beac",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x1a",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0x18",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bebc",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0004b608",
+      "instruction_count": 131,
+      "memory_relevance_score": 2
+    },
+    {
+      "camry_entry": "0x0004b9f4",
+      "camry_name": "decode_changed_rx16_three_ten_bit_values_and_flags_4b9f4",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x167",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x15f",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004ba1e",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x167",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x15f",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004ba38",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x167",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x15f",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004ba52",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x169",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x161",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004ba7e",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x169",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x161",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004ba98",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x169",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x161",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bab2",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x16b",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x163",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bade",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x16b",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x163",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004baf8",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x16b",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x163",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bb12",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0xf1",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0xef",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bb3c",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x183",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x17b",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bb40",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x16",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0x15",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bb4e",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0004b34e",
+      "instruction_count": 118,
+      "memory_relevance_score": 2
+    },
+    {
+      "camry_entry": "0x0004b8f4",
+      "camry_name": "decode_changed_rx15_eight_bitfields_4b8f4",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x15f",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x157",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b91a",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x15f",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x157",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b934",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0xd9",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0xd7",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b94c",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x15f",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x157",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b950",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x160",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x158",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b968",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x160",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x158",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b982",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x161",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x159",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b99c",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x161",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x159",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b9b6",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x161",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x159",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b9d0",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x15",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0x14",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b9e0",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0004b24e",
+      "instruction_count": 85,
+      "memory_relevance_score": 2
+    },
+    {
+      "camry_entry": "0x0004bed0",
+      "camry_name": "decode_changed_rx1b_three_bytes_4bed0",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x1d7",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x1c7",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bef6",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x1d8",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x1c8",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bf10",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x1d9",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x1c9",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bf2a",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x1b",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0x19",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bf3a",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0004b792",
+      "instruction_count": 40,
+      "memory_relevance_score": 2
+    },
+    {
+      "camry_entry": "0x0004bf4e",
+      "camry_name": "decode_changed_rx1c_three_and_four_bit_fields_4bf4e",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x1df",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x1cf",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bf74",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x1df",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x1cf",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bf8e",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x1c",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0x1a",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bf9e",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0004b810",
+      "instruction_count": 31,
+      "memory_relevance_score": 2
+    },
+    {
+      "camry_entry": "0x0004b86e",
+      "camry_name": "decode_changed_rx14_two_signed_words_and_flag_4b86e",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x157",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x14f",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b8d0",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x14",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0x13",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004b8e0",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0004b1c8",
+      "instruction_count": 42,
+      "memory_relevance_score": 2
+    },
+    {
+      "camry_entry": "0x0004bcc0",
+      "camry_name": "decode_changed_rx19_two_signed_eighteen_bit_fields_4bcc0",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x1b3",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x1a3",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bd04",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x19",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0x17",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bd32",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0004b582",
+      "instruction_count": 42,
+      "memory_relevance_score": 2
+    },
+    {
+      "camry_entry": "0x0004bfb2",
+      "camry_name": "decode_changed_rx1d_low_nibble_4bfb2",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x1e0",
+            "r0",
+            "r7"
+          ],
+          "crown_operands": [
+            "0x1d0",
+            "r0",
+            "r7"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bfd8",
+          "mnemonic": "movea"
+        },
+        {
+          "camry_operands": [
+            "0x1d",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0x1b",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004bfe8",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0004b874",
+      "instruction_count": 22,
+      "memory_relevance_score": 2
+    },
+    {
+      "camry_entry": "0x000be80e",
+      "camry_name": "snapshot_three_status_or_and_group_16_be80e",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x16",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0x15",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x000be82e",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x000bcfc6",
+      "instruction_count": 19,
+      "memory_relevance_score": 2
+    },
+    {
+      "camry_entry": "0x000bef9c",
+      "camry_name": "snapshot_three_status_flags_and_group16_bef9c",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x16",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0x15",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x000befbe",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x000bd754",
+      "instruction_count": 18,
+      "memory_relevance_score": 2
+    },
+    {
+      "camry_entry": "0x000c3bd4",
+      "camry_name": "update_estimator_group_release",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x12",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0x11",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x000c3bd8",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x000c169a",
+      "instruction_count": 19,
+      "memory_relevance_score": 2
+    },
+    {
+      "camry_entry": "0x000971e8",
+      "camry_name": "check_routine_session_allowlist_971e8",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x2450",
+            "r29",
+            "r29"
+          ],
+          "crown_operands": [
+            "0x22f0",
+            "r29",
+            "r29"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0009721e",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x00094c88",
+      "instruction_count": 51,
+      "memory_relevance_score": 1
+    },
+    {
+      "camry_entry": "0x0009726c",
+      "camry_name": "check_routine_security_allowlist_9726c",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x2450",
+            "r29",
+            "r29"
+          ],
+          "crown_operands": [
+            "0x22f0",
+            "r29",
+            "r29"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x000972a2",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x00094d0c",
+      "instruction_count": 51,
+      "memory_relevance_score": 1
+    },
+    {
+      "camry_entry": "0x0004ac7a",
+      "camry_name": "classify_two_magnitudes_with_source_gates_4ac7a",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x19",
+            "r0",
+            "r6"
+          ],
+          "crown_operands": [
+            "0x17",
+            "r0",
+            "r6"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0004ac7e",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0004a636",
+      "instruction_count": 47,
+      "memory_relevance_score": 0
+    },
+    {
+      "camry_entry": "0x0006008e",
+      "camry_name": "apply_indexed_capture_configuration_6008e",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x10a8",
+            "r28",
+            "r28"
+          ],
+          "crown_operands": [
+            "0xd50",
+            "r28",
+            "r28"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x000600aa",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x0005f48e",
+      "instruction_count": 19,
+      "memory_relevance_score": 0
+    },
+    {
+      "camry_entry": "0x00061b22",
+      "camry_name": "configure_both_phase_timer_dma_descriptors_61b22",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x161c",
+            "r28",
+            "r28"
+          ],
+          "crown_operands": [
+            "0x12c4",
+            "r28",
+            "r28"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x00061b36",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x00060f22",
+      "instruction_count": 17,
+      "memory_relevance_score": 0
+    },
+    {
+      "camry_entry": "0x000797f6",
+      "camry_name": "nvm_recompute_derived_diagnostic_mask_797f6",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0x3ed0",
+            "r1",
+            "r1"
+          ],
+          "crown_operands": [
+            "0x3d70",
+            "r1",
+            "r1"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x0007980e",
+          "mnemonic": "movea"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x00078c26",
+      "instruction_count": 19,
+      "memory_relevance_score": 0
+    },
+    {
+      "camry_entry": "0x000b84b8",
+      "camry_name": "qualify_service_admission",
+      "changed_guard_operands": [
+        {
+          "camry_operands": [
+            "0xa",
+            "r1"
+          ],
+          "crown_operands": [
+            "0x9",
+            "r1"
+          ],
+          "feeds_conditional_branch": true,
+          "instruction": "0x000b8514",
+          "mnemonic": "cmp"
+        }
+      ],
+      "classification": "exact-instruction-shape-homolog-with-changed-guard-operand",
+      "crown_entry": "0x000b81f4",
+      "instruction_count": 65,
+      "memory_relevance_score": 0
+    }
+  ],
+  "homolog_missing_guard_candidates": [
+    {
+      "camry_conditional_branches": 1,
+      "camry_entry": "0x000084f8",
+      "camry_name": "set_ebase_with_low_bit_one_preserving_irq_state_84f8",
+      "classification": "homolog-candidate-camry-has-fewer-conditional-branches",
+      "crown_conditional_branches": 2,
+      "crown_entry": "0x0000851c",
+      "memory_relevance_score": 0,
+      "mnemonic_similarity": 0.72
+    },
+    {
+      "camry_conditional_branches": 3,
+      "camry_entry": "0x0007bf60",
+      "camry_name": "reconcile_all_network_enable_and_policy_masks_7bf60",
+      "classification": "homolog-candidate-camry-has-fewer-conditional-branches",
+      "crown_conditional_branches": 4,
+      "crown_entry": "0x00079a10",
+      "memory_relevance_score": 0,
+      "mnemonic_similarity": 0.85
+    }
+  ],
+  "inputs": {
+    "camry_decomp": {
+      "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
+      "sha256": "e3ac4e094422d68757173a48b2a7a4d9ca85187ce324e7a9e1ac0ce2410e82b8"
+    },
+    "camry_fingerprints": {
+      "path": "build/out/targets/camry-8965F3307000/function_structural_fingerprints.jsonl",
+      "sha256": "2e25b36503469cc838c162a539a0f5ba2919bf427a2596fa4e44370e41a20e66"
+    },
+    "camry_scalars": {
+      "path": "build/out/targets/camry-8965F3307000/function_scalar_operands.jsonl",
+      "sha256": "0e8fa53019baa1891cbd669aceb31f6b17fd5c1b668dbdabffccf70df07200b9"
+    },
+    "crown_decomp": {
+      "path": "data/generated/crown-8965F3012000/decompilations.jsonl",
+      "sha256": "7af726a5ba8d11ce04f013ab02090d090fb224c3fa5ac266c6666c726754eef4"
+    },
+    "crown_fingerprints": {
+      "path": "build/out/targets/crown-8965F3012000/function_structural_fingerprints.jsonl",
+      "sha256": "52f1cbace3fe902db7ae0e18a388ea2b1cfb902d1150961244a8dacf5b227326"
+    },
+    "crown_scalars": {
+      "path": "build/out/targets/crown-8965F3012000/function_scalar_operands.jsonl",
+      "sha256": "ab67b6f63cb8b4578ae2ee0fbb6c0b4daabfe279a35b808a9cf011ba304984a2"
+    },
+    "matches": {
+      "path": "build/out/targets/camry-8965F3307000/crown_structural_function_transfer.json",
+      "sha256": "6812e7c6373a9a0381013ca88451a7451791233fe132e186bca8a58e6aa3f744"
+    },
+    "store_census": {
+      "path": "data/generated/camry_8965F3307000_computed_store_target_census.json",
+      "sha256": "77db8a686e2fdbf5bad004a17fe7d8964097fc48e7ff0967d2f99a41ad099776"
+    }
+  },
+  "interpretation": {
+    "call_graph_boundary": "direct-call closure excludes unresolved table-driven callbacks, represented as separate exact roots above",
+    "priority": "review request-derived loops, changed compare bounds, computed destinations, indirect callbacks, and lifecycle reuse before broad random mutation",
+    "proof_boundary": "structural homology and operand differences rank review targets; exact Camry disassembly/dataflow and dynamic reproduction are required for a finding"
+  },
+  "reachable_computed_store_rows": [
+    {
+      "function": "0x0007FC0E",
+      "hi": "0xFEC448D4",
+      "hits": [
+        "0xFEBE6AF4",
+        "0xFEBE6AF8",
+        "0xFEBE6D84",
+        "0xFEBE6D86",
+        "0xFEBE6DC8",
+        "0xFEBE6DD6",
+        "0xFEBE6DEC",
+        "0xFEBE6E0A",
+        "0xFEBE71F2",
+        "0xFEBEAC52",
+        "0xFEBEAC54",
+        "0xFEBEAC56",
+        "0xFEBEAC5A",
+        "0xFEBEADB0",
+        "0xFEBEAE90",
+        "0xFEBEBF3C",
+        "0xFEBEC3BA",
+        "0xFEBEC43C",
+        "0xFEBEC4C0",
+        "0xFEBEC5EE",
+        "0xFEBEC7BF",
+        "0xFEBEC81A",
+        "0xFEBECB38",
+        "0xFEBECBE8",
+        "0xFEBECC2C",
+        "0xFEBECC48",
+        "0xFEBECC4C",
+        "0xFEBECC4E",
+        "0xFEBECC50",
+        "0xFEBECC60",
+        "0xFEBECC62",
+        "0xFEBECC64",
+        "0xFEBECC66",
+        "0xFEBECC94",
+        "0xFEBECC98",
+        "0xFEBEE40A",
+        "0xFEBEE40C",
+        "0xFEBEEF8E"
+      ],
+      "lo": "0xFEBE48DA",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe48da),INT_MULT(INT_ZEXT((register, 0x1c, 2)),0x3),0x2)",
+      "store": "0x0007FCB2"
+    },
+    {
+      "function": "0x0007FC0E",
+      "hi": "0xFEC448D8",
+      "hits": [
+        "0xFEBE6AF4",
+        "0xFEBE6AF8",
+        "0xFEBE6D84",
+        "0xFEBE6D86",
+        "0xFEBE6DC8",
+        "0xFEBE6DD6",
+        "0xFEBE6DEC",
+        "0xFEBE6E0A",
+        "0xFEBE71F2",
+        "0xFEBEAC52",
+        "0xFEBEAC54",
+        "0xFEBEAC56",
+        "0xFEBEAC5A",
+        "0xFEBEADB0",
+        "0xFEBEAE90",
+        "0xFEBEBF3C",
+        "0xFEBEC3BA",
+        "0xFEBEC43C",
+        "0xFEBEC4C0",
+        "0xFEBEC5EE",
+        "0xFEBEC7BF",
+        "0xFEBEC81A",
+        "0xFEBECB38",
+        "0xFEBECBE8",
+        "0xFEBECC2C",
+        "0xFEBECC48",
+        "0xFEBECC4C",
+        "0xFEBECC4E",
+        "0xFEBECC50",
+        "0xFEBECC60",
+        "0xFEBECC62",
+        "0xFEBECC64",
+        "0xFEBECC66",
+        "0xFEBECC94",
+        "0xFEBECC98",
+        "0xFEBEE40A",
+        "0xFEBEE40C",
+        "0xFEBEEF8E"
+      ],
+      "lo": "0xFEBE48DE",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe48da),INT_ADD(INT_MULT(INT_ZEXT((register, 0x1c, 2)),0x3),0x2),0x2)",
+      "store": "0x0007FCB4"
+    },
+    {
+      "function": "0x0008300E",
+      "hi": "0xFEBF4C33",
+      "hits": [
+        "0xFEBE6AF4",
+        "0xFEBE6AF8",
+        "0xFEBE6D84",
+        "0xFEBE6D86",
+        "0xFEBE6DC8",
+        "0xFEBE6DD6",
+        "0xFEBE6DEC",
+        "0xFEBE6E0A",
+        "0xFEBE71F2",
+        "0xFEBEAC52",
+        "0xFEBEAC54",
+        "0xFEBEAC56",
+        "0xFEBEAC5A",
+        "0xFEBEADB0",
+        "0xFEBEAE90",
+        "0xFEBEBF3C",
+        "0xFEBEC3BA",
+        "0xFEBEC43C",
+        "0xFEBEC4C0",
+        "0xFEBEC5EE",
+        "0xFEBEC7BF",
+        "0xFEBEC81A",
+        "0xFEBECB38",
+        "0xFEBECBE8",
+        "0xFEBECC2C",
+        "0xFEBECC48",
+        "0xFEBECC4C",
+        "0xFEBECC4E",
+        "0xFEBECC50",
+        "0xFEBECC60",
+        "0xFEBECC62",
+        "0xFEBECC64",
+        "0xFEBECC66",
+        "0xFEBECC94",
+        "0xFEBECC98",
+        "0xFEBEE40A",
+        "0xFEBEE40C",
+        "0xFEBEEF8E"
+      ],
+      "lo": "0xFEBE4C34",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4c34),MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x4, 4),0x1),0xffff)),0x1)",
+      "store": "0x00083058"
+    },
+    {
+      "function": "0x000830D0",
+      "hi": "0xFEBF4C33",
+      "hits": [
+        "0xFEBE6AF4",
+        "0xFEBE6AF8",
+        "0xFEBE6D84",
+        "0xFEBE6D86",
+        "0xFEBE6DC8",
+        "0xFEBE6DD6",
+        "0xFEBE6DEC",
+        "0xFEBE6E0A",
+        "0xFEBE71F2",
+        "0xFEBEAC52",
+        "0xFEBEAC54",
+        "0xFEBEAC56",
+        "0xFEBEAC5A",
+        "0xFEBEADB0",
+        "0xFEBEAE90",
+        "0xFEBEBF3C",
+        "0xFEBEC3BA",
+        "0xFEBEC43C",
+        "0xFEBEC4C0",
+        "0xFEBEC5EE",
+        "0xFEBEC7BF",
+        "0xFEBEC81A",
+        "0xFEBECB38",
+        "0xFEBECBE8",
+        "0xFEBECC2C",
+        "0xFEBECC48",
+        "0xFEBECC4C",
+        "0xFEBECC4E",
+        "0xFEBECC50",
+        "0xFEBECC60",
+        "0xFEBECC62",
+        "0xFEBECC64",
+        "0xFEBECC66",
+        "0xFEBECC94",
+        "0xFEBECC98",
+        "0xFEBEE40A",
+        "0xFEBEE40C",
+        "0xFEBEEF8E"
+      ],
+      "lo": "0xFEBE4C34",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe4c34),MULTIEQUAL(COPY(0x0),INT_AND(INT_ADD((register, 0x4, 4),0x1),0xffff)),0x1)",
+      "store": "0x0008311A"
+    },
+    {
+      "function": "0x0008E7BA",
+      "hi": "0xFEBF5397",
+      "hits": [
+        "0xFEBE6AF4",
+        "0xFEBE6AF8",
+        "0xFEBE6D84",
+        "0xFEBE6D86",
+        "0xFEBE6DC8",
+        "0xFEBE6DD6",
+        "0xFEBE6DEC",
+        "0xFEBE6E0A",
+        "0xFEBE71F2",
+        "0xFEBEAC52",
+        "0xFEBEAC54",
+        "0xFEBEAC56",
+        "0xFEBEAC5A",
+        "0xFEBEADB0",
+        "0xFEBEAE90",
+        "0xFEBEBF3C",
+        "0xFEBEC3BA",
+        "0xFEBEC43C",
+        "0xFEBEC4C0",
+        "0xFEBEC5EE",
+        "0xFEBEC7BF",
+        "0xFEBEC81A",
+        "0xFEBECB38",
+        "0xFEBECBE8",
+        "0xFEBECC2C",
+        "0xFEBECC48",
+        "0xFEBECC4C",
+        "0xFEBECC4E",
+        "0xFEBECC50",
+        "0xFEBECC60",
+        "0xFEBECC62",
+        "0xFEBECC64",
+        "0xFEBECC66",
+        "0xFEBECC94",
+        "0xFEBECC98",
+        "0xFEBEE40A",
+        "0xFEBEE40C",
+        "0xFEBEEF8E"
+      ],
+      "lo": "0xFEBE5398",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xfebe5398),INT_AND((register, 0x18, 4),0xffff),0x1)",
+      "store": "0x0008E7CC"
+    },
+    {
+      "function": "0x00093C6C",
+      "hi": "0xFECE59E0",
+      "hits": [
+        "0xFEBE6AF4",
+        "0xFEBE6AF8",
+        "0xFEBE6D84",
+        "0xFEBE6D86",
+        "0xFEBE6DC8",
+        "0xFEBE6DD6",
+        "0xFEBE6DEC",
+        "0xFEBE6E0A",
+        "0xFEBE71F2",
+        "0xFEBEAC52",
+        "0xFEBEAC54",
+        "0xFEBEAC56",
+        "0xFEBEAC5A",
+        "0xFEBEADB0",
+        "0xFEBEAE90",
+        "0xFEBEBF3C",
+        "0xFEBEC3BA",
+        "0xFEBEC43C",
+        "0xFEBEC4C0",
+        "0xFEBEC5EE",
+        "0xFEBEC7BF",
+        "0xFEBEC81A",
+        "0xFEBECB38",
+        "0xFEBECBE8",
+        "0xFEBECC2C",
+        "0xFEBECC48",
+        "0xFEBECC4C",
+        "0xFEBECC4E",
+        "0xFEBECC50",
+        "0xFEBECC60",
+        "0xFEBECC62",
+        "0xFEBECC64",
+        "0xFEBECC66",
+        "0xFEBECC94",
+        "0xFEBECC98",
+        "0xFEBEE40A",
+        "0xFEBEE40C",
+        "0xFEBEEF8E"
+      ],
+      "lo": "0xFEBE59F0",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe59f0),INT_AND((register, 0x18, 4),0xffff),0x10),0x0)",
+      "store": "0x00093C80"
+    },
+    {
+      "function": "0x00093C9A",
+      "hi": "0xFECE59EA",
+      "hits": [
+        "0xFEBE6AF4",
+        "0xFEBE6AF8",
+        "0xFEBE6D84",
+        "0xFEBE6D86",
+        "0xFEBE6DC8",
+        "0xFEBE6DD6",
+        "0xFEBE6DEC",
+        "0xFEBE6E0A",
+        "0xFEBE71F2",
+        "0xFEBEAC52",
+        "0xFEBEAC54",
+        "0xFEBEAC56",
+        "0xFEBEAC5A",
+        "0xFEBEADB0",
+        "0xFEBEAE90",
+        "0xFEBEBF3C",
+        "0xFEBEC3BA",
+        "0xFEBEC43C",
+        "0xFEBEC4C0",
+        "0xFEBEC5EE",
+        "0xFEBEC7BF",
+        "0xFEBEC81A",
+        "0xFEBECB38",
+        "0xFEBECBE8",
+        "0xFEBECC2C",
+        "0xFEBECC48",
+        "0xFEBECC4C",
+        "0xFEBECC4E",
+        "0xFEBECC50",
+        "0xFEBECC60",
+        "0xFEBECC62",
+        "0xFEBECC64",
+        "0xFEBECC66",
+        "0xFEBECC94",
+        "0xFEBECC98",
+        "0xFEBEE40A",
+        "0xFEBEE40C",
+        "0xFEBEEF8E"
+      ],
+      "lo": "0xFEBE59FA",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe59f0),INT_AND((register, 0x18, 4),0xffff),0x10),0xa)",
+      "store": "0x00093CBA"
+    },
+    {
+      "function": "0x00093C9A",
+      "hi": "0xFECE59E0",
+      "hits": [
+        "0xFEBE6AF4",
+        "0xFEBE6AF8",
+        "0xFEBE6D84",
+        "0xFEBE6D86",
+        "0xFEBE6DC8",
+        "0xFEBE6DD6",
+        "0xFEBE6DEC",
+        "0xFEBE6E0A",
+        "0xFEBE71F2",
+        "0xFEBEAC52",
+        "0xFEBEAC54",
+        "0xFEBEAC56",
+        "0xFEBEAC5A",
+        "0xFEBEADB0",
+        "0xFEBEAE90",
+        "0xFEBEBF3C",
+        "0xFEBEC3BA",
+        "0xFEBEC43C",
+        "0xFEBEC4C0",
+        "0xFEBEC5EE",
+        "0xFEBEC7BF",
+        "0xFEBEC81A",
+        "0xFEBECB38",
+        "0xFEBECBE8",
+        "0xFEBECC2C",
+        "0xFEBECC48",
+        "0xFEBECC4C",
+        "0xFEBECC4E",
+        "0xFEBECC50",
+        "0xFEBECC60",
+        "0xFEBECC62",
+        "0xFEBECC64",
+        "0xFEBECC66",
+        "0xFEBECC94",
+        "0xFEBECC98",
+        "0xFEBEE40A",
+        "0xFEBEE40C",
+        "0xFEBEEF8E"
+      ],
+      "lo": "0xFEBE59F0",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe59f0),INT_AND((register, 0x18, 4),0xffff),0x10),0x0)",
+      "store": "0x00093CBC"
+    },
+    {
+      "function": "0x00093C9A",
+      "hi": "0xFECE59E4",
+      "hits": [
+        "0xFEBE6AF4",
+        "0xFEBE6AF8",
+        "0xFEBE6D84",
+        "0xFEBE6D86",
+        "0xFEBE6DC8",
+        "0xFEBE6DD6",
+        "0xFEBE6DEC",
+        "0xFEBE6E0A",
+        "0xFEBE71F2",
+        "0xFEBEAC52",
+        "0xFEBEAC54",
+        "0xFEBEAC56",
+        "0xFEBEAC5A",
+        "0xFEBEADB0",
+        "0xFEBEAE90",
+        "0xFEBEBF3C",
+        "0xFEBEC3BA",
+        "0xFEBEC43C",
+        "0xFEBEC4C0",
+        "0xFEBEC5EE",
+        "0xFEBEC7BF",
+        "0xFEBEC81A",
+        "0xFEBECB38",
+        "0xFEBECBE8",
+        "0xFEBECC2C",
+        "0xFEBECC48",
+        "0xFEBECC4C",
+        "0xFEBECC4E",
+        "0xFEBECC50",
+        "0xFEBECC60",
+        "0xFEBECC62",
+        "0xFEBECC64",
+        "0xFEBECC66",
+        "0xFEBECC94",
+        "0xFEBECC98",
+        "0xFEBEE40A",
+        "0xFEBEE40C",
+        "0xFEBEEF8E"
+      ],
+      "lo": "0xFEBE59F4",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe59f0),INT_AND((register, 0x18, 4),0xffff),0x10),0x4)",
+      "store": "0x00093CC6"
+    },
+    {
+      "function": "0x00093C9A",
+      "hi": "0xFECE59EC",
+      "hits": [
+        "0xFEBE6AF4",
+        "0xFEBE6AF8",
+        "0xFEBE6D84",
+        "0xFEBE6D86",
+        "0xFEBE6DC8",
+        "0xFEBE6DD6",
+        "0xFEBE6DEC",
+        "0xFEBE6E0A",
+        "0xFEBE71F2",
+        "0xFEBEAC52",
+        "0xFEBEAC54",
+        "0xFEBEAC56",
+        "0xFEBEAC5A",
+        "0xFEBEADB0",
+        "0xFEBEAE90",
+        "0xFEBEBF3C",
+        "0xFEBEC3BA",
+        "0xFEBEC43C",
+        "0xFEBEC4C0",
+        "0xFEBEC5EE",
+        "0xFEBEC7BF",
+        "0xFEBEC81A",
+        "0xFEBECB38",
+        "0xFEBECBE8",
+        "0xFEBECC2C",
+        "0xFEBECC48",
+        "0xFEBECC4C",
+        "0xFEBECC4E",
+        "0xFEBECC50",
+        "0xFEBECC60",
+        "0xFEBECC62",
+        "0xFEBECC64",
+        "0xFEBECC66",
+        "0xFEBECC94",
+        "0xFEBECC98",
+        "0xFEBEE40A",
+        "0xFEBEE40C",
+        "0xFEBEEF8E"
+      ],
+      "lo": "0xFEBE59FC",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe59f0),INT_AND((register, 0x18, 4),0xffff),0x10),0xc)",
+      "store": "0x00093CC8"
+    },
+    {
+      "function": "0x00093C9A",
+      "hi": "0xFECE59E8",
+      "hits": [
+        "0xFEBE6AF4",
+        "0xFEBE6AF8",
+        "0xFEBE6D84",
+        "0xFEBE6D86",
+        "0xFEBE6DC8",
+        "0xFEBE6DD6",
+        "0xFEBE6DEC",
+        "0xFEBE6E0A",
+        "0xFEBE71F2",
+        "0xFEBEAC52",
+        "0xFEBEAC54",
+        "0xFEBEAC56",
+        "0xFEBEAC5A",
+        "0xFEBEADB0",
+        "0xFEBEAE90",
+        "0xFEBEBF3C",
+        "0xFEBEC3BA",
+        "0xFEBEC43C",
+        "0xFEBEC4C0",
+        "0xFEBEC5EE",
+        "0xFEBEC7BF",
+        "0xFEBEC81A",
+        "0xFEBECB38",
+        "0xFEBECBE8",
+        "0xFEBECC2C",
+        "0xFEBECC48",
+        "0xFEBECC4C",
+        "0xFEBECC4E",
+        "0xFEBECC50",
+        "0xFEBECC60",
+        "0xFEBECC62",
+        "0xFEBECC64",
+        "0xFEBECC66",
+        "0xFEBECC94",
+        "0xFEBECC98",
+        "0xFEBEE40A",
+        "0xFEBEE40C",
+        "0xFEBEEF8E"
+      ],
+      "lo": "0xFEBE59F8",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe59f0),INT_AND((register, 0x18, 4),0xffff),0x10),0x8)",
+      "store": "0x00093CCA"
+    },
+    {
+      "function": "0x00093F4E",
+      "hi": "0xFECE59EC",
+      "hits": [
+        "0xFEBE6AF4",
+        "0xFEBE6AF8",
+        "0xFEBE6D84",
+        "0xFEBE6D86",
+        "0xFEBE6DC8",
+        "0xFEBE6DD6",
+        "0xFEBE6DEC",
+        "0xFEBE6E0A",
+        "0xFEBE71F2",
+        "0xFEBEAC52",
+        "0xFEBEAC54",
+        "0xFEBEAC56",
+        "0xFEBEAC5A",
+        "0xFEBEADB0",
+        "0xFEBEAE90",
+        "0xFEBEBF3C",
+        "0xFEBEC3BA",
+        "0xFEBEC43C",
+        "0xFEBEC4C0",
+        "0xFEBEC5EE",
+        "0xFEBEC7BF",
+        "0xFEBEC81A",
+        "0xFEBECB38",
+        "0xFEBECBE8",
+        "0xFEBECC2C",
+        "0xFEBECC48",
+        "0xFEBECC4C",
+        "0xFEBECC4E",
+        "0xFEBECC50",
+        "0xFEBECC60",
+        "0xFEBECC62",
+        "0xFEBECC64",
+        "0xFEBECC66",
+        "0xFEBECC94",
+        "0xFEBECC98",
+        "0xFEBEE40A",
+        "0xFEBEE40C",
+        "0xFEBEEF8E"
+      ],
+      "lo": "0xFEBE59FC",
+      "pointer_expression": "PTRSUB(PTRADD(PTRSUB(0x0,0xfebe59f0),INT_AND((register, 0x18, 4),0xffff),0x10),0xc)",
+      "store": "0x00093F54"
+    }
+  ],
+  "schema": "camry-8965f3307000-memory-attack-surface-v1",
+  "source_to_sink_map": {
+    "boot_uds_dispatch": {
+      "attacker_provenance": "boot diagnostic service dispatch after programming transition",
+      "computed_store_functions": [],
+      "direct_call_closure_count": 21,
+      "entry": "0x00005222",
+      "highest_risk_reachable_functions": [
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0000721E",
+          "indirect_call_count": 3,
+          "memory_relevance_score": 0,
+          "name": "raise_pmr_and_return_previous_mask_721e"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00007244",
+          "indirect_call_count": 3,
+          "memory_relevance_score": 0,
+          "name": "restore_pmr_preserving_interrupt_disable_state_7244"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00002C16",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 19,
+          "name": "send_transport_first_response_frame_2c16"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00002CD4",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 18,
+          "name": "send_transport_single_response_frame_2cd4"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00005222",
+          "indirect_call_count": 1,
+          "memory_relevance_score": 10,
+          "name": "boot_dispatch_diagnostic_service"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0000674A",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 16,
+          "name": "boot_response_submit"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x000066FA",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 14,
+          "name": "boot_response_copy_chunk"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0000374E",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 10,
+          "name": "guarded_submit_tx_buffer_from_descriptor_374e"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00006B8A",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 9,
+          "name": "boot_transport_response_copy"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00001D2C",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 8,
+          "name": "arm_timer_slot_from_tick_with_callback_data_1d2c"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00002D88",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 8,
+          "name": "start_response_if_enabled_without_busy_state_2d88"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x000036DE",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 8,
+          "name": "load_tx_buffer_and_set_request_if_idle_36de"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x000051FA",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 7,
+          "name": "boot_negative_response"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00001EC0",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 6,
+          "name": "copy_pdu_descriptor_and_submit_1ec0"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00001F60",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 6,
+          "name": "increment_timer_generation_and_arm_transport_slot_1f60"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00001D24",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 5,
+          "name": "read_ffe51010_word_1d24"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00004606",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 1,
+          "name": "submit_at_most_eight_byte_mapped_pdu_4606"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00001550",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 0,
+          "name": "set_gp_execution_state_three_1550"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00001560",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 0,
+          "name": "disable_interrupts_stop_clock3_clear_bits_and_spin_1560"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0000159E",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 0,
+          "name": "set_state_three_and_enter_stop_loop_159e"
+        }
+      ],
+      "indirect_call_functions": [
+        "0x00005222",
+        "0x0000721E",
+        "0x00007244"
+      ],
+      "name": "boot_dispatch_diagnostic_service"
+    },
+    "cantp_ingress": {
+      "attacker_provenance": "diagnostic CAN frame and ISO-TP PCI parser",
+      "computed_store_functions": [],
+      "direct_call_closure_count": 46,
+      "entry": "0x0007A57A",
+      "highest_risk_reachable_functions": [
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007B06A",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 13,
+          "name": "cantp_append_consecutive_receive"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007AEBE",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 10,
+          "name": "cantp_begin_first_frame_receive"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007AD64",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 8,
+          "name": "cantp_start_upper_receive"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007A8E8",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 7,
+          "name": "cantp_copy_upper_receive_bytes"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007ABE6",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 7,
+          "name": "arbitrate_cantp_transmit_owner_for_receive_admission_7abe6"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007B452",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 7,
+          "name": "cantp_reset_transmit_owner"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007A4E4",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 6,
+          "name": "dispatch_cantp_received_frame_by_pci_nibble_7a4e4"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007A77E",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 6,
+          "name": "cantp_reset_receive_owner"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007AC9C",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 6,
+          "name": "arbitrate_cantp_receive_owner_for_new_frame_7ac9c"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007B9AC",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 6,
+          "name": "cantp_finish_transmit_aggregate"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00081886",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 6,
+          "name": "query_packed_id_slot12_with_buffer_and_u16_81886"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007A41C",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 5,
+          "name": "cantp_find_receive_frame_connection"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007A57A",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 5,
+          "name": "cantp_receive_can_frame"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007A6D2",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 5,
+          "name": "cantp_find_receive_connection"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007A728",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 5,
+          "name": "cantp_find_transmit_connection"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007A79E",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 5,
+          "name": "forward_cantp_receive_result_to_router_7a79e"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007A7AE",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 5,
+          "name": "cantp_finish_receive_aggregate"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007A862",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 5,
+          "name": "read_or_repair_cantp_first_flow_byte_7a862"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007B126",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 5,
+          "name": "cantp_handle_consecutive_receive"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007B46E",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 5,
+          "name": "forward_cantp_transmit_result_to_router_7b46e"
+        }
+      ],
+      "indirect_call_functions": [],
+      "name": "cantp_receive_can_frame"
+    },
+    "dcm_read_did": {
+      "attacker_provenance": "SID 0x22 DID list and response producer",
+      "computed_store_functions": [
+        "0x00093C9A",
+        "0x00093F4E"
+      ],
+      "direct_call_closure_count": 193,
+      "entry": "0x000962F2",
+      "highest_risk_reachable_functions": [
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0008A134",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 56,
+          "name": "memzero"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00092AB0",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 38,
+          "name": "dcm_reset_response_queue"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x000933F8",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 35,
+          "name": "dcm_enqueue_final_disposition"
+        },
+        {
+          "computed_store_candidate": true,
+          "entry": "0x00093C9A",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 18,
+          "name": "dcm_reset_receive_slot_and_optionally_shared_response_93c9a"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0006A45E",
+          "indirect_call_count": 3,
+          "memory_relevance_score": 2,
+          "name": "push_priority_mask_and_raise_to_ff00_6a45e"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0006A4C4",
+          "indirect_call_count": 3,
+          "memory_relevance_score": 2,
+          "name": "pop_and_restore_priority_mask_stack_6a4c4"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x000912BE",
+          "indirect_call_count": 2,
+          "memory_relevance_score": 9,
+          "name": "dcm_deliver_response_notification"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00094590",
+          "indirect_call_count": 1,
+          "memory_relevance_score": 11,
+          "name": "dcm_read_and_slice_dynamic_did_sources_94590"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00092F76",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 18,
+          "name": "dcm_try_pending_response"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00093538",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 17,
+          "name": "dcm_request_explicit_pending_response"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00095FB4",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 17,
+          "name": "dcm_serialize_read_did_body"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00093198",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 16,
+          "name": "dcm_enqueue_pending_response"
+        },
+        {
+          "computed_store_candidate": true,
+          "entry": "0x00093F4E",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 6,
+          "name": "dcm_set_slot_inactivity_participant_93f4e"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0008FB52",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 15,
+          "name": "cancel_secoc_transmit_state_and_release_buffer_8fb52"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0009126A",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 15,
+          "name": "dcm_complete_service_response"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00092E00",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 15,
+          "name": "dcm_try_final_response"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0009449E",
+          "indirect_call_count": 1,
+          "memory_relevance_score": 7,
+          "name": "dcm_dispatch_did_length_callback_9449e"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x000946C6",
+          "indirect_call_count": 1,
+          "memory_relevance_score": 7,
+          "name": "dcm_read_dynamic_did_with_pending_cancellation_946c6"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0008E9C6",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 14,
+          "name": "copy_payload_and_append_queue_slot_8e9c6"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0008160C",
+          "indirect_call_count": 1,
+          "memory_relevance_score": 5,
+          "name": "dispatch_valid_twelve_bank_callback_slot_four_8160c"
+        }
+      ],
+      "indirect_call_functions": [
+        "0x0006A45E",
+        "0x0006A4C4",
+        "0x0008160C",
+        "0x000912BE",
+        "0x0009165E",
+        "0x000916AC",
+        "0x00092518",
+        "0x0009445A",
+        "0x0009449E",
+        "0x00094526",
+        "0x00094590",
+        "0x000946C6",
+        "0x00094F94"
+      ],
+      "name": "dcm_read_did_service"
+    },
+    "dcm_read_memory": {
+      "attacker_provenance": "SID 0x23 address, size, memory ID, and response capacity",
+      "computed_store_functions": [
+        "0x00093C9A",
+        "0x00093F4E"
+      ],
+      "direct_call_closure_count": 313,
+      "entry": "0x000965C0",
+      "highest_risk_reachable_functions": [
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0008A134",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 56,
+          "name": "memzero"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00092AB0",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 38,
+          "name": "dcm_reset_response_queue"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x000933F8",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 35,
+          "name": "dcm_enqueue_final_disposition"
+        },
+        {
+          "computed_store_candidate": true,
+          "entry": "0x00093C9A",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 18,
+          "name": "dcm_reset_receive_slot_and_optionally_shared_response_93c9a"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0006A45E",
+          "indirect_call_count": 3,
+          "memory_relevance_score": 2,
+          "name": "push_priority_mask_and_raise_to_ff00_6a45e"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0006A4C4",
+          "indirect_call_count": 3,
+          "memory_relevance_score": 2,
+          "name": "pop_and_restore_priority_mask_stack_6a4c4"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x000912BE",
+          "indirect_call_count": 2,
+          "memory_relevance_score": 9,
+          "name": "dcm_deliver_response_notification"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00092F76",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 18,
+          "name": "dcm_try_pending_response"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x000885B2",
+          "indirect_call_count": 2,
+          "memory_relevance_score": 1,
+          "name": "advance_crypto_scheduler_and_invoke_guarded_callbacks_885b2"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00093538",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 17,
+          "name": "dcm_request_explicit_pending_response"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0008D546",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 16,
+          "name": "dispatch_memory_read_by_selector_nibble_8d546"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00093198",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 16,
+          "name": "dcm_enqueue_pending_response"
+        },
+        {
+          "computed_store_candidate": true,
+          "entry": "0x00093F4E",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 6,
+          "name": "dcm_set_slot_inactivity_participant_93f4e"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0008FB52",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 15,
+          "name": "cancel_secoc_transmit_state_and_release_buffer_8fb52"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0009126A",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 15,
+          "name": "dcm_complete_service_response"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00092E00",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 15,
+          "name": "dcm_try_final_response"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0008E9C6",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 14,
+          "name": "copy_payload_and_append_queue_slot_8e9c6"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0008160C",
+          "indirect_call_count": 1,
+          "memory_relevance_score": 5,
+          "name": "dispatch_valid_twelve_bank_callback_slot_four_8160c"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00091CE2",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 13,
+          "name": "dcm_stage_final_response"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00091938",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 12,
+          "name": "update_dcm_connection_activity_requests_91938"
+        }
+      ],
+      "indirect_call_functions": [
+        "0x0006A45E",
+        "0x0006A4C4",
+        "0x000782DE",
+        "0x0008160C",
+        "0x000885B2",
+        "0x000912BE",
+        "0x0009165E",
+        "0x000916AC",
+        "0x00092518"
+      ],
+      "name": "dcm_read_memory_service"
+    },
+    "dcm_routine_control": {
+      "attacker_provenance": "SID 0x31 request body and lifecycle operation",
+      "computed_store_functions": [
+        "0x00093C9A",
+        "0x00093F4E"
+      ],
+      "direct_call_closure_count": 241,
+      "entry": "0x00097AE4",
+      "highest_risk_reachable_functions": [
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0008A134",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 56,
+          "name": "memzero"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00092AB0",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 38,
+          "name": "dcm_reset_response_queue"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x000933F8",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 35,
+          "name": "dcm_enqueue_final_disposition"
+        },
+        {
+          "computed_store_candidate": true,
+          "entry": "0x00093C9A",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 18,
+          "name": "dcm_reset_receive_slot_and_optionally_shared_response_93c9a"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0009767C",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 27,
+          "name": "pack_routine_scalar_response_and_advance_length_9767c"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0006A45E",
+          "indirect_call_count": 3,
+          "memory_relevance_score": 2,
+          "name": "push_priority_mask_and_raise_to_ff00_6a45e"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0006A4C4",
+          "indirect_call_count": 3,
+          "memory_relevance_score": 2,
+          "name": "pop_and_restore_priority_mask_stack_6a4c4"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x000912BE",
+          "indirect_call_count": 2,
+          "memory_relevance_score": 9,
+          "name": "dcm_deliver_response_notification"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x000974B0",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 24,
+          "name": "unpack_routine_arguments_and_zero_response_payload_974b0"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0008BD7C",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 20,
+          "name": "diag_routine_run_action_phase"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00092F76",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 18,
+          "name": "dcm_try_pending_response"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0008E5BC",
+          "indirect_call_count": 1,
+          "memory_relevance_score": 9,
+          "name": "diag_routine_dispatch_action"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00093538",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 17,
+          "name": "dcm_request_explicit_pending_response"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00093198",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 16,
+          "name": "dcm_enqueue_pending_response"
+        },
+        {
+          "computed_store_candidate": true,
+          "entry": "0x00093F4E",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 6,
+          "name": "dcm_set_slot_inactivity_participant_93f4e"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0008FB52",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 15,
+          "name": "cancel_secoc_transmit_state_and_release_buffer_8fb52"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0009126A",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 15,
+          "name": "dcm_complete_service_response"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00092E00",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 15,
+          "name": "dcm_try_final_response"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0008E9C6",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 14,
+          "name": "copy_payload_and_append_queue_slot_8e9c6"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0008160C",
+          "indirect_call_count": 1,
+          "memory_relevance_score": 5,
+          "name": "dispatch_valid_twelve_bank_callback_slot_four_8160c"
+        }
+      ],
+      "indirect_call_functions": [
+        "0x0006A45E",
+        "0x0006A4C4",
+        "0x0008160C",
+        "0x0008E5BC",
+        "0x000912BE",
+        "0x0009165E",
+        "0x000916AC",
+        "0x00092518"
+      ],
+      "name": "dispatch_routine_control_operation_status_97ae4"
+    },
+    "dcm_scheduled_dispatch": {
+      "attacker_provenance": "completed application diagnostic request",
+      "computed_store_functions": [
+        "0x00093C6C",
+        "0x00093C9A",
+        "0x00093F4E"
+      ],
+      "direct_call_closure_count": 177,
+      "entry": "0x000922AA",
+      "highest_risk_reachable_functions": [
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0008A134",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 56,
+          "name": "memzero"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00091466",
+          "indirect_call_count": 1,
+          "memory_relevance_score": 34,
+          "name": "dcm_dispatch_subfunction_service"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00092AB0",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 38,
+          "name": "dcm_reset_response_queue"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x000933F8",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 35,
+          "name": "dcm_enqueue_final_disposition"
+        },
+        {
+          "computed_store_candidate": true,
+          "entry": "0x00093C9A",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 18,
+          "name": "dcm_reset_receive_slot_and_optionally_shared_response_93c9a"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0006A45E",
+          "indirect_call_count": 3,
+          "memory_relevance_score": 2,
+          "name": "push_priority_mask_and_raise_to_ff00_6a45e"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0006A4C4",
+          "indirect_call_count": 3,
+          "memory_relevance_score": 2,
+          "name": "pop_and_restore_priority_mask_stack_6a4c4"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00091410",
+          "indirect_call_count": 1,
+          "memory_relevance_score": 18,
+          "name": "dcm_dispatch_direct_service"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x000912BE",
+          "indirect_call_count": 2,
+          "memory_relevance_score": 9,
+          "name": "dcm_deliver_response_notification"
+        },
+        {
+          "computed_store_candidate": true,
+          "entry": "0x00093C6C",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 12,
+          "name": "dcm_rewind_receive_cursor_and_get_received_pdu_93c6c"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x000910FA",
+          "indirect_call_count": 1,
+          "memory_relevance_score": 13,
+          "name": "dcm_invoke_request_policy"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00092F76",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 18,
+          "name": "dcm_try_pending_response"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00091566",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 17,
+          "name": "dcm_begin_service_request"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00093538",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 17,
+          "name": "dcm_request_explicit_pending_response"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00093198",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 16,
+          "name": "dcm_enqueue_pending_response"
+        },
+        {
+          "computed_store_candidate": true,
+          "entry": "0x00093F4E",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 6,
+          "name": "dcm_set_slot_inactivity_participant_93f4e"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0008FB52",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 15,
+          "name": "cancel_secoc_transmit_state_and_release_buffer_8fb52"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0009126A",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 15,
+          "name": "dcm_complete_service_response"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x000913C2",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 15,
+          "name": "dcm_initialize_message_context"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00092E00",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 15,
+          "name": "dcm_try_final_response"
+        }
+      ],
+      "indirect_call_functions": [
+        "0x0006A45E",
+        "0x0006A4C4",
+        "0x0008160C",
+        "0x000910FA",
+        "0x000912BE",
+        "0x00091410",
+        "0x00091466",
+        "0x0009165E",
+        "0x000916AC",
+        "0x00092518"
+      ],
+      "name": "dcm_run_scheduled_request"
+    },
+    "dcm_write_did": {
+      "attacker_provenance": "SID 0x2E request body",
+      "computed_store_functions": [
+        "0x00093C9A",
+        "0x00093F4E"
+      ],
+      "direct_call_closure_count": 181,
+      "entry": "0x00095978",
+      "highest_risk_reachable_functions": [
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0008A134",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 56,
+          "name": "memzero"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00092AB0",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 38,
+          "name": "dcm_reset_response_queue"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x000933F8",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 35,
+          "name": "dcm_enqueue_final_disposition"
+        },
+        {
+          "computed_store_candidate": true,
+          "entry": "0x00093C9A",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 18,
+          "name": "dcm_reset_receive_slot_and_optionally_shared_response_93c9a"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0006A45E",
+          "indirect_call_count": 3,
+          "memory_relevance_score": 2,
+          "name": "push_priority_mask_and_raise_to_ff00_6a45e"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0006A4C4",
+          "indirect_call_count": 3,
+          "memory_relevance_score": 2,
+          "name": "pop_and_restore_priority_mask_stack_6a4c4"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x000912BE",
+          "indirect_call_count": 2,
+          "memory_relevance_score": 9,
+          "name": "dcm_deliver_response_notification"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00092F76",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 18,
+          "name": "dcm_try_pending_response"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00093538",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 17,
+          "name": "dcm_request_explicit_pending_response"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00093198",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 16,
+          "name": "dcm_enqueue_pending_response"
+        },
+        {
+          "computed_store_candidate": true,
+          "entry": "0x00093F4E",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 6,
+          "name": "dcm_set_slot_inactivity_participant_93f4e"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0008FB52",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 15,
+          "name": "cancel_secoc_transmit_state_and_release_buffer_8fb52"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0009126A",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 15,
+          "name": "dcm_complete_service_response"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00092E00",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 15,
+          "name": "dcm_try_final_response"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0009449E",
+          "indirect_call_count": 1,
+          "memory_relevance_score": 7,
+          "name": "dcm_dispatch_did_length_callback_9449e"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0008E9C6",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 14,
+          "name": "copy_payload_and_append_queue_slot_8e9c6"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0008160C",
+          "indirect_call_count": 1,
+          "memory_relevance_score": 5,
+          "name": "dispatch_valid_twelve_bank_callback_slot_four_8160c"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00091CE2",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 13,
+          "name": "dcm_stage_final_response"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0009445A",
+          "indirect_call_count": 1,
+          "memory_relevance_score": 5,
+          "name": "dcm_dispatch_did_presence_probe_9445a"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00094786",
+          "indirect_call_count": 1,
+          "memory_relevance_score": 5,
+          "name": "dcm_dispatch_did_write_callback_94786"
+        }
+      ],
+      "indirect_call_functions": [
+        "0x0006A45E",
+        "0x0006A4C4",
+        "0x0008160C",
+        "0x000912BE",
+        "0x0009165E",
+        "0x000916AC",
+        "0x00092518",
+        "0x0009445A",
+        "0x0009449E",
+        "0x00094786"
+      ],
+      "name": "dcm_write_did_service"
+    },
+    "deferred_can_dispatch": {
+      "attacker_provenance": "software-ring records dispatch through configured callbacks",
+      "computed_store_functions": [],
+      "direct_call_closure_count": 1,
+      "entry": "0x00080884",
+      "highest_risk_reachable_functions": [
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00080884",
+          "indirect_call_count": 1,
+          "memory_relevance_score": 7,
+          "name": "dispatch_message_to_six_masked_callbacks_80884"
+        }
+      ],
+      "indirect_call_functions": [
+        "0x00080884"
+      ],
+      "name": "dispatch_message_to_six_masked_callbacks_80884"
+    },
+    "normal_com_ingress": {
+      "attacker_provenance": "normal/SecOC PDU callback path",
+      "computed_store_functions": [
+        "0x0008E7BA"
+      ],
+      "direct_call_closure_count": 10,
+      "entry": "0x000810F2",
+      "highest_risk_reachable_functions": [
+        {
+          "computed_store_candidate": false,
+          "entry": "0x000810F2",
+          "indirect_call_count": 2,
+          "memory_relevance_score": 6,
+          "name": "filter_matched_message_and_dispatch_pdu_810f2"
+        },
+        {
+          "computed_store_candidate": true,
+          "entry": "0x0008E7BA",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 1,
+          "name": "increment_tracking_counter5398_8e7ba"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00081D30",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 5,
+          "name": "dispatch_packed_id_resolved_slot8_81d30"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0006A32C",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 1,
+          "name": "validate_enabled_eight_byte_additive_checksum_6a32c"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0006A3BE",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 1,
+          "name": "conditionally_run_descriptor_checksum_check_6a3be"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0006A328",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 0,
+          "name": "return_const_0_6a328"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0008135C",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 0,
+          "name": "return_only_stub_8135c"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0008135E",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 0,
+          "name": "return_only_stub_8135e"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00081D16",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 0,
+          "name": "call_21ce4_with_masked_u16_81d16"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00081D2E",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 0,
+          "name": "return_only_stub_81d2e"
+        }
+      ],
+      "indirect_call_functions": [
+        "0x000810F2"
+      ],
+      "name": "filter_matched_message_and_dispatch_pdu_810f2"
+    },
+    "raw_can_ring_producer": {
+      "attacker_provenance": "RSCFD payload and retained DLC enter the software ring",
+      "computed_store_functions": [],
+      "direct_call_closure_count": 7,
+      "entry": "0x00080A4A",
+      "highest_risk_reachable_functions": [
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0006A45E",
+          "indirect_call_count": 3,
+          "memory_relevance_score": 2,
+          "name": "push_priority_mask_and_raise_to_ff00_6a45e"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0006A4C4",
+          "indirect_call_count": 3,
+          "memory_relevance_score": 2,
+          "name": "pop_and_restore_priority_mask_stack_6a4c4"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00080A4A",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 13,
+          "name": "enqueue_message_ring_with_complement_header_80a4a"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007A2DA",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 0,
+          "name": "call_interrupt_guard_and_return_zero_7a2da"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007A2E8",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 0,
+          "name": "thunk_pop_and_restore_priority_mask_stack_6a4c4"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00098B8A",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 0,
+          "name": "thunk_push_priority_mask_and_raise_to_ff00_6a45e"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00098B96",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 0,
+          "name": "thunk_pop_and_restore_priority_mask_stack_6a4c4"
+        }
+      ],
+      "indirect_call_functions": [
+        "0x0006A45E",
+        "0x0006A4C4"
+      ],
+      "name": "enqueue_message_ring_with_complement_header_80a4a"
+    },
+    "xcp_command_dispatch": {
+      "attacker_provenance": "post-staging command path behind fixed CodeFlash gate",
+      "computed_store_functions": [
+        "0x0007FC0E",
+        "0x0008300E"
+      ],
+      "direct_call_closure_count": 28,
+      "entry": "0x000821D6",
+      "highest_risk_reachable_functions": [
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0006A45E",
+          "indirect_call_count": 3,
+          "memory_relevance_score": 2,
+          "name": "push_priority_mask_and_raise_to_ff00_6a45e"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0006A4C4",
+          "indirect_call_count": 3,
+          "memory_relevance_score": 2,
+          "name": "pop_and_restore_priority_mask_stack_6a4c4"
+        },
+        {
+          "computed_store_candidate": true,
+          "entry": "0x0007FC0E",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 16,
+          "name": "enqueue_large_can_tx"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007FD46",
+          "indirect_call_count": 1,
+          "memory_relevance_score": 12,
+          "name": "snapshot_and_enqueue_can_tx"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x000821D6",
+          "indirect_call_count": 1,
+          "memory_relevance_score": 8,
+          "name": "dispatch_session_command_and_send_response_821d6"
+        },
+        {
+          "computed_store_candidate": true,
+          "entry": "0x0008300E",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 3,
+          "name": "send_bounded_zero_padded_packet_8300e"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00098E80",
+          "indirect_call_count": 1,
+          "memory_relevance_score": 5,
+          "name": "dispatch_eight_byte_command_reply_98e80"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00082BD2",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 9,
+          "name": "command_connect_session_and_report_limits_82bd2"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007FEF8",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 7,
+          "name": "canif_transmit"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00083158",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 6,
+          "name": "transmit_canif_pdu_with_f800_prefix_83158"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x000830C0",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 5,
+          "name": "wrapper_predispatch_session_command_hook_830c0"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00082F44",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 4,
+          "name": "enqueue_fixed_packet_overwriting_oldest_82f44"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00082330",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 3,
+          "name": "stop_all_sample_lists_82330"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00082ED6",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 2,
+          "name": "clear_packet_queue_indices_82ed6"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x000821B2",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 1,
+          "name": "close_session_and_clear_queue_indices_821b2"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00082A5C",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 1,
+          "name": "command_return_unsupported_error20_82a5c"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00082D6C",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 1,
+          "name": "try_channel_packet_callback_82d6c"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00082FC0",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 1,
+          "name": "try_packet_callback_then_enqueue_if_busy_82fc0"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007A2DA",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 0,
+          "name": "call_interrupt_guard_and_return_zero_7a2da"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007A2E8",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 0,
+          "name": "thunk_pop_and_restore_priority_mask_stack_6a4c4"
+        }
+      ],
+      "indirect_call_functions": [
+        "0x0006A45E",
+        "0x0006A4C4",
+        "0x0007FD46",
+        "0x000821D6",
+        "0x00098E80"
+      ],
+      "name": "dispatch_session_command_and_send_response_821d6"
+    },
+    "xcp_staging": {
+      "attacker_provenance": "extended-ID XCP-shaped frame staging; stock command gate is disabled",
+      "computed_store_functions": [
+        "0x0007FC0E",
+        "0x0008300E",
+        "0x000830D0"
+      ],
+      "direct_call_closure_count": 30,
+      "entry": "0x000830D0",
+      "highest_risk_reachable_functions": [
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0006A45E",
+          "indirect_call_count": 3,
+          "memory_relevance_score": 2,
+          "name": "push_priority_mask_and_raise_to_ff00_6a45e"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0006A4C4",
+          "indirect_call_count": 3,
+          "memory_relevance_score": 2,
+          "name": "pop_and_restore_priority_mask_stack_6a4c4"
+        },
+        {
+          "computed_store_candidate": true,
+          "entry": "0x0007FC0E",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 16,
+          "name": "enqueue_large_can_tx"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007FD46",
+          "indirect_call_count": 1,
+          "memory_relevance_score": 12,
+          "name": "snapshot_and_enqueue_can_tx"
+        },
+        {
+          "computed_store_candidate": true,
+          "entry": "0x000830D0",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 9,
+          "name": "dispatch_bounded_pdu_copy_for_enabled_channel_830d0"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x000821D6",
+          "indirect_call_count": 1,
+          "memory_relevance_score": 8,
+          "name": "dispatch_session_command_and_send_response_821d6"
+        },
+        {
+          "computed_store_candidate": true,
+          "entry": "0x0008300E",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 3,
+          "name": "send_bounded_zero_padded_packet_8300e"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00098E80",
+          "indirect_call_count": 1,
+          "memory_relevance_score": 5,
+          "name": "dispatch_eight_byte_command_reply_98e80"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00082BD2",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 9,
+          "name": "command_connect_session_and_report_limits_82bd2"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x0007FEF8",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 7,
+          "name": "canif_transmit"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00082FEC",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 7,
+          "name": "dispatch_packet_for_enabled_channel_82fec"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00083158",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 6,
+          "name": "transmit_canif_pdu_with_f800_prefix_83158"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x000830C0",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 5,
+          "name": "wrapper_predispatch_session_command_hook_830c0"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00082F44",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 4,
+          "name": "enqueue_fixed_packet_overwriting_oldest_82f44"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00082330",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 3,
+          "name": "stop_all_sample_lists_82330"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00082ED6",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 2,
+          "name": "clear_packet_queue_indices_82ed6"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x000821B2",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 1,
+          "name": "close_session_and_clear_queue_indices_821b2"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00082A5C",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 1,
+          "name": "command_return_unsupported_error20_82a5c"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00082D6C",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 1,
+          "name": "try_channel_packet_callback_82d6c"
+        },
+        {
+          "computed_store_candidate": false,
+          "entry": "0x00082FC0",
+          "indirect_call_count": 0,
+          "memory_relevance_score": 1,
+          "name": "try_packet_callback_then_enqueue_if_busy_82fc0"
+        }
+      ],
+      "indirect_call_functions": [
+        "0x0006A45E",
+        "0x0006A4C4",
+        "0x0007FD46",
+        "0x000821D6",
+        "0x00098E80"
+      ],
+      "name": "dispatch_bounded_pdu_copy_for_enabled_channel_830d0"
+    }
+  },
+  "summary": {
+    "attacker_root_count": 12,
+    "camry_fewer_branch_candidates": 2,
+    "camry_functions": 7336,
+    "changed_guard_operand_candidates": 50,
+    "crown_functions": 6971,
+    "directly_reachable_union_functions": 562,
+    "monotonic_exact_anchors": 3182,
+    "reachable_computed_store_rows": 12,
+    "unique_exact_shape_homologs": 3460
+  },
+  "target": {
+    "codeflash_sha256": "42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7",
+    "name": "camry-8965F3307000"
+  }
+}

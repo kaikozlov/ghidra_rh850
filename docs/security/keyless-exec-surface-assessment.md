@@ -600,6 +600,39 @@ fixed-state/NvM-object-`0x0E` reset helper; `0x58404` is a parameterless AUTOSAR
 OS task with a fixed caller; and `0x7C7C2` is COM-Tx maintenance called with an
 internally generated index bounded by the one-entry Tx-PDU configuration.
 
+## 20.4 Dynamic CanTp ingress fuzz on Camry `8965F3307000` (bounded negative)
+
+Section 20.1 closed the transport statically on its arithmetic. The exact Camry
+image has also been exercised dynamically by
+`tools/targets/camry/research/fuzz_camry_f33_cantp_ingress.py`, which enters
+`cantp_receive_can_frame @ 0x7A57A` with raw `(canif_receive_id, F33PduInfo)`
+pairs. The 231 structured trials cover SF/FF/CF/FC nibble and DLC boundaries,
+12-bit FF totals around the `0x100` receive capacity, sequence and remaining
+accounting, cross-connection interleave, restart, oversupply, and live-transmit
+flow control. Seed `49831` adds 256 deterministic random frame/state trials.
+
+This is the schema-v3 strong oracle, not the superseded envelope-only run.
+Every pattern-filled trial checks the whole RAM window, slot isolation, row
+invariants, four access-time fences, attacker-pointer sentinels, marker
+propagation, and the exact return PC. Ten sampled trials were independently
+re-run from a second address-derived fill and all ten post-states agreed after
+normalizing untouched bytes. The host divergence comparator is seeded, and
+NOPing both `dcm_copy_receive_data` capacity guards is detected as the expected
+cross-slot overwrite and length underflow. Full details and bounded exclusions
+are in [the fuzz-oracle methodology](fuzz-oracle-methodology.md).
+
+Executed result (2026-10-25, exact CodeFlash SHA-256
+`42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7`):
+**487 / 487** returns observed, **0** oracle findings, **0** fill-divergence
+findings, and **0** missing required sinks. The dynamic reach evidence includes
+283 CanTp→upper-layer copies, 77 starts of reception, and 12 accepted
+flow-control paths. Simulator-only priority-mask thunk patches and absent
+interrupt scheduling bound this result; it is not a live-CAN timing proof.
+
+Together with §20.1, this supplies no CanTp/Dcm-ingress write primitive for the
+tracked image. The direct DCM service and TX-segmenter campaign is recorded in
+[the Camry baseline §13.11](../variants/camry-2026-live-baseline.md).
+
 ## 21. Techstream Unified recovery does not reveal a target-compatible no-SA retry
 
 The two V18 CUW rows whose prepare+flash grammar is byte-compatible with the

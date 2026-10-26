@@ -205,6 +205,14 @@ builds Consecutive Frames at `0x20E4`. The maximum transport SDU is the classic
 12-bit limit, `0xFFF` bytes. Padding is zero and every transmitted CAN frame is
 eight bytes.
 
+Cross-target note: the Camry F33 application (`8965F3307000`) reaches a
+coincidentally equal 12-bit cap by a different mechanism — a ROM word at
+CodeFlash `0x22C40` gates `cantp_reject_first_frame_extent` (silently, no FC),
+and the effective receive bound is DCM's per-slot 0x100 capacity at
+`dcm_start_of_reception` (overshoot → FC OVERFLOW). See
+[fuzz-oracle-methodology](../security/fuzz-oracle-methodology.md) and the
+Camry baseline §13.10.
+
 ### Transmit
 
 `CanTp_Transmit @ 0x2D88` accepts TxPduId 0 and lengths `1..0xFFF`:

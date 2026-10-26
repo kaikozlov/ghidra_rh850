@@ -1312,6 +1312,212 @@ blocker is fixed**, but the entire authenticated download workflow is not yet
 end-to-end verified by this test. Run `tools/rh850 toolchain self-test` and
 `tools/test rh850_codeflash` for the regression contract.
 
+### 13.10 Superseded envelope-only CanTp/DCM campaign
+
+The first simulator campaigns used a zero-filled RAM image and treated only
+writes outside broad state envelopes as findings. Their recorded
+`456 / 456` CanTp and `12,457 / 12,457` DCM returns with zero findings are
+**withdrawn as security evidence**. The harness audit found that this design:
+
+- could not see zeroing stores, in-envelope cross-slot writes, or many
+  uninitialized reads;
+- had no second-fill divergence check, and its first attempted divergence
+  implementation deleted the alternate dump before comparison;
+- sent malformed direct SID `0x22`/`0x23` payloads and did not require nonzero
+  sink coverage; and
+- omitted the DCM batch-completion marker, causing completed trials to be
+  launched again as singletons.
+
+The replacement campaign and current bounded conclusion are in §13.11. The
+oracle defects, seeded self-tests, exclusions, and fail-fast retry contract are
+recorded in
+[the fuzz-oracle methodology](../security/fuzz-oracle-methodology.md).
+
+### 13.11 2026-10-25 research-refactored CanTp/DCM revalidation
+
+This is the authoritative replacement for §13.10. The process and blind-spot
+registry are in
+[the fuzz-oracle methodology](../security/fuzz-oracle-methodology.md). Both
+harnesses execute original CodeFlash SHA-256
+`42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7`:
+
+- `fuzz_camry_f33_cantp_ingress.py` enters
+  `cantp_receive_can_frame @ 0x7A57A`. Its 231 structured trials cover three
+  routes, SF/FF/CF/FC boundary matrices, segmented assembly through and past
+  the `0x100` slot capacity, interleave/restart/sequence mutations, and flow
+  control against live Tx state.
+- `fuzz_camry_f33_dcm_handlers.py` schema v5 enters eleven exact functions: the
+  scheduled dispatcher, WDBI and RoutineControl services, WDBI payload worker,
+  SID `0x22`/`0x23` services, CanTp TX tick, and four fixed-width crypto-bank
+  operations. Its 4,971 structured trials include every configured WDBI DID and
+  RID, every published read DID plus class edges, the complete SID `0x23`
+  address/size-nibble matrix and RAM boundaries, and every TX state character.
+  An additional 8,192 seeded trials retain the prior random corpus.
+
+Pattern trials start from executed firmware lifecycle state, not host-assumed
+zeroes: `run_init_chain_9887c` resets Dcm timers, event ring, callbacks,
+session, queues, and receive rows; `reset_four_96_byte_tracking_arrays @
+0x8E74E` initializes COM generations; and `crypto_bank_initialize_work @
+0x69064` initializes crypto state. Trial-specific primes model the exact
+direct-entry gates. Request `0xFEBE4200`, context `0xFEBE4300`, response
+`0xFEBE5A20`, and retained RDBI context `0xFEBE5D84` are non-overlapping, and
+request primes now contain exactly their declared bytes.
+
+The main oracle checks whole-window diffs, untouched-slot cross-writes,
+receive-row invariants, four access-time fences, attacker-pointer sentinels,
+marker propagation, and exact return PC. Every unprimed aligned RAM word gets
+an address-distinct splitmix32 marker. Sampled trials run again under an
+independent salt; the host comparator is seeded and rejects mismatched
+scheduled/compared counts. Sim-only removal of both
+`dcm_copy_receive_data` capacity guards produces the expected cross-slot write
+and u16 underflow and is detected.
+
+The research refactor added two class-specific passes:
+
+1. **Request-tail guard:** duplicate every eligible direct WDBI,
+   RoutineControl, RDBI, and RMEM trial with exactly its declared request bytes
+   ending at `0xFEBFFFFF`. A sequential read past the object reaches unmapped
+   `0xFEC00000`. The positive control sends the active DID `0x2030` writer to
+   that address and faults at `0x4F9C6`.
+2. **RDBI response extent:** parse the exact 242-row active publication table
+   at CodeFlash `0x2927C`, issue every DID through the full scheduled dispatcher
+   in sessions 1, 2, and 3, poison only the 0x110-byte response object, and
+   compare every transport-visible byte. Candidate unchanged bytes are rerun
+   with an independent poison. A sim-only no-write replacement for active
+   DID `0x2030` reader `0x4F9B6` is detected at all body offsets 3–18.
+
+Executed results:
+
+| Harness/pass | Executions | Completed/compared | Candidate firmware findings | Explicitly blocked |
+|---|---:|---:|---:|---:|
+| CanTp ingress main, seed `49831` | 487 | 487 returns | 0 | 0 |
+| CanTp independent-fill pass | 10 | 10 comparisons | 0 | 0 |
+| DCM/crypto/TX main v5, seed `53628` | 13,163 | 13,163 returns | 0 | 0 |
+| DCM independent-fill pass | 132 | 132 comparisons | 0 | 0 |
+| DCM exact request-tail guard | 6,199 | 6,190 returns | 0 | 9 DCRA1 |
+| Full-dispatch RDBI response extent | 726 (242 × 3 sessions) | 429 completed positives; 288 incomplete | 0 unwritten published bytes | 9 DCRA1 |
+
+The nine blocked cases in each new pass are DIDs `0x0105`, `0x010B`, and
+`0xF18C` in all three sessions. All stop at `dcra1_crc_raw_words + 0x6 @
+0x67066`; exact bytes disassemble as `sst.b 0x1c,ep,r0` after
+`mov 0xFFD51004,ep`. This is an unmodeled DCRA1 CRC MMIO write. These cases are
+classified **peripheral-blocked**, not clean and not firmware memory faults.
+
+The completed positive responses contained no surviving poison bytes, no
+first-pass poison candidates, and no poison collisions. This exact-target
+variant pass does **not** transfer the Sienna `8965B4512000` stale-DID result:
+the no-write callback observed there is not present on the completed Camry
+active publication paths.
+
+The required main-pass sink counts remain:
+
+| Harness | Required sink | Hits |
+|---|---|---:|
+| CanTp | `cantp_copy_upper_receive_bytes` | 283 |
+| CanTp | `cantp_start_upper_receive` / `dcm_start_of_reception` | 77 / 77 |
+| CanTp | `cantp_apply_flow_control` | 12 |
+| CanTp | `dcm_copy_receive_data` / `dcm_append_receive_chunk` | 283 / 267 |
+| DCM/TX | `cantp_build_and_queue_consecutive_frame` | 6 |
+| DCM/TX | `dcm_copy_transmit_data` | 12 |
+| DCM | DID-length / WDBI execution / RDBI serialization | 537 / 41 / 220 |
+| DCM | memory execution / selector / payload copy | 15 / 15 / 15 |
+| DCM | routine action / start / stop / result / scalar pack | 114 / 104 / 6 / 49 / 117 |
+| DCM | WDBI action dispatch | 6 |
+
+Reproduction:
+
+```bash
+uv run tools/targets/camry/research/fuzz_camry_f33_cantp_ingress.py \
+  --seed 49831 --random-each 256 --batch-size 512 --jobs 4 \
+  --divergence-step 50 --timeout 60 \
+  --out build/out/targets/camry-8965F3307000/cantp-ingress-fuzz
+
+uv run tools/targets/camry/research/fuzz_camry_f33_dcm_handlers.py \
+  --seed 53628 --random-each 8192 --batch-size 512 --jobs 4 \
+  --fill pattern --divergence-step 100 --timeout 60 \
+  --out build/out/targets/camry-8965F3307000/dcm-handlers-fuzz
+```
+
+The old serial 48-trial run launched 275 main simulators and then amplified
+missing batch markers into singleton retries. The current main pass uses 26
+512-trial batches plus one dense divergence batch. The resumed v5 campaign,
+including 6,925 new object-boundary executions, created 45 batch logs, no
+singleton-retry logs, and spanned 95.30 s from its earliest new batch-log
+timestamp to `summary.json`. Each batch is still `TP_END`-checked; failed
+batches preserve completed results, retry only unfinished indexes for at most
+10 seconds, and abort on the first still-missing trial.
+
+The result remains bounded: there is no branch/edge feedback, sanitizer shadow
+memory, interrupt/DMA/timer scheduling, successful DataFlash model, or complete
+temporal-lifetime campaign. Direct entry also bypasses some parser, scheduler,
+and concurrent state. See the methodology matrix for each covered property and
+open obligation.
+
+**Disposition:** no out-of-envelope/cross-slot write, end-of-mapped-RAM
+request-tail over-read, access-time fence hit, invariant failure,
+attacker-pointer materialization, abnormal return, marker propagation,
+unexplained fill dependence, or unwritten byte in a completed positive RDBI
+response emerged from the named entries and states. This supplies no LOAD
+primitive for those completed covered paths and therefore no LOAD+EXEC
+composition. It is not a whole-image absence proof. Reads that stay inside the
+receive slot but pass the declared request length are real on this image; they
+are recorded in §13.12.
+
+### 13.12 2026-10-25 lifecycle-prefix memory-access audit: real read findings
+
+`fuzz_camry_f33_stateful_coverage.py` prefixes every seed request with its own
+strict truncations and pairs each truncation with poll, cancellation, timeout,
+completion, reset, and slot-reuse lifecycle actions, preserving RAM between
+steps. The memory-access pass classifies every core read against the declared
+request object of the step that should have produced it. Schema
+`camry-f33-simulator-memory-access-audit-v1`; artifact
+`build/out/targets/camry-8965F3307000/lifecycle-prefix-memory-audit/summary.json`.
+
+Executed result: **1,554 cases in 292 s, zero hangs, zero persistent writes
+outside the corrected object envelopes, 99 affected records carrying 218
+access-time read events**. The events collapse to four mechanisms. This pass
+also proves oracle sensitivity the honest way: it found real defects, not only
+seeded ones.
+
+| Mechanism | Exact site | Trigger | Reachability | Consequence |
+|---|---|---|---|---|
+| Missing subfunction read | `dcm_resolve_subfunction @ 0x9105A`, PC `0x91078` | 1-byte request (SID only) for a subfunction service | **Proven through `cantp_receive_can_frame @ 0x7A57A`** | Reads one byte past the declared request; consumed as the subfunction |
+| Zero-length first-byte reads | `dcm_begin_service_request @ 0x91566` (PCs `0x91586/0x9158C/0x915A2/0x9161C`), `dcm_resolve_service @ 0x90F98` (PC `0x90FC6`) | 0-length direct-injected request | Direct entry only; not demonstrated through CanTp | Reads the absent SID byte; no write effect |
+| RoutineControl retained-tail read | `unpack_routine_arguments_and_zero_response_payload @ 0x974B0`, PCs `0x9758A/0x9758C` | Short `31 01 10 04` followed by poll/pending-completion | Scheduled dispatcher (DCM-lifecycle) | Stale bytes assemble into the routine callback **argument words** (`0x975C2–0x975D2` store them to the argument array at `ctx+4*n`); per-RID semantic impact not traced |
+| BA stale selector/token read | `dispatch_ba_configured_start @ 0x34DD4` PC `0x34DE4`, `compare_ba_token_bytes @ 0x34D7A` PC `0x34D8E` | 1-byte `BA` reusing a slot holding `F7 BAENA` | Scheduled DCM; not yet through CanTp | Up to **six** stale bytes consumed (maximal case `ba_stale_selector_token_reuse`, now a permanent seed); action dispatch blocked — see below |
+
+**BA consequence is closed by the configured length gate.** The BA operation
+table (`0x27EC4`, ten rows of 16 bytes, count at `0x27EC0`) requires
+`row[1] == declared_request_length` before the `row+8` action pointer is
+called, and every configured selector `F1..FB` declares length 6. The handler
+does read the selector and the five `BAENA` token bytes before that check, so
+short requests consume stale bytes through the token gate — but a length other
+than 6 cannot reach any action. The stale token replay passes the
+authorization-token gate and still stops at the per-operation length equality.
+
+**A latent null function-pointer call exists in the WDBI length path.**
+`dcm_did_class_length @ 0x9449E` bounds its row index with `cmp 0x6` (indices
+0..5), then calls `[row+4]` with no null check. The table at `0x2603C`
+(`tp+0x2240`, stride 0x1C) has five configured rows — DID ranges
+`0x0100–0x0201`, `0x0201–0x02FF`, `0x1000–0x2000`, `0x2001–0x20FF`,
+`0xF100–0xF200`, count u16 `5` at `0x26016` — and row 5 is an all-zero
+terminator. Calling with index 5 jumps to 0 (CWE-476). The index consumed at
+`0x9573C→0x9574A` is the stale slot `gp-0x5AD4` (`0xFEBE5D2C`), refreshed only
+afterwards by the search at `0x9577C` — a use-before-refresh pattern. It is
+**not request-reachable on this calibration**: the binary search
+(`0x940FE`/`0x94148`) is bounded by count 5 and returns indices 0..4, DID 0 is
+rejected by the min-DID gate before any search, reset zeroes the slot, and no
+attacker write path to `0xFEBE5D2C` is known. The every-configured-WDBI-DID
+campaign (§13.11) exercised this path with zero abnormal terminations. Graded
+latent, matching MEM-SAFE-004's treatment of the Sienna command-8 defect.
+
+**Disposition:** the application declares lengths it does not enforce at read
+time in four distinct places — the memory-safety defect class is real on this
+image — but each currently terminates in a bounded read with no write effect,
+no demonstrated information disclosure, and (for BA) a downstream configured
+length gate that blocks action dispatch. The RoutineControl argument-taint path
+is the one with unexplored downstream semantics.
+
 ## 14. Exact F33 persistent Gate-2 development patch
 
 The non-persistent signer architecture in §13 remains the preferred production

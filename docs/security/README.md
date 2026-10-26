@@ -21,6 +21,7 @@ calibrations are compared under [../variants/README.md](../variants/README.md).
 | App↔HSM command surface | Exhaustive cross-target census of every ICU-S/ICUMC command the application can issue (all EPS dumps + Venza airbag) | [icu-hsm-command-surface.md](icu-hsm-command-surface.md) |
 | Ephemeral SecOC bypass | Fail-stock RAM-only bootstrap, lifetime, hook, and internal-command feasibility | [ephemeral-secoc-bypass.md](ephemeral-secoc-bypass.md) |
 | Memory-safety audit | Externally reachable input-handler vulnerabilities | [memory-safety-audit.md](memory-safety-audit.md) |
+| Fuzz-oracle methodology | How sim fuzzing oracles are validated before any "clean" result is believed; blind-spot registry, CWE mapping, seeded-bug self-test | [fuzz-oracle-methodology.md](fuzz-oracle-methodology.md) |
 
 Dealer/tooling key-provisioning evidence is separate from those firmware
 domains. Start with [key-provisioning.md](key-provisioning.md); the recovered

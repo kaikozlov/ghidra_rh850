@@ -28,6 +28,24 @@ devices. Each finding documents input reachability, transport/reassembly path,
 session/security gating, the exact unsafe operation, the resulting security
 primitive, and applicability to the target ECU generation.
 
+## Exact-Camry applicability (2026-10-25)
+
+MEM-SAFE-001, -002, and -003 transfer byte-identically to the 2026 Camry EPS
+`8965F3307000` (CodeFlash SHA-256
+`42dce8efc42f6ae31718e7713fa2d26bb9191b4a82439778aee4d7afded9b0e7`). The
+decisive functions — `payload_decrypt_transfer_task @ 0x6BDE`, the raw staging
+consumer at `0x4F50`, `payload_cmac_verify_setup @ 0x7122` /
+`payload_cmac_verify_step @ 0x7170`, and the compare-mode task — hold the same
+instruction bodies at the same addresses. The independent raw-byte proposition
+verifier (`tools/security/memory_safety_semantics.py`) passes every
+MEM-SAFE-001/002/003 proposition against the Camry image, and
+`tests/targets/camry/verify_camry_f33_boot_memory_safety.py` proves the
+short-block bypass and raw staging copy dynamically in simulation. MEM-SAFE-004
+and -005 are Sienna-specific and intentionally not claimed for the Camry
+(running the verifier against the Camry image fails exactly those two). The
+Camry-side narrative and its application-layer read findings live in
+[camry-2026-live-baseline §13](../variants/camry-2026-live-baseline.md).
+
 ## Summary
 
 | ID | Finding | Primitive | Reachability | Grade |

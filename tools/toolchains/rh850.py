@@ -451,9 +451,9 @@ def validate_execution(
 
 def execute_elf(
     *, elf_path: Path, stop: str, assertions: Sequence[str] = (),
-    memory_regions: Sequence[str] = (), gdb_commands: Sequence[str] = (),
-    expected_output: Sequence[str] = (), timeout: float = 30.0,
-    output_path: Path | None = None,
+    memory_regions: Sequence[str] = (), sim_options: Sequence[str] = (),
+    gdb_commands: Sequence[str] = (), expected_output: Sequence[str] = (),
+    timeout: float = 30.0, output_path: Path | None = None,
 ) -> str:
     """Execute to a checked completion point; never report load-only success."""
     stop_expression = validate_execution(
@@ -467,6 +467,10 @@ def execute_elf(
     target = "target sim --architecture v850e3v5"
     for region in memory_regions:
         target += f" --memory-region {region}"
+    for option in sim_options:
+        if not re.fullmatch(r"--[a-z0-9-]+(?:=[A-Za-z0-9_./,:+~-]+)?", option):
+            raise Rh850ToolError(f"invalid simulator option: {option!r}")
+        target += f" {option}"
     commands = [
         "set confirm off", "set pagination off",
         'file "/out/' + elf.name.replace("\\", "\\\\").replace('"', '\\"') + '"',

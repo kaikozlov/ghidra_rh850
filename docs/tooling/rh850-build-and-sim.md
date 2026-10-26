@@ -914,6 +914,36 @@ suite additionally executes the **original, unmodified** Camry boot parser
 boot SID `0x34` from `0x5D68` to the locked SecurityAccess reject arm at
 `0x5F04`, with the requested RAM address and size verified.
 
+### Known unpatched simulator gaps (workaround recipes)
+
+Three further gaps surfaced while driving the **application** (not boot)
+surface on exact Camry `8965F3307000`. They are not patched in the pinned
+image; callers work around them in GDB:
+
+- **`stsr PMR` raises SIGILL** (`eb .. 40 10`, e.g. `0x6A45E` and
+  `priority_mask_raise @ 0x701C4`), while `ldsr` with the same register field
+  decodes without trapping. The GHS-style interrupt-mask thunk family around
+  `0x6A440..0x6A530` also contains `syncp` (`1F 00`) at
+  `0x6A4C0`/`0x6A51E`, which SIGILLs as well. The CanTp ingress fuzzer neuters
+  the two `0x6A45E/0x6A4C4` thunk entries and both `syncp` sites; the Dcm
+  handler fuzzer additionally neuters the deeper `0x701C4/0x70204`
+  raise/restore pair reached by RID `0x1108`. A GDB target-endian
+  `set {unsigned short}ADDR = 0x007f` writes instruction bytes `7f 00`
+  (`jmp [lp]`); `0x7f00` is byte-swapped and is not the intended return.
+  These are simulator-only patches after `load`. They are sound only for these
+  isolated single-threaded trials, where no interrupt is simulated.
+- **TP-relative addressing decodes as plain `r5`.** `get_cantp_configuration_
+  pointer_7a32e` is `movea -0x118c, tp, r10`, and the whole CanTp/Dcm/PduR
+  family derives config/table pointers from TP. Binutils renders the operand
+  `r5`, and the simulator computes `GR[5] + imm`. Priming `$r5` therefore
+  stands in for TP; the hardware value is `0x23DFC` (so `tp - 0x118C` =
+  `0x22C70`, `F33CanTpConfiguration`; `TP-0x236C` → filter table `0x21FA0`,
+  `TP-0x236C+4` → the `0x79DB0` CanTp callback). `$tp` itself accepts GDB
+  writes but the value does not reach the executed instruction.
+- **System-register state does not survive stops reliably and codeflash
+  bytes patched via `set {unsigned short}` persist**, so per-frame register
+  re-priming (including `$r5`) is required whenever a breakpoint intervened.
+
 ## Rebuilding the GNU setup
 
 `tools/toolchains/v850-gcc/Dockerfile` owns the Ubuntu digest and GCC,
