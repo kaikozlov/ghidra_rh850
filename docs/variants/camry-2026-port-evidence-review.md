@@ -1,59 +1,28 @@
-# 2026 Camry port: adversarial evidence review
+# 2026 Camry vehicle-state and cancellation evidence
 
-This review began on September 15 and retains later dated corrections and
-validation checkpoints. It audits evidence rather than accepting an
-“essentially complete” summary. Software state and test counts belong to the
-revision named in each section; earlier completion/blocker statements may be
-superseded farther down the chronology.
+This report owns the retained vehicle-model, radar, fault-projection and
+cancellation evidence. Current implementation status and software pins belong
+in the [capability matrix](camry-2026-capability-matrix.md); longitudinal
+request/result semantics belong in the
+[longitudinal report](camry-2026-longitudinal-evidence.md).
 
-Use [the capability matrix](camry-2026-capability-matrix.md) for consolidated
-status. Offline reviews below are distinct from the separately attributed
-vehicle observations they discuss; reading this report does not reproduce
-either class of evidence.
-
-## Confirmed corrections
-
-### Tire stiffness is a baseline times a learned multiplier
+## Vehicle-model interpretation
 
 `VehicleModel.update_params()` multiplies `CP.tireStiffnessFront/Rear` by
 `vehicleParameters.stiffnessFactor`. `paramsd.VehicleParamsLearner` likewise
 initializes its model globals from those same CP stiffnesses. A learned value
 near 1.0 therefore supports preserving the configured baseline; it does not
-justify replacing `CP.tireStiffnessFactor=0.7933` with 1.0. The PlotJuggler
-label used in the previous pass is not authoritative over executable code.
+justify replacing `CP.tireStiffnessFactor=0.7933` with 1.0.
 
-The erroneous 1.0 override has been removed. The 15.3 steering-ratio default
-is a separate absolute learned quantity and is not reverted with stiffness.
-The 0.18 s actuator delay is left unchanged, but identical cached lagd values
-on consecutive routes must not be described as independent fresh estimates.
+The 15.3 steering-ratio default is a separate absolute learned quantity.
+The actuator-delay default is 0.18 s; identical cached lagd values on
+consecutive routes are not independent fresh estimates.
 
-### Radar integration requires more than plausible field distributions
-
-The initial radar parser inherited Panda bus 1 from pre-repin Toyota code,
-whereas this branch uses stock Toyota-B: ADAS/camera on the 0/2 relay and
-EPS/Brake on unsplit bus 1. Its synthetic test fed the same wrong bus and did
-not exercise that topology mismatch.
-
-The first joined-object analyzer also indexed by segment and a repeating
-B2:B3 value, overwriting earlier bursts after wrap. A streaming, time-bounded
-join is required. Full-corpus reconstruction still supports the recovered
-relative-speed field, but cycle identity, validity, track lifetime, lateral
-sign/scale, and vision correspondence are being independently reviewed before
-calling the RadarPoint path qualified.
-
-### Continuous signer loses host-command liveness
-
-The archived continuous helper replaces every distinct native B6 while the
-last C7 sequence is nonzero. Its branch-to-NOP change removes one-shot
-consumption without introducing command expiry. Native B6 arrivals can
-therefore keep a stale host target active after host updates cease.
-The defect belongs to the adapter lifecycle.
-
-## Completed independent radar-unit review
+## Radar units and lifecycle
 
 `data/generated/camry_2026_radar_anchors.json` and its raw-object-byte fixture
 retain 17 original rlog identities and independent vision/gyro observations.
-They supersede the prior direct FFD-to-CAN scale transfer:
+The independent anchors are:
 
 | Quantity | Corrected observed wire interpretation | Independent anchor |
 |---|---|---|
@@ -61,13 +30,10 @@ They supersede the prior direct FFD-to-CAN scale transfer:
 | Lateral | signed12 B2:B3[7:4] × 0.04 m, left-positive | 240 off-center vision observations: slope=0.982563; 27,602 continuity-qualified gyro pairs: r=0.843106 and inferred LSB=0.038909 m/count |
 | Relative speed | signed low14 B1:B2 × 0.025 m/s; B1[7:6] excluded | vision-speed slope=0.992347; signed12 wraps 113 retained high-closing-speed observations |
 
-The previous range/range-rate correlation could not determine their common
-scale: both were doubled. Signed13 and signed14 velocity interpretations agree
-on the retained data; the wider field boundary is not independently resolved.
-Object validity/confidence and silent same-slot reassignment are also not
-resolved. The corrected parser remains available for offline/replay inspection;
-normal CarParams retains the model-only radar-unavailable path until object
-validity/lifecycle is established.
+Joint range/range-rate correlation cannot determine a common scale factor.
+Signed13 and signed14 velocity interpretations agree on the retained data;
+the wider field boundary is not independently resolved. Track lifecycle is
+established below; optional confidence/class labels remain unassigned.
 
 The corrected full August reconstruction consumes each time-bounded occurrence
 rather than overwriting repeated counter values: 30,532 / 35,994 complete
@@ -104,196 +70,6 @@ axis unavailability in DID 0x1012 and function restriction in DID 0x2093;
 their CAN carriers remain unassigned and should not be invented from the
 constant bytes of 0x123.
 
-## Completed diagnostic recovery review
-
-FRC_P5 monitor 199 defines control modes 1/2/4 as distance control and mode 3
-as conventional constant-speed cruise. Recovery now requires a distance-control
-mode as well as the permission flag and a clear ACC-not-available flag. Truncated
-DID1903/1905/1906 values are errors, never implicit false/no-fault booleans.
-ISO-TP response-pending no longer terminates a transaction, malformed single
-frames are rejected, and sequence errors cannot produce partial success.
-
-The pre-clear snapshot is written atomically **before** the first clearing
-request. A later timeout preserves that snapshot, completed clear responses,
-and the failure instead of discarding the diagnostic evidence. Six offline
-regression tests cover these cases, including an injected mid-clear failure
-and final Panda ownership cleanup. The historical vehicle result remains useful:
-DTC clear alone did **not** re-enable DRCC in the same ignition cycle after the
-EPS programming transition. September-18 live work supersedes the older conclusion
-that only a full vehicle restart could recover it: Brake/EPB `10 02 -> 11 01`
-followed by FRC `10 02 -> 11 01` restores cruise permission/LDA/PCS state while
-leaving the EPS RAM resident powered. Route `0000010c--506d7277c7` then road-
-qualifies that recovery under stock adaptive cruise plus openpilot lateral.
-
-## Completed host-loss correction
-
-The v17 Camry kit selects a new **598-byte supervised helper**, padded to the
-same 600-byte loader transfer. The 524-byte resident, staging image, and
-boot-authenticated payload are byte-identical to the preceding runtime; no
-CodeFlash patch or new memory region was introduced. The helper consumes a
-changed host generation as a seven-foreground-tick lease, polls it even when
-no native B6 is queued, never renews an unchanged generation, and leaves native
-B6 untouched on expiry or sequence zero. At the nominal 5-ms foreground period,
-this provides 35 ms of host-command receive-loss supervision.
-
-`VerifyCamrySignerHostLiveness.java` executes the actual linked instructions in
-Ghidra emulator-local memory. All 34 liveness assertions pass, including held-command
-expiry, empty-queue aging, sequence wrap, zero release, normal 50-Hz updates,
-and no resurrection across 520 further scheduler invocations. The archived
-continuous helper fails the same expiry assertion. The emulator intercepts
-NOP's custom pcode operation with its architectural no-op behavior and stops
-before the first stock memory-copy/crypto call.
-
-The replacement method now rejects `replace-once` before sending a C7
-substitution when a continuous/supervised helper is selected. Those helpers can legitimately
-replace multiple native frames during one host generation; labeling that as a
-one-frame experiment was incorrect. Historical binaries remain unchanged.
-
-## Completed integration and safety corrections
-
-The stock-harness source census places `0x412` and `0x101` on unsplit Panda bus
-1, `0x160` on camera-side bus 2, and perception `0x180..0x185` on bus 0. The
-previous controller's HUD-to-bus0 and brake-cancel-to-bus2 packets therefore did
-not replace the native sources. They and their Panda permissions are removed;
-CarState reads the HUD from its real PT-side parser. Automatic cancellation and
-any stock-HUD replacement remain unresolved rather than merely “waiting for a
-visual test.” See `camry_2026_stock_harness_topology.json` and the source-hashed
-`camry_20260915_port_evidence_audit.json` for the independent retained census.
-
-Reproduction uses the caller-input export at
-`build/work/camry-port-audit-20260915-openpilot-3f9f3c061`, with the historical
-openpilot/opendbc pins recorded under [Final validation and scope](#final-validation-and-scope).
-
-The September-10 steering witnesses report conventional cruise (`0x251` B0
-`0x88/0x90`) and remain valid historical authority evidence. September-18 route
-`0000010c--506d7277c7` closes the previously missing adaptive case: during the
-919.572-s stock-adaptive-cruise + openpilot-lateral overlap, raw `0x251 B0` is
-`0xC0` on 1,100 samples and `0xA0` twice, with **zero** `0x88/0x90` conventional
-frames. `carState.cruiseState.nonAdaptive` is false throughout the 91,707
-cruise-enabled samples, `carControl.longActive` remains false, and factory lateral
-request/result IDs remain 0. No synthetic engagement flag or new controller veto
-was added.
-
-The generic angle-rate checker did not enforce an active absolute angle cap.
-TSS3 now explicitly rejects targets outside ±1745 raw in addition to its usual
-rate checks; the regression approaches the boundary in legal increments, so it
-cannot pass merely because a large jump was rejected. CarController keeps its
-sequence across inactive periods while emitting wire sequence zero, so a
-subsequent engagement does not reuse a previously consumed generation.
-
-Planner acceleration bounds now agree with the Camry actuator envelope
-(−1.5..+1.3 m/s²). Both Python parsing and Panda verify native E2E Profile 5
-CRC, using init FFFF and Data ID equal to the CAN address; this is wire-equivalent
-to the old init-zero/Data-ID-444A expression for the fixed 32-byte `0x160` only.
-The encoder preserves the unassigned high bit of B12.
-
-Across the complete two August captures, **127/20,510 and 1,373/23,998** native
-`0x160` frames exceed one or both host acceleration-field bounds. When the
-controller intentionally hands back the native low-speed frame, rejecting that
-copy while suppressing the original is a transport defect. Panda now recognizes
-only a byte-exact copy of the latest valid camera frame for native passthrough;
-modified requests retain the ordinary host limits and CRC requirements.
-
-## Final validation and scope
-
-Openpilot `3f9f3c061` pins opendbc `093125ab`. The combined named suites passed
-615 tests / 11,049 subtests, with 404 existing skips. Both debug and non-debug
-H7 application ELF cross-builds pass `-Werror`. No build was deployed. The
-17 original radar rlogs were independently re-extracted and reproduced the
-committed raw-object fixture exactly.
-
-The healthy-EPS original segment has 5,477/5,477 valid post-startup parser
-samples after an explicit test-only topology translation; the stock-harness
-recording correctly remains invalid in 5,476/5,476 samples solely because EPS
-`0x030` is absent. Two compact, source-hashed opendbc fixtures retain the original
-frame cadence, buses, and bytes and regression-test both outcomes.
-
-These results substantially improve the implementation, but supersede rather
-than confirm the earlier “offline/software essentially complete” assessment.
-The [current capability matrix](camry-2026-capability-matrix.md) records the
-remaining specific integration/semantic boundaries. No vehicle commands,
-persistent firmware changes, or on-road tests were performed in this audit.
-
-The compiled-helper suite also runs **52 golden differential/error cases**
-against the archived continuous binary: all 16 received/committed low-counter
-combinations at three target angles, three command-5 failure modes, and an epoch
-mismatch. It compares the actual helper's domain, call-boundary inputs,
-freshness witness, and final queue image. Encoder/crypto callees are supplied
-identical deterministic stubs.
-All 86 compiled-instruction assertions pass. Command expiry changes while the
-signing construction and native-frame mutation tuple remain unchanged.
-
-## Stock topology and ordinary controller/safety corrections
-
-The four-original-rlog topology reducer pins radar bus0 / camera 0x160 bus2 /
-chassis 0x025,0x101,0x412 bus1. It deliberately records the lack of EPS 0x030 in
-these incident-era captures. The earlier wrong-bus HUD and fake-brake cancel
-transmitters are removed rather than presented as a successful source
-replacement. A genuine automatic-cancel ingress remains unresolved on stock
-Toyota-B; reading a state mirror does not make it a command.
-
-The seven-segment consolidated reducer additionally pins configured CP
-stiffness 0.7933, learned multipliers near 1.0, repeated cached lag estimates,
-and conventional cruise in the selected working steering samples. It also
-finds 127/20,510 and 1,373/23,998 native August 0x160 frames outside the narrower
-host-command envelope, all CRC-valid. Byte-exact native handback therefore
-must not be clipped or rejected as though it were a modified host command.
-
-The maintained opendbc changes align planner/controller/Panda bounds at
-Camry −1.5..+1.3 m/s², preserve B12 bit7 while changing only the recovered low 7
-request bits, validate Profile-5 RX/TX, allow only the byte-exact latest valid
-native handback outside those bounds, enforce actual ±1745-raw C7 angle limits
-in addition to rate limits, and preserve the host sequence across inactive
-periods. Read-only conventional cruise is exposed through the normal
-`cruiseState.nonAdaptive` field. No second engagement policy was added.
-
-## Verification and committed integration
-
-Current openpilot `3f9f3c061` pins opendbc `093125ab`. This combined command passes
-**598 tests / 3,172 subtests**, with 262 existing selection skips:
-
-```sh
-cd /Users/kai/dev/inspect/repos/kai-openpilot/opendbc_repo
-uv run pytest -q opendbc/car/toyota/tests opendbc/can/tests \
-  opendbc/safety/tests/test_toyota.py \
-  opendbc/car/tests/test_car_interfaces.py opendbc/car/tests/test_docs.py \
-  opendbc/car/tests/test_platform_configs.py opendbc/car/tests/test_vehicle_model.py
-uv run ruff check opendbc/car/toyota opendbc/can/dbc.py
-```
-
-Analysis verification is explicit and offline:
-
-```sh
-cd /Users/kai/dev/inspect/repos/ghidra_rh850_analysis
-tools/test camry_f33_signer_host_liveness camry_f33_b6_stationary_probe \
-  camry_f33_post_install_recovery camry_2026_radar_anchors \
-  camry_2026_bus1_camera_output camry_2026_stock_harness_topology \
-  camry_20260915_port_evidence_audit --jobs 2
-```
-
-The remaining adaptive-cruise/supervised-signer combination, genuine cancel
-mechanism, fault classification, radar validity/lifecycle, and physical
-longitudinal/AEB/hold behavior are not declared solved by these offline tests.
-The corrected current capability matrix distinguishes each boundary.
-
-The final analysis-side run passed all eight selected verification scripts,
-including 86 compiled-helper liveness/differential/error assertions. The
-differential cases substitute deterministic callback results to compare the
-new helper with the archived one; they do not emulate or validate ICU-S silicon.
-The standalone `build/out/camry-f33-car-kit-v17-audit` bundle passes `doctor`
-and offline `plan`, with the supervised helper SHA pinned in its manifest.
-
-Final targeted analysis result: **8 verification scripts passed, zero failures,
-zero skips**. This includes byte-identical regeneration from the original
-stock-topology and consolidated rlogs, all 121,941 selected radar source frames
-passing Profile-5 CRC, the v17 kit build, and the compiled-helper positive plus
-historical-negative regressions. No hardware execution was performed.
-
-## September 15 follow-up: source lifecycle and live steering-fault projection
-
-The subsequent offline pass resolves two previously unimplemented surfaces.
-No vehicle command, EPS patch, signer change, or Panda-policy change is involved.
-
 ### Source-driven object lifecycle
 
 The ordinary motion PDU for each bank (`0x183..0x185`) has eight seven-byte
@@ -321,15 +97,10 @@ wrong buses cannot manufacture an update; ordinary CAN timeout clears stale
 tracks and publishes a CAN error rather than waiting forever for a missing
 trigger PDU. End-old/start-new ordering is explicit.
 
-The actual opendbc parser replays all 60,969 held-out bank pairs as **20,323
+The retained opendbc replay of 60,969 held-out bank pairs produced **20,323
 complete updates**, **308,111 qualified point observations**, **17,868 observed
 identity replacements**, and **zero reported CAN errors** in source replay.
-Together with
-the already independent distance, speed and lateral-sign anchors, the supported
-Camry decoder is now selected by normal `CarParams` (`radarUnavailable=False`).
-Corolla has no radar DBC assignment and remains model-only; no cross-variant
-transfer is assumed. The exact signed13-versus-signed14 velocity boundary and
-optional object-class/confidence labels remain bounded as before.
+These Camry fixtures do not establish another vehicle's radar contract.
 
 Reproducible source reduction:
 `tools/targets/camry/analysis/analyze_camry_2026_radar_lifecycle.py`,
@@ -339,7 +110,35 @@ The extractor verifies original rlog hashes and P05 integrity before writing
 its deterministic fixture. `tests/targets/camry/verify_camry_2026_radar_lifecycle.py` checks
 both discovery captures and the independent holdout.
 
-### Current fault versus a restart-required failure
+## Driver torque and sender-attribution evidence
+
+The September-4 routes `0000003b--62262eb7a1`, `0000003c--97b9e7a69a`
+and `0000003d--0e812cecba` distinguish successful sending from steering
+control. They contain 751,664 direct-B6 host sends, 751,628 Panda TX returns
+and 33 rejected returns. In 181 fresh, low-driver-torque samples where the
+stock and host targets diverge by at least 2.5 degrees, median measured-angle
+error is 0.79 degrees against stock versus 2.02 against host; stock is closer
+in 134 samples versus 47. Driving windows have no Panda bus-off or transmit-
+error accumulation. This is negative evidence for that sender/configuration,
+not the status of the maintained `0x08A` port.
+
+Those routes also expose a separate driver-state defect: the recorded parser
+held `steeringPressed=False`, preventing ordinary torque-nudge lane changes.
+The retained replay fixtures `tests/fixtures/camry_20260904/3c-seg43.jsonl`
+and `3d-seg1-torque.jsonl` compare opendbc `c7a62eaf` with `ca52a67f`:
+valid angle/torque decoding is unchanged, while the high-torque fixture changes
+from zero to 797 pressed samples out of 1,001. The reproducer is
+`tools/targets/camry/utilities/replay_camry_tss3_carstate_revisions.py`.
+
+Independent September-6 routes `3e/3f` supply the sign and threshold evidence:
+all 45 observed lane-change starts have positive torque for left and negative
+for right. Toyota's `0x371 B20[4]` detector has a sampled assertion median of
+0.67 N·m and release medians of 0.37/0.34 N·m. The port's 0.6 N·m threshold
+is an openpilot policy, not an OEM single-comparator claim. Detailed source
+reduction: `data/generated/camry_20260906_hands_off_warning_audit.json` and
+[the hands-on evidence](camry-2026-tss3-opendbc-port.md#hands-on-detection-and-hud-evidence).
+
+## Fault projections
 
 Fresh exact-F33 decompilation/disassembly closes `0x4C000` as the producer of
 `FEBE80DE`; `0x4C97A` publishes it through `FEBE8C35` as `0x030 B6[2]`. It is
@@ -356,7 +155,7 @@ recovery, exclusion of history-only state, multiple active faults, and
 non-underflow after final recovery. Only interrupt save/restore callees are
 substituted; there is no concurrent actor in this emulator-local test.
 
-Camry `CarState.steerFaultTemporary` now reports this current fault/inhibit
+Camry `CarState.steerFaultTemporary` reports this current fault/inhibit
 aggregate through the ordinary upstream interface. "Temporary" describes current
 steering unavailability.
 `steerFaultPermanent` is not fabricated from the same
@@ -369,18 +168,6 @@ Reproducible proof:
 `data/generated/camry_f33_live_fault_projection.json`, and
 `tests/targets/camry/verify_camry_f33_live_fault_projection.py`.
 
-### Validation
-
-The combined Toyota, CAN, Toyota safety, generic interface, documentation,
-platform and vehicle-model selection passes **615 tests and 3,183 subtests**,
-with 262 pre-existing skips in that selection. Toyota lint passes. New radar
-adversarial coverage includes batching, deletion/replacement, unqualified
-retained geometry, duplicate/wrapped/skipped cycles, CRC, truncation, timeout,
-startup spread across publications, and wrong-bus traffic. Exact-F33 CarState
-fault assertion/recovery and unrelated status-bit separation are covered too.
-Automatic cruise cancellation remains a separate receiver/ownership question;
-none of these changes restores the invalid unsplit-bus fake-brake sender.
-
 ### Cooperative-control faults: two additional source-real inhibits
 
 Exact F33 also reports `CAFC` at `0x030 B16[0]` and `CAD9` at `0x030 B19[0]`.
@@ -388,11 +175,10 @@ These are separate from the selected hardware/DEM aggregate at B6[2]. Fresh
 stock-code tracing closes their RTE staging through `D0D7C -> BF3AA -> 4C2DC ->
 4C97A`; generated-COM signals 25 and 31 bind them to those wire locations.
 `CE772` requires both clear before entering ready, and `CE7A6` leaves ready
-when either asserts. Camry CarState now reports all three through ordinary
-`steerFaultTemporary`, without changing Panda, the controller, or engagement
-policy. The original unit-test telemetry was not healthy: its B19[0] flag is
-set. A separately retained operating zero-torque frame replaces that default,
-and an explicit regression preserves the original initializing/inhibited case.
+when either asserts. The inspected CarState maps B6[2] (`EPS_FAULT_INHIBIT`) to
+`steerFaultTemporary`; the two cooperative inhibits remain decoded DBC fields.
+Their firmware meaning does not imply that the current host aggregates them.
+
 
 The permanent/transient distinction is provably lossy at this projection:
 `CEC72` ORs `CAFB==1` and `CAFD==1`. `CEE7C` clears the request-failure source
@@ -411,101 +197,37 @@ verifier are `analyze_camry_f33_cooperative_fault_projection.py`,
 `data/generated/camry_f33_cooperative_fault_projection.json`, and
 `tests/targets/camry/verify_camry_f33_cooperative_fault_projection.py`.
 
-### Cancellation: the remaining command contract is not recovered
+## Cancellation evidence
 
-The durable reduction now retains **21 switch-CANCEL edges followed by genuine
-cruise-latch release**, drawn from all three September 4 highway routes. Every
-window has preceding cruise engagement and no overlapping brake assertion.
-The observed publication-batch delay to release is 29.756..172.179 ms, with a
-70.439 ms median; these timestamps are not physical CAN arbitration timing.
-Original source hashes and both sides of each state transition are in
-`tests/fixtures/camry_2026_cancel_windows.jsonl.gz`. Its tracked extractor
-regenerates the fixture byte-for-byte from the original rlogs, including the
-one window spanning a segment boundary.
+The maintained port implements cancel output; see the
+[port report](camry-2026-tss3-opendbc-port.md#maintained-integration).
+This section owns the bounded conclusions of the retained September captures,
+not a declaration that the current feature is absent.
 
-The expanded fixture preserves **all 22 periodic ADAS ID/DLC streams** in
-every event, including all 13 object-family PDUs; all **16,526 ADAS frames**
-pass native Profile-5 CRC. The principal comparison uses a pre-window of
-−1,000..−25 ms and a post-window of 0..1,000 ms relative to the physical
-switch edge. Publication timestamps do not establish CAN arbitration order.
+Three selections answer different questions and must not be added together:
 
-The literal-edge screen tests **17,824 fully covered single-bit/polarity
-hypotheses**. No stable-before/asserted-after bit reproduces in every window,
-even allowing a brief pulse anywhere in the post-window; the highest coverage
-is 10/21. The broader enum screen tests **279,904 contiguous 1..16-bit field
-layouts**, both big/MSB-first and little/LSB-first, at every bit start after
-B2 across all 22 streams. It permits different or changing pre-cancel values
-and requires a common post-only value in every event. **No candidate survives.**
-A separate shorter-window screen (−300..−25 ms, 0..250 ms) covers 80,532 short
-field layouts over the 20 streams with complete coverage and also yields no
-fully reproduced candidate.
+| Selection | Result | Artifact |
+|---|---|---|
+| 58 actual host-send episodes, 375 `sendcan 0x101` frames across 463 segments | Every episode has physical CANCEL or brake input at or before the first host send; none isolates host-command acceptance | `camry_2026_cancel_ownership.json` |
+| 79 rising CarControl cancel requests from 71 hashed rlogs / 16 routes | All follow physical driver input (53 switch, 26 brake); 76 have a release within 500 ms, three do not | `camry_2026_cancel_request_causality.json` |
+| 77 native cruise releases from 1,103,695 frames in the ten-route ownership corpus | 74 have preceding decoded driver assertions; the other three have no host cancel request and therefore are not host-acceptance witnesses | `camry_2026_native_cruise_release.json` |
 
-The current FRC catalogue has 69 routine Active-Test candidates and no direct
-Active-Test table. Its only cancel-named test is **PDA Cancel Notification
-Display**, which controls notification display. DID 1B01 is grouped with ISA switch
-recognition/output monitors; diagnostic bit positions do not establish CAN
-positions or writable DRCC commands. No maintenance/test routine, artificial
-fault, ECU communication suppression, or replay of a protected switch packet
-is substituted for normal cancellation.
+Artifact paths below are under `data/generated/`. Each reducer retains its
+source hashes and selection rules. A TX return establishes transmission, not
+an ECU acknowledgement.
 
-Retained comparison-source review does not supply the missing contract:
-legacy Toyota implementations send their established `0x343`/PCM cancel
-commands, whereas the retained TSS3 Corolla branch returns from its TSS3
-controller before that legacy path. The local Camry CUW `T-0051-26` is node 0724 Engine/MG.
-The next unresolved software fact is an ordinary accepted cancellation command
-and its receiver/transport ownership.
-No automatic-cancel sender is added in this checkpoint.
+### Physical-switch and mirror observations
 
-Source/reducer: `tools/targets/camry/extract/extract_camry_2026_cancel_windows.py`,
-`tools/targets/camry/analysis/analyze_camry_2026_cancel_evidence.py`,
-`data/generated/camry_2026_cancel_evidence.json` (v2), and
-`tests/targets/camry/verify_camry_2026_cancel_evidence.py`. Synthetic positive controls independently
-check that both endian search directions recover a one-frame pulse, including
-a 16-bit field crossing three bytes, and reject an otherwise identical
-non-reproducing event or a pulse supplied only by a CRC-corrupt frame.
+The 21 retained physical CANCEL windows include preceding engagement, no
+overlapping brake assertion, and release delays of 29.756–172.179 ms (median
+70.439 ms) on the host publication clock. They are retained in
+`tests/fixtures/camry_2026_cancel_windows.jsonl.gz`.
 
-### Final software checkpoint and reproducible replay
-
-Openpilot **`6d175daf9`** pins opendbc **`4f91b600`**, including radar lifecycle
-commit `b579c04d` and the additional F33 cooperative fault reporting. The combined
-Toyota/CAN/Toyota-safety/generic-interface/docs/platform/vehicle-model selection
-passes **617 tests and 3,186 subtests**, with 262 existing skips in that selection.
-Toyota Python lint passes. No EPS image, signer/runtime loader or Panda safety
-policy was changed in this follow-up, and nothing was installed in a vehicle.
-
-`tests/targets/camry/verify_camry_2026_radar_lifecycle_external.py` now makes the actual-parser
-replay reproducible through the maintained sibling opendbc environment. Besides
-the 17-source held-out reduction, it preserves original CAN publication
-boundaries on six raw-source segments. Two are stock-harness bus0 captures,
-and each produces 1,199 complete updates with zero reported CAN errors. Historical
-repin inputs are explicitly remapped by the test; stock-harness sources are not.
-This verifies source placement and parser behavior.
-
-The six explicitly selected analysis suites all pass: radar anchors,
-radar lifecycle reduction, actual-opendbc radar replay, current hardware-fault
-projection, cooperative-fault projection, and cancellation evidence reduction.
-
-## September 15 cancellation ownership follow-up
-
-**Automatic cancellation is not solved by this follow-up.** It recovers a
-previously omitted switch-event mirror and tests the historical host attempts
-for an independent acceptance witness. No controller, Panda whitelist, ECU
-image, or runtime installation is changed.
-
-### Correct the search domain and the topology argument
-
-The prior cancellation sweep covered the historical-repin **ADAS bus1**. It did
-not cover all FRC-side **chassis bus2** outputs. An all-native-bus extraction of
-the same 21 physical CANCEL windows now retains 168 shared address/length/bus
-streams: 92 on bus0, 22 on bus1, and 54 on bus2. The single-bit screen includes
-B0..B2 and starts its post-window 100 ms **before** the sampled button report,
-so an earlier-published event is not excluded merely by choice of time origin.
-The existing ADAS CRC result remains 16,526 valid frames and zero failures.
-
-The expanded screen finds cancellation-related chassis outputs, including
-`0x1B2` and `0x5F6`, that the old ADAS-only negative did not cover. It does not
-recover a new ADAS-bus cancellation bit even with this earlier window. Timing
-records host publication.
+The ADAS-only screen tested 17,824 bit/polarity hypotheses and 279,904
+contiguous field layouts without a common cancel edge. That negative applies
+only to its 22 ADAS streams. The all-native-bus extraction covers 168 streams
+and recovers the following switch mirrors; the ADAS CRC population remains
+16,526 valid frames.
 
 ### `0x1B2` switch-event mirror
 
@@ -548,122 +270,7 @@ each candidate spanning approximately 802 ms, alongside 34 native `0x08A`
 samples that remain engaged. This excludes treating either bit, on its own,
 as an unconditional current-cancellation indication.
 
-### Historical host attempts do not establish acceptance
-
-A separate extraction enumerates **all 463 complete original rlog segments**
-across ten specified September1/4/6/7/10 routes. It discovers **375 actual
-`sendcan 0x101` frames**, grouped into **58 episodes**. Native forwarding/TX
-returns are not used to discover an attempted host command.
-
-Every episode has fresh native switch/brake observations, cruise engaged
-before the first host send, and a subsequent native cruise release. Every
-one also has a raw physical CANCEL or brake assertion **at or before the first
-host send**. All 375 host payloads satisfy the ordinary `0x101` additive
-checksum. Thus payload construction and subsequent release are both observed,
-but **none of the 58 episodes separates host-command acceptance from the
-already sufficient physical driver action**. A TX echo does not supply the
-missing ECU-acceptance observation.
-
-The classifier has synthetic positive controls for a host attempt followed by
-a release without a competing button/brake input. It separately rejects
-forwarded-only echoes, missing release, missing correct-bus input coverage,
-and competing driver input before release. A driver action after release does
-not retroactively confound the earlier observation. These synthetic cases
-validate classifier behavior.
-
-The current cereal schema does not expose the former `fd` field. This
-extraction deliberately makes **no new FDF/BRS claim** from a defaulted
-`getattr(..., 'fd', False)`. Historic CAN-FD investigations must use their own
-appropriate original metadata/schema evidence.
-
-### Durable artifacts and verification
-
-- `tools/targets/camry/extract/extract_camry_2026_cancel_ownership.py`:
-  original-rlog extraction, with deterministic compression and source hashes.
-- `tools/targets/camry/analysis/analyze_camry_2026_cancel_ownership.py`:
-  stationary OEM correlation, all-bus screen, counterexamples, and host-attempt
-  attribution without vehicle I/O.
-- `data/generated/camry_2026_cancel_ownership.json` and the corresponding
-  `tests/fixtures/camry_2026_cancel_{all_buses,host_attempts}.jsonl.gz`:
-  portable source reduction and complete evidence needed by the new tests.
-
-Run `tools/test camry_2026_cancel_ownership camry_2026_cancel_evidence`.
-The new suite contains 17 tests, including the standalone extractor and
-positive-control classifier cases. Receiver acceptance remains explicitly absent from the result; passing
-these tests is not presented as completed automatic cancellation.
-
-Both new fixtures were independently re-extracted from the original rlogs into
-`build/out/cancel-ownership-regeneration` and compared byte-for-byte with their
-tracked copies. Both comparisons pass. All 16 new regression tests and the
-existing cancellation-evidence suite pass; lint and `git diff --check` pass.
-
-The remaining uncertainty is not resolved by more accurate decoding of the
-mirror itself. A controller that consumes only the original physical-switch
-input and publishes `0x1B2` for observers, and a controller that also accepts
-`0x1B2` as an external input, can both reproduce the retained observations.
-Discriminating between them requires the relevant receiver's implementation
-or an independent acceptance observation. The available exact EPS application
-is not a substitute for that cruise-receiver implementation. No claim of
-sender completion follows from the new passive mappings.
-
-### Independent control-layer cancellation causality
-
-An additional reduction selects episodes from the ordinary
-`carControl.cruiseControl.cancel` rising edge. Its 79 explicitly retained requests
-come from 71 SHA-256-checked original rlogs across 16 routes. This is a different
-population from the 58 actual `sendcan 0x101` episodes described above; the two
-counts must not be added or described as interchangeable.
-
-Every one of the 79 requests is preceded by a source-real physical driver
-assertion: 53 CANCEL-switch cases and 26 brake cases. The observed lead is
-4.498020..8.364384 ms (median 5.259704 ms). All windows contain correct-bus
-switch and brake observations on both sides of the host request. Historical
-repin sources use physical input bus0 and native cruise bus2; the 11 retained
-stock-harness requests use bus1 for both. Returned TX copies and other buses
-are not used as driver inputs. The reducer verifies the brake additive
-checksum and the recovered switch's complementary bit predicate; it does not
-claim cryptographic verification of the protected switch trailer.
-
-Native cruise is active before all 79 requests. Of those, 76 have an observed
-release within 500 ms. Three have no release in that interval and retain that
-classification. In every release case,
-the already preceding driver input prevents attributing release to an
-independently initiated host command. `sendcan` is recorded as an attempt,
-never as a receiving ECU acknowledgement. Missing event names in the old
-`onroadEvents` message do not overcome this raw-CAN timing evidence.
-
-The analysis also distinguishes a driver input between host request and cruise
-release, an input only after release, missing input coverage, already-inactive
-cruise, and an unwitnessed/held host flag.
-
-Reproduction uses
-`tools/targets/camry/analysis/analyze_camry_2026_cancel_request_causality.py`,
-`tests/fixtures/camry_2026_cancel_request_causality.jsonl.gz`, and
-`data/generated/camry_2026_cancel_request_causality.json`. The extractor has
-reproduced the fixture and report byte-for-byte from the original source files.
-The 12 regression tests in
-`tests/targets/camry/verify_camry_2026_cancel_request_causality.py` cover both the real windows
-and independent synthetic counterexamples. Run
-`tools/test camry_2026_cancel_request_causality camry_2026_cancel_evidence`.
-
-The configured North-American Toyota ECU-supply-change lookup entry was also
-checked through its ordinary public web entry. It redirected to a login page;
-no account session, calibration result, or receiver firmware was acquired.
-No calibration URL is inferred from a current software number. The available
-EPS image cannot establish the cruise receiver's behavior, and the locally
-retained Camry node0724 Engine/MG update is not an exact FRC/Brake receiver image.
-This follow-up therefore adds no cancellation transmitter or vehicle mutation.
-
-All three new cancellation fixtures were finally re-extracted from their
-original rlogs and matched byte-for-byte, including the all-bus windows, the
-463-segment host-transmission census, and the 79 control-layer request windows.
-The three selected cancellation suites pass with zero failures or skips; the
-new ownership and request-causality suites contain 17 and 12 tests respectively.
-The direct extraction command also runs from outside the repository after
-fixing its project-root import bootstrap. Python lint and diff checks pass.
-
-
-### September 16: factory cruise input ownership and the missing receiver
+### Factory cruise input ownership
 
 The 2025 Camry service information, with procedures applicable from April
 2024, gives a more specific investigation target than the earlier generic
@@ -720,18 +327,9 @@ and history tables but no direct or routine Active-Test tables in this corpus.
 FRC's
 "PDA Cancel Notification Display" controls notification display.
 
-**Disposition:** prioritize the Hybrid Control receiver (`0x7D2`) and its
-camera/brake request interfaces when acquiring additional firmware or receiver
-specifications. Exact ECU identity/compatibility must still be established;
-a related Crown or Grand Highlander node07D2 package is not automatically a
-Camry receiver. Neither the EPS image, MG update, switch mirror nor the
-confounded historical host attempts currently establishes automatic-cancel
-acceptance. No sender, Panda permission, diagnostic control or vehicle command
-was added in this investigation. The production feature remains unimplemented.
+### Native releases without a decoded button edge
 
-### Follow-up: select native releases
-
-The next pass changes the selection criterion. It scans every native chassis-side
+The native-release reduction scans every native chassis-side
 `0x08A` cruise-latch falling edge in the **463 hash-checked sources across the ten
 routes already enumerated by the host-attempt corpus**. This is independent of
 whether the driver pressed CANCEL or openpilot requested cancellation. There are
@@ -786,8 +384,8 @@ uv run --locked python -m tools.targets.camry.analysis.analyze_camry_2026_native
 tools/test camry_2026_native_cruise_release
 
 # Explicit full original-source scan, using the existing openpilot LogReader environment.
-../kai-openpilot/.venv/bin/python \
-  tools/targets/camry/analysis/analyze_camry_2026_native_cruise_release.py --extract
+uv run --no-sync --project ../kai-openpilot/opendbc_repo python -m \
+  tools.targets.camry.analysis.analyze_camry_2026_native_cruise_release --extract
 ```
 
 Artifacts are `data/generated/camry_2026_native_cruise_release.json` and
@@ -796,111 +394,22 @@ check missing/stale/corrupt input handling, source-bus and TX-echo exclusion,
 input/host ordering, unclassified brake bytes, raw mode distinctions, native
 release witnesses, and Profile-5 integrity of the retained ADAS request frames.
 
-**Cancellation is not implemented or qualified by this follow-up.** The remaining
-fact is an ordinary cancel input accepted by the actual cruise receiver, with its
-format and ownership established. An isolated accepted-command observation or a
-readable matching receiver implementation can close that fact; another search
-of button mirrors cannot substitute for it. No production openpilot/opendbc or
-Panda code, authentication path, EPS image, or vehicle state was changed.
+### Cancellation reducers and fixtures
 
-Validation for this follow-up: **15 new native-release tests pass**. The native-release, existing host-request-causality and existing cancellation-ownership suites all pass (**3 suites, no failures or skips**). Targeted Python lint and `git diff --check` pass.
+- `tools/targets/camry/analysis/analyze_camry_2026_cancel_evidence.py`
+  and `data/generated/camry_2026_cancel_evidence.json` own the initial
+  physical-switch windows and ADAS screen.
+- `tools/targets/camry/extract/extract_camry_2026_cancel_ownership.py`
+  and `tools/targets/camry/analysis/analyze_camry_2026_cancel_ownership.py`
+  own the all-bus screen and host-send population.
+- `tools/targets/camry/analysis/analyze_camry_2026_cancel_request_causality.py`
+  owns the independent CarControl-edge population. Driver input leads those
+  requests by 4.498020–8.364384 ms, median 5.259704 ms.
+- The corresponding tracked fixtures are
+  `tests/fixtures/camry_2026_cancel_{all_buses,host_attempts,request_causality}.jsonl.gz`.
+  Classifier tests include independent positive and negative controls for
+  driver-input timing, missing observations and forwarded-only echoes.
 
-
-## September 16: 0x160 role and causality correction
-
-The retained evidence does not establish the current Camry fine/coarse encoder
-as a direct longitudinal-command interface. Independent wheel acceleration
-matches native B4:B5 closely with cruise off (r=0.971345/0.988851 in the two
-complete August captures), and B4:B5 stays zero until 223–262 ms after wheel
-motion in three stock resumes. In all 1,249 counter-exact combined-trial pairs,
-intact native B12 predicts the chassis result better than replacement B12
-(r=0.930230 versus 0.700465 at nearest time). TX returns establish transport.
-The former "proves influence" wording is withdrawn.
-
-Full source populations, timing/selection limits, GTS vocabulary boundaries,
-and reproduction commands are in
-[the longitudinal evidence report](camry-2026-longitudinal-evidence.md#september-16-command-versus-feedback-audit).
-The tracked raw fixture and `camry_20260916_longitudinal_motion_audit.json` make this
-correction reproducible without external September logs or ignored workspaces.
-No production sender, safety policy, or vehicle firmware changed in this audit.
-
-## September 16 follow-up: 0x160 is not a verified longitudinal command
-
-The maintained [longitudinal evidence packet](camry-2026-longitudinal-evidence.md)
-now includes an independent cross-check of camera B4:B5 against native chassis
-`0x13C`, packed ego speed against valid raw wheels, and B12 alignment against
-native `0x0CA`. Cruise-off fine-field correlations are 0.979857/0.988391 and
-moving speed correlations are 0.999758/0.999936. These positively support
-state publication.
-
-The B12 lag advantage is shallow and sample-grid dependent; it is not a
-measured ECU latency. The original replacement trial still does not establish
-host influence when the untouched native camera value is included. No different
-command, exact OEM field names, or complete receiver contract has been recovered.
-The current Camry encoder must remain an unqualified hypothesis; neither
-Corolla's reported behavior nor the project's DBC name establishes Camry demand
-semantics. This follow-up changes only offline analysis, its tests/results,
-and documentation. The companion role audit was independently completed; its
-files were not staged or changed by this follow-up.
-
-
-## September 16 follow-up: protected 0x08A is the leading longitudinal request candidate
-
-Normalizing all retained captures by **Toyota network role** rather than raw
-Panda bus number resolves the stock -> repinned -> stock ambiguity. During the
-temporary CAN0/CAN1 repin, Toyota Bus 4 was the CAN0/CAN2 relay pair: protected
-`0x08A/0x0C9` were native upstream on Panda bus2 and `0x0CA` was native chassis
-return on bus0. After the Sep-11 restoration to stock Toyota-B, that Bus-4
-request/result family is again on unsplit Panda bus1, while Toyota Bus-1 camera
-FRC `0x020/0x160/0x230/0x440` uses source bus2 -> downstream bus0. The updated
-stock-topology verifier pins those candidate families directly.
-
-Against that corrected topology, `0x08A` B8:B9 and B11:B12 are the strongest
-direct longitudinal candidates. Across both complete Aug-27 drives the two
-signed16 words are identical in **44,617/44,617** source-side frames, span
-roughly -1.15..+1.07 m/s² at 0.001 m/s²/count, and are independently bounded
-away from simple measured-motion/steering identities. In all three retained
-no-driver-input stock resumes they are already positive 500 ms before wheel
-motion. Toyota's P5 Brake/Booster/EPB DDBs independently name upper/lower
-"Request Acceleration ... from Toyota Safety Sense" as signed16 ×0.001, while
-the FRC-hosted PCS recorder contains matching lower/upper TSS acceleration
-request records plus IDs/allocation/arbitration results.
-
-This is a strong **structural/semantic mapping**, but the equal acceleration words
-in these retained complete drives do not resolve upper versus lower A/B ordering.
-The former two-byte request-ID interpretation is superseded:
-`B7 = (0x8A + 8 + sum(B0..B6)) & 0xFF` is the prefix checksum, not a lower
-request-ID/allocation field. B6[7:2]/B6[1:0] remain one six-bit request-ID/two-bit
-allocation candidate (ID11/allocation1 during ordinary active cruise); the lower
-request ID/allocation wire locations remain unmapped. Brake `0x10A3/0x10A4` and
-recorder `5280` describe diagnostic/recorder fields, not a proven join onto B7.
-The direct FRC P05 streams `0x020/0x230/0x440` have no simple byte-aligned field that
-reproduces the protected request word across both complete drives; `0x160` has
-only state-related long-lag correlations and remains disqualified as the
-implemented Camry demand interface. The exhaustive FRC-dependent protected-domain
-screen finds no second same-scale signed16 acceleration carrier. `0x5AF` B26 and
-low-rate `0x5F7` B7 instead behave as coarse, lagging longitudinal companions;
-`0x0C9` is at most sideband/request metadata. `0x0CA` remains other protected
-longitudinal/chassis state; the cleaner arbitration result is in Brake-owned
-`0x081`, where B6[5:0] is the strongest selected-longitudinal-ID candidate and
-B20:B21 the strongest signed16 ×0.001 result-acceleration candidate.
-
-Because stock Toyota-B leaves protected `0x08A` on an **unsplit** network, the
-remaining integration problem is **source suppression / sole-emitter ownership
-for the already-established `0x08A` request plane**. A physically separate
-FRC-to-signer/proxy handoff may exist and would be a useful interception point,
-but it is not a second semantic request layer. Competing `0x08A` injection is
-not authorized by this evidence. The Camry platform
-therefore no longer advertises Alpha Long; stock longitudinal ownership remains
-in force until a real actuator ingress is recovered. See the longitudinal
-evidence packet and `data/generated/camry_2026_longitudinal_request_candidates.json`.
-
-`0x08A` is the central recovered continuous control
-request plane: lateral request identity/angle is already closed there and its
-duplicated signed16 words are now the strongest longitudinal acceleration-request
-candidates. Toyota's recorder schema additionally exposes longitudinal request
-IDs, force-allocation, shift/EPB, override/priority and other request metadata.
-Only B6 retains a request-ID/allocation structural candidate; B7 is the prefix
-checksum. The lower-request identity/allocation, shift/EPB/override/priority and
-57D3 validity wire fields remain unresolved, while ordinary FRC state/display
-and ego-motion publications exist on separate PDUs.
+The retained switch mirrors and confounded host attempts do not identify a
+receiving ECU's cancel-command parser. That is a limit of these captures, not
+evidence that the maintained controller lacks an output path.

@@ -1,8 +1,7 @@
 # Documentation map
 
-Start with the task below. The repository contains operating guides, evolving
-target reports, and historical evidence; **a file's directory does not certify
-that every paragraph is current**.
+Start with the task below. Target and subsystem reports own current conclusions;
+captures and cited source revisions establish the scope of their evidence.
 
 ## Find the right entry point
 
@@ -13,21 +12,18 @@ that every paragraph is current**.
 | Build or package a registered RAM-resident TSS3 runtime | [RAM-resident TSS3 workflow](WORKFLOW.md#ram-resident-tss3-build-and-kit-workflow) |
 | Find a command or artifact producer | [Tooling](tooling/README.md) |
 | Find a calibration or vehicle report | [Variants](variants/README.md) |
-| Review Camry capability and qualification boundaries | [Capability matrix](variants/camry-2026-capability-matrix.md) |
+| Find the current Camry port and its evidence | [Capability matrix](variants/camry-2026-capability-matrix.md) |
 | Understand normal openpilot ownership | [Porting contract](architecture/toyota-openpilot-porting-contract.md) |
 | Choose the next investigation | [Priorities](status/PRIORITIES.md) |
 | Find an earlier claim, question, or correction | [Status reference](status/README.md), or `tools/know QUERY` |
 
-## Reading reports without mixing checkpoints
+## Reading evidence
 
 1. Check the **target, software revision, capture date, and evidence source**.
-2. Use the report's conclusion and stated supersessions. Long Camry/Corolla
-   reports preserve dated investigations; “current” inside an old checkpoint
-   refers to that checkpoint.
-3. Follow the actual evidence. Regenerate generated artifacts from their
-   inputs. Use `build/` and `REFERENCE/` material as local context.
-4. Keep successful software checks, observed vehicle behavior, and outstanding
-   qualification separate.
+2. Use the owning report for the conclusion, not an archive's old status.
+3. Follow the actual evidence. Regenerate artifacts from their inputs;
+   `build/` and `REFERENCE/` are local context, not portable evidence.
+4. Keep software checks, capture measurements and attributed use distinct.
 
 ## Subsystem reports
 
@@ -52,13 +48,13 @@ multi-target reports. Their indexes identify that distinction.
 | [PRIORITIES.md](status/PRIORITIES.md) | Short execution queue |
 | [FINDINGS.md](status/FINDINGS.md) | Claim IDs, evidence grades, and links |
 | [OPEN_QUESTIONS.md](status/OPEN_QUESTIONS.md) | Reference questions and recorded closure boundaries; owning reports may be newer |
-| [CORRECTIONS.md](status/CORRECTIONS.md) | Prior interpretations retained so mistakes are not repeated |
+| [CORRECTIONS.md](status/CORRECTIONS.md) | Archived corrections and links to owning reports |
 | [ANALYSIS_STATUS.md](status/ANALYSIS_STATUS.md) | Historical Sienna coverage snapshot |
 | [history/](history/README.md) | Dated investigation journals and migrations |
 
-Historical sections also remain inside variant and subsystem reports where
-their provenance is useful. Retain observations and source identities; correct
-their interpretation in the owning report rather than rewriting a capture.
+Retain useful observations and source identities. Delete incorrect conclusions
+and obsolete implementation descriptions; do not keep them behind supersession
+notices or move them into a new archive merely to avoid deletion.
 
 ## Maintaining this documentation
 

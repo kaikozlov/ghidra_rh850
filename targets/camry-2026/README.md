@@ -345,59 +345,14 @@ cleanup. The next field discriminator is the separate sticky pre-aggregate phase
 That sentence records the Sep-8 checkpoint; the Sep-10 ingress section below supersedes it.
 
 ## Working steering configuration (2026-09-10)
+## Working steering captures (2026-09-10)
 
-The issue-ready interpretation of this route, including direct verification that
-Toyota LTA remained off throughout the steering interval, is in
-[`docs/variants/toyota-tss3-openpilot-bounty-evidence.md`](../../docs/variants/toyota-tss3-openpilot-bounty-evidence.md).
-
-Route `0000008d--a9f348691a` is the primary operator-observed openpilot steering
-record; later route `00000093--4066e7ae51` is a shorter same-build corroboration. Neither
-sent B6 from the camera. The controller sent C7 sideband commands
-on extended `0x1FDC0002` bus0; the exact live continuous EPS helper retained the
-latest nonzero C7 target, replaced B3..B9 in every distinct already-admitted native
-B6, and used ICU-S command 5 selector 4 to generate each valid replacement trailer
-before stock SecOC consumption. Sequence zero restored untouched native B6.
-
-This configuration depends on all of the following identities and lifecycle details:
-
-- cumulative persistent stage-5 image SHA-256 `669cedf8c8465ebfd02318cb7708b897b817bc3b40925c89743b64ce49aa01af`;
-- RAM payload/resident/live padded-helper SHA-256 values `01ce9934...fc6c`,
-  `31b1b2c3...3a3a`, and `b417e12d...159a`; the distinct `4719c4f2...965a`
-  helper belongs to the later one-shot variant. The final live steering handoff uses the continuous helper;
-- exact continuous source, binaries, checksums, and replay selection retained in
-  `raw-20260910/working-steering/runtime/`;
-- full EPS OFF, NRTD `./f33-secoc install`, direct transition to READY without OFF,
-  then `./f33-secoc load-arm` with byte-exact helper readback and native-trailer oracle;
-- exactly one normal openpilot manager/pandad tree after the Panda lease is returned;
-- the C7-enabled openpilot worktree files pinned by SHA-256 in the retained summary and
-  reconstructable from `raw-20260910/working-steering/kai-opendbc-c7-working-tree.patch`
-  against opendbc `baec01c15ac3`. The base commit alone emitted direct zero-trailer B6 and is
-  not sufficient.
-
-The primary route contains 31,943 C7 commands, 31,824 successful Panda TX returns,
-8,333 active nonzero commands, zero host B6, and eight `latActive` episodes totaling
-167.289 seconds. A clean 36.105-second segment-6 witness has 1,799/1,799 successful
-active returns, target/measured correlation 0.989 at 400 ms, low driver torque, no EPS
-steering faults, and Toyota `0x08A/0x081` ID0 throughout. Route `93` independently repeats
-the result with 893/893 successful active commands over 17.94 seconds. Entering
-EPS programming mode leaves Toyota TSS/DRCC unavailable for that ignition cycle, so this
-drive engaged openpilot using normal non-adaptive cruise. The exact-car parked/READY DTC
-clear can remove the historical U0131 warning without resetting the EPS or inherently
-removing the RAM signer, but the operator-observed same-cycle result is negative: **DRCC did
-not re-enable after the clear**. A full restart restores DRCC but also removes the RAM signer.
-Exact route-segment hashes, deployed source hashes,
-command format, and operational caveats are in
-`raw-20260910/working-steering/summary.json`.
-
-## September-18 request-plane design checkpoint
-
-This section formerly mixed request-plane development instructions with the
-capture index. The later
-[September-21 architecture checkpoint](../../docs/architecture/toyota-tss3-minimal-runtime.md#exact-camry-request-plane-supersession-2026-09-21)
-records that design transition separately. It must not inherit the earlier
-C7/B6 road result merely because both concern F33. Use
-[the capability matrix](../../docs/variants/camry-2026-capability-matrix.md)
-to distinguish implementation checkpoints from retained qualification evidence.
+`raw-20260910/working-steering/` retains the source, runtime identities and
+hash inventory for routes `0000008d--a9f348691a` and
+`00000093--4066e7ae51`. Their measured results and interpretation live in
+[the field-witness report](../../docs/variants/toyota-tss3-openpilot-bounty-evidence.md);
+current implementation status lives in
+[the capability matrix](../../docs/variants/camry-2026-capability-matrix.md).
 
 ## Direct-B6 ingress discriminator (2026-09-10)
 

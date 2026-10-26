@@ -3558,7 +3558,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   its source-real frame tests. It prevents uncertain nearby-variant evidence
   from becoming an automatic vehicle identity.
 - **Canonical:**
-  [../variants/camry-2026-tss3-integration-audit.md](../variants/camry-2026-tss3-integration-audit.md);
+  [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md);
   opendbc `8c1124fe37f146e2282ba68676ffa82cac4902f8`;
   `opendbc/car/toyota/tests/test_tss3_corolla.py`.
 
@@ -3645,7 +3645,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Superseded correction:** CORR-164 removed the provisional Corolla TSS3 census from `FINGERPRINTS` because the observed Corolla set is a strict subset of exact Camry and therefore cannot uniquely identify Corolla. That fixed the immediate ambiguous-Corolla test, but it left a partial/shared TSS3 census with only Camry registered and could therefore make shared startup traffic look uniquely Camry before a Camry-only ID arrived.
 - **Current correction:** fork opendbc `f754d14c` restores the Corolla census as a **competing FPv1 candidate**, while preserving its research-only/no-output platform boundary. Feeding the complete Corolla subset on bus0 or bus1 now returns no candidate because both Corolla and Camry survive. Feeding that shared traffic for 120 fingerprint iterations and then the exact Camry superset eliminates Corolla and identifies Camry deterministically. Thus the Corolla row prevents a false-positive Camry identity.
 - **Identity boundary:** exact Camry retains same-car F181 plus the larger READY census. Corolla still has MOCK `carParams`/no F181 join and remains `dashcamOnly`/`noOutput` when explicitly selected. A future exact Corolla identity requires an independent discriminator.
-- **Canonical:** fork opendbc `opendbc/car/toyota/fingerprints.py`; `opendbc/car/toyota/tests/test_tss3_corolla.py`; [../variants/camry-2026-tss3-integration-audit.md](../variants/camry-2026-tss3-integration-audit.md).
+- **Canonical:** fork opendbc `opendbc/car/toyota/fingerprints.py`; `opendbc/car/toyota/tests/test_tss3_corolla.py`; [../variants/corolla-h-f-openpilot-state-bridge.md](../variants/corolla-h-f-openpilot-state-bridge.md).
 
 ### CORR-171 — `0x610.UI_SPEED` is wheel-correlated
 

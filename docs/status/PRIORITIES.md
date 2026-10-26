@@ -1,10 +1,9 @@
 # Current priorities
 
 Short execution queue only. This page answers **what should we do next?** It is
-not a roadmap and must not become a completion diary. Detailed unresolved state
-belongs in [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md); claim history lives in
-[FINDINGS.md](FINDINGS.md) / [CORRECTIONS.md](CORRECTIONS.md); procedures,
-evidence, and closure narratives live in the canonical reports linked below.
+not a roadmap and must not become a completion diary. Current conclusions and
+unresolved semantics belong in the owning reports below. FINDINGS, CORRECTIONS
+and OPEN_QUESTIONS are archives, not an implementation-status authority.
 
 ## Active queue
 
@@ -13,13 +12,10 @@ evidence, and closure narratives live in the canonical reports linked below.
    downstream Brake request-arbitration/result → B6 handoff.
    Missing evidence includes synchronized FRC recorder/CAN observations and
    matched Brake/FRC firmware (item 2). Do not replace those with another
-   summary of already-retained EPS experiments. Preserve the demonstrated
-   development evidence and use the
-   [capability matrix](../variants/camry-2026-capability-matrix.md) for remaining
-   override, cancel, lifecycle, and deployment qualification. Detailed chronology:
-   [the port report](../variants/camry-2026-tss3-opendbc-port.md) and
-   [the field baseline](../variants/camry-2026-live-baseline.md);
-   canonical topology:
+   summary of already-retained EPS experiments. This is native-producer analysis,
+   not a claim that the maintained request-plane port is blocked. Current status:
+   [capability matrix](../variants/camry-2026-capability-matrix.md).
+   Canonical architecture:
    [../architecture/toyota-tss3-vehicle-movement-arbitration.md](../architecture/toyota-tss3-vehicle-movement-arbitration.md).
 2. **Missing target-native software.** (a) Exact-Camry Brake/EPB
    `F152633K0000` / assembly `8954147040` (`0x7B0`) is deterministically absent
@@ -61,10 +57,11 @@ evidence, and closure narratives live in the canonical reports linked below.
    exported, the `.vdas` ZIP (TMS-086/087). Canonical:
    [../tooling/gtsplus-tse-gtse-saved-session.md](../tooling/gtsplus-tse-gtse-saved-session.md)
    · [../tooling/gtsplus-vdas-pcs-data.md](../tooling/gtsplus-vdas-pcs-data.md).
-8. **Longitudinal — [OQ-052](OPEN_QUESTIONS.md).** The wire/auth/arbitration
-   execution contract is still open and must close before any production
-   longitudinal support. Canonical:
-   [../variants/camry-2026-longitudinal-evidence.md](../variants/camry-2026-longitudinal-evidence.md).
+8. **Longitudinal semantics.** Resolve the remaining request-policy and
+   result-quantity joins documented in the
+   [longitudinal report](../variants/camry-2026-longitudinal-evidence.md).
+   Port implementation and use are recorded in the
+   [capability matrix](../variants/camry-2026-capability-matrix.md).
 
 ## Deferred / opportunistic
 

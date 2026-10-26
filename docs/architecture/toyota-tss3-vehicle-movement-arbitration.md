@@ -972,8 +972,9 @@ Consequences for the Camry work:
   remains semantically unresolved.
 - A result ID of 63 while application bounds are present is expected when driver demand
   is the employed value inside the allowed range.
-- Remaining policy/permission fields still need recovery before native longitudinal is
-  complete; simply writing one scalar acceleration is not the complete OEM contract.
+- The request-policy fields are not all OEM-mapped. Their semantic boundaries
+  belong in the [longitudinal report](../variants/camry-2026-longitudinal-evidence.md),
+  separate from [current port status](../variants/camry-2026-capability-matrix.md).
 
 GTS supplies an independent request-generation boundary in the Brake domain:
 

@@ -124,20 +124,12 @@ inactive, cruise-main remains on and request communication remains healthy.
 
 ## 5. Integration implication
 
-For older Toyota ports, blocking/replacing camera steering and `LKAS_HUD` was enough
-because the stock camera's hands-off consequences no longer owned anything openpilot
-needed. On this TSS3 Camry, the FRC's hands-off state machine still owns the protected
-**joint longitudinal/lateral `0x08A` request PDU** while openpilot retains stock
-longitudinal control.
+The capture distinguishes HUD presentation from the FRC's functional request
+withdrawal: changing `0x412` alone does not establish that the deeper hands-off
+state has reset. The native FRC withdraws the joint `0x08A` request, and
+Brake/chassis result state follows it.
 
-That is why replacing `0x412` alone cannot solve the problem. At the functional
-cancel point the FRC itself changes `0x08A`; Brake/chassis arbitration then follows
-that withdrawal. The two plausible control boundaries are therefore:
-
-1. keep the FRC from reaching the late cancellation state by satisfying its genuine
-   hands-on/driver-steering detector without entering higher steering override; or
-2. take ownership of the protected `0x08A` request plane and preserve the desired
-   longitudinal request when the FRC would withdraw it.
-
-`0x08A` is authenticated and jointly carries lateral and longitudinal requests.
-Its source/authentication ownership must be handled correctly.
+The maintained port's request ownership is specified in the
+[runtime contract](../architecture/toyota-tss3-minimal-runtime.md).
+This capture does not describe the current controller or establish its
+behavior when openpilot owns both control axes.

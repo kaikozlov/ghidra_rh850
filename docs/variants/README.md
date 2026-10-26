@@ -23,24 +23,21 @@ albinoelephant and `8A3111213000` for Span. The former registry ID retains the
 historical `8965H1202000` auxiliary identity. Do not merge these specimens or
 rename their source evidence based on the shared primary string.
 
-## Camry: conclusions versus investigation history
+## Camry evidence owners
 
 | Question | Report |
 |---|---|
-| What has been demonstrated, and what remains unqualified? | [Capability matrix](camry-2026-capability-matrix.md) |
-| What evidence changed an earlier conclusion? | [Port evidence review](camry-2026-port-evidence-review.md) |
+| What does the maintained port implement and use? | [Capability matrix](camry-2026-capability-matrix.md) |
+| What supports vehicle-model, radar, fault and cancellation interpretations? | [Evidence review](camry-2026-port-evidence-review.md) |
 | Where are the dated field observations? | [Live baseline](camry-2026-live-baseline.md) · [bounty evidence](toyota-tss3-openpilot-bounty-evidence.md) |
-| Where are target-specific integration details and earlier designs? | [Port report](camry-2026-tss3-opendbc-port.md), read by checkpoint |
+| How does the port integrate, and what do native request/state captures show? | [Port report](camry-2026-tss3-opendbc-port.md) |
 | What does the longitudinal evidence establish? | [Longitudinal report](camry-2026-longitudinal-evidence.md) |
 | What does the exact EPS publish? | [EPS transmit report](camry-f33-eps-tx.md) |
 | How are fault observations bounded? | [Fault/status report](camry-2026-tss3-fault-status.md) |
 | What is the normal software ownership contract? | [Native openpilot contract](../architecture/toyota-openpilot-porting-contract.md) |
 
-The [integration replay audit](camry-2026-tss3-integration-audit.md) and
-[bench-validation specification](camry-2026-bench-validation-spec.md) retain
-earlier work-package checkpoints. They are not current installation guides or
-evidence that every listed experiment was performed. Recovery/incident reports
-likewise apply to their recorded rack, firmware, and date.
+Capture and recovery observations apply to their recorded rack, software,
+harness and date. They do not override the maintained implementation summary.
 
 ## Corolla comparison and qualification
 

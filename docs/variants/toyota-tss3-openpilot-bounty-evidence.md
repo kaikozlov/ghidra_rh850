@@ -1,40 +1,16 @@
-# Toyota TSS3 openpilot bounty evidence
-
-> **September-18 road-qualification supersession:** the September-10 steering
-> witnesses remain valid historical authority evidence, while route
-> `0000010c--506d7277c7` now closes the previously missing same-ignition stock-
-> adaptive-cruise coexistence case after the FRC→Brake→FRC recovery sequence. Current
-> capability boundaries remain in [the capability matrix](camry-2026-capability-matrix.md)
-> and [the evidence review](camry-2026-port-evidence-review.md).
+# Toyota TSS3 field witnesses
 
 **Issue:** [commaai/opendbc#3695 — Toyota TSS3 car port](https://github.com/commaai/opendbc/issues/3695)
 
-**Status:** exact-Camry openpilot lateral and stock-adaptive-cruise coexistence are
-road-demonstrated in the same ignition cycle; exact working runtime and recovery
-artifacts are preserved; upstream cleanup/review packaging remain.
+This report owns the measured results and provenance of the named captures.
+It is not a current-status summary or an installation guide. Use the
+[capability matrix](camry-2026-capability-matrix.md) for the maintained port.
 
-**Evidence sources:** direct same-car rlog (`firmware-static` is used only for the
-target-specific F33 wire/security boundary) plus an independent Corolla field
-report (`external-source`).
+## Camry lateral: direct route evidence
 
-This report is the compact review entry point for the Toyota TSS3 work. It
-separates the control result from the development mechanism used to obtain it:
+### September 18 coexistence result
 
-- the maintainer's 2026 Camry demonstrates openpilot lateral control while
-  Toyota LTA is off;
-- the independent Corolla longitudinal field experiment is retained with its
-  attribution and chronology, but its original `0x160` command-role
-  interpretation is superseded by [the longitudinal review](camry-2026-longitudinal-evidence.md);
-- development mechanisms and their successful observations remain
-  target/configuration-specific. They are not a universal TSS3 interface or
-  evidence of a production-ready port.
-
-## 1. Camry lateral: direct route evidence
-
-### September 18 final-integration coexistence result
-
-Route `0000010c--506d7277c7` is the strongest current exact-Camry integration
-record. It was captured immediately after the parked same-ignition recovery sequence
+Route `0000010c--506d7277c7` records the C7-era exact-Camry integration. It was captured immediately after the parked same-ignition recovery sequence
 that selectively reset **Brake/EPB first and FRC second** while leaving the EPS
 RAM-resident lateral helper powered. Across 30 rlogs / 1,743.811 s, the route contains
 13 openpilot lateral-active episodes totaling **919.594 s** and **19.772 km**.
@@ -42,8 +18,7 @@ Stock adaptive cruise overlaps those intervals for **919.572 s**; all 91,707
 cruise-enabled `carState` samples are adaptive (`nonAdaptive=false`), while
 `carControl.longActive` is never asserted.
 
-The steering result is stronger than the historical route because it is both longer
-and coexists with normal Toyota DRCC. There are 91,570 active functional-C7 commands;
+This route measures lateral operation alongside normal Toyota DRCC. There are 91,570 active functional-C7 commands;
 91,568 receive successful Panda TX returns. The two rejected nonzero C7 frames occur
 only after `latActive` has already fallen false at disengagement transitions. Active
 sequence progression has zero mismatches, with a 9.845-ms median / 13.523-ms p99
@@ -56,8 +31,8 @@ Toyota's own request/result traffic separates the two controllers. During openpi
 `latActive`, all **36,779** native `0x08A` lateral request IDs and all **30,652**
 `0x081` lateral result IDs are `0` (No Request / manual lateral), while Toyota
 longitudinal request IDs remain active. During the adaptive+latActive overlap,
-`0x08A` upper longitudinal request ID is 11 on 36,777/36,779 samples, lower request
-ID is primarily 17 (36,709 samples), and `0x081` returns longitudinal result ID11 on
+`0x08A` B6's upper request-ID candidate is 11 on 36,777/36,779 samples,
+and `0x081` returns longitudinal result ID11 on
 26,339 samples. Raw cruise display `0x251 B0` is `0xC0` on 1,100 overlap frames and
 `0xA0` twice, with zero historical conventional `0x88/0x90` frames. The route also
 includes a **15.871-s** stop below 0.5 m/s while the adaptive+lateral overlap remains
@@ -72,7 +47,7 @@ All 30 source-rlog SHA-256 values and the reduction are retained at
 are archived outside git at
 `/Users/kai/dev/inspect/logs/camry-2026/2026-09-18/0000010c--506d7277c7/`.
 
-### Historical primary authority result
+### September 10 authority result
 
 Route `0000008d--a9f348691a` is the primary working-lateral record. Across 11
 segments it contains eight lateral-active episodes totaling 167.289 seconds and
@@ -147,275 +122,16 @@ inventory. Its current comma segment 6 differs from the contemporaneously invent
 copy, so its historical full-route totals remain pinned rather than recomputed; that
 does not affect the segment-3 corroboration.
 
-## 2. Exact Camry development mechanism
+## Attributed Corolla field report
 
-This section records the **September-10 configuration** and subsequent rebuild
-notes. The source hashes and mechanism here explain that particular road witness.
+On 2026-09-10, albinoelephant reported a 2023 Corolla TSS3 drive with Toyota
+safety active, 23,683 host `0x160` transmissions at 40 Hz, and observed lead
+following. A later pass faulted at standstill. The contributor's description is
+retained under `community/albinoelephant/`; the
+[Corolla report](corolla-8965F1208000.md) owns the target-specific assessment.
 
-The successful Camry drive did not transmit a host-built B6. Its ordinary
-openpilot control path was:
-
-```text
-controlsd / CC.latActive
-  -> Toyota CarController angle limits
-  -> 00 C7 sequence 00 target_hi target_lo 00 00
-     on extended 0x1FDC0002, Panda bus 0
-  -> ephemeral exact-F33 EPS resident
-  -> replace B6 B3..B9 in one already-admitted native B6
-  -> EPS ICU-S command 5, selector 4
-  -> valid replacement trailer before stock SecOC consumption
-  -> normal F33 angle-control path
-```
-
-Sequence zero is neutral and leaves the native B6 untouched. While
-`CC.latActive`, the controller advances 1..255. The exact live-loaded continuous
-helper retains the latest nonzero C7 target and replaces every distinct native
-B6 until sequence zero is observed. Panda applies its normal Toyota angle-command
-checks to the requested angle and rejects malformed C7 frames.
-
-The exact reproduction identity is:
-
-- installed cumulative stage-5 image:
-  `669cedf8c8465ebfd02318cb7708b897b817bc3b40925c89743b64ce49aa01af`;
-- authenticated 4-KiB RAM payload:
-  `01ce993425e910a6ea37473580adb6e641bdff56a3568492d4c9e0388e02fc6c`;
-- retained high-tail resident:
-  `31b1b2c31007f130d6b4679a0c99f5903a58f748daf11978f9c52f504aea3a3a`;
-- exact live-loaded continuous helper, 588 bytes unpadded / 600 bytes padded:
-  `74315a067cfe457c945cbeadb0e1432e70765bbe36ef022fc57ffad272cb4469` /
-  `b417e12dde0dc7d6478ea6f242fe9eaa246a00a9fbbcc711a5d2d3adcf159a28`;
-- exact five-file working opendbc delta:
-  `kai-opendbc-c7-working-tree.patch`, SHA-256
-  `3f798940f439f329ebade4e342325f951e1b0725dba801565708df9bbc610081`.
-
-The `b417...` helper is the live experimental image used in the final steering
-handoff. The later packaged/audited one-shot helper
-`4719c4f27563180359445724eaefd594e3051ea545f75d69efb9bbede8f1965a`
-is a distinct artifact and must not be substituted when reproducing that handoff.
-Its source-level difference is one sequence-equality instruction: the continuous
-helper replaces `be .L_return` with `nop`. The four-byte branch becomes a
-two-byte NOP, reducing the helper from 590 to 588 bytes.
-
-The identities above are the exact road-observed artifacts. The P1M-E manual
-requires a dummy read from the written code region followed by `SYNCP` and
-`SYNCI` before branching to RAM code. The historical resident did not perform
-that complete publication sequence after installing its helper. The current
-specification-conformant rebuild does and therefore has resident SHA-256
-`f599fd600c7a2b59e72d18058729f0d121331df7078a72e6400571934447e2c4`
-and authenticated-payload SHA-256
-`8483fb5933d1354e9fe98fb5cfd59c6a7f0808151705295be20188eeb2a1c8b5`.
-It preserves the continuous helper bytes but is **not** assigned the old exact
-artifact's hardware qualification; repeat exact-F33 qualification before live
-use. The car kit retains the historical route/result separately from the
-current build identity.
-
-The retained [session summary](../../targets/camry-2026/raw-20260910/working-steering/summary.json),
-[verbatim runtime artifacts, hashes, and replay procedure](../../targets/camry-2026/raw-20260910/working-steering/runtime/README.md),
-[exact working delta](../../targets/camry-2026/raw-20260910/working-steering/kai-opendbc-c7-working-tree.patch),
-and [field runbook](../../tools/targets/camry/research/ram_runtime/monitor/camry_f33_runtime_monitor_runbook.md#known-working-openpilot-steering-fallback)
-are the reproduction sources.
-
-The rlog records C7 commands, Panda returns, vehicle state, and wheel response.
-The exact `b417...` identity is joined from the contemporaneous live install/status
-handoff and parked native-oracle witnesses. The original Comma `/tmp/f33-valid-helper.bin` was no
-longer reachable at preservation time, but rebuilding the recovered source emits
-the complete recorded SHA-256 exactly; the retained binary is therefore the same
-recorded identity under the ordinary SHA-256 collision assumption.
-
-Entering EPS programming can record U0131-87 and place Toyota TSS/DRCC in a
-peer fail-safe state. The previously proven DTC-clear path removes the warning/DTC
-memory but, by itself, did not restore DRCC in the same ignition cycle. September-18
-live probing recovered the missing stateful restart sequence without cycling EPS:
-
-1. FRC `0x792`: `10 02 -> 11 01` (no SecurityAccess required);
-2. wait for F181 `8646F3315000` to return; DRCC may remain denied;
-3. Brake/EPB `0x7B0`: `10 02 -> 11 01` (no SecurityAccess required);
-4. wait for application F181 `F152633K0000` to return;
-5. FRC `0x792`: `10 02 -> 11 01` again;
-6. wait for F181 `8646F3315000` and require healthy DRCC state.
-
-Brake reset alone clears the FRC PCS-availability / ESA-AES-invalid inputs but leaves
-DRCC permission denied. Resetting FRC after Brake is healthy changes `1905` from
-`8000` to `8080` (Cruise Control Allowed), clears the ACC-not-available request,
-enables LDA, and leaves PCS availability/invalid state healthy. The EPS RAM resident
-survives throughout. Route `0000010c--506d7277c7` subsequently demonstrates
-same-ignition recovery on the road.
-The older `recover-drcc` DTC-clear command remains useful for preserving diagnostic
-evidence, but the dependency-ordered resets are the actual same-ignition recovery
-**for that faulted legacy programming path**. A later 2026-09-20 startup-catch flow
-entered programming before the normal READY transition, installed the same volatile
-oracle, and preserved healthy peer state without any Brake/FRC reset. In that healthy
-run FRC `0x1905` was initially `8000` and `0x1906` Main Switch Recognition was false,
-then both became asserted after a normal drive with no ECU reset. Those two fields are
-therefore live cruise-state telemetry and must not be used alone as a post-install
-peer-health gate.
-
-## 3. Corolla TSS3 longitudinal proof of concept
-
-### Chronology and attribution
-
-The unprotected request-plane discovery and message-generation PoC predate the
-Corolla field report. Git author dates provide the repository record:
-
-| Date (America/Chicago) | Repository result |
-|---|---|
-| 2026-08-31 12:12 | `6d02fc4` documented the Camry plaintext/protected longitudinal join and identified native Bus-1 `0x160 B12` as the high-value non-SecOC request candidate. |
-| 2026-08-31 14:28 | `4bd9ccb` recovered the Bus-1 E2E framing. |
-| 2026-08-31 14:48 | `d73baf5` added the offline Camry FRC `0x160` request generator and deterministic verifier. |
-| 2026-08-31 15:13 | `1661e5c` recovered the exact AUTOSAR E2E Profile-5 CRC/counter/Data-ID contract and upgraded the generator. |
-| 2026-09-05 14:28 | `198d8da` documented the native openpilot longitudinal integration path. |
-| 2026-09-10 | albinoelephant reported the independent live Corolla controller result. |
-
-Thus the Camry work established the `0x160` Profile-5 transport/field hypothesis
-and deterministic message generation ten days before the reported Corolla run.
-The later September-16 request-plane audit supersedes treating `0x160` itself as
-the authoritative longitudinal command path: `0x08A` is the shared TSS3
-application-request PDU. The Corolla result remains valuable independent field
-evidence that a controller modified/transmitted `0x160` while reported closed-loop
-lead following occurred, but it is no longer used as causal proof of command ingress.
-
-On 2026-09-10, contributor albinoelephant reported a live openpilot-longitudinal
-run on the 2023 Corolla TSS3 target. The contributor's local opendbc + sunnypilot
-implementation modified the ordinary FRC-origin `0x160` Profile-5 PDU on the
-stock Toyota-B network; it did not require the Camry lateral repin or an EPS RAM
-signer. The word **command** in the original field interpretation is superseded:
-the current architecture classifies `0x160` as state/evidence and places the
-application acceleration requests in `0x08A`.
-
-The field report records three independent software/log witnesses:
-
-1. Panda `safetyModel` remained `toyota` for the drive; a shadow/no-output run
-   would report `noOutput`.
-2. The controller transmitted 23,683 `0x160` frames at 40 Hz; shadow mode would
-   transmit zero.
-3. About 80% of those frames carried real acceleration commands, with clean
-   frame rate and counter behavior.
-
-The contributor reported that the car followed a truck and controlled speed.
-The first live pass completed without the earlier system-malfunction behavior.
-On a later pass, a mismatch at complete standstill triggered a Toyota System
-Malfunction, after which the mode was explicitly reverted to `TSS3LongMode.OFF`
-while parked.
-
-The September-16 audit narrows what that result proves. It establishes a real,
-non-shadow host `0x160` modification/transmission experiment under Toyota safety,
-coincident with reported closed-loop lead following and a later standstill fault.
-Without a retained causal `0x160` receiver/actuator join, it does **not** prove that
-`0x160` was the authoritative longitudinal command or that the standstill fault was
-caused by a stock/openpilot command handoff. The direct retained-road command-plane
-evidence is instead Span's `0x08A` request geometry documented in VAR-163.
-
-### 2026-09-11 contributor architecture snapshot
-
-The contributor subsequently supplied
-[`community/albinoelephant/albinoelephant_discord_PORT_ARCHITECTURE.md`](../../community/albinoelephant/albinoelephant_discord_PORT_ARCHITECTURE.md),
-a hash-pinned architecture/change reference for the local Corolla port. It reports
-the concrete successor design used after the early standstill fault: each transmitted
-`0x160` is derived from the live camera frame, keeps the camera's B2 counter, is
-emitted at most once per newly observed camera frame, and is paired with Panda
-forwarding that blocks the stock bus-2 copy only while the same longitudinal-allowed
-state authorizes openpilot output. Below roughly 1 mph the controller relays the
-camera request so Toyota retains its native standstill/hold path. The note reports
-follow, speed, stop-and-go to zero/hold/resume as validated, with the deployed
-1-mph floor still awaiting a confirming drive at its 2026-09-10 status cutoff.
-
-The same note documents the contributor's signed-15 B4:B5 substitution at
-0.001 m/s²/count. This records the exact field shape used by the experiment.
-Its CRC is expressed as init=`0`
-with Data ID `0x444A`. Deterministic basis-vector comparison shows that this is
-wire-equivalent, for the fixed 32-byte `0x160`, to the repository's recovered
-init=`0xFFFF` with Data ID `0x0160`; the parameter labels differ, but the transmitted
-CRC does not. The reusable result is therefore Profile-5/topology and historical
-field-experiment evidence, while authoritative longitudinal request semantics come
-from the shared `0x08A` request plane.
-
-Evidence boundary: this remains attributed external field evidence. The original
-road result arrived as a Discord screenshot, and the later architecture/change
-reference is now retained verbatim and hash-pinned. The raw rlog, exact route ID,
-and exact source checkout/patch are still not in this repository, so road counts
-and code-behavior claims remain **observed/external-source**. When supplied, retain the
-route inventory and reduce `safetyModel`, `sendcan 0x160`, counter continuity,
-requested acceleration, lead distance, speed response, and the standstill fault
-transition without inventing a second longitudinal permission system.
-
-Before that field report, this repository already contained the bare offline
-message generator:
-[`camry_frc_request_poc.py`](../../tools/targets/camry/live/camry_frc_request_poc.py)
-constructs the observed Camry-family 32-byte `0x160` candidate by changing B2/B12
-and recomputing its exact Profile-5 CRC. Its verifier reconstructs fixed wire
-witnesses and more than 20,000 retained counter/request pairs byte-for-byte.
-That is repository-verified prior proof of message generation.
-
-## 4. What is universal and what is target-specific
-
-The cleanup should preserve ordinary openpilot ownership and make vehicle
-capabilities explicit:
-
-| Layer | Reusable TSS3 port shape | Exact-target detail |
-|---|---|---|
-| Engagement | `controlsd` owns `CC.latActive` and `CC.longActive` | None |
-| Vehicle description | `CarInterface`/`CarParams` select angle control, buses, limits, and longitudinal capability | Firmware identity and per-platform flags |
-| State | `CarState` decodes steering, torque, faults, cruise, gear, and readiness | Message layout and native bus |
-| Control | `CarController` encodes only target-qualified actuator requests whose source-ownership boundary is closed | Camry B6/C7 lateral path; TSS3 longitudinal remains stock-owned until `0x08A` ownership exists |
-| Safety | Panda uses ordinary Toyota limits plus an explicit target-specific TX whitelist | Current TSS3 host control surface permits only C7 lateral sideband; host `0x08A`/`0x160` longitudinal replacement is excluded |
-| Authentication | Optional transport/signing provider for a platform that actually requires it | Camry F33 C7/RAM/ICU-S adapter; `0x08A` signing/source handoff remains separate |
-| Harness | Preserve stock Toyota-B topology unless a proved command path requires interception | Camry C7 lateral on unsplit Panda bus 1; current Corolla longitudinal remains Toyota-owned |
-
-For the combined Camry cleanup, “stock Toyota-B” means undoing the temporary
-lateral-development CAN0/CAN1 repin and keeping the F33 C7 signer sideband on
-unsplit Panda bus 1 to reach Bus-4/EPS. `0x160` may still traverse the ordinary
-relay topology as stock FRC state/evidence, but openpilot no longer suppresses or
-replaces it. The successful lateral route proves the old post-repin assignment;
-the stock-topology lateral software assignment remains a separate qualification item.
-
-The following must not become global TSS3 policy: F181
-`8965F3307000/8A3113303100`, extended `0x1FDC0002`, C7, ICU-S selector 4, the
-stage-5 receiver patch, NRTD lifecycle, the Camry physical repin, or any
-controller-side permission veto. They are one development transport for one EPS.
-
-Likewise, TSS3 does not imply one universal security wrapper. The historical
-Corolla `0x160` experiment demonstrates an unprotected Profile-5 transport, while
-the shared `0x08A` request plane has its own signing/source-ownership boundary.
-Security and control semantics must therefore be qualified independently rather
-than inferred from the TSS generation.
-
-## 5. Bounty claim and remaining packaging
-
-The retained evidence addresses both control requirements named by issue #3695, but the September-16 audit leaves different causal grades:
-
-- **full lateral control:** same-car Camry road actuation with Toyota LTA off,
-  ordinary `CC.latActive`, normal Panda Toyota angle checks, a commanded angle
-  sweep, measured lagged response, negligible driver intervention, and no EPS
-  faults;
-- **longitudinal field experiment:** an independent TSS3 Corolla run modified and
-  transmitted 23,683 `0x160` frames under Toyota safety while the contributor
-  reported closed-loop lead following; VAR-163 now prevents treating that
-  coincidence as proof of `0x160` command ingress. Retained Span road data directly
-  establishes the shared `0x08A` longitudinal request geometry instead.
-
-What remains for a production native-long port is not promotion of the old offline
-`0x160` primitive. It is recovery of a clean `0x08A` source-ownership/pre-signing
-boundary, followed by result-plane, Brake/VMC, PCS/AEB and standstill qualification.
-The current opendbc therefore keeps TSS3 longitudinal stock-owned while preserving
-the historical Corolla field result and exact Profile-5 evidence for provenance.
-
-### Issue-ready progress summary
-
-> We now have road-tested TSS3 lateral control plus a separate Corolla longitudinal
-> field experiment whose original `0x160` causal interpretation has been narrowed.
-> On a 2026 Camry, openpilot lateral produced a 17.92-second active steering interval with 893/893 active
-> commands returned by Panda, commanded/measured angle correlation of 0.997,
-> low driver torque, no EPS faults, and Toyota `0x08A`/`0x081` remaining ID0
-> (LTA off) for the entire interval. The Camry used an exact-EPS RAM-resident
-> signer—authenticated payload `01ce9934...fc6c`, resident `31b1b2c3...3a3a`,
-> and exact live continuous helper `b417e12d...159a`—while controlsd,
-> CarController, and Panda retained normal ownership. The complete binaries,
-> source, hashes, and replay procedure are retained in the repository.
-> Independently and later, a 2023 Corolla TSS3 openpilot-longitudinal experiment
-> transmitted 23,683 modified `0x160` frames at 40 Hz under `safetyModel=toyota`,
-> with nonzero substituted acceleration fields in about 80% of frames and reported
-> closed-loop lead following. The September-16 audit now bounds that as historical
-> field evidence rather than proof that `0x160` is command ingress: retained Span
-> road data directly exposes the shared `0x08A` longitudinal request IDs/allocation
-> and signed acceleration pair. Current TSS3 software therefore keeps longitudinal
-> stock-owned until clean `0x08A` source ownership is recovered.
+This is an attributed observation of host modification and coincident vehicle
+behavior. It does not establish `0x160` as causal longitudinal ingress.
+The [longitudinal evidence](camry-2026-longitudinal-evidence.md) owns that
+distinction. No transmitter design or present-day platform-support claim is
+derived from this report.

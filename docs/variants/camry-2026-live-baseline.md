@@ -2,13 +2,11 @@
 
 ## Scope and evidence
 
-This report presents chronological evidence.
-It starts with the August-26 baseline and accumulates later acquisitions,
-corrections, and field checkpoints. Bus assignments, software revisions, and
-“not yet” statements apply to their section's capture/configuration.
-For consolidated capability and qualification boundaries, start with
-[the capability matrix](camry-2026-capability-matrix.md); for recorded
-interpretation changes, use [the evidence review](camry-2026-port-evidence-review.md).
+This report owns dated acquisitions and field observations, starting with the
+August-26 baseline. Bus assignments and software revisions identify each
+capture/configuration. Current port status belongs in
+[the capability matrix](camry-2026-capability-matrix.md); vehicle-state and
+cancellation interpretations belong in [the evidence review](camry-2026-port-evidence-review.md).
 
 On 2026-08-26 the maintainer's 2026 Toyota Camry produced an identity-bound TSK
 baseline covering EPS diagnostics, a stationary READY CAN segment, a bounded
@@ -847,9 +845,6 @@ for the PC-pivot question:
   `11/22/33/44/55`. Request state lives at `FEBF45D0..FEBF45E3`, below the XCP
   writer. The selectors format/read bounded event IDs and merge event-data buffers
   into the DCM response; the catalogue is not a function-pointer/address table.
-
-The later [application diagnostic reconstruction](#7725-diagnostic-admission-application-writes-and-routine-lifecycles)
-owns admission, control-state effects, asynchronous results and cancellation.
 
 Thus every **recovered configured application diagnostic class with plausible
 write/control semantics** is now bounded away from a tester-chosen PC transfer.
@@ -2559,7 +2554,7 @@ Deterministic evidence is the `firmware_exact_0x090` and
 
 CORR-127 closes the denominator question raised by the broader `0x58074` staging audit. The old VAR-065 `19/116 nonempty, 97 empty` count covered only one fixed raw→stage→snapshot model. An exhaustive census of staged COM values and consumers requires the larger exact-F33 pipeline below. It still converges to the same external-command result.
 
-**L1/L2 denominator.** Exact `FUN_0007D12A` literal calls provide **116 scalar raw cells** (including signal243's stack-RMW path `0x4BB62 -> FEBE80A0`). The table-driven callers `0x693FE/0x697F4` add **14 configured extracts**, signals 90..103, spanning CAN `0x013..0x01F`. Their qualification state belongs to the [crypto-test banks](#7727-crypto-test-banks-material-qualification-and-completion-ownership). `FUN_00058074` stages **99 of the 116 scalar raw cells over 106 exact copy edges**. The other 17 raw cells have no consumer beyond their unpacker/staging/init machinery.
+**L1/L2 denominator.** Exact `FUN_0007D12A` literal calls provide **116 scalar raw cells** (including signal243's stack-RMW path `0x4BB62 -> FEBE80A0`). The table-driven callers `0x693FE/0x697F4` add **14 configured extracts**, signals 90..103, spanning CAN `0x013..0x01F`. `FUN_00058074` stages **99 of the 116 scalar raw cells over 106 exact copy edges**. The other 17 raw cells have no consumer beyond their unpacker/staging/init machinery.
 
 The 2026-10-15 regeneration repairs an overlapping-field parsing error:
 `DAT_febe8000._2_1_` denotes byte `FEBE8002`, at offset 2 from the containing word's base.
@@ -7274,17 +7269,6 @@ lifecycle explicitly requires full OFF -> NRTD between each RAM preflight and
 its corresponding write. Each write payload still independently checks its
 complete live preimage before flash RMW.
 
-This design does not interpose on the logical `0x08A -> Brake/VMM request arbitration -> request generation -> B6`
-path; its exact physical/security realization remains open and does not require that hidden link to carry camera-originated B6. Stock
-0x08A and 0x081 remain intact. Future longitudinal remains a separate native
-openpilot integration through the upstream TSS3 transmit shape (currently the
-recovered `0x0CA` path); no longitudinal policy or permission is added to the
-signer. The exact historical steering patch remains unchanged beside §70.4;
-`kai-opendbc-c7-current.patch` (`43683fba...003b`) is its tested cleanup for
-this package, removing the unused dummy-key residue and naming the C7 helper by
-its actual role. It remains the controller-side input shape until reduced into
-the normal upstream port.
-
 ### 70.7 2026-09-11 malformed-hook incident and recovery boundary
 
 The first live stage-7 package is withdrawn. Its builder requested a six-byte
@@ -7632,15 +7616,6 @@ field build is 522 bytes at `FEBFF9F0` plus a 218-byte helper padded to the fixe
 aggregate tail; the low helper cannot execute uninitialized. Loader C6 traffic is
 also excluded from runtime generation state by requiring the durable DCM tag to
 be C7 before accepting a sequence.
-
-The implementation is firmware-closed and regression-built but, at this
-checkpoint, **not yet live-qualified**. Qualification no longer asks command 5 to
-reproduce a native MAC. It requires byte-exact install/arm, observes at least one
-stock authenticated route44 B6 publication while C7 is released, and requires
-zero post-auth override count before permitting a bounded C7 pulse. A later
-`0x08A` request-plane implementation remains desirable once clean sole-source
-ownership is recovered; it is not required to remove the present B6 continuity
-failure.
 
 ### 73.3 Live road qualification: post-auth route44 ownership removes the B16 dropout pattern
 

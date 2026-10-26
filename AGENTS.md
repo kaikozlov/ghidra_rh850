@@ -53,7 +53,9 @@ Tests are for things that can break: behavior, parsing boundaries, fragile binar
 
 ## Writing it down
 
-Each conclusion lives in one place, the target or subsystem report. Rewrite in place when we learn better, and fix the links. FINDINGS, CORRECTIONS, and OPEN_QUESTIONS are archives, so don't stop investigating to feed them.
+- Each conclusion lives in one place, the target or subsystem report. Rewrite in place when we learn better, and fix the links. FINDINGS, CORRECTIONS, and OPEN_QUESTIONS are archives, so don't stop investigating to feed them.
+- Do not write verbose documentation that buries the lede. State your point and be done with it. That applies to comments as well.
+- Do not write documentation or comments that makes a claim but then feigns rigor by saying "shows x, not y" or "still does not prove y" or "y is still not verified." -- y is immaterial. nobody was thinking of y. state x and stop. we only care about x until we actually decide to do anything with y, z, or otherwise.
 
 ## Across targets
 

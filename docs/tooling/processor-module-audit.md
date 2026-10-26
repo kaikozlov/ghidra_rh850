@@ -447,7 +447,7 @@ DATA reference into CodeFlash outside function entries, including scalars and ta
 Review counts are generated in each target's registered summary. Curated
 conclusions are separate inputs; automatic decompilation-only entries are not
 counted as reviews. Camry's reconstruction evidence and remaining boundaries are
-owned by [its report](../variants/camry-2026-live-baseline.md#77-2026-10-14-whole-image-semantic-reconstruction).
+owned by [the reconstruction tree](../../decomp/camry-8965F3307000/README.md#source-and-evidence-ownership).
 The earlier Sienna selected sweep and corrected-graph re-audit remain in the
 [historical report](../history/2026-08/CORRECTED_GRAPH_REAUDIT_2026-08-11.md).
 

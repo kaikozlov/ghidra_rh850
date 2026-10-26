@@ -27,7 +27,7 @@ tools/toyota ram kit TARGET --out EMPTY_KIT_DIRECTORY
 ```
 
 See the [RAM-resident TSS3 workflow](../../../../../docs/WORKFLOW.md#ram-resident-tss3-build-and-kit-workflow)
-and the [current runtime contract](../../../../../docs/architecture/toyota-tss3-minimal-runtime.md#current-exact-target-request-signer-contract).
+and the [current runtime contract](../../../../../docs/architecture/toyota-tss3-minimal-runtime.md#current-shared-request-signer-contract).
 The sections below retain Sienna, Camry, Crown, and Corolla experiments at their
 recorded checkpoints. References to direct C7/B6 control, target-specific kit
 builders, and vehicle-named launchers are historical unless a section explicitly

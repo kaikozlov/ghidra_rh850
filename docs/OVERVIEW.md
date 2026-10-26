@@ -34,8 +34,8 @@ and explains the historical Corolla naming.
 
 | Question | Owner |
 |---|---|
-| What does the retained Camry evidence demonstrate, and what is still unqualified? | [Capability matrix](variants/camry-2026-capability-matrix.md) |
-| How were those conclusions reached or corrected? | [Port evidence review](variants/camry-2026-port-evidence-review.md) and [field baseline](variants/camry-2026-live-baseline.md), read by checkpoint |
+| What does the maintained Camry port implement and use? | [Capability matrix](variants/camry-2026-capability-matrix.md) |
+| What supports vehicle-state and field observations? | [Evidence review](variants/camry-2026-port-evidence-review.md) and [field baseline](variants/camry-2026-live-baseline.md) |
 | What is the integration design contract? | [Native openpilot ownership](architecture/toyota-openpilot-porting-contract.md) |
 | What is the target-specific longitudinal evidence? | [Longitudinal report](variants/camry-2026-longitudinal-evidence.md) |
 | What is the next investigation? | [Priorities](status/PRIORITIES.md) |
@@ -64,8 +64,8 @@ qualification are not interchangeable.
 
 Status ledgers are lookup aids and may lag the owning reports.
 [ANALYSIS_STATUS.md](status/ANALYSIS_STATUS.md) is a historical Sienna coverage
-snapshot. Dated sections inside a subsystem or variant report are historical
-checkpoints even when they are stored outside `history/`.
+snapshot. Reports retain useful measurements with their provenance, not obsolete
+implementation status behind historical labels.
 
 ## Working state is not evidence
 
