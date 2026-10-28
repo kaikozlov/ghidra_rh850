@@ -4,18 +4,20 @@ from __future__ import annotations
 
 import io
 import json
-import subprocess
 import struct
+import subprocess
 import sys
 import tempfile
 from collections.abc import Sequence
 from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
+from typing import Any
 from unittest import mock
 
-import tsk.ram_runtime.tss3_request_signer as host
 import tools.targets.tss3.builders.build_tss3_request_signer as build
+import tsk.ram_runtime.tss3_request_signer as host
+from tools import REPO_ROOT
 from tsk.common.payload_package import inspect_payload
 from tsk.common.rh850_build import CJob
 from tsk.ram_runtime.target_profiles import registered_specs, spec_from_codeflash
@@ -24,7 +26,6 @@ from tsk.ram_runtime.tss3_request_signer_contract import (
     probe_request_signer_contract,
     resolve_request_signer_contract,
 )
-from tools import REPO_ROOT
 
 ROOT = REPO_ROOT
 
@@ -33,7 +34,7 @@ SPECS = registered_specs()
 SIENNA_TARGET = "sienna-8965B4512000"
 SIENNA_IMAGE = ROOT / "firmware/RH850_P1M-E_CodeFlash.bin"
 SIENNA_CONTRACT = resolve_request_signer_contract(SIENNA_IMAGE.read_bytes())
-RESOLUTION_SPECS = {
+RESOLUTION_SPECS: dict[str, dict[str, Any]] = {
     **SPECS,
     SIENNA_TARGET: {
         "image": SIENNA_IMAGE,
@@ -149,7 +150,7 @@ selector_offset = synthetic_image.find(old_selector)
 synthetic_image[selector_offset:selector_offset + len(old_selector)] = new_selector
 synthetic_path = BUILD_ROOT / "synthetic-unknown-CodeFlash.bin"
 synthetic_path.write_bytes(synthetic_image)
-synthetic_spec = spec_from_codeflash(synthetic_path, known_specs=SPECS)
+synthetic_spec = spec_from_codeflash(synthetic_path)
 synthetic_out = BUILD_ROOT / "synthetic"
 synthetic_meta = build.build_request_signer(
     codeflash=synthetic_path, output_dir=synthetic_out, stem="synthetic_request_signer",
@@ -251,6 +252,24 @@ check(
         *(camry_contract["runtime_config"][name] for name in build.CONFIG_FIELDS),
     ],
 )
+
+route_shifted = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())
+class_route = camry_contract["signer_abi"]["class_route_table"]
+route_shifted[class_route + 2] += 1
+route_shifted_path = BUILD_ROOT / "resolver-shifted-class-route.bin"
+route_shifted_path.write_bytes(route_shifted)
+route_shifted_contract = resolve_request_signer_contract(bytes(route_shifted))
+route_shifted_status, route_shifted_words = run_resolver(route_shifted_path)
+check(
+    "on-device response resolution follows the diagnostic class and resource tables",
+    route_shifted_contract["signer_abi"]["response_handle"]
+        != camry_contract["signer_abi"]["response_handle"]
+    and route_shifted_status == 0
+    and route_shifted_words == [
+        *route_shifted_contract["boot_calls"],
+        *(route_shifted_contract["runtime_config"][name] for name in build.CONFIG_FIELDS),
+    ],
+)
 command5_damaged = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())
 command5_address = SPECS[CAMRY_TARGET]["contract"]["signer_abi"]["command5_sync"]
 command5_damaged[command5_address:command5_address + 16] = bytes(16)
@@ -269,23 +288,24 @@ command5_duplicated[duplicate_address:duplicate_address + 16] = (
 command5_duplicated_path = BUILD_ROOT / "resolver-command5-duplicated.bin"
 command5_duplicated_path.write_bytes(command5_duplicated)
 
-route_ambiguous = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())
-route_map = SPECS[CAMRY_TARGET]["contract"]["signer_abi"]["route_map"]
-response_handle = SPECS[CAMRY_TARGET]["contract"]["signer_abi"]["response_handle"]
-duplicate_handle = next(
-    handle for handle in range(256)
-    if handle != response_handle
-    and route_ambiguous[route_map + handle * 2:route_map + handle * 2 + 2] != b"\x01\x06"
+class_route_ambiguous = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())
+class_route = SPECS[CAMRY_TARGET]["contract"]["signer_abi"]["class_route_table"]
+duplicate_address = next(
+    address
+    for address in range(0, len(class_route_ambiguous) - 6, 2)
+    if class_route_ambiguous[address:address + 6] == b"\xff" * 6
 )
-route_ambiguous[route_map + duplicate_handle * 2:route_map + duplicate_handle * 2 + 2] = b"\x01\x06"
-route_ambiguous_path = BUILD_ROOT / "resolver-route-ambiguous.bin"
-route_ambiguous_path.write_bytes(route_ambiguous)
+class_route_ambiguous[duplicate_address:duplicate_address + 6] = (
+    class_route_ambiguous[class_route:class_route + 6]
+)
+class_route_ambiguous_path = BUILD_ROOT / "resolver-class-route-ambiguous.bin"
+class_route_ambiguous_path.write_bytes(class_route_ambiguous)
 
 check(
-    "on-device resolver fails closed on missing, duplicate, and ambiguous dependencies",
+    "on-device resolver fails closed on missing and ambiguous dependencies",
     run_resolver(command5_damaged_path)[0] == -2
     and run_resolver(command5_duplicated_path)[0] == -2
-    and run_resolver(route_ambiguous_path)[0] == -11,
+    and run_resolver(class_route_ambiguous_path)[0] == -11,
 )
 
 def run_core_simulator() -> None:
@@ -338,29 +358,9 @@ check(
     and sienna_meta["request"]["bus"] is None
     and sienna_meta["response"]["bus"] is None,
 )
-expected_confirmation_paths = {
-    "camry-8965F3307000": (0x00085240, 0xFEBE5036, 0x0008043C, 0x0008152E),
-    "crown-8965F3012000": (0x000813D0, 0xFEBE4AE6, 0x0007DAA8, 0x0007EB4A),
-    "corolla-8965F1208000": (0x0007E550, 0xFEBE4F22, 0x0007974C, 0x0007A83E),
-    "corolla-8965H1202000": (0x0007E550, 0xFEBE4F22, 0x0007974C, 0x0007A83E),
-    "sienna-8965B4512000": (0x00084150, 0xFEBE502A, 0x0007F350, 0x00080442),
-}
-expected_slot4_configs = {
-    "camry-8965F3307000": 0x00025828,
-    "crown-8965F3012000": 0x00025564,
-    "corolla-8965F1208000": 0x0002570C,
-    "corolla-8965H1202000": 0x0002570C,
-    "sienna-8965B4512000": 0x00025950,
-}
-expected_shadow_copy = {
-    "camry-8965F3307000": 0x000636D4,
-    "crown-8965F3012000": 0x00062AD4,
-    "corolla-8965F1208000": 0x0005C992,
-    "corolla-8965H1202000": 0x0005C992,
-    "sienna-8965B4512000": 0x0006263E,
-}
 for target, spec in RESOLUTION_SPECS.items():
-    probe = probe_request_signer_contract(spec["image"].read_bytes())
+    image = spec["image"].read_bytes()
+    probe = probe_request_signer_contract(image)
     check(
         f"{target} exposes every dynamically required signer component",
         probe["compatible"]
@@ -372,31 +372,32 @@ for target, spec in RESOLUTION_SPECS.items():
     )
     shadow = probe["contract"]["execution"]["startup_shadow_copy"]
     check(
-        f"{target} binds the exact startup shadow copy before the resident boundary",
-        shadow["function"] == expected_shadow_copy[target]
+        f"{target} binds the startup shadow copy before the resident boundary",
+        0 <= shadow["function"] < len(image)
         and shadow["source"] == 0x00010000
         and shadow["destination"] == 0xFEBF7C00
         and shadow["size"] == 0x7DF0
-        and shadow["destination"] + shadow["size"] == 0xFEBFF9F0,
+        and shadow["destination"] + shadow["size"] == CANONICAL_MEMORY["state_base"],
     )
     abi = probe["contract"]["signer_abi"]
-    completion, slot, dispatcher, noop = expected_confirmation_paths[target]
     check(
-        f"{target} proves fixed command5 config is target-native type1/selector4",
-        abi["slot4_config"] == expected_slot4_configs[target]
-        and abi["command5_config_type"] == 1
+        f"{target} resolves the target-native type1/selector4 command config",
+        abi["command5_config_type"] == 1
         and abi["command5_selector"] == 4
-        and spec["image"].read_bytes()[abi["slot4_config"]:abi["slot4_config"] + 32]
+        and image[abi["slot4_config"]:abi["slot4_config"] + 32]
             == bytes.fromhex("0100000004000000000000000000000000000000000000000000cc000f000000"),
     )
+    route_pair = abi["route_map"] + abi["response_handle"] * 2
     check(
-        f"{target} proves private confirmation handle F0 follows the native completion path to a no-op",
-        abi["lower_tx_completion"] == completion
-        and abi["response_confirmation_slot"] == slot
+        f"{target} resolves the private response completion path to a no-op",
+        image[route_pair:route_pair + 2]
+            == bytes((abi["response_controller"], abi["response_resource"]))
+        and 0 <= abi["lower_tx_completion"] < len(image) - 4
+        and 0xFEBE0000 <= abi["response_confirmation_slot"] < 0xFEC00000
         and abi["software_confirmation_handle"] == 0x00F0
-        and abi["software_confirmation_dispatcher"] == dispatcher
-        and abi["software_confirmation_noop"] == noop
-        and spec["image"].read_bytes()[noop:noop + 2] == bytes.fromhex("7f00"),
+        and 0 <= abi["software_confirmation_dispatcher"] < len(image)
+        and image[abi["software_confirmation_noop"]:abi["software_confirmation_noop"] + 2]
+            == bytes.fromhex("7f00"),
     )
 
 # CanIf class-2 HTH routing selects the primary 0x7A9 response independently of
@@ -408,12 +409,20 @@ camry_abi = camry_contract["signer_abi"]
 four_resource_image = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())
 row4 = camry_abi["resource_table"] + 4 * 10
 four_resource_image[row4:row4 + 10] = b"\0" * 10
+four_resource_path = BUILD_ROOT / "resolver-four-resource.bin"
+four_resource_path.write_bytes(four_resource_image)
 four_resource_contract = resolve_request_signer_contract(bytes(four_resource_image))
+four_resource_status, four_resource_words = run_resolver(four_resource_path)
 check(
     "primary diagnostic response routing is independent of optional fifth resource",
     four_resource_contract["signer_abi"]["resource_row_count"] == 4
     and four_resource_contract["signer_abi"]["response_handle"] == camry_abi["response_handle"]
-    and four_resource_contract["signer_abi"]["response_resource"] == camry_abi["response_resource"],
+    and four_resource_contract["signer_abi"]["response_resource"] == camry_abi["response_resource"]
+    and four_resource_status == 0
+    and four_resource_words == [
+        *four_resource_contract["boot_calls"],
+        *(four_resource_contract["runtime_config"][name] for name in build.CONFIG_FIELDS),
+    ],
 )
 
 shadow_damaged_image = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())

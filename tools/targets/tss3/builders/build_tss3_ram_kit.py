@@ -9,15 +9,14 @@ import sys
 import tempfile
 from pathlib import Path
 
-from tsk.ram_runtime.target_profiles import (
-    BOOT_F181_HEX,
-    registered_specs,
-    registered_targets,
-    supported_targets,
-)
 from tools import REPO_ROOT
 from tools.targets.tss3.builders.build_tss3_request_signer import build_request_signer
 from tools.targets.tss3.console import render_kit
+from tsk.ram_runtime.target_profiles import (
+    BOOT_F181_HEX,
+    registered_targets,
+    supported_targets,
+)
 
 ROOT = REPO_ROOT
 LAUNCHER = ROOT / "tsk/ram_runtime/tss3_request_signer_launcher.sh"
@@ -54,7 +53,7 @@ def _copy(src: Path, dst: Path) -> None:
     shutil.copy2(src, dst)
 
 
-def _bound_metadata(metadata: dict, record: dict, spec: dict) -> dict:
+def _bound_metadata(metadata: dict, record: dict) -> dict:
     """Bind one universal build to an exact target on the repinned runtime bus."""
     runtime = record["ram_runtime"]
     return {
@@ -74,11 +73,7 @@ def _bound_metadata(metadata: dict, record: dict, spec: dict) -> dict:
             **metadata["response"],
             "bus": REPINNED_RUNTIME_BUS,
         },
-        "state": {
-            **metadata["state"],
-            "base": f"0x{int(spec['contract']['memory']['state_base']):08X}",
-            "layout": spec["contract"]["memory"]["layout"],
-        },
+        "state": {**metadata["state"]},
         "authenticated_payload": {
             "path": "payload.bin",
             "sha256": metadata["authenticated_payload"]["sha256"],
@@ -119,17 +114,15 @@ def build(target: str, out: Path) -> dict:
         raise RuntimeError(f"unsupported RAM-runtime target: {target}")
     _require_empty(out)
     record = {**registered_targets()[target], "name": target}
-    spec = registered_specs()[target]
     with tempfile.TemporaryDirectory(prefix="tss3-ram-kit-") as td:
         metadata = build_request_signer(target=target, output_dir=Path(td))
         payload = Path(td) / metadata["authenticated_payload"]["path"]
-        return _package(target, out, _bound_metadata(metadata, record, spec), payload)
+        return _package(target, out, _bound_metadata(metadata, record), payload)
 
 
 def build_set(out: Path) -> dict:
     _require_empty(out)
     records = registered_targets()
-    specs = registered_specs()
     with tempfile.TemporaryDirectory(prefix="tss3-ram-kit-") as td:
         metadata = build_request_signer(
             target=TARGETS[0],
@@ -145,7 +138,6 @@ def build_set(out: Path) -> dict:
                 _bound_metadata(
                     metadata,
                     {**records[target], "name": target},
-                    specs[target],
                 ),
                 payload,
             )

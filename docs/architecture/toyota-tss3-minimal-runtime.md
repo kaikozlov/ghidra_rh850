@@ -127,14 +127,15 @@ Bus routing belongs to the maintained topology above and
 | Corolla `8965H1202000` | `FEBE3F4C` / `FEBE480C` | `FEBFF9F0` | 50 | `FEF07F98` | `FEBF1264` |
 | Corolla `8965F1208000` | `FEBE3F4C` / `FEBE480C` | `FEBFF9F0` | 50 | `FEF07F98` | `FEBF1264` |
 
-The response handle is derived from the exact generated CanIf diagnostic class.
-In all four images, class 2 contains primary/functional `0x7A9` on local HTH0 and secondary `0x7A8`
-on local HTH1; the class-route base is 2, so `0x7A9` resolves to global HTH2.
-That is resource 6 / lower handle 53 on Camry and resource 6 / lower handle 50
-on Crown and Corolla. The former four-resource heuristic incorrectly selected
-Crown HTH3 / handle 51 / resource 7, which is the secondary `0x7A8` route. The
-machine verification now executes both the exact lower wrapper and the complete
-compiled C helper against the selected primary route on every registered image.
+The staging resolver derives the response handle from the duplicated primary
+`0x7A9` diagnostic entries, class-route base, and unique generated transmit
+resource row. It carries no controller, hardware-resource, or lower-handle
+literal. The host onboarding resolver additionally validates the selected
+handle against the complete resource table, lower route map, and transmit
+completion path. In all four registered images, class 2 maps primary `0x7A9`
+from local HTH0 to global HTH2: resource 6, lower handle 53 on Camry and lower
+handle 50 on Crown and Corolla. Machine verification executes the exact lower
+wrapper and complete compiled C helper against that resolved route.
 
 All four default to the same four-message classic standard-`0x777` request
 codec, standard-`0x7A9` response, and 36-byte command-5 authentication domain.

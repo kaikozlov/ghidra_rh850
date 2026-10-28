@@ -11,6 +11,8 @@ import tempfile
 from pathlib import Path
 from typing import Any, cast
 
+from tools import REPO_ROOT as REPO
+from tools.targets.tss3.console import render_build
 from tsk.common.payload_package import inspect_payload, package_shellcode
 from tsk.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET
 from tsk.common.rh850_build import (
@@ -23,9 +25,9 @@ from tsk.common.rh850_build import (
 )
 from tsk.ram_runtime.target_profiles import (
     BOOT_F181_HEX,
-    registered_specs,
     spec_from_codeflash,
     supported_targets,
+    target_spec,
 )
 from tsk.ram_runtime.tss3_request_signer_contract import (
     HELPER_CODE_LIMIT,
@@ -33,8 +35,6 @@ from tsk.ram_runtime.tss3_request_signer_contract import (
     RESIDENT_BASE,
     STATE_SIZE,
 )
-from tools import REPO_ROOT as REPO
-from tools.targets.tss3.console import render_build
 
 BUILDER = Path(__file__).resolve()
 SCHEMA = "tss3-request-signer-build-v2"
@@ -173,16 +173,10 @@ def build_request_signer(
     if stem is not None and re.fullmatch(r"[A-Za-z0-9_.-]+", stem) is None:
         raise ValueError("output stem must be a filename stem without path separators")
 
-    specs = registered_specs()
-    transport_ids = {
-        (spec["request"]["request_id"], spec["request"]["response_id"])
-        for spec in specs.values()
-    }
-    need(len(transport_ids) == 1, "registered targets do not share CAN identifiers")
     selected = (
-        spec_from_codeflash(codeflash, known_specs=specs)
+        spec_from_codeflash(codeflash)
         if codeflash is not None
-        else specs[target if target is not None else TARGETS[0]]
+        else target_spec(target if target is not None else TARGETS[0])
     )
     compatibility = {
         "status": "self-resolved-compatible",

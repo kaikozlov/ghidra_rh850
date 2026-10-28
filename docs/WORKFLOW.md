@@ -649,12 +649,13 @@ from that dump. Components are reported independently as `resolved`,
 
 It then builds one target-independent 4-KiB authenticated payload. The staging
 code scans the active 1-MiB CodeFlash for unique boot, startup, foreground, RX,
-freshness, command-five, lower-CAN, route-map, and memory-layout roles; writes
-the resolved 32-word boot/config handoff to retained RAM; and stops before any
-boot call or RAM installation when a role is missing or ambiguous. No software
-ID, image hash, vehicle name, or precomputed firmware offset enters the payload.
-The host resolver remains the stricter onboarding gate and records the exact
-dump contract.
+freshness, command-five, lower-CAN, diagnostic-Tx/class/resource, and
+memory-layout roles; writes the resolved 32-word boot/config handoff to retained
+RAM; and stops before any boot call or RAM installation when a role is missing
+or ambiguous. No software ID, image hash, vehicle name, controller/resource
+pair, lower handle, or precomputed firmware offset enters the payload. The host
+resolver remains the stricter onboarding gate and records the exact dump
+contract, including lower route-map and completion-path validation.
 
 The compiled simulator ELF is reused for separate clean-process fallback and
 timer-bounded idle executions against the supplied image. For an exact

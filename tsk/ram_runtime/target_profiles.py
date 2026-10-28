@@ -5,12 +5,11 @@ import json
 from pathlib import Path
 from typing import Any
 
+from tools import REPO_ROOT
 from tsk.common.rh850_build import sha_bytes
 from tsk.ram_runtime.tss3_request_signer_contract import (
-    RESIDENT_BASE,
     resolve_request_signer_contract,
 )
-from tools import REPO_ROOT
 
 REGISTRY = REPO_ROOT / "data/analysis_targets.json"
 PAYLOAD_NAME = "tss3-request-signer"
@@ -39,50 +38,26 @@ def supported_targets() -> tuple[str, ...]:
 def _spec_from_contract(
     *,
     name: str,
-    vehicle: str,
-    software_id: str,
-    profile: str,
     image_path: Path,
     contract: dict[str, Any],
     request_bus: int | None,
     response_bus: int | None,
-    registered: bool,
 ) -> dict[str, Any]:
     resolved_request = contract["request"]
-    resolved_signer = contract["signer_abi"]
-    memory = contract["memory"]
-    request = {
-        "request_id": resolved_request["request_id"],
-        "response_id": resolved_request["response_id"],
-        "ring_words": resolved_request["ring_words"],
-        "ring_base": resolved_request["ring_base"],
-        "ring_producer": resolved_request["ring_producer"],
-        "state_base": memory["state_base"],
-        "scratch_base": memory["scratch_base"],
-        "auth_reset": resolved_signer["auth_reset"],
-        "auth_trip": resolved_signer["auth_trip"],
-        "lower_can_write": resolved_signer["lower_can_write"],
-        "response_handle": resolved_signer["response_handle"],
-        "request_bus": request_bus,
-        "response_bus": response_bus,
-    }
     identity = contract["identity"]
     return {
         "name": name,
-        "vehicle": vehicle,
-        "software_id": software_id,
         "runtime_software_id": identity["runtime_software_id"],
-        "runtime_software_id_address": identity["runtime_software_id_address"],
-        "profile": profile,
         "application_f181_hex": identity["application_f181_hex"],
         "image": image_path,
         "sha256": contract["codeflash_sha256"],
-        "resident_base": RESIDENT_BASE,
-        "boot_calls": contract["boot_calls"],
-        "runtime_config": contract["runtime_config"],
-        "request": request,
+        "request": {
+            "request_id": resolved_request["request_id"],
+            "response_id": resolved_request["response_id"],
+            "request_bus": request_bus,
+            "response_bus": response_bus,
+        },
         "contract": contract,
-        "registered": registered,
     }
 
 
@@ -103,14 +78,10 @@ def _registered_spec(
         raise RuntimeError(f"{name} firmware identity drift")
     return _spec_from_contract(
         name=name,
-        vehicle=registry_target["vehicle"],
-        software_id=registry_target["software_id"],
-        profile=runtime["profile"],
         image_path=image_path,
         contract=contract,
         request_bus=runtime["request_bus"],
         response_bus=runtime["response_bus"],
-        registered=True,
     )
 
 
@@ -142,18 +113,10 @@ def registered_specs() -> dict[str, dict[str, Any]]:
     }
 
 
-def spec_from_codeflash(
-    image_path: Path,
-    known_specs: dict[str, dict[str, Any]] | None = None,
-) -> dict[str, Any]:
+def spec_from_codeflash(image_path: Path) -> dict[str, Any]:
     image_path = image_path.resolve()
     image = image_path.read_bytes()
     digest = sha_bytes(image)
-    if known_specs is not None:
-        for spec in known_specs.values():
-            if spec["sha256"] == digest:
-                return spec
-
     contract = resolve_request_signer_contract(image)
     for name, target in registered_targets().items():
         if target["codeflash_sha256"] == digest:
@@ -161,12 +124,8 @@ def spec_from_codeflash(
     identity = contract["identity"]
     return _spec_from_contract(
         name=f"tss3-{identity['firmware_software_id']}",
-        vehicle=f"Unregistered Toyota EPS {identity['firmware_software_id']}",
-        software_id=identity["firmware_software_id"],
-        profile=contract["memory"]["layout"],
         image_path=image_path,
         contract=contract,
         request_bus=None,
         response_bus=None,
-        registered=False,
     )

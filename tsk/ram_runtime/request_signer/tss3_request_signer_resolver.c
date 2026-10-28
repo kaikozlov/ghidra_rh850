@@ -86,12 +86,6 @@ static const uint8_t command5_signature[16] = {
 static const uint8_t lower_can_signature[12] = {
     0x86, 0x07, 0xe1, 0xf0, 0x06, 0xc8, 0xd9, 0x00, 0x07, 0xe0, 0x25, 0x0f,
 };
-static const uint8_t slot4_signature[32] = {
-    0x01, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0xcc, 0x00, 0x0f, 0x00, 0x00, 0x00,
-};
 static const uint8_t shadow_copy_signature[36] = {
     0x3e, 0x06, 0x00, 0x7c, 0xbf, 0xfe, 0x21, 0x06,
     0x00, 0x00, 0x01, 0x00, 0xe5, 0x05, 0x21, 0x9f,
@@ -186,6 +180,7 @@ static int foreground_matches(const uint8_t *image, uint32_t address)
     }
     return 1;
 }
+
 static int recover_auth_trip(
     const uint8_t *image, uint32_t freshness, uint32_t gp, uint32_t *auth_trip)
 {
@@ -208,7 +203,6 @@ static int recover_auth_trip(
     *auth_trip = candidate;
     return 1;
 }
-
 
 static int recover_context(
     const uint8_t *image, uint32_t context, uint32_t *gp, uint32_t *tp)
@@ -249,9 +243,11 @@ int resolve_request_signer_image(const uint8_t *image, uint32_t *output)
 {
     uint32_t boot = 0, coordinator = 0, producer = 0;
     uint32_t freshness = 0, command5 = 0, lower_can = 0;
+    uint32_t diagnostic_tx = 0, class_route = 0;
     unsigned boot_count = 0, coordinator_count = 0, producer_count = 0;
     unsigned freshness_count = 0, command5_count = 0, lower_can_count = 0;
-    unsigned mpu_count = 0, slot4_count = 0;
+    unsigned diagnostic_tx_count = 0, class_route_count = 0;
+    unsigned mpu_count = 0;
     unsigned transit_pointer_count = 0;
     uint32_t offset;
     uint32_t q;
@@ -305,11 +301,14 @@ int resolve_request_signer_image(const uint8_t *image, uint32_t *output)
                 record_hit(&lower_can, &lower_can_count, offset);
             }
         }
+        if ((read32(p) & 0xff00ffffu) == 0xff00ff00u &&
+            p[2] != 0xffu && p[4] == 0xffu) {
+            record_hit(&class_route, &class_route_count, offset);
+        }
         if ((offset & 3u) == 0u) {
             uint32_t word = read32(p);
-            if (word == 1u &&
-                bytes_equal(p, slot4_signature, sizeof(slot4_signature))) {
-                ++slot4_count;
+            if (word == 0x7a9u && read32(p + 8u) == word) {
+                record_hit(&diagnostic_tx, &diagnostic_tx_count, offset);
             }
             if (word == 0u && read32(p + 4) == 0xfebdfffcu &&
                 read32(p + 8) == 0xfebf7c00u && read32(p + 12) == 0xfebffbfcu &&
@@ -327,12 +326,14 @@ int resolve_request_signer_image(const uint8_t *image, uint32_t *output)
     if (boot_count != 1u || coordinator_count != 1u || producer_count != 1u) {
         return -1;
     }
-    if (freshness_count != 1u || command5_count != 1u || lower_can_count != 1u ||
-        slot4_count != 1u) {
+    if (freshness_count != 1u || command5_count != 1u || lower_can_count != 1u) {
         return -2;
     }
     if (mpu_count != 1u || transit_pointer_count != 0u) {
         return -3;
+    }
+    if (diagnostic_tx_count != 1u || class_route_count != 1u) {
+        return -11;
     }
 
     for (index = 0; index < BOOT_CALL_COUNT; ++index) {
@@ -355,10 +356,6 @@ int resolve_request_signer_image(const uint8_t *image, uint32_t *output)
         uint32_t ring_hits = 0;
         uint32_t auth_trip;
         uint32_t command5_globals;
-        uint32_t map_pointer_slot;
-        uint32_t route_map;
-        uint32_t response_handle = 0;
-        uint32_t response_hits = 0;
         uint32_t *config = output + BOOT_CALL_COUNT;
         unsigned startup_calls = 0;
         unsigned shadow_calls = 0;
@@ -438,25 +435,20 @@ int resolve_request_signer_image(const uint8_t *image, uint32_t *output)
         config[CONFIG_WORD_STATE_BASE] = RESIDENT_BASE;
         config[CONFIG_WORD_SCRATCH_BASE] = HELPER_BASE + HELPER_CODE_LIMIT;
 
-        map_pointer_slot = tp + (uint32_t)(signed16(image + lower_can + 12u) & -2);
-        if (map_pointer_slot > CODEFLASH_SIZE - 4u) {
-            return -11;
-        }
-        route_map = read32(image + map_pointer_slot);
-        if (route_map > CODEFLASH_SIZE - 512u) {
-            return -11;
-        }
-        for (index = 0; index < 256u; ++index) {
-            if (image[route_map + index * 2u] == 1u &&
-                image[route_map + index * 2u + 1u] == 6u) {
-                response_handle = index;
-                ++response_hits;
+        q = (uint32_t)image[class_route + 2u] + image[diagnostic_tx + 6u];
+
+        ring_hits = 0;
+        for (offset = class_route; offset + 10u < diagnostic_tx; offset += 2u) {
+            const uint8_t *row = image + offset;
+            uint32_t mapping = read32(row + 4u);
+            if (read32(row) == 0x00020007u && read16(row + 8u) == q) {
+                config[CONFIG_WORD_RESPONSE_HANDLE] = mapping >> 16;
+                ++ring_hits;
             }
         }
-        if (response_hits != 1u) {
+        if (ring_hits != 1u) {
             return -11;
         }
-        config[CONFIG_WORD_RESPONSE_HANDLE] = response_handle;
         for (index = 0; index < ARRAY_SIZE(foreground_call_offsets); ++index) {
             uint32_t target = jarl22_target(image, foreground + foreground_call_offsets[index]);
             if (target >= CODEFLASH_SIZE) {
