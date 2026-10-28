@@ -12,7 +12,7 @@ from pathlib import Path
 from tools import REPO_ROOT
 REPO = REPO_ROOT
 
-from tools.security.build_secoc_patch_manifest import P1M_E_CODEFLASH_SIZE  # noqa: E402
+from tools.firmware.p1me_codeflash import P1M_E_CODEFLASH_SIZE  # noqa: E402
 from tools.variants.check_variant_acquisition import (  # noqa: E402
     MANIFEST_SCHEMA,
     RUN_SCHEMA,

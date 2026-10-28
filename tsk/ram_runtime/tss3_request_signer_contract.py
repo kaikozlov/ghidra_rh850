@@ -5,14 +5,13 @@ import hashlib
 import struct
 from typing import Any
 
+from tools.firmware.p1me_codeflash import validate_codeflash_geometry
+from tools.firmware.rh850_instructions import is_jarl22, jarl22_target
 from tools.security.build_ephemeral_runtime_manifest import (
-    is_jarl22,
-    jarl22_target,
     recover_application_gp,
     recover_application_tp,
     recover_boot_handoff,
 )
-from tools.security.build_secoc_patch_manifest import validate_codeflash_geometry
 
 REQUEST_CAN_ID = 0x777
 RESPONSE_CAN_ID = 0x7A9

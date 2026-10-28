@@ -119,26 +119,26 @@ void oracle_core_sim_main(void) {
 
   clear_bytes(sb, sizeof(state));
   clear_bytes(sc, sizeof(scratch));
-  CHECK(113, oracle_core_advance_freshness(&state, &scratch, 0x1234,
-                                           0x00034567) == 1);
+  oracle_core_advance_freshness(&state, &scratch, 0x1234, 0x00034567);
+  CHECK(113, state.message_counter == 1);
   CHECK(114, load32(&sb[24]) == 0x00034567 && load16(&sb[28]) == 0x1234 &&
                  sb[30] == 1 && sb[31] == 1 && sb[34] == 0x07);
   CHECK(115, load32(&sc[0]) == 0x1234 && load32(&sc[4]) == 0x00034567 &&
                  load16(&sc[8]) == 1 && sc[10] == 3 && sc[11] == 0x2e &&
                  load32(&sc[100]) == 0x2e);
 
-  CHECK(116, oracle_core_advance_freshness(&state, &scratch, 0x1234,
-                                           0x00034567) == 2);
+  oracle_core_advance_freshness(&state, &scratch, 0x1234, 0x00034567);
+  CHECK(116, state.message_counter == 2);
   CHECK(117, sb[30] == 2 && sb[34] == 0x0b);
   sb[30] = 0xff;
-  CHECK(118, oracle_core_advance_freshness(&state, &scratch, 0x1234,
-                                           0x00034567) == 0);
+  oracle_core_advance_freshness(&state, &scratch, 0x1234, 0x00034567);
+  CHECK(118, state.message_counter == 0);
   CHECK(119, sb[30] == 0 && sb[34] == 0x03);
-  CHECK(120, oracle_core_advance_freshness(&state, &scratch, 0x1235,
-                                           0x00034567) == 1);
+  oracle_core_advance_freshness(&state, &scratch, 0x1235, 0x00034567);
+  CHECK(120, state.message_counter == 1);
   CHECK(121, sb[30] == 1 && load16(&sb[28]) == 0x1235);
-  CHECK(122, oracle_core_advance_freshness(&state, &scratch, 0x1235,
-                                           0x00034568) == 1);
+  oracle_core_advance_freshness(&state, &scratch, 0x1235, 0x00034568);
+  CHECK(122, state.message_counter == 1);
   CHECK(123, sb[30] == 1 && sb[34] == 0x04);
 
   clear_bytes(sb, sizeof(state));
@@ -149,17 +149,20 @@ void oracle_core_sim_main(void) {
   sc[53] = 0x4e;
   sc[54] = 0x2a;
   sc[55] = 0x5e;
-  CHECK(124, oracle_core_pack_response(&state, &scratch, 0x07, 0, 1, 0, 16) == 0);
+  oracle_core_pack_response(&state, &scratch, 0x07, 0, 1, 0, 16);
+  CHECK(124, scratch.response.status == 0);
   CHECK(125, load32(&sb[12]) == 42);
   CHECK(126, bytes_equal(&sc[80], response_success, sizeof(response_success)));
 
   clear_bytes(sc, sizeof(scratch));
-  CHECK(127, oracle_core_pack_response(&state, &scratch, 0x42, 0, 0, 0, 16) == 1);
+  oracle_core_pack_response(&state, &scratch, 0x42, 0, 0, 0, 16);
+  CHECK(127, scratch.response.status == 1);
   CHECK(128, load32(&sb[12]) == 42 &&
                 bytes_equal(&sc[80], response_error, sizeof(response_error)));
 
   clear_bytes(sc, sizeof(scratch));
-  CHECK(129, oracle_core_pack_response(&state, &scratch, 0x55, 2, 1, 0, 16) == 2);
+  oracle_core_pack_response(&state, &scratch, 0x55, 2, 1, 0, 16);
+  CHECK(129, scratch.response.status == 2);
   CHECK(130, load32(&sb[12]) == 42 &&
                 bytes_equal(&sc[80], response_busy, sizeof(response_busy)));
 

@@ -108,7 +108,7 @@ void helper_entry(void) {
         /* Read the EPS-authenticated current epoch. */
         reset = *config->auth_reset;
         trip = *config->auth_trip;
-        (void)oracle_core_advance_freshness(state, scratch, trip, reset);
+        oracle_core_advance_freshness(state, scratch, trip, reset);
         config->freshness_encode(&scratch->freshness, scratch->encoded_freshness,
                                  &scratch->freshness_length);
 
@@ -132,11 +132,10 @@ void helper_entry(void) {
         output_length = (uint8_t)scratch->mac_length;
         state->command_completion = completion;
         state->command_status = command_status;
-        state->command_outlen = (uint8_t)output_length;
+        state->command_outlen = output_length;
 
-        (void)oracle_core_pack_response(state, scratch, sequence, wrapper_result,
-                                        completion, command_status,
-                                        output_length);
+        oracle_core_pack_response(state, scratch, sequence, wrapper_result,
+                                  completion, command_status, output_length);
 
         /* Reuse the target's diagnostic response mailbox and no-op software
            confirmation handle; do not manufacture CanTp state. */

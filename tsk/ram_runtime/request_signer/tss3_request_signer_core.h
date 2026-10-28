@@ -89,9 +89,9 @@ rejected:
  * Advance the private freshness epoch and message counter from the
  * EPS-authenticated trip/reset counters, prepare the stock freshness-encoder
  * input at the scratch base (trip:u32 reset:u32 message:u16 reset_low2:u8
- * bitlen:u8) plus its output length, and return the next message counter.
+ * bitlen:u8) plus its output length.
  */
-static inline __attribute__((always_inline)) uint8_t
+static inline __attribute__((always_inline)) void
 oracle_core_advance_freshness(volatile SignerState *state, SignerScratch *scratch,
                               uint32_t trip, uint32_t reset) {
   uint16_t trip16 = (uint16_t)trip; /* authenticated trip is 16-bit */
@@ -123,19 +123,18 @@ oracle_core_advance_freshness(volatile SignerState *state, SignerScratch *scratc
   scratch->freshness.reset_low2 = (uint8_t)(reset & 3);
   scratch->freshness.bit_length = 0x2e;
   scratch->freshness_length = 0x2e;
-  return message;
 }
 
 /*
  * Pack the 8-byte oracle response (scratch->response) from the command-5
- * wrapper result, completion, status, and output length, and return the
- * response status: 0 success, 1 command error, 2 busy. Only a successful
+ * wrapper result, completion, status, and output length. The response status
+ * is 0 for success, 1 for command error, and 2 for busy. Only a successful
  * command-5 completion increments success_count; failure statuses carry a
  * zero trailer. On success the big-endian CMAC prefix (scratch->mac[0]) is
  * converted to an integer, truncated to its high 28 bits, prepended with the
  * transmitted FV4 nibble, and byte-swapped once for the little-endian store.
  */
-static inline __attribute__((always_inline)) int oracle_core_pack_response(
+static inline __attribute__((always_inline)) void oracle_core_pack_response(
     volatile SignerState *state, SignerScratch *scratch, uint8_t sequence,
     uint32_t wrapper_result, uint8_t completion, uint8_t status,
     uint8_t output_length) {
@@ -167,7 +166,6 @@ static inline __attribute__((always_inline)) int oracle_core_pack_response(
     trailer = 0;
   }
   scratch->response.trailer = trailer;
-  return response_status;
 }
 
 #endif

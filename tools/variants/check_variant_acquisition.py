@@ -35,7 +35,7 @@ from typing import Any
 REPO = REPO_ROOT
 
 from tools.firmware.analyze_rh850_codeflash_structure import analyze as scan_structure  # noqa: E402
-from tools.security.build_secoc_patch_manifest import (  # noqa: E402
+from tools.firmware.p1me_codeflash import (  # noqa: E402
     P1M_E_CODEFLASH_SIZE,
     validate_codeflash_geometry,
 )

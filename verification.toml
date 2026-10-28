@@ -809,6 +809,12 @@ tests = ["tests/diagnostics/verify_response_disclosure_audit.py"]
 [suite.boot_noauth_pc_pivot_assessment]
 tests = ["tests/runtime/verify_boot_noauth_pc_pivot_assessment.py"]
 
+[suite.p1me_codeflash]
+tests = ["tests/firmware/verify_p1me_codeflash.py"]
+
+[suite.rh850_instructions]
+tests = ["tests/firmware/verify_rh850_instructions.py"]
+
 [suite.codeflash_structure_scanner]
 tests = ["tests/firmware/verify_rh850_codeflash_structure_scanner.py"]
 
@@ -1105,8 +1111,16 @@ timeout = 600
 tests = ["tests/targets/camry/verify_camry_f33_08a_fd_oracle.py"]
 timeout = 600
 
+[suite.tss3_signer_reporting]
+tests = ["tests/targets/tss3/verify_tss3_signer_reporting.py"]
+
 [suite.tss3_request_signer]
-tests = ["tests/targets/tss3/verify_tss3_request_signer.py"]
+tests = [
+  "tests/targets/tss3/verify_tss3_signer_reporting.py",
+  "tests/firmware/verify_p1me_codeflash.py",
+  "tests/firmware/verify_rh850_instructions.py",
+  "tests/targets/tss3/verify_tss3_request_signer.py",
+]
 timeout = 600
 
 [suite.ram_exec_boot_transitions]

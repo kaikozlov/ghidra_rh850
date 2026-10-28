@@ -17,7 +17,7 @@ from tsk.ram_runtime.tss3_request_signer_contract import (
 from tools import REPO_ROOT
 from tools.rh850_codeflash import Overlay, Spec, run_elf
 from tools.rh850_codeflash import run as run_codeflash_sim
-from tools.security.build_ephemeral_runtime_manifest import is_jarl22, jarl22_target
+from tools.firmware.rh850_instructions import is_jarl22, jarl22_target
 from tools.targets.tss3.builders.build_tss3_request_signer import (
     CONFIG_BASE,
     CONFIG_FIELDS,

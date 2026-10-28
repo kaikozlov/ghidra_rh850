@@ -465,16 +465,18 @@ def latency_summary(values: list[float]) -> dict[str, float]:
     if not values:
         raise ValueError("latency summary requires at least one sample")
     ordered = sorted(values)
+    count = len(ordered)
+    middle = count // 2
 
     def percentile(p: float) -> float:
-        position = (len(ordered) - 1) * p
+        position = (count - 1) * p
         low = int(position)
-        high = min(low + 1, len(ordered) - 1)
+        high = min(low + 1, count - 1)
         return ordered[low] + (ordered[high] - ordered[low]) * (position - low)
 
     return {
         "mean_ms": statistics.fmean(ordered),
-        "median_ms": statistics.median(ordered),
+        "median_ms": ordered[middle] if count % 2 else (ordered[middle - 1] + ordered[middle]) / 2,
         "p95_ms": percentile(0.95),
         "p99_ms": percentile(0.99),
         "max_ms": ordered[-1],
@@ -556,6 +558,9 @@ def _reduce_pipelined_benchmark(
     RUNTIME_PUBLICATION_DEADLINE_MS.
     """
     rows: list[dict[str, Any]] = []
+    rtts: list[float] = []
+    lateness: list[float] = []
+    response_ns: list[int] = []
     for sent in sends:
         index = int(sent["index"])
         response_row = responses.get(index)
@@ -563,22 +568,25 @@ def _reduce_pipelined_benchmark(
         if response_row is None:
             row["error"] = "missing_response"
         else:
+            response_time_ns = int(response_row["monotonic_ns"])
             row.update({
                 "response_frame_hex": response_row["frame_hex"],
                 "status": response_row["status"],
                 "trailer": response_row["trailer"],
                 "fv4": response_row["fv4"],
                 "request_start_to_response_ms": round(
-                    (int(response_row["monotonic_ns"]) - int(sent["started_ns"])) / 1e6, 3
+                    (response_time_ns - int(sent["started_ns"])) / 1e6, 3
                 ),
-                "response_monotonic_ns": int(response_row["monotonic_ns"]),
+                "response_monotonic_ns": response_time_ns,
             })
         rows.append(row)
+        lateness.append(float(row["scheduled_start_lateness_ms"]))
+        if row.get("status") == 0:
+            rtts.append(float(row["request_start_to_response_ms"]))
+            response_ns.append(int(row["response_monotonic_ns"]))
 
-    good = [row for row in rows if row.get("status") == 0]
-    rtts = [float(row["request_start_to_response_ms"]) for row in good]
-    lateness = [float(row["scheduled_start_lateness_ms"]) for row in rows]
-    response_ns = sorted(int(row["response_monotonic_ns"]) for row in good)
+    success_count = len(rtts)
+    response_ns.sort()
     response_intervals_ms = [
         (later - earlier) / 1e6 for earlier, later in pairwise(response_ns)
     ]
@@ -597,8 +605,8 @@ def _reduce_pipelined_benchmark(
         "count_sent": len(sends),
         "period_ms": period_ms,
         "target_rate_hz": 1000.0 / period_ms,
-        "success_count": len(good),
-        "success_rate": len(good) / count,
+        "success_count": success_count,
+        "success_rate": success_count / count,
         "responses_received": len(responses),
         "outstanding_after_drain": outstanding_after_drain,
         "max_outstanding": max_outstanding,
@@ -618,7 +626,7 @@ def _reduce_pipelined_benchmark(
     max_lateness_ms = max(lateness, default=0.0)
     max_rtt_ms = max(rtts, default=float("inf"))
     result["complete_target_rate_run"] = bool(
-        len(sends) == count and len(good) == count and not rx_errors and not sequence_window_exhausted and
+        len(sends) == count and success_count == count and not rx_errors and not sequence_window_exhausted and
         outstanding_after_drain == 0 and max_outstanding <= RUNTIME_MAX_PENDING_GENERATIONS and
         max_lateness_ms < period_ms and max_rtt_ms <= RUNTIME_PUBLICATION_DEADLINE_MS
     )

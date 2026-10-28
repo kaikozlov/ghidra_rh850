@@ -14,6 +14,8 @@ import json
 import struct
 from pathlib import Path
 
+from tools.firmware import rh850_instructions
+
 REPO = Path(__file__).resolve().parents[2]
 DEFAULT_GEOMETRY_DB = REPO / "data" / "variant_ram_exec_requirements.json"
 DEFAULT_BOOTSTRAP_DB = REPO / "data" / "variant_bootstrap_profiles.json"
@@ -68,25 +70,6 @@ def s16(value: int) -> int:
     return value - 0x10000 if value & 0x8000 else value
 
 
-def is_jarl22(image: bytes, off: int) -> bool:
-    if off < 0 or off + 4 > len(image):
-        return False
-    hw = struct.unpack_from("<H", image, off)[0]
-    # v850_func.sinc: op6_10=0x1e, reg2=lp(31).  addr22 high bits
-    # occupy the low six bits; reg2 is the high five bits of this halfword.
-    return ((hw >> 6) & 0x1F) == 0x1E and ((hw >> 11) & 0x1F) == 0x1F
-
-
-def jarl22_target(image: bytes, off: int) -> int:
-    if not is_jarl22(image, off):
-        raise ManifestError(f"not a direct JARL disp22 at {off:#x}")
-    ins = struct.unpack_from("<I", image, off)[0]
-    high6 = ins & 0x3F
-    if high6 & 0x20:
-        high6 -= 0x40
-    return (off + (high6 << 16) + (ins >> 16)) & 0xFFFFFFFF
-
-
 def unique_hit(name: str, hits: list[int]) -> int:
     if len(hits) != 1:
         raise ManifestError(f"expected one raw {name} candidate, found {len(hits)}")
@@ -98,7 +81,7 @@ def recover_boot_handoff(image: bytes) -> dict:
     for base in range(0, len(image) - 0x40, 2):
         if image[base:base + 4] != bytes.fromhex("82076100"):
             continue
-        if not all(is_jarl22(image, base + 4 + 4 * i) for i in range(5)):
+        if not all(rh850_instructions.is_jarl22(image, base + 4 + 4 * i) for i in range(5)):
             continue
         if image[base + 24:base + 26] != bytes.fromhex("e051"):  # cmp r0,r10
             continue
@@ -106,7 +89,7 @@ def recover_boot_handoff(image: bytes) -> dict:
     base = unique_hit("boot-handoff", hits)
     return {
         "boot_application_handoff": hx(base),
-        "boot_transition_call_targets": [hx(jarl22_target(image, base + 4 + 4 * i)) for i in range(5)],
+        "boot_transition_call_targets": [hx(rh850_instructions.jarl22_target(image, base + 4 + 4 * i)) for i in range(5)],
         "boot_validity_call_index": 4,
     }
 
@@ -180,8 +163,8 @@ def timeout_shape(image: bytes, off: int) -> bool:
 def recover_timeout_helper(image: bytes, com_rx: int, gp: int) -> dict:
     hits = [off for off in range(0, len(image) - 30, 2) if timeout_shape(image, off)]
     helper = unique_hit("COM-timeout-helper", hits)
-    call_targets = [jarl22_target(image, off) for off in range(com_rx, min(com_rx + 0x120, len(image) - 4), 2)
-                    if is_jarl22(image, off)]
+    call_targets = [rh850_instructions.jarl22_target(image, off) for off in range(com_rx, min(com_rx + 0x120, len(image) - 4), 2)
+                    if rh850_instructions.is_jarl22(image, off)]
     if helper not in call_targets:
         raise ManifestError("raw COM-timeout helper is not a direct callee of Com_RxIndication")
     validity_disp = s16(struct.unpack_from("<H", image, helper + 14)[0])

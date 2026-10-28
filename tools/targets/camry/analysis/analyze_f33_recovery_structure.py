@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from tools.targets.camry.support import camry_f33_corpus as f33
 from tools import REPO_ROOT
+from tools.firmware.rh850_instructions import jarl22_target
 import argparse
 import hashlib
 import json
@@ -23,19 +24,6 @@ TP = 0x23DFC
 
 def address(value: int) -> str:
     return f"0x{value:08X}"
-
-
-def jarl22_target(raw: bytes, pc: int) -> int:
-    """Decode only an ordinary four-byte RH850 JARL with link register lp."""
-    if len(raw) != 4:
-        raise ValueError("JARL disp22 requires exactly four bytes")
-    first, second = struct.unpack("<HH", raw)
-    if first & 0xFFC0 != 0xFF80 or second & 1:
-        raise ValueError(f"not JARL disp22,lp at {address(pc)}: {raw.hex()}")
-    displacement = ((first & 0x3F) << 16) | second
-    if displacement & 0x200000:
-        displacement -= 0x400000
-    return (pc + displacement) & 0xFFFFFFFF
 
 
 def subset_displacements(value: int) -> list[int]:
@@ -64,7 +52,7 @@ def analyze(image: bytes) -> dict[str, object]:
 
     def call(offset: int) -> dict[str, object]:
         return {**span(offset, 4),
-                "target": address(jarl22_target(image[offset:offset + 4], offset))}
+                "target": address(jarl22_target(image, offset))}
 
     # Decode the incident record. Include the following stock halfword:
     # the defect cannot be decoded from its four stored bytes alone.

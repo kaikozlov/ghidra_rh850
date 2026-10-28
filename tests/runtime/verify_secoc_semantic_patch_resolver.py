@@ -12,15 +12,13 @@ from pathlib import Path
 from tools import REPO_ROOT
 REPO = REPO_ROOT
 
+from tools.firmware.p1me_codeflash import CONCATENATED_DUMP_SIZE, P1M_E_CODEFLASH_SIZE
 from tools.security.build_secoc_patch_manifest import (
-    CONCATENATED_DUMP_SIZE,
     EXPECTED_CRC_RESIDUE,
-    P1M_E_CODEFLASH_SIZE,
     VALIDITY_MARKER,
     build_manifest,
     crc32,
     discover_crc_descriptors,
-    validate_codeflash_geometry,
 )
 
 passed = failed = 0
@@ -129,34 +127,6 @@ cf_bytes = cf_path.read_bytes()
 dataflash_path = REPO / "firmware" / "RH850_P1M-E_DataFlash.bin"
 check("committed CodeFlash image has the expected 1 MiB geometry", len(cf_bytes) == P1M_E_CODEFLASH_SIZE == 0x100000)
 check("DataFlash prefix fixture is the 0x8000 concatenation prefix", dataflash_path.stat().st_size == 0x8000)
-try:
-    validate_codeflash_geometry(len(cf_bytes))
-    check("exact 1 MiB CodeFlash geometry is accepted", True)
-except ValueError as exc:
-    check("exact 1 MiB CodeFlash geometry is accepted", False, str(exc))
-for size, label in (
-    (0, "empty image"),
-    (0x8000, "DataFlash-only image"),
-    (0x80000, "half-size truncated image"),
-    (0xFFFFF, "one-byte-truncated image"),
-    (0x100008, "oversized image"),
-):
-    try:
-        validate_codeflash_geometry(size)
-    except ValueError as exc:
-        check(f"{label} geometry is rejected", "expected exactly" in str(exc), str(exc))
-    else:
-        check(f"{label} geometry is rejected", False)
-try:
-    validate_codeflash_geometry(CONCATENATED_DUMP_SIZE)
-except ValueError as exc:
-    check(
-        "0x108000 DataFlash+CodeFlash concatenation is rejected with explicit diagnosis",
-        "DataFlash" in str(exc) and "0x8000" in str(exc) and "strip" in str(exc),
-        str(exc),
-    )
-else:
-    check("0x108000 DataFlash+CodeFlash concatenation is rejected with explicit diagnosis", False)
 with tempfile.TemporaryDirectory() as td:
     concat_path = Path(td) / "concat.bin"
     concat_path.write_bytes(dataflash_path.read_bytes() + cf_bytes)

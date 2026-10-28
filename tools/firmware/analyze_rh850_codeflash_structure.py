@@ -31,10 +31,12 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from tools.security.build_secoc_patch_manifest import (
+from tools.firmware.p1me_codeflash import (
     CONCATENATED_DUMP_SIZE,
     P1M_E_CODEFLASH_SIZE,
     P1M_E_DATAFLASH_PREFIX_SIZE,
+)
+from tools.security.build_secoc_patch_manifest import (
     VALIDITY_MARKER,
     discover_crc_descriptors,
 )
