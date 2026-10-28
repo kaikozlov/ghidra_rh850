@@ -9,16 +9,17 @@ import sys
 import tempfile
 from pathlib import Path
 
-from tools.targets.tss3.builders.build_tss3_request_signer import (
-    DEFAULT_CODEC,
-    build_request_signer,
-)
 from exploit.ram_runtime.target_profiles import (
     BOOT_F181_HEX,
+    registered_specs,
     registered_targets,
     supported_targets,
 )
 from tools import REPO_ROOT
+from tools.targets.tss3.builders.build_tss3_request_signer import (
+    DEFAULT_CODEC,
+    build_request_signer,
+)
 from tools.targets.tss3.console import render_kit
 
 ROOT = REPO_ROOT
@@ -56,15 +57,8 @@ def _copy(src: Path, dst: Path) -> None:
     shutil.copy2(src, dst)
 
 
-def _bound_metadata(metadata: dict, record: dict) -> dict:
-    """Bind the universal build to one target's identity on the shared runtime bus.
-
-    Every maintained TSS3 vehicle runs the Toyota-B repin: the vehicle network
-    and EPS diagnostics (signer request/response, 0x7A1 session traffic) sit on
-    Panda bus 0 (opendbc tss3.py topology). The registry's per-target
-    request_bus/response_bus are stock-vehicle observations kept as provenance
-    and must never select a runtime bus, so all kits bind the repinned bus.
-    """
+def _bound_metadata(metadata: dict, record: dict, spec: dict) -> dict:
+    """Bind one universal build to an exact target on the repinned runtime bus."""
     runtime = record["ram_runtime"]
     return {
         "schema": metadata["schema"],
@@ -83,7 +77,11 @@ def _bound_metadata(metadata: dict, record: dict) -> dict:
             **metadata["response"],
             "bus": REPINNED_RUNTIME_BUS,
         },
-        "state": metadata["state"],
+        "state": {
+            **metadata["state"],
+            "base": f"0x{int(spec['contract']['memory']['state_base']):08X}",
+            "layout": spec["contract"]["memory"]["layout"],
+        },
         "authenticated_payload": {
             "path": "payload.bin",
             "sha256": metadata["authenticated_payload"]["sha256"],
@@ -128,10 +126,11 @@ def build(target: str, out: Path, codec: str = DEFAULT_CODEC) -> dict:
         raise RuntimeError(f"unsupported request codec: {codec}")
     _require_empty(out)
     record = {**registered_targets()[target], "name": target}
+    spec = registered_specs()[target]
     with tempfile.TemporaryDirectory(prefix="tss3-ram-kit-") as td:
         metadata = build_request_signer(target=target, codec=codec, output_dir=Path(td))
         payload = Path(td) / metadata["authenticated_payload"]["path"]
-        return _package(target, out, codec, _bound_metadata(metadata, record), payload)
+        return _package(target, out, codec, _bound_metadata(metadata, record, spec), payload)
 
 
 def build_set(out: Path, codec: str = DEFAULT_CODEC) -> dict:
@@ -139,8 +138,14 @@ def build_set(out: Path, codec: str = DEFAULT_CODEC) -> dict:
         raise RuntimeError(f"unsupported request codec: {codec}")
     _require_empty(out)
     records = registered_targets()
+    specs = registered_specs()
     with tempfile.TemporaryDirectory(prefix="tss3-ram-kit-") as td:
-        metadata = build_request_signer(target=TARGETS[0], codec=codec, output_dir=Path(td))
+        metadata = build_request_signer(
+            target=TARGETS[0],
+            codec=codec,
+            output_dir=Path(td),
+            stem="tss3_request_signer",
+        )
         payload = Path(td) / metadata["authenticated_payload"]["path"]
         kits = {}
         for target in TARGETS:
@@ -148,7 +153,11 @@ def build_set(out: Path, codec: str = DEFAULT_CODEC) -> dict:
                 target,
                 out / target,
                 codec,
-                _bound_metadata(metadata, {**records[target], "name": target}),
+                _bound_metadata(
+                    metadata,
+                    {**records[target], "name": target},
+                    specs[target],
+                ),
                 payload,
             )
     return {"schema": "tss3-ram-kit-set-v1", "codec": codec, "kits": kits}

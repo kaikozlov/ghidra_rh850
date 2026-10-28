@@ -2,7 +2,6 @@
 """Verify the dump-resolved universal TSS3 RAM-resident request signer."""
 from __future__ import annotations
 
-import copy
 import io
 import json
 import subprocess
@@ -14,11 +13,11 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
 
-from exploit.common.rh850_build import CJob
-
-import tools.targets.tss3.builders.build_tss3_request_signer as build
 import exploit.ram_runtime.tss3_request_signer as host
 import exploit.ram_runtime.tss3_request_signer_compact as compact_host
+import tools.targets.tss3.builders.build_tss3_request_signer as build
+from exploit.common.payload_package import inspect_payload
+from exploit.common.rh850_build import CJob
 from exploit.ram_runtime.target_profiles import registered_specs, spec_from_codeflash
 from exploit.ram_runtime.tss3_request_signer_contract import (
     ContractError,
@@ -105,16 +104,123 @@ if synthetic_image.count(old_selector) != 1:
     raise AssertionError("Camry selector identity is not unique")
 selector_offset = synthetic_image.find(old_selector)
 synthetic_image[selector_offset:selector_offset + len(old_selector)] = new_selector
-synthetic_path = BUILD_ROOT / "synthetic-new-profile-CodeFlash.bin"
+synthetic_path = BUILD_ROOT / "synthetic-unknown-CodeFlash.bin"
 synthetic_path.write_bytes(synthetic_image)
 synthetic_spec = spec_from_codeflash(synthetic_path, known_specs=SPECS)
-current_profiles = build.runtime_profiles(SPECS)
-synthetic_compatibility = build.profile_status(synthetic_spec, current_profiles)
-synthetic_profiles = build.runtime_profiles({
-    **SPECS,
-    synthetic_spec["name"]: synthetic_spec,
-})
+synthetic_out = BUILD_ROOT / "synthetic"
+synthetic_meta = build.build_request_signer(
+    codeflash=synthetic_path, output_dir=synthetic_out, stem="synthetic_request_signer",
+)
 
+reference_staging = (OUT / meta["staging"]["path"]).read_bytes()
+reference_payload = (OUT / meta["authenticated_payload"]["path"]).read_bytes()
+target_builds = {CAMRY_TARGET: (meta, OUT)}
+for target in SPECS:
+    if target == CAMRY_TARGET:
+        continue
+    target_out = BUILD_ROOT / f"target-{target}"
+    target_builds[target] = (
+        build.build_request_signer(target=target, output_dir=target_out),
+        target_out,
+    )
+
+for target, (target_meta, target_out) in target_builds.items():
+    check(
+        f"{target} build emits the identical self-resolving staging and payload",
+        (target_out / target_meta["staging"]["path"]).read_bytes() == reference_staging
+        and (target_out / target_meta["authenticated_payload"]["path"]).read_bytes()
+            == reference_payload
+        and target_meta["compatibility"]["status"] == "self-resolved-compatible",
+    )
+
+payload_plaintext = inspect_payload(
+    reference_payload, secret=build.TOYOTA_P1ME_PAYLOAD_BUILD_SECRET,
+).shellcode_region
+helper_guard_start = (
+    meta["staging"]["helper_offset"] + meta["helper"]["size"] - meta["helper"]["guard_size"]
+)
+check(
+    "authenticated shell padding supplies the staged helper fetch guard",
+    payload_plaintext[helper_guard_start:helper_guard_start + meta["helper"]["guard_size"]]
+        == bytes(meta["helper"]["guard_size"]),
+)
+
+
+resolver_runner = BUILD_ROOT / "resolver-host"
+subprocess.run([
+    "cc", "-O2", "-Wall", "-Wextra", "-Werror",
+    str(build.RESOLVER_SOURCE),
+    str(ROOT / "tests/fixtures/rh850/tss3_request_signer_resolver_host.c"),
+    "-o", str(resolver_runner),
+], cwd=ROOT, check=True, text=True, timeout=30)
+
+
+def run_resolver(image_path: Path) -> tuple[int, list[int]]:
+    fields = subprocess.check_output(
+        [str(resolver_runner), str(image_path)], text=True, timeout=30,
+    ).split()
+    return int(fields[0]), [int(value, 16) for value in fields[1:]]
+
+
+for target, spec in SPECS.items():
+    resolver_status, resolver_words = run_resolver(spec["image"])
+    contract = spec["contract"]
+    expected_words = [
+        *contract["boot_calls"],
+        *(contract["runtime_config"][name] for name in build.CONFIG_FIELDS),
+    ]
+    check(
+        f"{target} on-device resolver reproduces the independent host contract",
+        resolver_status == 0 and resolver_words == expected_words,
+    )
+synthetic_status, synthetic_words = run_resolver(synthetic_path)
+camry_contract = SPECS[CAMRY_TARGET]["contract"]
+check(
+    "on-device resolution is independent of the unknown software identity",
+    synthetic_status == 0
+    and synthetic_words == [
+        *camry_contract["boot_calls"],
+        *(camry_contract["runtime_config"][name] for name in build.CONFIG_FIELDS),
+    ],
+)
+
+
+command5_damaged = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())
+command5_address = SPECS[CAMRY_TARGET]["contract"]["signer_abi"]["command5_sync"]
+command5_damaged[command5_address:command5_address + 16] = bytes(16)
+command5_damaged_path = BUILD_ROOT / "resolver-command5-missing.bin"
+command5_damaged_path.write_bytes(command5_damaged)
+
+command5_duplicated = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())
+duplicate_address = next(
+    address
+    for address in range(0, len(command5_duplicated) - 16, 2)
+    if command5_duplicated[address:address + 16] == b"\xff" * 16
+)
+command5_duplicated[duplicate_address:duplicate_address + 16] = (
+    command5_duplicated[command5_address:command5_address + 16]
+)
+command5_duplicated_path = BUILD_ROOT / "resolver-command5-duplicated.bin"
+command5_duplicated_path.write_bytes(command5_duplicated)
+
+route_ambiguous = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())
+route_map = SPECS[CAMRY_TARGET]["contract"]["signer_abi"]["route_map"]
+response_handle = SPECS[CAMRY_TARGET]["contract"]["signer_abi"]["response_handle"]
+duplicate_handle = next(
+    handle for handle in range(256)
+    if handle != response_handle
+    and route_ambiguous[route_map + handle * 2:route_map + handle * 2 + 2] != b"\x01\x06"
+)
+route_ambiguous[route_map + duplicate_handle * 2:route_map + duplicate_handle * 2 + 2] = b"\x01\x06"
+route_ambiguous_path = BUILD_ROOT / "resolver-route-ambiguous.bin"
+route_ambiguous_path.write_bytes(route_ambiguous)
+
+check(
+    "on-device resolver fails closed on missing, duplicate, and ambiguous dependencies",
+    run_resolver(command5_damaged_path)[0] == -2
+    and run_resolver(command5_duplicated_path)[0] == -2
+    and run_resolver(route_ambiguous_path)[0] == -11,
+)
 
 def run_core_simulator() -> None:
     import subprocess
@@ -170,25 +276,15 @@ for rejected_application, rejected_seq in (
         raise AssertionError("optional compact codec accepted a nonrepresentable application")
 print("PASS optional compact codec rejects every nonrepresentable application")
 
-check("registered dump is already covered by the universal build",
-      meta["compatibility"]["status"] == "covered-by-current-build")
-check("missing selector extends the universal profile table without compilation",
-      synthetic_compatibility["status"] == "compatible-profile-missing" and
-      len(synthetic_profiles) == len(current_profiles) + 1 and
-      any(
-          row["software_id"] == new_selector.decode("ascii")
-          for row in synthetic_profiles
-      ))
-
-conflicting_spec = copy.deepcopy(SPECS[CAMRY_TARGET])
-conflicting_spec["runtime_config"]["app_context"] += 4
-try:
-    build.runtime_profiles({**SPECS, "conflict": conflicting_spec})
-except RuntimeError:
-    pass
-else:
-    raise AssertionError("universal profile table accepted an ambiguous selector")
-print("PASS universal profile table rejects an ambiguous selector")
+check(
+    "registered and unknown compatible dumps use the self-resolving payload",
+    meta["compatibility"]["status"] == "self-resolved-compatible"
+    and synthetic_meta["compatibility"]["status"] == "self-resolved-compatible"
+    and synthetic_spec["runtime_software_id"] == new_selector.decode("ascii")
+    and (synthetic_out / synthetic_meta["staging"]["path"]).read_bytes() == reference_staging
+    and (synthetic_out / synthetic_meta["authenticated_payload"]["path"]).read_bytes()
+        == reference_payload,
+)
 expected_confirmation_paths = {
     "camry-8965F3307000": (0x00085240, 0xFEBE5036, 0x0008043C, 0x0008152E),
     "crown-8965F3012000": (0x000813D0, 0xFEBE4AE6, 0x0007DAA8, 0x0007EB4A),
@@ -629,7 +725,7 @@ for app_live, signer_replies, expected_exit in ((True, True, 0), (True, False, 2
             "--meta", str(meta_path), "--output", str(cli_output),
         ]),
         mock.patch("sys.stdout", io.StringIO()) as stdout,
-        mock.patch.dict(sys.modules, {"panda": SimpleNamespace(Panda=lambda: cli_panda)}),
+        mock.patch.dict(sys.modules, {"panda": SimpleNamespace(Panda=lambda panda=cli_panda: panda)}),
         mock.patch.object(host, "execute_ram_payload", return_value={}),
         mock.patch.object(host, "wait_for_f181", return_value={"ok": app_live}),
         mock.patch.object(host, "SIGNER_PROBE_TIMEOUT_SECONDS", 0.01),

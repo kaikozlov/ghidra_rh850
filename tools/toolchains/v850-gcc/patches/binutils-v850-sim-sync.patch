@@ -1,0 +1,50 @@
+From: ghidra_rh850 project
+Subject: [PATCH] sim: v850: implement RH850 synchronization instructions
+
+RH850 firmware uses SYNCI after copying executable code and SYNCP before
+publishing it.  sim/v850 currently treats both encodings as illegal
+instructions, even though the simulator has no instruction/data-cache model
+that needs additional state changes.
+
+Decode SYNCI and SYNCP as completed synchronization operations.  This lets the
+simulator execute the exact firmware bytes instead of requiring callers to
+rewrite the instructions to NOPs.
+
+Pinned base: GDB 6a5e5259790e5a854ddbb69eb486b9245fcfeee8
+(gdb-18.1-release).
+---
+ sim/v850/v850.igen | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+
+diff --git a/sim/v850/v850.igen b/sim/v850/v850.igen
+index bd8de8e279..0000000000 100644
+--- a/sim/v850/v850.igen
++++ b/sim/v850/v850.igen
+@@ -1368,3 +1368,27 @@
++// SYNCI
++0000000000011100:I:::synci
++*v850e2
++*v850e2v3
++*v850e3v5
++"synci"
++{
++  /* The simulator has no instruction-cache state to invalidate.  */
++}
++
++
++
++// SYNCP
++0000000000011111:I:::syncp
++*v850e2
++*v850e2v3
++*v850e3v5
++"syncp"
++{
++  /* The scalar simulator completes all memory accesses in order.  */
++}
++
++
++
+ // NOT
+ rrrrr,000001,RRRRR:I:::not
+ "not r<reg1>, r<reg2>"

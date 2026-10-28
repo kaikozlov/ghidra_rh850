@@ -38,16 +38,12 @@ kit because removed launchers are intentionally absent from the new manifest.
 The exact-F33 Camry kit additionally exposes the maintained `ui-*`
 startup-catcher commands through `tss3-request-signer`.
 
-The universal staging profile selector is verified by execution.
-It reads the 12-byte `8965F...` identity from
-CodeFlash `0x20860` in three 32-bit comparisons, then copies the selected runtime
-config into the retained high-RAM config block. The `rh850_codeflash` simulation
-runs that actual staging selector against every registered exact CodeFlash image
-and now asserts selected config witnesses (`app_context`, RX-ring base,
-command-5 wrapper, lower CAN writer, and response handle) before the resident
-continues. Crown `8965F3012000` selects `0x709E4 / FEBE3E98 / 0x87662 /
-0x812A2 / 51`; Corolla `8965F1208000` selects `0x6A8C4 / FEBE3F4C /
-0x82ED2 / 0x7E422 / 50`. This rules out a current selector branch/table mix-up.
+The maintained authenticated payload is identical across the registered TSS3
+targets. Machine-role signatures are the staging resolver's target-discovery
+data. It scans the active CodeFlash, writes the boot/config handoff to retained
+RAM, and runs the stock boot calls. Exact-image host resolution and GNU
+simulation independently compare the on-device result with the maintained
+contract.
 
 ## What changed architecturally
 

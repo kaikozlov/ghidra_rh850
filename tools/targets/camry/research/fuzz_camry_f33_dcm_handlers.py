@@ -5,7 +5,7 @@ Drives eleven recovered diagnostic, transport, and crypto entry points directly
 with tester-controlled request buffers and crypto vectors, reusing the strong
 whole-window oracle from the CanTp ingress fuzzer (see
 fuzz_camry_f33_cantp_ingress.py for the environment contract: TP/r5 priming,
-PMR/syncp thunk patches, per-trial image restore):
+PMR thunk patches, and per-trial image restore):
 
 - 0x922AA dcm_run_scheduled_request (void) — scheduled SID dispatcher
 - 0x95978 dcm_write_did_service(op, ctx) — 0x2E WriteDataByIdentifier
@@ -810,12 +810,11 @@ def trial_script(index: int, trial: Trial, arm_fences: bool = True) -> list[str]
 def batch_prelude() -> list[str]:
     return [
         f"set $r4={GP:#x}", f"set $r5={TP_BASE:#x}", f"set $tp={TP_BASE:#x}",
-        # PMR/syncp thunk neutering (see fuzz_camry_f33_cantp_ingress.py).
+        # PMR thunk neutering (see fuzz_camry_f33_cantp_ingress.py).
         # GDB writes target-endian u16; 0x007f yields bytes 7f 00 = jmp [lp].
         "set {unsigned short}0x6a45e = 0x007f", "set {unsigned short}0x6a4c4 = 0x007f",
-        "set {unsigned short}0x6a4c0 = 0x0000", "set {unsigned short}0x6a51e = 0x0000",
         "set {unsigned short}0x701c4 = 0x007f", "set {unsigned short}0x70204 = 0x007f",
-        # priority_mask_raise/restore: sim lacks stsr/ldsr PMR; no simulated IRQs
+        # The simulator lacks usable PMR save/restore; no IRQs are simulated.
         f"break *{SENTINEL:#x}",
         f"restore /out/{DCRA1_MODEL_NAME} binary {DCRA1_MODEL_ENTRY:#x}",
         *sink_break_commands(),

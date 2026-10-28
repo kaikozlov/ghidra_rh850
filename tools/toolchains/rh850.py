@@ -19,7 +19,7 @@ from pathlib import Path
 from tools import REPO_ROOT
 
 ROOT = REPO_ROOT
-IMAGE = "ghidra-rh850-v850-gcc:16.2.0-binutils2.46.1-gdb18.1-simfix3-bswap1-noreturn1-codegen1-unwind1"
+IMAGE = "ghidra-rh850-v850-gcc:16.2.0-binutils2.46.1-gdb18.1-simfix4-bswap1-noreturn1-codegen1-unwind1"
 DOCKERFILE = ROOT / "tools" / "toolchains" / "v850-gcc" / "Dockerfile"
 SELFTEST_RESULT = "RH850_SELFTEST_RESULT=0x12cb5687"
 SELFTEST_CODEFLASH_RESULT = "RH850_CODEFLASH_RESULT=0xc0deface"
@@ -129,6 +129,11 @@ rh850_jmp32_anchor:
     br selftest_fail
     nop
 rh850_jmp32_target:
+
+    /* The simulator models no cache state; both synchronization operations
+       must still decode and retire from the exact instruction stream. */
+    syncp
+    synci
 
     .global rh850_sim_stop
 rh850_sim_stop:

@@ -647,18 +647,25 @@ path, signer ABI, private-memory layout, and MPU transit permission directly
 from that dump. Components are reported independently as `resolved`,
 `missing-or-ambiguous`, or `blocked`.
 
-It then reports whether the registered universal profile table already contains
-the exact selector/config row; a missing row is inserted into that candidate
-build before compilation. The compiled simulator ELF is reused for separate
-clean-process fallback and timer-bounded idle executions against the supplied
-image. For an exact registered target, onboarding also generates the
-target-neutral P1M-E scenarios from the resolved contract and executes TAUJ,
-freshness, request publication, native `0x777` receive→foreground, response
-transmit, and ICU-S submit/input/output behavior. An otherwise compatible
-unregistered image reports `not-run-unregistered-analysis-target` until exact
-MCU/project metadata is registered.
+It then builds one target-independent 4-KiB authenticated payload. The staging
+code scans the active 1-MiB CodeFlash for unique boot, startup, foreground, RX,
+freshness, command-five, lower-CAN, route-map, and memory-layout roles; writes
+the resolved 32-word boot/config handoff to retained RAM; and stops before any
+boot call or RAM installation when a role is missing or ambiguous. No software
+ID, image hash, vehicle name, or precomputed firmware offset enters the payload.
+The host resolver remains the stricter onboarding gate and records the exact
+dump contract.
 
-The retained result contains `report.json`, the resolved profile and build
+The compiled simulator ELF is reused for separate clean-process fallback and
+timer-bounded idle executions against the supplied image. For an exact
+registered target, onboarding also generates the target-neutral P1M-E scenarios
+from the resolved contract and executes TAUJ, freshness, request publication,
+native `0x777` receive→foreground, response transmit, and ICU-S
+submit/input/output behavior. An otherwise compatible unregistered image
+reports `not-run-unregistered-analysis-target` until exact MCU/project metadata
+is registered.
+
+The retained result contains `report.json`, the resolved contract and build
 artifacts under `build/`, GNU simulator outputs under `simulation/`, and, where
 registered, generated scenarios plus one P1M-E report each under `machine/`.
 Commands print a short human summary by default; pass `--json` to any `ram`

@@ -102,15 +102,17 @@ from firmware.
 What differs per firmware is a small signer/I/O ABI: RX ring and producer,
 authenticated trip/reset cells, state/scratch placement, freshness encoder,
 command-5 wrapper/globals, lower CAN writer and transmit handle. These values,
-the startup span, and the foreground calls are no longer a vehicle-named code
-table. The builder resolves them from unique machine structures in the supplied
-CodeFlash and rejects a missing or ambiguous structure. The registered exact
-CodeFlash hashes bind the resulting profiles; an unregistered dump is bound by
-the hash in its onboarding report. Panda logical-bus routing remains external
-registry metadata because it is not encoded by these CodeFlash structures.
+the startup span, and the foreground calls are not a vehicle-named code table.
+The host builder resolves and validates them from the supplied CodeFlash. The
+target-independent staging resolver independently scans the active 1-MiB
+CodeFlash, requires unique machine roles, and writes the 32-word boot/config
+handoff to retained RAM before any boot call. It carries no software ID, image
+hash, vehicle name, or precomputed firmware offset.
 
-The audited binary contains three runtime configs for four targets;
-Corolla H/F resolve to the same application software ID and ABI.
+The exact CodeFlash hash binds host metadata and the onboarding report, not
+payload bytes. The audited authenticated payload is byte-identical for Camry,
+Crown, and both Corolla targets. Panda logical-bus routing remains external
+registry metadata because it is not encoded by these CodeFlash structures.
 Bus routing belongs to the maintained topology above and
 `data/analysis_targets.json`.
 
@@ -166,10 +168,8 @@ CodeFlash identities and F181 responses but the same recovered signer-facing
 machine contract. Their five-row transmit-resource table maps primary `0x7A9`
 to local HTH0 -> global HTH2 -> handle 50/controller 1/resource 6, secondary
 `0x7A8` to handle 51/resource 7, and the fifth object to handle 52/resource 8.
-The old five-row heuristic already selected row 2, so neither Corolla profile
-received the Crown alternate-mailbox selection. The shared runtime selector
-`8965F1208000` is bounded by byte-identical boot calls/runtime configuration;
-the host manifest still binds the complete target-specific application F181.
+Both images resolve that structure at runtime; their target-specific application
+F181 values remain host-manifest metadata.
 
 Deeper recovery of `812A2 -> 8153A -> 8148E` shows that the request signer calls
 the `Can_Write`-shaped lower API beneath that upper association. Handles 50 and

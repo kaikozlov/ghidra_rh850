@@ -281,8 +281,8 @@ reconnaissance is explicit, not an emergent property of random frames.
   divergence; edge watchpoints and escaped marker propagation still apply.
   Three retained context bytes (`0xFEBE5D96..5D97`, `0xFEBE5D9D`) remain
   excluded only because exact-target consumers were disproved.
-- PMR/`syncp` thunks are simulator-only patched, so priority-mask effects are
-  not observed.
+- PMR save/restore thunks are simulator-only replaced, so priority-mask
+  effects are not observed.
 
 These are work queues, not footnotes to a whole-image “clean” claim.
 

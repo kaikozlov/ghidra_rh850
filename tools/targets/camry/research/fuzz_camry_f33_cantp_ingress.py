@@ -550,7 +550,6 @@ def batch_script(batch: list[tuple[int, Trial]]) -> list[str]:
         # Dcm timer arming does not SIGILL. Sim-only byte patch, not firmware.
         # GDB writes target-endian u16; 0x007f yields bytes 7f 00 = jmp [lp].
         "set {unsigned short}0x6a45e = 0x007f", "set {unsigned short}0x6a4c4 = 0x007f",
-        "set {unsigned short}0x6a4c0 = 0x0000", "set {unsigned short}0x6a51e = 0x0000",
         f"break *{SENTINEL:#x}",
         *sink_break_commands(),
         # Harmless warmup dispatch (unknown canif id) satisfies the executor's
@@ -877,7 +876,6 @@ def verify_liveness(elf: Path, timeout: float, salt: int | None = None) -> None:
     script = [
         f"set $r4={GP:#x}", f"set $r5={TP_BASE:#x}", f"set $tp={TP_BASE:#x}",
         "set {unsigned short}0x6a45e = 0x007f", "set {unsigned short}0x6a4c4 = 0x007f",
-        "set {unsigned short}0x6a4c0 = 0x0000", "set {unsigned short}0x6a51e = 0x0000",
         f"restore /out/img-999999.bin binary {RAM_BASE:#x}",
         f"break *{SENTINEL:#x}",
         *trial_script(999999, probe)[:-1],

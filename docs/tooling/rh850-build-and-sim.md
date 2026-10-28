@@ -486,28 +486,31 @@ The signer onboarding command is the compatibility entry point:
 tools/toyota ram onboard path/to/CodeFlash.bin
 ```
 
-It does not select a vehicle-named scenario set. The raw-byte resolver reports
-`geometry`, `identity`, `execution`, `boot`, `request`, `receive`, `signer_abi`,
-`memory`, and `mpu` independently as `resolved`, `missing-or-ambiguous`, or
-`blocked`. A complete dump is classified as `covered-by-current-build` when its
-runtime selector and resolved configuration already match the universal build,
-or `compatible-profile-missing` when the same payload can be rebuilt with one
-additional profile. Any missing or ambiguous required part fails closed before
-compilation.
+The raw-byte host resolver is the compatibility gate. It reports `geometry`,
+`identity`, `execution`, `boot`, `request`, `receive`, `signer_abi`, `memory`,
+and `mpu` independently as `resolved`, `missing-or-ambiguous`, or `blocked`.
+Any incomplete required part fails closed before compilation.
 
-The command builds that resolved candidate and runs two exact-image GNU
-simulations. The boot/context/hardware-heavy calls remain explicit overlays, but
-the dump-resolved `0x10000..0x17DEF` startup shadow copy executes as exact
-CodeFlash. At helper entry the runner byte-compares the copied resident outside
-Corolla's intentional 36-byte state prefix, the complete runtime config, and the
-GlobalRAM helper against the built artifacts. When the image hash belongs to a
-registered analysis target, onboarding also generates and runs the same P1M-E
-functional suite from the resolved contract. An otherwise compatible
-unregistered image retains a successful candidate build/GNU result but reports
-`not-run-unregistered-analysis-target` for the P1M-E layer: exact MCU and
-analyzed-project metadata must be registered before Ghidra execution.
+Every compatible dump builds the same 4-KiB authenticated payload. Machine-role
+signatures are the staging resolver's target-discovery data. It scans the
+running 1-MiB CodeFlash, writes the boot/config handoff to retained RAM, runs
+the boot calls, and installs the shared resident and helper. A missing or
+ambiguous role loops before the first boot call.
 
-The generated suite has no calibration-named JSON inputs:
+The command runs two exact-image GNU simulations. The
+boot/context/hardware-heavy calls remain explicit overlays, but the
+dump-resolved `0x10000..0x17DEF` startup shadow copy executes as exact CodeFlash.
+Both runs execute the unmodified copied resident to the unmodified copied
+GlobalRAM helper entry. At that boundary the runner byte-compares the copied
+resident outside Corolla's intentional 36-byte state prefix, the complete
+runtime config, and the GlobalRAM helper against the built artifacts. The
+permanent core and P1M-E scenarios execute the helper body. For a registered
+image hash, onboarding also runs the P1M-E functional suite from the contract.
+A compatible unregistered image retains its candidate build and GNU result.
+The P1M-E layer records `not-run-unregistered-analysis-target`; registering the
+exact MCU and analyzed-project metadata enables that execution layer.
+
+The generated suite derives every input from the resolved contract:
 
 |Domain|Dynamic source|Checked execution|
 |---|---|---|
@@ -896,7 +899,7 @@ its first halfword with six-byte `jmp32`, but has **bit 16 set** rather than
 clear. On exact Camry `8965F3307000`, the original `e1 06 09 00` at `0x52B8`
 therefore incorrectly consumed the following instruction and jumped to
 `0x007F000C`, rather than decrementing `r1` and branching to `0x52B0`.
-The repository toolchain applies three simulator patches:
+The repository toolchain applies four simulator patches:
 
 - `binutils-v850-sim-imm32.patch` fixes format-VI immediate word assembly;
 - `binutils-v850-sim-codeflash-map.patch` replaces the legacy 32 KiB mirrored
@@ -904,34 +907,31 @@ The repository toolchain applies three simulator patches:
   without it every `0x8000`-byte block overwrites the previous alias;
 - `binutils-v850-sim-loop.patch` disambiguates the six-byte `jmp32` (bit 16
   zero) from four-byte RH850E3 `loop` (bit 16 one), and implements LOOP's
-  unsigned backward displacement, decrement, and `ADD(-1)` condition flags.
+  unsigned backward displacement, decrement, and `ADD(-1)` condition flags;
+- `binutils-v850-sim-sync.patch` decodes `SYNCP` and `SYNCI` as completed
+  synchronization operations. GNU sim has no cache state to update.
 
 `tools/rh850 toolchain self-test` exercises the prior long branch/CodeFlash
-cases, the corrected taken/fallthrough LOOP cases (including Z/CY flags), and
-the non-LOOP six-byte JMP32 decoder. The existing `tools/test rh850_codeflash`
-suite additionally executes the **original, unmodified** Camry boot parser
+cases, the corrected taken/fallthrough LOOP cases (including Z/CY flags), the
+non-LOOP six-byte JMP32 decoder, and both synchronization instructions. The
+existing `tools/test rh850_codeflash` suite additionally executes the
+**original, unmodified** Camry boot parser
 `0x52A6` through LOOP at `0x52B8`, checks its big-endian result, then follows
 boot SID `0x34` from `0x5D68` to the locked SecurityAccess reject arm at
 `0x5F04`, with the requested RAM address and size verified.
 
-### Known unpatched simulator gaps (workaround recipes)
+### Known simulator gaps (harness controls)
 
-Three further gaps surfaced while driving the **application** (not boot)
-surface on exact Camry `8965F3307000`. They are not patched in the pinned
-image; callers work around them in GDB:
+Two further gaps affect the **application** (not boot) surface on exact Camry
+`8965F3307000`:
 
 - **`stsr PMR` raises SIGILL** (`eb .. 40 10`, e.g. `0x6A45E` and
   `priority_mask_raise @ 0x701C4`), while `ldsr` with the same register field
-  decodes without trapping. The GHS-style interrupt-mask thunk family around
-  `0x6A440..0x6A530` also contains `syncp` (`1F 00`) at
-  `0x6A4C0`/`0x6A51E`, which SIGILLs as well. The CanTp ingress fuzzer neuters
-  the two `0x6A45E/0x6A4C4` thunk entries and both `syncp` sites; the Dcm
-  handler fuzzer additionally neuters the deeper `0x701C4/0x70204`
-  raise/restore pair reached by RID `0x1108`. A GDB target-endian
+  decodes without trapping. The isolated single-threaded CanTp and Dcm trials
+  replace the affected PMR save/restore thunks after `load`; those trials do
+  not simulate interrupts. A GDB target-endian
   `set {unsigned short}ADDR = 0x007f` writes instruction bytes `7f 00`
   (`jmp [lp]`); `0x7f00` is byte-swapped and is not the intended return.
-  These are simulator-only patches after `load`. They are sound only for these
-  isolated single-threaded trials, where no interrupt is simulated.
 - **TP-relative addressing decodes as plain `r5`.** `get_cantp_configuration_
   pointer_7a32e` is `movea -0x118c, tp, r10`, and the whole CanTp/Dcm/PduR
   family derives config/table pointers from TP. Binutils renders the operand

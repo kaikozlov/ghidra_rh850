@@ -11,8 +11,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 _ONBOARD_VERDICTS = {
-    "covered-by-current-build": "COMPATIBLE - covered by the current universal build",
-    "compatible-profile-missing": "COMPATIBLE - new profile row resolved and rebuilt",
+    "self-resolved-compatible": "COMPATIBLE - on-device resolver and exact-image simulation passed",
     "not-proven-compatible": "NOT PROVEN COMPATIBLE",
     "candidate-build-failed": "CANDIDATE BUILD FAILED",
     "simulation-failed": "SIMULATION FAILED",
@@ -97,8 +96,6 @@ def render_onboard(report: dict[str, Any]) -> str:
         )
     verdict = _ONBOARD_VERDICTS.get(report["status"], report["status"].upper())
     rows.add("verdict", verdict)
-    if report.get("current_targets"):
-        rows.add("registered targets", ", ".join(report["current_targets"]))
     if report.get("reason"):
         rows.add("reason", report["reason"])
     _component_rows(report, rows)

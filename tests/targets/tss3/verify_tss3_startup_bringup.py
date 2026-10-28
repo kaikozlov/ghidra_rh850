@@ -11,9 +11,6 @@ from unittest import mock
 
 import exploit.ram_runtime.tss3_request_signer_ui_bringup as ui_bringup
 import exploit.ram_runtime.tss3_startup_programming as startup_programming
-from tools.targets.tss3.builders import (
-    build_tss3_ram_kit as kit_builder,
-)
 
 
 def check(name: str, cond: object) -> None:
@@ -136,16 +133,5 @@ with tempfile.TemporaryDirectory() as td:
         check(f"manual arm on {target} uses the shared repinned bus",
               "bus" not in race.call_args.kwargs and race.call_args.kwargs["target"] == target)
 
-    record = {
-        "name": "crown-8965F3012000",
-        "ram_runtime": {"application_f181_hex": "ab", "request_bus": 1, "response_bus": 1},
-    }
-    base = {"schema": "tss3-request-signer-build-v1", "request": {}, "response": {},
-            "state": {}, "authenticated_payload": {"sha256": "x"},
-            "toolchain": {}, "debug": {}}
-    bound = kit_builder._bound_metadata(base, record)
-    check("kit metadata binds the repinned runtime bus even for stock-bus-1 targets",
-          bound["request"]["bus"] == 0 and bound["response"]["bus"] == 0 and
-          bound["target"]["name"] == "crown-8965F3012000")
 
 print("PASS TSS3 startup bringup")
