@@ -100,14 +100,18 @@ must continue to prove the exact boot/reset path and startup write survival
 from firmware.
 
 What differs per firmware is a small signer/I/O ABI: RX ring and producer,
-authenticated trip/reset cells, state/scratch placement, freshness encoder,
-command-5 wrapper/globals, lower CAN writer and transmit handle. These values,
-the startup span, and the foreground calls are not a vehicle-named code table.
+authenticated trip/reset cells, freshness encoder, command-5 wrapper/globals,
+lower CAN writer and transmit handle. These values, the startup span, and the
+foreground calls are not a vehicle-named code table.
 The host builder resolves and validates them from the supplied CodeFlash. The
 target-independent staging resolver independently scans the active 1-MiB
 CodeFlash, requires unique machine roles, and writes the 32-word boot/config
 handoff to retained RAM before any boot call. It carries no software ID, image
 hash, vehicle name, or precomputed firmware offset.
+
+Private state and scratch are payload-owned memory, not firmware-resolved
+addresses. Every target reclaims the dead `FEBFF9F0..FEBFFA13` resident prefix
+as state and uses `FEF07F98..FEF07FFF` for scratch.
 
 The exact CodeFlash hash binds host metadata and the onboarding report, not
 payload bytes. The audited authenticated payload is byte-identical for Camry,
@@ -118,8 +122,8 @@ Bus routing belongs to the maintained topology above and
 
 | exact target | RX ring / producer | resident state | response lower handle | signer scratch | command-5 globals |
 |---|---|---|---:|---|---|
-| Camry `8965F3307000` | `FEBE4038` / `FEBE48F8` | `FEBF025C` | 53 | `FEBF0280` | `FEBF13A0` |
-| Crown `8965F3012000` | `FEBE3E98` / `FEBE475A` | `FEBF025C` | 50 | `FEBF0280` | `FEBF13A0` |
+| Camry `8965F3307000` | `FEBE4038` / `FEBE48F8` | `FEBFF9F0` | 53 | `FEF07F98` | `FEBF13A0` |
+| Crown `8965F3012000` | `FEBE3E98` / `FEBE475A` | `FEBFF9F0` | 50 | `FEF07F98` | `FEBF13A0` |
 | Corolla `8965H1202000` | `FEBE3F4C` / `FEBE480C` | `FEBFF9F0` | 50 | `FEF07F98` | `FEBF1264` |
 | Corolla `8965F1208000` | `FEBE3F4C` / `FEBE480C` | `FEBFF9F0` | 50 | `FEF07F98` | `FEBF1264` |
 
@@ -217,16 +221,15 @@ both recovered application MPU contexts. Retained Camry, 2023 Corolla, and 2025
 Corolla captures independently show the final 1 KiB all-zero after ordinary
 application use.
 
-Camry has live proof for `FEBFF9F0..FEBFFBFB`; Crown's earlier B6 resident ran
-from the same retained tail on hardware. Camry/Crown keep state
-`FEBF025C..FEBF027F` immediately before scratch `FEBF0280..FEBF02E7`; the state
-remains below the SID23 exclusion and scratch ends before the object-15 mirror.
-Corolla initializes its state over the already-executed first 36 resident bytes
-only after all startup calls return, and uses `FEF07F98..FEF07FFF` for scratch.
-The complete helper artifact ends at `FEF07F6C`, leaving 44 bytes before that
-scratch. This is strong placement/lifetime evidence, but current-helper
-execution from GlobalRAM is hardware-live only on Camry; Crown/Corolla still
-benefit from resident-state readback when a field probe fails.
+Every target initializes state over the already-executed first 36 resident
+bytes only after all startup calls return. Builder symbol checks keep the state
+clear and recurring scheduler beyond that prefix; the lifecycle simulation
+allows only those 36 bytes to differ from the installed resident artifact.
+Scratch occupies the final 104 bytes of the GlobalRAM helper pocket. The
+builder rejects any helper and speculative-fetch guard that reaches
+`FEF07F98`. Camry has live execution evidence for both the retained resident
+and GlobalRAM helper; Crown's earlier B6 resident ran from the same retained
+tail on hardware.
 
 The builder and lifecycle checks cover publication/coherency, guarded bounds,
 zero relocations, compare-immediate encoding, exact startup-copy survival and

@@ -130,7 +130,13 @@ for target, (target_meta, target_out) in target_builds.items():
         (target_out / target_meta["staging"]["path"]).read_bytes() == reference_staging
         and (target_out / target_meta["authenticated_payload"]["path"]).read_bytes()
             == reference_payload
-        and target_meta["compatibility"]["status"] == "self-resolved-compatible",
+        and target_meta["compatibility"]["status"] == "self-resolved-compatible"
+        and target_meta["state"] == {
+            "version": host.STATE_VERSION,
+            "base": "0xFEBFF9F0",
+            "size": host.STATE_SIZE,
+            "layout": "resident-prefix-global-tail",
+        },
     )
 
 payload_plaintext = inspect_payload(
@@ -161,6 +167,13 @@ def run_resolver(image_path: Path) -> tuple[int, list[int]]:
     ).split()
     return int(fields[0]), [int(value, 16) for value in fields[1:]]
 
+CANONICAL_MEMORY = {
+    "layout": "resident-prefix-global-tail",
+    "state_base": 0xFEBFF9F0,
+    "scratch_base": 0xFEF07F98,
+}
+
+
 
 for target, spec in SPECS.items():
     resolver_status, resolver_words = run_resolver(spec["image"])
@@ -172,6 +185,13 @@ for target, spec in SPECS.items():
     check(
         f"{target} on-device resolver reproduces the independent host contract",
         resolver_status == 0 and resolver_words == expected_words,
+    )
+    check(
+        f"{target} uses the canonical payload-owned state and scratch layout",
+        contract["schema"] == "tss3-request-signer-contract-v2"
+        and contract["memory"] == CANONICAL_MEMORY
+        and contract["runtime_config"]["state_base"] == CANONICAL_MEMORY["state_base"]
+        and contract["runtime_config"]["scratch_base"] == CANONICAL_MEMORY["scratch_base"],
     )
 synthetic_status, synthetic_words = run_resolver(synthetic_path)
 camry_contract = SPECS[CAMRY_TARGET]["contract"]
@@ -382,7 +402,8 @@ check(
     and damaged_probe["components"]["identity"]["status"] == "resolved"
     and damaged_probe["components"]["request"]["status"] == "resolved"
     and damaged_probe["components"]["signer_abi"]["status"] == "missing-or-ambiguous"
-    and damaged_probe["components"]["memory"]["status"] == "blocked",
+    and damaged_probe["components"]["memory"]["status"] == "resolved"
+    and damaged_probe["components"]["memory"]["value"] == CANONICAL_MEMORY,
 )
 try:
     resolve_request_signer_contract(bytes(damaged_image))
@@ -674,15 +695,15 @@ fake_uds_module = SimpleNamespace(
 )
 with mock.patch.object(host, "_import_uds", return_value=fake_uds_module):
     decoded_state = host.read_resident_state(meta, fake_probe_panda)
-check("resident state readback uses target-bound application SID23 geometry",
+check("resident state readback uses the canonical resident-prefix geometry",
       meta["state"] == {
           "version": host.STATE_VERSION,
-          "base": "0xFEBF025C",
+          "base": "0xFEBFF9F0",
           "size": host.STATE_SIZE,
-          "layout": "sid23-adjacent-local",
+          "layout": "resident-prefix-global-tail",
       }
       and fake_state_client.sessions == [3]
-      and fake_state_client.requests == [(0x23, bytes.fromhex("1501febf025c24"))]
+      and fake_state_client.requests == [(0x23, bytes.fromhex("1501febff9f024"))]
       and decoded_state["magic_ok"] is True
       and decoded_state["initialized"] is True
       and decoded_state["request_count"] == 7

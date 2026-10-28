@@ -47,15 +47,15 @@ For the openpilot-specific cross-generation result, use
 [toyota-openpilot-porting-contract.md](../architecture/toyota-openpilot-porting-contract.md)
 and `data/generated/corolla_tss3_opendbc_readiness.json`.
 
-## 2026-10-16 maintained request-signer transfer audit
+## 2026-10-28 maintained request-signer transfer audit
 
-The maintained `tss3-request-signer` uses one C resident/helper, with immutable dump-resolved configurations. Exact 1-MiB images of Camry `8965F3307000`, Crown `8965F3012000`, Corolla `8965F1208000` and Corolla H `8965H1202000` all resolve the complete runtime contract: app context and startup/shadow boundary, TAUJ0 5-ms foreground, classic functional `0x777` into native software Rx ring, signed freshness input, command-five wrapper, and exact CanIf primary `0x7A9` response route. Crown selects response handle 50 (Camry 53); both Corolla images select 50. Crown/Camry place private request state/scratch in the proven SID23-adjacent LocalRAM exclusion; Corolla H/F reclaim the resident's dead entry prefix as state and use GlobalRAM tail scratch. These differences are represented in the universal config.
+The maintained `tss3-request-signer` uses one C resident/helper, with immutable dump-resolved configurations. Exact 1-MiB images of Camry `8965F3307000`, Crown `8965F3012000`, Corolla `8965F1208000` and Corolla H `8965H1202000` all resolve the complete runtime contract: app context and startup/shadow boundary, TAUJ0 5-ms foreground, classic functional `0x777` into native software Rx ring, signed freshness input, command-five wrapper, and exact CanIf primary `0x7A9` response route. Crown selects response handle 50 (Camry 53); both Corolla images select 50. All four reclaim the resident's dead entry prefix as private state and use GlobalRAM tail scratch; payload-owned memory has one invariant ABI rather than a vehicle-specific configuration.
 
 On the contributor Crown, September's native-B6 MAC equality and subsequent signed soaks establish that the stock ECU can execute a resident and use type1/slot4 command five. October 10–12 request-signer logs record timeouts; see `community/mruno/README.md`.
 
 For Corolla H/F, the two exact application images are byte-identical at `0x17E00..0xFFFFF`, with specimen-specific low calibration and F181 secondary identity. The 2023 and Span 2025 moving captures independently contain native `0x08A/32` and `0x081/32` but **no active lateral ID11**; read-only DBC decode/re-encode reproduces the entire 28-byte `0x08A` application in all 4,755 observed requests, and stock-longitudinal cloning retains all other fields. This establishes a shared inactive request-plane wire image.
 
-**2026-10-16 verification:** `tools/test tss3_request_signer`, `tss3_resident_control_ingress`, `crown_8965f3012000` and `corolla_hf_command5` passed at least once; the GNU CodeFlash suite completed universal fallback/idle simulation for all four images before an intermittent `helper embedding drift` during its optional optimized build. Repeated direct `-O2` builds passed; that failure's cause remains unresolved. The P1M-E scenario runner stopped at `ReadOnlyException` while opening the working Camry Ghidra project.
+**2026-10-28 verification:** `tools/test tss3_request_signer` built the common payload, matched host and on-device resolver output across all four registered images, and exercised the compiled helper core. `tools/test rh850_codeflash` passed the exact CodeFlash signer scenarios, including fallback and idle lifecycle execution with the canonical reclaimed state prefix on Camry, Crown, Corolla F, and Corolla H.
 
 After canonical inventory regeneration, `tools/test spanconstant_corolla_codeflash`
 passes all five verification paths, including the Span-vs-Sienna transfer check.
