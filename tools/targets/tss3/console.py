@@ -90,9 +90,7 @@ def render_onboard(report: dict[str, Any]) -> str:
     if identity:
         rows.add(
             "identity",
-            f"selector {identity['runtime_software_id']}"
-            f" · app {identity['firmware_software_id']}"
-            f" · secondary {identity['secondary_software_id']}",
+            "F181 " + " + ".join(identity["f181_records"]),
         )
     verdict = _ONBOARD_VERDICTS.get(report["status"], report["status"].upper())
     rows.add("verdict", verdict)

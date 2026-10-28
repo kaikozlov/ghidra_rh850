@@ -10,7 +10,6 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from exploit.ram_runtime.target_profiles import registered_targets
 from exploit.ram_runtime.tss3_request_signer_contract import (
     ContractError,
     probe_request_signer_contract,
@@ -437,10 +436,13 @@ def onboard(image_path: Path, output_dir: Path | None = None) -> tuple[dict[str,
         report["reason"] = str(exc)
         return finish(report, 1)
 
+    analysis_targets = json.loads(
+        (ROOT / "data/analysis_targets.json").read_text(encoding="utf-8"),
+    )["targets"]
     registered_target = next(
         (
             name
-            for name, target in registered_targets().items()
+            for name, target in analysis_targets.items()
             if target["codeflash_sha256"] == digest
         ),
         None,

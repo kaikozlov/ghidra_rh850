@@ -5,6 +5,7 @@ from __future__ import annotations
 import io
 import json
 import subprocess
+import struct
 import sys
 import tempfile
 from collections.abc import Sequence
@@ -30,6 +31,17 @@ ROOT = REPO_ROOT
 
 CAMRY_TARGET = "camry-8965F3307000"
 SPECS = registered_specs()
+SIENNA_TARGET = "sienna-8965B4512000"
+SIENNA_IMAGE = ROOT / "firmware/RH850_P1M-E_CodeFlash.bin"
+SIENNA_CONTRACT = resolve_request_signer_contract(SIENNA_IMAGE.read_bytes())
+RESOLUTION_SPECS = {
+    **SPECS,
+    SIENNA_TARGET: {
+        "image": SIENNA_IMAGE,
+        "sha256": SIENNA_CONTRACT["codeflash_sha256"],
+        "contract": SIENNA_CONTRACT,
+    },
+}
 BUILD_TEMP = tempfile.TemporaryDirectory(prefix="verify-tss3-request-signer-")
 BUILD_ROOT = Path(BUILD_TEMP.name)
 OUT = BUILD_ROOT / "default"
@@ -96,6 +108,40 @@ check(
     and not any(over_budget_dir.glob("*.bin"))
     and not any(over_budget_dir.glob("*_request_signer.json")),
 )
+check(
+    "Sienna identity follows the application F181 callback",
+    SIENNA_CONTRACT["identity"]["f181_callback"] == 0x0004E8E4
+    and SIENNA_CONTRACT["identity"]["f181_records"] == ["8965B4512000"]
+    and SIENNA_CONTRACT["identity"]["runtime_software_id_address"] == 0x00020860
+    and SIENNA_CONTRACT["identity"]["application_f181_hex"]
+        == "0138393635423435313230303000000000",
+)
+
+sienna_relocated_identity = bytearray(SIENNA_IMAGE.read_bytes())
+sienna_identity = SIENNA_CONTRACT["identity"]
+sienna_old_record = int(sienna_identity["runtime_software_id_address"])
+sienna_new_record = next(
+    offset
+    for offset in range(0x8000, 0x10000, 2)
+    if sienna_relocated_identity[offset:offset + 16] == b"\xff" * 16
+)
+sienna_relocated_identity[sienna_new_record:sienna_new_record + 16] = (
+    sienna_relocated_identity[sienna_old_record:sienna_old_record + 16]
+)
+sienna_relocated_identity[sienna_old_record:sienna_old_record + 16] = b"\xff" * 16
+sienna_f181_callback = int(sienna_identity["f181_callback"])
+struct.pack_into("<H", sienna_relocated_identity, sienna_f181_callback + 10, sienna_new_record >> 16)
+struct.pack_into(
+    "<H", sienna_relocated_identity, sienna_f181_callback + 20,
+    (sienna_new_record & 0xFFFF) | 1,
+)
+sienna_relocated_contract = resolve_request_signer_contract(bytes(sienna_relocated_identity))
+check(
+    "F181 resolution follows a relocated callback source instead of a fixed address",
+    sienna_relocated_contract["identity"]["runtime_software_id_address"] == sienna_new_record
+    and sienna_relocated_contract["identity"]["application_f181_hex"]
+        == SIENNA_CONTRACT["identity"]["application_f181_hex"],
+)
 
 synthetic_image = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())
 old_selector = SPECS[CAMRY_TARGET]["runtime_software_id"].encode("ascii")
@@ -123,6 +169,11 @@ for target in SPECS:
         build.build_request_signer(target=target, output_dir=target_out),
         target_out,
     )
+sienna_out = BUILD_ROOT / f"target-{SIENNA_TARGET}"
+sienna_meta = build.build_request_signer(
+    codeflash=SIENNA_IMAGE, output_dir=sienna_out, stem="sienna_request_signer",
+)
+target_builds[SIENNA_TARGET] = (sienna_meta, sienna_out)
 
 for target, (target_meta, target_out) in target_builds.items():
     check(
@@ -175,7 +226,7 @@ CANONICAL_MEMORY = {
 
 
 
-for target, spec in SPECS.items():
+for target, spec in RESOLUTION_SPECS.items():
     resolver_status, resolver_words = run_resolver(spec["image"])
     contract = spec["contract"]
     expected_words = [
@@ -203,8 +254,6 @@ check(
         *(camry_contract["runtime_config"][name] for name in build.CONFIG_FIELDS),
     ],
 )
-
-
 command5_damaged = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())
 command5_address = SPECS[CAMRY_TARGET]["contract"]["signer_abi"]["command5_sync"]
 command5_damaged[command5_address:command5_address + 16] = bytes(16)
@@ -305,25 +354,35 @@ check(
     and (synthetic_out / synthetic_meta["authenticated_payload"]["path"]).read_bytes()
         == reference_payload,
 )
+check(
+    "Sienna dump build uses the shared self-resolving payload without deployment metadata",
+    sienna_meta["target"]["application_f181_hex"]
+        == SIENNA_CONTRACT["identity"]["application_f181_hex"]
+    and sienna_meta["request"]["bus"] is None
+    and sienna_meta["response"]["bus"] is None,
+)
 expected_confirmation_paths = {
     "camry-8965F3307000": (0x00085240, 0xFEBE5036, 0x0008043C, 0x0008152E),
     "crown-8965F3012000": (0x000813D0, 0xFEBE4AE6, 0x0007DAA8, 0x0007EB4A),
     "corolla-8965F1208000": (0x0007E550, 0xFEBE4F22, 0x0007974C, 0x0007A83E),
     "corolla-8965H1202000": (0x0007E550, 0xFEBE4F22, 0x0007974C, 0x0007A83E),
+    "sienna-8965B4512000": (0x00084150, 0xFEBE502A, 0x0007F350, 0x00080442),
 }
 expected_slot4_configs = {
     "camry-8965F3307000": 0x00025828,
     "crown-8965F3012000": 0x00025564,
     "corolla-8965F1208000": 0x0002570C,
     "corolla-8965H1202000": 0x0002570C,
+    "sienna-8965B4512000": 0x00025950,
 }
 expected_shadow_copy = {
     "camry-8965F3307000": 0x000636D4,
     "crown-8965F3012000": 0x00062AD4,
     "corolla-8965F1208000": 0x0005C992,
     "corolla-8965H1202000": 0x0005C992,
+    "sienna-8965B4512000": 0x0006263E,
 }
-for target, spec in SPECS.items():
+for target, spec in RESOLUTION_SPECS.items():
     probe = probe_request_signer_contract(spec["image"].read_bytes())
     check(
         f"{target} exposes every dynamically required signer component",
