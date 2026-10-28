@@ -33,7 +33,6 @@ See @AGENTS.md for agent-specific instructions.
 | What | When |
 |------|------|
 | `CHANGELOG.md` | Reviewing version history and release notes |
-| `.claude/skills/ghidra-cli/SKILL.md` | Full command reference for AI agents (all commands, query options, workflows) |
 | `src/ghidra/README.md` | Understanding bridge lifecycle, PID file sequence, TOCTOU elimination, BridgeClient adoption |
 | `src/ipc/README.md` | Understanding TCP wire format, BridgeClient API, single implementation rationale |
 | `tests/README.md` | Understanding test structure and conventions |

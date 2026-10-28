@@ -22,6 +22,7 @@ Everything you need lives under `tools/`, and each command has `--help`. Reach f
 
 - `tools/gtarget list` / `show TARGET` -- what targets exist, and where their images, projects, and corpora live. Targets are named like `camry-8965F3307000`; the bare part number is rejected. `tools/gtarget TARGET ...` runs Ghidra commands against that target, and bare `tools/g` runs against the registry default (currently the Camry).
 - `tools/g decompile ADDR`, `tools/g inspect ADDR --decompile --callers --disasm 40` -- live Ghidra. It bootstraps its own environment and working project; don't source env files by hand. `tools/g session-status` shows the daemon, `tools/g stop` shuts it down cleanly.
+- `tools/pe` -- like `tools/g` for arbitrary PE binaries (Techstream DLLs): `tools/pe import file.dll` runs a full analyzeHeadless pass, then `PE_PROGRAM=file.dll tools/pe <subcommand>` for any ghidra CLI command. Separate project under `build/work/`; never touches the firmware snapshots.
 - `tools/pseudo --target TARGET QUERY` -- search the tracked decompilation corpus. `--data-ref ADDR` finds functions that reference an address, which beats grepping decompiler spelling. Pseudocode is not proof; confirm in disassembly.
 - `tools/know QUERY` -- find what we've already written down about a topic. It's navigation, not an oracle.
 - `tools/gts` -- Toyota GTS+/Techstream data: ECU tables, DIDs, recorder schemas. Start with `--help` and the schema-first workflow in `docs/tooling/gts-query-cli.md` instead of grepping strings.
@@ -29,6 +30,8 @@ Everything you need lives under `tools/`, and each command has `--help`. Reach f
 - `tools/rh850` -- `toolchain` builds RH850 code; `test` and `csplus` run payloads or firmware scenarios in simulation.
 - `tools/artifact list` / `regen NAME` -- generated artifacts and what produces them.
 - `tools/test list` / `plan SELECTOR` / `SELECTOR` -- verification.
+
+Binaries that aren't registered targets (Techstream PEs, anything else) go through the vendored `ghidra` CLI at `ghidra/ghidra-cli/` -- `make ghidra-cli` builds it into `build/cache/ghidra-cli/`, and the wrappers prefer that build over any `ghidra` on `PATH`. Direct use: `build/cache/ghidra-cli/ghidra --projects-dir <dir under build/work/> --project NAME <command>` (`import`, `decompile`, `query`, ...). Bridge edits live in memory until a clean `stop`; the durability rules are in [WORKFLOW.md](docs/WORKFLOW.md).
 
 Python is an editable install (`uv sync --locked`). Import `tools.*` and use `tools.REPO_ROOT`; don't add `sys.path` or `PYTHONPATH` tricks to packaged tooling or tests.
 
