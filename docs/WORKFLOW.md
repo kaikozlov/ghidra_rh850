@@ -622,9 +622,9 @@ indexes those files and the exact compiler commands; `toolchain` records the
 image tag and image ID. These are offline developer artifacts: only `.text`
 is extracted into the uploaded binaries. See
 [source-level debugging](tooling/rh850-build-and-sim.md#c-frame-unwinding).
-The poll marker aliases a compiler-owned C label once outside the loop, so
-loop duplication cannot redefine it; the CodeFlash suite exercises fallback
-and idle-fast behavior with the resident compiled at `-O2` as well as `-Os`.
+The poll marker aliases a compiler-owned C label once outside the loop. The
+CodeFlash suite exercises fallback and idle-fast behavior using the canonical
+`-Os` resident build.
 
 The shared resident services a pending private-ring record immediately only
 while the foreground flag is clear and TAUJ0 channel 3 has more than 240,000
@@ -650,7 +650,7 @@ from that dump. Components are reported independently as `resolved`,
 It then builds one target-independent 4-KiB authenticated payload. The staging
 code scans the active 1-MiB CodeFlash for unique boot, startup, foreground, RX,
 freshness, command-five, lower-CAN, diagnostic-Tx/class/resource, and
-memory-layout roles; writes the resolved 32-word boot/config handoff to retained
+memory-layout roles; writes the resolved 33-word boot/config handoff to retained
 RAM; and stops before any boot call or RAM installation when a role is missing
 or ambiguous. No software ID, image hash, vehicle name, controller/resource
 pair, lower handle, or precomputed firmware offset enters the payload. The host

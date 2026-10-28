@@ -72,11 +72,11 @@ def default_output_dir(target: str) -> Path:
 
 STAGING_BASE = 0xFEBF0000
 STAGING_LIMIT = 0xFD0
-RESIDENT_STAGING_OFFSET = 0xB4C
-RESOLVER_OUTPUT_BASE = 0xFEBFFB7C
+RESIDENT_STAGING_OFFSET = 0xB50
+RESOLVER_OUTPUT_BASE = 0xFEBFFB78
 
 # The resolver writes five boot-transition targets followed immediately by the
-# resident's 27-word configuration. The retained resident and helper consume
+# resident's 28-word configuration. The retained resident and helper consume
 # only this fixed ABI; no software ID or target profile enters the payload.
 CONFIG_FIELDS = (
     "app_context",
@@ -106,6 +106,7 @@ CONFIG_FIELDS = (
     "lower_can_write",
     "command5_globals",
     "response_handle",
+    "ring_words",
 )
 CONFIG_OFFSETS = {name: index * 4 for index, name in enumerate(CONFIG_FIELDS)}
 CONFIG_SIZE = len(CONFIG_FIELDS) * 4

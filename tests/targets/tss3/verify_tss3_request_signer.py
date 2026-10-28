@@ -270,6 +270,34 @@ check(
         *(route_shifted_contract["runtime_config"][name] for name in build.CONFIG_FIELDS),
     ],
 )
+ring_resized = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())
+capacity_table = camry_contract["request"]["capacity_table"]
+ring_resized[capacity_table:capacity_table + 2] = (0x224).to_bytes(2, "little")
+ring_resized_path = BUILD_ROOT / "resolver-ring-resized.bin"
+ring_resized_path.write_bytes(ring_resized)
+ring_resized_contract = resolve_request_signer_contract(bytes(ring_resized))
+ring_resized_status, ring_resized_words = run_resolver(ring_resized_path)
+check(
+    "ring geometry follows the firmware capacity table instead of a compiled literal",
+    ring_resized_contract["runtime_config"]["ring_words"] == 0x224
+    and ring_resized_contract["request"]["ring_base"]
+        == camry_contract["request"]["ring_base"]
+    and ring_resized_status == 0
+    and ring_resized_words == [
+        *ring_resized_contract["boot_calls"],
+        *(ring_resized_contract["runtime_config"][name] for name in build.CONFIG_FIELDS),
+    ],
+)
+ring_oversized = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())
+ring_oversized[capacity_table:capacity_table + 2] = (0x1001).to_bytes(2, "little")
+try:
+    resolve_request_signer_contract(bytes(ring_oversized))
+except ContractError:
+    pass
+else:
+    raise AssertionError("dump resolver accepted an out-of-range ring capacity")
+print("PASS dump resolver rejects out-of-range ring capacity")
+
 command5_damaged = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())
 command5_address = SPECS[CAMRY_TARGET]["contract"]["signer_abi"]["command5_sync"]
 command5_damaged[command5_address:command5_address + 16] = bytes(16)

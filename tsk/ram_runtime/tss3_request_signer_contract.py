@@ -17,7 +17,6 @@ REQUEST_CAN_ID = 0x777
 RESPONSE_CAN_ID = 0x7A9
 REQUEST_LEN = 8
 REQUEST_CALLBACK_MASK = 0x04
-RING_WORDS = 0x228
 STATE_SIZE = 0x24
 RESIDENT_BASE = 0xFEBFF9F0
 RESIDENT_LIMIT = 0x20C
@@ -345,8 +344,11 @@ def _resolve_request_path(image: bytes, *, gp: int, tp: int) -> dict[str, Any]:
     producer_function = _resolve_rx_producer(image)
     capacity_table = (tp + (_s16(image, producer_function + 44) & ~1)) & 0xFFFFFFFF
     _need(capacity_table + 2 <= len(image), "RX capacity table is outside CodeFlash")
+    # The capacity is firmware-owned geometry: resolve it from the firmware's
+    # own table instead of pinning a literal, so a different ring size is a
+    # resolved contract rather than a source change. The unique ring-pointer
+    # join below validates the capacity against the LocalRAM producer gap.
     ring_words = _u16(image, capacity_table)
-    _need(ring_words == RING_WORDS, f"unsupported software RX ring capacity 0x{ring_words:X}")
 
     ring_producer = (gp + (_s16(image, producer_function + 54) & ~1)) & 0xFFFFFFFF
     ring_bytes = ring_words * 4
@@ -354,7 +356,7 @@ def _resolve_request_path(image: bytes, *, gp: int, tp: int) -> dict[str, Any]:
     for offset in range(max(0, capacity_table - 0x100), capacity_table, 2):
         value = _u32(image, offset)
         gap = ring_producer - value
-        if 0xFEBE0000 <= value < 0xFEC00000 and ring_bytes <= gap <= ring_bytes + 0x40:
+        if 0xFEBE0000 <= value < 0xFEC00000 and 0 <= gap - ring_bytes <= 0x40:
             ring_candidates.append((offset, value))
     _need(len(ring_candidates) == 1, f"expected one RX ring pointer near its capacity table, found {len(ring_candidates)}")
     ring_pointer_entry, ring_base = ring_candidates[0]
@@ -828,6 +830,7 @@ def _assemble_contract(image: bytes, values: dict[str, Any]) -> dict[str, Any]:
         "lower_can_write": signer["lower_can_write"],
         "command5_globals": signer["command5_globals"],
         "response_handle": signer["response_handle"],
+        "ring_words": request["ring_words"],
     }
     return {
         "schema": "tss3-request-signer-contract-v2",

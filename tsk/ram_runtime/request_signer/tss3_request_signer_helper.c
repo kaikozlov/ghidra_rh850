@@ -22,8 +22,6 @@
 
 #include "tss3_request_signer_core.h"
 
-/* Software RX ring geometry: 0x228 words of four bytes each. */
-#define ORACLE_RING_WORDS 0x228u
 
 /* Exact functional-diagnostic classic request record header: route_tag = 0,
  * callback selector = 0x04, received length = 8, standard CAN 0x777. */
@@ -50,7 +48,7 @@ void helper_entry(void) {
       int committed = 0;
 
       /* Stock wrap sentinel needs two readable words at the current index. */
-      if (cursor + 2u > ORACLE_RING_WORDS) return;
+      if (cursor + 2u > config->ring_words) return;
 
       record = config->ring_base + cursor;
       header = record[0];
@@ -70,8 +68,8 @@ void helper_entry(void) {
                           : (((received_length + 7) >> 3) << 1) + 3;
       }
       next = (uint16_t)(cursor + record_size);
-      if (next > ORACLE_RING_WORDS) return; /* word bounds */
-      if (next == ORACLE_RING_WORDS) next = 0; /* wrap the private tap */
+      if (next > config->ring_words) return; /* word bounds */
+      if (next == config->ring_words) next = 0; /* wrap the private tap */
 
       payload = (const volatile uint8_t *)record + 12;
       if (header == ORACLE_REQUEST_HEADER &&

@@ -106,6 +106,7 @@ typedef struct {
     uint32_t (*lower_can_write)(uint32_t, SignerPdu *);
     volatile SignerCommandGlobals *command5_globals;
     uint32_t response_handle;
+    uint32_t ring_words;
 } SignerConfig;
 
 _Static_assert(sizeof(SignerState) == 0x24, "signer state ABI");

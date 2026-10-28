@@ -2,7 +2,7 @@
  *
  * The host-side tss3_request_signer_contract.py remains the descriptive
  * checker. This freestanding resolver carries only the machine invariants
- * needed to materialize the 32-word boot/config handoff in retained RAM. Every
+ * needed to materialize the 33-word boot/config handoff in retained RAM. Every
  * candidate must be unique; an unknown or ambiguous image fails before the
  * resident or helper is installed.
  */
@@ -13,7 +13,6 @@
 #define HELPER_BASE 0xFEF07C00u
 #define HELPER_END 0xFEF08000u
 #define HELPER_CODE_LIMIT 0x398u
-#define RING_WORDS 0x228u
 
 #define ARRAY_SIZE(values) (sizeof(values) / sizeof((values)[0]))
 #define BOOT_CALL_COUNT 5u
@@ -46,9 +45,10 @@ enum config_word {
     CONFIG_WORD_LOWER_CAN_WRITE,
     CONFIG_WORD_COMMAND5_GLOBALS,
     CONFIG_WORD_RESPONSE_HANDLE,
+    CONFIG_WORD_RING_WORDS,
     CONFIG_WORD_COUNT,
 };
-_Static_assert(CONFIG_WORD_COUNT == 27, "signer config word count");
+_Static_assert(CONFIG_WORD_COUNT == 28, "signer config word count");
 
 static const uint8_t foreground_template[92] = {
     0x80, 0x07, 0x61, 0x00, 0xc0, 0xe7, 0x11, 0xb1,
@@ -351,6 +351,8 @@ int resolve_request_signer_image(const uint8_t *image, uint32_t *output)
         uint32_t gp;
         uint32_t tp;
         uint32_t capacity_table;
+        uint32_t ring_words;
+        uint32_t ring_bytes;
         uint32_t ring_producer;
         uint32_t ring_base = 0;
         uint32_t ring_hits = 0;
@@ -399,15 +401,16 @@ int resolve_request_signer_image(const uint8_t *image, uint32_t *output)
         capacity_table = tp + (uint32_t)(signed16(image + producer + 44u) & -2);
         ring_producer = gp + (uint32_t)(signed16(image + producer + 54u) & -2);
         if (capacity_table < 0x100u || capacity_table + 2u > CODEFLASH_SIZE ||
-            read16(image + capacity_table) != RING_WORDS ||
             ring_producer < 0xfebe0000u || ring_producer >= 0xfec00000u) {
             return -8;
         }
+        ring_words = read16(image + capacity_table);
+        ring_bytes = ring_words * 4u;
         for (offset = capacity_table - 0x100u; offset < capacity_table; offset += 2u) {
             uint32_t value = read32(image + offset);
             uint32_t gap = ring_producer - value;
             if (value >= 0xfebe0000u && value < 0xfec00000u &&
-                gap >= RING_WORDS * 4u && gap <= RING_WORDS * 4u + 0x40u) {
+                gap - ring_bytes <= 0x40u) {
                 ring_base = value;
                 ++ring_hits;
             }
@@ -417,6 +420,7 @@ int resolve_request_signer_image(const uint8_t *image, uint32_t *output)
         }
         config[CONFIG_WORD_RING_BASE] = ring_base;
         config[CONFIG_WORD_RING_PRODUCER] = ring_producer;
+        config[CONFIG_WORD_RING_WORDS] = ring_words;
 
         if (!recover_auth_trip(image, freshness, gp, &auth_trip)) {
             return -9;

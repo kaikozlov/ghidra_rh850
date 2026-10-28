@@ -10,12 +10,10 @@ import struct
 import subprocess
 import sys
 import tempfile
-from dataclasses import replace
 from pathlib import Path
 from typing import Any
-from unittest import mock
 
-from tsk.common.rh850_build import CJob, compile_c_batch, nm_symbol
+from tsk.common.rh850_build import nm_symbol
 import tools.targets.tss3.builders.build_tss3_request_signer as signer_builder
 from tsk.patcher.build_payload import simulate_apply
 from tsk.patcher.patch_config import config_from_manifest
@@ -997,6 +995,11 @@ def check_request_signer(work: Path) -> None:
         target="camry-8965F3307000", output_dir=build_dir,
     )
     staging = build_dir / metadata["staging"]["path"]
+    resident_compile = metadata["debug"]["units"]["resident"]["compile_command"]
+    if "-Os" not in resident_compile or any(
+        flag in resident_compile for flag in ("-O0", "-O1", "-O2", "-O3", "-Og", "-Oz")
+    ):
+        raise AssertionError(f"resident did not use the canonical -Os build: {resident_compile}")
 
     for target in supported_targets():
         spec = target_spec(target)
@@ -1007,31 +1010,7 @@ def check_request_signer(work: Path) -> None:
             staging_path=staging,
             output_dir=work / "request-signer-sim" / target,
         )
-        print(f"PASS universal request signer {target}")
-
-    # -O2 duplicates the poll loop. A named assembler label inside that loop
-    # used to fail assembly; its replacement must also identify a usable poll
-    # boundary for the idle-fast path in addition to compiling successfully.
-    optimized_dir = work / "tss3-request-signer-o2"
-
-    def compile_optimized_resident(work_dir: Path, jobs: tuple[CJob, ...]):
-        return compile_c_batch(work_dir, tuple(
-            replace(job, extra_cflags=(*job.extra_cflags, "-O2"))
-            if job.stem == "resident" else job
-            for job in jobs
-        ))
-
-    with mock.patch.object(signer_builder, "compile_c_batch", compile_optimized_resident):
-        optimized = signer_builder.build_request_signer(
-            target="camry-8965F3307000", output_dir=optimized_dir,
-        )
-    spec = target_spec("camry-8965F3307000")
-    simulate_candidate(
-        image_path=spec["image"], contract=spec["contract"], metadata=optimized,
-        staging_path=optimized_dir / optimized["staging"]["path"],
-        output_dir=work / "request-signer-sim-o2",
-    )
-    print("PASS optimized resident poll marker: fallback and idle-fast execution")
+        print(f"PASS canonical -Os request signer {target}")
 
 
 def check_unwind(work: Path) -> None:

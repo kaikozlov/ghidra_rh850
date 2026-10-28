@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 #define CODEFLASH_SIZE 0x100000u
-#define OUTPUT_WORDS 32u
+#define OUTPUT_WORDS 33u
 
 int resolve_request_signer_image(const uint8_t *image, uint32_t *output);
 

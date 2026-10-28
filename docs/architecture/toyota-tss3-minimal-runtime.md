@@ -105,7 +105,7 @@ lower CAN writer and transmit handle. These values, the startup span, and the
 foreground calls are not a vehicle-named code table.
 The host builder resolves and validates them from the supplied CodeFlash. The
 target-independent staging resolver independently scans the active 1-MiB
-CodeFlash, requires unique machine roles, and writes the 32-word boot/config
+CodeFlash, requires unique machine roles, and writes the 33-word boot/config
 handoff to retained RAM before any boot call. It carries no software ID, image
 hash, vehicle name, or precomputed firmware offset.
 
