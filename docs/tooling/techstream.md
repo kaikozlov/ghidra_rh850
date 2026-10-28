@@ -2443,6 +2443,55 @@ Current role `0x70` closes the selected direct Active Test's **signal/presentati
 
 Current role `0x05` now closes the list-selection layer immediately before that metadata family. Category405 `EMPS_P5` binds current `GetDatMonListP5_DT.dll` (39,440 B; SHA-256 `8db35a64…3a07c`). The plugin masks the low byte of the master category generation field (`raw +0x48`) with `0xE0`: mode `0x60` selects current type157 `CDbDatamonitorP5Table`, otherwise type62; mode `0x20` builds support state with `CreateEnableDataIdListForSubaruCheckDID`, otherwise `CreateEnableDataIdList`. For each current 80-byte monitor record, u16 `+0x34` is the candidate ID and byte `+0x30` controls support handling without requiring speculative bit names: if bit4 is clear, the plugin calls `CCommCachePlusP5::CheckSupportPid(command, candidate_id, &supported, enable_data_id_list, 1)` and includes only a successful `supported==1`; if bit4 is set, bit0 directly includes (1) or excludes (0) the candidate without that probe. Surviving candidates pass MultiPID validation/merge and final `CCmdDatMonData` construction, including physical/unit conversion and `ChangeSignalLSB`. Thus the DDB alone can enumerate and partition candidates, but not determine runtime-probed support outcomes. Current EMPS generation20 (`0x14`) selects type62 and ordinary `CreateEnableDataIdList`; all **230/230** type62 records have bit4 clear, so every candidate requires `CheckSupportPid` before Techstream's final presented list is known. `tools/gts command EMPS_P5 0x05` exposes this partition explicitly rather than mislabeling all DDB rows as live-supported.
 
+#### Brake monitor response length and field support
+
+**Brake DID `0x102F` has vehicle-dependent payload length and per-field support.**
+Current GTS+ accepts fields individually using the actual returned length. A
+shorter response can omit later fields without changing the earlier layout.
+
+The same-release installer-original `CommandCommon.dll` (SHA-256
+`98e313d197eb7115d037a2d46e71343b4b44862356e9d772c8f2f03d96e638d3`, recovered
+with `tools/gts recover-bodies`) supplies the instruction evidence in
+`CCommCachePlusP5::CheckSupportPid @ 0x10072180`:
+
+- `0x100727DB..0x100727F4` receives the selected DID and reads the actual UDS
+  response length. `0x10072612..0x1007262D` subtracts the three-byte `62 <DID>`
+  prefix and requires `8 * value_length > monitor.bit_end`; an out-of-range
+  field reaches `0x100727FA` and is marked unsupported.
+- `0x10072916..0x10072969` reads type-61 byte `+0x06`. Mode 1 requires
+  `value[(bit_end >> 3) - 1] & (0x80 >> (bit_end & 7))`; modes 0/2 bypass this
+  local bitmap check. The mode-1 read uses UDS response index
+  `(bit_end >> 3) + 2`, accounting for the prefix and preceding support byte.
+
+In all NA/EU/JP `ABS_P5`, `Brk_Bst_P5`, and `EPB_P5` databases, type61 and
+its type156 alias contain `00002f1000000100` for `0x102F` and
+`00002d1000000100` for `0x102D`: both use mode 1. `tools/gts did ABS_P5 0x102F --json` supplies the field
+positions and enum labels. These status DIDs
+interleave support and value bytes. For EPS communication bit74, byte8 mask
+`0x20` establishes support and byte9 mask `0x20` gives the value (zero-based).
+
+| Payload evidence | Length | GTS interpretation |
+|---|---:|---|
+| Corolla `0700000000000000`, reported in [Span's 2026-10-28 commit](https://github.com/spanconstant5/openpilot/commit/6f534271aff4ef830ef0a1c9aac130a54c11c574) | 8 | `Yaw Rate Open`, `Deceleration Open`, and `Steering Open` are supported and Normal; EPS bit74 is absent. |
+| Retained [Camry baseline](../variants/camry-2026-live-baseline.md#7-nrtd-p5-identities-and-cruise-control-wire-joins) `f700fd007c00a9000000` | 10 | EPS bit74 is present in the byte range but its support bit is clear, so that monitor is unavailable. |
+
+The Corolla value is also preserved in the pinned commit's
+`selfdrive/ui/tests/test_tss3_signer_runner.py`; the original CAN archive is
+external to that commit. Its `0x102D` fixture is 16 bytes
+(`30107f00ff007d00ef24c00010106040`): byte6 advertises Fail Status/Fail Control
+and byte7 clears both values.
+
+The current `tsk/ram_runtime/tss3_post_install_recovery.py::decode_brake_did`
+requires at least ten `0x102F` value bytes and reads byte9 without the support
+check. Its error prints the value after validating/removing `62 10 2F`.
+`isotp_request` assembles through the advertised ISO-TP length; loss of a
+consecutive frame times out. Thus the reported eight bytes refer to the DID
+value, while the original first-frame length remains the direct wire check.
+The helper's length-only check also interprets the retained Camry's unsupported
+EPS zero as Normal. Consumers need per-field length/support handling; omitted
+or unsupported fields have no health value. This investigation leaves runtime
+bringup policy unchanged.
+
 Current role `0x41` is now closed as the complementary metadata-only family. Category 405 `EMPS_P5` binds `GetDatMonSignalInfoP5_DT.dll` (28,176 B; SHA-256 `3bb9b8f2…20587`). Its current materialized helper resolves monitor physical-data key `+0x3A` through class `0x20D` / ECU type-13 `CDbPhyDataTable`, then copies physical `+0/+4/+8` to `CCmdDatMonSignalInfo` Mul/Div/Offset, physical `+0x14/+0x15` to signedness/decimal count, and computes bit length from current 80-byte monitor bit-end `+0x3E` minus bit-start `+0x3C` plus one. Physical `+0x0E` resolves class `0x20F` / type-15 unit metadata and default-unit text; monitor `+0x42` resolves class `0x20E` / type-14 pattern-display value/string records into the output display-info list. No frame/send primitive is imported by this plugin: it constructs the typed `CCmdDatMonSignalInfo` metadata consumed by Data Monitor. The canonical DDB semantic layer now performs that same consumer-proven join for interactive `tools/gts did` results while leaving its default API unchanged for deterministic extractors. Current EMPS witnesses are `0x1037 Steering Angle` → physical key 3, `15/1`, offset 0, signed, one decimal, `deg`, raw `-2048..2047`, graph integer `-30720..30705`; and `0x106A Cooperation Control State` → type-14 dictionary `0=Cooperation Control`, `1=Other than Cooperation Control`.
 
 Two already-proven endpoints illustrate the same machinery. Category 397 Hybrid Control + DLL role `0x19`

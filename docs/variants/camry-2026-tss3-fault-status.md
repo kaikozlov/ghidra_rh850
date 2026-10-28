@@ -168,7 +168,11 @@ by the event/table join above.
 Control Module). Both steering dictionaries expose `0x1CEF` **Target
 Lateral ID (System 2)**; Camry install set `0x1FB8` contains no category
 499 EMPS2. Brake/booster DID `0x102F` bit 74 is **EPS/Steering Control
-Actuator ECU Communication Open**, with 0=Normal and 1=Under intermittent.
+Actuator ECU Communication Open**, with 0=Normal and 1=Under intermittent
+when byte8 mask `0x20` advertises support (zero-based); byte9 mask `0x20`
+is the value. In the retained Camry `f700fd007c00a9000000` response that
+support bit is clear, so this monitor is unavailable. See the
+[GTS length/support contract](../tooling/techstream.md#brake-monitor-response-length-and-field-support).
 
 ## 5. F33 latch/aging constants are not H constants
 
