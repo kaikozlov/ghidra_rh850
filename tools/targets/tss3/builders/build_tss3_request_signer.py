@@ -38,18 +38,9 @@ from tools.targets.tss3.console import render_build
 
 BUILDER = Path(__file__).resolve()
 SCHEMA = "tss3-request-signer-build-v2"
-DEFAULT_CODEC = "four-frame"
-COMPACT_CODEC = "compact"
-CODECS: dict[str, dict[str, Any]] = {
-    DEFAULT_CODEC: {
-        "carrier": "functional-nibble4", "frame_count": 4,
-        "helper_macros": {}, "experimental": False,
-    },
-    COMPACT_CODEC: {
-        "carrier": "functional-compact1", "frame_count": 1,
-        "helper_macros": {"ORACLE_COMPACT_CODEC": 1}, "experimental": True,
-    },
-}
+REQUEST_CODEC = "four-frame"
+REQUEST_CARRIER = "functional-nibble4"
+REQUEST_FRAME_COUNT = 4
 
 RESIDENT_SOURCE = REPO / "exploit/ram_runtime/request_signer/tss3_request_signer_resident.c"
 RESIDENT_ENTRY_SOURCE = REPO / "exploit/ram_runtime/request_signer/tss3_request_signer_resident.S"
@@ -71,14 +62,12 @@ CMP_IMMEDIATE_RE = re.compile(
 )
 
 
-def output_stem(target: str, codec: str = DEFAULT_CODEC) -> str:
-    suffix = "" if codec == DEFAULT_CODEC else "_compact"
-    return f"{target.replace('-', '_')}_request_signer{suffix}"
+def output_stem(target: str) -> str:
+    return f"{target.replace('-', '_')}_request_signer"
 
 
-def default_output_dir(target: str, *, codec: str = DEFAULT_CODEC) -> Path:
-    codec_suffix = "" if codec == DEFAULT_CODEC else "-compact"
-    return REPO / "build/out/ram-runtime" / target / f"tss3-request-signer{codec_suffix}"
+def default_output_dir(target: str) -> Path:
+    return REPO / "build/out/ram-runtime" / target / "tss3-request-signer"
 
 
 STAGING_BASE = 0xFEBF0000
@@ -171,7 +160,6 @@ def build_request_signer(
     *,
     target: str | None = None,
     codeflash: Path | None = None,
-    codec: str = DEFAULT_CODEC,
     output_dir: Path | None = None,
     stem: str | None = None,
 ) -> dict[str, Any]:
@@ -182,8 +170,6 @@ def build_request_signer(
     """
     if target is not None and codeflash is not None:
         raise ValueError("pass exactly one of target or codeflash")
-    if codec not in CODECS:
-        raise ValueError(f"unsupported request codec: {codec}")
     if stem is not None and re.fullmatch(r"[A-Za-z0-9_.-]+", stem) is None:
         raise ValueError("output stem must be a filename stem without path separators")
 
@@ -203,10 +189,9 @@ def build_request_signer(
         "resolver": "on-device-codeflash",
         "codeflash_sha256": selected["sha256"],
     }
-    codec_spec = CODECS[codec]
-    out = output_dir if output_dir is not None else default_output_dir(selected["name"], codec=codec)
+    out = output_dir if output_dir is not None else default_output_dir(selected["name"])
     out.mkdir(parents=True, exist_ok=True)
-    file_stem = stem if stem is not None else output_stem(selected["name"], codec)
+    file_stem = stem if stem is not None else output_stem(selected["name"])
     contract_path = out / f"{file_stem}_contract.json"
     contract_path.write_text(
         json.dumps(selected["contract"], indent=2, sort_keys=True) + "\n",
@@ -224,7 +209,7 @@ def build_request_signer(
             CJob(
                 sources=(str(HELPER_SOURCE.relative_to(REPO)),),
                 stem="helper", vma=HELPER_TRANSIT_BASE, entry="_helper_entry",
-                symbols={}, defines=codec_spec["helper_macros"], preinclude="signer_config.h",
+                symbols={}, defines={}, preinclude="signer_config.h",
                 stack_budget=HELPER_STACK_BUDGET,
                 # In the four-frame build, hoisting saves four code bytes but
                 # adds twelve stack bytes. Keep the original helper footprint.
@@ -248,15 +233,12 @@ def build_request_signer(
         need(nm_symbol(str(helper["nm"]), "helper_entry") == HELPER_TRANSIT_BASE,
              "helper entry drift")
         need(not helper["relocations"], "helper retains relocations")
-        compact_template = nm_symbol(str(helper["nm"]), "oracle_compact_template")
-        need((compact_template is not None) == (codec == COMPACT_CODEC),
-             "compact template inclusion does not match the explicitly selected codec")
         need(jarl_targets(str(helper["disasm"])) == [],
              "helper retained a target-specific direct call")
         helper_blob += b"\0" * (-len(helper_blob) % 4)
         helper_blob += b"\0" * SPECULATIVE_FETCH_GUARD_SIZE
         need(len(helper_blob) <= UNIVERSAL_SIGNER_HELPER_CODE_LIMIT,
-             f"{codec} helper plus speculative-fetch guard exceeds universal layout: "
+             "helper plus speculative-fetch guard exceeds universal layout: "
              f"{len(helper_blob)} > {UNIVERSAL_SIGNER_HELPER_CODE_LIMIT}")
 
         need(nm_symbol(str(resident["nm"]), "resident_entry") == RESIDENT_BASE,
@@ -391,9 +373,9 @@ def build_request_signer(
             "request": {
                 "bus": selected["request"]["request_bus"],
                 "can_id": f"0x{selected['request']['request_id']:08X}",
-                "codec": codec,
-                "carrier": codec_spec["carrier"],
-                "frame_count": codec_spec["frame_count"],
+                "codec": REQUEST_CODEC,
+                "carrier": REQUEST_CARRIER,
+                "frame_count": REQUEST_FRAME_COUNT,
             },
             "response": {
                 "bus": selected["request"]["response_bus"],
@@ -455,10 +437,6 @@ def main() -> int:
     source = ap.add_mutually_exclusive_group()
     source.add_argument("--target", choices=TARGETS)
     source.add_argument("--codeflash", type=Path, help="resolve and include one arbitrary CodeFlash dump")
-    ap.add_argument(
-        "--codec", choices=tuple(CODECS), default=DEFAULT_CODEC,
-        help="request codec; four-frame is the universal default and compact is experimental opt-in",
-    )
     ap.add_argument("--output-dir", type=Path)
     ap.add_argument("--output-stem")
     ap.add_argument("--json", action="store_true", help="print the full JSON metadata instead of the human summary")
@@ -467,7 +445,6 @@ def main() -> int:
         meta = build_request_signer(
             target=args.target,
             codeflash=args.codeflash,
-            codec=args.codec,
             output_dir=args.output_dir,
             stem=args.output_stem,
         )
@@ -476,7 +453,7 @@ def main() -> int:
     if args.json:
         print(json.dumps(meta, indent=2, sort_keys=True))
     else:
-        out = args.output_dir if args.output_dir is not None else default_output_dir(meta["target"]["name"], codec=args.codec)
+        out = args.output_dir if args.output_dir is not None else default_output_dir(meta["target"]["name"])
         print(render_build(meta, str(out)))
     return 0
 

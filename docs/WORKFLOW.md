@@ -600,9 +600,9 @@ The builder uses the pinned GCC's native byte swaps, byte bit tests, and
 non-returning-frame optimization, and reserves the firmware application registers
 with `-mno-app-regs`. Only `helper_entry` carries `__attribute__((long_call))`:
 its GlobalRAM call uses native six-byte JARL, while nearby calls remain four bytes.
-There is no global `-mlong-calls` or linker-relaxation dependency. Only the
-helper disables loop-invariant motion: for the default four-frame build,
-reloading constants trades four code bytes for twelve fewer stack bytes.
+There is no global `-mlong-calls` or linker-relaxation dependency. The helper
+disables loop-invariant motion: reloading constants trades four code bytes for
+twelve fewer stack bytes.
 It links readonly constants into the copied
 code, rejects writable globals and relocations, checks C layouts against the
 host config, and enforces both code-plus-fetch-guard budgets and Corolla's
@@ -715,12 +715,9 @@ submodules; `TSS3_OPENPILOT_ROOT` overrides that root. Detached HEADs have
 failures record an `error` with null branch/commit without failing the signer
 probe. An uninitialized submodule never inherits the parent repository's identity.
 
-The optional `--codec compact` build is experimental and explicit. Omission
-always selects the four-frame carrier that transports all 28 application
-bytes. Run only the gate that owns the changed behavior:
 
 ```bash
-# signer build, codecs, metadata consumer, and host protocol
+# signer build, metadata consumer, and host protocol
 tools/test tss3_request_signer
 
 # retained RH850 regressions: compiler ABI, device model, source-to-result

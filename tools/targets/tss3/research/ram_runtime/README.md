@@ -626,12 +626,6 @@ Completed requests are signed once with selector-4 command 5 and answered by
 one classic standard-`0x7A9` response. The path uses no CanTp/DCM flow control,
 SecOC bypass, or resident-side `0x08A`/B6 transmit.
 
-The one-message compact reconstruction remains experimental because the
-steering experiment reported it broken with stock TSS3 steering. It is excluded
-from default builds and packages. An experiment must request `--codec compact`
-through `tools/toyota ram build` or `tools/toyota ram kit`; there is no silent
-fallback or runtime auto-selection. No identity-bound capture has been promoted
-here as vehicle qualification for that experiment.
 
 See `camry_f33_08a_oracle_stream.md` for the superseded diagnostic-transport
 measurements and the Camry opendbc-port document for the current carrier

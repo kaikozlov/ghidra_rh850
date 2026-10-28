@@ -16,16 +16,12 @@ from exploit.ram_runtime.target_profiles import (
     supported_targets,
 )
 from tools import REPO_ROOT
-from tools.targets.tss3.builders.build_tss3_request_signer import (
-    DEFAULT_CODEC,
-    build_request_signer,
-)
+from tools.targets.tss3.builders.build_tss3_request_signer import build_request_signer
 from tools.targets.tss3.console import render_kit
 
 ROOT = REPO_ROOT
 LAUNCHER = ROOT / "exploit/ram_runtime/tss3_request_signer_launcher.sh"
 TARGETS = supported_targets()
-CODECS = (DEFAULT_CODEC, "compact")
 RUNTIME_FILES = (
     "tools/__init__.py",
     "tsk/__init__.py",
@@ -44,7 +40,6 @@ UI_RUNTIME_FILES = (
     "exploit/ram_runtime/tss3_request_signer_ui_bringup.py",
     "exploit/ram_runtime/tss3_startup_programming.py",
 )
-COMPACT_RUNTIME_FILE = "exploit/ram_runtime/tss3_request_signer_compact.py"
 
 
 def _require_empty(out: Path) -> None:
@@ -89,7 +84,7 @@ def _bound_metadata(metadata: dict, record: dict, spec: dict) -> dict:
     }
 
 
-def _package(target: str, out: Path, codec: str, metadata: dict, payload_path: Path) -> dict:
+def _package(target: str, out: Path, metadata: dict, payload_path: Path) -> dict:
     _require_empty(out)
     out.mkdir(parents=True, exist_ok=True)
     bundle = out / "bundle"
@@ -106,43 +101,36 @@ def _package(target: str, out: Path, codec: str, metadata: dict, payload_path: P
         _copy(ROOT / rel, out / "runtime" / rel)
     for rel in UI_RUNTIME_FILES:
         _copy(ROOT / rel, out / "runtime" / rel)
-    if codec == "compact":
-        _copy(ROOT / COMPACT_RUNTIME_FILE, out / "runtime" / COMPACT_RUNTIME_FILE)
 
     _copy(LAUNCHER, out / "tss3-request-signer")
     (out / "tss3-request-signer").chmod(0o755)
     return {
         "schema": "tss3-ram-kit-v1",
         "target": target,
-        "codec": codec,
+        "codec": metadata["request"]["codec"],
         "payload_sha256": metadata["authenticated_payload"]["sha256"],
     }
 
 
-def build(target: str, out: Path, codec: str = DEFAULT_CODEC) -> dict:
+def build(target: str, out: Path) -> dict:
     if target not in TARGETS:
         raise RuntimeError(f"unsupported RAM-runtime target: {target}")
-    if codec not in CODECS:
-        raise RuntimeError(f"unsupported request codec: {codec}")
     _require_empty(out)
     record = {**registered_targets()[target], "name": target}
     spec = registered_specs()[target]
     with tempfile.TemporaryDirectory(prefix="tss3-ram-kit-") as td:
-        metadata = build_request_signer(target=target, codec=codec, output_dir=Path(td))
+        metadata = build_request_signer(target=target, output_dir=Path(td))
         payload = Path(td) / metadata["authenticated_payload"]["path"]
-        return _package(target, out, codec, _bound_metadata(metadata, record, spec), payload)
+        return _package(target, out, _bound_metadata(metadata, record, spec), payload)
 
 
-def build_set(out: Path, codec: str = DEFAULT_CODEC) -> dict:
-    if codec not in CODECS:
-        raise RuntimeError(f"unsupported request codec: {codec}")
+def build_set(out: Path) -> dict:
     _require_empty(out)
     records = registered_targets()
     specs = registered_specs()
     with tempfile.TemporaryDirectory(prefix="tss3-ram-kit-") as td:
         metadata = build_request_signer(
             target=TARGETS[0],
-            codec=codec,
             output_dir=Path(td),
             stem="tss3_request_signer",
         )
@@ -152,7 +140,6 @@ def build_set(out: Path, codec: str = DEFAULT_CODEC) -> dict:
             kits[target] = _package(
                 target,
                 out / target,
-                codec,
                 _bound_metadata(
                     metadata,
                     {**records[target], "name": target},
@@ -160,24 +147,24 @@ def build_set(out: Path, codec: str = DEFAULT_CODEC) -> dict:
                 ),
                 payload,
             )
-    return {"schema": "tss3-ram-kit-set-v1", "codec": codec, "kits": kits}
+    return {
+        "schema": "tss3-ram-kit-set-v1",
+        "codec": metadata["request"]["codec"],
+        "kits": kits,
+    }
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--target", choices=(*TARGETS, "all"), required=True)
     parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument(
-        "--codec", choices=CODECS, default=DEFAULT_CODEC,
-        help="four-frame is the default; compact is experimental and explicit",
-    )
     parser.add_argument("--json", action="store_true", help="print the full JSON result instead of the human summary")
     args = parser.parse_args()
     try:
         result = (
-            build_set(args.out, args.codec)
+            build_set(args.out)
             if args.target == "all"
-            else build(args.target, args.out, args.codec)
+            else build(args.target, args.out)
         )
     except (OSError, RuntimeError, ValueError) as exc:
         print(f"refusing: {exc}", file=sys.stderr)

@@ -15,7 +15,6 @@ from types import SimpleNamespace
 from unittest import mock
 
 import exploit.ram_runtime.tss3_request_signer as host
-import exploit.ram_runtime.tss3_request_signer_compact as compact_host
 import tools.targets.tss3.builders.build_tss3_request_signer as build
 from exploit.common.payload_package import inspect_payload
 from exploit.common.rh850_build import CJob
@@ -45,10 +44,8 @@ RESOLUTION_SPECS = {
 BUILD_TEMP = tempfile.TemporaryDirectory(prefix="verify-tss3-request-signer-")
 BUILD_ROOT = Path(BUILD_TEMP.name)
 OUT = BUILD_ROOT / "default"
-COMPACT_OUT = BUILD_ROOT / "compact"
 
 meta = build.build_request_signer(target=CAMRY_TARGET, output_dir=OUT)
-compact_meta = build.build_request_signer(target=CAMRY_TARGET, codec="compact", output_dir=COMPACT_OUT)
 meta_path = OUT / "camry_8965F3307000_request_signer.json"
 
 
@@ -314,7 +311,7 @@ print("PASS production C core executes and satisfies result checks")
 
 application = bytes(range(28))
 four_frames = host.build_request(application, 0xA7)
-check("host default codec transports all application bytes in four exact frames",
+check("host transport preserves all application bytes in four exact frames",
       four_frames == (
           bytes.fromhex("8700010203040506"),
           bytes.fromhex("9a0708090a0b0c0d"),
@@ -322,28 +319,8 @@ check("host default codec transports all application bytes in four exact frames"
           bytes.fromhex("ba15161718191a1b"),
       ) and
       b"".join(frame[1:] for frame in four_frames) == application and
-      host.build_request_frames(application, 0xA7) == four_frames)
+      host.build_request(application, 0xA7) == four_frames)
 
-compact_app = bytearray(host.SAFE_APPLICATION)
-compact_app[18], compact_app[19], compact_app[26] = 0x34, 0x12, 0x21
-compact_frame = compact_host.build_compact_frame(bytes(compact_app), 0xA1)
-check("optional compact module retains its bounded reconstruction contract",
-      compact_frame == bytes.fromhex("c0000000341200a1") and
-      compact_host.compact_reconstruction(compact_frame)[2:] == bytes(compact_app) and
-      compact_host.build_compact_frame(host.SAFE_APPLICATION, 0x40) ==
-          bytes.fromhex("c000000000000040"))
-for rejected_application, rejected_seq in (
-    (bytes(range(28)), 0xA7),
-    (host.SAFE_APPLICATION, 0x41),
-    (bytes(bytearray(compact_app[:24]) + bytearray([100]) + bytes(compact_app[25:])), 0xA1),
-):
-    try:
-        compact_host.build_compact_frame(rejected_application, rejected_seq)
-    except ValueError:
-        pass
-    else:
-        raise AssertionError("optional compact codec accepted a nonrepresentable application")
-print("PASS optional compact codec rejects every nonrepresentable application")
 
 check(
     "registered and unknown compatible dumps use the self-resolving payload",
@@ -472,9 +449,10 @@ else:
     raise AssertionError("dump resolver accepted firmware without the signer freshness primitive")
 print("PASS dump resolver rejects firmware with an unresolved signer ABI")
 
-check("generated transports satisfy the host metadata contract",
-      host.meta_transport(meta)["codec"] == "four-frame" and
-      host.meta_transport(compact_meta)["codec"] == "compact")
+check(
+    "generated transport satisfies the host metadata contract",
+    host.meta_transport(meta)["codec"] == "four-frame",
+)
 try:
     host.meta_transport({
         "request": {"can_id": "0x1FDC0002", "bus": 0, "carrier": "raw-extended"},
@@ -483,8 +461,8 @@ try:
 except host.RequestSignerError:
     pass
 else:
-    raise AssertionError("host accepted the retired second carrier")
-print("PASS host rejects the retired extended-XCP carrier")
+    raise AssertionError("host accepted an unsupported request carrier")
+print("PASS host rejects unsupported request carriers")
 resp = host.parse_response(bytes.fromhex("c90700f8d64e2a5e"), expected_seq=0x07)
 check("host response decoder matches resident layout",
       resp.seq == 0x07 and resp.status == 0 and resp.trailer == bytes.fromhex("d64e2a5e"))
@@ -497,7 +475,7 @@ check("parked benchmark reports deterministic distribution statistics",
 
 def _recorded_send(index: int, seq: int, *, lateness_ms: float, started_ns: int) -> dict:
     application = host.safe_application(seq)
-    frames = host.build_request_frames(application, seq, host.REQUEST_CARRIER)
+    frames = host.build_request(application, seq)
     return {
         "index": index,
         "seq": seq,

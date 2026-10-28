@@ -166,7 +166,7 @@ def cmd_ram_list(args: argparse.Namespace) -> int:
 
 
 def cmd_ram_build(args: argparse.Namespace) -> int:
-    command = ["--target", args.target, "--codec", args.codec]
+    command = ["--target", args.target]
     if args.out is not None:
         command.extend(("--output-dir", str(args.out)))
     if args.json:
@@ -187,7 +187,7 @@ def cmd_ram_onboard(args: argparse.Namespace) -> int:
 
 
 def cmd_ram_kit(args: argparse.Namespace) -> int:
-    command = ["--target", args.target, "--out", str(args.out), "--codec", args.codec]
+    command = ["--target", args.target, "--out", str(args.out)]
     if args.json:
         command.append("--json")
     return _run_path(
@@ -318,7 +318,6 @@ def build_parser() -> argparse.ArgumentParser:
     b = qs.add_parser("build", help="build the canonical request signer")
     b.add_argument("target")
     b.add_argument("--out", type=Path)
-    b.add_argument("--codec", choices=("four-frame", "compact"), default="four-frame")
     b.add_argument("--json", action="store_true", help="print full JSON instead of the human summary")
     b.set_defaults(func=cmd_ram_build)
     o = qs.add_parser(
@@ -332,7 +331,6 @@ def build_parser() -> argparse.ArgumentParser:
     k = qs.add_parser("kit", help="package one exact target or all registered targets")
     k.add_argument("target")
     k.add_argument("--out", type=Path, required=True)
-    k.add_argument("--codec", choices=("four-frame", "compact"), default="four-frame")
     k.add_argument("--json", action="store_true", help="print the full JSON result instead of the human summary")
     k.set_defaults(func=cmd_ram_kit)
 
