@@ -52,39 +52,31 @@ _Static_assert(CONFIG_WORD_COUNT == 28, "signer config word count");
 
 #define FOREGROUND_SIZE 92u
 
-typedef struct {
-    uint8_t offset;
-    uint8_t size;
-} fixed_run;
-
-/* Fixed bytes around the firmware-resolved addresses and ten direct calls. */
-static const fixed_run foreground_fixed_runs[] = {
-    {0x00, 6}, {0x08, 4}, {0x0e, 2}, {0x12, 2}, {0x16, 8},
-    {0x22, 4}, {0x46, 6}, {0x50, 2}, {0x54, 8},
-};
-static const uint8_t foreground_fixed_bytes[] = {
-    0x80, 0x07, 0x61, 0x00, 0xc0, 0xe7,
-    0xe2, 0xfd, 0xc0, 0xa7,
-    0x40, 0x0e,
-    0x81, 0x0f,
-    0x00, 0xea, 0x01, 0x06, 0xa6, 0xff, 0xda, 0x05,
-    0x20, 0xee, 0x5a, 0x00,
-    0x1d, 0x06, 0xa6, 0xff, 0xba, 0x05,
-    0x24, 0xf6,
-    0x60, 0x08, 0x41, 0x0a, 0x80, 0x0b, 0xd5, 0xd5,
+/* Each run is {size, offset, fixed bytes...}; size zero ends the pattern. */
+static const uint8_t foreground_pattern[] = {
+    6, 0x00, 0x80, 0x07, 0x61, 0x00, 0xc0, 0xe7,
+    4, 0x08, 0xe2, 0xfd, 0xc0, 0xa7,
+    2, 0x0e, 0x40, 0x0e,
+    2, 0x12, 0x81, 0x0f,
+    8, 0x16, 0x00, 0xea, 0x01, 0x06, 0xa6, 0xff, 0xda, 0x05,
+    4, 0x22, 0x20, 0xee, 0x5a, 0x00,
+    6, 0x46, 0x1d, 0x06, 0xa6, 0xff, 0xba, 0x05,
+    2, 0x50, 0x24, 0xf6,
+    8, 0x54, 0x60, 0x08, 0x41, 0x0a, 0x80, 0x0b, 0xd5, 0xd5,
+    0,
 };
 static const uint8_t foreground_call_offsets[10] = {
     0x1e, 0x26, 0x2a, 0x2e, 0x32, 0x36, 0x3a, 0x3e, 0x42, 0x4c,
 };
-static const uint8_t rx_producer_template[44] = {
-    0x80, 0x07, 0xe1, 0xf1, 0x86, 0x00, 0x07, 0x00,
-    0x07, 0xf0, 0x00, 0xc5, 0x67, 0x00, 0x08, 0x0a,
-    0x18, 0x98, 0x9f, 0x9a, 0xb9, 0x05, 0x20, 0x0e,
-    0x40, 0x00, 0xe6, 0xee, 0x06, 0x00, 0xe1, 0x00,
-    0xe1, 0x00, 0x36, 0xbb, 0x06, 0xc8, 0xc1, 0x32,
-    0xc5, 0x31, 0xe6, 0x00,
+static const uint8_t rx_producer_pattern[] = {
+    7, 0, 0x80, 0x07, 0xe1, 0xf1, 0x86, 0x00, 0x07,
+    5, 8, 0x07, 0xf0, 0x00, 0xc5, 0x67,
+    17, 14, 0x08, 0x0a, 0x18, 0x98, 0x9f, 0x9a, 0xb9, 0x05, 0x20,
+    0x0e, 0x40, 0x00, 0xe6, 0xee, 0x06, 0x00, 0xe1,
+    1, 32, 0xe1,
+    9, 34, 0x36, 0xbb, 0x06, 0xc8, 0xc1, 0x32, 0xc5, 0x31, 0xe6,
+    0,
 };
-static const uint8_t rx_variable_offsets[5] = {7, 13, 31, 33, 43};
 static const uint8_t freshness_signature[12] = {
     0x06, 0xf0, 0x6b, 0x08, 0x88, 0x9f, 0x01, 0x00, 0xf3, 0x09, 0xeb, 0x35,
 };
@@ -114,11 +106,6 @@ static uint32_t read32(const uint8_t *p)
            ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24);
 }
 
-static int16_t signed16(const uint8_t *p)
-{
-    return (int16_t)read16(p);
-}
-
 static int bytes_equal(const uint8_t *left, const uint8_t *right, unsigned size)
 {
     while (size-- != 0u) {
@@ -132,11 +119,11 @@ static int bytes_equal(const uint8_t *left, const uint8_t *right, unsigned size)
 static int is_jarl22(const uint8_t *image, uint32_t address)
 {
     uint16_t first;
-    if (address + 4u > CODEFLASH_SIZE) {
+    if (address > CODEFLASH_SIZE - 4u) {
         return 0;
     }
     first = read16(image + address);
-    return ((first >> 6) & 31u) == 30u && ((first >> 11) & 31u) == 31u;
+    return (first & 0xffc0u) == 0xff80u && (image[address + 2u] & 1u) == 0u;
 }
 
 static uint32_t jarl22_target(const uint8_t *image, uint32_t address)
@@ -149,23 +136,23 @@ static uint32_t jarl22_target(const uint8_t *image, uint32_t address)
     return address + (uint32_t)(high * 0x10000) + (instruction >> 16);
 }
 
-static void record_hit(uint32_t *address, unsigned *count, uint32_t value)
+/* UINT32_MAX is unseen; CODEFLASH_SIZE is ambiguous and stays ambiguous.
+ * Only a unique hit leaves an address inside CodeFlash. */
+static void record_hit(uint32_t *address, uint32_t value)
 {
-    *address = value;
-    ++*count;
+    *address = *address == UINT32_MAX ? value : CODEFLASH_SIZE;
 }
 
-static int rx_producer_matches(const uint8_t *candidate)
+static int pattern_matches(const uint8_t *candidate, const uint8_t *pattern)
 {
-    unsigned index;
-    unsigned variable = 0;
-    for (index = 0; index < ARRAY_SIZE(rx_producer_template); ++index) {
-        if (variable < ARRAY_SIZE(rx_variable_offsets) &&
-            index == rx_variable_offsets[variable]) {
-            ++variable;
-        } else if (candidate[index] != rx_producer_template[index]) {
-            return 0;
-        }
+    unsigned size;
+    while ((size = *pattern++) != 0u) {
+        const uint8_t *actual = candidate + *pattern++;
+        do {
+            if (*actual++ != *pattern++) {
+                return 0;
+            }
+        } while (--size != 0u);
     }
     return 1;
 }
@@ -174,16 +161,9 @@ static int32_t resolve_foreground(
     const uint8_t *image, uint32_t address)
 {
     int16_t foreground_flag_displacement;
-    const uint8_t *expected = foreground_fixed_bytes;
     unsigned index;
-    for (index = 0; index < ARRAY_SIZE(foreground_fixed_runs); ++index) {
-        const fixed_run *run = &foreground_fixed_runs[index];
-        unsigned byte;
-        for (byte = 0; byte < run->size; ++byte) {
-            if (image[address + run->offset + byte] != *expected++) {
-                return 0;
-            }
-        }
+    if (!pattern_matches(image + address, foreground_pattern)) {
+        return 0;
     }
     foreground_flag_displacement =
         *(const int16_t *)(const void *)(image + address + 6u);
@@ -210,7 +190,7 @@ static int recover_auth_trip(
     for (offset = start; offset + 8u <= freshness; offset += 2u) {
         if (read32(image + offset) == 0x00210780u &&
             read16(image + offset + 4u) == 0x3624u) {
-            candidate = gp + (uint32_t)signed16(image + offset + 6u);
+            candidate = gp + (uint32_t)(int16_t)read16(image + offset + 6u);
             ++count;
         }
     }
@@ -259,12 +239,10 @@ static int recover_context(
 
 int resolve_request_signer_image(const uint8_t *image, uint32_t *output)
 {
-    uint32_t boot = 0, coordinator = 0, producer = 0;
-    uint32_t freshness = 0, command5 = 0, lower_can = 0;
-    uint32_t diagnostic_tx = 0, class_route = 0;
-    unsigned boot_count = 0, coordinator_count = 0, producer_count = 0;
-    unsigned freshness_count = 0, command5_count = 0, lower_can_count = 0;
-    unsigned diagnostic_tx_count = 0, class_route_count = 0;
+    uint32_t boot = UINT32_MAX, coordinator = UINT32_MAX, producer = UINT32_MAX;
+    uint32_t freshness = UINT32_MAX, command5 = UINT32_MAX, lower_can = UINT32_MAX;
+    uint32_t diagnostic_tx = UINT32_MAX, class_route = UINT32_MAX;
+    uint32_t coordinator_after = 0;
     unsigned mpu_count = 0;
     unsigned transit_pointer_count = 0;
     uint32_t offset;
@@ -273,9 +251,10 @@ int resolve_request_signer_image(const uint8_t *image, uint32_t *output)
 
     for (offset = 0; offset + 256u < CODEFLASH_SIZE; offset += 2u) {
         const uint8_t *p = image + offset;
-        uint16_t first = read16(p);
+        uint32_t word = read32(p);
+        uint16_t first = (uint16_t)word;
 
-        if (first == 0x0782u && read32(p) == 0x00610782u) {
+        if (word == 0x00610782u) {
             unsigned calls = 0;
             q = offset + 4u;
             while (calls < BOOT_CALL_COUNT && is_jarl22(image, q)) {
@@ -283,11 +262,10 @@ int resolve_request_signer_image(const uint8_t *image, uint32_t *output)
                 q += 4u;
             }
             if (calls == BOOT_CALL_COUNT && read16(image + q) == 0x51e0u) {
-                record_hit(&boot, &boot_count, offset);
+                record_hit(&boot, offset);
             }
         }
         if (first == 0x0780u) {
-            uint32_t word = read32(p);
             if (word == 0x00210780u) {
                 unsigned calls = 0;
                 q = offset + 4u;
@@ -300,33 +278,33 @@ int resolve_request_signer_image(const uint8_t *image, uint32_t *output)
                     read32(image + q + 6u) == 0x016087e0u &&
                     is_jarl22(image, q + 10u) &&
                     read32(image + q + 14u) == 0x003f0640u) {
-                    record_hit(&coordinator, &coordinator_count, offset);
+                    record_hit(&coordinator, offset);
+                    coordinator_after = q;
                 }
             }
-            if (word == 0xf1e10780u && rx_producer_matches(p)) {
-                record_hit(&producer, &producer_count, offset);
+            if (word == 0xf1e10780u && pattern_matches(p, rx_producer_pattern)) {
+                record_hit(&producer, offset);
             }
         }
         if (first == 0xf006u &&
             bytes_equal(p, freshness_signature, sizeof(freshness_signature))) {
-            record_hit(&freshness, &freshness_count, offset);
+            record_hit(&freshness, offset);
         }
         if (first == 0x0786u) {
             if (bytes_equal(p, command5_signature, sizeof(command5_signature))) {
-                record_hit(&command5, &command5_count, offset);
+                record_hit(&command5, offset);
             }
             if (bytes_equal(p, lower_can_signature, sizeof(lower_can_signature))) {
-                record_hit(&lower_can, &lower_can_count, offset);
+                record_hit(&lower_can, offset);
             }
         }
-        if ((read32(p) & 0xff00ffffu) == 0xff00ff00u &&
+        if ((word & 0xff00ffffu) == 0xff00ff00u &&
             p[2] != 0xffu && p[4] == 0xffu) {
-            record_hit(&class_route, &class_route_count, offset);
+            record_hit(&class_route, offset);
         }
         if ((offset & 3u) == 0u) {
-            uint32_t word = read32(p);
             if (word == 0x7a9u && read32(p + 8u) == word) {
-                record_hit(&diagnostic_tx, &diagnostic_tx_count, offset);
+                record_hit(&diagnostic_tx, offset);
             }
             if (word == 0u && read32(p + 4) == 0xfebdfffcu &&
                 read32(p + 8) == 0xfebf7c00u && read32(p + 12) == 0xfebffbfcu &&
@@ -341,16 +319,16 @@ int resolve_request_signer_image(const uint8_t *image, uint32_t *output)
         }
     }
 
-    if (boot_count != 1u || coordinator_count != 1u || producer_count != 1u) {
+    if (boot >= CODEFLASH_SIZE || coordinator >= CODEFLASH_SIZE || producer >= CODEFLASH_SIZE) {
         return -1;
     }
-    if (freshness_count != 1u || command5_count != 1u || lower_can_count != 1u) {
+    if (freshness >= CODEFLASH_SIZE || command5 >= CODEFLASH_SIZE || lower_can >= CODEFLASH_SIZE) {
         return -2;
     }
     if (mpu_count != 1u || transit_pointer_count != 0u) {
         return -3;
     }
-    if (diagnostic_tx_count != 1u || class_route_count != 1u) {
+    if (diagnostic_tx >= CODEFLASH_SIZE || class_route >= CODEFLASH_SIZE) {
         return -11;
     }
 
@@ -378,29 +356,26 @@ int resolve_request_signer_image(const uint8_t *image, uint32_t *output)
         uint32_t auth_trip;
         uint32_t command5_globals;
         uint32_t *config = output + BOOT_CALL_COUNT;
-        unsigned startup_calls = 0;
         unsigned shadow_calls = 0;
 
-        q = coordinator + 4u;
-        while (startup_calls < 66u && is_jarl22(image, q)) {
+        /* Candidate discovery already validated this complete call span. */
+        for (q = coordinator + 4u; q < coordinator_after; q += 4u) {
             uint32_t target = jarl22_target(image, q);
             if (target >= CODEFLASH_SIZE) {
                 return -6;
             }
-            if (startup_calls == 0u) {
+            if (q == coordinator + 4u) {
                 app_context = target;
             } else if (target <= CODEFLASH_SIZE - sizeof(shadow_copy_signature) &&
                        bytes_equal(image + target, shadow_copy_signature,
                                    sizeof(shadow_copy_signature))) {
                 ++shadow_calls;
             }
-            ++startup_calls;
-            q += 4u;
         }
         config[CONFIG_WORD_STARTUP_AFTER] = q;
         startup_final = jarl22_target(image, q + 2u);
         foreground = jarl22_target(image, q + 10u);
-        if (startup_calls < 9u || startup_calls > 65u || shadow_calls != 1u ||
+        if (shadow_calls != 1u ||
             startup_final >= CODEFLASH_SIZE ||
             foreground > CODEFLASH_SIZE - FOREGROUND_SIZE ||
             (foreground_flag_displacement =
@@ -416,11 +391,11 @@ int resolve_request_signer_image(const uint8_t *image, uint32_t *output)
         config[CONFIG_WORD_STARTUP_FINAL] = startup_final;
         config[CONFIG_WORD_TIMING_FLAG] =
             ((uint32_t)read16(image + foreground + 0x10u) << 16) +
-            (uint32_t)(signed16(image + foreground + 0x14u) & -2);
+            (uint32_t)((int16_t)read16(image + foreground + 0x14u) & -2);
         config[CONFIG_WORD_TICK_COUNTER] =
-            gp + (uint32_t)signed16(image + foreground + 0x52u);
-        capacity_table = tp + (uint32_t)(signed16(image + producer + 44u) & -2);
-        ring_producer = gp + (uint32_t)(signed16(image + producer + 54u) & -2);
+            gp + (uint32_t)(int16_t)read16(image + foreground + 0x52u);
+        capacity_table = tp + (uint32_t)((int16_t)read16(image + producer + 44u) & -2);
+        ring_producer = gp + (uint32_t)((int16_t)read16(image + producer + 54u) & -2);
         if (capacity_table < 0x100u || capacity_table + 2u > CODEFLASH_SIZE ||
             ring_producer < 0xfebe0000u || ring_producer >= 0xfec00000u) {
             return -8;
@@ -447,7 +422,7 @@ int resolve_request_signer_image(const uint8_t *image, uint32_t *output)
         if (!recover_auth_trip(image, freshness, gp, &auth_trip)) {
             return -9;
         }
-        command5_globals = gp + (uint32_t)signed16(image + command5 + 16u) - 0x1cu;
+        command5_globals = gp + (uint32_t)(int16_t)read16(image + command5 + 16u) - 0x1cu;
         if (command5_globals < 0xfebe0000u || command5_globals >= 0xfec00000u) {
             return -9;
         }

@@ -201,6 +201,15 @@ check(
 )
 
 
+resolver_unit = BUILD_ROOT / "resolver-unit"
+subprocess.run([
+    "cc", "-Os", "-Wall", "-Wextra", "-Werror",
+    str(ROOT / "tests/fixtures/rh850/tss3_request_signer_resolver_unit.c"),
+    "-o", str(resolver_unit),
+], cwd=ROOT, check=True, text=True, timeout=30)
+subprocess.run([str(resolver_unit)], check=True, timeout=30)
+print("PASS resolver readers, unique-candidate state, and fixed/variable pattern boundaries")
+
 resolver_runner = BUILD_ROOT / "resolver-host"
 subprocess.run([
     "cc", "-O2", "-Wall", "-Wextra", "-Werror",
