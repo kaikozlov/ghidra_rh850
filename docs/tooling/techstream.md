@@ -2481,16 +2481,23 @@ external to that commit. Its `0x102D` fixture is 16 bytes
 (`30107f00ff007d00ef24c00010106040`): byte6 advertises Fail Status/Fail Control
 and byte7 clears both values.
 
-The current `tsk/ram_runtime/tss3_post_install_recovery.py::decode_brake_did`
-requires at least ten `0x102F` value bytes and reads byte9 without the support
-check. Its error prints the value after validating/removing `62 10 2F`.
-`isotp_request` assembles through the advertised ISO-TP length; loss of a
-consecutive frame times out. Thus the reported eight bytes refer to the DID
-value, while the original first-frame length remains the direct wire check.
-The helper's length-only check also interprets the retained Camry's unsupported
-EPS zero as Normal. Consumers need per-field length/support handling; omitted
-or unsupported fields have no health value. This investigation leaves runtime
-bringup policy unchanged.
+`tsk/ram_runtime/tss3_post_install_recovery.py::decode_brake_did` validates
+and removes `62 <DID>`, preserves the complete value, and applies this mode-1
+rule to each selected monitor. Supported values are booleans; omitted or
+unadvertised fields are `None`. A positive DID remains `available=True` even
+when an individual monitor is unsupported. Empty values, mismatched DIDs and
+negative responses remain read errors. `isotp_request` assembles through the
+advertised ISO-TP length; loss of a consecutive frame times out.
+
+The `tss3-control-domain-state-v3` report carries structured `peer_health`
+with `state`, `faults`, and `unavailable`. Any supported asserted fault takes
+precedence; all selected monitors must be supported and clear for `healthy`;
+otherwise the assessment is `inconclusive`. The compatibility boolean
+`peer_health_observed` is true only for `healthy`. The UI reads this structured
+assessment and distinguishes an observed fault from incomplete verification.
+Both retained `0x102F` samples leave the selected EPS monitor unavailable.
+Offline regressions cover both payloads, support/value handling, and fault
+precedence.
 
 Current role `0x41` is now closed as the complementary metadata-only family. Category 405 `EMPS_P5` binds `GetDatMonSignalInfoP5_DT.dll` (28,176 B; SHA-256 `3bb9b8f2…20587`). Its current materialized helper resolves monitor physical-data key `+0x3A` through class `0x20D` / ECU type-13 `CDbPhyDataTable`, then copies physical `+0/+4/+8` to `CCmdDatMonSignalInfo` Mul/Div/Offset, physical `+0x14/+0x15` to signedness/decimal count, and computes bit length from current 80-byte monitor bit-end `+0x3E` minus bit-start `+0x3C` plus one. Physical `+0x0E` resolves class `0x20F` / type-15 unit metadata and default-unit text; monitor `+0x42` resolves class `0x20E` / type-14 pattern-display value/string records into the output display-info list. No frame/send primitive is imported by this plugin: it constructs the typed `CCmdDatMonSignalInfo` metadata consumed by Data Monitor. The canonical DDB semantic layer now performs that same consumer-proven join for interactive `tools/gts did` results while leaving its default API unchanged for deterministic extractors. Current EMPS witnesses are `0x1037 Steering Angle` → physical key 3, `15/1`, offset 0, signed, one decimal, `deg`, raw `-2048..2047`, graph integer `-30720..30705`; and `0x106A Cooperation Control State` → type-14 dictionary `0=Cooperation Control`, `1=Other than Cooperation Control`.
 

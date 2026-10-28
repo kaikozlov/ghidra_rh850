@@ -47,7 +47,13 @@ FRC_DIDS = (0x1B09, *DRCC_DIDS)
 BRAKE_TX = 0x7B0
 BRAKE_BUS = 0
 BLANK_BOOT_F181 = bytes.fromhex("02" + "21" * 32)
-BRAKE_DIDS = (0x102D, 0x102F)
+# GTS+ ABS_P5 type61 mode 1: each value bit has a support bit in the
+# preceding byte. Type62 supplies these MSB0 positions (monitor keys 81/82/500).
+BRAKE_MONITORS = {
+    0x102D: {"fail_status": 57, "fail_control": 58},
+    0x102F: {"eps_communication_open": 74},
+}
+BRAKE_DIDS = tuple(BRAKE_MONITORS)
 FLOW_CONTROL = bytes.fromhex("3000000000000000")
 # ECUReset returns application identity before the rest of the peer domain has
 # necessarily reinitialized. Keep reset handling quiet, then give the network a
@@ -232,18 +238,16 @@ def decode_brake_did(did: int, response: bytes) -> dict[str, Any]:
     if len(data) < 2 or int.from_bytes(data[:2], "big") != did:
         raise RecoveryError(f"Brake DID 0x{did:04X} response mismatch: {response.hex()}")
     value = data[2:]
-    minimum_length = {0x102D: 8, 0x102F: 10}.get(did)
-    if minimum_length is None or len(value) < minimum_length:
-        raise RecoveryError(f"Brake DID 0x{did:04X} has unsupported/truncated data: {value.hex()}")
+    if did not in BRAKE_MONITORS:
+        raise RecoveryError(f"unsupported Brake DID 0x{did:04X}")
+    if not value:
+        raise RecoveryError(f"Brake DID 0x{did:04X} has no value data")
     row: dict[str, Any] = {"did": f"0x{did:04X}", "raw": value.hex()}
-    if did == 0x102D:
-        # GTS+ ABS_P5 uses MSB0 numbering: bit57 => byte7 mask 0x40;
-        # bit58 => byte7 mask 0x20.
-        row["fail_status"] = bool(value[7] & 0x40)
-        row["fail_control"] = bool(value[7] & 0x20)
-    elif did == 0x102F:
-        # GTS+ ABS_P5 bit74 is EPS/Steering Control Actuator ECU Communication Open.
-        row["eps_communication_open"] = bool(value[9] & 0x20)
+    for name, bit in BRAKE_MONITORS[did].items():
+        byte_index, bit_index = divmod(bit, 8)
+        mask = 0x80 >> bit_index
+        supported = byte_index < len(value) and bool(value[byte_index - 1] & mask)
+        row[name] = bool(value[byte_index] & mask) if supported else None
     return row
 
 
@@ -280,20 +284,29 @@ def drcc_permission_observed(oracles: dict[str, Any]) -> bool:
             and not oracles["0x1906"]["acc_not_available_icon"])
 
 
-def peer_health_observed(state: dict[str, Any]) -> bool:
-    """Return true when peer fault/communication monitors are healthy.
+def classify_peer_health(state: dict[str, Any]) -> dict[str, Any]:
+    """Classify the selected Brake/EPS monitors; unsupported values remain unknown.
 
-    FRC 0x1905 (Cruise Control Permission Flag) and 0x1906 Main Switch describe
-    operational state. They can legitimately be false just after READY and later
-    become true without an ECU reset. Keep those fields as telemetry and gate
-    startup bringup only on the Brake/EPS fault monitors.
+    FRC cruise permission and MAIN describe operating state and do not enter
+    this assessment. A supported fault takes precedence over missing monitors.
     """
-    brake = state["brake"]
-    fail = brake["0x102D"]
-    comm = brake["0x102F"]
-    return (bool(fail.get("available")) and bool(comm.get("available"))
-            and not fail["fail_status"] and not fail["fail_control"]
-            and not comm["eps_communication_open"])
+    faults = []
+    unavailable = []
+    brake = state.get("brake", {})
+    for did, monitors in BRAKE_MONITORS.items():
+        key = f"0x{did:04X}"
+        row = brake.get(key, {})
+        for name in monitors:
+            value = row.get(name) if row.get("available") is True else None
+            if value is True:
+                faults.append(f"{key}.{name}")
+            elif value is not False:
+                unavailable.append(f"{key}.{name}")
+    return {
+        "state": "fault" if faults else "inconclusive" if unavailable else "healthy",
+        "faults": faults,
+        "unavailable": unavailable,
+    }
 
 
 def _save_result(output: Path | None, result: dict[str, Any]) -> None:
@@ -614,7 +627,7 @@ def control_domain_state(
             raise RecoveryError(f"expected exactly one Panda, found {len(serials)}: {serials}")
         panda = Panda(serials[0])
     result: dict[str, Any] = {
-        "schema": "tss3-control-domain-state-v2",
+        "schema": "tss3-control-domain-state-v3",
         "target": target.name,
         "eps_identity": {
             "verification": "bound_by_install_pre_helper_f181",
@@ -630,8 +643,14 @@ def control_domain_state(
         result["brake_identity"] = read_f181(panda, BRAKE_TX, BRAKE_BUS, "Brake/EPB", timeout=0.8)
         state = read_fault_state(panda, {FRC_TX: FRC_BUS, BRAKE_TX: BRAKE_BUS})
         result["fault_state"] = state
-        result["peer_health_observed"] = peer_health_observed(state)
-        result["verdict"] = "control_domains_healthy" if result["peer_health_observed"] else "control_domain_fault_observed"
+        health = classify_peer_health(state)
+        result["peer_health"] = health
+        result["peer_health_observed"] = health["state"] == "healthy"
+        result["verdict"] = {
+            "healthy": "control_domains_healthy",
+            "fault": "control_domain_fault_observed",
+            "inconclusive": "control_domain_state_inconclusive",
+        }[health["state"]]
     finally:
         if owns_panda:
             try:

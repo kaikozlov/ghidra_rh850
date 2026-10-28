@@ -121,12 +121,12 @@ class TestRecovery(unittest.TestCase):
 
         # Exact live 2026-09-20 startup behavior: cruise permission and MAIN
         # were initially false, then became true later with no ECU reset.
-        self.assertTrue(recovery.peer_health_observed(state(allowed=False, main=False)))
-        self.assertTrue(recovery.peer_health_observed(state(allowed=True, main=True)))
+        self.assertEqual(recovery.classify_peer_health(state(allowed=False, main=False))["state"], "healthy")
+        self.assertEqual(recovery.classify_peer_health(state(allowed=True, main=True))["state"], "healthy")
 
-        self.assertFalse(recovery.peer_health_observed(state(allowed=False, main=False, fail_status=True)))
-        self.assertFalse(recovery.peer_health_observed(state(allowed=False, main=False, fail_control=True)))
-        self.assertFalse(recovery.peer_health_observed(state(allowed=False, main=False, comm_open=True)))
+        self.assertEqual(recovery.classify_peer_health(state(allowed=False, main=False, fail_status=True))["state"], "fault")
+        self.assertEqual(recovery.classify_peer_health(state(allowed=False, main=False, fail_control=True))["state"], "fault")
+        self.assertEqual(recovery.classify_peer_health(state(allowed=False, main=False, comm_open=True))["state"], "fault")
 
     def test_startup_control_domain_report_has_no_drcc_permission_verdict(self):
         state = {
@@ -165,20 +165,42 @@ class TestRecovery(unittest.TestCase):
                 with self.assertRaises(recovery.RecoveryError):
                     recovery.decode_frc_did(did, b"\x62" + did.to_bytes(2, "big") + bytes(size))
         for did, required in ((0x102D, 8), (0x102F, 10)):
-            for size in range(required):
-                with self.assertRaises(recovery.RecoveryError):
-                    recovery.decode_brake_did(did, b"\x62" + did.to_bytes(2, "big") + bytes(size))
+            prefix = b"\x62" + did.to_bytes(2, "big")
+            with self.assertRaises(recovery.RecoveryError):
+                recovery.decode_brake_did(did, prefix)
+            for size in range(1, required):
+                decoded = recovery.decode_brake_did(did, prefix + bytes(size))
+                for name in recovery.BRAKE_MONITORS[did]:
+                    self.assertIsNone(decoded[name])
         with self.assertRaises(KeyError):
             recovery.drcc_permission_observed({"0x1903": {"control_mode": 1}, "0x1905": {"cruise_control_allowed": True}, "0x1906": {}})
 
     def test_gts_fault_state_decoders(self):
         frc = recovery.decode_frc_did(0x1B09, bytes.fromhex("621b09010203040506"))
         self.assertEqual(frc["fail_safe_factors"], {"b1a": 1, "b1b": 2, "b2": 3, "c1": 4, "c2": 5, "d1": 6})
-        brake_102d = recovery.decode_brake_did(0x102D, bytes.fromhex("62102d0000000000000060"))
+        brake_102d = recovery.decode_brake_did(0x102D, bytes.fromhex("62102d0000000000006060"))
         self.assertTrue(brake_102d["fail_status"])
         self.assertTrue(brake_102d["fail_control"])
-        brake_102f = recovery.decode_brake_did(0x102F, bytes.fromhex("62102f00000000000000000020"))
+        brake_102f = recovery.decode_brake_did(0x102F, bytes.fromhex("62102f00000000000000002020"))
         self.assertTrue(brake_102f["eps_communication_open"])
+
+    def test_retained_brake_payloads_and_fault_precedence(self):
+        fail = recovery.decode_brake_did(
+            0x102D, bytes.fromhex("62102d30107f00ff007d00ef24c00010106040"),
+        )
+        self.assertIs(fail["fail_status"], False)
+        self.assertIs(fail["fail_control"], False)
+        for raw in ("0700000000000000", "f700fd007c00a9000000"):
+            comm = recovery.decode_brake_did(0x102F, bytes.fromhex("62102f" + raw))
+            self.assertIsNone(comm["eps_communication_open"])
+            for fault, expected in ((False, "inconclusive"), (True, "fault")):
+                state = {"brake": {
+                    "0x102D": {**fail, "available": True, "fail_status": fault},
+                    "0x102F": {**comm, "available": True},
+                }}
+                health = recovery.classify_peer_health(state)
+                self.assertEqual(health["state"], expected)
+                self.assertEqual(health["unavailable"], ["0x102F.eps_communication_open"])
 
     def test_pending_and_unrelated_reply_do_not_finish_request(self):
         panda = FakePanda()

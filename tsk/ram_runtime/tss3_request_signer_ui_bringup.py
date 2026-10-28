@@ -135,8 +135,11 @@ def run(payload: Path, meta: Path, output_dir: Path, *,
     state = control_domain_state(
         output_dir / "control-domain-state.json", recovery_target(meta), panda=panda,
     )
-    if state.get("peer_health_observed") is not True:
-        raise UiBringupError(f"peer fault state unhealthy: {state.get('verdict')}")
+    health = state["peer_health"]
+    if health["state"] == "fault":
+        raise UiBringupError(f"peer fault observed: {', '.join(health['faults'])}")
+    if health["state"] != "healthy":
+        raise UiBringupError(f"peer verification incomplete; unavailable monitors: {', '.join(health['unavailable'])}")
     signer_test = self_test(meta, panda=panda)
     write_json(output_dir / "request-signer-self-test.json", signer_test)
     if signer_test.get("passed") is not True:
