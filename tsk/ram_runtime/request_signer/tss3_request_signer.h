@@ -79,6 +79,11 @@ typedef struct {
 /* Serialized in CONFIG_FIELDS order by build_tss3_request_signer.py. The
  * builder generates offset assertions against that owner before compilation. */
 typedef struct {
+    uint16_t ring_words;
+    int16_t foreground_flag_displacement;
+} SignerRuntimeGeometry;
+
+typedef struct {
     uintptr_t app_context;
     uintptr_t startup_first;
     uintptr_t startup_after;
@@ -106,9 +111,12 @@ typedef struct {
     uint32_t (*lower_can_write)(uint32_t, SignerPdu *);
     volatile SignerCommandGlobals *command5_globals;
     uint32_t response_handle;
-    uint32_t ring_words;
+    SignerRuntimeGeometry runtime_geometry;
 } SignerConfig;
 
+_Static_assert(sizeof(SignerRuntimeGeometry) == 4, "runtime geometry ABI");
+_Static_assert(offsetof(SignerRuntimeGeometry, foreground_flag_displacement) == 2,
+               "foreground flag geometry ABI");
 _Static_assert(sizeof(SignerState) == 0x24, "signer state ABI");
 _Static_assert(offsetof(SignerState, cursor) == 32, "private cursor ABI");
 _Static_assert(offsetof(SignerState, auth_reset) == 24, "freshness state ABI");

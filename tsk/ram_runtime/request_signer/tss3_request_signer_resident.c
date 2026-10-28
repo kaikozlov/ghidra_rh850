@@ -20,19 +20,13 @@
 #define STATE_MAGIC 0x4C433841u /* little-endian "A8CL" */
 #define STATE_VERSION 3u
 
-/* Stock foreground tick flag: bit 4 of the OS byte at 0xFFFFB111. */
-#define TICK_FLAG_ADDRESS 0xFFFFB111u
+/* Stock foreground tick flag bit; its OS address is firmware-resolved. */
 #define TICK_FLAG_BIT 4
-/* The atomic clear keeps the original r0-relative instruction encoding. */
-#define TICK_FLAG_R0_DISPLACEMENT -0x4eef
 
 /* Shared TAUJ0 channel-3 interval counter: pending private-ring records are
  * serviced only while more than 3 ms of the stock interval remains. */
 #define TAUJ0CNT3_ADDRESS 0xFFE5001Cu
 #define TAUJ0_IDLE_MINIMUM_COUNTS 240000u
-
-#define RESIDENT_STRINGIFY_(x) #x
-#define RESIDENT_STRINGIFY(x) RESIDENT_STRINGIFY_(x)
 
 /* Only the GlobalRAM helper is far; other calls keep their ordinary encoding. */
 extern void helper_entry(void) __attribute__((long_call));
@@ -40,8 +34,6 @@ extern void helper_entry(void) __attribute__((long_call));
 __attribute__((noreturn, noinline)) void resident_forever(void);
 
 
-_Static_assert((uint32_t)(int32_t)TICK_FLAG_R0_DISPLACEMENT == TICK_FLAG_ADDRESS,
-               "tick flag r0 displacement drift");
 _Static_assert(sizeof(SignerState) % sizeof(uint32_t) == 0,
                "state clear walks whole words");
 
@@ -93,7 +85,8 @@ __attribute__((noreturn, noinline))
 void resident_forever(void)
 {
     const SignerConfig *config = SIGNER_CONFIG;
-    volatile uint8_t *tick_flag = (volatile uint8_t *)TICK_FLAG_ADDRESS;
+    volatile uint8_t *tick_flag = (volatile uint8_t *)(uintptr_t)(uint32_t)(int32_t)
+        config->runtime_geometry.foreground_flag_displacement;
     const volatile uint32_t *idle_timer = (const volatile uint32_t *)TAUJ0CNT3_ADDRESS;
     const uint8_t tick_mask = (uint8_t)(1u << TICK_FLAG_BIT);
 
@@ -121,12 +114,8 @@ tick_wait:
             continue;
         }
 
-        /* Atomic tick acknowledge, byte-identical instruction to the assembly
-         * resident: clr1 bit4, -0x4eef[r0]. */
-        __asm__ volatile(
-            "clr1 " RESIDENT_STRINGIFY(TICK_FLAG_BIT) ", "
-            RESIDENT_STRINGIFY(TICK_FLAG_R0_DISPLACEMENT) "[r0]"
-            ::: "cc", "memory");
+        /* Atomic tick acknowledge at the firmware-resolved OS byte. */
+        __asm__ volatile("clr1 4, 0[%0]" :: "r"(tick_flag) : "cc", "memory");
 
         const int paired_timing = *config->timing_flag == 0x5A;
         if (paired_timing) {

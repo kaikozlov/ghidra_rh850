@@ -31,7 +31,7 @@ REQUEST_RECEIVE_FIFO = 5
 REQUEST_INTERRUPT_CHANNEL = 187
 REQUEST_INTBP = 0x00020200
 FOREGROUND_CALL_OFFSETS = (0x1E, 0x26, 0x2A, 0x2E, 0x32, 0x36, 0x3A, 0x3E, 0x42, 0x4C)
-FOREGROUND_SHAPE_SHA256 = "f9b05396aa3b042a040194bf766b62a2c5d9bd6637a41d2261c51ca61c465ed3"
+FOREGROUND_SHAPE_SHA256 = "1b1501024e4f09a124573fd1234aa507758543e6740fce18ce1ee603cd99e586"
 FRESHNESS_ENCODER_SIGNATURE = bytes.fromhex("06f06b08889f0100f309eb35")
 COMMAND5_SYNC_SIGNATURE = bytes.fromhex("860761000990c600070808e892004407")
 LOWER_CAN_WRITE_SIGNATURE = bytes.fromhex("8607e1f006c8d90007e0250f")
@@ -209,7 +209,6 @@ def resolve_idle_fast_contract(image: bytes) -> dict[str, Any]:
         "steady_counts": terms[6],
         "steady_period_us": terms[6] * 1_000_000 // TAUJ0_CH3_COUNT_HZ,
         "direction": "down",
-        "foreground_flag": "FFFFB111 bit4",
         "minimum_remaining_counts": IDLE_FAST_MIN_COUNTS,
         "minimum_remaining_us": IDLE_FAST_MIN_COUNTS * 1_000_000 // TAUJ0_CH3_COUNT_HZ,
         "timer_table": timer_table,
@@ -282,6 +281,8 @@ def resolve_execution_contract(image: bytes) -> dict[str, Any]:
     for offset in FOREGROUND_CALL_OFFSETS:
         _need(is_jarl22(image, foreground + offset), f"foreground call missing at +0x{offset:X}")
         normalized[offset:offset + 4] = b"\0" * 4
+    normalized[0x06:0x08] = b"\0" * 2
+    normalized[0x0C:0x0E] = b"\0" * 2
     normalized[0x10:0x12] = b"\0" * 2
     normalized[0x14:0x16] = b"\0" * 2
     normalized[0x52:0x54] = b"\0" * 2
@@ -290,6 +291,13 @@ def resolve_execution_contract(image: bytes) -> dict[str, Any]:
         "foreground machine shape is unsupported",
     )
 
+    _need(
+        _u16(loop, 0x04) == 0xE7C0
+        and _u16(loop, 0x0A) == 0xA7C0
+        and _s16(loop, 0x06) == _s16(loop, 0x0C),
+        "foreground tick test/clear shape is unsupported",
+    )
+    foreground_flag = _s16(loop, 0x06) & 0xFFFFFFFF
     gp = recover_application_gp(image, calls[0])
     tp = recover_application_tp(image, calls[0])
     timing_high = _u16(loop, 0x10) << 16
@@ -297,6 +305,12 @@ def resolve_execution_contract(image: bytes) -> dict[str, Any]:
     timing_flag = (timing_high + timing_disp) & 0xFFFFFFFF
     tick_counter = (gp + _s16(loop, 0x52)) & 0xFFFFFFFF
     foreground_calls = [jarl22_target(image, foreground + offset) for offset in FOREGROUND_CALL_OFFSETS]
+    idle_fast = resolve_idle_fast_contract(image)
+    idle_fast.update({
+        "foreground_flag": f"{foreground_flag:08X} bit4",
+        "foreground_flag_address": foreground_flag,
+        "foreground_flag_bit": 4,
+    })
 
     return {
         "coordinator": coordinator,
@@ -310,12 +324,13 @@ def resolve_execution_contract(image: bytes) -> dict[str, Any]:
         "foreground": foreground,
         "foreground_size": len(loop),
         "foreground_shape_sha256": FOREGROUND_SHAPE_SHA256,
+        "foreground_flag": foreground_flag,
         "timing_flag": timing_flag,
         "tick_counter": tick_counter,
         "foreground_calls": foreground_calls,
         "gp": gp,
         "tp": tp,
-        "idle_fast": resolve_idle_fast_contract(image),
+        "idle_fast": idle_fast,
     }
 
 
@@ -830,7 +845,10 @@ def _assemble_contract(image: bytes, values: dict[str, Any]) -> dict[str, Any]:
         "lower_can_write": signer["lower_can_write"],
         "command5_globals": signer["command5_globals"],
         "response_handle": signer["response_handle"],
-        "ring_words": request["ring_words"],
+        "runtime_geometry": (
+            request["ring_words"]
+            | ((execution["foreground_flag"] & 0xFFFF) << 16)
+        ),
     }
     return {
         "schema": "tss3-request-signer-contract-v2",

@@ -72,7 +72,7 @@ def default_output_dir(target: str) -> Path:
 
 STAGING_BASE = 0xFEBF0000
 STAGING_LIMIT = 0xFD0
-RESIDENT_STAGING_OFFSET = 0xB50
+RESIDENT_STAGING_OFFSET = 0xB6C
 RESOLVER_OUTPUT_BASE = 0xFEBFFB78
 
 # The resolver writes five boot-transition targets followed immediately by the
@@ -106,7 +106,7 @@ CONFIG_FIELDS = (
     "lower_can_write",
     "command5_globals",
     "response_handle",
-    "ring_words",
+    "runtime_geometry",
 )
 CONFIG_OFFSETS = {name: index * 4 for index, name in enumerate(CONFIG_FIELDS)}
 CONFIG_SIZE = len(CONFIG_FIELDS) * 4

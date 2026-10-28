@@ -204,6 +204,7 @@ def simulate_candidate(
     config_dump = runtime_output_dir / "observed-config.bin"
 
     config = contract["runtime_config"]
+    foreground_flag = int(contract["execution"]["foreground_flag"])
     # The resident is nonreturning and has no stack frame. Both scheduler
     # paths must reach the helper with the context-installed SP unchanged.
     resident_sp_expected = f"SP=0x{SIM_INITIAL_SP:x}"
@@ -218,7 +219,7 @@ def simulate_candidate(
     fallback_gdb = (
         f"break *0x{resident_handoff:08X}",
         "run",
-        "set {unsigned char}0xFFFFB111 = 0x10",
+        f"set {{unsigned char}}0x{foreground_flag:08X} = 0x10",
         f"set {{unsigned char}}0x{tick:08X} = 0",
         f"set {{unsigned short}}0x{producer:08X} = 0",
         f"set {{unsigned int}}0x{CONTEXT_MARKER:08X} = 0",
@@ -296,14 +297,14 @@ def simulate_candidate(
     idle_gdb = (
         f"break *0x{resident_handoff:08X}",
         "run",
-        "set {unsigned char}0xFFFFB111 = 0x10",
+        f"set {{unsigned char}}0x{foreground_flag:08X} = 0x10",
         f"set {{unsigned char}}0x{tick:08X} = 0",
         f"set {{unsigned short}}0x{producer:08X} = 0",
         f"set {{unsigned int}}0x{CONTEXT_MARKER:08X} = 0",
         f"set {{unsigned int}}0x{STARTUP_MARKER:08X} = 0",
         f"break *0x{tick_wait:08X}",
         "continue",
-        "set {unsigned char}0xFFFFB111 = 0",
+        f"set {{unsigned char}}0x{foreground_flag:08X} = 0",
         f"set {{unsigned short}}0x{producer:08X} = 5",
         "set {unsigned int}0xFFE5001C = 300000",
         f"break *0x{helper_base:08X}",

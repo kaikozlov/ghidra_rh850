@@ -45,24 +45,33 @@ enum config_word {
     CONFIG_WORD_LOWER_CAN_WRITE,
     CONFIG_WORD_COMMAND5_GLOBALS,
     CONFIG_WORD_RESPONSE_HANDLE,
-    CONFIG_WORD_RING_WORDS,
+    CONFIG_WORD_RUNTIME_GEOMETRY,
     CONFIG_WORD_COUNT,
 };
 _Static_assert(CONFIG_WORD_COUNT == 28, "signer config word count");
 
-static const uint8_t foreground_template[92] = {
-    0x80, 0x07, 0x61, 0x00, 0xc0, 0xe7, 0x11, 0xb1,
-    0xe2, 0xfd, 0xc0, 0xa7, 0x11, 0xb1, 0x40, 0x0e,
-    0x00, 0x00, 0x81, 0x0f, 0x00, 0x00, 0x00, 0xea,
-    0x01, 0x06, 0xa6, 0xff, 0xda, 0x05, 0x00, 0x00,
-    0x00, 0x00, 0x20, 0xee, 0x5a, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1d, 0x06,
-    0xa6, 0xff, 0xba, 0x05, 0x00, 0x00, 0x00, 0x00,
-    0x24, 0xf6, 0x00, 0x00, 0x60, 0x08, 0x41, 0x0a,
-    0x80, 0x0b, 0xd5, 0xd5,
+#define FOREGROUND_SIZE 92u
+
+typedef struct {
+    uint8_t offset;
+    uint8_t size;
+} fixed_run;
+
+/* Fixed bytes around the firmware-resolved addresses and ten direct calls. */
+static const fixed_run foreground_fixed_runs[] = {
+    {0x00, 6}, {0x08, 4}, {0x0e, 2}, {0x12, 2}, {0x16, 8},
+    {0x22, 4}, {0x46, 6}, {0x50, 2}, {0x54, 8},
+};
+static const uint8_t foreground_fixed_bytes[] = {
+    0x80, 0x07, 0x61, 0x00, 0xc0, 0xe7,
+    0xe2, 0xfd, 0xc0, 0xa7,
+    0x40, 0x0e,
+    0x81, 0x0f,
+    0x00, 0xea, 0x01, 0x06, 0xa6, 0xff, 0xda, 0x05,
+    0x20, 0xee, 0x5a, 0x00,
+    0x1d, 0x06, 0xa6, 0xff, 0xba, 0x05,
+    0x24, 0xf6,
+    0x60, 0x08, 0x41, 0x0a, 0x80, 0x0b, 0xd5, 0xd5,
 };
 static const uint8_t foreground_call_offsets[10] = {
     0x1e, 0x26, 0x2a, 0x2e, 0x32, 0x36, 0x3a, 0x3e, 0x42, 0x4c,
@@ -161,24 +170,33 @@ static int rx_producer_matches(const uint8_t *candidate)
     return 1;
 }
 
-static int foreground_matches(const uint8_t *image, uint32_t address)
+static int32_t resolve_foreground(
+    const uint8_t *image, uint32_t address)
 {
+    int16_t foreground_flag_displacement;
+    const uint8_t *expected = foreground_fixed_bytes;
     unsigned index;
-    if (address + sizeof(foreground_template) > CODEFLASH_SIZE) {
-        return 0;
-    }
-    for (index = 0; index < sizeof(foreground_template); ++index) {
-        if (foreground_template[index] != 0u &&
-            image[address + index] != foreground_template[index]) {
-            return 0;
+    for (index = 0; index < ARRAY_SIZE(foreground_fixed_runs); ++index) {
+        const fixed_run *run = &foreground_fixed_runs[index];
+        unsigned byte;
+        for (byte = 0; byte < run->size; ++byte) {
+            if (image[address + run->offset + byte] != *expected++) {
+                return 0;
+            }
         }
+    }
+    foreground_flag_displacement =
+        *(const int16_t *)(const void *)(image + address + 6u);
+    if (foreground_flag_displacement !=
+        *(const int16_t *)(const void *)(image + address + 12u)) {
+        return 0;
     }
     for (index = 0; index < ARRAY_SIZE(foreground_call_offsets); ++index) {
         if (!is_jarl22(image, address + foreground_call_offsets[index])) {
             return 0;
         }
     }
-    return 1;
+    return foreground_flag_displacement;
 }
 
 static int recover_auth_trip(
@@ -348,6 +366,7 @@ int resolve_request_signer_image(const uint8_t *image, uint32_t *output)
         uint32_t app_context = 0;
         uint32_t startup_final;
         uint32_t foreground;
+        int32_t foreground_flag_displacement;
         uint32_t gp;
         uint32_t tp;
         uint32_t capacity_table;
@@ -382,8 +401,10 @@ int resolve_request_signer_image(const uint8_t *image, uint32_t *output)
         startup_final = jarl22_target(image, q + 2u);
         foreground = jarl22_target(image, q + 10u);
         if (startup_calls < 9u || startup_calls > 65u || shadow_calls != 1u ||
-            startup_final >= CODEFLASH_SIZE || foreground >= CODEFLASH_SIZE ||
-            !foreground_matches(image, foreground)) {
+            startup_final >= CODEFLASH_SIZE ||
+            foreground > CODEFLASH_SIZE - FOREGROUND_SIZE ||
+            (foreground_flag_displacement =
+                 resolve_foreground(image, foreground)) == 0) {
             return -6;
         }
         if (!recover_context(image, app_context, &gp, &tp)) {
@@ -420,7 +441,8 @@ int resolve_request_signer_image(const uint8_t *image, uint32_t *output)
         }
         config[CONFIG_WORD_RING_BASE] = ring_base;
         config[CONFIG_WORD_RING_PRODUCER] = ring_producer;
-        config[CONFIG_WORD_RING_WORDS] = ring_words;
+        config[CONFIG_WORD_RUNTIME_GEOMETRY] =
+            ring_words | ((uint32_t)(uint16_t)foreground_flag_displacement << 16);
 
         if (!recover_auth_trip(image, freshness, gp, &auth_trip)) {
             return -9;

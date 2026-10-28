@@ -99,10 +99,11 @@ blanket promise that every reset clears every local-RAM view. Target builders
 must continue to prove the exact boot/reset path and startup write survival
 from firmware.
 
-What differs per firmware is a small signer/I/O ABI: RX ring and producer,
-authenticated trip/reset cells, freshness encoder, command-5 wrapper/globals,
-lower CAN writer and transmit handle. These values, the startup span, and the
-foreground calls are not a vehicle-named code table.
+What differs per firmware is a small signer/I/O ABI: RX ring geometry and
+producer, foreground tick-flag address, authenticated trip/reset cells,
+freshness encoder, command-5 wrapper/globals, lower CAN writer and transmit
+handle. These values, the startup span, and the foreground calls are not a
+vehicle-named code table.
 The host builder resolves and validates them from the supplied CodeFlash. The
 target-independent staging resolver independently scans the active 1-MiB
 CodeFlash, requires unique machine roles, and writes the 33-word boot/config

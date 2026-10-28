@@ -279,7 +279,8 @@ ring_resized_contract = resolve_request_signer_contract(bytes(ring_resized))
 ring_resized_status, ring_resized_words = run_resolver(ring_resized_path)
 check(
     "ring geometry follows the firmware capacity table instead of a compiled literal",
-    ring_resized_contract["runtime_config"]["ring_words"] == 0x224
+    ring_resized_contract["request"]["ring_words"] == 0x224
+    and ring_resized_contract["runtime_config"]["runtime_geometry"] & 0xFFFF == 0x224
     and ring_resized_contract["request"]["ring_base"]
         == camry_contract["request"]["ring_base"]
     and ring_resized_status == 0
@@ -297,6 +298,45 @@ except ContractError:
 else:
     raise AssertionError("dump resolver accepted an out-of-range ring capacity")
 print("PASS dump resolver rejects out-of-range ring capacity")
+
+foreground_shifted = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())
+foreground = camry_contract["execution"]["foreground"]
+foreground_displacement = struct.unpack_from("<h", foreground_shifted, foreground + 6)[0]
+shifted_displacement = foreground_displacement + 2
+struct.pack_into("<h", foreground_shifted, foreground + 6, shifted_displacement)
+struct.pack_into("<h", foreground_shifted, foreground + 12, shifted_displacement)
+foreground_shifted_path = BUILD_ROOT / "resolver-foreground-flag-shifted.bin"
+foreground_shifted_path.write_bytes(foreground_shifted)
+foreground_shifted_contract = resolve_request_signer_contract(bytes(foreground_shifted))
+foreground_shifted_status, foreground_shifted_words = run_resolver(foreground_shifted_path)
+expected_foreground_flag = shifted_displacement & 0xFFFFFFFF
+check(
+    "foreground flag address follows the stock test/clear displacement",
+    foreground_shifted_contract["execution"]["foreground_flag"] == expected_foreground_flag
+    and foreground_shifted_contract["execution"]["idle_fast"]["foreground_flag_address"]
+        == expected_foreground_flag
+    and foreground_shifted_contract["runtime_config"]["runtime_geometry"]
+        == (camry_contract["request"]["ring_words"] | ((shifted_displacement & 0xFFFF) << 16))
+    and foreground_shifted_status == 0
+    and foreground_shifted_words == [
+        *foreground_shifted_contract["boot_calls"],
+        *(foreground_shifted_contract["runtime_config"][name] for name in build.CONFIG_FIELDS),
+    ],
+)
+foreground_mismatched = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())
+struct.pack_into("<h", foreground_mismatched, foreground + 6, shifted_displacement)
+foreground_mismatched_path = BUILD_ROOT / "resolver-foreground-flag-mismatched.bin"
+foreground_mismatched_path.write_bytes(foreground_mismatched)
+try:
+    resolve_request_signer_contract(bytes(foreground_mismatched))
+except ContractError:
+    pass
+else:
+    raise AssertionError("dump resolver accepted mismatched foreground test/clear addresses")
+check(
+    "both resolvers reject mismatched foreground test/clear addresses",
+    run_resolver(foreground_mismatched_path)[0] == -6,
+)
 
 command5_damaged = bytearray(SPECS[CAMRY_TARGET]["image"].read_bytes())
 command5_address = SPECS[CAMRY_TARGET]["contract"]["signer_abi"]["command5_sync"]

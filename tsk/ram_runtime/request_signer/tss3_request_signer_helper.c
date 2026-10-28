@@ -34,10 +34,10 @@ void helper_entry(void) {
   volatile SignerState *state = config->state_base;
   SignerScratch *scratch = config->scratch_base;
 
-  for (;;) {
+reload_producer:
+  {
     uint16_t producer = *config->ring_producer;
     uint16_t cursor = state->cursor; /* private oracle tap */
-    unsigned reload = 0;
 
     while (producer != cursor) {
       const volatile uint32_t *record;
@@ -48,7 +48,7 @@ void helper_entry(void) {
       int committed = 0;
 
       /* Stock wrap sentinel needs two readable words at the current index. */
-      if (cursor + 2u > config->ring_words) return;
+      if (cursor + 2u > config->runtime_geometry.ring_words) return;
 
       record = config->ring_base + cursor;
       header = record[0];
@@ -68,8 +68,8 @@ void helper_entry(void) {
                           : (((received_length + 7) >> 3) << 1) + 3;
       }
       next = (uint16_t)(cursor + record_size);
-      if (next > config->ring_words) return; /* word bounds */
-      if (next == config->ring_words) next = 0; /* wrap the private tap */
+      if (next > config->runtime_geometry.ring_words) return; /* word bounds */
+      if (next == config->runtime_geometry.ring_words) next = 0; /* wrap the private tap */
 
       payload = (const volatile uint8_t *)record + 12;
       if (header == ORACLE_REQUEST_HEADER &&
@@ -124,6 +124,8 @@ void helper_entry(void) {
             config->command5_sync(0, scratch->mac, &scratch->mac_length, 1);
 
         state->wrapper_result = (uint8_t)wrapper_result;
+        /* Rematerializing this immutable pointer after the external call keeps
+           the pinned compiler's helper frame at 24 bytes instead of 28. */
         globals = config->command5_globals;
         completion = globals->completion;
         command_status = globals->status;
@@ -149,10 +151,8 @@ void helper_entry(void) {
         /* command5/lower-write may span new RX arrivals. Reload the producer
            and continue from the private cursor rather than relying on stale
            ring state. */
-        reload = 1;
-        break;
+        goto reload_producer;
       }
     }
-    if (!reload) return;
   }
 }
