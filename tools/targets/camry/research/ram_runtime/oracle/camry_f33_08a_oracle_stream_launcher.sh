@@ -8,8 +8,8 @@ PROBE="${F33_08A_ORACLE_PATH:-$KIT_ROOT/runtime/tools/targets/camry/research/ram
 PAYLOAD="${F33_08A_ORACLE_PAYLOAD_PATH:-$KIT_ROOT/ram_payloads/camry_f33_08a_oracle_stream_payload.bin}"
 INSTALL_RECORD="${F33_08A_ORACLE_INSTALL_RECORD:-/tmp/camry-f33-08a-oracle-install.json}"
 EXPECTED_PAYLOAD_SHA256="${F33_08A_ORACLE_PAYLOAD_SHA256:-e2be2710ffb30abc9863367833b28ea23bc577435fa2cdbb02e73f15cfa32f94}"
-PANDA_LEASE_LIB="${F33_PANDA_LEASE_LIB:-$KIT_ROOT/runtime/exploit/ram_runtime/tss3_panda_lease.sh}"
-RECOVERY_TOOL="${F33_RECOVERY_TOOL:-$KIT_ROOT/runtime/exploit/ram_runtime/tss3_post_install_recovery.py}"
+PANDA_LEASE_LIB="${F33_PANDA_LEASE_LIB:-$KIT_ROOT/runtime/tsk/ram_runtime/tss3_panda_lease.sh}"
+RECOVERY_TOOL="${F33_RECOVERY_TOOL:-$KIT_ROOT/runtime/tsk/ram_runtime/tss3_post_install_recovery.py}"
 RECOVERY_META="${F33_RECOVERY_META_PATH:-$KIT_ROOT/ram_payloads/tss3_recovery_target.json}"
 
 export PYTHONPATH="$OPENPILOT_ROOT:$KIT_ROOT/runtime"

@@ -10,7 +10,7 @@ import sys
 from tools import REPO_ROOT
 REPO = REPO_ROOT
 
-from exploit.command5.ram_proxy import (  # noqa: E402
+from tsk.command5.ram_proxy import (  # noqa: E402
     INPUT,
     MAILBOX,
     MAILBOX_MAGIC,
@@ -19,7 +19,7 @@ from exploit.command5.ram_proxy import (  # noqa: E402
     PRODUCTION_LENGTHS,
     build_request_plan,
 )
-from exploit.followups.xcp_shadow_write_plan import SHADOW_END, SHADOW_START  # noqa: E402
+from tsk.followups.xcp_shadow_write_plan import SHADOW_END, SHADOW_START  # noqa: E402
 
 CF = (REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin").read_bytes()
 MANIFEST = json.loads((REPO / "data/generated/ephemeral_runtime_target_manifest_4512000.json").read_text())

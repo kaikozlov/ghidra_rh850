@@ -13,7 +13,7 @@ from pathlib import Path
 from tools import REPO_ROOT
 REPO = REPO_ROOT
 
-from exploit.dumper.protocol import (
+from tsk.dumper.protocol import (
     CODEFLASH_BASE,
     CODEFLASH_SIZE,
     CTRL_DONE,
@@ -28,8 +28,8 @@ from exploit.dumper.protocol import (
     encode_data,
     startup_frames,
 )
-from exploit.dumper.reassemble import CodeFlashReassembler, DumpReassemblyError
-from exploit.dumper.dump_codeflash import DumpRunError, LiveDumpCollector, load_audited_shellcode
+from tsk.dumper.reassemble import CodeFlashReassembler, DumpReassemblyError
+from tsk.dumper.dump_codeflash import DumpRunError, LiveDumpCollector, load_audited_shellcode
 
 passed = failed = 0
 
@@ -165,7 +165,7 @@ with tempfile.TemporaryDirectory() as td:
 print("\n== physical source separation contract ==")
 dumper_sources = "\n".join(
     path.read_text(encoding="utf-8").lower()
-    for path in (REPO / "exploit" / "dumper").rglob("*")
+    for path in (REPO / "tsk" / "dumper").rglob("*")
     if path.is_file() and path.suffix in {".py", ".c", ".h"}
 )
 check("dumper workstream contains no FACI symbol", "faci_" not in dumper_sources)
@@ -173,15 +173,15 @@ check("dumper workstream does not import flash backend", "flash_backend" not in 
 check("dumper workstream contains no flash erase/program primitive", "flash_block_rmw" not in dumper_sources and "faci_program_page" not in dumper_sources)
 
 print("\n== live payload and wrapper structure ==")
-dumper_c = (REPO / "exploit" / "dumper" / "main.c").read_text(encoding="utf-8").lower()
-wrapper_py = (REPO / "exploit" / "dumper" / "dump_codeflash.py").read_text(encoding="utf-8").lower()
+dumper_c = (REPO / "tsk" / "dumper" / "main.c").read_text(encoding="utf-8").lower()
+wrapper_py = (REPO / "tsk" / "dumper" / "dump_codeflash.py").read_text(encoding="utf-8").lower()
 check("read payload does not call unverified boot-RAM watchdog helpers", "0xfebf1188" not in dumper_c and "0xfebf11ac" not in dumper_c and "0xfebf11d2" not in dumper_c)
 check("read payload contains no automatic reset", "reset(" not in dumper_c and "0x157e" not in dumper_c)
 check("read payload clears any nonzero callback completion without stock CanIf reclassification", "tx_result_success_mask" not in dumper_c and "status & 0xf9u" in dumper_c)
 check("live wrapper authenticates shellcode before RAM upload", "package_shellcode" in wrapper_py and "cmac_valid" in wrapper_py and "crc_residue" in wrapper_py)
 check("live wrapper requires the tracked audited executable identity", "load_audited_shellcode" in wrapper_py and "audited_build.json" in wrapper_py)
 check("live wrapper keeps payload-build and SecurityAccess secrets separate", "load_payload_secret" in wrapper_py and "load_security_secret" in wrapper_py)
-check("live wrapper never imports patcher write code", "exploit.patcher" not in wrapper_py)
+check("live wrapper never imports patcher write code", "tsk.patcher" not in wrapper_py)
 
 print("\n== audited executable provenance ==")
 
@@ -195,8 +195,8 @@ with tempfile.TemporaryDirectory() as td:
         "schema": "p1me-codeflash-dumper-audited-build-v1",
         "review_status": "audited-read-only",
         "sources": [
-            {"path": "exploit/dumper/main.c", "sha256": hashlib.sha256((REPO / "exploit/dumper/main.c").read_bytes()).hexdigest()},
-            {"path": "exploit/dumper/build_shellcode.py", "sha256": hashlib.sha256((REPO / "exploit/dumper/build_shellcode.py").read_bytes()).hexdigest()},
+            {"path": "tsk/dumper/main.c", "sha256": hashlib.sha256((REPO / "tsk/dumper/main.c").read_bytes()).hexdigest()},
+            {"path": "tsk/dumper/build_shellcode.py", "sha256": hashlib.sha256((REPO / "tsk/dumper/build_shellcode.py").read_bytes()).hexdigest()},
         ],
         "shellcode": {"sha256": binary_sha, "size": shellcode_path.stat().st_size, "entry_offset": 0},
         "toolchain": toolchain,
@@ -210,7 +210,7 @@ with tempfile.TemporaryDirectory() as td:
         "size": shellcode_path.stat().st_size,
         "entry_offset": 0,
         "read_only": True,
-        "source": "exploit/dumper/main.c",
+        "source": "tsk/dumper/main.c",
         "source_sha256": audit["sources"][0]["sha256"],
         "toolchain": toolchain,
     }

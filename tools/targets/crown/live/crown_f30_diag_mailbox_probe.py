@@ -24,7 +24,7 @@ from typing import Any
 
 ROOT = REPO_ROOT
 
-from exploit.common.ram_exec import (  # noqa: E402
+from tsk.common.ram_exec import (  # noqa: E402
     ELM327_SAFETY_MODE,
     _import_uds,
     _make_uds_client,

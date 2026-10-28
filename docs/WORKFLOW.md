@@ -186,7 +186,7 @@ and [Corolla report](variants/corolla-h-f-openpilot-state-bridge.md).
 `build/` is ignored **workspace state**. A
 clean clone must be able to run `make verify` and `make verify-full` without any
 pre-existing build files. If a deterministic/core verifier needs bytes or compact
-facts, promote them to a tracked location (`community/`, `data/`, `exploit/.../audited/`, etc.)
+facts, promote them to a tracked location (`community/`, `data/`, `tsk/.../audited/`, etc.)
 and bind their provenance there instead of reading an ignored file.
 
 Only five top-level namespaces are valid:
@@ -589,9 +589,9 @@ Camry, Crown, and Corolla H/F target. Target builds retain separate metadata
 for host bus/F181 binding, but their default payload SHA-256 is identical.
 
 The maintained helper and foreground scheduler are freestanding C:
-[`tss3_request_signer_helper.c`](../exploit/ram_runtime/request_signer/tss3_request_signer_helper.c),
-[`tss3_request_signer_core.h`](../exploit/ram_runtime/request_signer/tss3_request_signer_core.h),
-and [`tss3_request_signer_resident.c`](../exploit/ram_runtime/request_signer/tss3_request_signer_resident.c).
+[`tss3_request_signer_helper.c`](../tsk/ram_runtime/request_signer/tss3_request_signer_helper.c),
+[`tss3_request_signer_core.h`](../tsk/ram_runtime/request_signer/tss3_request_signer_core.h),
+and [`tss3_request_signer_resident.c`](../tsk/ram_runtime/request_signer/tss3_request_signer_resident.c).
 The small resident `.S` entry installs the stock CPU context before any C
 prologue; interrupt enable and atomic tick-bit clear remain CPU instructions.
 The generated boot staging/copy shell also remains assembly.

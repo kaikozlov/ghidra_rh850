@@ -8,8 +8,8 @@ from pathlib import Path
 from typing import Any
 
 from tools.targets.tss3.builders.build_tss3_request_signer import CONFIG_BASE, CONFIG_FIELDS
-from exploit.ram_runtime.tss3_request_signer import SAFE_APPLICATION, build_request
-from exploit.ram_runtime.tss3_request_signer_contract import HELPER_TRANSIT_BASE
+from tsk.ram_runtime.tss3_request_signer import SAFE_APPLICATION, build_request
+from tsk.ram_runtime.tss3_request_signer_contract import HELPER_TRANSIT_BASE
 from tools import REPO_ROOT
 from tools.emulation.p1me_machine import run_many
 from tools.project.analysis_target import target as resolve_target

@@ -1,0 +1,617 @@
+#!/usr/bin/env python3
+"""Fail-closed host controller for SecOC patch preflight/APPLY RAM payloads."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import struct
+import sys
+from dataclasses import asdict
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO))
+
+from tsk.common.ram_exec import (
+    RAM_LOAD_ADDR,
+    RAM_LOAD_SIZE,
+    SIENNA_RAM_EXEC_GEOMETRY,
+    RamExecError,
+    RamExecGeometry,
+    execute_ram_payload,
+    explicit_ram_exec_geometry,
+    explicit_route,
+    load_payload_secret,
+    load_security_secret,
+    route_from_session,
+)
+from tsk.patcher.build_payload import (
+    CONFIG_OFFSET,
+    DEFAULT_TEMPLATE,
+    PayloadBuildError,
+    build_authenticated_payload,
+    ensure_manifest,
+    inject_config,
+    load_bound_config,
+    sha256_bytes,
+    sha256_file,
+    simulate_apply,
+    validate_restore_artifact,
+)
+from tsk.patcher.patch_config import EXPECTED_RESIDUE, PatchConfigV1
+from tools.security.build_secoc_patch_manifest import crc32
+
+STAGE_NAMES = {
+    0x10: "BOOT",
+    0x11: "CONFIG",
+    0x12: "PREFLIGHT",
+    0x20: "APPLY_TARGET",
+    0x21: "APPLY_CRC",
+    0x22: "VERIFY_FINAL",
+    0x7F: "SUCCESS",
+    0xFF: "DONE",
+}
+TAG_NAMES = {
+    0xB0: "RUNTIME",
+    0xB1: "CONFIG",
+    0xB2: "PREFLIGHT",
+    0xC0: "APPLY",
+    0xC1: "CRC",
+    0xEE: "ERROR",
+}
+ERROR_NAMES = {
+    0x1001: "CONFIG_MAGIC",
+    0x1002: "CONFIG_VERSION",
+    0x1003: "CONFIG_FLAGS",
+    0x1004: "CONFIG_CRC",
+    0x1005: "CONFIG_IMAGE_RANGE",
+    0x1006: "CONFIG_PATCH_RANGE",
+    0x1007: "CONFIG_BLOCK_GEOMETRY",
+    0x1008: "CONFIG_CRC_GEOMETRY",
+    0x1009: "CONFIG_RESIDUE",
+    0x2001: "PATCH_PREIMAGE",
+    0x2002: "APPLY_UNAVAILABLE",
+    0x3001: "TARGET_RMW",
+    0x3002: "TARGET_READBACK",
+    0x3003: "FIXUP_RMW",
+    0x3004: "FIXUP_READBACK",
+    0x3005: "FINAL_RESIDUE",
+    0x4101: "FIXED_STAGE5_IDENTITY",
+    0x4102: "FIXED_HOOK_PREIMAGE",
+    0x4103: "FIXED_SOURCE_FIXUP",
+    0x4104: "FIXED_SOURCE_CRC",
+    0x4105: "FIXED_SEGMENT0_PREIMAGE",
+    0x4106: "FIXED_SEGMENT1_PREIMAGE",
+    0x4107: "FIXED_TARGET_RMW",
+    0x4108: "FIXED_SEGMENT0_READBACK",
+    0x4109: "FIXED_SEGMENT1_READBACK",
+    0x410A: "FIXED_FINAL_CRC",
+}
+CONFIG_FIELDS = {
+    0x0001: "mode",
+    0x0002: "patch_va",
+    0x0003: "patch_block_base",
+    0x0004: "flash_block_size",
+    0x0005: "crc_start",
+    0x0006: "crc_end",
+    0x0007: "crc_fixup_va",
+    0x0008: "crc_fixup_block_base",
+    0x0009: "config_crc32",
+}
+PREFLIGHT_FIELDS = {
+    0x0100: "patch_observed",
+    0x0101: "fixup_stored",
+    0x0102: "crc_prefix",
+    0x0103: "crc_residue",
+}
+
+RUN_SCHEMA = "secoc-patch-run-v1"
+PREFLIGHT_SCHEMA = "secoc-patch-preflight-v1"
+
+
+class DeployError(RuntimeError):
+    pass
+
+
+def now() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def canonical_sha256(obj: dict[str, Any]) -> str:
+    raw = (json.dumps(obj, sort_keys=True, separators=(",", ":")) + "\n").encode()
+    return hashlib.sha256(raw).hexdigest()
+
+
+def config_identity(config: PatchConfigV1) -> dict[str, Any]:
+    return {
+        "image_sha256": config.image_sha256.hex(),
+        "image_base": config.image_base,
+        "image_size": config.image_size,
+        "patch_va": config.patch_va,
+        "original": config.original.hex(),
+        "replacement": config.replacement.hex(),
+        "patch_len": config.patch_len,
+        "patch_block_base": config.patch_block_base,
+        "flash_block_size": config.flash_block_size,
+        "crc_start": config.crc_start,
+        "crc_end": config.crc_end,
+        "crc_fixup_va": config.crc_fixup_va,
+        "crc_fixup_block_base": config.crc_fixup_block_base,
+        "expected_residue": config.expected_residue,
+    }
+
+
+def ram_exec_geometry_identity(geometry: RamExecGeometry) -> dict[str, int]:
+    geometry.validate()
+    return {"load_addr": geometry.load_addr, "load_size": geometry.load_size}
+
+
+def resolve_ram_exec_geometry(args) -> RamExecGeometry:
+    evidence = args.ram_geometry_evidence
+    if args.ram_load_addr == RAM_LOAD_ADDR:
+        evidence = evidence or "firmware-static:sienna-8965b4512000"
+    elif not evidence:
+        raise DeployError(
+            "non-default --ram-load-addr requires --ram-geometry-evidence; "
+            "do not infer a target bootloader window from a shellcode/linker report"
+        )
+    return explicit_ram_exec_geometry(
+        load_addr=args.ram_load_addr,
+        load_size=RAM_LOAD_SIZE,
+        evidence=evidence,
+    )
+
+
+def expected_preflight(image: bytes, config: PatchConfigV1) -> dict[str, int]:
+    patch_off = config.patch_va - config.image_base
+    fixup_off = config.crc_fixup_va - config.image_base
+    start_off = config.crc_start - config.image_base
+    end_off = config.crc_end - config.image_base
+    observed = int.from_bytes(image[patch_off:patch_off + config.patch_len], "little")
+    stored = int.from_bytes(image[fixup_off:fixup_off + 4], "little")
+    prefix = crc32(image[start_off:fixup_off])
+    residue = crc32(image[start_off:end_off])
+    return {
+        "patch_observed": observed,
+        "fixup_stored": stored,
+        "crc_prefix": prefix,
+        "crc_residue": residue,
+    }
+
+
+def decode_telemetry_frame(data: bytes) -> dict[str, Any]:
+    if len(data) < 8:
+        raise DeployError("telemetry frame is shorter than 8 bytes")
+    raw = bytes(data[:8])
+    w0, w1 = struct.unpack("<II", raw)
+    if (w0 & 0xFFFFFF00) == 0xDEAD0000 and w1 == 0xCAFEBABE:
+        stage = w0 & 0xFF
+        return {
+            "type": "stage",
+            "stage": stage,
+            "name": STAGE_NAMES.get(stage, f"STAGE_0x{stage:02X}"),
+            "raw": raw.hex(),
+        }
+
+    tag = w0 & 0xFF
+    field = (w0 >> 8) & 0x00FFFFFF
+    event: dict[str, Any] = {
+        "type": "value",
+        "tag": tag,
+        "tag_name": TAG_NAMES.get(tag, f"TAG_0x{tag:02X}"),
+        "field": field,
+        "value": w1,
+        "raw": raw.hex(),
+    }
+    if tag == 0xB1:
+        event["field_name"] = CONFIG_FIELDS.get(field, f"config_0x{field:X}")
+    elif tag == 0xB2:
+        event["field_name"] = PREFLIGHT_FIELDS.get(field, f"preflight_0x{field:X}")
+    elif tag == 0xEE:
+        event["type"] = "error"
+        event["error_code"] = field
+        event["error_name"] = ERROR_NAMES.get(field, f"ERROR_0x{field:X}")
+        event["detail"] = w1
+    return event
+
+
+class TelemetryCollector:
+    def __init__(self) -> None:
+        self.events: list[dict[str, Any]] = []
+        self.saw_success = False
+        self.saw_done = False
+        self.errors: list[dict[str, Any]] = []
+
+    def feed(self, data: bytes) -> bool:
+        event = decode_telemetry_frame(data)
+        self.events.append(event)
+        if event["type"] == "stage":
+            self.saw_success |= event["stage"] == 0x7F
+            self.saw_done |= event["stage"] == 0xFF
+        elif event["type"] == "error":
+            self.errors.append(event)
+        return self.saw_done
+
+    @property
+    def payload_success(self) -> bool:
+        return self.saw_success and self.saw_done and not self.errors
+
+
+def extract_named_values(events: list[dict[str, Any]], tag: int) -> dict[str, int]:
+    result: dict[str, int] = {}
+    for event in events:
+        if event.get("type") != "value" or event.get("tag") != tag:
+            continue
+        name = event.get("field_name")
+        if isinstance(name, str):
+            result[name] = int(event["value"])
+    return result
+
+
+def validate_runtime_config_telemetry(events: list[dict[str, Any]], config: PatchConfigV1) -> list[str]:
+    observed = extract_named_values(events, 0xB1)
+    expected = {
+        "mode": config.flags,
+        "patch_va": config.patch_va,
+        "patch_block_base": config.patch_block_base,
+        "flash_block_size": config.flash_block_size,
+        "crc_start": config.crc_start,
+        "crc_end": config.crc_end,
+        "crc_fixup_va": config.crc_fixup_va,
+        "crc_fixup_block_base": config.crc_fixup_block_base,
+        "config_crc32": PatchConfigV1.from_bytes(config.to_bytes()).config_crc32,
+    }
+    return [
+        f"config telemetry {name}: expected 0x{value:X}, observed {observed.get(name)!r}"
+        for name, value in expected.items()
+        if observed.get(name) != value
+    ]
+
+
+def preflight_record(
+    *,
+    collector: TelemetryCollector,
+    config: PatchConfigV1,
+    image: bytes,
+    image_path: Path,
+    manifest_path: Path,
+    template_path: Path,
+    execution: dict[str, Any],
+    telemetry_sha256: str,
+) -> dict[str, Any]:
+    expected = expected_preflight(image, config)
+    observed = extract_named_values(collector.events, 0xB2)
+    config_mismatches = validate_runtime_config_telemetry(collector.events, config)
+    observation_mismatches = [
+        f"preflight {name}: expected 0x{value:08X}, observed {observed.get(name)!r}"
+        for name, value in expected.items()
+        if observed.get(name) != value
+    ]
+    boot_crc_valid = expected["crc_residue"] == EXPECTED_RESIDUE
+    apply_ready = (
+        collector.payload_success
+        and not config_mismatches
+        and not observation_mismatches
+        and boot_crc_valid
+        and execution.get("f181_hex") is not None
+    )
+    identity = config_identity(config)
+    return {
+        "schema": PREFLIGHT_SCHEMA,
+        "created_at": now(),
+        "mode": "validate-only",
+        "image": {
+            "path": str(image_path),
+            "sha256": sha256_bytes(image),
+            "size": len(image),
+        },
+        "manifest": {"path": str(manifest_path), "sha256": sha256_file(manifest_path)},
+        "template": {"path": str(template_path), "sha256": sha256_file(template_path)},
+        "config_identity": identity,
+        "config_identity_sha256": canonical_sha256(identity),
+        "expected": expected,
+        "observed": observed,
+        "config_mismatches": config_mismatches,
+        "observation_mismatches": observation_mismatches,
+        "boot_crc_valid": boot_crc_valid,
+        "payload_success": collector.payload_success,
+        "apply_ready": apply_ready,
+        "f181_hex": execution.get("f181_hex"),
+        "f181_ascii": execution.get("f181_ascii"),
+        "boot_f181_hex": execution.get("boot_f181_hex"),
+        "boot_f181_ascii": execution.get("boot_f181_ascii"),
+        "route": execution.get("route"),
+        "ram_exec_geometry": execution.get("ram_exec_geometry") or asdict(SIENNA_RAM_EXEC_GEOMETRY),
+        "telemetry_sha256": telemetry_sha256,
+    }
+
+
+def validate_preflight_for_apply(
+    path: Path,
+    *,
+    config: PatchConfigV1,
+    image: bytes,
+    manifest_path: Path,
+    template_path: Path,
+    ram_exec_geometry: RamExecGeometry = SIENNA_RAM_EXEC_GEOMETRY,
+) -> dict[str, Any]:
+    record = json.loads(path.read_text(encoding="utf-8"))
+    if record.get("schema") != PREFLIGHT_SCHEMA:
+        raise DeployError("unsupported preflight record schema")
+    if record.get("apply_ready") is not True:
+        raise DeployError("preflight record is not APPLY-ready")
+    if record.get("payload_success") is not True:
+        raise DeployError("preflight payload did not complete successfully")
+    if record.get("boot_crc_valid") is not True:
+        raise DeployError("preflight image/live CRC was not valid")
+    if record.get("image", {}).get("sha256") != sha256_bytes(image):
+        raise DeployError("preflight record belongs to a different pre-write image")
+    if record.get("manifest", {}).get("sha256") != sha256_file(manifest_path):
+        raise DeployError("preflight record belongs to a different manifest")
+    if record.get("template", {}).get("sha256") != sha256_file(template_path):
+        raise DeployError("preflight record belongs to a different generic payload template")
+    identity = config_identity(config)
+    if record.get("config_identity_sha256") != canonical_sha256(identity):
+        raise DeployError("preflight record config identity does not match APPLY config")
+    recorded_geometry = record.get("ram_exec_geometry")
+    expected_geometry = ram_exec_geometry_identity(ram_exec_geometry)
+    if not isinstance(recorded_geometry, dict) or {
+        "load_addr": recorded_geometry.get("load_addr"),
+        "load_size": recorded_geometry.get("load_size"),
+    } != expected_geometry:
+        raise DeployError("preflight record RAM-exec geometry does not match APPLY geometry")
+    expected = expected_preflight(image, config)
+    if record.get("expected") != expected or record.get("observed") != expected:
+        raise DeployError("preflight observations do not exactly match the preserved pre-write image")
+    if not record.get("f181_hex"):
+        raise DeployError("preflight record has no application F181 identity")
+    if not record.get("boot_f181_hex"):
+        raise DeployError("preflight record has no boot F181 identity")
+    return record
+
+
+def write_telemetry(path: Path, events: list[dict[str, Any]]) -> str:
+    with path.open("w", encoding="utf-8") as stream:
+        for event in events:
+            stream.write(json.dumps(event, sort_keys=True) + "\n")
+    return sha256_file(path)
+
+
+def resolve_route_from_args(args) -> tuple[Any, dict | None]:
+    if args.uds_variant is None:
+        raise DeployError("--uds-variant old|new is required for --execute")
+    if args.session_dir is not None:
+        return route_from_session(
+            args.session_dir,
+            uds_variant=args.uds_variant,
+            cpu_index=args.cpu_index,
+            bus=args.bus,
+            elm327_param=args.elm327_param,
+        )
+    if args.bus is None or args.elm327_param is None:
+        raise DeployError("--execute requires --session-dir or explicit --bus and --elm327-param")
+    return explicit_route(
+        bus=args.bus,
+        elm327_param=args.elm327_param,
+        uds_variant=args.uds_variant,
+        cpu_index=args.cpu_index,
+    ), None
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("image", type=Path, help="complete exact pre-write CodeFlash dump")
+    parser.add_argument("--manifest", type=Path, help="resolver manifest; omitted => run semantic resolver")
+    parser.add_argument("--template", type=Path, default=DEFAULT_TEMPLATE)
+    parser.add_argument("--run-dir", type=Path, required=True, help="preserve payload, telemetry, and run metadata here")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--validate-only", action="store_true", help="zero-write live preflight (default)")
+    mode.add_argument("--apply", action="store_true", help="explicitly request persistent APPLY")
+    parser.add_argument("--execute", action="store_true", help="actually connect to Panda/ECU; otherwise prepare-only")
+    parser.add_argument("--restore-artifact", type=Path, help="required for APPLY")
+    parser.add_argument("--preflight-record", type=Path, help="required APPLY-ready live preflight record")
+    parser.add_argument("--session-dir", type=Path, help="session from tools/toyota_support/toyota_secoc_session.py")
+    parser.add_argument("--bus", type=lambda value: int(value, 0))
+    parser.add_argument("--elm327-param", type=lambda value: int(value, 0))
+    parser.add_argument("--uds-variant", choices=("old", "new"))
+    parser.add_argument("--cpu-index", type=int, default=0)
+    
+    
+    
+    
+    parser.add_argument(
+        "--ram-load-addr",
+        type=lambda value: int(value, 0),
+        default=RAM_LOAD_ADDR,
+        help="authenticated payload load/callback address (default: verified Sienna 0xFEBF0000)",
+    )
+    parser.add_argument(
+        "--ram-geometry-evidence",
+        help=(
+            "non-secret provenance label for an explicit RAM geometry; required when overriding "
+            "the verified Sienna load address"
+        ),
+    )
+    parser.add_argument("--expected-f181-hex", help="required application identity for the first validate-only execution")
+    parser.add_argument("--expected-boot-f181-hex", help="required bootloader identity for the first validate-only execution")
+    parser.add_argument("--timeout", type=float, default=120.0)
+    args = parser.parse_args()
+
+    selected_mode = "apply" if args.apply else "validate-only"
+    args.run_dir.mkdir(parents=True, exist_ok=True)
+    payload_path = args.run_dir / f"payload-{selected_mode}.bin"
+    run_path = args.run_dir / "run.json"
+    telemetry_path = args.run_dir / "telemetry.ndjson"
+
+    try:
+        ram_exec_geometry = resolve_ram_exec_geometry(args)
+        manifest_path = ensure_manifest(args.image, args.manifest, payload_path)
+        manifest, config, image = load_bound_config(args.image, manifest_path, mode=selected_mode)
+        template = args.template.read_bytes()
+        configured_shellcode = inject_config(template, config)
+        payload_secret, payload_secret_source = load_payload_secret()
+        payload = build_authenticated_payload(
+            configured_shellcode,
+            payload_secret,
+            ram_load_addr=ram_exec_geometry.load_addr,
+        )
+
+        preflight: dict[str, Any] | None = None
+        restore: dict[str, Any] | None = None
+        if selected_mode == "apply":
+            if args.restore_artifact is None:
+                raise DeployError("APPLY is refused without --restore-artifact")
+            if args.preflight_record is None:
+                raise DeployError("APPLY is refused without --preflight-record from a successful live validate-only run")
+            restore = validate_restore_artifact(
+                args.restore_artifact,
+                image_path=args.image,
+                manifest_path=manifest_path,
+                template_path=args.template,
+                payload_secret=payload_secret,
+                expected_ram_load_addr=ram_exec_geometry.load_addr,
+            )
+            if restore.get("apply_payload_sha256") != sha256_bytes(payload):
+                raise DeployError("RESTORE artifact was generated for a different APPLY payload")
+            preflight = validate_preflight_for_apply(
+                args.preflight_record,
+                config=config,
+                image=image,
+                manifest_path=manifest_path,
+                template_path=args.template,
+                ram_exec_geometry=ram_exec_geometry,
+            )
+
+        payload_path.write_bytes(payload)
+        configured_shellcode_path = args.run_dir / f"shellcode-{selected_mode}.bin"
+        configured_shellcode_path.write_bytes(configured_shellcode)
+        collector = TelemetryCollector()
+        execution: dict[str, Any] | None = None
+        secret_source: str | None = None
+
+        if args.execute:
+            route, _session_state = resolve_route_from_args(args)
+            secret, secret_source = load_security_secret()
+            if preflight is not None:
+                expected_f181_hex = preflight.get("f181_hex")
+                expected_boot_f181_hex = preflight.get("boot_f181_hex")
+                if args.expected_f181_hex and args.expected_f181_hex.lower() != str(expected_f181_hex).lower():
+                    raise DeployError("--expected-f181-hex disagrees with the APPLY-authorizing preflight identity")
+                if args.expected_boot_f181_hex and args.expected_boot_f181_hex.lower() != str(expected_boot_f181_hex).lower():
+                    raise DeployError("--expected-boot-f181-hex disagrees with the APPLY-authorizing preflight identity")
+            else:
+                expected_f181_hex = args.expected_f181_hex
+                expected_boot_f181_hex = args.expected_boot_f181_hex
+                if not expected_f181_hex:
+                    raise DeployError("first live validate-only execution requires --expected-f181-hex")
+                if not expected_boot_f181_hex:
+                    raise DeployError("first live validate-only execution requires --expected-boot-f181-hex")
+                try:
+                    bytes.fromhex(expected_f181_hex)
+                    bytes.fromhex(expected_boot_f181_hex)
+                except ValueError as exc:
+                    raise DeployError("expected F181 values must be even-length hexadecimal strings") from exc
+            execution = execute_ram_payload(
+                payload,
+                route=route,
+                security_secret=secret,
+                timeout=args.timeout,
+                frame_handler=collector.feed,
+                expected_f181_hex=expected_f181_hex,
+                expected_boot_f181_hex=expected_boot_f181_hex,
+                geometry=ram_exec_geometry,
+            )
+        telemetry_sha = write_telemetry(telemetry_path, collector.events)
+
+        result: dict[str, Any] = {
+            "schema": RUN_SCHEMA,
+            "created_at": now(),
+            "mode": selected_mode,
+            "execute": args.execute,
+            "status": "prepared" if not args.execute else (
+                "payload-complete" if collector.payload_success else "payload-failed"
+            ),
+            "interpretation": (
+                "payload-complete proves only the requested preflight/write+CRC sequence; "
+                "it is not evidence that SecOC authentication is bypassed"
+            ),
+            "image": {"path": str(args.image), "sha256": sha256_bytes(image), "size": len(image)},
+            "manifest": {"path": str(manifest_path), "sha256": sha256_file(manifest_path), "schema": manifest.get("schema")},
+            "template": {"path": str(args.template), "sha256": sha256_bytes(template), "config_offset": CONFIG_OFFSET},
+            "config_identity": config_identity(config),
+            "ram_exec_geometry": asdict(ram_exec_geometry),
+            "configured_shellcode": {
+                "path": str(configured_shellcode_path),
+                "sha256": sha256_bytes(configured_shellcode),
+                "size": len(configured_shellcode),
+            },
+            "payload": {
+                "path": str(payload_path),
+                "sha256": sha256_bytes(payload),
+                "size": len(payload),
+                "authenticated": True,
+            },
+            "restore_artifact": str(args.restore_artifact) if args.restore_artifact else None,
+            "preflight_record": str(args.preflight_record) if args.preflight_record else None,
+            "payload_authentication": {
+                "secret_source": payload_secret_source,
+                "secret_value_recorded": False,
+            },
+            "security_access": {
+                "secret_source": secret_source,
+                "secret_value_recorded": False,
+            } if args.execute else None,
+            "execution": execution,
+            "telemetry": {
+                "path": str(telemetry_path),
+                "sha256": telemetry_sha,
+                "event_count": len(collector.events),
+                "errors": collector.errors,
+                "payload_success": collector.payload_success,
+            },
+        }
+
+        if selected_mode == "validate-only" and args.execute and execution is not None:
+            pf = preflight_record(
+                collector=collector,
+                config=config,
+                image=image,
+                image_path=args.image,
+                manifest_path=manifest_path,
+                template_path=args.template,
+                execution=execution,
+                telemetry_sha256=telemetry_sha,
+            )
+            pf_path = args.run_dir / "preflight.json"
+            pf_path.write_text(json.dumps(pf, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+            result["preflight"] = {
+                "path": str(pf_path),
+                "sha256": sha256_file(pf_path),
+                "apply_ready": pf["apply_ready"],
+                "mismatches": pf["config_mismatches"] + pf["observation_mismatches"],
+            }
+        elif selected_mode == "apply" and args.execute:
+            expected_post_image, expected_fixup, expected_residue = simulate_apply(image, config)
+            result["apply"] = {
+                "write_crc_sequence_complete": collector.payload_success,
+                "expected_post_image_sha256": sha256_bytes(expected_post_image),
+                "expected_fixup": f"0x{expected_fixup:08X}",
+                "expected_residue": f"0x{expected_residue:08X}",
+                "secoc_bypass_proven": False,
+                "next_required_proof": "stock-message MAC28-only ablation with CAN/DTC/steering evidence",
+            }
+
+        run_path.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    except (DeployError, PayloadBuildError, RamExecError, OSError, json.JSONDecodeError) as exc:
+        parser.error(str(exc))
+
+    print(json.dumps(result, indent=2, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

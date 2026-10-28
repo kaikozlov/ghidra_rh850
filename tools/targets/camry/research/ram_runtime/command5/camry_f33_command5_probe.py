@@ -14,7 +14,7 @@ from typing import Any, Callable
 
 
 
-from exploit.common.ram_exec import (
+from tsk.common.ram_exec import (
     RAM_LOAD_ADDR,
     RamExecError,
     _import_uds,
@@ -31,7 +31,7 @@ from tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_monitor 
     decode_secoc_sync,
     decode_steering_angle_deg,
 )
-from exploit.ram_runtime.panda_eps import set_alloutput_mode, wait_for_f181
+from tsk.ram_runtime.panda_eps import set_alloutput_mode, wait_for_f181
 from tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_replay_discriminator import (
     EXPECTED_BOOT_F181_HEX,
     EXPECTED_F181_HEX,

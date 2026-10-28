@@ -5,7 +5,7 @@
  * helper links in. tss3_request_signer_core_sim.S provides only the entry
  * stack and the simulator stop label.
  */
-#include "../../../exploit/ram_runtime/request_signer/tss3_request_signer_core.h"
+#include "../../../tsk/ram_runtime/request_signer/tss3_request_signer_core.h"
 
 volatile uint32_t oracle_sim_failure;
 volatile uint32_t oracle_sim_passes;

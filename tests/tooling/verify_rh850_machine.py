@@ -9,7 +9,7 @@ import tempfile
 from pathlib import Path
 
 import tools.targets.tss3.builders.build_tss3_request_signer as signer_builder
-from exploit.ram_runtime.target_profiles import supported_targets, target_spec
+from tsk.ram_runtime.target_profiles import supported_targets, target_spec
 from tools import REPO_ROOT
 from tools.emulation.p1me_machine import load_scenario
 from tools.targets.tss3.request_signer_machine import verify_request_signer_target

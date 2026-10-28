@@ -99,7 +99,7 @@ The RAV4 Prime model/year overlaps the yc field report already captured in SECOC
 
 This is the materially new item we were missing.
 
-Our `exploit/patcher/flash_backend.c` descended from the same older blurbdust-style primitive and previously used:
+Our `tsk/patcher/flash_backend.c` descended from the same older blurbdust-style primitive and previously used:
 
 ```text
 ready:             FFA10080 bit 15
@@ -146,7 +146,7 @@ Those stock routines do not independently prove the exact external `0x7040` CUW 
 
 ### Local correction made during this refresh
 
-`exploit/patcher/flash_backend.c` was updated to:
+`tsk/patcher/flash_backend.c` was updated to:
 
 1. use the corrected FACI register identities;
 2. replace the bit-21 loop with a bounded bit-11 pacing wait;
@@ -232,7 +232,7 @@ No surviving Lochuan artifact records the **CUW extraction procedure itself**. A
 - pinned public `blurbdust/secoc @ 47d2824...` plus Willem's `I-CAN-hack/secoc tundra @ b80d9104...` precursor, bound the retained Discord shellcode byte-for-byte to the public fork, and corrected the prior "no canonical git source" / "independent toolchain" classification;
 - added hashes for refreshed `README.md`, `eps_patch/manifest.py`, and `payload/faci_dual.h`;
 - updated `tests/verify_external_corroboration.py` to distinguish the historical wrong target from the current corrected target and pin the FACI refresh/vehicle claims;
-- corrected `exploit/patcher/flash_backend.c` and strengthened its deterministic regression checks;
+- corrected `tsk/patcher/flash_backend.c` and strengthened its deterministic regression checks;
 - updated the SecOC canonical report, findings ledger, corrections ledger, patcher README, and community provenance page.
 
 ## 6. Verification
@@ -243,7 +243,7 @@ Completed during the refresh:
 upstream: PYTHONPATH=. uv run --python 3.12 --extra test pytest -q
           504 passed
 
-local:    uv run --locked python exploit/patcher/build_shellcode_template.py \
+local:    uv run --locked python tsk/patcher/build_shellcode_template.py \
             --docker build/patcher-template-lochuan-refresh.bin
           raw .text = 0xF70 bytes; template = 0xFD0 bytes
 

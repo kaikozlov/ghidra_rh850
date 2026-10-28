@@ -17,7 +17,7 @@ from tools.targets.tss3.research.ram_runtime.live_installer import (  # noqa: E4
     load_install_spec,
     validate_target_f181,
 )
-from exploit.common.ram_exec import explicit_route  # noqa: E402
+from tsk.common.ram_exec import explicit_route  # noqa: E402
 
 passed = failed = 0
 

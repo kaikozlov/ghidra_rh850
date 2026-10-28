@@ -8,12 +8,13 @@ BUILDER=ROOT/'tools/targets/camry/research/ram_runtime/bootstrap/build_camry_f33
 LAUNCHER=ROOT/'tools/targets/camry/research/ram_runtime/bootstrap/camry_f33_early030_launcher.sh'
 RUNTIME=(
  'tools/__init__.py',
- 'exploit/common/ram_exec.py',
+ 'tsk/common/__init__.py',
+ 'tsk/common/ram_exec.py',
  'tools/targets/camry/research/ram_runtime/bootstrap/camry_f33_early030_bootstrap_probe.py',
  'tools/targets/tss3/research/ram_runtime/tss3_unified_b6_signer.py',
  'tools/targets/camry/research/ram_runtime/monitor/camry_f33_runtime_monitor.py',
  'tools/targets/camry/research/ram_runtime/monitor/camry_f33_runtime_replay_discriminator.py',
- 'exploit/ram_runtime/tss3_panda_lease.sh',
+ 'tsk/ram_runtime/tss3_panda_lease.sh',
  'tsk/__init__.py','tsk/lib/__init__.py','tsk/lib/programming.py','tsk/lib/diagnostic_route.py',
 )
 def cp(src,dst): dst.parent.mkdir(parents=True,exist_ok=True); shutil.copy2(src,dst)

@@ -68,7 +68,7 @@ mods = (
   "panda",
   "opendbc.car",
   "opendbc.car.toyota.tss3",
-  "exploit.common.ram_exec",
+  "tsk.common.ram_exec",
   "tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_monitor",
 )
 for name in mods:

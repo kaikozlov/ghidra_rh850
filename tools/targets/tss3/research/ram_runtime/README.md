@@ -5,7 +5,7 @@ research notes. It is not the maintained host runtime or public build surface.
 
 | Owner | Contents |
 |---|---|
-| [`exploit/ram_runtime/`](../../../../../exploit/ram_runtime/) | Maintained signer host, startup/recovery tools, and `request_signer/` C payload |
+| [`tsk/ram_runtime/`](../../../../../tsk/ram_runtime/) | Maintained signer host, startup/recovery tools, and `request_signer/` C payload |
 | [`tools/targets/tss3/builders/`](../../builders/) | Maintained request-signer and kit builders |
 | This directory | Shared canary, bridge, command-5 proxy, and direct-B6 research |
 | [Camry research](../../../camry/research/ram_runtime/) | `bootstrap/`, `b6/`, `command5/`, `monitor/`, `oracle/`, and `routing/` experiments |
@@ -191,7 +191,7 @@ heartbeat:    FEBFFBF0
 Plan/read the heartbeat without writes:
 
 ```bash
-uv run --locked python exploit/followups/application_rmba_probe.py \
+uv run --locked python tsk/followups/application_rmba_probe.py \
   --probe-ephemeral-canary
 ```
 

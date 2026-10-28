@@ -15,11 +15,11 @@ from pathlib import Path
 from typing import Any
 from unittest import mock
 
-from exploit.common.rh850_build import CJob, compile_c_batch, nm_symbol
+from tsk.common.rh850_build import CJob, compile_c_batch, nm_symbol
 import tools.targets.tss3.builders.build_tss3_request_signer as signer_builder
-from exploit.patcher.build_payload import simulate_apply
-from exploit.patcher.patch_config import config_from_manifest
-from exploit.ram_runtime.target_profiles import supported_targets, target_spec
+from tsk.patcher.build_payload import simulate_apply
+from tsk.patcher.patch_config import config_from_manifest
+from tsk.ram_runtime.target_profiles import supported_targets, target_spec
 from tools import REPO_ROOT
 from tools.rh850_codeflash import CodeFlashSimError, Overlay, Spec
 from tools.rh850_codeflash import run as run_codeflash

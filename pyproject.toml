@@ -21,5 +21,18 @@ build-backend = "setuptools.build_meta"
 # Checkout tooling: uv sync installs this project editable from the source
 # tree, so operational code is never relocated into site-packages and module
 # __file__ paths keep resolving inside the checkout.
-include = ["tools", "tools.*", "exploit", "exploit.*", "tsk", "tsk.*", "tests", "tests.*"]
+include = ["tools", "tools.*", "tsk", "tsk.*", "tests", "tests.*"]
+exclude = [
+  "build*",
+  "REFERENCE*",
+  "community*",
+  "data*",
+  "decomp*",
+  "docs*",
+  "firmware*",
+  "ghidra*",
+  "projects*",
+  "software*",
+  "targets*",
+]
 namespaces = true

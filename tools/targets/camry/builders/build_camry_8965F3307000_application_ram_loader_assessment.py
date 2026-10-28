@@ -508,7 +508,7 @@ def build() -> dict:
           "source_comm_mask":"0xFEBE4FAE","configured_source_mask":"0x10","propagated_comm_mask":"0xFEBE493A","owner_active_state":"0xFEBE491B","owner_online_event_state":"0xFEBE4919",
           "owner_active_predicate":"0x0007F23C","owner_online_setter":"0x0007F030","configured_delay_foreground_ticks":3,"foreground_tick_ms":5.0,"configured_delay_ms":15.0,
           "dynamic_boundary":"Sep-6 live SID23 proved the transport/owner predicates active and FEBE4EE6=0x5A; the independent fixed CodeFlash pre-command gate remains disabled",
-          "read_only_preflight":"exploit/followups/xcp_runtime_state_probe.py",
+          "read_only_preflight":"tsk/followups/xcp_runtime_state_probe.py",
         },
         "normal_route_live_result":{"status":"superseded_standard_id_probe","tested_bus":1,"elm327_param":1,"panda_tx_block_counter_recorded":False,"source":str(XCP_LIVE.relative_to(ROOT)),"source_sha256":sha_file(XCP_LIVE)},
         "extended_route_live_result":{"status":"ingress_to_staging_verified_protocol_blocked","tested_bus":0,"request":"0x1FDC0002","panda_tx_blocked_delta":0,"source":str(XCP_EXT_LIVE.relative_to(ROOT)),"source_sha256":sha_file(XCP_EXT_LIVE)},

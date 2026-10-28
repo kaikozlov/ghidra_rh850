@@ -15,8 +15,8 @@ from pathlib import Path
 from tools import REPO_ROOT as REPO
 
 
-from exploit.common.payload_package import package_shellcode
-from exploit.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET
+from tsk.common.payload_package import package_shellcode
+from tsk.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET
 from tools.rh850_toolchain import command as rh850_command
 from tools.targets.corolla.research.ram_runtime.build_corolla_hf_command5_carrier import validate_toolchain
 from tools.targets.camry.live.camry_f33_steering_state_capture import SOURCE_TERMS

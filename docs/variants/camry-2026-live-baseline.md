@@ -1545,7 +1545,7 @@ The run is retained under
 `targets/camry-2026/raw-20260830/secoc-patch-preflight-f33-collector-fixed/`; see SECOC-080.
 
 Before persistent APPLY, the recovery side is now executable.
-`exploit/patcher/restore.py` validates the exact hash-bound RESTORE package and can use
+`tsk/patcher/restore.py` validates the exact hash-bound RESTORE package and can use
 the ordinary field-proven application→boot handoff or, specifically for the unavoidable
 two-block power-loss window, an already-running bootloader **only after exact boot F181
 match**. Its prepare-only F33 plan validates restore payload `d8c5b3dc…`, semantic

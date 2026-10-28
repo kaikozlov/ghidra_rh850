@@ -557,7 +557,7 @@ stationary phase.
 Implementation:
 
 ```text
-exploit/behavioral_proof/camry_f33_b6_stationary_probe.py
+tsk/behavioral_proof/camry_f33_b6_stationary_probe.py
 ```
 
 ## RAM-only non-bypassing transaction observer
@@ -792,7 +792,7 @@ docs/status/OPEN_QUESTIONS.md    # OQ-054 and B6-related questions
 Receive-path / observer / bridge implementation:
 
 ```text
-exploit/behavioral_proof/camry_f33_b6_stationary_probe.py
+tsk/behavioral_proof/camry_f33_b6_stationary_probe.py
 tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_transaction_observer.c
 tools/targets/camry/research/ram_runtime/b6/build_camry_f33_b6_transaction_observer.py
 tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_transaction_observer.py

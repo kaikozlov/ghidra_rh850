@@ -434,7 +434,7 @@ This gives an exact read-only confirmation oracle. Seed the fixed buffer with a
 22 1C F4                 ->  62 1C F4 <seed[2:47]>
 ```
 
-`exploit/followups/application_rdbi_stale_probe.py` supports all 48 verified
+`tsk/followups/application_rdbi_stale_probe.py` supports all 48 verified
 DIDs, sizes the seed read to `declared_length + 2`, implements only those two
 read services, defaults to planning, and requires `--execute --bench-isolated`
 for live confirmation. The firmware-static disclosure chain is verified; the
@@ -815,7 +815,7 @@ The 16-byte secret at CodeFlash `0x20840` is:
   `FEBF45A8+0xC`. Not GP/TP-relative.
 
 The bounded dynamic experiment is
-`exploit/followups/communication_control_probe.py`. It enters extended session
+`tsk/followups/communication_control_probe.py`. It enters extended session
 without SecurityAccess, counts known EPS application Tx IDs, requests only
 `28 01 01` (receive enabled, normal-message transmit disabled), and restores
 `28 00 01` in `finally` before checking traffic recovery. It requires an

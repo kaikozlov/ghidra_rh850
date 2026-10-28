@@ -23,7 +23,7 @@ from tools.targets.camry.research.ram_runtime.b6.camry_f33_b6_transaction_observ
     TELEMETRY_SIZE,
     decode_telemetry,
 )
-from exploit.common.ram_exec import (
+from tsk.common.ram_exec import (
     ELM327_SAFETY_MODE,
     RAM_LOAD_ADDR,
     RamExecError,

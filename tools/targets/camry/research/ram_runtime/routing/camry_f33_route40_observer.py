@@ -13,7 +13,7 @@ from typing import Any, Callable
 
 
 
-from exploit.common.ram_exec import (
+from tsk.common.ram_exec import (
     RAM_LOAD_ADDR, RamExecError, _import_uds, _make_uds_client, _read_f181,
     ensure_boardd_stopped, execute_ram_payload, explicit_ram_exec_geometry,
     explicit_route, load_security_secret,
@@ -24,7 +24,7 @@ from tools.targets.camry.research.ram_runtime.command5.camry_f33_command5_probe 
     decode_secoc_sync, toyota_legacy_checksum8,
 )
 from tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_monitor import PandaTap
-from exploit.ram_runtime.panda_eps import set_alloutput_mode, wait_for_f181
+from tsk.ram_runtime.panda_eps import set_alloutput_mode, wait_for_f181
 from tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_replay_discriminator import (
     EXPECTED_BOOT_F181_HEX, EXPECTED_F181_HEX, _read_memory,
     verify_nrtd_ready, verify_ready_parked_on_panda,

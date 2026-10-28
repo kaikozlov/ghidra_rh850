@@ -150,7 +150,7 @@ def cmd_variant(args: argparse.Namespace) -> int:
 
 
 def cmd_ram_list(args: argparse.Namespace) -> int:
-    from exploit.ram_runtime.target_profiles import registered_targets
+    from tsk.ram_runtime.target_profiles import registered_targets
 
     query = (args.query or "").casefold()
     for target, record in registered_targets().items():

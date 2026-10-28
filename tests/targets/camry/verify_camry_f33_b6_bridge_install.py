@@ -8,7 +8,7 @@ from pathlib import Path
 
 from tools import REPO_ROOT
 ROOT = REPO_ROOT
-from exploit.common.payload_package import inspect_payload, package_shellcode
+from tsk.common.payload_package import inspect_payload, package_shellcode
 import tools.targets.camry.research.ram_runtime.b6.build_camry_f33_b6_bridge as builder
 
 MOD = ROOT / "tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_bridge_install.py"

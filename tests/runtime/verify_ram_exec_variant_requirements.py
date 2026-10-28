@@ -12,8 +12,8 @@ from types import SimpleNamespace
 from tools import REPO_ROOT
 ROOT = REPO_ROOT
 
-from exploit.common import ram_exec
-from exploit.common.payload_package import inspect_payload, package_shellcode
+from tsk.common import ram_exec
+from tsk.common.payload_package import inspect_payload, package_shellcode
 
 passed = failed = 0
 

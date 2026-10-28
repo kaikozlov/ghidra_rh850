@@ -1,0 +1,343 @@
+# Bounded exploit follow-ups
+
+These tools turn the remaining static avenues into reproducible host-side
+experiments without changing the live patch payload architecture. They are
+specific to Sienna `8965B4512000` until a target image proves transferability.
+
+## MEM-SAFE-001 authenticated raw substitution
+
+`bootloader_primitives.py` implements repeated 1–15 byte RAM downloads and
+`raw_substitution_plan.py` emits their exact wire records. The live helper
+requires the caller to assert that RID `0x10F0` already authenticated a payload
+in the same bootloader session. It validates every byte against
+`0xFEBF0000..0xFEBF0FFF`.
+
+```sh
+uv run --locked python tsk/followups/raw_substitution_plan.py \
+  0xFEBF0FD0 0000bffe
+```
+
+## MEM-SAFE-003 targeted equality-oracle read
+
+`oracle_dump.py` implements the exact loop: arm RID `0x10F3`, open a one-byte
+compare download, submit one raw guess, interpret only NRC `0x10` as mismatch,
+and re-arm after every failed guess. It rejects the inaccessible bootloader
+region, the `0x17E00..0x17FFF` gap, and ranges above `0xFFDFF`. A run is capped
+at 256 bytes because the oracle costs up to 256 diagnostic transactions per
+byte; the read-only RAM-exec dumper remains the preferred acquisition path.
+
+Dry-run planning is the default. Simulation provides a deterministic local
+proof without CAN:
+
+```sh
+uv run --locked python tsk/followups/oracle_dump.py \
+  0x10000 16 --simulate-image firmware/RH850_P1M-E_CodeFlash.bin
+```
+
+Live execution additionally requires `--execute`, an explicit route or recorded
+session, and the boot SecurityAccess secret. Results bind address, request
+budget, F181, and output hashes. The intended use is a small known-signature or
+calibration discriminator on a device where a full dump is unavailable—not a
+full-image extraction and not boot-secret recovery.
+
+## Application SID `0x23` read-only disclosure probe
+
+`application_rmba_probe.py` operationalizes the corrected application
+ReadMemoryByAddress service without implementing any write operation. Runtime
+service object `0x25EA0` admits SID `0x23` in extended session with no configured
+SecurityAccess level. The only accepted address/length format is `0x15`, so the
+wire request is:
+
+```text
+23 15 <memory-id:1> <absolute-address:4-byte-be> <size:1>
+```
+
+Memory ID `1` covers application LocalRAM and memory ID `2` covers DataFlash,
+but the firmware rejects overlaps with five RAM and two DataFlash protected
+subranges. The helper mirrors those exclusions exactly and caps every request at
+255 bytes. Its full readable-DataFlash plan acquires exactly 29,952 bytes from
+`FF200000..FF206BFF` plus `FF206F00..FF2077FF` in 119 requests.
+
+Planning is the default. A named `--probe-boot-payload-key-residue` mode targets
+`FEBF2D08..FEBF2D17`, the bootloader DID-`0201` payload key-derivation input
+buffer that SEC-APP-006 proves is readable after application handoff. This does
+not assume useful residue survives; it turns that remaining dynamic question
+into one exact 16-byte read-only observation.
+
+Simulation proves the DataFlash extraction layout against the canonical 32 KiB
+image:
+
+```sh
+uv run --locked python tsk/followups/application_rmba_probe.py \
+  --probe-boot-payload-key-residue
+uv run --locked python tsk/followups/application_rmba_probe.py \
+  --dump-readable-dataflash
+uv run --locked python tsk/followups/application_rmba_probe.py \
+  --dump-readable-dataflash \
+  --simulate-dataflash firmware/RH850_P1M-E_DataFlash.bin \
+  --output build/out/rmba-readable-dataflash.bin
+```
+
+Live mode requires `--execute --bench-isolated` plus an F181-bound recorded
+session or explicit route. It enters extended diagnostic session, implements
+only SID `0x23`, and rejects every request that the static exclusion model says
+would touch a protected interval.
+
+## Application RDBI stale-response proof
+
+`application_rdbi_stale_probe.py` confirms the firmware-static Dcm buffer-lifetime
+bug without writing ECU state. Forty-eight RDBI DIDs declare 1..45-byte values
+but use success stubs that never populate the output. The response buffer is the
+fixed LocalRAM region at `FEBE59F8`, so a prior response can be used as a known
+seed. The probe accepts any of the 48 verified DIDs and sizes the RMBA seed to
+`declared_length + 2`. The default maximum-width proof performs:
+
+```text
+23 15 02 FF 20 00 00 2F  -> 63 <47 DataFlash bytes>
+22 1C F4                  -> expected 62 1C F4 <prior bytes 2..46>
+```
+
+Planning is the default:
+
+```sh
+uv run --locked python tsk/followups/application_rdbi_stale_probe.py
+```
+
+Live mode requires `--execute --bench-isolated` plus the same route/F181 guards
+as the RMBA probe. It fails closed unless all 45 observed RDBI value bytes match
+the exact predicted stale slice. No write-memory service or SecurityAccess call
+is implemented.
+
+## Application CommunicationControl availability probe
+
+`communication_control_probe.py` tests the recovered extended-session SID
+`0x28` path without SecurityAccess. It is deliberately limited to
+`enableRxAndDisableTx` for normal messages (`28 01 01`), restores with
+`28 00 01` in an unconditional cleanup path, and verifies that every
+baseline-active EPS Tx ID resumes. Live mode requires both `--execute` and
+`--bench-isolated`; do not run an availability experiment on an operating
+vehicle.
+
+The default mode only prints the transaction/capture plan. Suppression followed
+by recovery would prove an unauthenticated application-message availability surface.
+
+## SECOC-012/013/014 offline receive trials
+
+`secoc_freshness_trials.py` turns the volatile-freshness and FD-canonicalization
+findings into exact, offline experiment artifacts without adding a CAN
+transmitter. `reset-replay`
+parses a captured authenticated `0x00F` sync plus one or more protected classic
+frames and emits the cold-reset/startup-race replay sequence and dynamic proof
+predicates. `future-sync` compares two already-authenticated sync frames with the
+firmware's monotonicity predicate and refuses a candidate that is not forward. `tag-guesses` preserves the authentic payload
+and transmitted freshness nibble while replacing only the 28-bit tag; artifact
+generation is bounded to 65,536 candidates per invocation. `fd-suffix-alias`
+takes the exact 32-byte SecOC-effective FD frame and appends 16 or 32 bytes,
+producing a DLC-48/64 physical alias whose first 32 bytes—and therefore the
+Sienna EPS authenticated view—remain unchanged.
+
+These tools do not make the unresolved claims for us: reset replay still depends
+on winning/suppressing startup synchronization, future-sync still requires an
+actually valid MAC for the forward epoch, and practical tag guessing still
+depends on command-7 throughput and keeping receiver freshness stable. There is
+no `--execute` path.
+
+## Exact-F33 XCP runtime-state preflight
+
+`xcp_runtime_state_probe.py` remains a read-only **transport-state diagnostic** for
+`8965F3307000`; it is no longer a precursor to repeating CONNECT. Sep-6 exact-F33
+closure proved the physical endpoint is extended `0x1FDC0002 -> 0x1FE00002`, and a
+non-command marker live-reached XCP staging `FEBE4C34`. The same session observed
+manager/owner masks active and `FEBE4EE6=0x5A`.
+
+That does not admit CONNECT because F33 has an independent fixed protocol gate:
+`0x821D6` calls `0x830C0 -> 0x98E80` before command parsing, and CodeFlash
+`0x30D68=0x5A` makes the hook return nonzero; command parsing requires zero. The probe
+therefore reports **transport admission** separately from `stock_protocol_dispatch_enabled`
+and `connect_admission_state_observed` (false on this calibration).
+
+Live mode still enters extendedDiagnostic only because application SID `0x23` requires
+session 3, then performs four bounded ReadMemoryByAddress reads covering
+`FEBE3DE5/FEBE3DF2`, `FEBE4914..FEBE493A`, `FEBE4EE6`, and `FEBE4FAE`. It sends zero
+XCP frames and implements no write operation.
+
+```sh
+uv run --locked python tsk/followups/xcp_runtime_state_probe.py
+# exact-F33 live use is diagnostic only; do not follow it with stock CONNECT/DAQ.
+```
+
+## COM-005 CONNECT-only XCP reachability check
+
+`xcp_reachability.py` answers the cheapest hardware question first: is the XCP
+channel physically reachable on the routed bench bus? It sends exactly one
+`CONNECT (0xFF)` request on `0x7F7`, records the first raw `0x7F8` response with
+both monotonic and wall stamps plus every frame seen in the window, binds the
+run to recorded route/F181 identity, and classifies the outcome: a positive
+`FF` response, an `FE` XCP error response (still proof of reachability), a
+timeout, or an unexpected PID/Panda rejection.
+
+The mode is CONNECT-only by construction — the single transmit call site is
+guarded against the literal frame, and every other opcode is refused with its
+reason. In particular the `E4` page copy is excluded because it *mutates* the
+`0xFEBF7C00` shadow window even though its CodeFlash source is fixed, and
+`F0 DOWNLOAD`/`EC MODIFY_BITS` are not implemented anywhere in this tree. The
+read/DAQ acquisition behavior of the sibling probes below is intentionally
+unchanged.
+
+```sh
+uv run --locked python tsk/followups/xcp_reachability.py
+# live: --execute --bench-isolated --session-dir <dir> (or explicit route+F181)
+```
+
+Live mode requires `--execute --bench-isolated` and the same F181-bound routing
+as the read probe; it exits `0` when the channel answered and `3` on
+no-response. No write command, page copy, SET_MTA, or upload is ever sent.
+
+## COM-005 read-only XCP disclosure probe
+
+`xcp_read_probe.py` operationalizes the firmware-static CAN `0x7F7/0x7F8`
+disclosure chain without implementing any generic write command. The default
+path now sends CONNECT, the custom page-copy command, then 4,606 address-explicit
+standard `SHORT_UPLOAD (0xF4)` requests across the copied shadow. This removes
+the probe's dependency on a prior SET_MTA while reconstructing CodeFlash
+`0x10000..0x17DEF` (32,240 bytes) byte-for-byte and binding the result by
+SHA-256. The older `SET_MTA + UPLOAD (0xF5)` sequence remains available as
+`--read-method mta-upload` for regression/comparison.
+
+Planning is the default. Simulation proves the CodeFlash-copy reassembly against
+the canonical firmware without hardware:
+
+```sh
+uv run --locked python tsk/followups/xcp_read_probe.py
+uv run --locked python tsk/followups/xcp_read_probe.py \
+  --simulate-image firmware/RH850_P1M-E_CodeFlash.bin \
+  --dump-output build/out/xcp-low-codeflash.bin
+```
+
+The same helper also exposes the verified direct LocalRAM `F4` primitive without
+implementing a generic XCP client. `--ram-address` and `--ram-length` must stay
+inside `FEBE0000..FEBFFFFF` and outside the exact five firmware exclusion
+intervals; no page-copy, SET_MTA, F5, DOWNLOAD, or MODIFY_BITS request is used.
+For example, this plans a five-byte observation covering the recovered d/q and
+nearby state bytes:
+
+```sh
+uv run --locked python tsk/followups/xcp_read_probe.py \
+  --ram-address 0xFEBE6D28 --ram-length 5
+```
+
+Live mode requires `--execute --bench-isolated`, an F181-bound recorded session
+or explicit route, and a dump output. It fails on a timeout, wrong CAN ID/DLC,
+XCP error response, nonzero bytes beyond the requested upload length, target
+identity mismatch, or any Panda safety rejection. Ordinary ELM327 safety
+already admits eight-byte standard diagnostic-range ID `0x7F7`; no widened
+Panda safety patch is required. This remains a read-only isolated-bench probe,
+not authorization to test writable calibration state on a vehicle.
+
+## COM-007 event-driven XCP DAQ observer
+
+`xcp_daq_probe.py` operationalizes the recovered DAQ direction without exposing
+the adjacent generic RAM-write commands. It configures only list 0 using the
+firmware-backed sequence `CONNECT -> E3 CLEAR_DAQ_LIST -> E2 SET_DAQ_PTR -> E1
+WRITE_DAQ -> E0 SET_DAQ_LIST_MODE -> DE START`, captures DTOs from CAN `0x7F8`,
+and sends `DE STOP` in cleanup. Each configured source is one permitted
+LocalRAM byte; one list supports up to 28 sources as four ODTs of seven bytes.
+The helper does not claim a wall-clock sample rate because the firmware only
+proves the event worker reload/cadence in communication-manager invocations.
+
+Named profiles map several recent findings into observation rather than adding
+state-changing diagnostic mutators:
+
+- `actuation-discriminator` — both bytes of each d/q-reference word plus the
+  three staged TSG3 comparison bytes (`COM-007`);
+- `diagnostic-control-state` — WDBI `2012/2013/2014` lifecycle/control state
+  (`DIAG-APP-016/017/018`);
+- `routine-lifecycle-state` — one-shot/state-gated RoutineControl lifecycle
+  flags and groups (`DIAG-APP-010/011`);
+- `async-ba-state` — shared async queue plus persistent BA marker/countdown
+  (`DIAG-APP-023`, `SEC-APP-007`);
+- `ba-operational-state` — BA lifecycle, alternate-speed-like, and inhibit state
+  (`DIAG-APP-024`);
+- `secoc-verification-state` — MAC verification result byte plus current and
+  pending SecOC synchronization trip/reset words: read-only dynamic
+  discriminators for Gate-2 acceptance and the post-reset replay window
+  (`SECOC-011/012/029`). No write primitive is involved; the command-5
+  generated-result buffer and ICU-S driver polling word remain
+  firmware-excluded from XCP and deliberately absent.
+
+Planning remains the default:
+
+```sh
+uv run --locked python tsk/followups/xcp_daq_probe.py \
+  --profile actuation-discriminator
+```
+
+Live mode requires `--execute --bench-isolated`, F181-bound routing, and a raw
+NDJSON capture output. Source-memory mutation is not implemented. This is the
+preferred dynamic harness for recent WDBI/BA/RoutineControl findings whose
+trigger is persistent or lifecycle-affecting: observe their state when another
+controlled experiment supplies the trigger rather than teaching this directory
+to issue the dangerous request itself.
+
+The observer schema is v2: the plan carries an explicit forbidden-opcode audit
+(`F0`/`EC` generic writes plus the `E4` page copy as a shadow-window mutation),
+and a fail-closed guard asserts no configured or cleanup request uses them. Live
+results additionally preserve per-control-request RTT records (request hex,
+both clocks, statistics), a capture-window record (start/finish monotonic+wall,
+requested duration/frame cap, and whether the cap truncated the capture), and a
+wall-clock stamp on every captured DTO alongside its monotonic stamp.
+
+The DAQ configuration helper also accepts an explicit 1..255 event prescaler. The
+default remains 1 for existing generic profiles; target-specific tooling can reduce
+DTO bus load without changing the source-pointer/read-only contract. Exact Camry F33
+uses this through `tools/targets/camry/live/camry_f33_steering_state_capture.py`. Firmware constants pin
+four DAQ lists, four ODTs/list, and seven bytes/ODT. The wrapper therefore defaults to
+a two-list **52-byte `full-path`** profile covering the complete `D0218` source sum and
+the downstream `CC48 -> AC54/AC56` funnel in one event; 28-byte `source-terms` and
+`command-funnel` subsets remain available. It uses post-repin Panda bus 0 after an exact
+F181 check, records selected native CAN context in the same receive loop, and defaults
+to prescaler 10. Post-repin XCP reachability remains a live preflight question; the tool
+is plan-only unless explicitly armed.
+
+## COM-005 offline shadow-write planner
+
+`xcp_shadow_write_plan.py` maps the verified `F0 DOWNLOAD`/`F6 SET_MTA` shadow
+write primitive into an **offline-only** artifact. Given an address and bytes it
+validates the exact `FEBF7C00..FEBFFBFF` window, chunks the write into 1..6-byte
+DOWNLOAD CTOs, and emits the exact eight-byte transaction plan. An optional
+32 KiB local shadow file can be mutated to verify the predicted byte result and
+hash. The helper also encodes the recovered `EC MODIFY_BITS` request shape for
+deterministic tests, but it has no Panda import and no `--execute` path.
+
+The window has no recovered direct runtime consumer. Its Ghidra `execute=false`
+block attribute is analysis metadata; the hardware MPU configuration (region 1,
+`MPAT1` contexts at `0x31898/0x318D8`) grants supervisor execute (see CORR-060).
+
+## Deliberately unimplemented state-changing diagnostic triggers
+
+The recent application audit recovered several real SecurityAccess-free
+maintenance/control surfaces, but adding a normal live mutator would worsen the
+safety/evidence boundary rather than improve it. In particular, WDBI `0204`,
+RoutineControl `1108`, and RoutineControl `1004` intentionally rewrite
+persistent checkpoint/event state; WDBI `2012/2013/2014` and SID-BA operations
+perturb lifecycle/control state. Their exact static behavior remains verified,
+and the DAQ profiles above expose useful state for experiments, but this
+workstream intentionally does not provide convenience commands that trigger
+those mutations.
+
+## Closed static leads: malformed CMAC and command 8
+
+`static_closure.py` independently rechecks the decisive firmware bytes and
+emits two explicit dispositions. Across authenticated lengths `1..0x1000`, only
+the 256 positive multiples of 16 can reach the CMAC endpoint; the other 3,840
+walk out of the requested range. The exact step body has only the CMAC primitive
+as a direct callee and no response-buffer consumer, so the bounded outcome is an availability
+fault (hang/exception/reset). No live probe is provided because it adds hardware
+risk without a useful exploit predicate.
+
+The command-8 failure path really does zero the original caller capacity, but
+the only configured driver-dispatch caller supplies a fixed 48-byte buffer and
+capacity. The avenue is closed for this image until a variant exposes a caller
+with capacity above 48 or independent pointer/length corruption reaches the
+prepare API. Random command-8 diagnostic stimulation cannot change those
+CPU-side arguments and is therefore not an informative experiment.

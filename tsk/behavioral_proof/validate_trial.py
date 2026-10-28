@@ -1,0 +1,346 @@
+#!/usr/bin/env python3
+"""Validate the evidence bundle for the MAC28-only SecOC behavioral proof.
+
+The validator is deliberately conservative. It cannot infer steering acceptance
+from a flash write or reboot; it only marks the bypass proven when the same
+MAC28-only forwarding ablation is demonstrated in a stock-firmware rejection
+trial and a semantic-patch acceptance trial, with raw CAN, DTC, and steering
+artifacts preserved for both.
+"""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import sys
+from pathlib import Path
+from typing import Any
+
+REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO))
+
+from tsk.behavioral_proof.analyze_acceptance import AcceptanceError, analyze_acceptance
+from tsk.behavioral_proof.analyze_forwarding import CaptureError, analyze, iter_capture
+from tsk.patcher.build_payload import PayloadBuildError, simulate_apply
+from tsk.patcher.patch_config import PatchConfigError, config_from_manifest
+
+SCHEMA = "toyota-secoc-mac28-behavioral-proof-v1"
+REQUIRED_PHASES = ("baseline_stock", "prepatch_invalid_mac28", "postpatch_invalid_mac28")
+
+
+class TrialError(ValueError):
+    pass
+
+
+def sha256_file(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _same_int_value(left: Any, right: Any) -> bool:
+    try:
+        return int(str(left), 0) == int(str(right), 0)
+    except (TypeError, ValueError):
+        return False
+
+
+def _require_file(base: Path, item: Any, label: str) -> tuple[Path, str]:
+    if not isinstance(item, dict):
+        raise TrialError(f"{label}: expected object with path/sha256")
+    path_value = item.get("path")
+    expected_sha = item.get("sha256")
+    if not isinstance(path_value, str) or not isinstance(expected_sha, str):
+        raise TrialError(f"{label}: path and sha256 are required")
+    path = Path(path_value)
+    if not path.is_absolute():
+        path = base / path
+    if not path.is_file():
+        raise TrialError(f"{label}: file does not exist: {path}")
+    observed_sha = sha256_file(path)
+    if observed_sha != expected_sha:
+        raise TrialError(
+            f"{label}: SHA mismatch: expected {expected_sha}, observed {observed_sha}"
+        )
+    return path, observed_sha
+
+
+def _load_json(path: Path, label: str) -> dict[str, Any]:
+    try:
+        value = json.loads(path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise TrialError(f"{label}: invalid JSON") from exc
+    if not isinstance(value, dict):
+        raise TrialError(f"{label}: expected JSON object")
+    return value
+
+
+def _validate_dtc(path: Path, expected_f181: str, label: str) -> list[str]:
+    errors: list[str] = []
+    try:
+        dtc = _load_json(path, label)
+        raw = bytes.fromhex(str(dtc.get("response_payload_hex", "")))
+    except (TrialError, ValueError) as exc:
+        return [str(exc)]
+    if dtc.get("schema") != "toyota-eps-dtc-snapshot-v1":
+        errors.append(f"{label}: unsupported DTC schema")
+    if dtc.get("f181_hex") != expected_f181:
+        errors.append(f"{label}: F181 does not match trial EPS identity")
+    if dtc.get("request") != "19 02 FF":
+        errors.append(f"{label}: expected read-only 19 02 FF request")
+    if not raw or raw[0] != 0x59:
+        errors.append(f"{label}: response is not a positive UDS 0x59 payload")
+    return errors
+
+
+def _validate_apply_run(
+    path: Path,
+    *,
+    stock_sha: str,
+    patched_sha: str,
+    manifest_sha: str,
+) -> list[str]:
+    errors: list[str] = []
+    try:
+        run = _load_json(path, "apply_run")
+    except TrialError as exc:
+        return [str(exc)]
+    if run.get("schema") != "secoc-patch-run-v1" or run.get("mode") != "apply":
+        errors.append("apply_run: not an APPLY run record")
+    if run.get("execute") is not True or run.get("status") != "payload-complete":
+        errors.append("apply_run: payload did not execute to completion")
+    if run.get("image", {}).get("sha256") != stock_sha:
+        errors.append("apply_run: pre-write image SHA does not match stock artifact")
+    if run.get("manifest", {}).get("sha256") != manifest_sha:
+        errors.append("apply_run: manifest SHA mismatch")
+    if run.get("telemetry", {}).get("payload_success") is not True:
+        errors.append("apply_run: telemetry does not report payload success")
+    apply = run.get("apply", {})
+    if apply.get("write_crc_sequence_complete") is not True:
+        errors.append("apply_run: write/CRC sequence is incomplete")
+    if apply.get("expected_post_image_sha256") != patched_sha:
+        errors.append("apply_run: expected post-image SHA does not match patched artifact")
+    telemetry = run.get("telemetry", {})
+    telemetry_path_value = telemetry.get("path")
+    if isinstance(telemetry_path_value, str):
+        telemetry_path = Path(telemetry_path_value)
+        if not telemetry_path.is_absolute():
+            telemetry_path = path.parent / telemetry_path
+        if not telemetry_path.is_file() or sha256_file(telemetry_path) != telemetry.get("sha256"):
+            errors.append("apply_run: telemetry artifact is absent or hash-mismatched")
+    else:
+        errors.append("apply_run: telemetry artifact path is missing")
+    return errors
+
+
+def validate_trial(path: Path) -> dict[str, Any]:
+    trial = json.loads(path.read_text(encoding="utf-8"))
+    if trial.get("schema") != SCHEMA:
+        raise TrialError("unsupported behavioral-proof schema")
+    base = path.parent
+    phases = trial.get("phases")
+    if not isinstance(phases, dict):
+        raise TrialError("phases object is required")
+
+    errors: list[str] = []
+    phase_reports: dict[str, Any] = {}
+    expected_f181 = trial.get("f181_hex")
+    if not isinstance(expected_f181, str) or not expected_f181:
+        errors.append("top-level f181_hex is required to bind all phases to the same EPS identity")
+    expected_modes = {
+        "baseline_stock": "stock",
+        "prepatch_invalid_mac28": "invalid-mac28",
+        "postpatch_invalid_mac28": "invalid-mac28",
+    }
+    observed_routes: list[tuple[int, int]] = []
+
+    try:
+        stock_path, stock_sha = _require_file(base, trial.get("stock_image"), "stock_image")
+        patched_path, patched_sha = _require_file(base, trial.get("patched_image"), "patched_image")
+    except TrialError as exc:
+        errors.append(str(exc))
+        stock_path = patched_path = None
+        stock_sha = patched_sha = ""
+
+    for name in REQUIRED_PHASES:
+        phase = phases.get(name)
+        if not isinstance(phase, dict):
+            errors.append(f"missing phase: {name}")
+            continue
+        if phase.get("f181_hex") != expected_f181:
+            errors.append(f"{name}: f181_hex differs from top-level EPS identity")
+        evidence: dict[str, Any] = {}
+        evidence_paths: dict[str, Path] = {}
+        for field in ("raw_can", "forwarding_analysis", "acceptance_analysis", "dtc", "steering"):
+            try:
+                evidence_paths[field], evidence[field] = _require_file(
+                    base, phase.get(field), f"{name}.{field}"
+                )
+            except TrialError as exc:
+                errors.append(str(exc))
+        analysis_ok = False
+        acceptance_ok = False
+        source_bus = forward_bus = None
+        analysis_path = evidence_paths.get("forwarding_analysis")
+        raw_path = evidence_paths.get("raw_can")
+        if analysis_path is not None and raw_path is not None:
+            try:
+                recorded = _load_json(analysis_path, f"{name}.forwarding_analysis")
+                source_bus = recorded.get("source_bus")
+                forward_bus = recorded.get("forward_bus")
+                if not isinstance(source_bus, int) or not isinstance(forward_bus, int) or source_bus == forward_bus:
+                    raise TrialError(f"{name}: invalid source/forward buses")
+                recomputed = analyze(
+                    iter_capture(raw_path),
+                    source_bus=source_bus,
+                    forward_bus=forward_bus,
+                    mode=expected_modes[name],
+                )
+                recomputed["capture"] = {"path": str(raw_path), "sha256": evidence["raw_can"]}
+                analysis_ok = recomputed["pass"] is True
+                if recorded.get("mode") != expected_modes[name] or recorded.get("pass") != recomputed["pass"]:
+                    errors.append(f"{name}: recorded forwarding result disagrees with raw CAN recomputation")
+                if recorded.get("capture", {}).get("sha256") != evidence["raw_can"]:
+                    errors.append(f"{name}: forwarding analysis is not bound to exact raw CAN")
+                observed_routes.append((source_bus, forward_bus))
+            except (TrialError, CaptureError, OSError) as exc:
+                errors.append(str(exc))
+        if not analysis_ok:
+            errors.append(f"{name}: forwarding_analysis does not prove bounded source->forward behavior")
+
+        acceptance_path = evidence_paths.get("acceptance_analysis")
+        steering_path = evidence_paths.get("steering")
+        expected_class = "rejected" if name == "prepatch_invalid_mac28" else "accepted"
+        if acceptance_path is not None and raw_path is not None and steering_path is not None and isinstance(source_bus, int) and isinstance(forward_bus, int):
+            try:
+                recorded_acceptance = _load_json(acceptance_path, f"{name}.acceptance_analysis")
+                recomputed_acceptance = analyze_acceptance(
+                    raw_path,
+                    steering_path,
+                    source_bus=source_bus,
+                    eps_bus=forward_bus,
+                )
+                if recorded_acceptance != recomputed_acceptance:
+                    errors.append(f"{name}: recorded acceptance analysis disagrees with raw evidence")
+                acceptance_ok = recomputed_acceptance["classification"] == expected_class
+                if not acceptance_ok:
+                    errors.append(
+                        f"{name}: derived EPS classification must be {expected_class}, got "
+                        f"{recomputed_acceptance['classification']}"
+                    )
+            except (TrialError, AcceptanceError, OSError) as exc:
+                errors.append(str(exc))
+
+        dtc_path = evidence_paths.get("dtc")
+        if dtc_path is not None:
+            errors.extend(_validate_dtc(dtc_path, expected_f181, f"{name}.dtc"))
+
+        expected_firmware_sha = stock_sha if name != "postpatch_invalid_mac28" else patched_sha
+        if phase.get("firmware_sha256") != expected_firmware_sha:
+            errors.append(f"{name}: firmware SHA is not bound to the exact phase artifact")
+        phase_reports[name] = {
+            "firmware_sha256": phase.get("firmware_sha256"),
+            "openpilot_ablation_commit": phase.get("openpilot_ablation_commit"),
+            "observed_behavior": phase.get("observed_behavior"),
+            "evidence_sha256": evidence,
+            "forwarding_analysis_pass": analysis_ok,
+            "derived_acceptance_pass": acceptance_ok,
+        }
+
+    baseline = phases.get("baseline_stock", {}) if isinstance(phases.get("baseline_stock"), dict) else {}
+    pre = phases.get("prepatch_invalid_mac28", {}) if isinstance(phases.get("prepatch_invalid_mac28"), dict) else {}
+    post = phases.get("postpatch_invalid_mac28", {}) if isinstance(phases.get("postpatch_invalid_mac28"), dict) else {}
+
+    if observed_routes and len(set(observed_routes)) != 1:
+        errors.append(f"all phases must use the same source/forward bus topology, observed {observed_routes}")
+
+    ablation_commit = trial.get("openpilot_ablation_commit")
+    if not isinstance(ablation_commit, str) or len(ablation_commit) != 40:
+        errors.append("openpilot_ablation_commit must be a full 40-hex commit SHA")
+    for name, phase in (("prepatch_invalid_mac28", pre), ("postpatch_invalid_mac28", post)):
+        if phase.get("openpilot_ablation_commit") != ablation_commit:
+            errors.append(f"{name}: ablation commit differs from top-level experiment commit")
+    if baseline.get("firmware_sha256") != pre.get("firmware_sha256"):
+        errors.append("baseline_stock and prepatch_invalid_mac28 must use the same stock firmware SHA")
+    if pre.get("firmware_sha256") == post.get("firmware_sha256"):
+        errors.append("prepatch and postpatch phases must use different firmware image SHAs")
+    # Human notes are retained but never used as proof predicates.
+
+    patch_manifest = trial.get("secoc_patch_manifest")
+    try:
+        manifest_path, manifest_sha = _require_file(base, patch_manifest, "secoc_patch_manifest")
+        manifest = _load_json(manifest_path, "secoc_patch_manifest")
+        semantic = manifest.get("semantic_resolution", {})
+        semantic_patch = semantic.get("patch", {}) if isinstance(semantic, dict) else {}
+        if not (
+            manifest.get("schema") == "toyota-secoc-patch-manifest-v1"
+            and semantic.get("schema") == "toyota-secoc-semantic-target-v2"
+            and semantic.get("resolution") == "unique"
+            and semantic.get("candidate_count") == 1
+            and semantic.get("verify_result_polarity") == "zero-is-verified-ok-nonzero-is-not-verified"
+            and semantic_patch.get("operation") == "cmp-second-register-to-first-force-fallthrough"
+            and _same_int_value(semantic_patch.get("address"), manifest.get("patch", {}).get("address"))
+            and semantic_patch.get("original") == manifest.get("patch", {}).get("original")
+            and semantic_patch.get("replacement") == manifest.get("patch", {}).get("replacement")
+        ):
+            errors.append("secoc_patch_manifest is not a unique semantic Gate-2 patch manifest")
+        if stock_path is not None and patched_path is not None:
+            if manifest.get("image", {}).get("sha256") != stock_sha:
+                errors.append("secoc_patch_manifest is not bound to the stock image")
+            config = config_from_manifest(manifest, mode="apply")
+            expected_patched, _fixup, _residue = simulate_apply(stock_path.read_bytes(), config)
+            if expected_patched != patched_path.read_bytes():
+                errors.append("patched_image is not the exact manifest patch plus CRC fixup")
+    except (TrialError, PatchConfigError, PayloadBuildError, OSError) as exc:
+        errors.append(str(exc))
+        manifest_sha = None
+
+    try:
+        apply_run_path, _apply_run_sha = _require_file(base, trial.get("apply_run"), "apply_run")
+        if manifest_sha is not None:
+            errors.extend(
+                _validate_apply_run(
+                    apply_run_path,
+                    stock_sha=stock_sha,
+                    patched_sha=patched_sha,
+                    manifest_sha=manifest_sha,
+                )
+            )
+    except TrialError as exc:
+        errors.append(str(exc))
+
+    proven = not errors
+    return {
+        "schema": "toyota-secoc-mac28-behavioral-proof-validation-v1",
+        "trial": str(path),
+        "trial_sha256": sha256_file(path),
+        "openpilot_ablation_commit": ablation_commit,
+        "secoc_patch_manifest_sha256": manifest_sha,
+        "phases": phase_reports,
+        "errors": errors,
+        "secoc_bypass_proven": proven,
+        "interpretation": (
+            "secoc_bypass_proven=true is derived by reprocessing exact raw CAN and steering evidence, "
+            "validating DTC/F181 provenance, reconstructing the manifest-patched firmware, and binding a "
+            "successful APPLY run. Human observed_behavior labels are non-authoritative."
+        ),
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("trial", type=Path)
+    parser.add_argument("--output", type=Path)
+    args = parser.parse_args()
+    try:
+        report = validate_trial(args.trial)
+    except (TrialError, OSError, json.JSONDecodeError) as exc:
+        parser.error(str(exc))
+    if args.output:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print(json.dumps(report, indent=2, sort_keys=True))
+    return 0 if report["secoc_bypass_proven"] else 2
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

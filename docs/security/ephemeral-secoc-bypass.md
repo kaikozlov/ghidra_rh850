@@ -507,7 +507,7 @@ construction and proves:
 - exact AES-CBC ciphertext round trip.
 
 The fixture construction uses tester values `DID 0x0201 = 00*16` and
-`DID 0x0202 = 00*16`, which `exploit/common/ram_exec.py` already writes. Thus
+`DID 0x0202 = 00*16`, which `tsk/common/ram_exec.py` already writes. Thus
 replaying the fixture does **not** require knowing `PAYLOAD_BUILD_SECRET` or
 obtaining a matching CUW. Bootloader SecurityAccess remains mandatory, but its
 separate `SEED_KEY_SECRET` is already recovered/verified for this firmware and

@@ -20,14 +20,14 @@ from typing import Any
 
 ROOT = REPO_ROOT
 
-from exploit.common.ram_exec import (  # noqa: E402
+from tsk.common.ram_exec import (  # noqa: E402
     _import_uds,
     _make_uds_client,
     _read_f181,
     ensure_boardd_stopped,
 )
 import tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_monitor as monitor
-from exploit.ram_runtime.panda_eps import set_alloutput_mode  # noqa: E402
+from tsk.ram_runtime.panda_eps import set_alloutput_mode  # noqa: E402
 from tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_replay_discriminator import _read_memory  # noqa: E402
 from tools.targets.crown.research.ram_runtime.crown_f30_b6_inline_signer import (  # noqa: E402
     CONTROL_BUS,

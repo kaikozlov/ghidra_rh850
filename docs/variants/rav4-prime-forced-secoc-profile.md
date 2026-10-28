@@ -261,7 +261,7 @@ The experiment is still not the controlled MAC28-only causal proof. The forced
 old profile continues to block/replace stock `0x191/0x412/0x2E4/0x131`, so
 traffic semantics change in addition to the protected authenticators. The
 strict proof therefore remains the three-phase same-traffic experiment in
-`exploit/behavioral_proof/`: healthy stock baseline, exact MAC28-only corruption
+`tsk/behavioral_proof/`: healthy stock baseline, exact MAC28-only corruption
 rejected on stock firmware, then the identical corruption accepted after the
 semantically resolved patch.
 

@@ -161,7 +161,7 @@ physical `0x7F7/0x7F8` route is reachable. The already-recovered d/q reference
 bytes at `FEBE6D28/6D2A` and staged TSG3 compare bytes at
 `FEBE38A2/38A4/38A6` all pass the DAQ address validator. Configuring adjacent
 byte entries can therefore observe those multi-byte states without patching the
-motor-control loop. `exploit/followups/xcp_daq_probe.py` now reproduces the
+motor-control loop. `tsk/followups/xcp_daq_probe.py` now reproduces the
 exact volatile list-0 configuration and has named observation profiles for this
 actuation discriminator plus recent WDBI/BA/async state. It never implements
 `DOWNLOAD` or `MODIFY_BITS`, and live mode remains isolated-bench/F181 gated.
@@ -245,7 +245,7 @@ pins the source ZIP and extracted bytes and verifies the full composition; see
 [the Span Corolla variant record](../variants/corolla-8965F1208000.md).
 
 **Write capability is verified, and the window is supervisor-executable by MPU
-configuration.** `exploit/followups/xcp_shadow_write_plan.py` represents the verified
+configuration.** `tsk/followups/xcp_shadow_write_plan.py` represents the verified
 SET_MTA/DOWNLOAD wire primitive as an offline planner/simulator.
 
 Firmware-static evidence proves CAN1 acceptance and response construction.
@@ -256,7 +256,7 @@ custom handlers require an exact eight-byte request before consuming their
 fields. Standard commands retain their own configured request-length checks.
 Any live confirmation belongs on an isolated bench and should exercise only the
 read chain. The default-plan/simulation tool
-[`../../exploit/followups/xcp_read_probe.py`](../../exploit/followups/xcp_read_probe.py)
+[`../../tsk/followups/xcp_read_probe.py`](../../tsk/followups/xcp_read_probe.py)
 operationalizes that bounded proof, requires an F181-bound isolated bench for
 live mode, and implements no generic write command. Its default CodeFlash
 acquisition path uses CONNECT + `E4` copy + address-explicit `F4 SHORT_UPLOAD`,

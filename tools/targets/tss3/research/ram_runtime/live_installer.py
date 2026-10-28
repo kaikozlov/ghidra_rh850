@@ -27,7 +27,7 @@ from tools import REPO_ROOT as REPO
 
 
 
-from exploit.common.ram_exec import (
+from tsk.common.ram_exec import (
     DID_201_KEY,
     DID_202_IV,
     ELM327_SAFETY_MODE,
@@ -50,7 +50,7 @@ from exploit.common.ram_exec import (
     load_security_secret,
     route_from_session,
 )
-from exploit.followups.bootloader_primitives import (
+from tsk.followups.bootloader_primitives import (
     MAX_RAW_CHUNK,
     apply_raw_substitution,
     raw_substitution_chunks,
@@ -466,7 +466,7 @@ def _attest_canary_once(
     uds_client.diagnostic_session_control(uds_mod.SESSION_TYPE.EXTENDED_DIAGNOSTIC)
 
     if read_memory_fn is None:
-        from exploit.followups.application_rmba_probe import execute_read as read_memory_fn  # noqa: WPS433
+        from tsk.followups.application_rmba_probe import execute_read as read_memory_fn  # noqa: WPS433
     address = spec.canary_observation_address
     first = bytes(read_memory_fn(uds_client, uds_mod, 1, address, 4))
     sleep_fn(heartbeat_interval)
@@ -529,12 +529,12 @@ def _wait_for_command5_proxy(panda, *, bus: int, timeout: float) -> None:
         raise RuntimeInstallError("proxy-ready timeout must be positive")
     # Import lazily so the generic canary/bridge installer has no command5/XCP
     # dependency at startup.
-    from exploit.command5.ram_proxy import (  # noqa: WPS433
+    from tsk.command5.ram_proxy import (  # noqa: WPS433
         MAILBOX,
         MAILBOX_MAGIC,
         _read_bytes,
     )
-    from exploit.followups.xcp_read_probe import (  # noqa: WPS433
+    from tsk.followups.xcp_read_probe import (  # noqa: WPS433
         CONNECT_REQUEST,
         _exchange,
         parse_positive_response,
@@ -591,7 +591,7 @@ def main() -> int:
             raise RuntimeInstallError("--command5-message requires --variant command5-proxy")
         command5_message: bytes | None = None
         if args.command5_message is not None:
-            from exploit.command5.ram_proxy import _validate_message, parse_message  # noqa: WPS433
+            from tsk.command5.ram_proxy import _validate_message, parse_message  # noqa: WPS433
 
             command5_message = parse_message(args.command5_message)
             _validate_message(command5_message, allow_any_length=args.allow_any_command5_length)
@@ -629,7 +629,7 @@ def main() -> int:
                     _wait_for_command5_proxy(panda, bus=route.bus, timeout=args.proxy_ready_timeout)
                     result["live"]["proxy_mailbox_live"] = True
                     if command5_message is not None:
-                        from exploit.command5.ram_proxy import execute_request  # noqa: WPS433
+                        from tsk.command5.ram_proxy import execute_request  # noqa: WPS433
 
                         output, stats = execute_request(
                             panda,

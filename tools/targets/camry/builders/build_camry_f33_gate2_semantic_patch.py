@@ -21,19 +21,19 @@ from typing import Any
 
 ROOT = REPO_ROOT
 
-from exploit.patcher.build_payload import (
+from tsk.patcher.build_payload import (
     build_authenticated_payload,
     build_configured_payload,
     inject_config,
     sha256_bytes,
     simulate_apply,
 )
-from exploit.patcher.patch_config import (
+from tsk.patcher.patch_config import (
     PatchConfigV1,
     config_from_manifest,
     load_manifest,
 )
-from exploit.patcher.post_apply_verify import (
+from tsk.patcher.post_apply_verify import (
     build_post_apply_validate_config,
 )
 from tools.security.build_secoc_patch_manifest import crc32

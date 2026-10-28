@@ -22,15 +22,15 @@ from typing import Any
 
 ROOT = REPO_ROOT
 
-from exploit.patcher.build_payload import (
+from tsk.patcher.build_payload import (
     build_authenticated_payload,
     build_configured_payload,
     inject_config,
     sha256_bytes,
     simulate_apply,
 )
-from exploit.patcher.patch_config import PatchConfigV1, config_from_manifest
-from exploit.patcher.post_apply_verify import build_post_apply_validate_config
+from tsk.patcher.patch_config import PatchConfigV1, config_from_manifest
+from tsk.patcher.post_apply_verify import build_post_apply_validate_config
 from tools.targets.camry.builders import build_camry_f33_gate2_root_result_patch as stage3
 from tools.security.build_secoc_patch_manifest import crc32
 

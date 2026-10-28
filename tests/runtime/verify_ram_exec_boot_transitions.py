@@ -6,7 +6,7 @@ import sys
 from types import SimpleNamespace
 from unittest import mock
 
-from exploit.common import ram_exec
+from tsk.common import ram_exec
 from tools import REPO_ROOT
 
 ROOT = REPO_ROOT

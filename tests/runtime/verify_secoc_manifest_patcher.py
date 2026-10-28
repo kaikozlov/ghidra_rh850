@@ -15,7 +15,7 @@ from pathlib import Path
 from tools import REPO_ROOT
 REPO = REPO_ROOT
 
-from exploit.patcher.patch_config import (
+from tsk.patcher.patch_config import (
     CONFIG_SIZE,
     EXPECTED_RESIDUE,
     FLAG_APPLY,
@@ -24,8 +24,8 @@ from exploit.patcher.patch_config import (
     PatchConfigV1,
     config_from_manifest,
 )
-from exploit.common.payload_package import PAYLOAD_SIZE, inspect_payload, package_shellcode
-from exploit.common.ram_exec import (
+from tsk.common.payload_package import PAYLOAD_SIZE, inspect_payload, package_shellcode
+from tsk.common.ram_exec import (
     TOYOTA_P1ME_BOOT_SECURITY_ACCESS_SECRET,
     TOYOTA_P1ME_PAYLOAD_BUILD_SECRET,
     bootstrap_protocol_values,
@@ -34,7 +34,7 @@ from exploit.common.ram_exec import (
     load_payload_secret,
     load_security_secret,
 )
-from exploit.patcher.build_payload import (
+from tsk.patcher.build_payload import (
     CONFIG_OFFSET,
     TEMPLATE_SIZE,
     PayloadBuildError,
@@ -42,7 +42,7 @@ from exploit.patcher.build_payload import (
     inject_config,
     validate_restore_artifact,
 )
-from exploit.patcher.deploy import (
+from tsk.patcher.deploy import (
     DeployError,
     TelemetryCollector,
     expected_preflight,
@@ -85,7 +85,7 @@ check("old-stack CPU1 keeps zero DID 0203 and memory ID 0", bootstrap_protocol_v
 check("new-stack CPU1 keeps zero DID 0203 and uses new routine magic", bootstrap_protocol_values(new1) == (bytes(5), b"\x00", b"\x45\x01"))
 
 print("== ABI shape ==")
-header = (REPO / "exploit" / "common" / "patch_config.h").read_text(encoding="utf-8")
+header = (REPO / "tsk" / "common" / "patch_config.h").read_text(encoding="utf-8")
 check("C header carries no Sienna patch VA", "8E6C6" not in header.upper() and "8E6C8" not in header.upper())
 check("C header carries no Sienna CRC geometry", "FFDEC" not in header.upper() and "18000" not in header.upper())
 
@@ -186,14 +186,14 @@ foreign["semantic_resolution"]["patch"]["original"] = "3412"
 foreign["semantic_resolution"]["patch"]["replacement"] = "3512"
 foreign_cfg = config_from_manifest(foreign)
 check("synthetic foreign manifest serializes without special case", PatchConfigV1.from_bytes(foreign_cfg.to_bytes()).patch_va == 0x42220)
-source = (REPO / "exploit" / "patcher" / "patch_config.py").read_text(encoding="utf-8").lower()
+source = (REPO / "tsk" / "patcher" / "patch_config.py").read_text(encoding="utf-8").lower()
 check("serializer has no software-ID routing table", "software_id" not in source and "8965" not in source)
 check("serializer has no known Sienna target/CRC addresses", all(token not in source for token in ("8e6c6", "8e6c8", "ffdec", "88000", "f8000")))
 
 print("\n== zero-write preflight structure ==")
-main_c = (REPO / "exploit" / "patcher" / "main.c").read_text(encoding="utf-8").lower()
-preflight_c = (REPO / "exploit" / "patcher" / "preflight.c").read_text(encoding="utf-8").lower()
-runtime_c = (REPO / "exploit" / "common" / "runtime.c").read_text(encoding="utf-8").lower()
+main_c = (REPO / "tsk" / "patcher" / "main.c").read_text(encoding="utf-8").lower()
+preflight_c = (REPO / "tsk" / "patcher" / "preflight.c").read_text(encoding="utf-8").lower()
+runtime_c = (REPO / "tsk" / "common" / "runtime.c").read_text(encoding="utf-8").lower()
 zero_write_sources = "\n".join((main_c, preflight_c, runtime_c))
 for forbidden, label in (
     ("faci_", "FACI helper"),
@@ -209,8 +209,8 @@ check("generic runtime does not write community scratch RAM before first witness
 check("payload source contains no reset call", "reset(" not in zero_write_sources and "0x157e" not in zero_write_sources)
 
 print("\n== fail-closed APPLY structure ==")
-apply_c = (REPO / "exploit" / "patcher" / "apply.c").read_text(encoding="utf-8").lower()
-flash_c = (REPO / "exploit" / "patcher" / "flash_backend.c").read_text(encoding="utf-8").lower()
+apply_c = (REPO / "tsk" / "patcher" / "apply.c").read_text(encoding="utf-8").lower()
+flash_c = (REPO / "tsk" / "patcher" / "flash_backend.c").read_text(encoding="utf-8").lower()
 rmw_positions = []
 pos = 0
 while True:
@@ -249,11 +249,11 @@ check("erase and program completion use full FACI result", flash_c.count("return
 check("all P/E-attempt failures converge on cleanup and exit", flash_c.count("goto cleanup;") >= 3 and "cleanup:" in flash_c and "err = faci_exit_pe_mode();" in flash_c)
 check("FCU errors preserve failing phase in return code", all(token in flash_c for token in ("flash_err_unlock", "flash_err_enter", "flash_err_erase", "flash_err_program", "flash_err_exit", "flash_err_cleanup")))
 generic_patcher_sources = (
-    REPO / "exploit" / "patcher" / "main.c",
-    REPO / "exploit" / "patcher" / "preflight.c",
-    REPO / "exploit" / "patcher" / "apply.c",
-    REPO / "exploit" / "patcher" / "flash_backend.c",
-    REPO / "exploit" / "patcher" / "shellcode.c",
+    REPO / "tsk" / "patcher" / "main.c",
+    REPO / "tsk" / "patcher" / "preflight.c",
+    REPO / "tsk" / "patcher" / "apply.c",
+    REPO / "tsk" / "patcher" / "flash_backend.c",
+    REPO / "tsk" / "patcher" / "shellcode.c",
 )
 all_generic_c = "\n".join(p.read_text(encoding="utf-8").lower() for p in generic_patcher_sources)
 check("generic payload C embeds no known Sienna patch/CRC addresses", all(token not in all_generic_c for token in ("8e6c6", "8e6c8", "ffdec", "88000", "f8000")))
@@ -530,9 +530,9 @@ with tempfile.TemporaryDirectory() as td:
         check("APPLY rejects preflight observations that do not match dump", False)
 
 print("\n== bootstrap/deployer secret and routing discipline ==")
-ram_exec_source = (REPO / "exploit" / "common" / "ram_exec.py").read_text(encoding="utf-8").lower()
-deploy_source = (REPO / "exploit" / "patcher" / "deploy.py").read_text(encoding="utf-8").lower()
-restore_source = (REPO / "exploit" / "patcher" / "restore.py").read_text(encoding="utf-8").lower()
+ram_exec_source = (REPO / "tsk" / "common" / "ram_exec.py").read_text(encoding="utf-8").lower()
+deploy_source = (REPO / "tsk" / "patcher" / "deploy.py").read_text(encoding="utf-8").lower()
+restore_source = (REPO / "tsk" / "patcher" / "restore.py").read_text(encoding="utf-8").lower()
 builtin_boot_secret, _builtin_boot_source = load_security_secret()
 builtin_payload_secret, _builtin_payload_source = load_payload_secret()
 check("shared bootstrap embeds the public P1M-E SecurityAccess root",
@@ -549,7 +549,7 @@ check("deployer requires explicit boot F181 on first live preflight", "first liv
 check("RESTORE executor validates only hash-bound recovery artifact", "validate_restore_artifact(" in restore_source and "restore_payload" in restore_source)
 check("RESTORE executor enables exact direct-boot recovery", "allow_direct_boot=true" in restore_source and "expected-boot-f181-hex" in restore_source)
 check("direct-boot RAM exec accepts only exact expected boot F181", "allow_direct_boot" in ram_exec_source and "initial_f181_hex.lower() == expected_boot_f181_hex.lower()" in ram_exec_source and "_prepare_direct_bootloader(" in ram_exec_source)
-post_verify_source = (REPO / "exploit" / "patcher" / "post_apply_verify.py").read_text(encoding="utf-8").lower()
+post_verify_source = (REPO / "tsk" / "patcher" / "post_apply_verify.py").read_text(encoding="utf-8").lower()
 check("post-APPLY verifier is validate-only by construction", "flags=flag_validate_only" in post_verify_source and "run_apply" not in post_verify_source)
 check("post-APPLY verifier binds deterministic patched-image SHA to APPLY record", "expected_post_image_sha256" in post_verify_source and "simulate_apply" in post_verify_source)
 check("post-APPLY verifier requires exact target and boot F181", "--expected-f181-hex" in post_verify_source and "--expected-boot-f181-hex" in post_verify_source)
@@ -563,7 +563,7 @@ with tempfile.TemporaryDirectory() as td:
     result = subprocess.run(
         [
             sys.executable,
-            str(REPO / "exploit" / "patcher" / "deploy.py"),
+            str(REPO / "tsk" / "patcher" / "deploy.py"),
             str(REPO / "firmware" / "RH850_P1M-E_CodeFlash.bin"),
             "--manifest", str(manifest_path),
             "--template", str(template_path),

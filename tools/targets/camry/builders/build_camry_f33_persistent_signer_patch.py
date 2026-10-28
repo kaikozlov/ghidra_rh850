@@ -15,10 +15,10 @@ from typing import Any
 
 ROOT = REPO_ROOT
 
-from exploit.common.payload_package import package_shellcode  # noqa: E402
-from exploit.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET  # noqa: E402
+from tsk.common.payload_package import package_shellcode  # noqa: E402
+from tsk.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET  # noqa: E402
 import tools.targets.camry.research.ram_runtime.b6.build_camry_f33_b6_persistent_signer as signer_build
-from exploit.patcher.build_payload import (  # noqa: E402
+from tsk.patcher.build_payload import (  # noqa: E402
     build_configured_payload,
     config_from_manifest,
     simulate_apply,
@@ -28,7 +28,7 @@ from tools.targets.camry.builders import build_camry_f33_crypto_result_patch as 
 from tools.rh850_toolchain import command as rh850_command  # noqa: E402
 
 SIGNER_BUILDER = ROOT / "tools/targets/camry/research/ram_runtime/b6/build_camry_f33_b6_persistent_signer.py"
-FIXED_BLOB_SOURCE = ROOT / "exploit/patcher/fixed_blob.c"
+FIXED_BLOB_SOURCE = ROOT / "tsk/patcher/fixed_blob.c"
 DEFAULT_OUT = ROOT / "build/out/f33-persistent-b6-signer"
 FLASH_SIZE = 0x100000
 CRC_FIXUP_VA = 0xFFDEC
@@ -111,7 +111,7 @@ def compile_fixed_blob_shellcode(*, expected: list[bytes], replacement: list[byt
         "v850-elf-gcc", "-mv850e3v5", "-mno-app-regs", "-fPIC", "-ffreestanding",
         "-fno-toplevel-reorder", "-fno-builtin", "-flto", "-Os", "-nostdlib",
         "-Wl,-Ttext=0xFEBF0000", "-Wl,-e,_exploit", "-Wl,--build-id=none",
-        *definitions, "/src/exploit/patcher/fixed_blob.c", f"/out/{blob_source.name}",
+        *definitions, "/src/tsk/patcher/fixed_blob.c", f"/out/{blob_source.name}",
         "-o", f"/out/{elf.name}",
     ]
     base = rh850_command(work)

@@ -9,8 +9,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
 
-import exploit.ram_runtime.tss3_request_signer_ui_bringup as ui_bringup
-import exploit.ram_runtime.tss3_startup_programming as startup_programming
+import tsk.ram_runtime.tss3_request_signer_ui_bringup as ui_bringup
+import tsk.ram_runtime.tss3_startup_programming as startup_programming
 
 
 def check(name: str, cond: object) -> None:

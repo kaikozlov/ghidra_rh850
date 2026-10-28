@@ -26,7 +26,7 @@ from typing import Any
 
 
 
-from exploit.common.ram_exec import (
+from tsk.common.ram_exec import (
     ELM327_SAFETY_MODE,
     RAM_LOAD_ADDR,
     _import_uds,

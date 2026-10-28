@@ -31,7 +31,7 @@ from typing import Any
 
 
 
-from exploit.common.ram_exec import (
+from tsk.common.ram_exec import (
     ELM327_SAFETY_MODE,
     RAM_LOAD_ADDR,
     RamExecError,
@@ -44,7 +44,7 @@ from exploit.common.ram_exec import (
     explicit_route,
     load_security_secret,
 )
-from exploit.ram_runtime.panda_eps import wait_for_f181
+from tsk.ram_runtime.panda_eps import wait_for_f181
 
 EXPECTED_F181_HEX = "023839363546333330373030300000000038413331313333303331303000000000"
 EXPECTED_BOOT_F181_HEX = "02" + "21" * 32

@@ -12,7 +12,7 @@ from pathlib import Path
 from tools import REPO_ROOT
 REPO = REPO_ROOT
 
-from exploit.command5.build_experiment import (
+from tsk.command5.build_experiment import (
     EXPECTED_RESIDUE,
     FCU_BLOCK_SIZE,
     MUTATIONS,
@@ -20,7 +20,7 @@ from exploit.command5.build_experiment import (
     ExperimentBuildError,
     build_plan,
 )
-from exploit.command5.stimulus import (
+from tsk.command5.stimulus import (
     CONTROL_STATUS_ABSENT,
     CONTROL_STATUS_FAILED,
     CONTROL_STATUS_INCOMPATIBLE,
@@ -235,7 +235,7 @@ else:
     check("wrong RID/selector response prefix is rejected", False)
 
 print("\n== live-observation timing/provenance/verdict schema (v4) ==")
-stimulus_source = (REPO / "exploit" / "command5" / "stimulus.py").read_text(encoding="utf-8").lower()
+stimulus_source = (REPO / "tsk" / "command5" / "stimulus.py").read_text(encoding="utf-8").lower()
 check("live result schema is pinned as v4", '"sienna-command5-app-live-result-v4"' in stimulus_source)
 check("older live result schemas are retired", all(f'"sienna-command5-app-live-result-v{s}"' not in stimulus_source for s in (1, 2, 3)))
 check("live module constant matches the pinned schema", LIVE_RESULT_SCHEMA == "sienna-command5-app-live-result-v4")
@@ -298,7 +298,7 @@ check("--control-artifact requires --execute", '"--control-artifact requires --e
 
 print("\n== separate-boot control artifact loader ==")
 import tempfile
-from exploit.common.ram_exec import RamExecRoute
+from tsk.common.ram_exec import RamExecRoute
 with tempfile.TemporaryDirectory() as td:
     tmp = Path(td)
     route = RamExecRoute(0, 1, "old", 0)
@@ -353,7 +353,7 @@ check("primary timing block reports RTT and poll-interval statistics", '"rtt_sta
 check("plan publishes the verdict contract and control option", '"verdict_contract": verdict_contract' in stimulus_source and '"known_good_control"' in stimulus_source)
 
 print("\n== scope and interpretation discipline ==")
-source = (REPO / "exploit" / "command5" / "build_experiment.py").read_text(encoding="utf-8").lower()
+source = (REPO / "tsk" / "command5" / "build_experiment.py").read_text(encoding="utf-8").lower()
 check("experiment patch does not contain SecOC Gate-2 target addresses", "8e6c6" not in source and "8e6c8" not in source)
 check("experiment patch does not import production flash backend", "flash_backend" not in source)
 check("stimulus labels result as application-context evidence only", "does not prove production secoc transmit integration" in stimulus_source)
@@ -365,8 +365,8 @@ check("live stimulus rejects Panda-blocked frames", "safety_tx_blocked" in stimu
 check("live stimulus restores ordinary ELM327 mode", "restore ordinary diagnostic-only elm mode" in stimulus_source)
 
 print("\n== bounded Panda safety provenance ==")
-safety_patch_path = REPO / "exploit" / "command5" / "kai-openpilot-command5-safety.patch"
-safety_meta_path = REPO / "exploit" / "command5" / "kai-openpilot-command5-safety.json"
+safety_patch_path = REPO / "tsk" / "command5" / "kai-openpilot-command5-safety.patch"
+safety_meta_path = REPO / "tsk" / "command5" / "kai-openpilot-command5-safety.json"
 safety_meta = json.loads(safety_meta_path.read_text(encoding="utf-8"))
 check("bounded safety patch is hash-pinned", hashlib.sha256(safety_patch_path.read_bytes()).hexdigest() == safety_meta["patch"]["sha256"])
 check("bounded safety pins full external commits", len(safety_meta["commit"]) == 40 and len(safety_meta["opendbc"]["commit"]) == 40)

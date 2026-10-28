@@ -1,0 +1,125 @@
+#!/usr/bin/env python3
+"""Compile the physically read-only CodeFlash dumper RH850 shellcode."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import subprocess
+import sys
+import tempfile
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO))
+
+from tsk.common.payload_package import CALLBACK_OFFSET, PAYLOAD_LOAD_ADDR
+from tools.rh850_toolchain import command as rh850_command, metadata as toolchain_metadata
+
+SOURCE = REPO / "tsk" / "dumper" / "main.c"
+DEFAULT_OUTPUT = REPO / "build" / "out" / "codeflash-dumper" / "codeflash_dumper_shellcode.bin"
+
+
+class DumperBuildError(RuntimeError):
+    pass
+
+
+def sha256_bytes(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def _compile_args(gcc: str, source: str, output: str) -> list[str]:
+    return [
+        gcc,
+        "-mv850e3v5",
+        "-mno-app-regs",
+        "-fPIC",
+        "-ffreestanding",
+        "-fno-toplevel-reorder",
+        "-fno-delete-null-pointer-checks",
+        "-fno-builtin",
+        "-Os",
+        "-nostdlib",
+        f"-Wl,-Ttext=0x{PAYLOAD_LOAD_ADDR:08X}",
+        "-Wl,-e,_exploit",
+        "-Wl,--build-id=none",
+        source,
+        "-o",
+        output,
+    ]
+
+
+def _entry_address(nm_text: str) -> int | None:
+    for line in nm_text.splitlines():
+        parts = line.split()
+        if len(parts) >= 3 and parts[-1] == "_exploit":
+            try:
+                return int(parts[0], 16)
+            except ValueError:
+                return None
+    return None
+
+
+
+
+def _compile(work: Path) -> tuple[bytes, str]:
+    base = rh850_command(work)
+    subprocess.run(base + _compile_args("v850-elf-gcc", "/src/tsk/dumper/main.c", "/out/dumper.elf"), check=True)
+    subprocess.run(base + ["v850-elf-objcopy", "-O", "binary", "-j", ".text", "/out/dumper.elf", "/out/dumper.bin"], check=True)
+    nm_text = subprocess.run(base + ["v850-elf-nm", "-n", "/out/dumper.elf"], check=True, capture_output=True, text=True).stdout
+    return (work / "dumper.bin").read_bytes(), nm_text
+
+
+def build(output: Path) -> dict:
+    with tempfile.TemporaryDirectory(prefix="codeflash-dumper-") as td:
+        work = Path(td)
+        shellcode, nm_text = _compile(work)
+        toolchain = toolchain_metadata()
+
+    entry = _entry_address(nm_text)
+    if entry != PAYLOAD_LOAD_ADDR:
+        raise DumperBuildError(
+            f"exploit entry is not payload load address 0x{PAYLOAD_LOAD_ADDR:08X}: {entry!r}"
+        )
+    entry_offset = entry - PAYLOAD_LOAD_ADDR
+    if not shellcode or len(shellcode) > CALLBACK_OFFSET:
+        raise DumperBuildError(
+            f"dumper .text must fit below callback @ 0x{CALLBACK_OFFSET:X}; got 0x{len(shellcode):X}"
+        )
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_bytes(shellcode)
+    metadata = {
+        "schema": "p1me-codeflash-dumper-shellcode-v1",
+        "source": str(SOURCE.relative_to(REPO)),
+        "source_sha256": sha256_bytes(SOURCE.read_bytes()),
+        "backend": "tools/rh850",
+        "toolchain": toolchain,
+        "link_vma": f"0x{PAYLOAD_LOAD_ADDR:08X}",
+        "entry_offset": entry_offset,
+        "size": len(shellcode),
+        "sha256": sha256_bytes(shellcode),
+        "callback_limit": CALLBACK_OFFSET,
+        "read_only": True,
+    }
+    output.with_suffix(output.suffix + ".json").write_text(
+        json.dumps(metadata, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
+    return metadata
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("output", nargs="?", type=Path, default=DEFAULT_OUTPUT)
+    
+    args = parser.parse_args()
+    try:
+        metadata = build(args.output)
+    except (DumperBuildError, OSError, subprocess.CalledProcessError) as exc:
+        parser.error(str(exc))
+    print(json.dumps(metadata, indent=2, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

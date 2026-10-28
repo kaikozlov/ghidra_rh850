@@ -30,8 +30,8 @@ from typing import Any
 from tools import REPO_ROOT as REPO
 
 
-from exploit.common.payload_package import inspect_payload, package_shellcode
-from exploit.common.ram_exec import (
+from tsk.common.payload_package import inspect_payload, package_shellcode
+from tsk.common.ram_exec import (
     ELM327_SAFETY_MODE,
     RX_ADDR,
     TX_ADDR,
@@ -61,14 +61,14 @@ from tools.targets.corolla.research.ram_runtime.corolla_hf_direct_canary import 
     _resolve_route,
     _session_ladder,
 )
-from exploit.followups.xcp_read_probe import (
+from tsk.followups.xcp_read_probe import (
     CONNECT_REQUEST,
     _exchange,
     parse_positive_response,
     parse_upload_response,
     short_upload_request,
 )
-from exploit.followups.xcp_shadow_write_plan import download_request, set_mta_request
+from tsk.followups.xcp_shadow_write_plan import download_request, set_mta_request
 
 SCHEMA = "corolla-hf-direct-command5-v1"
 CANARY_SCHEMA = "corolla-hf-direct-canary-v1"

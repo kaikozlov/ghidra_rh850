@@ -2,7 +2,7 @@
 """Check acquisition/variant readiness of a CodeFlash artifact (offline, read-only).
 
 Given an acquired CodeFlash image (and optionally the `.run.json` produced by
-``exploit/dumper/dump_codeflash.py``), this tool verifies the evidence chain that
+``tsk/dumper/dump_codeflash.py``), this tool verifies the evidence chain that
 the next analysis stages depend on and emits one machine-readable artifact:
 
 1. **acquisition** — exact bare-1MiB geometry, recomputed SHA-256/size, and (when
@@ -210,7 +210,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--run-json",
         type=Path,
-        help="optional .run.json written by exploit/dumper/dump_codeflash.py",
+        help="optional .run.json written by tsk/dumper/dump_codeflash.py",
     )
     parser.add_argument(
         "--manifest",

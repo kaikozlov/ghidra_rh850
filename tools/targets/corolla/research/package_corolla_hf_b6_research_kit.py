@@ -18,9 +18,11 @@ BUILDER = ROOT / "tools/targets/corolla/research/ram_runtime/build_corolla_hf_b6
 LAUNCHER = ROOT / "tools/targets/corolla/research/ram_runtime/corolla_hf_b6_inline_signer_launcher.sh"
 RUNTIME_FILES = (
     "tools/__init__.py",
-    "exploit/common/ram_exec.py",
+    "tsk/__init__.py",
+    "tsk/common/__init__.py",
+    "tsk/common/ram_exec.py",
     "tools/targets/corolla/research/ram_runtime/corolla_hf_b6_inline_signer.py",
-    "exploit/ram_runtime/tss3_panda_lease.sh",
+    "tsk/ram_runtime/tss3_panda_lease.sh",
 )
 
 

@@ -5,8 +5,8 @@ import argparse, json, subprocess, tempfile
 from pathlib import Path
 from tools import REPO_ROOT as REPO
 
-from exploit.common.payload_package import package_shellcode
-from exploit.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET
+from tsk.common.payload_package import package_shellcode
+from tsk.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET
 from tools.targets.corolla.research.ram_runtime.build_corolla_hf_command5_carrier import validate_toolchain
 from tools.targets.camry.research.ram_runtime.monitor.build_camry_f33_runtime_monitor import CONTROL_BLOCK_BASE, CONTROL_BLOCK_SIZE, CONTROL_ID, CONTROL_STAGING, LOW_UNREFERENCED_END, MONITOR_MAGIC, MONITOR_VERSION, SNAPSHOT_END_GENERATION_OFFSET, SNAPSHOT_GENERATION_OFFSET, SNAPSHOT_VALUES_OFFSET, WATCH_SLOTS
 from tools.targets.camry.research.ram_runtime.monitor.build_camry_f33_runtime_replay_discriminator import EXPECTED_RESIDENT_JARL_TARGETS, IMAGE, IMAGE_SHA256, RESIDENT_BASE, RESIDENT_END, RESIDENT_LIMIT, RESIDENT_SYMBOLS, STAGING_BASE, STAGING_LIMIT, STAGING_RESIDENT_OFFSET, compile_asm, jarl_targets, nm_symbol, sha_bytes, sha_file, staging_source, verify_static_contract

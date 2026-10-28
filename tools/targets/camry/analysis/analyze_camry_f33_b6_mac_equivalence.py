@@ -22,7 +22,7 @@ from typing import Any
 
 ROOT = REPO_ROOT
 
-from exploit.patcher.build_payload import config_from_manifest, simulate_apply
+from tsk.patcher.build_payload import config_from_manifest, simulate_apply
 from tools.targets.camry.builders import build_camry_f33_crypto_result_patch as stage5
 from tools.targets.camry.builders import build_camry_f33_freshness_result_patch as stage4
 from tools.targets.camry.builders import build_camry_f33_gate2_root_result_patch as stage3

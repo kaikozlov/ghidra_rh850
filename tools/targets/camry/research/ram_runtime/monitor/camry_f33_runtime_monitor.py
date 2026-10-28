@@ -22,7 +22,7 @@ from typing import Any, Callable
 
 
 
-from exploit.common.ram_exec import (
+from tsk.common.ram_exec import (
     RAM_LOAD_ADDR,
     RamExecError,
     _import_uds,
@@ -41,7 +41,7 @@ from tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_replay_d
     verify_ready_parked_on_panda,
     _read_memory,
 )
-from exploit.ram_runtime.panda_eps import set_alloutput_mode, wait_for_f181
+from tsk.ram_runtime.panda_eps import set_alloutput_mode, wait_for_f181
 
 EXPECTED_PAYLOAD_SHA256 = "a6e3bf4d8efd42446cf3bd0e5e4752eba5a466217257d225c6059e04dd386aa2"
 EXPECTED_STAGING_SHA256 = "873cae752190d66ba9ca94ba926fd1af3defe50c785cbcf1555659d3f77d91ff"

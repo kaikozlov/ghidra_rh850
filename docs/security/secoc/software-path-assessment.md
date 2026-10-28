@@ -240,7 +240,7 @@ clear. The complete key-lifetime analysis and exact-F33 transfer are canonical
 in [bootloader-payload-gate.md](../bootloader-payload-gate.md#key-material-lifetime-and-residue-boundary).
 
 The read-only host implementation is
-`exploit/followups/application_rmba_probe.py`. It models the exact exclusion
+`tsk/followups/application_rmba_probe.py`. It models the exact exclusion
 rules, defaults to planning/simulation, requires explicit isolated-bench consent
 for live reads, and can acquire the 29,952-byte readable DataFlash subset in 119
 requests. `tests/diagnostics/verify_application_read_memory_by_address.py` pins the firmware
@@ -430,7 +430,7 @@ with parameter flag `0x8000`: only five eight-byte input IDs on one encoded bus
 are added to the existing diagnostic allowlist. The host selects this mode only
 while sending the five input PDUs, checks `safety_tx_blocked == 0`, and restores
 ordinary ELM327 mode before polling DID `0x1010`. The exact external
-opendbc/superproject commits and patch are pinned under `exploit/command5/`.
+opendbc/superproject commits and patch are pinned under `tsk/command5/`.
 
 This closes the host/Panda transport defect mechanically. It does not replace
 the still-required initialized-application hardware observation.

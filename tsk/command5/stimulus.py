@@ -1,0 +1,925 @@
+#!/usr/bin/env python3
+"""Build and optionally run the application-context selector-4 command-5 stimulus."""
+
+from __future__ import annotations
+
+import argparse
+import hashlib
+import importlib
+import json
+import statistics
+import sys
+import time
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any
+
+REPO = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(REPO))
+
+from tsk.common.ram_exec import (
+    ELM327_SAFETY_MODE,
+    RX_ADDR,
+    TX_ADDR,
+    RamExecError,
+    ensure_boardd_stopped,
+    explicit_route,
+    route_from_session,
+)
+
+INPUT_CAN_IDS = (0x01B, 0x01C, 0x01D, 0x01E, 0x01F)
+RID_1010 = 0x1010
+RID_BANK1_ACTIVATE = 0x100F
+CONTROL_TYPE_START = 1
+CONTROL_TYPE_REQUEST_RESULTS = 3
+COMMAND5_SELECTOR = 4
+COMMAND5_MODE = 1
+DEFAULT_ROUNDS = 5
+DEFAULT_ROUND_INTERVAL = 0.10
+DEFAULT_POLL_INTERVAL = 0.05
+ELM327_COMMAND5_FLAG = 0x8000
+ELM327_COMMAND5_BUS_SHIFT = 8
+ELM327_COMMAND5_BASE_PARAM_MASK = 0x00FF
+
+PLAN_SCHEMA = "sienna-command5-app-stimulus-v1"
+LIVE_RESULT_SCHEMA = "sienna-command5-app-live-result-v4"
+VERDICT_SCHEMA = "sienna-command5-verdict-v1"
+
+VERDICT_CONTRACT = {
+    "schema": VERDICT_SCHEMA,
+    "fields": {
+        "result_regenerated": "true/false/null — final observed generated result differs from the pre-stimulus diagnostic baseline (null when no baseline was obtainable)",
+        "result_matches_expected_value": "true/false/null — regenerated result equals the chosen expected value (null when not regenerated or no expected value was supplied)",
+        "command_failure": "true/false/null — null whenever the recorded evidence cannot separate command failure from expected-result mismatch",
+        "compare_mismatch": "true/false/null — same separability rule as command_failure",
+        "known_good_control": "optional separate-boot control evidence: a prior live-result artifact from a --role control run on a different boot, SHA-bound and identity-checked at load time; never re-executed on this boot",
+        "dtc_side_channel": "read-only 19 02 FF delta across the primary trial window; DTC 0x00D317 alone cannot separate command failure from mismatch",
+        "conclusion": "positive | inconclusive_no_baseline | negative_no_control | negative_control_passed | negative_control_failed",
+    },
+    "separability_rule": (
+        "command_failure/compare_mismatch are decided only when the evidence separates them: "
+        "a regenerated result decides both directly; a passing separate-boot known-good control "
+        "artifact plus an unchanged DTC snapshot bounds the negative to command non-execution; "
+        "every other negative stays null with the ambiguity recorded"
+    ),
+    "evidence_boundary": (
+        "hardware observation only; a positive result is application-context evidence for "
+        "selector-4 command-5 execution and does not prove production SecOC transmit "
+        "integration or the separate Gate-2 bypass"
+    ),
+}
+
+
+class StimulusError(ValueError):
+    pass
+
+
+@dataclass(frozen=True)
+class InputFrame:
+    address: int
+    data: bytes
+
+    def as_dict(self) -> dict[str, Any]:
+        return {"address": f"0x{self.address:03X}", "data": self.data.hex()}
+
+
+def command5_elm327_param(*, base_param: int, bus: int) -> int:
+    """Encode the local bounded command-5 Panda safety parameter.
+
+    The corresponding experiment-only ELM327 hook permits exactly classic
+    0x01B..0x01F frames on the encoded bus. Unknown pre-existing high bits are
+    rejected instead of being silently repurposed.
+    """
+    if not 0 <= bus <= 2:
+        raise StimulusError("command-5 probe bus must be 0, 1, or 2")
+    if not 0 <= base_param <= 0xFFFF or base_param & ~ELM327_COMMAND5_BASE_PARAM_MASK:
+        raise StimulusError(
+            "ELM327 parameter uses bits reserved by the bounded command-5 experiment"
+        )
+    return ELM327_COMMAND5_FLAG | (bus << ELM327_COMMAND5_BUS_SHIFT) | base_param
+
+
+def _require_16(name: str, value: bytes) -> None:
+    if len(value) != 16:
+        raise StimulusError(f"{name} must be exactly 16 bytes")
+
+
+def build_input_frames(
+    message: bytes,
+    *,
+    expected: bytes = b"\x00" * 16,
+    key_selector: int = COMMAND5_SELECTOR,
+    mode: int = COMMAND5_MODE,
+) -> tuple[InputFrame, ...]:
+    _require_16("message", message)
+    _require_16("expected", expected)
+    if not 0 <= key_selector <= 0x0E:
+        raise StimulusError("key_selector must fit the command-5 selector range 0..14")
+    if not 0 <= mode <= 0xFF:
+        raise StimulusError("mode must fit uint8")
+    return (
+        InputFrame(0x01B, bytes((key_selector, mode, 0, 0, 0, 0, 0, 0))),
+        InputFrame(0x01C, message[:8]),
+        InputFrame(0x01D, message[8:]),
+        InputFrame(0x01E, expected[:8]),
+        InputFrame(0x01F, expected[8:]),
+    )
+
+
+def build_stimulus_plan(
+    message: bytes,
+    *,
+    expected: bytes = b"\x00" * 16,
+    rounds: int = DEFAULT_ROUNDS,
+    round_interval: float = DEFAULT_ROUND_INTERVAL,
+) -> dict[str, Any]:
+    if rounds < 4:
+        raise StimulusError(
+            "use at least four spaced update rounds: the collector snapshots the first changed value "
+            "then requires three stable observations (threshold 3)"
+        )
+    if round_interval <= 0:
+        raise StimulusError("round_interval must be positive")
+    frames = build_input_frames(message, expected=expected)
+    return {
+        "schema": PLAN_SCHEMA,
+        "selector": COMMAND5_SELECTOR,
+        "mode": COMMAND5_MODE,
+        "message": message.hex(),
+        "expected_compare_value": expected.hex(),
+        "rounds": rounds,
+        "round_interval_seconds": round_interval,
+        "frames_per_round": [frame.as_dict() for frame in frames],
+        "stability": {
+            "required_unchanged_observations": 3,
+            "recommended_rounds": rounds,
+            "reason": (
+                "signals 95..100 commit only after the COM update counter changes and the same shadow "
+                "value is observed three times; spacing rounds prevents multiple bus updates from "
+                "collapsing into one cyclic observation"
+            ),
+        },
+        "activation": {
+            "request": "31 01 10 0F",
+            "positive_response_prefix": "71 01 10 0F",
+            "effect": "stock RoutineControl RID 0x100F startRoutine wrapper 0x8A782 calls crypto_test_bank1_activate 0x69018",
+            "lifecycle": (
+                "deterministic baseline: start from a fresh application boot because the bank finalizer "
+                "leaves active=0x02/0xFF; firmware also has an internal application-transition reset "
+                "path (0x4F93C -> reset request 0xA5 -> 0x68C0C -> 0x67FCE), but deliberate "
+                "tester-controlled re-arm through that path is not established"
+            ),
+        },
+        "observation": {
+            "request": "31 03 10 10",
+            "positive_response_prefix": "71 03 10 10",
+            "status_byte": "response[4] remains the stock RID-0x1010 result/status byte and is not a command-5 completion signal",
+            "generated_cmac": "response[5:21] mirrors FEBE51AA..FEBE51B9",
+            "extra_bytes": "response[21:53] are adjacent crypto-test RAM and must not be interpreted",
+        },
+        "verdict_contract": VERDICT_CONTRACT,
+        "known_good_control": (
+            "optional: run a known-good message/expected pair first on a separate fresh boot with "
+            "--role control, then pass that run's artifact to the experiment run with "
+            "--control-artifact. The control is loaded, SHA-bound, and identity-checked; it is "
+            "never re-executed, because bank 1 is not re-armable after its terminal state on the "
+            "same boot"
+        ),
+    }
+
+
+def parse_control_type3_response(response: bytes) -> dict[str, Any]:
+    if len(response) < 53:
+        raise StimulusError(f"RoutineControl result response must be at least 53 bytes, got {len(response)}")
+    if response[:4] != b"\x71\x03\x10\x10":
+        raise StimulusError(
+            f"unexpected RoutineControl result response prefix: {response[:4].hex()}"
+        )
+    return {
+        "status": response[4],
+        "generated_cmac": response[5:21],
+        "extra": response[21:53],
+    }
+
+
+def latency_statistics(seconds: list[float]) -> dict[str, Any] | None:
+    """Summarize monotonic-clock deltas; never mixes wall time into the arithmetic."""
+    if not seconds:
+        return None
+    ordered = sorted(seconds)
+    return {
+        "count": len(seconds),
+        "min_seconds": min(seconds),
+        "max_seconds": max(seconds),
+        "mean_seconds": sum(seconds) / len(seconds),
+        "median_seconds": statistics.median(seconds),
+        "jitter_seconds": max(seconds) - min(seconds),
+        "samples_source": "time.monotonic deltas only",
+    }
+
+
+def observation_rtt_statistics(observations: list[dict[str, Any]]) -> dict[str, Any] | None:
+    return latency_statistics([row["rtt_seconds"] for row in observations])
+
+
+def observation_interval_statistics(observations: list[dict[str, Any]]) -> dict[str, Any] | None:
+    if len(observations) < 2:
+        return None
+    stamps = [row["observed_monotonic"] for row in observations]
+    return latency_statistics(
+        [later - earlier for earlier, later in zip(stamps, stamps[1:])]
+    )
+
+
+def classify_dtc_change(
+    before_hex: str | None, after_hex: str | None
+) -> dict[str, Any]:
+    """Classify the read-only SID-0x19/0x02 delta without ever mutating DTC state."""
+    if before_hex is None or after_hex is None:
+        return {"available": False, "changed": None}
+    return {
+        "available": True,
+        "changed": before_hex != after_hex,
+        "before_hex": before_hex,
+        "after_hex": after_hex,
+    }
+
+
+CONTROL_STATUS_POSITIVE = "positive"
+CONTROL_STATUS_FAILED = "failed"
+CONTROL_STATUS_INCOMPATIBLE = "incompatible"
+CONTROL_STATUS_ABSENT = "absent"
+ROLE_EXPERIMENT = "experiment"
+ROLE_CONTROL = "control"
+ROLES = (ROLE_EXPERIMENT, ROLE_CONTROL)
+
+
+def load_control_artifact(
+    path: Path,
+    *,
+    f181_hex: str | None,
+    route,
+) -> dict[str, Any]:
+    """Load and classify a prior separate-boot control run's live-result artifact.
+
+    The control is *evidence*, never something this boot executes: bank 1 is not
+    re-armable after its terminal state, so a same-boot second stimulus would test
+    a spent bank. The artifact is SHA-bound, must be a v4 live result explicitly
+    tagged ``--role control``, and must agree with this run on F181 identity and
+    diagnostic route to count as compatible.
+    """
+    try:
+        raw = path.read_bytes()
+    except OSError as exc:
+        raise StimulusError(f"cannot read control artifact {path}: {exc}") from exc
+    try:
+        data = json.loads(raw.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise StimulusError(f"control artifact {path} is not valid JSON: {exc}") from exc
+    if not isinstance(data, dict):
+        raise StimulusError(f"control artifact {path} is not a JSON object")
+    if data.get("schema") != LIVE_RESULT_SCHEMA:
+        raise StimulusError(
+            f"control artifact {path} must carry schema {LIVE_RESULT_SCHEMA}"
+        )
+    if data.get("role") != ROLE_CONTROL:
+        raise StimulusError(
+            f"control artifact {path} was not produced by a --role {ROLE_CONTROL} run"
+        )
+
+    control_route = data.get("route") or {}
+    f181_match = (
+        f181_hex is not None
+        and data.get("f181_hex") is not None
+        and f181_hex.lower() == str(data["f181_hex"]).lower()
+    )
+    route_match = (
+        control_route.get("bus") == route.bus
+        and control_route.get("elm327_param") == route.elm327_param
+        and control_route.get("uds_variant") == route.uds_variant
+        and control_route.get("cpu_index") == route.cpu_index
+    )
+    verdict = data.get("verdict") or {}
+    regenerated = verdict.get("result_regenerated") is True
+
+    if not (f181_match and route_match):
+        status = CONTROL_STATUS_INCOMPATIBLE
+    elif regenerated:
+        status = CONTROL_STATUS_POSITIVE
+    else:
+        status = CONTROL_STATUS_FAILED
+
+    return {
+        "source": "separate-boot artifact",
+        "path": str(path),
+        "sha256": hashlib.sha256(raw).hexdigest(),
+        "status": status,
+        "role": data.get("role"),
+        "f181_match": f181_match,
+        "route_match": route_match,
+        "control_f181_hex": data.get("f181_hex"),
+        "control_route": {
+            "bus": control_route.get("bus"),
+            "elm327_param": control_route.get("elm327_param"),
+            "uds_variant": control_route.get("uds_variant"),
+            "cpu_index": control_route.get("cpu_index"),
+        },
+        "control_result_regenerated": regenerated,
+        "control_conclusion": verdict.get("conclusion"),
+        "executed_this_boot": False,
+        "purpose": (
+            "pipeline sanity from a different boot (route, activation, patch, polling); "
+            "bank 1 is not re-armable on one boot, so the control is never re-run here"
+        ),
+    }
+
+
+def build_verdict(
+    *,
+    result_regenerated: bool | None,
+    result_matches_expected: bool | None,
+    control_status: str,
+    dtc_changed: bool | None,
+) -> dict[str, Any]:
+    """Machine-readable separation of command failure from compare mismatch where possible.
+
+    Null means "not separable with the recorded evidence" — never a silent default to
+    either failure mode. ``control_status`` classifies a *separate-boot* control
+    artifact (positive / failed / incompatible / absent); the control is loaded
+    evidence about the observation pipeline, never a second stimulus on this boot.
+    """
+    command_failure: bool | None = None
+    compare_mismatch: bool | None = None
+
+    if result_regenerated is True:
+        conclusion = "positive"
+        command_failure = False
+        compare_mismatch = None if result_matches_expected is None else not result_matches_expected
+        separability = (
+            "the regenerated 16-byte result decides execution directly; the expected-value comparison "
+            "is read out of the patched diagnostic response rather than inferred from a DTC"
+        )
+    elif result_regenerated is None:
+        conclusion = "inconclusive_no_baseline"
+        separability = (
+            "no pre-stimulus diagnostic baseline was obtainable, so no statement about the "
+            "generated result is possible in this run"
+        )
+    elif control_status == CONTROL_STATUS_POSITIVE:
+        conclusion = "negative_control_passed"
+        # A different-boot control proves that this target/route/tooling combination
+        # can work, but it cannot establish what happened on the current boot.  In
+        # particular, an unchanged DTC cannot distinguish command non-execution from
+        # an unobserved/unchanged terminal state, and DTC 0x00D317 explicitly conflates
+        # command failure with compare mismatch.  Keep both causal fields null.
+        if dtc_changed is True:
+            separability = (
+                "a compatible separate-boot control regenerated a result, so the pipeline has "
+                "worked on this target/route before; this experiment also latched DTC 0x00D317, "
+                "but that DTC conflates command failure with expected-result mismatch, so the "
+                "current run's failure mode remains unresolved"
+            )
+        elif dtc_changed is False:
+            separability = (
+                "a compatible separate-boot control regenerated a result, but a control from a "
+                "different boot cannot prove command execution or non-execution on this boot; "
+                "the unchanged DTC therefore leaves the current negative unresolved"
+            )
+        else:
+            separability = (
+                "a compatible separate-boot control regenerated a result, but the current run "
+                "has no DTC snapshot and no regenerated output; the failure mode remains unresolved"
+            )
+    elif control_status == CONTROL_STATUS_FAILED:
+        conclusion = "negative_control_failed"
+        separability = (
+            "the known-good control run itself failed to regenerate a result on its own boot, "
+            "so the observation pipeline (route, activation, patch, or polling) is unproven; "
+            "this experiment negative is uninformative about command 5"
+        )
+    else:
+        conclusion = "negative_no_control"
+        separability = (
+            "no compatible known-good control artifact was supplied; DTC 0x00D317 alone "
+            "cannot separate command failure from expected-result mismatch"
+        )
+
+    verdict = {
+        "schema": VERDICT_SCHEMA,
+        "result_regenerated": result_regenerated,
+        "result_matches_expected_value": result_matches_expected,
+        "command_failure": command_failure,
+        "compare_mismatch": compare_mismatch,
+        "known_good_control": control_status,
+        "dtc_side_channel": {
+            "changed": dtc_changed,
+            "dtc": "0x00D317 / failure type 0x57 via Dem event 0xCC",
+            "limitation": (
+                "terminal negative outcome only; cannot by itself separate command "
+                "failure from expected-result mismatch"
+            ),
+        },
+        "conclusion": conclusion,
+        "separability": separability,
+        "evidence_boundary": VERDICT_CONTRACT["evidence_boundary"],
+    }
+    return verdict
+
+
+def _import_uds():
+    for name in ("opendbc.car.uds", "panda.python.uds", "panda.uds"):
+        try:
+            return importlib.import_module(name)
+        except ImportError:
+            continue
+    raise RamExecError("cannot import a supported UDS module")
+
+
+def _normalize_routine_response(payload: bytes, control_type: int) -> bytes:
+    """Restore the service/subfunction bytes stripped by UdsClient._uds_request."""
+    return bytes((0x71, control_type)) + bytes(payload)
+
+def parse_bank1_activation_response(response: bytes) -> dict[str, Any]:
+    expected = b"\x71\x01\x10\x0f"
+    if len(response) < len(expected) or response[:4] != expected:
+        raise StimulusError(
+            f"unexpected bank-1 activation response prefix: {response[:4].hex()}"
+        )
+    return {"positive_response": response[:4].hex()}
+
+
+def _raw_bank1_activate(uds_client, uds_mod) -> bytes:
+    payload = uds_client._uds_request(
+        uds_mod.SERVICE_TYPE.ROUTINE_CONTROL,
+        subfunction=CONTROL_TYPE_START,
+        data=RID_BANK1_ACTIVATE.to_bytes(2, "big"),
+    )
+    raw = _normalize_routine_response(payload, CONTROL_TYPE_START)
+    parse_bank1_activation_response(raw)
+    return raw
+
+
+def _raw_control_type3(uds_client, uds_mod) -> bytes:
+    payload = uds_client._uds_request(
+        uds_mod.SERVICE_TYPE.ROUTINE_CONTROL,
+        subfunction=CONTROL_TYPE_REQUEST_RESULTS,
+        data=RID_1010.to_bytes(2, "big"),
+    )
+    return _normalize_routine_response(payload, CONTROL_TYPE_REQUEST_RESULTS)
+
+
+def _raw_dtc_status_snapshot(uds_client, uds_mod) -> bytes:
+    """Read-only SID 0x19/0x02 snapshot; never clears or mutates DTC state."""
+    return bytes(
+        uds_client._uds_request(
+            uds_mod.SERVICE_TYPE.READ_DTC_INFORMATION,
+            data=b"\x02\xFF",
+        )
+    )
+
+
+def _utc_now() -> str:
+    """Wall-clock provenance stamp; never used for interval arithmetic."""
+    return datetime.now(timezone.utc).isoformat(timespec="milliseconds")
+
+
+class _Timeline:
+    """Ordered phase chronology with both clocks for cross-log correlation."""
+
+    def __init__(self) -> None:
+        self.events: list[dict[str, Any]] = []
+
+    def mark(self, event: str, **detail: Any) -> None:
+        row: dict[str, Any] = {
+            "event": event,
+            "monotonic": time.monotonic(),
+            "wall_utc": _utc_now(),
+        }
+        row.update(detail)
+        self.events.append(row)
+
+    def as_list(self) -> list[dict[str, Any]]:
+        return list(self.events)
+
+
+def _send_stimulus(
+    panda,
+    *,
+    route,
+    frames: tuple[InputFrame, ...],
+    rounds: int,
+    round_interval: float,
+    phase: str,
+) -> list[dict[str, Any]]:
+    sent: list[dict[str, Any]] = []
+    for round_index in range(rounds):
+        for frame in frames:
+            sent_monotonic = time.monotonic()
+            panda.can_send(frame.address, frame.data, route.bus)
+            sent.append(
+                {
+                    "phase": phase,
+                    "round": round_index + 1,
+                    "sent_monotonic": sent_monotonic,
+                    "sent_wall_utc": _utc_now(),
+                    **frame.as_dict(),
+                }
+            )
+        time.sleep(round_interval)
+    return sent
+
+
+def _poll_command5_results(
+    uds_client, uds_mod, *, poll_seconds: float
+) -> tuple[list[dict[str, Any]], bytes]:
+    deadline = time.monotonic() + poll_seconds
+    observations: list[dict[str, Any]] = []
+    last_cmac = b"\x00" * 16
+    while time.monotonic() < deadline:
+        requested_monotonic = time.monotonic()
+        parsed = parse_control_type3_response(_raw_control_type3(uds_client, uds_mod))
+        observed_monotonic = time.monotonic()
+        observations.append(
+            {
+                "status": parsed["status"],
+                "generated_cmac": parsed["generated_cmac"].hex(),
+                "requested_monotonic": requested_monotonic,
+                "observed_monotonic": observed_monotonic,
+                "rtt_seconds": observed_monotonic - requested_monotonic,
+                "observed_wall_utc": _utc_now(),
+            }
+        )
+        last_cmac = parsed["generated_cmac"]
+        # Do not treat non-zero data as a completion signal: the dormant buffer
+        # could contain a prior value. Preserve the full polling window and
+        # compare against the pre-stimulus diagnostic baseline instead.
+        time.sleep(DEFAULT_POLL_INTERVAL)
+    return observations, last_cmac
+
+
+def _snapshot_dtc(uds_client, uds_mod) -> str | None:
+    try:
+        return _raw_dtc_status_snapshot(uds_client, uds_mod).hex()
+    except Exception:
+        return None
+
+
+def _run_trial(
+    panda,
+    uds_client,
+    uds_mod,
+    *,
+    route,
+    message: bytes,
+    expected: bytes,
+    rounds: int,
+    round_interval: float,
+    poll_seconds: float,
+    timeline: _Timeline,
+    phase: str,
+) -> dict[str, Any]:
+    """One bounded stimulus+poll trial. Activates nothing; requires an armed bank."""
+    frames = build_input_frames(message, expected=expected)
+    probe_safety_param = command5_elm327_param(
+        base_param=route.elm327_param,
+        bus=route.bus,
+    )
+    blocked_tx = None
+    timeline.mark(f"{phase}_stimulus_started")
+    panda.set_safety_mode(ELM327_SAFETY_MODE, probe_safety_param)
+    try:
+        sent = _send_stimulus(
+            panda,
+            route=route,
+            frames=frames,
+            rounds=rounds,
+            round_interval=round_interval,
+            phase=phase,
+        )
+        blocked_tx = int(panda.health()["safety_tx_blocked"])
+        if blocked_tx != 0:
+            raise StimulusError(
+                "Panda blocked command-5 stimulus frames; install the audited bounded "
+                "ELM327 experiment firmware before interpreting this run"
+            )
+    finally:
+        # Restore ordinary diagnostic-only ELM mode before polling DID 0x1010.
+        panda.set_safety_mode(ELM327_SAFETY_MODE, route.elm327_param)
+    timeline.mark(f"{phase}_stimulus_finished", safety_tx_blocked=blocked_tx)
+
+    timeline.mark(f"{phase}_polling_started", poll_window_seconds=poll_seconds)
+    observations, last_cmac = _poll_command5_results(
+        uds_client, uds_mod, poll_seconds=poll_seconds
+    )
+    timeline.mark(f"{phase}_polling_finished", observations=len(observations))
+    return {
+        "message": message.hex(),
+        "expected_compare_value": expected.hex(),
+        "sent_frames": sent,
+        "safety_tx_blocked": blocked_tx,
+        "probe_safety_param": probe_safety_param,
+        "observations": observations,
+        "last_cmac_hex": last_cmac.hex(),
+        "rtt_statistics": observation_rtt_statistics(observations),
+        "poll_interval_statistics": observation_interval_statistics(observations),
+    }
+
+
+def run_live(
+    *,
+    message: bytes,
+    expected: bytes,
+    route,
+    rounds: int,
+    round_interval: float,
+    poll_seconds: float,
+    role: str = ROLE_EXPERIMENT,
+    control_artifact_path: Path | None = None,
+) -> dict[str, Any]:
+    if role not in ROLES:
+        raise StimulusError(f"role must be one of {ROLES}")
+    if role == ROLE_CONTROL and control_artifact_path is not None:
+        raise StimulusError("--control-artifact is for experiment runs; a control run produces its own artifact")
+    started_monotonic = time.monotonic()
+    timeline = _Timeline()
+    timeline.mark("started")
+    ensure_boardd_stopped()
+    try:
+        from panda import Panda
+    except ImportError as exc:
+        raise RamExecError("cannot import panda; run this on a comma/openpilot environment") from exc
+    uds_mod = _import_uds()
+    panda = Panda()
+    panda.set_safety_mode(ELM327_SAFETY_MODE, route.elm327_param)
+    uds_client = uds_mod.UdsClient(
+        panda,
+        TX_ADDR,
+        RX_ADDR,
+        route.bus,
+        timeout=0.1,
+        response_pending_timeout=1.0,
+    )
+    uds_client.diagnostic_session_control(uds_mod.SESSION_TYPE.DEFAULT)
+    timeline.mark("diagnostic_session_default")
+    uds_client.diagnostic_session_control(uds_mod.SESSION_TYPE.EXTENDED_DIAGNOSTIC)
+    timeline.mark("diagnostic_session_extended")
+
+    f181 = None
+    f181_ascii = None
+    try:
+        raw_f181 = bytes(
+            uds_client.read_data_by_identifier(
+                uds_mod.DATA_IDENTIFIER_TYPE.APPLICATION_SOFTWARE_IDENTIFICATION
+            )
+        )
+        f181 = raw_f181.hex()
+        try:
+            f181_ascii = raw_f181.rstrip(b"\x00").decode("ascii") or None
+        except UnicodeDecodeError:
+            f181_ascii = None
+    except Exception:
+        pass
+    timeline.mark("f181_read", f181_hex=f181)
+
+    # Preserve the no-SA stock DTC view before activation. This is read-only and
+    # allows the command-5 terminal event/DTC side channel to be distinguished
+    # from a pre-existing DTC without ever issuing ClearDiagnosticInformation.
+    dtc_before = _snapshot_dtc(uds_client, uds_mod)
+    timeline.mark("dtc_snapshot_before", available=dtc_before is not None)
+
+    # Activate immediately before the CAN stimulus. The stock activator only
+    # arms bank 1 while its active byte is zero. A fresh application boot is the
+    # deterministic baseline; firmware has an internal transition-reset path,
+    # but deliberate tester-controlled re-arm through it is not established.
+    activation = parse_bank1_activation_response(_raw_bank1_activate(uds_client, uds_mod))
+    timeline.mark("bank1_activation", positive_response=activation["positive_response"])
+
+    routine_result_before = None
+    baseline_rtt = None
+    try:
+        baseline_requested_monotonic = time.monotonic()
+        routine_result_before = parse_control_type3_response(_raw_control_type3(uds_client, uds_mod))
+        baseline_rtt = time.monotonic() - baseline_requested_monotonic
+    except Exception:
+        routine_result_before = None
+        baseline_rtt = None
+    timeline.mark("baseline_result_request", obtained=routine_result_before is not None)
+
+    trial = _run_trial(
+        panda,
+        uds_client,
+        uds_mod,
+        route=route,
+        message=message,
+        expected=expected,
+        rounds=rounds,
+        round_interval=round_interval,
+        poll_seconds=poll_seconds,
+        timeline=timeline,
+        phase="primary",
+    )
+
+    dtc_after = _snapshot_dtc(uds_client, uds_mod)
+    timeline.mark("dtc_snapshot_after", available=dtc_after is not None)
+
+    # The known-good control, when supplied, is loaded artifact evidence from a
+    # separate --role control boot. It is NEVER executed here: bank 1 is not
+    # re-armable after its terminal state, so a second stimulus on this boot
+    # would only observe a spent bank.
+    control_evidence: dict[str, Any] | None = None
+    if control_artifact_path is not None:
+        control_evidence = load_control_artifact(
+            control_artifact_path, f181_hex=f181, route=route
+        )
+        timeline.mark(
+            "control_artifact_loaded",
+            status=control_evidence["status"],
+            sha256=control_evidence["sha256"],
+        )
+
+    finished_monotonic = time.monotonic()
+    timeline.mark("finished")
+    baseline_cmac_hex = (
+        routine_result_before["generated_cmac"].hex() if routine_result_before is not None else None
+    )
+    changed_from_baseline = baseline_cmac_hex is not None and trial["last_cmac_hex"] != baseline_cmac_hex
+    result_matches_expected = (
+        bytes.fromhex(trial["last_cmac_hex"]) == expected if changed_from_baseline else None
+    )
+    dtc_classification = classify_dtc_change(dtc_before, dtc_after)
+
+    control_status = (
+        control_evidence["status"] if control_evidence is not None else CONTROL_STATUS_ABSENT
+    )
+
+    verdict = build_verdict(
+        result_regenerated=changed_from_baseline if baseline_cmac_hex is not None else None,
+        result_matches_expected=result_matches_expected,
+        control_status=control_status,
+        dtc_changed=dtc_classification["changed"],
+    )
+
+    return {
+        "schema": LIVE_RESULT_SCHEMA,
+        "route": {
+            "bus": route.bus,
+            "elm327_param": route.elm327_param,
+            "uds_variant": route.uds_variant,
+            "cpu_index": route.cpu_index,
+        },
+        "f181_hex": f181,
+        "f181_ascii": f181_ascii,
+        "bank1_activation": activation,
+        "message": message.hex(),
+        "expected_compare_value": expected.hex(),
+        "sent_frames": trial["sent_frames"],
+        "panda_safety": {
+            "mode": "elm327-bounded-command5",
+            "probe_param": trial["probe_safety_param"],
+            "restored_param": route.elm327_param,
+            "safety_tx_blocked": trial["safety_tx_blocked"],
+        },
+        "dtc_observation": {
+            "request": "19 02 FF",
+            "read_only": True,
+            "before_response_payload_hex": dtc_before,
+            "after_response_payload_hex": dtc_after,
+            "classification": dtc_classification,
+            "firmware_side_channel": (
+                "command-5 failure or successful-generation/result-mismatch reaches Dem event 0xCC, "
+                "mapped to enabled DTC 0x00D317/failure-type 0x57; absence is not by itself proof "
+                "of equality unless command execution is independently known successful"
+            ),
+        },
+        "routine_result_before": (
+            {
+                "status": routine_result_before["status"],
+                "generated_cmac": routine_result_before["generated_cmac"].hex(),
+                "rtt_seconds": baseline_rtt,
+            }
+            if routine_result_before is not None
+            else None
+        ),
+        "timing": {
+            "clocks": {
+                "monotonic": "time.monotonic seconds; deltas only (RTT, intervals), not wall time",
+                "wall": "UTC ISO-8601 timestamps for cross-log correlation",
+            },
+            "started_monotonic": started_monotonic,
+            "started_wall_utc": timeline.events[0]["wall_utc"],
+            "finished_monotonic": finished_monotonic,
+            "finished_wall_utc": _utc_now(),
+            "round_interval_seconds": round_interval,
+            "poll_window_seconds": poll_seconds,
+            "poll_interval_seconds": DEFAULT_POLL_INTERVAL,
+            "poll_interval_source": "fixed inter-request sleep between command-5 result/status polls; unchanged protocol",
+            "rtt_statistics": trial["rtt_statistics"],
+            "poll_interval_statistics": trial["poll_interval_statistics"],
+        },
+        "timeline": timeline.as_list(),
+        "observations": trial["observations"],
+        "generated_cmac": trial["last_cmac_hex"],
+        "result_changed_from_pre_stimulus_baseline": changed_from_baseline,
+        "role": role,
+        "control_evidence": control_evidence,
+        "verdict": verdict,
+        "interpretation": (
+            "A generated result here is evidence for application-context selector-4 command-5 execution. "
+            "The read-only DTC snapshots preserve the stock terminal negative-outcome side channel; "
+            "see verdict.separability for whether this run separates command failure from "
+            "expected-result mismatch. "
+            "This does not prove production SecOC transmit integration or the separate Gate-2 bypass."
+        ),
+    }
+
+
+def build_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("message", help="16-byte message as 32 hex characters")
+    parser.add_argument("--expected", default="00" * 16, help="16-byte compare value; observation shim makes this optional")
+    parser.add_argument("--rounds", type=int, default=DEFAULT_ROUNDS)
+    parser.add_argument("--round-interval", type=float, default=DEFAULT_ROUND_INTERVAL)
+    parser.add_argument("--execute", action="store_true")
+    parser.add_argument("--session-dir", type=Path)
+    parser.add_argument("--bus", type=lambda value: int(value, 0))
+    parser.add_argument("--elm327-param", type=lambda value: int(value, 0))
+    parser.add_argument("--uds-variant", choices=("old", "new"), default="old")
+    parser.add_argument("--cpu-index", type=int, default=0)
+    parser.add_argument("--poll-seconds", type=float, default=3.0)
+    parser.add_argument(
+        "--role",
+        choices=ROLES,
+        default=ROLE_EXPERIMENT,
+        help="experiment (default) records the selector-4 trial; control records a known-good "
+        "pipeline-sanity run on its own fresh boot for later --control-artifact reuse",
+    )
+    parser.add_argument(
+        "--control-artifact",
+        type=Path,
+        help="live experiment only: prior separate-boot control run's JSON artifact; loaded, "
+        "SHA-bound, and identity-checked — never re-executed (bank 1 is single-use per boot)",
+    )
+    parser.add_argument("--output", type=Path)
+    return parser
+
+
+def main() -> int:
+    parser = build_parser()
+    args = parser.parse_args()
+
+    try:
+        message = bytes.fromhex(args.message)
+        expected = bytes.fromhex(args.expected)
+        if args.control_artifact is not None and args.role == ROLE_CONTROL:
+            raise StimulusError("--control-artifact is valid only for --role experiment runs")
+        plan = build_stimulus_plan(
+            message,
+            expected=expected,
+            rounds=args.rounds,
+            round_interval=args.round_interval,
+        )
+        if args.execute:
+            if args.session_dir is not None:
+                route, _ = route_from_session(
+                    args.session_dir,
+                    uds_variant=args.uds_variant,
+                    cpu_index=args.cpu_index,
+                    bus=args.bus,
+                    elm327_param=args.elm327_param,
+                )
+            else:
+                if args.bus is None or args.elm327_param is None:
+                    raise StimulusError("--execute requires --session-dir or explicit --bus and --elm327-param")
+                route = explicit_route(
+                    bus=args.bus,
+                    elm327_param=args.elm327_param,
+                    uds_variant=args.uds_variant,
+                    cpu_index=args.cpu_index,
+                )
+            result = run_live(
+                message=message,
+                expected=expected,
+                route=route,
+                rounds=args.rounds,
+                round_interval=args.round_interval,
+                poll_seconds=args.poll_seconds,
+                role=args.role,
+                control_artifact_path=args.control_artifact,
+            )
+        else:
+            if args.control_artifact is not None:
+                raise StimulusError("--control-artifact requires --execute")
+            result = plan
+    except (ValueError, StimulusError, RamExecError, OSError) as exc:
+        parser.error(str(exc))
+
+    if args.output is not None:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    print(json.dumps(result, indent=2, sort_keys=True))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

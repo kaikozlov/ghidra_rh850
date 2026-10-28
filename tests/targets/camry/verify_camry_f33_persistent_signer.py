@@ -9,8 +9,8 @@ from pathlib import Path
 from tools import REPO_ROOT
 ROOT = REPO_ROOT
 
-from exploit.common.payload_package import inspect_payload
-from exploit.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET
+from tsk.common.payload_package import inspect_payload
+from tsk.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET
 import tools.targets.camry.research.ram_runtime.b6.build_camry_f33_b6_persistent_signer as signer
 import tools.targets.camry.research.ram_runtime.b6.camry_f33_persistent_signer as host
 from tools.security.build_secoc_patch_manifest import crc32

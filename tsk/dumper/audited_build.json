@@ -1,0 +1,36 @@
+{
+  "compile_contract": {
+    "architecture": "v850e3v5",
+    "callback_limit": 4048,
+    "entry_offset": 0,
+    "entry_symbol": "_exploit",
+    "link_vma": "0xFEBF0000",
+    "optimization": "-Os",
+    "output_section": ".text"
+  },
+  "review_status": "audited-read-only",
+  "schema": "p1me-codeflash-dumper-audited-build-v1",
+  "shellcode": {
+    "entry_offset": 0,
+    "sha256": "33f8182d1fb6338d5e62aacdd4cb7fd557055a31ac59cfae0a73269afd0d99e8",
+    "size": 344
+  },
+  "sources": [
+    {
+      "path": "tsk/dumper/main.c",
+      "sha256": "90faf3b704e90fb8a76fd920d1e76c46dbfef0a60bae17cdeecc0640cf5dcfae"
+    },
+    {
+      "path": "tsk/dumper/build_shellcode.py",
+      "sha256": "b4a104949185f1184ba9fbb9d9e2b3bf24cf570c6d2fdab575e151e647abd985"
+    }
+  ],
+  "toolchain": {
+    "backend": "docker:v850-gcc-scratch",
+    "image_id": "sha256:89676b8b85d27e84538ffd8a7764ea30a90e09b5a759a242801229f96fc01d43"
+  },
+  "verification": {
+    "command": "uv run --locked python tsk/dumper/build_shellcode.py --docker --docker-image v850-gcc-scratch",
+    "read_only_source_separation_suite": "tests/verify_codeflash_dumper.py"
+  }
+}

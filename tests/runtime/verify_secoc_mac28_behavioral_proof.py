@@ -12,18 +12,18 @@ from pathlib import Path
 from tools import REPO_ROOT
 REPO = REPO_ROOT
 
-from exploit.behavioral_proof.analyze_acceptance import analyze_acceptance
-from exploit.behavioral_proof.analyze_forwarding import analyze, iter_capture
-from exploit.behavioral_proof.mac28 import (
+from tsk.behavioral_proof.analyze_acceptance import analyze_acceptance
+from tsk.behavioral_proof.analyze_forwarding import analyze, iter_capture
+from tsk.behavioral_proof.mac28 import (
     MAC28_IDS,
     STOCK_CAMERA_PROOF_IDS,
     CanFrame,
     changed_bit_positions,
     invalidate_mac28,
 )
-from exploit.behavioral_proof.validate_trial import SCHEMA, validate_trial
-from exploit.patcher.build_payload import simulate_apply
-from exploit.patcher.patch_config import config_from_manifest
+from tsk.behavioral_proof.validate_trial import SCHEMA, validate_trial
+from tsk.patcher.build_payload import simulate_apply
+from tsk.patcher.patch_config import config_from_manifest
 
 passed = failed = 0
 
@@ -94,9 +94,9 @@ bad_control[control_index] = CanFrame(0x191, 2, bytes(wrong_control))
 check("non-protected control-frame mutation fails analyzer", not analyze(bad_control, source_bus=1, forward_bus=2, mode="invalid-mac28")["pass"])
 
 print("\n== vendored one-off openpilot experiment provenance ==")
-patch_path = REPO / "exploit" / "behavioral_proof" / "kai-openpilot-mac28-ablation.patch"
-meta_path = REPO / "exploit" / "behavioral_proof" / "kai-openpilot-mac28-ablation.json"
-audit_path = REPO / "exploit" / "behavioral_proof" / "openpilot_ablation_audit.json"
+patch_path = REPO / "tsk" / "behavioral_proof" / "kai-openpilot-mac28-ablation.patch"
+meta_path = REPO / "tsk" / "behavioral_proof" / "kai-openpilot-mac28-ablation.json"
+audit_path = REPO / "tsk" / "behavioral_proof" / "openpilot_ablation_audit.json"
 check("external openpilot commit patch is vendored", patch_path.is_file())
 check("external openpilot commit provenance is vendored", meta_path.is_file())
 meta = json.loads(meta_path.read_text(encoding="utf-8"))
@@ -123,9 +123,9 @@ if audit_path.is_file():
     check("audit records MAC28 high-nibble preservation", "high" in text and "nibble" in text)
 
 print("\n== read-only evidence collectors ==")
-capture_source = (REPO / "exploit" / "behavioral_proof" / "capture_can.py").read_text(encoding="utf-8").lower()
-dtc_source = (REPO / "exploit" / "behavioral_proof" / "capture_eps_dtc.py").read_text(encoding="utf-8").lower()
-steer_source = (REPO / "exploit" / "behavioral_proof" / "capture_steering_state.py").read_text(encoding="utf-8").lower()
+capture_source = (REPO / "tsk" / "behavioral_proof" / "capture_can.py").read_text(encoding="utf-8").lower()
+dtc_source = (REPO / "tsk" / "behavioral_proof" / "capture_eps_dtc.py").read_text(encoding="utf-8").lower()
+steer_source = (REPO / "tsk" / "behavioral_proof" / "capture_steering_state.py").read_text(encoding="utf-8").lower()
 check("raw CAN collector never calls can_send", "can_send" not in capture_source)
 check("raw CAN collector never changes Panda safety mode", "set_safety_mode" not in capture_source)
 check("DTC collector requests report-by-status without clear-DTC", "\\x02\\xff" in dtc_source and "clear_diagnostic" not in dtc_source and "clear_dtc" not in dtc_source)

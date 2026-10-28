@@ -9,7 +9,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from exploit.ram_runtime.target_profiles import (
+from tsk.ram_runtime.target_profiles import (
     BOOT_F181_HEX,
     registered_specs,
     registered_targets,
@@ -20,7 +20,7 @@ from tools.targets.tss3.builders.build_tss3_request_signer import build_request_
 from tools.targets.tss3.console import render_kit
 
 ROOT = REPO_ROOT
-LAUNCHER = ROOT / "exploit/ram_runtime/tss3_request_signer_launcher.sh"
+LAUNCHER = ROOT / "tsk/ram_runtime/tss3_request_signer_launcher.sh"
 TARGETS = supported_targets()
 RUNTIME_FILES = (
     "tools/__init__.py",
@@ -28,17 +28,19 @@ RUNTIME_FILES = (
     "tsk/lib/__init__.py",
     "tsk/lib/programming.py",
     "tsk/lib/diagnostic_route.py",
-    "exploit/common/ram_exec.py",
-    "exploit/ram_runtime/tss3_request_signer.py",
-    "exploit/ram_runtime/tss3_post_install_recovery.py",
-    "exploit/ram_runtime/panda_eps.py",
-    "exploit/ram_runtime/tss3_panda_lease.sh",
+    "tsk/common/__init__.py",
+    "tsk/common/ram_exec.py",
+    "tsk/ram_runtime/__init__.py",
+    "tsk/ram_runtime/tss3_request_signer.py",
+    "tsk/ram_runtime/tss3_post_install_recovery.py",
+    "tsk/ram_runtime/panda_eps.py",
+    "tsk/ram_runtime/tss3_panda_lease.sh",
 )
 # Shared repinned runtime topology: vehicle network + EPS diagnostics on bus 0.
 REPINNED_RUNTIME_BUS = 0
 UI_RUNTIME_FILES = (
-    "exploit/ram_runtime/tss3_request_signer_ui_bringup.py",
-    "exploit/ram_runtime/tss3_startup_programming.py",
+    "tsk/ram_runtime/tss3_request_signer_ui_bringup.py",
+    "tsk/ram_runtime/tss3_startup_programming.py",
 )
 
 

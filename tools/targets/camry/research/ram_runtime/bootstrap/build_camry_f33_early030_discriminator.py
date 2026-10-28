@@ -8,8 +8,8 @@ from pathlib import Path
 from tools import REPO_ROOT as REPO
 
 
-from exploit.common.payload_package import package_shellcode
-from exploit.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET
+from tsk.common.payload_package import package_shellcode
+from tsk.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET
 from tools.targets.camry.research.ram_runtime.monitor.build_camry_f33_runtime_replay_discriminator import IMAGE, IMAGE_SHA256, BOOT_SYMBOLS, STARTUP_TARGETS, RESIDENT_BASE, RESIDENT_LIMIT, STAGING_BASE, STAGING_LIMIT, compile_asm, jarl_targets, nm_symbol, sha_bytes, sha_file, staging_source, validate_toolchain
 
 SOURCE = REPO / "tools/targets/camry/research/ram_runtime/bootstrap/camry_f33_early030_discriminator_resident.S"

@@ -918,9 +918,9 @@ does not return, preempting that erase path. Therefore adapting Calvin's
 read-only body is the correct payload-core strategy; `FF00` naming alone does
 not mean the requested flash operation reaches FACI.
 
-**Adapted read-only core.** `exploit/dumper/venza_airbag_main.c` implements
+**Adapted read-only core.** `tsk/dumper/venza_airbag_main.c` implements
 the Venza-specific body and
-`exploit/dumper/build_venza_airbag_payload.py` links it at `0xFEBFF800`,
+`tsk/dumper/build_venza_airbag_payload.py` links it at `0xFEBFF800`,
 requires entry offset zero, rejects code larger than `0x800`, and zero-pads
 the raw type-2 image to exactly 2 KiB. The current pinned-toolchain build is
 678 bytes before padding. It reads only

@@ -11,9 +11,9 @@ import tempfile
 from pathlib import Path
 from typing import Any, cast
 
-from exploit.common.payload_package import inspect_payload, package_shellcode
-from exploit.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET
-from exploit.common.rh850_build import (
+from tsk.common.payload_package import inspect_payload, package_shellcode
+from tsk.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET
+from tsk.common.rh850_build import (
     CJob,
     compile_c_batch,
     jarl_targets,
@@ -21,13 +21,13 @@ from exploit.common.rh850_build import (
     sha_bytes,
     validate_toolchain,
 )
-from exploit.ram_runtime.target_profiles import (
+from tsk.ram_runtime.target_profiles import (
     BOOT_F181_HEX,
     registered_specs,
     spec_from_codeflash,
     supported_targets,
 )
-from exploit.ram_runtime.tss3_request_signer_contract import (
+from tsk.ram_runtime.tss3_request_signer_contract import (
     HELPER_CODE_LIMIT,
     HELPER_TRANSIT_BASE,
     RESIDENT_BASE,
@@ -42,12 +42,12 @@ REQUEST_CODEC = "four-frame"
 REQUEST_CARRIER = "functional-nibble4"
 REQUEST_FRAME_COUNT = 4
 
-RESIDENT_SOURCE = REPO / "exploit/ram_runtime/request_signer/tss3_request_signer_resident.c"
-RESIDENT_ENTRY_SOURCE = REPO / "exploit/ram_runtime/request_signer/tss3_request_signer_resident.S"
-HELPER_SOURCE = REPO / "exploit/ram_runtime/request_signer/tss3_request_signer_helper.c"
-ABI_HEADER = REPO / "exploit/ram_runtime/request_signer/tss3_request_signer.h"
-RESOLVER_SOURCE = REPO / "exploit/ram_runtime/request_signer/tss3_request_signer_resolver.c"
-STAGE_ENTRY_SOURCE = REPO / "exploit/ram_runtime/request_signer/tss3_request_signer_stage.S"
+RESIDENT_SOURCE = REPO / "tsk/ram_runtime/request_signer/tss3_request_signer_resident.c"
+RESIDENT_ENTRY_SOURCE = REPO / "tsk/ram_runtime/request_signer/tss3_request_signer_resident.S"
+HELPER_SOURCE = REPO / "tsk/ram_runtime/request_signer/tss3_request_signer_helper.c"
+ABI_HEADER = REPO / "tsk/ram_runtime/request_signer/tss3_request_signer.h"
+RESOLVER_SOURCE = REPO / "tsk/ram_runtime/request_signer/tss3_request_signer_resolver.c"
+STAGE_ENTRY_SOURCE = REPO / "tsk/ram_runtime/request_signer/tss3_request_signer_stage.S"
 STATE_MAGIC = 0x4C433841  # little-endian "A8CL"
 STATE_VERSION = 3
 UNIVERSAL_SIGNER_HELPER_CODE_LIMIT = HELPER_CODE_LIMIT

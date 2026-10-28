@@ -16,7 +16,7 @@ from Crypto.Hash import CMAC
 
 
 
-from exploit.common.ram_exec import RamExecError
+from tsk.common.ram_exec import RamExecError
 import tools.targets.camry.research.ram_runtime.b6.camry_f33_b6_inline_signer as inline
 from tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_replay_discriminator import _read_memory
 

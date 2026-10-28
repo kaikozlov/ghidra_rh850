@@ -554,7 +554,7 @@ call and its CRC fixup, and reproduces the prior stage-6 image byte-for-byte.
 Its evidence and boundaries are in
 [`camry-f33-gateway-recovery-lifecycle.md`](camry-f33-gateway-recovery-lifecycle.md).
 The executable controller is
-[`exploit/patcher/restore.py`](../../exploit/patcher/restore.py), and its normal
+[`tsk/patcher/restore.py`](../../tsk/patcher/restore.py), and its normal
 operator wrapper is the incident package's `hook-remove` action.
 
 Do not launch that writer merely because Brake or the gateway answers. Before

@@ -26,8 +26,8 @@ def _section_xcp_daq_probe():
     import subprocess
     import sys
     REPO = REPO_ROOT
-    from exploit.followups.xcp_daq_probe import ENTRIES_PER_ODT, FORBIDDEN_COMMANDS, MAX_ENTRIES, PROFILES, SECOC_XCP_EXCLUDED_CANDIDATES, XcpDaqError, assert_no_write_commands, build_plan, clear_daq_list_request, configure_daq, configuration_requests, control_rtt_statistics, decode_dto, layout, set_daq_list_mode_request, set_daq_ptr_request, start_stop_daq_list_request, validate_addresses, write_daq_request
-    from exploit.followups.xcp_read_probe import LOCALRAM_EXCLUSIONS
+    from tsk.followups.xcp_daq_probe import ENTRIES_PER_ODT, FORBIDDEN_COMMANDS, MAX_ENTRIES, PROFILES, SECOC_XCP_EXCLUDED_CANDIDATES, XcpDaqError, assert_no_write_commands, build_plan, clear_daq_list_request, configure_daq, configuration_requests, control_rtt_statistics, decode_dto, layout, set_daq_list_mode_request, set_daq_ptr_request, start_stop_daq_list_request, validate_addresses, write_daq_request
+    from tsk.followups.xcp_read_probe import LOCALRAM_EXCLUSIONS
     CF = (REPO / 'firmware/RH850_P1M-E_CodeFlash.bin').read_bytes()
 
     def rejects(fn) -> bool:
@@ -198,11 +198,11 @@ def _section_xcp_daq_probe():
         def can_recv(self):
             self.calls += 1
             return [(2040, bytes.fromhex('0001020304050607'), 1)]
-    from exploit.followups.xcp_daq_probe import capture_dto_frames
+    from tsk.followups.xcp_daq_probe import capture_dto_frames
     streamed = capture_dto_frames(StreamingDtoPanda(), bus=1, addresses=profile.addresses, duration_seconds=0.05, max_frames=5)
     check('captured DTO frames now carry wall-clock stamps', len(streamed) == 5 and all(('captured_wall_utc' in row and 'captured_monotonic' in row for row in streamed)) and all((row['captured_wall_utc'].startswith('2') for row in streamed)))
     print('\n== CLI guardrails ==')
-    probe = REPO / 'exploit/followups/xcp_daq_probe.py'
+    probe = REPO / 'tsk/followups/xcp_daq_probe.py'
     plan_cli = subprocess.run([sys.executable, str(probe), '--profile', 'actuation-discriminator'], cwd=REPO, capture_output=True, text=True, check=False)
     check('CLI defaults to non-live plan', plan_cli.returncode == 0 and '"mode": "plan"' in plan_cli.stdout)
     check('CLI publishes COM-007 profile binding', '"COM-007"' in plan_cli.stdout and '"source_memory_write_implemented": false' in plan_cli.stdout)

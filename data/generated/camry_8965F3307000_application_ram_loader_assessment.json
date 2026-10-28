@@ -519,7 +519,7 @@
       "owner_online_event_state": "0xFEBE4919",
       "owner_online_setter": "0x0007F030",
       "propagated_comm_mask": "0xFEBE493A",
-      "read_only_preflight": "exploit/followups/xcp_runtime_state_probe.py",
+      "read_only_preflight": "tsk/followups/xcp_runtime_state_probe.py",
       "rx_gate": "0x00082FEC",
       "source_comm_mask": "0xFEBE4FAE",
       "transport_state": "0xFEBE4EE6",

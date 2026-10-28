@@ -14,8 +14,8 @@ def section_secoc_patch() -> int:
 
     REPO = REPO_ROOT
 
-    from exploit.patcher.build_payload import make_restore_config, simulate_apply  # noqa: E402
-    from exploit.patcher.patch_config import config_from_manifest  # noqa: E402
+    from tsk.patcher.build_payload import make_restore_config, simulate_apply  # noqa: E402
+    from tsk.patcher.patch_config import config_from_manifest  # noqa: E402
     from tools.security.build_secoc_patch_manifest import build_manifest, crc32  # noqa: E402
 
     IMAGE = REPO / "firmware/camry-8965F3307000/CodeFlash.bin"

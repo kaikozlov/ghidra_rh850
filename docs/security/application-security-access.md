@@ -289,7 +289,7 @@ authorization:
   in that service path. A bus-local tester can therefore exercise a
   safety-relevant communication availability surface without unlocking SID
   `0x27`. The reversible bench experiment is now implemented under
-  `exploit/followups/communication_control_probe.py`: it uses only
+  `tsk/followups/communication_control_probe.py`: it uses only
   enable-Rx/disable-normal-Tx, restores enable-Rx/enable-Tx unconditionally,
   and requires every baseline-active Tx ID to recover. A live result is still
   hardware-gated.

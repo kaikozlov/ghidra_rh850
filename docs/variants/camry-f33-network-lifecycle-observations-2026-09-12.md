@@ -42,7 +42,7 @@ The telemetry file referenced by the original result is
 `8439209debceec8e4402b62092ea9cdbb34736d1238114d6fcb0bfd753acc2f4`;
 that complete raw file has not been recovered in this pass.
 
-The report semantics were checked in `exploit/patcher/deploy.py`:
+The report semantics were checked in `tsk/patcher/deploy.py`:
 `payload_success` requires the SUCCESS and DONE stages with no error event;
 `write_crc_sequence_complete` copies that result, whereas the post-image hash,
 fixup and residue in `apply` are calculated by `simulate_apply`. Therefore the

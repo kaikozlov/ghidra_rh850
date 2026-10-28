@@ -586,8 +586,8 @@ The target lifecycle is explicit:
   request, bootloader call, `EI`, `EIRET`, or `FERET`. The only waits in the
   telemetry sender concern only its transmit-buffer status.
 
-This agrees with `exploit/patcher/main.c` and
-`exploit/common/runtime.c::runtime_halt`, but the frozen bytes are the evidence
+This agrees with `tsk/patcher/main.c` and
+`tsk/common/runtime.c::runtime_halt`, but the frozen bytes are the evidence
 for this incident. `DONE` reports completion; it does **not** mean the boot UDS
 server has resumed. Therefore leaving the writer powered cannot expose a
 network continuation or abort command that this payload does not implement.

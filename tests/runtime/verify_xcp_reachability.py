@@ -26,8 +26,8 @@ def _section_xcp_reachability():
     import subprocess
     import sys
     REPO = REPO_ROOT
-    from exploit.followups.xcp_read_probe import CONNECT_REQUEST
-    from exploit.followups.xcp_reachability import FORBIDDEN_COMMANDS, VERDICT_REACHABLE_ERROR, VERDICT_REACHABLE_POSITIVE, VERDICT_TIMEOUT, VERDICT_UNEXPECTED, XcpReachabilityError, assert_connect_only, build_plan, classify_response, forbidden_opcode_audit
+    from tsk.followups.xcp_read_probe import CONNECT_REQUEST
+    from tsk.followups.xcp_reachability import FORBIDDEN_COMMANDS, VERDICT_REACHABLE_ERROR, VERDICT_REACHABLE_POSITIVE, VERDICT_TIMEOUT, VERDICT_UNEXPECTED, XcpReachabilityError, assert_connect_only, build_plan, classify_response, forbidden_opcode_audit
     print('== CONNECT-only guard ==')
     assert_connect_only(CONNECT_REQUEST)
     check('stock CONNECT frame passes the guard', True)
@@ -69,13 +69,13 @@ def _section_xcp_reachability():
         check('non-eight-byte response is rejected', False)
     check('timeout verdict exists and is not reachable', VERDICT_TIMEOUT == 'no_response_timeout')
     print('\n== source-level no-write invariants ==')
-    source = (REPO / 'exploit/followups/xcp_reachability.py').read_text(encoding='utf-8')
+    source = (REPO / 'tsk/followups/xcp_reachability.py').read_text(encoding='utf-8')
     can_send_calls = [line.strip() for line in source.splitlines() if '.can_send(' in line]
     check('exactly one transmit call site exists', len(can_send_calls) == 1, repr(can_send_calls))
     check('the only transmit sends the guarded CONNECT frame', 'panda.can_send(REQUEST_ID, CONNECT_REQUEST, route.bus)' in can_send_calls[0])
     check('no page-copy / SET_MTA / DOWNLOAD / MODIFY_BITS byte literal appears in the module', all((token not in source for token in ('"\\xe4', '"\\xf6', '"\\xf0\\x', '"\\xec\\x'))))
     print('\n== CLI guardrails ==')
-    probe = REPO / 'exploit/followups/xcp_reachability.py'
+    probe = REPO / 'tsk/followups/xcp_reachability.py'
     plan_cli = subprocess.run([sys.executable, str(probe)], cwd=REPO, capture_output=True, text=True, check=False)
     check('CLI defaults to non-live plan', plan_cli.returncode == 0 and '"mode": "plan"' in plan_cli.stdout and ('"connect_only": true' in plan_cli.stdout))
     unsafe = subprocess.run([sys.executable, str(probe), '--execute'], cwd=REPO, capture_output=True, text=True, check=False)
@@ -94,7 +94,7 @@ def _section_xcp_shadow_write_plan():
     import tempfile
     from pathlib import Path
     REPO = REPO_ROOT
-    from exploit.followups.xcp_shadow_write_plan import MAX_DOWNLOAD, SHADOW_END, SHADOW_SIZE, SHADOW_START, XcpShadowWriteError, build_download_plan, chunk_write, download_request, modify_bits_request, set_mta_request, simulate_plan, simulate_write, validate_window
+    from tsk.followups.xcp_shadow_write_plan import MAX_DOWNLOAD, SHADOW_END, SHADOW_SIZE, SHADOW_START, XcpShadowWriteError, build_download_plan, chunk_write, download_request, modify_bits_request, set_mta_request, simulate_plan, simulate_write, validate_window
 
     def rejects(fn) -> bool:
         try:
@@ -131,7 +131,7 @@ def _section_xcp_shadow_write_plan():
     check('simulation helper returns identical bytes', updated2 == updated)
     check('simulation metadata reports output hash and bounded changes', simulated['mode'] == 'simulation' and 0 < simulated['simulation']['changed_bytes'] <= len(data))
     print('\n== CLI is offline-only ==')
-    probe = REPO / 'exploit/followups/xcp_shadow_write_plan.py'
+    probe = REPO / 'tsk/followups/xcp_shadow_write_plan.py'
     source = probe.read_text(encoding='utf-8')
     check('planner source has no Panda import', 'from panda import' not in source and 'import panda' not in source)
     check('planner source exposes no execute flag', '--execute' not in source)

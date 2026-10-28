@@ -348,7 +348,7 @@ supports 80 input bytes and 16 output bytes. Request sequence is committed last;
 response sequence is published only after record-0 completion has copied the
 result.
 
-`exploit/command5/ram_proxy.py` is the matching offline planner / bench-gated
+`tsk/command5/ram_proxy.py` is the matching offline planner / bench-gated
 live client. It fixes record 0 and selector 4, defaults to the configured
 authenticated-domain lengths `7/12/36`, and uses existing XCP SET_MTA/DOWNLOAD
 and SHORT_UPLOAD rather than inventing a new CAN protocol.

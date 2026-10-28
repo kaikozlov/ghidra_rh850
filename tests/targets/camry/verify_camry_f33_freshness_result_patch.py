@@ -3,8 +3,8 @@ from __future__ import annotations
 import json, struct, tempfile
 from pathlib import Path
 import tools.targets.camry.builders.build_camry_f33_freshness_result_patch as b
-from exploit.patcher.build_payload import simulate_apply
-from exploit.patcher.patch_config import config_from_manifest
+from tsk.patcher.build_payload import simulate_apply
+from tsk.patcher.patch_config import config_from_manifest
 from tools.security.build_secoc_patch_manifest import crc32
 passed=failed=0
 def check(n,c):

@@ -12,7 +12,7 @@ from typing import Any
 
 
 
-from exploit.common.ram_exec import (
+from tsk.common.ram_exec import (
     RAM_LOAD_ADDR,
     TOYOTA_P1ME_PAYLOAD_BUILD_SECRET,
     RamExecError,
@@ -26,11 +26,11 @@ from tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_replay_d
     EXPECTED_F181_HEX,
     verify_nrtd_ready,
 )
-from exploit.patcher.build_payload import (
+from tsk.patcher.build_payload import (
     PayloadBuildError,
     validate_restore_artifact,
 )
-from exploit.patcher.deploy import TelemetryCollector
+from tsk.patcher.deploy import TelemetryCollector
 
 PACKAGE_SCHEMA = "camry-f33-persistent-b6-signer-patch-v1"
 OPERATIONS = (

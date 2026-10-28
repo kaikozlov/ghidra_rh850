@@ -259,7 +259,7 @@ def _section_secoc_freshness_trials():
     import tempfile
     from pathlib import Path
     REPO = REPO_ROOT
-    from exploit.followups.secoc_freshness_trials import FreshnessTrialError, TAG_MASK, build_fd_suffix_alias, build_future_sync, build_reset_replay, build_tag_guesses, parse_protected_frame, parse_sync_frame, replace_tag, sync_candidate_is_forward
+    from tsk.followups.secoc_freshness_trials import FreshnessTrialError, TAG_MASK, build_fd_suffix_alias, build_future_sync, build_reset_replay, build_tag_guesses, parse_protected_frame, parse_sync_frame, replace_tag, sync_candidate_is_forward
     from tools.toyota_support.toyota_secoc_signer import sign_classic_frame, sign_sync_frame
     KEY = bytes(range(16))
 
@@ -322,7 +322,7 @@ def _section_secoc_freshness_trials():
     check('tag range overflow rejected', rejects(lambda: build_tag_guesses(740, protected, TAG_MASK, 2)))
     check('unbounded artifact generation rejected', rejects(lambda: build_tag_guesses(740, protected, 0, 65537)))
     print('\n== CLI remains offline only ==')
-    probe = REPO / 'exploit/followups/secoc_freshness_trials.py'
+    probe = REPO / 'tsk/followups/secoc_freshness_trials.py'
     source = probe.read_text(encoding='utf-8')
     check('freshness trial source has no Panda import', 'from panda import' not in source and 'import panda' not in source)
     check('freshness trial source has no execute flag', '--execute' not in source)

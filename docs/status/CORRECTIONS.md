@@ -794,14 +794,14 @@ the mistakes are not re-made.
   `SEED_KEY_SECRET` at `0xBFE8` are distinct gates and now have separate host
   inputs. The former constructs/decrypts/authenticates the RAM image; the latter
   performs UDS SecurityAccess. Neither value is serialized into run metadata.
-- **Mechanical proof:** `exploit/common/payload_package.py` decrypts the
+- **Mechanical proof:** `tsk/common/payload_package.py` decrypts the
   committed standard DataFlash-dump payload with `PAYLOAD_BUILD_SECRET`, verifies
   its `0xFFFFFFFF` CRC residue and CMAC, and repackages the recovered 0x18A-byte
   shellcode to the exact same ciphertext byte-for-byte. Regression tests reject
   post-package config mutation by construction because config injection occurs
   only in the plaintext template.
 - **Canonical:** [../security/bootloader-payload-gate.md](../security/bootloader-payload-gate.md) §§2–8;
-  `exploit/common/payload_package.py`; `exploit/patcher/build_payload.py`;
+  `tsk/common/payload_package.py`; `tsk/patcher/build_payload.py`;
   `tests/runtime/verify_secoc_manifest_patcher.py`.
 
 ### CORR-044 — Dormant command-5 inputs/output required a new application runner
@@ -832,7 +832,7 @@ the mistakes are not re-made.
   prove selector-4 availability in initialized application context.
 - **Canonical:** [../communications/application-rx.md](../communications/application-rx.md) §5.5;
   [../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md) §7.5;
-  `exploit/command5/build_experiment.py`; `exploit/command5/stimulus.py`;
+  `tsk/command5/build_experiment.py`; `tsk/command5/stimulus.py`;
   `tests/runtime/verify_secoc_command5_experiment.py`.
 
 ### CORR-045 — Toyota static-blocking source was misclassified as unavailable
@@ -856,8 +856,8 @@ the mistakes are not re-made.
 - **Verification:** the Panda firmware builds against the modified local
   opendbc tree; both SecOC Toyota safety classes pass 62 tests (9 expected
   skips); the one-off source/scope regression passes 4/4.
-- **Canonical:** `exploit/behavioral_proof/README.md`;
-  `exploit/behavioral_proof/openpilot_ablation_audit.json`;
+- **Canonical:** `tsk/behavioral_proof/README.md`;
+  `tsk/behavioral_proof/openpilot_ablation_audit.json`;
   `tests/runtime/verify_secoc_mac28_behavioral_proof.py`.
 
 ### CORR-046 — Command-5 live stimulus used diagnostic-only Panda safety
@@ -874,9 +874,9 @@ the mistakes are not re-made.
 - **Verification:** opendbc's ELM327 suite proves exact ID/bus/DLC scope; the
   repository command-5 suite proves parameter encoding, blocked-Tx rejection,
   and mode restoration. External commits and patch provenance are pinned in
-  `exploit/command5/kai-openpilot-command5-safety.json`.
+  `tsk/command5/kai-openpilot-command5-safety.json`.
 - **Canonical:** [../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md);
-  `exploit/command5/stimulus.py`.
+  `tsk/command5/stimulus.py`.
 
 ### CORR-047 — MAC28 proof trusted declared behavior
 
@@ -897,7 +897,7 @@ the mistakes are not re-made.
   steering, forwarding-report unbinding, phase-image substitution, and patched
   image tampering.
 - **Canonical:** [../security/secoc/application-chain.md](../security/secoc/application-chain.md);
-  `exploit/behavioral_proof/README.md`; `validate_trial.py`.
+  `tsk/behavioral_proof/README.md`; `validate_trial.py`.
 
 ### CORR-048 — RAM payload telemetry did not implement the full RSCFD Tx handshake
 
@@ -920,7 +920,7 @@ the mistakes are not re-made.
   588 bytes; deterministic suites assert the register-operation ordering and
   status semantics against the firmware-backed transport tests.
 - **Canonical:** [../communications/diagnostic-transport.md](../communications/diagnostic-transport.md);
-  `exploit/patcher/README.md`; `exploit/dumper/README.md`.
+  `tsk/patcher/README.md`; `tsk/dumper/README.md`.
 
 ### CORR-049 — Read-only wrapper accepted any caller-supplied shellcode
 
@@ -937,8 +937,8 @@ the mistakes are not re-made.
   set and rejects executable and toolchain tampering; the pinned Docker rebuild
   reproduces executable SHA
   `e756229014ad27d62a4e7ab82e6af4d20cd6dfb261d3b3bff82424bd3a26cb3d`.
-- **Canonical:** `exploit/dumper/README.md`;
-  `exploit/dumper/audited_build.json`.
+- **Canonical:** `tsk/dumper/README.md`;
+  `tsk/dumper/audited_build.json`.
 
 ### CORR-050 — P1M-E backend accepted relocatable geometry and ignored FCU failures
 
@@ -960,8 +960,8 @@ the mistakes are not re-made.
 - **Verification:** host rejection tests cover shifted/oversized images;
   deterministic C-source checks cover every FACI phase and cleanup edge; the
   pinned Docker toolchain builds the complete template successfully.
-- **Canonical:** `exploit/patcher/README.md`;
-  `exploit/common/patch_config.h`; `exploit/patcher/flash_backend.c`.
+- **Canonical:** `tsk/patcher/README.md`;
+  `tsk/common/patch_config.h`; `tsk/patcher/flash_backend.c`.
 
 ### CORR-051 — Raw substitution requires a fresh short download per chunk
 
@@ -975,7 +975,7 @@ the mistakes are not re-made.
 - **Verification:** `verify_exploit_followups.py` proves exact 15/15/10 chunking,
   transaction ordering, address advancement, reassembly, and RAM-window bounds.
 - **Canonical:** [../security/memory-safety-audit.md](../security/memory-safety-audit.md);
-  `exploit/followups/bootloader_primitives.py`.
+  `tsk/followups/bootloader_primitives.py`.
 
 ### CORR-052 — Direct activator-pointer census missed a one-hop WDBI wrapper
 
@@ -1070,7 +1070,7 @@ the mistakes are not re-made.
   proven to survive the required reset/session sequence.
 - **Canonical:** [../security/secoc/software-path-assessment.md](../security/secoc/software-path-assessment.md);
   `tests/diagnostics/verify_application_read_memory_by_address.py`;
-  `exploit/followups/application_rmba_probe.py`.
+  `tsk/followups/application_rmba_probe.py`.
 
 ### CORR-055 — RDBI stale-response disclosure affects 48 DIDs
 
@@ -1095,7 +1095,7 @@ the mistakes are not re-made.
 - **Canonical:** [../diagnostics/application.md](../diagnostics/application.md);
   [../security/application-security-access.md](../security/application-security-access.md);
   `tests/diagnostics/verify_application_rdbi.py`;
-  `exploit/followups/application_rdbi_stale_probe.py`.
+  `tsk/followups/application_rdbi_stale_probe.py`.
 
 
 ### CORR-056 — `0x25768` is the active 13-entry WDBI callback table
@@ -1266,7 +1266,7 @@ the mistakes are not re-made.
   not impossible: transition helper `0x4F93C` can request `0xA5`, cyclic
   `0x68C0C` then invokes full reset `0x67FCE`, and that reset clears bank active
   state to zero. Deliberate external control of that transition is unproved.
-- **Operationalization:** `exploit/command5/stimulus.py` records read-only
+- **Operationalization:** `tsk/command5/stimulus.py` records read-only
   `19 02 FF` DTC snapshots before and after the existing bounded experiment and
   never issues ClearDiagnosticInformation.
 - **Canonical:** [FINDINGS.md](FINDINGS.md) SECOC-046;
@@ -1359,7 +1359,7 @@ the mistakes are not re-made.
 - **Wrong (CORR-048):** after correctly recovering the full busy/completion/ack
   handshake, the repository stopped treating every nonzero `CFDTMSTS` result
   as success but then classified encoded result `1` as the sole success and
-  results `2/3` as errors. `exploit/common/runtime.c`, the CodeFlash dumper,
+  results `2/3` as errors. `tsk/common/runtime.c`, the CodeFlash dumper,
   SEC-EXP-003, and the transport documentation all inherited that mapping.
 - **Right:** `direct_call_target_00003e48 @ 0x3E48` does extract
   `(CFDTMSTSn & 0x06) >> 1`, but that extractor alone does not define success.
@@ -2029,7 +2029,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 
 ### CORR-086 — the persistent patcher's FACI pacing/status model inherited obsolete community code
 
-- **Earlier wording/implementation:** `exploit/patcher/flash_backend.c` was
+- **Earlier wording/implementation:** `tsk/patcher/flash_backend.c` was
   described as retaining the reviewed P1M-E FACI primitive with full checked
   completion. Its per-halfword program loop actually polled FSTATR bit 21
   (`0x00200000`), and `faci_result()` checked only ready bit 15 plus FASTAT
@@ -2056,7 +2056,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   halfword first, then waits on bit10/`0x400` (DBFULL). The `0x7040` FSTATR
   family, FASTAT command-lock, Forced Stop/Status Clear recovery, and checked P/E
   exit remain current.
-- **Canonical:** `exploit/patcher/flash_backend.c`;
+- **Canonical:** `tsk/patcher/flash_backend.c`;
   [../security/secoc/application-chain.md](../security/secoc/application-chain.md)
   §9.7; `tests/runtime/verify_secoc_manifest_patcher.py`.
 
@@ -2971,7 +2971,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **New manufacturer evidence:** the canonical external CUW corpus now contains exact Toyota `T-0035-22.cuw` (SHA-256 `9882b1b6dd6acda2d142a2825eda396b0a425e41c13f822b9a18e022d4c43e81`), the TSB-linked dual-CPU Tundra EPS package for `8965F3401200/8965F3402200`. The retained extractor grammar decrypts both `EraseRoutine` regions under the already-recovered payload-build root; both body and erase regions pass CMAC. Each erase payload is exactly `0x1000` bytes loaded at `FEBF0000`.
 - **Exact control-flow correction:** independent disposable Ghidra imports of both CMAC-valid manufacturer erase routines recover the same program sequence: set `FSADDR`, issue `E8` then halfword-count `0x80`, write a halfword to `FFA20000`, then test/wait while `FSTATR & 0x400`, repeated for 128 halfwords, followed by `D0`. Thus the pacing condition is **bit 10 / `0x400` (DBFULL), after the data write**. The same routines independently recover FRDY `0x8000`, FASTAT command-lock `0x10`, FSTATR `0x7040`, P/E entry/protection registers, erase `20,D0`, and Forced Stop `B3`. The exact extracted T-0035 cleanup does not itself issue FCMD `0x50`.
 - **Exact F33 cross-check:** Camry `8965F3307000` native program routine `0x78E2A` writes each halfword and immediately checks `FSTATR & 0x400`; its target-native helpers `0x78C30/0x78CE6` independently provide Status Clear `0x50` and Forced Stop `0xB3`. This makes the DBFULL correction exact-target firmware-static as well as manufacturer-CUW-backed.
-- **Implementation consequence:** `exploit/patcher/flash_backend.c` now writes each halfword first and performs a bounded `FSTATR_DBFULL_MASK=0x00000400` wait afterward. The `0x800` pacing interpretation is rejected by regression tests. The backend retains `0x50` cleanup because exact F33/Sienna stock code supports it; no byte-identical T-0035 implementation claim is made. The rebuilt generic template remains within the fixed `0xFD0` code boundary (`0xF6E` raw text).
+- **Implementation consequence:** `tsk/patcher/flash_backend.c` now writes each halfword first and performs a bounded `FSTATR_DBFULL_MASK=0x00000400` wait afterward. The `0x800` pacing interpretation is rejected by regression tests. The backend retains `0x50` cleanup because exact F33/Sienna stock code supports it; no byte-identical T-0035 implementation claim is made. The rebuilt generic template remains within the fixed `0xFD0` code boundary (`0xF6E` raw text).
 - **Scope:** T-0035 validates Toyota F3/P1M-E manufacturer flash-control behavior; it is not an exact Camry F33 CUW and does not replace the exact stock F33 dump/restore artifact.
 - **Canonical:** `data/generated/techstream_v18/t0035_faci_backend_evidence.json`; `data/generated/camry_8965F3307000_flash_backend_evidence.json`; `camry_8965f3307000_*` suites in `verification.toml`; local `tests/firmware/verify_t0035_faci_backend_external.py`; [../security/secoc/application-chain.md](../security/secoc/application-chain.md) §9.7.
 
@@ -3060,7 +3060,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   reachability. The separate production control-transfer/pivot problem remains open.
 - **Canonical:**
   `data/generated/camry_8965F3307000_application_ram_loader_assessment.json`;
-  `exploit/followups/xcp_runtime_state_probe.py`;
+  `tsk/followups/xcp_runtime_state_probe.py`;
   `camry_8965f3307000_*` suites in `verification.toml`;
   `tests/runtime/verify_exploit_followups.py`;
   [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§6,13.1,13.6.
@@ -3259,7 +3259,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Exact F33 evidence:** all retained successful 2026-08-26 Camry `8965F3307000` CodeFlash/RAM acquisitions identify the old stack by accepting `0x0203 = 00 00 00 00 00`, then `RequestDownload = 01 46 01 00 FEBF0000 1000`, RID `10F0` option `45 00 ...`, and old-stack FF00 `45 00 ...`. The `01 00 00 00 00` DID value is the newer-stack CPU0 offset selector only.
 - **2026-08-30 live observation:** a validate-only Gate-2 preflight matched exact application F181 and passed boot SecurityAccess/`10F0`; the shared runner then *reported* zero payload telemetry and blocked APPLY. CORR-145 later proves that collector discarded every current Panda 3-tuple, so the zero count cannot be attributed to the wrong DID value. The DID grammar bug remains independently proven by the retained successful old-stack transcript. No flash write occurred.
 - **Permanent rule:** DID `0x0203` and RequestDownload memory ID are separate protocol fields. Old stack uses five zero bytes for DID `0x0203` on CPU0/CPU1; new-stack CPU0 uses `01 00 00 00 00` while new-stack CPU1 remains zero. RequestDownload memory ID is independently `1` for CPU0 and `0` for CPU1. Use the shared bootstrap-protocol helper; do not derive DID `0x0203` from CPU index alone.
-- **Canonical:** SECOC-075; `exploit/common/README.md`; `exploit/common/ram_exec.py`; `tests/runtime/verify_secoc_manifest_patcher.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §14.
+- **Canonical:** SECOC-075; `tsk/common/README.md`; `tsk/common/ram_exec.py`; `tests/runtime/verify_secoc_manifest_patcher.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §14.
 
 
 ### CORR-142 — zero payload telemetry did not prove the DID0203 fix failed or that the patcher runtime was the sole remaining defect
@@ -3269,7 +3269,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Independent payload correction:** the generic patcher was linked at VMA 0 even though GCC materialized absolute addresses for several intra-payload calls. Disassembly therefore contained low targets such as `0x154/0x196` rather than `FEBF0154/FEBF0196`. The builder now links at the authenticated callback/load VMA `FEBF0000` while retaining entry offset 0. This was a real execution defect. A corrected-VMA retry still *reported* zero telemetry, but CORR-145 later invalidates that count as execution evidence because the collector dropped current Panda 3-tuples.
 - **Independent host delta:** the successful exact-F33 2026-08-26 acquisition performs `panda.can_clear(0xFFFF)` plus a 10-ms settle immediately before the one-shot multi-frame FF00 trigger. The shared runner omitted this. Current `opendbc.car.isotp.isotp_send()` takes the first matching response-ID frame as flow-control without first validating its PCI byte, so stale `0x7A9` backlog can corrupt the FF00 transaction. The shared runner now mirrors the proven F33 clear+settle sequence. CORR-145 means the earlier zero-count retries cannot establish whether this delta was causal.
 - **Permanent rule:** do not infer callback/payload failure from zero post-trigger telemetry until the host trigger choreography matches a target-native successful acquisition. Treat DID grammar, payload link VMA, and host ISO-TP/RX-ring discipline as separate gates.
-- **Canonical:** SECOC-075/076; `exploit/common/ram_exec.py`; `exploit/patcher/build_shellcode_template.py`; `tests/runtime/verify_secoc_manifest_patcher.py`; `tests/runtime/verify_ram_exec_variant_requirements.py`; `targets/camry-2026/raw-20260830/secoc-patch-preflight-f33-handoff-vmafix/`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §14.
+- **Canonical:** SECOC-075/076; `tsk/common/ram_exec.py`; `tsk/patcher/build_shellcode_template.py`; `tests/runtime/verify_secoc_manifest_patcher.py`; `tests/runtime/verify_ram_exec_variant_requirements.py`; `targets/camry-2026/raw-20260830/secoc-patch-preflight-f33-handoff-vmafix/`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §14.
 
 ### CORR-143 — nonzero F33 boot-RAM bytes do not establish a watchdog API; callback Tx must follow the field-proven payload context
 
@@ -3277,7 +3277,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Exact F33 correction:** retained LocalRAM bytes decode `FEBF1188` and `FEBF11AC/FEBF11D2` as privileged status-register helpers; no target-native watchdog callable contract has been recovered for those addresses. The exact Calvin 4-KiB payload that successfully streamed all 2 MiB of F33 CodeFlash for ~194.9 s calls none of them. Its callback sender waits only for `CFDTMSTS16 & 0x06 == 0`, submits the frame, waits for any nonzero `0x06` completion, clears with `& 0xF9`, and continues.
 - **2026-08-30 live observation:** retries before and after removing the unverified helper calls / adopting the callback `0x06` handshake all *reported* zero telemetry and blocked APPLY. CORR-145 later proves those shared-run counts were blind because every current Panda 3-tuple was discarded before inspection; they do not establish payload failure. The unverified helper contract and later-discovered `FEBF1F00/FEBF1F04` scratch writes remain independently invalid assumptions and are removed.
 - **Permanent rule:** do not infer a callable RAM helper from a nonzero instruction word, and do not reuse community scratch RAM on an exact target without proving that region is free. For exact F33 RAM callbacks, use only target-native recovered call contracts or the retained field-proven callback behavior. Stock-driver Tx predicates and callback-context Tx behavior are separate evidence classes. The standalone dumper now follows the same rule, links at `FEBF0000`, and pins its corrected read-only executable identity.
-- **Canonical:** SECOC-077; `exploit/common/runtime.c`; `exploit/dumper/main.c`; `exploit/dumper/build_shellcode.py`; `tests/runtime/verify_secoc_manifest_patcher.py`; `tests/firmware/verify_codeflash_dumper.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §14.
+- **Canonical:** SECOC-077; `tsk/common/runtime.c`; `tsk/dumper/main.c`; `tsk/dumper/build_shellcode.py`; `tests/runtime/verify_secoc_manifest_patcher.py`; `tests/firmware/verify_codeflash_dumper.py`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §14.
 
 ### CORR-144 — the shared F33 RAM-exec handoff duplicated a retained proven helper; its causal blame for zero telemetry is withdrawn
 
@@ -3285,7 +3285,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Causal correction:** the one-word Calvin derivative was initially reported as failing through the duplicate shared handoff and succeeding through the retained host script, and that contrast was used to blame the handoff. CORR-145 shows the shared collector discarded every current Panda 3-tuple, so its “zero frames” side of that comparison was not an execution observation. The handoff reuse is still the correct implementation shape, but its causal attribution is disproved.
 - **Preserved positive control:** the retained host path on the current post-repin Panda bus 0 returned address 0 / CodeFlash word `0x06E0001F` in 6 ms. This independently proves the repin, bus0 callback transport, CAN-FD state, and current opendbc/Panda versions are viable.
 - **Permanent rule:** reuse a retained successful stateful helper when available, but do not call an A/B control causal unless both observation paths are themselves validated.
-- **Canonical:** SECOC-078/079; `exploit/common/ram_exec.py`; `tests/runtime/verify_secoc_manifest_patcher.py`; `targets/camry-2026/raw-20260830/secoc-ram-exec-exact-host-control/`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §14.
+- **Canonical:** SECOC-078/079; `tsk/common/ram_exec.py`; `tests/runtime/verify_secoc_manifest_patcher.py`; `targets/camry-2026/raw-20260830/secoc-ram-exec-exact-host-control/`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §14.
 
 ### CORR-145 — shared F33 zero-telemetry runs discarded current Panda 3-tuples before inspecting them
 
@@ -3295,7 +3295,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Collector-fixed confirmation:** the next exact-F33 validate-only run on post-repin Panda bus 0 recovered 35 telemetry events, reached `SUCCESS` and `DONE`, produced no config/observation mismatches, and set `apply_ready=true`. This dynamically confirms the tuple filter as the reason the prior shared runs reported zero frames. No flash write occurred.
 - **Permanent rule:** a zero telemetry count is meaningful only after the collector is validated against the concrete Panda row ABI. Accept current 3-tuples and wider historical tuples by reading address from field 0 and data/bus from the last two fields. Do not use the earlier shared-run zero counts as causal evidence about payload execution.
 - **Preserved boundaries:** the old-stack DID0203 bug, VMA=0 bug, unverified boot-RAM helper assumption, unproven scratch writes, and duplicate handoff were real implementation defects found independently and remain fixed. Their causal role in the earlier live failures is unproved because those runs had a blind collector. No persistent flash write occurred.
-- **Canonical:** SECOC-079; `exploit/common/ram_exec.py`; `tests/runtime/verify_secoc_manifest_patcher.py`; `camry_8965f3307000_*` suites in `verification.toml`; `targets/camry-2026/raw-20260830/secoc-ram-exec-exact-host-control/`; `targets/camry-2026/raw-20260830/secoc-patch-preflight-f33-field-proven-handoff-collector-bug/`; `targets/camry-2026/raw-20260830/secoc-patch-preflight-f33-collector-fixed/`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §14.
+- **Canonical:** SECOC-079; `tsk/common/ram_exec.py`; `tests/runtime/verify_secoc_manifest_patcher.py`; `camry_8965f3307000_*` suites in `verification.toml`; `targets/camry-2026/raw-20260830/secoc-ram-exec-exact-host-control/`; `targets/camry-2026/raw-20260830/secoc-patch-preflight-f33-field-proven-handoff-collector-bug/`; `targets/camry-2026/raw-20260830/secoc-patch-preflight-f33-collector-fixed/`; [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §14.
 
 ### CORR-146 — relay-closed TSS3 was only a workaround; forwarding was frame-format-sensitive, and `0x08A` state belongs on native bus 2
 
@@ -3513,7 +3513,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   claimed.
 - **Canonical:** VAR-122/123;
   [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md)
-  §§57.11–57.12; `exploit/behavioral_proof/camry_f33_b6_stationary_probe.py`;
+  §§57.11–57.12; `tsk/behavioral_proof/camry_f33_b6_stationary_probe.py`;
   `tests/targets/camry/verify_camry_f33_b6_stationary_probe.py`.
 
 ### CORR-163 — the September stock-steering grid phase is recoverable exactly
@@ -3605,7 +3605,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
   `targets/camry-2026/raw-20260906/xcp-extended-ingress-probe.json`;
   `data/generated/camry_8965F3307000_application_ram_loader_assessment.json`;
   `camry_8965f3307000_*` suites in `verification.toml`;
-  `exploit/followups/xcp_runtime_state_probe.py`;
+  `tsk/followups/xcp_runtime_state_probe.py`;
   [../variants/camry-2026-live-baseline.md](../variants/camry-2026-live-baseline.md) §§6,13.1.
 
 
@@ -3928,7 +3928,7 @@ and [`../variants/corolla-2023-us-public-route.md`](../variants/corolla-2023-us-
 - **Exact dynamic proof:** immediate post-install state on 2026-09-20 was `0x1903=01` (DRCC all speed), `0x1905=8000` (Cruise Control Permission false), and `0x1906=e000e0008000` (Main Switch Recognition false, ACC-not-available false), while Brake `0x102D` had `fail_status=false/fail_control=false` and `0x102F` had `eps_communication_open=false`. No Brake or FRC reset was performed. The vehicle then completed a normal drive. A post-drive read, still with no peer reset, showed `0x1905=8080` and `0x1906=e080e0008000`; the legacy DRCC-permission verdict flipped to healthy solely because those operational bits changed.
 - **GTS semantic correction:** Toyota names `0x1905` **Cruise Control Permission Flag** and `0x1906` bit8 **Main Switch Recognition Flag**. Both describe current cruise state. `0x1906` bit40 is separately the **ACC Not Available Icon Lighting Request Flag**. None is a persistent proof that the peer ECU failed to recover from EPS programming.
 - **Maintained contract:** `drcc_permission_observed()` remains a live cruise-state diagnostic only for explicit recovery/debugging. The startup control-domain report does not derive or publish a DRCC-permission verdict. Startup `peer_health_observed()` instead requires peer identity/liveness at the topology-defined FRC/Brake addresses plus Brake `0x102D` fail-status/fail-control clear and `0x102F` EPS-communication-open clear; only the kit-bound EPS identity remains target-exact. Explicit peer recovery binds each reset to the F181 observed immediately before it. The normal startup flow then requires a fresh resident-signing self-test. Healthy startup no longer resets Brake/FRC or waits for `0x1905`/MAIN to assert.
-- **Canonical:** `targets/camry-2026/raw-20260920/startup-ui-transient-drcc-permission/`; `tests/targets/tss3/verify_tss3_post_install_recovery.py`; `exploit/ram_runtime/tss3_post_install_recovery.py`; `exploit/ram_runtime/tss3_request_signer_ui_bringup.py`; [Toyota TSS3 minimal runtime](../architecture/toyota-tss3-minimal-runtime.md).
+- **Canonical:** `targets/camry-2026/raw-20260920/startup-ui-transient-drcc-permission/`; `tests/targets/tss3/verify_tss3_post_install_recovery.py`; `tsk/ram_runtime/tss3_post_install_recovery.py`; `tsk/ram_runtime/tss3_request_signer_ui_bringup.py`; [Toyota TSS3 minimal runtime](../architecture/toyota-tss3-minimal-runtime.md).
 
 ### CORR-203 — Interior MULU halfwords were misdecoded as boot CALLT sites
 

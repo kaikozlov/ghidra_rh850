@@ -30,7 +30,7 @@ from typing import Any
 
 
 
-from exploit.common.ram_exec import (
+from tsk.common.ram_exec import (
     ELM327_SAFETY_MODE,
     RAM_LOAD_ADDR,
     _boot_route_dict,
@@ -47,7 +47,7 @@ from exploit.common.ram_exec import (
     load_security_secret,
 )
 import tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_monitor as monitor
-from exploit.ram_runtime.panda_eps import set_alloutput_mode
+from tsk.ram_runtime.panda_eps import set_alloutput_mode
 from tsk.lib.diagnostic_route import panda_health_snapshot, route_fields
 from tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_replay_discriminator import (
     _read_memory,

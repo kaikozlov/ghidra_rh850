@@ -54,7 +54,7 @@ from typing import Any, Iterable
 
 REPO = REPO_ROOT
 
-from exploit.common.ram_exec import (  # noqa: E402
+from tsk.common.ram_exec import (  # noqa: E402
     ELM327_SAFETY_MODE,
     RX_ADDR,
     TX_ADDR,
@@ -63,7 +63,7 @@ from exploit.common.ram_exec import (  # noqa: E402
     _read_f181,
     ensure_boardd_stopped,
 )
-from exploit.followups.xcp_daq_probe import (  # noqa: E402
+from tsk.followups.xcp_daq_probe import (  # noqa: E402
     ENTRIES_PER_ODT,
     MAX_ENTRIES,
     ODTS_PER_LIST,

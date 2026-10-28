@@ -14,8 +14,8 @@ from pathlib import Path
 from tools import REPO_ROOT as REPO
 
 
-from exploit.common.payload_package import package_shellcode
-from exploit.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET
+from tsk.common.payload_package import package_shellcode
+from tsk.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET
 from tools.targets.camry.research.ram_runtime.oracle.build_camry_f33_08a_tx_probe import PROFILE_DATA_OFFSET, STAGING_BASE, STAGING_LIMIT, align, staging_source
 from tools.targets.camry.research.ram_runtime.monitor.build_camry_f33_runtime_replay_discriminator import BOOT_SYMBOLS, IMAGE, IMAGE_SHA256, RESIDENT_BASE, RESIDENT_LIMIT, RESIDENT_SYMBOLS, compile_asm, jarl_targets, nm_symbol, sha_bytes, sha_file, verify_static_contract
 from tools.targets.corolla.research.ram_runtime.build_corolla_hf_command5_carrier import validate_toolchain

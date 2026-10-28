@@ -14,12 +14,12 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
 
-import exploit.ram_runtime.tss3_request_signer as host
+import tsk.ram_runtime.tss3_request_signer as host
 import tools.targets.tss3.builders.build_tss3_request_signer as build
-from exploit.common.payload_package import inspect_payload
-from exploit.common.rh850_build import CJob
-from exploit.ram_runtime.target_profiles import registered_specs, spec_from_codeflash
-from exploit.ram_runtime.tss3_request_signer_contract import (
+from tsk.common.payload_package import inspect_payload
+from tsk.common.rh850_build import CJob
+from tsk.ram_runtime.target_profiles import registered_specs, spec_from_codeflash
+from tsk.ram_runtime.tss3_request_signer_contract import (
     ContractError,
     probe_request_signer_contract,
     resolve_request_signer_contract,

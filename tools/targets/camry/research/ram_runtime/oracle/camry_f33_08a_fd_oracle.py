@@ -14,7 +14,7 @@ from typing import Any
 
 
 
-from exploit.common.ram_exec import (
+from tsk.common.ram_exec import (
     RAM_LOAD_ADDR,
     _import_uds,
     _make_uds_client,
@@ -24,7 +24,7 @@ from exploit.common.ram_exec import (
     explicit_route,
     load_security_secret,
 )
-from exploit.ram_runtime.panda_eps import set_alloutput_mode, wait_for_f181
+from tsk.ram_runtime.panda_eps import set_alloutput_mode, wait_for_f181
 from tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_replay_discriminator import (
     EXPECTED_BOOT_F181_HEX,
     EXPECTED_F181_HEX,

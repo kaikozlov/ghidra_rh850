@@ -11,8 +11,8 @@ from tools import REPO_ROOT
 ROOT = REPO_ROOT
 import tools.targets.camry.builders.build_camry_f33_gate2_root_result_patch as builder
 
-from exploit.patcher.build_payload import simulate_apply
-from exploit.patcher.patch_config import config_from_manifest
+from tsk.patcher.build_payload import simulate_apply
+from tsk.patcher.patch_config import config_from_manifest
 from tools.security.build_secoc_patch_manifest import crc32
 
 LIVE = ROOT / "targets/camry-2026/raw-20260901/f33-gate2-stage2"

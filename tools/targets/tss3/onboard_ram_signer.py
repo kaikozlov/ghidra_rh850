@@ -10,7 +10,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from exploit.ram_runtime.tss3_request_signer_contract import (
+from tsk.ram_runtime.tss3_request_signer_contract import (
     ContractError,
     probe_request_signer_contract,
 )

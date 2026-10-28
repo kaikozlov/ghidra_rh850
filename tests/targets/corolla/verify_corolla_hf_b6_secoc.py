@@ -20,7 +20,7 @@ print('== corolla hf direct canary ==')
 
 def _section_corolla_hf_direct_canary():
     ROOT = REPO_ROOT
-    from exploit.common.ram_exec import explicit_route
+    from tsk.common.ram_exec import explicit_route
     from tools.targets.corolla.research.ram_runtime.corolla_hf_direct_canary import ALBINO_APP_F181, BOOT_F181, CANARY_SHA256, DIRECT_PAYLOAD_SHA256, DID_201, DID_202, DID_203, FF00_REQUEST, HEARTBEAT_ADDR, HEARTBEAT_MAGIC, REQUEST_DOWNLOAD, VERIFY_10F0, _attest_once, _upload_and_trigger, build_payload, build_plan
 
     class FakeUds:

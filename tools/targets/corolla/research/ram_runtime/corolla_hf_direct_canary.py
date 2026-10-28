@@ -34,8 +34,8 @@ from typing import Any, Callable
 from tools import REPO_ROOT as REPO
 
 
-from exploit.common.payload_package import inspect_payload, package_shellcode
-from exploit.common.ram_exec import (
+from tsk.common.payload_package import inspect_payload, package_shellcode
+from tsk.common.ram_exec import (
     ELM327_SAFETY_MODE,
     RX_ADDR,
     TX_ADDR,
@@ -49,7 +49,7 @@ from exploit.common.ram_exec import (
     load_security_secret,
     route_from_session,
 )
-from exploit.followups.application_rmba_probe import execute_read
+from tsk.followups.application_rmba_probe import execute_read
 
 SCHEMA = "corolla-hf-direct-canary-v1"
 H_CODE = REPO / "community/albinoelephant/normalized/8965H1202000_CodeFlash.bin"

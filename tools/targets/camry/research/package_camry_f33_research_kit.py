@@ -14,12 +14,12 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 ROOT = REPO_ROOT
-from exploit.common.payload_package import package_shellcode
-from exploit.common.ram_exec import (
+from tsk.common.payload_package import package_shellcode
+from tsk.common.ram_exec import (
     TOYOTA_P1ME_BOOT_SECURITY_ACCESS_SECRET,
     TOYOTA_P1ME_PAYLOAD_BUILD_SECRET,
 )
-from exploit.ram_runtime.target_profiles import target_spec
+from tsk.ram_runtime.target_profiles import target_spec
 
 
 import tools.targets.camry.research.ram_runtime.oracle.camry_f33_08a_tx_probe as eps08a_probe
@@ -40,7 +40,7 @@ from tools.targets.camry.builders import (
     build_camry_f33_persistent_signer_patch as persistent_patch,
 )
 
-PROBE = ROOT / "exploit/behavioral_proof/camry_f33_b6_stationary_probe.py"
+PROBE = ROOT / "tsk/behavioral_proof/camry_f33_b6_stationary_probe.py"
 RUNBOOK_TEMPLATE = ROOT / "tools/targets/camry/research/ram_runtime/monitor/camry_f33_runtime_monitor_runbook.md"
 PERSISTENT_RUNBOOK = ROOT / "tools/targets/camry/research/ram_runtime/b6/camry_f33_persistent_signer_runbook.md"
 EPS08A_RUNBOOK = ROOT / "tools/targets/camry/research/ram_runtime/oracle/camry_f33_08a_sender_experiments.md"
@@ -87,8 +87,10 @@ RUNTIME_FILES = [
     "tsk/lib/__init__.py",
     "tsk/lib/programming.py",
     "tsk/lib/diagnostic_route.py",
-    "exploit/common/payload_package.py",
-    "exploit/common/ram_exec.py",
+    "tsk/common/__init__.py",
+    "tsk/common/payload_package.py",
+    "tsk/common/ram_exec.py",
+    "tsk/ram_runtime/__init__.py",
     "tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_transaction_observer.py",
     "tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_transaction_observer_install.py",
     "tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_bridge_install.py",
@@ -103,19 +105,21 @@ RUNTIME_FILES = [
     "tools/targets/camry/research/ram_runtime/oracle/camry_f33_08a_tx_probe.py",
     "tools/targets/camry/research/ram_runtime/oracle/camry_f33_08a_oracle_stream.py",
     "tools/targets/camry/research/ram_runtime/b6/camry_f33_b6_inline_signer.py",
-    "exploit/ram_runtime/tss3_post_install_recovery.py",
+    "tsk/ram_runtime/tss3_post_install_recovery.py",
     "tools/targets/camry/research/ram_runtime/command5/camry_f33_icus_ramkey_probe.py",
     "tools/targets/camry/research/ram_runtime/b6/camry_f33_persistent_signer.py",
-    "exploit/ram_runtime/tss3_panda_lease.sh",
-    "exploit/followups/xcp_read_probe.py",
-    "exploit/followups/xcp_daq_probe.py",
-    "exploit/followups/xcp_runtime_state_probe.py",
-    "exploit/followups/application_rmba_probe.py",
-    "exploit/patcher/patch_config.py",
-    "exploit/patcher/build_payload.py",
-    "exploit/patcher/deploy.py",
-    "exploit/patcher/restore.py",
-    "exploit/patcher/post_apply_verify.py",
+    "tsk/ram_runtime/tss3_panda_lease.sh",
+    "tsk/followups/__init__.py",
+    "tsk/followups/xcp_read_probe.py",
+    "tsk/followups/xcp_daq_probe.py",
+    "tsk/followups/xcp_runtime_state_probe.py",
+    "tsk/followups/application_rmba_probe.py",
+    "tsk/patcher/__init__.py",
+    "tsk/patcher/patch_config.py",
+    "tsk/patcher/build_payload.py",
+    "tsk/patcher/deploy.py",
+    "tsk/patcher/restore.py",
+    "tsk/patcher/post_apply_verify.py",
     "tools/__init__.py",
     "tools/security/build_secoc_patch_manifest.py",
     "tools/targets/camry/live/camry_f33_steering_state_capture.py",
@@ -245,7 +249,7 @@ must report `apply_ready: true`, with exact F181, live root preimage
 `FFFFFFFF`.
 
 ```bash
-$PY runtime/exploit/patcher/deploy.py \\
+$PY runtime/tsk/patcher/deploy.py \\
   firmware_patch/CodeFlash.gate2-stage2.bin \\
   --manifest firmware_patch/secoc_patch_manifest_f33_root_result.json \\
   --template firmware_patch/generic_shellcode_template.bin \\
@@ -262,7 +266,7 @@ not reappear after the preflight programming cycle, power fully OFF then return
 to NRTD before retrying APPLY; never bypass the preflight binding.
 
 ```bash
-$PY runtime/exploit/patcher/deploy.py \\
+$PY runtime/tsk/patcher/deploy.py \\
   firmware_patch/CodeFlash.gate2-stage2.bin \\
   --manifest firmware_patch/secoc_patch_manifest_f33_root_result.json \\
   --template firmware_patch/generic_shellcode_template.bin \\
@@ -280,7 +284,7 @@ fixup `EC525C33`, CRC prefix `13ADA3CC`, and final residue `FFFFFFFF`.
 Power the vehicle fully OFF. Return to **NRTD/Park/stationary**. Keep READY off, then:
 
 ```bash
-$PY runtime/exploit/patcher/post_apply_verify.py \\
+$PY runtime/tsk/patcher/post_apply_verify.py \\
   firmware_patch/CodeFlash.gate2-stage2.bin \\
   --manifest firmware_patch/secoc_patch_manifest_f33_root_result.json \\
   --template firmware_patch/generic_shellcode_template.bin \\
@@ -307,7 +311,7 @@ returns exactly to the reboot-verified stage-2 image, including `8F948=003A`,
 RESTORE also requires NRTD/Park/stationary:
 
 ```bash
-$PY runtime/exploit/patcher/restore.py \\
+$PY runtime/tsk/patcher/restore.py \\
   firmware_patch/CodeFlash.gate2-stage2.bin \\
   --manifest firmware_patch/secoc_patch_manifest_f33_root_result.json \\
   --template firmware_patch/generic_shellcode_template.bin \\
@@ -684,7 +688,7 @@ def build(out: Path, openpilot: Path) -> dict:
                 "same_cycle_drcc_recovery": {
                     "command": "./f33-secoc recover-drcc",
                     "role": "diagnostic_only",
-                    "tool": "runtime/exploit/ram_runtime/tss3_post_install_recovery.py",
+                    "tool": "runtime/tsk/ram_runtime/tss3_post_install_recovery.py",
                     "physical_clear": "14FFFFFF on the six exact-car responders that accepted it",
                     "functional_clear": "0x7DF Mode 04 on Panda bus 0; require 0x7E8/7EA/7EB/7ED/7EE positive 44",
                     "acceptance": "all 11 known physical responders have no status&0xAF fault records and FRC DID1905 permits cruise without DID1906 ACC-not-available",

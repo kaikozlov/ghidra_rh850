@@ -341,7 +341,7 @@ after stock command-5 completion and result copy.
 The runtime obeys shared-driver arbitration. A dispatcher return of `2` is
 handled as busy and retried on a later foreground tick; it never invokes the ICU
 abort path or preempts production command-7 verification. The host-side planner
-and guarded live client are `exploit/command5/ram_proxy.py`; default inputs are
+and guarded live client are `tsk/command5/ram_proxy.py`; default inputs are
 restricted to the configured SecOC authenticated-domain sizes `7/12/36`, with an
 explicit override for other command-5 lengths up to 80.
 

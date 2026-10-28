@@ -22,15 +22,15 @@ from typing import Any
 
 ROOT = REPO_ROOT
 
-from exploit.patcher.build_payload import (
+from tsk.patcher.build_payload import (
     build_authenticated_payload,
     build_configured_payload,
     inject_config,
     sha256_bytes,
     simulate_apply,
 )
-from exploit.patcher.patch_config import PatchConfigV1, config_from_manifest
-from exploit.patcher.post_apply_verify import build_post_apply_validate_config
+from tsk.patcher.patch_config import PatchConfigV1, config_from_manifest
+from tsk.patcher.post_apply_verify import build_post_apply_validate_config
 from tools.targets.camry.builders import build_camry_f33_gate2_semantic_patch as stage2
 from tools.security.build_secoc_patch_manifest import crc32
 
@@ -236,7 +236,7 @@ def materialize_template(out: Path) -> Path:
     meta = {
         "schema": "camry-f33-gate2-stage3-template-v1",
         "sha256": EXPECTED_TEMPLATE_SHA256,
-        "source": "exploit/patcher/shellcode.c",
+        "source": "tsk/patcher/shellcode.c",
         "config_offset": 0xF70,
         "size": path.stat().st_size,
     }

@@ -23,7 +23,7 @@ from pathlib import Path
 
 REPO = REPO_ROOT
 
-from exploit.common.payload_package import inspect_payload
+from tsk.common.payload_package import inspect_payload
 from tools.toyota_support.analyze_toyota_dataflash import analyze_triplicate_objects
 
 ROOT = f33.CAPTURE / "raw-20260826/secoc-recovery"

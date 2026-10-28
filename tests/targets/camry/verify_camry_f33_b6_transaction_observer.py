@@ -9,7 +9,7 @@ from pathlib import Path
 from tools import REPO_ROOT
 ROOT = REPO_ROOT
 
-from exploit.common.payload_package import inspect_payload, package_shellcode
+from tsk.common.payload_package import inspect_payload, package_shellcode
 from tools.targets.camry.research.ram_runtime.b6.camry_f33_b6_transaction_observer import (
     TELEMETRY_BASE,
     TELEMETRY_FIELDS,

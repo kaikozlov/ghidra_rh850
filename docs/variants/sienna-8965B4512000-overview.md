@@ -121,7 +121,7 @@ No recovered callback, return-address, vector, DMA, or other control-transfer
 consumer currently turns that write window into a demonstrated execution
 primitive. Physical vehicle/bench reachability of `0x7F7/0x7F8` is also still
 unobserved. A CONNECT-only reachability probe and read-only DAQ tooling are ready
-under `exploit/followups/`.
+under `tsk/followups/`.
 
 Canonical report:
 [communications/xcp-command-dispatch.md](../communications/xcp-command-dispatch.md).
@@ -147,7 +147,7 @@ Canonical report:
 ## Exploit engineering status
 
 The repo now separates a firmware finding from a runnable experiment. The
-`exploit/` tree contains bounded tooling for:
+`tsk/` tree contains bounded tooling for:
 
 - authenticated RAM-exec and read-only CodeFlash acquisition;
 - manifest-driven persistent Gate-2 patching / restore construction;
@@ -156,7 +156,7 @@ The repo now separates a firmware finding from a runnable experiment. The
 - RMBA/RDBI/CommunicationControl/SecOC freshness follow-ups;
 - XCP CONNECT/read/DAQ observation.
 
-See [the experimental research index](../../exploit/README.md).
+See [the experimental research index](../../tsk/README.md).
 
 ## Earlier Sienna investigation priorities
 

@@ -468,7 +468,7 @@ RoutineControl RID `0x1010` requestResults to copy and redirect its 48-byte sour
 first 16 returned bytes are the generated result; the adjacent 32 bytes remain
 uninterpreted. See [SecOC application chain](../security/secoc/application-chain.md),
 [software-path assessment](../security/secoc/software-path-assessment.md), and
-`exploit/command5/stimulus.py`.
+`tsk/command5/stimulus.py`.
 
 ## 6. Timeout / validity RAM
 

@@ -204,7 +204,7 @@ the target's CodeFlash.
 
 ### Operational tooling
 
-`exploit/followups/bootloader_primitives.py` implements the corrected repeated
+`tsk/followups/bootloader_primitives.py` implements the corrected repeated
 download/one-short-block sequence, validates every transaction against the 4 KiB
 RAM window, and refuses execution unless its caller explicitly declares a prior
 successful `0x10F0` in the same session. `raw_substitution_plan.py` emits exact
@@ -252,7 +252,7 @@ Expected external behavior is a hypothesis—hang, exception, or reset depends
 on RH850 unmapped-read handling and has not been dynamically probed. This
 negative does not exclude hardware timing or fault side channels.
 
-The executable arithmetic census in `exploit/followups/static_closure.py`
+The executable arithmetic census in `tsk/followups/static_closure.py`
 classifies every nonzero length in the 4 KiB window: 256 multiples of 16 reach
 the endpoint and 3,840 lengths walk out of the requested range. It independently
 rechecks the endpoint/increment/callee bytes before reporting. No live malformed
@@ -331,7 +331,7 @@ configuration tables, or function addresses from a target ECU without dumping
 the full image. For the comma goal, this could identify whether a newer target
 uses the same crypto routines, SecOC profiles, or callback structures.
 
-`exploit/followups/oracle_dump.py` now makes that experiment executable. It
+`tsk/followups/oracle_dump.py` now makes that experiment executable. It
 re-arms `0x10F3` for every guess, accepts only NRC `0x10` as inequality, rejects
 the inaccessible boot-secret region and table gap, caps a run at 256 bytes, and
 records identity/request-budget/output provenance. Its simulator recovers bytes
@@ -381,7 +381,7 @@ callback pointer via MEM-SAFE-001) supplied a caller-controlled output
 pointer/length. It is documented to prevent regression and to flag the risk
 for variant analysis.
 
-`exploit/followups/static_closure.py` makes the stop condition mechanical. It
+`tsk/followups/static_closure.py` makes the stop condition mechanical. It
 requires the exact failure zero-fill instructions, fixed 48/64 configured
 arguments, and unique driver-dispatch call site. Random diagnostic command-8
 stimulation cannot alter either CPU-side argument, so no live probe is

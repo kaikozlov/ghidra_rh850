@@ -7,7 +7,7 @@ import sys
 
 from tools import REPO_ROOT
 REPO = REPO_ROOT
-from exploit.followups.xcp_daq_probe import (  # noqa: E402
+from tsk.followups.xcp_daq_probe import (  # noqa: E402
     FORBIDDEN_COMMANDS,
 )
 from tools.targets.camry.live.camry_f33_steering_state_capture import (  # noqa: E402

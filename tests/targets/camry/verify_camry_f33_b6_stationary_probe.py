@@ -11,7 +11,7 @@ from pathlib import Path
 
 from tools import REPO_ROOT
 ROOT = REPO_ROOT
-import exploit.behavioral_proof.camry_f33_b6_stationary_probe as probe
+import tsk.behavioral_proof.camry_f33_b6_stationary_probe as probe
 
 passed = failed = 0
 
@@ -212,7 +212,7 @@ sim = probe.simulate()
 check("offline simulation reproduces positive/negative verdicts", sim["good_verdict"]["admitted"] is True and sim["bad_verdict"]["admitted"] is False)
 
 print("\n== ABI-preserving runtime/source-term discriminator ==")
-from exploit.common.payload_package import inspect_payload, package_shellcode
+from tsk.common.payload_package import inspect_payload, package_shellcode
 import tools.targets.camry.research.ram_runtime.monitor.build_camry_f33_runtime_replay_discriminator as replay_builder
 import tools.targets.camry.research.ram_runtime.monitor.camry_f33_runtime_replay_discriminator as replay_runner
 replay_audit = json.loads((ROOT / "tools/targets/camry/research/ram_runtime/monitor/audited/audited_camry_f33_runtime_replay_discriminator_build.json").read_text())
@@ -776,7 +776,7 @@ check("command-5 plan is non-actuating and ephemeral", command5_probe.plan(None)
 print("\n== inline B6 signer host-visible state ==")
 import tools.targets.camry.research.ram_runtime.b6.camry_f33_b6_inline_signer as inline_signer
 import tools.targets.camry.research.ram_runtime.b6.camry_f33_b6_ingress_helper as ingress_helper
-import exploit.ram_runtime.tss3_post_install_recovery as post_recovery
+import tsk.ram_runtime.tss3_post_install_recovery as post_recovery
 check("inline signer state remains wholly SID23-readable below the protected boundary",
       inline_signer.STATE_BASE == 0xFEBF025C and inline_signer.STATE_SIZE == 12 and
       inline_signer.STATE_BASE + inline_signer.STATE_SIZE == inline_signer.TELEMETRY_BASE and

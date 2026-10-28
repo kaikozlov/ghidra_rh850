@@ -4,8 +4,8 @@ import json, subprocess, sys, tempfile
 from pathlib import Path
 from tools import REPO_ROOT
 ROOT=REPO_ROOT
-from exploit.common.payload_package import inspect_payload
-from exploit.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET
+from tsk.common.payload_package import inspect_payload
+from tsk.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET
 BUILDER=ROOT/'tools/targets/camry/research/ram_runtime/bootstrap/build_camry_f33_early030_discriminator.py'
 passed=failed=0
 def check(name,cond,detail=''):

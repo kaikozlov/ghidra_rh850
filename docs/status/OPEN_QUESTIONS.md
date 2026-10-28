@@ -26,7 +26,7 @@ ledger context is useful.
   analysis proves that DIDs `1CF4..1CFF` and `1D01..1D03` return 45 bytes that
   their success-stub producers never write, sourced from persistent Dcm buffer
   `FEBE59F8`. On an isolated Sienna `8965B4512000` bench, run the default-safe
-  `exploit/followups/application_rdbi_stale_probe.py`: its discriminator seeds
+  `tsk/followups/application_rdbi_stale_probe.py`: its discriminator seeds
   the buffer with a 47-byte SID-`0x23` read and requires `22 1C F4` to equal
   `62 1C F4 ‖ seed[2:47]`. Preserve F181, route, and raw request/response bytes.
 - **OQ-004 — XCP physical reachability; dynamic-only write consumers.** COM-005 proves
@@ -44,15 +44,15 @@ ledger context is useful.
   question is which runtime-computed control-transfer consumer reaches that executable region.
   What is still unobserved is whether a vehicle
   gateway or diagnostic connector forwards CAN `0x7F7/0x7F8`.
-  `exploit/followups/xcp_read_probe.py` remains read-only for isolated-bench
-  reachability confirmation. `exploit/followups/xcp_daq_probe.py` now adds the
+  `tsk/followups/xcp_read_probe.py` remains read-only for isolated-bench
+  reachability confirmation. `tsk/followups/xcp_daq_probe.py` now adds the
   exact volatile DAQ configuration/capture path, including named actuation and
   diagnostic-state profiles, without implementing the generic F0/EC memory
   writers. Do not exercise generic write commands on a vehicle. Canonical:
   [../communications/xcp-command-dispatch.md](../communications/xcp-command-dispatch.md).
 - **OQ-005 — Dynamic authenticated-command actuation discriminator.** If COM-007's
   `0x7F7/0x7F8` route is physically reachable on the bench,
-  `exploit/followups/xcp_daq_probe.py --profile actuation-discriminator` can
+  `tsk/followups/xcp_daq_probe.py --profile actuation-discriminator` can
   stream the already-pinned d/q-reference and TSG3-compare RAM directly during
   this experiment without modifying the motor loop. The full-corpus
   extension closes the static join search more broadly than Stage 6. Protected
@@ -266,7 +266,7 @@ ledger context is useful.
   words, and compare the resulting SHA/CRC descriptors with any independently
   acquired image. This read-only acquisition should precede every live APPLY and
   supplies the exact recovery source image. Canonical:
-  `exploit/dumper/README.md`; [historical exploit-engineering journal](../history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md).
+  `tsk/dumper/README.md`; [historical exploit-engineering journal](../history/2026-08/EXPLOIT_ENGINEERING_2026-08-12.md).
 - **OQ-010 — Live Gate-2 MAC28 causal proof.** The local hardware-proof harness and the
   exact one-off openpilot ablation are complete. yc's 2026-08-16 external field
   report corroborates the corrected `cmp r0,r26 -> cmp r0,r0` direction on a
@@ -278,7 +278,7 @@ ledger context is useful.
   resolved Gate-2 patch and demonstrate acceptance with the same ablation
   commit. Preserve SHA-bound raw CAN, EPS DTC, and steering-state evidence for
   all three phases. `validate_trial.py` intentionally rejects flash/reboot
-  success as proof. Canonical: `exploit/behavioral_proof/README.md` and
+  success as proof. Canonical: `tsk/behavioral_proof/README.md` and
   [../security/secoc/application-chain.md](../security/secoc/application-chain.md).
 - **OQ-011 — RR versus RL ordering inside protected CAN-FD `0x090`.** Techstream
   `EMPS2_P5` plus the firmware consumer shapes now identify signals 270/273 as
@@ -408,7 +408,7 @@ ledger context is useful.
   hypothesis only).
 - **OQ-023 — Reset-window replay.** Receiver freshness is zeroed at SecOC initialization,
   so a captured positive synchronization value is structurally forward after
-  reset. `exploit/followups/secoc_freshness_trials.py reset-replay` now validates
+  reset. `tsk/followups/secoc_freshness_trials.py reset-replay` now validates
   the captured sync/protected frames and emits the exact offline phase artifact;
   a cold-boot bench run must still determine sync cadence, whether the old
   authenticated sync can win the startup race, which early ordinary frames can
@@ -811,7 +811,7 @@ ledger context is useful.
 - **OQ-041 — MEM-SAFE-001 transfer to newer SecOC/TSK targets.** The partial-AES-block
   raw-write primitive (MEM-SAFE-001) upgrades a prior authenticated payload into
   arbitrary RAM-code execution without repeating CMAC. The exact bounded host
-  transactions are now implemented and tested under `exploit/followups/`; the
+  transactions are now implemented and tested under `tsk/followups/`; the
   remaining question is only whether the same
   bootloader gate structure (4 KiB download window, callback pointer at
   `0xFEBF0FD0`, `payload_decrypt_transfer_task` floor-division block count,
@@ -825,7 +825,7 @@ ledger context is useful.
   `0x10F3` byte-compare oracle can read application CodeFlash at
   its two configured ranges without dumping the full image. The re-arm loop,
   range gates, request budget, simulator, and explicit live mode are now
-  implemented under `exploit/followups/`. It could be used on a newer
+  implemented under `tsk/followups/`. It could be used on a newer
   target to check whether the same crypto routines, SecOC profiles, or callback
   structures are present before attempting a full exploit. The remaining
   unknown is a live timing/reachability measurement; the 256-request worst case
@@ -881,7 +881,7 @@ ledger context is useful.
 - **OQ-049 — Application CommunicationControl live effect.** Static recovery proves that
   extended-session SID `0x28` reaches real communication-mode updates without a
   configured SecurityAccess policy or recovered speed gate. The isolated-bench
-  probe is now ready under `exploit/followups/`; run it to determine which
+  probe is now ready under `tsk/followups/`; run it to determine which
   baseline-active EPS application Tx IDs are suppressed by `28 01 01` and prove
   all recover after `28 00 01`.
 - **OQ-050 — Exploit-interest cohort consumption (SWEEP-008).** The ranking pipeline

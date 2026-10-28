@@ -13,7 +13,7 @@ from tools import REPO_ROOT as REPO
 
 
 
-from exploit.followups.bootloader_primitives import raw_substitution_chunks, request_download_record
+from tsk.followups.bootloader_primitives import raw_substitution_chunks, request_download_record
 from tools.targets.tss3.research.ram_runtime.target_config import TargetConfigError, load_manifest, manifest_sha256
 
 DEFAULT_MANIFEST = REPO / "data/generated/ephemeral_runtime_target_manifest_4512000.json"

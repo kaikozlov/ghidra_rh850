@@ -7,8 +7,8 @@ import hashlib
 from tools import REPO_ROOT
 REPO = REPO_ROOT
 
-from exploit.common.payload_package import inspect_payload
-from exploit.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET
+from tsk.common.payload_package import inspect_payload
+from tsk.common.ram_exec import TOYOTA_P1ME_PAYLOAD_BUILD_SECRET
 
 SIENNA = REPO / "firmware/RH850_P1M-E_CodeFlash.bin"
 F33 = REPO / "firmware/camry-8965F3307000/CodeFlash.bin"
