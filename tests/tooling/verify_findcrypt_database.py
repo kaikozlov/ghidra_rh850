@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
-"""Check firmware crypto-constant locations using the FindCrypt database."""
+"""Check Findcrypt package provenance and firmware crypto-constant locations."""
+import hashlib
+import io
 import json
+import re
 import sys
+import zipfile
 
 from tools import REPO_ROOT
 REPO = REPO_ROOT
@@ -18,6 +22,72 @@ def check(name, cond, detail=""):
     print(f"[{status}] {name}" + (f"  ({detail})" if detail else ""))
 
 db = json.loads(DB_PATH.read_text())
+
+# Package verification is independent of the firmware scan below.
+print("== findcrypt package provenance ==")
+vendor = DB_PATH.parent.parent
+source_commit = "fcaa49e545b131e2cc631168c6c168c1aec862a6"
+database_sha256 = "8f7bdbc5f9bbe48a4ed93792adab67fca6f103384165ed1917d883870ee6f471"
+patch_path = "patches/ghidra-12.2-task-monitor.patch"
+patch_sha256 = "b2e08dbb2d9f9a66fea38bc595b9d22bec775e85d5bfb3dc46d7258eb243c7b3"
+try:
+    provenance = json.loads((vendor / "PROVENANCE.json").read_text())
+    rebuild = provenance["local_rebuild"]
+    check("Findcrypt upstream v3.1.9 source pinned",
+          provenance["version"] == "3.1.9"
+          and provenance["upstream"]["baseline_commit"] == source_commit
+          and rebuild["source_tag"] == "v3.1.9"
+          and rebuild["source_commit"] == source_commit)
+    check("Findcrypt requires Ghidra 12.2",
+          provenance["ghidra"]["required_version"] == "12.2")
+    patches = provenance["source_patches"]
+    check("Findcrypt Ghidra 12.2 compatibility patch is pinned",
+          len(patches) == 1
+          and patches[0]["path"] == patch_path
+          and patches[0]["ghidra_version"] == "12.2"
+          and patches[0]["sha256"] == patch_sha256
+          and hashlib.sha256((vendor / patch_path).read_bytes()).hexdigest()
+          == patch_sha256)
+    check("Findcrypt database matches pinned upstream",
+          hashlib.sha256(DB_PATH.read_bytes()).hexdigest()
+          == rebuild["database_sha256"] == database_sha256)
+    check("Findcrypt database contains 130 signatures", len(db) == 130)
+    archives = sorted(vendor.glob("*.zip"))
+    check("Exactly one Ghidra 12.2 Findcrypt package is vendored",
+          len(archives) == 1
+          and re.fullmatch(r"ghidra_12\.2_PUBLIC_\d{8}_GhidraFindcrypt\.zip",
+                           archives[0].name) is not None)
+    if len(archives) == 1:
+        archive = archives[0]
+        check("Vendored package list matches actual files",
+              sorted(provenance["vendored_files"])
+              == sorted(["data/database.json", patch_path, archive.name]))
+        check("Findcrypt package SHA-256 matches provenance",
+              hashlib.sha256(archive.read_bytes()).hexdigest()
+              == rebuild["artifact_sha256"])
+        with zipfile.ZipFile(archive) as package:
+            properties = dict(
+                line.split("=", 1)
+                for line in package.read("GhidraFindcrypt/extension.properties")
+                .decode().splitlines()
+                if "=" in line and not line.lstrip().startswith("#")
+            )
+            check("Packaged extension declares Ghidra 12.2",
+                  properties.get("version") == "12.2"
+                  and properties.get("name") == "GhidraFindcrypt")
+            check("Packaged and CLI signature databases are identical",
+                  package.read("GhidraFindcrypt/data/database.json")
+                  == DB_PATH.read_bytes())
+            jar = package.read("GhidraFindcrypt/lib/GhidraFindcrypt.jar")
+            check("Findcrypt JAR SHA-256 matches provenance",
+                  hashlib.sha256(jar).hexdigest() == rebuild["jar_sha256"])
+            with zipfile.ZipFile(io.BytesIO(jar)) as classes:
+                analyzer = classes.read("findcrypt/FindCryptAnalyzer.class")
+                check("Findcrypt analyzer compiled for Java 25",
+                      analyzer[:4] == b"\xca\xfe\xba\xbe"
+                      and int.from_bytes(analyzer[6:8], "big") == 69)
+except (OSError, KeyError, ValueError, zipfile.BadZipFile) as exc:
+    check("Findcrypt package provenance is readable", False, str(exc))
 
 # Scan the CodeFlash-only image with the signatures used by FindCrypt.
 print("\n== firmware scan with findcrypt signatures ==")

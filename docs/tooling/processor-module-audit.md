@@ -377,25 +377,35 @@ Instruction inventory for this firmware is committed as
 inventory under `build/out/` with `InventoryUsedInstructions.java` and compares it
 byte-for-byte with the committed baseline instead of mutating tracked evidence.
 
-### Ghidra 12.1.4 migration
+### Ghidra 12.2 compatibility
 
-The repository is pinned to Ghidra **12.1.4**. The 12.1.3→12.1.4 migration
-itself changed only inventory-version metadata; the compiled language and
-semantic project rows were unchanged at that milestone. Later P1M-E
-hardware-spec and G3M-instruction corrections intentionally change the
-processor language and persisted semantics; the current source fingerprint and
-compiled-SLA hash live in `data/processor_manifest.baseline.json`. At the recorded
-migration milestones, two independent clean rebuilds of every then-registered
-target agreed. The 2026-10-14 cache correction refreshes Camry; other target
-snapshots retain their recorded processor identities and require a rebuild before
-using the corrected cache semantics. See
-[the migration journal](../history/2026-09/GHIDRA_12_1_4_MIGRATION_2026-09-21.md)
-for the earlier version-only migration evidence.
+The repository is pinned to Ghidra **12.2** and JDK **25+**. The CLI bridge
+uses the current single-type removal API; Findcrypt's tracked patch updates
+its two cancellation checks to `TaskMonitor.checkCancelled()`.
+
+The compiler-helper analyzer marks instruction-proven GCC/GHS save-helper
+`jmp [r10]` exits as returns before native inlining. Ghidra 12.2 otherwise
+turns those indirect branches into tail calls and loses the caller's continuation
+and stack effects. Mutated helper bodies remain indirect jumps. The fixture
+checks the original machine execution and exact escaped-SP deltas; its p-code
+resolver also handles constant-index `PTRADD`.
+
+The current source and compiled-artifact identities are recorded in
+`data/processor_manifest.baseline.json`. Each project snapshot retains the
+processor identity that actually produced it.
+
+The migration regenerated 45,655 function records across all six targets with
+zero decompilation failures. Each target's two clean rebuild inventories agreed,
+and each promoted snapshot was materialized and opened through `tools/gtarget`.
+
+The Camry computed-store resolver handles low-word `SUBPIECE` values emitted
+for combined GP/TP temporaries. Its refreshed censuses and bound checks pass;
+destination-writer matching uses the current named SFRs with address provenance.
 
 ## Exact project parity
 
 The legacy Sienna normalized project inventory has **7,090 functions, 197,726
-instructions, and 8,813 symbols**. Aggregate floors remain useful as a fast
+instructions, and 11,249 symbols**. Aggregate floors remain useful as a fast
 collapse detector, but they cannot detect equal-count substitutions. The deterministic
 `ExportProjectInventory.java` exporter therefore records path-free Ghidra and
 program identity, every memory mapping, function entry/body/signature/parameter

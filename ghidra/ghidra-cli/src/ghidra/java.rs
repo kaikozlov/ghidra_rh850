@@ -19,7 +19,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 /// The default Java floor if we cannot read it from the Ghidra install.
-/// Ghidra 12.x sets `application.java.min=21`.
+/// Ghidra 12.0/12.1 used 21; 12.2 declares 25 in its application properties.
 pub const DEFAULT_MIN_JAVA: u32 = 21;
 
 /// Details about a validated JDK.

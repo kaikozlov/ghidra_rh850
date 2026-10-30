@@ -40,6 +40,9 @@ public class AuditComputedStoreTargets extends GhidraScript {
     if(op==null){int bits=v.getSize()*8;if(bits<32)return new R(0,(1L<<bits)-1,true);return R.unk();}
     int c=op.getOpcode();
     if(c==PcodeOp.COPY||c==PcodeOp.CAST||c==PcodeOp.INDIRECT||c==PcodeOp.INT_ZEXT)return ev(op.getInput(0),d+1,seen);
+    // 12.2 may combine adjacent registers into a 64-bit value. The range
+    // domain already tracks its low u32, so extracting that word preserves it.
+    if(c==PcodeOp.SUBPIECE&&v.getSize()==4&&op.getInput(1).isConstant()&&op.getInput(1).getOffset()==0)return ev(op.getInput(0),d+1,seen);
     if(c==PcodeOp.PTRSUB){R a=ev(op.getInput(0),d+1,new HashSet<>(seen)),b=ev(op.getInput(1),d+1,new HashSet<>(seen));if(a.known&&a.lo==0&&a.hi==0&&b.known)return b;return add(a,b);}
     if(c==PcodeOp.INT_ADD)return add(ev(op.getInput(0),d+1,new HashSet<>(seen)),ev(op.getInput(1),d+1,new HashSet<>(seen)));
     if(c==PcodeOp.INT_SUB){R a=ev(op.getInput(0),d+1,new HashSet<>(seen)),b=ev(op.getInput(1),d+1,new HashSet<>(seen));if(a.known&&b.known&&b.lo==b.hi){long k=(-b.lo)&U32;return add(a,new R(k,k,true));}return R.unk();}

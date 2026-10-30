@@ -2759,14 +2759,22 @@ range analysis:
   literal lane indices **0..7**, while `3C108/3C116/3C184/3C19C` are bounded to
   indices `<0x18`;
 - generated-COM bookkeeping candidates are confined by exact manager/event/route counts to
-  `FEBE48xx..FEBE4Fxx`; the five route buffers are fixed at
+  `FEBE48xx..FEBE4Fxx`. The 48 PDU configurations have lengths at most 32 and
+  buffer offset plus length at most 488; direct signal writers use literal offsets.
+  The five route buffers are fixed at
   `FEBE3DF8/FEBE3E2C/FEBE3E48/FEBE3E64/FEBE3EA0`;
 - XCP/CAN-manager scratch candidates are confined to `FEBE493E..FEBE503A` by the exact
-  state/rule counts; diagnostic-event state is bounded below `FEBE5527`;
+  state/rule counts. `82510`'s guarded slot index is at most 147; CAN route handles
+  `47/50/53/54/55` fit the nine slots beginning at handle 47.
+  Diagnostic-event state is bounded below `FEBE5527`;
 - the logical-block family has exactly three state rows and backing buffers
   `FEBE5651/FEBE5751/FEBE5851`; the apparent wide indexed motor/snapshot families are
   called only with the exact five-channel domain **0..4**; and the remaining `CBxx`
   helpers carry explicit `<=0x13` / `<3` bounds.
+
+Ghidra 12.2 combines some GP/TP values into 64-bit temporaries. The resolver
+preserves their low-word `SUBPIECE` arithmetic; the resulting nine additional
+candidate functions belong to the bounded COM and XCP/CAN families above.
 
 The refreshed 7,336-function census no longer reports `69EAC` as a candidate.
 Its earlier conservative intersection remains independently bounded by the

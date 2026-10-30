@@ -409,7 +409,7 @@ correctly retries only pre-send connection failures; preserve that property.
 ### Cancellation and shutdown
 
 Ghidra's `TaskMonitor` contract includes `cancel()`, `isCancelled()`, and
-`checkCanceled()`. `TaskMonitorAdapter` stores cancellation in a volatile flag.
+`checkCancelled()`. `TaskMonitorAdapter` stores cancellation in a volatile flag.
 This gives the control thread a legitimate cancellation channel without
 touching `Program`.
 

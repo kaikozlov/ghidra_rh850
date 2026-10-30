@@ -41,7 +41,7 @@
         "0xFFFF87D4"
       ],
       "lo": "0xFFFF8420",
-      "pointer_expression": "CAST(INT_ADD(INT_MULT(INT_AND((register, 0x18, 4),0xff),0x40),0xffff8420))",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xffff8420),INT_MULT(INT_AND((register, 0x18, 4),0xff),0x10),0x4)",
       "store": "0x00060808"
     },
     {
@@ -80,7 +80,7 @@
         "0xFFFF87D4"
       ],
       "lo": "0xFFFF8438",
-      "pointer_expression": "CAST(INT_ADD(INT_MULT(INT_AND((register, 0x18, 4),0xff),0x40),0xffff8438))",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xffff8438),INT_MULT(INT_AND((register, 0x18, 4),0xff),0x10),0x4)",
       "store": "0x0006081E"
     },
     {
@@ -119,7 +119,7 @@
         "0xFFFF87D4"
       ],
       "lo": "0xFFFF842C",
-      "pointer_expression": "CAST(INT_ADD(INT_MULT(INT_AND((register, 0x18, 4),0xff),0x40),0xffff842c))",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xffff842c),INT_MULT(INT_AND((register, 0x18, 4),0xff),0x10),0x4)",
       "store": "0x00060824"
     },
     {
@@ -158,7 +158,7 @@
         "0xFFFF87D4"
       ],
       "lo": "0xFFFF8420",
-      "pointer_expression": "CAST(INT_ADD(INT_MULT(INT_AND((register, 0x18, 4),0xff),0x40),0xffff8420))",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xffff8420),INT_MULT(INT_AND((register, 0x18, 4),0xff),0x10),0x4)",
       "store": "0x00060828"
     },
     {
@@ -197,17 +197,17 @@
         "0xFFFF87D4"
       ],
       "lo": "0xFFFF842C",
-      "pointer_expression": "CAST(INT_ADD(INT_MULT(INT_ZEXT((register, 0x18, 1)),0x40),0xffff842c))",
+      "pointer_expression": "PTRADD(PTRSUB(0x0,0xffff842c),INT_MULT(INT_ZEXT((register, 0x18, 1)),0x10),0x4)",
       "store": "0x000609CE"
     }
   ],
   "canonical_corpus": {
     "path": "data/generated/camry-8965F3307000/decompilations.jsonl",
-    "sha256": "e3ac4e094422d68757173a48b2a7a4d9ca85187ce324e7a9e1ac0ce2410e82b8"
+    "sha256": "481884e1fc805782248cd591919c77341a993e3a1a367fc1f65543a6c2b823d0"
   },
   "ghidra_script": {
     "path": "ghidra/scripts/investigate/AuditComputedStoreTargets.java",
-    "sha256": "eb1c8c95ff08239ee520f0e2ae1a32f6b02fd02117317d0b733ef329f164d3c6"
+    "sha256": "b878f1937d1fea68fb1f88b3ccce5b7f03105abd80c2a24464be7dc115504557"
   },
   "kind": "dmac_destination_registers",
   "schema": "camry-8965f3307000-computed-store-target-census-v1",
@@ -216,7 +216,7 @@
     "candidateFunctions": 3,
     "candidates": 5,
     "functions": 7336,
-    "knownRangeStores": 5432,
+    "knownRangeStores": 5459,
     "stores": 14134
   },
   "target": {

@@ -6,7 +6,8 @@ the firmware *is*, see [OVERVIEW.md](OVERVIEW.md).
 ## Prerequisites
 
 - [Astral UV](https://docs.astral.sh/uv/) for the locked Python environment.
-- Ghidra **12.1.4** (tested Homebrew location `/opt/homebrew/opt/ghidra/libexec`).
+- Ghidra **12.2** (tested Homebrew location `/opt/homebrew/opt/ghidra/libexec`)
+  and a full **JDK 25+**.
 - Rust `ghidra` CLI **0.2.1** (`ghidra doctor` must pass). The CLI source is
   **vendored in-tree** at `ghidra/ghidra-cli/` (fork of
   `akiselev/ghidra-cli`). Run `make ghidra-cli` to build it into
@@ -28,6 +29,17 @@ the firmware *is*, see [OVERVIEW.md](OVERVIEW.md).
   `tools/rh850 toolchain self-test`. There is no compiler-profile selection or
   image override. See
   [RH850 build and execution testing](tooling/rh850-build-and-sim.md).
+
+On macOS, build the native components after installing or upgrading Ghidra:
+
+```bash
+GHIDRA_HOME="$(brew --prefix ghidra)/libexec"
+"$GHIDRA_HOME/support/gradle/gradlew" -p "$GHIDRA_HOME/support/gradle" buildNatives
+```
+
+This is Ghidra's supplied native build procedure; it installs the decompiler
+under the installation's module `build/os/` directories. The repository's
+processor and Findcrypt extensions remain isolated below `build/cache/`.
 
 There is no separate processor install step. `tools/project/install_v850_extension.sh` (invoked
 by `make verify-sleigh` and every project rebuild) compiles the vendored
@@ -1025,9 +1037,16 @@ dependency; changed candidate families require analysis before closure.
 Normal push/PR CI runs the small `make verify` core suite. The exhaustive
 portable `make verify-full` sweep is scheduled/manual. Processor-path PRs run
 SLEIGH, synthetic fixtures, and committed-project audits on macOS with pinned
-Ghidra 12.1.4 / ghidra CLI 0.2.1; the processor/rebuild/CLI jobs also remain
+Ghidra 12.2 / vendored ghidra CLI 0.2.1 with JDK 25. CI builds the native
+components before running Ghidra. The processor/rebuild/CLI jobs also remain
 available on scheduled/manual runs. Ordinary source, evidence, and documentation
-commits do not trigger the four-stage Ghidra rebuild. The 12.1.3 -> 12.1.4
-migration was verified by two independent clean rebuilds of every registered
-target and changed no canonical semantic record; see
-[the migration journal](history/2026-09/GHIDRA_12_1_4_MIGRATION_2026-09-21.md).
+commits do not trigger the four-stage Ghidra rebuild.
+
+The 12.2 migration produced byte-identical independent rebuild inventories for
+all six registered targets. Function counts and bodies were unchanged. The
+fresh P1M-E projects also incorporate existing SFR-map additions; Crown, both
+Corollas, and Sienna acquire four existing `__v850_copy_words` conventions.
+Camry's function records are unchanged; Venza's inventory changes only its
+Ghidra-version metadata. See
+[processor compatibility](tooling/processor-module-audit.md#ghidra-122-compatibility)
+for the helper-return correction.

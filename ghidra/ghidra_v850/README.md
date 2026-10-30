@@ -86,7 +86,8 @@ Implementation owners:
 - `data/patterns/` — Ghidra function-start patterns for PREPARE/ADDI prologues
   following architectural returns.
 - Language versions `0.8` (V850E2M), `0.9` (RH850G3M), `1.1` (broad RH850)
-  and `1.0` (V850E1F), with extension metadata pinned to Ghidra `12.1.4`.
+  and `1.0` (V850E1F), with extension metadata pinned to Ghidra `12.2`.
+  Runtime and analyzer compilation require JDK 25; analyzers target Java 25.
   `MADDF`/`MSUBF`/`NMADDF`/`NMSUBF` use the V850E2M architectural contract;
   G3M has its separate fused forms.
   `CACHE`/`PREF` use the G3M manual's named operations (Table 7-7/7-8).

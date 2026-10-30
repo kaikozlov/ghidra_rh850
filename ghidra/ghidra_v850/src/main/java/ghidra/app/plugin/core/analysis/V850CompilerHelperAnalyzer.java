@@ -99,6 +99,7 @@ import ghidra.program.model.data.VoidDataType;
 import ghidra.program.model.lang.InjectPayload;
 import ghidra.program.model.lang.Register;
 import ghidra.program.model.listing.Data;
+import ghidra.program.model.listing.FlowOverride;
 import ghidra.program.model.listing.Function;
 import ghidra.program.model.listing.Instruction;
 import ghidra.program.model.listing.InstructionIterator;
@@ -141,6 +142,8 @@ public class V850CompilerHelperAnalyzer extends AbstractAnalyzer {
 		Address entry;
 		String name;
 		HelperKind kind;
+		/** Instruction-proven alternate-link return; never inferred from a name. */
+		Address returnSite;
 		/** First saved register rN (20..29), or -1 when only LP is saved. */
 		int reglo = -1;
 		/** Registers stored by the helper, in store order. */
@@ -498,12 +501,10 @@ public class V850CompilerHelperAnalyzer extends AbstractAnalyzer {
 			Instruction ins = it.next();
 			sites.add(ins.getMinAddress());
 		}
+		// Revisit already-inline helpers so existing programs also acquire
+		// instruction-proven alternate-link return overrides.
 		for (Address a : sites) {
 			monitor.checkCancelled();
-			Function existing = listing.getFunctionAt(a);
-			if (existing != null && existing.isInline() && matchFixedWordCopy(program, a) == null) {
-				continue;
-			}
 			if (!isIndependentEntry(program, a)) {
 				continue;
 			}
@@ -698,6 +699,7 @@ public class V850CompilerHelperAnalyzer extends AbstractAnalyzer {
 		}
 		HelperInfo info = new HelperInfo(a, gccName("save", nregs, reghi), HelperKind.GCC_SAVE);
 		info.savedRegs = regs;
+		info.returnSite = ea;
 		return info;
 	}
 
@@ -849,6 +851,7 @@ public class V850CompilerHelperAnalyzer extends AbstractAnalyzer {
 		HelperInfo info = new HelperInfo(a,
 			reglo == 31 ? "__ghssavelp" + suffix : "__ghssave" + reglo + suffix, HelperKind.GHS_SAVE);
 		info.savedRegs = regs;
+		info.returnSite = ea;
 		info.locals = alloc > 0;
 		return info;
 	}
@@ -1475,6 +1478,16 @@ public class V850CompilerHelperAnalyzer extends AbstractAnalyzer {
 		if (info.kind == HelperKind.FIXED_WORD_COPY) {
 			applyWordCopyContract(program, function, monitor);
 			return;
+		}
+		if (info.returnSite != null) {
+			// jmp [r10] is normally BRANCHIND, but these complete bodies prove
+			// it returns to the helper's caller. Native inlining only reconnects
+			// RETURN ops; leaving BRANCHIND loses the caller's continuation to
+			// an indirect tail call (including its live stack/memory effects).
+			Instruction ret = listing.getInstructionAt(info.returnSite);
+			if (ret.getFlowOverride() != FlowOverride.RETURN) {
+				ret.setFlowOverride(FlowOverride.RETURN);
+			}
 		}
 		if (!function.isInline()) {
 			// The helper body is the ground truth: inlining splices its real

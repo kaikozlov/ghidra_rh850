@@ -12,14 +12,14 @@ VENDOR="$ROOT/ghidra/ghidra_v850"
 BUILD_EXT="$BUILD_CACHE/processor-extension-src/Renesas_v850"
 LANG="$BUILD_EXT/data/languages"
 USER_HOME="${GHIDRA_ISOLATED_HOME:-$BUILD_CACHE/ghidra-home}"
-SETTINGS_DIR="$USER_HOME/Library/ghidra/ghidra_12.1.4_PUBLIC"
+SETTINGS_DIR="$USER_HOME/Library/ghidra/ghidra_12.2_PUBLIC"
 EXT_DIR="${V850_EXT_DIR:-$SETTINGS_DIR/Extensions/Renesas_v850}"
 LOG_DIR="$BUILD_LOGS/sleigh"
 MANIFEST="${PROCESSOR_MANIFEST:-$BUILD_OUT/processor_manifest.json}"
 
 GHIDRA_VERSION=$(awk -F= '$1 == "application.version" { print $2 }' "$GHIDRA_HOME/Ghidra/application.properties")
-[[ "$GHIDRA_VERSION" == "12.1.4" ]] || {
-  echo "Ghidra 12.1.4 is required (found ${GHIDRA_VERSION:-unknown})" >&2
+[[ "$GHIDRA_VERSION" == "12.2" ]] || {
+  echo "Ghidra 12.2 is required (found ${GHIDRA_VERSION:-unknown})" >&2
   exit 1
 }
 CLI_VERSION="missing"
@@ -102,7 +102,7 @@ if [[ ${#JAVA_SOURCES[@]} -gt 0 ]]; then
   done
   CLASSES="$BUILD_EXT/build/classes"
   mkdir -p "$CLASSES" "$BUILD_EXT/lib"
-  javac --release 21 -encoding UTF-8 -cp "$CLASSPATH" \
+  javac --release 25 -encoding UTF-8 -cp "$CLASSPATH" \
     -d "$CLASSES" "${JAVA_SOURCES[@]}"
   jar --create --file "$BUILD_EXT/lib/Renesas_v850.jar" \
     --date=2000-01-01T00:00:00Z -C "$CLASSES" .

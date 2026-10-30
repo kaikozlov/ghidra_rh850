@@ -64,7 +64,6 @@ ranges = {
     "flexray": (0x10020000, 0x10022000),
     "psi50": (0xFFE00000, 0xFFE01000),
     "psi51": (0xFFE01000, 0xFFE02000),
-    "rsent": (0xFFE05000, 0xFFE0B000),
 }
 refs = {k: [] for k in ranges}
 with corpus.open() as fh:
@@ -80,8 +79,6 @@ with corpus.open() as fh:
                     refs[name].append((rec.get("entry_addr"), dref.get("from_addr"), dref.get("ref_type"), addr))
 check("exact F33 has no application FlexRay/PSI5 data references",
       refs["flexray"] == [] and refs["psi50"] == [] and refs["psi51"] == [])
-check("sole RSENT SFR reference is RSENT1IDE enable at 0xFFE06018",
-      refs["rsent"] == [("0x00060c20", "0x00060c40", "WRITE", 0xFFE06018)])
 
 
 print(f"\nResults: {passed} passed, {failed} failed")

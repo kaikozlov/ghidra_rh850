@@ -89,6 +89,33 @@ fn test_type_create() {
 
 #[test]
 #[serial]
+fn test_type_delete_removes_created_type() {
+    require_ghidra!();
+    let _harness = harness();
+    let name = "TypeDeleteRegression";
+    let run = |action: &str| {
+        let mut command = assert_cmd::cargo::cargo_bin_cmd!("ghidra");
+        command.args([
+            "type", action, name, "--project", TEST_PROJECT, "--program", TEST_PROGRAM,
+        ]);
+        command
+    };
+
+    run("create").assert().success();
+    run("get")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(name));
+    run("delete")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("deleted"));
+    run("get").assert().failure();
+    run("delete").assert().failure();
+}
+
+#[test]
+#[serial]
 fn test_type_apply() {
     require_ghidra!();
     let harness = harness();

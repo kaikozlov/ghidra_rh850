@@ -3616,7 +3616,8 @@ public class GhidraCliBridge extends GhidraScript {
             DataTypeManager dtm = currentProgram.getDataTypeManager();
             int txId = currentProgram.startTransaction("Delete type");
             try {
-                boolean removed = dtm.remove(dataType, monitor);
+                monitor.checkCancelled();
+                boolean removed = dtm.remove(dataType);
                 currentProgram.endTransaction(txId, true);
                 if (!removed) {
                     return errorResult("Failed to remove type: " + typeName + " (may be in use or built-in)");

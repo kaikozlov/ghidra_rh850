@@ -7,22 +7,31 @@
     "fork_of": "https://github.com/TorgoTorgo/ghidra-findcrypt",
     "baseline_commit": "fcaa49e545b131e2cc631168c6c168c1aec862a6",
     "baseline_branch": "main",
-    "notes": "Full GhidraFindcrypt v3.1.9 source is pinned to upstream commit `fcaa49e545b131e2cc631168c6c168c1aec862a6`. The vendored extension zip is a local rebuild of that exact source against Ghidra 12.1.4 because upstream v3.1.9 predates the 12.1.4 release. The rebuilt JAR and data/database.json are byte-identical to the official 12.1.2 v3.1.9 package; only extension version packaging changes."
+    "notes": "Full GhidraFindcrypt v3.1.9 source is pinned to upstream commit fcaa49e545b131e2cc631168c6c168c1aec862a6. Builds for Ghidra 12.2 require the tracked source_patches below, which replace two removed TaskMonitor.checkCanceled() calls with checkCancelled() and preserve cancellation exceptions. The local_rebuild hashes describe the actual vendored package; its Ghidra version is recorded separately."
   },
+  "source_patches": [
+    {
+      "path": "patches/ghidra-12.2-task-monitor.patch",
+      "sha256": "b2e08dbb2d9f9a66fea38bc595b9d22bec775e85d5bfb3dc46d7258eb243c7b3",
+      "ghidra_version": "12.2",
+      "description": "Rename both TaskMonitor cancellation checks to checkCancelled(), retaining CancelledException propagation."
+    }
+  ],
   "vendored_files": [
     "data/database.json",
-    "ghidra_12.1.4_PUBLIC_20260921_GhidraFindcrypt.zip"
+    "patches/ghidra-12.2-task-monitor.patch",
+    "ghidra_12.2_PUBLIC_20261030_GhidraFindcrypt.zip"
   ],
   "ghidra": {
-    "required_version": "12.1.4"
+    "required_version": "12.2"
   },
   "license": "GPL-3.0",
   "local_rebuild": {
     "source_tag": "v3.1.9",
     "source_commit": "fcaa49e545b131e2cc631168c6c168c1aec862a6",
-    "build_command": "GHIDRA_INSTALL_DIR=/opt/homebrew/opt/ghidra/libexec ./gradlew buildExtension",
-    "artifact_sha256": "c10023384658968dee94ccc24fd5f9e1ee75088ddd2b7264d71e53ad4e236391",
-    "jar_sha256": "dc2e395b6dac463ed9191465ce43d5c6cea5002851515b06f0167c5464ee3aa3",
+    "build_command": "git apply /path/to/ghidra-findcrypt/patches/ghidra-12.2-task-monitor.patch && GHIDRA_INSTALL_DIR=/opt/homebrew/opt/ghidra/libexec TZ=UTC ./gradlew --no-daemon clean buildExtension",
+    "artifact_sha256": "a7b88f63b4cb3b3640e63f6f04593c6f42332385ef6317a31b8fd718a6e7087f",
+    "jar_sha256": "9291090cd44f7158bf79246f0db3797364776162886386a080f79f7b85d2fb15",
     "database_sha256": "8f7bdbc5f9bbe48a4ed93792adab67fca6f103384165ed1917d883870ee6f471"
   }
 }

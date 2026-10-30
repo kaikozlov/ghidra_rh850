@@ -69,6 +69,7 @@ public class AssertDecompilerInvariants extends GhidraScript {
         int unknown = 0;
         int stdcall = 0;
         int interrupt = 0;
+        int wordCopy = 0;
         int other = 0;
         FunctionIterator it = currentProgram.getFunctionManager().getFunctions(true);
         while (it.hasNext()) {
@@ -77,6 +78,7 @@ public class AssertDecompilerInvariants extends GhidraScript {
             String cc = f.getCallingConventionName();
             if ("__stdcall".equals(cc)) stdcall++;
             else if ("__interrupt".equals(cc)) interrupt++;
+            else if ("__v850_copy_words".equals(cc)) wordCopy++;
             else if (cc == null || "unknown".equals(cc) || "default".equals(cc)) {
                 unknown++;
                 if (unknown <= 8) {
@@ -93,8 +95,8 @@ public class AssertDecompilerInvariants extends GhidraScript {
             fail(String.format("... and %d more functions still on unknown/default",
                     unknown - 8));
         }
-        println(String.format("convention census: __stdcall=%d __interrupt=%d unknown=%d other=%d",
-                stdcall, interrupt, unknown, other));
+        println(String.format("convention census: __stdcall=%d __interrupt=%d __v850_copy_words=%d unknown=%d other=%d",
+                stdcall, interrupt, wordCopy, unknown, other));
         if (stdcall == 0) fail("expected at least one __stdcall function after ApplyCallingConventions");
         if (interrupt == 0) fail("expected at least one __interrupt ISR wrapper");
     }

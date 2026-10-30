@@ -56,6 +56,7 @@ import ghidra.program.model.lang.Language;
 import ghidra.program.model.lang.LanguageID;
 import ghidra.program.model.lang.Register;
 import ghidra.program.model.listing.Data;
+import ghidra.program.model.listing.FlowOverride;
 import ghidra.program.model.listing.Function;
 import ghidra.program.model.listing.Listing;
 import ghidra.program.model.listing.Parameter;
@@ -1208,6 +1209,17 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 		check(ghsLoad != null && ghsLoad.getName().equals("__ghsload27") && ghsLoad.isInline(),
 			"GHS __ghsload27 recognized, named, inline (got " +
 				(ghsLoad == null ? "<none>" : ghsLoad.getName()) + ")");
+		check(listing.getInstructionAt(addr(program, 0x1010c)).getFlowOverride() ==
+			FlowOverride.RETURN &&
+			listing.getInstructionAt(addr(program, 0x10222)).getFlowOverride() ==
+			FlowOverride.RETURN,
+			"instruction-proven GCC/GHS r10 exits are returns for native inlining");
+		for (long exit : new long[] { 0x1180c, 0x12fe2, 0x12ffc }) {
+			check(listing.getInstructionAt(addr(program, exit)).getFlowOverride() ==
+				FlowOverride.NONE,
+				"unproven save-helper r10 exit at " + Long.toHexString(exit) +
+					" remains an indirect jump");
+		}
 
 		// Real stack effect of the inlined GCC save on its caller: the
 		// consumer stores the helper-adjusted sp ITSELF into escaping RAM
@@ -1764,6 +1776,15 @@ public class AssertV850CompilerHelpers extends GhidraScript {
 		int opcode = def.getOpcode();
 		if (opcode == PcodeOp.COPY || opcode == PcodeOp.CAST) {
 			return spOffset(program, def.getInput(0), depth + 1);
+		}
+		if (opcode == PcodeOp.PTRADD) {
+			// 12.2 can anchor the frame below the escaped local, e.g.
+			// PTRADD(PTRSUB(entry_sp,-136),128,1) still denotes entry_sp-8.
+			Varnode index = def.getInput(1), scale = def.getInput(2);
+			if (!index.isConstant() || !scale.isConstant()) return null;
+			Long parent = spOffset(program, def.getInput(0), depth + 1);
+			if (parent == null) return null;
+			return (long) (int) (parent + (int) index.getOffset() * scale.getOffset());
 		}
 		if (opcode == PcodeOp.INT_ADD || opcode == PcodeOp.PTRSUB || opcode == PcodeOp.INT_SUB) {
 			Varnode base = def.getInput(0), offset = def.getInput(1);

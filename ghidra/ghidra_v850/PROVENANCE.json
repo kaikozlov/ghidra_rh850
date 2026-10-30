@@ -53,7 +53,7 @@
     "U14559EJ3V0UM V850E1 User's Manual: Architecture (legacy DBTRAP/DBRET and DIR.DM transitions)"
   ],
   "ghidra": {
-    "required_version": "12.1.4",
+    "required_version": "12.2",
     "cli_required_version": "0.2.1"
   },
   "audit": "docs/tooling/processor-module-audit.md"

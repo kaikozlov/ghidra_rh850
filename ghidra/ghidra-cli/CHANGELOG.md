@@ -32,6 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Ghidra 12.2 bridge compilation uses the single-type `DataTypeManager.remove`
+  API; type deletion retains its transaction and checks cancellation first.
 - Commands issued while the bridge is busy now wait in the queue instead of
   failing with "bridge not responding" — a slow analysis no longer looks like a
   dead bridge.

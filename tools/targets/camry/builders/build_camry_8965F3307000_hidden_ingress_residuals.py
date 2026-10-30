@@ -37,8 +37,9 @@ OUT = ROOT / "data/generated/camry_8965F3307000_hidden_ingress_residuals.json"
 
 E1_FUNCTIONS = {
     0x3B8E4, 0x3BD8E, 0x3C108, 0x3C116, 0x3C184, 0x3C19C,
-    0x7B248, 0x7B2C4, 0x7DD64, 0x7E364, 0x7FC0E, 0x82294, 0x82880,
-    0x8300E, 0x830D0, 0x832F4, 0x850C2, 0x850E0, 0x8E772, 0x8E790,
+    0x7B248, 0x7B2C4, 0x7D31E, 0x7D6E6, 0x7D72C, 0x7DD64, 0x7DDD8,
+    0x7DF14, 0x7E196, 0x7E364, 0x7FC0E, 0x82294, 0x82510, 0x82880,
+    0x8300E, 0x830D0, 0x832F4, 0x850C2, 0x850E0, 0x85112, 0x851EE, 0x8E772, 0x8E790,
     0x8E7A4, 0x8E7BA, 0x8E7D0, 0x8F60E, 0x8F6B2, 0x93C6C, 0x93C9A,
     0x93DE8, 0x93E5C, 0x93EF6, 0x93F4E, 0x9405C, 0xB9CBE, 0xB9D5E,
     0xB9DFC, 0xB9EAA, 0xBA052, 0xBA134, 0xBA170, 0xBA284, 0xBA398,
@@ -153,6 +154,10 @@ def refresh_census(path: Path, audit_output: Path) -> None:
         "path": str(CORPUS.relative_to(ROOT)),
         "sha256": sha(CORPUS.read_bytes()),
     }
+    old["ghidra_script"] = {
+        "path": str(SCRIPT.relative_to(ROOT)),
+        "sha256": sha(SCRIPT.read_bytes()),
+    }
     path.write_text(json.dumps(old, indent=2, sort_keys=True) + "\n")
 
 
@@ -210,6 +215,27 @@ def build() -> dict:
     need(route_indices == [0, 1, 2, 3, 4], f"7FC0E route indices drift: {route_indices}")
     route_buffers = [struct.unpack_from("<I", image, 0x21A54 + i * 4)[0] for i in range(5)]
     need(route_buffers == [0xFEBE3DF8, 0xFEBE3E2C, 0xFEBE3E48, 0xFEBE3E64, 0xFEBE3EA0], "generated-COM buffer table drift")
+    pdu_count = image[0x21C54]
+    need(pdu_count == 48, "COM PDU count drift")
+    pdu_lengths = [struct.unpack_from("<H", image, 0x226C4 + i * 8)[0] for i in range(pdu_count)]
+    pdu_offsets = [struct.unpack_from("<H", image, 0x22840 + i * 2)[0] for i in range(pdu_count)]
+    need(max(pdu_lengths) <= 32, "COM TX scratch length exceeds configured extent")
+    need(max(off + size for off, size in zip(pdu_offsets, pdu_lengths, strict=True)) <= 0x1E8,
+         "COM PDU buffer exceeds configured extent")
+    signal_pdu_map = struct.unpack("<284H", image[0x22488:0x226C0])
+    need(max(signal_pdu_map) < pdu_count, "COM signal-to-PDU map escapes configured rows")
+    signal_callee = rows[0x7D31E]["name"]
+    signal_offsets = []
+    for entry, row in rows.items():
+        if entry == 0x7D31E:
+            continue
+        for line in str(row.get("decompiled_c", "")).splitlines():
+            if signal_callee + "(" not in line:
+                continue
+            match = re.search(re.escape(signal_callee) + r"\(\s*(?:0x[0-9a-fA-F]+|\d+)\s*,\s*(0x[0-9a-fA-F]+|\d+)\s*,", line)
+            need(match, f"COM signal writer has a nonliteral offset at {entry:#x}")
+            signal_offsets.append(int(match.group(1), 0))
+    need(signal_offsets and max(signal_offsets) + 4 <= 0x1E8, "COM signal store escapes configured buffer")
 
     # E1-C: XCP/communication manager state arrays.
     need(struct.unpack_from("<H", image, 0x22AE4)[0] == 0x70, "XCP state pointer count drift")
@@ -221,6 +247,8 @@ def build() -> dict:
     need(image[0x21971] == 3, "CAN rule-group count drift")
     rule_groups = [(struct.unpack_from("<H", image, 0x22E44 + i * 8)[0], image[0x22E44 + i * 8 + 4]) for i in range(3)]
     need(rule_groups == [(47, 0), (47, 9), (56, 0)], f"CAN rule-group spans drift: {rule_groups}")
+    route_handles = [struct.unpack_from("<H", image, 0x21ACC + i * 10 + 6)[0] for i in range(5)]
+    need(route_handles == [47, 50, 53, 54, 55], f"CAN route handle fields drift: {route_handles}")
 
     # E1-D: diagnostic/event arrays have hard bounds in the recovered functions.
     for entry in (0x8E772, 0x8E790, 0x8E7A4, 0x8E7BA, 0x8E7D0):
@@ -276,14 +304,17 @@ def build() -> dict:
 
     # Direct recovered destination writers. +0x04 is initialized only by 6082C;
     # +0x14 is initialized by 6082C and refreshed by 60A6A. 6091E is read-only.
-    # Match the destination offsets and assignment form. Decompiler-local
-    # variable names can change when unrelated function recovery improves.
-    plus04_store = re.compile(r"\*\(undefined4 \*\)\([^;\n]*\+ -0x7bfc\) =")
-    plus14_store = re.compile(r"\*\(undefined4 \*\)\([^;\n]*\+ -0x7bec\) =")
+    # The current device profile gives these SFRs their hardware names.
+    # Match indexed assignments independently of decompiler-local names.
+    plus04_store = re.compile(r"\(&DDA0\)\[[^;\n]*\]\s*=")
+    plus14_store = re.compile(r"\(&DRDA0\)\[[^;\n]*\]\s*=")
     plus04_writers = sorted(entry for entry, row in rows.items() if plus04_store.search(str(row.get("decompiled_c", ""))))
     plus14_writers = sorted(entry for entry, row in rows.items() if plus14_store.search(str(row.get("decompiled_c", ""))))
     need(plus04_writers == [0x6082C], f"DMAC +04 writer set drift: {plus04_writers}")
     need(plus14_writers == [0x6082C, 0x60A6A], f"DMAC +14 writer set drift: {plus14_writers}")
+    for entry, address in ((0x6082C, 0xFFFF8404), (0x6082C, 0xFFFF8414), (0x60A6A, 0xFFFF8414)):
+        need(any(int(ref["to_addr"], 16) == address for ref in rows[entry]["data_references"]),
+             f"named DMAC destination address drift: {entry:#x}/{address:#x}")
     # ZXB r6; SHL 6,r6; LD.W -0x7bfc[r6],r10; JMP lp. The accessor's
     # named uint return and uchar argument do not alter this read-only dataflow.
     need(image[0x6091E:0x60928] == bytes.fromhex("8600c632265705847f00"), "DMAC +04 reader instruction drift")
@@ -320,6 +351,7 @@ def build() -> dict:
         0x93ABA, 0x93C60, 0x93C66, 0x93F0E, 0xBA224, 0xBA25E, 0xBA336,
         0xBA5A0, 0xBA642, 0x6082C, 0x6091E, 0x60A6A, 0x60462, 0x60C20,
         0x61B90, 0x628B2, 0x69EAC,
+        0x4C7AA, 0x4C8E0, 0x4C97A, 0x7D1DC, 0x7DE52, 0x7E13A,
     }
 
     return {
@@ -337,8 +369,8 @@ def build() -> dict:
             "candidate_functions": [hx(x) for x in sorted(E1_FUNCTIONS)],
             "closure_groups": [
                 {"name": "71f2_status_arrays", "functions": [hx(x) for x in (0x3B8E4,0x3BD8E,0x3C108,0x3C116,0x3C184,0x3C19C)], "bound": "3B8E4 receives literal lanes 0..7; 3BD8E is bounded to indices <3; 3C108/116/184/19C are bounded to indices <0x18; none reaches FEBE71F2"},
-                {"name": "generated_com_bookkeeping", "functions": [hx(x) for x in (0x7B248,0x7B2C4,0x7DD64,0x7E364,0x7FC0E)], "bound": "exact manager/event/route counts confine writes to 0xFEBE48xx..0xFEBE4Fxx; the five generated-COM buffers are fixed at FEBE3DF8..FEBE3EA0"},
-                {"name": "xcp_can_manager_state", "functions": [hx(x) for x in (0x82294,0x82880,0x8300E,0x830D0,0x832F4,0x850C2,0x850E0)], "bound": "exact state/rule counts confine writes to FEBE493E..FEBE503A; 82880's configured row count is four and its inner span is 4*7 entries"},
+                {"name": "generated_com_bookkeeping", "functions": [hx(x) for x in (0x7B248,0x7B2C4,0x7D31E,0x7D6E6,0x7D72C,0x7DD64,0x7DDD8,0x7DF14,0x7E196,0x7E364,0x7FC0E)], "bound": "exact manager/event/route counts confine writes to 0xFEBE48xx..0xFEBE4Fxx; 48 COM PDU rows have at most 32 bytes each and buffer offset plus length at most 488; signal-to-PDU entries remain below 48 and direct signal-writer offsets are literal; the five generated-COM buffers are fixed at FEBE3DF8..FEBE3EA0"},
+                {"name": "xcp_can_manager_state", "functions": [hx(x) for x in (0x82294,0x82510,0x82880,0x8300E,0x830D0,0x832F4,0x850C2,0x850E0,0x85112,0x851EE)], "bound": "exact state/rule counts confine writes to FEBE493E..FEBE503A; 82510's guarded pointer-slot index is at most 147; 82880's configured row count is four and its inner span is 4*7 entries; fixed route handles 47/50/53/54/55 index the nine-slot CAN state table beginning at handle 47"},
                 {"name": "diagnostic_event_state", "functions": [hx(x) for x in (0x8E772,0x8E790,0x8E7A4,0x8E7BA,0x8E7D0,0x8F60E,0x8F6B2)], "bound": "event arrays are <0x60 and the linked diagnostic-list path has exactly three node IDs, confining writes below FEBE5527"},
                 {"name": "logical_block_state", "functions": [hx(x) for x in (0x93C6C,0x93C9A,0x93DE8,0x93E5C,0x93EF6,0x93F4E,0x9405C)], "bound": "logical-block index domain is exactly 0..2; backing buffers are FEBE5651/FEBE5751/FEBE5851; ring index wraps at two slots"},
                 {"name": "five_channel_snapshot_state", "functions": [hx(x) for x in (0xB9CBE,0xB9D5E,0xB9DFC,0xB9EAA,0xBA052,0xBA134,0xBA170,0xBA284,0xBA398,0xBA4EA,0xBEF80,0xBEF8E)], "bound": "top-level BA642 index is 0..4 and BEF80/BEF8E is called with literal 0; writes remain below FEBEBF3C"},
