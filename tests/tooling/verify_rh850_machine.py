@@ -2,10 +2,12 @@
 """Exercise target-discovered exact firmware scenarios through the P1M-E machine."""
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import subprocess
 import tempfile
+from collections import Counter
 from pathlib import Path
 
 import tools.targets.tss3.builders.build_tss3_request_signer as signer_builder
@@ -920,10 +922,57 @@ def check_register_input_boundaries(output_root: Path) -> None:
         print(f"PASS register-input {name} rejected at device-model boundary")
 
 
+def check_runtime_soak(output_root: Path) -> None:
+    target = "camry-8965F3307000"
+    fixture = FIXTURE_ROOT / target / "original-reset-to-runtime-synthetic-board.json"
+    scenario = json.loads(fixture.read_text(encoding="utf-8"))
+    scenario.update(
+        name="original-reset-runtime-soak",
+        max_instructions=80_000_000,
+        stop_addresses=[],
+        expected_termination="instruction-budget",
+    )
+    path = output_root / f"{scenario['name']}.json"
+    path.write_text(json.dumps(scenario, indent=2) + "\n", encoding="utf-8")
+    proc = run([
+        str(REPO_ROOT / "tools/rh850"), "test", "firmware", target, str(path),
+        "--output-dir", str(output_root),
+    ])
+    result = json.loads(proc.stdout)
+    report = json.loads(Path(result["reports"][0]["report"]).read_text(encoding="utf-8"))
+    if not report["passed"] or report["status"] != "verified-stubbed-execution":
+        raise AssertionError("runtime soak did not complete its declared execution contract")
+    events = report["device_events"]
+    interrupts = Counter(row["kind"] for row in events if row["kind"].startswith("interrupt-"))
+    if interrupts["interrupt-enter"] < 2 or interrupts["interrupt-enter"] != interrupts["interrupt-return"]:
+        raise AssertionError(f"runtime soak did not sustain balanced interrupt delivery: {interrupts}")
+    flash = Counter(
+        row["operation"] for row in events
+        if row["kind"] == "faci-completion" and row["operation"] in {"erase", "program"}
+    )
+    if flash != {"erase": 9, "program": 95}:
+        raise AssertionError(f"runtime soak DataFlash lifecycle changed: {flash}")
+    serial = Counter(row["unit"] for row in events if row["kind"] == "csih-word")
+    if serial[1] <= 252 or serial[2] < 2 or serial[3] < 2:
+        raise AssertionError(f"runtime soak did not continue all CSIH units beyond startup: {serial}")
+    print(
+        f"PASS runtime soak: {report['instruction_count']} instructions, "
+        f"{interrupts['interrupt-return']} interrupt round trips, "
+        f"DataFlash={dict(flash)}, CSIH={dict(serial)}"
+    )
+
+
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--runtime-soak", action="store_true",
+                        help="run only the explicit long-duration lifecycle bench")
+    args = parser.parse_args()
     run([str(REPO_ROOT / "tools/rh850"), "model", "check"])
     with tempfile.TemporaryDirectory(prefix="verify-rh850-machine-", dir=REPO_ROOT / "build/tmp") as tmp:
         output_root = Path(tmp)
+        if args.runtime_soak:
+            check_runtime_soak(output_root)
+            return 0
         check_exact_scenarios(output_root)
         check_dynamic_request_signer_targets(output_root)
         check_schema_rejection(output_root)

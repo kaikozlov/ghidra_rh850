@@ -314,6 +314,15 @@ tests = ["tests/firmware/verify_p1m_device_profile.py"]
 
 [suite.rh850_firmware]
 tests = ["tests/tooling/verify_rh850_machine.py"]
+# The verified boot milestone executes approximately 29 million instructions.
+timeout = 600
+
+[suite.rh850_runtime_soak]
+tests = ["tests/tooling/verify_rh850_machine.py"]
+args = ["--runtime-soak"]
+# Explicit selection only; excluded from the default processor gate and bundles.
+modes = []
+timeout = 1800
 
 [suite.camry_decomp]
 tests = [

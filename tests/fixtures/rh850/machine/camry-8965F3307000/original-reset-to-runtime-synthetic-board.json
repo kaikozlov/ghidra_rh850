@@ -7,8 +7,8 @@
     "address": "0x0"
   },
   "reset": "power-on",
-  "max_instructions": 80000000,
-  "stop_addresses": [],
+  "max_instructions": 35000000,
+  "stop_addresses": ["0x660bc"],
   "gpr_fill": "0",
   "registers": {},
   "checks": [
@@ -13440,5 +13440,5 @@
     ]
   },
   "dma_master_rewrite_assumption": "Explicit bench assumption: original Camry60A10 periodically rewrites identical DMA master values while enabled. Treat only these unchanged writes as state-preserving; manual section7.8 warns operation is not guaranteed, and no hardware capture validates this assumption.",
-  "expected_termination": "instruction-budget"
+  "expected_termination": "stop-address"
 }

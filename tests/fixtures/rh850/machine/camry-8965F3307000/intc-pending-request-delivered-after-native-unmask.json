@@ -1,0 +1,22 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "intc-pending-request-delivered-after-native-unmask",
+  "entry": {"role": "original-halfword-store-unmasks-pending-source", "scope": "resolved-address", "address": "0x62e4c"},
+  "max_instructions": 3,
+  "stop_addresses": ["0x62e50"],
+  "gpr_fill": "0",
+  "registers": {"PSW": "0", "RBASE": "0", "INTBP": "0xfebf0000", "ep": "0xffffb0c6", "r7": "0x1044"},
+  "memory": [
+    {"address": "0xffffb0c6", "hex": "c400", "evidence": "Explicit EIC99 priority4, table vector, initially masked."},
+    {"address": "0xfebf018c", "hex": "72130700", "evidence": "Explicit vector to the original EIRET at71372; no firmware bytes modified."}
+  ],
+  "events": [{"kind": "interrupt", "channel": 99, "after_instructions": 0, "evidence": "Explicit CSIH2 receive pulse while EIMK is set; the native store clears EIMK and preserves EIRF."}],
+  "checks": [
+    {"name": "pending-edge-consumed-after-unmask", "kind": "memory", "address": "0xffffb0c6", "size": 2, "equals_hex": "4400"},
+    {"name": "interrupt-follows-unmask-store", "kind": "register", "register": "EIPC", "equals": "0x62e4e"},
+    {"name": "foreground-resumes-after-real-eiret", "kind": "register", "register": "pc", "equals": "0x62e50"},
+    {"name": "priority-state-released", "kind": "register", "register": "ISPR", "equals": "0"},
+    {"name": "single-delivery", "kind": "event-count", "operation": "interrupt-enter", "equals": "1"},
+    {"name": "single-return", "kind": "event-count", "operation": "interrupt-return", "equals": "1"}
+  ]
+}

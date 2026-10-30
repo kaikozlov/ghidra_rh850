@@ -554,6 +554,19 @@ required explicitly. Do not combine `expected_termination` with
 Machine runs wait for the Ghidra report without the bridge's default
 300-second timeout. An explicit `GHIDRA_CLI_READ_TIMEOUT` overrides that wait;
 `max_instructions` remains the execution bound.
+The `rh850_firmware` suite has a 600-second deadline: the verified boot
+milestone alone executes approximately 29 million original instructions.
+The separately selected `rh850_runtime_soak` suite has a 1,800-second deadline.
+
+Interrupt arbitration scans an index of asserted EIRF requests rather than
+rereading every EIC on each instruction. Initialization, reset, device requests,
+and CPU writes update that index; EIMK, priority and CPU-mask checks remain at
+delivery. The native-unmask fixture covers a request captured while masked and
+delivered after the original halfword store clears EIMK.
+
+The runner checks Ghidra cancellation at instruction and scenario boundaries.
+`tools/gtarget TARGET jobs` identifies a running job;
+`tools/gtarget TARGET cancel JOB_ID` aborts the batch without reporting success.
 
 Optional `hsb_cycles_per_instruction` is a positive signed-64 integer. It
 advances CLK_HSB after each executed instruction; it is a declared functional
@@ -1259,9 +1272,9 @@ firmware path; the supplied inputs are not a captured external-ASIC protocol.
 
 ### Clocked original reset with declared bench inputs
 
-The retained bench starts unchanged `camry-8965F3307000` CodeFlash at its
-original reset vector with `stop_addresses: []`, no executable overlays, and
-the original MPU configuration:
+The default boot regression starts unchanged `camry-8965F3307000` CodeFlash at
+its original reset vector, with no executable overlays and the original MPU
+configuration:
 
 ```sh
 tools/rh850 test firmware camry-8965F3307000 \
@@ -1269,21 +1282,27 @@ tools/rh850 test firmware camry-8965F3307000 \
   --output-dir build/out/rh850-machine/serial-lifecycle/original-reset-spooled
 ```
 
-This retained case passes as `verified-stubbed-execution`. The observed run
-retired **80,000,000 instructions** across **67,213 instruction addresses** and
-ended in the foreground loop at `0x6606A`, without an execution fault. It
-recorded **5,467 interrupt entries and 5,467 returns**, **9 completed DataFlash
-block erases**, and **95 completed word programs**. Completed CSIH words were
-2,824 on unit1 and 32,175 on each of units2/3.
+The fixture requires startup readiness at `0xFEBE3800 == 0x5A` and a
+`stop-address` termination at `0x660BC`. Decompilation of `0x66062` and its
+disassembly identify this branch as the end of the first foreground dispatch
+cycle, after the subsystem and NVM calls return. The observed milestone run
+retired **29,006,190 instructions**. Its 35-million-instruction budget is a
+failure ceiling, not the success condition.
 
-The report is
-`build/out/rh850-machine/serial-lifecycle/original-reset-spooled/original-reset-to-runtime-synthetic-board.report.json`.
-Its device-event log is complete. The memory-access prefix retains the
-existing 1,048,576-row limit and reports `trace_lost_address: true`; it must not
-be treated as a complete write set.
+The long-duration lifecycle bench reuses the same declared inputs:
 
-The scenario has an 80-million-instruction budget and declares its environment
-rather than changing firmware decisions:
+```sh
+tools/test rh850_runtime_soak
+```
+
+This explicit-only suite is excluded from `make verify-processor` and the
+`full`/`local` bundles. It runs 80 million instructions, representing one
+second of declared HSB-clock progress, and requires balanced interrupt round
+trips, 9 completed DataFlash block erases, 95 completed word programs, and
+continued traffic on all three CSIH units beyond the initial exchange.
+Successful runs are classified as `verified-stubbed-execution`.
+
+Both cases declare their environment rather than changing firmware decisions:
 
 - One HSB cycle per retired instruction: a functional clock coupling, not
   CPU cycle-accuracy.

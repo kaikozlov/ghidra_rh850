@@ -44,6 +44,7 @@ import ghidra.program.model.listing.Instruction;
 import ghidra.program.model.listing.InstructionIterator;
 import ghidra.program.model.pcode.PcodeOp;
 import ghidra.program.model.scalar.Scalar;
+import ghidra.util.exception.CancelledException;
 import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.IOException;
@@ -55,6 +56,7 @@ import java.security.MessageDigest;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -680,6 +682,8 @@ public class RunP1MEMachine extends GhidraScript {
         final List<RegisterDef> registers;
         final Map<String, RegisterDef> registersByName = new HashMap<>();
         final Map<Integer, RegisterDef> interruptRegisters = new LinkedHashMap<>();
+        final RegisterDef[] interruptRegistersByAddress;
+        final BitSet pendingInterrupts;
         final Map<Integer, ReceiveFifo> receiveFifos = new HashMap<>();
         // R01UH0585EJ0120 Table 17.132: CFDC and CFPLS encodings.
         static final int[] FIFO_DEPTHS = {0, 4, 8, 16, 32, 48, 64, 128};
@@ -804,6 +808,9 @@ public class RunP1MEMachine extends GhidraScript {
                     interruptRegisters.put(register.interrupt_channel, register);
                 }
             }
+            interruptRegistersByAddress = interruptRegisters.values().toArray(RegisterDef[]::new);
+            Arrays.sort(interruptRegistersByAddress, Comparator.comparingLong(row -> row.address));
+            pendingInterrupts = new BitSet(interruptRegistersByAddress.length);
             resetFactorKnownMask = requiredRegister("reset controller", "status", "RESF").reset_mask;
             bindPortAliases();
             registers.sort(Comparator.comparingLong(row -> row.address));
@@ -983,8 +990,9 @@ public class RunP1MEMachine extends GhidraScript {
             RegisterDef selected = null;
             int priority = 16;
             boolean priorityMasked = false;
-            for (RegisterDef eic : interruptRegisters.values()) {
-                if (eic.reset == null) continue;
+            for (int index = pendingInterrupts.nextSetBit(0); index >= 0;
+                    index = pendingInterrupts.nextSetBit(index + 1)) {
+                RegisterDef eic = interruptRegistersByAddress[index];
                 long value = unsigned(memory(eic.address, eic.size));
                 if ((value & 0x1080) != 0x1000) continue;
                 int candidate = (int) value & 15;
@@ -6629,7 +6637,8 @@ public class RunP1MEMachine extends GhidraScript {
                     }
                 }
             }
-            if (!peripheralFile) handleRegisterWrite(thread, address, size, value);
+            if (peripheralFile) refreshPendingInterrupts(address, size);
+            else handleRegisterWrite(thread, address, size, value);
         }
 
         void initializeResetRegisters() {
@@ -6703,10 +6712,35 @@ public class RunP1MEMachine extends GhidraScript {
             }
         }
 
+        // Index EIRF by address-sorted EIC; retain mask/priority arbitration at delivery.
+        void refreshPendingInterrupts(long address, int size) {
+            if (interruptRegistersByAddress.length == 0 || size == 0) return;
+            RegisterDef last = interruptRegistersByAddress[interruptRegistersByAddress.length - 1];
+            long end = address + size;
+            if (end <= interruptRegistersByAddress[0].address
+                    || address >= last.address + last.size) return;
+            int low = 0;
+            int high = interruptRegistersByAddress.length;
+            while (low < high) {
+                int middle = (low + high) >>> 1;
+                RegisterDef eic = interruptRegistersByAddress[middle];
+                if (eic.address + eic.size <= address) low = middle + 1;
+                else high = middle;
+            }
+            for (int index = low; index < interruptRegistersByAddress.length; index++) {
+                RegisterDef eic = interruptRegistersByAddress[index];
+                if (eic.address >= end) break;
+                if (eic.reset != null) {
+                    pendingInterrupts.set(index, (unsigned(memory(eic.address, eic.size)) & 0x1000) != 0);
+                }
+            }
+        }
+
         void setMemory(long address, byte[] value) {
             internalWrite = true;
             try {
                 emulator.getSharedState().setVar(memorySpace, address, value.length, true, value);
+                refreshPendingInterrupts(address, value.length);
             }
             finally {
                 internalWrite = false;
@@ -7720,6 +7754,7 @@ public class RunP1MEMachine extends GhidraScript {
         try {
             while (trace.instructions < scenario.max_instructions
                     && !stops.contains(thread.getCounter().getOffset())) {
+                monitor.checkCancelled();
                 if (model.returnBoundedCallee(thread)) continue;
                 model.dispatchDueEvents();
                 model.dispatchExternalEvents();
@@ -7936,12 +7971,16 @@ public class RunP1MEMachine extends GhidraScript {
             if (failure != null) throw failure;
         }) {
             for (Scenario scenario : contract.scenarios) {
+                monitor.checkCancelled();
                 JsonObject report;
                 Trace trace = new Trace(instructionTraceEnabled, reportPath.getParent());
                 traces.add(trace);
                 try {
                     report = runScenario(
                         contract, machineSpec, language, scenario, codeflash, dataflash, trace);
+                }
+                catch (CancelledException exc) {
+                    throw exc;
                 }
                 catch (Exception exc) {
                     report = new JsonObject();
