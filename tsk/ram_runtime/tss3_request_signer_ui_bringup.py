@@ -129,7 +129,7 @@ def run(payload: Path, meta: Path, output_dir: Path, *,
 
     emit(
         "verifying", "Verifying bringup",
-        "Checking peer health without resets, then requesting one independently fresh signed 0x08A trailer.",
+        "Checking FRC/Brake current faults without resets, then requesting one independently fresh signed 0x08A trailer.",
         progress=70, output_dir=output_dir,
     )
     state = control_domain_state(
@@ -139,7 +139,7 @@ def run(payload: Path, meta: Path, output_dir: Path, *,
     if health["state"] == "fault":
         raise UiBringupError(f"peer fault observed: {', '.join(health['faults'])}")
     if health["state"] != "healthy":
-        raise UiBringupError(f"peer verification incomplete; unavailable monitors: {', '.join(health['unavailable'])}")
+        raise UiBringupError(f"peer verification incomplete; unavailable diagnostics: {', '.join(health['unavailable'])}")
     signer_test = self_test(meta, panda=panda)
     write_json(output_dir / "request-signer-self-test.json", signer_test)
     if signer_test.get("passed") is not True:
@@ -155,7 +155,7 @@ def run(payload: Path, meta: Path, output_dir: Path, *,
     }
     write_json(output_dir / "summary.json", result)
     emit(
-        "done", "Request-signer bringup complete", "EPS fresh signer and Brake/EPS communication health passed without peer resets.",
+        "done", "Request-signer bringup complete", "EPS fresh signer and FRC/Brake current-fault checks passed without peer resets.",
         progress=100, done=True, output_dir=output_dir,
     )
     return result

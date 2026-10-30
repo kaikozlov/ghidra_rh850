@@ -966,7 +966,7 @@ it did not repair the ECU, perform a live test, or establish that another
 ordinary CAN request will work. Section 18 resolves a separate installed-access
 lead at the upstream A30 connector without treating the rack photo as a pinout.
 
-## 17. First no-lift network check: Brake/EPB reports EPS communication state
+## 17. First no-lift network check: Brake/EPB diagnostic evidence
 
 The exact 2026 Camry Hybrid already has a live-identified, ordinary diagnostic
 neighbor that can be queried without lifting the car, unplugging A30 or touching
@@ -980,30 +980,27 @@ f7 00 fd 00 7c 00 a9 00 00 00
 ```
 
 The current `ABS_P5` Data List maps **EPS/Steering Control Actuator ECU
-Communication Open** to MSB0 bit 74 of those ten bytes. For a zero-indexed byte
-array `value`, decode it as `(value[9] & 0x20) != 0`: zero is `Normal`; one is
-`Under intermittent`. The retained pre-incident value decodes to zero and
-establishes a baseline.
+Communication Open** to MSB0 bit74. GTS requires byte8 mask `0x20` to advertise
+support before interpreting byte9 mask `0x20` as Normal/open. The retained
+response clears the support bit, making this monitor unavailable. The
+[GTS support contract](../tooling/techstream.md#brake-monitor-response-length-and-field-support)
+owns the exact database and instruction evidence.
 
-The safest first action is therefore a stationary, IG-ON/not-READY Techstream or
-GTS read: select Brake/EPB identity `F152633K0000`, open Data List, retain the
-full raw value for that exact label, and then read—but do not clear—DTC
-**U0131-87, Lost Communication with Power Steering Control Module / Missing
-Message**. If an already-validated direct UDS setup is used instead, keep the
-physical route current rather than hardcoding a Panda bus: retained harness
-configurations place this stable CAN-ID pair on different logical buses.
+A stationary, IG-ON/not-READY diagnostic read can select Brake/EPB identity
+`F152633K0000` and retain DTC **U0131-87, Lost Communication with Power Steering
+Control Module / Missing Message**, including its status byte. Preserve the
+record without clearing it. With an already-validated direct UDS setup, use
+the current physical route: retained harness configurations place this stable
+CAN-ID pair on different logical buses.
 
 Interpretation:
 
 - a positive `0x7B8` response proves Brake/EPB ECU and route liveness;
-- bit 74 set is the brake ECU's current peer-monitor report that EPS
-  communication is open/intermittent;
-- bit 74 clear means the brake ECU currently considers that monitored EPS
-  communication normal, which is a reason to retain passive EPS-origin traffic
-  and recheck routing/frame format before treating the rack as network-dead; and
-- U0131-87 alone is historical/status evidence. The exact car previously stored
-  Brake/EPB status `0xAC` with current-failure bits clear, so its mere presence
-  is not a current-liveness result.
+- a supported bit74 reports Normal/open according to its value;
+- U0131-87 with UDS `testFailed` (status bit0) set reports a current diagnostic
+  failure;
+- the retained Brake status `0xAC` has bit0 clear and includes stored
+  history/warning state.
 
 Exact evidence is
 `targets/camry-2026/raw-20260826/camry_nrtd_p5_oracles_extra_20260826.json`,
@@ -1017,8 +1014,8 @@ separate route/identity join.
 
 Post-incident retained traffic does show native `0x7B8` replies to session and
 TesterPresent requests, so this neighboring endpoint survived the incident.
-No post-incident `0x102F` value was retained. That missing read is now the first
-network step; it reports state but does not reset, reflash or repair EPS.
+No post-incident `0x102F` value was retained. Preserve fresh DTC/status evidence
+and passive EPS-origin traffic when diagnosing the incident.
 
 ## 18. A30 exposes an installed-rack, downstream-CAN discriminator
 

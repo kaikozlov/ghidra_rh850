@@ -2470,6 +2470,17 @@ positions and enum labels. These status DIDs
 interleave support and value bytes. For EPS communication bit74, byte8 mask
 `0x20` establishes support and byte9 mask `0x20` gives the value (zero-based).
 
+The exact `ABS_P5` monitor records 81, 82, and 500 have flags `+0x30=0x43`,
+condition key `+0x36=0`, and override byte `+0x4B=0`. The current
+`GetDatMonListP5_DT.dll` branch at `0x10001DE1..0x10001E32` therefore calls
+`CheckSupportPid(..., 1)` and requires a positive support result.
+`CommandCommon.dll`'s final override at `0x10072CA4..0x10072CD8` leaves these
+records unchanged. The 2026-10-30 Camry report's `0x102D` value
+`30106f00ff001d00bf048000d0106840` has byte6 `0x1D`, clearing both selected
+support masks (`0x40` and `0x20`). Executing the DLL's bitmap-check instructions
+offline with that value and the retained `0x102F` value rejects all three
+monitors; setting each support bit independently admits its monitor.
+
 | Payload evidence | Length | GTS interpretation |
 |---|---:|---|
 | Corolla `0700000000000000`, reported in [Span's 2026-10-28 commit](https://github.com/spanconstant5/openpilot/commit/6f534271aff4ef830ef0a1c9aac130a54c11c574) | 8 | `Yaw Rate Open`, `Deceleration Open`, and `Steering Open` are supported and Normal; EPS bit74 is absent. |
@@ -2489,15 +2500,29 @@ when an individual monitor is unsupported. Empty values, mismatched DIDs and
 negative responses remain read errors. `isotp_request` assembles through the
 advertised ISO-TP length; loss of a consecutive frame times out.
 
-The `tss3-control-domain-state-v3` report carries structured `peer_health`
-with `state`, `faults`, and `unavailable`. Any supported asserted fault takes
-precedence; all selected monitors must be supported and clear for `healthy`;
-otherwise the assessment is `inconclusive`. The compatibility boolean
-`peer_health_observed` is true only for `healthy`. The UI reads this structured
-assessment and distinguishes an observed fault from incomplete verification.
-Both retained `0x102F` samples leave the selected EPS monitor unavailable.
-Offline regressions cover both payloads, support/value handling, and fault
-precedence.
+The `tss3-control-domain-state-v4` report uses read-only `19 02 FF` DTC reads
+from FRC and Brake as the required current-fault check. `dtc_state` preserves
+each complete reply, status-availability mask, and DTC records. Both replies
+must advertise UDS `testFailed` (status bit0). Any record asserting that bit,
+or any supported Brake monitor asserting a fault, produces `peer_health.state`
+`fault`. Missing, rejected, malformed, or bit0-unsupported DTC replies produce
+`inconclusive`; a fault takes precedence. Otherwise the state is `healthy`,
+meaning both peers report no current failed diagnostic tests and no selected
+supported Brake monitor reports a fault. `peer_health_observed` follows this
+assessment; `unavailable` lists missing required DTC evidence. Unsupported
+Data List fields remain `None` telemetry.
+
+Exact-Camry `19 02 FF` support is recorded in
+`targets/camry-2026/raw-20260827/dtc-clear/camry_dtc_sweep_before.json`:
+Brake advertises `0xBD`, FRC `0xB9`, both including bit0. Their stored U0131-87
+statuses `0xAC` and `0x28` have bit0 clear. History and warning bits remain in
+the report; the separate DTC-clear operation retains its existing `0xAF`
+acceptance mask. The startup check performs no clear, reset, or session change.
+
+Current `ABS_P5` and `FRC_P5` type66 both contain
+`010000000100000001010000`: diagnostic class `1`, mask/expected `01/01`.
+`CGetDiagCodeP5Base::GetDTCStatusMaskInfo @ 0x1008AE30` loads raw `+8/+9`;
+`GetDiagType @ 0x1008B116..0x1008B11F` applies `(status & mask) == expected`.
 
 Current role `0x41` is now closed as the complementary metadata-only family. Category 405 `EMPS_P5` binds `GetDatMonSignalInfoP5_DT.dll` (28,176 B; SHA-256 `3bb9b8f2…20587`). Its current materialized helper resolves monitor physical-data key `+0x3A` through class `0x20D` / ECU type-13 `CDbPhyDataTable`, then copies physical `+0/+4/+8` to `CCmdDatMonSignalInfo` Mul/Div/Offset, physical `+0x14/+0x15` to signedness/decimal count, and computes bit length from current 80-byte monitor bit-end `+0x3E` minus bit-start `+0x3C` plus one. Physical `+0x0E` resolves class `0x20F` / type-15 unit metadata and default-unit text; monitor `+0x42` resolves class `0x20E` / type-14 pattern-display value/string records into the output display-info list. No frame/send primitive is imported by this plugin: it constructs the typed `CCmdDatMonSignalInfo` metadata consumed by Data Monitor. The canonical DDB semantic layer now performs that same consumer-proven join for interactive `tools/gts did` results while leaving its default API unchanged for deterministic extractors. Current EMPS witnesses are `0x1037 Steering Angle` → physical key 3, `15/1`, offset 0, signed, one decimal, `deg`, raw `-2048..2047`, graph integer `-30720..30705`; and `0x106A Cooperation Control State` → type-14 dictionary `0=Cooperation Control`, `1=Other than Cooperation Control`.
 

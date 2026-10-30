@@ -22,6 +22,21 @@ TARGET = recovery.RecoveryTarget(
 )
 PEER_FRC_F181 = bytes.fromhex("01" + "aa" * 15)
 PEER_BRAKE_F181 = bytes.fromhex("01" + "bb" * 15)
+# Exact pre-clear Camry replies; the capture omits the 59 02 service prefix.
+PEER_DTC_RESPONSES = {
+    int(row["address"], 16): bytes.fromhex("5902" + row["dtc_response"])
+    for row in json.loads(
+        (ROOT / "targets/camry-2026/raw-20260827/dtc-clear/camry_dtc_sweep_before.json").read_text()
+    )
+    if int(row["address"], 16) in (recovery.FRC_TX, recovery.BRAKE_TX)
+}
+
+
+def peer_dtcs():
+    return {
+        name: {"available": True, **recovery.parse_dtc_by_status(PEER_DTC_RESPONSES[address])}
+        for name, address in (("frc", recovery.FRC_TX), ("brake", recovery.BRAKE_TX))
+    }
 
 
 class FakePanda:
@@ -59,6 +74,42 @@ class FakePanda:
 
     def close(self):
         self.closed = True
+
+
+class PeerDiagnosticPanda(FakePanda):
+    def __init__(self, dtc_responses=None):
+        super().__init__()
+        self.responses = {
+            (recovery.FRC_TX, "22f181"): bytes.fromhex("62f181") + PEER_FRC_F181,
+            (recovery.BRAKE_TX, "22f181"): bytes.fromhex("62f181") + PEER_BRAKE_F181,
+            (recovery.FRC_TX, "221b09"): bytes.fromhex("7f2231"),
+            (recovery.FRC_TX, "221903"): bytes.fromhex("62190301"),
+            (recovery.FRC_TX, "221905"): bytes.fromhex("6219058000"),
+            (recovery.FRC_TX, "221906"): bytes.fromhex("621906e000e0008000"),
+            (recovery.BRAKE_TX, "22102d"): bytes.fromhex("62102d30106f00ff001d00bf048000d0106840"),
+            (recovery.BRAKE_TX, "22102f"): bytes.fromhex("62102ff700fd007c00a9000000"),
+        }
+        self.responses.update({
+            (address, "1902ff"): response
+            for address, response in (dtc_responses or PEER_DTC_RESPONSES).items()
+        })
+
+    def can_send(self, addr, data, bus):
+        self.sent.append((addr, data, bus))
+        if data[0] == 0x30:
+            return
+        response = self.responses[addr, data[1:1 + data[0]].hex()]
+        if isinstance(response, Exception):
+            raise response
+        if len(response) <= 7:
+            frames = [bytes([len(response)]) + response]
+        else:
+            frames = [bytes([0x10 | (len(response) >> 8), len(response) & 0xFF]) + response[:6]]
+            frames.extend(
+                bytes([0x20 | (index & 0xF)]) + response[offset:offset + 7]
+                for index, offset in enumerate(range(6, len(response), 7), 1)
+            )
+        self.pending = [(addr + 8, frame.ljust(8, b"\0"), bus) for frame in frames]
 
 
 class TestRecovery(unittest.TestCase):
@@ -121,43 +172,75 @@ class TestRecovery(unittest.TestCase):
 
         # Exact live 2026-09-20 startup behavior: cruise permission and MAIN
         # were initially false, then became true later with no ECU reset.
-        self.assertEqual(recovery.classify_peer_health(state(allowed=False, main=False))["state"], "healthy")
-        self.assertEqual(recovery.classify_peer_health(state(allowed=True, main=True))["state"], "healthy")
+        dtcs = peer_dtcs()
+        self.assertEqual(recovery.classify_peer_health(state(allowed=False, main=False), dtcs)["state"], "healthy")
+        self.assertEqual(recovery.classify_peer_health(state(allowed=True, main=True), dtcs)["state"], "healthy")
 
-        self.assertEqual(recovery.classify_peer_health(state(allowed=False, main=False, fail_status=True))["state"], "fault")
-        self.assertEqual(recovery.classify_peer_health(state(allowed=False, main=False, fail_control=True))["state"], "fault")
-        self.assertEqual(recovery.classify_peer_health(state(allowed=False, main=False, comm_open=True))["state"], "fault")
+        self.assertEqual(recovery.classify_peer_health(state(allowed=False, main=False, fail_status=True), dtcs)["state"], "fault")
+        self.assertEqual(recovery.classify_peer_health(state(allowed=False, main=False, fail_control=True), dtcs)["state"], "fault")
+        self.assertEqual(recovery.classify_peer_health(state(allowed=False, main=False, comm_open=True), dtcs)["state"], "fault")
 
-    def test_startup_control_domain_report_has_no_drcc_permission_verdict(self):
-        state = {
-            "frc": {
-                "0x1B09": {"available": False},
-                "0x1903": {"available": True, "control_mode": 1},
-                "0x1905": {"available": True, "cruise_control_allowed": False},
-                "0x1906": {"available": True, "acc_not_available_icon": False},
-            },
-            "brake": {
-                "0x102D": {"available": True, "fail_status": False, "fail_control": False},
-                "0x102F": {"available": True, "eps_communication_open": False},
-            },
-        }
-        def read_peer_identity(_panda, tx_addr, _bus, label, *, timeout):
-            self.assertNotEqual(tx_addr, recovery.EPS_TX)
-            f181 = PEER_FRC_F181 if tx_addr == recovery.FRC_TX else PEER_BRAKE_F181
-            return {"ecu": label, "timeout": timeout, "f181": f181.hex()}
-
-        panda = FakePanda()
-        with (patch.dict(sys.modules, {"panda": types.SimpleNamespace(Panda=FakePanda)}),
-              patch.object(recovery, "read_f181", side_effect=read_peer_identity) as identities,
-              patch.object(recovery, "read_fault_state", return_value=state)):
+    def test_camry_status_uses_current_dtcs_with_optional_monitors_unavailable(self):
+        panda = PeerDiagnosticPanda()
+        with patch.dict(sys.modules, {"panda": types.SimpleNamespace(Panda=FakePanda)}):
             result = recovery.control_domain_state(None, TARGET, panda=panda)
-        self.assertEqual(identities.call_count, 2)
-        self.assertEqual(result["frc_identity"]["f181"], PEER_FRC_F181.hex())
-        self.assertEqual(result["brake_identity"]["f181"], PEER_BRAKE_F181.hex())
-        self.assertEqual(result["eps_identity"]["verification"], "bound_by_install_pre_helper_f181")
         self.assertTrue(result["peer_health_observed"])
-        self.assertEqual(result["verdict"], "control_domains_healthy")
-        self.assertNotIn("drcc_permission_observed", result)
+        self.assertEqual(result["peer_health"]["unavailable"], [])
+        self.assertIsNone(result["fault_state"]["brake"]["0x102D"]["fail_status"])
+        self.assertIsNone(result["fault_state"]["brake"]["0x102D"]["fail_control"])
+        self.assertIsNone(result["fault_state"]["brake"]["0x102F"]["eps_communication_open"])
+        self.assertFalse(result["fault_state"]["frc"]["0x1B09"]["available"])
+        self.assertEqual(result["dtc_state"]["brake"]["records"][-1]["status"], 0xAC)
+        self.assertEqual(result["dtc_state"]["frc"]["records"][-1]["status"], 0x28)
+        requests = {(address, frame[1:1 + frame[0]], bus)
+                    for address, frame, bus in panda.sent if frame[0] != 0x30}
+        self.assertTrue(all(pdu[0] in (0x19, 0x22) for _, pdu, _ in requests))
+        self.assertTrue(all(address != recovery.EPS_TX for address, _, _ in requests))
+        self.assertIn((recovery.FRC_TX, bytes.fromhex("1902ff"), recovery.FRC_BUS), requests)
+        self.assertIn((recovery.BRAKE_TX, bytes.fromhex("1902ff"), recovery.BRAKE_BUS), requests)
+
+    def test_current_dtc_failure_is_distinct_from_stored_history(self):
+        for peer in ("frc", "brake"):
+            for status in range(256):
+                with self.subTest(peer=peer, status=status):
+                    dtcs = peer_dtcs()
+                    dtcs[peer]["status_availability_mask"] = "0xFF"
+                    dtcs[peer]["records"] = [{"dtc": "C13187", "status": status}]
+                    health = recovery.classify_peer_health({}, dtcs)
+                    self.assertEqual(health["state"], "fault" if status & 1 else "healthy")
+                    self.assertEqual(health["faults"], [f"{peer}.dtc.C13187"] if status & 1 else [])
+
+    def test_missing_dtc_evidence_stays_inconclusive_and_faults_take_precedence(self):
+        for peer, other in (("frc", "brake"), ("brake", "frc")):
+            for row, reason in (
+                ({}, f"{peer}.dtcs"),
+                ({"available": False}, f"{peer}.dtcs"),
+                ({"available": True, "status_availability_mask": "0xFE", "records": []},
+                 f"{peer}.dtcs.test_failed"),
+            ):
+                with self.subTest(peer=peer, row=row):
+                    dtcs = peer_dtcs()
+                    dtcs[peer] = row
+                    health = recovery.classify_peer_health({}, dtcs)
+                    self.assertEqual(health["state"], "inconclusive")
+                    self.assertEqual(health["unavailable"], [reason])
+                    dtcs[other]["records"] = [{"dtc": "C13187", "status": 1}]
+                    health = recovery.classify_peer_health({}, dtcs)
+                    self.assertEqual(health["state"], "fault")
+                    self.assertEqual(health["faults"], [f"{other}.dtc.C13187"])
+                    self.assertEqual(health["unavailable"], [reason])
+
+    def test_dtc_read_errors_do_not_pass_the_status_check(self):
+        for response in (bytes.fromhex("7f1931"), bytes.fromhex("5902"),
+                         bytes.fromhex("5902bdc131"), TimeoutError("no DTC response")):
+            with self.subTest(response=response):
+                panda = PeerDiagnosticPanda({**PEER_DTC_RESPONSES, recovery.BRAKE_TX: response})
+                with patch.dict(sys.modules, {"panda": types.SimpleNamespace(Panda=FakePanda)}):
+                    result = recovery.control_domain_state(None, TARGET, panda=panda)
+                self.assertFalse(result["peer_health_observed"])
+                self.assertEqual(result["peer_health"]["state"], "inconclusive")
+                self.assertEqual(result["peer_health"]["unavailable"], ["brake.dtcs"])
+                self.assertFalse(result["dtc_state"]["brake"]["available"])
 
     def test_missing_fields_never_mean_no_fault(self):
         for did, required in ((0x1B09, 6), (0x1903, 1), (0x1905, 2), (0x1906, 6)):
@@ -198,9 +281,9 @@ class TestRecovery(unittest.TestCase):
                     "0x102D": {**fail, "available": True, "fail_status": fault},
                     "0x102F": {**comm, "available": True},
                 }}
-                health = recovery.classify_peer_health(state)
+                health = recovery.classify_peer_health(state, {})
                 self.assertEqual(health["state"], expected)
-                self.assertEqual(health["unavailable"], ["0x102F.eps_communication_open"])
+                self.assertEqual(health["unavailable"], ["frc.dtcs", "brake.dtcs"])
 
     def test_pending_and_unrelated_reply_do_not_finish_request(self):
         panda = FakePanda()

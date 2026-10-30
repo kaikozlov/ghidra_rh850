@@ -31,6 +31,7 @@ DIAG_SAFETY_PARAM = 1  # CAN_MODE_NORMAL
 SILENT_SAFETY = 0
 
 FAULT_MASK = 0xAF
+CURRENT_DTC_FAILURE_MASK = 0x01  # UDS testFailed; history has separate status bits.
 DTC_RESPONDERS = (0x700, 0x724, 0x7D2, 0x747, 0x7A1, 0x7B0, 0x7B3, 0x7C4, 0x7D0, 0x792, 0x7A2)
 PHYSICAL_CLEAR = (0x7A1, 0x7B3, 0x7C4, 0x7D0, 0x792, 0x7A2)
 OBD_CLEAR_TX = 0x7DF
@@ -276,6 +277,22 @@ def read_fault_state(panda, buses: dict[int, int]) -> dict[str, Any]:
     return {"frc": frc, "brake": brake}
 
 
+def read_peer_dtcs(panda, buses: dict[int, int]) -> dict[str, Any]:
+    """Read FRC/Brake DTC status without clearing or changing diagnostic sessions."""
+    peers = {}
+    for name, address in (("frc", FRC_TX), ("brake", BRAKE_TX)):
+        row: dict[str, Any] = {"address": f"0x{address:03X}", "bus": buses[address]}
+        try:
+            response = isotp_request(panda, address, buses[address], bytes.fromhex("1902ff"))
+            row["raw"] = response.hex()
+            row.update(parse_dtc_by_status(response))
+            row["available"] = True
+        except (TimeoutError, RecoveryError) as exc:
+            row.update(available=False, error=f"{type(exc).__name__}: {exc}")
+        peers[name] = row
+    return peers
+
+
 def drcc_permission_observed(oracles: dict[str, Any]) -> bool:
     # Current FRC_P5 monitor 199 distinguishes distance control (1/2/4) from
     # conventional constant-speed cruise (3). MAIN alone is not permission.
@@ -284,12 +301,8 @@ def drcc_permission_observed(oracles: dict[str, Any]) -> bool:
             and not oracles["0x1906"]["acc_not_available_icon"])
 
 
-def classify_peer_health(state: dict[str, Any]) -> dict[str, Any]:
-    """Classify the selected Brake/EPS monitors; unsupported values remain unknown.
-
-    FRC cruise permission and MAIN describe operating state and do not enter
-    this assessment. A supported fault takes precedence over missing monitors.
-    """
+def classify_peer_health(state: dict[str, Any], dtcs: dict[str, Any]) -> dict[str, Any]:
+    """Require supported FRC/Brake current-DTC checks; retain explicit monitor faults."""
     faults = []
     unavailable = []
     brake = state.get("brake", {})
@@ -297,13 +310,22 @@ def classify_peer_health(state: dict[str, Any]) -> dict[str, Any]:
         key = f"0x{did:04X}"
         row = brake.get(key, {})
         for name in monitors:
-            value = row.get(name) if row.get("available") is True else None
-            if value is True:
+            if row.get("available") is True and row.get(name) is True:
                 faults.append(f"{key}.{name}")
-            elif value is not False:
-                unavailable.append(f"{key}.{name}")
+    for peer in ("frc", "brake"):
+        row = dtcs.get(peer, {})
+        if row.get("available") is not True:
+            unavailable.append(f"{peer}.dtcs")
+            continue
+        if not int(row["status_availability_mask"], 16) & CURRENT_DTC_FAILURE_MASK:
+            unavailable.append(f"{peer}.dtcs.test_failed")
+            continue
+        for record in row["records"]:
+            if record["status"] & CURRENT_DTC_FAILURE_MASK:
+                faults.append(f"{peer}.dtc.{record['dtc']}")
     return {
         "state": "fault" if faults else "inconclusive" if unavailable else "healthy",
+        "basis": "peer_dtc_test_failed_and_supported_brake_monitors",
         "faults": faults,
         "unavailable": unavailable,
     }
@@ -627,7 +649,7 @@ def control_domain_state(
             raise RecoveryError(f"expected exactly one Panda, found {len(serials)}: {serials}")
         panda = Panda(serials[0])
     result: dict[str, Any] = {
-        "schema": "tss3-control-domain-state-v3",
+        "schema": "tss3-control-domain-state-v4",
         "target": target.name,
         "eps_identity": {
             "verification": "bound_by_install_pre_helper_f181",
@@ -641,9 +663,12 @@ def control_domain_state(
         panda.set_canfd_auto(1, False)
         result["frc_identity"] = read_f181(panda, FRC_TX, FRC_BUS, "FRC", timeout=0.8)
         result["brake_identity"] = read_f181(panda, BRAKE_TX, BRAKE_BUS, "Brake/EPB", timeout=0.8)
-        state = read_fault_state(panda, {FRC_TX: FRC_BUS, BRAKE_TX: BRAKE_BUS})
+        buses = {FRC_TX: FRC_BUS, BRAKE_TX: BRAKE_BUS}
+        dtcs = read_peer_dtcs(panda, buses)
+        result["dtc_state"] = dtcs
+        state = read_fault_state(panda, buses)
         result["fault_state"] = state
-        health = classify_peer_health(state)
+        health = classify_peer_health(state, dtcs)
         result["peer_health"] = health
         result["peer_health_observed"] = health["state"] == "healthy"
         result["verdict"] = {
