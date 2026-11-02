@@ -67,5 +67,50 @@ RequestDownload switches the separate *address-space byte* (`mem_id=01/00`)
 and sends a zero-prefixed five-byte RAM address. That is **not** the factory
 Unified writer's per-CPU RequestDownload construction above. The Tundra
 bootloader's implementation of these address fields is not contained in the
-retained CPU11 application-only extract; its precise hardware CPU-dispatch path
+retained application-only extracts; its precise hardware CPU-dispatch path
 remains to be recovered from bootloader bytes or a live reflash trace.
+
+## Application-side evidence from both CPUs
+
+The same CUW's `CPU12` application is now retained at
+[`firmware/tundra-8965F3402200/Application.bin`](../tundra-8965F3402200/Application.bin)
+(SHA-256 `54c84ac25db1dfdb73e982c3ec9b379febe56229310ad07cd171eec333ac87f8`).
+Both images have the same local CodeFlash range, but 544,648 of their 949,744
+application bytes differ. The images were examined independently as raw
+`v850e3:LE:32:default` Ghidra programs loaded at `0x18000`.
+
+The application diagnostic configuration distinguishes the two CPU roles:
+
+| Evidence | CPU11 `8965F3401200` | CPU12 `8965F3402200` |
+|---|---|---|
+| Software ID | `0x20860`: `8965F3401200` | `0x20860`: `8965F3402200` |
+| `F181` descriptor | `0x29B60`, length `0x41` | `0x28830`, length `0x20` |
+| `F181` callback | `0x47B18` | `0x4604E` |
+| `2032` descriptor | `0x29B40`, length `0x21` | `0x28810`, length `0x10` |
+| `2032` callback | `0x47ABA` | `0x4600C` |
+
+In CPU11, `0x47B18` initializes the `F181` output with `0x3F` and fills
+`0x04 || 16 bytes at 0x20860 || 16 bytes at 0x17DC0`. CPU12's `0x4604E`
+fills 32 bytes with the corresponding two local software-identification
+fields, without a count prefix. The `2032` handlers have the same complementary
+shape: CPU11 initializes a 33-byte output and supplies `0x02 || 16 bytes at
+0x17D80`; CPU12 supplies 16 bytes without a prefix. The lengths reserve exactly
+enough space for both CPUs' records. The secondary-ID sources at `0x17D80`
+and `0x17DC0` are in the missing lower CodeFlash region.
+
+CPU11 also carries explicit external CAN diagnostic configuration: `0x7A1`
+physical receive at `0x21EB8` (acceptance rule `0x23004`), `0x7A9` transmit
+at `0x21E98`, and a full application SID object table starting at `0x25B10`
+(SID `0x22` at `0x25B70`, callback `0x8E2BC`). CPU12 has its own DID handlers
+but lacks that primary CAN endpoint configuration and the corresponding SID
+object table. This is consistent with CPU11 receiving tester traffic and
+providing an internal path to CPU12; the transport and response-composition
+implementation remain to be traced.
+
+The CUW's separate `CPU11`/`CPU12` logical address ranges are host-side proof
+of how programming requests are *formed*. The application images do not contain
+the bootloader's `0x0203`, RequestDownload `0x34`, or RoutineControl `0x31`
+CPU-selection dispatch. In particular, the related Sienna bootloader ignores
+all five `0x0203` data bytes; for Tundra the exact selection mechanism among
+`0x0203`, the six-byte RequestDownload address, and CPU-to-CPU forwarding must
+be verified against Tundra bootloader bytes or a real programming trace.

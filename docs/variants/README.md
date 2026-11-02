@@ -53,7 +53,7 @@ Capture and recovery reports retain their rack, software, harness and date.
 | Evidence | Scope / report |
 |---|---|
 | Sienna `8965B4514000` | [External field report](sienna-8965B4514000.md) |
-| Tundra `8965F3401200` | [Partial application-image provenance](../../firmware/tundra-8965F3401200/README.md) |
+| Tundra dual-CPU `8965F3401200/2200` | [Dual-CPU programming and application evidence](../../firmware/tundra-8965F3401200/README.md) |
 | TSS3 Front Recognition Camera | [Acquisition and evidence boundaries](tss3-frc-firmware-acquisition.md) |
 | RAV4 Prime | [Historical field experiments](rav4-prime-forced-secoc-profile.md) |
 | Venza airbag sensor | [September-14 specimen report](yc-venza-airbag-reprogramming-2026-09-14.md) |
