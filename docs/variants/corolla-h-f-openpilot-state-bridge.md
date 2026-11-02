@@ -1012,13 +1012,39 @@ are byte-identical in 1,271 and 1,513 pairs respectively, with median absolute r
 difference zero in both. Loggerd publication timestamps remain batch timestamps and do
 not establish physical latency or wire order.
 
-Both retained Corolla captures use the historical normal **unsplit** Toyota harness
-observation, so `0x08A` and `0x081` appear together on logical bus 1 and cannot be
-direction-separated there. The repinned 2026 Camry later exposes their opposite sides
-of the relay: `0x08A` upstream-to-chassis and `0x081` chassis-to-upstream. That repinned
-direction is now the integration contract for Corolla as well. The strongest cross-generation
-interpretation is a persistent Toyota TSS3 **control request/result plane**,
-already present by the 2023 Corolla.
+Both retained Corolla captures use the historical stock **unsplit**
+Toyota-B harness: `0x08A` and `0x081` appear together on logical bus 1, so
+their individual publishers cannot be direction-separated from those captures.
+The EPS itself, however, has a firmware-identified publisher: exact H/F
+CodeFlash configures `0x030/32` as EPS Tx PDU 0. Every observed `0x030` in
+these two raw rlogs satisfies the firmware-derived additive checksum
+`B7 = (sum(B0..B6) + 0x38) & 0xFF`:
+
+| Stock-harness capture | EPS `0x030/32` on bus 1 | EPS `0x030` on buses 0/2 | Camera-family `0x160/32` on bus 2 | Incoming `0x160` on bus 0 |
+|---|---:|---:|---:|---:|
+| Albino 2023 public route | 5,888 (all checksum-valid) | 0 | 2,443 | 433 |
+| Span 2025 July-29 rlog | 6,000 (all checksum-valid) | 0 | 2,400 | 2,400 |
+
+Albino's rlog supplies a particularly useful mode discriminator: after Panda
+switched to Toyota safety with `safetyParam=73`, **5,014 native EPS `0x030`
+frames remained on bus 1**. In that same interval `0x160` had 2,006 incoming
+bus-2 instances and **zero incoming bus-0 instances**, accompanied by 2,006
+bus-0 returned-TX records (`src=128`). Thus the CAN0/CAN2 interception
+changed the visibility of camera traffic without moving the EPS transmission
+off stock CAN1. Span's entire older rlog used ELM327 `param=1` and captured
+the camera-family `0x160` equally on both bypassed relay buses. Both rlogs
+reported `harnessStatus=flipped`, which describes USB-C orientation, **not**
+the Toyota-B CAN0/CAN1 physical repin.
+
+These are **pre-repin** network observations; they do not attest the placement
+or relay electrical state of a later modified harness. In particular they
+cannot validate a post-repin claim that EPS `0x030` or functional `0x777`
+belongs on the physical camera-side CAN2 connection. The repinned 2026 Camry
+independently exposes `0x08A` upstream-to-chassis and `0x081`
+chassis-to-upstream on opposite sides of the relay; the expected Corolla
+interception integration follows that established physical mapping. The
+strongest cross-generation interpretation is a persistent Toyota TSS3
+**control request/result plane**, already present by the 2023 Corolla.
 
 The retained Corolla segments never leave Target Lateral ID 0. Factory road traffic
 shows the same CAN reference family while the captured segments contain neither native
