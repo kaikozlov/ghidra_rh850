@@ -53,9 +53,8 @@ See [../../status/PRIORITIES.md](../../status/PRIORITIES.md).
 
 ## Important boundaries
 
-- The old proposed `0x65CD8 → 0x66E48 → 0x67590 → 0x72F58` “runtime-key” path
-  was wrong; it is generic NvM/checkpoint machinery. See
-  [../../status/CORRECTIONS.md](../../status/CORRECTIONS.md).
+- The `0x65CD8 → 0x66E48 → 0x67590 → 0x72F58` path is
+  [NvM/checkpoint machinery](key-storage-and-lifecycle.md).
 - A command-8 submission path is **not** a raw-key-write primitive. ICU-S still
   authenticates AuthID/counter/M3 and keeps plaintext key material outside the
   CPU-visible MainPE path.
@@ -65,6 +64,5 @@ See [../../status/PRIORITIES.md](../../status/PRIORITIES.md).
 - Findings from `8965B4514000`, Corolla, F3/F4, or other TSS3 targets are not
   facts about this calibration unless separately validated.
 
-For claim IDs and confidence grades, use
-[../../status/FINDINGS.md](../../status/FINDINGS.md). For all unresolved details,
-use [../../status/OPEN_QUESTIONS.md](../../status/OPEN_QUESTIONS.md).
+The reports above own unresolved details. Source and confidence definitions
+live in the [evidence model](../../OVERVIEW.md#evidence-model).

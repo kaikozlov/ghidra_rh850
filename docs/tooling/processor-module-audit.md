@@ -6,7 +6,7 @@
 >
 > **Status:** active
 >
-> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS ARCH-006
+> **Evidence profile:** mixed — claims carry individual grades.
 >
 > **Canonical artifacts:** `data/semantic_coverage_ledger.csv`
 >
@@ -458,8 +458,6 @@ Review counts are generated in each target's registered summary. Curated
 conclusions are separate inputs; automatic decompilation-only entries are not
 counted as reviews. Camry's reconstruction evidence and remaining boundaries are
 owned by [the reconstruction tree](../../decomp/camry-8965F3307000/README.md#source-and-evidence-ownership).
-The earlier Sienna selected sweep and corrected-graph re-audit remain in the
-[historical report](../history/2026-08/CORRECTED_GRAPH_REAUDIT_2026-08-11.md).
 
 This in-function inventory is not an executable denominator. For **Sienna**,
 after importing the upstream function-start patterns, the outside-function exporter
@@ -906,10 +904,9 @@ truncated instruction tail from satisfying that function-start pattern.
 The clean rebuild also disproved a prior CALLT interpretation rather than
 turning it into a processor feature: Sienna `22 02 @ 0x1d5c` and H/F
 `22 02 @ 0x1d40` are interior halfwords of four-byte `mulu` instructions, not
-instruction boundaries. The stale overlapping Sienna function and the
-security conclusion derived from it are corrected in `KEYLESS-008` /
-`CORR-203`. This is why raw halfword mnemonics and permissive overlapping-code
-recovery are not accepted as target evidence.
+instruction boundaries. The [keyless execution assessment](../security/keyless-exec-surface-assessment.md)
+details the security consequence. Raw halfword mnemonics and permissive
+overlapping-code recovery are not accepted as target evidence.
 
 ### Live differential check and indexed-store width correction
 

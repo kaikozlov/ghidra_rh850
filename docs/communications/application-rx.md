@@ -6,7 +6,7 @@
 >
 > **Status:** active
 >
-> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS COM-001, COM-002
+> **Evidence profile:** mixed — claims carry individual grades.
 >
 > **Canonical artifacts:** `data/application_rx_map.csv` (final map), `data/application_rx_signal_evidence.csv` (extraction evidence)
 >
@@ -555,9 +555,7 @@ application ingress. Stage 6 now bounds all three by their execution domains:
 
 The runtime acquisition/current-control/TSG3 PWM chain and the version-domain
 proof are canonical in [../architecture/control-partition.md](../architecture/control-partition.md)
-§9 and `data/motor_calibration_handlers.csv`. CORR-016 records the earlier
-`0x47C3C` correction; Stage-6 corrections record the remaining stale handler
-and phase-acquisition interpretations.
+§9 and `data/motor_calibration_handlers.csv`.
 
 ## 10. Hardware register access helper
 

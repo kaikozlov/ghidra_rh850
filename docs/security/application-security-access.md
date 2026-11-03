@@ -6,7 +6,7 @@
 >
 > **Status:** active
 >
-> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS SEC-APP-001 … SEC-APP-004
+> **Evidence profile:** mixed — claims carry individual grades.
 >
 > **Canonical artifacts:** —
 >
@@ -384,8 +384,7 @@ SecOC key-buffer access.
 
 The 13 callback pairs at `0x25768` belong to active SID `0x2E` WDBI. Their
 lookup remains separate from SID `0xAB`, while SID `0x31` independently owns
-direct callback `0x95DCE` and its 19-RID table at `0x26AEC`. CORR-056 records the
-former dormant-RoutineControl/SID-`0x28` attribution error. The canonical
+direct callback `0x95DCE` and its 19-RID table at `0x26AEC`. The canonical
 control-flow and table evidence is in
 [the application diagnostics report](../diagnostics/application.md).
 

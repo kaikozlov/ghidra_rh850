@@ -171,7 +171,7 @@ cells at `0x1C7FC/0x1C840/0x1C884/0x1C8A8/0x1C8C8`):
 |---|---|---|---|---|
 | `0xBDC7A` | `FEFF02B8` | `0x12` | MAC generation (SecOC TX DataIDs `0x0326/0x0024`, selector 4) | SecOC TX worker `0xDE9F0 → 0xBCCF4` |
 | `0xBDE88` | `FEFF0330` | `0x12` | MAC verification (four RX profiles incl. `0x00F/0x090/0x0D7/0x024`, selector 4) | SecOC RX worker `0xDE09E → 0xBCEFA` |
-| `0xBD8C8` | `FEFF01E8` | **`0x10`** (new) | 16-byte-block-count input + logical key selector from a type-1 config; callback delivers a 4-byte result | **diagnostic RoutineControl** handler `0x7C05A` via engine thunk `0xBD44A` (session-gated at `0xFEF041C4`; exact routine mode and result meaning open — OQ-055) |
+| `0xBD8C8` | `FEFF01E8` | **`0x10`** (new) | 16-byte-block-count input + logical key selector from a type-1 config; callback delivers a 4-byte result | **diagnostic RoutineControl** handler `0x7C05A` via engine thunk `0xBD44A` (session-gated at `0xFEF041C4`; exact routine mode and result meaning open) |
 | `0xBE0CC` | `FEFF0398` | `0x31` | authenticated 64-byte key update (SHE `CMD_LOAD_KEY` M1/M2/M3 → M4/M5) | RID `0x1010` worker (`0x7C13E` staging, `0xB76D4` async, dispatcher `0xBD2EC`) |
 | `0xBDA6E` | `FEFF0250` | **`0x04`** | mode-mapped query: caller byte `{1→0, 2→1, 4..14→n−2}` (SHE key-ID-like domain) | RID `0x1010` worker mode 2 (via `0xBD2EC` record 1) |
 
@@ -392,7 +392,7 @@ zero-I/O and 1-in/2-out shapes respectively.
 
 - The opcode-`0x10` airbag service is diagnostic-routine-driven (RoutineControl
   handler `0x7C05A`, session-gated at `0xFEF041C4`); the exact routine-mode
-  number and the meaning of its 4-byte result remain open — see OQ-055.
+  number and the meaning of its 4-byte result remain open.
 - Airbag completion is task-polled (no interrupt dispatcher found; see §5
   closure). Vector-level EIINT analysis was not performed on this project, and
   the `0x114C` boot enable sequence remains recorded but not decoded
@@ -408,7 +408,7 @@ zero-I/O and 1-in/2-out shapes respectively.
   `boot.bin` RPRG module uses CPU-side AES (payload/SA roots) and does not
   reach the secure-service boundary.
 - Nothing here observes hardware: slot-4 generation permission/latency and all
-  live opcode behavior remain dynamic questions (OQ-012/OQ-021 unchanged).
+  live opcode behavior remain dynamic questions.
 
 ## 9. Reproduction
 

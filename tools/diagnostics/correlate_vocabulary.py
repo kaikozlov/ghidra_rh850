@@ -9,7 +9,7 @@ Produces:
     ``data/generated/<sha>/diagnostic_vocabulary.json`` — an enriched artifact
     that adds OEM names, match grades, and firmware addresses to the raw catalog.
 
-Match grades (aligned with ``docs/status/FINDINGS.md``):
+Match grades (source/confidence policy: ``docs/OVERVIEW.md#evidence-model``):
 
     exact       — identifier exists in both firmware and an EPS database.
                   The firmware proves existence; Techstream supplies the name.

@@ -153,7 +153,8 @@ generating/routing B6 onto an EPS-local
 leg feeding F33's single CAN controller. Exact `F152633K0000` firmware is still needed
 to prove the concrete channel/filter/signing implementation.
 
-Canonical evidence: VAR-161/162, CORR-195/196/197, OQ-054.
+Canonical evidence and the remaining topology question are in the
+[Camry target report](../variants/camry-2026-live-baseline.md).
 
 ## Current TSK roster: what is actually known
 

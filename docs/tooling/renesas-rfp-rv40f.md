@@ -452,7 +452,7 @@ remaining RFP/P1M-E questions require a target or a legitimate capture:
 The shipped RFP CLI documentation includes a generic all-`FF` ID-code example,
 and retained generic configuration strings use `UserID=0xFFFFFFFF`. Those facts
 support an all-`FF` `CheckIDAuth` value as a reasonable **probe hypothesis**.
-Acceptance or rejection must be treated as target observation (CORR-092).
+Acceptance or rejection must be treated as target observation.
 
 Until those are observed, host support must not be promoted into a claim about
 P1M-E mask-ROM capabilities.

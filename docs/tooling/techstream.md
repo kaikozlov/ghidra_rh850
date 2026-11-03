@@ -385,7 +385,7 @@ last frame is the selected uint32 password in little-endian wire order. This is
 a proprietary CheckID exchange, separate from UDS SecurityAccess. This old
 two-control design is useful architectural precedent but does not transfer
 either value/algorithm to RH850 EPS. Canonical specimen analysis:
-[historical T-0087-17 CUW analysis](../history/2026-08/T0087_17_CUW_ANALYSIS_2026-08-22.md).
+[T-0087-17 CUW analysis](cuw-t0087-17.md).
 
 #### 4.5.1 `CalcSeedKeyForSecurityUp`: exact modern CUW construction
 
@@ -552,9 +552,8 @@ The adjacent tail-handling code was previously mislabeled as a PKCS#7 gate.
 check. Optional post-decrypt trimming starts at `0x10024001`: it reads the last
 plaintext byte as a count, bounds that count against the plaintext length, and
 zeros that many trailing bytes. No loop compares every trailing byte to the
-count, so this is **not a strict PKCS#7 padding validator**. CORR-091 corrects
-the live IT3 Neo cipher to AES-256-ECB keyed by the full 32-character string.
-The earlier AES-128 / 16-character-prefix interpretation was incorrect.
+count, so this is **not a strict PKCS#7 padding validator**. The live IT3 Neo
+cipher is AES-256-ECB keyed by the full 32-character string.
 
 That key also closes the formerly opaque `CONF/*.srp` UtilityNeo scripts. All
 18 pinned V18 SRPs decrypt under the recovered AES-256-ECB key; after the
@@ -596,8 +595,7 @@ Techstream's CPU export for the real package is `CPUType=86 ->
 VFOREST_2_0M`; its same export table separately names explicit V850 families.
 Independent tuning-tool data places `89663-04C21 / 304C2100` in Toyota Denso
 Gen2/newGen D76F0xxx 2-MiB support. The CUW does not establish an exact MCU
-suffix or ISA/core, so earlier shorthand `FOREST/RH850` was too broad
-(CORR-103).
+suffix or ISA/core.
 
 #### 4.5.2 Real VFOREST/LZF case: `T-0011-21 / 304C21`
 
@@ -653,7 +651,7 @@ Canonical evidence:
 `tools/techstream/inspect_cuw_vforest.py`,
 `tests/techstream/verify_techstream_cuw_vforest.py`,
 `data/generated/techstream_v18/cuw_t0011_21_04c21_specimen.json`, and the
-[historical analysis](../history/2026-08/T0011_21_04C21_CUW_ANALYSIS_2026-08-23.md).
+[T-0011-21 / 04C21 analysis](cuw-t0011-21-04c21.md).
 
 #### 4.5.3 Real Tacoma VFOREST corpus: 11 packages / 16 CPU images
 
@@ -710,7 +708,7 @@ Canonical corpus evidence:
 `tools/techstream/inspect_cuw_vforest_corpus.py`,
 `tests/techstream/verify_techstream_cuw_vforest_corpus.py`,
 `data/generated/techstream_v18/cuw_tacoma_vforest_corpus.json`, and the
-[corpus analysis](../history/2026-08/TACOMA_VFOREST_CUW_CORPUS_ANALYSIS_2026-08-23.md).
+[corpus analysis](cuw-tacoma-vforest-corpus.md).
 The complete artifact pins all package/image hashes, source/new passwords,
 member order, fill boundaries, and pairwise CPUType86 block-diff counts.
 
@@ -766,7 +764,7 @@ Windows CryptoAPI (`CryptEncrypt`/`CryptDecrypt`/`CryptImportKey`/
 §4.5 `CalcSeedKey` cipher object. The FlashWriter merely frames and ships key
 bytes; it does no cryptography.
 
-> **Resolved (firmware-side, CORR-021).** The Sienna `8965B4512000` bootloader
+> **Firmware-side evidence.** The Sienna `8965B4512000` bootloader
 > speaks **standard UDS only**: its 20-entry service table at `0x8E54` implements
 > `0x10/0x11/0x22/0x27/0x28/0x2E/0x31/0x34/0x36/0x37/0x3E/0x85` and maps
 > `0x14/0x19/0x23/0x2C/0x2F/0xAB/0xBA/0xBB` to `uds_unsupported_service_handler`
@@ -778,7 +776,7 @@ bytes; it does no cryptography.
 > `SendNonceAndSeedKey` path (`0x37`–`0x3c` proprietary frames) **does not apply
 > to the Sienna** — those frames would be rejected (NRC 0x11). The firmware
 > therefore constrains any matching Sienna host route to its implemented UDS
-> vocabulary. A later byte-level join (CORR-079/TMS-029) sharpens this further:
+> vocabulary. The byte-level join (TMS-029) sharpens this further:
 > the standard writer is **not** compatible despite using familiar UDS SIDs,
 > because its request-seed is only `27 01` while this bootloader requires exact
 > length `0x12` (`27 01 || 16 bytes`), and its wire RIDs `10F5/10F6` are absent.
@@ -1027,14 +1025,12 @@ Their exact builders cover:
    is 1 for area tags 0/1/2 and 0 for tag 3. The EachArea body is independently
    pinned at `0x10001420`; it parses `74`, caps the negotiated block length at
    `0x0FFF`, and subtracts two header bytes; the area Length field bytes are
-   transmitted verbatim rather than as a parsed integer (CORR-082).
+   transmitted verbatim rather than as a parsed integer.
 3. **TransferData / TransferExit** — `36 || counter || data` / `76 || counter`,
    then `37` / `77`.
 4. **RoutineControl** — standard writes wire RIDs `10F5`, `FF00`, and `10F6`;
    unified writes `10F0`, `FF00`, `10F1`, and `10F2`, with calibration-derived
-   range/hash or offset-adjusted area fields. Earlier `F510/00FF/...` labels
-   incorrectly read x86 little-endian immediate values as wire order
-   (CORR-079).
+   range/hash or offset-adjusted area fields.
 5. **ECUReset** — `11 01`, requiring `51 01` (180 ms reset timeout).
 
 For the Sienna bootloader, the unified predownload field names also line up
@@ -1069,7 +1065,7 @@ are separate. Its exact transfer semantics are now pinned: `CBytes(const char*)`
 hex-decodes the string, and bit 3 of the first decoded byte becomes the
 Unified RequestDownload `dataFormatIdentifier` (public example `98` → byte
 `0x98` → 1). Interpret the decoded byte as key material.
-Do not reinterpret the ASCII character value (CORR-083).
+Do not reinterpret the ASCII character value.
 
 ECU-specific flash writers include:
 `TCUWCanReproStdFlashWriter` (standard CAN), `TCUWCanUnifiedFlashWriter`
@@ -1644,8 +1640,7 @@ post-write `0x400` program condition at `0x78E2A` and supplies stock Status
 Clear `0x50` / Forced Stop `0xB3` helpers. This is why the generic patcher now
 uses bounded post-write DBFULL polling while retaining `0x50` as exact-target
 recovery behavior. T-0035 applies to Tundra F340. Canonical
-evidence: `data/generated/techstream_v18/t0035_faci_backend_evidence.json`;
-SECOC-074/CORR-121.
+evidence: `data/generated/techstream_v18/t0035_faci_backend_evidence.json`.
 
 ### 5.3 Reprogramming-key authorization (RKS / TIS portal) — Layer A
 
@@ -1833,8 +1828,7 @@ NUL** into the `+0x78` field. Thus `SeedValue` is not generated by the managed
 RKS layer and there is no RNG/time transform in the request-construction edge;
 it is a textual serialization of a pre-existing 16-byte native input.
 
-The former "one edge upstream" boundary is now closed inside `Cuw.exe`: the
-whole SeedValue producer is static code (CORR-084). The chain is
+The whole SeedValue producer is static code inside `Cuw.exe`. The chain is
 `CCentralGWModeChanger::CollateSeedKeyForP5CentralGW @ 0x590320` → CentralGW
 P5-CAN SecurityAccess **`27 21`** (expected `67 21`; NRC gate `7F 27` with
 `13/35/36`) → 16-byte response seed copied at `0x5903F6` → seed bridge
@@ -1849,12 +1843,6 @@ loader `0x43E0C0`). What remains external is only the live gateway seed value
 and the server-side signing algorithm/private key. All anchors, call targets,
 and strings are raw-byte asserted in `verify_techstream_rks_client_state.py`.
 
-> **Correction of an earlier characterization.** This section previously
-> (and §8.3) described the online portal as "immobilizer resets and MAC key
-> management." That is inaccurate for this installer: there is no immobilizer
-> code path, and the portal is the RKS reprogramming-key authorization
-> described here. The portal does not supply the ECU crypto key (Layer B's key
-> remains in the calibration file). Recorded in `docs/status/CORRECTIONS.md`.
 
 
 ### 5.4 Timing, retry, reconnect, and Flash Recovery
@@ -2539,9 +2527,7 @@ all V18 type-19 rows have u16 `+0x54 == 0`. Current GTS+ `FindDbItem1` instead
 consumes the role as **u16 `+0x54`**, while `+0x56` is a separate field/flag.
 The old shared parser treated `+0x56` as the role in both generations and thus
 misreported current GTS+ `DelDiagCodeP4.dll` as role 0. The corrected parser is
-version-aware; the logical role is **`0x19` (25) in both generations**. This is
-recorded as CORR-125. The live Camry DTC-clear transport/result is unchanged;
-only the plugin-role attribution was wrong.
+version-aware; the logical role is **`0x19` (25) in both generations**.
 
 Current GTS+ also namespaces master-variable references without changing the
 underlying variable table. `CDbVariableTable::GetVariable` checks a base-table
@@ -3353,7 +3339,7 @@ Gateway **Bus 1**, while Skid Control (ABS/VSC/TRAC) and Power Steering (EPS) ar
 on **Bus 4**. This is Toyota network-topology evidence rather than inference from CAN
 arbitration IDs. Vehicle-specific physical interpretation, including the Toyota-B repin
 join and B6 consequence, is owned by
-[the Camry baseline §19](../variants/camry-2026-live-baseline.md#19-current-gts-closes-logical-bus-4-membership-corr-197-separates-physical-transparency).
+[the Camry baseline §19](../variants/camry-2026-live-baseline.md#19-current-gts-establishes-logical-bus-4-membership-not-physical-transparency).
 
 `Bus 1`/`Bus 4` are Central-Gateway logical network identities. They must not be equated
 numerically with Panda bus 1/4 or connector cavity numbers without a separate physical

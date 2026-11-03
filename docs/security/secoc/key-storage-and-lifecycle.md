@@ -6,7 +6,7 @@
 >
 > **Status:** active
 >
-> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS SECOC-003, SECOC-005, SECOC-009
+> **Evidence profile:** mixed — claims carry individual grades.
 >
 > **Canonical artifacts:** `data/dataflash_nvm_records.csv`
 >
@@ -443,7 +443,7 @@ and clears the diagnostic request/result banks after either terminal status
 
 Completion requires application-level polling through a separate RoutineControl
 request. A trace must retain both control types to distinguish acceptance
-from completion. **Composition caveat (CORR-062):** status `0x02` proves only
+from completion. **Composition caveat:** status `0x02` proves only
 that *some* command-8 job completed while `FEBE5085` was active — the
 RID-`0x100E` bank-0 test can submit its own envelope first and have its
 completion attributed to the diagnostic, whose zeroed result bank is then

@@ -228,7 +228,7 @@ owned through explicit `requires_external` gates rather than `REFERENCE/` paths.
 
 Use `tools/artifact list/show` instead of grepping for generator filenames. `tools/artifact regen` runs a derived producer. The catalog derives producers from tracked source references and declared outputs; it has no verification-ownership role.
 
-Use `tools/know QUERY` when the question is "what did we already establish?" or "where is this owned?" It searches findings, corrections, open questions, generated artifacts, suites, and tracked docs in one pass. It is only a navigation layer; firmware/Ghidra and deterministic verification remain the evidence authority.
+Use `tools/know QUERY` to locate an owning report, artifact, or verification suite. It searches maintained documentation, the artifact catalog, and the suite registry. Follow the returned report's evidence sources for the actual conclusion.
 
 Use `tools/gtarget list` / `tools/gtarget show TARGET` before target-specific work. `data/analysis_targets.json` owns registered image identities, work/snapshot/corpus paths, function seeds, and target-specific rebuild stage scripts. The generic target rebuild/snapshot drivers consume those fields and intentionally contain no Camry-specific path/profile switch.
 
@@ -570,7 +570,7 @@ belong there rather than in a new top-level file:
 | Read-only exports from the selected working project (signals/consumers/producers/coverage/inventory) | `tools/project/export_ghidra_project.sh list` |
 | Cross-variant image-bound evidence | `tools/toyota variant list` |
 | Interactive GTS+ diagnostic / recorder schemas, OEM vocabulary and implementation routes | `tools/gts` |
-| Repository knowledge across findings/corrections/OQs/artifacts/suites/docs | `tools/know QUERY` |
+| Maintained reports, artifacts, and verification suites | `tools/know QUERY` |
 
 The three evidence/export runners expose a `list` discovery command. The
 Corolla-H runner reports its profile inputs and tracked outputs; the

@@ -346,8 +346,8 @@ The 2026-08-18 contributor manifest predated a direct diagnostic identity captur
 and treated `8965H1202000 @0x17D80` as the live primary. The later same-car
 `telescope` transcript corrects that interpretation: F181 producer `0x4A328`
 reads `8965F1208000 @0x20860` plus `8A3111202000 @0x17DC0`, while
-`8965H1202000 @0x17D80` belongs to DID `0x2032`. CORR-118 preserves the raw
-manifest as immutable provenance while superseding its identity interpretation.
+`8965H1202000 @0x17D80` belongs to DID `0x2032`. The raw manifest remains
+immutable acquisition provenance; its identity interpretation is superseded.
 The public route itself still retains its deliberately forced old fingerprint.
 
 ### 7.1 Security roots transfer exactly
@@ -380,7 +380,7 @@ expiry; initialization arms the same delay with the attempt counter cleared.
 The normal application-to-PROGRAMMING replay is a separate lifecycle and
 explicitly clears the initializer delay before synthetic boot `10 02`, which is
 why Calvin's immediate successful field unlocks do not contradict the bad-key
-backoff (CORR-088). None of this state is persistent NVM. See
+backoff. None of this state is persistent NVM. See
 [bootloader diagnostics](../diagnostics/bootloader.md) §2.1.
 
 The acquisition itself is additional dynamic evidence for the authenticated-RAM
@@ -2740,8 +2740,7 @@ window and the OEM name of the D2 override mode remain unrecovered.
 Freshness-valid but MAC-invalid B6 therefore cannot advance committed freshness.
 Outside the bounded failure-forwarding modes it cannot reach the steering application;
 inside those modes the generated stack can deliver the failed queued payload without
-turning it into an authenticated success. This corrects the earlier unconditional
-"mismatch cannot deliver" statement (CORR-111).
+turning it into an authenticated success.
 
 The two retry counters are also different mechanisms. B6 record `+0x10=1` bounds the
 same-queued-PDU freshness-candidate/CMAC-mismatch retry at `FEBE5406`; record

@@ -84,7 +84,7 @@ The Corolla labels identify separate retained specimens; the
 | `tests/`, `verification.toml` | Subsystem/target checks and their public suite selectors |
 | `ghidra/` | Vendored processor/CLI and analysis scripts |
 | `tsk/` | Diagnostic support and experimental research implementations |
-| `docs/` | Guides, scoped reports, status references, and historical journals |
+| `docs/` | Guides, maintained target/subsystem reports, and current priorities |
 | `software/` | Tracked corpus identities plus ignored local vendor inputs |
 | `REFERENCE/`, `build/` | Ignored reference material and mutable workspace; never evidence authority |
 

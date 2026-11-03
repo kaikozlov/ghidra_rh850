@@ -6,7 +6,7 @@
 >
 > **Status:** active
 >
-> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS COM-003
+> **Evidence profile:** mixed — claims carry individual grades.
 >
 > **Canonical artifacts:** `data/application_tx_map.csv`, `data/application_tx_producer_evidence.csv`
 >

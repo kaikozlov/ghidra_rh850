@@ -180,8 +180,7 @@ signing proxy is recorded as a separate capability.
 
 ### 2026-08-14 — corrected application memory/read boundary
 
-The old application-memory negative was caused by the eight-byte-shifted service
-parser (CORR-053/CORR-054). Correct runtime object `0x25EA0` binds SID `0x23` to
+Runtime object `0x25EA0` binds SID `0x23` to
 `application_read_memory_by_address_callback @ 0x948AA`; only SIDs
 `0x34/0x36/0x37` remain null download/transfer callbacks.
 
@@ -260,8 +259,8 @@ requested-vs-emitted mismatch, or async state TOCTOU exists on this path.
   No parsing ever runs past the request.
 - **Size domain:** the upper gate rejects `size == 0` and
   `remaining < size`; the copy primitive `0x4EB1C` re-rejects everything
-  outside unsigned `(size-1) < 0xFF`. Effective domain `1..255` (bounded above
-  by the runtime response capacity, see OPEN_QUESTIONS).
+  outside unsigned `(size-1) < 0xFF`. Effective domain `1..255`, bounded above
+  by the runtime response capacity.
 - **Address/memid:** `0x94672` consumes data[1] as the memory id (selector
   `0x26328 == 1`) and parses exactly `BE32(data[2..5])`; of the five-byte
   address field only four bytes are address. The range table match

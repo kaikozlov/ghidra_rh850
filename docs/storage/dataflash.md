@@ -6,7 +6,7 @@
 >
 > **Status:** active
 >
-> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS STORE-001 … STORE-005, SECOC-003
+> **Evidence profile:** mixed — claims carry individual grades.
 >
 > **Canonical artifacts:** `data/dataflash_nvm_records.csv`, `data/checkpoint_payload_map.csv`
 >

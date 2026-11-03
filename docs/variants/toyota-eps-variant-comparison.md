@@ -22,8 +22,8 @@ specimen has two classifications:
 | Corolla `8965H1202000` | TSS3 vehicle/P5 control context | SecOC/TSK | exact tracked image | exact newer-EPS receiver/state/control contract |
 | Corolla `8965F1208000` | TSS3 vehicle/P5 control context | SecOC/TSK | exact tracked image | application-identical H/F transfer + 2025 field acquisition |
 
-The old empty Camry/RAV4 placeholder rows were removed. Keep unacquired vehicles
-in `OPEN_QUESTIONS.md` / the acquisition queue.
+Keep acquisition requirements in the relevant target report and
+[execution queue](../status/PRIORITIES.md).
 
 ## What actually transfers
 
@@ -68,8 +68,8 @@ passes all five verification paths, including the Span-vs-Sienna transfer check.
    `unknown` / `not established` when evidence for either field is missing.
 3. If firmware is in hand, create a `variants/<name>-<partnumber>.md` and add
    target-native verification.
-4. Keep unacquired family targets in `OPEN_QUESTIONS.md`. Matrix rows require
-   observed evidence.
+4. Keep unacquired family-target requirements in the relevant target report.
+   Matrix rows require observed evidence.
 
 For an unidentified newer-TSK target, first satisfy the identity/artifact contract
 in [newer-tsk-target-evidence.md](newer-tsk-target-evidence.md).

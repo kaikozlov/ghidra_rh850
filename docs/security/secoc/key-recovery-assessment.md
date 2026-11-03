@@ -228,7 +228,7 @@ Slot 4 is a MAC-usage key (it is used for `CMD_VERIFY_MAC`/command 7, SECOC-002)
 so under SHE semantics it may run **both** `CMD_GENERATE_MAC` (command 5) and
 `CMD_VERIFY_MAC` (command 7). The earlier statement that "a SecOC MAC key may
 permit MAC verification while generation is disabled" is **not supported by the
-SHE specification** and is retracted (CORR-017). The polarity is the reverse of
+SHE specification**. The polarity is the reverse of
 the prior AES-oracle fallback: it is command 1/3 (raw encipher/decipher) that a
 MAC-usage slot would reject, while command 5 (MAC generation) is the
 spec-permitted primitive. A command-5 signing oracle therefore follows
@@ -461,7 +461,7 @@ Thus CUW-informed provenance is no longer merely an acquisition lead, although
 the historical question of whether blurbdust's April writer was line-for-line
 derived from this exact package remains unproved. Canonical secret-free evidence
 is `data/generated/techstream_v18/t0035_faci_backend_evidence.json`; see
-SECOC-074/CORR-121 and `community/README.md`.
+[community tooling](../../../community/README.md).
 
 The retained extractor remains payload-oriented rather than a general outer-CUW
 validator, but the raw T-0035 specimen is now pinned in `software/locks/` and its
@@ -492,7 +492,7 @@ calibration.
   `0xBB1C4`, `0xA2→0x82`; after that reconstruction, its existing
   `0x0962887F` fixup validates exactly. The same bit repairs the local RH850
   store displacement from `0x22` to `0x02`, making six destination stores an
-  exact permutation of offsets `0..5` (SECOC-044/CORR-042).
+  exact permutation of offsets `0..5` (SECOC-044).
 - **`decrypt.T-0035-22.py`** — CUW decryption. Documents the per-byte
   SeedKey/Nonce obfuscation (`out[i] = (raw[i] − i) mod 256` → ASCII hex →
   16 bytes) and the `AES-ECB(BL_KEY, DID_201)` key derivation matching
@@ -973,7 +973,7 @@ A recovery is complete only when one 16-byte candidate:
 > **Document type:** strategic analysis.
 > Synthesizes the recovery methods above with external evidence to frame the
 > broader research direction. This section is **hypothesis** unless a
-> specific claim references a FINDINGS-grade result.
+> specific claim cites evidence with a stronger grade.
 
 ### 11.1 The two layers are independent
 
@@ -1053,7 +1053,7 @@ It remains gated by hardware policy and application-context execution:
 
 1. **Does ICU-S slot 4 permit MAC generation?** Command 5's software plumbing
    accepts selector 4 and handles output (SECOC-006, **verified structure**).
-   Hardware slot-4 generation permission is **unobserved**. Standard SHE permits generation and verification under the same MAC-usage flag (SECOC-023/CORR-017). A rejection would therefore indicate a Renesas-specific restriction or lifecycle condition.
+   Hardware slot-4 generation permission is **unobserved**. Standard SHE permits generation and verification under the same MAC-usage flag (SECOC-023). A rejection would therefore indicate a Renesas-specific restriction or lifecycle condition.
 2. **Is ICU-S operational in bootloader context?** The authenticated callback
    runs before application init. Whether ICU-S is initialized and slot 4 is
    loaded at that point is unknown. A restorable application-context hook is
@@ -1093,8 +1093,8 @@ analysis applies equally here.
 The receiver-freshness observation in SECOC-012 (initialization zeroes windows,
 accepts forward sync) describes what the EPS would accept as a *receiver*. It
 does not by itself establish that a compromised EPS can *originate* valid
-sender freshness. The startup-race dynamics described in OPEN_QUESTIONS
-("reset-window replay") remain open for the sender case as well.
+sender freshness. The startup-race dynamics of reset-window replay remain
+open for the sender case as well.
 
 Stage 7 now makes the latency/contention architecture concrete: command-5 generation and command-7 verification share the same serialized ICU-S driver. The proxy design therefore treats a busy result as defer, never preempts a production verify with the abort path, and bounds its own queue. Whether this arbitration meets live message cadence remains dynamic.
 

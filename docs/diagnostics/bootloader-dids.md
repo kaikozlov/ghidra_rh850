@@ -6,7 +6,7 @@
 >
 > **Status:** active
 >
-> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS DIAG-BOOT-001, STORE-005
+> **Evidence profile:** mixed — claims carry individual grades.
 >
 > **Canonical artifacts:** —
 >

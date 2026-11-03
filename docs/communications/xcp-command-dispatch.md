@@ -201,8 +201,8 @@ foreground/flash-end entry (`0x31810=1`), and context 0 for CAN1 Tx/Rx ISR
 wrappers (`0x31811=0`). MPAT bit semantics are those in the Renesas P1M-E
 manual (`REFERENCE/r01uh0585ej0120_manual.pdf`, Table 3.49). The common P1M-E
 device profile now correctly marks the PE1 and self Local-RAM views executable;
-the former `execute=false` Ghidra block flag was stale analysis metadata
-(CORR-060). Second, an exhaustive live-project
+the former `execute=false` Ghidra block flag was stale analysis metadata.
+Second, an exhaustive live-project
 census over all defined function instructions finds exactly three direct
 references into `0xFEBF7C00..0xFEBFFBFF`, all `WRITE` references to the base
 `FEBF7C00` (`0x142E`, `0x62652`, `0x976E4`). It finds zero function-owned direct
@@ -212,7 +212,7 @@ window base are also pinned: a **zero-trip clear-shaped loop** at `0x1426`,
 application page copy `0x6263E`, XCP range/translation helper `0x974D0`, and
 XCP E4 copy `0x976D0`. At `0x1426` the start is `FEBF7C00` but the loop endpoint
 is `FEBE7000`; the unsigned-lower branch therefore does not enter the store
-body in this image (CORR-067).
+body in this image.
 A nearby apparent alias at `0x6266E` is a separate 64-byte application-info
 initializer rooted at `FEBF7BB0`; its exact loop stops at `FEBF7BEF`, 16 bytes
 below the XCP window. The current static graph therefore does **not** establish a

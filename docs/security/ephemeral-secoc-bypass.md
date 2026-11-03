@@ -145,8 +145,8 @@ The corrected persistent neutralization is:
 ```
 
 This makes the mismatch branch untakeable and preserves the success
-fallthrough. See `secoc/application-chain.md` and CORR-064 for the earlier
-predicate-direction correction.
+fallthrough. See the [SecOC application chain](secoc/application-chain.md)
+for the predicate evidence.
 
 This report uses the corrected `0x8E6C6` predicate as the semantic target.
 
@@ -165,8 +165,7 @@ Reset startup contains the following explicit zero loops:
 The clear-shaped loop beginning at `0x1426` is **zero-trip** in this image. It
 sets start `FEBF7C00` and endpoint `FEBE7000`, then uses the same unsigned
 lower-than loop form seen in the real copy/clear loops. Since the start is
-already above the endpoint, it does not clear the XCP shadow window. Existing
-text that called this a startup clear is corrected by CORR-067.
+already above the endpoint, it does not clear the XCP shadow window.
 
 ### 3.2 Lower LocalRAM is retained by reset but not a free code cave
 
@@ -382,9 +381,8 @@ requirements:
 3. can be made to point to the retained/XCP RAM region from the available
    boot/application inputs.
 
-That remains the conclusion for a **stock callback hook**. CORR-068 records why
-it is no longer an architectural blocker: the retained payload can own the
-application foreground schedule itself.
+That remains the conclusion for a **stock callback hook**. The retained payload
+can instead own the application foreground schedule itself.
 
 ## 6. RAM-executed code already present in the firmware
 

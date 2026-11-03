@@ -6,7 +6,7 @@
 >
 > **Status:** active
 >
-> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS ARCH-001 … ARCH-006
+> **Evidence profile:** mixed — claims carry individual grades.
 >
 > **Canonical artifacts:** `data/semantic_coverage_ledger.csv`
 >
@@ -394,10 +394,10 @@ This is the application configuration, distinct from the bootloader's already-do
 
 ## 5.5 Foreground system-mode dispatch
 
-`application_foreground_system_mode_dispatch` (already named in the annotated
-project) is the function that fans the foreground tick into parallel subsystem
-pipelines. Its structure was recovered during a systematic sweep of the 5,317
-evidence-grade `recovered` functions (see OPEN_QUESTIONS §"Semantic coverage").
+`application_foreground_system_mode_dispatch` is the function that fans the
+foreground tick into parallel subsystem pipelines. See the Sienna report's
+[analysis coverage](../variants/sienna-8965B4512000.md#analysis-coverage)
+for the semantic-review inventory.
 
 The function gates on an E2E-protected version counter: it reads a 16-bit value
 at `GP - 0x2C46` and checks it against the bitwise complement of the stored

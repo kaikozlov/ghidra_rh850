@@ -6,7 +6,7 @@
 >
 > **Status:** active
 >
-> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS SEC-BOOT-001 … SEC-BOOT-009 and SEC-BOOT-014
+> **Evidence profile:** mixed — claims carry individual grades.
 >
 > **Canonical artifacts:** pinned payload fixtures
 >

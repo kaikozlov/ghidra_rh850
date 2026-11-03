@@ -2,12 +2,11 @@
 
 Short execution queue only. This page answers **what should we do next?** It is
 not a roadmap and must not become a completion diary. Current conclusions and
-unresolved semantics belong in the owning reports below. FINDINGS, CORRECTIONS
-and OPEN_QUESTIONS are archives, not an implementation-status authority.
+unresolved semantics belong in the owning reports below.
 
 ## Active queue
 
-1. **Camry native producer contract — [OQ-054](OPEN_QUESTIONS.md).** Recover the
+1. **Camry native producer contract.** Recover the
    FRC-internal feature-selection → protected `0x08A` egress implementation and
    downstream Brake request-arbitration/result → B6 handoff.
    Missing evidence includes synchronized FRC recorder/CAN observations and
@@ -39,15 +38,15 @@ and OPEN_QUESTIONS are archives, not an implementation-status authority.
    [../variants/corolla-2023-us-public-route.md](../variants/corolla-2023-us-public-route.md)
    §§7.34–7.36.
 4. **Target-specific hardware questions.** Sienna command-5 permission and
-   related retention questions are indexed by [OQ-012](OPEN_QUESTIONS.md) and
-   [OQ-021](OPEN_QUESTIONS.md). Read each question's calibration and later
-   evidence before treating it as an unresolved Camry/Crown/Corolla blocker.
-   These are not one cross-target sender-qualification state.
-5. **Sienna XCP evidence boundary — [OQ-004](OPEN_QUESTIONS.md).** Keep this
+   retention questions belong in the
+   [command-5 assessment](../security/secoc/command5-oracle-assessment.md).
+   Keep that target's remaining measurements separate from the Camry,
+   Crown, and Corolla reports.
+5. **Sienna XCP evidence boundary.** Keep this
    legacy target's physical-reachability question separate from later
    target-specific results. Canonical:
    [XCP report](../communications/xcp-command-dispatch.md).
-6. **Applicable comparison image — [OQ-006](OPEN_QUESTIONS.md).** Additional
+6. **Applicable comparison image.** Additional
    acquisition should answer a specific transfer question. Existing Crown, Camry,
    and Corolla inputs already satisfy the former “first foreign image” milestone
    and are discoverable through [the target index](../variants/README.md).
@@ -64,13 +63,13 @@ and OPEN_QUESTIONS are archives, not an implementation-status authority.
 
 ## Deferred / opportunistic
 
-Work only when the specific dependency appears: bench-only SecOC behavior
-trials ([OQ-023](OPEN_QUESTIONS.md)..[OQ-026](OPEN_QUESTIONS.md)) · stale-RDBI
-confirmation ([OQ-003](OPEN_QUESTIONS.md)) · CommunicationControl availability
-([OQ-049](OPEN_QUESTIONS.md)) · command-13 SHE-deviation check
-([OQ-013](OPEN_QUESTIONS.md)) · RFP serial-protocol transfer
-([OQ-033](OPEN_QUESTIONS.md)) · power/EM and fault-injection fallbacks
-([OQ-017](OPEN_QUESTIONS.md)/[OQ-018](OPEN_QUESTIONS.md)).
+Work only when the specific dependency appears:
+[SecOC behavior](../security/secoc/application-chain.md),
+[stale-RDBI confirmation](../diagnostics/application.md),
+[CommunicationControl](../diagnostics/application.md),
+[ICU-S command semantics](../security/icu-hsm-command-surface.md),
+[RFP serial-protocol transfer](../tooling/renesas-rfp-rv40f.md), and
+[physical measurements](../security/secoc/key-recovery-assessment.md).
 
 ## Closed queues — do not reopen without new evidence
 
@@ -86,13 +85,9 @@ confirmation ([OQ-003](OPEN_QUESTIONS.md)) · CommunicationControl availability
 - **GTS+ recorder host-static boundary** (TMS-079..087): no generic
   protected-host decoder or ownership sweep remains; next value is
   target-native dynamic/firmware correlation (items 1–2).
-- **Exact-F33/EPS static command-path closure** (VAR-065..085,
-  CORR-127..138): no more blind bus-traffic mining, ordinary-COM searches, or
+- **Exact-F33/EPS static command-path closure**: no more blind bus-traffic mining, ordinary-COM searches, or
   DDB publisher hunts; the remaining discriminators are items 1 and 4.
-- **`8965H1202000` comparative sweep** ([OQ-029](OPEN_QUESTIONS.md)): closed
+- **`8965H1202000` comparative sweep**: closed
   target-natively. New static work needs a concrete target-native semantic,
   externally reachable sink, or variant-transfer question;
   `data/exploit_interest_reviewed_candidates.csv` prevents re-audit.
-- Historical negative guidance — generic whole-image sweeps, `FF*16` KAT as a
-  live key, object-15 as live-key proof, command-13 as key export, software-ID
-  offset tables — is retained in [CORRECTIONS.md](CORRECTIONS.md).

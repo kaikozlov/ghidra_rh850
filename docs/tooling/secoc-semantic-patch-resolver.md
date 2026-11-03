@@ -13,10 +13,9 @@ The durable target is not a raw Sienna byte string or software-ID table. It is
 the decision that consumes the command-7 verification result and selects the
 verified PduR/COM delivery fallthrough versus mismatch/retry bookkeeping.
 
-The earlier resolver forced the forward BNE target. CORR-064 establishes that
-this was backwards: command-7 result `0` is verification success, so the stock
-BNE is **not taken** on success. The corrected resolver therefore patches the
-CMP immediately before that BNE and leaves the branch itself untouched.
+Command-7 result `0` is verification success, so the stock BNE is **not taken**
+on success. The resolver patches the CMP immediately before that BNE and
+leaves the branch itself untouched.
 
 ## 1. Semantic discovery
 

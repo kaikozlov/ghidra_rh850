@@ -6,7 +6,7 @@
 >
 > **Status:** active
 >
-> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS MEM-SAFE-001 … MEM-SAFE-004
+> **Evidence profile:** mixed — claims carry individual grades.
 >
 > **Canonical artifacts:** committed CodeFlash bytes, decompiled functions
 >

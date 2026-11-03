@@ -15,12 +15,12 @@ captures and cited source revisions establish the scope of their evidence.
 | Find the current Camry port and its evidence | [Capability matrix](variants/camry-2026-capability-matrix.md) |
 | Understand normal openpilot ownership | [Porting contract](architecture/toyota-openpilot-porting-contract.md) |
 | Choose the next investigation | [Priorities](status/PRIORITIES.md) |
-| Find an earlier claim, question, or correction | [Status reference](status/README.md), or `tools/know QUERY` |
+| Locate a conclusion, evidence source, or open question | The owning target/subsystem report, or `tools/know QUERY` |
 
 ## Reading evidence
 
 1. Check the **target, software revision, capture date, and evidence source**.
-2. Use the owning report for the conclusion, not an archive's old status.
+2. Use the owning report for the conclusion and its unresolved questions.
 3. Follow the actual evidence. Regenerate artifacts from their inputs;
    `build/` and `REFERENCE/` are local context, not portable evidence.
 4. Keep software checks, capture measurements and attributed use distinct.
@@ -41,20 +41,13 @@ captures and cited source revisions establish the scope of their evidence.
 These sections include legacy Sienna reference material as well as newer
 multi-target reports. Their indexes identify that distinction.
 
-## Status and history
+## Current work and evidence
 
-| Document | Meaning |
-|---|---|
-| [PRIORITIES.md](status/PRIORITIES.md) | Short execution queue |
-| [FINDINGS.md](status/FINDINGS.md) | Claim IDs, evidence grades, and links |
-| [OPEN_QUESTIONS.md](status/OPEN_QUESTIONS.md) | Reference questions and recorded closure boundaries; owning reports may be newer |
-| [CORRECTIONS.md](status/CORRECTIONS.md) | Archived corrections and links to owning reports |
-| [ANALYSIS_STATUS.md](status/ANALYSIS_STATUS.md) | Historical Sienna coverage snapshot |
-| [history/](history/README.md) | Dated investigation journals and migrations |
-
-Retain useful observations and source identities. Delete incorrect conclusions
-and obsolete implementation descriptions; do not keep them behind supersession
-notices or move them into a new archive merely to avoid deletion.
+[PRIORITIES.md](status/PRIORITIES.md) is the execution queue.
+The [evidence model](OVERVIEW.md#evidence-model) defines source and confidence.
+Keep useful observations and source identities in their owning reports.
+Delete superseded documents after integrating unique current material and
+repairing their references. Git preserves change history.
 
 ## Maintaining this documentation
 

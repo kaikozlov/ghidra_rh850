@@ -173,12 +173,6 @@
     "FEBEB3FC/FEBEB3FE/FEBEB400/FEBEB354 (command block bytes 406/407/416/418) come from 0xB7xxx/0xB8xxx internal qualification not traced byte-exhaustively here",
     "no live vehicle I/O was performed; live context is re-read from retained artifacts"
   ],
-  "census_supersession": {
-    "correction": "docs/status/CORRECTIONS.md CORR entry: the '97 empty' framing is superseded",
-    "finding": "the 19-signal set was an artifact of requiring a fixed raw->stage->snapshot triple with pre-listed consumers; the complete pipeline stages 98/116 raw cells and 6 copiers fill 306 unique snapshot destinations",
-    "preserved": "the VAR-065 headline survives and is strengthened: at composition level the only COM-derived VALUE inputs to FEBECC50/FEBECC62 are still B6 sig261 (mode) and B6 sig262 (magnitude); every other non-B6 member is a gate, qualifier, observer, or telemetry input",
-    "prior": "VAR-065 pinned copy-edge census: 19/116 nonempty, 97 empty"
-  },
   "class_l_relevance": {
     "0x090": "the previously unresolved live 0x090 correlation now has a firmware path: 0x090-derived values are integrated observers (FEBEBFA0/FEBEBF80) whose plausibility flags (FEBEC02C/FEBEC043/FEBEC045) and validity gates (FEBEBFB0..FB2) qualify other paths; no 0x090 value is a command magnitude",
     "mode_without_b6": "no non-B6 COM signal can raise assist-active FEBEC7BF (activation is B6-sig261-gated at 0xCB73A); Class-L mode change with B6=0 must therefore arise from the B6-independent internal baseline-assist path, other internal state machinery, or driver/feedback dynamics"

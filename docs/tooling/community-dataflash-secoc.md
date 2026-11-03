@@ -259,8 +259,7 @@ The branch history is also rewritten. The original July `Range dumper` and
 commits preserve an abandoned 288-KiB DataFlash payload
 `FF200000..FF238000`, split 1-MiB CodeFlash payloads, and an older wide RAM
 profile. The final six payload blobs themselves remained byte-identical through
-the later rebases/amends. Full chronology is in
-[`CALVIN_TSKM_DUMP_ARCHAEOLOGY_2026-08-21.md`](../history/2026-08/CALVIN_TSKM_DUMP_ARCHAEOLOGY_2026-08-21.md).
+the later rebases/amends.
 
 One provenance question in Calvin's journal can also be closed from public Git.
 The `DEFAULT -> sleep(.5) -> EXTENDED -> sleep(.7) -> PROGRAMMING ->

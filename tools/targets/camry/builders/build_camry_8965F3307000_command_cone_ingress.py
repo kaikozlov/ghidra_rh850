@@ -854,17 +854,6 @@ def build() -> dict:
             "b6_frames_in_retained_drives": sum(b6_absent.values()),
             "note": "retained-drive intersection re-read from camry_8965F3307000_external_lateral_ingress.json; no new vehicle I/O",
         },
-        "census_supersession": {
-            "prior": "VAR-065 pinned copy-edge census: 19/116 nonempty, 97 empty",
-            "finding": "the 19-signal set was an artifact of requiring a fixed raw->stage->snapshot "
-                       "triple with pre-listed consumers; the complete pipeline stages 98/116 raw cells "
-                       "and 6 copiers fill 306 unique snapshot destinations",
-            "preserved": "the VAR-065 headline survives and is strengthened: at composition level the only "
-                         "COM-derived VALUE inputs to FEBECC50/FEBECC62 are still B6 sig261 (mode) and "
-                         "B6 sig262 (magnitude); every other non-B6 member is a gate, qualifier, observer, "
-                         "or telemetry input",
-            "correction": "docs/status/CORRECTIONS.md CORR entry: the '97 empty' framing is superseded",
-        },
         "boundary": [
             "statement-level closure: 0xBF97A holds WRITE refs into FEBEE400..418 whose stores the "
             "decompiler elides; 0xBF33E is the statement-verified block writer and BF97A's block refs "

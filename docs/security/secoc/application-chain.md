@@ -6,7 +6,7 @@
 >
 > **Status:** active
 >
-> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS SECOC-001..SECOC-008
+> **Evidence profile:** mixed — claims carry individual grades.
 >
 > **Canonical artifacts:** —
 >
@@ -684,7 +684,7 @@ ECU queue behavior, ICU-S throughput, error reporting, legitimate traffic, and
 watchdog effects determine the real attempt rate. Those must be measured on a
 bench. The static firmware nevertheless proves the tag width, unchanged
 freshness on failure, absence of a recovered cross-frame lockout in this path,
-and bounded busy-poll loop. See CORR-090.
+and bounded busy-poll loop.
 
 ## 5.8 DLC canonicalization: classic is exact, FD has ignored suffix aliases
 
@@ -885,10 +885,8 @@ Impact classification:
 - The diagnostic can report **status `0x02` "complete" for an envelope it never
   submitted**, with zero-filled M4/M5. Any tool treating RID `0x1010` status
   `0x02` as proof that *its own* package executed is wrong; the proof bytes
-  returned are not correlated with the submitted request. (Supersedes the
-  sufficiency reading of §8.1 in
-  [key-storage-and-lifecycle.md](key-storage-and-lifecycle.md#81-exact-diagnostic-transport-contract);
-  see CORR-062.)
+  returned are not correlated with the submitted request. See the
+  [exact diagnostic transport contract](key-storage-and-lifecycle.md#81-exact-diagnostic-transport-contract).
 - The window where real M4/M5 exist at `FEBE526A` is **not remotely readable**:
   no stock diagnostic reads that bank, RMBA/XCP disclosure paths exclude the
   `0xFEBE5030..0xFEBE529B` region, and bank-0's own timeout (1200 ticks)
@@ -1127,11 +1125,6 @@ exact-EPS branch selection and package target remain dynamic questions.
 > **Evidence grade:** verified firmware structure for result polarity, local gate
 > direction, PduR/COM delivery reachability, and exact Sienna patch encoding;
 > cross-calibration transfer remains bounded.
->
-> **Correction:** the earlier model inverted the ICU-S verify-result polarity and
-> consequently labeled the two Gate-2 arms backwards. See the corresponding entry
-> in `docs/status/CORRECTIONS.md`. The old `0x8E6C8 9A→95` branch patch forces the
-> **mismatch** arm and is not a bypass.
 
 ### 9.1 Two-level gate and command-7 result polarity
 
@@ -1715,8 +1708,7 @@ correctly pointed to the FACI register family (`FSTATR=FFA10080`,
 `FASTAT=FFA10010`, `FENTRYR=FFA10084`, `FPROTR=FFA10088`), FSTATR error mask
 `0x00007040`, and stronger failure recovery, while attributing per-halfword
 program pacing to bit 11 / `0x800` (`SUSRDY`) in an `8965F3... *_erase.pt.bin`.
-That pacing claim is now disproved by the exact local Toyota artifact; see
-CORR-121.
+The exact local Toyota artifact below disproves that pacing interpretation.
 
 The canonical CUW corpus contains **`T-0035-22.cuw`** (SHA-256
 `9882b1b6dd6acda2d142a2825eda396b0a425e41c13f822b9a18e022d4c43e81`,
@@ -1760,8 +1752,7 @@ corroboration. Nor does T-0035 provide an OEM full-image restore package for
 manifest-bound narrow block RMW, CRC repair, and inverse restore. Canonical
 secret-free evidence is
 `data/generated/techstream_v18/t0035_faci_backend_evidence.json` plus
-`data/generated/camry_8965F3307000_flash_backend_evidence.json`; see SECOC-074
-and CORR-121.
+`data/generated/camry_8965F3307000_flash_backend_evidence.json`.
 
 This is not merely similarity inferred after the fact. The first public payload
 commit, `8d0f29fbe506e36de37a912930f6c68c10a75c42`, says the Task-4 payloads were

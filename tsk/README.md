@@ -70,10 +70,10 @@ tools/test codeflash_dumper
 
 TSK tooling deliberately does **not** maintain a second priority list. The
 current execution order lives in
-[`docs/status/PRIORITIES.md`](../docs/status/PRIORITIES.md); recorded
-dynamic/hardware questions are indexed in
-[`docs/status/OPEN_QUESTIONS.md`](../docs/status/OPEN_QUESTIONS.md).
-Those ledgers may lag the owning target/subsystem reports.
+[`docs/status/PRIORITIES.md`](../docs/status/PRIORITIES.md). Dynamic and
+hardware questions belong beside their evidence in the owning
+[target](../docs/variants/README.md) or [subsystem](../docs/README.md#subsystem-reports)
+report.
 
 The important policy here is narrower: prefer read-only observation of an
 already-established primitive, bind live runs to target identity/routing, and

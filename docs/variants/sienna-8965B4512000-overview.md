@@ -1,9 +1,8 @@
 # Sienna `8965B4512000` reference overview
 
-This document summarizes legacy Sienna research.
-The technical sections and earlier investigation priorities below retain their
-Sienna scope. Start at [the project overview](../OVERVIEW.md) for repository
-orientation and [the variant index](README.md) for other targets.
+This document introduces the Sienna-specific subsystem reports. Start at
+[the project overview](../OVERVIEW.md) for repository orientation and
+[the variant index](README.md) for other targets.
 
 ## Target and evidence boundary
 
@@ -16,10 +15,8 @@ Calibration covered here (legacy reference):
 - **Application:** base `0x20000`, entry `0x20880`
 
 The committed Sienna CodeFlash and DataFlash files are the source inputs.
-The recorded inventory contains **7,090 structurally discovered functions /
-197,726 decoded instructions**. Its semantic-review counts describe a historical
-checkpoint. See the
-[Sienna coverage snapshot](../status/ANALYSIS_STATUS.md) and use
+The [target report](sienna-8965B4512000.md#analysis-coverage) owns analysis
+coverage and review-source references. Use
 `tools/gtarget show sienna-8965B4512000` for registered input/corpus paths.
 
 Related Corolla/Sienna/F3/F4/RAV4 observations are tracked under [variant reports](README.md).
@@ -158,27 +155,16 @@ The repo now separates a firmware finding from a runnable experiment. The
 
 See [the experimental research index](../../tsk/README.md).
 
-## Earlier Sienna investigation priorities
+## Target-specific unresolved questions
 
-This list records the Sienna research checkpoint. Use the current repository
-queue for current priorities. Later Crown, Camry, and Corolla acquisitions supersede
-the generic “another CodeFlash” acquisition gap below.
+Use the owning reports for the evidence and remaining measurements:
 
-1. **Live slot-4 command-5 permission and timing.** If generation is allowed,
-   an application-resident signing proxy becomes practical without extracting
-   the key.
-2. **XCP physical reachability.** A positive result gives a powerful read-only
-   dynamic observer and exposes the existing unauthenticated write surface.
-3. **Gate-2 causal hardware proof.** The host harness is ready; the remaining
-   result is behavioral on matching hardware.
-4. **Another CodeFlash calibration.** A real F3/F4/Corolla/`4514000` image is
-   the fastest way to test which structural/exploit findings transfer.
-5. **Live command→actuation discriminator.** Static work has reached diminishing
-   returns; dynamic observation is now more informative.
+- [Slot-4 operation permissions and timing](../security/secoc/command5-oracle-assessment.md).
+- [Physical XCP reachability](../communications/xcp-command-dispatch.md).
+- [Gate-2 behavioral evidence](../security/secoc/application-chain.md).
+- [Authenticated-command actuation](../architecture/control-partition.md).
 
-Use [PRIORITIES.md](../status/PRIORITIES.md) for the current execution queue
-and [OPEN_QUESTIONS.md](../status/OPEN_QUESTIONS.md) for recorded unresolved
-boundaries. Neither this earlier list nor the ledger is a live coverage dashboard.
+The repository execution queue is [PRIORITIES.md](../status/PRIORITIES.md).
 
 ## External / variant evidence
 
@@ -195,9 +181,8 @@ and [community/README.md](../../community/README.md).
 
 ## How to navigate from here
 
-- Need a **claim ID / confidence** → [FINDINGS.md](../status/FINDINGS.md)
+- Need **source and confidence definitions** → [evidence model](../OVERVIEW.md#evidence-model)
 - Need a **current task** → [PRIORITIES.md](../status/PRIORITIES.md)
-- Need an **unresolved detail** → [OPEN_QUESTIONS.md](../status/OPEN_QUESTIONS.md)
-- Need a **past investigation journal** → [history/](../history/README.md)
+- Need an **unresolved detail** → the owning target or subsystem report above
 - Need **exact machine evidence** → `data/`, `tests/`, firmware bytes
 - Need **Ghidra mechanics** → [WORKFLOW.md](../WORKFLOW.md)

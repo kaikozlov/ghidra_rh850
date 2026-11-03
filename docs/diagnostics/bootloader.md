@@ -6,7 +6,7 @@
 >
 > **Status:** active
 >
-> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS DIAG-BOOT-002
+> **Evidence profile:** mixed — claims carry individual grades.
 >
 > **Canonical artifacts:** —
 >
@@ -97,8 +97,7 @@ this calibration rejects). Any SID not in the table falls through to
 proprietary/VFOREST protocol handler** — the reflash path is entirely standard
 UDS (`0x2E` DID writes → `0x34/0x36/0x37` → `0x31`), which is why the CUW
 VFOREST `SendNonceAndSeedKey` frames (`0x37`–`0x3c` block-seq) cannot apply to
-this calibration (see [../tooling/techstream.md](../tooling/techstream.md) §4.6,
-CORR-021).
+this calibration (see [../tooling/techstream.md](../tooling/techstream.md) §4.6).
 
 Mask `0x02` is physical-only (`0x7A1`), mask `0x01` is functional-only
 (`0x777`), and mask `0x03` permits both. These masks are independent of the

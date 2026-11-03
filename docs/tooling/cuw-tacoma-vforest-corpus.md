@@ -1,4 +1,4 @@
-# Tacoma VFOREST CUW corpus analysis — 2026-08-23
+# Tacoma VFOREST CUW corpus analysis
 
 ## Scope
 
@@ -7,7 +7,7 @@ using the recovered Toyota Techstream V18 CUW semantics. Raw CUWs remain ignored
 external specimens. The tracked artifact
 `data/generated/techstream_v18/cuw_tacoma_vforest_corpus.json` is generated
 from those packages by `tools/techstream/inspect_cuw_vforest_corpus.py` and is
-verified by `tests/verify_techstream_cuw_vforest_corpus.py`.
+verified by `tests/techstream/verify_techstream_cuw_vforest_corpus.py`.
 
 The corpus is 11 Tacoma ENG&ECT packages, containing 16 CPU images. It spans
 2016–2021 application coverage and three integrated VFOREST size classes:
@@ -294,19 +294,13 @@ remains bounded.
 - live timing/retry behavior beyond the recovered host parameter model; and
 - any transfer of this legacy ENG&ECT security design to modern Toyota EPS.
 
-Most importantly for the openpilot/TSS3 work, none of these packages is a
-modern EPS CUW. They contain none of the modern Unified credential fields and
-do not choose between the two byte-compatible Unified routes already recovered
-for the tracked EPS bootloader. A matching modern EPS CUW remains the highest
-value missing artifact.
 
 ## Reproduction
 
 ```bash
-PYTHONPATH=tools/techstream uv run --locked python \
+uv run --locked python \
   tools/techstream/inspect_cuw_vforest_corpus.py software/Techstream/cuw \
   --output /tmp/cuw_tacoma_vforest_corpus.json
 
-PYTHONPATH=tools/techstream uv run --locked python \
-  tests/verify_techstream_cuw_vforest_corpus.py
+tools/test techstream_cuw_vforest_corpus
 ```

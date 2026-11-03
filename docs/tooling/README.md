@@ -8,6 +8,9 @@ The analysis toolchain: processor module, scripts, verification.
 | [rh850-build-and-sim.md](rh850-build-and-sim.md) | Unified `tools/rh850` workflow for the pinned toolchain, payload tests, CodeFlash tests, exact-firmware scenarios, and generated P1M-E model |
 | [renesas-rfp-rv40f.md](renesas-rfp-rv40f.md) | External-source recovery of the Renesas Flash Programmer RV40F serial protocol and its bounded ICU-S configuration interface |
 | [techstream.md](techstream.md) | External-source recovery of Toyota Techstream V18.00.003 (installer 18.00.008): J2534 diagnostic architecture, SecurityAccess implementations, CUW reflash flow, and the ptshim32 CAN traffic logger |
+| [cuw-t0087-17.md](cuw-t0087-17.md) | T0087-17 CUW package analysis and decoded payload evidence |
+| [cuw-t0011-21-04c21.md](cuw-t0011-21-04c21.md) | T0011-21 / 04C21 VFOREST CUW package analysis |
+| [cuw-tacoma-vforest-corpus.md](cuw-tacoma-vforest-corpus.md) | Comparative analysis of the Tacoma VFOREST CUW corpus |
 | [techstream-capture-procedure.md](techstream-capture-procedure.md) | Isolated-bench capture, hashing, normalization, redaction, and evidence labeling for official J2534 traces |
 | [techstream-ddb-pipeline.md](techstream-ddb-pipeline.md) | `.ddb` binary format reverse-engineering: LZSS decompression, section parsing, OEM string resolution, and the generated diagnostic catalog pipeline |
 | [gts-query-cli.md](gts-query-cli.md) | `tools/gts`: unified read-only discovery across current GTS+ DDB semantics, CUW descriptors/writer routes, and DLL/EXE metadata/strings |
@@ -50,7 +53,7 @@ The small command surface to remember is:
 | Ghidra / pseudocode | `tools/g`, `tools/pseudo` |
 | GTS+ / Toyota vocabulary / CUW routes | `tools/gts` |
 | Toyota platform capabilities / target workflows | `tools/toyota capabilities`, `tools/toyota target list camry` |
-| Repository knowledge / findings / corrections / open questions | `tools/know QUERY` |
+| Maintained reports, artifacts, and verification suites | `tools/know QUERY` |
 | Generated artifacts / producers | `tools/artifact list`, `show`, `regen` |
 | Broad gates | `tools/test core` / `full` / `local` |
 | Discover/query configured targets | `tools/gtarget list`, `tools/gtarget show TARGET`, `tools/gtarget TARGET ...` |
@@ -73,13 +76,13 @@ The catalog is derived from tracked artifact paths and source references; it is 
 Repository memory has the same task-shaped surface:
 
 ```bash
-tools/know COM-017
-tools/know "Target Lateral ID" --kind finding --kind open
+tools/know "CAN receive"
+tools/know "Target Lateral ID" --kind doc
 tools/know fault_status --kind artifact --kind suite
-tools/know TMS-060 --json
+tools/know "Panda routing" --json
 ```
 
-`tools/know` reads the authoritative findings/corrections/open-question ledgers, the derived artifact catalog, `verification.toml`, and tracked docs directly. Use it for navigation: continue with the returned canonical report/test, and return to firmware/Ghidra for primary proof.
+`tools/know` searches maintained reports first, then the derived artifact catalog and `verification.toml`. Follow the returned report or test to its evidence.
 
 Configured firmware targets likewise have one registry-backed discovery surface:
 

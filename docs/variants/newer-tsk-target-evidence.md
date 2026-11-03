@@ -65,16 +65,15 @@ derivative may include normalized diagnostic bytes only after reviewing every
 record for VIN, account, license, key material, server tokens, and session IDs;
 otherwise commit only hashes, counts, operation labels, and bounded findings.
 
-## Current disposition
+## Target-specific disposition
 
-No exact newer-TSK part number, target CodeFlash/DataFlash, matching `.cuw`, or
-labeled official Techstream capture is present. Therefore:
+Select a registered target through `tools/gtarget list` and the
+[variant index](README.md). Each target report owns its acquired inputs,
+verified transfers, and remaining acquisition requirements.
 
-- V18's zero `SecOC`/`VehSec` vocabulary supports only “no named/static path
-  recovered in pinned V18”;
-- Sienna firmware findings remain Sienna-specific;
-- target-generation transfer remains **hypothesis**, with zero verified exact
-  transfers in [../status/ANALYSIS_STATUS.md](../status/ANALYSIS_STATUS.md).
+V18's vocabulary, Sienna firmware behavior, and a newer target's behavior
+remain distinct evidence sources; apply the target-specific discriminators
+above before transferring a conclusion.
 
 
 ## Ephemeral runtime transfer boundary

@@ -6,7 +6,7 @@
 >
 > **Status:** active
 >
-> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS DIAG-APP-003 (mode/shutdown machinery)
+> **Evidence profile:** mixed — claims carry individual grades.
 >
 > **Canonical artifacts:** —
 >

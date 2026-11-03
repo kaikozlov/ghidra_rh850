@@ -16,9 +16,8 @@
 > TransferData state, RequestDownload pre-SA side effects, CTBP retention,
 > alternate credential-read engines, the 18 Corolla boot residuals, the
 > effectively-keyless application-SA surface, live-handoff DMA state, and a
-> target-native H computed-control-flow census. CORR-101 records the correction after a
-> fresh re-audit found additional unaudited application transport and formatter
-> surfaces. Deterministic regressions are
+> target-native H computed-control-flow census. A fresh re-audit found additional
+> unaudited application transport and formatter surfaces. Deterministic regressions are
 > `tools/test keyless` and
 > `tests/runtime/verify_keyless_live_handoff_dma.py`; the fuller Sienna no-auth control-
 > flow audit remains in
@@ -261,8 +260,7 @@ containing functions coherently compute `(param_2 & 0xffff) * 20000`. Stale
 overlapping auto-analysis had treated those interior halfwords as
 `callt 0x22` and incorrectly joined unrelated table halfwords at `0x44`.
 Therefore CTBP's exact value is recovered context, but no CALLT-based pivot is
-closed by these sites. `KEYLESS-008` retains this correction; `CORR-203`
-records the superseded security claim.
+closed by these sites.
 
 ## 11. Failed boot-SA computation does not expose a response-stack oracle
 
@@ -588,8 +586,8 @@ artifact
 
 ## 20.3 What the reopened static audit does and does not establish
 
-CORR-101 corrects the earlier analysis mistake: closing a collection of known
-compositions is not equivalent to exhausting the firmware's software-visible
+Closing a collection of known compositions is not equivalent to exhausting
+the firmware's software-visible
 attack surface. The exploit-interest ranking generates candidates. Its
 reviewed-candidate ledger covers selected cohorts within the 1,055
 pre-SA-reachable ranked functions.

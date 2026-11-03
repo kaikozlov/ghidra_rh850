@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
-"""Query repository findings, corrections, open questions, artifacts, suites, and docs."""
+"""Search maintained target/subsystem reports, artifacts, and verification suites."""
 from __future__ import annotations
 
 import argparse
 import json
-import re
 import tomllib
 from pathlib import Path
 
@@ -13,82 +12,12 @@ from tools.catalog.artifact_catalog import rows as artifact_rows
 
 ROOT = REPO_ROOT
 
-FINDINGS = ROOT / "docs/status/FINDINGS.md"
-CORRECTIONS = ROOT / "docs/status/CORRECTIONS.md"
-OPEN_QUESTIONS = ROOT / "docs/status/OPEN_QUESTIONS.md"
 MANIFEST = ROOT / "verification.toml"
 
 
 def matches(query: str, *values: object) -> bool:
     q = query.casefold()
     return any(q in str(v).casefold() for v in values if v is not None)
-
-
-def findings(query: str) -> list[dict]:
-    out = []
-    for line in FINDINGS.read_text(encoding="utf-8").splitlines():
-        if not re.match(r"^\| [A-Z][A-Z0-9-]+ \|", line):
-            continue
-        cols = [col.strip() for col in line.strip().strip("|").split(" | ")]
-        if len(cols) < 6 or cols[0] == "ID":
-            continue
-        # The ledger intentionally contains both its original six-column
-        # ID/Claim/Scope/Grade/Checked/Canonical rows and newer seven-column
-        # rows that split Source from Grade. A raw ``|`` inside code does not
-        # carry surrounding spaces, so ``" | "`` remains the structural delimiter.
-        if len(cols) == 6:
-            source, grade = "", cols[3]
-        else:
-            source, grade = cols[3], cols[4]
-        row = {
-            "kind": "finding",
-            "id": cols[0],
-            "claim": cols[1],
-            "scope": cols[2],
-            "source": source,
-            "grade": grade,
-            "checked_by": cols[-2],
-            "canonical": cols[-1],
-        }
-        if matches(query, *row.values()):
-            out.append(row)
-    return out
-
-
-def _heading_blocks(path: Path, pattern: re.Pattern[str]) -> list[tuple[re.Match[str], str]]:
-    text = path.read_text(encoding="utf-8")
-    matches_ = list(pattern.finditer(text))
-    out = []
-    for index, match in enumerate(matches_):
-        end = matches_[index + 1].start() if index + 1 < len(matches_) else len(text)
-        out.append((match, text[match.end():end].strip()))
-    return out
-
-
-def corrections(query: str) -> list[dict]:
-    pattern = re.compile(r"(?m)^### (CORR-\d+) — (.+)$")
-    out = []
-    for match, body in _heading_blocks(CORRECTIONS, pattern):
-        row = {"kind": "correction", "id": match.group(1), "title": match.group(2), "body": body}
-        if matches(query, *row.values()):
-            out.append(row)
-    return out
-
-
-def open_questions(query: str) -> list[dict]:
-    text = OPEN_QUESTIONS.read_text(encoding="utf-8")
-    pattern = re.compile(r"(?m)^- \*\*(OQ-\d+) — (.+?)\*\*(.*)$")
-    found = list(pattern.finditer(text))
-    out = []
-    for index, match in enumerate(found):
-        end = found[index + 1].start() if index + 1 < len(found) else len(text)
-        body = (match.group(3) + "\n" + text[match.end():end]).strip()
-        # Do not let the current question swallow the next section heading into results.
-        body = re.split(r"(?m)^## ", body, maxsplit=1)[0].strip()
-        row = {"kind": "open_question", "id": match.group(1), "title": match.group(2).rstrip("."), "body": body}
-        if matches(query, *row.values()):
-            out.append(row)
-    return out
 
 
 def artifacts(query: str) -> list[dict]:
@@ -136,12 +65,6 @@ def docs(query: str) -> list[dict]:
 
 def format_result(row: dict) -> str:
     kind = row["kind"]
-    if kind == "finding":
-        return f"finding\t{row['id']}\t{row['grade']}\t{row['claim']}\t{row['canonical']}"
-    if kind == "correction":
-        return f"correction\t{row['id']}\t{row['title']}"
-    if kind == "open_question":
-        return f"open\t{row['id']}\t{row['title']}"
     if kind == "artifact":
         return f"artifact\t{row['artifact']}\tproducer={','.join(row['producers']) or '—'}"
     if kind == "suite":
@@ -153,22 +76,19 @@ def format_result(row: dict) -> str:
 
 def main() -> int:
     ap = argparse.ArgumentParser(prog="know", description=__doc__)
-    ap.add_argument("query", help="ID, subsystem, filename, suite, or free-text fragment")
-    ap.add_argument("--kind", action="append", choices=("finding", "correction", "open", "artifact", "suite", "doc"))
+    ap.add_argument("query", help="Subsystem, filename, suite, or free-text fragment")
+    ap.add_argument("--kind", action="append", choices=("doc", "artifact", "suite"))
     ap.add_argument("--limit", type=int, default=60)
     ap.add_argument("--json", action="store_true")
     args = ap.parse_args()
-    kinds = set(args.kind or ("finding", "correction", "open", "artifact", "suite", "doc"))
+    kinds = set(args.kind or ("doc", "artifact", "suite"))
     loaders = {
-        "finding": findings,
-        "correction": corrections,
-        "open": open_questions,
         "artifact": artifacts,
         "suite": suites,
         "doc": docs,
     }
     result = []
-    for kind in ("finding", "correction", "open", "artifact", "suite", "doc"):
+    for kind in ("doc", "artifact", "suite"):
         if kind in kinds:
             result.extend(loaders[kind](args.query))
     result = result[: max(0, args.limit)]

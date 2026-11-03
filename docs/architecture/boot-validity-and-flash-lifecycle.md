@@ -6,7 +6,7 @@
 >
 > **Status:** active
 >
-> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS ARCH-003
+> **Evidence profile:** mixed — claims carry individual grades.
 >
 > **Canonical artifacts:** —
 >
@@ -211,7 +211,7 @@ re-derivation against raw bytes; split-CodeFlash file offset == VA):
    `0x1398 -> 0x1338` boot-runtime initialization likewise does not call
    reset-startup initializer `0x1404`; direct xrefs make `boot_reset_startup @
    0x1F2` its sole caller. The apparent `0x1426` `FEBF7C00` clear remains the
-   CORR-067 zero-trip loop (`FEBF7C00 > FEBE7000`). Consequently bytes written
+   zero-trip loop (`FEBF7C00 > FEBE7000`). Consequently bytes written
    into the XCP window immediately before `10 02` remain resident across the
    normal application-to-boot transition. `tools/test xcp` pins this
    composition directly from raw CodeFlash.
@@ -253,7 +253,7 @@ erase/write/reset/RAM-exec path still requires SecurityAccess level 2
 (`0xFEBF2B0F == 2`; writer census: only send-key success writes `2` —
 SEC-BOOT-007), and no unauthenticated mutating path was recovered. Watchdog/reset
 transitions likewise cannot preserve UDS privilege because sanitization in
-`FUN_00005086` precedes IRQ enable at `0x1398`. See CORR-089.
+`FUN_00005086` precedes IRQ enable at `0x1398`.
 
 
 ## 5. Object-15 reachability (bounded negative)

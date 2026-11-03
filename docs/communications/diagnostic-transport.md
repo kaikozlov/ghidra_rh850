@@ -6,7 +6,7 @@
 >
 > **Status:** active
 >
-> **Evidence profile:** mixed — claims carry individual grades; see FINDINGS DIAG-BOOT-002 (transport path)
+> **Evidence profile:** mixed — claims carry individual grades.
 >
 > **Canonical artifacts:** —
 >
@@ -161,7 +161,7 @@ only for status `0`. Therefore encoded **results 2 and 3 are successful
 completion and result 1 is the error path** in this firmware. RAM payloads
 using slot 16 must wait for the complete ready mask, set TMTR only after filling
 message RAM, wait for a nonzero result, accept results 2/3, and acknowledge the
-result bits. CORR-065 supersedes the earlier reversed result mapping.
+result bits.
 
 No CAN-FD payload is used despite the FD-capable peripheral: CanIf rejects DLC
 above 8, CanTp always constructs eight-byte frames, and CFDTMFDCTR is cleared.

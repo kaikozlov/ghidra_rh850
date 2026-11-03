@@ -55,16 +55,31 @@ for its recorded vehicle, software, harness, and operating state.
 For openpilot design, start from current upstream openpilot/opendbc/Panda.
 Firmware establishes target-specific constraints.
 
-Keep evidence source separate from confidence. The
-[evidence model](status/FINDINGS.md#evidence-model) defines **verified**,
-**observed**, **recovered**, **bounded**, **hypothesis**, and **disproved**.
-Discovery counts, offline test results, field observations, and production
-qualification are not interchangeable.
+## Evidence model
 
-Status ledgers are lookup aids and may lag the owning reports.
-[ANALYSIS_STATUS.md](status/ANALYSIS_STATUS.md) is a historical Sienna coverage
-snapshot. Reports retain useful measurements with their provenance, not obsolete
-implementation status behind historical labels.
+Record evidence source separately from confidence. A field observation and a
+firmware reconstruction answer different questions.
+
+| Source | Meaning |
+|---|---|
+| **firmware-static** | Recovered from committed firmware bytes |
+| **dynamic-probe** | Observed on a live vehicle or bus |
+| **generated-artifact** | Produced by a tracked generator from identified inputs |
+| **external-source** | Attributed to an outside document, report, or third party |
+
+| Grade | Meaning |
+|---|---|
+| **verified** | The stated behavior or invariant is asserted by a deterministic test |
+| **observed** | Directly observed within the recorded target and operating conditions |
+| **recovered** | Control/data flow reconstructed to the stated extent |
+| **bounded** | Evidence constrains the interpretation; specified semantics remain unknown |
+| **hypothesis** | Plausible and explicitly unverified |
+
+The variant CSV's `definitive`, `inference`, and `none` grades summarize rows.
+Individual fields retain their own source and confidence in the target report;
+an observed software identity does not establish an inferred MCU identity.
+Keep unresolved questions beside the evidence in their owning report. Replace
+disproved conclusions there rather than preserving a separate error ledger.
 
 ## Working state is not evidence
 

@@ -374,7 +374,7 @@ Current output (345 mappings):
 
 No selected P4 database carries a type-7 `CDbDidTable`; consequently there are
 no direct DDB→firmware DID correlations. The previous eleven were a disproved
-reinterpretation of type-3 `CDbSupPidTable` bytes (CORR-030).
+reinterpretation of type-3 `CDbSupPidTable` bytes.
 DTC correlation structurally scans all `0xA0` 8-byte records used by
 `FUN_0005159e`/`FUN_000517b4`, at `0x309DC`–`0x30EDC`; blind byte matches elsewhere in
 CodeFlash are rejected. The record's byte 0 is now preserved as the UDS
