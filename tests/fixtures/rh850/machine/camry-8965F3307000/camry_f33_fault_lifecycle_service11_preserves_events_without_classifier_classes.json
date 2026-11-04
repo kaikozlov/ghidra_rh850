@@ -1,0 +1,234 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_fault_lifecycle_service11_preserves_events_without_classifier_classes",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "max_instructions": 500000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe5f81",
+      "hex": "0000000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe6090",
+      "hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe6764",
+      "hex": "0040",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe6af0",
+      "hex": "01000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe7f51",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe82a0",
+      "hex": "000000000000000000",
+      "evidence": "Explicit synthetic bounded classifier-owned object 82A0..82D1; original51592 initializes counts/banks/ages; remaining bytes are declared initial lifecycle state, not injected between calls."
+    },
+    {
+      "address": "0xfebe82a9",
+      "hex": "5a",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe82aa",
+      "hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic bounded classifier-owned object 82A0..82D1; original51592 initializes counts/banks/ages; remaining bytes are declared initial lifecycle state, not injected between calls."
+    },
+    {
+      "address": "0xfebe82d4",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee81a",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee827",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee853",
+      "hex": "00000011000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee8b0",
+      "hex": "9a56",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee91c",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee924",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee92c",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebf0668",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe7600",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack; SP=7800; all original callees execute."
+    },
+    {
+      "address": "0xfebe8ffc",
+      "size": 80,
+      "fill": 165,
+      "evidence": "Observation-only canaried scratch. Original89F2E copies out; never copied back to owned state."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe210692150500610026060e00000027060a0000003f062800befe2106661c0500610026065100000027060a0000003f064200befe2106661c050061002606be00000027060a0000003f065c00befe2106661c050061002606ff00000027060a0000003f067600befe2106661c0500610026062000000027060a0000003f069000befe2106661c0500610026062001000027060a0000003f06aa00befe2106661c0500610026069800000027060a0000003f06c400befe2106661c050061003f06d200befe2106e4120500610026060090befe2706a082befe2806010000003f06f200befe21062e9f0800610026060490befe2706aa82befe2806050000003f061201befe21062e9f080061003f062001befe2106dc16050061003f062e01befe2106e4120500610026060c90befe2706a082befe2806010000003f064e01befe21062e9f0800610026061090befe2706aa82befe2806050000003f066e01befe21062e9f0800610026061890befe27069060befe2806040000003f068e01befe21062e9f0800610026061c90befe27069460befe2806040000003f06ae01befe21062e9f0800610026062090befe27069860befe2806040000003f06ce01befe21062e9f0800610026062490befe2706a060befe2806040000003f06ee01befe21062e9f0800610026062890befe27060061befe2806040000003f060e02befe21062e9f0800610026062c90befe2706ba82befe2806100000003f062e02befe21062e9f0800610026069800000027060a0000003f064802befe2106661c050061003f065602befe2106e4120500610026063c90befe2706a082befe2806010000003f067602befe21062e9f0800610026064090befe2706aa82befe2806050000003f069602befe21062e9f080061002106980700006100",
+      "evidence": "Transparent synthetic MOV/JMP call sequencer only; immutable firmware, no conditional stores or modeled transitions. Original call order: 0x51592, 0x51c66, 0x51c66, 0x51c66, 0x51c66, 0x51c66, 0x51c66, 0x51c66, 0x512e4, 0x89f2e, 0x89f2e, 0x516dc, 0x512e4, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x51c66, 0x512e4, 0x89f2e, 0x89f2e"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original sequence returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Non-preserved class10 active beside six preserved events selector",
+      "kind": "memory",
+      "address": "0xfebe9000",
+      "size": 1,
+      "equals_hex": "0a"
+    },
+    {
+      "name": "Non-preserved class10 active beside six preserved events exact five table columns AA..AE",
+      "kind": "memory",
+      "address": "0xfebe9004",
+      "size": 5,
+      "equals_hex": "0701010103"
+    },
+    {
+      "name": "Service11 clears classifier; preserved classes01 and00 do not reassert selector",
+      "kind": "memory",
+      "address": "0xfebe900c",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Service11 clears classifier; preserved classes01 and00 do not reassert exact five table columns AA..AE",
+      "kind": "memory",
+      "address": "0xfebe9010",
+      "size": 5,
+      "equals_hex": "0000000000"
+    },
+    {
+      "name": "Service11 restores preserved event0E current",
+      "kind": "memory",
+      "address": "0xfebe9018",
+      "size": 4,
+      "equals_hex": "00400000"
+    },
+    {
+      "name": "Service11 restores preserved event20 current",
+      "kind": "memory",
+      "address": "0xfebe901c",
+      "size": 4,
+      "equals_hex": "01000000"
+    },
+    {
+      "name": "Service11 restores preserved event51 current",
+      "kind": "memory",
+      "address": "0xfebe9020",
+      "size": 4,
+      "equals_hex": "00000200"
+    },
+    {
+      "name": "Service11 removes non-preserved event98 current",
+      "kind": "memory",
+      "address": "0xfebe9024",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Service11 retains non-preserved second-history bit",
+      "kind": "memory",
+      "address": "0xfebe9028",
+      "size": 4,
+      "equals_hex": "00000001"
+    },
+    {
+      "name": "Preserved events have no supported class counters",
+      "kind": "memory",
+      "address": "0xfebe902c",
+      "size": 16,
+      "equals_hex": "00000000000000000000000000000000"
+    },
+    {
+      "name": "Non-preserved failure reasserts after service clear selector",
+      "kind": "memory",
+      "address": "0xfebe903c",
+      "size": 1,
+      "equals_hex": "0a"
+    },
+    {
+      "name": "Non-preserved failure reasserts after service clear exact five table columns AA..AE",
+      "kind": "memory",
+      "address": "0xfebe9040",
+      "size": 5,
+      "equals_hex": "0701010103"
+    },
+    {
+      "name": "Observation lower canary",
+      "kind": "memory",
+      "address": "0xfebe8ffc",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "Observation upper canary",
+      "kind": "memory",
+      "address": "0xfebe9048",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    }
+  ]
+}

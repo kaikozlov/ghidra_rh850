@@ -1,0 +1,507 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_fault_lifecycle_classifier_and_command_gate_independence",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "max_instructions": 500000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe6764",
+      "hex": "0040",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe686c",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe6af0",
+      "hex": "01000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe71ec",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe71f2",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe7567",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe7bbc",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe7da6",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe7db0",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe7f51",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe82a0",
+      "hex": "000000000000000000",
+      "evidence": "Explicit synthetic bounded classifier-owned object 82A0..82D1; original51592 initializes counts/banks/ages; remaining bytes are declared initial lifecycle state, not injected between calls."
+    },
+    {
+      "address": "0xfebe82a9",
+      "hex": "5a",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe82aa",
+      "hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic bounded classifier-owned object 82A0..82D1; original51592 initializes counts/banks/ages; remaining bytes are declared initial lifecycle state, not injected between calls."
+    },
+    {
+      "address": "0xfebe8b28",
+      "hex": "000000000000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe8ba5",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe8bab",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebeac4c",
+      "hex": "d007",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebeac5a",
+      "hex": "0004",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebeaf4d",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebeaf50",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebeaf56",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebeaf60",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebebe1c",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebebe20",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebecc50",
+      "hex": "b004",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee81a",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee827",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee853",
+      "hex": "000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee857",
+      "hex": "000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee8b0",
+      "hex": "9a56",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee91c",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee924",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee92c",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebeed00",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebef300",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebef302",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebef306",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebf0668",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe7600",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack; SP=7800; all original callees execute."
+    },
+    {
+      "address": "0xfebe8ffc",
+      "size": 164,
+      "fill": 165,
+      "evidence": "Observation-only canaried scratch. Original89F2E copies out; never copied back to owned state."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe21069215050061003f061c00befe2106e4120500610026060090befe2706a082befe2806010000003f063c00befe21062e9f0800610026060490befe2706aa82befe2806050000003f065c00befe21062e9f080061002606000000002706000000003f067600befe21067a73050061003f068400befe2106e672050061003f069200befe210600cc0f0061003f06a000befe2106a6ca0b0061003f06ae00befe21062c040d00610026060c90befe2706288bbefe2806040000003f06ce00befe21062e9f0800610026061090befe270690efbefe2806040000003f06ee00befe21062e9f0800610026061490befe270629acbefe2806020000003f060e01befe21062e9f0800610026061890befe270654ccbefe2806020000003f062e01befe21062e9f0800610026061c90befe270666ccbefe2806020000003f064e01befe21062e9f080061002606020000003f066201befe2106c80f050061003f067001befe2106e4120500610026062090befe2706a082befe2806010000003f069001befe21062e9f0800610026062490befe2706aa82befe2806050000003f06b001befe21062e9f080061003f06be01befe2106e672050061003f06cc01befe210600cc0f0061003f06da01befe2106a6ca0b0061003f06e801befe21062c040d00610026062c90befe2706288bbefe2806040000003f060802befe21062e9f0800610026063090befe270690efbefe2806040000003f062802befe21062e9f0800610026063490befe270629acbefe2806020000003f064802befe21062e9f0800610026063890befe270654ccbefe2806020000003f066802befe21062e9f0800610026063c90befe270666ccbefe2806020000003f068802befe21062e9f080061002606000000002706017001703f06a202befe21067a73050061003f06b002befe2106e672050061003f06be02befe210600cc0f0061003f06cc02befe2106a6ca0b0061003f06da02befe21062c040d00610026064090befe2706288bbefe2806040000003f06fa02befe21062e9f0800610026064490befe270690efbefe2806040000003f061a03befe21062e9f0800610026064890befe270629acbefe2806020000003f063a03befe21062e9f0800610026064c90befe270654ccbefe2806020000003f065a03befe21062e9f0800610026065090befe270666ccbefe2806020000003f067a03befe21062e9f080061002606020000003f068e03befe2106bc14050061003f069c03befe2106e412050061003f06aa03befe2106e412050061003f06b803befe2106e412050061003f06c603befe2106e412050061003f06d403befe2106e412050061003f06e203befe2106e412050061003f06f003befe2106e412050061003f06fe03befe2106e412050061003f060c04befe2106e412050061003f061a04befe2106e412050061003f062804befe2106e412050061003f063604befe2106e412050061003f064404befe2106e412050061003f065204befe2106e412050061003f066004befe2106e412050061003f066e04befe2106e412050061003f067c04befe2106e412050061003f068a04befe2106e412050061003f069804befe2106e412050061003f06a604befe2106e412050061003f06b404befe2106e412050061003f06c204befe2106e412050061003f06d004befe2106e412050061003f06de04befe2106e412050061003f06ec04befe2106e412050061003f06fa04befe2106e412050061003f060805befe2106e412050061003f061605befe2106e412050061003f062405befe2106e412050061003f063205befe2106e412050061003f064005befe2106e412050061003f064e05befe2106e412050061003f065c05befe2106e412050061003f066a05befe2106e412050061003f067805befe2106e412050061003f068605befe2106e412050061003f069405befe2106e412050061003f06a205befe2106e412050061003f06b005befe2106e412050061003f06be05befe2106e412050061003f06cc05befe2106e412050061003f06da05befe2106e412050061003f06e805befe2106e412050061003f06f605befe2106e412050061003f060406befe2106e412050061003f061206befe2106e412050061003f062006befe2106e412050061003f062e06befe2106e412050061003f063c06befe2106e412050061003f064a06befe2106e412050061003f065806befe2106e412050061003f066606befe2106e412050061003f067406befe2106e412050061003f068206befe2106e412050061003f069006befe2106e412050061003f069e06befe2106e412050061003f06ac06befe2106e412050061003f06ba06befe2106e412050061003f06c806befe2106e412050061003f06d606befe2106e412050061003f06e406befe2106e412050061003f06f206befe2106e412050061003f060007befe2106e412050061003f060e07befe2106e412050061003f061c07befe2106e412050061003f062a07befe2106e412050061003f063807befe2106e412050061003f064607befe2106e412050061003f065407befe2106e412050061003f066207befe2106e412050061003f067007befe2106e412050061003f067e07befe2106e412050061003f068c07befe2106e412050061003f069a07befe2106e412050061003f06a807befe2106e412050061003f06b607befe2106e412050061003f06c407befe2106e412050061003f06d207befe2106e412050061003f06e007befe2106e412050061003f06ee07befe2106e412050061003f06fc07befe2106e412050061003f060a08befe2106e412050061003f061808befe2106e412050061003f062608befe2106e412050061003f063408befe2106e412050061003f064208befe2106e412050061003f065008befe2106e412050061003f065e08befe2106e412050061003f066c08befe2106e412050061003f067a08befe2106e412050061003f068808befe2106e412050061003f069608befe2106e412050061003f06a408befe2106e412050061003f06b208befe2106e412050061003f06c008befe2106e412050061003f06ce08befe2106e412050061003f06dc08befe2106e412050061003f06ea08befe2106e412050061003f06f808befe2106e412050061003f060609befe2106e412050061003f061409befe2106e412050061003f062209befe2106e412050061003f063009befe2106e412050061003f063e09befe2106e412050061003f064c09befe2106e412050061003f065a09befe2106e412050061003f066809befe2106e412050061003f067609befe2106e412050061003f068409befe2106e412050061003f069209befe2106e412050061003f06a009befe2106e412050061003f06ae09befe2106e412050061003f06bc09befe2106e412050061003f06ca09befe2106e412050061003f06d809befe2106e412050061003f06e609befe2106e412050061003f06f409befe2106e412050061003f06020abefe2106e412050061003f06100abefe2106e412050061003f061e0abefe2106e412050061003f062c0abefe2106e412050061003f063a0abefe2106e412050061003f06480abefe2106e412050061003f06560abefe2106e412050061003f06640abefe2106e412050061003f06720abefe2106e412050061003f06800abefe2106e412050061003f068e0abefe2106e412050061003f069c0abefe2106e412050061003f06aa0abefe2106e412050061003f06b80abefe2106e412050061003f06c60abefe2106e412050061003f06d40abefe2106e412050061003f06e20abefe2106e412050061003f06f00abefe2106e412050061003f06fe0abefe2106e412050061003f060c0bbefe2106e412050061003f061a0bbefe2106e412050061003f06280bbefe2106e412050061003f06360bbefe2106e412050061003f06440bbefe2106e412050061003f06520bbefe2106e412050061003f06600bbefe2106e412050061003f066e0bbefe2106e412050061003f067c0bbefe2106e412050061003f068a0bbefe2106e412050061003f06980bbefe2106e412050061003f06a60bbefe2106e412050061003f06b40bbefe2106e412050061003f06c20bbefe2106e412050061003f06d00bbefe2106e412050061003f06de0bbefe2106e412050061003f06ec0bbefe2106e412050061003f06fa0bbefe2106e412050061003f06080cbefe2106e412050061003f06160cbefe2106e412050061003f06240cbefe2106e412050061003f06320cbefe2106e412050061003f06400cbefe2106e412050061003f064e0cbefe2106e412050061003f065c0cbefe2106e412050061003f066a0cbefe2106e412050061003f06780cbefe2106e412050061003f06860cbefe2106e412050061003f06940cbefe2106e412050061003f06a20cbefe2106e412050061003f06b00cbefe2106e412050061003f06be0cbefe2106e412050061003f06cc0cbefe2106e412050061003f06da0cbefe2106e412050061003f06e80cbefe2106e412050061003f06f60cbefe2106e412050061003f06040dbefe2106e412050061003f06120dbefe2106e412050061003f06200dbefe2106e412050061003f062e0dbefe2106e412050061003f063c0dbefe2106e412050061003f064a0dbefe2106e412050061003f06580dbefe2106e412050061003f06660dbefe2106e412050061003f06740dbefe2106e412050061003f06820dbefe2106e412050061003f06900dbefe2106e412050061003f069e0dbefe2106e412050061003f06ac0dbefe2106e412050061003f06ba0dbefe2106e412050061003f06c80dbefe2106e412050061003f06d60dbefe2106e412050061003f06e40dbefe2106e412050061003f06f20dbefe2106e412050061003f06000ebefe2106e412050061003f060e0ebefe2106e412050061003f061c0ebefe2106e412050061003f062a0ebefe2106e412050061003f06380ebefe2106e412050061003f06460ebefe2106e412050061003f06540ebefe2106e412050061003f06620ebefe2106e412050061003f06700ebefe2106e412050061003f067e0ebefe2106e4120500610026065490befe2706a082befe2806010000003f069e0ebefe21062e9f0800610026065890befe2706aa82befe2806050000003f06be0ebefe21062e9f080061003f06cc0ebefe2106e672050061003f06da0ebefe210600cc0f0061003f06e80ebefe2106a6ca0b0061003f06f60ebefe21062c040d00610026066090befe2706288bbefe2806040000003f06160fbefe21062e9f0800610026066490befe270690efbefe2806040000003f06360fbefe21062e9f0800610026066890befe270629acbefe2806020000003f06560fbefe21062e9f0800610026066c90befe270654ccbefe2806020000003f06760fbefe21062e9f0800610026067090befe270666ccbefe2806020000003f06960fbefe21062e9f080061002606000000002706040004003f06b00fbefe21067a73050061003f06be0fbefe2106e672050061003f06cc0fbefe210600cc0f0061003f06da0fbefe2106a6ca0b0061003f06e80fbefe21062c040d00610026067490befe2706288bbefe2806040000003f060810befe21062e9f0800610026067890befe270690efbefe2806040000003f062810befe21062e9f0800610026067c90befe270629acbefe2806020000003f064810befe21062e9f0800610026068090befe270654ccbefe2806020000003f066810befe21062e9f0800610026068490befe270666ccbefe2806020000003f068810befe21062e9f080061002606000000002706000000003f06a210befe21067a73050061003f06b010befe2106e672050061003f06be10befe210600cc0f0061003f06cc10befe2106a6ca0b0061003f06da10befe21062c040d00610026068890befe2706288bbefe2806040000003f06fa10befe21062e9f0800610026068c90befe270690efbefe2806040000003f061a11befe21062e9f0800610026069090befe270629acbefe2806020000003f063a11befe21062e9f0800610026069490befe270654ccbefe2806020000003f065a11befe21062e9f0800610026069890befe270666ccbefe2806020000003f067a11befe21062e9f080061002106980700006100",
+      "evidence": "Transparent synthetic MOV/JMP call sequencer only; immutable firmware, no conditional stores or modeled transitions. Original call order: 0x51592, 0x512e4, 0x89f2e, 0x89f2e, 0x5737a, 0x572e6, 0xfcc00, 0xbcaa6, 0xd042c, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x50fc8, 0x512e4, 0x89f2e, 0x89f2e, 0x572e6, 0xfcc00, 0xbcaa6, 0xd042c, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x5737a, 0x572e6, 0xfcc00, 0xbcaa6, 0xd042c, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x514bc, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x89f2e, 0x89f2e, 0x572e6, 0xfcc00, 0xbcaa6, 0xd042c, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x5737a, 0x572e6, 0xfcc00, 0xbcaa6, 0xd042c, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x5737a, 0x572e6, 0xfcc00, 0xbcaa6, 0xd042c, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original sequence returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Initial reporting normal selector",
+      "kind": "memory",
+      "address": "0xfebe9000",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Initial reporting normal exact five table columns AA..AE",
+      "kind": "memory",
+      "address": "0xfebe9004",
+      "size": 5,
+      "equals_hex": "0000000000"
+    },
+    {
+      "name": "Normal report and no requests aggregate producer",
+      "kind": "memory",
+      "address": "0xfebe900c",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Normal report and no requests snapshot",
+      "kind": "memory",
+      "address": "0xfebe9010",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Normal report and no requests command gate bytes",
+      "kind": "memory",
+      "address": "0xfebe9014",
+      "size": 2,
+      "equals_hex": "0100"
+    },
+    {
+      "name": "Normal report and no requests pre-gate value preserved",
+      "kind": "memory",
+      "address": "0xfebe9018",
+      "size": 2,
+      "equals_hex": "b004"
+    },
+    {
+      "name": "Normal report and no requests actual gated command",
+      "kind": "memory",
+      "address": "0xfebe901c",
+      "size": 2,
+      "equals_hex": "b004"
+    },
+    {
+      "name": "Class02 fault reporting selector",
+      "kind": "memory",
+      "address": "0xfebe9020",
+      "size": 1,
+      "equals_hex": "06"
+    },
+    {
+      "name": "Class02 fault reporting exact five table columns AA..AE",
+      "kind": "memory",
+      "address": "0xfebe9024",
+      "size": 5,
+      "equals_hex": "0302010203"
+    },
+    {
+      "name": "Fault report without output request aggregate producer",
+      "kind": "memory",
+      "address": "0xfebe902c",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Fault report without output request snapshot",
+      "kind": "memory",
+      "address": "0xfebe9030",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Fault report without output request command gate bytes",
+      "kind": "memory",
+      "address": "0xfebe9034",
+      "size": 2,
+      "equals_hex": "0100"
+    },
+    {
+      "name": "Fault report without output request pre-gate value preserved",
+      "kind": "memory",
+      "address": "0xfebe9038",
+      "size": 2,
+      "equals_hex": "b004"
+    },
+    {
+      "name": "Fault report without output request actual gated command",
+      "kind": "memory",
+      "address": "0xfebe903c",
+      "size": 2,
+      "equals_hex": "b004"
+    },
+    {
+      "name": "Independent full output request aggregate producer",
+      "kind": "memory",
+      "address": "0xfebe9040",
+      "size": 4,
+      "equals_hex": "03700370"
+    },
+    {
+      "name": "Independent full output request snapshot",
+      "kind": "memory",
+      "address": "0xfebe9044",
+      "size": 4,
+      "equals_hex": "03700370"
+    },
+    {
+      "name": "Independent full output request command gate bytes",
+      "kind": "memory",
+      "address": "0xfebe9048",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "Independent full output request pre-gate value preserved",
+      "kind": "memory",
+      "address": "0xfebe904c",
+      "size": 2,
+      "equals_hex": "b004"
+    },
+    {
+      "name": "Independent full output request actual gated command",
+      "kind": "memory",
+      "address": "0xfebe9050",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "Reporting recovers after201 total calls selector",
+      "kind": "memory",
+      "address": "0xfebe9054",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Reporting recovers after201 total calls exact five table columns AA..AE",
+      "kind": "memory",
+      "address": "0xfebe9058",
+      "size": 5,
+      "equals_hex": "0000000000"
+    },
+    {
+      "name": "Normal reporting while full output request retained aggregate producer",
+      "kind": "memory",
+      "address": "0xfebe9060",
+      "size": 4,
+      "equals_hex": "03700370"
+    },
+    {
+      "name": "Normal reporting while full output request retained snapshot",
+      "kind": "memory",
+      "address": "0xfebe9064",
+      "size": 4,
+      "equals_hex": "03700370"
+    },
+    {
+      "name": "Normal reporting while full output request retained command gate bytes",
+      "kind": "memory",
+      "address": "0xfebe9068",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "Normal reporting while full output request retained pre-gate value preserved",
+      "kind": "memory",
+      "address": "0xfebe906c",
+      "size": 2,
+      "equals_hex": "b004"
+    },
+    {
+      "name": "Normal reporting while full output request retained actual gated command",
+      "kind": "memory",
+      "address": "0xfebe9070",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "Independent phase request hard inhibit aggregate producer",
+      "kind": "memory",
+      "address": "0xfebe9074",
+      "size": 4,
+      "equals_hex": "04000400"
+    },
+    {
+      "name": "Independent phase request hard inhibit snapshot",
+      "kind": "memory",
+      "address": "0xfebe9078",
+      "size": 4,
+      "equals_hex": "04000400"
+    },
+    {
+      "name": "Independent phase request hard inhibit command gate bytes",
+      "kind": "memory",
+      "address": "0xfebe907c",
+      "size": 2,
+      "equals_hex": "0101"
+    },
+    {
+      "name": "Independent phase request hard inhibit pre-gate value preserved",
+      "kind": "memory",
+      "address": "0xfebe9080",
+      "size": 2,
+      "equals_hex": "b004"
+    },
+    {
+      "name": "Independent phase request hard inhibit actual gated command",
+      "kind": "memory",
+      "address": "0xfebe9084",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "Only request removal restores actual command aggregate producer",
+      "kind": "memory",
+      "address": "0xfebe9088",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Only request removal restores actual command snapshot",
+      "kind": "memory",
+      "address": "0xfebe908c",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Only request removal restores actual command command gate bytes",
+      "kind": "memory",
+      "address": "0xfebe9090",
+      "size": 2,
+      "equals_hex": "0100"
+    },
+    {
+      "name": "Only request removal restores actual command pre-gate value preserved",
+      "kind": "memory",
+      "address": "0xfebe9094",
+      "size": 2,
+      "equals_hex": "b004"
+    },
+    {
+      "name": "Only request removal restores actual command actual gated command",
+      "kind": "memory",
+      "address": "0xfebe9098",
+      "size": 2,
+      "equals_hex": "b004"
+    },
+    {
+      "name": "Observation lower canary",
+      "kind": "memory",
+      "address": "0xfebe8ffc",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "Observation upper canary",
+      "kind": "memory",
+      "address": "0xfebe909c",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    }
+  ]
+}

@@ -1,0 +1,255 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_fault_lifecycle_sticky6764_source_reset_scope",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "max_instructions": 500000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe6764",
+      "hex": "0080",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe6af0",
+      "hex": "01000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe7f51",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe8000",
+      "hex": "0000",
+      "evidence": "Synthetic external snapshot transition: source falls; original89F2E copies only external input, not internal history."
+    },
+    {
+      "address": "0xfebe8008",
+      "hex": "0080",
+      "evidence": "Synthetic external snapshot transition: source rises again; original89F2E copies only external input, not internal history."
+    },
+    {
+      "address": "0xfebe82a0",
+      "hex": "000000000000000000",
+      "evidence": "Explicit synthetic bounded classifier-owned object 82A0..82D1; original51592 initializes counts/banks/ages; remaining bytes are declared initial lifecycle state, not injected between calls."
+    },
+    {
+      "address": "0xfebe82a9",
+      "hex": "5a",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe82aa",
+      "hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic bounded classifier-owned object 82A0..82D1; original51592 initializes counts/banks/ages; remaining bytes are declared initial lifecycle state, not injected between calls."
+    },
+    {
+      "address": "0xfebee81a",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee827",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee853",
+      "hex": "000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee857",
+      "hex": "000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee8b0",
+      "hex": "9a56",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee91c",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee924",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee92c",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebf0668",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe7600",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack; SP=7800; all original callees execute."
+    },
+    {
+      "address": "0xfebe8ffc",
+      "size": 96,
+      "fill": 165,
+      "evidence": "Observation-only canaried scratch. Original89F2E copies out; never copied back to owned state."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe21069215050061003f061c00befe2106e4120500610026060090befe2706a082befe2806010000003f063c00befe21062e9f0800610026060490befe2706aa82befe2806050000003f065c00befe21062e9f0800610026060c90befe2706ba82befe2806020000003f067c00befe21062e9f0800610026061090befe2706af82befe2806010000003f069c00befe21062e9f080061003f06aa00befe210692150500610026061490befe2706ba82befe2806100000003f06ca00befe21062e9f0800610026062490befe2706d082befe2806020000003f06ea00befe21062e9f0800610026062890befe2706ca82befe2806060000003f060a01befe21062e9f0800610026063090befe2706af82befe2806010000003f062a01befe21062e9f080061003f063801befe2106e4120500610026063490befe2706a082befe2806010000003f065801befe21062e9f0800610026063890befe2706aa82befe2806050000003f067801befe21062e9f0800610026066467befe27060080befe2806020000003f069801befe21062e9f080061003f06a601befe2106e4120500610026066467befe27060880befe2806020000003f06c601befe21062e9f080061003f06d401befe2106e4120500610026064090befe2706a082befe2806010000003f06f401befe21062e9f0800610026064490befe2706aa82befe2806050000003f061402befe21062e9f080061003f062202befe2106d4150500610026064c90befe2706af82befe2806010000003f064202befe21062e9f0800610026065090befe2706a182befe2806010000003f066202befe21062e9f0800610026065490befe2706a282befe2806010000003f068202befe21062e9f080061002106980700006100",
+      "evidence": "Transparent synthetic MOV/JMP call sequencer only; immutable firmware, no conditional stores or modeled transitions. Original call order: 0x51592, 0x512e4, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x51592, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x512e4, 0x89f2e, 0x89f2e, 0x89f2e, 0x512e4, 0x89f2e, 0x512e4, 0x89f2e, 0x89f2e, 0x515d4, 0x89f2e, 0x89f2e, 0x89f2e"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original sequence returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Qualified source bit15 injects02 selector",
+      "kind": "memory",
+      "address": "0xfebe9000",
+      "size": 1,
+      "equals_hex": "06"
+    },
+    {
+      "name": "Qualified source bit15 injects02 exact five table columns AA..AE",
+      "kind": "memory",
+      "address": "0xfebe9004",
+      "size": 5,
+      "equals_hex": "0302010203"
+    },
+    {
+      "name": "First source injection count1",
+      "kind": "memory",
+      "address": "0xfebe900c",
+      "size": 2,
+      "equals_hex": "0100"
+    },
+    {
+      "name": "Sticky source latch set",
+      "kind": "memory",
+      "address": "0xfebe9010",
+      "size": 1,
+      "equals_hex": "5a"
+    },
+    {
+      "name": "Reset clears eight standard counters",
+      "kind": "memory",
+      "address": "0xfebe9014",
+      "size": 16,
+      "equals_hex": "00000000000000000000000000000000"
+    },
+    {
+      "name": "Reset clears F0 counter",
+      "kind": "memory",
+      "address": "0xfebe9024",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "Reset reloads200200600",
+      "kind": "memory",
+      "address": "0xfebe9028",
+      "size": 6,
+      "equals_hex": "c800c8005802"
+    },
+    {
+      "name": "Count reset does not clear source latch",
+      "kind": "memory",
+      "address": "0xfebe9030",
+      "size": 1,
+      "equals_hex": "5a"
+    },
+    {
+      "name": "Still-high source does not reinject after count reset selector",
+      "kind": "memory",
+      "address": "0xfebe9034",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Still-high source does not reinject after count reset exact five table columns AA..AE",
+      "kind": "memory",
+      "address": "0xfebe9038",
+      "size": 5,
+      "equals_hex": "0000000000"
+    },
+    {
+      "name": "Low then high still does not rearm sticky source selector",
+      "kind": "memory",
+      "address": "0xfebe9040",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Low then high still does not rearm sticky source exact five table columns AA..AE",
+      "kind": "memory",
+      "address": "0xfebe9044",
+      "size": 5,
+      "equals_hex": "0000000000"
+    },
+    {
+      "name": "Startup-only reset also preserves source latch",
+      "kind": "memory",
+      "address": "0xfebe904c",
+      "size": 1,
+      "equals_hex": "5a"
+    },
+    {
+      "name": "Startup-only reset rearms A1",
+      "kind": "memory",
+      "address": "0xfebe9050",
+      "size": 1,
+      "equals_hex": "5a"
+    },
+    {
+      "name": "Startup-only reset rearms A2",
+      "kind": "memory",
+      "address": "0xfebe9054",
+      "size": 1,
+      "equals_hex": "5a"
+    },
+    {
+      "name": "Observation lower canary",
+      "kind": "memory",
+      "address": "0xfebe8ffc",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "Observation upper canary",
+      "kind": "memory",
+      "address": "0xfebe9058",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    }
+  ]
+}

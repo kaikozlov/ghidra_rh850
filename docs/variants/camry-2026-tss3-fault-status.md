@@ -98,6 +98,24 @@ uses a separate current fault/inhibit projection.
 supported class `0xF0`. Class `0x01` exists in the event catalog but is not a
 recovered classifier input.
 
+**Simultaneous-class precedence.** After startup and invalid-input selection,
+`512E4` chooses `02 > 04 > 10 > (20/F0/status22) > 40 > 0F > 08`.
+Classes `0F/08` select rows14/13 only when operational helper `510E0`
+returns0; otherwise they select16. Class80 inhibits the deepest normal path,
+but special row15 takes precedence over that inhibit. Retained A5 bits only
+decorate rows6/8 versus7/9; A5 alone cannot select a fault row.
+Counts are sampled before aging, flag banks afterward. Status22 detection
+`51266` runs after aging: its rising edge selects row11 immediately, while
+its new activity is consumed on the following invocation. Decisive branches
+are `513A6..51480`.
+
+**Event ownership.** `51C66` reports failure only once per current-event
+transition; repeated failure reports do not add class references.
+`51D5E` releases a reference only when the old current bit was set.
+Healthy-observation API `51E2C` updates a separate bitmap and does not release
+the fault. Direct accumulator `50FC8` increments unsigned16 with wrap;
+release `514BC` saturates at zero and preserves latched flags.
+
 The exact F33 DEM event table is **`0x2FC50`**, 384 records × 8 bytes. The class
 byte is record `+1`, and the DTC index is record `+2`. Its populated class census
 is:
@@ -217,8 +235,9 @@ publishes its startup row. Ordinary selection begins on the following call.
 Inactive phase counters hold; synthetic 65535 increments wrap to zero.
 `0x51592` clears class counts/banks and loads ages 200/200/600, preserving
 activity and startup state. `0x50FAE` only reloads those ages on mode entry.
-`0x515D4` separately rearms startup flags/counters; `0x515E6` composes both
-initializations.
+`0x515D4` separately rearms startup flags/counters. `0x515E6` invokes both
+initializations, additionally clears `82A9` and sets `82B0=5A`
+(`51602: 8903`, `51606: 900B`).
 
 The class-02 source helper `0x510B6` injects only when `FEBE82AF !=5A`
 and source `FEBE6764` bit15 is high. Once set, **82AF stays 5A for either
@@ -250,6 +269,39 @@ interruption and reset scope. All executed as `verified-local-execution`:
 **2106 original instructions**, with no overlays or stubs. Inputs are synthetic,
 explicitly bounded owner state, external predicates and a 256-byte stack;
 no clocks or blanket-RAM initialization are supplied.
+
+### Event clearing and command-gate independence
+
+Count reset `51592` preserves DEM current-event bits. A repeated failure
+after that reset is still deduplicated and does not reacquire its class.
+RAM-generation clear `516DC -> 5255A` instead clears current, first-history
+and healthy-observation bitmaps, retaining second history; a later failure
+can reacquire the class. In service mode `E856=11`, `516DC` preserves the six
+ROM-listed events `0E,51,BE,FF,20,120`. Their classes are01 or00, so restoring
+them does not reassert supported classifier counts.
+
+Classifier output and command inhibition have separate owners. Every
+projected classifier cell `82A0/82AA..82AE` has only `4C24A` as its
+non-initialization direct reader, for Tx projection. The command gates instead
+follow `5737A(owner,request) -> 572E6 -> 8B28 -> FCC00 -> EEF90 -> BCAA6`.
+`BCAA6` derives `AC29=(EEF90&70017001)!=70017001` and
+`AC2A=(EEF90&40004)!=0`; `D042C` zeros `CC66` when `AC29==0` or `AC2A!=0`.
+`D047C` subsequently selects the final command as described in
+[live baseline §66.3](camry-2026-live-baseline.md#663-four-independent-post-b6-gates-can-erase-or-replace-a-valid-cooperative-command).
+
+A continuous original-byte sequence exercises the classifier, request
+aggregation, snapshots and `D042C`: row6 can coexist with `CC66=1200`;
+recovered row0 can coexist with `CC66=0` under a retained output request.
+Removing that request through original `5737A` restores the command.
+Classifier aging is therefore not a command-recovery timer.
+
+All thirteen standalone `camry_f33_fault_lifecycle_*.json` scenarios passed
+exact-image execution across `build/out/firmware-question-campaign/`
+`fault-lifecycle-wave1`, `wave2` and `wave3`. They cover simultaneous priority,
+real event fail/pass/healthy reporting, 201/601-call aging, request thresholds,
+startup, edge/latch retention, count wrap, both clear modes and the independent
+command gate. Initial inputs are explicitly synthetic and bounded; retained
+histories evolve through original firmware calls without CodeFlash overlays.
 
 ## 6. `0x351` force-status boundary
 

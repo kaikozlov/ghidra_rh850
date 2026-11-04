@@ -1,0 +1,301 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_fault_lifecycle_event_fail_deduplicate_healthy_pass_and_age",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "max_instructions": 500000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe5f81",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe5f84",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe60a0",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe60d0",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe6100",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe6130",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe6764",
+      "hex": "0040",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe6af0",
+      "hex": "01000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe7f51",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe82a0",
+      "hex": "000000000000000000",
+      "evidence": "Explicit synthetic bounded classifier-owned object 82A0..82D1; original51592 initializes counts/banks/ages; remaining bytes are declared initial lifecycle state, not injected between calls."
+    },
+    {
+      "address": "0xfebe82a9",
+      "hex": "5a",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe82aa",
+      "hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic bounded classifier-owned object 82A0..82D1; original51592 initializes counts/banks/ages; remaining bytes are declared initial lifecycle state, not injected between calls."
+    },
+    {
+      "address": "0xfebe82d4",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee81a",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee827",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee853",
+      "hex": "000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee857",
+      "hex": "000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee8b0",
+      "hex": "9a56",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee91c",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee924",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee92c",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebf0668",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe7600",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack; SP=7800; all original callees execute."
+    },
+    {
+      "address": "0xfebe8ffc",
+      "size": 92,
+      "fill": 165,
+      "evidence": "Observation-only canaried scratch. Original89F2E copies out; never copied back to owned state."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe210692150500610026069800000027060a0000003f062800befe2106661c0500610026069800000027060a0000003f064200befe2106661c0500610026060090befe2706c282befe2806020000003f066200befe21062e9f0800610026060490befe2706a060befe2806040000003f068200befe21062e9f0800610026060890befe2706d060befe2806040000003f06a200befe21062e9f0800610026060c90befe27060061befe2806040000003f06c200befe21062e9f080061002606980000003f06d600befe21062c1e0500610026061090befe2706c282befe2806020000003f06f600befe21062e9f0800610026061490befe27063061befe2806040000003f061601befe21062e9f080061003f062401befe2106e4120500610026061890befe2706a082befe2806010000003f064401befe21062e9f0800610026061c90befe2706aa82befe2806050000003f066401befe21062e9f080061002606980000003f067801befe21065e1d050061002606980000003f068c01befe21065e1d0500610026062490befe2706c282befe2806020000003f06ac01befe21062e9f0800610026062890befe2706a060befe2806040000003f06cc01befe21062e9f0800610026062c90befe2706d060befe2806040000003f06ec01befe21062e9f0800610026063090befe2706a482befe2806010000003f060c02befe21062e9f080061003f061a02befe2106e412050061003f062802befe2106e412050061003f063602befe2106e412050061003f064402befe2106e412050061003f065202befe2106e412050061003f066002befe2106e412050061003f066e02befe2106e412050061003f067c02befe2106e412050061003f068a02befe2106e412050061003f069802befe2106e412050061003f06a602befe2106e412050061003f06b402befe2106e412050061003f06c202befe2106e412050061003f06d002befe2106e412050061003f06de02befe2106e412050061003f06ec02befe2106e412050061003f06fa02befe2106e412050061003f060803befe2106e412050061003f061603befe2106e412050061003f062403befe2106e412050061003f063203befe2106e412050061003f064003befe2106e412050061003f064e03befe2106e412050061003f065c03befe2106e412050061003f066a03befe2106e412050061003f067803befe2106e412050061003f068603befe2106e412050061003f069403befe2106e412050061003f06a203befe2106e412050061003f06b003befe2106e412050061003f06be03befe2106e412050061003f06cc03befe2106e412050061003f06da03befe2106e412050061003f06e803befe2106e412050061003f06f603befe2106e412050061003f060404befe2106e412050061003f061204befe2106e412050061003f062004befe2106e412050061003f062e04befe2106e412050061003f063c04befe2106e412050061003f064a04befe2106e412050061003f065804befe2106e412050061003f066604befe2106e412050061003f067404befe2106e412050061003f068204befe2106e412050061003f069004befe2106e412050061003f069e04befe2106e412050061003f06ac04befe2106e412050061003f06ba04befe2106e412050061003f06c804befe2106e412050061003f06d604befe2106e412050061003f06e404befe2106e412050061003f06f204befe2106e412050061003f060005befe2106e412050061003f060e05befe2106e412050061003f061c05befe2106e412050061003f062a05befe2106e412050061003f063805befe2106e412050061003f064605befe2106e412050061003f065405befe2106e412050061003f066205befe2106e412050061003f067005befe2106e412050061003f067e05befe2106e412050061003f068c05befe2106e412050061003f069a05befe2106e412050061003f06a805befe2106e412050061003f06b605befe2106e412050061003f06c405befe2106e412050061003f06d205befe2106e412050061003f06e005befe2106e412050061003f06ee05befe2106e412050061003f06fc05befe2106e412050061003f060a06befe2106e412050061003f061806befe2106e412050061003f062606befe2106e412050061003f063406befe2106e412050061003f064206befe2106e412050061003f065006befe2106e412050061003f065e06befe2106e412050061003f066c06befe2106e412050061003f067a06befe2106e412050061003f068806befe2106e412050061003f069606befe2106e412050061003f06a406befe2106e412050061003f06b206befe2106e412050061003f06c006befe2106e412050061003f06ce06befe2106e412050061003f06dc06befe2106e412050061003f06ea06befe2106e412050061003f06f806befe2106e412050061003f060607befe2106e412050061003f061407befe2106e412050061003f062207befe2106e412050061003f063007befe2106e412050061003f063e07befe2106e412050061003f064c07befe2106e412050061003f065a07befe2106e412050061003f066807befe2106e412050061003f067607befe2106e412050061003f068407befe2106e412050061003f069207befe2106e412050061003f06a007befe2106e412050061003f06ae07befe2106e412050061003f06bc07befe2106e412050061003f06ca07befe2106e412050061003f06d807befe2106e412050061003f06e607befe2106e412050061003f06f407befe2106e412050061003f060208befe2106e412050061003f061008befe2106e412050061003f061e08befe2106e412050061003f062c08befe2106e412050061003f063a08befe2106e412050061003f064808befe2106e412050061003f065608befe2106e412050061003f066408befe2106e412050061003f067208befe2106e412050061003f068008befe2106e412050061003f068e08befe2106e412050061003f069c08befe2106e412050061003f06aa08befe2106e412050061003f06b808befe2106e412050061003f06c608befe2106e412050061003f06d408befe2106e412050061003f06e208befe2106e412050061003f06f008befe2106e412050061003f06fe08befe2106e412050061003f060c09befe2106e412050061003f061a09befe2106e412050061003f062809befe2106e412050061003f063609befe2106e412050061003f064409befe2106e412050061003f065209befe2106e412050061003f066009befe2106e412050061003f066e09befe2106e412050061003f067c09befe2106e412050061003f068a09befe2106e412050061003f069809befe2106e412050061003f06a609befe2106e412050061003f06b409befe2106e412050061003f06c209befe2106e412050061003f06d009befe2106e412050061003f06de09befe2106e412050061003f06ec09befe2106e412050061003f06fa09befe2106e412050061003f06080abefe2106e412050061003f06160abefe2106e412050061003f06240abefe2106e412050061003f06320abefe2106e412050061003f06400abefe2106e412050061003f064e0abefe2106e412050061003f065c0abefe2106e412050061003f066a0abefe2106e412050061003f06780abefe2106e412050061003f06860abefe2106e412050061003f06940abefe2106e412050061003f06a20abefe2106e412050061003f06b00abefe2106e412050061003f06be0abefe2106e412050061003f06cc0abefe2106e412050061003f06da0abefe2106e412050061003f06e80abefe2106e412050061003f06f60abefe2106e412050061003f06040bbefe2106e412050061003f06120bbefe2106e412050061003f06200bbefe2106e412050061003f062e0bbefe2106e412050061003f063c0bbefe2106e412050061003f064a0bbefe2106e412050061003f06580bbefe2106e412050061003f06660bbefe2106e412050061003f06740bbefe2106e412050061003f06820bbefe2106e412050061003f06900bbefe2106e412050061003f069e0bbefe2106e412050061003f06ac0bbefe2106e412050061003f06ba0bbefe2106e412050061003f06c80bbefe2106e412050061003f06d60bbefe2106e412050061003f06e40bbefe2106e412050061003f06f20bbefe2106e412050061003f06000cbefe2106e412050061003f060e0cbefe2106e412050061003f061c0cbefe2106e412050061003f062a0cbefe2106e412050061003f06380cbefe2106e412050061003f06460cbefe2106e412050061003f06540cbefe2106e412050061003f06620cbefe2106e412050061003f06700cbefe2106e412050061003f067e0cbefe2106e412050061003f068c0cbefe2106e412050061003f069a0cbefe2106e412050061003f06a80cbefe2106e412050061003f06b60cbefe2106e412050061003f06c40cbefe2106e412050061003f06d20cbefe2106e412050061003f06e00cbefe2106e412050061003f06ee0cbefe2106e4120500610026063490befe2706a082befe2806010000003f060e0dbefe21062e9f0800610026063890befe2706aa82befe2806050000003f062e0dbefe21062e9f0800610026064090befe2706cc82befe2806020000003f064e0dbefe21062e9f080061003f065c0dbefe2106e4120500610026064490befe2706a082befe2806010000003f067c0dbefe21062e9f0800610026064890befe2706aa82befe2806050000003f069c0dbefe21062e9f0800610026065090befe2706cc82befe2806020000003f06bc0dbefe21062e9f080061002106980700006100",
+      "evidence": "Transparent synthetic MOV/JMP call sequencer only; immutable firmware, no conditional stores or modeled transitions. Original call order: 0x51592, 0x51c66, 0x51c66, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x51e2c, 0x89f2e, 0x89f2e, 0x512e4, 0x89f2e, 0x89f2e, 0x51d5e, 0x51d5e, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x89f2e, 0x89f2e, 0x89f2e, 0x512e4, 0x89f2e, 0x89f2e, 0x89f2e"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original sequence returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Repeated fail reports accumulate one active reference",
+      "kind": "memory",
+      "address": "0xfebe9000",
+      "size": 2,
+      "equals_hex": "0100"
+    },
+    {
+      "name": "Failure marks current bit",
+      "kind": "memory",
+      "address": "0xfebe9004",
+      "size": 4,
+      "equals_hex": "00000001"
+    },
+    {
+      "name": "Failure marks retained first bitmap",
+      "kind": "memory",
+      "address": "0xfebe9008",
+      "size": 4,
+      "equals_hex": "00000001"
+    },
+    {
+      "name": "Failure marks retained second bitmap",
+      "kind": "memory",
+      "address": "0xfebe900c",
+      "size": 4,
+      "equals_hex": "00000001"
+    },
+    {
+      "name": "Healthy observation does not release active reference",
+      "kind": "memory",
+      "address": "0xfebe9010",
+      "size": 2,
+      "equals_hex": "0100"
+    },
+    {
+      "name": "Healthy observation sets separate bitmap",
+      "kind": "memory",
+      "address": "0xfebe9014",
+      "size": 4,
+      "equals_hex": "00000001"
+    },
+    {
+      "name": "Failed event produces class10 selector",
+      "kind": "memory",
+      "address": "0xfebe9018",
+      "size": 1,
+      "equals_hex": "0a"
+    },
+    {
+      "name": "Failed event produces class10 exact five table columns AA..AE",
+      "kind": "memory",
+      "address": "0xfebe901c",
+      "size": 5,
+      "equals_hex": "0701010103"
+    },
+    {
+      "name": "Pass releases once and repeated pass saturates",
+      "kind": "memory",
+      "address": "0xfebe9024",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "Pass clears current bitmap",
+      "kind": "memory",
+      "address": "0xfebe9028",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "Pass preserves historical bitmap",
+      "kind": "memory",
+      "address": "0xfebe902c",
+      "size": 4,
+      "equals_hex": "00000001"
+    },
+    {
+      "name": "Pass leaves class latch",
+      "kind": "memory",
+      "address": "0xfebe9030",
+      "size": 1,
+      "equals_hex": "10"
+    },
+    {
+      "name": "Age200 transient class retained selector",
+      "kind": "memory",
+      "address": "0xfebe9034",
+      "size": 1,
+      "equals_hex": "0a"
+    },
+    {
+      "name": "Age200 transient class retained exact five table columns AA..AE",
+      "kind": "memory",
+      "address": "0xfebe9038",
+      "size": 5,
+      "equals_hex": "0701010103"
+    },
+    {
+      "name": "Age200 boundary",
+      "kind": "memory",
+      "address": "0xfebe9040",
+      "size": 2,
+      "equals_hex": "c800"
+    },
+    {
+      "name": "Age201 transient class releases selector",
+      "kind": "memory",
+      "address": "0xfebe9044",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Age201 transient class releases exact five table columns AA..AE",
+      "kind": "memory",
+      "address": "0xfebe9048",
+      "size": 5,
+      "equals_hex": "0000000000"
+    },
+    {
+      "name": "Age201 boundary",
+      "kind": "memory",
+      "address": "0xfebe9050",
+      "size": 2,
+      "equals_hex": "c900"
+    },
+    {
+      "name": "Observation lower canary",
+      "kind": "memory",
+      "address": "0xfebe8ffc",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "Observation upper canary",
+      "kind": "memory",
+      "address": "0xfebe9054",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    }
+  ]
+}

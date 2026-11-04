@@ -1,0 +1,260 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_fault_lifecycle_status22_edge_hold_fall_reinsert",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "max_instructions": 500000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe6764",
+      "hex": "0040",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe6af0",
+      "hex": "01000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe7f51",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe8000",
+      "hex": "22",
+      "evidence": "Synthetic external snapshot transition: status22 rises; original89F2E copies only external input, not internal history."
+    },
+    {
+      "address": "0xfebe8008",
+      "hex": "00",
+      "evidence": "Synthetic external snapshot transition: status22 falls; original89F2E copies only external input, not internal history."
+    },
+    {
+      "address": "0xfebe8010",
+      "hex": "22",
+      "evidence": "Synthetic external snapshot transition: status22 rises again; original89F2E copies only external input, not internal history."
+    },
+    {
+      "address": "0xfebe82a0",
+      "hex": "000000000000000000",
+      "evidence": "Explicit synthetic bounded classifier-owned object 82A0..82D1; original51592 initializes counts/banks/ages; remaining bytes are declared initial lifecycle state, not injected between calls."
+    },
+    {
+      "address": "0xfebe82a9",
+      "hex": "5a",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe82aa",
+      "hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic bounded classifier-owned object 82A0..82D1; original51592 initializes counts/banks/ages; remaining bytes are declared initial lifecycle state, not injected between calls."
+    },
+    {
+      "address": "0xfebee81a",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee827",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee853",
+      "hex": "000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee857",
+      "hex": "000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee8b0",
+      "hex": "9a56",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee91c",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee924",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee92c",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebf0668",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe7600",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack; SP=7800; all original callees execute."
+    },
+    {
+      "address": "0xfebe8ffc",
+      "size": 84,
+      "fill": 165,
+      "evidence": "Observation-only canaried scratch. Original89F2E copies out; never copied back to owned state."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe2106921505006100260657e8befe27060080befe2806010000003f062e00befe21062e9f080061003f063c00befe2106e4120500610026060090befe2706a082befe2806010000003f065c00befe21062e9f0800610026060490befe2706aa82befe2806050000003f067c00befe21062e9f0800610026060c90befe2706a782befe2806010000003f069c00befe21062e9f0800610026061090befe2706cc82befe2806020000003f06bc00befe21062e9f080061003f06ca00befe2106e4120500610026061490befe2706cc82befe2806020000003f06ea00befe21062e9f080061003f06f800befe2106e412050061003f060601befe2106e412050061003f061401befe2106e412050061003f062201befe2106e412050061003f063001befe2106e412050061003f063e01befe2106e412050061003f064c01befe2106e412050061003f065a01befe2106e412050061003f066801befe2106e412050061003f067601befe2106e412050061003f068401befe2106e412050061003f069201befe2106e412050061003f06a001befe2106e412050061003f06ae01befe2106e412050061003f06bc01befe2106e412050061003f06ca01befe2106e412050061003f06d801befe2106e412050061003f06e601befe2106e412050061003f06f401befe2106e412050061003f060202befe2106e412050061003f061002befe2106e412050061003f061e02befe2106e412050061003f062c02befe2106e412050061003f063a02befe2106e412050061003f064802befe2106e412050061003f065602befe2106e412050061003f066402befe2106e412050061003f067202befe2106e412050061003f068002befe2106e412050061003f068e02befe2106e412050061003f069c02befe2106e412050061003f06aa02befe2106e412050061003f06b802befe2106e412050061003f06c602befe2106e412050061003f06d402befe2106e412050061003f06e202befe2106e412050061003f06f002befe2106e412050061003f06fe02befe2106e412050061003f060c03befe2106e412050061003f061a03befe2106e412050061003f062803befe2106e412050061003f063603befe2106e412050061003f064403befe2106e412050061003f065203befe2106e412050061003f066003befe2106e412050061003f066e03befe2106e412050061003f067c03befe2106e412050061003f068a03befe2106e412050061003f069803befe2106e412050061003f06a603befe2106e412050061003f06b403befe2106e412050061003f06c203befe2106e412050061003f06d003befe2106e412050061003f06de03befe2106e412050061003f06ec03befe2106e412050061003f06fa03befe2106e412050061003f060804befe2106e412050061003f061604befe2106e412050061003f062404befe2106e412050061003f063204befe2106e412050061003f064004befe2106e412050061003f064e04befe2106e412050061003f065c04befe2106e412050061003f066a04befe2106e412050061003f067804befe2106e412050061003f068604befe2106e412050061003f069404befe2106e412050061003f06a204befe2106e412050061003f06b004befe2106e412050061003f06be04befe2106e412050061003f06cc04befe2106e412050061003f06da04befe2106e412050061003f06e804befe2106e412050061003f06f604befe2106e412050061003f060405befe2106e412050061003f061205befe2106e412050061003f062005befe2106e412050061003f062e05befe2106e412050061003f063c05befe2106e412050061003f064a05befe2106e412050061003f065805befe2106e412050061003f066605befe2106e412050061003f067405befe2106e412050061003f068205befe2106e412050061003f069005befe2106e412050061003f069e05befe2106e412050061003f06ac05befe2106e412050061003f06ba05befe2106e412050061003f06c805befe2106e412050061003f06d605befe2106e412050061003f06e405befe2106e412050061003f06f205befe2106e412050061003f060006befe2106e412050061003f060e06befe2106e412050061003f061c06befe2106e412050061003f062a06befe2106e412050061003f063806befe2106e412050061003f064606befe2106e412050061003f065406befe2106e412050061003f066206befe2106e412050061003f067006befe2106e412050061003f067e06befe2106e412050061003f068c06befe2106e412050061003f069a06befe2106e412050061003f06a806befe2106e412050061003f06b606befe2106e412050061003f06c406befe2106e412050061003f06d206befe2106e412050061003f06e006befe2106e412050061003f06ee06befe2106e412050061003f06fc06befe2106e412050061003f060a07befe2106e412050061003f061807befe2106e412050061003f062607befe2106e412050061003f063407befe2106e412050061003f064207befe2106e412050061003f065007befe2106e412050061003f065e07befe2106e412050061003f066c07befe2106e412050061003f067a07befe2106e412050061003f068807befe2106e412050061003f069607befe2106e412050061003f06a407befe2106e412050061003f06b207befe2106e412050061003f06c007befe2106e412050061003f06ce07befe2106e412050061003f06dc07befe2106e412050061003f06ea07befe2106e412050061003f06f807befe2106e412050061003f060608befe2106e412050061003f061408befe2106e412050061003f062208befe2106e412050061003f063008befe2106e412050061003f063e08befe2106e412050061003f064c08befe2106e412050061003f065a08befe2106e412050061003f066808befe2106e412050061003f067608befe2106e412050061003f068408befe2106e412050061003f069208befe2106e412050061003f06a008befe2106e412050061003f06ae08befe2106e412050061003f06bc08befe2106e412050061003f06ca08befe2106e412050061003f06d808befe2106e412050061003f06e608befe2106e412050061003f06f408befe2106e412050061003f060209befe2106e412050061003f061009befe2106e412050061003f061e09befe2106e412050061003f062c09befe2106e412050061003f063a09befe2106e412050061003f064809befe2106e412050061003f065609befe2106e412050061003f066409befe2106e412050061003f067209befe2106e412050061003f068009befe2106e412050061003f068e09befe2106e412050061003f069c09befe2106e412050061003f06aa09befe2106e412050061003f06b809befe2106e412050061003f06c609befe2106e412050061003f06d409befe2106e412050061003f06e209befe2106e412050061003f06f009befe2106e412050061003f06fe09befe2106e412050061003f060c0abefe2106e412050061003f061a0abefe2106e412050061003f06280abefe2106e412050061003f06360abefe2106e412050061003f06440abefe2106e412050061003f06520abefe2106e412050061003f06600abefe2106e412050061003f066e0abefe2106e412050061003f067c0abefe2106e412050061003f068a0abefe2106e412050061003f06980abefe2106e412050061003f06a60abefe2106e412050061003f06b40abefe2106e412050061003f06c20abefe2106e412050061003f06d00abefe2106e412050061003f06de0abefe2106e412050061003f06ec0abefe2106e412050061003f06fa0abefe2106e412050061003f06080bbefe2106e412050061003f06160bbefe2106e412050061003f06240bbefe2106e412050061003f06320bbefe2106e412050061003f06400bbefe2106e412050061003f064e0bbefe2106e412050061003f065c0bbefe2106e412050061003f066a0bbefe2106e412050061003f06780bbefe2106e412050061003f06860bbefe2106e412050061003f06940bbefe2106e412050061003f06a20bbefe2106e412050061003f06b00bbefe2106e412050061003f06be0bbefe2106e412050061003f06cc0bbefe2106e4120500610026061890befe2706cc82befe2806020000003f06ec0bbefe21062e9f080061003f06fa0bbefe2106e4120500610026061c90befe2706a082befe2806010000003f061a0cbefe21062e9f0800610026062090befe2706aa82befe2806050000003f063a0cbefe21062e9f0800610026062890befe2706a482befe2806010000003f065a0cbefe21062e9f08006100260657e8befe27060880befe2806010000003f067a0cbefe21062e9f080061003f06880cbefe2106e4120500610026062c90befe2706a082befe2806010000003f06a80cbefe21062e9f0800610026063090befe2706aa82befe2806050000003f06c80cbefe21062e9f0800610026063890befe2706b182befe2806010000003f06e80cbefe21062e9f08006100260657e8befe27061080befe2806010000003f06080dbefe21062e9f080061003f06160dbefe2106e4120500610026063c90befe2706a082befe2806010000003f06360dbefe21062e9f0800610026064090befe2706aa82befe2806050000003f06560dbefe21062e9f0800610026064890befe2706a782befe2806010000003f06760dbefe21062e9f080061002106980700006100",
+      "evidence": "Transparent synthetic MOV/JMP call sequencer only; immutable firmware, no conditional stores or modeled transitions. Original call order: 0x51592, 0x89f2e, 0x512e4, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x512e4, 0x89f2e, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x89f2e, 0x512e4, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x512e4, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x512e4, 0x89f2e, 0x89f2e, 0x89f2e"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original sequence returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Rising status selects11 same call selector",
+      "kind": "memory",
+      "address": "0xfebe9000",
+      "size": 1,
+      "equals_hex": "0b"
+    },
+    {
+      "name": "Rising status selects11 same call exact five table columns AA..AE",
+      "kind": "memory",
+      "address": "0xfebe9004",
+      "size": 5,
+      "equals_hex": "0704010103"
+    },
+    {
+      "name": "Rising edge activity pending after aging",
+      "kind": "memory",
+      "address": "0xfebe900c",
+      "size": 1,
+      "equals_hex": "5a"
+    },
+    {
+      "name": "No flag bank before edge so age holds200",
+      "kind": "memory",
+      "address": "0xfebe9010",
+      "size": 2,
+      "equals_hex": "c800"
+    },
+    {
+      "name": "Next call consumes edge activity and produces age1",
+      "kind": "memory",
+      "address": "0xfebe9014",
+      "size": 2,
+      "equals_hex": "0100"
+    },
+    {
+      "name": "Held status does not refresh activity",
+      "kind": "memory",
+      "address": "0xfebe9018",
+      "size": 2,
+      "equals_hex": "c800"
+    },
+    {
+      "name": "Held source still selects11 even after bank expiry selector",
+      "kind": "memory",
+      "address": "0xfebe901c",
+      "size": 1,
+      "equals_hex": "0b"
+    },
+    {
+      "name": "Held source still selects11 even after bank expiry exact five table columns AA..AE",
+      "kind": "memory",
+      "address": "0xfebe9020",
+      "size": 5,
+      "equals_hex": "0704010103"
+    },
+    {
+      "name": "Held source bank expires at201",
+      "kind": "memory",
+      "address": "0xfebe9028",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Falling source now permits normal selector",
+      "kind": "memory",
+      "address": "0xfebe902c",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Falling source now permits normal exact five table columns AA..AE",
+      "kind": "memory",
+      "address": "0xfebe9030",
+      "size": 5,
+      "equals_hex": "0000000000"
+    },
+    {
+      "name": "Falling source rearms edge history",
+      "kind": "memory",
+      "address": "0xfebe9038",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Second rising edge reinserts class bank selector",
+      "kind": "memory",
+      "address": "0xfebe903c",
+      "size": 1,
+      "equals_hex": "0b"
+    },
+    {
+      "name": "Second rising edge reinserts class bank exact five table columns AA..AE",
+      "kind": "memory",
+      "address": "0xfebe9040",
+      "size": 5,
+      "equals_hex": "0704010103"
+    },
+    {
+      "name": "Second edge activity pending",
+      "kind": "memory",
+      "address": "0xfebe9048",
+      "size": 1,
+      "equals_hex": "5a"
+    },
+    {
+      "name": "Observation lower canary",
+      "kind": "memory",
+      "address": "0xfebe8ffc",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "Observation upper canary",
+      "kind": "memory",
+      "address": "0xfebe904c",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    }
+  ]
+}

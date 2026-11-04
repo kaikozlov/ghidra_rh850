@@ -1,0 +1,234 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_fault_lifecycle_event_count_reset_vs_ram_clear",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "max_instructions": 500000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe5f81",
+      "hex": "0000000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe6090",
+      "hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe6764",
+      "hex": "0040",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe6af0",
+      "hex": "01000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe7f51",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe82a0",
+      "hex": "000000000000000000",
+      "evidence": "Explicit synthetic bounded classifier-owned object 82A0..82D1; original51592 initializes counts/banks/ages; remaining bytes are declared initial lifecycle state, not injected between calls."
+    },
+    {
+      "address": "0xfebe82a9",
+      "hex": "5a",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe82aa",
+      "hex": "00000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic bounded classifier-owned object 82A0..82D1; original51592 initializes counts/banks/ages; remaining bytes are declared initial lifecycle state, not injected between calls."
+    },
+    {
+      "address": "0xfebe82d4",
+      "hex": "0000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee81a",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee827",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee853",
+      "hex": "00000000000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee8b0",
+      "hex": "9a56",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee91c",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee924",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee92c",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebf0668",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe7600",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack; SP=7800; all original callees execute."
+    },
+    {
+      "address": "0xfebe8ffc",
+      "size": 68,
+      "fill": 165,
+      "evidence": "Observation-only canaried scratch. Original89F2E copies out; never copied back to owned state."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "3f060e00befe210692150500610026069800000027060a0000003f062800befe2106661c050061003f063600befe2106e4120500610026060090befe2706a082befe2806010000003f065600befe21062e9f0800610026060490befe2706aa82befe2806050000003f067600befe21062e9f080061003f068400befe210692150500610026069800000027060a0000003f069e00befe2106661c050061003f06ac00befe2106e4120500610026060c90befe2706a082befe2806010000003f06cc00befe21062e9f0800610026061090befe2706aa82befe2806050000003f06ec00befe21062e9f0800610026061890befe2706a060befe2806040000003f060c01befe21062e9f080061003f061a01befe2106dc160500610026061c90befe2706a060befe2806040000003f063a01befe21062e9f0800610026062090befe2706d060befe2806040000003f065a01befe21062e9f0800610026062490befe27060061befe2806040000003f067a01befe21062e9f0800610026062890befe2706cc82befe2806020000003f069a01befe21062e9f0800610026069800000027060a0000003f06b401befe2106661c050061003f06c201befe2106e4120500610026062c90befe2706a082befe2806010000003f06e201befe21062e9f0800610026063090befe2706aa82befe2806050000003f060202befe21062e9f0800610026063890befe2706c282befe2806020000003f062202befe21062e9f080061002106980700006100",
+      "evidence": "Transparent synthetic MOV/JMP call sequencer only; immutable firmware, no conditional stores or modeled transitions. Original call order: 0x51592, 0x51c66, 0x512e4, 0x89f2e, 0x89f2e, 0x51592, 0x51c66, 0x512e4, 0x89f2e, 0x89f2e, 0x89f2e, 0x516dc, 0x89f2e, 0x89f2e, 0x89f2e, 0x89f2e, 0x51c66, 0x512e4, 0x89f2e, 0x89f2e, 0x89f2e"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original sequence returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Original event failure class10 selector",
+      "kind": "memory",
+      "address": "0xfebe9000",
+      "size": 1,
+      "equals_hex": "0a"
+    },
+    {
+      "name": "Original event failure class10 exact five table columns AA..AE",
+      "kind": "memory",
+      "address": "0xfebe9004",
+      "size": 5,
+      "equals_hex": "0701010103"
+    },
+    {
+      "name": "Count reset alone leaves failed bitmap so repeated report does not reassert selector",
+      "kind": "memory",
+      "address": "0xfebe900c",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Count reset alone leaves failed bitmap so repeated report does not reassert exact five table columns AA..AE",
+      "kind": "memory",
+      "address": "0xfebe9010",
+      "size": 5,
+      "equals_hex": "0000000000"
+    },
+    {
+      "name": "Current event still failed after count reset",
+      "kind": "memory",
+      "address": "0xfebe9018",
+      "size": 4,
+      "equals_hex": "00000001"
+    },
+    {
+      "name": "RAM clear resets current event",
+      "kind": "memory",
+      "address": "0xfebe901c",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "RAM clear resets first history",
+      "kind": "memory",
+      "address": "0xfebe9020",
+      "size": 4,
+      "equals_hex": "00000000"
+    },
+    {
+      "name": "RAM clear retains second history",
+      "kind": "memory",
+      "address": "0xfebe9024",
+      "size": 4,
+      "equals_hex": "00000001"
+    },
+    {
+      "name": "RAM clear reloads classifier age",
+      "kind": "memory",
+      "address": "0xfebe9028",
+      "size": 2,
+      "equals_hex": "c800"
+    },
+    {
+      "name": "Failure after real RAM clear reasserts class selector",
+      "kind": "memory",
+      "address": "0xfebe902c",
+      "size": 1,
+      "equals_hex": "0a"
+    },
+    {
+      "name": "Failure after real RAM clear reasserts class exact five table columns AA..AE",
+      "kind": "memory",
+      "address": "0xfebe9030",
+      "size": 5,
+      "equals_hex": "0701010103"
+    },
+    {
+      "name": "RAM-clear rearm permits one new active reference",
+      "kind": "memory",
+      "address": "0xfebe9038",
+      "size": 2,
+      "equals_hex": "0100"
+    },
+    {
+      "name": "Observation lower canary",
+      "kind": "memory",
+      "address": "0xfebe8ffc",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "Observation upper canary",
+      "kind": "memory",
+      "address": "0xfebe903c",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    }
+  ]
+}

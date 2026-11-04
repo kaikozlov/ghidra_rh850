@@ -1,0 +1,208 @@
+{
+  "schema": "rh850-p1me-machine-scenario-v2",
+  "name": "camry_f33_fault_lifecycle_unsigned_reference_wrap_and_release_saturation",
+  "entry": {
+    "role": "retained-original-software-state",
+    "scope": "resolved-address",
+    "address": "0xfebe0000"
+  },
+  "max_instructions": 500000,
+  "reset": "none",
+  "gpr_fill": "0x0",
+  "registers": {
+    "sp": "0xfebe7800",
+    "gp": "0xfebeb800",
+    "tp": "0x23dfc",
+    "lp": "0x798",
+    "PSW": "0x20",
+    "PMR": "0xff00"
+  },
+  "stop_addresses": [
+    "0x798"
+  ],
+  "expected_termination": "stop-address",
+  "memory": [
+    {
+      "address": "0xfebe6764",
+      "hex": "0040",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe6af0",
+      "hex": "01000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe7f51",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe82a0",
+      "hex": "000000000000000000",
+      "evidence": "Explicit synthetic bounded classifier-owned object 82A0..82D1; original51592 initializes counts/banks/ages; remaining bytes are declared initial lifecycle state, not injected between calls."
+    },
+    {
+      "address": "0xfebe82a9",
+      "hex": "5a",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe82aa",
+      "hex": "0000000000000000000000000000000000000000000000000000000000000000",
+      "evidence": "Explicit synthetic bounded classifier-owned object 82A0..82D1; original51592 initializes counts/banks/ages; remaining bytes are declared initial lifecycle state, not injected between calls."
+    },
+    {
+      "address": "0xfebe82ca",
+      "hex": "c800c8005802feff",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee81a",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee827",
+      "hex": "00",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee853",
+      "hex": "000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee857",
+      "hex": "000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee8b0",
+      "hex": "9a56",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee91c",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee924",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebee92c",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebf0668",
+      "hex": "00000000",
+      "evidence": "Explicit bounded synthetic external input or declared initial state for listed original calls; no broad RAM fill."
+    },
+    {
+      "address": "0xfebe7600",
+      "size": 512,
+      "fill": 165,
+      "evidence": "Synthetic bounded caller stack; SP=7800; all original callees execute."
+    },
+    {
+      "address": "0xfebe8ffc",
+      "size": 64,
+      "fill": 165,
+      "evidence": "Observation-only canaried scratch. Original89F2E copies out; never copied back to owned state."
+    },
+    {
+      "address": "0xfebe0000",
+      "hex": "2606f00000003f061400befe2106c80f0500610026060090befe2706d082befe2806020000003f063400befe21062e9f080061002606f00000003f064800befe2106c80f0500610026060490befe2706d082befe2806020000003f066800befe21062e9f080061002606f00000003f067c00befe2106bc140500610026060890befe2706d082befe2806020000003f069c00befe21062e9f080061003f06aa00befe2106e4120500610026060c90befe2706a082befe2806010000003f06ca00befe21062e9f0800610026061090befe2706aa82befe2806050000003f06ea00befe21062e9f080061002606010000003f06fe00befe2106c80f0500610026061890befe2706ba82befe2806100000003f061e01befe21062e9f0800610026062890befe2706d082befe2806020000003f063e01befe21062e9f080061003f064c01befe2106e412050061003f065a01befe2106e412050061003f066801befe2106e412050061003f067601befe2106e412050061003f068401befe2106e412050061003f069201befe2106e412050061003f06a001befe2106e412050061003f06ae01befe2106e412050061003f06bc01befe2106e412050061003f06ca01befe2106e412050061003f06d801befe2106e412050061003f06e601befe2106e412050061003f06f401befe2106e412050061003f060202befe2106e412050061003f061002befe2106e412050061003f061e02befe2106e412050061003f062c02befe2106e412050061003f063a02befe2106e412050061003f064802befe2106e412050061003f065602befe2106e412050061003f066402befe2106e412050061003f067202befe2106e412050061003f068002befe2106e412050061003f068e02befe2106e412050061003f069c02befe2106e412050061003f06aa02befe2106e412050061003f06b802befe2106e412050061003f06c602befe2106e412050061003f06d402befe2106e412050061003f06e202befe2106e412050061003f06f002befe2106e412050061003f06fe02befe2106e412050061003f060c03befe2106e412050061003f061a03befe2106e412050061003f062803befe2106e412050061003f063603befe2106e412050061003f064403befe2106e412050061003f065203befe2106e412050061003f066003befe2106e412050061003f066e03befe2106e412050061003f067c03befe2106e412050061003f068a03befe2106e412050061003f069803befe2106e412050061003f06a603befe2106e412050061003f06b403befe2106e412050061003f06c203befe2106e412050061003f06d003befe2106e412050061003f06de03befe2106e412050061003f06ec03befe2106e412050061003f06fa03befe2106e412050061003f060804befe2106e412050061003f061604befe2106e412050061003f062404befe2106e412050061003f063204befe2106e412050061003f064004befe2106e412050061003f064e04befe2106e412050061003f065c04befe2106e412050061003f066a04befe2106e412050061003f067804befe2106e412050061003f068604befe2106e412050061003f069404befe2106e412050061003f06a204befe2106e412050061003f06b004befe2106e412050061003f06be04befe2106e412050061003f06cc04befe2106e412050061003f06da04befe2106e412050061003f06e804befe2106e412050061003f06f604befe2106e412050061003f060405befe2106e412050061003f061205befe2106e412050061003f062005befe2106e412050061003f062e05befe2106e412050061003f063c05befe2106e412050061003f064a05befe2106e412050061003f065805befe2106e412050061003f066605befe2106e412050061003f067405befe2106e412050061003f068205befe2106e412050061003f069005befe2106e412050061003f069e05befe2106e412050061003f06ac05befe2106e412050061003f06ba05befe2106e412050061003f06c805befe2106e412050061003f06d605befe2106e412050061003f06e405befe2106e412050061003f06f205befe2106e412050061003f060006befe2106e412050061003f060e06befe2106e412050061003f061c06befe2106e412050061003f062a06befe2106e412050061003f063806befe2106e412050061003f064606befe2106e412050061003f065406befe2106e412050061003f066206befe2106e412050061003f067006befe2106e412050061003f067e06befe2106e412050061003f068c06befe2106e412050061003f069a06befe2106e412050061003f06a806befe2106e412050061003f06b606befe2106e412050061003f06c406befe2106e412050061003f06d206befe2106e412050061003f06e006befe2106e412050061003f06ee06befe2106e412050061003f06fc06befe2106e412050061003f060a07befe2106e412050061003f061807befe2106e412050061003f062607befe2106e412050061003f063407befe2106e412050061003f064207befe2106e412050061003f065007befe2106e412050061003f065e07befe2106e412050061003f066c07befe2106e412050061003f067a07befe2106e412050061003f068807befe2106e412050061003f069607befe2106e412050061003f06a407befe2106e412050061003f06b207befe2106e412050061003f06c007befe2106e412050061003f06ce07befe2106e412050061003f06dc07befe2106e412050061003f06ea07befe2106e412050061003f06f807befe2106e412050061003f060608befe2106e412050061003f061408befe2106e412050061003f062208befe2106e412050061003f063008befe2106e412050061003f063e08befe2106e412050061003f064c08befe2106e412050061003f065a08befe2106e412050061003f066808befe2106e412050061003f067608befe2106e412050061003f068408befe2106e412050061003f069208befe2106e412050061003f06a008befe2106e412050061003f06ae08befe2106e412050061003f06bc08befe2106e412050061003f06ca08befe2106e412050061003f06d808befe2106e412050061003f06e608befe2106e412050061003f06f408befe2106e412050061003f060209befe2106e412050061003f061009befe2106e412050061003f061e09befe2106e412050061003f062c09befe2106e412050061003f063a09befe2106e412050061003f064809befe2106e412050061003f065609befe2106e412050061003f066409befe2106e412050061003f067209befe2106e412050061003f068009befe2106e412050061003f068e09befe2106e412050061003f069c09befe2106e412050061003f06aa09befe2106e412050061003f06b809befe2106e412050061003f06c609befe2106e412050061003f06d409befe2106e412050061003f06e209befe2106e412050061003f06f009befe2106e412050061003f06fe09befe2106e412050061003f060c0abefe2106e412050061003f061a0abefe2106e412050061003f06280abefe2106e412050061003f06360abefe2106e412050061003f06440abefe2106e412050061003f06520abefe2106e412050061003f06600abefe2106e412050061003f066e0abefe2106e412050061003f067c0abefe2106e412050061003f068a0abefe2106e412050061003f06980abefe2106e412050061003f06a60abefe2106e412050061003f06b40abefe2106e412050061003f06c20abefe2106e412050061003f06d00abefe2106e412050061003f06de0abefe2106e412050061003f06ec0abefe2106e412050061003f06fa0abefe2106e412050061003f06080bbefe2106e412050061003f06160bbefe2106e412050061003f06240bbefe2106e412050061003f06320bbefe2106e412050061003f06400bbefe2106e412050061003f064e0bbefe2106e412050061003f065c0bbefe2106e412050061003f066a0bbefe2106e412050061003f06780bbefe2106e412050061003f06860bbefe2106e412050061003f06940bbefe2106e412050061003f06a20bbefe2106e412050061003f06b00bbefe2106e412050061003f06be0bbefe2106e412050061003f06cc0bbefe2106e412050061003f06da0bbefe2106e412050061003f06e80bbefe2106e412050061003f06f60bbefe2106e412050061003f06040cbefe2106e412050061003f06120cbefe2106e412050061003f06200cbefe2106e412050061003f062e0cbefe2106e4120500610026062c90befe2706a082befe2806010000003f064e0cbefe21062e9f0800610026063090befe2706aa82befe2806050000003f066e0cbefe21062e9f080061002106980700006100",
+      "evidence": "Transparent synthetic MOV/JMP call sequencer only; immutable firmware, no conditional stores or modeled transitions. Original call order: 0x50fc8, 0x89f2e, 0x50fc8, 0x89f2e, 0x514bc, 0x89f2e, 0x512e4, 0x89f2e, 0x89f2e, 0x50fc8, 0x89f2e, 0x89f2e, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x512e4, 0x89f2e, 0x89f2e"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Original sequence returns",
+      "kind": "register",
+      "register": "PC",
+      "equals": "0x798"
+    },
+    {
+      "name": "Unsigned count reaches65535",
+      "kind": "memory",
+      "address": "0xfebe9000",
+      "size": 2,
+      "equals_hex": "ffff"
+    },
+    {
+      "name": "Increment wraps to zero",
+      "kind": "memory",
+      "address": "0xfebe9004",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "Release at zero holds rather than underflow",
+      "kind": "memory",
+      "address": "0xfebe9008",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "Wrapped reference still has asserted aggregate latch selector",
+      "kind": "memory",
+      "address": "0xfebe900c",
+      "size": 1,
+      "equals_hex": "0b"
+    },
+    {
+      "name": "Wrapped reference still has asserted aggregate latch exact five table columns AA..AE",
+      "kind": "memory",
+      "address": "0xfebe9010",
+      "size": 5,
+      "equals_hex": "0704010103"
+    },
+    {
+      "name": "Class01 is not accumulated into classifier counts",
+      "kind": "memory",
+      "address": "0xfebe9018",
+      "size": 16,
+      "equals_hex": "00000000000000000000000000000000"
+    },
+    {
+      "name": "Unsupported01 does not modify F0 count",
+      "kind": "memory",
+      "address": "0xfebe9028",
+      "size": 2,
+      "equals_hex": "0000"
+    },
+    {
+      "name": "Aggregate latch alone expires201 selector",
+      "kind": "memory",
+      "address": "0xfebe902c",
+      "size": 1,
+      "equals_hex": "00"
+    },
+    {
+      "name": "Aggregate latch alone expires201 exact five table columns AA..AE",
+      "kind": "memory",
+      "address": "0xfebe9030",
+      "size": 5,
+      "equals_hex": "0000000000"
+    },
+    {
+      "name": "Observation lower canary",
+      "kind": "memory",
+      "address": "0xfebe8ffc",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    },
+    {
+      "name": "Observation upper canary",
+      "kind": "memory",
+      "address": "0xfebe9038",
+      "size": 4,
+      "equals_hex": "a5a5a5a5"
+    }
+  ]
+}
