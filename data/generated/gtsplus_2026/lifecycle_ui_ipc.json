@@ -5955,6 +5955,2598 @@
       "finding": "QDC worker disposes common state then disconnects native socket; buffer infrastructure was removed in this entry variant."
     },
     {
+      "id": "ui_ipc.qdc.purpose",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "resources/en/resource.json",
+      "asset_sha256": "f5a02a9e0c16bd846425ea281d5165c5a03aef910b20dba2530db26b7a7f67a0",
+      "body_sha256": "7b45db2d4f6a9472dfcaeb8a25f23d7d03620a3830e465311c3f5e11f18d15f9",
+      "character_offset": 0,
+      "line": 1,
+      "anchors": [
+        {
+          "text": "\"DTC Quick Check after Reprogramming\"",
+          "character_offset": 48,
+          "line": 2
+        },
+        {
+          "text": "\"Clear All DTCs\"",
+          "character_offset": 211,
+          "line": 6
+        },
+        {
+          "text": "\"Refresh\"",
+          "character_offset": 273,
+          "line": 8
+        },
+        {
+          "text": "\"Absent/No Comm.\"",
+          "character_offset": 356,
+          "line": 11
+        },
+        {
+          "text": "\"Close this window",
+          "character_offset": 392,
+          "line": 12
+        },
+        {
+          "text": "\"If there were existent DTCs",
+          "character_offset": 482,
+          "line": 13
+        },
+        {
+          "text": "\"The carrying out this application requires a VehicleConnect.",
+          "character_offset": 5411,
+          "line": 148
+        },
+        {
+          "text": "\"Note:\\nWhen this Application is active",
+          "character_offset": 5594,
+          "line": 149
+        }
+      ],
+      "finding": "Shipped title is DTC Quick Check after Reprogramming; instructions require existing GTS+ VehicleConnect, prohibit operating GTS+ concurrently, and direct further diagnosis back to GTS+."
+    },
+    {
+      "id": "ui_ipc.qdc.entry",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "QDCMain.html",
+      "asset_sha256": "5cfc81fbf60aa89357cde5b265338cb317657ce780c0962dad81dac3bcc93547",
+      "body_sha256": "5cfc81fbf60aa89357cde5b265338cb317657ce780c0962dad81dac3bcc93547",
+      "character_offset": 0,
+      "line": 1,
+      "anchors": [
+        {
+          "text": "js/gts/GTSMain.js",
+          "character_offset": 2360,
+          "line": 53
+        },
+        {
+          "text": "js/gts/vehicle_connect/vehicle_connect_controller.js",
+          "character_offset": 3354,
+          "line": 71
+        },
+        {
+          "text": "js/gts/quick_dtc_check/quick_dtc_check_controller.js",
+          "character_offset": 3919,
+          "line": 79
+        }
+      ],
+      "finding": "Entry loads main/frame, VehicleConnect and QuickDtcCheck sources, not the normal GTS login/dashboard."
+    },
+    {
+      "id": "ui_ipc.qdc.launcher",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "index.html",
+      "asset_sha256": "13cf032c387826067cfa57afb9907bb3705e02c135565c3ac2392bf74874d8f5",
+      "body_sha256": "13cf032c387826067cfa57afb9907bb3705e02c135565c3ac2392bf74874d8f5",
+      "character_offset": 0,
+      "line": 1,
+      "anchors": [
+        {
+          "text": "button[id^=start_btn]",
+          "character_offset": 318,
+          "line": 8
+        },
+        {
+          "text": "start_btn_1",
+          "character_offset": 501,
+          "line": 11
+        },
+        {
+          "text": "html = \"QDCMain.html\"",
+          "character_offset": 542,
+          "line": 12
+        },
+        {
+          "text": "width=1024px, height=768px, resizable=yes",
+          "character_offset": 597,
+          "line": 13
+        },
+        {
+          "text": "window.open(html, '_BLANK', opt)",
+          "character_offset": 685,
+          "line": 15
+        },
+        {
+          "text": "<button id=\"start_btn_1\">start(horizontal)</button>",
+          "character_offset": 815,
+          "line": 21
+        }
+      ],
+      "finding": "Authenticated qdc/index.html binds start_btn_1 to window.open QDCMain.html in _BLANK with1024x768 resizable options. This is the evidenced shipped launcher; the after-reprogramming title does not establish a GTS/CUW launch edge."
+    },
+    {
+      "id": "ui_ipc.qdc.profile",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/GTSWorker.js::WorkerController.getPfUserProfile",
+      "asset_sha256": "f4015a66b501abbd227c3767e79d35e217eb5c698f5b043512f41fbb694b38e4",
+      "body_sha256": "02fa0440d146c1877300232e85f29a6f1f6914db6c77673a2bb6ce90807f951d",
+      "character_offset": 37241,
+      "line": 1168,
+      "anchors": [
+        {
+          "text": "getPfConfig()",
+          "character_offset": 37405,
+          "line": 1173
+        },
+        {
+          "text": "createReturnValue(true)",
+          "character_offset": 37458,
+          "line": 1176
+        },
+        {
+          "text": ".catch",
+          "character_offset": 37494,
+          "line": 1178
+        },
+        {
+          "text": "createReturnValue(false)",
+          "character_offset": 37528,
+          "line": 1179
+        },
+        {
+          "text": "JSON.parse(response.apiArgs.userProfile)",
+          "character_offset": 37788,
+          "line": 1190
+        },
+        {
+          "text": "controller.commonInfo.setUserInfo(userInfo)",
+          "character_offset": 38409,
+          "line": 1204
+        }
+      ],
+      "finding": "PF userProfile JSON is projected into shared worker userInfo. API rejection or malformed JSON resolves result=false with existing userInfo; no login is initiated."
+    },
+    {
+      "id": "ui_ipc.qdc.context",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/GTSWorker.js::WorkerController.getCurrentInformation",
+      "asset_sha256": "f4015a66b501abbd227c3767e79d35e217eb5c698f5b043512f41fbb694b38e4",
+      "body_sha256": "26f53c662373649b94b0ef40154d9d0af147051f25882018a09ff7ca92b4102a",
+      "character_offset": 39027,
+      "line": 1230,
+      "anchors": [
+        {
+          "text": "getVehicleConfirmation()",
+          "character_offset": 39196,
+          "line": 1235
+        },
+        {
+          "text": "createReturnValue(true)",
+          "character_offset": 39260,
+          "line": 1238
+        },
+        {
+          "text": ".catch",
+          "character_offset": 39296,
+          "line": 1240
+        },
+        {
+          "text": "createReturnValue(false)",
+          "character_offset": 39330,
+          "line": 1241
+        },
+        {
+          "text": "response.apiArgs && response.apiArgs.vinCode",
+          "character_offset": 39613,
+          "line": 1252
+        },
+        {
+          "text": "controller.commonInfo.vehicleInfo.vin",
+          "character_offset": 39671,
+          "line": 1253
+        },
+        {
+          "text": "controller.commonInfo.vehicleInfo.optionList",
+          "character_offset": 43025,
+          "line": 1280
+        },
+        {
+          "text": "return Promise.reject()",
+          "character_offset": 45237,
+          "line": 1321
+        }
+      ],
+      "finding": "Only successful getVehicleConfirmation with truthy vinCode yields result=true. Copy PF VIN, vehicleId, decisionVin, categories, car attributes and options; API/missing-VIN errors resolve false. Commented mounted/configuration/provenance fields are not hydrated."
+    },
+    {
+      "id": "ui_ipc.qdc.context_ui",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/GTSMain.js::GTSMain.onCheckVehicle",
+      "asset_sha256": "698cb2b8cd9c6a0866a99cf050a69d0c6a5b69d6a038a3c2ed5abda81e0d9181",
+      "body_sha256": "806720c77c412ac6532b4ab4bbf0308a2fbfc50937447801402bf77be646a3d5",
+      "character_offset": 8036,
+      "line": 265,
+      "anchors": [
+        {
+          "text": "getCurrentInformation()",
+          "character_offset": 8163,
+          "line": 268
+        },
+        {
+          "text": "showWarningDialog(response.vehicleInfo)",
+          "character_offset": 8257,
+          "line": 271
+        },
+        {
+          "text": "showVehicleConfirmationErrorDialog()",
+          "character_offset": 8328,
+          "line": 273
+        },
+        {
+          "text": "'r_msg_iAP99'",
+          "character_offset": 8704,
+          "line": 286
+        },
+        {
+          "text": "VEHICLE_CONNECTED",
+          "character_offset": 11985,
+          "line": 333
+        },
+        {
+          "text": "'r_msg_wAP98'",
+          "character_offset": 12342,
+          "line": 347
+        },
+        {
+          "text": "pressed.id === 'TryAgain'",
+          "character_offset": 12646,
+          "line": 356
+        },
+        {
+          "text": "VEHICLE_CHECK",
+          "character_offset": 12740,
+          "line": 357
+        },
+        {
+          "text": "gts.util.closeWindow()",
+          "character_offset": 12783,
+          "line": 359
+        }
+      ],
+      "finding": "Success displays do-not-operate-GTS warning then copies vehicle fields and enters frame after acknowledgement. No current context shows TryAgain/Exit: TryAgain re-queries PF, Exit closes. It does not create a new context."
+    },
+    {
+      "id": "ui_ipc.qdc.new_context",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/vehicle_connect/vehicle_connect_worker.js::VehicleConnectWorkerModel.refleshDiagnosis",
+      "asset_sha256": "78ed28754e7a957eec44941430d518b3e8ada5cc048add21dcfaa19291cdc67f",
+      "body_sha256": "63ffd71cc7fe59c8f1aa56fb796121410f14b723e92da4eaf95a0ea0e7362b18",
+      "character_offset": 24012,
+      "line": 811,
+      "anchors": [
+        {
+          "text": "gtsPFApi.forcedEndDiagnosis()",
+          "character_offset": 24237,
+          "line": 820
+        },
+        {
+          "text": ".catch",
+          "character_offset": 24273,
+          "line": 821
+        },
+        {
+          "text": "gtsPFApi.startDiagnosis()",
+          "character_offset": 24453,
+          "line": 832
+        },
+        {
+          "text": ".catch",
+          "character_offset": 24485,
+          "line": 833
+        },
+        {
+          "text": ".then(forcedEndDiagnosis)",
+          "character_offset": 24686,
+          "line": 846
+        },
+        {
+          "text": ".then(startDiagnosis)",
+          "character_offset": 24716,
+          "line": 847
+        },
+        {
+          "text": "model.cache.diagnosisRestarted = true",
+          "character_offset": 24768,
+          "line": 849
+        }
+      ],
+      "finding": "Registered callable clone refleshDiagnosis attempts forcedEndDiagnosis then startDiagnosis; both errors are swallowed, and diagnosisRestarted becomes true even when both fail. Not a QDC startup fallback."
+    },
+    {
+      "id": "ui_ipc.qdc.orphan_connect",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/GTSMain.js::GTSMain.showVehicleConnectView",
+      "asset_sha256": "698cb2b8cd9c6a0866a99cf050a69d0c6a5b69d6a038a3c2ed5abda81e0d9181",
+      "body_sha256": "2789433d539deb0e31aac4f2368b82953e23ed9f57cc7c82fbcc2d9b5a5bd2d4",
+      "character_offset": 18706,
+      "line": 509,
+      "anchors": [
+        {
+          "text": "mainObj.initUnitString()",
+          "character_offset": 18896,
+          "line": 515
+        },
+        {
+          "text": "mainObj.initUserTypeSettings()",
+          "character_offset": 18960,
+          "line": 518
+        },
+        {
+          "text": "GTSMain.controller.VEHICLE_CONNECT",
+          "character_offset": 19068,
+          "line": 521
+        },
+        {
+          "text": "VehicleConnectController.ControllerEvent.VEHICLE_CONNECTED",
+          "character_offset": 19200,
+          "line": 525
+        }
+      ],
+      "finding": "showVehicleConnectView implements a selectable new-vehicle route but has no direct source call site in QDC assets. Startup/event routing instead evidences reuse/retry/exit; registration alone is not proof of normal UI reachability."
+    },
+    {
+      "id": "ui_ipc.qdc.frame",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/main_frame/main_frame_controller.js::MainFrameController.init",
+      "asset_sha256": "dc138dc48a29f18c22d0911862eebee4952a6b2b3c8468721296aaca1bdb3326",
+      "body_sha256": "6699211073190074a28bf37f46d8d7993cc87b02f437b5da6908822329174fe9",
+      "character_offset": 2255,
+      "line": 66,
+      "anchors": [
+        {
+          "text": "gtsWorkerApi.getECUList",
+          "character_offset": 2966,
+          "line": 87
+        },
+        {
+          "text": ".then(initMountedEcuList)",
+          "character_offset": 3279,
+          "line": 96
+        },
+        {
+          "text": "startGetVBatteryValue",
+          "character_offset": 3409,
+          "line": 101
+        },
+        {
+          "text": "getMileageInformation",
+          "character_offset": 3545,
+          "line": 104
+        },
+        {
+          "text": "getDisplayInfo",
+          "character_offset": 3836,
+          "line": 111
+        },
+        {
+          "text": "storedData: false",
+          "character_offset": 4846,
+          "line": 137
+        },
+        {
+          "text": "print: false",
+          "character_offset": 4951,
+          "line": 137
+        },
+        {
+          "text": "MainFrameController.ControllerID.QUICK_DTC_CHECK",
+          "character_offset": 5454,
+          "line": 145
+        }
+      ],
+      "finding": "Frame has only QuickDtcCheck child; refresh mounted ECUs, start battery polling, mileage and display metadata, suppress normal navigation/print/stored controls, then enter quick check."
+    },
+    {
+      "id": "ui_ipc.qdc.init",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/quick_dtc_check/quick_dtc_check_worker.js::QuickDtcCheckWorkerModel.initQuickDtcCheck",
+      "asset_sha256": "fde677796930473a4cc201e65c7eb247c690ede701be38a33f3dfe847c5b338b",
+      "body_sha256": "15213bea958a6969faddbd26fd11f9a185255df2f60bdb6f5b203cd7ac0858e6",
+      "character_offset": 1135,
+      "line": 1,
+      "anchors": [
+        {
+          "text": "model.cache=cache",
+          "character_offset": 1516,
+          "line": 1
+        },
+        {
+          "text": "getSettingFileInfo()",
+          "character_offset": 1576,
+          "line": 1
+        },
+        {
+          "text": "getEquippedEcuList()",
+          "character_offset": 1617,
+          "line": 1
+        },
+        {
+          "text": "getSoftwareId()",
+          "character_offset": 1658,
+          "line": 1
+        },
+        {
+          "text": "createReturnValue(true)",
+          "character_offset": 1694,
+          "line": 1
+        },
+        {
+          "text": "createReturnValue(false)",
+          "character_offset": 1739,
+          "line": 1
+        },
+        {
+          "text": "cacheData.displayPermanent",
+          "character_offset": 3001,
+          "line": 1
+        }
+      ],
+      "finding": "Build ephemeral cache: VIN/date format, PC+distributor settings, country permanent-DTC policy, flattened equipped ECUs, softwareId. Any failure resolves result=false, possibly with partial ECU list."
+    },
+    {
+      "id": "ui_ipc.qdc.scan",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/quick_dtc_check/quick_dtc_check_worker.js::QuickDtcCheckWorkerModel.startDtcCheck",
+      "asset_sha256": "fde677796930473a4cc201e65c7eb247c690ede701be38a33f3dfe847c5b338b",
+      "body_sha256": "33cac40191e7ca6736ff8eb5f9fe1330608876287831da007740868bd552a639",
+      "character_offset": 3845,
+      "line": 1,
+      "anchors": [
+        {
+          "text": "INTERVAL_TIME=100",
+          "character_offset": 3973,
+          "line": 1
+        },
+        {
+          "text": "model.commandThread.start",
+          "character_offset": 4190,
+          "line": 1
+        },
+        {
+          "text": "clearEcuConnectCache()",
+          "character_offset": 4366,
+          "line": 1
+        },
+        {
+          "text": "if(model.isCancel)",
+          "character_offset": 4601,
+          "line": 1
+        },
+        {
+          "text": "QuickDtcCheck.ecuStatus.ABNORMAL",
+          "character_offset": 5035,
+          "line": 1
+        },
+        {
+          "text": "QuickDtcCheck.ecuStatus.NORMAL",
+          "character_offset": 5090,
+          "line": 1
+        },
+        {
+          "text": "QuickDtcCheck.ecuStatus.UNKNOWN",
+          "character_offset": 5144,
+          "line": 1
+        },
+        {
+          "text": "QuickDtcCheck.ecuStatus.WITHOUT",
+          "character_offset": 5284,
+          "line": 1
+        },
+        {
+          "text": "createReturnValue(false)",
+          "character_offset": 5538,
+          "line": 1
+        },
+        {
+          "text": "functionIdList=[DTC_FFD,CHECK_DTC,DTC_FFD_P5,CHECK_REGULATORY]",
+          "character_offset": 6327,
+          "line": 1
+        },
+        {
+          "text": "if(currentList.length)",
+          "character_offset": 6989,
+          "line": 1
+        },
+        {
+          "text": "else if(pastList.length)",
+          "character_offset": 7049,
+          "line": 1
+        },
+        {
+          "text": "QuickDtcCheck.messageId.END,cancel:model.isCancel",
+          "character_offset": 7512,
+          "line": 1
+        },
+        {
+          "text": "model.isCancel=false",
+          "character_offset": 7624,
+          "line": 1
+        }
+      ],
+      "finding": "Start 100ms message pump then clear connection cache and scan ECUs serially. Cancel skips not-yet-started ECUs only. Connection rejection becomes WITHOUT; DTC-read rejection becomes UNKNOWN; capability/system/cache errors abort remaining scan and resolve false. Current DTC functions preferred over past; permanent regulatory function32 only when configured. Always enqueue END and reset cancel flag, including failure."
+    },
+    {
+      "id": "ui_ipc.qdc.clear",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/quick_dtc_check/quick_dtc_check_worker.js::QuickDtcCheckWorkerModel.clearDtc",
+      "asset_sha256": "fde677796930473a4cc201e65c7eb247c690ede701be38a33f3dfe847c5b338b",
+      "body_sha256": "8b17181c443625ae256c053239a3d5935e43a347434e786b00478de194a141ce",
+      "character_offset": 9075,
+      "line": 1,
+      "anchors": [
+        {
+          "text": "MAZDA_CAN=21",
+          "character_offset": 9244,
+          "line": 1
+        },
+        {
+          "text": "CLEAR_DTC_FFD_FAS=67",
+          "character_offset": 9347,
+          "line": 1
+        },
+        {
+          "text": "clearEcuConnectCache()",
+          "character_offset": 9500,
+          "line": 1
+        },
+        {
+          "text": "isClearDtcFfdForAfterSales",
+          "character_offset": 9828,
+          "line": 1
+        },
+        {
+          "text": "ecuInfo.phaseType !== MAZDA_CAN",
+          "character_offset": 10023,
+          "line": 1
+        },
+        {
+          "text": "writeAfterSalesZone(ecuInfo)",
+          "character_offset": 10421,
+          "line": 1
+        },
+        {
+          "text": "clearDtc(ecuInfo)",
+          "character_offset": 10503,
+          "line": 1
+        },
+        {
+          "text": "if(yetCleared)",
+          "character_offset": 10564,
+          "line": 1
+        },
+        {
+          "text": "clearDtcForMazda()",
+          "character_offset": 10734,
+          "line": 1
+        },
+        {
+          "text": "yetCleared=false",
+          "character_offset": 10763,
+          "line": 1
+        },
+        {
+          "text": "createReturnValue(false)",
+          "character_offset": 10964,
+          "line": 1
+        },
+        {
+          "text": "gtsPFApi.writeAfterSalesZone(para)",
+          "character_offset": 11962,
+          "line": 1
+        },
+        {
+          "text": "if(resultInfo.result === NORMAL)",
+          "character_offset": 12215,
+          "line": 1
+        }
+      ],
+      "finding": "Clear all connected capable ECUs serially. Optional after-sales date/mileage write ignores error; non-Mazda clears per ECU, phase21 Mazda global clear once. First clear resultInfo error retained while scan continues; prerequisite errors resolve result=false. This is an ECU mutation, not a saved report."
+    },
+    {
+      "id": "ui_ipc.qdc.cancel",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/quick_dtc_check/quick_dtc_check_worker.js::QuickDtcCheckWorkerModel.cancelDtcCheck",
+      "asset_sha256": "fde677796930473a4cc201e65c7eb247c690ede701be38a33f3dfe847c5b338b",
+      "body_sha256": "f2e5f74b4bbb331fdaf8d00a8ef7839b0ce23c5d8f0363c1d0328f2735f87bac",
+      "character_offset": 8937,
+      "line": 1,
+      "anchors": [
+        {
+          "text": "model.isCancel=true",
+          "character_offset": 9025,
+          "line": 1
+        }
+      ],
+      "finding": "Cancel merely sets isCancel=true and returns true; it sends no PF cancel and does not interrupt in-flight ECU requests."
+    },
+    {
+      "id": "ui_ipc.qdc.stop",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/quick_dtc_check/quick_dtc_check_worker.js::QuickDtcCheckWorkerModel.endDtcCheck",
+      "asset_sha256": "fde677796930473a4cc201e65c7eb247c690ede701be38a33f3dfe847c5b338b",
+      "body_sha256": "1b441dc46db54cacf1a7161f10468bea1ee7ff84499e9c6f7a10ca23456e83fc",
+      "character_offset": 8687,
+      "line": 1,
+      "anchors": [
+        {
+          "text": "model.isCancel=false",
+          "character_offset": 8750,
+          "line": 1
+        },
+        {
+          "text": "model.commandThread.stop",
+          "character_offset": 8828,
+          "line": 1
+        }
+      ],
+      "finding": "endDtcCheck clears cancel flag and stops interval producer; not called automatically by scan promise, but by controller receiving END."
+    },
+    {
+      "id": "ui_ipc.qdc.ui_results",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/quick_dtc_check/quick_dtc_check_controller.js::QuickDtcCheckController.onReceiveMessage",
+      "asset_sha256": "796dfe3b6129e88f8450d0f867765933728aa16effcfe1e243a8e158ceba658f",
+      "body_sha256": "57f8d787e925b58549d83384237d4d9919dc7ea9514378b645672695cc99426f",
+      "character_offset": 5208,
+      "line": 1,
+      "anchors": [
+        {
+          "text": "QuickDtcCheck.messageId.GOT",
+          "character_offset": 5337,
+          "line": 1
+        },
+        {
+          "text": "updateEcuStatus",
+          "character_offset": 5382,
+          "line": 1
+        },
+        {
+          "text": "QuickDtcCheck.messageId.END",
+          "character_offset": 5456,
+          "line": 1
+        },
+        {
+          "text": "message.cancel?'':message.timestamp",
+          "character_offset": 5499,
+          "line": 1
+        },
+        {
+          "text": "controller.model.endDtcCheck()",
+          "character_offset": 5535,
+          "line": 1
+        },
+        {
+          "text": "controller.isCheckingDtc=false",
+          "character_offset": 5609,
+          "line": 1
+        }
+      ],
+      "finding": "GOT updates ECU status/DTC list; END stops pump, blanks timestamp on cancel, updates view and clears busy flag. Worker result=false is not inspected in this callback."
+    },
+    {
+      "id": "ui_ipc.qdc.ui_clear",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/quick_dtc_check/quick_dtc_check_controller.js::QuickDtcCheckController.onClearDtc",
+      "asset_sha256": "796dfe3b6129e88f8450d0f867765933728aa16effcfe1e243a8e158ceba658f",
+      "body_sha256": "d5ed20991173f6a05cb2785806bb0b25bf42ad03cef65ea2b69bde2f83921dc5",
+      "character_offset": 4749,
+      "line": 1,
+      "anchors": [
+        {
+          "text": "showSQuickDtcCheckDl001",
+          "character_offset": 4868,
+          "line": 1
+        },
+        {
+          "text": "controller.model.clearDtc()",
+          "character_offset": 4924,
+          "line": 1
+        },
+        {
+          "text": "showSQuickDtcCheckDl001",
+          "character_offset": 4979,
+          "line": 1
+        },
+        {
+          "text": "if(response.resultInfo.result)",
+          "character_offset": 5015,
+          "line": 1
+        },
+        {
+          "text": "showSQuickDtcCheckDl003",
+          "character_offset": 5064,
+          "line": 1
+        },
+        {
+          "text": "showSQuickDtcCheckDl002",
+          "character_offset": 5125,
+          "line": 1
+        }
+      ],
+      "finding": "Clear shows wait modal; completion closes it and chooses retry dialog solely by response.resultInfo.result, not response.result. Success acknowledgement refreshes; failure Yes repeats clear."
+    },
+    {
+      "id": "ui_ipc.qdc.clear_ack",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/quick_dtc_check/quick_dtc_check_controller.js::QuickDtcCheckController.showSQuickDtcCheckDl002",
+      "asset_sha256": "796dfe3b6129e88f8450d0f867765933728aa16effcfe1e243a8e158ceba658f",
+      "body_sha256": "3220e634e65a0170ba494ed868afa93f431afd639614e54c4abc1c6a2aff60ad",
+      "character_offset": 3613,
+      "line": 1,
+      "anchors": [
+        {
+          "text": "dialog.buttonPressed.then",
+          "character_offset": 3754,
+          "line": 1
+        },
+        {
+          "text": "QuickDtcCheckController.ControllerEvent.START_DTC_CHECK",
+          "character_offset": 3819,
+          "line": 1
+        }
+      ],
+      "finding": "Success-dialog acknowledgement triggers START_DTC_CHECK, including the outer-result=false/resultInfo-normal mismatch."
+    },
+    {
+      "id": "ui_ipc.qdc.clear_retry_choice",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/quick_dtc_check/quick_dtc_check_controller.js::QuickDtcCheckController.showSQuickDtcCheckDl003",
+      "asset_sha256": "796dfe3b6129e88f8450d0f867765933728aa16effcfe1e243a8e158ceba658f",
+      "body_sha256": "a013b81e8c78a0dd605eaf0255285f671ee1faa1d3f4e706e5e3dc75a559a45b",
+      "character_offset": 3919,
+      "line": 1,
+      "anchors": [
+        {
+          "text": "dialog.buttonPressed.then",
+          "character_offset": 4060,
+          "line": 1
+        },
+        {
+          "text": "BUTTON_YES",
+          "character_offset": 4167,
+          "line": 1
+        },
+        {
+          "text": "QuickDtcCheckController.ControllerEvent.CLEAR_DTC",
+          "character_offset": 4213,
+          "line": 1
+        },
+        {
+          "text": "else",
+          "character_offset": 4290,
+          "line": 1
+        }
+      ],
+      "finding": "Retry dialog Yes triggers CLEAR_DTC again; No resolves without retry or fresh scan, leaving displayed prior results."
+    },
+    {
+      "id": "ui_ipc.qdc.dispose",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/quick_dtc_check/quick_dtc_check_controller.js::QuickDtcCheckController.dispose",
+      "asset_sha256": "796dfe3b6129e88f8450d0f867765933728aa16effcfe1e243a8e158ceba658f",
+      "body_sha256": "4d89ab6eccd6be477a139a27783b4a541ebedc0f399c92ce94f45d09db773272",
+      "character_offset": 1179,
+      "line": 1,
+      "anchors": [
+        {
+          "text": "if(controller.isCheckingDtc)",
+          "character_offset": 1277,
+          "line": 1
+        },
+        {
+          "text": "view.hideStatusPane()",
+          "character_offset": 1306,
+          "line": 1
+        },
+        {
+          "text": "Promise.reject()",
+          "character_offset": 1335,
+          "line": 1
+        },
+        {
+          "text": "view.disposeView()",
+          "character_offset": 1353,
+          "line": 1
+        },
+        {
+          "text": "controller.eventDisp.dispose()",
+          "character_offset": 1372,
+          "line": 1
+        }
+      ],
+      "finding": "Disposal while checking hides status and rejects; idle disposal removes view/events. A source Back callback exists separately, but the shipped view binds only Clear/Cancel/Refresh."
+    },
+    {
+      "id": "ui_ipc.qdc.back",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/quick_dtc_check/quick_dtc_check_controller.js::QuickDtcCheckController.onClickSQuickDtcCheck001ViewBackBtn",
+      "asset_sha256": "796dfe3b6129e88f8450d0f867765933728aa16effcfe1e243a8e158ceba658f",
+      "body_sha256": "c6de3d8aaea14b0b53bafa48b98f130574fa317a01922e17f886fcd52ba21d48",
+      "character_offset": 2623,
+      "line": 1,
+      "anchors": [
+        {
+          "text": "gts.util.closeWindow()",
+          "character_offset": 2714,
+          "line": 1
+        }
+      ],
+      "finding": "Callable controller Back callback closes browser directly; not a shipped view click binding."
+    },
+    {
+      "id": "ui_ipc.qdc.view_title",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/quick_dtc_check/quick_dtc_check_screen_01_view.js::QuickDtcCheckScreen01View.initView",
+      "asset_sha256": "62ce6e1d5693a39e7aa9b75473c7a8e45bd1bfd28088efc403743647f6a66a41",
+      "body_sha256": "774b8139c904f6e84954a9a2d2d8f7b68b9eb590002a38944de98274c64da827",
+      "character_offset": 478,
+      "line": 1,
+      "anchors": [
+        {
+          "text": "$('title').text(view.getResourceData('r_item_iAP01'))",
+          "character_offset": 684,
+          "line": 1
+        },
+        {
+          "text": "document.querySelector('#h_title').textContent",
+          "character_offset": 738,
+          "line": 1
+        }
+      ],
+      "finding": "Actual view writes localized r_item_iAP01 to document title and header, establishing the after-reprogramming quick-check purpose from executable UI code."
+    },
+    {
+      "id": "ui_ipc.qdc.view_controls",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/quick_dtc_check/quick_dtc_check_screen_01_view.js::QuickDtcCheckScreen01View.initEcuList",
+      "asset_sha256": "62ce6e1d5693a39e7aa9b75473c7a8e45bd1bfd28088efc403743647f6a66a41",
+      "body_sha256": "2bc60cfd5c8f67743f7a04baa8fb13758ddd682e6be655485440d9ae21171c1d",
+      "character_offset": 2159,
+      "line": 1,
+      "anchors": [
+        {
+          "text": "document.querySelector('#v_c_quick_dtc_check_btn_clear').disabled=true",
+          "character_offset": 3455,
+          "line": 1
+        },
+        {
+          "text": "document.querySelector('#v_c_quick_dtc_check_btn_cancel').disabled=false",
+          "character_offset": 3526,
+          "line": 1
+        },
+        {
+          "text": "document.querySelector('#v_c_quick_dtc_check_btn_refresh').disabled=true",
+          "character_offset": 3599,
+          "line": 1
+        }
+      ],
+      "finding": "During scan Clear/Refresh disabled and Cancel enabled/visible; END enables Clear/Refresh, disables/hides Cancel. A cancelled END leaves checking text rather than writing Completed timestamp."
+    },
+    {
+      "id": "ui_ipc.qdc.view_end",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/quick_dtc_check/quick_dtc_check_screen_01_view.js::QuickDtcCheckScreen01View.endUpdateStatus",
+      "asset_sha256": "62ce6e1d5693a39e7aa9b75473c7a8e45bd1bfd28088efc403743647f6a66a41",
+      "body_sha256": "f7eb429755f501d2779c7cc631beb2aaece746937f1ba1a2abae9eff51adf4b5",
+      "character_offset": 5138,
+      "line": 1,
+      "anchors": [
+        {
+          "text": "if(timeStamp)",
+          "character_offset": 5224,
+          "line": 1
+        },
+        {
+          "text": "'r_item_iAP03'",
+          "character_offset": 5323,
+          "line": 1
+        },
+        {
+          "text": "document.querySelector('#v_c_quick_dtc_check_btn_clear').disabled=false",
+          "character_offset": 5358,
+          "line": 1
+        },
+        {
+          "text": "document.querySelector('#v_c_quick_dtc_check_btn_cancel').disabled=true",
+          "character_offset": 5430,
+          "line": 1
+        },
+        {
+          "text": "document.querySelector('#v_c_quick_dtc_check_btn_refresh').disabled=false",
+          "character_offset": 5502,
+          "line": 1
+        }
+      ],
+      "finding": "END view update writes Completed only with nonempty timestamp; enables Clear and Refresh even after a failed/partial scan."
+    },
+    {
+      "id": "ui_ipc.qdc.view_events",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/quick_dtc_check/quick_dtc_check_screen_01_view.js::QuickDtcCheckScreen01View.initEventHandler",
+      "asset_sha256": "62ce6e1d5693a39e7aa9b75473c7a8e45bd1bfd28088efc403743647f6a66a41",
+      "body_sha256": "a35e6fc85f86ea5c3d753abbb3a62978a1a8a2dc7777622dc866a353abc6bdb6",
+      "character_offset": 5882,
+      "line": 1,
+      "anchors": [
+        {
+          "text": "$('#v_c_quick_dtc_check_btn_clear').on('click'",
+          "character_offset": 5960,
+          "line": 1
+        },
+        {
+          "text": "$('#v_c_quick_dtc_check_btn_cancel').on('click'",
+          "character_offset": 6034,
+          "line": 1
+        },
+        {
+          "text": "$('#v_c_quick_dtc_check_btn_refresh').on('click'",
+          "character_offset": 6110,
+          "line": 1
+        }
+      ],
+      "finding": "Shipped DOM click handlers bind Clear, Cancel and Refresh only. Back callback is present in source, but no Back click binding is installed here; shipped instructions instead say close window."
+    },
+    {
+      "id": "ui_ipc.qdc.power_off",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/GTSWorker.js::WorkerController.cancelAutoPowerOff",
+      "asset_sha256": "f4015a66b501abbd227c3767e79d35e217eb5c698f5b043512f41fbb694b38e4",
+      "body_sha256": "fdd63e76681ddb9cc937b8ba9534311a447fb146f86d78dcd9437f5caeae9326",
+      "character_offset": 36352,
+      "line": 1134,
+      "anchors": [
+        {
+          "text": "[454, 6034, 6534,]",
+          "character_offset": 36484,
+          "line": 1136
+        },
+        {
+          "text": "getEcuInfoByEcuId(ecuId)",
+          "character_offset": 36626,
+          "line": 1140
+        },
+        {
+          "text": "if (!powerEcuIdInfo)",
+          "character_offset": 36730,
+          "line": 1146
+        },
+        {
+          "text": "gtsPFApi.cancelAutoPowerOff(param)",
+          "character_offset": 36854,
+          "line": 1154
+        },
+        {
+          "text": ".catch",
+          "character_offset": 36956,
+          "line": 1158
+        }
+      ],
+      "finding": "Normal controller scan first requests cancelAutoPowerOff. Worker selects the last available ECU among454/6034/6534, sends its ecuId; no matching ECU and PF rejection both resolve without aborting scan."
+    },
+    {
+      "id": "ui_ipc.qdc.end_diagnosis_effective",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/GTSWorker.js::WorkerController.endDiagnosis",
+      "asset_sha256": "f4015a66b501abbd227c3767e79d35e217eb5c698f5b043512f41fbb694b38e4",
+      "body_sha256": "d8813716d8ed39d4e1f7b1cce1754852fd2716270df29221a2b4f5fa7028f273",
+      "character_offset": 32798,
+      "line": 996,
+      "anchors": [
+        {
+          "text": "gtsPFApi.endDiagnosis()",
+          "character_offset": 32909,
+          "line": 999
+        },
+        {
+          "text": "Promise.resolve(result.apiArgs)",
+          "character_offset": 32976,
+          "line": 1001
+        },
+        {
+          "text": "Promise.reject(reason)",
+          "character_offset": 33094,
+          "line": 1005
+        }
+      ],
+      "finding": "Effective last endDiagnosis assignment overwrites the earlier wrapper before registration: success returns result.apiArgs, not the full PF response; PF rejection propagates."
+    },
+    {
+      "id": "ui_ipc.qdc.reverse_unregistered",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/common/gts_worker_api.js::GtsWorkerApi.initMainCommand",
+      "asset_sha256": "5b362250f7aabcc5d536f6e59307f24e0825e4a31fe6a50d8385bf4b1678fec2",
+      "body_sha256": "25bd751ef8e4b8e182cd216fae52124d425040b1e43b1a57801f8e95a483f868",
+      "character_offset": 3295,
+      "line": 1,
+      "anchors": [
+        {
+          "text": "function(){}",
+          "character_offset": 3334,
+          "line": 1
+        }
+      ],
+      "finding": "initMainCommand is empty. Defining utility WORKER_TO_MAIN metadata does not register a commandMap callback; normal consumer therefore drops reverse-worker messages."
+    },
+    {
+      "id": "ui_ipc.qdc.reverse_drop",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/common/gts_worker_api.js::GtsWorkerApi.onMessage",
+      "asset_sha256": "5b362250f7aabcc5d536f6e59307f24e0825e4a31fe6a50d8385bf4b1678fec2",
+      "body_sha256": "ed8c853ffef86361269870e9202f33538d0fca495e931c64d3f95d10f24e3ef5",
+      "character_offset": 1746,
+      "line": 1,
+      "anchors": [
+        {
+          "text": "gtsWorkerApi.commandMap[response.commandId]",
+          "character_offset": 2261,
+          "line": 1
+        },
+        {
+          "text": "if(!commandFunc)",
+          "character_offset": 2305,
+          "line": 1
+        },
+        {
+          "text": "'command not found: '",
+          "character_offset": 2341,
+          "line": 1
+        },
+        {
+          "text": "return;",
+          "character_offset": 2385,
+          "line": 1
+        }
+      ],
+      "finding": "Unsolicited messages route by commandMap. Missing WORKER_TO_MAIN callback logs and returns; the worker deferred remains pending, with no timeout/drain. Helper dispatch is callable only if separately installed/invoked."
+    },
+    {
+      "id": "ui_ipc.qdc.main_request",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/GTSWorker.js::WorkerController.callTaskOnMainThread",
+      "asset_sha256": "f4015a66b501abbd227c3767e79d35e217eb5c698f5b043512f41fbb694b38e4",
+      "body_sha256": "e8d20737cde4b7940f757805477612a48b1850b71ac544bf756a202adac04af5",
+      "character_offset": 33684,
+      "line": 1032,
+      "anchors": [
+        {
+          "text": "controller._requestMap",
+          "character_offset": 33782,
+          "line": 1034
+        },
+        {
+          "text": "while (requestId in controller._requestMap)",
+          "character_offset": 33931,
+          "line": 1038
+        },
+        {
+          "text": "commandId: 'WORKER_TO_MAIN'",
+          "character_offset": 34133,
+          "line": 1044
+        },
+        {
+          "text": "controller.SendToBrowser(commandParam)",
+          "character_offset": 34331,
+          "line": 1053
+        },
+        {
+          "text": "Date.now() % 10000000000",
+          "character_offset": 34487,
+          "line": 1061
+        }
+      ],
+      "finding": "Worker-to-main request saves resolve/reject under Date.now modulo10^10, emits WORKER_TO_MAIN with nested requestId/command/parameter; no timeout or disconnect drain here. Collision loop waits synchronously for clock advance."
+    },
+    {
+      "id": "ui_ipc.qdc.main_response",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/GTSWorker.js::WorkerController.onRescieveMainThreadResponse",
+      "asset_sha256": "f4015a66b501abbd227c3767e79d35e217eb5c698f5b043512f41fbb694b38e4",
+      "body_sha256": "3a0079b73f4bb49580f6aae11d9a34dbe6b4d1168baf1e17ff88bfc0a8386d26",
+      "character_offset": 34568,
+      "line": 1065,
+      "anchors": [
+        {
+          "text": "controller._requestMap[requestId]",
+          "character_offset": 34754,
+          "line": 1068
+        },
+        {
+          "text": "if (!requestDef)",
+          "character_offset": 34791,
+          "line": 1069
+        },
+        {
+          "text": "errorCode === 0x0000",
+          "character_offset": 34924,
+          "line": 1075
+        },
+        {
+          "text": "requestDef.resolve",
+          "character_offset": 34952,
+          "line": 1076
+        },
+        {
+          "text": "requestDef.reject",
+          "character_offset": 35004,
+          "line": 1078
+        },
+        {
+          "text": "delete controller._requestMap[requestId]",
+          "character_offset": 35039,
+          "line": 1080
+        }
+      ],
+      "finding": "MAIN_TO_WORKER response with errorCode exactly0 resolves, otherwise rejects; delete deferred. Missing request logs/returns; absent _requestMap is not guarded."
+    },
+    {
+      "id": "ui_ipc.qdc.main_dispatch",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/common/gts_utility.js",
+      "asset_sha256": "a31ef912e0fb2ce15aa1e00370ef10b59ef468dd37dc256fdbfc1585e29ecdea",
+      "body_sha256": "a31ef912e0fb2ce15aa1e00370ef10b59ef468dd37dc256fdbfc1585e29ecdea",
+      "character_offset": 0,
+      "line": 1,
+      "anchors": [
+        {
+          "text": "gts.util.onRescieveMessageFromWorker = function",
+          "character_offset": 23778,
+          "line": 822
+        },
+        {
+          "text": "thisFunc.commandMap[commandId]",
+          "character_offset": 24178,
+          "line": 835
+        },
+        {
+          "text": "errorCode: 0x0001",
+          "character_offset": 24370,
+          "line": 840
+        },
+        {
+          "text": "gtsWorkerApi.sendMainThreadResponse",
+          "character_offset": 24535,
+          "line": 845
+        },
+        {
+          "text": "gts.util.startLoginProcess = function",
+          "character_offset": 26072,
+          "line": 903
+        },
+        {
+          "text": "window.open('blank.html'",
+          "character_offset": 26692,
+          "line": 928
+        },
+        {
+          "text": "setInterval",
+          "character_offset": 27042,
+          "line": 936
+        },
+        {
+          "text": ".finally",
+          "character_offset": 27550,
+          "line": 956
+        },
+        {
+          "text": "clearInterval",
+          "character_offset": 27662,
+          "line": 958
+        }
+      ],
+      "finding": "Unregistered browser helper, not the normal QDC message route: if explicitly invoked, dispatches commandMap callback or returns error1. Its callable login helper opens blank window, polls certification/close, and cleans interval+popup+loader in finally."
+    },
+    {
+      "id": "ui_ipc.qdc.registry",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/GTSWorker.js::WorkerController.init",
+      "asset_sha256": "f4015a66b501abbd227c3767e79d35e217eb5c698f5b043512f41fbb694b38e4",
+      "body_sha256": "c0c01847afa93b87cf2e3cd7d0db831944d8415254d1ee8008164a7ef8b11008",
+      "character_offset": 1699,
+      "line": 51,
+      "anchors": [
+        {
+          "text": "controller.defaultCommands",
+          "character_offset": 2538,
+          "line": 71
+        },
+        {
+          "text": "Object.assign({}, controller.defaultCommands)",
+          "character_offset": 5965,
+          "line": 102
+        },
+        {
+          "text": "Object.assign(controller.commandHandler, controller.workerModels[fn].commandHandler)",
+          "character_offset": 6106,
+          "line": 107
+        }
+      ],
+      "finding": "Active default assignments plus four imported worker registries are censused, excluding commented echo/changeFunction/createTseFile and simple-utility imports. Registration is callable transport, not UI feature reachability.",
+      "registration_writes": 67,
+      "unique_commands": 66,
+      "duplicate_commands": [
+        "endDiagnosis"
+      ],
+      "imported_models": [
+        "js/gts/main_frame/main_frame_worker.js",
+        "js/gts/footer_pane/footer_pane_worker.js",
+        "js/gts/vehicle_connect/vehicle_connect_worker.js",
+        "js/gts/quick_dtc_check/quick_dtc_check_worker.js"
+      ],
+      "commands": [
+        {
+          "command": "connect",
+          "handler": "cmdConnect",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 9949,
+          "handler_line": 223,
+          "handler_end_line": 272,
+          "handler_sha256": "8507e2888fea7451055d214faa752fd04809d1bb149232896d9b49d2f1cba330",
+          "direct_pf_methods": [
+            "checkApiAuthentication",
+            "connect",
+            "createChallengeCode"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "disconnect",
+          "handler": "cmdDisconnect",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 11204,
+          "handler_line": 272,
+          "handler_end_line": 289,
+          "handler_sha256": "76977eecb032133294bd78b97783e3edc995cd7f1818f5939f53d821e4c9a656",
+          "direct_pf_methods": [
+            "disconnect"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "cancelAllAwaiting",
+          "handler": "cmdCancelAllAwaiting",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 12420,
+          "handler_line": 311,
+          "handler_end_line": 325,
+          "handler_sha256": "93e1f918745ba2ed89672621acc67099e22fa7e02b96c35cc888b208a89729e4",
+          "direct_pf_methods": [
+            "cancelAwaitingExecution"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "cancelByCancelKey",
+          "handler": "cmdCancelByCancelKey",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 11726,
+          "handler_line": 289,
+          "handler_end_line": 311,
+          "handler_sha256": "77aba70f584d8d22f88382ef1da7ba351be15642f20bfc23b574a60749a3f2ac",
+          "direct_pf_methods": [
+            "cancelByCancelId"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "startDiagnosis",
+          "handler": "startDiagnosis",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 19324,
+          "handler_line": 585,
+          "handler_end_line": 599,
+          "handler_sha256": "f75ca25bb106cd7c4663f19aa656d19845c4b982574bc9decefe076ec8e22e0c",
+          "direct_pf_methods": [
+            "startDiagnosis"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "endDiagnosis",
+          "handler": "endDiagnosis",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 32798,
+          "handler_line": 996,
+          "handler_end_line": 1014,
+          "handler_sha256": "d8813716d8ed39d4e1f7b1cce1754852fd2716270df29221a2b4f5fa7028f273",
+          "direct_pf_methods": [
+            "endDiagnosis"
+          ],
+          "prototype_assignment_count": 2,
+          "overwritten_assignments": [
+            {
+              "character_offset": 19634,
+              "line": 599,
+              "body_sha256": "42bcb68b739f9a8fa78dfa7467d99ef07dc39508491425868a88e563e6eccd8b"
+            }
+          ]
+        },
+        {
+          "command": "getEcuList",
+          "handler": "getEcuList",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 19938,
+          "handler_line": 613,
+          "handler_end_line": 716,
+          "handler_sha256": "b0837bc684831aa7ae330273ac635ef89cd0e0459fa261569b137b7e2bc1af65",
+          "direct_pf_methods": [
+            "getEcuDescription",
+            "getEquippedEcuList"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "getEcuStatus",
+          "handler": "getEcuStatus",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 23074,
+          "handler_line": 716,
+          "handler_end_line": 741,
+          "handler_sha256": "48117c68621f13d5a45e94426f0b9432a8272e140515073d0470d8cadf97a67a",
+          "direct_pf_methods": [],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "initCommonSettings",
+          "handler": "initCommonSettings",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 15107,
+          "handler_line": 431,
+          "handler_end_line": 585,
+          "handler_sha256": "e07809d68aeb02a12074a63c20e60a8111be123b017e641e363a36121e53e0d6",
+          "direct_pf_methods": [
+            "getDateTimeLocale",
+            "getSettingFileInfo",
+            "getVersionInformation"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "sendRelayMessage",
+          "handler": "sendRelayMessage",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 23752,
+          "handler_line": 741,
+          "handler_end_line": 763,
+          "handler_sha256": "0712836b867b9d51b20e0d05e6c16f06c21d7eb46a6b172ec780d287b1e0fccd",
+          "direct_pf_methods": [
+            "relayGuiMessage"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "loggerProcessLog",
+          "handler": "loggerProcessLog",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 24353,
+          "handler_line": 763,
+          "handler_end_line": 775,
+          "handler_sha256": "59b19fc50e36dfa7ec1ca7c9f8df3935ef8299d9559d30638a5539493f570eeb",
+          "direct_pf_methods": [],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "loggerActivityLogForTitle",
+          "handler": "loggerActivityLogForTitle",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 24756,
+          "handler_line": 775,
+          "handler_end_line": 787,
+          "handler_sha256": "9d3091f306c4444da718e07ba1d5eb252dad15a63670fd9323d20753f0766bf3",
+          "direct_pf_methods": [],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "loggerActivityLogForSubTitle",
+          "handler": "loggerActivityLogForSubTitle",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 25156,
+          "handler_line": 787,
+          "handler_end_line": 799,
+          "handler_sha256": "6a919dac36e5fb4854accdcaef70f53d30f3211c1f4223df1b4323f0258b1dde",
+          "direct_pf_methods": [],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "loggerActivityLogForList",
+          "handler": "loggerActivityLogForList",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 25554,
+          "handler_line": 799,
+          "handler_end_line": 811,
+          "handler_sha256": "44386716f8873ada1d46950806ee733b78597c79845be1d83417385ccbbbbf70",
+          "direct_pf_methods": [],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "loggerActivityLogForText",
+          "handler": "loggerActivityLogForText",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 25974,
+          "handler_line": 811,
+          "handler_end_line": 823,
+          "handler_sha256": "008d9dcdd8cde2bdfe9b5bd9f6dd275b10c0e6b54dc70250a5a7f936de812a98",
+          "direct_pf_methods": [],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "loggerActivityLogForLink",
+          "handler": "loggerActivityLogForLink",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 26394,
+          "handler_line": 823,
+          "handler_end_line": 833,
+          "handler_sha256": "7f7905c791d9a2921a9cc7f82f048b75a5c6eaf0e8356f2e21de3ccd4f529139",
+          "direct_pf_methods": [],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "getDiagnosticInformation",
+          "handler": "getDiagnosticInformation",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 26729,
+          "handler_line": 833,
+          "handler_end_line": 858,
+          "handler_sha256": "d0e7cfe4e618a9a53d12b547688793348c2481c8181341d05f4fef1f9a37187b",
+          "direct_pf_methods": [
+            "getDiagnosticInformation",
+            "setPFLanguage",
+            "setUserLanguage"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "initUserTypeSettings",
+          "handler": "initUserTypeSettings",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 27406,
+          "handler_line": 858,
+          "handler_end_line": 970,
+          "handler_sha256": "bc02cc0dff5bf0515f1cd3cee07b73280acf373be69a71ded6b789bc283b3b3c",
+          "direct_pf_methods": [
+            "getSettingFileInfo",
+            "getSpecificFolder"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "sendLogoutMessage",
+          "handler": "sendLogoutMessage",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 32142,
+          "handler_line": 970,
+          "handler_end_line": 996,
+          "handler_sha256": "bae7f4f5ae450054a581f774bad9d21890a41eb524d2c86e0a486f6706f7a89d",
+          "direct_pf_methods": [
+            "relayGuiMessage"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "logout",
+          "handler": "logout",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 33244,
+          "handler_line": 1014,
+          "handler_end_line": 1032,
+          "handler_sha256": "0283dcdf719ce47c6ba6f6dbb033b26c67847f784cbd3636cb53da8db4953f8c",
+          "direct_pf_methods": [
+            "logout"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "MAIN_TO_WORKER",
+          "handler": "onRescieveMainThreadResponse",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 34568,
+          "handler_line": 1065,
+          "handler_end_line": 1090,
+          "handler_sha256": "3a0079b73f4bb49580f6aae11d9a34dbe6b4d1168baf1e17ff88bfc0a8386d26",
+          "direct_pf_methods": [],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "setGUISharedParameter",
+          "handler": "setGUISharedParameter",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 35243,
+          "handler_line": 1090,
+          "handler_end_line": 1112,
+          "handler_sha256": "3cb343fc109050ebb47d7035f2b393e97ca3eafb0ef7ba1f5566029faf537f02",
+          "direct_pf_methods": [
+            "setGUISharedParameter"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "getDecimalSeparator",
+          "handler": "getDecimalSeparator",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 35787,
+          "handler_line": 1112,
+          "handler_end_line": 1134,
+          "handler_sha256": "1c43eec0324b1af0b60dda7cc26c03b565351c8859d2d22df1fac29e7589c5cc",
+          "direct_pf_methods": [
+            "getDecimalSeparator"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "cancelAutoPowerOff",
+          "handler": "cancelAutoPowerOff",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 36352,
+          "handler_line": 1134,
+          "handler_end_line": 1168,
+          "handler_sha256": "fdd63e76681ddb9cc937b8ba9534311a447fb146f86d78dcd9437f5caeae9326",
+          "direct_pf_methods": [
+            "cancelAutoPowerOff"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "getPfUserProfile",
+          "handler": "getPfUserProfile",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 37241,
+          "handler_line": 1168,
+          "handler_end_line": 1230,
+          "handler_sha256": "02fa0440d146c1877300232e85f29a6f1f6914db6c77673a2bb6ce90807f951d",
+          "direct_pf_methods": [
+            "getPfConfig"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "getCurrentInformation",
+          "handler": "getCurrentInformation",
+          "owner": "WorkerController",
+          "path": "js/gts/GTSWorker.js",
+          "handler_character_offset": 39027,
+          "handler_line": 1230,
+          "handler_end_line": 1361,
+          "handler_sha256": "26f53c662373649b94b0ef40154d9d0af147051f25882018a09ff7ca92b4102a",
+          "direct_pf_methods": [
+            "getVehicleConfirmation"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "mainFrame.startGetVBatteryValue",
+          "handler": "startGetVBatteryValue",
+          "owner": "MainFrameWorkerModel",
+          "path": "js/gts/main_frame/main_frame_worker.js",
+          "handler_character_offset": 2548,
+          "handler_line": 1,
+          "handler_end_line": 1,
+          "handler_sha256": "dfd5f28c6177d78259f8a40178bcd08fce3f7e9af432497ea8c9818f95975b3c",
+          "direct_pf_methods": [
+            "getBatteryVoltage"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "mainFrame.stopGetVBatteryValue",
+          "handler": "stopGetVBatteryValue",
+          "owner": "MainFrameWorkerModel",
+          "path": "js/gts/main_frame/main_frame_worker.js",
+          "handler_character_offset": 3533,
+          "handler_line": 1,
+          "handler_end_line": 1,
+          "handler_sha256": "1e6e39e374b446dd41185336ac7fd18c334275a19a52c0c7fdaf846fcc5b80ee",
+          "direct_pf_methods": [],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "mainFrame.getMileageInformation",
+          "handler": "getMileageInformation",
+          "owner": "MainFrameWorkerModel",
+          "path": "js/gts/main_frame/main_frame_worker.js",
+          "handler_character_offset": 3704,
+          "handler_line": 1,
+          "handler_end_line": 1,
+          "handler_sha256": "457478dd6228067d432db8b6ed1b8b204903e91c6ffdabcdb7da99af22efcaaf",
+          "direct_pf_methods": [
+            "getMileageInfo"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "mainFrame.getDiagnosticInformation",
+          "handler": "getDiagnosticInformation",
+          "owner": "MainFrameWorkerModel",
+          "path": "js/gts/main_frame/main_frame_worker.js",
+          "handler_character_offset": 6316,
+          "handler_line": 1,
+          "handler_end_line": 1,
+          "handler_sha256": "549c60dc1b2d5a1d04a79468e115196759373299f8206313eba862164bc05e2f",
+          "direct_pf_methods": [
+            "getDiagnosticInformation"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "mainFrame.endDiagnosis",
+          "handler": "endDiagnosis",
+          "owner": "MainFrameWorkerModel",
+          "path": "js/gts/main_frame/main_frame_worker.js",
+          "handler_character_offset": 6885,
+          "handler_line": 1,
+          "handler_end_line": 1,
+          "handler_sha256": "ae23d3333af83aec1f875269ce42096a62df0817d15e3117790bb2031657c48e",
+          "direct_pf_methods": [
+            "endDiagnosis"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "mainFrame.startDiagnosis",
+          "handler": "startDiagnosis",
+          "owner": "MainFrameWorkerModel",
+          "path": "js/gts/main_frame/main_frame_worker.js",
+          "handler_character_offset": 7410,
+          "handler_line": 1,
+          "handler_end_line": 1,
+          "handler_sha256": "3c0fee9dd95a3308cd664827f393798a81970095b86b88a080ec0750eb78368f",
+          "direct_pf_methods": [
+            "startDiagnosis"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "mainFrame.getEcuFunctionList",
+          "handler": "getEcuFunctionList",
+          "owner": "MainFrameWorkerModel",
+          "path": "js/gts/main_frame/main_frame_worker.js",
+          "handler_character_offset": 6180,
+          "handler_line": 1,
+          "handler_end_line": 1,
+          "handler_sha256": "1d3a66c055cdcc85257386c4615c2a4a180d09ed013846e721f59865f1f9bbc3",
+          "direct_pf_methods": [],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "mainFrame.getDisplayInfo",
+          "handler": "getDisplayInfo",
+          "owner": "MainFrameWorkerModel",
+          "path": "js/gts/main_frame/main_frame_worker.js",
+          "handler_character_offset": 7911,
+          "handler_line": 1,
+          "handler_end_line": 1,
+          "handler_sha256": "277c7c6f4cac45b6b7fd05d1f1ac304294b6fb3f073e5ff30ed61c47ea34b7dd",
+          "direct_pf_methods": [
+            "checkVimDrs",
+            "getSettingFileInfo",
+            "getUtiltyFunctionList"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "footer_pane.getBugListUrl",
+          "handler": "getBugListUrl",
+          "owner": "FooterPaneWorkerModel",
+          "path": "js/gts/footer_pane/footer_pane_worker.js",
+          "handler_character_offset": 611,
+          "handler_line": 1,
+          "handler_end_line": 1,
+          "handler_sha256": "d445765a4928805e51a08702ca6a1943ef78c2dcfa5498decf230c9878b0844c",
+          "direct_pf_methods": [
+            "getSettingFileInfo"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "vehicleConnect.getEnvInfo",
+          "handler": "getEnvInfo",
+          "owner": "VehicleConnectWorkerModel",
+          "path": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+          "handler_character_offset": 7090,
+          "handler_line": 160,
+          "handler_end_line": 393,
+          "handler_sha256": "a62fe871f612a670a691b8725cada8250e625af081731b8203c726b2d8289d49",
+          "direct_pf_methods": [
+            "getSettingFileInfo",
+            "getSoftwareId",
+            "getSpecificFolder"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "vehicleConnect.checkVIMVersion",
+          "handler": "checkVIMVersion",
+          "owner": "VehicleConnectWorkerModel",
+          "path": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+          "handler_character_offset": 13850,
+          "handler_line": 393,
+          "handler_end_line": 553,
+          "handler_sha256": "58be0999445e0a1bef354f3164545928f67010208a13f0affa0eb0fb7e0599c3",
+          "direct_pf_methods": [
+            "getSettingFileInfo",
+            "getVimInformation",
+            "getVimVersion"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "vehicleConnect.checkBatteryVoltage",
+          "handler": "checkBatteryVoltage",
+          "owner": "VehicleConnectWorkerModel",
+          "path": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+          "handler_character_offset": 18135,
+          "handler_line": 553,
+          "handler_end_line": 602,
+          "handler_sha256": "c826d8a68a58f9eefb644b559c0cd3ac1e2df30a6456f648f06c6a0108ec2110",
+          "direct_pf_methods": [
+            "getBatteryVoltage"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "vehicleConnect.getPlatformLock",
+          "handler": "getPlatformLock",
+          "owner": "VehicleConnectWorkerModel",
+          "path": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+          "handler_character_offset": 19212,
+          "handler_line": 602,
+          "handler_end_line": 695,
+          "handler_sha256": "3135215b04ebe1c6cd009e5f0f307c822f09339440e0ae6156371b8e70af0231",
+          "direct_pf_methods": [
+            "checkConnectionNameExist",
+            "lockApiExclusiveControl"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "vehicleConnect.releasePlatformLock",
+          "handler": "releasePlatformLock",
+          "owner": "VehicleConnectWorkerModel",
+          "path": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+          "handler_character_offset": 21403,
+          "handler_line": 695,
+          "handler_end_line": 732,
+          "handler_sha256": "e48881fcc4c7d561e47c5615618aa907b940a8577493614a6736afe051169e51",
+          "direct_pf_methods": [
+            "unlockAPIExclusiveControl"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "vehicleConnect.getVIN",
+          "handler": "getVIN",
+          "owner": "VehicleConnectWorkerModel",
+          "path": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+          "handler_character_offset": 22178,
+          "handler_line": 732,
+          "handler_end_line": 811,
+          "handler_sha256": "902a1610fd12e70bba42a2df351f12b5cbb868190087d2e8243e4f79257015d9",
+          "direct_pf_methods": [
+            "getVehicleConfirmation",
+            "getVin"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "vehicleConnect.refleshDiagnosis",
+          "handler": "refleshDiagnosis",
+          "owner": "VehicleConnectWorkerModel",
+          "path": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+          "handler_character_offset": 24012,
+          "handler_line": 811,
+          "handler_end_line": 861,
+          "handler_sha256": "63ffd71cc7fe59c8f1aa56fb796121410f14b723e92da4eaf95a0ea0e7362b18",
+          "direct_pf_methods": [
+            "forcedEndDiagnosis",
+            "startDiagnosis"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "vehicleConnect.startSelectVehicle",
+          "handler": "startSelectVehicle",
+          "owner": "VehicleConnectWorkerModel",
+          "path": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+          "handler_character_offset": 25016,
+          "handler_line": 861,
+          "handler_end_line": 1043,
+          "handler_sha256": "53bc68cbe9ae8e450a34ef8c7a7dc9fda5c660fa9895a5087b91c4f9de6eef74",
+          "direct_pf_methods": [
+            "selectVehicle"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "vehicleConnect.getCategories",
+          "handler": "getCategories",
+          "owner": "VehicleConnectWorkerModel",
+          "path": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+          "handler_character_offset": 30939,
+          "handler_line": 1043,
+          "handler_end_line": 1199,
+          "handler_sha256": "be5d6995129e68d260854c936695eb1b4680874e32f01ae406cb4b86a66b695e",
+          "direct_pf_methods": [
+            "saveSettingFileInfo",
+            "selectVehicleCategory"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "vehicleConnect.getCategoriesWithVin",
+          "handler": "getCategoriesWithVin",
+          "owner": "VehicleConnectWorkerModel",
+          "path": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+          "handler_character_offset": 35418,
+          "handler_line": 1199,
+          "handler_end_line": 1508,
+          "handler_sha256": "e850f859b7de5519a4087236eca0f5997672378facf48663e6af7e71091df36f",
+          "direct_pf_methods": [
+            "queryVehiclebyManualVin",
+            "selectVehicleCategory"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "vehicleConnect.startManualMode",
+          "handler": "startManualMode",
+          "owner": "VehicleConnectWorkerModel",
+          "path": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+          "handler_character_offset": 45817,
+          "handler_line": 1508,
+          "handler_end_line": 1651,
+          "handler_sha256": "f082f5402ccf3a2c20729487238ac6ff34617b14b6f9a06390ce74b7c1798e79",
+          "direct_pf_methods": [
+            "selectVehicleCategory"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "vehicleConnect.setCategory",
+          "handler": "onSetCategory",
+          "owner": "VehicleConnectWorkerModel",
+          "path": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+          "handler_character_offset": 50351,
+          "handler_line": 1651,
+          "handler_end_line": 1690,
+          "handler_sha256": "54a447eab955c7add10d3156d7feae4f0754eea231ad945046327743e3f57580",
+          "direct_pf_methods": [],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "vehicleConnect.setOption",
+          "handler": "setOption",
+          "owner": "VehicleConnectWorkerModel",
+          "path": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+          "handler_character_offset": 62808,
+          "handler_line": 2023,
+          "handler_end_line": 2224,
+          "handler_sha256": "303b8b18e9fd326b9b3779ccc4d99961fb02a0dbb8ba6f76fa5e412d0ca9ef38",
+          "direct_pf_methods": [
+            "selectVehicle"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "vehicleConnect.getVehicleDecisionInfo",
+          "handler": "getVehicleDecisionInfo",
+          "owner": "VehicleConnectWorkerModel",
+          "path": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+          "handler_character_offset": 71610,
+          "handler_line": 2334,
+          "handler_end_line": 2357,
+          "handler_sha256": "27ac730ad2ab38d580e6844d8a9a71ce1ce9eacc2b6b5f1df8a5c1564ed97326",
+          "direct_pf_methods": [],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "vehicleConnect.vehicleDecision",
+          "handler": "vehicleDecision",
+          "owner": "VehicleConnectWorkerModel",
+          "path": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+          "handler_character_offset": 72183,
+          "handler_line": 2357,
+          "handler_end_line": 2621,
+          "handler_sha256": "b4417f5d16fe6e61726fcb9a64499b8a03cb24645b35816f78258a6cb89377b7",
+          "direct_pf_methods": [
+            "checkEcuConnect",
+            "excuteSystemException",
+            "getEcuFunctionList",
+            "getEquippedEcuList",
+            "getGeneralCommResult",
+            "getVimSupport",
+            "notifySelectedVehicle",
+            "selectVehicleById"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "vehicleConnect.initDKISO09141",
+          "handler": "initDKISO09141",
+          "owner": "VehicleConnectWorkerModel",
+          "path": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+          "handler_character_offset": 78598,
+          "handler_line": 2621,
+          "handler_end_line": 2655,
+          "handler_sha256": "1810f52c4ba1babe644f4088a37a544bb0fbd31b7f52b581e3f59c2714fb86e8",
+          "direct_pf_methods": [
+            "initializeDkIso9141"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "vehicleConnect.setRemoteDiagSendMask",
+          "handler": "setRemoteDiagSendMask",
+          "owner": "VehicleConnectWorkerModel",
+          "path": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+          "handler_character_offset": 79278,
+          "handler_line": 2655,
+          "handler_end_line": 2734,
+          "handler_sha256": "e14f9f3c41cf94c79b11fbc0b31b64000b2c076b64664424d5fa90245ba263c4",
+          "direct_pf_methods": [
+            "setRemoteDiagSendMask"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "vehicleConnect.loadVehicleInformation",
+          "handler": "loadVehicleInformation",
+          "owner": "VehicleConnectWorkerModel",
+          "path": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+          "handler_character_offset": 81559,
+          "handler_line": 2734,
+          "handler_end_line": 3005,
+          "handler_sha256": "1fb4d387f326d72f6a766afa9c117e3069b6ee21912e3e032d1bd449c8697e91",
+          "direct_pf_methods": [
+            "excuteVehicleException",
+            "getEcuDescription",
+            "getEquippedEcuList",
+            "getMileageInfo",
+            "getVersionInformation"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "vehicleConnect.checkinformationGatheringStatus",
+          "handler": "checkinformationGatheringStatus",
+          "owner": "VehicleConnectWorkerModel",
+          "path": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+          "handler_character_offset": 91457,
+          "handler_line": 3005,
+          "handler_end_line": 3384,
+          "handler_sha256": "74a038603fe441951ccf77eb28a62724c3441f83b222e52a75a5f02f5ed76153",
+          "direct_pf_methods": [
+            "executeGenWebService",
+            "getVersionInformation",
+            "judgeWiredVehicleTarget",
+            "setGUISharedParameter"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "vehicleConnect.setinformationGatheringStatus",
+          "handler": "setinformationGatheringStatus",
+          "owner": "VehicleConnectWorkerModel",
+          "path": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+          "handler_character_offset": 103537,
+          "handler_line": 3384,
+          "handler_end_line": 3397,
+          "handler_sha256": "c331377bc72ca3ae7eacd0948a184da56126bdba1f899ae0ed2c585280b780e7",
+          "direct_pf_methods": [],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "vehicleConnect.checkOBFCMStatus",
+          "handler": "checkOBFCMStatus",
+          "owner": "VehicleConnectWorkerModel",
+          "path": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+          "handler_character_offset": 103895,
+          "handler_line": 3397,
+          "handler_end_line": 3439,
+          "handler_sha256": "7c3c32f995abe6f374957860f3dbcf7c3db8f25f7dadb85766c67277e4b14e58",
+          "direct_pf_methods": [],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "vehicleConnect.setOBFCMStatus",
+          "handler": "setOBFCMStatus",
+          "owner": "VehicleConnectWorkerModel",
+          "path": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+          "handler_character_offset": 105037,
+          "handler_line": 3439,
+          "handler_end_line": 3711,
+          "handler_sha256": "d6550a8c92bba81c1d93968a94d7ac0a04ff571311920e2249c356cc850f317a",
+          "direct_pf_methods": [
+            "collectWiredVehicleData",
+            "flashWiredVehicleData",
+            "getSpecificFolder",
+            "initializeWiredVehicleData",
+            "moveFile",
+            "setLogCollectionMode",
+            "writeFile"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "vehicleConnect.getProductionDate",
+          "handler": "getProductionDate",
+          "owner": "VehicleConnectWorkerModel",
+          "path": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+          "handler_character_offset": 112802,
+          "handler_line": 3711,
+          "handler_end_line": 3788,
+          "handler_sha256": "ad7ca7daedb89c809a5200e244f23840ebfbd9dcca4c47b6b363895943ac3f54",
+          "direct_pf_methods": [
+            "executeGenWebService"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "vehicleConnect.endDiagnosis",
+          "handler": "endDiagnosis",
+          "owner": "VehicleConnectWorkerModel",
+          "path": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+          "handler_character_offset": 114912,
+          "handler_line": 3788,
+          "handler_end_line": 3826,
+          "handler_sha256": "f588978912b4e846dd9262b9ed60e9693a0e59ed4f14c5c7b403f4033f71651b",
+          "direct_pf_methods": [
+            "endDiagnosis"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "vehicleConnect.getConfirmedSelectVehicleResult",
+          "handler": "getConfirmedSelectVehicleResult",
+          "owner": "VehicleConnectWorkerModel",
+          "path": "js/gts/vehicle_connect/vehicle_connect_worker.js",
+          "handler_character_offset": 115666,
+          "handler_line": 3826,
+          "handler_end_line": 3867,
+          "handler_sha256": "161ab85f7f4368c899077fc8e44406931fb04c0129360bd2c3438d950c500376",
+          "direct_pf_methods": [],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "quick_dtc_check.initQuickDtcCheck",
+          "handler": "initQuickDtcCheck",
+          "owner": "QuickDtcCheckWorkerModel",
+          "path": "js/gts/quick_dtc_check/quick_dtc_check_worker.js",
+          "handler_character_offset": 1135,
+          "handler_line": 1,
+          "handler_end_line": 1,
+          "handler_sha256": "15213bea958a6969faddbd26fd11f9a185255df2f60bdb6f5b203cd7ac0858e6",
+          "direct_pf_methods": [
+            "getEquippedEcuList",
+            "getSettingFileInfo",
+            "getSoftwareId"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "quick_dtc_check.startDtcCheck",
+          "handler": "startDtcCheck",
+          "owner": "QuickDtcCheckWorkerModel",
+          "path": "js/gts/quick_dtc_check/quick_dtc_check_worker.js",
+          "handler_character_offset": 3845,
+          "handler_line": 1,
+          "handler_end_line": 1,
+          "handler_sha256": "33cac40191e7ca6736ff8eb5f9fe1330608876287831da007740868bd552a639",
+          "direct_pf_methods": [
+            "checkEcuConnect",
+            "clearEcuConnectCache",
+            "excuteSystemException",
+            "getDtc",
+            "getEcuFunctionList"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "quick_dtc_check.endDtcCheck",
+          "handler": "endDtcCheck",
+          "owner": "QuickDtcCheckWorkerModel",
+          "path": "js/gts/quick_dtc_check/quick_dtc_check_worker.js",
+          "handler_character_offset": 8687,
+          "handler_line": 1,
+          "handler_end_line": 1,
+          "handler_sha256": "1b441dc46db54cacf1a7161f10468bea1ee7ff84499e9c6f7a10ca23456e83fc",
+          "direct_pf_methods": [],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "quick_dtc_check.cancelDtcCheck",
+          "handler": "cancelDtcCheck",
+          "owner": "QuickDtcCheckWorkerModel",
+          "path": "js/gts/quick_dtc_check/quick_dtc_check_worker.js",
+          "handler_character_offset": 8937,
+          "handler_line": 1,
+          "handler_end_line": 1,
+          "handler_sha256": "f2e5f74b4bbb331fdaf8d00a8ef7839b0ce23c5d8f0363c1d0328f2735f87bac",
+          "direct_pf_methods": [],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "quick_dtc_check.clearDtc",
+          "handler": "clearDtc",
+          "owner": "QuickDtcCheckWorkerModel",
+          "path": "js/gts/quick_dtc_check/quick_dtc_check_worker.js",
+          "handler_character_offset": 9075,
+          "handler_line": 1,
+          "handler_end_line": 1,
+          "handler_sha256": "8b17181c443625ae256c053239a3d5935e43a347434e786b00478de194a141ce",
+          "direct_pf_methods": [
+            "checkEcuConnect",
+            "clearDtc",
+            "clearDtcForMazda",
+            "clearEcuConnectCache",
+            "excuteSystemException",
+            "getEcuFunctionList",
+            "writeAfterSalesZone"
+          ],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        },
+        {
+          "command": "quick_dtc_check.intervalMessage",
+          "handler": "intervalMessage",
+          "owner": "QuickDtcCheckWorkerModel",
+          "path": "js/gts/quick_dtc_check/quick_dtc_check_worker.js",
+          "handler_character_offset": 12815,
+          "handler_line": 1,
+          "handler_end_line": 1,
+          "handler_sha256": "8832fe37ed0b5c1421bc383abb7cbe80886ba9233751eb93125baa874db8dfcc",
+          "direct_pf_methods": [],
+          "prototype_assignment_count": 1,
+          "overwritten_assignments": []
+        }
+      ],
+      "show_vehicle_connect_direct_callers": []
+    },
+    {
+      "id": "ui_ipc.qdc.wire.getPfConfig",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/common/gts_platform_raw_interface.js::GtsPFRawInterface.getPfConfig",
+      "asset_sha256": "03b64faadf454a305ceb055e58f7b59c8a67045756950d61ae08af0cec44820c",
+      "body_sha256": "22866d4138ce5b4eced02163b7e38259a0baab07e18966cbf2a1422792ae2d3d",
+      "character_offset": 76825,
+      "line": 1,
+      "anchors": [
+        {
+          "text": ".send(PFCMD_GET_PF_CONFIG,",
+          "character_offset": 76959,
+          "line": 1
+        }
+      ],
+      "finding": "QDC PF wrapper getPfConfig sends UP000009; external execution outcome is outside this source contract."
+    },
+    {
+      "id": "ui_ipc.qdc.wire.getVehicleConfirmation",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/common/gts_platform_raw_interface.js::GtsPFRawInterface.getVehicleConfirmation",
+      "asset_sha256": "03b64faadf454a305ceb055e58f7b59c8a67045756950d61ae08af0cec44820c",
+      "body_sha256": "39d4adb00d0941ede62f4c4f7d2ec080e255ffd0480b8761308d114b4e3bd7a1",
+      "character_offset": 69078,
+      "line": 1,
+      "anchors": [
+        {
+          "text": ".send(PFCMD_GET_VEHICLE_CONFIRMATION,",
+          "character_offset": 69234,
+          "line": 1
+        }
+      ],
+      "finding": "QDC PF wrapper getVehicleConfirmation sends IF000004; external execution outcome is outside this source contract."
+    },
+    {
+      "id": "ui_ipc.qdc.wire.getSettingFileInfo",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/common/gts_platform_raw_interface.js::GtsPFRawInterface.getSettingFileInfo",
+      "asset_sha256": "03b64faadf454a305ceb055e58f7b59c8a67045756950d61ae08af0cec44820c",
+      "body_sha256": "44a8531dede66e98fcd04e69c3f4bac48848edd84202b85ea31ee1000dd0ab3e",
+      "character_offset": 68279,
+      "line": 1,
+      "anchors": [
+        {
+          "text": ".send(PFCMD_GET_SETTING_FILE_INFO,",
+          "character_offset": 68427,
+          "line": 1
+        }
+      ],
+      "finding": "QDC PF wrapper getSettingFileInfo sends IF000012; external execution outcome is outside this source contract."
+    },
+    {
+      "id": "ui_ipc.qdc.wire.getEquippedEcuList",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/common/gts_platform_raw_interface.js::GtsPFRawInterface.getEquippedEcuList",
+      "asset_sha256": "03b64faadf454a305ceb055e58f7b59c8a67045756950d61ae08af0cec44820c",
+      "body_sha256": "c57db63912ed96557bd9d2fe18a375f6d404b46e2ac1b237c4554ff5c03cffd2",
+      "character_offset": 40367,
+      "line": 1,
+      "anchors": [
+        {
+          "text": ".send(PFCMD_GET_EQUIPPED_ECU_LIST,",
+          "character_offset": 40515,
+          "line": 1
+        }
+      ],
+      "finding": "QDC PF wrapper getEquippedEcuList sends DV000004; external execution outcome is outside this source contract."
+    },
+    {
+      "id": "ui_ipc.qdc.wire.getSoftwareId",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/common/gts_platform_raw_interface.js::GtsPFRawInterface.getSoftwareId",
+      "asset_sha256": "03b64faadf454a305ceb055e58f7b59c8a67045756950d61ae08af0cec44820c",
+      "body_sha256": "ba5dfac16b72aac633646e07cad1199efd26ecab1675826ce280a57d1c77bdf7",
+      "character_offset": 68554,
+      "line": 1,
+      "anchors": [
+        {
+          "text": ".send(PFCMD_GET_SOFTWARE_ID,",
+          "character_offset": 68692,
+          "line": 1
+        }
+      ],
+      "finding": "QDC PF wrapper getSoftwareId sends IF000009; external execution outcome is outside this source contract."
+    },
+    {
+      "id": "ui_ipc.qdc.wire.clearEcuConnectCache",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/common/gts_platform_raw_interface.js::GtsPFRawInterface.clearEcuConnectCache",
+      "asset_sha256": "03b64faadf454a305ceb055e58f7b59c8a67045756950d61ae08af0cec44820c",
+      "body_sha256": "8dfd2bf41c662a3440c2dbb51624d7a01c293c917c737a059cc937c86a777dda",
+      "character_offset": 24685,
+      "line": 1,
+      "anchors": [
+        {
+          "text": ".send(PFCMD_CLEAR_ECU_CONNECT_CACHE,",
+          "character_offset": 24837,
+          "line": 1
+        }
+      ],
+      "finding": "QDC PF wrapper clearEcuConnectCache sends DV000033; external execution outcome is outside this source contract."
+    },
+    {
+      "id": "ui_ipc.qdc.wire.checkEcuConnect",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/common/gts_platform_raw_interface.js::GtsPFRawInterface.checkEcuConnect",
+      "asset_sha256": "03b64faadf454a305ceb055e58f7b59c8a67045756950d61ae08af0cec44820c",
+      "body_sha256": "84db5279e5757d9aae2dbb6dd91d72be22de148ad9e7b7fde2517c19842546b3",
+      "character_offset": 22305,
+      "line": 1,
+      "anchors": [
+        {
+          "text": ".send(PFCMD_CHECK_ECU_CONNECT,",
+          "character_offset": 22447,
+          "line": 1
+        }
+      ],
+      "finding": "QDC PF wrapper checkEcuConnect sends DV000005; external execution outcome is outside this source contract."
+    },
+    {
+      "id": "ui_ipc.qdc.wire.excuteSystemException",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/common/gts_platform_raw_interface.js::GtsPFRawInterface.excuteSystemException",
+      "asset_sha256": "03b64faadf454a305ceb055e58f7b59c8a67045756950d61ae08af0cec44820c",
+      "body_sha256": "36659bbdc5de169c3a8bf4910f5914822733e4a02fb978fb0790b56b02aed054",
+      "character_offset": 28095,
+      "line": 1,
+      "anchors": [
+        {
+          "text": ".send(PFCMD_EXCUTE_SYSTEM_EXCEPTION,",
+          "character_offset": 28249,
+          "line": 1
+        }
+      ],
+      "finding": "QDC PF wrapper excuteSystemException sends DV000067; external execution outcome is outside this source contract."
+    },
+    {
+      "id": "ui_ipc.qdc.wire.getEcuFunctionList",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/common/gts_platform_raw_interface.js::GtsPFRawInterface.getEcuFunctionList",
+      "asset_sha256": "03b64faadf454a305ceb055e58f7b59c8a67045756950d61ae08af0cec44820c",
+      "body_sha256": "a4a9d7ab7c1ef40073d54ac21a9a17c0ef9ae8b0a5217174600822bd9a9bff2a",
+      "character_offset": 39799,
+      "line": 1,
+      "anchors": [
+        {
+          "text": ".send(PFCMD_GET_ECU_FUNCTION_LIST,",
+          "character_offset": 39947,
+          "line": 1
+        }
+      ],
+      "finding": "QDC PF wrapper getEcuFunctionList sends DV000006; external execution outcome is outside this source contract."
+    },
+    {
+      "id": "ui_ipc.qdc.wire.getDtc",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/common/gts_platform_raw_interface.js::GtsPFRawInterface.getDtc",
+      "asset_sha256": "03b64faadf454a305ceb055e58f7b59c8a67045756950d61ae08af0cec44820c",
+      "body_sha256": "bea2f1c4d51d672bcdfcb1cf7d905d9cc8fef9c5ceaada1396eaa900f9c28e23",
+      "character_offset": 38531,
+      "line": 1,
+      "anchors": [
+        {
+          "text": ".send(PFCMD_GET_DTC,",
+          "character_offset": 38655,
+          "line": 1
+        }
+      ],
+      "finding": "QDC PF wrapper getDtc sends DV000008; external execution outcome is outside this source contract."
+    },
+    {
+      "id": "ui_ipc.qdc.wire.writeAfterSalesZone",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/common/gts_platform_raw_interface.js::GtsPFRawInterface.writeAfterSalesZone",
+      "asset_sha256": "03b64faadf454a305ceb055e58f7b59c8a67045756950d61ae08af0cec44820c",
+      "body_sha256": "79887f2ed005c8bd55f171e5dde23374477bad8494c8ab4927d9293b6af782e4",
+      "character_offset": 63744,
+      "line": 1,
+      "anchors": [
+        {
+          "text": ".send(PFCMD_WRITE_AFTER_SALES_ZONE,",
+          "character_offset": 63894,
+          "line": 1
+        }
+      ],
+      "finding": "QDC PF wrapper writeAfterSalesZone sends DV000079; external execution outcome is outside this source contract."
+    },
+    {
+      "id": "ui_ipc.qdc.wire.clearDtc",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/common/gts_platform_raw_interface.js::GtsPFRawInterface.clearDtc",
+      "asset_sha256": "03b64faadf454a305ceb055e58f7b59c8a67045756950d61ae08af0cec44820c",
+      "body_sha256": "45aa682d4ed969e1e8c0e215335fbfe4b80de2945db050f2f3e4df9ccd209b75",
+      "character_offset": 24185,
+      "line": 1,
+      "anchors": [
+        {
+          "text": ".send(PFCMD_CLEAR_DTC,",
+          "character_offset": 24313,
+          "line": 1
+        }
+      ],
+      "finding": "QDC PF wrapper clearDtc sends DV000010; external execution outcome is outside this source contract."
+    },
+    {
+      "id": "ui_ipc.qdc.wire.clearDtcForMazda",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/common/gts_platform_raw_interface.js::GtsPFRawInterface.clearDtcForMazda",
+      "asset_sha256": "03b64faadf454a305ceb055e58f7b59c8a67045756950d61ae08af0cec44820c",
+      "body_sha256": "fcc64136edb38cb3f4817d0255aa8090f8264798ccfba1fa774dc921d178e94c",
+      "character_offset": 24418,
+      "line": 1,
+      "anchors": [
+        {
+          "text": ".send(PFCMD_CLEAR_DTC_FOR_MAZDA,",
+          "character_offset": 24562,
+          "line": 1
+        }
+      ],
+      "finding": "QDC PF wrapper clearDtcForMazda sends DV000011; external execution outcome is outside this source contract."
+    },
+    {
+      "id": "ui_ipc.qdc.wire.forcedEndDiagnosis",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/common/gts_platform_raw_interface.js::GtsPFRawInterface.forcedEndDiagnosis",
+      "asset_sha256": "03b64faadf454a305ceb055e58f7b59c8a67045756950d61ae08af0cec44820c",
+      "body_sha256": "e3844847889ab9174f2867645212fb949c9dacde5a735d02d01c25c9d8586726",
+      "character_offset": 29564,
+      "line": 1,
+      "anchors": [
+        {
+          "text": ".send(PFCMD_FORCED_END_DIAGNOSIS,",
+          "character_offset": 29712,
+          "line": 1
+        }
+      ],
+      "finding": "QDC PF wrapper forcedEndDiagnosis sends SC000007; external execution outcome is outside this source contract."
+    },
+    {
+      "id": "ui_ipc.qdc.wire.startDiagnosis",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/common/gts_platform_raw_interface.js::GtsPFRawInterface.startDiagnosis",
+      "asset_sha256": "03b64faadf454a305ceb055e58f7b59c8a67045756950d61ae08af0cec44820c",
+      "body_sha256": "1ced21e93720ef40f579d37df491205ca7822dc6e1dea62c63d7e1770fa484e0",
+      "character_offset": 60311,
+      "line": 1,
+      "anchors": [
+        {
+          "text": ".send(PFCMD_START_DIAGNOSIS,",
+          "character_offset": 60451,
+          "line": 1
+        }
+      ],
+      "finding": "QDC PF wrapper startDiagnosis sends SC000001; external execution outcome is outside this source contract."
+    },
+    {
+      "id": "ui_ipc.qdc.wire.endDiagnosis",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/common/gts_platform_raw_interface.js::GtsPFRawInterface.endDiagnosis",
+      "asset_sha256": "03b64faadf454a305ceb055e58f7b59c8a67045756950d61ae08af0cec44820c",
+      "body_sha256": "74291ff274ae47ca7baa9bf54c1a49b34fe1c277e85ac2ea0e375487020da54e",
+      "character_offset": 27588,
+      "line": 1,
+      "anchors": [
+        {
+          "text": ".send(PFCMD_END_DIAGNOSIS,",
+          "character_offset": 27724,
+          "line": 1
+        }
+      ],
+      "finding": "QDC PF wrapper endDiagnosis sends SC000002; external execution outcome is outside this source contract."
+    },
+    {
+      "id": "ui_ipc.qdc.wire.cancelAutoPowerOff",
+      "source": "ui_ipc.qdc.gui",
+      "kind": "authenticated-javascript-contract",
+      "locator": "js/gts/common/gts_platform_raw_interface.js::GtsPFRawInterface.cancelAutoPowerOff",
+      "asset_sha256": "03b64faadf454a305ceb055e58f7b59c8a67045756950d61ae08af0cec44820c",
+      "body_sha256": "791389f3a9adb7299b79f9f7e0f75a85673121d9443a6ac25bea7eb5ca9cee8e",
+      "character_offset": 20347,
+      "line": 1,
+      "anchors": [
+        {
+          "text": ".send(PFCMD_CANCEL_AUTO_POWER_OFF,",
+          "character_offset": 20495,
+          "line": 1
+        }
+      ],
+      "finding": "QDC PF wrapper cancelAutoPowerOff sends DV000100; external execution outcome is outside this source contract."
+    },
+    {
       "id": "ui_ipc.browser_close",
       "source": "ui_ipc.gts.gui",
       "kind": "decoded-inline-javascript",
@@ -6148,7 +8740,52 @@
     {
       "id": "ui_ipc.qdc",
       "owner": "browser QDC MainFrameController",
-      "meaning": "Quick-DTC-check variant without login/menu"
+      "meaning": "DTC Quick Check after Reprogramming, reusing PF vehicle context without login/menu"
+    },
+    {
+      "id": "ui_ipc.qdc_context_wait",
+      "owner": "QDC GTSMain",
+      "meaning": "PF vehicle unavailable; GTS+ VehicleConnect required, retry/exit dialog"
+    },
+    {
+      "id": "ui_ipc.qdc_warning",
+      "owner": "QDC GTSMain",
+      "meaning": "Current PF context found; do-not-operate-GTS warning awaiting acknowledgement"
+    },
+    {
+      "id": "ui_ipc.qdc_scanning",
+      "owner": "QuickDtcCheckWorkerModel",
+      "meaning": "Serial ECU checks and 100ms message pump; transient status queue"
+    },
+    {
+      "id": "ui_ipc.qdc_results",
+      "owner": "QuickDtcCheckController",
+      "meaning": "Completed/cancelled/partial statuses displayed; no saved report"
+    },
+    {
+      "id": "ui_ipc.qdc_clearing",
+      "owner": "QuickDtcCheckWorkerModel",
+      "meaning": "Serial capability-gated clear requests; aggregate first error"
+    },
+    {
+      "id": "ui_ipc.qdc_clear_success_dialog",
+      "owner": "QuickDtcCheckController",
+      "meaning": "Clear success dialog pending acknowledgement; also reached on outer false with normal resultInfo"
+    },
+    {
+      "id": "ui_ipc.qdc_clear_retry_dialog",
+      "owner": "QuickDtcCheckController",
+      "meaning": "Clear resultInfo error; awaiting retry Yes/No"
+    },
+    {
+      "id": "ui_ipc.qdc_new_context_callable",
+      "owner": "VehicleConnectWorkerModel",
+      "meaning": "Registered reset/selection clone, not reached by shipped QDC startup"
+    },
+    {
+      "id": "ui_ipc.qdc_main_request",
+      "owner": "QDC worker/browser bridge",
+      "meaning": "Worker request deferred pending main-thread callback"
     }
   ],
   "transitions": [
@@ -6536,6 +9173,249 @@
       ]
     },
     {
+      "id": "ui_ipc.qdc_no_context",
+      "from": "ui_ipc.qdc",
+      "to": "ui_ipc.qdc_context_wait",
+      "trigger": "getCurrentInformation completes false",
+      "guard": "PF rejection or missing vinCode",
+      "action": "Prompt to perform VehicleConnect in GTS+; no new diagnosis fallback",
+      "evidence": [
+        "ui_ipc.qdc.context",
+        "ui_ipc.qdc.context_ui",
+        "ui_ipc.qdc.purpose"
+      ]
+    },
+    {
+      "id": "ui_ipc.qdc_retry_context",
+      "from": "ui_ipc.qdc_context_wait",
+      "to": "ui_ipc.qdc",
+      "trigger": "TryAgain",
+      "guard": "User chooses retry",
+      "action": "Repeat VEHICLE_CHECK and query current PF context",
+      "evidence": [
+        "ui_ipc.qdc.context_ui"
+      ]
+    },
+    {
+      "id": "ui_ipc.qdc_exit_context",
+      "from": "ui_ipc.qdc_context_wait",
+      "to": "ui_ipc.disconnecting",
+      "trigger": "Exit",
+      "guard": "No current vehicle required",
+      "action": "Close browser; socket cleanup is separate",
+      "evidence": [
+        "ui_ipc.qdc.context_ui"
+      ]
+    },
+    {
+      "id": "ui_ipc.qdc_reuse_context",
+      "from": "ui_ipc.qdc",
+      "to": "ui_ipc.qdc_warning",
+      "trigger": "Current PF vehicle returned",
+      "guard": "Truthy vinCode",
+      "action": "Reuse vehicle identity/category/options and warn not to operate GTS+",
+      "evidence": [
+        "ui_ipc.qdc.context",
+        "ui_ipc.qdc.context_ui"
+      ]
+    },
+    {
+      "id": "ui_ipc.qdc_begin_scan",
+      "from": "ui_ipc.qdc_warning",
+      "to": "ui_ipc.qdc_scanning",
+      "trigger": "Warning acknowledgement/frame initialization",
+      "guard": "Settings/equipped ECU/softwareId initialization succeeds",
+      "action": "Enter sole QuickDtcCheck child, best-effort cancelAutoPowerOff, then serial scan/message pump",
+      "evidence": [
+        "ui_ipc.qdc.frame",
+        "ui_ipc.qdc.init",
+        "ui_ipc.qdc.power_off",
+        "ui_ipc.qdc.scan"
+      ]
+    },
+    {
+      "id": "ui_ipc.qdc_scan_end",
+      "from": "ui_ipc.qdc_scanning",
+      "to": "ui_ipc.qdc_results",
+      "trigger": "END dequeued",
+      "guard": "Success, capability failure, cancellation, or partial read failures",
+      "action": "Update statuses, stop pump, clear busy flag; failure result itself not checked by controller",
+      "evidence": [
+        "ui_ipc.qdc.scan",
+        "ui_ipc.qdc.ui_results",
+        "ui_ipc.qdc.stop"
+      ]
+    },
+    {
+      "id": "ui_ipc.qdc_cancel_scan",
+      "from": "ui_ipc.qdc_scanning",
+      "to": "ui_ipc.qdc_scanning",
+      "trigger": "Cancel",
+      "guard": "Scan in progress",
+      "action": "Set flag only; current PF request continues, subsequent ECUs skipped, END cancel hides timestamp",
+      "evidence": [
+        "ui_ipc.qdc.cancel",
+        "ui_ipc.qdc.scan",
+        "ui_ipc.qdc.ui_results"
+      ]
+    },
+    {
+      "id": "ui_ipc.qdc_refresh",
+      "from": "ui_ipc.qdc_results",
+      "to": "ui_ipc.qdc_scanning",
+      "trigger": "Refresh",
+      "guard": "Quick-check initialized",
+      "action": "Reinitialize displayed ECU statuses, best-effort cancelAutoPowerOff, and scan again",
+      "evidence": [
+        "ui_ipc.qdc.scan",
+        "ui_ipc.qdc.power_off"
+      ]
+    },
+    {
+      "id": "ui_ipc.qdc_clear",
+      "from": "ui_ipc.qdc_results",
+      "to": "ui_ipc.qdc_clearing",
+      "trigger": "Clear All DTCs",
+      "guard": "Connected ECU exposes clear detail or Mazda phase21",
+      "action": "After-sales write best effort then clear per ECU/global Mazda once; retain first error",
+      "evidence": [
+        "ui_ipc.qdc.clear"
+      ]
+    },
+    {
+      "id": "ui_ipc.qdc_clear_retry",
+      "from": "ui_ipc.qdc_clearing",
+      "to": "ui_ipc.qdc_clear_retry_dialog",
+      "trigger": "Clear response contains resultInfo error",
+      "guard": "response.resultInfo.result is nonzero",
+      "action": "Close wait modal and offer retry",
+      "evidence": [
+        "ui_ipc.qdc.clear",
+        "ui_ipc.qdc.ui_clear"
+      ]
+    },
+    {
+      "id": "ui_ipc.qdc_clear_success",
+      "from": "ui_ipc.qdc_clearing",
+      "to": "ui_ipc.qdc_clear_success_dialog",
+      "trigger": "Clear completes with normal resultInfo",
+      "guard": "response.result=true and resultInfo.result=0",
+      "action": "Close wait modal and display success dialog",
+      "evidence": [
+        "ui_ipc.qdc.clear",
+        "ui_ipc.qdc.ui_clear"
+      ]
+    },
+    {
+      "id": "ui_ipc.qdc_clear_false_success",
+      "from": "ui_ipc.qdc_clearing",
+      "to": "ui_ipc.qdc_clear_success_dialog",
+      "trigger": "Prerequisite failure before recorded clear error",
+      "guard": "response.result=false but resultInfo.result=0",
+      "action": "Controller ignores outer failure and displays success dialog",
+      "evidence": [
+        "ui_ipc.qdc.clear",
+        "ui_ipc.qdc.ui_clear"
+      ]
+    },
+    {
+      "id": "ui_ipc.qdc_clear_success_ack",
+      "from": "ui_ipc.qdc_clear_success_dialog",
+      "to": "ui_ipc.qdc_scanning",
+      "trigger": "Success acknowledgement",
+      "guard": "User acknowledges dialog",
+      "action": "Trigger START_DTC_CHECK and scan again",
+      "evidence": [
+        "ui_ipc.qdc.clear_ack",
+        "ui_ipc.qdc.power_off",
+        "ui_ipc.qdc.scan"
+      ]
+    },
+    {
+      "id": "ui_ipc.qdc_clear_retry_yes",
+      "from": "ui_ipc.qdc_clear_retry_dialog",
+      "to": "ui_ipc.qdc_clearing",
+      "trigger": "Retry Yes",
+      "guard": "User chooses Yes",
+      "action": "Trigger CLEAR_DTC again",
+      "evidence": [
+        "ui_ipc.qdc.clear_retry_choice"
+      ]
+    },
+    {
+      "id": "ui_ipc.qdc_clear_retry_no",
+      "from": "ui_ipc.qdc_clear_retry_dialog",
+      "to": "ui_ipc.qdc_results",
+      "trigger": "Retry No",
+      "guard": "User declines retry",
+      "action": "Resolve without clearing or scanning again; leave prior display",
+      "evidence": [
+        "ui_ipc.qdc.clear_retry_choice"
+      ]
+    },
+    {
+      "id": "ui_ipc.qdc_close",
+      "from": "ui_ipc.qdc_results",
+      "to": "ui_ipc.disconnecting",
+      "trigger": "User closes browser window",
+      "guard": "Shipped instruction says close window; view binds no Back click",
+      "action": "No feature report-save or explicit endDiagnosis close hook; native transport cleanup is separately owned",
+      "evidence": [
+        "ui_ipc.qdc.purpose",
+        "ui_ipc.qdc.view_events",
+        "ui_ipc.frontend.qdc_disconnect",
+        "ui_ipc.controller.ConnectionManager.Disconnect"
+      ]
+    },
+    {
+      "id": "ui_ipc.qdc_new_context_callable",
+      "from": "ui_ipc.qdc",
+      "to": "ui_ipc.qdc_new_context_callable",
+      "trigger": "Explicit registered vehicleConnect.refleshDiagnosis invocation",
+      "guard": "Not a normal QDC UI route",
+      "action": "Attempt forced end then start; swallow failures and set diagnosisRestarted",
+      "evidence": [
+        "ui_ipc.qdc.new_context",
+        "ui_ipc.qdc.orphan_connect",
+        "ui_ipc.qdc.registry"
+      ]
+    },
+    {
+      "id": "ui_ipc.qdc_main_request",
+      "from": "ui_ipc.qdc",
+      "to": "ui_ipc.qdc_main_request",
+      "trigger": "callTaskOnMainThread",
+      "guard": "Request id unused",
+      "action": "Emit WORKER_TO_MAIN and retain deferred; normal QDC consumer has no registered reverse callback",
+      "evidence": [
+        "ui_ipc.qdc.main_request",
+        "ui_ipc.qdc.reverse_unregistered"
+      ]
+    },
+    {
+      "id": "ui_ipc.qdc_main_dropped",
+      "from": "ui_ipc.qdc_main_request",
+      "to": "ui_ipc.qdc_main_request",
+      "trigger": "Browser GtsWorkerApi.onMessage",
+      "guard": "No commandMap.WORKER_TO_MAIN callback",
+      "action": "Log command-not-found and return; worker promise remains pending",
+      "evidence": [
+        "ui_ipc.qdc.reverse_drop",
+        "ui_ipc.qdc.reverse_unregistered"
+      ]
+    },
+    {
+      "id": "ui_ipc.qdc_main_response",
+      "from": "ui_ipc.qdc_main_request",
+      "to": "ui_ipc.qdc",
+      "trigger": "Explicit MAIN_TO_WORKER response (not normal reverse-route continuation)",
+      "guard": "Response externally supplied for matching requestId",
+      "action": "Resolve only errorCode0, otherwise reject; delete deferred",
+      "evidence": [
+        "ui_ipc.qdc.main_response"
+      ]
+    },
+    {
       "id": "ui_ipc.tab_close",
       "from": "ui_ipc.connected",
       "to": "ui_ipc.disconnecting",
@@ -6622,6 +9502,51 @@
         "ui_ipc.routes",
         "ui_ipc.frontend_inventory"
       ]
+    },
+    {
+      "to_domain": "vehicle_session",
+      "caller": "QDC getCurrentInformation / registered VehicleConnect clone",
+      "callee": "PF getVehicleConfirmation / diagnosis reset",
+      "mechanism": "QDC worker → PF API",
+      "payload": "Current VIN/vehicleId/category/options read PF common[0]; explicit diagnosis start may attach shared adaptation; reset remains separately callable and is not the evidenced startup route",
+      "policy_reference": [
+        "vehicle_session.pf_ExecuteGetVehicleConfirmation",
+        "vehicle_session.pf_ExecuteNotifyVehicleConfirmation",
+        "vehicle_session.pf_ExecuteStartDiagnosis",
+        "vehicle_session.pf_ExecuteEndDiagnosis",
+        "vehicle_session.pf_ExecuteEndDiagAdaptation"
+      ],
+      "evidence": [
+        "ui_ipc.qdc.context",
+        "ui_ipc.qdc.context_ui",
+        "ui_ipc.qdc.new_context"
+      ]
+    },
+    {
+      "to_domain": "operations",
+      "caller": "QuickDtcCheckWorkerModel.startDtcCheck/clearDtc",
+      "callee": "PF ECU connect/capabilities/DTC/after-sales/clear",
+      "mechanism": "Sequential API promises, 100ms worker message pump",
+      "payload": "Best-effort cancelAutoPowerOff for last matching ECU454/6034/6534 precedes normal scan; groupId,ecuId,busId,phaseType,getDtcList; date/mileage; Mazda global clear",
+      "evidence": [
+        "ui_ipc.qdc.power_off",
+        "ui_ipc.qdc.scan",
+        "ui_ipc.qdc.clear",
+        "ui_ipc.qdc.cancel"
+      ]
+    },
+    {
+      "to_domain": "auth_settings",
+      "caller": "QDC getPfUserProfile / worker-to-main login helper",
+      "callee": "PF profile / browser login callback",
+      "mechanism": "PF profile JSON; reverse-worker helper is not registered in normal QDC consumer",
+      "payload": "userInfo fallback=false is not fresh login; WORKER_TO_MAIN is dropped and its worker deferred remains pending; callable login helper behavior is separate",
+      "evidence": [
+        "ui_ipc.qdc.profile",
+        "ui_ipc.qdc.main_request",
+        "ui_ipc.qdc.reverse_drop",
+        "ui_ipc.qdc.main_dispatch"
+      ]
     }
   ],
   "persistence": [
@@ -6638,8 +9563,194 @@
         "ui_ipc.crypt.GuiFile.GetPassphrase",
         "ui_ipc.frontend_inventory"
       ]
+    },
+    {
+      "path_pattern": "QDC worker/browser memory (no file output)",
+      "producer": "QuickDtcCheckWorkerModel",
+      "consumer": "QuickDtcCheckController/view",
+      "created": "init cache; scan queues GOT/END status and timestamp",
+      "flushed": "100ms queue delivery to browser, not disk commit",
+      "deleted": "worker/browser lifetime; no explicit report-save path in quick-check feature",
+      "evidence": [
+        "ui_ipc.qdc.init",
+        "ui_ipc.qdc.scan",
+        "ui_ipc.qdc.ui_results",
+        "ui_ipc.qdc.clear"
+      ]
     }
   ],
+  "qdc_feature_map": {
+    "purpose": "DTC Quick Check after Reprogramming",
+    "evidence": {
+      "purpose": "ui_ipc.qdc.purpose",
+      "entry": "ui_ipc.qdc.entry",
+      "launcher": "ui_ipc.qdc.launcher",
+      "profile": "ui_ipc.qdc.profile",
+      "context": "ui_ipc.qdc.context",
+      "context_ui": "ui_ipc.qdc.context_ui",
+      "new_context": "ui_ipc.qdc.new_context",
+      "orphan_connect": "ui_ipc.qdc.orphan_connect",
+      "frame": "ui_ipc.qdc.frame",
+      "init": "ui_ipc.qdc.init",
+      "scan": "ui_ipc.qdc.scan",
+      "clear": "ui_ipc.qdc.clear",
+      "cancel": "ui_ipc.qdc.cancel",
+      "stop": "ui_ipc.qdc.stop",
+      "ui_results": "ui_ipc.qdc.ui_results",
+      "ui_clear": "ui_ipc.qdc.ui_clear",
+      "clear_ack": "ui_ipc.qdc.clear_ack",
+      "clear_retry_choice": "ui_ipc.qdc.clear_retry_choice",
+      "dispose": "ui_ipc.qdc.dispose",
+      "back": "ui_ipc.qdc.back",
+      "view_title": "ui_ipc.qdc.view_title",
+      "view_controls": "ui_ipc.qdc.view_controls",
+      "view_end": "ui_ipc.qdc.view_end",
+      "view_events": "ui_ipc.qdc.view_events",
+      "power_off": "ui_ipc.qdc.power_off",
+      "end_diagnosis_effective": "ui_ipc.qdc.end_diagnosis_effective",
+      "reverse_unregistered": "ui_ipc.qdc.reverse_unregistered",
+      "reverse_drop": "ui_ipc.qdc.reverse_drop",
+      "main_request": "ui_ipc.qdc.main_request",
+      "main_response": "ui_ipc.qdc.main_response",
+      "main_dispatch": "ui_ipc.qdc.main_dispatch"
+    },
+    "registry_evidence": "ui_ipc.qdc.registry",
+    "launcher": {
+      "package": "qdc.gui",
+      "asset": "index.html",
+      "action": "start_btn_1 click → window.open QDCMain.html",
+      "evidence": "ui_ipc.qdc.launcher",
+      "integration_limit": "No GTS/CUW direct-launch relationship is inferred."
+    },
+    "pf_wire_contracts": [
+      {
+        "method": "getPfConfig",
+        "api_id": "UP000009",
+        "constant": "PFCMD_GET_PF_CONFIG",
+        "evidence": "ui_ipc.qdc.wire.getPfConfig"
+      },
+      {
+        "method": "getVehicleConfirmation",
+        "api_id": "IF000004",
+        "constant": "PFCMD_GET_VEHICLE_CONFIRMATION",
+        "evidence": "ui_ipc.qdc.wire.getVehicleConfirmation"
+      },
+      {
+        "method": "getSettingFileInfo",
+        "api_id": "IF000012",
+        "constant": "PFCMD_GET_SETTING_FILE_INFO",
+        "evidence": "ui_ipc.qdc.wire.getSettingFileInfo"
+      },
+      {
+        "method": "getEquippedEcuList",
+        "api_id": "DV000004",
+        "constant": "PFCMD_GET_EQUIPPED_ECU_LIST",
+        "evidence": "ui_ipc.qdc.wire.getEquippedEcuList"
+      },
+      {
+        "method": "getSoftwareId",
+        "api_id": "IF000009",
+        "constant": "PFCMD_GET_SOFTWARE_ID",
+        "evidence": "ui_ipc.qdc.wire.getSoftwareId"
+      },
+      {
+        "method": "clearEcuConnectCache",
+        "api_id": "DV000033",
+        "constant": "PFCMD_CLEAR_ECU_CONNECT_CACHE",
+        "evidence": "ui_ipc.qdc.wire.clearEcuConnectCache"
+      },
+      {
+        "method": "checkEcuConnect",
+        "api_id": "DV000005",
+        "constant": "PFCMD_CHECK_ECU_CONNECT",
+        "evidence": "ui_ipc.qdc.wire.checkEcuConnect"
+      },
+      {
+        "method": "excuteSystemException",
+        "api_id": "DV000067",
+        "constant": "PFCMD_EXCUTE_SYSTEM_EXCEPTION",
+        "evidence": "ui_ipc.qdc.wire.excuteSystemException"
+      },
+      {
+        "method": "getEcuFunctionList",
+        "api_id": "DV000006",
+        "constant": "PFCMD_GET_ECU_FUNCTION_LIST",
+        "evidence": "ui_ipc.qdc.wire.getEcuFunctionList"
+      },
+      {
+        "method": "getDtc",
+        "api_id": "DV000008",
+        "constant": "PFCMD_GET_DTC",
+        "evidence": "ui_ipc.qdc.wire.getDtc"
+      },
+      {
+        "method": "writeAfterSalesZone",
+        "api_id": "DV000079",
+        "constant": "PFCMD_WRITE_AFTER_SALES_ZONE",
+        "evidence": "ui_ipc.qdc.wire.writeAfterSalesZone"
+      },
+      {
+        "method": "clearDtc",
+        "api_id": "DV000010",
+        "constant": "PFCMD_CLEAR_DTC",
+        "evidence": "ui_ipc.qdc.wire.clearDtc"
+      },
+      {
+        "method": "clearDtcForMazda",
+        "api_id": "DV000011",
+        "constant": "PFCMD_CLEAR_DTC_FOR_MAZDA",
+        "evidence": "ui_ipc.qdc.wire.clearDtcForMazda"
+      },
+      {
+        "method": "forcedEndDiagnosis",
+        "api_id": "SC000007",
+        "constant": "PFCMD_FORCED_END_DIAGNOSIS",
+        "evidence": "ui_ipc.qdc.wire.forcedEndDiagnosis"
+      },
+      {
+        "method": "startDiagnosis",
+        "api_id": "SC000001",
+        "constant": "PFCMD_START_DIAGNOSIS",
+        "evidence": "ui_ipc.qdc.wire.startDiagnosis"
+      },
+      {
+        "method": "endDiagnosis",
+        "api_id": "SC000002",
+        "constant": "PFCMD_END_DIAGNOSIS",
+        "evidence": "ui_ipc.qdc.wire.endDiagnosis"
+      },
+      {
+        "method": "cancelAutoPowerOff",
+        "api_id": "DV000100",
+        "constant": "PFCMD_CANCEL_AUTO_POWER_OFF",
+        "evidence": "ui_ipc.qdc.wire.cancelAutoPowerOff"
+      }
+    ],
+    "smoke_scope": "Prepared harness scope: actual GTSMain/event startup route to a synthetic frame boundary; worker scan, view/controller cleanup, clear-dialog choices and consumer dispatch in bounded separate segments. Does not establish periodic pump→browser→feature callback delivery or full frame startup integration; execution results are reported separately.",
+    "context_policy": "Reuse PF profile/current confirmed vehicle; unavailable context requires VehicleConnect in GTS+ then TryAgain. No automatic new diagnosis.",
+    "normal_ui_features": [
+      "automatic serial DTC check",
+      "Refresh",
+      "cooperative Cancel",
+      "Clear All DTCs",
+      "window close"
+    ],
+    "registered_but_not_normal_ui": [
+      "VehicleConnect new-context selection/reset",
+      "diagnosis start/end",
+      "logout",
+      "footer bug URL"
+    ],
+    "source_only_helpers": [
+      "showVehicleConnectView (no direct caller found; not evidenced in startup route)",
+      "controller Back callback (no shipped view click binding)",
+      "reverse-worker helper (not installed in GtsWorkerApi.commandMap)",
+      "loadModel (no active command registration)",
+      "commented simple operation utility import"
+    ],
+    "persistence": "Quick-check ECU statuses, DTC lists, timestamp and cancel state are in worker/browser memory only; no TSE/buffer/report save invoked by this feature. Settings/profile are read; after-sales date/mileage and clear requests mutate ECU state through PF.",
+    "limits": "PF/API return handling is proven host behavior, not evidence of ECU clearing, durable report storage, or concurrent GTS+ exclusion."
+  },
   "coverage": {
     "components": [
       "controller",

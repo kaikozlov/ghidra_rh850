@@ -3920,10 +3920,13 @@ flowchart TD
     Arbitration -->|launch 1| Info["InfoCenter WPF / tray"]
     Arbitration -->|launch 2| PF["GTSPlus PF"]
     Arbitration -->|launch 3| CUW["CUW backend"]
-    Entry -->|user activation| Browser["GTS / CUW / QDC browsers"]
+    Entry -->|user activation| Browser["GTS / CUW browsers"]
     Content -->|signed assets| Browser
     Browser <-->|requests and responses| PF
     Browser <-->|programming control| CUW
+    Content --> QdcEntry["QDC index.html"]
+    QdcEntry -->|user click| QDC["QDCMain.html"]
+    QDC <-->|shared vehicle context| PF
     PF --> Operations["Diagnostic operations"]
     Operations --> VCI["VCI / ECU transport"]
     CUW --> VCI
@@ -4112,6 +4115,34 @@ Backend disconnect schedules session-scoped cleanup APIs and removes the
 session. GUI logout disposes its controllers/workers, ends diagnosis, and
 reconnects the login view. Application exit follows arbitration's separate
 shutdown protocol.
+
+### QDC quick DTC check
+
+The signed QDC resource names the feature **DTC Quick Check after
+Reprogramming**. Its shipped `index.html` button opens `QDCMain.html`.
+Startup requires an already confirmed PF vehicle/VIN and profile. Missing
+context offers Try Again/Exit and directs the user to VehicleConnect in GTS+;
+it does not start a new diagnosis automatically.
+
+The worker installs 66 distinct commands through 67 registration writes across
+four models. The later `endDiagnosis` prototype assignment is effective and
+returns `apiArgs`, replacing the earlier full-response implementation.
+Scanning visits ECUs serially, attempts power-off cancellation for an eligible
+ECU, and handles cooperative cancellation and END cleanup. Clear is per-ECU,
+except the Mazda branch performs its global clear once.
+
+A clear-prerequisite failure can return `result:false` with result-info 0.
+The controller checks result-info alone and opens the success dialog;
+acknowledgment starts another scan. Declining an error retry returns to prior
+results. These exits are explicit in the lifecycle graph.
+
+The reverse `WORKER_TO_MAIN` helper has no browser command-map registration.
+The actual `GtsWorkerApi.onMessage` consumer drops it, leaving the worker's
+deferred pending. Defining the callback does not connect this channel.
+Authenticated-source execution covered startup context decisions, worker
+scan/clear/cancel paths, effective `endDiagnosis`, dialog choices, and this
+actual dispatcher drop. Frame rendering and periodic pump delivery were
+synthetic boundaries in those runs.
 
 ### Authentication, licensing, and settings
 

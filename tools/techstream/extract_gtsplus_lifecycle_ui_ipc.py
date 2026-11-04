@@ -35,12 +35,13 @@ def rel(path: Path) -> str:
     return path.resolve().relative_to(REPO_ROOT).as_posix()
 
 
-def js_function(text: str, owner: str, name: str) -> str:
-    """Select complete prototype assignment up to the next prototype owner."""
+def js_function(text: str, owner: str, name: str, occurrence: int = 0) -> str:
+    """Select a prototype assignment; occurrence=-1 selects the effective last body."""
     pattern = re.escape(owner) + r'\.prototype\.' + re.escape(name) + r'\s*=\s*function\b'
-    match = re.search(pattern, text)
-    if not match:
+    matches = list(re.finditer(pattern, text))
+    if not matches:
         raise ValueError(f'missing frontend function {owner}.{name}')
+    match = matches[occurrence]
     # Decoded GTS production scripts concatenate complete prototype assignments.
     next_match = re.search(r'[A-Za-z_$][\w$]*\.prototype\.[\w$]+\s*=', text[match.end():])
     end = match.end() + next_match.start() if next_match else len(text)
@@ -56,6 +57,278 @@ def _operand(pe: Any, value: Any) -> str:
     if isinstance(row, dnfile.mdtable.TypeSpecRow):
         return f'TypeSpec[{bytes(row.Signature.value).hex()}]'
     return format_operand(pe, row)
+
+
+def qdc_contracts(assets: dict[str, bytes]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    """Pin QDC's shipped feature and distinguish registration from UI reachability."""
+    records: list[dict[str, Any]] = []
+
+    def pin(key: str, path: str, finding: str, owner: str = '', method: str = '',
+            needles: tuple[str, ...] = ()) -> str:
+        raw = assets[path]
+        text = raw.decode('utf-8-sig')
+        body = js_function(text, owner, method, -1) if owner else text
+        offset = text.index(body)
+        anchors = []
+        position = 0
+        for needle in needles:
+            at = body.find(needle, position)
+            if at < 0:
+                raise ValueError(f'QDC source drift: {path}:{method}:{needle}')
+            anchors.append(dict(text=needle, character_offset=offset+at,
+                                line=text.count('\n', 0, offset+at)+1))
+            position = at + len(needle)
+        eid = D+'qdc.'+key
+        records.append(dict(id=eid, source=D+'qdc.gui', kind='authenticated-javascript-contract',
+                            locator=path+(f'::{owner}.{method}' if owner else ''),
+                            asset_sha256=digest(raw), body_sha256=digest(body.encode()),
+                            character_offset=offset, line=text.count('\n', 0, offset)+1,
+                            anchors=anchors, finding=finding))
+        return eid
+
+    main = 'js/gts/GTSMain.js'
+    worker = 'js/gts/GTSWorker.js'
+    quick = 'js/gts/quick_dtc_check/quick_dtc_check_worker.js'
+    controller = 'js/gts/quick_dtc_check/quick_dtc_check_controller.js'
+    frame = 'js/gts/main_frame/main_frame_controller.js'
+    vehicle = 'js/gts/vehicle_connect/vehicle_connect_worker.js'
+    refs = {}
+    refs['purpose'] = pin('purpose', 'resources/en/resource.json',
+        'Shipped title is DTC Quick Check after Reprogramming; instructions require existing GTS+ VehicleConnect, prohibit operating GTS+ concurrently, and direct further diagnosis back to GTS+.',
+        needles=('"DTC Quick Check after Reprogramming"', '"Clear All DTCs"',
+                 '"Refresh"', '"Absent/No Comm."', '"Close this window', '"If there were existent DTCs',
+                 '"The carrying out this application requires a VehicleConnect.',
+                 '"Note:\\nWhen this Application is active'))
+    refs['entry'] = pin('entry', 'QDCMain.html',
+        'Entry loads main/frame, VehicleConnect and QuickDtcCheck sources, not the normal GTS login/dashboard.',
+        needles=('js/gts/GTSMain.js', 'js/gts/vehicle_connect/vehicle_connect_controller.js',
+                 'js/gts/quick_dtc_check/quick_dtc_check_controller.js'))
+    refs['launcher'] = pin('launcher', 'index.html',
+        'Authenticated qdc/index.html binds start_btn_1 to window.open QDCMain.html in _BLANK with1024x768 resizable options. This is the evidenced shipped launcher; the after-reprogramming title does not establish a GTS/CUW launch edge.',
+        needles=('button[id^=start_btn]', 'start_btn_1', 'html = "QDCMain.html"',
+                 'width=1024px, height=768px, resizable=yes', "window.open(html, '_BLANK', opt)",
+                 '<button id="start_btn_1">start(horizontal)</button>'))
+    refs['profile'] = pin('profile', worker,
+        'PF userProfile JSON is projected into shared worker userInfo. API rejection or malformed JSON resolves result=false with existing userInfo; no login is initiated.',
+        'WorkerController', 'getPfUserProfile',
+        ('getPfConfig()', 'createReturnValue(true)', '.catch', 'createReturnValue(false)',
+         'JSON.parse(response.apiArgs.userProfile)', 'controller.commonInfo.setUserInfo(userInfo)'))
+    refs['context'] = pin('context', worker,
+        'Only successful getVehicleConfirmation with truthy vinCode yields result=true. Copy PF VIN, vehicleId, decisionVin, categories, car attributes and options; API/missing-VIN errors resolve false. Commented mounted/configuration/provenance fields are not hydrated.',
+        'WorkerController', 'getCurrentInformation',
+        ('getVehicleConfirmation()', 'createReturnValue(true)', '.catch', 'createReturnValue(false)',
+         'response.apiArgs && response.apiArgs.vinCode', 'controller.commonInfo.vehicleInfo.vin',
+         'controller.commonInfo.vehicleInfo.optionList', 'return Promise.reject()'))
+    refs['context_ui'] = pin('context_ui', main,
+        'Success displays do-not-operate-GTS warning then copies vehicle fields and enters frame after acknowledgement. No current context shows TryAgain/Exit: TryAgain re-queries PF, Exit closes. It does not create a new context.',
+        'GTSMain', 'onCheckVehicle',
+        ('getCurrentInformation()', 'showWarningDialog(response.vehicleInfo)',
+         'showVehicleConfirmationErrorDialog()', "'r_msg_iAP99'", 'VEHICLE_CONNECTED',
+         "'r_msg_wAP98'", "pressed.id === 'TryAgain'", 'VEHICLE_CHECK', 'gts.util.closeWindow()'))
+    refs['new_context'] = pin('new_context', vehicle,
+        'Registered callable clone refleshDiagnosis attempts forcedEndDiagnosis then startDiagnosis; both errors are swallowed, and diagnosisRestarted becomes true even when both fail. Not a QDC startup fallback.',
+        'VehicleConnectWorkerModel', 'refleshDiagnosis',
+        ('gtsPFApi.forcedEndDiagnosis()', '.catch', 'gtsPFApi.startDiagnosis()', '.catch',
+         '.then(forcedEndDiagnosis)', '.then(startDiagnosis)', 'model.cache.diagnosisRestarted = true'))
+    refs['orphan_connect'] = pin('orphan_connect', main,
+        'showVehicleConnectView implements a selectable new-vehicle route but has no direct source call site in QDC assets. Startup/event routing instead evidences reuse/retry/exit; registration alone is not proof of normal UI reachability.',
+        'GTSMain', 'showVehicleConnectView',
+        ('mainObj.initUnitString()', 'mainObj.initUserTypeSettings()',
+         'GTSMain.controller.VEHICLE_CONNECT', 'VehicleConnectController.ControllerEvent.VEHICLE_CONNECTED'))
+    refs['frame'] = pin('frame', frame,
+        'Frame has only QuickDtcCheck child; refresh mounted ECUs, start battery polling, mileage and display metadata, suppress normal navigation/print/stored controls, then enter quick check.',
+        'MainFrameController', 'init',
+        ('gtsWorkerApi.getECUList', '.then(initMountedEcuList)', 'startGetVBatteryValue',
+         'getMileageInformation', 'getDisplayInfo', 'storedData: false', 'print: false',
+         'MainFrameController.ControllerID.QUICK_DTC_CHECK'))
+    refs['init'] = pin('init', quick,
+        'Build ephemeral cache: VIN/date format, PC+distributor settings, country permanent-DTC policy, flattened equipped ECUs, softwareId. Any failure resolves result=false, possibly with partial ECU list.',
+        'QuickDtcCheckWorkerModel', 'initQuickDtcCheck',
+        ('model.cache=cache', 'getSettingFileInfo()', 'getEquippedEcuList()', 'getSoftwareId()',
+         'createReturnValue(true)', 'createReturnValue(false)', 'cacheData.displayPermanent'))
+    refs['scan'] = pin('scan', quick,
+        'Start 100ms message pump then clear connection cache and scan ECUs serially. Cancel skips not-yet-started ECUs only. Connection rejection becomes WITHOUT; DTC-read rejection becomes UNKNOWN; capability/system/cache errors abort remaining scan and resolve false. Current DTC functions preferred over past; permanent regulatory function32 only when configured. Always enqueue END and reset cancel flag, including failure.',
+        'QuickDtcCheckWorkerModel', 'startDtcCheck',
+        ('INTERVAL_TIME=100', 'model.commandThread.start', 'clearEcuConnectCache()',
+         'if(model.isCancel)', 'QuickDtcCheck.ecuStatus.ABNORMAL',
+         'QuickDtcCheck.ecuStatus.NORMAL', 'QuickDtcCheck.ecuStatus.UNKNOWN',
+         'QuickDtcCheck.ecuStatus.WITHOUT', 'createReturnValue(false)',
+         'functionIdList=[DTC_FFD,CHECK_DTC,DTC_FFD_P5,CHECK_REGULATORY]',
+         'if(currentList.length)', 'else if(pastList.length)',
+         'QuickDtcCheck.messageId.END,cancel:model.isCancel', 'model.isCancel=false'))
+    refs['clear'] = pin('clear', quick,
+        'Clear all connected capable ECUs serially. Optional after-sales date/mileage write ignores error; non-Mazda clears per ECU, phase21 Mazda global clear once. First clear resultInfo error retained while scan continues; prerequisite errors resolve result=false. This is an ECU mutation, not a saved report.',
+        'QuickDtcCheckWorkerModel', 'clearDtc',
+        ('MAZDA_CAN=21', 'CLEAR_DTC_FFD_FAS=67', 'clearEcuConnectCache()',
+         'isClearDtcFfdForAfterSales', 'ecuInfo.phaseType !== MAZDA_CAN',
+         'writeAfterSalesZone(ecuInfo)', 'clearDtc(ecuInfo)', 'if(yetCleared)',
+         'clearDtcForMazda()', 'yetCleared=false', 'createReturnValue(false)',
+         'gtsPFApi.writeAfterSalesZone(para)', 'if(resultInfo.result === NORMAL)'))
+    refs['cancel'] = pin('cancel', quick,
+        'Cancel merely sets isCancel=true and returns true; it sends no PF cancel and does not interrupt in-flight ECU requests.',
+        'QuickDtcCheckWorkerModel', 'cancelDtcCheck', ('model.isCancel=true',))
+    refs['stop'] = pin('stop', quick,
+        'endDtcCheck clears cancel flag and stops interval producer; not called automatically by scan promise, but by controller receiving END.',
+        'QuickDtcCheckWorkerModel', 'endDtcCheck', ('model.isCancel=false', 'model.commandThread.stop'))
+    refs['ui_results'] = pin('ui_results', controller,
+        'GOT updates ECU status/DTC list; END stops pump, blanks timestamp on cancel, updates view and clears busy flag. Worker result=false is not inspected in this callback.',
+        'QuickDtcCheckController', 'onReceiveMessage',
+        ('QuickDtcCheck.messageId.GOT', 'updateEcuStatus', 'QuickDtcCheck.messageId.END',
+         "message.cancel?'':message.timestamp", 'controller.model.endDtcCheck()',
+         'controller.isCheckingDtc=false'))
+    refs['ui_clear'] = pin('ui_clear', controller,
+        'Clear shows wait modal; completion closes it and chooses retry dialog solely by response.resultInfo.result, not response.result. Success acknowledgement refreshes; failure Yes repeats clear.',
+        'QuickDtcCheckController', 'onClearDtc',
+        ('showSQuickDtcCheckDl001', 'controller.model.clearDtc()', 'showSQuickDtcCheckDl001',
+         'if(response.resultInfo.result)', 'showSQuickDtcCheckDl003', 'showSQuickDtcCheckDl002'))
+    refs['clear_ack'] = pin('clear_ack', controller,
+        'Success-dialog acknowledgement triggers START_DTC_CHECK, including the outer-result=false/resultInfo-normal mismatch.',
+        'QuickDtcCheckController', 'showSQuickDtcCheckDl002',
+        ('dialog.buttonPressed.then', 'QuickDtcCheckController.ControllerEvent.START_DTC_CHECK'))
+    refs['clear_retry_choice'] = pin('clear_retry_choice', controller,
+        'Retry dialog Yes triggers CLEAR_DTC again; No resolves without retry or fresh scan, leaving displayed prior results.',
+        'QuickDtcCheckController', 'showSQuickDtcCheckDl003',
+        ('dialog.buttonPressed.then', 'BUTTON_YES', 'QuickDtcCheckController.ControllerEvent.CLEAR_DTC', 'else'))
+    refs['dispose'] = pin('dispose', controller,
+        'Disposal while checking hides status and rejects; idle disposal removes view/events. A source Back callback exists separately, but the shipped view binds only Clear/Cancel/Refresh.',
+        'QuickDtcCheckController', 'dispose',
+        ('if(controller.isCheckingDtc)', 'view.hideStatusPane()', 'Promise.reject()',
+         'view.disposeView()', 'controller.eventDisp.dispose()'))
+    refs['back'] = pin('back', controller, 'Callable controller Back callback closes browser directly; not a shipped view click binding.',
+        'QuickDtcCheckController', 'onClickSQuickDtcCheck001ViewBackBtn', ('gts.util.closeWindow()',))
+    view = 'js/gts/quick_dtc_check/quick_dtc_check_screen_01_view.js'
+    refs['view_title'] = pin('view_title', view,
+        'Actual view writes localized r_item_iAP01 to document title and header, establishing the after-reprogramming quick-check purpose from executable UI code.',
+        'QuickDtcCheckScreen01View', 'initView',
+        ("$('title').text(view.getResourceData('r_item_iAP01'))", "document.querySelector('#h_title').textContent"))
+    refs['view_controls'] = pin('view_controls', view,
+        'During scan Clear/Refresh disabled and Cancel enabled/visible; END enables Clear/Refresh, disables/hides Cancel. A cancelled END leaves checking text rather than writing Completed timestamp.',
+        'QuickDtcCheckScreen01View', 'initEcuList',
+        ("document.querySelector('#v_c_quick_dtc_check_btn_clear').disabled=true",
+         "document.querySelector('#v_c_quick_dtc_check_btn_cancel').disabled=false",
+         "document.querySelector('#v_c_quick_dtc_check_btn_refresh').disabled=true"))
+    refs['view_end'] = pin('view_end', view,
+        'END view update writes Completed only with nonempty timestamp; enables Clear and Refresh even after a failed/partial scan.',
+        'QuickDtcCheckScreen01View', 'endUpdateStatus',
+        ('if(timeStamp)', "'r_item_iAP03'", "document.querySelector('#v_c_quick_dtc_check_btn_clear').disabled=false",
+         "document.querySelector('#v_c_quick_dtc_check_btn_cancel').disabled=true",
+         "document.querySelector('#v_c_quick_dtc_check_btn_refresh').disabled=false"))
+    refs['view_events'] = pin('view_events', view,
+        'Shipped DOM click handlers bind Clear, Cancel and Refresh only. Back callback is present in source, but no Back click binding is installed here; shipped instructions instead say close window.',
+        'QuickDtcCheckScreen01View', 'initEventHandler',
+        ("$('#v_c_quick_dtc_check_btn_clear').on('click'", "$('#v_c_quick_dtc_check_btn_cancel').on('click'",
+         "$('#v_c_quick_dtc_check_btn_refresh').on('click'"))
+    refs['power_off'] = pin('power_off', worker,
+        'Normal controller scan first requests cancelAutoPowerOff. Worker selects the last available ECU among454/6034/6534, sends its ecuId; no matching ECU and PF rejection both resolve without aborting scan.',
+        'WorkerController', 'cancelAutoPowerOff',
+        ('[454, 6034, 6534,]', 'getEcuInfoByEcuId(ecuId)', 'if (!powerEcuIdInfo)',
+         'gtsPFApi.cancelAutoPowerOff(param)', '.catch'))
+    refs['end_diagnosis_effective'] = pin('end_diagnosis_effective', worker,
+        'Effective last endDiagnosis assignment overwrites the earlier wrapper before registration: success returns result.apiArgs, not the full PF response; PF rejection propagates.',
+        'WorkerController', 'endDiagnosis',
+        ('gtsPFApi.endDiagnosis()', 'Promise.resolve(result.apiArgs)', 'Promise.reject(reason)'))
+    consumer = 'js/gts/common/gts_worker_api.js'
+    refs['reverse_unregistered'] = pin('reverse_unregistered', consumer,
+        'initMainCommand is empty. Defining utility WORKER_TO_MAIN metadata does not register a commandMap callback; normal consumer therefore drops reverse-worker messages.',
+        'GtsWorkerApi', 'initMainCommand', ('function(){}',))
+    refs['reverse_drop'] = pin('reverse_drop', consumer,
+        'Unsolicited messages route by commandMap. Missing WORKER_TO_MAIN callback logs and returns; the worker deferred remains pending, with no timeout/drain. Helper dispatch is callable only if separately installed/invoked.',
+        'GtsWorkerApi', 'onMessage',
+        ('gtsWorkerApi.commandMap[response.commandId]', 'if(!commandFunc)', "'command not found: '", 'return;'))
+    refs['main_request'] = pin('main_request', worker,
+        'Worker-to-main request saves resolve/reject under Date.now modulo10^10, emits WORKER_TO_MAIN with nested requestId/command/parameter; no timeout or disconnect drain here. Collision loop waits synchronously for clock advance.',
+        'WorkerController', 'callTaskOnMainThread',
+        ('controller._requestMap', 'while (requestId in controller._requestMap)',
+         "commandId: 'WORKER_TO_MAIN'", 'controller.SendToBrowser(commandParam)', 'Date.now() % 10000000000'))
+    refs['main_response'] = pin('main_response', worker,
+        'MAIN_TO_WORKER response with errorCode exactly0 resolves, otherwise rejects; delete deferred. Missing request logs/returns; absent _requestMap is not guarded.',
+        'WorkerController', 'onRescieveMainThreadResponse',
+        ('controller._requestMap[requestId]', 'if (!requestDef)', 'errorCode === 0x0000',
+         'requestDef.resolve', 'requestDef.reject', 'delete controller._requestMap[requestId]'))
+    refs['main_dispatch'] = pin('main_dispatch', 'js/gts/common/gts_utility.js',
+        'Unregistered browser helper, not the normal QDC message route: if explicitly invoked, dispatches commandMap callback or returns error1. Its callable login helper opens blank window, polls certification/close, and cleans interval+popup+loader in finally.',
+        needles=('gts.util.onRescieveMessageFromWorker = function', 'thisFunc.commandMap[commandId]',
+                 'errorCode: 0x0001', 'gtsWorkerApi.sendMainThreadResponse',
+                 'gts.util.startLoginProcess = function', "window.open('blank.html'",
+                 'setInterval', '.finally', 'clearInterval'))
+
+    worker_text = assets[worker].decode('utf-8-sig')
+    model_paths = [path for path in re.findall(r"^importScripts\(BASE_PATH \+ '([^']+_worker\.js)'\);", worker_text, re.M)
+                   if re.search(r"workerController\.workerModels\['[^']+'\]\s*=", assets[path].decode('utf-8-sig'))]
+    registrations = []
+    defaults = js_function(worker_text, 'WorkerController', 'init')
+    # Start-of-line excludes commented clone assignments and preserves duplicate writes.
+    for match in re.finditer(r"^\s*controller\.defaultCommands\['([^']+)'\]\s*=\s*controller\.(\w+)\.bind", defaults, re.M):
+        registrations.append(dict(command=match[1], handler=match[2], owner='WorkerController', path=worker))
+    for path in model_paths:
+        text = assets[path].decode('utf-8-sig')
+        owner = re.search(r'function\s+(\w+)\(', text)[1]
+        constants = dict(re.findall(r"(\w+):'([^']+)'", text))
+        body = js_function(text, owner, 'initCommandHandler')
+        for match in re.finditer(r"model\.commandHandler\[([^\]]+)\]\s*=\s*model\.(\w+)\.bind", body):
+            expression = match[1]
+            command = expression.strip("'\"") if expression[0] in "'\"" else constants[expression.rsplit('.', 1)[1]]
+            registrations.append(dict(command=command, handler=match[2], owner=owner, path=path))
+    final_commands = {entry['command']: entry for entry in registrations}
+    for entry in final_commands.values():
+        text = assets[entry['path']].decode('utf-8-sig')
+        body = js_function(text, entry['owner'], entry['handler'], -1)
+        at = text.index(body)
+        entry['handler_character_offset'] = at
+        entry['handler_line'] = text.count('\n', 0, at)+1
+        entry['handler_end_line'] = text.count('\n', 0, at+len(body))+1
+        entry['handler_sha256'] = digest(body.encode())
+        entry['direct_pf_methods'] = sorted(set(re.findall(r'gtsPFApi\.(\w+)\(', body)))
+        pattern = re.escape(entry['owner'])+r'\.prototype\.'+re.escape(entry['handler'])+r'\s*=\s*function\b'
+        assignments = list(re.finditer(pattern, text))
+        entry['prototype_assignment_count'] = len(assignments)
+        entry['overwritten_assignments'] = [
+            dict(character_offset=match.start(), line=text.count('\n', 0, match.start())+1,
+                 body_sha256=digest(js_function(text, entry['owner'], entry['handler'], index).encode()))
+            for index, match in enumerate(assignments[:-1])]
+    registry_id = pin('registry', worker,
+        'Active default assignments plus four imported worker registries are censused, excluding commented echo/changeFunction/createTseFile and simple-utility imports. Registration is callable transport, not UI feature reachability.',
+        'WorkerController', 'init', ('controller.defaultCommands', 'Object.assign({}, controller.defaultCommands)',
+                                   'Object.assign(controller.commandHandler, controller.workerModels[fn].commandHandler)'))
+    records[-1].update(registration_writes=len(registrations), unique_commands=len(final_commands),
+                       duplicate_commands=[k for k, v in collections.Counter(r['command'] for r in registrations).items() if v > 1],
+                       imported_models=model_paths, commands=list(final_commands.values()))
+    # Record direct callers only; dynamic reachability is not disproved by a name scan.
+    connect_calls = []
+    for path, raw in assets.items():
+        if path.endswith('.js'):
+            text = raw.decode('utf-8-sig', errors='replace')
+            for match in re.finditer(r'\.showVehicleConnectView\s*\(', text):
+                connect_calls.append(dict(path=path, character_offset=match.start()))
+    records[-1]['show_vehicle_connect_direct_callers'] = connect_calls
+    raw_path = 'js/gts/common/gts_platform_raw_interface.js'
+    raw_text = assets[raw_path].decode('utf-8-sig')
+    constants = dict(re.findall(r"\bvar\s+(PFCMD_\w+)='([^']+)'", raw_text))
+    wire_contracts = []
+    for method in ('getPfConfig', 'getVehicleConfirmation', 'getSettingFileInfo', 'getEquippedEcuList',
+                   'getSoftwareId', 'clearEcuConnectCache', 'checkEcuConnect', 'excuteSystemException',
+                   'getEcuFunctionList', 'getDtc', 'writeAfterSalesZone', 'clearDtc', 'clearDtcForMazda',
+                   'forcedEndDiagnosis', 'startDiagnosis', 'endDiagnosis', 'cancelAutoPowerOff'):
+        body = js_function(raw_text, 'GtsPFRawInterface', method)
+        match = re.search(r'\.send\((PFCMD_\w+),', body)
+        if not match or match[1] not in constants:
+            raise ValueError(f'QDC PF wire mapping drift: {method}')
+        eid = pin('wire.'+method, raw_path,
+                  f'QDC PF wrapper {method} sends {constants[match[1]]}; external execution outcome is outside this source contract.',
+                  'GtsPFRawInterface', method, (match[0],))
+        wire_contracts.append(dict(method=method, api_id=constants[match[1]], constant=match[1], evidence=eid))
+    return records, dict(
+        purpose='DTC Quick Check after Reprogramming', evidence=refs, registry_evidence=registry_id,
+        launcher=dict(package='qdc.gui', asset='index.html', action='start_btn_1 click → window.open QDCMain.html',
+                      evidence=refs['launcher'], integration_limit='No GTS/CUW direct-launch relationship is inferred.'),
+        pf_wire_contracts=wire_contracts,
+        smoke_scope='Prepared harness scope: actual GTSMain/event startup route to a synthetic frame boundary; worker scan, view/controller cleanup, clear-dialog choices and consumer dispatch in bounded separate segments. Does not establish periodic pump→browser→feature callback delivery or full frame startup integration; execution results are reported separately.',
+        context_policy='Reuse PF profile/current confirmed vehicle; unavailable context requires VehicleConnect in GTS+ then TryAgain. No automatic new diagnosis.',
+        normal_ui_features=['automatic serial DTC check', 'Refresh', 'cooperative Cancel', 'Clear All DTCs', 'window close'],
+        registered_but_not_normal_ui=['VehicleConnect new-context selection/reset', 'diagnosis start/end', 'logout', 'footer bug URL'],
+        source_only_helpers=['showVehicleConnectView (no direct caller found; not evidenced in startup route)', 'controller Back callback (no shipped view click binding)', 'reverse-worker helper (not installed in GtsWorkerApi.commandMap)', 'loadModel (no active command registration)', 'commented simple operation utility import'],
+        persistence='Quick-check ECU statuses, DTC lists, timestamp and cancel state are in worker/browser memory only; no TSE/buffer/report save invoked by this feature. Settings/profile are read; after-sales date/mileage and clear requests mutate ECU state through PF.',
+        limits='PF/API return handling is proven host behavior, not evidence of ECU clearing, durable report storage, or concurrent GTS+ exclusion.')
 
 
 def build(root: Path = DEFAULT_ROOT, main_root: Path = DEFAULT_MAIN, aux_root: Path = DEFAULT_AUX) -> dict[str, Any]:
@@ -307,6 +580,8 @@ def build(root: Path = DEFAULT_ROOT, main_root: Path = DEFAULT_MAIN, aux_root: P
     front['qdc_init']=js('qdc_init','js/gts/GTSMain.js','GTSMain','init','QDC reuses platform/worker but omits login and menu, gets PF user profile then triggers VEHICLE_CHECK.',('platformSession.connect','gtsWorkerApi.connect','getPfUserProfile','VEHICLE_CHECK'),package='qdc')
     front['qdc_connect']=js('qdc_connect','js/gts/GTSWorker.js','WorkerController','cmdConnect','QDC dedicated worker registers QDC,max3, then challenge/API authentication; no buffer worker startup.',('ScreenRelay.API_ID.QDC','maxNum = 3','connect(name, maxNum)','createChallengeCode','checkApiAuthentication'),package='qdc')
     front['qdc_disconnect']=js('qdc_disconnect','js/gts/GTSWorker.js','WorkerController','cmdDisconnect','QDC worker disposes common state then disconnects native socket; buffer infrastructure was removed in this entry variant.',('commonInfo.dispose','gtsPFApi.disconnect()'),package='qdc')
+    qdc_evidence, qdc_features = qdc_contracts(assets_by_package['qdc'])
+    evidence.extend(qdc_evidence)
     main_html=assets_by_package['gts']['GTSMain.html']
     if b'window.onbeforeunload = confirmExit' not in main_html or b'return "Are you sure you want to close GTS+?"' not in main_html:
         raise ValueError('browser close prompt drift')
@@ -335,7 +610,18 @@ def build(root: Path = DEFAULT_ROOT, main_root: Path = DEFAULT_MAIN, aux_root: P
     states.extend([
         dict(id=D+'stored',owner='browser StoredFrameController',meaning='Stored entry with tse query path'),
         dict(id=D+'panel',owner='browser ActiveTestPanelMain',meaning='TGD-embedded active-test panel with screen relay'),
-        dict(id=D+'qdc',owner='browser QDC MainFrameController',meaning='Quick-DTC-check variant without login/menu'),
+        dict(id=D+'qdc',owner='browser QDC MainFrameController',meaning='DTC Quick Check after Reprogramming, reusing PF vehicle context without login/menu'),
+    ])
+    states.extend(dict(id=D+'qdc_'+name, owner=owner, meaning=meaning) for name, owner, meaning in [
+        ('context_wait', 'QDC GTSMain', 'PF vehicle unavailable; GTS+ VehicleConnect required, retry/exit dialog'),
+        ('warning', 'QDC GTSMain', 'Current PF context found; do-not-operate-GTS warning awaiting acknowledgement'),
+        ('scanning', 'QuickDtcCheckWorkerModel', 'Serial ECU checks and 100ms message pump; transient status queue'),
+        ('results', 'QuickDtcCheckController', 'Completed/cancelled/partial statuses displayed; no saved report'),
+        ('clearing', 'QuickDtcCheckWorkerModel', 'Serial capability-gated clear requests; aggregate first error'),
+        ('clear_success_dialog', 'QuickDtcCheckController', 'Clear success dialog pending acknowledgement; also reached on outer false with normal resultInfo'),
+        ('clear_retry_dialog', 'QuickDtcCheckController', 'Clear resultInfo error; awaiting retry Yes/No'),
+        ('new_context_callable', 'VehicleConnectWorkerModel', 'Registered reset/selection clone, not reached by shipped QDC startup'),
+        ('main_request', 'QDC worker/browser bridge', 'Worker request deferred pending main-thread callback'),
     ])
     transitions=[]
     def tr(name: str, start: str, end: str, trigger: str, guard: str, action: str, refs: list[str]) -> None:
@@ -371,6 +657,27 @@ def build(root: Path = DEFAULT_ROOT, main_root: Path = DEFAULT_MAIN, aux_root: P
     tr('panel_entry','connected','panel','ActiveTestPanelMain.init','Panel metadata load succeeds','Parse operation identifiers and relay open result to TGD caller',[front['panel_init'],front['panel_error']])
     tr('qdc_entry','connected','qdc','QDC GTSMain.init','PF user profile/vehicle check domain sequence','Dedicated/shared QDC session,max3; no normal login/menu or buffer worker',[front['qdc_init'],front['qdc_connect']])
     tr('qdc_stop','qdc','disconnecting','QDC worker disconnect','Worker stop command','Dispose common state then native socket disconnect',[front['qdc_disconnect']])
+    q = qdc_features['evidence']
+    tr('qdc_no_context', 'qdc', 'qdc_context_wait', 'getCurrentInformation completes false', 'PF rejection or missing vinCode', 'Prompt to perform VehicleConnect in GTS+; no new diagnosis fallback', [q['context'], q['context_ui'], q['purpose']])
+    tr('qdc_retry_context', 'qdc_context_wait', 'qdc', 'TryAgain', 'User chooses retry', 'Repeat VEHICLE_CHECK and query current PF context', [q['context_ui']])
+    tr('qdc_exit_context', 'qdc_context_wait', 'disconnecting', 'Exit', 'No current vehicle required', 'Close browser; socket cleanup is separate', [q['context_ui']])
+    tr('qdc_reuse_context', 'qdc', 'qdc_warning', 'Current PF vehicle returned', 'Truthy vinCode', 'Reuse vehicle identity/category/options and warn not to operate GTS+', [q['context'], q['context_ui']])
+    tr('qdc_begin_scan', 'qdc_warning', 'qdc_scanning', 'Warning acknowledgement/frame initialization', 'Settings/equipped ECU/softwareId initialization succeeds', 'Enter sole QuickDtcCheck child, best-effort cancelAutoPowerOff, then serial scan/message pump', [q['frame'], q['init'], q['power_off'], q['scan']])
+    tr('qdc_scan_end', 'qdc_scanning', 'qdc_results', 'END dequeued', 'Success, capability failure, cancellation, or partial read failures', 'Update statuses, stop pump, clear busy flag; failure result itself not checked by controller', [q['scan'], q['ui_results'], q['stop']])
+    tr('qdc_cancel_scan', 'qdc_scanning', 'qdc_scanning', 'Cancel', 'Scan in progress', 'Set flag only; current PF request continues, subsequent ECUs skipped, END cancel hides timestamp', [q['cancel'], q['scan'], q['ui_results']])
+    tr('qdc_refresh', 'qdc_results', 'qdc_scanning', 'Refresh', 'Quick-check initialized', 'Reinitialize displayed ECU statuses, best-effort cancelAutoPowerOff, and scan again', [q['scan'], q['power_off']])
+    tr('qdc_clear', 'qdc_results', 'qdc_clearing', 'Clear All DTCs', 'Connected ECU exposes clear detail or Mazda phase21', 'After-sales write best effort then clear per ECU/global Mazda once; retain first error', [q['clear']])
+    tr('qdc_clear_retry', 'qdc_clearing', 'qdc_clear_retry_dialog', 'Clear response contains resultInfo error', 'response.resultInfo.result is nonzero', 'Close wait modal and offer retry', [q['clear'], q['ui_clear']])
+    tr('qdc_clear_success', 'qdc_clearing', 'qdc_clear_success_dialog', 'Clear completes with normal resultInfo', 'response.result=true and resultInfo.result=0', 'Close wait modal and display success dialog', [q['clear'], q['ui_clear']])
+    tr('qdc_clear_false_success', 'qdc_clearing', 'qdc_clear_success_dialog', 'Prerequisite failure before recorded clear error', 'response.result=false but resultInfo.result=0', 'Controller ignores outer failure and displays success dialog', [q['clear'], q['ui_clear']])
+    tr('qdc_clear_success_ack', 'qdc_clear_success_dialog', 'qdc_scanning', 'Success acknowledgement', 'User acknowledges dialog', 'Trigger START_DTC_CHECK and scan again', [q['clear_ack'], q['power_off'], q['scan']])
+    tr('qdc_clear_retry_yes', 'qdc_clear_retry_dialog', 'qdc_clearing', 'Retry Yes', 'User chooses Yes', 'Trigger CLEAR_DTC again', [q['clear_retry_choice']])
+    tr('qdc_clear_retry_no', 'qdc_clear_retry_dialog', 'qdc_results', 'Retry No', 'User declines retry', 'Resolve without clearing or scanning again; leave prior display', [q['clear_retry_choice']])
+    tr('qdc_close', 'qdc_results', 'disconnecting', 'User closes browser window', 'Shipped instruction says close window; view binds no Back click', 'No feature report-save or explicit endDiagnosis close hook; native transport cleanup is separately owned', [q['purpose'], q['view_events'], front['qdc_disconnect'], ids['disconnect']])
+    tr('qdc_new_context_callable', 'qdc', 'qdc_new_context_callable', 'Explicit registered vehicleConnect.refleshDiagnosis invocation', 'Not a normal QDC UI route', 'Attempt forced end then start; swallow failures and set diagnosisRestarted', [q['new_context'], q['orphan_connect'], qdc_features['registry_evidence']])
+    tr('qdc_main_request', 'qdc', 'qdc_main_request', 'callTaskOnMainThread', 'Request id unused', 'Emit WORKER_TO_MAIN and retain deferred; normal QDC consumer has no registered reverse callback', [q['main_request'], q['reverse_unregistered']])
+    tr('qdc_main_dropped', 'qdc_main_request', 'qdc_main_request', 'Browser GtsWorkerApi.onMessage', 'No commandMap.WORKER_TO_MAIN callback', 'Log command-not-found and return; worker promise remains pending', [q['reverse_drop'], q['reverse_unregistered']])
+    tr('qdc_main_response', 'qdc_main_request', 'qdc', 'Explicit MAIN_TO_WORKER response (not normal reverse-route continuation)', 'Response externally supplied for matching requestId', 'Resolve only errorCode0, otherwise reject; delete deferred', [q['main_response']])
     tr('tab_close','connected','disconnecting','Browser unload proceeds','User accepts browser close prompt','No direct native shutdown call in unload handler; transport disconnect drives native session cleanup',[D+'browser_close',ids['ws_close'],ids['disconnect']])
     handoffs=[
         dict(to_domain='bootstrap',caller='LocalWebServerWindowsService.Program.Main',callee='SCM GTS+GUIServer / arbitration monitoring',mechanism='ServiceBase.Run; MsgDatComm alive/end callback registration; SCM owns actual host stop',payload='OnStart/OnStop; alive string; execute flag. Bootstrap config sets service EndMode0, so ordinary arbitration exit does not invoke registered ending callbacks. ExecuteEnding itself only unregisters monitors when execute=true.',policy_reference=['bootstrap.config','bootstrap.arb-confirm','bootstrap.arb-execute'],evidence=[ids['host'],ids['stop'],ids['ending']]),
@@ -380,11 +687,27 @@ def build(root: Path = DEFAULT_ROOT, main_root: Path = DEFAULT_MAIN, aux_root: P
         dict(to_domain='persistence',caller='GTSMain / MainFrameController',callee='stored-data workers',mechanism='initStoredData; browser workers',payload='CommonInfo session model and saved-data registry',evidence=[front['ui_init'],front['frame_stop']]),
         dict(to_domain='cuw_utility',caller='ContentServer GUI resource service',callee='CUWMain.html',mechanism='TLS GET /GetResource/cuw/CUWMain.html plus browser workers',payload='Authenticated cuw.gui resources; command contracts owned by CUW domain',evidence=[D+'routes',D+'frontend_inventory']),
     ]
+    handoffs.extend([
+        dict(to_domain='vehicle_session', caller='QDC getCurrentInformation / registered VehicleConnect clone', callee='PF getVehicleConfirmation / diagnosis reset',
+             mechanism='QDC worker → PF API', payload='Current VIN/vehicleId/category/options read PF common[0]; explicit diagnosis start may attach shared adaptation; reset remains separately callable and is not the evidenced startup route',
+             policy_reference=['vehicle_session.pf_ExecuteGetVehicleConfirmation', 'vehicle_session.pf_ExecuteNotifyVehicleConfirmation',
+                               'vehicle_session.pf_ExecuteStartDiagnosis', 'vehicle_session.pf_ExecuteEndDiagnosis', 'vehicle_session.pf_ExecuteEndDiagAdaptation'],
+             evidence=[q['context'], q['context_ui'], q['new_context']]),
+        dict(to_domain='operations', caller='QuickDtcCheckWorkerModel.startDtcCheck/clearDtc', callee='PF ECU connect/capabilities/DTC/after-sales/clear',
+             mechanism='Sequential API promises, 100ms worker message pump', payload='Best-effort cancelAutoPowerOff for last matching ECU454/6034/6534 precedes normal scan; groupId,ecuId,busId,phaseType,getDtcList; date/mileage; Mazda global clear', evidence=[q['power_off'], q['scan'], q['clear'], q['cancel']]),
+        dict(to_domain='auth_settings', caller='QDC getPfUserProfile / worker-to-main login helper', callee='PF profile / browser login callback',
+             mechanism='PF profile JSON; reverse-worker helper is not registered in normal QDC consumer', payload='userInfo fallback=false is not fresh login; WORKER_TO_MAIN is dropped and its worker deferred remains pending; callable login helper behavior is separate', evidence=[q['profile'], q['main_request'], q['reverse_drop'], q['main_dispatch']]),
+    ])
     persistence=[dict(path_pattern='%SystemDrive%/Toyota Diagnostics/GTSPlusGUI/{gts,cuw,qdc}.{gui,cpf}',producer='installed package/update system',consumer='GTS+GUIServer GuiFileContainer',created='installer/update outside this domain',flushed='archives immutable during load; decrypted ZIP stays in process memory',deleted='OnGuiFileDeleted can remove cached app if invoked; watcher not registered here',evidence=[ids['gui_init'],ids['gui_deleted'],ids['passphrase'],D+'frontend_inventory'])]
+    persistence.append(dict(path_pattern='QDC worker/browser memory (no file output)', producer='QuickDtcCheckWorkerModel', consumer='QuickDtcCheckController/view',
+                            created='init cache; scan queues GOT/END status and timestamp', flushed='100ms queue delivery to browser, not disk commit',
+                            deleted='worker/browser lifetime; no explicit report-save path in quick-check feature',
+                            evidence=[q['init'], q['scan'], q['ui_results'], q['clear']]))
     return dict(
         schema='gtsplus-lifecycle-domain-v1', domain='ui_ipc',
         sources=sources, evidence=evidence, states=states,
         transitions=transitions, handoffs=handoffs, persistence=persistence,
+        qdc_feature_map=qdc_features,
         coverage=dict(
             components=list(components)+['gts.gui','cuw.gui','qdc.gui','shared browser login worker','dedicated command/buffer workers'],
             entrypoints=['SCM ServiceBase.Run→OnStart/OnStop','GTSMain.html','GTSStoredMain.html','ActiveTestPanel.html','CUWMain.html','QDCMain.html','qdc/index.html','blank.html (inert)'],
