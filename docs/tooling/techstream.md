@@ -4320,6 +4320,32 @@ joins frontend operation workers, managed dispatch, native command plugins,
 monitor threads, frame retries, and teardown. The current adaptation path and
 six-pointer plugin ABI are specified in §6.2.0.
 
+Utility execution has three distinct owners:
+
+| Entry | Execution owner |
+|---|---|
+| `DV000061` / `DV000080` | Managed `UtilitySequencer` binds context, disconnects J2534, and invokes the configured cassette broker |
+| `SC000013` / `SC000014` and implemented `UG` selectors | `UtilityPlusFrontNK` dispatches native `UtilityGene` communication primitives |
+| Registered browser workflows | Authenticated JavaScript commands, cached variables, Promise/event continuations, and PF calls |
+
+The artifact pins `eVbBroker.dll`'s compiled `IT3Utility*.EntranceDLL` selection
+and 49-entry continuation table, the native SC/UG dispatch table, and 231
+registered browser workflows. `Fcm13` references a missing shipped dialog member.
+`Szcom03` is already preloaded: its registration guard makes `loadModel` return
+zero new models, the utility worker converts zero to an error, and the uncached
+controller path rejects before construction. Cached controllers instead ignore
+that worker error. The worker's unknown-command branch binds its reply function
+without invoking it, so sends no response.
+
+`ComUtilityAbort` at `0x100028D0` is exactly `33 C0 C2 04 00`: a
+success-returning no-op. The implemented `SC000014` end path performs
+communication, periodic-message, and keepalive teardown. Abg03's controller
+handles worker `ABORTED` by attempting mode 1 and `SC000014` before returning
+to the menu; its Next callback starts but does not return the Promise chain.
+Actual source execution covered Abg03 branch/error/cancel/cleanup paths,
+CheckMode timer ownership, and the module-loading/worker-dispatch joins above.
+Actual x86 execution confirmed the abort export's unchanged argument memory.
+
 Command cancellation sets cooperative state and returns without waiting for
 completion. The monitor-owner stop path is different: both P5 and P6 signal
 exit, wait 1,000 ms, then call `TerminateThread` and the stop callback for any
